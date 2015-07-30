@@ -23,6 +23,7 @@
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
+#include <ESP8266mDNS.h>
 #include <EEPROM.h>
 #include <E131.h>
 #include <Adafruit_NeoPixel.h>
@@ -46,8 +47,8 @@
 #define UNIVERSE        1       /* Universe to listen for */
 #define CHANNEL_START   1       /* Channel to start listening at */
 
-const char ssid[] = "*****";        /* Replace with your SSID */
-const char passphrase[] = "*****";  /* Replace with your WPA2 passphrase */
+const char ssid[] = "........";        /* Replace with your SSID */
+const char passphrase[] = "........";  /* Replace with your WPA2 passphrase */
 
 /****************************************/
 /*       END - User Configuration       */
@@ -65,7 +66,7 @@ void setup() {
     /* Load configuration from EEPROM */
     EEPROM.begin(sizeof(config));
     loadConfig();
-
+   
     /* Begin listening for E1.31 data */
     if (config.dhcp) {
         if (config.multicast)
@@ -79,12 +80,26 @@ void setup() {
     /* Configure and start the web server */
     initWeb();
 
+    /* Setup DNS-SD */
+/* -- not working
+    if (MDNS.begin("esp8266")) {
+        MDNS.addService("e131", "udp", E131_DEF_PORT);
+        MDNS.addService("http", "tcp", HTTP_PORT);
+        MDNS.update();
+    } else {
+        Serial.println(F("** Error setting up MDNS responder **"));
+    }
+*/    
     /* Configure pixels and initialize output */
+    updatePixelConfig();
     pixels.setPin(DATA_PIN);
-    pixels.updateType(config.pixel_color + config.pixel_type);
-    pixels.updateLength(config.pixel_count);
     pixels.begin();
     pixels.show();
+}
+
+void updatePixelConfig() {
+    pixels.updateType(config.pixel_color + config.pixel_type);
+    pixels.updateLength(config.pixel_count);    
 }
 
 /* Attempt to load configuration from EEPROM.  Initialize or upgrade as required */
@@ -125,10 +140,7 @@ void saveConfig() {
     /* Write the configuration structre */
     EEPROM.put(EEPROM_BASE, config);
     EEPROM.commit();
-    Serial.println(F("* New configuration saved - restarting."));
-
-    /* reboot */
-    ESP.restart();
+    Serial.println(F("* New configuration saved."));
 }
 
 /* Configure and start the web server */

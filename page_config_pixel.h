@@ -15,18 +15,13 @@ const char PAGE_CONFIG_PIXEL[] PROGMEM = R"=====(
 <tr><td align="right">Pixel Count:</td><td><input type="text" id="pixel_count" name="pixel_count" value=""></td></tr>
 <tr><td align="right">Pixel Type:</td><td><select id="pixel_type" name="pixel_type"></select></td></tr>
 <tr><td align="right">Color Order:</td><td><select id="pixel_color" name="pixel_color"></select></td></tr>
-<tr><td align="right">Enable Multicast:</td><td><input type="checkbox" id="multicast" name="multicast"></td></tr>
+<tr><td align="right">Gamma:</td><td><input type="text" id="gamma" name="gamma" value=""></td></tr>
 <tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Save"></td></tr>
 </table>
 </form>
 <script>
 	setValues("/config/pixelvals");
 </script>
-)=====";
-
-const char PAGE_RELOAD_PIXEL[] PROGMEM = R"=====(
-<meta http-equiv="refresh" content="2; url=/config/pixel.html">
-Please Wait....Configuring and Restarting.
 )=====";
 
 void send_config_pixel_html() {
@@ -36,15 +31,14 @@ void send_config_pixel_html() {
             if (web.argName(i) == "universe") config.universe = web.arg(i).toInt(); 
             if (web.argName(i) == "channel_start") config.channel_start = web.arg(i).toInt();
             if (web.argName(i) == "pixel_count") config.pixel_count = web.arg(i).toInt();
-            if (web.argName(i) == "multicast") config.multicast = true;
             if (web.argName(i) == "pixel_type") config.pixel_type = web.arg(i).toInt();
             if (web.argName(i) == "pixel_color") config.pixel_color = web.arg(i).toInt();
+            if (web.argName(i) == "gamma") config.gamma = web.arg(i).toFloat();
         }
-        web.send(200, "text/html", PAGE_RELOAD_PIXEL);
         saveConfig();
-    } else {
-        web.send(200, "text/html", PAGE_CONFIG_PIXEL);
+        updatePixelConfig();
     }
+    web.send(200, "text/html", PAGE_CONFIG_PIXEL);
 }
 
 void send_config_pixel_vals_html() {
@@ -53,7 +47,6 @@ void send_config_pixel_vals_html() {
     values += "universe|input|" + (String)config.universe + "\n";
     values += "channel_start|input|" + (String)config.channel_start + "\n";
     values += "pixel_count|input|" + (String)config.pixel_count + "\n";
-    values += "multicast|chk|" + (String)(config.multicast ? "checked" : "") + "\n";
     values += "pixel_type|opt|" + String("WS2811 800kHz|") + (String)NEO_KHZ800 + "\n";
     values += "pixel_type|input|" + (String)config.pixel_type + "\n";
     values += "pixel_color|opt|" + String("RGB|") + (String)NEO_RGB + "\n";
@@ -61,6 +54,7 @@ void send_config_pixel_vals_html() {
     values += "pixel_color|opt|" + String("BRG|") + (String)NEO_BRG + "\n";
     values += "pixel_color|opt|" + String("RBG|") + (String)NEO_RBG + "\n";
     values += "pixel_color|input|" + (String)config.pixel_color + "\n";
+    values += "gamma|input|" + String(config.gamma) + "\n";
     web.send(200, "text/plain", values);
 }
 

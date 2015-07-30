@@ -61,5 +61,6 @@ ESP8266WebServer    web(HTTP_PORT);
 config_t            config;
 
 void saveConfig();
+void updatePixelConfig();
 
 #endif

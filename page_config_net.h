@@ -16,6 +16,7 @@ Connect to Router with these settings:<br>
 <tr><td align="right">IP:</td><td><input type="text" id="ip_0" name="ip_0" size="3">.<input type="text" id="ip_1" name="ip_1" size="3">.<input type="text" id="ip_2" name="ip_2" size="3">.<input type="text" id="ip_3" name="ip_3" value="" size="3"></td></tr>
 <tr><td align="right">Netmask:</td><td><input type="text" id="nm_0" name="nm_0" size="3">.<input type="text" id="nm_1" name="nm_1" size="3">.<input type="text" id="nm_2" name="nm_2" size="3">.<input type="text" id="nm_3" name="nm_3" size="3"></td></tr>
 <tr><td align="right">Gateway:</td><td><input type="text" id="gw_0" name="gw_0" size="3">.<input type="text" id="gw_1" name="gw_1" size="3">.<input type="text" id="gw_2" name="gw_2" size="3">.<input type="text" id="gw_3" name="gw_3" size="3"></td></tr>
+<tr><td align="right">Multicast:</td><td><input type="checkbox" id="multicast" name="multicast"></td></tr>
 <tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Save"></td></tr>
 </table>
 </form>
@@ -41,7 +42,7 @@ function selssid(value) {
 
 const char PAGE_RELOAD_NET[] PROGMEM = R"=====(
 <meta http-equiv="refresh" content="2; url=/config/net.html">
-Please Wait....Configuring and Restarting.
+<strong>Please Wait....Configuring and Restarting.</strong>
 )=====";
 
 //
@@ -50,6 +51,8 @@ Please Wait....Configuring and Restarting.
 
 void send_config_net_html() {
     if (web.args()) { // Save Settings
+        config.dhcp = false;
+        config.multicast = false;
         for ( uint8_t i = 0; i < web.args(); i++ ) {
             if (web.argName(i) == "ssid") urldecode(web.arg(i)).toCharArray(config.ssid, sizeof(config.ssid));
             if (web.argName(i) == "password") urldecode(web.arg(i)).toCharArray(config.passphrase, sizeof(config.passphrase));
@@ -66,9 +69,12 @@ void send_config_net_html() {
             if (web.argName(i) == "gw_2") if (checkRange(web.arg(i))) config.gateway[2] = web.arg(i).toInt();
             if (web.argName(i) == "gw_3") if (checkRange(web.arg(i))) config.gateway[3] = web.arg(i).toInt();
             if (web.argName(i) == "dhcp") config.dhcp = true;
+            if (web.argName(i) == "multicast") config.multicast = true;
         }
         web.send(200, "text/html", PAGE_RELOAD_NET);
+
         saveConfig();
+        ESP.restart();
     } else {
         web.send(200, "text/html", PAGE_CONFIG_NET); 
     }
@@ -95,6 +101,7 @@ void send_config_net_vals_html() {
     values += "gw_2|input|" + (String)config.gateway[2] + "\n";
     values += "gw_3|input|" + (String)config.gateway[3] + "\n";
     values += "dhcp|chk|" + (String)(config.dhcp ? "checked" : "") + "\n";
+    values += "multicast|chk|" + (String)(config.multicast ? "checked" : "") + "\n";
     web.send(200, "text/plain", values);
 }
 
