@@ -7,7 +7,19 @@ This is the Arduino firmware for the ESP8266 based ESPixelStick.  The ESPixelSti
 - E1.31 for Arduino - https://github.com/forkineye/E131
 - Adafruit NeoPixel - https://github.com/adafruit/Adafruit_NeoPixel
 
-### Latest Development
+### Known Issues
+- Gamma value is ingored.  ```pow()``` is currently broken in the ESP8266 Arduino environment, so gamma tables cannot be generated.
+- Static configuration ignored.  Currently, only DHCP is supported.  Need to implement changes in the E131 for Arduino library.
+- No network configuration failsafe.  Need to add WiFi connection timeout and fallback to default configuration.
+- Some fields do not validate input.  Need to add validation routines to the web configuration inputs fields.
+- Multicast mode can cause resets.  Multicast listening configuration currently causes sporadic resets with the web server is running.
+
+### To-do
+- Add softAP configuration mode.
+- Add mDNS and DNS-SD support.
+- Migrate to FastLED when ported to ESP8266.
+
+### Resources
 - Firmware: http://github.com/forkineye/ESPixelStick
 - Hardware: http://forkineye.com/ESPixelStick
 
