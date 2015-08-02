@@ -9,8 +9,6 @@ This is the Arduino firmware for the ESP8266 based ESPixelStick.  The ESPixelSti
 
 ### Known Issues
 - Gamma value is ingored.  ```pow()``` is currently broken in the ESP8266 Arduino environment, so gamma tables cannot be generated.
-- Static configuration ignored.  Currently, only DHCP is supported.  Need to implement changes in the E131 for Arduino library.
-- No network configuration failsafe.  Need to add WiFi connection timeout and fallback to default configuration.
 - Some fields do not validate input.  Need to add validation routines to the web configuration inputs fields.
 - Multicast mode can cause resets.  Multicast listening configuration currently causes sporadic resets with the web server is running.
 

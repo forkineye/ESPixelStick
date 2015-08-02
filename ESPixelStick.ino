@@ -61,22 +61,29 @@ void setup() {
     delay(10);
 
     Serial.println("");
-    Serial.println(F("ESPixelStick v1.0"));
+    for (uint8_t i = 0; i < strlen_P(VERSION); i++)
+        Serial.print((char)(pgm_read_byte(VERSION + i)));
+    Serial.println("");
     
     /* Load configuration from EEPROM */
     EEPROM.begin(sizeof(config));
     loadConfig();
-   
-    /* Begin listening for E1.31 data */
-    if (config.dhcp) {
-        if (config.multicast)
-            e131.beginMulticast(config.ssid, config.passphrase, config.universe);               
-        else
-            e131.begin(config.ssid, config.passphrase);
-    } else {
-        Serial.println(F("** Only DHCP is supported at this time **"));
+
+    /* Fallback to default SSID and passphrase if we fail to connect */
+    int status = initWifi();
+    if (status != WL_CONNECTED) {
+        Serial.println(F("*** Timeout - Reverting to default SSID ***"));
+        strncpy(config.ssid, ssid, sizeof(config.ssid));
+        strncpy(config.passphrase, passphrase, sizeof(config.passphrase));
+        status = initWifi();
     }
-    
+
+    /* If we fail again, reboot */
+    if (status != WL_CONNECTED) {
+        Serial.println(F("**** FAILED TO ASSOCIATE WITH AP ****"));
+        ESP.restart();
+    }
+
     /* Configure and start the web server */
     initWeb();
 
@@ -85,7 +92,6 @@ void setup() {
     if (MDNS.begin("esp8266")) {
         MDNS.addService("e131", "udp", E131_DEF_PORT);
         MDNS.addService("http", "tcp", HTTP_PORT);
-        MDNS.update();
     } else {
         Serial.println(F("** Error setting up MDNS responder **"));
     }
@@ -95,6 +101,62 @@ void setup() {
     pixels.setPin(DATA_PIN);
     pixels.begin();
     pixels.show();
+}
+
+int initWifi() {
+    /* Begin listening for E1.31 data  - we aren't using DNS, so set it to the gateway if static */
+    int status = WL_IDLE_STATUS;
+
+    if (config.dhcp) {
+        if (config.multicast)
+            status = e131.beginMulticast(config.ssid, config.passphrase, config.universe);
+        else
+            status = e131.begin(config.ssid, config.passphrase);
+    } else {
+        if (config.multicast)
+            status = e131.beginMulticast(config.ssid, config.passphrase, config.universe,
+                    IPAddress(config.ip[0], config.ip[1], config.ip[2], config.ip[3]),
+                    IPAddress(config.netmask[0], config.netmask[1], config.netmask[2], config.netmask[3]),
+                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3]),
+                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3])
+            );
+        else
+            status = e131.begin(config.ssid, config.passphrase,
+                    IPAddress(config.ip[0], config.ip[1], config.ip[2], config.ip[3]),
+                    IPAddress(config.netmask[0], config.netmask[1], config.netmask[2], config.netmask[3]),
+                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3]),
+                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3])
+            );
+    }
+    return status;
+}
+
+/* Configure and start the web server */
+void initWeb() {
+    /* JavaScript and Stylesheets */
+    web.on ("/style.css", []() { web.send(200, "text/plain", PAGE_STYLE_CSS); });
+    web.on ("/microajax.js", []() { web.send(200, "text/plain", PAGE_MICROAJAX_JS); });
+
+    /* HTML Pages */
+    web.on("/", []() { web.send(200, "text/html", PAGE_ROOT); });
+    web.on("/config/net.html", send_config_net_html);
+    web.on("/config/pixel.html", send_config_pixel_html);
+    web.on("/status/net.html", []() { web.send(200, "text/html", PAGE_STATUS_NET); });
+    web.on("/status/e131.html", []() { web.send(200, "text/html", PAGE_STATUS_E131); });
+
+    /* AJAX Handlers */
+    web.on("/rootvals", send_root_vals_html);
+    web.on("/config/netvals", send_config_net_vals_html);
+    web.on("/config/pixelvals", send_config_pixel_vals_html);
+    web.on("/config/connectionstate", send_connection_state_vals_html);
+    web.on("/status/netvals", send_status_net_vals_html);
+    web.on("/status/e131vals", send_status_e131_vals_html);
+
+    web.onNotFound([]() { web.send(404, "text/html", "Page not Found"); });
+    web.begin();
+
+    Serial.print(F("- Web Server started on port "));
+    Serial.println(HTTP_PORT);
 }
 
 void updatePixelConfig() {
@@ -141,34 +203,6 @@ void saveConfig() {
     EEPROM.put(EEPROM_BASE, config);
     EEPROM.commit();
     Serial.println(F("* New configuration saved."));
-}
-
-/* Configure and start the web server */
-void initWeb() {
-    /* JavaScript and Stylesheets */
-    web.on ("/style.css", []() { web.send(200, "text/plain", PAGE_STYLE_CSS); });
-    web.on ("/microajax.js", []() { web.send(200, "text/plain", PAGE_MICROAJAX_JS); });
-
-    /* HTML Pages */
-    web.on("/", []() { web.send(200, "text/html", PAGE_ROOT); });
-    web.on("/config/net.html", send_config_net_html);
-    web.on("/config/pixel.html", send_config_pixel_html);
-    web.on("/status/net.html", []() { web.send(200, "text/html", PAGE_STATUS_NET); });
-    web.on("/status/e131.html", []() { web.send(200, "text/html", PAGE_STATUS_E131); });
-
-    /* AJAX Handlers */
-    web.on("/rootvals", send_root_vals_html);
-    web.on("/config/netvals", send_config_net_vals_html);
-    web.on("/config/pixelvals", send_config_pixel_vals_html);
-    web.on("/config/connectionstate", send_connection_state_vals_html);
-    web.on("/status/netvals", send_status_net_vals_html);
-    web.on("/status/e131vals", send_status_e131_vals_html);
-
-    web.onNotFound([]() { web.send(404, "text/html", "Page not Found"); });
-    web.begin();
-
-    Serial.print(F("- Web Server started on port "));
-    Serial.println(HTTP_PORT);
 }
 
 /* Main Loop */
