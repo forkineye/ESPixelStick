@@ -31,8 +31,8 @@ void send_config_pixel_html() {
             if (web.argName(i) == "universe") config.universe = web.arg(i).toInt(); 
             if (web.argName(i) == "channel_start") config.channel_start = web.arg(i).toInt();
             if (web.argName(i) == "pixel_count") config.pixel_count = web.arg(i).toInt();
-            if (web.argName(i) == "pixel_type") config.pixel_type = web.arg(i).toInt();
-            if (web.argName(i) == "pixel_color") config.pixel_color = web.arg(i).toInt();
+            if (web.argName(i) == "pixel_type") config.pixel_type = (pixel_t)web.arg(i).toInt();
+            if (web.argName(i) == "pixel_color") config.pixel_color = (color_t)web.arg(i).toInt();
             if (web.argName(i) == "gamma") config.gamma = web.arg(i).toFloat();
         }
         saveConfig();
@@ -47,12 +47,12 @@ void send_config_pixel_vals_html() {
     values += "universe|input|" + (String)config.universe + "\n";
     values += "channel_start|input|" + (String)config.channel_start + "\n";
     values += "pixel_count|input|" + (String)config.pixel_count + "\n";
-    values += "pixel_type|opt|" + String("WS2811 800kHz|") + (String)NEO_KHZ800 + "\n";
+    values += "pixel_type|opt|" + String("WS2811 800kHz|") + (String)PIXEL_WS2811 + "\n";
     values += "pixel_type|input|" + (String)config.pixel_type + "\n";
-    values += "pixel_color|opt|" + String("RGB|") + (String)NEO_RGB + "\n";
-    values += "pixel_color|opt|" + String("GRB|") + (String)NEO_GRB + "\n";
-    values += "pixel_color|opt|" + String("BRG|") + (String)NEO_BRG + "\n";
-    values += "pixel_color|opt|" + String("RBG|") + (String)NEO_RBG + "\n";
+    values += "pixel_color|opt|" + String("RGB|") + (String)COLOR_RGB + "\n";
+    values += "pixel_color|opt|" + String("GRB|") + (String)COLOR_GRB + "\n";
+    values += "pixel_color|opt|" + String("BRG|") + (String)COLOR_BRG + "\n";
+    values += "pixel_color|opt|" + String("RBG|") + (String)COLOR_RBG + "\n";
     values += "pixel_color|input|" + (String)config.pixel_color + "\n";
     values += "gamma|input|" + String(config.gamma) + "\n";
     web.send(200, "text/plain", values);

@@ -26,7 +26,8 @@
 #include <ESP8266mDNS.h>
 #include <EEPROM.h>
 #include <E131.h>
-#include <Adafruit_NeoPixel.h>
+//#include <Adafruit_NeoPixel.h>
+#include "ESPixelUART.h"
 #include "ESPixelStick.h"
 #include "helpers.h"
 
@@ -38,6 +39,7 @@
 #include "page_config_pixel.h"
 #include "page_status_net.h"
 #include "page_status_e131.h"
+
 
 /****************************************/
 /*      BEGIN - User Configuration      */
@@ -54,7 +56,8 @@ const char passphrase[] = "........";  /* Replace with your WPA2 passphrase */
 /*       END - User Configuration       */
 /****************************************/
 
-Adafruit_NeoPixel   pixels;
+//Adafruit_NeoPixel   pixels;
+ESPixelUART pixels;
 
 void setup() {
     Serial.begin(115200);
@@ -96,10 +99,17 @@ void setup() {
         Serial.println(F("** Error setting up MDNS responder **"));
     }
 */    
-    /* Configure pixels and initialize output */
+    /* Configure pixels and initialize output -- old NeoPixel way */
+    /*
     updatePixelConfig();
     pixels.setPin(DATA_PIN);
     pixels.begin();
+    pixels.show();
+    */
+
+    /* Configure UART1 for WS2811 output */
+    pixels.begin();
+    updatePixelConfig();
     pixels.show();
 }
 
@@ -160,7 +170,7 @@ void initWeb() {
 }
 
 void updatePixelConfig() {
-    pixels.updateType(config.pixel_color + config.pixel_type);
+    pixels.updateType(config.pixel_type, config.pixel_color);
     pixels.updateLength(config.pixel_count);    
 }
 
@@ -185,8 +195,8 @@ void loadConfig() {
         config.universe = UNIVERSE;
         config.channel_start = CHANNEL_START;
         config.pixel_count = NUM_PIXELS;
-        config.pixel_type = NEO_KHZ800;
-        config.pixel_color = NEO_RGB;
+        config.pixel_type = PIXEL_WS2811;
+        config.pixel_color = COLOR_RGB;
         config.gamma = 1.0;
 
         /* Write the configuration structre */

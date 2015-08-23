@@ -20,11 +20,13 @@
 #ifndef ESPIXELSTICK_H
 #define ESPIXELSTICK_H
 
+#include "ESPixelUART.h"
+
 /* Name and version */
 const char VERSION[] PROGMEM = "ESPixelStick v1.0";
 
 #define HTTP_PORT   80  /* Default web server port */
-#define DATA_PIN    0   /* Pixel output - GPIO0 */
+#define DATA_PIN    2   /* Pixel output - GPIO2 */
 #define EEPROM_BASE 0   /* EEPROM configuration base address */
 
 /* Configuration ID and Version */
@@ -53,8 +55,8 @@ typedef struct {
     uint16_t    universe;       /* Universe to listen for */
     uint16_t    channel_start;  /* Channel to start listening at - 1 based */
     uint16_t    pixel_count;    /* Number of pixels */
-    uint8_t     pixel_type;     /* Pixel type */
-    uint8_t     pixel_color;    /* Pixel color order */
+    pixel_t     pixel_type;     /* Pixel type */
+    color_t     pixel_color;    /* Pixel color order */
     float       gamma;          /* Value used to build gamma correction table */
 } __attribute__((packed)) config_t;
 
