@@ -27,7 +27,7 @@
 #include <EEPROM.h>
 #include <E131.h>
 //#include <Adafruit_NeoPixel.h>
-#include "ESPixelUART.h"
+#include "ESPixelDriver.h"
 #include "ESPixelStick.h"
 #include "helpers.h"
 
@@ -41,23 +41,26 @@
 #include "page_status_e131.h"
 
 
-/****************************************/
-/*      BEGIN - User Configuration      */
-/****************************************/
+/*************************************************/
+/*      BEGIN - User Configuration Defaults      */
+/*************************************************/
 
 #define NUM_PIXELS      170     /* Number of pixels */
-#define UNIVERSE        1       /* Universe to listen for */
+#define UNIVERSE        1       /* First Universe to listen for */
 #define CHANNEL_START   1       /* Channel to start listening at */
 
-const char ssid[] = "........";        /* Replace with your SSID */
-const char passphrase[] = "........";  /* Replace with your WPA2 passphrase */
+const char ssid[] = "SSID_NOT_SET";             /* Replace with your SSID */
+const char passphrase[] = "PASSWORD_NOT_SET";   /* Replace with your WPA2 passphrase */
 
-/****************************************/
-/*       END - User Configuration       */
-/****************************************/
+/*************************************************/
+/*       END - User Configuration Defaults       */
+/*************************************************/
 
 //Adafruit_NeoPixel   pixels;
-ESPixelUART pixels;
+ESPixelDriver	pixels;			/* Pixel object */
+uint16_t		uniLast = 1;	/* Last Universe to listen for */
+uint8_t         seqTracker[4];  /* Current sequence numbers for each Universe */
+uint32_t        lastPacket;     /* Packet timeout tracker */
 
 void setup() {
     Serial.begin(115200);
@@ -99,15 +102,13 @@ void setup() {
         Serial.println(F("** Error setting up MDNS responder **"));
     }
 */    
-    /* Configure pixels and initialize output -- old NeoPixel way */
-    /*
-    updatePixelConfig();
-    pixels.setPin(DATA_PIN);
-    pixels.begin();
-    pixels.show();
-    */
+
+    /* Initialize globals */
+    memset(seqTracker, 0x00, sizeof(seqTracker));
+    memset(seqError, 0x00, sizeof(seqTracker));
 
     /* Configure UART1 for WS2811 output */
+    pixels.setPin(DATA_PIN);    /* For protocols that require bit-banging */
     pixels.begin();
     updatePixelConfig();
     pixels.show();
@@ -170,8 +171,15 @@ void initWeb() {
 }
 
 void updatePixelConfig() {
+	uniLast = config.universe + ceil((config.pixel_count * 3) / 512);
     pixels.updateType(config.pixel_type, config.pixel_color);
     pixels.updateLength(config.pixel_count);    
+    Serial.print(F("- listening for "));
+    Serial.print(config.pixel_count * 3);
+    Serial.print(F(" channels, from Universe "));
+    Serial.print(config.universe);
+    Serial.print(F(" to "));
+    Serial.println(uniLast);
 }
 
 /* Attempt to load configuration from EEPROM.  Initialize or upgrade as required */
@@ -222,12 +230,44 @@ void loop() {
 
     /* Parse a packet and update pixels */
     if(e131.parsePacket()) {
-        if (e131.universe == config.universe) {
-            for (int i = 0; i < config.pixel_count; i++) {
-                int j = i * 3 + (config.channel_start - 1);
+        if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
+            lastPacket = millis();
+            
+            /* Universe offset and sequence tracking */
+            uint8_t uniOffset = (e131.universe - config.universe);
+            if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
+                seqError[uniOffset]++;
+                seqTracker[uniOffset] = e131.packet->sequence_number + 1;
+            }
+            
+            /* Find out starting pixel based off the Universe */
+            uint16_t pixelStart = uniOffset * PIXELS_MAX;
+
+            /* Calculate how many pixels we need from this buffer */
+            uint16_t pixelStop = config.pixel_count;
+            if ((pixelStart + PIXELS_MAX) < pixelStop)
+                pixelStop = pixelStart + PIXELS_MAX;
+
+            /* Offset the channel if required for the first universe */
+            uint16_t offset = 0;
+            if (e131.universe == config.universe)
+                offset = config.channel_start - 1;
+
+            /* Set the pixel data */
+            for (int i = pixelStart; i < pixelStop; i++) {
+                int j = i * 3 + offset;
                 pixels.setPixelColor(i, e131.data[j], e131.data[j+1], e131.data[j+2]);
             }
-            pixels.show();
+
+            /* Refresh when last universe shows up */
+            if (e131.universe == uniLast)
+                pixels.show();
         }
+    }
+    
+    /* Force refresh every second if there is no data received */
+    if ((millis() - lastPacket) > E131_TIMEOUT) {
+        lastPacket = millis();
+        pixels.show();
     }
 }

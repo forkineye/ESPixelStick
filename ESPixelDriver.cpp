@@ -1,5 +1,24 @@
+/*
+* ESPixelDriver.cpp
+*
+* Project: ESPixelStick - An ESP8266 and E1.31 based pixel driver
+* Copyright (c) 2015 Shelby Merrick
+* http://www.forkineye.com
+*
+*  This program is provided free for you to use in any way that you wish,
+*  subject to the laws and regulations where you are using it.  Due diligence
+*  is strongly suggested before using this code.  Please give credit where due.
+*
+*  The Author makes no warranty of any kind, express or implied, with regard
+*  to this program or the documentation contained in this document.  The
+*  Author shall not be liable in any event for incidental or consequential
+*  damages in connection with, or arising out of, the furnishing, performance
+*  or use of these programs.
+*
+*/
+
 #include <Arduino.h>
-#include "ESPixelUART.h"
+#include "ESPixelDriver.h"
 
 extern "C" {
 #include "eagle_soc.h"
@@ -9,15 +28,15 @@ extern "C" {
 /* 6 bit UART lookup table, first 2 bits ignored. Start and stop bits are part of the pixel stream. */
 const char data[4] = { 0b00110111, 0b00000111, 0b00110100, 0b00000100 };
 
-int ESPixelUART::begin() {
-    return begin(type, COLOR_RGB);
+int ESPixelDriver::begin() {
+    return begin(PIXEL_WS2811, COLOR_RGB);
 }
 
-int ESPixelUART::begin(pixel_t type) {
+int ESPixelDriver::begin(pixel_t type) {
 	return begin(type, COLOR_RGB);
 }
 
-int ESPixelUART::begin(pixel_t type, color_t color) {
+int ESPixelDriver::begin(pixel_t type, color_t color) {
 	int retval = true;
 
 	this->type = type;
@@ -33,7 +52,15 @@ int ESPixelUART::begin(pixel_t type, color_t color) {
 	return retval;
 }
 
-void ESPixelUART::ws2811_init() {
+void ESPixelDriver::setPin(uint8_t pin) {
+    if (this->pin >= 0) {
+        this->pin = pin;
+        pinMode(pin, OUTPUT);
+        digitalWrite(pin, LOW);
+    }
+}
+
+void ESPixelDriver::ws2811_init() {
 	/* Serial rate is 4x 800KHz for WS2811 */
 	Serial1.begin(3200000, SERIAL_6N1, SERIAL_TX_ONLY);
     CLEAR_PERI_REG_MASK(UART_CONF0(UART), UART_INV_MASK);
@@ -42,11 +69,11 @@ void ESPixelUART::ws2811_init() {
 }
 
 // TODO - gece support
-void ESPixelUART::gece_init() {
+void ESPixelDriver::gece_init() {
 
 }
 
-void ESPixelUART::updateLength(uint16_t length) {
+void ESPixelDriver::updateLength(uint16_t length) {
 	if (pixdata) free(pixdata);
 	//TODO: Update with if for GECE
 	szBuffer = length * 3;
@@ -60,7 +87,7 @@ void ESPixelUART::updateLength(uint16_t length) {
 
 }
 
-void ESPixelUART::updateType(pixel_t type, color_t color) {
+void ESPixelDriver::updateType(pixel_t type, color_t color) {
 	this->type = type;
 	this->color = color;
 	
@@ -88,7 +115,7 @@ void ESPixelUART::updateType(pixel_t type, color_t color) {
 	}
 }
 
-void ESPixelUART::setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b) {
+void ESPixelDriver::setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b) {
 	if(pixel < numPixels) {
 		uint8_t *p = &pixdata[pixel*3];
 		p[rOffset] = r;
@@ -98,7 +125,7 @@ void ESPixelUART::setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b)
 }
 
 //TODO: Optimize this
-void ESPixelUART::show() {
+void ESPixelDriver::show() {
 	if(!pixdata) return;
 	while(!canShow()) yield();
 

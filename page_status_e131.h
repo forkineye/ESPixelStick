@@ -27,10 +27,12 @@ const char PAGE_STATUS_E131[] PROGMEM = R"=====(
 // 
 
 void send_status_e131_vals_html() {
+    //TODO: Show sequence errors for each universe
+    uint32_t seqErrors = seqError[0] + seqError[1] + seqError[2] + seqError[3];
     String values = "";
     values += "universe|div|" + (String)e131.universe + "\n";
     values += "num_packets|div|" + (String)e131.stats.num_packets + "\n";
-    values += "sequence_errors|div|" + (String)e131.stats.sequence_errors + "\n";
+    values += "sequence_errors|div|" + (String)seqErrors + "\n";
     values += "packet_errors|div|" + (String)e131.stats.packet_errors + "\n";
     web.send (200, "text/plain", values);
 }

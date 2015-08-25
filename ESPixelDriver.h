@@ -1,5 +1,5 @@
 /*
-* ESPixelUART.h
+* ESPixelDriver.h
 *
 * Project: ESPixelStick - An ESP8266 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -17,8 +17,8 @@
 *
 */
 
-#ifndef ESPIXELUART_H
-#define ESPIXELUART_H
+#ifndef ESPIXELDRIVER_H
+#define ESPIXELDRIVER_H
 
 #define UART_INV_MASK  (0x3f<<19)
 #define UART 1
@@ -60,11 +60,12 @@ typedef enum {
 	COLOR_RBG
 } color_t;
 
-class ESPixelUART {
+class ESPixelDriver {
 	public:
         int begin();
 		int begin(pixel_t type);
 		int begin(pixel_t type, color_t color);
+		void setPin(uint8_t pin);
 		void updateLength(uint16_t length);
 		void updateType(pixel_t type, color_t color);
 		void setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b);
@@ -76,6 +77,7 @@ class ESPixelUART {
 	private:
 		pixel_t		type;		// Pixel type
 		color_t		color;		// Color Order
+		uint8_t		pin;		// Pin for bit-banging
 		uint8_t		*pixdata;	// Pixel buffer
 		uint16_t	numPixels;	// Number of pixels
 		uint16_t	szBuffer;	// Size of Pixel buffer

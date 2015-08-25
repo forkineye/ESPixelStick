@@ -20,14 +20,17 @@
 #ifndef ESPIXELSTICK_H
 #define ESPIXELSTICK_H
 
-#include "ESPixelUART.h"
+#include "ESPixelDriver.h"
 
 /* Name and version */
-const char VERSION[] PROGMEM = "ESPixelStick v1.0";
+const char VERSION[] PROGMEM = "ESPixelStick v1.1beta";
 
-#define HTTP_PORT   80  /* Default web server port */
-#define DATA_PIN    2   /* Pixel output - GPIO2 */
-#define EEPROM_BASE 0   /* EEPROM configuration base address */
+#define HTTP_PORT       80      /* Default web server port */
+#define DATA_PIN        2       /* Pixel output - GPIO2 */
+#define EEPROM_BASE     0       /* EEPROM configuration base address */
+#define UNIVERSE_LIMIT  510     /* Universe boundary - 510 Channels */
+#define PIXELS_MAX      170     /* Max pixels per Universe */
+#define E131_TIMEOUT    1000    /* Force refresh every second a packet is not seen */
 
 /* Configuration ID and Version */
 #define CONFIG_VERSION 1;
@@ -64,6 +67,7 @@ typedef struct {
 E131                e131;
 ESP8266WebServer    web(HTTP_PORT);
 config_t            config;
+uint32_t            seqError[4];    /* Sequence error tracking for each universe */
 
 void saveConfig();
 void updatePixelConfig();
