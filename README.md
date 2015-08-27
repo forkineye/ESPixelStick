@@ -4,8 +4,6 @@ This is the Arduino firmware for the ESP8266 based ESPixelStick.  The ESPixelSti
 
 ### Requirements
 - Adruino for ESP8266 - https://github.com/esp8266/Arduino
-- E1.31 for Arduino - https://github.com/forkineye/E131
-- Adafruit NeoPixel - https://github.com/adafruit/Adafruit_NeoPixel
 
 ### Known Issues
 - Gamma value is ingored.  ```pow()``` is currently broken in the ESP8266 Arduino environment, so gamma tables cannot be generated.
@@ -15,7 +13,7 @@ This is the Arduino firmware for the ESP8266 based ESPixelStick.  The ESPixelSti
 ### To-do
 - Add softAP configuration mode.
 - Add mDNS and DNS-SD support.
-- Migrate to FastLED when ported to ESP8266.
+- Migrate to FastLED if / when ported to ESP8266.
 
 ### Resources
 - Firmware: http://github.com/forkineye/ESPixelStick
