@@ -1,5 +1,5 @@
 /*
-* ESPixelDriver.h
+* ESPixelDriver.h - Pixel driver code for ESPixelStick
 *
 * Project: ESPixelStick - An ESP8266 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -46,6 +46,21 @@ const uint8_t GAMMA_2811[] = {
 };
 #endif
 
+#define GECE_DEFAULT_BRIGHTNESS 0xCC
+
+#define GECE_ADDRESS_MASK       0x03F00000
+#define GECE_BRIGHTNESS_MASK    0x000FF000
+#define GECE_BLUE_MASK          0x00000F00
+#define GECE_GREEN_MASK         0x000000F0
+#define GECE_RED_MASK           0x0000000F
+
+#define GECE_GET_ADDRESS(packet)     (packet >> 20) & 0x3F
+#define GECE_GET_BRIGHTNESS(packet)  (packet >> 12) & 0xFF
+#define GECE_GET_BLUE(packet)        (packet >> 8) & 0x0F
+#define GECE_GET_GREEN(packet)       (packet >> 4) & 0x0F
+#define GECE_GET_RED(packet)         packet & 0x0F
+
+
 /* Pixel Types */
 typedef enum {
 	PIXEL_WS2811,
@@ -67,7 +82,7 @@ class ESPixelDriver {
 		int begin(pixel_t type, color_t color);
 		void setPin(uint8_t pin);
 		void updateLength(uint16_t length);
-		void updateType(pixel_t type, color_t color);
+		void updateOrder(color_t color);
 		void setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b);
 		void show();
 		//TODO: Modify to support GECE

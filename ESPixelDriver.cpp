@@ -1,5 +1,5 @@
 /*
-* ESPixelDriver.cpp
+* ESPixelDriver.cpp - Pixel driver code for ESPixelStick
 *
 * Project: ESPixelStick - An ESP8266 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -19,6 +19,7 @@
 
 #include <Arduino.h>
 #include "ESPixelDriver.h"
+#include "bitbang.h"
 
 extern "C" {
 #include "eagle_soc.h"
@@ -42,6 +43,8 @@ int ESPixelDriver::begin(pixel_t type, color_t color) {
 	this->type = type;
 	this->color = color;
 
+    updateOrder(color);
+
 	if (type == PIXEL_WS2811)
 		ws2811_init();
 	else if (type == PIXEL_GECE)
@@ -53,11 +56,8 @@ int ESPixelDriver::begin(pixel_t type, color_t color) {
 }
 
 void ESPixelDriver::setPin(uint8_t pin) {
-    if (this->pin >= 0) {
+    if (this->pin >= 0)
         this->pin = pin;
-        pinMode(pin, OUTPUT);
-        digitalWrite(pin, LOW);
-    }
 }
 
 void ESPixelDriver::ws2811_init() {
@@ -70,12 +70,13 @@ void ESPixelDriver::ws2811_init() {
 
 // TODO - gece support
 void ESPixelDriver::gece_init() {
-
+    Serial1.end();
+    pinMode(pin, OUTPUT);
+    digitalWrite(pin, LOW);
 }
 
 void ESPixelDriver::updateLength(uint16_t length) {
 	if (pixdata) free(pixdata);
-	//TODO: Update with if for GECE
 	szBuffer = length * 3;
 	if ((pixdata = (uint8_t *)malloc(szBuffer))) {
 		memset(pixdata, 0, szBuffer);
@@ -84,11 +85,9 @@ void ESPixelDriver::updateLength(uint16_t length) {
 		numPixels = 0;
 		szBuffer = 0;
 	}
-
 }
 
-void ESPixelDriver::updateType(pixel_t type, color_t color) {
-	this->type = type;
+void ESPixelDriver::updateOrder(color_t color) {
 	this->color = color;
 	
 	//TODO: Add handling for switching 2811 / GECE
@@ -116,7 +115,7 @@ void ESPixelDriver::updateType(pixel_t type, color_t color) {
 }
 
 void ESPixelDriver::setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b) {
-	if(pixel < numPixels) {
+	if (pixel < numPixels) {
 		uint8_t *p = &pixdata[pixel*3];
 		p[rOffset] = r;
 		p[gOffset] = g;
@@ -124,29 +123,57 @@ void ESPixelDriver::setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t 
 	}
 }
 
-//TODO: Optimize this
+//TODO: Optimize UART buffer handling
 void ESPixelDriver::show() {
-	if(!pixdata) return;
-	while(!canShow()) yield();
+	if (!pixdata) return;
+	while (!canShow()) yield();
 
-	char buff[4];
-//TODO: Until pow() is fixed and we can generate tables at runtime
+	if (type == PIXEL_WS2811) {
+		char buff[4];
+	//TODO: Until pow() is fixed and we can generate tables at runtime
 #ifdef GAMMA_CORRECTION
-	for (uint16_t i = 0; i < szBuffer; i++) {
-		buff[0] = data[(GAMMA_2811[pixdata[i]] >> 6) & 3];
-		buff[1] = data[(GAMMA_2811[pixdata[i]] >> 4) & 3];
-		buff[2] = data[(GAMMA_2811[pixdata[i]] >> 2) & 3];
-		buff[3] = data[GAMMA_2811[pixdata[i]] & 3];
-		Serial1.write(buff, sizeof(buff));		
-	}
+		for (uint16_t i = 0; i < szBuffer; i++) {
+			buff[0] = data[(GAMMA_2811[pixdata[i]] >> 6) & 3];
+			buff[1] = data[(GAMMA_2811[pixdata[i]] >> 4) & 3];
+			buff[2] = data[(GAMMA_2811[pixdata[i]] >> 2) & 3];
+			buff[3] = data[GAMMA_2811[pixdata[i]] & 3];
+			Serial1.write(buff, sizeof(buff));		
+		}
 #else
-	for (uint16_t i = 0; i < szBuffer; i++) {
-		buff[0] = data[(pixdata[i] >> 6) & 3];
-		buff[1] = data[(pixdata[i] >> 4) & 3];
-		buff[2] = data[(pixdata[i] >> 2) & 3];
-		buff[3] = data[pixdata[i] & 3];
-		Serial1.write(buff, sizeof(buff));		
-	}
+		for (uint16_t i = 0; i < szBuffer; i++) {
+			buff[0] = data[(pixdata[i] >> 6) & 3];
+			buff[1] = data[(pixdata[i] >> 4) & 3];
+			buff[2] = data[(pixdata[i] >> 2) & 3];
+			buff[3] = data[pixdata[i] & 3];
+			Serial1.write(buff, sizeof(buff));		
+		}
 #endif
+	} else if (type == PIXEL_GECE) {
+		uint32_t packet = 0;
+        /* Build a GECE packet */
+		for (uint8_t i = 0; i < numPixels; i++) {
+            //TODO: Calculate color value - 8bit to 4bit
+            packet = (packet & ~GECE_ADDRESS_MASK) | (i << 20);
+            packet = (packet & ~GECE_BRIGHTNESS_MASK) | (GECE_DEFAULT_BRIGHTNESS << 12);
+            packet = (packet & ~GECE_BLUE_MASK) | (pixdata[i*3+2] << 4);
+            packet = (packet & ~GECE_GREEN_MASK) | pixdata[i*3+1];
+            packet = (packet & ~GECE_RED_MASK) | (pixdata[i*3] >> 4);
+/*
+            Serial.printf("Packet %i: %i, %i, %i, %i, %i, %08x\n",
+                    i,
+                    GECE_GET_ADDRESS(packet),
+                    GECE_GET_BRIGHTNESS(packet),
+                    GECE_GET_BLUE(packet),
+                    GECE_GET_GREEN(packet),
+                    GECE_GET_RED(packet),
+                    packet
+            );
+*/
+        /* and send it */
+            noInterrupts();
+    		doGECE(pin, packet);
+            interrupts();
+		}
+	}
     endTime = micros();
 }

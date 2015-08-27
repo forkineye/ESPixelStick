@@ -21,6 +21,7 @@
 #define ESPIXELSTICK_H
 
 #include "ESPixelDriver.h"
+#include "_E131.h"
 
 /* Name and version */
 const char VERSION[] PROGMEM = "ESPixelStick v1.1beta";
@@ -31,6 +32,7 @@ const char VERSION[] PROGMEM = "ESPixelStick v1.1beta";
 #define UNIVERSE_LIMIT  510     /* Universe boundary - 510 Channels */
 #define PIXELS_MAX      170     /* Max pixels per Universe */
 #define E131_TIMEOUT    1000    /* Force refresh every second a packet is not seen */
+#define CONNECT_TIMEOUT 10000   /* 10 seconds */
 
 /* Configuration ID and Version */
 #define CONFIG_VERSION 1;

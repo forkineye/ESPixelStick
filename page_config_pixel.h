@@ -48,6 +48,7 @@ void send_config_pixel_vals_html() {
     values += "channel_start|input|" + (String)config.channel_start + "\n";
     values += "pixel_count|input|" + (String)config.pixel_count + "\n";
     values += "pixel_type|opt|" + String("WS2811 800kHz|") + (String)PIXEL_WS2811 + "\n";
+    values += "pixel_type|opt|" + String("GE Color Effects|") + (String)PIXEL_GECE + "\n";
     values += "pixel_type|input|" + (String)config.pixel_type + "\n";
     values += "pixel_color|opt|" + String("RGB|") + (String)COLOR_RGB + "\n";
     values += "pixel_color|opt|" + String("GRB|") + (String)COLOR_GRB + "\n";

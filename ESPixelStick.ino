@@ -7,7 +7,6 @@
 *
 * Library Requirements:
 * - E1.31 for Arduino - https://github.com/forkineye/E131
-* - Adafruit NeoPixel - https://github.com/adafruit/Adafruit_NeoPixel
 *
 *  This program is provided free for you to use in any way that you wish,
 *  subject to the laws and regulations where you are using it.  Due diligence
@@ -25,10 +24,9 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <EEPROM.h>
-#include <E131.h>
-//#include <Adafruit_NeoPixel.h>
 #include "ESPixelDriver.h"
 #include "ESPixelStick.h"
+#include "_E131.h"
 #include "helpers.h"
 
 /* Web pages and handlers */
@@ -56,13 +54,16 @@ const char passphrase[] = "PASSWORD_NOT_SET";   /* Replace with your WPA2 passph
 /*       END - User Configuration Defaults       */
 /*************************************************/
 
-//Adafruit_NeoPixel   pixels;
-ESPixelDriver	pixels;			/* Pixel object */
-uint16_t		uniLast = 1;	/* Last Universe to listen for */
+ESPixelDriver	pixels;         /* Pixel object */
+uint16_t        uniLast = 1;    /* Last Universe to listen for */
 uint8_t         seqTracker[4];  /* Current sequence numbers for each Universe */
 uint32_t        lastPacket;     /* Packet timeout tracker */
 
 void setup() {
+    /* Initial pin states */
+    pinMode(DATA_PIN, OUTPUT);
+    digitalWrite(DATA_PIN, LOW);
+    
     Serial.begin(115200);
     delay(10);
 
@@ -84,6 +85,7 @@ void setup() {
         status = initWifi();
     }
 
+    //TODO: Change this to switch to softAP mode 
     /* If we fail again, reboot */
     if (status != WL_CONNECTED) {
         Serial.println(F("**** FAILED TO ASSOCIATE WITH AP ****"));
@@ -109,37 +111,59 @@ void setup() {
 
     /* Configure UART1 for WS2811 output */
     pixels.setPin(DATA_PIN);    /* For protocols that require bit-banging */
-    pixels.begin();
     updatePixelConfig();
     pixels.show();
 }
 
 int initWifi() {
-    /* Begin listening for E1.31 data  - we aren't using DNS, so set it to the gateway if static */
-    int status = WL_IDLE_STATUS;
+    /* Switch to station mode and disconnect just in case */
+    WiFi.mode(WIFI_STA);
+    WiFi.disconnect();
+    delay(100);
 
-    if (config.dhcp) {
-        if (config.multicast)
-            status = e131.beginMulticast(config.ssid, config.passphrase, config.universe);
-        else
-            status = e131.begin(config.ssid, config.passphrase);
-    } else {
-        if (config.multicast)
-            status = e131.beginMulticast(config.ssid, config.passphrase, config.universe,
-                    IPAddress(config.ip[0], config.ip[1], config.ip[2], config.ip[3]),
-                    IPAddress(config.netmask[0], config.netmask[1], config.netmask[2], config.netmask[3]),
-                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3]),
-                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3])
-            );
-        else
-            status = e131.begin(config.ssid, config.passphrase,
-                    IPAddress(config.ip[0], config.ip[1], config.ip[2], config.ip[3]),
-                    IPAddress(config.netmask[0], config.netmask[1], config.netmask[2], config.netmask[3]),
-                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3]),
-                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3])
-            );
+    Serial.println("");
+    Serial.print(F("Connecting to "));
+    Serial.print(config.ssid);
+    
+    WiFi.begin(config.ssid, config.passphrase);
+
+    uint32_t timeout = millis();
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        if (Serial)
+            Serial.print(".");
+        if (millis() - timeout > CONNECT_TIMEOUT) {
+            if (Serial) {
+                Serial.println("");
+                Serial.println(F("*** Failed to connect ***"));
+            }
+            break;
+        }
     }
-    return status;
+
+    if (WiFi.status() == WL_CONNECTED) {
+        Serial.println("");
+        if (config.dhcp) {
+            Serial.print(F("Connected DHCP with IP: "));
+        }  else {
+            /* We don't use DNS, so just set it to our gateway */
+            WiFi.config(IPAddress(config.ip[0], config.ip[1], config.ip[2], config.ip[3]),
+                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3]),
+                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3]),
+                    IPAddress(config.netmask[0], config.netmask[1], config.netmask[2], config.netmask[3])
+            );
+            Serial.print(F("Connected with Static IP: "));
+
+        }
+        Serial.println(WiFi.localIP());
+
+        if (config.multicast)
+            e131.begin(E131_MULTICAST, config.universe);
+        else
+            e131.begin(E131_UNICAST);
+    }
+
+    return WiFi.status();
 }
 
 /* Configure and start the web server */
@@ -171,10 +195,25 @@ void initWeb() {
 }
 
 void updatePixelConfig() {
-	uniLast = config.universe + ceil((config.pixel_count * 3) / 512);
-    pixels.updateType(config.pixel_type, config.pixel_color);
+    /* Generic Limits */
+    if (config.pixel_count > 680)
+        config.pixel_count = 680;
+    
+    /* GECE Limits */
+    if (config.pixel_type == PIXEL_GECE) {
+        uniLast = config.universe;
+        config.pixel_color = COLOR_RGB;
+        if (config.pixel_count > 63)
+            config.pixel_count = 63;
+    } else {
+	    uniLast = config.universe + ceil((config.pixel_count * 3) / 512);
+    }
+
+    /* Initialize for our pixel type */
+    pixels.begin(config.pixel_type, config.pixel_color);
+    //pixels.updateType(config.pixel_type, config.pixel_color);
     pixels.updateLength(config.pixel_count);    
-    Serial.print(F("- listening for "));
+    Serial.print(F("- Listening for "));
     Serial.print(config.pixel_count * 3);
     Serial.print(F(" channels, from Universe "));
     Serial.print(config.universe);
@@ -268,6 +307,6 @@ void loop() {
     /* Force refresh every second if there is no data received */
     if ((millis() - lastPacket) > E131_TIMEOUT) {
         lastPacket = millis();
-        pixels.show();
+        //pixels.show();
     }
 }
