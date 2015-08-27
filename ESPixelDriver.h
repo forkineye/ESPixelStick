@@ -25,6 +25,7 @@
 
 #define GAMMA_CORRECTION
 
+/* Gamma correction table until pow() is fixed */
 #ifdef GAMMA_CORRECTION
 const uint8_t GAMMA_2811[] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -45,6 +46,12 @@ const uint8_t GAMMA_2811[] = {
     222,224,227,229,231,233,235,237,239,241,244,246,248,250,252,255
 };
 #endif
+
+/* 
+* 6 bit UART lookup table, first 2 bits ignored.
+* Start and stop bits are part of the pixel stream. 
+*/
+const char LOOKUP_2811[4] = { 0b00110111, 0b00000111, 0b00110100, 0b00000100 };
 
 #define GECE_DEFAULT_BRIGHTNESS 0xCC
 
@@ -85,7 +92,6 @@ class ESPixelDriver {
 		void updateOrder(color_t color);
 		void setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b);
 		void show();
-		//TODO: Modify to support GECE
 		/* 50us reset for WS2811 */
 		inline bool canShow(void) { return (micros() - endTime) >= 50L; }
 

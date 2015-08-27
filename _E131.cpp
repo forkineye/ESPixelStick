@@ -106,7 +106,6 @@ int E131::initWiFi(const char *ssid, const char *passphrase) {
         }
     }
 
-    //TODO: Add timeout and return false if we fail to connect -- handle in E131::begin
     return retval;
 }
 

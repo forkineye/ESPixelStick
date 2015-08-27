@@ -307,6 +307,6 @@ void loop() {
     /* Force refresh every second if there is no data received */
     if ((millis() - lastPacket) > E131_TIMEOUT) {
         lastPacket = millis();
-        //pixels.show();
+        pixels.show();
     }
 }

@@ -1,9 +1,7 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
-//
-// Check the Values is between 0-255
-//
+/* Check if value is between 0 and 255 */
 boolean checkRange(String Value) {
     if (Value.toInt() < 0 || Value.toInt() > 255)
         return false;
@@ -11,6 +9,7 @@ boolean checkRange(String Value) {
         return true;
 }
 
+/* Plain text friendly MAC */
 String GetMacAddress() {
     uint8_t mac[6];
     char macStr[18] = {0};
@@ -19,7 +18,7 @@ String GetMacAddress() {
     return  String(macStr);
 }
 
-// convert a single hex digit character to its integer value (from https://code.google.com/p/avr-netino/)
+/* Convert a single hex digit character to its integer value - from https://code.google.com/p/avr-netino */
 unsigned char h2int(char c) {
     if (c >= '0' && c <='9')
         return((unsigned char)c - '0');
@@ -30,7 +29,7 @@ unsigned char h2int(char c) {
     return(0);
 }
 
-// (based on https://code.google.com/p/avr-netino/)
+/* Based on https://code.google.com/p/avr-netino */
 String urldecode(String input) {
     char c;
     String ret = "";

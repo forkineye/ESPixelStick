@@ -22,11 +22,12 @@
 #include <Arduino.h>
 #include "eagle_soc.h"
 
-/* Timings
-    Start Bit - 10us
+/* 
+  Timings  
+    Start Bit - 10us  
     Data bit - 30us
-        0 Bit - 10us low / 20us high
-        1 Bit - 20us low / 10us high
+      0 Bit - 10us low / 20us high
+      1 Bit - 20us low / 10us high
     Line Reset - 30us
 */
 
@@ -43,7 +44,8 @@ static inline uint32_t _getCycleCount(void) {
     return ccount;
 }
 
-/* Each GECE frame is 26 bits long and has the following format:
+/*   
+  Each GECE frame is 26 bits long and has the following format:
     Start bit (10us)
     6-Bit Bulb Address, MSB first
     8-Bit Brightness, MSB first
@@ -51,13 +53,14 @@ static inline uint32_t _getCycleCount(void) {
     4-Bit Green, MSB first
     4-Bit Red, MSB first
 */
-/* Bit-bang one GECE packet */
+
+/* Bit-bang one GECE packet - bit bang method dervied from the NeoPixel 8266 code */
 void ICACHE_RAM_ATTR doGECE(uint8_t pin, uint32_t packet) {
 	uint32_t t, time0, time1, period, c, startTime, pinMask, mask;
     static uint32_t resetDelay = 0;
 
 	pinMask   = _BV(pin);
-	mask      = 0x02000000;
+	mask      = 0x02000000;     /* Start at bit 26 (MSB) and work our way through the packet */
 	startTime = 0;
 
 	time0  = CYCLES_GECE_T0L;
@@ -69,9 +72,9 @@ void ICACHE_RAM_ATTR doGECE(uint8_t pin, uint32_t packet) {
 
 	/* 10us Start Bit */
     c = _getCycleCount();
-    GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, pinMask);     // Set high
-    while ((_getCycleCount() - c) < CYCLES_GECE_T1H);	// Wait 10us
-	GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, pinMask);     // Set low
+    GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, pinMask);             // Set high
+    while ((_getCycleCount() - c) < CYCLES_GECE_T1H);           // Wait 10us
+	GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, pinMask);             // Set low
 
 	/* Rest of packet */
 	for (t = time0;; t = time0) {
@@ -83,22 +86,9 @@ void ICACHE_RAM_ATTR doGECE(uint8_t pin, uint32_t packet) {
 		GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, pinMask);        	// Set high
 		if (!(mask >>= 1)) break;		
 	}
-	while((_getCycleCount() - startTime) < period);				// Wait for last bit
-	GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, pinMask);      		// Set low
+	while((_getCycleCount() - startTime) < period);             // Wait for last bit
+	GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, pinMask);             // Set low
     resetDelay = micros();
-/*
-	for (t = time0;; t = time0) {
-		if(packet & mask) t = time0;                           // Bit low duration
-		while (((c = _getCycleCount()) - startTime) < period); // Wait for bit start
-		GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, pinMask);        // Set low
-		startTime = c;                                         // Save start time
-		while (((c = _getCycleCount()) - startTime) < t);      // Wait high duration
-		GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, pinMask);        // Set high
-		if (!(mask >>= 1)) break;
-	}
-
-	while((_getCycleCount() - startTime) < period); // Wait for last bit
-*/
 }
 
 #endif
