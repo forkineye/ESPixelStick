@@ -56,6 +56,7 @@ const char passphrase[] = "PASSWORD_NOT_SET";   /* Replace with your WPA2 passph
 
 ESPixelDriver	pixels;         /* Pixel object */
 uint16_t        uniLast = 1;    /* Last Universe to listen for */
+//TODO: Dynamically allocate seqTracker to support more than 4 universes w/ PIXELS_MAX change
 uint8_t         seqTracker[4];  /* Current sequence numbers for each Universe */
 uint32_t        lastPacket;     /* Packet timeout tracker */
 
@@ -206,7 +207,12 @@ void updatePixelConfig() {
         if (config.pixel_count > 63)
             config.pixel_count = 63;
     } else {
-	    uniLast = config.universe + ceil((config.pixel_count * 3) / 512);
+        uint16_t count = config.pixel_count * 3;
+        uint16_t bounds = PIXELS_MAX * 3;
+        if (count % bounds)
+            uniLast = config.universe + count / bounds;
+        else 
+            uniLast = config.universe + count / bounds - 1;
     }
 
     /* Initialize for our pixel type */
@@ -270,8 +276,6 @@ void loop() {
     /* Parse a packet and update pixels */
     if(e131.parsePacket()) {
         if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
-            lastPacket = millis();
-            
             /* Universe offset and sequence tracking */
             uint8_t uniOffset = (e131.universe - config.universe);
             if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
@@ -299,8 +303,10 @@ void loop() {
             }
 
             /* Refresh when last universe shows up */
-            if (e131.universe == uniLast)
+            if (e131.universe == uniLast) {
+                lastPacket = millis();
                 pixels.show();
+            }
         }
     }
     

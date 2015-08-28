@@ -30,7 +30,8 @@ const char VERSION[] PROGMEM = "ESPixelStick v1.1beta";
 #define DATA_PIN        2       /* Pixel output - GPIO2 */
 #define EEPROM_BASE     0       /* EEPROM configuration base address */
 #define UNIVERSE_LIMIT  510     /* Universe boundary - 510 Channels */
-#define PIXELS_MAX      170     /* Max pixels per Universe */
+//TODO:  Change PIXELS_MAX to a user configuration item
+#define PIXELS_MAX      128     /* Max pixels per Universe */
 #define E131_TIMEOUT    1000    /* Force refresh every second a packet is not seen */
 #define CONNECT_TIMEOUT 10000   /* 10 seconds */
 
