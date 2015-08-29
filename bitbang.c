@@ -67,9 +67,8 @@ void ICACHE_RAM_ATTR doGECE(uint8_t pin, uint32_t packet) {
 	time1  = CYCLES_GECE_T1L;
 	period = CYCLES_GECE;
 
-    /* Wait for 30us inter-packet delay */
-    //TODO: 30us was causing issues, 50us for now until I can debug further
-    while ((micros() - resetDelay) < 50);
+    /* Wait for 35us inter-packet delay */
+    while ((micros() - resetDelay) < 35);
 
 	/* 10us Start Bit */
     c = _getCycleCount();

@@ -31,7 +31,7 @@ const char VERSION[] PROGMEM = "ESPixelStick v1.1beta";
 #define EEPROM_BASE     0       /* EEPROM configuration base address */
 #define UNIVERSE_LIMIT  510     /* Universe boundary - 510 Channels */
 //TODO:  Change PIXELS_MAX to a user configuration item
-#define PIXELS_MAX      128     /* Max pixels per Universe */
+#define PIXELS_MAX      170     /* Max pixels per Universe */
 #define E131_TIMEOUT    1000    /* Force refresh every second a packet is not seen */
 #define CONNECT_TIMEOUT 10000   /* 10 seconds */
 
@@ -63,6 +63,7 @@ typedef struct {
     uint16_t    pixel_count;    /* Number of pixels */
     pixel_t     pixel_type;     /* Pixel type */
     color_t     pixel_color;    /* Pixel color order */
+    uint8_t     ppu;            /* Pixels per Universe boundary - Max PIXELS_MAX (Default 170) */
     float       gamma;          /* Value used to build gamma correction table */
 } __attribute__((packed)) config_t;
 
@@ -70,7 +71,8 @@ typedef struct {
 E131                e131;
 ESP8266WebServer    web(HTTP_PORT);
 config_t            config;
-uint32_t            seqError[4];    /* Sequence error tracking for each universe */
+uint32_t            *seqError;      /* Sequence error tracking for each universe */
+uint16_t            uniLast = 1;    /* Last Universe to listen for */
 
 void saveConfig();
 void updatePixelConfig();

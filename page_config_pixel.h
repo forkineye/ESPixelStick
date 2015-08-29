@@ -15,6 +15,7 @@ const char PAGE_CONFIG_PIXEL[] PROGMEM = R"=====(
 <tr><td align="right">Pixel Count:</td><td><input type="text" id="pixel_count" name="pixel_count" value=""></td></tr>
 <tr><td align="right">Pixel Type:</td><td><select id="pixel_type" name="pixel_type"></select></td></tr>
 <tr><td align="right">Color Order:</td><td><select id="pixel_color" name="pixel_color"></select></td></tr>
+<tr><td align="right">PPU:</td><td><input type="text" id="ppu" name="ppu" value=""></td></tr>
 <tr><td align="right">Gamma:</td><td><input type="text" id="gamma" name="gamma" value=""></td></tr>
 <tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Save"></td></tr>
 </table>
@@ -33,10 +34,11 @@ void send_config_pixel_html() {
             if (web.argName(i) == "pixel_count") config.pixel_count = web.arg(i).toInt();
             if (web.argName(i) == "pixel_type") config.pixel_type = (pixel_t)web.arg(i).toInt();
             if (web.argName(i) == "pixel_color") config.pixel_color = (color_t)web.arg(i).toInt();
+            if (web.argName(i) == "ppu") config.ppu = web.arg(i).toInt();
             if (web.argName(i) == "gamma") config.gamma = web.arg(i).toFloat();
         }
-        saveConfig();
         updatePixelConfig();
+        saveConfig();
     }
     web.send(200, "text/html", PAGE_CONFIG_PIXEL);
 }
@@ -55,6 +57,7 @@ void send_config_pixel_vals_html() {
     values += "pixel_color|opt|" + String("BRG|") + (String)COLOR_BRG + "\n";
     values += "pixel_color|opt|" + String("RBG|") + (String)COLOR_RBG + "\n";
     values += "pixel_color|input|" + (String)config.pixel_color + "\n";
+    values += "ppu|input|" + String(config.ppu) + "\n";
     values += "gamma|input|" + String(config.gamma) + "\n";
     web.send(200, "text/plain", values);
 }

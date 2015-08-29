@@ -8,6 +8,7 @@ const char PAGE_STATUS_E131[] PROGMEM = R"=====(
 <a href="/" class="btn btn--s"><</a>&nbsp;&nbsp;<strong>E1.31 Status</strong>
 <hr>
 <table border="0" cellspacing="0" cellpadding="3" style="width:310px">
+<tr><td align="right">Universe Range :</td><td><span id="uni_first"></span> to <span id="uni_last"></span></td></tr>
 <tr><td align="right">Last Universe :</td><td><span id="universe"></span></td></tr>
 <tr><td align="right">Total Packets :</td><td><span id="num_packets"></span></td></tr>
 <tr><td align="right">Sequence Errors :</td><td><span id="sequence_errors"></span></td></tr>
@@ -28,8 +29,13 @@ const char PAGE_STATUS_E131[] PROGMEM = R"=====(
 
 void send_status_e131_vals_html() {
     //TODO: Show sequence errors for each universe
-    uint32_t seqErrors = seqError[0] + seqError[1] + seqError[2] + seqError[3];
+    uint32_t seqErrors = 0;
+    for (int i = 0; i < ((uniLast + 1) - config.universe); i++)
+        seqErrors =+ seqError[i];
+            
     String values = "";
+    values += "uni_first|div|" + (String)config.universe + "\n";
+    values += "uni_last|div|" + (String)uniLast + "\n";
     values += "universe|div|" + (String)e131.universe + "\n";
     values += "num_packets|div|" + (String)e131.stats.num_packets + "\n";
     values += "sequence_errors|div|" + (String)seqErrors + "\n";

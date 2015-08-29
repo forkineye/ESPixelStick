@@ -5,8 +5,8 @@
 * Copyright (c) 2015 Shelby Merrick
 * http://www.forkineye.com
 *
-* Library Requirements:
-* - E1.31 for Arduino - https://github.com/forkineye/E131
+* Notes:
+* - For best performance, set to 160MHz (Tools->CPU Frequency).
 *
 *  This program is provided free for you to use in any way that you wish,
 *  subject to the laws and regulations where you are using it.  Due diligence
@@ -55,9 +55,8 @@ const char passphrase[] = "PASSWORD_NOT_SET";   /* Replace with your WPA2 passph
 /*************************************************/
 
 ESPixelDriver	pixels;         /* Pixel object */
-uint16_t        uniLast = 1;    /* Last Universe to listen for */
 //TODO: Dynamically allocate seqTracker to support more than 4 universes w/ PIXELS_MAX change
-uint8_t         seqTracker[4];  /* Current sequence numbers for each Universe */
+uint8_t         *seqTracker;    /* Current sequence numbers for each Universe */
 uint32_t        lastPacket;     /* Packet timeout tracker */
 
 void setup() {
@@ -95,7 +94,6 @@ void setup() {
 
     /* Configure and start the web server */
     initWeb();
-
     /* Setup DNS-SD */
 /* -- not working
     if (MDNS.begin("esp8266")) {
@@ -107,8 +105,8 @@ void setup() {
 */    
 
     /* Initialize globals */
-    memset(seqTracker, 0x00, sizeof(seqTracker));
-    memset(seqError, 0x00, sizeof(seqTracker));
+    //memset(seqTracker, 0x00, sizeof(seqTracker));
+    //memset(seqError, 0x00, sizeof(seqTracker));
 
     /* Configure UART1 for WS2811 output */
     pixels.setPin(DATA_PIN);    /* For protocols that require bit-banging */
@@ -195,11 +193,20 @@ void initWeb() {
     Serial.println(HTTP_PORT);
 }
 
-void updatePixelConfig() {
-    /* Generic Limits */
+/* Configuration Validations */
+void validateConfig() {
+    /* Generic count limit */
     if (config.pixel_count > 680)
         config.pixel_count = 680;
-    
+    else if (config.pixel_count < 1)
+        config.pixel_count = 1;
+
+    /* Generic PPU Limit */
+    if (config.ppu > PIXELS_MAX)
+        config.ppu = PIXELS_MAX;
+    else if (config.ppu < 1)
+        config.ppu = 1;
+
     /* GECE Limits */
     if (config.pixel_type == PIXEL_GECE) {
         uniLast = config.universe;
@@ -208,17 +215,32 @@ void updatePixelConfig() {
             config.pixel_count = 63;
     } else {
         uint16_t count = config.pixel_count * 3;
-        uint16_t bounds = PIXELS_MAX * 3;
+        uint16_t bounds = config.ppu * 3;
         if (count % bounds)
             uniLast = config.universe + count / bounds;
         else 
             uniLast = config.universe + count / bounds - 1;
     }
+}
+void updatePixelConfig() {
+    /* Validate first */
+    validateConfig();
+
+    /* Setup the sequence error tracker */
+    uint8_t uniTotal = (uniLast + 1) - config.universe;
+
+    if (seqTracker) free(seqTracker);
+    if ((seqTracker = (uint8_t *)malloc(uniTotal)))
+        memset(seqTracker, 0x00, uniTotal);
+
+    if (seqError) free(seqError);
+    if ((seqError = (uint32_t *)malloc(uniTotal * 4)))
+        memset(seqError, 0x00, uniTotal * 4);
 
     /* Initialize for our pixel type */
     pixels.begin(config.pixel_type, config.pixel_color);
     //pixels.updateType(config.pixel_type, config.pixel_color);
-    pixels.updateLength(config.pixel_count);    
+    pixels.updateLength(config.pixel_count);
     Serial.print(F("- Listening for "));
     Serial.print(config.pixel_count * 3);
     Serial.print(F(" channels, from Universe "));
@@ -250,6 +272,7 @@ void loadConfig() {
         config.pixel_count = NUM_PIXELS;
         config.pixel_type = PIXEL_WS2811;
         config.pixel_color = COLOR_RGB;
+        config.ppu = PIXELS_MAX;
         config.gamma = 1.0;
 
         /* Write the configuration structre */
@@ -259,9 +282,12 @@ void loadConfig() {
     } else {
         Serial.println(F("- Configuration loaded."));
     }
+
+    /* Validate it */
+    validateConfig();
 }
 
-void saveConfig() {
+void saveConfig() {  
     /* Write the configuration structre */
     EEPROM.put(EEPROM_BASE, config);
     EEPROM.commit();
@@ -284,12 +310,12 @@ void loop() {
             }
             
             /* Find out starting pixel based off the Universe */
-            uint16_t pixelStart = uniOffset * PIXELS_MAX;
+            uint16_t pixelStart = uniOffset * config.ppu;
 
             /* Calculate how many pixels we need from this buffer */
             uint16_t pixelStop = config.pixel_count;
-            if ((pixelStart + PIXELS_MAX) < pixelStop)
-                pixelStop = pixelStart + PIXELS_MAX;
+            if ((pixelStart + config.ppu) < pixelStop)
+                pixelStop = pixelStart + config.ppu;
 
             /* Offset the channel if required for the first universe */
             uint16_t offset = 0;
@@ -297,19 +323,23 @@ void loop() {
                 offset = config.channel_start - 1;
 
             /* Set the pixel data */
+            uint16_t buffloc = 0;
             for (int i = pixelStart; i < pixelStop; i++) {
-                int j = i * 3 + offset;
+                int j = buffloc++ * 3 + offset;
                 pixels.setPixelColor(i, e131.data[j], e131.data[j+1], e131.data[j+2]);
             }
 
-            /* Refresh when last universe shows up */
-            if (e131.universe == uniLast) {
+            /* Refresh when last universe shows up  or within 10ms if missed */
+            if ((e131.universe == uniLast) || (millis() - lastPacket > 10)) {
+            //if (e131.universe == uniLast) {
+            //if (millis() - lastPacket > 25) {
                 lastPacket = millis();
                 pixels.show();
             }
         }
     }
-    
+
+    //TODO: Use this for setting defaults states at a later date
     /* Force refresh every second if there is no data received */
     if ((millis() - lastPacket) > E131_TIMEOUT) {
         lastPacket = millis();
