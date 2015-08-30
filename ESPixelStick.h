@@ -32,7 +32,8 @@ const char VERSION[] PROGMEM = "ESPixelStick v1.1beta";
 #define UNIVERSE_LIMIT  510     /* Universe boundary - 510 Channels */
 //TODO:  Change PIXELS_MAX to a user configuration item
 #define PIXELS_MAX      170     /* Max pixels per Universe */
-#define E131_TIMEOUT    1000    /* Force refresh every second a packet is not seen */
+#define E131_TIMEOUT    1000    /* Force refresh every second an E1.31 packet is not seen */
+#define MULTI_TIMEOUT   5       /* Time to wait until force refresh when listening for multiple Universes - 5ms */
 #define CONNECT_TIMEOUT 10000   /* 10 seconds */
 
 /* Configuration ID and Version */

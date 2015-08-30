@@ -329,10 +329,8 @@ void loop() {
                 pixels.setPixelColor(i, e131.data[j], e131.data[j+1], e131.data[j+2]);
             }
 
-            /* Refresh when last universe shows up  or within 10ms if missed */
-            if ((e131.universe == uniLast) || (millis() - lastPacket > 10)) {
-            //if (e131.universe == uniLast) {
-            //if (millis() - lastPacket > 25) {
+            /* Refresh when last universe shows up or within MULTI_TIMEOUT if missed */
+            if ((e131.universe == uniLast) || (millis() - lastPacket) > MULTI_TIMEOUT) {
                 lastPacket = millis();
                 pixels.show();
             }
