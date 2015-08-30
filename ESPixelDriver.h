@@ -67,48 +67,63 @@ const char LOOKUP_2811[4] = { 0b00110111, 0b00000111, 0b00110100, 0b00000100 };
 #define GECE_GET_GREEN(packet)       (packet >> 4) & 0x0F
 #define GECE_GET_RED(packet)         packet & 0x0F
 
+#define WS2811_TFRAME   30L     /* 30us frame time */
+#define WS2811_TIDLE    50L     /* 50us idle time */
+#define GECE_TFRAME     790L    /* 790us frame time */
+#define GECE_TIDLE      35L     /* 35us idle time */
+
 
 /* Pixel Types */
 typedef enum {
-	PIXEL_WS2811,
-	PIXEL_GECE
+    PIXEL_WS2811,
+    PIXEL_GECE
 } pixel_t;
 
 /* Color Order */
 typedef enum {
-	COLOR_RGB,
-	COLOR_GRB,
-	COLOR_BRG,
-	COLOR_RBG
+    COLOR_RGB,
+    COLOR_GRB,
+    COLOR_BRG,
+    COLOR_RBG
 } color_t;
 
 class ESPixelDriver {
-	public:
+    public:
         int begin();
-		int begin(pixel_t type);
-		int begin(pixel_t type, color_t color);
-		void setPin(uint8_t pin);
-		void updateLength(uint16_t length);
-		void updateOrder(color_t color);
-		void setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b);
-		void show();
-		/* 50us reset for WS2811 */
-		inline bool canShow(void) { return (micros() - endTime) >= 50L; }
+        int begin(pixel_t type);
+        int begin(pixel_t type, color_t color);
+        void setPin(uint8_t pin);
+        void updateLength(uint16_t length);
+        void updateOrder(color_t color);
+        void setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b);
+        void show();
 
-	private:
-		pixel_t		type;		// Pixel type
-		color_t		color;		// Color Order
-		uint8_t		pin;		// Pin for bit-banging
-		uint8_t		*pixdata;	// Pixel buffer
-		uint16_t	numPixels;	// Number of pixels
-		uint16_t	szBuffer;	// Size of Pixel buffer
-		uint8_t		rOffset;	// Index of red byte
-		uint8_t		gOffset;	// Index of red byte
-		uint8_t		bOffset;	// Index of red byte
+        /* 50us reset for WS2811 */
+        inline bool canShow_WS2811(void) {
+            return (micros() - endTime) >= WS2811_TIDLE;
+        }
+
+    private:
+        pixel_t		type;		// Pixel type
+        color_t		color;		// Color Order
+        uint8_t		pin;		// Pin for bit-banging
+        uint8_t		*pixdata;	// Pixel buffer
+        uint16_t	numPixels;	// Number of pixels
+        uint16_t	szBuffer;	// Size of Pixel buffer
+        uint8_t		rOffset;	// Index of red byte
+        uint8_t		gOffset;	// Index of red byte
+        uint8_t		bOffset;	// Index of red byte
         uint32_t    endTime;    // Reset tracker
+        
+        void ws2811_init();
+        void gece_init();
 
-		void ws2811_init();
-		void gece_init();
+        /* Drop the update if our refresh rate is too high */
+        inline bool canRefresh(uint32_t frame, uint32_t idle) { 
+            return (micros() - endTime) >= (frame * numPixels + idle);
+        }
+
+
 };
 
 #endif

@@ -125,10 +125,14 @@ void ESPixelDriver::setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t 
 //TODO: Optimize UART buffer handling
 void ESPixelDriver::show() {
 	if (!pixdata) return;
-	while (!canShow()) yield();
 
 	if (type == PIXEL_WS2811) {
 		char buff[4];
+
+        /* Drop the update if our refresh rate is too high */
+        if (!canRefresh(WS2811_TFRAME, WS2811_TIDLE)) return;
+        
+		while (!canShow_WS2811()) yield();
         //TODO: Until pow() is fixed and we can generate tables at runtime
 #ifdef GAMMA_CORRECTION
 		for (uint16_t i = 0; i < szBuffer; i++) {
@@ -147,8 +151,13 @@ void ESPixelDriver::show() {
 			Serial1.write(buff, sizeof(buff));		
 		}
 #endif
+        endTime = micros();
 	} else if (type == PIXEL_GECE) {
 		uint32_t packet = 0;
+
+        /* Drop the update if our refresh rate is too high */
+        if (!canRefresh(GECE_TFRAME, GECE_TIDLE)) return;
+        
         /* Build a GECE packet */
 		for (uint8_t i = 0; i < numPixels; i++) {
             packet = (packet & ~GECE_ADDRESS_MASK) | (i << 20);
@@ -162,6 +171,6 @@ void ESPixelDriver::show() {
     		doGECE(pin, packet);
             interrupts();
 		}
+       endTime = micros();
 	}
-    endTime = micros();
 }
