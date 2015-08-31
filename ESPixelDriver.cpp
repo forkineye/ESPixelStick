@@ -160,6 +160,7 @@ void ESPixelDriver::show() {
         
         /* Build a GECE packet */
 		for (uint8_t i = 0; i < numPixels; i++) {
+            //uint8_t brightness = (pixdata[i*3] + pixdata[i*3+1] + pixdata[i*3+2]) / 3;  // toying with brightness ideas
             packet = (packet & ~GECE_ADDRESS_MASK) | (i << 20);
             packet = (packet & ~GECE_BRIGHTNESS_MASK) | (GECE_DEFAULT_BRIGHTNESS << 12);
             packet = (packet & ~GECE_BLUE_MASK) | (pixdata[i*3+2] << 4);

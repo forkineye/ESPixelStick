@@ -237,6 +237,9 @@ void updatePixelConfig() {
     if ((seqError = (uint32_t *)malloc(uniTotal * 4)))
         memset(seqError, 0x00, uniTotal * 4);
 
+    /* Zero out packet stats */
+    e131.stats.num_packets = 0;
+    
     /* Initialize for our pixel type */
     pixels.begin(config.pixel_type, config.pixel_color);
     //pixels.updateType(config.pixel_type, config.pixel_color);
@@ -329,8 +332,8 @@ void loop() {
                 pixels.setPixelColor(i, e131.data[j], e131.data[j+1], e131.data[j+2]);
             }
 
-            /* Refresh when last universe shows up or within MULTI_TIMEOUT if missed */
-            if ((e131.universe == uniLast) || (millis() - lastPacket) > MULTI_TIMEOUT) {
+            /* Refresh when last universe shows up */
+            if (e131.universe == uniLast) {
                 lastPacket = millis();
                 pixels.show();
             }
