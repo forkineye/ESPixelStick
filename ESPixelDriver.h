@@ -122,8 +122,6 @@ class ESPixelDriver {
         inline bool canRefresh(uint32_t frame, uint32_t idle) { 
             return (micros() - endTime) >= (frame * numPixels + idle);
         }
-
-
 };
 
 #endif

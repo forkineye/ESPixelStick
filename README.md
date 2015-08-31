@@ -1,6 +1,10 @@
 ESPixelStick Firmware
 =====================
-This is the Arduino firmware for the ESP8266 based ESPixelStick.  The ESPixelStick is a small wireless E1.31 sACN pixel controller designed to control a single DMX Universe of WS2811 pixels.  
+This is the Arduino firmware for the ESP8266 based ESPixelStick.  The ESPixelStick is a small wireless E1.31 sACN pixel controller designed to control a single strand of pixels.  Pixel limitations are mostly based upon your desired refresh rate, around 680 pixels (4 universes) for a 25ms E1.31 source rate.
+
+### Supported Pixels
+- WS2811 / WS2812 / WS2812b
+- GE Color Effects
 
 ### Requirements
 - Adruino for ESP8266 - https://github.com/esp8266/Arduino

@@ -283,7 +283,14 @@ void loadConfig() {
         EEPROM.commit();
         Serial.println(F("* Default configuration saved."));
     } else {
-        Serial.println(F("- Configuration loaded."));
+        if (config.version < CONFIG_VERSION) {
+            /* Config updates and resets for V2 */
+            config.ppu = PIXELS_MAX;
+            config.gamma = 1.0;
+            Serial.println(F("- Configuration upgraded."));
+        } else {
+            Serial.println(F("- Configuration loaded."));
+        }
     }
 
     /* Validate it */

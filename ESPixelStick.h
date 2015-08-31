@@ -24,19 +24,18 @@
 #include "_E131.h"
 
 /* Name and version */
-const char VERSION[] PROGMEM = "ESPixelStick v1.1beta";
+const char VERSION[] PROGMEM = "ESPixelStick v1.1";
 
 #define HTTP_PORT       80      /* Default web server port */
 #define DATA_PIN        2       /* Pixel output - GPIO2 */
 #define EEPROM_BASE     0       /* EEPROM configuration base address */
 #define UNIVERSE_LIMIT  510     /* Universe boundary - 510 Channels */
-//TODO:  Change PIXELS_MAX to a user configuration item
 #define PIXELS_MAX      170     /* Max pixels per Universe */
 #define E131_TIMEOUT    1000    /* Force refresh every second an E1.31 packet is not seen */
 #define CONNECT_TIMEOUT 10000   /* 10 seconds */
 
 /* Configuration ID and Version */
-#define CONFIG_VERSION 1;
+#define CONFIG_VERSION 2
 const uint8_t CONFIG_ID[4] PROGMEM = { 'F', 'O', 'R', 'K'};
 
 /* Configuration structure */
