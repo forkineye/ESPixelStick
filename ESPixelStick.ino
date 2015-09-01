@@ -285,6 +285,7 @@ void loadConfig() {
     } else {
         if (config.version < CONFIG_VERSION) {
             /* Config updates and resets for V2 */
+            config.version = CONFIG_VERSION;
             config.ppu = PIXELS_MAX;
             config.gamma = 1.0;
             Serial.println(F("- Configuration upgraded."));
