@@ -50,18 +50,34 @@ display: block;
 width: 100%; 
 	} 
 	.btn--blue:link, .btn--blue:visited {
-color: #fff;  
+        color: #fff;  
 		background-color: #0074D9; 
 	}
 	.btn--blue:hover, .btn--blue:focus {
-color: #fff !important;  
+        color: #fff !important;  
 		background-color: #0063aa;  
 		border-color: #0063aa; 
 	}
 	.btn--blue:active {
-color: #fff; 
+        color: #fff; 
 		background-color: #001F3F;  border-color: #001F3F; 
 	}
+
+    .btn--red:link, .btn--red:visited {
+        color: #fff;  
+        background-color: #e60000; 
+    }
+    .btn--red:hover, .btn--red:focus {
+        color: #fff !important;  
+        background-color: #cc0000;  
+        border-color: #cc0000; 
+    }
+    .btn--red:active {
+        color: #fff; 
+        background-color: #990000;  border-color: #990000; 
+    }
+
+   
 	@media screen and (min-width: 32em) {
 		.btn--full {  
 			max-width: 16em !important; } 

@@ -1,5 +1,5 @@
-#ifndef PAGE_STATUS_DMX_H
-#define PAGE_STATUS_DMX_H
+#ifndef PAGE_STATUS_E131_H
+#define PAGE_STATUS_E131_H
 
 const char PAGE_STATUS_E131[] PROGMEM = R"=====(
 <meta name="viewport" content="width=device-width, initial-scale=1"/>

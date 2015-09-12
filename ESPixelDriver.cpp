@@ -26,9 +26,6 @@ extern "C" {
 #include "uart_register.h"
 }
 
-/* 6 bit UART lookup table, first 2 bits ignored. Start and stop bits are part of the pixel stream. */
-//const char LOOKUP_2811[4] = { 0b00110111, 0b00000111, 0b00110100, 0b00000100 };
-
 int ESPixelDriver::begin() {
     return begin(PIXEL_WS2811, COLOR_RGB);
 }
@@ -58,6 +55,14 @@ int ESPixelDriver::begin(pixel_t type, color_t color) {
 void ESPixelDriver::setPin(uint8_t pin) {
     if (this->pin >= 0)
         this->pin = pin;
+}
+
+void ESPixelDriver::setGamma(float gamma) {
+    /* Treat this as a boolean until pow() is fixed */
+    if (gamma)
+        this->gamma = true;
+    else
+        this->gamma = false;
 }
 
 void ESPixelDriver::ws2811_init() {
@@ -134,23 +139,24 @@ void ESPixelDriver::show() {
         
 		while (!canShow_WS2811()) yield();
         //TODO: Until pow() is fixed and we can generate tables at runtime
-#ifdef GAMMA_CORRECTION
-		for (uint16_t i = 0; i < szBuffer; i++) {
-			buff[0] = LOOKUP_2811[(GAMMA_2811[pixdata[i]] >> 6) & 3];
-			buff[1] = LOOKUP_2811[(GAMMA_2811[pixdata[i]] >> 4) & 3];
-			buff[2] = LOOKUP_2811[(GAMMA_2811[pixdata[i]] >> 2) & 3];
-			buff[3] = LOOKUP_2811[GAMMA_2811[pixdata[i]] & 3];
-			Serial1.write(buff, sizeof(buff));		
-		}
-#else
-		for (uint16_t i = 0; i < szBuffer; i++) {
-			buff[0] = LOOKUP_2811[(pixdata[i] >> 6) & 3];
-			buff[1] = LOOKUP_2811[(pixdata[i] >> 4) & 3];
-			buff[2] = LOOKUP_2811[(pixdata[i] >> 2) & 3];
-			buff[3] = LOOKUP_2811[pixdata[i] & 3];
-			Serial1.write(buff, sizeof(buff));		
-		}
-#endif
+
+        if (gamma) {
+    		for (uint16_t i = 0; i < szBuffer; i++) {
+    			buff[0] = LOOKUP_2811[(GAMMA_2811[pixdata[i]] >> 6) & 3];
+    			buff[1] = LOOKUP_2811[(GAMMA_2811[pixdata[i]] >> 4) & 3];
+    			buff[2] = LOOKUP_2811[(GAMMA_2811[pixdata[i]] >> 2) & 3];
+    			buff[3] = LOOKUP_2811[GAMMA_2811[pixdata[i]] & 3];
+    			Serial1.write(buff, sizeof(buff));		
+    		}
+        } else {
+    		for (uint16_t i = 0; i < szBuffer; i++) {
+    			buff[0] = LOOKUP_2811[(pixdata[i] >> 6) & 3];
+    			buff[1] = LOOKUP_2811[(pixdata[i] >> 4) & 3];
+    			buff[2] = LOOKUP_2811[(pixdata[i] >> 2) & 3];
+    			buff[3] = LOOKUP_2811[pixdata[i] & 3];
+    			Serial1.write(buff, sizeof(buff));		
+    		}
+        }
         endTime = micros();
 	} else if (type == PIXEL_GECE) {
 		uint32_t packet = 0;

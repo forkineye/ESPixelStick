@@ -33,6 +33,7 @@
 #include "page_microajax.js.h"
 #include "page_style.css.h"
 #include "page_root.h"
+#include "page_admin.h"
 #include "page_config_net.h"
 #include "page_config_pixel.h"
 #include "page_status_net.h"
@@ -43,19 +44,29 @@
 /*      BEGIN - User Configuration Defaults      */
 /*************************************************/
 
-#define NUM_PIXELS      170     /* Number of pixels */
-#define UNIVERSE        1       /* First Universe to listen for */
-#define CHANNEL_START   1       /* Channel to start listening at */
-
+/* REQUIRED */
 const char ssid[] = "SSID_NOT_SET";             /* Replace with your SSID */
 const char passphrase[] = "PASSWORD_NOT_SET";   /* Replace with your WPA2 passphrase */
+
+/* OPTIONAL */
+#define UNIVERSE        1               /* Universe to listen for */
+#define CHANNEL_START   1               /* Channel to start listening at */
+#define NUM_PIXELS      170             /* Number of pixels */
+#define PIXEL_TYPE      PIXEL_WS2811    /* Pixel type */
+#define COLOR_ORDER     COLOR_RGB       /* Color Order */
+#define PPU             170             /* Pixels per Universe */
+
+/*  Use only 1.0 or 0.0 to enable / disable the internal gamma map for now.  In the future
+ *  this will be the gamma value used for dynamic gamma table creation, but the current
+ *  stable release of the ESP SDK has pow() broken.
+ */
+#define GAMMA           1.0             /* Gamma */
 
 /*************************************************/
 /*       END - User Configuration Defaults       */
 /*************************************************/
 
 ESPixelDriver	pixels;         /* Pixel object */
-//TODO: Dynamically allocate seqTracker to support more than 4 universes w/ PIXELS_MAX change
 uint8_t         *seqTracker;    /* Current sequence numbers for each Universe */
 uint32_t        lastPacket;     /* Packet timeout tracker */
 
@@ -68,6 +79,7 @@ void setup() {
     delay(10);
 
     Serial.println("");
+    Serial.print(F("ESPixelStick v"));
     for (uint8_t i = 0; i < strlen_P(VERSION); i++)
         Serial.print((char)(pgm_read_byte(VERSION + i)));
     Serial.println("");
@@ -104,11 +116,7 @@ void setup() {
     }
 */    
 
-    /* Initialize globals */
-    //memset(seqTracker, 0x00, sizeof(seqTracker));
-    //memset(seqError, 0x00, sizeof(seqTracker));
-
-    /* Configure UART1 for WS2811 output */
+    /* Configure our outputs and pixels */
     pixels.setPin(DATA_PIN);    /* For protocols that require bit-banging */
     updatePixelConfig();
     pixels.show();
@@ -173,6 +181,7 @@ void initWeb() {
 
     /* HTML Pages */
     web.on("/", []() { web.send(200, "text/html", PAGE_ROOT); });
+    web.on("/admin.html", send_admin_html);
     web.on("/config/net.html", send_config_net_html);
     web.on("/config/pixel.html", send_config_pixel_html);
     web.on("/status/net.html", []() { web.send(200, "text/html", PAGE_STATUS_NET); });
@@ -180,11 +189,15 @@ void initWeb() {
 
     /* AJAX Handlers */
     web.on("/rootvals", send_root_vals_html);
+    web.on("/adminvals", send_admin_vals_html);
     web.on("/config/netvals", send_config_net_vals_html);
     web.on("/config/pixelvals", send_config_pixel_vals_html);
     web.on("/config/connectionstate", send_connection_state_vals_html);
     web.on("/status/netvals", send_status_net_vals_html);
     web.on("/status/e131vals", send_status_e131_vals_html);
+
+    /* Admin Handlers */
+    web.on("/reboot", []() { web.send(200, "text/html", PAGE_ADMIN_REBOOT); ESP.restart(); });
 
     web.onNotFound([]() { web.send(404, "text/html", "Page not Found"); });
     web.begin();
@@ -196,14 +209,14 @@ void initWeb() {
 /* Configuration Validations */
 void validateConfig() {
     /* Generic count limit */
-    if (config.pixel_count > 680)
-        config.pixel_count = 680;
+    if (config.pixel_count > PIXEL_LIMIT)
+        config.pixel_count = PIXEL_LIMIT;
     else if (config.pixel_count < 1)
         config.pixel_count = 1;
 
     /* Generic PPU Limit */
-    if (config.ppu > PIXELS_MAX)
-        config.ppu = PIXELS_MAX;
+    if (config.ppu > PPU_MAX)
+        config.ppu = PPU_MAX;
     else if (config.ppu < 1)
         config.ppu = 1;
 
@@ -242,8 +255,8 @@ void updatePixelConfig() {
     
     /* Initialize for our pixel type */
     pixels.begin(config.pixel_type, config.pixel_color);
-    //pixels.updateType(config.pixel_type, config.pixel_color);
     pixels.updateLength(config.pixel_count);
+    pixels.setGamma(config.gamma);
     Serial.print(F("- Listening for "));
     Serial.print(config.pixel_count * 3);
     Serial.print(F(" channels, from Universe "));
@@ -273,22 +286,24 @@ void loadConfig() {
         config.universe = UNIVERSE;
         config.channel_start = CHANNEL_START;
         config.pixel_count = NUM_PIXELS;
-        config.pixel_type = PIXEL_WS2811;
-        config.pixel_color = COLOR_RGB;
-        config.ppu = PIXELS_MAX;
-        config.gamma = 1.0;
+        config.pixel_type = PIXEL_TYPE;
+        config.pixel_color = COLOR_ORDER;
+        config.ppu = PPU;
+        config.gamma = GAMMA;
 
-        /* Write the configuration structre */
+        /* Write the configuration structure */
         EEPROM.put(EEPROM_BASE, config);
         EEPROM.commit();
         Serial.println(F("* Default configuration saved."));
     } else {
         if (config.version < CONFIG_VERSION) {
-            /* Config updates and resets for V2 */
+            /* Config updates and resets for V2 config */
             config.version = CONFIG_VERSION;
-            config.ppu = PIXELS_MAX;
-            config.gamma = 1.0;
-            Serial.println(F("- Configuration upgraded."));
+            config.ppu = PPU;
+            config.gamma = GAMMA;
+            EEPROM.put(EEPROM_BASE, config);
+            EEPROM.commit();
+            Serial.println(F("* Configuration upgraded."));
         } else {
             Serial.println(F("- Configuration loaded."));
         }

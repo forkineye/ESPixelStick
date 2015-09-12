@@ -23,10 +23,7 @@
 #define UART_INV_MASK  (0x3f<<19)
 #define UART 1
 
-#define GAMMA_CORRECTION
-
 /* Gamma correction table until pow() is fixed */
-#ifdef GAMMA_CORRECTION
 const uint8_t GAMMA_2811[] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2,
@@ -45,7 +42,6 @@ const uint8_t GAMMA_2811[] = {
     191,193,194,196,198,200,202,204,206,208,210,212,214,216,218,220,
     222,224,227,229,231,233,235,237,239,241,244,246,248,250,252,255
 };
-#endif
 
 /* 
 * 6 bit UART lookup table, first 2 bits ignored.
@@ -93,6 +89,7 @@ class ESPixelDriver {
         int begin(pixel_t type);
         int begin(pixel_t type, color_t color);
         void setPin(uint8_t pin);
+        void setGamma(float gamma);
         void updateLength(uint16_t length);
         void updateOrder(color_t color);
         void setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b);
@@ -114,6 +111,7 @@ class ESPixelDriver {
         uint8_t		gOffset;	// Index of red byte
         uint8_t		bOffset;	// Index of red byte
         uint32_t    endTime;    // Reset tracker
+        boolean     gamma;      // Gamma correction flag
         
         void ws2811_init();
         void gece_init();

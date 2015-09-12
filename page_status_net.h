@@ -5,7 +5,7 @@ const char PAGE_STATUS_NET[] PROGMEM = R"=====(
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="stylesheet" href="/style.css" type="text/css"/>
 <script src="/microajax.js"></script> 
-<a href="/" class="btn btn--s"><</a>&nbsp;&nbsp;<strong>Network Information</strong>
+<a href="/" class="btn btn--s"><</a>&nbsp;&nbsp;<strong>Network Status</strong>
 <hr>
 <table border="0" cellspacing="0" cellpadding="3" style="width:310px">
 <tr><td align="right">SSID :</td><td><span id="x_ssid"></span></td></tr>
