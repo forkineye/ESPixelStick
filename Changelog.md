@@ -1,6 +1,11 @@
 
 Changelog
 =========
+#### 1.2
+- Added Administration Page.
+- Disconnect from WiFi before rebooting.
+- Code cleanup / housekeeping.
+
 #### 1.1
 - Migration to UART code for handling WS281x streams.
 - Initial GECE support.

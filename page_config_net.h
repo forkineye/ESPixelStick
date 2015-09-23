@@ -2,6 +2,7 @@
 #define PAGE_CONFIG_NET_H
 
 const char PAGE_CONFIG_NET[] PROGMEM = R"=====(
+<title>ESPS Network Config</title>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="stylesheet" href="/style.css" type="text/css"/>
 <script src="/microajax.js"></script> 
@@ -74,6 +75,7 @@ void send_config_net_html() {
         web.send(200, "text/html", PAGE_RELOAD_NET);
 
         saveConfig();
+        WiFi.disconnect();
         ESP.restart();
     } else {
         web.send(200, "text/html", PAGE_CONFIG_NET); 

@@ -52,8 +52,8 @@ const char passphrase[] = "PASSWORD_NOT_SET";   /* Replace with your WPA2 passph
 #define UNIVERSE        1               /* Universe to listen for */
 #define CHANNEL_START   1               /* Channel to start listening at */
 #define NUM_PIXELS      170             /* Number of pixels */
-#define PIXEL_TYPE      PIXEL_WS2811    /* Pixel type */
-#define COLOR_ORDER     COLOR_RGB       /* Color Order */
+#define PIXEL_TYPE      PIXEL_WS2811    /* Pixel type - See ESPixelDriver.h for full list */
+#define COLOR_ORDER     COLOR_RGB       /* Color Order - See ESPixelDriver.h for full list */
 #define PPU             170             /* Pixels per Universe */
 
 /*  Use only 1.0 or 0.0 to enable / disable the internal gamma map for now.  In the future
@@ -197,7 +197,7 @@ void initWeb() {
     web.on("/status/e131vals", send_status_e131_vals_html);
 
     /* Admin Handlers */
-    web.on("/reboot", []() { web.send(200, "text/html", PAGE_ADMIN_REBOOT); ESP.restart(); });
+    web.on("/reboot", []() { web.send(200, "text/html", PAGE_ADMIN_REBOOT); WiFi.disconnect(); ESP.restart(); });
 
     web.onNotFound([]() { web.send(404, "text/html", "Page not Found"); });
     web.begin();
@@ -235,6 +235,7 @@ void validateConfig() {
             uniLast = config.universe + count / bounds - 1;
     }
 }
+
 void updatePixelConfig() {
     /* Validate first */
     validateConfig();

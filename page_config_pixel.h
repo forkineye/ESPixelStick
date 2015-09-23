@@ -2,6 +2,7 @@
 #define PAGE_CONFIG_PIXEL_H
 
 const char PAGE_CONFIG_PIXEL[] PROGMEM = R"=====(
+<title>ESPS Pixel Config</title>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="stylesheet" href="/style.css" type="text/css"/>
 <script src="/microajax.js"></script>
@@ -9,6 +10,7 @@ const char PAGE_CONFIG_PIXEL[] PROGMEM = R"=====(
 <hr>
 <form action="" method="get">
 <table border="0" cellspacing="0" cellpadding="3">
+<tr><td align="right">Device ID :</td><td><input type="text" id="devid" name="devid" value=""></td></tr>
 <tr><td align="right">Universe :</td><td><input type="text" id="universe" name="universe" value=""></td></tr>
 <tr><td align="right">Start Channel :</td><td><input type="text" id="channel_start" name="channel_start" value=""></td></tr>
 <tr><td align="right">Pixel Count :</td><td><input type="text" id="pixel_count" name="pixel_count" value=""></td></tr>
@@ -28,6 +30,7 @@ void send_config_pixel_html() {
     if (web.args()) {  // Save Settings
         config.gamma = 0;
         for (uint8_t i = 0; i < web.args(); i++) {
+            if (web.argName(i) == "devid") urldecode(web.arg(i)).toCharArray(config.name, sizeof(config.name));
             if (web.argName(i) == "universe") config.universe = web.arg(i).toInt(); 
             if (web.argName(i) == "channel_start") config.channel_start = web.arg(i).toInt();
             if (web.argName(i) == "pixel_count") config.pixel_count = web.arg(i).toInt();
@@ -45,6 +48,7 @@ void send_config_pixel_html() {
 
 void send_config_pixel_vals_html() {
     String values = "";
+    values += "devid|input|" + (String)config.name + "\n";
     values += "universe|input|" + (String)config.universe + "\n";
     values += "channel_start|input|" + (String)config.channel_start + "\n";
     values += "pixel_count|input|" + (String)config.pixel_count + "\n";

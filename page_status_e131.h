@@ -2,6 +2,7 @@
 #define PAGE_STATUS_E131_H
 
 const char PAGE_STATUS_E131[] PROGMEM = R"=====(
+<title>ESPS E1.31 Status</title>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="stylesheet" href="/style.css" type="text/css"/>
 <script src="/microajax.js"></script> 
