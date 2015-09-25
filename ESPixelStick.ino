@@ -156,8 +156,8 @@ int initWifi() {
             /* We don't use DNS, so just set it to our gateway */
             WiFi.config(IPAddress(config.ip[0], config.ip[1], config.ip[2], config.ip[3]),
                     IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3]),
-                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3]),
-                    IPAddress(config.netmask[0], config.netmask[1], config.netmask[2], config.netmask[3])
+                    IPAddress(config.netmask[0], config.netmask[1], config.netmask[2], config.netmask[3]),
+                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3])
             );
             Serial.print(F("Connected with Static IP: "));
 
