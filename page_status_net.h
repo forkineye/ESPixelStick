@@ -29,7 +29,7 @@ const char PAGE_STATUS_NET[] PROGMEM = R"=====(
 // FILL WITH INFOMATION
 // 
 
-void send_status_net_vals_html() {
+void send_status_net_vals() {
     int quality = 0;
     long rssi = WiFi.RSSI();
     
@@ -48,7 +48,7 @@ void send_status_net_vals_html() {
     values += "x_mac|div|" + GetMacAddress() + "\n";
     values += "x_rssi|div|" + (String)rssi + "\n";
     values += "x_quality|div|" + (String)quality + "\n";
-    web.send(200, "text/plain", values);
+    web.send(200, PTYPE_PLAIN, values);
 }
 
 #endif

@@ -32,13 +32,13 @@ void send_admin_html() {
         saveConfig();
     }
     */
-    web.send(200, "text/html", PAGE_ADMIN);
+    sendPage(PAGE_ADMIN, sizeof(PAGE_ADMIN), PTYPE_HTML);
 }
 
-void send_admin_vals_html() {
+void send_admin_vals() {
     String values = "";
     values += "version|div|" + (String)VERSION + "\n";
-    web.send(200, "text/plain", values);
+    web.send(200, PTYPE_PLAIN, values);
 }
 
 #endif

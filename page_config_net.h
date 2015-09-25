@@ -72,13 +72,13 @@ void send_config_net_html() {
             if (web.argName(i) == "dhcp") config.dhcp = true;
             if (web.argName(i) == "multicast") config.multicast = true;
         }
-        web.send(200, "text/html", PAGE_RELOAD_NET);
+        sendPage(PAGE_RELOAD_NET, sizeof(PAGE_RELOAD_NET), PTYPE_HTML);
 
         saveConfig();
         WiFi.disconnect();
         ESP.restart();
     } else {
-        web.send(200, "text/html", PAGE_CONFIG_NET); 
+        sendPage(PAGE_CONFIG_NET, sizeof(PAGE_CONFIG_NET), PTYPE_HTML);
     }
 }
 
@@ -86,7 +86,7 @@ void send_config_net_html() {
 //   FILL THE PAGE WITH VALUES
 //
 
-void send_config_net_vals_html() {
+void send_config_net_vals() {
     String values ="";
     values += "ssid|input|" + String((char*)config.ssid) + "\n";
     values += "password|input|" + String((char*)config.passphrase) + "\n";
@@ -104,14 +104,14 @@ void send_config_net_vals_html() {
     values += "gw_3|input|" + (String)config.gateway[3] + "\n";
     values += "dhcp|chk|" + (String)(config.dhcp ? "checked" : "") + "\n";
     values += "multicast|chk|" + (String)(config.multicast ? "checked" : "") + "\n";
-    web.send(200, "text/plain", values);
+    web.send(200, PTYPE_PLAIN, values);
 }
 
 
 //
 //   FILL THE PAGE WITH NETWORKSTATE & NETWORKS
 //
-void send_connection_state_vals_html() {
+void send_connection_state_vals() {
     String state = "N/A";
     String Networks = "";
     if (WiFi.status() == 0) state = "Idle";
@@ -147,7 +147,7 @@ void send_connection_state_vals_html() {
     String values = "";
     values += "connectionstate|div|" + state + "\n";
     values += "networks|div|" + Networks + "\n";
-    web.send(200, "text/plain", values);
+    web.send(200, PTYPE_PLAIN, values);
 }
 
 #endif

@@ -19,10 +19,10 @@ const char PAGE_ROOT[] PROGMEM = R"=====(
 </script>
 )=====";
 
-void send_root_vals_html() {
+void send_root_vals() {
     String values = "";
     values += "name|div|" + (String)config.name + "\n";
     values += "title|div|" + String("ESPS - ") + (String)config.name + "\n";
-    web.send(200, "text/plain", values);
+    web.send(200, PTYPE_PLAIN, values);
 }
 #endif

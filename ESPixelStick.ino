@@ -173,33 +173,47 @@ int initWifi() {
     return WiFi.status();
 }
 
+/* Read a page from PROGMEM and send it */
+void sendPage(const char *data, int count, const char *type) {
+    char *buffer = (char*)malloc(count);
+    if (buffer) {
+        memcpy_P(buffer, data, count);
+        web.send(200, type, buffer);
+        free(buffer);
+    } else {
+        Serial.print(F("*** Malloc failed for "));
+        Serial.print(count);
+        Serial.println(F(" bytes in sendPage() ***"));
+    }
+}
+
 /* Configure and start the web server */
 void initWeb() {
     /* JavaScript and Stylesheets */
-    web.on ("/style.css", []() { web.send(200, "text/plain", PAGE_STYLE_CSS); });
-    web.on ("/microajax.js", []() { web.send(200, "text/plain", PAGE_MICROAJAX_JS); });
+    web.on("/style.css", []() { sendPage(PAGE_STYLE_CSS, sizeof(PAGE_STYLE_CSS), PTYPE_PLAIN); });
+    web.on("/microajax.js", []() { sendPage(PAGE_MICROAJAX_JS, sizeof(PAGE_MICROAJAX_JS), PTYPE_PLAIN); });
 
     /* HTML Pages */
-    web.on("/", []() { web.send(200, "text/html", PAGE_ROOT); });
+    web.on("/", []() { sendPage(PAGE_ROOT, sizeof(PAGE_ROOT), PTYPE_HTML); });
     web.on("/admin.html", send_admin_html);
     web.on("/config/net.html", send_config_net_html);
     web.on("/config/pixel.html", send_config_pixel_html);
-    web.on("/status/net.html", []() { web.send(200, "text/html", PAGE_STATUS_NET); });
-    web.on("/status/e131.html", []() { web.send(200, "text/html", PAGE_STATUS_E131); });
+    web.on("/status/net.html", []() { sendPage(PAGE_STATUS_NET, sizeof(PAGE_STATUS_NET), PTYPE_HTML); });
+    web.on("/status/e131.html", []() { sendPage(PAGE_STATUS_E131, sizeof(PAGE_STATUS_E131), PTYPE_HTML); });
 
     /* AJAX Handlers */
-    web.on("/rootvals", send_root_vals_html);
-    web.on("/adminvals", send_admin_vals_html);
-    web.on("/config/netvals", send_config_net_vals_html);
-    web.on("/config/pixelvals", send_config_pixel_vals_html);
-    web.on("/config/connectionstate", send_connection_state_vals_html);
-    web.on("/status/netvals", send_status_net_vals_html);
-    web.on("/status/e131vals", send_status_e131_vals_html);
+    web.on("/rootvals", send_root_vals);
+    web.on("/adminvals", send_admin_vals);
+    web.on("/config/netvals", send_config_net_vals);
+    web.on("/config/pixelvals", send_config_pixel_vals);
+    web.on("/config/connectionstate", send_connection_state_vals);
+    web.on("/status/netvals", send_status_net_vals);
+    web.on("/status/e131vals", send_status_e131_vals);
 
     /* Admin Handlers */
-    web.on("/reboot", []() { web.send(200, "text/html", PAGE_ADMIN_REBOOT); WiFi.disconnect(); ESP.restart(); });
+    web.on("/reboot", []() { sendPage(PAGE_ADMIN_REBOOT, sizeof(PAGE_ADMIN_REBOOT), PTYPE_HTML); WiFi.disconnect(); ESP.restart(); });
 
-    web.onNotFound([]() { web.send(404, "text/html", "Page not Found"); });
+    web.onNotFound([]() { web.send(404, PTYPE_HTML, "Page not Found"); });
     web.begin();
 
     Serial.print(F("- Web Server started on port "));

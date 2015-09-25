@@ -24,7 +24,7 @@
 #include "_E131.h"
 
 /* Name and version */
-const char VERSION[] PROGMEM = "1.2";
+const char VERSION[] = "1.3 beta";
 
 #define HTTP_PORT       80      /* Default web server port */
 #define DATA_PIN        2       /* Pixel output - GPIO2 */
@@ -74,7 +74,11 @@ config_t            config;
 uint32_t            *seqError;      /* Sequence error tracking for each universe */
 uint16_t            uniLast = 1;    /* Last Universe to listen for */
 
+const char PTYPE_HTML[] = "text/html";
+const char PTYPE_PLAIN[] = "text/plain";
+
 void saveConfig();
 void updatePixelConfig();
+void sendPage(const char *data, int count, const char *type);
 
 #endif

@@ -43,10 +43,10 @@ void send_config_pixel_html() {
         updatePixelConfig();
         saveConfig();
     }
-    web.send(200, "text/html", PAGE_CONFIG_PIXEL);
+    sendPage(PAGE_CONFIG_PIXEL, sizeof(PAGE_CONFIG_PIXEL), PTYPE_HTML);
 }
 
-void send_config_pixel_vals_html() {
+void send_config_pixel_vals() {
     String values = "";
     values += "devid|input|" + (String)config.name + "\n";
     values += "universe|input|" + (String)config.universe + "\n";
@@ -63,7 +63,7 @@ void send_config_pixel_vals_html() {
     values += "ppu|input|" + String(config.ppu) + "\n";
     //values += "gamma|input|" + String(config.gamma) + "\n";
     values += "gamma|chk|" + String(config.gamma ? "checked" : "") + "\n";
-    web.send(200, "text/plain", values);
+    web.send(200, PTYPE_PLAIN, values);
 }
 
 #endif
