@@ -2,28 +2,7 @@
 #define PAGE_CONFIG_PIXEL_H
 
 const char PAGE_CONFIG_PIXEL[] PROGMEM = R"=====(
-<title>ESPS Pixel Config</title>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<link rel="stylesheet" href="/style.css" type="text/css"/>
-<script src="/microajax.js"></script>
-<a href="/" class="btn btn--s"><</a>&nbsp;&nbsp;<strong>Pixel Configuration</strong>
-<hr>
-<form action="" method="get">
-<table border="0" cellspacing="0" cellpadding="3">
-<tr><td align="right">Device ID :</td><td><input type="text" id="devid" name="devid" value=""></td></tr>
-<tr><td align="right">Universe :</td><td><input type="text" id="universe" name="universe" value=""></td></tr>
-<tr><td align="right">Start Channel :</td><td><input type="text" id="channel_start" name="channel_start" value=""></td></tr>
-<tr><td align="right">Pixel Count :</td><td><input type="text" id="pixel_count" name="pixel_count" value=""></td></tr>
-<tr><td align="right">Pixel Type :</td><td><select id="pixel_type" name="pixel_type"></select></td></tr>
-<tr><td align="right">Color Order :</td><td><select id="pixel_color" name="pixel_color"></select></td></tr>
-<tr><td align="right">PPU :</td><td><input type="text" id="ppu" name="ppu" value=""></td></tr>
-<tr><td align="right">Gamma Map :</td><td><input type="checkbox" id="gamma" name="gamma"></td></tr>
-<tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Save"></td></tr>
-</table>
-</form>
-<script>
-	setValues("/config/pixelvals");
-</script>
+<a href="/" class="btn btn--s">&lt;</a>&nbsp;&nbsp;<strong>Pixel Configuration</strong> <hr> <form action=""> <table border="0" cellspacing="0" cellpadding="3"> <tr><td align="right">Device ID :</td><td><input id="devid" name="devid" value=""></td></tr> <tr><td align="right">Universe :</td><td><input id="universe" name="universe" value=""></td></tr> <tr><td align="right">Start Channel :</td><td><input id="channel_start" name="channel_start" value=""></td></tr> <tr><td align="right">Pixel Count :</td><td><input id="pixel_count" name="pixel_count" value=""></td></tr> <tr><td align="right">Pixel Type :</td><td><select id="pixel_type" name="pixel_type"></select></td></tr> <tr><td align="right">Color Order :</td><td><select id="pixel_color" name="pixel_color"></select></td></tr> <tr><td align="right">PPU :</td><td><input id="ppu" name="ppu" value=""></td></tr> <tr><td align="right">Gamma Map :</td><td><input type="checkbox" id="gamma" name="gamma"></td></tr> <tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Save"></td></tr> </table> </form> <script>setValues("/config/pixelvals");</script>
 )=====";
 
 void send_config_pixel_html() {
@@ -63,6 +42,7 @@ void send_config_pixel_vals() {
     values += "ppu|input|" + String(config.ppu) + "\n";
     //values += "gamma|input|" + String(config.gamma) + "\n";
     values += "gamma|chk|" + String(config.gamma ? "checked" : "") + "\n";
+    values += "title|div|" + String("Pixel Config - ") + (String)config.name + "\n";
     web.send(200, PTYPE_PLAIN, values);
 }
 

@@ -30,8 +30,7 @@
 #include "helpers.h"
 
 /* Web pages and handlers */
-#include "page_microajax.js.h"
-#include "page_style.css.h"
+#include "page_header.h"
 #include "page_root.h"
 #include "page_admin.h"
 #include "page_config_net.h"
@@ -175,9 +174,11 @@ int initWifi() {
 
 /* Read a page from PROGMEM and send it */
 void sendPage(const char *data, int count, const char *type) {
-    char *buffer = (char*)malloc(count);
+    int szHeader = sizeof(PAGE_HEADER);
+    char *buffer = (char*)malloc(count + szHeader);
     if (buffer) {
-        memcpy_P(buffer, data, count);
+        memcpy_P(buffer, PAGE_HEADER, szHeader);
+        memcpy_P(buffer + szHeader - 1, data, count);   /* back up over the null byte from the header string */
         web.send(200, type, buffer);
         free(buffer);
     } else {
@@ -189,10 +190,6 @@ void sendPage(const char *data, int count, const char *type) {
 
 /* Configure and start the web server */
 void initWeb() {
-    /* JavaScript and Stylesheets */
-    web.on("/style.css", []() { sendPage(PAGE_STYLE_CSS, sizeof(PAGE_STYLE_CSS), PTYPE_PLAIN); });
-    web.on("/microajax.js", []() { sendPage(PAGE_MICROAJAX_JS, sizeof(PAGE_MICROAJAX_JS), PTYPE_PLAIN); });
-
     /* HTML Pages */
     web.on("/", []() { sendPage(PAGE_ROOT, sizeof(PAGE_ROOT), PTYPE_HTML); });
     web.on("/admin.html", send_admin_html);

@@ -12,12 +12,10 @@ This is the Arduino firmware for the ESP8266 based ESPixelStick.  The ESPixelSti
 ### Known Issues
 - Gamma value is ingored.  ```pow()``` is currently broken in the ESP8266 Arduino environment, so gamma tables cannot be generated.
 - Some fields do not validate input.  Need to add validation routines to the web configuration inputs fields.
-- Multicast mode can cause resets.  Multicast listening configuration currently causes sporadic resets with the web server is running.
 
 ### To-do
 - Add softAP configuration mode.
 - Add mDNS and DNS-SD support.
-- Migrate to FastLED if / when ported to ESP8266.
 
 ### Resources
 - Firmware: http://github.com/forkineye/ESPixelStick

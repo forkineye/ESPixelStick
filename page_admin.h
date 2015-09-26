@@ -2,21 +2,7 @@
 #define PAGE_ADMIN_H
 
 const char PAGE_ADMIN[] PROGMEM = R"=====(
-<title>ESPS Admin</title>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<link rel="stylesheet" href="/style.css" type="text/css"/>
-<script src="/microajax.js"></script>
-<a href="/" class="btn btn--s"><</a>&nbsp;&nbsp;<strong>Administration</strong>
-<hr>
-<form action="" method="get">
-<table border="0" cellspacing="0" cellpadding="3">
-<tr><td align="right">FW Version :</td><td><span id="version"></span></td></tr>
-<tr><td colspan="2" align="center"><a href="/reboot" class="btn btn--m btn--red">Reboot</a></td></tr>
-</table>
-</form>
-<script>
-    setValues("/adminvals");
-</script>
+<a href="/" class="btn btn--s">&lt;</a>&nbsp;&nbsp;<strong>Administration</strong> <hr> <form action=""> <table border="0" cellspacing="0" cellpadding="3"> <tr><td align="right">FW Version :</td><td><span id="version"></span></td></tr> <tr><td colspan="2" align="center"><a href="/reboot" class="btn btn--m btn--red">Reboot</a></td></tr> </table> </form> <script>setValues("/adminvals");</script>
 )=====";
 
 const char PAGE_ADMIN_REBOOT[] PROGMEM = R"=====(
@@ -38,6 +24,7 @@ void send_admin_html() {
 void send_admin_vals() {
     String values = "";
     values += "version|div|" + (String)VERSION + "\n";
+    values += "title|div|" + String("Admin - ") + (String)config.name + "\n";
     web.send(200, PTYPE_PLAIN, values);
 }
 
