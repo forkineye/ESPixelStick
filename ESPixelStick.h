@@ -24,7 +24,7 @@
 #include "_E131.h"
 
 /* Name and version */
-const char VERSION[] = "1.3 beta";
+const char VERSION[] = "1.3";
 
 #define HTTP_PORT       80      /* Default web server port */
 #define DATA_PIN        2       /* Pixel output - GPIO2 */
@@ -36,7 +36,7 @@ const char VERSION[] = "1.3 beta";
 #define CONNECT_TIMEOUT 10000   /* 10 seconds */
 
 /* Configuration ID and Version */
-#define CONFIG_VERSION 2
+#define CONFIG_VERSION 3
 const uint8_t CONFIG_ID[4] PROGMEM = { 'F', 'O', 'R', 'K'};
 
 /* Configuration structure */
@@ -44,6 +44,7 @@ typedef struct {
     /* header */
     uint8_t     id[4];          /* Configuration structure ID */
     uint8_t     version;        /* Configuration structure version */
+    uint8_t     reserved;       /* Reserved for future use - struct alignment */
 
     /* general config */
     char        name[32];       /* Device Name */
@@ -58,13 +59,13 @@ typedef struct {
     uint8_t     multicast;      /* Multicast listener enabled boolean */
 
     /* dmx and pixel config */
+    float       gamma;          /* Value used to build gamma correction table */
     uint16_t    universe;       /* Universe to listen for */
     uint16_t    channel_start;  /* Channel to start listening at - 1 based */
     uint16_t    pixel_count;    /* Number of pixels */
     pixel_t     pixel_type;     /* Pixel type */
     color_t     pixel_color;    /* Pixel color order */
     uint8_t     ppu;            /* Pixels per Universe boundary - Max PIXELS_MAX (Default 170) */
-    float       gamma;          /* Value used to build gamma correction table */
 } __attribute__((packed)) config_t;
 
 /* Globals */

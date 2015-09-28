@@ -1,6 +1,11 @@
 
 Changelog
 =========
+### 1.3
+- Fix for issues when compiling on Mac and Linux.
+- Web page optimizations.
+- Configuration structure update to fix alignment errors.
+
 #### 1.2
 - Added Administration Page.
 - Disconnect from WiFi before rebooting.

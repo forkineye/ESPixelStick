@@ -37,11 +37,13 @@ void send_config_net_html() {
             if (web.argName(i) == "dhcp") config.dhcp = true;
             if (web.argName(i) == "multicast") config.multicast = true;
         }
-        sendPage(PAGE_RELOAD_NET, sizeof(PAGE_RELOAD_NET), PTYPE_HTML);
-
         saveConfig();
-        WiFi.disconnect();
-        ESP.restart();
+        delay(500);
+        sendPage(PAGE_ADMIN_REBOOT, sizeof(PAGE_ADMIN_REBOOT), PTYPE_HTML);
+        ESP.restart(); 
+
+//        sendPage(PAGE_RELOAD_NET, sizeof(PAGE_RELOAD_NET), PTYPE_HTML);
+//        ESP.restart();
     } else {
         sendPage(PAGE_CONFIG_NET, sizeof(PAGE_CONFIG_NET), PTYPE_HTML);
     }
@@ -69,7 +71,7 @@ void send_config_net_vals() {
     values += "gw_3|input|" + (String)config.gateway[3] + "\n";
     values += "dhcp|chk|" + (String)(config.dhcp ? "checked" : "") + "\n";
     values += "multicast|chk|" + (String)(config.multicast ? "checked" : "") + "\n";
-    values += "title|div|" + String("Net Config - ") + (String)config.name + "\n";
+    values += "title|div|" + (String)config.name + " - Net Config\n";
     web.send(200, PTYPE_PLAIN, values);
 }
 

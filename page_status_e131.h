@@ -22,7 +22,7 @@ void send_status_e131_vals() {
     values += "num_packets|div|" + (String)e131.stats.num_packets + "\n";
     values += "sequence_errors|div|" + (String)seqErrors + "\n";
     values += "packet_errors|div|" + (String)e131.stats.packet_errors + "\n";
-    values += "title|div|" + String("E1.31 Status - ") + (String)config.name + "\n";
+    values += "title|div|" + (String)config.name + " - E1.31 Status\n";
     web.send (200, PTYPE_PLAIN, values);
 }
 

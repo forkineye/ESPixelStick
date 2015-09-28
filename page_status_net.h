@@ -28,7 +28,7 @@ void send_status_net_vals() {
     values += "x_mac|div|" + GetMacAddress() + "\n";
     values += "x_rssi|div|" + (String)rssi + "\n";
     values += "x_quality|div|" + (String)quality + "\n";
-    values += "title|div|" + String("Net Status - ") + (String)config.name + "\n";
+    values += "title|div|" + (String)config.name + " - Net Status\n";
     web.send(200, PTYPE_PLAIN, values);
 }
 

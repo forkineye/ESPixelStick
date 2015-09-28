@@ -208,7 +208,7 @@ void initWeb() {
     web.on("/status/e131vals", send_status_e131_vals);
 
     /* Admin Handlers */
-    web.on("/reboot", []() { sendPage(PAGE_ADMIN_REBOOT, sizeof(PAGE_ADMIN_REBOOT), PTYPE_HTML); WiFi.disconnect(); ESP.restart(); });
+    web.on("/reboot", []() { sendPage(PAGE_ADMIN_REBOOT, sizeof(PAGE_ADMIN_REBOOT), PTYPE_HTML); ESP.restart(); });
 
     web.onNotFound([]() { web.send(404, PTYPE_HTML, "Page not Found"); });
     web.begin();
@@ -277,31 +277,36 @@ void updatePixelConfig() {
     Serial.println(uniLast);
 }
 
+/* Initialize configuration structure */
+void initConfig() {
+    memset(&config, 0, sizeof(config));
+    memcpy_P(config.id, CONFIG_ID, sizeof(config.id));
+    config.version = CONFIG_VERSION;
+    strncpy(config.name, "ESPixelStick", sizeof(config.name));
+    strncpy(config.ssid, ssid, sizeof(config.ssid));
+    strncpy(config.passphrase, passphrase, sizeof(config.passphrase));
+    config.ip[0] = 0; config.ip[1] = 0; config.ip[2] = 0; config.ip[3] = 0;
+    config.netmask[0] = 0; config.netmask[1] = 0; config.netmask[2] = 0; config.netmask[3] = 0;
+    config.gateway[0] = 0; config.gateway[1] = 0; config.gateway[2] = 0; config.gateway[3] = 0;
+    config.dhcp = 1;
+    config.multicast = 0;
+    config.universe = UNIVERSE;
+    config.channel_start = CHANNEL_START;
+    config.pixel_count = NUM_PIXELS;
+    config.pixel_type = PIXEL_TYPE;
+    config.pixel_color = COLOR_ORDER;
+    config.ppu = PPU;
+    config.gamma = GAMMA;    
+}
+
 /* Attempt to load configuration from EEPROM.  Initialize or upgrade as required */
 void loadConfig() {
     EEPROM.get(EEPROM_BASE, config);
     if (memcmp_P(config.id, CONFIG_ID, sizeof(config.id))) {
         Serial.println(F("- No configuration found."));
 
-        /* Initialize configuration structure */
-        memset(&config, 0, sizeof(config));
-        memcpy_P(config.id, CONFIG_ID, sizeof(config.id));
-        config.version = CONFIG_VERSION;
-        strncpy(config.name, "ESPixelStick", sizeof(config.name));
-        strncpy(config.ssid, ssid, sizeof(config.ssid));
-        strncpy(config.passphrase, passphrase, sizeof(config.passphrase));
-        config.ip[0] = 0; config.ip[1] = 0; config.ip[2] = 0; config.ip[3] = 0;
-        config.netmask[0] = 0; config.netmask[1] = 0; config.netmask[2] = 0; config.netmask[3] = 0;
-        config.gateway[0] = 0; config.gateway[1] = 0; config.gateway[2] = 0; config.gateway[3] = 0;
-        config.dhcp = 1;
-        config.multicast = 0;
-        config.universe = UNIVERSE;
-        config.channel_start = CHANNEL_START;
-        config.pixel_count = NUM_PIXELS;
-        config.pixel_type = PIXEL_TYPE;
-        config.pixel_color = COLOR_ORDER;
-        config.ppu = PPU;
-        config.gamma = GAMMA;
+        /* Initialize config structure */
+        initConfig();
 
         /* Write the configuration structure */
         EEPROM.put(EEPROM_BASE, config);
@@ -309,10 +314,17 @@ void loadConfig() {
         Serial.println(F("* Default configuration saved."));
     } else {
         if (config.version < CONFIG_VERSION) {
-            /* Config updates and resets for V2 config */
-            config.version = CONFIG_VERSION;
-            config.ppu = PPU;
-            config.gamma = GAMMA;
+            /* Major struct changes in V3 for alignment require re-initialization */
+            if (config.version < 3) {
+                char ssid[32];
+                char pass[64];
+                strncpy(ssid, config.ssid - 1, sizeof(ssid));
+                strncpy(pass, config.passphrase - 1, sizeof(pass));
+                initConfig();
+                strncpy(config.ssid, ssid, sizeof(config.ssid));
+                strncpy(config.passphrase, pass, sizeof(config.passphrase));
+            }
+            
             EEPROM.put(EEPROM_BASE, config);
             EEPROM.commit();
             Serial.println(F("* Configuration upgraded."));

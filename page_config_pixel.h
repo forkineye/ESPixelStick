@@ -42,7 +42,7 @@ void send_config_pixel_vals() {
     values += "ppu|input|" + String(config.ppu) + "\n";
     //values += "gamma|input|" + String(config.gamma) + "\n";
     values += "gamma|chk|" + String(config.gamma ? "checked" : "") + "\n";
-    values += "title|div|" + String("Pixel Config - ") + (String)config.name + "\n";
+    values += "title|div|" + (String)config.name + " - Pixel Config\n";
     web.send(200, PTYPE_PLAIN, values);
 }
 

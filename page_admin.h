@@ -24,7 +24,7 @@ void send_admin_html() {
 void send_admin_vals() {
     String values = "";
     values += "version|div|" + (String)VERSION + "\n";
-    values += "title|div|" + String("Admin - ") + (String)config.name + "\n";
+    values += "title|div|" + (String)config.name + " - Admin\n";
     web.send(200, PTYPE_PLAIN, values);
 }
 
