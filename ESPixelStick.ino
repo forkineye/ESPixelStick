@@ -96,11 +96,14 @@ void setup() {
         status = initWifi();
     }
 
-    //TODO: Change this to switch to softAP mode 
-    /* If we fail again, reboot */
+    
+    /* If we fail again, go SoftAP */
     if (status != WL_CONNECTED) {
         Serial.println(F("**** FAILED TO ASSOCIATE WITH AP ****"));
-        ESP.restart();
+	WiFi.mode(WIFI_AP);
+        String ssid = "ESPixel " + (String)ESP.getChipId();
+        WiFi.softAP(ssid.c_str());
+        //ESP.restart();
     }
 
     /* Configure and start the web server */
