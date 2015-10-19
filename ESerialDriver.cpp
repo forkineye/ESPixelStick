@@ -25,7 +25,7 @@ GNU General Public License for more details.
 #include <Arduino.h>
 #include "ESerialDriver.h"
 
-ESerialDriver::begin(HardwareSerial *theSerial, serial_t type, uint16_t length){
+int ESerialDriver::begin(HardwareSerial *theSerial, serial_t type, uint16_t length){
 	
 		return begin(theSerial, type, length, 57600);
 }
