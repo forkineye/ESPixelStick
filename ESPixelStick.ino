@@ -25,6 +25,7 @@
 #include <ESP8266mDNS.h>
 #include <EEPROM.h>
 #include "ESPixelDriver.h"
+#include "ESerialDriver.h"
 #include "ESPixelStick.h"
 #include "_E131.h"
 #include "helpers.h"
@@ -35,6 +36,7 @@
 #include "page_admin.h"
 #include "page_config_net.h"
 #include "page_config_pixel.h"
+#include "page_config_serial.h"
 #include "page_status_net.h"
 #include "page_status_e131.h"
 
@@ -66,6 +68,7 @@ const char passphrase[] = "PASSWORD_NOT_SET";   /* Replace with your WPA2 passph
 /*************************************************/
 
 ESPixelDriver	pixels;         /* Pixel object */
+ESerialDriver serial; 				/*serial object */
 uint8_t         *seqTracker;    /* Current sequence numbers for each Universe */
 uint32_t        lastPacket;     /* Packet timeout tracker */
 
@@ -99,8 +102,8 @@ void setup() {
     
     /* If we fail again, go SoftAP */
     if (status != WL_CONNECTED) {
-        Serial.println(F("**** FAILED TO ASSOCIATE WITH AP ****"));
-	WiFi.mode(WIFI_AP);
+        Serial.println(F("**** FAILED TO ASSOCIATE WITH AP, GOING SOFTAP ****"));
+				WiFi.mode(WIFI_AP);
         String ssid = "ESPixel " + (String)ESP.getChipId();
         WiFi.softAP(ssid.c_str());
         //ESP.restart();
@@ -119,9 +122,19 @@ void setup() {
 */    
 
     /* Configure our outputs and pixels */
-    pixels.setPin(DATA_PIN);    /* For protocols that require bit-banging */
-    updatePixelConfig();
-    pixels.show();
+    switch(config.mode){
+      case MODE_PIXEL:
+        pixels.setPin(DATA_PIN);    /* For protocols that require bit-banging */
+        updatePixelConfig();
+        pixels.show();
+      break;
+      case MODE_SERIAL:
+        serial.begin(&Serial, config.serial_type, config.channel_count, config.serial_baud);
+
+      break;
+      
+    };
+   
 }
 
 int initWifi() {
@@ -193,11 +206,29 @@ void sendPage(const char *data, int count, const char *type) {
 
 /* Configure and start the web server */
 void initWeb() {
-    /* HTML Pages */
-    web.on("/", []() { sendPage(PAGE_ROOT, sizeof(PAGE_ROOT), PTYPE_HTML); });
+    
+    /* Mode Specific Pages */
+    switch(config.mode){
+      case MODE_PIXEL:
+        //HTML
+        web.on("/", []() { sendPage(PAGE_ROOT_PIXEL, sizeof(PAGE_ROOT_PIXEL), PTYPE_HTML); });
+        web.on("/config/pixel.html", send_config_pixel_html);
+        //AJAX
+        web.on("/config/pixelvals", send_config_pixel_vals);
+      break;
+      case MODE_SERIAL:
+        //HTML
+        web.on("/", []() { sendPage(PAGE_ROOT_SERIAL, sizeof(PAGE_ROOT_SERIAL), PTYPE_HTML); });
+        web.on("/config/serial.html", send_config_serial_html);
+        //AJAX
+        web.on("/config/serialvals", send_config_serial_vals);
+      break;
+    };
+		
+		/*Common Pages */
+		/* HTML Pages */
     web.on("/admin.html", send_admin_html);
     web.on("/config/net.html", send_config_net_html);
-    web.on("/config/pixel.html", send_config_pixel_html);
     web.on("/status/net.html", []() { sendPage(PAGE_STATUS_NET, sizeof(PAGE_STATUS_NET), PTYPE_HTML); });
     web.on("/status/e131.html", []() { sendPage(PAGE_STATUS_E131, sizeof(PAGE_STATUS_E131), PTYPE_HTML); });
 
@@ -205,7 +236,6 @@ void initWeb() {
     web.on("/rootvals", send_root_vals);
     web.on("/adminvals", send_admin_vals);
     web.on("/config/netvals", send_config_net_vals);
-    web.on("/config/pixelvals", send_config_pixel_vals);
     web.on("/config/connectionstate", send_connection_state_vals);
     web.on("/status/netvals", send_status_net_vals);
     web.on("/status/e131vals", send_status_e131_vals);
@@ -280,12 +310,43 @@ void updatePixelConfig() {
     Serial.println(uniLast);
 }
 
+void updateSerialConfig() {
+    /* Validate first */
+		//need serial specific validation settings
+    //validateConfig();
+
+    /* Setup the sequence error tracker */
+    uint8_t uniTotal = (uniLast + 1) - config.universe;
+
+    if (seqTracker) free(seqTracker);
+    if ((seqTracker = (uint8_t *)malloc(uniTotal)))
+        memset(seqTracker, 0x00, uniTotal);
+
+    if (seqError) free(seqError);
+    if ((seqError = (uint32_t *)malloc(uniTotal * 4)))
+        memset(seqError, 0x00, uniTotal * 4);
+
+    /* Zero out packet stats */
+    e131.stats.num_packets = 0;
+    
+    /* Initialize for our serial type */
+    serial.begin(&Serial, config.serial_type, config.channel_count, config.serial_baud);
+
+    Serial.print(F("- Listening for "));
+    Serial.print(config.channel_count);
+    Serial.print(F(" channels, from Universe "));
+    Serial.print(config.universe);
+    Serial.print(F(" to "));
+    Serial.println(uniLast);
+}
+
 /* Initialize configuration structure */
 void initConfig() {
     memset(&config, 0, sizeof(config));
     memcpy_P(config.id, CONFIG_ID, sizeof(config.id));
     config.version = CONFIG_VERSION;
     strncpy(config.name, "ESPixelStick", sizeof(config.name));
+		config.mode = MODE_PIXEL;
     strncpy(config.ssid, ssid, sizeof(config.ssid));
     strncpy(config.passphrase, passphrase, sizeof(config.passphrase));
     config.ip[0] = 0; config.ip[1] = 0; config.ip[2] = 0; config.ip[3] = 0;
@@ -299,7 +360,10 @@ void initConfig() {
     config.pixel_type = PIXEL_TYPE;
     config.pixel_color = COLOR_ORDER;
     config.ppu = PPU;
-    config.gamma = GAMMA;    
+    config.gamma = GAMMA;
+		config.channel_count=150;
+		config.serial_type=SERIAL_RENARD;
+		config.serial_baud=57600;
 }
 
 /* Attempt to load configuration from EEPROM.  Initialize or upgrade as required */
@@ -352,16 +416,20 @@ void loop() {
     /* Handle incoming web requests if needed */
     web.handleClient();
 
-    /* Parse a packet and update pixels */
-    if(e131.parsePacket()) {
-        if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
+		
+    /* Configure our outputs and pixels */
+    switch(config.mode){
+    case MODE_PIXEL:
+        /* Parse a packet and update pixels */
+        if(e131.parsePacket()) {
+          if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
             /* Universe offset and sequence tracking */
             uint8_t uniOffset = (e131.universe - config.universe);
             if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
                 seqError[uniOffset]++;
                 seqTracker[uniOffset] = e131.packet->sequence_number + 1;
             }
-            
+
             /* Find out starting pixel based off the Universe */
             uint16_t pixelStart = uniOffset * config.ppu;
 
@@ -386,14 +454,47 @@ void loop() {
             if (e131.universe == uniLast) {
                 lastPacket = millis();
                 pixels.show();
-            }
-        }
-    }
+              }
+          }
+      }
 
-    //TODO: Use this for setting defaults states at a later date
-    /* Force refresh every second if there is no data received */
-    if ((millis() - lastPacket) > E131_TIMEOUT) {
-        lastPacket = millis();
-        pixels.show();
-    }
+      //TODO: Use this for setting defaults states at a later date
+      /* Force refresh every second if there is no data received */
+      if ((millis() - lastPacket) > E131_TIMEOUT) {
+          lastPacket = millis();
+          pixels.show();
+      }
+      break;
+			
+      /* Parse a packet and update serial */
+      case MODE_SERIAL:
+        if(e131.parsePacket()) {
+          if (e131.universe = config.universe) {
+            /* Universe offset and sequence tracking */
+            uint8_t uniOffset = (e131.universe - config.universe);
+            if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
+              seqError[uniOffset]++;
+              seqTracker[uniOffset] = e131.packet->sequence_number + 1;
+            }
+
+
+            uint16_t offset = config.channel_start - 1;
+
+            /* Set the serial data */
+            serial.startPacket();
+            for(int i = 0; i<config.channel_count; i++){
+              serial.setValue(i, e131.data[i + offset]);	
+            }
+
+            /* Refresh  */
+            serial.show();
+          }
+        }
+
+      break;
+        
+      };
+		
+		
+    
 }
