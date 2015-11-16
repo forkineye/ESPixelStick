@@ -46,13 +46,15 @@ int ESerialDriver::begin(HardwareSerial *theSerial, serial_t type, uint16_t leng
 	else
 		retval = false;
 
+
+
 	return retval;
 }
 	
 	
 void ESerialDriver::startPacket(){
-	
-	//create a buffer and fill in header
+
+        //create a buffer and fill in header
 	if (_type == SERIAL_RENARD){
 		_ptr = (uint8_t*) malloc(_size+2);
 		_ptr[0] = 0x7E;

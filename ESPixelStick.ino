@@ -469,28 +469,28 @@ void loop() {
       /* Parse a packet and update serial */
       case MODE_SERIAL:
         if(e131.parsePacket()) {
-          if (e131.universe = config.universe) {
-            /* Universe offset and sequence tracking */
-            uint8_t uniOffset = (e131.universe - config.universe);
+          if (e131.universe == config.universe) {
+            // Universe offset and sequence tracking 
+           /* uint8_t uniOffset = (e131.universe - config.universe);
             if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
               seqError[uniOffset]++;
               seqTracker[uniOffset] = e131.packet->sequence_number + 1;
             }
 
-
+            */
             uint16_t offset = config.channel_start - 1;
 
-            /* Set the serial data */
+            // Set the serial data 
             serial.startPacket();
             for(int i = 0; i<config.channel_count; i++){
               serial.setValue(i, e131.data[i + offset]);	
             }
 
-            /* Refresh  */
+            // Refresh  
             serial.show();
           }
         }
-
+              
       break;
         
       };
