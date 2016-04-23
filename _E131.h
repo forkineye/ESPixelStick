@@ -146,7 +146,7 @@ class E131 {
         int initWiFi(const char *ssid, const char *passphrase);
         int initEthernet(uint8_t *mac, IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns);
         void initUnicast();
-        void initMulticast(uint16_t universe);
+        void initMulticast(uint16_t universe, uint16_t n);
 
 	public:
         uint8_t       *data;                /* Pointer to DMX channel data */
@@ -157,7 +157,7 @@ class E131 {
         E131();
 
         /* Generic UDP listener, no physical or IP configuration */
-    	void begin(e131_listen_t type, uint16_t universe = 1);
+    	void begin(e131_listen_t type, uint16_t universe = 1, uint16_t n = 1);
 
 /****** START - Wireless ifdef block ******/
 #if defined (INT_WIFI) || defined (INT_ESP8266)
@@ -171,8 +171,8 @@ class E131 {
 /****** START - ESP8266 ifdef block ******/
 #if defined (INT_ESP8266)
         /* Multicast WiFi Initializers  -- ESP8266 Only */
-        int beginMulticast(const char *ssid, const char *passphrase, uint16_t universe);
-        int beginMulticast(const char *ssid, const char *passphrase, uint16_t universe, 
+        int beginMulticast(const char *ssid, const char *passphrase, uint16_t universe, uint16_t n);
+        int beginMulticast(const char *ssid, const char *passphrase, uint16_t universe, uint16_t n,
                 IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns);
 #endif
 /****** END - ESP8266 ifdef block ******/
@@ -185,8 +185,8 @@ class E131 {
                 IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns);
 
         /* Multicast Ethernet Initializers */
-        int beginMulticast(uint8_t *mac, uint16_t universe);
-        void beginMulticast(uint8_t *mac, uint16_t universe,
+        int beginMulticast(uint8_t *mac, uint16_t universe, uint16_t n);
+        void beginMulticast(uint8_t *mac, uint16_t universe, uint16_t n,
                 IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns);
 #endif
 /****** END - Ethernet ifdef block ******/
