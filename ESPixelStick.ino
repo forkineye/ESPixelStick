@@ -69,6 +69,11 @@ ESPixelDriver	pixels;         /* Pixel object */
 uint8_t         *seqTracker;    /* Current sequence numbers for each Universe */
 uint32_t        lastPacket;     /* Packet timeout tracker */
 
+/* Forward Declarations */
+void loadConfig();
+int initWifi();
+void initWeb();
+
 void setup() {
     /* Initial pin states */
     pinMode(DATA_PIN, OUTPUT);
