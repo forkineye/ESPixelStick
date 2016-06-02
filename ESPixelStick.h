@@ -23,8 +23,11 @@
 #include "ESPixelDriver.h"
 #include "_E131.h"
 
+#include "SSD1306.h"
+#include "SSD1306Ui.h"
+
 /* Name and version */
-const char VERSION[] = "1.3";
+const char VERSION[] = "1.4";
 
 #define HTTP_PORT       80      /* Default web server port */
 #define DATA_PIN        2       /* Pixel output - GPIO2 */
@@ -36,8 +39,14 @@ const char VERSION[] = "1.3";
 #define CONNECT_TIMEOUT 10000   /* 10 seconds */
 
 /* Configuration ID and Version */
-#define CONFIG_VERSION 3
+#define CONFIG_VERSION 4
 const uint8_t CONFIG_ID[4] PROGMEM = { 'F', 'O', 'R', 'K'};
+
+/* Mode Types */
+typedef enum {
+    MODE_PIXEL,
+    MODE_SERIAL
+} ESP_mode_t;
 
 /* Configuration structure */
 typedef struct {
@@ -48,6 +57,7 @@ typedef struct {
 
     /* general config */
     char        name[32];       /* Device Name */
+    ESP_mode_t    mode;           /* Global Output Mode */
 
     /* network config */
     char        ssid[32];       /* 31 bytes max - null terminated */
@@ -66,6 +76,12 @@ typedef struct {
     pixel_t     pixel_type;     /* Pixel type */
     color_t     pixel_color;    /* Pixel color order */
     uint8_t     ppu;            /* Pixels per Universe boundary - Max PIXELS_MAX (Default 170) */
+    
+    /* serial config */
+    uint16_t  channel_count;      /* Number of channels */
+    serial_t  serial_type;        /* Type of Serial Output */
+    uint32_t  serial_baud;        /* Baudrate of Serial Port */
+    
 } __attribute__((packed)) config_t;
 
 /* Globals */
@@ -78,8 +94,16 @@ uint16_t            uniLast = 1;    /* Last Universe to listen for */
 const char PTYPE_HTML[] = "text/html";
 const char PTYPE_PLAIN[] = "text/plain";
 
+int initWifi();
+void initWeb();
+void loadConfig();
 void saveConfig();
 void updatePixelConfig();
+void updateSerialConfig();
 void sendPage(const char *data, int count, const char *type);
+void initOled();
+bool msOverlay(SSD1306 *display, SSD1306UiState* state);
+bool drawFrame1(SSD1306 *display, SSD1306UiState* state, int x, int y);
+bool drawFrame2(SSD1306 *display, SSD1306UiState* state, int x, int y);
 
 #endif

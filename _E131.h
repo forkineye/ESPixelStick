@@ -28,15 +28,15 @@
 #   include <ESP8266WiFi.h>
 #   include <ESP8266WiFiMulti.h>
 #   include <WiFiUdp.h>
-#	define _UDP WiFiUDP
-#	define INT_ESP8266
-#	define INT_WIFI
+#  define _UDP WiFiUDP
+# define INT_ESP8266
+# define INT_WIFI
 #elif defined (ARDUINO_ARCH_AVR)
-#	include <Ethernet.h>
+# include <Ethernet.h>
 #   include <EthernetUdp.h>
-#	include <avr/pgmspace.h>
-#	define _UDP EthernetUDP
-#	define INT_ETHERNET
+# include <avr/pgmspace.h>
+# define _UDP EthernetUDP
+# define INT_ETHERNET
 #   define NO_DOUBLE_BUFFER
 #endif
 
@@ -75,7 +75,7 @@ typedef union {
         /* Root Layer */
         uint16_t preamble_size;
         uint16_t postamble_size;
-        uint8_t	 acn_id[12];
+        uint8_t  acn_id[12];
         uint16_t root_flength;
         uint32_t root_vector;
         uint8_t  cid[16];
@@ -122,12 +122,12 @@ typedef enum {
 
 /* E1.31 Listener Types */
 typedef enum {
-	E131_UNICAST,
-	E131_MULTICAST
+  E131_UNICAST,
+  E131_MULTICAST
 } e131_listen_t;
 
 class E131 {
-	private:
+  private:
         /* Constants for packet validation */
         static const uint8_t ACN_ID[];
         static const uint32_t VECTOR_ROOT = 4;
@@ -146,9 +146,9 @@ class E131 {
         int initWiFi(const char *ssid, const char *passphrase);
         int initEthernet(uint8_t *mac, IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns);
         void initUnicast();
-        void initMulticast(uint16_t universe);
+        void initMulticast(uint16_t universe, uint16_t n);
 
-	public:
+  public:
         uint8_t       *data;                /* Pointer to DMX channel data */
         uint16_t      universe;             /* DMX Universe of last valid packet */
         e131_packet_t *packet;              /* Pointer to last valid packet */
@@ -157,7 +157,7 @@ class E131 {
         E131();
 
         /* Generic UDP listener, no physical or IP configuration */
-    	void begin(e131_listen_t type, uint16_t universe = 1);
+      void begin(e131_listen_t type, uint16_t universe = 1, uint16_t n = 1);
 
 /****** START - Wireless ifdef block ******/
 #if defined (INT_WIFI) || defined (INT_ESP8266)
@@ -171,22 +171,22 @@ class E131 {
 /****** START - ESP8266 ifdef block ******/
 #if defined (INT_ESP8266)
         /* Multicast WiFi Initializers  -- ESP8266 Only */
-        int beginMulticast(const char *ssid, const char *passphrase, uint16_t universe);
-        int beginMulticast(const char *ssid, const char *passphrase, uint16_t universe, 
+        int beginMulticast(const char *ssid, const char *passphrase, uint16_t universe, uint16_t n);
+        int beginMulticast(const char *ssid, const char *passphrase, uint16_t universe, uint16_t n,
                 IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns);
 #endif
 /****** END - ESP8266 ifdef block ******/
 
 /****** START - Ethernet ifdef block ******/
-#if defined (INT_ETHERNET)		
+#if defined (INT_ETHERNET)    
         /* Unicast Ethernet Initializers */
         int begin(uint8_t *mac);
         void begin(uint8_t *mac,
                 IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns);
 
         /* Multicast Ethernet Initializers */
-        int beginMulticast(uint8_t *mac, uint16_t universe);
-        void beginMulticast(uint8_t *mac, uint16_t universe,
+        int beginMulticast(uint8_t *mac, uint16_t universe, uint16_t n);
+        void beginMulticast(uint8_t *mac, uint16_t universe, uint16_t n,
                 IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns);
 #endif
 /****** END - Ethernet ifdef block ******/

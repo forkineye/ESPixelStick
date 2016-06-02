@@ -1,9 +1,8 @@
 
 Changelog
 =========
-### 1.4 (In Progress)
-- Arduino 1.6.8 compatibility.
-
+### 1.4
+- Added OLED driver
 ### 1.3
 - Fix for issues when compiling on Mac and Linux.
 - Web page optimizations.

@@ -25,9 +25,17 @@
 #include <ESP8266mDNS.h>
 #include <EEPROM.h>
 #include "ESPixelDriver.h"
+#include "ESerialDriver.h"
 #include "ESPixelStick.h"
 #include "_E131.h"
 #include "helpers.h"
+
+/* OLED Librarys */
+#include <Wire.h>
+#include <SPI.h>
+#include "SSD1306.h"
+#include "SSD1306Ui.h"
+#include "images.h"
 
 /* Web pages and handlers */
 #include "page_header.h"
@@ -35,6 +43,7 @@
 #include "page_admin.h"
 #include "page_config_net.h"
 #include "page_config_pixel.h"
+#include "page_config_serial.h"
 #include "page_status_net.h"
 #include "page_status_e131.h"
 
@@ -44,8 +53,46 @@
 /*************************************************/
 
 /* REQUIRED */
-const char ssid[] = "SSID_NOT_SET";             /* Replace with your SSID */
-const char passphrase[] = "PASSWORD_NOT_SET";   /* Replace with your WPA2 passphrase */
+const char ssid[] = "NO";             /* Replace with your SSID */
+const char passphrase[] = "NETWORK";   /* Replace with your WPA2 passphrase */
+
+
+// Pin definitions for I2C
+#define OLED_SDA    D2  // pin 14
+#define OLED_SDC    D4  // pin 12
+#define OLED_ADDR   0x3C
+
+/* Hardware Wemos D1 mini SPI pins
+ D5 GPIO14   CLK         - D0 pin OLED display
+ D6 GPIO12   MISO (DIN)  - not connected
+ D7 GPIO13   MOSI (DOUT) - D1 pin OLED display
+ D8 GPIO15   CS / SS     - CS pin OLED display
+ D0 GPIO16   RST         - RST pin OLED display
+ D2 GPIO4    DC          - DC pin OLED
+*/
+
+// Pin definitions for SPI
+#define OLED_RESET  D0  // RESET
+#define OLED_DC     D2  // Data/Command
+#define OLED_CS     D8  // Chip select
+
+// Uncomment one of the following based on OLED type
+// SSD1306 display(true, OLED_RESET, OLED_DC, OLED_CS); // FOR SPI
+SSD1306 display(OLED_ADDR, OLED_SDA, OLED_SDC);    // For I2C
+SSD1306Ui ui(&display );
+
+// this array keeps function pointers to all frames
+// frames are the single views that slide from right to left
+bool (*frames[])(SSD1306 *display, SSD1306UiState* state, int x, int y) = { drawFrame1, drawFrame2};
+
+// how many frames are there?
+int frameCount = 2;
+
+bool (*overlays[])(SSD1306 *display, SSD1306UiState* state)             = { msOverlay };
+int overlaysCount = 1;
+
+int remainingTimeBudget;
+
 
 /* OPTIONAL */
 #define UNIVERSE        1               /* Universe to listen for */
@@ -65,14 +112,10 @@ const char passphrase[] = "PASSWORD_NOT_SET";   /* Replace with your WPA2 passph
 /*       END - User Configuration Defaults       */
 /*************************************************/
 
-ESPixelDriver	pixels;         /* Pixel object */
+ESPixelDriver  pixels;         /* Pixel object */
+ESerialDriver serial;         /*serial object */
 uint8_t         *seqTracker;    /* Current sequence numbers for each Universe */
 uint32_t        lastPacket;     /* Packet timeout tracker */
-
-/* Forward Declarations */
-void loadConfig();
-int initWifi();
-void initWeb();
 
 void setup() {
     /* Initial pin states */
@@ -91,7 +134,9 @@ void setup() {
     /* Load configuration from EEPROM */
     EEPROM.begin(sizeof(config));
     loadConfig();
-
+	  
+	  initOled();
+	
     /* Fallback to default SSID and passphrase if we fail to connect */
     int status = initWifi();
     if (status != WL_CONNECTED) {
@@ -101,11 +146,14 @@ void setup() {
         status = initWifi();
     }
 
-    //TODO: Change this to switch to softAP mode 
-    /* If we fail again, reboot */
+    
+    /* If we fail again, go SoftAP */
     if (status != WL_CONNECTED) {
-        Serial.println(F("**** FAILED TO ASSOCIATE WITH AP ****"));
-        ESP.restart();
+        Serial.println(F("**** FAILED TO ASSOCIATE WITH AP, GOING SOFTAP ****"));
+        WiFi.mode(WIFI_AP);
+        String ssid = "ESPixel " + (String)ESP.getChipId();
+        WiFi.softAP(ssid.c_str());
+        //ESP.restart();
     }
 
     /* Configure and start the web server */
@@ -118,12 +166,25 @@ void setup() {
     } else {
         Serial.println(F("** Error setting up MDNS responder **"));
     }
-*/    
-
+*/   
+	
     /* Configure our outputs and pixels */
-    pixels.setPin(DATA_PIN);    /* For protocols that require bit-banging */
-    updatePixelConfig();
-    pixels.show();
+    switch(config.mode){
+      case MODE_PIXEL:
+        pixels.setPin(DATA_PIN);    /* For protocols that require bit-banging */
+        updatePixelConfig();
+        pixels.show();
+      break;
+      case MODE_SERIAL:
+        serial.begin(&Serial, config.serial_type, config.channel_count, config.serial_baud);
+
+      break;
+      
+    };
+
+    ui.nextFrame();
+    ui.update();
+   
 }
 
 int initWifi() {
@@ -169,7 +230,7 @@ int initWifi() {
         Serial.println(WiFi.localIP());
 
         if (config.multicast)
-            e131.begin(E131_MULTICAST, config.universe);
+            e131.begin(E131_MULTICAST, config.universe, uniLast - config.universe + 1);
         else
             e131.begin(E131_UNICAST);
     }
@@ -195,11 +256,29 @@ void sendPage(const char *data, int count, const char *type) {
 
 /* Configure and start the web server */
 void initWeb() {
+    
+    /* Mode Specific Pages */
+    switch(config.mode){
+      case MODE_PIXEL:
+        //HTML
+        web.on("/", []() { sendPage(PAGE_ROOT_PIXEL, sizeof(PAGE_ROOT_PIXEL), PTYPE_HTML); });
+        web.on("/config/pixel.html", send_config_pixel_html);
+        //AJAX
+        web.on("/config/pixelvals", send_config_pixel_vals);
+      break;
+      case MODE_SERIAL:
+        //HTML
+        web.on("/", []() { sendPage(PAGE_ROOT_SERIAL, sizeof(PAGE_ROOT_SERIAL), PTYPE_HTML); });
+        web.on("/config/serial.html", send_config_serial_html);
+        //AJAX
+        web.on("/config/serialvals", send_config_serial_vals);
+      break;
+    };
+    
+    /*Common Pages */
     /* HTML Pages */
-    web.on("/", []() { sendPage(PAGE_ROOT, sizeof(PAGE_ROOT), PTYPE_HTML); });
     web.on("/admin.html", send_admin_html);
     web.on("/config/net.html", send_config_net_html);
-    web.on("/config/pixel.html", send_config_pixel_html);
     web.on("/status/net.html", []() { sendPage(PAGE_STATUS_NET, sizeof(PAGE_STATUS_NET), PTYPE_HTML); });
     web.on("/status/e131.html", []() { sendPage(PAGE_STATUS_E131, sizeof(PAGE_STATUS_E131), PTYPE_HTML); });
 
@@ -207,7 +286,6 @@ void initWeb() {
     web.on("/rootvals", send_root_vals);
     web.on("/adminvals", send_admin_vals);
     web.on("/config/netvals", send_config_net_vals);
-    web.on("/config/pixelvals", send_config_pixel_vals);
     web.on("/config/connectionstate", send_connection_state_vals);
     web.on("/status/netvals", send_status_net_vals);
     web.on("/status/e131vals", send_status_e131_vals);
@@ -220,6 +298,39 @@ void initWeb() {
 
     Serial.print(F("- Web Server started on port "));
     Serial.println(HTTP_PORT);
+}
+
+void initOled() {
+	ui.setTargetFPS(15);
+  
+  //ui.setTimePerFrame(20);
+  ui.disableAutoTransition();
+  
+	ui.setActiveSymbole(activeSymbole);
+	ui.setInactiveSymbole(inactiveSymbole);
+
+  // You can change this to
+  // TOP, LEFT, BOTTOM, RIGHT
+	ui.setIndicatorPosition(BOTTOM);
+
+  // Defines where the first frame is located in the bar.
+	ui.setIndicatorDirection(LEFT_RIGHT);
+
+  // You can change the transition that is used
+  // SLIDE_LEFT, SLIDE_RIGHT, SLIDE_TOP, SLIDE_DOWN
+	ui.setFrameAnimation(SLIDE_LEFT);
+
+  // Add frames
+	ui.setFrames(frames, frameCount);
+
+  // Add overlays
+	ui.setOverlays(overlays, overlaysCount);
+
+  // Inital UI takes care of initalising the display too.
+	ui.init();
+
+	display.flipScreenVertically();
+	ui.update();
 }
 
 /* Configuration Validations */
@@ -282,12 +393,43 @@ void updatePixelConfig() {
     Serial.println(uniLast);
 }
 
+void updateSerialConfig() {
+    /* Validate first */
+    //need serial specific validation settings
+    //validateConfig();
+
+    /* Setup the sequence error tracker */
+    uint8_t uniTotal = (uniLast + 1) - config.universe;
+
+    if (seqTracker) free(seqTracker);
+    if ((seqTracker = (uint8_t *)malloc(uniTotal)))
+        memset(seqTracker, 0x00, uniTotal);
+
+    if (seqError) free(seqError);
+    if ((seqError = (uint32_t *)malloc(uniTotal * 4)))
+        memset(seqError, 0x00, uniTotal * 4);
+
+    /* Zero out packet stats */
+    e131.stats.num_packets = 0;
+    
+    /* Initialize for our serial type */
+    serial.begin(&Serial, config.serial_type, config.channel_count, config.serial_baud);
+
+    Serial.print(F("- Listening for "));
+    Serial.print(config.channel_count);
+    Serial.print(F(" channels, from Universe "));
+    Serial.print(config.universe);
+    Serial.print(F(" to "));
+    Serial.println(uniLast);
+}
+
 /* Initialize configuration structure */
 void initConfig() {
     memset(&config, 0, sizeof(config));
     memcpy_P(config.id, CONFIG_ID, sizeof(config.id));
     config.version = CONFIG_VERSION;
     strncpy(config.name, "ESPixelStick", sizeof(config.name));
+    config.mode = MODE_PIXEL;
     strncpy(config.ssid, ssid, sizeof(config.ssid));
     strncpy(config.passphrase, passphrase, sizeof(config.passphrase));
     config.ip[0] = 0; config.ip[1] = 0; config.ip[2] = 0; config.ip[3] = 0;
@@ -301,7 +443,10 @@ void initConfig() {
     config.pixel_type = PIXEL_TYPE;
     config.pixel_color = COLOR_ORDER;
     config.ppu = PPU;
-    config.gamma = GAMMA;    
+    config.gamma = GAMMA;
+    config.channel_count=150;
+    config.serial_type=SERIAL_RENARD;
+    config.serial_baud=57600;
 }
 
 /* Attempt to load configuration from EEPROM.  Initialize or upgrade as required */
@@ -349,21 +494,61 @@ void saveConfig() {
     Serial.println(F("* New configuration saved."));
 }
 
+bool msOverlay(SSD1306 *display, SSD1306UiState* state) {
+  display->setTextAlignment(TEXT_ALIGN_RIGHT);
+  display->setFont(ArialMT_Plain_10);
+  display->drawString(128, 0, WiFi.localIP().toString());
+  return true;
+}
+
+bool drawFrame1(SSD1306 *display, SSD1306UiState* state, int x, int y) {
+  // draw an xbm image.
+  // Please note that everything that should be transitioned
+  // needs to be drawn relative to x and y
+
+  // if this frame need to be refreshed at the targetFPS you need to
+  // return true
+  display->drawXbm(x + 34, y + 14, WiFi_Logo_width, WiFi_Logo_height, WiFi_Logo_bits);
+  return false;
+}
+
+bool drawFrame2(SSD1306 *display, SSD1306UiState* state, int x, int y) {
+  // Text alignment demo
+  display->setFont(ArialMT_Plain_10);
+
+  // The coordinates define the left starting point of the text
+  display->setTextAlignment(TEXT_ALIGN_CENTER);
+  display->drawString(0 + x, 11 + y, "Uni " + config.universe);
+
+  // The coordinates define the center of the text
+  display->setTextAlignment(TEXT_ALIGN_CENTER);
+  display->drawString(64 + x, 22, "Addr " + config.channel_start);
+
+  // The coordinates define the right end of the text
+  display->setTextAlignment(TEXT_ALIGN_CENTER);
+  display->drawString(128 + x, 33, WiFi.localIP().toString());
+  return false;
+}
+
 /* Main Loop */
 void loop() {
     /* Handle incoming web requests if needed */
     web.handleClient();
 
-    /* Parse a packet and update pixels */
-    if(e131.parsePacket()) {
-        if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
+    
+    /* Configure our outputs and pixels */
+    switch(config.mode){
+    case MODE_PIXEL:
+        /* Parse a packet and update pixels */
+        if(e131.parsePacket()) {
+          if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
             /* Universe offset and sequence tracking */
             uint8_t uniOffset = (e131.universe - config.universe);
             if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
                 seqError[uniOffset]++;
                 seqTracker[uniOffset] = e131.packet->sequence_number + 1;
             }
-            
+
             /* Find out starting pixel based off the Universe */
             uint16_t pixelStart = uniOffset * config.ppu;
 
@@ -388,14 +573,46 @@ void loop() {
             if (e131.universe == uniLast) {
                 lastPacket = millis();
                 pixels.show();
-            }
-        }
-    }
+              }
+          }
+      }
 
-    //TODO: Use this for setting defaults states at a later date
-    /* Force refresh every second if there is no data received */
-    if ((millis() - lastPacket) > E131_TIMEOUT) {
-        lastPacket = millis();
-        pixels.show();
-    }
+      //TODO: Use this for setting defaults states at a later date
+      /* Force refresh every second if there is no data received */
+      if ((millis() - lastPacket) > E131_TIMEOUT) {
+          lastPacket = millis();
+          pixels.show();
+      }
+      break;
+      
+      /* Parse a packet and update serial */
+      case MODE_SERIAL:
+        if(e131.parsePacket()) {
+          if (e131.universe == config.universe) {
+            // Universe offset and sequence tracking 
+           /* uint8_t uniOffset = (e131.universe - config.universe);
+            if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
+              seqError[uniOffset]++;
+              seqTracker[uniOffset] = e131.packet->sequence_number + 1;
+            }
+            */
+            uint16_t offset = config.channel_start - 1;
+
+            // Set the serial data 
+            serial.startPacket();
+            for(int i = 0; i<config.channel_count; i++){
+              serial.setValue(i, e131.data[i + offset]);  
+            }
+
+            // Refresh  
+            serial.show();
+          }
+        }
+              
+      break;
+        
+      };
+    
+    
+    
 }
