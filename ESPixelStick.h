@@ -22,12 +22,14 @@
 
 #include "ESPixelDriver.h"
 #include "_E131.h"
+#include "_ART.h"
 
 #include "SSD1306.h"
 #include "SSD1306Ui.h"
 
 /* Name and version */
 const char VERSION[] = "1.4";
+#define PROTOCOL        ART             /* Protocol to use (ART, E131) */
 
 #define HTTP_PORT       80      /* Default web server port */
 #define DATA_PIN        2       /* Pixel output - GPIO2 */
@@ -35,18 +37,26 @@ const char VERSION[] = "1.4";
 #define UNIVERSE_LIMIT  510     /* Universe boundary - 510 Channels */
 #define PPU_MAX         170     /* Max pixels per Universe */
 #define PIXEL_LIMIT     1360    /* Total pixel limit - 40.85ms for 8 universes */
-#define E131_TIMEOUT    1000    /* Force refresh every second an E1.31 packet is not seen */
+#define E131_TIMEOUT    1000000    /* Force refresh every second an E1.31 packet is not seen */
 #define CONNECT_TIMEOUT 10000   /* 10 seconds */
 
+#define DEFAULT_PIN     D5
+
 /* Configuration ID and Version */
-#define CONFIG_VERSION 4
-const uint8_t CONFIG_ID[4] PROGMEM = { 'F', 'O', 'R', 'K'};
+#define CONFIG_VERSION 5 //4
+const uint8_t CONFIG_ID[4] PROGMEM = { 'E', 'T', 'T', 'I'}; //FORK
 
 /* Mode Types */
 typedef enum {
     MODE_PIXEL,
     MODE_SERIAL
 } ESP_mode_t;
+
+/* Protocol Types */
+typedef enum {
+    MODE_sACN,
+    MODE_ARTNET
+} stream_mode_t;
 
 /* Configuration structure */
 typedef struct {
@@ -67,6 +77,7 @@ typedef struct {
     uint8_t     gateway[4];
     uint8_t     dhcp;           /* DHCP enabled boolean */
     uint8_t     multicast;      /* Multicast listener enabled boolean */
+    stream_mode_t     protocol;       /* Streaming Protocol choose */
 
     /* dmx and pixel config */
     float       gamma;          /* Value used to build gamma correction table */
@@ -85,7 +96,8 @@ typedef struct {
 } __attribute__((packed)) config_t;
 
 /* Globals */
-E131                e131;
+ART                e131;          /* At the moment Config for Protocol*/ //TODO!!!!
+
 ESP8266WebServer    web(HTTP_PORT);
 config_t            config;
 uint32_t            *seqError;      /* Sequence error tracking for each universe */
@@ -94,6 +106,7 @@ uint16_t            uniLast = 1;    /* Last Universe to listen for */
 const char PTYPE_HTML[] = "text/html";
 const char PTYPE_PLAIN[] = "text/plain";
 
+void initDefaultRequest();
 int initWifi();
 void initWeb();
 void loadConfig();

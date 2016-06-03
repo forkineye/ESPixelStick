@@ -29,6 +29,7 @@
 #include "ESPixelStick.h"
 #include "_E131.h"
 #include "helpers.h"
+#include "_ART.h"
 
 /* OLED Librarys */
 #include <Wire.h>
@@ -53,13 +54,13 @@
 /*************************************************/
 
 /* REQUIRED */
-const char ssid[] = "NO";             /* Replace with your SSID */
-const char passphrase[] = "NETWORK";   /* Replace with your WPA2 passphrase */
+const char ssid[] = "ThorNet";             /* Replace with your SSID */
+const char passphrase[] = "LepaGGX86";   /* Replace with your WPA2 passphrase */
 
 
 // Pin definitions for I2C
 #define OLED_SDA    D2  // pin 14
-#define OLED_SDC    D4  // pin 12
+#define OLED_SDC    D3  // D3 pin 12
 #define OLED_ADDR   0x3C
 
 /* Hardware Wemos D1 mini SPI pins
@@ -116,6 +117,7 @@ ESPixelDriver  pixels;         /* Pixel object */
 ESerialDriver serial;         /*serial object */
 uint8_t         *seqTracker;    /* Current sequence numbers for each Universe */
 uint32_t        lastPacket;     /* Packet timeout tracker */
+bool            initReady = 0;
 
 void setup() {
     /* Initial pin states */
@@ -133,9 +135,20 @@ void setup() {
     
     /* Load configuration from EEPROM */
     EEPROM.begin(sizeof(config));
+    initDefaultRequest();
+    
     loadConfig();
+
+    initOled();
+/*
+    if(config.protocol == MODE_sACN){
+      E131                e131;
+    }
+    else{
+      ART                 e131;
+    }    
+*/
 	  
-	  initOled();
 	
     /* Fallback to default SSID and passphrase if we fail to connect */
     int status = initWifi();
@@ -181,10 +194,31 @@ void setup() {
       break;
       
     };
+    switch(config.protocol){
+      case MODE_sACN:
+        //E131 e131;
+      break;
+      case MODE_ARTNET:
+        //ART e131;
+      break;
+    };
 
     ui.nextFrame();
     ui.update();
-   
+
+    initReady = 1;
+
+}
+
+/* clear settings from EEPROM  if D5 is high*/
+void initDefaultRequest() {
+    pinMode(DEFAULT_PIN, INPUT); //INPUT_PULLUP
+    if(digitalRead(DEFAULT_PIN) == LOW){
+      for (int i = 0 ; i < sizeof(config) ; i++) {
+        EEPROM.write(i, 0);
+      }
+      Serial.println("EEPROM Cleared!");
+    }
 }
 
 int initWifi() {
@@ -230,9 +264,10 @@ int initWifi() {
         Serial.println(WiFi.localIP());
 
         if (config.multicast)
-            e131.begin(E131_MULTICAST, config.universe, uniLast - config.universe + 1);
+            e131.begin(MULTICAST, config.universe, uniLast - config.universe + 1);
         else
-            e131.begin(E131_UNICAST);
+          
+            e131.begin(UNICAST);
     }
 
     return WiFi.status();
@@ -296,7 +331,12 @@ void initWeb() {
     web.onNotFound([]() { web.send(404, PTYPE_HTML, "Page not Found"); });
     web.begin();
 
-    Serial.print(F("- Web Server started on port "));
+    Serial.print(F("- Web Server started on: "));
+    if(WiFi.status() != WL_CONNECTED)
+      Serial.print(WiFi.softAPIP());
+    else
+      Serial.print(WiFi.localIP());
+    Serial.print(":");
     Serial.println(HTTP_PORT);
 }
 
@@ -356,10 +396,21 @@ void validateConfig() {
     } else {
         uint16_t count = config.pixel_count * 3;
         uint16_t bounds = config.ppu * 3;
-        if (count % bounds)
+        //uint16_t dmxchannelend = count - ((512 - config.channel_start) / 3) * 3;
+        uint16_t dmxchannelend = count + config.channel_start  -1;
+        
+        if (dmxchannelend != 512) // count % bounds
+            //uniLast = config.universe + count / bounds;
+            uniLast = config.universe + dmxchannelend / 512;
+        else 
+            uniLast = config.universe + dmxchannelend / 512 -1;
+        /*    
+        if (count % bounds) // count % bounds
+            //uniLast = config.universe + count / bounds;
             uniLast = config.universe + count / bounds;
         else 
             uniLast = config.universe + count / bounds - 1;
+        */
     }
 }
 
@@ -391,6 +442,10 @@ void updatePixelConfig() {
     Serial.print(config.universe);
     Serial.print(F(" to "));
     Serial.println(uniLast);
+
+    if(initReady == 1)
+      ui.update();
+
 }
 
 void updateSerialConfig() {
@@ -421,6 +476,9 @@ void updateSerialConfig() {
     Serial.print(config.universe);
     Serial.print(F(" to "));
     Serial.println(uniLast);
+
+    if(initReady == 1)
+      ui.update();
 }
 
 /* Initialize configuration structure */
@@ -485,6 +543,9 @@ void loadConfig() {
 
     /* Validate it */
     validateConfig();
+
+    if(initReady == 1)
+      ui.update();
 }
 
 void saveConfig() {  
@@ -498,6 +559,18 @@ bool msOverlay(SSD1306 *display, SSD1306UiState* state) {
   display->setTextAlignment(TEXT_ALIGN_RIGHT);
   display->setFont(ArialMT_Plain_10);
   display->drawString(128, 0, WiFi.localIP().toString());
+  display->setTextAlignment(TEXT_ALIGN_LEFT);
+  display->drawString(0, 0, (String)ESP.getChipId());
+  switch(config.protocol){ //TODO read the Class Name
+    case MODE_sACN:
+      display->drawString(10, 50,"sACN");
+    break;
+    case MODE_ARTNET:
+      display->drawString(10, 50,"ArtNet");
+    break;
+  };
+  display->setTextAlignment(TEXT_ALIGN_RIGHT);
+  display->drawString(118, 50, "v" + (String)VERSION);
   return true;
 }
 
@@ -517,16 +590,25 @@ bool drawFrame2(SSD1306 *display, SSD1306UiState* state, int x, int y) {
   display->setFont(ArialMT_Plain_10);
 
   // The coordinates define the left starting point of the text
-  display->setTextAlignment(TEXT_ALIGN_CENTER);
-  display->drawString(0 + x, 11 + y, "Uni " + config.universe);
+  display->setTextAlignment(TEXT_ALIGN_LEFT);
+  display->drawString(0 + x, 11 + y, "Uni: " + (String)config.universe + " - " + (String)uniLast);
 
   // The coordinates define the center of the text
-  display->setTextAlignment(TEXT_ALIGN_CENTER);
-  display->drawString(64 + x, 22, "Addr " + config.channel_start);
+  display->setTextAlignment(TEXT_ALIGN_LEFT);
+  display->drawString(0 + x, 22, "Addr: " + (String)config.channel_start + " -> " + (String)(config.pixel_count * 3) + "Ch");
 
   // The coordinates define the right end of the text
-  display->setTextAlignment(TEXT_ALIGN_CENTER);
-  display->drawString(128 + x, 33, WiFi.localIP().toString());
+  display->setTextAlignment(TEXT_ALIGN_LEFT);
+  String opmode;
+  switch(config.mode){
+    case MODE_PIXEL:
+      opmode = "Pixel";
+    break;
+    case MODE_SERIAL:
+      opmode = "Serial";
+    break;  
+  };
+  display->drawString(0 + x, 33, "Multicast: " + (String)config.multicast + "  Mode: " + opmode);
   return false;
 }
 
@@ -541,26 +623,33 @@ void loop() {
     case MODE_PIXEL:
         /* Parse a packet and update pixels */
         if(e131.parsePacket()) {
+          
           if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
             /* Universe offset and sequence tracking */
             uint8_t uniOffset = (e131.universe - config.universe);
+            
             if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
                 seqError[uniOffset]++;
                 seqTracker[uniOffset] = e131.packet->sequence_number + 1;
             }
 
-            /* Find out starting pixel based off the Universe */
-            uint16_t pixelStart = uniOffset * config.ppu;
+            /* Find out starting pixel based off the Universe and Startaddress*/
+            //uint16_t pixelStart = uniOffset * config.ppu;
 
             /* Calculate how many pixels we need from this buffer */
             uint16_t pixelStop = config.pixel_count;
-            if ((pixelStart + config.ppu) < pixelStop)
-                pixelStop = pixelStart + config.ppu;
+            //if ((pixelStart + config.ppu) < pixelStop)
+            //    pixelStop = pixelStart + config.ppu;
 
             /* Offset the channel if required for the first universe */
             uint16_t offset = 0;
+            uint16_t pixelStart = 0;
             if (e131.universe == config.universe)
                 offset = config.channel_start - 1;
+            else if(uniOffset == 1)
+                pixelStart = (512 - config.channel_start) / 3;
+            else
+                pixelStart = ((512 - config.channel_start) / 3) + config.ppu * (uniOffset-1);
 
             /* Set the pixel data */
             uint16_t buffloc = 0;
@@ -569,6 +658,8 @@ void loop() {
                 pixels.setPixelColor(i, e131.data[j], e131.data[j+1], e131.data[j+2]);
             }
 
+
+            //TODO Flickering of next universe
             /* Refresh when last universe shows up */
             if (e131.universe == uniLast) {
                 lastPacket = millis();

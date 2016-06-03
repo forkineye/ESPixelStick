@@ -1,7 +1,7 @@
 /*
-* E131.h
+* ART.h
 *
-* Project: E131 - E.131 (sACN) library for Arduino
+* Project: ART - E.131 (sART) library for Arduino
 * Copyright (c) 2015 Shelby Merrick
 * http://www.forkineye.com
 *
@@ -17,10 +17,9 @@
 *
 */
 
-#ifndef _E131_h
-#define _E131_h
+#ifndef _ART_h
+#define _ART_h
 
-#include "_ART.h"
 #include "Arduino.h"
 #include "util.h"
 
@@ -34,7 +33,7 @@
 # define INT_WIFI
 #elif defined (ARDUINO_ARCH_AVR)
 # include <Ethernet.h>
-#   include <EthernetUdp.h>
+# include <EthernetUdp.h>
 # include <avr/pgmspace.h>
 # define _UDP EthernetUDP
 # define INT_ETHERNET
@@ -42,107 +41,83 @@
 #endif
 
 /* Defaults */
-#define E131_DEFAULT_PORT 5568
+#define ART_DEFAULT_PORT 6454
 #define WIFI_CONNECT_TIMEOUT 10000  /* 10 seconds */
 
 /* E1.31 Packet Offsets */
-#define E131_ROOT_PREAMBLE_SIZE 0
-#define E131_ROOT_POSTAMBLE_SIZE 2
-#define E131_ROOT_ID 4
-#define E131_ROOT_FLENGTH 16
-#define E131_ROOT_VECTOR 18
-#define E131_ROOT_CID 22
+#define ART_ROOT_ID 0
+#define ART_ROOT_ID_SIZE 8
+#define ART_ROOT_OPCODE 8
+#define ART_ROOT_OPCODE_SIZE 2
+#define ART_ROOT_OPCODE_VALUE 0x500000
+#define ART_ROOT_PROTOCOL 10
+#define ART_ROOT_PROTOCOL_SIZE 2
+#define ART_ROOT_PROTOCOL_VALUE 0xE0000
+#define ART_ROOT_PACKET_SIZE 572
 
-#define E131_FRAME_FLENGTH 38
-#define E131_FRAME_VECTOR 40
-#define E131_FRAME_SOURCE 44
-#define E131_FRAME_PRIORITY 108
-#define E131_FRAME_RESERVED 109
-#define E131_FRAME_SEQ 111
-#define E131_FRAME_OPT 112
-#define E131_FRAME_UNIVERSE 113
+#define ART_FRAME_SEQ 12
+#define ART_FRAME_PHY 13
+#define ART_FRAME_UNIVERSE 14
+#define ART_FRAME_FLENGTH 16
 
-#define E131_DMP_FLENGTH 115
-#define E131_DMP_VECTOR 117
-#define E131_DMP_TYPE 118
-#define E131_DMP_ADDR_FIRST 119
-#define E131_DMP_ADDR_INC 121
-#define E131_DMP_COUNT 123
-#define E131_DMP_DATA 125
+#define ART_DMP_DATA 18
 
-/* E1.31 Packet Structure */
+/* ArtNet Packet Structure */
 typedef union {
     struct {
         /* Root Layer */
-        uint16_t preamble_size;
-        uint16_t postamble_size;
-        uint8_t  acn_id[12];
-        uint16_t root_flength;
-        uint32_t root_vector;
-        uint8_t  cid[16];
+        uint8_t  art_id[8];
+        uint16_t opcode;
+        uint16_t protocol;
 
         /* Frame Layer */
-        uint16_t frame_flength;
-        uint32_t frame_vector;
-        uint8_t  source_name[64];
-        uint8_t  priority;
-        uint16_t reserved;
         uint8_t  sequence_number;
-        uint8_t  options;
-        uint16_t universe;
+		    uint8_t  physical;
+        uint8_t  universe;
+		    uint16_t data_length;
 
         /* DMP Layer */
-        uint16_t dmp_flength;
-        uint8_t  dmp_vector;
-        uint8_t  type;
-        uint16_t first_address;
-        uint16_t address_increment;
-        uint16_t property_value_count;
-        uint8_t  property_values[513];
+		    uint8_t  data_values[512];
     } __attribute__((packed));
 
-    uint8_t raw[638];
-} e131_packet_t;
+    uint8_t raw[ART_ROOT_PACKET_SIZE]; //TODO Pakcet Size
+} art_packet_t;
 
 /* Status structure */
 typedef struct {
     uint32_t    num_packets;
     uint32_t    sequence_errors;
     uint32_t    packet_errors;
-} e131_stats_t;
+} art_stats_t;
 
 /* Error Types */
 typedef enum {
-    ERROR_NONE,
-    ERROR_ACN_ID,
-    ERROR_PACKET_SIZE,
-    ERROR_VECTOR_ROOT,
-    ERROR_VECTOR_FRAME,
-    ERROR_VECTOR_DMP
-} e131_error_t;
-
+    ERROR_NO,
+    ERROR_ART_ID,
+    ERROR_DATA_SIZE,
+    ERROR_OPCODE,
+    ERROR_PROTOCOL
+} art_error_t;
 
 /* E1.31 Listener Types */
-/* not needed -> went to listen_t
 typedef enum {
-  E131_UNICAST,
-  E131_MULTICAST
-} e131_listen_t;
-*/
+  UNICAST,
+  MULTICAST
+} listen_t;
 
-class E131 {
+class ART {
   private:
         /* Constants for packet validation */
-        static const uint8_t ACN_ID[];
-        static const uint32_t VECTOR_ROOT = 4;
-        static const uint32_t VECTOR_FRAME = 2;
-        static const uint8_t VECTOR_DMP = 2;
+        static const uint8_t ART_ID[];
+        static const uint32_t PACKET_SIZE = ART_ROOT_PACKET_SIZE;
+        static const uint32_t OPCODE = ART_ROOT_OPCODE_VALUE;
+        static const uint8_t PROTOCOL = ART_ROOT_PROTOCOL_VALUE;
         
-        e131_packet_t pbuff1;   /* Packet buffer */
+        art_packet_t pbuff1;   /* Packet buffer */
 #ifndef NO_DOUBLE_BUFFER
-        e131_packet_t pbuff2;   /* Double buffer */
+        art_packet_t pbuff2;   /* Double buffer */
 #endif
-        e131_packet_t *pwbuff;  /* Pointer to working packet buffer */
+        art_packet_t *pwbuff;  /* Pointer to working packet buffer */
         uint8_t       sequence; /* Sequence tracker */
         _UDP udp;               /* UDP handle */
 
@@ -155,10 +130,10 @@ class E131 {
   public:
         uint8_t       *data;                /* Pointer to DMX channel data */
         uint16_t      universe;             /* DMX Universe of last valid packet */
-        e131_packet_t *packet;              /* Pointer to last valid packet */
-        e131_stats_t  stats;                /* Statistics tracker */
+        art_packet_t *packet;              /* Pointer to last valid packet */
+        art_stats_t  stats;                /* Statistics tracker */
 
-        E131();
+        ART();
 
         /* Generic UDP listener, no physical or IP configuration */
       void begin(listen_t type, uint16_t universe = 1, uint16_t n = 1);
@@ -196,11 +171,11 @@ class E131 {
 /****** END - Ethernet ifdef block ******/
 
         /* Diag functions */
-        void dumpError(e131_error_t error);
+        void dumpError(art_error_t error);
 
         /* Main packet parser */
         inline uint16_t parsePacket() {
-            e131_error_t error;
+            art_error_t error;
             uint16_t retval = 0;
 
             int size = udp.parsePacket();
@@ -209,13 +184,13 @@ class E131 {
                 error = validate();
                 if (!error) {
 #ifndef NO_DOUBLE_BUFFER
-                    e131_packet_t *swap = packet;
+                    art_packet_t *swap = packet;
                     packet = pwbuff;
                     pwbuff = swap;
 #endif
-                    universe = htons(packet->universe);
-                    data = packet->property_values + 1;
-                    retval = htons(packet->property_value_count) - 1;
+                    universe = packet->universe +1; //htons(packet->universe);
+                    data = packet->data_values + 1;
+                    retval = packet->data_length; // htons(packet->data_length) - 1;
                     if (packet->sequence_number != sequence++) {
                         stats.sequence_errors++;
                         sequence = packet->sequence_number + 1;
@@ -231,20 +206,18 @@ class E131 {
         }
 
         /* Packet validater */
-        inline e131_error_t validate() {
+        inline art_error_t validate() {
 #ifdef ARDUINO_ARCH_AVR
-            if (memcmp_P(pwbuff->acn_id, ACN_ID, sizeof(pwbuff->acn_id)))
+            if (memcmp_P(pwbuff->art_id, ART_ID, sizeof(pwbuff->art_id)))
 #else
-            if (memcmp(pwbuff->acn_id, ACN_ID, sizeof(pwbuff->acn_id)))
+            if (memcmp(pwbuff->art_id, ART_ID, sizeof(pwbuff->art_id)))
 #endif
-                return ERROR_ACN_ID;
-            if (htonl(pwbuff->root_vector) != VECTOR_ROOT)
-                return ERROR_VECTOR_ROOT;
-            if (htonl(pwbuff->frame_vector) != VECTOR_FRAME)
-                return ERROR_VECTOR_FRAME;
-            if (pwbuff->dmp_vector != VECTOR_DMP)
-                return ERROR_VECTOR_DMP;
-            return ERROR_NONE;
+                return ERROR_ART_ID;
+            if (htonl(pwbuff->opcode) != ART_ROOT_OPCODE_VALUE)
+                return ERROR_OPCODE;
+            if (htonl(pwbuff->protocol) != ART_ROOT_PROTOCOL_VALUE)
+                return ERROR_PROTOCOL;
+            return ERROR_NO;
         }
 };
 

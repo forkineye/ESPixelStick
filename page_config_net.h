@@ -2,7 +2,7 @@
 #define PAGE_CONFIG_NET_H
 
 const char PAGE_CONFIG_NET[] PROGMEM = R"=====(
-<a href="/" class="btn btn--s">&lt;</a>&nbsp;&nbsp;<strong>Network Configuration</strong> <hr> Connect to Router with these settings:<br> <form action=""> <table border="0" cellspacing="0" cellpadding="3" style="width:360px"> <tr><td align="right">SSID :</td><td><input id="ssid" name="ssid" value=""></td></tr> <tr><td align="right">Password :</td><td><input id="password" name="password" value=""></td></tr> <tr><td align="right">DHCP :</td><td><input type="checkbox" id="dhcp" name="dhcp"></td></tr> <tr><td align="right">IP :</td><td><input id="ip_0" name="ip_0" size="3">.<input id="ip_1" name="ip_1" size="3">.<input id="ip_2" name="ip_2" size="3">.<input id="ip_3" name="ip_3" value="" size="3"></td></tr> <tr><td align="right">Netmask :</td><td><input id="nm_0" name="nm_0" size="3">.<input id="nm_1" name="nm_1" size="3">.<input id="nm_2" name="nm_2" size="3">.<input id="nm_3" name="nm_3" size="3"></td></tr> <tr><td align="right">Gateway :</td><td><input id="gw_0" name="gw_0" size="3">.<input id="gw_1" name="gw_1" size="3">.<input id="gw_2" name="gw_2" size="3">.<input id="gw_3" name="gw_3" size="3"></td></tr> <tr><td align="right">Multicast :</td><td><input type="checkbox" id="multicast" name="multicast"></td></tr> <tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Save"></td></tr> </table> </form> <hr> <strong>Connection State:</strong><div id="connectionstate">N/A</div> <hr> <strong>Networks:</strong><br> <table border="0" cellspacing="3" style="width:310px"> <tr><td><div id="networks">Scanning...</div></td></tr> <tr><td align="center"><a href="javascript:GetState()" style="width:150px" class="btn btn--m btn--blue">Refresh</a></td></tr> </table> <script>function GetState(){setValues("/config/connectionstate")}function selssid(e){document.getElementById("ssid").value=e}setValues("/config/netvals"),setTimeout(GetState,2e3);</script>
+<a href="/" class="btn btn--s">&lt;</a>&nbsp;&nbsp;<strong>Network Configuration</strong> <hr> Connect to Router with these settings:<br> <form action=""> <table border="0" cellspacing="0" cellpadding="3" style="width:360px"> <tr><td align="right">SSID :</td><td><input id="ssid" name="ssid" value=""></td></tr> <tr><td align="right">Password :</td><td><input id="password" name="password" value=""></td></tr> <tr><td align="right">DHCP :</td><td><input type="checkbox" id="dhcp" name="dhcp"></td></tr> <tr><td align="right">IP :</td><td><input id="ip_0" name="ip_0" size="3">.<input id="ip_1" name="ip_1" size="3">.<input id="ip_2" name="ip_2" size="3">.<input id="ip_3" name="ip_3" value="" size="3"></td></tr> <tr><td align="right">Netmask :</td><td><input id="nm_0" name="nm_0" size="3">.<input id="nm_1" name="nm_1" size="3">.<input id="nm_2" name="nm_2" size="3">.<input id="nm_3" name="nm_3" size="3"></td></tr> <tr><td align="right">Gateway :</td><td><input id="gw_0" name="gw_0" size="3">.<input id="gw_1" name="gw_1" size="3">.<input id="gw_2" name="gw_2" size="3">.<input id="gw_3" name="gw_3" size="3"></td></tr> <tr><td align="right">Multicast :</td><td><input type="checkbox" id="multicast" name="multicast"></td></tr> <tr><td align="right">Stream Mode :</td><td><select id="protocol" name="protocol"></select></td></tr> <tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Save"></td></tr> </table> </form> <hr> <strong>Connection State:</strong><div id="connectionstate">N/A</div> <hr> <strong>Networks:</strong><br> <table border="0" cellspacing="3" style="width:310px"> <tr><td><div id="networks">Scanning...</div></td></tr> <tr><td align="center"><a href="javascript:GetState()" style="width:150px" class="btn btn--m btn--blue">Refresh</a></td></tr> </table> <script>function GetState(){setValues("/config/connectionstate")}function selssid(e){document.getElementById("ssid").value=e}setValues("/config/netvals"),setTimeout(GetState,2e3);</script>
 )=====";
 
 /* No source .html for this */
@@ -36,6 +36,7 @@ void send_config_net_html() {
             if (web.argName(i) == "gw_3") if (checkRange(web.arg(i))) config.gateway[3] = web.arg(i).toInt();
             if (web.argName(i) == "dhcp") config.dhcp = true;
             if (web.argName(i) == "multicast") config.multicast = true;
+            if (web.argName(i) == "protocol") config.protocol = (stream_mode_t)web.arg(i).toInt();
         }
         saveConfig();
         delay(500);
@@ -71,6 +72,9 @@ void send_config_net_vals() {
     values += "gw_3|input|" + (String)config.gateway[3] + "\n";
     values += "dhcp|chk|" + (String)(config.dhcp ? "checked" : "") + "\n";
     values += "multicast|chk|" + (String)(config.multicast ? "checked" : "") + "\n";
+    values += "protocol|opt|" + String("sACN|") + (String)MODE_sACN + "\n";
+    values += "protocol|opt|" + String("ArtNet|") + (String)MODE_ARTNET + "\n";
+    values += "protocol|input|" + (String)config.protocol + "\n";
     values += "title|div|" + (String)config.name + " - Net Config\n";
     web.send(200, PTYPE_PLAIN, values);
 }

@@ -1,7 +1,7 @@
 /*
-* E131.cpp
+* ART.cpp
 *
-* Project: E131 - E.131 (sACN) library for Arduino
+* Project: ART - E.131 (sART) library for Arduino
 * Copyright (c) 2015 Shelby Merrick
 * http://www.forkineye.com
 *
@@ -17,7 +17,7 @@
 *
 */
 
-#include "_E131.h"
+#include "_ART.h"
 #include <string.h>
 
 #ifdef INT_ESP8266
@@ -25,15 +25,15 @@
 #include "lwip/igmp.h"
 #endif
 
-/* E1.17 ACN Packet Identifier */
+/* E1.17 ART Packet Identifier */
 #ifdef ARDUINO_ARCH_AVR
-const PROGMEM byte E131::ACN_ID[12] = { 0x41, 0x53, 0x43, 0x2d, 0x45, 0x31, 0x2e, 0x31, 0x37, 0x00, 0x00, 0x00 };
+const PROGMEM byte ART::ART_ID[8] = { 0x41, 0x72, 0x74, 0x2d, 0x4e, 0x65, 0x74, 0x00};
 #else
-const byte E131::ACN_ID[12] = { 0x41, 0x53, 0x43, 0x2d, 0x45, 0x31, 0x2e, 0x31, 0x37, 0x00, 0x00, 0x00 };
+const byte ART::ART_ID[8] = { 0x41, 0x72, 0x74, 0x2d, 0x4e, 0x65, 0x74, 0x00};
 #endif
 
 /* Constructor */
-E131::E131() {
+ART::ART() {
 #ifdef NO_DOUBLE_BUFFER
     memset(pbuff1.raw, 0, sizeof(pbuff1.raw));
     packet = &pbuff1;
@@ -51,31 +51,42 @@ E131::E131() {
     stats.packet_errors = 0;
 }
 
-void E131::initUnicast() {
+void ART::initUnicast() {
     delay(100);
-    udp.begin(E131_DEFAULT_PORT);
+    udp.begin(ART_DEFAULT_PORT);
     if (Serial) {
         Serial.print(F("- Unicast port: "));
-        Serial.println(E131_DEFAULT_PORT);
+        Serial.println(ART_DEFAULT_PORT);
     }
 }
 
-void E131::initMulticast(uint16_t universe, uint16_t n) {
+/* Senseless, doese not work */
+void ART::initMulticast(uint16_t universe, uint16_t n) {
     delay(100);
     IPAddress localIP = WiFi.localIP();
-    IPAddress address = IPAddress(239, 255, ((universe >> 8) & 0xff), ((universe >> 0) & 0xff));
+	  //uint8_t localIPByte [4] = {};
+	  //localIPByte = &((byte) localIP);
+    IPAddress subnet = WiFi.subnetMask();
+    Serial.print("Subnet: ");
+    Serial.println(subnet);
+    IPAddress address = IPAddress(((uint8_t)subnet[0] == (uint8_t)255) ? (uint8_t)localIP[0] : 255, ((uint8_t)subnet[1] == 255) ? (uint8_t)localIP[1] : 255, ((uint8_t)subnet[2] == 255) ? (uint8_t)localIP[2] : 255, ((uint8_t)subnet[3] == 255) ? (uint8_t)localIP[3] : 255);
+    Serial.print("Bradcast Address: ");
+    Serial.println(address);
 
 #ifdef INT_ESP8266
     ip_addr_t ifaddr;
     ip_addr_t multicast_addr;
     ifaddr.addr = (uint32_t) localIP;
-
+/*
     for (uint16_t i = 1; i < n; i++) {
-        multicast_addr.addr = (uint32_t) IPAddress(239, 255, (((universe + i) >> 8) & 0xff), (((universe + i) >> 0) & 0xff));
+        multicast_addr.addr = (uint32_t) IPAddress((uint8_t)localIP[0], (uint8_t)localIP[1], (uint8_t)localIP[2], 255);
         igmp_joingroup(&ifaddr, &multicast_addr);
     }
-
-    udp.beginMulticast(localIP, address, E131_DEFAULT_PORT);
+*/
+    multicast_addr.addr = (uint32_t) IPAddress((uint8_t)localIP[0], (uint8_t)localIP[1], (uint8_t)localIP[2], 255);
+    igmp_joingroup(&ifaddr, &multicast_addr);
+    
+    udp.beginMulticast(localIP, address, ART_DEFAULT_PORT);
 #endif
 
     if (Serial) {
@@ -92,7 +103,7 @@ void E131::initMulticast(uint16_t universe, uint16_t n) {
 #if defined (INT_ESP8266) || defined (INT_WIFI)
 
 /* WiFi Initialization */
-int E131::initWiFi(const char *ssid, const char *passphrase) {
+int ART::initWiFi(const char *ssid, const char *passphrase) {
     /* Switch to station mode and disconnect just in case */
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
@@ -128,14 +139,14 @@ int E131::initWiFi(const char *ssid, const char *passphrase) {
     return retval;
 }
 
-void E131::begin(listen_t type, uint16_t universe, uint16_t n) {
+void ART::begin(listen_t type, uint16_t universe, uint16_t n) {
   if (type == UNICAST)
     initUnicast();
   if (type == MULTICAST)
     initMulticast(universe, n);
 }
 
-int E131::begin(const char *ssid, const char *passphrase) {
+int ART::begin(const char *ssid, const char *passphrase) {
     if (initWiFi(ssid, passphrase)) {
         if (Serial) {
             Serial.println("");
@@ -147,7 +158,7 @@ int E131::begin(const char *ssid, const char *passphrase) {
     return WiFi.status();
 }
 
-int E131::begin(const char *ssid, const char *passphrase, 
+int ART::begin(const char *ssid, const char *passphrase, 
                 IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns) {
     if (initWiFi(ssid, passphrase)) {
         WiFi.config(ip, gateway, netmask, dns);
@@ -166,7 +177,7 @@ int E131::begin(const char *ssid, const char *passphrase,
 
 /****** START - ESP8266 ifdef block ******/
 #if defined (INT_ESP8266)  
-int E131::beginMulticast(const char *ssid, const char *passphrase, uint16_t universe, uint16_t n) {
+int ART::beginMulticast(const char *ssid, const char *passphrase, uint16_t universe, uint16_t n) {
     if (initWiFi(ssid, passphrase)) {
         if (Serial) {
             Serial.println("");
@@ -178,7 +189,7 @@ int E131::beginMulticast(const char *ssid, const char *passphrase, uint16_t univ
     return WiFi.status();
 }
 
-int E131::beginMulticast(const char *ssid, const char *passphrase, uint16_t universe, uint16_t n,
+int ART::beginMulticast(const char *ssid, const char *passphrase, uint16_t universe, uint16_t n,
         IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns) {
     if (initWiFi(ssid, passphrase)) {
         WiFi.config(ip, dns, gateway, netmask);
@@ -198,7 +209,7 @@ int E131::beginMulticast(const char *ssid, const char *passphrase, uint16_t univ
 #if defined (INT_ETHERNET)  
 
 /* Unicast Ethernet Initializers */
-int E131::begin(uint8_t *mac) {
+int ART::begin(uint8_t *mac) {
     int retval = 0;
 
     if (Serial) {
@@ -227,7 +238,7 @@ int E131::begin(uint8_t *mac) {
     return retval;
 }
 
-void E131::begin(uint8_t *mac, 
+void ART::begin(uint8_t *mac, 
         IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns) {
     Ethernet.begin(mac, ip, dns, gateway, netmask);
     if (Serial) {
@@ -244,38 +255,39 @@ void E131::begin(uint8_t *mac,
 }
 
 /* Multicast Ethernet Initializers */
-int E131::beginMulticast(uint8_t *mac, uint16_t universe, uint16_t n) {
+int ART::beginMulticast(uint8_t *mac, uint16_t universe, uint16_t n) {
     //TODO: Add ethernet multicast support
 }
 
-void E131::beginMulticast(uint8_t *mac, uint16_t universe, uint16_t n,
+void ART::beginMulticast(uint8_t *mac, uint16_t universe, uint16_t n,
         IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns) {
     //TODO: Add ethernet multicast support
 }
 #endif
 /****** END - Ethernet ifdef block ******/
 
-void E131::dumpError(e131_error_t error) {
+void ART::dumpError(art_error_t error) {
     switch (error) {
-        case ERROR_ACN_ID:
+        case ERROR_ART_ID:
             Serial.print(F("INVALID PACKET ID: "));
-            for (int i = 0; i < sizeof(ACN_ID); i++)
-                Serial.print(pwbuff->acn_id[i], HEX);
+            for (int i = 0; i < sizeof(pwbuff->art_id); i++)
+                Serial.print(pwbuff->art_id[i], HEX);
+            Serial.println("");
+            Serial.print(F("Should be: "));
+            for (int i = 0; i < sizeof(ART_ID); i++)
+                Serial.print(ART_ID[i], HEX);
             Serial.println("");
             break;
-        case ERROR_PACKET_SIZE:
+        case ERROR_DATA_SIZE:
             Serial.println(F("INVALID PACKET SIZE: "));
             break;
-        case ERROR_VECTOR_ROOT:
-            Serial.print(F("INVALID ROOT VECTOR: 0x"));
-            Serial.println(htonl(pwbuff->root_vector), HEX);
+        case ERROR_OPCODE:
+            Serial.print(F("INVALID OPCODE: 0x"));
+            Serial.println(htonl(pwbuff->opcode), HEX);
             break;
-        case ERROR_VECTOR_FRAME:
-            Serial.print(F("INVALID FRAME VECTOR: 0x"));
-            Serial.println(htonl(pwbuff->frame_vector), HEX);
-            break;
-        case ERROR_VECTOR_DMP:
-            Serial.print(F("INVALID DMP VECTOR: 0x"));
-            Serial.println(pwbuff->dmp_vector, HEX);
+        case ERROR_PROTOCOL:
+            Serial.print(F("INVALID PROTOCOL: 0x"));
+            Serial.println(htonl(pwbuff->protocol), HEX);
+
     }
 }
