@@ -95,16 +95,24 @@ void ESerialDriver::show(){
 	
 	if (_type == SERIAL_RENARD)
 		_serial->write(_ptr, _size+2);
-//Changed Serial_DMX to function correctly when using RenardESP stick to replace RS-485 Chip on DMX Compatible controllers
-//Verified working 6/3/2016 on Lynx Express V5, Will test LOR CTB16PC(will kill output likely), and LOR CMB24D next
+		
+//Updated begins with serial 8n1/8n2 enabling functionality as a RS485 Chip replacement on Lynx Express, LOR CTB16PC, LOR CMB24D, etc.
+//-Grayson Lough (Lights on Grassland)
   else if(_type == SERIAL_DMX){
-		_serial->begin(83333, SERIAL_8N1);
+		// send the break by sending a slow 0 byte
+		_serial->begin(125000, SERIAL_8N1);
 		_serial->write(0);
 		_serial->flush();
+
+   // send the data
 		_serial->begin(250000, SERIAL_8N2);
 		_serial->write(0);
 		_serial->write(_ptr, _size);
-		_serial->flush();
+//This shouldn't be needed.
+		  //_serial->flush();
 	}
 	free(_ptr);
+	
+	
+	
 }
