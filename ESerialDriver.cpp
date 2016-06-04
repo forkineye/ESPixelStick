@@ -95,19 +95,22 @@ void ESerialDriver::show(){
 	
 	if (_type == SERIAL_RENARD)
 		_serial->write(_ptr, _size+2);
+		
+//Updated begins with serial 8n1/8n2 enabling functionality as a RS485 Chip replacement on Lynx Express, LOR CTB16PC, LOR CMB24D, etc.
+//-Grayson Lough (Lights on Grassland)
   else if(_type == SERIAL_DMX){
 		// send the break by sending a slow 0 byte
-		_serial->begin(125000);
+		_serial->begin(125000, SERIAL_8N1);
 		_serial->write(0);
 		_serial->flush();
-		_serial->begin(250000);
+
+   // send the data
+		_serial->begin(250000, SERIAL_8N2);
 		_serial->write(0);
 		_serial->write(_ptr, _size);
+//This shouldn't be needed.
+		  //_serial->flush();
 	}
-		
-	
-	//_serial->flush();  //this may be needed later
-	
 	free(_ptr);
 	
 	
