@@ -1,8 +1,11 @@
 
 Changelog
 =========
-### 1.4 (In Progress)
+### 1.4
 - Arduino 1.6.8 compatibility.
+- Added SoftAP support (credit: Bill Porter)
+- Added Renard Support (credit: Bill Porter)
+- Added DMX Support (credit: Bill Porter and Grayson Lough)
 
 ### 1.3
 - Fix for issues when compiling on Mac and Linux.
