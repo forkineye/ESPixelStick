@@ -28,7 +28,8 @@
 #include "SSD1306Ui.h"
 
 /* Name and version */
-const char VERSION[] = "1.42";
+const char VERSION[] = "1.4";
+#define PROTOCOL        ART             /* Protocol to use (ART, E131) */
 
 #define HTTP_PORT       80      /* Default web server port */
 #define DATA_PIN        2       /* Pixel output - GPIO2 */
@@ -95,9 +96,8 @@ typedef struct {
 } __attribute__((packed)) config_t;
 
 /* Globals */
-//Protocol            *proto;          /* At the moment Config for Protocol*/ //TODO Upper Class
-ART                 art;
-E131                e131;
+ART                e131;          /* At the moment Config for Protocol*/ //TODO!!!!
+
 ESP8266WebServer    web(HTTP_PORT);
 config_t            config;
 uint32_t            *seqError;      /* Sequence error tracking for each universe */
