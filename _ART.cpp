@@ -1,8 +1,10 @@
 /*
 * ART.cpp
 *
-* Project: ART - E.131 (sART) library for Arduino
-* Copyright (c) 2015 Shelby Merrick
+* Project: ART - ART(ArtNet) library for Arduino
+* Copyright (c) 2016 Rene Glitza
+* 
+* Based on E1.31 Library from Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -55,34 +57,50 @@ void ART::initUnicast() {
     delay(100);
     udp.begin(ART_DEFAULT_PORT);
     if (Serial) {
-        Serial.print(F("- Unicast port: "));
+        IPAddress localIP = WiFi.localIP();
+        IPAddress subnet = WiFi.subnetMask();
+        IPAddress address = IPAddress(((uint8_t)subnet[0] == (uint8_t)255) ? (uint8_t)localIP[0] : 255, ((uint8_t)subnet[1] == 255) ? (uint8_t)localIP[1] : 255, ((uint8_t)subnet[2] == 255) ? (uint8_t)localIP[2] : 255, ((uint8_t)subnet[3] == 255) ? (uint8_t)localIP[3] : 255);
+        Serial.print(F("- Broadcast port: "));
         Serial.println(ART_DEFAULT_PORT);
+        Serial.print("Subnet: ");
+        Serial.println(subnet);
+        Serial.print("Broadcast Address: ");
+        Serial.println(address);
+        Serial.print(F("- Universe from: "));
+        Serial.println(universe);
     }
 }
 
-/* Senseless, doese not work */
+/* Senseless, has only bradcast */
 void ART::initMulticast(uint16_t universe, uint16_t n) {
     delay(100);
-    IPAddress localIP = WiFi.localIP();
-	  //uint8_t localIPByte [4] = {};
-	  //localIPByte = &((byte) localIP);
-    IPAddress subnet = WiFi.subnetMask();
-    Serial.print("Subnet: ");
-    Serial.println(subnet);
-    IPAddress address = IPAddress(((uint8_t)subnet[0] == (uint8_t)255) ? (uint8_t)localIP[0] : 255, ((uint8_t)subnet[1] == 255) ? (uint8_t)localIP[1] : 255, ((uint8_t)subnet[2] == 255) ? (uint8_t)localIP[2] : 255, ((uint8_t)subnet[3] == 255) ? (uint8_t)localIP[3] : 255);
-    Serial.print("Bradcast Address: ");
-    Serial.println(address);
-
+    udp.begin(ART_DEFAULT_PORT);
+    if (Serial) {
+        IPAddress localIP = WiFi.localIP();
+        IPAddress subnet = WiFi.subnetMask();
+        IPAddress address = IPAddress(((uint8_t)subnet[0] == (uint8_t)255) ? (uint8_t)localIP[0] : 255, ((uint8_t)subnet[1] == 255) ? (uint8_t)localIP[1] : 255, ((uint8_t)subnet[2] == 255) ? (uint8_t)localIP[2] : 255, ((uint8_t)subnet[3] == 255) ? (uint8_t)localIP[3] : 255);
+        Serial.print(F("- Broadcast port: "));
+        Serial.println(ART_DEFAULT_PORT);
+        Serial.print("Subnet: ");
+        Serial.println(subnet);
+        Serial.print("Broadcast Address: ");
+        Serial.println(address);
+        Serial.print(F("- Universe from: "));
+        Serial.println(universe);
+        Serial.print(F("- Universes total: "));
+        Serial.println(n);
+    }
+/*
 #ifdef INT_ESP8266
     ip_addr_t ifaddr;
     ip_addr_t multicast_addr;
     ifaddr.addr = (uint32_t) localIP;
-/*
+
     for (uint16_t i = 1; i < n; i++) {
         multicast_addr.addr = (uint32_t) IPAddress((uint8_t)localIP[0], (uint8_t)localIP[1], (uint8_t)localIP[2], 255);
         igmp_joingroup(&ifaddr, &multicast_addr);
     }
-*/
+
     multicast_addr.addr = (uint32_t) IPAddress((uint8_t)localIP[0], (uint8_t)localIP[1], (uint8_t)localIP[2], 255);
     igmp_joingroup(&ifaddr, &multicast_addr);
     
@@ -97,6 +115,7 @@ void ART::initMulticast(uint16_t universe, uint16_t n) {
         Serial.print(F("- First multicast address: "));
         Serial.println(address);
     }
+*/
 }
 
 /****** START - Wireless ifdef block ******/

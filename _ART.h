@@ -1,8 +1,10 @@
 /*
 * ART.h
 *
-* Project: ART - E.131 (sART) library for Arduino
-* Copyright (c) 2015 Shelby Merrick
+* Project: ART - ART(ArtNet) library for Arduino
+* Copyright (c) 2016 Rene Glitza
+* 
+* Based on E1.31 Library from Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -106,6 +108,8 @@ typedef enum {
 } listen_t;
 
 class ART {
+  
+  
   private:
         /* Constants for packet validation */
         static const uint8_t ART_ID[];
