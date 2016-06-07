@@ -17,6 +17,8 @@
 *  Author shall not be liable in any event for incidental or consequential
 *  damages in connection with, or arising out of, the furnishing, performance
 *  or use of these programs.
+*  
+*  TODO Virtual Variables
 *
 */
 
@@ -54,8 +56,8 @@
 /*************************************************/
 
 /* REQUIRED */
-const char ssid[] = "ThorNet";             /* Replace with your SSID */
-const char passphrase[] = "LepaGGX86";   /* Replace with your WPA2 passphrase */
+const char ssid[] = "SSID";             /* Replace with your SSID */
+const char passphrase[] = "PASSWORD";   /* Replace with your WPA2 passphrase */
 
 
 // Pin definitions for I2C
@@ -140,16 +142,7 @@ void setup() {
     loadConfig();
 
     initOled();
-/*
-    if(config.protocol == MODE_sACN){
-      E131                e131;
-    }
-    else{
-      ART                 e131;
-    }    
-*/
 	  
-	
     /* Fallback to default SSID and passphrase if we fail to connect */
     int status = initWifi();
     if (status != WL_CONNECTED) {
@@ -194,12 +187,14 @@ void setup() {
       break;
       
     };
+
+    //TODO Upper class
     switch(config.protocol){
       case MODE_sACN:
-        //E131 e131;
+        //e131 = new E131;
       break;
       case MODE_ARTNET:
-        //ART e131;
+        //e131 = new ART;
       break;
     };
 
@@ -263,11 +258,20 @@ int initWifi() {
         }
         Serial.println(WiFi.localIP());
 
-        if (config.multicast)
-            e131.begin(MULTICAST, config.universe, uniLast - config.universe + 1);
-        else
-          
-            e131.begin(UNICAST);
+        switch(config.protocol){
+          case MODE_sACN:
+            if (config.multicast)
+                e131.begin(MULTICAST, config.universe, uniLast - config.universe + 1);
+            else
+                e131.begin(UNICAST);
+          break;
+          case MODE_ARTNET:
+            if (config.multicast)
+                art.begin(MULTICAST, config.universe, uniLast - config.universe + 1);
+            else
+                art.begin(UNICAST);
+          break;
+        };
     }
 
     return WiFi.status();
@@ -465,7 +469,15 @@ void updateSerialConfig() {
         memset(seqError, 0x00, uniTotal * 4);
 
     /* Zero out packet stats */
-    e131.stats.num_packets = 0;
+
+    switch(config.protocol){
+      case MODE_sACN:
+        e131.stats.num_packets = 0;
+      break;
+      case MODE_ARTNET:
+        e131.stats.num_packets = 0;
+      break;
+    }; 
     
     /* Initialize for our serial type */
     serial.begin(&Serial, config.serial_type, config.channel_count, config.serial_baud);
@@ -561,7 +573,7 @@ bool msOverlay(SSD1306 *display, SSD1306UiState* state) {
   display->drawString(128, 0, WiFi.localIP().toString());
   display->setTextAlignment(TEXT_ALIGN_LEFT);
   display->drawString(0, 0, (String)ESP.getChipId());
-  switch(config.protocol){ //TODO read the Class Name
+  switch(config.protocol){
     case MODE_sACN:
       display->drawString(10, 50,"sACN");
     break;
@@ -615,9 +627,10 @@ bool drawFrame2(SSD1306 *display, SSD1306UiState* state, int x, int y) {
 /* Main Loop */
 void loop() {
     /* Handle incoming web requests if needed */
-    web.handleClient();
+  web.handleClient();
 
-    
+  switch(config.protocol){
+  case MODE_sACN:
     /* Configure our outputs and pixels */
     switch(config.mode){
     case MODE_PIXEL:
@@ -625,6 +638,7 @@ void loop() {
         if(e131.parsePacket()) {
           
           if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
+
             /* Universe offset and sequence tracking */
             uint8_t uniOffset = (e131.universe - config.universe);
             
@@ -703,6 +717,96 @@ void loop() {
       break;
         
       };
+  break;
+  
+  case MODE_ARTNET:
+    /* Configure our outputs and pixels */
+    switch(config.mode){
+    case MODE_PIXEL:
+        /* Parse a packet and update pixels */
+        if(art.parsePacket()) {
+          
+          if ((art.universe >= config.universe) && (art.universe <= uniLast)) {
+            /* Universe offset and sequence tracking */
+            uint8_t uniOffset = (art.universe - config.universe);
+            
+            if (art.packet->sequence_number != seqTracker[uniOffset]++) {
+                seqError[uniOffset]++;
+                seqTracker[uniOffset] = art.packet->sequence_number + 1;
+            }
+
+            /* Find out starting pixel based off the Universe and Startaddress*/
+            //uint16_t pixelStart = uniOffset * config.ppu;
+
+            /* Calculate how many pixels we need from this buffer */
+            uint16_t pixelStop = config.pixel_count;
+            //if ((pixelStart + config.ppu) < pixelStop)
+            //    pixelStop = pixelStart + config.ppu;
+
+            /* Offset the channel if required for the first universe */
+            uint16_t offset = 0;
+            uint16_t pixelStart = 0;
+            if (art.universe == config.universe)
+                offset = config.channel_start - 1;
+            else if(uniOffset == 1)
+                pixelStart = (512 - config.channel_start) / 3;
+            else
+                pixelStart = ((512 - config.channel_start) / 3) + config.ppu * (uniOffset-1);
+
+            /* Set the pixel data */
+            uint16_t buffloc = 0;
+            for (int i = pixelStart; i < pixelStop; i++) {
+                int j = buffloc++ * 3 + offset;
+                pixels.setPixelColor(i, art.data[j], art.data[j+1], art.data[j+2]);
+            }
+
+
+            //TODO Flickering of next universe
+            /* Refresh when last universe shows up */
+            if (art.universe == uniLast) {
+                lastPacket = millis();
+                pixels.show();
+              }
+          }
+      }
+
+      //TODO: Use this for setting defaults states at a later date
+      /* Force refresh every second if there is no data received */
+      if ((millis() - lastPacket) > E131_TIMEOUT) {
+          lastPacket = millis();
+          pixels.show();
+      }
+      break;
+      
+      /* Parse a packet and update serial */
+      case MODE_SERIAL:
+        if(art.parsePacket()) {
+          if (art.universe == config.universe) {
+            // Universe offset and sequence tracking 
+           /* uint8_t uniOffset = (e131.universe - config.universe);
+            if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
+              seqError[uniOffset]++;
+              seqTracker[uniOffset] = e131.packet->sequence_number + 1;
+            }
+            */
+            uint16_t offset = config.channel_start - 1;
+
+            // Set the serial data 
+            serial.startPacket();
+            for(int i = 0; i<config.channel_count; i++){
+              serial.setValue(i, art.data[i + offset]);  
+            }
+
+            // Refresh  
+            serial.show();
+          }
+        }
+              
+      break;
+        
+      };
+  break;
+  }; 
     
     
     
