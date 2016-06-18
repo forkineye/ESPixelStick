@@ -1,15 +1,7 @@
-#ifndef PAGE_STATUS_E131_H
-#define PAGE_STATUS_E131_H
+#ifndef PAGE_STATUS_E131_H_
+#define PAGE_STATUS_E131_H_
 
-const char PAGE_STATUS_E131[] PROGMEM = R"=====(
-<a href="/" class="btn btn--s">&lt;</a>&nbsp;&nbsp;<strong>E1.31 Status</strong> <hr> <table border="0" cellspacing="0" cellpadding="3" style="width:310px"> <tr><td align="right">Universe Range :</td><td><span id="uni_first"></span> to <span id="uni_last"></span></td></tr> <tr><td align="right">Last Universe :</td><td><span id="universe"></span></td></tr> <tr><td align="right">Total Packets :</td><td><span id="num_packets"></span></td></tr> <tr><td align="right">Sequence Errors :</td><td><span id="sequence_errors"></span></td></tr> <tr><td align="right">Packet Errors :</td><td><span id="packet_errors"></span></td></tr> <tr><td colspan="2" align="center"><a href="javascript:GetState()" class="btn btn--m btn--blue">Refresh</a></td></tr> </table> <script>function GetState(){setValues("/status/e131vals")}setTimeout(GetState,1e3);</script>
-)=====" ;
-
-//
-// FILL WITH INFOMATION
-// 
-
-void send_status_e131_vals() {
+void send_status_e131_vals(AsyncWebServerRequest *request) {
     //TODO: Show sequence errors for each universe
     uint32_t seqErrors = 0;
     for (int i = 0; i < ((uniLast + 1) - config.universe); i++)
@@ -23,7 +15,7 @@ void send_status_e131_vals() {
     values += "sequence_errors|div|" + (String)seqErrors + "\n";
     values += "packet_errors|div|" + (String)e131.stats.packet_errors + "\n";
     values += "title|div|" + (String)config.name + " - E1.31 Status\n";
-    web.send (200, PTYPE_PLAIN, values);
+    request->send(200, "text/plain", values);
 }
 
-#endif
+#endif /* PAGE_STATUS_E131_H_ */

@@ -17,9 +17,9 @@
 *
 */
 
-#ifndef BITBANG_H
-#define BITBANG_H
+#ifndef BITBANG_H_
+#define BITBANG_H_
 
 extern "C" void ICACHE_RAM_ATTR doGECE(uint8_t pin, uint32_t packet);
 
-#endif
+#endif /* BITBANG_H_ */

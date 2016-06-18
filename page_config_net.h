@@ -1,59 +1,40 @@
-#ifndef PAGE_CONFIG_NET_H
-#define PAGE_CONFIG_NET_H
+#ifndef PAGE_CONFIG_NET_H_
+#define PAGE_CONFIG_NET_H_
 
-const char PAGE_CONFIG_NET[] PROGMEM = R"=====(
-<a href="/" class="btn btn--s">&lt;</a>&nbsp;&nbsp;<strong>Network Configuration</strong> <hr> Connect to Router with these settings:<br> <form action=""> <table border="0" cellspacing="0" cellpadding="3" style="width:360px"> <tr><td align="right">SSID :</td><td><input id="ssid" name="ssid" value=""></td></tr> <tr><td align="right">Password :</td><td><input id="password" name="password" value=""></td></tr> <tr><td align="right">DHCP :</td><td><input type="checkbox" id="dhcp" name="dhcp"></td></tr> <tr><td align="right">IP :</td><td><input id="ip_0" name="ip_0" size="3">.<input id="ip_1" name="ip_1" size="3">.<input id="ip_2" name="ip_2" size="3">.<input id="ip_3" name="ip_3" value="" size="3"></td></tr> <tr><td align="right">Netmask :</td><td><input id="nm_0" name="nm_0" size="3">.<input id="nm_1" name="nm_1" size="3">.<input id="nm_2" name="nm_2" size="3">.<input id="nm_3" name="nm_3" size="3"></td></tr> <tr><td align="right">Gateway :</td><td><input id="gw_0" name="gw_0" size="3">.<input id="gw_1" name="gw_1" size="3">.<input id="gw_2" name="gw_2" size="3">.<input id="gw_3" name="gw_3" size="3"></td></tr> <tr><td align="right">Multicast :</td><td><input type="checkbox" id="multicast" name="multicast"></td></tr> <tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Save"></td></tr> </table> </form> <hr> <strong>Connection State:</strong><div id="connectionstate">N/A</div> <hr> <strong>Networks:</strong><br> <table border="0" cellspacing="3" style="width:310px"> <tr><td><div id="networks">Scanning...</div></td></tr> <tr><td align="center"><a href="javascript:GetState()" style="width:150px" class="btn btn--m btn--blue">Refresh</a></td></tr> </table> <script>function GetState(){setValues("/config/connectionstate")}function selssid(e){document.getElementById("ssid").value=e}setValues("/config/netvals"),setTimeout(GetState,2e3);</script>
-)=====";
-
-/* No source .html for this */
-const char PAGE_RELOAD_NET[] PROGMEM = R"=====(
-<meta http-equiv="refresh" content="2; url=/config/net.html">
-<strong>Please Wait....Configuring and Restarting.</strong>
-)=====";
-
-//
-//  SEND HTML PAGE OR IF A FORM SUMBITTED VALUES, PROCESS THESE VALUES
-// 
-
-void send_config_net_html() {
-    if (web.args()) { // Save Settings
+void send_config_net_html(AsyncWebServerRequest *request) {
+    if (request->params()) {
         config.dhcp = false;
         config.multicast = false;
-        for ( uint8_t i = 0; i < web.args(); i++ ) {
-            if (web.argName(i) == "ssid") urldecode(web.arg(i)).toCharArray(config.ssid, sizeof(config.ssid));
-            if (web.argName(i) == "password") urldecode(web.arg(i)).toCharArray(config.passphrase, sizeof(config.passphrase));
-            if (web.argName(i) == "ip_0") if (checkRange(web.arg(i))) config.ip[0] = web.arg(i).toInt();
-            if (web.argName(i) == "ip_1") if (checkRange(web.arg(i))) config.ip[1] = web.arg(i).toInt();
-            if (web.argName(i) == "ip_2") if (checkRange(web.arg(i))) config.ip[2] = web.arg(i).toInt();
-            if (web.argName(i) == "ip_3") if (checkRange(web.arg(i))) config.ip[3] = web.arg(i).toInt();
-            if (web.argName(i) == "nm_0") if (checkRange(web.arg(i))) config.netmask[0] = web.arg(i).toInt();
-            if (web.argName(i) == "nm_1") if (checkRange(web.arg(i))) config.netmask[1] = web.arg(i).toInt();
-            if (web.argName(i) == "nm_2") if (checkRange(web.arg(i))) config.netmask[2] = web.arg(i).toInt();
-            if (web.argName(i) == "nm_3") if (checkRange(web.arg(i))) config.netmask[3] = web.arg(i).toInt();
-            if (web.argName(i) == "gw_0") if (checkRange(web.arg(i))) config.gateway[0] = web.arg(i).toInt();
-            if (web.argName(i) == "gw_1") if (checkRange(web.arg(i))) config.gateway[1] = web.arg(i).toInt();
-            if (web.argName(i) == "gw_2") if (checkRange(web.arg(i))) config.gateway[2] = web.arg(i).toInt();
-            if (web.argName(i) == "gw_3") if (checkRange(web.arg(i))) config.gateway[3] = web.arg(i).toInt();
-            if (web.argName(i) == "dhcp") config.dhcp = true;
-            if (web.argName(i) == "multicast") config.multicast = true;
+        for ( uint8_t i = 0; i < request->params(); i++ ) {
+            AsyncWebParameter *p = request->getParam(i);
+            if (p->name() == "ssid") urldecode(p->value()).toCharArray(config.ssid, sizeof(config.ssid));
+            if (p->name() == "password") urldecode(p->value()).toCharArray(config.passphrase, sizeof(config.passphrase));
+            if (p->name() == "ip_0") if (checkRange(p->value())) config.ip[0] = p->value().toInt();
+            if (p->name() == "ip_1") if (checkRange(p->value())) config.ip[1] = p->value().toInt();
+            if (p->name() == "ip_2") if (checkRange(p->value())) config.ip[2] = p->value().toInt();
+            if (p->name() == "ip_3") if (checkRange(p->value())) config.ip[3] = p->value().toInt();
+            if (p->name() == "nm_0") if (checkRange(p->value())) config.netmask[0] = p->value().toInt();
+            if (p->name() == "nm_1") if (checkRange(p->value())) config.netmask[1] = p->value().toInt();
+            if (p->name() == "nm_2") if (checkRange(p->value())) config.netmask[2] = p->value().toInt();
+            if (p->name() == "nm_3") if (checkRange(p->value())) config.netmask[3] = p->value().toInt();
+            if (p->name() == "gw_0") if (checkRange(p->value())) config.gateway[0] = p->value().toInt();
+            if (p->name() == "gw_1") if (checkRange(p->value())) config.gateway[1] = p->value().toInt();
+            if (p->name() == "gw_2") if (checkRange(p->value())) config.gateway[2] = p->value().toInt();
+            if (p->name() == "gw_3") if (checkRange(p->value())) config.gateway[3] = p->value().toInt();
+            if (p->name() == "dhcp") config.dhcp = true;
+            if (p->name() == "multicast") config.multicast = true;
         }
         saveConfig();
-        delay(500);
-        sendPage(PAGE_ADMIN_REBOOT, sizeof(PAGE_ADMIN_REBOOT), PTYPE_HTML);
-        ESP.restart(); 
 
-//        sendPage(PAGE_RELOAD_NET, sizeof(PAGE_RELOAD_NET), PTYPE_HTML);
-//        ESP.restart();
+        request->send(200, "text/html", 
+                R"=====(<meta http-equiv="refresh" content="2; url=/"><strong>Rebooting...</strong>)=====");
+        reboot = true;
     } else {
-        sendPage(PAGE_CONFIG_NET, sizeof(PAGE_CONFIG_NET), PTYPE_HTML);
+        request->send(400);
     }
 }
 
-//
-//   FILL THE PAGE WITH VALUES
-//
-
-void send_config_net_vals() {
+void send_config_net_vals(AsyncWebServerRequest *request) {
     String values ="";
     values += "ssid|input|" + String((char*)config.ssid) + "\n";
     values += "password|input|" + String((char*)config.passphrase) + "\n";
@@ -72,14 +53,14 @@ void send_config_net_vals() {
     values += "dhcp|chk|" + (String)(config.dhcp ? "checked" : "") + "\n";
     values += "multicast|chk|" + (String)(config.multicast ? "checked" : "") + "\n";
     values += "title|div|" + (String)config.name + " - Net Config\n";
-    web.send(200, PTYPE_PLAIN, values);
+    request->send(200, "text/plain", values);
 }
 
 
 //
 //   FILL THE PAGE WITH NETWORKSTATE & NETWORKS
 //
-void send_connection_state_vals() {
+void send_connection_state_vals(AsyncWebServerRequest *request) {
     String state = "N/A";
     String Networks = "";
     if (WiFi.status() == 0) state = "Idle";
@@ -93,17 +74,17 @@ void send_connection_state_vals() {
      int n = WiFi.scanNetworks();
 
      if (n == 0) {
-         Networks = "<font color='#FF0000'>No networks found!</font>";
+        Networks = "<font color='#FF0000'>No networks found!</font>";
      } else {
         Networks = "Found " +String(n) + " Networks<br>";
         Networks += "<table border='0' cellspacing='0' cellpadding='3'>";
         Networks += "<tr bgcolor='#DDDDDD' ><td><strong>Name</strong></td><td><strong>Quality</strong></td><td><strong>Enc</strong></td><tr>";
         for (int i = 0; i < n; ++i) {
-            int quality=0;
-            if(WiFi.RSSI(i) <= -100) {
-                    quality = 0;
-            } else if(WiFi.RSSI(i) >= -50) {
-                    quality = 100;
+            int quality = 0;
+            if (WiFi.RSSI(i) <= -100) {
+                quality = 0;
+            } else if (WiFi.RSSI(i) >= -50) {
+                quality = 100;
             } else {
                 quality = 2 * (WiFi.RSSI(i) + 100);
             }
@@ -111,11 +92,11 @@ void send_connection_state_vals() {
         }
         Networks += "</table>";
     }
-   
+
     String values = "";
     values += "connectionstate|div|" + state + "\n";
     values += "networks|div|" + Networks + "\n";
-    web.send(200, PTYPE_PLAIN, values);
+    request->send(200, "text/plain", values);
 }
 
-#endif
+#endif /* PAGE_CONFIG_NET_H_ */

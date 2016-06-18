@@ -1,3 +1,6 @@
+<title id="title"></title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" type="text/css" href="style.css">
 <a href="/" class="btn btn--s">&lt;</a>&nbsp;&nbsp;<strong>Network Status</strong>
 <hr>
 <table border="0" cellspacing="0" cellpadding="3" style="width:310px">
@@ -9,6 +12,7 @@
 <tr><td align="right">RSSI :</td><td><span id="x_rssi"></span>dBm / <span id="x_quality"></span>%</td></tr>
 <tr><td colspan="2" align="center"><a href="javascript:GetState()" class="btn btn--m btn--blue">Refresh</a></td></tr>
 </table>
+<script type="text/javascript" src="script.js"></script>
 <script>
 	setTimeout(GetState,1000);
 	function GetState()	{

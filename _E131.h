@@ -17,26 +17,26 @@
 *
 */
 
-#ifndef _E131_h
-#define _E131_h
+#ifndef _E131_H_
+#define _E131_H_
 
 #include "Arduino.h"
 #include "util.h"
 
 /* Network interface detection.  WiFi for ESP8266 and Ethernet for AVR */
-#if defined (ARDUINO_ARCH_ESP8266) 
+#if defined (ARDUINO_ARCH_ESP8266)
 #   include <ESP8266WiFi.h>
 #   include <ESP8266WiFiMulti.h>
 #   include <WiFiUdp.h>
-#	define _UDP WiFiUDP
-#	define INT_ESP8266
-#	define INT_WIFI
+#   define _UDP WiFiUDP
+#   define INT_ESP8266
+#   define INT_WIFI
 #elif defined (ARDUINO_ARCH_AVR)
-#	include <Ethernet.h>
+#   include <Ethernet.h>
 #   include <EthernetUdp.h>
-#	include <avr/pgmspace.h>
-#	define _UDP EthernetUDP
-#	define INT_ETHERNET
+#   include <avr/pgmspace.h>
+#   define _UDP EthernetUDP
+#   define INT_ETHERNET
 #   define NO_DOUBLE_BUFFER
 #endif
 
@@ -75,7 +75,7 @@ typedef union {
         /* Root Layer */
         uint16_t preamble_size;
         uint16_t postamble_size;
-        uint8_t	 acn_id[12];
+        uint8_t  acn_id[12];
         uint16_t root_flength;
         uint32_t root_vector;
         uint8_t  cid[16];
@@ -122,126 +122,129 @@ typedef enum {
 
 /* E1.31 Listener Types */
 typedef enum {
-	E131_UNICAST,
-	E131_MULTICAST
+    E131_UNICAST,
+    E131_MULTICAST
 } e131_listen_t;
 
 class E131 {
-	private:
-        /* Constants for packet validation */
-        static const uint8_t ACN_ID[];
-        static const uint32_t VECTOR_ROOT = 4;
-        static const uint32_t VECTOR_FRAME = 2;
-        static const uint8_t VECTOR_DMP = 2;
-        
-        e131_packet_t pbuff1;   /* Packet buffer */
+ private:
+    /* Constants for packet validation */
+    static const uint8_t ACN_ID[];
+    static const uint32_t VECTOR_ROOT = 4;
+    static const uint32_t VECTOR_FRAME = 2;
+    static const uint8_t VECTOR_DMP = 2;
+
+    e131_packet_t pbuff1;   /* Packet buffer */
 #ifndef NO_DOUBLE_BUFFER
-        e131_packet_t pbuff2;   /* Double buffer */
+    e131_packet_t pbuff2;   /* Double buffer */
 #endif
-        e131_packet_t *pwbuff;  /* Pointer to working packet buffer */
-        uint8_t       sequence; /* Sequence tracker */
-        _UDP udp;               /* UDP handle */
+    e131_packet_t *pwbuff;  /* Pointer to working packet buffer */
+    uint8_t       sequence; /* Sequence tracker */
+    _UDP udp;               /* UDP handle */
 
-        /* Internal Initializers */
-        int initWiFi(const char *ssid, const char *passphrase);
-        int initEthernet(uint8_t *mac, IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns);
-        void initUnicast();
-        void initMulticast(uint16_t universe);
+    /* Internal Initializers */
+    int initWiFi(const char *ssid, const char *passphrase);
+    int initEthernet(uint8_t *mac, IPAddress ip, IPAddress netmask,
+            IPAddress gateway, IPAddress dns);
+    void initUnicast();
+    void initMulticast(uint16_t universe);
 
-	public:
-        uint8_t       *data;                /* Pointer to DMX channel data */
-        uint16_t      universe;             /* DMX Universe of last valid packet */
-        e131_packet_t *packet;              /* Pointer to last valid packet */
-        e131_stats_t  stats;                /* Statistics tracker */
+ public:
+    uint8_t       *data;                /* Pointer to DMX channel data */
+    uint16_t      universe;             /* DMX Universe of last valid packet */
+    e131_packet_t *packet;              /* Pointer to last valid packet */
+    e131_stats_t  stats;                /* Statistics tracker */
 
-        E131();
+    E131();
 
-        /* Generic UDP listener, no physical or IP configuration */
-    	void begin(e131_listen_t type, uint16_t universe = 1);
+    /* Generic UDP listener, no physical or IP configuration */
+    void begin(e131_listen_t type, uint16_t universe = 1);
 
 /****** START - Wireless ifdef block ******/
 #if defined (INT_WIFI) || defined (INT_ESP8266)
-        /* Unicast WiFi Initializers */
-        int begin(const char *ssid, const char *passphrase);
-        int begin(const char *ssid, const char *passphrase,
-                IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns);
+    /* Unicast WiFi Initializers */
+    int begin(const char *ssid, const char *passphrase);
+    int begin(const char *ssid, const char *passphrase,
+            IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns);
 #endif
 /****** END - Wireless ifdef block ******/
 
 /****** START - ESP8266 ifdef block ******/
 #if defined (INT_ESP8266)
-        /* Multicast WiFi Initializers  -- ESP8266 Only */
-        int beginMulticast(const char *ssid, const char *passphrase, uint16_t universe);
-        int beginMulticast(const char *ssid, const char *passphrase, uint16_t universe, 
-                IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns);
+    /* Multicast WiFi Initializers  -- ESP8266 Only */
+    int beginMulticast(const char *ssid, const char *passphrase,
+            uint16_t universe);
+    int beginMulticast(const char *ssid, const char *passphrase,
+            uint16_t universe, IPAddress ip, IPAddress netmask,
+            IPAddress gateway, IPAddress dns);
 #endif
 /****** END - ESP8266 ifdef block ******/
 
 /****** START - Ethernet ifdef block ******/
-#if defined (INT_ETHERNET)		
-        /* Unicast Ethernet Initializers */
-        int begin(uint8_t *mac);
-        void begin(uint8_t *mac,
-                IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns);
+#if defined (INT_ETHERNET)
+    /* Unicast Ethernet Initializers */
+    int begin(uint8_t *mac);
+    void begin(uint8_t *mac,
+            IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns);
 
-        /* Multicast Ethernet Initializers */
-        int beginMulticast(uint8_t *mac, uint16_t universe);
-        void beginMulticast(uint8_t *mac, uint16_t universe,
-                IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns);
+    /* Multicast Ethernet Initializers */
+    int beginMulticast(uint8_t *mac, uint16_t universe);
+    void beginMulticast(uint8_t *mac, uint16_t universe,
+            IPAddress ip, IPAddress netmask, IPAddress gateway, IPAddress dns);
 #endif
 /****** END - Ethernet ifdef block ******/
 
-        /* Diag functions */
-        void dumpError(e131_error_t error);
+    /* Diag functions */
+    void dumpError(e131_error_t error);
 
-        /* Main packet parser */
-        inline uint16_t parsePacket() {
-            e131_error_t error;
-            uint16_t retval = 0;
+    /* Main packet parser */
+    inline uint16_t parsePacket() {
+        e131_error_t error;
+        uint16_t retval = 0;
 
-            int size = udp.parsePacket();
-            if (size) {
-                udp.readBytes(pwbuff->raw, size);
-                error = validate();
-                if (!error) {
+        int size = udp.parsePacket();
+        if (size) {
+            udp.readBytes(pwbuff->raw, size);
+            error = validate();
+            if (!error) {
 #ifndef NO_DOUBLE_BUFFER
-                    e131_packet_t *swap = packet;
-                    packet = pwbuff;
-                    pwbuff = swap;
+                e131_packet_t *swap = packet;
+                packet = pwbuff;
+                pwbuff = swap;
 #endif
-                    universe = htons(packet->universe);
-                    data = packet->property_values + 1;
-                    retval = htons(packet->property_value_count) - 1;
-                    if (packet->sequence_number != sequence++) {
-                        stats.sequence_errors++;
-                        sequence = packet->sequence_number + 1;
-                    }
-                    stats.num_packets++;
-                } else {
-                    if (Serial)
-                        dumpError(error);
-                    stats.packet_errors++;
+                universe = htons(packet->universe);
+                data = packet->property_values + 1;
+                retval = htons(packet->property_value_count) - 1;
+                if (packet->sequence_number != sequence++) {
+                    stats.sequence_errors++;
+                    sequence = packet->sequence_number + 1;
                 }
+                stats.num_packets++;
+            } else {
+                if (Serial)
+                    dumpError(error);
+                stats.packet_errors++;
             }
-            return retval;
         }
+        return retval;
+    }
 
-        /* Packet validater */
-        inline e131_error_t validate() {
+    /* Packet validater */
+    inline e131_error_t validate() {
 #ifdef ARDUINO_ARCH_AVR
-            if (memcmp_P(pwbuff->acn_id, ACN_ID, sizeof(pwbuff->acn_id)))
+        if (memcmp_P(pwbuff->acn_id, ACN_ID, sizeof(pwbuff->acn_id)))
 #else
-            if (memcmp(pwbuff->acn_id, ACN_ID, sizeof(pwbuff->acn_id)))
+        if (memcmp(pwbuff->acn_id, ACN_ID, sizeof(pwbuff->acn_id)))
 #endif
-                return ERROR_ACN_ID;
-            if (htonl(pwbuff->root_vector) != VECTOR_ROOT)
-                return ERROR_VECTOR_ROOT;
-            if (htonl(pwbuff->frame_vector) != VECTOR_FRAME)
-                return ERROR_VECTOR_FRAME;
-            if (pwbuff->dmp_vector != VECTOR_DMP)
-                return ERROR_VECTOR_DMP;
-            return ERROR_NONE;
-        }
+            return ERROR_ACN_ID;
+        if (htonl(pwbuff->root_vector) != VECTOR_ROOT)
+            return ERROR_VECTOR_ROOT;
+        if (htonl(pwbuff->frame_vector) != VECTOR_FRAME)
+            return ERROR_VECTOR_FRAME;
+        if (pwbuff->dmp_vector != VECTOR_DMP)
+            return ERROR_VECTOR_DMP;
+        return ERROR_NONE;
+    }
 };
 
-#endif
+#endif /* _E131_H_ */

@@ -86,7 +86,7 @@ void ICACHE_RAM_ATTR doGECE(uint8_t pin, uint32_t packet) {
 		GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, pinMask);        	// Set high
 		if (!(mask >>= 1)) break;		
 	}
-	while((_getCycleCount() - startTime) < period);             // Wait for last bit
+	while ((_getCycleCount() - startTime) < period);            // Wait for last bit
 	GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, pinMask);             // Set low
     resetDelay = micros();
 }

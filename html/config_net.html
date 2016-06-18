@@ -1,7 +1,10 @@
+<title id="title"></title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" type="text/css" href="style.css">
 <a href="/"  class="btn btn--s">&lt;</a>&nbsp;&nbsp;<strong>Network Configuration</strong>
 <hr>
 Connect to Router with these settings:<br>
-<form action="" method="get">
+<form action="" method="post">
 <table border="0" cellspacing="0" cellpadding="3" style="width:360px">
 <tr><td align="right">SSID :</td><td><input type="text" id="ssid" name="ssid" value=""></td></tr>
 <tr><td align="right">Password :</td><td><input type="text" id="password" name="password" value=""></td></tr>
@@ -21,6 +24,7 @@ Connect to Router with these settings:<br>
 <tr><td><div id="networks">Scanning...</div></td></tr>
 <tr><td align="center"><a href="javascript:GetState()" style="width:150px" class="btn btn--m btn--blue">Refresh</a></td></tr>
 </table>
+<script type="text/javascript" src="script.js"></script>
 <script>
 setValues("/config/netvals");
 setTimeout(GetState,2000);

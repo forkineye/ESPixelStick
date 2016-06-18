@@ -17,10 +17,10 @@
 *
 */
 
-#ifndef ESPIXELDRIVER_H
-#define ESPIXELDRIVER_H
+#ifndef ESPIXELDRIVER_H_
+#define ESPIXELDRIVER_H_
 
-#define UART_INV_MASK  (0x3f<<19)
+#define UART_INV_MASK  (0x3f << 19)
 #define UART 1
 
 /* Gamma correction table until pow() is fixed */
@@ -84,42 +84,42 @@ typedef enum {
 } color_t;
 
 class ESPixelDriver {
-    public:
-        int begin();
-        int begin(pixel_t type);
-        int begin(pixel_t type, color_t color);
-        void setPin(uint8_t pin);
-        void setGamma(float gamma);
-        void updateLength(uint16_t length);
-        void updateOrder(color_t color);
-        void setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b);
-        void show();
+ public:
+    int begin();
+    int begin(pixel_t type);
+    int begin(pixel_t type, color_t color);
+    void setPin(uint8_t pin);
+    void setGamma(float gamma);
+    void updateLength(uint16_t length);
+    void updateOrder(color_t color);
+    void setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b);
+    void show();
 
-        /* 50us reset for WS2811 */
-        inline bool canShow_WS2811(void) {
-            return (micros() - endTime) >= WS2811_TIDLE;
-        }
+    /* 50us reset for WS2811 */
+    inline bool canShow_WS2811(void) {
+        return (micros() - endTime) >= WS2811_TIDLE;
+    }
 
-    private:
-        pixel_t		type;		// Pixel type
-        color_t		color;		// Color Order
-        uint8_t		pin;		// Pin for bit-banging
-        uint8_t		*pixdata;	// Pixel buffer
-        uint16_t	numPixels;	// Number of pixels
-        uint16_t	szBuffer;	// Size of Pixel buffer
-        uint8_t		rOffset;	// Index of red byte
-        uint8_t		gOffset;	// Index of red byte
-        uint8_t		bOffset;	// Index of red byte
-        uint32_t    endTime;    // Reset tracker
-        boolean     gamma;      // Gamma correction flag
-        
-        void ws2811_init();
-        void gece_init();
+ private:
+    pixel_t     type;       // Pixel type
+    color_t     color;      // Color Order
+    uint8_t     pin;        // Pin for bit-banging
+    uint8_t     *pixdata;   // Pixel buffer
+    uint16_t    numPixels;  // Number of pixels
+    uint16_t    szBuffer;   // Size of Pixel buffer
+    uint8_t     rOffset;    // Index of red byte
+    uint8_t     gOffset;    // Index of red byte
+    uint8_t     bOffset;    // Index of red byte
+    uint32_t    endTime;    // Reset tracker
+    boolean     gamma;      // Gamma correction flag
 
-        /* Drop the update if our refresh rate is too high */
-        inline bool canRefresh(uint32_t frame, uint32_t idle) { 
-            return (micros() - endTime) >= (frame * numPixels + idle);
-        }
+    void ws2811_init();
+    void gece_init();
+
+    /* Drop the update if our refresh rate is too high */
+    inline bool canRefresh(uint32_t frame, uint32_t idle) {
+        return (micros() - endTime) >= (frame * numPixels + idle);
+    }
 };
 
-#endif
+#endif /* ESPIXELDRIVER_H_ */

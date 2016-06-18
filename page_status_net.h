@@ -1,25 +1,17 @@
-#ifndef PAGE_STATUS_NET_H
-#define PAGE_STATUS_NET_H
+#ifndef PAGE_STATUS_NET_H_
+#define PAGE_STATUS_NET_H_
 
-const char PAGE_STATUS_NET[] PROGMEM = R"=====(
-<a href="/" class="btn btn--s">&lt;</a>&nbsp;&nbsp;<strong>Network Status</strong> <hr> <table border="0" cellspacing="0" cellpadding="3" style="width:310px"> <tr><td align="right">SSID :</td><td><span id="x_ssid"></span></td></tr> <tr><td align="right">IP :</td><td><span id="x_ip"></span></td></tr> <tr><td align="right">Netmask :</td><td><span id="x_netmask"></span></td></tr> <tr><td align="right">Gateway :</td><td><span id="x_gateway"></span></td></tr> <tr><td align="right">Mac :</td><td><span id="x_mac"></span></td></tr> <tr><td align="right">RSSI :</td><td><span id="x_rssi"></span>dBm / <span id="x_quality"></span>%</td></tr> <tr><td colspan="2" align="center"><a href="javascript:GetState()" class="btn btn--m btn--blue">Refresh</a></td></tr> </table> <script>function GetState(){setValues("/status/netvals")}setTimeout(GetState,1e3);</script>
-)=====" ;
-
-//
-// FILL WITH INFOMATION
-// 
-
-void send_status_net_vals() {
+void send_status_net_vals(AsyncWebServerRequest *request) {
     int quality = 0;
     long rssi = WiFi.RSSI();
-    
+
     if (rssi <= -100)
         quality = 0;
     else if (rssi >= -50)
         quality = 100;
     else
         quality = 2 * (rssi + 100);
-    
+
     String values = "";
     values += "x_ssid|div|" + (String)WiFi.SSID() + "\n";
     values += "x_ip|div|" + (String)WiFi.localIP()[0] + "." + (String)WiFi.localIP()[1] + "." + (String)WiFi.localIP()[2] + "." + (String)WiFi.localIP()[3] + "\n";
@@ -29,7 +21,7 @@ void send_status_net_vals() {
     values += "x_rssi|div|" + (String)rssi + "\n";
     values += "x_quality|div|" + (String)quality + "\n";
     values += "title|div|" + (String)config.name + " - Net Status\n";
-    web.send(200, PTYPE_PLAIN, values);
+    request->send(200, "text/plain", values);
 }
 
-#endif
+#endif /* PAGE_STATUS_NET_H_ */

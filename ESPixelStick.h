@@ -17,14 +17,14 @@
 *
 */
 
-#ifndef ESPIXELSTICK_H
-#define ESPIXELSTICK_H
+#ifndef ESPIXELSTICK_H_
+#define ESPIXELSTICK_H_
 
 #include "ESPixelDriver.h"
 #include "_E131.h"
 
 /* Name and version */
-const char VERSION[] = "1.4";
+const char VERSION[] = "1.5 beta";
 
 #define HTTP_PORT       80      /* Default web server port */
 #define DATA_PIN        2       /* Pixel output - GPIO2 */
@@ -34,6 +34,7 @@ const char VERSION[] = "1.4";
 #define PIXEL_LIMIT     1360    /* Total pixel limit - 40.85ms for 8 universes */
 #define E131_TIMEOUT    1000    /* Force refresh every second an E1.31 packet is not seen */
 #define CONNECT_TIMEOUT 10000   /* 10 seconds */
+#define REBOOT_DELAY    100     /* Delay for rebooting once reboot flag is set */
 
 /* Configuration ID and Version */
 #define CONFIG_VERSION 4
@@ -54,7 +55,7 @@ typedef struct {
 
     /* general config */
     char        name[32];       /* Device Name */
-    ESP_mode_t		mode;						/* Global Output Mode */
+    ESP_mode_t  mode;           /* Global Output Mode */
 
     /* network config */
     char        ssid[32];       /* 31 bytes max - null terminated */
@@ -73,20 +74,20 @@ typedef struct {
     pixel_t     pixel_type;     /* Pixel type */
     color_t     pixel_color;    /* Pixel color order */
     uint8_t     ppu;            /* Pixels per Universe boundary - Max PIXELS_MAX (Default 170) */
-		
+
     /* serial config */
-    uint16_t	channel_count;		  /* Number of channels */
-    serial_t	serial_type;				/* Type of Serial Output */
-    uint32_t	serial_baud;				/* Baudrate of Serial Port */
-		
+    uint16_t    channel_count;  /* Number of channels */
+    serial_t    serial_type;    /* Type of Serial Output */
+    uint32_t    serial_baud;    /* Baudrate of Serial Port */
 } __attribute__((packed)) config_t;
 
 /* Globals */
 E131                e131;
-ESP8266WebServer    web(HTTP_PORT);
+AsyncWebServer      web(HTTP_PORT);
 config_t            config;
 uint32_t            *seqError;      /* Sequence error tracking for each universe */
 uint16_t            uniLast = 1;    /* Last Universe to listen for */
+boolean             reboot = false; /* Flag to reboot the ESP */
 
 const char PTYPE_HTML[] = "text/html";
 const char PTYPE_PLAIN[] = "text/plain";
@@ -96,4 +97,4 @@ void updatePixelConfig();
 void updateSerialConfig();
 void sendPage(const char *data, int count, const char *type);
 
-#endif
+#endif /* ESPIXELSTICK_H_ */

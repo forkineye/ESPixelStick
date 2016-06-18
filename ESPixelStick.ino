@@ -21,7 +21,8 @@
 */
 
 #include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
 #include <ESP8266mDNS.h>
 #include <EEPROM.h>
 #include "ESPixelDriver.h"
@@ -67,8 +68,8 @@ const char passphrase[] = "PASSWORD_NOT_SET";   /* Replace with your WPA2 passph
 /*       END - User Configuration Defaults       */
 /*************************************************/
 
-ESPixelDriver	pixels;         /* Pixel object */
-ESerialDriver serial; 				/*serial object */
+ESPixelDriver   pixels;         /* Pixel object */
+ESerialDriver   serial;         /* Serial object */
 uint8_t         *seqTracker;    /* Current sequence numbers for each Universe */
 uint32_t        lastPacket;     /* Packet timeout tracker */
 
@@ -81,6 +82,9 @@ void setup() {
     /* Initial pin states */
     pinMode(DATA_PIN, OUTPUT);
     digitalWrite(DATA_PIN, LOW);
+
+    /* Enable SPIFFS */
+    SPIFFS.begin();
     
     Serial.begin(115200);
     delay(10);
@@ -108,7 +112,7 @@ void setup() {
     /* If we fail again, go SoftAP */
     if (status != WL_CONNECTED) {
         Serial.println(F("**** FAILED TO ASSOCIATE WITH AP, GOING SOFTAP ****"));
-				WiFi.mode(WIFI_AP);
+        WiFi.mode(WIFI_AP);
         String ssid = "ESPixel " + (String)ESP.getChipId();
         WiFi.softAP(ssid.c_str());
         //ESP.restart();
@@ -127,19 +131,16 @@ void setup() {
 */    
 
     /* Configure our outputs and pixels */
-    switch(config.mode){
-      case MODE_PIXEL:
-        pixels.setPin(DATA_PIN);    /* For protocols that require bit-banging */
-        updatePixelConfig();
-        pixels.show();
-      break;
-      case MODE_SERIAL:
-        serial.begin(&Serial, config.serial_type, config.channel_count, config.serial_baud);
-
-      break;
-      
-    };
-   
+    switch(config.mode) {
+        case MODE_PIXEL:
+            pixels.setPin(DATA_PIN);    /* For protocols that require bit-banging */
+            updatePixelConfig();
+            pixels.show();
+            break;
+        case MODE_SERIAL:
+            serial.begin(&Serial, config.serial_type, config.channel_count, config.serial_baud);
+            break;
+    }
 }
 
 int initWifi() {
@@ -193,62 +194,45 @@ int initWifi() {
     return WiFi.status();
 }
 
-/* Read a page from PROGMEM and send it */
-void sendPage(const char *data, int count, const char *type) {
-    int szHeader = sizeof(PAGE_HEADER);
-    char *buffer = (char*)malloc(count + szHeader);
-    if (buffer) {
-        memcpy_P(buffer, PAGE_HEADER, szHeader);
-        memcpy_P(buffer + szHeader - 1, data, count);   /* back up over the null byte from the header string */
-        web.send(200, type, buffer);
-        free(buffer);
-    } else {
-        Serial.print(F("*** Malloc failed for "));
-        Serial.print(count);
-        Serial.println(F(" bytes in sendPage() ***"));
-    }
-}
-
 /* Configure and start the web server */
 void initWeb() {
-    
-    /* Mode Specific Pages */
-    switch(config.mode){
-      case MODE_PIXEL:
-        //HTML
-        web.on("/", []() { sendPage(PAGE_ROOT_PIXEL, sizeof(PAGE_ROOT_PIXEL), PTYPE_HTML); });
-        web.on("/config/pixel.html", send_config_pixel_html);
-        //AJAX
-        web.on("/config/pixelvals", send_config_pixel_vals);
-      break;
-      case MODE_SERIAL:
-        //HTML
-        web.on("/", []() { sendPage(PAGE_ROOT_SERIAL, sizeof(PAGE_ROOT_SERIAL), PTYPE_HTML); });
-        web.on("/config/serial.html", send_config_serial_html);
-        //AJAX
-        web.on("/config/serialvals", send_config_serial_vals);
-      break;
-    };
-		
-		/*Common Pages */
-		/* HTML Pages */
-    web.on("/admin.html", send_admin_html);
-    web.on("/config/net.html", send_config_net_html);
-    web.on("/status/net.html", []() { sendPage(PAGE_STATUS_NET, sizeof(PAGE_STATUS_NET), PTYPE_HTML); });
-    web.on("/status/e131.html", []() { sendPage(PAGE_STATUS_E131, sizeof(PAGE_STATUS_E131), PTYPE_HTML); });
+    /* Heap status handler */
+    web.on("/heap", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/plain", String(ESP.getFreeHeap()));
+    });
 
+    //TODO: Add reboot handler
+
+/*
+    web.on("/reboot", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/html", 
+                R"=====(<meta http-equiv="refresh" content="2; url=/"><strong>Rebooting...</strong>)=====");
+        ESP.restart();
+    });
+*/
     /* AJAX Handlers */
-    web.on("/rootvals", send_root_vals);
-    web.on("/adminvals", send_admin_vals);
-    web.on("/config/netvals", send_config_net_vals);
-    web.on("/config/connectionstate", send_connection_state_vals);
-    web.on("/status/netvals", send_status_net_vals);
-    web.on("/status/e131vals", send_status_e131_vals);
+    web.on("/rootvals", HTTP_GET, send_root_vals);
+    web.on("/adminvals", HTTP_GET, send_admin_vals);
+    web.on("/config/netvals", HTTP_GET, send_config_net_vals);
+    web.on("/config/connectionstate", HTTP_GET, send_connection_state_vals);
+    web.on("/config/pixelvals", HTTP_GET, send_config_pixel_vals);
+    web.on("/config/serialvals", HTTP_GET, send_config_serial_vals);
+    web.on("/status/netvals", HTTP_GET, send_status_net_vals);
+    web.on("/status/e131vals", HTTP_GET, send_status_e131_vals);
 
-    /* Admin Handlers */
-    web.on("/reboot", []() { sendPage(PAGE_ADMIN_REBOOT, sizeof(PAGE_ADMIN_REBOOT), PTYPE_HTML); ESP.restart(); });
+    /* POST Handlers */
+    web.on("/admin.html", HTTP_POST, send_admin_html);
+    web.on("/config_net.html", HTTP_POST, send_config_net_html);
+    web.on("/config_pixel.html", HTTP_POST, send_config_pixel_html);
+    web.on("/config_serial.html", HTTP_POST, send_config_serial_html);
 
-    web.onNotFound([]() { web.send(404, PTYPE_HTML, "Page not Found"); });
+    /* Static handler */
+    web.serveStatic("/", SPIFFS, "/www/");
+
+    web.onNotFound([](AsyncWebServerRequest *request) {
+        request->send(404);
+    });
+
     web.begin();
 
     Serial.print(F("- Web Server started on port "));
@@ -317,7 +301,7 @@ void updatePixelConfig() {
 
 void updateSerialConfig() {
     /* Validate first */
-		//need serial specific validation settings
+        //need serial specific validation settings
     //validateConfig();
 
     /* Setup the sequence error tracker */
@@ -351,7 +335,7 @@ void initConfig() {
     memcpy_P(config.id, CONFIG_ID, sizeof(config.id));
     config.version = CONFIG_VERSION;
     strncpy(config.name, "ESPixelStick", sizeof(config.name));
-		config.mode = MODE_PIXEL;
+    config.mode = MODE_PIXEL;
     strncpy(config.ssid, ssid, sizeof(config.ssid));
     strncpy(config.passphrase, passphrase, sizeof(config.passphrase));
     config.ip[0] = 0; config.ip[1] = 0; config.ip[2] = 0; config.ip[3] = 0;
@@ -366,9 +350,9 @@ void initConfig() {
     config.pixel_color = COLOR_ORDER;
     config.ppu = PPU;
     config.gamma = GAMMA;
-		config.channel_count=150;
-		config.serial_type=SERIAL_RENARD;
-		config.serial_baud=57600;
+    config.channel_count=150;
+    config.serial_type=SERIAL_RENARD;
+    config.serial_baud=57600;
 }
 
 /* Attempt to load configuration from EEPROM.  Initialize or upgrade as required */
@@ -418,88 +402,84 @@ void saveConfig() {
 
 /* Main Loop */
 void loop() {
-    /* Handle incoming web requests if needed */
-    web.handleClient();
+    /* Reboot handler */
+    if (reboot) {
+        delay(REBOOT_DELAY);
+        ESP.restart();
+    }
 
-		
     /* Configure our outputs and pixels */
-    switch(config.mode){
-    case MODE_PIXEL:
-        /* Parse a packet and update pixels */
-        if(e131.parsePacket()) {
-          if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
-            /* Universe offset and sequence tracking */
-            uint8_t uniOffset = (e131.universe - config.universe);
-            if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
-                seqError[uniOffset]++;
-                seqTracker[uniOffset] = e131.packet->sequence_number + 1;
+    switch(config.mode) {
+        case MODE_PIXEL:
+            /* Parse a packet and update pixels */
+            if(e131.parsePacket()) {
+                if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
+                    /* Universe offset and sequence tracking */
+                    uint8_t uniOffset = (e131.universe - config.universe);
+                    if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
+                        seqError[uniOffset]++;
+                        seqTracker[uniOffset] = e131.packet->sequence_number + 1;
+                    }
+
+                    /* Find out starting pixel based off the Universe */
+                    uint16_t pixelStart = uniOffset * config.ppu;
+
+                    /* Calculate how many pixels we need from this buffer */
+                    uint16_t pixelStop = config.pixel_count;
+                    if ((pixelStart + config.ppu) < pixelStop)
+                        pixelStop = pixelStart + config.ppu;
+
+                    /* Offset the channel if required for the first universe */
+                    uint16_t offset = 0;
+                    if (e131.universe == config.universe)
+                        offset = config.channel_start - 1;
+
+                    /* Set the pixel data */
+                    uint16_t buffloc = 0;
+                    for (int i = pixelStart; i < pixelStop; i++) {
+                        int j = buffloc++ * 3 + offset;
+                        pixels.setPixelColor(i, e131.data[j], e131.data[j+1], e131.data[j+2]);
+                    }
+
+                    /* Refresh when last universe shows up */
+                    if (e131.universe == uniLast) {
+                        lastPacket = millis();
+                        pixels.show();
+                    }
+                }
             }
 
-            /* Find out starting pixel based off the Universe */
-            uint16_t pixelStart = uniOffset * config.ppu;
-
-            /* Calculate how many pixels we need from this buffer */
-            uint16_t pixelStop = config.pixel_count;
-            if ((pixelStart + config.ppu) < pixelStop)
-                pixelStop = pixelStart + config.ppu;
-
-            /* Offset the channel if required for the first universe */
-            uint16_t offset = 0;
-            if (e131.universe == config.universe)
-                offset = config.channel_start - 1;
-
-            /* Set the pixel data */
-            uint16_t buffloc = 0;
-            for (int i = pixelStart; i < pixelStop; i++) {
-                int j = buffloc++ * 3 + offset;
-                pixels.setPixelColor(i, e131.data[j], e131.data[j+1], e131.data[j+2]);
-            }
-
-            /* Refresh when last universe shows up */
-            if (e131.universe == uniLast) {
+            //TODO: Use this for setting defaults states at a later date
+            /* Force refresh every second if there is no data received */
+            if ((millis() - lastPacket) > E131_TIMEOUT) {
                 lastPacket = millis();
                 pixels.show();
-              }
-          }
-      }
-
-      //TODO: Use this for setting defaults states at a later date
-      /* Force refresh every second if there is no data received */
-      if ((millis() - lastPacket) > E131_TIMEOUT) {
-          lastPacket = millis();
-          pixels.show();
-      }
-      break;
-			
-      /* Parse a packet and update serial */
-      case MODE_SERIAL:
-        if(e131.parsePacket()) {
-          if (e131.universe == config.universe) {
-            // Universe offset and sequence tracking 
-           /* uint8_t uniOffset = (e131.universe - config.universe);
-            if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
-              seqError[uniOffset]++;
-              seqTracker[uniOffset] = e131.packet->sequence_number + 1;
             }
+            break;
+            
+        /* Parse a packet and update serial */
+        case MODE_SERIAL:
+            if(e131.parsePacket()) {
+                if (e131.universe == config.universe) {
+                    // Universe offset and sequence tracking 
+                    /* uint8_t uniOffset = (e131.universe - config.universe);
+                    if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
+                        seqError[uniOffset]++;
+                        seqTracker[uniOffset] = e131.packet->sequence_number + 1;
+                    }
+                    */
+                    uint16_t offset = config.channel_start - 1;
 
-            */
-            uint16_t offset = config.channel_start - 1;
+                    // Set the serial data 
+                    serial.startPacket();
+                    for(int i = 0; i<config.channel_count; i++){
+                        serial.setValue(i, e131.data[i + offset]);    
+                    }
 
-            // Set the serial data 
-            serial.startPacket();
-            for(int i = 0; i<config.channel_count; i++){
-              serial.setValue(i, e131.data[i + offset]);	
+                    // Refresh  
+                    serial.show();
+                }
             }
-
-            // Refresh  
-            serial.show();
-          }
-        }
-              
-      break;
-        
-      };
-		
-		
-    
+            break;
+    }
 }

@@ -1,6 +1,9 @@
 
 Changelog
 =========
+### 1.5 (in progress)
+- Migrated to ESPAsyncWebserver for the web server.  The web frontend should now be usable while processing incoming e1.31 traffic.
+
 ### 1.4
 - Arduino 1.6.8 compatibility.
 - Added SoftAP support (credit: Bill Porter)
@@ -21,7 +24,7 @@ Changelog
 - Migration to UART code for handling WS281x streams.
 - Initial GECE support.
 - Support for multiple universes.
-- Pixel per Universe configuration to allow subsets of multiple universes to be used (eases matrix patching Jinx).
+- Pixel per Universe configuration to allow subsets of multiple universes to be used.
 - Removed external library dependencies.
 - Added stream timeout and refresh overflow handling.
 

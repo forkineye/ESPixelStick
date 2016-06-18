@@ -1,5 +1,5 @@
-#ifndef HELPERS_H
-#define HELPERS_H
+#ifndef HELPERS_H_
+#define HELPERS_H_
 
 /* Check if value is between 0 and 255 */
 boolean checkRange(String Value) {
@@ -34,7 +34,7 @@ String urldecode(String input) {
     char c;
     String ret = "";
 
-    for(byte t = 0; t < input.length(); t++) {
+    for (byte t = 0; t < input.length(); t++) {
         c = input[t];
         if (c == '+') c = ' ';
         if (c == '%') {
@@ -48,4 +48,4 @@ String urldecode(String input) {
     return ret;
 }
 
-#endif
+#endif /* HELPERS_H_ */
