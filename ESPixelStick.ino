@@ -32,7 +32,6 @@
 #include "helpers.h"
 
 /* Web pages and handlers */
-#include "page_header.h"
 #include "page_root.h"
 #include "page_admin.h"
 #include "page_config_net.h"
