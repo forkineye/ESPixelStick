@@ -91,6 +91,9 @@ uint16_t            uniLast = 1;    /* Last Universe to listen for */
 const char PTYPE_HTML[] = "text/html";
 const char PTYPE_PLAIN[] = "text/plain";
 
+int initWifi();
+void initWeb();
+void loadConfig();
 void saveConfig();
 void updatePixelConfig();
 void updateSerialConfig();
