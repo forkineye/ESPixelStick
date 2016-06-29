@@ -35,6 +35,11 @@ const char VERSION[] = "1.5 beta";
 #define E131_TIMEOUT    1000    /* Force refresh every second an E1.31 packet is not seen */
 #define CONNECT_TIMEOUT 10000   /* 10 seconds */
 #define REBOOT_DELAY    100     /* Delay for rebooting once reboot flag is set */
+#define LOG_PORT        Serial  /* Serial port for console logging */
+#define SERIAL_PORT     Serial1 /* Serial port for Renard / DMX output */
+
+//#define LOGF(...) LOG_PORT.printf(__VA_ARGS__)  /* Macro for console logging */
+
 
 /* Configuration ID and Version */
 #define CONFIG_VERSION 4

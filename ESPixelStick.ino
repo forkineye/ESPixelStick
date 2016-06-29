@@ -85,14 +85,14 @@ void setup() {
     /* Enable SPIFFS */
     SPIFFS.begin();
     
-    Serial.begin(115200);
+    LOG_PORT.begin(115200);
     delay(10);
 
-    Serial.println("");
-    Serial.print(F("ESPixelStick v"));
+    LOG_PORT.println("");
+    LOG_PORT.print(F("ESPixelStick v"));
     for (uint8_t i = 0; i < strlen_P(VERSION); i++)
-        Serial.print((char)(pgm_read_byte(VERSION + i)));
-    Serial.println("");
+        LOG_PORT.print((char)(pgm_read_byte(VERSION + i)));
+    LOG_PORT.println("");
     
     /* Load configuration from EEPROM */
     EEPROM.begin(sizeof(config));
@@ -101,16 +101,15 @@ void setup() {
     /* Fallback to default SSID and passphrase if we fail to connect */
     int status = initWifi();
     if (status != WL_CONNECTED) {
-        Serial.println(F("*** Timeout - Reverting to default SSID ***"));
+        LOG_PORT.println(F("*** Timeout - Reverting to default SSID ***"));
         strncpy(config.ssid, ssid, sizeof(config.ssid));
         strncpy(config.passphrase, passphrase, sizeof(config.passphrase));
         status = initWifi();
     }
 
-    
     /* If we fail again, go SoftAP */
     if (status != WL_CONNECTED) {
-        Serial.println(F("**** FAILED TO ASSOCIATE WITH AP, GOING SOFTAP ****"));
+        LOG_PORT.println(F("**** FAILED TO ASSOCIATE WITH AP, GOING SOFTAP ****"));
         WiFi.mode(WIFI_AP);
         String ssid = "ESPixel " + (String)ESP.getChipId();
         WiFi.softAP(ssid.c_str());
@@ -125,19 +124,19 @@ void setup() {
         MDNS.addService("e131", "udp", E131_DEF_PORT);
         MDNS.addService("http", "tcp", HTTP_PORT);
     } else {
-        Serial.println(F("** Error setting up MDNS responder **"));
+        LOG_PORT.println(F("** Error setting up MDNS responder **"));
     }
 */    
 
     /* Configure our outputs and pixels */
-    switch(config.mode) {
+    switch (config.mode) {
         case MODE_PIXEL:
             pixels.setPin(DATA_PIN);    /* For protocols that require bit-banging */
             updatePixelConfig();
             pixels.show();
             break;
         case MODE_SERIAL:
-            serial.begin(&Serial, config.serial_type, config.channel_count, config.serial_baud);
+            updateSerialConfig();
             break;
     }
 }
@@ -148,30 +147,27 @@ int initWifi() {
     WiFi.disconnect();
     delay(100);
 
-    Serial.println("");
-    Serial.print(F("Connecting to "));
-    Serial.print(config.ssid);
+    LOG_PORT.println("");
+    LOG_PORT.print(F("Connecting to "));
+    LOG_PORT.print(config.ssid);
     
     WiFi.begin(config.ssid, config.passphrase);
 
     uint32_t timeout = millis();
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
-        if (Serial)
-            Serial.print(".");
+        LOG_PORT.print(".");
         if (millis() - timeout > CONNECT_TIMEOUT) {
-            if (Serial) {
-                Serial.println("");
-                Serial.println(F("*** Failed to connect ***"));
-            }
+            LOG_PORT.println("");
+            LOG_PORT.println(F("*** Failed to connect ***"));
             break;
         }
     }
 
     if (WiFi.status() == WL_CONNECTED) {
-        Serial.println("");
+        LOG_PORT.println("");
         if (config.dhcp) {
-            Serial.print(F("Connected DHCP with IP: "));
+            LOG_PORT.print(F("Connected DHCP with IP: "));
         }  else {
             /* We don't use DNS, so just set it to our gateway */
             WiFi.config(IPAddress(config.ip[0], config.ip[1], config.ip[2], config.ip[3]),
@@ -179,10 +175,10 @@ int initWifi() {
                     IPAddress(config.netmask[0], config.netmask[1], config.netmask[2], config.netmask[3]),
                     IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3])
             );
-            Serial.print(F("Connected with Static IP: "));
+            LOG_PORT.print(F("Connected with Static IP: "));
 
         }
-        Serial.println(WiFi.localIP());
+        LOG_PORT.println(WiFi.localIP());
 
         if (config.multicast)
             e131.begin(E131_MULTICAST, config.universe);
@@ -226,7 +222,10 @@ void initWeb() {
     web.on("/config_serial.html", HTTP_POST, send_config_serial_html);
 
     /* Static handler */
-    web.serveStatic("/", SPIFFS, "/www/");
+    if (config.mode == MODE_SERIAL)
+        web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("serial.html");
+    else
+        web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
 
     web.onNotFound([](AsyncWebServerRequest *request) {
         request->send(404);
@@ -234,8 +233,8 @@ void initWeb() {
 
     web.begin();
 
-    Serial.print(F("- Web Server started on port "));
-    Serial.println(HTTP_PORT);
+    LOG_PORT.print(F("- Web Server started on port "));
+    LOG_PORT.println(HTTP_PORT);
 }
 
 /* Configuration Validations */
@@ -290,12 +289,12 @@ void updatePixelConfig() {
     pixels.begin(config.pixel_type, config.pixel_color);
     pixels.updateLength(config.pixel_count);
     pixels.setGamma(config.gamma);
-    Serial.print(F("- Listening for "));
-    Serial.print(config.pixel_count * 3);
-    Serial.print(F(" channels, from Universe "));
-    Serial.print(config.universe);
-    Serial.print(F(" to "));
-    Serial.println(uniLast);
+    LOG_PORT.print(F("- Listening for "));
+    LOG_PORT.print(config.pixel_count * 3);
+    LOG_PORT.print(F(" channels, from Universe "));
+    LOG_PORT.print(config.universe);
+    LOG_PORT.print(F(" to "));
+    LOG_PORT.println(uniLast);
 }
 
 void updateSerialConfig() {
@@ -318,14 +317,14 @@ void updateSerialConfig() {
     e131.stats.num_packets = 0;
     
     /* Initialize for our serial type */
-    serial.begin(&Serial, config.serial_type, config.channel_count, config.serial_baud);
+    serial.begin(&SERIAL_PORT, config.serial_type, config.channel_count, config.serial_baud);
 
-    Serial.print(F("- Listening for "));
-    Serial.print(config.channel_count);
-    Serial.print(F(" channels, from Universe "));
-    Serial.print(config.universe);
-    Serial.print(F(" to "));
-    Serial.println(uniLast);
+    LOG_PORT.print(F("- Listening for "));
+    LOG_PORT.print(config.channel_count);
+    LOG_PORT.print(F(" channels, from Universe "));
+    LOG_PORT.print(config.universe);
+    LOG_PORT.print(F(" to "));
+    LOG_PORT.println(uniLast);
 }
 
 /* Initialize configuration structure */
@@ -358,7 +357,7 @@ void initConfig() {
 void loadConfig() {
     EEPROM.get(EEPROM_BASE, config);
     if (memcmp_P(config.id, CONFIG_ID, sizeof(config.id))) {
-        Serial.println(F("- No configuration found."));
+        LOG_PORT.println(F("- No configuration found."));
 
         /* Initialize config structure */
         initConfig();
@@ -366,7 +365,7 @@ void loadConfig() {
         /* Write the configuration structure */
         EEPROM.put(EEPROM_BASE, config);
         EEPROM.commit();
-        Serial.println(F("* Default configuration saved."));
+        LOG_PORT.println(F("* Default configuration saved."));
     } else {
         if (config.version < CONFIG_VERSION) {
             /* Major struct changes in V3 for alignment require re-initialization */
@@ -382,9 +381,9 @@ void loadConfig() {
             
             EEPROM.put(EEPROM_BASE, config);
             EEPROM.commit();
-            Serial.println(F("* Configuration upgraded."));
+            LOG_PORT.println(F("* Configuration upgraded."));
         } else {
-            Serial.println(F("- Configuration loaded."));
+            LOG_PORT.println(F("- Configuration loaded."));
         }
     }
 
@@ -396,7 +395,7 @@ void saveConfig() {
     /* Write the configuration structre */
     EEPROM.put(EEPROM_BASE, config);
     EEPROM.commit();
-    Serial.println(F("* New configuration saved."));
+    LOG_PORT.println(F("* New configuration saved."));
 }
 
 /* Main Loop */
@@ -408,7 +407,7 @@ void loop() {
     }
 
     /* Configure our outputs and pixels */
-    switch(config.mode) {
+    switch (config.mode) {
         case MODE_PIXEL:
             /* Parse a packet and update pixels */
             if(e131.parsePacket()) {
@@ -458,7 +457,7 @@ void loop() {
             
         /* Parse a packet and update serial */
         case MODE_SERIAL:
-            if(e131.parsePacket()) {
+            if (e131.parsePacket()) {
                 if (e131.universe == config.universe) {
                     // Universe offset and sequence tracking 
                     /* uint8_t uniOffset = (e131.universe - config.universe);
@@ -471,7 +470,7 @@ void loop() {
 
                     // Set the serial data 
                     serial.startPacket();
-                    for(int i = 0; i<config.channel_count; i++){
+                    for(int i = 0; i<config.channel_count; i++) {
                         serial.setValue(i, e131.data[i + offset]);    
                     }
 

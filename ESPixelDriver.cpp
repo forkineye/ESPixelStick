@@ -94,7 +94,7 @@ void ESPixelDriver::updateLength(uint16_t length) {
 
 void ESPixelDriver::updateOrder(color_t color) {
     this->color = color;
-    
+
     switch (color) {
         case COLOR_GRB:
             rOffset = 1;
@@ -136,7 +136,7 @@ void ESPixelDriver::show() {
 
         /* Drop the update if our refresh rate is too high */
         if (!canRefresh(WS2811_TFRAME, WS2811_TIDLE)) return;
-        
+
         while (!canShow_WS2811()) yield();
         //TODO: Until pow() is fixed and we can generate tables at runtime
 
@@ -146,7 +146,7 @@ void ESPixelDriver::show() {
                 buff[1] = LOOKUP_2811[(GAMMA_2811[pixdata[i]] >> 4) & 3];
                 buff[2] = LOOKUP_2811[(GAMMA_2811[pixdata[i]] >> 2) & 3];
                 buff[3] = LOOKUP_2811[GAMMA_2811[pixdata[i]] & 3];
-                Serial1.write(buff, sizeof(buff));      
+                Serial1.write(buff, sizeof(buff));
             }
         } else {
             for (uint16_t i = 0; i < szBuffer; i++) {
@@ -154,7 +154,7 @@ void ESPixelDriver::show() {
                 buff[1] = LOOKUP_2811[(pixdata[i] >> 4) & 3];
                 buff[2] = LOOKUP_2811[(pixdata[i] >> 2) & 3];
                 buff[3] = LOOKUP_2811[pixdata[i] & 3];
-                Serial1.write(buff, sizeof(buff));      
+                Serial1.write(buff, sizeof(buff));
             }
         }
         endTime = micros();
@@ -163,12 +163,12 @@ void ESPixelDriver::show() {
 
         /* Drop the update if our refresh rate is too high */
         if (!canRefresh(GECE_TFRAME, GECE_TIDLE)) return;
-        
+
         /* Build a GECE packet */
         for (uint8_t i = 0; i < numPixels; i++) {
-            //uint8_t brightness = (pixdata[i*3] + pixdata[i*3+1] + pixdata[i*3+2]) / 3;  // toying with brightness ideas
             packet = (packet & ~GECE_ADDRESS_MASK) | (i << 20);
-            packet = (packet & ~GECE_BRIGHTNESS_MASK) | (GECE_DEFAULT_BRIGHTNESS << 12);
+            packet = (packet & ~GECE_BRIGHTNESS_MASK) |
+                    (GECE_DEFAULT_BRIGHTNESS << 12);
             packet = (packet & ~GECE_BLUE_MASK) | (pixdata[i*3+2] << 4);
             packet = (packet & ~GECE_GREEN_MASK) | pixdata[i*3+1];
             packet = (packet & ~GECE_RED_MASK) | (pixdata[i*3] >> 4);

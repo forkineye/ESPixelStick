@@ -2,7 +2,10 @@
 Changelog
 =========
 ### 1.5 (in progress)
-- Migrated to ESPAsyncWebserver for the web server.  The web frontend should now be usable while processing incoming e1.31 traffic.
+- Migrated to ESPAsyncWebserver for the web server.
+- Migrated all web pages to SPIFFS.
+- Added Gulp script to assist with preparing web pages.
+- Changed default serial port for Renard / DMX to Serial1.
 
 ### 1.4
 - Arduino 1.6.8 compatibility.

@@ -25,14 +25,11 @@ GNU General Public License for more details.
 #include <Arduino.h>
 #include "ESerialDriver.h"
 
-int ESerialDriver::begin(HardwareSerial *theSerial, serial_t type, uint16_t length){
-    
-        return begin(theSerial, type, length, 57600);
+int ESerialDriver::begin(HardwareSerial *theSerial, serial_t type, uint16_t length) {
+    return begin(theSerial, type, length, 57600);
 }
-    
 
-int ESerialDriver::begin(HardwareSerial *theSerial, serial_t type, uint16_t length, uint32_t baud){
-    
+int ESerialDriver::begin(HardwareSerial *theSerial, serial_t type, uint16_t length, uint32_t baud) {
     int retval = true;
 
     _type = type;
@@ -46,73 +43,63 @@ int ESerialDriver::begin(HardwareSerial *theSerial, serial_t type, uint16_t leng
     else
         retval = false;
 
-
-
     return retval;
 }
-    
-    
-void ESerialDriver::startPacket(){
 
-        //create a buffer and fill in header
-    if (_type == SERIAL_RENARD){
+void ESerialDriver::startPacket() {
+    // create a buffer and fill in header for Renard
+    if (_type == SERIAL_RENARD) {
         _ptr = (uint8_t*) malloc(_size+2);
         _ptr[0] = 0x7E;
         _ptr[1] = 0x80;
-    }
-    //create buffer 
-    else if (_type == SERIAL_DMX)
+    // or just create a buffer for DMX
+    } else if (_type == SERIAL_DMX) {
         _ptr = (uint8_t*) malloc(_size);
-    
+    }
 }
 
-
-void ESerialDriver::setValue(uint16_t address, uint8_t value){
-    
-    //avoid the special characters by rounding
-    if (_type == SERIAL_RENARD){
-        switch (value){
+void ESerialDriver::setValue(uint16_t address, uint8_t value) {
+    // avoid the special characters by rounding
+    if (_type == SERIAL_RENARD) {
+        switch (value) {
             case 0x7d:
-            _ptr[address+2] = 0x7c;
-            break;
+                _ptr[address+2] = 0x7c;
+                break;
             case 0x7e:
             case 0x7f:
-            _ptr[address+2] = 0x80;
-            break;
+                _ptr[address+2] = 0x80;
+                break;
             default:
-            _ptr[address+2] = value;
-            break;
+                _ptr[address+2] = value;
+                break;
         }
-    }
-    //set value
-    else if(_type == SERIAL_DMX)
+    // set value
+    } else if (_type == SERIAL_DMX) {
         _ptr[address] = value;
-        
-    
+    }
 }
 
-void ESerialDriver::show(){
-    
-    if (_type == SERIAL_RENARD)
+
+/* 
+   Updated begins with serial 8n1/8n2 enabling functionality as a 
+   RS485 Chip replacement on Lynx Express, LOR CTB16PC, LOR CMB24D, etc.
+   -Grayson Lough (Lights on Grassland)
+*/
+void ESerialDriver::show() {
+    if (_type == SERIAL_RENARD) {
         _serial->write(_ptr, _size+2);
-        
-//Updated begins with serial 8n1/8n2 enabling functionality as a RS485 Chip replacement on Lynx Express, LOR CTB16PC, LOR CMB24D, etc.
-//-Grayson Lough (Lights on Grassland)
-  else if(_type == SERIAL_DMX){
+    } else if (_type == SERIAL_DMX) {
         // send the break by sending a slow 0 byte
         _serial->begin(125000, SERIAL_8N1);
         _serial->write(0);
         _serial->flush();
 
-   // send the data
+        // send the data
         _serial->begin(250000, SERIAL_8N2);
         _serial->write(0);
         _serial->write(_ptr, _size);
-//This shouldn't be needed.
-          //_serial->flush();
+        // This shouldn't be needed.
+        //_serial->flush();
     }
     free(_ptr);
-    
-    
-    
 }

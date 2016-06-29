@@ -3,7 +3,7 @@
 
 void send_admin_html(AsyncWebServerRequest *request) {
     if (request->params()) {
-        if (request->hasParam("save")) {
+        if (request->hasParam("save", true)) {
             for (uint8_t i = 0; i < request->params(); i++) {
                 AsyncWebParameter *p = request->getParam(i);
                 if (p->name() == "mode")
@@ -12,7 +12,7 @@ void send_admin_html(AsyncWebServerRequest *request) {
             saveConfig();
         }
 
-        request->send(200, "text/html", 
+        request->send(200, "text/html",
                 R"=====(<meta http-equiv="refresh" content="2; url=/"><strong>Rebooting...</strong>)=====");
         reboot = true;
     } else {
