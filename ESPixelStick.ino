@@ -27,11 +27,13 @@
 #include <ESP8266mDNS.h>
 #include <ArduinoJson.h>
 #include "ESPixelStick.h"
+#include "_E131.h"
+#include "helpers.h"
+
+/* Output Drivers */
 #include "PixelDriver.h"
 #include "RenardDriver.h"
 #include "DMX512Driver.h"
-#include "_E131.h"
-#include "helpers.h"
 
 /* Web pages and handlers */
 #include "page_root.h"
@@ -42,25 +44,20 @@
 #include "page_status_net.h"
 #include "page_status_e131.h"
 
-
 /*****************************************/
-/*      BEGIN - User Configuration       */
+/*    BEGIN - Fallback Configuration     */
 /*****************************************/
 
-/* Fallback Credentials - used when config.json fails */
+/* 
+   Default configuration values are now in data/config.json.
+   If ssid or passphrase in config.json is null, or the AP 
+   fails to associate, these values will be used as a fallback.
+*/
 const char ssid[] = "SSID_NOT_SET";             /* Replace with your SSID */
 const char passphrase[] = "PASSPHRASE_NOT_SET"; /* Replace with your WPA2 passphrase */
 
-/* OPTIONAL - moved to config.json */
-//#define UNIVERSE        1                   /* Universe to listen for */
-//#define CHANNEL_START   1                   /* Channel to start listening at */
-//#define NUM_PIXELS      170                 /* Number of pixels */
-//#define PIXEL_TYPE      PixelType::WS2811   /* Pixel type - See ESPixelDriver.h for full list */
-//#define COLOR_ORDER     PixelColor::RGB     /* Color Order - See ESPixelDriver.h for full list */
-//#define PPU             170                 /* Pixels per Universe */
-
 /*****************************************/
-/*       END - User Configuration        */
+/*     END - Fallback Configuration      */
 /*****************************************/
 
 PixelDriver     pixels;         /* Pixel object */
@@ -121,13 +118,13 @@ void setup() {
     initWeb();
     /* Setup mDNS / DNS-SD */
     if (MDNS.begin(hostname)) {
-        MDNS.addService("e131", "udp", E131_DEFAULT_PORT);
+        MDNS.addService("e131", "udp", E131_DEFAULT_PORT); 
         MDNS.addService("http", "tcp", HTTP_PORT);
     } else {
         LOG_PORT.println(F("** Error setting up mDNS responder **"));
     }
 
-    /* Configure our outputs and pixels */
+    /* Configure our outputs */
     switch (config.mode) {
         case OutputMode::PIXEL:
             pixels.setPin(DATA_PIN);    /* For protocols that require bit-banging */
@@ -405,9 +402,11 @@ void loadConfig() {
             sprintf(config.hostname, "ESP_%06X", ESP.getChipId());
 
         /* Network */
-        //config.ip[0] = 0; config.ip[1] = 0; config.ip[2] = 0; config.ip[3] = 0;
-        //config.netmask[0] = 0; config.netmask[1] = 0; config.netmask[2] = 0; config.netmask[3] = 0;
-        //config.gateway[0] = 0; config.gateway[1] = 0; config.gateway[2] = 0; config.gateway[3] = 0;
+        for (int i = 0; i < 4; i++) {
+            config.ip[i] = json["network"]["ip"][i];
+            config.netmask[i] = json["network"]["netmask"][i];
+            config.gateway[i] = json["network"]["gateway"][i];
+        }
         config.dhcp = json["network"]["dhcp"];
         config.ap_fallback = json["network"]["ap_fallback"];
 
@@ -456,9 +455,14 @@ void saveConfig() {
         network["ssid"] = config.ssid;
         network["passphrase"] = config.passphrase;
         network["hostname"] = config.hostname;
-        //network["ip"] = config.ip;
-        //network["netmask"] = config.netmask;
-        //network["gateway"] = config.gateway;
+        JsonArray &ip = network.createNestedArray("ip");
+        JsonArray &netmask = network.createNestedArray("netmask");
+        JsonArray &gateway = network.createNestedArray("gateway");
+        for (int i = 0; i < 4; i++) {
+            ip.add(config.ip[i]);
+            netmask.add(config.netmask[i]);
+            gateway.add(config.gateway[i]);
+        }
         network["dhcp"] = config.dhcp;
         network["ap_fallback"] = config.ap_fallback;
 

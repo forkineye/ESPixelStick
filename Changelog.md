@@ -6,6 +6,7 @@ Changelog
 - Migrated all web pages to SPIFFS.
 - Added Gulp script to assist with preparing web pages.
 - Changed default serial port for Renard / DMX to Serial1.
+- Migrated configuration structure to SPIFFS.
 
 ### 1.4
 - Arduino 1.6.8 compatibility.
