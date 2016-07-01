@@ -20,7 +20,7 @@
 #ifndef ESPIXELSTICK_H_
 #define ESPIXELSTICK_H_
 
-#include "ESPixelDriver.h"
+#include "PixelDriver.h"
 #include "_E131.h"
 
 /* Name and version */
@@ -41,50 +41,56 @@ const char VERSION[] = "1.5 beta";
 //#define LOGF(...) LOG_PORT.printf(__VA_ARGS__)  /* Macro for console logging */
 
 
-/* Configuration ID and Version */
+/* Configuration ID, Version -- EEPROM specific, to be removed soon */
 #define CONFIG_VERSION 4
 const uint8_t CONFIG_ID[4] PROGMEM = { 'F', 'O', 'R', 'K'};
 
+/* Configuration file params */
+const char CONFIG_FILE[] = "/config.json";
+#define CONFIG_MAX_SIZE 2048    /* Sanity limit for config file */
+
+
 /* Mode Types */
-typedef enum {
-    MODE_PIXEL,
-    MODE_SERIAL
-} ESP_mode_t;
+enum class OutputMode : uint8_t {
+    PIXEL,
+    DMX512,
+    RENARD
+};
 
 /* Configuration structure */
 typedef struct {
-    /* header */
-    uint8_t     id[4];          /* Configuration structure ID */
-    uint8_t     version;        /* Configuration structure version */
-    uint8_t     reserved;       /* Reserved for future use - struct alignment */
-
-    /* general config */
-    char        name[32];       /* Device Name */
-    ESP_mode_t  mode;           /* Global Output Mode */
-
-    /* network config */
-    char        ssid[32];       /* 31 bytes max - null terminated */
+    /* Network */
+    char        ssid[33];       /* 32 bytes max - null terminated */
     char        passphrase[64]; /* 63 bytes max - null terminated */
+    char        hostname[33];   /* 32 bytes max - null terminated */
     uint8_t     ip[4];
     uint8_t     netmask[4];
     uint8_t     gateway[4];
-    uint8_t     dhcp;           /* DHCP enabled boolean */
-    uint8_t     multicast;      /* Multicast listener enabled boolean */
+    boolean     dhcp;           /* Use DHCP */
+    boolean     ap_fallback;    /* Fallback to AP if fail to associate */
 
-    /* dmx and pixel config */
-    float       gamma;          /* Value used to build gamma correction table */
+    /* Device */
+    char        id[32];         /* Device ID */
+    OutputMode  mode;           /* Global Output Mode */
+
+    /* E131 */
     uint16_t    universe;       /* Universe to listen for */
     uint16_t    channel_start;  /* Channel to start listening at - 1 based */
-    uint16_t    pixel_count;    /* Number of pixels */
-    pixel_t     pixel_type;     /* Pixel type */
-    color_t     pixel_color;    /* Pixel color order */
-    uint8_t     ppu;            /* Pixels per Universe boundary - Max PIXELS_MAX (Default 170) */
-
-    /* serial config */
     uint16_t    channel_count;  /* Number of channels */
-    serial_t    serial_type;    /* Type of Serial Output */
-    uint32_t    serial_baud;    /* Baudrate of Serial Port */
-} __attribute__((packed)) config_t;
+    boolean     multicast;      /* Enable multicast listener */
+
+    /* Pixels */
+    PixelType   pixel_type;     /* Pixel type */
+    PixelColor  pixel_color;    /* Pixel color order */
+    uint8_t     ppu;            /* Pixels per Universe boundary - Max PIXELS_MAX (Default 170) */
+    float       gamma;          /* Value used to build gamma correction table */
+
+    /* DMX */
+    boolean     dmx_passthru;   /* DMX Passthrough */
+
+    /* Renard */
+    uint32_t    renard_baud;    /* Baudrate for Renard */
+} config_t;
 
 /* Globals */
 E131                e131;
@@ -99,7 +105,8 @@ const char PTYPE_PLAIN[] = "text/plain";
 
 void saveConfig();
 void updatePixelConfig();
-void updateSerialConfig();
+void updateRenardConfig();
+void updateDMXConfig();
 void sendPage(const char *data, int count, const char *type);
 
 #endif /* ESPIXELSTICK_H_ */

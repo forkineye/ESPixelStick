@@ -7,7 +7,7 @@ void send_admin_html(AsyncWebServerRequest *request) {
             for (uint8_t i = 0; i < request->params(); i++) {
                 AsyncWebParameter *p = request->getParam(i);
                 if (p->name() == "mode")
-                    config.mode = (ESP_mode_t)p->value().toInt();
+                    config.mode = OutputMode(p->value().toInt());
             }
             saveConfig();
         }
@@ -23,10 +23,11 @@ void send_admin_html(AsyncWebServerRequest *request) {
 void send_admin_vals(AsyncWebServerRequest *request) {
     String values = "";
     values += "version|div|" + (String)VERSION + "\n";
-    values += "title|div|" + (String)config.name + " - Admin\n";
-    values += "mode|opt|" + String("Pixel|") + (String)MODE_PIXEL + "\n";
-    values += "mode|opt|" + String("Serial|") + (String)MODE_SERIAL + "\n";
-    values += "mode|input|" + (String)config.mode + "\n";
+    values += "title|div|" + (String)config.id + " - Admin\n";
+    values += "mode|opt|" + String("Pixel|") + String(static_cast<uint8_t>(OutputMode::PIXEL)) + "\n";
+    values += "mode|opt|" + String("DMX512|") + String(static_cast<uint8_t>(OutputMode::DMX512)) + "\n";
+    values += "mode|opt|" + String("Renard|") + String(static_cast<uint8_t>(OutputMode::RENARD)) + "\n";
+    values += "mode|input|" + String(static_cast<uint8_t>(config.mode)) + "\n";
     request->send(200, "text/plain", values);
 }
 

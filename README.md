@@ -6,33 +6,47 @@ This is the Arduino firmware for the ESP8266 based ESPixelStick.  The ESPixelSti
 
 Since this project began, the firmware has moved beyond just pixel support for those with other ESP8266 based devices.  The ESPixelStick firmware now supports outputting E1.31 streams to serial links as well.  Note this is not supported on the ESPixelStick hardware, but intended for other ESP8266 devices such as Bill's RenardESP.
 
-### Supported Pixels
+Requirements
+------------
+Along with the Arduino IDE, you'll need the following software to build this project:
+- [Adruino for ESP8266](https://github.com/esp8266/Arduino) - Arduino core for ESP8266
+- [Arduino ESP8266 Filesystem Uploader](https://github.com/esp8266/arduino-esp8266fs-plugin) - Arduino plugin for uploading files to SPIFFS
+- [gulp](http://gulpjs.com/) - Build system to process web sources.  Optional, but recommended.  Refer to the html [README](html/README.md) for more information.
+
+The following libraries are required:
+- [ArduinoJson](https://github.com/bblanchon/ArduinoJson) - Arduino JSON Library
+- [ESPAsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP) - Asynchronous TCP Library
+- [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) - Asynchronous Web Server Library
+
+Important Notes on Compiling and Flashing
+-----------------------------------------
+- Web pages **must** be processed, placed into ```data/www```, and uploaded with the upload plugin. Gulp will process the pages and put them in ```data/www``` for you. Refer to the html [README](html/README.md) for more information.
+- In order to use the upload plugin, the ESP8266 **must** be placed into programming mode and the Arduino serial monitor **must** be closed.
+- For best performance, set the CPU frequency to 160MHz (Tools->CPU Frequency).  You may experience lag and other issues if running at 80MHz.
+
+Supported Outputs
+-----------------
+The ESPixelStick firmware can generate the following outputs from incoming E1.31 streams, however your hardware must support the physical interface.
+#### Pixel Protocols
 - WS2811 / WS2812 / WS2812b
 - GE Color Effects
 
-### Requirements
-- [Adruino for ESP8266](https://github.com/esp8266/Arduino) - Arduino core for ESP8266
-- [Arduino ESP8266 Filesystem Uploader](https://github.com/esp8266/arduino-esp8266fs-plugin) - Arduino plugin for uploading files to SPIFFS
-- [ESPAsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP) - Asynchronous TCP Library
-- [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) - Asynchronous Web Server Library
-- [gulp](http://gulpjs.com/) - Build system to process web sources.  Optional, but recommended.  Refer to the html [README](html/README.md) for more information.
+#### Serial Protocols
+- DMX512
+- Renard
 
-### Notes
-- For best performance, set the CPU frequency to 160MHz (Tools->CPU Frequency)
-- Web pages ***must*** be processed, placed into ```data/www```, and uploaded with the upload tool. Gulp will process the pages and put them in ```data/www``` for you. 
-
-### Known Issues
+Known Issues
+------------
 - Gamma value is ingored.  ```pow()``` is currently broken in the ESP8266 Arduino environment, so gamma tables cannot be generated.
 - Some fields do not validate input.  Need to add validation routines to the web configuration inputs fields.
 
-### To-do
-- Add mDNS and DNS-SD support.
-
-### Resources
+Resources
+---------
 - Firmware: http://github.com/forkineye/ESPixelStick
 - Hardware: http://forkineye.com/ESPixelStick
 
-### Credits
+Credits
+-------
 - The people at http://diychristmas.org and http://doityourselfchristmas.com for inspiration.
 - John Lassen for his web framework from which the web porition was derived - http://www.john-lassen.de/index.php/projects/esp-8266-arduino-ide-webconfig.
 - Bill Porter for Renard and SoftAP aupport.

@@ -52,7 +52,7 @@ void send_config_net_vals(AsyncWebServerRequest *request) {
     values += "gw_3|input|" + (String)config.gateway[3] + "\n";
     values += "dhcp|chk|" + (String)(config.dhcp ? "checked" : "") + "\n";
     values += "multicast|chk|" + (String)(config.multicast ? "checked" : "") + "\n";
-    values += "title|div|" + (String)config.name + " - Net Config\n";
+    values += "title|div|" + (String)config.id + " - Net Config\n";
     request->send(200, "text/plain", values);
 }
 

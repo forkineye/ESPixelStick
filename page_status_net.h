@@ -20,7 +20,7 @@ void send_status_net_vals(AsyncWebServerRequest *request) {
     values += "x_mac|div|" + GetMacAddress() + "\n";
     values += "x_rssi|div|" + (String)rssi + "\n";
     values += "x_quality|div|" + (String)quality + "\n";
-    values += "title|div|" + (String)config.name + " - Net Status\n";
+    values += "title|div|" + (String)config.id + " - Net Status\n";
     request->send(200, "text/plain", values);
 }
 

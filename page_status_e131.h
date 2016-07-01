@@ -14,7 +14,7 @@ void send_status_e131_vals(AsyncWebServerRequest *request) {
     values += "num_packets|div|" + (String)e131.stats.num_packets + "\n";
     values += "sequence_errors|div|" + (String)seqErrors + "\n";
     values += "packet_errors|div|" + (String)e131.stats.packet_errors + "\n";
-    values += "title|div|" + (String)config.name + " - E1.31 Status\n";
+    values += "title|div|" + (String)config.id + " - E1.31 Status\n";
     request->send(200, "text/plain", values);
 }
 

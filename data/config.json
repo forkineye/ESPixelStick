@@ -1,0 +1,39 @@
+{
+  "network": {
+    "ssid": "",
+    "passphrase": "",
+    "hostname": "",
+    "ip": "",
+    "netmask": "",
+    "gateway": "",
+    "dhcp": true,
+    "ap_fallback": true
+  },
+
+  "device": {
+    "id": "ESPixelStick",
+    "mode": 0
+  },
+
+  "e131": {
+    "universe": 1,
+    "channel_start": 1,
+    "channel_count": 510,
+    "multicast": false
+  },
+
+  "pixel": {
+    "type": 0,
+    "color": 0,
+    "ppu": 170,
+    "gamma": 1.0
+  },
+
+  "dmx512": {
+    "passthru": false
+  },
+
+  "renard": {
+    "baudrate": 57600
+  }
+}

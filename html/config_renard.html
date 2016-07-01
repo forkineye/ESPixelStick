@@ -1,0 +1,19 @@
+<title id="title"></title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" type="text/css" href="style.css">
+<a href="/" class="btn btn--s">&lt;</a>&nbsp;&nbsp;<strong>Renard Configuration</strong>
+<hr>
+<form action="" method="post">
+<table border="0" cellspacing="0" cellpadding="3">
+<tr><td align="right">Device ID :</td><td><input id="devid" name="devid" value=""></td></tr>
+<tr><td align="right">Universe :</td><td><input id="universe" name="universe" value=""></td></tr>
+<tr><td align="right">Start Channel :</td><td><input id="channel_start" name="channel_start" value=""></td></tr>
+<tr><td align="right">Channel Count :</td><td><input id="channel_count" name="channel_count" value=""></td></tr>
+<tr><td align="right">Baud Rate :</td><td><select id="renard_baud" name="renard_baud"></select></td></tr>
+<tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Save"></td></tr>
+</table>
+</form>
+<script type="text/javascript" src="script.js"></script>
+<script>
+setValues("/config/renardvals");
+</script>

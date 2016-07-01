@@ -1,5 +1,5 @@
 /*
-* ESPixelDriver.cpp - Pixel driver code for ESPixelStick
+* PixelDriver.cpp - Pixel driver code for ESPixelStick
 *
 * Project: ESPixelStick - An ESP8266 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -18,7 +18,7 @@
 */
 
 #include <Arduino.h>
-#include "ESPixelDriver.h"
+#include "PixelDriver.h"
 #include "bitbang.h"
 
 extern "C" {
@@ -26,15 +26,15 @@ extern "C" {
 #include "uart_register.h"
 }
 
-int ESPixelDriver::begin() {
-    return begin(PIXEL_WS2811, COLOR_RGB);
+int PixelDriver::begin() {
+    return begin(PixelType::WS2811, PixelColor::RGB);
 }
 
-int ESPixelDriver::begin(pixel_t type) {
-    return begin(type, COLOR_RGB);
+int PixelDriver::begin(PixelType type) {
+    return begin(type, PixelColor::RGB);
 }
 
-int ESPixelDriver::begin(pixel_t type, color_t color) {
+int PixelDriver::begin(PixelType type, PixelColor color) {
     int retval = true;
 
     this->type = type;
@@ -42,9 +42,9 @@ int ESPixelDriver::begin(pixel_t type, color_t color) {
 
     updateOrder(color);
 
-    if (type == PIXEL_WS2811)
+    if (type == PixelType::WS2811)
         ws2811_init();
-    else if (type == PIXEL_GECE)
+    else if (type == PixelType::GECE)
         gece_init();
     else
         retval = false;
@@ -52,12 +52,12 @@ int ESPixelDriver::begin(pixel_t type, color_t color) {
     return retval;
 }
 
-void ESPixelDriver::setPin(uint8_t pin) {
+void PixelDriver::setPin(uint8_t pin) {
     if (this->pin >= 0)
         this->pin = pin;
 }
 
-void ESPixelDriver::setGamma(float gamma) {
+void PixelDriver::setGamma(float gamma) {
     /* Treat this as a boolean until pow() is fixed */
     if (gamma)
         this->gamma = true;
@@ -65,7 +65,7 @@ void ESPixelDriver::setGamma(float gamma) {
         this->gamma = false;
 }
 
-void ESPixelDriver::ws2811_init() {
+void PixelDriver::ws2811_init() {
     /* Serial rate is 4x 800KHz for WS2811 */
     Serial1.begin(3200000, SERIAL_6N1, SERIAL_TX_ONLY);
     CLEAR_PERI_REG_MASK(UART_CONF0(UART), UART_INV_MASK);
@@ -73,14 +73,14 @@ void ESPixelDriver::ws2811_init() {
     SET_PERI_REG_MASK(UART_CONF0(UART), (BIT(22)));
 }
 
-void ESPixelDriver::gece_init() {
+void PixelDriver::gece_init() {
     /* Setup for bit-banging */
     Serial1.end();
     pinMode(pin, OUTPUT);
     digitalWrite(pin, LOW);
 }
 
-void ESPixelDriver::updateLength(uint16_t length) {
+void PixelDriver::updateLength(uint16_t length) {
     if (pixdata) free(pixdata);
     szBuffer = length * 3;
     if ((pixdata = (uint8_t *)malloc(szBuffer))) {
@@ -92,21 +92,21 @@ void ESPixelDriver::updateLength(uint16_t length) {
     }
 }
 
-void ESPixelDriver::updateOrder(color_t color) {
+void PixelDriver::updateOrder(PixelColor color) {
     this->color = color;
 
     switch (color) {
-        case COLOR_GRB:
+        case PixelColor::GRB:
             rOffset = 1;
             gOffset = 0;
             bOffset = 2;
             break;
-        case COLOR_BRG:
+        case PixelColor::BRG:
             rOffset = 1;
             gOffset = 2;
             bOffset = 0;
             break;
-        case COLOR_RBG:
+        case PixelColor::RBG:
             rOffset = 0;
             gOffset = 2;
             bOffset = 1;
@@ -118,7 +118,7 @@ void ESPixelDriver::updateOrder(color_t color) {
     }
 }
 
-void ESPixelDriver::setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b) {
+void PixelDriver::setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b) {
     if (pixel < numPixels) {
         uint8_t *p = &pixdata[pixel*3];
         p[rOffset] = r;
@@ -128,10 +128,10 @@ void ESPixelDriver::setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t 
 }
 
 //TODO: Optimize UART buffer handling
-void ESPixelDriver::show() {
+void PixelDriver::show() {
     if (!pixdata) return;
 
-    if (type == PIXEL_WS2811) {
+    if (type == PixelType::WS2811) {
         char buff[4];
 
         /* Drop the update if our refresh rate is too high */
@@ -158,7 +158,7 @@ void ESPixelDriver::show() {
             }
         }
         endTime = micros();
-    } else if (type == PIXEL_GECE) {
+    } else if (type == PixelType::GECE) {
         uint32_t packet = 0;
 
         /* Drop the update if our refresh rate is too high */

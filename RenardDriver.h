@@ -23,31 +23,23 @@ GNU General Public License for more details.
 ******************************************************************/
 
 
-#ifndef ESERIALDRIVER_H_
-#define ESERIALDRIVER_H_
+#ifndef RENARDDRIVER_H_
+#define RENARDDRIVER_H_
 
 #include "HardwareSerial.h"
 
-
-/* Serial Types */
-typedef enum {
-    SERIAL_RENARD,
-    SERIAL_DMX
-} serial_t;
-
-class ESerialDriver {
+class RenardDriver {
  public:
-    int begin(HardwareSerial *theSerial, serial_t, uint16_t);
-    int begin(HardwareSerial *theSerial, serial_t, uint16_t, uint32_t);
+    int begin(HardwareSerial *theSerial, uint16_t length);
+    int begin(HardwareSerial *theSerial, uint16_t length, uint32_t baud);
     void startPacket();
-    void setValue(uint16_t, uint8_t);
+    void setValue(uint16_t address, uint8_t value);
     void show();
 
  private:
-    serial_t _type;             // Output Serial type
     HardwareSerial *_serial;    // The Serial Port
     uint16_t _size;             // Size of buffer
     uint8_t * _ptr;             // Pointer for buffer
 };
 
-#endif /* ESERIALDRIVER_H_ */
+#endif /* RENARDDRIVER_H_ */

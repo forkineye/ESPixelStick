@@ -1,5 +1,5 @@
 /*
-* ESPixelDriver.h - Pixel driver code for ESPixelStick
+* PixelDriver.h - Pixel driver code for ESPixelStick
 *
 * Project: ESPixelStick - An ESP8266 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -17,8 +17,8 @@
 *
 */
 
-#ifndef ESPIXELDRIVER_H_
-#define ESPIXELDRIVER_H_
+#ifndef PIXELDRIVER_H_
+#define PIXELDRIVER_H_
 
 #define UART_INV_MASK  (0x3f << 19)
 #define UART 1
@@ -70,28 +70,28 @@ const char LOOKUP_2811[4] = { 0b00110111, 0b00000111, 0b00110100, 0b00000100 };
 
 
 /* Pixel Types */
-typedef enum {
-    PIXEL_WS2811,
-    PIXEL_GECE
-} pixel_t;
+enum class PixelType : uint8_t {
+    WS2811,
+    GECE
+};
 
 /* Color Order */
-typedef enum {
-    COLOR_RGB,
-    COLOR_GRB,
-    COLOR_BRG,
-    COLOR_RBG
-} color_t;
+enum class PixelColor : uint8_t {
+    RGB,
+    GRB,
+    BRG,
+    RBG
+};
 
-class ESPixelDriver {
+class PixelDriver {
  public:
     int begin();
-    int begin(pixel_t type);
-    int begin(pixel_t type, color_t color);
+    int begin(PixelType type);
+    int begin(PixelType type, PixelColor color);
     void setPin(uint8_t pin);
     void setGamma(float gamma);
     void updateLength(uint16_t length);
-    void updateOrder(color_t color);
+    void updateOrder(PixelColor color);
     void setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b);
     void show();
 
@@ -101,8 +101,8 @@ class ESPixelDriver {
     }
 
  private:
-    pixel_t     type;       // Pixel type
-    color_t     color;      // Color Order
+    PixelType   type;       // Pixel type
+    PixelColor  color;      // Color Order
     uint8_t     pin;        // Pin for bit-banging
     uint8_t     *pixdata;   // Pixel buffer
     uint16_t    numPixels;  // Number of pixels
@@ -122,4 +122,4 @@ class ESPixelDriver {
     }
 };
 
-#endif /* ESPIXELDRIVER_H_ */
+#endif /* PIXELDRIVER_H_ */
