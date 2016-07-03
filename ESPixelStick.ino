@@ -2,11 +2,8 @@
 * ESPixelStick.ino
 *
 * Project: ESPixelStick - An ESP8266 and E1.31 based pixel driver
-* Copyright (c) 2015 Shelby Merrick
+* Copyright (c) 2016 Shelby Merrick
 * http://www.forkineye.com
-*
-* Notes:
-* - For best performance, set to 160MHz (Tools->CPU Frequency).
 *
 *  This program is provided free for you to use in any way that you wish,
 *  subject to the laws and regulations where you are using it.  Due diligence
@@ -20,6 +17,23 @@
 *
 */
 
+
+/*****************************************/
+/*        BEGIN - Configuration          */
+/*****************************************/
+
+/* Output Mode - There can be only one! (-Conor MacLeod) */
+#define ESPS_MODE_PIXEL
+//#define ESPS_MODE_SERIAL
+
+/* Fallback configuration if config.json is empty or fails */
+const char ssid[] = "ENTER_SSID_HERE";
+const char passphrase[] = "ENTER_PASSPHRASE_HERE";
+
+/*****************************************/
+/*         END - Configuration           */
+/*****************************************/
+
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
@@ -31,45 +45,37 @@
 #include "helpers.h"
 
 /* Output Drivers */
+#if defined (ESPS_MODE_PIXEL)
 #include "PixelDriver.h"
-#include "RenardDriver.h"
-#include "DMX512Driver.h"
+#include "page_config_pixel.h"
+#elif defined (ESPS_MODE_SERIAL)
+#include "SerialDriver.h"
+#include "page_config_serial.h"
+#endif
 
-/* Web pages and handlers */
+/* Common Web pages and handlers */
 #include "page_root.h"
 #include "page_admin.h"
 #include "page_config_net.h"
-#include "page_config_pixel.h"
-#include "page_config_serial.h"
 #include "page_status_net.h"
 #include "page_status_e131.h"
 
-/*****************************************/
-/*    BEGIN - Fallback Configuration     */
-/*****************************************/
-
-/* 
-   Default configuration values are now in data/config.json.
-   If ssid or passphrase in config.json is null, or the AP 
-   fails to associate, these values will be used as a fallback.
-*/
-const char ssid[] = "SSID_NOT_SET";             /* Replace with your SSID */
-const char passphrase[] = "PASSPHRASE_NOT_SET"; /* Replace with your WPA2 passphrase */
-
-/*****************************************/
-/*     END - Fallback Configuration      */
-/*****************************************/
-
+#if defined (ESPS_MODE_PIXEL)
 PixelDriver     pixels;         /* Pixel object */
-RenardDriver    renard;         /* Renard object */
-DMX512Driver    dmx;            /* DMX object */
+#elif defined (ESPS_MODE_SERIAL)
+SerialDriver    serial;         /* Serial object */
+#endif
+
 uint8_t         *seqTracker;    /* Current sequence numbers for each Universe */
 uint32_t        lastPacket;     /* Packet timeout tracker */
+AsyncWebServer  web(HTTP_PORT); /* Web Server */
+char            *configString;
 
 /* Forward Declarations */
 void loadConfig();
 int initWifi();
 void initWeb();
+void updateConfig();
 
 void setup() {
     /* Generate and set hostname */
@@ -118,26 +124,20 @@ void setup() {
     initWeb();
     /* Setup mDNS / DNS-SD */
     if (MDNS.begin(hostname)) {
-        MDNS.addService("e131", "udp", E131_DEFAULT_PORT); 
+        MDNS.addService("e131", "udp", E131_DEFAULT_PORT);
         MDNS.addService("http", "tcp", HTTP_PORT);
     } else {
         LOG_PORT.println(F("** Error setting up mDNS responder **"));
     }
 
-    /* Configure our outputs */
-    switch (config.mode) {
-        case OutputMode::PIXEL:
-            pixels.setPin(DATA_PIN);    /* For protocols that require bit-banging */
-            updatePixelConfig();
-            pixels.show();
-            break;
-        case OutputMode::DMX512:
-            updateDMXConfig();
-            break;
-        case OutputMode::RENARD:
-            updateRenardConfig();
-            break;
-    }
+    /* Configure the outputs */
+#if defined (ESPS_MODE_PIXEL)
+    pixels.setPin(DATA_PIN);
+    updateConfig();
+    pixels.show();
+#else
+    updateConfig();
+#endif
 }
 
 int initWifi() {
@@ -195,6 +195,10 @@ void initWeb() {
         request->send(200, "text/plain", String(ESP.getFreeHeap()));
     });
 
+    web.on("/conf", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/plain", configString);
+    });
+
     /* Temp Config handler */
     web.serveStatic("/config", SPIFFS, "/config.json");
 
@@ -203,26 +207,23 @@ void initWeb() {
     web.on("/adminvals", HTTP_GET, send_admin_vals);
     web.on("/config/netvals", HTTP_GET, send_config_net_vals);
     web.on("/config/connectionstate", HTTP_GET, send_connection_state_vals);
-    web.on("/config/pixelvals", HTTP_GET, send_config_pixel_vals);
-    web.on("/config/renardvals", HTTP_GET, send_config_renard_vals);
-    web.on("/config/dmxvals", HTTP_GET, send_config_dmx_vals);
     web.on("/status/netvals", HTTP_GET, send_status_net_vals);
     web.on("/status/e131vals", HTTP_GET, send_status_e131_vals);
 
     /* POST Handlers */
     web.on("/admin.html", HTTP_POST, send_admin_html);
     web.on("/config_net.html", HTTP_POST, send_config_net_html);
-    web.on("/config_pixel.html", HTTP_POST, send_config_pixel_html);
-    web.on("/config_renard.html", HTTP_POST, send_config_renard_html);
-    web.on("/config_dmx.html", HTTP_POST, send_config_dmx_html);
 
     /* Static handler */
-    if (config.mode == OutputMode::RENARD)
-        web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("renard.html");
-    else if (config.mode == OutputMode::DMX512)
-        web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("dmx512.html");
-    else
-        web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
+#if defined (ESPS_MODE_PIXEL)
+    web.on("/config/pixelvals", HTTP_GET, send_config_pixel_vals);
+    web.on("/config_pixel.html", HTTP_POST, send_config_pixel_html);
+    web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("pixel.html");
+#elif defined (ESPS_MODE_SERIAL)
+    web.on("/config/serialvals", HTTP_GET, send_config_serial_vals);
+    web.on("/config_serial.html", HTTP_POST, send_config_serial_html);
+    web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("serial.html");
+#endif    
 
     web.onNotFound([](AsyncWebServerRequest *request) {
         request->send(404);
@@ -236,13 +237,14 @@ void initWeb() {
 
 /* Configuration Validations */
 void validateConfig() {
-    /* Generic channel limit */
+#if defined (ESPS_MODE_PIXEL)    
+    /* Generic channel limits for pixels */
     if (config.channel_count > PIXEL_LIMIT * 3)
         config.channel_count = PIXEL_LIMIT * 3;
     else if (config.channel_count < 1)
         config.channel_count = 1;
 
-    /* Generic PPU Limit */
+    /* PPU Limits */
     if (config.ppu > PPU_MAX)
         config.ppu = PPU_MAX;
     else if (config.ppu < 1)
@@ -261,9 +263,23 @@ void validateConfig() {
         else 
             uniLast = config.universe + config.channel_count / bounds - 1;
     }
+
+#elif defined (ESPS_MODE_SERIAL)
+    /* Generic serial channel limits */
+    if (config.channel_count > SERIAL_LIMIT)
+        config.channel_count = SERIAL_LIMIT;
+    else if (config.channel_count < 1)
+        config.channel_count = 1;
+
+    /* Baud rate check */
+    if (config.baudrate > BaudRate::BR_250000)
+        config.baudrate = BaudRate::BR_250000;
+    else if (config.baudrate < BaudRate::BR_38400)
+        config.baudrate = BaudRate::BR_57600;
+#endif
 }
 
-void updatePixelConfig() {
+void updateConfig() {
     /* Validate first */
     validateConfig();
 
@@ -271,80 +287,24 @@ void updatePixelConfig() {
     uint8_t uniTotal = (uniLast + 1) - config.universe;
 
     if (seqTracker) free(seqTracker);
-    if ((seqTracker = (uint8_t *)malloc(uniTotal)))
+    if (seqTracker = static_cast<uint8_t *>(malloc(uniTotal)))
         memset(seqTracker, 0x00, uniTotal);
 
     if (seqError) free(seqError);
-    if ((seqError = (uint32_t *)malloc(uniTotal * 4)))
+    if (seqError = static_cast<uint32_t *>(malloc(uniTotal * 4)))
         memset(seqError, 0x00, uniTotal * 4);
 
     /* Zero out packet stats */
     e131.stats.num_packets = 0;
-    
+
     /* Initialize for our pixel type */
+#if defined (ESPS_MODE_PIXEL)
     pixels.begin(config.pixel_type, config.pixel_color);
     pixels.updateLength(config.channel_count / 3);
     pixels.setGamma(config.gamma);
-    LOG_PORT.print(F("- Listening for "));
-    LOG_PORT.print(config.channel_count);
-    LOG_PORT.print(F(" channels, from Universe "));
-    LOG_PORT.print(config.universe);
-    LOG_PORT.print(F(" to "));
-    LOG_PORT.println(uniLast);
-}
-
-void updateRenardConfig() {
-    /* Validate first */
-    //need serial specific validation settings
-    //validateConfig();
-
-    /* Setup the sequence error tracker */
-    uint8_t uniTotal = (uniLast + 1) - config.universe;
-
-    if (seqTracker) free(seqTracker);
-    if ((seqTracker = (uint8_t *)malloc(uniTotal)))
-        memset(seqTracker, 0x00, uniTotal);
-
-    if (seqError) free(seqError);
-    if ((seqError = (uint32_t *)malloc(uniTotal * 4)))
-        memset(seqError, 0x00, uniTotal * 4);
-
-    /* Zero out packet stats */
-    e131.stats.num_packets = 0;
-    
-    /* Initialize for our serial type */
-    renard.begin(&SERIAL_PORT, config.channel_count, config.renard_baud);
-
-    LOG_PORT.print(F("- Listening for "));
-    LOG_PORT.print(config.channel_count);
-    LOG_PORT.print(F(" channels, from Universe "));
-    LOG_PORT.print(config.universe);
-    LOG_PORT.print(F(" to "));
-    LOG_PORT.println(uniLast);
-}
-
-void updateDMXConfig() {
-    /* Validate first */
-    //need serial specific validation settings
-    //validateConfig();
-
-    /* Setup the sequence error tracker */
-    uint8_t uniTotal = (uniLast + 1) - config.universe;
-
-    if (seqTracker) free(seqTracker);
-    if ((seqTracker = (uint8_t *)malloc(uniTotal)))
-        memset(seqTracker, 0x00, uniTotal);
-
-    if (seqError) free(seqError);
-    if ((seqError = (uint32_t *)malloc(uniTotal * 4)))
-        memset(seqError, 0x00, uniTotal * 4);
-
-    /* Zero out packet stats */
-    e131.stats.num_packets = 0;
-    
-    /* Initialize for our serial type */
-    dmx.begin(&SERIAL_PORT, config.channel_count);
-
+#elif defined (ESPS_MODE_SERIAL)    
+    serial.begin(&SERIAL_PORT, config.serial_type, config.channel_count, config.baudrate);
+#endif    
     LOG_PORT.print(F("- Listening for "));
     LOG_PORT.print(config.channel_count);
     LOG_PORT.print(F(" channels, from Universe "));
@@ -384,6 +344,9 @@ void loadConfig() {
             return;
         }
 
+        /* Device */
+        strncpy(config.id, json["device"]["id"], sizeof(config.id));
+
         /* Fallback to embedded ssid and passphrase if null in config */
         if (strlen(json["network"]["ssid"]))
             strncpy(config.ssid, json["network"]["ssid"], sizeof(config.ssid));
@@ -410,27 +373,25 @@ void loadConfig() {
         config.dhcp = json["network"]["dhcp"];
         config.ap_fallback = json["network"]["ap_fallback"];
 
-        /* Device */
-        strncpy(config.id, json["device"]["id"], sizeof(config.id));
-        config.mode = OutputMode(static_cast<uint8_t>(json["device"]["mode"]));
-
         /* E131 */
         config.universe = json["e131"]["universe"];
         config.channel_start = json["e131"]["channel_start"];
         config.channel_count = json["e131"]["channel_count"];
         config.multicast = json["e131"]["multicast"];
-        
+
+#if defined (ESPS_MODE_PIXEL)
         /* Pixel */
         config.pixel_type = PixelType(static_cast<uint8_t>(json["pixel"]["type"]));
         config.pixel_color = PixelColor(static_cast<uint8_t>(json["pixel"]["color"]));
         config.ppu = json["pixel"]["ppu"];
         config.gamma = json["pixel"]["gamma"];
 
-        /* DMX512 */
-        config.dmx_passthru = json["dmx"]["passthru"];
-
-        /* Renard */
-        config.renard_baud = json["renard"]["baudrate"];
+#elif defined (ESPS_MODE_SERIAL)
+        /* Serial */
+        config.serial_type = SerialType(static_cast<uint8_t>(json["serial"]["type"]));
+        config.baudrate = BaudRate(static_cast<uint32_t>(json["serial"]["baudrate"]));
+        config.dmx_passthru = json["serial"]["dmx_passthru"];
+#endif        
 
         LOG_PORT.println(F("- Configuration loaded."));
     }
@@ -440,7 +401,11 @@ void loadConfig() {
 }
 
 /* Save configuration JSON file */
-void saveConfig() {  
+void saveConfig() {
+    /* Update Config */
+    updateConfig();
+
+    /* Save Config */
     File file = SPIFFS.open(CONFIG_FILE, "w");
     if (!file) {
         LOG_PORT.println(F("*** Error creating configuration file ***"));
@@ -449,6 +414,10 @@ void saveConfig() {
         /* Create all required JSON objects and save the file */
         DynamicJsonBuffer jsonBuffer;
         JsonObject &json = jsonBuffer.createObject();
+
+        /* Device */
+        JsonObject &device = json.createNestedObject("device");
+        device["id"] = config.id;
 
         /* Network */
         JsonObject &network = json.createNestedObject("network");
@@ -466,11 +435,6 @@ void saveConfig() {
         network["dhcp"] = config.dhcp;
         network["ap_fallback"] = config.ap_fallback;
 
-        /* Device */
-        JsonObject &device = json.createNestedObject("device");
-        device["id"] = config.id;
-        device["mode"] = static_cast<uint8_t>(config.mode);
-
         /* E131 */
         JsonObject &e131 = json.createNestedObject("e131");
         e131["universe"] = config.universe;
@@ -478,6 +442,7 @@ void saveConfig() {
         e131["channel_count"] = config.channel_count;
         e131["multicast"] = config.multicast;
 
+#if defined (ESPS_MODE_PIXEL)
         /* Pixel */
         JsonObject &pixel = json.createNestedObject("pixel");
         pixel["type"] = static_cast<uint8_t>(config.pixel_type);
@@ -485,13 +450,13 @@ void saveConfig() {
         pixel["ppu"] = config.ppu;
         pixel["gamma"] = config.gamma;
 
-        /* DMX512 */
-        JsonObject &dmx512 = json.createNestedObject("dmx512");
-        dmx512["passthru"] = config.dmx_passthru;
-
-        /* Renard */
-        JsonObject &renard = json.createNestedObject("renard");
-        renard["baudrate"] = config.renard_baud;
+#elif defined (ESPS_MODE_SERIAL)
+        /* Serial */
+        JsonObject &serial = json.createNestedObject("serial");
+        serial["type"] = static_cast<uint8_t>(config.serial_type);
+        serial["baudrate"] = static_cast<uint32_t>(config.baudrate);
+        serial["dmx_passthru"] = config.dmx_passthru;
+#endif        
 
         json.prettyPrintTo(file);
         LOG_PORT.println(F("* New configuration saved."));
@@ -506,103 +471,76 @@ void loop() {
         ESP.restart();
     }
 
-    /* Configure our outputs and pixels */
-    switch (config.mode) {
-        case OutputMode::PIXEL:
-            /* Parse a packet and update pixels */
-            if(e131.parsePacket()) {
-                if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
-                    /* Universe offset and sequence tracking */
-                    uint8_t uniOffset = (e131.universe - config.universe);
-                    if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
-                        seqError[uniOffset]++;
-                        seqTracker[uniOffset] = e131.packet->sequence_number + 1;
-                    }
-
-                    /* Find out starting pixel based off the Universe */
-                    uint16_t pixelStart = uniOffset * config.ppu;
-
-                    /* Calculate how many pixels we need from this buffer */
-                    uint16_t pixelStop = config.channel_count / 3;
-                    if ((pixelStart + config.ppu) < pixelStop)
-                        pixelStop = pixelStart + config.ppu;
-
-                    /* Offset the channel if required for the first universe */
-                    uint16_t offset = 0;
-                    if (e131.universe == config.universe)
-                        offset = config.channel_start - 1;
-
-                    /* Set the pixel data */
-                    uint16_t buffloc = 0;
-                    for (int i = pixelStart; i < pixelStop; i++) {
-                        int j = buffloc++ * 3 + offset;
-                        pixels.setPixelColor(i, e131.data[j], e131.data[j+1], e131.data[j+2]);
-                    }
-
-                    /* Refresh when last universe shows up */
-                    if (e131.universe == uniLast) {
-                        lastPacket = millis();
-                        pixels.show();
-                    }
-                }
+#if defined (ESPS_MODE_PIXEL)
+    /* Parse a packet and update pixels */
+    if(e131.parsePacket()) {
+        if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
+            /* Universe offset and sequence tracking */
+            uint8_t uniOffset = (e131.universe - config.universe);
+            if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
+                seqError[uniOffset]++;
+                seqTracker[uniOffset] = e131.packet->sequence_number + 1;
             }
 
-            //TODO: Use this for setting defaults states at a later date
-            /* Force refresh every second if there is no data received */
-            if ((millis() - lastPacket) > E131_TIMEOUT) {
+            /* Find out starting pixel based off the Universe */
+            uint16_t pixelStart = uniOffset * config.ppu;
+
+            /* Calculate how many pixels we need from this buffer */
+            uint16_t pixelStop = config.channel_count / 3;
+            if ((pixelStart + config.ppu) < pixelStop)
+                pixelStop = pixelStart + config.ppu;
+
+            /* Offset the channel if required for the first universe */
+            uint16_t offset = 0;
+            if (e131.universe == config.universe)
+                offset = config.channel_start - 1;
+
+            /* Set the pixel data */
+            uint16_t buffloc = 0;
+            for (int i = pixelStart; i < pixelStop; i++) {
+                int j = buffloc++ * 3 + offset;
+                pixels.setPixelColor(i, e131.data[j], e131.data[j+1], e131.data[j+2]);
+            }
+
+            /* Refresh when last universe shows up */
+            if (e131.universe == uniLast) {
                 lastPacket = millis();
                 pixels.show();
             }
-            break;
-            
-        /* Parse a packet and update Renard */
-        case OutputMode::RENARD:
-            if (e131.parsePacket()) {
-                if (e131.universe == config.universe) {
-                    // Universe offset and sequence tracking 
-                    /* uint8_t uniOffset = (e131.universe - config.universe);
-                    if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
-                        seqError[uniOffset]++;
-                        seqTracker[uniOffset] = e131.packet->sequence_number + 1;
-                    }
-                    */
-                    uint16_t offset = config.channel_start - 1;
-
-                    // Set the serial data 
-                    renard.startPacket();
-                    for(int i = 0; i<config.channel_count; i++) {
-                        renard.setValue(i, e131.data[i + offset]);    
-                    }
-
-                    // Refresh  
-                    renard.show();
-                }
-            }
-            break;
-
-        /* Parse a packet and update DMX */
-        case OutputMode::DMX512:
-            if (e131.parsePacket()) {
-                if (e131.universe == config.universe) {
-                    // Universe offset and sequence tracking 
-                    /* uint8_t uniOffset = (e131.universe - config.universe);
-                    if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
-                        seqError[uniOffset]++;
-                        seqTracker[uniOffset] = e131.packet->sequence_number + 1;
-                    }
-                    */
-                    uint16_t offset = config.channel_start - 1;
-
-                    // Set the serial data 
-                    dmx.startPacket();
-                    for(int i = 0; i<config.channel_count; i++) {
-                        dmx.setValue(i, e131.data[i + offset]);    
-                    }
-
-                    // Refresh  
-                    dmx.show();
-                }
-            }
-            break;
+        }
     }
+
+    //TODO: Use this for setting defaults states at a later date
+    /* Force refresh every second if there is no data received */
+    if ((millis() - lastPacket) > E131_TIMEOUT) {
+        lastPacket = millis();
+        pixels.show();
+    }
+
+#elif defined (ESPS_MODE_SERIAL)
+    /* Parse a packet and update Serial */
+    if (e131.parsePacket()) {
+        if (e131.universe == config.universe) {
+            // Universe offset and sequence tracking
+            /*
+            uint8_t uniOffset = (e131.universe - config.universe);
+            if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
+                seqError[uniOffset]++;
+                seqTracker[uniOffset] = e131.packet->sequence_number + 1;
+            }
+            */
+
+            uint16_t offset = config.channel_start - 1;
+
+            // Set the serial data 
+            serial.startPacket();
+            for(int i = 0; i<config.channel_count; i++) {
+                serial.setValue(i, e131.data[i + offset]);    
+            }
+
+            // Refresh  
+            serial.show();
+        }
+    }
+#endif
 }

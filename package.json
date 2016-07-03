@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/forkineye/ESPixelStick#readme",
   "devDependencies": {
+    "del": "^2.2.1",
     "gulp": "^3.9.1",
     "gulp-clean-css": "^2.0.10",
     "gulp-gzip": "^1.4.0",

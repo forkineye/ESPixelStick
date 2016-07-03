@@ -23,23 +23,39 @@ GNU General Public License for more details.
 ******************************************************************/
 
 
-#ifndef RENARDDRIVER_H_
-#define RENARDDRIVER_H_
+#ifndef SERIALDRIVER_H_
+#define SERIALDRIVER_H_
 
 #include "HardwareSerial.h"
 
-class RenardDriver {
+/* Serial Types */
+enum class SerialType : uint8_t {
+    RENARD,
+    DMX512
+};
+
+enum class BaudRate : uint32_t {
+    BR_38400 = 38400,
+    BR_57600 = 57600,
+    BR_115200 = 115200,
+    BR_230400 = 230400,
+    BR_250000 = 250000
+};
+
+class SerialDriver {
  public:
-    int begin(HardwareSerial *theSerial, uint16_t length);
-    int begin(HardwareSerial *theSerial, uint16_t length, uint32_t baud);
+    int begin(HardwareSerial *theSerial, SerialType type, uint16_t length);
+    int begin(HardwareSerial *theSerial, SerialType type, uint16_t length,
+            BaudRate baud);
     void startPacket();
-    void setValue(uint16_t address, uint8_t value);
+    void setValue(uint16_t, uint8_t);
     void show();
 
  private:
-    HardwareSerial *_serial;    // The Serial Port
-    uint16_t _size;             // Size of buffer
-    uint8_t * _ptr;             // Pointer for buffer
+    SerialType      _type;      // Output Serial type
+    HardwareSerial  *_serial;   // The Serial Port
+    uint16_t        _size;      // Size of buffer
+    uint8_t         *_ptr;      // Pointer for buffer
 };
 
-#endif /* RENARDDRIVER_H_ */
+#endif /* SERIALDRIVER_H_ */

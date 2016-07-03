@@ -4,6 +4,7 @@ var htmlmin = require('gulp-htmlmin');
 var cleancss = require('gulp-clean-css');
 var uglifyjs = require('gulp-uglify');
 var gzip = require('gulp-gzip');
+var del = require('del');
 
 /* HTML Task */
 gulp.task('html', function() {
@@ -29,6 +30,11 @@ gulp.task('js', function() {
         .pipe(uglifyjs())
         .pipe(gzip())
         .pipe(gulp.dest('data/www'));
+});
+
+/* Clean Task */
+gulp.task('clean', function() {
+    return del(['data/www/*']);
 });
 
 /* Watch Task */

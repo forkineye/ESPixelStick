@@ -4,9 +4,10 @@ Changelog
 ### 1.5 (in progress)
 - Migrated to ESPAsyncWebserver for the web server.
 - Migrated all web pages to SPIFFS.
+- Migrated configuration structure to SPIFFS as a JSON file.
 - Added Gulp script to assist with preparing web pages.
 - Changed default serial port for Renard / DMX to Serial1.
-- Migrated configuration structure to SPIFFS.
+- Changed output type to compile time option. Check top of main sketch.
 
 ### 1.4
 - Arduino 1.6.8 compatibility.

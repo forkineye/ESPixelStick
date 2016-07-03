@@ -44,11 +44,9 @@
     "gamma": 1.0
   },
 
-  "dmx512": {
-    "passthru": false
-  },
-
-  "renard": {
-    "baudrate": 57600
+  "serial": {
+    "type": 0,
+    "baudrate": 57600,
+    "dmx_passthru": false
   }
 }

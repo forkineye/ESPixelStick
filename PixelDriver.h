@@ -111,7 +111,7 @@ class PixelDriver {
     uint8_t     gOffset;    // Index of red byte
     uint8_t     bOffset;    // Index of red byte
     uint32_t    endTime;    // Reset tracker
-    boolean     gamma;      // Gamma correction flag
+    bool        gamma;      // Gamma correction flag
 
     void ws2811_init();
     void gece_init();

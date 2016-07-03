@@ -2,7 +2,7 @@
 #define HELPERS_H_
 
 /* Check if value is between 0 and 255 */
-boolean checkRange(String Value) {
+bool checkRange(String Value) {
     if (Value.toInt() < 0 || Value.toInt() > 255)
         return false;
     else

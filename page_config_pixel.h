@@ -16,7 +16,6 @@ void send_config_pixel_html(AsyncWebServerRequest *request) {
             //if (p->name() == "gamma") config.gamma = p->value().toFloat();
             if (p->name() == "gamma") config.gamma = 1.0;
         }
-        updatePixelConfig();
         saveConfig();
 
         AsyncWebServerResponse *response = request->beginResponse(303);
