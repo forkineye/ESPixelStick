@@ -46,4 +46,4 @@ gulp.task('watch', function() {
 });
 
 /* Default Task */
-gulp.task('default', ['html', 'css', 'js']);
+gulp.task('default', ['clean', 'html', 'css', 'js']);

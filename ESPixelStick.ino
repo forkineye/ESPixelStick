@@ -51,6 +51,8 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #elif defined (ESPS_MODE_SERIAL)
 #include "SerialDriver.h"
 #include "page_config_serial.h"
+#else
+#error "No valid output mode defined."
 #endif
 
 /* Common Web pages and handlers */
@@ -69,9 +71,9 @@ SerialDriver    serial;         /* Serial object */
 uint8_t         *seqTracker;    /* Current sequence numbers for each Universe */
 uint32_t        lastPacket;     /* Packet timeout tracker */
 AsyncWebServer  web(HTTP_PORT); /* Web Server */
-char            *configString;
 
 /* Forward Declarations */
+bool serializeConfig(String &jsonString, bool pretty = false, bool creds = false);
 void loadConfig();
 int initWifi();
 void initWeb();
@@ -122,6 +124,7 @@ void setup() {
 
     /* Configure and start the web server */
     initWeb();
+
     /* Setup mDNS / DNS-SD */
     if (MDNS.begin(hostname)) {
         MDNS.addService("e131", "udp", E131_DEFAULT_PORT);
@@ -195,12 +198,15 @@ void initWeb() {
         request->send(200, "text/plain", String(ESP.getFreeHeap()));
     });
 
-    web.on("/conf", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(200, "text/plain", configString);
-    });
-
     /* Temp Config handler */
-    web.serveStatic("/config", SPIFFS, "/config.json");
+    //web.serveStatic("/configfile", SPIFFS, "/config.json");
+
+    /* JSON Config Handler */
+    web.on("/conf", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String jsonString;
+        serializeConfig(jsonString);
+        request->send(200, "text/plain", jsonString);
+    });
 
     /* AJAX Handlers */
     web.on("/rootvals", HTTP_GET, send_root_vals);
@@ -390,7 +396,6 @@ void loadConfig() {
         /* Serial */
         config.serial_type = SerialType(static_cast<uint8_t>(json["serial"]["type"]));
         config.baudrate = BaudRate(static_cast<uint32_t>(json["serial"]["baudrate"]));
-        config.dmx_passthru = json["serial"]["dmx_passthru"];
 #endif        
 
         LOG_PORT.println(F("- Configuration loaded."));
@@ -398,6 +403,61 @@ void loadConfig() {
 
     /* Validate it */
     validateConfig();
+}
+
+/* Serialize the current config into a JSON string */
+bool serializeConfig(String &jsonString, bool pretty, bool creds) {
+    /* Create buffer and root object */
+    DynamicJsonBuffer jsonBuffer;
+    JsonObject &json = jsonBuffer.createObject();
+
+    /* Device */
+    JsonObject &device = json.createNestedObject("device");
+    device["id"] = config.id;
+
+    /* Network */
+    JsonObject &network = json.createNestedObject("network");
+    network["ssid"] = config.ssid;
+    if (creds)
+        network["passphrase"] = config.passphrase;
+    network["hostname"] = config.hostname;
+    JsonArray &ip = network.createNestedArray("ip");
+    JsonArray &netmask = network.createNestedArray("netmask");
+    JsonArray &gateway = network.createNestedArray("gateway");
+    for (int i = 0; i < 4; i++) {
+        ip.add(config.ip[i]);
+        netmask.add(config.netmask[i]);
+        gateway.add(config.gateway[i]);
+    }
+    network["dhcp"] = config.dhcp;
+    network["ap_fallback"] = config.ap_fallback;
+
+    /* E131 */
+    JsonObject &e131 = json.createNestedObject("e131");
+    e131["universe"] = config.universe;
+    e131["channel_start"] = config.channel_start;
+    e131["channel_count"] = config.channel_count;
+    e131["multicast"] = config.multicast;
+
+#if defined (ESPS_MODE_PIXEL)
+    /* Pixel */
+    JsonObject &pixel = json.createNestedObject("pixel");
+    pixel["type"] = static_cast<uint8_t>(config.pixel_type);
+    pixel["color"] = static_cast<uint8_t>(config.pixel_color);
+    pixel["ppu"] = config.ppu;
+    pixel["gamma"] = config.gamma;
+
+#elif defined (ESPS_MODE_SERIAL)
+    /* Serial */
+    JsonObject &serial = json.createNestedObject("serial");
+    serial["type"] = static_cast<uint8_t>(config.serial_type);
+    serial["baudrate"] = static_cast<uint32_t>(config.baudrate);
+#endif        
+
+    if (pretty)
+        json.prettyPrintTo(jsonString);
+    else
+        json.printTo(jsonString);
 }
 
 /* Save configuration JSON file */
@@ -411,54 +471,9 @@ void saveConfig() {
         LOG_PORT.println(F("*** Error creating configuration file ***"));
         return;
     } else {
-        /* Create all required JSON objects and save the file */
-        DynamicJsonBuffer jsonBuffer;
-        JsonObject &json = jsonBuffer.createObject();
-
-        /* Device */
-        JsonObject &device = json.createNestedObject("device");
-        device["id"] = config.id;
-
-        /* Network */
-        JsonObject &network = json.createNestedObject("network");
-        network["ssid"] = config.ssid;
-        network["passphrase"] = config.passphrase;
-        network["hostname"] = config.hostname;
-        JsonArray &ip = network.createNestedArray("ip");
-        JsonArray &netmask = network.createNestedArray("netmask");
-        JsonArray &gateway = network.createNestedArray("gateway");
-        for (int i = 0; i < 4; i++) {
-            ip.add(config.ip[i]);
-            netmask.add(config.netmask[i]);
-            gateway.add(config.gateway[i]);
-        }
-        network["dhcp"] = config.dhcp;
-        network["ap_fallback"] = config.ap_fallback;
-
-        /* E131 */
-        JsonObject &e131 = json.createNestedObject("e131");
-        e131["universe"] = config.universe;
-        e131["channel_start"] = config.channel_start;
-        e131["channel_count"] = config.channel_count;
-        e131["multicast"] = config.multicast;
-
-#if defined (ESPS_MODE_PIXEL)
-        /* Pixel */
-        JsonObject &pixel = json.createNestedObject("pixel");
-        pixel["type"] = static_cast<uint8_t>(config.pixel_type);
-        pixel["color"] = static_cast<uint8_t>(config.pixel_color);
-        pixel["ppu"] = config.ppu;
-        pixel["gamma"] = config.gamma;
-
-#elif defined (ESPS_MODE_SERIAL)
-        /* Serial */
-        JsonObject &serial = json.createNestedObject("serial");
-        serial["type"] = static_cast<uint8_t>(config.serial_type);
-        serial["baudrate"] = static_cast<uint32_t>(config.baudrate);
-        serial["dmx_passthru"] = config.dmx_passthru;
-#endif        
-
-        json.prettyPrintTo(file);
+        String jsonString;
+        serializeConfig(jsonString, true, true);
+        file.println(jsonString);
         LOG_PORT.println(F("* New configuration saved."));
     }
 }
@@ -521,24 +536,22 @@ void loop() {
     /* Parse a packet and update Serial */
     if (e131.parsePacket()) {
         if (e131.universe == config.universe) {
-            // Universe offset and sequence tracking
-            /*
+            /* Universe offset and sequence tracking */
             uint8_t uniOffset = (e131.universe - config.universe);
             if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
                 seqError[uniOffset]++;
                 seqTracker[uniOffset] = e131.packet->sequence_number + 1;
             }
-            */
 
             uint16_t offset = config.channel_start - 1;
 
-            // Set the serial data 
+            /* Set the serial data */
             serial.startPacket();
             for(int i = 0; i<config.channel_count; i++) {
                 serial.setValue(i, e131.data[i + offset]);    
             }
 
-            // Refresh  
+            /* Refresh */
             serial.show();
         }
     }

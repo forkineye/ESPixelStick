@@ -79,7 +79,6 @@ typedef struct {
     /* Serial */
     SerialType  serial_type;    /* Serial type */
     BaudRate    baudrate;       /* Baudrate */
-    bool        dmx_passthru;   /* DMX Passthrough */
 #endif
 } config_t;
 

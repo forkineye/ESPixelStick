@@ -11,7 +11,6 @@ void send_config_serial_html(AsyncWebServerRequest *request) {
             if (p->name() == "channel_count") config.channel_count = p->value().toInt();
             if (p->name() == "mode") config.serial_type = SerialType(p->value().toInt());
             if (p->name() == "baudrate") config.baudrate = BaudRate(p->value().toInt());
-            if (p->name() == "dmx_passthru") config.dmx_passthru = true;
         }
         saveConfig();
 
@@ -38,7 +37,6 @@ void send_config_serial_vals(AsyncWebServerRequest *request) {
     values += "baudrate|opt|" + String("230400|") + String(static_cast<uint32_t>(BaudRate::BR_230400)) + "\n";
     values += "baudrate|opt|" + String("250000|") + String(static_cast<uint32_t>(BaudRate::BR_250000)) + "\n";
     values += "baudrate|input|" + String(static_cast<uint32_t>(config.baudrate)) + "\n";
-    values += "dmx_passthru|chk|" + (String)(config.dmx_passthru ? "checked" : "") + "\n";
     values += "title|div|" + (String)config.id + " - Serial Config\n";
     request->send(200, "text/plain", values);
 }
