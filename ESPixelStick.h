@@ -43,6 +43,13 @@ const char VERSION[] = "1.5 beta";
 #define LOG_PORT        Serial  /* Serial port for console logging */
 #define SERIAL_PORT     Serial1 /* Serial port for Renard / DMX output */
 
+/* E1.33 / RDMnet stuff - to be moved to library */
+#define RDMNET_DNSSD_SRV_TYPE   "draft-e133.tcp"
+#define RDMNET_DEFAULT_SCOPE    "default"
+#define RDMNET_DEFAULT_DOMAIN   "local"
+#define RDMNET_DNSSD_TXTVERS    1
+#define RDMNET_DNSSD_E133VERS   1
+
 /* Configuration file params */
 const char CONFIG_FILE[] = "/config.json";
 #define CONFIG_MAX_SIZE 2048    /* Sanity limit for config file */
@@ -50,12 +57,12 @@ const char CONFIG_FILE[] = "/config.json";
 /* Configuration structure */
 typedef struct {
     /* Device */
-    char        id[33];         /* Device ID - 32 bytes max */
+    String      id;             /* Device ID */
 
     /* Network */
-    char        ssid[33];       /* 32 bytes max */
-    char        passphrase[65]; /* 64 bytes max */
-    char        hostname[33];   /* 32 bytes max */
+    String      ssid;
+    String      passphrase;
+    String      hostname;
     uint8_t     ip[4];
     uint8_t     netmask[4];
     uint8_t     gateway[4];

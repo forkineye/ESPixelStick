@@ -68,12 +68,12 @@ PixelDriver     pixels;         /* Pixel object */
 SerialDriver    serial;         /* Serial object */
 #endif
 
-uint8_t         *seqTracker;    /* Current sequence numbers for each Universe */
-uint32_t        lastPacket;     /* Packet timeout tracker */
-AsyncWebServer  web(HTTP_PORT); /* Web Server */
+uint8_t             *seqTracker;        /* Current sequence numbers for each Universe */
+uint32_t            lastPacket;         /* Packet timeout tracker */
+AsyncWebServer      web(HTTP_PORT);     /* Web Server */
 
 /* Forward Declarations */
-bool serializeConfig(String &jsonString, bool pretty = false, bool creds = false);
+void serializeConfig(String &jsonString, bool pretty = false, bool creds = false);
 void loadConfig();
 int initWifi();
 void initWeb();
@@ -81,8 +81,9 @@ void updateConfig();
 
 void setup() {
     /* Generate and set hostname */
-    char hostname[16] = { 0 };
-    sprintf(hostname, "ESP_%06X", ESP.getChipId());
+    char chipId[7] = { 0 };
+    sprintf(chipId, "%06x", ESP.getChipId());
+    String hostname = "esps_" + String(chipId);
     WiFi.hostname(hostname);
 
     /* Initial pin states */
@@ -108,29 +109,41 @@ void setup() {
     int status = initWifi();
     if (status != WL_CONNECTED) {
         LOG_PORT.println(F("*** Timeout - Reverting to default SSID ***"));
-        strncpy(config.ssid, ssid, sizeof(config.ssid));
-        strncpy(config.passphrase, passphrase, sizeof(config.passphrase));
+        config.ssid = ssid;
+        config.passphrase = passphrase;
         status = initWifi();
     }
 
-    /* If we fail again, go SoftAP */
+    /* If we fail again, go SoftAP or reboot */
     if (status != WL_CONNECTED) {
-        LOG_PORT.println(F("**** FAILED TO ASSOCIATE WITH AP, GOING SOFTAP ****"));
-        WiFi.mode(WIFI_AP);
-        String ssid = "ESPixel " + (String)ESP.getChipId();
-        WiFi.softAP(ssid.c_str());
-        //ESP.restart();
+        if (config.ap_fallback) {
+            LOG_PORT.println(F("**** FAILED TO ASSOCIATE WITH AP, GOING SOFTAP ****"));
+            WiFi.mode(WIFI_AP);
+            String ssid = "ESPixel " + String(chipId);
+            WiFi.softAP(ssid.c_str());
+        } else {
+            LOG_PORT.println(F("**** FAILED TO ASSOCIATE WITH AP, REBOOTING ****"));
+            ESP.restart();
+        }
     }
 
     /* Configure and start the web server */
     initWeb();
 
     /* Setup mDNS / DNS-SD */
-    if (MDNS.begin(hostname)) {
-        MDNS.addService("e131", "udp", E131_DEFAULT_PORT);
+    //TODO: Reboot or restart mdns when config.id is changed?
+    MDNS.setInstanceName(config.id + " (" + String(chipId) + ")");
+    if (MDNS.begin(hostname.c_str())) {
         MDNS.addService("http", "tcp", HTTP_PORT);
+        MDNS.addService("e131", "udp", E131_DEFAULT_PORT);
+        MDNS.addServiceTxt("e131", "udp", "TxtVers", String(RDMNET_DNSSD_TXTVERS));
+        MDNS.addServiceTxt("e131", "udp", "ConfScope", RDMNET_DEFAULT_SCOPE);
+        MDNS.addServiceTxt("e131", "udp", "E133Vers", String(RDMNET_DNSSD_E133VERS));
+        MDNS.addServiceTxt("e131", "udp", "CID", String(chipId));
+        MDNS.addServiceTxt("e131", "udp", "Model", "ESPixelStick");
+        MDNS.addServiceTxt("e131", "udp", "Manuf", "Forkineye");
     } else {
-        LOG_PORT.println(F("** Error setting up mDNS responder **"));
+        LOG_PORT.println(F("*** Error setting up mDNS responder ***"));
     }
 
     /* Configure the outputs */
@@ -153,7 +166,7 @@ int initWifi() {
     LOG_PORT.print(F("Connecting to "));
     LOG_PORT.print(config.ssid);
     
-    WiFi.begin(config.ssid, config.passphrase);
+    WiFi.begin(config.ssid.c_str(), config.passphrase.c_str());
 
     uint32_t timeout = millis();
     while (WiFi.status() != WL_CONNECTED) {
@@ -178,7 +191,6 @@ int initWifi() {
                     IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3])
             );
             LOG_PORT.print(F("Connected with Static IP: "));
-
         }
         LOG_PORT.println(WiFi.localIP());
 
@@ -198,21 +210,21 @@ void initWeb() {
         request->send(200, "text/plain", String(ESP.getFreeHeap()));
     });
 
-    /* Temp Config handler */
+    /* Config file handler for testing */
     //web.serveStatic("/configfile", SPIFFS, "/config.json");
 
     /* JSON Config Handler */
     web.on("/conf", HTTP_GET, [](AsyncWebServerRequest *request) {
         String jsonString;
         serializeConfig(jsonString);
-        request->send(200, "text/plain", jsonString);
+        request->send(200, "text/json", jsonString);
     });
 
     /* AJAX Handlers */
     web.on("/rootvals", HTTP_GET, send_root_vals);
     web.on("/adminvals", HTTP_GET, send_admin_vals);
     web.on("/config/netvals", HTTP_GET, send_config_net_vals);
-    web.on("/config/connectionstate", HTTP_GET, send_connection_state_vals);
+    web.on("/config/survey", HTTP_GET, send_survey_vals);
     web.on("/status/netvals", HTTP_GET, send_status_net_vals);
     web.on("/status/e131vals", HTTP_GET, send_status_e131_vals);
 
@@ -243,6 +255,16 @@ void initWeb() {
 
 /* Configuration Validations */
 void validateConfig() {
+    /* E1.31 Limits */
+    if (config.universe < 1)
+        config.universe = 1;
+
+    if (config.channel_start < 1)
+        config.channel_start = 1;
+    else if (config.channel_start > 512)
+        config.channel_start = 512;
+
+
 #if defined (ESPS_MODE_PIXEL)    
     /* Generic channel limits for pixels */
     if (config.channel_count > PIXEL_LIMIT * 3)
@@ -251,10 +273,8 @@ void validateConfig() {
         config.channel_count = 1;
 
     /* PPU Limits */
-    if (config.ppu > PPU_MAX)
+    if (config.ppu > PPU_MAX || config.ppu < 1)
         config.ppu = PPU_MAX;
-    else if (config.ppu < 1)
-        config.ppu = 1;
 
     /* GECE Limits */
     if (config.pixel_type == PixelType::GECE) {
@@ -328,9 +348,8 @@ void loadConfig() {
     File file = SPIFFS.open(CONFIG_FILE, "r");
     if (!file) {
         LOG_PORT.println(F("- No configuration file found."));
-        strncpy(config.ssid, ssid, sizeof(config.ssid));
-        strncpy(config.passphrase, passphrase, sizeof(config.passphrase));
-        sprintf(config.hostname, "ESP_%06X", ESP.getChipId());
+        config.ssid = ssid;
+        config.passphrase = passphrase;
         saveConfig();
     } else {
         /* Parse CONFIG_FILE json */
@@ -351,24 +370,18 @@ void loadConfig() {
         }
 
         /* Device */
-        strncpy(config.id, json["device"]["id"], sizeof(config.id));
+        config.id = json["device"]["id"].as<String>();
 
         /* Fallback to embedded ssid and passphrase if null in config */
         if (strlen(json["network"]["ssid"]))
-            strncpy(config.ssid, json["network"]["ssid"], sizeof(config.ssid));
+            config.ssid = json["network"]["ssid"].as<String>();
         else
-            strncpy(config.ssid, ssid, sizeof(config.ssid));
+            config.ssid = ssid;
         
         if (strlen(json["network"]["passphrase"]))
-            strncpy(config.passphrase, json["network"]["passphrase"], sizeof(config.passphrase));
+            config.passphrase = json["network"]["passphrase"].as<String>();
         else
-            strncpy(config.passphrase, passphrase, sizeof(config.passphrase));
-
-        /* Fallback to auto-generated hostname if null in config */
-        if (strlen(json["network"]["hostname"]))
-            strncpy(config.hostname, json["network"]["hostname"], sizeof(config.hostname));
-        else
-            sprintf(config.hostname, "ESP_%06X", ESP.getChipId());
+            config.passphrase = passphrase;
 
         /* Network */
         for (int i = 0; i < 4; i++) {
@@ -406,21 +419,20 @@ void loadConfig() {
 }
 
 /* Serialize the current config into a JSON string */
-bool serializeConfig(String &jsonString, bool pretty, bool creds) {
+void serializeConfig(String &jsonString, bool pretty, bool creds) {
     /* Create buffer and root object */
     DynamicJsonBuffer jsonBuffer;
     JsonObject &json = jsonBuffer.createObject();
 
     /* Device */
     JsonObject &device = json.createNestedObject("device");
-    device["id"] = config.id;
+    device["id"] = config.id.c_str();
 
     /* Network */
     JsonObject &network = json.createNestedObject("network");
-    network["ssid"] = config.ssid;
+    network["ssid"] = config.ssid.c_str();
     if (creds)
-        network["passphrase"] = config.passphrase;
-    network["hostname"] = config.hostname;
+        network["passphrase"] = config.passphrase.c_str();
     JsonArray &ip = network.createNestedArray("ip");
     JsonArray &netmask = network.createNestedArray("netmask");
     JsonArray &gateway = network.createNestedArray("gateway");
@@ -465,14 +477,16 @@ void saveConfig() {
     /* Update Config */
     updateConfig();
 
+    /* Serialize Config */
+    String jsonString;
+    serializeConfig(jsonString, true, true);
+
     /* Save Config */
     File file = SPIFFS.open(CONFIG_FILE, "w");
     if (!file) {
         LOG_PORT.println(F("*** Error creating configuration file ***"));
         return;
     } else {
-        String jsonString;
-        serializeConfig(jsonString, true, true);
         file.println(jsonString);
         LOG_PORT.println(F("* New configuration saved."));
     }

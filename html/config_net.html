@@ -17,19 +17,17 @@ Connect to Router with these settings:<br>
 </table>
 </form>
 <hr>
-<strong>Connection State:</strong><div id="connectionstate">N/A</div>
-<hr>
 <strong>Networks:</strong><br>
 <table border="0"  cellspacing="3" style="width:310px">
 <tr><td><div id="networks">Scanning...</div></td></tr>
-<tr><td align="center"><a href="javascript:GetState()" style="width:150px" class="btn btn--m btn--blue">Refresh</a></td></tr>
+<tr><td colspan="2" align="center"><button id="refresh" onclick="updateSurvey()" style="width:150px" class="btn btn--m btn--blue">Refresh</button></td></tr>
 </table>
 <script type="text/javascript" src="script.js"></script>
 <script>
 setValues("/config/netvals");
-setTimeout(GetState,2000);
-function GetState() {
-	setValues("/config/connectionstate");
+setTimeout(updateSurvey, 2000);
+function updateSurvey() {
+    setValues("/config/survey");
 }
 function selssid(value) {
 	document.getElementById("ssid").value = value; 

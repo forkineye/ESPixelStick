@@ -6,14 +6,13 @@ void send_config_pixel_html(AsyncWebServerRequest *request) {
         config.gamma = 0;
         for (uint8_t i = 0; i < request->params(); i++) {
             AsyncWebParameter *p = request->getParam(i);
-            if (p->name() == "devid") urldecode(p->value()).toCharArray(config.id, sizeof(config.id));
+            if (p->name() == "devid") config.id = p->value();
             if (p->name() == "universe") config.universe = p->value().toInt(); 
             if (p->name() == "channel_start") config.channel_start = p->value().toInt();
             if (p->name() == "pixel_count") config.channel_count = p->value().toInt() * 3;
             if (p->name() == "pixel_type") config.pixel_type = PixelType(p->value().toInt());
             if (p->name() == "pixel_color") config.pixel_color = PixelColor(p->value().toInt());
             if (p->name() == "ppu") config.ppu = p->value().toInt();
-            //if (p->name() == "gamma") config.gamma = p->value().toFloat();
             if (p->name() == "gamma") config.gamma = 1.0;
         }
         saveConfig();
@@ -28,7 +27,7 @@ void send_config_pixel_html(AsyncWebServerRequest *request) {
 
 void send_config_pixel_vals(AsyncWebServerRequest *request) {
     String values = "";
-    values += "devid|input|" + (String)config.id + "\n";
+    values += "devid|input|" + config.id + "\n";
     values += "universe|input|" + (String)config.universe + "\n";
     values += "channel_start|input|" + (String)config.channel_start + "\n";
     values += "pixel_count|input|" + String(config.channel_count / 3) + "\n";
@@ -41,9 +40,8 @@ void send_config_pixel_vals(AsyncWebServerRequest *request) {
     values += "pixel_color|opt|" + String("RBG|") + String(static_cast<uint8_t>(PixelColor::RBG)) + "\n";
     values += "pixel_color|input|" + String(static_cast<uint8_t>(config.pixel_color)) + "\n";
     values += "ppu|input|" + String(config.ppu) + "\n";
-    //values += "gamma|input|" + String(config.gamma) + "\n";
     values += "gamma|chk|" + String(config.gamma ? "checked" : "") + "\n";
-    values += "title|div|" + (String)config.id + " - Pixel Config\n";
+    values += "title|div|" + config.id + " - Pixel Config\n";
     request->send(200, "text/plain", values);
 }
 

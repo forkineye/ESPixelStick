@@ -5,7 +5,7 @@ void send_config_serial_html(AsyncWebServerRequest *request) {
     if (request->params()) {
         for (uint8_t i = 0; i < request->params(); i++) {
             AsyncWebParameter *p = request->getParam(i);
-            if (p->name() == "devid") urldecode(p->value()).toCharArray(config.id, sizeof(config.id));
+            if (p->name() == "devid") config.id = p->value();
             if (p->name() == "universe") config.universe = p->value().toInt(); 
             if (p->name() == "channel_start") config.channel_start = p->value().toInt();
             if (p->name() == "channel_count") config.channel_count = p->value().toInt();
@@ -24,7 +24,7 @@ void send_config_serial_html(AsyncWebServerRequest *request) {
 
 void send_config_serial_vals(AsyncWebServerRequest *request) {
     String values = "";
-    values += "devid|input|" + (String)config.id + "\n";
+    values += "devid|input|" + config.id + "\n";
     values += "universe|input|" + (String)config.universe + "\n";
     values += "channel_start|input|" + (String)config.channel_start + "\n";
     values += "channel_count|input|" + (String)config.channel_count + "\n";
@@ -37,7 +37,7 @@ void send_config_serial_vals(AsyncWebServerRequest *request) {
     values += "baudrate|opt|" + String("230400|") + String(static_cast<uint32_t>(BaudRate::BR_230400)) + "\n";
     values += "baudrate|opt|" + String("250000|") + String(static_cast<uint32_t>(BaudRate::BR_250000)) + "\n";
     values += "baudrate|input|" + String(static_cast<uint32_t>(config.baudrate)) + "\n";
-    values += "title|div|" + (String)config.id + " - Serial Config\n";
+    values += "title|div|" + config.id + " - Serial Config\n";
     request->send(200, "text/plain", values);
 }
 

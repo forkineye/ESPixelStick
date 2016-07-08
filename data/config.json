@@ -46,7 +46,6 @@
 
   "serial": {
     "type": 0,
-    "baudrate": 57600,
-    "dmx_passthru": false
+    "baudrate": 57600
   }
 }

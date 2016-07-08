@@ -25,7 +25,7 @@ void send_admin_html(AsyncWebServerRequest *request) {
 void send_admin_vals(AsyncWebServerRequest *request) {
     String values = "";
     values += "version|div|" + (String)VERSION + "\n";
-    values += "title|div|" + (String)config.id + " - Admin\n";
+    values += "title|div|" + config.id + " - Admin\n";
     request->send(200, "text/plain", values);
 }
 
