@@ -8,6 +8,7 @@ Changelog
 - Added Gulp script to assist with preparing web pages.
 - Changed default serial port for Renard / DMX to Serial1.
 - Changed output type to compile time option. Check top of main sketch.
+- Added mDNS / DNS-SD responder.
 
 ### 1.4
 - Arduino 1.6.8 compatibility.
