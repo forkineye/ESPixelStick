@@ -69,7 +69,7 @@ SerialDriver    serial;         /* Serial object */
 #endif
 
 uint8_t             *seqTracker;        /* Current sequence numbers for each Universe */
-uint32_t            lastPacket;         /* Packet timeout tracker */
+uint32_t            lastUpdate;         /* Update timeout tracker */
 AsyncWebServer      web(HTTP_PORT);     /* Web Server */
 
 /* Forward Declarations */
@@ -533,7 +533,7 @@ void loop() {
 
             /* Refresh when last universe shows up */
             if (e131.universe == uniLast) {
-                lastPacket = millis();
+                lastUpdate = millis();
                 pixels.show();
             }
         }
@@ -541,8 +541,8 @@ void loop() {
 
     //TODO: Use this for setting defaults states at a later date
     /* Force refresh every second if there is no data received */
-    if ((millis() - lastPacket) > E131_TIMEOUT) {
-        lastPacket = millis();
+    if ((millis() - lastUpdate) > E131_TIMEOUT) {
+        lastUpdate = millis();
         pixels.show();
     }
 

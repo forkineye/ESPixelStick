@@ -95,16 +95,12 @@ class PixelDriver {
     void setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b);
     void show();
 
-    /* 50us reset for WS2811 */
-    inline bool canShow_WS2811(void) {
-        return (micros() - endTime) >= WS2811_TIDLE;
-    }
-
  private:
     PixelType   type;       // Pixel type
     PixelColor  color;      // Color Order
     uint8_t     pin;        // Pin for bit-banging
     uint8_t     *pixdata;   // Pixel buffer
+    uint8_t     *asyncdata; // Async buffer
     uint16_t    numPixels;  // Number of pixels
     uint16_t    szBuffer;   // Size of Pixel buffer
     uint8_t     rOffset;    // Index of red byte
@@ -115,11 +111,26 @@ class PixelDriver {
 
     void ws2811_init();
     void gece_init();
+    static const uint8_t* ICACHE_RAM_ATTR fillFifo(const uint8_t *buff, const uint8_t *tail);
+
+    /* WS2811 interrupt handler */
+    static void ICACHE_RAM_ATTR ws2811_handle(void *param);
 
     /* Drop the update if our refresh rate is too high */
     inline bool canRefresh(uint32_t frame, uint32_t idle) {
         return (micros() - endTime) >= (frame * numPixels + idle);
     }
+
+    /* Returns number of bytes waiting in the TX FIFO of UART1 */
+    static inline uint8_t getFifoLength() {
+        return (U1S >> USTXC) & 0xff;
+    }
+
+    /* Append a byte to the TX FIFO of UART1 */
+    static inline void enqueue(uint8_t byte) {
+        U1F = byte;
+    }
+
 };
 
 #endif /* PIXELDRIVER_H_ */
