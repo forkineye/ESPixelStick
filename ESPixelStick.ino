@@ -34,12 +34,14 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 /*         END - Configuration           */
 /*****************************************/
 
+#include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <WiFiUdp.h>
 #include <ESP8266mDNS.h>
 #include <ArduinoJson.h>
+#include <Hash.h>
 #include "ESPixelStick.h"
 #include "_E131.h"
 #include "helpers.h"
@@ -62,9 +64,9 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include "page_status_net.h"
 #include "page_status_e131.h"
 
-#if defined (ESPS_MODE_PIXEL)
+#if defined(ESPS_MODE_PIXEL)
 PixelDriver     pixels;         /* Pixel object */
-#elif defined (ESPS_MODE_SERIAL)
+#elif defined(ESPS_MODE_SERIAL)
 SerialDriver    serial;         /* Serial object */
 #endif
 
@@ -82,7 +84,7 @@ void updateConfig();
 void setup() {
     /* Generate and set hostname */
     char chipId[7] = { 0 };
-    sprintf(chipId, "%06x", ESP.getChipId());
+    snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
     String hostname = "esps_" + String(chipId);
     WiFi.hostname(hostname);
 
@@ -92,7 +94,7 @@ void setup() {
 
     /* Enable SPIFFS */
     SPIFFS.begin();
-    
+
     LOG_PORT.begin(115200);
     delay(10);
 
@@ -101,7 +103,7 @@ void setup() {
     for (uint8_t i = 0; i < strlen_P(VERSION); i++)
         LOG_PORT.print((char)(pgm_read_byte(VERSION + i)));
     LOG_PORT.println("");
-    
+
     /* Load configuration from SPIFFS */
     loadConfig();
 
@@ -165,7 +167,7 @@ int initWifi() {
     LOG_PORT.println("");
     LOG_PORT.print(F("Connecting to "));
     LOG_PORT.print(config.ssid);
-    
+
     WiFi.begin(config.ssid.c_str(), config.passphrase.c_str());
 
     uint32_t timeout = millis();
@@ -233,15 +235,15 @@ void initWeb() {
     web.on("/config_net.html", HTTP_POST, send_config_net_html);
 
     /* Static handler */
-#if defined (ESPS_MODE_PIXEL)
+#if defined(ESPS_MODE_PIXEL)
     web.on("/config/pixelvals", HTTP_GET, send_config_pixel_vals);
     web.on("/config_pixel.html", HTTP_POST, send_config_pixel_html);
     web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("pixel.html");
-#elif defined (ESPS_MODE_SERIAL)
+#elif defined(ESPS_MODE_SERIAL)
     web.on("/config/serialvals", HTTP_GET, send_config_serial_vals);
     web.on("/config_serial.html", HTTP_POST, send_config_serial_html);
     web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("serial.html");
-#endif    
+#endif
 
     web.onNotFound([](AsyncWebServerRequest *request) {
         request->send(404);
@@ -265,7 +267,7 @@ void validateConfig() {
         config.channel_start = 512;
 
 
-#if defined (ESPS_MODE_PIXEL)    
+#if defined(ESPS_MODE_PIXEL)
     /* Generic channel limits for pixels */
     if (config.channel_count > PIXEL_LIMIT * 3)
         config.channel_count = PIXEL_LIMIT * 3;
@@ -286,11 +288,11 @@ void validateConfig() {
         uint16_t bounds = config.ppu * 3;
         if (config.channel_count % bounds)
             uniLast = config.universe + config.channel_count / bounds;
-        else 
+        else
             uniLast = config.universe + config.channel_count / bounds - 1;
     }
 
-#elif defined (ESPS_MODE_SERIAL)
+#elif defined(ESPS_MODE_SERIAL)
     /* Generic serial channel limits */
     if (config.channel_count > SERIAL_LIMIT)
         config.channel_count = SERIAL_LIMIT;
@@ -324,13 +326,13 @@ void updateConfig() {
     e131.stats.num_packets = 0;
 
     /* Initialize for our pixel type */
-#if defined (ESPS_MODE_PIXEL)
+#if defined(ESPS_MODE_PIXEL)
     pixels.begin(config.pixel_type, config.pixel_color);
     pixels.updateLength(config.channel_count / 3);
     pixels.setGamma(config.gamma);
-#elif defined (ESPS_MODE_SERIAL)    
+#elif defined(ESPS_MODE_SERIAL)
     serial.begin(&SERIAL_PORT, config.serial_type, config.channel_count, config.baudrate);
-#endif    
+#endif
     LOG_PORT.print(F("- Listening for "));
     LOG_PORT.print(config.channel_count);
     LOG_PORT.print(F(" channels, from Universe "));
@@ -377,7 +379,7 @@ void loadConfig() {
             config.ssid = json["network"]["ssid"].as<String>();
         else
             config.ssid = ssid;
-        
+
         if (strlen(json["network"]["passphrase"]))
             config.passphrase = json["network"]["passphrase"].as<String>();
         else
@@ -398,18 +400,18 @@ void loadConfig() {
         config.channel_count = json["e131"]["channel_count"];
         config.multicast = json["e131"]["multicast"];
 
-#if defined (ESPS_MODE_PIXEL)
+#if defined(ESPS_MODE_PIXEL)
         /* Pixel */
         config.pixel_type = PixelType(static_cast<uint8_t>(json["pixel"]["type"]));
         config.pixel_color = PixelColor(static_cast<uint8_t>(json["pixel"]["color"]));
         config.ppu = json["pixel"]["ppu"];
         config.gamma = json["pixel"]["gamma"];
 
-#elif defined (ESPS_MODE_SERIAL)
+#elif defined(ESPS_MODE_SERIAL)
         /* Serial */
         config.serial_type = SerialType(static_cast<uint8_t>(json["serial"]["type"]));
         config.baudrate = BaudRate(static_cast<uint32_t>(json["serial"]["baudrate"]));
-#endif        
+#endif
 
         LOG_PORT.println(F("- Configuration loaded."));
     }
@@ -451,7 +453,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     e131["channel_count"] = config.channel_count;
     e131["multicast"] = config.multicast;
 
-#if defined (ESPS_MODE_PIXEL)
+#if defined(ESPS_MODE_PIXEL)
     /* Pixel */
     JsonObject &pixel = json.createNestedObject("pixel");
     pixel["type"] = static_cast<uint8_t>(config.pixel_type);
@@ -459,12 +461,12 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     pixel["ppu"] = config.ppu;
     pixel["gamma"] = config.gamma;
 
-#elif defined (ESPS_MODE_SERIAL)
+#elif defined(ESPS_MODE_SERIAL)
     /* Serial */
     JsonObject &serial = json.createNestedObject("serial");
     serial["type"] = static_cast<uint8_t>(config.serial_type);
     serial["baudrate"] = static_cast<uint32_t>(config.baudrate);
-#endif        
+#endif
 
     if (pretty)
         json.prettyPrintTo(jsonString);
@@ -500,9 +502,9 @@ void loop() {
         ESP.restart();
     }
 
-#if defined (ESPS_MODE_PIXEL)
+#if defined(ESPS_MODE_PIXEL)
     /* Parse a packet and update pixels */
-    if(e131.parsePacket()) {
+    if (e131.parsePacket()) {
         if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
             /* Universe offset and sequence tracking */
             uint8_t uniOffset = (e131.universe - config.universe);
@@ -546,7 +548,7 @@ void loop() {
         pixels.show();
     }
 
-#elif defined (ESPS_MODE_SERIAL)
+#elif defined(ESPS_MODE_SERIAL)
     /* Parse a packet and update Serial */
     if (e131.parsePacket()) {
         if (e131.universe == config.universe) {
@@ -561,9 +563,8 @@ void loop() {
 
             /* Set the serial data */
             serial.startPacket();
-            for(int i = 0; i<config.channel_count; i++) {
-                serial.setValue(i, e131.data[i + offset]);    
-            }
+            for (int i = 0; i < config.channel_count; i++)
+                serial.setValue(i, e131.data[i + offset]);
 
             /* Refresh */
             serial.show();

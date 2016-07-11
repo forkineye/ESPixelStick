@@ -130,7 +130,6 @@ class PixelDriver {
     static inline void enqueue(uint8_t byte) {
         U1F = byte;
     }
-
 };
 
 #endif /* PIXELDRIVER_H_ */

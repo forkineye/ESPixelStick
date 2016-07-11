@@ -19,15 +19,19 @@ Connect to Router with these settings:<br>
 <hr>
 <strong>Networks:</strong><br>
 <table border="0"  cellspacing="3" style="width:310px">
-<tr><td><div id="networks">Scanning...</div></td></tr>
+<tr><td><div id="networks">No Scan Data</div></td></tr>
 <tr><td colspan="2" align="center"><button id="refresh" onclick="updateSurvey()" style="width:150px" class="btn btn--m btn--blue">Refresh</button></td></tr>
 </table>
 <script type="text/javascript" src="script.js"></script>
 <script>
 setValues("/config/netvals");
-setTimeout(updateSurvey, 2000);
 function updateSurvey() {
+    document.getElementById("refresh").disabled = true;
     setValues("/config/survey");
+    setTimeout(function() {
+        setValues("/config/survey");
+        document.getElementById("refresh").disabled = false;
+    }, 2500);
 }
 function selssid(value) {
 	document.getElementById("ssid").value = value; 

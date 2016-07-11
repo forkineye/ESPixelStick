@@ -35,9 +35,6 @@ void send_config_net_html(AsyncWebServerRequest *request) {
 }
 
 void send_config_net_vals(AsyncWebServerRequest *request) {
-    WiFi.scanDelete();
-    WiFi.scanNetworks(true);
-
     String values ="";
     values += "ssid|input|" + config.ssid + "\n";
     values += "password|input|" + config.passphrase + "\n";
@@ -65,7 +62,6 @@ void send_survey_vals(AsyncWebServerRequest *request) {
 
     if (scanStatus == WIFI_SCAN_FAILED) {
         WiFi.scanNetworks(true);
-    } else if (scanStatus == WIFI_SCAN_RUNNING) {
         networks = "<font color='#FF0000'>Scan in progress...</font>";
     } else if (scanStatus == 0) {
         networks = "<font color='#FF0000'>No networks found!</font>";
@@ -87,8 +83,6 @@ void send_survey_vals(AsyncWebServerRequest *request) {
         networks += "</table>";
 
         WiFi.scanDelete();
-        if (WiFi.scanComplete() == WIFI_SCAN_FAILED)
-            WiFi.scanNetworks(true);
     }
     String values = "";
     values += "networks|div|" + networks + "\n";
