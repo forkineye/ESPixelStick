@@ -23,8 +23,8 @@
 /*****************************************/
 
 /* Output Mode - There can be only one! (-Conor MacLeod) */
-//#define ESPS_MODE_PIXEL
-#define ESPS_MODE_SERIAL
+#define ESPS_MODE_PIXEL
+//#define ESPS_MODE_SERIAL
 
 /* Fallback configuration if config.json is empty or fails */
 const char ssid[] = "ENTER_SSID_HERE";
