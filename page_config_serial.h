@@ -36,6 +36,7 @@ void send_config_serial_vals(AsyncWebServerRequest *request) {
     values += "baudrate|opt|" + String("115200|") + String(static_cast<uint32_t>(BaudRate::BR_115200)) + "\n";
     values += "baudrate|opt|" + String("230400|") + String(static_cast<uint32_t>(BaudRate::BR_230400)) + "\n";
     values += "baudrate|opt|" + String("250000|") + String(static_cast<uint32_t>(BaudRate::BR_250000)) + "\n";
+    values += "baudrate|opt|" + String("460800|") + String(static_cast<uint32_t>(BaudRate::BR_460800)) + "\n";
     values += "baudrate|input|" + String(static_cast<uint32_t>(config.baudrate)) + "\n";
     values += "title|div|" + config.id + " - Serial Config\n";
     request->send(200, "text/plain", values);

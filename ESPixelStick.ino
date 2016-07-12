@@ -23,8 +23,8 @@
 /*****************************************/
 
 /* Output Mode - There can be only one! (-Conor MacLeod) */
-#define ESPS_MODE_PIXEL
-//#define ESPS_MODE_SERIAL
+//#define ESPS_MODE_PIXEL
+#define ESPS_MODE_SERIAL
 
 /* Fallback configuration if config.json is empty or fails */
 const char ssid[] = "ENTER_SSID_HERE";
@@ -294,14 +294,22 @@ void validateConfig() {
 
 #elif defined(ESPS_MODE_SERIAL)
     /* Generic serial channel limits */
-    if (config.channel_count > SERIAL_LIMIT)
-        config.channel_count = SERIAL_LIMIT;
+    if (config.channel_count > RENARD_LIMIT)
+        config.channel_count = RENARD_LIMIT;
     else if (config.channel_count < 1)
         config.channel_count = 1;
 
+    if (config.serial_type == SerialType::DMX512 && config.channel_count > 512)
+        config.channel_count = 512;
+
+    if (config.channel_count % 512)
+            uniLast = config.universe + config.channel_count / 512;
+        else
+            uniLast = config.universe + config.channel_count / 512 - 1;
+
     /* Baud rate check */
-    if (config.baudrate > BaudRate::BR_250000)
-        config.baudrate = BaudRate::BR_250000;
+    if (config.baudrate > BaudRate::BR_460800)
+        config.baudrate = BaudRate::BR_460800;
     else if (config.baudrate < BaudRate::BR_38400)
         config.baudrate = BaudRate::BR_57600;
 #endif
@@ -502,7 +510,6 @@ void loop() {
         ESP.restart();
     }
 
-#if defined(ESPS_MODE_PIXEL)
     /* Parse a packet and update pixels */
     if (e131.parsePacket()) {
         if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
@@ -513,6 +520,12 @@ void loop() {
                 seqTracker[uniOffset] = e131.packet->sequence_number + 1;
             }
 
+            /* Offset the channel if required for the first universe */
+            uint16_t offset = 0;
+            if (e131.universe == config.universe)
+                offset = config.channel_start - 1;
+
+#if defined(ESPS_MODE_PIXEL)
             /* Find out starting pixel based off the Universe */
             uint16_t pixelStart = uniOffset * config.ppu;
 
@@ -520,11 +533,6 @@ void loop() {
             uint16_t pixelStop = config.channel_count / 3;
             if ((pixelStart + config.ppu) < pixelStop)
                 pixelStop = pixelStart + config.ppu;
-
-            /* Offset the channel if required for the first universe */
-            uint16_t offset = 0;
-            if (e131.universe == config.universe)
-                offset = config.channel_start - 1;
 
             /* Set the pixel data */
             uint16_t buffloc = 0;
@@ -539,36 +547,18 @@ void loop() {
                 pixels.show();
             }
         }
-    }
-
-    //TODO: Use this for setting defaults states at a later date
-    /* Force refresh every second if there is no data received */
-    if ((millis() - lastUpdate) > E131_TIMEOUT) {
-        lastUpdate = millis();
-        pixels.show();
-    }
-
 #elif defined(ESPS_MODE_SERIAL)
-    /* Parse a packet and update Serial */
-    if (e131.parsePacket()) {
-        if (e131.universe == config.universe) {
-            /* Universe offset and sequence tracking */
-            uint8_t uniOffset = (e131.universe - config.universe);
-            if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
-                seqError[uniOffset]++;
-                seqTracker[uniOffset] = e131.packet->sequence_number + 1;
-            }
-
-            uint16_t offset = config.channel_start - 1;
-
             /* Set the serial data */
-            serial.startPacket();
             for (int i = 0; i < config.channel_count; i++)
                 serial.setValue(i, e131.data[i + offset]);
 
             /* Refresh */
-            serial.show();
+            if (e131.universe == uniLast) {
+                lastUpdate = millis();
+                serial.show();
+            }
+
         }
-    }
 #endif
+    }
 }

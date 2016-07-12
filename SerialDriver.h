@@ -28,6 +28,12 @@ GNU General Public License for more details.
 
 #include "HardwareSerial.h"
 
+#define UART 1
+
+/* DMX minimum timings per E1.11 */
+#define DMX_BREAK 92
+#define DMX_MAB 12
+
 /* Serial Types */
 enum class SerialType : uint8_t {
     RENARD,
@@ -39,7 +45,8 @@ enum class BaudRate : uint32_t {
     BR_57600 = 57600,
     BR_115200 = 115200,
     BR_230400 = 230400,
-    BR_250000 = 250000
+    BR_250000 = 250000,
+    BR_460800 = 460800
 };
 
 class SerialDriver {
@@ -48,14 +55,39 @@ class SerialDriver {
     int begin(HardwareSerial *theSerial, SerialType type, uint16_t length,
             BaudRate baud);
     void startPacket();
-    void setValue(uint16_t, uint8_t);
+    void setValue(uint16_t address, uint8_t value);
     void show();
 
  private:
-    SerialType      _type;      // Output Serial type
-    HardwareSerial  *_serial;   // The Serial Port
-    uint16_t        _size;      // Size of buffer
-    uint8_t         *_ptr;      // Pointer for buffer
+    SerialType      _type;          // Output Serial type
+    HardwareSerial  *_serial;       // The Serial Port
+    uint16_t        _size;          // Size of buffer
+    uint8_t         *_serialdata;   // Serial data buffer
+    uint8_t         *_asyncdata;    // Async buffer
+    uint32_t        frameTime;      // Time it takes for a frame TX to complete
+    uint32_t        startTime;      // When the last frame TX started
+
+
+    /* Fill the FIFO */
+    static const uint8_t* ICACHE_RAM_ATTR fillFifo(const uint8_t *buff, const uint8_t *tail);
+
+    /* Serial interrupt handler */
+    static void ICACHE_RAM_ATTR serial_handle(void *param);
+
+    /* Drop the update if our refresh rate is too high */
+    inline bool canRefresh() {
+        return (micros() - startTime) >= frameTime;
+    }
+
+    /* Returns number of bytes waiting in the TX FIFO of UART1 */
+    static inline uint8_t getFifoLength() {
+        return (U1S >> USTXC) & 0xff;
+    }
+
+    /* Append a byte to the TX FIFO of UART1 */
+    static inline void enqueue(uint8_t byte) {
+        U1F = byte;
+    }
 };
 
 #endif /* SERIALDRIVER_H_ */

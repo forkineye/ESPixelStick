@@ -23,8 +23,21 @@ GNU General Public License for more details.
 ******************************************************************/
 
 #include <Arduino.h>
-#include <ArduinoJson.h>
+#include <utility>
+#include <algorithm>
+#include <Math.h>
 #include "SerialDriver.h"
+
+extern "C" {
+#include <eagle_soc.h>
+#include <ets_sys.h>
+#include <uart.h>
+#include <uart_register.h>
+}
+
+/* Uart Buffer tracker */
+static const uint8_t *uart_buffer;
+static const uint8_t *uart_buffer_tail;
 
 int SerialDriver::begin(HardwareSerial *theSerial, SerialType type,
         uint16_t length) {
@@ -39,25 +52,83 @@ int SerialDriver::begin(HardwareSerial *theSerial, SerialType type,
     _serial = theSerial;
     _size = length;
 
-    if (type == SerialType::RENARD)
+    /* Initialize uart */
+    /* frameTime = szSymbol * 1000000 / baud * szBuffer */
+    if (type == SerialType::RENARD) {
+        _size = length + 2;
+        /* 10 bit symbols, no idle */
+        frameTime = ceil(10.0 * 1000000.0
+                / static_cast<float>(baud)
+                * static_cast<float>(_size));
         _serial->begin(static_cast<uint32_t>(baud));
-    else if (type == SerialType::DMX512)
-        _serial->begin(static_cast<uint32_t>(BaudRate::BR_250000));
+    } else if (type == SerialType::DMX512) {
+        _size = length + 1;
+        /* 11 bit symbols, add BREAK and MAB */
+        frameTime = ceil(11.0 * 1000000.0
+                / static_cast<float>(BaudRate::BR_250000)
+                * static_cast<float>(_size)
+                + static_cast<float>(DMX_BREAK)
+                + static_cast<float>(DMX_MAB));
+        _serial->begin(static_cast<uint32_t>(BaudRate::BR_250000), SERIAL_8N2);
+    } else {
+        retval = false;
+    }
+
+    /* Setup buffers */
+    if (_serialdata) free(_serialdata);
+    if (_serialdata = static_cast<uint8_t *>(malloc(_size))) {
+        memset(_serialdata, 0, _size);
+    } else {
+        _size = 0;
+        retval = false;
+    }
+
+    if (_asyncdata) free(_asyncdata);
+    if (_asyncdata = static_cast<uint8_t *>(malloc(_size)))
+        memset(_asyncdata, 0, _size);
     else
         retval = false;
+
+    if (_serialdata && type == SerialType::RENARD) {
+        _serialdata[0] = 0x7E;
+        _serialdata[1] = 0x80;
+    }
+
+    /* Clear FIFOs */
+    SET_PERI_REG_MASK(UART_CONF0(UART), UART_RXFIFO_RST | UART_TXFIFO_RST);
+    CLEAR_PERI_REG_MASK(UART_CONF0(UART), UART_RXFIFO_RST | UART_TXFIFO_RST);
+
+    /* Disable all interrupts */
+    ETS_UART_INTR_DISABLE();
+
+    /* Atttach interrupt handler */
+    ETS_UART_INTR_ATTACH(serial_handle, NULL);
+
+    /* Set TX FIFO trigger. 80 bytes gives 200 microsecs to refill the FIFO */
+    WRITE_PERI_REG(UART_CONF1(UART), 80 << UART_TXFIFO_EMPTY_THRHD_S);
+
+    /* Disable RX & TX interrupts. It is enabled by uart.c in the SDK */
+    CLEAR_PERI_REG_MASK(UART_INT_ENA(UART), UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
+
+    /* Clear all pending interrupts in UART1 */
+    WRITE_PERI_REG(UART_INT_CLR(UART), 0xffff);
+
+    /* Reenable interrupts */
+    ETS_UART_INTR_ENABLE();
 
     return retval;
 }
 
+/* move buffer creation to being, added header bytes on eneqeue / fill fifo */
 void SerialDriver::startPacket() {
     // Create a buffer and fill in header
     if (_type == SerialType::RENARD) {
-        _ptr = static_cast<uint8_t *>(malloc(_size + 2));
-        _ptr[0] = 0x7E;
-        _ptr[1] = 0x80;
+        _serialdata = static_cast<uint8_t *>(malloc(_size + 2));
+        _serialdata[0] = 0x7E;
+        _serialdata[1] = 0x80;
     // Create buffer
     } else if (_type == SerialType::DMX512) {
-        _ptr = static_cast<uint8_t *>(malloc(_size));
+        _serialdata = static_cast<uint8_t *>(malloc(_size));
     }
 }
 
@@ -66,39 +137,70 @@ void SerialDriver::setValue(uint16_t address, uint8_t value) {
     if (_type == SerialType::RENARD) {
         switch (value) {
             case 0x7d:
-                _ptr[address+2] = 0x7c;
+                _serialdata[address + 2] = 0x7c;
                 break;
             case 0x7e:
             case 0x7f:
-                _ptr[address+2] = 0x80;
+                _serialdata[address + 2] = 0x80;
                 break;
             default:
-                _ptr[address+2] = value;
+                _serialdata[address + 2] = value;
                 break;
         }
-    // Set value
     } else if (_type == SerialType::DMX512) {
-        _ptr[address] = value;
+        _serialdata[address + 1] = value;
     }
 }
 
-/*  
-  Updated begins with serial 8n1/8n2 enabling functionality as a RS485 Chip
-  replacement on Lynx Express, LOR CTB16PC, LOR CMB24D, etc.
-  -Grayson Lough (Lights on Grassland)
-*/
-void SerialDriver::show() {
-    if (_type == SerialType::RENARD) {
-        _serial->write(_ptr, _size+2);
-    } else if (_type == SerialType::DMX512) {
-        // Send the break by sending a slow 0 byte
-        _serial->begin(125000, SERIAL_8N1);
-        _serial->write(0);
-        _serial->flush();
-        // Send the data
-        _serial->begin(250000, SERIAL_8N2);
-        _serial->write(0);
-        _serial->write(_ptr, _size);
+const uint8_t* ICACHE_RAM_ATTR SerialDriver::fillFifo(const uint8_t *buff, const uint8_t *tail) {
+    uint8_t avail = (UART_TX_FIFO_SIZE - getFifoLength());
+    if (tail - buff > avail) tail = buff + avail;
+    while (buff < tail) enqueue(*buff++);
+    return buff;
+}
+
+void ICACHE_RAM_ATTR SerialDriver::serial_handle(void *param) {
+    /* Process and clear if UART1 */
+    if (READ_PERI_REG(UART_INT_ST(UART1))) {
+        // Fill the FIFO with new data
+        uart_buffer = fillFifo(uart_buffer, uart_buffer_tail);
+
+        // Clear TX interrupt when done
+        if (uart_buffer == uart_buffer_tail)
+            CLEAR_PERI_REG_MASK(UART_INT_ENA(UART1), UART_TXFIFO_EMPTY_INT_ENA);
+
+        // Clear all interrupts flags (just in case)
+        WRITE_PERI_REG(UART_INT_CLR(UART1), 0xffff);
     }
-    free(_ptr);
+
+    /* Clear if UART0 */
+    if (READ_PERI_REG(UART_INT_ST(UART0)))
+        WRITE_PERI_REG(UART_INT_CLR(UART0), 0xffff);
+}
+
+
+void SerialDriver::show() {
+    if (!_serialdata) return;
+
+    /* Drop the update if our refresh rate is too high */
+    if (!canRefresh())
+        return;
+
+    uart_buffer = _serialdata;
+    uart_buffer_tail = _serialdata + _size;
+
+    if (_type == SerialType::DMX512) {
+        SET_PERI_REG_MASK(UART_CONF0(UART1), UART_TXD_BRK);
+        delayMicroseconds(DMX_BREAK);
+        CLEAR_PERI_REG_MASK(UART_CONF0(UART1), UART_TXD_BRK);
+        delayMicroseconds(DMX_MAB);
+    }
+
+    SET_PERI_REG_MASK(UART_INT_ENA(1), UART_TXFIFO_EMPTY_INT_ENA);
+
+    startTime = micros();
+
+    /* Copy data to the idle buffer and swap it */
+    memcpy(_asyncdata, _serialdata, _size);
+    std::swap(_asyncdata, _serialdata);
 }

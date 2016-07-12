@@ -9,7 +9,10 @@ Changelog
 - Changed default serial port for Renard / DMX to Serial1.
 - Changed output type to compile time option. Check top of main sketch.
 - Added mDNS / DNS-SD responder.
+- Added 480kbps for Renard.
 - Made WS2811 stream generation asynchronous.
+- Made Serial stream generation asynchronous (Renard and DMX).
+- Added multi-universe support for Renard
 
 ### 1.4
 - Arduino 1.6.8 compatibility.

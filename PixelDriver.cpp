@@ -121,7 +121,12 @@ void PixelDriver::updateLength(uint16_t length) {
     }
 
     if (asyncdata) free(asyncdata);
-    asyncdata = static_cast<uint8_t *>(malloc(szBuffer));
+    if (asyncdata = static_cast<uint8_t *>(malloc(szBuffer))) {
+        memset(asyncdata, 0, szBuffer);
+    } else {
+        numPixels = 0;
+        szBuffer = 0;
+    }
 }
 
 void PixelDriver::updateOrder(PixelColor color) {
@@ -180,9 +185,9 @@ void ICACHE_RAM_ATTR PixelDriver::ws2811_handle(void *param) {
 
 const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillFifo(const uint8_t *buff, const uint8_t *tail) {
     uint8_t avail = (UART_TX_FIFO_SIZE - getFifoLength()) / 4;
-    if (tail - buff > avail) {
+    if (tail - buff > avail)
         tail = buff + avail;
-    }
+
     while (buff < tail) {
         uint8_t subpix = *buff++;
         enqueue(LOOKUP_2811[(subpix >> 6) & 0x3]);
@@ -226,7 +231,7 @@ void PixelDriver::show() {
         uart_buffer_tail = pixdata + szBuffer;
         SET_PERI_REG_MASK(UART_INT_ENA(1), UART_TXFIFO_EMPTY_INT_ENA);
 
-        endTime = micros();
+        startTime = micros();
 
         // Copy the pixels to the idle buffer and swap them
         memcpy(asyncdata, pixdata, szBuffer);
@@ -252,6 +257,6 @@ void PixelDriver::show() {
             doGECE(pin, packet);
             interrupts();
         }
-        endTime = micros();
+        startTime = micros();
     }
 }

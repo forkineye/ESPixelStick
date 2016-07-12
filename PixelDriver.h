@@ -106,11 +106,13 @@ class PixelDriver {
     uint8_t     rOffset;    // Index of red byte
     uint8_t     gOffset;    // Index of red byte
     uint8_t     bOffset;    // Index of red byte
-    uint32_t    endTime;    // Reset tracker
+    uint32_t    startTime;  // When the last frame TX started
     bool        gamma;      // Gamma correction flag
 
     void ws2811_init();
     void gece_init();
+
+    /* Fill the FIFO */
     static const uint8_t* ICACHE_RAM_ATTR fillFifo(const uint8_t *buff, const uint8_t *tail);
 
     /* WS2811 interrupt handler */
@@ -118,7 +120,7 @@ class PixelDriver {
 
     /* Drop the update if our refresh rate is too high */
     inline bool canRefresh(uint32_t frame, uint32_t idle) {
-        return (micros() - endTime) >= (frame * numPixels + idle);
+        return (micros() - startTime) >= (frame * numPixels + idle);
     }
 
     /* Returns number of bytes waiting in the TX FIFO of UART1 */

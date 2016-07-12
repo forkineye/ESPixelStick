@@ -36,7 +36,7 @@ const char VERSION[] = "1.5 beta";
 #define UNIVERSE_LIMIT  510     /* Universe boundary - 510 Channels */
 #define PPU_MAX         170     /* Max pixels per Universe */
 #define PIXEL_LIMIT     1360    /* Total pixel limit - 40.85ms for 8 universes */
-#define SERIAL_LIMIT    512     /* Channel limite for serial outputs */
+#define RENARD_LIMIT    2048    /* Channel limite for serial outputs */
 #define E131_TIMEOUT    1000    /* Force refresh every second an E1.31 packet is not seen */
 #define CONNECT_TIMEOUT 10000   /* 10 seconds */
 #define REBOOT_DELAY    100     /* Delay for rebooting once reboot flag is set */
