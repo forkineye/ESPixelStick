@@ -28,7 +28,16 @@ GNU General Public License for more details.
 
 #include "HardwareSerial.h"
 
-#define UART 1
+/* UART for Renard / DMX output */
+#define SEROUT_UART 1
+
+#if SEROUT_UART == 0
+#define SEROUT_PORT        Serial
+#elif SEROUT_UART == 1
+#define SEROUT_PORT        Serial1
+#else
+#error "Invalid SEROUT_UART specified"
+#endif
 
 /* DMX minimum timings per E1.11 */
 #define DMX_BREAK 92
@@ -36,8 +45,8 @@ GNU General Public License for more details.
 
 /* Serial Types */
 enum class SerialType : uint8_t {
-    RENARD,
-    DMX512
+    DMX512,
+    RENARD
 };
 
 enum class BaudRate : uint32_t {
@@ -79,12 +88,12 @@ class SerialDriver {
         return (micros() - startTime) >= frameTime;
     }
 
-    /* Returns number of bytes waiting in the TX FIFO of UART1 */
+    /* Returns number of bytes waiting in the TX FIFO of SEROUT_UART */
     static inline uint8_t getFifoLength() {
         return (U1S >> USTXC) & 0xff;
     }
 
-    /* Append a byte to the TX FIFO of UART1 */
+    /* Append a byte to the TX FIFO of SEROUT_UART */
     static inline void enqueue(uint8_t byte) {
         U1F = byte;
     }

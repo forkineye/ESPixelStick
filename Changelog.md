@@ -6,7 +6,7 @@ Changelog
 - Migrated all web pages to SPIFFS.
 - Migrated configuration structure to SPIFFS as a JSON file.
 - Added Gulp script to assist with preparing web pages.
-- Changed default serial port for Renard / DMX to Serial1.
+- Changed default UART for Renard / DMX to UART1. Can be changed in SerialDriver.h.
 - Changed output type to compile time option. Check top of main sketch.
 - Added mDNS / DNS-SD responder.
 - Added 480kbps for Renard.

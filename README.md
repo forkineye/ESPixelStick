@@ -36,11 +36,6 @@ The ESPixelStick firmware can generate the following outputs from incoming E1.31
 - DMX512
 - Renard
 
-Known Issues
-------------
-- Gamma value is ingored.  ```pow()``` is currently broken in the ESP8266 Arduino environment, so gamma tables cannot be generated.
-- Some fields do not validate input.  Need to add validation routines to the web configuration inputs fields.
-
 Resources
 ---------
 - Firmware: http://github.com/forkineye/ESPixelStick

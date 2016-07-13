@@ -28,8 +28,8 @@ void send_config_serial_vals(AsyncWebServerRequest *request) {
     values += "universe|input|" + (String)config.universe + "\n";
     values += "channel_start|input|" + (String)config.channel_start + "\n";
     values += "channel_count|input|" + (String)config.channel_count + "\n";
-    values += "mode|opt|" + String("Renard|") + String(static_cast<uint8_t>(SerialType::RENARD)) + "\n";
     values += "mode|opt|" + String("DMX512|") + String(static_cast<uint8_t>(SerialType::DMX512)) + "\n";
+    values += "mode|opt|" + String("Renard|") + String(static_cast<uint8_t>(SerialType::RENARD)) + "\n";
     values += "mode|input|" + String(static_cast<uint8_t>(config.serial_type)) + "\n";
     values += "baudrate|opt|" + String("38400|") + String(static_cast<uint32_t>(BaudRate::BR_38400)) + "\n";
     values += "baudrate|opt|" + String("57600|") + String(static_cast<uint32_t>(BaudRate::BR_57600)) + "\n";

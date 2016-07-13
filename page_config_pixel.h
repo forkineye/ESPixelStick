@@ -3,7 +3,7 @@
 
 void send_config_pixel_html(AsyncWebServerRequest *request) {
     if (request->params()) {
-        config.gamma = 0;
+        config.gamma = false;
         for (uint8_t i = 0; i < request->params(); i++) {
             AsyncWebParameter *p = request->getParam(i);
             if (p->name() == "devid") config.id = p->value();
@@ -13,7 +13,7 @@ void send_config_pixel_html(AsyncWebServerRequest *request) {
             if (p->name() == "pixel_type") config.pixel_type = PixelType(p->value().toInt());
             if (p->name() == "pixel_color") config.pixel_color = PixelColor(p->value().toInt());
             if (p->name() == "ppu") config.ppu = p->value().toInt();
-            if (p->name() == "gamma") config.gamma = 1.0;
+            if (p->name() == "gamma") config.gamma = true;
         }
         saveConfig();
 

@@ -8,7 +8,7 @@
 <tr><td align="right">Device ID :</td><td><input id="devid" name="devid" value=""></td></tr>
 <tr><td align="right">Universe :</td><td><input id="universe" name="universe" value=""></td></tr>
 <tr><td align="right">Start Channel :</td><td><input id="channel_start" name="channel_start" value=""></td></tr>
-<tr><td align="right">Channel Count :</td><td><input id="channel_count" name="channel_count" value="" onkeypress="getRefreshRate()"></td></tr>
+<tr><td align="right">Channel Count :</td><td><input id="channel_count" name="channel_count" value="" onchange="getRefreshRate()"></td></tr>
 <tr><td align="right">Protocol :</td><td><select id="mode" name="mode" onclick="getRefreshRate()"></select></td></tr>
 <tr><td align="right">Baudrate :</td><td><select id="baudrate" name="baudrate" onclick="getRefreshRate()"></select></td></tr>
 <tr><td align="right">Refresh Rate :</td><td><span id="refresh" name="refresh"></span></td></tr>
@@ -18,6 +18,7 @@
 <script type="text/javascript" src="script.js"></script>
 <script>
 setValues("/config/serialvals");
+setTimeout(getRefreshRate, 500);
 
 function getRefreshRate() {
     var mode = document.getElementById("mode");
@@ -38,6 +39,6 @@ function getRefreshRate() {
 
     var rate = symbol * 1000 / baud * size;
     var hz = 1000 / rate;
-    document.getElementById("refresh").innerHTML = Math.floor(rate) + "ms / " + Math.floor(hz) + "Hz";
+    document.getElementById("refresh").innerHTML = Math.ceil(rate) + "ms / " + Math.floor(hz) + "Hz";
 }
 </script>

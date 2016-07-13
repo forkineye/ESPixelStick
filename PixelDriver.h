@@ -72,6 +72,7 @@ const char LOOKUP_2811[4] = { 0b00110111, 0b00000111, 0b00110100, 0b00000100 };
 /* Pixel Types */
 enum class PixelType : uint8_t {
     WS2811,
+    WS2801,
     GECE
 };
 
@@ -89,31 +90,31 @@ class PixelDriver {
     int begin(PixelType type);
     int begin(PixelType type, PixelColor color);
     void setPin(uint8_t pin);
-    void setGamma(float gamma);
+    void setGamma(bool gamma);
     void updateLength(uint16_t length);
     void updateOrder(PixelColor color);
     void setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b);
     void show();
 
  private:
-    PixelType   type;       // Pixel type
-    PixelColor  color;      // Color Order
-    uint8_t     pin;        // Pin for bit-banging
-    uint8_t     *pixdata;   // Pixel buffer
-    uint8_t     *asyncdata; // Async buffer
-    uint16_t    numPixels;  // Number of pixels
-    uint16_t    szBuffer;   // Size of Pixel buffer
-    uint8_t     rOffset;    // Index of red byte
-    uint8_t     gOffset;    // Index of red byte
-    uint8_t     bOffset;    // Index of red byte
-    uint32_t    startTime;  // When the last frame TX started
-    bool        gamma;      // Gamma correction flag
+    PixelType   type;           // Pixel type
+    PixelColor  color;          // Color Order
+    uint8_t     pin;            // Pin for bit-banging
+    uint8_t     *pixdata;       // Pixel buffer
+    uint8_t     *asyncdata;     // Async buffer
+    uint16_t    numPixels;      // Number of pixels
+    uint16_t    szBuffer;       // Size of Pixel buffer
+    uint8_t     rOffset;        // Index of red byte
+    uint8_t     gOffset;        // Index of red byte
+    uint8_t     bOffset;        // Index of red byte
+    uint32_t    startTime;      // When the last frame TX started
 
     void ws2811_init();
     void gece_init();
 
     /* Fill the FIFO */
-    static const uint8_t* ICACHE_RAM_ATTR fillFifo(const uint8_t *buff, const uint8_t *tail);
+    static const uint8_t* ICACHE_RAM_ATTR fillFifo(const uint8_t *buff,
+            const uint8_t *tail);
 
     /* WS2811 interrupt handler */
     static void ICACHE_RAM_ATTR ws2811_handle(void *param);

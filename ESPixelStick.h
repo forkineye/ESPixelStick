@@ -41,7 +41,6 @@ const char VERSION[] = "1.5 beta";
 #define CONNECT_TIMEOUT 10000   /* 10 seconds */
 #define REBOOT_DELAY    100     /* Delay for rebooting once reboot flag is set */
 #define LOG_PORT        Serial  /* Serial port for console logging */
-#define SERIAL_PORT     Serial1 /* Serial port for Renard / DMX output */
 
 /* E1.33 / RDMnet stuff - to be moved to library */
 #define RDMNET_DNSSD_SRV_TYPE   "draft-e133.tcp"
@@ -80,7 +79,7 @@ typedef struct {
     PixelType   pixel_type;     /* Pixel type */
     PixelColor  pixel_color;    /* Pixel color order */
     uint8_t     ppu;            /* Pixels per Universe boundary */
-    float       gamma;          /* Value used to build gamma correction table */
+    bool        gamma;          /* Use gamma map? */
 
 #elif defined(ESPS_MODE_SERIAL)
     /* Serial */

@@ -30,9 +30,9 @@ extern "C" {
 #include <uart_register.h>
 }
 
-/* Uart Buffer tracker */
-static const uint8_t *uart_buffer;
-static const uint8_t *uart_buffer_tail;
+static const uint8_t    *uart_buffer;       // Buffer tracker
+static const uint8_t    *uart_buffer_tail;  // Buffer tracker
+static bool             ws2811gamma;        // Gamma flag
 
 int PixelDriver::begin() {
     return begin(PixelType::WS2811, PixelColor::RGB);
@@ -65,12 +65,8 @@ void PixelDriver::setPin(uint8_t pin) {
         this->pin = pin;
 }
 
-void PixelDriver::setGamma(float gamma) {
-    /* Treat this as a boolean until pow() is fixed */
-    if (gamma)
-        this->gamma = true;
-    else
-        this->gamma = false;
+void PixelDriver::setGamma(bool gamma) {
+    ws2811gamma = gamma;
 }
 
 void PixelDriver::ws2811_init() {
@@ -155,7 +151,8 @@ void PixelDriver::updateOrder(PixelColor color) {
     }
 }
 
-void PixelDriver::setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b) {
+void PixelDriver::setPixelColor(uint16_t pixel,
+        uint8_t r, uint8_t g, uint8_t b) {
     if (pixel < numPixels) {
         uint8_t *p = &pixdata[pixel*3];
         p[rOffset] = r;
@@ -183,40 +180,30 @@ void ICACHE_RAM_ATTR PixelDriver::ws2811_handle(void *param) {
         WRITE_PERI_REG(UART_INT_CLR(UART0), 0xffff);
 }
 
-const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillFifo(const uint8_t *buff, const uint8_t *tail) {
+const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillFifo(const uint8_t *buff,
+        const uint8_t *tail) {
     uint8_t avail = (UART_TX_FIFO_SIZE - getFifoLength()) / 4;
     if (tail - buff > avail)
         tail = buff + avail;
 
-    while (buff < tail) {
-        uint8_t subpix = *buff++;
-        enqueue(LOOKUP_2811[(subpix >> 6) & 0x3]);
-        enqueue(LOOKUP_2811[(subpix >> 4) & 0x3]);
-        enqueue(LOOKUP_2811[(subpix >> 2) & 0x3]);
-        enqueue(LOOKUP_2811[subpix & 0x3]);
-    }
-    return buff;
-
-/*
-    //TODO: Add Gamma support and runtime table generation.
-    if (gamma) {
-        for (uint16_t i = 0; i < szBuffer; i++) {
-            buff[0] = LOOKUP_2811[(GAMMA_2811[pixdata[i]] >> 6) & 3];
-            buff[1] = LOOKUP_2811[(GAMMA_2811[pixdata[i]] >> 4) & 3];
-            buff[2] = LOOKUP_2811[(GAMMA_2811[pixdata[i]] >> 2) & 3];
-            buff[3] = LOOKUP_2811[GAMMA_2811[pixdata[i]] & 3];
-            Serial1.write(buff, sizeof(buff));
+    if (ws2811gamma) {
+        while (buff < tail) {
+            uint8_t subpix = *buff++;
+            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 6) & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 4) & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 2) & 0x3]);
+            enqueue(LOOKUP_2811[GAMMA_2811[subpix] & 0x3]);
         }
     } else {
-        for (uint16_t i = 0; i < szBuffer; i++) {
-            buff[0] = LOOKUP_2811[(pixdata[i] >> 6) & 3];
-            buff[1] = LOOKUP_2811[(pixdata[i] >> 4) & 3];
-            buff[2] = LOOKUP_2811[(pixdata[i] >> 2) & 3];
-            buff[3] = LOOKUP_2811[pixdata[i] & 3];
-            Serial1.write(buff, sizeof(buff));
+        while (buff < tail) {
+            uint8_t subpix = *buff++;
+            enqueue(LOOKUP_2811[(subpix >> 6) & 0x3]);
+            enqueue(LOOKUP_2811[(subpix >> 4) & 0x3]);
+            enqueue(LOOKUP_2811[(subpix >> 2) & 0x3]);
+            enqueue(LOOKUP_2811[subpix & 0x3]);
         }
     }
-*/
+    return buff;
 }
 
 void PixelDriver::show() {

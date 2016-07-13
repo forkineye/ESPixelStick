@@ -8,15 +8,39 @@
 <tr><td align="right">Device ID :</td><td><input type="text" id="devid" name="devid" value=""></td></tr>
 <tr><td align="right">Universe :</td><td><input type="text" id="universe" name="universe" value=""></td></tr>
 <tr><td align="right">Start Channel :</td><td><input type="text" id="channel_start" name="channel_start" value=""></td></tr>
-<tr><td align="right">Pixel Count :</td><td><input type="text" id="pixel_count" name="pixel_count" value=""></td></tr>
-<tr><td align="right">Pixel Type :</td><td><select id="pixel_type" name="pixel_type"></select></td></tr>
+<tr><td align="right">Pixel Count :</td><td><input type="text" id="pixel_count" name="pixel_count" value="" onchange="getRefreshRate()"></td></tr>
+<tr><td align="right">Pixel Type :</td><td><select id="pixel_type" name="pixel_type" onclick="getRefreshRate()"></select></td></tr>
 <tr><td align="right">Color Order :</td><td><select id="pixel_color" name="pixel_color"></select></td></tr>
 <tr><td align="right">PPU :</td><td><input type="text" id="ppu" name="ppu" value=""></td></tr>
 <tr><td align="right">Gamma Map :</td><td><input type="checkbox" id="gamma" name="gamma"></td></tr>
+<tr><td align="right">Refresh Rate :</td><td><span id="refresh" name="refresh"></span></td></tr>
 <tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Save"></td></tr>
 </table>
 </form>
 <script type="text/javascript" src="script.js"></script>
 <script>
-	setValues("/config/pixelvals");
+setValues("/config/pixelvals");
+setTimeout(getRefreshRate, 500);
+
+function getRefreshRate() {
+    var mode = document.getElementById("pixel_type");
+    var proto = mode.options[mode.selectedIndex].text;
+    var size = parseInt(document.getElementById("pixel_count").value);
+    var frame = 30;
+    var idle = 50;
+
+    if (!proto.localeCompare("WS2811 800kHz")) {
+        frame = 30;
+        idle = 50;
+        document.getElementById("pixel_color").disabled = false;
+    } else if (!proto.localeCompare("GE Color Effects")) {
+        frame = 790;
+        idle = 35;
+        document.getElementById("pixel_color").disabled = true;
+    }
+
+    var rate = (frame * size + idle) / 1000;
+    var hz = 1000 / rate;
+    document.getElementById("refresh").innerHTML = Math.ceil(rate) + "ms / " + Math.floor(hz) + "Hz";
+}
 </script>

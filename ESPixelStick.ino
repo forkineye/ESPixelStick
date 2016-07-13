@@ -269,6 +269,9 @@ void validateConfig() {
 
 #if defined(ESPS_MODE_PIXEL)
     /* Generic channel limits for pixels */
+    if (config.channel_count % 3)
+        config.channel_count = (config.channel_count / 3) * 3;
+
     if (config.channel_count > PIXEL_LIMIT * 3)
         config.channel_count = PIXEL_LIMIT * 3;
     else if (config.channel_count < 1)
@@ -339,7 +342,7 @@ void updateConfig() {
     pixels.updateLength(config.channel_count / 3);
     pixels.setGamma(config.gamma);
 #elif defined(ESPS_MODE_SERIAL)
-    serial.begin(&SERIAL_PORT, config.serial_type, config.channel_count, config.baudrate);
+    serial.begin(&SEROUT_PORT, config.serial_type, config.channel_count, config.baudrate);
 #endif
     LOG_PORT.print(F("- Listening for "));
     LOG_PORT.print(config.channel_count);

@@ -95,8 +95,8 @@ int SerialDriver::begin(HardwareSerial *theSerial, SerialType type,
     }
 
     /* Clear FIFOs */
-    SET_PERI_REG_MASK(UART_CONF0(UART), UART_RXFIFO_RST | UART_TXFIFO_RST);
-    CLEAR_PERI_REG_MASK(UART_CONF0(UART), UART_RXFIFO_RST | UART_TXFIFO_RST);
+    SET_PERI_REG_MASK(UART_CONF0(SEROUT_UART), UART_RXFIFO_RST | UART_TXFIFO_RST);
+    CLEAR_PERI_REG_MASK(UART_CONF0(SEROUT_UART), UART_RXFIFO_RST | UART_TXFIFO_RST);
 
     /* Disable all interrupts */
     ETS_UART_INTR_DISABLE();
@@ -105,13 +105,13 @@ int SerialDriver::begin(HardwareSerial *theSerial, SerialType type,
     ETS_UART_INTR_ATTACH(serial_handle, NULL);
 
     /* Set TX FIFO trigger. 80 bytes gives 200 microsecs to refill the FIFO */
-    WRITE_PERI_REG(UART_CONF1(UART), 80 << UART_TXFIFO_EMPTY_THRHD_S);
+    WRITE_PERI_REG(UART_CONF1(SEROUT_UART), 80 << UART_TXFIFO_EMPTY_THRHD_S);
 
     /* Disable RX & TX interrupts. It is enabled by uart.c in the SDK */
-    CLEAR_PERI_REG_MASK(UART_INT_ENA(UART), UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
+    CLEAR_PERI_REG_MASK(UART_INT_ENA(SEROUT_UART), UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
 
-    /* Clear all pending interrupts in UART1 */
-    WRITE_PERI_REG(UART_INT_CLR(UART), 0xffff);
+    /* Clear all pending interrupts in SEROUT_UART */
+    WRITE_PERI_REG(UART_INT_CLR(SEROUT_UART), 0xffff);
 
     /* Reenable interrupts */
     ETS_UART_INTR_ENABLE();
@@ -160,22 +160,28 @@ const uint8_t* ICACHE_RAM_ATTR SerialDriver::fillFifo(const uint8_t *buff, const
 }
 
 void ICACHE_RAM_ATTR SerialDriver::serial_handle(void *param) {
-    /* Process and clear if UART1 */
-    if (READ_PERI_REG(UART_INT_ST(UART1))) {
+    /* Process and clear SEROUT_UART */
+    if (READ_PERI_REG(UART_INT_ST(SEROUT_UART))) {
         // Fill the FIFO with new data
         uart_buffer = fillFifo(uart_buffer, uart_buffer_tail);
 
         // Clear TX interrupt when done
         if (uart_buffer == uart_buffer_tail)
-            CLEAR_PERI_REG_MASK(UART_INT_ENA(UART1), UART_TXFIFO_EMPTY_INT_ENA);
+            CLEAR_PERI_REG_MASK(UART_INT_ENA(SEROUT_UART), UART_TXFIFO_EMPTY_INT_ENA);
 
         // Clear all interrupts flags (just in case)
-        WRITE_PERI_REG(UART_INT_CLR(UART1), 0xffff);
+        WRITE_PERI_REG(UART_INT_CLR(SEROUT_UART), 0xffff);
     }
 
-    /* Clear if UART0 */
+#if SEROUT_UART == 0
+    /* Clear UART1 if needed */
+    if (READ_PERI_REG(UART_INT_ST(UART1)))
+        WRITE_PERI_REG(UART_INT_CLR(UART1), 0xffff);
+#elif SEROUT_UART == 1
+    /* Clear if UART0 if needed */
     if (READ_PERI_REG(UART_INT_ST(UART0)))
         WRITE_PERI_REG(UART_INT_CLR(UART0), 0xffff);
+#endif
 }
 
 
@@ -190,9 +196,9 @@ void SerialDriver::show() {
     uart_buffer_tail = _serialdata + _size;
 
     if (_type == SerialType::DMX512) {
-        SET_PERI_REG_MASK(UART_CONF0(UART1), UART_TXD_BRK);
+        SET_PERI_REG_MASK(UART_CONF0(SEROUT_UART), UART_TXD_BRK);
         delayMicroseconds(DMX_BREAK);
-        CLEAR_PERI_REG_MASK(UART_CONF0(UART1), UART_TXD_BRK);
+        CLEAR_PERI_REG_MASK(UART_CONF0(SEROUT_UART), UART_TXD_BRK);
         delayMicroseconds(DMX_MAB);
     }
 

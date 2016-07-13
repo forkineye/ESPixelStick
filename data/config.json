@@ -2,7 +2,6 @@
   "network": {
     "ssid": "",
     "passphrase": "",
-    "hostname": "",
     "ip": [
       192,
       168,
@@ -26,8 +25,7 @@
   },
 
   "device": {
-    "id": "ESPixelStick",
-    "mode": 0
+    "id": "ESPixelStick"
   },
 
   "e131": {
@@ -41,7 +39,7 @@
     "type": 0,
     "color": 0,
     "ppu": 170,
-    "gamma": 1.0
+    "gamma": true
   },
 
   "serial": {
