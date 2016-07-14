@@ -47,10 +47,10 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include "helpers.h"
 
 /* Output Drivers */
-#if defined (ESPS_MODE_PIXEL)
+#if defined(ESPS_MODE_PIXEL)
 #include "PixelDriver.h"
 #include "page_config_pixel.h"
-#elif defined (ESPS_MODE_SERIAL)
+#elif defined(ESPS_MODE_SERIAL)
 #include "SerialDriver.h"
 #include "page_config_serial.h"
 #else
@@ -263,9 +263,8 @@ void validateConfig() {
 
     if (config.channel_start < 1)
         config.channel_start = 1;
-    else if (config.channel_start > 512)
-        config.channel_start = 512;
-
+    else if (config.channel_start > UNIVERSE_LIMIT)
+        config.channel_start = UNIVERSE_LIMIT;
 
 #if defined(ESPS_MODE_PIXEL)
     /* Generic channel limits for pixels */
@@ -277,22 +276,11 @@ void validateConfig() {
     else if (config.channel_count < 1)
         config.channel_count = 1;
 
-    /* PPU Limits */
-    if (config.ppu > PPU_MAX || config.ppu < 1)
-        config.ppu = PPU_MAX;
-
     /* GECE Limits */
     if (config.pixel_type == PixelType::GECE) {
-        uniLast = config.universe;
         config.pixel_color = PixelColor::RGB;
         if (config.channel_count > 63 * 3)
             config.channel_count = 63 * 3;
-    } else {
-        uint16_t bounds = config.ppu * 3;
-        if (config.channel_count % bounds)
-            uniLast = config.universe + config.channel_count / bounds;
-        else
-            uniLast = config.universe + config.channel_count / bounds - 1;
     }
 
 #elif defined(ESPS_MODE_SERIAL)
@@ -302,13 +290,8 @@ void validateConfig() {
     else if (config.channel_count < 1)
         config.channel_count = 1;
 
-    if (config.serial_type == SerialType::DMX512 && config.channel_count > 512)
-        config.channel_count = 512;
-
-    if (config.channel_count % 512)
-            uniLast = config.universe + config.channel_count / 512;
-        else
-            uniLast = config.universe + config.channel_count / 512 - 1;
+    if (config.serial_type == SerialType::DMX512 && config.channel_count > UNIVERSE_LIMIT)
+        config.channel_count = UNIVERSE_LIMIT;
 
     /* Baud rate check */
     if (config.baudrate > BaudRate::BR_460800)
@@ -321,6 +304,13 @@ void validateConfig() {
 void updateConfig() {
     /* Validate first */
     validateConfig();
+
+    /* Find the last universe we should listen for */
+    uint16_t span = config.channel_start + config.channel_count - 1;
+    if (span % UNIVERSE_LIMIT)
+        uniLast = config.universe + span / UNIVERSE_LIMIT;
+    else
+        uniLast = config.universe + span / UNIVERSE_LIMIT - 1;
 
     /* Setup the sequence error tracker */
     uint8_t uniTotal = (uniLast + 1) - config.universe;
@@ -415,7 +405,6 @@ void loadConfig() {
         /* Pixel */
         config.pixel_type = PixelType(static_cast<uint8_t>(json["pixel"]["type"]));
         config.pixel_color = PixelColor(static_cast<uint8_t>(json["pixel"]["color"]));
-        config.ppu = json["pixel"]["ppu"];
         config.gamma = json["pixel"]["gamma"];
 
 #elif defined(ESPS_MODE_SERIAL)
@@ -469,7 +458,6 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     JsonObject &pixel = json.createNestedObject("pixel");
     pixel["type"] = static_cast<uint8_t>(config.pixel_type);
     pixel["color"] = static_cast<uint8_t>(config.pixel_color);
-    pixel["ppu"] = config.ppu;
     pixel["gamma"] = config.gamma;
 
 #elif defined(ESPS_MODE_SERIAL)
@@ -528,40 +516,33 @@ void loop() {
             if (e131.universe == config.universe)
                 offset = config.channel_start - 1;
 
-#if defined(ESPS_MODE_PIXEL)
-            /* Find out starting pixel based off the Universe */
-            uint16_t pixelStart = uniOffset * config.ppu;
+            /* Find start of data based off the Universe */
+            uint16_t dataStart = uniOffset * UNIVERSE_LIMIT;
 
-            /* Calculate how many pixels we need from this buffer */
-            uint16_t pixelStop = config.channel_count / 3;
-            if ((pixelStart + config.ppu) < pixelStop)
-                pixelStop = pixelStart + config.ppu;
+            /* Caculate how much data we need for this buffer */
+            uint16_t dataStop = config.channel_count;
+            if ((dataStart + UNIVERSE_LIMIT) < dataStop)
+                dataStop = dataStart + UNIVERSE_LIMIT;
 
-            /* Set the pixel data */
+            /* Set the data */
             uint16_t buffloc = 0;
-            for (int i = pixelStart; i < pixelStop; i++) {
-                int j = buffloc++ * 3 + offset;
-                pixels.setPixelColor(i, e131.data[j], e131.data[j+1], e131.data[j+2]);
-            }
-
-            /* Refresh when last universe shows up */
-            if (e131.universe == uniLast) {
-                lastUpdate = millis();
-                pixels.show();
-            }
-        }
+            for (int i = dataStart; i < dataStop; i++) {
+#if defined(ESPS_MODE_PIXEL)
+                pixels.setValue(i, e131.data[buffloc + offset]);
 #elif defined(ESPS_MODE_SERIAL)
-            /* Set the serial data */
-            for (int i = 0; i < config.channel_count; i++)
-                serial.setValue(i, e131.data[i + offset]);
-
-            /* Refresh */
-            if (e131.universe == uniLast) {
-                lastUpdate = millis();
-                serial.show();
-            }
-
-        }
+                serial.setValue(i, e131.data[buffloc + offset]);
 #endif
+                buffloc++;
+            }
+        }
     }
+
+/* Streaming refresh */
+#if defined(ESPS_MODE_PIXEL)
+    if (pixels.canRefresh())
+        pixels.show();
+#elif defined(ESPS_MODE_SERIAL)
+    if (serial.canRefresh())
+        serial.show();
+#endif
 }

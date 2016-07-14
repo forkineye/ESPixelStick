@@ -12,8 +12,7 @@ void send_config_pixel_html(AsyncWebServerRequest *request) {
             if (p->name() == "pixel_count") config.channel_count = p->value().toInt() * 3;
             if (p->name() == "pixel_type") config.pixel_type = PixelType(p->value().toInt());
             if (p->name() == "pixel_color") config.pixel_color = PixelColor(p->value().toInt());
-            if (p->name() == "ppu") config.ppu = p->value().toInt();
-            if (p->name() == "gamma") config.gamma = true;
+                        if (p->name() == "gamma") config.gamma = true;
         }
         saveConfig();
 
@@ -39,7 +38,6 @@ void send_config_pixel_vals(AsyncWebServerRequest *request) {
     values += "pixel_color|opt|" + String("BRG|") + String(static_cast<uint8_t>(PixelColor::BRG)) + "\n";
     values += "pixel_color|opt|" + String("RBG|") + String(static_cast<uint8_t>(PixelColor::RBG)) + "\n";
     values += "pixel_color|input|" + String(static_cast<uint8_t>(config.pixel_color)) + "\n";
-    values += "ppu|input|" + String(config.ppu) + "\n";
     values += "gamma|chk|" + String(config.gamma ? "checked" : "") + "\n";
     values += "title|div|" + config.id + " - Pixel Config\n";
     request->send(200, "text/plain", values);

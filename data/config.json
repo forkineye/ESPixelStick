@@ -31,14 +31,13 @@
   "e131": {
     "universe": 1,
     "channel_start": 1,
-    "channel_count": 510,
+    "channel_count": 512,
     "multicast": false
   },
 
   "pixel": {
     "type": 0,
     "color": 0,
-    "ppu": 170,
     "gamma": true
   },
 

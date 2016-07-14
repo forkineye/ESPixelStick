@@ -34,6 +34,10 @@ static const uint8_t    *uart_buffer;       // Buffer tracker
 static const uint8_t    *uart_buffer_tail;  // Buffer tracker
 static bool             ws2811gamma;        // Gamma flag
 
+uint8_t PixelDriver::rOffset = 0;
+uint8_t PixelDriver::gOffset = 1;
+uint8_t PixelDriver::bOffset = 2;
+
 int PixelDriver::begin() {
     return begin(PixelType::WS2811, PixelColor::RGB);
 }
@@ -50,12 +54,17 @@ int PixelDriver::begin(PixelType type, PixelColor color) {
 
     updateOrder(color);
 
-    if (type == PixelType::WS2811)
+    if (type == PixelType::WS2811) {
+        frameTime = WS2811_TFRAME;
+        idleTime = WS2811_TIDLE;
         ws2811_init();
-    else if (type == PixelType::GECE)
+    } else if (type == PixelType::GECE) {
+        frameTime = GECE_TFRAME;
+        idleTime = GECE_TIDLE;
         gece_init();
-    else
+    } else {
         retval = false;
+    }
 
     return retval;
 }
@@ -151,16 +160,6 @@ void PixelDriver::updateOrder(PixelColor color) {
     }
 }
 
-void PixelDriver::setPixelColor(uint16_t pixel,
-        uint8_t r, uint8_t g, uint8_t b) {
-    if (pixel < numPixels) {
-        uint8_t *p = &pixdata[pixel*3];
-        p[rOffset] = r;
-        p[gOffset] = g;
-        p[bOffset] = b;
-    }
-}
-
 void ICACHE_RAM_ATTR PixelDriver::ws2811_handle(void *param) {
     /* Process if UART1 */
     if (READ_PERI_REG(UART_INT_ST(UART1))) {
@@ -186,6 +185,29 @@ const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillFifo(const uint8_t *buff,
     if (tail - buff > avail)
         tail = buff + avail;
 
+        while (buff + 2 < tail) {
+            uint8_t subpix = buff[rOffset];
+            enqueue(LOOKUP_2811[(subpix >> 6) & 0x3]);
+            enqueue(LOOKUP_2811[(subpix >> 4) & 0x3]);
+            enqueue(LOOKUP_2811[(subpix >> 2) & 0x3]);
+            enqueue(LOOKUP_2811[subpix & 0x3]);
+
+            subpix = buff[gOffset];
+            enqueue(LOOKUP_2811[(subpix >> 6) & 0x3]);
+            enqueue(LOOKUP_2811[(subpix >> 4) & 0x3]);
+            enqueue(LOOKUP_2811[(subpix >> 2) & 0x3]);
+            enqueue(LOOKUP_2811[subpix & 0x3]);
+
+            subpix = buff[bOffset];
+            enqueue(LOOKUP_2811[(subpix >> 6) & 0x3]);
+            enqueue(LOOKUP_2811[(subpix >> 4) & 0x3]);
+            enqueue(LOOKUP_2811[(subpix >> 2) & 0x3]);
+            enqueue(LOOKUP_2811[subpix & 0x3]);
+
+            buff += 3;
+        }
+
+/*
     if (ws2811gamma) {
         while (buff < tail) {
             uint8_t subpix = *buff++;
@@ -203,6 +225,7 @@ const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillFifo(const uint8_t *buff,
             enqueue(LOOKUP_2811[subpix & 0x3]);
         }
     }
+*/
     return buff;
 }
 
@@ -210,10 +233,6 @@ void PixelDriver::show() {
     if (!pixdata) return;
 
     if (type == PixelType::WS2811) {
-        /* Drop the update if our refresh rate is too high */
-        if (!canRefresh(WS2811_TFRAME, WS2811_TIDLE))
-            return;
-
         uart_buffer = pixdata;
         uart_buffer_tail = pixdata + szBuffer;
         SET_PERI_REG_MASK(UART_INT_ENA(1), UART_TXFIFO_EMPTY_INT_ENA);
@@ -226,9 +245,6 @@ void PixelDriver::show() {
 
     } else if (type == PixelType::GECE) {
         uint32_t packet = 0;
-
-        /* Drop the update if our refresh rate is too high */
-        if (!canRefresh(GECE_TFRAME, GECE_TIDLE)) return;
 
         /* Build a GECE packet */
         for (uint8_t i = 0; i < numPixels; i++) {

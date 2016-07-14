@@ -64,8 +64,33 @@ class SerialDriver {
     int begin(HardwareSerial *theSerial, SerialType type, uint16_t length,
             BaudRate baud);
     void startPacket();
-    void setValue(uint16_t address, uint8_t value);
     void show();
+
+    /* Set the value */
+    inline void setValue(uint16_t address, uint8_t value) {
+    // Avoid the special characters by rounding
+        if (_type == SerialType::RENARD) {
+            switch (value) {
+                case 0x7d:
+                    _serialdata[address + 2] = 0x7c;
+                    break;
+                case 0x7e:
+                case 0x7f:
+                    _serialdata[address + 2] = 0x80;
+                    break;
+                default:
+                    _serialdata[address + 2] = value;
+                    break;
+            }
+        } else if (_type == SerialType::DMX512) {
+            _serialdata[address + 1] = value;
+        }
+    }
+
+    /* Drop the update if our refresh rate is too high */
+    inline bool canRefresh() {
+        return (micros() - startTime) >= frameTime;
+    }
 
  private:
     SerialType      _type;          // Output Serial type
@@ -82,11 +107,6 @@ class SerialDriver {
 
     /* Serial interrupt handler */
     static void ICACHE_RAM_ATTR serial_handle(void *param);
-
-    /* Drop the update if our refresh rate is too high */
-    inline bool canRefresh() {
-        return (micros() - startTime) >= frameTime;
-    }
 
     /* Returns number of bytes waiting in the TX FIFO of SEROUT_UART */
     static inline uint8_t getFifoLength() {

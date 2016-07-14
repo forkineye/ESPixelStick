@@ -93,8 +93,17 @@ class PixelDriver {
     void setGamma(bool gamma);
     void updateLength(uint16_t length);
     void updateOrder(PixelColor color);
-    void setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b);
     void show();
+
+    /* Set channel value at address */
+    inline void setValue(uint16_t address, uint8_t value) {
+        pixdata[address] = value;
+    }
+
+    /* Drop the update if our refresh rate is too high */
+    inline bool canRefresh() {
+        return (micros() - startTime) >= (frameTime * numPixels + idleTime);
+    }
 
  private:
     PixelType   type;           // Pixel type
@@ -104,10 +113,12 @@ class PixelDriver {
     uint8_t     *asyncdata;     // Async buffer
     uint16_t    numPixels;      // Number of pixels
     uint16_t    szBuffer;       // Size of Pixel buffer
-    uint8_t     rOffset;        // Index of red byte
-    uint8_t     gOffset;        // Index of red byte
-    uint8_t     bOffset;        // Index of red byte
     uint32_t    startTime;      // When the last frame TX started
+    uint32_t    frameTime;      // Time to tranmsmit a full frame
+    uint32_t    idleTime;       // Required idle time after a frame
+    static uint8_t  rOffset;    // Index of red byte
+    static uint8_t  gOffset;    // Index of green byte
+    static uint8_t  bOffset;    // Index of blue byte
 
     void ws2811_init();
     void gece_init();
@@ -118,11 +129,6 @@ class PixelDriver {
 
     /* WS2811 interrupt handler */
     static void ICACHE_RAM_ATTR ws2811_handle(void *param);
-
-    /* Drop the update if our refresh rate is too high */
-    inline bool canRefresh(uint32_t frame, uint32_t idle) {
-        return (micros() - startTime) >= (frame * numPixels + idle);
-    }
 
     /* Returns number of bytes waiting in the TX FIFO of UART1 */
     static inline uint8_t getFifoLength() {

@@ -2,17 +2,19 @@
 Changelog
 =========
 ### 1.5 (in progress)
+- Changed output type to compile time option. Check top of main sketch.
 - Migrated to ESPAsyncWebserver for the web server.
 - Migrated all web pages to SPIFFS.
 - Migrated configuration structure to SPIFFS as a JSON file.
 - Added Gulp script to assist with preparing web pages.
-- Changed default UART for Renard / DMX to UART1. Can be changed in SerialDriver.h.
-- Changed output type to compile time option. Check top of main sketch.
 - Added mDNS / DNS-SD responder.
-- Added 480kbps for Renard.
 - Made WS2811 stream generation asynchronous.
+- Removed PPU configuration for pixels.
+- Pixel data now will utilize all 512 channels of a universe if required.
+- Changed default UART for Renard / DMX to UART1. Can be changed in SerialDriver.h.
 - Made Serial stream generation asynchronous (Renard and DMX).
-- Added multi-universe support for Renard
+- Added multi-universe support for Renard.
+- Added 480kbps for Renard.
 
 ### 1.4
 - Arduino 1.6.8 compatibility.

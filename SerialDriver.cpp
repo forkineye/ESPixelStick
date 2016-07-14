@@ -25,7 +25,7 @@ GNU General Public License for more details.
 #include <Arduino.h>
 #include <utility>
 #include <algorithm>
-#include <Math.h>
+#include <math.h>
 #include "SerialDriver.h"
 
 extern "C" {
@@ -132,26 +132,6 @@ void SerialDriver::startPacket() {
     }
 }
 
-void SerialDriver::setValue(uint16_t address, uint8_t value) {
-    // Avoid the special characters by rounding
-    if (_type == SerialType::RENARD) {
-        switch (value) {
-            case 0x7d:
-                _serialdata[address + 2] = 0x7c;
-                break;
-            case 0x7e:
-            case 0x7f:
-                _serialdata[address + 2] = 0x80;
-                break;
-            default:
-                _serialdata[address + 2] = value;
-                break;
-        }
-    } else if (_type == SerialType::DMX512) {
-        _serialdata[address + 1] = value;
-    }
-}
-
 const uint8_t* ICACHE_RAM_ATTR SerialDriver::fillFifo(const uint8_t *buff, const uint8_t *tail) {
     uint8_t avail = (UART_TX_FIFO_SIZE - getFifoLength());
     if (tail - buff > avail) tail = buff + avail;
@@ -187,10 +167,6 @@ void ICACHE_RAM_ATTR SerialDriver::serial_handle(void *param) {
 
 void SerialDriver::show() {
     if (!_serialdata) return;
-
-    /* Drop the update if our refresh rate is too high */
-    if (!canRefresh())
-        return;
 
     uart_buffer = _serialdata;
     uart_buffer_tail = _serialdata + _size;
