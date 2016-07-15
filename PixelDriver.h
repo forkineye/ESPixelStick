@@ -72,7 +72,6 @@ const char LOOKUP_2811[4] = { 0b00110111, 0b00000111, 0b00110100, 0b00000100 };
 /* Pixel Types */
 enum class PixelType : uint8_t {
     WS2811,
-    WS2801,
     GECE
 };
 

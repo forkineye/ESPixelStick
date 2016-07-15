@@ -92,11 +92,12 @@ void setup() {
     pinMode(DATA_PIN, OUTPUT);
     digitalWrite(DATA_PIN, LOW);
 
-    /* Enable SPIFFS */
-    SPIFFS.begin();
-
+    /* Setup serial log port */
     LOG_PORT.begin(115200);
     delay(10);
+
+    /* Enable SPIFFS */
+    SPIFFS.begin();
 
     LOG_PORT.println("");
     LOG_PORT.print(F("ESPixelStick v"));
@@ -207,6 +208,9 @@ int initWifi() {
 
 /* Configure and start the web server */
 void initWeb() {
+    /* Handle OTA update from asynchronous callbacks */
+    Update.runAsync(true);
+
     /* Heap status handler */
     web.on("/heap", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", String(ESP.getFreeHeap()));
@@ -231,7 +235,7 @@ void initWeb() {
     web.on("/status/e131vals", HTTP_GET, send_status_e131_vals);
 
     /* POST Handlers */
-    web.on("/admin.html", HTTP_POST, send_admin_html);
+    web.on("/admin.html", HTTP_POST, send_admin_html, handle_fw_upload);
     web.on("/config_net.html", HTTP_POST, send_config_net_html);
 
     /* Static handler */
