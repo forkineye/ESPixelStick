@@ -185,6 +185,29 @@ const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillFifo(const uint8_t *buff,
     if (tail - buff > avail)
         tail = buff + avail;
 
+    if (ws2811gamma) {
+        while (buff + 2 < tail) {
+            uint8_t subpix = buff[rOffset];
+            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 6) & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 4) & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 2) & 0x3]);
+            enqueue(LOOKUP_2811[GAMMA_2811[subpix] & 0x3]);
+
+            subpix = buff[gOffset];
+            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 6) & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 4) & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 2) & 0x3]);
+            enqueue(LOOKUP_2811[GAMMA_2811[subpix] & 0x3]);
+
+            subpix = buff[bOffset];
+            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 6) & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 4) & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 2) & 0x3]);
+            enqueue(LOOKUP_2811[GAMMA_2811[subpix] & 0x3]);
+
+            buff += 3;
+        }
+    } else {
         while (buff + 2 < tail) {
             uint8_t subpix = buff[rOffset];
             enqueue(LOOKUP_2811[(subpix >> 6) & 0x3]);
@@ -206,26 +229,7 @@ const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillFifo(const uint8_t *buff,
 
             buff += 3;
         }
-
-/*
-    if (ws2811gamma) {
-        while (buff < tail) {
-            uint8_t subpix = *buff++;
-            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 6) & 0x3]);
-            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 4) & 0x3]);
-            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 2) & 0x3]);
-            enqueue(LOOKUP_2811[GAMMA_2811[subpix] & 0x3]);
-        }
-    } else {
-        while (buff < tail) {
-            uint8_t subpix = *buff++;
-            enqueue(LOOKUP_2811[(subpix >> 6) & 0x3]);
-            enqueue(LOOKUP_2811[(subpix >> 4) & 0x3]);
-            enqueue(LOOKUP_2811[(subpix >> 2) & 0x3]);
-            enqueue(LOOKUP_2811[subpix & 0x3]);
-        }
     }
-*/
     return buff;
 }
 
