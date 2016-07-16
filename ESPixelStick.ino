@@ -167,9 +167,20 @@ int initWifi() {
 
     LOG_PORT.println("");
     LOG_PORT.print(F("Connecting to "));
-    LOG_PORT.print(config.ssid);
+    LOG_PORT.println(config.ssid);
 
     WiFi.begin(config.ssid.c_str(), config.passphrase.c_str());
+    if (config.dhcp) {
+        LOG_PORT.print(F("Connecting with DHCP"));
+    } else {
+        /* We don't use DNS, so just set it to our gateway */
+        WiFi.config(IPAddress(config.ip[0], config.ip[1], config.ip[2], config.ip[3]),
+                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3]),
+                    IPAddress(config.netmask[0], config.netmask[1], config.netmask[2], config.netmask[3]),
+                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3])
+        );
+        LOG_PORT.print(F("Connecting with Static IP"));
+    }
 
     uint32_t timeout = millis();
     while (WiFi.status() != WL_CONNECTED) {
@@ -184,17 +195,7 @@ int initWifi() {
 
     if (WiFi.status() == WL_CONNECTED) {
         LOG_PORT.println("");
-        if (config.dhcp) {
-            LOG_PORT.print(F("Connected DHCP with IP: "));
-        }  else {
-            /* We don't use DNS, so just set it to our gateway */
-            WiFi.config(IPAddress(config.ip[0], config.ip[1], config.ip[2], config.ip[3]),
-                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3]),
-                    IPAddress(config.netmask[0], config.netmask[1], config.netmask[2], config.netmask[3]),
-                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3])
-            );
-            LOG_PORT.print(F("Connected with Static IP: "));
-        }
+        LOG_PORT.print(F("Connected with IP: "));
         LOG_PORT.println(WiFi.localIP());
 
         if (config.multicast)
