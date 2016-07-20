@@ -44,10 +44,62 @@ const uint8_t GAMMA_2811[] = {
 };
 
 /* 
-* 6 bit UART lookup table, first 2 bits ignored.
+* Inverted 6N1 UART lookup table for ws2811, first 2 bits ignored.
 * Start and stop bits are part of the pixel stream. 
 */
-const char LOOKUP_2811[4] = { 0b00110111, 0b00000111, 0b00110100, 0b00000100 };
+const char LOOKUP_2811[4] = {
+    0b00110111,     // 00 - (1)000 100(0)
+    0b00000111,     // 01 - (1)000 111(0)
+    0b00110100,     // 10 - (1)110 100(0)
+    0b00000100      // 11 - (1)110 111(0)
+};
+
+/* 
+* 8N0 UART lookup table for GECE.
+* Levels are inverted since we need high start bits.
+* Start bit is part of the packet.
+* Bits are backwards since we need MSB out.
+*/
+/*
+const char LOOKUP_GECE_8N0[8] = {
+    0b01001001,     // 000 - 011 011 01(1)
+    0b11001001,     // 001 - 011 011 00(1)
+    0b01011001,     // 010 - 011 001 01(1)
+    0b11011001,     // 011 - 011 001 00(1)
+    0b01001011,     // 100 - 001 011 01(1)
+    0b11001011,     // 101 - 001 011 00(1)
+    0b01011011,     // 110 - 001 001 01(1)
+    0b11011011      // 111 - 001 001 00(1)
+};
+*/
+
+/* 
+* 7N1 UART lookup table for GECE, first bit is ignored.
+* Start bit and stop bits are part of the packet.
+* Bits are backwards since we need MSB out.
+*/
+/*
+const char LOOKUP_GECE_7N1[8] = {
+    0b01011011,     // 000 - (0)11 011 01(1)
+    0b00011011,     // 001 - (0)11 011 00(1)
+    0b01010011,     // 010 - (0)11 001 01(1)
+    0b00010011,     // 011 - (0)11 001 00(1)
+    0b01011010,     // 100 - (0)01 011 01(1)
+    0b00011010,     // 101 - (0)01 011 00(1)
+    0b01010010,     // 110 - (0)01 001 01(1)
+    0b00010010      // 111 - (0)01 001 00(1)
+};
+*/
+
+/* 
+* 7N1 UART lookup table for GECE, first bit is ignored.
+* Start bit and stop bits are part of the packet.
+* Bits are backwards since we need MSB out.
+*/
+const char LOOKUP_GECE[2] = {
+    0b01111100,     // 0 - (0)00 111 11(1)
+    0b01100000      // 1 - (0)00 000 11(1)
+};
 
 #define GECE_DEFAULT_BRIGHTNESS 0xCC
 
@@ -62,12 +114,12 @@ const char LOOKUP_2811[4] = { 0b00110111, 0b00000111, 0b00110100, 0b00000100 };
 #define GECE_GET_BLUE(packet)        (packet >> 8) & 0x0F
 #define GECE_GET_GREEN(packet)       (packet >> 4) & 0x0F
 #define GECE_GET_RED(packet)         packet & 0x0F
+#define GECE_PSIZE      26
 
 #define WS2811_TFRAME   30L     /* 30us frame time */
 #define WS2811_TIDLE    50L     /* 50us idle time */
 #define GECE_TFRAME     790L    /* 790us frame time */
 #define GECE_TIDLE      35L     /* 35us idle time */
-
 
 /* Pixel Types */
 enum class PixelType : uint8_t {
@@ -87,10 +139,9 @@ class PixelDriver {
  public:
     int begin();
     int begin(PixelType type);
-    int begin(PixelType type, PixelColor color);
+    int begin(PixelType type, PixelColor color, uint16_t length);
     void setPin(uint8_t pin);
     void setGamma(bool gamma);
-    void updateLength(uint16_t length);
     void updateOrder(PixelColor color);
     void show();
 
@@ -101,33 +152,34 @@ class PixelDriver {
 
     /* Drop the update if our refresh rate is too high */
     inline bool canRefresh() {
-        return (micros() - startTime) >= (frameTime * numPixels + idleTime);
+        return (micros() - startTime) >= refreshTime;
     }
 
  private:
-    PixelType   type;           // Pixel type
-    PixelColor  color;          // Color Order
+    PixelType  type;            // Pixel type
+    PixelColor color;           // Color Order
     uint8_t     pin;            // Pin for bit-banging
     uint8_t     *pixdata;       // Pixel buffer
     uint8_t     *asyncdata;     // Async buffer
+    uint8_t     *pbuff;         // GECE Packet Buffer
     uint16_t    numPixels;      // Number of pixels
     uint16_t    szBuffer;       // Size of Pixel buffer
     uint32_t    startTime;      // When the last frame TX started
-    uint32_t    frameTime;      // Time to tranmsmit a full frame
-    uint32_t    idleTime;       // Required idle time after a frame
-    static uint8_t  rOffset;    // Index of red byte
-    static uint8_t  gOffset;    // Index of green byte
-    static uint8_t  bOffset;    // Index of blue byte
+    uint32_t    refreshTime;    // Time until we can refresh after starting a TX
+    static uint8_t    rOffset;  // Index of red byte
+    static uint8_t    gOffset;  // Index of green byte
+    static uint8_t    bOffset;  // Index of blue byte
 
     void ws2811_init();
     void gece_init();
+    void setupInterrupts();
 
-    /* Fill the FIFO */
-    static const uint8_t* ICACHE_RAM_ATTR fillFifo(const uint8_t *buff,
+    /* FIFO Handlers */
+    static const uint8_t* ICACHE_RAM_ATTR fillWS2811(const uint8_t *buff,
             const uint8_t *tail);
 
-    /* WS2811 interrupt handler */
-    static void ICACHE_RAM_ATTR ws2811_handle(void *param);
+    /* Interrupt Handlers */
+    static void ICACHE_RAM_ATTR handleWS2811(void *param);
 
     /* Returns number of bytes waiting in the TX FIFO of UART1 */
     static inline uint8_t getFifoLength() {

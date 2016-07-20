@@ -26,16 +26,18 @@ void send_admin_html(AsyncWebServerRequest *request) {
 void handle_fw_upload(AsyncWebServerRequest *request, String filename,
         size_t index, uint8_t *data, size_t len, bool final) {
     if (!index) {
-        Serial.printf("\nUpload Started: %s\n", filename.c_str());
         uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
-        Serial.printf("Free space: %u\n", maxSketchSpace);
+        LOG_PORT.print(F("* Upload Started: "));
+        LOG_PORT.println(filename.c_str());
+        LOG_PORT.print(F("- Free space: "));
+        LOG_PORT.println(maxSketchSpace);
         if (!Update.begin(maxSketchSpace, U_FLASH))
             Update.printError(LOG_PORT);
     }
 
     Update.write(data, len);
     if (final) {
-        Serial.printf("\nUpload Finished: %s, %u bytes\n", filename.c_str(), index + len);
+        LOG_PORT.println(F("* Upload Finished."));
         Update.end(true);
     }
 }

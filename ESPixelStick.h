@@ -37,7 +37,7 @@ const char VERSION[] = "1.5 beta";
 #define PIXEL_LIMIT     1360    /* Total pixel limit - 40.85ms for 8 universes */
 #define RENARD_LIMIT    2048    /* Channel limit for serial outputs */
 #define E131_TIMEOUT    1000    /* Force refresh every second an E1.31 packet is not seen */
-#define CONNECT_TIMEOUT 10000   /* 10 seconds */
+#define CONNECT_TIMEOUT 15000   /* 15 seconds */
 #define REBOOT_DELAY    100     /* Delay for rebooting once reboot flag is set */
 #define LOG_PORT        Serial  /* Serial port for console logging */
 

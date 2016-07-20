@@ -24,11 +24,11 @@
 
 /* 
   Timings  
-    Start Bit - 10us  
+    Start Bit - 10us high
     Data bit - 30us
       0 Bit - 10us low / 20us high
       1 Bit - 20us low / 10us high
-    Line Reset - 30us
+    Line Reset - 30us low
 */
 
 #define CYCLES_GECE_T0L  (F_CPU / 100000) // 10us
