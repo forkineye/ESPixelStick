@@ -301,9 +301,9 @@ void PixelDriver::show() {
 
             /* Wait until ready */
             while ((micros() - pTime) < (GECE_TFRAME + GECE_TIDLE)) {}
+            pTime = micros();
             CLEAR_PERI_REG_MASK(UART_CONF0(UART), UART_TXD_BRK);
             delayMicroseconds(9);
-            pTime = micros();
             Serial1.write(pbuff, GECE_PSIZE);
             SET_PERI_REG_MASK(UART_CONF0(UART), UART_TXD_BRK);
         }

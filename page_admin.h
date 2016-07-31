@@ -26,6 +26,7 @@ void send_admin_html(AsyncWebServerRequest *request) {
 void handle_fw_upload(AsyncWebServerRequest *request, String filename,
         size_t index, uint8_t *data, size_t len, bool final) {
     if (!index) {
+        WiFiUDP::stopAll();
         uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
         LOG_PORT.print(F("* Upload Started: "));
         LOG_PORT.println(filename.c_str());
