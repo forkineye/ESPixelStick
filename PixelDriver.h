@@ -54,53 +54,6 @@ const char LOOKUP_2811[4] = {
     0b00000100      // 11 - (1)110 111(0)
 };
 
-/* 
-* 8N0 UART lookup table for GECE.
-* Levels are inverted since we need high start bits.
-* Start bit is part of the packet.
-* Bits are backwards since we need MSB out.
-*/
-/*
-const char LOOKUP_GECE_8N0[8] = {
-    0b01001001,     // 000 - 011 011 01(1)
-    0b11001001,     // 001 - 011 011 00(1)
-    0b01011001,     // 010 - 011 001 01(1)
-    0b11011001,     // 011 - 011 001 00(1)
-    0b01001011,     // 100 - 001 011 01(1)
-    0b11001011,     // 101 - 001 011 00(1)
-    0b01011011,     // 110 - 001 001 01(1)
-    0b11011011      // 111 - 001 001 00(1)
-};
-*/
-
-/* 
-* 7N1 UART lookup table for GECE, first bit is ignored.
-* Start bit and stop bits are part of the packet.
-* Bits are backwards since we need MSB out.
-*/
-/*
-const char LOOKUP_GECE_7N1[8] = {
-    0b01011011,     // 000 - (0)11 011 01(1)
-    0b00011011,     // 001 - (0)11 011 00(1)
-    0b01010011,     // 010 - (0)11 001 01(1)
-    0b00010011,     // 011 - (0)11 001 00(1)
-    0b01011010,     // 100 - (0)01 011 01(1)
-    0b00011010,     // 101 - (0)01 011 00(1)
-    0b01010010,     // 110 - (0)01 001 01(1)
-    0b00010010      // 111 - (0)01 001 00(1)
-};
-*/
-
-/* 
-* 7N1 UART lookup table for GECE, first bit is ignored.
-* Start bit and stop bits are part of the packet.
-* Bits are backwards since we need MSB out.
-*/
-const char LOOKUP_GECE[2] = {
-    0b01111100,     // 0 - (0)00 111 11(1)
-    0b01100000      // 1 - (0)00 000 11(1)
-};
-
 #define GECE_DEFAULT_BRIGHTNESS 0xCC
 
 #define GECE_ADDRESS_MASK       0x03F00000
@@ -172,7 +125,6 @@ class PixelDriver {
 
     void ws2811_init();
     void gece_init();
-    void setupInterrupts();
 
     /* FIFO Handlers */
     static const uint8_t* ICACHE_RAM_ATTR fillWS2811(const uint8_t *buff,

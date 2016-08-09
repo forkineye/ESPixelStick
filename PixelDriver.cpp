@@ -109,7 +109,12 @@ void PixelDriver::setGamma(bool gamma) {
     ws2811gamma = gamma;
 }
 
-void PixelDriver::setupInterrupts() {
+void PixelDriver::ws2811_init() {
+    /* Serial rate is 4x 800KHz for WS2811 */
+    Serial1.begin(3200000, SERIAL_6N1, SERIAL_TX_ONLY);
+    CLEAR_PERI_REG_MASK(UART_CONF0(UART), UART_INV_MASK);
+    SET_PERI_REG_MASK(UART_CONF0(UART), (BIT(22)));
+
     /* Clear FIFOs */
     SET_PERI_REG_MASK(UART_CONF0(UART), UART_RXFIFO_RST | UART_TXFIFO_RST);
     CLEAR_PERI_REG_MASK(UART_CONF0(UART), UART_RXFIFO_RST | UART_TXFIFO_RST);
@@ -133,39 +138,11 @@ void PixelDriver::setupInterrupts() {
     ETS_UART_INTR_ENABLE();
 }
 
-void PixelDriver::ws2811_init() {
-    /* Serial rate is 4x 800KHz for WS2811 */
-    Serial1.begin(3200000, SERIAL_6N1, SERIAL_TX_ONLY);
-    CLEAR_PERI_REG_MASK(UART_CONF0(UART), UART_INV_MASK);
-    SET_PERI_REG_MASK(UART_CONF0(UART), (BIT(22)));
-    setupInterrupts();
-}
-
 void PixelDriver::gece_init() {
-    /* Serial rate is 3x 100KHz for GECE */
-    Serial1.begin(300000, SERIAL_7N1, SERIAL_TX_ONLY);
-    SET_PERI_REG_MASK(UART_CONF0(UART), UART_TXD_BRK);
-    delayMicroseconds(GECE_TIDLE);
-
-    uint32_t packet = 0;
-    uint32_t pTime = 0;
-
-    /* String initialization */
-    for (uint8_t i = 0; i < 63; i++) {
-        packet = (packet & ~GECE_ADDRESS_MASK) | (i << 20);
-
-        uint8_t shift = GECE_PSIZE;
-        for (uint8_t i = 0; i < GECE_PSIZE; i++)
-            pbuff[i] = LOOKUP_GECE[(packet >> --shift) & 0x1];
-
-        /* Wait until ready */
-        while ((micros() - pTime) < (GECE_TFRAME + GECE_TIDLE)) {}
-        CLEAR_PERI_REG_MASK(UART_CONF0(UART), UART_TXD_BRK);
-        delayMicroseconds(9);
-        pTime = micros();
-        Serial1.write(pbuff, GECE_PSIZE);
-        SET_PERI_REG_MASK(UART_CONF0(UART), UART_TXD_BRK);
-    }
+    /* Setup for bit-banging */
+    Serial1.end();
+    pinMode(pin, OUTPUT);
+    digitalWrite(pin, LOW);
 }
 
 void PixelDriver::updateOrder(PixelColor color) {
@@ -281,12 +258,10 @@ void PixelDriver::show() {
         memcpy(asyncdata, pixdata, szBuffer);
         std::swap(asyncdata, pixdata);
     } else if (type == PixelType::GECE) {
-        uint32_t packet = 0;
-        uint32_t pTime = 0;
-
-        startTime = micros();
+         uint32_t packet = 0;
 
         /* Build a GECE packet */
+        startTime = micros();
         for (uint8_t i = 0; i < numPixels; i++) {
             packet = (packet & ~GECE_ADDRESS_MASK) | (i << 20);
             packet = (packet & ~GECE_BRIGHTNESS_MASK) |
@@ -295,17 +270,9 @@ void PixelDriver::show() {
             packet = (packet & ~GECE_GREEN_MASK) | pixdata[i*3+1];
             packet = (packet & ~GECE_RED_MASK) | (pixdata[i*3] >> 4);
 
-            uint8_t shift = GECE_PSIZE;
-            for (uint8_t i = 0; i < GECE_PSIZE; i++)
-                pbuff[i] = LOOKUP_GECE[(packet >> --shift) & 0x1];
-
-            /* Wait until ready */
-            while ((micros() - pTime) < (GECE_TFRAME + GECE_TIDLE)) {}
-            pTime = micros();
-            CLEAR_PERI_REG_MASK(UART_CONF0(UART), UART_TXD_BRK);
-            delayMicroseconds(9);
-            Serial1.write(pbuff, GECE_PSIZE);
-            SET_PERI_REG_MASK(UART_CONF0(UART), UART_TXD_BRK);
+            /* and send it */
+            doGECE(pin, packet);
         }
+        //startTime = micros();   
     }
 }
