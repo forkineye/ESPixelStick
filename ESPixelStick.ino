@@ -27,8 +27,8 @@
 //#define ESPS_MODE_SERIAL
 
 /* Fallback configuration if config.json is empty or fails */
-const char ssid[] = "ENTER_SSID_HERE";
-const char passphrase[] = "ENTER_PASSPHRASE_HERE";
+const char ssid[] = "hidden2";
+const char passphrase[] = "blahdeblah";
 
 /*****************************************/
 /*         END - Configuration           */
@@ -70,6 +70,12 @@ PixelDriver     pixels;         /* Pixel object */
 SerialDriver    serial;         /* Serial object */
 #endif
 
+WiFiUDP             RAWudp;             /* Raw UDP packet Server */
+unsigned int        RAWPort = 2801;      // local port to listen for UDP packets
+unsigned long       RAW_ctr = 0;
+#define             UDPRAW_BUFFER_SIZE  1600
+uint8_t             udpraw_Buffer[ UDPRAW_BUFFER_SIZE]; 
+
 uint8_t             *seqTracker;        /* Current sequence numbers for each Universe */
 uint32_t            lastUpdate;         /* Update timeout tracker */
 AsyncWebServer      web(HTTP_PORT);     /* Web Server */
@@ -110,13 +116,14 @@ void setup() {
 
     /* Fallback to default SSID and passphrase if we fail to connect */
     int status = initWifi();
+/* DONT! fallback to hard coded defaults
     if (status != WL_CONNECTED) {
         LOG_PORT.println(F("*** Timeout - Reverting to default SSID ***"));
         config.ssid = ssid;
         config.passphrase = passphrase;
         status = initWifi();
     }
-
+*/
     /* If we fail again, go SoftAP or reboot */
     if (status != WL_CONNECTED) {
         if (config.ap_fallback) {
@@ -497,6 +504,37 @@ void saveConfig() {
     }
 }
 
+void handle_raw_port() {
+
+  if (!RAWudp) {
+    Serial.println("RE-Starting UDP");
+    RAWudp.begin(RAWPort);
+    MDNS.addService("hyperiond-rgbled", "udp", RAWPort);
+    Serial.print("Local RAWport: ");
+    Serial.println(RAWudp.localPort());
+  }
+  if (!RAWudp) {
+    Serial.println("RE-Start failed.");
+    return;
+  }
+
+  int cb = RAWudp.parsePacket();
+  if (cb) {
+    // We've received a packet, read the data from it
+    RAWudp.read(udpraw_Buffer, UDPRAW_BUFFER_SIZE); // read the packet into the buffer
+    RAW_ctr++;
+
+    /* Set the data */
+    for (int i = 0; i < cb; i++) {
+#if defined(ESPS_MODE_PIXEL)
+        pixels.setValue(i, udpraw_Buffer[i]);
+#elif defined(ESPS_MODE_SERIAL)
+        serial.setValue(i, udpraw_Buffer[i]);
+#endif
+    }
+  }
+}
+
 /* Main Loop */
 void loop() {
     /* Reboot handler */
@@ -504,8 +542,10 @@ void loop() {
         delay(REBOOT_DELAY);
         ESP.restart();
     }
+   /* check for raw packets on port 2801 */
+   handle_raw_port();
 
-    /* Parse a packet and update pixels */
+   /* Parse a packet and update pixels */
     if (e131.parsePacket()) {
         if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
             /* Universe offset and sequence tracking */
