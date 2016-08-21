@@ -534,6 +534,7 @@ void handle_raw_port() {
 #endif
     }
     /* fill the rest with 0s*/
+    for (      ; i < config.channel_count; i++) {
 #if defined(ESPS_MODE_PIXEL)
         pixels.setValue(i, 0);
 #elif defined(ESPS_MODE_SERIAL)
