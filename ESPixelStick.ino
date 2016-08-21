@@ -518,18 +518,26 @@ void handle_raw_port() {
     return;
   }
 
-  int cb = RAWudp.parsePacket();
-  if (cb) {
+  int size = RAWudp.parsePacket();
+  if (size) {
     // We've received a packet, read the data from it
     RAWudp.read(udpraw_Buffer, UDPRAW_BUFFER_SIZE); // read the packet into the buffer
     RAW_ctr++;
 
     /* Set the data */
-    for (int i = 0; i < cb; i++) {
+    int i=0;
+    for (i = 0; i < _min(size,config.channel_count); i++) {
 #if defined(ESPS_MODE_PIXEL)
         pixels.setValue(i, udpraw_Buffer[i]);
 #elif defined(ESPS_MODE_SERIAL)
         serial.setValue(i, udpraw_Buffer[i]);
+#endif
+    }
+    /* fill the rest with 0s*/
+#if defined(ESPS_MODE_PIXEL)
+        pixels.setValue(i, 0);
+#elif defined(ESPS_MODE_SERIAL)
+        serial.setValue(i, 0);
 #endif
     }
   }
