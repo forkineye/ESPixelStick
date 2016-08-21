@@ -12,7 +12,9 @@ void send_config_pixel_html(AsyncWebServerRequest *request) {
             if (p->name() == "pixel_count") config.channel_count = p->value().toInt() * 3;
             if (p->name() == "pixel_type") config.pixel_type = PixelType(p->value().toInt());
             if (p->name() == "pixel_color") config.pixel_color = PixelColor(p->value().toInt());
-                        if (p->name() == "gamma") config.gamma = true;
+            if (p->name() == "gamma") config.gamma = true;
+            if (p->name() == "zigzag") config.zigzag = true;
+            if (p->name() == "zigzag_interval") config.zigzag_interval= p->value().toInt();
         }
         saveConfig();
 
@@ -39,6 +41,9 @@ void send_config_pixel_vals(AsyncWebServerRequest *request) {
     values += "pixel_color|opt|" + String("RBG|") + String(static_cast<uint8_t>(PixelColor::RBG)) + "\n";
     values += "pixel_color|input|" + String(static_cast<uint8_t>(config.pixel_color)) + "\n";
     values += "gamma|chk|" + String(config.gamma ? "checked" : "") + "\n";
+    values += "zigzag|chk|" + String(config.zigzag ? "checked" : "") + "\n";
+    values += "zigzag_interval|input|" + (String)config.zigzag_interval + "\n";
+   
     values += "title|div|" + config.id + " - Pixel Config\n";
     request->send(200, "text/plain", values);
 }

@@ -11,6 +11,8 @@ void send_config_serial_html(AsyncWebServerRequest *request) {
             if (p->name() == "channel_count") config.channel_count = p->value().toInt();
             if (p->name() == "mode") config.serial_type = SerialType(p->value().toInt());
             if (p->name() == "baudrate") config.baudrate = BaudRate(p->value().toInt());
+            if (p->name() == "zigzag") config.zigzag = true;
+            if (p->name() == "zigzag_interval") config.zigzag_interval= p->value().toInt();
         }
         saveConfig();
 
@@ -39,6 +41,8 @@ void send_config_serial_vals(AsyncWebServerRequest *request) {
     values += "baudrate|opt|" + String("460800|") + String(static_cast<uint32_t>(BaudRate::BR_460800)) + "\n";
     values += "baudrate|input|" + String(static_cast<uint32_t>(config.baudrate)) + "\n";
     values += "title|div|" + config.id + " - Serial Config\n";
+    values += "zigzag|chk|" + String(config.zigzag ? "checked" : "") + "\n";
+    values += "zigzag_interval|input|" + (String)config.zigzag_interval + "\n";
     request->send(200, "text/plain", values);
 }
 

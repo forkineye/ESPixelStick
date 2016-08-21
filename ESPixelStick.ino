@@ -1,3 +1,5 @@
+
+
 /*
 * ESPixelStick.ino
 *
@@ -73,6 +75,7 @@ SerialDriver    serial;         /* Serial object */
 uint8_t             *seqTracker;        /* Current sequence numbers for each Universe */
 uint32_t            lastUpdate;         /* Update timeout tracker */
 AsyncWebServer      web(HTTP_PORT);     /* Web Server */
+
 
 /* Forward Declarations */
 void serializeConfig(String &jsonString, bool pretty = false, bool creds = false);
@@ -410,11 +413,16 @@ void loadConfig() {
         config.pixel_type = PixelType(static_cast<uint8_t>(json["pixel"]["type"]));
         config.pixel_color = PixelColor(static_cast<uint8_t>(json["pixel"]["color"]));
         config.gamma = json["pixel"]["gamma"];
+        config.zigzag = json["pixel"]["zigzag"];
+        config.zigzag_interval = static_cast<uint_8_t>(json["pixel"]["zigzag_interval"]);
 
 #elif defined(ESPS_MODE_SERIAL)
         /* Serial */
         config.serial_type = SerialType(static_cast<uint8_t>(json["serial"]["type"]));
         config.baudrate = BaudRate(static_cast<uint32_t>(json["serial"]["baudrate"]));
+        config.zigzag = json["serial"]["zigzag"];
+        config.zigzag_interval = static_cast<uint_8_t>(json["serial"]["zigzag_interval"]);
+
 #endif
 
         LOG_PORT.println(F("- Configuration loaded."));
@@ -463,12 +471,17 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     pixel["type"] = static_cast<uint8_t>(config.pixel_type);
     pixel["color"] = static_cast<uint8_t>(config.pixel_color);
     pixel["gamma"] = config.gamma;
+    pixel["zigzag"] = config.zigzag;
+    pixel["zigzag_interval"] = static_cast<uint8_t>(config.zigzag_interval);
 
 #elif defined(ESPS_MODE_SERIAL)
     /* Serial */
     JsonObject &serial = json.createNestedObject("serial");
     serial["type"] = static_cast<uint8_t>(config.serial_type);
     serial["baudrate"] = static_cast<uint32_t>(config.baudrate);
+    serial["zigzag"] = config.zigzag;
+    serial["zigzag_interval"] = static_cast<uint8_t>(config.zigzag_interval);
+
 #endif
 
     if (pretty)
@@ -531,10 +544,11 @@ void loop() {
             /* Set the data */
             uint16_t buffloc = 0;
             for (int i = dataStart; i < dataStop; i++) {
+              int  k = reverseEveryN(i);
 #if defined(ESPS_MODE_PIXEL)
-                pixels.setValue(i, e131.data[buffloc + offset]);
+                pixels.setValue(k, e131.data[buffloc + offset]);
 #elif defined(ESPS_MODE_SERIAL)
-                serial.setValue(i, e131.data[buffloc + offset]);
+                serial.setValue(k, e131.data[buffloc + offset]);
 #endif
                 buffloc++;
             }
@@ -549,4 +563,32 @@ void loop() {
     if (serial.canRefresh())
         serial.show();
 #endif
+}
+
+
+int reverseEveryN(int pixelId) {
+
+  if (config.zigzag && pixelId > config.zigzag_interval)
+    {
+      int g = 0;
+        for( int i = config.zigzag_interval; i < pixelId; i+=config.zigzag_interval){
+          reverse=!reverse;
+          g++;
+        }
+        if (reverse){
+            int minPixel = (g * config.zigzag_interval);
+            int tmpPixel = pixelId - minPixel; //Should be between 0 and REVERSE_EVERY;
+  
+            int newPixel = tmpPixel - config.zigzag_interval;
+            return minPixel + abs(newPixel) + 1;
+          }
+          else {
+            return pixelId;
+          }
+    }
+    else {
+      
+      return pixelId;
+   }    
+   
 }
