@@ -63,6 +63,7 @@ const char passphrase[] = "blahdeblah";
 #include "page_config_net.h"
 #include "page_status_net.h"
 #include "page_status_e131.h"
+#include "page_ledcontrol.h"
 
 #if defined(ESPS_MODE_PIXEL)
 PixelDriver     pixels;         /* Pixel object */
@@ -248,6 +249,8 @@ void initWeb() {
 
     /* Static handler */
 #if defined(ESPS_MODE_PIXEL)
+    web.on("/status/ledval", HTTP_GET, send_led_val);
+    web.on("/config_colour.html", HTTP_POST, send_led_val_html);
     web.on("/config/pixelvals", HTTP_GET, send_config_pixel_vals);
     web.on("/config_pixel.html", HTTP_POST, send_config_pixel_html);
     web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("pixel.html");
@@ -551,6 +554,7 @@ void loop() {
         delay(REBOOT_DELAY);
         ESP.restart();
     }
+
    /* check for raw packets on port 2801 */
    handle_raw_port();
 

@@ -1,0 +1,37 @@
+<title id="title"></title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" type="text/css" href="style.css">
+<a href="/" class="btn btn--s">&lt;</a>&nbsp;&nbsp;<strong>Pixel Configuration</strong>
+<hr>
+<form action="http://dev-e131.home/config_colour.html" method="post">
+<table border="0" cellspacing="0" cellpadding="3">
+<tr><td align="right">colour :</td><td><input type="text" id="colour" name="colour" value=""></td></tr>
+<tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Save"></td></tr>
+</table>
+</form>
+<script type="text/javascript" src="script.js"></script>
+<script>
+setTimeout(getRefreshRate, 500);
+
+function getRefreshRate() {
+    var mode = document.getElementById("pixel_type");
+    var proto = mode.options[mode.selectedIndex].text;
+    var size = parseInt(document.getElementById("pixel_count").value);
+    var frame = 30;
+    var idle = 50;
+
+    if (!proto.localeCompare("WS2811 800kHz")) {
+        frame = 30;
+        idle = 50;
+        document.getElementById("pixel_color").disabled = false;
+    } else if (!proto.localeCompare("GE Color Effects")) {
+        frame = 790;
+        idle = 35;
+        document.getElementById("pixel_color").disabled = true;
+    }
+
+    var rate = (frame * size + idle) / 1000;
+    var hz = 1000 / rate;
+    document.getElementById("refresh").innerHTML = Math.ceil(rate) + "ms / " + Math.floor(hz) + "Hz";
+}
+</script>

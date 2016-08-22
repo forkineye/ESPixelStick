@@ -103,6 +103,10 @@ class PixelDriver {
         pixdata[address] = value;
     }
 
+    /* Get channel value at address */
+    inline uint8_t getValue(uint16_t address) {
+        return pixdata[address];
+    }
     /* Drop the update if our refresh rate is too high */
     inline bool canRefresh() {
         return (micros() - startTime) >= refreshTime;

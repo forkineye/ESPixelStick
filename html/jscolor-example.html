@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>jscolor Example</title>
+</head>
+<body style="text-align:center;" onload=setuppicker()>
+
+
+
+	<script src="jscolor.js"></script>
+
+
+
+	<h2>Example 1</h2>
+	Color: <input class="jscolor {position:'bottom', padding:0, borderWidth:3, shadow:false}" id="foo" value="ab2567" >
+
+
+
+	<h2>Example 2</h2>
+
+	<button class="jscolor {valueElement:'chosen-value', onFineChange:'setTextColor(this)'}">
+		Pick text color
+	</button>
+
+	HEX value: <input id="chosen-value" value="000000">
+
+	<script>
+	function setTextColor(picker) {
+//		document.getElementsByTagName('body')[0].style.background-color = '#' + picker.toString()
+		document.getElementsByTagName('body')[0].style.color = '#' + picker.toString()
+	}
+	function setuppicker(picker) {
+		document.getElementById('foo').jscolor.show()
+	}
+	</script>
+
+</body>
+</html>
