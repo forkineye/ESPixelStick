@@ -1,6 +1,8 @@
 #ifndef PAGE_ADMIN_H_
 #define PAGE_ADMIN_H_
 
+#include "EFUpdate.h"
+
 const char REBOOT[] = R"=====(<meta http-equiv="refresh" content="2; url=/"><strong>Rebooting...</strong>)=====";
 
 void send_admin_html(AsyncWebServerRequest *request) {
@@ -25,21 +27,24 @@ void send_admin_html(AsyncWebServerRequest *request) {
 
 void handle_fw_upload(AsyncWebServerRequest *request, String filename,
         size_t index, uint8_t *data, size_t len, bool final) {
+    static EFUpdate update;
+
     if (!index) {
         WiFiUDP::stopAll();
-        uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
         LOG_PORT.print(F("* Upload Started: "));
         LOG_PORT.println(filename.c_str());
-        LOG_PORT.print(F("- Free space: "));
-        LOG_PORT.println(maxSketchSpace);
-        if (!Update.begin(maxSketchSpace, U_FLASH))
-            Update.printError(LOG_PORT);
+        update.begin();
     }
 
-    Update.write(data, len);
+    if (!update.process(data, len)) {
+        LOG_PORT.println(F("*** UPDATE FAILURE ***"));
+    }
+
     if (final) {
         LOG_PORT.println(F("* Upload Finished."));
-        Update.end(true);
+        update.end();
+        SPIFFS.begin();
+        saveConfig();
     }
 }
 

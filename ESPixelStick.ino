@@ -493,7 +493,7 @@ void saveConfig() {
         return;
     } else {
         file.println(jsonString);
-        LOG_PORT.println(F("* New configuration saved."));
+        LOG_PORT.println(F("* Configuration saved."));
     }
 }
 
