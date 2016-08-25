@@ -3,17 +3,21 @@
 <link rel="stylesheet" type="text/css" href="style.css">
 <a href="/" class="btn btn--s">&lt;</a>&nbsp;&nbsp;<strong>Colour Control</strong>
 <hr>
+<form action="http://10.0.0.62/config_colour.html" method="post">
 <table border="0" cellspacing="0" cellpadding="3" style="width:310px">
 <tr><td align="right">Colour :</td><td><input class="jscolor {position:'bottom', padding:0, borderWidth:3, shadow:false}" id="colour" name="colour" value=""></td></tr>
-<tr><td colspan="2" align="center"><a href="javascript:GetState()" class="btn btn--m btn--blue">Refresh</a></td></tr>
+<tr><td colspan="1" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Save"></td></tr>
+<tr><td colspan="1" align="center"><a href="havascript:SetState()" style="width:150px" class="btn btn--m btn--blue">Apply</a></td></tr>
+<tr><td colspan="1" align="center"><a href="javascript:GetState()" style="width:150px" class="btn btn--m btn--blue">Refresh</a></td></tr>
 </table>
+</form>
 <script type="text/javascript" src="script.js"></script>
 <script type="text/javascript" src="jscolor.js"></script>
 
 <script>
 	setTimeout(GetState,1000);
 	function GetState()	{
-		setValues("/status/ledval");
+		setValues("http://10.0.0.62/status/ledval");
 	}
 </script>
 

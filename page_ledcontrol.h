@@ -15,7 +15,7 @@ extern PixelDriver     pixels;         /* Pixel object */
 
 void send_led_val(AsyncWebServerRequest *request) {
     char rgbStr[18] = {0};
-    sprintf(rgbStr, "\#%02X%02X%02X", pixels.getValue(0), pixels.getValue(1), pixels.getValue(2));
+    sprintf(rgbStr, "%02X%02X%02X", pixels.getValue(0), pixels.getValue(1), pixels.getValue(2));
     String values = "";
     values += "colour|input|" + (String)rgbStr + "\n";
     request->send(200, "text/plain", values);
@@ -25,15 +25,23 @@ void send_led_val_html(AsyncWebServerRequest *request) {
     if (request->params()) {
         for (uint8_t i = 0; i < request->params(); i++) {
             AsyncWebParameter *p = request->getParam(i);
-            if (p->name() == "colour")
-            {
-              for (int i=0; i<config.channel_count; i+=3)
-              {
-                pixels.setValue(i,p->value().toInt());
+            if (p->name() == "colour") {
+//Serial.print("got colour str");
+//Serial.println(p->value());
+long RGBint = (int) strtol( p->value().c_str(), NULL, 16);
+//Serial.print("got colour RGBint");
+//Serial.println(RGBint);
+
+              for (int i=0; i<config.channel_count; i+=3) {
+                pixels.setValue(i+0,RGBint>>16 & 0xff);
+                pixels.setValue(i+1,RGBint>>8  & 0xff);
+                pixels.setValue(i+2,RGBint     & 0xff);
               }
             }
         }
-        request->send(200);
+        AsyncWebServerResponse *response = request->beginResponse(303);
+        response->addHeader("Location", request->url());
+        request->send(response);
     } else {
         request->send(400);
     }

@@ -9,8 +9,7 @@
 <tr><td align="right">Total Packets :</td><td><span id="num_packets"></span></td></tr>
 <tr><td align="right">Sequence Errors :</td><td><span id="sequence_errors"></span></td></tr>
 <tr><td align="right">Packet Errors :</td><td><span id="packet_errors"></span></td></tr>
-<tr><td align="right">Last Client IP :</td><td><span id="last_clientIP"></span></td></tr>
-<tr><td align="right">Last Client Port :</td><td><span id="last_clientPort"></span></td></tr>
+<tr><td align="right">Last Client :</td><td><span id="last_client"></span></td></tr>
 <tr><td colspan="2" align="center"><a href="javascript:GetState()" class="btn btn--m btn--blue">Refresh</a></td></tr>
 </table>
 <script type="text/javascript" src="script.js"></script>

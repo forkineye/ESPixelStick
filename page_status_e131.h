@@ -14,6 +14,12 @@ void send_status_e131_vals(AsyncWebServerRequest *request) {
     values += "num_packets|div|" + (String)e131.stats.num_packets + "\n";
     values += "sequence_errors|div|" + (String)seqErrors + "\n";
     values += "packet_errors|div|" + (String)e131.stats.packet_errors + "\n";
+    values += "last_clientIP|div|"  + (String)e131.stats.last_clientIP[0] 
+                                  + "." + (String)e131.stats.last_clientIP[1] 
+                                  + "." + (String)e131.stats.last_clientIP[2] 
+                                  + "." + (String)e131.stats.last_clientIP[3] 
+                                  + "\n";
+    values += "last_clientPort|div|"  + (String)e131.stats.last_clientPort + "\n";
     values += "title|div|" + config.id + " - E1.31 Status\n";
     request->send(200, "text/plain", values);
 }
