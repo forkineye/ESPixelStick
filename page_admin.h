@@ -47,7 +47,14 @@ void send_admin_vals(AsyncWebServerRequest *request) {
     String values = "";
     values += "version|div|" + (String)VERSION + "\n";
     values += "title|div|" + config.id + " - Admin\n";
-    request->send(200, "text/plain", values);
+    values += "FlashChipId|div|0x" + String(ESP.getFlashChipId(), HEX) + "\n";
+    values += "FlashChipSize|div|" + (String)ESP.getFlashChipSize() + "\n";
+    values += "FlashChipRealSize|div|" + (String)ESP.getFlashChipRealSize() + "\n";
+    values += "FreeHeap|div|" + (String)ESP.getFreeHeap()  + "\n";
+    
+    AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", values);
+    response->addHeader("Access-Control-Allow-Origin", "*");
+    request->send(response);
 }
 
 #endif /* PAGE_ADMIN_H_ */

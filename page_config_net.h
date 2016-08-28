@@ -53,7 +53,9 @@ void send_config_net_vals(AsyncWebServerRequest *request) {
     values += "dhcp|chk|" + (String)(config.dhcp ? "checked" : "") + "\n";
     values += "multicast|chk|" + (String)(config.multicast ? "checked" : "") + "\n";
     values += "title|div|" + config.id + " - Net Config\n";
-    request->send(200, "text/plain", values);
+    AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", values);
+    response->addHeader("Access-Control-Allow-Origin", "*");
+    request->send(response);
 }
 
 void send_survey_vals(AsyncWebServerRequest *request) {
@@ -86,7 +88,9 @@ void send_survey_vals(AsyncWebServerRequest *request) {
     }
     String values = "";
     values += "networks|div|" + networks + "\n";
-    request->send(200, "text/plain", values);
+    AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", values);
+    response->addHeader("Access-Control-Allow-Origin", "*");
+    request->send(response);
 }
 
 #endif /* PAGE_CONFIG_NET_H_ */

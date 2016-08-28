@@ -22,7 +22,9 @@ void send_status_net_vals(AsyncWebServerRequest *request) {
     values += "x_rssi|div|" + (String)rssi + "\n";
     values += "x_quality|div|" + (String)quality + "\n";
     values += "title|div|" + config.id + " - Net Status\n";
-    request->send(200, "text/plain", values);
+    AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", values);
+    response->addHeader("Access-Control-Allow-Origin", "*");
+    request->send(response);
 }
 
 #endif /* PAGE_STATUS_NET_H_ */

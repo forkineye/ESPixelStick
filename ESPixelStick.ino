@@ -27,7 +27,7 @@
 //#define ESPS_MODE_SERIAL
 
 /* Fallback configuration if config.json is empty or fails */
-const char ssid[] = "hidden2";
+const char ssid[] = "photon";
 const char passphrase[] = "blahdeblah";
 
 /*****************************************/

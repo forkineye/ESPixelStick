@@ -21,7 +21,9 @@ void send_status_e131_vals(AsyncWebServerRequest *request) {
                                   + "\n";
     values += "last_clientPort|div|"  + (String)e131.stats.last_clientPort + "\n";
     values += "title|div|" + config.id + " - E1.31 Status\n";
-    request->send(200, "text/plain", values);
+    AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", values);
+    response->addHeader("Access-Control-Allow-Origin", "*");
+    request->send(response);
 }
 
 #endif /* PAGE_STATUS_E131_H_ */
