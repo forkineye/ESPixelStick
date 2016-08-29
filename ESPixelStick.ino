@@ -103,14 +103,16 @@ void setup() {
     LOG_PORT.begin(115200);
     delay(10);
 
-    /* Enable SPIFFS */
-    SPIFFS.begin();
-
     LOG_PORT.println("");
     LOG_PORT.print(F("ESPixelStick v"));
     for (uint8_t i = 0; i < strlen_P(VERSION); i++)
         LOG_PORT.print((char)(pgm_read_byte(VERSION + i)));
     LOG_PORT.println("");
+
+    /* Enable SPIFFS */
+    if (!SPIFFS.begin()){
+      LOG_PORT.println(F("**** FAILED TO MOUNT SPIFFS ****"));    
+    }
 
     /* Load configuration from SPIFFS */
     loadConfig();

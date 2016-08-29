@@ -18,7 +18,9 @@ void send_led_val(AsyncWebServerRequest *request) {
     sprintf(rgbStr, "%02X%02X%02X", pixels.getValue(0), pixels.getValue(1), pixels.getValue(2));
     String values = "";
     values += "colour|input|" + (String)rgbStr + "\n";
-    request->send(200, "text/plain", values);
+    AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", values);
+    response->addHeader("Access-Control-Allow-Origin", "*");
+    request->send(response);
 }
 
 void send_led_val_html(AsyncWebServerRequest *request) {

@@ -6,6 +6,10 @@
 <form name="frmAdmin" action="" method="post" enctype="multipart/form-data">
 <table border="0" cellspacing="0" cellpadding="3">
 <tr><td align="right">FW Version :</td><td><span id="version"></span></td></tr>
+<tr><td align="right">FlashChipId :</td><td><span id="FlashChipId"></span></td></tr>
+<tr><td align="right">FlashChipSize :</td><td><span id="FlashChipSize"></span></td></tr>
+<tr><td align="right">FlashChipRealSize :</td><td><span id="FlashChipRealSize"></span></td></tr>
+<tr><td align="right">FreeHeap :</td><td><span id="FreeHeap"></span></td></tr>
 <tr><td colspan="2" align="left"><input type="file" name="updateFile"></td><td></td></tr>
 <tr><td colspan="2" align="center"><input type="submit" name="update" style="width:150px" class="btn btn--m btn--blue" value="Update"></td></tr>
 <tr><td colspan="2" align="center"><input type="submit" name="reboot" onClick="reset()" style="width:150px" class="btn btn--m btn--red" value="Reboot"></td></tr>

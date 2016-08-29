@@ -37,8 +37,8 @@
 
   "pixel": {
     "type": 0,
-    "color": 1,
-    "gamma": false
+    "color": 0,
+    "gamma": true
   },
 
   "serial": {
