@@ -251,7 +251,7 @@ void initWeb() {
 #endif
 
     web.onNotFound([](AsyncWebServerRequest *request) {
-        request->send(404);
+        request->send(404, "text/plain", "Page not found");
     });
 
     web.begin();

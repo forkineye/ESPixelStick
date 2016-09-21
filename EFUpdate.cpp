@@ -26,9 +26,7 @@ void EFUpdate::begin() {
     _maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
     _state = State::HEADER;
     _loc = 0;
-
-    Serial.print(F("- Sketch free space: "));
-    Serial.println(_maxSketchSpace);
+    _error = EFUPDATE_ERROR_OK;
 }
 
 bool EFUpdate::process(uint8_t *data, size_t len) {
@@ -46,8 +44,8 @@ bool EFUpdate::process(uint8_t *data, size_t len) {
                         _loc = 0;
                         _state = State::RECORD;
                     } else {
-                        Serial.print(F("** Bad Signature**"));
                         _state = State::FAIL;
+                        _error = EFUPDATE_ERROR_SIG;
                     }
                 }
                 break;
@@ -59,17 +57,24 @@ bool EFUpdate::process(uint8_t *data, size_t len) {
                     _loc = 0;
                     if (_record.type == RecordType::SKETCH_IMAGE) {
                         // Begin sketch update
-                        if (!Update.begin(_record.size, U_FLASH))
-                            Update.printError(Serial);
-                        _state = State::DATA;
+                        if (!Update.begin(_record.size, U_FLASH)) {
+                            _state = State::FAIL;
+                            _error = Update.getError();
+                        } else {
+                            _state = State::DATA;
+                        }
                     } else if (_record.type == RecordType::SPIFFS_IMAGE) {
                         // Begin spiffs update
                         SPIFFS.end();
-                        if (!Update.begin(_record.size, U_SPIFFS))
-                            Update.printError(Serial);
-                        _state = State::DATA;
+                        if (!Update.begin(_record.size, U_SPIFFS)) {
+                            _state = State::FAIL;
+                            _error = Update.getError();
+                        } else {
+                            _state = State::DATA;
+                        }
                     } else {
                         _state = State::FAIL;
+                        _error = EFUPDATE_ERROR_REC;
                     }
                 }
                 break;
@@ -96,6 +101,14 @@ bool EFUpdate::process(uint8_t *data, size_t len) {
     }
 
     return retval;
+}
+
+bool EFUpdate::hasError() {
+    return _error != EFUPDATE_ERROR_OK;
+}
+
+uint8_t EFUpdate::getError() {
+    return _error;
 }
 
 bool EFUpdate::end() {

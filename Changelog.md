@@ -1,8 +1,9 @@
 
 Changelog
 =========
-### 1.5 (in progress)
-- Changed output type to compile time option. Check top of main sketch.
+### 2.0
+- Added web based OTA update capability.
+- Changed output type (pixel vs serial) to compile time option. Check top of main sketch.
 - Migrated to ESPAsyncWebserver for the web server.
 - Migrated all web pages to SPIFFS.
 - Migrated configuration structure to SPIFFS as a JSON file.

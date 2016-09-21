@@ -20,12 +20,18 @@
 #ifndef EFUPDATE_H_
 #define EFUPDATE_H_
 
+#define EFUPDATE_ERROR_OK   (0)
+#define EFUPDATE_ERROR_SIG  (100)
+#define EFUPDATE_ERROR_REC  (101)
+
 class EFUpdate {
  public:
     const uint32_t EFU_ID = 0x00554645;     // 'E', 'F', 'U', 0x00
 
     void begin();
     bool process(uint8_t *data, size_t len);
+    bool hasError();
+    uint8_t getError();
     bool end();
 
  private:
@@ -70,6 +76,7 @@ class EFUpdate {
     efuheader_t _header;
     efurecord_t _record;
     uint32_t    _maxSketchSpace;
+    uint8_t     _error;
 };
 
 #endif /* EFUPDATE_H_ */
