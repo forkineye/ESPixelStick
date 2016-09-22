@@ -37,6 +37,8 @@ void send_config_pixel_vals(AsyncWebServerRequest *request) {
     values += "pixel_color|opt|" + String("GRB|") + String(static_cast<uint8_t>(PixelColor::GRB)) + "\n";
     values += "pixel_color|opt|" + String("BRG|") + String(static_cast<uint8_t>(PixelColor::BRG)) + "\n";
     values += "pixel_color|opt|" + String("RBG|") + String(static_cast<uint8_t>(PixelColor::RBG)) + "\n";
+    values += "pixel_color|opt|" + String("GBR|") + String(static_cast<uint8_t>(PixelColor::GBR)) + "\n";
+    values += "pixel_color|opt|" + String("BGR|") + String(static_cast<uint8_t>(PixelColor::BGR)) + "\n";
     values += "pixel_color|input|" + String(static_cast<uint8_t>(config.pixel_color)) + "\n";
     values += "gamma|chk|" + String(config.gamma ? "checked" : "") + "\n";
     values += "title|div|" + config.id + " - Pixel Config\n";

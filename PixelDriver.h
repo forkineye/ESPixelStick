@@ -85,7 +85,9 @@ enum class PixelColor : uint8_t {
     RGB,
     GRB,
     BRG,
-    RBG
+    RBG,
+    GBR,
+    BGR
 };
 
 class PixelDriver {

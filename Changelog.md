@@ -1,6 +1,9 @@
 
 Changelog
 =========
+### 2.1
+- Added GBR and BGR color order for pixels.
+
 ### 2.0
 - Added web based OTA update capability.
 - Changed output type (pixel vs serial) to compile time option. Check top of main sketch.
