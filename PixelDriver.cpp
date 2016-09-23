@@ -164,6 +164,16 @@ void PixelDriver::updateOrder(PixelColor color) {
             gOffset = 2;
             bOffset = 1;
             break;
+        case PixelColor::GBR:
+            rOffset = 2;
+            gOffset = 0;
+            bOffset = 1;
+            break;
+        case PixelColor::BGR:
+            rOffset = 2;
+            gOffset = 1;
+            bOffset = 0;
+            break;
         default:
             rOffset = 0;
             gOffset = 1;

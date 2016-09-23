@@ -1,7 +1,10 @@
 #ifndef PAGE_ADMIN_H_
 #define PAGE_ADMIN_H_
 
+#include "EFUpdate.h"
+
 const char REBOOT[] = R"=====(<meta http-equiv="refresh" content="2; url=/"><strong>Rebooting...</strong>)=====";
+EFUpdate efupdate;
 
 void send_admin_html(AsyncWebServerRequest *request) {
     if (request->hasParam("reboot", true)) {
@@ -9,8 +12,8 @@ void send_admin_html(AsyncWebServerRequest *request) {
         reboot = true;
     } else if (request->hasParam("update"), true) {
         if (request->hasParam("updateFile", true, true)) {
-            if (Update.hasError()) {
-                request->send(200, "text/plain", "Error: " + String(Update.getError()));
+            if (efupdate.hasError()) {
+                request->send(200, "text/plain", "Update Error: " + String(efupdate.getError()));
             } else {
                 request->send(200, "text/html", REBOOT);
                 reboot = true;
@@ -27,19 +30,22 @@ void handle_fw_upload(AsyncWebServerRequest *request, String filename,
         size_t index, uint8_t *data, size_t len, bool final) {
     if (!index) {
         WiFiUDP::stopAll();
-        uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
         LOG_PORT.print(F("* Upload Started: "));
         LOG_PORT.println(filename.c_str());
-        LOG_PORT.print(F("- Free space: "));
-        LOG_PORT.println(maxSketchSpace);
-        if (!Update.begin(maxSketchSpace, U_FLASH))
-            Update.printError(LOG_PORT);
+        efupdate.begin();
     }
 
-    Update.write(data, len);
+    if (!efupdate.process(data, len)) {
+        LOG_PORT.print(F("*** UPDATE ERROR: "));
+        LOG_PORT.println(String(efupdate.getError()));
+
+    }
+
     if (final) {
         LOG_PORT.println(F("* Upload Finished."));
-        Update.end(true);
+        efupdate.end();
+        SPIFFS.begin();
+        saveConfig();
     }
 }
 

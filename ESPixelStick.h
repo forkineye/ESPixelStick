@@ -28,7 +28,7 @@
 #include "_E131.h"
 
 /* Name and version */
-const char VERSION[] = "1.5 beta";
+const char VERSION[] = "2.1-dev";
 
 #define HTTP_PORT       80      /* Default web server port */
 #define DATA_PIN        2       /* Pixel output - GPIO2 */
