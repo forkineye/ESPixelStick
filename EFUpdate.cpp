@@ -112,8 +112,6 @@ uint8_t EFUpdate::getError() {
 }
 
 bool EFUpdate::end() {
-    Serial.print(F("- Update Complete"));
-
     if (_state == State::FAIL)
         return false;
     else

@@ -52,10 +52,17 @@ const char VERSION[] = "2.1-dev";
 const char CONFIG_FILE[] = "/config.json";
 #define CONFIG_MAX_SIZE 2048    /* Sanity limit for config file */
 
+/* Pixel Types */
+enum class DevMode : uint8_t {
+    MPIXEL,
+    MSERIAL
+};
+
 /* Configuration structure */
 typedef struct {
     /* Device */
     String      id;             /* Device ID */
+    DevMode     mode;           /* Device Mode - used for reporting mode, can't be set */
 
     /* Network */
     String      ssid;
@@ -91,9 +98,16 @@ E131            e131;
 config_t        config;
 uint32_t        *seqError;      /* Sequence error tracking for each universe */
 uint16_t        uniLast = 1;    /* Last Universe to listen for */
-bool            reboot = false; /* Flag to reboot the ESP */
 
-/* Called from web handlers */
+/* Forward Declarations */
+void serializeConfig(String &jsonString, bool pretty = false, bool creds = false);
+void dsNetworkConfig(JsonObject &json);
+void dsDeviceConfig(JsonObject &json);
 void saveConfig();
+
+void reboot() {
+    delay(REBOOT_DELAY);
+    ESP.restart();
+}
 
 #endif /* ESPIXELSTICK_H_ */

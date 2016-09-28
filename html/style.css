@@ -1,112 +1,84 @@
 body {
-    color: #000000;
-    font-family: avenir, helvetica, arial, sans-serif;
-    letter-spacing: 0.15em;
+  padding-top: 60px;
+  padding-bottom: 20px;
 }
 
-hr {
-    background-color: #eee;
-    border: 0 none;
-    color: #eee;
-    height: 1px;
+/* Fix single page anchor nav */
+.anchor:before { 
+  display: block; 
+  content: " "; 
+  margin-top: -75px; 
+  height: 75px; 
+  visibility: hidden; 
 }
 
-.btn,
-.btn:link,
-.btn:visited {
-    border-radius: 0.3em;
-    border-style: solid;
-    border-width: 1px;
-    color: #111;
-    display: inline-block;
-    font-family: avenir, helvetica, arial, sans-serif;
-    letter-spacing: 0.15em;
-    margin-bottom: 0.5em;
-    padding: 1em 0.75em;
-    text-decoration: none;
-    text-transform: uppercase;
-    -webkit-transition: color 0.4s, background-color 0.4s, border 0.4s;
-    transition: color 0.4s, background-color 0.4s, border 0.4s;
+.esps {
+   text-align: center;
 }
 
-.btn:hover,
-.btn:focus {
-    color: #7FDBFF;
-    border: 1px solid #7FDBFF;
-    -webkit-transition: background-color 0.3s, color 0.3s, border 0.3s;
-    transition: background-color 0.3s, color 0.3s, border 0.3s;
+.esps-legend {
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
-.btn:active {
-    color: #0074D9;
-    border: 1px solid #0074D9;
-    -webkit-transition: background-color 0.3s, color 0.3s, border 0.3s;
-    transition: background-color 0.3s, color 0.3s, border 0.3s;
-}
-
-.btn--s {
-    font-size: 12px;
-}
-
-.btn--m {
-    font-size: 14px;
-}
-
-.btn--l {
-    font-size: 20px;
-    border-radius: 0.25em !important;
-}
-
-.btn--full,
-.btn--full:link {
-    border-radius: 0.25em;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
+.esps-table {
+    margin-left: 10px;
+    border-spacing: 10px;
     width: 100%;
 }
 
-.btn--blue:link,
-.btn--blue:visited {
-    color: #fff;
-    background-color: #0074D9;
+.footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 20px;
+  background-color: #222;
+  color: #9d9d9d;
 }
 
-.btn--blue:hover,
-.btn--blue:focus {
-    color: #fff !important;
-    background-color: #0063aa;
-    border-color: #0063aa;
+/* Snackbar - position it at the bottom and in the middle of the screen */
+#snackbar {
+    visibility: hidden;     /* Hidden by default. Visible on click */
+    min-width: 250px;       /* Set a default minimum width */
+    margin-left: -125px;    /* Divide value of min-width by 2 */
+    background-color: #333; /* Black background color */
+    color: #fff;            /* White text color */
+    text-align: center;     /* Centered text */
+    border-radius: 2px;     /* Rounded borders */
+    padding: 16px;          /* Padding */
+    position: fixed;        /* Sit on top of the screen */
+    z-index: 1;             /* Add a z-index if needed */
+    left: 50%;              /* Center the snackbar */
+    bottom: 30px;           /* 30px from the bottom */
 }
 
-.btn--blue:active {
-    color: #fff;
-    background-color: #001F3F;
-    border-color: #001F3F;
+/* Show the snackbar when clicking on a button (class added with JavaScript) */
+#snackbar.show {
+    visibility: visible; /* Show the snackbar */
+
+/* Add animation: Take 0.5 seconds to fade in and out the snackbar. 
+However, delay the fade out process for 2.5 seconds */
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
 }
 
-.btn--red:link,
-.btn--red:visited {
-    color: #fff;
-    background-color: #e60000;
+/* Animations to fade the snackbar in and out */
+@-webkit-keyframes fadein {
+    from {bottom: 0; opacity: 0;} 
+    to {bottom: 30px; opacity: 1;}
 }
 
-.btn--red:hover,
-.btn--red:focus {
-    color: #fff !important;
-    background-color: #cc0000;
-    border-color: #cc0000;
+@keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
 }
 
-.btn--red:active {
-    color: #fff;
-    background-color: #990000;
-    border-color: #990000;
+@-webkit-keyframes fadeout {
+    from {bottom: 30px; opacity: 1;} 
+    to {bottom: 0; opacity: 0;}
 }
 
-@media screen and (min-width: 32em) {
-    .btn--full {
-        max-width: 16em !important;
-    }
+@keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
 }

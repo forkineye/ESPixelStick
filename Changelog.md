@@ -2,6 +2,7 @@
 Changelog
 =========
 ### 2.1
+- Complete re-write of the web frontend. Requires a WebSockets capable browser.
 - Added GBR and BGR color order for pixels.
 
 ### 2.0
