@@ -2,7 +2,9 @@
 Changelog
 =========
 ### 2.1
+- Complete re-write of the web frontend. Requires a WebSockets capable browser.
 - Added GBR and BGR color order for pixels.
+- Changed WS2811 reset time from 50us to 80us to better support WS2811 clones.
 
 ### 2.0
 - Added web based OTA update capability.

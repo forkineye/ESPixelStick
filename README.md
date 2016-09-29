@@ -45,6 +45,5 @@ Resources
 Credits
 -------
 - The people at http://diychristmas.org and http://doityourselfchristmas.com for inspiration.
-- John Lassen for his web framework from which the web porition was derived - http://www.john-lassen.de/index.php/projects/esp-8266-arduino-ide-webconfig.
-- Bill Porter for Renard and SoftAP aupport.
-- Bill Porter and Grayson Lough for DMX support.
+- Bill Porter for initial Renard and SoftAP aupport.
+- Bill Porter and Grayson Lough for initial DMX support.

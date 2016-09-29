@@ -43,39 +43,28 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include <ArduinoJson.h>
 #include <Hash.h>
 #include "ESPixelStick.h"
-#include "_E131.h"
+#include "EFUpdate.h"
 #include "helpers.h"
+#include "wshandler.h"
+#include "_E131.h"
 
 /* Output Drivers */
 #if defined(ESPS_MODE_PIXEL)
 #include "PixelDriver.h"
-#include "page_config_pixel.h"
-#elif defined(ESPS_MODE_SERIAL)
-#include "SerialDriver.h"
-#include "page_config_serial.h"
-#else
-#error "No valid output mode defined."
-#endif
-
-/* Common Web pages and handlers */
-#include "page_root.h"
-#include "page_admin.h"
-#include "page_config_net.h"
-#include "page_status_net.h"
-#include "page_status_e131.h"
-
-#if defined(ESPS_MODE_PIXEL)
 PixelDriver     pixels;         /* Pixel object */
 #elif defined(ESPS_MODE_SERIAL)
+#include "SerialDriver.h"
 SerialDriver    serial;         /* Serial object */
+#else
+#error "No valid output mode defined."
 #endif
 
 uint8_t             *seqTracker;        /* Current sequence numbers for each Universe */
 uint32_t            lastUpdate;         /* Update timeout tracker */
 AsyncWebServer      web(HTTP_PORT);     /* Web Server */
+AsyncWebSocket      ws("/ws");          /* Web Socket Plugin */
 
 /* Forward Declarations */
-void serializeConfig(String &jsonString, bool pretty = false, bool creds = false);
 void loadConfig();
 int initWifi();
 void initWeb();
@@ -212,13 +201,14 @@ void initWeb() {
     /* Handle OTA update from asynchronous callbacks */
     Update.runAsync(true);
 
+    /* Setup WebSockets */
+    ws.onEvent(wsEvent);
+    web.addHandler(&ws);
+
     /* Heap status handler */
     web.on("/heap", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", String(ESP.getFreeHeap()));
     });
-
-    /* Config file handler for testing */
-    //web.serveStatic("/configfile", SPIFFS, "/config.json");
 
     /* JSON Config Handler */
     web.on("/conf", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -227,28 +217,13 @@ void initWeb() {
         request->send(200, "text/json", jsonString);
     });
 
-    /* AJAX Handlers */
-    web.on("/rootvals", HTTP_GET, send_root_vals);
-    web.on("/adminvals", HTTP_GET, send_admin_vals);
-    web.on("/config/netvals", HTTP_GET, send_config_net_vals);
-    web.on("/config/survey", HTTP_GET, send_survey_vals);
-    web.on("/status/netvals", HTTP_GET, send_status_net_vals);
-    web.on("/status/e131vals", HTTP_GET, send_status_e131_vals);
-
     /* POST Handlers */
-    web.on("/admin.html", HTTP_POST, send_admin_html, handle_fw_upload);
-    web.on("/config_net.html", HTTP_POST, send_config_net_html);
+    web.on("/updatefw", HTTP_POST, [](AsyncWebServerRequest *request) {
+        request->send(200);
+    }, handle_fw_upload);
 
-    /* Static handler */
-#if defined(ESPS_MODE_PIXEL)
-    web.on("/config/pixelvals", HTTP_GET, send_config_pixel_vals);
-    web.on("/config_pixel.html", HTTP_POST, send_config_pixel_html);
-    web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("pixel.html");
-#elif defined(ESPS_MODE_SERIAL)
-    web.on("/config/serialvals", HTTP_GET, send_config_serial_vals);
-    web.on("/config_serial.html", HTTP_POST, send_config_serial_html);
-    web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("serial.html");
-#endif
+    /* Static Handler */
+    web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
 
     web.onNotFound([](AsyncWebServerRequest *request) {
         request->send(404, "text/plain", "Page not found");
@@ -272,6 +247,9 @@ void validateConfig() {
         config.channel_start = UNIVERSE_LIMIT;
 
 #if defined(ESPS_MODE_PIXEL)
+    /* Set Mode */
+    config.mode = DevMode::MPIXEL;
+
     /* Generic channel limits for pixels */
     if (config.channel_count % 3)
         config.channel_count = (config.channel_count / 3) * 3;
@@ -289,6 +267,9 @@ void validateConfig() {
     }
 
 #elif defined(ESPS_MODE_SERIAL)
+    /* Set Mode */
+    config.mode = DevMode::MSERIAL;
+
     /* Generic serial channel limits */
     if (config.channel_count > RENARD_LIMIT)
         config.channel_count = RENARD_LIMIT;
@@ -346,6 +327,52 @@ void updateConfig() {
     LOG_PORT.println(uniLast);
 }
 
+/* De-Serialize Network config */
+void dsNetworkConfig(JsonObject &json) {
+    /* Fallback to embedded ssid and passphrase if null in config */
+    if (strlen(json["network"]["ssid"]))
+        config.ssid = json["network"]["ssid"].as<String>();
+    else
+        config.ssid = ssid;
+
+    if (strlen(json["network"]["passphrase"]))
+        config.passphrase = json["network"]["passphrase"].as<String>();
+    else
+        config.passphrase = passphrase;
+
+    /* Network */
+    for (int i = 0; i < 4; i++) {
+        config.ip[i] = json["network"]["ip"][i];
+        config.netmask[i] = json["network"]["netmask"][i];
+        config.gateway[i] = json["network"]["gateway"][i];
+    }
+    config.dhcp = json["network"]["dhcp"];
+    config.ap_fallback = json["network"]["ap_fallback"];
+}
+
+void dsDeviceConfig(JsonObject &json) {
+    /* Device */
+    config.id = json["device"]["id"].as<String>();
+
+    /* E131 */
+    config.universe = json["e131"]["universe"];
+    config.channel_start = json["e131"]["channel_start"];
+    config.channel_count = json["e131"]["channel_count"];
+    config.multicast = json["e131"]["multicast"];
+
+#if defined(ESPS_MODE_PIXEL)
+    /* Pixel */
+    config.pixel_type = PixelType(static_cast<uint8_t>(json["pixel"]["type"]));
+    config.pixel_color = PixelColor(static_cast<uint8_t>(json["pixel"]["color"]));
+    config.gamma = json["pixel"]["gamma"];
+
+#elif defined(ESPS_MODE_SERIAL)
+    /* Serial */
+    config.serial_type = SerialType(static_cast<uint8_t>(json["serial"]["type"]));
+    config.baudrate = BaudRate(static_cast<uint32_t>(json["serial"]["baudrate"]));
+#endif
+}
+
 /* Load configugration JSON file */
 void loadConfig() {
     /* Zeroize Config struct */
@@ -376,46 +403,8 @@ void loadConfig() {
             return;
         }
 
-        /* Device */
-        config.id = json["device"]["id"].as<String>();
-
-        /* Fallback to embedded ssid and passphrase if null in config */
-        if (strlen(json["network"]["ssid"]))
-            config.ssid = json["network"]["ssid"].as<String>();
-        else
-            config.ssid = ssid;
-
-        if (strlen(json["network"]["passphrase"]))
-            config.passphrase = json["network"]["passphrase"].as<String>();
-        else
-            config.passphrase = passphrase;
-
-        /* Network */
-        for (int i = 0; i < 4; i++) {
-            config.ip[i] = json["network"]["ip"][i];
-            config.netmask[i] = json["network"]["netmask"][i];
-            config.gateway[i] = json["network"]["gateway"][i];
-        }
-        config.dhcp = json["network"]["dhcp"];
-        config.ap_fallback = json["network"]["ap_fallback"];
-
-        /* E131 */
-        config.universe = json["e131"]["universe"];
-        config.channel_start = json["e131"]["channel_start"];
-        config.channel_count = json["e131"]["channel_count"];
-        config.multicast = json["e131"]["multicast"];
-
-#if defined(ESPS_MODE_PIXEL)
-        /* Pixel */
-        config.pixel_type = PixelType(static_cast<uint8_t>(json["pixel"]["type"]));
-        config.pixel_color = PixelColor(static_cast<uint8_t>(json["pixel"]["color"]));
-        config.gamma = json["pixel"]["gamma"];
-
-#elif defined(ESPS_MODE_SERIAL)
-        /* Serial */
-        config.serial_type = SerialType(static_cast<uint8_t>(json["serial"]["type"]));
-        config.baudrate = BaudRate(static_cast<uint32_t>(json["serial"]["baudrate"]));
-#endif
+        dsNetworkConfig(json);
+        dsDeviceConfig(json);
 
         LOG_PORT.println(F("- Configuration loaded."));
     }
@@ -433,6 +422,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     /* Device */
     JsonObject &device = json.createNestedObject("device");
     device["id"] = config.id.c_str();
+    device["mode"] = static_cast<uint8_t>(config.mode);
 
     /* Network */
     JsonObject &network = json.createNestedObject("network");
@@ -499,12 +489,6 @@ void saveConfig() {
 
 /* Main Loop */
 void loop() {
-    /* Reboot handler */
-    if (reboot) {
-        delay(REBOOT_DELAY);
-        ESP.restart();
-    }
-
     /* Parse a packet and update pixels */
     if (e131.parsePacket()) {
         if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
