@@ -98,16 +98,14 @@ E131            e131;
 config_t        config;
 uint32_t        *seqError;      /* Sequence error tracking for each universe */
 uint16_t        uniLast = 1;    /* Last Universe to listen for */
+bool            reboot = false; /* Reboot flag */
+AsyncWebServer  web(HTTP_PORT); /* Web Server */
+AsyncWebSocket  ws("/ws");      /* Web Socket Plugin */
 
 /* Forward Declarations */
 void serializeConfig(String &jsonString, bool pretty = false, bool creds = false);
 void dsNetworkConfig(JsonObject &json);
 void dsDeviceConfig(JsonObject &json);
 void saveConfig();
-
-void reboot() {
-    delay(REBOOT_DELAY);
-    ESP.restart();
-}
 
 #endif /* ESPIXELSTICK_H_ */

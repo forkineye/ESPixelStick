@@ -55,7 +55,7 @@ void procX(uint8_t *data, AsyncWebSocketClient *client) {
             break;
         }
         case '6':  // Init 6 baby, reboot!
-            reboot();            
+            reboot = true;
     }
 }
 
@@ -152,7 +152,7 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
     }
 }
 
-const char REBOOT[] = R"=====(<meta http-equiv="refresh" content="5; url=/"><strong>Rebooting...</strong>)=====";
+//const char REBOOT[] = R"=====(<meta http-equiv="refresh" content="5; url=/"><strong>Rebooting...</strong>)=====";
 /*
 void send_update_html(AsyncWebServerRequest *request) {
     if (request->hasParam("file", true, true)) {
@@ -186,12 +186,13 @@ void handle_fw_upload(AsyncWebServerRequest *request, String filename,
         request->send(200, "text/plain", "Update Error: " + String(efupdate.getError()));
 
     if (final) {
+//        ws.textAll("X6");
         LOG_PORT.println(F("* Upload Finished."));
         efupdate.end();
         SPIFFS.begin();
         saveConfig();
-        request->send(200, "text/html", REBOOT);
-        reboot();
+//        request->send(200, "text/html", REBOOT);
+        reboot = true;
     }
 }
 
