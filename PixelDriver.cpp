@@ -283,6 +283,5 @@ void PixelDriver::show() {
             /* and send it */
             doGECE(pin, packet);
         }
-        //startTime = micros();   
     }
 }
