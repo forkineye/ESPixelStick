@@ -46,6 +46,7 @@ const char passphrase[] = "omgthisismywirelesskeyhaha";
 #include "helpers.h"
 #include "wshandler.h"
 #include "_E131.h"
+#include "udpraw.h"
 
 /* Output Drivers */
 #if defined(ESPS_MODE_PIXEL)
@@ -487,48 +488,11 @@ void saveConfig() {
     }
 }
 
-void handle_raw_port() {
-
-  if (!RAWudp) {
-    Serial.println("RE-Starting UDP");
-    RAWudp.begin(RAWPort);
-    MDNS.addService("hyperiond-rgbled", "udp", RAWPort);
-    Serial.print("Local RAWport: ");
-    Serial.println(RAWudp.localPort());
-  }
-  if (!RAWudp) {
-    Serial.println("RE-Start failed.");
-    return;
-  }
-
-  int size = RAWudp.parsePacket();
-  if (size) {
-    // We've received a packet, read the data from it
-    RAWudp.read(udpraw_Buffer, UDPRAW_BUFFER_SIZE); // read the packet into the buffer
-    RAW_ctr++;
-
-    /* Set the data */
-    int i=0;
-    for (i = 0; i < _min(size,config.channel_count); i++) {
-#if defined(ESPS_MODE_PIXEL)
-        pixels.setValue(i, udpraw_Buffer[i]);
-#elif defined(ESPS_MODE_SERIAL)
-        serial.setValue(i, udpraw_Buffer[i]);
-#endif
-    }
-    /* fill the rest with 0s*/
-    for (      ; i < config.channel_count; i++) {
-#if defined(ESPS_MODE_PIXEL)
-        pixels.setValue(i, 0);
-#elif defined(ESPS_MODE_SERIAL)
-        serial.setValue(i, 0);
-#endif
-    }
-  }
-}
-
 /* Main Loop */
 void loop() {
+   /* check for raw packets on port 2801 */
+    handle_raw_port();
+
     /* Parse a packet and update pixels */
     if (e131.parsePacket()) {
         if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
