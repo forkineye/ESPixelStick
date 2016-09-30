@@ -35,6 +35,8 @@
     X6 - Reboot
 */
 
+EFUpdate efupdate;
+
 void procX(uint8_t *data, AsyncWebSocketClient *client) {
     switch(data[1]) {
         case '1':
@@ -53,7 +55,7 @@ void procX(uint8_t *data, AsyncWebSocketClient *client) {
             break;
         }
         case '6':  // Init 6 baby, reboot!
-            reboot();            
+            reboot = true;
     }
 }
 
@@ -147,6 +149,50 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
             saveConfig();
             client->text("S2");
             break;
+    }
+}
+
+//const char REBOOT[] = R"=====(<meta http-equiv="refresh" content="5; url=/"><strong>Rebooting...</strong>)=====";
+/*
+void send_update_html(AsyncWebServerRequest *request) {
+    if (request->hasParam("file", true, true)) {
+        if (efupdate.hasError()) {
+            request->send(200, "text/plain", "Update Error: " + String(efupdate.getError()));
+        } else {
+            request->send(200, "text/html", REBOOT);
+            reboot();
+        }
+    } else {
+        request->send(200, "text/plain", "No File specified for update.");
+    }
+}
+*/
+
+void handle_fw_upload(AsyncWebServerRequest *request, String filename,
+        size_t index, uint8_t *data, size_t len, bool final) {
+    if (!index) {
+        WiFiUDP::stopAll();
+        LOG_PORT.print(F("* Upload Started: "));
+        LOG_PORT.println(filename.c_str());
+        efupdate.begin();
+    }
+
+    if (!efupdate.process(data, len)) {
+        LOG_PORT.print(F("*** UPDATE ERROR: "));
+        LOG_PORT.println(String(efupdate.getError()));
+    }
+
+    if (efupdate.hasError())
+        request->send(200, "text/plain", "Update Error: " + String(efupdate.getError()));
+
+    if (final) {
+//        ws.textAll("X6");
+        LOG_PORT.println(F("* Upload Finished."));
+        efupdate.end();
+        SPIFFS.begin();
+        saveConfig();
+//        request->send(200, "text/html", REBOOT);
+        reboot = true;
     }
 }
 

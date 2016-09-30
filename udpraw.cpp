@@ -3,6 +3,18 @@
 #include <WiFiUdp.h>
 #include <ESP8266mDNS.h>
 
+#define ESPS_MODE_PIXEL
+
+#if defined(ESPS_MODE_PIXEL)
+#include "PixelDriver.h"
+extern PixelDriver     pixels;         /* Pixel object */
+#elif defined(ESPS_MODE_SERIAL)
+#include "SerialDriver.h"
+extern  SerialDriver    serial;         /* Serial object */
+#else
+#error "No valid output mode defined."
+#endif
+
 enum class DevMode : uint8_t {
     MPIXEL,
     MSERIAL

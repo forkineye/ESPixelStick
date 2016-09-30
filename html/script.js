@@ -20,6 +20,12 @@ $(function() {
             location.reload();
         });
 
+        // Firmware selection and upload
+        $('#efu').change(function () {
+            $('#updatefw').submit();
+            $('#update').modal({backdrop: 'static', keyboard: false});
+        });
+
         // Set page event feeds
         feed();
     });
@@ -40,6 +46,8 @@ $(function() {
         else 
             $('#s_baud').prop('disabled', false);
     });
+
+
 });
 
 // Page event feeds
@@ -88,7 +96,7 @@ function wsConnect() {
             case 'S1':
                 setConfig(data);
                 reboot();
-                break
+                break;
             case 'S2':
                 setConfig(data);
                 break;
@@ -97,6 +105,9 @@ function wsConnect() {
                 break;
             case 'X2':
                 getE131Status(data);
+                break;
+            case 'X6':
+                showReboot();
                 break;
             default:
                 console.log('Unknown Command: ' + event.data);
@@ -112,7 +123,7 @@ function wsConnect() {
             $('#wserror').modal({backdrop: 'static', keyboard: false});
         };
     } else {
-        alert('WebSockets NOT supported by your Browser!');
+        alert('WebSockets is NOT supported by your Browser! You will need to upgrade your browser or downgrade to v2.0 of the ESPixelStick firmware.');
     }
 }
 
@@ -140,18 +151,18 @@ function getConfig(data) {
     $('#password').val(config.network.passphrase);
     $('#dhcp').prop('checked', config.network.dhcp);
     $('#ap').prop('checked', config.network.ap_fallback);
-    $('#ip').val(config.network.ip[0] + '.'
-            + config.network.ip[1] + '.' 
-            + config.network.ip[2] + '.' 
-            + config.network.ip[3]);
-    $('#netmask').val(config.network.netmask[0] + '.'
-            + config.network.netmask[1] + '.' 
-            + config.network.netmask[2] + '.' 
-            + config.network.netmask[3]);
-    $('#gateway').val(config.network.gateway[0] + '.'
-            + config.network.gateway[1] + '.' 
-            + config.network.gateway[2] + '.' 
-            + config.network.gateway[3]);
+    $('#ip').val(config.network.ip[0] + '.' +
+            config.network.ip[1] + '.' +
+            config.network.ip[2] + '.' +
+            config.network.ip[3]);
+    $('#netmask').val(config.network.netmask[0] + '.' +
+            config.network.netmask[1] + '.' +
+            config.network.netmask[2] + '.' +
+            config.network.netmask[3]);
+    $('#gateway').val(config.network.gateway[0] + '.' +
+            config.network.gateway[1] + '.' +
+            config.network.gateway[2] + '.' +
+            config.network.gateway[3]);
 
     // E1.31 Config
     $('#universe').val(config.e131.universe);
@@ -160,8 +171,8 @@ function getConfig(data) {
 
     // Output Config
     $('.odiv').addClass('hidden');
-    if (config.device.mode == 0) {  // Pixel
-        mode = 'pixel'
+    if (config.device.mode === 0) {  // Pixel
+        mode = 'pixel';
         $('#o_pixel').removeClass('hidden');
         $('#p_count').val(config.e131.channel_count / 3);
         $('#p_type').val(config.pixel.type);
@@ -170,7 +181,7 @@ function getConfig(data) {
     }
 
     if (config.device.mode == 1) {  // Serial
-        mode = 'serial'
+        mode = 'serial';
         $('#o_serial').removeClass('hidden');
         $('#s_count').val(config.e131.channel_count);
         $('#s_baud').val(config.serial.baudrate);
@@ -215,7 +226,7 @@ function getE131Status(data) {
 
 function snackSave() {
     // Show snackbar for 3sec
-    var x = document.getElementById('snackbar')
+    var x = document.getElementById('snackbar');
     x.className = 'show';
     setTimeout(function(){
         x.className = x.className.replace('show', ''); 
@@ -243,7 +254,7 @@ function submitWiFi() {
                 'dhcp': $('#dhcp').prop('checked'),
                 'ap_fallback': $('#ap').prop('checked')
             }
-        }
+        };
     ws.send('S1' + JSON.stringify(json));
 }
 
@@ -271,7 +282,7 @@ function submitConfig() {
                 'type': parseInt($('#s_proto').val()),
                 'baudrate': parseInt($('#s_baud').val())
             }
-        }
+        };
     ws.send('S2' + JSON.stringify(json));
 }
 
@@ -299,10 +310,15 @@ function refreshPixel() {
     document.getElementById('refresh').innerHTML = Math.ceil(rate) + 'ms / ' + Math.floor(hz) + 'Hz';
 }
 
-function reboot() {
-    ws.send('X6');
+function showReboot() {
+    $('#update').modal('hide');
     $('#reboot').modal({backdrop: 'static', keyboard: false});
-    setTimeout(function(){
-        document.location.reload(true); 
-    }, 5000);
+    setTimeout(function() {
+        window.location.replace("/"); 
+    }, 5000);    
+}
+
+function reboot() {
+    showReboot();
+    ws.send('X6');
 }

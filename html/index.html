@@ -205,7 +205,7 @@
     <div id="admin" class="mdiv hidden anchor">
       <fieldset>
         <legend class="esps-legend">Administration</legend>
-        <form class="form-horizontal" action="" method="post">
+        <form class="form-horizontal" id="updatefw" action="/updatefw" method="post" enctype="multipart/form-data">
           <div class="form-group">
             <label class="control-label col-sm-2">FW Version</label>
             <div class="col-sm-10"><p class="form-control-static" id="x_version"></p></div>
@@ -229,6 +229,10 @@
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
               <button type="submit" class="btn btn-primary">Upload Firmware</button>
+            <div class="col-sm-offset-2 col-sm-10">
+              <label class="btn btn-primary btn-file">
+                Update Firmware <input type="file" id="efu" name="file" accept=".efu" style="display: none;">
+              </label>
             </div>
           </div>
           <div class="form-group">
@@ -252,6 +256,21 @@
         </div>
         <div class="modal-body">
           <p>(reboot animation placeholder)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Update Modal -->
+  <div id="update" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Firmware Updating</h4>
+        </div>
+        <div class="modal-body">
+          <p>Firmware update in progress...</p>
+          <p>(progress bar placeholder)</p>
         </div>
       </div>
     </div>
@@ -283,7 +302,6 @@
 
   <script type="text/javascript" src="js/jquery-2.2.3.min.js"></script>
   <script type="text/javascript" src="js/bootstrap.min.js"></script>
-  <script type="text/javascript" src="js/spin.min.js"></script>
   <script type="text/javascript" src="script.js"></script>
 
   <script>

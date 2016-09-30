@@ -43,10 +43,11 @@ const char passphrase[] = "omgthisismywirelesskeyhaha";
 #include <ArduinoJson.h>
 #include <Hash.h>
 #include "ESPixelStick.h"
+#include "udpraw.h"
+#include "EFUpdate.h"
 #include "helpers.h"
 #include "wshandler.h"
 #include "_E131.h"
-#include "udpraw.h"
 
 /* Output Drivers */
 #if defined(ESPS_MODE_PIXEL)
@@ -61,8 +62,6 @@ SerialDriver    serial;         /* Serial object */
 
 uint8_t             *seqTracker;        /* Current sequence numbers for each Universe */
 uint32_t            lastUpdate;         /* Update timeout tracker */
-AsyncWebServer      web(HTTP_PORT);     /* Web Server */
-AsyncWebSocket      ws("/ws");          /* Web Socket Plugin */
 
 /* Forward Declarations */
 void loadConfig();
@@ -213,15 +212,17 @@ void initWeb() {
         request->send(200, "text/plain", String(ESP.getFreeHeap()));
     });
 
-    /* Config file handler for testing */
-    //web.serveStatic("/configfile", SPIFFS, "/config.json");
-
     /* JSON Config Handler */
     web.on("/conf", HTTP_GET, [](AsyncWebServerRequest *request) {
         String jsonString;
         serializeConfig(jsonString);
         request->send(200, "text/json", jsonString);
     });
+
+    /* POST Handlers */
+    web.on("/updatefw", HTTP_POST, [](AsyncWebServerRequest *request) {
+        ws.textAll("X6");
+    }, handle_fw_upload);
 
     /* Static Handler */
     web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
@@ -493,6 +494,12 @@ void loop() {
    /* check for raw packets on port 2801 */
     handle_raw_port();
 
+    /* Reboot handler */
+    if (reboot) {
+        delay(REBOOT_DELAY);
+        ESP.restart();
+    }
+    
     /* Parse a packet and update pixels */
     if (e131.parsePacket()) {
         if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
