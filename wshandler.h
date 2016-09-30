@@ -51,7 +51,14 @@ void procX(uint8_t *data, AsyncWebSocketClient *client) {
                     (String)uniLast + ":" +
                     (String)e131.stats.num_packets + ":" +
                     (String)seqErrors + ":" +
-                    (String)e131.stats.packet_errors);
+                    (String)e131.stats.packet_errors + ":" +
+                    (String)e131.stats.last_clientIP[0]
+                              + "." + (String)e131.stats.last_clientIP[1]
+                              + "." + (String)e131.stats.last_clientIP[2]
+                              + "." + (String)e131.stats.last_clientIP[3]
+                              + ":" + 
+                    (String)e131.stats.last_clientPort
+                    );
             break;
         }
         case '6':  // Init 6 baby, reboot!
@@ -121,6 +128,11 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             json["ip"] = WiFi.localIP().toString();
             json["mac"] = GetMacAddress();
             json["version"] = (String)VERSION;
+            json["flashchipid"] = String(ESP.getFlashChipId(), HEX);
+            json["usedflashsize"] = (String)ESP.getFlashChipSize();
+            json["realflashsize"] = (String)ESP.getFlashChipRealSize();
+            json["freeHeap"] = (String)ESP.getFreeHeap();
+
 
             String response;
             json.printTo(response);

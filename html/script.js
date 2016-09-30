@@ -199,6 +199,10 @@ function getConfigStatus(data) {
     $('#x_ip').text(status.ip);
     $('#x_mac').text(status.mac);
     $('#x_version').text(status.version);
+    $('#x_flashchipid').text(status.flashchipid);
+    $('#x_usedflashsize').text(status.usedflashsize);
+    $('#x_realflashsize').text(status.realflashsize);
+    $('#x_freeheap').text(status.freeheap);
 }
 
 function getRSSI(data) {
@@ -222,6 +226,8 @@ function getE131Status(data) {
     $('#pkts').text(status[2]);
     $('#serr').text(status[3]);
     $('#perr').text(status[4]);
+    $('#clientip').text(status[5]);
+    $('#clientport').text(status[6]);
 }
 
 function snackSave() {
