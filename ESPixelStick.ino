@@ -42,6 +42,7 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include <ESP8266mDNS.h>
 #include <ArduinoJson.h>
 #include <Hash.h>
+#include <SPI.h>
 #include "ESPixelStick.h"
 #include "EFUpdate.h"
 #include "helpers.h"
