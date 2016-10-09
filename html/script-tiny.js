@@ -67,7 +67,8 @@ function feed() {
 function wsConnect() {
     if ('WebSocket' in window) {
         // Open a new web socket and set the binary type
-        ws = new WebSocket('ws://' + document.location.host + '/ws');
+//        ws = new WebSocket('ws://' + document.location.host + '/ws');
+        ws = new WebSocket('ws://' + 'tinydev.home' + '/ws');
         ws.binaryType = 'arraybuffer';
 
         ws.onopen = function() {
@@ -208,6 +209,7 @@ function getConfigStatus(data) {
     $('#x_usedflashsize').text(status.usedflashsize);
     $('#x_realflashsize').text(status.realflashsize);
     $('#x_freeheap').text(status.freeheap);
+    $('#x_ledcolor').text(status.ledcolor);
 }
 
 function getRSSI(data) {

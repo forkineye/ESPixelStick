@@ -20,6 +20,11 @@
 #ifndef WSHANDLER_H_
 #define WSHANDLER_H_
 
+#if defined (ESPS_MODE_PIXEL)
+            #include "PixelDriver.h"
+            extern PixelDriver     pixels;         /* Pixel object */
+#endif
+
 /* 
   Packet Commands
     E1 - Get Elements
@@ -32,6 +37,7 @@
 
     X1 - Get RSSI
     X2 - Get E131 Status
+    Xh - Get Heap
     X6 - Reboot
 */
 
@@ -47,6 +53,8 @@ void procX(uint8_t *data, AsyncWebSocketClient *client) {
             for (int i = 0; i < ((uniLast + 1) - config.universe); i++)
                 seqErrors =+ seqError[i];
             
+            char rgbStr[18] = {0};
+            sprintf(rgbStr, "#%02X%02X%02X", pixels.getValue(0), pixels.getValue(1), pixels.getValue(2));
             client->text("X2" + (String)config.universe + ":" + 
                     (String)uniLast + ":" +
                     (String)e131.stats.num_packets + ":" +
@@ -57,10 +65,15 @@ void procX(uint8_t *data, AsyncWebSocketClient *client) {
                               + "." + (String)e131.stats.last_clientIP[2]
                               + "." + (String)e131.stats.last_clientIP[3]
                               + ":" + 
-                    (String)e131.stats.last_clientPort
+                    (String)e131.stats.last_clientPort + ":" +
+                    (String)rgbStr
+
                     );
             break;
         }
+        case 'h':
+            client->text("Xh" + (String)ESP.getFreeHeap());
+            break;
         case '6':  // Init 6 baby, reboot!
             reboot = true;
     }
@@ -125,14 +138,14 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             JsonObject &json = jsonBuffer.createObject();
 
             json["ssid"] = (String)WiFi.SSID();
+            json["hostname"] = (String)WiFi.hostname();
             json["ip"] = WiFi.localIP().toString();
             json["mac"] = GetMacAddress();
             json["version"] = (String)VERSION;
             json["flashchipid"] = String(ESP.getFlashChipId(), HEX);
             json["usedflashsize"] = (String)ESP.getFlashChipSize();
             json["realflashsize"] = (String)ESP.getFlashChipRealSize();
-            json["freeHeap"] = (String)ESP.getFreeHeap();
-
+            json["freeheap"] = (String)ESP.getFreeHeap();
 
             String response;
             json.printTo(response);

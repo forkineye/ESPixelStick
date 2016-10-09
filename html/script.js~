@@ -200,7 +200,6 @@ function getConfigStatus(data) {
     var status = JSON.parse(data);
     
     $('#x_ssid').text(status.ssid);
-    $('#x_hostname').text(status.hostname);
     $('#x_ip').text(status.ip);
     $('#x_mac').text(status.mac);
     $('#x_version').text(status.version);
