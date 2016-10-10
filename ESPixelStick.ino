@@ -504,7 +504,6 @@ void loop() {
             }
 
             uint8_t uniTotal = (uniLast + 1) - config.universe;
-            uint16_t pixelsChLimit = UNIVERSE_LIMIT / 3 * 3;
 
             /* Offset the channel if required for the first universe */
             uint16_t offset = 0;
@@ -512,18 +511,18 @@ void loop() {
                 offset = config.channel_start - 1;
 
             /* Find start of data based off the Universe */
-            uint16_t dataStart = uniOffset * pixelsChLimit;
+            uint16_t dataStart = uniOffset * UNIVERSE_LIMIT;
             if (e131.universe != config.universe)
                 dataStart -= (config.channel_start - 1);
 
             /* Caculate how much data we need for this buffer */
-            uint16_t dataCount = pixelsChLimit;
+            uint16_t dataCount = UNIVERSE_LIMIT;
             if (e131.universe == config.universe)
-                dataCount = pixelsChLimit - config.channel_start + 1;
+                dataCount = UNIVERSE_LIMIT - config.channel_start + 1;
 
             if (e131.universe == uniLast) {
                 dataCount = config.channel_count +
-                  config.channel_start + 1 - (uniTotal - 1) * pixelsChLimit;
+                  config.channel_start + 1 - (uniTotal - 1) * UNIVERSE_LIMIT;
             }
 
             /* Set the data */
