@@ -503,6 +503,8 @@ void loop() {
                 seqTracker[uniOffset] = e131.packet->sequence_number + 1;
             }
 
+            uint8_t uniTotal = (uniLast + 1) - config.universe;
+
             /* Offset the channel if required for the first universe */
             uint16_t offset = 0;
             if (e131.universe == config.universe)
@@ -510,14 +512,22 @@ void loop() {
 
             /* Find start of data based off the Universe */
             uint16_t dataStart = uniOffset * UNIVERSE_LIMIT;
+            if (e131.universe != config.universe)
+                dataStart -= (config.channel_start - 1);
 
             /* Caculate how much data we need for this buffer */
-            uint16_t dataStop = config.channel_count;
-            if ((dataStart + UNIVERSE_LIMIT) < dataStop)
-                dataStop = dataStart + UNIVERSE_LIMIT;
+            uint16_t dataCount = UNIVERSE_LIMIT;
+            if (e131.universe == config.universe)
+                dataCount = UNIVERSE_LIMIT - config.channel_start + 1;
+
+            if (e131.universe == uniLast) {
+                dataCount = config.channel_count +
+                  config.channel_start + 1 - (uniTotal - 1) * UNIVERSE_LIMIT;
+            }
 
             /* Set the data */
             uint16_t buffloc = 0;
+            uint16_t dataStop = dataStart + dataCount;
             for (int i = dataStart; i < dataStop; i++) {
 #if defined(ESPS_MODE_PIXEL)
                 pixels.setValue(i, e131.data[buffloc + offset]);
