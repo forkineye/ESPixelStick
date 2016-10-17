@@ -11,6 +11,12 @@ Changelog
 - Added mDNS / DNS-SD responder.
 - Made WS2811 stream generation asynchronous.
 
+### 1.41
+- Added ArtNet Support
+- Added OLED Support
+- Added Factory Reset
+- Added Multi Universe Support
+
 ### 1.4
 - Arduino 1.6.8 compatibility.
 - Added SoftAP support (credit: Bill Porter)
