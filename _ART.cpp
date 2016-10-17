@@ -62,9 +62,9 @@ void ART::initUnicast() {
         IPAddress address = IPAddress(((uint8_t)subnet[0] == (uint8_t)255) ? (uint8_t)localIP[0] : 255, ((uint8_t)subnet[1] == 255) ? (uint8_t)localIP[1] : 255, ((uint8_t)subnet[2] == 255) ? (uint8_t)localIP[2] : 255, ((uint8_t)subnet[3] == 255) ? (uint8_t)localIP[3] : 255);
         Serial.print(F("- Broadcast port: "));
         Serial.println(ART_DEFAULT_PORT);
-        Serial.print("Subnet: ");
+        Serial.print("- Subnet: ");
         Serial.println(subnet);
-        Serial.print("Broadcast Address: ");
+        Serial.print("- Broadcast Address: ");
         Serial.println(address);
         Serial.print(F("- Universe from: "));
         Serial.println(universe);

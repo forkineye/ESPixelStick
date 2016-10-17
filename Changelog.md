@@ -1,16 +1,22 @@
 
 Changelog
 =========
-### 1.41
-- Added ArtNet Support
-- Added OLED Support
-- Added Factory Reset
-- Added Multi Universe Support
+### 1.5 (in progress)
+- Migrated to ESPAsyncWebserver for the web server.
+- Migrated all web pages to SPIFFS.
+- Migrated configuration structure to SPIFFS as a JSON file.
+- Added Gulp script to assist with preparing web pages.
+- Changed default serial port for Renard / DMX to Serial1.
+- Changed output type to compile time option. Check top of main sketch.
+- Added mDNS / DNS-SD responder.
+- Made WS2811 stream generation asynchronous.
+
 ### 1.4
 - Arduino 1.6.8 compatibility.
 - Added SoftAP support (credit: Bill Porter)
 - Added Renard Support (credit: Bill Porter)
 - Added DMX Support (credit: Bill Porter and Grayson Lough)
+
 ### 1.3
 - Fix for issues when compiling on Mac and Linux.
 - Web page optimizations.
@@ -25,7 +31,7 @@ Changelog
 - Migration to UART code for handling WS281x streams.
 - Initial GECE support.
 - Support for multiple universes.
-- Pixel per Universe configuration to allow subsets of multiple universes to be used (eases matrix patching Jinx).
+- Pixel per Universe configuration to allow subsets of multiple universes to be used.
 - Removed external library dependencies.
 - Added stream timeout and refresh overflow handling.
 

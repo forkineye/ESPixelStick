@@ -1,14 +1,14 @@
 /******************************************************************
 *  
-*    Project: ESPixelStick - An ESP8266 and E1.31 based pixel (And Serial!) driver
-*   Orginal ESPixelStickproject by 2015 Shelby Merrick
+*       Project: ESPixelStick - An ESP8266 and E1.31 based pixel (And Serial!) driver
+*       Orginal ESPixelStickproject by 2015 Shelby Merrick
 *
-*   Brought to you by:
+*       Brought to you by:
 *              Bill Porter
 *              www.billporter.info
 *
-*   See Readme for other info and version history
-* 
+*       See Readme for other info and version history
+*   
 *  
 *This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or(at your option) any later version.
 This program is distributed in the hope that it will be useful,
@@ -23,33 +23,39 @@ GNU General Public License for more details.
 ******************************************************************/
 
 
-
-
-#ifndef ESERIALDRIVER_H
-#define ESERIALDRIVER_H
+#ifndef SERIALDRIVER_H_
+#define SERIALDRIVER_H_
 
 #include "HardwareSerial.h"
 
-
 /* Serial Types */
-typedef enum {
-    SERIAL_RENARD,
-    SERIAL_DMX
-} serial_t;
+enum class SerialType : uint8_t {
+    RENARD,
+    DMX512
+};
 
-class ESerialDriver {
-    public:
-    int begin(HardwareSerial *theSerial, serial_t, uint16_t);
-    int begin(HardwareSerial *theSerial, serial_t, uint16_t, uint32_t);
+enum class BaudRate : uint32_t {
+    BR_38400 = 38400,
+    BR_57600 = 57600,
+    BR_115200 = 115200,
+    BR_230400 = 230400,
+    BR_250000 = 250000
+};
+
+class SerialDriver {
+ public:
+    int begin(HardwareSerial *theSerial, SerialType type, uint16_t length);
+    int begin(HardwareSerial *theSerial, SerialType type, uint16_t length,
+            BaudRate baud);
     void startPacket();
     void setValue(uint16_t, uint8_t);
     void show();
 
-    private:
-    serial_t _type;            //Output Serial type
-    HardwareSerial *_serial;  //The Serial Port
-    uint16_t _size;           //Size of buffer    
-    uint8_t * _ptr;           //pointer for buffer
+ private:
+    SerialType      _type;      // Output Serial type
+    HardwareSerial  *_serial;   // The Serial Port
+    uint16_t        _size;      // Size of buffer
+    uint8_t         *_ptr;      // Pointer for buffer
 };
 
-#endif
+#endif /* SERIALDRIVER_H_ */

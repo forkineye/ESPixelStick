@@ -95,6 +95,7 @@ SSD1306UiState SSD1306Ui::getUiState(){
 
 
 int SSD1306Ui::update(){
+  Serial.println(F("OLED UI Update"));
   int timeBudget = this->updateInterval - (millis() - this->state.lastUpdate);
   if ( timeBudget <= 0) {
     // Implement frame skipping to ensure time budget is keept

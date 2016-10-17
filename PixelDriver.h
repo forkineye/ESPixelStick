@@ -1,5 +1,5 @@
 /*
-* ESPixelDriver.h - Pixel driver code for ESPixelStick
+* PixelDriver.h - Pixel driver code for ESPixelStick
 *
 * Project: ESPixelStick - An ESP8266 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -17,10 +17,10 @@
 *
 */
 
-#ifndef ESPIXELDRIVER_H
-#define ESPIXELDRIVER_H
+#ifndef PIXELDRIVER_H_
+#define PIXELDRIVER_H_
 
-#define UART_INV_MASK  (0x3f<<19)
+#define UART_INV_MASK  (0x3f << 19)
 #define UART 1
 
 /* Gamma correction table until pow() is fixed */
@@ -70,56 +70,67 @@ const char LOOKUP_2811[4] = { 0b00110111, 0b00000111, 0b00110100, 0b00000100 };
 
 
 /* Pixel Types */
-typedef enum {
-    PIXEL_WS2811,
-    PIXEL_GECE
-} pixel_t;
-
-/* Color Order */
-typedef enum {
-    COLOR_RGB,
-    COLOR_GRB,
-    COLOR_BRG,
-    COLOR_RBG
-} color_t;
-
-class ESPixelDriver {
-    public:
-        int begin();
-        int begin(pixel_t type);
-        int begin(pixel_t type, color_t color);
-        void setPin(uint8_t pin);
-        void setGamma(float gamma);
-        void updateLength(uint16_t length);
-        void updateOrder(color_t color);
-        void setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b);
-        void show();
-
-        /* 50us reset for WS2811 */
-        inline bool canShow_WS2811(void) {
-            return (micros() - endTime) >= WS2811_TIDLE;
-        }
-
-    private:
-        pixel_t		type;		// Pixel type
-        color_t		color;		// Color Order
-        uint8_t		pin;		// Pin for bit-banging
-        uint8_t		*pixdata;	// Pixel buffer
-        uint16_t	numPixels;	// Number of pixels
-        uint16_t	szBuffer;	// Size of Pixel buffer
-        uint8_t		rOffset;	// Index of red byte
-        uint8_t		gOffset;	// Index of red byte
-        uint8_t		bOffset;	// Index of red byte
-        uint32_t    endTime;    // Reset tracker
-        boolean     gamma;      // Gamma correction flag
-        
-        void ws2811_init();
-        void gece_init();
-
-        /* Drop the update if our refresh rate is too high */
-        inline bool canRefresh(uint32_t frame, uint32_t idle) { 
-            return (micros() - endTime) >= (frame * numPixels + idle);
-        }
+enum class PixelType : uint8_t {
+    WS2811,
+    GECE
 };
 
-#endif
+/* Color Order */
+enum class PixelColor : uint8_t {
+    RGB,
+    GRB,
+    BRG,
+    RBG
+};
+
+class PixelDriver {
+ public:
+    int begin();
+    int begin(PixelType type);
+    int begin(PixelType type, PixelColor color);
+    void setPin(uint8_t pin);
+    void setGamma(float gamma);
+    void updateLength(uint16_t length);
+    void updateOrder(PixelColor color);
+    void setPixelColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b);
+    void show();
+
+ private:
+    PixelType   type;       // Pixel type
+    PixelColor  color;      // Color Order
+    uint8_t     pin;        // Pin for bit-banging
+    uint8_t     *pixdata;   // Pixel buffer
+    uint8_t     *asyncdata; // Async buffer
+    uint16_t    numPixels;  // Number of pixels
+    uint16_t    szBuffer;   // Size of Pixel buffer
+    uint8_t     rOffset;    // Index of red byte
+    uint8_t     gOffset;    // Index of red byte
+    uint8_t     bOffset;    // Index of red byte
+    uint32_t    endTime;    // Reset tracker
+    bool        gamma;      // Gamma correction flag
+
+    void ws2811_init();
+    void gece_init();
+    static const uint8_t* ICACHE_RAM_ATTR fillFifo(const uint8_t *buff, const uint8_t *tail);
+
+    /* WS2811 interrupt handler */
+    static void ICACHE_RAM_ATTR ws2811_handle(void *param);
+
+    /* Drop the update if our refresh rate is too high */
+    inline bool canRefresh(uint32_t frame, uint32_t idle) {
+        return (micros() - endTime) >= (frame * numPixels + idle);
+    }
+
+    /* Returns number of bytes waiting in the TX FIFO of UART1 */
+    static inline uint8_t getFifoLength() {
+        return (U1S >> USTXC) & 0xff;
+    }
+
+    /* Append a byte to the TX FIFO of UART1 */
+    static inline void enqueue(uint8_t byte) {
+        U1F = byte;
+    }
+
+};
+
+#endif /* PIXELDRIVER_H_ */

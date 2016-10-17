@@ -31,6 +31,25 @@ Credits for parts of this code go to Mike Rankin. Thank you so much for sharing!
 #include <SPI.h>
 #include "SSD1306Fonts.h"
 
+// Pin definitions for I2C
+#define OLED_SDA    D2  // pin 14
+#define OLED_SDC    D3  // D3 pin 12
+#define OLED_ADDR   0x3C
+
+/* Hardware Wemos D1 mini SPI pins
+ D5 GPIO14   CLK         - D0 pin OLED display
+ D6 GPIO12   MISO (DIN)  - not connected
+ D7 GPIO13   MOSI (DOUT) - D1 pin OLED display
+ D8 GPIO15   CS / SS     - CS pin OLED display
+ D0 GPIO16   RST         - RST pin OLED display
+ D2 GPIO4    DC          - DC pin OLED
+*/
+
+// Pin definitions for SPI
+#define OLED_RESET  D0  // RESET
+#define OLED_DC     D2  // Data/Command
+#define OLED_CS     D8  // Chip select
+
 #define BLACK 0
 #define WHITE 1
 #define INVERSE 2

@@ -1,0 +1,51 @@
+{
+  "network": {
+    "ssid": "",
+    "passphrase": "",
+    "hostname": "",
+    "ip": [
+      192,
+      168,
+      1,
+      10
+    ],
+    "netmask": [
+      255,
+      255,
+      255,
+      0
+    ],
+    "gateway": [
+      192,
+      168,
+      1,
+      1
+    ],
+    "dhcp": true,
+    "ap_fallback": true
+  },
+
+  "device": {
+    "id": "ESPixelStick",
+    "mode": 0
+  },
+
+  "e131": {
+    "universe": 1,
+    "channel_start": 1,
+    "channel_count": 510,
+    "multicast": false
+  },
+
+  "pixel": {
+    "type": 0,
+    "color": 0,
+    "ppu": 170,
+    "gamma": 1.0
+  },
+
+  "serial": {
+    "type": 0,
+    "baudrate": 57600
+  }
+}
