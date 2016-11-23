@@ -5,7 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title id="title"></title>
-  <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
@@ -68,7 +68,7 @@
     <div id="wifi" class="mdiv hidden anchor">
       <fieldset>
         <legend class="esps-legend">Network Configuration</legend>
-        <form class="form-horizontal" action="" method="post">
+        <form class="form-horizontal">
           <div class="form-group">
             <label class="control-label col-sm-2" for="ssid">SSID</label>
             <div class="col-sm-10"><input type="text" class="form-control" id="ssid" name="ssid" placeholder="Enter SSID"></div>
@@ -112,7 +112,7 @@
     <div id="config" class="mdiv hidden anchor">
       <fieldset>
         <legend class="esps-legend">Device Configuration</legend>
-        <form class="form-horizontal" action="" method="post">
+        <form class="form-horizontal">
           <div class="form-group">
             <label class="control-label col-sm-2" for="devid">Device ID</label>
             <div class="col-sm-10"><input type="text" class="form-control" id="devid" name="devid" placeholder="Enter Device ID"></div>
@@ -162,18 +162,18 @@
             <legend class="esps-legend">Serial Configuration</legend>
             <div class="form-group">
               <label class="control-label col-sm-2" for="s_count">Channel Count</label>
-              <div class="col-sm-10"><input type="text" class="form-control" id="s_count" placeholder="Enter number of channels"></div>
+              <div class="col-sm-10"><input type="text" class="form-control" id="s_count" placeholder="Enter number of channels" onchange="refreshSerial()"></div>
             </div>
             <div class="form-group">
               <label class="control-label col-sm-2" for="s_proto">Protocol</label>
               <div class="col-sm-10">
-                <select class="form-control" id="s_proto" name="s_proto"></select>
+                <select class="form-control" id="s_proto" name="s_proto" onclick="refreshSerial()"></select>
               </div>
             </div>
             <div class="form-group">
               <label class="control-label col-sm-2" for="s_baud">Baud Rate</label>
               <div class="col-sm-10">
-                <select class="form-control" id="s_baud" name="s_baud"></select>
+                <select class="form-control" id="s_baud" name="s_baud" onchange="refreshSerial()"></select>
               </div>
             </div>
           </div>
@@ -182,7 +182,6 @@
           <div class="form-group">
             <label class="control-label col-sm-2" for="refresh">Refresh Rate</label>
             <div class="col-sm-10"><p class="form-control-static" id="refresh"></p></div>
-
             <div class="col-sm-offset-2 col-sm-10">
               <button type="button" onclick="submitConfig()" class="btn btn-primary">Save Changes</button>
             </div>
@@ -195,6 +194,33 @@
     <div id="test" class="mdiv hidden anchor">
       <fieldset>
         <legend class="esps-legend">Display Testing</legend>
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label class="control-label col-sm-2" for="t_mode">Testing Mode</label>
+            <div class="col-sm-10">
+              <select class="form-control" id="tmode" name="tmode" onclick="test()">
+                <option value="t_disable">Disabled</option>
+                <option value="t_static">Static</option>
+                <option value="t_chase">Chase</option>
+                <option value="t_rainbow">Rainbow</option>
+                <option value="t_view">View Stream</option>
+              </select>
+            </div>
+          </div>
+          <div id="t_disable"></div>
+
+          <!-- Testing - Static -->
+          <div id="t_static" class="tdiv hidden">
+            <legend class="esps-legend">Static Testing</legend>
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="t_color">Color</label>
+              <div class="col-sm-10">
+                <input type="button" class="form-control color no-alpha" value="rgb(255,255,255)" />
+              </div>
+            </div>
+          </div>
+
+        </form>
       </fieldset>
     </div>
 
@@ -279,8 +305,9 @@
     </div>
   </footer>
 
-  <script type="text/javascript" src="js/jquery-2.2.3.min.js"></script>
-  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="js/jquery-3.1.1.slim.js"></script>
+  <script type="text/javascript" src="js/bootstrap.js"></script>
+  <script type="text/javascript" src="js/jqColorPicker.js"></script>
   <script type="text/javascript" src="script.js"></script>
 
   <script>

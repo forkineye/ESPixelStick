@@ -14,6 +14,7 @@ Along with the Arduino IDE, you'll need the following software to build this pro
 - [gulp](http://gulpjs.com/) - Build system to process web sources.  Optional, but recommended.  Refer to the html [README](html/README.md) for more information.
 
 The following libraries are required:
+- [E131](https://github.com/forkineye/E131) - E1.31 (sACN) Library for Arduino
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson) - Arduino JSON Library
 - [ESPAsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP) - Asynchronous TCP Library
 - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) - Asynchronous Web Server Library

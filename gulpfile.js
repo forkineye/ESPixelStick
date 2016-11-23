@@ -1,6 +1,7 @@
 /* Requires */
 var gulp = require('gulp');
 var plumber = require('gulp-plumber');
+var concat = require('gulp-concat');
 var htmlmin = require('gulp-htmlmin');
 var cleancss = require('gulp-clean-css');
 var uglifyjs = require('gulp-uglify');
@@ -38,6 +39,14 @@ gulp.task('js', function() {
         .pipe(gulp.dest('data/www'));
 });
 
+/* Image Task */
+gulp.task('image', function() {
+    return gulp.src(['html/**/*.png', 'html/**/*.ico'])
+        .pipe(plumber())
+        .pipe(gulp.dest('data/www'));
+});
+
+
 /* Clean Task */
 gulp.task('clean', function() {
     return del(['data/www/*']);
@@ -52,4 +61,4 @@ gulp.task('watch', function() {
 });
 
 /* Default Task */
-gulp.task('default', ['clean', 'html', 'css', 'js']);
+gulp.task('default', ['clean', 'html', 'css', 'js', 'image']);

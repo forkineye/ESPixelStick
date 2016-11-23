@@ -26,6 +26,66 @@ $(function() {
             $('#update').modal({backdrop: 'static', keyboard: false});
         });
 
+        /* Test mode toggles */
+        $('#tmode').change(function() {
+            $('.tdiv').addClass('hidden');
+            $('#'+$('select[name=tmode]').val()).removeClass('hidden');
+        });
+
+        /* Color Picker */
+        $('.color').colorPicker({
+            buildCallback: function($elm) {
+                var colorInstance = this.color;
+                var colorPicker = this;
+
+                $elm.append('<div class="cp-memory">' +
+                    '<div style="background-color: #FFFFFF";></div>' +
+                    '<div style="background-color: #FF0000";></div>' +
+                    '<div style="background-color: #00FF00";></div>' +
+                    '<div style="background-color: #0000FF";></div>').
+                on('click', '.cp-memory div', function(e) {
+                    var $this = $(this);
+
+                    if (this.className) {
+                        $this.parent().prepend($this.prev()).children().eq(0).
+                            css('background-color', '#' + colorInstance.colors.HEX);
+                    } else {
+                        colorInstance.setColor($this.css('background-color'));
+                        colorPicker.render();
+                    }
+                });
+                this.$colorPatch = $elm.prepend('<div class="cp-disp">').find('.cp-disp');
+            },
+
+            cssAddon:
+                '.cp-memory {margin-bottom:6px; clear:both;}' +
+                '.cp-memory div {float:left; width:25%; height:40px;' +
+                'background:rgba(0,0,0,1); text-align:center; line-height:40px;}' +
+                '.cp-disp{padding:10px; margin-bottom:6px; font-size:19px; height:40px; line-height:20px}' +
+                '.cp-xy-slider{width:200px; height:200px;}' +
+                '.cp-xy-cursor{width:16px; height:16px; border-width:2px; margin:-8px}' +
+                '.cp-z-slider{height:200px; width:40px;}' +
+                '.cp-z-cursor{border-width:8px; margin-top:-8px;}',
+
+            opacity: false,
+
+            renderCallback: function($elm, toggled) {
+                var colors = this.color.colors.RND;
+                var json = {
+                        'r': colors.rgb.r,
+                        'g': colors.rgb.g,
+                        'b': colors.rgb.b
+                    };
+
+                this.$colorPatch.css({
+                    backgroundColor: '#' + colors.HEX,
+                    color: colors.RGBLuminance > 0.22 ? '#222' : '#ddd'
+                }).text(this.color.toString($elm._colorMode)); // $elm.val();
+
+                ws.send('T1' + JSON.stringify(json));
+            }
+        });
+
         // Set page event feeds
         feed();
     });
@@ -39,13 +99,23 @@ $(function() {
        }
     });
 
+    // Pixel type toggles
+    $('#p_type').change(function() {
+        if ($('select[name_type]').val() == '1')
+            $('#p_color').prop('disabled', true);
+        else
+            $('#p_color').prop('disabled', false);
+    });
+
     // Serial protocol toggles
     $('#s_proto').change(function() {
-        if ($('select[name=s_proto]').val() == 'o_dmx')
+        if ($('select[name=s_proto]').val() == '0')
             $('#s_baud').prop('disabled', true);
         else 
             $('#s_baud').prop('disabled', false);
     });
+
+
 
 
 });
@@ -77,6 +147,7 @@ function wsConnect() {
             // Init dynamic fields
             $('#dhcp').trigger('click');
             $('#s_proto').trigger('change');
+
             feed();
         };
         
@@ -184,12 +255,15 @@ function getConfig(data) {
         mode = 'serial';
         $('#o_serial').removeClass('hidden');
         $('#s_count').val(config.e131.channel_count);
+        $('#s_proto').val(config.serial.type);
         $('#s_baud').val(config.serial.baudrate);
     }
 
     // Trigger updated elements
     $('#p_type').trigger('click');
     $('#p_count').trigger('change');
+    $('#s_proto').trigger('click');
+    $('#s_proto').trigger('change');
 }
 
 function getConfigStatus(data) {
@@ -287,27 +361,44 @@ function submitConfig() {
 }
 
 function refreshPixel() {
-    var mode = document.getElementById('p_type');
-    if (mode.selectedIndex == -1)
-        return;
-    var proto = mode.options[mode.selectedIndex].text;
-    var size = parseInt(document.getElementById('p_count').value);
+    var proto = $('#p_type option:selected').text();    
+    var size = parseInt($('#p_count').val());
     var frame = 30;
     var idle = 80;
 
     if (!proto.localeCompare('WS2811 800kHz')) {
         frame = 30;
         idle = 80;
-        document.getElementById('p_color').disabled = false;
     } else if (!proto.localeCompare('GE Color Effects')) {
         frame = 790;
         idle = 35;
-        document.getElementById('p_color').disabled = true;
     }
 
     var rate = (frame * size + idle) / 1000;
     var hz = 1000 / rate;
-    document.getElementById('refresh').innerHTML = Math.ceil(rate) + 'ms / ' + Math.floor(hz) + 'Hz';
+    $('#refresh').html(Math.ceil(rate) + 'ms / ' + Math.floor(hz) + 'Hz');
+}
+
+function refreshSerial() {
+    var proto = $('#s_proto option:selected').text();
+    var baud = parseInt($('#s_baud').val());
+    var size = parseInt($('#s_count').val());
+    var symbol = 11;
+    if (!proto.localeCompare('Renard')) {
+        symbol = 10;
+        size = size + 2;
+    } else if (!proto.localeCompare('DMX512')) {
+        symbol = 11;
+        baud = 250000;
+        $('#s_baud').val(baud);
+    }
+    var rate = symbol * 1000 / baud * size;
+    var hz = 1000 / rate;
+    $('#refresh').html(Math.ceil(rate) + 'ms / ' + Math.floor(hz) + 'Hz');
+}
+
+function test() {
+    console.log('test mode');
 }
 
 function showReboot() {

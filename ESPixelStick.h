@@ -25,7 +25,6 @@
 #elif defined(ESPS_MODE_SERIAL)
 #include "SerialDriver.h"
 #endif
-#include "_E131.h"
 
 /* Name and version */
 const char VERSION[] = "2.1-dev";
@@ -58,11 +57,21 @@ enum class DevMode : uint8_t {
     MSERIAL
 };
 
+/* Test Modes */
+enum class TestMode : uint8_t {
+    DISABLED,
+    STATIC,
+    CHASE,
+    RAINBOW,
+    VIEW_STREAM
+};
+
 /* Configuration structure */
 typedef struct {
     /* Device */
     String      id;             /* Device ID */
-    DevMode     mode;           /* Device Mode - used for reporting mode, can't be set */
+    DevMode     devmode;        /* Device Mode - used for reporting mode, can't be set */
+    TestMode    testmode;       /* Testing mode */
 
     /* Network */
     String      ssid;
@@ -102,10 +111,31 @@ bool            reboot = false; /* Reboot flag */
 AsyncWebServer  web(HTTP_PORT); /* Web Server */
 AsyncWebSocket  ws("/ws");      /* Web Socket Plugin */
 
+/* Output Drivers */
+#if defined(ESPS_MODE_PIXEL)
+#include "PixelDriver.h"
+PixelDriver     pixels;         /* Pixel object */
+#elif defined(ESPS_MODE_SERIAL)
+#include "SerialDriver.h"
+SerialDriver    serial;         /* Serial object */
+#else
+#error "No valid output mode defined."
+#endif
+
 /* Forward Declarations */
 void serializeConfig(String &jsonString, bool pretty = false, bool creds = false);
 void dsNetworkConfig(JsonObject &json);
 void dsDeviceConfig(JsonObject &json);
 void saveConfig();
+
+/* Plain text friendly MAC */
+String getMacAddress() {
+    uint8_t mac[6];
+    char macStr[18] = {0};
+    WiFi.macAddress(mac);
+    snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
+            mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    return  String(macStr);
+}
 
 #endif /* ESPIXELSTICK_H_ */
