@@ -20,6 +20,11 @@
 #ifndef WSHANDLER_H_
 #define WSHANDLER_H_
 
+#if defined (ESPS_MODE_PIXEL)
+            #include "PixelDriver.h"
+            extern PixelDriver     pixels;         /* Pixel object */
+#endif
+
 /* 
   Packet Commands
     E1 - Get Elements
@@ -32,8 +37,11 @@
 
     X1 - Get RSSI
     X2 - Get E131 Status
+    Xh - Get Heap
     X6 - Reboot
 */
+
+EFUpdate efupdate;
 
 void procX(uint8_t *data, AsyncWebSocketClient *client) {
     switch(data[1]) {
@@ -45,15 +53,29 @@ void procX(uint8_t *data, AsyncWebSocketClient *client) {
             for (int i = 0; i < ((uniLast + 1) - config.universe); i++)
                 seqErrors =+ seqError[i];
             
+            char rgbStr[18] = {0};
+            sprintf(rgbStr, "#%02X%02X%02X", pixels.getValue(0), pixels.getValue(1), pixels.getValue(2));
             client->text("X2" + (String)config.universe + ":" + 
                     (String)uniLast + ":" +
                     (String)e131.stats.num_packets + ":" +
                     (String)seqErrors + ":" +
-                    (String)e131.stats.packet_errors);
+                    (String)e131.stats.packet_errors + ":" +
+                    (String)e131.stats.last_clientIP[0]
+                              + "." + (String)e131.stats.last_clientIP[1]
+                              + "." + (String)e131.stats.last_clientIP[2]
+                              + "." + (String)e131.stats.last_clientIP[3]
+                              + ":" + 
+                    (String)e131.stats.last_clientPort + ":" +
+                    (String)rgbStr
+
+                    );
             break;
         }
+        case 'h':
+            client->text("Xh" + (String)ESP.getFreeHeap());
+            break;
         case '6':  // Init 6 baby, reboot!
-            reboot();            
+            reboot = true;
     }
 }
 
@@ -116,9 +138,14 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             JsonObject &json = jsonBuffer.createObject();
 
             json["ssid"] = (String)WiFi.SSID();
+            json["hostname"] = (String)WiFi.hostname();
             json["ip"] = WiFi.localIP().toString();
             json["mac"] = GetMacAddress();
             json["version"] = (String)VERSION;
+            json["flashchipid"] = String(ESP.getFlashChipId(), HEX);
+            json["usedflashsize"] = (String)ESP.getFlashChipSize();
+            json["realflashsize"] = (String)ESP.getFlashChipRealSize();
+            json["freeheap"] = (String)ESP.getFreeHeap();
 
             String response;
             json.printTo(response);
@@ -147,6 +174,50 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
             saveConfig();
             client->text("S2");
             break;
+    }
+}
+
+//const char REBOOT[] = R"=====(<meta http-equiv="refresh" content="5; url=/"><strong>Rebooting...</strong>)=====";
+/*
+void send_update_html(AsyncWebServerRequest *request) {
+    if (request->hasParam("file", true, true)) {
+        if (efupdate.hasError()) {
+            request->send(200, "text/plain", "Update Error: " + String(efupdate.getError()));
+        } else {
+            request->send(200, "text/html", REBOOT);
+            reboot();
+        }
+    } else {
+        request->send(200, "text/plain", "No File specified for update.");
+    }
+}
+*/
+
+void handle_fw_upload(AsyncWebServerRequest *request, String filename,
+        size_t index, uint8_t *data, size_t len, bool final) {
+    if (!index) {
+        WiFiUDP::stopAll();
+        LOG_PORT.print(F("* Upload Started: "));
+        LOG_PORT.println(filename.c_str());
+        efupdate.begin();
+    }
+
+    if (!efupdate.process(data, len)) {
+        LOG_PORT.print(F("*** UPDATE ERROR: "));
+        LOG_PORT.println(String(efupdate.getError()));
+    }
+
+    if (efupdate.hasError())
+        request->send(200, "text/plain", "Update Error: " + String(efupdate.getError()));
+
+    if (final) {
+//        ws.textAll("X6");
+        LOG_PORT.println(F("* Upload Finished."));
+        efupdate.end();
+        SPIFFS.begin();
+        saveConfig();
+//        request->send(200, "text/html", REBOOT);
+        reboot = true;
     }
 }
 

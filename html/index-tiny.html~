@@ -27,6 +27,7 @@
           <li><a href="#wifi">Wireless Setup</a></li>
           <li><a href="#config">Device Setup</a></li>
           <li><a href="#test">Testing</a></li>
+          <li><a href="#display">Display</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
           <li><a href="#admin">Admin</a></li>
@@ -202,6 +203,16 @@
       </fieldset>
     </div>
 
+    <!-- Display Led 0 -->
+    <div id="display" class="mdiv hidden anchor">
+      <fieldset>
+        <legend class="esps-legend">Display Testing</legend>
+	<table border=1 width="100px" height="100px">
+		<tr><td bgcolor="008844">&nbsp;</td>
+	</table>
+      </fieldset>
+    </div>
+
     <!-- Administration -->
     <div id="admin" class="mdiv hidden anchor">
       <fieldset>
@@ -297,7 +308,7 @@
 
   <script type="text/javascript" src="js/jquery-2.2.3.min.js"></script>
   <script type="text/javascript" src="js/bootstrap.min.js"></script>
-  <script type="text/javascript" src="script.js"></script>
+  <script type="text/javascript" src="script-tiny.js"></script>
 
   <script>
     wsConnect();
