@@ -8,3 +8,10 @@ These are the web source files which must be placed in ```data/www``` and upload
 - Install Gulp globally - ```npm install -g gulp-cli```
 - To install Gulp and the dependencies for this project, simply run the following in the root of the project - ```npm install```
 - Running ```gulp``` will minify, gzip, and move all web assets to ```data/www``` for you.  You can also run ```gulp watch``` and web pages will automatically be processed and moved as they are saved.
+
+3rd Party Software
+------------------
+The following 3rd party software is included for the web frontend.
+- [Bootstrap](http://getbootstrap.com/)
+- [jQuery](https://jquery.com/)
+- [tinyColorPicker](https://github.com/PitPik/tinyColorPicker)

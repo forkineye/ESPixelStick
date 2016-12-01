@@ -47,6 +47,10 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include "EFUpdate.h"
 #include "wshandler.h"
 
+extern "C" {
+#include <user_interface.h>
+}
+
 uint8_t             *seqTracker;        /* Current sequence numbers for each Universe */
 uint32_t            lastUpdate;         /* Update timeout tracker */
 
@@ -56,7 +60,16 @@ int initWifi();
 void initWeb();
 void updateConfig();
 
+RF_PRE_INIT() {
+    //wifi_set_phy_mode(PHY_MODE_11G);    // Force 802.11g mode
+    system_phy_set_powerup_option(31);  // Do full RF calibration on power-up
+    system_phy_set_max_tpw(82);         // Set max TX power
+}
+
 void setup() {
+    /* Configure SDK params */
+    wifi_set_sleep_type(NONE_SLEEP_T);
+
     /* Generate and set hostname */
     char chipId[7] = { 0 };
     snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());

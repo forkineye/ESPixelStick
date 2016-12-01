@@ -54,6 +54,7 @@ $(function() {
                         colorPicker.render();
                     }
                 });
+
                 this.$colorPatch = $elm.prepend('<div class="cp-disp">').find('.cp-disp');
             },
 
@@ -114,10 +115,6 @@ $(function() {
         else 
             $('#s_baud').prop('disabled', false);
     });
-
-
-
-
 });
 
 // Page event feeds
@@ -147,6 +144,7 @@ function wsConnect() {
             // Init dynamic fields
             $('#dhcp').trigger('click');
             $('#s_proto').trigger('change');
+            $('#p_type').trigger('change');
 
             feed();
         };
@@ -398,7 +396,7 @@ function refreshSerial() {
 }
 
 function test() {
-    console.log('test mode');
+    console.log('test mode click');
 }
 
 function showReboot() {
