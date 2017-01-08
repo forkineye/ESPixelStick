@@ -70,7 +70,7 @@ const char LOOKUP_2811[4] = {
 #define GECE_PSIZE      26
 
 #define WS2811_TFRAME   30L     /* 30us frame time */
-#define WS2811_TIDLE    80L     /* 50us idle time */
+#define WS2811_TIDLE    80L     /* 80us idle time */
 #define GECE_TFRAME     790L    /* 790us frame time */
 #define GECE_TIDLE      35L     /* 35us idle time */
 

@@ -43,22 +43,14 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include <ArduinoJson.h>
 #include <Hash.h>
 #include <SPI.h>
+#include <E131.h>
 #include "ESPixelStick.h"
 #include "EFUpdate.h"
-#include "helpers.h"
 #include "wshandler.h"
-#include "_E131.h"
 
-/* Output Drivers */
-#if defined(ESPS_MODE_PIXEL)
-#include "PixelDriver.h"
-PixelDriver     pixels;         /* Pixel object */
-#elif defined(ESPS_MODE_SERIAL)
-#include "SerialDriver.h"
-SerialDriver    serial;         /* Serial object */
-#else
-#error "No valid output mode defined."
-#endif
+extern "C" {
+#include <user_interface.h>
+}
 
 uint8_t             *seqTracker;        /* Current sequence numbers for each Universe */
 uint32_t            lastUpdate;         /* Update timeout tracker */
@@ -69,7 +61,16 @@ int initWifi();
 void initWeb();
 void updateConfig();
 
+RF_PRE_INIT() {
+    //wifi_set_phy_mode(PHY_MODE_11G);    // Force 802.11g mode
+    system_phy_set_powerup_option(31);  // Do full RF calibration on power-up
+    system_phy_set_max_tpw(82);         // Set max TX power
+}
+
 void setup() {
+    /* Configure SDK params */
+    wifi_set_sleep_type(NONE_SLEEP_T);
+
     /* Generate and set hostname */
     char chipId[7] = { 0 };
     snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
@@ -95,6 +96,7 @@ void setup() {
 
     /* Load configuration from SPIFFS */
     loadConfig();
+    config.testmode = TestMode::DISABLED;
 
     /* Fallback to default SSID and passphrase if we fail to connect */
     int status = initWifi();
@@ -151,7 +153,8 @@ int initWifi() {
     /* Switch to station mode and disconnect just in case */
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
-    delay(100);
+    delay(secureRandom(100,500));
+
 
     LOG_PORT.println("");
     LOG_PORT.print(F("Connecting to "));
@@ -187,7 +190,8 @@ int initWifi() {
         LOG_PORT.println(WiFi.localIP());
 
         if (config.multicast)
-            e131.begin(E131_MULTICAST, config.universe);
+            e131.begin(E131_MULTICAST, config.universe,
+                    uniLast - config.universe + 1);
         else
             e131.begin(E131_UNICAST);
     }
@@ -216,7 +220,7 @@ void initWeb() {
         request->send(200, "text/json", jsonString);
     });
 
-    /* POST Handlers */
+    /* Firmware upload handler */
     web.on("/updatefw", HTTP_POST, [](AsyncWebServerRequest *request) {
         ws.textAll("X6");
     }, handle_fw_upload);
@@ -247,7 +251,7 @@ void validateConfig() {
 
 #if defined(ESPS_MODE_PIXEL)
     /* Set Mode */
-    config.mode = DevMode::MPIXEL;
+    config.devmode = DevMode::MPIXEL;
 
     /* Generic channel limits for pixels */
     if (config.channel_count % 3)
@@ -267,7 +271,7 @@ void validateConfig() {
 
 #elif defined(ESPS_MODE_SERIAL)
     /* Set Mode */
-    config.mode = DevMode::MSERIAL;
+    config.devmode = DevMode::MSERIAL;
 
     /* Generic serial channel limits */
     if (config.channel_count > RENARD_LIMIT)
@@ -421,7 +425,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     /* Device */
     JsonObject &device = json.createNestedObject("device");
     device["id"] = config.id.c_str();
-    device["mode"] = static_cast<uint8_t>(config.mode);
+    device["mode"] = static_cast<uint8_t>(config.devmode);
 
     /* Network */
     JsonObject &network = json.createNestedObject("network");
@@ -493,39 +497,42 @@ void loop() {
         delay(REBOOT_DELAY);
         ESP.restart();
     }
-    
-    /* Parse a packet and update pixels */
-    if (e131.parsePacket()) {
-        if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
-            /* Universe offset and sequence tracking */
-            uint8_t uniOffset = (e131.universe - config.universe);
-            if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
-                seqError[uniOffset]++;
-                seqTracker[uniOffset] = e131.packet->sequence_number + 1;
-            }
 
-            /* Offset the channel if required for the first universe */
-            uint16_t offset = 0;
-            if (e131.universe == config.universe)
-                offset = config.channel_start - 1;
+    if (config.testmode == TestMode::DISABLED) {
 
-            /* Find start of data based off the Universe */
-            uint16_t dataStart = uniOffset * UNIVERSE_LIMIT;
+        /* Parse a packet and update pixels */
+        if (e131.parsePacket()) {
+            if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
+                /* Universe offset and sequence tracking */
+                uint8_t uniOffset = (e131.universe - config.universe);
+                if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
+                    seqError[uniOffset]++;
+                    seqTracker[uniOffset] = e131.packet->sequence_number + 1;
+                }
 
-            /* Caculate how much data we need for this buffer */
-            uint16_t dataStop = config.channel_count;
-            if ((dataStart + UNIVERSE_LIMIT) < dataStop)
-                dataStop = dataStart + UNIVERSE_LIMIT;
+                /* Offset the channel if required for the first universe */
+                uint16_t offset = 0;
+                if (e131.universe == config.universe)
+                    offset = config.channel_start - 1;
 
-            /* Set the data */
-            uint16_t buffloc = 0;
-            for (int i = dataStart; i < dataStop; i++) {
-#if defined(ESPS_MODE_PIXEL)
-                pixels.setValue(i, e131.data[buffloc + offset]);
-#elif defined(ESPS_MODE_SERIAL)
-                serial.setValue(i, e131.data[buffloc + offset]);
-#endif
-                buffloc++;
+                /* Find start of data based off the Universe */
+                uint16_t dataStart = uniOffset * UNIVERSE_LIMIT;
+
+                /* Caculate how much data we need for this buffer */
+                uint16_t dataStop = config.channel_count;
+                if ((dataStart + UNIVERSE_LIMIT) < dataStop)
+                    dataStop = dataStart + UNIVERSE_LIMIT;
+
+                /* Set the data */
+                uint16_t buffloc = 0;
+                for (int i = dataStart; i < dataStop; i++) {
+    #if defined(ESPS_MODE_PIXEL)
+                    pixels.setValue(i, e131.data[buffloc + offset]);
+    #elif defined(ESPS_MODE_SERIAL)
+                    serial.setValue(i, e131.data[buffloc + offset]);
+    #endif
+                    buffloc++;
+                }
             }
         }
     }

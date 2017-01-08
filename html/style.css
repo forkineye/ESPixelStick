@@ -36,6 +36,52 @@ body {
   color: #9d9d9d;
 }
 
+/* Color picker */
+.colorpicker-saturation {
+  width: 200px;
+  height: 200px;
+}
+  
+.colorpicker-hue,
+.colorpicker-alpha {
+  width: 30px;
+  height: 200px;
+}
+
+.colorpicker-color,
+.colorpicker-color div {
+  height: 30px;
+}
+
+.btn-cp {
+  border: 1px solid;
+  width: 100%;
+}
+
+.white {
+  background-color: #FFFFFF;
+  border: 1px solid;
+  width: 100%;
+}
+
+.red {
+  background-color: #FF0000;
+  border: 1px solid;
+  width: 100%;
+}
+
+.green {
+  background-color: #00FF00;
+  border: 1px solid;
+  width: 100%;
+}
+
+.blue {
+  background-color: #0000FF;
+  border: 1px solid;
+  width: 100%;
+}
+
 /* Snackbar - position it at the bottom and in the middle of the screen */
 #snackbar {
     visibility: hidden;     /* Hidden by default. Visible on click */

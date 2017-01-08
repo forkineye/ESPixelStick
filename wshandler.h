@@ -26,6 +26,9 @@
 
     G1 - Get Config
     G2 - Get Config Status
+    
+    T0 - Disable Testing
+    T1 - Static Testing
 
     S1 - Set Network Config
     S2 - Set Device Config
@@ -38,7 +41,7 @@
 EFUpdate efupdate;
 
 void procX(uint8_t *data, AsyncWebSocketClient *client) {
-    switch(data[1]) {
+    switch (data[1]) {
         case '1':
             client->text("X1" + (String)WiFi.RSSI());
             break;
@@ -46,8 +49,8 @@ void procX(uint8_t *data, AsyncWebSocketClient *client) {
             uint32_t seqErrors = 0;
             for (int i = 0; i < ((uniLast + 1) - config.universe); i++)
                 seqErrors =+ seqError[i];
-            
-            client->text("X2" + (String)config.universe + ":" + 
+
+            client->text("X2" + (String)config.universe + ":" +
                     (String)uniLast + ":" +
                     (String)e131.stats.num_packets + ":" +
                     (String)seqErrors + ":" +
@@ -60,7 +63,7 @@ void procX(uint8_t *data, AsyncWebSocketClient *client) {
 }
 
 void procE(uint8_t *data, AsyncWebSocketClient *client) {
-    switch(data[1]) {
+    switch (data[1]) {
         case '1':
             // Create buffer and root object
             DynamicJsonBuffer jsonBuffer;
@@ -89,12 +92,12 @@ void procE(uint8_t *data, AsyncWebSocketClient *client) {
 
             // Serial Baudrates
             JsonObject &s_baud = json.createNestedObject("s_baud");
-            s_baud["38400"] = static_cast<uint8_t>(BaudRate::BR_38400);
-            s_baud["57600"] = static_cast<uint8_t>(BaudRate::BR_57600);
-            s_baud["115200"] = static_cast<uint8_t>(BaudRate::BR_115200);
-            s_baud["230400"] = static_cast<uint8_t>(BaudRate::BR_230400);
-            s_baud["250000"] = static_cast<uint8_t>(BaudRate::BR_250000);
-            s_baud["460800"] = static_cast<uint8_t>(BaudRate::BR_460800);
+            s_baud["38400"] = static_cast<uint32_t>(BaudRate::BR_38400);
+            s_baud["57600"] = static_cast<uint32_t>(BaudRate::BR_57600);
+            s_baud["115200"] = static_cast<uint32_t>(BaudRate::BR_115200);
+            s_baud["230400"] = static_cast<uint32_t>(BaudRate::BR_230400);
+            s_baud["250000"] = static_cast<uint32_t>(BaudRate::BR_250000);
+            s_baud["460800"] = static_cast<uint32_t>(BaudRate::BR_460800);
 #endif
 
             String response;
@@ -119,12 +122,13 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
 
             json["ssid"] = (String)WiFi.SSID();
             json["ip"] = WiFi.localIP().toString();
-            json["mac"] = GetMacAddress();
+            json["mac"] = getMacAddress();
             json["version"] = (String)VERSION;
+            json["testing"] = static_cast<uint8_t>(config.testmode);
 
             String response;
             json.printTo(response);
-            client->text("G2" + response);            
+            client->text("G2" + response);
             break;
     }
 }
@@ -152,21 +156,35 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
     }
 }
 
-//const char REBOOT[] = R"=====(<meta http-equiv="refresh" content="5; url=/"><strong>Rebooting...</strong>)=====";
-/*
-void send_update_html(AsyncWebServerRequest *request) {
-    if (request->hasParam("file", true, true)) {
-        if (efupdate.hasError()) {
-            request->send(200, "text/plain", "Update Error: " + String(efupdate.getError()));
-        } else {
-            request->send(200, "text/html", REBOOT);
-            reboot();
-        }
-    } else {
-        request->send(200, "text/plain", "No File specified for update.");
+void procT(uint8_t *data, AsyncWebSocketClient *client) {
+    switch(data[1]) {
+        case '0':
+            config.testmode = TestMode::DISABLED;
+            break;
+        case '1':
+            config.testmode = TestMode::STATIC;
+            DynamicJsonBuffer jsonBuffer;
+            JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
+
+            uint8_t r = json["r"];
+            uint8_t g = json["g"];
+            uint8_t b = json["b"];
+
+            uint16_t i = 0;
+            while (i < config.channel_count) {
+#if defined(ESPS_MODE_PIXEL)
+                pixels.setValue(i++, r);
+                pixels.setValue(i++, g);
+                pixels.setValue(i++, b);
+#elif defined(ESPS_MODE_SERIAL)
+                serial.setValue(i++, r);
+                serial.setValue(i++, g);
+                serial.setValue(i++, b);
+#endif
+            }
+            break;
     }
 }
-*/
 
 void handle_fw_upload(AsyncWebServerRequest *request, String filename,
         size_t index, uint8_t *data, size_t len, bool final) {
@@ -183,15 +201,14 @@ void handle_fw_upload(AsyncWebServerRequest *request, String filename,
     }
 
     if (efupdate.hasError())
-        request->send(200, "text/plain", "Update Error: " + String(efupdate.getError()));
+        request->send(200, "text/plain", "Update Error: " +
+                String(efupdate.getError()));
 
     if (final) {
-//        ws.textAll("X6");
         LOG_PORT.println(F("* Upload Finished."));
         efupdate.end();
         SPIFFS.begin();
         saveConfig();
-//        request->send(200, "text/html", REBOOT);
         reboot = true;
     }
 }
@@ -214,6 +231,9 @@ void wsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
                         break;
                     case 'S':
                         procS(data, client);
+                        break;
+                    case 'T':
+                        procT(data, client);
                         break;
                 }
             } else {
