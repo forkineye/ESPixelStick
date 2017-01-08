@@ -110,12 +110,12 @@ class SerialDriver {
 
     /* Returns number of bytes waiting in the TX FIFO of SEROUT_UART */
     static inline uint8_t getFifoLength() {
-        return (U1S >> USTXC) & 0xff;
+        return (ESP8266_REG(U0S+(0xF00*SEROUT_UART)) >> USTXC) & 0xff;
     }
 
     /* Append a byte to the TX FIFO of SEROUT_UART */
     static inline void enqueue(uint8_t byte) {
-        U1F = byte;
+        ESP8266_REG(U0F+(0xF00*SEROUT_UART)) = byte;
     }
 };
 

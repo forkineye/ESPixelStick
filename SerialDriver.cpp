@@ -178,7 +178,7 @@ void SerialDriver::show() {
         delayMicroseconds(DMX_MAB);
     }
 
-    SET_PERI_REG_MASK(UART_INT_ENA(1), UART_TXFIFO_EMPTY_INT_ENA);
+    SET_PERI_REG_MASK(UART_INT_ENA(SEROUT_UART), UART_TXFIFO_EMPTY_INT_ENA);
 
     startTime = micros();
 
