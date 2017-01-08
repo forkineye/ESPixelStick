@@ -396,7 +396,11 @@ function refreshSerial() {
 }
 
 function test() {
-    console.log('test mode click');
+    var tmode = $('#tmode option:selected').val();
+
+    if (!tmode.localeCompare('t_disabled')) {
+        ws.send('T0');
+    }
 }
 
 function showReboot() {

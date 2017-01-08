@@ -189,7 +189,8 @@ int initWifi() {
         LOG_PORT.println(WiFi.localIP());
 
         if (config.multicast)
-            e131.begin(E131_MULTICAST, config.universe);
+            e131.begin(E131_MULTICAST, config.universe,
+                    uniLast - config.universe + 1);
         else
             e131.begin(E131_UNICAST);
     }
