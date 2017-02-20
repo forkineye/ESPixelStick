@@ -247,6 +247,10 @@ function getConfig(data) {
         $('#p_type').val(config.pixel.type);
         $('#p_color').val(config.pixel.color);
         $('#p_gamma').prop('checked', config.pixel.gamma);
+		
+        // Trigger updated elements
+        $('#p_type').trigger('click');
+        $('#p_count').trigger('change');
     }
 
     if (config.device.mode == 1) {  // Serial
@@ -255,13 +259,11 @@ function getConfig(data) {
         $('#s_count').val(config.e131.channel_count);
         $('#s_proto').val(config.serial.type);
         $('#s_baud').val(config.serial.baudrate);
-    }
 
-    // Trigger updated elements
-    $('#p_type').trigger('click');
-    $('#p_count').trigger('change');
-    $('#s_proto').trigger('click');
-    $('#s_proto').trigger('change');
+        // Trigger updated elements
+        $('#s_proto').trigger('click');
+        $('#s_count').trigger('change');
+    }
 }
 
 function getConfigStatus(data) {
