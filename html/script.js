@@ -409,7 +409,11 @@ function showReboot() {
     $('#update').modal('hide');
     $('#reboot').modal({backdrop: 'static', keyboard: false});
     setTimeout(function() {
-        window.location.replace("/"); 
+		if($('#dhcp').prop('checked')) {
+			window.location.assign("/");
+		} else {
+	        window.location.assign("http://" + $('#ip').val());
+		}
     }, 5000);    
 }
 
