@@ -141,11 +141,6 @@ function wsConnect() {
             ws.send('G1'); // Get Config
             ws.send('G2'); // Get Net Status
 
-            // Init dynamic fields
-            $('#dhcp').trigger('click');
-            $('#s_proto').trigger('change');
-            $('#p_type').trigger('change');
-
             feed();
         };
         
@@ -219,6 +214,7 @@ function getConfig(data) {
     $('#ssid').val(config.network.ssid);
     $('#password').val(config.network.passphrase);
     $('#dhcp').prop('checked', config.network.dhcp);
+	$('.dhcp').prop('disabled', config.network.dhcp);
     $('#ap').prop('checked', config.network.ap_fallback);
     $('#ip').val(config.network.ip[0] + '.' +
             config.network.ip[1] + '.' +
