@@ -141,11 +141,6 @@ function wsConnect() {
             ws.send('G1'); // Get Config
             ws.send('G2'); // Get Net Status
 
-            // Init dynamic fields
-            $('#dhcp').trigger('click');
-            $('#s_proto').trigger('change');
-            $('#p_type').trigger('change');
-
             feed();
         };
         
@@ -219,6 +214,7 @@ function getConfig(data) {
     $('#ssid').val(config.network.ssid);
     $('#password').val(config.network.passphrase);
     $('#dhcp').prop('checked', config.network.dhcp);
+	$('.dhcp').prop('disabled', config.network.dhcp);
     $('#ap').prop('checked', config.network.ap_fallback);
     $('#ip').val(config.network.ip[0] + '.' +
             config.network.ip[1] + '.' +
@@ -247,6 +243,10 @@ function getConfig(data) {
         $('#p_type').val(config.pixel.type);
         $('#p_color').val(config.pixel.color);
         $('#p_gamma').prop('checked', config.pixel.gamma);
+		
+        // Trigger updated elements
+        $('#p_type').trigger('click');
+        $('#p_count').trigger('change');
     }
 
     if (config.device.mode == 1) {  // Serial
@@ -255,13 +255,11 @@ function getConfig(data) {
         $('#s_count').val(config.e131.channel_count);
         $('#s_proto').val(config.serial.type);
         $('#s_baud').val(config.serial.baudrate);
-    }
 
-    // Trigger updated elements
-    $('#p_type').trigger('click');
-    $('#p_count').trigger('change');
-    $('#s_proto').trigger('click');
-    $('#s_proto').trigger('change');
+        // Trigger updated elements
+        $('#s_proto').trigger('click');
+        $('#s_count').trigger('change');
+    }
 }
 
 function getConfigStatus(data) {
@@ -407,7 +405,11 @@ function showReboot() {
     $('#update').modal('hide');
     $('#reboot').modal({backdrop: 'static', keyboard: false});
     setTimeout(function() {
-        window.location.replace("/"); 
+		if($('#dhcp').prop('checked')) {
+			window.location.assign("/");
+		} else {
+	        window.location.assign("http://" + $('#ip').val());
+		}
     }, 5000);    
 }
 
