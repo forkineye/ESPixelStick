@@ -82,8 +82,15 @@ $(function() {
                     backgroundColor: '#' + colors.HEX,
                     color: colors.RGBLuminance > 0.22 ? '#222' : '#ddd'
                 }).text(this.color.toString($elm._colorMode)); // $elm.val();
+                
+                var tmode = $('#tmode option:selected').val();
 
-                ws.send('T1' + JSON.stringify(json));
+                if (!tmode.localeCompare('t_static')) {
+                    ws.send('T1' + JSON.stringify(json));
+                }
+                else if(!tmode.localeCompare('t_chase')) {
+                    ws.send('T2' + JSON.stringify(json));
+                }
             }
         });
 
@@ -399,7 +406,14 @@ function test() {
     if (!tmode.localeCompare('t_disabled')) {
         ws.send('T0');
     }
+    else if (!tmode.localeCompare('t_rainbow')) {
+        ws.send('T3');
+    }
+    else if (!tmode.localeCompare('t_view')) {
+        ws.send('T4');
+    }
 }
+
 
 function showReboot() {
     $('#update').modal('hide');

@@ -29,7 +29,7 @@ GNU General Public License for more details.
 #include "HardwareSerial.h"
 
 /* UART for Renard / DMX output */
-#define SEROUT_UART 1
+#define SEROUT_UART 0
 
 #if SEROUT_UART == 0
 #define SEROUT_PORT        Serial
