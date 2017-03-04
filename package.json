@@ -1,0 +1,30 @@
+{
+  "name": "espixelstick",
+  "version": "1.0.0",
+  "description": "Gulp based build system for ESPixelStick web files",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/forkineye/ESPixelStick.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/forkineye/ESPixelStick/issues"
+  },
+  "homepage": "https://github.com/forkineye/ESPixelStick#readme",
+  "devDependencies": {
+    "del": "^2.2.1",
+    "gulp": "^3.9.1",
+    "gulp-clean-css": "^2.0.10",
+    "gulp-concat": "^2.6.0",
+    "gulp-gzip": "^1.4.0",
+    "gulp-htmlmin": "^2.0.0",
+    "gulp-inline-source": "^3.0.0",
+    "gulp-plumber": "^1.1.0",
+    "gulp-uglify": "^1.5.3"
+  }
+}

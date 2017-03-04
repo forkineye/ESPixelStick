@@ -1,0 +1,7 @@
+{
+    "linters": {
+        "cpplint": {
+            "args": ["--extensions=ino,c,cpp,h"]
+        }
+    }
+}
