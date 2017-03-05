@@ -285,3 +285,7 @@ void PixelDriver::show() {
         }
     }
 }
+
+uint8_t* PixelDriver::getData() {
+    return pixdata;
+}

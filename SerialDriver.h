@@ -65,6 +65,7 @@ class SerialDriver {
             BaudRate baud);
     void startPacket();
     void show();
+    uint8_t* getData();
 
     /* Set the value */
     inline void setValue(uint16_t address, uint8_t value) {

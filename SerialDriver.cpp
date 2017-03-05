@@ -186,3 +186,8 @@ void SerialDriver::show() {
     memcpy(_asyncdata, _serialdata, _size);
     std::swap(_asyncdata, _serialdata);
 }
+
+
+uint8_t* SerialDriver::getData() {
+    return _serialdata;
+}

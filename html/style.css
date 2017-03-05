@@ -82,6 +82,12 @@ body {
   width: 100%;
 }
 
+canvas {
+  background-color: black; 
+  width: 100%;
+  height: auto;
+}
+
 /* Snackbar - position it at the bottom and in the middle of the screen */
 #snackbar {
     visibility: hidden;     /* Hidden by default. Visible on click */

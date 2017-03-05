@@ -161,7 +161,7 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
         case '0':
             config.testmode = TestMode::DISABLED;
             break;
-        case '1':
+        case '1': {
             config.testmode = TestMode::STATIC;
             DynamicJsonBuffer jsonBuffer;
             JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
@@ -183,6 +183,15 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
 #endif
             }
             break;
+        }
+        case '4': {
+#if defined(ESPS_MODE_PIXEL)
+            client->binary(pixels.getData(),config.channel_count);
+#elif defined(ESPS_MODE_SERIAL)
+            client->binary(serial.getData(),config.channel_count);
+#endif
+            break;
+        }
     }
 }
 
