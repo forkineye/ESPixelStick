@@ -498,7 +498,7 @@ void loop() {
         ESP.restart();
     }
 
-    if (config.testmode == TestMode::DISABLED) {
+    if (config.testmode == TestMode::DISABLED || config.testmode == TestMode::VIEW_STREAM) {
 
         /* Parse a packet and update pixels */
         if (e131.parsePacket()) {
@@ -510,31 +510,149 @@ void loop() {
                     seqTracker[uniOffset] = e131.packet->sequence_number + 1;
                 }
 
-                /* Offset the channel if required for the first universe */
+                /* Offset the channels if required */
                 uint16_t offset = 0;
-                if (e131.universe == config.universe)
-                    offset = config.channel_start - 1;
+                offset = config.channel_start - 1;
 
                 /* Find start of data based off the Universe */
-                uint16_t dataStart = uniOffset * UNIVERSE_LIMIT;
+                int16_t dataStart = uniOffset * UNIVERSE_LIMIT - offset;
 
-                /* Caculate how much data we need for this buffer */
+                /* Calculate how much data we need for this buffer */
                 uint16_t dataStop = config.channel_count;
                 if ((dataStart + UNIVERSE_LIMIT) < dataStop)
                     dataStop = dataStart + UNIVERSE_LIMIT;
 
                 /* Set the data */
                 uint16_t buffloc = 0;
+                
+                /* ignore data from start of first Universe before channel_start */
+                if(dataStart<0) {
+                    dataStart=0;
+                    buffloc=config.channel_start-1;
+                }
+                
                 for (int i = dataStart; i < dataStop; i++) {
     #if defined(ESPS_MODE_PIXEL)
-                    pixels.setValue(i, e131.data[buffloc + offset]);
+                    pixels.setValue(i, e131.data[buffloc]);
     #elif defined(ESPS_MODE_SERIAL)
-                    serial.setValue(i, e131.data[buffloc + offset]);
+                    serial.setValue(i, e131.data[buffloc]);
     #endif
                     buffloc++;
                 }
             }
         }
+    }
+    else { //some other testmode
+    
+      //keep feeding server so we don't overrun with packets
+      e131.parsePacket();
+    
+      switch(config.testmode){
+        case TestMode::STATIC: {
+          
+          //continue to update color to whole string
+          uint16_t i = 0;
+          while (i < config.channel_count - 3) {
+  #if defined(ESPS_MODE_PIXEL)
+            pixels.setValue(i++, testing.r);
+            pixels.setValue(i++, testing.g);
+            pixels.setValue(i++, testing.b);
+  #elif defined(ESPS_MODE_SERIAL)
+            serial.setValue(i++, testing.r);
+            serial.setValue(i++, testing.g);
+            serial.setValue(i++, testing.b);
+  #endif
+              }
+         break;
+        }
+       
+        case TestMode::CHASE:
+          //run chase routine
+          
+          if(millis() - testing.last > 100){
+            //time for new step
+            testing.last = millis();
+  #if defined(ESPS_MODE_PIXEL)
+            //clear whole string
+            for(int y =0; y < config.channel_count; y++) pixels.setValue(y, 0);
+            //set pixel at step
+            int ch_offset = testing.step*3;
+            pixels.setValue(ch_offset++, testing.r);
+            pixels.setValue(ch_offset++, testing.g);
+            pixels.setValue(ch_offset, testing.b);
+            testing.step++;
+            if(testing.step >= (config.channel_count/3)) testing.step = 0;
+          
+  #elif defined(ESPS_MODE_SERIAL)
+            for(int y =0; y < config.channel_count; y++) serial.setValue(y, 0);
+            //set pixel at step
+            serial.setValue(testing.step++, 0xFF);
+            if(testing.step >= config.channel_count) testing.step = 0;
+  #endif   
+          }
+       
+        break;
+        case TestMode::RAINBOW:
+          //run rainbow routine
+          if(millis() - testing.last > 50){
+            testing.last = millis();
+            uint16_t i, WheelPos, num_pixels;
+           
+            num_pixels = config.channel_count/3;
+            if (testing.step < 255){
+              for(i=0; i< (num_pixels); i++) {
+                int ch_offset = i*3;
+                WheelPos = 255 - (((i * 256 / num_pixels) + testing.step) & 255);
+  #if defined(ESPS_MODE_PIXEL)             
+                if(WheelPos < 85) {
+                  pixels.setValue(ch_offset++, 255 - WheelPos * 3 );
+                  pixels.setValue(ch_offset++, 0 );
+                  pixels.setValue(ch_offset, WheelPos * 3 );
+                }
+                else if(WheelPos < 170) {
+                  WheelPos -= 85;
+                  pixels.setValue(ch_offset++, 0 );
+                  pixels.setValue(ch_offset++, WheelPos * 3 );
+                  pixels.setValue(ch_offset, 255 - WheelPos * 3 );
+                }
+                else {
+                  WheelPos -= 170;
+                  pixels.setValue(ch_offset++, WheelPos * 3 );
+                  pixels.setValue(ch_offset++,255 - WheelPos * 3 );
+                  pixels.setValue(ch_offset, 0 );
+                }
+  #elif defined(ESPS_MODE_SERIAL)
+                if(WheelPos < 85) {
+                  serial.setValue(ch_offset++, 255 - WheelPos * 3 );
+                  serial.setValue(ch_offset++, 0 );
+                  serial.setValue(ch_offset, WheelPos * 3 );
+                }
+                else if(WheelPos < 170) {
+                  WheelPos -= 85;
+                  serial.setValue(ch_offset++, 0 );
+                  serial.setValue(ch_offset++, WheelPos * 3 );
+                  serial.setValue(ch_offset, 255 - WheelPos * 3 );
+                }
+                else {
+                  WheelPos -= 170;
+                  serial.setValue(ch_offset++, WheelPos * 3 );
+                  serial.setValue(ch_offset++,255 - WheelPos * 3 );
+                  serial.setValue(ch_offset, 0 );
+                }           
+  #endif               
+              }
+              
+            }
+            else testing.step = 0;
+            
+            testing.step++;
+          }
+        break;
+      }
+        
+        
+        
+        
     }
 
 /* Streaming refresh */

@@ -198,7 +198,7 @@
           <div class="form-group">
             <label class="control-label col-sm-2" for="t_mode">Testing Mode</label>
             <div class="col-sm-10">
-              <select class="form-control" id="tmode" name="tmode" onclick="test()">
+              <select class="form-control" id="tmode" name="tmode" onchange="test()">
                 <option value="t_disabled">Disabled</option>
                 <option value="t_static">Static</option>
                 <option value="t_chase">Chase</option>
@@ -215,8 +215,27 @@
             <div class="form-group">
               <label class="control-label col-sm-2" for="t_color">Color</label>
               <div class="col-sm-10">
+                <input type="button" class="form-control color no-alpha" value="rgb(128,128,128)"/>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Testing - Chase -->
+          <div id="t_chase" class="tdiv hidden">
+            <legend class="esps-legend">Chase Testing</legend>
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="t_color">Color</label>
+              <div class="col-sm-10">
                 <input type="button" class="form-control color no-alpha" value="rgb(255,255,255)" />
               </div>
+            </div>
+          </div>
+
+	  <!-- Testing - View Stream -->
+          <div id="t_view" class="tdiv hidden">
+            <legend class="esps-legend">View Stream</legend>
+            <div class="form-group">
+              <div class="col-sm-12"><canvas id="canvas" width="270" height="570"></canvas></div>
             </div>
           </div>
 

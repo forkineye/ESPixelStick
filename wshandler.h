@@ -156,33 +156,65 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
     }
 }
 
+/*
+enum class TestMode : uint8_t {
+    DISABLED,
+    STATIC,
+    CHASE,
+    RAINBOW,
+    VIEW_STREAM
+};
+*/
+
 void procT(uint8_t *data, AsyncWebSocketClient *client) {
+    
     switch(data[1]) {
         case '0':
             config.testmode = TestMode::DISABLED;
+            //clear whole string
+#if defined(ESPS_MODE_PIXEL)
+          for(int y =0; y < config.channel_count; y++) pixels.setValue(y, 0);
+#elif defined(ESPS_MODE_SERIAL)
+          for(int y =0; y < config.channel_count; y++) serial.setValue(y, 0);
+#endif
             break;
-        case '1':
+
+        case '1': {//static color
             config.testmode = TestMode::STATIC;
+            testing.step = 0;
             DynamicJsonBuffer jsonBuffer;
             JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
 
-            uint8_t r = json["r"];
-            uint8_t g = json["g"];
-            uint8_t b = json["b"];
-
-            uint16_t i = 0;
-            while (i < config.channel_count) {
-#if defined(ESPS_MODE_PIXEL)
-                pixels.setValue(i++, r);
-                pixels.setValue(i++, g);
-                pixels.setValue(i++, b);
-#elif defined(ESPS_MODE_SERIAL)
-                serial.setValue(i++, r);
-                serial.setValue(i++, g);
-                serial.setValue(i++, b);
-#endif
-            }
+            testing.r = json["r"];
+            testing.g = json["g"];
+            testing.b = json["b"];
             break;
+        }
+        case '2': {//chase
+            config.testmode = TestMode::CHASE;
+            testing.step = 0;
+            DynamicJsonBuffer jsonBuffer;
+            JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
+
+            testing.r = json["r"];
+            testing.g = json["g"];
+            testing.b = json["b"];
+        
+          break;
+        }
+        case '3': //rainbow
+            config.testmode = TestMode::RAINBOW;
+            testing.step = 0;
+          break;
+        case '4': {//view stream
+            config.testmode = TestMode::VIEW_STREAM;
+#if defined(ESPS_MODE_PIXEL)
+            client->binary(pixels.getData(),config.channel_count);
+#elif defined(ESPS_MODE_SERIAL)
+            client->binary(serial.getData(),config.channel_count);
+#endif
+            break;
+        }
     }
 }
 
