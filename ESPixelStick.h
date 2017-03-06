@@ -66,6 +66,12 @@ enum class TestMode : uint8_t {
     VIEW_STREAM
 };
 
+typedef struct {
+    uint8_t r,g,b;              //hold requested color
+    uint16_t step;               //step in testing routine
+    uint32_t last;              //last update
+} testing_t;
+
 /* Configuration structure */
 typedef struct {
     /* Device */
@@ -104,6 +110,7 @@ typedef struct {
 
 /* Globals */
 E131            e131;
+testing_t       testing;
 config_t        config;
 uint32_t        *seqError;      /* Sequence error tracking for each universe */
 uint16_t        uniLast = 1;    /* Last Universe to listen for */

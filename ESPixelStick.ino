@@ -542,6 +542,118 @@ void loop() {
             }
         }
     }
+    else { //some other testmode
+    
+      //keep feeding server so we don't overrun with packets
+      e131.parsePacket();
+    
+      switch(config.testmode){
+        case TestMode::STATIC: {
+          
+          //continue to update color to whole string
+          uint16_t i = 0;
+          while (i < config.channel_count - 3) {
+  #if defined(ESPS_MODE_PIXEL)
+            pixels.setValue(i++, testing.r);
+            pixels.setValue(i++, testing.g);
+            pixels.setValue(i++, testing.b);
+  #elif defined(ESPS_MODE_SERIAL)
+            serial.setValue(i++, testing.r);
+            serial.setValue(i++, testing.g);
+            serial.setValue(i++, testing.b);
+  #endif
+              }
+         break;
+        }
+       
+        case TestMode::CHASE:
+          //run chase routine
+          
+          if(millis() - testing.last > 100){
+            //time for new step
+            testing.last = millis();
+  #if defined(ESPS_MODE_PIXEL)
+            //clear whole string
+            for(int y =0; y < config.channel_count; y++) pixels.setValue(y, 0);
+            //set pixel at step
+            int ch_offset = testing.step*3;
+            pixels.setValue(ch_offset++, testing.r);
+            pixels.setValue(ch_offset++, testing.g);
+            pixels.setValue(ch_offset, testing.b);
+            testing.step++;
+            if(testing.step >= (config.channel_count/3)) testing.step = 0;
+          
+  #elif defined(ESPS_MODE_SERIAL)
+            for(int y =0; y < config.channel_count; y++) serial.setValue(y, 0);
+            //set pixel at step
+            serial.setValue(testing.step++, 0xFF);
+            if(testing.step >= config.channel_count) testing.step = 0;
+  #endif   
+          }
+       
+        break;
+        case TestMode::RAINBOW:
+          //run rainbow routine
+          if(millis() - testing.last > 50){
+            testing.last = millis();
+            uint16_t i, WheelPos, num_pixels;
+           
+            num_pixels = config.channel_count/3;
+            if (testing.step < 255){
+              for(i=0; i< (num_pixels); i++) {
+                int ch_offset = i*3;
+                WheelPos = 255 - (((i * 256 / num_pixels) + testing.step) & 255);
+  #if defined(ESPS_MODE_PIXEL)             
+                if(WheelPos < 85) {
+                  pixels.setValue(ch_offset++, 255 - WheelPos * 3 );
+                  pixels.setValue(ch_offset++, 0 );
+                  pixels.setValue(ch_offset, WheelPos * 3 );
+                }
+                else if(WheelPos < 170) {
+                  WheelPos -= 85;
+                  pixels.setValue(ch_offset++, 0 );
+                  pixels.setValue(ch_offset++, WheelPos * 3 );
+                  pixels.setValue(ch_offset, 255 - WheelPos * 3 );
+                }
+                else {
+                  WheelPos -= 170;
+                  pixels.setValue(ch_offset++, WheelPos * 3 );
+                  pixels.setValue(ch_offset++,255 - WheelPos * 3 );
+                  pixels.setValue(ch_offset, 0 );
+                }
+  #elif defined(ESPS_MODE_SERIAL)
+                if(WheelPos < 85) {
+                  serial.setValue(ch_offset++, 255 - WheelPos * 3 );
+                  serial.setValue(ch_offset++, 0 );
+                  serial.setValue(ch_offset, WheelPos * 3 );
+                }
+                else if(WheelPos < 170) {
+                  WheelPos -= 85;
+                  serial.setValue(ch_offset++, 0 );
+                  serial.setValue(ch_offset++, WheelPos * 3 );
+                  serial.setValue(ch_offset, 255 - WheelPos * 3 );
+                }
+                else {
+                  WheelPos -= 170;
+                  serial.setValue(ch_offset++, WheelPos * 3 );
+                  serial.setValue(ch_offset++,255 - WheelPos * 3 );
+                  serial.setValue(ch_offset, 0 );
+                }           
+  #endif               
+              }
+              
+            }
+            else testing.step = 0;
+            
+            testing.step++;
+          }
+        break;
+      }
+        
+        
+        
+        
+    }
 
 /* Streaming refresh */
 #if defined(ESPS_MODE_PIXEL)

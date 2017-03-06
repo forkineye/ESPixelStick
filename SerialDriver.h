@@ -29,7 +29,7 @@ GNU General Public License for more details.
 #include "HardwareSerial.h"
 
 /* UART for Renard / DMX output */
-#define SEROUT_UART 1
+#define SEROUT_UART 0
 
 #if SEROUT_UART == 0
 #define SEROUT_PORT        Serial
@@ -111,7 +111,7 @@ class SerialDriver {
 
     /* Returns number of bytes waiting in the TX FIFO of SEROUT_UART */
     static inline uint8_t getFifoLength() {
-        return (ESP8266_REG(U0S+(0xF00*SEROUT_UART)) >> USTXC) & 0xff;
+        return (ESP8266_REG(U0F+(0xF00*SEROUT_UART)) >> USTXC) & 0xff;
     }
 
     /* Append a byte to the TX FIFO of SEROUT_UART */
