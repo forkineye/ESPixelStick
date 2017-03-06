@@ -498,7 +498,7 @@ void loop() {
         ESP.restart();
     }
 
-    if (config.testmode == TestMode::DISABLED) {
+    if (config.testmode == TestMode::DISABLED || config.testmode == TestMode::VIEW_STREAM) {
 
         /* Parse a packet and update pixels */
         if (e131.parsePacket()) {

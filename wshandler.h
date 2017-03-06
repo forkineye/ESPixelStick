@@ -207,6 +207,7 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             testing.step = 0;
           break;
         case '4': {//view stream
+            config.testmode = TestMode::VIEW_STREAM;
 #if defined(ESPS_MODE_PIXEL)
             client->binary(pixels.getData(),config.channel_count);
 #elif defined(ESPS_MODE_SERIAL)
