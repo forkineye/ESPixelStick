@@ -498,7 +498,7 @@ void loop() {
         ESP.restart();
     }
 
-    if (config.testmode == TestMode::DISABLED) {
+    if (config.testmode == TestMode::DISABLED || config.testmode == TestMode::VIEW_STREAM) {
 
         /* Parse a packet and update pixels */
         if (e131.parsePacket()) {
@@ -510,26 +510,32 @@ void loop() {
                     seqTracker[uniOffset] = e131.packet->sequence_number + 1;
                 }
 
-                /* Offset the channel if required for the first universe */
+                /* Offset the channels if required */
                 uint16_t offset = 0;
-                if (e131.universe == config.universe)
-                    offset = config.channel_start - 1;
+                offset = config.channel_start - 1;
 
                 /* Find start of data based off the Universe */
-                uint16_t dataStart = uniOffset * UNIVERSE_LIMIT;
+                int16_t dataStart = uniOffset * UNIVERSE_LIMIT - offset;
 
-                /* Caculate how much data we need for this buffer */
+                /* Calculate how much data we need for this buffer */
                 uint16_t dataStop = config.channel_count;
                 if ((dataStart + UNIVERSE_LIMIT) < dataStop)
                     dataStop = dataStart + UNIVERSE_LIMIT;
 
                 /* Set the data */
                 uint16_t buffloc = 0;
+                
+                /* ignore data from start of first Universe before channel_start */
+                if(dataStart<0) {
+                    dataStart=0;
+                    buffloc=config.channel_start-1;
+                }
+                
                 for (int i = dataStart; i < dataStop; i++) {
     #if defined(ESPS_MODE_PIXEL)
-                    pixels.setValue(i, e131.data[buffloc + offset]);
+                    pixels.setValue(i, e131.data[buffloc]);
     #elif defined(ESPS_MODE_SERIAL)
-                    serial.setValue(i, e131.data[buffloc + offset]);
+                    serial.setValue(i, e131.data[buffloc]);
     #endif
                     buffloc++;
                 }

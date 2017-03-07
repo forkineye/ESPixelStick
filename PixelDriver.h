@@ -99,6 +99,7 @@ class PixelDriver {
     void setGamma(bool gamma);
     void updateOrder(PixelColor color);
     void show();
+    uint8_t* getData();
 
     /* Set channel value at address */
     inline void setValue(uint16_t address, uint8_t value) {

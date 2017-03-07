@@ -122,6 +122,9 @@ $(function() {
         else 
             $('#s_baud').prop('disabled', false);
     });
+	
+	var canvas = document.getElementById("canvas");
+	ctx = canvas.getContext("2d");
 });
 
 // Page event feeds
@@ -151,39 +154,45 @@ function wsConnect() {
             feed();
         };
         
-        ws.onmessage = function (event) { 
-            var cmd = event.data.substr(0, 2);
-            var data = event.data.substr(2);
-            switch (cmd) {
-            case 'E1':
-                getElements(data);
-                break;                
-            case 'G1':
-                getConfig(data);
-                break;
-            case 'G2':
-                getConfigStatus(data);
-                break;
-            case 'S1':
-                setConfig(data);
-                reboot();
-                break;
-            case 'S2':
-                setConfig(data);
-                break;
-            case 'X1':
-                getRSSI(data);
-                break;
-            case 'X2':
-                getE131Status(data);
-                break;
-            case 'X6':
-                showReboot();
-                break;
-            default:
-                console.log('Unknown Command: ' + event.data);
-                break;
-            }
+        ws.onmessage = function (event) {
+		    if(typeof event.data === "string") {
+                var cmd = event.data.substr(0, 2);
+                var data = event.data.substr(2);
+                switch (cmd) {
+                case 'E1':
+                    getElements(data);
+                    break;                
+                case 'G1':
+                    getConfig(data);
+                    break;
+                case 'G2':
+                    getConfigStatus(data);
+                    break;
+                case 'S1':
+                    setConfig(data);
+                    reboot();
+                    break;
+                case 'S2':
+                    setConfig(data);
+                    break;
+                case 'X1':
+                    getRSSI(data);
+                    break;
+                case 'X2':
+                    getE131Status(data);
+                    break;
+                case 'X6':
+                    showReboot();
+                    break;
+                default:
+                    console.log('Unknown Command: ' + event.data);
+                    break;
+                }
+			} else {
+				steamData= new Uint8Array(event.data);
+				drawStream(steamData);
+				if (!$('#tmode option:selected').val().localeCompare('t_view')) ws.send('T4');
+			}
         };
         
         ws.onerror = function() {
@@ -196,6 +205,49 @@ function wsConnect() {
     } else {
         alert('WebSockets is NOT supported by your Browser! You will need to upgrade your browser or downgrade to v2.0 of the ESPixelStick firmware.');
     }
+}
+
+function drawStream(steamData) {
+	for (i = 0; i < steamData.length; i+=3) {
+		ctx.fillStyle='rgb(' + steamData[i+rOffset] + ',' + steamData[i+gOffset] + ',' + steamData[i+bOffset] + ')';
+		var col=(i/3)%25;
+		var row=Math.floor((i/3)/25);
+		ctx.fillRect(10+(col*10),10+(row*10),9,9);
+	}
+}
+
+function setColorOrder(colorOrder) {
+	switch (colorOrder) {
+	case 1: //GRB
+		rOffset = 1;
+		gOffset = 0;
+		bOffset = 2;
+		break;
+	case 2: //BRG
+		rOffset = 1;
+		gOffset = 2;
+		bOffset = 0;
+		break;
+	case 3: //RBG
+		rOffset = 0;
+		gOffset = 2;
+		bOffset = 1;
+		break;
+	case 4: //GBR
+		rOffset = 2;
+		gOffset = 0;
+		bOffset = 1;
+		break;
+	case 5: //BGR
+		rOffset = 2;
+		gOffset = 1;
+		bOffset = 0;
+		break;
+	default: //RGB
+		rOffset = 0;
+		gOffset = 1;
+		bOffset = 2;
+	}
 }
 
 function getElements(data) {
@@ -251,6 +303,8 @@ function getConfig(data) {
         $('#p_color').val(config.pixel.color);
         $('#p_gamma').prop('checked', config.pixel.gamma);
 		
+		setColorOrder(config.pixel.color);
+		
         // Trigger updated elements
         $('#p_type').trigger('click');
         $('#p_count').trigger('change');
@@ -262,6 +316,8 @@ function getConfig(data) {
         $('#s_count').val(config.e131.channel_count);
         $('#s_proto').val(config.serial.type);
         $('#s_baud').val(config.serial.baudrate);
+		
+		setColorOrder(0);
 
         // Trigger updated elements
         $('#s_proto').trigger('click');
@@ -361,6 +417,7 @@ function submitConfig() {
             }
         };
     ws.send('S2' + JSON.stringify(json));
+	setColorOrder(parseInt($('#p_color').val()));
 }
 
 function refreshPixel() {
