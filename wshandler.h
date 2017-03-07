@@ -216,12 +216,23 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             uint8_t* bufi = serial.getData();
             if (bufq){
               uint16_t q = 0;
-              uint16_t i = 2;
-              while(i<config.channel_count+2){
-                bufq[q++]=bufi[i];
-                bufq[q++]=bufi[i];
-                bufq[q++]=bufi[i++];
-              }           
+              uint16_t i = 0;
+              if( config.serial_type == DMX512){
+                while(i<config.channel_count){
+                  bufq[q++]=bufi[i];
+                  bufq[q++]=bufi[i];
+                  bufq[q++]=bufi[i++];
+                }
+              }
+              else {
+                i = 2;
+                while(i<config.channel_count+2){
+                  bufq[q++]=bufi[i];
+                  bufq[q++]=bufi[i];
+                  bufq[q++]=bufi[i++];
+                }
+                
+              }
               client->binary(bufq,qsize);
               free(bufq);
             }
