@@ -338,6 +338,7 @@ function getConfig(data) {
             $('#v_columns').val(25);
         }
         $("input[name='viewStyle'][value='RGB']").trigger('click');
+		clearStream();
         
         // Trigger updated elements
         $('#p_type').trigger('click');
@@ -358,6 +359,7 @@ function getConfig(data) {
             $('#v_columns').val(16);
         }
         $("input[name='viewStyle'][value='Channel']").trigger('click');
+		clearStream();
 
         // Trigger updated elements
         $('#s_proto').trigger('click');
