@@ -157,7 +157,7 @@ function wsConnect() {
         };
         
         ws.onmessage = function (event) {
-		    if(typeof event.data === "string") {
+            if(typeof event.data === "string") {
                 var cmd = event.data.substr(0, 2);
                 var data = event.data.substr(2);
                 switch (cmd) {
@@ -190,11 +190,11 @@ function wsConnect() {
                     console.log('Unknown Command: ' + event.data);
                     break;
                 }
-			} else {
-				steamData= new Uint8Array(event.data);
-				drawStream(steamData);
-				if (!$('#tmode option:selected').val().localeCompare('t_view')) ws.send('T4');
-			}
+            } else {
+                streamData= new Uint8Array(event.data);
+                drawStream(streamData);
+                if (!$('#tmode option:selected').val().localeCompare('t_view')) ws.send('T4');
+            }
         };
         
         ws.onerror = function() {
@@ -243,37 +243,37 @@ function clearStream() {
 }
 
 function setColorOrder(colorOrder) {
-	switch (colorOrder) {
-	case 1: //GRB
-		rOffset = 1;
-		gOffset = 0;
-		bOffset = 2;
-		break;
-	case 2: //BRG
-		rOffset = 1;
-		gOffset = 2;
-		bOffset = 0;
-		break;
-	case 3: //RBG
-		rOffset = 0;
-		gOffset = 2;
-		bOffset = 1;
-		break;
-	case 4: //GBR
-		rOffset = 2;
-		gOffset = 0;
-		bOffset = 1;
-		break;
-	case 5: //BGR
-		rOffset = 2;
-		gOffset = 1;
-		bOffset = 0;
-		break;
-	default: //RGB
-		rOffset = 0;
-		gOffset = 1;
-		bOffset = 2;
-	}
+    switch (colorOrder) {
+    case 1: //GRB
+        rOffset = 1;
+        gOffset = 0;
+        bOffset = 2;
+        break;
+    case 2: //BRG
+        rOffset = 1;
+        gOffset = 2;
+        bOffset = 0;
+        break;
+    case 3: //RBG
+        rOffset = 0;
+        gOffset = 2;
+        bOffset = 1;
+        break;
+    case 4: //GBR
+        rOffset = 2;
+        gOffset = 0;
+        bOffset = 1;
+        break;
+    case 5: //BGR
+        rOffset = 2;
+        gOffset = 1;
+        bOffset = 0;
+        break;
+    default: //RGB
+        rOffset = 0;
+        gOffset = 1;
+        bOffset = 2;
+    }
 }
 
 function getElements(data) {
@@ -299,7 +299,7 @@ function getConfig(data) {
     $('#ssid').val(config.network.ssid);
     $('#password').val(config.network.passphrase);
     $('#dhcp').prop('checked', config.network.dhcp);
-	$('.dhcp').prop('disabled', config.network.dhcp);
+    $('.dhcp').prop('disabled', config.network.dhcp);
     $('#ap').prop('checked', config.network.ap_fallback);
     $('#ip').val(config.network.ip[0] + '.' +
             config.network.ip[1] + '.' +
@@ -457,7 +457,7 @@ function submitConfig() {
             }
         };
     ws.send('S2' + JSON.stringify(json));
-	setColorOrder(parseInt($('#p_color').val()));
+    setColorOrder(parseInt($('#p_color').val()));
 }
 
 function refreshPixel() {
@@ -516,11 +516,11 @@ function showReboot() {
     $('#update').modal('hide');
     $('#reboot').modal({backdrop: 'static', keyboard: false});
     setTimeout(function() {
-		if($('#dhcp').prop('checked')) {
-			window.location.assign("/");
-		} else {
-	        window.location.assign("http://" + $('#ip').val());
-		}
+        if($('#dhcp').prop('checked')) {
+            window.location.assign("/");
+        } else {
+            window.location.assign("http://" + $('#ip').val());
+        }
     }, 5000);    
 }
 
