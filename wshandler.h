@@ -211,7 +211,11 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
 #if defined(ESPS_MODE_PIXEL)
             client->binary(pixels.getData(),config.channel_count);
 #elif defined(ESPS_MODE_SERIAL)
-            client->binary(serial.getData(),config.channel_count);
+            if( config.serial_type == SerialType::DMX512)
+                client->binary(&serial.getData()[1],config.channel_count);
+            else 
+                client->binary(&serial.getData()[2],config.channel_count);        
+              
 #endif
             break;
         }
