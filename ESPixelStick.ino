@@ -552,7 +552,7 @@ void loop() {
           
           //continue to update color to whole string
           uint16_t i = 0;
-          while (i < config.channel_count - 3) {
+          while (i <= config.channel_count - 3) {
   #if defined(ESPS_MODE_PIXEL)
             pixels.setValue(i++, testing.r);
             pixels.setValue(i++, testing.g);

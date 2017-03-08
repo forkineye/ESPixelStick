@@ -122,9 +122,11 @@ $(function() {
         else 
             $('#s_baud').prop('disabled', false);
     });
-	
-	var canvas = document.getElementById("canvas");
-	ctx = canvas.getContext("2d");
+    
+    canvas = document.getElementById("canvas");
+    ctx = canvas.getContext("2d");
+    ctx.font = "20px Arial";
+    ctx.textAlign = "center";
 });
 
 // Page event feeds
@@ -155,7 +157,7 @@ function wsConnect() {
         };
         
         ws.onmessage = function (event) {
-		    if(typeof event.data === "string") {
+            if(typeof event.data === "string") {
                 var cmd = event.data.substr(0, 2);
                 var data = event.data.substr(2);
                 switch (cmd) {
@@ -188,11 +190,11 @@ function wsConnect() {
                     console.log('Unknown Command: ' + event.data);
                     break;
                 }
-			} else {
-				steamData= new Uint8Array(event.data);
-				drawStream(steamData);
-				if (!$('#tmode option:selected').val().localeCompare('t_view')) ws.send('T4');
-			}
+            } else {
+                streamData= new Uint8Array(event.data);
+                drawStream(streamData);
+                if (!$('#tmode option:selected').val().localeCompare('t_view')) ws.send('T4');
+            }
         };
         
         ws.onerror = function() {
@@ -207,47 +209,71 @@ function wsConnect() {
     }
 }
 
-function drawStream(steamData) {
-	for (i = 0; i < steamData.length; i+=3) {
-		ctx.fillStyle='rgb(' + steamData[i+rOffset] + ',' + steamData[i+gOffset] + ',' + steamData[i+bOffset] + ')';
-		var col=(i/3)%25;
-		var row=Math.floor((i/3)/25);
-		ctx.fillRect(10+(col*10),10+(row*10),9,9);
-	}
+function drawStream(streamData) {
+    var cols=parseInt($('#v_columns').val());
+    var size=Math.floor((canvas.width-20)/cols);
+    if($("input[name='viewStyle'][value='RGB']").prop('checked')) {
+        maxDisplay=Math.min(streamData.length, (cols*Math.floor((canvas.height-30)/size))*3);
+        for (i = 0; i < maxDisplay; i+=3) {
+            ctx.fillStyle='rgb(' + streamData[i+rOffset] + ',' + streamData[i+gOffset] + ',' + streamData[i+bOffset] + ')';
+            var col=(i/3)%cols;
+            var row=Math.floor((i/3)/cols);
+            ctx.fillRect(10+(col*size),10+(row*size),size-1,size-1);
+        }
+    } else {
+        maxDisplay=Math.min(streamData.length, (cols*Math.floor((canvas.height-30)/size)));
+        for (i = 0; i < maxDisplay; i++) {
+            ctx.fillStyle='rgb(' + streamData[i] + ',' + streamData[i] + ',' + streamData[i] + ')';
+            var col=(i)%cols;
+            var row=Math.floor(i/cols);
+            ctx.fillRect(10+(col*size),10+(row*size),size-2,size-2);
+        }
+    }
+    if(streamData.length>maxDisplay) {
+        ctx.fillStyle='rgb(204,0,0)';
+        ctx.fillRect(0,canvas.height-25,canvas.width,25);
+        ctx.fillStyle='rgb(255,255,255)';
+        ctx.fillText("Increase number of columns to show all data" , (canvas.width/2), canvas.height-5);
+    }
+
+}
+
+function clearStream() {
+     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 function setColorOrder(colorOrder) {
-	switch (colorOrder) {
-	case 1: //GRB
-		rOffset = 1;
-		gOffset = 0;
-		bOffset = 2;
-		break;
-	case 2: //BRG
-		rOffset = 1;
-		gOffset = 2;
-		bOffset = 0;
-		break;
-	case 3: //RBG
-		rOffset = 0;
-		gOffset = 2;
-		bOffset = 1;
-		break;
-	case 4: //GBR
-		rOffset = 2;
-		gOffset = 0;
-		bOffset = 1;
-		break;
-	case 5: //BGR
-		rOffset = 2;
-		gOffset = 1;
-		bOffset = 0;
-		break;
-	default: //RGB
-		rOffset = 0;
-		gOffset = 1;
-		bOffset = 2;
-	}
+    switch (colorOrder) {
+    case 1: //GRB
+        rOffset = 1;
+        gOffset = 0;
+        bOffset = 2;
+        break;
+    case 2: //BRG
+        rOffset = 1;
+        gOffset = 2;
+        bOffset = 0;
+        break;
+    case 3: //RBG
+        rOffset = 0;
+        gOffset = 2;
+        bOffset = 1;
+        break;
+    case 4: //GBR
+        rOffset = 2;
+        gOffset = 0;
+        bOffset = 1;
+        break;
+    case 5: //BGR
+        rOffset = 2;
+        gOffset = 1;
+        bOffset = 0;
+        break;
+    default: //RGB
+        rOffset = 0;
+        gOffset = 1;
+        bOffset = 2;
+    }
 }
 
 function getElements(data) {
@@ -273,7 +299,7 @@ function getConfig(data) {
     $('#ssid').val(config.network.ssid);
     $('#password').val(config.network.passphrase);
     $('#dhcp').prop('checked', config.network.dhcp);
-	$('.dhcp').prop('disabled', config.network.dhcp);
+    $('.dhcp').prop('disabled', config.network.dhcp);
     $('#ap').prop('checked', config.network.ap_fallback);
     $('#ip').val(config.network.ip[0] + '.' +
             config.network.ip[1] + '.' +
@@ -302,9 +328,18 @@ function getConfig(data) {
         $('#p_type').val(config.pixel.type);
         $('#p_color').val(config.pixel.color);
         $('#p_gamma').prop('checked', config.pixel.gamma);
-		
-		setColorOrder(config.pixel.color);
-		
+        
+        setColorOrder(config.pixel.color);
+        if(config.e131.channel_count / 3 <8 ) {
+            $('#v_columns').val(config.e131.channel_count / 3);
+        } else if (config.e131.channel_count / 3 <50 ) {
+            $('#v_columns').val(10);
+        } else {
+            $('#v_columns').val(25);
+        }
+        $("input[name='viewStyle'][value='RGB']").trigger('click');
+		clearStream();
+        
         // Trigger updated elements
         $('#p_type').trigger('click');
         $('#p_count').trigger('change');
@@ -316,8 +351,15 @@ function getConfig(data) {
         $('#s_count').val(config.e131.channel_count);
         $('#s_proto').val(config.serial.type);
         $('#s_baud').val(config.serial.baudrate);
-		
-		setColorOrder(0);
+        
+        setColorOrder(0);
+        if (config.e131.channel_count<=64 ) {
+            $('#v_columns').val(8);
+        } else {
+            $('#v_columns').val(16);
+        }
+        $("input[name='viewStyle'][value='Channel']").trigger('click');
+		clearStream();
 
         // Trigger updated elements
         $('#s_proto').trigger('click');
@@ -417,7 +459,7 @@ function submitConfig() {
             }
         };
     ws.send('S2' + JSON.stringify(json));
-	setColorOrder(parseInt($('#p_color').val()));
+    setColorOrder(parseInt($('#p_color').val()));
 }
 
 function refreshPixel() {
@@ -476,11 +518,11 @@ function showReboot() {
     $('#update').modal('hide');
     $('#reboot').modal({backdrop: 'static', keyboard: false});
     setTimeout(function() {
-		if($('#dhcp').prop('checked')) {
-			window.location.assign("/");
-		} else {
-	        window.location.assign("http://" + $('#ip').val());
-		}
+        if($('#dhcp').prop('checked')) {
+            window.location.assign("/");
+        } else {
+            window.location.assign("http://" + $('#ip').val());
+        }
     }, 5000);    
 }
 
