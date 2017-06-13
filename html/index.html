@@ -44,9 +44,12 @@
             <legend class="esps-legend">Network Status</legend>
             <table class="esps-table">
               <tr><td width="33%">SSID</td><td><span id="x_ssid"></span></td></tr>
+              <tr><td width="33%">HOSTNAME</td><td><span id="x_hostname"></span></td></tr>
               <tr><td width="33%">IP</td><td><span id="x_ip"></span></td></tr>
               <tr><td width="33%">MAC</td><td><span id="x_mac"></span></td></tr>
               <tr><td width="33%">RSSI</td><td><span id="x_rssi"></span>dBm / <span id="x_quality"></span>%</td></tr>
+              <tr><td width="33%">Free heap</td><td><span id="x_freeheap"></span></td></tr>
+              <tr><td width="33%">Up Time</td><td><span id="x_uptime"></span></td></tr>
             </table>
           </fieldset>
         </div>
@@ -58,6 +61,8 @@
               <tr><td width="33%">Total Packets</td><td><span id="pkts"></span></td></tr>
               <tr><td width="33%">Sequence Errors</td><td><span id="serr"></span></td></tr>
               <tr><td width="33%">Packet Errors</td><td><span id="perr"></span></td></tr>
+              <tr><td width="33%">Last Client IP</td><td><span id="clientip"></span></td></tr>
+              <tr><td width="33%">Last Client Port</td><td><span id="clientport"></span></td></tr>
             </table>
           </fieldset>
         </div>
@@ -268,6 +273,18 @@
           <div class="form-group">
             <label class="control-label col-sm-2">FW Version</label>
             <div class="col-sm-10"><p class="form-control-static" id="x_version"></p></div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-2">Used Flash Size</label>
+            <div class="col-sm-10"><p class="form-control-static" id="x_usedflashsize"></p></div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-2">Real Flash Size</label>
+            <div class="col-sm-10"><p class="form-control-static" id="x_realflashsize"></p></div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-2">Flash Chip ID</label>
+            <div class="col-sm-10"><p class="form-control-static" id="x_flashchipid"></p></div>
           </div>
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">

@@ -134,6 +134,8 @@ function feed() {
     if ($('#home').is(':visible')) {
         ws.send('X1');
         ws.send('X2');
+        ws.send('Xh');
+        ws.send('XU');
 
         setTimeout(function() {
             feed();
@@ -182,6 +184,12 @@ function wsConnect() {
                     break;
                 case 'X2':
                     getE131Status(data);
+                    break;
+	        case 'Xh':
+                    getHeap(data);
+                    break;
+                case 'XU':
+                    getUptime(data);
                     break;
                 case 'X6':
                     showReboot();
@@ -371,9 +379,14 @@ function getConfigStatus(data) {
     var status = JSON.parse(data);
     
     $('#x_ssid').text(status.ssid);
+    $('#x_hostname').text(status.hostname);
     $('#x_ip').text(status.ip);
     $('#x_mac').text(status.mac);
     $('#x_version').text(status.version);
+    $('#x_flashchipid').text(status.flashchipid);
+    $('#x_usedflashsize').text(status.usedflashsize);
+    $('#x_realflashsize').text(status.realflashsize);
+    $('#x_freeheap').text(status.freeheap);
 }
 
 function getRSSI(data) {
@@ -389,6 +402,23 @@ function getRSSI(data) {
     $('#x_quality').text(quality);
 }
 
+function getHeap(data) {
+    var heap = +data;
+
+    $('#x_freeheap').text(heap);
+}
+
+function getUptime(data) {
+    var date = new Date(+data);
+    var str = '';
+
+    str += Math.floor(date.getTime()/86400000) + " days, ";
+    str += ("0" + date.getUTCHours()).slice(-2) + ":";
+    str += ("0" + date.getUTCMinutes()).slice(-2) + ":";
+    str += ("0" + date.getUTCSeconds()).slice(-2);
+    $('#x_uptime').text(str);
+}
+
 function getE131Status(data) {
     var status = data.split(':');
    
@@ -397,6 +427,8 @@ function getE131Status(data) {
     $('#pkts').text(status[2]);
     $('#serr').text(status[3]);
     $('#perr').text(status[4]);
+    $('#clientip').text(status[5]);
+    $('#clientport').text(status[6]);
 }
 
 function snackSave() {

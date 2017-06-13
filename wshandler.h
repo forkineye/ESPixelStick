@@ -35,6 +35,7 @@
 
     X1 - Get RSSI
     X2 - Get E131 Status
+    Xh - Get Heap
     X6 - Reboot
 */
 
@@ -49,14 +50,22 @@ void procX(uint8_t *data, AsyncWebSocketClient *client) {
             uint32_t seqErrors = 0;
             for (int i = 0; i < ((uniLast + 1) - config.universe); i++)
                 seqErrors =+ seqError[i];
-
+            
             client->text("X2" + (String)config.universe + ":" +
                     (String)uniLast + ":" +
                     (String)e131.stats.num_packets + ":" +
                     (String)seqErrors + ":" +
-                    (String)e131.stats.packet_errors);
+                    (String)e131.stats.packet_errors + ":" +
+                    e131.stats.last_clientIP.toString() + ":" + 
+                    (String)e131.stats.last_clientPort);
             break;
         }
+        case 'h':
+            client->text("Xh" + (String)ESP.getFreeHeap());
+            break;
+        case 'U':
+            client->text("XU" + (String)millis());
+            break;
         case '6':  // Init 6 baby, reboot!
             reboot = true;
     }
@@ -121,9 +130,14 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             JsonObject &json = jsonBuffer.createObject();
 
             json["ssid"] = (String)WiFi.SSID();
+            json["hostname"] = (String)WiFi.hostname();
             json["ip"] = WiFi.localIP().toString();
             json["mac"] = getMacAddress();
             json["version"] = (String)VERSION;
+            json["flashchipid"] = String(ESP.getFlashChipId(), HEX);
+            json["usedflashsize"] = (String)ESP.getFlashChipSize();
+            json["realflashsize"] = (String)ESP.getFlashChipRealSize();
+            json["freeheap"] = (String)ESP.getFreeHeap();
             json["testing"] = static_cast<uint8_t>(config.testmode);
 
             String response;
@@ -292,3 +306,4 @@ void wsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
 }
 
 #endif /* ESPIXELSTICK_H_ */
+
