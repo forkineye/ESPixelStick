@@ -23,8 +23,8 @@
 /*****************************************/
 
 /* Output Mode - There can be only one! (-Conor MacLeod) */
-#define ESPS_MODE_PIXEL
-//#define ESPS_MODE_SERIAL
+/* NOW MOVED TO ESPixelStick.h */
+
 
 /* Fallback configuration if config.json is empty or fails */
 const char ssid[] = "ENTER_SSID_HERE";
@@ -54,6 +54,27 @@ extern "C" {
 
 uint8_t             *seqTracker;        /* Current sequence numbers for each Universe */
 uint32_t            lastUpdate;         /* Update timeout tracker */
+
+/* Globals */
+E131            e131;
+testing_t       testing;
+config_t        config;
+uint32_t        *seqError;      /* Sequence error tracking for each universe */
+uint16_t        uniLast = 1;    /* Last Universe to listen for */
+bool            reboot = false; /* Reboot flag */
+AsyncWebServer  web(HTTP_PORT); /* Web Server */
+AsyncWebSocket  ws("/ws");      /* Web Socket Plugin */
+
+/* Output Drivers */
+#if defined(ESPS_MODE_PIXEL)
+#include "PixelDriver.h"
+PixelDriver     pixels;         /* Pixel object */
+#elif defined(ESPS_MODE_SERIAL)
+#include "SerialDriver.h"
+SerialDriver    serial;         /* Serial object */
+#else
+#error "No valid output mode defined."
+#endif
 
 /* Forward Declarations */
 void loadConfig();
