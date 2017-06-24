@@ -306,6 +306,7 @@ function getConfig(data) {
     $('#devid').val(config.device.id);
     $('#ssid').val(config.network.ssid);
     $('#password').val(config.network.passphrase);
+    $('#hostname').val(config.network.hostname);
     $('#dhcp').prop('checked', config.network.dhcp);
     $('.dhcp').prop('disabled', config.network.dhcp);
     $('#ap').prop('checked', config.network.ap_fallback);
@@ -455,6 +456,7 @@ function submitWiFi() {
             'network': {
                 'ssid': $('#ssid').val(),
                 'passphrase': $('#password').val(),
+                'hostname': $('#hostname').val(),
                 'ip': [parseInt(ip[0]), parseInt(ip[1]), parseInt(ip[2]), parseInt(ip[3])],
                 'netmask': [parseInt(netmask[0]), parseInt(netmask[1]), parseInt(netmask[2]), parseInt(netmask[3])],
                 'gateway': [parseInt(gateway[0]), parseInt(gateway[1]), parseInt(gateway[2]), parseInt(gateway[3])],
@@ -498,11 +500,11 @@ function refreshPixel() {
     var proto = $('#p_type option:selected').text();    
     var size = parseInt($('#p_count').val());
     var frame = 30;
-    var idle = 80;
+    var idle = 300;
 
     if (!proto.localeCompare('WS2811 800kHz')) {
         frame = 30;
-        idle = 80;
+        idle = 300;
     } else if (!proto.localeCompare('GE Color Effects')) {
         frame = 790;
         idle = 35;

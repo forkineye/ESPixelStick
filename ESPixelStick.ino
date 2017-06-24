@@ -71,12 +71,6 @@ void setup() {
     /* Configure SDK params */
     wifi_set_sleep_type(NONE_SLEEP_T);
 
-    /* Generate and set hostname */
-    char chipId[7] = { 0 };
-    snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
-    String hostname = "esps_" + String(chipId);
-    WiFi.hostname(hostname);
-
     /* Initial pin states */
     pinMode(DATA_PIN, OUTPUT);
     digitalWrite(DATA_PIN, LOW);
@@ -94,8 +88,9 @@ void setup() {
         LOG_PORT.print((char)(pgm_read_byte(VERSION + i)));
     LOG_PORT.println("");
 
-    /* Load configuration from SPIFFS */
+    /* Load configuration from SPIFFS and set Hostname */
     loadConfig();
+    WiFi.hostname(config.hostname);
     config.testmode = TestMode::DISABLED;
 
     /* Fallback to default SSID and passphrase if we fail to connect */
@@ -112,7 +107,7 @@ void setup() {
         if (config.ap_fallback) {
             LOG_PORT.println(F("**** FAILED TO ASSOCIATE WITH AP, GOING SOFTAP ****"));
             WiFi.mode(WIFI_AP);
-            String ssid = "ESPixel " + String(chipId);
+            String ssid = "ESPixelStick " + String(config.hostname);
             WiFi.softAP(ssid.c_str());
         } else {
             LOG_PORT.println(F("**** FAILED TO ASSOCIATE WITH AP, REBOOTING ****"));
@@ -125,8 +120,10 @@ void setup() {
 
     /* Setup mDNS / DNS-SD */
     //TODO: Reboot or restart mdns when config.id is changed?
+    char chipId[7] = { 0 };
+    snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
     MDNS.setInstanceName(config.id + " (" + String(chipId) + ")");
-    if (MDNS.begin(hostname.c_str())) {
+    if (MDNS.begin(config.hostname.c_str())) {
         MDNS.addService("http", "tcp", HTTP_PORT);
         MDNS.addService("e131", "udp", E131_DEFAULT_PORT);
         MDNS.addServiceTxt("e131", "udp", "TxtVers", String(RDMNET_DNSSD_TXTVERS));
@@ -155,10 +152,11 @@ int initWifi() {
     WiFi.disconnect();
     delay(secureRandom(100,500));
 
-
     LOG_PORT.println("");
     LOG_PORT.print(F("Connecting to "));
-    LOG_PORT.println(config.ssid);
+    LOG_PORT.print(config.ssid);
+    LOG_PORT.print(F(" as "));
+    LOG_PORT.println(config.hostname);
 
     WiFi.begin(config.ssid.c_str(), config.passphrase.c_str());
     if (config.dhcp) {
@@ -333,14 +331,12 @@ void updateConfig() {
 /* De-Serialize Network config */
 void dsNetworkConfig(JsonObject &json) {
     /* Fallback to embedded ssid and passphrase if null in config */
-    if (strlen(json["network"]["ssid"]))
-        config.ssid = json["network"]["ssid"].as<String>();
-    else
+    config.ssid = json["network"]["ssid"].as<String>();
+    if (!config.ssid.length())
         config.ssid = ssid;
 
-    if (strlen(json["network"]["passphrase"]))
-        config.passphrase = json["network"]["passphrase"].as<String>();
-    else
+    config.passphrase = json["network"]["passphrase"].as<String>();
+    if (!config.passphrase.length())
         config.passphrase = passphrase;
 
     /* Network */
@@ -351,6 +347,14 @@ void dsNetworkConfig(JsonObject &json) {
     }
     config.dhcp = json["network"]["dhcp"];
     config.ap_fallback = json["network"]["ap_fallback"];
+
+    /* Generate default hostname if needed */
+    config.hostname = json["network"]["hostname"].as<String>();
+    if (!config.hostname.length()) {
+        char chipId[7] = { 0 };
+        snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
+        config.hostname = "esps_" + String(chipId);
+    }
 }
 
 void dsDeviceConfig(JsonObject &json) {
@@ -432,6 +436,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     network["ssid"] = config.ssid.c_str();
     if (creds)
         network["passphrase"] = config.passphrase.c_str();
+    network["hostname"] = config.hostname.c_str();
     JsonArray &ip = network.createNestedArray("ip");
     JsonArray &netmask = network.createNestedArray("netmask");
     JsonArray &gateway = network.createNestedArray("gateway");
@@ -499,7 +504,6 @@ void loop() {
     }
 
     if (config.testmode == TestMode::DISABLED || config.testmode == TestMode::VIEW_STREAM) {
-
         /* Parse a packet and update pixels */
         if (e131.parsePacket()) {
             if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
@@ -530,129 +534,118 @@ void loop() {
                     dataStart=0;
                     buffloc=config.channel_start-1;
                 }
-                
+
                 for (int i = dataStart; i < dataStop; i++) {
-    #if defined(ESPS_MODE_PIXEL)
+#if defined(ESPS_MODE_PIXEL)
                     pixels.setValue(i, e131.data[buffloc]);
-    #elif defined(ESPS_MODE_SERIAL)
+#elif defined(ESPS_MODE_SERIAL)
                     serial.setValue(i, e131.data[buffloc]);
-    #endif
+#endif
                     buffloc++;
                 }
             }
         }
-    }
-    else { //some other testmode
+    } else { //some other testmode
+        //keep feeding server so we don't overrun with packets
+        e131.parsePacket();
     
-      //keep feeding server so we don't overrun with packets
-      e131.parsePacket();
-    
-      switch(config.testmode){
-        case TestMode::STATIC: {
-          
-          //continue to update color to whole string
-          uint16_t i = 0;
-          while (i <= config.channel_count - 3) {
-  #if defined(ESPS_MODE_PIXEL)
-            pixels.setValue(i++, testing.r);
-            pixels.setValue(i++, testing.g);
-            pixels.setValue(i++, testing.b);
-  #elif defined(ESPS_MODE_SERIAL)
-            serial.setValue(i++, testing.r);
-            serial.setValue(i++, testing.g);
-            serial.setValue(i++, testing.b);
-  #endif
-              }
-         break;
-        }
-       
-        case TestMode::CHASE:
-          //run chase routine
-          
-          if(millis() - testing.last > 100){
-            //time for new step
-            testing.last = millis();
-  #if defined(ESPS_MODE_PIXEL)
-            //clear whole string
-            for(int y =0; y < config.channel_count; y++) pixels.setValue(y, 0);
-            //set pixel at step
-            int ch_offset = testing.step*3;
-            pixels.setValue(ch_offset++, testing.r);
-            pixels.setValue(ch_offset++, testing.g);
-            pixels.setValue(ch_offset, testing.b);
-            testing.step++;
-            if(testing.step >= (config.channel_count/3)) testing.step = 0;
-          
-  #elif defined(ESPS_MODE_SERIAL)
-            for(int y =0; y < config.channel_count; y++) serial.setValue(y, 0);
-            //set pixel at step
-            serial.setValue(testing.step++, 0xFF);
-            if(testing.step >= config.channel_count) testing.step = 0;
-  #endif   
-          }
-       
-        break;
-        case TestMode::RAINBOW:
-          //run rainbow routine
-          if(millis() - testing.last > 50){
-            testing.last = millis();
-            uint16_t i, WheelPos, num_pixels;
-           
-            num_pixels = config.channel_count/3;
-            if (testing.step < 255){
-              for(i=0; i< (num_pixels); i++) {
-                int ch_offset = i*3;
-                WheelPos = 255 - (((i * 256 / num_pixels) + testing.step) & 255);
-  #if defined(ESPS_MODE_PIXEL)             
-                if(WheelPos < 85) {
-                  pixels.setValue(ch_offset++, 255 - WheelPos * 3 );
-                  pixels.setValue(ch_offset++, 0 );
-                  pixels.setValue(ch_offset, WheelPos * 3 );
+        switch(config.testmode) {
+            case TestMode::STATIC: {
+                //continue to update color to whole string
+                uint16_t i = 0;
+                while (i <= config.channel_count - 3) {
+#if defined(ESPS_MODE_PIXEL)
+                    pixels.setValue(i++, testing.r);
+                    pixels.setValue(i++, testing.g);
+                    pixels.setValue(i++, testing.b);
+#elif defined(ESPS_MODE_SERIAL)
+                    serial.setValue(i++, testing.r);
+                    serial.setValue(i++, testing.g);
+                    serial.setValue(i++, testing.b);
+#endif
                 }
-                else if(WheelPos < 170) {
-                  WheelPos -= 85;
-                  pixels.setValue(ch_offset++, 0 );
-                  pixels.setValue(ch_offset++, WheelPos * 3 );
-                  pixels.setValue(ch_offset, 255 - WheelPos * 3 );
-                }
-                else {
-                  WheelPos -= 170;
-                  pixels.setValue(ch_offset++, WheelPos * 3 );
-                  pixels.setValue(ch_offset++,255 - WheelPos * 3 );
-                  pixels.setValue(ch_offset, 0 );
-                }
-  #elif defined(ESPS_MODE_SERIAL)
-                if(WheelPos < 85) {
-                  serial.setValue(ch_offset++, 255 - WheelPos * 3 );
-                  serial.setValue(ch_offset++, 0 );
-                  serial.setValue(ch_offset, WheelPos * 3 );
-                }
-                else if(WheelPos < 170) {
-                  WheelPos -= 85;
-                  serial.setValue(ch_offset++, 0 );
-                  serial.setValue(ch_offset++, WheelPos * 3 );
-                  serial.setValue(ch_offset, 255 - WheelPos * 3 );
-                }
-                else {
-                  WheelPos -= 170;
-                  serial.setValue(ch_offset++, WheelPos * 3 );
-                  serial.setValue(ch_offset++,255 - WheelPos * 3 );
-                  serial.setValue(ch_offset, 0 );
-                }           
-  #endif               
-              }
-              
+                break;
             }
-            else testing.step = 0;
-            
-            testing.step++;
-          }
-        break;
-      }
-        
-        
-        
-        
+
+            case TestMode::CHASE:
+                // Run chase routine
+                if (millis() - testing.last > 100) {
+                    // Rime for new step
+                    testing.last = millis();
+#if defined(ESPS_MODE_PIXEL)
+                    // Clear whole string
+                    for (int y =0; y < config.channel_count; y++)
+                        pixels.setValue(y, 0);
+                    // Set pixel at step
+                    int ch_offset = testing.step*3;
+                    pixels.setValue(ch_offset++, testing.r);
+                    pixels.setValue(ch_offset++, testing.g);
+                    pixels.setValue(ch_offset, testing.b);
+                    testing.step++;
+                    if (testing.step >= (config.channel_count/3))
+                        testing.step = 0;
+#elif defined(ESPS_MODE_SERIAL)
+                    for (int y =0; y < config.channel_count; y++)
+                        serial.setValue(y, 0);
+                    // Set pixel at step
+                    serial.setValue(testing.step++, 0xFF);
+                    if (testing.step >= config.channel_count)
+                        testing.step = 0;
+#endif
+                }
+                break;
+
+            case TestMode::RAINBOW:
+                // Run rainbow routine
+                if (millis() - testing.last > 50) {
+                    testing.last = millis();
+                    uint16_t i, WheelPos, num_pixels;
+                    num_pixels = config.channel_count / 3;
+                    if (testing.step < 255) {
+                        for (i=0; i < (num_pixels); i++) {
+                            int ch_offset = i*3;
+                            WheelPos = 255 - (((i * 256 / num_pixels) + testing.step) & 255);
+#if defined(ESPS_MODE_PIXEL)
+                            if (WheelPos < 85) {
+                                pixels.setValue(ch_offset++, 255 - WheelPos * 3);
+                                pixels.setValue(ch_offset++, 0);
+                                pixels.setValue(ch_offset, WheelPos * 3);
+                            } else if (WheelPos < 170) {
+                                WheelPos -= 85;
+                                pixels.setValue(ch_offset++, 0);
+                                pixels.setValue(ch_offset++, WheelPos * 3);
+                                pixels.setValue(ch_offset, 255 - WheelPos * 3);
+                            } else {
+                                WheelPos -= 170;
+                                pixels.setValue(ch_offset++, WheelPos * 3);
+                                pixels.setValue(ch_offset++,255 - WheelPos * 3);
+                                pixels.setValue(ch_offset, 0);
+                            }
+  #elif defined(ESPS_MODE_SERIAL)
+                            if (WheelPos < 85) {
+                                serial.setValue(ch_offset++, 255 - WheelPos * 3);
+                                serial.setValue(ch_offset++, 0);
+                                serial.setValue(ch_offset, WheelPos * 3);
+                            } else if (WheelPos < 170) {
+                                WheelPos -= 85;
+                                serial.setValue(ch_offset++, 0);
+                                serial.setValue(ch_offset++, WheelPos * 3);
+                                serial.setValue(ch_offset, 255 - WheelPos * 3);
+                            } else {
+                                WheelPos -= 170;
+                                serial.setValue(ch_offset++, WheelPos * 3);
+                                serial.setValue(ch_offset++,255 - WheelPos * 3);
+                                serial.setValue(ch_offset, 0);
+                            }
+  #endif
+                        }
+                    } else {
+                        testing.step = 0;
+                    }
+                    testing.step++;
+                }
+                break;
+        }
     }
 
 /* Streaming refresh */

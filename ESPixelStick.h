@@ -27,7 +27,7 @@
 #endif
 
 /* Name and version */
-const char VERSION[] = "2.1-dev (20161214)";
+const char VERSION[] = "3.0-dev (20170623)";
 
 #define HTTP_PORT       80      /* Default web server port */
 #define DATA_PIN        2       /* Pixel output - GPIO2 */

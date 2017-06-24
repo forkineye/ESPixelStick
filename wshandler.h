@@ -181,19 +181,20 @@ enum class TestMode : uint8_t {
 */
 
 void procT(uint8_t *data, AsyncWebSocketClient *client) {
-    
-    switch(data[1]) {
+    switch (data[1]) {
         case '0':
             config.testmode = TestMode::DISABLED;
-            //clear whole string
+            // Clear whole string
 #if defined(ESPS_MODE_PIXEL)
-          for(int y =0; y < config.channel_count; y++) pixels.setValue(y, 0);
+            for (int y =0; y < config.channel_count; y++)
+                pixels.setValue(y, 0);
 #elif defined(ESPS_MODE_SERIAL)
-          for(int y =0; y < config.channel_count; y++) serial.setValue(y, 0);
+            for (int y =0; y < config.channel_count; y++)
+                serial.setValue(y, 0);
 #endif
             break;
 
-        case '1': {//static color
+        case '1': {  // Static color
             config.testmode = TestMode::STATIC;
             testing.step = 0;
             DynamicJsonBuffer jsonBuffer;
@@ -204,7 +205,7 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             testing.b = json["b"];
             break;
         }
-        case '2': {//chase
+        case '2': {  // Chase
             config.testmode = TestMode::CHASE;
             testing.step = 0;
             DynamicJsonBuffer jsonBuffer;
@@ -213,23 +214,22 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             testing.r = json["r"];
             testing.g = json["g"];
             testing.b = json["b"];
-        
-          break;
+            break;
         }
-        case '3': //rainbow
+        case '3':  // Rainbow
             config.testmode = TestMode::RAINBOW;
             testing.step = 0;
-          break;
-        case '4': {//view stream
+            break;
+
+        case '4': {  // View stream
             config.testmode = TestMode::VIEW_STREAM;
 #if defined(ESPS_MODE_PIXEL)
-            client->binary(pixels.getData(),config.channel_count);
+            client->binary(pixels.getData(), config.channel_count);
 #elif defined(ESPS_MODE_SERIAL)
-            if( config.serial_type == SerialType::DMX512)
-                client->binary(&serial.getData()[1],config.channel_count);
-            else 
-                client->binary(&serial.getData()[2],config.channel_count);        
-              
+            if (config.serial_type == SerialType::DMX512)
+                client->binary(&serial.getData()[1], config.channel_count);
+            else
+                client->binary(&serial.getData()[2], config.channel_count);
 #endif
             break;
         }
