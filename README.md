@@ -9,15 +9,15 @@ Since this project began, the firmware has moved beyond just pixel support for t
 Requirements
 ------------
 Along with the Arduino IDE, you'll need the following software to build this project:
-- [Adruino for ESP8266](https://github.com/esp8266/Arduino) - Arduino core for ESP8266 **2.40-rc1 or greater required**
+- [Adruino for ESP8266](https://github.com/esp8266/Arduino) - Arduino core for ESP8266 - **2.40-rc1 or greater required**
 - [Arduino ESP8266 Filesystem Uploader](https://github.com/esp8266/arduino-esp8266fs-plugin) - Arduino plugin for uploading files to SPIFFS
-- [gulp](http://gulpjs.com/) - Build system to process web sources.  Optional, but recommended.  Refer to the html [README](html/README.md) for more information.
+- [gulp](http://gulpjs.com/) - Build system required to process web sources.  Refer to the html [README](html/README.md) for more information.
 
 The following libraries are required:
 - [E131](https://github.com/forkineye/E131) - E1.31 (sACN) Library for Arduino
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson) - Arduino JSON Library
 - [ESPAsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP) - Asynchronous TCP Library
-- [ESPAsyncUDP](https://github.com/me-no-dev/ESPAsyncUDP) - Asynchronous UDP LibraryA
+- [ESPAsyncUDP](https://github.com/me-no-dev/ESPAsyncUDP) - Asynchronous UDP Library
 - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) - Asynchronous Web Server Library
 
 Important Notes on Compiling and Flashing
