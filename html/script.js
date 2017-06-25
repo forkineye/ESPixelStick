@@ -26,13 +26,13 @@ $(function() {
             $('#update').modal({backdrop: 'static', keyboard: false});
         });
 
-        /* Test mode toggles */
+        // Test mode toggles
         $('#tmode').change(function() {
             $('.tdiv').addClass('hidden');
             $('#'+$('select[name=tmode]').val()).removeClass('hidden');
         });
 
-        /* Color Picker */
+        // Color Picker
         $('.color').colorPicker({
             buildCallback: function($elm) {
                 var colorInstance = this.color;
@@ -123,6 +123,21 @@ $(function() {
             $('#s_baud').prop('disabled', false);
     });
     
+    // Hostname Validation
+    $('#hostname').keyup(function() {
+        var re = /^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])$/;
+        if (re.test($(this).val())) {
+            $('#fg_hostname').removeClass('has-error');
+            $('#fg_hostname').addClass('has-success');
+            $('#btn_wifi').prop('disabled', false);
+        } else {
+            $('#fg_hostname').removeClass('has-success');
+            $('#fg_hostname').addClass('has-error');
+            $('#btn_wifi').prop('disabled', true);
+        }
+    });
+
+
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
     ctx.font = "20px Arial";
@@ -546,7 +561,6 @@ function test() {
         ws.send('T4');
     }
 }
-
 
 function showReboot() {
     $('#update').modal('hide');

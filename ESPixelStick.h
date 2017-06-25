@@ -27,7 +27,7 @@
 #endif
 
 /* Name and version */
-const char VERSION[] = "3.0-dev (20170623)";
+const char VERSION[] = "3.0-dev1 (20170624)";
 
 #define HTTP_PORT       80      /* Default web server port */
 #define DATA_PIN        2       /* Pixel output - GPIO2 */
@@ -109,7 +109,7 @@ typedef struct {
 } config_t;
 
 /* Globals */
-E131            e131;
+E131Async       e131(10);       /* E131Async with X buffers */
 testing_t       testing;
 config_t        config;
 uint32_t        *seqError;      /* Sequence error tracking for each universe */

@@ -37,13 +37,14 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
+#include <ESPAsyncUDP.h>
 #include <ESPAsyncWebServer.h>
-#include <WiFiUdp.h>
+//#include <WiFiUdp.h>
 #include <ESP8266mDNS.h>
 #include <ArduinoJson.h>
 #include <Hash.h>
 #include <SPI.h>
-#include <E131.h>
+#include <E131Async.h>
 #include "ESPixelStick.h"
 #include "EFUpdate.h"
 #include "wshandler.h"
@@ -353,7 +354,7 @@ void dsNetworkConfig(JsonObject &json) {
     if (!config.hostname.length()) {
         char chipId[7] = { 0 };
         snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
-        config.hostname = "esps_" + String(chipId);
+        config.hostname = "esps-" + String(chipId);
     }
 }
 
@@ -497,61 +498,62 @@ void saveConfig() {
 
 /* Main Loop */
 void loop() {
-    /* Reboot handler */
+    e131_packet_t packet;
+    // Reboot handler
     if (reboot) {
         delay(REBOOT_DELAY);
         ESP.restart();
     }
 
     if (config.testmode == TestMode::DISABLED || config.testmode == TestMode::VIEW_STREAM) {
-        /* Parse a packet and update pixels */
-        if (e131.parsePacket()) {
-            if ((e131.universe >= config.universe) && (e131.universe <= uniLast)) {
-                /* Universe offset and sequence tracking */
-                uint8_t uniOffset = (e131.universe - config.universe);
-                if (e131.packet->sequence_number != seqTracker[uniOffset]++) {
+        // Parse a packet and update pixels
+        if (!e131.pbuff->isEmpty(e131.pbuff)) {
+            e131.pbuff->pull(e131.pbuff, &packet);
+            uint16_t universe = htons(packet.universe);
+            uint8_t *data = packet.property_values + 1;
+            if ((universe >= config.universe) && (universe <= uniLast)) {
+                // Universe offset and sequence tracking
+                uint8_t uniOffset = (universe - config.universe);
+                if (packet.sequence_number != seqTracker[uniOffset]++) {
                     seqError[uniOffset]++;
-                    seqTracker[uniOffset] = e131.packet->sequence_number + 1;
+                    seqTracker[uniOffset] = packet.sequence_number + 1;
                 }
 
-                /* Offset the channels if required */
+                // Offset the channels if required
                 uint16_t offset = 0;
                 offset = config.channel_start - 1;
 
-                /* Find start of data based off the Universe */
+                // Find start of data based off the Universe
                 int16_t dataStart = uniOffset * UNIVERSE_LIMIT - offset;
 
-                /* Calculate how much data we need for this buffer */
+                // Calculate how much data we need for this buffer
                 uint16_t dataStop = config.channel_count;
                 if ((dataStart + UNIVERSE_LIMIT) < dataStop)
                     dataStop = dataStart + UNIVERSE_LIMIT;
 
-                /* Set the data */
+                // Set the data
                 uint16_t buffloc = 0;
-                
-                /* ignore data from start of first Universe before channel_start */
-                if(dataStart<0) {
-                    dataStart=0;
-                    buffloc=config.channel_start-1;
+
+                // ignore data from start of first Universe before channel_start
+                if (dataStart < 0) {
+                    dataStart = 0;
+                    buffloc = config.channel_start-1;
                 }
 
                 for (int i = dataStart; i < dataStop; i++) {
 #if defined(ESPS_MODE_PIXEL)
-                    pixels.setValue(i, e131.data[buffloc]);
+                    pixels.setValue(i, data[buffloc]);
 #elif defined(ESPS_MODE_SERIAL)
-                    serial.setValue(i, e131.data[buffloc]);
+                    serial.setValue(i, data[buffloc]);
 #endif
                     buffloc++;
                 }
             }
         }
-    } else { //some other testmode
-        //keep feeding server so we don't overrun with packets
-        e131.parsePacket();
-    
-        switch(config.testmode) {
+    } else {  // Other testmodes
+        switch (config.testmode) {
             case TestMode::STATIC: {
-                //continue to update color to whole string
+                // Continue to update color to whole string
                 uint16_t i = 0;
                 while (i <= config.channel_count - 3) {
 #if defined(ESPS_MODE_PIXEL)
@@ -621,7 +623,7 @@ void loop() {
                                 pixels.setValue(ch_offset++,255 - WheelPos * 3);
                                 pixels.setValue(ch_offset, 0);
                             }
-  #elif defined(ESPS_MODE_SERIAL)
+#elif defined(ESPS_MODE_SERIAL)
                             if (WheelPos < 85) {
                                 serial.setValue(ch_offset++, 255 - WheelPos * 3);
                                 serial.setValue(ch_offset++, 0);
@@ -637,7 +639,7 @@ void loop() {
                                 serial.setValue(ch_offset++,255 - WheelPos * 3);
                                 serial.setValue(ch_offset, 0);
                             }
-  #endif
+#endif
                         }
                     } else {
                         testing.step = 0;
@@ -647,6 +649,7 @@ void loop() {
                 break;
         }
     }
+
 
 /* Streaming refresh */
 #if defined(ESPS_MODE_PIXEL)

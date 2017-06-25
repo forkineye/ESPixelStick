@@ -50,7 +50,6 @@ void procX(uint8_t *data, AsyncWebSocketClient *client) {
             uint32_t seqErrors = 0;
             for (int i = 0; i < ((uniLast + 1) - config.universe); i++)
                 seqErrors =+ seqError[i];
-            
             client->text("X2" + (String)config.universe + ":" +
                     (String)uniLast + ":" +
                     (String)e131.stats.num_packets + ":" +
