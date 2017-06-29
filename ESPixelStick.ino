@@ -144,6 +144,8 @@ void setup() {
         mqtt.onDisconnect(onMqttDisconnect);
         mqtt.onMessage(onMqttMessage);
         mqtt.setServer(config.mqtt_ip.c_str(), config.mqtt_port);
+        if (config.mqtt_user.length() > 0)
+            mqtt.setCredentials(config.mqtt_user.c_str(), config.mqtt_password.c_str());
     }
 
     // Fallback to default SSID and passphrase if we fail to connect
