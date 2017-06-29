@@ -2,7 +2,7 @@ ESPixelStick Firmware
 =====================
 [![Join the chat at https://gitter.im/forkineye/ESPixelStick](https://badges.gitter.im/forkineye/ESPixelStick.svg)](https://gitter.im/forkineye/ESPixelStick)
 
-This is the Arduino firmware for the ESP8266 based ESPixelStick.  The ESPixelStick is a small wireless E1.31 sACN pixel controller designed to control a single strand of pixels.  Pixel limitations are mostly based upon your desired refresh rate, around 680 pixels (4 universes) for a 25ms E1.31 source rate.  
+This is the Arduino firmware for the ESP8266 based ESPixelStick.  The ESPixelStick is a small wireless E1.31 sACN pixel controller designed to control a single strand of pixels.  Pixel limitations are mostly based upon your desired refresh rate, around 680 pixels (4 universes) for a 25ms E1.31 source rate.  MQTT support is provided as well for integration into home automation systems where an E1.31 source may not be present.
 
 Since this project began, the firmware has moved beyond just pixel support for those with other ESP8266 based devices.  The ESPixelStick firmware now supports outputting E1.31 streams to serial links as well.  Note this is not supported on the ESPixelStick hardware, but intended for other ESP8266 devices such as Bill's RenardESP.
 
@@ -19,6 +19,7 @@ The following libraries are required:
 - [ESPAsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP) - Asynchronous TCP Library
 - [ESPAsyncUDP](https://github.com/me-no-dev/ESPAsyncUDP) - Asynchronous UDP Library
 - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) - Asynchronous Web Server Library
+- [async-mqtt-client](https://github.com/marvinroger/async-mqtt-client) - Asynchronous MQTT Client
 
 Important Notes on Compiling and Flashing
 -----------------------------------------
@@ -38,6 +39,37 @@ The ESPixelStick firmware can generate the following outputs from incoming E1.31
 #### Serial Protocols
 - DMX512
 - Renard
+
+MQTT Support
+------------
+**NOTE:** Effects are planned, this is just the initial static support.  Brightness is not implemented yet either.
+
+MQTT can be configured via the web interface.  When enabled, a payload of "ON" will tell the ESPixelStick to override any incoming E1.31 data with MQTT data.  When a payload of "OFF" is received, E1.31 processing will resume.  All Topics are under the configured top level Topic.
+
+For example, if you enter ```porch/esps``` as the topic, the following topics will be generated:
+```
+porch/esps/light/status
+porch/esps/light/switch
+porch/esps/brightness/status
+porch/esps/brightness/set
+porch/esps/rgb/status
+porch/esps/rgb/set
+```
+
+And here's a corresponding configuration for [Home Assistant](https://home-assistant.io/):
+```
+light:
+  - platform: mqtt
+    name: "Front Porch ESPixelStick"
+    state_topic: "porch/esps/light/status"
+    command_topic: "porch/esps/light/switch"
+    brightness_state_topic: "porch/esps/brightness/status"
+    brightness_command_topic: "porch/esps/brightness/set"
+    rgb_state_topic: "porch/esps/rgb/status"
+    rgb_command_topic: "porch/esps/rgb/set"
+    brightness_scale: 100
+    optimistic: false
+```
 
 Resources
 ---------

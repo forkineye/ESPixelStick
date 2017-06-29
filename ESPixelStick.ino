@@ -34,13 +34,14 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 /*         END - Configuration           */
 /*****************************************/
 
-#include <Arduino.h>
+//#include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <Ticker.h>
+#include <AsyncMqttClient.h>
+#include <ESP8266mDNS.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncUDP.h>
 #include <ESPAsyncWebServer.h>
-//#include <WiFiUdp.h>
-#include <ESP8266mDNS.h>
 #include <ArduinoJson.h>
 #include <Hash.h>
 #include <SPI.h>
@@ -53,14 +54,53 @@ extern "C" {
 #include <user_interface.h>
 }
 
+// MQTT Sub topics
+// state
+const char MQTT_LIGHT_STATE_TOPIC[] = "/light/status";
+const char MQTT_LIGHT_COMMAND_TOPIC[] = "/light/switch";
+
+// brightness
+const char MQTT_LIGHT_BRIGHTNESS_STATE_TOPIC[] = "/brightness/status";
+const char MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC[] = "/brightness/set";
+
+// colors (rgb)
+const char MQTT_LIGHT_RGB_STATE_TOPIC[] = "/rgb/status";
+const char MQTT_LIGHT_RGB_COMMAND_TOPIC[] = "/rgb/set";
+
+// payloads by default (on/off)
+const char LIGHT_ON[] = "ON";
+const char LIGHT_OFF[] = "OFF";
+
+// variables used to store the state, the brightness and the color of the light
+boolean m_rgb_state = false;
+uint8_t m_rgb_brightness = 100;
+uint8_t m_rgb_red = 255;
+uint8_t m_rgb_green = 255;
+uint8_t m_rgb_blue = 255;
+
+// buffer used to send/receive data with MQTT
+const uint8_t MSG_BUFFER_SIZE = 20;
+char m_msg_buffer[MSG_BUFFER_SIZE]; 
+
+
+
+
+
 uint8_t             *seqTracker;        /* Current sequence numbers for each Universe */
 uint32_t            lastUpdate;         /* Update timeout tracker */
 
 /* Forward Declarations */
 void loadConfig();
-int initWifi();
+void initWifi();
 void initWeb();
 void updateConfig();
+
+WiFiEventHandler wifiConnectHandler;
+WiFiEventHandler wifiDisconnectHandler;
+Ticker wifiTicker;
+
+AsyncMqttClient mqtt;
+Ticker mqttTicker;
 
 RF_PRE_INIT() {
     //wifi_set_phy_mode(PHY_MODE_11G);    // Force 802.11g mode
@@ -69,18 +109,18 @@ RF_PRE_INIT() {
 }
 
 void setup() {
-    /* Configure SDK params */
+    // Configure SDK params
     wifi_set_sleep_type(NONE_SLEEP_T);
 
-    /* Initial pin states */
+    // Initial pin states
     pinMode(DATA_PIN, OUTPUT);
     digitalWrite(DATA_PIN, LOW);
 
-    /* Setup serial log port */
+    // Setup serial log port
     LOG_PORT.begin(115200);
     delay(10);
 
-    /* Enable SPIFFS */
+    // Enable SPIFFS
     SPIFFS.begin();
 
     LOG_PORT.println("");
@@ -89,22 +129,34 @@ void setup() {
         LOG_PORT.print((char)(pgm_read_byte(VERSION + i)));
     LOG_PORT.println("");
 
-    /* Load configuration from SPIFFS and set Hostname */
+    // Load configuration from SPIFFS and set Hostname
     loadConfig();
     WiFi.hostname(config.hostname);
     config.testmode = TestMode::DISABLED;
 
-    /* Fallback to default SSID and passphrase if we fail to connect */
-    int status = initWifi();
-    if (status != WL_CONNECTED) {
+    // Setup WiFi Handlers
+    wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
+    wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWiFiDisconnect);
+
+    // Setup MQTT Handlers
+    if (config.mqtt) {
+        mqtt.onConnect(onMqttConnect);
+        mqtt.onDisconnect(onMqttDisconnect);
+        mqtt.onMessage(onMqttMessage);
+        mqtt.setServer(config.mqtt_ip.c_str(), config.mqtt_port);
+    }
+
+    // Fallback to default SSID and passphrase if we fail to connect
+    initWifi();
+    if (WiFi.status() != WL_CONNECTED) {
         LOG_PORT.println(F("*** Timeout - Reverting to default SSID ***"));
         config.ssid = ssid;
         config.passphrase = passphrase;
-        status = initWifi();
+        initWifi();
     }
 
-    /* If we fail again, go SoftAP or reboot */
-    if (status != WL_CONNECTED) {
+    // If we fail again, go SoftAP or reboot
+    if (WiFi.status() != WL_CONNECTED) {
         if (config.ap_fallback) {
             LOG_PORT.println(F("**** FAILED TO ASSOCIATE WITH AP, GOING SOFTAP ****"));
             WiFi.mode(WIFI_AP);
@@ -116,12 +168,85 @@ void setup() {
         }
     }
 
-    /* Configure and start the web server */
+    // Configure and start the web server
     initWeb();
 
-    /* Setup mDNS / DNS-SD */
+    // Setup E1.31
+    if (config.multicast)
+        e131.begin(E131_MULTICAST, config.universe,
+                uniLast - config.universe + 1);
+    else
+        e131.begin(E131_UNICAST);
+
+    // Configure the outputs
+#if defined (ESPS_MODE_PIXEL)
+    pixels.setPin(DATA_PIN);
+    updateConfig();
+    pixels.show();
+#else
+    updateConfig();
+#endif
+}
+
+/////////////////////////////////////////////////////////
+// 
+//  WiFi Section
+//
+/////////////////////////////////////////////////////////
+
+void initWifi() {
+    // Switch to station mode and disconnect just in case
+    WiFi.mode(WIFI_STA);
+    WiFi.disconnect();
+
+    connectWifi();
+    uint32_t timeout = millis();
+    while (WiFi.status() != WL_CONNECTED) {
+        LOG_PORT.print(".");
+        delay(500);
+        if (millis() - timeout > CONNECT_TIMEOUT) {
+            LOG_PORT.println("");
+            LOG_PORT.println(F("*** Failed to connect ***"));
+            break;
+        }
+    }
+}
+
+void connectWifi() {
+    delay(secureRandom(100,500));
+
+    LOG_PORT.println("");
+    LOG_PORT.print(F("Connecting to "));
+    LOG_PORT.print(config.ssid);
+    LOG_PORT.print(F(" as "));
+    LOG_PORT.println(config.hostname);
+
+    WiFi.begin(config.ssid.c_str(), config.passphrase.c_str());
+    if (config.dhcp) {
+        LOG_PORT.print(F("Connecting with DHCP"));
+    } else {
+        // We don't use DNS, so just set it to our gateway
+        WiFi.config(IPAddress(config.ip[0], config.ip[1], config.ip[2], config.ip[3]),
+                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3]),
+                    IPAddress(config.netmask[0], config.netmask[1], config.netmask[2], config.netmask[3]),
+                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3])
+        );
+        LOG_PORT.print(F("Connecting with Static IP"));
+    }
+}
+
+void onWifiConnect(const WiFiEventStationModeGotIP &event) {
+    LOG_PORT.println("");
+    LOG_PORT.print(F("Connected with IP: "));
+    LOG_PORT.println(WiFi.localIP());
+
+    // Setup MQTT connection if enabled
+    if (config.mqtt)
+        connectToMqtt();
+
+    // Setup mDNS / DNS-SD
     //TODO: Reboot or restart mdns when config.id is changed?
-    char chipId[7] = { 0 };
+     char chipId[7] = { 0 };
     snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
     MDNS.setInstanceName(config.id + " (" + String(chipId) + ")");
     if (MDNS.begin(config.hostname.c_str())) {
@@ -136,67 +261,147 @@ void setup() {
     } else {
         LOG_PORT.println(F("*** Error setting up mDNS responder ***"));
     }
-
-    /* Configure the outputs */
-#if defined (ESPS_MODE_PIXEL)
-    pixels.setPin(DATA_PIN);
-    updateConfig();
-    pixels.show();
-#else
-    updateConfig();
-#endif
 }
 
-int initWifi() {
-    /* Switch to station mode and disconnect just in case */
-    WiFi.mode(WIFI_STA);
-    WiFi.disconnect();
-    delay(secureRandom(100,500));
+void onWiFiDisconnect(const WiFiEventStationModeDisconnected &event) {
+    LOG_PORT.println(F("*** WiFi Disconnected ***"));
 
-    LOG_PORT.println("");
-    LOG_PORT.print(F("Connecting to "));
-    LOG_PORT.print(config.ssid);
-    LOG_PORT.print(F(" as "));
-    LOG_PORT.println(config.hostname);
+    // Pause MQTT reconnect while WiFi is reconnecting
+    mqttTicker.detach();
+    wifiTicker.once(2, connectWifi);
+}
 
-    WiFi.begin(config.ssid.c_str(), config.passphrase.c_str());
-    if (config.dhcp) {
-        LOG_PORT.print(F("Connecting with DHCP"));
-    } else {
-        /* We don't use DNS, so just set it to our gateway */
-        WiFi.config(IPAddress(config.ip[0], config.ip[1], config.ip[2], config.ip[3]),
-                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3]),
-                    IPAddress(config.netmask[0], config.netmask[1], config.netmask[2], config.netmask[3]),
-                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3])
-        );
-        LOG_PORT.print(F("Connecting with Static IP"));
+/////////////////////////////////////////////////////////
+// 
+//  MQTT Section
+//
+/////////////////////////////////////////////////////////
+
+void connectToMqtt() {
+    LOG_PORT.print(F("- Connecting to MQTT Broker "));
+    LOG_PORT.println(config.mqtt_ip);
+    mqtt.connect();
+}
+
+void onMqttConnect(bool sessionPresent) {
+    LOG_PORT.println(F("- MQTT Connected"));
+
+    // Setup subscriptions
+    mqtt.subscribe(String(config.mqtt_topic + MQTT_LIGHT_COMMAND_TOPIC).c_str(), 0);
+    mqtt.subscribe(String(config.mqtt_topic + MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC).c_str(), 0);
+    mqtt.subscribe(String(config.mqtt_topic + MQTT_LIGHT_RGB_COMMAND_TOPIC).c_str(), 0);
+
+    // Publish state
+    publishRGBState();
+    publishRGBBrightness();
+    publishRGBColor();
+}
+
+void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
+    LOG_PORT.println(F("*** MQTT Disconnected ***"));
+    if (WiFi.isConnected()) {
+        mqttTicker.once(2, connectToMqtt);
     }
+}
 
-    uint32_t timeout = millis();
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        LOG_PORT.print(".");
-        if (millis() - timeout > CONNECT_TIMEOUT) {
-            LOG_PORT.println("");
-            LOG_PORT.println(F("*** Failed to connect ***"));
-            break;
+void onMqttMessage(char* topic, char* p_payload,
+        AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
+
+    String payload;
+    for (uint8_t i = 0; i < len; i++)
+        payload.concat((char)p_payload[i]);
+/*
+Serial.print("Topic: ");
+Serial.print(topic);
+Serial.print(" | Payload: ");
+Serial.println(payload);
+*/
+    // handle message topic
+    if (String(config.mqtt_topic + MQTT_LIGHT_COMMAND_TOPIC).equals(topic)) {
+    // test if the payload is equal to "ON" or "OFF"
+        if (payload.equals(String(LIGHT_ON))) {
+            config.testmode = TestMode::MQTT;
+            if (m_rgb_state != true) {
+                m_rgb_state = true;
+                setStatic(m_rgb_red, m_rgb_green, m_rgb_blue);
+                publishRGBState();
+            }
+        } else if (payload.equals(String(LIGHT_OFF))) {
+            config.testmode = TestMode::DISABLED;
+            if (m_rgb_state != false) {
+                m_rgb_state = false;
+                setStatic(0, 0, 0);
+                publishRGBState();
+            }
         }
-    }
-
-    if (WiFi.status() == WL_CONNECTED) {
-        LOG_PORT.println("");
-        LOG_PORT.print(F("Connected with IP: "));
-        LOG_PORT.println(WiFi.localIP());
-
-        if (config.multicast)
-            e131.begin(E131_MULTICAST, config.universe,
-                    uniLast - config.universe + 1);
+    } else if (String(config.mqtt_topic + MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC).equals(topic)) {
+        uint8_t brightness = payload.toInt();
+        if (brightness < 0 || brightness > 100) {
+            return;
+        } else {
+            m_rgb_brightness = brightness;
+            setStatic(m_rgb_red, m_rgb_green, m_rgb_blue);
+            publishRGBBrightness();
+        }
+    } else if (String(config.mqtt_topic + MQTT_LIGHT_RGB_COMMAND_TOPIC).equals(topic)) {
+        // get the position of the first and second commas
+        uint8_t firstIndex = payload.indexOf(',');
+        uint8_t lastIndex = payload.lastIndexOf(',');
+    
+        uint8_t rgb_red = payload.substring(0, firstIndex).toInt();
+        if (rgb_red < 0 || rgb_red > 255)
+            return;
         else
-            e131.begin(E131_UNICAST);
+            m_rgb_red = rgb_red;
+            
+        uint8_t rgb_green = payload.substring(firstIndex + 1, lastIndex).toInt();
+        if (rgb_green < 0 || rgb_green > 255)
+            return;
+        else
+            m_rgb_green = rgb_green;
+    
+        uint8_t rgb_blue = payload.substring(lastIndex + 1).toInt();
+        if (rgb_blue < 0 || rgb_blue > 255)
+            return;
+        else
+            m_rgb_blue = rgb_blue;
+   
+        setStatic(m_rgb_red, m_rgb_green, m_rgb_blue);
+        publishRGBColor();
     }
-
-    return WiFi.status();
 }
+
+// function called to publish the state of the led (on/off)
+void publishRGBState() {
+    if (m_rgb_state) {
+        mqtt.publish(String(config.mqtt_topic + MQTT_LIGHT_STATE_TOPIC).c_str(),
+                0, true, LIGHT_ON);
+    } else {
+        mqtt.publish(String(config.mqtt_topic + MQTT_LIGHT_STATE_TOPIC).c_str(),
+                0, true, LIGHT_OFF);
+    }
+}
+
+// function called to publish the brightness of the led (0-100)
+void publishRGBBrightness() {
+    snprintf(m_msg_buffer, MSG_BUFFER_SIZE, "%d", m_rgb_brightness);
+    mqtt.publish(String(config.mqtt_topic + MQTT_LIGHT_BRIGHTNESS_STATE_TOPIC).c_str(),
+            0, true, m_msg_buffer);
+}
+
+// function called to publish the colors of the led (xx(x),xx(x),xx(x))
+void publishRGBColor() {
+    snprintf(m_msg_buffer, MSG_BUFFER_SIZE, "%d,%d,%d", m_rgb_red, m_rgb_green, m_rgb_blue);
+    mqtt.publish(String(config.mqtt_topic + MQTT_LIGHT_RGB_STATE_TOPIC).c_str(),
+            0, true, m_msg_buffer);
+}
+
+
+/////////////////////////////////////////////////////////
+// 
+//  Web Section
+//
+/////////////////////////////////////////////////////////
 
 /* Configure and start the web server */
 void initWeb() {
@@ -237,9 +442,15 @@ void initWeb() {
     LOG_PORT.println(HTTP_PORT);
 }
 
-/* Configuration Validations */
+/////////////////////////////////////////////////////////
+// 
+//  JSON / Configuration Section
+//
+/////////////////////////////////////////////////////////
+
+// Configuration Validations
 void validateConfig() {
-    /* E1.31 Limits */
+    // E1.31 Limits
     if (config.universe < 1)
         config.universe = 1;
 
@@ -248,11 +459,23 @@ void validateConfig() {
     else if (config.channel_start > UNIVERSE_LIMIT)
         config.channel_start = UNIVERSE_LIMIT;
 
+    // Set default MQTT port if missing
+    if (config.mqtt_port == 0)
+        config.mqtt_port = MQTT_PORT;
+
+    // Generate default MQTT topic if needed
+    if (!config.mqtt_topic.length()) {
+        char chipId[7] = { 0 };
+        snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
+        config.mqtt_topic = "diy/esps/" + String(chipId);
+    }
+
+
 #if defined(ESPS_MODE_PIXEL)
-    /* Set Mode */
+    // Set Mode
     config.devmode = DevMode::MPIXEL;
 
-    /* Generic channel limits for pixels */
+    // Generic channel limits for pixels
     if (config.channel_count % 3)
         config.channel_count = (config.channel_count / 3) * 3;
 
@@ -261,7 +484,7 @@ void validateConfig() {
     else if (config.channel_count < 1)
         config.channel_count = 1;
 
-    /* GECE Limits */
+    // GECE Limits
     if (config.pixel_type == PixelType::GECE) {
         config.pixel_color = PixelColor::RGB;
         if (config.channel_count > 63 * 3)
@@ -269,10 +492,10 @@ void validateConfig() {
     }
 
 #elif defined(ESPS_MODE_SERIAL)
-    /* Set Mode */
+    // Set Mode
     config.devmode = DevMode::MSERIAL;
 
-    /* Generic serial channel limits */
+    // Generic serial channel limits
     if (config.channel_count > RENARD_LIMIT)
         config.channel_count = RENARD_LIMIT;
     else if (config.channel_count < 1)
@@ -281,7 +504,7 @@ void validateConfig() {
     if (config.serial_type == SerialType::DMX512 && config.channel_count > UNIVERSE_LIMIT)
         config.channel_count = UNIVERSE_LIMIT;
 
-    /* Baud rate check */
+    // Baud rate check
     if (config.baudrate > BaudRate::BR_460800)
         config.baudrate = BaudRate::BR_460800;
     else if (config.baudrate < BaudRate::BR_38400)
@@ -329,9 +552,9 @@ void updateConfig() {
     LOG_PORT.println(uniLast);
 }
 
-/* De-Serialize Network config */
+// De-Serialize Network config
 void dsNetworkConfig(JsonObject &json) {
-    /* Fallback to embedded ssid and passphrase if null in config */
+    // Fallback to embedded ssid and passphrase if null in config
     config.ssid = json["network"]["ssid"].as<String>();
     if (!config.ssid.length())
         config.ssid = ssid;
@@ -340,7 +563,7 @@ void dsNetworkConfig(JsonObject &json) {
     if (!config.passphrase.length())
         config.passphrase = passphrase;
 
-    /* Network */
+    // Network
     for (int i = 0; i < 4; i++) {
         config.ip[i] = json["network"]["ip"][i];
         config.netmask[i] = json["network"]["netmask"][i];
@@ -349,7 +572,7 @@ void dsNetworkConfig(JsonObject &json) {
     config.dhcp = json["network"]["dhcp"];
     config.ap_fallback = json["network"]["ap_fallback"];
 
-    /* Generate default hostname if needed */
+    // Generate default hostname if needed
     config.hostname = json["network"]["hostname"].as<String>();
     if (!config.hostname.length()) {
         char chipId[7] = { 0 };
@@ -358,15 +581,24 @@ void dsNetworkConfig(JsonObject &json) {
     }
 }
 
+// De-serialize Device Config
 void dsDeviceConfig(JsonObject &json) {
-    /* Device */
+    // Device
     config.id = json["device"]["id"].as<String>();
 
-    /* E131 */
+    // E131
     config.universe = json["e131"]["universe"];
     config.channel_start = json["e131"]["channel_start"];
     config.channel_count = json["e131"]["channel_count"];
     config.multicast = json["e131"]["multicast"];
+
+    // MQTT
+    config.mqtt = json["mqtt"]["enabled"];
+    config.mqtt_ip = json["mqtt"]["ip"].as<String>();
+    config.mqtt_port = json["mqtt"]["port"];
+    config.mqtt_user = json["mqtt"]["user"].as<String>();
+    config.mqtt_password = json["mqtt"]["password"].as<String>();
+    config.mqtt_topic = json["mqtt"]["topic"].as<String>();
 
 #if defined(ESPS_MODE_PIXEL)
     /* Pixel */
@@ -421,18 +653,18 @@ void loadConfig() {
     validateConfig();
 }
 
-/* Serialize the current config into a JSON string */
+// Serialize the current config into a JSON string
 void serializeConfig(String &jsonString, bool pretty, bool creds) {
-    /* Create buffer and root object */
+    // Create buffer and root object
     DynamicJsonBuffer jsonBuffer;
     JsonObject &json = jsonBuffer.createObject();
 
-    /* Device */
+    // Device
     JsonObject &device = json.createNestedObject("device");
     device["id"] = config.id.c_str();
     device["mode"] = static_cast<uint8_t>(config.devmode);
 
-    /* Network */
+    // Network
     JsonObject &network = json.createNestedObject("network");
     network["ssid"] = config.ssid.c_str();
     if (creds)
@@ -449,7 +681,16 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     network["dhcp"] = config.dhcp;
     network["ap_fallback"] = config.ap_fallback;
 
-    /* E131 */
+    // MQTT
+    JsonObject &_mqtt = json.createNestedObject("mqtt");
+    _mqtt["enabled"] = config.mqtt;
+    _mqtt["ip"] = config.mqtt_ip.c_str();
+    _mqtt["port"] = config.mqtt_port;
+    _mqtt["user"] = config.mqtt_user.c_str();
+    _mqtt["password"] = config.mqtt_password.c_str();
+    _mqtt["topic"] = config.mqtt_topic.c_str();
+
+    // E131
     JsonObject &e131 = json.createNestedObject("e131");
     e131["universe"] = config.universe;
     e131["channel_start"] = config.channel_start;
@@ -457,14 +698,14 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     e131["multicast"] = config.multicast;
 
 #if defined(ESPS_MODE_PIXEL)
-    /* Pixel */
+    // Pixel
     JsonObject &pixel = json.createNestedObject("pixel");
     pixel["type"] = static_cast<uint8_t>(config.pixel_type);
     pixel["color"] = static_cast<uint8_t>(config.pixel_color);
     pixel["gamma"] = config.gamma;
 
 #elif defined(ESPS_MODE_SERIAL)
-    /* Serial */
+    // Serial
     JsonObject &serial = json.createNestedObject("serial");
     serial["type"] = static_cast<uint8_t>(config.serial_type);
     serial["baudrate"] = static_cast<uint32_t>(config.baudrate);
@@ -496,9 +737,37 @@ void saveConfig() {
     }
 }
 
-/* Main Loop */
+
+/////////////////////////////////////////////////////////
+// 
+//  Set routines for Testing and MQTT
+//
+/////////////////////////////////////////////////////////
+
+void setStatic(uint8_t r, uint8_t g, uint8_t b) {
+    uint16_t i = 0;
+    while (i <= config.channel_count - 3) {
+#if defined(ESPS_MODE_PIXEL)
+        pixels.setValue(i++, r);
+        pixels.setValue(i++, g);
+        pixels.setValue(i++, b);
+#elif defined(ESPS_MODE_SERIAL)
+        serial.setValue(i++, r);
+        serial.setValue(i++, g);
+        serial.setValue(i++, b);
+#endif
+    }
+}
+
+
+/////////////////////////////////////////////////////////
+// 
+//  Main Loop
+//
+/////////////////////////////////////////////////////////
 void loop() {
     e131_packet_t packet;
+
     // Reboot handler
     if (reboot) {
         delay(REBOOT_DELAY);
@@ -553,19 +822,7 @@ void loop() {
     } else {  // Other testmodes
         switch (config.testmode) {
             case TestMode::STATIC: {
-                // Continue to update color to whole string
-                uint16_t i = 0;
-                while (i <= config.channel_count - 3) {
-#if defined(ESPS_MODE_PIXEL)
-                    pixels.setValue(i++, testing.r);
-                    pixels.setValue(i++, testing.g);
-                    pixels.setValue(i++, testing.b);
-#elif defined(ESPS_MODE_SERIAL)
-                    serial.setValue(i++, testing.r);
-                    serial.setValue(i++, testing.g);
-                    serial.setValue(i++, testing.b);
-#endif
-                }
+                setStatic(testing.r, testing.g, testing.b);
                 break;
             }
 

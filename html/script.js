@@ -101,9 +101,22 @@ $(function() {
     // DHCP field toggles
     $('#dhcp').click(function() {
         if ($(this).is(':checked')) {
-            $('.dhcp').prop('disabled', true);
+            //$('.dhcp').prop('disabled', true);
+            $('.dhcp').addClass('hidden');
        } else {
-            $('.dhcp').prop('disabled', false);
+            //$('.dhcp').prop('disabled', false);
+            $('.dhcp').removeClass('hidden');
+       }
+    });
+
+    // MQTT field toggles
+    $('#mqtt').click(function() {
+        if ($(this).is(':checked')) {
+            //$('.mqtt').prop('disabled', false);
+            $('.mqtt').removeClass('hidden');
+       } else {
+            //$('.mqtt').prop('disabled', true);
+            $('.mqtt').addClass('hidden');
        }
     });
 
@@ -323,7 +336,12 @@ function getConfig(data) {
     $('#password').val(config.network.passphrase);
     $('#hostname').val(config.network.hostname);
     $('#dhcp').prop('checked', config.network.dhcp);
-    $('.dhcp').prop('disabled', config.network.dhcp);
+    if (config.network.dhcp) {
+        $('.dhcp').addClass('hidden');
+    } else {
+        $('.dhcp').removeClass('hidden');
+    }
+    //$('.dhcp').prop('disabled', config.network.dhcp);
     $('#ap').prop('checked', config.network.ap_fallback);
     $('#ip').val(config.network.ip[0] + '.' +
             config.network.ip[1] + '.' +
@@ -338,6 +356,20 @@ function getConfig(data) {
             config.network.gateway[2] + '.' +
             config.network.gateway[3]);
 
+    // MQTT Config
+    $('#mqtt').prop('checked', config.mqtt.enabled);
+    if (config.mqtt.enabled) {
+        $('.mqtt').removeClass('hidden');
+    } else {
+        $('.mqtt').addClass('hidden');
+    }
+    //$('.mqtt').prop('disabled', !config.mqtt.enabled);
+    $('#mqtt_ip').val(config.mqtt.ip);
+    $('#mqtt_port').val(config.mqtt.port);
+    $('#mqtt_user').val(config.mqtt.user);
+    $('#mqtt_password').val(config.mqtt.password);
+    $('#mqtt_topic').val(config.mqtt.topic);
+    
     // E1.31 Config
     $('#universe').val(config.e131.universe);
     $('#channel_start').val(config.e131.channel_start);
@@ -490,6 +522,14 @@ function submitConfig() {
     var json = {
             'device': {
                 'id': $('#devid').val()
+            },
+            'mqtt': {
+                'enabled': $('#mqtt').prop('checked'),
+                'ip': $('#mqtt_ip').val(),
+                'port': $('#mqtt_port').val(),
+                'user': $('#mqtt_user').val(),
+                'password': $('#mqtt_password').val(),
+                'topic': $('#mqtt_topic').val()
             },
             'e131': {
                 'universe': parseInt($('#universe').val()),
