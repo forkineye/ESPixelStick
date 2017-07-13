@@ -251,7 +251,7 @@ function drawStream(streamData) {
     if($("input[name='viewStyle'][value='RGB']").prop('checked')) {
         maxDisplay=Math.min(streamData.length, (cols*Math.floor((canvas.height-30)/size))*3);
         for (i = 0; i < maxDisplay; i+=3) {
-            ctx.fillStyle='rgb(' + streamData[i+rOffset] + ',' + streamData[i+gOffset] + ',' + streamData[i+bOffset] + ')';
+            ctx.fillStyle='rgb(' + streamData[i+0] + ',' + streamData[i+1] + ',' + streamData[i+2] + ')';
             var col=(i/3)%cols;
             var row=Math.floor((i/3)/cols);
             ctx.fillRect(10+(col*size),10+(row*size),size-1,size-1);
@@ -276,40 +276,6 @@ function drawStream(streamData) {
 
 function clearStream() {
      ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-function setColorOrder(colorOrder) {
-    switch (colorOrder) {
-    case 1: //GRB
-        rOffset = 1;
-        gOffset = 0;
-        bOffset = 2;
-        break;
-    case 2: //BRG
-        rOffset = 1;
-        gOffset = 2;
-        bOffset = 0;
-        break;
-    case 3: //RBG
-        rOffset = 0;
-        gOffset = 2;
-        bOffset = 1;
-        break;
-    case 4: //GBR
-        rOffset = 2;
-        gOffset = 0;
-        bOffset = 1;
-        break;
-    case 5: //BGR
-        rOffset = 2;
-        gOffset = 1;
-        bOffset = 0;
-        break;
-    default: //RGB
-        rOffset = 0;
-        gOffset = 1;
-        bOffset = 2;
-    }
 }
 
 function getElements(data) {
@@ -385,7 +351,6 @@ function getConfig(data) {
         $('#p_color').val(config.pixel.color);
         $('#p_gamma').prop('checked', config.pixel.gamma);
         
-        setColorOrder(config.pixel.color);
         if(config.e131.channel_count / 3 <8 ) {
             $('#v_columns').val(config.e131.channel_count / 3);
         } else if (config.e131.channel_count / 3 <50 ) {
@@ -408,7 +373,6 @@ function getConfig(data) {
         $('#s_proto').val(config.serial.type);
         $('#s_baud').val(config.serial.baudrate);
         
-        setColorOrder(0);
         if (config.e131.channel_count<=64 ) {
             $('#v_columns').val(8);
         } else {
@@ -548,7 +512,6 @@ function submitConfig() {
             }
         };
     ws.send('S2' + JSON.stringify(json));
-    setColorOrder(parseInt($('#p_color').val()));
 }
 
 function refreshPixel() {
