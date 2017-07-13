@@ -136,26 +136,53 @@ $(function() {
             $('#s_baud').prop('disabled', false);
     });
     
-    // Hostname Validation
+    // Hostname, SSID, and Password validation
     $('#hostname').keyup(function() {
-        var re = /^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])$/;
-        if (re.test($(this).val())) {
-            $('#fg_hostname').removeClass('has-error');
-            $('#fg_hostname').addClass('has-success');
-            $('#btn_wifi').prop('disabled', false);
-        } else {
-            $('#fg_hostname').removeClass('has-success');
-            $('#fg_hostname').addClass('has-error');
-            $('#btn_wifi').prop('disabled', true);
-        }
+		wifiValidation();
     });
-
+	$('#ssid').keyup(function() {
+		wifiValidation();
+    });
+	$('#password').keyup(function() {
+		wifiValidation();
+    });
 
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
     ctx.font = "20px Arial";
     ctx.textAlign = "center";
 });
+
+function wifiValidation() {
+	var WifiSaveDisabled = false;
+	var re = /^([a-zA-Z0-9][a-zA-Z0-9][a-zA-Z0-9\-.]*[a-zA-Z0-9.])$/;
+	if (re.test($('#hostname').val()) && $('#hostname').val().length <= 255) {
+		$('#fg_hostname').removeClass('has-error');
+		$('#fg_hostname').addClass('has-success');
+	} else {
+		$('#fg_hostname').removeClass('has-success');
+		$('#fg_hostname').addClass('has-error');
+		WifiSaveDisabled = true
+	}
+	if ($('#ssid').val().length <= 32){
+		$('#fg_ssid').removeClass('has-error');
+		$('#fg_ssid').addClass('has-success');
+	} else {
+		$('#fg_ssid').removeClass('has-success');
+		$('#fg_ssid').addClass('has-error');
+		WifiSaveDisabled = true
+	}
+	if ($('#password').val().length <= 32){
+		$('#fg_password').removeClass('has-error');
+		$('#fg_password').addClass('has-success');
+	} else {
+		$('#fg_password').removeClass('has-success');
+		$('#fg_password').addClass('has-error');
+		WifiSaveDisabled = true
+	}
+
+	$('#btn_wifi').prop('disabled', WifiSaveDisabled);
+}
 
 // Page event feeds
 function feed() {
