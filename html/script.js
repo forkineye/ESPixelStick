@@ -136,7 +136,7 @@ $(function() {
             $('#s_baud').prop('disabled', false);
     });
     
-    // Hostname Validation, SSID and password validation 
+    // Hostname, SSID, and Password validation
     $('#hostname').keyup(function() {
 		wifiValidation();
     });
