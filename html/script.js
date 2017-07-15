@@ -146,6 +146,21 @@ $(function() {
 	$('#password').keyup(function() {
 		wifiValidation();
     });
+	$('#ap').change(function () {
+		wifiValidation();
+	});
+	$('#dhcp').change(function () {
+		wifiValidation();
+	});
+	$('#gateway').keyup(function () {
+		wifiValidation();
+	});
+	$('#ip').keyup(function () {
+		wifiValidation();
+	});
+	$('#netmask').keyup(function () {
+		wifiValidation();
+	});
 
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
@@ -180,7 +195,39 @@ function wifiValidation() {
 		$('#fg_password').addClass('has-error');
 		WifiSaveDisabled = true
 	}
+	if ($('#dhcp').prop('checked')== false) {
+		var iptest = new RegExp('' 
+		+ /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source
+		+ /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source
+		+ /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source
+		+ /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.source
+		);
 
+		if (iptest.test($('#ip').val())) {
+			$('#fg_ip').removeClass('has-error');
+			$('#fg_ip').addClass('has-success');
+		} else {
+			$('#fg_ip').removeClass('has-success');
+			$('#fg_ip').addClass('has-error');
+			WifiSaveDisabled = true
+		}
+		if (iptest.test($('#netmask').val())) {
+			$('#fg_netmask').removeClass('has-error');
+			$('#fg_netmask').addClass('has-success');
+		} else {
+			$('#fg_netmask').removeClass('has-success');
+			$('#fg_netmask').addClass('has-error');
+			WifiSaveDisabled = true
+		}
+		if (iptest.test($('#gateway').val())) {
+			$('#fg_gateway').removeClass('has-error');
+			$('#fg_gateway').addClass('has-success');
+		} else {
+			$('#fg_gateway').removeClass('has-success');
+			$('#fg_gateway').addClass('has-error');
+			WifiSaveDisabled = true
+		}
+	}
 	$('#btn_wifi').prop('disabled', WifiSaveDisabled);
 }
 
