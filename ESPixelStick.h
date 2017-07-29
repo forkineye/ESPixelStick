@@ -27,7 +27,7 @@
 #endif
 
 /* Name and version */
-const char VERSION[] = "3.0-dev2 (20170629)";
+const char VERSION[] = "3.0-rc1 (20170729)";
 
 #define HTTP_PORT       80      /* Default web server port */
 #define MQTT_PORT       1883    /* Default MQTT port */
