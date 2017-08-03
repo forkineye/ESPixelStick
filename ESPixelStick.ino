@@ -174,13 +174,6 @@ void setup() {
     // Configure and start the web server
     initWeb();
 
-    // Setup E1.31
-    if (config.multicast)
-        e131.begin(E131_MULTICAST, config.universe,
-                uniLast - config.universe + 1);
-    else
-        e131.begin(E131_UNICAST);
-
     // Configure the outputs
 #if defined (ESPS_MODE_PIXEL)
     pixels.setPin(DATA_PIN);
@@ -189,6 +182,13 @@ void setup() {
 #else
     updateConfig();
 #endif
+
+    // Setup E1.31
+    if (config.multicast)
+        e131.begin(E131_MULTICAST, config.universe,
+                uniLast - config.universe + 1);
+    else
+        e131.begin(E131_UNICAST);
 }
 
 /////////////////////////////////////////////////////////
