@@ -162,22 +162,21 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
             client->text("S1");
             break;
         case '2':   // Set Device Config
+            // Reboot if MQTT changed
+            bool reboot = false;
+            if (config.mqtt != json["mqtt"]["enabled"])
+                reboot = true;
+
             dsDeviceConfig(json);
             saveConfig();
-            client->text("S2");
+
+            if (reboot)
+                client->text("S1");
+            else
+                client->text("S2");
             break;
     }
 }
-
-/*
-enum class TestMode : uint8_t {
-    DISABLED,
-    STATIC,
-    CHASE,
-    RAINBOW,
-    VIEW_STREAM
-};
-*/
 
 void procT(uint8_t *data, AsyncWebSocketClient *client) {
     switch (data[1]) {

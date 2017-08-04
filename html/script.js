@@ -412,6 +412,7 @@ function getConfig(data) {
     
     // E1.31 Config
     $('#universe').val(config.e131.universe);
+    $('#universe_limit').val(config.e131.universe_limit);
     $('#channel_start').val(config.e131.channel_start);
     $('#multicast').prop('checked', config.e131.multicast);
 
@@ -571,6 +572,7 @@ function submitConfig() {
             },
             'e131': {
                 'universe': parseInt($('#universe').val()),
+                'universe_limit': parseInt($('#universe_limit').val()),
                 'channel_start': parseInt($('#channel_start').val()),
                 'channel_count': channels,
                 'multicast': $('#multicast').prop('checked')

@@ -274,8 +274,24 @@ void onWiFiDisconnect(const WiFiEventStationModeDisconnected &event) {
     wifiTicker.once(2, connectWifi);
 }
 
+// Subscribe to "n" universes, starting at "universe"
+void multiSub() {
+    uint8_t count;
+    ip_addr_t ifaddr;
+    ip_addr_t multicast_addr;
+
+    count = uniLast - config.universe + 1;
+    ifaddr.addr = static_cast<uint32_t>(WiFi.localIP());
+    for (uint8_t i = 0; i < count; i++) {
+        multicast_addr.addr = static_cast<uint32_t>(IPAddress(239, 255,
+                (((config.universe + i) >> 8) & 0xff),
+                (((config.universe + i) >> 0) & 0xff)));
+        igmp_joingroup(&ifaddr, &multicast_addr);
+    }
+}
+
 /////////////////////////////////////////////////////////
-// 
+//
 //  MQTT Section
 //
 /////////////////////////////////////////////////////////
@@ -457,10 +473,13 @@ void validateConfig() {
     if (config.universe < 1)
         config.universe = 1;
 
+    if (config.universe_limit > UNIVERSE_MAX || config.universe_limit < 1)
+        config.universe_limit = UNIVERSE_MAX;
+
     if (config.channel_start < 1)
         config.channel_start = 1;
-    else if (config.channel_start > UNIVERSE_LIMIT)
-        config.channel_start = UNIVERSE_LIMIT;
+    else if (config.channel_start > config.universe_limit)
+        config.channel_start = config.universe_limit;
 
     // Set default MQTT port if missing
     if (config.mqtt_port == 0)
@@ -504,8 +523,8 @@ void validateConfig() {
     else if (config.channel_count < 1)
         config.channel_count = 1;
 
-    if (config.serial_type == SerialType::DMX512 && config.channel_count > UNIVERSE_LIMIT)
-        config.channel_count = UNIVERSE_LIMIT;
+    if (config.serial_type == SerialType::DMX512 && config.channel_count > UNIVERSE_MAX)
+        config.channel_count = UNIVERSE_MAX;
 
     // Baud rate check
     if (config.baudrate > BaudRate::BR_460800)
@@ -521,10 +540,10 @@ void updateConfig() {
 
     /* Find the last universe we should listen for */
     uint16_t span = config.channel_start + config.channel_count - 1;
-    if (span % UNIVERSE_LIMIT)
-        uniLast = config.universe + span / UNIVERSE_LIMIT;
+    if (span % config.universe_limit)
+        uniLast = config.universe + span / config.universe_limit;
     else
-        uniLast = config.universe + span / UNIVERSE_LIMIT - 1;
+        uniLast = config.universe + span / config.universe_limit - 1;
 
     /* Setup the sequence error tracker */
     uint8_t uniTotal = (uniLast + 1) - config.universe;
@@ -553,6 +572,10 @@ void updateConfig() {
     LOG_PORT.print(config.universe);
     LOG_PORT.print(F(" to "));
     LOG_PORT.println(uniLast);
+
+    // Setup IGMP subscriptions if multicast is enabled
+    if (config.multicast)
+        multiSub();
 }
 
 // De-Serialize Network config
@@ -591,6 +614,7 @@ void dsDeviceConfig(JsonObject &json) {
 
     // E131
     config.universe = json["e131"]["universe"];
+    config.universe_limit = json["e131"]["universe_limit"];
     config.channel_start = json["e131"]["channel_start"];
     config.channel_count = json["e131"]["channel_count"];
     config.multicast = json["e131"]["multicast"];
@@ -696,6 +720,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     // E131
     JsonObject &e131 = json.createNestedObject("e131");
     e131["universe"] = config.universe;
+    e131["universe_limit"] = config.universe_limit;
     e131["channel_start"] = config.channel_start;
     e131["channel_count"] = config.channel_count;
     e131["multicast"] = config.multicast;
@@ -796,12 +821,12 @@ void loop() {
                 offset = config.channel_start - 1;
 
                 // Find start of data based off the Universe
-                int16_t dataStart = uniOffset * UNIVERSE_LIMIT - offset;
+                int16_t dataStart = uniOffset * config.universe_limit - offset;
 
                 // Calculate how much data we need for this buffer
                 uint16_t dataStop = config.channel_count;
-                if ((dataStart + UNIVERSE_LIMIT) < dataStop)
-                    dataStop = dataStart + UNIVERSE_LIMIT;
+                if ((dataStart + config.universe_limit) < dataStop)
+                    dataStop = dataStart + config.universe_limit;
 
                 // Set the data
                 uint16_t buffloc = 0;

@@ -27,13 +27,13 @@
 #endif
 
 /* Name and version */
-const char VERSION[] = "3.0-rc1 (20170729)";
+const char VERSION[] = "3.0-rc2 (20170804)";
 
 #define HTTP_PORT       80      /* Default web server port */
 #define MQTT_PORT       1883    /* Default MQTT port */
 #define DATA_PIN        2       /* Pixel output - GPIO2 */
 #define EEPROM_BASE     0       /* EEPROM configuration base address */
-#define UNIVERSE_LIMIT  512     /* Universe boundary - 512 Channels */
+#define UNIVERSE_MAX    512     /* Max channels in a DMX Universe */
 #define PIXEL_LIMIT     1360    /* Total pixel limit - 40.85ms for 8 universes */
 #define RENARD_LIMIT    2048    /* Channel limit for serial outputs */
 #define E131_TIMEOUT    1000    /* Force refresh every second an E1.31 packet is not seen */
@@ -101,6 +101,7 @@ typedef struct {
 
     /* E131 */
     uint16_t    universe;       /* Universe to listen for */
+    uint16_t    universe_limit; /* Universe boundary limit */
     uint16_t    channel_start;  /* Channel to start listening at - 1 based */
     uint16_t    channel_count;  /* Number of channels */
     bool        multicast;      /* Enable multicast listener */
