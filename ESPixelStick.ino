@@ -83,6 +83,7 @@ const uint8_t MSG_BUFFER_SIZE = 20;
 char m_msg_buffer[MSG_BUFFER_SIZE]; 
 
 
+// PWM globals
 
 
 
@@ -119,6 +120,8 @@ void setup() {
     // Setup serial log port
     LOG_PORT.begin(115200);
     delay(10);
+
+    setupPWM ();
 
     // Enable SPIFFS
     SPIFFS.begin();
@@ -944,4 +947,26 @@ void loop() {
     if (serial.canRefresh())
         serial.show();
 #endif
+
+
+/* update the PWM outputs */
+  handlePWM();
 }
+
+void setupPWM () {
+  pinMode(4, OUTPUT);
+  analogWrite(4, 0);
+}
+
+int last_pwm[17];
+
+void handlePWM() {
+  int gpio = 4;
+  int gpio_dmx = 0;
+  int pwm_val = pixels.getData()[gpio_dmx];
+  if ( pwm_val != last_pwm[gpio]) {
+    analogWrite(gpio, 4*pwm_val); // 0..255, 0..1023
+    last_pwm[gpio] = pwm_val;
+  }
+}
+
