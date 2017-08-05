@@ -17,7 +17,6 @@
 *
 */
 
-
 /*****************************************/
 /*        BEGIN - Configuration          */
 /*****************************************/
@@ -34,7 +33,6 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 /*         END - Configuration           */
 /*****************************************/
 
-//#include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <Ticker.h>
 #include <AsyncMqttClient.h>
@@ -53,6 +51,16 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 extern "C" {
 #include <user_interface.h>
 }
+
+#if defined(DEBUG)
+extern "C" void system_set_os_print(uint8 onoff);
+extern "C" void ets_install_putc1(void* routine);
+
+static void _u0_putc(char c){
+  while(((U0S >> USTXC) & 0x7F) == 0x7F);
+  U0F = c;
+}
+#endif
 
 // MQTT Sub topics
 // state
@@ -81,10 +89,6 @@ uint8_t m_rgb_blue = 255;
 // buffer used to send/receive data with MQTT
 const uint8_t MSG_BUFFER_SIZE = 20;
 char m_msg_buffer[MSG_BUFFER_SIZE]; 
-
-
-
-
 
 uint8_t             *seqTracker;        /* Current sequence numbers for each Universe */
 uint32_t            lastUpdate;         /* Update timeout tracker */
@@ -119,6 +123,11 @@ void setup() {
     // Setup serial log port
     LOG_PORT.begin(115200);
     delay(10);
+
+#if defined(DEBUG)
+    ets_install_putc1((void *) &_u0_putc);
+    system_set_os_print(1);
+#endif
 
     // Enable SPIFFS
     SPIFFS.begin();
