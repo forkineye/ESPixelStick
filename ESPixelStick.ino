@@ -26,6 +26,8 @@
 #define ESPS_MODE_PIXEL
 //#define ESPS_MODE_SERIAL
 
+#define ESPS_ENABLE_PWM
+
 /* Fallback configuration if config.json is empty or fails */
 const char ssid[] = "ENTER_SSID_HERE";
 const char passphrase[] = "ENTER_PASSPHRASE_HERE";
@@ -121,8 +123,6 @@ void setup() {
     LOG_PORT.begin(115200);
     delay(10);
 
-    setupPWM ();
-
     // Enable SPIFFS
     SPIFFS.begin();
 
@@ -178,6 +178,10 @@ void setup() {
     initWeb();
 
     // Configure the outputs
+#if defined (ESPS_ENABLE_PWM)
+    setupPWM();
+#endif
+
 #if defined (ESPS_MODE_PIXEL)
     pixels.setPin(DATA_PIN);
     updateConfig();
@@ -535,6 +539,11 @@ void validateConfig() {
     else if (config.baudrate < BaudRate::BR_38400)
         config.baudrate = BaudRate::BR_57600;
 #endif
+
+#if defined(ESPS_ENABLE_PWM)
+    // Set Mode
+    config.pwm_enabled = 1;
+#endif
 }
 
 void updateConfig() {
@@ -635,6 +644,8 @@ void dsDeviceConfig(JsonObject &json) {
     config.pixel_type = PixelType(static_cast<uint8_t>(json["pixel"]["type"]));
     config.pixel_color = PixelColor(static_cast<uint8_t>(json["pixel"]["color"]));
     config.gamma = json["pixel"]["gamma"];
+
+#elif defined(ESPS_ENABLE_PWM)
 
 #elif defined(ESPS_MODE_SERIAL)
     /* Serial */
@@ -740,6 +751,10 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     JsonObject &serial = json.createNestedObject("serial");
     serial["type"] = static_cast<uint8_t>(config.serial_type);
     serial["baudrate"] = static_cast<uint32_t>(config.baudrate);
+#endif
+#if defined(ESPS_ENABLE_PWM)
+    JsonObject &pwm = json.createNestedObject("pwm");
+    pwm["gpio4"] = static_cast<uint8_t>(config.pwm_gpio4);
 #endif
 
     if (pretty)
@@ -950,10 +965,14 @@ void loop() {
 
 
 /* update the PWM outputs */
+#if defined(ESPS_ENABLE_PWM)
   handlePWM();
+#endif
 }
 
 void setupPWM () {
+  config.pwm_enabled = 1;
+  config.pwm_gpio4 = 0;
   pinMode(4, OUTPUT);
   analogWrite(4, 0);
 }
