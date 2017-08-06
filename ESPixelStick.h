@@ -117,13 +117,11 @@ typedef struct {
     SerialType  serial_type;    /* Serial type */
     BaudRate    baudrate;       /* Baudrate */
 #endif
-#if defined(ESPS_ENABLE_PWM)
+#if defined(ESPS_SUPPORT_PWM)
     bool        pwm_enabled;     /* is pwm runtime enabled? */
-    int         pwm_gpio0;       /* which dmx channel is gpio0 mapped to? */
-    int         pwm_gpio1;       /* which dmx channel is gpio mapped to? */
-    int         pwm_gpio2;       /* which dmx channel is gpio mapped to? */
-    int         pwm_gpio3;       /* which dmx channel is gpio mapped to? */
-    int         pwm_gpio4;       /* which dmx channel is gpio mapped to? */
+    bool        pwm_gamma;     /* is pwm runtime enabled? */
+    int         pwm_gpio[17];       /* which dmx channel is gpio[n] mapped to? */
+    bool        pwm_gpio_enabled[17];       /* which dmx channel is gpio[n] mapped to? */
 #endif
 } config_t;
 

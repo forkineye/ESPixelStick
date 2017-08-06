@@ -26,7 +26,7 @@
 #define ESPS_MODE_PIXEL
 //#define ESPS_MODE_SERIAL
 
-#define ESPS_ENABLE_PWM
+#define ESPS_SUPPORT_PWM
 
 /* Fallback configuration if config.json is empty or fails */
 const char ssid[] = "ENTER_SSID_HERE";
@@ -86,6 +86,7 @@ char m_msg_buffer[MSG_BUFFER_SIZE];
 
 
 // PWM globals
+int valid_gpio[11] = { 0,1,2,3,4,5,12,13,14,15,16 };
 
 
 
@@ -97,6 +98,8 @@ void loadConfig();
 void initWifi();
 void initWeb();
 void updateConfig();
+void setupPWM();
+void handlePWM();
 
 WiFiEventHandler wifiConnectHandler;
 WiFiEventHandler wifiDisconnectHandler;
@@ -178,7 +181,7 @@ void setup() {
     initWeb();
 
     // Configure the outputs
-#if defined (ESPS_ENABLE_PWM)
+#if defined (ESPS_SUPPORT_PWM)
     setupPWM();
 #endif
 
@@ -446,7 +449,7 @@ void initWeb() {
     /* JSON Config Handler */
     web.on("/conf", HTTP_GET, [](AsyncWebServerRequest *request) {
         String jsonString;
-        serializeConfig(jsonString);
+        serializeConfig(jsonString, true);
         request->send(200, "text/json", jsonString);
     });
 
@@ -457,6 +460,7 @@ void initWeb() {
 
     /* Static Handler */
     web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
+    web.serveStatic("/config.json", SPIFFS, "/config.json");
 
     web.onNotFound([](AsyncWebServerRequest *request) {
         request->send(404, "text/plain", "Page not found");
@@ -540,7 +544,7 @@ void validateConfig() {
         config.baudrate = BaudRate::BR_57600;
 #endif
 
-#if defined(ESPS_ENABLE_PWM)
+#if defined(ESPS_SUPPORT_PWM)
     // Set Mode
     config.pwm_enabled = 1;
 #endif
@@ -645,13 +649,22 @@ void dsDeviceConfig(JsonObject &json) {
     config.pixel_color = PixelColor(static_cast<uint8_t>(json["pixel"]["color"]));
     config.gamma = json["pixel"]["gamma"];
 
-#elif defined(ESPS_ENABLE_PWM)
-
 #elif defined(ESPS_MODE_SERIAL)
     /* Serial */
     config.serial_type = SerialType(static_cast<uint8_t>(json["serial"]["type"]));
     config.baudrate = BaudRate(static_cast<uint32_t>(json["serial"]["baudrate"]));
 #endif
+
+#if defined(ESPS_SUPPORT_PWM)
+    config.pwm_enabled = json["pwm"]["enabled"];
+    config.pwm_gamma = json["pwm"]["gamma"];
+    for (int i=0; i < 11; i++ ) {
+      int j = valid_gpio[i];
+      config.pwm_gpio[j] = json["pwm"]["gpio" + (String)j + "_channel"];
+      config.pwm_gpio_enabled[j] = json["pwm"]["gpio" + (String)j + "_enabled"];
+    }
+#endif
+
 }
 
 /* Load configugration JSON file */
@@ -752,9 +765,17 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     serial["type"] = static_cast<uint8_t>(config.serial_type);
     serial["baudrate"] = static_cast<uint32_t>(config.baudrate);
 #endif
-#if defined(ESPS_ENABLE_PWM)
+
+#if defined(ESPS_SUPPORT_PWM)
     JsonObject &pwm = json.createNestedObject("pwm");
-    pwm["gpio4"] = static_cast<uint8_t>(config.pwm_gpio4);
+    pwm["enabled"] = config.pwm_enabled;
+    pwm["gamma"] = config.pwm_gamma;
+    
+    for (int i=0; i < 11; i++ ) {
+      int j = valid_gpio[i];
+      pwm["gpio" + (String)j + "_channel"] = static_cast<uint16_t>(config.pwm_gpio[j]);
+      pwm["gpio" + (String)j + "_enabled"] = static_cast<bool>(config.pwm_gpio_enabled[j]);
+    }
 #endif
 
     if (pretty)
@@ -965,27 +986,36 @@ void loop() {
 
 
 /* update the PWM outputs */
-#if defined(ESPS_ENABLE_PWM)
+#if defined(ESPS_SUPPORT_PWM)
   handlePWM();
 #endif
 }
 
 void setupPWM () {
   config.pwm_enabled = 1;
-  config.pwm_gpio4 = 0;
+  config.pwm_gpio[4] = 1; // dmx channel
+  config.pwm_gpio_enabled[4] = true;
   pinMode(4, OUTPUT);
   analogWrite(4, 0);
 }
 
 int last_pwm[17];
+extern const uint8_t GAMMA_2811[];
 
 void handlePWM() {
-  int gpio = 4;
-  int gpio_dmx = 0;
-  int pwm_val = pixels.getData()[gpio_dmx];
-  if ( pwm_val != last_pwm[gpio]) {
-    analogWrite(gpio, 4*pwm_val); // 0..255, 0..1023
-    last_pwm[gpio] = pwm_val;
+  bool gpio_gamma = true;
+
+  for (int i=0; i < 11; i++ ) {
+    int gpio = valid_gpio[i];
+    if (config.pwm_gpio_enabled[gpio]) {
+      int gpio_dmx = config.pwm_gpio[gpio];
+      int pwm_val = (gpio_gamma) ? GAMMA_2811[pixels.getData()[gpio_dmx]] : pixels.getData()[gpio_dmx];
+        
+      if ( pwm_val != last_pwm[gpio]) {
+        analogWrite(gpio, 4*pwm_val); // 0..255, 0..1023
+        last_pwm[gpio] = pwm_val;
+      }
+    }
   }
 }
 
