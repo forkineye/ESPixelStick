@@ -225,6 +225,46 @@
             <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_topic" name="mqtt_topic" placeholder="Enter Top Level MQTT Topic"></div>
           </div>
 
+          <!-- PWM Configuration -->
+          <legend class="esps-legend">PWM Configuration</legend>
+          <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+              <div class="checkbox"><label><input type="checkbox" id="pwm" name="pwm"> Enable PWM</label></div>
+            </div>
+          </div>          
+          <div class="form-group pwm">
+          <table> 
+          <tr>
+          <th>Enabled
+          <th>GPIO
+          <th>DMX Channel
+          <tr>
+          <td><div class="checkbox"><label><input type="checkbox" id="gpio0_enabled" name="gpio0_enabled"></label></div>
+          <td><label class="control-label col-sm-2" for="gpio0_channel">0</label>
+          <td><div class="col-sm-10"><input type="text" class="form-control" id="gpio0_channel" name="gpio0_channel" placeholder="DMX Channel"></div>
+          <tr>
+          <td><div class="checkbox"><label><input type="checkbox" id="gpio1_enabled" name="gpio1_enabled"></label></div>
+          <td><label class="control-label col-sm-2" for="gpio1_channel">1</label>
+          <td><div class="col-sm-10"><input type="text" class="form-control" id="gpio1_channel" name="gpio1_channel" placeholder="DMX Channel"></div>
+          <tr>
+          <td><div class="checkbox"><label><input type="checkbox" id="gpio2_enabled" name="gpio2_enabled"></label></div>
+          <td><label class="control-label col-sm-2" for="gpio2_channel">2</label>
+          <td><div class="col-sm-10"><input type="text" class="form-control" id="gpio2_channel" name="gpio2_channel" placeholder="DMX Channel"></div>
+          <tr>
+          <td><div class="checkbox"><label><input type="checkbox" id="gpio3_enabled" name="gpio3_enabled"></label></div>
+          <td><label class="control-label col-sm-2" for="gpio3_channel">3</label>
+          <td><div class="col-sm-10"><input type="text" class="form-control" id="gpio3_channel" name="gpio3_channel" placeholder="DMX Channel"></div>
+          <tr>
+          <td><div class="checkbox"><label><input type="checkbox" id="gpio4_enabled" name="gpio4_enabled"></label></div>
+          <td><label class="control-label col-sm-2" for="gpio4_channel">4</label>
+          <td><div class="col-sm-10"><input type="text" class="form-control" id="gpio4_channel" name="gpio4_channel" placeholder="DMX Channel"></div>
+          <tr>
+          <td><div class="checkbox"><label><input type="checkbox" id="gpio5_enabled" name="gpio5_enabled"></label></div>
+          <td><label class="control-label col-sm-2" for="gpio5_channel">5</label>
+          <td><div class="col-sm-10"><input type="text" class="form-control" id="gpio5_channel" name="gpio5_channel" placeholder="DMX Channel"></div>
+          </table>
+          </div>
+
           <!-- Device Config Save -->
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">

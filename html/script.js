@@ -120,6 +120,17 @@ $(function() {
        }
     });
 
+    // PWM field toggles
+    $('#pwm').click(function() {
+        if ($(this).is(':checked')) {
+            //$('.mqtt').prop('disabled', false);
+            $('.pwm').removeClass('hidden');
+       } else {
+            //$('.mqtt').prop('disabled', true);
+            $('.pwm').addClass('hidden');
+       }
+    });
+
     // Pixel type toggles
     $('#p_type').change(function() {
         if ($('select[name_type]').val() == '1')
@@ -409,7 +420,29 @@ function getConfig(data) {
     $('#mqtt_user').val(config.mqtt.user);
     $('#mqtt_password').val(config.mqtt.password);
     $('#mqtt_topic').val(config.mqtt.topic);
-    
+
+    // PWM Config
+    $('#pwm').prop('checked', config.pwm.enabled);
+    if (config.pwm.enabled) {
+        $('.pwm').removeClass('hidden');
+    } else {
+        $('.pwm').addClass('hidden');
+    }
+
+    $('#gpio0_enabled').prop('checked', config.pwm.gpio0_enabled);
+    $('#gpio1_enabled').prop('checked', config.pwm.gpio1_enabled);
+    $('#gpio2_enabled').prop('checked', config.pwm.gpio2_enabled);
+    $('#gpio3_enabled').prop('checked', config.pwm.gpio3_enabled);
+    $('#gpio4_enabled').prop('checked', config.pwm.gpio4_enabled);
+    $('#gpio5_enabled').prop('checked', config.pwm.gpio5_enabled);
+
+    $('#gpio0_channel').val(config.pwm.gpio0_channel);
+    $('#gpio1_channel').val(config.pwm.gpio1_channel);
+    $('#gpio2_channel').val(config.pwm.gpio2_channel);
+    $('#gpio3_channel').val(config.pwm.gpio3_channel);
+    $('#gpio4_channel').val(config.pwm.gpio4_channel);
+    $('#gpio5_channel').val(config.pwm.gpio5_channel);
+
     // E1.31 Config
     $('#universe').val(config.e131.universe);
     $('#universe_limit').val(config.e131.universe_limit);
@@ -585,6 +618,32 @@ function submitConfig() {
             'serial': {
                 'type': parseInt($('#s_proto').val()),
                 'baudrate': parseInt($('#s_baud').val())
+            },
+            "pwm": {
+               "enabled": true,
+               "gamma": false,
+               "gpio0_channel": parseInt($('#gpio0_channel').val()),
+               "gpio0_enabled": false,
+               "gpio1_channel": parseInt($('#gpio1_channel').val()),
+               "gpio1_enabled": false,
+               "gpio2_channel": parseInt($('#gpio2_channel').val()),
+               "gpio2_enabled": false,
+               "gpio3_channel": parseInt($('#gpio3_channel').val()),
+               "gpio3_enabled": $('#gpio3_enabled').prop('checked'),
+               "gpio4_channel": parseInt($('#gpio4_channel').val()),
+               "gpio4_enabled": $('#gpio4_enabled').prop('checked'),
+               "gpio5_channel": parseInt($('#gpio5_channel').val()),
+               "gpio5_enabled": $('#gpio5_enabled').prop('checked'),
+               "gpio12_channel": 0,
+               "gpio12_enabled": false,
+               "gpio13_channel": 0,
+               "gpio13_enabled": false,
+               "gpio14_channel": 0,
+               "gpio14_enabled": false,
+               "gpio15_channel": 0,
+               "gpio15_enabled": false,
+               "gpio16_channel": 0,
+               "gpio16_enabled": false
             }
         };
     ws.send('S2' + JSON.stringify(json));
