@@ -435,6 +435,9 @@ function getConfig(data) {
     $('#gpio3_enabled').prop('checked', config.pwm.gpio3_enabled);
     $('#gpio4_enabled').prop('checked', config.pwm.gpio4_enabled);
     $('#gpio5_enabled').prop('checked', config.pwm.gpio5_enabled);
+    $('#gpio12_enabled').prop('checked', config.pwm.gpio12_enabled);
+    $('#gpio13_enabled').prop('checked', config.pwm.gpio13_enabled);
+    $('#gpio14_enabled').prop('checked', config.pwm.gpio14_enabled);
 
     $('#gpio0_channel').val(config.pwm.gpio0_channel);
     $('#gpio1_channel').val(config.pwm.gpio1_channel);
@@ -442,6 +445,9 @@ function getConfig(data) {
     $('#gpio3_channel').val(config.pwm.gpio3_channel);
     $('#gpio4_channel').val(config.pwm.gpio4_channel);
     $('#gpio5_channel').val(config.pwm.gpio5_channel);
+    $('#gpio12_channel').val(config.pwm.gpio12_channel);
+    $('#gpio13_channel').val(config.pwm.gpio13_channel);
+    $('#gpio14_channel').val(config.pwm.gpio14_channel);
 
     // E1.31 Config
     $('#universe').val(config.e131.universe);
@@ -625,7 +631,7 @@ function submitConfig() {
                "gpio0_channel": parseInt($('#gpio0_channel').val()),
                "gpio0_enabled": false,
                "gpio1_channel": parseInt($('#gpio1_channel').val()),
-               "gpio1_enabled": false,
+               "gpio1_enabled": $('#gpio1_enabled').prop('checked'),
                "gpio2_channel": parseInt($('#gpio2_channel').val()),
                "gpio2_enabled": false,
                "gpio3_channel": parseInt($('#gpio3_channel').val()),
@@ -634,12 +640,12 @@ function submitConfig() {
                "gpio4_enabled": $('#gpio4_enabled').prop('checked'),
                "gpio5_channel": parseInt($('#gpio5_channel').val()),
                "gpio5_enabled": $('#gpio5_enabled').prop('checked'),
-               "gpio12_channel": 0,
-               "gpio12_enabled": false,
-               "gpio13_channel": 0,
-               "gpio13_enabled": false,
-               "gpio14_channel": 0,
-               "gpio14_enabled": false,
+               "gpio12_channel": parseInt($('#gpio12_channel').val()),
+               "gpio12_enabled": $('#gpio12_enabled').prop('checked'),
+               "gpio13_channel": parseInt($('#gpio13_channel').val()),
+               "gpio13_enabled": $('#gpio13_enabled').prop('checked'),
+               "gpio14_channel": parseInt($('#gpio14_channel').val()),
+               "gpio14_enabled": $('#gpio14_enabled').prop('checked'),
                "gpio15_channel": 0,
                "gpio15_enabled": false,
                "gpio16_channel": 0,

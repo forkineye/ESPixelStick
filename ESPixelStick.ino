@@ -991,7 +991,7 @@ void loop() {
 #endif
 }
 
-void setupPWM () {
+void old_setupPWM () {
   config.pwm_enabled = 1;
   config.pwm_gpio[4] = 1; // dmx channel
   config.pwm_gpio_enabled[4] = true;
@@ -999,6 +999,18 @@ void setupPWM () {
   analogWrite(4, 0);
 }
 
+void setupPWM () {
+  if ( config.pwm_enabled == 1) {
+    for (int i=0; i < 11; i++ ) {
+      int gpio = valid_gpio[i];
+      if (config.pwm_gpio_enabled[gpio]) {
+        pinMode(gpio, OUTPUT);
+        analogWrite(gpio, 0);
+      }
+    }
+  }
+}
+  
 int last_pwm[17];
 extern const uint8_t GAMMA_2811[];
 
