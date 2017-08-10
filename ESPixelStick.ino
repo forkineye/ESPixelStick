@@ -837,8 +837,11 @@ void loop() {
 
                 // Calculate how much data we need for this buffer
                 uint16_t dataStop = config.channel_count;
-                if ((dataStart + config.universe_limit) < dataStop)
-                    dataStop = dataStart + config.universe_limit;
+                uint16_t channels = htons(packet.property_value_count) - 1;
+                if (config.universe_limit < channels)
+                    channels = config.universe_limit;
+                if ((dataStart + channels) < dataStop)
+                    dataStop = dataStart + channels;
 
                 // Set the data
                 uint16_t buffloc = 0;
@@ -846,7 +849,7 @@ void loop() {
                 // ignore data from start of first Universe before channel_start
                 if (dataStart < 0) {
                     dataStart = 0;
-                    buffloc = config.channel_start-1;
+                    buffloc = config.channel_start - 1;
                 }
 
                 for (int i = dataStart; i < dataStop; i++) {
