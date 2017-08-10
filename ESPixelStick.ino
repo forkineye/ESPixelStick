@@ -40,10 +40,10 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncUDP.h>
 #include <ESPAsyncWebServer.h>
+#include <ESPAsyncE131.h>
 #include <ArduinoJson.h>
 #include <Hash.h>
 #include <SPI.h>
-#include <E131Async.h>
 #include "ESPixelStick.h"
 #include "EFUpdate.h"
 #include "wshandler.h"
@@ -182,6 +182,23 @@ void setup() {
 
     // Configure and start the web server
     initWeb();
+
+    // Setup E1.31
+    if (config.multicast) {
+        if (e131.begin(E131_MULTICAST, config.universe,
+                uniLast - config.universe + 1)) {
+            LOG_PORT.println(F("- Multicast Enabled"));
+        }  else {
+            LOG_PORT.println(F("*** MULTICAST INIT FAILED ****"));
+        }
+    } else {
+        if (e131.begin(E131_UNICAST)) {
+            LOG_PORT.print(F("- Unicast port: "));
+            LOG_PORT.println(E131_DEFAULT_PORT);
+        } else {
+            LOG_PORT.println(F("*** UNICAST INIT FAILED ****"));
+        }
+    }
 
     // Configure the outputs
 #if defined (ESPS_MODE_PIXEL)
@@ -364,7 +381,7 @@ Serial.println(payload);
         }
     } else if (String(config.mqtt_topic + MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC).equals(topic)) {
         uint8_t brightness = payload.toInt();
-        if (brightness < 0 || brightness > 100) {
+        if (brightness > 100) {
             return;
         } else {
             m_rgb_brightness = brightness;
@@ -376,23 +393,9 @@ Serial.println(payload);
         uint8_t firstIndex = payload.indexOf(',');
         uint8_t lastIndex = payload.lastIndexOf(',');
     
-        uint8_t rgb_red = payload.substring(0, firstIndex).toInt();
-        if (rgb_red < 0 || rgb_red > 255)
-            return;
-        else
-            m_rgb_red = rgb_red;
-            
-        uint8_t rgb_green = payload.substring(firstIndex + 1, lastIndex).toInt();
-        if (rgb_green < 0 || rgb_green > 255)
-            return;
-        else
-            m_rgb_green = rgb_green;
-    
-        uint8_t rgb_blue = payload.substring(lastIndex + 1).toInt();
-        if (rgb_blue < 0 || rgb_blue > 255)
-            return;
-        else
-            m_rgb_blue = rgb_blue;
+        m_rgb_red = payload.substring(0, firstIndex).toInt();
+        m_rgb_green = payload.substring(firstIndex + 1, lastIndex).toInt();
+        m_rgb_blue = payload.substring(lastIndex + 1).toInt();
    
         setStatic(m_rgb_red, m_rgb_green, m_rgb_blue);
         publishRGBColor();
@@ -558,11 +561,11 @@ void updateConfig() {
     uint8_t uniTotal = (uniLast + 1) - config.universe;
 
     if (seqTracker) free(seqTracker);
-    if (seqTracker = static_cast<uint8_t *>(malloc(uniTotal)))
+    if ((seqTracker = static_cast<uint8_t *>(malloc(uniTotal))))
         memset(seqTracker, 0x00, uniTotal);
 
     if (seqError) free(seqError);
-    if (seqError = static_cast<uint32_t *>(malloc(uniTotal * 4)))
+    if ((seqError = static_cast<uint32_t *>(malloc(uniTotal * 4))))
         memset(seqError, 0x00, uniTotal * 4);
 
     /* Zero out packet stats */
@@ -813,8 +816,8 @@ void loop() {
 
     if (config.testmode == TestMode::DISABLED || config.testmode == TestMode::VIEW_STREAM) {
         // Parse a packet and update pixels
-        if (!e131.pbuff->isEmpty(e131.pbuff)) {
-            e131.pbuff->pull(e131.pbuff, &packet);
+        if (!e131.isEmpty()) {
+            e131.pull(&packet);
             uint16_t universe = htons(packet.universe);
             uint8_t *data = packet.property_values + 1;
             if ((universe >= config.universe) && (universe <= uniLast)) {

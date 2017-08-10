@@ -297,6 +297,9 @@ void wsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
             LOG_PORT.print(F("* WS Disconnect - "));
             LOG_PORT.println(client->id());
             break;
+        case WS_EVT_PONG:
+            LOG_PORT.println(F("* WS PONG *"));
+            break;
         case WS_EVT_ERROR:
             LOG_PORT.println(F("** WS ERROR **"));
             break;

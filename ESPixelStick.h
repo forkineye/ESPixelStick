@@ -120,7 +120,7 @@ typedef struct {
 } config_t;
 
 /* Globals */
-E131Async       e131(10);       /* E131Async with X buffers */
+ESPAsyncE131    e131(10);       /* ESPAsyncE131 with X buffers */
 testing_t       testing;
 config_t        config;
 uint32_t        *seqError;      /* Sequence error tracking for each universe */
