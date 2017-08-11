@@ -20,6 +20,22 @@
 #ifndef WSHANDLER_H_
 #define WSHANDLER_H_
 
+#if defined(ESPS_MODE_PIXEL)
+#include "PixelDriver.h"
+extern PixelDriver  pixels;     // Pixel object
+#elif defined(ESPS_MODE_SERIAL)
+#include "SerialDriver.h"
+extern SerialDriver serial;     // Serial object
+#endif
+
+extern ESPAsyncE131 e131;       // ESPAsyncE131 with X buffers
+extern testing_t    testing;    // Testing mode
+extern config_t     config;     // Current configuration
+extern uint32_t     *seqError;  // Sequence error tracking for each universe
+extern uint16_t     uniLast;    // Last Universe to listen for
+extern bool         reboot;     // Reboot flag
+
+
 /* 
   Packet Commands
     E1 - Get Elements
@@ -131,8 +147,9 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             json["ssid"] = (String)WiFi.SSID();
             json["hostname"] = (String)WiFi.hostname();
             json["ip"] = WiFi.localIP().toString();
-            json["mac"] = getMacAddress();
+            json["mac"] = WiFi.macAddress();
             json["version"] = (String)VERSION;
+            json["built"] = (String)BUILD_DATE;
             json["flashchipid"] = String(ESP.getFlashChipId(), HEX);
             json["usedflashsize"] = (String)ESP.getFlashChipSize();
             json["realflashsize"] = (String)ESP.getFlashChipRealSize();
@@ -296,6 +313,9 @@ void wsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
         case WS_EVT_DISCONNECT:
             LOG_PORT.print(F("* WS Disconnect - "));
             LOG_PORT.println(client->id());
+            break;
+        case WS_EVT_PONG:
+            LOG_PORT.println(F("* WS PONG *"));
             break;
         case WS_EVT_ERROR:
             LOG_PORT.println(F("** WS ERROR **"));

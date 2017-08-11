@@ -17,7 +17,7 @@ $(function() {
         $('.navbar-toggle').attr('aria-expanded', 'false');
 
         $('#wserror').on('hidden.bs.modal', function() {
-            location.reload();
+            location.reload(true);
         });
 
         // Firmware selection and upload
@@ -322,7 +322,7 @@ function wsConnect() {
             $('#wserror').modal({backdrop: 'static', keyboard: false});
         };
 
-        ws.onclose = function() { 
+        ws.onclose = function() {
             $('#wserror').modal({backdrop: 'static', keyboard: false});
         };
     } else {
@@ -509,6 +509,7 @@ function getConfigStatus(data) {
     $('#x_ip').text(status.ip);
     $('#x_mac').text(status.mac);
     $('#x_version').text(status.version);
+    $('#x_built').text(status.built);
     $('#x_flashchipid').text(status.flashchipid);
     $('#x_usedflashsize').text(status.usedflashsize);
     $('#x_realflashsize').text(status.realflashsize);

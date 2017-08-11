@@ -20,14 +20,26 @@
 #ifndef ESPIXELSTICK_H_
 #define ESPIXELSTICK_H_
 
+const char VERSION[] = "3.0-rc3";
+const char BUILD_DATE[] = __DATE__ " " __TIME__;
+
+/*****************************************/
+/*        BEGIN - Configuration          */
+/*****************************************/
+
+/* Output Mode - There can be only one! (-Conor MacLeod) */
+#define ESPS_MODE_PIXEL
+//#define ESPS_MODE_SERIAL
+
+/*****************************************/
+/*         END - Configuration           */
+/*****************************************/
+
 #if defined(ESPS_MODE_PIXEL)
 #include "PixelDriver.h"
 #elif defined(ESPS_MODE_SERIAL)
 #include "SerialDriver.h"
 #endif
-
-/* Name and version */
-const char VERSION[] = "3.0-rc2 (20170804)";
 
 #define HTTP_PORT       80      /* Default web server port */
 #define MQTT_PORT       1883    /* Default MQTT port */
@@ -49,7 +61,6 @@ const char VERSION[] = "3.0-rc2 (20170804)";
 #define RDMNET_DNSSD_E133VERS   1
 
 /* Configuration file params */
-const char CONFIG_FILE[] = "/config.json";
 #define CONFIG_MAX_SIZE 2048    /* Sanity limit for config file */
 
 /* Pixel Types */
@@ -69,9 +80,9 @@ enum class TestMode : uint8_t {
 };
 
 typedef struct {
-    uint8_t r,g,b;              //hold requested color
-    uint16_t step;               //step in testing routine
-    uint32_t last;              //last update
+    uint8_t r, g, b;    /* Hold requested color */
+    uint16_t step;      /* Step in testing routine */
+    uint32_t last;      /* Last update */
 } testing_t;
 
 /* Configuration structure */
@@ -125,41 +136,10 @@ typedef struct {
 #endif
 } config_t;
 
-/* Globals */
-E131Async       e131(10);       /* E131Async with X buffers */
-testing_t       testing;
-config_t        config;
-uint32_t        *seqError;      /* Sequence error tracking for each universe */
-uint16_t        uniLast = 1;    /* Last Universe to listen for */
-bool            reboot = false; /* Reboot flag */
-AsyncWebServer  web(HTTP_PORT); /* Web Server */
-AsyncWebSocket  ws("/ws");      /* Web Socket Plugin */
-
-/* Output Drivers */
-#if defined(ESPS_MODE_PIXEL)
-#include "PixelDriver.h"
-PixelDriver     pixels;         /* Pixel object */
-#elif defined(ESPS_MODE_SERIAL)
-#include "SerialDriver.h"
-SerialDriver    serial;         /* Serial object */
-#else
-#error "No valid output mode defined."
-#endif
-
 /* Forward Declarations */
 void serializeConfig(String &jsonString, bool pretty = false, bool creds = false);
 void dsNetworkConfig(JsonObject &json);
 void dsDeviceConfig(JsonObject &json);
 void saveConfig();
-
-/* Plain text friendly MAC */
-String getMacAddress() {
-    uint8_t mac[6];
-    char macStr[18] = {0};
-    WiFi.macAddress(mac);
-    snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
-            mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-    return  String(macStr);
-}
 
 #endif /* ESPIXELSTICK_H_ */

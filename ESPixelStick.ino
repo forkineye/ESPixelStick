@@ -17,14 +17,11 @@
 *
 */
 
-
 /*****************************************/
 /*        BEGIN - Configuration          */
 /*****************************************/
 
-/* Output Mode - There can be only one! (-Conor MacLeod) */
-#define ESPS_MODE_PIXEL
-//#define ESPS_MODE_SERIAL
+/* Output Mode has been moved to ESPixelStick.h */
 
 #define ESPS_SUPPORT_PWM
 
@@ -36,7 +33,6 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 /*         END - Configuration           */
 /*****************************************/
 
-//#include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <Ticker.h>
 #include <AsyncMqttClient.h>
@@ -44,10 +40,10 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncUDP.h>
 #include <ESPAsyncWebServer.h>
+#include <ESPAsyncE131.h>
 #include <ArduinoJson.h>
 #include <Hash.h>
 #include <SPI.h>
-#include <E131Async.h>
 #include "ESPixelStick.h"
 #include "EFUpdate.h"
 #include "wshandler.h"
@@ -56,44 +52,89 @@ extern "C" {
 #include <user_interface.h>
 }
 
-// MQTT Sub topics
-// state
+// Debugging support
+#if defined(DEBUG)
+extern "C" void system_set_os_print(uint8 onoff);
+extern "C" void ets_install_putc1(void* routine);
+
+static void _u0_putc(char c){
+  while(((U0S >> USTXC) & 0x7F) == 0x7F);
+  U0F = c;
+}
+#endif
+
+/////////////////////////////////////////////////////////
+// 
+//  Globals
+//
+/////////////////////////////////////////////////////////
+
+// MQTT State
 const char MQTT_LIGHT_STATE_TOPIC[] = "/light/status";
 const char MQTT_LIGHT_COMMAND_TOPIC[] = "/light/switch";
 
-// brightness
+// MQTT Brightness
 const char MQTT_LIGHT_BRIGHTNESS_STATE_TOPIC[] = "/brightness/status";
 const char MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC[] = "/brightness/set";
 
-// colors (rgb)
+// MQTT Colors (rgb)
 const char MQTT_LIGHT_RGB_STATE_TOPIC[] = "/rgb/status";
 const char MQTT_LIGHT_RGB_COMMAND_TOPIC[] = "/rgb/set";
 
-// payloads by default (on/off)
+// MQTT Payloads by default (on/off)
 const char LIGHT_ON[] = "ON";
 const char LIGHT_OFF[] = "OFF";
 
-// variables used to store the state, the brightness and the color of the light
+// MQTT variables used to store the state, the brightness and the color of the light
 boolean m_rgb_state = false;
 uint8_t m_rgb_brightness = 100;
 uint8_t m_rgb_red = 255;
 uint8_t m_rgb_green = 255;
 uint8_t m_rgb_blue = 255;
 
-// buffer used to send/receive data with MQTT
+// MQTT buffer used to send / receive data
 const uint8_t MSG_BUFFER_SIZE = 20;
 char m_msg_buffer[MSG_BUFFER_SIZE]; 
+
+// Configuration file
+const char CONFIG_FILE[] = "/config.json";
+
+ESPAsyncE131        e131(10);       // ESPAsyncE131 with X buffers
+testing_t           testing;        // Testing mode
+config_t            config;         // Current configuration
+uint32_t            *seqError;      // Sequence error tracking for each universe
+uint16_t            uniLast = 1;    // Last Universe to listen for
+bool                reboot = false; // Reboot flag
+AsyncWebServer      web(HTTP_PORT); // Web Server
+AsyncWebSocket      ws("/ws");      // Web Socket Plugin
+uint8_t             *seqTracker;    // Current sequence numbers for each Universe */
+uint32_t            lastUpdate;     // Update timeout tracker
+WiFiEventHandler    wifiConnectHandler;     // WiFi connect handler
+WiFiEventHandler    wifiDisconnectHandler;  // WiFi disconnect handler
+Ticker              wifiTicker; // Ticker to handle WiFi
+AsyncMqttClient     mqtt;       // MQTT object
+Ticker              mqttTicker; // Ticker to handle MQTT
+
+// Output Drivers
+#if defined(ESPS_MODE_PIXEL)
+PixelDriver     pixels;         // Pixel object
+#elif defined(ESPS_MODE_SERIAL)
+SerialDriver    serial;         // Serial object
+#else
+#error "No valid output mode defined."
+#endif
 
 
 // PWM globals
 int valid_gpio[11] = { 0,1,2,3,4,5,12,13,14,15,16 };
 
 
+/////////////////////////////////////////////////////////
+// 
+//  Forward Declarations
+//
+/////////////////////////////////////////////////////////
 
-uint8_t             *seqTracker;        /* Current sequence numbers for each Universe */
-uint32_t            lastUpdate;         /* Update timeout tracker */
-
-/* Forward Declarations */
 void loadConfig();
 void initWifi();
 void initWeb();
@@ -101,13 +142,7 @@ void updateConfig();
 void setupPWM();
 void handlePWM();
 
-WiFiEventHandler wifiConnectHandler;
-WiFiEventHandler wifiDisconnectHandler;
-Ticker wifiTicker;
-
-AsyncMqttClient mqtt;
-Ticker mqttTicker;
-
+// Radio config
 RF_PRE_INIT() {
     //wifi_set_phy_mode(PHY_MODE_11G);    // Force 802.11g mode
     system_phy_set_powerup_option(31);  // Do full RF calibration on power-up
@@ -125,6 +160,11 @@ void setup() {
     // Setup serial log port
     LOG_PORT.begin(115200);
     delay(10);
+
+#if defined(DEBUG)
+    ets_install_putc1((void *) &_u0_putc);
+    system_set_os_print(1);
+#endif
 
     // Enable SPIFFS
     SPIFFS.begin();
@@ -179,6 +219,23 @@ void setup() {
 
     // Configure and start the web server
     initWeb();
+
+    // Setup E1.31
+    if (config.multicast) {
+        if (e131.begin(E131_MULTICAST, config.universe,
+                uniLast - config.universe + 1)) {
+            LOG_PORT.println(F("- Multicast Enabled"));
+        }  else {
+            LOG_PORT.println(F("*** MULTICAST INIT FAILED ****"));
+        }
+    } else {
+        if (e131.begin(E131_UNICAST)) {
+            LOG_PORT.print(F("- Unicast port: "));
+            LOG_PORT.println(E131_DEFAULT_PORT);
+        } else {
+            LOG_PORT.println(F("*** UNICAST INIT FAILED ****"));
+        }
+    }
 
     // Configure the outputs
 #if defined (ESPS_SUPPORT_PWM)
@@ -345,9 +402,9 @@ Serial.print(topic);
 Serial.print(" | Payload: ");
 Serial.println(payload);
 */
-    // handle message topic
+    // Handle message topic
     if (String(config.mqtt_topic + MQTT_LIGHT_COMMAND_TOPIC).equals(topic)) {
-    // test if the payload is equal to "ON" or "OFF"
+    // Test if the payload is equal to "ON" or "OFF"
         if (payload.equals(String(LIGHT_ON))) {
             config.testmode = TestMode::MQTT;
             if (m_rgb_state != true) {
@@ -365,7 +422,7 @@ Serial.println(payload);
         }
     } else if (String(config.mqtt_topic + MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC).equals(topic)) {
         uint8_t brightness = payload.toInt();
-        if (brightness < 0 || brightness > 100) {
+        if (brightness > 100) {
             return;
         } else {
             m_rgb_brightness = brightness;
@@ -373,34 +430,20 @@ Serial.println(payload);
             publishRGBBrightness();
         }
     } else if (String(config.mqtt_topic + MQTT_LIGHT_RGB_COMMAND_TOPIC).equals(topic)) {
-        // get the position of the first and second commas
+        // Get the position of the first and second commas
         uint8_t firstIndex = payload.indexOf(',');
         uint8_t lastIndex = payload.lastIndexOf(',');
     
-        uint8_t rgb_red = payload.substring(0, firstIndex).toInt();
-        if (rgb_red < 0 || rgb_red > 255)
-            return;
-        else
-            m_rgb_red = rgb_red;
-            
-        uint8_t rgb_green = payload.substring(firstIndex + 1, lastIndex).toInt();
-        if (rgb_green < 0 || rgb_green > 255)
-            return;
-        else
-            m_rgb_green = rgb_green;
-    
-        uint8_t rgb_blue = payload.substring(lastIndex + 1).toInt();
-        if (rgb_blue < 0 || rgb_blue > 255)
-            return;
-        else
-            m_rgb_blue = rgb_blue;
+        m_rgb_red = payload.substring(0, firstIndex).toInt();
+        m_rgb_green = payload.substring(firstIndex + 1, lastIndex).toInt();
+        m_rgb_blue = payload.substring(lastIndex + 1).toInt();
    
         setStatic(m_rgb_red, m_rgb_green, m_rgb_blue);
         publishRGBColor();
     }
 }
 
-// function called to publish the state of the led (on/off)
+// Called to publish the state of the led (on/off)
 void publishRGBState() {
     if (m_rgb_state) {
         mqtt.publish(String(config.mqtt_topic + MQTT_LIGHT_STATE_TOPIC).c_str(),
@@ -411,14 +454,14 @@ void publishRGBState() {
     }
 }
 
-// function called to publish the brightness of the led (0-100)
+// Called to publish the brightness of the led (0-100)
 void publishRGBBrightness() {
     snprintf(m_msg_buffer, MSG_BUFFER_SIZE, "%d", m_rgb_brightness);
     mqtt.publish(String(config.mqtt_topic + MQTT_LIGHT_BRIGHTNESS_STATE_TOPIC).c_str(),
             0, true, m_msg_buffer);
 }
 
-// function called to publish the colors of the led (xx(x),xx(x),xx(x))
+// Called to publish the colors of the led (xx(x),xx(x),xx(x))
 void publishRGBColor() {
     snprintf(m_msg_buffer, MSG_BUFFER_SIZE, "%d,%d,%d", m_rgb_red, m_rgb_green, m_rgb_blue);
     mqtt.publish(String(config.mqtt_topic + MQTT_LIGHT_RGB_STATE_TOPIC).c_str(),
@@ -432,33 +475,33 @@ void publishRGBColor() {
 //
 /////////////////////////////////////////////////////////
 
-/* Configure and start the web server */
+// Configure and start the web server
 void initWeb() {
-    /* Handle OTA update from asynchronous callbacks */
+    // Handle OTA update from asynchronous callbacks
     Update.runAsync(true);
 
-    /* Setup WebSockets */
+    // Setup WebSockets
     ws.onEvent(wsEvent);
     web.addHandler(&ws);
 
-    /* Heap status handler */
+    // Heap status handler
     web.on("/heap", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", String(ESP.getFreeHeap()));
     });
 
-    /* JSON Config Handler */
+    // JSON Config Handler
     web.on("/conf", HTTP_GET, [](AsyncWebServerRequest *request) {
         String jsonString;
         serializeConfig(jsonString, true);
         request->send(200, "text/json", jsonString);
     });
 
-    /* Firmware upload handler */
+    // Firmware upload handler
     web.on("/updatefw", HTTP_POST, [](AsyncWebServerRequest *request) {
         ws.textAll("X6");
     }, handle_fw_upload);
 
-    /* Static Handler */
+    // Static Handler
     web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
     web.serveStatic("/config.json", SPIFFS, "/config.json");
 
@@ -551,31 +594,31 @@ void validateConfig() {
 }
 
 void updateConfig() {
-    /* Validate first */
+    // Validate first
     validateConfig();
 
-    /* Find the last universe we should listen for */
+    // Find the last universe we should listen for
     uint16_t span = config.channel_start + config.channel_count - 1;
     if (span % config.universe_limit)
         uniLast = config.universe + span / config.universe_limit;
     else
         uniLast = config.universe + span / config.universe_limit - 1;
 
-    /* Setup the sequence error tracker */
+    // Setup the sequence error tracker
     uint8_t uniTotal = (uniLast + 1) - config.universe;
 
     if (seqTracker) free(seqTracker);
-    if (seqTracker = static_cast<uint8_t *>(malloc(uniTotal)))
+    if ((seqTracker = static_cast<uint8_t *>(malloc(uniTotal))))
         memset(seqTracker, 0x00, uniTotal);
 
     if (seqError) free(seqError);
-    if (seqError = static_cast<uint32_t *>(malloc(uniTotal * 4)))
+    if ((seqError = static_cast<uint32_t *>(malloc(uniTotal * 4))))
         memset(seqError, 0x00, uniTotal * 4);
 
-    /* Zero out packet stats */
+    // Zero out packet stats
     e131.stats.num_packets = 0;
 
-    /* Initialize for our pixel type */
+    // Initialize for our pixel type
 #if defined(ESPS_MODE_PIXEL)
     pixels.begin(config.pixel_type, config.pixel_color, config.channel_count / 3);
     pixels.setGamma(config.gamma);
@@ -667,12 +710,12 @@ void dsDeviceConfig(JsonObject &json) {
 
 }
 
-/* Load configugration JSON file */
+// Load configugration JSON file
 void loadConfig() {
-    /* Zeroize Config struct */
+    // Zeroize Config struct
     memset(&config, 0, sizeof(config));
 
-    /* Load CONFIG_FILE json. Create and init with defaults if not found */
+    // Load CONFIG_FILE json. Create and init with defaults if not found
     File file = SPIFFS.open(CONFIG_FILE, "r");
     if (!file) {
         LOG_PORT.println(F("- No configuration file found."));
@@ -680,7 +723,7 @@ void loadConfig() {
         config.passphrase = passphrase;
         saveConfig();
     } else {
-        /* Parse CONFIG_FILE json */
+        // Parse CONFIG_FILE json
         size_t size = file.size();
         if (size > CONFIG_MAX_SIZE) {
             LOG_PORT.println(F("*** Configuration File too large ***"));
@@ -703,7 +746,7 @@ void loadConfig() {
         LOG_PORT.println(F("- Configuration loaded."));
     }
 
-    /* Validate it */
+    // Validate it
     validateConfig();
 }
 
@@ -784,16 +827,16 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
         json.printTo(jsonString);
 }
 
-/* Save configuration JSON file */
+// Save configuration JSON file
 void saveConfig() {
-    /* Update Config */
+    // Update Config
     updateConfig();
 
-    /* Serialize Config */
+    // Serialize Config
     String jsonString;
     serializeConfig(jsonString, true, true);
 
-    /* Save Config */
+    // Save Config
     File file = SPIFFS.open(CONFIG_FILE, "w");
     if (!file) {
         LOG_PORT.println(F("*** Error creating configuration file ***"));
@@ -806,7 +849,7 @@ void saveConfig() {
 
 
 /////////////////////////////////////////////////////////
-// 
+//
 //  Set routines for Testing and MQTT
 //
 /////////////////////////////////////////////////////////
@@ -828,7 +871,7 @@ void setStatic(uint8_t r, uint8_t g, uint8_t b) {
 
 
 /////////////////////////////////////////////////////////
-// 
+//
 //  Main Loop
 //
 /////////////////////////////////////////////////////////
@@ -843,8 +886,8 @@ void loop() {
 
     if (config.testmode == TestMode::DISABLED || config.testmode == TestMode::VIEW_STREAM) {
         // Parse a packet and update pixels
-        if (!e131.pbuff->isEmpty(e131.pbuff)) {
-            e131.pbuff->pull(e131.pbuff, &packet);
+        if (!e131.isEmpty()) {
+            e131.pull(&packet);
             uint16_t universe = htons(packet.universe);
             uint8_t *data = packet.property_values + 1;
             if ((universe >= config.universe) && (universe <= uniLast)) {
@@ -864,8 +907,11 @@ void loop() {
 
                 // Calculate how much data we need for this buffer
                 uint16_t dataStop = config.channel_count;
-                if ((dataStart + config.universe_limit) < dataStop)
-                    dataStop = dataStart + config.universe_limit;
+                uint16_t channels = htons(packet.property_value_count) - 1;
+                if (config.universe_limit < channels)
+                    channels = config.universe_limit;
+                if ((dataStart + channels) < dataStop)
+                    dataStop = dataStart + channels;
 
                 // Set the data
                 uint16_t buffloc = 0;
@@ -873,7 +919,7 @@ void loop() {
                 // ignore data from start of first Universe before channel_start
                 if (dataStart < 0) {
                     dataStart = 0;
-                    buffloc = config.channel_start-1;
+                    buffloc = config.channel_start - 1;
                 }
 
                 for (int i = dataStart; i < dataStop; i++) {
