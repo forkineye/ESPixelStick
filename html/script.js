@@ -470,6 +470,7 @@ function getConfigStatus(data) {
     $('#x_ip').text(status.ip);
     $('#x_mac').text(status.mac);
     $('#x_version').text(status.version);
+    $('#x_built').text(status.built);
     $('#x_flashchipid').text(status.flashchipid);
     $('#x_usedflashsize').text(status.usedflashsize);
     $('#x_realflashsize').text(status.realflashsize);

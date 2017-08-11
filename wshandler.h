@@ -149,6 +149,7 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             json["ip"] = WiFi.localIP().toString();
             json["mac"] = WiFi.macAddress();
             json["version"] = (String)VERSION;
+            json["built"] = (String)BUILD_DATE;
             json["flashchipid"] = String(ESP.getFlashChipId(), HEX);
             json["usedflashsize"] = (String)ESP.getFlashChipSize();
             json["realflashsize"] = (String)ESP.getFlashChipRealSize();
