@@ -438,6 +438,7 @@ function getConfig(data) {
     $('#gpio12_enabled').prop('checked', config.pwm.gpio12_enabled);
     $('#gpio13_enabled').prop('checked', config.pwm.gpio13_enabled);
     $('#gpio14_enabled').prop('checked', config.pwm.gpio14_enabled);
+    $('#gpio15_enabled').prop('checked', config.pwm.gpio15_enabled);
 
     $('#gpio0_channel').val(config.pwm.gpio0_channel);
     $('#gpio1_channel').val(config.pwm.gpio1_channel);
@@ -448,6 +449,7 @@ function getConfig(data) {
     $('#gpio12_channel').val(config.pwm.gpio12_channel);
     $('#gpio13_channel').val(config.pwm.gpio13_channel);
     $('#gpio14_channel').val(config.pwm.gpio14_channel);
+    $('#gpio15_channel').val(config.pwm.gpio15_channel);
 
     // E1.31 Config
     $('#universe').val(config.e131.universe);
@@ -647,8 +649,8 @@ function submitConfig() {
                "gpio13_enabled": $('#gpio13_enabled').prop('checked'),
                "gpio14_channel": parseInt($('#gpio14_channel').val()),
                "gpio14_enabled": $('#gpio14_enabled').prop('checked'),
-               "gpio15_channel": 0,
-               "gpio15_enabled": false,
+               "gpio15_channel": parseInt($('#gpio15_channel').val()),
+               "gpio15_enabled": $('#gpio15_enabled').prop('checked'),
                "gpio16_channel": 0,
                "gpio16_enabled": false
             }
