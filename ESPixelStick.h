@@ -31,6 +31,9 @@ const char BUILD_DATE[] = __DATE__ " " __TIME__;
 #define ESPS_MODE_PIXEL
 //#define ESPS_MODE_SERIAL
 
+/* Include support for PWM */
+#define ESPS_SUPPORT_PWM
+
 /*****************************************/
 /*         END - Configuration           */
 /*****************************************/
@@ -129,10 +132,11 @@ typedef struct {
     BaudRate    baudrate;       /* Baudrate */
 #endif
 #if defined(ESPS_SUPPORT_PWM)
-    bool        pwm_enabled;     /* is pwm runtime enabled? */
-    bool        pwm_gamma;     /* is pwm runtime enabled? */
-    int         pwm_gpio[17];       /* which dmx channel is gpio[n] mapped to? */
-    bool        pwm_gpio_enabled[17];       /* which dmx channel is gpio[n] mapped to? */
+    bool        pwm_enabled;    /* is pwm runtime enabled? */
+    bool        pwm_gamma;      /* is pwm runtime enabled? */
+    int         pwm_gpio_dmx[17];    /* which dmx channel is gpio[n] mapped to? */
+    bool        pwm_gpio_enabled[17];      /* is gpio[n] enabled? */
+    bool        pwm_gpio_invert[17];       /* is gpio[n] active high or active low? */
 #endif
 } config_t;
 

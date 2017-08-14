@@ -121,7 +121,7 @@ $(function() {
     });
 
     // PWM field toggles
-    $('#pwm').click(function() {
+    $('#pwm_enabled').click(function() {
         if ($(this).is(':checked')) {
             //$('.mqtt').prop('disabled', false);
             $('.pwm').removeClass('hidden');
@@ -422,7 +422,7 @@ function getConfig(data) {
     $('#mqtt_topic').val(config.mqtt.topic);
 
     // PWM Config
-    $('#pwm').prop('checked', config.pwm.enabled);
+    $('#pwm_enabled').prop('checked', config.pwm.enabled);
     if (config.pwm.enabled) {
         $('.pwm').removeClass('hidden');
     } else {
@@ -439,6 +439,18 @@ function getConfig(data) {
     $('#gpio13_enabled').prop('checked', config.pwm.gpio13_enabled);
     $('#gpio14_enabled').prop('checked', config.pwm.gpio14_enabled);
     $('#gpio15_enabled').prop('checked', config.pwm.gpio15_enabled);
+
+    $('#gpio0_invert').prop('checked', config.pwm.gpio0_invert);
+    $('#gpio1_invert').prop('checked', config.pwm.gpio1_invert);
+    $('#gpio2_invert').prop('checked', config.pwm.gpio2_invert);
+    $('#gpio3_invert').prop('checked', config.pwm.gpio3_invert);
+    $('#gpio4_invert').prop('checked', config.pwm.gpio4_invert);
+    $('#gpio5_invert').prop('checked', config.pwm.gpio5_invert);
+    $('#gpio12_invert').prop('checked', config.pwm.gpio12_invert);
+    $('#gpio13_invert').prop('checked', config.pwm.gpio13_invert);
+    $('#gpio14_invert').prop('checked', config.pwm.gpio14_invert);
+    $('#gpio15_invert').prop('checked', config.pwm.gpio15_invert);
+
 
     $('#gpio0_channel').val(config.pwm.gpio0_channel);
     $('#gpio1_channel').val(config.pwm.gpio1_channel);
@@ -629,30 +641,41 @@ function submitConfig() {
                 'baudrate': parseInt($('#s_baud').val())
             },
             "pwm": {
-               "enabled": true,
-               "gamma": false,
+               "enabled": $('#pwm_enabled').prop('checked'),
+               "gamma": $('#pwm_gamma').prop('checked'),
                "gpio0_channel": parseInt($('#gpio0_channel').val()),
-               "gpio0_enabled": false,
+               "gpio0_enabled": $('#gpio0_enabled').prop('checked'),
+               "gpio0_invert": $('#gpio0_invert').prop('checked'),
                "gpio1_channel": parseInt($('#gpio1_channel').val()),
                "gpio1_enabled": $('#gpio1_enabled').prop('checked'),
+               "gpio1_invert": $('#gpio1_invert').prop('checked'),
                "gpio2_channel": parseInt($('#gpio2_channel').val()),
-               "gpio2_enabled": false,
+               "gpio2_enabled": $('#gpio2_enabled').prop('checked'),
+               "gpio2_invert": $('#gpio2_invert').prop('checked'),
                "gpio3_channel": parseInt($('#gpio3_channel').val()),
                "gpio3_enabled": $('#gpio3_enabled').prop('checked'),
+               "gpio3_invert": $('#gpio3_invert').prop('checked'),
                "gpio4_channel": parseInt($('#gpio4_channel').val()),
                "gpio4_enabled": $('#gpio4_enabled').prop('checked'),
+               "gpio4_invert": $('#gpio4_invert').prop('checked'),
                "gpio5_channel": parseInt($('#gpio5_channel').val()),
                "gpio5_enabled": $('#gpio5_enabled').prop('checked'),
+               "gpio5_invert": $('#gpio5_invert').prop('checked'),
                "gpio12_channel": parseInt($('#gpio12_channel').val()),
                "gpio12_enabled": $('#gpio12_enabled').prop('checked'),
+               "gpio12_invert": $('#gpio12_invert').prop('checked'),
                "gpio13_channel": parseInt($('#gpio13_channel').val()),
                "gpio13_enabled": $('#gpio13_enabled').prop('checked'),
+               "gpio13_invert": $('#gpio13_invert').prop('checked'),
                "gpio14_channel": parseInt($('#gpio14_channel').val()),
                "gpio14_enabled": $('#gpio14_enabled').prop('checked'),
+               "gpio14_invert": $('#gpio14_invert').prop('checked'),
                "gpio15_channel": parseInt($('#gpio15_channel').val()),
                "gpio15_enabled": $('#gpio15_enabled').prop('checked'),
+               "gpio15_invert": $('#gpio15_invert').prop('checked'),
                "gpio16_channel": 0,
-               "gpio16_enabled": false
+               "gpio16_enabled": false,
+               "gpio16_invert": false
             }
         };
     ws.send('S2' + JSON.stringify(json));

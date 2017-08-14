@@ -23,7 +23,6 @@
 
 /* Output Mode has been moved to ESPixelStick.h */
 
-#define ESPS_SUPPORT_PWM
 
 /* Fallback configuration if config.json is empty or fails */
 const char ssid[] = "ENTER_SSID_HERE";
@@ -126,6 +125,7 @@ SerialDriver    serial;         // Serial object
 
 
 // PWM globals
+// GPIO 6-11 are for flash chip
 int valid_gpio[11] = { 0,1,2,3,4,5,12,13,14,15,16 };
 
 
@@ -587,10 +587,6 @@ void validateConfig() {
         config.baudrate = BaudRate::BR_57600;
 #endif
 
-#if defined(ESPS_SUPPORT_PWM)
-    // Set Mode
-    config.pwm_enabled = 1;
-#endif
 }
 
 void updateConfig() {
@@ -703,7 +699,8 @@ void dsDeviceConfig(JsonObject &json) {
     config.pwm_gamma = json["pwm"]["gamma"];
     for (int i=0; i < 11; i++ ) {
       int j = valid_gpio[i];
-      config.pwm_gpio[j] = json["pwm"]["gpio" + (String)j + "_channel"];
+      config.pwm_gpio_dmx[j] = json["pwm"]["gpio" + (String)j + "_channel"];
+      config.pwm_gpio_invert[j] = json["pwm"]["gpio" + (String)j + "_invert"];
       config.pwm_gpio_enabled[j] = json["pwm"]["gpio" + (String)j + "_enabled"];
     }
 #endif
@@ -816,8 +813,9 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     
     for (int i=0; i < 11; i++ ) {
       int j = valid_gpio[i];
-      pwm["gpio" + (String)j + "_channel"] = static_cast<uint16_t>(config.pwm_gpio[j]);
+      pwm["gpio" + (String)j + "_channel"] = static_cast<uint16_t>(config.pwm_gpio_dmx[j]);
       pwm["gpio" + (String)j + "_enabled"] = static_cast<bool>(config.pwm_gpio_enabled[j]);
+      pwm["gpio" + (String)j + "_invert"] = static_cast<bool>(config.pwm_gpio_invert[j]);
     }
 #endif
 
@@ -1037,16 +1035,9 @@ void loop() {
 #endif
 }
 
-void old_setupPWM () {
-  config.pwm_enabled = 1;
-  config.pwm_gpio[4] = 1; // dmx channel
-  config.pwm_gpio_enabled[4] = true;
-  pinMode(4, OUTPUT);
-  analogWrite(4, 0);
-}
 
 void setupPWM () {
-  if ( config.pwm_enabled == 1) {
+  if ( config.pwm_enabled ) {
     for (int i=0; i < 11; i++ ) {
       int gpio = valid_gpio[i];
       if (config.pwm_gpio_enabled[gpio]) {
@@ -1057,20 +1048,23 @@ void setupPWM () {
   }
 }
   
-int last_pwm[17];
+int last_pwm[17];   // 0-255, 0=dark
 extern const uint8_t GAMMA_2811[];
 
 void handlePWM() {
-  bool gpio_gamma = true;
 
   for (int i=0; i < 11; i++ ) {
     int gpio = valid_gpio[i];
     if (config.pwm_gpio_enabled[gpio]) {
-      int gpio_dmx = config.pwm_gpio[gpio];
-      int pwm_val = (gpio_gamma) ? GAMMA_2811[pixels.getData()[gpio_dmx]] : pixels.getData()[gpio_dmx];
+      int gpio_dmx = config.pwm_gpio_dmx[gpio];
+      int pwm_val = (config.pwm_gamma) ? GAMMA_2811[pixels.getData()[gpio_dmx]] : pixels.getData()[gpio_dmx];
         
       if ( pwm_val != last_pwm[gpio]) {
-        analogWrite(gpio, 4*pwm_val); // 0..255, 0..1023
+        if (config.pwm_gpio_invert[gpio]) {
+          analogWrite(gpio, 1023-4*pwm_val);  // 0..255 => 1023..0
+        } else {
+          analogWrite(gpio, 4*pwm_val);       // 0..255 => 0..1023
+        }
         last_pwm[gpio] = pwm_val;
       }
     }
