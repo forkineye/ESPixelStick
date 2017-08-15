@@ -209,22 +209,22 @@ const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillWS2811(const uint8_t *buff,
     if (ws2811gamma) {
         while (buff + 2 < tail) {
             uint8_t subpix = buff[rOffset];
-            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 6) & 0x3]);
-            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 4) & 0x3]);
-            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 2) & 0x3]);
-            enqueue(LOOKUP_2811[GAMMA_2811[subpix] & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 6) & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 4) & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 2) & 0x3]);
+            enqueue(LOOKUP_2811[GAMMA_TABLE[subpix] & 0x3]);
 
             subpix = buff[gOffset];
-            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 6) & 0x3]);
-            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 4) & 0x3]);
-            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 2) & 0x3]);
-            enqueue(LOOKUP_2811[GAMMA_2811[subpix] & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 6) & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 4) & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 2) & 0x3]);
+            enqueue(LOOKUP_2811[GAMMA_TABLE[subpix] & 0x3]);
 
             subpix = buff[bOffset];
-            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 6) & 0x3]);
-            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 4) & 0x3]);
-            enqueue(LOOKUP_2811[(GAMMA_2811[subpix] >> 2) & 0x3]);
-            enqueue(LOOKUP_2811[GAMMA_2811[subpix] & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 6) & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 4) & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 2) & 0x3]);
+            enqueue(LOOKUP_2811[GAMMA_TABLE[subpix] & 0x3]);
 
             buff += 3;
         }

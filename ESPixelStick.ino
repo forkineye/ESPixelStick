@@ -123,10 +123,16 @@ SerialDriver    serial;         // Serial object
 #error "No valid output mode defined."
 #endif
 
-
 // PWM globals
 // GPIO 6-11 are for flash chip
-int valid_gpio[11] = { 0,1,2,3,4,5,12,13,14,15,16 };
+#if defined (ESPS_MODE_PIXEL)
+int valid_gpio[11] = { 0,1,  3,4,5,12,13,14,15,16 };  // 2 is WS2811 led data
+#elif defined(ESPS_MODE_SERIAL)
+int valid_gpio[11] = { 0,  2,3,4,5,12,13,14,15,16 };  // 1 is serial TX for DMX data
+#endif
+
+int last_pwm[17];   // 0-255, 0=dark
+//extern const uint8_t GAMMA_TABLE[];
 
 
 /////////////////////////////////////////////////////////
@@ -586,7 +592,6 @@ void validateConfig() {
     else if (config.baudrate < BaudRate::BR_38400)
         config.baudrate = BaudRate::BR_57600;
 #endif
-
 }
 
 void updateConfig() {
@@ -1035,9 +1040,10 @@ void loop() {
 #endif
 }
 
-
+#if defined(ESPS_SUPPORT_PWM)
 void setupPWM () {
   if ( config.pwm_enabled ) {
+    analogWriteFreq(100);
     for (int i=0; i < 11; i++ ) {
       int gpio = valid_gpio[i];
       if (config.pwm_gpio_enabled[gpio]) {
@@ -1047,27 +1053,30 @@ void setupPWM () {
     }
   }
 }
-  
-int last_pwm[17];   // 0-255, 0=dark
-extern const uint8_t GAMMA_2811[];
+
 
 void handlePWM() {
-
-  for (int i=0; i < 11; i++ ) {
-    int gpio = valid_gpio[i];
-    if (config.pwm_gpio_enabled[gpio]) {
-      int gpio_dmx = config.pwm_gpio_dmx[gpio];
-      int pwm_val = (config.pwm_gamma) ? GAMMA_2811[pixels.getData()[gpio_dmx]] : pixels.getData()[gpio_dmx];
-        
-      if ( pwm_val != last_pwm[gpio]) {
-        if (config.pwm_gpio_invert[gpio]) {
-          analogWrite(gpio, 1023-4*pwm_val);  // 0..255 => 1023..0
-        } else {
-          analogWrite(gpio, 4*pwm_val);       // 0..255 => 0..1023
+  if ( config.pwm_enabled ) {
+    for (int i=0; i < 11; i++ ) {
+      int gpio = valid_gpio[i];
+      if (config.pwm_gpio_enabled[gpio]) {
+        int gpio_dmx = config.pwm_gpio_dmx[gpio];
+#if defined (ESPS_MODE_PIXEL)
+        int pwm_val = (config.pwm_gamma) ? GAMMA_TABLE[pixels.getData()[gpio_dmx]] : pixels.getData()[gpio_dmx];
+#elif defined(ESPS_MODE_SERIAL)
+        int pwm_val = (config.pwm_gamma) ? GAMMA_TABLE[serial.getData()[gpio_dmx]] : serial.getData()[gpio_dmx];
+#endif
+        if ( pwm_val != last_pwm[gpio]) {
+          if (config.pwm_gpio_invert[gpio]) {
+            analogWrite(gpio, 1023-4*pwm_val);  // 0..255 => 1023..0
+          } else {
+            analogWrite(gpio, 4*pwm_val);       // 0..255 => 0..1023
+          }
+          last_pwm[gpio] = pwm_val;
         }
-        last_pwm[gpio] = pwm_val;
       }
     }
   }
 }
+#endif
 

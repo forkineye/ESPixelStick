@@ -24,7 +24,8 @@
 #define UART 1
 
 /* Gamma correction table until pow() is fixed */
-const uint8_t GAMMA_2811[] = {
+extern const uint8_t GAMMA_TABLE[];
+const uint8_t NOT_GAMMA_TABLE[] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2,
     2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
