@@ -133,6 +133,7 @@ typedef struct {
 #endif
 #if defined(ESPS_SUPPORT_PWM)
     bool        pwm_enabled;    /* is pwm runtime enabled? */
+    int         pwm_freq;       /* pwm frequency */
     bool        pwm_gamma;      /* is pwm runtime enabled? */
     int         pwm_gpio_dmx[17];    /* which dmx channel is gpio[n] mapped to? */
     bool        pwm_gpio_enabled[17];      /* is gpio[n] enabled? */

@@ -429,6 +429,9 @@ function getConfig(data) {
         $('.pwm').addClass('hidden');
     }
 
+    $('#pwm_freq').val(config.pwm.freq);
+    $('#pwm_gamma').prop('checked', config.pwm.gamma);
+
     $('#gpio0_enabled').prop('checked', config.pwm.gpio0_enabled);
     $('#gpio1_enabled').prop('checked', config.pwm.gpio1_enabled);
     $('#gpio2_enabled').prop('checked', config.pwm.gpio2_enabled);
@@ -450,7 +453,6 @@ function getConfig(data) {
     $('#gpio13_invert').prop('checked', config.pwm.gpio13_invert);
     $('#gpio14_invert').prop('checked', config.pwm.gpio14_invert);
     $('#gpio15_invert').prop('checked', config.pwm.gpio15_invert);
-
 
     $('#gpio0_channel').val(config.pwm.gpio0_channel);
     $('#gpio1_channel').val(config.pwm.gpio1_channel);
@@ -642,6 +644,7 @@ function submitConfig() {
             },
             "pwm": {
                "enabled": $('#pwm_enabled').prop('checked'),
+               "freq": parseInt($('#pwm_freq').val()),
                "gamma": $('#pwm_gamma').prop('checked'),
                "gpio0_channel": parseInt($('#gpio0_channel').val()),
                "gpio0_enabled": $('#gpio0_enabled').prop('checked'),

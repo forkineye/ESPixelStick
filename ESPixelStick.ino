@@ -700,6 +700,7 @@ void dsDeviceConfig(JsonObject &json) {
 
 #if defined(ESPS_SUPPORT_PWM)
     config.pwm_enabled = json["pwm"]["enabled"];
+    config.pwm_freq = json["pwm"]["freq"];
     config.pwm_gamma = json["pwm"]["gamma"];
     for (int i=0; i < 11; i++ ) {
       int j = valid_gpio[i];
@@ -813,6 +814,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
 #if defined(ESPS_SUPPORT_PWM)
     JsonObject &pwm = json.createNestedObject("pwm");
     pwm["enabled"] = config.pwm_enabled;
+    pwm["freq"] = config.pwm_freq;
     pwm["gamma"] = config.pwm_gamma;
     
     for (int i=0; i < 11; i++ ) {
@@ -1042,7 +1044,9 @@ void loop() {
 #if defined(ESPS_SUPPORT_PWM)
 void setupPWM () {
   if ( config.pwm_enabled ) {
-    analogWriteFreq(100);
+    if ( (config.pwm_freq >= 100) && (config.pwm_freq <= 1000) ) {
+      analogWriteFreq(config.pwm_freq);
+    }
     for (int i=0; i < 11; i++ ) {
       int gpio = valid_gpio[i];
       if (config.pwm_gpio_enabled[gpio]) {
