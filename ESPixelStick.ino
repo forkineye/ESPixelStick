@@ -126,13 +126,12 @@ SerialDriver    serial;         // Serial object
 // PWM globals
 // GPIO 6-11 are for flash chip
 #if defined (ESPS_MODE_PIXEL)
-int valid_gpio[11] = { 0,1,  3,4,5,12,13,14,15,16 };  // 2 is WS2811 led data
+uint8_t valid_gpio[11] = { 0,1,  3,4,5,12,13,14,15,16 };  // 2 is WS2811 led data
 #elif defined(ESPS_MODE_SERIAL)
-int valid_gpio[11] = { 0,  2,3,4,5,12,13,14,15,16 };  // 1 is serial TX for DMX data
+uint8_t valid_gpio[11] = { 0,  2,3,4,5,12,13,14,15,16 };  // 1 is serial TX for DMX data
 #endif
 
-int last_pwm[17];   // 0-255, 0=dark
-//extern const uint8_t GAMMA_TABLE[];
+uint8_t last_pwm[17];   // 0-255, 0=dark
 
 
 /////////////////////////////////////////////////////////
