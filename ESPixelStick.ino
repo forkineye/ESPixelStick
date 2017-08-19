@@ -125,9 +125,9 @@ SerialDriver    serial;         // Serial object
 
 // PWM globals
 // GPIO 6-11 are for flash chip
-#if defined (ESPS_MODE_PIXEL)
+#if defined (ESPS_MODE_PIXEL) || ( defined(ESPS_MODE_SERIAL) && (SEROUT_UART == 1))
 uint8_t valid_gpio[11] = { 0,1,  3,4,5,12,13,14,15,16 };  // 2 is WS2811 led data
-#elif defined(ESPS_MODE_SERIAL)
+#elif defined(ESPS_MODE_SERIAL) && (SEROUT_UART == 0)
 uint8_t valid_gpio[11] = { 0,  2,3,4,5,12,13,14,15,16 };  // 1 is serial TX for DMX data
 #endif
 
@@ -245,6 +245,7 @@ void setup() {
     // Configure the outputs
 #if defined (ESPS_SUPPORT_PWM)
     setupPWM();
+    
 #endif
 
 #if defined (ESPS_MODE_PIXEL)
@@ -551,10 +552,15 @@ void validateConfig() {
         config.mqtt_topic = "diy/esps/" + String(chipId);
     }
 
+#if defined(ESPS_SUPPORT_PWM)
+    config.devmode.MPWM = true;
+#endif
 
 #if defined(ESPS_MODE_PIXEL)
     // Set Mode
-    config.devmode = DevMode::MPIXEL;
+//    config.devmode = DevMode::MPIXEL;
+    config.devmode.MPIXEL = true;
+    config.devmode.MSERIAL = false;
 
     // Generic channel limits for pixels
     if (config.channel_count % 3)
@@ -574,7 +580,9 @@ void validateConfig() {
 
 #elif defined(ESPS_MODE_SERIAL)
     // Set Mode
-    config.devmode = DevMode::MSERIAL;
+//    config.devmode = DevMode::MSERIAL;
+    config.devmode.MPIXEL = false;
+    config.devmode.MSERIAL = true;
 
     // Generic serial channel limits
     if (config.channel_count > RENARD_LIMIT)
@@ -761,7 +769,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     // Device
     JsonObject &device = json.createNestedObject("device");
     device["id"] = config.id.c_str();
-    device["mode"] = static_cast<uint8_t>(config.devmode);
+    device["mode"] = config.devmode.toInt();
 
     // Network
     JsonObject &network = json.createNestedObject("network");

@@ -67,11 +67,22 @@ const char BUILD_DATE[] = __DATE__ " " __TIME__;
 #define CONFIG_MAX_SIZE 2048    /* Sanity limit for config file */
 
 /* Pixel Types */
+class DevCap {
+public:
+    bool MPIXEL : 1;
+    bool MSERIAL : 1;
+    bool MPWM : 1;
+    uint8_t toInt() {
+      return (MPWM<<2 | MSERIAL<<1 | MPIXEL);
+    }
+
+};
+/*
 enum class DevMode : uint8_t {
     MPIXEL,
     MSERIAL
 };
-
+*/
 /* Test Modes */
 enum class TestMode : uint8_t {
     DISABLED,
@@ -92,7 +103,7 @@ typedef struct {
 typedef struct {
     /* Device */
     String      id;             /* Device ID */
-    DevMode     devmode;        /* Device Mode - used for reporting mode, can't be set */
+    DevCap      devmode;        /* Device Mode - used for reporting mode, can't be set */
     TestMode    testmode;       /* Testing mode */
 
     /* Network */
