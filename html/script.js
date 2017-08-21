@@ -1,5 +1,5 @@
 var mode = 'null';
-var gpio_list = [0,1,2,3,4,5,12,13,14,15];
+var gpio_list = [0,1,2,3,4,5,12,13,14,15,16];
 
 // jQuery doc ready 
 $(function() {
