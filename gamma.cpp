@@ -22,7 +22,7 @@ uint8_t GAMMA_2811[] = {
 
 void updateGammaTable(float gammaVal) {
   for (int i=0; i<256; i++) {
-    GAMMA_2811[i] = pow(i, 1.0/gammaVal);
+    GAMMA_2811[i] = (uint8_t) 255.0 * pow(i/255.0, gammaVal) + 0.5;
   }
 }
 

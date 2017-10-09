@@ -483,6 +483,17 @@ void initWeb() {
         request->send(200, "text/json", jsonString);
     });
 
+    // JSON Config Handler
+    web.on("/gamma", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String myString;
+        for (int i=0; i<256; i++) {
+          if (i%16 == 0) myString += "\r\n";
+          myString += GAMMA_2811[i];
+          myString += ", ";
+        }
+        request->send(200, "text/json", myString);
+    });
+
     // Firmware upload handler
     web.on("/updatefw", HTTP_POST, [](AsyncWebServerRequest *request) {
         ws.textAll("X6");
