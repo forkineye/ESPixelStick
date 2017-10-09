@@ -122,7 +122,7 @@ typedef struct {
     PixelType   pixel_type;     /* Pixel type */
     PixelColor  pixel_color;    /* Pixel color order */
     bool        gamma;          /* Use gamma map? */
-
+    float       gammaVal;       /* gamma value to use */
 #elif defined(ESPS_MODE_SERIAL)
     /* Serial */
     SerialType  serial_type;    /* Serial type */

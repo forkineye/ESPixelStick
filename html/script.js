@@ -425,6 +425,7 @@ function getConfig(data) {
         $('#p_type').val(config.pixel.type);
         $('#p_color').val(config.pixel.color);
         $('#p_gamma').prop('checked', config.pixel.gamma);
+        $('#p_gammaVal').val(config.pixel.gammaVal);
         
         if(config.e131.channel_count / 3 <8 ) {
             $('#v_columns').val(config.e131.channel_count / 3);
@@ -581,7 +582,8 @@ function submitConfig() {
             'pixel': {
                 'type': parseInt($('#p_type').val()),
                 'color': parseInt($('#p_color').val()),
-                'gamma': $('#p_gamma').prop('checked')
+                'gamma': $('#p_gamma').prop('checked'),
+                'gammaVal': parseFloat($('#p_gammaVal').val())
             },
             'serial': {
                 'type': parseInt($('#s_proto').val()),
