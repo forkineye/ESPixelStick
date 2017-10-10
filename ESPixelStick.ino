@@ -483,7 +483,7 @@ void initWeb() {
         request->send(200, "text/json", jsonString);
     });
 
-    // JSON Config Handler
+    // gamma debugging Config Handler
     web.on("/gamma", HTTP_GET, [](AsyncWebServerRequest *request) {
         String myString;
         for (int i=0; i<256; i++) {
@@ -564,6 +564,10 @@ void validateConfig() {
             config.channel_count = 63 * 3;
     }
 
+    // default gamma value
+    if (config.gammaVal <= 0) {
+        config.gammaVal = 2.2;
+    }
 #elif defined(ESPS_MODE_SERIAL)
     // Set Mode
     config.devmode = DevMode::MSERIAL;
