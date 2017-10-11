@@ -658,3 +658,4 @@ function reboot() {
     showReboot();
     ws.send('X6');
 }
+
