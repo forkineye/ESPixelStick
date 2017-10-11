@@ -1,6 +1,7 @@
 /* Requires */
 var gulp = require('gulp');
 var plumber = require('gulp-plumber');
+var concat = require('gulp-concat');
 var htmlmin = require('gulp-htmlmin');
 var cleancss = require('gulp-clean-css');
 var uglifyjs = require('gulp-uglify');
@@ -22,8 +23,9 @@ gulp.task('html', function() {
 
 /* CSS Task */
 gulp.task('css', function() {
-    return gulp.src(['html/**/*.css'])
+    return gulp.src(['html/css/bootstrap.css', 'html/style.css'])
         .pipe(plumber())
+        .pipe(concat('esps.css'))
         .pipe(cleancss())
         .pipe(gzip())
         .pipe(gulp.dest('data/www'));
@@ -31,12 +33,21 @@ gulp.task('css', function() {
 
 /* JavaScript Task */
 gulp.task('js', function() {
-    return gulp.src(['html/**/*.js'])
+    return gulp.src(['html/js/jquery*.js', 'html/js/bootstrap.js', 'html/js/jqColorPicker.js', 'html/script.js'])
         .pipe(plumber())
+        .pipe(concat('esps.js'))
         .pipe(uglifyjs())
         .pipe(gzip())
         .pipe(gulp.dest('data/www'));
 });
+
+/* Image Task */
+gulp.task('image', function() {
+    return gulp.src(['html/**/*.png', 'html/**/*.ico'])
+        .pipe(plumber())
+        .pipe(gulp.dest('data/www'));
+});
+
 
 /* Clean Task */
 gulp.task('clean', function() {
@@ -52,4 +63,4 @@ gulp.task('watch', function() {
 });
 
 /* Default Task */
-gulp.task('default', ['clean', 'html', 'css', 'js']);
+gulp.task('default', ['clean', 'html', 'css', 'js', 'image']);

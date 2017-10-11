@@ -178,11 +178,16 @@ void SerialDriver::show() {
         delayMicroseconds(DMX_MAB);
     }
 
-    SET_PERI_REG_MASK(UART_INT_ENA(1), UART_TXFIFO_EMPTY_INT_ENA);
+    SET_PERI_REG_MASK(UART_INT_ENA(SEROUT_UART), UART_TXFIFO_EMPTY_INT_ENA);
 
     startTime = micros();
 
     /* Copy data to the idle buffer and swap it */
     memcpy(_asyncdata, _serialdata, _size);
     std::swap(_asyncdata, _serialdata);
+}
+
+
+uint8_t* SerialDriver::getData() {
+    return _serialdata;
 }

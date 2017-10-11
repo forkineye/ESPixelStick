@@ -36,6 +36,58 @@ body {
   color: #9d9d9d;
 }
 
+/* Color picker */
+.colorpicker-saturation {
+  width: 200px;
+  height: 200px;
+}
+  
+.colorpicker-hue,
+.colorpicker-alpha {
+  width: 30px;
+  height: 200px;
+}
+
+.colorpicker-color,
+.colorpicker-color div {
+  height: 30px;
+}
+
+.btn-cp {
+  border: 1px solid;
+  width: 100%;
+}
+
+.white {
+  background-color: #FFFFFF;
+  border: 1px solid;
+  width: 100%;
+}
+
+.red {
+  background-color: #FF0000;
+  border: 1px solid;
+  width: 100%;
+}
+
+.green {
+  background-color: #00FF00;
+  border: 1px solid;
+  width: 100%;
+}
+
+.blue {
+  background-color: #0000FF;
+  border: 1px solid;
+  width: 100%;
+}
+
+canvas {
+  background-color: black; 
+  width: 100%;
+  height: auto;
+}
+
 /* Snackbar - position it at the bottom and in the middle of the screen */
 #snackbar {
     visibility: hidden;     /* Hidden by default. Visible on click */
@@ -81,4 +133,31 @@ However, delay the fade out process for 2.5 seconds */
 @keyframes fadeout {
     from {bottom: 30px; opacity: 1;}
     to {bottom: 0; opacity: 0;}
+}
+
+/* Progress bar */
+.bar {
+  width: 100%;
+  height: 20px;
+  border: 1px solid #2980b9;
+  border-radius: 3px;
+  background-image: 
+    repeating-linear-gradient(
+      -45deg,
+      #2980b9,
+      #2980b9 11px,
+      #eee 10px,
+      #eee 20px /* determines size */
+    );
+  background-size: 28px 28px;
+  animation: move .5s linear infinite;
+}
+
+@keyframes move {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 28px 0;
+  }
 }
