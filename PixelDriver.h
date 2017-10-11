@@ -23,8 +23,8 @@
 #define UART_INV_MASK  (0x3f << 19)
 #define UART 1
 
-/* Gamma correction table until pow() is fixed */
-extern const uint8_t GAMMA_TABLE[];
+/* Gamma correction table */
+extern uint8_t GAMMA_TABLE[];
 
 /* 
 * Inverted 6N1 UART lookup table for ws2811, first 2 bits ignored.

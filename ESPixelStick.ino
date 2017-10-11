@@ -46,6 +46,7 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include "ESPixelStick.h"
 #include "EFUpdate.h"
 #include "wshandler.h"
+#include "gamma.h"
 
 extern "C" {
 #include <user_interface.h>
@@ -504,6 +505,17 @@ void initWeb() {
         request->send(200, "text/json", jsonString);
     });
 
+    // gamma debugging Config Handler
+    web.on("/gamma", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String myString;
+        for (int i=0; i<256; i++) {
+          if (i%16 == 0) myString += "\r\n";
+          myString += GAMMA_2811[i];
+          myString += ", ";
+        }
+        request->send(200, "text/json", myString);
+    });
+
     // Firmware upload handler
     web.on("/updatefw", HTTP_POST, [](AsyncWebServerRequest *request) {
         ws.textAll("X6");
@@ -580,6 +592,10 @@ void validateConfig() {
             config.channel_count = 63 * 3;
     }
 
+    // default gamma value
+    if (config.gammaVal <= 0) {
+        config.gammaVal = 2.2;
+    }
 #elif defined(ESPS_MODE_SERIAL)
     // Set Mode
 //    config.devmode = DevMode::MSERIAL;
@@ -632,6 +648,8 @@ void updateConfig() {
 #if defined(ESPS_MODE_PIXEL)
     pixels.begin(config.pixel_type, config.pixel_color, config.channel_count / 3);
     pixels.setGamma(config.gamma);
+    updateGammaTable(config.gammaVal);
+
 #elif defined(ESPS_MODE_SERIAL)
     serial.begin(&SEROUT_PORT, config.serial_type, config.channel_count, config.baudrate);
 #endif
@@ -701,6 +719,7 @@ void dsDeviceConfig(JsonObject &json) {
     config.pixel_type = PixelType(static_cast<uint8_t>(json["pixel"]["type"]));
     config.pixel_color = PixelColor(static_cast<uint8_t>(json["pixel"]["color"]));
     config.gamma = json["pixel"]["gamma"];
+    config.gammaVal = json["pixel"]["gammaVal"];
 
 #elif defined(ESPS_MODE_SERIAL)
     /* Serial */
@@ -814,6 +833,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     pixel["type"] = static_cast<uint8_t>(config.pixel_type);
     pixel["color"] = static_cast<uint8_t>(config.pixel_color);
     pixel["gamma"] = config.gamma;
+    pixel["gammaVal"] = config.gammaVal;
 
 #elif defined(ESPS_MODE_SERIAL)
     // Serial
