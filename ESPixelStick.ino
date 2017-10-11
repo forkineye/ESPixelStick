@@ -510,7 +510,7 @@ void initWeb() {
         String myString;
         for (int i=0; i<256; i++) {
           if (i%16 == 0) myString += "\r\n";
-          myString += GAMMA_2811[i];
+          myString += GAMMA_TABLE[i];
           myString += ", ";
         }
         request->send(200, "text/json", myString);
