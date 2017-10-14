@@ -47,6 +47,7 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include "EFUpdate.h"
 #include "wshandler.h"
 #include "gamma.h"
+#include "gpio.h"
 
 extern "C" {
 #include <user_interface.h>
@@ -516,6 +517,7 @@ void initWeb() {
         request->send(200, "text/json", myString);
     });
 
+    web.on("/gpio", HTTP_GET, handleGPIO);
     // Firmware upload handler
     web.on("/updatefw", HTTP_POST, [](AsyncWebServerRequest *request) {
         ws.textAll("X6");
