@@ -1,0 +1,126 @@
+
+<!DOCTYPE html
+	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+<head>
+<title>Garage</title>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<meta http-equiv="CACHE-CONTROL" content="NO-CACHE" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+</head>
+<body>
+
+<script type="text/javascript">
+
+var responseText='';
+//var lockscroll="no";
+var lockscroll="no";
+
+ 
+//window.scrollTo(0, 1);
+window.onload = loadscroll;
+window.onscroll = fightscroll;
+
+function fightscroll()
+{
+  if (lockscroll=="yes")
+    {
+      if (window.pageYOffset<=1)
+        lockscroll="no";
+      else
+        setTimeout('window.scrollTo(0, 120)' , 1);
+    }
+}
+
+function loadscroll()
+{
+  setTimeout('window.scrollTo(0, 120)' , 1);
+}
+
+function delayAlert(alert_text)
+{
+	alert(alert_text);
+	document.bgColor = 'white';
+}
+function toggleButton()
+{
+sendRemoteButton('4','1');
+setTimeout(function(){
+sendRemoteButton('4','0');
+} , 300);
+}
+function sendRemoteButton(gpio,state)
+{
+//alert ("got sendRemoteButtom remote: "+gpio+" button: "+state);
+
+var xmlHttp;
+try
+  {
+  // Firefox, Opera 8.0+, Safari
+  xmlHttp=new XMLHttpRequest();
+  }
+catch (e)
+  {
+  // Internet Explorer
+  try
+    {
+    xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+    }
+  catch (e)
+    {
+    try
+      {
+      xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+      }
+    catch (e)
+      {
+      alert("Your browser does not support AJAX!");
+      return false;
+      }
+    }
+  }
+
+  xmlHttp.onreadystatechange=function()
+    {
+    if(xmlHttp.readyState==4)
+      {
+      responseText=xmlHttp.responseText;
+      rstatus=xmlHttp.status;
+      if(rstatus==200)
+        {
+			document.bgColor = 'white';
+		}
+      else
+		{
+			document.bgColor = 'red';
+			setTimeout('delayAlert(rstatus+": "+responseText)', 1000);
+alert ("xmlHttp.status is "+xmlHttp.status);
+	alert ("rstatus is "+rstatus);
+		}
+      }
+    }
+
+
+  if ((gpio != "")&&(state != "")) { 
+	var url="/gpio/";
+	url=url+gpio; 
+	url=url+'/set/';
+	url=url+state;
+	//alert ('are we alive?' + url)
+  	xmlHttp.open("GET",url,true);
+  	xmlHttp.setRequestHeader("Cache-Control", "no-cache");
+	xmlHttp.setRequestHeader("If-Modified-Since", "Sat, 1 Jan 2000 00:00:00 GMT");
+  	xmlHttp.send(null);
+	document.bgColor = 'gray';
+    }
+  }
+</script>
+<center>
+<img src="button.jpg" height=250 align=center onclick=toggleButton()></img>
+</center>
+
+
+</body>
+</html>
