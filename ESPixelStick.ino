@@ -161,7 +161,7 @@ RF_PRE_INIT() {
 void setup() {
     // Configure SDK params
     wifi_set_sleep_type(NONE_SLEEP_T);
-
+    ToggleSetup();
     // Initial pin states
     pinMode(DATA_PIN, OUTPUT);
     digitalWrite(DATA_PIN, LOW);
@@ -528,9 +528,16 @@ void initWeb() {
     web.serveStatic("/config.json", SPIFFS, "/config.json");
 
     web.onNotFound([](AsyncWebServerRequest *request) {
-        request->send(404, "text/plain", "Page not found");
+        if (request->method() == HTTP_OPTIONS) {
+            AsyncWebServerResponse *response = request->beginResponse(200);
+            response->addHeader("Access-Control-Allow-Origin","*");
+            request->send(response);
+        } else {
+            request->send(404, "text/plain", "Page not found");          
+        }
     });
 
+//    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
     web.begin();
 
     LOG_PORT.print(F("- Web Server started on port "));
@@ -1057,6 +1064,8 @@ void loop() {
                 break;
         }
     }
+
+  ToggleTime();
 
 
 /* Streaming refresh */
