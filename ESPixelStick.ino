@@ -46,6 +46,7 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include "ESPixelStick.h"
 #include "EFUpdate.h"
 #include "wshandler.h"
+#include "pwm.h"
 #include "gamma.h"
 
 extern "C" {
@@ -124,17 +125,6 @@ SerialDriver    serial;         // Serial object
 #error "No valid output mode defined."
 #endif
 
-// PWM globals
-// GPIO 6-11 are for flash chip
-#if defined (ESPS_MODE_PIXEL) || ( defined(ESPS_MODE_SERIAL) && (SEROUT_UART == 1))
-// { 0,1,  3,4,5,12,13,14,15,16 };  // 2 is WS2811 led data
-uint32_t valid_gpio_mask = 0b11111000000111011;
-#elif defined(ESPS_MODE_SERIAL) && (SEROUT_UART == 0)
-// { 0,  2,3,4,5,12,13,14,15,16 };  // 1 is serial TX for DMX data
-uint32_t valid_gpio_mask = 0b11111000000111101;
-#endif
-#define NUM_GPIO 17    // 0 .. 16 inclusive
-uint8_t last_pwm[NUM_GPIO];   // 0-255, 0=dark
 
 
 /////////////////////////////////////////////////////////
@@ -147,8 +137,6 @@ void loadConfig();
 void initWifi();
 void initWeb();
 void updateConfig();
-void setupPWM();
-void handlePWM();
 
 // Radio config
 RF_PRE_INIT() {
@@ -1073,49 +1061,4 @@ void loop() {
 #endif
 }
 
-#if defined(ESPS_SUPPORT_PWM)
-void setupPWM () {
-  if ( config.pwm_enabled ) {
-    if ( (config.pwm_freq >= 100) && (config.pwm_freq <= 1000) ) {
-      analogWriteFreq(config.pwm_freq);
-    }
-    for (int gpio=0; gpio < NUM_GPIO; gpio++ ) {
-      if ( ( valid_gpio_mask & 1<<gpio ) && (config.pwm_gpio_enabled[gpio]) ) {
-        pinMode(gpio, OUTPUT);
-        if (config.pwm_gpio_invert[gpio]) {
-          analogWrite(gpio, 1023);
-        } else {
-          analogWrite(gpio, 0);          
-        }
-      }
-    }
-  }
-}
-
-
-void handlePWM() {
-  if ( config.pwm_enabled ) {
-    for (int gpio=0; gpio < NUM_GPIO; gpio++ ) {
-      if ( ( valid_gpio_mask & 1<<gpio ) && (config.pwm_gpio_enabled[gpio]) ) {
-        int gpio_dmx = config.pwm_gpio_dmx[gpio];
-        if (gpio_dmx < config.channel_count) {
-#if defined (ESPS_MODE_PIXEL)
-          int pwm_val = (config.pwm_gamma) ? GAMMA_TABLE[pixels.getData()[gpio_dmx]] : pixels.getData()[gpio_dmx];
-#elif defined(ESPS_MODE_SERIAL)
-          int pwm_val = (config.pwm_gamma) ? GAMMA_TABLE[serial.getData()[gpio_dmx]] : serial.getData()[gpio_dmx];
-#endif
-          if ( pwm_val != last_pwm[gpio]) {
-            last_pwm[gpio] = pwm_val;
-            if (config.pwm_gpio_invert[gpio]) {
-              analogWrite(gpio, 1023-4*pwm_val);  // 0..255 => 1023..0
-            } else {
-              analogWrite(gpio, 4*pwm_val);       // 0..255 => 0..1023
-            }
-          }
-        }
-      }
-    }
-  }
-}
-#endif
 
