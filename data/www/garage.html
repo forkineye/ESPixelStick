@@ -6,20 +6,80 @@
 <head>
 <title>Garage</title>
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="CACHE-CONTROL" content="NO-CACHE" />
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 </head>
 <body>
+<center>
+<button class="button hover-block" id='gb' align=center>Garage Door</button>
+</center>
+<style>
+.hover-block {
+    -webkit-transition: all 1s linear;
+            transition: all 1s linear;      
 
+}
+
+
+html, body {
+  overflow: hidden;
+  background-color: grey;
+    max-width:100%;
+    max-height:100%;
+    overflow:hidden;
+	  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  }
+.button {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+		user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+	background-color: white; /* Green */
+    border: none;
+    color: black;
+    padding: 16px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 50px;
+    margin: 4px 2px;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    cursor: pointer;  padding: 20px;
+  width: 300px;
+	border: 5px solid #4CAF50;
+      -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+	height: 500px;
+	border-radius: 30px;
+}
+
+.toggleColour {
+  background-color: #4CAF50;
+    color: white;
+  }
+
+
+</style>
+<script type='text/javascript' src="esps.js"></script>
 <script type="text/javascript">
 
 var responseText='';
-//var lockscroll="no";
 var lockscroll="no";
-
- 
-//window.scrollTo(0, 1);
+ function changeClr( id , clr ){
+    document.getElementById( id ).backgroundColor = clr;
+}
 window.onload = loadscroll;
 window.onscroll = fightscroll;
 
@@ -33,7 +93,6 @@ function fightscroll()
         setTimeout('window.scrollTo(0, 120)' , 1);
     }
 }
-
 function loadscroll()
 {
   setTimeout('window.scrollTo(0, 120)' , 1);
@@ -44,17 +103,16 @@ function delayAlert(alert_text)
 	alert(alert_text);
 	document.bgColor = 'white';
 }
+
+
 function toggleButton()
 {
-sendRemoteButton('4','1');
-setTimeout(function(){
-sendRemoteButton('4','0');
-} , 300);
+sendRemoteButton('4','010');
 }
+
+
 function sendRemoteButton(gpio,state)
 {
-//alert ("got sendRemoteButtom remote: "+gpio+" button: "+state);
-
 var xmlHttp;
 try
   {
@@ -96,30 +154,35 @@ catch (e)
 		{
 			document.bgColor = 'red';
 			setTimeout('delayAlert(rstatus+": "+responseText)', 1000);
-alert ("xmlHttp.status is "+xmlHttp.status);
-	alert ("rstatus is "+rstatus);
 		}
       }
     }
 
 
   if ((gpio != "")&&(state != "")) { 
+	$('button').addClass('toggleColour');
 	var url="/gpio/";
 	url=url+gpio; 
-	url=url+'/set/';
+	url=url+'/toggle/';
 	url=url+state;
-	//alert ('are we alive?' + url)
   	xmlHttp.open("GET",url,true);
-  	xmlHttp.setRequestHeader("Cache-Control", "no-cache");
-	xmlHttp.setRequestHeader("If-Modified-Since", "Sat, 1 Jan 2000 00:00:00 GMT");
   	xmlHttp.send(null);
 	document.bgColor = 'gray';
+	setTimeout(refResh, 300);
     }
-  }
+	
+}
+$('#gb').on('touchstart mousedown', function(e) {
+    e.preventDefault();
+	toggleButton();
+});
+
+function refResh(){
+	$(':focus').blur()
+	$('button').removeClass('toggleColour');
+	}
 </script>
-<center>
-<img src="button.jpg" height=250 align=center onclick=toggleButton()></img>
-</center>
+
 
 
 </body>
