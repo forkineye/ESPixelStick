@@ -517,7 +517,6 @@ void initWeb() {
         request->send(200, "text/json", myString);
     });
 
-    web.on("/gpio", HTTP_GET, handleGPIO);
     // Firmware upload handler
     web.on("/updatefw", HTTP_POST, [](AsyncWebServerRequest *request) {
         ws.textAll("X6");
@@ -537,7 +536,7 @@ void initWeb() {
         }
     });
 
-//    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
     web.begin();
 
     LOG_PORT.print(F("- Web Server started on port "));
