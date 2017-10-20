@@ -1,3 +1,22 @@
+/*
+Generic GPIO interface via the web interface
+
+IMPLEMENTED URLs:
+/uptime            // show uptime, heap, signal strength
+
+/gpio/<n>/get      // read gpio <n>
+/gpio/<n>/set/0    // set to low
+/gpio/<n>/set/1    // set to high
+/gpio/<n>/mode/0   // set to input
+/gpio/<n>/mode/1   // set to output
+/gpio/<n>/toggle/101  // toggle the output 1,0,1 with 200ms delay
+
+NOT IMPLEMENTED:
+/acl/<row>/set/aaa.bbb.ccc.ddd.eee/mask  // add aaa.bbb.ccc.ddd to the allowed IP list in slot <row>
+/acl/<row>/get    // show allowed IP list in slot <row>
+
+*/
+
 #include "gpio.h"
 
 int gpio;
@@ -20,7 +39,8 @@ void handleGPIO (AsyncWebServerRequest *request) {
   String substrings[10];
   int res = splitString('/', request->url(), substrings, sizeof(substrings) / sizeof(substrings[0]));
   gpio = substrings[2].toInt();
-  if ((gpio == 0) && (substrings[3].charAt(0) != '0')) {
+  // distinguish between valid gpio 0 and invalid data (which also return 0 *sigh*)
+  if ((gpio == 0) && (substrings[2].charAt(0) != '0')) {
     gpio = -1;
   }
   switch (gpio) {
@@ -124,7 +144,9 @@ void ToggleTime() {
 }
 
 void ToggleSetup() {
-  lWaitMillis = millis() + toggleMS;  // initial setup
+    lWaitMillis = millis() + toggleMS;  // initial setup
+    // gpio url handler
+    web.on("/gpio", HTTP_GET, handleGPIO);
 
     // uptime Handler
     web.on("/uptime", HTTP_GET, [](AsyncWebServerRequest *request) {
