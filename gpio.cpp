@@ -146,7 +146,7 @@ void ToggleTime() {
 void ToggleSetup() {
     lWaitMillis = millis() + toggleMS;  // initial setup
     // gpio url handler
-    web.on("/gpio", HTTP_GET, handleGPIO);
+    web.on("/gpio", HTTP_GET, handleGPIO).setFilter(ON_STA_FILTER);
 
     // uptime Handler
     web.on("/uptime", HTTP_GET, [](AsyncWebServerRequest *request) {

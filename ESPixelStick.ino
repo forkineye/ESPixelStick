@@ -536,7 +536,7 @@ void initWeb() {
         }
     });
 
-//    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
     web.begin();
 
     LOG_PORT.print(F("- Web Server started on port "));
