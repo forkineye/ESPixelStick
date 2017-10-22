@@ -4,7 +4,7 @@
 	 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
 <head>
-<title>Garage</title>
+<title>Gamma Curve</title>
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="CACHE-CONTROL" content="NO-CACHE" />
@@ -14,18 +14,20 @@
 <body>
 <center>
 
-<svg viewBox="-20 -20 320 320" class="chart">
+<svg viewBox="-25 -30 320 320" width="256" height="256" class="chart">
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
     </marker>
   </defs>
 
+  <text x="140" y="5" class="label-title" style="font-size: 25px">Gamma Curve</text>
+
   <line x1="0" y1="256" x2="256" y2="256" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
-  <text x="125" y="280" class="label-title">Input</text>
+  <text x="125" y="275" class="label-title">Input</text>
 
   <line x1="0" y1="256" x2="0" y2="0" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
-  <text x="-20" y="128" class="label-title">Output</text>
+  <text x="-15" y="120" class="label-title" style="writing-mode: tb;">Output</text>
 
   <polyline
      id="cracker"
@@ -41,10 +43,14 @@
 
 <style>
 
+.label-title {
+  text-anchor: middle;
+  font-family: Arial;
+  font-size: 15px;
+}
+
 .chart {
   background: white;
-  width: 320px;
-  height: 320px;
   padding: 0px 0px 0px 0;
 }
 
@@ -84,8 +90,6 @@ function updateGamma()
 	xmlHttp.onreadystatechange=function()
 	{
 		if(this.readyState==4 && this.status == 200) {
-//alert ( xmlHttp.responseText);
-//			document.getElementById("statusUptime").innerHTML = xmlHttp.responseText;
 			var polyline = document.getElementById('cracker');
 			var points = polyline.getAttribute('points');
 
