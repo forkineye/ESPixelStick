@@ -23,7 +23,7 @@
 #define UART_INV_MASK  (0x3f << 19)
 #define UART 1
 
-extern uint8_t GAMMA_2811[];
+extern uint8_t GAMMA_TABLE[];
 
 
 /* 

@@ -485,13 +485,14 @@ void initWeb() {
 
     // gamma debugging Config Handler
     web.on("/gamma", HTTP_GET, [](AsyncWebServerRequest *request) {
-        String myString;
+        AsyncResponseStream *response = request->beginResponseStream("text/plain");
         for (int i=0; i<256; i++) {
-          if (i%16 == 0) myString += "\r\n";
-          myString += GAMMA_2811[i];
-          myString += ", ";
+          response->printf ("%5d,", GAMMA_TABLE[i]);
+          if (i%16 == 15) {
+            response->printf("\r\n");
+          }
         }
-        request->send(200, "text/json", myString);
+        request->send(response);
     });
 
     // Firmware upload handler
@@ -505,6 +506,8 @@ void initWeb() {
     web.onNotFound([](AsyncWebServerRequest *request) {
         request->send(404, "text/plain", "Page not found");
     });
+
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
 
     web.begin();
 
