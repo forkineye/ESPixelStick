@@ -14,15 +14,18 @@
 <body>
 <center>
 
-<svg viewBox="-20 -20 300 300" class="chart">
+<svg viewBox="-20 -20 320 320" class="chart">
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
     </marker>
   </defs>
 
-  <line x1="0" y1="256" x2="250" y2="256" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="0" y1="256" x2="256" y2="256" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="125" y="280" class="label-title">Input</text>
+
   <line x1="0" y1="256" x2="0" y2="0" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="-20" y="128" class="label-title">Output</text>
 
   <polyline
      id="cracker"
@@ -46,7 +49,7 @@
 }
 
 body {
-  /* background: #ccc; */
+  background: #ccc;
   padding: 20px;
   display: flex;
   align-items: center;
@@ -99,7 +102,6 @@ function updateGamma()
 	var url= host + "gamma";
 	xmlHttp.open("GET",url,true);
 	xmlHttp.send(null);
-
 }
 
 </script>
