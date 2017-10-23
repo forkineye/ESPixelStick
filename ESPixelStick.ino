@@ -24,8 +24,8 @@
 /* Output Mode has been moved to ESPixelStick.h */
 
 /* Fallback configuration if config.json is empty or fails */
-const char ssid[] = "blaster";
-const char passphrase[] = "omgthisismywirelesskeyhaha";
+const char ssid[] = "ENTER_SSID_HERE";
+const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 
 /*****************************************/
 /*         END - Configuration           */
