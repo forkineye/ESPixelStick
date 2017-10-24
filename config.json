@@ -21,7 +21,7 @@
       1
     ],
     "dhcp": true,
-    "ap_fallback": false
+    "ap_fallback": true
   },
 
   "device": {
