@@ -408,7 +408,7 @@ Serial.println(payload);
             config.testmode = TestMode::MQTT;
             if (m_rgb_state != true) {
                 m_rgb_state = true;
-                setStatic(m_rgb_red, m_rgb_green, m_rgb_blue);
+                setStatic(m_rgb_red*m_rgb_brightness/100, m_rgb_green*m_rgb_brightness/100, m_rgb_blue*m_rgb_brightness/100);
                 publishRGBState();
             }
         } else if (payload.equals(String(LIGHT_OFF))) {
@@ -425,7 +425,7 @@ Serial.println(payload);
             return;
         } else {
             m_rgb_brightness = brightness;
-            setStatic(m_rgb_red, m_rgb_green, m_rgb_blue);
+            setStatic(m_rgb_red*m_rgb_brightness/100, m_rgb_green*m_rgb_brightness/100, m_rgb_blue*m_rgb_brightness/100);
             publishRGBBrightness();
         }
     } else if (String(config.mqtt_topic + MQTT_LIGHT_RGB_COMMAND_TOPIC).equals(topic)) {
@@ -437,7 +437,7 @@ Serial.println(payload);
         m_rgb_green = payload.substring(firstIndex + 1, lastIndex).toInt();
         m_rgb_blue = payload.substring(lastIndex + 1).toInt();
    
-        setStatic(m_rgb_red, m_rgb_green, m_rgb_blue);
+        setStatic(m_rgb_red*m_rgb_brightness/100, m_rgb_green*m_rgb_brightness/100, m_rgb_blue*m_rgb_brightness/100);
         publishRGBColor();
     }
 }
