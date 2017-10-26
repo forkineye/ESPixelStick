@@ -38,6 +38,14 @@ const char BUILD_DATE[] = __DATE__ " " __TIME__;
 /*         END - Configuration           */
 /*****************************************/
 
+#include <ESP8266WiFi.h>
+#include <Ticker.h>
+#include <AsyncMqttClient.h>
+#include <ESP8266mDNS.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncUDP.h>
+#include <ESPAsyncWebServer.h>
+
 #if defined(ESPS_MODE_PIXEL)
 #include "PixelDriver.h"
 #elif defined(ESPS_MODE_SERIAL)
@@ -157,5 +165,18 @@ void serializeConfig(String &jsonString, bool pretty = false, bool creds = false
 void dsNetworkConfig(JsonObject &json);
 void dsDeviceConfig(JsonObject &json);
 void saveConfig();
+
+void connectWifi();
+void onWifiConnect(const WiFiEventStationModeGotIP &event);
+void onWiFiDisconnect(const WiFiEventStationModeDisconnected &event);
+void connectToMqtt();
+void onMqttConnect(bool sessionPresent);
+void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
+void onMqttMessage(char* topic, char* p_payload,
+        AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
+void publishRGBState();
+void publishRGBBrightness();
+void publishRGBColor();
+void setStatic(uint8_t r, uint8_t g, uint8_t b);
 
 #endif /* ESPIXELSTICK_H_ */
