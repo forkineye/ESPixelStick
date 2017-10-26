@@ -38,7 +38,13 @@ const char BUILD_DATE[] = __DATE__ " " __TIME__;
 /*         END - Configuration           */
 /*****************************************/
 
+#include <ESP8266WiFi.h>
+#include <Ticker.h>
 #include <AsyncMqttClient.h>
+#include <ESP8266mDNS.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncUDP.h>
+#include <ESPAsyncWebServer.h>
 
 #if defined(ESPS_MODE_PIXEL)
 #include "PixelDriver.h"
