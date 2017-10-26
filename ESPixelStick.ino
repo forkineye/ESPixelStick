@@ -716,14 +716,20 @@ void dsDeviceConfig(JsonObject &json) {
 #endif
 
 #if defined(ESPS_SUPPORT_PWM)
-    config.pwm_enabled = json["pwm"]["enabled"];
+    config.pwm_global_enabled = json["pwm"]["enabled"];
     config.pwm_freq = json["pwm"]["freq"];
     config.pwm_gamma = json["pwm"]["gamma"];
+    config.pwm_gpio_invert = 0;
+    config.pwm_gpio_enabled = 0;
     for (int gpio=0; gpio < NUM_GPIO; gpio++ ) {
       if ( valid_gpio_mask & 1<<gpio ) {
         config.pwm_gpio_dmx[gpio] = json["pwm"]["gpio" + (String)gpio + "_channel"];
-        config.pwm_gpio_invert[gpio] = json["pwm"]["gpio" + (String)gpio + "_invert"];
-        config.pwm_gpio_enabled[gpio] = json["pwm"]["gpio" + (String)gpio + "_enabled"];
+        if (json["pwm"]["gpio" + (String)gpio + "_invert"]) {
+          config.pwm_gpio_invert |= 1<<gpio;
+        }
+        if (json["pwm"]["gpio" + (String)gpio + "_enabled"]) {
+          config.pwm_gpio_enabled |= 1<<gpio;
+        }
       }
     }
 #endif
@@ -832,15 +838,15 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
 
 #if defined(ESPS_SUPPORT_PWM)
     JsonObject &pwm = json.createNestedObject("pwm");
-    pwm["enabled"] = config.pwm_enabled;
+    pwm["enabled"] = config.pwm_global_enabled;
     pwm["freq"] = config.pwm_freq;
     pwm["gamma"] = config.pwm_gamma;
     
     for (int gpio=0; gpio < NUM_GPIO; gpio++ ) {
       if ( valid_gpio_mask & 1<<gpio ) {
         pwm["gpio" + (String)gpio + "_channel"] = static_cast<uint16_t>(config.pwm_gpio_dmx[gpio]);
-        pwm["gpio" + (String)gpio + "_enabled"] = static_cast<bool>(config.pwm_gpio_enabled[gpio]);
-        pwm["gpio" + (String)gpio + "_invert"] = static_cast<bool>(config.pwm_gpio_invert[gpio]);
+        pwm["gpio" + (String)gpio + "_enabled"] = static_cast<bool>(config.pwm_gpio_enabled & 1<<gpio);
+        pwm["gpio" + (String)gpio + "_invert"] = static_cast<bool>(config.pwm_gpio_invert & 1<<gpio);
       }
     }
 #endif
