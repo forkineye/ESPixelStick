@@ -531,14 +531,13 @@ void initWeb() {
     web.onNotFound([](AsyncWebServerRequest *request) {
         if (request->method() == HTTP_OPTIONS) {
             AsyncWebServerResponse *response = request->beginResponse(200);
-            response->addHeader("Access-Control-Allow-Origin","*");
             request->send(response);
         } else {
             request->send(404, "text/plain", "Page not found");          
         }
     });
 
-    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+    DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
 
     web.begin();
 

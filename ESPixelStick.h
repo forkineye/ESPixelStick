@@ -38,6 +38,8 @@ const char BUILD_DATE[] = __DATE__ " " __TIME__;
 /*         END - Configuration           */
 /*****************************************/
 
+#include <AsyncMqttClient.h>
+
 #if defined(ESPS_MODE_PIXEL)
 #include "PixelDriver.h"
 #elif defined(ESPS_MODE_SERIAL)
@@ -146,7 +148,7 @@ typedef struct {
     bool        pwm_enabled;    /* is pwm runtime enabled? */
     int         pwm_freq;       /* pwm frequency */
     bool        pwm_gamma;      /* is pwm runtime enabled? */
-    int         pwm_gpio_dmx[17];    /* which dmx channel is gpio[n] mapped to? */
+    uint16_t    pwm_gpio_dmx[17];    /* which dmx channel is gpio[n] mapped to? */
     bool        pwm_gpio_enabled[17];      /* is gpio[n] enabled? */
     bool        pwm_gpio_invert[17];       /* is gpio[n] active high or active low? */
 #endif
@@ -157,5 +159,18 @@ void serializeConfig(String &jsonString, bool pretty = false, bool creds = false
 void dsNetworkConfig(JsonObject &json);
 void dsDeviceConfig(JsonObject &json);
 void saveConfig();
+
+void connectWifi();
+void onWifiConnect(const WiFiEventStationModeGotIP &event);
+void onWiFiDisconnect(const WiFiEventStationModeDisconnected &event);
+void connectToMqtt();
+void onMqttConnect(bool sessionPresent);
+void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
+void onMqttMessage(char* topic, char* p_payload,
+        AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
+void publishRGBState();
+void publishRGBBrightness();
+void publishRGBColor();
+void setStatic(uint8_t r, uint8_t g, uint8_t b);
 
 #endif /* ESPIXELSTICK_H_ */
