@@ -44,6 +44,7 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include <Hash.h>
 #include <SPI.h>
 #include "ESPixelStick.h"
+#include "udpraw.h"
 #include "EFUpdate.h"
 #include "wshandler.h"
 #include "gamma.h"
@@ -920,6 +921,9 @@ void setStatic(uint8_t r, uint8_t g, uint8_t b) {
 //
 /////////////////////////////////////////////////////////
 void loop() {
+   /* check for raw packets on port 2801 */
+    handle_raw_port();
+
     e131_packet_t packet;
 
     // Reboot handler
