@@ -85,7 +85,6 @@ void handleGPIO (AsyncWebServerRequest *request) {
       response->printf("Invalid gpio %d\r\n",gpio);
       break;
   }
-  response->addHeader("Access-Control-Allow-Origin", "*");
   request->send(response);
 }
 

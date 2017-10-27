@@ -47,6 +47,7 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include "udpraw.h"
 #include "EFUpdate.h"
 #include "wshandler.h"
+#include "pwm.h"
 #include "gamma.h"
 #include "gpio.h"
 
@@ -126,17 +127,6 @@ SerialDriver    serial;         // Serial object
 #error "No valid output mode defined."
 #endif
 
-// PWM globals
-// GPIO 6-11 are for flash chip
-#if defined (ESPS_MODE_PIXEL) || ( defined(ESPS_MODE_SERIAL) && (SEROUT_UART == 1))
-// { 0,1,  3,4,5,12,13,14,15,16 };  // 2 is WS2811 led data
-uint32_t valid_gpio_mask = 0b11111000000111011;
-#elif defined(ESPS_MODE_SERIAL) && (SEROUT_UART == 0)
-// { 0,  2,3,4,5,12,13,14,15,16 };  // 1 is serial TX for DMX data
-uint32_t valid_gpio_mask = 0b11111000000111101;
-#endif
-#define NUM_GPIO 17    // 0 .. 16 inclusive
-uint8_t last_pwm[NUM_GPIO];   // 0-255, 0=dark
 
 
 /////////////////////////////////////////////////////////
@@ -149,8 +139,6 @@ void loadConfig();
 void initWifi();
 void initWeb();
 void updateConfig();
-void setupPWM();
-void handlePWM();
 
 // Radio config
 RF_PRE_INIT() {
@@ -420,7 +408,7 @@ Serial.println(payload);
             config.testmode = TestMode::MQTT;
             if (m_rgb_state != true) {
                 m_rgb_state = true;
-                setStatic(m_rgb_red, m_rgb_green, m_rgb_blue);
+                setStatic(m_rgb_red*m_rgb_brightness/100, m_rgb_green*m_rgb_brightness/100, m_rgb_blue*m_rgb_brightness/100);
                 publishRGBState();
             }
         } else if (payload.equals(String(LIGHT_OFF))) {
@@ -437,7 +425,7 @@ Serial.println(payload);
             return;
         } else {
             m_rgb_brightness = brightness;
-            setStatic(m_rgb_red, m_rgb_green, m_rgb_blue);
+            setStatic(m_rgb_red*m_rgb_brightness/100, m_rgb_green*m_rgb_brightness/100, m_rgb_blue*m_rgb_brightness/100);
             publishRGBBrightness();
         }
     } else if (String(config.mqtt_topic + MQTT_LIGHT_RGB_COMMAND_TOPIC).equals(topic)) {
@@ -449,7 +437,7 @@ Serial.println(payload);
         m_rgb_green = payload.substring(firstIndex + 1, lastIndex).toInt();
         m_rgb_blue = payload.substring(lastIndex + 1).toInt();
    
-        setStatic(m_rgb_red, m_rgb_green, m_rgb_blue);
+        setStatic(m_rgb_red*m_rgb_brightness/100, m_rgb_green*m_rgb_brightness/100, m_rgb_blue*m_rgb_brightness/100);
         publishRGBColor();
     }
 }
@@ -509,13 +497,14 @@ void initWeb() {
 
     // gamma debugging Config Handler
     web.on("/gamma", HTTP_GET, [](AsyncWebServerRequest *request) {
-        String myString;
+        AsyncResponseStream *response = request->beginResponseStream("text/plain");
         for (int i=0; i<256; i++) {
-          if (i%16 == 0) myString += "\r\n";
-          myString += GAMMA_TABLE[i];
-          myString += ", ";
+          response->printf ("%5d,", GAMMA_TABLE[i]);
+          if (i%16 == 15) {
+            response->printf("\r\n");
+          }
         }
-        request->send(200, "text/json", myString);
+        request->send(response);
     });
 
     // Firmware upload handler
@@ -530,14 +519,14 @@ void initWeb() {
     web.onNotFound([](AsyncWebServerRequest *request) {
         if (request->method() == HTTP_OPTIONS) {
             AsyncWebServerResponse *response = request->beginResponse(200);
-            response->addHeader("Access-Control-Allow-Origin","*");
             request->send(response);
         } else {
             request->send(404, "text/plain", "Page not found");          
         }
     });
 
-    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+    DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
+
     web.begin();
 
     LOG_PORT.print(F("- Web Server started on port "));
@@ -737,14 +726,20 @@ void dsDeviceConfig(JsonObject &json) {
 #endif
 
 #if defined(ESPS_SUPPORT_PWM)
-    config.pwm_enabled = json["pwm"]["enabled"];
+    config.pwm_global_enabled = json["pwm"]["enabled"];
     config.pwm_freq = json["pwm"]["freq"];
     config.pwm_gamma = json["pwm"]["gamma"];
+    config.pwm_gpio_invert = 0;
+    config.pwm_gpio_enabled = 0;
     for (int gpio=0; gpio < NUM_GPIO; gpio++ ) {
       if ( valid_gpio_mask & 1<<gpio ) {
         config.pwm_gpio_dmx[gpio] = json["pwm"]["gpio" + (String)gpio + "_channel"];
-        config.pwm_gpio_invert[gpio] = json["pwm"]["gpio" + (String)gpio + "_invert"];
-        config.pwm_gpio_enabled[gpio] = json["pwm"]["gpio" + (String)gpio + "_enabled"];
+        if (json["pwm"]["gpio" + (String)gpio + "_invert"]) {
+          config.pwm_gpio_invert |= 1<<gpio;
+        }
+        if (json["pwm"]["gpio" + (String)gpio + "_enabled"]) {
+          config.pwm_gpio_enabled |= 1<<gpio;
+        }
       }
     }
 #endif
@@ -853,15 +848,15 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
 
 #if defined(ESPS_SUPPORT_PWM)
     JsonObject &pwm = json.createNestedObject("pwm");
-    pwm["enabled"] = config.pwm_enabled;
+    pwm["enabled"] = config.pwm_global_enabled;
     pwm["freq"] = config.pwm_freq;
     pwm["gamma"] = config.pwm_gamma;
     
     for (int gpio=0; gpio < NUM_GPIO; gpio++ ) {
       if ( valid_gpio_mask & 1<<gpio ) {
         pwm["gpio" + (String)gpio + "_channel"] = static_cast<uint16_t>(config.pwm_gpio_dmx[gpio]);
-        pwm["gpio" + (String)gpio + "_enabled"] = static_cast<bool>(config.pwm_gpio_enabled[gpio]);
-        pwm["gpio" + (String)gpio + "_invert"] = static_cast<bool>(config.pwm_gpio_invert[gpio]);
+        pwm["gpio" + (String)gpio + "_enabled"] = static_cast<bool>(config.pwm_gpio_enabled & 1<<gpio);
+        pwm["gpio" + (String)gpio + "_invert"] = static_cast<bool>(config.pwm_gpio_invert & 1<<gpio);
       }
     }
 #endif
@@ -1087,49 +1082,4 @@ void loop() {
 #endif
 }
 
-#if defined(ESPS_SUPPORT_PWM)
-void setupPWM () {
-  if ( config.pwm_enabled ) {
-    if ( (config.pwm_freq >= 100) && (config.pwm_freq <= 1000) ) {
-      analogWriteFreq(config.pwm_freq);
-    }
-    for (int gpio=0; gpio < NUM_GPIO; gpio++ ) {
-      if ( ( valid_gpio_mask & 1<<gpio ) && (config.pwm_gpio_enabled[gpio]) ) {
-        pinMode(gpio, OUTPUT);
-        if (config.pwm_gpio_invert[gpio]) {
-          analogWrite(gpio, 1023);
-        } else {
-          analogWrite(gpio, 0);          
-        }
-      }
-    }
-  }
-}
-
-
-void handlePWM() {
-  if ( config.pwm_enabled ) {
-    for (int gpio=0; gpio < NUM_GPIO; gpio++ ) {
-      if ( ( valid_gpio_mask & 1<<gpio ) && (config.pwm_gpio_enabled[gpio]) ) {
-        int gpio_dmx = config.pwm_gpio_dmx[gpio];
-        if (gpio_dmx < config.channel_count) {
-#if defined (ESPS_MODE_PIXEL)
-          int pwm_val = (config.pwm_gamma) ? GAMMA_TABLE[pixels.getData()[gpio_dmx]] : pixels.getData()[gpio_dmx];
-#elif defined(ESPS_MODE_SERIAL)
-          int pwm_val = (config.pwm_gamma) ? GAMMA_TABLE[serial.getData()[gpio_dmx]] : serial.getData()[gpio_dmx];
-#endif
-          if ( pwm_val != last_pwm[gpio]) {
-            last_pwm[gpio] = pwm_val;
-            if (config.pwm_gpio_invert[gpio]) {
-              analogWrite(gpio, 1023-4*pwm_val);  // 0..255 => 1023..0
-            } else {
-              analogWrite(gpio, 4*pwm_val);       // 0..255 => 0..1023
-            }
-          }
-        }
-      }
-    }
-  }
-}
-#endif
 
