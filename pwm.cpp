@@ -43,9 +43,9 @@ void handlePWM() {
           if ( pwm_val != last_pwm[gpio]) {
             last_pwm[gpio] = pwm_val;
             if (config.pwm_gpio_invert & 1<<gpio) {
-              analogWrite(gpio, 1023-4*pwm_val);  // 0..255 => 1023..0
+              analogWrite(gpio, 1023-(1023*pwm_val/255) );  // 0..255 => 1023..0
             } else {
-              analogWrite(gpio, 4*pwm_val);       // 0..255 => 0..1023
+              analogWrite(gpio, 1023*pwm_val/255);       // 0..255 => 0..1023
             }
           }
         }
