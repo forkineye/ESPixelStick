@@ -5,8 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title id="title"></title>
-  <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
-  <link rel="stylesheet" type="text/css" href="style.css">
+  <link rel="stylesheet" type="text/css" href="esps.css">
 </head>
 
 <body>
@@ -44,9 +43,12 @@
             <legend class="esps-legend">Network Status</legend>
             <table class="esps-table">
               <tr><td width="33%">SSID</td><td><span id="x_ssid"></span></td></tr>
+              <tr><td width="33%">Hostname</td><td><span id="x_hostname"></span></td></tr>
               <tr><td width="33%">IP</td><td><span id="x_ip"></span></td></tr>
               <tr><td width="33%">MAC</td><td><span id="x_mac"></span></td></tr>
               <tr><td width="33%">RSSI</td><td><span id="x_rssi"></span>dBm / <span id="x_quality"></span>%</td></tr>
+              <tr><td width="33%">Free Heap</td><td><span id="x_freeheap"></span></td></tr>
+              <tr><td width="33%">Up Time</td><td><span id="x_uptime"></span></td></tr>
             </table>
           </fieldset>
         </div>
@@ -58,6 +60,8 @@
               <tr><td width="33%">Total Packets</td><td><span id="pkts"></span></td></tr>
               <tr><td width="33%">Sequence Errors</td><td><span id="serr"></span></td></tr>
               <tr><td width="33%">Packet Errors</td><td><span id="perr"></span></td></tr>
+              <tr><td width="33%">Last Client IP</td><td><span id="clientip"></span></td></tr>
+              <tr><td width="33%">Last Client Port</td><td><span id="clientport"></span></td></tr>
             </table>
           </fieldset>
         </div>
@@ -69,30 +73,34 @@
       <fieldset>
         <legend class="esps-legend">Network Configuration</legend>
         <form class="form-horizontal">
-          <div class="form-group">
+          <div class="form-group" id="fg_ssid">
             <label class="control-label col-sm-2" for="ssid">SSID</label>
             <div class="col-sm-10"><input type="text" class="form-control" id="ssid" name="ssid" placeholder="Enter SSID"></div>
           </div>
-          <div class="form-group">
+          <div class="form-group" id="fg_password">
             <label class="control-label col-sm-2" for="password">Password</label>
             <div class="col-sm-10"><input type="text" class="form-control" id="password" name="password" placeholder="Enter Password"></div>
+          </div>
+          <div class="form-group" id="fg_hostname">
+            <label class="control-label col-sm-2" for="hostname">Hostname</label>
+            <div class="col-sm-10"><input type="text" class="form-control has-error" id="hostname" name="hostname" placeholder="Enter Hostname"></div>
           </div>
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
               <div class="checkbox"><label><input type="checkbox" id="dhcp" name="dhcp"> Use DHCP</label></div>
             </div>
           </div>
-          <div class="form-group">
+          <div class="form-group dhcp" id="fg_ip">
             <label class="control-label col-sm-2" for="ip">IP</label>
-            <div class="col-sm-10"><input type="text" class="form-control dhcp" id="ip" name="ip" placeholder="xxx.xxx.xxx.xxx"></div>
+            <div class="col-sm-10"><input type="text" class="form-control" id="ip" name="ip" placeholder="xxx.xxx.xxx.xxx"></div>
           </div>
-          <div class="form-group">
+          <div class="form-group dhcp" id="fg_netmask">
             <label class="control-label col-sm-2" for="netmask">Netmask</label>
-            <div class="col-sm-10"><input type="text" class="form-control dhcp" id="netmask" name="netmask" placeholder="xxx.xxx.xxx.xxx"></div>
+            <div class="col-sm-10"><input type="text" class="form-control" id="netmask" name="netmask" placeholder="xxx.xxx.xxx.xxx"></div>
           </div>
-          <div class="form-group">
+          <div class="form-group dhcp" id="fg_gateway">
             <label class="control-label col-sm-2" for="gateway">Gateway</label>
-            <div class="col-sm-10"><input type="text" class="form-control dhcp" id="gateway" name="gateway" placeholder="xxx.xxx.xxx.xxx"></div>
+            <div class="col-sm-10"><input type="text" class="form-control" id="gateway" name="gateway" placeholder="xxx.xxx.xxx.xxx"></div>
           </div>
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
@@ -101,7 +109,7 @@
           </div>          
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
-              <button type="button" onclick="submitWiFi()" class="btn btn-primary">Save Changes</button>
+              <button id="btn_wifi" type="button" onclick="submitWiFi()" class="btn btn-primary" disabled>Save Changes</button>
             </div>
           </div>
         </form>
@@ -125,6 +133,11 @@
             <label class="control-label col-sm-2" for="channel_start">Start Channel</label>
             <div class="col-sm-10"><input type="text" class="form-control" id="channel_start" name="channel_start" placeholder="Enter Starting Channel"></div>
           </div>
+          <div class="form-group">
+            <label class="control-label col-sm-2" for="universe_limit">Universe Boundary</label>
+            <div class="col-sm-10"><input type="text" class="form-control" id="universe_limit" name="universe_limit" placeholder="Enter number of channels to handle per universe"></div>
+          </div>
+
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
               <div class="checkbox"><label><input type="checkbox" id="multicast" name="multicast"> Enable Multicast</label></div>
@@ -178,10 +191,42 @@
             </div>
           </div>
 
-          <!-- Device Config Save -->
+          <!-- Refresh Rate Display -->
           <div class="form-group">
             <label class="control-label col-sm-2" for="refresh">Refresh Rate</label>
             <div class="col-sm-10"><p class="form-control-static" id="refresh"></p></div>
+          </div>
+
+          <!-- MQTT Configuration -->
+          <legend class="esps-legend">MQTT Configuration</legend>
+          <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+              <div class="checkbox"><label><input type="checkbox" id="mqtt" name="mqtt"> Enable MQTT</label></div>
+            </div>
+          </div>          
+          <div class="form-group mqtt">
+            <label class="control-label col-sm-2" for="mqtt_ip">Broker IP</label>
+            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_ip" name="mqtt_ip" placeholder="Enter MQTT Broker IP"></div>
+          </div>
+          <div class="form-group mqtt">
+            <label class="control-label col-sm-2" for="mqtt_port">Broker Port</label>
+            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_port" name="mqtt_port" placeholder="Enter MQTT Broker Port"></div>
+          </div>
+          <div class="form-group mqtt">
+            <label class="control-label col-sm-2" for="mqtt_user">User</label>
+            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_user" name="mqtt_user" placeholder="Enter MQTT User (optional)"></div>
+          </div>
+          <div class="form-group mqtt">
+            <label class="control-label col-sm-2" for="mqtt_port">Password</label>
+            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_password" name="mqtt_password" placeholder="Enter MQTT Password (optional)"></div>
+          </div>
+          <div class="form-group mqtt">
+            <label class="control-label col-sm-2" for="mqtt_topic">Topic</label>
+            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_topic" name="mqtt_topic" placeholder="Enter Top Level MQTT Topic"></div>
+          </div>
+
+          <!-- Device Config Save -->
+          <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
               <button type="button" onclick="submitConfig()" class="btn btn-primary">Save Changes</button>
             </div>
@@ -270,6 +315,22 @@
             <div class="col-sm-10"><p class="form-control-static" id="x_version"></p></div>
           </div>
           <div class="form-group">
+            <label class="control-label col-sm-2">Build Date</label>
+            <div class="col-sm-10"><p class="form-control-static" id="x_built"></p></div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-2">Used Flash Size</label>
+            <div class="col-sm-10"><p class="form-control-static" id="x_usedflashsize"></p></div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-2">Real Flash Size</label>
+            <div class="col-sm-10"><p class="form-control-static" id="x_realflashsize"></p></div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-2">Flash Chip ID</label>
+            <div class="col-sm-10"><p class="form-control-static" id="x_flashchipid"></p></div>
+          </div>
+          <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
               <label class="btn btn-primary btn-file">
                 Update Firmware <input type="file" id="efu" name="file" accept=".efu" style="display: none;">
@@ -293,10 +354,8 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title">Restarting, Please Wait...</h4>
-        </div>
-        <div class="modal-body">
-          <p>(reboot animation placeholder)</p>
+          <h4 class="modal-title">Restarting, Please Wait</h4>
+          <div class="bar"></div>
         </div>
       </div>
     </div>
@@ -311,7 +370,7 @@
         </div>
         <div class="modal-body">
           <p>Firmware update in progress...</p>
-          <p>(progress bar placeholder)</p>
+          <div class="bar"></div>
         </div>
       </div>
     </div>
@@ -341,10 +400,7 @@
     </div>
   </footer>
 
-  <script type="text/javascript" src="js/jquery-3.1.1.js"></script>
-  <script type="text/javascript" src="js/bootstrap.js"></script>
-  <script type="text/javascript" src="js/jqColorPicker.js"></script>
-  <script type="text/javascript" src="script.js"></script>
+  <script type="text/javascript" src="esps.js"></script>
 
   <script>
     wsConnect();

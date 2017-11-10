@@ -20,6 +20,22 @@
 #ifndef WSHANDLER_H_
 #define WSHANDLER_H_
 
+#if defined(ESPS_MODE_PIXEL)
+#include "PixelDriver.h"
+extern PixelDriver  pixels;     // Pixel object
+#elif defined(ESPS_MODE_SERIAL)
+#include "SerialDriver.h"
+extern SerialDriver serial;     // Serial object
+#endif
+
+extern ESPAsyncE131 e131;       // ESPAsyncE131 with X buffers
+extern testing_t    testing;    // Testing mode
+extern config_t     config;     // Current configuration
+extern uint32_t     *seqError;  // Sequence error tracking for each universe
+extern uint16_t     uniLast;    // Last Universe to listen for
+extern bool         reboot;     // Reboot flag
+
+
 /* 
   Packet Commands
     E1 - Get Elements
@@ -35,6 +51,7 @@
 
     X1 - Get RSSI
     X2 - Get E131 Status
+    Xh - Get Heap
     X6 - Reboot
 */
 
@@ -49,14 +66,21 @@ void procX(uint8_t *data, AsyncWebSocketClient *client) {
             uint32_t seqErrors = 0;
             for (int i = 0; i < ((uniLast + 1) - config.universe); i++)
                 seqErrors =+ seqError[i];
-
             client->text("X2" + (String)config.universe + ":" +
                     (String)uniLast + ":" +
                     (String)e131.stats.num_packets + ":" +
                     (String)seqErrors + ":" +
-                    (String)e131.stats.packet_errors);
+                    (String)e131.stats.packet_errors + ":" +
+                    e131.stats.last_clientIP.toString() + ":" + 
+                    (String)e131.stats.last_clientPort);
             break;
         }
+        case 'h':
+            client->text("Xh" + (String)ESP.getFreeHeap());
+            break;
+        case 'U':
+            client->text("XU" + (String)millis());
+            break;
         case '6':  // Init 6 baby, reboot!
             reboot = true;
     }
@@ -121,9 +145,15 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             JsonObject &json = jsonBuffer.createObject();
 
             json["ssid"] = (String)WiFi.SSID();
+            json["hostname"] = (String)WiFi.hostname();
             json["ip"] = WiFi.localIP().toString();
-            json["mac"] = getMacAddress();
+            json["mac"] = WiFi.macAddress();
             json["version"] = (String)VERSION;
+            json["built"] = (String)BUILD_DATE;
+            json["flashchipid"] = String(ESP.getFlashChipId(), HEX);
+            json["usedflashsize"] = (String)ESP.getFlashChipSize();
+            json["realflashsize"] = (String)ESP.getFlashChipRealSize();
+            json["freeheap"] = (String)ESP.getFreeHeap();
             json["testing"] = static_cast<uint8_t>(config.testmode);
 
             String response;
@@ -149,37 +179,37 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
             client->text("S1");
             break;
         case '2':   // Set Device Config
+            // Reboot if MQTT changed
+            bool reboot = false;
+            if (config.mqtt != json["mqtt"]["enabled"])
+                reboot = true;
+
             dsDeviceConfig(json);
             saveConfig();
-            client->text("S2");
+
+            if (reboot)
+                client->text("S1");
+            else
+                client->text("S2");
             break;
     }
 }
 
-/*
-enum class TestMode : uint8_t {
-    DISABLED,
-    STATIC,
-    CHASE,
-    RAINBOW,
-    VIEW_STREAM
-};
-*/
-
 void procT(uint8_t *data, AsyncWebSocketClient *client) {
-    
-    switch(data[1]) {
+    switch (data[1]) {
         case '0':
             config.testmode = TestMode::DISABLED;
-            //clear whole string
+            // Clear whole string
 #if defined(ESPS_MODE_PIXEL)
-          for(int y =0; y < config.channel_count; y++) pixels.setValue(y, 0);
+            for (int y =0; y < config.channel_count; y++)
+                pixels.setValue(y, 0);
 #elif defined(ESPS_MODE_SERIAL)
-          for(int y =0; y < config.channel_count; y++) serial.setValue(y, 0);
+            for (int y =0; y < config.channel_count; y++)
+                serial.setValue(y, 0);
 #endif
             break;
 
-        case '1': {//static color
+        case '1': {  // Static color
             config.testmode = TestMode::STATIC;
             testing.step = 0;
             DynamicJsonBuffer jsonBuffer;
@@ -190,7 +220,7 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             testing.b = json["b"];
             break;
         }
-        case '2': {//chase
+        case '2': {  // Chase
             config.testmode = TestMode::CHASE;
             testing.step = 0;
             DynamicJsonBuffer jsonBuffer;
@@ -199,39 +229,22 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             testing.r = json["r"];
             testing.g = json["g"];
             testing.b = json["b"];
-        
-          break;
+            break;
         }
-        case '3': //rainbow
+        case '3':  // Rainbow
             config.testmode = TestMode::RAINBOW;
             testing.step = 0;
-          break;
-        case '4': {//view stream
+            break;
+
+        case '4': {  // View stream
             config.testmode = TestMode::VIEW_STREAM;
 #if defined(ESPS_MODE_PIXEL)
-            client->binary(pixels.getData(),config.channel_count);
+            client->binary(pixels.getData(), config.channel_count);
 #elif defined(ESPS_MODE_SERIAL)
-            uint16_t qsize = config.channel_count;
-            uint8_t* bufq = (uint8_t *)(malloc(qsize));
-            uint8_t* bufi = serial.getData();
-            if (bufq){
-              uint16_t i = 0;
-              if( config.serial_type == DMX512){
-                while(i<config.channel_count){
-                  bufq[i]=bufi[1+i++];
-                }
-              }
-              else {
-                while(i<config.channel_count+2){
-                  bufq[i]=bufi[2+i++];
-                }
-                
-              }
-              client->binary(bufq,qsize);
-              free(bufq);
-            }
+            if (config.serial_type == SerialType::DMX512)
+                client->binary(&serial.getData()[1], config.channel_count);
             else
-              client->binary(serial.getData(),config.channel_count);
+                client->binary(&serial.getData()[2], config.channel_count);
 #endif
             break;
         }
@@ -301,6 +314,9 @@ void wsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
             LOG_PORT.print(F("* WS Disconnect - "));
             LOG_PORT.println(client->id());
             break;
+        case WS_EVT_PONG:
+            LOG_PORT.println(F("* WS PONG *"));
+            break;
         case WS_EVT_ERROR:
             LOG_PORT.println(F("** WS ERROR **"));
             break;
@@ -308,3 +324,4 @@ void wsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
 }
 
 #endif /* ESPIXELSTICK_H_ */
+

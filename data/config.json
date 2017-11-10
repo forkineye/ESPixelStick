@@ -30,6 +30,7 @@
 
   "e131": {
     "universe": 1,
+    "universe_limit": 512,
     "channel_start": 1,
     "channel_count": 512,
     "multicast": false

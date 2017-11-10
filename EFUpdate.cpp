@@ -19,8 +19,8 @@
 
 #include <Arduino.h>
 #include <FS.h>
+#include <lwip/def.h>
 #include "EFUpdate.h"
-#include "util.h"
 
 void EFUpdate::begin() {
     _maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
