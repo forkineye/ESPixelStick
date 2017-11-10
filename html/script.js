@@ -1,4 +1,7 @@
 var mode = 'null';
+var wsQueue = [];
+var wsBusy = false;
+var wsTimerId;
 
 // jQuery doc ready 
 $(function() {
@@ -86,10 +89,10 @@ $(function() {
                 var tmode = $('#tmode option:selected').val();
 
                 if (!tmode.localeCompare('t_static')) {
-                    ws.send('T1' + JSON.stringify(json));
+                    wsEnqueue('T1' + JSON.stringify(json));
                 }
                 else if(!tmode.localeCompare('t_chase')) {
-                    ws.send('T2' + JSON.stringify(json));
+                    wsEnqueue('T2' + JSON.stringify(json));
                 }
             }
         });
@@ -234,10 +237,10 @@ function wifiValidation() {
 // Page event feeds
 function feed() {
     if ($('#home').is(':visible')) {
-        ws.send('X1');
-        ws.send('X2');
-        ws.send('Xh');
-        ws.send('XU');
+        wsEnqueue('X1');
+        wsEnqueue('X2');
+        wsEnqueue('Xh');
+        wsEnqueue('XU');
 
         setTimeout(function() {
             feed();
@@ -253,9 +256,9 @@ function wsConnect() {
         ws.binaryType = 'arraybuffer';
 
         ws.onopen = function() {
-            ws.send('E1'); // Get html elements
-            ws.send('G1'); // Get Config
-            ws.send('G2'); // Get Net Status
+            wsEnqueue('E1'); // Get html elements
+            wsEnqueue('G1'); // Get Config
+            wsEnqueue('G2'); // Get Net Status
 
             feed();
         };
@@ -287,7 +290,7 @@ function wsConnect() {
                 case 'X2':
                     getE131Status(data);
                     break;
-	        case 'Xh':
+                case 'Xh':
                     getHeap(data);
                     break;
                 case 'XU':
@@ -303,8 +306,9 @@ function wsConnect() {
             } else {
                 streamData= new Uint8Array(event.data);
                 drawStream(streamData);
-                if (!$('#tmode option:selected').val().localeCompare('t_view')) ws.send('T4');
+                if (!$('#tmode option:selected').val().localeCompare('t_view')) wsEnqueue('T4');
             }
+			wsReadyToSend();
         };
         
         ws.onerror = function() {
@@ -317,6 +321,51 @@ function wsConnect() {
     } else {
         alert('WebSockets is NOT supported by your Browser! You will need to upgrade your browser or downgrade to v2.0 of the ESPixelStick firmware.');
     }
+}
+
+function wsEnqueue(message) {
+	//only add a message to the queue if there isn't already one of the same type already queued, otherwise update the message with the latest request. 
+	wsQueueIndex=wsQueue.findIndex(wsCheckQueue,message);
+	if(wsQueueIndex == -1) {
+		//add message		
+		wsQueue.push(message);
+	} else {
+		//update message
+		wsQueue[wsQueueIndex]=message;
+	}
+	wsProcessQueue();
+}
+
+function wsCheckQueue(value) {
+	//messages are of the same type if the first two characters match
+	return value.substr(0,2)==this.substr(0,2);	
+}
+
+function wsProcessQueue() {
+	//check if currently waiting for a response
+	if(wsBusy) {
+		console.log('WS queue busy : ' + wsQueue)
+	} else {
+		//set wsBusy flag that we are waiting for a response
+		wsBusy=true;
+		//set timeout to clear flag and try next message if response isn't recieved
+		wsTimerId=setTimeout(wsReadyToSend,2000);
+		//get next message from queue and send it.
+		message=wsQueue.shift();
+		console.log('WS sending ' + message);
+		ws.send(message);
+	}
+}
+
+function wsReadyToSend() {
+	clearTimeout(wsTimerId);
+	wsBusy=false;
+	if(wsQueue.length>0) {
+		//send next message
+		wsProcessQueue();
+	} else {
+		console.log('WS queue empty');
+	}
 }
 
 function drawStream(streamData) {
@@ -530,7 +579,7 @@ function snackSave() {
 
 function setConfig() {
     // Get config to refresh UI and show result
-    ws.send("G1");
+    wsEnqueue("G1");
     snackSave();
 }
 
@@ -551,7 +600,7 @@ function submitWiFi() {
                 'ap_fallback': $('#ap').prop('checked')
             }
         };
-    ws.send('S1' + JSON.stringify(json));
+    wsEnqueue('S1' + JSON.stringify(json));
 }
 
 function submitConfig() {
@@ -588,7 +637,7 @@ function submitConfig() {
                 'baudrate': parseInt($('#s_baud').val())
             }
         };
-    ws.send('S2' + JSON.stringify(json));
+    wsEnqueue('S2' + JSON.stringify(json));
 }
 
 function refreshPixel() {
@@ -632,13 +681,13 @@ function test() {
     var tmode = $('#tmode option:selected').val();
 
     if (!tmode.localeCompare('t_disabled')) {
-        ws.send('T0');
+        wsEnqueue('T0');
     }
     else if (!tmode.localeCompare('t_rainbow')) {
-        ws.send('T3');
+        wsEnqueue('T3');
     }
     else if (!tmode.localeCompare('t_view')) {
-        ws.send('T4');
+        wsEnqueue('T4');
     }
 }
 
@@ -656,5 +705,5 @@ function showReboot() {
 
 function reboot() {
     showReboot();
-    ws.send('X6');
+    wsEnqueue('X6');
 }
