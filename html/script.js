@@ -252,8 +252,7 @@ function feed() {
 function wsConnect() {
     if ('WebSocket' in window) {
         // Open a new web socket and set the binary type
-        //ws = new WebSocket('ws://' + document.location.host + '/ws');
-		ws = new WebSocket('ws://192.168.0.245/ws');
+        ws = new WebSocket('ws://' + document.location.host + '/ws');
         ws.binaryType = 'arraybuffer';
 
         ws.onopen = function() {
@@ -308,9 +307,8 @@ function wsConnect() {
                 streamData= new Uint8Array(event.data);
                 drawStream(streamData);
                 if (!$('#tmode option:selected').val().localeCompare('t_view')) wsEnqueue('T4');
-				var cmd='T4'
             }
-			wsReceived(cmd);
+			wsReadyToSend();
         };
         
         ws.onerror = function() {
@@ -353,20 +351,10 @@ function wsProcessQueue() {
 		//set timeout to clear flag and try next message if response isn't recieved
 		wsTimerId=setTimeout(wsReadyToSend,2000);
 		//get next message from queue and send it.
-		message=wsQueue[0];
+		message=wsQueue.shift();
 		console.log('WS sending ' + message);
 		ws.send(message);
 	}
-}
-
-function wsReceived(cmd) {
-	console.log(cmd);
-	//find first message in queue that matches the received cmd and delete it. Should always be index 0 unless a message has been missed or a timeout occured.
-	wsQueueIndex=wsQueue.findIndex(wsCheckQueue,cmd);
-	if(wsQueueIndex>-1) {
-		wsQueue.splice(wsQueueIndex,1);
-	}
-	wsReadyToSend();
 }
 
 function wsReadyToSend() {
