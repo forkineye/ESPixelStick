@@ -1,5 +1,8 @@
 var mode = 'null';
 var gpio_list = [0,1,2,3,4,5,12,13,14,15,16];
+var wsQueue = [];
+var wsBusy = false;
+var wsTimerId;
 
 // jQuery doc ready 
 $(function() {
@@ -87,10 +90,10 @@ $(function() {
                 var tmode = $('#tmode option:selected').val();
 
                 if (!tmode.localeCompare('t_static')) {
-                    ws.send('T1' + JSON.stringify(json));
+                    wsEnqueue('T1' + JSON.stringify(json));
                 }
                 else if(!tmode.localeCompare('t_chase')) {
-                    ws.send('T2' + JSON.stringify(json));
+                    wsEnqueue('T2' + JSON.stringify(json));
                 }
             }
         });
@@ -150,29 +153,29 @@ $(function() {
     
     // Hostname, SSID, and Password validation
     $('#hostname').keyup(function() {
-		wifiValidation();
+        wifiValidation();
     });
-	$('#ssid').keyup(function() {
-		wifiValidation();
+    $('#ssid').keyup(function() {
+        wifiValidation();
     });
-	$('#password').keyup(function() {
-		wifiValidation();
+    $('#password').keyup(function() {
+        wifiValidation();
     });
-	$('#ap').change(function () {
-		wifiValidation();
-	});
-	$('#dhcp').change(function () {
-		wifiValidation();
-	});
-	$('#gateway').keyup(function () {
-		wifiValidation();
-	});
-	$('#ip').keyup(function () {
-		wifiValidation();
-	});
-	$('#netmask').keyup(function () {
-		wifiValidation();
-	});
+    $('#ap').change(function () {
+        wifiValidation();
+    });
+    $('#dhcp').change(function () {
+        wifiValidation();
+    });
+    $('#gateway').keyup(function () {
+        wifiValidation();
+    });
+    $('#ip').keyup(function () {
+        wifiValidation();
+    });
+    $('#netmask').keyup(function () {
+        wifiValidation();
+    });
 
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
@@ -181,75 +184,75 @@ $(function() {
 });
 
 function wifiValidation() {
-	var WifiSaveDisabled = false;
-	var re = /^([a-zA-Z0-9][a-zA-Z0-9][a-zA-Z0-9\-.]*[a-zA-Z0-9.])$/;
-	if (re.test($('#hostname').val()) && $('#hostname').val().length <= 255) {
-		$('#fg_hostname').removeClass('has-error');
-		$('#fg_hostname').addClass('has-success');
-	} else {
-		$('#fg_hostname').removeClass('has-success');
-		$('#fg_hostname').addClass('has-error');
-		WifiSaveDisabled = true
-	}
-	if ($('#ssid').val().length <= 32){
-		$('#fg_ssid').removeClass('has-error');
-		$('#fg_ssid').addClass('has-success');
-	} else {
-		$('#fg_ssid').removeClass('has-success');
-		$('#fg_ssid').addClass('has-error');
-		WifiSaveDisabled = true
-	}
-	if ($('#password').val().length <= 32){
-		$('#fg_password').removeClass('has-error');
-		$('#fg_password').addClass('has-success');
-	} else {
-		$('#fg_password').removeClass('has-success');
-		$('#fg_password').addClass('has-error');
-		WifiSaveDisabled = true
-	}
-	if ($('#dhcp').prop('checked')== false) {
-		var iptest = new RegExp('' 
-		+ /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source
-		+ /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source
-		+ /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source
-		+ /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.source
-		);
+    var WifiSaveDisabled = false;
+    var re = /^([a-zA-Z0-9][a-zA-Z0-9][a-zA-Z0-9\-.]*[a-zA-Z0-9.])$/;
+    if (re.test($('#hostname').val()) && $('#hostname').val().length <= 255) {
+        $('#fg_hostname').removeClass('has-error');
+        $('#fg_hostname').addClass('has-success');
+    } else {
+        $('#fg_hostname').removeClass('has-success');
+        $('#fg_hostname').addClass('has-error');
+        WifiSaveDisabled = true
+    }
+    if ($('#ssid').val().length <= 32){
+        $('#fg_ssid').removeClass('has-error');
+        $('#fg_ssid').addClass('has-success');
+    } else {
+        $('#fg_ssid').removeClass('has-success');
+        $('#fg_ssid').addClass('has-error');
+        WifiSaveDisabled = true
+    }
+    if ($('#password').val().length <= 32){
+        $('#fg_password').removeClass('has-error');
+        $('#fg_password').addClass('has-success');
+    } else {
+        $('#fg_password').removeClass('has-success');
+        $('#fg_password').addClass('has-error');
+        WifiSaveDisabled = true
+    }
+    if ($('#dhcp').prop('checked')== false) {
+        var iptest = new RegExp('' 
+        + /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source
+        + /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source
+        + /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source
+        + /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.source
+        );
 
-		if (iptest.test($('#ip').val())) {
-			$('#fg_ip').removeClass('has-error');
-			$('#fg_ip').addClass('has-success');
-		} else {
-			$('#fg_ip').removeClass('has-success');
-			$('#fg_ip').addClass('has-error');
-			WifiSaveDisabled = true
-		}
-		if (iptest.test($('#netmask').val())) {
-			$('#fg_netmask').removeClass('has-error');
-			$('#fg_netmask').addClass('has-success');
-		} else {
-			$('#fg_netmask').removeClass('has-success');
-			$('#fg_netmask').addClass('has-error');
-			WifiSaveDisabled = true
-		}
-		if (iptest.test($('#gateway').val())) {
-			$('#fg_gateway').removeClass('has-error');
-			$('#fg_gateway').addClass('has-success');
-		} else {
-			$('#fg_gateway').removeClass('has-success');
-			$('#fg_gateway').addClass('has-error');
-			WifiSaveDisabled = true
-		}
-	}
-	$('#btn_wifi').prop('disabled', WifiSaveDisabled);
+        if (iptest.test($('#ip').val())) {
+            $('#fg_ip').removeClass('has-error');
+            $('#fg_ip').addClass('has-success');
+        } else {
+            $('#fg_ip').removeClass('has-success');
+            $('#fg_ip').addClass('has-error');
+            WifiSaveDisabled = true
+        }
+        if (iptest.test($('#netmask').val())) {
+            $('#fg_netmask').removeClass('has-error');
+            $('#fg_netmask').addClass('has-success');
+        } else {
+            $('#fg_netmask').removeClass('has-success');
+            $('#fg_netmask').addClass('has-error');
+            WifiSaveDisabled = true
+        }
+        if (iptest.test($('#gateway').val())) {
+            $('#fg_gateway').removeClass('has-error');
+            $('#fg_gateway').addClass('has-success');
+        } else {
+            $('#fg_gateway').removeClass('has-success');
+            $('#fg_gateway').addClass('has-error');
+            WifiSaveDisabled = true
+        }
+    }
+    $('#btn_wifi').prop('disabled', WifiSaveDisabled);
 }
 
 // Page event feeds
 function feed() {
     if ($('#home').is(':visible')) {
-        ws.send('X1');
-        ws.send('X2');
-        ws.send('Xh');
-        ws.send('XU');
+        wsEnqueue('X1');
+        wsEnqueue('X2');
+        wsEnqueue('Xh');
+        wsEnqueue('XU');
 
         setTimeout(function() {
             feed();
@@ -265,9 +268,9 @@ function wsConnect() {
         ws.binaryType = 'arraybuffer';
 
         ws.onopen = function() {
-            ws.send('E1'); // Get html elements
-            ws.send('G1'); // Get Config
-            ws.send('G2'); // Get Net Status
+            wsEnqueue('E1'); // Get html elements
+            wsEnqueue('G1'); // Get Config
+            wsEnqueue('G2'); // Get Net Status
 
             feed();
         };
@@ -315,8 +318,9 @@ function wsConnect() {
             } else {
                 streamData= new Uint8Array(event.data);
                 drawStream(streamData);
-                if (!$('#tmode option:selected').val().localeCompare('t_view')) ws.send('T4');
+                if (!$('#tmode option:selected').val().localeCompare('t_view')) wsEnqueue('T4');
             }
+            wsReadyToSend();
         };
         
         ws.onerror = function() {
@@ -328,6 +332,51 @@ function wsConnect() {
         };
     } else {
         alert('WebSockets is NOT supported by your Browser! You will need to upgrade your browser or downgrade to v2.0 of the ESPixelStick firmware.');
+    }
+}
+
+function wsEnqueue(message) {
+    //only add a message to the queue if there isn't already one of the same type already queued, otherwise update the message with the latest request. 
+    wsQueueIndex=wsQueue.findIndex(wsCheckQueue,message);
+    if(wsQueueIndex == -1) {
+        //add message        
+        wsQueue.push(message);
+    } else {
+        //update message
+        wsQueue[wsQueueIndex]=message;
+    }
+    wsProcessQueue();
+}
+
+function wsCheckQueue(value) {
+    //messages are of the same type if the first two characters match
+    return value.substr(0,2)==this.substr(0,2);    
+}
+
+function wsProcessQueue() {
+    //check if currently waiting for a response
+    if(wsBusy) {
+        console.log('WS queue busy : ' + wsQueue)
+    } else {
+        //set wsBusy flag that we are waiting for a response
+        wsBusy=true;
+        //set timeout to clear flag and try next message if response isn't recieved
+        wsTimerId=setTimeout(wsReadyToSend,2000);
+        //get next message from queue and send it.
+        message=wsQueue.shift();
+        console.log('WS sending ' + message);
+        ws.send(message);
+    }
+}
+
+function wsReadyToSend() {
+    clearTimeout(wsTimerId);
+    wsBusy=false;
+    if(wsQueue.length>0) {
+        //send next message
+        wsProcessQueue();
+    } else {
+        console.log('WS queue empty');
     }
 }
 
@@ -447,7 +496,7 @@ function getConfig(data) {
             $('#v_columns').val(25);
         }
         $("input[name='viewStyle'][value='RGB']").trigger('click');
-		clearStream();
+        clearStream();
         
         // Trigger updated elements
         $('#p_type').trigger('click');
@@ -467,7 +516,7 @@ function getConfig(data) {
             $('#v_columns').val(16);
         }
         $("input[name='viewStyle'][value='Channel']").trigger('click');
-		clearStream();
+        clearStream();
 
         // Trigger updated elements
         $('#s_proto').trigger('click');
@@ -571,7 +620,7 @@ function snackSave() {
 
 function setConfig() {
     // Get config to refresh UI and show result
-    ws.send("G1");
+    wsEnqueue("G1");
     snackSave();
 }
 
@@ -592,7 +641,7 @@ function submitWiFi() {
                 'ap_fallback': $('#ap').prop('checked')
             }
         };
-    ws.send('S1' + JSON.stringify(json));
+    wsEnqueue('S1' + JSON.stringify(json));
 }
 
 function submitConfig() {
@@ -642,8 +691,7 @@ function submitConfig() {
         json['pwm']['gpio'+tg+'_enabled'] = $('#gpio'+tg+'_enabled').prop('checked');
         json['pwm']['gpio'+tg+'_invert'] = $('#gpio'+tg+'_invert').prop('checked');
     }
-//	console.log(json);
-    ws.send('S2' + JSON.stringify(json));
+    wsEnqueue('S2' + JSON.stringify(json));
 }
 
 function refreshPixel() {
@@ -687,13 +735,13 @@ function test() {
     var tmode = $('#tmode option:selected').val();
 
     if (!tmode.localeCompare('t_disabled')) {
-        ws.send('T0');
+        wsEnqueue('T0');
     }
     else if (!tmode.localeCompare('t_rainbow')) {
-        ws.send('T3');
+        wsEnqueue('T3');
     }
     else if (!tmode.localeCompare('t_view')) {
-        ws.send('T4');
+        wsEnqueue('T4');
     }
 }
 
@@ -711,5 +759,5 @@ function showReboot() {
 
 function reboot() {
     showReboot();
-    ws.send('X6');
+    wsEnqueue('X6');
 }
