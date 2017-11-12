@@ -218,6 +218,7 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             testing.r = json["r"];
             testing.g = json["g"];
             testing.b = json["b"];
+            client->text("OK");
             break;
         }
         case '2': {  // Chase
@@ -229,11 +230,13 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             testing.r = json["r"];
             testing.g = json["g"];
             testing.b = json["b"];
+            client->text("OK");
             break;
         }
         case '3':  // Rainbow
             config.testmode = TestMode::RAINBOW;
             testing.step = 0;
+            client->text("OK");
             break;
 
         case '4': {  // View stream
