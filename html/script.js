@@ -348,10 +348,16 @@ function wsProcessQueue() {
     } else {
         //set wsBusy flag that we are waiting for a response
         wsBusy=true;
-        //set timeout to clear flag and try next message if response isn't recieved
-        wsTimerId=setTimeout(wsReadyToSend,2000);
-        //get next message from queue and send it.
+        //get next message from queue.
         message=wsQueue.shift();
+        //set timeout to clear flag and try next message if response isn't recieved. Short timeout for message types that don't generate a response.
+        if(['T0','T1','T2','T3','X6'].indexOf(message.substr(0,2))) {
+            timeout=40;
+        } else {
+            timeout=2000;
+        }
+        wsTimerId=setTimeout(wsReadyToSend,timeout);
+        //send it.
         console.log('WS sending ' + message);
         ws.send(message);
     }
