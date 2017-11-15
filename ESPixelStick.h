@@ -145,6 +145,7 @@ typedef struct {
     PixelColor  pixel_color;    /* Pixel color order */
     bool        gamma;          /* Use gamma map? */
     float       gammaVal;       /* gamma value to use */
+    float       briteVal;       /* brightness lto use */
 #elif defined(ESPS_MODE_SERIAL)
     /* Serial */
     SerialType  serial_type;    /* Serial type */

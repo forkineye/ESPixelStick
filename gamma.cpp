@@ -20,9 +20,9 @@ uint8_t GAMMA_TABLE[] = {
     222,224,227,229,231,233,235,237,239,241,244,246,248,250,252,255
 };
 
-void updateGammaTable(float gammaVal) {
+void updateGammaTable(float gammaVal, float briteVal) {
   for (int i=0; i<256; i++) {
-    GAMMA_TABLE[i] = (uint8_t) 255.0 * pow(i/255.0, gammaVal) + 0.5;
+    GAMMA_TABLE[i] = min( (uint8_t) 255.0 * pow(i*briteVal/255.0, gammaVal) + 0.5, 255);
   }
 }
 

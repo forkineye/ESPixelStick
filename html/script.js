@@ -489,6 +489,7 @@ function getConfig(data) {
         $('#p_color').val(config.pixel.color);
         $('#p_gamma').prop('checked', config.pixel.gamma);
         $('#p_gammaVal').val(config.pixel.gammaVal);
+        $('#p_briteVal').val(config.pixel.briteVal);
         
         if(config.e131.channel_count / 3 <8 ) {
             $('#v_columns').val(config.e131.channel_count / 3);
@@ -674,7 +675,8 @@ function submitConfig() {
                 'type': parseInt($('#p_type').val()),
                 'color': parseInt($('#p_color').val()),
                 'gamma': $('#p_gamma').prop('checked'),
-                'gammaVal': parseFloat($('#p_gammaVal').val())
+                'gammaVal': parseFloat($('#p_gammaVal').val()),
+                'briteVal': parseFloat($('#p_briteVal').val())
             },
             'serial': {
                 'type': parseInt($('#s_proto').val()),
