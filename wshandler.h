@@ -52,6 +52,7 @@ extern bool         reboot;     // Reboot flag
     S1 - Set Network Config
     S2 - Set Device Config
 
+    XS - Get RSSI:heap:uptime
     X1 - Get RSSI
     X2 - Get E131 Status
     Xh - Get Heap
@@ -63,6 +64,12 @@ EFUpdate efupdate;
 
 void procX(uint8_t *data, AsyncWebSocketClient *client) {
     switch (data[1]) {
+        case 'S':
+            client->text("XS" + 
+                     (String)WiFi.RSSI() + ":" +
+                     (String)ESP.getFreeHeap() + ":" +
+                     (String)millis());
+            break;
         case '1':
             client->text("X1" + (String)WiFi.RSSI());
             break;

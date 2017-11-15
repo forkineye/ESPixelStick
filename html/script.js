@@ -237,10 +237,8 @@ function wifiValidation() {
 // Page event feeds
 function feed() {
     if ($('#home').is(':visible')) {
-        wsEnqueue('X1');
+        wsEnqueue('XS');
         wsEnqueue('X2');
-        wsEnqueue('Xh');
-        wsEnqueue('XU');
 
         setTimeout(function() {
             feed();
@@ -283,6 +281,9 @@ function wsConnect() {
                     break;
                 case 'S2':
                     setConfig(data);
+                    break;
+                case 'XS':
+                    getSystemStatus(data);
                     break;
                 case 'X1':
                     getRSSI(data);
@@ -530,6 +531,36 @@ function getConfigStatus(data) {
     $('#x_usedflashsize').text(status.usedflashsize);
     $('#x_realflashsize').text(status.realflashsize);
     $('#x_freeheap').text(status.freeheap);
+}
+
+function getSystemStatus(data) {
+    var status = data.split(':');
+   
+    var rssi = +status[0];
+    var quality = 2 * (rssi + 100);
+
+    if (rssi <= -100)
+        quality = 0;
+    else if (rssi >= -50)
+        quality = 100;
+
+    $('#x_rssi').text(rssi);
+    $('#x_quality').text(quality);
+
+// getHeap(data) 
+    var heap = status[1];
+
+    $('#x_freeheap').text(heap);
+
+// function getUptime
+    var date = new Date(+status[2]);
+    var str = '';
+
+    str += Math.floor(date.getTime()/86400000) + " days, ";
+    str += ("0" + date.getUTCHours()).slice(-2) + ":";
+    str += ("0" + date.getUTCMinutes()).slice(-2) + ":";
+    str += ("0" + date.getUTCSeconds()).slice(-2);
+    $('#x_uptime').text(str);
 }
 
 function getRSSI(data) {
