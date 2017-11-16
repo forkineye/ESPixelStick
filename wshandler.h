@@ -45,6 +45,9 @@ extern bool         reboot;     // Reboot flag
     
     T0 - Disable Testing
     T1 - Static Testing
+    T2 - Chase Test
+    T3 - Rainbow Test
+    T4 - View Stream
 
     S1 - Set Network Config
     S2 - Set Device Config
@@ -52,6 +55,7 @@ extern bool         reboot;     // Reboot flag
     X1 - Get RSSI
     X2 - Get E131 Status
     Xh - Get Heap
+    XU - Get Uptime
     X6 - Reboot
 */
 
