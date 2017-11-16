@@ -544,11 +544,13 @@ function getConfig(data) {
             if (typeof config['pwm'][gpioN + '_enabled'] === 'undefined') {
                 $('#' + gpioN +'_enabled').attr('disabled', 'true');
                 $('#' + gpioN +'_invert').attr('disabled', 'true');
-                $('#' + gpioN +'_channel').val('disabled');
+                $('#' + gpioN +'_digital').attr('disabled', 'true');
+                $('#' + gpioN +'_channel').val('-');
                 $('#' + gpioN +'_channel').attr('disabled', 'true');
             } else {
                 $('#' + gpioN +'_enabled').prop('checked', config['pwm'][gpioN + '_enabled']);
                 $('#' + gpioN +'_invert').prop('checked', config['pwm'][gpioN + '_invert']);
+                $('#' + gpioN +'_digital').prop('checked', config['pwm'][gpioN + '_digital']);
                 $('#' + gpioN +'_channel').val(config['pwm'][gpioN + '_channel']);
             }
         }
@@ -694,6 +696,7 @@ function submitConfig() {
         json['pwm']['gpio'+tg+'_channel'] = parseInt($('#gpio'+tg+'_channel').val());
         json['pwm']['gpio'+tg+'_enabled'] = $('#gpio'+tg+'_enabled').prop('checked');
         json['pwm']['gpio'+tg+'_invert'] = $('#gpio'+tg+'_invert').prop('checked');
+        json['pwm']['gpio'+tg+'_digital'] = $('#gpio'+tg+'_digital').prop('checked');
     }
     wsEnqueue('S2' + JSON.stringify(json));
 }

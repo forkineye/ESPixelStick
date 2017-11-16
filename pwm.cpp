@@ -35,11 +35,25 @@ void handlePWM() {
       if ( ( valid_gpio_mask & 1<<gpio ) && (config.pwm_gpio_enabled & 1<<gpio) ) {
         uint16_t gpio_dmx = config.pwm_gpio_dmx[gpio];
         if (gpio_dmx < config.channel_count) {
+
 #if defined (ESPS_MODE_PIXEL)
-          int pwm_val = (config.pwm_gamma) ? GAMMA_TABLE[pixels.getData()[gpio_dmx]] : pixels.getData()[gpio_dmx];
+          int pwm_val = pixels.getData()[gpio_dmx];
 #elif defined(ESPS_MODE_SERIAL)
-          int pwm_val = (config.pwm_gamma) ? GAMMA_TABLE[serial.getData()[gpio_dmx]] : serial.getData()[gpio_dmx];
+          int pwm_val = serial.getData()[gpio_dmx];
 #endif
+
+          if (config.pwm_gpio_digital & 1<<gpio) {
+            if ( pwm_val >= 128) {
+              pwm_val = 255;
+            } else {
+              pwm_val = 0;
+            }
+          } else {
+            if (config.pwm_gamma) {
+              pwm_val = GAMMA_TABLE[pwm_val];
+            }
+          }
+
           if ( pwm_val != last_pwm[gpio]) {
             last_pwm[gpio] = pwm_val;
             if (config.pwm_gpio_invert & 1<<gpio) {
