@@ -44,10 +44,12 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include <Hash.h>
 #include <SPI.h>
 #include "ESPixelStick.h"
+#include "udpraw.h"
 #include "EFUpdate.h"
 #include "wshandler.h"
 #include "pwm.h"
 #include "gamma.h"
+#include "gpio.h"
 
 extern "C" {
 #include <user_interface.h>
@@ -148,7 +150,7 @@ RF_PRE_INIT() {
 void setup() {
     // Configure SDK params
     wifi_set_sleep_type(NONE_SLEEP_T);
-
+    ToggleSetup();
     // Initial pin states
     pinMode(DATA_PIN, OUTPUT);
     digitalWrite(DATA_PIN, LOW);
@@ -515,10 +517,15 @@ void initWeb() {
     web.serveStatic("/config.json", SPIFFS, "/config.json");
 
     web.onNotFound([](AsyncWebServerRequest *request) {
-        request->send(404, "text/plain", "Page not found");
+        if (request->method() == HTTP_OPTIONS) {
+            AsyncWebServerResponse *response = request->beginResponse(200);
+            request->send(response);
+        } else {
+            request->send(404, "text/plain", "Page not found");          
+        }
     });
 
-    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+    DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
 
     web.begin();
 
@@ -583,7 +590,7 @@ void validateConfig() {
             config.channel_count = 63 * 3;
     }
 
-    // default gamma value
+    // gamma value
     if (config.gammaVal <= 0) {
         config.gammaVal = 2.2;
     }
@@ -920,6 +927,9 @@ void setStatic(uint8_t r, uint8_t g, uint8_t b) {
 //
 /////////////////////////////////////////////////////////
 void loop() {
+   /* check for raw packets on port 2801 */
+    handle_raw_port();
+
     e131_packet_t packet;
 
     // Reboot handler
@@ -1063,6 +1073,8 @@ void loop() {
                 break;
         }
     }
+
+  ToggleTime();
 
 
 /* Streaming refresh */
