@@ -163,7 +163,10 @@ void setup() {
     LOG_PORT.print(F("ESPixelStick v"));
     for (uint8_t i = 0; i < strlen_P(VERSION); i++)
         LOG_PORT.print((char)(pgm_read_byte(VERSION + i)));
-    LOG_PORT.println("");
+    LOG_PORT.print(F(" ("));
+    for (uint8_t i = 0; i < strlen_P(BUILD_DATE); i++)
+        LOG_PORT.print((char)(pgm_read_byte(BUILD_DATE + i)));
+    LOG_PORT.println(")");
 
     // Load configuration from SPIFFS and set Hostname
     loadConfig();

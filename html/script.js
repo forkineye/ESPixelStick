@@ -187,7 +187,7 @@ function wifiValidation() {
 		$('#fg_ssid').addClass('has-error');
 		WifiSaveDisabled = true
 	}
-	if ($('#password').val().length <= 32){
+	if ($('#password').val().length <= 64){
 		$('#fg_password').removeClass('has-error');
 		$('#fg_password').addClass('has-success');
 	} else {
