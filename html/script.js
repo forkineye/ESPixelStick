@@ -180,25 +180,25 @@ function wifiValidation() {
     } else {
         $('#fg_hostname').removeClass('has-success');
         $('#fg_hostname').addClass('has-error');
-        WifiSaveDisabled = true
+        WifiSaveDisabled = true;
     }
-    if ($('#ssid').val().length <= 32){
+    if ($('#ssid').val().length <= 32) {
         $('#fg_ssid').removeClass('has-error');
         $('#fg_ssid').addClass('has-success');
     } else {
         $('#fg_ssid').removeClass('has-success');
         $('#fg_ssid').addClass('has-error');
-        WifiSaveDisabled = true
+        WifiSaveDisabled = true;
     }
-    if ($('#password').val().length <= 32){
+    if ($('#password').val().length <= 64) {
         $('#fg_password').removeClass('has-error');
         $('#fg_password').addClass('has-success');
     } else {
         $('#fg_password').removeClass('has-success');
         $('#fg_password').addClass('has-error');
-        WifiSaveDisabled = true
+        WifiSaveDisabled = true;
     }
-    if ($('#dhcp').prop('checked')== false) {
+    if ($('#dhcp').prop('checked') === false) {
         var iptest = new RegExp('' 
         + /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source
         + /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source
@@ -212,7 +212,7 @@ function wifiValidation() {
         } else {
             $('#fg_ip').removeClass('has-success');
             $('#fg_ip').addClass('has-error');
-            WifiSaveDisabled = true
+            WifiSaveDisabled = true;
         }
         if (iptest.test($('#netmask').val())) {
             $('#fg_netmask').removeClass('has-error');
@@ -220,7 +220,7 @@ function wifiValidation() {
         } else {
             $('#fg_netmask').removeClass('has-success');
             $('#fg_netmask').addClass('has-error');
-            WifiSaveDisabled = true
+            WifiSaveDisabled = true;
         }
         if (iptest.test($('#gateway').val())) {
             $('#fg_gateway').removeClass('has-error');
@@ -228,7 +228,7 @@ function wifiValidation() {
         } else {
             $('#fg_gateway').removeClass('has-success');
             $('#fg_gateway').addClass('has-error');
-            WifiSaveDisabled = true
+            WifiSaveDisabled = true;
         }
     }
     $('#btn_wifi').prop('disabled', WifiSaveDisabled);
@@ -344,7 +344,7 @@ function wsCheckQueue(value) {
 function wsProcessQueue() {
     //check if currently waiting for a response
     if(wsBusy) {
-        console.log('WS queue busy : ' + wsQueue)
+        console.log('WS queue busy : ' + wsQueue);
     } else {
         //set wsBusy flag that we are waiting for a response
         wsBusy=true;

@@ -1,6 +1,28 @@
 
 Changelog
 =========
+### 3.0-rc4
+ - Compiled against [2017.11.16 Arduino core](https://github.com/esp8266/Arduino/tree/d1e8fe99a23c0e4641199f7a5ee3b0b8ca334443)
+   - Upgrades to lwip2
+   - Includes WPA2 KRACK security fix
+ - Migrated to [ESPAsyncE131](https://github.com/forkineye/ESPAsyncE131) library
+ - Fixed [Issue #56](https://github.com/forkineye/ESPixelStick/issues/56) - Read too far
+ - Fixed [Issue #65](https://github.com/forkineye/ESPixelStick/issues/65) - Websocket queuing
+ - Added build date
+
+### 3.0-rc3
+- Fixed IGMP timer bug in lwip (Fix submitted to ESP8266 Arduino project)
+
+### 3.0-rc2
+- Fixed IGMP subscription bug introduced in 3.0-dev1
+- Fixed issue receiving E1.31 alternate start codes (fixed in E131 library)
+- Added Universe Boundary configuration
+
+### 3.0-rc1
+- Fixed validation errors on wifi setup page.
+- Fixed AP reboot loop.
+- Fixed color order issue in testing interface.
+
 ### 3.0-dev1
 - Complete re-write of the web frontend. Requires a WebSockets capable browser.
 - Migrated to ESPAsyncUDP for E131 parsing (E131 library updated).
