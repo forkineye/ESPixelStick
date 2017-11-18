@@ -3,9 +3,12 @@ var wsQueue = [];
 var wsBusy = false;
 var wsTimerId;
 
+var testing_modes = [ "t_disabled", "t_static", "t_chase", "t_rainbow", "t_view" ];
+
 // jQuery doc ready 
 $(function() {
     // Menu navigation for single page layout
+
     $('ul.navbar-nav li a').click(function() {
         // Highlight proper navbar item
         $('.nav li').removeClass('active');
@@ -29,12 +32,6 @@ $(function() {
             $('#update').modal({backdrop: 'static', keyboard: false});
         });
 
-        // Test mode toggles
-        $('#tmode').change(function() {
-            $('.tdiv').addClass('hidden');
-            $('#'+$('select[name=tmode]').val()).removeClass('hidden');
-        });
-
         // Color Picker
         $('.color').colorPicker({
             buildCallback: function($elm) {
@@ -44,8 +41,12 @@ $(function() {
                 $elm.append('<div class="cp-memory">' +
                     '<div style="background-color: #FFFFFF";></div>' +
                     '<div style="background-color: #FF0000";></div>' +
+                    '<div style="background-color: #FFFF00";></div>' +
                     '<div style="background-color: #00FF00";></div>' +
-                    '<div style="background-color: #0000FF";></div>').
+                    '<div style="background-color: #00FFFF";></div>' +
+                    '<div style="background-color: #0000FF";></div>' +
+                    '<div style="background-color: #FF00FF";></div>' +
+                    '<div style="background-color: #000000";></div>').
                 on('click', '.cp-memory div', function(e) {
                     var $this = $(this);
 
@@ -63,7 +64,7 @@ $(function() {
 
             cssAddon:
                 '.cp-memory {margin-bottom:6px; clear:both;}' +
-                '.cp-memory div {float:left; width:25%; height:40px;' +
+                '.cp-memory div {float:left; width:12.5%; height:40px;' +
                 'background:rgba(0,0,0,1); text-align:center; line-height:40px;}' +
                 '.cp-disp{padding:10px; margin-bottom:6px; font-size:19px; height:40px; line-height:20px}' +
                 '.cp-xy-slider{width:200px; height:200px;}' +
@@ -100,6 +101,9 @@ $(function() {
         // Set page event feeds
         feed();
     });
+
+    // Test mode toggles
+    $('#tmode').change( hideShowTestSections() );
 
     // DHCP field toggles
     $('#dhcp').click(function() {
@@ -531,6 +535,14 @@ function getConfigStatus(data) {
     $('#x_usedflashsize').text(status.usedflashsize);
     $('#x_realflashsize').text(status.realflashsize);
     $('#x_freeheap').text(status.freeheap);
+    updateTestingGUI(status.testing);
+}
+
+function updateTestingGUI(data) {
+    if ($('#tmode option:selected').val().localeCompare(testing_modes[data])) {
+        $('#tmode').val(testing_modes[data]);//.change();
+	hideShowTestSections();
+    }
 }
 
 function getSystemStatus(data) {
@@ -714,7 +726,15 @@ function refreshSerial() {
     $('#refresh').html(Math.ceil(rate) + 'ms / ' + Math.floor(hz) + 'Hz');
 }
 
+function hideShowTestSections() {
+    // Test mode toggles
+    $('.tdiv').addClass('hidden');
+    $('#'+$('select[name=tmode]').val()).removeClass('hidden');
+}
+
 function test() {
+    hideShowTestSections();
+
     var tmode = $('#tmode option:selected').val();
 
     if (!tmode.localeCompare('t_disabled')) {
