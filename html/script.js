@@ -14,7 +14,12 @@ $(function() {
         // Show the proper menu div
         $('.mdiv').addClass('hidden');
         $($(this).attr('href')).removeClass('hidden');
-        
+
+        // kick start the live stream
+	if ($(this).attr('href') == "#stream") {
+            wsEnqueue('T4');
+	}
+
         // Collapse the menu on smaller screens
         $('#navbar').removeClass('in').attr('aria-expanded', 'false');
         $('.navbar-toggle').attr('aria-expanded', 'false');
@@ -307,7 +312,7 @@ function wsConnect() {
             } else {
                 streamData= new Uint8Array(event.data);
                 drawStream(streamData);
-                if (!$('#tmode option:selected').val().localeCompare('t_view')) wsEnqueue('T4');
+                if ($('#stream').is(':visible')) wsEnqueue('T4');
             }
             wsReadyToSend();
         };
@@ -722,9 +727,6 @@ function test() {
     }
     else if (!tmode.localeCompare('t_rainbow')) {
         wsEnqueue('T3');
-    }
-    else if (!tmode.localeCompare('t_view')) {
-        wsEnqueue('T4');
     }
 }
 

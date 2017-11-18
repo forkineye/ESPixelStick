@@ -17,6 +17,7 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
         </button>
         <a class="navbar-brand" href="#">ESPixelStick</a>
       </div>
@@ -26,6 +27,7 @@
           <li><a href="#wifi">Wireless Setup</a></li>
           <li><a href="#config">Device Setup</a></li>
           <li><a href="#test">Testing</a></li>
+          <li><a href="#stream">Live View</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
           <li><a href="#admin">Admin</a></li>
@@ -248,7 +250,6 @@
                 <option value="t_static">Static</option>
                 <option value="t_chase">Chase</option>
                 <option value="t_rainbow">Rainbow</option>
-                <option value="t_view">View Stream</option>
               </select>
             </div>
           </div>
@@ -276,9 +277,16 @@
             </div>
           </div>
 
-          <!-- Testing - View Stream -->
-          <div id="t_view" class="tdiv hidden">
-            <legend class="esps-legend">View Stream</legend>
+        </form>
+      </fieldset>
+    </div>
+
+    <!-- View Stream -->
+    <div id="stream" class="mdiv hidden anchor">
+      <fieldset>
+        <legend class="esps-legend">Live Stream View</legend>
+        <form class="form-horizontal" onsubmit="return false">
+          <div id="t_view" >
             <div class="form-group">
               <label class="control-label col-sm-2" for="t_color">Display</label>
               <div class="col-sm-10">
