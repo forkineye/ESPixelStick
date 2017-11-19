@@ -30,16 +30,20 @@ void setupPWM () {
 }
 
 void handlePWM() {
+  int pwm_val;
+
   if ( config.pwm_global_enabled ) {
     for (int gpio=0; gpio < NUM_GPIO; gpio++ ) {
       if ( ( valid_gpio_mask & 1<<gpio ) && (config.pwm_gpio_enabled & 1<<gpio) ) {
         uint16_t gpio_dmx = config.pwm_gpio_dmx[gpio];
         if (gpio_dmx < config.channel_count) {
-
 #if defined (ESPS_MODE_PIXEL)
-          int pwm_val = pixels.getData()[gpio_dmx];
+          pwm_val = pixels.getData()[gpio_dmx];
 #elif defined(ESPS_MODE_SERIAL)
-          int pwm_val = serial.getData()[gpio_dmx];
+          if (config.serial_type == SerialType::DMX512)
+                pwm_val = serial.getData()[gpio_dmx+1];
+          else
+                pwm_val = serial.getData()[gpio_dmx+2];
 #endif
 
           if (config.pwm_gpio_digital & 1<<gpio) {
