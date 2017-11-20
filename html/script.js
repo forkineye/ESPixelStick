@@ -5,10 +5,13 @@ var wsTimerId;
 
 var testing_modes = [ "t_disabled", "t_static", "t_chase", "t_rainbow", "t_view" ];
 
+// Default modal properties
+$.fn.modal.Constructor.DEFAULTS.backdrop = 'static';
+$.fn.modal.Constructor.DEFAULTS.keyboard = false;
+
 // jQuery doc ready 
 $(function() {
     // Menu navigation for single page layout
-
     $('ul.navbar-nav li a').click(function() {
         // Highlight proper navbar item
         $('.nav li').removeClass('active');
@@ -22,14 +25,10 @@ $(function() {
         $('#navbar').removeClass('in').attr('aria-expanded', 'false');
         $('.navbar-toggle').attr('aria-expanded', 'false');
 
-        $('#wserror').on('hidden.bs.modal', function() {
-            location.reload(true);
-        });
-
         // Firmware selection and upload
         $('#efu').change(function () {
             $('#updatefw').submit();
-            $('#update').modal({backdrop: 'static', keyboard: false});
+            $('#update').modal();
         });
 
         // Color Picker
@@ -313,13 +312,11 @@ function wsConnect() {
             wsReadyToSend();
         };
         
-        ws.onerror = function() {
-            wsReconnect();
+        ws.onclose = function() {
+            $('#wserror').modal();
+            wsConnect();
         };
 
-        ws.onclose = function() {
-            wsReconnect();
-        };
     } else {
         alert('WebSockets is NOT supported by your Browser! You will need to upgrade your browser or downgrade to v2.0 of the ESPixelStick firmware.');
     }
@@ -346,7 +343,7 @@ function wsCheckQueue(value) {
 function wsProcessQueue() {
     //check if currently waiting for a response
     if(wsBusy) {
-        console.log('WS queue busy : ' + wsQueue);
+        //console.log('WS queue busy : ' + wsQueue);
     } else {
         //set wsBusy flag that we are waiting for a response
         wsBusy=true;
@@ -360,7 +357,7 @@ function wsProcessQueue() {
         }
         wsTimerId=setTimeout(wsReadyToSend,timeout);
         //send it.
-        console.log('WS sending ' + message);
+        //console.log('WS sending ' + message);
         ws.send(message);
     }
 }
@@ -372,7 +369,7 @@ function wsReadyToSend() {
         //send next message
         wsProcessQueue();
     } else {
-        console.log('WS queue empty');
+        //console.log('WS queue empty');
     }
 }
 
@@ -744,16 +741,9 @@ function test() {
     }
 }
 
-function wsReconnect() {
-    $('#wserror').modal({backdrop: 'static', keyboard: false});
-    setTimeout(function() {
-        wsConnect();
-    }, 1000);
-}
-
 function showReboot() {
     $('#update').modal('hide');
-    $('#reboot').modal({backdrop: 'static', keyboard: false});
+    $('#reboot').modal();
     setTimeout(function() {
         if($('#dhcp').prop('checked')) {
             window.location.assign("/");
