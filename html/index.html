@@ -61,7 +61,6 @@
               <tr><td width="33%">Sequence Errors</td><td><span id="serr"></span></td></tr>
               <tr><td width="33%">Packet Errors</td><td><span id="perr"></span></td></tr>
               <tr><td width="33%">Last Client IP</td><td><span id="clientip"></span></td></tr>
-              <tr><td width="33%">Last Client Port</td><td><span id="clientport"></span></td></tr>
             </table>
           </fieldset>
         </div>
@@ -217,7 +216,7 @@
             <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_user" name="mqtt_user" placeholder="Enter MQTT User (optional)"></div>
           </div>
           <div class="form-group mqtt">
-            <label class="control-label col-sm-2" for="mqtt_port">Password</label>
+            <label class="control-label col-sm-2" for="mqtt_password">Password</label>
             <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_password" name="mqtt_password" placeholder="Enter MQTT Password (optional)"></div>
           </div>
           <div class="form-group mqtt">
@@ -384,10 +383,8 @@
           <h4 class="modal-title">WebSocket Error</h4>
         </div>
         <div class="modal-body">
-          <p>Connection lost, please reload the page.</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-dismiss="modal">Reload</button>
+          <p>WebSocket connection lost, attempting to reconnect...</p>
+          <div class="bar"></div>
         </div>
       </div>
     </div>

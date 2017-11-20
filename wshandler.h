@@ -82,8 +82,7 @@ void procX(uint8_t *data, AsyncWebSocketClient *client) {
                     (String)e131.stats.num_packets + ":" +
                     (String)seqErrors + ":" +
                     (String)e131.stats.packet_errors + ":" +
-                    e131.stats.last_clientIP.toString() + ":" + 
-                    (String)e131.stats.last_clientPort);
+                    e131.stats.last_clientIP.toString());
             break;
         }
         case 'h':

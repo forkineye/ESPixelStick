@@ -8,6 +8,7 @@ Changelog
  - Migrated to [ESPAsyncE131](https://github.com/forkineye/ESPAsyncE131) library
  - Fixed [Issue #56](https://github.com/forkineye/ESPixelStick/issues/56) - Read too far
  - Fixed [Issue #65](https://github.com/forkineye/ESPixelStick/issues/65) - Websocket queuing
+ - Fixed [Issue #80](https://github.com/forkineye/ESPixelStick/issues/80) - Test mode state reporting
  - Added build date
 
 ### 3.0-rc3

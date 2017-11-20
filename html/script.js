@@ -254,6 +254,7 @@ function wsConnect() {
         ws.binaryType = 'arraybuffer';
 
         ws.onopen = function() {
+            $('#wserror').modal('hide');
             wsEnqueue('E1'); // Get html elements
             wsEnqueue('G1'); // Get Config
             wsEnqueue('G2'); // Get Net Status
@@ -313,11 +314,11 @@ function wsConnect() {
         };
         
         ws.onerror = function() {
-            $('#wserror').modal({backdrop: 'static', keyboard: false});
+            wsReconnect();
         };
 
         ws.onclose = function() {
-            $('#wserror').modal({backdrop: 'static', keyboard: false});
+            wsReconnect();
         };
     } else {
         alert('WebSockets is NOT supported by your Browser! You will need to upgrade your browser or downgrade to v2.0 of the ESPixelStick firmware.');
@@ -610,7 +611,6 @@ function getE131Status(data) {
     $('#serr').text(status[3]);
     $('#perr').text(status[4]);
     $('#clientip').text(status[5]);
-    $('#clientport').text(status[6]);
 }
 
 function snackSave() {
@@ -744,6 +744,13 @@ function test() {
     }
 }
 
+function wsReconnect() {
+    $('#wserror').modal({backdrop: 'static', keyboard: false});
+    setTimeout(function() {
+        wsConnect();
+    }, 1000);
+}
+
 function showReboot() {
     $('#update').modal('hide');
     $('#reboot').modal({backdrop: 'static', keyboard: false});
@@ -753,7 +760,7 @@ function showReboot() {
         } else {
             window.location.assign("http://" + $('#ip').val());
         }
-    }, 5000);    
+    }, 5000);
 }
 
 function reboot() {
