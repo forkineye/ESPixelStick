@@ -2,7 +2,7 @@
 Changelog
 =========
 ### 3.0-rc4
- - Compiled against [2017.11.16 Arduino core](https://github.com/esp8266/Arduino/tree/d1e8fe99a23c0e4641199f7a5ee3b0b8ca334443)
+ - Compiled against [2017.11.20 Arduino core](https://github.com/esp8266/Arduino/tree/117bc875ffdd1f4b11af0dd236e0e12a84748e53)
    - Upgrades to lwip2
    - Includes WPA2 KRACK security fix
  - Migrated to [ESPAsyncE131](https://github.com/forkineye/ESPAsyncE131) library

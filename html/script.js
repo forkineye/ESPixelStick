@@ -41,12 +41,8 @@ $(function() {
                 $elm.append('<div class="cp-memory">' +
                     '<div style="background-color: #FFFFFF";></div>' +
                     '<div style="background-color: #FF0000";></div>' +
-                    '<div style="background-color: #FFFF00";></div>' +
                     '<div style="background-color: #00FF00";></div>' +
-                    '<div style="background-color: #00FFFF";></div>' +
-                    '<div style="background-color: #0000FF";></div>' +
-                    '<div style="background-color: #FF00FF";></div>' +
-                    '<div style="background-color: #000000";></div>').
+                    '<div style="background-color: #0000FF";></div>').
                 on('click', '.cp-memory div', function(e) {
                     var $this = $(this);
 
@@ -64,7 +60,7 @@ $(function() {
 
             cssAddon:
                 '.cp-memory {margin-bottom:6px; clear:both;}' +
-                '.cp-memory div {float:left; width:12.5%; height:40px;' +
+                '.cp-memory div {float:left; width:25%; height:40px;' +
                 'background:rgba(0,0,0,1); text-align:center; line-height:40px;}' +
                 '.cp-disp{padding:10px; margin-bottom:6px; font-size:19px; height:40px; line-height:20px}' +
                 '.cp-xy-slider{width:200px; height:200px;}' +
@@ -103,7 +99,7 @@ $(function() {
     });
 
     // Test mode toggles
-    $('#tmode').change( hideShowTestSections() );
+    $('#tmode').change(hideShowTestSections());
 
     // DHCP field toggles
     $('#dhcp').click(function() {
@@ -441,7 +437,6 @@ function getConfig(data) {
     } else {
         $('.dhcp').removeClass('hidden');
     }
-    //$('.dhcp').prop('disabled', config.network.dhcp);
     $('#ap').prop('checked', config.network.ap_fallback);
     $('#ip').val(config.network.ip[0] + '.' +
             config.network.ip[1] + '.' +
@@ -463,7 +458,6 @@ function getConfig(data) {
     } else {
         $('.mqtt').addClass('hidden');
     }
-    //$('.mqtt').prop('disabled', !config.mqtt.enabled);
     $('#mqtt_ip').val(config.mqtt.ip);
     $('#mqtt_port').val(config.mqtt.port);
     $('#mqtt_user').val(config.mqtt.user);
@@ -539,10 +533,12 @@ function getConfigStatus(data) {
 }
 
 function updateTestingGUI(data) {
-    if ($('#tmode option:selected').val().localeCompare(testing_modes[data])) {
-        $('#tmode').val(testing_modes[data]);//.change();
-	hideShowTestSections();
+    if ($('#tmode option:selected').val().localeCompare(testing_modes[data.mode])) {
+        $('#tmode').val(testing_modes[data.mode]);
+	    hideShowTestSections();
     }
+
+    $('.color').val('rgb(' + data.r + ',' + data.g + ',' + data.b + ')');
 }
 
 function getSystemStatus(data) {
