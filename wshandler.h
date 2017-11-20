@@ -165,7 +165,12 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             json["usedflashsize"] = (String)ESP.getFlashChipSize();
             json["realflashsize"] = (String)ESP.getFlashChipRealSize();
             json["freeheap"] = (String)ESP.getFreeHeap();
-            json["testing"] = static_cast<uint8_t>(config.testmode);
+
+            JsonObject &test = json.createNestedObject("testing");
+            test["mode"] = static_cast<uint8_t>(config.testmode);
+            test["r"] = testing.r;
+            test["g"] = testing.g;
+            test["b"] = testing.b;
 
             String response;
             json.printTo(response);

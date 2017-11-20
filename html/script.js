@@ -3,9 +3,12 @@ var wsQueue = [];
 var wsBusy = false;
 var wsTimerId;
 
+var testing_modes = [ "t_disabled", "t_static", "t_chase", "t_rainbow", "t_view" ];
+
 // jQuery doc ready 
 $(function() {
     // Menu navigation for single page layout
+
     $('ul.navbar-nav li a').click(function() {
         // Highlight proper navbar item
         $('.nav li').removeClass('active');
@@ -27,12 +30,6 @@ $(function() {
         $('#efu').change(function () {
             $('#updatefw').submit();
             $('#update').modal({backdrop: 'static', keyboard: false});
-        });
-
-        // Test mode toggles
-        $('#tmode').change(function() {
-            $('.tdiv').addClass('hidden');
-            $('#'+$('select[name=tmode]').val()).removeClass('hidden');
         });
 
         // Color Picker
@@ -100,6 +97,9 @@ $(function() {
         // Set page event feeds
         feed();
     });
+
+    // Test mode toggles
+    $('#tmode').change(hideShowTestSections());
 
     // DHCP field toggles
     $('#dhcp').click(function() {
@@ -437,7 +437,6 @@ function getConfig(data) {
     } else {
         $('.dhcp').removeClass('hidden');
     }
-    //$('.dhcp').prop('disabled', config.network.dhcp);
     $('#ap').prop('checked', config.network.ap_fallback);
     $('#ip').val(config.network.ip[0] + '.' +
             config.network.ip[1] + '.' +
@@ -459,7 +458,6 @@ function getConfig(data) {
     } else {
         $('.mqtt').addClass('hidden');
     }
-    //$('.mqtt').prop('disabled', !config.mqtt.enabled);
     $('#mqtt_ip').val(config.mqtt.ip);
     $('#mqtt_port').val(config.mqtt.port);
     $('#mqtt_user').val(config.mqtt.user);
@@ -531,6 +529,16 @@ function getConfigStatus(data) {
     $('#x_usedflashsize').text(status.usedflashsize);
     $('#x_realflashsize').text(status.realflashsize);
     $('#x_freeheap').text(status.freeheap);
+    updateTestingGUI(status.testing);
+}
+
+function updateTestingGUI(data) {
+    if ($('#tmode option:selected').val().localeCompare(testing_modes[data.mode])) {
+        $('#tmode').val(testing_modes[data.mode]);
+	    hideShowTestSections();
+    }
+
+    $('.color').val('rgb(' + data.r + ',' + data.g + ',' + data.b + ')');
 }
 
 function getSystemStatus(data) {
@@ -714,7 +722,15 @@ function refreshSerial() {
     $('#refresh').html(Math.ceil(rate) + 'ms / ' + Math.floor(hz) + 'Hz');
 }
 
+function hideShowTestSections() {
+    // Test mode toggles
+    $('.tdiv').addClass('hidden');
+    $('#'+$('select[name=tmode]').val()).removeClass('hidden');
+}
+
 function test() {
+    hideShowTestSections();
+
     var tmode = $('#tmode option:selected').val();
 
     if (!tmode.localeCompare('t_disabled')) {
