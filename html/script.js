@@ -725,13 +725,16 @@ function submitConfig() {
             }
         };
 
-    for(var i=0, len=gpio_list.length; i < len; i++){
+// TODO: Need to fix this, it's crashing procS() in wshandler.h
+/*
+    for(var i = 0, len = gpio_list.length; i < len; i++) {
         var tg = gpio_list[i];
         json['pwm']['gpio'+tg+'_channel'] = parseInt($('#gpio'+tg+'_channel').val());
         json['pwm']['gpio'+tg+'_enabled'] = $('#gpio'+tg+'_enabled').prop('checked');
         json['pwm']['gpio'+tg+'_invert'] = $('#gpio'+tg+'_invert').prop('checked');
         json['pwm']['gpio'+tg+'_digital'] = $('#gpio'+tg+'_digital').prop('checked');
     }
+*/
     wsEnqueue('S2' + JSON.stringify(json));
 }
 
