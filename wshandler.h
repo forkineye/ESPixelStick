@@ -1,5 +1,5 @@
 /*
-* ESPixelStick.h
+* wshandler.h
 *
 * Project: ESPixelStick - An ESP8266 and E1.31 based pixel driver
 * Copyright (c) 2016 Shelby Merrick

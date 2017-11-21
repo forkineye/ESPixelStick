@@ -1,4 +1,5 @@
 var mode = 'null';
+var gpio_list = [0, 1, 2, 3, 4, 5, 12, 13, 14, 15, 16];
 var wsQueue = [];
 var wsBusy = false;
 var wsTimerId;
@@ -103,10 +104,8 @@ $(function() {
     // DHCP field toggles
     $('#dhcp').click(function() {
         if ($(this).is(':checked')) {
-            //$('.dhcp').prop('disabled', true);
             $('.dhcp').addClass('hidden');
        } else {
-            //$('.dhcp').prop('disabled', false);
             $('.dhcp').removeClass('hidden');
        }
     });
@@ -114,11 +113,18 @@ $(function() {
     // MQTT field toggles
     $('#mqtt').click(function() {
         if ($(this).is(':checked')) {
-            //$('.mqtt').prop('disabled', false);
             $('.mqtt').removeClass('hidden');
        } else {
-            //$('.mqtt').prop('disabled', true);
             $('.mqtt').addClass('hidden');
+       }
+    });
+
+    // PWM field toggles
+    $('#pwm_enabled').click(function() {
+        if ($(this).is(':checked')) {
+            $('.pwm').removeClass('hidden');
+       } else {
+            $('.pwm').addClass('hidden');
        }
     });
 
@@ -461,7 +467,7 @@ function getConfig(data) {
     $('#mqtt_user').val(config.mqtt.user);
     $('#mqtt_password').val(config.mqtt.password);
     $('#mqtt_topic').val(config.mqtt.topic);
-    
+
     // E1.31 Config
     $('#universe').val(config.e131.universe);
     $('#universe_limit').val(config.e131.universe_limit);
@@ -470,14 +476,16 @@ function getConfig(data) {
 
     // Output Config
     $('.odiv').addClass('hidden');
-    if (config.device.mode === 0) {  // Pixel
+    if (config.device.mode & 0x01) {  // Pixel
         mode = 'pixel';
         $('#o_pixel').removeClass('hidden');
         $('#p_count').val(config.e131.channel_count / 3);
         $('#p_type').val(config.pixel.type);
         $('#p_color').val(config.pixel.color);
         $('#p_gamma').prop('checked', config.pixel.gamma);
-        
+        $('#p_gammaVal').val(config.pixel.gammaVal);
+        $('#p_briteVal').val(config.pixel.briteVal);
+
         if(config.e131.channel_count / 3 <8 ) {
             $('#v_columns').val(config.e131.channel_count / 3);
         } else if (config.e131.channel_count / 3 <50 ) {
@@ -493,7 +501,7 @@ function getConfig(data) {
         $('#p_count').trigger('change');
     }
 
-    if (config.device.mode == 1) {  // Serial
+    if (config.device.mode & 0x02) {  // Serial
         mode = 'serial';
         $('#o_serial').removeClass('hidden');
         $('#s_count').val(config.e131.channel_count);
@@ -511,6 +519,36 @@ function getConfig(data) {
         // Trigger updated elements
         $('#s_proto').trigger('click');
         $('#s_count').trigger('change');
+    }
+
+    // PWM Config
+    if (config.device.mode & 0x04) {  // PWM
+        $('#o_pwm').removeClass('hidden');
+        $('#pwm_enabled').prop('checked', config.pwm.enabled);
+        if (config.pwm.enabled) {
+            $('.pwm').removeClass('hidden');
+        } else {
+            $('.pwm').addClass('hidden');
+        }
+
+        $('#pwm_freq').val(config.pwm.freq);
+        $('#pwm_gamma').prop('checked', config.pwm.gamma);
+        for(var i=0, len=gpio_list.length; i < len; i++){
+            var gpioN = 'gpio' + gpio_list[i];
+
+            if (typeof config['pwm'][gpioN + '_enabled'] === 'undefined') {
+                $('#' + gpioN +'_enabled').attr('disabled', 'true');
+                $('#' + gpioN +'_invert').attr('disabled', 'true');
+                $('#' + gpioN +'_digital').attr('disabled', 'true');
+                $('#' + gpioN +'_channel').val('-');
+                $('#' + gpioN +'_channel').attr('disabled', 'true');
+            } else {
+                $('#' + gpioN +'_enabled').prop('checked', config['pwm'][gpioN + '_enabled']);
+                $('#' + gpioN +'_invert').prop('checked', config['pwm'][gpioN + '_invert']);
+                $('#' + gpioN +'_digital').prop('checked', config['pwm'][gpioN + '_digital']);
+                $('#' + gpioN +'_channel').val(config['pwm'][gpioN + '_channel']);
+            }
+        }
     }
 }
 
@@ -672,13 +710,28 @@ function submitConfig() {
             'pixel': {
                 'type': parseInt($('#p_type').val()),
                 'color': parseInt($('#p_color').val()),
-                'gamma': $('#p_gamma').prop('checked')
+                'gamma': $('#p_gamma').prop('checked'),
+                'gammaVal': parseFloat($('#p_gammaVal').val()),
+                'briteVal': parseFloat($('#p_briteVal').val())
             },
             'serial': {
                 'type': parseInt($('#s_proto').val()),
                 'baudrate': parseInt($('#s_baud').val())
+            },
+            "pwm": {
+               "enabled": $('#pwm_enabled').prop('checked'),
+               "freq": parseInt($('#pwm_freq').val()),
+               "gamma": $('#pwm_gamma').prop('checked'),
             }
         };
+
+    for(var i=0, len=gpio_list.length; i < len; i++){
+        var tg = gpio_list[i];
+        json['pwm']['gpio'+tg+'_channel'] = parseInt($('#gpio'+tg+'_channel').val());
+        json['pwm']['gpio'+tg+'_enabled'] = $('#gpio'+tg+'_enabled').prop('checked');
+        json['pwm']['gpio'+tg+'_invert'] = $('#gpio'+tg+'_invert').prop('checked');
+        json['pwm']['gpio'+tg+'_digital'] = $('#gpio'+tg+'_digital').prop('checked');
+    }
     wsEnqueue('S2' + JSON.stringify(json));
 }
 

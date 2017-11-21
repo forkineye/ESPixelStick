@@ -20,7 +20,7 @@
 #ifndef ESPIXELSTICK_H_
 #define ESPIXELSTICK_H_
 
-const char VERSION[] = "3.0";
+const char VERSION[] = "3.1-dev";
 const char BUILD_DATE[] = __DATE__;
 
 /*****************************************/
@@ -31,9 +31,20 @@ const char BUILD_DATE[] = __DATE__;
 #define ESPS_MODE_PIXEL
 //#define ESPS_MODE_SERIAL
 
+/* Include support for PWM */
+//#define ESPS_SUPPORT_PWM
+
 /*****************************************/
 /*         END - Configuration           */
 /*****************************************/
+
+#include <ESP8266WiFi.h>
+#include <Ticker.h>
+#include <AsyncMqttClient.h>
+#include <ESP8266mDNS.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncUDP.h>
+#include <ESPAsyncWebServer.h>
 
 #if defined(ESPS_MODE_PIXEL)
 #include "PixelDriver.h"
@@ -64,10 +75,22 @@ const char BUILD_DATE[] = __DATE__;
 #define CONFIG_MAX_SIZE 2048    /* Sanity limit for config file */
 
 /* Pixel Types */
+class DevCap {
+ public:
+    bool MPIXEL : 1;
+    bool MSERIAL : 1;
+    bool MPWM : 1;
+    uint8_t toInt() {
+        return (MPWM << 2 | MSERIAL << 1 | MPIXEL);
+    }
+};
+
+/*
 enum class DevMode : uint8_t {
     MPIXEL,
     MSERIAL
 };
+*/
 
 /* Test Modes */
 enum class TestMode : uint8_t {
@@ -89,7 +112,7 @@ typedef struct {
 typedef struct {
     /* Device */
     String      id;             /* Device ID */
-    DevMode     devmode;        /* Device Mode - used for reporting mode, can't be set */
+    DevCap      devmode;        /* Device Mode - used for reporting mode, can't be set */
     TestMode    testmode;       /* Testing mode */
 
     /* Network */
@@ -122,18 +145,43 @@ typedef struct {
     PixelType   pixel_type;     /* Pixel type */
     PixelColor  pixel_color;    /* Pixel color order */
     bool        gamma;          /* Use gamma map? */
-
+    float       gammaVal;       /* gamma value to use */
+    float       briteVal;       /* brightness lto use */
 #elif defined(ESPS_MODE_SERIAL)
     /* Serial */
     SerialType  serial_type;    /* Serial type */
     BaudRate    baudrate;       /* Baudrate */
 #endif
+
+#if defined(ESPS_SUPPORT_PWM)
+    bool        pwm_global_enabled; /* is pwm runtime enabled? */
+    int         pwm_freq;           /* pwm frequency */
+    bool        pwm_gamma;          /* is pwm gamma enabled? */
+    uint16_t    pwm_gpio_dmx[17];   /* which dmx channel is gpio[n] mapped to? */
+    uint32_t    pwm_gpio_enabled;   /* is gpio[n] enabled? */
+    uint32_t    pwm_gpio_invert;    /* is gpio[n] active high or active low? */
+    uint32_t    pwm_gpio_digital;   /* is gpio[n] digital or "analog"? */
+#endif
 } config_t;
+
 
 /* Forward Declarations */
 void serializeConfig(String &jsonString, bool pretty = false, bool creds = false);
 void dsNetworkConfig(JsonObject &json);
 void dsDeviceConfig(JsonObject &json);
 void saveConfig();
+
+void connectWifi();
+void onWifiConnect(const WiFiEventStationModeGotIP &event);
+void onWiFiDisconnect(const WiFiEventStationModeDisconnected &event);
+void connectToMqtt();
+void onMqttConnect(bool sessionPresent);
+void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
+void onMqttMessage(char* topic, char* p_payload,
+        AsyncMqttClientMessageProperties properties, size_t len,size_t index, size_t total);
+void publishRGBState();
+void publishRGBBrightness();
+void publishRGBColor();
+void setStatic(uint8_t r, uint8_t g, uint8_t b);
 
 #endif /* ESPIXELSTICK_H_ */
