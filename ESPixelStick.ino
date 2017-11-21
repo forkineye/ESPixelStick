@@ -125,8 +125,6 @@ SerialDriver    serial;         // Serial object
 #error "No valid output mode defined."
 #endif
 
-
-
 /////////////////////////////////////////////////////////
 // 
 //  Forward Declarations
@@ -239,7 +237,6 @@ void setup() {
     // Configure the outputs
 #if defined (ESPS_SUPPORT_PWM)
     setupPWM();
-    
 #endif
 
 #if defined (ESPS_MODE_PIXEL)
@@ -276,7 +273,7 @@ void initWifi() {
 }
 
 void connectWifi() {
-    delay(secureRandom(100,500));
+    delay(secureRandom(100, 500));
 
     LOG_PORT.println("");
     LOG_PORT.print(F("Connecting to "));
@@ -402,7 +399,9 @@ Serial.println(payload);
             config.testmode = TestMode::MQTT;
             if (m_rgb_state != true) {
                 m_rgb_state = true;
-                setStatic(m_rgb_red*m_rgb_brightness/100, m_rgb_green*m_rgb_brightness/100, m_rgb_blue*m_rgb_brightness/100);
+                setStatic(m_rgb_red * m_rgb_brightness / 100,
+                        m_rgb_green * m_rgb_brightness / 100,
+                        m_rgb_blue * m_rgb_brightness / 100);
                 publishRGBState();
             }
         } else if (payload.equals(String(LIGHT_OFF))) {
@@ -415,13 +414,13 @@ Serial.println(payload);
         }
     } else if (String(config.mqtt_topic + MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC).equals(topic)) {
         uint8_t brightness = payload.toInt();
-        if (brightness > 100) {
-            return;
-        } else {
-            m_rgb_brightness = brightness;
-            setStatic(m_rgb_red*m_rgb_brightness/100, m_rgb_green*m_rgb_brightness/100, m_rgb_blue*m_rgb_brightness/100);
-            publishRGBBrightness();
-        }
+        if (brightness > 100)
+            brightness = 100;
+        m_rgb_brightness = brightness;
+        setStatic(m_rgb_red * m_rgb_brightness / 100,
+                m_rgb_green * m_rgb_brightness / 100,
+                m_rgb_blue * m_rgb_brightness / 100);
+        publishRGBBrightness();
     } else if (String(config.mqtt_topic + MQTT_LIGHT_RGB_COMMAND_TOPIC).equals(topic)) {
         // Get the position of the first and second commas
         uint8_t firstIndex = payload.indexOf(',');
@@ -430,8 +429,9 @@ Serial.println(payload);
         m_rgb_red = payload.substring(0, firstIndex).toInt();
         m_rgb_green = payload.substring(firstIndex + 1, lastIndex).toInt();
         m_rgb_blue = payload.substring(lastIndex + 1).toInt();
-   
-        setStatic(m_rgb_red*m_rgb_brightness/100, m_rgb_green*m_rgb_brightness/100, m_rgb_blue*m_rgb_brightness/100);
+        setStatic(m_rgb_red * m_rgb_brightness / 100,
+                m_rgb_green * m_rgb_brightness / 100,
+                m_rgb_blue * m_rgb_brightness / 100);
         publishRGBColor();
     }
 }
@@ -473,6 +473,9 @@ void initWeb() {
     // Handle OTA update from asynchronous callbacks
     Update.runAsync(true);
 
+    // Add header for SVG plot support?
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+
     // Setup WebSockets
     ws.onEvent(wsEvent);
     web.addHandler(&ws);
@@ -492,9 +495,9 @@ void initWeb() {
     // gamma debugging Config Handler
     web.on("/gamma", HTTP_GET, [](AsyncWebServerRequest *request) {
         AsyncResponseStream *response = request->beginResponseStream("text/plain");
-        for (int i=0; i<256; i++) {
+        for (int i = 0; i < 256; i++) {
           response->printf ("%5d,", GAMMA_TABLE[i]);
-          if (i%16 == 15) {
+          if (i % 16 == 15) {
             response->printf("\r\n");
           }
         }
@@ -508,13 +511,11 @@ void initWeb() {
 
     // Static Handler
     web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
-    web.serveStatic("/config.json", SPIFFS, "/config.json");
+    //web.serveStatic("/config.json", SPIFFS, "/config.json");
 
     web.onNotFound([](AsyncWebServerRequest *request) {
         request->send(404, "text/plain", "Page not found");
     });
-
-    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
 
     web.begin();
 
@@ -579,11 +580,12 @@ void validateConfig() {
             config.channel_count = 63 * 3;
     }
 
-    // default gamma value
+    // Default gamma value
     if (config.gammaVal <= 0) {
         config.gammaVal = 2.2;
     }
-    // default gamma value
+
+    // Default brightness value
     if (config.briteVal <= 0) {
         config.briteVal = 1.0;
     }
@@ -640,10 +642,10 @@ void updateConfig() {
     pixels.begin(config.pixel_type, config.pixel_color, config.channel_count / 3);
     pixels.setGamma(config.gamma);
     updateGammaTable(config.gammaVal, config.briteVal);
-
 #elif defined(ESPS_MODE_SERIAL)
     serial.begin(&SEROUT_PORT, config.serial_type, config.channel_count, config.baudrate);
 #endif
+
     LOG_PORT.print(F("- Listening for "));
     LOG_PORT.print(config.channel_count);
     LOG_PORT.print(F(" channels, from Universe "));
@@ -720,28 +722,25 @@ void dsDeviceConfig(JsonObject &json) {
 #endif
 
 #if defined(ESPS_SUPPORT_PWM)
+    /* PWM */
     config.pwm_global_enabled = json["pwm"]["enabled"];
     config.pwm_freq = json["pwm"]["freq"];
     config.pwm_gamma = json["pwm"]["gamma"];
     config.pwm_gpio_invert = 0;
     config.pwm_gpio_digital = 0;
     config.pwm_gpio_enabled = 0;
-    for (int gpio=0; gpio < NUM_GPIO; gpio++ ) {
-      if ( valid_gpio_mask & 1<<gpio ) {
-        config.pwm_gpio_dmx[gpio] = json["pwm"]["gpio" + (String)gpio + "_channel"];
-        if (json["pwm"]["gpio" + (String)gpio + "_invert"]) {
-          config.pwm_gpio_invert |= 1<<gpio;
+    for (int gpio = 0; gpio < NUM_GPIO; gpio++) {
+        if (valid_gpio_mask & 1<<gpio) {
+            config.pwm_gpio_dmx[gpio] = json["pwm"]["gpio" + (String)gpio + "_channel"];
+            if (json["pwm"]["gpio" + (String)gpio + "_invert"])
+                config.pwm_gpio_invert |= 1<<gpio;
+            if (json["pwm"]["gpio" + (String)gpio + "_digital"])
+                config.pwm_gpio_digital |= 1<<gpio;
+            if (json["pwm"]["gpio" + (String)gpio + "_enabled"])
+                config.pwm_gpio_enabled |= 1<<gpio;
         }
-        if (json["pwm"]["gpio" + (String)gpio + "_digital"]) {
-          config.pwm_gpio_digital |= 1<<gpio;
-        }
-        if (json["pwm"]["gpio" + (String)gpio + "_enabled"]) {
-          config.pwm_gpio_enabled |= 1<<gpio;
-        }
-      }
     }
 #endif
-
 }
 
 // Load configugration JSON file
@@ -846,18 +845,19 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
 #endif
 
 #if defined(ESPS_SUPPORT_PWM)
+    // PWM
     JsonObject &pwm = json.createNestedObject("pwm");
     pwm["enabled"] = config.pwm_global_enabled;
     pwm["freq"] = config.pwm_freq;
     pwm["gamma"] = config.pwm_gamma;
     
-    for (int gpio=0; gpio < NUM_GPIO; gpio++ ) {
-      if ( valid_gpio_mask & 1<<gpio ) {
-        pwm["gpio" + (String)gpio + "_channel"] = static_cast<uint16_t>(config.pwm_gpio_dmx[gpio]);
-        pwm["gpio" + (String)gpio + "_enabled"] = static_cast<bool>(config.pwm_gpio_enabled & 1<<gpio);
-        pwm["gpio" + (String)gpio + "_invert"] = static_cast<bool>(config.pwm_gpio_invert & 1<<gpio);
-        pwm["gpio" + (String)gpio + "_digital"] = static_cast<bool>(config.pwm_gpio_digital & 1<<gpio);
-      }
+    for (int gpio = 0; gpio < NUM_GPIO; gpio++ ) {
+        if (valid_gpio_mask & 1<<gpio) {
+            pwm["gpio" + (String)gpio + "_channel"] = static_cast<uint16_t>(config.pwm_gpio_dmx[gpio]);
+            pwm["gpio" + (String)gpio + "_enabled"] = static_cast<bool>(config.pwm_gpio_enabled & 1<<gpio);
+            pwm["gpio" + (String)gpio + "_invert"] = static_cast<bool>(config.pwm_gpio_invert & 1<<gpio);
+            pwm["gpio" + (String)gpio + "_digital"] = static_cast<bool>(config.pwm_gpio_digital & 1<<gpio);
+        }
     }
 #endif
 
@@ -1070,11 +1070,8 @@ void loop() {
         serial.show();
 #endif
 
-
-/* update the PWM outputs */
+/* Update the PWM outputs */
 #if defined(ESPS_SUPPORT_PWM)
   handlePWM();
 #endif
 }
-
-

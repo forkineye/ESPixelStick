@@ -1,5 +1,5 @@
 var mode = 'null';
-var gpio_list = [0,1,2,3,4,5,12,13,14,15,16];
+var gpio_list = [0, 1, 2, 3, 4, 5, 12, 13, 14, 15, 16];
 var wsQueue = [];
 var wsBusy = false;
 var wsTimerId;
@@ -104,10 +104,8 @@ $(function() {
     // DHCP field toggles
     $('#dhcp').click(function() {
         if ($(this).is(':checked')) {
-            //$('.dhcp').prop('disabled', true);
             $('.dhcp').addClass('hidden');
        } else {
-            //$('.dhcp').prop('disabled', false);
             $('.dhcp').removeClass('hidden');
        }
     });
@@ -115,10 +113,8 @@ $(function() {
     // MQTT field toggles
     $('#mqtt').click(function() {
         if ($(this).is(':checked')) {
-            //$('.mqtt').prop('disabled', false);
             $('.mqtt').removeClass('hidden');
        } else {
-            //$('.mqtt').prop('disabled', true);
             $('.mqtt').addClass('hidden');
        }
     });
@@ -126,10 +122,8 @@ $(function() {
     // PWM field toggles
     $('#pwm_enabled').click(function() {
         if ($(this).is(':checked')) {
-            //$('.mqtt').prop('disabled', false);
             $('.pwm').removeClass('hidden');
        } else {
-            //$('.mqtt').prop('disabled', true);
             $('.pwm').addClass('hidden');
        }
     });
@@ -312,8 +306,6 @@ function wsConnect() {
                 case 'X6':
                     showReboot();
                     break;
-                case 'OK':
-                    break;
                 default:
                     console.log('Unknown Command: ' + event.data);
                     break;
@@ -493,7 +485,7 @@ function getConfig(data) {
         $('#p_gamma').prop('checked', config.pixel.gamma);
         $('#p_gammaVal').val(config.pixel.gammaVal);
         $('#p_briteVal').val(config.pixel.briteVal);
-        
+
         if(config.e131.channel_count / 3 <8 ) {
             $('#v_columns').val(config.e131.channel_count / 3);
         } else if (config.e131.channel_count / 3 <50 ) {
