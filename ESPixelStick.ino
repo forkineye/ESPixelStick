@@ -23,7 +23,6 @@
 
 /* Output Mode has been moved to ESPixelStick.h */
 
-
 /* Fallback configuration if config.json is empty or fails */
 const char ssid[] = "ENTER_SSID_HERE";
 const char passphrase[] = "ENTER_PASSPHRASE_HERE";
@@ -101,7 +100,7 @@ char m_msg_buffer[MSG_BUFFER_SIZE];
 const char CONFIG_FILE[] = "/config.json";
 
 ESPAsyncE131        e131(10);       // ESPAsyncE131 with X buffers
-testing_t           testing = {128,128,128,0,0};        // Testing mode
+testing_t           testing;        // Testing mode
 config_t            config;         // Current configuration
 uint32_t            *seqError;      // Sequence error tracking for each universe
 uint16_t            uniLast = 1;    // Last Universe to listen for
@@ -1059,7 +1058,6 @@ void loop() {
                 break;
         }
     }
-
 
 /* Streaming refresh */
 #if defined(ESPS_MODE_PIXEL)
