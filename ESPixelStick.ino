@@ -101,7 +101,7 @@ char m_msg_buffer[MSG_BUFFER_SIZE];
 const char CONFIG_FILE[] = "/config.json";
 
 ESPAsyncE131        e131(10);       // ESPAsyncE131 with X buffers
-testing_t           testing;        // Testing mode
+testing_t           testing = {128,128,128,0,0};        // Testing mode
 config_t            config;         // Current configuration
 uint32_t            *seqError;      // Sequence error tracking for each universe
 uint16_t            uniLast = 1;    // Last Universe to listen for
@@ -1013,47 +1013,47 @@ void loop() {
                     testing.last = millis();
                     uint16_t i, WheelPos, num_pixels;
                     num_pixels = config.channel_count / 3;
-                    if (testing.step < 255) {
-                        for (i=0; i < (num_pixels); i++) {
-                            int ch_offset = i*3;
-                            WheelPos = 255 - (((i * 256 / num_pixels) + testing.step) & 255);
-#if defined(ESPS_MODE_PIXEL)
-                            if (WheelPos < 85) {
-                                pixels.setValue(ch_offset++, 255 - WheelPos * 3);
-                                pixels.setValue(ch_offset++, 0);
-                                pixels.setValue(ch_offset, WheelPos * 3);
-                            } else if (WheelPos < 170) {
-                                WheelPos -= 85;
-                                pixels.setValue(ch_offset++, 0);
-                                pixels.setValue(ch_offset++, WheelPos * 3);
-                                pixels.setValue(ch_offset, 255 - WheelPos * 3);
-                            } else {
-                                WheelPos -= 170;
-                                pixels.setValue(ch_offset++, WheelPos * 3);
-                                pixels.setValue(ch_offset++,255 - WheelPos * 3);
-                                pixels.setValue(ch_offset, 0);
-                            }
-#elif defined(ESPS_MODE_SERIAL)
-                            if (WheelPos < 85) {
-                                serial.setValue(ch_offset++, 255 - WheelPos * 3);
-                                serial.setValue(ch_offset++, 0);
-                                serial.setValue(ch_offset, WheelPos * 3);
-                            } else if (WheelPos < 170) {
-                                WheelPos -= 85;
-                                serial.setValue(ch_offset++, 0);
-                                serial.setValue(ch_offset++, WheelPos * 3);
-                                serial.setValue(ch_offset, 255 - WheelPos * 3);
-                            } else {
-                                WheelPos -= 170;
-                                serial.setValue(ch_offset++, WheelPos * 3);
-                                serial.setValue(ch_offset++,255 - WheelPos * 3);
-                                serial.setValue(ch_offset, 0);
-                            }
-#endif
-                        }
-                    } else {
-                        testing.step = 0;
+                    if (testing.step > 255) {
+                        testing.step=0;
                     }
+                    for (i=0; i < (num_pixels); i++) {
+                        int ch_offset = i*3;
+                        WheelPos = 255 - (((i * 255 / num_pixels) + testing.step) & 255);
+#if defined(ESPS_MODE_PIXEL)
+                        if (WheelPos < 85) {
+                            pixels.setValue(ch_offset++, 255 - WheelPos * 3);
+                            pixels.setValue(ch_offset++, 0);
+                            pixels.setValue(ch_offset, WheelPos * 3);
+                        } else if (WheelPos < 170) {
+                            WheelPos -= 85;
+                            pixels.setValue(ch_offset++, 0);
+                            pixels.setValue(ch_offset++, WheelPos * 3);
+                            pixels.setValue(ch_offset, 255 - WheelPos * 3);
+                        } else {
+                            WheelPos -= 170;
+                            pixels.setValue(ch_offset++, WheelPos * 3);
+                            pixels.setValue(ch_offset++,255 - WheelPos * 3);
+                            pixels.setValue(ch_offset, 0);
+                        }
+#elif defined(ESPS_MODE_SERIAL)
+                        if (WheelPos < 85) {
+                            serial.setValue(ch_offset++, 255 - WheelPos * 3);
+                            serial.setValue(ch_offset++, 0);
+                            serial.setValue(ch_offset, WheelPos * 3);
+                        } else if (WheelPos < 170) {
+                            WheelPos -= 85;
+                            serial.setValue(ch_offset++, 0);
+                            serial.setValue(ch_offset++, WheelPos * 3);
+                            serial.setValue(ch_offset, 255 - WheelPos * 3);
+                        } else {
+                            WheelPos -= 170;
+                            serial.setValue(ch_offset++, WheelPos * 3);
+                            serial.setValue(ch_offset++,255 - WheelPos * 3);
+                            serial.setValue(ch_offset, 0);
+                        }
+#endif
+                    }
+
                     testing.step++;
                 }
                 break;
