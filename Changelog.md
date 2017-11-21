@@ -1,15 +1,13 @@
 
 Changelog
 =========
-### 3.0-rc4
+### 3.0
  - Compiled against [2017.11.20 Arduino core](https://github.com/esp8266/Arduino/tree/117bc875ffdd1f4b11af0dd236e0e12a84748e53)
-   - Upgrades to lwip2
    - Includes WPA2 KRACK security fix
  - Migrated to [ESPAsyncE131](https://github.com/forkineye/ESPAsyncE131) library
  - Fixed [Issue #56](https://github.com/forkineye/ESPixelStick/issues/56) - Read too far
  - Fixed [Issue #65](https://github.com/forkineye/ESPixelStick/issues/65) - Websocket queuing
  - Fixed [Issue #80](https://github.com/forkineye/ESPixelStick/issues/80) - Test mode state reporting
- - Added build date
 
 ### 3.0-rc3
 - Fixed IGMP timer bug in lwip (Fix submitted to ESP8266 Arduino project)

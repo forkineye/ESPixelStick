@@ -20,7 +20,7 @@
 #ifndef ESPIXELSTICK_H_
 #define ESPIXELSTICK_H_
 
-const char VERSION[] = "3.0-rc4";
+const char VERSION[] = "3.0";
 const char BUILD_DATE[] = __DATE__;
 
 /*****************************************/
