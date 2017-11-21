@@ -23,6 +23,7 @@
 
 /* Output Mode has been moved to ESPixelStick.h */
 
+
 /* Fallback configuration if config.json is empty or fails */
 const char ssid[] = "ENTER_SSID_HERE";
 const char passphrase[] = "ENTER_PASSPHRASE_HERE";
@@ -45,6 +46,8 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include "ESPixelStick.h"
 #include "EFUpdate.h"
 #include "wshandler.h"
+#include "pwm.h"
+#include "gamma.h"
 
 extern "C" {
 #include <user_interface.h>
@@ -122,11 +125,14 @@ SerialDriver    serial;         // Serial object
 #error "No valid output mode defined."
 #endif
 
+
+
 /////////////////////////////////////////////////////////
 // 
 //  Forward Declarations
 //
 /////////////////////////////////////////////////////////
+
 void loadConfig();
 void initWifi();
 void initWeb();
@@ -231,6 +237,11 @@ void setup() {
     }
 
     // Configure the outputs
+#if defined (ESPS_SUPPORT_PWM)
+    setupPWM();
+    
+#endif
+
 #if defined (ESPS_MODE_PIXEL)
     pixels.setPin(DATA_PIN);
     updateConfig();
@@ -391,7 +402,7 @@ Serial.println(payload);
             config.testmode = TestMode::MQTT;
             if (m_rgb_state != true) {
                 m_rgb_state = true;
-                setStatic(m_rgb_red, m_rgb_green, m_rgb_blue);
+                setStatic(m_rgb_red*m_rgb_brightness/100, m_rgb_green*m_rgb_brightness/100, m_rgb_blue*m_rgb_brightness/100);
                 publishRGBState();
             }
         } else if (payload.equals(String(LIGHT_OFF))) {
@@ -408,7 +419,7 @@ Serial.println(payload);
             return;
         } else {
             m_rgb_brightness = brightness;
-            setStatic(m_rgb_red, m_rgb_green, m_rgb_blue);
+            setStatic(m_rgb_red*m_rgb_brightness/100, m_rgb_green*m_rgb_brightness/100, m_rgb_blue*m_rgb_brightness/100);
             publishRGBBrightness();
         }
     } else if (String(config.mqtt_topic + MQTT_LIGHT_RGB_COMMAND_TOPIC).equals(topic)) {
@@ -420,7 +431,7 @@ Serial.println(payload);
         m_rgb_green = payload.substring(firstIndex + 1, lastIndex).toInt();
         m_rgb_blue = payload.substring(lastIndex + 1).toInt();
    
-        setStatic(m_rgb_red, m_rgb_green, m_rgb_blue);
+        setStatic(m_rgb_red*m_rgb_brightness/100, m_rgb_green*m_rgb_brightness/100, m_rgb_blue*m_rgb_brightness/100);
         publishRGBColor();
     }
 }
@@ -474,8 +485,20 @@ void initWeb() {
     // JSON Config Handler
     web.on("/conf", HTTP_GET, [](AsyncWebServerRequest *request) {
         String jsonString;
-        serializeConfig(jsonString);
+        serializeConfig(jsonString, true);
         request->send(200, "text/json", jsonString);
+    });
+
+    // gamma debugging Config Handler
+    web.on("/gamma", HTTP_GET, [](AsyncWebServerRequest *request) {
+        AsyncResponseStream *response = request->beginResponseStream("text/plain");
+        for (int i=0; i<256; i++) {
+          response->printf ("%5d,", GAMMA_TABLE[i]);
+          if (i%16 == 15) {
+            response->printf("\r\n");
+          }
+        }
+        request->send(response);
     });
 
     // Firmware upload handler
@@ -485,10 +508,13 @@ void initWeb() {
 
     // Static Handler
     web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
+    web.serveStatic("/config.json", SPIFFS, "/config.json");
 
     web.onNotFound([](AsyncWebServerRequest *request) {
         request->send(404, "text/plain", "Page not found");
     });
+
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
 
     web.begin();
 
@@ -527,10 +553,15 @@ void validateConfig() {
         config.mqtt_topic = "diy/esps/" + String(chipId);
     }
 
+#if defined(ESPS_SUPPORT_PWM)
+    config.devmode.MPWM = true;
+#endif
 
 #if defined(ESPS_MODE_PIXEL)
     // Set Mode
-    config.devmode = DevMode::MPIXEL;
+//    config.devmode = DevMode::MPIXEL;
+    config.devmode.MPIXEL = true;
+    config.devmode.MSERIAL = false;
 
     // Generic channel limits for pixels
     if (config.channel_count % 3)
@@ -548,9 +579,19 @@ void validateConfig() {
             config.channel_count = 63 * 3;
     }
 
+    // default gamma value
+    if (config.gammaVal <= 0) {
+        config.gammaVal = 2.2;
+    }
+    // default gamma value
+    if (config.briteVal <= 0) {
+        config.briteVal = 1.0;
+    }
 #elif defined(ESPS_MODE_SERIAL)
     // Set Mode
-    config.devmode = DevMode::MSERIAL;
+//    config.devmode = DevMode::MSERIAL;
+    config.devmode.MPIXEL = false;
+    config.devmode.MSERIAL = true;
 
     // Generic serial channel limits
     if (config.channel_count > RENARD_LIMIT)
@@ -598,6 +639,8 @@ void updateConfig() {
 #if defined(ESPS_MODE_PIXEL)
     pixels.begin(config.pixel_type, config.pixel_color, config.channel_count / 3);
     pixels.setGamma(config.gamma);
+    updateGammaTable(config.gammaVal, config.briteVal);
+
 #elif defined(ESPS_MODE_SERIAL)
     serial.begin(&SEROUT_PORT, config.serial_type, config.channel_count, config.baudrate);
 #endif
@@ -667,12 +710,38 @@ void dsDeviceConfig(JsonObject &json) {
     config.pixel_type = PixelType(static_cast<uint8_t>(json["pixel"]["type"]));
     config.pixel_color = PixelColor(static_cast<uint8_t>(json["pixel"]["color"]));
     config.gamma = json["pixel"]["gamma"];
+    config.gammaVal = json["pixel"]["gammaVal"];
+    config.briteVal = json["pixel"]["briteVal"];
 
 #elif defined(ESPS_MODE_SERIAL)
     /* Serial */
     config.serial_type = SerialType(static_cast<uint8_t>(json["serial"]["type"]));
     config.baudrate = BaudRate(static_cast<uint32_t>(json["serial"]["baudrate"]));
 #endif
+
+#if defined(ESPS_SUPPORT_PWM)
+    config.pwm_global_enabled = json["pwm"]["enabled"];
+    config.pwm_freq = json["pwm"]["freq"];
+    config.pwm_gamma = json["pwm"]["gamma"];
+    config.pwm_gpio_invert = 0;
+    config.pwm_gpio_digital = 0;
+    config.pwm_gpio_enabled = 0;
+    for (int gpio=0; gpio < NUM_GPIO; gpio++ ) {
+      if ( valid_gpio_mask & 1<<gpio ) {
+        config.pwm_gpio_dmx[gpio] = json["pwm"]["gpio" + (String)gpio + "_channel"];
+        if (json["pwm"]["gpio" + (String)gpio + "_invert"]) {
+          config.pwm_gpio_invert |= 1<<gpio;
+        }
+        if (json["pwm"]["gpio" + (String)gpio + "_digital"]) {
+          config.pwm_gpio_digital |= 1<<gpio;
+        }
+        if (json["pwm"]["gpio" + (String)gpio + "_enabled"]) {
+          config.pwm_gpio_enabled |= 1<<gpio;
+        }
+      }
+    }
+#endif
+
 }
 
 // Load configugration JSON file
@@ -724,7 +793,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     // Device
     JsonObject &device = json.createNestedObject("device");
     device["id"] = config.id.c_str();
-    device["mode"] = static_cast<uint8_t>(config.devmode);
+    device["mode"] = config.devmode.toInt();
 
     // Network
     JsonObject &network = json.createNestedObject("network");
@@ -766,12 +835,30 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     pixel["type"] = static_cast<uint8_t>(config.pixel_type);
     pixel["color"] = static_cast<uint8_t>(config.pixel_color);
     pixel["gamma"] = config.gamma;
+    pixel["gammaVal"] = config.gammaVal;
+    pixel["briteVal"] = config.briteVal;
 
 #elif defined(ESPS_MODE_SERIAL)
     // Serial
     JsonObject &serial = json.createNestedObject("serial");
     serial["type"] = static_cast<uint8_t>(config.serial_type);
     serial["baudrate"] = static_cast<uint32_t>(config.baudrate);
+#endif
+
+#if defined(ESPS_SUPPORT_PWM)
+    JsonObject &pwm = json.createNestedObject("pwm");
+    pwm["enabled"] = config.pwm_global_enabled;
+    pwm["freq"] = config.pwm_freq;
+    pwm["gamma"] = config.pwm_gamma;
+    
+    for (int gpio=0; gpio < NUM_GPIO; gpio++ ) {
+      if ( valid_gpio_mask & 1<<gpio ) {
+        pwm["gpio" + (String)gpio + "_channel"] = static_cast<uint16_t>(config.pwm_gpio_dmx[gpio]);
+        pwm["gpio" + (String)gpio + "_enabled"] = static_cast<bool>(config.pwm_gpio_enabled & 1<<gpio);
+        pwm["gpio" + (String)gpio + "_invert"] = static_cast<bool>(config.pwm_gpio_invert & 1<<gpio);
+        pwm["gpio" + (String)gpio + "_digital"] = static_cast<bool>(config.pwm_gpio_digital & 1<<gpio);
+      }
+    }
 #endif
 
     if (pretty)
@@ -982,4 +1069,12 @@ void loop() {
     if (serial.canRefresh())
         serial.show();
 #endif
+
+
+/* update the PWM outputs */
+#if defined(ESPS_SUPPORT_PWM)
+  handlePWM();
+#endif
 }
+
+
