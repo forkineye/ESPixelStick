@@ -173,7 +173,8 @@ void setup() {
 
     // Load configuration from SPIFFS and set Hostname
     loadConfig();
-    WiFi.hostname(config.hostname);
+    if (config.hostname)
+        WiFi.hostname(config.hostname);
     config.testmode = TestMode::DISABLED;
 
     // Setup WiFi Handlers
@@ -746,6 +747,9 @@ void dsDeviceConfig(JsonObject &json) {
 void loadConfig() {
     // Zeroize Config struct
     memset(&config, 0, sizeof(config));
+
+    // default to ap_fallback if config file cant be read
+    config.ap_fallback = true;
 
     // Load CONFIG_FILE json. Create and init with defaults if not found
     File file = SPIFFS.open(CONFIG_FILE, "r");
