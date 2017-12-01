@@ -37,6 +37,17 @@ const char LOOKUP_2811[4] = {
     0b00000100      // 11 - (1)110 111(0)
 };
 
+/* 
+* 7N1 UART lookup table for GECE, first bit is ignored.
+* Start bit and stop bits are part of the packet.
+* Bits are backwards since we need MSB out.
+*/
+
+const char LOOKUP_GECE[2] = {
+    0b01111100,     // 0 - (0)00 111 11(1)
+    0b01100000      // 1 - (0)00 000 11(1)
+};
+
 #define GECE_DEFAULT_BRIGHTNESS 0xCC
 
 #define GECE_ADDRESS_MASK       0x03F00000
@@ -45,17 +56,19 @@ const char LOOKUP_2811[4] = {
 #define GECE_GREEN_MASK         0x000000F0
 #define GECE_RED_MASK           0x0000000F
 
-#define GECE_GET_ADDRESS(packet)     (packet >> 20) & 0x3F
-#define GECE_GET_BRIGHTNESS(packet)  (packet >> 12) & 0xFF
-#define GECE_GET_BLUE(packet)        (packet >> 8) & 0x0F
-#define GECE_GET_GREEN(packet)       (packet >> 4) & 0x0F
-#define GECE_GET_RED(packet)         packet & 0x0F
-#define GECE_PSIZE      26
+#define GECE_GET_ADDRESS(packet)    (packet >> 20) & 0x3F
+#define GECE_GET_BRIGHTNESS(packet) (packet >> 12) & 0xFF
+#define GECE_GET_BLUE(packet)       (packet >> 8) & 0x0F
+#define GECE_GET_GREEN(packet)      (packet >> 4) & 0x0F
+#define GECE_GET_RED(packet)        packet & 0x0F
+#define GECE_PSIZE                  26
 
 #define WS2811_TFRAME   30L     /* 30us frame time */
 #define WS2811_TIDLE    300L    /* 300us idle time */
 #define GECE_TFRAME     790L    /* 790us frame time */
-#define GECE_TIDLE      35L     /* 35us idle time */
+#define GECE_TIDLE      45L     /* 45us idle time - should be 30us */
+
+#define CYCLES_GECE_START   (F_CPU / 100000) // 10us
 
 /* Pixel Types */
 enum class PixelType : uint8_t {
@@ -81,7 +94,7 @@ class PixelDriver {
     void setPin(uint8_t pin);
     void setGamma(bool gamma);
     void updateOrder(PixelColor color);
-    void show();
+    void ICACHE_RAM_ATTR show();
     uint8_t* getData();
 
     /* Set channel value at address */
@@ -129,5 +142,13 @@ class PixelDriver {
         U1F = byte;
     }
 };
+
+// Cycle counter
+static uint32_t _getCycleCount(void) __attribute__((always_inline));
+static inline uint32_t _getCycleCount(void) {
+    uint32_t ccount;
+    __asm__ __volatile__("rsr %0,ccount":"=a" (ccount));
+    return ccount;
+}
 
 #endif /* PIXELDRIVER_H_ */

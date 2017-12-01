@@ -21,7 +21,6 @@
 #include <utility>
 #include <algorithm>
 #include "PixelDriver.h"
-#include "bitbang.h"
 
 extern "C" {
 #include <eagle_soc.h>
@@ -139,10 +138,10 @@ void PixelDriver::ws2811_init() {
 }
 
 void PixelDriver::gece_init() {
-    /* Setup for bit-banging */
-    Serial1.end();
-    pinMode(pin, OUTPUT);
-    digitalWrite(pin, LOW);
+    // Serial rate is 3x 100KHz for GECE
+    Serial1.begin(300000, SERIAL_7N1, SERIAL_TX_ONLY);
+    SET_PERI_REG_MASK(UART_CONF0(UART), UART_TXD_BRK);
+    delayMicroseconds(GECE_TIDLE);
 }
 
 void PixelDriver::updateOrder(PixelColor color) {
@@ -254,7 +253,7 @@ const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillWS2811(const uint8_t *buff,
     return buff;
 }
 
-void PixelDriver::show() {
+void ICACHE_RAM_ATTR PixelDriver::show() {
     if (!pixdata) return;
 
     if (type == PixelType::WS2811) {
@@ -268,9 +267,10 @@ void PixelDriver::show() {
         memcpy(asyncdata, pixdata, szBuffer);
         std::swap(asyncdata, pixdata);
     } else if (type == PixelType::GECE) {
-         uint32_t packet = 0;
+        uint32_t packet = 0;
+        uint32_t pTime = 0;
 
-        /* Build a GECE packet */
+        // Build a GECE packet
         startTime = micros();
         for (uint8_t i = 0; i < numPixels; i++) {
             packet = (packet & ~GECE_ADDRESS_MASK) | (i << 20);
@@ -280,8 +280,22 @@ void PixelDriver::show() {
             packet = (packet & ~GECE_GREEN_MASK) | pixdata[i*3+1];
             packet = (packet & ~GECE_RED_MASK) | (pixdata[i*3] >> 4);
 
-            /* and send it */
-            doGECE(pin, packet);
+            uint8_t shift = GECE_PSIZE;
+            for (uint8_t i = 0; i < GECE_PSIZE; i++)
+                pbuff[i] = LOOKUP_GECE[(packet >> --shift) & 0x1];
+
+            // Wait until ready
+            while ((micros() - pTime) < (GECE_TFRAME + GECE_TIDLE)) {}
+
+            // 10us start bit
+            pTime = micros();
+            uint32_t c = _getCycleCount();
+            CLEAR_PERI_REG_MASK(UART_CONF0(UART), UART_TXD_BRK);
+            while ((_getCycleCount() - c) < CYCLES_GECE_START - 100) {}
+
+            // Send packet and idle low (break)
+            Serial1.write(pbuff, GECE_PSIZE);
+            SET_PERI_REG_MASK(UART_CONF0(UART), UART_TXD_BRK);
         }
     }
 }
