@@ -729,7 +729,7 @@ void dsDeviceConfig(JsonObject &json) {
     config.pwm_gpio_digital = 0;
     config.pwm_gpio_enabled = 0;
     for (int gpio = 0; gpio < NUM_GPIO; gpio++) {
-        if (valid_gpio_mask & 1<<gpio) {
+        if (pwm_valid_gpio_mask & 1<<gpio) {
             config.pwm_gpio_dmx[gpio] = json["pwm"]["gpio" + (String)gpio + "_channel"];
             if (json["pwm"]["gpio" + (String)gpio + "_invert"])
                 config.pwm_gpio_invert |= 1<<gpio;
@@ -851,7 +851,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     pwm["gamma"] = config.pwm_gamma;
     
     for (int gpio = 0; gpio < NUM_GPIO; gpio++ ) {
-        if (valid_gpio_mask & 1<<gpio) {
+        if (pwm_valid_gpio_mask & 1<<gpio) {
             pwm["gpio" + (String)gpio + "_channel"] = static_cast<uint16_t>(config.pwm_gpio_dmx[gpio]);
             pwm["gpio" + (String)gpio + "_enabled"] = static_cast<bool>(config.pwm_gpio_enabled & 1<<gpio);
             pwm["gpio" + (String)gpio + "_invert"] = static_cast<bool>(config.pwm_gpio_invert & 1<<gpio);

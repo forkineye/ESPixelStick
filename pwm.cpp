@@ -17,7 +17,7 @@ void setupPWM () {
       analogWriteFreq(config.pwm_freq);
     }
     for (int gpio=0; gpio < NUM_GPIO; gpio++ ) {
-      if ( ( valid_gpio_mask & 1<<gpio ) && (config.pwm_gpio_enabled & 1<<gpio) ) {
+      if ( ( pwm_valid_gpio_mask & 1<<gpio ) && (config.pwm_gpio_enabled & 1<<gpio) ) {
         pinMode(gpio, OUTPUT);
         if (config.pwm_gpio_invert & 1<<gpio) {
           analogWrite(gpio, 1023);
@@ -34,7 +34,7 @@ void handlePWM() {
 
   if ( config.pwm_global_enabled ) {
     for (int gpio=0; gpio < NUM_GPIO; gpio++ ) {
-      if ( ( valid_gpio_mask & 1<<gpio ) && (config.pwm_gpio_enabled & 1<<gpio) ) {
+      if ( ( pwm_valid_gpio_mask & 1<<gpio ) && (config.pwm_gpio_enabled & 1<<gpio) ) {
         uint16_t gpio_dmx = config.pwm_gpio_dmx[gpio];
         if (gpio_dmx < config.channel_count) {
 #if defined (ESPS_MODE_PIXEL)
