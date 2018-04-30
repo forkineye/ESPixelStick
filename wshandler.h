@@ -28,8 +28,9 @@ extern PixelDriver  pixels;     // Pixel object
 extern SerialDriver serial;     // Serial object
 #endif
 
+extern EffectEngine effects;    // EffectEngine for test modes
+
 extern ESPAsyncE131 e131;       // ESPAsyncE131 with X buffers
-extern testing_t    testing;    // Testing mode
 extern config_t     config;     // Current configuration
 extern uint32_t     *seqError;  // Sequence error tracking for each universe
 extern uint16_t     uniLast;    // Last Universe to listen for
@@ -165,11 +166,13 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             json["realflashsize"] = (String)ESP.getFlashChipRealSize();
             json["freeheap"] = (String)ESP.getFreeHeap();
 
-            JsonObject &test = json.createNestedObject("testing");
-            test["mode"] = static_cast<uint8_t>(config.testmode);
-            test["r"] = testing.r;
-            test["g"] = testing.g;
-            test["b"] = testing.b;
+            JsonObject &effect = json.createNestedObject("effect");
+            effect["name"] = (String)effects.getEffect() ? effects.getEffect() : "";
+            effect["brightness"] = effects.getBrightness();
+            effect["speed"] = effects.getSpeed();
+            effect["r"] = effects.getColor().r;
+            effect["g"] = effects.getColor().g;
+            effect["b"] = effects.getColor().b;
 
             String response;
             json.printTo(response);
@@ -212,47 +215,32 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
 
 void procT(uint8_t *data, AsyncWebSocketClient *client) {
     switch (data[1]) {
-        case '0':
-            config.testmode = TestMode::DISABLED;
-            // Clear whole string
-#if defined(ESPS_MODE_PIXEL)
-            for (int y =0; y < config.channel_count; y++)
-                pixels.setValue(y, 0);
-#elif defined(ESPS_MODE_SERIAL)
-            for (int y =0; y < config.channel_count; y++)
-                serial.setValue(y, 0);
-#endif
+        case '0': { // Clear whole string
+            effects.setEffect("");
             break;
-
+        }
         case '1': {  // Static color
-            config.testmode = TestMode::STATIC;
-            testing.step = 0;
             DynamicJsonBuffer jsonBuffer;
             JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
 
-            testing.r = json["r"];
-            testing.g = json["g"];
-            testing.b = json["b"];
+            effects.setColor({json["r"], json["g"], json["b"]});
+            effects.setEffect("Solid");
             break;
         }
         case '2': {  // Chase
-            config.testmode = TestMode::CHASE;
-            testing.step = 0;
             DynamicJsonBuffer jsonBuffer;
             JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
 
-            testing.r = json["r"];
-            testing.g = json["g"];
-            testing.b = json["b"];
+            effects.setColor({json["r"], json["g"], json["b"]});
+            effects.setEffect("Chase");
             break;
         }
-        case '3':  // Rainbow
-            config.testmode = TestMode::RAINBOW;
-            testing.step = 0;
+        case '3': { // Rainbow
+            effects.setEffect("Rainbow");
             break;
+        }
 
         case '4': {  // View stream
-            config.testmode = TestMode::VIEW_STREAM;
 #if defined(ESPS_MODE_PIXEL)
             client->binary(pixels.getData(), config.channel_count);
 #elif defined(ESPS_MODE_SERIAL)

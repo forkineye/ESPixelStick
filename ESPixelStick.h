@@ -52,6 +52,8 @@ const char BUILD_DATE[] = __DATE__;
 #include "SerialDriver.h"
 #endif
 
+#include "EffectEngine.h"
+
 #define HTTP_PORT       80      /* Default web server port */
 #define MQTT_PORT       1883    /* Default MQTT port */
 #define DATA_PIN        2       /* Pixel output - GPIO2 */
@@ -92,28 +94,11 @@ enum class DevMode : uint8_t {
 };
 */
 
-/* Test Modes */
-enum class TestMode : uint8_t {
-    DISABLED,
-    STATIC,
-    CHASE,
-    RAINBOW,
-    VIEW_STREAM,
-    MQTT
-};
-
-typedef struct {
-    uint8_t r, g, b;    /* Hold requested color */
-    uint16_t step;      /* Step in testing routine */
-    uint32_t last;      /* Last update */
-} testing_t;
-
 /* Configuration structure */
 typedef struct {
     /* Device */
     String      id;             /* Device ID */
     DevCap      devmode;        /* Device Mode - used for reporting mode, can't be set */
-    TestMode    testmode;       /* Testing mode */
 
     /* Network */
     String      ssid;

@@ -4,7 +4,13 @@ var wsQueue = [];
 var wsBusy = false;
 var wsTimerId;
 
-var testing_modes = [ "t_disabled", "t_static", "t_chase", "t_rainbow", "t_view" ];
+var testing_modes = { 
+    "" : "t_disabled",
+    "Solid" : "t_static",
+    "Chase" : "t_chase",
+    "Rainbow" : "t_rainbow",
+    "View" : "t_view"
+};
 
 // Default modal properties
 $.fn.modal.Constructor.DEFAULTS.backdrop = 'static';
@@ -565,13 +571,13 @@ function getConfigStatus(data) {
     $('#x_usedflashsize').text(status.usedflashsize);
     $('#x_realflashsize').text(status.realflashsize);
     $('#x_freeheap').text(status.freeheap);
-    updateTestingGUI(status.testing);
+    updateTestingGUI(status.effect);
 }
 
 function updateTestingGUI(data) {
-    if ($('#tmode option:selected').val().localeCompare(testing_modes[data.mode])) {
-        $('#tmode').val(testing_modes[data.mode]);
-	    hideShowTestSections();
+    if ($('#tmode option:selected').val().localeCompare(testing_modes[data.name])) {
+        $('#tmode').val(testing_modes[data.name]);
+        hideShowTestSections();
     }
 
     $('.color').val('rgb(' + data.r + ',' + data.g + ',' + data.b + ')');
