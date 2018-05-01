@@ -73,10 +73,6 @@ public:
     uint16_t effectRainbowCycle();
     uint16_t effectChase();
 
-    uint16_t effectRainbowChase();
-    uint16_t effect0();
-    uint16_t effect1();
-
 private:
 
     void setPixel(uint16_t idx,  CRGB color);

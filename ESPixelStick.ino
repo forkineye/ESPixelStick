@@ -80,7 +80,7 @@ const char LIGHT_OFF[] = "OFF";
 const int JSON_BUFFER_SIZE = JSON_OBJECT_SIZE(10);
 
 // Effect defaults
-const char DEFAULT_EFFECT[] = "Solid"
+const char DEFAULT_EFFECT[] = "Solid";
 const CRGB DEFAULT_EFFECT_COLOR = { 127, 127, 127 };
 const uint8_t DEFAULT_EFFECT_BRIGHTNESS = 255;
 
@@ -363,10 +363,10 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
     }
 }
 
-void onMqttMessage(char* topic, char* p_payload,
+void onMqttMessage(char* topic, char* payload,
         AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
     StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
-    JsonObject& root = jsonBuffer.parseObject(message);
+    JsonObject& root = jsonBuffer.parseObject(payload);
     bool stateOn = false;
 
     if (!root.success()) {
@@ -403,7 +403,7 @@ void onMqttMessage(char* topic, char* p_payload,
         effects.setEffect("Solid");
     } else if (stateOn) {
         // If we are just an "ON" command then set the default color and effect
-        effects.setColor(DEFUALT_EFFECT_COLOR);
+        effects.setColor(DEFAULT_EFFECT_COLOR);
         effects.setBrightness(DEFAULT_EFFECT_BRIGHTNESS);
         effects.setEffect(DEFAULT_EFFECT);
     } else {
