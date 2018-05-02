@@ -47,33 +47,23 @@ The ESPixelStick firmware can generate the following outputs from incoming E1.31
 
 MQTT Support
 ------------
-**NOTE:** Effects are planned, this is just the initial static support.  Brightness is not implemented yet either.
-
 MQTT can be configured via the web interface.  When enabled, a payload of "ON" will tell the ESPixelStick to override any incoming E1.31 data with MQTT data.  When a payload of "OFF" is received, E1.31 processing will resume.  All Topics are under the configured top level Topic.
 
-For example, if you enter ```porch/esps``` as the topic, the following topics will be generated:
-```
-porch/esps/light/status
-porch/esps/light/switch
-porch/esps/brightness/status
-porch/esps/brightness/set
-porch/esps/rgb/status
-porch/esps/rgb/set
-```
+For example, if you enter ```porch/esps``` as the topic, the state can be queried from ```porch/esps``` and commands can be sent to ```porch/esps/set```
 
 And here's a corresponding configuration for [Home Assistant](https://home-assistant.io/):
 ```
 light:
-  - platform: mqtt
+  - platform: mqtt_json
     name: "Front Porch ESPixelStick"
-    state_topic: "porch/esps/light/status"
-    command_topic: "porch/esps/light/switch"
-    brightness_state_topic: "porch/esps/brightness/status"
-    brightness_command_topic: "porch/esps/brightness/set"
-    rgb_state_topic: "porch/esps/rgb/status"
-    rgb_command_topic: "porch/esps/rgb/set"
-    brightness_scale: 100
-    optimistic: false
+    state_topic: "porch/esps"
+    command_topic: "porch/esps/set"
+    brightness: true
+    rgb: true
+    effect: true
+    effect_list:
+      - Rainbow
+      - Chase
 ```
 
 Resources

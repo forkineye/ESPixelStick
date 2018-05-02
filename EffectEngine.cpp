@@ -75,19 +75,6 @@ CRGB EffectEngine::colorWheel(uint8_t pos) {
     }
 }
 
-uint16_t EffectEngine::theaterChase(CRGB color1, CRGB color2) {
-    uint32_t counter = _effectCounter % 3;
-    for(uint16_t i=0; i < _ledCount; i++) {
-        if((i % 3) == counter) {
-            setPixel(i, color1);
-        } else {
-            setPixel(i, color2);
-        }
-    }
-
-    return _effectSpeed / _ledCount;
-}
-
 uint16_t EffectEngine::effectSolidColor() {
     for(uint16_t i=0; i < _ledCount; i++) {
         setPixel(i, _effectColor);

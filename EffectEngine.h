@@ -60,14 +60,6 @@ public:
     void setSpeed(uint16_t speed)           { _effectSpeed = speed; }
     void setColor(CRGB color)               { _effectColor = color; }
 
-public:
-
-    CRGB colorWheel(uint8_t pos);
-
-    uint16_t theaterChase(CRGB color1, CRGB color2);
-
-public:
-
     // Effect functions
     uint16_t effectSolidColor();
     uint16_t effectRainbowCycle();
@@ -78,6 +70,8 @@ private:
     void setPixel(uint16_t idx,  CRGB color);
     void setAll(CRGB color);
     void clearAll();
+
+    CRGB colorWheel(uint8_t pos);
 };
 
 #endif
