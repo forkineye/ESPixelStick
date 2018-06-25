@@ -40,11 +40,12 @@ The ESPixelStick firmware can generate the following outputs from incoming E1.31
 #### Pixel Protocols
 - WS2811 / WS2812 / WS2812b
 - GE Color Effects
-
+Support upto 8 universes each of 512channel of output - making it 1360pixels(170pixels in each universe ) at 24Hz frame rate.
+These numbers can be increased by editing the file ESPixelStick.h but it will decrease the frame rate even further.
 #### Serial Protocols
 - DMX512
 - Renard
-
+The renard has a limit of 2048 Channel limit for serial outputs.
 MQTT Support
 ------------
 **NOTE:** Effects are planned, this is just the initial static support.  Brightness is not implemented yet either.
