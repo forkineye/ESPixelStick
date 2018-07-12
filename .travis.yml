@@ -1,0 +1,36 @@
+language: c
+env:
+  global:
+    - ESP_HOME=$HOME/ide/hardware/esp8266com
+    - LIB_HOME=$HOME/Arduino/libraries
+    - ESPS_HOME=$HOME/Arduino/ESPixelStick
+before_install:
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
+  - sleep 3
+  - export DISPLAY=:1.0
+  - wget http://downloads.arduino.cc/arduino-1.8.1-linux64.tar.xz
+  - tar xf arduino-1.8.1-linux64.tar.xz
+  - mv arduino-1.8.1 $HOME/ide
+  - export PATH="$HOME/ide:$PATH"
+  - mkdir -p $LIB_HOME
+  - mkdir -p $ESP_HOME
+  - git clone https://github.com/esp8266/Arduino.git $ESP_HOME/esp8266
+  - cd $ESP_HOME/esp8266/tools
+  - python get.py
+  - git clone https://github.com/bblanchon/ArduinoJson $LIB_HOME/ArduinoJson
+  - git clone https://github.com/forkineye/ESPAsyncE131 $LIB_HOME/ESPAsyncE131
+  - git clone https://github.com/me-no-dev/ESPAsyncTCP $LIB_HOME/ESPAsyncTCP
+  - git clone https://github.com/me-no-dev/ESPAsyncUDP $LIB_HOME/ESPAsyncUDP
+  - git clone https://github.com/me-no-dev/ESPAsyncWebServer $LIB_HOME/ESPAsyncWebServer
+  - git clone https://github.com/marvinroger/async-mqtt-client $LIB_HOME/async-mqtt-client
+install:
+  - cp -r $TRAVIS_BUILD_DIR $ESPS_HOME
+  - arduino --board esp8266com:esp8266:generic:FlashFreq=40,FlashMode=dio,CpuFrequency=160,FlashSize=1M128 --save-prefs
+script:
+  - source $TRAVIS_BUILD_DIR/travis/common.sh
+  - cd $ESPS_HOME
+  - build_sketches arduino $ESPS_HOME esp8266
+notifications:
+  email:
+    on_success: change
+    on_failure: change
