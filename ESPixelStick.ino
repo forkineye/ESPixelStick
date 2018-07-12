@@ -45,7 +45,6 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include "ESPixelStick.h"
 #include "EFUpdate.h"
 #include "wshandler.h"
-#include "pwm.h"
 #include "gamma.h"
 
 extern "C" {
@@ -222,10 +221,6 @@ void setup() {
     }
 
     // Configure the outputs
-#if defined (ESPS_SUPPORT_PWM)
-    setupPWM();
-#endif
-
 #if defined (ESPS_MODE_PIXEL)
     pixels.setPin(DATA_PIN);
     updateConfig();
@@ -525,10 +520,6 @@ void validateConfig() {
         config.mqtt_topic = "diy/esps/" + String(chipId);
     }
 
-#if defined(ESPS_SUPPORT_PWM)
-    config.devmode.MPWM = true;
-#endif
-
 #if defined(ESPS_MODE_PIXEL)
     // Set Mode
 //    config.devmode = DevMode::MPIXEL;
@@ -693,27 +684,6 @@ void dsDeviceConfig(JsonObject &json) {
     config.serial_type = SerialType(static_cast<uint8_t>(json["serial"]["type"]));
     config.baudrate = BaudRate(static_cast<uint32_t>(json["serial"]["baudrate"]));
 #endif
-
-#if defined(ESPS_SUPPORT_PWM)
-    /* PWM */
-    config.pwm_global_enabled = json["pwm"]["enabled"];
-    config.pwm_freq = json["pwm"]["freq"];
-    config.pwm_gamma = json["pwm"]["gamma"];
-    config.pwm_gpio_invert = 0;
-    config.pwm_gpio_digital = 0;
-    config.pwm_gpio_enabled = 0;
-    for (int gpio = 0; gpio < NUM_GPIO; gpio++) {
-        if (valid_gpio_mask & 1<<gpio) {
-            config.pwm_gpio_dmx[gpio] = json["pwm"]["gpio" + (String)gpio + "_channel"];
-            if (json["pwm"]["gpio" + (String)gpio + "_invert"])
-                config.pwm_gpio_invert |= 1<<gpio;
-            if (json["pwm"]["gpio" + (String)gpio + "_digital"])
-                config.pwm_gpio_digital |= 1<<gpio;
-            if (json["pwm"]["gpio" + (String)gpio + "_enabled"])
-                config.pwm_gpio_enabled |= 1<<gpio;
-        }
-    }
-#endif
 }
 
 // Load configugration JSON file
@@ -817,23 +787,6 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     serial["baudrate"] = static_cast<uint32_t>(config.baudrate);
 #endif
 
-#if defined(ESPS_SUPPORT_PWM)
-    // PWM
-    JsonObject &pwm = json.createNestedObject("pwm");
-    pwm["enabled"] = config.pwm_global_enabled;
-    pwm["freq"] = config.pwm_freq;
-    pwm["gamma"] = config.pwm_gamma;
-    
-    for (int gpio = 0; gpio < NUM_GPIO; gpio++ ) {
-        if (valid_gpio_mask & 1<<gpio) {
-            pwm["gpio" + (String)gpio + "_channel"] = static_cast<uint16_t>(config.pwm_gpio_dmx[gpio]);
-            pwm["gpio" + (String)gpio + "_enabled"] = static_cast<bool>(config.pwm_gpio_enabled & 1<<gpio);
-            pwm["gpio" + (String)gpio + "_invert"] = static_cast<bool>(config.pwm_gpio_invert & 1<<gpio);
-            pwm["gpio" + (String)gpio + "_digital"] = static_cast<bool>(config.pwm_gpio_digital & 1<<gpio);
-        }
-    }
-#endif
-
     if (pretty)
         json.prettyPrintTo(jsonString);
     else
@@ -882,8 +835,8 @@ void loop() {
             e131.pull(&packet);
             uint16_t universe = htons(packet.universe);
             uint8_t *data = packet.property_values + 1;
-            LOG_PORT.print(universe);
-            LOG_PORT.println(packet.sequence_number);
+            //LOG_PORT.print(universe);
+            //LOG_PORT.println(packet.sequence_number);
             if ((universe >= config.universe) && (universe <= uniLast)) {
                 // Universe offset and sequence tracking
                 uint8_t uniOffset = (universe - config.universe);
@@ -944,10 +897,5 @@ void loop() {
 #elif defined(ESPS_MODE_SERIAL)
     if (serial.canRefresh())
         serial.show();
-#endif
-
-/* Update the PWM outputs */
-#if defined(ESPS_SUPPORT_PWM)
-  handlePWM();
 #endif
 }

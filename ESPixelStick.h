@@ -20,7 +20,7 @@
 #ifndef ESPIXELSTICK_H_
 #define ESPIXELSTICK_H_
 
-const char VERSION[] = "3.1-dev (gece uart)";
+const char VERSION[] = "3.1-dev";
 const char BUILD_DATE[] = __DATE__;
 
 /*****************************************/
@@ -30,9 +30,6 @@ const char BUILD_DATE[] = __DATE__;
 /* Output Mode - There can be only one! (-Conor MacLeod) */
 #define ESPS_MODE_PIXEL
 //#define ESPS_MODE_SERIAL
-
-/* Include support for PWM */
-//#define ESPS_SUPPORT_PWM
 
 /*****************************************/
 /*         END - Configuration           */
@@ -57,7 +54,6 @@ const char BUILD_DATE[] = __DATE__;
 #define HTTP_PORT       80      /* Default web server port */
 #define MQTT_PORT       1883    /* Default MQTT port */
 #define DATA_PIN        2       /* Pixel output - GPIO2 */
-#define EEPROM_BASE     0       /* EEPROM configuration base address */
 #define UNIVERSE_MAX    512     /* Max channels in a DMX Universe */
 #define PIXEL_LIMIT     1360    /* Total pixel limit - 40.85ms for 8 universes */
 #define RENARD_LIMIT    2048    /* Channel limit for serial outputs */
@@ -81,18 +77,10 @@ class DevCap {
  public:
     bool MPIXEL : 1;
     bool MSERIAL : 1;
-    bool MPWM : 1;
     uint8_t toInt() {
-        return (MPWM << 2 | MSERIAL << 1 | MPIXEL);
+        return (MSERIAL << 1 | MPIXEL);
     }
 };
-
-/*
-enum class DevMode : uint8_t {
-    MPIXEL,
-    MSERIAL
-};
-*/
 
 /* Configuration structure */
 typedef struct {
@@ -136,16 +124,6 @@ typedef struct {
     /* Serial */
     SerialType  serial_type;    /* Serial type */
     BaudRate    baudrate;       /* Baudrate */
-#endif
-
-#if defined(ESPS_SUPPORT_PWM)
-    bool        pwm_global_enabled; /* is pwm runtime enabled? */
-    int         pwm_freq;           /* pwm frequency */
-    bool        pwm_gamma;          /* is pwm gamma enabled? */
-    uint16_t    pwm_gpio_dmx[17];   /* which dmx channel is gpio[n] mapped to? */
-    uint32_t    pwm_gpio_enabled;   /* is gpio[n] enabled? */
-    uint32_t    pwm_gpio_invert;    /* is gpio[n] active high or active low? */
-    uint32_t    pwm_gpio_digital;   /* is gpio[n] digital or "analog"? */
 #endif
 } config_t;
 

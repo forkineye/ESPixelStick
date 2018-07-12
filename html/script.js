@@ -125,15 +125,6 @@ $(function() {
        }
     });
 
-    // PWM field toggles
-    $('#pwm_enabled').click(function() {
-        if ($(this).is(':checked')) {
-            $('.pwm').removeClass('hidden');
-       } else {
-            $('.pwm').addClass('hidden');
-       }
-    });
-
     // Pixel type toggles
     $('#p_type').change(function() {
         if ($('select[name_type]').val() == '1')
@@ -526,38 +517,8 @@ function getConfig(data) {
         $('#s_proto').trigger('click');
         $('#s_count').trigger('change');
     }
-
-    // PWM Config
-    if (config.device.mode & 0x04) {  // PWM
-        $('#o_pwm').removeClass('hidden');
-        $('#pwm_enabled').prop('checked', config.pwm.enabled);
-        if (config.pwm.enabled) {
-            $('.pwm').removeClass('hidden');
-        } else {
-            $('.pwm').addClass('hidden');
-        }
-
-        $('#pwm_freq').val(config.pwm.freq);
-        $('#pwm_gamma').prop('checked', config.pwm.gamma);
-        for(var i=0, len=gpio_list.length; i < len; i++){
-            var gpioN = 'gpio' + gpio_list[i];
-
-            if (typeof config['pwm'][gpioN + '_enabled'] === 'undefined') {
-                $('#' + gpioN +'_enabled').attr('disabled', 'true');
-                $('#' + gpioN +'_invert').attr('disabled', 'true');
-                $('#' + gpioN +'_digital').attr('disabled', 'true');
-                $('#' + gpioN +'_channel').val('-');
-                $('#' + gpioN +'_channel').attr('disabled', 'true');
-            } else {
-                $('#' + gpioN +'_enabled').prop('checked', config['pwm'][gpioN + '_enabled']);
-                $('#' + gpioN +'_invert').prop('checked', config['pwm'][gpioN + '_invert']);
-                $('#' + gpioN +'_digital').prop('checked', config['pwm'][gpioN + '_digital']);
-                $('#' + gpioN +'_channel').val(config['pwm'][gpioN + '_channel']);
-            }
-        }
-    }
 }
-
+    
 function getConfigStatus(data) {
     var status = JSON.parse(data);
     
@@ -723,24 +684,8 @@ function submitConfig() {
             'serial': {
                 'type': parseInt($('#s_proto').val()),
                 'baudrate': parseInt($('#s_baud').val())
-            },
-            "pwm": {
-               "enabled": $('#pwm_enabled').prop('checked'),
-               "freq": parseInt($('#pwm_freq').val()),
-               "gamma": $('#pwm_gamma').prop('checked'),
             }
-        };
-
-// TODO: Need to fix this, it's crashing procS() in wshandler.h
-/*
-    for(var i = 0, len = gpio_list.length; i < len; i++) {
-        var tg = gpio_list[i];
-        json['pwm']['gpio'+tg+'_channel'] = parseInt($('#gpio'+tg+'_channel').val());
-        json['pwm']['gpio'+tg+'_enabled'] = $('#gpio'+tg+'_enabled').prop('checked');
-        json['pwm']['gpio'+tg+'_invert'] = $('#gpio'+tg+'_invert').prop('checked');
-        json['pwm']['gpio'+tg+'_digital'] = $('#gpio'+tg+'_digital').prop('checked');
-    }
-*/
+    };
     wsEnqueue('S2' + JSON.stringify(json));
 }
 
