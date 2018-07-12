@@ -161,7 +161,8 @@ void setup() {
 
     // Load configuration from SPIFFS and set Hostname
     loadConfig();
-    WiFi.hostname(config.hostname);
+    if (config.hostname)
+        WiFi.hostname(config.hostname);
 
     // Setup WiFi Handlers
     wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);

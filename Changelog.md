@@ -1,6 +1,13 @@
 
 Changelog
 =========
+### 3.1-dev (on-going)
+ - Added brightness support.
+ - Added calculated gamma support.
+ - Implemented a new method for GECE support utilzing the UART.
+ - Better MQTT support (usage detailed in the README).
+ - Removed PWM support. A version supporting PWM is maintaned by [penfold42](https://github.com/penfold42/ESPixelBoard).
+
 ### 3.0
  - Compiled against [2017.11.20 Arduino core](https://github.com/esp8266/Arduino/tree/117bc875ffdd1f4b11af0dd236e0e12a84748e53)
    - Includes WPA2 KRACK security fix
