@@ -29,11 +29,11 @@ install:
 before_script:
   - cd $ESPS_HOME
   - source $TRAVIS_BUILD_DIR/travis/common.sh
-  - npm install -g gulp-cli
-  - npm link gulp
+#  - npm install -g gulp-cli
+#  - npm link gulp
 script:
   - build_sketches arduino $ESPS_HOME esp8266
-  - gulp
+#  - gulp
 notifications:
   email:
     on_success: change
