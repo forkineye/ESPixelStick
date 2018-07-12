@@ -26,10 +26,13 @@ before_install:
 install:
   - cp -r $TRAVIS_BUILD_DIR $ESPS_HOME
   - arduino --board esp8266com:esp8266:generic:FlashFreq=40,FlashMode=dio,CpuFrequency=160,FlashSize=1M128 --save-prefs
+before_script:
+  - npm install -g gulp-cli
 script:
   - source $TRAVIS_BUILD_DIR/travis/common.sh
   - cd $ESPS_HOME
   - build_sketches arduino $ESPS_HOME esp8266
+  - gulp
 notifications:
   email:
     on_success: change
