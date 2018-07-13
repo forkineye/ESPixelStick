@@ -19,7 +19,7 @@ void EffectEngine::begin(DRIVER* ledDriver, uint16_t ledCount) {
 void EffectEngine::run() {
     if (_initialized && _activeEffect) {
         uint32_t now = millis();
-        if(now > _effectTimeout) {
+        if (now > _effectTimeout) {
             uint16_t delay = (this->*_activeEffect->func)();
             _effectTimeout = now + max((int)delay, MIN_EFFECT_DELAY);
             _effectCounter++;
@@ -31,8 +31,7 @@ void EffectEngine::setEffect(const char* effectName) {
     const uint8_t effectCount = sizeof(EFFECT_LIST) / sizeof(EffectDesc);
     for (uint8_t effect = 0; effect < effectCount; effect++) {
         if (strcmp(effectName, EFFECT_LIST[effect].name) == 0) {
-            if (_activeEffect != &EFFECT_LIST[effect])
-            {
+            if (_activeEffect != &EFFECT_LIST[effect]) {
                 _activeEffect = &EFFECT_LIST[effect];
                 _effectTimeout = 0;
                 _effectCounter = 0;
@@ -53,7 +52,7 @@ void EffectEngine::setPixel(uint16_t idx,  CRGB color) {
 }
 
 void EffectEngine::setAll(CRGB color) {
-    for(uint16_t i=0; i < _ledCount; i++) {
+    for (uint16_t i=0; i < _ledCount; i++) {
         setPixel(i, color);
     }
 }
@@ -64,9 +63,9 @@ void EffectEngine::clearAll() {
 
 CRGB EffectEngine::colorWheel(uint8_t pos) {
     pos = 255 - pos;
-    if(pos < 85) {
+    if (pos < 85) {
         return { 255 - pos * 3, 0, pos * 3};
-    } else if(pos < 170) {
+    } else if (pos < 170) {
         pos -= 85;
         return { 0, pos * 3, 255 - pos * 3 };
     } else {
@@ -76,14 +75,14 @@ CRGB EffectEngine::colorWheel(uint8_t pos) {
 }
 
 uint16_t EffectEngine::effectSolidColor() {
-    for(uint16_t i=0; i < _ledCount; i++) {
+    for (uint16_t i=0; i < _ledCount; i++) {
         setPixel(i, _effectColor);
     }
     return 32;
 }
 
 uint16_t EffectEngine::effectChase() {
-    for(uint16_t i=0; i < _ledCount; i++) {
+    for (uint16_t i=0; i < _ledCount; i++) {
         if (i != _effectStep) {
             setPixel(i, {0, 0, 0});
         }
@@ -95,7 +94,7 @@ uint16_t EffectEngine::effectChase() {
 }
 
 uint16_t EffectEngine::effectRainbowCycle() {
-    for(uint16_t i=0; i < _ledCount; i++) {
+    for (uint16_t i=0; i < _ledCount; i++) {
         CRGB color = colorWheel(((i * 256 / _ledCount) + _effectStep) & 0xFF);
         setPixel(i, color);
     }
