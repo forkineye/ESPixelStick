@@ -318,7 +318,7 @@ function wsConnect() {
             } else {
                 streamData= new Uint8Array(event.data);
                 drawStream(streamData);
-                if (!$('#tmode option:selected').val().localeCompare('t_view')) wsEnqueue('T4');
+                if (!$('#tmode option:selected').val().localeCompare('t_view')) wsEnqueue('T6');
             }
             wsReadyToSend();
         };
