@@ -252,6 +252,8 @@
               <select class="form-control" id="tmode" name="tmode" onchange="test()">
                 <option value="t_disabled">Disabled</option>
                 <option value="t_static">Static</option>
+                <option value="t_blink">Blink</option>
+                <option value="t_flash">Flash</option>
                 <option value="t_chase">Chase</option>
                 <option value="t_rainbow">Rainbow</option>
                 <option value="t_view">View Stream</option>
@@ -263,6 +265,28 @@
           <!-- Testing - Static -->
           <div id="t_static" class="tdiv hidden">
             <legend class="esps-legend">Static Testing</legend>
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="t_color">Color</label>
+              <div class="col-sm-10">
+                <input type="button" class="form-control color no-alpha" value="rgb(128,128,128)"/>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Testing - Blink -->
+          <div id="t_blink" class="tdiv hidden">
+            <legend class="esps-legend">Blink Testing</legend>
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="t_color">Color</label>
+              <div class="col-sm-10">
+                <input type="button" class="form-control color no-alpha" value="rgb(128,128,128)"/>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Testing - Flash -->
+          <div id="t_flash" class="tdiv hidden">
+            <legend class="esps-legend">Flash Testing</legend>
             <div class="form-group">
               <label class="control-label col-sm-2" for="t_color">Color</label>
               <div class="col-sm-10">

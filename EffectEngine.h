@@ -64,6 +64,8 @@ public:
     uint16_t effectSolidColor();
     uint16_t effectRainbowCycle();
     uint16_t effectChase();
+    uint16_t effectBlink();
+    uint16_t effectFlash();
 
 private:
 

@@ -6,6 +6,8 @@
 // List of all the supported effects and their names
 static const EffectDesc EFFECT_LIST[] = {
     { "Solid",          &EffectEngine::effectSolidColor },
+    { "Blink",          &EffectEngine::effectBlink },
+    { "Flash",          &EffectEngine::effectFlash },
     { "Rainbow",        &EffectEngine::effectRainbowCycle },
     { "Chase",          &EffectEngine::effectChase }
 };
@@ -102,3 +104,36 @@ uint16_t EffectEngine::effectRainbowCycle() {
     _effectStep = ++_effectStep & 0xFF;
     return _effectSpeed / 256;
 }
+
+uint16_t EffectEngine::effectBlink() {
+    // The Blink effect uses two "time slots": on, off
+    // Using default speed, a complete sequence takes 2s.
+    if (_effectStep % 2) {
+      clearAll();
+    } else {
+      setAll(_effectColor);
+    }
+
+    _effectStep = ++_effectStep % 2;
+    return _effectSpeed / 1;
+}
+
+uint16_t EffectEngine::effectFlash() {
+    // The Flash effect uses 6 "time slots": on, off, on, off, off, off
+    // Using default speed, a complete sequence takes 2s.
+    // Prevent errors if we come from another effect with more steps
+    _effectStep = _effectStep % 6;
+    
+    switch (_effectStep) {
+      case 0:
+      case 2:
+        setAll(_effectColor);
+        break;
+      default:
+        clearAll();
+    }
+
+    _effectStep = ++_effectStep % 6;
+    return _effectSpeed / 3;
+}
+
