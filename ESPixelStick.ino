@@ -393,20 +393,26 @@ void onMqttMessage(char* topic, char* payload,
     if (root.containsKey("effect")) {
         // Set the explict effect provided by the MQTT client
         effects.setEffect(root["effect"]);
-    } else if (root.containsKey("color") && effects.getEffect() == nullptr) {
-        // Only set the effect to solid if we are not in an active effect, otherwise
-        // the color of the current effect will just be updated
-        effects.setEffect("Solid");
-    } else if (stateOn) {
+    }
+    
+    // handle missing parameters
+    if (stateOn) {
+      // only try to set defaults if state is ON
+      if (effects.getEffect() == nullptr) {
+        // no effect running, set default (Solid)
+        effects.setEffect(DEFAULT_EFFECT);
+      }
+      if (!root.containsKey("color") && !root.containsKey("brightness") && !root.containsKey("effect")) {
         // If we are just an "ON" command then set the default color and effect
         effects.setColor(DEFAULT_EFFECT_COLOR);
         effects.setBrightness(DEFAULT_EFFECT_BRIGHTNESS);
         effects.setEffect(DEFAULT_EFFECT);
+      }
     } else {
-        // Otherwise just disable the effect engine.
-        effects.setEffect("");
+      // state OFF, switch off effects engine and return to DMX mode
+      effects.setEffect("");
     }
-
+    
     publishState();
 }
 

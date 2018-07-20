@@ -63,6 +63,9 @@ light:
     rgb: true
     effect: true
     effect_list:
+      - Solid
+      - Blink
+      - Flash
       - Rainbow
       - Chase
 ```
@@ -81,3 +84,5 @@ Credits
 - penfold42(https://github.com/penfold42) for fixes, brightness, and gamma support.
   - penfold42 also maintains PWM support in their fork located [here](https://github.com/penfold42/ESPixelBoard).
 - Austin Hodges(https://github.com/ahodges9) for effects support and MQTT cleanup.
+- Matthias C. Hormann(https://github.com/Moonbase59) — some MQTT & effects cleanup.
+

@@ -46,9 +46,11 @@ extern bool         reboot;     // Reboot flag
     
     T0 - Disable Testing
     T1 - Static Testing
-    T2 - Chase Test
-    T3 - Rainbow Test
-    T4 - View Stream
+    T2 - Blink Test
+    T3 - Flash Test
+    T4 - Chase Test
+    T5 - Rainbow Test
+    T6 - View Stream
 
     S1 - Set Network Config
     S2 - Set Device Config
@@ -227,7 +229,23 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             effects.setEffect("Solid");
             break;
         }
-        case '2': {  // Chase
+        case '2': {  // Blink
+            DynamicJsonBuffer jsonBuffer;
+            JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
+
+            effects.setColor({json["r"], json["g"], json["b"]});
+            effects.setEffect("Blink");
+            break;
+        }
+        case '3': {  // Flash
+            DynamicJsonBuffer jsonBuffer;
+            JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
+
+            effects.setColor({json["r"], json["g"], json["b"]});
+            effects.setEffect("Flash");
+            break;
+        }
+        case '4': {  // Chase
             DynamicJsonBuffer jsonBuffer;
             JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
 
@@ -235,12 +253,12 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             effects.setEffect("Chase");
             break;
         }
-        case '3': { // Rainbow
+        case '5': { // Rainbow
             effects.setEffect("Rainbow");
             break;
         }
 
-        case '4': {  // View stream
+        case '6': {  // View stream
 #if defined(ESPS_MODE_PIXEL)
             client->binary(pixels.getData(), config.channel_count);
 #elif defined(ESPS_MODE_SERIAL)
