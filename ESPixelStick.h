@@ -23,18 +23,8 @@
 const char VERSION[] = "3.1-dev";
 const char BUILD_DATE[] = __DATE__;
 
-/*****************************************/
-/*        BEGIN - Configuration          */
-/*****************************************/
-
-/* Output Mode - There can be only one! (-Conor MacLeod) */
-#define ESPS_MODE_PIXEL
-//#define ESPS_MODE_SERIAL
-
-/*****************************************/
-/*         END - Configuration           */
-/*****************************************/
-
+// Mode configuration moved to Mode.h to ease things with Travis
+#include "Mode.h"
 #include <ESP8266WiFi.h>
 #include <Ticker.h>
 #include <AsyncMqttClient.h>
@@ -147,4 +137,4 @@ void publishRGBBrightness();
 void publishRGBColor();
 void setStatic(uint8_t r, uint8_t g, uint8_t b);
 
-#endif /* ESPIXELSTICK_H_ */
+#endif  // ESPIXELSTICK_H_

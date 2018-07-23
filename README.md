@@ -78,7 +78,7 @@ Resources
 Credits
 -------
 - The great people at http://diychristmas.org and http://doityourselfchristmas.com for inspiration and support.
-- Bill Porter for initial Renard and SoftAP aupport.
+- Bill Porter for initial Renard and SoftAP support.
 - Bill Porter and Grayson Lough for initial DMX support.
 - Rich Danby(https://github.com/cinoan) for fixes and helping polish the front-end.
 - penfold42(https://github.com/penfold42) for fixes, brightness, and gamma support.

@@ -1,9 +1,12 @@
+sudo: false
 language: c
 env:
   global:
     - ESP_HOME=$HOME/ide/hardware/esp8266com
     - LIB_HOME=$HOME/Arduino/libraries
     - ESPS_HOME=$HOME/Arduino/ESPixelStick
+    - BUILD=$HOME/build
+    - PKG=$HOME/pkg
 before_install:
   - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
   - sleep 3
@@ -14,6 +17,8 @@ before_install:
   - export PATH="$HOME/ide:$PATH"
   - mkdir -p $LIB_HOME
   - mkdir -p $ESP_HOME
+  - mkdir -p $BUILD
+  - mkdir -p $PKG
   - git clone https://github.com/esp8266/Arduino.git $ESP_HOME/esp8266
   - cd $ESP_HOME/esp8266/tools
   - python get.py
@@ -25,15 +30,24 @@ before_install:
   - git clone https://github.com/marvinroger/async-mqtt-client $LIB_HOME/async-mqtt-client
 install:
   - cp -r $TRAVIS_BUILD_DIR $ESPS_HOME
-  - arduino --board esp8266com:esp8266:generic:FlashFreq=40,FlashMode=dio,CpuFrequency=160,FlashSize=1M128 --save-prefs
+  - arduino --board esp8266com:esp8266:generic:FlashFreq=40,FlashMode=dio,CpuFrequency=160,FlashSize=1M128 --pref build.path=$BUILD --save-prefs
 before_script:
   - cd $ESPS_HOME
   - source $TRAVIS_BUILD_DIR/travis/common.sh
   - npm install -g gulp-cli
   - npm install
 script:
-  - build_sketches arduino $ESPS_HOME esp8266
+# Build PIXEL binary
+  - echo "#define ESPS_MODE_PIXEL" > $ESPS_HOME/Mode.h
+  - arduino --verify $ESPS_HOME/ESPixelStick.ino
+  - mv $BUILD/ESPixelStick.ino.bin $PKG/pixel.bin
+# Build SERIAL binary
+  - echo "#define ESPS_MODE_SERIAL" > $ESPS_HOME/Mode.h
+  - arduino --verify $ESPS_HOME/ESPixelStick.ino
+  - mv $BUILD/ESPixelStick.ino.bin $PKG/serial.bin
+# Process web pages
   - gulp
+  - mv $ESPS_HOME/data $PKG/spiffs
 notifications:
   email:
     on_success: change
