@@ -35,7 +35,6 @@ install:
 - arduino --board esp8266com:esp8266:generic:FlashFreq=40,FlashMode=dio,CpuFrequency=160,FlashSize=1M128
   --pref build.path=$BUILD --save-prefs
 before_script:
-- find $HOME
 - cd $ESPS_HOME
 - npm install -g gulp-cli
 - npm install
@@ -53,7 +52,9 @@ script:
 - mv $ESPS_HOME/travis/firmware.json $DIST/firmware/firmware.json
 - cd $DIST
 - zip $HOME/$DIST_FILE *
-- find $HOME
+- ls -al $HOME
+- ls -al $DIST
+- ls -al $ESPS_HOME
 notifications:
   email:
     on_success: change
