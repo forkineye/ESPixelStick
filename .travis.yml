@@ -1,13 +1,13 @@
 sudo: false
-language: c
+language: bash
 env:
   global:
   - ESP_HOME=$HOME/ide/hardware/esp8266com
   - LIB_HOME=$HOME/Arduino/libraries
   - ESPS_HOME=$HOME/Arduino/ESPixelStick
   - BUILD=$HOME/build
-  - DIST=$HOME/dist
-  - STAMP=$(date +'%Y%m%d%H%M%S)
+  - DIST=$ESPS_HOME/dist
+  - STAMP=$(date +'%Y%m%d%H%M%S')
   - DIST_FILE=ESPixelStick_TRAVIS-$STAMP.zip
 before_install:
 - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile
@@ -35,6 +35,7 @@ install:
 - arduino --board esp8266com:esp8266:generic:FlashFreq=40,FlashMode=dio,CpuFrequency=160,FlashSize=1M128
   --pref build.path=$BUILD --save-prefs
 before_script:
+- find $HOME
 - cd $ESPS_HOME
 - npm install -g gulp-cli
 - npm install
@@ -51,7 +52,8 @@ script:
 - mv $ESPS_HOME/data $DIST/spiffs
 - mv $ESPS_HOME/travis/firmware.json $DIST/firmware/firmware.json
 - cd $DIST
-- zip ../$DIST_FILE *
+- zip $HOME/$DIST_FILE *
+- find $HOME
 notifications:
   email:
     on_success: change
