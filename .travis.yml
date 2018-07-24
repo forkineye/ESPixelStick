@@ -41,10 +41,10 @@ before_script:
 script:
 - echo "#define ESPS_MODE_PIXEL" > $ESPS_HOME/Mode.h
 - arduino --verify $ESPS_HOME/ESPixelStick.ino
-- mv $BUILD/ESPixelStick.ino.bin $DIST/firmware/travis-pixel.bin
+- mv $BUILD/ESPixelStick.ino.bin $DIST/firmware/pixel-travis.bin
 - echo "#define ESPS_MODE_SERIAL" > $ESPS_HOME/Mode.h
 - arduino --verify $ESPS_HOME/ESPixelStick.ino
-- mv $BUILD/ESPixelStick.ino.bin $DIST/firmware/travis-serial.bin
+- mv $BUILD/ESPixelStick.ino.bin $DIST/firmware/serial-travis.bin
 - gulp
 - gulp md
 - gulp travis
@@ -64,5 +64,7 @@ deploy:
   body: This release includes binaries which were automatically built by Travis-CI and should not be considered stable.  
   prerelease: true
   file: $HOME/$DIST_FILE
+  skip_cleanup: true
   on:
     repo: forkineye/ESPixelStick
+    branch: master

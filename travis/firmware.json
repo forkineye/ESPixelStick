@@ -3,13 +3,13 @@
         {
             "name": "Pixel (WS2811 / GECE)",
             "description": "Pixel Mode",
-            "version": "Travis Build",
+            "version": "DEV (Travis-CI Build)",
             "file": "pixel-travis.bin"
         },
         {
             "name": "Serial (DMX / Renard)",
             "description": "Serial Mode",
-            "version": "Travis Build",
+            "version": "DEV (Travis-CI Build)",
             "file": "serial-travis.bin"
         }
     ],
