@@ -1,7 +1,7 @@
 ESPixelStick Firmware
 =====================
 [![Join the chat at https://gitter.im/forkineye/ESPixelStick](https://badges.gitter.im/forkineye/ESPixelStick.svg)](https://gitter.im/forkineye/ESPixelStick)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](paypal.me/ShelbyMerrick)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/ShelbyMerrick)
 [![Build Status](https://travis-ci.org/forkineye/ESPixelStick.svg?branch=master)](https://travis-ci.org/forkineye/ESPixelStick)
 
 This is the Arduino firmware for the ESP8266 based ESPixelStick.  The ESPixelStick is a small wireless E1.31 sACN pixel controller designed to control a single strand of pixels.  Pixel limitations are mostly based upon your desired refresh rate, around 680 pixels (4 universes) for a 25ms E1.31 source rate.  MQTT support is provided as well for integration into home automation systems where an E1.31 source may not be present.
@@ -72,17 +72,17 @@ light:
 
 Resources
 ---------
-- Firmware: http://github.com/forkineye/ESPixelStick
-- Hardware: http://forkineye.com/ESPixelStick
+- Firmware: [http://github.com/forkineye/ESPixelStick](http://github.com/forkineye/ESPixelStick)
+- Hardware: [http://forkineye.com/ESPixelStick](http://forkineye.com/ESPixelStick)
 
 Credits
 -------
-- The great people at http://diychristmas.org and http://doityourselfchristmas.com for inspiration and support.
-- Bill Porter for initial Renard and SoftAP support.
-- Bill Porter and Grayson Lough for initial DMX support.
-- Rich Danby(https://github.com/cinoan) for fixes and helping polish the front-end.
-- penfold42(https://github.com/penfold42) for fixes, brightness, and gamma support.
+- The great people at [diychristmas.org](http://diychristmas.org) and [doityourselfchristmas.com](http://doityourselfchristmas.com) for inspiration and support.
+- [Bill Porter](https://github.com/madsci1016) for initial Renard and SoftAP support.
+- Bill Porter and [Grayson Lough](https://github.com/GraysonLough) for initial DMX support.
+- [Rich Danby](https://github.com/cinoan) for fixes and helping polish the front-end.
+- [penfold42](https://github.com/penfold42) for fixes, brightness, and gamma support.
   - penfold42 also maintains PWM support in their fork located [here](https://github.com/penfold42/ESPixelBoard).
-- Austin Hodges(https://github.com/ahodges9) for effects support and MQTT cleanup.
-- Matthias C. Hormann(https://github.com/Moonbase59) — some MQTT & effects cleanup.
+- [Austin Hodges](https://github.com/ahodges9) for effects support and MQTT cleanup.
+- [Matthias C. Hormann](https://github.com/Moonbase59) — some MQTT & effects cleanup.
 

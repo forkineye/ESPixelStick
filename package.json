@@ -24,7 +24,9 @@
     "gulp-gzip": "^1.4.0",
     "gulp-htmlmin": "^4.0.0",
     "gulp-inline-source": "^3.0.0",
+    "gulp-markdown-github-style": "^1.1.1",
     "gulp-plumber": "^1.1.0",
+    "gulp-rename": "^1.4.0",
     "gulp-uglify": "^3.0.0"
   }
 }

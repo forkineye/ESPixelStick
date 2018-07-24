@@ -7,6 +7,8 @@ var cleancss = require('gulp-clean-css');
 var uglifyjs = require('gulp-uglify');
 var gzip = require('gulp-gzip');
 var del = require('del');
+var markdown = require('gulp-markdown-github-style');
+var rename = require('gulp-rename');
 
 /* HTML Task */
 gulp.task('html', function() {
@@ -52,6 +54,34 @@ gulp.task('image', function() {
 /* Clean Task */
 gulp.task('clean', function() {
     return del(['data/www/*']);
+});
+
+/* Markdown to HTML Task */
+gulp.task('md', function() {
+    gulp.src('README.md')
+        .pipe(plumber())
+        .pipe(rename('ESPixelStick.html'))
+        .pipe(markdown())
+        .pipe(gulp.dest('dist'));
+    gulp.src('Changelog.md')
+        .pipe(plumber())
+        .pipe(rename('Changelog.html'))
+        .pipe(markdown())
+        .pipe(gulp.dest('dist'));
+    gulp.src('dist/README.md')
+        .pipe(plumber())
+        .pipe(rename('README.html'))
+        .pipe(markdown())
+        .pipe(gulp.dest('dist'));
+});
+
+/* Travis specific stuff */
+gulp.task('travis', function() {
+    gulp.src(['travis/travis.md', 'dist/README.md'])
+        .pipe(plumber())
+        .pipe(concat('README.html'))
+        .pipe(markdown())
+        .pipe(gulp.dest('dist'));
 });
 
 /* Watch Task */

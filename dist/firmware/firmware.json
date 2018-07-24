@@ -1,0 +1,32 @@
+{
+    "modes": [
+        {
+            "name": "Pixel (WS2811 / GECE)",
+            "description": "Pixel Mode",
+            "version": "3.0 (20171120)",
+            "file": "pixel-3.0-1m_128k.bin"
+        },
+        {
+            "name": "Serial (DMX / Renard)",
+            "description": "Serial Mode",
+            "version": "3.0 (20171120)",
+            "file": "serial-3.0-1m_128k.bin"
+        }
+    ],
+    
+    "devices": [
+        {
+            "name": "ESP01_1MB_128K",
+            "esptool": {
+                "reset": "none",
+                "baudrate": "115200",
+                "spiffsloc": "0xDB000"
+            },
+            "mkspiffs": {
+                "page": "256",
+                "block": "4096",
+                "size": "131072"
+            }
+        }
+    ]
+}

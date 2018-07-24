@@ -1,3 +1,4 @@
+dist/*.html
 node_modules
 .vscode
 *.gz
