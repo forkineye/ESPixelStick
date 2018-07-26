@@ -105,7 +105,7 @@
             <div class="col-sm-offset-2 col-sm-10">
               <div class="checkbox"><label><input type="checkbox" id="ap" name="ap"> AP Fallback</label></div>
             </div>
-          </div>          
+          </div>
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
               <button id="btn_wifi" type="button" onclick="submitWiFi()" class="btn btn-primary" disabled>Save Changes</button>
@@ -141,7 +141,7 @@
             <div class="col-sm-offset-2 col-sm-10">
               <div class="checkbox"><label><input type="checkbox" id="multicast" name="multicast"> Enable Multicast</label></div>
             </div>
-          </div>          
+          </div>
 
           <!-- Pixel Configuration -->
           <div id="o_pixel" class="odiv hidden">
@@ -166,7 +166,7 @@
               <div class="col-sm-offset-2 col-sm-10">
                 <div class="checkbox"><label><input type="checkbox" id="p_gamma" name="p_gamma"> Gamma Correction</label></div>
               </div>
-            </div>          
+            </div>
             <div class="form-group">
               <label class="control-label col-sm-2" for="p_gammaVal">Gamma Value</label>
               <div class="col-sm-3"><input type="text" class="form-control" id="p_gammaVal" name="p_gammaVal" placeholder="Gamma Value" onchange="refreshPixel()"></div>
@@ -209,7 +209,7 @@
             <div class="col-sm-offset-2 col-sm-10">
               <div class="checkbox"><label><input type="checkbox" id="mqtt" name="mqtt"> Enable MQTT</label></div>
             </div>
-          </div>          
+          </div>
           <div class="form-group mqtt">
             <label class="control-label col-sm-2" for="mqtt_ip">Broker IP</label>
             <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_ip" name="mqtt_ip" placeholder="Enter MQTT Broker IP"></div>
@@ -272,7 +272,7 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Testing - Blink -->
           <div id="t_blink" class="tdiv hidden">
             <legend class="esps-legend">Blink Testing</legend>
@@ -283,7 +283,7 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Testing - Flash -->
           <div id="t_flash" class="tdiv hidden">
             <legend class="esps-legend">Flash Testing</legend>
@@ -294,7 +294,7 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Testing - Chase -->
           <div id="t_chase" class="tdiv hidden">
             <legend class="esps-legend">Chase Testing</legend>
@@ -302,6 +302,35 @@
               <label class="control-label col-sm-2" for="t_color">Color</label>
               <div class="col-sm-10">
                 <input type="button" class="form-control color no-alpha" value="rgb(255,255,255)" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="t_reverse">Reverse</label>
+              <div class="col-sm-10">
+                <input type="checkbox" class="reverse" name="t_reverse">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="t_mirror">Mirror</label>
+              <div class="col-sm-10">
+                <input type="checkbox" class="mirror" name="t_mirror">
+              </div>
+            </div>
+          </div>
+
+          <!-- Testing - Rainbow -->
+          <div id="t_rainbow" class="tdiv hidden">
+            <legend class="esps-legend">Rainbow Testing</legend>
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="t_reverse">Reverse</label>
+              <div class="col-sm-10">
+                <input type="checkbox" class="reverse" name="t_reverse">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="t_mirror">Mirror</label>
+              <div class="col-sm-10">
+                <input type="checkbox" class="mirror" name="t_mirror">
               </div>
             </div>
           </div>

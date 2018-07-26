@@ -84,21 +84,58 @@ uint16_t EffectEngine::effectSolidColor() {
 }
 
 uint16_t EffectEngine::effectChase() {
-    for (uint16_t i=0; i < _ledCount; i++) {
+    // calculate only half the pixels if mirroring
+    uint16_t lc = _ledCount;
+    if (_effectMirror) {
+        lc = lc / 2;
+    }
+    // Prevent errors if we come from another effect with more steps
+    // or switch from the upper half of non-mirror to mirror mode
+    _effectStep = _effectStep % lc;
+
+    for (uint16_t i=0; i < lc; i++) {
         if (i != _effectStep) {
-            setPixel(i, {0, 0, 0});
+            if (_effectMirror) {
+                setPixel(i + lc, {0, 0, 0});
+                setPixel(lc - 1 - i, {0, 0, 0});
+            } else {
+                setPixel(i, {0, 0, 0});
+            }
         }
     }
-    setPixel(_effectStep, _effectColor);
+    uint16_t pixel = _effectStep;
+    if (_effectReverse) {
+      pixel = lc - 1 - pixel;
+    }
+    if (_effectMirror) {
+        setPixel(pixel + lc, _effectColor);
+        setPixel(lc - 1 - pixel, _effectColor);
+    } else {
+        setPixel(pixel, _effectColor);
+    }
 
-    _effectStep = ++_effectStep % _ledCount;
+    _effectStep = ++_effectStep % lc;
     return _effectSpeed / 32;
 }
 
 uint16_t EffectEngine::effectRainbowCycle() {
-    for (uint16_t i=0; i < _ledCount; i++) {
-        CRGB color = colorWheel(((i * 256 / _ledCount) + _effectStep) & 0xFF);
-        setPixel(i, color);
+    // calculate only half the pixels if mirroring
+    uint16_t lc = _ledCount;
+    if (_effectMirror) {
+        lc = lc / 2;
+    }
+    for (uint16_t i=0; i < lc; i++) {
+        CRGB color = colorWheel(((i * 256 / lc) + _effectStep) & 0xFF);
+        uint16_t pixel = i;
+        if (_effectReverse) {
+            pixel = lc - 1 - pixel;
+        }
+        if (_effectMirror) {
+            setPixel(pixel + lc, color);
+            setPixel(lc - 1 - pixel, color);
+        } else {
+            setPixel(pixel, color);
+        }
     }
 
     _effectStep = ++_effectStep & 0xFF;
@@ -123,7 +160,7 @@ uint16_t EffectEngine::effectFlash() {
     // Using default speed, a complete sequence takes 2s.
     // Prevent errors if we come from another effect with more steps
     _effectStep = _effectStep % 6;
-    
+
     switch (_effectStep) {
       case 0:
       case 2:

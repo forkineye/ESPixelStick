@@ -82,6 +82,8 @@ const int JSON_BUFFER_SIZE = JSON_OBJECT_SIZE(10);
 const char DEFAULT_EFFECT[] = "Solid";
 const CRGB DEFAULT_EFFECT_COLOR = { 127, 127, 127 };
 const uint8_t DEFAULT_EFFECT_BRIGHTNESS = 255;
+const bool DEFAULT_EFFECT_REVERSE = false;
+const bool DEFAULT_EFFECT_MIRROR = false;
 
 // Configuration file
 const char CONFIG_FILE[] = "/config.json";
@@ -113,7 +115,7 @@ SerialDriver    serial;         // Serial object
 EffectEngine effects;
 
 /////////////////////////////////////////////////////////
-// 
+//
 //  Forward Declarations
 //
 /////////////////////////////////////////////////////////
@@ -394,7 +396,15 @@ void onMqttMessage(char* topic, char* payload,
         // Set the explict effect provided by the MQTT client
         effects.setEffect(root["effect"]);
     }
-    
+
+    if (root.containsKey("reverse")) {
+        effects.setReverse(root["reverse"]);
+    }
+
+    if (root.containsKey("mirror")) {
+        effects.setMirror(root["mirror"]);
+    }
+
     // handle missing parameters
     if (stateOn) {
       // only try to set defaults if state is ON
@@ -402,17 +412,23 @@ void onMqttMessage(char* topic, char* payload,
         // no effect running, set default (Solid)
         effects.setEffect(DEFAULT_EFFECT);
       }
-      if (!root.containsKey("color") && !root.containsKey("brightness") && !root.containsKey("effect")) {
+      if (!root.containsKey("color")
+          && !root.containsKey("brightness")
+          && !root.containsKey("effect")
+          && !root.containsKey("reverse")
+          && !root.containsKey("mirror")) {
         // If we are just an "ON" command then set the default color and effect
         effects.setColor(DEFAULT_EFFECT_COLOR);
         effects.setBrightness(DEFAULT_EFFECT_BRIGHTNESS);
         effects.setEffect(DEFAULT_EFFECT);
+        effects.setReverse(DEFAULT_EFFECT_REVERSE);
+        effects.setMirror(DEFAULT_EFFECT_MIRROR);
       }
     } else {
       // state OFF, switch off effects engine and return to DMX mode
       effects.setEffect("");
     }
-    
+
     publishState();
 }
 
@@ -429,6 +445,8 @@ void publishState() {
     if (effects.getEffect() != nullptr) {
         root["effect"] = effects.getEffect();
     }
+    root["reverse"] = effects.getReverse();
+    root["mirror"] = effects.getMirror();
 
     char buffer[root.measureLength() + 1];
     root.printTo(buffer, sizeof(buffer));
@@ -436,7 +454,7 @@ void publishState() {
 }
 
 /////////////////////////////////////////////////////////
-// 
+//
 //  Web Section
 //
 /////////////////////////////////////////////////////////
@@ -497,7 +515,7 @@ void initWeb() {
 }
 
 /////////////////////////////////////////////////////////
-// 
+//
 //  JSON / Configuration Section
 //
 /////////////////////////////////////////////////////////
@@ -834,7 +852,7 @@ void loop() {
         ESP.restart();
     }
 
-    // Local effects override any e131 packets so only read if we 
+    // Local effects override any e131 packets so only read if we
     // have no active effects
     if (effects.getEffect() == nullptr) {
         // Parse a packet and update pixels
@@ -892,7 +910,7 @@ void loop() {
                 }
             }
         }
-    } 
+    }
 
     // Run the effect engine loop
     effects.run();
@@ -906,3 +924,4 @@ void loop() {
         serial.show();
 #endif
 }
+

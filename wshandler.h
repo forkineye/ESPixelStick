@@ -37,13 +37,13 @@ extern uint16_t     uniLast;    // Last Universe to listen for
 extern bool         reboot;     // Reboot flag
 
 
-/* 
+/*
   Packet Commands
     E1 - Get Elements
 
     G1 - Get Config
     G2 - Get Config Status
-    
+
     T0 - Disable Testing
     T1 - Static Testing
     T2 - Blink Test
@@ -68,7 +68,7 @@ EFUpdate efupdate;
 void procX(uint8_t *data, AsyncWebSocketClient *client) {
     switch (data[1]) {
         case 'S':
-            client->text("XS" + 
+            client->text("XS" +
                      (String)WiFi.RSSI() + ":" +
                      (String)ESP.getFreeHeap() + ":" +
                      (String)millis());
@@ -175,6 +175,8 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             effect["r"] = effects.getColor().r;
             effect["g"] = effects.getColor().g;
             effect["b"] = effects.getColor().b;
+            effect["reverse"] = effects.getReverse();
+            effect["mirror"] = effects.getMirror();
 
             String response;
             json.printTo(response);
@@ -225,7 +227,10 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             DynamicJsonBuffer jsonBuffer;
             JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
 
-            effects.setColor({json["r"], json["g"], json["b"]});
+            if (json.containsKey("r") && json.containsKey("g") && json.containsKey("b")) {
+                effects.setColor({json["r"], json["g"], json["b"]});
+            }
+
             effects.setEffect("Solid");
             break;
         }
@@ -233,7 +238,10 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             DynamicJsonBuffer jsonBuffer;
             JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
 
-            effects.setColor({json["r"], json["g"], json["b"]});
+            if (json.containsKey("r") && json.containsKey("g") && json.containsKey("b")) {
+                effects.setColor({json["r"], json["g"], json["b"]});
+            }
+
             effects.setEffect("Blink");
             break;
         }
@@ -241,7 +249,10 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             DynamicJsonBuffer jsonBuffer;
             JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
 
-            effects.setColor({json["r"], json["g"], json["b"]});
+            if (json.containsKey("r") && json.containsKey("g") && json.containsKey("b")) {
+                effects.setColor({json["r"], json["g"], json["b"]});
+            }
+
             effects.setEffect("Flash");
             break;
         }
@@ -249,11 +260,33 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             DynamicJsonBuffer jsonBuffer;
             JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
 
-            effects.setColor({json["r"], json["g"], json["b"]});
+            if (json.containsKey("r") && json.containsKey("g") && json.containsKey("b")) {
+                effects.setColor({json["r"], json["g"], json["b"]});
+            }
+
+            if (json.containsKey("reverse")) {
+                effects.setReverse(json["reverse"]);
+            }
+
+            if (json.containsKey("mirror")) {
+                effects.setMirror(json["mirror"]);
+            }
+
             effects.setEffect("Chase");
             break;
         }
         case '5': { // Rainbow
+            DynamicJsonBuffer jsonBuffer;
+            JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
+
+            if (json.containsKey("reverse")) {
+                effects.setReverse(json["reverse"]);
+            }
+
+            if (json.containsKey("mirror")) {
+                effects.setMirror(json["mirror"]);
+            }
+
             effects.setEffect("Rainbow");
             break;
         }
