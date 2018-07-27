@@ -173,6 +173,9 @@ void setup() {
         mqtt.onDisconnect(onMqttDisconnect);
         mqtt.onMessage(onMqttMessage);
         mqtt.setServer(config.mqtt_ip.c_str(), config.mqtt_port);
+        // Unset clean session (defaults to true) so we get retained messages of QoS > 0
+        // FIXME: Make this configurable
+        mqtt.setCleanSession(false);
         if (config.mqtt_user.length() > 0)
             mqtt.setCredentials(config.mqtt_user.c_str(), config.mqtt_password.c_str());
     }
