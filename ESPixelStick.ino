@@ -21,8 +21,6 @@
 /*        BEGIN - Configuration          */
 /*****************************************/
 
-/* Output Mode has been moved to ESPixelStick.h */
-
 /* Fallback configuration if config.json is empty or fails */
 const char ssid[] = "ENTER_SSID_HERE";
 const char passphrase[] = "ENTER_PASSPHRASE_HERE";
@@ -78,13 +76,6 @@ const char LIGHT_OFF[] = "OFF";
 // MQTT json buffer size
 const int JSON_BUFFER_SIZE = JSON_OBJECT_SIZE(10);
 
-// Effect defaults
-const char DEFAULT_EFFECT[] = "Solid";
-const CRGB DEFAULT_EFFECT_COLOR = { 127, 127, 127 };
-const uint8_t DEFAULT_EFFECT_BRIGHTNESS = 255;
-const bool DEFAULT_EFFECT_REVERSE = false;
-const bool DEFAULT_EFFECT_MIRROR = false;
-
 // Configuration file
 const char CONFIG_FILE[] = "/config.json";
 
@@ -102,6 +93,7 @@ WiFiEventHandler    wifiDisconnectHandler;  // WiFi disconnect handler
 Ticker              wifiTicker; // Ticker to handle WiFi
 AsyncMqttClient     mqtt;       // MQTT object
 Ticker              mqttTicker; // Ticker to handle MQTT
+EffectEngine        effects;    // Effects Engine
 
 // Output Drivers
 #if defined(ESPS_MODE_PIXEL)
@@ -111,8 +103,6 @@ SerialDriver    serial;         // Serial object
 #else
 #error "No valid output mode defined."
 #endif
-
-EffectEngine effects;
 
 /////////////////////////////////////////////////////////
 //
@@ -152,6 +142,9 @@ void setup() {
     // Enable SPIFFS
     SPIFFS.begin();
 
+    // Set default data source to E131
+    config.ds = DataSource::E131;
+
     LOG_PORT.println("");
     LOG_PORT.print(F("ESPixelStick v"));
     for (uint8_t i = 0; i < strlen_P(VERSION); i++)
@@ -176,9 +169,6 @@ void setup() {
         mqtt.onDisconnect(onMqttDisconnect);
         mqtt.onMessage(onMqttMessage);
         mqtt.setServer(config.mqtt_ip.c_str(), config.mqtt_port);
-        // Unset clean session (defaults to true) so we get retained messages of QoS > 0
-        // FIXME: Make this configurable
-        mqtt.setCleanSession(false);
         if (config.mqtt_user.length() > 0)
             mqtt.setCredentials(config.mqtt_user.c_str(), config.mqtt_password.c_str());
     }
@@ -351,6 +341,10 @@ void connectToMqtt() {
 void onMqttConnect(bool sessionPresent) {
     LOG_PORT.println(F("- MQTT Connected"));
 
+    // Get retained MQTT state
+    mqtt.subscribe(config.mqtt_topic.c_str(), 0);
+    mqtt.unsubscribe(config.mqtt_topic.c_str());
+
     // Setup subscriptions
     mqtt.subscribe(String(config.mqtt_topic + MQTT_SET_COMMAND_TOPIC).c_str(), 0);
 
@@ -372,7 +366,7 @@ void onMqttMessage(char* topic, char* payload,
     bool stateOn = false;
 
     if (!root.success()) {
-        Serial.println("MQTT: Parsing failed");
+        LOG_PORT.println("MQTT: Parsing failed");
         return;
     }
 
@@ -409,28 +403,12 @@ void onMqttMessage(char* topic, char* payload,
         effects.setMirror(root["mirror"]);
     }
 
-    // handle missing parameters
+    // Set data source based on state - Fall back to E131 when off
     if (stateOn) {
-      // only try to set defaults if state is ON
-      if (effects.getEffect() == nullptr) {
-        // no effect running, set default (Solid)
-        effects.setEffect(DEFAULT_EFFECT);
-      }
-      if (!root.containsKey("color")
-          && !root.containsKey("brightness")
-          && !root.containsKey("effect")
-          && !root.containsKey("reverse")
-          && !root.containsKey("mirror")) {
-        // If we are just an "ON" command then set the default color and effect
-        effects.setColor(DEFAULT_EFFECT_COLOR);
-        effects.setBrightness(DEFAULT_EFFECT_BRIGHTNESS);
-        effects.setEffect(DEFAULT_EFFECT);
-        effects.setReverse(DEFAULT_EFFECT_REVERSE);
-        effects.setMirror(DEFAULT_EFFECT_MIRROR);
-      }
+        config.ds = DataSource::MQTT;
     } else {
-      // state OFF, switch off effects engine and return to DMX mode
-      effects.setEffect("");
+        config.ds = DataSource::E131;
+        effects.clearAll();
     }
 
     publishState();
@@ -439,8 +417,7 @@ void onMqttMessage(char* topic, char* payload,
 void publishState() {
     StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
     JsonObject& root = jsonBuffer.createObject();
-
-    root["state"] = effects.getEffect() ? LIGHT_ON : LIGHT_OFF;
+    root["state"] = (config.ds == DataSource::MQTT) ? LIGHT_ON : LIGHT_OFF;
     JsonObject& color = root.createNestedObject("color");
     color["r"] = effects.getColor().r;
     color["g"] = effects.getColor().g;
@@ -701,7 +678,7 @@ void dsDeviceConfig(JsonObject &json) {
     config.mqtt_topic = json["mqtt"]["topic"].as<String>();
 
 #if defined(ESPS_MODE_PIXEL)
-    /* Pixel */
+    // Pixel
     config.pixel_type = PixelType(static_cast<uint8_t>(json["pixel"]["type"]));
     config.pixel_color = PixelColor(static_cast<uint8_t>(json["pixel"]["color"]));
     config.gamma = json["pixel"]["gamma"];
@@ -709,7 +686,7 @@ void dsDeviceConfig(JsonObject &json) {
     config.briteVal = json["pixel"]["briteVal"];
 
 #elif defined(ESPS_MODE_SERIAL)
-    /* Serial */
+    // Serial
     config.serial_type = SerialType(static_cast<uint8_t>(json["serial"]["type"]));
     config.baudrate = BaudRate(static_cast<uint32_t>(json["serial"]["baudrate"]));
 #endif
@@ -856,68 +833,74 @@ void loop() {
         ESP.restart();
     }
 
-    // Local effects override any e131 packets so only read if we
-    // have no active effects
-    if (effects.getEffect() == nullptr) {
-        // Parse a packet and update pixels
-        if (!e131.isEmpty()) {
-            e131.pull(&packet);
-            uint16_t universe = htons(packet.universe);
-            uint8_t *data = packet.property_values + 1;
-            //LOG_PORT.print(universe);
-            //LOG_PORT.println(packet.sequence_number);
-            if ((universe >= config.universe) && (universe <= uniLast)) {
-                // Universe offset and sequence tracking
-                uint8_t uniOffset = (universe - config.universe);
-                if (packet.sequence_number != seqTracker[uniOffset]++) {
-                    LOG_PORT.print(F("Sequence Error - expected: "));
-                    LOG_PORT.print(seqTracker[uniOffset] - 1);
-                    LOG_PORT.print(F(" actual: "));
-                    LOG_PORT.print(packet.sequence_number);
-                    LOG_PORT.print(F(" universe: "));
-                    LOG_PORT.println(universe);
-                    seqError[uniOffset]++;
-                    seqTracker[uniOffset] = packet.sequence_number + 1;
-                }
+    // Render output for current data source
+    switch (config.ds) {
+        case DataSource::E131:
+            // Parse a packet and update pixels
+            if (!e131.isEmpty()) {
+                e131.pull(&packet);
+                uint16_t universe = htons(packet.universe);
+                uint8_t *data = packet.property_values + 1;
+                //LOG_PORT.print(universe);
+                //LOG_PORT.println(packet.sequence_number);
+                if ((universe >= config.universe) && (universe <= uniLast)) {
+                    // Universe offset and sequence tracking
+                    uint8_t uniOffset = (universe - config.universe);
+                    if (packet.sequence_number != seqTracker[uniOffset]++) {
+                        LOG_PORT.print(F("Sequence Error - expected: "));
+                        LOG_PORT.print(seqTracker[uniOffset] - 1);
+                        LOG_PORT.print(F(" actual: "));
+                        LOG_PORT.print(packet.sequence_number);
+                        LOG_PORT.print(F(" universe: "));
+                        LOG_PORT.println(universe);
+                        seqError[uniOffset]++;
+                        seqTracker[uniOffset] = packet.sequence_number + 1;
+                    }
 
-                // Offset the channels if required
-                uint16_t offset = 0;
-                offset = config.channel_start - 1;
+                    // Offset the channels if required
+                    uint16_t offset = 0;
+                    offset = config.channel_start - 1;
 
-                // Find start of data based off the Universe
-                int16_t dataStart = uniOffset * config.universe_limit - offset;
+                    // Find start of data based off the Universe
+                    int16_t dataStart = uniOffset * config.universe_limit - offset;
 
-                // Calculate how much data we need for this buffer
-                uint16_t dataStop = config.channel_count;
-                uint16_t channels = htons(packet.property_value_count) - 1;
-                if (config.universe_limit < channels)
-                    channels = config.universe_limit;
-                if ((dataStart + channels) < dataStop)
-                    dataStop = dataStart + channels;
+                    // Calculate how much data we need for this buffer
+                    uint16_t dataStop = config.channel_count;
+                    uint16_t channels = htons(packet.property_value_count) - 1;
+                    if (config.universe_limit < channels)
+                        channels = config.universe_limit;
+                    if ((dataStart + channels) < dataStop)
+                        dataStop = dataStart + channels;
 
-                // Set the data
-                uint16_t buffloc = 0;
+                    // Set the data
+                    uint16_t buffloc = 0;
 
-                // ignore data from start of first Universe before channel_start
-                if (dataStart < 0) {
-                    dataStart = 0;
-                    buffloc = config.channel_start - 1;
-                }
+                    // ignore data from start of first Universe before channel_start
+                    if (dataStart < 0) {
+                        dataStart = 0;
+                        buffloc = config.channel_start - 1;
+                    }
 
-                for (int i = dataStart; i < dataStop; i++) {
-#if defined(ESPS_MODE_PIXEL)
-                    pixels.setValue(i, data[buffloc]);
-#elif defined(ESPS_MODE_SERIAL)
-                    serial.setValue(i, data[buffloc]);
-#endif
-                    buffloc++;
+                    for (int i = dataStart; i < dataStop; i++) {
+    #if defined(ESPS_MODE_PIXEL)
+                        pixels.setValue(i, data[buffloc]);
+    #elif defined(ESPS_MODE_SERIAL)
+                        serial.setValue(i, data[buffloc]);
+    #endif
+                        buffloc++;
+                    }
                 }
             }
-        }
-    }
+            break;
 
-    // Run the effect engine loop
-    effects.run();
+        case DataSource::MQTT:
+            effects.run();
+            break;
+
+        case DataSource::WEB:
+            effects.run();
+            break;
+    }
 
 /* Streaming refresh */
 #if defined(ESPS_MODE_PIXEL)
