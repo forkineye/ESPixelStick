@@ -12,6 +12,22 @@ static const EffectDesc EFFECT_LIST[] = {
     { "Chase",          &EffectEngine::effectChase }
 };
 
+// Effect defaults
+const char DEFAULT_EFFECT[] = "Solid";
+const CRGB DEFAULT_EFFECT_COLOR = { 255, 255, 255 };
+const uint8_t DEFAULT_EFFECT_BRIGHTNESS = 127;
+const bool DEFAULT_EFFECT_REVERSE = false;
+const bool DEFAULT_EFFECT_MIRROR = false;
+
+EffectEngine::EffectEngine() {
+    // Initialize with defaults
+    setEffect(DEFAULT_EFFECT);
+    setColor(DEFAULT_EFFECT_COLOR);
+    setBrightness(DEFAULT_EFFECT_BRIGHTNESS);
+    setReverse(DEFAULT_EFFECT_REVERSE);
+    setMirror(DEFAULT_EFFECT_MIRROR);
+}
+
 void EffectEngine::begin(DRIVER* ledDriver, uint16_t ledCount) {
     _ledDriver = ledDriver;
     _ledCount = ledCount;

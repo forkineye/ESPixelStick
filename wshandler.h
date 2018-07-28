@@ -218,9 +218,12 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
 }
 
 void procT(uint8_t *data, AsyncWebSocketClient *client) {
+    config.ds = DataSource::WEB;
     switch (data[1]) {
         case '0': { // Clear whole string
-            effects.setEffect("");
+            //TODO: Store previous data source when effect is selected so we can switch back to it
+            config.ds = DataSource::E131;
+            effects.clearAll();
             break;
         }
         case '1': {  // Static color

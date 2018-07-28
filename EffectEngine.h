@@ -48,6 +48,7 @@ private:
     uint16_t _ledCount              = 0;            /* Number of RGB leds (not channels) */
 
 public:
+    EffectEngine();
 
     void begin(DRIVER* ledDriver, uint16_t ledCount);
     void run();
@@ -72,12 +73,12 @@ public:
     uint16_t effectChase();
     uint16_t effectBlink();
     uint16_t effectFlash();
+    void clearAll();
 
 private:
 
     void setPixel(uint16_t idx,  CRGB color);
     void setAll(CRGB color);
-    void clearAll();
 
     CRGB colorWheel(uint8_t pos);
 };
