@@ -9,7 +9,9 @@ static const EffectDesc EFFECT_LIST[] = {
     { "Blink",          &EffectEngine::effectBlink },
     { "Flash",          &EffectEngine::effectFlash },
     { "Rainbow",        &EffectEngine::effectRainbowCycle },
-    { "Chase",          &EffectEngine::effectChase }
+    { "Chase",          &EffectEngine::effectChase },
+    { "Fire flicker",   &EffectEngine::effectFireFlicker },
+    { "Lightning",      &EffectEngine::effectLightning }
 };
 
 // Effect defaults
@@ -69,14 +71,24 @@ void EffectEngine::setPixel(uint16_t idx,  CRGB color) {
     _ledDriver->setValue(3 * idx + 2, (color.b * _effectBrightness) >> 8);
 }
 
-void EffectEngine::setAll(CRGB color) {
-    for (uint16_t i=0; i < _ledCount; i++) {
+void EffectEngine::setRange(uint16_t first, uint16_t len, CRGB color) {
+    for (uint16_t i=first; i < min(uint16_t(first+len), _ledCount); i++) {
         setPixel(i, color);
     }
 }
 
+void EffectEngine::clearRange(uint16_t first, uint16_t len) {
+    for (uint16_t i=first; i < min(uint16_t(first+len), _ledCount); i++) {
+        setPixel(i, {0, 0, 0});
+    }
+}
+
+void EffectEngine::setAll(CRGB color) {
+    setRange(0, _ledCount, color);
+}
+
 void EffectEngine::clearAll() {
-    setAll({0, 0, 0});
+    clearRange(0, _ledCount);
 }
 
 CRGB EffectEngine::colorWheel(uint8_t pos) {
@@ -188,5 +200,56 @@ uint16_t EffectEngine::effectFlash() {
 
     _effectStep = ++_effectStep % 6;
     return _effectSpeed / 3;
+}
+
+uint16_t EffectEngine::effectFireFlicker() {
+  byte rev_intensity = 6; // more=less intensive, less=more intensive
+  byte lum = max(_effectColor.r, max(_effectColor.g, _effectColor.b)) / rev_intensity;
+  for ( int i = 0; i < _ledCount; i++) {
+    byte flicker = random(lum);
+    setPixel(i, CRGB { max(_effectColor.r - flicker, 0), max(_effectColor.g - flicker, 0), max(_effectColor.b - flicker, 0) });
+  }
+  _effectStep = ++_effectStep % _ledCount;
+  return _effectSpeed / 10;
+}
+
+uint16_t EffectEngine::effectLightning() {
+  static byte maxFlashes;
+  static int timeslot = _effectSpeed / 1000; // 1ms
+  int flashPause = 10; // 10ms
+  uint16_t ledStart = random(_ledCount);
+  uint16_t ledLen = random(1, _ledCount - ledStart);
+  byte intensity; // flash intensity
+
+  if (_effectStep % 2) {
+    // odd steps = clear
+    clearAll();
+    if (_effectStep == 1) {
+      // pause after 1st flash is longer
+      flashPause = 130;
+    } else {
+      flashPause = random(50, 151); // pause between flashes 50-150ms
+    }
+  } else {
+    // even steps = flashes
+    if (_effectStep == 0) {
+      // first flash (weaker and longer pause)
+      maxFlashes = random(3, 8); // 2-6 follow-up flashes
+      intensity = random(128);
+    } else {
+      // follow-up flashes (stronger)
+      intensity = random(128, 256); // next flashes are stronger
+    }
+    setRange(ledStart, ledLen, {intensity, intensity, intensity});
+    flashPause = random(4, 21); // flash duration 4-20ms
+  }
+
+  _effectStep++;
+  
+  if (_effectStep >= maxFlashes * 2) {
+    _effectStep = 0;
+    flashPause = random(100, 5001); // between 0.1 and 5s
+  }
+  return timeslot * flashPause;
 }
 

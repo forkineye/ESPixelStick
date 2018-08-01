@@ -50,7 +50,9 @@ extern bool         reboot;     // Reboot flag
     T3 - Flash Test
     T4 - Chase Test
     T5 - Rainbow Test
-    T6 - View Stream
+    T6 - Fire flicker
+    T7 - Lightning
+    T8 - View Stream
 
     S1 - Set Network Config
     S2 - Set Device Config
@@ -293,8 +295,30 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             effects.setEffect("Rainbow");
             break;
         }
+        case '6': { // Fire flicker
+            DynamicJsonBuffer jsonBuffer;
+            JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
 
-        case '6': {  // View stream
+            if (json.containsKey("r") && json.containsKey("g") && json.containsKey("b")) {
+                effects.setColor({json["r"], json["g"], json["b"]});
+            }
+
+            effects.setEffect("Fire flicker");
+            break;
+        }
+        case '7': { // Lightning
+            DynamicJsonBuffer jsonBuffer;
+            JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
+
+            if (json.containsKey("r") && json.containsKey("g") && json.containsKey("b")) {
+                effects.setColor({json["r"], json["g"], json["b"]});
+            }
+
+            effects.setEffect("Lightning");
+            break;
+        }
+
+        case '8': {  // View stream
 #if defined(ESPS_MODE_PIXEL)
             client->binary(pixels.getData(), config.channel_count);
 #elif defined(ESPS_MODE_SERIAL)
@@ -381,4 +405,3 @@ void wsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
 }
 
 #endif /* ESPIXELSTICK_H_ */
-
