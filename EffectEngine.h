@@ -73,15 +73,18 @@ public:
     uint16_t effectChase();
     uint16_t effectBlink();
     uint16_t effectFlash();
+    uint16_t effectFireFlicker();
+    uint16_t effectLightning();
     void clearAll();
 
 private:
 
     void setPixel(uint16_t idx,  CRGB color);
+    void setRange(uint16_t first, uint16_t len, CRGB color);
+    void clearRange(uint16_t first, uint16_t len);
     void setAll(CRGB color);
 
     CRGB colorWheel(uint8_t pos);
 };
 
 #endif
-

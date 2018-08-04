@@ -6,11 +6,13 @@ var wsTimerId;
 
 var testing_modes = {
     "" : "t_disabled",
-    "Solid" : "t_static",
-    "Blink" : "t_blink",
-    "Flash" : "t_flash",
-    "Chase" : "t_chase",
-    "Rainbow" : "t_rainbow",
+    "Solid"         : "t_static",
+    "Blink"         : "t_blink",
+    "Flash"         : "t_flash",
+    "Chase"         : "t_chase",
+    "Rainbow"       : "t_rainbow",
+    "Fire flicker"  : "t_fireflicker",
+    "Lightning"     : "t_lightning",
     "View" : "t_view"
 };
 
@@ -104,6 +106,12 @@ $(function() {
                 }
                 else if(!tmode.localeCompare('t_chase')) {
                     wsEnqueue('T4' + JSON.stringify(json));
+                }
+                else if(!tmode.localeCompare('t_fireflicker')) {
+                    wsEnqueue('T6' + JSON.stringify(json));
+                }
+                else if(!tmode.localeCompare('t_lightning')) {
+                    wsEnqueue('T7' + JSON.stringify(json));
                 }
             }
         });
@@ -346,7 +354,7 @@ function wsConnect() {
             } else {
                 streamData= new Uint8Array(event.data);
                 drawStream(streamData);
-                if (!$('#tmode option:selected').val().localeCompare('t_view')) wsEnqueue('T6');
+                if (!$('#tmode option:selected').val().localeCompare('t_view')) wsEnqueue('T8');
             }
             wsReadyToSend();
         };
@@ -389,7 +397,7 @@ function wsProcessQueue() {
         //get next message from queue.
         message=wsQueue.shift();
         //set timeout to clear flag and try next message if response isn't recieved. Short timeout for message types that don't generate a response.
-        if(['T0','T1','T2','T3','T4','T5','X6'].indexOf(message.substr(0,2))) {
+        if(['T0','T1','T2','T3','T4','T5','T6','T7','X6'].indexOf(message.substr(0,2))) {
             timeout=40;
         } else {
             timeout=2000;
@@ -779,7 +787,7 @@ function test() {
         wsEnqueue('T0');
     }
     else if (!tmode.localeCompare('t_view')) {
-        wsEnqueue('T6');
+        wsEnqueue('T8');
     }
 }
 
