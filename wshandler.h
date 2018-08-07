@@ -52,7 +52,8 @@ extern bool         reboot;     // Reboot flag
     T5 - Rainbow Test
     T6 - Fire flicker
     T7 - Lightning
-    T8 - View Stream
+    T8 - Breathe
+    T9 - View Stream
 
     S1 - Set Network Config
     S2 - Set Device Config
@@ -317,8 +318,19 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             effects.setEffect("Lightning");
             break;
         }
+        case '8': { // Breathe
+            DynamicJsonBuffer jsonBuffer;
+            JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
 
-        case '8': {  // View stream
+            if (json.containsKey("r") && json.containsKey("g") && json.containsKey("b")) {
+                effects.setColor({json["r"], json["g"], json["b"]});
+            }
+
+            effects.setEffect("Breathe");
+            break;
+        }
+
+        case '9': {  // View stream
 #if defined(ESPS_MODE_PIXEL)
             client->binary(pixels.getData(), config.channel_count);
 #elif defined(ESPS_MODE_SERIAL)

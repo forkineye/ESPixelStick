@@ -75,6 +75,7 @@ public:
     uint16_t effectFlash();
     uint16_t effectFireFlicker();
     uint16_t effectLightning();
+    uint16_t effectBreathe();
     void clearAll();
 
 private:
