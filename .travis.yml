@@ -32,7 +32,7 @@ before_install:
 - git clone https://github.com/marvinroger/async-mqtt-client $LIB_HOME/async-mqtt-client
 install:
 - cp -r $TRAVIS_BUILD_DIR $ESPS_HOME
-- arduino --board esp8266com:esp8266:generic:FlashFreq=40,FlashMode=dio,CpuFrequency=160,FlashSize=1M128
+- arduino --board esp8266com:esp8266:generic:FlashFreq=40,FlashMode=dio,xtal=160,eesz=1M128
   --pref build.path=$BUILD --save-prefs
 before_script:
 - cd $ESPS_HOME
