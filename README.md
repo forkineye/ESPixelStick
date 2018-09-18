@@ -70,6 +70,7 @@ light:
       - Chase
       - Fire flicker
       - Lightning
+      - Breathe
 ```
 
 Resources
