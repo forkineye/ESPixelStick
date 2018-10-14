@@ -902,5 +902,10 @@ void loop() {
     if (serial.canRefresh())
         serial.show();
 #endif
+
+// workaround crash - consume incoming bytes on serial port
+    if (LOG_PORT.available()) {
+        while (LOG_PORT.read() >= 0);
+    }
 }
 
