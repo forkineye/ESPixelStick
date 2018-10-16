@@ -339,17 +339,8 @@ function wsConnect() {
                 case 'XS':
                     getSystemStatus(data);
                     break;
-                case 'X1':
-                    getRSSI(data);
-                    break;
                 case 'X2':
                     getE131Status(data);
-                    break;
-                case 'Xh':
-                    getHeap(data);
-                    break;
-                case 'XU':
-                    getUptime(data);
                     break;
                 case 'X6':
                     showReboot();
@@ -640,36 +631,6 @@ function getSystemStatus(data) {
 
 // function getUptime
     var date = new Date(+status[2]);
-    var str = '';
-
-    str += Math.floor(date.getTime()/86400000) + " days, ";
-    str += ("0" + date.getUTCHours()).slice(-2) + ":";
-    str += ("0" + date.getUTCMinutes()).slice(-2) + ":";
-    str += ("0" + date.getUTCSeconds()).slice(-2);
-    $('#x_uptime').text(str);
-}
-
-function getRSSI(data) {
-    var rssi = +data;
-    var quality = 2 * (rssi + 100);
-
-    if (rssi <= -100)
-        quality = 0;
-    else if (rssi >= -50)
-        quality = 100;
-
-    $('#x_rssi').text(rssi);
-    $('#x_quality').text(quality);
-}
-
-function getHeap(data) {
-    var heap = +data;
-
-    $('#x_freeheap').text(heap);
-}
-
-function getUptime(data) {
-    var date = new Date(+data);
     var str = '';
 
     str += Math.floor(date.getTime()/86400000) + " days, ";
