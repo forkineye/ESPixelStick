@@ -18,7 +18,7 @@ static const EffectDesc EFFECT_LIST[] = {
 // Effect defaults
 const char DEFAULT_EFFECT[] = "Solid";
 const CRGB DEFAULT_EFFECT_COLOR = { 255, 255, 255 };
-const uint8_t DEFAULT_EFFECT_BRIGHTNESS = 127;
+const uint8_t DEFAULT_EFFECT_BRIGHTNESS = 255;
 const bool DEFAULT_EFFECT_REVERSE = false;
 const bool DEFAULT_EFFECT_MIRROR = false;
 
@@ -154,7 +154,13 @@ uint16_t EffectEngine::effectRainbowCycle() {
         lc = lc / 2;
     }
     for (uint16_t i=0; i < lc; i++) {
-        CRGB color = colorWheel(((i * 256 / lc) + _effectStep) & 0xFF);
+//      double hue = _effectStep*360.0d / 256;	// all same colour
+
+        double hue = 360.0 * (((i * 256 / lc) + _effectStep) & 0xFF) / 255;
+	double sat = 1.0;
+	double val = 1.0;
+
+        CRGB color = hsv2rgb ( { hue, sat, val } );
         uint16_t pixel = i;
         if (_effectReverse) {
             pixel = lc - 1 - pixel;
@@ -280,3 +286,114 @@ uint16_t EffectEngine::effectBreathe() {
   setAll({_effectColor.r*val, _effectColor.g*val, _effectColor.b*val});
   return _effectSpeed / 40; // update every 25ms
 }
+
+
+// dCHSV hue 0->360 sat 0->1.0 val 0->1.0
+dCHSV EffectEngine::rgb2hsv(CRGB in_int)
+{
+    dCHSV       out;
+    dCRGB	in = {in_int.r, in_int.g, in_int.b};
+    double      min, max, delta;
+
+    min = in.r < in.g ? in.r : in.g;
+    min = min  < in.b ? min  : in.b;
+
+    max = in.r > in.g ? in.r : in.g;
+    max = max  > in.b ? max  : in.b;
+
+    out.v = max;                                // v
+    delta = max - min;
+    if (delta < 0.00001)
+    {
+        out.s = 0;
+        out.h = 0; // undefined, maybe nan?
+        return out;
+    }
+    if( max > 0.0 ) { // NOTE: if Max is == 0, this divide would cause a crash
+        out.s = (delta / max);                  // s
+    } else {
+        // if max is 0, then r = g = b = 0
+        // s = 0, v is undefined
+        out.s = 0.0;
+        out.h = NAN;                            // its now undefined
+        return out;
+    }
+    if( in.r >= max )                           // > is bogus, just keeps compilor happy
+        out.h = ( in.g - in.b ) / delta;        // between yellow & magenta
+    else
+    if( in.g >= max )
+        out.h = 2.0 + ( in.b - in.r ) / delta;  // between cyan & yellow
+    else
+        out.h = 4.0 + ( in.r - in.g ) / delta;  // between magenta & cyan
+
+    out.h *= 60.0;                              // degrees
+
+    if( out.h < 0.0 )
+        out.h += 360.0;
+
+    return out;
+}
+
+
+// dCHSV hue 0->360 sat 0->1.0 val 0->1.0
+CRGB EffectEngine::hsv2rgb(dCHSV in)
+{
+    double      hh, p, q, t, ff;
+    long        i;
+    dCRGB       out;
+    CRGB out_int = {};
+
+    if(in.s <= 0.0) {       // < is bogus, just shuts up warnings
+        out.r = in.v;
+        out.g = in.v;
+        out.b = in.v;
+        out_int = {255*out.r, 255*out.g, 255*out.b};
+        return out_int;
+    }
+    hh = in.h;
+    if(hh >= 360.0) hh = 0.0;
+    hh /= 60.0;
+    i = (long)hh;
+    ff = hh - i;
+    p = in.v * (1.0 - in.s);
+    q = in.v * (1.0 - (in.s * ff));
+    t = in.v * (1.0 - (in.s * (1.0 - ff)));
+
+    switch(i) {
+    case 0:
+        out.r = in.v;
+        out.g = t;
+        out.b = p;
+        break;
+    case 1:
+        out.r = q;
+        out.g = in.v;
+        out.b = p;
+        break;
+    case 2:
+        out.r = p;
+        out.g = in.v;
+        out.b = t;
+        break;
+
+    case 3:
+        out.r = p;
+        out.g = q;
+        out.b = in.v;
+        break;
+    case 4:
+        out.r = t;
+        out.g = p;
+        out.b = in.v;
+        break;
+    case 5:
+    default:
+        out.r = in.v;
+        out.g = p;
+        out.b = q;
+        break;
+    }
+    out_int = {255*out.r, 255*out.g, 255*out.b};
+    return out_int;
+}
+

@@ -12,10 +12,25 @@
 #endif
 
 class EffectEngine;
+// CRGB red, green, blue 0->255
 struct CRGB {
     uint8_t r;
     uint8_t g;
     uint8_t b;
+};
+
+// dCRGB red, green, blue 0->1.0
+struct dCRGB {
+    double r;
+    double g;
+    double b;
+};
+
+// dCHSV hue 0->360 sat 0->1.0 val 0->1.0
+struct dCHSV {
+    double h;
+    double s;
+    double v;
 };
 
 /*
@@ -39,7 +54,7 @@ private:
     bool _effectReverse             = false;        /* Externally controlled effect reverse option */
     bool _effectMirror              = false;        /* Externally controlled effect mirroring (start at center) */
     uint8_t _effectBrightness       = 255;          /* Externally controlled effect brightness [0, 255] */
-    CRGB _effectColor               = { };          /* Externally controlled effect color */
+    CRGB _effectColor               = {0,0,0};          /* Externally controlled effect color */
 
     uint32_t _effectStep            = 0;            /* Shared mutable effect step counter */
 
@@ -86,6 +101,8 @@ private:
     void setAll(CRGB color);
 
     CRGB colorWheel(uint8_t pos);
+    dCHSV rgb2hsv(CRGB in);
+    CRGB hsv2rgb(dCHSV in);
 };
 
 #endif
