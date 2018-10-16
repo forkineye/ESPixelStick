@@ -247,7 +247,8 @@ uint16_t EffectEngine::effectLightning() {
       // follow-up flashes (stronger)
       intensity = random(128, 256); // next flashes are stronger
     }
-    setRange(ledStart, ledLen, {intensity, intensity, intensity});
+    CRGB temprgb = { _effectColor.r*intensity/256, _effectColor.g*intensity/256, _effectColor.b*intensity/256 };
+    setRange(ledStart, ledLen, temprgb );
     flashPause = random(4, 21); // flash duration 4-20ms
   }
 
