@@ -21,6 +21,7 @@ const CRGB DEFAULT_EFFECT_COLOR = { 255, 255, 255 };
 const uint8_t DEFAULT_EFFECT_BRIGHTNESS = 255;
 const bool DEFAULT_EFFECT_REVERSE = false;
 const bool DEFAULT_EFFECT_MIRROR = false;
+const bool DEFAULT_EFFECT_ALLLEDS = false;
 
 EffectEngine::EffectEngine() {
     // Initialize with defaults
@@ -29,6 +30,7 @@ EffectEngine::EffectEngine() {
     setBrightness(DEFAULT_EFFECT_BRIGHTNESS);
     setReverse(DEFAULT_EFFECT_REVERSE);
     setMirror(DEFAULT_EFFECT_MIRROR);
+    setAllLeds(DEFAULT_EFFECT_ALLLEDS);
 }
 
 void EffectEngine::begin(DRIVER* ledDriver, uint16_t ledCount) {
@@ -154,13 +156,18 @@ uint16_t EffectEngine::effectRainbowCycle() {
         lc = lc / 2;
     }
     for (uint16_t i=0; i < lc; i++) {
-//      double hue = _effectStep*360.0d / 256;	// all same colour
+//      CRGB color = colorWheel(((i * 256 / lc) + _effectStep) & 0xFF);
 
-        double hue = 360.0 * (((i * 256 / lc) + _effectStep) & 0xFF) / 255;
-	double sat = 1.0;
-	double val = 1.0;
-
+        double hue = 0;
+        if (_effectAllLeds) {
+            hue = _effectStep*360.0d / 256;	// all same colour
+        } else {
+            hue = 360.0 * (((i * 256 / lc) + _effectStep) & 0xFF) / 255;
+        }
+        double sat = 1.0;
+        double val = 1.0;
         CRGB color = hsv2rgb ( { hue, sat, val } );
+
         uint16_t pixel = i;
         if (_effectReverse) {
             pixel = lc - 1 - pixel;
@@ -293,7 +300,7 @@ uint16_t EffectEngine::effectBreathe() {
 dCHSV EffectEngine::rgb2hsv(CRGB in_int)
 {
     dCHSV       out;
-    dCRGB	in = {in_int.r, in_int.g, in_int.b};
+    dCRGB       in = {in_int.r, in_int.g, in_int.b};
     double      min, max, delta;
 
     min = in.r < in.g ? in.r : in.g;
