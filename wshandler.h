@@ -293,6 +293,10 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
                 effects.setMirror(json["mirror"]);
             }
 
+            if (json.containsKey("allleds")) {
+                effects.setAllLeds(json["allleds"]);
+            }
+
             effects.setEffect("Rainbow");
             break;
         }

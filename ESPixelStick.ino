@@ -395,6 +395,10 @@ void onMqttMessage(char* topic, char* payload,
         effects.setMirror(root["mirror"]);
     }
 
+    if (root.containsKey("allleds")) {
+        effects.setAllLeds(root["allleds"]);
+    }
+
     // Set data source based on state - Fall back to E131 when off
     if (stateOn) {
         config.ds = DataSource::MQTT;
@@ -420,6 +424,7 @@ void publishState() {
     }
     root["reverse"] = effects.getReverse();
     root["mirror"] = effects.getMirror();
+    root["allleds"] = effects.getAllLeds();
 
     char buffer[root.measureLength() + 1];
     root.printTo(buffer, sizeof(buffer));

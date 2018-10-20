@@ -12,10 +12,25 @@
 #endif
 
 class EffectEngine;
+// CRGB red, green, blue 0->255
 struct CRGB {
     uint8_t r;
     uint8_t g;
     uint8_t b;
+};
+
+// dCRGB red, green, blue 0->1.0
+struct dCRGB {
+    double r;
+    double g;
+    double b;
+};
+
+// dCHSV hue 0->360 sat 0->1.0 val 0->1.0
+struct dCHSV {
+    double h;
+    double s;
+    double v;
 };
 
 /*
@@ -38,8 +53,9 @@ private:
     uint16_t _effectSpeed           = 1024;         /* Externally controlled effect speed [MIN_EFFECT_DELAY, MAX_EFFECT_DELAY]*/
     bool _effectReverse             = false;        /* Externally controlled effect reverse option */
     bool _effectMirror              = false;        /* Externally controlled effect mirroring (start at center) */
+    bool _effectAllLeds             = false;        /* Externally controlled effect mirroring (start at center) */
     uint8_t _effectBrightness       = 255;          /* Externally controlled effect brightness [0, 255] */
-    CRGB _effectColor               = { };          /* Externally controlled effect color */
+    CRGB _effectColor               = {0,0,0};          /* Externally controlled effect color */
 
     uint32_t _effectStep            = 0;            /* Shared mutable effect step counter */
 
@@ -56,6 +72,7 @@ public:
     const char* getEffect()                 { return _activeEffect ? _activeEffect->name : nullptr; }
     bool getReverse()                       { return _effectReverse; }
     bool getMirror()                        { return _effectMirror; }
+    bool getAllLeds()                       { return _effectAllLeds; }
     uint32_t getBrightness()                { return _effectBrightness; }
     uint16_t getSpeed()                     { return _effectSpeed; }
     CRGB getColor()                         { return _effectColor; }
@@ -63,6 +80,7 @@ public:
     void setEffect(const char* effectName);
     void setReverse(bool reverse)           { _effectReverse = reverse; }
     void setMirror(bool mirror)             { _effectMirror = mirror; }
+    void setAllLeds(bool allleds)            { _effectAllLeds = allleds; }
     void setBrightness(uint8_t brightness)  { _effectBrightness = brightness; }
     void setSpeed(uint16_t speed)           { _effectSpeed = speed; }
     void setColor(CRGB color)               { _effectColor = color; }
@@ -86,6 +104,8 @@ private:
     void setAll(CRGB color);
 
     CRGB colorWheel(uint8_t pos);
+    dCHSV rgb2hsv(CRGB in);
+    CRGB hsv2rgb(dCHSV in);
 };
 
 #endif

@@ -120,36 +120,50 @@ $(function() {
             }
         });
 
-        // Reverse checkbox
-        $('.reverse').click(function() {
-          // On click(), the new checkbox state has already been set
-          var json = { 'reverse': $(this).prop('checked') };
-          var tmode = $('#tmode option:selected').val();
-
-          if(!tmode.localeCompare('t_chase')) {
-              wsEnqueue('T4' + JSON.stringify(json));
-          }
-          else if(!tmode.localeCompare('t_rainbow')) {
-              wsEnqueue('T5' + JSON.stringify(json));
-          }
-        });
-
-        // Mirror checkbox
-        $('.mirror').click(function() {
-          // On click(), the new checkbox state has already been set
-          var json = { 'mirror': $(this).prop('checked') };
-          var tmode = $('#tmode option:selected').val();
-
-          if(!tmode.localeCompare('t_chase')) {
-              wsEnqueue('T4' + JSON.stringify(json));
-          }
-          else if(!tmode.localeCompare('t_rainbow')) {
-              wsEnqueue('T5' + JSON.stringify(json));
-          }
-        });
-
         // Set page event feeds
         feed();
+    });
+
+    // Reverse checkbox
+    $('.reverse').click(function() {
+      // On click(), the new checkbox state has already been set
+      var json = { 'reverse': $(this).prop('checked') };
+      var tmode = $('#tmode option:selected').val();
+
+      if(!tmode.localeCompare('t_chase')) {
+          wsEnqueue('T4' + JSON.stringify(json));
+      }
+      else if(!tmode.localeCompare('t_rainbow')) {
+          wsEnqueue('T5' + JSON.stringify(json));
+      }
+    });
+
+    // Mirror checkbox
+    $('.mirror').click(function() {
+      // On click(), the new checkbox state has already been set
+      var json = { 'mirror': $(this).prop('checked') };
+      var tmode = $('#tmode option:selected').val();
+
+      if(!tmode.localeCompare('t_chase')) {
+          wsEnqueue('T4' + JSON.stringify(json));
+      }
+      else if(!tmode.localeCompare('t_rainbow')) {
+          wsEnqueue('T5' + JSON.stringify(json));
+      }
+    });
+
+    // AllLeds checkbox
+    $('.allleds').click(function() {
+      // On click(), the new checkbox state has already been set
+      var json = { 'allleds': $(this).prop('checked') };
+      var tmode = $('#tmode option:selected').val();
+
+      if(!tmode.localeCompare('t_chase')) {
+          wsEnqueue('T4' + JSON.stringify(json));
+      }
+      else if(!tmode.localeCompare('t_rainbow')) {
+          wsEnqueue('T5' + JSON.stringify(json));
+      }
     });
 
     // Test mode toggles
@@ -592,6 +606,7 @@ function updateTestingGUI(data) {
     $('.color').val('rgb(' + data.r + ',' + data.g + ',' + data.b + ')');
     $('.reverse').prop('checked', data.reverse);
     $('.mirror').prop('checked', data.mirror);
+    $('.allleds').prop('checked', data.allleds);
 }
 
 function getSystemStatus(data) {
