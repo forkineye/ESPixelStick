@@ -99,6 +99,15 @@ typedef struct {
     bool        dhcp;           /* Use DHCP? */
     bool        ap_fallback;    /* Fallback to AP if fail to associate? */
 
+    /* Effects */
+    String startup_effect_name;
+    CRGB startup_effect_color;
+    uint8_t startup_effect_brightness;
+    bool startup_effect_reverse;
+    bool startup_effect_mirror;
+    bool startup_effect_allleds;
+    bool startup_effect_enabled;
+
     /* MQTT */
     bool        mqtt;           /* Use MQTT? */
     String      mqtt_ip;
@@ -132,6 +141,7 @@ typedef struct {
 void serializeConfig(String &jsonString, bool pretty = false, bool creds = false);
 void dsNetworkConfig(JsonObject &json);
 void dsDeviceConfig(JsonObject &json);
+void dsEffectConfig(JsonObject &json);
 void saveConfig();
 
 void connectWifi();

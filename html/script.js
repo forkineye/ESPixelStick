@@ -4,18 +4,8 @@ var wsQueue = [];
 var wsBusy = false;
 var wsTimerId;
 
-var testing_modes = {
-    "" : "t_disabled",
-    "Solid"         : "t_static",
-    "Blink"         : "t_blink",
-    "Flash"         : "t_flash",
-    "Chase"         : "t_chase",
-    "Rainbow"       : "t_rainbow",
-    "Fire flicker"  : "t_fireflicker",
-    "Lightning"     : "t_lightning",
-    "Breathe"       : "t_breathe",
-    "View" : "t_view"
-};
+// json with effect definitions
+var effectInfo;
 
 // Default modal properties
 $.fn.modal.Constructor.DEFAULTS.backdrop = 'static';
@@ -95,27 +85,10 @@ $(function() {
                 }).text(this.color.toString($elm._colorMode)); // $elm.val();
 
                 var tmode = $('#tmode option:selected').val();
-
-                if (!tmode.localeCompare('t_static')) {
-                    wsEnqueue('T1' + JSON.stringify(json));
-                }
-                else if(!tmode.localeCompare('t_blink')) {
-                    wsEnqueue('T2' + JSON.stringify(json));
-                }
-                else if(!tmode.localeCompare('t_flash')) {
-                    wsEnqueue('T3' + JSON.stringify(json));
-                }
-                else if(!tmode.localeCompare('t_chase')) {
-                    wsEnqueue('T4' + JSON.stringify(json));
-                }
-                else if(!tmode.localeCompare('t_fireflicker')) {
-                    wsEnqueue('T6' + JSON.stringify(json));
-                }
-                else if(!tmode.localeCompare('t_lightning')) {
-                    wsEnqueue('T7' + JSON.stringify(json));
-                }
-                else if(!tmode.localeCompare('t_breathe')) {
-                    wsEnqueue('T8' + JSON.stringify(json));
+                if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
+                    if (effectInfo[tmode].hasColor) {
+                        wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
+                    }
                 }
             }
         });
@@ -130,11 +103,10 @@ $(function() {
       var json = { 'reverse': $(this).prop('checked') };
       var tmode = $('#tmode option:selected').val();
 
-      if(!tmode.localeCompare('t_chase')) {
-          wsEnqueue('T4' + JSON.stringify(json));
-      }
-      else if(!tmode.localeCompare('t_rainbow')) {
-          wsEnqueue('T5' + JSON.stringify(json));
+      if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
+          if (effectInfo[tmode].hasReverse) {
+              wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
+          }
       }
     });
 
@@ -144,11 +116,10 @@ $(function() {
       var json = { 'mirror': $(this).prop('checked') };
       var tmode = $('#tmode option:selected').val();
 
-      if(!tmode.localeCompare('t_chase')) {
-          wsEnqueue('T4' + JSON.stringify(json));
-      }
-      else if(!tmode.localeCompare('t_rainbow')) {
-          wsEnqueue('T5' + JSON.stringify(json));
+      if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
+          if (effectInfo[tmode].hasMirror) {
+              wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
+          }
       }
     });
 
@@ -158,11 +129,10 @@ $(function() {
       var json = { 'allleds': $(this).prop('checked') };
       var tmode = $('#tmode option:selected').val();
 
-      if(!tmode.localeCompare('t_chase')) {
-          wsEnqueue('T4' + JSON.stringify(json));
-      }
-      else if(!tmode.localeCompare('t_rainbow')) {
-          wsEnqueue('T5' + JSON.stringify(json));
+      if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
+          if (effectInfo[tmode].hasAllLeds) {
+              wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
+          }
       }
     });
 
@@ -310,11 +280,23 @@ function feed() {
     }
 }
 
+function param(name) {
+    return (location.search.split(name + '=')[1] || '').split('&')[0];
+}
+
 // WebSockets
 function wsConnect() {
     if ('WebSocket' in window) {
+
+// accept ?target=10.0.0.123 to make a WS connection to another device
+        if (target = param('target')) {
+// 
+        } else {
+            target = document.location.host;
+        }
+
         // Open a new web socket and set the binary type
-        ws = new WebSocket('ws://' + document.location.host + '/ws');
+        ws = new WebSocket('ws://' + target + '/ws');
         ws.binaryType = 'arraybuffer';
 
         ws.onopen = function() {
@@ -322,6 +304,7 @@ function wsConnect() {
             wsEnqueue('E1'); // Get html elements
             wsEnqueue('G1'); // Get Config
             wsEnqueue('G2'); // Get Net Status
+            wsEnqueue('G3'); // Get Effect Info
 
             feed();
         };
@@ -340,12 +323,18 @@ function wsConnect() {
                 case 'G2':
                     getConfigStatus(data);
                     break;
+                case 'G3':
+                    getEffectInfo(data);
+                    break;
                 case 'S1':
                     setConfig(data);
                     reboot();
                     break;
                 case 'S2':
                     setConfig(data);
+                    break;
+                case 'S3':
+                    snackSave();
                     break;
                 case 'XS':
                     getSystemStatus(data);
@@ -468,7 +457,9 @@ function drawStream(streamData) {
 }
 
 function clearStream() {
+    if (typeof ctx !== 'undefined') {
      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
 }
 
 function getElements(data) {
@@ -545,13 +536,15 @@ function getConfig(data) {
         $('#p_gammaVal').val(config.pixel.gammaVal);
         $('#p_briteVal').val(config.pixel.briteVal);
 
-        if(config.e131.channel_count / 3 <8 ) {
-            $('#v_columns').val(config.e131.channel_count / 3);
-        } else if (config.e131.channel_count / 3 <50 ) {
-            $('#v_columns').val(10);
-        } else {
-            $('#v_columns').val(25);
-        }
+//      if(config.e131.channel_count / 3 <8 ) {
+//          $('#v_columns').val(config.e131.channel_count / 3);
+//      } else if (config.e131.channel_count / 3 <50 ) {
+//          $('#v_columns').val(10);
+//      } else {
+//          $('#v_columns').val(25);
+//      }
+        $('#v_columns').val(Math.floor(Math.sqrt(config.e131.channel_count/3)));
+
         $("input[name='viewStyle'][value='RGB']").trigger('click');
         clearStream();
 
@@ -594,19 +587,35 @@ function getConfigStatus(data) {
     $('#x_usedflashsize').text(status.usedflashsize);
     $('#x_realflashsize').text(status.realflashsize);
     $('#x_freeheap').text(status.freeheap);
-    updateTestingGUI(status.effect);
 }
 
-function updateTestingGUI(data) {
-    if ($('#tmode option:selected').val().localeCompare(testing_modes[data.name])) {
-        $('#tmode').val(testing_modes[data.name]);
-        hideShowTestSections();
+function getEffectInfo(data) {
+    parsed = JSON.parse(data);
+
+    effectInfo = parsed.effectList;	// global effectInfo
+    var running = parsed.currentEffect;
+
+//  console.log (effectInfo);
+//  console.log (effectInfo.t_chase);
+
+    // process the effect configuration options
+    for (var i in effectInfo) {
+        var htmlid = effectInfo[i].htmlid;
+        var name =   effectInfo[i].name;
+        $('#tmode').append('<option value="' + htmlid + '">' + name + '</option>');
+        if ( ! name.localeCompare(running.name) ) {
+            $('#tmode').val(htmlid);
+            hideShowTestSections();
+        }
     }
 
-    $('.color').val('rgb(' + data.r + ',' + data.g + ',' + data.b + ')');
-    $('.reverse').prop('checked', data.reverse);
-    $('.mirror').prop('checked', data.mirror);
-    $('.allleds').prop('checked', data.allleds);
+    // set html based on current running effect
+    $('.color').val('rgb(' + running.r + ',' + running.g + ',' + running.b + ')');
+    $('.color').css('background-color', 'rgb(' + running.r + ',' + running.g + ',' + running.b + ')');
+    $('#t_reverse').prop('checked', running.reverse);
+    $('#t_mirror').prop('checked', running.mirror);
+    $('#t_allleds').prop('checked', running.allleds);
+    $('#t_startenabled').prop('checked', running.enabled);
 }
 
 function getSystemStatus(data) {
@@ -754,6 +763,30 @@ function submitConfig() {
     wsEnqueue('S2' + JSON.stringify(json));
 }
 
+function submitStartupEffect() {
+// not pretty - get current r,g,b from color picker
+    var temp = $('.color').val().split(/\D+/);
+
+    var currentEffectName = effectInfo[ $('#tmode option:selected').val() ].name;
+//console.log (currentEffectName);
+
+    var json = {
+            'effects': {
+                'name': currentEffectName,
+                'mirror': $('#t_mirror').prop('checked'),
+                'allleds': $('#t_allleds').prop('checked'),
+                'reverse': $('#t_reverse').prop('checked'),
+                'r': temp[1],
+                'g': temp[2],
+                'b': temp[3],
+                'brightness': 255,
+                'enabled': $('#t_startenabled').prop('checked')
+            }
+        };
+
+    wsEnqueue('S3' + JSON.stringify(json));
+}
+
 function refreshPixel() {
     var proto = $('#p_type option:selected').text();
     var size = parseInt($('#p_count').val());
@@ -793,20 +826,57 @@ function refreshSerial() {
 
 function hideShowTestSections() {
     // Test mode toggles
-    $('.tdiv').addClass('hidden');
-    $('#'+$('select[name=tmode]').val()).removeClass('hidden');
+//    $('.tdiv').addClass('hidden');
+//    $('#'+$('select[name=tmode]').val()).removeClass('hidden');
+
+    var tmode = $('#tmode option:selected').val();
+//console.log('tmode is: ' + tmode);
+    if ( (typeof tmode !== 'undefined') && (typeof effectInfo[tmode].wsTCode !== 'undefined') ) {
+// hide/show view stream and testing options+startup
+        if (!tmode.localeCompare('t_view')) {
+            $('#t_options').addClass('hidden');
+            $('.t_startup').addClass('hidden');
+            $('#t_view').removeClass('hidden');
+        } else {
+            $('#t_options').removeClass('hidden');
+            $('.t_startup').removeClass('hidden');
+            $('#t_view').addClass('hidden');
+        }
+
+        if (effectInfo[tmode].hasColor) {
+            $('#lab_color').removeClass('hidden');
+            $('#div_color').removeClass('hidden');
+	} else {
+            $('#lab_color').addClass('hidden');
+            $('#div_color').addClass('hidden');
+        }
+        if (effectInfo[tmode].hasMirror) {
+            $('#div_mirror').removeClass('hidden');
+	} else {
+            $('#div_mirror').addClass('hidden');
+        }
+        if (effectInfo[tmode].hasReverse) {
+            $('#div_reverse').removeClass('hidden');
+	} else {
+            $('#div_reverse').addClass('hidden');
+        }
+        if (effectInfo[tmode].hasAllLeds) {
+            $('#div_allleds').removeClass('hidden');
+	} else {
+            $('#div_allleds').addClass('hidden');
+        }
+    }
 }
 
-function test() {
+// effect selector changed
+function effectChanged() {
     hideShowTestSections();
 
     var tmode = $('#tmode option:selected').val();
 
-    if (!tmode.localeCompare('t_disabled')) {
-        wsEnqueue('T0');
-    }
-    else if (!tmode.localeCompare('t_view')) {
-        wsEnqueue('T9');
+//console.log ('found tcode ' + effectInfo[tmode].wsTCode);
+    if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
+        wsEnqueue( effectInfo[tmode].wsTCode );
     }
 }
 
@@ -826,3 +896,12 @@ function reboot() {
     showReboot();
     wsEnqueue('X6');
 }
+
+//function getKeyByValue(object, value) {
+//    return Object.keys(object).find(key => object[key] === value);
+//}
+
+function getKeyByValue(obj, value) {
+    return Object.keys(obj)[Object.values(obj).indexOf(value)];
+}
+
