@@ -599,6 +599,7 @@ function getEffectInfo(data) {
 //  console.log (effectInfo.t_chase);
 
     // process the effect configuration options
+    $('#tmode').empty(); // clear the dropdown first
     for (var i in effectInfo) {
         var htmlid = effectInfo[i].htmlid;
         var name =   effectInfo[i].name;

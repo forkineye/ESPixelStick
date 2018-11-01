@@ -449,7 +449,7 @@ void handle_config_upload(AsyncWebServerRequest *request, String filename,
             LOG_PORT.println(reinterpret_cast<char*>(confuploadtemp));
             request->send(500, "text/plain", "Config Update Error." );
         } else {
-//          dsNetworkConfig(json);
+            dsNetworkConfig(json);
 //          dsDeviceConfig(json);
             dsEffectConfig(json);
             saveConfig();
