@@ -39,7 +39,7 @@ struct dCHSV {
 */
 typedef uint16_t (EffectEngine::*EffectFunc)(void);
 struct EffectDesc {
-    const char* name;
+    String      name;
     EffectFunc  func;
     const char* htmlid;
     bool        hasColor;
@@ -75,7 +75,7 @@ public:
     void begin(DRIVER* ledDriver, uint16_t ledCount);
     void run();
 
-    String getEffect()                      { return _activeEffect ? _activeEffect->name : nullptr; }
+    String getEffect()                      { return _activeEffect ? _activeEffect->name : ""; }
     bool getReverse()                       { return _effectReverse; }
     bool getMirror()                        { return _effectMirror; }
     bool getAllLeds()                       { return _effectAllLeds; }

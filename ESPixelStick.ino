@@ -419,7 +419,7 @@ void publishState() {
     color["g"] = effects.getColor().g;
     color["b"] = effects.getColor().b;
     root["brightness"] = effects.getBrightness();
-    if (effects.getEffect() != nullptr) {
+    if (effects.getEffect() != "") {
         root["effect"] = effects.getEffect();
     }
     root["reverse"] = effects.getReverse();

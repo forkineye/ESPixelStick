@@ -67,12 +67,10 @@ void EffectEngine::run() {
     }
 }
 
-//void EffectEngine::setEffect(const char* effectName) {
-void EffectEngine::setEffect(const String effectNameStr) {
-    const char* effectName = effectNameStr.c_str();
+void EffectEngine::setEffect(const String effectName) {
     const uint8_t effectCount = sizeof(EFFECT_LIST) / sizeof(EffectDesc);
     for (uint8_t effect = 0; effect < effectCount; effect++) {
-        if (strcmp(effectName, EFFECT_LIST[effect].name) == 0) {
+        if (effectName == EFFECT_LIST[effect].name) {
             if (_activeEffect != &EFFECT_LIST[effect]) {
                 _activeEffect = &EFFECT_LIST[effect];
                 _effectTimeout = 0;
@@ -98,11 +96,10 @@ const EffectDesc* EffectEngine::getEffectInfo(unsigned a) {
     return &EFFECT_LIST[a];
 }
 
-bool EffectEngine::isValidEffect(const String effectNameStr) {
-    const char* effectName = effectNameStr.c_str();
+bool EffectEngine::isValidEffect(const String effectName) {
     const uint8_t effectCount = sizeof(EFFECT_LIST) / sizeof(EffectDesc);
     for (uint8_t effect = 0; effect < effectCount; effect++) {
-        if (strcmp(effectName, EFFECT_LIST[effect].name) == 0) {
+        if (effectName == EFFECT_LIST[effect].name) {
             return true;
         }
     }
