@@ -508,6 +508,7 @@ function getConfig(data) {
     $('#mqtt_user').val(config.mqtt.user);
     $('#mqtt_password').val(config.mqtt.password);
     $('#mqtt_topic').val(config.mqtt.topic);
+    $('#mqtt_clean').prop('checked', config.mqtt.clean);
 
     // E1.31 Config
     $('#universe').val(config.e131.universe);
@@ -701,7 +702,8 @@ function submitConfig() {
                 'port': $('#mqtt_port').val(),
                 'user': $('#mqtt_user').val(),
                 'password': $('#mqtt_password').val(),
-                'topic': $('#mqtt_topic').val()
+                'topic': $('#mqtt_topic').val(),
+                'clean': $('#mqtt_clean').prop('checked')
             },
             'e131': {
                 'universe': parseInt($('#universe').val()),

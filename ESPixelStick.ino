@@ -175,6 +175,8 @@ void setup() {
         mqtt.onDisconnect(onMqttDisconnect);
         mqtt.onMessage(onMqttMessage);
         mqtt.setServer(config.mqtt_ip.c_str(), config.mqtt_port);
+        // Unset clean session (defaults to true) so we get retained messages of QoS > 0
+        mqtt.setCleanSession(config.mqtt_clean);
         if (config.mqtt_user.length() > 0)
             mqtt.setCredentials(config.mqtt_user.c_str(), config.mqtt_password.c_str());
     }
@@ -831,7 +833,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     _mqtt["user"] = config.mqtt_user.c_str();
     _mqtt["password"] = config.mqtt_password.c_str();
     _mqtt["topic"] = config.mqtt_topic.c_str();
-    _mqtt["clean"] = config.mqtt_topic.clean;
+    _mqtt["clean"] = config.mqtt_clean;
 
     // E131
     JsonObject &e131 = json.createNestedObject("e131");
