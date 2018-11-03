@@ -203,6 +203,11 @@ $(function() {
     ctx = canvas.getContext("2d");
     ctx.font = "20px Arial";
     ctx.textAlign = "center";
+
+    // autoload tab based on URL hash
+    var hash = window.location.hash;
+    hash && $('ul.navbar-nav li a[href="' + hash + '"]').click();
+
 });
 
 function wifiValidation() {

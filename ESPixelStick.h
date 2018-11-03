@@ -62,7 +62,7 @@ const char BUILD_DATE[] = __DATE__;
 #define RDMNET_DNSSD_E133VERS   1
 
 // Configuration file params
-#define CONFIG_MAX_SIZE 2048    /* Sanity limit for config file */
+#define CONFIG_MAX_SIZE 4096    /* Sanity limit for config file */
 
 // Pixel Types
 class DevCap {
