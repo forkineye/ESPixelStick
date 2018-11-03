@@ -152,6 +152,20 @@ void setup() {
     if (config.hostname)
         WiFi.hostname(config.hostname);
 
+#if defined (ESPS_MODE_PIXEL)
+    pixels.setPin(DATA_PIN);
+    updateConfig();
+
+    // Do one effects cycle as early as possible
+    if (config.ds == DataSource::WEB) {
+        effects.run();
+    }
+
+    pixels.show();
+#else
+    updateConfig();
+#endif
+
     // Setup WiFi Handlers
     wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
 
@@ -699,12 +713,16 @@ void dsDeviceConfig(JsonObject &json) {
     config.multicast = json["e131"]["multicast"];
 
     // MQTT
-    config.mqtt = json["mqtt"]["enabled"];
-    config.mqtt_ip = json["mqtt"]["ip"].as<String>();
-    config.mqtt_port = json["mqtt"]["port"];
-    config.mqtt_user = json["mqtt"]["user"].as<String>();
-    config.mqtt_password = json["mqtt"]["password"].as<String>();
-    config.mqtt_topic = json["mqtt"]["topic"].as<String>();
+    if (json.containsKey("mqtt")) {
+        JsonObject& mqttJson = json["mqtt"];
+        config.mqtt = mqttJson["enabled"];
+        config.mqtt_ip = mqttJson["ip"].as<String>();
+        config.mqtt_port = mqttJson["port"];
+        config.mqtt_user = mqttJson["user"].as<String>();
+        config.mqtt_password = mqttJson["password"].as<String>();
+        config.mqtt_topic = mqttJson["topic"].as<String>();
+        config.mqtt_clean = mqttJson["clean"] | false;
+    }
 
 #if defined(ESPS_MODE_PIXEL)
     // Pixel
@@ -813,6 +831,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     _mqtt["user"] = config.mqtt_user.c_str();
     _mqtt["password"] = config.mqtt_password.c_str();
     _mqtt["topic"] = config.mqtt_topic.c_str();
+    _mqtt["clean"] = config.mqtt_topic.clean;
 
     // E131
     JsonObject &e131 = json.createNestedObject("e131");

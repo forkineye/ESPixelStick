@@ -115,6 +115,7 @@ typedef struct {
     String      mqtt_user;
     String      mqtt_password;
     String      mqtt_topic;
+    bool        mqtt_clean;
 
     /* E131 */
     uint16_t    universe;       /* Universe to listen for */
