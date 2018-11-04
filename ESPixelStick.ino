@@ -378,6 +378,11 @@ void onMqttMessage(char* topic, char* payload,
         return;
     }
 
+// if its a retained message and we want clean session, ignore it
+    if ( properties.retain && config.mqtt_clean ) {
+        return;
+    }
+
     if (root.containsKey("state")) {
         if (strcmp(root["state"], LIGHT_ON) == 0) {
             stateOn = true;
