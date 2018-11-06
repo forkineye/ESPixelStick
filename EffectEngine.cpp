@@ -70,7 +70,7 @@ void EffectEngine::run() {
 void EffectEngine::setEffect(const String effectName) {
     const uint8_t effectCount = sizeof(EFFECT_LIST) / sizeof(EffectDesc);
     for (uint8_t effect = 0; effect < effectCount; effect++) {
-        if (effectName == EFFECT_LIST[effect].name) {
+        if ( effectName.equalsIgnoreCase(EFFECT_LIST[effect].name) ) {
             if (_activeEffect != &EFFECT_LIST[effect]) {
                 _activeEffect = &EFFECT_LIST[effect];
                 _effectTimeout = 0;
