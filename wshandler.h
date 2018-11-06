@@ -250,7 +250,9 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
 }
 
 void procT(uint8_t *data, AsyncWebSocketClient *client) {
-    config.ds = DataSource::WEB;
+    // T9 is view stream, DONT change source when we get this
+    if ( (data[1] >= '1') && (data[1] <= '8') ) config.ds = DataSource::WEB;
+
     switch (data[1]) {
         case '0': { // Clear whole string
             //TODO: Store previous data source when effect is selected so we can switch back to it
