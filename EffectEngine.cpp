@@ -96,6 +96,7 @@ int EffectEngine::getEffectCount() {
     return sizeof(EFFECT_LIST) / sizeof(EffectDesc);
 }
 
+// find effect info by its index in the table
 const EffectDesc* EffectEngine::getEffectInfo(unsigned a) {
     if (a >= sizeof(EFFECT_LIST) / sizeof(EffectDesc))
 	a = 0;
@@ -103,10 +104,21 @@ const EffectDesc* EffectEngine::getEffectInfo(unsigned a) {
     return &EFFECT_LIST[a];
 }
 
+// find effect info by its web services Tcode
+const EffectDesc* EffectEngine::getEffectInfo(const String TCode) {
+    const uint8_t effectCount = sizeof(EFFECT_LIST) / sizeof(EffectDesc);
+    for (uint8_t effect = 0; effect < effectCount; effect++) {
+        if ( TCode.equalsIgnoreCase(EFFECT_LIST[effect].wsTCode) ) {
+            return &EFFECT_LIST[effect];
+        }
+    }
+    return nullptr;
+}
+
 bool EffectEngine::isValidEffect(const String effectName) {
     const uint8_t effectCount = sizeof(EFFECT_LIST) / sizeof(EffectDesc);
     for (uint8_t effect = 0; effect < effectCount; effect++) {
-        if (effectName == EFFECT_LIST[effect].name) {
+        if ( effectName.equalsIgnoreCase(EFFECT_LIST[effect].name) ) {
             return true;
         }
     }
