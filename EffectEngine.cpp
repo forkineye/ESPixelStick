@@ -338,7 +338,7 @@ uint16_t EffectEngine::effectBreathe() {
 dCHSV EffectEngine::rgb2hsv(CRGB in_int)
 {
     dCHSV       out;
-    dCRGB       in = {in_int.r, in_int.g, in_int.b};
+    dCRGB       in = {in_int.r/255.0d, in_int.g/255.0d, in_int.b/255.0d};
     double      min, max, delta;
 
     min = in.r < in.g ? in.r : in.g;
