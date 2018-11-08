@@ -62,6 +62,7 @@ extern const char CONFIG_FILE[];
     S1 - Set Network Config
     S2 - Set Device Config
     S3 - Set Effect Startup Config
+    S4 - Set Gamma and Brightness (but dont save)
 
     XS - Get RSSI:heap:uptime
     X2 - Get E131 Status
@@ -267,6 +268,10 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
             saveConfig();
             client->text("S3");
             break;
+        case '4':   // Set Gamma (but no save)
+            dsGammaConfig(json);
+            client->text("S4");
+            break;
     }
 }
 
@@ -467,7 +472,7 @@ void handle_config_upload(AsyncWebServerRequest *request, String filename,
             request->send(500, "text/plain", "Config Update Error." );
         } else {
             dsNetworkConfig(json);
-//          dsDeviceConfig(json);
+            dsDeviceConfig(json);
             dsEffectConfig(json);
             saveConfig();
             request->send(200, "text/plain", "Config Update Finished: " );

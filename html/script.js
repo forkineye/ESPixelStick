@@ -162,6 +162,13 @@ $(function() {
        }
     });
 
+    $('#p_gammaVal').change(function() {
+            sendGamma();
+    });
+    $('#p_briteVal').change(function() {
+            sendGamma();
+    });
+
     // Gamma graph
     $('#showgamma').click(function() {
         if ($(this).is(':checked')) {
@@ -371,11 +378,15 @@ function wsConnect() {
                 case 'S3':
                     snackSave();
                     break;
+                case 'S4':
+                    break;
                 case 'XS':
                     getSystemStatus(data);
                     break;
                 case 'X2':
                     getE131Status(data);
+                case 'XJ':
+                    getJsonStatus(data);
                     break;
                 case 'X6':
                     showReboot();
@@ -790,6 +801,7 @@ function submitConfig() {
                 'baudrate': parseInt($('#s_baud').val())
             }
     };
+
     wsEnqueue('S2' + JSON.stringify(json));
 }
 
@@ -928,3 +940,13 @@ function getKeyByValue(obj, value) {
     return Object.keys(obj)[Object.values(obj).indexOf(value)];
 }
 
+function sendGamma() {
+    var json = {
+        'pixel': {
+            'gammaVal': parseFloat($('#p_gammaVal').val()),
+            'briteVal': parseFloat($('#p_briteVal').val())
+        }
+    }
+    wsEnqueue('S4' + JSON.stringify(json));
+    wsEnqueue('G4'); // Get Gamma Table
+}
