@@ -45,6 +45,7 @@ extern const char CONFIG_FILE[];
     G1 - Get Config
     G2 - Get Config Status
     G3 - Get Current Effect and Effect Config Options
+    G4 - Get Gamma table values
 
     T0 - Disable Testing
     T1 - Static Testing
@@ -215,6 +216,18 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             json.printTo(response);
             client->text("G3" + response);
 //LOG_PORT.print(response);
+            break;
+        }
+        case '4': {
+            DynamicJsonBuffer jsonBuffer;
+            JsonObject &json = jsonBuffer.createObject();
+            JsonArray &gamma = json.createNestedArray("gamma");
+            for (int i=0; i<256; i++) {
+                gamma.add(GAMMA_TABLE[i]);
+            }
+            String response;
+            json.printTo(response);
+            client->text("G4" + response);
             break;
         }
     }

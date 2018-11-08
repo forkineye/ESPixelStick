@@ -181,7 +181,32 @@
               <div class="col-sm-3"><input type="text" class="form-control" id="p_gammaVal" name="p_gammaVal" title="Recommended value is 2.2. Set to 1.0 to disable." onchange="refreshPixel()"></div>
               <label class="control-label col-sm-2" for="p_briteVal">Brightness</label>
               <div class="col-sm-3"><input type="text" class="form-control" id="p_briteVal" name="p_briteVal" title="Maximum brightness is 1.0." onchange="refreshPixel()"></div>
-              <div class="col-sm-2"><a target="_gamma" href="/gamma.html">View Graph</a></div>
+              <div class="col-sm-offset-2 col-sm-10">
+                <div class="checkbox"><label><input type="checkbox" id="showgamma" name="showgamma"> Show Gamma Curve</label></div>
+              </div>
+              <div class="col-sm-offset-2 col-sm-8 hidden gammagraph">
+<svg viewBox="-25 -30 320 320" width="256" height="256" class="chart">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
+    </marker>
+  </defs>
+
+  <line x1="0" y1="256" x2="256" y2="256" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="125" y="275" class="label-title">Input</text>
+
+  <line x1="0" y1="256" x2="0" y2="0" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="-15" y="120" class="label-title" style="writing-mode: tb;">Output</text>
+
+  <polyline
+     id="cracker"
+     fill="none"
+     stroke="#0074d9"
+     stroke-width="2"
+     points=""
+   />
+</svg>
+              </div>
             </div>
           </div>
 

@@ -161,6 +161,16 @@ $(function() {
             $('.mqtt').addClass('hidden');
        }
     });
+
+    // Gamma graph
+    $('#showgamma').click(function() {
+        if ($(this).is(':checked')) {
+            $('.gammagraph').removeClass('hidden');
+       } else {
+            $('.gammagraph').addClass('hidden');
+       }
+    });
+
     $('#mqtt_hadisco').click(function() {
         if ($(this).is(':checked')) {
             $('#mqtt_haprefix').prop('disabled', false);
@@ -326,6 +336,7 @@ function wsConnect() {
             wsEnqueue('G1'); // Get Config
             wsEnqueue('G2'); // Get Net Status
             wsEnqueue('G3'); // Get Effect Info
+            wsEnqueue('G4'); // Get Gamma Table
 
             feed();
         };
@@ -346,6 +357,9 @@ function wsConnect() {
                     break;
                 case 'G3':
                     getEffectInfo(data);
+                    break;
+                case 'G4':
+                    refreshGamma(data);
                     break;
                 case 'S1':
                     setConfig(data);
@@ -682,6 +696,23 @@ function getE131Status(data) {
     $('#serr').text(status[3]);
     $('#perr').text(status[4]);
     $('#clientip').text(status[5]);
+}
+
+function refreshGamma(data) {
+    var gammaData = JSON.parse(data);
+
+    var polyline = document.getElementById('cracker');
+    var points = polyline.getAttribute('points');
+
+    points = "";
+    for (X=0; X<256; X++) {
+	var Y = 255-gammaData.gamma[X];
+	points += X + ", "+ Y +" ";
+//	console.log ( X + ", "+ Y +" ") ;
+
+    }
+
+    polyline.setAttribute('points', points);
 }
 
 function snackSave() {
