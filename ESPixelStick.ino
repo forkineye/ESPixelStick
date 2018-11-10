@@ -80,6 +80,7 @@ uint32_t            lastUpdate;     // Update timeout tracker
 WiFiEventHandler    wifiConnectHandler;     // WiFi connect handler
 WiFiEventHandler    wifiDisconnectHandler;  // WiFi disconnect handler
 Ticker              wifiTicker; // Ticker to handle WiFi
+Ticker              idleTicker; // Ticker for effect on idle
 AsyncMqttClient     mqtt;       // MQTT object
 Ticker              mqttTicker; // Ticker to handle MQTT
 EffectEngine        effects;    // Effects Engine
@@ -156,6 +157,10 @@ void setup() {
     // Do one effects cycle as early as possible
     if (config.ds == DataSource::WEB) {
         effects.run();
+    }
+    // set the effect idle timer
+    if ( (config.effect_idleenabled) && (config.ds == DataSource::E131) ) {
+       idleTicker.attach(config.effect_idletimeout, idleTimeout);
     }
 
     pixels.show();
@@ -600,12 +605,18 @@ void validateConfig() {
         config.baudrate = BaudRate::BR_57600;
 #endif
 
+    effects.setFromConfig();
     if (config.startup_effect_enabled) {
         if (effects.isValidEffect(config.startup_effect_name)) {
-            effects.setFromConfig();
+            effects.setEffect(config.startup_effect_name);
             config.ds = DataSource::WEB;
         }
     }
+
+    if (config.effect_idletimeout == 0) {
+        config.effect_idleenabled = false;
+    }
+
 }
 
 void updateConfig() {
@@ -702,6 +713,9 @@ void dsEffectConfig(JsonObject &json) {
         if (effectsJson.containsKey("brightness"))
             config.startup_effect_brightness = effectsJson["brightness"];
         config.startup_effect_enabled = effectsJson["enabled"];
+        config.effect_idleenabled = effectsJson["idleenabled"];
+        config.effect_idletimeout = effectsJson["idletimeout"];
+
     }
 }
 
@@ -827,6 +841,9 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
 
     _effects["brightness"] = config.startup_effect_brightness;
     _effects["enabled"] = config.startup_effect_enabled;
+    _effects["idleenabled"] = config.effect_idleenabled;
+    _effects["idletimeout"] = config.effect_idletimeout;
+
 
     // MQTT
     JsonObject &_mqtt = json.createNestedObject("mqtt");
@@ -888,6 +905,14 @@ void saveConfig() {
     }
 }
 
+void idleTimeout() {
+    if (config.ds == DataSource::E131) {
+        config.ds = DataSource::IDLEWEB;
+        effects.setFromConfig();
+    }
+}
+
+
 /////////////////////////////////////////////////////////
 //
 //  Main Loop
@@ -903,10 +928,16 @@ void loop() {
     }
 
     // Render output for current data source
-    switch (config.ds) {
-        case DataSource::E131:
+    if ( (config.ds == DataSource::E131) || (config.ds == DataSource::IDLEWEB) ) {
             // Parse a packet and update pixels
             if (!e131.isEmpty()) {
+                if (config.ds == DataSource::IDLEWEB) {
+                    config.ds = DataSource::E131;
+                    if (config.effect_idleenabled) {
+                        idleTicker.attach(config.effect_idletimeout, idleTimeout);
+                    }
+                }
+
                 e131.pull(&packet);
                 uint16_t universe = htons(packet.universe);
                 uint8_t *data = packet.property_values + 1;
@@ -960,15 +991,12 @@ void loop() {
                     }
                 }
             }
-            break;
+    }
 
-        case DataSource::MQTT:
+    if ( (config.ds == DataSource::WEB)
+      || (config.ds == DataSource::IDLEWEB)
+      || (config.ds == DataSource::MQTT) ) {
             effects.run();
-            break;
-
-        case DataSource::WEB:
-            effects.run();
-            break;
     }
 
 /* Streaming refresh */

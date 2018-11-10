@@ -23,8 +23,8 @@ const EffectDesc EFFECT_LIST[] = {
 };
 
 // Effect defaults
-#define DEFAULT_EFFECT_NAME "Solid"
-#define DEFAULT_EFFECT_COLOR { 255, 255, 255 }
+#define DEFAULT_EFFECT_NAME "Disabled"
+#define DEFAULT_EFFECT_COLOR { 183, 0, 255 }
 #define DEFAULT_EFFECT_BRIGHTNESS 255
 #define DEFAULT_EFFECT_REVERSE false
 #define DEFAULT_EFFECT_MIRROR false
