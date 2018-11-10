@@ -753,7 +753,7 @@ function submitStartupEffect() {
                 'b': temp[3],
                 'brightness': 255,
                 'enabled': $('#t_startenabled').prop('checked'),
-                'idleenabled': $('#t_idleenabled'),
+                'idleenabled': $('#t_idleenabled').prop('checked'),
                 'idletimeout': parseInt($('#t_idletimeout').val())
 
             }
