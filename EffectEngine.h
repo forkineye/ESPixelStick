@@ -86,6 +86,8 @@ public:
     int getEffectCount();
     const EffectDesc* getEffectInfo(unsigned a);
     void setFromConfig();
+    void setFromDefaults();
+
     bool isValidEffect(const String effectName);
     void setEffect(const String effectName);
     void setReverse(bool reverse)           { _effectReverse = reverse; }

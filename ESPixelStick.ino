@@ -159,7 +159,7 @@ void setup() {
         effects.run();
     }
     // set the effect idle timer
-   idleTicker.attach(config.effect_idletimeout, idleTimeout);
+    idleTicker.attach(config.effect_idletimeout, idleTimeout);
 
     pixels.show();
 #else
@@ -609,9 +609,9 @@ void validateConfig() {
     }
 
     effects.setFromConfig();
-    if (config.startup_effect_enabled) {
-        if (effects.isValidEffect(config.startup_effect_name)) {
-            effects.setEffect(config.startup_effect_name);
+    if (config.effect_enabled) {
+        if (effects.isValidEffect(config.effect_name)) {
+            effects.setEffect(config.effect_name);
             config.ds = DataSource::WEB;
         }
     } else {
@@ -707,14 +707,14 @@ void dsEffectConfig(JsonObject &json) {
     // Effects
     if (json.containsKey("effects")) {
         JsonObject& effectsJson = json["effects"];
-        config.startup_effect_name = effectsJson["name"].as<String>();
-        config.startup_effect_mirror = effectsJson["mirror"];
-        config.startup_effect_allleds = effectsJson["allleds"];
-        config.startup_effect_reverse = effectsJson["reverse"];
-        config.startup_effect_color = { effectsJson["r"], effectsJson["g"], effectsJson["b"] };
+        config.effect_name = effectsJson["name"].as<String>();
+        config.effect_mirror = effectsJson["mirror"];
+        config.effect_allleds = effectsJson["allleds"];
+        config.effect_reverse = effectsJson["reverse"];
+        config.effect_color = { effectsJson["r"], effectsJson["g"], effectsJson["b"] };
         if (effectsJson.containsKey("brightness"))
-            config.startup_effect_brightness = effectsJson["brightness"];
-        config.startup_effect_enabled = effectsJson["enabled"];
+            config.effect_brightness = effectsJson["brightness"];
+        config.effect_enabled = effectsJson["enabled"];
         config.effect_idleenabled = effectsJson["idleenabled"];
         config.effect_idletimeout = effectsJson["idletimeout"];
 
@@ -764,6 +764,8 @@ void dsDeviceConfig(JsonObject &json) {
 void loadConfig() {
     // Zeroize Config struct
     memset(&config, 0, sizeof(config));
+
+    effects.setFromDefaults();
 
     // Load CONFIG_FILE json. Create and init with defaults if not found
     File file = SPIFFS.open(CONFIG_FILE, "r");
@@ -831,18 +833,18 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
 
     // Effects
     JsonObject &_effects = json.createNestedObject("effects");
-    _effects["name"] = config.startup_effect_name;
+    _effects["name"] = config.effect_name;
 
-    _effects["mirror"] = config.startup_effect_mirror;
-    _effects["allleds"] = config.startup_effect_allleds;
-    _effects["reverse"] = config.startup_effect_reverse;
+    _effects["mirror"] = config.effect_mirror;
+    _effects["allleds"] = config.effect_allleds;
+    _effects["reverse"] = config.effect_reverse;
 
-    _effects["r"] = config.startup_effect_color.r;
-    _effects["g"] = config.startup_effect_color.g;
-    _effects["b"] = config.startup_effect_color.b;
+    _effects["r"] = config.effect_color.r;
+    _effects["g"] = config.effect_color.g;
+    _effects["b"] = config.effect_color.b;
 
-    _effects["brightness"] = config.startup_effect_brightness;
-    _effects["enabled"] = config.startup_effect_enabled;
+    _effects["brightness"] = config.effect_brightness;
+    _effects["enabled"] = config.effect_enabled;
     _effects["idleenabled"] = config.effect_idleenabled;
     _effects["idletimeout"] = config.effect_idletimeout;
 

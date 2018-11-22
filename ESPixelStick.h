@@ -101,13 +101,13 @@ typedef struct {
     bool        ap_fallback;    /* Fallback to AP if fail to associate? */
 
     /* Effects */
-    String startup_effect_name;
-    CRGB startup_effect_color;
-    uint8_t startup_effect_brightness;
-    bool startup_effect_reverse;
-    bool startup_effect_mirror;
-    bool startup_effect_allleds;
-    bool startup_effect_enabled;
+    String effect_name;
+    CRGB effect_color;
+    uint8_t effect_brightness;
+    bool effect_reverse;
+    bool effect_mirror;
+    bool effect_allleds;
+    bool effect_enabled;
     bool effect_idleenabled;
     uint16_t effect_idletimeout;
 

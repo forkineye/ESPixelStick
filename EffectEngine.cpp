@@ -32,22 +32,27 @@ const EffectDesc EFFECT_LIST[] = {
 
 EffectEngine::EffectEngine() {
     // Initialize with defaults
-    setEffect(DEFAULT_EFFECT_NAME);
-    setColor(DEFAULT_EFFECT_COLOR);
-    setBrightness(DEFAULT_EFFECT_BRIGHTNESS);
-    setReverse(DEFAULT_EFFECT_REVERSE);
-    setMirror(DEFAULT_EFFECT_MIRROR);
-    setAllLeds(DEFAULT_EFFECT_ALLLEDS);
+    setFromDefaults();
+}
+
+void EffectEngine::setFromDefaults() {
+    config.effect_name = DEFAULT_EFFECT_NAME;
+    config.effect_color = DEFAULT_EFFECT_COLOR;
+    config.effect_brightness = DEFAULT_EFFECT_BRIGHTNESS;
+    config.effect_reverse = DEFAULT_EFFECT_REVERSE;
+    config.effect_mirror = DEFAULT_EFFECT_MIRROR;
+    config.effect_allleds = DEFAULT_EFFECT_ALLLEDS;
+    setFromConfig();
 }
 
 void EffectEngine::setFromConfig() {
     // Initialize with defaults
-    setEffect(config.startup_effect_name);
-    setColor(config.startup_effect_color);
-    setBrightness(config.startup_effect_brightness);
-    setReverse(config.startup_effect_reverse);
-    setMirror(config.startup_effect_mirror);
-    setAllLeds(config.startup_effect_allleds);
+    setEffect(config.effect_name);
+    setColor(config.effect_color);
+    setBrightness(config.effect_brightness);
+    setReverse(config.effect_reverse);
+    setMirror(config.effect_mirror);
+    setAllLeds(config.effect_allleds);
 }
 
 void EffectEngine::begin(DRIVER* ledDriver, uint16_t ledCount) {
