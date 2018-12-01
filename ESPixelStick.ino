@@ -609,10 +609,15 @@ void validateConfig() {
     }
 
     effects.setFromConfig();
-    if (config.effect_enabled) {
+    if (config.effect_startenabled) {
         if (effects.isValidEffect(config.effect_name)) {
             effects.setEffect(config.effect_name);
-            config.ds = DataSource::WEB;
+
+            if ( !config.effect_name.equalsIgnoreCase("disabled")
+              && !config.effect_name.equalsIgnoreCase("view") ) {
+                config.ds = DataSource::WEB;
+            }
+
         }
     } else {
         effects.setEffect("Disabled");
@@ -714,7 +719,7 @@ void dsEffectConfig(JsonObject &json) {
         config.effect_color = { effectsJson["r"], effectsJson["g"], effectsJson["b"] };
         if (effectsJson.containsKey("brightness"))
             config.effect_brightness = effectsJson["brightness"];
-        config.effect_enabled = effectsJson["enabled"];
+        config.effect_startenabled = effectsJson["startenabled"];
         config.effect_idleenabled = effectsJson["idleenabled"];
         config.effect_idletimeout = effectsJson["idletimeout"];
 
@@ -844,7 +849,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     _effects["b"] = config.effect_color.b;
 
     _effects["brightness"] = config.effect_brightness;
-    _effects["enabled"] = config.effect_enabled;
+    _effects["startenabled"] = config.effect_startenabled;
     _effects["idleenabled"] = config.effect_idleenabled;
     _effects["idletimeout"] = config.effect_idletimeout;
 

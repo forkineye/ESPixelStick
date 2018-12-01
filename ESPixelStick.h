@@ -107,7 +107,7 @@ typedef struct {
     bool effect_reverse;
     bool effect_mirror;
     bool effect_allleds;
-    bool effect_enabled;
+    bool effect_startenabled;
     bool effect_idleenabled;
     uint16_t effect_idletimeout;
 

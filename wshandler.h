@@ -187,7 +187,7 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             effect["reverse"] = effects.getReverse();
             effect["mirror"] = effects.getMirror();
             effect["allleds"] = effects.getAllLeds();
-            effect["enabled"] = config.effect_enabled;
+            effect["startenabled"] = config.effect_startenabled;
             effect["idleenabled"] = config.effect_idleenabled;
             effect["idletimeout"] = config.effect_idletimeout;
 
