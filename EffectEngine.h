@@ -52,9 +52,11 @@ struct EffectDesc {
 class EffectEngine {
 
 private:
+    using timeType = decltype(millis());
 
     const EffectDesc* _activeEffect = nullptr;      /* Pointer to the active effect descriptor */
-    uint32_t _effectTimeout         = 0;            /* Time after which the effect will run again */
+    uint32_t _effectDelay           = 0;            /* How long to wait for the effect to run again */
+    timeType _effectLastRun         = 0;            /* When did the effect last run ? in millis() */
     uint32_t _effectCounter         = 0;            /* Counter for the number of calls to the active effect */
     uint16_t _effectSpeed           = 1024;         /* Externally controlled effect speed [MIN_EFFECT_DELAY, MAX_EFFECT_DELAY]*/
     bool _effectReverse             = false;        /* Externally controlled effect reverse option */
