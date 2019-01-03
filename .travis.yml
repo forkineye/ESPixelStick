@@ -1,7 +1,8 @@
 sudo: false
-language: bash
+language: c
 env:
   global:
+  - IDE_VERSION=1.8.8
   - ESP_HOME=$HOME/ide/hardware/esp8266com
   - LIB_HOME=$HOME/Arduino/libraries
   - ESPS_HOME=$HOME/Arduino/ESPixelStick
@@ -14,9 +15,9 @@ before_install:
   --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
 - sleep 3
 - export DISPLAY=:1.0
-- wget http://downloads.arduino.cc/arduino-1.8.1-linux64.tar.xz
-- tar xf arduino-1.8.1-linux64.tar.xz
-- mv arduino-1.8.1 $HOME/ide
+- wget http://downloads.arduino.cc/arduino-$IDE_VERSION-linux64.tar.xz
+- tar xf arduino-$IDE_VERSION-linux64.tar.xz
+- mv arduino-$IDE_VERSION $HOME/ide
 - export PATH="$HOME/ide:$PATH"
 - mkdir -p $LIB_HOME
 - mkdir -p $ESP_HOME
