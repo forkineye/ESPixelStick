@@ -61,7 +61,7 @@ private:
     uint16_t _effectSpeed           = 1024;         /* Externally controlled effect speed [MIN_EFFECT_DELAY, MAX_EFFECT_DELAY]*/
     bool _effectReverse             = false;        /* Externally controlled effect reverse option */
     bool _effectMirror              = false;        /* Externally controlled effect mirroring (start at center) */
-    bool _effectAllLeds             = false;        /* Externally controlled effect mirroring (start at center) */
+    bool _effectAllLeds             = false;        /* Externally controlled effect all leds = 1st led */
     uint8_t _effectBrightness       = 255;          /* Externally controlled effect brightness [0, 255] */
     CRGB _effectColor               = {0,0,0};      /* Externally controlled effect color */
 

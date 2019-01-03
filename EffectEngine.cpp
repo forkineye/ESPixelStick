@@ -41,6 +41,7 @@ void EffectEngine::setFromDefaults() {
     config.effect_reverse = DEFAULT_EFFECT_REVERSE;
     config.effect_mirror = DEFAULT_EFFECT_MIRROR;
     config.effect_allleds = DEFAULT_EFFECT_ALLLEDS;
+    config.effect_speed = DEFAULT_EFFECT_SPEED;
     setFromConfig();
 }
 
@@ -52,6 +53,7 @@ void EffectEngine::setFromConfig() {
     setReverse(config.effect_reverse);
     setMirror(config.effect_mirror);
     setAllLeds(config.effect_allleds);
+    setSpeed(config.effect_speed);
 }
 
 void EffectEngine::begin(DRIVER* ledDriver, uint16_t ledCount) {

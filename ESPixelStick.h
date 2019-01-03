@@ -104,6 +104,7 @@ typedef struct {
     String effect_name;
     CRGB effect_color;
     uint8_t effect_brightness;
+    uint16_t effect_speed;
     bool effect_reverse;
     bool effect_mirror;
     bool effect_allleds;
