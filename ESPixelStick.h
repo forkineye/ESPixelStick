@@ -62,7 +62,7 @@ const char BUILD_DATE[] = __DATE__;
 #define RDMNET_DNSSD_E133VERS   1
 
 // Configuration file params
-#define CONFIG_MAX_SIZE 2048    /* Sanity limit for config file */
+#define CONFIG_MAX_SIZE 4096    /* Sanity limit for config file */
 
 // Pixel Types
 class DevCap {
@@ -78,7 +78,8 @@ class DevCap {
 enum class DataSource : uint8_t {
     E131,
     MQTT,
-    WEB
+    WEB,
+    IDLEWEB
 };
 
 // Configuration structure
@@ -99,6 +100,18 @@ typedef struct {
     bool        dhcp;           /* Use DHCP? */
     bool        ap_fallback;    /* Fallback to AP if fail to associate? */
 
+    /* Effects */
+    String effect_name;
+    CRGB effect_color;
+    uint8_t effect_brightness;
+    bool effect_reverse;
+    bool effect_mirror;
+    bool effect_allleds;
+    bool effect_startenabled;
+    bool effect_idleenabled;
+    uint16_t effect_idletimeout;
+
+
     /* MQTT */
     bool        mqtt;           /* Use MQTT? */
     String      mqtt_ip;
@@ -106,6 +119,7 @@ typedef struct {
     String      mqtt_user;
     String      mqtt_password;
     String      mqtt_topic;
+    bool        mqtt_clean;
 
     /* E131 */
     uint16_t    universe;       /* Universe to listen for */
@@ -132,6 +146,7 @@ typedef struct {
 void serializeConfig(String &jsonString, bool pretty = false, bool creds = false);
 void dsNetworkConfig(JsonObject &json);
 void dsDeviceConfig(JsonObject &json);
+void dsEffectConfig(JsonObject &json);
 void saveConfig();
 
 void connectWifi();
@@ -146,5 +161,7 @@ void publishRGBState();
 void publishRGBBrightness();
 void publishRGBColor();
 void setStatic(uint8_t r, uint8_t g, uint8_t b);
+void idleTimeout();
+
 
 #endif  // ESPIXELSTICK_H_

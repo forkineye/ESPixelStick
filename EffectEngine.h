@@ -39,8 +39,14 @@ struct dCHSV {
 */
 typedef uint16_t (EffectEngine::*EffectFunc)(void);
 struct EffectDesc {
-    const char* name;
+    String      name;
     EffectFunc  func;
+    const char* htmlid;
+    bool        hasColor;
+    bool        hasMirror;
+    bool        hasReverse;
+    bool        hasAllLeds;
+    const char* wsTCode;
 };
 
 class EffectEngine {
@@ -69,7 +75,7 @@ public:
     void begin(DRIVER* ledDriver, uint16_t ledCount);
     void run();
 
-    const char* getEffect()                 { return _activeEffect ? _activeEffect->name : nullptr; }
+    String getEffect()                      { return _activeEffect ? _activeEffect->name : ""; }
     bool getReverse()                       { return _effectReverse; }
     bool getMirror()                        { return _effectMirror; }
     bool getAllLeds()                       { return _effectAllLeds; }
@@ -77,7 +83,13 @@ public:
     uint16_t getSpeed()                     { return _effectSpeed; }
     CRGB getColor()                         { return _effectColor; }
 
-    void setEffect(const char* effectName);
+    int getEffectCount();
+    const EffectDesc* getEffectInfo(unsigned a);
+    void setFromConfig();
+    void setFromDefaults();
+
+    bool isValidEffect(const String effectName);
+    void setEffect(const String effectName);
     void setReverse(bool reverse)           { _effectReverse = reverse; }
     void setMirror(bool mirror)             { _effectMirror = mirror; }
     void setAllLeds(bool allleds)            { _effectAllLeds = allleds; }
@@ -87,13 +99,14 @@ public:
 
     // Effect functions
     uint16_t effectSolidColor();
-    uint16_t effectRainbowCycle();
+    uint16_t effectRainbow();
     uint16_t effectChase();
     uint16_t effectBlink();
     uint16_t effectFlash();
     uint16_t effectFireFlicker();
     uint16_t effectLightning();
     uint16_t effectBreathe();
+    uint16_t effectNull();
     void clearAll();
 
 private:

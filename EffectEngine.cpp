@@ -3,34 +3,56 @@
 #include "ESPixelStick.h"
 #include "EffectEngine.h"
 
+extern  config_t        config;
+
 // List of all the supported effects and their names
-static const EffectDesc EFFECT_LIST[] = {
-    { "Solid",          &EffectEngine::effectSolidColor },
-    { "Blink",          &EffectEngine::effectBlink },
-    { "Flash",          &EffectEngine::effectFlash },
-    { "Rainbow",        &EffectEngine::effectRainbowCycle },
-    { "Chase",          &EffectEngine::effectChase },
-    { "Fire flicker",   &EffectEngine::effectFireFlicker },
-    { "Lightning",      &EffectEngine::effectLightning },
-    { "Breathe",      &EffectEngine::effectBreathe }
+const EffectDesc EFFECT_LIST[] = {
+//                                                                          Mirror     AllLeds
+//    name;             func;                             htmlid;      Color;     Reverse     wsTCode
+
+    { "Disabled",     nullptr,                         "t_disabled",     1,    1,    1,    1,  "T0"     },
+    { "Solid",        &EffectEngine::effectSolidColor, "t_static",       1,    0,    0,    0,  "T1"     },
+    { "Blink",        &EffectEngine::effectBlink,      "t_blink",        1,    0,    0,    0,  "T2"     },
+    { "Flash",        &EffectEngine::effectFlash,      "t_flash",        1,    0,    0,    0,  "T3"     },
+    { "Rainbow",      &EffectEngine::effectRainbow,    "t_rainbow",      0,    1,    1,    1,  "T5"     },
+    { "Chase",        &EffectEngine::effectChase,      "t_chase",        1,    1,    1,    0,  "T4"     },
+    { "Fire flicker", &EffectEngine::effectFireFlicker,"t_fireflicker",  1,    0,    0,    0,  "T6"     },
+    { "Lightning",    &EffectEngine::effectLightning,  "t_lightning",    1,    0,    0,    0,  "T7"     },
+    { "Breathe",      &EffectEngine::effectBreathe,    "t_breathe",      1,    0,    0,    0,  "T8"     },
+    { "View",         nullptr,                         "t_view",         0,    0,    0,    0,  "T9"     }
 };
 
 // Effect defaults
-const char DEFAULT_EFFECT[] = "Solid";
-const CRGB DEFAULT_EFFECT_COLOR = { 255, 255, 255 };
-const uint8_t DEFAULT_EFFECT_BRIGHTNESS = 255;
-const bool DEFAULT_EFFECT_REVERSE = false;
-const bool DEFAULT_EFFECT_MIRROR = false;
-const bool DEFAULT_EFFECT_ALLLEDS = false;
+#define DEFAULT_EFFECT_NAME "Disabled"
+#define DEFAULT_EFFECT_COLOR { 183, 0, 255 }
+#define DEFAULT_EFFECT_BRIGHTNESS 255
+#define DEFAULT_EFFECT_REVERSE false
+#define DEFAULT_EFFECT_MIRROR false
+#define DEFAULT_EFFECT_ALLLEDS false
 
 EffectEngine::EffectEngine() {
     // Initialize with defaults
-    setEffect(DEFAULT_EFFECT);
-    setColor(DEFAULT_EFFECT_COLOR);
-    setBrightness(DEFAULT_EFFECT_BRIGHTNESS);
-    setReverse(DEFAULT_EFFECT_REVERSE);
-    setMirror(DEFAULT_EFFECT_MIRROR);
-    setAllLeds(DEFAULT_EFFECT_ALLLEDS);
+    setFromDefaults();
+}
+
+void EffectEngine::setFromDefaults() {
+    config.effect_name = DEFAULT_EFFECT_NAME;
+    config.effect_color = DEFAULT_EFFECT_COLOR;
+    config.effect_brightness = DEFAULT_EFFECT_BRIGHTNESS;
+    config.effect_reverse = DEFAULT_EFFECT_REVERSE;
+    config.effect_mirror = DEFAULT_EFFECT_MIRROR;
+    config.effect_allleds = DEFAULT_EFFECT_ALLLEDS;
+    setFromConfig();
+}
+
+void EffectEngine::setFromConfig() {
+    // Initialize with defaults
+    setEffect(config.effect_name);
+    setColor(config.effect_color);
+    setBrightness(config.effect_brightness);
+    setReverse(config.effect_reverse);
+    setMirror(config.effect_mirror);
+    setAllLeds(config.effect_allleds);
 }
 
 void EffectEngine::begin(DRIVER* ledDriver, uint16_t ledCount) {
@@ -40,7 +62,7 @@ void EffectEngine::begin(DRIVER* ledDriver, uint16_t ledCount) {
 }
 
 void EffectEngine::run() {
-    if (_initialized && _activeEffect) {
+    if (_initialized && _activeEffect && _activeEffect->func) {
         uint32_t now = millis();
         if (now > _effectTimeout) {
             uint16_t delay = (this->*_activeEffect->func)();
@@ -50,10 +72,10 @@ void EffectEngine::run() {
     }
 }
 
-void EffectEngine::setEffect(const char* effectName) {
+void EffectEngine::setEffect(const String effectName) {
     const uint8_t effectCount = sizeof(EFFECT_LIST) / sizeof(EffectDesc);
     for (uint8_t effect = 0; effect < effectCount; effect++) {
-        if (strcmp(effectName, EFFECT_LIST[effect].name) == 0) {
+        if ( effectName.equalsIgnoreCase(EFFECT_LIST[effect].name) ) {
             if (_activeEffect != &EFFECT_LIST[effect]) {
                 _activeEffect = &EFFECT_LIST[effect];
                 _effectTimeout = 0;
@@ -66,6 +88,27 @@ void EffectEngine::setEffect(const char* effectName) {
 
     _activeEffect = nullptr;
     clearAll();
+}
+
+int EffectEngine::getEffectCount() {
+    return sizeof(EFFECT_LIST) / sizeof(EffectDesc);
+}
+
+const EffectDesc* EffectEngine::getEffectInfo(unsigned a) {
+    if (a >= sizeof(EFFECT_LIST) / sizeof(EffectDesc))
+	a = 0;
+
+    return &EFFECT_LIST[a];
+}
+
+bool EffectEngine::isValidEffect(const String effectName) {
+    const uint8_t effectCount = sizeof(EFFECT_LIST) / sizeof(EffectDesc);
+    for (uint8_t effect = 0; effect < effectCount; effect++) {
+        if (effectName == EFFECT_LIST[effect].name) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void EffectEngine::setPixel(uint16_t idx,  CRGB color) {
@@ -145,11 +188,11 @@ uint16_t EffectEngine::effectChase() {
         setPixel(pixel, _effectColor);
     }
 
-    _effectStep = ++_effectStep % lc;
+    _effectStep = (1+_effectStep) % lc;
     return _effectSpeed / 32;
 }
 
-uint16_t EffectEngine::effectRainbowCycle() {
+uint16_t EffectEngine::effectRainbow() {
     // calculate only half the pixels if mirroring
     uint16_t lc = _ledCount;
     if (_effectMirror) {
@@ -180,7 +223,7 @@ uint16_t EffectEngine::effectRainbowCycle() {
         }
     }
 
-    _effectStep = ++_effectStep & 0xFF;
+    _effectStep = (1+_effectStep) & 0xFF;
     return _effectSpeed / 256;
 }
 
@@ -193,7 +236,7 @@ uint16_t EffectEngine::effectBlink() {
       setAll(_effectColor);
     }
 
-    _effectStep = ++_effectStep % 2;
+    _effectStep = (1+_effectStep) % 2;
     return _effectSpeed / 1;
 }
 
@@ -212,7 +255,7 @@ uint16_t EffectEngine::effectFlash() {
         clearAll();
     }
 
-    _effectStep = ++_effectStep % 6;
+    _effectStep = (1+_effectStep) % 6;
     return _effectSpeed / 3;
 }
 
@@ -223,7 +266,7 @@ uint16_t EffectEngine::effectFireFlicker() {
     byte flicker = random(lum);
     setPixel(i, CRGB { max(_effectColor.r - flicker, 0), max(_effectColor.g - flicker, 0), max(_effectColor.b - flicker, 0) });
   }
-  _effectStep = ++_effectStep % _ledCount;
+  _effectStep = (1+_effectStep) % _ledCount;
   return _effectSpeed / 10;
 }
 
@@ -300,7 +343,7 @@ uint16_t EffectEngine::effectBreathe() {
 dCHSV EffectEngine::rgb2hsv(CRGB in_int)
 {
     dCHSV       out;
-    dCRGB       in = {in_int.r, in_int.g, in_int.b};
+    dCRGB       in = {in_int.r/255.0d, in_int.g/255.0d, in_int.b/255.0d};
     double      min, max, delta;
 
     min = in.r < in.g ? in.r : in.g;
@@ -349,7 +392,7 @@ CRGB EffectEngine::hsv2rgb(dCHSV in)
     double      hh, p, q, t, ff;
     long        i;
     dCRGB       out;
-    CRGB out_int = {};
+    CRGB out_int = {0,0,0};
 
     if(in.s <= 0.0) {       // < is bogus, just shuts up warnings
         out.r = in.v;

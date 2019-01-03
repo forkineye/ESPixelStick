@@ -73,6 +73,11 @@ light:
       - Breathe
 ```
 
+Here's an example using the mosquitto_pub command line tool:
+```
+mosquitto_pub -t porch/esps/set -m '{"state":"ON","color":{"r":255,"g":128,"b":64},"brightness":255,"effect":"solid","reverse":false,"mirror":false}'
+```
+
 Resources
 ---------
 - Firmware: [http://github.com/forkineye/ESPixelStick](http://github.com/forkineye/ESPixelStick)

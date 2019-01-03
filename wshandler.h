@@ -36,6 +36,7 @@ extern uint32_t     *seqError;  // Sequence error tracking for each universe
 extern uint16_t     uniLast;    // Last Universe to listen for
 extern bool         reboot;     // Reboot flag
 
+extern const char CONFIG_FILE[];
 
 /*
   Packet Commands
@@ -43,6 +44,7 @@ extern bool         reboot;     // Reboot flag
 
     G1 - Get Config
     G2 - Get Config Status
+    G3 - Get Current Effect and Effect Config Options
 
     T0 - Disable Testing
     T1 - Static Testing
@@ -57,16 +59,16 @@ extern bool         reboot;     // Reboot flag
 
     S1 - Set Network Config
     S2 - Set Device Config
+    S3 - Set Effect Startup Config
 
     XS - Get RSSI:heap:uptime
-    X1 - Get RSSI
     X2 - Get E131 Status
-    Xh - Get Heap
-    XU - Get Uptime
     X6 - Reboot
 */
 
 EFUpdate efupdate;
+uint8_t * WSframetemp;
+uint8_t * confuploadtemp;
 
 void procX(uint8_t *data, AsyncWebSocketClient *client) {
     switch (data[1]) {
@@ -75,9 +77,6 @@ void procX(uint8_t *data, AsyncWebSocketClient *client) {
                      (String)WiFi.RSSI() + ":" +
                      (String)ESP.getFreeHeap() + ":" +
                      (String)millis());
-            break;
-        case '1':
-            client->text("X1" + (String)WiFi.RSSI());
             break;
         case '2': {
             uint32_t seqErrors = 0;
@@ -91,12 +90,6 @@ void procX(uint8_t *data, AsyncWebSocketClient *client) {
                     e131.stats.last_clientIP.toString());
             break;
         }
-        case 'h':
-            client->text("Xh" + (String)ESP.getFreeHeap());
-            break;
-        case 'U':
-            client->text("XU" + (String)millis());
-            break;
         case '6':  // Init 6 baby, reboot!
             reboot = true;
     }
@@ -155,7 +148,8 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             client->text("G1" + response);
             break;
         }
-        case '2':
+
+        case '2': {
             // Create buffer and root object
             DynamicJsonBuffer jsonBuffer;
             JsonObject &json = jsonBuffer.createObject();
@@ -171,7 +165,19 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             json["realflashsize"] = (String)ESP.getFlashChipRealSize();
             json["freeheap"] = (String)ESP.getFreeHeap();
 
-            JsonObject &effect = json.createNestedObject("effect");
+            String response;
+            json.printTo(response);
+            client->text("G2" + response);
+            break;
+        }
+
+        case '3': {
+            String response;
+            DynamicJsonBuffer jsonBuffer;
+            JsonObject &json = jsonBuffer.createObject();
+
+// dump the current running effect options
+            JsonObject &effect = json.createNestedObject("currentEffect");
             effect["name"] = (String)effects.getEffect() ? effects.getEffect() : "";
             effect["brightness"] = effects.getBrightness();
             effect["speed"] = effects.getSpeed();
@@ -180,11 +186,32 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             effect["b"] = effects.getColor().b;
             effect["reverse"] = effects.getReverse();
             effect["mirror"] = effects.getMirror();
+            effect["allleds"] = effects.getAllLeds();
+            effect["startenabled"] = config.effect_startenabled;
+            effect["idleenabled"] = config.effect_idleenabled;
+            effect["idletimeout"] = config.effect_idletimeout;
 
-            String response;
+
+// dump all the known effect and options
+            JsonObject &effectList = json.createNestedObject("effectList");
+            for(int i=0; i < effects.getEffectCount(); i++){
+                JsonObject &effect = effectList.createNestedObject( effects.getEffectInfo(i)->htmlid );
+                effect["name"] = effects.getEffectInfo(i)->name;
+                effect["htmlid"] = effects.getEffectInfo(i)->htmlid;
+                effect["hasColor"] = effects.getEffectInfo(i)->hasColor;
+                effect["hasMirror"] = effects.getEffectInfo(i)->hasMirror;
+                effect["hasReverse"] = effects.getEffectInfo(i)->hasReverse;
+                effect["hasAllLeds"] = effects.getEffectInfo(i)->hasAllLeds;
+                effect["wsTCode"] = effects.getEffectInfo(i)->wsTCode;
+//            effect["brightness"] = effects.getBrightness();
+//            effect["speed"] = effects.getSpeed();
+            }
+
             json.printTo(response);
-            client->text("G2" + response);
+            client->text("G3" + response);
+//LOG_PORT.print(response);
             break;
+        }
     }
 }
 
@@ -197,6 +224,7 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
         return;
     }
 
+    bool reboot = false;
     switch (data[1]) {
         case '1':   // Set Network Config
             dsNetworkConfig(json);
@@ -205,7 +233,6 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
             break;
         case '2':   // Set Device Config
             // Reboot if MQTT changed
-            bool reboot = false;
             if (config.mqtt != json["mqtt"]["enabled"])
                 reboot = true;
 
@@ -217,11 +244,18 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
             else
                 client->text("S2");
             break;
+        case '3':   // Set Effect Startup Config
+            dsEffectConfig(json);
+            saveConfig();
+            client->text("S3");
+            break;
     }
 }
 
 void procT(uint8_t *data, AsyncWebSocketClient *client) {
-    config.ds = DataSource::WEB;
+    // T9 is view stream, DONT change source when we get this
+    if ( (data[1] >= '1') && (data[1] <= '8') ) config.ds = DataSource::WEB;
+
     switch (data[1]) {
         case '0': { // Clear whole string
             //TODO: Store previous data source when effect is selected so we can switch back to it
@@ -374,6 +408,52 @@ void handle_fw_upload(AsyncWebServerRequest *request, String filename,
         SPIFFS.begin();
         saveConfig();
         reboot = true;
+    }
+}
+
+void handle_config_upload(AsyncWebServerRequest *request, String filename,
+        size_t index, uint8_t *data, size_t len, bool final) {
+    static File file;
+    if (!index) {
+        WiFiUDP::stopAll();
+        LOG_PORT.print(F("* Config Upload Started: "));
+        LOG_PORT.println(filename.c_str());
+
+        if (confuploadtemp) {
+          free (confuploadtemp);
+          confuploadtemp = nullptr;
+        }
+        confuploadtemp = (uint8_t*) malloc(CONFIG_MAX_SIZE);
+    }
+
+    LOG_PORT.printf("index %d len %d\n", index, len);
+    memcpy(confuploadtemp + index, data, len);
+    confuploadtemp[index + len] = 0;
+
+    if (final) {
+        int filesize = index+len;
+        LOG_PORT.print(F("* Config Upload Finished:"));
+        LOG_PORT.printf(" %d bytes", filesize);
+
+        DynamicJsonBuffer jsonBuffer;
+        JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(confuploadtemp));
+        if (!json.success()) {
+            LOG_PORT.println(F("*** Parse Error ***"));
+            LOG_PORT.println(reinterpret_cast<char*>(confuploadtemp));
+            request->send(500, "text/plain", "Config Update Error." );
+        } else {
+            dsNetworkConfig(json);
+//          dsDeviceConfig(json);
+            dsEffectConfig(json);
+            saveConfig();
+            request->send(200, "text/plain", "Config Update Finished: " );
+//          reboot = true;
+        }
+
+        if (confuploadtemp) {
+            free (confuploadtemp);
+            confuploadtemp = nullptr;
+        }
     }
 }
 

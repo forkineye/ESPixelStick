@@ -65,9 +65,6 @@ const char MQTT_SET_COMMAND_TOPIC[] = "/set";
 const char LIGHT_ON[] = "ON";
 const char LIGHT_OFF[] = "OFF";
 
-// MQTT json buffer size
-const int JSON_BUFFER_SIZE = JSON_OBJECT_SIZE(10);
-
 // Configuration file
 const char CONFIG_FILE[] = "/config.json";
 
@@ -83,6 +80,7 @@ uint32_t            lastUpdate;     // Update timeout tracker
 WiFiEventHandler    wifiConnectHandler;     // WiFi connect handler
 WiFiEventHandler    wifiDisconnectHandler;  // WiFi disconnect handler
 Ticker              wifiTicker; // Ticker to handle WiFi
+Ticker              idleTicker; // Ticker for effect on idle
 AsyncMqttClient     mqtt;       // MQTT object
 Ticker              mqttTicker; // Ticker to handle MQTT
 EffectEngine        effects;    // Effects Engine
@@ -152,6 +150,22 @@ void setup() {
     if (config.hostname)
         WiFi.hostname(config.hostname);
 
+#if defined (ESPS_MODE_PIXEL)
+    pixels.setPin(DATA_PIN);
+    updateConfig();
+
+    // Do one effects cycle as early as possible
+    if (config.ds == DataSource::WEB) {
+        effects.run();
+    }
+    // set the effect idle timer
+    idleTicker.attach(config.effect_idletimeout, idleTimeout);
+
+    pixels.show();
+#else
+    updateConfig();
+#endif
+
     // Setup WiFi Handlers
     wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
 
@@ -161,6 +175,8 @@ void setup() {
         mqtt.onDisconnect(onMqttDisconnect);
         mqtt.onMessage(onMqttMessage);
         mqtt.setServer(config.mqtt_ip.c_str(), config.mqtt_port);
+        // Unset clean session (defaults to true) so we get retained messages of QoS > 0
+        mqtt.setCleanSession(config.mqtt_clean);
         if (config.mqtt_user.length() > 0)
             mqtt.setCredentials(config.mqtt_user.c_str(), config.mqtt_password.c_str());
     }
@@ -353,12 +369,18 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
 
 void onMqttMessage(char* topic, char* payload,
         AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
-    StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
+    DynamicJsonBuffer jsonBuffer;
+
     JsonObject& root = jsonBuffer.parseObject(payload);
     bool stateOn = false;
 
     if (!root.success()) {
         LOG_PORT.println("MQTT: Parsing failed");
+        return;
+    }
+
+// if its a retained message and we want clean session, ignore it
+    if ( properties.retain && config.mqtt_clean ) {
         return;
     }
 
@@ -411,7 +433,7 @@ void onMqttMessage(char* topic, char* payload,
 }
 
 void publishState() {
-    StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
+    DynamicJsonBuffer jsonBuffer;
     JsonObject& root = jsonBuffer.createObject();
     root["state"] = (config.ds == DataSource::MQTT) ? LIGHT_ON : LIGHT_OFF;
     JsonObject& color = root.createNestedObject("color");
@@ -419,7 +441,7 @@ void publishState() {
     color["g"] = effects.getColor().g;
     color["b"] = effects.getColor().b;
     root["brightness"] = effects.getBrightness();
-    if (effects.getEffect() != nullptr) {
+    if (effects.getEffect() != "") {
         root["effect"] = effects.getEffect();
     }
     root["reverse"] = effects.getReverse();
@@ -486,6 +508,13 @@ void initWeb() {
         request->send(404, "text/plain", "Page not found");
     });
 
+    DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
+
+    // Config file upload handler
+    web.on("/config", HTTP_POST, [](AsyncWebServerRequest *request) {
+        ws.textAll("X6");
+    }, handle_config_upload);
+
     web.begin();
 
     LOG_PORT.print(F("- Web Server started on port "));
@@ -525,7 +554,6 @@ void validateConfig() {
 
 #if defined(ESPS_MODE_PIXEL)
     // Set Mode
-//    config.devmode = DevMode::MPIXEL;
     config.devmode.MPIXEL = true;
     config.devmode.MSERIAL = false;
 
@@ -556,7 +584,6 @@ void validateConfig() {
     }
 #elif defined(ESPS_MODE_SERIAL)
     // Set Mode
-//    config.devmode = DevMode::MSERIAL;
     config.devmode.MPIXEL = false;
     config.devmode.MSERIAL = true;
 
@@ -575,6 +602,27 @@ void validateConfig() {
     else if (config.baudrate < BaudRate::BR_38400)
         config.baudrate = BaudRate::BR_57600;
 #endif
+
+    if (config.effect_idletimeout == 0) {
+        config.effect_idletimeout = 10;
+        config.effect_idleenabled = false;
+    }
+
+    effects.setFromConfig();
+    if (config.effect_startenabled) {
+        if (effects.isValidEffect(config.effect_name)) {
+            effects.setEffect(config.effect_name);
+
+            if ( !config.effect_name.equalsIgnoreCase("disabled")
+              && !config.effect_name.equalsIgnoreCase("view") ) {
+                config.ds = DataSource::WEB;
+            }
+
+        }
+    } else {
+        effects.setEffect("Disabled");
+    }
+
 }
 
 void updateConfig() {
@@ -607,10 +655,11 @@ void updateConfig() {
     pixels.begin(config.pixel_type, config.pixel_color, config.channel_count / 3);
     pixels.setGamma(config.gamma);
     updateGammaTable(config.gammaVal, config.briteVal);
-
     effects.begin(&pixels, config.channel_count / 3);
+
 #elif defined(ESPS_MODE_SERIAL)
     serial.begin(&SEROUT_PORT, config.serial_type, config.channel_count, config.baudrate);
+
 #endif
 
     LOG_PORT.print(F("- Listening for "));
@@ -627,30 +676,53 @@ void updateConfig() {
 
 // De-Serialize Network config
 void dsNetworkConfig(JsonObject &json) {
-    // Fallback to embedded ssid and passphrase if null in config
-    config.ssid = json["network"]["ssid"].as<String>();
-    if (!config.ssid.length())
-        config.ssid = ssid;
+    if (json.containsKey("network")) {
+        JsonObject& networkJson = json["network"];
 
-    config.passphrase = json["network"]["passphrase"].as<String>();
-    if (!config.passphrase.length())
-        config.passphrase = passphrase;
+        // Fallback to embedded ssid and passphrase if null in config
+        config.ssid = networkJson["ssid"].as<String>();
+        if (!config.ssid.length())
+            config.ssid = ssid;
 
-    // Network
-    for (int i = 0; i < 4; i++) {
-        config.ip[i] = json["network"]["ip"][i];
-        config.netmask[i] = json["network"]["netmask"][i];
-        config.gateway[i] = json["network"]["gateway"][i];
+        config.passphrase = networkJson["passphrase"].as<String>();
+        if (!config.passphrase.length())
+            config.passphrase = passphrase;
+
+        // Network
+        for (int i = 0; i < 4; i++) {
+            config.ip[i] = networkJson["ip"][i];
+            config.netmask[i] = networkJson["netmask"][i];
+            config.gateway[i] = networkJson["gateway"][i];
+        }
+        config.dhcp = networkJson["dhcp"];
+        config.ap_fallback = networkJson["ap_fallback"];
+
+        // Generate default hostname if needed
+        config.hostname = networkJson["hostname"].as<String>();
+        if (!config.hostname.length()) {
+            char chipId[7] = { 0 };
+            snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
+            config.hostname = "esps-" + String(chipId);
+        }
     }
-    config.dhcp = json["network"]["dhcp"];
-    config.ap_fallback = json["network"]["ap_fallback"];
+}
 
-    // Generate default hostname if needed
-    config.hostname = json["network"]["hostname"].as<String>();
-    if (!config.hostname.length()) {
-        char chipId[7] = { 0 };
-        snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
-        config.hostname = "esps-" + String(chipId);
+// De-serialize Effect Config
+void dsEffectConfig(JsonObject &json) {
+    // Effects
+    if (json.containsKey("effects")) {
+        JsonObject& effectsJson = json["effects"];
+        config.effect_name = effectsJson["name"].as<String>();
+        config.effect_mirror = effectsJson["mirror"];
+        config.effect_allleds = effectsJson["allleds"];
+        config.effect_reverse = effectsJson["reverse"];
+        config.effect_color = { effectsJson["r"], effectsJson["g"], effectsJson["b"] };
+        if (effectsJson.containsKey("brightness"))
+            config.effect_brightness = effectsJson["brightness"];
+        config.effect_startenabled = effectsJson["startenabled"];
+        config.effect_idleenabled = effectsJson["idleenabled"];
+        config.effect_idletimeout = effectsJson["idletimeout"];
+
     }
 }
 
@@ -667,12 +739,16 @@ void dsDeviceConfig(JsonObject &json) {
     config.multicast = json["e131"]["multicast"];
 
     // MQTT
-    config.mqtt = json["mqtt"]["enabled"];
-    config.mqtt_ip = json["mqtt"]["ip"].as<String>();
-    config.mqtt_port = json["mqtt"]["port"];
-    config.mqtt_user = json["mqtt"]["user"].as<String>();
-    config.mqtt_password = json["mqtt"]["password"].as<String>();
-    config.mqtt_topic = json["mqtt"]["topic"].as<String>();
+    if (json.containsKey("mqtt")) {
+        JsonObject& mqttJson = json["mqtt"];
+        config.mqtt = mqttJson["enabled"];
+        config.mqtt_ip = mqttJson["ip"].as<String>();
+        config.mqtt_port = mqttJson["port"];
+        config.mqtt_user = mqttJson["user"].as<String>();
+        config.mqtt_password = mqttJson["password"].as<String>();
+        config.mqtt_topic = mqttJson["topic"].as<String>();
+        config.mqtt_clean = mqttJson["clean"] | false;
+    }
 
 #if defined(ESPS_MODE_PIXEL)
     // Pixel
@@ -693,6 +769,8 @@ void dsDeviceConfig(JsonObject &json) {
 void loadConfig() {
     // Zeroize Config struct
     memset(&config, 0, sizeof(config));
+
+    effects.setFromDefaults();
 
     // Load CONFIG_FILE json. Create and init with defaults if not found
     File file = SPIFFS.open(CONFIG_FILE, "r");
@@ -721,6 +799,7 @@ void loadConfig() {
 
         dsNetworkConfig(json);
         dsDeviceConfig(json);
+        dsEffectConfig(json);
 
         LOG_PORT.println(F("- Configuration loaded."));
     }
@@ -757,6 +836,24 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     network["dhcp"] = config.dhcp;
     network["ap_fallback"] = config.ap_fallback;
 
+    // Effects
+    JsonObject &_effects = json.createNestedObject("effects");
+    _effects["name"] = config.effect_name;
+
+    _effects["mirror"] = config.effect_mirror;
+    _effects["allleds"] = config.effect_allleds;
+    _effects["reverse"] = config.effect_reverse;
+
+    _effects["r"] = config.effect_color.r;
+    _effects["g"] = config.effect_color.g;
+    _effects["b"] = config.effect_color.b;
+
+    _effects["brightness"] = config.effect_brightness;
+    _effects["startenabled"] = config.effect_startenabled;
+    _effects["idleenabled"] = config.effect_idleenabled;
+    _effects["idletimeout"] = config.effect_idletimeout;
+
+
     // MQTT
     JsonObject &_mqtt = json.createNestedObject("mqtt");
     _mqtt["enabled"] = config.mqtt;
@@ -765,6 +862,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     _mqtt["user"] = config.mqtt_user.c_str();
     _mqtt["password"] = config.mqtt_password.c_str();
     _mqtt["topic"] = config.mqtt_topic.c_str();
+    _mqtt["clean"] = config.mqtt_clean;
 
     // E131
     JsonObject &e131 = json.createNestedObject("e131");
@@ -816,6 +914,15 @@ void saveConfig() {
     }
 }
 
+void idleTimeout() {
+   idleTicker.attach(config.effect_idletimeout, idleTimeout);
+    if ( (config.effect_idleenabled) && (config.ds == DataSource::E131) ) {
+        config.ds = DataSource::IDLEWEB;
+        effects.setFromConfig();
+    }
+}
+
+
 /////////////////////////////////////////////////////////
 //
 //  Main Loop
@@ -831,10 +938,14 @@ void loop() {
     }
 
     // Render output for current data source
-    switch (config.ds) {
-        case DataSource::E131:
+    if ( (config.ds == DataSource::E131) || (config.ds == DataSource::IDLEWEB) ) {
             // Parse a packet and update pixels
             if (!e131.isEmpty()) {
+                idleTicker.attach(config.effect_idletimeout, idleTimeout);
+                if (config.ds == DataSource::IDLEWEB) {
+                    config.ds = DataSource::E131;
+                }
+
                 e131.pull(&packet);
                 uint16_t universe = htons(packet.universe);
                 uint8_t *data = packet.property_values + 1;
@@ -888,15 +999,12 @@ void loop() {
                     }
                 }
             }
-            break;
+    }
 
-        case DataSource::MQTT:
+    if ( (config.ds == DataSource::WEB)
+      || (config.ds == DataSource::IDLEWEB)
+      || (config.ds == DataSource::MQTT) ) {
             effects.run();
-            break;
-
-        case DataSource::WEB:
-            effects.run();
-            break;
     }
 
 /* Streaming refresh */
