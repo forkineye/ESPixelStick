@@ -295,7 +295,7 @@ void onWifiConnect(const WiFiEventStationModeGotIP &event) {
     //TODO: Reboot or restart mdns when config.id is changed?
      char chipId[7] = { 0 };
     snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
-    MDNS.setInstanceName(config.id + " (" + String(chipId) + ")");
+    MDNS.setInstanceName(String(config.id + " (" + String(chipId) + ")").c_str());
     if (MDNS.begin(config.hostname.c_str())) {
         MDNS.addService("http", "tcp", HTTP_PORT);
         MDNS.addService("e131", "udp", E131_DEFAULT_PORT);

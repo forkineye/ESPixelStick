@@ -1,5 +1,5 @@
 dist/*.html
 node_modules
-.vscode
+.build
 *.gz
 package-lock.json
