@@ -93,4 +93,4 @@ gulp.task('watch', function() {
 });
 
 /* Default Task */
-gulp.task('default', ['clean', 'html', 'css', 'js', 'image']);
+gulp.task('default', gulp.series(['clean', 'html', 'css', 'js', 'image']));
