@@ -102,14 +102,22 @@ class PixelDriver {
         pixdata[address] = value;
     }
 
+    /* Set group / zigzag counts */
+    inline void setGroup(uint16_t _group, uint16_t _zigzag) {
+        this->cntGroup = _group;
+        this->cntZigzag = _zigzag;
+    }
+
     /* Drop the update if our refresh rate is too high */
     inline bool canRefresh() {
         return (micros() - startTime) >= refreshTime;
     }
 
  private:
-    PixelType  type;            // Pixel type
-    PixelColor color;           // Color Order
+    PixelType   type;           // Pixel type
+    PixelColor  color;          // Color Order
+    uint16_t    cntGroup;       // Output modifying interval (in LEDs, not channels)
+    uint16_t    cntZigzag;      // Zigzag every cntZigzag physical pixels
     uint8_t     pin;            // Pin for bit-banging
     uint8_t     *pixdata;       // Pixel buffer
     uint8_t     *asyncdata;     // Async buffer

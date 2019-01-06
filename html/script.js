@@ -159,10 +159,13 @@ $(function() {
 
     // Pixel type toggles
     $('#p_type').change(function() {
-        if ($('select[name_type]').val() == '1')
+        if ($('select[name=p_type]').val() == '1') {
             $('#p_color').prop('disabled', true);
-        else
+            $('#o_gamma').addClass('hidden');
+        } else {
             $('#p_color').prop('disabled', false);
+            $('#o_gamma').removeClass('hidden');
+        }
     });
 
     // Serial protocol toggles
@@ -529,6 +532,8 @@ function getConfig(data) {
         $('#p_count').val(config.e131.channel_count / 3);
         $('#p_type').val(config.pixel.type);
         $('#p_color').val(config.pixel.color);
+        $('#p_groupSize').val(config.pixel.groupSize);
+        $('#p_zigSize').val(config.pixel.zigSize);
         $('#p_gamma').prop('checked', config.pixel.gamma);
         $('#p_gammaVal').val(config.pixel.gammaVal);
         $('#p_briteVal').val(config.pixel.briteVal);
@@ -723,6 +728,8 @@ function submitConfig() {
             'pixel': {
                 'type': parseInt($('#p_type').val()),
                 'color': parseInt($('#p_color').val()),
+                'groupSize': parseInt($('#p_groupSize').val()),
+                'zigSize': parseInt($('#p_zigSize').val()),
                 'gamma': $('#p_gamma').prop('checked'),
                 'gammaVal': parseFloat($('#p_gammaVal').val()),
                 'briteVal': parseFloat($('#p_briteVal').val())

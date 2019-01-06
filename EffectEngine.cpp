@@ -63,10 +63,10 @@ void EffectEngine::begin(DRIVER* ledDriver, uint16_t ledCount) {
 
 void EffectEngine::run() {
     if (_initialized && _activeEffect && _activeEffect->func) {
-        uint32_t now = millis();
-        if (now > _effectTimeout) {
+        if (millis() - _effectLastRun >= _effectDelay) {
+            _effectLastRun = millis();
             uint16_t delay = (this->*_activeEffect->func)();
-            _effectTimeout = now + max((int)delay, MIN_EFFECT_DELAY);
+            _effectDelay = max((int)delay, MIN_EFFECT_DELAY);
             _effectCounter++;
         }
     }
@@ -78,7 +78,8 @@ void EffectEngine::setEffect(const String effectName) {
         if ( effectName.equalsIgnoreCase(EFFECT_LIST[effect].name) ) {
             if (_activeEffect != &EFFECT_LIST[effect]) {
                 _activeEffect = &EFFECT_LIST[effect];
-                _effectTimeout = 0;
+                _effectLastRun = millis();
+                _effectDelay = MIN_EFFECT_DELAY;
                 _effectCounter = 0;
                 _effectStep = 0;
             }

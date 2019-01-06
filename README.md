@@ -96,7 +96,7 @@ mosquitto_pub -t porch/esps/set -m '{"state":"ON","color":{"r":255,"g":128,"b":6
 - [Bill Porter](https://github.com/madsci1016) for initial Renard and SoftAP support.
 - Bill Porter and [Grayson Lough](https://github.com/GraysonLough) for initial DMX support.
 - [Rich Danby](https://github.com/cinoan) for fixes and helping polish the front-end.
-- [penfold42](https://github.com/penfold42) for fixes, brightness, and gamma support.
+- [penfold42](https://github.com/penfold42) for fixes, brightness, gamma support, and zig-zag / grouping.
   - penfold42 also maintains PWM support in their fork located [here](https://github.com/penfold42/ESPixelBoard).
 - [Austin Hodges](https://github.com/ahodges9) for effects support and MQTT cleanup.
 - [Matthias C. Hormann](https://github.com/Moonbase59) — some MQTT & effects cleanup.

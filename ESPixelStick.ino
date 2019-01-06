@@ -566,6 +566,11 @@ void validateConfig() {
     else if (config.channel_count < 1)
         config.channel_count = 1;
 
+    if (config.groupSize > config.channel_count / 3)
+        config.groupSize = config.channel_count / 3;
+    else if (config.groupSize < 1)
+        config.groupSize = 1;
+
     // GECE Limits
     if (config.pixel_type == PixelType::GECE) {
         config.pixel_color = PixelColor::RGB;
@@ -653,9 +658,11 @@ void updateConfig() {
     // Initialize for our pixel type
 #if defined(ESPS_MODE_PIXEL)
     pixels.begin(config.pixel_type, config.pixel_color, config.channel_count / 3);
+//    pixels.setGroupMode(config.groupMode, config.groupSize);
+    pixels.setGroup(config.groupSize, config.zigSize);
     pixels.setGamma(config.gamma);
     updateGammaTable(config.gammaVal, config.briteVal);
-    effects.begin(&pixels, config.channel_count / 3);
+    effects.begin(&pixels, config.channel_count / 3 / config.groupSize);
 
 #elif defined(ESPS_MODE_SERIAL)
     serial.begin(&SEROUT_PORT, config.serial_type, config.channel_count, config.baudrate);
@@ -754,6 +761,8 @@ void dsDeviceConfig(JsonObject &json) {
     // Pixel
     config.pixel_type = PixelType(static_cast<uint8_t>(json["pixel"]["type"]));
     config.pixel_color = PixelColor(static_cast<uint8_t>(json["pixel"]["color"]));
+    config.groupSize = json["pixel"]["groupSize"];
+    config.zigSize = json["pixel"]["zigSize"];
     config.gamma = json["pixel"]["gamma"];
     config.gammaVal = json["pixel"]["gammaVal"];
     config.briteVal = json["pixel"]["briteVal"];
@@ -877,6 +886,8 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     JsonObject &pixel = json.createNestedObject("pixel");
     pixel["type"] = static_cast<uint8_t>(config.pixel_type);
     pixel["color"] = static_cast<uint8_t>(config.pixel_color);
+    pixel["groupSize"] = config.groupSize;
+    pixel["zigSize"] = config.zigSize;
     pixel["gamma"] = config.gamma;
     pixel["gammaVal"] = config.gammaVal;
     pixel["briteVal"] = config.briteVal;
@@ -940,7 +951,7 @@ void loop() {
     // Render output for current data source
     if ( (config.ds == DataSource::E131) || (config.ds == DataSource::IDLEWEB) ) {
             // Parse a packet and update pixels
-            if (!e131.isEmpty()) {
+            while (!e131.isEmpty()) {
                 idleTicker.attach(config.effect_idletimeout, idleTimeout);
                 if (config.ds == DataSource::IDLEWEB) {
                     config.ds = DataSource::E131;

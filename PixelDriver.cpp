@@ -257,15 +257,37 @@ void ICACHE_RAM_ATTR PixelDriver::show() {
     if (!pixdata) return;
 
     if (type == PixelType::WS2811) {
-        uart_buffer = pixdata;
-        uart_buffer_tail = pixdata + szBuffer;
-        SET_PERI_REG_MASK(UART_INT_ENA(1), UART_TXFIFO_EMPTY_INT_ENA);
+        if (!cntZigzag) {  // Normal / group copy
+            for (size_t led = 0; led < szBuffer / 3; led++) {
+                uint16 modifier = led / cntGroup;
+                asyncdata[3 * led + 0] = pixdata[3 * modifier + 0];
+                asyncdata[3 * led + 1] = pixdata[3 * modifier + 1];
+                asyncdata[3 * led + 2] = pixdata[3 * modifier + 2];
+            }
+        } else {  // Zigzag copy
+            for (size_t led = 0; led < szBuffer / 3; led++) {
+                uint16 modifier = led / cntGroup;
+                if (led / cntZigzag % 2) { // Odd "zig"
+                    int group = cntZigzag * (led / cntZigzag);
+                    int this_led = (group + cntZigzag - (led % cntZigzag) - 1) / cntGroup;
+                    asyncdata[3 * led + 0] = pixdata[3 * this_led + 0];
+                    asyncdata[3 * led + 1] = pixdata[3 * this_led + 1];
+                    asyncdata[3 * led + 2] = pixdata[3 * this_led + 2];
+                } else { // Even "zag"
+                    asyncdata[3 * led + 0] = pixdata[3 * modifier + 0];
+                    asyncdata[3 * led + 1] = pixdata[3 * modifier + 1];
+                    asyncdata[3 * led + 2] = pixdata[3 * modifier + 2];
+                }
+            }
 
+        }
+
+        uart_buffer = asyncdata;
+        uart_buffer_tail = asyncdata + szBuffer;
+
+        SET_PERI_REG_MASK(UART_INT_ENA(1), UART_TXFIFO_EMPTY_INT_ENA);
         startTime = micros();
 
-        // Copy the pixels to the idle buffer and swap them
-        memcpy(asyncdata, pixdata, szBuffer);
-        std::swap(asyncdata, pixdata);
     } else if (type == PixelType::GECE) {
         uint32_t packet = 0;
         uint32_t pTime = 0;
@@ -301,5 +323,6 @@ void ICACHE_RAM_ATTR PixelDriver::show() {
 }
 
 uint8_t* PixelDriver::getData() {
-    return pixdata;
+    return asyncdata;	// data post grouping or zigzaging
+//    return pixdata;
 }
