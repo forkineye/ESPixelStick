@@ -527,8 +527,10 @@ function getConfig(data) {
         mode = 'pixel';
         $('#o_pixel').removeClass('hidden');
         $('#p_count').val(config.e131.channel_count / 3);
+        $('#p_groupsize').val(config.pixel.groupSize);
         $('#p_type').val(config.pixel.type);
         $('#p_color').val(config.pixel.color);
+        $('#p_groupMode').val(config.pixel.groupMode);
         $('#p_gamma').prop('checked', config.pixel.gamma);
         $('#p_gammaVal').val(config.pixel.gammaVal);
         $('#p_briteVal').val(config.pixel.briteVal);
@@ -723,6 +725,8 @@ function submitConfig() {
             'pixel': {
                 'type': parseInt($('#p_type').val()),
                 'color': parseInt($('#p_color').val()),
+                'groupSize': parseInt($('#p_groupsize').val()),
+                'groupMode': parseInt($('#p_groupMode').val()),
                 'gamma': $('#p_gamma').prop('checked'),
                 'gammaVal': parseFloat($('#p_gammaVal').val()),
                 'briteVal': parseFloat($('#p_briteVal').val())

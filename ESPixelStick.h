@@ -132,6 +132,8 @@ typedef struct {
     /* Pixels */
     PixelType   pixel_type;     /* Pixel type */
     PixelColor  pixel_color;    /* Pixel color order */
+    GroupMode   groupMode;	/* disabled, grouped, zigzag */
+    uint16_t    groupSize;
     bool        gamma;          /* Use gamma map? */
     float       gammaVal;       /* gamma value to use */
     float       briteVal;       /* brightness lto use */

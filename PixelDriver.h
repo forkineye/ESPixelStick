@@ -86,6 +86,13 @@ enum class PixelColor : uint8_t {
     BGR
 };
 
+/* Group Mode */
+enum class GroupMode : uint8_t {
+    disabled,
+    grouped,
+    zigzag
+};
+
 class PixelDriver {
  public:
     int begin();
@@ -102,14 +109,22 @@ class PixelDriver {
         pixdata[address] = value;
     }
 
+    /* Set output mode */
+    inline void setGroupMode(GroupMode _mode, uint16_t _interval) {
+        this->mode = _mode;
+        this->interval = _interval;
+    }
+
     /* Drop the update if our refresh rate is too high */
     inline bool canRefresh() {
         return (micros() - startTime) >= refreshTime;
     }
 
  private:
-    PixelType  type;            // Pixel type
-    PixelColor color;           // Color Order
+    PixelType   type;           // Pixel type
+    PixelColor  color;          // Color Order
+    GroupMode   mode;           // Output modifying mode - normal, grouped, zigzag
+    uint16_t    interval;       // Output modifying interval (in LEDs, not channels)
     uint8_t     pin;            // Pin for bit-banging
     uint8_t     *pixdata;       // Pixel buffer
     uint8_t     *asyncdata;     // Async buffer

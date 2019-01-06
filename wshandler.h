@@ -117,6 +117,12 @@ void procE(uint8_t *data, AsyncWebSocketClient *client) {
             p_color["GBR"] = static_cast<uint8_t>(PixelColor::GBR);
             p_color["BGR"] = static_cast<uint8_t>(PixelColor::BGR);
 
+            // Pixel Colors
+            JsonObject &p_groupMode = json.createNestedObject("p_groupMode");
+            p_groupMode["Disabled"]  = static_cast<uint8_t>(GroupMode::disabled);
+            p_groupMode["Grouped"] = static_cast<uint8_t>(GroupMode::grouped);
+            p_groupMode["Zig-Zag"] = static_cast<uint8_t>(GroupMode::zigzag);
+
 #elif defined (ESPS_MODE_SERIAL)
             // Serial Protocols
             JsonObject &s_proto = json.createNestedObject("s_proto");
