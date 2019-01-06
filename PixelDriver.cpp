@@ -257,39 +257,29 @@ void ICACHE_RAM_ATTR PixelDriver::show() {
     if (!pixdata) return;
 
     if (type == PixelType::WS2811) {
-        // Copy or group the pixels to the idle buffer
-        switch (mode) {
-            case GroupMode::grouped:
-                for (size_t led=0; led < szBuffer/3; led++) {
-                    asyncdata[3*led+0] = pixdata[3*(led/interval)+0];
-                    asyncdata[3*led+1] = pixdata[3*(led/interval)+1];
-                    asyncdata[3*led+2] = pixdata[3*(led/interval)+2];
+        if (!cntZigzag) {  // Normal / group copy
+            for (size_t led = 0; led < szBuffer / 3; led++) {
+                uint16 modifier = led / cntGroup;
+                asyncdata[3 * led + 0] = pixdata[3 * modifier + 0];
+                asyncdata[3 * led + 1] = pixdata[3 * modifier + 1];
+                asyncdata[3 * led + 2] = pixdata[3 * modifier + 2];
+            }
+        } else {  // Zigzag copy
+            for (size_t led = 0; led < szBuffer / 3; led++) {
+                uint16 modifier = led / cntGroup;
+                if (led / cntZigzag % 2) { // Odd "zig"
+                    int group = cntZigzag * (led / cntZigzag);
+                    int this_led = (group + cntZigzag - (led % cntZigzag) - 1) / cntGroup;
+                    asyncdata[3 * led + 0] = pixdata[3 * this_led + 0];
+                    asyncdata[3 * led + 1] = pixdata[3 * this_led + 1];
+                    asyncdata[3 * led + 2] = pixdata[3 * this_led + 2];
+                } else { // Even "zag"
+                    asyncdata[3 * led + 0] = pixdata[3 * modifier + 0];
+                    asyncdata[3 * led + 1] = pixdata[3 * modifier + 1];
+                    asyncdata[3 * led + 2] = pixdata[3 * modifier + 2];
                 }
-                break;
+            }
 
-            case GroupMode::zigzag:
-                for (size_t led=0; led < szBuffer/3; led++) {
-                    if (led/interval%2) { // Odd "zig"
-                        int group = interval * (led / interval);
-                        int this_led = group + interval - (led % interval) - 1;
-                        asyncdata[3*led+0] = pixdata[3*this_led+0];
-                        asyncdata[3*led+1] = pixdata[3*this_led+1];
-                        asyncdata[3*led+2] = pixdata[3*this_led+2];
-                    } else { // Evem "zag"
-                        asyncdata[3*led+0] = pixdata[3*led+0];
-                        asyncdata[3*led+1] = pixdata[3*led+1];
-                        asyncdata[3*led+2] = pixdata[3*led+2];
-                    }
-                }
-                break;
-
-            case GroupMode::disabled:
-                memcpy(asyncdata, pixdata, szBuffer);
-                break;
-
-            default:
-                memcpy(asyncdata, pixdata, szBuffer);
-                break;
         }
 
         uart_buffer = asyncdata;

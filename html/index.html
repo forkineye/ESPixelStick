@@ -78,36 +78,36 @@
         <form class="form-horizontal">
           <div class="form-group" id="fg_ssid">
             <label class="control-label col-sm-2" for="ssid">SSID</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="ssid" name="ssid" placeholder="Enter SSID"></div>
+            <div class="col-sm-10"><input type="text" class="form-control" id="ssid" name="ssid" title="The SSID for your access point."></div>
           </div>
           <div class="form-group" id="fg_password">
             <label class="control-label col-sm-2" for="password">Password</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="password" name="password" placeholder="Enter Password"></div>
+            <div class="col-sm-10"><input type="text" class="form-control" id="password" name="password" title="The password for your access point."></div>
           </div>
           <div class="form-group" id="fg_hostname">
             <label class="control-label col-sm-2" for="hostname">Hostname</label>
-            <div class="col-sm-10"><input type="text" class="form-control has-error" id="hostname" name="hostname" placeholder="Enter Hostname"></div>
+            <div class="col-sm-10"><input type="text" class="form-control has-error" id="hostname" name="hostname" title="Hostname for this device."></div>
           </div>
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
-              <div class="checkbox"><label><input type="checkbox" id="dhcp" name="dhcp"> Use DHCP</label></div>
+              <div class="checkbox"><label><input type="checkbox" id="dhcp" name="dhcp" title="Usage of DHCP with static leases is recommended."> Use DHCP</label></div>
             </div>
           </div>
           <div class="form-group dhcp" id="fg_ip">
             <label class="control-label col-sm-2" for="ip">IP</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="ip" name="ip" placeholder="xxx.xxx.xxx.xxx"></div>
+            <div class="col-sm-10"><input type="text" class="form-control" id="ip" name="ip" title="Static IP Address"></div>
           </div>
           <div class="form-group dhcp" id="fg_netmask">
             <label class="control-label col-sm-2" for="netmask">Netmask</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="netmask" name="netmask" placeholder="xxx.xxx.xxx.xxx"></div>
+            <div class="col-sm-10"><input type="text" class="form-control" id="netmask" name="netmask" title="Static Netmask"></div>
           </div>
           <div class="form-group dhcp" id="fg_gateway">
             <label class="control-label col-sm-2" for="gateway">Gateway</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="gateway" name="gateway" placeholder="xxx.xxx.xxx.xxx"></div>
+            <div class="col-sm-10"><input type="text" class="form-control" id="gateway" name="gateway" title="Static Gateway"></div>
           </div>
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
-              <div class="checkbox"><label><input type="checkbox" id="ap" name="ap"> AP Fallback</label></div>
+              <div class="checkbox"><label><input type="checkbox" id="ap" name="ap" title="Enabling this will cause your device to come up as an Access Point if your configured WiFi connection fails. Not recommended for live / production devices."> AP Fallback</label></div>
             </div>
           </div>
           <div class="form-group">
@@ -126,19 +126,19 @@
         <form class="form-horizontal">
           <div class="form-group">
             <label class="control-label col-sm-2" for="devid">Device ID</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="devid" name="devid" placeholder="Enter Device ID"></div>
+            <div class="col-sm-10"><input type="text" class="form-control" id="devid" name="devid" title="Plain text ID to help identify your device."></div>
           </div>
           <div class="form-group">
             <label class="control-label col-sm-2" for="universe">Universe</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="universe" name="universe" placeholder="Enter Universe Number"></div>
+            <div class="col-sm-10"><input type="text" class="form-control" id="universe" name="universe" title="DMX Universe to listen for. Consecutive DMX Universes will be monitored as needed."></div>
           </div>
           <div class="form-group">
             <label class="control-label col-sm-2" for="channel_start">Start Channel</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="channel_start" name="channel_start" placeholder="Enter Starting Channel"></div>
+            <div class="col-sm-10"><input type="text" class="form-control" id="channel_start" name="channel_start" title="Start listening for data at this DMX channel."></div>
           </div>
           <div class="form-group">
             <label class="control-label col-sm-2" for="universe_limit">Universe Boundary</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="universe_limit" name="universe_limit" placeholder="Enter number of channels to handle per universe"></div>
+            <div class="col-sm-10"><input type="text" class="form-control" id="universe_limit" name="universe_limit" title="The number of DMX channels you are using per Universe.  This must match the configuration of your sequencer.  Most common values are 510 and 512."></div>
           </div>
 
           <div class="form-group">
@@ -150,9 +150,12 @@
           <!-- Pixel Configuration -->
           <div id="o_pixel" class="odiv hidden">
             <legend class="esps-legend">Pixel Configuration</legend>
+
             <div class="form-group">
-              <label class="control-label col-sm-2" for="p_count">Physical Pixels</label>
-              <div class="col-sm-10"><input type="text" class="form-control" id="p_count" name="p_count" placeholder="Enter number of pixels" onchange="refreshPixel()"></div>
+              <label class="control-label col-sm-2" for="p_count">Pixel Count</label>
+              <div class="col-sm-3"><input type="text" class="form-control" id="p_count" name="p_count" title="Number of physical pixels" onchange="refreshPixel()"></div>
+              <label class="control-label col-sm-2" for="p_groupSize">Group Size</label>
+              <div class="col-sm-3"><input type="text" class="form-control" id="p_groupSize" name="p_groupSize" title="Group every X number of physical pixels together.  Default of 1 is no grouping." onchange="refreshPixel()"></div>
             </div>
 
             <div class="form-group">
@@ -166,26 +169,20 @@
               </div>
             </div>
 
-            <div class="form-group" id="o_grouping">
-              <label class="control-label col-sm-2" for="p_groupMode">Output Grouping</label>
-              <div class="col-sm-3">
-                <select class="form-control" id="p_groupMode" name="p_groupMode"></select>
-              </div>
-              <label class="control-label col-sm-2" for="p_groupSize">Group Size</label>
-              <div class="col-sm-3"><input type="text" class="form-control" id="p_groupSize" name="p_groupSize" placeholder="Group size of pixels" onchange="refreshPixel()"></div>
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="p_zigSize">Zigzag Count</label>
+              <div class="col-sm-3"><input type="text" class="form-control" id="p_zigSize" name="p_zigSize" title="Zigzag every X number of physical pixels." onchange="refreshPixel()"></div>
             </div>
 
-            <div class="form-group">
-              <div class="col-sm-offset-2 col-sm-10">
-                <div class="checkbox"><label><input type="checkbox" id="p_gamma" name="p_gamma"> Gamma Correction</label></div>
-              </div>
-            </div>
-            <div class="form-group">
+            <div class="form-group" id="o_gamma">
               <label class="control-label col-sm-2" for="p_gammaVal">Gamma Value</label>
-              <div class="col-sm-3"><input type="text" class="form-control" id="p_gammaVal" name="p_gammaVal" placeholder="Gamma Value" onchange="refreshPixel()"></div>
+              <div class="col-sm-3"><input type="text" class="form-control" id="p_gammaVal" name="p_gammaVal" title="Recommended value is 2.2." onchange="refreshPixel()"></div>
               <label class="control-label col-sm-2" for="p_briteVal">Brightness</label>
-              <div class="col-sm-3"><input type="text" class="form-control" id="p_briteVal" name="p_briteVal" placeholder="Brightness" onchange="refreshPixel()"></div>
+              <div class="col-sm-3"><input type="text" class="form-control" id="p_briteVal" name="p_briteVal" title="Maximum brightness is 1.0." onchange="refreshPixel()"></div>
               <div class="col-sm-2"><a target="_gamma" href="/gamma.html">View Graph</a></div>
+              <div class="col-sm-offset-2 col-sm-10">
+                  <div class="checkbox"><label><input type="checkbox" id="p_gamma" name="p_gamma"> Gamma Correction</label></div>
+                </div>
             </div>
           </div>
 
@@ -353,24 +350,24 @@
         <legend class="esps-legend">Administration</legend>
         <form class="form-horizontal" id="updatefw" action="/updatefw" method="post" enctype="multipart/form-data">
           <div class="form-group">
-            <label class="control-label col-sm-2">FW Version</label>
-            <div class="col-sm-10"><p class="form-control-static" id="x_version"></p></div>
+            <label class="control-label col-sm-3">FW Version</label>
+            <div class="col-sm-9"><p class="form-control-static" id="x_version"></p></div>
           </div>
           <div class="form-group">
-            <label class="control-label col-sm-2">Build Date</label>
-            <div class="col-sm-10"><p class="form-control-static" id="x_built"></p></div>
+            <label class="control-label col-sm-3">Build Date</label>
+            <div class="col-sm-9"><p class="form-control-static" id="x_built"></p></div>
           </div>
           <div class="form-group">
-            <label class="control-label col-sm-2">Used Flash Size</label>
-            <div class="col-sm-10"><p class="form-control-static" id="x_usedflashsize"></p></div>
+            <label class="control-label col-sm-3">Used Flash Size</label>
+            <div class="col-sm-9"><p class="form-control-static" id="x_usedflashsize"></p></div>
           </div>
           <div class="form-group">
-            <label class="control-label col-sm-2">Real Flash Size</label>
-            <div class="col-sm-10"><p class="form-control-static" id="x_realflashsize"></p></div>
+            <label class="control-label col-sm-3">Real Flash Size</label>
+            <div class="col-sm-9"><p class="form-control-static" id="x_realflashsize"></p></div>
           </div>
           <div class="form-group">
-            <label class="control-label col-sm-2">Flash Chip ID</label>
-            <div class="col-sm-10"><p class="form-control-static" id="x_flashchipid"></p></div>
+            <label class="control-label col-sm-3">Flash Chip ID</label>
+            <div class="col-sm-9"><p class="form-control-static" id="x_flashchipid"></p></div>
           </div>
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
