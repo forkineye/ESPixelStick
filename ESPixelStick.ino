@@ -639,6 +639,9 @@ void validateConfig() {
         config.baudrate = BaudRate::BR_57600;
 #endif
 
+    if (config.effect_speed < 100)
+        config.effect_speed = 100;
+
     if (config.effect_idletimeout == 0) {
         config.effect_idletimeout = 10;
         config.effect_idleenabled = false;
@@ -754,6 +757,7 @@ void dsEffectConfig(JsonObject &json) {
         config.effect_mirror = effectsJson["mirror"];
         config.effect_allleds = effectsJson["allleds"];
         config.effect_reverse = effectsJson["reverse"];
+        config.effect_speed = effectsJson["speed"];
         config.effect_color = { effectsJson["r"], effectsJson["g"], effectsJson["b"] };
         if (effectsJson.containsKey("brightness"))
             config.effect_brightness = effectsJson["brightness"];
@@ -894,6 +898,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     _effects["mirror"] = config.effect_mirror;
     _effects["allleds"] = config.effect_allleds;
     _effects["reverse"] = config.effect_reverse;
+    _effects["speed"] = config.effect_speed;
 
     _effects["r"] = config.effect_color.r;
     _effects["g"] = config.effect_color.g;
