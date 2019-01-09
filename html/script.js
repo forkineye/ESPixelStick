@@ -554,7 +554,6 @@ function getConfig(data) {
         $('#p_color').val(config.pixel.color);
         $('#p_groupSize').val(config.pixel.groupSize);
         $('#p_zigSize').val(config.pixel.zigSize);
-        $('#p_gamma').prop('checked', config.pixel.gamma);
         $('#p_gammaVal').val(config.pixel.gammaVal);
         $('#p_briteVal').val(config.pixel.briteVal);
 
@@ -752,7 +751,6 @@ function submitConfig() {
                 'color': parseInt($('#p_color').val()),
                 'groupSize': parseInt($('#p_groupSize').val()),
                 'zigSize': parseInt($('#p_zigSize').val()),
-                'gamma': $('#p_gamma').prop('checked'),
                 'gammaVal': parseFloat($('#p_gammaVal').val()),
                 'briteVal': parseFloat($('#p_briteVal').val())
             },

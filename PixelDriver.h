@@ -92,7 +92,6 @@ class PixelDriver {
     int begin(PixelType type);
     int begin(PixelType type, PixelColor color, uint16_t length);
     void setPin(uint8_t pin);
-    void setGamma(bool gamma);
     void updateOrder(PixelColor color);
     void ICACHE_RAM_ATTR show();
     uint8_t* getData();
