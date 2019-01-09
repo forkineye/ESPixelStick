@@ -23,6 +23,11 @@ $(function() {
         $('.mdiv').addClass('hidden');
         $($(this).attr('href')).removeClass('hidden');
 
+        // kick start the live stream
+        if ($(this).attr('href') == "#diag") {
+            wsEnqueue('V1');
+        }
+
         // Collapse the menu on smaller screens
         $('#navbar').removeClass('in').attr('aria-expanded', 'false');
         $('.navbar-toggle').attr('aria-expanded', 'false');
@@ -133,6 +138,16 @@ $(function() {
           if (effectInfo[tmode].hasAllLeds) {
               wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
           }
+      }
+    });
+
+    // Effect running now checkbox
+    $('#t_effectenabled').click(function() {
+      // On click(), the new checkbox state has already been set
+      if ( $(this).prop('checked') ) {
+        wsEnqueue( 'T+' );
+      } else {
+        wsEnqueue( 'T-' );
       }
     });
 
@@ -368,7 +383,7 @@ function wsConnect() {
             } else {
                 streamData= new Uint8Array(event.data);
                 drawStream(streamData);
-                if (!$('#tmode option:selected').val().localeCompare('t_view')) wsEnqueue('T9');
+                if ($('#diag').is(':visible')) wsEnqueue('V1');
             }
             wsReadyToSend();
         };
@@ -633,6 +648,7 @@ function getEffectInfo(data) {
     $('#t_reverse').prop('checked', running.reverse);
     $('#t_mirror').prop('checked', running.mirror);
     $('#t_allleds').prop('checked', running.allleds);
+    $('#t_effectenabled').prop('checked', running.effectenabled);
     $('#t_startenabled').prop('checked', running.startenabled);
     $('#t_idleenabled').prop('checked', running.idleenabled);
     $('#t_idletimeout').val(running.idletimeout);
@@ -832,16 +848,6 @@ function hideShowTestSections() {
 //console.log('tmode is: ' + tmode);
     if ( (typeof tmode !== 'undefined') && (typeof effectInfo[tmode].wsTCode !== 'undefined') ) {
 // hide/show view stream and testing options+startup
-        if (!tmode.localeCompare('t_view')) {
-            $('#t_options').addClass('hidden');
-            $('.t_startup').addClass('hidden');
-            $('#t_view').removeClass('hidden');
-        } else {
-            $('#t_options').removeClass('hidden');
-            $('.t_startup').removeClass('hidden');
-            $('#t_view').addClass('hidden');
-        }
-
         if (effectInfo[tmode].hasColor) {
             $('#lab_color').removeClass('hidden');
             $('#div_color').removeClass('hidden');
