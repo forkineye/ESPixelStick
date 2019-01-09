@@ -53,15 +53,16 @@ The ESPixelStick firmware can generate the following outputs from incoming E1.31
 
 ## MQTT Support
 
-MQTT can be configured via the web interface.  When enabled, a payload of "ON" will tell the ESPixelStick to override any incoming E1.31 data with MQTT data.  When a payload of "OFF" is received, E1.31 processing will resume.  All Topics are under the configured top level Topic.
+MQTT can be configured via the web interface.  When enabled, a payload of "ON" will tell the ESPixelStick to override any incoming E1.31 data with MQTT data.  When a payload of "OFF" is received, E1.31 processing will resume.  The configured topic is used for state, and the command topic will be the state topic appended with ```/set```.
 
 For example, if you enter ```porch/esps``` as the topic, the state can be queried from ```porch/esps``` and commands can be sent to ```porch/esps/set```
 
-And here's a corresponding configuration for [Home Assistant](https://home-assistant.io/):
+If using [Home Assistant](https://home-assistant.io/), it is recommended to enable Home Assistant Discovery in the MQTT configuration.  Your ESPixelStick along with all effects will be automatically imported as an entity within Home Assistant utilzing "Device ID" as the friendly name.  For manual configuration, you can use the following as an example.  When disabling Home Assistant Discovery, ESPixelStick will attempt to remove its configuration entry from your MQTTT broker.
 
 ```yaml
 light:
-  - platform: mqtt_json
+  - platform: mqtt
+    schema: json
     name: "Front Porch ESPixelStick"
     state_topic: "porch/esps"
     command_topic: "porch/esps/set"

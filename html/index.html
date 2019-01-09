@@ -29,7 +29,8 @@
           <li class="active"><a href="#home">Home</a></li>
           <li><a href="#wifi">Wireless Setup</a></li>
           <li><a href="#config">Device Setup</a></li>
-          <li><a href="#test">Testing</a></li>
+          <li><a href="#effects">Effects</a></li>
+          <li><a href="#diag">Diagnostics</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
           <li><a href="#admin">Admin</a></li>
@@ -191,7 +192,7 @@
             <legend class="esps-legend">Serial Configuration</legend>
             <div class="form-group">
               <label class="control-label col-sm-2" for="s_count">Channel Count</label>
-              <div class="col-sm-10"><input type="text" class="form-control" id="s_count" placeholder="Enter number of channels" onchange="refreshSerial()"></div>
+              <div class="col-sm-10"><input type="text" class="form-control" id="s_count" title="Number of channels." onchange="refreshSerial()"></div>
             </div>
             <div class="form-group">
               <label class="control-label col-sm-2" for="s_proto">Protocol</label>
@@ -222,25 +223,32 @@
           </div>
           <div class="form-group mqtt">
             <label class="control-label col-sm-2" for="mqtt_ip">Broker IP</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_ip" name="mqtt_ip" placeholder="Enter MQTT Broker IP"></div>
+            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_ip" name="mqtt_ip" title="MQTT Broker IP."></div>
           </div>
           <div class="form-group mqtt">
             <label class="control-label col-sm-2" for="mqtt_port">Broker Port</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_port" name="mqtt_port" placeholder="Enter MQTT Broker Port"></div>
+            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_port" name="mqtt_port" title="MQTT Broker Port."></div>
           </div>
           <div class="form-group mqtt">
             <label class="control-label col-sm-2" for="mqtt_user">User</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_user" name="mqtt_user" placeholder="Enter MQTT User (optional)"></div>
+            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_user" name="mqtt_user" title="MQTT Username (optional)."></div>
           </div>
           <div class="form-group mqtt">
             <label class="control-label col-sm-2" for="mqtt_password">Password</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_password" name="mqtt_password" placeholder="Enter MQTT Password (optional)"></div>
+            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_password" name="mqtt_password" title="MQTT Password (optional)."></div>
           </div>
           <div class="form-group mqtt">
-            <label class="control-label col-sm-2" for="mqtt_topic">Topic</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_topic" name="mqtt_topic" placeholder="Enter Top Level MQTT Topic"></div>
+            <label class="control-label col-sm-2" for="mqtt_topic">Status Topic</label>
+            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_topic" name="mqtt_topic" title="MQTT Status Topic. Control topic will be appended with /set."></div>
           </div>
           <div class="form-group mqtt">
+            <label class="control-label col-sm-2" for="mqtt_haprefix">Home Assistant Prefix</label>
+            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_haprefix" name="mqtt_haprefix" title="Prefix used for Home Assistant Discovery"></div>
+          </div>
+          <div class="form-group mqtt">
+            <div class="col-sm-offset-2 col-sm-10">
+              <div class="checkbox"><label><input type="checkbox" id="mqtt_hadisco" name="mqtt_hadisco" title="Enables auto-discovery by Home Assistant."> Home Assistant Discovery</label></div>
+            </div>
             <div class="col-sm-offset-2 col-sm-10">
               <div class="checkbox"><label><input type="checkbox" id="mqtt_clean" name="mqtt_clean"> Clean Session</label></div>
             </div>
@@ -256,28 +264,29 @@
       </fieldset>
     </div>
 
-    <!-- Display Testing -->
-    <div id="test" class="mdiv hidden anchor">
+    <!-- Effects configuration -->
+    <div id="effects" class="mdiv hidden anchor">
       <fieldset>
-        <legend class="esps-legend">Display Testing</legend>
         <form class="form-horizontal" onsubmit="return false">
-          <div class="form-group">
-            <label class="control-label col-sm-2" for="t_mode">Testing Mode</label>
-            <div class="col-sm-10">
-              <select class="form-control" id="tmode" name="tmode" onchange="effectChanged()">
-              </select>
-            </div>
-          </div>
-          <div id="t_disable"></div>
 
           <!-- Effect Options -->
           <div id="t_options">
             <legend class="esps-legend">Effect Options</legend>
             <div class="form-group">
+              <label class="control-label col-sm-2" for="t_mode">Effect</label>
+              <div class="col-sm-10">
+                <select class="form-control" id="tmode" name="tmode" onchange="effectChanged()">
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
               <label class="control-label col-sm-2" id="lab_color" for="t_color">Color</label>
               <div class="col-sm-10" id="div_color">
                 <input type="button" id="t_color" class="form-control color no-alpha" value="rgb(255,255,255)" />
               </div>
+            </div>
+
+            <div class="form-group">
               <div class="col-sm-offset-2 col-sm-10" id="div_reverse">
                 <div class="checkbox"><label><input type="checkbox" id="t_reverse" class="reverse" name="t_reverse">Reverse pattern</label></div>
               </div>
@@ -290,24 +299,24 @@
             </div>
           </div>
 
-          <!-- Startup Effect Config -->
+          <!-- Effect Runtime Config -->
           <div class="t_startup">
-            <legend class="esps-legend">Startup Effect</legend>
+            <legend class="esps-legend">Effect Runtime</legend>
             <div class="form-group">
               <div class="col-sm-offset-2 col-sm-10">
-                <div class="checkbox"><label><input type="checkbox" id="t_startenabled" name="t_startenabled"> Enable Startup Effect</label></div>
+                  <div class="checkbox"><label><input type="checkbox" id="t_effectenabled" name="t_effectenabled"> Enable Now</label></div>
               </div>
-            </div>
-            <div class="form-group">
               <div class="col-sm-offset-2 col-sm-10">
-                <div class="checkbox"><label><input type="checkbox" id="t_idleenabled" name="t_idleenabled"> Enable Idle Effect</label></div>
+                <div class="checkbox"><label><input type="checkbox" id="t_startenabled" name="t_startenabled"> Enable at Startup</label></div>
+              </div>
+              <div class="col-sm-offset-2 col-sm-10">
+                <div class="checkbox"><label><input type="checkbox" id="t_idleenabled" name="t_idleenabled"> Enable when Idle</label></div>
               </div>
             </div>
             <div class="form-group" id="fg_udpport">
               <label class="control-label col-sm-2" for="ssid">Idle Timeout</label>
-              <div class="col-sm-10"><input type="text" class="form-control" id="t_idletimeout" name="t_idletimeout" placeholder="Idle Timer (secs)"></div>
+              <div class="col-sm-10"><input type="text" class="form-control" id="t_idletimeout" name="t_idletimeout" title="Idle time in seconds before effect starts."></div>
             </div>
-
           </div>
           <div class="form-group t_startup">
             <div class="col-sm-offset-2 col-sm-10">
@@ -315,33 +324,42 @@
             </div>
           </div>
 
-          <!-- Testing - View Stream -->
-          <div id="t_view" class="tdiv hidden">
-            <legend class="esps-legend">View Stream</legend>
-            <div class="form-group">
-              <label class="control-label col-sm-2">Display</label>
-              <div class="col-sm-10">
-                <div class="btn-group" data-toggle="buttons">
-                  <label class="btn btn-primary">
-                    <input type="radio" name="viewStyle" value="RGB" autocomplete="off" onchange="clearStream()">RGB
-                  </label>
-                  <label class="btn btn-primary">
-                    <input type="radio" name="viewStyle" value="Channel" autocomplete="off" onchange="clearStream()">Channel
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="control-label col-sm-2" for="v_columns">Columns</label>
-              <div class="col-sm-10"><input type="number" class="form-control" id="v_columns" name="v_columns" oninput="clearStream()"></div>
-            </div>
-            <div class="row">
-              <div class="col-sm-12"><canvas id="canvas" width="820" height="960"></canvas></div>
-            </div>
+          <!-- Display Layout -->
+          <div class="t_layout">
+            <legend class="esps-legend">Display Layout</legend>
+            Placeholder for layout configuration to assist in effect rendering. Selectable type (string, matrix, tree, etc..) and size / orientation where applicable (20x30 matrix - horizontal or veritcal? where does feed start?). Should also be used to render view stream which is moved to the Diagnostics tab.
           </div>
 
         </form>
       </fieldset>
+    </div>
+
+    <!-- Diagnostics -->
+    <div id="diag" class="mdiv hidden anchor">
+          <!-- Diagnostic - View Stream -->
+          <div id="t_view" class="tdiv hidden">
+              <legend class="esps-legend">View Stream</legend>
+              <div class="form-group">
+                <label class="control-label col-sm-2">Display</label>
+                <div class="col-sm-10">
+                  <div class="btn-group" data-toggle="buttons">
+                    <label class="btn btn-primary">
+                      <input type="radio" name="viewStyle" value="RGB" autocomplete="off" onchange="clearStream()">RGB
+                    </label>
+                    <label class="btn btn-primary">
+                      <input type="radio" name="viewStyle" value="Channel" autocomplete="off" onchange="clearStream()">Channel
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label col-sm-2" for="v_columns">Columns</label>
+                <div class="col-sm-10"><input type="number" class="form-control" id="v_columns" name="v_columns" oninput="clearStream()"></div>
+              </div>
+              <div class="row">
+                <div class="col-sm-12"><canvas id="canvas" width="820" height="960"></canvas></div>
+              </div>
+            </div>
     </div>
 
     <!-- Administration -->

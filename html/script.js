@@ -156,6 +156,14 @@ $(function() {
             $('.mqtt').addClass('hidden');
        }
     });
+    $('#mqtt_hadisco').click(function() {
+        if ($(this).is(':checked')) {
+            $('#mqtt_haprefix').prop('disabled', false);
+       } else {
+            $('#mqtt_haprefix').prop('disabled', true);
+       }
+    });
+
 
     // Pixel type toggles
     $('#p_type').change(function() {
@@ -516,7 +524,14 @@ function getConfig(data) {
     $('#mqtt_user').val(config.mqtt.user);
     $('#mqtt_password').val(config.mqtt.password);
     $('#mqtt_topic').val(config.mqtt.topic);
+    $('#mqtt_haprefix').val(config.mqtt.haprefix);
     $('#mqtt_clean').prop('checked', config.mqtt.clean);
+    $('#mqtt_hadisco').prop('checked', config.mqtt.hadisco);
+    if (config.mqtt.hadisco) {
+        $('#mqtt_haprefix').prop('disabled', false);
+    } else {
+        $('#mqtt_haprefix').prop('disabled', true);
+    }
 
     // E1.31 Config
     $('#universe').val(config.e131.universe);
@@ -716,7 +731,9 @@ function submitConfig() {
                 'user': $('#mqtt_user').val(),
                 'password': $('#mqtt_password').val(),
                 'topic': $('#mqtt_topic').val(),
-                'clean': $('#mqtt_clean').prop('checked')
+                'haprefix': $('#mqtt_haprefix').val(),
+                'clean': $('#mqtt_clean').prop('checked'),
+                'hadisco': $('#mqtt_hadisco').prop('checked')
             },
             'e131': {
                 'universe': parseInt($('#universe').val()),

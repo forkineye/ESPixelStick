@@ -114,12 +114,14 @@ typedef struct {
 
     /* MQTT */
     bool        mqtt;           /* Use MQTT? */
-    String      mqtt_ip;
+    String      mqtt_ip = " ";
     uint16_t    mqtt_port;
-    String      mqtt_user;
-    String      mqtt_password;
+    String      mqtt_user = " ";
+    String      mqtt_password = " ";
     String      mqtt_topic;
     bool        mqtt_clean;
+    bool        mqtt_hadisco;
+    String      mqtt_haprefix;
 
     /* E131 */
     uint16_t    universe;       /* Universe to listen for */

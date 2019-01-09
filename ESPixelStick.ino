@@ -432,6 +432,35 @@ void onMqttMessage(char* topic, char* payload,
     publishState();
 }
 
+void publishHA(bool join) {
+    // Setup HA discovery
+    char chipId[7] = { 0 };
+    snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
+    String ha_config = config.mqtt_haprefix + "/light/" + String(chipId) + "/config";
+
+    if (join) {
+        DynamicJsonBuffer jsonBuffer;
+        JsonObject& root = jsonBuffer.createObject();
+        root["name"] = config.id;
+        root["schema"] = "json";
+        root["state_topic"] = config.mqtt_topic;
+        root["command_topic"] = config.mqtt_topic + "/set";
+        root["rgb"] = "true";
+        root["brightness"] = "true";
+        root["effect"] = "true";
+        JsonArray& effect_list = root.createNestedArray("effect_list");
+        for (uint8_t i = 0; i < effects.getEffectCount(); i++) {
+            effect_list.add(effects.getEffectInfo(i)->name);
+        }
+
+        char buffer[root.measureLength() + 1];
+        root.printTo(buffer, sizeof(buffer));
+        mqtt.publish(ha_config.c_str(), 0, true, buffer);
+    } else {
+        mqtt.publish(ha_config.c_str(), 0, true, "");
+    }
+}
+
 void publishState() {
     DynamicJsonBuffer jsonBuffer;
     JsonObject& root = jsonBuffer.createObject();
@@ -545,11 +574,16 @@ void validateConfig() {
     if (config.mqtt_port == 0)
         config.mqtt_port = MQTT_PORT;
 
-    // Generate default MQTT topic if needed
+    // Generate default MQTT topic if blank
     if (!config.mqtt_topic.length()) {
         char chipId[7] = { 0 };
         snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
         config.mqtt_topic = "diy/esps/" + String(chipId);
+    }
+
+    // Set default Home Assistant Discovery prefix if blank
+    if (!config.mqtt_haprefix.length()) {
+        config.mqtt_haprefix = "homeassistant";
     }
 
 #if defined(ESPS_MODE_PIXEL)
@@ -679,6 +713,10 @@ void updateConfig() {
     // Setup IGMP subscriptions if multicast is enabled
     if (config.multicast)
         multiSub();
+
+    // Update Home Assistant Discovery if enabled
+    if (config.mqtt)
+        publishHA(config.mqtt_hadisco);
 }
 
 // De-Serialize Network config
@@ -755,6 +793,8 @@ void dsDeviceConfig(JsonObject &json) {
         config.mqtt_password = mqttJson["password"].as<String>();
         config.mqtt_topic = mqttJson["topic"].as<String>();
         config.mqtt_clean = mqttJson["clean"] | false;
+        config.mqtt_hadisco = mqttJson["hadisco"] | false;
+        config.mqtt_haprefix = mqttJson["haprefix"].as<String>();
     }
 
 #if defined(ESPS_MODE_PIXEL)
@@ -872,6 +912,8 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     _mqtt["password"] = config.mqtt_password.c_str();
     _mqtt["topic"] = config.mqtt_topic.c_str();
     _mqtt["clean"] = config.mqtt_clean;
+    _mqtt["hadisco"] = config.mqtt_hadisco;
+    _mqtt["haprefix"] = config.mqtt_haprefix.c_str();
 
     // E131
     JsonObject &e131 = json.createNestedObject("e131");
