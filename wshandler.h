@@ -191,7 +191,11 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             effect["startenabled"] = config.effect_startenabled;
             effect["idleenabled"] = config.effect_idleenabled;
             effect["idletimeout"] = config.effect_idletimeout;
-
+            if (config.ds == DataSource::WEB) {
+                effect["effectenabled"] = true;
+            } else {
+                effect["effectenabled"] = false;
+            }
 
 // dump all the known effect and options
             JsonObject &effectList = json.createNestedObject("effectList");
@@ -255,8 +259,18 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
 
 void procT(uint8_t *data, AsyncWebSocketClient *client) {
     if ( (data[1] >= '1') && (data[1] <= '8') ) config.ds = DataSource::WEB;
+//TODO: Store previous data source when effect is selected so we can switch back to it
 
     switch (data[1]) {
+        case '-': { // Stop running effect
+            config.ds = DataSource::E131;
+            effects.clearAll();
+            break;
+        }
+        case '+': { // Start running effect
+            config.ds = DataSource::WEB;
+            break;
+        }
         case '0': { // Clear whole string
             //TODO: Store previous data source when effect is selected so we can switch back to it
             config.ds = DataSource::E131;
