@@ -23,6 +23,11 @@ $(function() {
         $('.mdiv').addClass('hidden');
         $($(this).attr('href')).removeClass('hidden');
 
+        // kick start the live stream
+        if ($(this).attr('href') == "#diag") {
+            wsEnqueue('T9');
+        }
+
         // Collapse the menu on smaller screens
         $('#navbar').removeClass('in').attr('aria-expanded', 'false');
         $('.navbar-toggle').attr('aria-expanded', 'false');
@@ -368,7 +373,8 @@ function wsConnect() {
             } else {
                 streamData= new Uint8Array(event.data);
                 drawStream(streamData);
-                if (!$('#tmode option:selected').val().localeCompare('t_view')) wsEnqueue('T9');
+                if ($('#diag').is(':visible')) wsEnqueue('T9');
+//                if (!$('#tmode option:selected').val().localeCompare('t_view')) wsEnqueue('T9');
             }
             wsReadyToSend();
         };
@@ -832,16 +838,6 @@ function hideShowTestSections() {
 //console.log('tmode is: ' + tmode);
     if ( (typeof tmode !== 'undefined') && (typeof effectInfo[tmode].wsTCode !== 'undefined') ) {
 // hide/show view stream and testing options+startup
-        if (!tmode.localeCompare('t_view')) {
-            $('#t_options').addClass('hidden');
-            $('.t_startup').addClass('hidden');
-            $('#t_view').removeClass('hidden');
-        } else {
-            $('#t_options').removeClass('hidden');
-            $('.t_startup').removeClass('hidden');
-            $('#t_view').addClass('hidden');
-        }
-
         if (effectInfo[tmode].hasColor) {
             $('#lab_color').removeClass('hidden');
             $('#div_color').removeClass('hidden');

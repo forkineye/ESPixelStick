@@ -18,8 +18,7 @@ const EffectDesc EFFECT_LIST[] = {
     { "Chase",        &EffectEngine::effectChase,      "t_chase",        1,    1,    1,    0,  "T4"     },
     { "Fire flicker", &EffectEngine::effectFireFlicker,"t_fireflicker",  1,    0,    0,    0,  "T6"     },
     { "Lightning",    &EffectEngine::effectLightning,  "t_lightning",    1,    0,    0,    0,  "T7"     },
-    { "Breathe",      &EffectEngine::effectBreathe,    "t_breathe",      1,    0,    0,    0,  "T8"     },
-    { "View",         nullptr,                         "t_view",         0,    0,    0,    0,  "T9"     }
+    { "Breathe",      &EffectEngine::effectBreathe,    "t_breathe",      1,    0,    0,    0,  "T8"     }
 };
 
 // Effect defaults
