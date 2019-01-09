@@ -25,7 +25,7 @@ $(function() {
 
         // kick start the live stream
         if ($(this).attr('href') == "#diag") {
-            wsEnqueue('T9');
+            wsEnqueue('V1');
         }
 
         // Collapse the menu on smaller screens
@@ -373,8 +373,7 @@ function wsConnect() {
             } else {
                 streamData= new Uint8Array(event.data);
                 drawStream(streamData);
-                if ($('#diag').is(':visible')) wsEnqueue('T9');
-//                if (!$('#tmode option:selected').val().localeCompare('t_view')) wsEnqueue('T9');
+                if ($('#diag').is(':visible')) wsEnqueue('V1');
             }
             wsReadyToSend();
         };

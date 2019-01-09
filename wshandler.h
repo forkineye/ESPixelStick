@@ -55,7 +55,8 @@ extern const char CONFIG_FILE[];
     T6 - Fire flicker
     T7 - Lightning
     T8 - Breathe
-    T9 - View Stream
+
+    V1 - View Stream
 
     S1 - Set Network Config
     S2 - Set Device Config
@@ -253,7 +254,6 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
 }
 
 void procT(uint8_t *data, AsyncWebSocketClient *client) {
-    // T9 is view stream, DONT change source when we get this
     if ( (data[1] >= '1') && (data[1] <= '8') ) config.ds = DataSource::WEB;
 
     switch (data[1]) {
@@ -367,8 +367,12 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             effects.setEffect("Breathe");
             break;
         }
+    }
+}
 
-        case '9': {  // View stream
+void procV(uint8_t *data, AsyncWebSocketClient *client) {
+    switch (data[1]) {
+        case '1': {  // View stream
 #if defined(ESPS_MODE_PIXEL)
             client->binary(pixels.getData(), config.channel_count);
 #elif defined(ESPS_MODE_SERIAL)
@@ -478,6 +482,9 @@ void wsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
                         break;
                     case 'T':
                         procT(data, client);
+                        break;
+                    case 'V':
+                        procV(data, client);
                         break;
                 }
             } else {
