@@ -259,18 +259,8 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
 
 void procT(uint8_t *data, AsyncWebSocketClient *client) {
     if ( (data[1] >= '1') && (data[1] <= '8') ) config.ds = DataSource::WEB;
-//TODO: Store previous data source when effect is selected so we can switch back to it
 
     switch (data[1]) {
-        case '-': { // Stop running effect
-            config.ds = DataSource::E131;
-            effects.clearAll();
-            break;
-        }
-        case '+': { // Start running effect
-            config.ds = DataSource::WEB;
-            break;
-        }
         case '0': { // Clear whole string
             //TODO: Store previous data source when effect is selected so we can switch back to it
             config.ds = DataSource::E131;
@@ -382,6 +372,9 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             break;
         }
     }
+
+    if (config.mqtt)
+        publishState();
 }
 
 void procV(uint8_t *data, AsyncWebSocketClient *client) {

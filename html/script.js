@@ -141,16 +141,6 @@ $(function() {
       }
     });
 
-    // Effect running now checkbox
-    $('#t_effectenabled').click(function() {
-      // On click(), the new checkbox state has already been set
-      if ( $(this).prop('checked') ) {
-        wsEnqueue( 'T+' );
-      } else {
-        wsEnqueue( 'T-' );
-      }
-    });
-
     // Test mode toggles
     $('#tmode').change(hideShowTestSections());
 
@@ -648,7 +638,6 @@ function getEffectInfo(data) {
     $('#t_reverse').prop('checked', running.reverse);
     $('#t_mirror').prop('checked', running.mirror);
     $('#t_allleds').prop('checked', running.allleds);
-    $('#t_effectenabled').prop('checked', running.effectenabled);
     $('#t_startenabled').prop('checked', running.startenabled);
     $('#t_idleenabled').prop('checked', running.idleenabled);
     $('#t_idletimeout').val(running.idletimeout);

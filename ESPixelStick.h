@@ -161,10 +161,7 @@ void onMqttConnect(bool sessionPresent);
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
 void onMqttMessage(char* topic, char* p_payload,
         AsyncMqttClientMessageProperties properties, size_t len,size_t index, size_t total);
-void publishRGBState();
-void publishRGBBrightness();
-void publishRGBColor();
-void setStatic(uint8_t r, uint8_t g, uint8_t b);
+void publishState();
 void idleTimeout();
 
 

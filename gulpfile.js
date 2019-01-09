@@ -88,10 +88,9 @@ gulp.task('travis', function(done) {
 
 /* Watch Task */
 gulp.task('watch', function() {
-    gulp.watch('html/*.html', ['html']);
-    gulp.watch('html/*.htm', ['html']);
-    gulp.watch('html/**/*.css', ['css']);
-    gulp.watch('html/**/*.js', ['js']);
+    gulp.watch('html/*.html', gulp.series('html'));
+    gulp.watch('html/**/*.css', gulp.series('css'));
+    gulp.watch('html/**/*.js', gulp.series('js'));
 });
 
 /* Default Task */

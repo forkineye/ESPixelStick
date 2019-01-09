@@ -79,11 +79,11 @@ uint8_t             *seqTracker;    // Current sequence numbers for each Univers
 uint32_t            lastUpdate;     // Update timeout tracker
 WiFiEventHandler    wifiConnectHandler;     // WiFi connect handler
 WiFiEventHandler    wifiDisconnectHandler;  // WiFi disconnect handler
-Ticker              wifiTicker; // Ticker to handle WiFi
-Ticker              idleTicker; // Ticker for effect on idle
-AsyncMqttClient     mqtt;       // MQTT object
-Ticker              mqttTicker; // Ticker to handle MQTT
-EffectEngine        effects;    // Effects Engine
+Ticker              wifiTicker;     // Ticker to handle WiFi
+Ticker              idleTicker;     // Ticker for effect on idle
+AsyncMqttClient     mqtt;           // MQTT object
+Ticker              mqttTicker;     // Ticker to handle MQTT
+EffectEngine        effects;        // Effects Engine
 
 // Output Drivers
 #if defined(ESPS_MODE_PIXEL)
@@ -379,7 +379,7 @@ void onMqttMessage(char* topic, char* payload,
         return;
     }
 
-// if its a retained message and we want clean session, ignore it
+    // if its a retained message and we want clean session, ignore it
     if ( properties.retain && config.mqtt_clean ) {
         return;
     }
@@ -423,6 +423,8 @@ void onMqttMessage(char* topic, char* payload,
 
     // Set data source based on state - Fall back to E131 when off
     if (stateOn) {
+        if (effects.getEffect().equalsIgnoreCase("Disabled"))
+            effects.setEffect("Solid");
         config.ds = DataSource::MQTT;
     } else {
         config.ds = DataSource::E131;
@@ -449,7 +451,8 @@ void publishHA(bool join) {
         root["brightness"] = "true";
         root["effect"] = "true";
         JsonArray& effect_list = root.createNestedArray("effect_list");
-        for (uint8_t i = 0; i < effects.getEffectCount(); i++) {
+        // effect[0] is 'disabled', skip it
+        for (uint8_t i = 1; i < effects.getEffectCount(); i++) {
             effect_list.add(effects.getEffectInfo(i)->name);
         }
 
@@ -464,13 +467,17 @@ void publishHA(bool join) {
 void publishState() {
     DynamicJsonBuffer jsonBuffer;
     JsonObject& root = jsonBuffer.createObject();
-    root["state"] = (config.ds == DataSource::MQTT) ? LIGHT_ON : LIGHT_OFF;
+    if ((config.ds != DataSource::E131) && (!effects.getEffect().equalsIgnoreCase("Disabled")))
+        root["state"] = LIGHT_ON;
+    else
+        root["state"] = LIGHT_OFF;
+
     JsonObject& color = root.createNestedObject("color");
     color["r"] = effects.getColor().r;
     color["g"] = effects.getColor().g;
     color["b"] = effects.getColor().b;
     root["brightness"] = effects.getBrightness();
-    if (effects.getEffect() != "") {
+    if (!effects.getEffect().equalsIgnoreCase("Disabled")) {
         root["effect"] = effects.getEffect();
     }
     root["reverse"] = effects.getReverse();
@@ -647,7 +654,6 @@ void validateConfig() {
         config.effect_idleenabled = false;
     }
 
-    effects.setFromConfig();
     if (config.effect_startenabled) {
         if (effects.isValidEffect(config.effect_name)) {
             effects.setEffect(config.effect_name);
@@ -658,10 +664,7 @@ void validateConfig() {
             }
 
         }
-    } else {
-        effects.setEffect("Disabled");
     }
-
 }
 
 void updateConfig() {
@@ -715,8 +718,10 @@ void updateConfig() {
         multiSub();
 
     // Update Home Assistant Discovery if enabled
-    if (config.mqtt)
+    if (config.mqtt) {
         publishHA(config.mqtt_hadisco);
+        publishState();
+    }
 }
 
 // De-Serialize Network config
@@ -849,6 +854,8 @@ void loadConfig() {
         dsNetworkConfig(json);
         dsDeviceConfig(json);
         dsEffectConfig(json);
+
+        effects.setFromConfig();
 
         LOG_PORT.println(F("- Configuration loaded."));
     }
