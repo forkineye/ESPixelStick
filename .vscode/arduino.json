@@ -1,6 +1,6 @@
 {
     "board": "esp8266com:esp8266:generic",
-    "configuration": "xtal=160,vt=flash,exception=disabled,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=40,FlashMode=dio,eesz=1M128,led=2,ip=lm2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200",
+    "configuration": "xtal=160,vt=flash,exception=disabled,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=40,FlashMode=dio,eesz=1M128,led=2,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200",
     "sketch": "ESPixelStick.ino",
     "output": ".build"
 }

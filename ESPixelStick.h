@@ -114,12 +114,14 @@ typedef struct {
 
     /* MQTT */
     bool        mqtt;           /* Use MQTT? */
-    String      mqtt_ip;
+    String      mqtt_ip = " ";
     uint16_t    mqtt_port;
-    String      mqtt_user;
-    String      mqtt_password;
+    String      mqtt_user = " ";
+    String      mqtt_password = " ";
     String      mqtt_topic;
     bool        mqtt_clean;
+    bool        mqtt_hadisco;
+    String      mqtt_haprefix;
 
     /* E131 */
     uint16_t    universe;       /* Universe to listen for */
@@ -159,10 +161,7 @@ void onMqttConnect(bool sessionPresent);
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
 void onMqttMessage(char* topic, char* p_payload,
         AsyncMqttClientMessageProperties properties, size_t len,size_t index, size_t total);
-void publishRGBState();
-void publishRGBBrightness();
-void publishRGBColor();
-void setStatic(uint8_t r, uint8_t g, uint8_t b);
+void publishState();
 void idleTimeout();
 
 

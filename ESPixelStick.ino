@@ -79,11 +79,11 @@ uint8_t             *seqTracker;    // Current sequence numbers for each Univers
 uint32_t            lastUpdate;     // Update timeout tracker
 WiFiEventHandler    wifiConnectHandler;     // WiFi connect handler
 WiFiEventHandler    wifiDisconnectHandler;  // WiFi disconnect handler
-Ticker              wifiTicker; // Ticker to handle WiFi
-Ticker              idleTicker; // Ticker for effect on idle
-AsyncMqttClient     mqtt;       // MQTT object
-Ticker              mqttTicker; // Ticker to handle MQTT
-EffectEngine        effects;    // Effects Engine
+Ticker              wifiTicker;     // Ticker to handle WiFi
+Ticker              idleTicker;     // Ticker for effect on idle
+AsyncMqttClient     mqtt;           // MQTT object
+Ticker              mqttTicker;     // Ticker to handle MQTT
+EffectEngine        effects;        // Effects Engine
 
 // Output Drivers
 #if defined(ESPS_MODE_PIXEL)
@@ -379,7 +379,7 @@ void onMqttMessage(char* topic, char* payload,
         return;
     }
 
-// if its a retained message and we want clean session, ignore it
+    // if its a retained message and we want clean session, ignore it
     if ( properties.retain && config.mqtt_clean ) {
         return;
     }
@@ -423,6 +423,8 @@ void onMqttMessage(char* topic, char* payload,
 
     // Set data source based on state - Fall back to E131 when off
     if (stateOn) {
+        if (effects.getEffect().equalsIgnoreCase("Disabled"))
+            effects.setEffect("Solid");
         config.ds = DataSource::MQTT;
     } else {
         config.ds = DataSource::E131;
@@ -432,16 +434,50 @@ void onMqttMessage(char* topic, char* payload,
     publishState();
 }
 
+void publishHA(bool join) {
+    // Setup HA discovery
+    char chipId[7] = { 0 };
+    snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
+    String ha_config = config.mqtt_haprefix + "/light/" + String(chipId) + "/config";
+
+    if (join) {
+        DynamicJsonBuffer jsonBuffer;
+        JsonObject& root = jsonBuffer.createObject();
+        root["name"] = config.id;
+        root["schema"] = "json";
+        root["state_topic"] = config.mqtt_topic;
+        root["command_topic"] = config.mqtt_topic + "/set";
+        root["rgb"] = "true";
+        root["brightness"] = "true";
+        root["effect"] = "true";
+        JsonArray& effect_list = root.createNestedArray("effect_list");
+        // effect[0] is 'disabled', skip it
+        for (uint8_t i = 1; i < effects.getEffectCount(); i++) {
+            effect_list.add(effects.getEffectInfo(i)->name);
+        }
+
+        char buffer[root.measureLength() + 1];
+        root.printTo(buffer, sizeof(buffer));
+        mqtt.publish(ha_config.c_str(), 0, true, buffer);
+    } else {
+        mqtt.publish(ha_config.c_str(), 0, true, "");
+    }
+}
+
 void publishState() {
     DynamicJsonBuffer jsonBuffer;
     JsonObject& root = jsonBuffer.createObject();
-    root["state"] = (config.ds == DataSource::MQTT) ? LIGHT_ON : LIGHT_OFF;
+    if ((config.ds != DataSource::E131) && (!effects.getEffect().equalsIgnoreCase("Disabled")))
+        root["state"] = LIGHT_ON;
+    else
+        root["state"] = LIGHT_OFF;
+
     JsonObject& color = root.createNestedObject("color");
     color["r"] = effects.getColor().r;
     color["g"] = effects.getColor().g;
     color["b"] = effects.getColor().b;
     root["brightness"] = effects.getBrightness();
-    if (effects.getEffect() != "") {
+    if (!effects.getEffect().equalsIgnoreCase("Disabled")) {
         root["effect"] = effects.getEffect();
     }
     root["reverse"] = effects.getReverse();
@@ -545,11 +581,16 @@ void validateConfig() {
     if (config.mqtt_port == 0)
         config.mqtt_port = MQTT_PORT;
 
-    // Generate default MQTT topic if needed
+    // Generate default MQTT topic if blank
     if (!config.mqtt_topic.length()) {
         char chipId[7] = { 0 };
         snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
         config.mqtt_topic = "diy/esps/" + String(chipId);
+    }
+
+    // Set default Home Assistant Discovery prefix if blank
+    if (!config.mqtt_haprefix.length()) {
+        config.mqtt_haprefix = "homeassistant";
     }
 
 #if defined(ESPS_MODE_PIXEL)
@@ -613,7 +654,6 @@ void validateConfig() {
         config.effect_idleenabled = false;
     }
 
-    effects.setFromConfig();
     if (config.effect_startenabled) {
         if (effects.isValidEffect(config.effect_name)) {
             effects.setEffect(config.effect_name);
@@ -624,10 +664,7 @@ void validateConfig() {
             }
 
         }
-    } else {
-        effects.setEffect("Disabled");
     }
-
 }
 
 void updateConfig() {
@@ -679,6 +716,12 @@ void updateConfig() {
     // Setup IGMP subscriptions if multicast is enabled
     if (config.multicast)
         multiSub();
+
+    // Update Home Assistant Discovery if enabled
+    if (config.mqtt) {
+        publishHA(config.mqtt_hadisco);
+        publishState();
+    }
 }
 
 // De-Serialize Network config
@@ -755,6 +798,8 @@ void dsDeviceConfig(JsonObject &json) {
         config.mqtt_password = mqttJson["password"].as<String>();
         config.mqtt_topic = mqttJson["topic"].as<String>();
         config.mqtt_clean = mqttJson["clean"] | false;
+        config.mqtt_hadisco = mqttJson["hadisco"] | false;
+        config.mqtt_haprefix = mqttJson["haprefix"].as<String>();
     }
 
 #if defined(ESPS_MODE_PIXEL)
@@ -809,6 +854,8 @@ void loadConfig() {
         dsNetworkConfig(json);
         dsDeviceConfig(json);
         dsEffectConfig(json);
+
+        effects.setFromConfig();
 
         LOG_PORT.println(F("- Configuration loaded."));
     }
@@ -872,6 +919,8 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     _mqtt["password"] = config.mqtt_password.c_str();
     _mqtt["topic"] = config.mqtt_topic.c_str();
     _mqtt["clean"] = config.mqtt_clean;
+    _mqtt["hadisco"] = config.mqtt_hadisco;
+    _mqtt["haprefix"] = config.mqtt_haprefix.c_str();
 
     // E131
     JsonObject &e131 = json.createNestedObject("e131");

@@ -63,7 +63,7 @@ private:
     bool _effectMirror              = false;        /* Externally controlled effect mirroring (start at center) */
     bool _effectAllLeds             = false;        /* Externally controlled effect mirroring (start at center) */
     uint8_t _effectBrightness       = 255;          /* Externally controlled effect brightness [0, 255] */
-    CRGB _effectColor               = {0,0,0};          /* Externally controlled effect color */
+    CRGB _effectColor               = {0,0,0};      /* Externally controlled effect color */
 
     uint32_t _effectStep            = 0;            /* Shared mutable effect step counter */
 
