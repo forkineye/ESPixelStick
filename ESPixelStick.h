@@ -136,7 +136,6 @@ typedef struct {
     PixelColor  pixel_color;    /* Pixel color order */
     uint16_t    zigSize;	    /* Zigsize count - 0 = no zigzag */
     uint16_t    groupSize;      /* Group size - 1 = no grouping */
-    bool        gamma;          /* Use gamma map? */
     float       gammaVal;       /* gamma value to use */
     float       briteVal;       /* brightness lto use */
 #elif defined(ESPS_MODE_SERIAL)
@@ -152,6 +151,7 @@ void dsNetworkConfig(JsonObject &json);
 void dsDeviceConfig(JsonObject &json);
 void dsEffectConfig(JsonObject &json);
 void saveConfig();
+void dsGammaConfig(JsonObject &json);
 
 void connectWifi();
 void onWifiConnect(const WiFiEventStationModeGotIP &event);

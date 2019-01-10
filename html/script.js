@@ -161,6 +161,23 @@ $(function() {
             $('.mqtt').addClass('hidden');
        }
     });
+
+    $('#p_gammaVal').change(function() {
+            sendGamma();
+    });
+    $('#p_briteVal').change(function() {
+            sendGamma();
+    });
+
+    // Gamma graph
+    $('#showgamma').click(function() {
+        if ($(this).is(':checked')) {
+            $('.gammagraph').removeClass('hidden');
+       } else {
+            $('.gammagraph').addClass('hidden');
+       }
+    });
+
     $('#mqtt_hadisco').click(function() {
         if ($(this).is(':checked')) {
             $('#mqtt_haprefix').prop('disabled', false);
@@ -292,8 +309,7 @@ function wifiValidation() {
 // Page event feeds
 function feed() {
     if ($('#home').is(':visible')) {
-        wsEnqueue('XS');
-        wsEnqueue('X2');
+        wsEnqueue('XJ');
 
         setTimeout(function() {
             feed();
@@ -326,6 +342,7 @@ function wsConnect() {
             wsEnqueue('G1'); // Get Config
             wsEnqueue('G2'); // Get Net Status
             wsEnqueue('G3'); // Get Effect Info
+            wsEnqueue('G4'); // Get Gamma Table
 
             feed();
         };
@@ -347,6 +364,9 @@ function wsConnect() {
                 case 'G3':
                     getEffectInfo(data);
                     break;
+                case 'G4':
+                    refreshGamma(data);
+                    break;
                 case 'S1':
                     setConfig(data);
                     reboot();
@@ -357,11 +377,10 @@ function wsConnect() {
                 case 'S3':
                     snackSave();
                     break;
-                case 'XS':
-                    getSystemStatus(data);
+                case 'S4':
                     break;
-                case 'X2':
-                    getE131Status(data);
+                case 'XJ':
+                    getJsonStatus(data);
                     break;
                 case 'X6':
                     showReboot();
@@ -554,7 +573,6 @@ function getConfig(data) {
         $('#p_color').val(config.pixel.color);
         $('#p_groupSize').val(config.pixel.groupSize);
         $('#p_zigSize').val(config.pixel.zigSize);
-        $('#p_gamma').prop('checked', config.pixel.gamma);
         $('#p_gammaVal').val(config.pixel.gammaVal);
         $('#p_briteVal').val(config.pixel.briteVal);
 
@@ -644,10 +662,10 @@ function getEffectInfo(data) {
 
 }
 
-function getSystemStatus(data) {
-    var status = data.split(':');
+function getJsonStatus(data) {
+    var status = JSON.parse(data);
 
-    var rssi = +status[0];
+    var rssi = +status.system.rssi;
     var quality = 2 * (rssi + 100);
 
     if (rssi <= -100)
@@ -659,12 +677,10 @@ function getSystemStatus(data) {
     $('#x_quality').text(quality);
 
 // getHeap(data)
-    var heap = status[1];
+    $('#x_freeheap').text( status.system.freeheap );
 
-    $('#x_freeheap').text(heap);
-
-// function getUptime
-    var date = new Date(+status[2]);
+// getUptime
+    var date = new Date(+status.system.uptime);
     var str = '';
 
     str += Math.floor(date.getTime()/86400000) + " days, ";
@@ -672,17 +688,31 @@ function getSystemStatus(data) {
     str += ("0" + date.getUTCMinutes()).slice(-2) + ":";
     str += ("0" + date.getUTCSeconds()).slice(-2);
     $('#x_uptime').text(str);
+
+// getE131Status(data)
+    $('#uni_first').text(status.e131.universe);
+    $('#uni_last').text(status.e131.uniLast);
+    $('#pkts').text(status.e131.num_packets);
+    $('#serr').text(status.e131.seq_errors);
+    $('#perr').text(status.e131.packet_errors);
+    $('#clientip').text(status.e131.last_clientIP);
 }
 
-function getE131Status(data) {
-    var status = data.split(':');
+function refreshGamma(data) {
+    var gammaData = JSON.parse(data);
 
-    $('#uni_first').text(status[0]);
-    $('#uni_last').text(status[1]);
-    $('#pkts').text(status[2]);
-    $('#serr').text(status[3]);
-    $('#perr').text(status[4]);
-    $('#clientip').text(status[5]);
+    var polyline = document.getElementById('cracker');
+    var points = polyline.getAttribute('points');
+
+    points = "";
+    for (X=0; X<256; X++) {
+	var Y = 255-gammaData.gamma[X];
+	points += X + ", "+ Y +" ";
+//	console.log ( X + ", "+ Y +" ") ;
+
+    }
+
+    polyline.setAttribute('points', points);
 }
 
 function snackSave() {
@@ -752,7 +782,6 @@ function submitConfig() {
                 'color': parseInt($('#p_color').val()),
                 'groupSize': parseInt($('#p_groupSize').val()),
                 'zigSize': parseInt($('#p_zigSize').val()),
-                'gamma': $('#p_gamma').prop('checked'),
                 'gammaVal': parseFloat($('#p_gammaVal').val()),
                 'briteVal': parseFloat($('#p_briteVal').val())
             },
@@ -761,6 +790,7 @@ function submitConfig() {
                 'baudrate': parseInt($('#s_baud').val())
             }
     };
+
     wsEnqueue('S2' + JSON.stringify(json));
 }
 
@@ -899,3 +929,13 @@ function getKeyByValue(obj, value) {
     return Object.keys(obj)[Object.values(obj).indexOf(value)];
 }
 
+function sendGamma() {
+    var json = {
+        'pixel': {
+            'gammaVal': parseFloat($('#p_gammaVal').val()),
+            'briteVal': parseFloat($('#p_briteVal').val())
+        }
+    }
+    wsEnqueue('S4' + JSON.stringify(json));
+    wsEnqueue('G4'); // Get Gamma Table
+}
