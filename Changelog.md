@@ -7,8 +7,10 @@
 - Added calculated gamma support.
 - Added grouping and zigzag for pixels.
 - Added startup and idle effect options.
-- Implemented a new method for GECE support utilzing the UART.
+- Added Home Assistant MQTT Discovery support.
 - Better MQTT support (usage detailed in the README).
+- New effects for standalone or MQTT usage.
+- Changed GECE output from bit-banging to a UART based implementation.
 - Removed PWM support. A version supporting PWM is maintaned by [penfold42](https://github.com/penfold42/ESPixelBoard).
 
 ### 3.0
