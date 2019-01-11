@@ -31,7 +31,6 @@ extern "C" {
 
 static const uint8_t    *uart_buffer;       // Buffer tracker
 static const uint8_t    *uart_buffer_tail;  // Buffer tracker
-static bool             ws2811gamma;        // Gamma flag
 
 uint8_t PixelDriver::rOffset = 0;
 uint8_t PixelDriver::gOffset = 1;
@@ -102,10 +101,6 @@ int PixelDriver::begin(PixelType type, PixelColor color, uint16_t length) {
 void PixelDriver::setPin(uint8_t pin) {
     if (this->pin >= 0)
         this->pin = pin;
-}
-
-void PixelDriver::setGamma(bool gamma) {
-    ws2811gamma = gamma;
 }
 
 void PixelDriver::ws2811_init() {
@@ -205,51 +200,28 @@ const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillWS2811(const uint8_t *buff,
     if (tail - buff > avail)
         tail = buff + avail;
 
-    if (ws2811gamma) {
-        while (buff + 2 < tail) {
-            uint8_t subpix = buff[rOffset];
-            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 6) & 0x3]);
-            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 4) & 0x3]);
-            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 2) & 0x3]);
-            enqueue(LOOKUP_2811[GAMMA_TABLE[subpix] & 0x3]);
+    while (buff + 2 < tail) {
+        uint8_t subpix = buff[rOffset];
+        enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 6) & 0x3]);
+        enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 4) & 0x3]);
+        enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 2) & 0x3]);
+        enqueue(LOOKUP_2811[GAMMA_TABLE[subpix] & 0x3]);
 
-            subpix = buff[gOffset];
-            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 6) & 0x3]);
-            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 4) & 0x3]);
-            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 2) & 0x3]);
-            enqueue(LOOKUP_2811[GAMMA_TABLE[subpix] & 0x3]);
+        subpix = buff[gOffset];
+        enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 6) & 0x3]);
+        enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 4) & 0x3]);
+        enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 2) & 0x3]);
+        enqueue(LOOKUP_2811[GAMMA_TABLE[subpix] & 0x3]);
 
-            subpix = buff[bOffset];
-            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 6) & 0x3]);
-            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 4) & 0x3]);
-            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 2) & 0x3]);
-            enqueue(LOOKUP_2811[GAMMA_TABLE[subpix] & 0x3]);
+        subpix = buff[bOffset];
+        enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 6) & 0x3]);
+        enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 4) & 0x3]);
+        enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 2) & 0x3]);
+        enqueue(LOOKUP_2811[GAMMA_TABLE[subpix] & 0x3]);
 
-            buff += 3;
-        }
-    } else {
-        while (buff + 2 < tail) {
-            uint8_t subpix = buff[rOffset];
-            enqueue(LOOKUP_2811[(subpix >> 6) & 0x3]);
-            enqueue(LOOKUP_2811[(subpix >> 4) & 0x3]);
-            enqueue(LOOKUP_2811[(subpix >> 2) & 0x3]);
-            enqueue(LOOKUP_2811[subpix & 0x3]);
-
-            subpix = buff[gOffset];
-            enqueue(LOOKUP_2811[(subpix >> 6) & 0x3]);
-            enqueue(LOOKUP_2811[(subpix >> 4) & 0x3]);
-            enqueue(LOOKUP_2811[(subpix >> 2) & 0x3]);
-            enqueue(LOOKUP_2811[subpix & 0x3]);
-
-            subpix = buff[bOffset];
-            enqueue(LOOKUP_2811[(subpix >> 6) & 0x3]);
-            enqueue(LOOKUP_2811[(subpix >> 4) & 0x3]);
-            enqueue(LOOKUP_2811[(subpix >> 2) & 0x3]);
-            enqueue(LOOKUP_2811[subpix & 0x3]);
-
-            buff += 3;
-        }
+        buff += 3;
     }
+
     return buff;
 }
 

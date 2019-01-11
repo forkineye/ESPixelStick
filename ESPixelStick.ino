@@ -519,18 +519,6 @@ void initWeb() {
         request->send(200, "text/json", jsonString);
     });
 
-    // gamma debugging Config Handler
-    web.on("/gamma", HTTP_GET, [](AsyncWebServerRequest *request) {
-        AsyncResponseStream *response = request->beginResponseStream("text/plain");
-        for (int i = 0; i < 256; i++) {
-          response->printf ("%5d,", GAMMA_TABLE[i]);
-          if (i % 16 == 15) {
-            response->printf("\r\n");
-          }
-        }
-        request->send(response);
-    });
-
     // Firmware upload handler
     web.on("/updatefw", HTTP_POST, [](AsyncWebServerRequest *request) {
         ws.textAll("X6");
@@ -538,6 +526,8 @@ void initWeb() {
 
     // Static Handler
     web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
+
+    // Raw config file Handler
     //web.serveStatic("/config.json", SPIFFS, "/config.json");
 
     web.onNotFound([](AsyncWebServerRequest *request) {
@@ -695,9 +685,7 @@ void updateConfig() {
     // Initialize for our pixel type
 #if defined(ESPS_MODE_PIXEL)
     pixels.begin(config.pixel_type, config.pixel_color, config.channel_count / 3);
-//    pixels.setGroupMode(config.groupMode, config.groupSize);
     pixels.setGroup(config.groupSize, config.zigSize);
-    pixels.setGamma(config.gamma);
     updateGammaTable(config.gammaVal, config.briteVal);
     effects.begin(&pixels, config.channel_count / 3 / config.groupSize);
 
@@ -779,14 +767,18 @@ void dsEffectConfig(JsonObject &json) {
 // De-serialize Device Config
 void dsDeviceConfig(JsonObject &json) {
     // Device
-    config.id = json["device"]["id"].as<String>();
+    if (json.containsKey("device")) {
+        config.id = json["device"]["id"].as<String>();
+    }
 
     // E131
-    config.universe = json["e131"]["universe"];
-    config.universe_limit = json["e131"]["universe_limit"];
-    config.channel_start = json["e131"]["channel_start"];
-    config.channel_count = json["e131"]["channel_count"];
-    config.multicast = json["e131"]["multicast"];
+    if (json.containsKey("e131")) {
+        config.universe = json["e131"]["universe"];
+        config.universe_limit = json["e131"]["universe_limit"];
+        config.channel_start = json["e131"]["channel_start"];
+        config.channel_count = json["e131"]["channel_count"];
+        config.multicast = json["e131"]["multicast"];
+    }
 
     // MQTT
     if (json.containsKey("mqtt")) {
@@ -804,18 +796,21 @@ void dsDeviceConfig(JsonObject &json) {
 
 #if defined(ESPS_MODE_PIXEL)
     // Pixel
-    config.pixel_type = PixelType(static_cast<uint8_t>(json["pixel"]["type"]));
-    config.pixel_color = PixelColor(static_cast<uint8_t>(json["pixel"]["color"]));
-    config.groupSize = json["pixel"]["groupSize"];
-    config.zigSize = json["pixel"]["zigSize"];
-    config.gamma = json["pixel"]["gamma"];
-    config.gammaVal = json["pixel"]["gammaVal"];
-    config.briteVal = json["pixel"]["briteVal"];
+    if (json.containsKey("pixel")) {
+        config.pixel_type = PixelType(static_cast<uint8_t>(json["pixel"]["type"]));
+        config.pixel_color = PixelColor(static_cast<uint8_t>(json["pixel"]["color"]));
+        config.groupSize = json["pixel"]["groupSize"];
+        config.zigSize = json["pixel"]["zigSize"];
+        config.gammaVal = json["pixel"]["gammaVal"];
+        config.briteVal = json["pixel"]["briteVal"];
+    }
 
 #elif defined(ESPS_MODE_SERIAL)
     // Serial
-    config.serial_type = SerialType(static_cast<uint8_t>(json["serial"]["type"]));
-    config.baudrate = BaudRate(static_cast<uint32_t>(json["serial"]["baudrate"]));
+    if (json.containsKey("serial")) {
+        config.serial_type = SerialType(static_cast<uint8_t>(json["serial"]["type"]));
+        config.baudrate = BaudRate(static_cast<uint32_t>(json["serial"]["baudrate"]));
+    }
 #endif
 }
 
@@ -937,7 +932,6 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     pixel["color"] = static_cast<uint8_t>(config.pixel_color);
     pixel["groupSize"] = config.groupSize;
     pixel["zigSize"] = config.zigSize;
-    pixel["gamma"] = config.gamma;
     pixel["gammaVal"] = config.gammaVal;
     pixel["briteVal"] = config.briteVal;
 
@@ -953,6 +947,16 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     else
         json.printTo(jsonString);
 }
+
+#if defined(ESPS_MODE_PIXEL)
+void dsGammaConfig(JsonObject &json) {
+    if (json.containsKey("pixel")) {
+        config.gammaVal = json["pixel"]["gammaVal"];
+        config.briteVal = json["pixel"]["briteVal"];
+        updateGammaTable(config.gammaVal, config.briteVal);
+    }
+}
+#endif
 
 // Save configuration JSON file
 void saveConfig() {

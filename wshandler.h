@@ -45,6 +45,7 @@ extern const char CONFIG_FILE[];
     G1 - Get Config
     G2 - Get Config Status
     G3 - Get Current Effect and Effect Config Options
+    G4 - Get Gamma table values
 
     T0 - Disable Testing
     T1 - Static Testing
@@ -61,9 +62,10 @@ extern const char CONFIG_FILE[];
     S1 - Set Network Config
     S2 - Set Device Config
     S3 - Set Effect Startup Config
+    S4 - Set Gamma and Brightness (but dont save)
 
-    XS - Get RSSI:heap:uptime
-    X2 - Get E131 Status
+    XJ - Get RSSI,heap,uptime, e131 stats in json
+
     X6 - Reboot
 */
 
@@ -73,24 +75,36 @@ uint8_t * confuploadtemp;
 
 void procX(uint8_t *data, AsyncWebSocketClient *client) {
     switch (data[1]) {
-        case 'S':
-            client->text("XS" +
-                     (String)WiFi.RSSI() + ":" +
-                     (String)ESP.getFreeHeap() + ":" +
-                     (String)millis());
-            break;
-        case '2': {
+        case 'J': {
+
+            DynamicJsonBuffer jsonBuffer;
+            JsonObject &json = jsonBuffer.createObject();
+
+            // system statistics
+            JsonObject &system = json.createNestedObject("system");
+            system["rssi"] = (String)WiFi.RSSI();
+            system["freeheap"] = (String)ESP.getFreeHeap();
+            system["uptime"] = (String)millis();
+
+            // E131 statistics
+            JsonObject &e131J = json.createNestedObject("e131");
             uint32_t seqErrors = 0;
             for (int i = 0; i < ((uniLast + 1) - config.universe); i++)
                 seqErrors =+ seqError[i];
-            client->text("X2" + (String)config.universe + ":" +
-                    (String)uniLast + ":" +
-                    (String)e131.stats.num_packets + ":" +
-                    (String)seqErrors + ":" +
-                    (String)e131.stats.packet_errors + ":" +
-                    e131.stats.last_clientIP.toString());
+
+            e131J["universe"] = (String)config.universe;
+            e131J["uniLast"] = (String)uniLast;
+            e131J["num_packets"] = (String)e131.stats.num_packets;
+            e131J["seq_errors"] = (String)seqErrors;
+            e131J["packet_errors"] = (String)e131.stats.packet_errors;
+            e131J["last_clientIP"] = e131.stats.last_clientIP.toString();
+
+            String response;
+            json.printTo(response);
+            client->text("XJ" + response);
             break;
         }
+
         case '6':  // Init 6 baby, reboot!
             reboot = true;
     }
@@ -217,6 +231,20 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
 //LOG_PORT.print(response);
             break;
         }
+#if defined(ESPS_MODE_PIXEL)
+        case '4': {
+            DynamicJsonBuffer jsonBuffer;
+            JsonObject &json = jsonBuffer.createObject();
+            JsonArray &gamma = json.createNestedArray("gamma");
+            for (int i=0; i<256; i++) {
+                gamma.add(GAMMA_TABLE[i]);
+            }
+            String response;
+            json.printTo(response);
+            client->text("G4" + response);
+            break;
+        }
+#endif
     }
 }
 
@@ -254,6 +282,12 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
             saveConfig();
             client->text("S3");
             break;
+#if defined(ESPS_MODE_PIXEL)
+        case '4':   // Set Gamma (but no save)
+            dsGammaConfig(json);
+            client->text("S4");
+            break;
+#endif
     }
 }
 
@@ -454,7 +488,7 @@ void handle_config_upload(AsyncWebServerRequest *request, String filename,
             request->send(500, "text/plain", "Config Update Error." );
         } else {
             dsNetworkConfig(json);
-//          dsDeviceConfig(json);
+            dsDeviceConfig(json);
             dsEffectConfig(json);
             saveConfig();
             request->send(200, "text/plain", "Config Update Finished: " );
