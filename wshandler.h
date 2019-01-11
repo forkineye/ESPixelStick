@@ -231,6 +231,7 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
 //LOG_PORT.print(response);
             break;
         }
+#if defined(ESPS_MODE_PIXEL)
         case '4': {
             DynamicJsonBuffer jsonBuffer;
             JsonObject &json = jsonBuffer.createObject();
@@ -243,6 +244,7 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             client->text("G4" + response);
             break;
         }
+#endif
     }
 }
 
@@ -280,10 +282,12 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
             saveConfig();
             client->text("S3");
             break;
+#if defined(ESPS_MODE_PIXEL)
         case '4':   // Set Gamma (but no save)
             dsGammaConfig(json);
             client->text("S4");
             break;
+#endif
     }
 }
 

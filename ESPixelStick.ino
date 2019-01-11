@@ -948,6 +948,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
         json.printTo(jsonString);
 }
 
+#if defined(ESPS_MODE_PIXEL)
 void dsGammaConfig(JsonObject &json) {
     if (json.containsKey("pixel")) {
         config.gammaVal = json["pixel"]["gammaVal"];
@@ -955,6 +956,7 @@ void dsGammaConfig(JsonObject &json) {
         updateGammaTable(config.gammaVal, config.briteVal);
     }
 }
+#endif
 
 // Save configuration JSON file
 void saveConfig() {
