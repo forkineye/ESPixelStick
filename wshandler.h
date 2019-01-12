@@ -334,7 +334,6 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             if (json.containsKey("speed")) {
                 effects.setSpeed(json["speed"]);
             }
-            client->text("OK");
         }
     }
 
@@ -353,6 +352,7 @@ void procV(uint8_t *data, AsyncWebSocketClient *client) {
             else
                 client->binary(&serial.getData()[2], config.channel_count);
 #endif
+            break;
         }
     }
 }
