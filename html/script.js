@@ -151,6 +151,16 @@ $(function() {
       }
     });
 
+    // Effect brightness field
+    $('#t_brightness').change(function() {
+      var json = { 'brightness': $(this).val() };
+      var tmode = $('#tmode option:selected').val();
+
+      if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
+          wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
+      }
+    });
+
     // Test mode toggles
     $('#tmode').change(hideShowTestSections());
 
@@ -667,6 +677,7 @@ function getEffectInfo(data) {
     $('#t_mirror').prop('checked', running.mirror);
     $('#t_allleds').prop('checked', running.allleds);
     $('#t_speed').val(running.speed);
+    $('#t_brightness').val(running.brightness);
     $('#t_startenabled').prop('checked', running.startenabled);
     $('#t_idleenabled').prop('checked', running.idleenabled);
     $('#t_idletimeout').val(running.idletimeout);
@@ -822,7 +833,7 @@ function submitStartupEffect() {
                 'r': temp[1],
                 'g': temp[2],
                 'b': temp[3],
-                'brightness': 255,
+                'brightness': parseInt($('#t_brightness').val()),
                 'startenabled': $('#t_startenabled').prop('checked'),
                 'idleenabled': $('#t_idleenabled').prop('checked'),
                 'idletimeout': parseInt($('#t_idletimeout').val())

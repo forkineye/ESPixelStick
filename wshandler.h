@@ -334,6 +334,9 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             if (json.containsKey("speed")) {
                 effects.setSpeed(json["speed"]);
             }
+            if (json.containsKey("brightness")) {
+                effects.setBrightness(json["brightness"]);
+            }
         }
     }
 

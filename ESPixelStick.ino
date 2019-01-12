@@ -757,7 +757,8 @@ void dsEffectConfig(JsonObject &json) {
         config.effect_mirror = effectsJson["mirror"];
         config.effect_allleds = effectsJson["allleds"];
         config.effect_reverse = effectsJson["reverse"];
-        config.effect_speed = effectsJson["speed"];
+        if (effectsJson.containsKey("speed"))
+            config.effect_speed = effectsJson["speed"];
         config.effect_color = { effectsJson["r"], effectsJson["g"], effectsJson["b"] };
         if (effectsJson.containsKey("brightness"))
             config.effect_brightness = effectsJson["brightness"];
@@ -899,6 +900,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     _effects["allleds"] = config.effect_allleds;
     _effects["reverse"] = config.effect_reverse;
     _effects["speed"] = config.effect_speed;
+    _effects["brightness"] = config.effect_brightness;
 
     _effects["r"] = config.effect_color.r;
     _effects["g"] = config.effect_color.g;
