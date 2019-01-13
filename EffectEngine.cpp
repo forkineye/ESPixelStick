@@ -24,7 +24,7 @@ const EffectDesc EFFECT_LIST[] = {
 // Effect defaults
 #define DEFAULT_EFFECT_NAME "Disabled"
 #define DEFAULT_EFFECT_COLOR { 183, 0, 255 }
-#define DEFAULT_EFFECT_BRIGHTNESS 255
+#define DEFAULT_EFFECT_BRIGHTNESS 1.0
 #define DEFAULT_EFFECT_REVERSE false
 #define DEFAULT_EFFECT_MIRROR false
 #define DEFAULT_EFFECT_ALLLEDS false
@@ -126,9 +126,9 @@ bool EffectEngine::isValidEffect(const String effectName) {
 }
 
 void EffectEngine::setPixel(uint16_t idx,  CRGB color) {
-    _ledDriver->setValue(3 * idx + 0, (color.r * _effectBrightness) >> 8);
-    _ledDriver->setValue(3 * idx + 1, (color.g * _effectBrightness) >> 8);
-    _ledDriver->setValue(3 * idx + 2, (color.b * _effectBrightness) >> 8);
+    _ledDriver->setValue(3 * idx + 0, (uint8_t)(color.r * _effectBrightness) );
+    _ledDriver->setValue(3 * idx + 1, (uint8_t)(color.g * _effectBrightness) );
+    _ledDriver->setValue(3 * idx + 2, (uint8_t)(color.b * _effectBrightness) );
 }
 
 void EffectEngine::setRange(uint16_t first, uint16_t len, CRGB color) {

@@ -62,7 +62,7 @@ private:
     bool _effectReverse             = false;        /* Externally controlled effect reverse option */
     bool _effectMirror              = false;        /* Externally controlled effect mirroring (start at center) */
     bool _effectAllLeds             = false;        /* Externally controlled effect all leds = 1st led */
-    uint8_t _effectBrightness       = 255;          /* Externally controlled effect brightness [0, 255] */
+    float _effectBrightness         = 1.0;          /* Externally controlled effect brightness [0, 255] */
     CRGB _effectColor               = {0,0,0};      /* Externally controlled effect color */
 
     uint32_t _effectStep            = 0;            /* Shared mutable effect step counter */
@@ -95,8 +95,8 @@ public:
     void setEffect(const String effectName);
     void setReverse(bool reverse)           { _effectReverse = reverse; }
     void setMirror(bool mirror)             { _effectMirror = mirror; }
-    void setAllLeds(bool allleds)            { _effectAllLeds = allleds; }
-    void setBrightness(uint8_t brightness)  { _effectBrightness = brightness; }
+    void setAllLeds(bool allleds)           { _effectAllLeds = allleds; }
+    void setBrightness(float brightness)    { _effectBrightness = brightness; }
     void setSpeed(uint16_t speed)           { _effectSpeed = speed; }
     void setColor(CRGB color)               { _effectColor = color; }
 
