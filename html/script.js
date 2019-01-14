@@ -230,6 +230,9 @@ $(function() {
     $('#hostname').keyup(function() {
         wifiValidation();
     });
+    $('#staTimeout').keyup(function() {
+        wifiValidation();
+    });
     $('#ssid').keyup(function() {
         wifiValidation();
     });
@@ -272,6 +275,14 @@ function wifiValidation() {
     } else {
         $('#fg_hostname').removeClass('has-success');
         $('#fg_hostname').addClass('has-error');
+        WifiSaveDisabled = true;
+    }
+    if ($('#staTimeout').val() >= 5) {
+        $('#fg_staTimeout').removeClass('has-error');
+        $('#fg_staTimeout').addClass('has-success');
+    } else {
+        $('#fg_staTimeout').removeClass('has-success');
+        $('#fg_staTimeout').addClass('has-error');
         WifiSaveDisabled = true;
     }
     if ($('#ssid').val().length <= 32) {
@@ -536,6 +547,7 @@ function getConfig(data) {
     $('#ssid').val(config.network.ssid);
     $('#password').val(config.network.passphrase);
     $('#hostname').val(config.network.hostname);
+    $('#staTimeout').val(config.network.sta_timeout);
     $('#dhcp').prop('checked', config.network.dhcp);
     if (config.network.dhcp) {
         $('.dhcp').addClass('hidden');
@@ -762,6 +774,7 @@ function submitWiFi() {
                 'ssid': $('#ssid').val(),
                 'passphrase': $('#password').val(),
                 'hostname': $('#hostname').val(),
+                'sta_timeout': $('#staTimeout').val(),
                 'ip': [parseInt(ip[0]), parseInt(ip[1]), parseInt(ip[2]), parseInt(ip[3])],
                 'netmask': [parseInt(netmask[0]), parseInt(netmask[1]), parseInt(netmask[2]), parseInt(netmask[3])],
                 'gateway': [parseInt(gateway[0]), parseInt(gateway[1]), parseInt(gateway[2]), parseInt(gateway[3])],

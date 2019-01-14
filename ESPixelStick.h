@@ -50,7 +50,8 @@ const char BUILD_DATE[] = __DATE__;
 #define PIXEL_LIMIT     1360    /* Total pixel limit - 40.85ms for 8 universes */
 #define RENARD_LIMIT    2048    /* Channel limit for serial outputs */
 #define E131_TIMEOUT    1000    /* Force refresh every second an E1.31 packet is not seen */
-#define CONNECT_TIMEOUT 15000   /* 15 seconds */
+#define CLIENT_TIMEOUT  15      /* In station/client mode try to connection for 15 seconds */
+#define AP_TIMEOUT      60      /* In AP mode, wait 60 seconds for a connection or reboot */
 #define REBOOT_DELAY    100     /* Delay for rebooting once reboot flag is set */
 #define LOG_PORT        Serial  /* Serial port for console logging */
 
@@ -99,6 +100,8 @@ typedef struct {
     uint8_t     gateway[4];
     bool        dhcp;           /* Use DHCP? */
     bool        ap_fallback;    /* Fallback to AP if fail to associate? */
+    uint32_t    sta_timeout;    /* Timeout when connection as client (station) */
+    uint32_t    ap_timeout;     /* How long to wait in AP mode with no connection before rebooting */
 
     /* Effects */
     String effect_name;

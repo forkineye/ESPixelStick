@@ -251,7 +251,7 @@ void initWifi() {
     while (WiFi.status() != WL_CONNECTED) {
         LOG_PORT.print(".");
         delay(500);
-        if (millis() - timeout > CONNECT_TIMEOUT) {
+        if (millis() - timeout > (1000 * config.sta_timeout) ){
             LOG_PORT.println("");
             LOG_PORT.println(F("*** Failed to connect ***"));
             break;
@@ -533,7 +533,7 @@ void initWeb() {
     web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
 
     // Raw config file Handler - but only on station
-    web.serveStatic("/config.json", SPIFFS, "/config.json").setFilter(ON_STA_FILTER);
+//  web.serveStatic("/config.json", SPIFFS, "/config.json").setFilter(ON_STA_FILTER);
 
     web.onNotFound([](AsyncWebServerRequest *request) {
         request->send(404, "text/plain", "Page not found");
@@ -746,7 +746,16 @@ void dsNetworkConfig(JsonObject &json) {
             config.gateway[i] = networkJson["gateway"][i];
         }
         config.dhcp = networkJson["dhcp"];
+        config.sta_timeout = networkJson["sta_timeout"] | CLIENT_TIMEOUT;
+        if (config.sta_timeout < 5) {
+            config.sta_timeout = 5;
+        }
+
         config.ap_fallback = networkJson["ap_fallback"];
+        config.ap_timeout = networkJson["ap_timeout"] | AP_TIMEOUT;
+        if (config.ap_timeout < 15) {
+            config.ap_timeout = 15;
+        }
 
         // Generate default hostname if needed
         config.hostname = networkJson["hostname"].as<String>();
@@ -901,7 +910,10 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
         gateway.add(config.gateway[i]);
     }
     network["dhcp"] = config.dhcp;
+    network["sta_timeout"] = config.sta_timeout;
+
     network["ap_fallback"] = config.ap_fallback;
+    network["ap_timeout"] = config.ap_timeout;
 
     // Effects
     JsonObject &_effects = json.createNestedObject("effects");
