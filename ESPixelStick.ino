@@ -396,6 +396,10 @@ void onMqttMessage(char* topic, char* payload,
         effects.setBrightness((float)root["brightness"] / 255.0);
     }
 
+    if (root.containsKey("delay")) {
+        effects.setDelay(root["delay"]);
+    }
+
     if (root.containsKey("color")) {
         effects.setColor({
             root["color"]["r"],
@@ -477,6 +481,7 @@ void publishState() {
     color["g"] = effects.getColor().g;
     color["b"] = effects.getColor().b;
     root["brightness"] = effects.getBrightness()*255;
+    root["delay"] = effects.getDelay();
     if (!effects.getEffect().equalsIgnoreCase("Disabled")) {
         root["effect"] = effects.getEffect();
     }
