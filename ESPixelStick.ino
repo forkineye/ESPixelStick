@@ -524,10 +524,10 @@ void initWeb() {
         request->send(200, "text/json", jsonString);
     });
 
-    // Firmware upload handler
+    // Firmware upload handler - only in station mode
     web.on("/updatefw", HTTP_POST, [](AsyncWebServerRequest *request) {
         ws.textAll("X6");
-    }, handle_fw_upload);
+    }, handle_fw_upload).setFilter(ON_STA_FILTER);
 
     // Static Handler
     web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
@@ -541,10 +541,10 @@ void initWeb() {
 
     DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
 
-    // Config file upload handler
+    // Config file upload handler - only in station mode
     web.on("/config", HTTP_POST, [](AsyncWebServerRequest *request) {
         ws.textAll("X6");
-    }, handle_config_upload);
+    }, handle_config_upload).setFilter(ON_STA_FILTER);
 
     web.begin();
 
