@@ -141,9 +141,9 @@ $(function() {
       }
     });
 
-    // Effect speed field
-    $('#t_speed').change(function() {
-      var json = { 'speed': $(this).val() };
+    // Effect delay field
+    $('#t_delay').change(function() {
+      var json = { 'delay': $(this).val() };
       var tmode = $('#tmode option:selected').val();
 
       if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
@@ -676,7 +676,7 @@ function getEffectInfo(data) {
     $('#t_reverse').prop('checked', running.reverse);
     $('#t_mirror').prop('checked', running.mirror);
     $('#t_allleds').prop('checked', running.allleds);
-    $('#t_speed').val(running.speed);
+    $('#t_delay').val(running.delay);
     $('#t_brightness').val(running.brightness);
     $('#t_startenabled').prop('checked', running.startenabled);
     $('#t_idleenabled').prop('checked', running.idleenabled);
@@ -829,11 +829,11 @@ function submitStartupEffect() {
                 'mirror': $('#t_mirror').prop('checked'),
                 'allleds': $('#t_allleds').prop('checked'),
                 'reverse': $('#t_reverse').prop('checked'),
-                'speed': parseInt($('#t_speed').val()),
+                'delay': parseInt($('#t_delay').val()),
                 'r': temp[1],
                 'g': temp[2],
                 'b': temp[3],
-                'brightness': parseInt($('#t_brightness').val()),
+                'brightness': parseFloat($('#t_brightness').val()),
                 'startenabled': $('#t_startenabled').prop('checked'),
                 'idleenabled': $('#t_idleenabled').prop('checked'),
                 'idletimeout': parseInt($('#t_idletimeout').val())

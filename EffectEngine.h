@@ -3,7 +3,7 @@
 
 #define MIN_EFFECT_DELAY 10
 #define MAX_EFFECT_DELAY 65535
-#define DEFAULT_EFFECT_SPEED 1000
+#define DEFAULT_EFFECT_DELAY 1000
 
 #if defined(ESPS_MODE_PIXEL)
     #define DRIVER PixelDriver
@@ -55,10 +55,10 @@ private:
     using timeType = decltype(millis());
 
     const EffectDesc* _activeEffect = nullptr;      /* Pointer to the active effect descriptor */
-    uint32_t _effectDelay           = 0;            /* How long to wait for the effect to run again */
+    uint32_t _effectWait            = 0;            /* How long to wait for the effect to run again */
     timeType _effectLastRun         = 0;            /* When did the effect last run ? in millis() */
     uint32_t _effectCounter         = 0;            /* Counter for the number of calls to the active effect */
-    uint16_t _effectSpeed           = 1024;         /* Externally controlled effect speed [MIN_EFFECT_DELAY, MAX_EFFECT_DELAY]*/
+    uint16_t _effectDelay           = 1024;         /* Externally controlled effect speed [MIN_EFFECT_DELAY, MAX_EFFECT_DELAY]*/
     bool _effectReverse             = false;        /* Externally controlled effect reverse option */
     bool _effectMirror              = false;        /* Externally controlled effect mirroring (start at center) */
     bool _effectAllLeds             = false;        /* Externally controlled effect all leds = 1st led */
@@ -81,8 +81,8 @@ public:
     bool getReverse()                       { return _effectReverse; }
     bool getMirror()                        { return _effectMirror; }
     bool getAllLeds()                       { return _effectAllLeds; }
-    uint32_t getBrightness()                { return _effectBrightness; }
-    uint16_t getSpeed()                     { return _effectSpeed; }
+    float getBrightness()                   { return _effectBrightness; }
+    uint16_t getDelay()                     { return _effectDelay; }
     CRGB getColor()                         { return _effectColor; }
 
     int getEffectCount();
@@ -96,8 +96,10 @@ public:
     void setReverse(bool reverse)           { _effectReverse = reverse; }
     void setMirror(bool mirror)             { _effectMirror = mirror; }
     void setAllLeds(bool allleds)           { _effectAllLeds = allleds; }
-    void setBrightness(float brightness)    { _effectBrightness = brightness; }
-    void setSpeed(uint16_t speed)           { _effectSpeed = speed; }
+//  void setBrightness(float brightness)    { _effectBrightness = brightness; }
+//  void setDelay(uint16_t delay)           { _effectDelay = delay; }
+    void setBrightness(float brightness);
+    void setDelay(uint16_t delay);
     void setColor(CRGB color)               { _effectColor = color; }
 
     // Effect functions

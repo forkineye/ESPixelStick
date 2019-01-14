@@ -103,8 +103,8 @@ typedef struct {
     /* Effects */
     String effect_name;
     CRGB effect_color;
-    uint8_t effect_brightness;
-    uint16_t effect_speed;
+    float effect_brightness;
+    uint16_t effect_delay;
     bool effect_reverse;
     bool effect_mirror;
     bool effect_allleds;
