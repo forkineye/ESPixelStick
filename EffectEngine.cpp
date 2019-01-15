@@ -28,6 +28,7 @@ const EffectDesc EFFECT_LIST[] = {
 #define DEFAULT_EFFECT_REVERSE false
 #define DEFAULT_EFFECT_MIRROR false
 #define DEFAULT_EFFECT_ALLLEDS false
+#define DEFAULT_EFFECT_SPEED 6
 
 EffectEngine::EffectEngine() {
     // Initialize with defaults
@@ -41,7 +42,7 @@ void EffectEngine::setFromDefaults() {
     config.effect_reverse = DEFAULT_EFFECT_REVERSE;
     config.effect_mirror = DEFAULT_EFFECT_MIRROR;
     config.effect_allleds = DEFAULT_EFFECT_ALLLEDS;
-    config.effect_delay = DEFAULT_EFFECT_DELAY;
+    config.effect_speed = DEFAULT_EFFECT_SPEED;
     setFromConfig();
 }
 
@@ -53,7 +54,7 @@ void EffectEngine::setFromConfig() {
     setReverse(config.effect_reverse);
     setMirror(config.effect_mirror);
     setAllLeds(config.effect_allleds);
-    setDelay(config.effect_delay);
+    setSpeed(config.effect_speed);
 }
 
 void EffectEngine::setBrightness(float brightness) {
@@ -62,6 +63,12 @@ void EffectEngine::setBrightness(float brightness) {
         _effectBrightness = 1.0;
     if (_effectBrightness < 0.0)
         _effectBrightness = 0.0;
+}
+
+// Yukky maths here. Input speeds from 1..10 get mapped to 17782..100
+void EffectEngine::setSpeed(uint16_t speed) {
+    _effectSpeed = speed;
+    setDelay( pow (10, (10-speed)/4.0 +2 ) );
 }
 
 void EffectEngine::setDelay(uint16_t delay) {

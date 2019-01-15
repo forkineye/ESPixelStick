@@ -58,7 +58,8 @@ private:
     uint32_t _effectWait            = 0;            /* How long to wait for the effect to run again */
     timeType _effectLastRun         = 0;            /* When did the effect last run ? in millis() */
     uint32_t _effectCounter         = 0;            /* Counter for the number of calls to the active effect */
-    uint16_t _effectDelay           = 1024;         /* Externally controlled effect speed [MIN_EFFECT_DELAY, MAX_EFFECT_DELAY]*/
+    uint16_t _effectSpeed           = 6;            /* Externally controlled effect speed 1..10 */
+    uint16_t _effectDelay           = 1000;         /* Internal representation of speed */
     bool _effectReverse             = false;        /* Externally controlled effect reverse option */
     bool _effectMirror              = false;        /* Externally controlled effect mirroring (start at center) */
     bool _effectAllLeds             = false;        /* Externally controlled effect all leds = 1st led */
@@ -83,6 +84,7 @@ public:
     bool getAllLeds()                       { return _effectAllLeds; }
     float getBrightness()                   { return _effectBrightness; }
     uint16_t getDelay()                     { return _effectDelay; }
+    uint16_t getSpeed()                     { return _effectSpeed; }
     CRGB getColor()                         { return _effectColor; }
 
     int getEffectCount();
@@ -96,9 +98,8 @@ public:
     void setReverse(bool reverse)           { _effectReverse = reverse; }
     void setMirror(bool mirror)             { _effectMirror = mirror; }
     void setAllLeds(bool allleds)           { _effectAllLeds = allleds; }
-//  void setBrightness(float brightness)    { _effectBrightness = brightness; }
-//  void setDelay(uint16_t delay)           { _effectDelay = delay; }
     void setBrightness(float brightness);
+    void setSpeed(uint16_t speed);
     void setDelay(uint16_t delay);
     void setColor(CRGB color)               { _effectColor = color; }
 

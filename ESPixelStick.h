@@ -107,7 +107,7 @@ typedef struct {
     String effect_name;
     CRGB effect_color;
     float effect_brightness;
-    uint16_t effect_delay;
+    uint16_t effect_speed;	/* 1..10 for web UI and MQTT */
     bool effect_reverse;
     bool effect_mirror;
     bool effect_allleds;
