@@ -220,10 +220,12 @@ $(function() {
 
     // Serial protocol toggles
     $('#s_proto').change(function() {
-        if ($('select[name=s_proto]').val() == '0')
+        var proto = $('#s_proto option:selected').text();
+        if (!proto.localeCompare('DMX512')) {
             $('#s_baud').prop('disabled', true);
-        else
+        } else if (!proto.localeCompare('Renard')) {
             $('#s_baud').prop('disabled', false);
+        }
     });
 
     // Hostname, SSID, and Password validation
@@ -884,10 +886,12 @@ function refreshSerial() {
     if (!proto.localeCompare('Renard')) {
         symbol = 10;
         size = size + 2;
+        $('#s_baud').prop('disabled', false);
     } else if (!proto.localeCompare('DMX512')) {
         symbol = 11;
         baud = 250000;
         $('#s_baud').val(baud);
+        $('#s_baud').prop('disabled', true);
     }
     var rate = symbol * 1000 / baud * size;
     var hz = 1000 / rate;

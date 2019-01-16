@@ -164,6 +164,14 @@ void setup() {
     pixels.show();
 #else
     updateConfig();
+    // Do one effects cycle as early as possible
+    if (config.ds == DataSource::WEB) {
+        effects.run();
+    }
+    // set the effect idle timer
+    idleTicker.attach(config.effect_idletimeout, idleTimeout);
+
+    serial.show();
 #endif
 
     // Setup WiFi Handlers
@@ -225,6 +233,7 @@ void setup() {
         }
     }
 
+/* to be removed, done earlier
     // Configure the outputs
 #if defined (ESPS_MODE_PIXEL)
     pixels.setPin(DATA_PIN);
@@ -233,6 +242,7 @@ void setup() {
 #else
     updateConfig();
 #endif
+*/
 }
 
 /////////////////////////////////////////////////////////
@@ -706,6 +716,7 @@ void updateConfig() {
 
 #elif defined(ESPS_MODE_SERIAL)
     serial.begin(&SEROUT_PORT, config.serial_type, config.channel_count, config.baudrate);
+    effects.begin(&serial, config.channel_count / 3 );
 
 #endif
 
