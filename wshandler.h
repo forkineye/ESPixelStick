@@ -193,7 +193,11 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
 
 // dump the current running effect options
             JsonObject &effect = json.createNestedObject("currentEffect");
-            effect["name"] = (String)effects.getEffect() ? effects.getEffect() : "";
+            if (config.ds == DataSource::E131) {
+                effect["name"] = "Disabled";
+            } else {
+                effect["name"] = (String)effects.getEffect() ? effects.getEffect() : "";
+            }
             effect["brightness"] = effects.getBrightness();
             effect["speed"] = effects.getSpeed();
             effect["r"] = effects.getColor().r;
@@ -205,11 +209,7 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             effect["startenabled"] = config.effect_startenabled;
             effect["idleenabled"] = config.effect_idleenabled;
             effect["idletimeout"] = config.effect_idletimeout;
-            if (config.ds == DataSource::WEB) {
-                effect["effectenabled"] = true;
-            } else {
-                effect["effectenabled"] = false;
-            }
+
 
 // dump all the known effect and options
             JsonObject &effectList = json.createNestedObject("effectList");
