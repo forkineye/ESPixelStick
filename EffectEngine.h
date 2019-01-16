@@ -3,7 +3,7 @@
 
 #define MIN_EFFECT_DELAY 10
 #define MAX_EFFECT_DELAY 65535
-#define DEFAULT_EFFECT_SPEED 1000
+#define DEFAULT_EFFECT_DELAY 1000
 
 #if defined(ESPS_MODE_PIXEL)
     #define DRIVER PixelDriver
@@ -46,7 +46,7 @@ struct EffectDesc {
     bool        hasMirror;
     bool        hasReverse;
     bool        hasAllLeds;
-    const char* wsTCode;
+    String      wsTCode;
 };
 
 class EffectEngine {
@@ -55,14 +55,15 @@ private:
     using timeType = decltype(millis());
 
     const EffectDesc* _activeEffect = nullptr;      /* Pointer to the active effect descriptor */
-    uint32_t _effectDelay           = 0;            /* How long to wait for the effect to run again */
+    uint32_t _effectWait            = 0;            /* How long to wait for the effect to run again */
     timeType _effectLastRun         = 0;            /* When did the effect last run ? in millis() */
     uint32_t _effectCounter         = 0;            /* Counter for the number of calls to the active effect */
-    uint16_t _effectSpeed           = 1024;         /* Externally controlled effect speed [MIN_EFFECT_DELAY, MAX_EFFECT_DELAY]*/
+    uint16_t _effectSpeed           = 6;            /* Externally controlled effect speed 1..10 */
+    uint16_t _effectDelay           = 1000;         /* Internal representation of speed */
     bool _effectReverse             = false;        /* Externally controlled effect reverse option */
     bool _effectMirror              = false;        /* Externally controlled effect mirroring (start at center) */
-    bool _effectAllLeds             = false;        /* Externally controlled effect mirroring (start at center) */
-    uint8_t _effectBrightness       = 255;          /* Externally controlled effect brightness [0, 255] */
+    bool _effectAllLeds             = false;        /* Externally controlled effect all leds = 1st led */
+    float _effectBrightness         = 1.0;          /* Externally controlled effect brightness [0, 255] */
     CRGB _effectColor               = {0,0,0};      /* Externally controlled effect color */
 
     uint32_t _effectStep            = 0;            /* Shared mutable effect step counter */
@@ -81,12 +82,14 @@ public:
     bool getReverse()                       { return _effectReverse; }
     bool getMirror()                        { return _effectMirror; }
     bool getAllLeds()                       { return _effectAllLeds; }
-    uint32_t getBrightness()                { return _effectBrightness; }
+    float getBrightness()                   { return _effectBrightness; }
+    uint16_t getDelay()                     { return _effectDelay; }
     uint16_t getSpeed()                     { return _effectSpeed; }
     CRGB getColor()                         { return _effectColor; }
 
     int getEffectCount();
     const EffectDesc* getEffectInfo(unsigned a);
+    const EffectDesc* getEffectInfo(String s);
     void setFromConfig();
     void setFromDefaults();
 
@@ -94,9 +97,10 @@ public:
     void setEffect(const String effectName);
     void setReverse(bool reverse)           { _effectReverse = reverse; }
     void setMirror(bool mirror)             { _effectMirror = mirror; }
-    void setAllLeds(bool allleds)            { _effectAllLeds = allleds; }
-    void setBrightness(uint8_t brightness)  { _effectBrightness = brightness; }
-    void setSpeed(uint16_t speed)           { _effectSpeed = speed; }
+    void setAllLeds(bool allleds)           { _effectAllLeds = allleds; }
+    void setBrightness(float brightness);
+    void setSpeed(uint16_t speed);
+    void setDelay(uint16_t delay);
     void setColor(CRGB color)               { _effectColor = color; }
 
     // Effect functions

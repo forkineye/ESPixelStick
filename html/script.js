@@ -141,6 +141,26 @@ $(function() {
       }
     });
 
+    // Effect speed field
+    $('#t_speed').change(function() {
+      var json = { 'speed': $(this).val() };
+      var tmode = $('#tmode option:selected').val();
+
+      if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
+          wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
+      }
+    });
+
+    // Effect brightness field
+    $('#t_brightness').change(function() {
+      var json = { 'brightness': $(this).val() };
+      var tmode = $('#tmode option:selected').val();
+
+      if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
+          wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
+      }
+    });
+
     // Test mode toggles
     $('#tmode').change(hideShowTestSections());
 
@@ -210,6 +230,9 @@ $(function() {
     $('#hostname').keyup(function() {
         wifiValidation();
     });
+    $('#staTimeout').keyup(function() {
+        wifiValidation();
+    });
     $('#ssid').keyup(function() {
         wifiValidation();
     });
@@ -252,6 +275,14 @@ function wifiValidation() {
     } else {
         $('#fg_hostname').removeClass('has-success');
         $('#fg_hostname').addClass('has-error');
+        WifiSaveDisabled = true;
+    }
+    if ($('#staTimeout').val() >= 5) {
+        $('#fg_staTimeout').removeClass('has-error');
+        $('#fg_staTimeout').addClass('has-success');
+    } else {
+        $('#fg_staTimeout').removeClass('has-success');
+        $('#fg_staTimeout').addClass('has-error');
         WifiSaveDisabled = true;
     }
     if ($('#ssid').val().length <= 32) {
@@ -516,6 +547,7 @@ function getConfig(data) {
     $('#ssid').val(config.network.ssid);
     $('#password').val(config.network.passphrase);
     $('#hostname').val(config.network.hostname);
+    $('#staTimeout').val(config.network.sta_timeout);
     $('#dhcp').prop('checked', config.network.dhcp);
     if (config.network.dhcp) {
         $('.dhcp').addClass('hidden');
@@ -656,6 +688,8 @@ function getEffectInfo(data) {
     $('#t_reverse').prop('checked', running.reverse);
     $('#t_mirror').prop('checked', running.mirror);
     $('#t_allleds').prop('checked', running.allleds);
+    $('#t_speed').val(running.speed);
+    $('#t_brightness').val(running.brightness);
     $('#t_startenabled').prop('checked', running.startenabled);
     $('#t_idleenabled').prop('checked', running.idleenabled);
     $('#t_idletimeout').val(running.idletimeout);
@@ -740,6 +774,7 @@ function submitWiFi() {
                 'ssid': $('#ssid').val(),
                 'passphrase': $('#password').val(),
                 'hostname': $('#hostname').val(),
+                'sta_timeout': $('#staTimeout').val(),
                 'ip': [parseInt(ip[0]), parseInt(ip[1]), parseInt(ip[2]), parseInt(ip[3])],
                 'netmask': [parseInt(netmask[0]), parseInt(netmask[1]), parseInt(netmask[2]), parseInt(netmask[3])],
                 'gateway': [parseInt(gateway[0]), parseInt(gateway[1]), parseInt(gateway[2]), parseInt(gateway[3])],
@@ -807,10 +842,11 @@ function submitStartupEffect() {
                 'mirror': $('#t_mirror').prop('checked'),
                 'allleds': $('#t_allleds').prop('checked'),
                 'reverse': $('#t_reverse').prop('checked'),
+                'speed': parseInt($('#t_speed').val()),
                 'r': temp[1],
                 'g': temp[2],
                 'b': temp[3],
-                'brightness': 255,
+                'brightness': parseFloat($('#t_brightness').val()),
                 'startenabled': $('#t_startenabled').prop('checked'),
                 'idleenabled': $('#t_idleenabled').prop('checked'),
                 'idletimeout': parseInt($('#t_idletimeout').val())

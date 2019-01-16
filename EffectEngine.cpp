@@ -24,10 +24,11 @@ const EffectDesc EFFECT_LIST[] = {
 // Effect defaults
 #define DEFAULT_EFFECT_NAME "Disabled"
 #define DEFAULT_EFFECT_COLOR { 183, 0, 255 }
-#define DEFAULT_EFFECT_BRIGHTNESS 255
+#define DEFAULT_EFFECT_BRIGHTNESS 1.0
 #define DEFAULT_EFFECT_REVERSE false
 #define DEFAULT_EFFECT_MIRROR false
 #define DEFAULT_EFFECT_ALLLEDS false
+#define DEFAULT_EFFECT_SPEED 6
 
 EffectEngine::EffectEngine() {
     // Initialize with defaults
@@ -41,6 +42,7 @@ void EffectEngine::setFromDefaults() {
     config.effect_reverse = DEFAULT_EFFECT_REVERSE;
     config.effect_mirror = DEFAULT_EFFECT_MIRROR;
     config.effect_allleds = DEFAULT_EFFECT_ALLLEDS;
+    config.effect_speed = DEFAULT_EFFECT_SPEED;
     setFromConfig();
 }
 
@@ -52,6 +54,27 @@ void EffectEngine::setFromConfig() {
     setReverse(config.effect_reverse);
     setMirror(config.effect_mirror);
     setAllLeds(config.effect_allleds);
+    setSpeed(config.effect_speed);
+}
+
+void EffectEngine::setBrightness(float brightness) {
+    _effectBrightness = brightness;
+    if (_effectBrightness > 1.0)
+        _effectBrightness = 1.0;
+    if (_effectBrightness < 0.0)
+        _effectBrightness = 0.0;
+}
+
+// Yukky maths here. Input speeds from 1..10 get mapped to 17782..100
+void EffectEngine::setSpeed(uint16_t speed) {
+    _effectSpeed = speed;
+    setDelay( pow (10, (10-speed)/4.0 +2 ) );
+}
+
+void EffectEngine::setDelay(uint16_t delay) {
+    _effectDelay = delay;
+    if (_effectDelay < MIN_EFFECT_DELAY)
+        _effectDelay = MIN_EFFECT_DELAY;
 }
 
 void EffectEngine::begin(DRIVER* ledDriver, uint16_t ledCount) {
@@ -62,10 +85,10 @@ void EffectEngine::begin(DRIVER* ledDriver, uint16_t ledCount) {
 
 void EffectEngine::run() {
     if (_initialized && _activeEffect && _activeEffect->func) {
-        if (millis() - _effectLastRun >= _effectDelay) {
+        if (millis() - _effectLastRun >= _effectWait) {
             _effectLastRun = millis();
-            uint16_t delay = (this->*_activeEffect->func)();
-            _effectDelay = max((int)delay, MIN_EFFECT_DELAY);
+            uint16_t wait = (this->*_activeEffect->func)();
+            _effectWait = max((int)wait, MIN_EFFECT_DELAY);
             _effectCounter++;
         }
     }
@@ -78,7 +101,7 @@ void EffectEngine::setEffect(const String effectName) {
             if (_activeEffect != &EFFECT_LIST[effect]) {
                 _activeEffect = &EFFECT_LIST[effect];
                 _effectLastRun = millis();
-                _effectDelay = MIN_EFFECT_DELAY;
+                _effectWait = MIN_EFFECT_DELAY;
                 _effectCounter = 0;
                 _effectStep = 0;
             }
@@ -94,6 +117,7 @@ int EffectEngine::getEffectCount() {
     return sizeof(EFFECT_LIST) / sizeof(EffectDesc);
 }
 
+// find effect info by its index in the table
 const EffectDesc* EffectEngine::getEffectInfo(unsigned a) {
     if (a >= sizeof(EFFECT_LIST) / sizeof(EffectDesc))
 	a = 0;
@@ -101,10 +125,21 @@ const EffectDesc* EffectEngine::getEffectInfo(unsigned a) {
     return &EFFECT_LIST[a];
 }
 
+// find effect info by its web services Tcode
+const EffectDesc* EffectEngine::getEffectInfo(const String TCode) {
+    const uint8_t effectCount = sizeof(EFFECT_LIST) / sizeof(EffectDesc);
+    for (uint8_t effect = 0; effect < effectCount; effect++) {
+        if ( TCode.equalsIgnoreCase(EFFECT_LIST[effect].wsTCode) ) {
+            return &EFFECT_LIST[effect];
+        }
+    }
+    return nullptr;
+}
+
 bool EffectEngine::isValidEffect(const String effectName) {
     const uint8_t effectCount = sizeof(EFFECT_LIST) / sizeof(EffectDesc);
     for (uint8_t effect = 0; effect < effectCount; effect++) {
-        if (effectName == EFFECT_LIST[effect].name) {
+        if ( effectName.equalsIgnoreCase(EFFECT_LIST[effect].name) ) {
             return true;
         }
     }
@@ -112,9 +147,9 @@ bool EffectEngine::isValidEffect(const String effectName) {
 }
 
 void EffectEngine::setPixel(uint16_t idx,  CRGB color) {
-    _ledDriver->setValue(3 * idx + 0, (color.r * _effectBrightness) >> 8);
-    _ledDriver->setValue(3 * idx + 1, (color.g * _effectBrightness) >> 8);
-    _ledDriver->setValue(3 * idx + 2, (color.b * _effectBrightness) >> 8);
+    _ledDriver->setValue(3 * idx + 0, (uint8_t)(color.r * _effectBrightness) );
+    _ledDriver->setValue(3 * idx + 1, (uint8_t)(color.g * _effectBrightness) );
+    _ledDriver->setValue(3 * idx + 2, (uint8_t)(color.b * _effectBrightness) );
 }
 
 void EffectEngine::setRange(uint16_t first, uint16_t len, CRGB color) {
@@ -189,7 +224,7 @@ uint16_t EffectEngine::effectChase() {
     }
 
     _effectStep = (1+_effectStep) % lc;
-    return _effectSpeed / 32;
+    return _effectDelay / 32;
 }
 
 uint16_t EffectEngine::effectRainbow() {
@@ -224,12 +259,12 @@ uint16_t EffectEngine::effectRainbow() {
     }
 
     _effectStep = (1+_effectStep) & 0xFF;
-    return _effectSpeed / 256;
+    return _effectDelay / 256;
 }
 
 uint16_t EffectEngine::effectBlink() {
     // The Blink effect uses two "time slots": on, off
-    // Using default speed, a complete sequence takes 2s.
+    // Using default delay, a complete sequence takes 2s.
     if (_effectStep % 2) {
       clearAll();
     } else {
@@ -237,12 +272,12 @@ uint16_t EffectEngine::effectBlink() {
     }
 
     _effectStep = (1+_effectStep) % 2;
-    return _effectSpeed / 1;
+    return _effectDelay / 1;
 }
 
 uint16_t EffectEngine::effectFlash() {
     // The Flash effect uses 6 "time slots": on, off, on, off, off, off
-    // Using default speed, a complete sequence takes 2s.
+    // Using default delay, a complete sequence takes 2s.
     // Prevent errors if we come from another effect with more steps
     _effectStep = _effectStep % 6;
 
@@ -256,7 +291,7 @@ uint16_t EffectEngine::effectFlash() {
     }
 
     _effectStep = (1+_effectStep) % 6;
-    return _effectSpeed / 3;
+    return _effectDelay / 3;
 }
 
 uint16_t EffectEngine::effectFireFlicker() {
@@ -267,12 +302,12 @@ uint16_t EffectEngine::effectFireFlicker() {
     setPixel(i, CRGB { max(_effectColor.r - flicker, 0), max(_effectColor.g - flicker, 0), max(_effectColor.b - flicker, 0) });
   }
   _effectStep = (1+_effectStep) % _ledCount;
-  return _effectSpeed / 10;
+  return _effectDelay / 10;
 }
 
 uint16_t EffectEngine::effectLightning() {
   static byte maxFlashes;
-  static int timeslot = _effectSpeed / 1000; // 1ms
+  static int timeslot = _effectDelay / 1000; // 1ms
   int flashPause = 10; // 10ms
   uint16_t ledStart = random(_ledCount);
   uint16_t ledLen = random(1, _ledCount - ledStart);
@@ -316,7 +351,7 @@ uint16_t EffectEngine::effectBreathe() {
    * Subtle "breathing" effect, works best with gamma correction on.
    *
    * The average resting respiratory rate of an adult is 12–18 breaths/minute.
-   * We use 12 breaths/minute = 5.0s/breath at the default _effectSpeed.
+   * We use 12 breaths/minute = 5.0s/breath at the default _effectDelay.
    * The tidal volume (~0.5l) is much less than the total lung capacity,
    * so we vary only between 75% and 100% of the set brightness.
    *
@@ -333,9 +368,9 @@ uint16_t EffectEngine::effectBreathe() {
    * for a nice explanation of the math.
    */
   // sin() is in radians, so 2*PI rad is a full period; compiler should optimize.
-  float val = (exp(sin(millis()/(_effectSpeed*5.0)*2*PI)) - 0.367879441) * 0.106364766 + 0.75;
+  float val = (exp(sin(millis()/(_effectDelay*5.0)*2*PI)) - 0.367879441) * 0.106364766 + 0.75;
   setAll({_effectColor.r*val, _effectColor.g*val, _effectColor.b*val});
-  return _effectSpeed / 40; // update every 25ms
+  return _effectDelay / 40; // update every 25ms
 }
 
 

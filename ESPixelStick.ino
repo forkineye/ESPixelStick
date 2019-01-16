@@ -251,7 +251,7 @@ void initWifi() {
     while (WiFi.status() != WL_CONNECTED) {
         LOG_PORT.print(".");
         delay(500);
-        if (millis() - timeout > CONNECT_TIMEOUT) {
+        if (millis() - timeout > (1000 * config.sta_timeout) ){
             LOG_PORT.println("");
             LOG_PORT.println(F("*** Failed to connect ***"));
             break;
@@ -393,7 +393,11 @@ void onMqttMessage(char* topic, char* payload,
     }
 
     if (root.containsKey("brightness")) {
-        effects.setBrightness(root["brightness"]);
+        effects.setBrightness((float)root["brightness"] / 255.0);
+    }
+
+    if (root.containsKey("speed")) {
+        effects.setSpeed(root["speed"]);
     }
 
     if (root.containsKey("color")) {
@@ -476,7 +480,8 @@ void publishState() {
     color["r"] = effects.getColor().r;
     color["g"] = effects.getColor().g;
     color["b"] = effects.getColor().b;
-    root["brightness"] = effects.getBrightness();
+    root["brightness"] = effects.getBrightness()*255;
+    root["speed"] = effects.getSpeed();
     if (!effects.getEffect().equalsIgnoreCase("Disabled")) {
         root["effect"] = effects.getEffect();
     }
@@ -519,16 +524,16 @@ void initWeb() {
         request->send(200, "text/json", jsonString);
     });
 
-    // Firmware upload handler
+    // Firmware upload handler - only in station mode
     web.on("/updatefw", HTTP_POST, [](AsyncWebServerRequest *request) {
         ws.textAll("X6");
-    }, handle_fw_upload);
+    }, handle_fw_upload).setFilter(ON_STA_FILTER);
 
     // Static Handler
     web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
 
-    // Raw config file Handler
-    //web.serveStatic("/config.json", SPIFFS, "/config.json");
+    // Raw config file Handler - but only on station
+//  web.serveStatic("/config.json", SPIFFS, "/config.json").setFilter(ON_STA_FILTER);
 
     web.onNotFound([](AsyncWebServerRequest *request) {
         request->send(404, "text/plain", "Page not found");
@@ -536,10 +541,10 @@ void initWeb() {
 
     DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
 
-    // Config file upload handler
+    // Config file upload handler - only in station mode
     web.on("/config", HTTP_POST, [](AsyncWebServerRequest *request) {
         ws.textAll("X6");
-    }, handle_config_upload);
+    }, handle_config_upload).setFilter(ON_STA_FILTER);
 
     web.begin();
 
@@ -639,6 +644,16 @@ void validateConfig() {
         config.baudrate = BaudRate::BR_57600;
 #endif
 
+    if (config.effect_speed < 1)
+        config.effect_speed = 1;
+    if (config.effect_speed > 10)
+        config.effect_speed = 10;
+
+    if (config.effect_brightness > 1.0)
+        config.effect_brightness = 1.0;
+    if (config.effect_brightness < 0.0)
+        config.effect_brightness = 0.0;
+
     if (config.effect_idletimeout == 0) {
         config.effect_idletimeout = 10;
         config.effect_idleenabled = false;
@@ -733,7 +748,16 @@ void dsNetworkConfig(JsonObject &json) {
             config.gateway[i] = networkJson["gateway"][i];
         }
         config.dhcp = networkJson["dhcp"];
+        config.sta_timeout = networkJson["sta_timeout"] | CLIENT_TIMEOUT;
+        if (config.sta_timeout < 5) {
+            config.sta_timeout = 5;
+        }
+
         config.ap_fallback = networkJson["ap_fallback"];
+        config.ap_timeout = networkJson["ap_timeout"] | AP_TIMEOUT;
+        if (config.ap_timeout < 15) {
+            config.ap_timeout = 15;
+        }
 
         // Generate default hostname if needed
         config.hostname = networkJson["hostname"].as<String>();
@@ -754,6 +778,8 @@ void dsEffectConfig(JsonObject &json) {
         config.effect_mirror = effectsJson["mirror"];
         config.effect_allleds = effectsJson["allleds"];
         config.effect_reverse = effectsJson["reverse"];
+        if (effectsJson.containsKey("speed"))
+            config.effect_speed = effectsJson["speed"];
         config.effect_color = { effectsJson["r"], effectsJson["g"], effectsJson["b"] };
         if (effectsJson.containsKey("brightness"))
             config.effect_brightness = effectsJson["brightness"];
@@ -850,13 +876,14 @@ void loadConfig() {
         dsDeviceConfig(json);
         dsEffectConfig(json);
 
-        effects.setFromConfig();
-
         LOG_PORT.println(F("- Configuration loaded."));
     }
 
     // Validate it
     validateConfig();
+
+    effects.setFromConfig();
+
 }
 
 // Serialize the current config into a JSON string
@@ -885,7 +912,10 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
         gateway.add(config.gateway[i]);
     }
     network["dhcp"] = config.dhcp;
+    network["sta_timeout"] = config.sta_timeout;
+
     network["ap_fallback"] = config.ap_fallback;
+    network["ap_timeout"] = config.ap_timeout;
 
     // Effects
     JsonObject &_effects = json.createNestedObject("effects");
@@ -894,6 +924,8 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     _effects["mirror"] = config.effect_mirror;
     _effects["allleds"] = config.effect_allleds;
     _effects["reverse"] = config.effect_reverse;
+    _effects["speed"] = config.effect_speed;
+    _effects["brightness"] = config.effect_brightness;
 
     _effects["r"] = config.effect_color.r;
     _effects["g"] = config.effect_color.g;

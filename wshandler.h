@@ -193,7 +193,11 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
 
 // dump the current running effect options
             JsonObject &effect = json.createNestedObject("currentEffect");
-            effect["name"] = (String)effects.getEffect() ? effects.getEffect() : "";
+            if (config.ds == DataSource::E131) {
+                effect["name"] = "Disabled";
+            } else {
+                effect["name"] = (String)effects.getEffect() ? effects.getEffect() : "";
+            }
             effect["brightness"] = effects.getBrightness();
             effect["speed"] = effects.getSpeed();
             effect["r"] = effects.getColor().r;
@@ -205,11 +209,7 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             effect["startenabled"] = config.effect_startenabled;
             effect["idleenabled"] = config.effect_idleenabled;
             effect["idletimeout"] = config.effect_idletimeout;
-            if (config.ds == DataSource::WEB) {
-                effect["effectenabled"] = true;
-            } else {
-                effect["effectenabled"] = false;
-            }
+
 
 // dump all the known effect and options
             JsonObject &effectList = json.createNestedObject("effectList");
@@ -222,8 +222,6 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
                 effect["hasReverse"] = effects.getEffectInfo(i)->hasReverse;
                 effect["hasAllLeds"] = effects.getEffectInfo(i)->hasAllLeds;
                 effect["wsTCode"] = effects.getEffectInfo(i)->wsTCode;
-//            effect["brightness"] = effects.getBrightness();
-//            effect["speed"] = effects.getSpeed();
             }
 
             json.printTo(response);
@@ -292,118 +290,51 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
 }
 
 void procT(uint8_t *data, AsyncWebSocketClient *client) {
-    if ( (data[1] >= '1') && (data[1] <= '8') ) config.ds = DataSource::WEB;
 
-    switch (data[1]) {
-        case '0': { // Clear whole string
+    if (data[1] == '0') {
             //TODO: Store previous data source when effect is selected so we can switch back to it
             config.ds = DataSource::E131;
             effects.clearAll();
-            break;
-        }
-        case '1': {  // Static color
+    }
+    else if ( (data[1] >= '1') && (data[1] <= '8') ) {
+        String TCode;
+        TCode += (char)data[0];
+        TCode += (char)data[1];
+        const EffectDesc* effectInfo = effects.getEffectInfo(TCode);
+
+        if (effectInfo) {
             DynamicJsonBuffer jsonBuffer;
             JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
 
-            if (json.containsKey("r") && json.containsKey("g") && json.containsKey("b")) {
-                effects.setColor({json["r"], json["g"], json["b"]});
+            config.ds = DataSource::WEB;
+            effects.setEffect( effectInfo->name );
+
+            if ( effectInfo->hasColor ) {
+                if (json.containsKey("r") && json.containsKey("g") && json.containsKey("b")) {
+                    effects.setColor({json["r"], json["g"], json["b"]});
+                }
             }
-
-            effects.setEffect("Solid");
-            break;
-        }
-        case '2': {  // Blink
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
-
-            if (json.containsKey("r") && json.containsKey("g") && json.containsKey("b")) {
-                effects.setColor({json["r"], json["g"], json["b"]});
+            if ( effectInfo->hasMirror ) {
+                if (json.containsKey("mirror")) {
+                    effects.setMirror(json["mirror"]);
+                }
             }
-
-            effects.setEffect("Blink");
-            break;
-        }
-        case '3': {  // Flash
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
-
-            if (json.containsKey("r") && json.containsKey("g") && json.containsKey("b")) {
-                effects.setColor({json["r"], json["g"], json["b"]});
+            if ( effectInfo->hasReverse ) {
+                if (json.containsKey("reverse")) {
+                    effects.setReverse(json["reverse"]);
+                }
             }
-
-            effects.setEffect("Flash");
-            break;
-        }
-        case '4': {  // Chase
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
-
-            if (json.containsKey("r") && json.containsKey("g") && json.containsKey("b")) {
-                effects.setColor({json["r"], json["g"], json["b"]});
+            if ( effectInfo->hasAllLeds ) {
+                if (json.containsKey("allleds")) {
+                    effects.setAllLeds(json["allleds"]);
+                }
             }
-
-            if (json.containsKey("reverse")) {
-                effects.setReverse(json["reverse"]);
+            if (json.containsKey("speed")) {
+                effects.setSpeed(json["speed"]);
             }
-
-            if (json.containsKey("mirror")) {
-                effects.setMirror(json["mirror"]);
+            if (json.containsKey("brightness")) {
+                effects.setBrightness(json["brightness"]);
             }
-
-            effects.setEffect("Chase");
-            break;
-        }
-        case '5': { // Rainbow
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
-
-            if (json.containsKey("reverse")) {
-                effects.setReverse(json["reverse"]);
-            }
-
-            if (json.containsKey("mirror")) {
-                effects.setMirror(json["mirror"]);
-            }
-
-            if (json.containsKey("allleds")) {
-                effects.setAllLeds(json["allleds"]);
-            }
-
-            effects.setEffect("Rainbow");
-            break;
-        }
-        case '6': { // Fire flicker
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
-
-            if (json.containsKey("r") && json.containsKey("g") && json.containsKey("b")) {
-                effects.setColor({json["r"], json["g"], json["b"]});
-            }
-
-            effects.setEffect("Fire flicker");
-            break;
-        }
-        case '7': { // Lightning
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
-
-            if (json.containsKey("r") && json.containsKey("g") && json.containsKey("b")) {
-                effects.setColor({json["r"], json["g"], json["b"]});
-            }
-
-            effects.setEffect("Lightning");
-            break;
-        }
-        case '8': { // Breathe
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
-
-            if (json.containsKey("r") && json.containsKey("g") && json.containsKey("b")) {
-                effects.setColor({json["r"], json["g"], json["b"]});
-            }
-
-            effects.setEffect("Breathe");
-            break;
         }
     }
 
