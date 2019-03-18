@@ -77,17 +77,16 @@ void procX(uint8_t *data, AsyncWebSocketClient *client) {
     switch (data[1]) {
         case 'J': {
 
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &json = jsonBuffer.createObject();
+            DynamicJsonDocument json(1024);
 
             // system statistics
-            JsonObject &system = json.createNestedObject("system");
+            JsonObject system = json.createNestedObject("system");
             system["rssi"] = (String)WiFi.RSSI();
             system["freeheap"] = (String)ESP.getFreeHeap();
             system["uptime"] = (String)millis();
 
             // E131 statistics
-            JsonObject &e131J = json.createNestedObject("e131");
+            JsonObject e131J = json.createNestedObject("e131");
             uint32_t seqErrors = 0;
             for (int i = 0; i < ((uniLast + 1) - config.universe); i++)
                 seqErrors =+ seqError[i];
@@ -100,7 +99,7 @@ void procX(uint8_t *data, AsyncWebSocketClient *client) {
             e131J["last_clientIP"] = e131.stats.last_clientIP.toString();
 
             String response;
-            json.printTo(response);
+            serializeJson(json, response);
             client->text("XJ" + response);
             break;
         }
@@ -114,17 +113,16 @@ void procE(uint8_t *data, AsyncWebSocketClient *client) {
     switch (data[1]) {
         case '1':
             // Create buffer and root object
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &json = jsonBuffer.createObject();
+            DynamicJsonDocument json(1024);
 
 #if defined (ESPS_MODE_PIXEL)
             // Pixel Types
-            JsonObject &p_type = json.createNestedObject("p_type");
+            JsonObject p_type = json.createNestedObject("p_type");
             p_type["WS2811 800kHz"] = static_cast<uint8_t>(PixelType::WS2811);
             p_type["GE Color Effects"] = static_cast<uint8_t>(PixelType::GECE);
 
             // Pixel Colors
-            JsonObject &p_color = json.createNestedObject("p_color");
+            JsonObject p_color = json.createNestedObject("p_color");
             p_color["RGB"] = static_cast<uint8_t>(PixelColor::RGB);
             p_color["GRB"] = static_cast<uint8_t>(PixelColor::GRB);
             p_color["BRG"] = static_cast<uint8_t>(PixelColor::BRG);
@@ -134,12 +132,12 @@ void procE(uint8_t *data, AsyncWebSocketClient *client) {
 
 #elif defined (ESPS_MODE_SERIAL)
             // Serial Protocols
-            JsonObject &s_proto = json.createNestedObject("s_proto");
+            JsonObject s_proto = json.createNestedObject("s_proto");
             s_proto["DMX512"] = static_cast<uint8_t>(SerialType::DMX512);
             s_proto["Renard"] = static_cast<uint8_t>(SerialType::RENARD);
 
             // Serial Baudrates
-            JsonObject &s_baud = json.createNestedObject("s_baud");
+            JsonObject s_baud = json.createNestedObject("s_baud");
             s_baud["38400"] = static_cast<uint32_t>(BaudRate::BR_38400);
             s_baud["57600"] = static_cast<uint32_t>(BaudRate::BR_57600);
             s_baud["115200"] = static_cast<uint32_t>(BaudRate::BR_115200);
@@ -149,7 +147,7 @@ void procE(uint8_t *data, AsyncWebSocketClient *client) {
 #endif
 
             String response;
-            json.printTo(response);
+            serializeJson(json, response);
             client->text("E1" + response);
             break;
     }
@@ -166,8 +164,7 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
 
         case '2': {
             // Create buffer and root object
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &json = jsonBuffer.createObject();
+            DynamicJsonDocument json(1024);
 
             json["ssid"] = (String)WiFi.SSID();
             json["hostname"] = (String)WiFi.hostname();
@@ -181,18 +178,17 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             json["freeheap"] = (String)ESP.getFreeHeap();
 
             String response;
-            json.printTo(response);
+            serializeJson(json, response);
             client->text("G2" + response);
             break;
         }
 
         case '3': {
             String response;
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &json = jsonBuffer.createObject();
+            DynamicJsonDocument json(1024);
 
 // dump the current running effect options
-            JsonObject &effect = json.createNestedObject("currentEffect");
+            JsonObject effect = json.createNestedObject("currentEffect");
             if (config.ds == DataSource::E131) {
                 effect["name"] = "Disabled";
             } else {
@@ -212,9 +208,9 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
 
 
 // dump all the known effect and options
-            JsonObject &effectList = json.createNestedObject("effectList");
+            JsonObject effectList = json.createNestedObject("effectList");
             for(int i=0; i < effects.getEffectCount(); i++){
-                JsonObject &effect = effectList.createNestedObject( effects.getEffectInfo(i)->htmlid );
+                JsonObject effect = effectList.createNestedObject( effects.getEffectInfo(i)->htmlid );
                 effect["name"] = effects.getEffectInfo(i)->name;
                 effect["htmlid"] = effects.getEffectInfo(i)->htmlid;
                 effect["hasColor"] = effects.getEffectInfo(i)->hasColor;
@@ -224,21 +220,20 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
                 effect["wsTCode"] = effects.getEffectInfo(i)->wsTCode;
             }
 
-            json.printTo(response);
+            serializeJson(json, response);
             client->text("G3" + response);
 //LOG_PORT.print(response);
             break;
         }
 #if defined(ESPS_MODE_PIXEL)
         case '4': {
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &json = jsonBuffer.createObject();
-            JsonArray &gamma = json.createNestedArray("gamma");
+            DynamicJsonDocument json(1024);
+            JsonArray gamma = json.createNestedArray("gamma");
             for (int i=0; i<256; i++) {
                 gamma.add(GAMMA_TABLE[i]);
             }
             String response;
-            json.printTo(response);
+            serializeJson(json, response);
             client->text("G4" + response);
             break;
         }
@@ -247,9 +242,11 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
 }
 
 void procS(uint8_t *data, AsyncWebSocketClient *client) {
-    DynamicJsonBuffer jsonBuffer;
-    JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
-    if (!json.success()) {
+
+    DynamicJsonDocument json(1024);
+    DeserializationError error = deserializeJson(json, reinterpret_cast<char*>(data + 2));
+
+    if (error) {
         LOG_PORT.println(F("*** procS(): Parse Error ***"));
         LOG_PORT.println(reinterpret_cast<char*>(data));
         return;
@@ -258,7 +255,7 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
     bool reboot = false;
     switch (data[1]) {
         case '1':   // Set Network Config
-            dsNetworkConfig(json);
+            dsNetworkConfig(json.to<JsonObject>());
             saveConfig();
             client->text("S1");
             break;
@@ -267,7 +264,7 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
             if (config.mqtt != json["mqtt"]["enabled"])
                 reboot = true;
 
-            dsDeviceConfig(json);
+            dsDeviceConfig(json.to<JsonObject>());
             saveConfig();
 
             if (reboot)
@@ -276,13 +273,13 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
                 client->text("S2");
             break;
         case '3':   // Set Effect Startup Config
-            dsEffectConfig(json);
+            dsEffectConfig(json.to<JsonObject>());
             saveConfig();
             client->text("S3");
             break;
 #if defined(ESPS_MODE_PIXEL)
         case '4':   // Set Gamma (but no save)
-            dsGammaConfig(json);
+            dsGammaConfig(json.to<JsonObject>());
             client->text("S4");
             break;
 #endif
@@ -303,8 +300,13 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
         const EffectDesc* effectInfo = effects.getEffectInfo(TCode);
 
         if (effectInfo) {
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(data + 2));
+
+            DynamicJsonDocument j(1024);
+            DeserializationError error = deserializeJson(j, reinterpret_cast<char*>(data + 2));
+
+            // weird ... no error handling on json parsing
+
+            JsonObject json = j.to<JsonObject>();
 
             config.ds = DataSource::WEB;
             effects.setEffect( effectInfo->name );
@@ -411,16 +413,17 @@ void handle_config_upload(AsyncWebServerRequest *request, String filename,
         LOG_PORT.print(F("* Config Upload Finished:"));
         LOG_PORT.printf(" %d bytes", filesize);
 
-        DynamicJsonBuffer jsonBuffer;
-        JsonObject &json = jsonBuffer.parseObject(reinterpret_cast<char*>(confuploadtemp));
-        if (!json.success()) {
+        DynamicJsonDocument json(1024);
+        DeserializationError error = deserializeJson(json, reinterpret_cast<char*>(confuploadtemp));
+
+        if (error) {
             LOG_PORT.println(F("*** Parse Error ***"));
             LOG_PORT.println(reinterpret_cast<char*>(confuploadtemp));
             request->send(500, "text/plain", "Config Update Error." );
         } else {
-            dsNetworkConfig(json);
-            dsDeviceConfig(json);
-            dsEffectConfig(json);
+            dsNetworkConfig(json.to<JsonObject>());
+            dsDeviceConfig(json.to<JsonObject>());
+            dsEffectConfig(json.to<JsonObject>());
             saveConfig();
             request->send(200, "text/plain", "Config Update Finished: " );
 //          reboot = true;

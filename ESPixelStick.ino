@@ -379,20 +379,23 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
 
 void onMqttMessage(char* topic, char* payload,
         AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
-    DynamicJsonBuffer jsonBuffer;
+    
+    DynamicJsonDocument r(1024);
+    DeserializationError error = deserializeJson(r, payload);
 
-    JsonObject& root = jsonBuffer.parseObject(payload);
-    bool stateOn = false;
-
-    if (!root.success()) {
+    if (error) {
         LOG_PORT.println("MQTT: Parsing failed");
         return;
     }
+
+    JsonObject root = r.to<JsonObject>();
 
     // if its a retained message and we want clean session, ignore it
     if ( properties.retain && config.mqtt_clean ) {
         return;
     }
+
+    bool stateOn = false;
 
     if (root.containsKey("state")) {
         if (strcmp(root["state"], LIGHT_ON) == 0) {
@@ -455,8 +458,7 @@ void publishHA(bool join) {
     String ha_config = config.mqtt_haprefix + "/light/" + String(chipId) + "/config";
 
     if (join) {
-        DynamicJsonBuffer jsonBuffer;
-        JsonObject& root = jsonBuffer.createObject();
+        DynamicJsonDocument root(1024);
         root["name"] = config.id;
         root["schema"] = "json";
         root["state_topic"] = config.mqtt_topic;
@@ -464,14 +466,14 @@ void publishHA(bool join) {
         root["rgb"] = "true";
         root["brightness"] = "true";
         root["effect"] = "true";
-        JsonArray& effect_list = root.createNestedArray("effect_list");
+        JsonArray effect_list = root.createNestedArray("effect_list");
         // effect[0] is 'disabled', skip it
         for (uint8_t i = 1; i < effects.getEffectCount(); i++) {
             effect_list.add(effects.getEffectInfo(i)->name);
         }
 
-        char buffer[root.measureLength() + 1];
-        root.printTo(buffer, sizeof(buffer));
+        char buffer[measureJson(root) + 1];
+        serializeJson(root, buffer, sizeof(buffer));
         mqtt.publish(ha_config.c_str(), 0, true, buffer);
     } else {
         mqtt.publish(ha_config.c_str(), 0, true, "");
@@ -479,14 +481,14 @@ void publishHA(bool join) {
 }
 
 void publishState() {
-    DynamicJsonBuffer jsonBuffer;
-    JsonObject& root = jsonBuffer.createObject();
+
+    DynamicJsonDocument root(1024);
     if ((config.ds != DataSource::E131) && (!effects.getEffect().equalsIgnoreCase("Disabled")))
         root["state"] = LIGHT_ON;
     else
         root["state"] = LIGHT_OFF;
 
-    JsonObject& color = root.createNestedObject("color");
+    JsonObject color = root.createNestedObject("color");
     color["r"] = effects.getColor().r;
     color["g"] = effects.getColor().g;
     color["b"] = effects.getColor().b;
@@ -499,8 +501,8 @@ void publishState() {
     root["mirror"] = effects.getMirror();
     root["allleds"] = effects.getAllLeds();
 
-    char buffer[root.measureLength() + 1];
-    root.printTo(buffer, sizeof(buffer));
+    char buffer[measureJson(root) + 1];
+    serializeJson(root, buffer, sizeof(buffer));
     mqtt.publish(config.mqtt_topic.c_str(), 0, true, buffer);
 }
 
@@ -739,9 +741,9 @@ void updateConfig() {
 }
 
 // De-Serialize Network config
-void dsNetworkConfig(JsonObject &json) {
+void dsNetworkConfig(const JsonObject &json) {
     if (json.containsKey("network")) {
-        JsonObject& networkJson = json["network"];
+        JsonObject networkJson = json["network"];
 
         // Fallback to embedded ssid and passphrase if null in config
         config.ssid = networkJson["ssid"].as<String>();
@@ -781,10 +783,10 @@ void dsNetworkConfig(JsonObject &json) {
 }
 
 // De-serialize Effect Config
-void dsEffectConfig(JsonObject &json) {
+void dsEffectConfig(const JsonObject &json) {
     // Effects
     if (json.containsKey("effects")) {
-        JsonObject& effectsJson = json["effects"];
+        JsonObject effectsJson = json["effects"];
         config.effect_name = effectsJson["name"].as<String>();
         config.effect_mirror = effectsJson["mirror"];
         config.effect_allleds = effectsJson["allleds"];
@@ -802,7 +804,7 @@ void dsEffectConfig(JsonObject &json) {
 }
 
 // De-serialize Device Config
-void dsDeviceConfig(JsonObject &json) {
+void dsDeviceConfig(const JsonObject &json) {
     // Device
     if (json.containsKey("device")) {
         config.id = json["device"]["id"].as<String>();
@@ -819,7 +821,7 @@ void dsDeviceConfig(JsonObject &json) {
 
     // MQTT
     if (json.containsKey("mqtt")) {
-        JsonObject& mqttJson = json["mqtt"];
+        JsonObject mqttJson = json["mqtt"];
         config.mqtt = mqttJson["enabled"];
         config.mqtt_ip = mqttJson["ip"].as<String>();
         config.mqtt_port = mqttJson["port"];
@@ -876,16 +878,16 @@ void loadConfig() {
         std::unique_ptr<char[]> buf(new char[size]);
         file.readBytes(buf.get(), size);
 
-        DynamicJsonBuffer jsonBuffer;
-        JsonObject &json = jsonBuffer.parseObject(buf.get());
-        if (!json.success()) {
+        DynamicJsonDocument json(1024);
+        DeserializationError error = deserializeJson(json, buf.get());
+        if (error) {
             LOG_PORT.println(F("*** Configuration File Format Error ***"));
             return;
         }
 
-        dsNetworkConfig(json);
-        dsDeviceConfig(json);
-        dsEffectConfig(json);
+        dsNetworkConfig(json.to<JsonObject>());
+        dsDeviceConfig(json.to<JsonObject>());
+        dsEffectConfig(json.to<JsonObject>());
 
         LOG_PORT.println(F("- Configuration loaded."));
     }
@@ -900,23 +902,22 @@ void loadConfig() {
 // Serialize the current config into a JSON string
 void serializeConfig(String &jsonString, bool pretty, bool creds) {
     // Create buffer and root object
-    DynamicJsonBuffer jsonBuffer;
-    JsonObject &json = jsonBuffer.createObject();
-
+    DynamicJsonDocument json(1024);
+    
     // Device
-    JsonObject &device = json.createNestedObject("device");
+    JsonObject device = json.createNestedObject("device");
     device["id"] = config.id.c_str();
     device["mode"] = config.devmode.toInt();
 
     // Network
-    JsonObject &network = json.createNestedObject("network");
+    JsonObject network = json.createNestedObject("network");
     network["ssid"] = config.ssid.c_str();
     if (creds)
         network["passphrase"] = config.passphrase.c_str();
     network["hostname"] = config.hostname.c_str();
-    JsonArray &ip = network.createNestedArray("ip");
-    JsonArray &netmask = network.createNestedArray("netmask");
-    JsonArray &gateway = network.createNestedArray("gateway");
+    JsonArray ip = network.createNestedArray("ip");
+    JsonArray netmask = network.createNestedArray("netmask");
+    JsonArray gateway = network.createNestedArray("gateway");
     for (int i = 0; i < 4; i++) {
         ip.add(config.ip[i]);
         netmask.add(config.netmask[i]);
@@ -929,7 +930,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     network["ap_timeout"] = config.ap_timeout;
 
     // Effects
-    JsonObject &_effects = json.createNestedObject("effects");
+    JsonObject _effects = json.createNestedObject("effects");
     _effects["name"] = config.effect_name;
 
     _effects["mirror"] = config.effect_mirror;
@@ -949,7 +950,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
 
 
     // MQTT
-    JsonObject &_mqtt = json.createNestedObject("mqtt");
+    JsonObject _mqtt = json.createNestedObject("mqtt");
     _mqtt["enabled"] = config.mqtt;
     _mqtt["ip"] = config.mqtt_ip.c_str();
     _mqtt["port"] = config.mqtt_port;
@@ -961,7 +962,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     _mqtt["haprefix"] = config.mqtt_haprefix.c_str();
 
     // E131
-    JsonObject &e131 = json.createNestedObject("e131");
+    JsonObject e131 = json.createNestedObject("e131");
     e131["universe"] = config.universe;
     e131["universe_limit"] = config.universe_limit;
     e131["channel_start"] = config.channel_start;
@@ -970,7 +971,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
 
 #if defined(ESPS_MODE_PIXEL)
     // Pixel
-    JsonObject &pixel = json.createNestedObject("pixel");
+    JsonObject pixel = json.createNestedObject("pixel");
     pixel["type"] = static_cast<uint8_t>(config.pixel_type);
     pixel["color"] = static_cast<uint8_t>(config.pixel_color);
     pixel["groupSize"] = config.groupSize;
@@ -980,19 +981,19 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
 
 #elif defined(ESPS_MODE_SERIAL)
     // Serial
-    JsonObject &serial = json.createNestedObject("serial");
+    JsonObject serial = json.createNestedObject("serial");
     serial["type"] = static_cast<uint8_t>(config.serial_type);
     serial["baudrate"] = static_cast<uint32_t>(config.baudrate);
 #endif
 
     if (pretty)
-        json.prettyPrintTo(jsonString);
+        serializeJsonPretty(json, jsonString); 
     else
-        json.printTo(jsonString);
+        serializeJson(json, jsonString);
 }
 
 #if defined(ESPS_MODE_PIXEL)
-void dsGammaConfig(JsonObject &json) {
+void dsGammaConfig(const JsonObject &json) {
     if (json.containsKey("pixel")) {
         config.gammaVal = json["pixel"]["gammaVal"];
         config.briteVal = json["pixel"]["briteVal"];
