@@ -255,7 +255,7 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
     bool reboot = false;
     switch (data[1]) {
         case '1':   // Set Network Config
-            dsNetworkConfig(json.to<JsonObject>());
+            dsNetworkConfig(json.as<JsonObject>());
             saveConfig();
             client->text("S1");
             break;
@@ -264,7 +264,7 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
             if (config.mqtt != json["mqtt"]["enabled"])
                 reboot = true;
 
-            dsDeviceConfig(json.to<JsonObject>());
+            dsDeviceConfig(json.as<JsonObject>());
             saveConfig();
 
             if (reboot)
@@ -273,13 +273,13 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
                 client->text("S2");
             break;
         case '3':   // Set Effect Startup Config
-            dsEffectConfig(json.to<JsonObject>());
+            dsEffectConfig(json.as<JsonObject>());
             saveConfig();
             client->text("S3");
             break;
 #if defined(ESPS_MODE_PIXEL)
         case '4':   // Set Gamma (but no save)
-            dsGammaConfig(json.to<JsonObject>());
+            dsGammaConfig(json.as<JsonObject>());
             client->text("S4");
             break;
 #endif
@@ -306,7 +306,7 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
 
             // weird ... no error handling on json parsing
 
-            JsonObject json = j.to<JsonObject>();
+            JsonObject json = j.as<JsonObject>();
 
             config.ds = DataSource::WEB;
             effects.setEffect( effectInfo->name );
@@ -421,9 +421,9 @@ void handle_config_upload(AsyncWebServerRequest *request, String filename,
             LOG_PORT.println(reinterpret_cast<char*>(confuploadtemp));
             request->send(500, "text/plain", "Config Update Error." );
         } else {
-            dsNetworkConfig(json.to<JsonObject>());
-            dsDeviceConfig(json.to<JsonObject>());
-            dsEffectConfig(json.to<JsonObject>());
+            dsNetworkConfig(json.as<JsonObject>());
+            dsDeviceConfig(json.as<JsonObject>());
+            dsEffectConfig(json.as<JsonObject>());
             saveConfig();
             request->send(200, "text/plain", "Config Update Finished: " );
 //          reboot = true;

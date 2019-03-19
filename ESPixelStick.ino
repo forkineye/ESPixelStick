@@ -129,9 +129,6 @@ void setup() {
     system_set_os_print(1);
 #endif
 
-    // Enable SPIFFS
-    SPIFFS.begin();
-
     // Set default data source to E131
     config.ds = DataSource::E131;
 
@@ -145,6 +142,34 @@ void setup() {
     LOG_PORT.println(")");
     LOG_PORT.println(ESP.getFullVersion());
 
+    // Enable SPIFFS
+    if (!SPIFFS.begin())
+    {
+        LOG_PORT.println("File system did not initialise correctly");
+    }
+    else
+    {
+        LOG_PORT.println("File system initialised");
+    }
+
+    FSInfo fs_info;
+    if (SPIFFS.info(fs_info))
+    {
+        LOG_PORT.print("Total bytes in file system: ");
+        LOG_PORT.println(fs_info.usedBytes);
+
+        Dir dir = SPIFFS.openDir("/");
+        while (dir.next()) {
+          LOG_PORT.print(dir.fileName());
+          File f = dir.openFile("r");
+          LOG_PORT.println(f.size());
+        }
+    }
+    else
+    {
+        LOG_PORT.println("Failed to read file system details");
+    }
+    
     // Load configuration from SPIFFS and set Hostname
     loadConfig();
     if (config.hostname)
@@ -388,7 +413,7 @@ void onMqttMessage(char* topic, char* payload,
         return;
     }
 
-    JsonObject root = r.to<JsonObject>();
+    JsonObject root = r.as<JsonObject>();
 
     // if its a retained message and we want clean session, ignore it
     if ( properties.retain && config.mqtt_clean ) {
@@ -714,6 +739,7 @@ void updateConfig() {
     pixels.begin(config.pixel_type, config.pixel_color, config.channel_count / 3);
     pixels.setGroup(config.groupSize, config.zigSize);
     updateGammaTable(config.gammaVal, config.briteVal);
+    if (config.groupSize == 0) config.groupSize = 1;
     effects.begin(&pixels, config.channel_count / 3 / config.groupSize);
 
 #elif defined(ESPS_MODE_SERIAL)
@@ -774,11 +800,16 @@ void dsNetworkConfig(const JsonObject &json) {
 
         // Generate default hostname if needed
         config.hostname = networkJson["hostname"].as<String>();
-        if (!config.hostname.length()) {
-            char chipId[7] = { 0 };
-            snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
-            config.hostname = "esps-" + String(chipId);
-        }
+    }
+    else
+    {
+        LOG_PORT.println("No network settings found.");
+    }
+
+    if (!config.hostname.length()) {
+        char chipId[7] = { 0 };
+        snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
+        config.hostname = "esps-" + String(chipId);
     }
 }
 
@@ -799,7 +830,10 @@ void dsEffectConfig(const JsonObject &json) {
         config.effect_startenabled = effectsJson["startenabled"];
         config.effect_idleenabled = effectsJson["idleenabled"];
         config.effect_idletimeout = effectsJson["idletimeout"];
-
+    }
+    else
+    {
+        LOG_PORT.println("No effect settings found.");
     }
 }
 
@@ -809,6 +843,10 @@ void dsDeviceConfig(const JsonObject &json) {
     if (json.containsKey("device")) {
         config.id = json["device"]["id"].as<String>();
     }
+    else
+    {
+        LOG_PORT.println("No device settings found.");
+    }
 
     // E131
     if (json.containsKey("e131")) {
@@ -817,6 +855,10 @@ void dsDeviceConfig(const JsonObject &json) {
         config.channel_start = json["e131"]["channel_start"];
         config.channel_count = json["e131"]["channel_count"];
         config.multicast = json["e131"]["multicast"];
+    }
+    else
+    {
+        LOG_PORT.println("No e131 settings found.");
     }
 
     // MQTT
@@ -832,6 +874,10 @@ void dsDeviceConfig(const JsonObject &json) {
         config.mqtt_hadisco = mqttJson["hadisco"] | false;
         config.mqtt_haprefix = mqttJson["haprefix"].as<String>();
     }
+    else
+    {
+        LOG_PORT.println("No mqtt settings found.");
+    }
 
 #if defined(ESPS_MODE_PIXEL)
     // Pixel
@@ -843,12 +889,20 @@ void dsDeviceConfig(const JsonObject &json) {
         config.gammaVal = json["pixel"]["gammaVal"];
         config.briteVal = json["pixel"]["briteVal"];
     }
+    else
+    {
+        LOG_PORT.println("No pixel settings found.");
+    }
 
 #elif defined(ESPS_MODE_SERIAL)
     // Serial
     if (json.containsKey("serial")) {
         config.serial_type = SerialType(static_cast<uint8_t>(json["serial"]["type"]));
         config.baudrate = BaudRate(static_cast<uint32_t>(json["serial"]["baudrate"]));
+    }
+    else
+    {
+        LOG_PORT.println("No serial settings found.");
     }
 #endif
 }
@@ -866,6 +920,10 @@ void loadConfig() {
         LOG_PORT.println(F("- No configuration file found."));
         config.ssid = ssid;
         config.passphrase = passphrase;
+        char chipId[7] = { 0 };
+        snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
+        config.hostname = "esps-" + String(chipId);
+        config.ap_fallback = true;
         saveConfig();
     } else {
         // Parse CONFIG_FILE json
@@ -885,9 +943,9 @@ void loadConfig() {
             return;
         }
 
-        dsNetworkConfig(json.to<JsonObject>());
-        dsDeviceConfig(json.to<JsonObject>());
-        dsEffectConfig(json.to<JsonObject>());
+        dsNetworkConfig(json.as<JsonObject>());
+        dsDeviceConfig(json.as<JsonObject>());
+        dsEffectConfig(json.as<JsonObject>());
 
         LOG_PORT.println(F("- Configuration loaded."));
     }
