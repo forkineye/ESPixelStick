@@ -151,11 +151,11 @@ typedef struct {
 
 // Forward Declarations
 void serializeConfig(String &jsonString, bool pretty = false, bool creds = false);
-void dsNetworkConfig(JsonObject &json);
-void dsDeviceConfig(JsonObject &json);
-void dsEffectConfig(JsonObject &json);
+void dsNetworkConfig(const JsonObject &json);
+void dsDeviceConfig(const JsonObject &json);
+void dsEffectConfig(const JsonObject &json);
 void saveConfig();
-void dsGammaConfig(JsonObject &json);
+void dsGammaConfig(const JsonObject &json);
 
 void connectWifi();
 void onWifiConnect(const WiFiEventStationModeGotIP &event);
