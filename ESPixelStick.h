@@ -80,7 +80,8 @@ enum class DataSource : uint8_t {
     E131,
     MQTT,
     WEB,
-    IDLEWEB
+    IDLEWEB,
+    ZCPP
 };
 
 // Configuration structure

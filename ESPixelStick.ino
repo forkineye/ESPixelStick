@@ -30,6 +30,7 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 /*****************************************/
 
 #include <ESPAsyncE131.h>
+#include <ESPAsyncZCPP.h>
 #include <Hash.h>
 #include <SPI.h>
 #include "ESPixelStick.h"
@@ -69,8 +70,12 @@ const char LIGHT_OFF[] = "OFF";
 const char CONFIG_FILE[] = "/config.json";
 
 ESPAsyncE131        e131(10);       // ESPAsyncE131 with X buffers
+ESPAsyncZCPP        zcpp(10);       // ESPAsyncZCPP with X buffers
 config_t            config;         // Current configuration
 uint32_t            *seqError;      // Sequence error tracking for each universe
+uint32_t            *seqZCPPError;  // Sequence error tracking for each universe
+uint16_t            lastZCPPConfig; // last config we saw
+uint8_t             seqZCPPTracker; // sequence number of zcpp frames
 uint16_t            uniLast = 1;    // Last Universe to listen for
 bool                reboot = false; // Reboot flag
 AsyncWebServer      web(HTTP_PORT); // Web Server
@@ -236,6 +241,11 @@ void setup() {
         }
     }
 
+    LOG_PORT.print("IP : ");
+    LOG_PORT.println(WiFi.localIP());
+    LOG_PORT.print("Subnet mask : ");
+    LOG_PORT.println(WiFi.subnetMask());
+
     wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWiFiDisconnect);
 
     // Configure and start the web server
@@ -245,29 +255,29 @@ void setup() {
     if (config.multicast) {
         if (e131.begin(E131_MULTICAST, config.universe,
                 uniLast - config.universe + 1)) {
-            LOG_PORT.println(F("- Multicast Enabled"));
+            LOG_PORT.println(F("- E131 Multicast Enabled"));
         }  else {
-            LOG_PORT.println(F("*** MULTICAST INIT FAILED ****"));
+            LOG_PORT.println(F("*** E131 MULTICAST INIT FAILED ****"));
         }
     } else {
         if (e131.begin(E131_UNICAST)) {
-            LOG_PORT.print(F("- Unicast port: "));
+            LOG_PORT.print(F("- E131 Unicast port: "));
             LOG_PORT.println(E131_DEFAULT_PORT);
         } else {
-            LOG_PORT.println(F("*** UNICAST INIT FAILED ****"));
+            LOG_PORT.println(F("*** E131 UNICAST INIT FAILED ****"));
         }
     }
 
-/* to be removed, done earlier
-    // Configure the outputs
-#if defined (ESPS_MODE_PIXEL)
-    pixels.setPin(DATA_PIN);
-    updateConfig();
-    pixels.show();
-#else
-    updateConfig();
-#endif
-*/
+    lastZCPPConfig = -1;
+    if (zcpp.begin())
+    {
+        LOG_PORT.println(F("- ZCPP Enabled"));
+        ZCPPSub();
+    }
+    else
+    {
+        LOG_PORT.println(F("*** ZCPP INIT FAILED ****"));
+    }
 }
 
 /////////////////////////////////////////////////////////
@@ -333,6 +343,7 @@ void onWifiConnect(const WiFiEventStationModeGotIP &event) {
     MDNS.setInstanceName(String(config.id + " (" + String(chipId) + ")").c_str());
     if (MDNS.begin(config.hostname.c_str())) {
         MDNS.addService("http", "tcp", HTTP_PORT);
+        MDNS.addService("zcpp", "udp", ZCPP_DEFAULT_PORT);
         MDNS.addService("e131", "udp", E131_DEFAULT_PORT);
         MDNS.addServiceTxt("e131", "udp", "TxtVers", String(RDMNET_DNSSD_TXTVERS));
         MDNS.addServiceTxt("e131", "udp", "ConfScope", RDMNET_DEFAULT_SCOPE);
@@ -367,6 +378,14 @@ void multiSub() {
                 (((config.universe + i) >> 0) & 0xff)));
         igmp_joingroup(&ifaddr, &multicast_addr);
     }
+}
+
+void ZCPPSub() {
+    ip_addr_t ifaddr;
+    ifaddr.addr = static_cast<uint32_t>(WiFi.localIP());
+    ip_addr_t multicast_addr;
+    multicast_addr.addr = static_cast<uint32_t>(IPAddress(224, 0, 40, 5));
+    igmp_joingroup(&ifaddr, &multicast_addr);
 }
 
 /////////////////////////////////////////////////////////
@@ -508,7 +527,7 @@ void publishHA(bool join) {
 void publishState() {
 
     DynamicJsonDocument root(1024);
-    if ((config.ds != DataSource::E131) && (!effects.getEffect().equalsIgnoreCase("Disabled")))
+    if ((config.ds != DataSource::E131 && config.ds != DataSource::ZCPP) && (!effects.getEffect().equalsIgnoreCase("Disabled")))
         root["state"] = LIGHT_ON;
     else
         root["state"] = LIGHT_OFF;
@@ -727,12 +746,17 @@ void updateConfig() {
     if ((seqTracker = static_cast<uint8_t *>(malloc(uniTotal))))
         memset(seqTracker, 0x00, uniTotal);
 
+    seqZCPPTracker = 0;
+
     if (seqError) free(seqError);
     if ((seqError = static_cast<uint32_t *>(malloc(uniTotal * 4))))
         memset(seqError, 0x00, uniTotal * 4);
 
+    seqZCPPError = 0;
+
     // Zero out packet stats
     e131.stats.num_packets = 0;
+    zcpp.stats.num_packets = 0;
 
     // Initialize for our pixel type
 #if defined(ESPS_MODE_PIXEL)
@@ -1082,7 +1106,7 @@ void saveConfig() {
 
 void idleTimeout() {
    idleTicker.attach(config.effect_idletimeout, idleTimeout);
-    if ( (config.effect_idleenabled) && (config.ds == DataSource::E131) ) {
+    if ( (config.effect_idleenabled) && (config.ds == DataSource::E131 || config.ds == DataSource::ZCPP) ) {
         config.ds = DataSource::IDLEWEB;
         effects.setFromConfig();
     }
@@ -1096,6 +1120,7 @@ void idleTimeout() {
 /////////////////////////////////////////////////////////
 void loop() {
     e131_packet_t packet;
+    ZCPP_packet_t zcppPacket;
 
     // Reboot handler
     if (reboot) {
@@ -1104,11 +1129,11 @@ void loop() {
     }
 
     // Render output for current data source
-    if ( (config.ds == DataSource::E131) || (config.ds == DataSource::IDLEWEB) ) {
+    if ( (config.ds == DataSource::E131) || (config.ds == DataSource::ZCPP) || (config.ds == DataSource::IDLEWEB) ) {
             // Parse a packet and update pixels
             while (!e131.isEmpty()) {
                 idleTicker.attach(config.effect_idletimeout, idleTimeout);
-                if (config.ds == DataSource::IDLEWEB) {
+                if (config.ds == DataSource::IDLEWEB || config.ds == DataSource::ZCPP) {
                     config.ds = DataSource::E131;
                 }
 
@@ -1165,10 +1190,156 @@ void loop() {
                     }
                 }
             }
+
+            while (!zcpp.isEmpty())
+            {
+                idleTicker.attach(config.effect_idletimeout, idleTimeout);
+                if (config.ds == DataSource::IDLEWEB || config.ds == DataSource::E131) {
+                    config.ds = DataSource::ZCPP;
+                }
+
+                zcpp.pull(&zcppPacket);
+
+                switch (zcppPacket.Discovery.type)
+                {
+                  case ZCPP_TYPE_DISCOVERY: // discovery
+                  {
+                      LOG_PORT.println("ZCPP Discovery received.");
+                      int pixelPorts = 0;
+                      int serialPorts = 0;
+    #if defined(ESPS_MODE_PIXEL)
+                        pixelPorts = 1;
+    #elif defined(ESPS_MODE_SERIAL)
+                        serialPorts = 1;
+    #endif
+                      char version[9];
+                      memset(version, 0x00, sizeof(version));
+                      for (uint8_t i = 0; i < min(strlen_P(VERSION), sizeof(version)-1); i++)
+                        version[i] = pgm_read_byte(VERSION + i);
+
+                      uint8_t mac[WL_MAC_ADDR_LENGTH];
+                      zcpp.sendDiscoveryResponse(&zcppPacket, version, WiFi.macAddress(mac), config.id.c_str(), pixelPorts, serialPorts, 680 * 3, WiFi.localIP(), WiFi.subnetMask());
+                  }
+                      break;
+                  case ZCPP_TYPE_CONFIG: // config
+                      LOG_PORT.println("ZCPP Config received.");
+                      if (ntohs(zcppPacket.Configuration.sequenceNumber) != lastZCPPConfig)
+                      {
+                        // a new config to apply
+                        LOG_PORT.println("    The config is new.");
+                        
+                        config.id = String(zcppPacket.Configuration.userControllerName);
+
+                        _CController* p = &zcppPacket.Configuration.Controller;
+                        for (int i = 0; i < zcppPacket.Configuration.ports; i++)
+                        {
+                            if (p->port == 1)
+                            {
+                                switch(p->protocol)
+                                {
+#if defined(ESPS_MODE_PIXEL)
+                                    case 0x00: // WS2811
+                                        config.pixel_type = PixelType::WS2811;
+                                        break;
+                                    case 0x01: // GECE
+                                        config.pixel_type = PixelType::GECE;
+                                        break;
+#elif defined(ESPS_MODE_SERIAL)
+                                    case 0x02: // DMX
+                                        config.serial_type = SerialType::DMX512;
+                                        break;
+                                    case 0x0F: // RENARD
+                                        config.serial_type = SerialType::RENARD;
+                                        break;
+#endif
+                                    default:
+                                        LOG_PORT.print("Attempt to configure invalid protocol ");
+                                        LOG_PORT.print(p->protocol);
+                                        break;                                      
+                                }
+                                config.channel_start = ntohl(p->startChannel);
+                                config.channel_count = ntohs(p->channels);                            
+                                config.groupSize = p->grouping;
+                                switch(p->directionColourOrder & 0x07)
+                                {
+                                    case 0x00:
+                                      config.pixel_color = PixelColor::RGB;
+                                      break;
+                                    case 0x01:
+                                      config.pixel_color = PixelColor::RBG;
+                                      break;
+                                    case 0x02:
+                                      config.pixel_color = PixelColor::GRB;
+                                      break;
+                                    case 0x03:
+                                      config.pixel_color = PixelColor::GBR;
+                                      break;
+                                    case 0x04:
+                                      config.pixel_color = PixelColor::BRG;
+                                      break;
+                                    case 0x05:
+                                      config.pixel_color = PixelColor::BGR;
+                                      break;
+                                    default:
+                                      LOG_PORT.print("Attempt to configure invalid colour order ");
+                                      LOG_PORT.print(p->directionColourOrder & 0x07);
+                                      break;
+                                }
+                                config.briteVal = (float)p->brightness / 100.0f;
+                                config.gammaVal = (float)p->gamma / 10.0f;
+                            }
+                            else
+                            {
+                                LOG_PORT.print("Attempt to configure invalid port ");
+                                LOG_PORT.print(p->port);
+                            }
+  
+                            p += sizeof(zcppPacket.Configuration.Controller);  
+                          }
+
+                          if (zcppPacket.Configuration.flags & 0x80)
+                          {
+                              lastZCPPConfig = ntohs(zcppPacket.Configuration.sequenceNumber);
+                              updateConfig();
+                          }
+                      }
+                      break;
+                  case ZCPP_TYPE_DATA: // data
+                      LOG_PORT.println("ZCPP Data received.");
+
+                      uint8_t seq = zcppPacket.Data.frameSequenceNumber;
+                      uint32_t offset = ntohl(zcppPacket.Data.frameAddress);
+                      bool frameLast = zcppPacket.Data.sync & 0x80;
+                      uint16_t len = ntohs(zcppPacket.Data.packetDataLength);
+
+                      if (seq != seqZCPPTracker) {
+                        LOG_PORT.print(F("Sequence Error - expected: "));
+                        LOG_PORT.print(seqZCPPTracker);
+                        LOG_PORT.print(F(" actual: "));
+                        LOG_PORT.print(seq);
+                        seqZCPPError++;
+                        if (frameLast)
+                          seqZCPPTracker = seq + 1;
+                      }
+
+                      zcpp.stats.num_packets++;
+
+                      for (int i = offset; i < offset + len; i++) {
+    #if defined(ESPS_MODE_PIXEL)
+                        pixels.setValue(i, zcppPacket.Data.data[i - offset]);
+    #elif defined(ESPS_MODE_SERIAL)
+                        serial.setValue(i, zcppPacket.Data.data[i - offset]);
+    #endif
+                      }
+
+                      break;
+                }
+            }
     }
 
     if ( (config.ds == DataSource::WEB)
       || (config.ds == DataSource::IDLEWEB)
+      || (config.ds == DataSource::ZCPP)
       || (config.ds == DataSource::MQTT) ) {
             effects.run();
     }
@@ -1187,4 +1358,3 @@ void loop() {
         while (LOG_PORT.read() >= 0);
     }
 }
-
