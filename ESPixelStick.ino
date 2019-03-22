@@ -30,7 +30,7 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 /*****************************************/
 
 #include <ESPAsyncE131.h>
-#include <ESPAsyncZCPP.h>
+#include "ESPAsyncZCPP.h"
 #include <Hash.h>
 #include <SPI.h>
 #include "ESPixelStick.h"
@@ -89,6 +89,8 @@ Ticker              idleTicker;     // Ticker for effect on idle
 AsyncMqttClient     mqtt;           // MQTT object
 Ticker              mqttTicker;     // Ticker to handle MQTT
 EffectEngine        effects;        // Effects Engine
+IPAddress           ourLocalIP;
+IPAddress           ourSubnetMask;
 
 // Output Drivers
 #if defined(ESPS_MODE_PIXEL)
@@ -226,6 +228,8 @@ void setup() {
         config.ssid = ssid;
         config.passphrase = passphrase;
         initWifi();
+        ourLocalIP = WiFi.localIP();
+        ourSubnetMask = WiFi.subnetMask();
     }
 
     // If we fail again, go SoftAP or reboot
@@ -235,18 +239,20 @@ void setup() {
             WiFi.mode(WIFI_AP);
             String ssid = "ESPixelStick " + String(config.hostname);
             WiFi.softAP(ssid.c_str());
+            ourLocalIP = WiFi.softAPIP();
+            ourSubnetMask = IPAddress(255,255,255,0);
         } else {
             LOG_PORT.println(F("*** FAILED TO ASSOCIATE WITH AP, REBOOTING ***"));
             ESP.restart();
         }
     }
 
-    LOG_PORT.print("IP : ");
-    LOG_PORT.println(WiFi.localIP());
-    LOG_PORT.print("Subnet mask : ");
-    LOG_PORT.println(WiFi.subnetMask());
-
     wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWiFiDisconnect);
+
+    LOG_PORT.print("IP : ");
+    LOG_PORT.println(ourLocalIP);
+    LOG_PORT.print("Subnet mask : ");
+    LOG_PORT.println(ourSubnetMask);
 
     // Configure and start the web server
     initWeb();
@@ -269,7 +275,7 @@ void setup() {
     }
 
     lastZCPPConfig = -1;
-    if (zcpp.begin(WiFi.localIP()))
+    if (zcpp.begin(ourLocalIP))
     {
         LOG_PORT.println(F("- ZCPP Enabled"));
         ZCPPSub();
@@ -382,7 +388,7 @@ void multiSub() {
 
 void ZCPPSub() {
     ip_addr_t ifaddr;
-    ifaddr.addr = static_cast<uint32_t>(WiFi.localIP());
+    ifaddr.addr = static_cast<uint32_t>(ourLocalIP);
     ip_addr_t multicast_addr;
     multicast_addr.addr = static_cast<uint32_t>(IPAddress(224, 0, 40, 5));
     igmp_joingroup(&ifaddr, &multicast_addr);
@@ -948,6 +954,7 @@ void loadConfig() {
         snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
         config.hostname = "esps-" + String(chipId);
         config.ap_fallback = true;
+        config.id = "No Config Found";
         saveConfig();
     } else {
         // Parse CONFIG_FILE json
@@ -1221,12 +1228,12 @@ void loop() {
                         version[i] = pgm_read_byte(VERSION + i);
 
                       uint8_t mac[WL_MAC_ADDR_LENGTH];
-                      zcpp.sendDiscoveryResponse(&zcppPacket, version, WiFi.macAddress(mac), config.id.c_str(), pixelPorts, serialPorts, 680 * 3, 512, 680 * 3, static_cast<uint32_t>(WiFi.localIP()), static_cast<uint32_t>(WiFi.subnetMask()));
+                      zcpp.sendDiscoveryResponse(&zcppPacket, version, WiFi.macAddress(mac), config.id.c_str(), pixelPorts, serialPorts, 680 * 3, 512, 680 * 3, static_cast<uint32_t>(ourLocalIP), static_cast<uint32_t>(ourSubnetMask));
                   }
                       break;
                   case ZCPP_TYPE_CONFIG: // config
                       LOG_PORT.println("ZCPP Config received.");
-                      if (ntohs(zcppPacket.Configuration.sequenceNumber) != lastZCPPConfig)
+                      if (htons(zcppPacket.Configuration.sequenceNumber) != lastZCPPConfig)
                       {
                         // a new config to apply
                         LOG_PORT.println("    The config is new.");
@@ -1260,8 +1267,8 @@ void loop() {
                                         LOG_PORT.print(p->protocol);
                                         break;                                      
                                 }
-                                config.channel_start = ntohl(p->startChannel);
-                                config.channel_count = ntohs(p->channels);                            
+                                config.channel_start = htons(p->startChannel);
+                                config.channel_count = htons(p->channels);                            
                                 config.groupSize = p->grouping;
                                 switch(ZCPP_GetColourOrder(p->directionColourOrder))
                                 {
@@ -1302,7 +1309,7 @@ void loop() {
 
                           if (zcppPacket.Configuration.flags & ZCPP_CONFIG_FLAG_LAST)
                           {
-                              lastZCPPConfig = ntohs(zcppPacket.Configuration.sequenceNumber);
+                              lastZCPPConfig = htons(zcppPacket.Configuration.sequenceNumber);
                               updateConfig();
                           }
 
@@ -1321,9 +1328,9 @@ void loop() {
                       LOG_PORT.println("ZCPP Data received.");
 
                       uint8_t seq = zcppPacket.Data.sequenceNumber;
-                      uint32_t offset = ntohl(zcppPacket.Data.frameAddress);
+                      uint32_t offset = htonl(zcppPacket.Data.frameAddress);
                       bool frameLast = zcppPacket.Data.flags & ZCPP_DATA_FLAG_LAST;
-                      uint16_t len = ntohs(zcppPacket.Data.packetDataLength);
+                      uint16_t len = htons(zcppPacket.Data.packetDataLength);
                       bool sync = zcppPacket.Data.flags & ZCPP_DATA_FLAG_SYNC_WILL_BE_SENT != 0;
 
                       if (sync) {
