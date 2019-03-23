@@ -83,7 +83,8 @@ class ESPAsyncZCPP {
     // Ring buffer access
     inline bool isEmpty() { return pbuff->isEmpty(pbuff); }
     inline void *pull(ZCPP_packet_t *packet) { return pbuff->pull(pbuff, packet); }
-	void sendDiscoveryResponse(ZCPP_packet_t* packet, const char* firmwareVersion, const uint8_t* mac, const char* controllerName, int pixelPorts, int serialPorts, uint32_t maxPixelPortChannels, uint32_t maxSerialPortChannels, uint32_t maximumChannels, uint32_t ipAddress, uint32_t ipMask);
+	  void sendDiscoveryResponse(ZCPP_packet_t* packet, const char* firmwareVersion, const uint8_t* mac, const char* controllerName, int pixelPorts, int serialPorts, uint32_t maxPixelPortChannels, uint32_t maxSerialPortChannels, uint32_t maximumChannels, uint32_t ipAddress, uint32_t ipMask);
+    void sendConfigResponse(ZCPP_packet_t* packet);
 
     // Diag functions
     void dumpError(ZCPP_error_t error);

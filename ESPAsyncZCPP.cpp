@@ -81,7 +81,8 @@ void ESPAsyncZCPP::parsePacket(AsyncUDPPacket _packet) {
         error = ERROR_ZCPP_ID;
 
 	if (!error && sbuff->Discovery.Header.type != ZCPP_TYPE_DISCOVERY &&
-		sbuff->Discovery.Header.type != ZCPP_TYPE_CONFIG &&
+    sbuff->Discovery.Header.type != ZCPP_TYPE_CONFIG &&
+    sbuff->Discovery.Header.type != ZCPP_TYPE_QUERY_CONFIG &&
 		sbuff->Discovery.Header.type != ZCPP_TYPE_SYNC &&
 		sbuff->Discovery.Header.type != ZCPP_TYPE_DATA)
 	{
@@ -102,7 +103,9 @@ void ESPAsyncZCPP::parsePacket(AsyncUDPPacket _packet) {
 
     if (!error && (!suspend || sbuff->Discovery.Header.type == ZCPP_TYPE_DISCOVERY)) {
 		
-		if (sbuff->Discovery.Header.type == ZCPP_TYPE_DISCOVERY)
+		if (sbuff->Discovery.Header.type == ZCPP_TYPE_DISCOVERY ||
+		    sbuff->Discovery.Header.type == ZCPP_TYPE_QUERY_CONFIG ||
+		    (sbuff->Discovery.Header.type == ZCPP_TYPE_CONFIG && (sbuff->Configuration.flags & ZCPP_CONFIG_FLAG_QUERY_CONFIGURATION_RESPONSE_REQUIRED) != 0))
 		{
 			suspend = true;
 		}
@@ -144,6 +147,21 @@ void ESPAsyncZCPP::dumpError(ZCPP_error_t error) {
         case ERROR_ZCPP_IGNORE:
             break;
     }
+}
+
+void ESPAsyncZCPP::sendConfigResponse(ZCPP_packet_t* packet)
+{
+  if (udp.writeTo(packet->raw, sizeof(ZCPP_packet_t), stats.last_clientIP, stats.last_clientPort) != sizeof(ZCPP_packet_t))
+  {
+    Serial.println("Write of configuration response failed");
+  }
+  else
+  {
+    Serial.print("Configuration response wrote ");
+    Serial.print(sizeof(ZCPP_packet_t));
+    Serial.println(" bytes.");
+  }
+  suspend = false;
 }
 
 void ESPAsyncZCPP::sendDiscoveryResponse(ZCPP_packet_t* packet, const char* firmwareVersion, const uint8_t* mac, const char* controllerName, int pixelPorts, int serialPorts, uint32_t maxPixelPortChannels, uint32_t maxSerialPortChannels, uint32_t maximumChannels, uint32_t ipAddress, uint32_t ipMask)
