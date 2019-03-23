@@ -1413,7 +1413,7 @@ void loop() {
                     break;
                   case ZCPP_TYPE_DATA: // data
                       uint8_t seq = zcppPacket.Data.sequenceNumber;
-                      uint32_t offset = htonl(zcppPacket.Data.frameAddress);
+                      uint16_t offset = htons(zcppPacket.Data.frameAddress);
                       bool frameLast = zcppPacket.Data.flags & ZCPP_DATA_FLAG_LAST;
                       uint16_t len = htons(zcppPacket.Data.packetDataLength);
                       bool sync = (zcppPacket.Data.flags & ZCPP_DATA_FLAG_SYNC_WILL_BE_SENT) != 0;
