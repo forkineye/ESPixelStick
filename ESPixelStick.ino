@@ -228,8 +228,6 @@ void setup() {
         config.ssid = ssid;
         config.passphrase = passphrase;
         initWifi();
-        ourLocalIP = WiFi.localIP();
-        ourSubnetMask = WiFi.subnetMask();
     }
 
     // If we fail again, go SoftAP or reboot
@@ -338,6 +336,9 @@ void onWifiConnect(const WiFiEventStationModeGotIP &event) {
     LOG_PORT.print(F("Connected with IP: "));
     LOG_PORT.println(WiFi.localIP());
 
+    ourLocalIP = WiFi.localIP();
+    ourSubnetMask = WiFi.subnetMask();
+
     // Setup MQTT connection if enabled
     if (config.mqtt)
         connectToMqtt();
@@ -390,8 +391,9 @@ void ZCPPSub() {
     ip_addr_t ifaddr;
     ifaddr.addr = static_cast<uint32_t>(ourLocalIP);
     ip_addr_t multicast_addr;
-    multicast_addr.addr = static_cast<uint32_t>(IPAddress(224, 0, 40, 5));
+    multicast_addr.addr = static_cast<uint32_t>(IPAddress(224, 0, 30, 5));
     igmp_joingroup(&ifaddr, &multicast_addr);
+    LOG_PORT.println(F("- ZCPP Subscribed to multicast 224.0.30.5"));
 }
 
 /////////////////////////////////////////////////////////
@@ -831,8 +833,7 @@ void dsNetworkConfig(const JsonObject &json) {
         // Generate default hostname if needed
         config.hostname = networkJson["hostname"].as<String>();
     }
-    else
-    {
+    else {
         LOG_PORT.println("No network settings found.");
     }
 
@@ -1119,8 +1120,8 @@ void idleTimeout() {
     }
 }
 
-void sendZCPPConfig(ZCPP_packet_t& packet)
-{
+void sendZCPPConfig(ZCPP_packet_t& packet) {
+
     LOG_PORT.println("Sending ZCPP Configuration query response.");
 
     memset(&packet, 0x00, sizeof(packet));
@@ -1129,12 +1130,10 @@ void sendZCPPConfig(ZCPP_packet_t& packet)
     packet.QueryConfigurationResponse.Header.protocolVersion = ZCPP_CURRENT_PROTOCOL_VERSION;
     packet.QueryConfigurationResponse.sequenceNumber = ntohs(lastZCPPConfig);
     strncpy(packet.QueryConfigurationResponse.userControllerName, config.id.c_str(), std::min((int)strlen(config.id.c_str()), (int)sizeof(packet.QueryConfigurationResponse.userControllerName)));
-    if (config.channel_count == 0)
-    {
+    if (config.channel_count == 0) {
         packet.QueryConfigurationResponse.ports = 0;
     }
-    else
-    {
+    else {
         packet.QueryConfigurationResponse.ports = 1;
         packet.QueryConfigurationResponse.PortConfig[0].port = 0;
         #if defined(ESPS_MODE_SERIAL)
@@ -1143,11 +1142,10 @@ void sendZCPPConfig(ZCPP_packet_t& packet)
         packet.QueryConfigurationResponse.PortConfig[0].string = 0;
         packet.QueryConfigurationResponse.PortConfig[0].startChannel = ntohs(config.channel_start);
 #if defined(ESPS_MODE_PIXEL)
-        switch(config.pixel_type)
+        switch(config.pixel_type) {
 #elif defined(ESPS_MODE_SERIAL)
-        switch(config.serial_type)
+        switch(config.serial_type) {
 #endif
-        {
 #if defined(ESPS_MODE_PIXEL)
           case  PixelType::WS2811:
               packet.QueryConfigurationResponse.PortConfig[0].protocol = ZCPP_PROTOCOL_WS2811;
@@ -1166,8 +1164,7 @@ void sendZCPPConfig(ZCPP_packet_t& packet)
         }
         packet.QueryConfigurationResponse.PortConfig[0].channels = ntohs(config.channel_count);
         packet.QueryConfigurationResponse.PortConfig[0].grouping = config.groupSize;
-        switch(config.pixel_color)
-        {
+        switch(config.pixel_color) {
           case PixelColor::RGB:
               packet.QueryConfigurationResponse.PortConfig[0].directionColourOrder = ZCPP_COLOUR_ORDER_RGB;
               break;
@@ -1275,8 +1272,7 @@ void loop() {
             }
 
             bool abortPacketRead = false;
-            while (!zcpp.isEmpty() && !abortPacketRead)
-            {
+            while (!zcpp.isEmpty() && !abortPacketRead) {
                 idleTicker.attach(config.effect_idletimeout, idleTimeout);
                 if (config.ds == DataSource::IDLEWEB || config.ds == DataSource::E131) {
                     config.ds = DataSource::ZCPP;
@@ -1284,45 +1280,41 @@ void loop() {
 
                 zcpp.pull(&zcppPacket);
 
-                switch (zcppPacket.Discovery.Header.type)
-                {
+                switch (zcppPacket.Discovery.Header.type) {
                   case ZCPP_TYPE_DISCOVERY: // discovery
-                  {
-                      LOG_PORT.println("ZCPP Discovery received.");
-                      int pixelPorts = 0;
-                      int serialPorts = 0;
-    #if defined(ESPS_MODE_PIXEL)
-                        pixelPorts = 1;
-    #elif defined(ESPS_MODE_SERIAL)
-                        serialPorts = 1;
-    #endif
-                      char version[9];
-                      memset(version, 0x00, sizeof(version));
-                      for (uint8_t i = 0; i < min(strlen_P(VERSION), sizeof(version)-1); i++)
-                        version[i] = pgm_read_byte(VERSION + i);
-
-                      uint8_t mac[WL_MAC_ADDR_LENGTH];
-                      zcpp.sendDiscoveryResponse(&zcppPacket, version, WiFi.macAddress(mac), config.id.c_str(), pixelPorts, serialPorts, 680 * 3, 512, 680 * 3, static_cast<uint32_t>(ourLocalIP), static_cast<uint32_t>(ourSubnetMask));
-                  }
+                      {
+                          LOG_PORT.println("ZCPP Discovery received.");
+                          int pixelPorts = 0;
+                          int serialPorts = 0;
+        #if defined(ESPS_MODE_PIXEL)
+                            pixelPorts = 1;
+        #elif defined(ESPS_MODE_SERIAL)
+                            serialPorts = 1;
+        #endif
+                          char version[9];
+                          memset(version, 0x00, sizeof(version));
+                          for (uint8_t i = 0; i < min(strlen_P(VERSION), sizeof(version)-1); i++)
+                            version[i] = pgm_read_byte(VERSION + i);
+    
+                          uint8_t mac[WL_MAC_ADDR_LENGTH];
+                          zcpp.sendDiscoveryResponse(&zcppPacket, version, WiFi.macAddress(mac), config.id.c_str(), pixelPorts, serialPorts, 680 * 3, 512, 680 * 3, static_cast<uint32_t>(ourLocalIP), static_cast<uint32_t>(ourSubnetMask));
+                      }
                       break;
                   case ZCPP_TYPE_CONFIG: // config
                       LOG_PORT.println("ZCPP Config received.");
-                      if (htons(zcppPacket.Configuration.sequenceNumber) != lastZCPPConfig)
-                      {                        
+                      if (htons(zcppPacket.Configuration.sequenceNumber) != lastZCPPConfig) {                        
                         // a new config to apply
-                        LOG_PORT.println("    The config is new.");
-                        
+                        LOG_PORT.print("    The config is new: ");
+                        LOG_PORT.println(htons(zcppPacket.Configuration.sequenceNumber));
+
                         config.id = String(zcppPacket.Configuration.userControllerName);
-                        LOG_PORT.print("Controller Name: ");
+                        LOG_PORT.print("    Controller Name: ");
                         LOG_PORT.println(config.id);
 
                         ZCPP_PortConfig* p = zcppPacket.Configuration.PortConfig;
-                        for (int i = 0; i < zcppPacket.Configuration.ports; i++)
-                        {
-                            if (p->port == 1)
-                            {
-                                switch(p->protocol)
-                                {
+                        for (int i = 0; i < zcppPacket.Configuration.ports; i++) {
+                            if (p->port == 0) {
+                                switch(p->protocol) {
 #if defined(ESPS_MODE_PIXEL)
                                     case ZCPP_PROTOCOL_WS2811: 
                                         config.pixel_type = PixelType::WS2811;
@@ -1343,23 +1335,22 @@ void loop() {
                                         LOG_PORT.print(p->protocol);
                                         break;                                      
                                 }
-                                LOG_PORT.print("Protocol: ");
+                                LOG_PORT.print("    Protocol: ");
 #if defined(ESPS_MODE_PIXEL)
                                 LOG_PORT.println((int)config.pixel_type);
 #elif defined(ESPS_MODE_SERIAL)
                                 LOG_PORT.println((int)config.serial_type);
 #endif
                                 config.channel_start = htons(p->startChannel);
-                                LOG_PORT.print("Start Channel: ");
+                                LOG_PORT.print("    Start Channel: ");
                                 LOG_PORT.println(config.channel_start);
                                 config.channel_count = htons(p->channels);                            
-                                LOG_PORT.print("Channel Count: ");
+                                LOG_PORT.print("    Channel Count: ");
                                 LOG_PORT.println(config.channel_count);
                                 config.groupSize = p->grouping;
-                                LOG_PORT.print("Group Size: ");
+                                LOG_PORT.print("    Group Size: ");
                                 LOG_PORT.println(config.groupSize);
-                                switch(ZCPP_GetColourOrder(p->directionColourOrder))
-                                {
+                                switch(ZCPP_GetColourOrder(p->directionColourOrder)) {
                                     case ZCPP_COLOUR_ORDER_RGB:
                                       config.pixel_color = PixelColor::RGB;
                                       break;
@@ -1383,17 +1374,16 @@ void loop() {
                                       LOG_PORT.print(ZCPP_GetColourOrder(p->directionColourOrder));
                                       break;
                                 }
-                                LOG_PORT.print("Colour Order: ");
+                                LOG_PORT.print("    Colour Order: ");
                                 LOG_PORT.println((int)config.pixel_color);
                                 config.briteVal = (float)p->brightness / 100.0f;
-                                LOG_PORT.print("Brightness: ");
+                                LOG_PORT.print("    Brightness: ");
                                 LOG_PORT.println(config.briteVal);
                                 config.gammaVal = ZCPP_GetGamma(p->gamma);
-                                LOG_PORT.print("Gamma: ");
+                                LOG_PORT.print("    Gamma: ");
                                 LOG_PORT.println(config.gammaVal);
                             }
-                            else
-                            {
+                            else {
                                 LOG_PORT.print("Attempt to configure invalid port ");
                                 LOG_PORT.print(p->port);
                             }
@@ -1401,34 +1391,32 @@ void loop() {
                             p += sizeof(zcppPacket.Configuration.PortConfig);  
                           }
 
-                          if (zcppPacket.Configuration.flags & ZCPP_CONFIG_FLAG_LAST)
-                          {
+                          if (zcppPacket.Configuration.flags & ZCPP_CONFIG_FLAG_LAST) {
                               lastZCPPConfig = htons(zcppPacket.Configuration.sequenceNumber);
                               updateConfig();
-                              if ((zcppPacket.Configuration.flags & ZCPP_CONFIG_FLAG_QUERY_CONFIGURATION_RESPONSE_REQUIRED) != 0)
-                              {
+                              if ((zcppPacket.Configuration.flags & ZCPP_CONFIG_FLAG_QUERY_CONFIGURATION_RESPONSE_REQUIRED) != 0) {
                                 sendZCPPConfig(zcppPacket);
                               }
                           }
+                      }
+                      else {
+                        LOG_PORT.println("    The config has not changed.");
                       }
                       break;
                   case ZCPP_TYPE_QUERY_CONFIG: // query config
                       sendZCPPConfig(zcppPacket);
                       break;
                   case ZCPP_TYPE_SYNC: // sync
-                      LOG_PORT.println("ZCPP Sync received.");
                     doShow = true;
                     // exit read and send data to the pixels
                     abortPacketRead = true;
                     break;
                   case ZCPP_TYPE_DATA: // data
-                      LOG_PORT.println("ZCPP Data received.");
-
                       uint8_t seq = zcppPacket.Data.sequenceNumber;
                       uint32_t offset = htonl(zcppPacket.Data.frameAddress);
                       bool frameLast = zcppPacket.Data.flags & ZCPP_DATA_FLAG_LAST;
                       uint16_t len = htons(zcppPacket.Data.packetDataLength);
-                      bool sync = zcppPacket.Data.flags & ZCPP_DATA_FLAG_SYNC_WILL_BE_SENT != 0;
+                      bool sync = (zcppPacket.Data.flags & ZCPP_DATA_FLAG_SYNC_WILL_BE_SENT) != 0;
 
                       if (sync) {
                         // suppress display until we see a sync
@@ -1439,11 +1427,12 @@ void loop() {
                         LOG_PORT.print(F("Sequence Error - expected: "));
                         LOG_PORT.print(seqZCPPTracker);
                         LOG_PORT.print(F(" actual: "));
-                        LOG_PORT.print(seq);
+                        LOG_PORT.println(seq);
                         seqZCPPError++;
-                        if (frameLast)
-                          seqZCPPTracker = seq + 1;
                       }
+
+                      if (frameLast)
+                        seqZCPPTracker = seq + 1;
 
                       zcpp.stats.num_packets++;
 

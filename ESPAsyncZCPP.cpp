@@ -58,12 +58,15 @@ bool ESPAsyncZCPP::initUDP(IPAddress ourIP) {
         success = true;
     }
 	
-	ip_addr_t ifaddr;
+  	ip_addr_t ifaddr;
     ip_addr_t multicast_addr;
-	ifaddr.addr = static_cast<uint32_t>(ourIP);
-	multicast_addr.addr = static_cast<uint32_t>(IPAddress(224, 0, 31, ourIP[4]));
-	igmp_joingroup(&ifaddr, &multicast_addr);
-
+  	ifaddr.addr = static_cast<uint32_t>(ourIP);
+	  multicast_addr.addr = static_cast<uint32_t>(IPAddress(224, 0, 31, (ifaddr.addr & 0xFF000000) >> 24));
+	  igmp_joingroup(&ifaddr, &multicast_addr);
+    if (Serial) {
+        Serial.print("ZCPP subscribed to multicast 224.0.31.");
+        Serial.println((ifaddr.addr & 0xFF000000) >> 24);
+    }
     return success;
 }
 
@@ -77,26 +80,23 @@ void ESPAsyncZCPP::parsePacket(AsyncUDPPacket _packet) {
     ZCPP_error_t error = ERROR_ZCPP_NONE;
 
     sbuff = reinterpret_cast<ZCPP_packet_t *>(_packet.data());
-    if (memcmp(sbuff->Discovery.Header.token, ZCPP_token, sizeof(sbuff->Discovery.Header.token)))
+    if (memcmp(sbuff->Discovery.Header.token, ZCPP_token, sizeof(sbuff->Discovery.Header.token))) {
         error = ERROR_ZCPP_ID;
-
+    }
+    
 	if (!error && sbuff->Discovery.Header.type != ZCPP_TYPE_DISCOVERY &&
     sbuff->Discovery.Header.type != ZCPP_TYPE_CONFIG &&
     sbuff->Discovery.Header.type != ZCPP_TYPE_QUERY_CONFIG &&
 		sbuff->Discovery.Header.type != ZCPP_TYPE_SYNC &&
-		sbuff->Discovery.Header.type != ZCPP_TYPE_DATA)
-	{
+		sbuff->Discovery.Header.type != ZCPP_TYPE_DATA) {
 		error = ERROR_ZCPP_IGNORE;
 	}
 
-	if (sbuff->Discovery.Header.protocolVersion > ZCPP_CURRENT_PROTOCOL_VERSION)
-	{
-		if (sbuff->Discovery.Header.type == 0x00)
-		{
+	if (!error && sbuff->Discovery.Header.protocolVersion > ZCPP_CURRENT_PROTOCOL_VERSION) {
+		if (sbuff->Discovery.Header.type == 0x00) {
 			error = ERROR_ZCPP_NONE;
 		}
-		else if (!error)
-		{
+		else if (!error) {
 			error = ERROR_ZCPP_PROTOCOL_VERSION;
 		}
 	}
@@ -105,8 +105,7 @@ void ESPAsyncZCPP::parsePacket(AsyncUDPPacket _packet) {
 		
 		if (sbuff->Discovery.Header.type == ZCPP_TYPE_DISCOVERY ||
 		    sbuff->Discovery.Header.type == ZCPP_TYPE_QUERY_CONFIG ||
-		    (sbuff->Discovery.Header.type == ZCPP_TYPE_CONFIG && (sbuff->Configuration.flags & ZCPP_CONFIG_FLAG_QUERY_CONFIGURATION_RESPONSE_REQUIRED) != 0))
-		{
+		    (sbuff->Discovery.Header.type == ZCPP_TYPE_CONFIG && (sbuff->Configuration.flags & ZCPP_CONFIG_FLAG_QUERY_CONFIGURATION_RESPONSE_REQUIRED) != 0)) {
 			suspend = true;
 		}
 		
@@ -151,15 +150,16 @@ void ESPAsyncZCPP::dumpError(ZCPP_error_t error) {
 
 void ESPAsyncZCPP::sendConfigResponse(ZCPP_packet_t* packet)
 {
-  if (udp.writeTo(packet->raw, sizeof(ZCPP_packet_t), stats.last_clientIP, stats.last_clientPort) != sizeof(ZCPP_packet_t))
-  {
-    Serial.println("Write of configuration response failed");
+  if (udp.writeTo(packet->raw, sizeof(ZCPP_packet_t), stats.last_clientIP, stats.last_clientPort) != sizeof(ZCPP_packet_t)) {
+    if (Serial)
+        Serial.println("Write of configuration response failed");
   }
-  else
-  {
-    Serial.print("Configuration response wrote ");
-    Serial.print(sizeof(ZCPP_packet_t));
-    Serial.println(" bytes.");
+  else {
+    if (Serial) {
+        Serial.print("Configuration response wrote ");
+        Serial.print(sizeof(ZCPP_packet_t));
+        Serial.println(" bytes.");
+    }
   }
   suspend = false;
 }
@@ -185,28 +185,27 @@ void ESPAsyncZCPP::sendDiscoveryResponse(ZCPP_packet_t* packet, const char* firm
 	packet->DiscoveryResponse.channelsPerRSPort = ntohs(maxSerialPortChannels);
 	packet->DiscoveryResponse.maxTotalChannels = ntohl(maximumChannels);
 	uint32_t protocolsSupported = 0;
-	if (pixelPorts >0)
-	{
+	if (pixelPorts > 0) {
 		protocolsSupported |= ZCPP_DISCOVERY_PROTOCOL_WS2811;
 		protocolsSupported |= ZCPP_DISCOVERY_PROTOCOL_GECE;
 	}
-	if (serialPorts > 0)
-	{
+	if (serialPorts > 0) {
 		protocolsSupported |= ZCPP_DISCOVERY_PROTOCOL_DMX;
 		protocolsSupported |= ZCPP_DISCOVERY_PROTOCOL_RENARD;
 	}
 	packet->DiscoveryResponse.protocolsSupported = ntohl(protocolsSupported);
 	packet->DiscoveryResponse.flags = ZCPP_DISCOVERY_FLAG_SEND_DATA_AS_MULTICAST;
 
-	if (udp.writeTo(packet->raw, sizeof(packet->DiscoveryResponse), stats.last_clientIP, stats.last_clientPort) != sizeof(packet->DiscoveryResponse))
-	{
-		Serial.println("Write of discovery response failed");
+	if (udp.writeTo(packet->raw, sizeof(packet->DiscoveryResponse), stats.last_clientIP, stats.last_clientPort) != sizeof(packet->DiscoveryResponse)) {
+    if (Serial)
+    		Serial.println("Write of discovery response failed");
 	}
-	else
-	{
-		Serial.print("Discovery response wrote ");
-		Serial.print(sizeof(packet->DiscoveryResponse));
-		Serial.println(" bytes.");
+	else {
+    if (Serial) {
+  		Serial.print("Discovery response wrote ");
+  		Serial.print(sizeof(packet->DiscoveryResponse));
+  		Serial.println(" bytes.");
+    }
 	}
 	suspend = false;
 }
