@@ -1140,7 +1140,7 @@ void sendZCPPConfig(ZCPP_packet_t& packet) {
         packet.QueryConfigurationResponse.PortConfig[0].port |= 0x80;
         #endif        
         packet.QueryConfigurationResponse.PortConfig[0].string = 0;
-        packet.QueryConfigurationResponse.PortConfig[0].startChannel = ntohs(config.channel_start);
+        packet.QueryConfigurationResponse.PortConfig[0].startChannel = ntohl((uint32_t)config.channel_start);
 #if defined(ESPS_MODE_PIXEL)
         switch(config.pixel_type) {
 #elif defined(ESPS_MODE_SERIAL)
@@ -1162,7 +1162,7 @@ void sendZCPPConfig(ZCPP_packet_t& packet) {
               break;
 #endif
         }
-        packet.QueryConfigurationResponse.PortConfig[0].channels = ntohs(config.channel_count);
+        packet.QueryConfigurationResponse.PortConfig[0].channels = ntohl((uint32_t)config.channel_count);
         packet.QueryConfigurationResponse.PortConfig[0].grouping = config.groupSize;
         switch(config.pixel_color) {
           case PixelColor::RGB:
@@ -1341,10 +1341,10 @@ void loop() {
 #elif defined(ESPS_MODE_SERIAL)
                                 LOG_PORT.println((int)config.serial_type);
 #endif
-                                config.channel_start = htons(p->startChannel);
+                                config.channel_start = htonl(p->startChannel);
                                 LOG_PORT.print("    Start Channel: ");
                                 LOG_PORT.println(config.channel_start);
-                                config.channel_count = htons(p->channels);                            
+                                config.channel_count = htonl(p->channels);                            
                                 LOG_PORT.print("    Channel Count: ");
                                 LOG_PORT.println(config.channel_count);
                                 config.groupSize = p->grouping;
@@ -1413,7 +1413,7 @@ void loop() {
                     break;
                   case ZCPP_TYPE_DATA: // data
                       uint8_t seq = zcppPacket.Data.sequenceNumber;
-                      uint16_t offset = htons(zcppPacket.Data.frameAddress);
+                      uint32_t offset = htonl(zcppPacket.Data.frameAddress);
                       bool frameLast = zcppPacket.Data.flags & ZCPP_DATA_FLAG_LAST;
                       uint16_t len = htons(zcppPacket.Data.packetDataLength);
                       bool sync = (zcppPacket.Data.flags & ZCPP_DATA_FLAG_SYNC_WILL_BE_SENT) != 0;
