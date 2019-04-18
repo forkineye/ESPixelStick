@@ -34,6 +34,7 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include <Hash.h>
 #include <SPI.h>
 #include "ESPixelStick.h"
+#include "FPPDiscovery.h"
 #include "EFUpdate.h"
 #include "wshandler.h"
 #include "gamma.h"
@@ -71,6 +72,8 @@ const char CONFIG_FILE[] = "/config.json";
 
 ESPAsyncE131        e131(10);       // ESPAsyncE131 with X buffers
 ESPAsyncZCPP        zcpp(10);       // ESPAsyncZCPP with X buffers
+FPPDiscovery        fppDiscovery(VERSION);   // FPP Discovery Listener
+
 config_t            config;         // Current configuration
 uint32_t            *seqError;      // Sequence error tracking for each universe
 uint32_t            *seqZCPPError;  // Sequence error tracking for each universe
@@ -271,6 +274,7 @@ void setup() {
             LOG_PORT.println(F("*** E131 UNICAST INIT FAILED ****"));
         }
     }
+    fppDiscovery.begin();
 
     lastZCPPConfig = -1;
     if (zcpp.begin(ourLocalIP))
