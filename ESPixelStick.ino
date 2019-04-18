@@ -33,6 +33,7 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include <Hash.h>
 #include <SPI.h>
 #include "ESPixelStick.h"
+#include "FPPDiscovery.h"
 #include "EFUpdate.h"
 #include "wshandler.h"
 #include "gamma.h"
@@ -69,6 +70,7 @@ const char LIGHT_OFF[] = "OFF";
 const char CONFIG_FILE[] = "/config.json";
 
 ESPAsyncE131        e131(10);       // ESPAsyncE131 with X buffers
+FPPDiscovery        fppDiscovery(VERSION);   // FPP Discovery Listener
 config_t            config;         // Current configuration
 uint32_t            *seqError;      // Sequence error tracking for each universe
 uint16_t            uniLast = 1;    // Last Universe to listen for
@@ -257,6 +259,7 @@ void setup() {
             LOG_PORT.println(F("*** UNICAST INIT FAILED ****"));
         }
     }
+    fppDiscovery.begin();
 
 /* to be removed, done earlier
     // Configure the outputs
@@ -1187,4 +1190,3 @@ void loop() {
         while (LOG_PORT.read() >= 0);
     }
 }
-
