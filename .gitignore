@@ -3,3 +3,4 @@ node_modules
 .build
 *.gz
 package-lock.json
+*.ino.generic.bin
