@@ -31,6 +31,7 @@ extern SerialDriver serial;     // Serial object
 extern EffectEngine effects;    // EffectEngine for test modes
 
 extern ESPAsyncE131 e131;       // ESPAsyncE131 with X buffers
+extern ESPAsyncDDP  ddp;        // ESPAsyncDDP with X buffers
 extern config_t     config;     // Current configuration
 extern uint32_t     *seqError;  // Sequence error tracking for each universe
 extern uint16_t     uniLast;    // Last Universe to listen for
@@ -98,6 +99,13 @@ void procX(uint8_t *data, AsyncWebSocketClient *client) {
             e131J["packet_errors"] = (String)e131.stats.packet_errors;
             e131J["last_clientIP"] = e131.stats.last_clientIP.toString();
 
+            JsonObject ddpJ = json.createNestedObject("ddp");
+            ddpJ["num_packets"] = (String)ddp.stats.packetsReceived;
+            ddpJ["seq_errors"] = (String)ddp.stats.errors;
+            ddpJ["num_bytes"] = (String)ddp.stats.bytesReceived;
+            ddpJ["max_channel"] = (String)ddp.stats.ddpMaxChannel;
+            ddpJ["min_channel"] = (String)ddp.stats.ddpMinChannel;
+            
             String response;
             serializeJson(json, response);
             client->text("XJ" + response);

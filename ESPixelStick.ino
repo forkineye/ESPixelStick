@@ -31,6 +31,7 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 
 #include <ESPAsyncE131.h>
 #include "ESPAsyncZCPP.h"
+#include "ESPAsyncDDP.h"
 #include <Hash.h>
 #include <SPI.h>
 #include "ESPixelStick.h"
@@ -71,7 +72,8 @@ const char LIGHT_OFF[] = "OFF";
 const char CONFIG_FILE[] = "/config.json";
 
 ESPAsyncE131        e131(10);       // ESPAsyncE131 with X buffers
-ESPAsyncZCPP        zcpp(10);       // ESPAsyncZCPP with X buffers
+ESPAsyncZCPP        zcpp(5);        // ESPAsyncZCPP with X buffers
+ESPAsyncDDP         ddp(5);         // ESPAsyncDDP with X buffers
 FPPDiscovery        fppDiscovery(VERSION);   // FPP Discovery Listener
 
 config_t            config;         // Current configuration
@@ -276,14 +278,17 @@ void setup() {
     }
     fppDiscovery.begin();
 
+    if (ddp.begin(ourLocalIP)) {
+      LOG_PORT.println(F("- DDP Enabled"));      
+    } else {
+      LOG_PORT.println(F("*** DDP INIT FAILED ****"));      
+    }
+
     lastZCPPConfig = -1;
-    if (zcpp.begin(ourLocalIP))
-    {
+    if (zcpp.begin(ourLocalIP)) {
         LOG_PORT.println(F("- ZCPP Enabled"));
         ZCPPSub();
-    }
-    else
-    {
+    } else {
         LOG_PORT.println(F("*** ZCPP INIT FAILED ****"));
     }
 }
@@ -355,6 +360,7 @@ void onWifiConnect(const WiFiEventStationModeGotIP &event) {
     if (MDNS.begin(config.hostname.c_str())) {
         MDNS.addService("http", "tcp", HTTP_PORT);
         MDNS.addService("zcpp", "udp", ZCPP_PORT);
+        MDNS.addService("ddp", "udp", DDP_PORT);
         MDNS.addService("e131", "udp", E131_DEFAULT_PORT);
         MDNS.addServiceTxt("e131", "udp", "TxtVers", String(RDMNET_DNSSD_TXTVERS));
         MDNS.addServiceTxt("e131", "udp", "ConfScope", RDMNET_DEFAULT_SCOPE);
@@ -1201,9 +1207,6 @@ void sendZCPPConfig(ZCPP_packet_t& packet) {
 //
 /////////////////////////////////////////////////////////
 void loop() {
-    e131_packet_t packet;
-    ZCPP_packet_t zcppPacket;
-
     // Reboot handler
     if (reboot) {
         delay(REBOOT_DELAY);
@@ -1213,9 +1216,10 @@ void loop() {
     bool doShow = true;
 
     // Render output for current data source
-    if ( (config.ds == DataSource::E131) || (config.ds == DataSource::ZCPP) || (config.ds == DataSource::IDLEWEB) ) {
+    if ( (config.ds == DataSource::E131) || (config.ds == DataSource::ZCPP) || (config.ds == DataSource::DDP)  || (config.ds == DataSource::IDLEWEB) ) {
             // Parse a packet and update pixels
             while (!e131.isEmpty()) {
+                e131_packet_t packet;
                 idleTicker.attach(config.effect_idletimeout, idleTimeout);
                 if (config.ds == DataSource::IDLEWEB || config.ds == DataSource::ZCPP) {
                     config.ds = DataSource::E131;
@@ -1274,9 +1278,35 @@ void loop() {
                     }
                 }
             }
+            while (!ddp.isEmpty()) {
+              DDP_packet_t ddpPacket;
+              ddp.pull(&ddpPacket);
+              if (ddpPacket.header.flags & 0x01) {
+                doShow = true;
+              } else {
+                doShow = false;
+              }
+              uint16_t len = htons(ddpPacket.header.dataLen);
+              uint32_t offset = htonl(ddpPacket.header.channelOffset);
+              bool tc = ddpPacket.header.flags & 0x10;
+              uint8_t *data = ddpPacket.header.data;
+              if (tc) {
+                data = ddpPacket.timeCodeHeader.data;
+              }
+              for (int i = offset; i < offset + len; i++) {
+                if (i < config.channel_count) {
+    #if defined(ESPS_MODE_PIXEL)
+                 pixels.setValue(i, data[i - offset]);
+    #elif defined(ESPS_MODE_SERIAL)
+                 serial.setValue(i, data[i - offset]);
+    #endif
+                }
+              }
+            }
 
             bool abortPacketRead = false;
             while (!zcpp.isEmpty() && !abortPacketRead) {
+                ZCPP_packet_t zcppPacket;
                 idleTicker.attach(config.effect_idletimeout, idleTimeout);
                 if (config.ds == DataSource::IDLEWEB || config.ds == DataSource::E131) {
                     config.ds = DataSource::ZCPP;
@@ -1397,7 +1427,7 @@ void loop() {
 
                           if (zcppPacket.Configuration.flags & ZCPP_CONFIG_FLAG_LAST) {
                               lastZCPPConfig = htons(zcppPacket.Configuration.sequenceNumber);
-                              updateConfig();
+                              saveConfig();
                               if ((zcppPacket.Configuration.flags & ZCPP_CONFIG_FLAG_QUERY_CONFIGURATION_RESPONSE_REQUIRED) != 0) {
                                 sendZCPPConfig(zcppPacket);
                               }
@@ -1453,11 +1483,11 @@ void loop() {
             }
     }
 
-  if (doShow)
-  {
+  if (doShow) {
         if ( (config.ds == DataSource::WEB)
           || (config.ds == DataSource::IDLEWEB)
           || (config.ds == DataSource::ZCPP)
+          || (config.ds == DataSource::DDP)
           || (config.ds == DataSource::MQTT) ) {
                 effects.run();
         }
