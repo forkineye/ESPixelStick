@@ -1164,16 +1164,19 @@ void sendZCPPConfig(ZCPP_packet_t& packet) {
               packet.QueryConfigurationResponse.PortConfig[0].protocol = ZCPP_PROTOCOL_GECE;
               break;
 #elif defined(ESPS_MODE_SERIAL)
-          case  PixelType::DMX512:
+          case  SerialType::DMX512:
               packet.QueryConfigurationResponse.PortConfig[0].protocol = ZCPP_PROTOCOL_DMX;
               break;
-          case  PixelType::RENARD:
+          case  SerialType::RENARD:
               packet.QueryConfigurationResponse.PortConfig[0].protocol = ZCPP_PROTOCOL_RENARD;
               break;
 #endif
         }
         packet.QueryConfigurationResponse.PortConfig[0].channels = ntohl((uint32_t)config.channel_count);
+
+#if defined(ESPS_MODE_PIXEL)
         packet.QueryConfigurationResponse.PortConfig[0].grouping = config.groupSize;
+
         switch(config.pixel_color) {
           case PixelColor::RGB:
               packet.QueryConfigurationResponse.PortConfig[0].directionColourOrder = ZCPP_COLOUR_ORDER_RGB;
@@ -1194,8 +1197,15 @@ void sendZCPPConfig(ZCPP_packet_t& packet) {
               packet.QueryConfigurationResponse.PortConfig[0].directionColourOrder = ZCPP_COLOUR_ORDER_BGR;
               break;
         }
+
         packet.QueryConfigurationResponse.PortConfig[0].brightness = config.briteVal * 100.0f;
         packet.QueryConfigurationResponse.PortConfig[0].gamma = config.gammaVal * 10;
+#else
+        packet.QueryConfigurationResponse.PortConfig[0].grouping = 0;
+        packet.QueryConfigurationResponse.PortConfig[0].directionColourOrder = 0;
+        packet.QueryConfigurationResponse.PortConfig[0].brightness = 100.0f;
+        packet.QueryConfigurationResponse.PortConfig[0].gamma = 0;
+#endif
     }
     
     zcpp.sendConfigResponse(&packet);  
@@ -1381,6 +1391,7 @@ void loop() {
                                 config.channel_count = htonl(p->channels);                            
                                 LOG_PORT.print("    Channel Count: ");
                                 LOG_PORT.println(config.channel_count);
+#if defined(ESPS_MODE_PIXEL)
                                 config.groupSize = p->grouping;
                                 LOG_PORT.print("    Group Size: ");
                                 LOG_PORT.println(config.groupSize);
@@ -1416,6 +1427,7 @@ void loop() {
                                 config.gammaVal = ZCPP_GetGamma(p->gamma);
                                 LOG_PORT.print("    Gamma: ");
                                 LOG_PORT.println(config.gammaVal);
+#endif
                             }
                             else {
                                 LOG_PORT.print("Attempt to configure invalid port ");
