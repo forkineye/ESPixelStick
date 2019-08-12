@@ -67,7 +67,9 @@ void FPPDiscovery::sendPingPacket() {
     packet.operatingMode = 0x01; // we only support bridge mode
     uint32_t ip = static_cast<uint32_t>(WiFi.localIP());
     memcpy(packet.ipAddress, &ip, 4);
-    strcpy(packet.hostName, WiFi.hostname().c_str());
+    if (WiFi.hostname()) {
+      strcpy(packet.hostName, WiFi.hostname().c_str());
+    }
     strcpy(packet.version, version);
     strcpy(packet.hardwareType, "ESPixelStick");
     packet.ranges[0] = 0;
