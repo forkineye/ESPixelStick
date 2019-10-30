@@ -48,7 +48,7 @@ const char BUILD_DATE[] = __DATE__;
 // Configuration file params
 #define CONFIG_MAX_SIZE 4096    ///< Sanity limit for config file
 
-/// Configuration structure
+/// Core configuration structure
 typedef struct {
     // Device
     String      id;             ///< Device ID

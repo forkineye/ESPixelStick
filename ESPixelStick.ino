@@ -20,10 +20,13 @@
 /*****************************************/
 /*        BEGIN - Configuration          */
 /*****************************************/
+// Create secrets.h with a #define for SECRETS_SSID and SECRETS_PASS
+// or delete the #include and enter them directly below.
+#include "secrets.h"
 
 /* Fallback configuration if config.json is empty or fails */
-const char ssid[] = "portabox";
-const char passphrase[] = "portaboxhaha";
+const char ssid[] = SECRETS_SSID;
+const char passphrase[] = SECRETS_PASS;
 
 /*****************************************/
 /*         END - Configuration           */
@@ -245,6 +248,9 @@ void setup() {
 
     wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWiFiDisconnect);
 
+    // Handle OTA update from asynchronous callbacks
+    Update.runAsync(true);
+
     // Configure and start the web server
     initWeb();
 }
@@ -339,11 +345,8 @@ void onWiFiDisconnect(const WiFiEventStationModeDisconnected &event) {
 
 // Configure and start the web server
 void initWeb() {
-    // Handle OTA update from asynchronous callbacks
-    Update.runAsync(true);
-
     // Add header for SVG plot support?
-    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+    DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
 
     // Setup WebSockets
     ws.onEvent(wsEvent);
@@ -376,13 +379,12 @@ void initWeb() {
         request->send(404, "text/plain", "Page not found");
     });
 
-    DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
-
+/*
     // Config file upload handler - only in station mode
     web.on("/config", HTTP_POST, [](AsyncWebServerRequest *request) {
         ws.textAll("X6");
     }, handle_config_upload).setFilter(ON_STA_FILTER);
-
+*/
     web.begin();
 
     LOG_PORT.print(F("- Web Server started on port "));

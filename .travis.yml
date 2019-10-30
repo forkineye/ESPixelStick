@@ -35,6 +35,8 @@ before_script:
 - npm install -g gulp-cli
 - npm install
 script:
+- echo '#define SECRETS_SSID "SSID_NOT_SET"' > $ESPS_HOME/secrets.h
+- echo '#define SECRETS_PASS "PASSPHRASE_NOT_SET"' >> $ESPS_HOME/secrets.h
 - arduino --verify $ESPS_HOME/ESPixelStick.ino
 - mv $BUILD/ESPixelStick.ino.bin $DIST/firmware/espixelstick-travis.bin
 - gulp

@@ -118,7 +118,11 @@ uint16_t WS2811::getTupleCount() {
 }
 
 void WS2811::validate() {
-//TODO: check pixelCount
+    if (pixelCount > PIXEL_LIMIT)
+        pixelCount = PIXEL_LIMIT;
+    else if (pixelCount < 1)
+        pixelCount = 1;
+
     if (groupSize > pixelCount)
         groupSize = pixelCount;
     else if (groupSize < 1)
@@ -308,5 +312,4 @@ void WS2811::render() {
 
 uint8_t* WS2811::getData() {
     return asyncdata;	// data post grouping or zigzaging
-//    return pixdata;
 }
