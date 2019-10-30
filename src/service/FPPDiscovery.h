@@ -34,6 +34,13 @@
 
 #define FPP_DISCOVERY_PORT 32320
 
+/*
+Code ripped from main sketch
+setup():
+  fppDiscovery.begin();
+
+*/
+
 typedef union {
     struct {
         uint8_t  header[4];  //FPPD
@@ -64,7 +71,7 @@ class FPPDiscovery {
   public:
     FPPDiscovery(const char *ver);
     bool begin();
-    void sendPingPacket();  
+    void sendPingPacket();
 };
 
 

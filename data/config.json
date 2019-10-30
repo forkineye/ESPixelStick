@@ -1,4 +1,10 @@
 {
+  "device": {
+    "id": "ESPixelStick",
+    "inputmode": "e131",
+    "outputmode": "ws2811"
+  },
+
   "network": {
     "ssid": "",
     "passphrase": "",
@@ -22,10 +28,6 @@
     ],
     "dhcp": true,
     "ap_fallback": false
-  },
-
-  "device": {
-    "id": "ESPixelStick"
   },
 
   "e131": {

@@ -4,3 +4,4 @@ node_modules
 *.gz
 package-lock.json
 *.ino.generic.bin
+.doxygen/doc

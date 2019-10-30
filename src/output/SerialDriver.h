@@ -1,5 +1,5 @@
 /******************************************************************
-*  
+*
 *       Project: ESPixelStick - An ESP8266 and E1.31 based pixel (And Serial!) driver
 *       Orginal ESPixelStickproject by 2015 Shelby Merrick
 *
@@ -8,8 +8,8 @@
 *              www.billporter.info
 *
 *       See Readme for other info and version history
-*   
-*  
+*
+*
 *This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or(at your option) any later version.
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,7 +17,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 <http://www.gnu.org/licenses/>
 *
-*This work is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unported License. 
+*This work is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unported License.
 *To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/3.0/ or
 *send a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
 ******************************************************************/
@@ -25,6 +25,55 @@ GNU General Public License for more details.
 
 #ifndef SERIALDRIVER_H_
 #define SERIALDRIVER_H_
+
+#define RENARD_LIMIT    2048    ///< Channel limit for serial outputs
+
+/*
+config_t:
+    SerialType  serial_type;    ///< Serial type
+    BaudRate    baudrate;       ///< Baudrate
+
+
+from main sketch:
+
+validateConfig():
+    case OutputMode::RENARD:
+        // Renard channel limits
+        if (config.channel_count > RENARD_LIMIT)
+            config.channel_count = RENARD_LIMIT;
+        else if (config.channel_count < 1)
+            config.channel_count = 1;
+        break;
+
+    case OutputMode::DMX:
+        if (config.channel_count > UNIVERSE_MAX)
+            config.channel_count = UNIVERSE_MAX;
+        break;
+
+    // Baud rate check
+    if (config.baudrate > BaudRate::BR_460800)
+        config.baudrate = BaudRate::BR_460800;
+    else if (config.baudrate < BaudRate::BR_38400)
+        config.baudrate = BaudRate::BR_57600;
+
+updateConfig():
+    serial.begin(&SEROUT_PORT, config.serial_type, config.channel_count, config.baudrate);
+    effects.begin(&serial, config.channel_count / 3 );
+
+dsDeviceConfig():
+    if (json.containsKey("serial")) {
+        config.serial_type = SerialType(static_cast<uint8_t>(json["serial"]["type"]));
+        config.baudrate = BaudRate(static_cast<uint32_t>(json["serial"]["baudrate"]));
+    } else {
+        LOG_PORT.println("No serial settings found.");
+    }
+
+serializeConfig():
+    JsonObject serial = json.createNestedObject("serial");
+    serial["type"] = static_cast<uint8_t>(config.serial_type);
+    serial["baudrate"] = static_cast<uint32_t>(config.baudrate);
+
+*/
 
 #include "HardwareSerial.h"
 

@@ -1,7 +1,13 @@
 
 # Changelog
 
-### 3.1-dev (on-going)
+### 4.0-dev (in progress)
+
+- Code refactored to allow easier implementation of extensions.
+- All output modes are now selecatble at runtime.
+- JSON configuration layout changed. Each module has its own configuration file.
+
+### 3.1-dev
 
 - Added brightness support.
 - Added calculated gamma support.

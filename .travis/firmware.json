@@ -1,24 +1,18 @@
 {
     "modes": [
         {
-            "name": "Pixel (WS2811 / GECE)",
-            "description": "Pixel Mode",
+            "name": "ESPixelStick",
+            "description": "Default firmware",
             "version": "DEV (Travis-CI Build)",
-            "file": "pixel-travis.bin"
-        },
-        {
-            "name": "Serial (DMX / Renard)",
-            "description": "Serial Mode",
-            "version": "DEV (Travis-CI Build)",
-            "file": "serial-travis.bin"
+            "file": "espixelstick-travis.bin"
         }
     ],
-    
+
     "devices": [
         {
             "name": "ESP01_1MB_128K",
             "esptool": {
-                "reset": "none",
+                "reset": "nodemcu",
                 "baudrate": "115200",
                 "spiffsloc": "0xDB000"
             },

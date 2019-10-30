@@ -44,6 +44,44 @@ typedef struct ip_addr ip4_addr_t;
 #define DDP_PUSH_FLAG 0x01
 #define DDP_TIMECODE_FLAG 0x10
 
+/*
+Code ripped from main sketch
+setup():
+  if (ddp.begin(ourLocalIP)) {
+    LOG_PORT.println(F("- DDP Enabled"));
+  } else {
+    LOG_PORT.println(F("*** DDP INIT FAILED ****"));
+  }
+
+loop():
+while (!ddp.isEmpty()) {
+  DDP_packet_t ddpPacket;
+  ddp.pull(&ddpPacket);
+  if (ddpPacket.header.flags & 0x01) {
+    doShow = true;
+  } else {
+    doShow = false;
+  }
+  uint16_t len = htons(ddpPacket.header.dataLen);
+  uint32_t offset = htonl(ddpPacket.header.channelOffset);
+  bool tc = ddpPacket.header.flags & 0x10;
+  uint8_t *data = ddpPacket.header.data;
+  if (tc) {
+    data = ddpPacket.timeCodeHeader.data;
+  }
+  for (int i = offset; i < offset + len; i++) {
+    if (i < config.channel_count) {
+#if defined(ESPS_MODE_PIXEL)
+      pixels.setValue(i, data[i - offset]);
+#elif defined(ESPS_MODE_SERIAL)
+      serial.setValue(i, data[i - offset]);
+#endif
+    }
+  }
+}
+
+*/
+
 typedef struct __attribute__((packed)) {
   uint8_t flags;
   uint8_t sequenceNum;
@@ -86,13 +124,13 @@ class ESPAsyncDDP {
     AsyncUDP        udp;         // UDP
     RingBuf         *pbuff;      // Ring Buffer of universe packet buffers
     uint8_t         lastSequenceSeen;
-  
+
     // Internal Initializers
     bool initUDP(IPAddress ourIP);
 
     // Packet parser callback
     void parsePacket(AsyncUDPPacket _packet);
-    
+
  public:
     DDP_stats_t  stats;    // Statistics tracker
 

@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include "ESPixelStick.h"
+#include "../ESPixelStick.h"
 #include "EffectEngine.h"
 
 extern  config_t        config;
@@ -36,6 +36,7 @@ EffectEngine::EffectEngine() {
 }
 
 void EffectEngine::setFromDefaults() {
+    /*
     config.effect_name = DEFAULT_EFFECT_NAME;
     config.effect_color = DEFAULT_EFFECT_COLOR;
     config.effect_brightness = DEFAULT_EFFECT_BRIGHTNESS;
@@ -43,11 +44,13 @@ void EffectEngine::setFromDefaults() {
     config.effect_mirror = DEFAULT_EFFECT_MIRROR;
     config.effect_allleds = DEFAULT_EFFECT_ALLLEDS;
     config.effect_speed = DEFAULT_EFFECT_SPEED;
+    */
     setFromConfig();
 }
 
 void EffectEngine::setFromConfig() {
     // Initialize with defaults
+    /*
     setEffect(config.effect_name);
     setColor(config.effect_color);
     setBrightness(config.effect_brightness);
@@ -55,6 +58,7 @@ void EffectEngine::setFromConfig() {
     setMirror(config.effect_mirror);
     setAllLeds(config.effect_allleds);
     setSpeed(config.effect_speed);
+    */
 }
 
 void EffectEngine::setBrightness(float brightness) {
@@ -76,13 +80,13 @@ void EffectEngine::setDelay(uint16_t delay) {
     if (_effectDelay < MIN_EFFECT_DELAY)
         _effectDelay = MIN_EFFECT_DELAY;
 }
-
+/*
 void EffectEngine::begin(DRIVER* ledDriver, uint16_t ledCount) {
     _ledDriver = ledDriver;
     _ledCount = ledCount;
     _initialized = true;
 }
-
+*/
 void EffectEngine::run() {
     if (_initialized && _activeEffect && _activeEffect->func) {
         if (millis() - _effectLastRun >= _effectWait) {
@@ -147,9 +151,11 @@ bool EffectEngine::isValidEffect(const String effectName) {
 }
 
 void EffectEngine::setPixel(uint16_t idx,  CRGB color) {
+/*
     _ledDriver->setValue(3 * idx + 0, (uint8_t)(color.r * _effectBrightness) );
     _ledDriver->setValue(3 * idx + 1, (uint8_t)(color.g * _effectBrightness) );
     _ledDriver->setValue(3 * idx + 2, (uint8_t)(color.b * _effectBrightness) );
+*/
 }
 
 void EffectEngine::setRange(uint16_t first, uint16_t len, CRGB color) {
