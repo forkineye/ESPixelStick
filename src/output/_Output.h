@@ -22,6 +22,7 @@
 
 #include <Arduino.h>
 #include "../ESPixelStick.h"
+#include "../FileIO.h"
 
 class _Output {
   public:
@@ -46,7 +47,10 @@ class _Output {
     }
 
   protected:
-    uint8_t *showBuffer;  ///< Show data buffer
+    uint8_t *showBuffer;    ///< Show data buffer
+
+    virtual void deserialize(DynamicJsonDocument &json) = 0;
+    virtual String serialize() = 0;
 };
 
 #endif /* _OUTPUT_H_ */

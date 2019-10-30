@@ -35,6 +35,7 @@ const char passphrase[] = "portaboxhaha";
 // Core
 #include "src/ESPixelStick.h"
 #include "src/EFUpdate.h"
+#include "src/FileIO.h"
 #include "src/wshandler.h"
 
 // Inputs
@@ -129,6 +130,7 @@ void initWifi();
 void initWeb();
 void setInput();
 void setOutput();
+void serializeConfig(String &jsonString, bool pretty = false, bool creds = false);
 
 /// Radio configuration
 /** ESP8266 radio configuration routines that are executed at startup. */
@@ -466,9 +468,17 @@ void validateConfig() {
         output = itOutput->second;
     }
 }
+void deserialize(DynamicJsonDocument &json) {
+    // Device
+    if (json.containsKey("device")) {
+        config.id = json["device"]["id"].as<String>();
+        config.inputmode = json["device"]["inputmode"].as<String>();
+        config.outputmode = json["device"]["outputmode"].as<String>();
+    } else {
+        LOG_PORT.println("No device settings found.");
+    }
 
-// De-Serialize Network config
-void dsNetworkConfig(const JsonObject &json) {
+    // Network
     if (json.containsKey("network")) {
         JsonObject networkJson = json["network"];
 
@@ -512,18 +522,6 @@ void dsNetworkConfig(const JsonObject &json) {
     }
 }
 
-// De-serialize Device Config
-void dsDeviceConfig(const JsonObject &json) {
-    // Device
-    if (json.containsKey("device")) {
-        config.id = json["device"]["id"].as<String>();
-        config.inputmode = json["device"]["inputmode"].as<String>();
-        config.outputmode = json["device"]["outputmode"].as<String>();
-    } else {
-        LOG_PORT.println("No device settings found.");
-    }
-}
-
 /// Load configuration file
 /** Loads and validates the JSON configuration file via SPIFFS.
  *  If no configuration file is found, a new one will be created.
@@ -532,37 +530,12 @@ void loadConfig() {
     // Zeroize Config struct
     memset(&config, 0, sizeof(config));
 
-    // Load CONFIG_FILE json. Create and init with defaults if not found
-    File file = SPIFFS.open(CONFIG_FILE, "r");
-    if (!file) {
-        LOG_PORT.println(F("* Core configuration file found."));
-        saveConfig();
+    if (FileIO::loadConfig(CONFIG_FILE, &deserialize)) {
+        validateConfig();
     } else {
-        // Parse CONFIG_FILE json
-        size_t size = file.size();
-        if (size > CONFIG_MAX_SIZE) {
-            LOG_PORT.println(F("*** Core configuration File too large ***"));
-            return;
-        }
-
-        std::unique_ptr<char[]> buf(new char[size]);
-        file.readBytes(buf.get(), size);
-
-        DynamicJsonDocument json(1024);
-        DeserializationError error = deserializeJson(json, buf.get());
-        if (error) {
-            LOG_PORT.println(F("*** Core configuration file format error ***"));
-            return;
-        }
-
-        dsDeviceConfig(json.as<JsonObject>());
-        dsNetworkConfig(json.as<JsonObject>());
-
-        LOG_PORT.println(F("Core configuration loaded."));
+        // Load failed, create a new config file and save it
+        saveConfig();
     }
-
-    // Validate core configuration
-    validateConfig();
 
     //TODO: Add auxiliary service load routine
 }
@@ -612,14 +585,7 @@ void saveConfig() {
     serializeConfig(jsonString, true, true);
 
     // Save Config
-    File file = SPIFFS.open(CONFIG_FILE, "w");
-    if (!file) {
-        LOG_PORT.println(F("*** Error saving core configuration file ***"));
-        return;
-    } else {
-        file.println(jsonString);
-        LOG_PORT.println(F("* Core configuration saved."));
-    }
+    FileIO::saveConfig(CONFIG_FILE, jsonString);
 }
 
 /////////////////////////////////////////////////////////

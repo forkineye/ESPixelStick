@@ -17,8 +17,6 @@
 *
 */
 
-#include <utility>
-#include <algorithm>
 #include "WS2811.h"
 
 extern "C" {
@@ -36,6 +34,7 @@ uint8_t WS2811::gOffset = 1;
 uint8_t WS2811::bOffset = 2;
 
 const String WS2811::KEY = "ws2811";
+const String WS2811::CONFIG_FILE = "/ws2811.json";
 
 WS2811::~WS2811() {
     destroy();
@@ -43,7 +42,63 @@ WS2811::~WS2811() {
 
 void WS2811::destroy() {
     // free stuff
+    if (asyncdata) free(asyncdata);
+    Serial1.end();
     pinMode(DATA_PIN, INPUT);
+}
+
+void WS2811::init() {
+    Serial.println(F("** WS2811 Initialization **"));
+
+    // Call destroy for good measure and create new stuff if needed
+    destroy();
+
+    // Load and validate our configuration
+    load();
+
+    // Set output pins
+    pinMode(DATA_PIN, OUTPUT);
+    digitalWrite(DATA_PIN, LOW);
+
+    // Setup asyncdata buffer
+    szBuffer = pixelCount * 3;
+    if (asyncdata) free(asyncdata);
+    if (asyncdata = static_cast<uint8_t *>(malloc(szBuffer))) {
+        memset(asyncdata, 0, szBuffer);
+    } else {
+        szBuffer = 0;
+    }
+
+    // Calculate our refresh time
+    refreshTime = WS2811_TFRAME * pixelCount + WS2811_TIDLE;
+
+    // Initialize for WS2811 via UART
+    // Serial rate is 4x 800KHz for WS2811
+    Serial1.begin(3200000, SERIAL_6N1, SERIAL_TX_ONLY);
+    CLEAR_PERI_REG_MASK(UART_CONF0(UART), UART_INV_MASK);
+    SET_PERI_REG_MASK(UART_CONF0(UART), (BIT(22)));
+
+    // Clear FIFOs
+    SET_PERI_REG_MASK(UART_CONF0(UART), UART_RXFIFO_RST | UART_TXFIFO_RST);
+    CLEAR_PERI_REG_MASK(UART_CONF0(UART), UART_RXFIFO_RST | UART_TXFIFO_RST);
+
+    // Disable all interrupts
+    ETS_UART_INTR_DISABLE();
+
+    // Atttach interrupt handler
+    ETS_UART_INTR_ATTACH(handleWS2811, NULL);
+
+    // Set TX FIFO trigger. 80 bytes gives 200 microsecs to refill the FIFO
+    WRITE_PERI_REG(UART_CONF1(UART), 80 << UART_TXFIFO_EMPTY_THRHD_S);
+
+    // Disable RX & TX interrupts. It is enabled by uart.c in the SDK
+    CLEAR_PERI_REG_MASK(UART_INT_ENA(UART), UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
+
+    // Clear all pending interrupts in UART1
+    WRITE_PERI_REG(UART_INT_CLR(UART), 0xffff);
+
+    // Reenable interrupts
+    ETS_UART_INTR_ENABLE();
 }
 
 String WS2811::getKey() {
@@ -77,90 +132,56 @@ void WS2811::validate() {
     if (briteVal <= 0)
         briteVal = 1.0;
 
-//from updateConfig():
-//    begin(pixel_color, channel_count / 3);
     setGroup(groupSize, zigSize);
     updateGammaTable(gammaVal, briteVal);
+    updateOrder(color);
+}
+
+void WS2811::deserialize(DynamicJsonDocument &json) {
+    if (json.containsKey("ws2811")) {
+        pixel_color = PixelColor(static_cast<uint8_t>(json["pixel"]["color"]));
+        groupSize = json["pixel"]["groupSize"];
+        zigSize = json["pixel"]["zigSize"];
+        gammaVal = json["pixel"]["gammaVal"];
+        briteVal = json["pixel"]["briteVal"];
+    } else {
+        LOG_PORT.println("No WS2811 settings found.");
+    }
 }
 
 void WS2811::load() {
-    validate();
+    if (FileIO::loadConfig(CONFIG_FILE, std::bind(
+            &WS2811::deserialize, this, std::placeholders::_1))) {
+        validate();
+    } else {
+        // Load failed, create a new config file and save it
+        pixel_color = PixelColor::RGB;
+        groupSize = 1;
+        zigSize = 0;
+        gammaVal = 2.2;
+        briteVal = 1.0;
+        validate();
+        save();
+    }
+}
+
+String WS2811::serialize() {
+    DynamicJsonDocument json(1024);
+
+    JsonObject pixel = json.createNestedObject("ws2811");
+    pixel["color"] = static_cast<uint8_t>(pixel_color);
+    pixel["groupSize"] = groupSize;
+    pixel["zigSize"] = zigSize;
+    pixel["gammaVal"] = gammaVal;
+    pixel["briteVal"] = briteVal;
+
+    String jsonString;
+    serializeJsonPretty(json, jsonString);
+    return jsonString;
 }
 
 void WS2811::save() {
-
-}
-
-void WS2811::init() {
-    Serial.println(F("** WS2811 Initialization **"));
-
-    // Call destroy for good measure and create new stuff if needed
-    destroy();
-
-    // Load and validate our configuration
-    load();
-
-    // Set output pins
-    pinMode(DATA_PIN, OUTPUT);
-    digitalWrite(DATA_PIN, LOW);
-
-    //TODO: Update / replace begin once load is done to account for config
-    begin();
-}
-
-int WS2811::begin() {
-    return begin(PixelColor::RGB, 170);
-}
-
-int WS2811::begin(PixelColor color, uint16_t length) {
-    int retval = true;
-
-    this->color = color;
-
-    updateOrder(color);
-
-    szBuffer = length * 3;
-    if (asyncdata) free(asyncdata);
-    if (asyncdata = static_cast<uint8_t *>(malloc(szBuffer))) {
-        memset(asyncdata, 0, szBuffer);
-    } else {
-        szBuffer = 0;
-        retval = false;
-    }
-
-    refreshTime = WS2811_TFRAME * length + WS2811_TIDLE;
-    ws2811_init();
-
-    return retval;
-}
-
-void WS2811::ws2811_init() {
-    /* Serial rate is 4x 800KHz for WS2811 */
-    Serial1.begin(3200000, SERIAL_6N1, SERIAL_TX_ONLY);
-    CLEAR_PERI_REG_MASK(UART_CONF0(UART), UART_INV_MASK);
-    SET_PERI_REG_MASK(UART_CONF0(UART), (BIT(22)));
-
-    /* Clear FIFOs */
-    SET_PERI_REG_MASK(UART_CONF0(UART), UART_RXFIFO_RST | UART_TXFIFO_RST);
-    CLEAR_PERI_REG_MASK(UART_CONF0(UART), UART_RXFIFO_RST | UART_TXFIFO_RST);
-
-    /* Disable all interrupts */
-    ETS_UART_INTR_DISABLE();
-
-    /* Atttach interrupt handler */
-    ETS_UART_INTR_ATTACH(handleWS2811, NULL);
-
-    /* Set TX FIFO trigger. 80 bytes gives 200 microsecs to refill the FIFO */
-    WRITE_PERI_REG(UART_CONF1(UART), 80 << UART_TXFIFO_EMPTY_THRHD_S);
-
-    /* Disable RX & TX interrupts. It is enabled by uart.c in the SDK */
-    CLEAR_PERI_REG_MASK(UART_INT_ENA(UART), UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
-
-    /* Clear all pending interrupts in UART1 */
-    WRITE_PERI_REG(UART_INT_CLR(UART), 0xffff);
-
-    /* Reenable interrupts */
-    ETS_UART_INTR_ENABLE();
+    FileIO::saveConfig(CONFIG_FILE, serialize());
 }
 
 void WS2811::updateOrder(PixelColor color) {

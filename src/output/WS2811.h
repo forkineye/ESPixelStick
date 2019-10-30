@@ -29,39 +29,6 @@
 #define DATA_PIN        2       ///< Pixel output - GPIO2 (D4 on Wemos / NodeMCU)
 #define PIXEL_LIMIT     1360    ///< Total pixel limit - 40.85ms for 8 universes
 
-/*
-From main sketch:
-dsDeviceConfig():
-    if (json.containsKey("pixel")) {
-        config.pixel_color = PixelColor(static_cast<uint8_t>(json["pixel"]["color"]));
-        config.groupSize = json["pixel"]["groupSize"];
-        config.zigSize = json["pixel"]["zigSize"];
-        config.gammaVal = json["pixel"]["gammaVal"];
-        config.briteVal = json["pixel"]["briteVal"];
-    } else {
-        LOG_PORT.println("No pixel settings found.");
-    }
-
-serializeConfig():
-    // Pixel
-    JsonObject pixel = json.createNestedObject("pixel");
-    pixel["color"] = static_cast<uint8_t>(config.pixel_color);
-    pixel["groupSize"] = config.groupSize;
-    pixel["zigSize"] = config.zigSize;
-    pixel["gammaVal"] = config.gammaVal;
-    pixel["briteVal"] = config.briteVal;
-
-void dsGammaConfig(const JsonObject &json) {
-    if (json.containsKey("pixel")) {
-        config.gammaVal = json["pixel"]["gammaVal"];
-        config.briteVal = json["pixel"]["briteVal"];
-        updateGammaTable(config.gammaVal, config.briteVal);
-    }
-}
-
-*/
-
-
 /* Gamma correction table */
 extern uint8_t GAMMA_TABLE[];
 
@@ -91,6 +58,8 @@ enum class PixelColor : uint8_t {
 
 class WS2811 : public _Output  {
    private:
+    static const String CONFIG_FILE;
+
     //from  sketch config_t:
     PixelColor  pixel_color;    ///< Pixel color order
     uint16_t    pixelCount;     ///< Number of pixels
@@ -103,7 +72,6 @@ class WS2811 : public _Output  {
     PixelColor  color;          // Color Order
     uint16_t    cntGroup;       // Output modifying interval (in LEDs, not channels)
     uint16_t    cntZigzag;      // Zigzag every cntZigzag physical pixels
-//    uint8_t     *pixdata;       // Pixel buffer
     uint8_t     *asyncdata;     // Async buffer
     uint8_t     *pbuff;         // GECE Packet Buffer
     uint16_t    szBuffer;       // Size of Pixel buffer
@@ -113,7 +81,8 @@ class WS2811 : public _Output  {
     static uint8_t    gOffset;  // Index of green byte
     static uint8_t    bOffset;  // Index of blue byte
 
-    void ws2811_init();
+    void deserialize(DynamicJsonDocument &json);
+    String serialize();
 
     /* FIFO Handlers */
     static const uint8_t* ICACHE_RAM_ATTR fillWS2811(const uint8_t *buff,
@@ -155,12 +124,6 @@ class WS2811 : public _Output  {
     void render();
     uint8_t* getData();
 
-/*
-    // Set channel value at address
-    inline void setValue(uint16_t address, uint8_t value) {
-        pixdata[address] = value;
-    }
-*/
     /* Set group / zigzag counts */
     inline void setGroup(uint16_t _group, uint16_t _zigzag) {
         this->cntGroup = _group;

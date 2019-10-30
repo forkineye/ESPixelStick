@@ -32,7 +32,6 @@ const char BUILD_DATE[] = __DATE__;
 #include <ArduinoJson.h>
 
 #define HTTP_PORT       80      ///< Default web server port
-//#define E131_TIMEOUT    1000    ///< Force refresh every second an E1.31 packet is not seen
 #define CLIENT_TIMEOUT  15      ///< In station/client mode try to connection for 15 seconds
 #define AP_TIMEOUT      60      ///< In AP mode, wait 60 seconds for a connection or reboot
 #define REBOOT_DELAY    100     ///< Delay for rebooting once reboot flag is set
@@ -68,14 +67,5 @@ typedef struct {
     uint32_t    sta_timeout;    ///< Timeout when connection as client (station)
     uint32_t    ap_timeout;     ///< How long to wait in AP mode with no connection before rebooting
 } config_t;
-
-//TODO: These should probably be moved to their own file
-// For now, these are documented inside the ino sketch
-// Forward Declarations
-void serializeConfig(String &jsonString, bool pretty = false, bool creds = false);
-void dsNetworkConfig(const JsonObject &json);
-void dsDeviceConfig(const JsonObject &json);
-void saveConfig();
-void publishState();
 
 #endif  // ESPIXELSTICK_H_

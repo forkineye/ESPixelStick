@@ -120,7 +120,7 @@ void E131Input::deserialize(DynamicJsonDocument &json) {
 }
 
 void E131Input::load() {
-    if (_Input::load(CONFIG_FILE, std::bind(
+    if (FileIO::loadConfig(CONFIG_FILE, std::bind(
             &E131Input::deserialize, this, std::placeholders::_1))) {
         validate();
     } else {
@@ -149,7 +149,7 @@ String E131Input::serialize() {
 }
 
 void E131Input::save() {
-    _Input::save(CONFIG_FILE, serialize());
+    FileIO::saveConfig(CONFIG_FILE, serialize());
 }
 
 // Subscribe to "n" universes, starting at "universe"

@@ -162,7 +162,7 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
     switch (data[1]) {
         case '1': {
             String response;
-            serializeConfig(response, false, true);
+//            serializeConfig(response, false, true);
             client->text("G1" + response);
             break;
         }
@@ -262,8 +262,8 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
     bool reboot = false;
     switch (data[1]) {
         case '1':   // Set Network Config
-            dsNetworkConfig(json.as<JsonObject>());
-            saveConfig();
+//            dsNetworkConfig(json.as<JsonObject>());
+//            saveConfig();
             client->text("S1");
             break;
         case '2':   // Set Device Config
@@ -273,8 +273,8 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
             if (config.mqtt != json["mqtt"]["enabled"])
                 reboot = true;
 */
-            dsDeviceConfig(json.as<JsonObject>());
-            saveConfig();
+//            dsDeviceConfig(json.as<JsonObject>());
+//            saveConfig();
 
             if (reboot)
                 client->text("S1");
@@ -283,7 +283,7 @@ void procS(uint8_t *data, AsyncWebSocketClient *client) {
             break;
         case '3':   // Set Effect Startup Config
 //            dsEffectConfig(json.as<JsonObject>());
-            saveConfig();
+//            saveConfig();
             client->text("S3");
             break;
 //TODO: Seperate this section for Pixel mode only or make more generic
@@ -396,7 +396,7 @@ void handle_fw_upload(AsyncWebServerRequest *request, String filename,
         LOG_PORT.println(F("* Upload Finished."));
         efupdate.end();
         SPIFFS.begin();
-        saveConfig();
+//        saveConfig();
         reboot = true;
     }
 }
@@ -433,10 +433,10 @@ void handle_config_upload(AsyncWebServerRequest *request, String filename,
             LOG_PORT.println(reinterpret_cast<char*>(confuploadtemp));
             request->send(500, "text/plain", "Config Update Error." );
         } else {
-            dsNetworkConfig(json.as<JsonObject>());
-            dsDeviceConfig(json.as<JsonObject>());
+//            dsNetworkConfig(json.as<JsonObject>());
+//            dsDeviceConfig(json.as<JsonObject>());
 //            dsEffectConfig(json.as<JsonObject>());
-            saveConfig();
+//            saveConfig();
             request->send(200, "text/plain", "Config Update Finished: " );
 //          reboot = true;
         }
