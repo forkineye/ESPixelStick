@@ -193,7 +193,7 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
 
         case '3': {
             String response;
-            DynamicJsonDocument json(1024);
+            DynamicJsonDocument json(2048);
 
 // dump the current running effect options
             JsonObject effect = json.createNestedObject("currentEffect");
