@@ -6,7 +6,9 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/../libraries/**",
                 "${workspaceFolder}/../tools/**",
-                "${workspaceFolder}/../hardware/esp8266com/esp8266/**"
+                "${workspaceFolder}/../hardware/esp8266com/esp8266/**",
+                "C:\\Users\\sporadic\\Documents\\Arduino\\hardware\\esp8266com\\esp8266\\**",
+                "C:\\Users\\sporadic\\Documents\\Arduino\\tools\\**"
             ],
             "defines": [
                 "_DEBUG",

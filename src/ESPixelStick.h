@@ -51,21 +51,23 @@ const char BUILD_DATE[] = __DATE__;
 /// Core configuration structure
 typedef struct {
     // Device
-    String      id;             ///< Device ID
-    String      inputmode;      ///< Device Input Mode, selectable at runtime
-    String      outputmode;     ///< Device Output Mode, selectable at runtime
+    String      id;         ///< Device ID
+    String      input;      ///< Device Input Mode, selectable at runtime
+    String      output;     ///< Device Output Mode, selectable at runtime
 
     // Network
     String      ssid;
     String      passphrase;
     String      hostname;
-    uint8_t     ip[4];
-    uint8_t     netmask[4];
-    uint8_t     gateway[4];
+    String      ip;
+    String      netmask;
+    String      gateway;
     bool        dhcp = true;    ///< Use DHCP?
     bool        ap_fallback;    ///< Fallback to AP if fail to associate?
     uint32_t    sta_timeout;    ///< Timeout when connection as client (station)
     uint32_t    ap_timeout;     ///< How long to wait in AP mode with no connection before rebooting
 } config_t;
+
+void serializeCore(String &jsonString, boolean pretty = false, boolean creds = false);
 
 #endif  // ESPIXELSTICK_H_

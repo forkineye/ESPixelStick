@@ -21,7 +21,7 @@
 /*        BEGIN - Configuration          */
 /*****************************************/
 // Create secrets.h with a #define for SECRETS_SSID and SECRETS_PASS
-// or delete the #include and enter them directly below.
+// or delete the #include and enter the strings directly below.
 #include "secrets.h"
 
 /* Fallback configuration if config.json is empty or fails */
@@ -39,7 +39,8 @@ const char passphrase[] = SECRETS_PASS;
 #include "src/ESPixelStick.h"
 #include "src/EFUpdate.h"
 #include "src/FileIO.h"
-#include "src/wshandler.h"
+#include "src/WebIO.h"
+//#include "src/wshandler.h"
 
 // Inputs
 #include "src/input/_Input.h"
@@ -80,12 +81,14 @@ static void _u0_putc(char c){
 
 /// Map of input modules
 std::map<const String, _Input*>::const_iterator itInput;
+const String strddp="ddp";
 const std::map<const String, _Input*> INPUT_MODES = {
     { E131Input::KEY, new E131Input() }
 };
 
 /// Map of output modules
 std::map<const String, _Output*>::const_iterator itOutput;
+const String strdmx="dmx";
 const std::map<const String, _Output*> OUTPUT_MODES = {
     { WS2811::KEY, new WS2811() }
 };
@@ -133,7 +136,6 @@ void initWifi();
 void initWeb();
 void setInput();
 void setOutput();
-void serializeConfig(String &jsonString, bool pretty = false, bool creds = false);
 
 /// Radio configuration
 /** ESP8266 radio configuration routines that are executed at startup. */
@@ -213,8 +215,6 @@ void setup() {
     WiFi.hostname(config.hostname);
 
     // Configure inputs and outputs
-//    setInput(input);
-//    setOutput(output);
     setMode(input, output);
 
     // Setup WiFi Handlers
@@ -293,11 +293,10 @@ void connectWifi() {
         LOG_PORT.print(F("Connecting with DHCP"));
     } else {
         // We don't use DNS, so just set it to our gateway
-        WiFi.config(IPAddress(config.ip[0], config.ip[1], config.ip[2], config.ip[3]),
-                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3]),
-                    IPAddress(config.netmask[0], config.netmask[1], config.netmask[2], config.netmask[3]),
-                    IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3])
-        );
+        IPAddress ip = ip.fromString(config.ip);
+        IPAddress gateway = gateway.fromString(config.gateway);
+        IPAddress netmask = netmask.fromString(config.netmask);
+        WiFi.config(ip, gateway, netmask, gateway);
         LOG_PORT.print(F("Connecting with Static IP"));
     }
 }
@@ -349,7 +348,7 @@ void initWeb() {
     DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
 
     // Setup WebSockets
-    ws.onEvent(wsEvent);
+    ws.onEvent(WebIO::onEvent);
     web.addHandler(&ws);
 
     // Heap status handler
@@ -360,14 +359,17 @@ void initWeb() {
     // JSON Config Handler
     web.on("/conf", HTTP_GET, [](AsyncWebServerRequest *request) {
         String jsonString;
-        serializeConfig(jsonString, true);
+        serializeCore(jsonString, true);
         request->send(200, "text/json", jsonString);
     });
 
     // Firmware upload handler - only in station mode
     web.on("/updatefw", HTTP_POST, [](AsyncWebServerRequest *request) {
         ws.textAll("X6");
-    }, handle_fw_upload).setFilter(ON_STA_FILTER);
+    }, WebIO::onFirmwareUpload).setFilter(ON_STA_FILTER);
+
+    // Root access for testing
+    web.serveStatic("/root", SPIFFS, "/");
 
     // Static Handler
     web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
@@ -447,8 +449,8 @@ void validateConfig() {
     if (!config.hostname.length())
         config.hostname = "esps-" + String(chipId);
 
-
-    itInput = INPUT_MODES.find(config.inputmode);
+//TODO: Update this to set to ws2811 and e131 if no config found
+    itInput = INPUT_MODES.find(config.input);
     if (itInput != INPUT_MODES.end()) {
         input = itInput->second;
         LOG_PORT.printf("- Input mode set to %s\n", input->getKey().c_str());
@@ -456,10 +458,11 @@ void validateConfig() {
         itInput = INPUT_MODES.begin();
         LOG_PORT.printf("* Input mode from core config invalid, setting to %s.\n",
                 itInput->first.c_str());
+        config.input = itInput->first;
         input = itInput->second;
     }
 
-    itOutput = OUTPUT_MODES.find(config.outputmode);
+    itOutput = OUTPUT_MODES.find(config.output);
     if (itOutput != OUTPUT_MODES.end()) {
         output = itOutput->second;
         LOG_PORT.printf("- Output mode set to %s\n", output->getKey().c_str());
@@ -467,15 +470,17 @@ void validateConfig() {
         itOutput = OUTPUT_MODES.begin();
         LOG_PORT.printf("* Input mode from core config invalid, setting to %s.\n",
                 itOutput->first.c_str());
+        config.output = itOutput->first;
         output = itOutput->second;
     }
 }
-void deserialize(DynamicJsonDocument &json) {
+
+void deserializeCore(DynamicJsonDocument &json) {
     // Device
     if (json.containsKey("device")) {
         config.id = json["device"]["id"].as<String>();
-        config.inputmode = json["device"]["inputmode"].as<String>();
-        config.outputmode = json["device"]["outputmode"].as<String>();
+        config.input = json["device"]["input"].as<String>();
+        config.output = json["device"]["output"].as<String>();
     } else {
         LOG_PORT.println("No device settings found.");
     }
@@ -494,11 +499,10 @@ void deserialize(DynamicJsonDocument &json) {
             config.passphrase = passphrase;
 
         // Network
-        for (int i = 0; i < 4; i++) {
-            config.ip[i] = networkJson["ip"][i];
-            config.netmask[i] = networkJson["netmask"][i];
-            config.gateway[i] = networkJson["gateway"][i];
-        }
+        config.ip = networkJson["ip"].as<String>();
+        config.netmask = networkJson["netmask"].as<String>();
+        config.gateway = networkJson["gateway"].as<String>();
+
         config.dhcp = networkJson["dhcp"];
         config.sta_timeout = networkJson["sta_timeout"] | CLIENT_TIMEOUT;
         if (config.sta_timeout < 5) {
@@ -532,7 +536,7 @@ void loadConfig() {
     // Zeroize Config struct
     memset(&config, 0, sizeof(config));
 
-    if (FileIO::loadConfig(CONFIG_FILE, &deserialize)) {
+    if (FileIO::loadConfig(CONFIG_FILE, &deserializeCore)) {
         validateConfig();
     } else {
         // Load failed, create a new config file and save it
@@ -543,13 +547,15 @@ void loadConfig() {
 }
 
 // Serialize the current config into a JSON string
-void serializeConfig(String &jsonString, bool pretty, bool creds) {
+void serializeCore(String &jsonString, boolean pretty, boolean creds) {
     // Create buffer and root object
     DynamicJsonDocument json(1024);
 
     // Device
     JsonObject device = json.createNestedObject("device");
     device["id"] = config.id.c_str();
+    device["input"] = config.input.c_str();
+    device["output"] = config.output.c_str();
 
     // Network
     JsonObject network = json.createNestedObject("network");
@@ -557,14 +563,10 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     if (creds)
         network["passphrase"] = config.passphrase.c_str();
     network["hostname"] = config.hostname.c_str();
-    JsonArray ip = network.createNestedArray("ip");
-    JsonArray netmask = network.createNestedArray("netmask");
-    JsonArray gateway = network.createNestedArray("gateway");
-    for (int i = 0; i < 4; i++) {
-        ip.add(config.ip[i]);
-        netmask.add(config.netmask[i]);
-        gateway.add(config.gateway[i]);
-    }
+    network["ip"] = config.ip.c_str();
+    network["netmask"] = config.netmask.c_str();
+    network["gateway"] = config.gateway.c_str();
+
     network["dhcp"] = config.dhcp;
     network["sta_timeout"] = config.sta_timeout;
 
@@ -584,7 +586,7 @@ void saveConfig() {
 
     // Serialize Config
     String jsonString;
-    serializeConfig(jsonString, true, true);
+    serializeCore(jsonString, false, true);
 
     // Save Config
     FileIO::saveConfig(CONFIG_FILE, jsonString);

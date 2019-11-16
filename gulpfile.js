@@ -12,7 +12,7 @@ var rename = require('gulp-rename');
 
 /* HTML Task */
 gulp.task('html', function() {
-    return gulp.src(['html/*.html', 'html/*.htm'])
+    return gulp.src(['html/*.html'])
         .pipe(plumber())
         .pipe(htmlmin({
             collapseWhitespace: true,

@@ -46,11 +46,11 @@ class _Output {
         showBuffer = buff;
     }
 
+    virtual void deserialize(DynamicJsonDocument &json) = 0;
+    virtual String serialize(boolean pretty = false) = 0;
+
   protected:
     uint8_t *showBuffer;    ///< Show data buffer
-
-    virtual void deserialize(DynamicJsonDocument &json) = 0;
-    virtual String serialize() = 0;
 };
 
 #endif /* _OUTPUT_H_ */

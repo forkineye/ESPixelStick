@@ -134,7 +134,7 @@ void E131Input::load() {
     }
 }
 
-String E131Input::serialize() {
+String E131Input::serialize(boolean pretty = false) {
     DynamicJsonDocument json(1024);
 
     JsonObject e131 = json.createNestedObject("e131");
@@ -144,7 +144,11 @@ String E131Input::serialize() {
     e131["multicast"] = multicast;
 
     String jsonString;
-    serializeJsonPretty(json, jsonString);
+    if (pretty)
+        serializeJsonPretty(json, jsonString);
+    else
+        serializeJson(json, jsonString);
+
     return jsonString;
 }
 

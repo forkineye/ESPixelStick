@@ -39,6 +39,18 @@ class _Input {
     virtual void init() = 0;        ///< Call from setup(), initializes and starts input
     virtual void process() = 0;     ///< Call from loop(), process incoming data
 
+    virtual void deserialize(DynamicJsonDocument &json) = 0;  ///< Sets configuration from JSON
+    virtual String serialize(boolean pretty = false) = 0;     ///< Gets configuration as JSON
+
+    /* TODO:
+     * - send config data as JSON to browser via ws
+     * - respond to JSON data from browser ws
+     * - proivde JSON based interface description
+     * - add support for this crap in the javascript
+     * - add static class similar for FileIO for this?
+     *   - new class would also handle core, generate mode lists, etc.. WebIO?
+     */
+
     void setBuffer(uint8_t *buff, uint16_t size) {
         showBuffer = buff;
         showBufferSize = size;
@@ -47,9 +59,6 @@ class _Input {
   protected:
     uint8_t *showBuffer;        ///< Show data buffer
     uint16_t showBufferSize;    ///< Size of show data buffer
-
-    virtual void deserialize(DynamicJsonDocument &json) = 0;
-    virtual String serialize() = 0;
 };
 
 #endif /* _INPUT_H_ */

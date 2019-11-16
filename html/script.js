@@ -1,8 +1,8 @@
 var mode = 'null';
-var gpio_list = [0, 1, 2, 3, 4, 5, 12, 13, 14, 15, 16];
 var wsQueue = [];
 var wsBusy = false;
 var wsTimerId;
+var ws; // Web Socket
 
 // json with effect definitions
 var effectInfo;
@@ -99,7 +99,7 @@ $(function() {
         });
 
         // Set page event feeds
-        feed();
+        //feed();
     });
 
     // Reverse checkbox
@@ -165,7 +165,7 @@ $(function() {
     $('#tmode').change(hideShowTestSections());
 
     // DHCP field toggles
-    $('#dhcp').click(function() {
+    $('#dhcp').change(function() {
         if ($(this).is(':checked')) {
             $('.dhcp').addClass('hidden');
        } else {
@@ -236,13 +236,13 @@ $(function() {
     $('#hostname').keyup(function() {
         wifiValidation();
     });
-    $('#staTimeout').keyup(function() {
+    $('#sta_timeout').keyup(function() {
         wifiValidation();
     });
     $('#ssid').keyup(function() {
         wifiValidation();
     });
-    $('#password').keyup(function() {
+    $('#passphrase').keyup(function() {
         wifiValidation();
     });
     $('#ap').change(function () {
@@ -260,6 +260,19 @@ $(function() {
     $('#netmask').keyup(function () {
         wifiValidation();
     });
+
+    // Grab interface and config on input / output change
+    $('#input').change(function () {
+        $('#imode').load($(this).val() + ".html", function() {
+            wsEnqueue(JSON.stringify({'cmd':{'get':'input'}}));
+        });
+    });
+    $('#output').change(function () {
+        $('#omode').load($(this).val() + ".html", function() {
+            wsEnqueue(JSON.stringify({'cmd':{'get':'output'}}));
+        });
+    });
+
 
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
@@ -285,33 +298,25 @@ function wifiValidation() {
     var re = /^([a-zA-Z0-9][a-zA-Z0-9][a-zA-Z0-9\-.]*[a-zA-Z0-9.])$/;
     if (re.test($('#hostname').val()) && $('#hostname').val().length <= 255) {
         $('#fg_hostname').removeClass('has-error');
-        $('#fg_hostname').addClass('has-success');
     } else {
-        $('#fg_hostname').removeClass('has-success');
         $('#fg_hostname').addClass('has-error');
         WifiSaveDisabled = true;
     }
-    if ($('#staTimeout').val() >= 5) {
+    if ($('#sta_timeout').val() >= 5) {
         $('#fg_staTimeout').removeClass('has-error');
-        $('#fg_staTimeout').addClass('has-success');
     } else {
-        $('#fg_staTimeout').removeClass('has-success');
         $('#fg_staTimeout').addClass('has-error');
         WifiSaveDisabled = true;
     }
     if ($('#ssid').val().length <= 32) {
         $('#fg_ssid').removeClass('has-error');
-        $('#fg_ssid').addClass('has-success');
     } else {
-        $('#fg_ssid').removeClass('has-success');
         $('#fg_ssid').addClass('has-error');
         WifiSaveDisabled = true;
     }
-    if ($('#password').val().length <= 64) {
+    if ($('#passphrase').val().length <= 64) {
         $('#fg_password').removeClass('has-error');
-        $('#fg_password').addClass('has-success');
     } else {
-        $('#fg_password').removeClass('has-success');
         $('#fg_password').addClass('has-error');
         WifiSaveDisabled = true;
     }
@@ -325,25 +330,19 @@ function wifiValidation() {
 
         if (iptest.test($('#ip').val())) {
             $('#fg_ip').removeClass('has-error');
-            $('#fg_ip').addClass('has-success');
         } else {
-            $('#fg_ip').removeClass('has-success');
             $('#fg_ip').addClass('has-error');
             WifiSaveDisabled = true;
         }
         if (iptest.test($('#netmask').val())) {
             $('#fg_netmask').removeClass('has-error');
-            $('#fg_netmask').addClass('has-success');
         } else {
-            $('#fg_netmask').removeClass('has-success');
             $('#fg_netmask').addClass('has-error');
             WifiSaveDisabled = true;
         }
         if (iptest.test($('#gateway').val())) {
             $('#fg_gateway').removeClass('has-error');
-            $('#fg_gateway').addClass('has-success');
         } else {
-            $('#fg_gateway').removeClass('has-success');
             $('#fg_gateway').addClass('has-error');
             WifiSaveDisabled = true;
         }
@@ -366,21 +365,61 @@ function param(name) {
     return (location.search.split(name + '=')[1] || '').split('&')[0];
 }
 
+// Builds jQuery selectors from JSON data and updates the web interface
+var selector = [];
+async function updateFromJSON(obj) {
+    for (var k in obj) {
+        selector.push('#' + k);
+        if (typeof obj[k] == 'object' && obj[k] !== null) {
+            updateFromJSON(obj[k]);
+        } else {
+            var jqSelector = selector.join(' ');
+            if (typeof obj[k] === 'boolean') {
+                $(jqSelector).prop('checked', obj[k]);
+            } else {
+                $(jqSelector).val(obj[k]);
+            }
+            // Trigger keyup / change events
+            $(jqSelector).trigger('keyup');
+            $(jqSelector).trigger('change');
+        }
+        selector.pop();
+    }
+}
+
+// Builds jQuery selectors from JSON data and populates select options
+function addOptionDataFromJSON(obj) {
+    for (var k in obj) {
+        selector.push('#' + k);
+        if (typeof obj[k] == 'object' && obj[k] !== null) {
+            addOptionDataFromJSON(obj[k]);
+        } else {
+            // Get the key and remove the json array index
+            var key = selector.pop().substr(1);
+            selector.pop();
+            var jqSelector = selector.join(' ');
+            selector.push('','');
+            $(jqSelector).append(
+                '<option value="' + key + '">' + obj[k] + '</option>');
+        }
+        selector.pop();
+    }
+}
+
 // WebSockets
 function wsConnect() {
     if ('WebSocket' in window) {
 
 // accept ?target=10.0.0.123 to make a WS connection to another device
-        if (target = param('target')) {
-// 
-        } else {
+        var target;
+        if (!(target = param('target'))) {
             target = document.location.host;
         }
 
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');
         ws.binaryType = 'arraybuffer';
-
+/*
         ws.onopen = function() {
             $('#wserror').modal('hide');
             wsEnqueue('E1'); // Get html elements
@@ -391,9 +430,67 @@ function wsConnect() {
 
             feed();
         };
+*/
+
+        // When connection is opened, get raw element data, option data, the config data in that order
+        ws.onopen = function() {
+            $('#wserror').modal('hide');
+            wsEnqueue(JSON.stringify({'cmd':{'ele':'core'}}));      // Get core element data
+            wsEnqueue(JSON.stringify({'cmd':{'opt':'core'}}));      // Get core option data
+            wsEnqueue(JSON.stringify({'cmd':{'get':'core'}}));      // Get core config
+
+            wsEnqueue(JSON.stringify({'cmd':{'ele':'input'}}));     // Get input element data
+            wsEnqueue(JSON.stringify({'cmd':{'opt':'input'}}));     // Get input option data
+//            wsEnqueue(JSON.stringify({'cmd':{'get':'input'}}));     // Get input config
+
+            wsEnqueue(JSON.stringify({'cmd':{'ele':'output'}}));    // Get output element data
+            wsEnqueue(JSON.stringify({'cmd':{'opt':'output'}}));    // Get output option data
+//            wsEnqueue(JSON.stringify({'cmd':{'get':'output'}}));    // Get output config
+        };
 
         ws.onmessage = function (event) {
             if(typeof event.data === "string") {
+                // Process "simple" message format
+                if (event.data.startsWith("X")) {
+                    var data = event.data.substr(2);
+                    getJsonStatus(data);
+                // Process as JSON
+                } else {
+                    var msg = JSON.parse(event.data);
+                    // "GET" message is a response to a get request. Populate the frontend.
+                    if (msg.hasOwnProperty("get")) {
+                        updateFromJSON(msg.get);
+                    }
+
+                    // "SET" message is a reponse to a set request. Data has been validated and saved, Populate the frontend.
+                    if (msg.hasOwnProperty("set")) {
+                        updateFromJSON(msg.set);
+                    }
+
+                    // "ELE" message is raw data to be inserted at given node
+                    if (msg.hasOwnProperty("ele")) {
+                        console.log("ELEMENT DATA: " + msg.ele);
+                    }
+
+                    // "OPT" message is select option data
+                    if (msg.hasOwnProperty("opt")) {
+                        addOptionDataFromJSON(msg.opt);
+                    }
+
+//                    $('#s_count').val(config.e131.channel_count);
+
+                    /*
+                    switch (msg.type) {
+                        case 'get':
+                            console.log("*** JSON get ***");
+                            break;
+                        case 'set':
+                            console.log("*** JSON set ***");
+                            break;
+                    }
+                    */
+                }
+/*
                 var cmd = event.data.substr(0, 2);
                 var data = event.data.substr(2);
                 switch (cmd) {
@@ -434,6 +531,7 @@ function wsConnect() {
                     console.log('Unknown Command: ' + event.data);
                     break;
                 }
+*/
             } else {
                 streamData= new Uint8Array(event.data);
                 drawStream(streamData);
@@ -454,14 +552,14 @@ function wsConnect() {
 
 function wsEnqueue(message) {
     //only add a message to the queue if there isn't already one of the same type already queued, otherwise update the message with the latest request.
-    wsQueueIndex=wsQueue.findIndex(wsCheckQueue,message);
-    if(wsQueueIndex == -1) {
+//    var wsQueueIndex = wsQueue.findIndex(wsCheckQueue,message);
+//    if(wsQueueIndex == -1) {
         //add message
         wsQueue.push(message);
-    } else {
+//    } else {
         //update message
-        wsQueue[wsQueueIndex]=message;
-    }
+//        wsQueue[wsQueueIndex]=message;
+//    }
     wsProcessQueue();
 }
 
@@ -478,7 +576,7 @@ function wsProcessQueue() {
         //set wsBusy flag that we are waiting for a response
         wsBusy=true;
         //get next message from queue.
-        message=wsQueue.shift();
+        var message=wsQueue.shift();
         //set timeout to clear flag and try next message if response isn't recieved. Short timeout for message types that don't generate a response.
         if(['T0','T1','T2','T3','T4','T5','T6','T7','X6'].indexOf(message.substr(0,2))) {
             timeout=40;
@@ -559,9 +657,9 @@ function getConfig(data) {
     $('#name').text(config.device.id);
     $('#devid').val(config.device.id);
     $('#ssid').val(config.network.ssid);
-    $('#password').val(config.network.passphrase);
+    $('#passphrase').val(config.network.passphrase);
     $('#hostname').val(config.network.hostname);
-    $('#staTimeout').val(config.network.sta_timeout);
+    $('#sta_timeout').val(config.network.sta_timeout);
     $('#dhcp').prop('checked', config.network.dhcp);
     if (config.network.dhcp) {
         $('.dhcp').addClass('hidden');
@@ -664,7 +762,7 @@ function getConfig(data) {
 function getConfigStatus(data) {
     var status = JSON.parse(data);
 
-    $('#x_ssid').text(status.ssid);
+//    $('#x_ssid').text(status.ssid);
     $('#x_hostname').text(status.hostname);
     $('#x_ip').text(status.ip);
     $('#x_mac').text(status.mac);
@@ -787,9 +885,9 @@ function submitWiFi() {
     var json = {
             'network': {
                 'ssid': $('#ssid').val(),
-                'passphrase': $('#password').val(),
+                'passphrase': $('#passphrase').val(),
                 'hostname': $('#hostname').val(),
-                'sta_timeout': $('#staTimeout').val(),
+                'sta_timeout': $('#sta_timeout').val(),
                 'ip': [parseInt(ip[0]), parseInt(ip[1]), parseInt(ip[2]), parseInt(ip[3])],
                 'netmask': [parseInt(netmask[0]), parseInt(netmask[1]), parseInt(netmask[2]), parseInt(netmask[3])],
                 'gateway': [parseInt(gateway[0]), parseInt(gateway[1]), parseInt(gateway[2]), parseInt(gateway[3])],
@@ -973,10 +1071,6 @@ function reboot() {
     showReboot();
     wsEnqueue('X6');
 }
-
-//function getKeyByValue(object, value) {
-//    return Object.keys(object).find(key => object[key] === value);
-//}
 
 function getKeyByValue(obj, value) {
     return Object.keys(obj)[Object.values(obj).indexOf(value)];

@@ -81,9 +81,6 @@ class WS2811 : public _Output  {
     static uint8_t    gOffset;  // Index of green byte
     static uint8_t    bOffset;  // Index of blue byte
 
-    void deserialize(DynamicJsonDocument &json);
-    String serialize();
-
     /* FIFO Handlers */
     static const uint8_t* ICACHE_RAM_ATTR fillWS2811(const uint8_t *buff,
             const uint8_t *tail);
@@ -122,6 +119,10 @@ class WS2811 : public _Output  {
     int begin(PixelColor color, uint16_t length);
     void updateOrder(PixelColor color);
     void render();
+
+    void deserialize(DynamicJsonDocument &json);
+    String serialize(boolean pretty);
+
     uint8_t* getData();
 
     /* Set group / zigzag counts */

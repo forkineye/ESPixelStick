@@ -26,6 +26,7 @@
 /// Deserialization callback for I/O modules
 typedef std::function<void(DynamicJsonDocument &json)> DeserializationHandler;
 
+/// Contains static methods used for common File IO routines
 class FileIO {
   public:
     /// Load configuration file
@@ -50,7 +51,7 @@ class FileIO {
             DynamicJsonDocument json(1024);
             DeserializationError error = deserializeJson(json, buf.get());
             if (error) {
-                LOG_PORT.printf("*** JSON Deserialzation Error: %s\n***", filename.c_str());
+                LOG_PORT.printf("*** JSON Deserialzation Error: %s ***\n", filename.c_str());
             }
 
             dsHandler(json);

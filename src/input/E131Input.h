@@ -42,9 +42,6 @@ class E131Input : public _Input {
     uint8_t     *seqTracker;    ///< Current sequence numbers for each Universe
     uint32_t    *seqError;      ///< Sequence error tracking for each universe
 
-    void deserialize(DynamicJsonDocument &json);
-    String serialize();
-
     void multiSub();
 
   public:
@@ -62,6 +59,9 @@ class E131Input : public _Input {
 
     void init();
     void process();
+
+    void deserialize(DynamicJsonDocument &json);
+    String serialize(boolean pretty);
 };
 
 #endif /* E131INPUT_H_ */

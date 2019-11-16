@@ -6,8 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title id="title"></title>
 <!-- for local development -->
+
   <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
   <link rel="stylesheet" type="text/css" href="style.css">
+
 <!--
   <link rel="stylesheet" type="text/css" href="esps.css">
 -->
@@ -29,7 +31,7 @@
       <div id="navbar" class="collapse navbar-collapse">
         <ul class="nav navbar-nav">
           <li class="active"><a href="#home">Home</a></li>
-          <li><a href="#wifi">Wireless Setup</a></li>
+          <li><a href="#wifi">WiFi Setup</a></li>
           <li><a href="#config">Device Setup</a></li>
           <li><a href="#effects">Effects</a></li>
           <li><a href="#diag">Diagnostics</a></li>
@@ -76,16 +78,16 @@
 
     <!-- Network Configuration -->
     <div id="wifi" class="mdiv hidden anchor">
-      <fieldset>
-        <legend class="esps-legend">Network Configuration</legend>
-        <form class="form-horizontal">
+      <form class="form-horizontal">
+        <fieldset id="network">
+          <legend class="esps-legend">Network Configuration</legend>
           <div class="form-group" id="fg_ssid">
             <label class="control-label col-sm-2" for="ssid">SSID</label>
             <div class="col-sm-10"><input type="text" class="form-control" id="ssid" name="ssid" title="The SSID for your access point."></div>
           </div>
           <div class="form-group" id="fg_password">
             <label class="control-label col-sm-2" for="password">Password</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="password" name="password" title="The password for your access point."></div>
+            <div class="col-sm-10"><input type="text" class="form-control" id="passphrase" name="password" title="The password for your access point."></div>
           </div>
           <div class="form-group" id="fg_hostname">
             <label class="control-label col-sm-2" for="hostname">Hostname</label>
@@ -93,7 +95,7 @@
           </div>
           <div class="form-group" id="fg_staTimeout">
             <label class="control-label col-sm-2" for="staTimeout">Client Timeout</label>
-            <div class="col-sm-10"><input type="text" class="form-control has-error" id="staTimeout" name="staTimeout" title="When connecting as a client, this is the timeout in seconds."></div>
+            <div class="col-sm-10"><input type="text" class="form-control has-error" id="sta_timeout" name="staTimeout" title="When connecting as a client, this is the timeout in seconds."></div>
           </div>
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
@@ -114,108 +116,47 @@
           </div>
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
-              <div class="checkbox"><label><input type="checkbox" id="ap" name="ap" title="Enabling this will cause your device to come up as an Access Point if your configured WiFi connection fails. Not recommended for live / production devices."> AP Fallback</label></div>
+              <div class="checkbox"><label><input type="checkbox" id="ap_fallback" name="ap" title="Enabling this will cause your device to come up as an Access Point if your configured WiFi connection fails. Not recommended for live / production devices."> AP Fallback</label></div>
             </div>
           </div>
-          <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-              <button id="btn_wifi" type="button" onclick="submitWiFi()" class="btn btn-primary" disabled>Save Changes</button>
-            </div>
+        </fieldset>
+        <div class="form-group">
+          <div class="col-sm-offset-2 col-sm-10">
+            <button id="btn_wifi" type="button" onclick="submitWiFi()" class="btn btn-primary" disabled>Save Changes</button>
           </div>
-        </form>
-      </fieldset>
+        </div>
+      </form>
     </div>
 
     <!-- Device Configuration -->
     <div id="config" class="mdiv hidden anchor">
-      <fieldset>
-        <legend class="esps-legend">Device Configuration</legend>
-        <form class="form-horizontal">
+      <form class="form-horizontal">
+        <fieldset id="device">
+          <legend class="esps-legend">Device Configuration</legend>
           <div class="form-group">
-            <label class="control-label col-sm-2" for="devid">Device ID</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="devid" name="devid" title="Plain text ID to help identify your device."></div>
-          </div>
-          <div class="form-group">
-            <label class="control-label col-sm-2" for="universe">Universe</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="universe" name="universe" title="DMX Universe to listen for. Consecutive DMX Universes will be monitored as needed."></div>
-          </div>
-          <div class="form-group">
-            <label class="control-label col-sm-2" for="channel_start">Start Channel</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="channel_start" name="channel_start" title="Start listening for data at this DMX channel."></div>
-          </div>
-          <div class="form-group">
-            <label class="control-label col-sm-2" for="universe_limit">Universe Boundary</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="universe_limit" name="universe_limit" title="The number of DMX channels you are using per Universe.  This must match the configuration of your sequencer.  Most common values are 510 and 512."></div>
+            <label class="control-label col-sm-2" for="id">Device ID</label>
+            <div class="col-sm-10"><input type="text" class="form-control" id="id" name="device-id" title="Plain text ID to help identify your device."></div>
           </div>
 
           <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-              <div class="checkbox"><label><input type="checkbox" id="multicast" name="multicast"> Enable Multicast</label></div>
+            <label class="control-label col-sm-2" for="input">Input Mode</label>
+            <div class="col-sm-10">
+              <select class="form-control" id="input" name="device-input"></select>
             </div>
           </div>
 
-          <!-- Pixel Configuration -->
-          <div id="o_pixel" class="odiv hidden">
-            <legend class="esps-legend">Pixel Configuration</legend>
-
-            <div class="form-group">
-              <label class="control-label col-sm-2" for="p_count">Pixel Count</label>
-              <div class="col-sm-3"><input type="text" class="form-control" id="p_count" name="p_count" title="Number of physical pixels" onchange="refreshPixel()"></div>
-              <label class="control-label col-sm-2" for="p_groupSize">Group Size</label>
-              <div class="col-sm-3"><input type="text" class="form-control" id="p_groupSize" name="p_groupSize" title="Group every X number of physical pixels together.  Default of 1 is no grouping." onchange="refreshPixel()"></div>
-            </div>
-
-            <div class="form-group">
-              <label class="control-label col-sm-2" for="p_type">Pixel Type</label>
-              <div class="col-sm-3">
-                <select class="form-control" id="p_type" name="p_type" onclick="refreshPixel()"></select>
-              </div>
-              <label class="control-label col-sm-2" for="p_color">Color Order</label>
-              <div class="col-sm-3">
-                <select class="form-control" id="p_color" name="p_color"></select>
+          <div class="form-group">
+              <label class="control-label col-sm-2" for="output">Output Mode</label>
+              <div class="col-sm-10">
+                <select class="form-control" id="output" name="device-output"></select>
               </div>
             </div>
+        </fieldset>
 
-            <div class="form-group">
-              <label class="control-label col-sm-2" for="p_zigSize">Zigzag Count</label>
-              <div class="col-sm-3"><input type="text" class="form-control" id="p_zigSize" name="p_zigSize" title="Zigzag every X number of physical pixels." onchange="refreshPixel()"></div>
-            </div>
+        <fieldset id="imode"></fieldset>
+        <fieldset id="omode"></fieldset>
 
-            <div class="form-group" id="o_gamma">
-              <label class="control-label col-sm-2" for="p_gammaVal">Gamma Value</label>
-              <div class="col-sm-3"><input type="text" class="form-control" id="p_gammaVal" name="p_gammaVal" title="Recommended value is 2.2. Set to 1.0 to disable." onchange="refreshPixel()"></div>
-              <label class="control-label col-sm-2" for="p_briteVal">Brightness</label>
-              <div class="col-sm-3"><input type="text" class="form-control" id="p_briteVal" name="p_briteVal" title="Maximum brightness is 1.0." onchange="refreshPixel()"></div>
-              <div class="col-sm-offset-2 col-sm-10">
-                <div class="checkbox"><label><input type="checkbox" id="showgamma" name="showgamma"> Show Gamma Curve</label></div>
-              </div>
-              <div class="col-sm-offset-2 col-sm-8 hidden gammagraph">
-
-<svg viewBox="-25 -30 320 320" width="256" height="256" class="chart">
-  <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
-    </marker>
-  </defs>
-
-  <line x1="0" y1="256" x2="256" y2="256" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
-  <text x="125" y="275" class="label-title">Input</text>
-
-  <line x1="0" y1="256" x2="0" y2="0" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
-  <text x="-15" y="120" class="label-title" style="writing-mode: tb;">Output</text>
-
-  <polyline
-     id="cracker"
-     fill="none"
-     stroke="#0074d9"
-     stroke-width="2"
-     points=""
-   />
-</svg>
-              </div>
-            </div>
-          </div>
-
+        <fieldset>
           <!-- Serial Configuration -->
           <div id="o_serial" class="odiv hidden">
             <legend class="esps-legend">Serial Configuration</legend>
@@ -236,14 +177,18 @@
               </div>
             </div>
           </div>
+        </fieldset>
 
+        <fieldset>
           <!-- Refresh Rate Display -->
           <div class="form-group">
             <label class="control-label col-sm-2" for="refresh">Refresh Rate</label>
             <div class="col-sm-10"><p class="form-control-static" id="refresh"></p></div>
           </div>
+        </fieldset>
 
           <!-- MQTT Configuration -->
+        <fieldset>
           <legend class="esps-legend">MQTT Configuration</legend>
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
@@ -280,15 +225,15 @@
               <div class="checkbox"><label><input type="checkbox" id="mqtt_clean" name="mqtt_clean"> Clean Session</label></div>
             </div>
           </div>
+        </fieldset>
 
-          <!-- Device Config Save -->
-          <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-              <button type="button" onclick="submitConfig()" class="btn btn-primary">Save Changes</button>
-            </div>
+        <!-- Device Config Save -->
+        <div class="form-group">
+          <div class="col-sm-offset-2 col-sm-10">
+            <button type="button" onclick="submitConfig()" class="btn btn-primary">Save Changes</button>
           </div>
-        </form>
-      </fieldset>
+        </div>
+      </form>
     </div>
 
     <!-- Effects configuration -->
@@ -486,11 +431,11 @@
   </footer>
 
   <!-- for local development -->
+
   <script type="text/javascript" src="js/jquery-3.1.1.js"></script>
   <script type="text/javascript" src="js/bootstrap.js"></script>
   <script type="text/javascript" src="js/jqColorPicker.js"></script>
   <script type="text/javascript" src="script.js"></script>
-
 <!--
   <script type="text/javascript" src="esps.js"></script>
 -->

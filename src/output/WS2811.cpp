@@ -121,7 +121,7 @@ void WS2811::validate() {
     if (pixelCount > PIXEL_LIMIT)
         pixelCount = PIXEL_LIMIT;
     else if (pixelCount < 1)
-        pixelCount = 1;
+        pixelCount = 170;
 
     if (groupSize > pixelCount)
         groupSize = pixelCount;
@@ -144,10 +144,11 @@ void WS2811::validate() {
 void WS2811::deserialize(DynamicJsonDocument &json) {
     if (json.containsKey("ws2811")) {
         pixel_color = PixelColor(static_cast<uint8_t>(json["pixel"]["color"]));
-        groupSize = json["pixel"]["groupSize"];
-        zigSize = json["pixel"]["zigSize"];
-        gammaVal = json["pixel"]["gammaVal"];
-        briteVal = json["pixel"]["briteVal"];
+        pixelCount = json["ws2811"]["pixelCount"];
+        groupSize = json["ws2811"]["groupSize"];
+        zigSize = json["ws2811"]["zigSize"];
+        gammaVal = json["ws2811"]["gammaVal"];
+        briteVal = json["ws2811"]["briteVal"];
     } else {
         LOG_PORT.println("No WS2811 settings found.");
     }
@@ -169,18 +170,23 @@ void WS2811::load() {
     }
 }
 
-String WS2811::serialize() {
+String WS2811::serialize(boolean pretty = false) {
     DynamicJsonDocument json(1024);
 
     JsonObject pixel = json.createNestedObject("ws2811");
     pixel["color"] = static_cast<uint8_t>(pixel_color);
+    pixel["pixelCount"] = pixelCount;
     pixel["groupSize"] = groupSize;
     pixel["zigSize"] = zigSize;
     pixel["gammaVal"] = gammaVal;
     pixel["briteVal"] = briteVal;
 
     String jsonString;
-    serializeJsonPretty(json, jsonString);
+    if (pretty)
+        serializeJsonPretty(json, jsonString);
+    else
+        serializeJson(json, jsonString);
+
     return jsonString;
 }
 
