@@ -117,14 +117,33 @@ class WebIO {
             }
 
             // Process "SET" command - receive configuration as JSON
-            if (target = json["cmd"]["set"].as<String>()) {
-                if (target.equalsIgnoreCase("core")) {
-                    LOG_PORT.println("*** WebIO set config core***");
+            if (JsonObject root = json["cmd"]["set"].as<JsonObject>()) {
+                DynamicJsonDocument doc(1024);
+                doc.set(root);
+                for (JsonPair kv : root) {
+                    String key = kv.key().c_str();
+                    // Device config
+                    if (key.equalsIgnoreCase("device")) {
+                        dsDevice(doc);
+                    // Network config
+                    } else if (key.equalsIgnoreCase("network")) {
+                        dsNetwork(doc);
+                    // Iterate over input and output modules
+                    } else {
+                        itInput = INPUT_MODES.find(key);
+                        if (itInput != INPUT_MODES.end()) {
+                            itInput->second->deserialize(doc);
+                            itInput->second->save();
+                        }
+
+                        itOutput = OUTPUT_MODES.find(key);
+                        if (itOutput != OUTPUT_MODES.end()) {
+                            itOutput->second->deserialize(doc);
+                            itOutput->second->save();
+                        }
+                    }
                 }
-                if (target.equalsIgnoreCase("input"))
-                    LOG_PORT.println("*** WebIO set config input ***");
-                if (target.equalsIgnoreCase("output"))
-                    LOG_PORT.println("*** WebIO set config output ***");
+                saveConfig();
             }
 
             // Generate select option list data

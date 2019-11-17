@@ -3,32 +3,32 @@
 
     <div class="form-group">
         <label class="control-label col-sm-2" for="p_count">Pixel Count</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="pixelCount" name="p_count" title="Number of physical pixels" onchange="refreshPixel()"></div>
+        <div class="col-sm-3"><input type="text" class="form-control" id="pixel_count" name="p_count" title="Number of physical pixels" onchange="refreshPixel()"></div>
         <label class="control-label col-sm-2" for="p_groupSize">Group Size</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="groupSize" name="p_groupSize" title="Group every X number of physical pixels together.  Default of 1 is no grouping." onchange="refreshPixel()"></div>
+        <div class="col-sm-3"><input type="text" class="form-control" id="group_size" name="p_groupSize" title="Group every X number of physical pixels together.  Default of 1 is no grouping." onchange="refreshPixel()"></div>
     </div>
 
     <div class="form-group">
-        <label class="control-label col-sm-2" for="p_type">Pixel Type</label>
-        <div class="col-sm-3">
-            <select class="form-control" id="p_type" name="p_type" onclick="refreshPixel()"></select>
-        </div>
         <label class="control-label col-sm-2" for="p_color">Color Order</label>
         <div class="col-sm-3">
-            <select class="form-control" id="p_color" name="p_color"></select>
+            <select class="form-control" id="color_order" name="p_color">
+                <option value="rgb">RGB</option>
+                <option value="grb">GRB</option>
+                <option value="brg">BRG</option>
+                <option value="rbg">RBG</option>
+                <option value="gbr">GBR</option>
+                <option value="bgr">BGR</option>
+            </select>
         </div>
-    </div>
-
-    <div class="form-group">
         <label class="control-label col-sm-2" for="p_zigSize">Zigzag Count</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="zigSize" name="p_zigSize" title="Zigzag every X number of physical pixels." onchange="refreshPixel()"></div>
+        <div class="col-sm-3"><input type="text" class="form-control" id="zig_size" name="p_zigSize" title="Zigzag every X number of physical pixels." onchange="refreshPixel()"></div>
     </div>
 
     <div class="form-group" id="o_gamma">
         <label class="control-label col-sm-2" for="p_gammaVal">Gamma Value</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="gammaVal" name="p_gammaVal" title="Recommended value is 2.2. Set to 1.0 to disable." onchange="refreshPixel()"></div>
+        <div class="col-sm-3"><input type="text" class="form-control" id="gamma" name="p_gammaVal" title="Recommended value is 2.2. Set to 1.0 to disable." onchange="refreshPixel()"></div>
         <label class="control-label col-sm-2" for="p_briteVal">Brightness</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="briteVal" name="p_briteVal" title="Maximum brightness is 1.0." onchange="refreshPixel()"></div>
+        <div class="col-sm-3"><input type="text" class="form-control" id="brightness" name="p_briteVal" title="Maximum brightness is 1.0." onchange="refreshPixel()"></div>
         <div class="col-sm-offset-2 col-sm-10">
             <div class="checkbox"><label><input type="checkbox" id="showgamma" name="showgamma"> Show Gamma Curve</label></div>
         </div>

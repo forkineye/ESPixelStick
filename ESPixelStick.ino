@@ -81,16 +81,14 @@ static void _u0_putc(char c){
 
 /// Map of input modules
 std::map<const String, _Input*>::const_iterator itInput;
-const String strddp="ddp";
 const std::map<const String, _Input*> INPUT_MODES = {
     { E131Input::KEY, new E131Input() }
 };
 
 /// Map of output modules
 std::map<const String, _Output*>::const_iterator itOutput;
-const String strdmx="dmx";
 const std::map<const String, _Output*> OUTPUT_MODES = {
-    { WS2811::KEY, new WS2811() }
+    { WS2811::KEY, new WS2811() },
 };
 
 /////////////////////////////////////////////////////////
@@ -215,7 +213,7 @@ void setup() {
     WiFi.hostname(config.hostname);
 
     // Configure inputs and outputs
-    setMode(input, output);
+    //setMode(input, output);
 
     // Setup WiFi Handlers
     wifiConnectHandler = WiFi.onStationModeGotIP(onWiFiConnect);
@@ -310,6 +308,7 @@ void onWiFiConnect(const WiFiEventStationModeGotIP &event) {
 
     // Setup mDNS / DNS-SD
     //TODO: Reboot or restart mdns when config.id is changed?
+/*
     char chipId[7] = { 0 };
     snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
     MDNS.setInstanceName(String(config.id + " (" + String(chipId) + ")").c_str());
@@ -327,6 +326,7 @@ void onWiFiConnect(const WiFiEventStationModeGotIP &event) {
     } else {
         LOG_PORT.println(F("*** Error setting up mDNS responder ***"));
     }
+*/
 }
 
 /// WiFi Disconnect Handler
@@ -473,9 +473,12 @@ void validateConfig() {
         config.output = itOutput->first;
         output = itOutput->second;
     }
+
+    // Set I/O modes
+    setMode(input, output);
 }
 
-void deserializeCore(DynamicJsonDocument &json) {
+void dsDevice(DynamicJsonDocument &json) {
     // Device
     if (json.containsKey("device")) {
         config.id = json["device"]["id"].as<String>();
@@ -484,7 +487,9 @@ void deserializeCore(DynamicJsonDocument &json) {
     } else {
         LOG_PORT.println("No device settings found.");
     }
+}
 
+void dsNetwork(DynamicJsonDocument &json) {
     // Network
     if (json.containsKey("network")) {
         JsonObject networkJson = json["network"];
@@ -526,6 +531,11 @@ void deserializeCore(DynamicJsonDocument &json) {
         snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
         config.hostname = "esps-" + String(chipId);
     }
+}
+
+void deserializeCore(DynamicJsonDocument &json) {
+    dsDevice(json);
+    dsNetwork(json);
 }
 
 /// Load configuration file

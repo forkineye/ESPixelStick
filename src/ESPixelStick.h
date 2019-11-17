@@ -69,5 +69,8 @@ typedef struct {
 } config_t;
 
 void serializeCore(String &jsonString, boolean pretty = false, boolean creds = false);
+void dsDevice(DynamicJsonDocument &json);
+void dsNetwork(DynamicJsonDocument &json);
+void saveConfig();
 
 #endif  // ESPIXELSTICK_H_

@@ -435,16 +435,16 @@ function wsConnect() {
         // When connection is opened, get raw element data, option data, the config data in that order
         ws.onopen = function() {
             $('#wserror').modal('hide');
-            wsEnqueue(JSON.stringify({'cmd':{'ele':'core'}}));      // Get core element data
+//            wsEnqueue(JSON.stringify({'cmd':{'ele':'core'}}));      // Get core element data
             wsEnqueue(JSON.stringify({'cmd':{'opt':'core'}}));      // Get core option data
             wsEnqueue(JSON.stringify({'cmd':{'get':'core'}}));      // Get core config
 
-            wsEnqueue(JSON.stringify({'cmd':{'ele':'input'}}));     // Get input element data
-            wsEnqueue(JSON.stringify({'cmd':{'opt':'input'}}));     // Get input option data
+//            wsEnqueue(JSON.stringify({'cmd':{'ele':'input'}}));     // Get input element data
+//            wsEnqueue(JSON.stringify({'cmd':{'opt':'input'}}));     // Get input option data
 //            wsEnqueue(JSON.stringify({'cmd':{'get':'input'}}));     // Get input config
 
-            wsEnqueue(JSON.stringify({'cmd':{'ele':'output'}}));    // Get output element data
-            wsEnqueue(JSON.stringify({'cmd':{'opt':'output'}}));    // Get output option data
+//            wsEnqueue(JSON.stringify({'cmd':{'ele':'output'}}));    // Get output element data
+//            wsEnqueue(JSON.stringify({'cmd':{'opt':'output'}}));    // Get output option data
 //            wsEnqueue(JSON.stringify({'cmd':{'get':'output'}}));    // Get output config
         };
 
@@ -898,48 +898,53 @@ function submitWiFi() {
     wsEnqueue('S1' + JSON.stringify(json));
 }
 
+// Build dynamic JSON config submission for "Device Config" tab
 function submitConfig() {
-    var channels = parseInt($('#s_count').val());
-    if (mode == 'pixel')
-        channels = parseInt($('#p_count').val()) * 3;
+    var input = $('#config #device #input').val();
+    var inputJson = {};
+    var inputids = $('#config #imode :input').map(function () {
+        return $(this).attr('id');
+    }).get();
+
+    inputids.forEach(function (id) {
+        var select = '#config #imode #' + id;
+        if ($(select).is(':checkbox')) {
+            inputJson[id] = $(select).prop('checked');
+        } else {
+            inputJson[id] = $(select).val();
+        }
+    });
+
+    var output = $('#config #device #output').val();
+    var outputJson = {};
+        var outputids = $('#config #omode :input').map(function () {
+        return $(this).attr('id');
+    }).get();
+
+    outputids.forEach(function (id) {
+        var select = '#config #omode #' + id;
+        if ($(select).is(':checkbox')) {
+            outputJson[id] = $(select).prop('checked');
+        } else {
+            outputJson[id] = $(select).val();
+        }
+    });
 
     var json = {
-            'device': {
-                'id': $('#devid').val()
-            },
-            'mqtt': {
-                'enabled': $('#mqtt').prop('checked'),
-                'ip': $('#mqtt_ip').val(),
-                'port': $('#mqtt_port').val(),
-                'user': $('#mqtt_user').val(),
-                'password': $('#mqtt_password').val(),
-                'topic': $('#mqtt_topic').val(),
-                'haprefix': $('#mqtt_haprefix').val(),
-                'clean': $('#mqtt_clean').prop('checked'),
-                'hadisco': $('#mqtt_hadisco').prop('checked')
-            },
-            'e131': {
-                'universe': parseInt($('#universe').val()),
-                'universe_limit': parseInt($('#universe_limit').val()),
-                'channel_start': parseInt($('#channel_start').val()),
-                'channel_count': channels,
-                'multicast': $('#multicast').prop('checked')
-            },
-            'pixel': {
-                'type': parseInt($('#p_type').val()),
-                'color': parseInt($('#p_color').val()),
-                'groupSize': parseInt($('#p_groupSize').val()),
-                'zigSize': parseInt($('#p_zigSize').val()),
-                'gammaVal': parseFloat($('#p_gammaVal').val()),
-                'briteVal': parseFloat($('#p_briteVal').val())
-            },
-            'serial': {
-                'type': parseInt($('#s_proto').val()),
-                'baudrate': parseInt($('#s_baud').val())
-            }
-    };
+        'device': {
+            'id': $('#config #device #id').val(),
+            'input': input,
+            'output': output
+        },
 
-    wsEnqueue('S2' + JSON.stringify(json));
+        [input]: inputJson,
+
+        [output]: outputJson
+    }
+
+//    console.log(JSON.stringify(json));
+//    wsEnqueue('S2' + JSON.stringify(json));
+    wsEnqueue(JSON.stringify({'cmd':{'set': json}}));
 }
 
 function submitStartupEffect() {

@@ -29,6 +29,7 @@ extern "C" {
 static const uint8_t    *uart_buffer;       // Buffer tracker
 static const uint8_t    *uart_buffer_tail;  // Buffer tracker
 
+uint8_t gamma_table[256] = { 0 };
 uint8_t WS2811::rOffset = 0;
 uint8_t WS2811::gOffset = 1;
 uint8_t WS2811::bOffset = 2;
@@ -43,6 +44,7 @@ WS2811::~WS2811() {
 void WS2811::destroy() {
     // free stuff
     if (asyncdata) free(asyncdata);
+    asyncdata = NULL;
     Serial1.end();
     pinMode(DATA_PIN, INPUT);
 }
@@ -61,7 +63,7 @@ void WS2811::init() {
     digitalWrite(DATA_PIN, LOW);
 
     // Setup asyncdata buffer
-    szBuffer = pixelCount * 3;
+    szBuffer = pixel_count * 3;
     if (asyncdata) free(asyncdata);
     if (asyncdata = static_cast<uint8_t *>(malloc(szBuffer))) {
         memset(asyncdata, 0, szBuffer);
@@ -70,7 +72,7 @@ void WS2811::init() {
     }
 
     // Calculate our refresh time
-    refreshTime = WS2811_TFRAME * pixelCount + WS2811_TIDLE;
+    refreshTime = WS2811_TFRAME * pixel_count + WS2811_TIDLE;
 
     // Initialize for WS2811 via UART
     // Serial rate is 4x 800KHz for WS2811
@@ -114,41 +116,40 @@ uint8_t WS2811::getTupleSize() {
 }
 
 uint16_t WS2811::getTupleCount() {
-    return 170;
+    return pixel_count;
 }
 
 void WS2811::validate() {
-    if (pixelCount > PIXEL_LIMIT)
-        pixelCount = PIXEL_LIMIT;
-    else if (pixelCount < 1)
-        pixelCount = 170;
+    if (pixel_count > PIXEL_LIMIT)
+        pixel_count = PIXEL_LIMIT;
+    else if (pixel_count < 1)
+        pixel_count = 170;
 
-    if (groupSize > pixelCount)
-        groupSize = pixelCount;
-    else if (groupSize < 1)
-        groupSize = 1;
+    if (group_size > pixel_count)
+        group_size = pixel_count;
+    else if (group_size < 1)
+        group_size = 1;
 
     // Default gamma value
-    if (gammaVal <= 0)
-        gammaVal = 2.2;
+    if (gamma <= 0)
+        gamma = 2.2;
 
     // Default brightness value
-    if (briteVal <= 0)
-        briteVal = 1.0;
+    if (brightness <= 0)
+        brightness = 1.0;
 
-    setGroup(groupSize, zigSize);
-    updateGammaTable(gammaVal, briteVal);
-    updateOrder(color);
+    updateGammaTable();
+    updateColorOrder();
 }
 
 void WS2811::deserialize(DynamicJsonDocument &json) {
     if (json.containsKey("ws2811")) {
-        pixel_color = PixelColor(static_cast<uint8_t>(json["pixel"]["color"]));
-        pixelCount = json["ws2811"]["pixelCount"];
-        groupSize = json["ws2811"]["groupSize"];
-        zigSize = json["ws2811"]["zigSize"];
-        gammaVal = json["ws2811"]["gammaVal"];
-        briteVal = json["ws2811"]["briteVal"];
+        color_order = json["ws2811"]["color_order"].as<String>();
+        pixel_count = json["ws2811"]["pixel_count"];
+        group_size = json["ws2811"]["group_size"];
+        zig_size = json["ws2811"]["zig_size"];
+        gamma = json["ws2811"]["gamma"];
+        brightness = json["ws2811"]["brightness"];
     } else {
         LOG_PORT.println("No WS2811 settings found.");
     }
@@ -160,12 +161,12 @@ void WS2811::load() {
         validate();
     } else {
         // Load failed, create a new config file and save it
-        pixel_color = PixelColor::RGB;
-        groupSize = 1;
-        zigSize = 0;
-        gammaVal = 2.2;
-        briteVal = 1.0;
-        validate();
+        color_order = "rgb";
+        pixel_count = 170;
+        group_size = 1;
+        zig_size = 0;
+        gamma = 2.2;
+        brightness = 1.0;
         save();
     }
 }
@@ -174,12 +175,12 @@ String WS2811::serialize(boolean pretty = false) {
     DynamicJsonDocument json(1024);
 
     JsonObject pixel = json.createNestedObject("ws2811");
-    pixel["color"] = static_cast<uint8_t>(pixel_color);
-    pixel["pixelCount"] = pixelCount;
-    pixel["groupSize"] = groupSize;
-    pixel["zigSize"] = zigSize;
-    pixel["gammaVal"] = gammaVal;
-    pixel["briteVal"] = briteVal;
+    pixel["color_order"] = color_order.c_str();
+    pixel["pixel_count"] = pixel_count;
+    pixel["group_size"] = group_size;
+    pixel["zig_size"] = zig_size;
+    pixel["gamma"] = gamma;
+    pixel["brightness"] = brightness;
 
     String jsonString;
     if (pretty)
@@ -191,42 +192,24 @@ String WS2811::serialize(boolean pretty = false) {
 }
 
 void WS2811::save() {
+    validate();
     FileIO::saveConfig(CONFIG_FILE, serialize());
 }
 
-void WS2811::updateOrder(PixelColor color) {
-    this->color = color;
-
-    switch (color) {
-        case PixelColor::GRB:
-            rOffset = 1;
-            gOffset = 0;
-            bOffset = 2;
-            break;
-        case PixelColor::BRG:
-            rOffset = 1;
-            gOffset = 2;
-            bOffset = 0;
-            break;
-        case PixelColor::RBG:
-            rOffset = 0;
-            gOffset = 2;
-            bOffset = 1;
-            break;
-        case PixelColor::GBR:
-            rOffset = 2;
-            gOffset = 0;
-            bOffset = 1;
-            break;
-        case PixelColor::BGR:
-            rOffset = 2;
-            gOffset = 1;
-            bOffset = 0;
-            break;
-        default:
-            rOffset = 0;
-            gOffset = 1;
-            bOffset = 2;
+void WS2811::updateColorOrder() {
+    if (color_order.equalsIgnoreCase("grb")) {
+        rOffset = 1; gOffset = 0; bOffset = 2;
+    } else if (color_order.equalsIgnoreCase("brg")) {
+        rOffset = 1; gOffset = 2; bOffset = 0;
+    } else if (color_order.equalsIgnoreCase("rbg")) {
+        rOffset = 0; gOffset = 2; bOffset = 1;
+    } else if (color_order.equalsIgnoreCase("gbr")) {
+        rOffset = 2; gOffset = 0; bOffset = 1;
+    } else if (color_order.equalsIgnoreCase("bgr")) {
+        rOffset = 2; gOffset = 1; bOffset = 0;
+    } else {
+        color_order="rgb";
+        rOffset = 0; gOffset = 1; bOffset = 2;
     }
 }
 
@@ -257,22 +240,22 @@ const uint8_t* ICACHE_RAM_ATTR WS2811::fillWS2811(const uint8_t *buff,
 
     while (buff + 2 < tail) {
         uint8_t subpix = buff[rOffset];
-        enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 6) & 0x3]);
-        enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 4) & 0x3]);
-        enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 2) & 0x3]);
-        enqueue(LOOKUP_2811[GAMMA_TABLE[subpix] & 0x3]);
+        enqueue(LOOKUP_2811[(gamma_table[subpix] >> 6) & 0x3]);
+        enqueue(LOOKUP_2811[(gamma_table[subpix] >> 4) & 0x3]);
+        enqueue(LOOKUP_2811[(gamma_table[subpix] >> 2) & 0x3]);
+        enqueue(LOOKUP_2811[gamma_table[subpix] & 0x3]);
 
         subpix = buff[gOffset];
-        enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 6) & 0x3]);
-        enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 4) & 0x3]);
-        enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 2) & 0x3]);
-        enqueue(LOOKUP_2811[GAMMA_TABLE[subpix] & 0x3]);
+        enqueue(LOOKUP_2811[(gamma_table[subpix] >> 6) & 0x3]);
+        enqueue(LOOKUP_2811[(gamma_table[subpix] >> 4) & 0x3]);
+        enqueue(LOOKUP_2811[(gamma_table[subpix] >> 2) & 0x3]);
+        enqueue(LOOKUP_2811[gamma_table[subpix] & 0x3]);
 
         subpix = buff[bOffset];
-        enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 6) & 0x3]);
-        enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 4) & 0x3]);
-        enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 2) & 0x3]);
-        enqueue(LOOKUP_2811[GAMMA_TABLE[subpix] & 0x3]);
+        enqueue(LOOKUP_2811[(gamma_table[subpix] >> 6) & 0x3]);
+        enqueue(LOOKUP_2811[(gamma_table[subpix] >> 4) & 0x3]);
+        enqueue(LOOKUP_2811[(gamma_table[subpix] >> 2) & 0x3]);
+        enqueue(LOOKUP_2811[gamma_table[subpix] & 0x3]);
 
         buff += 3;
     }
@@ -280,23 +263,30 @@ const uint8_t* ICACHE_RAM_ATTR WS2811::fillWS2811(const uint8_t *buff,
     return buff;
 }
 
+void WS2811::updateGammaTable() {
+    for (int i = 0; i < 256; i++) {
+        gamma_table[i] = (uint8_t) min((255.0 * pow(i * brightness / 255.0, gamma) + 0.5), 255.0);
+    }
+}
+
+
 void WS2811::render() {
     if (!canRefresh()) return;
     if (!showBuffer) return;
 
-    if (!cntZigzag) {  // Normal / group copy
+    if (!zig_size) {  // Normal / group copy
         for (size_t led = 0; led < szBuffer / 3; led++) {
-            uint16 modifier = led / cntGroup;
+            uint16 modifier = led / group_size;
             asyncdata[3 * led + 0] = showBuffer[3 * modifier + 0];
             asyncdata[3 * led + 1] = showBuffer[3 * modifier + 1];
             asyncdata[3 * led + 2] = showBuffer[3 * modifier + 2];
         }
     } else {  // Zigzag copy
         for (size_t led = 0; led < szBuffer / 3; led++) {
-            uint16 modifier = led / cntGroup;
-            if (led / cntZigzag % 2) { // Odd "zig"
-                int group = cntZigzag * (led / cntZigzag);
-                int this_led = (group + cntZigzag - (led % cntZigzag) - 1) / cntGroup;
+            uint16 modifier = led / group_size;
+            if (led / zig_size % 2) { // Odd "zig"
+                int group = zig_size * (led / zig_size);
+                int this_led = (group + zig_size - (led % zig_size) - 1) / group_size;
                 asyncdata[3 * led + 0] = showBuffer[3 * this_led + 0];
                 asyncdata[3 * led + 1] = showBuffer[3 * this_led + 1];
                 asyncdata[3 * led + 2] = showBuffer[3 * this_led + 2];

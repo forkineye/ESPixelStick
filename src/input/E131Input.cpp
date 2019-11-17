@@ -28,8 +28,11 @@ E131Input::~E131Input() {
 
 void E131Input::destroy() {
     if (seqTracker) free(seqTracker);
+    seqTracker = NULL;
     if (seqError) free(seqError);
+    seqError = NULL;
     delete e131;
+    e131 = nullptr;
 }
 
 void E131Input::init() {
@@ -129,7 +132,6 @@ void E131Input::load() {
         universe_limit = 512;
         channel_start = 1;
         multicast = true;
-        validate();
         save();
     }
 }
@@ -153,6 +155,7 @@ String E131Input::serialize(boolean pretty = false) {
 }
 
 void E131Input::save() {
+    validate();
     FileIO::saveConfig(CONFIG_FILE, serialize());
 }
 

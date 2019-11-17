@@ -21,16 +21,12 @@
 #define WS2811_H_
 
 #include "_Output.h"
-#include "gamma.h"
 
 #define UART_INV_MASK  (0x3f << 19)
 #define UART 1
 
 #define DATA_PIN        2       ///< Pixel output - GPIO2 (D4 on Wemos / NodeMCU)
 #define PIXEL_LIMIT     1360    ///< Total pixel limit - 40.85ms for 8 universes
-
-/* Gamma correction table */
-extern uint8_t GAMMA_TABLE[];
 
 /*
 * Inverted 6N1 UART lookup table for ws2811, first 2 bits ignored.
@@ -46,32 +42,19 @@ const char LOOKUP_2811[4] = {
 #define WS2811_TFRAME   30L     /* 30us frame time */
 #define WS2811_TIDLE    300L    /* 300us idle time */
 
-/* Color Order */
-enum class PixelColor : uint8_t {
-    RGB,
-    GRB,
-    BRG,
-    RBG,
-    GBR,
-    BGR
-};
-
 class WS2811 : public _Output  {
    private:
     static const String CONFIG_FILE;
 
-    //from  sketch config_t:
-    PixelColor  pixel_color;    ///< Pixel color order
-    uint16_t    pixelCount;     ///< Number of pixels
-    uint16_t    zigSize;	    ///< Zigsize count - 0 = no zigzag
-    uint16_t    groupSize;      ///< Group size - 1 = no grouping
-    float       gammaVal;       ///< gamma value to use
-    float       briteVal;       ///< brightness lto use
+    // JSON configuration parameters
+    String      color_order;    ///< Pixel color order
+    uint16_t    pixel_count;    ///< Number of pixels
+    uint16_t    zig_size;	    ///< Zigsize count - 0 = no zigzag
+    uint16_t    group_size;     ///< Group size - 1 = no grouping
+    float       gamma;          ///< gamma value to use
+    float       brightness;     ///< brightness lto use
 
-    // from original pixeldriver.h
-    PixelColor  color;          // Color Order
-    uint16_t    cntGroup;       // Output modifying interval (in LEDs, not channels)
-    uint16_t    cntZigzag;      // Zigzag every cntZigzag physical pixels
+    // Internal variables
     uint8_t     *asyncdata;     // Async buffer
     uint8_t     *pbuff;         // GECE Packet Buffer
     uint16_t    szBuffer;       // Size of Pixel buffer
@@ -98,6 +81,16 @@ class WS2811 : public _Output  {
         U1F = byte;
     }
 
+    /* Drop the update if our refresh rate is too high */
+    inline boolean canRefresh() {
+        return (micros() - startTime) >= refreshTime;
+    }
+
+    /* Gamma correction table */
+    void updateGammaTable();
+
+    void updateColorOrder();
+
   public:
     static const String KEY;
 
@@ -114,27 +107,12 @@ class WS2811 : public _Output  {
     void save();
 
     void init();
-
-    int begin();
-    int begin(PixelColor color, uint16_t length);
-    void updateOrder(PixelColor color);
     void render();
 
     void deserialize(DynamicJsonDocument &json);
     String serialize(boolean pretty);
 
     uint8_t* getData();
-
-    /* Set group / zigzag counts */
-    inline void setGroup(uint16_t _group, uint16_t _zigzag) {
-        this->cntGroup = _group;
-        this->cntZigzag = _zigzag;
-    }
-
-    /* Drop the update if our refresh rate is too high */
-    inline boolean canRefresh() {
-        return (micros() - startTime) >= refreshTime;
-    }
 };
 
 #endif /* WS2811_H_ */

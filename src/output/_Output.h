@@ -42,12 +42,12 @@ class _Output {
     virtual void init() = 0;            ///< Call from setup(), initializes and starts input
     virtual void render() = 0;          ///< Call from loop(), renders output data
 
+    virtual void deserialize(DynamicJsonDocument &json) = 0;
+    virtual String serialize(boolean pretty = false) = 0;
+
     void setBuffer(uint8_t *buff) {
         showBuffer = buff;
     }
-
-    virtual void deserialize(DynamicJsonDocument &json) = 0;
-    virtual String serialize(boolean pretty = false) = 0;
 
   protected:
     uint8_t *showBuffer;    ///< Show data buffer
