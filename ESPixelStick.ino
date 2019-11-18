@@ -88,7 +88,7 @@ const std::map<const String, _Input*> INPUT_MODES = {
 /// Map of output modules
 std::map<const String, _Output*>::const_iterator itOutput;
 const std::map<const String, _Output*> OUTPUT_MODES = {
-    { WS2811::KEY, new WS2811() },
+    { WS2811::KEY, new WS2811() }
 };
 
 /////////////////////////////////////////////////////////

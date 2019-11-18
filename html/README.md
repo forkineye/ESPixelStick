@@ -5,7 +5,7 @@ These are the web source files which must be placed in ```data/www``` and upload
 ## How to setup and use Gulp
 
 - To install Gulp, you first need to install [Node.js](https://nodejs.org). The latest stable version should be fine.  Make sure the node executable is in your path and that you can execute it from a command prompt.
-- After Node.js is installed, open a command prompt and update to the latest version of npm - ```npm install -g npm```
+- After Node.js is installed, open a command prompt and update to the latest version of npm - ```npm install -g npm``` and npx - ```npm install -g npx```
 - Install Gulp globally - ```npm install -g gulp-cli```
 - To install Gulp and the dependencies for this project, simply run the following in the root of the project - ```npm install```
 - Running ```gulp``` will minify, gzip, and move all web assets to ```data/www``` for you.  You can also run ```gulp watch``` and web pages will automatically be processed and moved as they are saved.

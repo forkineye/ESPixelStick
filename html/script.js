@@ -367,7 +367,7 @@ function param(name) {
 
 // Builds jQuery selectors from JSON data and updates the web interface
 var selector = [];
-async function updateFromJSON(obj) {
+function updateFromJSON(obj) {
     for (var k in obj) {
         selector.push('#' + k);
         if (typeof obj[k] == 'object' && obj[k] !== null) {

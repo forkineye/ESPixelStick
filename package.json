@@ -17,16 +17,15 @@
   },
   "homepage": "https://github.com/forkineye/ESPixelStick#readme",
   "devDependencies": {
-    "del": "^3.0.0",
-    "gulp": "^4.0.0",
-    "gulp-clean-css": "^4.0.0",
+    "del": "^5.1.0",
+    "gulp": "^4.0.2",
+    "gulp-clean-css": "^4.2.0",
     "gulp-concat": "^2.6.1",
     "gulp-gzip": "^1.4.2",
     "gulp-htmlmin": "^5.0.1",
-    "gulp-inline-source": "^4.0.0",
     "gulp-markdown-github-style": "^1.1.1",
     "gulp-plumber": "^1.2.1",
     "gulp-rename": "^1.4.0",
-    "gulp-uglify": "^3.0.1"
+    "gulp-terser": "^1.2.0"
   }
 }

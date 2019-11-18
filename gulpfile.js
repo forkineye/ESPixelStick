@@ -4,7 +4,7 @@ var plumber = require('gulp-plumber');
 var concat = require('gulp-concat');
 var htmlmin = require('gulp-htmlmin');
 var cleancss = require('gulp-clean-css');
-var uglifyjs = require('gulp-uglify');
+var terser = require('gulp-terser');
 var gzip = require('gulp-gzip');
 var del = require('del');
 var markdown = require('gulp-markdown-github-style');
@@ -38,7 +38,7 @@ gulp.task('js', function() {
     return gulp.src(['html/js/jquery*.js', 'html/js/bootstrap.js', 'html/js/jqColorPicker.js', 'html/script.js'])
         .pipe(plumber())
         .pipe(concat('esps.js'))
-        .pipe(uglifyjs())
+        .pipe(terser())
         .pipe(gzip())
         .pipe(gulp.dest('data/www'));
 });
@@ -49,7 +49,6 @@ gulp.task('image', function() {
         .pipe(plumber())
         .pipe(gulp.dest('data/www'));
 });
-
 
 /* Clean Task */
 gulp.task('clean', function() {
