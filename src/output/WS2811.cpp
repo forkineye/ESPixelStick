@@ -52,9 +52,6 @@ void WS2811::destroy() {
 void WS2811::init() {
     Serial.println(F("** WS2811 Initialization **"));
 
-    // Call destroy for good measure and create new stuff if needed
-    destroy();
-
     // Load and validate our configuration
     load();
 
@@ -143,13 +140,13 @@ void WS2811::validate() {
 }
 
 void WS2811::deserialize(DynamicJsonDocument &json) {
-    if (json.containsKey("ws2811")) {
-        color_order = json["ws2811"]["color_order"].as<String>();
-        pixel_count = json["ws2811"]["pixel_count"];
-        group_size = json["ws2811"]["group_size"];
-        zig_size = json["ws2811"]["zig_size"];
-        gamma = json["ws2811"]["gamma"];
-        brightness = json["ws2811"]["brightness"];
+    if (json.containsKey(KEY)) {
+        color_order = json[KEY.c_str()]["color_order"].as<String>();
+        pixel_count = json[KEY.c_str()]["pixel_count"];
+        group_size = json[KEY.c_str()]["group_size"];
+        zig_size = json[KEY.c_str()]["zig_size"];
+        gamma = json[KEY.c_str()]["gamma"];
+        brightness = json[KEY.c_str()]["brightness"];
     } else {
         LOG_PORT.println("No WS2811 settings found.");
     }
@@ -174,7 +171,7 @@ void WS2811::load() {
 String WS2811::serialize(boolean pretty = false) {
     DynamicJsonDocument json(1024);
 
-    JsonObject pixel = json.createNestedObject("ws2811");
+    JsonObject pixel = json.createNestedObject(KEY);
     pixel["color_order"] = color_order.c_str();
     pixel["pixel_count"] = pixel_count;
     pixel["group_size"] = group_size;
@@ -269,7 +266,6 @@ void WS2811::updateGammaTable() {
     }
 }
 
-
 void WS2811::render() {
     if (!canRefresh()) return;
     if (!showBuffer) return;
@@ -304,8 +300,4 @@ void WS2811::render() {
 
     SET_PERI_REG_MASK(UART_INT_ENA(1), UART_TXFIFO_EMPTY_INT_ENA);
     startTime = micros();
-}
-
-uint8_t* WS2811::getData() {
-    return asyncdata;	// data post grouping or zigzaging
 }

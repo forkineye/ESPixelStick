@@ -40,17 +40,18 @@ const char passphrase[] = SECRETS_PASS;
 #include "src/EFUpdate.h"
 #include "src/FileIO.h"
 #include "src/WebIO.h"
-//#include "src/wshandler.h"
 
-// Inputs
+// Input modules
 #include "src/input/_Input.h"
 #include "src/input/E131Input.h"
 //#include "src/input/ESPAsyncDDP.h"
 
-// Outputs
+// Output modules
 #include "src/output/_Output.h"
 #include "src/output/WS2811.h"
-//#include "src/output/SerialDriver.h"
+#include "src/output/GECE.h"
+//#include "src/output/DMX.h"
+//#include "src/output/Renard.h"
 
 // Services
 //#include "src/service/MQTT.h"
@@ -88,7 +89,8 @@ const std::map<const String, _Input*> INPUT_MODES = {
 /// Map of output modules
 std::map<const String, _Output*>::const_iterator itOutput;
 const std::map<const String, _Output*> OUTPUT_MODES = {
-    { WS2811::KEY, new WS2811() }
+    { WS2811::KEY, new WS2811() },
+    { GECE::KEY, new GECE() }
 };
 
 /////////////////////////////////////////////////////////
@@ -197,13 +199,14 @@ void setup() {
     FSInfo fs_info;
     if (SPIFFS.info(fs_info)) {
         LOG_PORT.printf("Total bytes used in file system: %u.\n", fs_info.usedBytes);
-
+/*
         Dir dir = SPIFFS.openDir("/");
         while (dir.next()) {
             File file = dir.openFile("r");
             LOG_PORT.printf("%s : %u\n", file.name(), file.size());
             file.close();
         }
+*/
     } else {
         LOG_PORT.println(F("*** Failed to read file system details ***"));
     }

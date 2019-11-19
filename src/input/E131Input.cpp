@@ -38,8 +38,7 @@ void E131Input::destroy() {
 void E131Input::init() {
     Serial.println(F("** E1.31 Initialization **"));
 
-    // Call destroy for good measure and create a new ESPAsyncE131
-    destroy();
+    // Create a new ESPAsyncE131
     e131 = new ESPAsyncE131(10);
 
     // Load and validate our configuration

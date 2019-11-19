@@ -2,16 +2,16 @@
     <legend class="esps-legend">WS2811 Configuration</legend>
 
     <div class="form-group">
-        <label class="control-label col-sm-2" for="p_count">Pixel Count</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="pixel_count" name="p_count" title="Number of physical pixels" onchange="refreshPixel()"></div>
-        <label class="control-label col-sm-2" for="p_groupSize">Group Size</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="group_size" name="p_groupSize" title="Group every X number of physical pixels together.  Default of 1 is no grouping." onchange="refreshPixel()"></div>
+        <label class="control-label col-sm-2" for="pixel_count">Pixel Count</label>
+        <div class="col-sm-3"><input type="text" class="form-control" id="pixel_count" title="Number of physical pixels" onchange="refreshPixel()"></div>
+        <label class="control-label col-sm-2" for="group_size">Group Size</label>
+        <div class="col-sm-3"><input type="text" class="form-control" id="group_size" title="Group every X number of physical pixels together.  Default of 1 is no grouping." onchange="refreshPixel()"></div>
     </div>
 
     <div class="form-group">
-        <label class="control-label col-sm-2" for="p_color">Color Order</label>
+        <label class="control-label col-sm-2" for="color_order">Color Order</label>
         <div class="col-sm-3">
-            <select class="form-control" id="color_order" name="p_color">
+            <select class="form-control" id="color_order">
                 <option value="rgb">RGB</option>
                 <option value="grb">GRB</option>
                 <option value="brg">BRG</option>
@@ -20,39 +20,39 @@
                 <option value="bgr">BGR</option>
             </select>
         </div>
-        <label class="control-label col-sm-2" for="p_zigSize">Zigzag Count</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="zig_size" name="p_zigSize" title="Zigzag every X number of physical pixels." onchange="refreshPixel()"></div>
+        <label class="control-label col-sm-2" for="zig_size">Zigzag Count</label>
+        <div class="col-sm-3"><input type="text" class="form-control" id="zig_size" title="Zigzag every X number of physical pixels." onchange="refreshPixel()"></div>
     </div>
 
-    <div class="form-group" id="o_gamma">
-        <label class="control-label col-sm-2" for="p_gammaVal">Gamma Value</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="gamma" name="p_gammaVal" title="Recommended value is 2.2. Set to 1.0 to disable." onchange="refreshPixel()"></div>
-        <label class="control-label col-sm-2" for="p_briteVal">Brightness</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="brightness" name="p_briteVal" title="Maximum brightness is 1.0." onchange="refreshPixel()"></div>
+    <div class="form-group">
+        <label class="control-label col-sm-2" for="gamma">Gamma Value</label>
+        <div class="col-sm-3"><input type="text" class="form-control" id="gamma" title="Recommended value is 2.2. Set to 1.0 to disable." onchange="refreshPixel()"></div>
+        <label class="control-label col-sm-2" for="brightness">Brightness</label>
+        <div class="col-sm-3"><input type="text" class="form-control" id="brightness" title="Maximum brightness is 1.0." onchange="refreshPixel()"></div>
         <div class="col-sm-offset-2 col-sm-10">
-            <div class="checkbox"><label><input type="checkbox" id="showgamma" name="showgamma"> Show Gamma Curve</label></div>
+            <div class="checkbox"><label><input type="checkbox" id="showgamma"> Show Gamma Curve</label></div>
         </div>
         <div class="col-sm-offset-2 col-sm-8 hidden gammagraph">
             <svg viewBox="-25 -30 320 320" width="256" height="256" class="chart">
-            <defs>
-                <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
-                    <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
-                </marker>
-            </defs>
+                <defs>
+                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
+                    </marker>
+                </defs>
 
-            <line x1="0" y1="256" x2="256" y2="256" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
-            <text x="125" y="275" class="label-title">Input</text>
+                <line x1="0" y1="256" x2="256" y2="256" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
+                <text x="125" y="275" class="label-title">Input</text>
 
-            <line x1="0" y1="256" x2="0" y2="0" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
-            <text x="-15" y="120" class="label-title" style="writing-mode: tb;">Output</text>
+                <line x1="0" y1="256" x2="0" y2="0" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
+                <text x="-15" y="120" class="label-title" style="writing-mode: tb;">Output</text>
 
-            <polyline
-                id="cracker"
-                fill="none"
-                stroke="#0074d9"
-                stroke-width="2"
-                points=""
-            />
+                <polyline
+                    id="cracker"
+                    fill="none"
+                    stroke="#0074d9"
+                    stroke-width="2"
+                    points=""
+                />
             </svg>
         </div>
     </div>

@@ -17,8 +17,6 @@
 *
 */
 
-#include <utility>
-#include <algorithm>
 #include "GECE.h"
 
 extern "C" {
@@ -31,77 +29,125 @@ extern "C" {
 static const uint8_t    *uart_buffer;       // Buffer tracker
 static const uint8_t    *uart_buffer_tail;  // Buffer tracker
 
-int GECE::begin() {
-    return begin(63);
+const String GECE::KEY = "gece";
+const String GECE::CONFIG_FILE = "/gece.json";
+
+GECE::~GECE() {
+    destroy();
 }
 
-int GECE::begin(uint16_t length) {
-    int retval = true;
+void GECE::destroy() {
+    // free stuff
+    if (pbuff) free(pbuff);
+    pbuff = NULL;
+    Serial1.end();
+    pinMode(DATA_PIN, INPUT);
+}
 
-    if (pixdata) free(pixdata);
-    szBuffer = length * 3;
-    if (pixdata = static_cast<uint8_t *>(malloc(szBuffer))) {
-        memset(pixdata, 0, szBuffer);
-        numPixels = length;
-    } else {
-        numPixels = 0;
-        szBuffer = 0;
-        retval = false;
-    }
+void GECE::init() {
+    Serial.println(F("** GECE Initialization **"));
 
-    uint16_t szAsync = szBuffer;
+    // Load and validate our configuration
+    load();
+
+    // Set output pins
+    pinMode(DATA_PIN, OUTPUT);
+    digitalWrite(DATA_PIN, LOW);
+
     if (pbuff) free(pbuff);
     if (pbuff = static_cast<uint8_t *>(malloc(GECE_PSIZE))) {
         memset(pbuff, 0, GECE_PSIZE);
     } else {
-        numPixels = 0;
-        szBuffer = 0;
-        retval = false;
-    }
-    szAsync = GECE_PSIZE;
-
-    if (asyncdata) free(asyncdata);
-    if (asyncdata = static_cast<uint8_t *>(malloc(szAsync))) {
-        memset(asyncdata, 0, szAsync);
-    } else {
-        numPixels = 0;
-        szBuffer = 0;
-        retval = false;
+        pixel_count = 0;
     }
 
-    refreshTime = (GECE_TFRAME + GECE_TIDLE) * length;
-    gece_init();
+    refreshTime = (GECE_TFRAME + GECE_TIDLE) * pixel_count;
 
-    return retval;
-}
-
-void GECE::setPin(uint8_t pin) {
-    if (this->pin >= 0)
-        this->pin = pin;
-}
-
-void GECE::gece_init() {
     // Serial rate is 3x 100KHz for GECE
     Serial1.begin(300000, SERIAL_7N1, SERIAL_TX_ONLY);
     SET_PERI_REG_MASK(UART_CONF0(UART), UART_TXD_BRK);
     delayMicroseconds(GECE_TIDLE);
 }
 
-void ICACHE_RAM_ATTR GECE::show() {
-    if (!pixdata) return;
+String GECE::getKey() {
+    return KEY;
+}
+
+String GECE::getBrief() {
+    return "GE Color Effects";
+}
+
+uint8_t GECE::getTupleSize() {
+    return 3;   // 3 bytes per pixel
+}
+
+uint16_t GECE::getTupleCount() {
+    return pixel_count;
+}
+
+void GECE::validate() {
+    if (pixel_count > PIXEL_LIMIT)
+        pixel_count = PIXEL_LIMIT;
+    else if (pixel_count < 1)
+        pixel_count = PIXEL_LIMIT;
+}
+
+void GECE::deserialize(DynamicJsonDocument &json) {
+    if (json.containsKey(KEY)) {
+        pixel_count = json[KEY.c_str()]["pixel_count"];
+    } else {
+        LOG_PORT.println("No GECE settings found.");
+    }
+}
+
+void GECE::load() {
+    if (FileIO::loadConfig(CONFIG_FILE, std::bind(
+            &GECE::deserialize, this, std::placeholders::_1))) {
+        validate();
+    } else {
+        // Load failed, create a new config file and save it
+        pixel_count = 63;
+        save();
+    }
+}
+
+String GECE::serialize(boolean pretty = false) {
+    DynamicJsonDocument json(1024);
+
+    JsonObject pixel = json.createNestedObject(KEY);
+    pixel["pixel_count"] = pixel_count;
+
+    String jsonString;
+    if (pretty)
+        serializeJsonPretty(json, jsonString);
+    else
+        serializeJson(json, jsonString);
+
+    return jsonString;
+}
+
+void GECE::save() {
+    validate();
+    FileIO::saveConfig(CONFIG_FILE, serialize());
+}
+
+
+void ICACHE_RAM_ATTR GECE::render() {
+    if (!canRefresh()) return;
+    if (!showBuffer) return;
 
     uint32_t packet = 0;
     uint32_t pTime = 0;
 
     // Build a GECE packet
     startTime = micros();
-    for (uint8_t i = 0; i < numPixels; i++) {
+    for (uint8_t i = 0; i < pixel_count; i++) {
         packet = (packet & ~GECE_ADDRESS_MASK) | (i << 20);
         packet = (packet & ~GECE_BRIGHTNESS_MASK) |
                 (GECE_DEFAULT_BRIGHTNESS << 12);
-        packet = (packet & ~GECE_BLUE_MASK) | (pixdata[i*3+2] << 4);
-        packet = (packet & ~GECE_GREEN_MASK) | pixdata[i*3+1];
-        packet = (packet & ~GECE_RED_MASK) | (pixdata[i*3] >> 4);
+        packet = (packet & ~GECE_BLUE_MASK) | (showBuffer[i*3+2] << 4);
+        packet = (packet & ~GECE_GREEN_MASK) | showBuffer[i*3+1];
+        packet = (packet & ~GECE_RED_MASK) | (showBuffer[i*3] >> 4);
 
         uint8_t shift = GECE_PSIZE;
         for (uint8_t i = 0; i < GECE_PSIZE; i++)
@@ -120,9 +166,4 @@ void ICACHE_RAM_ATTR GECE::show() {
         Serial1.write(pbuff, GECE_PSIZE);
         SET_PERI_REG_MASK(UART_CONF0(UART), UART_TXD_BRK);
     }
-}
-
-uint8_t* GECE::getData() {
-    return asyncdata;	// data post grouping or zigzaging
-//    return pixdata;
 }

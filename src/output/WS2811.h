@@ -39,8 +39,8 @@ const char LOOKUP_2811[4] = {
     0b00000100      // 11 - (1)110 111(0)
 };
 
-#define WS2811_TFRAME   30L     /* 30us frame time */
-#define WS2811_TIDLE    300L    /* 300us idle time */
+#define WS2811_TFRAME   30L     ///< 30us frame time
+#define WS2811_TIDLE    300L    ///< 300us idle time
 
 class WS2811 : public _Output  {
    private:
@@ -55,45 +55,46 @@ class WS2811 : public _Output  {
     float       brightness;     ///< brightness lto use
 
     // Internal variables
-    uint8_t     *asyncdata;     // Async buffer
-    uint8_t     *pbuff;         // GECE Packet Buffer
-    uint16_t    szBuffer;       // Size of Pixel buffer
-    uint32_t    startTime;      // When the last frame TX started
-    uint32_t    refreshTime;    // Time until we can refresh after starting a TX
-    static uint8_t    rOffset;  // Index of red byte
-    static uint8_t    gOffset;  // Index of green byte
-    static uint8_t    bOffset;  // Index of blue byte
+    uint8_t     *asyncdata;     ///< Async buffer
+    uint8_t     *pbuff;         ///< GECE Packet Buffer
+    uint16_t    szBuffer;       ///< Size of Pixel buffer
+    uint32_t    startTime;      ///< When the last frame TX started
+    uint32_t    refreshTime;    ///< Time until we can refresh after starting a TX
+    static uint8_t    rOffset;  ///< Index of red byte
+    static uint8_t    gOffset;  ///< Index of green byte
+    static uint8_t    bOffset;  ///< Index of blue byte
 
-    /* FIFO Handlers */
+    /// FIFO Handlers
     static const uint8_t* ICACHE_RAM_ATTR fillWS2811(const uint8_t *buff,
             const uint8_t *tail);
 
-    /* Interrupt Handlers */
+    /// Interrupt Handlers
     static void ICACHE_RAM_ATTR handleWS2811(void *param);
 
-    /* Returns number of bytes waiting in the TX FIFO of UART1 */
+    /// Returns number of bytes waiting in the TX FIFO of UART1
     static inline uint8_t getFifoLength() {
         return (U1S >> USTXC) & 0xff;
     }
 
-    /* Append a byte to the TX FIFO of UART1 */
+    /// Append a byte to the TX FIFO of UART1
     static inline void enqueue(uint8_t byte) {
         U1F = byte;
     }
 
-    /* Drop the update if our refresh rate is too high */
+    /// Drop the update if our refresh rate is too high
     inline boolean canRefresh() {
         return (micros() - startTime) >= refreshTime;
     }
 
-    /* Gamma correction table */
+    /// Generate gamma correction table
     void updateGammaTable();
 
+    /// Update color order
     void updateColorOrder();
 
   public:
+    // Everything below here is inherited from _Output
     static const String KEY;
-
     ~WS2811();
     void destroy();
 
@@ -111,8 +112,6 @@ class WS2811 : public _Output  {
 
     void deserialize(DynamicJsonDocument &json);
     String serialize(boolean pretty);
-
-    uint8_t* getData();
 };
 
 #endif /* WS2811_H_ */

@@ -20,28 +20,13 @@
 #ifndef GECE_H_
 #define GECE_H_
 
-#include <Arduino.h>
+#include "_Output.h"
 
 #define UART_INV_MASK  (0x3f << 19)
 #define UART 1
 
-/*
-From main sketch:
-validateConfig():
-        // 3 channel per pixel limits
-        if (config.channel_count % 3)
-            config.channel_count = (config.channel_count / 3) * 3;
-
-        if (config.channel_count > 63 * 3)
-            config.channel_count = 63 * 3;
-        break;
-
-        config.pixel_color = PixelColor::RGB;
-
-updateConfig():
-    pixels.begin(config.pixel_type, config.pixel_color, config.channel_count / 3);
-}
-*/
+#define DATA_PIN        2   ///< Pixel output - GPIO2 (D4 on Wemos / NodeMCU)
+#define PIXEL_LIMIT     63  ///< Total pixel limit - GECE Max is 63
 
 /*
 * 7N1 UART lookup table for GECE, first bit is ignored.
@@ -74,46 +59,49 @@ const char LOOKUP_GECE[2] = {
 
 #define CYCLES_GECE_START   (F_CPU / 100000) // 10us
 
-class GECE {
+class GECE: public _Output {
+  private:
+    static const String CONFIG_FILE;
+
+    // JSON configuration parameters
+    uint8_t     pixel_count;
+
+    // Internal variables
+    uint8_t     *pbuff;         // GECE Packet Buffer
+    //uint16_t    numPixels;      // Number of pixels
+    uint16_t    szBuffer;       // Size of Pixel buffer
+    uint32_t    startTime;      // When the last frame TX started
+    uint32_t    refreshTime;    // Time until we can refresh after starting a TX
+
+    void gece_init();
+
  public:
-    int begin();
-    int begin(uint16_t length);
-    void setPin(uint8_t pin);
     void ICACHE_RAM_ATTR show();
-    uint8_t* getData();
-
-    /* Set channel value at address */
-    inline void setValue(uint16_t address, uint8_t value) {
-        pixdata[address] = value;
-    }
-
-    /* Set group / zigzag counts */
-    inline void setGroup(uint16_t _group, uint16_t _zigzag) {
-        this->cntGroup = _group;
-        this->cntZigzag = _zigzag;
-    }
 
     /* Drop the update if our refresh rate is too high */
     inline bool canRefresh() {
         return (micros() - startTime) >= refreshTime;
     }
 
- private:
-    uint16_t    cntGroup;       // Output modifying interval (in LEDs, not channels)
-    uint16_t    cntZigzag;      // Zigzag every cntZigzag physical pixels
-    uint8_t     pin;            // Pin for bit-banging
-    uint8_t     *pixdata;       // Pixel buffer
-    uint8_t     *asyncdata;     // Async buffer
-    uint8_t     *pbuff;         // GECE Packet Buffer
-    uint16_t    numPixels;      // Number of pixels
-    uint16_t    szBuffer;       // Size of Pixel buffer
-    uint32_t    startTime;      // When the last frame TX started
-    uint32_t    refreshTime;    // Time until we can refresh after starting a TX
-    static uint8_t    rOffset;  // Index of red byte
-    static uint8_t    gOffset;  // Index of green byte
-    static uint8_t    bOffset;  // Index of blue byte
+    // Everything below here is inherited from _Output
+    static const String KEY;
+    ~GECE();
+    void destroy();
 
-    void gece_init();
+    String getKey();
+    String getBrief();
+    uint8_t getTupleSize();
+    uint16_t getTupleCount();
+
+    void validate();
+    void load();
+    void save();
+
+    void init();
+    void render();
+
+    void deserialize(DynamicJsonDocument &json);
+    String serialize(boolean pretty);
 };
 
 // Cycle counter
