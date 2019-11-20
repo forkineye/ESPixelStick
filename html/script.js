@@ -38,134 +38,23 @@ $(function() {
             $('#update').modal();
         });
 
-        // Color Picker
-        $('.color').colorPicker({
-            buildCallback: function($elm) {
-                var colorInstance = this.color;
-                var colorPicker = this;
-
-                $elm.append('<div class="cp-memory">' +
-                    '<div style="background-color: #FFFFFF";></div>' +
-                    '<div style="background-color: #FF0000";></div>' +
-                    '<div style="background-color: #00FF00";></div>' +
-                    '<div style="background-color: #0000FF";></div>').
-                on('click', '.cp-memory div', function(e) {
-                    var $this = $(this);
-
-                    if (this.className) {
-                        $this.parent().prepend($this.prev()).children().eq(0).
-                            css('background-color', '#' + colorInstance.colors.HEX);
-                    } else {
-                        colorInstance.setColor($this.css('background-color'));
-                        colorPicker.render();
-                    }
-                });
-
-                this.$colorPatch = $elm.prepend('<div class="cp-disp">').find('.cp-disp');
-            },
-
-            cssAddon:
-                '.cp-memory {margin-bottom:6px; clear:both;}' +
-                '.cp-memory div {float:left; width:25%; height:40px;' +
-                'background:rgba(0,0,0,1); text-align:center; line-height:40px;}' +
-                '.cp-disp{padding:10px; margin-bottom:6px; font-size:19px; height:40px; line-height:20px}' +
-                '.cp-xy-slider{width:200px; height:200px;}' +
-                '.cp-xy-cursor{width:16px; height:16px; border-width:2px; margin:-8px}' +
-                '.cp-z-slider{height:200px; width:40px;}' +
-                '.cp-z-cursor{border-width:8px; margin-top:-8px;}',
-
-            opacity: false,
-
-            renderCallback: function($elm, toggled) {
-                var colors = this.color.colors.RND;
-                var json = {
-                        'r': colors.rgb.r,
-                        'g': colors.rgb.g,
-                        'b': colors.rgb.b
-                    };
-
-                this.$colorPatch.css({
-                    backgroundColor: '#' + colors.HEX,
-                    color: colors.RGBLuminance > 0.22 ? '#222' : '#ddd'
-                }).text(this.color.toString($elm._colorMode)); // $elm.val();
-
-                var tmode = $('#tmode option:selected').val();
-                if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
-                    if (effectInfo[tmode].hasColor) {
-                        wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
-                    }
-                }
-            }
-        });
-
         // Set page event feeds
         //feed();
     });
 
-    // Reverse checkbox
-    $('.reverse').click(function() {
-      // On click(), the new checkbox state has already been set
-      var json = { 'reverse': $(this).prop('checked') };
-      var tmode = $('#tmode option:selected').val();
+    // Drawing canvas - move to diagnostics
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    ctx.font = "20px Arial";
+    ctx.textAlign = "center";
 
-      if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
-          if (effectInfo[tmode].hasReverse) {
-              wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
-          }
-      }
-    });
-
-    // Mirror checkbox
-    $('.mirror').click(function() {
-      // On click(), the new checkbox state has already been set
-      var json = { 'mirror': $(this).prop('checked') };
-      var tmode = $('#tmode option:selected').val();
-
-      if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
-          if (effectInfo[tmode].hasMirror) {
-              wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
-          }
-      }
-    });
-
-    // AllLeds checkbox
-    $('.allleds').click(function() {
-      // On click(), the new checkbox state has already been set
-      var json = { 'allleds': $(this).prop('checked') };
-      var tmode = $('#tmode option:selected').val();
-
-      if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
-          if (effectInfo[tmode].hasAllLeds) {
-              wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
-          }
-      }
-    });
-
-    // Effect speed field
-    $('#t_speed').change(function() {
-      var json = { 'speed': $(this).val() };
-      var tmode = $('#tmode option:selected').val();
-
-      if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
-          wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
-      }
-    });
-
-    // Effect brightness field
-    $('#t_brightness').change(function() {
-      var json = { 'brightness': $(this).val() };
-      var tmode = $('#tmode option:selected').val();
-
-      if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
-          wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
-      }
-    });
-
-    // Test mode toggles
-    $('#tmode').change(hideShowTestSections());
-
+    ////////////////////////////////////////////////////
+    //
+    //  WiFi configuration change callbacks
+    //
+    ////////////////////////////////////////////////////
     // DHCP field toggles
-    $('#dhcp').change(function() {
+    $('#network #dhcp').change(function() {
         if ($(this).is(':checked')) {
             $('.dhcp').addClass('hidden');
        } else {
@@ -173,182 +62,56 @@ $(function() {
        }
     });
 
-    // MQTT field toggles
-    $('#mqtt_topic').keyup(function() {
-        updateMQTTSet();
-    });
-
-    $('#mqtt').click(function() {
-        if ($(this).is(':checked')) {
-            $('.mqtt').removeClass('hidden');
-       } else {
-            $('.mqtt').addClass('hidden');
-       }
-    });
-
-    $('#p_gammaVal').change(function() {
-            sendGamma();
-    });
-    $('#p_briteVal').change(function() {
-            sendGamma();
-    });
-
-    // Gamma graph
-    $('#showgamma').click(function() {
-        if ($(this).is(':checked')) {
-            $('.gammagraph').removeClass('hidden');
-       } else {
-            $('.gammagraph').addClass('hidden');
-       }
-    });
-
-    $('#mqtt_hadisco').click(function() {
-        if ($(this).is(':checked')) {
-            $('#mqtt_haprefix').prop('disabled', false);
-       } else {
-            $('#mqtt_haprefix').prop('disabled', true);
-       }
-    });
-
-
-    // Pixel type toggles
-    $('#p_type').change(function() {
-        if ($('select[name=p_type]').val() == '1') {
-            $('#p_color').prop('disabled', true);
-            $('#o_gamma').addClass('hidden');
-        } else {
-            $('#p_color').prop('disabled', false);
-            $('#o_gamma').removeClass('hidden');
-        }
-    });
-
-    // Serial protocol toggles
-    $('#s_proto').change(function() {
-        var proto = $('#s_proto option:selected').text();
-        if (!proto.localeCompare('DMX512')) {
-            $('#s_baud').prop('disabled', true);
-        } else if (!proto.localeCompare('Renard')) {
-            $('#s_baud').prop('disabled', false);
-        }
-    });
-
     // Hostname, SSID, and Password validation
-    $('#hostname').keyup(function() {
+    $('#network #hostname').keyup(function() {
         wifiValidation();
     });
-    $('#sta_timeout').keyup(function() {
+    $('#network #sta_timeout').keyup(function() {
         wifiValidation();
     });
-    $('#ssid').keyup(function() {
+    $('#network #ssid').keyup(function() {
         wifiValidation();
     });
-    $('#passphrase').keyup(function() {
+    $('#network #passphrase').keyup(function() {
         wifiValidation();
     });
-    $('#ap').change(function () {
+    $('#network #ap').change(function () {
         wifiValidation();
     });
-    $('#dhcp').change(function () {
+    $('#network #dhcp').change(function () {
         wifiValidation();
     });
-    $('#gateway').keyup(function () {
+    $('#network #gateway').keyup(function () {
         wifiValidation();
     });
-    $('#ip').keyup(function () {
+    $('#network #ip').keyup(function () {
         wifiValidation();
     });
-    $('#netmask').keyup(function () {
+    $('#network #netmask').keyup(function () {
         wifiValidation();
     });
 
-    // Grab interface and config on input / output change
-    $('#input').change(function () {
+    ////////////////////////////////////////////////////
+    //
+    //  I/O module configuration change callbacks
+    //
+    ////////////////////////////////////////////////////
+    $('#config #device #input').change(function () {
         $('#imode').load($(this).val() + ".html", function() {
-            wsEnqueue(JSON.stringify({'cmd':{'get':'input'}}));
+            wsEnqueue(JSON.stringify({'cmd':{'get':$('#config #device #input').val()}}));
         });
     });
-    $('#output').change(function () {
+    $('#config #device #output').change(function () {
         $('#omode').load($(this).val() + ".html", function() {
-            wsEnqueue(JSON.stringify({'cmd':{'get':'output'}}));
+            wsEnqueue(JSON.stringify({'cmd':{'get':$('#config #device #output').val()}}));
         });
     });
 
-
-    canvas = document.getElementById("canvas");
-    ctx = canvas.getContext("2d");
-    ctx.font = "20px Arial";
-    ctx.textAlign = "center";
-
-    // autoload tab based on URL hash
+    // Autoload tab based on URL hash
     var hash = window.location.hash;
     hash && $('ul.navbar-nav li a[href="' + hash + '"]').click();
 
 });
-
-function updateMQTTSet() {
-    if ( $('#mqtt_topic').val() ) {
-        $('#mqtt_topicset').val( $('#mqtt_topic').val() + '/set');
-    } else {
-        $('#mqtt_topicset').val( '' );
-    }
-}
-
-function wifiValidation() {
-    var WifiSaveDisabled = false;
-    var re = /^([a-zA-Z0-9][a-zA-Z0-9][a-zA-Z0-9\-.]*[a-zA-Z0-9.])$/;
-    if (re.test($('#hostname').val()) && $('#hostname').val().length <= 255) {
-        $('#fg_hostname').removeClass('has-error');
-    } else {
-        $('#fg_hostname').addClass('has-error');
-        WifiSaveDisabled = true;
-    }
-    if ($('#sta_timeout').val() >= 5) {
-        $('#fg_staTimeout').removeClass('has-error');
-    } else {
-        $('#fg_staTimeout').addClass('has-error');
-        WifiSaveDisabled = true;
-    }
-    if ($('#ssid').val().length <= 32) {
-        $('#fg_ssid').removeClass('has-error');
-    } else {
-        $('#fg_ssid').addClass('has-error');
-        WifiSaveDisabled = true;
-    }
-    if ($('#passphrase').val().length <= 64) {
-        $('#fg_password').removeClass('has-error');
-    } else {
-        $('#fg_password').addClass('has-error');
-        WifiSaveDisabled = true;
-    }
-    if ($('#dhcp').prop('checked') === false) {
-        var iptest = new RegExp(''
-        + /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source
-        + /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source
-        + /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source
-        + /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.source
-        );
-
-        if (iptest.test($('#ip').val())) {
-            $('#fg_ip').removeClass('has-error');
-        } else {
-            $('#fg_ip').addClass('has-error');
-            WifiSaveDisabled = true;
-        }
-        if (iptest.test($('#netmask').val())) {
-            $('#fg_netmask').removeClass('has-error');
-        } else {
-            $('#fg_netmask').addClass('has-error');
-            WifiSaveDisabled = true;
-        }
-        if (iptest.test($('#gateway').val())) {
-            $('#fg_gateway').removeClass('has-error');
-        } else {
-            $('#fg_gateway').addClass('has-error');
-            WifiSaveDisabled = true;
-        }
-    }
-    $('#btn_wifi').prop('disabled', WifiSaveDisabled);
-}
 
 // Page event feeds
 function feed() {
@@ -361,8 +124,67 @@ function feed() {
     }
 }
 
+// Param parser
 function param(name) {
     return (location.search.split(name + '=')[1] || '').split('&')[0];
+}
+
+// WiFi validation routines
+function wifiValidation() {
+    var WifiSaveDisabled = false;
+    var re = /^([a-zA-Z0-9][a-zA-Z0-9][a-zA-Z0-9\-.]*[a-zA-Z0-9.])$/;
+    if (re.test($('#network #hostname').val()) && $('#network #hostname').val().length <= 255) {
+        $('#network #fg_hostname').removeClass('has-error');
+    } else {
+        $('#network #fg_hostname').addClass('has-error');
+        WifiSaveDisabled = true;
+    }
+    if ($('#network #sta_timeout').val() >= 5) {
+        $('#network #fg_staTimeout').removeClass('has-error');
+    } else {
+        $('#network #fg_staTimeout').addClass('has-error');
+        WifiSaveDisabled = true;
+    }
+    if ($('#network #ssid').val().length <= 32) {
+        $('#network #fg_ssid').removeClass('has-error');
+    } else {
+        $('#network #fg_ssid').addClass('has-error');
+        WifiSaveDisabled = true;
+    }
+    if ($('#network #passphrase').val().length <= 64) {
+        $('#network #fg_password').removeClass('has-error');
+    } else {
+        $('#network #fg_password').addClass('has-error');
+        WifiSaveDisabled = true;
+    }
+    if ($('#network #dhcp').prop('checked') === false) {
+        var iptest = new RegExp(''
+        + /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source
+        + /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source
+        + /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\./.source
+        + /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.source
+        );
+
+        if (iptest.test($('#network #ip').val())) {
+            $('#network #fg_ip').removeClass('has-error');
+        } else {
+            $('#network #fg_ip').addClass('has-error');
+            WifiSaveDisabled = true;
+        }
+        if (iptest.test($('#network #networkmask').val())) {
+            $('#network #fg_netmask').removeClass('has-error');
+        } else {
+            $('#network #fg_netmask').addClass('has-error');
+            WifiSaveDisabled = true;
+        }
+        if (iptest.test($('#network #gateway').val())) {
+            $('#network #fg_gateway').removeClass('has-error');
+        } else {
+            $('#network #fg_gateway').addClass('has-error');
+            WifiSaveDisabled = true;
+        }
+    }
+    $('#network #btn_wifi').prop('disabled', WifiSaveDisabled);
 }
 
 // Builds jQuery selectors from JSON data and updates the web interface
@@ -406,7 +228,83 @@ function addOptionDataFromJSON(obj) {
     }
 }
 
-// WebSockets
+// Buils JSON config submission for "WiFi" tab - Needs updated
+function submitWiFiConfig() {
+    var ip = $('#ip').val().split('.');
+    var netmask = $('#netmask').val().split('.');
+    var gateway = $('#gateway').val().split('.');
+
+    var json = {
+            'network': {
+                'ssid': $('#ssid').val(),
+                'passphrase': $('#passphrase').val(),
+                'hostname': $('#hostname').val(),
+                'sta_timeout': $('#sta_timeout').val(),
+                'ip': [parseInt(ip[0]), parseInt(ip[1]), parseInt(ip[2]), parseInt(ip[3])],
+                'netmask': [parseInt(netmask[0]), parseInt(netmask[1]), parseInt(netmask[2]), parseInt(netmask[3])],
+                'gateway': [parseInt(gateway[0]), parseInt(gateway[1]), parseInt(gateway[2]), parseInt(gateway[3])],
+                'dhcp': $('#dhcp').prop('checked'),
+                'ap_fallback': $('#ap').prop('checked')
+            }
+        };
+    wsEnqueue('S1' + JSON.stringify(json));
+}
+
+// Build dynamic JSON config submission for "Device" tab
+function submitDeviceConfig() {
+    // Build input mode JSON data for submission
+    var input = $('#config #device #input').val();
+    var inputJson = {};
+    var inputids = $('#config #imode :input').map(function () {
+        return $(this).attr('id');
+    }).get();
+
+    inputids.forEach(function (id) {
+        var select = '#config #imode #' + id;
+        if ($(select).is(':checkbox')) {
+            inputJson[id] = $(select).prop('checked');
+        } else {
+            inputJson[id] = $(select).val();
+        }
+    });
+
+    // Build output mode JSON data for submission
+    var output = $('#config #device #output').val();
+    var outputJson = {};
+        var outputids = $('#config #omode :input').map(function () {
+        return $(this).attr('id');
+    }).get();
+
+    outputids.forEach(function (id) {
+        var select = '#config #omode #' + id;
+        if ($(select).is(':checkbox')) {
+            outputJson[id] = $(select).prop('checked');
+        } else {
+            outputJson[id] = $(select).val();
+        }
+    });
+
+    var json = {
+        'device': {
+            'id': $('#config #device #id').val(),
+            'input': input,
+            'output': output
+        },
+
+        [input]: inputJson,
+
+        [output]: outputJson
+    }
+
+    wsEnqueue(JSON.stringify({'cmd':{'set': json}}));
+}
+
+////////////////////////////////////////////////////
+//
+//  Websocket stuff
+//
+////////////////////////////////////////////////////
+// On websocket connect
 function wsConnect() {
     if ('WebSocket' in window) {
 
@@ -419,33 +317,15 @@ function wsConnect() {
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');
         ws.binaryType = 'arraybuffer';
-/*
+
+        // When connection is opened, get core data.
+        // Module data is loaded in module change / load callbacks
         ws.onopen = function() {
             $('#wserror').modal('hide');
-            wsEnqueue('E1'); // Get html elements
-            wsEnqueue('G1'); // Get Config
-            wsEnqueue('G2'); // Get Net Status
-            wsEnqueue('G3'); // Get Effect Info
-            wsEnqueue('G4'); // Get Gamma Table
-
-            feed();
-        };
-*/
-
-        // When connection is opened, get raw element data, option data, the config data in that order
-        ws.onopen = function() {
-            $('#wserror').modal('hide');
-//            wsEnqueue(JSON.stringify({'cmd':{'ele':'core'}}));      // Get core element data
-            wsEnqueue(JSON.stringify({'cmd':{'opt':'core'}}));      // Get core option data
-            wsEnqueue(JSON.stringify({'cmd':{'get':'core'}}));      // Get core config
-
-//            wsEnqueue(JSON.stringify({'cmd':{'ele':'input'}}));     // Get input element data
-//            wsEnqueue(JSON.stringify({'cmd':{'opt':'input'}}));     // Get input option data
-//            wsEnqueue(JSON.stringify({'cmd':{'get':'input'}}));     // Get input config
-
-//            wsEnqueue(JSON.stringify({'cmd':{'ele':'output'}}));    // Get output element data
-//            wsEnqueue(JSON.stringify({'cmd':{'opt':'output'}}));    // Get output option data
-//            wsEnqueue(JSON.stringify({'cmd':{'get':'output'}}));    // Get output config
+            wsEnqueue(JSON.stringify({'cmd':{'get':'network'}}));   // Get network config
+            wsEnqueue(JSON.stringify({'cmd':{'opt':'device'}}));    // Get device option data
+            wsEnqueue(JSON.stringify({'cmd':{'get':'device'}}));    // Get device config
+            //feed();
         };
 
         ws.onmessage = function (event) {
@@ -467,28 +347,11 @@ function wsConnect() {
                         updateFromJSON(msg.set);
                     }
 
-                    // "ELE" message is raw data to be inserted at given node
-                    if (msg.hasOwnProperty("ele")) {
-                        console.log("ELEMENT DATA: " + msg.ele);
-                    }
-
                     // "OPT" message is select option data
                     if (msg.hasOwnProperty("opt")) {
                         addOptionDataFromJSON(msg.opt);
                     }
 
-//                    $('#s_count').val(config.e131.channel_count);
-
-                    /*
-                    switch (msg.type) {
-                        case 'get':
-                            console.log("*** JSON get ***");
-                            break;
-                        case 'set':
-                            console.log("*** JSON set ***");
-                            break;
-                    }
-                    */
                 }
 /*
                 var cmd = event.data.substr(0, 2);
@@ -550,6 +413,7 @@ function wsConnect() {
     }
 }
 
+// Websocket message queuer
 function wsEnqueue(message) {
     //only add a message to the queue if there isn't already one of the same type already queued, otherwise update the message with the latest request.
 //    var wsQueueIndex = wsQueue.findIndex(wsCheckQueue,message);
@@ -563,11 +427,13 @@ function wsEnqueue(message) {
     wsProcessQueue();
 }
 
+// Websocket message queuer
 function wsCheckQueue(value) {
     //messages are of the same type if the first two characters match
     return value.substr(0,2)==this.substr(0,2);
 }
 
+// Websocket message queuer
 function wsProcessQueue() {
     //check if currently waiting for a response
     if(wsBusy) {
@@ -590,6 +456,7 @@ function wsProcessQueue() {
     }
 }
 
+// Websocket message queuer
 function wsReadyToSend() {
     clearTimeout(wsTimerId);
     wsBusy=false;
@@ -601,6 +468,7 @@ function wsReadyToSend() {
     }
 }
 
+// Move to diagnostics
 function drawStream(streamData) {
     var cols=parseInt($('#v_columns').val());
     var size=Math.floor((canvas.width-20)/cols);
@@ -630,32 +498,21 @@ function drawStream(streamData) {
 
 }
 
+// Move to diagnostics
 function clearStream() {
     if (typeof ctx !== 'undefined') {
      ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 }
 
-function getElements(data) {
-    var elements = JSON.parse(data);
-
-    for (var i in elements) {
-        for (var j in elements[i]) {
-            var opt = document.createElement('option');
-            opt.text = j;
-            opt.value = elements[i][j];
-            document.getElementById(i).add(opt);
-        }
-    }
-}
-
+// Remove?
 function getConfig(data) {
     var config = JSON.parse(data);
 
     // Device and Network config
     $('#title').text('ESPS - ' + config.device.id);
     $('#name').text(config.device.id);
-    $('#devid').val(config.device.id);
+    $('#deviceid').val(config.device.id);
     $('#ssid').val(config.network.ssid);
     $('#passphrase').val(config.network.passphrase);
     $('#hostname').val(config.network.hostname);
@@ -759,6 +616,7 @@ function getConfig(data) {
     }
 }
 
+// Needs updated
 function getConfigStatus(data) {
     var status = JSON.parse(data);
 
@@ -774,41 +632,7 @@ function getConfigStatus(data) {
     $('#x_freeheap').text(status.freeheap);
 }
 
-function getEffectInfo(data) {
-    parsed = JSON.parse(data);
-
-    effectInfo = parsed.effectList;	// global effectInfo
-    var running = parsed.currentEffect;
-
-//  console.log (effectInfo);
-//  console.log (effectInfo.t_chase);
-
-    // process the effect configuration options
-    $('#tmode').empty(); // clear the dropdown first
-    for (var i in effectInfo) {
-        var htmlid = effectInfo[i].htmlid;
-        var name =   effectInfo[i].name;
-        $('#tmode').append('<option value="' + htmlid + '">' + name + '</option>');
-        if ( ! name.localeCompare(running.name) ) {
-            $('#tmode').val(htmlid);
-            hideShowTestSections();
-        }
-    }
-
-    // set html based on current running effect
-    $('.color').val('rgb(' + running.r + ',' + running.g + ',' + running.b + ')');
-    $('.color').css('background-color', 'rgb(' + running.r + ',' + running.g + ',' + running.b + ')');
-    $('#t_reverse').prop('checked', running.reverse);
-    $('#t_mirror').prop('checked', running.mirror);
-    $('#t_allleds').prop('checked', running.allleds);
-    $('#t_speed').val(running.speed);
-    $('#t_brightness').val(running.brightness);
-    $('#t_startenabled').prop('checked', running.startenabled);
-    $('#t_idleenabled').prop('checked', running.idleenabled);
-    $('#t_idletimeout').val(running.idletimeout);
-
-}
-
+// Needs updated
 function getJsonStatus(data) {
     var status = JSON.parse(data);
 
@@ -845,25 +669,8 @@ function getJsonStatus(data) {
     $('#clientip').text(status.e131.last_clientIP);
 }
 
-function refreshGamma(data) {
-    var gammaData = JSON.parse(data);
-
-    var polyline = document.getElementById('cracker');
-    var points = polyline.getAttribute('points');
-
-    points = "";
-    for (X=0; X<256; X++) {
-	var Y = 255-gammaData.gamma[X];
-	points += X + ", "+ Y +" ";
-//	console.log ( X + ", "+ Y +" ") ;
-
-    }
-
-    polyline.setAttribute('points', points);
-}
-
+// Show "save" snackbar for 3sec
 function snackSave() {
-    // Show snackbar for 3sec
     var x = document.getElementById('snackbar');
     x.className = 'show';
     setTimeout(function(){
@@ -871,195 +678,14 @@ function snackSave() {
     }, 3000);
 }
 
+// Needs updated
 function setConfig() {
     // Get config to refresh UI and show result
     wsEnqueue("G1");
     snackSave();
 }
 
-function submitWiFi() {
-    var ip = $('#ip').val().split('.');
-    var netmask = $('#netmask').val().split('.');
-    var gateway = $('#gateway').val().split('.');
-
-    var json = {
-            'network': {
-                'ssid': $('#ssid').val(),
-                'passphrase': $('#passphrase').val(),
-                'hostname': $('#hostname').val(),
-                'sta_timeout': $('#sta_timeout').val(),
-                'ip': [parseInt(ip[0]), parseInt(ip[1]), parseInt(ip[2]), parseInt(ip[3])],
-                'netmask': [parseInt(netmask[0]), parseInt(netmask[1]), parseInt(netmask[2]), parseInt(netmask[3])],
-                'gateway': [parseInt(gateway[0]), parseInt(gateway[1]), parseInt(gateway[2]), parseInt(gateway[3])],
-                'dhcp': $('#dhcp').prop('checked'),
-                'ap_fallback': $('#ap').prop('checked')
-            }
-        };
-    wsEnqueue('S1' + JSON.stringify(json));
-}
-
-// Build dynamic JSON config submission for "Device Config" tab
-function submitConfig() {
-    var input = $('#config #device #input').val();
-    var inputJson = {};
-    var inputids = $('#config #imode :input').map(function () {
-        return $(this).attr('id');
-    }).get();
-
-    inputids.forEach(function (id) {
-        var select = '#config #imode #' + id;
-        if ($(select).is(':checkbox')) {
-            inputJson[id] = $(select).prop('checked');
-        } else {
-            inputJson[id] = $(select).val();
-        }
-    });
-
-    var output = $('#config #device #output').val();
-    var outputJson = {};
-        var outputids = $('#config #omode :input').map(function () {
-        return $(this).attr('id');
-    }).get();
-
-    outputids.forEach(function (id) {
-        var select = '#config #omode #' + id;
-        if ($(select).is(':checkbox')) {
-            outputJson[id] = $(select).prop('checked');
-        } else {
-            outputJson[id] = $(select).val();
-        }
-    });
-
-    var json = {
-        'device': {
-            'id': $('#config #device #id').val(),
-            'input': input,
-            'output': output
-        },
-
-        [input]: inputJson,
-
-        [output]: outputJson
-    }
-
-//    console.log(JSON.stringify(json));
-//    wsEnqueue('S2' + JSON.stringify(json));
-    wsEnqueue(JSON.stringify({'cmd':{'set': json}}));
-}
-
-function submitStartupEffect() {
-// not pretty - get current r,g,b from color picker
-    var temp = $('.color').val().split(/\D+/);
-
-    var currentEffectName = effectInfo[ $('#tmode option:selected').val() ].name;
-//console.log (currentEffectName);
-
-    var json = {
-            'effects': {
-                'name': currentEffectName,
-                'mirror': $('#t_mirror').prop('checked'),
-                'allleds': $('#t_allleds').prop('checked'),
-                'reverse': $('#t_reverse').prop('checked'),
-                'speed': parseInt($('#t_speed').val()),
-                'r': temp[1],
-                'g': temp[2],
-                'b': temp[3],
-                'brightness': parseFloat($('#t_brightness').val()),
-                'startenabled': $('#t_startenabled').prop('checked'),
-                'idleenabled': $('#t_idleenabled').prop('checked'),
-                'idletimeout': parseInt($('#t_idletimeout').val())
-
-            }
-        };
-
-    wsEnqueue('S3' + JSON.stringify(json));
-}
-
-function refreshPixel() {
-    var proto = $('#p_type option:selected').text();
-    var size = parseInt($('#p_count').val());
-    var frame = 30;
-    var idle = 300;
-
-    if (!proto.localeCompare('WS2811 800kHz')) {
-        frame = 30;
-        idle = 300;
-    } else if (!proto.localeCompare('GE Color Effects')) {
-        frame = 790;
-        idle = 35;
-    }
-
-    var rate = (frame * size + idle) / 1000;
-    var hz = 1000 / rate;
-    $('#refresh').html(Math.ceil(rate) + 'ms / ' + Math.floor(hz) + 'Hz');
-}
-
-function refreshSerial() {
-    var proto = $('#s_proto option:selected').text();
-    var baud = parseInt($('#s_baud').val());
-    var size = parseInt($('#s_count').val());
-    var symbol = 11;
-    if (!proto.localeCompare('Renard')) {
-        symbol = 10;
-        size = size + 2;
-        $('#s_baud').prop('disabled', false);
-    } else if (!proto.localeCompare('DMX512')) {
-        symbol = 11;
-        baud = 250000;
-        $('#s_baud').val(baud);
-        $('#s_baud').prop('disabled', true);
-    }
-    var rate = symbol * 1000 / baud * size;
-    var hz = 1000 / rate;
-    $('#refresh').html(Math.ceil(rate) + 'ms / ' + Math.floor(hz) + 'Hz');
-}
-
-function hideShowTestSections() {
-    // Test mode toggles
-//    $('.tdiv').addClass('hidden');
-//    $('#'+$('select[name=tmode]').val()).removeClass('hidden');
-
-    var tmode = $('#tmode option:selected').val();
-//console.log('tmode is: ' + tmode);
-    if ( (typeof tmode !== 'undefined') && (typeof effectInfo[tmode].wsTCode !== 'undefined') ) {
-// hide/show view stream and testing options+startup
-        if (effectInfo[tmode].hasColor) {
-            $('#lab_color').removeClass('hidden');
-            $('#div_color').removeClass('hidden');
-	} else {
-            $('#lab_color').addClass('hidden');
-            $('#div_color').addClass('hidden');
-        }
-        if (effectInfo[tmode].hasMirror) {
-            $('#div_mirror').removeClass('hidden');
-	} else {
-            $('#div_mirror').addClass('hidden');
-        }
-        if (effectInfo[tmode].hasReverse) {
-            $('#div_reverse').removeClass('hidden');
-	} else {
-            $('#div_reverse').addClass('hidden');
-        }
-        if (effectInfo[tmode].hasAllLeds) {
-            $('#div_allleds').removeClass('hidden');
-	} else {
-            $('#div_allleds').addClass('hidden');
-        }
-    }
-}
-
-// effect selector changed
-function effectChanged() {
-    hideShowTestSections();
-
-    var tmode = $('#tmode option:selected').val();
-
-//console.log ('found tcode ' + effectInfo[tmode].wsTCode);
-    if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
-        wsEnqueue( effectInfo[tmode].wsTCode );
-    }
-}
-
+// Show reboot modal
 function showReboot() {
     $('#update').modal('hide');
     $('#reboot').modal();
@@ -1072,22 +698,8 @@ function showReboot() {
     }, 5000);
 }
 
+// Queue reboot
 function reboot() {
     showReboot();
     wsEnqueue('X6');
-}
-
-function getKeyByValue(obj, value) {
-    return Object.keys(obj)[Object.values(obj).indexOf(value)];
-}
-
-function sendGamma() {
-    var json = {
-        'pixel': {
-            'gammaVal': parseFloat($('#p_gammaVal').val()),
-            'briteVal': parseFloat($('#p_briteVal').val())
-        }
-    }
-    wsEnqueue('S4' + JSON.stringify(json));
-    wsEnqueue('G4'); // Get Gamma Table
 }

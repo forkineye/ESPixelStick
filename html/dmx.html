@@ -5,3 +5,27 @@
         <div class="col-sm-10"><input type="text" class="form-control" id="channel_count" title="Number of channels." onchange="refreshSerial()"></div>
     </div>
 </div>
+
+<script>
+
+function refreshSerial() {
+    var proto = $('#s_proto option:selected').text();
+    var baud = parseInt($('#s_baud').val());
+    var size = parseInt($('#s_count').val());
+    var symbol = 11;
+    if (!proto.localeCompare('Renard')) {
+        symbol = 10;
+        size = size + 2;
+        $('#s_baud').prop('disabled', false);
+    } else if (!proto.localeCompare('DMX512')) {
+        symbol = 11;
+        baud = 250000;
+        $('#s_baud').val(baud);
+        $('#s_baud').prop('disabled', true);
+    }
+    var rate = symbol * 1000 / baud * size;
+    var hz = 1000 / rate;
+    $('#refresh').html(Math.ceil(rate) + 'ms / ' + Math.floor(hz) + 'Hz');
+}
+
+</script>

@@ -294,11 +294,15 @@ void connectWifi() {
         LOG_PORT.print(F("Connecting with DHCP"));
     } else {
         // We don't use DNS, so just set it to our gateway
-        IPAddress ip = ip.fromString(config.ip);
-        IPAddress gateway = gateway.fromString(config.gateway);
-        IPAddress netmask = netmask.fromString(config.netmask);
-        WiFi.config(ip, gateway, netmask, gateway);
-        LOG_PORT.print(F("Connecting with Static IP"));
+        if (!config.ip.isEmpty()) {
+            IPAddress ip = ip.fromString(config.ip);
+            IPAddress gateway = gateway.fromString(config.gateway);
+            IPAddress netmask = netmask.fromString(config.netmask);
+            WiFi.config(ip, gateway, netmask, gateway);
+            LOG_PORT.print(F("Connecting with Static IP"));
+        } else {
+            LOG_PORT.println(F("** ERROR - STATIC SELECTED WITHOUT IP **"));
+        }
     }
 }
 

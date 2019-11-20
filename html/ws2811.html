@@ -57,3 +57,68 @@
         </div>
     </div>
 </div>
+
+<script>
+
+// Gamma graph
+$('#ws2811 #showgamma').click(function() {
+    if ($(this).is(':checked')) {
+        $('.gammagraph').removeClass('hidden');
+    } else {
+        $('.gammagraph').addClass('hidden');
+    }
+});
+
+// Gamma graph
+$('#ws2811 #gamma').change(function() {
+    sendGamma();
+});
+$('#ws2811 #brightness').change(function() {
+    sendGamma();
+});
+
+function sendGamma() {
+    var json = {
+        'pixel': {
+            'gammaVal': parseFloat($('#p_gammaVal').val()),
+            'briteVal': parseFloat($('#p_briteVal').val())
+        }
+    }
+//    wsEnqueue('S4' + JSON.stringify(json));
+//    wsEnqueue('G4'); // Get Gamma Table
+}
+
+function refreshGamma(data) {
+    var gammaData = JSON.parse(data);
+    var polyline = document.getElementById('cracker');
+    var points = polyline.getAttribute('points');
+
+    points = "";
+    for (X=0; X<256; X++) {
+        var Y = 255-gammaData.gamma[X];
+        points += X + ", "+ Y +" ";
+    }
+
+    polyline.setAttribute('points', points);
+}
+
+function refreshPixel() {
+    var proto = $('#p_type option:selected').text();
+    var size = parseInt($('#p_count').val());
+    var frame = 30;
+    var idle = 300;
+
+    if (!proto.localeCompare('WS2811 800kHz')) {
+        frame = 30;
+        idle = 300;
+    } else if (!proto.localeCompare('GE Color Effects')) {
+        frame = 790;
+        idle = 35;
+    }
+
+    var rate = (frame * size + idle) / 1000;
+    var hz = 1000 / rate;
+    $('#refresh').html(Math.ceil(rate) + 'ms / ' + Math.floor(hz) + 'Hz');
+}
+
+</script>

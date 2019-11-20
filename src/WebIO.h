@@ -85,8 +85,8 @@ class WebIO {
 
     /// Process JSON messages
     static void procJSON(uint8_t *data, AsyncWebSocketClient *client) {
+//LOG_PORT.printf("procJSON heap stats: %d:%d:%d\n", ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize());
         DynamicJsonDocument json(1024);
-
         DeserializationError error = deserializeJson(json, reinterpret_cast<char*>(data));
         if (error) {
             LOG_PORT.println(F("*** WebIO::procJSON(): Parse Error ***"));
@@ -98,23 +98,71 @@ class WebIO {
          * - get: returns requested configuration
          * - set: receive and applies configuration
          * - opt: returns select option lists
-         * - ele: returns raw element data to build elements
          */
         if (json.containsKey("cmd")) {
-            String target;
-
             // Process "GET" command - return requested configuration as JSON
-            if (target = json["cmd"]["get"].as<String>()) {
-                if (target.equalsIgnoreCase("core")) {
+            if (json["cmd"]["get"]) {
+                String target = json["cmd"]["get"].as<String>();
+                if (target.equalsIgnoreCase("device")) {
                     String jsonString;
                     serializeCore(jsonString, false, true);
                     client->text("{\"get\":" + jsonString + "}");
                 }
-                if (target.equalsIgnoreCase("input"))
-                    client->text("{\"get\":" + input->serialize() + "}");
-                if (target.equalsIgnoreCase("output"))
-                    client->text("{\"get\":" + output->serialize() + "}");
+
+                if (target.equalsIgnoreCase("network")) {
+                    String jsonString;
+                    serializeCore(jsonString, false, true);
+                    client->text("{\"get\":" + jsonString + "}");
+                }
+
+                itInput = INPUT_MODES.find(target);
+                if (itInput != INPUT_MODES.end()) {
+                    if (!itInput->first.equalsIgnoreCase(input->getKey()))
+                        itInput->second->load();
+                    client->text("{\"get\":" + itInput->second->serialize() + "}");
+                }
+
+                itOutput = OUTPUT_MODES.find(target);
+                if (itOutput != OUTPUT_MODES.end()) {
+                    if (!itOutput->first.equalsIgnoreCase(output->getKey()))
+                        itOutput->second->load();
+                    client->text("{\"get\":" + itOutput->second->serialize() + "}");
+                }
             }
+
+            // Generate select option list data
+            if (json["cmd"]["opt"]) {
+                String target = json["cmd"]["opt"].as<String>();
+                if (target.equalsIgnoreCase("device")) {
+                    DynamicJsonDocument json(1024);
+                    JsonObject device = json.createNestedObject("device");
+                    JsonArray input = device.createNestedArray("input");
+                    JsonArray output = device.createNestedArray("output");
+
+                    itInput = INPUT_MODES.begin();
+                    while (itInput != INPUT_MODES.end()) {
+                        JsonObject data = input.createNestedObject();
+                        data[itInput->first.c_str()] =  itInput->second->getBrief();
+                        itInput++;
+                    }
+
+                    itOutput = OUTPUT_MODES.begin();
+                    while (itOutput != OUTPUT_MODES.end()) {
+                        JsonObject data = output.createNestedObject();
+                        data[itOutput->first.c_str()] =  itOutput->second->getBrief();
+                        itOutput++;
+                    }
+
+                    String jsonString;
+                    serializeJson(json, jsonString);
+                    client->text("{\"opt\":" + jsonString + "}");
+                }
+                if (target.equalsIgnoreCase("input"))
+                    LOG_PORT.println("*** WebIO opt input ***");
+                if (target.equalsIgnoreCase("output"))
+                    LOG_PORT.println("*** WebIO opt output ***");
+            }
+        }
 
             // Process "SET" command - receive configuration as JSON
             if (JsonObject root = json["cmd"]["set"].as<JsonObject>()) {
@@ -145,73 +193,6 @@ class WebIO {
                 }
                 saveConfig();
             }
-
-            // Generate select option list data
-            if (target = json["cmd"]["opt"].as<String>()) {
-                if (target.equalsIgnoreCase("core")) {
-                    DynamicJsonDocument json(1024);
-                    JsonObject core = json.createNestedObject("device");
-                    JsonArray input = core.createNestedArray("input");
-                    JsonArray output = core.createNestedArray("output");
-
-                    itInput = INPUT_MODES.begin();
-                    while (itInput != INPUT_MODES.end()) {
-                        JsonObject data = input.createNestedObject();
-                        data[itInput->first.c_str()] =  itInput->second->getBrief();
-                        itInput++;
-                    }
-
-                    itOutput = OUTPUT_MODES.begin();
-                    while (itOutput != OUTPUT_MODES.end()) {
-                        JsonObject data = output.createNestedObject();
-                        data[itOutput->first.c_str()] =  itOutput->second->getBrief();
-                        itOutput++;
-                    }
-
-                    String jsonString;
-                    serializeJson(json, jsonString);
-                    client->text("{\"opt\":" + jsonString + "}");
-                }
-                if (target.equalsIgnoreCase("input"))
-                    LOG_PORT.println("*** WebIO opt input ***");
-                if (target.equalsIgnoreCase("output"))
-                    LOG_PORT.println("*** WebIO opt output ***");
-            }
-
-
-            // Process "ELE" command - return requested element data as JSON
-            if (target = json["cmd"]["ele"].as<String>()) {
-                if (target.equalsIgnoreCase("core")) {
-                    DynamicJsonDocument json(1024);
-                    JsonObject core = json.createNestedObject("core");
-                    JsonArray input = core.createNestedArray("input");
-                    JsonArray output = core.createNestedArray("output");
-
-                    itInput = INPUT_MODES.begin();
-                    while (itInput != INPUT_MODES.end()) {
-                        input.add(itInput->first);
-                        itInput++;
-                    }
-
-                    itOutput = OUTPUT_MODES.begin();
-                    while (itOutput != OUTPUT_MODES.end()) {
-                        output.add(itOutput->first);
-                        itOutput++;
-                    }
-
-                    String jsonString;
-                    serializeJson(json, jsonString);
-                    client->text("{\"ele\":" + jsonString + "}");
-                }
-                if (target.equalsIgnoreCase("input"))
-                    LOG_PORT.println("*** WebIO ele input ***");
-                if (target.equalsIgnoreCase("output"))
-                    LOG_PORT.println("*** WebIO ele output ***");
-            }
-
-        }
-
-
 
 /* From wshandler:
         bool reboot = false;

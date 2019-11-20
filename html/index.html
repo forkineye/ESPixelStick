@@ -6,12 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title id="title"></title>
 <!-- for local development -->
-<!--
+
   <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
   <link rel="stylesheet" type="text/css" href="style.css">
--->
+<!--
   <link rel="stylesheet" type="text/css" href="esps.css">
-
+-->
 </head>
 
 <body>
@@ -122,7 +122,7 @@
         </fieldset>
         <div class="form-group">
           <div class="col-sm-offset-2 col-sm-10">
-            <button id="btn_wifi" type="button" onclick="submitWiFi()" class="btn btn-primary" disabled>Save Changes</button>
+            <button id="btn_wifi" type="button" onclick="submitWiFiConfig()" class="btn btn-primary" disabled>Save Changes</button>
           </div>
         </div>
       </form>
@@ -167,7 +167,7 @@
         <!-- Device Config Save -->
         <div class="form-group">
           <div class="col-sm-offset-2 col-sm-10">
-            <button type="button" onclick="submitConfig()" class="btn btn-primary">Save Changes</button>
+            <button type="button" onclick="submitDeviceConfig()" class="btn btn-primary">Save Changes</button>
           </div>
         </div>
       </form>
@@ -179,42 +179,6 @@
 
         <!-- MQTT Configuration -->
         <fieldset>
-          <legend class="esps-legend">MQTT Configuration</legend>
-          <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-              <div class="checkbox"><label><input type="checkbox" id="mqtt" name="mqtt"> Enable MQTT</label></div>
-            </div>
-          </div>
-          <div class="form-group mqtt">
-            <label class="control-label col-sm-2" for="mqtt_ip">Broker IP</label>
-            <div class="col-sm-3"><input type="text" class="form-control" id="mqtt_ip" name="mqtt_ip" title="MQTT Broker IP."></div>
-            <label class="control-label col-sm-2" for="mqtt_port">Broker Port</label>
-            <div class="col-sm-3"><input type="text" class="form-control" id="mqtt_port" name="mqtt_port" title="MQTT Broker Port."></div>
-          </div>
-          <div class="form-group mqtt">
-            <label class="control-label col-sm-2" for="mqtt_user">User</label>
-            <div class="col-sm-3"><input type="text" class="form-control" id="mqtt_user" name="mqtt_user" title="MQTT Username (optional)."></div>
-            <label class="control-label col-sm-2" for="mqtt_password">Password</label>
-            <div class="col-sm-3"><input type="text" class="form-control" id="mqtt_password" name="mqtt_password" title="MQTT Password (optional)."></div>
-          </div>
-          <div class="form-group mqtt">
-            <label class="control-label col-sm-2" for="mqtt_topic">Status Topic</label>
-            <div class="col-sm-3"><input type="text" class="form-control" id="mqtt_topic" name="mqtt_topic" title="MQTT Status Topic. Control topic will be appended with /set."></div>
-            <label class="control-label col-sm-2" for="mqtt_topicset">Set Topic</label>
-            <div class="col-sm-3"><input type="text" class="form-control" id="mqtt_topicset" name="mqtt_topicset" title="MQTT Set Topic." readonly="true"></div>
-          </div>
-          <div class="form-group mqtt">
-            <label class="control-label col-sm-2" for="mqtt_haprefix">Home Assistant Prefix</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_haprefix" name="mqtt_haprefix" title="Prefix used for Home Assistant Discovery"></div>
-          </div>
-          <div class="form-group mqtt">
-            <div class="col-sm-offset-2 col-sm-10">
-              <div class="checkbox"><label><input type="checkbox" id="mqtt_hadisco" name="mqtt_hadisco" title="Enables auto-discovery by Home Assistant."> Home Assistant Discovery</label></div>
-            </div>
-            <div class="col-sm-offset-2 col-sm-10">
-              <div class="checkbox"><label><input type="checkbox" id="mqtt_clean" name="mqtt_clean"> Clean Session</label></div>
-            </div>
-          </div>
         </fieldset>
       </form>
     </div>
@@ -222,73 +186,6 @@
     <!-- Effects configuration -->
     <div id="effects" class="mdiv hidden anchor">
       <fieldset>
-        <form class="form-horizontal" onsubmit="return false">
-
-          <!-- Effect Options -->
-          <div id="t_options">
-            <legend class="esps-legend">Effect Options</legend>
-            <div class="form-group">
-              <label class="control-label col-sm-2" for="t_mode">Effect</label>
-              <div class="col-sm-10">
-                <select class="form-control" id="tmode" name="tmode" onchange="effectChanged()">
-                </select>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="control-label col-sm-2" id="lab_color" for="t_color">Color</label>
-              <div class="col-sm-10" id="div_color">
-                <input type="button" id="t_color" class="form-control color no-alpha" value="rgb(255,255,255)" />
-              </div>
-            </div>
-
-            <div class="form-group">
-              <div class="col-sm-offset-2 col-sm-10" id="div_reverse">
-                <div class="checkbox"><label><input type="checkbox" id="t_reverse" class="reverse" name="t_reverse">Reverse pattern</label></div>
-              </div>
-              <div class="col-sm-offset-2 col-sm-10" id="div_mirror">
-                <div class="checkbox"><label><input type="checkbox" id="t_mirror" class="mirror" name="t_mirror">Mirror pattern</label></div>
-              </div>
-              <div class="col-sm-offset-2 col-sm-10" id="div_allleds">
-                <div class="checkbox"><label><input type="checkbox" id="t_allleds" class="allleds" name="t_allleds">All leds same </label></div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="control-label col-sm-2" for="t_speed">Effect Speed</label>
-              <div class="col-sm-3"><input type="number" min="1" max="10" step="1" class="form-control" id="t_speed" name="t_speed" title="Effect speed, 1(slowest) to 10 (fastest)"></div>
-              <label class="control-label col-sm-2" for="t_brightness">Effect Brightness</label>
-              <div class="col-sm-3"><input type="number" step="0.1" class="form-control" id="t_brightness" name="t_brightness" title="Effect Brightness"></div>
-            </div>
-          </div>
-
-          <!-- Effect Runtime Config -->
-          <div class="t_startup">
-            <legend class="esps-legend">Effect Runtime</legend>
-            <div class="form-group">
-              <div class="col-sm-offset-2 col-sm-10">
-                <div class="checkbox"><label><input type="checkbox" id="t_startenabled" name="t_startenabled"> Enable at Startup</label></div>
-              </div>
-              <div class="col-sm-offset-2 col-sm-10">
-                <div class="checkbox"><label><input type="checkbox" id="t_idleenabled" name="t_idleenabled"> Enable when Idle</label></div>
-              </div>
-            </div>
-            <div class="form-group" id="fg_udpport">
-              <label class="control-label col-sm-2" for="ssid">Idle Timeout</label>
-              <div class="col-sm-10"><input type="text" class="form-control" id="t_idletimeout" name="t_idletimeout" title="Idle time in seconds before effect starts."></div>
-            </div>
-          </div>
-          <div class="form-group t_startup">
-            <div class="col-sm-offset-2 col-sm-10">
-              <button type="button" onclick="submitStartupEffect()" class="btn btn-primary">Save Changes</button>
-            </div>
-          </div>
-
-          <!-- Display Layout -->
-          <div class="t_layout">
-            <legend class="esps-legend">Display Layout</legend>
-            Placeholder for layout configuration to assist in effect rendering. Selectable type (string, matrix, tree, etc..) and size / orientation where applicable (20x30 matrix - horizontal or veritcal? where does feed start?). Should also be used to render view stream which is moved to the Diagnostics tab.
-          </div>
-
-        </form>
       </fieldset>
     </div>
 
@@ -414,14 +311,14 @@
   </footer>
 
   <!-- for local development -->
-<!--
+
   <script type="text/javascript" src="js/jquery-3.1.1.js"></script>
   <script type="text/javascript" src="js/bootstrap.js"></script>
   <script type="text/javascript" src="js/jqColorPicker.js"></script>
   <script type="text/javascript" src="script.js"></script>
--->
+<!--
   <script type="text/javascript" src="esps.js"></script>
-
+-->
   <script>
     wsConnect();
   </script>
