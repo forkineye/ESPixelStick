@@ -446,11 +446,9 @@ void onMqttMessage(char* topic, char* payload,
     
     DynamicJsonDocument r(1024);
     DeserializationError error = deserializeJson(r, payload);
-    LOG_PORT.println(payload);
 
     if (error) {
         LOG_PORT.println("MQTT: Parsing failed");
-        LOG_PORT.println(payload);
         return;
     }
 
