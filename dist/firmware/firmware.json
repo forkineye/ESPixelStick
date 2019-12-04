@@ -13,12 +13,12 @@
             "file": "serial-3.0-1m_128k.bin"
         }
     ],
-    
+
     "devices": [
         {
             "name": "ESP01_1MB_128K",
             "esptool": {
-                "reset": "none",
+                "reset": "nodemcu",
                 "baudrate": "115200",
                 "spiffsloc": "0xDB000"
             },
