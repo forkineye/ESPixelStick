@@ -41,6 +41,14 @@ const char BUILD_DATE[] = __DATE__;
 #include "SerialDriver.h"
 #endif
 
+// LiffleFS and SPIFFS Support
+#if defined(U_FS)
+#include <LittleFS.h>
+#define FILESYSTEM LittleFS
+#else
+#define FILESYSTEM SPIFFS
+#endif
+
 #include "EffectEngine.h"
 
 #define HTTP_PORT       80      /* Default web server port */

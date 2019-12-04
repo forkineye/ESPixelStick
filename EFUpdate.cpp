@@ -29,6 +29,8 @@
  *
  * Substitute the value here, while not breaking things for people using older SDKs.
  */
+#include <LittleFS.h>
+#define FILESYSTEM LittleFS
 #define U_SPIFFS U_FS
 #endif
 

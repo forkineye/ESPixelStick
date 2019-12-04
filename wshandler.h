@@ -391,7 +391,7 @@ void handle_fw_upload(AsyncWebServerRequest *request, String filename,
                 String(efupdate.getError()));
         LOG_PORT.println(F("* Upload Finished."));
         efupdate.end();
-        SPIFFS.begin();
+        FILESYSTEM.begin();
         saveConfig();
         reboot = true;
     }

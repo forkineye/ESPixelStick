@@ -154,8 +154,8 @@ void setup() {
     LOG_PORT.println(")");
     LOG_PORT.println(ESP.getFullVersion());
 
-    // Enable SPIFFS
-    if (!SPIFFS.begin())
+    // Enable the filesystem
+    if (!FILESYSTEM.begin())
     {
         LOG_PORT.println("File system did not initialise correctly");
     }
@@ -165,12 +165,12 @@ void setup() {
     }
 
     FSInfo fs_info;
-    if (SPIFFS.info(fs_info))
+    if (FILESYSTEM.info(fs_info))
     {
         LOG_PORT.print("Total bytes in file system: ");
         LOG_PORT.println(fs_info.usedBytes);
 
-        Dir dir = SPIFFS.openDir("/");
+        Dir dir = FILESYSTEM.openDir("/");
         while (dir.next()) {
           LOG_PORT.print(dir.fileName());
           File f = dir.openFile("r");
@@ -182,7 +182,7 @@ void setup() {
         LOG_PORT.println("Failed to read file system details");
     }
     
-    // Load configuration from SPIFFS and set Hostname
+    // Load configuration from filesystem and set Hostname
     loadConfig();
     if (config.hostname)
         WiFi.hostname(config.hostname);
@@ -604,10 +604,10 @@ void initWeb() {
     }, handle_fw_upload).setFilter(ON_STA_FILTER);
 
     // Static Handler
-    web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
+    web.serveStatic("/", FILESYSTEM, "/www/").setDefaultFile("index.html");
 
     // Raw config file Handler - but only on station
-//  web.serveStatic("/config.json", SPIFFS, "/config.json").setFilter(ON_STA_FILTER);
+//  web.serveStatic("/config.json", FILESYSTEM, "/config.json").setFilter(ON_STA_FILTER);
 
     web.onNotFound([](AsyncWebServerRequest *request) {
         request->send(404, "text/plain", "Page not found");
@@ -956,7 +956,7 @@ void loadConfig() {
     effects.setFromDefaults();
 
     // Load CONFIG_FILE json. Create and init with defaults if not found
-    File file = SPIFFS.open(CONFIG_FILE, "r");
+    File file = FILESYSTEM.open(CONFIG_FILE, "r");
     if (!file) {
         LOG_PORT.println(F("- No configuration file found."));
         config.ssid = ssid;
@@ -1112,7 +1112,7 @@ void saveConfig() {
     serializeConfig(jsonString, true, true);
 
     // Save Config
-    File file = SPIFFS.open(CONFIG_FILE, "w");
+    File file = FILESYSTEM.open(CONFIG_FILE, "w");
     if (!file) {
         LOG_PORT.println(F("*** Error creating configuration file ***"));
         return;
