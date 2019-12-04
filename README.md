@@ -17,7 +17,7 @@ Being open source, you are free to use the ESPixelStick firmware on the device o
 Along with the Arduino IDE, you'll need the following software to build this project:
 
 - [Adruino for ESP8266](https://github.com/esp8266/Arduino) - Arduino core for ESP8266
-- [Arduino ESP8266 Filesystem Uploader](https://github.com/esp8266/arduino-esp8266fs-plugin) - Arduino plugin for uploading files to SPIFFS
+- [Arduino ESP8266 Filesystem Uploader](https://github.com/earlephilhower/arduino-esp8266littlefs-plugin) - Arduino plugin for uploading files to LittleFS
 - [gulp](http://gulpjs.com/) - Build system required to process web sources.  Refer to the html [README](html/README.md) for more information.
 
 The following libraries are required:
