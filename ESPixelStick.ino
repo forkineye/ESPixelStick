@@ -354,9 +354,8 @@ void onWifiConnect(const WiFiEventStationModeGotIP &event) {
 
     // Setup mDNS / DNS-SD
     //TODO: Reboot or restart mdns when config.id is changed?
-     char chipId[7] = { 0 };
-    snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
-    MDNS.setInstanceName(String(config.id + " (" + String(chipId) + ")").c_str());
+    String chipId = String(ESP.getChipId(), HEX);
+    MDNS.setInstanceName(String(config.id + " (" + chipId + ")").c_str());
     if (MDNS.begin(config.hostname.c_str())) {
         MDNS.addService("http", "tcp", HTTP_PORT);
         MDNS.addService("zcpp", "udp", ZCPP_PORT);
@@ -365,7 +364,7 @@ void onWifiConnect(const WiFiEventStationModeGotIP &event) {
         MDNS.addServiceTxt("e131", "udp", "TxtVers", String(RDMNET_DNSSD_TXTVERS));
         MDNS.addServiceTxt("e131", "udp", "ConfScope", RDMNET_DEFAULT_SCOPE);
         MDNS.addServiceTxt("e131", "udp", "E133Vers", String(RDMNET_DNSSD_E133VERS));
-        MDNS.addServiceTxt("e131", "udp", "CID", String(chipId));
+        MDNS.addServiceTxt("e131", "udp", "CID", chipId);
         MDNS.addServiceTxt("e131", "udp", "Model", "ESPixelStick");
         MDNS.addServiceTxt("e131", "udp", "Manuf", "Forkineye");
     } else {
@@ -430,6 +429,9 @@ void onMqttConnect(bool sessionPresent) {
 
     // Publish state
     publishState();
+
+    // Publish discovery
+    publishHA(config.mqtt_hadisco);
 }
 
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
@@ -514,10 +516,9 @@ void onMqttMessage(char* topic, char* payload,
 }
 
 void publishHA(bool join) {
+
     // Setup HA discovery
-    char chipId[7] = { 0 };
-    snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
-    String ha_config = config.mqtt_haprefix + "/light/" + String(chipId) + "/config";
+    String ha_config = config.mqtt_haprefix + "/light/" + String(ESP.getChipId(), HEX) + "/config";
 
     if (join) {
         DynamicJsonDocument root(1024);
@@ -528,15 +529,32 @@ void publishHA(bool join) {
         root["rgb"] = "true";
         root["brightness"] = "true";
         root["effect"] = "true";
+
+        // Populate the effect list
         JsonArray effect_list = root.createNestedArray("effect_list");
         // effect[0] is 'disabled', skip it
         for (uint8_t i = 1; i < effects.getEffectCount(); i++) {
             effect_list.add(effects.getEffectInfo(i)->name);
         }
 
+        // Register the attributes topic
+        root["json_attributes_topic"] = config.mqtt_topic + "/attributes";
+
+        // Create a unique id using the chip id, and fill in the device properties
+        // to enable integration support in HomeAssistant.
+        root["unique_id"] = "ESPixelStick_" + String(ESP.getChipId(), HEX);
+        JsonObject device = root.createNestedObject("device");
+        device["identifiers"] = WiFi.macAddress();
+        device["manufacturer"] = "ESPixelStick";
+        device["model"] = String(config.channel_count / 3) + " Pixel Controller";
+        device["name"] = config.id;
+        device["sw_version"] = "ESPixelStick v" + String(VERSION);
+
         char buffer[measureJson(root) + 1];
         serializeJson(root, buffer, sizeof(buffer));
         mqtt.publish(ha_config.c_str(), 0, true, buffer);
+
+        publishAttributes();
     } else {
         mqtt.publish(ha_config.c_str(), 0, true, "");
     }
@@ -566,6 +584,22 @@ void publishState() {
     char buffer[measureJson(root) + 1];
     serializeJson(root, buffer, sizeof(buffer));
     mqtt.publish(config.mqtt_topic.c_str(), 0, true, buffer);
+}
+
+void publishAttributes() {
+    String topic = config.mqtt_topic + "/attributes";
+    DynamicJsonDocument root(1024);
+
+    // Publish the e131 attributes=
+    root["universe"] = config.universe;
+    root["universe_limit"] = config.universe_limit;
+    root["channel_start"] = config.channel_start;
+    root["channel_count"] = config.channel_count;
+    root["multicast"] = config.multicast;
+
+    char buffer[measureJson(root) + 1];
+    serializeJson(root, buffer, sizeof(buffer));
+    mqtt.publish(topic.c_str(), 0, true, buffer);
 }
 
 /////////////////////////////////////////////////////////
@@ -652,9 +686,7 @@ void validateConfig() {
 
     // Generate default MQTT topic if blank
     if (!config.mqtt_topic.length()) {
-        char chipId[7] = { 0 };
-        snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
-        config.mqtt_topic = "diy/esps/" + String(chipId);
+        config.mqtt_topic = "diy/esps/" + String(ESP.getChipId(), HEX);
     }
 
     // Set default Home Assistant Discovery prefix if blank
@@ -848,9 +880,7 @@ void dsNetworkConfig(const JsonObject &json) {
     }
 
     if (!config.hostname.length()) {
-        char chipId[7] = { 0 };
-        snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
-        config.hostname = "esps-" + String(chipId);
+        config.hostname = "esps-" + String(ESP.getChipId(), HEX);
     }
 }
 
@@ -961,9 +991,7 @@ void loadConfig() {
         LOG_PORT.println(F("- No configuration file found."));
         config.ssid = ssid;
         config.passphrase = passphrase;
-        char chipId[7] = { 0 };
-        snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
-        config.hostname = "esps-" + String(chipId);
+        config.hostname = "esps-" + String(ESP.getChipId(), HEX);
         config.ap_fallback = true;
         config.id = "No Config Found";
         saveConfig();
