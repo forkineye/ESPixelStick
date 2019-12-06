@@ -6,24 +6,25 @@
 extern  config_t        config;
 
 // List of all the supported effects and their names
-const EffectDesc EFFECT_LIST[] = {
-//                                                                          Mirror     AllLeds
+EffectDesc EFFECT_LIST[] = {
+//                                                                          Mirror     AllLeds       White
 //    name;             func;                             htmlid;      Color;     Reverse     wsTCode
 
-    { "Disabled",     nullptr,                         "t_disabled",     1,    1,    1,    1,  "T0"     },
-    { "Solid",        &EffectEngine::effectSolidColor, "t_static",       1,    0,    0,    0,  "T1"     },
-    { "Blink",        &EffectEngine::effectBlink,      "t_blink",        1,    0,    0,    0,  "T2"     },
-    { "Flash",        &EffectEngine::effectFlash,      "t_flash",        1,    0,    0,    0,  "T3"     },
-    { "Rainbow",      &EffectEngine::effectRainbow,    "t_rainbow",      0,    1,    1,    1,  "T5"     },
-    { "Chase",        &EffectEngine::effectChase,      "t_chase",        1,    1,    1,    0,  "T4"     },
-    { "Fire flicker", &EffectEngine::effectFireFlicker,"t_fireflicker",  1,    0,    0,    0,  "T6"     },
-    { "Lightning",    &EffectEngine::effectLightning,  "t_lightning",    1,    0,    0,    0,  "T7"     },
-    { "Breathe",      &EffectEngine::effectBreathe,    "t_breathe",      1,    0,    0,    0,  "T8"     }
+    { "Disabled",     nullptr,                         "t_disabled",     0,    0,    0,    0,  "T0",   0   },
+    { "Solid",        &EffectEngine::effectSolidColor, "t_static",       1,    0,    0,    0,  "T1",   1   },
+    { "Blink",        &EffectEngine::effectBlink,      "t_blink",        1,    0,    0,    0,  "T2",   1   },
+    { "Flash",        &EffectEngine::effectFlash,      "t_flash",        1,    0,    0,    0,  "T3",   1   },
+    { "Rainbow",      &EffectEngine::effectRainbow,    "t_rainbow",      0,    1,    1,    1,  "T5",   0   },
+    { "Chase",        &EffectEngine::effectChase,      "t_chase",        1,    1,    1,    0,  "T4",   1   },
+    { "Fire flicker", &EffectEngine::effectFireFlicker,"t_fireflicker",  1,    0,    0,    0,  "T6",   1   },
+    { "Lightning",    &EffectEngine::effectLightning,  "t_lightning",    1,    0,    0,    0,  "T7",   1   },
+    { "Breathe",      &EffectEngine::effectBreathe,    "t_breathe",      1,    0,    0,    0,  "T8",   1   }
 };
 
 // Effect defaults
 #define DEFAULT_EFFECT_NAME "Disabled"
 #define DEFAULT_EFFECT_COLOR { 183, 0, 255 }
+#define DEFAULT_EFFECT_WHITE 0
 #define DEFAULT_EFFECT_BRIGHTNESS 1.0
 #define DEFAULT_EFFECT_REVERSE false
 #define DEFAULT_EFFECT_MIRROR false
@@ -38,6 +39,7 @@ EffectEngine::EffectEngine() {
 void EffectEngine::setFromDefaults() {
     config.effect_name = DEFAULT_EFFECT_NAME;
     config.effect_color = DEFAULT_EFFECT_COLOR;
+    config.effect_white = DEFAULT_EFFECT_WHITE;
     config.effect_brightness = DEFAULT_EFFECT_BRIGHTNESS;
     config.effect_reverse = DEFAULT_EFFECT_REVERSE;
     config.effect_mirror = DEFAULT_EFFECT_MIRROR;
@@ -50,6 +52,7 @@ void EffectEngine::setFromConfig() {
     // Initialize with defaults
     setEffect(config.effect_name);
     setColor(config.effect_color);
+    setWhite(config.effect_white);
     setBrightness(config.effect_brightness);
     setReverse(config.effect_reverse);
     setMirror(config.effect_mirror);
@@ -80,6 +83,12 @@ void EffectEngine::setDelay(uint16_t delay) {
 void EffectEngine::begin(DRIVER* ledDriver, uint16_t ledCount) {
     _ledDriver = ledDriver;
     _ledCount = ledCount;
+    if (!_ledDriver->hasWhite()) {
+        const uint8_t effectCount = sizeof(EFFECT_LIST) / sizeof(EffectDesc);
+        for (uint8_t effect = 0; effect < effectCount; effect++) {
+            EFFECT_LIST[effect].hasWhite = 0;
+        }
+    }
     _initialized = true;
 }
 
@@ -147,9 +156,22 @@ bool EffectEngine::isValidEffect(const String effectName) {
 }
 
 void EffectEngine::setPixel(uint16_t idx, CRGB color) {
-    _ledDriver->setRValue(idx, (uint8_t)(color.r * _effectBrightness) );
-    _ledDriver->setGValue(idx, (uint8_t)(color.g * _effectBrightness) );
-    _ledDriver->setBValue(idx, (uint8_t)(color.b * _effectBrightness) );
+    if (_ledDriver->hasWhite()) {
+        _ledDriver->setRValue(idx, (uint8_t)(color.r * _effectBrightness) );
+        _ledDriver->setGValue(idx, (uint8_t)(color.g * _effectBrightness) );
+        _ledDriver->setBValue(idx, (uint8_t)(color.b * _effectBrightness) );
+    }
+    else {
+        _ledDriver->setValue(3 * idx + 0, (uint8_t)(color.r * _effectBrightness) );
+        _ledDriver->setValue(3 * idx + 1, (uint8_t)(color.g * _effectBrightness) );
+        _ledDriver->setValue(3 * idx + 2, (uint8_t)(color.b * _effectBrightness) );
+    }
+}
+
+void EffectEngine::setWhite(uint16_t idx, uint8_t w) {
+    if(_ledDriver->hasWhite()) {
+        _ledDriver->setWValue(idx, (uint8_t)(w * _effectBrightness) );
+    }
 }
 
 void EffectEngine::setRange(uint16_t first, uint16_t len, CRGB color) {
@@ -158,14 +180,25 @@ void EffectEngine::setRange(uint16_t first, uint16_t len, CRGB color) {
     }
 }
 
+void EffectEngine::setWhiteRange(uint16_t first, uint16_t len, uint8_t w) {
+    for (uint16_t i=first; i < min(uint16_t(first+len), _ledCount); i++) {
+        setWhite(i, w);
+    }
+}
+
 void EffectEngine::clearRange(uint16_t first, uint16_t len) {
     for (uint16_t i=first; i < min(uint16_t(first+len), _ledCount); i++) {
         setPixel(i, {0, 0, 0});
+        setWhite(i, 0);
     }
 }
 
 void EffectEngine::setAll(CRGB color) {
     setRange(0, _ledCount, color);
+}
+
+void EffectEngine::setAllWhite(uint8_t w) {
+    setWhiteRange(0, _ledCount, w);
 }
 
 void EffectEngine::clearAll() {
@@ -188,6 +221,7 @@ CRGB EffectEngine::colorWheel(uint8_t pos) {
 uint16_t EffectEngine::effectSolidColor() {
     for (uint16_t i=0; i < _ledCount; i++) {
         setPixel(i, _effectColor);
+        setWhite(i, _effectWhite);
     }
     return 32;
 }
@@ -207,8 +241,11 @@ uint16_t EffectEngine::effectChase() {
             if (_effectMirror) {
                 setPixel(i + lc, {0, 0, 0});
                 setPixel(lc - 1 - i, {0, 0, 0});
+                setWhite(i + lc, 0);
+                setWhite(lc - 1 - i, 0);
             } else {
                 setPixel(i, {0, 0, 0});
+                setWhite(i, 0);
             }
         }
     }
@@ -219,8 +256,11 @@ uint16_t EffectEngine::effectChase() {
     if (_effectMirror) {
         setPixel(pixel + lc, _effectColor);
         setPixel(lc - 1 - pixel, _effectColor);
+        setWhite(pixel + lc, _effectWhite);
+        setWhite(lc - 1 - pixel, _effectWhite);
     } else {
         setPixel(pixel, _effectColor);
+        setWhite(pixel, _effectWhite);
     }
 
     _effectStep = (1+_effectStep) % lc;
@@ -253,8 +293,11 @@ uint16_t EffectEngine::effectRainbow() {
         if (_effectMirror) {
             setPixel(pixel + lc, color);
             setPixel(lc - 1 - pixel, color);
+            setWhite(pixel + lc, 0);
+            setWhite(lc - 1 - pixel, 0);
         } else {
             setPixel(pixel, color);
+            setWhite(pixel, 0);
         }
     }
 
@@ -269,6 +312,7 @@ uint16_t EffectEngine::effectBlink() {
       clearAll();
     } else {
       setAll(_effectColor);
+      setAllWhite(_effectWhite);
     }
 
     _effectStep = (1+_effectStep) % 2;
@@ -285,6 +329,7 @@ uint16_t EffectEngine::effectFlash() {
       case 0:
       case 2:
         setAll(_effectColor);
+        setAllWhite(_effectWhite);
         break;
       default:
         clearAll();
@@ -296,10 +341,11 @@ uint16_t EffectEngine::effectFlash() {
 
 uint16_t EffectEngine::effectFireFlicker() {
   byte rev_intensity = 6; // more=less intensive, less=more intensive
-  byte lum = max(_effectColor.r, max(_effectColor.g, _effectColor.b)) / rev_intensity;
+  byte lum = max(_effectWhite, max(_effectColor.r, max(_effectColor.g, _effectColor.b))) / rev_intensity;
   for ( int i = 0; i < _ledCount; i++) {
     byte flicker = random(lum);
     setPixel(i, CRGB { max(_effectColor.r - flicker, 0), max(_effectColor.g - flicker, 0), max(_effectColor.b - flicker, 0) });
+    setWhite(i, max(_effectWhite - flicker, 0));
   }
   _effectStep = (1+_effectStep) % _ledCount;
   return _effectDelay / 10;
@@ -334,6 +380,7 @@ uint16_t EffectEngine::effectLightning() {
     }
     CRGB temprgb = { _effectColor.r*intensity/256, _effectColor.g*intensity/256, _effectColor.b*intensity/256 };
     setRange(ledStart, ledLen, temprgb );
+    setWhiteRange(ledStart, ledLen, _effectWhite*intensity/256);
     flashPause = random(4, 21); // flash duration 4-20ms
   }
 
@@ -370,6 +417,7 @@ uint16_t EffectEngine::effectBreathe() {
   // sin() is in radians, so 2*PI rad is a full period; compiler should optimize.
   float val = (exp(sin(millis()/(_effectDelay*5.0)*2*PI)) - 0.367879441) * 0.106364766 + 0.75;
   setAll({_effectColor.r*val, _effectColor.g*val, _effectColor.b*val});
+  setAllWhite(_effectWhite*val);
   return _effectDelay / 40; // update every 25ms
 }
 

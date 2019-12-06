@@ -3,6 +3,7 @@ var gpio_list = [0, 1, 2, 3, 4, 5, 12, 13, 14, 15, 16];
 var wsQueue = [];
 var wsBusy = false;
 var wsTimerId;
+var picker = null;
 
 // json with effect definitions
 var effectInfo;
@@ -39,7 +40,7 @@ $(function() {
         });
 
         // Color Picker
-        $('.color').colorPicker({
+        picker = $('.color').colorPicker({
             buildCallback: function($elm) {
                 var colorInstance = this.color;
                 var colorPicker = this;
@@ -56,7 +57,11 @@ $(function() {
                         $this.parent().prepend($this.prev()).children().eq(0).
                             css('background-color', '#' + colorInstance.colors.HEX);
                     } else {
-                        colorInstance.setColor($this.css('background-color'));
+                        var color = $this.css('background-color');
+                        if(colorInstance.options.opacity && (color == "rgb(255, 255, 255)" || color == "#FFFFFF")) {
+                            color = "rgba(0, 0, 0, 0)";
+                        }
+                        colorInstance.setColor(color);
                         colorPicker.render();
                     }
                 });
@@ -78,10 +83,12 @@ $(function() {
 
             renderCallback: function($elm, toggled) {
                 var colors = this.color.colors.RND;
+                var white = this.color.colors.alpha;
                 var json = {
                         'r': colors.rgb.r,
                         'g': colors.rgb.g,
-                        'b': colors.rgb.b
+                        'b': colors.rgb.b,
+                        'w': Math.round((1 - white) * 255),
                     };
 
                 this.$colorPatch.css({
@@ -504,14 +511,15 @@ function wsReadyToSend() {
 }
 
 function drawStream(streamData) {
+    var color_count = $('#p_color').val() < 6 ? 3 : 4;
     var cols=parseInt($('#v_columns').val());
     var size=Math.floor((canvas.width-20)/cols);
     if($("input[name='viewStyle'][value='RGB']").prop('checked')) {
         maxDisplay=Math.min(streamData.length, (cols*Math.floor((canvas.height-30)/size))*3);
-        for (i = 0; i < maxDisplay; i+=3) {
+        for (i = 0; i < maxDisplay; i+=color_count) {
             ctx.fillStyle='rgb(' + streamData[i+0] + ',' + streamData[i+1] + ',' + streamData[i+2] + ')';
-            var col=(i/3)%cols;
-            var row=Math.floor((i/3)/cols);
+            var col=(i/color_count)%cols;
+            var row=Math.floor((i/color_count)/cols);
             ctx.fillRect(10+(col*size),10+(row*size),size-1,size-1);
         }
     } else {
@@ -698,7 +706,8 @@ function getEffectInfo(data) {
     }
 
     // set html based on current running effect
-    $('.color').val('rgb(' + running.r + ',' + running.g + ',' + running.b + ')');
+    var a = 1 - (running.w / 255);
+    $('.color').val('rgba(' + running.r + ',' + running.g + ',' + running.b + ', ' + a + ')');
     $('.color').css('background-color', 'rgb(' + running.r + ',' + running.g + ',' + running.b + ')');
     $('#t_reverse').prop('checked', running.reverse);
     $('#t_mirror').prop('checked', running.mirror);
@@ -845,11 +854,13 @@ function submitConfig() {
 }
 
 function submitStartupEffect() {
-// not pretty - get current r,g,b from color picker
-    var temp = $('.color').val().split(/\D+/);
+    // not pretty - get current r,g,b from color picker
+    var temp = $('.color').val().match(/rgba?\((?<r>\d+),\s?(?<g>\d+),\s?(?<b>\d+),?\s?(?<a>[\d\.]+)?/);
+    var colors = temp ? temp.groups : {'r': '0', 'g': '0', 'b': '0'};
+    var white = colors['a'] ? Math.round((1 - parseFloat(colors['a'])) * 255) : 0;
 
     var currentEffectName = effectInfo[ $('#tmode option:selected').val() ].name;
-//console.log (currentEffectName);
+    //console.log (currentEffectName);
 
     var json = {
             'effects': {
@@ -858,9 +869,10 @@ function submitStartupEffect() {
                 'allleds': $('#t_allleds').prop('checked'),
                 'reverse': $('#t_reverse').prop('checked'),
                 'speed': parseInt($('#t_speed').val()),
-                'r': temp[1],
-                'g': temp[2],
-                'b': temp[3],
+                'r': colors[1],
+                'g': colors[2],
+                'b': colors[3],
+                'w': white,
                 'brightness': parseFloat($('#t_brightness').val()),
                 'startenabled': $('#t_startenabled').prop('checked'),
                 'idleenabled': $('#t_idleenabled').prop('checked'),
@@ -917,35 +929,40 @@ function refreshSerial() {
 
 function hideShowTestSections() {
     // Test mode toggles
-//    $('.tdiv').addClass('hidden');
-//    $('#'+$('select[name=tmode]').val()).removeClass('hidden');
+    // $('.tdiv').addClass('hidden');
+    // $('#'+$('select[name=tmode]').val()).removeClass('hidden');
 
     var tmode = $('#tmode option:selected').val();
-//console.log('tmode is: ' + tmode);
+    //console.log('tmode is: ' + tmode);
     if ( (typeof tmode !== 'undefined') && (typeof effectInfo[tmode].wsTCode !== 'undefined') ) {
-// hide/show view stream and testing options+startup
+    // hide/show view stream and testing options+startup
         if (effectInfo[tmode].hasColor) {
             $('#lab_color').removeClass('hidden');
             $('#div_color').removeClass('hidden');
-	} else {
+        } else {
             $('#lab_color').addClass('hidden');
             $('#div_color').addClass('hidden');
         }
+
         if (effectInfo[tmode].hasMirror) {
             $('#div_mirror').removeClass('hidden');
-	} else {
+        } else {
             $('#div_mirror').addClass('hidden');
         }
+
         if (effectInfo[tmode].hasReverse) {
             $('#div_reverse').removeClass('hidden');
-	} else {
+        } else {
             $('#div_reverse').addClass('hidden');
         }
+
         if (effectInfo[tmode].hasAllLeds) {
             $('#div_allleds').removeClass('hidden');
-	} else {
+        } else {
             $('#div_allleds').addClass('hidden');
         }
+
+        picker.options.opacity = effectInfo[tmode].hasWhite;
     }
 }
 

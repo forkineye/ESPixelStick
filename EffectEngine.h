@@ -47,6 +47,7 @@ struct EffectDesc {
     bool        hasReverse;
     bool        hasAllLeds;
     String      wsTCode;
+    bool        hasWhite;
 };
 
 class EffectEngine {
@@ -65,6 +66,7 @@ private:
     bool _effectAllLeds             = false;        /* Externally controlled effect all leds = 1st led */
     float _effectBrightness         = 1.0;          /* Externally controlled effect brightness [0, 255] */
     CRGB _effectColor               = {0,0,0};      /* Externally controlled effect color */
+    uint8_t _effectWhite            = 0;            /* Externally controlled effect white */
 
     uint32_t _effectStep            = 0;            /* Shared mutable effect step counter */
 
@@ -86,6 +88,7 @@ public:
     uint16_t getDelay()                     { return _effectDelay; }
     uint16_t getSpeed()                     { return _effectSpeed; }
     CRGB getColor()                         { return _effectColor; }
+    uint8_t getWhite()                      { return _effectWhite; }
 
     int getEffectCount();
     const EffectDesc* getEffectInfo(unsigned a);
@@ -102,6 +105,7 @@ public:
     void setSpeed(uint16_t speed);
     void setDelay(uint16_t delay);
     void setColor(CRGB color)               { _effectColor = color; }
+    void setWhite(uint8_t w)                { _effectWhite = w; }
 
     // Effect functions
     uint16_t effectSolidColor();
@@ -118,9 +122,12 @@ public:
 private:
 
     void setPixel(uint16_t idx,  CRGB color);
+    void setWhite(uint16_t idx, uint8_t w);
     void setRange(uint16_t first, uint16_t len, CRGB color);
+    void setWhiteRange(uint16_t first, uint16_t len, uint8_t w);
     void clearRange(uint16_t first, uint16_t len);
     void setAll(CRGB color);
+    void setAllWhite(uint8_t w);
 
     CRGB colorWheel(uint8_t pos);
     dCHSV rgb2hsv(CRGB in);

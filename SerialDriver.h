@@ -67,6 +67,8 @@ class SerialDriver {
     void show();
     uint8_t* getData();
 
+    inline bool hasWhite() { return false; }
+
     /* Set the value */
     inline void setValue(uint16_t address, uint8_t value) {
     // Avoid the special characters by rounding

@@ -214,6 +214,7 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             effect["r"] = effects.getColor().r;
             effect["g"] = effects.getColor().g;
             effect["b"] = effects.getColor().b;
+            effect["w"] = effects.getWhite();
             effect["reverse"] = effects.getReverse();
             effect["mirror"] = effects.getMirror();
             effect["allleds"] = effects.getAllLeds();
@@ -229,6 +230,7 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
                 effect["name"] = effects.getEffectInfo(i)->name;
                 effect["htmlid"] = effects.getEffectInfo(i)->htmlid;
                 effect["hasColor"] = effects.getEffectInfo(i)->hasColor;
+                effect["hasWhite"] = effects.getEffectInfo(i)->hasWhite;
                 effect["hasMirror"] = effects.getEffectInfo(i)->hasMirror;
                 effect["hasReverse"] = effects.getEffectInfo(i)->hasReverse;
                 effect["hasAllLeds"] = effects.getEffectInfo(i)->hasAllLeds;
@@ -329,6 +331,11 @@ void procT(uint8_t *data, AsyncWebSocketClient *client) {
             if ( effectInfo->hasColor ) {
                 if (json.containsKey("r") && json.containsKey("g") && json.containsKey("b")) {
                     effects.setColor({json["r"], json["g"], json["b"]});
+                }
+            }
+            if ( effectInfo->hasWhite ) {
+                if (json.containsKey("w")) {
+                    effects.setWhite({json["w"]});
                 }
             }
             if ( effectInfo->hasMirror ) {

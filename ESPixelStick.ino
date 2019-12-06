@@ -896,6 +896,7 @@ void dsEffectConfig(const JsonObject &json) {
         if (effectsJson.containsKey("speed"))
             config.effect_speed = effectsJson["speed"];
         config.effect_color = { effectsJson["r"], effectsJson["g"], effectsJson["b"] };
+        config.effect_white = effectsJson["w"];
         if (effectsJson.containsKey("brightness"))
             config.effect_brightness = effectsJson["brightness"];
         config.effect_startenabled = effectsJson["startenabled"];
@@ -1070,6 +1071,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
     _effects["r"] = config.effect_color.r;
     _effects["g"] = config.effect_color.g;
     _effects["b"] = config.effect_color.b;
+    _effects["w"] = config.effect_white;
 
     _effects["brightness"] = config.effect_brightness;
     _effects["startenabled"] = config.effect_startenabled;

@@ -106,6 +106,10 @@ class PixelDriver {
     void ICACHE_RAM_ATTR show();
     uint8_t* getData();
 
+    inline bool hasWhite() {
+        return this->color_count == 4;
+    }
+
     /* Set channel value at address */
     inline void setRawValue(uint16_t address, uint8_t value) {
         pixdata[address] = value;
