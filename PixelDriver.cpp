@@ -35,6 +35,7 @@ static const uint8_t    *uart_buffer_tail;  // Buffer tracker
 uint8_t PixelDriver::rOffset = 0;
 uint8_t PixelDriver::gOffset = 1;
 uint8_t PixelDriver::bOffset = 2;
+uint8_t PixelDriver::wOffset = 3;
 
 int PixelDriver::begin() {
     return begin(PixelType::WS2811, PixelColor::RGB, 170);
@@ -50,10 +51,17 @@ int PixelDriver::begin(PixelType type, PixelColor color, uint16_t length) {
     this->type = type;
     this->color = color;
 
+    if (color >= PixelColor::RGBW) {
+        this->color_count = 4;
+    }
+    else {
+        this->color_count = 3;
+    }
+
     updateOrder(color);
 
     if (pixdata) free(pixdata);
-    szBuffer = length * 3;
+    szBuffer = length * this->color_count;
     if (pixdata = static_cast<uint8_t *>(malloc(szBuffer))) {
         memset(pixdata, 0, szBuffer);
         numPixels = length;
@@ -91,6 +99,9 @@ int PixelDriver::begin(PixelType type, PixelColor color, uint16_t length) {
     } else if (type == PixelType::GECE) {
         refreshTime = (GECE_TFRAME + GECE_TIDLE) * length;
         gece_init();
+    } else if (type == PixelType::SK6812RGBW) {
+        refreshTime = SK6812_TFRAME * length + SK6812_TIDLE;
+        ws2811_init();
     } else {
         retval = false;
     }
@@ -117,7 +128,7 @@ void PixelDriver::ws2811_init() {
     ETS_UART_INTR_DISABLE();
 
     /* Atttach interrupt handler */
-    ETS_UART_INTR_ATTACH(handleWS2811, NULL);
+    ETS_UART_INTR_ATTACH(handleWS2811, this);
 
     /* Set TX FIFO trigger. 80 bytes gives 200 microsecs to refill the FIFO */
     WRITE_PERI_REG(UART_CONF1(UART), 80 << UART_TXFIFO_EMPTY_THRHD_S);
@@ -168,6 +179,42 @@ void PixelDriver::updateOrder(PixelColor color) {
             gOffset = 1;
             bOffset = 0;
             break;
+        case PixelColor::RGBW:
+            rOffset = 0;
+            gOffset = 1;
+            bOffset = 2;
+            wOffset = 3;
+            break;
+        case PixelColor::GRBW:
+            rOffset = 1;
+            gOffset = 0;
+            bOffset = 2;
+            wOffset = 3;
+            break;
+        case PixelColor::BRGW:
+            rOffset = 1;
+            gOffset = 2;
+            bOffset = 0;
+            wOffset = 3;
+            break;
+        case PixelColor::RBGW:
+            rOffset = 0;
+            gOffset = 2;
+            bOffset = 1;
+            wOffset = 3;
+            break;
+        case PixelColor::GBRW:
+            rOffset = 2;
+            gOffset = 0;
+            bOffset = 1;
+            wOffset = 3;
+            break;
+        case PixelColor::BGRW:
+            rOffset = 2;
+            gOffset = 1;
+            bOffset = 0;
+            wOffset = 3;
+            break;
         default:
             rOffset = 0;
             gOffset = 1;
@@ -179,7 +226,7 @@ void ICACHE_RAM_ATTR PixelDriver::handleWS2811(void *param) {
     /* Process if UART1 */
     if (READ_PERI_REG(UART_INT_ST(UART1))) {
         // Fill the FIFO with new data
-        uart_buffer = fillWS2811(uart_buffer, uart_buffer_tail);
+        uart_buffer = fillWS2811(uart_buffer, uart_buffer_tail, ((PixelDriver*)param)->color_count);
 
         // Disable TX interrupt when done
         if (uart_buffer == uart_buffer_tail)
@@ -194,13 +241,12 @@ void ICACHE_RAM_ATTR PixelDriver::handleWS2811(void *param) {
         WRITE_PERI_REG(UART_INT_CLR(UART0), 0xffff);
 }
 
-const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillWS2811(const uint8_t *buff,
-        const uint8_t *tail) {
+const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillWS2811(const uint8_t *buff, const uint8_t *tail, const uint8_t color_count) {
     uint8_t avail = (UART_TX_FIFO_SIZE - getFifoLength()) / 4;
     if (tail - buff > avail)
         tail = buff + avail;
 
-    while (buff + 2 < tail) {
+    while (buff + (color_count - 1) < tail) {
         uint8_t subpix = buff[rOffset];
         enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 6) & 0x3]);
         enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 4) & 0x3]);
@@ -219,39 +265,46 @@ const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillWS2811(const uint8_t *buff,
         enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 2) & 0x3]);
         enqueue(LOOKUP_2811[GAMMA_TABLE[subpix] & 0x3]);
 
-        buff += 3;
-    }
+        if (color_count == 4) {
+            subpix = buff[wOffset];
+            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 6) & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 4) & 0x3]);
+            enqueue(LOOKUP_2811[(GAMMA_TABLE[subpix] >> 2) & 0x3]);
+            enqueue(LOOKUP_2811[GAMMA_TABLE[subpix] & 0x3]);
+        }
 
+        buff += color_count;
+    }
     return buff;
 }
 
 void ICACHE_RAM_ATTR PixelDriver::show() {
     if (!pixdata) return;
 
-    if (type == PixelType::WS2811) {
+    if (type == PixelType::WS2811 || type == PixelType::SK6812RGBW) {
         if (!cntZigzag) {  // Normal / group copy
-            for (size_t led = 0; led < szBuffer / 3; led++) {
+            for (size_t led = 0; led < szBuffer / this->color_count; led++) {
                 uint16 modifier = led / cntGroup;
-                asyncdata[3 * led + 0] = pixdata[3 * modifier + 0];
-                asyncdata[3 * led + 1] = pixdata[3 * modifier + 1];
-                asyncdata[3 * led + 2] = pixdata[3 * modifier + 2];
+                for (uint8_t c = 0; c < this->color_count; c++) {
+                    asyncdata[this->color_count * led + c] = pixdata[this->color_count * modifier + c];
+                }
             }
         } else {  // Zigzag copy
-            for (size_t led = 0; led < szBuffer / 3; led++) {
+            for (size_t led = 0; led < szBuffer / this->color_count; led++) {
                 uint16 modifier = led / cntGroup;
                 if (led / cntZigzag % 2) { // Odd "zig"
                     int group = cntZigzag * (led / cntZigzag);
                     int this_led = (group + cntZigzag - (led % cntZigzag) - 1) / cntGroup;
-                    asyncdata[3 * led + 0] = pixdata[3 * this_led + 0];
-                    asyncdata[3 * led + 1] = pixdata[3 * this_led + 1];
-                    asyncdata[3 * led + 2] = pixdata[3 * this_led + 2];
+                    for (uint8_t c = 0; c < this->color_count; c++) {
+                        asyncdata[this->color_count * led + c] = pixdata[this->color_count * this_led + c];
+                    }
+
                 } else { // Even "zag"
-                    asyncdata[3 * led + 0] = pixdata[3 * modifier + 0];
-                    asyncdata[3 * led + 1] = pixdata[3 * modifier + 1];
-                    asyncdata[3 * led + 2] = pixdata[3 * modifier + 2];
+                    for (uint8_t c = 0; c < this->color_count; c++) {
+                        asyncdata[this->color_count * led + c] = pixdata[this->color_count * modifier + c];
+                    }
                 }
             }
-
         }
 
         uart_buffer = asyncdata;

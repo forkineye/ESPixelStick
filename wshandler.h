@@ -128,6 +128,7 @@ void procE(uint8_t *data, AsyncWebSocketClient *client) {
             JsonObject p_type = json.createNestedObject("p_type");
             p_type["WS2811 800kHz"] = static_cast<uint8_t>(PixelType::WS2811);
             p_type["GE Color Effects"] = static_cast<uint8_t>(PixelType::GECE);
+            p_type["SK6812 RGBW"] = static_cast<uint8_t>(PixelType::SK6812RGBW);
 
             // Pixel Colors
             JsonObject p_color = json.createNestedObject("p_color");
@@ -137,6 +138,12 @@ void procE(uint8_t *data, AsyncWebSocketClient *client) {
             p_color["RBG"] = static_cast<uint8_t>(PixelColor::RBG);
             p_color["GBR"] = static_cast<uint8_t>(PixelColor::GBR);
             p_color["BGR"] = static_cast<uint8_t>(PixelColor::BGR);
+            p_color["RGBW"] = static_cast<uint8_t>(PixelColor::RGBW);
+            p_color["GRBW"] = static_cast<uint8_t>(PixelColor::GRBW);
+            p_color["BRGW"] = static_cast<uint8_t>(PixelColor::BRGW);
+            p_color["RBGW"] = static_cast<uint8_t>(PixelColor::RBGW);
+            p_color["GBRW"] = static_cast<uint8_t>(PixelColor::GBRW);
+            p_color["BGRW"] = static_cast<uint8_t>(PixelColor::BGRW);
 
 #elif defined (ESPS_MODE_SERIAL)
             // Serial Protocols

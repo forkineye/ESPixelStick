@@ -885,6 +885,10 @@ function refreshPixel() {
         frame = 790;
         idle = 35;
     }
+    else if (!proto.localeCompare('SK6812 RGBW')) {
+        frame = 40;
+        idle = 300;
+    }
 
     var rate = (frame * size + idle) / 1000;
     var hz = 1000 / rate;

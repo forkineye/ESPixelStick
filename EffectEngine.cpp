@@ -146,10 +146,10 @@ bool EffectEngine::isValidEffect(const String effectName) {
     return false;
 }
 
-void EffectEngine::setPixel(uint16_t idx,  CRGB color) {
-    _ledDriver->setValue(3 * idx + 0, (uint8_t)(color.r * _effectBrightness) );
-    _ledDriver->setValue(3 * idx + 1, (uint8_t)(color.g * _effectBrightness) );
-    _ledDriver->setValue(3 * idx + 2, (uint8_t)(color.b * _effectBrightness) );
+void EffectEngine::setPixel(uint16_t idx, CRGB color) {
+    _ledDriver->setRValue(idx, (uint8_t)(color.r * _effectBrightness) );
+    _ledDriver->setGValue(idx, (uint8_t)(color.g * _effectBrightness) );
+    _ledDriver->setBValue(idx, (uint8_t)(color.b * _effectBrightness) );
 }
 
 void EffectEngine::setRange(uint16_t first, uint16_t len, CRGB color) {
