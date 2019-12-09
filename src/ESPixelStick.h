@@ -30,6 +30,9 @@ const char BUILD_DATE[] = __DATE__;
 #include <ESPAsyncUDP.h>
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
+#include "input/_Input.h"
+#include "output/_Output.h"
+
 
 #define HTTP_PORT       80      ///< Default web server port
 #define CLIENT_TIMEOUT  15      ///< In station/client mode try to connection for 15 seconds
@@ -64,13 +67,14 @@ typedef struct {
     String      gateway;
     bool        dhcp = true;    ///< Use DHCP?
     bool        ap_fallback;    ///< Fallback to AP if fail to associate?
-    uint32_t    sta_timeout;    ///< Timeout when connection as client (station)
     uint32_t    ap_timeout;     ///< How long to wait in AP mode with no connection before rebooting
+    uint32_t    sta_timeout;    ///< Timeout when connection as client (station)
 } config_t;
 
-void serializeCore(String &jsonString, boolean pretty = false, boolean creds = false);
-void dsDevice(DynamicJsonDocument &json);
-void dsNetwork(DynamicJsonDocument &json);
+String serializeCore(boolean pretty = false, boolean creds = false);
+boolean dsDevice(DynamicJsonDocument &json);
+boolean dsNetwork(DynamicJsonDocument &json);
+void setMode(_Input *newinput, _Output *newoutput);
 void saveConfig();
 
 #endif  // ESPIXELSTICK_H_

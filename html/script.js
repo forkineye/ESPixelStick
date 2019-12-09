@@ -97,14 +97,18 @@ $(function() {
     //
     ////////////////////////////////////////////////////
     $('#config #device #input').change(function () {
-        $('#imode').load($(this).val() + ".html", function() {
-            wsEnqueue(JSON.stringify({'cmd':{'get':$('#config #device #input').val()}}));
-        });
+        if ($(this).val()) {
+            $('#imode').load($(this).val() + ".html", function() {
+                wsEnqueue(JSON.stringify({'cmd':{'get':$('#config #device #input').val()}}));
+            });
+        }
     });
     $('#config #device #output').change(function () {
-        $('#omode').load($(this).val() + ".html", function() {
-            wsEnqueue(JSON.stringify({'cmd':{'get':$('#config #device #output').val()}}));
-        });
+        if ($(this).val()) {
+            $('#omode').load($(this).val() + ".html", function() {
+                wsEnqueue(JSON.stringify({'cmd':{'get':$('#config #device #output').val()}}));
+            });
+        }
     });
 
     // Autoload tab based on URL hash
@@ -207,6 +211,9 @@ function updateFromJSON(obj) {
         }
         selector.pop();
     }
+
+    // Update Device ID in footer
+    $('#device-id').text($('#config #id').val());
 }
 
 // Builds jQuery selectors from JSON data and populates select options
@@ -321,7 +328,8 @@ function wsConnect() {
         // When connection is opened, get core data.
         // Module data is loaded in module change / load callbacks
         ws.onopen = function() {
-            $('#wserror').modal('hide');
+            $('#wserror').modal('hide');                            // Remove error modal
+            $('.wsopt').empty();                                    // Clear out option data built from websockets
             wsEnqueue(JSON.stringify({'cmd':{'get':'network'}}));   // Get network config
             wsEnqueue(JSON.stringify({'cmd':{'opt':'device'}}));    // Get device option data
             wsEnqueue(JSON.stringify({'cmd':{'get':'device'}}));    // Get device config

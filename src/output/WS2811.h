@@ -44,7 +44,7 @@ const char LOOKUP_2811[4] = {
 
 class WS2811 : public _Output  {
    private:
-    static const String CONFIG_FILE;
+    static const char CONFIG_FILE[];
 
     // JSON configuration parameters
     String      color_order;    ///< Pixel color order
@@ -64,11 +64,7 @@ class WS2811 : public _Output  {
     static uint8_t    gOffset;  ///< Index of green byte
     static uint8_t    bOffset;  ///< Index of blue byte
 
-    /// FIFO Handlers
-    static const uint8_t* ICACHE_RAM_ATTR fillWS2811(const uint8_t *buff,
-            const uint8_t *tail);
-
-    /// Interrupt Handlers
+    /// Interrupt Handler
     static void ICACHE_RAM_ATTR handleWS2811(void *param);
 
     /// Returns number of bytes waiting in the TX FIFO of UART1
@@ -94,12 +90,12 @@ class WS2811 : public _Output  {
 
   public:
     // Everything below here is inherited from _Output
-    static const String KEY;
+    static const char KEY[];
     ~WS2811();
     void destroy();
 
-    String getKey();
-    String getBrief();
+    const char* getKey();
+    const char* getBrief();
     uint8_t getTupleSize();
     uint16_t getTupleCount();
 
@@ -110,7 +106,7 @@ class WS2811 : public _Output  {
     void init();
     void render();
 
-    void deserialize(DynamicJsonDocument &json);
+    boolean deserialize(DynamicJsonDocument &json);
     String serialize(boolean pretty);
 };
 

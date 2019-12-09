@@ -18,9 +18,11 @@
 */
 
 #include "E131Input.h"
+#include "../ESPixelStick.h"
+#include "../FileIO.h"
 
-const String E131Input::KEY = "e131";
-const String E131Input::CONFIG_FILE = "/e131.json";
+const char E131Input::KEY[] = "e131";
+const char E131Input::CONFIG_FILE[] = "/e131.json";
 
 E131Input::~E131Input() {
     destroy();
@@ -62,11 +64,11 @@ void E131Input::init() {
     }
 }
 
-String E131Input::getKey() {
+const char* E131Input::getKey() {
     return KEY;
 }
 
-String E131Input::getBrief() {
+const char* E131Input::getBrief() {
     return "E1.31 (sACN)";
 }
 
@@ -110,15 +112,17 @@ void E131Input::validate() {
         multiSub();
 }
 
-void E131Input::deserialize(DynamicJsonDocument &json) {
-    if (json.containsKey("e131")) {
-        universe = json["e131"]["universe"];
-        universe_limit = json["e131"]["universe_limit"];
-        channel_start = json["e131"]["channel_start"];
-        multicast = json["e131"]["multicast"];
+boolean E131Input::deserialize(DynamicJsonDocument &json) {
+    boolean retval = false;
+    if (json.containsKey(KEY)) {
+        retval = retval | FileIO::setFromJSON(universe, json[KEY]["universe"]);
+        retval = retval | FileIO::setFromJSON(universe_limit, json[KEY]["universe_limit"]);
+        retval = retval | FileIO::setFromJSON(channel_start, json[KEY]["channel_start"]);
+        retval = retval | FileIO::setFromJSON(multicast, json[KEY]["multicast"]);
     } else {
         LOG_PORT.println("No e131 settings found.");
     }
+    return retval;
 }
 
 void E131Input::load() {

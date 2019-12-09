@@ -61,7 +61,7 @@ const char LOOKUP_GECE[2] = {
 
 class GECE: public _Output {
   private:
-    static const String CONFIG_FILE;
+    static const char CONFIG_FILE[];
 
     // JSON configuration parameters
     uint8_t     pixel_count;
@@ -84,12 +84,12 @@ class GECE: public _Output {
     }
 
     // Everything below here is inherited from _Output
-    static const String KEY;
+    static const char KEY[];
     ~GECE();
     void destroy();
 
-    String getKey();
-    String getBrief();
+    const char* getKey();
+    const char* getBrief();
     uint8_t getTupleSize();
     uint16_t getTupleCount();
 
@@ -100,7 +100,7 @@ class GECE: public _Output {
     void init();
     void render();
 
-    void deserialize(DynamicJsonDocument &json);
+    boolean deserialize(DynamicJsonDocument &json);
     String serialize(boolean pretty);
 };
 

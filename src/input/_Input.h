@@ -21,26 +21,25 @@
 #define _INPUT_H_
 
 #include <Arduino.h>
-#include "../ESPixelStick.h"
-#include "../FileIO.h"
+#include <ArduinoJson.h>
 
 class _Input {
   public:
     virtual ~_Input() {}
-    virtual void destroy() = 0;     ///< Call to destroy and shutdown input
+    virtual void destroy() = 0;         ///< Call to destroy and shutdown input
 
-    virtual String getKey() = 0;    ///< Returns KEY of module
-    virtual String getBrief() = 0;  ///< Returns brief description of module
+    virtual const char* getKey() = 0;   ///< Returns KEY of module
+    virtual const char* getBrief() = 0; ///< Returns brief description of module
 
-    virtual void validate() = 0;    ///< Validates configuration
-    virtual void load() = 0;        ///< Loads configuration
-    virtual void save() = 0;        ///< Saves configuration
+    virtual void validate() = 0;        ///< Validates configuration
+    virtual void load() = 0;            ///< Loads configuration
+    virtual void save() = 0;            ///< Saves configuration
 
-    virtual void init() = 0;        ///< Call from setup(), initializes and starts input
-    virtual void process() = 0;     ///< Call from loop(), process incoming data
+    virtual void init() = 0;            ///< Call from setup(), initializes and starts input
+    virtual void process() = 0;         ///< Call from loop(), process incoming data
 
-    virtual void deserialize(DynamicJsonDocument &json) = 0;  ///< Sets configuration from JSON
-    virtual String serialize(boolean pretty = false) = 0;     ///< Gets configuration as JSON
+    virtual boolean deserialize(DynamicJsonDocument &json) = 0; ///< Sets configuration from JSON
+    virtual String serialize(boolean pretty = false) = 0;       ///< Gets configuration as JSON
 
     /* TODO:
      * - send config data as JSON to browser via ws

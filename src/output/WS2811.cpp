@@ -18,6 +18,8 @@
 */
 
 #include "WS2811.h"
+#include "../ESPixelStick.h"
+#include "../FileIO.h"
 
 extern "C" {
 #include <eagle_soc.h>
@@ -34,8 +36,8 @@ uint8_t WS2811::rOffset = 0;
 uint8_t WS2811::gOffset = 1;
 uint8_t WS2811::bOffset = 2;
 
-const String WS2811::KEY = "ws2811";
-const String WS2811::CONFIG_FILE = "/ws2811.json";
+const char WS2811::KEY[] = "ws2811";
+const char WS2811::CONFIG_FILE[] = "/ws2811.json";
 
 WS2811::~WS2811() {
     destroy();
@@ -100,11 +102,11 @@ void WS2811::init() {
     ETS_UART_INTR_ENABLE();
 }
 
-String WS2811::getKey() {
+const char* WS2811::getKey() {
     return KEY;
 }
 
-String WS2811::getBrief() {
+const char* WS2811::getBrief() {
     return "WS2811 800kHz";
 }
 
@@ -139,17 +141,19 @@ void WS2811::validate() {
     updateColorOrder();
 }
 
-void WS2811::deserialize(DynamicJsonDocument &json) {
+boolean WS2811::deserialize(DynamicJsonDocument &json) {
+    boolean retval = false;
     if (json.containsKey(KEY)) {
-        color_order = json[KEY.c_str()]["color_order"].as<String>();
-        pixel_count = json[KEY.c_str()]["pixel_count"];
-        group_size = json[KEY.c_str()]["group_size"];
-        zig_size = json[KEY.c_str()]["zig_size"];
-        gamma = json[KEY.c_str()]["gamma"];
-        brightness = json[KEY.c_str()]["brightness"];
+        retval = retval | FileIO::setFromJSON(color_order, json[KEY]["color_order"]);
+        retval = retval | FileIO::setFromJSON(pixel_count, json[KEY]["pixel_count"]);
+        retval = retval | FileIO::setFromJSON(group_size, json[KEY]["group_size"]);
+        retval = retval | FileIO::setFromJSON(zig_size, json[KEY]["zig_size"]);
+        retval = retval | FileIO::setFromJSON(gamma, json[KEY]["gamma"]);
+        retval = retval | FileIO::setFromJSON(brightness, json[KEY]["brightness"]);
     } else {
         LOG_PORT.println("No WS2811 settings found.");
     }
+    return retval;
 }
 
 void WS2811::load() {
@@ -214,7 +218,32 @@ void ICACHE_RAM_ATTR WS2811::handleWS2811(void *param) {
     /* Process if UART1 */
     if (READ_PERI_REG(UART_INT_ST(UART1))) {
         // Fill the FIFO with new data
-        uart_buffer = fillWS2811(uart_buffer, uart_buffer_tail);
+        uint8_t avail = (UART_TX_FIFO_SIZE - getFifoLength()) / 4;
+        if (uart_buffer_tail - uart_buffer > avail)
+            uart_buffer_tail = uart_buffer + avail;
+
+        while (uart_buffer + 2 < uart_buffer_tail) {
+            uint8_t subpix = uart_buffer[rOffset];
+            enqueue(LOOKUP_2811[(gamma_table[subpix] >> 6) & 0x3]);
+            enqueue(LOOKUP_2811[(gamma_table[subpix] >> 4) & 0x3]);
+            enqueue(LOOKUP_2811[(gamma_table[subpix] >> 2) & 0x3]);
+            enqueue(LOOKUP_2811[gamma_table[subpix] & 0x3]);
+
+            subpix = uart_buffer[gOffset];
+            enqueue(LOOKUP_2811[(gamma_table[subpix] >> 6) & 0x3]);
+            enqueue(LOOKUP_2811[(gamma_table[subpix] >> 4) & 0x3]);
+            enqueue(LOOKUP_2811[(gamma_table[subpix] >> 2) & 0x3]);
+            enqueue(LOOKUP_2811[gamma_table[subpix] & 0x3]);
+
+            subpix = uart_buffer[bOffset];
+            enqueue(LOOKUP_2811[(gamma_table[subpix] >> 6) & 0x3]);
+            enqueue(LOOKUP_2811[(gamma_table[subpix] >> 4) & 0x3]);
+            enqueue(LOOKUP_2811[(gamma_table[subpix] >> 2) & 0x3]);
+            enqueue(LOOKUP_2811[gamma_table[subpix] & 0x3]);
+
+            uart_buffer += 3;
+        }
+        uart_buffer +=2; // hack - fix
 
         // Disable TX interrupt when done
         if (uart_buffer == uart_buffer_tail)
@@ -227,37 +256,6 @@ void ICACHE_RAM_ATTR WS2811::handleWS2811(void *param) {
     /* Clear if UART0 */
     if (READ_PERI_REG(UART_INT_ST(UART0)))
         WRITE_PERI_REG(UART_INT_CLR(UART0), 0xffff);
-}
-
-const uint8_t* ICACHE_RAM_ATTR WS2811::fillWS2811(const uint8_t *buff,
-        const uint8_t *tail) {
-    uint8_t avail = (UART_TX_FIFO_SIZE - getFifoLength()) / 4;
-    if (tail - buff > avail)
-        tail = buff + avail;
-
-    while (buff + 2 < tail) {
-        uint8_t subpix = buff[rOffset];
-        enqueue(LOOKUP_2811[(gamma_table[subpix] >> 6) & 0x3]);
-        enqueue(LOOKUP_2811[(gamma_table[subpix] >> 4) & 0x3]);
-        enqueue(LOOKUP_2811[(gamma_table[subpix] >> 2) & 0x3]);
-        enqueue(LOOKUP_2811[gamma_table[subpix] & 0x3]);
-
-        subpix = buff[gOffset];
-        enqueue(LOOKUP_2811[(gamma_table[subpix] >> 6) & 0x3]);
-        enqueue(LOOKUP_2811[(gamma_table[subpix] >> 4) & 0x3]);
-        enqueue(LOOKUP_2811[(gamma_table[subpix] >> 2) & 0x3]);
-        enqueue(LOOKUP_2811[gamma_table[subpix] & 0x3]);
-
-        subpix = buff[bOffset];
-        enqueue(LOOKUP_2811[(gamma_table[subpix] >> 6) & 0x3]);
-        enqueue(LOOKUP_2811[(gamma_table[subpix] >> 4) & 0x3]);
-        enqueue(LOOKUP_2811[(gamma_table[subpix] >> 2) & 0x3]);
-        enqueue(LOOKUP_2811[gamma_table[subpix] & 0x3]);
-
-        buff += 3;
-    }
-
-    return buff;
 }
 
 void WS2811::updateGammaTable() {

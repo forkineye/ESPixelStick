@@ -18,6 +18,8 @@
 */
 
 #include "GECE.h"
+#include "../ESPixelStick.h"
+#include "../FileIO.h"
 
 extern "C" {
 #include <eagle_soc.h>
@@ -29,8 +31,8 @@ extern "C" {
 static const uint8_t    *uart_buffer;       // Buffer tracker
 static const uint8_t    *uart_buffer_tail;  // Buffer tracker
 
-const String GECE::KEY = "gece";
-const String GECE::CONFIG_FILE = "/gece.json";
+const char GECE::KEY[] = "gece";
+const char GECE::CONFIG_FILE[] = "/gece.json";
 
 GECE::~GECE() {
     destroy();
@@ -69,11 +71,11 @@ void GECE::init() {
     delayMicroseconds(GECE_TIDLE);
 }
 
-String GECE::getKey() {
+const char* GECE::getKey() {
     return KEY;
 }
 
-String GECE::getBrief() {
+const char* GECE::getBrief() {
     return "GE Color Effects";
 }
 
@@ -92,12 +94,14 @@ void GECE::validate() {
         pixel_count = PIXEL_LIMIT;
 }
 
-void GECE::deserialize(DynamicJsonDocument &json) {
+boolean GECE::deserialize(DynamicJsonDocument &json) {
+    boolean retval = false;
     if (json.containsKey(KEY)) {
-        pixel_count = json[KEY.c_str()]["pixel_count"];
+        retval = FileIO::setFromJSON(pixel_count, json[KEY]["pixel_count"]);
     } else {
         LOG_PORT.println("No GECE settings found.");
     }
+    return retval;
 }
 
 void GECE::load() {

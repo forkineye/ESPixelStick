@@ -42,12 +42,10 @@ const char passphrase[] = SECRETS_PASS;
 #include "src/WebIO.h"
 
 // Input modules
-#include "src/input/_Input.h"
 #include "src/input/E131Input.h"
 //#include "src/input/ESPAsyncDDP.h"
 
 // Output modules
-#include "src/output/_Output.h"
 #include "src/output/WS2811.h"
 #include "src/output/GECE.h"
 //#include "src/output/DMX.h"
@@ -134,8 +132,6 @@ IPAddress           ourSubnetMask;
 void loadConfig();
 void initWifi();
 void initWeb();
-void setInput();
-void setOutput();
 
 /// Radio configuration
 /** ESP8266 radio configuration routines that are executed at startup. */
@@ -177,7 +173,7 @@ void setup() {
     LOG_PORT.println(F("Supported Input modes:"));
     itInput = INPUT_MODES.begin();
     while (itInput != INPUT_MODES.end()) {
-        LOG_PORT.printf("- %s : %s\n", itInput->first.c_str(), itInput->second->getBrief().c_str());
+        LOG_PORT.printf("- %s : %s\n", itInput->first.c_str(), itInput->second->getBrief());
         itInput++;
     }
 
@@ -185,7 +181,7 @@ void setup() {
     LOG_PORT.println(F("Supported Output modes:"));
     itOutput = OUTPUT_MODES.begin();
     while (itOutput != OUTPUT_MODES.end()) {
-        LOG_PORT.printf("- %s : %s\n", itOutput->first.c_str(), itOutput->second->getBrief().c_str());
+        LOG_PORT.printf("- %s : %s\n", itOutput->first.c_str(), itOutput->second->getBrief());
         itOutput++;
     }
 
@@ -214,9 +210,6 @@ void setup() {
     // Load configuration from SPIFFS and set Hostname
     loadConfig();
     WiFi.hostname(config.hostname);
-
-    // Configure inputs and outputs
-    //setMode(input, output);
 
     // Setup WiFi Handlers
     wifiConnectHandler = WiFi.onStationModeGotIP(onWiFiConnect);
@@ -365,9 +358,7 @@ void initWeb() {
 
     // JSON Config Handler
     web.on("/conf", HTTP_GET, [](AsyncWebServerRequest *request) {
-        String jsonString;
-        serializeCore(jsonString, true);
-        request->send(200, "text/json", jsonString);
+        request->send(200, "text/json", serializeCore(true));
     });
 
     // Firmware upload handler - only in station mode
@@ -448,7 +439,7 @@ void validateConfig() {
 
     // Device defaults
     if (!config.id.length())
-        config.id = "No Config Found";
+        config.id = "No ID Found";
     if (!config.ssid.length())
         config.ssid = ssid;
     if (!config.passphrase.length())
@@ -456,11 +447,17 @@ void validateConfig() {
     if (!config.hostname.length())
         config.hostname = "esps-" + String(chipId);
 
+    if (config.sta_timeout < 5)
+        config.sta_timeout = CLIENT_TIMEOUT;
+
+    if (config.ap_timeout < 15)
+        config.ap_timeout = AP_TIMEOUT;
+
 //TODO: Update this to set to ws2811 and e131 if no config found
     itInput = INPUT_MODES.find(config.input);
     if (itInput != INPUT_MODES.end()) {
         input = itInput->second;
-        LOG_PORT.printf("- Input mode set to %s\n", input->getKey().c_str());
+        LOG_PORT.printf("- Input mode set to %s\n", input->getKey());
     } else {
         itInput = INPUT_MODES.begin();
         LOG_PORT.printf("* Input mode from core config invalid, setting to %s.\n",
@@ -472,7 +469,7 @@ void validateConfig() {
     itOutput = OUTPUT_MODES.find(config.output);
     if (itOutput != OUTPUT_MODES.end()) {
         output = itOutput->second;
-        LOG_PORT.printf("- Output mode set to %s\n", output->getKey().c_str());
+        LOG_PORT.printf("- Output mode set to %s\n", output->getKey());
     } else {
         itOutput = OUTPUT_MODES.begin();
         LOG_PORT.printf("* Input mode from core config invalid, setting to %s.\n",
@@ -485,59 +482,40 @@ void validateConfig() {
     setMode(input, output);
 }
 
-void dsDevice(DynamicJsonDocument &json) {
-    // Device
+/// Deserialize device confiugration JSON to config structure - returns true if config change detected
+boolean dsDevice(DynamicJsonDocument &json) {
+    boolean retval = false;
     if (json.containsKey("device")) {
-        config.id = json["device"]["id"].as<String>();
-        config.input = json["device"]["input"].as<String>();
-        config.output = json["device"]["output"].as<String>();
+        retval = retval | FileIO::setFromJSON(config.id, json["device"]["id"]);
+        retval = retval | FileIO::setFromJSON(config.input, json["device"]["input"]);
+        retval = retval | FileIO::setFromJSON(config.output, json["device"]["output"]);
     } else {
         LOG_PORT.println("No device settings found.");
     }
+
+    return retval;
 }
 
-void dsNetwork(DynamicJsonDocument &json) {
-    // Network
+/// Deserialize network confiugration JSON to config structure - returns true if config change detected
+boolean dsNetwork(DynamicJsonDocument &json) {
+    boolean retval = false;
     if (json.containsKey("network")) {
-        JsonObject networkJson = json["network"];
-
-        // Fallback to embedded ssid and passphrase if null in config
-        config.ssid = networkJson["ssid"].as<String>();
-        if (!config.ssid.length())
-            config.ssid = ssid;
-
-        config.passphrase = networkJson["passphrase"].as<String>();
-        if (!config.passphrase.length())
-            config.passphrase = passphrase;
-
-        // Network
-        config.ip = networkJson["ip"].as<String>();
-        config.netmask = networkJson["netmask"].as<String>();
-        config.gateway = networkJson["gateway"].as<String>();
-
-        config.dhcp = networkJson["dhcp"];
-        config.sta_timeout = networkJson["sta_timeout"] | CLIENT_TIMEOUT;
-        if (config.sta_timeout < 5) {
-            config.sta_timeout = 5;
-        }
-
-        config.ap_fallback = networkJson["ap_fallback"];
-        config.ap_timeout = networkJson["ap_timeout"] | AP_TIMEOUT;
-        if (config.ap_timeout < 15) {
-            config.ap_timeout = 15;
-        }
-
-        if (networkJson.containsKey("hostname"))
-            config.hostname = networkJson["hostname"].as<String>();
+        JsonObject network = json["network"];
+        retval = retval | FileIO::setFromJSON(config.ssid, network["ssid"]);
+        retval = retval | FileIO::setFromJSON(config.passphrase, network["passphrase"]);
+        retval = retval | FileIO::setFromJSON(config.ip, network["ip"]);
+        retval = retval | FileIO::setFromJSON(config.netmask, network["netmask"]);
+        retval = retval | FileIO::setFromJSON(config.gateway, network["gateway"]);
+        retval = retval | FileIO::setFromJSON(config.hostname, network["hostname"]);
+        retval = retval | FileIO::setFromJSON(config.dhcp, network["dhcp"]);
+        retval = retval | FileIO::setFromJSON(config.sta_timeout, network["sta_timeout"]);
+        retval = retval | FileIO::setFromJSON(config.ap_fallback, network["ap_fallback"]);
+        retval = retval | FileIO::setFromJSON(config.ap_timeout, network["ap_timeout"]);
     } else {
         LOG_PORT.println("No network settings found.");
     }
 
-    if (!config.hostname.length()) {
-        char chipId[7] = { 0 };
-        snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
-        config.hostname = "esps-" + String(chipId);
-    }
+    return retval;
 }
 
 void deserializeCore(DynamicJsonDocument &json) {
@@ -564,9 +542,10 @@ void loadConfig() {
 }
 
 // Serialize the current config into a JSON string
-void serializeCore(String &jsonString, boolean pretty, boolean creds) {
+String serializeCore(boolean pretty, boolean creds) {
     // Create buffer and root object
     DynamicJsonDocument json(1024);
+    String jsonString;
 
     // Device
     JsonObject device = json.createNestedObject("device");
@@ -594,6 +573,8 @@ void serializeCore(String &jsonString, boolean pretty, boolean creds) {
         serializeJsonPretty(json, jsonString);
     else
         serializeJson(json, jsonString);
+
+    return jsonString;
 }
 
 // Save configuration JSON file
@@ -601,12 +582,8 @@ void saveConfig() {
     // Validate Config
     validateConfig();
 
-    // Serialize Config
-    String jsonString;
-    serializeCore(jsonString, false, true);
-
     // Save Config
-    FileIO::saveConfig(CONFIG_FILE, jsonString);
+    FileIO::saveConfig(CONFIG_FILE, serializeCore(false, true));
 }
 
 /////////////////////////////////////////////////////////

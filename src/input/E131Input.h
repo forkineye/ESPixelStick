@@ -26,7 +26,7 @@
 class E131Input : public _Input {
   private:
     static const uint16_t   UNIVERSE_MAX = 512;
-    static const String     CONFIG_FILE;
+    static const char       CONFIG_FILE[];
 
     ESPAsyncE131  *e131;        ///< ESPAsyncE131 pointer
 
@@ -45,13 +45,13 @@ class E131Input : public _Input {
     void multiSub();
 
   public:
-    static const String KEY;
+    static const char KEY[];
 
     ~E131Input();
     void destroy();
 
-    String getKey();
-    String getBrief();
+    const char* getKey();
+    const char* getBrief();
 
     void validate();
     void load();
@@ -60,7 +60,7 @@ class E131Input : public _Input {
     void init();
     void process();
 
-    void deserialize(DynamicJsonDocument &json);
+    boolean deserialize(DynamicJsonDocument &json);
     String serialize(boolean pretty);
 };
 

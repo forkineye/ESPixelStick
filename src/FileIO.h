@@ -33,16 +33,16 @@ class FileIO {
     /** Loads JSON configuration file via SPIFFS.
      *  Returns true on success.
      */
-    static boolean loadConfig(String filename, DeserializationHandler dsHandler) {
+    static boolean loadConfig(const char *filename, DeserializationHandler dsHandler) {
         boolean retval = false;
         File file = SPIFFS.open(filename, "r");
         if (!file) {
-            LOG_PORT.printf("Configuration file %s not found.\n", filename.c_str());
+            LOG_PORT.printf("Configuration file %s not found.\n", filename);
         } else {
             // Parse CONFIG_FILE json
             size_t size = file.size();
             if (size > CONFIG_MAX_SIZE) {
-                LOG_PORT.printf("*** Configuration file %s too large ***\n", filename.c_str());
+                LOG_PORT.printf("*** Configuration file %s too large ***\n", filename);
             }
 
             std::unique_ptr<char[]> buf(new char[size]);
@@ -51,12 +51,12 @@ class FileIO {
             DynamicJsonDocument json(1024);
             DeserializationError error = deserializeJson(json, buf.get());
             if (error) {
-                LOG_PORT.printf("*** JSON Deserialzation Error: %s ***\n", filename.c_str());
+                LOG_PORT.printf("*** JSON Deserialzation Error: %s ***\n", filename);
             }
 
             dsHandler(json);
 
-            LOG_PORT.printf("Configuration file %s loaded.\n", filename.c_str());
+            LOG_PORT.printf("Configuration file %s loaded.\n", filename);
             retval = true;
         }
         return retval;
@@ -66,17 +66,73 @@ class FileIO {
     /** Saves configuration file via SPIFFS
      * Returns true on success.
      */
-    static boolean saveConfig(String filename, String jsonString) {
+    static boolean saveConfig(const char *filename, String jsonString) {
         boolean retval = false;
         File file = SPIFFS.open(filename, "w");
         if (!file) {
-            LOG_PORT.printf("*** Error saving %s ***\n", filename.c_str());
+            LOG_PORT.printf("*** Error saving %s ***\n", filename);
         } else {
             file.println(jsonString);
-            LOG_PORT.printf("Configuration file %s saved.\n", filename.c_str());
+            LOG_PORT.printf("Configuration file %s saved.\n", filename);
             retval = true;
         }
         return retval;
+    }
+
+    /// Checks if value is empty and sets key to value if they're different. Returns true if key was set
+    static boolean setFromJSON(String &key, JsonVariant val) {
+        if (!val.isNull() && !val.as<String>().equals(key)) {
+    //LOG_PORT.printf("**** Setting '%s' ****\n", val.c_str());
+            key = val.as<String>();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    static boolean setFromJSON(boolean &key, JsonVariant val) {
+        if (!val.isNull() && (val.as<boolean>() != key)) {
+            key = val;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    static boolean setFromJSON(uint8_t &key, JsonVariant val) {
+        if (!val.isNull() && (val.as<uint8_t>() != key)) {
+            key = val;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    static boolean setFromJSON(uint16_t &key, JsonVariant val) {
+        if (!val.isNull() && (val.as<uint16_t>() != key)) {
+            key = val;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    static boolean setFromJSON(uint32_t &key, JsonVariant val) {
+        if (!val.isNull() && (val.as<uint32_t>() != key)) {
+            key = val;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    static boolean setFromJSON(float &key, JsonVariant val) {
+        if (!val.isNull() && (val.as<float>() != key)) {
+            key = val;
+            return true;
+        } else {
+            return false;
+        }
     }
 };
 

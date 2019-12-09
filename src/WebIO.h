@@ -104,15 +104,11 @@ class WebIO {
             if (json["cmd"]["get"]) {
                 String target = json["cmd"]["get"].as<String>();
                 if (target.equalsIgnoreCase("device")) {
-                    String jsonString;
-                    serializeCore(jsonString, false, true);
-                    client->text("{\"get\":" + jsonString + "}");
+                    client->text("{\"get\":" + serializeCore(false, true) + "}");
                 }
 
                 if (target.equalsIgnoreCase("network")) {
-                    String jsonString;
-                    serializeCore(jsonString, false, true);
-                    client->text("{\"get\":" + jsonString + "}");
+                    client->text("{\"get\":" + serializeCore(false, true) + "}");
                 }
 
                 itInput = INPUT_MODES.find(target);
@@ -157,12 +153,14 @@ class WebIO {
                     serializeJson(json, jsonString);
                     client->text("{\"opt\":" + jsonString + "}");
                 }
+
                 if (target.equalsIgnoreCase("input"))
                     LOG_PORT.println("*** WebIO opt input ***");
+
                 if (target.equalsIgnoreCase("output"))
                     LOG_PORT.println("*** WebIO opt output ***");
+                }
             }
-        }
 
             // Process "SET" command - receive configuration as JSON
             if (JsonObject root = json["cmd"]["set"].as<JsonObject>()) {
@@ -172,26 +170,40 @@ class WebIO {
                     String key = kv.key().c_str();
                     // Device config
                     if (key.equalsIgnoreCase("device")) {
-                        dsDevice(doc);
+                        if (dsDevice(doc))
+                            saveConfig();
+                        client->text("{\"set\":" + serializeCore(false, true) + "}");
                     // Network config
                     } else if (key.equalsIgnoreCase("network")) {
-                        dsNetwork(doc);
+                        if (dsNetwork(doc))
+                            saveConfig();
+                        client->text("{\"set\":" + serializeCore(false, true) + "}");
                     // Iterate over input and output modules
                     } else {
+                        boolean changed = false;
                         itInput = INPUT_MODES.find(key);
                         if (itInput != INPUT_MODES.end()) {
-                            itInput->second->deserialize(doc);
-                            itInput->second->save();
+                            if (itInput->second->deserialize(doc)) {
+                                itInput->second->save();
+                                changed = true;
+                            }
+                            client->text("{\"set\":" + itInput->second->serialize() + "}");
                         }
 
                         itOutput = OUTPUT_MODES.find(key);
                         if (itOutput != OUTPUT_MODES.end()) {
-                            itOutput->second->deserialize(doc);
-                            itOutput->second->save();
+                            if (itOutput->second->deserialize(doc)) {
+                                itOutput->second->save();
+                                changed = true;
+                            }
+                            client->text("{\"set\":" + itOutput->second->serialize() + "}");
                         }
+
+                        // Re-init I/O modules if their config changed
+                        if (changed)
+                            setMode(input, output);
                     }
                 }
-                saveConfig();
             }
 
 /* From wshandler:
