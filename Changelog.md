@@ -1,17 +1,21 @@
 
 # Changelog
 
-### 3.1-dev (on-going)
+### 3.1
 
+- Compiled against [2.6.3 Arduino Core](https://github.com/esp8266/Arduino/releases/tag/2.6.3)
+- ESPSFlashTool support for ESPixelStick v3.0 Hardware
+- Fixed DMX issues - [Issue #101](https://github.com/forkineye/ESPixelStick/issues/101)
 - Added brightness support.
 - Added calculated gamma support.
 - Added grouping and zigzag for pixels.
 - Added startup and idle effect options.
+- Added FPP Discovery support.
+- Added xLights ZCPP support.
+- Added DDP support.
 - Added Home Assistant MQTT Discovery support.
-- Better MQTT support (usage detailed in the README).
-- New effects for standalone or MQTT usage.
+- New effects for standalone and MQTT usage.
 - Changed GECE output from bit-banging to a UART based implementation.
-- Removed PWM support. A version supporting PWM is maintaned by [penfold42](https://github.com/penfold42/ESPixelBoard).
 
 ### 3.0
 

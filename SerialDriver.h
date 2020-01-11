@@ -1,5 +1,5 @@
 /******************************************************************
-*  
+*
 *       Project: ESPixelStick - An ESP8266 and E1.31 based pixel (And Serial!) driver
 *       Orginal ESPixelStickproject by 2015 Shelby Merrick
 *
@@ -8,8 +8,8 @@
 *              www.billporter.info
 *
 *       See Readme for other info and version history
-*   
-*  
+*
+*
 *This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or(at your option) any later version.
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,7 +17,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 <http://www.gnu.org/licenses/>
 *
-*This work is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unported License. 
+*This work is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unported License.
 *To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/3.0/ or
 *send a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
 ******************************************************************/
@@ -63,7 +63,6 @@ class SerialDriver {
     int begin(HardwareSerial *theSerial, SerialType type, uint16_t length);
     int begin(HardwareSerial *theSerial, SerialType type, uint16_t length,
             BaudRate baud);
-    void startPacket();
     void show();
     uint8_t* getData();
 
@@ -109,14 +108,14 @@ class SerialDriver {
     /* Serial interrupt handler */
     static void ICACHE_RAM_ATTR serial_handle(void *param);
 
-    /* Returns number of bytes waiting in the TX FIFO of SEROUT_UART */
+    /* Returns number of bytes waiting in the TX FIFO of UART1 */
     static inline uint8_t getFifoLength() {
-        return (ESP8266_REG(U0F+(0xF00*SEROUT_UART)) >> USTXC) & 0xff;
+        return (U1S >> USTXC) & 0xff;
     }
 
-    /* Append a byte to the TX FIFO of SEROUT_UART */
+    /* Append a byte to the TX FIFO of UART1 */
     static inline void enqueue(uint8_t byte) {
-        ESP8266_REG(U0F+(0xF00*SEROUT_UART)) = byte;
+        U1F = byte;
     }
 };
 

@@ -105,7 +105,7 @@ void procX(uint8_t *data, AsyncWebSocketClient *client) {
             ddpJ["num_bytes"] = (String)ddp.stats.bytesReceived;
             ddpJ["max_channel"] = (String)ddp.stats.ddpMaxChannel;
             ddpJ["min_channel"] = (String)ddp.stats.ddpMinChannel;
-            
+
             String response;
             serializeJson(json, response);
             client->text("XJ" + response);
@@ -387,8 +387,6 @@ void handle_fw_upload(AsyncWebServerRequest *request, String filename,
                 String(efupdate.getError()));
 
     if (final) {
-        request->send(200, "text/plain", "Update Finished: " +
-                String(efupdate.getError()));
         LOG_PORT.println(F("* Upload Finished."));
         efupdate.end();
         SPIFFS.begin();

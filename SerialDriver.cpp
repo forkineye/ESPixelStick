@@ -1,5 +1,5 @@
 /******************************************************************
-*  
+*
 *       Project: ESPixelStick - An ESP8266 and E1.31 based pixel (And Serial!) driver
 *       Orginal ESPixelStickproject by 2015 Shelby Merrick
 *
@@ -8,8 +8,8 @@
 *              www.billporter.info
 *
 *       See Readme for other info and version history
-*   
-*  
+*
+*
 *This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or(at your option) any later version.
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,7 +17,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 <http://www.gnu.org/licenses/>
 *
-*This work is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unported License. 
+*This work is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unported License.
 *To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/3.0/ or
 *send a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
 ******************************************************************/
@@ -119,23 +119,14 @@ int SerialDriver::begin(HardwareSerial *theSerial, SerialType type,
     return retval;
 }
 
-/* move buffer creation to being, added header bytes on eneqeue / fill fifo */
-void SerialDriver::startPacket() {
-    // Create a buffer and fill in header
-    if (_type == SerialType::RENARD) {
-        _serialdata = static_cast<uint8_t *>(malloc(_size + 2));
-        _serialdata[0] = 0x7E;
-        _serialdata[1] = 0x80;
-    // Create buffer
-    } else if (_type == SerialType::DMX512) {
-        _serialdata = static_cast<uint8_t *>(malloc(_size));
-    }
-}
-
 const uint8_t* ICACHE_RAM_ATTR SerialDriver::fillFifo(const uint8_t *buff, const uint8_t *tail) {
     uint8_t avail = (UART_TX_FIFO_SIZE - getFifoLength());
-    if (tail - buff > avail) tail = buff + avail;
-    while (buff < tail) enqueue(*buff++);
+    if (tail - buff > avail)
+        tail = buff + avail;
+
+    while (buff < tail)
+        enqueue(*buff++);
+
     return buff;
 }
 
@@ -168,8 +159,11 @@ void ICACHE_RAM_ATTR SerialDriver::serial_handle(void *param) {
 void SerialDriver::show() {
     if (!_serialdata) return;
 
-    uart_buffer = _serialdata;
-    uart_buffer_tail = _serialdata + _size;
+    /* Copy data to the idle buffer and swap it */
+    memcpy(_asyncdata, _serialdata, _size);
+
+    uart_buffer = _asyncdata;
+    uart_buffer_tail = _asyncdata + _size;
 
     if (_type == SerialType::DMX512) {
         SET_PERI_REG_MASK(UART_CONF0(SEROUT_UART), UART_TXD_BRK);
@@ -182,9 +176,7 @@ void SerialDriver::show() {
 
     startTime = micros();
 
-    /* Copy data to the idle buffer and swap it */
-    memcpy(_asyncdata, _serialdata, _size);
-    std::swap(_asyncdata, _serialdata);
+//    std::swap(_asyncdata, _serialdata);
 }
 
 

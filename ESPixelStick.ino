@@ -181,7 +181,7 @@ void setup() {
     {
         LOG_PORT.println("Failed to read file system details");
     }
-    
+
     // Load configuration from SPIFFS and set Hostname
     loadConfig();
     if (config.hostname)
@@ -279,9 +279,9 @@ void setup() {
     fppDiscovery.begin();
 
     if (ddp.begin(ourLocalIP)) {
-      LOG_PORT.println(F("- DDP Enabled"));      
+      LOG_PORT.println(F("- DDP Enabled"));
     } else {
-      LOG_PORT.println(F("*** DDP INIT FAILED ****"));      
+      LOG_PORT.println(F("*** DDP INIT FAILED ****"));
     }
 
     lastZCPPConfig = -1;
@@ -443,7 +443,7 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
 
 void onMqttMessage(char* topic, char* payload,
         AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
-    
+
     DynamicJsonDocument r(1024);
     DeserializationError error = deserializeJson(r, payload);
 
@@ -1031,7 +1031,7 @@ void loadConfig() {
 void serializeConfig(String &jsonString, bool pretty, bool creds) {
     // Create buffer and root object
     DynamicJsonDocument json(1024);
-    
+
     // Device
     JsonObject device = json.createNestedObject("device");
     device["id"] = config.id.c_str();
@@ -1115,7 +1115,7 @@ void serializeConfig(String &jsonString, bool pretty, bool creds) {
 #endif
 
     if (pretty)
-        serializeJsonPretty(json, jsonString); 
+        serializeJsonPretty(json, jsonString);
     else
         serializeJson(json, jsonString);
 }
@@ -1176,7 +1176,7 @@ void sendZCPPConfig(ZCPP_packet_t& packet) {
         packet.QueryConfigurationResponse.PortConfig[0].port = 0;
         #if defined(ESPS_MODE_SERIAL)
         packet.QueryConfigurationResponse.PortConfig[0].port |= 0x80;
-        #endif        
+        #endif
         packet.QueryConfigurationResponse.PortConfig[0].string = 0;
         packet.QueryConfigurationResponse.PortConfig[0].startChannel = ntohl((uint32_t)config.channel_start);
 #if defined(ESPS_MODE_PIXEL)
@@ -1235,8 +1235,8 @@ void sendZCPPConfig(ZCPP_packet_t& packet) {
         packet.QueryConfigurationResponse.PortConfig[0].gamma = 0;
 #endif
     }
-    
-    zcpp.sendConfigResponse(&packet);  
+
+    zcpp.sendConfigResponse(&packet);
 }
 
 /////////////////////////////////////////////////////////
@@ -1367,14 +1367,14 @@ void loop() {
                           memset(version, 0x00, sizeof(version));
                           for (uint8_t i = 0; i < min(strlen_P(VERSION), sizeof(version)-1); i++)
                             version[i] = pgm_read_byte(VERSION + i);
-    
+
                           uint8_t mac[WL_MAC_ADDR_LENGTH];
                           zcpp.sendDiscoveryResponse(&zcppPacket, version, WiFi.macAddress(mac), config.id.c_str(), pixelPorts, serialPorts, 680 * 3, 512, 680 * 3, static_cast<uint32_t>(ourLocalIP), static_cast<uint32_t>(ourSubnetMask));
                       }
                       break;
                   case ZCPP_TYPE_CONFIG: // config
                       LOG_PORT.println("ZCPP Config received.");
-                      if (htons(zcppPacket.Configuration.sequenceNumber) != lastZCPPConfig) {                        
+                      if (htons(zcppPacket.Configuration.sequenceNumber) != lastZCPPConfig) {
                         // a new config to apply
                         LOG_PORT.print("    The config is new: ");
                         LOG_PORT.println(htons(zcppPacket.Configuration.sequenceNumber));
@@ -1388,7 +1388,7 @@ void loop() {
                             if (p->port == 0) {
                                 switch(p->protocol) {
 #if defined(ESPS_MODE_PIXEL)
-                                    case ZCPP_PROTOCOL_WS2811: 
+                                    case ZCPP_PROTOCOL_WS2811:
                                         config.pixel_type = PixelType::WS2811;
                                         break;
                                     case ZCPP_PROTOCOL_GECE:
@@ -1405,7 +1405,7 @@ void loop() {
                                     default:
                                         LOG_PORT.print("Attempt to configure invalid protocol ");
                                         LOG_PORT.print(p->protocol);
-                                        break;                                      
+                                        break;
                                 }
                                 LOG_PORT.print("    Protocol: ");
 #if defined(ESPS_MODE_PIXEL)
@@ -1416,7 +1416,7 @@ void loop() {
                                 config.channel_start = htonl(p->startChannel);
                                 LOG_PORT.print("    Start Channel: ");
                                 LOG_PORT.println(config.channel_start);
-                                config.channel_count = htonl(p->channels);                            
+                                config.channel_count = htonl(p->channels);
                                 LOG_PORT.print("    Channel Count: ");
                                 LOG_PORT.println(config.channel_count);
 #if defined(ESPS_MODE_PIXEL)
@@ -1461,8 +1461,8 @@ void loop() {
                                 LOG_PORT.print("Attempt to configure invalid port ");
                                 LOG_PORT.print(p->port);
                             }
-  
-                            p += sizeof(zcppPacket.Configuration.PortConfig);  
+
+                            p += sizeof(zcppPacket.Configuration.PortConfig);
                           }
 
                           if (zcppPacket.Configuration.flags & ZCPP_CONFIG_FLAG_LAST) {
@@ -1531,7 +1531,7 @@ void loop() {
           || (config.ds == DataSource::MQTT) ) {
                 effects.run();
         }
-    
+
     /* Streaming refresh */
     #if defined(ESPS_MODE_PIXEL)
         if (pixels.canRefresh())
@@ -1541,7 +1541,7 @@ void loop() {
             serial.show();
     #endif
   }
-  
+
 // workaround crash - consume incoming bytes on serial port
     if (LOG_PORT.available()) {
         while (LOG_PORT.read() >= 0);
