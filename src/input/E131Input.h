@@ -29,9 +29,10 @@ class E131Input : public _Input {
     static const char       CONFIG_FILE[];
 
     ESPAsyncE131  *e131;        ///< ESPAsyncE131 pointer
+    e131_packet_t packet;       ///< Packet buffer for parsing
 
     /// JSON configuration parameters
-    uint16_t    universe;       ///< Universe to listen for
+    uint16_t    startUniverse;  ///< Universe to listen for
     uint16_t    universe_limit; ///< Universe boundary limit
     uint16_t    channel_start;  ///< Channel to start listening at - 1 based
     boolean     multicast;      ///< Enable multicast listener

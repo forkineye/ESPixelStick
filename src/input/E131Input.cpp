@@ -48,8 +48,8 @@ void E131Input::init() {
 
     // Get on with business
     if (multicast) {
-        if (e131->begin(E131_MULTICAST, universe,
-                uniLast - universe + 1)) {
+        if (e131->begin(E131_MULTICAST, startUniverse,
+                uniLast - startUniverse + 1)) {
             LOG_PORT.println(F("E131 Multicast Enabled."));
         }  else {
             LOG_PORT.println(F("*** E131 MULTICAST INIT FAILED ****"));
@@ -73,8 +73,8 @@ const char* E131Input::getBrief() {
 }
 
 void E131Input::validate() {
-    if (universe < 1)
-        universe = 1;
+    if (startUniverse < 1)
+        startUniverse = 1;
     if (universe_limit > UNIVERSE_MAX || universe_limit < 1)
         universe_limit = UNIVERSE_MAX;
     if (channel_start < 1)
@@ -86,12 +86,12 @@ void E131Input::validate() {
    // Find the last universe we should listen for
     uint16_t span = channel_start + showBufferSize - 1;
     if (span % universe_limit)
-        uniLast = universe + span / universe_limit;
+        uniLast = startUniverse + span / universe_limit;
     else
-        uniLast = universe + span / universe_limit - 1;
+        uniLast = startUniverse + span / universe_limit - 1;
 
     // Setup the sequence error tracker
-    uint8_t uniTotal = (uniLast + 1) - universe;
+    uint8_t uniTotal = (uniLast + 1) - startUniverse;
 
     if (seqTracker) free(seqTracker);
     if ((seqTracker = static_cast<uint8_t *>(malloc(uniTotal))))
@@ -105,7 +105,7 @@ void E131Input::validate() {
     e131->stats.num_packets = 0;
 
     LOG_PORT.printf("Listening for %u channels from Universe %u to %u.\n",
-            showBufferSize, universe, uniLast);
+            showBufferSize, startUniverse, uniLast);
 
     // Setup IGMP subscriptions if multicast is enabled
     if (multicast)
@@ -115,7 +115,7 @@ void E131Input::validate() {
 boolean E131Input::deserialize(DynamicJsonDocument &json) {
     boolean retval = false;
     if (json.containsKey(KEY)) {
-        retval = retval | FileIO::setFromJSON(universe, json[KEY]["universe"]);
+        retval = retval | FileIO::setFromJSON(startUniverse, json[KEY]["universe"]);
         retval = retval | FileIO::setFromJSON(universe_limit, json[KEY]["universe_limit"]);
         retval = retval | FileIO::setFromJSON(channel_start, json[KEY]["channel_start"]);
         retval = retval | FileIO::setFromJSON(multicast, json[KEY]["multicast"]);
@@ -131,7 +131,7 @@ void E131Input::load() {
         validate();
     } else {
         // Load failed, create a new config file and save it
-        universe = 1;
+        startUniverse = 1;
         universe_limit = 512;
         channel_start = 1;
         multicast = true;
@@ -143,7 +143,7 @@ String E131Input::serialize(boolean pretty = false) {
     DynamicJsonDocument json(1024);
 
     JsonObject e131 = json.createNestedObject("e131");
-    e131["universe"] = universe;
+    e131["universe"] = startUniverse;
     e131["universe_limit"] = universe_limit;
     e131["channel_start"] = channel_start;
     e131["multicast"] = multicast;
@@ -168,28 +168,36 @@ void E131Input::multiSub() {
     ip_addr_t ifaddr;
     ip_addr_t multicast_addr;
 
-    count = uniLast - universe + 1;
+    count = uniLast - startUniverse + 1;
     ifaddr.addr = static_cast<uint32_t>(WiFi.localIP());
     for (uint8_t i = 0; i < count; i++) {
         multicast_addr.addr = static_cast<uint32_t>(IPAddress(239, 255,
-                (((universe + i) >> 8) & 0xff),
-                (((universe + i) >> 0) & 0xff)));
+                (((startUniverse + i) >> 8) & 0xff),
+                (((startUniverse + i) >> 0) & 0xff)));
         igmp_joingroup(&ifaddr, &multicast_addr);
     }
 }
 
 void E131Input::process() {
+    uint8_t     *data;
+    uint8_t     uniOffset;
+    uint16_t    universe;
+    uint16_t    offset;
+    uint16_t    dataStart;
+    uint16_t    dataStop;
+    uint16_t    channels;
+    uint16_t    buffloc;
+
     // Parse a packet and update pixels
     while (!e131->isEmpty()) {
-        e131_packet_t packet;
         e131->pull(&packet);
-        uint16_t universe = htons(packet.universe);
-        uint8_t *data = packet.property_values + 1;
+        universe = htons(packet.universe);
+        data = packet.property_values + 1;
         //LOG_PORT.print(universe);
         //LOG_PORT.println(packet.sequence_number);
-        if ((universe >= universe) && (universe <= uniLast)) {
+        if ((universe >= startUniverse) && (universe <= uniLast)) {
             // Universe offset and sequence tracking
-            uint8_t uniOffset = (universe - universe);
+            uniOffset = (universe - startUniverse);
             if (packet.sequence_number != seqTracker[uniOffset]++) {
                 LOG_PORT.print(F("Sequence Error - expected: "));
                 LOG_PORT.print(seqTracker[uniOffset] - 1);
@@ -202,22 +210,21 @@ void E131Input::process() {
             }
 
             // Offset the channels if required
-            uint16_t offset = 0;
             offset = channel_start - 1;
 
             // Find start of data based off the Universe
-            int16_t dataStart = uniOffset * universe_limit - offset;
+            dataStart = uniOffset * universe_limit - offset;
 
             // Calculate how much data we need for this buffer
-            uint16_t dataStop = showBufferSize;
-            uint16_t channels = htons(packet.property_value_count) - 1;
+            dataStop = showBufferSize;
+            channels = htons(packet.property_value_count) - 1;
             if (universe_limit < channels)
                 channels = universe_limit;
             if ((dataStart + channels) < dataStop)
                 dataStop = dataStart + channels;
 
             // Set the data
-            uint16_t buffloc = 0;
+            buffloc = 0;
 
             // ignore data from start of first Universe before channel_start
             if (dataStart < 0) {
@@ -232,5 +239,5 @@ void E131Input::process() {
             }
         }
     }
-
+//    LOG_PORT.printf("procJSON heap /stack stats: %u:%u:%u:%u\n", ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
 }

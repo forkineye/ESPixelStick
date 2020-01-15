@@ -85,7 +85,8 @@ class WebIO {
 
     /// Process JSON messages
     static void procJSON(uint8_t *data, AsyncWebSocketClient *client) {
-//LOG_PORT.printf("procJSON heap stats: %d:%d:%d\n", ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize());
+//LOG_PORT.printf("procJSON heap /stack stats: %u:%u:%u:%u\n", ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
+
         DynamicJsonDocument json(1024);
         DeserializationError error = deserializeJson(json, reinterpret_cast<char*>(data));
         if (error) {
