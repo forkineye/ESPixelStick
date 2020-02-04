@@ -789,7 +789,7 @@ function submitWiFi() {
                 'ssid': $('#ssid').val(),
                 'passphrase': $('#password').val(),
                 'hostname': $('#hostname').val(),
-                'sta_timeout': $('#staTimeout').val(),
+                'sta_timeout': parseInt($('#staTimeout').val()),
                 'ip': [parseInt(ip[0]), parseInt(ip[1]), parseInt(ip[2]), parseInt(ip[3])],
                 'netmask': [parseInt(netmask[0]), parseInt(netmask[1]), parseInt(netmask[2]), parseInt(netmask[3])],
                 'gateway': [parseInt(gateway[0]), parseInt(gateway[1]), parseInt(gateway[2]), parseInt(gateway[3])],
