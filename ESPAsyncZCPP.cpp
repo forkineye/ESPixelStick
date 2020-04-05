@@ -58,8 +58,8 @@ bool ESPAsyncZCPP::initUDP(IPAddress ourIP) {
         success = true;
     }
 	
-  	ip_addr_t ifaddr;
-    ip_addr_t multicast_addr;
+  	ip4_addr_t ifaddr;
+    ip4_addr_t multicast_addr;
   	ifaddr.addr = static_cast<uint32_t>(ourIP);
 	  multicast_addr.addr = static_cast<uint32_t>(IPAddress(224, 0, 31, (ifaddr.addr & 0xFF000000) >> 24));
 	  igmp_joingroup(&ifaddr, &multicast_addr);

@@ -22,6 +22,11 @@
 #include <lwip/def.h>
 #include "EFUpdate.h"
 
+#ifdef ARDUINO_ARCH_ESP32
+#   include <Update.h>
+#   define U_FS U_SPIFFS
+#endif
+
 void EFUpdate::begin() {
     _maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
     _state = State::HEADER;

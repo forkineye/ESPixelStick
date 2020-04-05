@@ -22,6 +22,7 @@
 /*****************************************/
 
 /* Fallback configuration if config.json is empty or fails */
+#include <dummy.h>
 const char ssid[] = "ENTER_SSID_HERE";
 const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 
@@ -32,7 +33,7 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include <ESPAsyncE131.h>
 #include "ESPAsyncZCPP.h"
 #include "ESPAsyncDDP.h"
-#include <Hash.h>
+
 #include <SPI.h>
 #include "ESPixelStick.h"
 #include "FPPDiscovery.h"
@@ -40,9 +41,29 @@ const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 #include "wshandler.h"
 #include "gamma.h"
 
-extern "C" {
-#include <user_interface.h>
-}
+#ifdef ARDUINO_ARCH_ESP8266
+extern "C" 
+{
+#   include <user_interface.h>
+} // extern "C" 
+
+#elif defined ARDUINO_ARCH_ESP32
+    // ESP32 user_interface is now built in
+#   include <WiFi.h>
+#   include <esp_wifi.h>
+#   include <SPIFFS.h>
+#   include <Update.h>
+#else
+#	error "Unsupported CPU type."
+#endif
+
+#ifndef WL_MAC_ADDR_LENGTH
+#   define WL_MAC_ADDR_LENGTH 6
+#endif // WL_MAC_ADDR_LENGTH
+
+#ifndef ICACHE_RAM_ATTR
+#   define ICACHE_RAM_ATTR IRAM_ATTR 
+#endif // ICACHE_RAM_ATTR
 
 // Debugging support
 #if defined(DEBUG)
@@ -65,7 +86,7 @@ static void _u0_putc(char c){
 const char MQTT_SET_COMMAND_TOPIC[] = "/set";
 
 // MQTT Payloads by default (on/off)
-const char LIGHT_ON[] = "ON";
+const char LIGHT_ON[]  = "ON";
 const char LIGHT_OFF[] = "OFF";
 
 // Configuration file
@@ -87,8 +108,10 @@ AsyncWebServer      web(HTTP_PORT); // Web Server
 AsyncWebSocket      ws("/ws");      // Web Socket Plugin
 uint8_t             *seqTracker;    // Current sequence numbers for each Universe */
 uint32_t            lastUpdate;     // Update timeout tracker
+#ifdef ARDUINO_ARCH_ESP8266
 WiFiEventHandler    wifiConnectHandler;     // WiFi connect handler
 WiFiEventHandler    wifiDisconnectHandler;  // WiFi disconnect handler
+#endif
 Ticker              wifiTicker;     // Ticker to handle WiFi
 Ticker              idleTicker;     // Ticker for effect on idle
 AsyncMqttClient     mqtt;           // MQTT object
@@ -118,15 +141,26 @@ void initWeb();
 void updateConfig();
 
 // Radio config
+#ifdef ARDUINO_ARCH_ESP8266
 RF_PRE_INIT() {
     //wifi_set_phy_mode(PHY_MODE_11G);    // Force 802.11g mode
     system_phy_set_powerup_option(31);  // Do full RF calibration on power-up
     system_phy_set_max_tpw(82);         // Set max TX power
 }
+#else
+#	define RF_PRE_INIT { \
+        esp_phy_erase_cal_data_in_nvs(); /* Do full RF calibration on power-up */ \
+        esp_wifi_set_max_tx_power (78);  /* Set max TX power */ \
+}
+#endif
 
 void setup() {
     // Configure SDK params
-    wifi_set_sleep_type(NONE_SLEEP_T);
+#ifdef ARDUINO_ARCH_ESP8266
+    wifi_set_sleep_type (NONE_SLEEP_T);
+#else
+    esp_wifi_set_ps (WIFI_PS_NONE);
+#endif
 
     // Initial pin states
     pinMode(DATA_PIN, OUTPUT);
@@ -152,10 +186,17 @@ void setup() {
     for (uint8_t i = 0; i < strlen_P(BUILD_DATE); i++)
         LOG_PORT.print((char)(pgm_read_byte(BUILD_DATE + i)));
     LOG_PORT.println(")");
+#ifdef ARDUINO_ARCH_ESP8266
     LOG_PORT.println(ESP.getFullVersion());
-
+#else
+    LOG_PORT.println(ESP.getSdkVersion());
+#endif
     // Enable SPIFFS
+#ifdef ARDUINO_ARCH_ESP8266
     if (!SPIFFS.begin())
+#else
+    if (!SPIFFS.begin(false))
+#endif
     {
         LOG_PORT.println("File system did not initialise correctly");
     }
@@ -164,19 +205,33 @@ void setup() {
         LOG_PORT.println("File system initialised");
     }
 
+#ifdef ARDUINO_ARCH_ESP8266
     FSInfo fs_info;
-    if (SPIFFS.info(fs_info))
+    if (SPIFFS.info (fs_info))
     {
-        LOG_PORT.print("Total bytes in file system: ");
-        LOG_PORT.println(fs_info.usedBytes);
+        LOG_PORT.print ("Total bytes in file system: ");
+        LOG_PORT.println (fs_info.usedBytes);
 
-        Dir dir = SPIFFS.openDir("/");
-        while (dir.next()) {
-          LOG_PORT.print(dir.fileName());
-          File f = dir.openFile("r");
-          LOG_PORT.println(f.size());
+        Dir dir = SPIFFS.openDir ("/");
+        while (dir.next ()) {
+            LOG_PORT.print (dir.fileName ());
+            File f = dir.openFile ("r");
+            LOG_PORT.println (f.size ());
         }
     }
+#elif defined(ARDUINO_ARCH_ESP32)
+    if (0 != SPIFFS.totalBytes())
+    {
+        LOG_PORT.println (String ("Total bytes in file system: ") + String(SPIFFS.usedBytes()));
+
+        fs::File dir = SPIFFS.open ("/");
+        while (dir.openNextFile ())
+        {
+            LOG_PORT.print (String (dir.name ()) + ": /t" + String (dir.size ()));
+        }
+    }
+#endif // ARDUINO_ARCH_ESP32
+
     else
     {
         LOG_PORT.println("Failed to read file system details");
@@ -184,8 +239,15 @@ void setup() {
 
     // Load configuration from SPIFFS and set Hostname
     loadConfig();
+
     if (config.hostname)
-        WiFi.hostname(config.hostname);
+    {
+#ifdef ARDUINO_ARCH_ESP8266
+        WiFi.hostname (config.hostname);
+#else
+        WiFi.setHostname (config.hostname.c_str());
+#endif
+    }
 
 #if defined (ESPS_MODE_PIXEL)
     pixels.setPin(DATA_PIN);
@@ -212,8 +274,11 @@ void setup() {
 #endif
 
     // Setup WiFi Handlers
+#ifdef ARDUINO_ARCH_ESP8266
     wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
-
+#else
+    WiFi.onEvent(onWifiConnect, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
+#endif
     // Setup MQTT Handlers
     if (config.mqtt) {
         mqtt.onConnect(onMqttConnect);
@@ -250,8 +315,11 @@ void setup() {
         }
     }
 
+#ifdef ARDUINO_ARCH_ESP8266
     wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWiFiDisconnect);
-
+#else
+    WiFi.onEvent(onWiFiDisconnect, SYSTEM_EVENT_STA_DISCONNECTED);
+#endif
     LOG_PORT.print("IP : ");
     LOG_PORT.println(ourLocalIP);
     LOG_PORT.print("Subnet mask : ");
@@ -318,8 +386,11 @@ void initWifi() {
 }
 
 void connectWifi() {
+#ifdef ARDUINO_ARCH_ESP8266
     delay(secureRandom(100, 500));
-
+#else
+    delay (random (100, 500));
+#endif
     LOG_PORT.println("");
     LOG_PORT.print(F("Connecting to "));
     LOG_PORT.print(config.ssid);
@@ -340,10 +411,13 @@ void connectWifi() {
     }
 }
 
-void onWifiConnect(const WiFiEventStationModeGotIP &event) {
+#ifdef ARDUINO_ARCH_ESP8266
+void onWifiConnect(const WiFiEventStationModeGotIP & event) {
+#else
+void onWifiConnect (const WiFiEvent_t event, const WiFiEventInfo_t info) {
+#endif
     LOG_PORT.println("");
-    LOG_PORT.print(F("Connected with IP: "));
-    LOG_PORT.println(WiFi.localIP());
+    LOG_PORT.println(String(F("Connected with IP: ")) + WiFi.localIP().toString());
 
     ourLocalIP = WiFi.localIP();
     ourSubnetMask = WiFi.subnetMask();
@@ -354,7 +428,11 @@ void onWifiConnect(const WiFiEventStationModeGotIP &event) {
 
     // Setup mDNS / DNS-SD
     //TODO: Reboot or restart mdns when config.id is changed?
-    String chipId = String(ESP.getChipId(), HEX);
+#ifdef ARDUINO_ARCH_ESP8266
+    String chipId = String (ESP.getChipId (), HEX);
+#else
+    String chipId = String ((unsigned long)ESP.getEfuseMac (), HEX);
+#endif
     MDNS.setInstanceName(String(config.id + " (" + chipId + ")").c_str());
     if (MDNS.begin(config.hostname.c_str())) {
         MDNS.addService("http", "tcp", HTTP_PORT);
@@ -372,7 +450,11 @@ void onWifiConnect(const WiFiEventStationModeGotIP &event) {
     }
 }
 
-void onWiFiDisconnect(const WiFiEventStationModeDisconnected &event) {
+#ifdef ARDUINO_ARCH_ESP8266
+void onWiFiDisconnect(const WiFiEventStationModeDisconnected & event) {
+#else
+static void onWiFiDisconnect (const WiFiEvent_t event, const WiFiEventInfo_t info) {
+#endif
     LOG_PORT.println(F("*** WiFi Disconnected ***"));
 
     // Pause MQTT reconnect while WiFi is reconnecting
@@ -383,25 +465,21 @@ void onWiFiDisconnect(const WiFiEventStationModeDisconnected &event) {
 // Subscribe to "n" universes, starting at "universe"
 void multiSub() {
     uint8_t count;
-    ip_addr_t ifaddr;
-    ip_addr_t multicast_addr;
+    IPAddress ifaddr;
+    IPAddress multicast_addr;
 
     count = uniLast - config.universe + 1;
-    ifaddr.addr = static_cast<uint32_t>(WiFi.localIP());
+    ifaddr = WiFi.localIP();
     for (uint8_t i = 0; i < count; i++) {
-        multicast_addr.addr = static_cast<uint32_t>(IPAddress(239, 255,
-                (((config.universe + i) >> 8) & 0xff),
-                (((config.universe + i) >> 0) & 0xff)));
-        igmp_joingroup(&ifaddr, &multicast_addr);
+        multicast_addr = IPAddress(239, 255,
+                                   (((config.universe + i) >> 8) & 0xff),
+                                   (((config.universe + i) >> 0) & 0xff));
+        igmp_joingroup((ip4_addr_t*)&ifaddr[0], (ip4_addr_t*)&multicast_addr[0]);
     }
 }
 
 void ZCPPSub() {
-    ip_addr_t ifaddr;
-    ifaddr.addr = static_cast<uint32_t>(ourLocalIP);
-    ip_addr_t multicast_addr;
-    multicast_addr.addr = static_cast<uint32_t>(IPAddress(224, 0, 30, 5));
-    igmp_joingroup(&ifaddr, &multicast_addr);
+    igmp_joingroup((ip4_addr_t*)&ourLocalIP[0], (ip4_addr_t*) &IPAddress (224, 0, 30, 5)[0]);
     LOG_PORT.println(F("- ZCPP Subscribed to multicast 224.0.30.5"));
 }
 
@@ -444,81 +522,85 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
 void onMqttMessage(char* topic, char* payload,
         AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
 
-    DynamicJsonDocument r(1024);
-    DeserializationError error = deserializeJson(r, payload);
+        DynamicJsonDocument r (1024);
+        DeserializationError error = deserializeJson (r, payload);
 
-    if (error) {
-        LOG_PORT.println("MQTT: Parsing failed");
+        if (error) {
+            LOG_PORT.println ("MQTT: Parsing failed");
         return;
-    }
-
-    JsonObject root = r.as<JsonObject>();
-
-    // if its a retained message and we want clean session, ignore it
-    if ( properties.retain && config.mqtt_clean ) {
-        return;
-    }
-
-    bool stateOn = false;
-
-    if (root.containsKey("state")) {
-        if (strcmp(root["state"], LIGHT_ON) == 0) {
-            stateOn = true;
-        } else if (strcmp(root["state"], LIGHT_OFF) == 0) {
-            stateOn = false;
         }
-    }
 
-    if (root.containsKey("brightness")) {
-        effects.setBrightness((float)root["brightness"] / 255.0);
-    }
+        JsonObject root = r.as<JsonObject> ();
 
-    if (root.containsKey("speed")) {
-        effects.setSpeed(root["speed"]);
-    }
+        // if its a retained message and we want clean session, ignore it
+        if (properties.retain && config.mqtt_clean) {
+        return;
+        }
 
-    if (root.containsKey("color")) {
-        effects.setColor({
-            root["color"]["r"],
-            root["color"]["g"],
-            root["color"]["b"]
-        });
-    }
+        bool stateOn = false;
 
-    if (root.containsKey("effect")) {
-        // Set the explict effect provided by the MQTT client
-        effects.setEffect(root["effect"]);
-    }
+        if (root.containsKey ("state")) {
+            if (strcmp (root["state"], LIGHT_ON) == 0) {
+                stateOn = true;
+            } else if (strcmp (root["state"], LIGHT_OFF) == 0) {
+                stateOn = false;
+            }
+        }
 
-    if (root.containsKey("reverse")) {
-        effects.setReverse(root["reverse"]);
-    }
+        if (root.containsKey ("brightness")) {
+            effects.setBrightness ((float)root["brightness"] / 255.0);
+        }
 
-    if (root.containsKey("mirror")) {
-        effects.setMirror(root["mirror"]);
-    }
+        if (root.containsKey ("speed")) {
+            effects.setSpeed (root["speed"]);
+        }
 
-    if (root.containsKey("allleds")) {
-        effects.setAllLeds(root["allleds"]);
-    }
+        if (root.containsKey ("color")) {
+            effects.setColor ({
+                root["color"]["r"],
+                root["color"]["g"],
+                root["color"]["b"]
+                });
+        }
 
-    // Set data source based on state - Fall back to E131 when off
-    if (stateOn) {
-        if (effects.getEffect().equalsIgnoreCase("Disabled"))
-            effects.setEffect("Solid");
-        config.ds = DataSource::MQTT;
-    } else {
-        config.ds = DataSource::E131;
-        effects.clearAll();
-    }
+        if (root.containsKey ("effect")) {
+            // Set the explict effect provided by the MQTT client
+            effects.setEffect (root["effect"]);
+        }
 
-    publishState();
+        if (root.containsKey ("reverse")) {
+            effects.setReverse (root["reverse"]);
+        }
+
+        if (root.containsKey ("mirror")) {
+            effects.setMirror (root["mirror"]);
+        }
+
+        if (root.containsKey ("allleds")) {
+            effects.setAllLeds (root["allleds"]);
+        }
+
+        // Set data source based on state - Fall back to E131 when off
+        if (stateOn) {
+            if (effects.getEffect ().equalsIgnoreCase ("Disabled"))
+                effects.setEffect ("Solid");
+            config.ds = DataSource::MQTT;
+        } else {
+            config.ds = DataSource::E131;
+            effects.clearAll ();
+        }
+
+        publishState ();
 }
 
 void publishHA(bool join) {
 
     // Setup HA discovery
+#ifdef ARDUINO_ARCH_ESP8266
     String ha_config = config.mqtt_haprefix + "/light/" + String(ESP.getChipId(), HEX) + "/config";
+#else
+    String ha_config = config.mqtt_haprefix + "/light/" + String ((unsigned long)ESP.getEfuseMac (), HEX) + "/config";
+#endif
 
     if (join) {
         DynamicJsonDocument root(1024);
@@ -542,7 +624,11 @@ void publishHA(bool join) {
 
         // Create a unique id using the chip id, and fill in the device properties
         // to enable integration support in HomeAssistant.
+#ifdef ARDUINO_ARCH_ESP8266
         root["unique_id"] = "ESPixelStick_" + String(ESP.getChipId(), HEX);
+#else
+        root["unique_id"] = "ESPixelStick_" + String ((unsigned long)ESP.getEfuseMac (), HEX);
+#endif
         JsonObject device = root.createNestedObject("device");
         device["identifiers"] = WiFi.macAddress();
         device["manufacturer"] = "ESPixelStick";
@@ -610,8 +696,12 @@ void publishAttributes() {
 
 // Configure and start the web server
 void initWeb() {
+#ifdef ARDUINO_ARCH_ESP8266
     // Handle OTA update from asynchronous callbacks
     Update.runAsync(true);
+#
+    //Todo: This is not needed in the ESP32 implementation
+#endif
 
     // Add header for SVG plot support?
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
@@ -686,7 +776,11 @@ void validateConfig() {
 
     // Generate default MQTT topic if blank
     if (!config.mqtt_topic.length()) {
-        config.mqtt_topic = "diy/esps/" + String(ESP.getChipId(), HEX);
+#ifdef ARDUINO_ARCH_ESP8266
+        config.mqtt_topic = "diy/esps/" + String (ESP.getChipId (), HEX);
+#else
+        config.mqtt_topic = "diy/esps/" + String ((unsigned long)ESP.getEfuseMac (), HEX);
+#endif
     }
 
     // Set default Home Assistant Discovery prefix if blank
@@ -810,6 +904,7 @@ void updateConfig() {
 
     // Initialize for our pixel type
 #if defined(ESPS_MODE_PIXEL)
+
     pixels.begin(config.pixel_type, config.pixel_color, config.channel_count / 3);
     pixels.setGroup(config.groupSize, config.zigSize);
     updateGammaTable(config.gammaVal, config.briteVal);
@@ -880,7 +975,11 @@ void dsNetworkConfig(const JsonObject &json) {
     }
 
     if (!config.hostname.length()) {
-        config.hostname = "esps-" + String(ESP.getChipId(), HEX);
+#ifdef ARDUINO_ARCH_ESP8266
+        config.hostname = "esps-" + String (ESP.getChipId (), HEX);
+#else
+        config.hostname = "esps-" + String ((unsigned long)ESP.getEfuseMac (), HEX);
+#endif
     }
 }
 
@@ -991,7 +1090,11 @@ void loadConfig() {
         LOG_PORT.println(F("- No configuration file found."));
         config.ssid = ssid;
         config.passphrase = passphrase;
+#ifdef ARDUINO_ARCH_ESP8266
         config.hostname = "esps-" + String(ESP.getChipId(), HEX);
+#else
+        config.hostname = "esps-" + String ((unsigned long)ESP.getEfuseMac (), HEX);
+#endif
         config.ap_fallback = true;
         config.id = "No Config Found";
         saveConfig();
@@ -1365,7 +1468,7 @@ void loop() {
         #endif
                           char version[9];
                           memset(version, 0x00, sizeof(version));
-                          for (uint8_t i = 0; i < min(strlen_P(VERSION), sizeof(version)-1); i++)
+                          for (uint8_t i = 0; i < min(strlen_P(VERSION), (size_t)(sizeof(version)-1)); i++)
                             version[i] = pgm_read_byte(VERSION + i);
 
                           uint8_t mac[WL_MAC_ADDR_LENGTH];
@@ -1532,10 +1635,10 @@ void loop() {
                 effects.run();
         }
 
-    /* Streaming refresh */
+        /* Streaming refresh */
     #if defined(ESPS_MODE_PIXEL)
-        if (pixels.canRefresh())
-            pixels.show();
+        if (pixels.canRefresh ())
+            pixels.show ();
     #elif defined(ESPS_MODE_SERIAL)
         if (serial.canRefresh())
             serial.show();

@@ -29,10 +29,26 @@ GNU General Public License for more details.
 #include "SerialDriver.h"
 
 extern "C" {
-#include <eagle_soc.h>
-#include <ets_sys.h>
-#include <uart.h>
-#include <uart_register.h>
+#ifdef ARDUINO_ARCH_ESP8266
+#   include <eagle_soc.h>
+#   include <ets_sys.h>
+#   include <uart.h>
+#   include <uart_register.h>
+#else
+#   include <esp32-hal-uart.h>
+#   include <soc/soc.h>
+#   include <soc/uart_reg.h>
+#   include <driver/uart.h>
+#   define UART_CONF0           UART_CONF0_REG
+#   define UART_CONF1           UART_CONF1_REG
+#   define UART_INT_ENA         UART_INT_ENA_REG
+#   define UART_INT_CLR         UART_INT_CLR_REG
+#   define SERIAL_TX_ONLY       UART_INT_CLR_REG
+#   define UART_INT_ST          UART_INT_ST_REG
+#   define UART_TX_FIFO_SIZE    UART_FIFO_LEN
+#   define UART0                uart_port_t::UART_NUM_0
+#   define UART1                uart_port_t::UART_NUM_1
+#endif
 }
 
 /* Uart Buffer tracker */
@@ -76,19 +92,20 @@ int SerialDriver::begin(HardwareSerial *theSerial, SerialType type,
 
     /* Setup buffers */
     if (_serialdata) free(_serialdata);
-    if (_serialdata = static_cast<uint8_t *>(malloc(_size))) {
+    if (nullptr != (_serialdata = static_cast<uint8_t *>(malloc(_size)))) {
         memset(_serialdata, 0, _size);
     } else {
         _size = 0;
         retval = false;
     }
 
-    if (_asyncdata) free(_asyncdata);
-    if (_asyncdata = static_cast<uint8_t *>(malloc(_size)))
+    if (_asyncdata) {free(_asyncdata);}
+    if (nullptr != (_asyncdata = static_cast<uint8_t *>(malloc(_size)))){
         memset(_asyncdata, 0, _size);
-    else
+    }
+    else {
         retval = false;
-
+    }
     if (_serialdata && type == SerialType::RENARD) {
         _serialdata[0] = 0x7E;
         _serialdata[1] = 0x80;
@@ -99,23 +116,46 @@ int SerialDriver::begin(HardwareSerial *theSerial, SerialType type,
     CLEAR_PERI_REG_MASK(UART_CONF0(SEROUT_UART), UART_RXFIFO_RST | UART_TXFIFO_RST);
 
     /* Disable all interrupts */
+#ifdef ARDUINO_ARCH_ESP8266
     ETS_UART_INTR_DISABLE();
 
     /* Atttach interrupt handler */
-    ETS_UART_INTR_ATTACH(serial_handle, NULL);
+    ETS_UART_INTR_ATTACH (serial_handle, NULL);
+
+#else
+    // get the current interrupt control bit values
+    uint64_t CurrentInterruptValues = GET_PERI_REG_MASK (UART_INT_ENA (SEROUT_UART), UART_INTR_MASK);
+
+    // turn off all of the interrupts for this uart
+    CLEAR_PERI_REG_MASK (UART_INT_ENA (SEROUT_UART), UART_INTR_MASK);
+
+    /* Atttach interrupt handler */
+    uart_isr_register (uart_port_t(SEROUT_UART), serial_handle, NULL, UART_TXFIFO_EMPTY_INT_ENA, nullptr);
+#endif
 
     /* Set TX FIFO trigger. 80 bytes gives 200 microsecs to refill the FIFO */
     WRITE_PERI_REG(UART_CONF1(SEROUT_UART), 80 << UART_TXFIFO_EMPTY_THRHD_S);
 
+#ifdef ARDUINO_ARCH_ESP8266
     /* Disable RX & TX interrupts. It is enabled by uart.c in the SDK */
-    CLEAR_PERI_REG_MASK(UART_INT_ENA(SEROUT_UART), UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
+    CLEAR_PERI_REG_MASK (UART_INT_ENA (SEROUT_UART), UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
 
     /* Clear all pending interrupts in SEROUT_UART */
-    WRITE_PERI_REG(UART_INT_CLR(SEROUT_UART), 0xffff);
+    WRITE_PERI_REG (UART_INT_CLR (SEROUT_UART), 0xffff);
 
     /* Reenable interrupts */
     ETS_UART_INTR_ENABLE();
+#else
+    /* Disable RX & TX interrupts. It is enabled by uart.c in the SDK */
+    CurrentInterruptValues &= !UART_RXFIFO_FULL_INT_ENA;  // RX off
+    CurrentInterruptValues |=  UART_TXFIFO_EMPTY_INT_ENA; // TX on
 
+    /* Clear all pending interrupts in UART1 */
+    WRITE_PERI_REG (UART_INT_CLR (SEROUT_UART), UART_INTR_MASK);
+
+    /* Reenable interrupts */
+    WRITE_PERI_REG (UART_INT_ENA (SEROUT_UART), CurrentInterruptValues);
+#endif
     return retval;
 }
 

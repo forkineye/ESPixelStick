@@ -25,12 +25,23 @@ const char BUILD_DATE[] = __DATE__;
 
 // Mode configuration moved to Mode.h to ease things with Travis
 #include "Mode.h"
-#include <ESP8266WiFi.h>
+#if defined(ARDUINO_ARCH_ESP8266)
+#   include <ESP8266WiFi.h>
+#   include <ESPAsyncTCP.h>
+#   include <ESP8266mDNS.h>
+#   include <ESPAsyncUDP.h>
+#elif defined(ARDUINO_ARCH_ESP32)
+#   include <AsyncTCP.h>
+#   include <AsyncUDP.h>
+#   include <ESPmDNS.h>
+#   include <WiFi.h>
+#else
+#error "Unsupported CPU type"
+#endif
+
+
 #include <Ticker.h>
 #include <AsyncMqttClient.h>
-#include <ESP8266mDNS.h>
-#include <ESPAsyncTCP.h>
-#include <ESPAsyncUDP.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPAsyncE131.h>
 #include <ArduinoJson.h>
@@ -45,7 +56,7 @@ const char BUILD_DATE[] = __DATE__;
 
 #define HTTP_PORT       80      /* Default web server port */
 #define MQTT_PORT       1883    /* Default MQTT port */
-#define DATA_PIN        2       /* Pixel output - GPIO2 (D4 on NodeMCU) */
+#define DATA_PIN        GPIO_NUM_2 /* Pixel output - GPIO2 (D4 on NodeMCU) */
 #define UNIVERSE_MAX    512     /* Max channels in a DMX Universe */
 #define PIXEL_LIMIT     1360    /* Total pixel limit - 40.85ms for 8 universes */
 #define RENARD_LIMIT    2048    /* Channel limit for serial outputs */
@@ -160,8 +171,13 @@ void saveConfig();
 void dsGammaConfig(const JsonObject &json);
 
 void connectWifi();
-void onWifiConnect(const WiFiEventStationModeGotIP &event);
-void onWiFiDisconnect(const WiFiEventStationModeDisconnected &event);
+#ifdef ARDUINO_ARCH_ESP8266
+	void onWifiConnect(const WiFiEventStationModeGotIP &event);
+	void onWiFiDisconnect(const WiFiEventStationModeDisconnected &event);
+#else
+	static void onWifiConnect(const WiFiEvent_t event, const WiFiEventInfo_t info);
+	static void onWiFiDisconnect(const WiFiEvent_t event, const WiFiEventInfo_t info);
+#endif
 void connectToMqtt();
 void onMqttConnect(bool sessionPresent);
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);

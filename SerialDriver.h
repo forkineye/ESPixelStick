@@ -28,6 +28,10 @@ GNU General Public License for more details.
 
 #include "HardwareSerial.h"
 
+#ifdef ARDUINO_ARCH_ESP32
+#   include <driver/uart.h>
+#endif // ARDUINO_ARCH_ESP32
+
 /* UART for Renard / DMX output */
 #define SEROUT_UART 1
 
@@ -107,7 +111,7 @@ class SerialDriver {
 
     /* Serial interrupt handler */
     static void ICACHE_RAM_ATTR serial_handle(void *param);
-
+#ifdef ARDUINO_ARCH_ESP8266
     /* Returns number of bytes waiting in the TX FIFO of UART1 */
     static inline uint8_t getFifoLength() {
         return (U1S >> USTXC) & 0xff;
@@ -117,6 +121,19 @@ class SerialDriver {
     static inline void enqueue(uint8_t byte) {
         U1F = byte;
     }
-};
+#else
+    /* Returns number of bytes waiting in the TX FIFO of UART1 */
+    /* Returns number of bytes waiting in the TX FIFO of UART1 */
+    static inline uint8_t getFifoLength () {
+        return uint8_t ((READ_PERI_REG (UART_STATUS_REG (SEROUT_UART)) & UART_TXFIFO_CNT_M) >> UART_TXFIFO_CNT_S);
+    }
+
+    /* Append a byte to the TX FIFO of UART1 */
+    static inline void enqueue(uint8_t byte) {
+        SEROUT_PORT.write(byte);
+    }
+
+#endif // !ARDUINO_ARCH_ESP8266
+}; // end class SerialDriver
 
 #endif /* SERIALDRIVER_H_ */

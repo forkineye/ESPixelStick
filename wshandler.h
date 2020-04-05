@@ -28,6 +28,10 @@ extern PixelDriver  pixels;     // Pixel object
 extern SerialDriver serial;     // Serial object
 #endif
 
+#ifdef ARDUINO_ARCH_ESP32
+# include "SPIFFS.h"
+#endif // ARDUINO_ARCH_ESP32
+
 extern EffectEngine effects;    // EffectEngine for test modes
 
 extern ESPAsyncE131 e131;       // ESPAsyncE131 with X buffers
@@ -174,15 +178,24 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
             // Create buffer and root object
             DynamicJsonDocument json(1024);
 
-            json["ssid"] = (String)WiFi.SSID();
+            json["ssid"]     = String(WiFi.SSID());
+#ifdef ARDUINO_ARCH_ESP8266
             json["hostname"] = (String)WiFi.hostname();
-            json["ip"] = WiFi.localIP().toString();
-            json["mac"] = WiFi.macAddress();
-            json["version"] = (String)VERSION;
-            json["built"] = (String)BUILD_DATE;
-            json["flashchipid"] = String(ESP.getFlashChipId(), HEX);
-            json["usedflashsize"] = (String)ESP.getFlashChipSize();
-            json["realflashsize"] = (String)ESP.getFlashChipRealSize();
+#else
+            json["hostname"] = (String)WiFi.getHostname ();
+#endif
+            json["ip"]       = WiFi.localIP().toString();
+            json["mac"]      = WiFi.macAddress();
+            json["version"]  = (String)VERSION;
+            json["built"]    = (String)BUILD_DATE;
+#ifdef ARDUINO_ARCH_ESP8266
+            json["flashchipid"]   = String (ESP.getFlashChipId (), HEX);
+            json["realflashsize"] = (String)ESP.getFlashChipRealSize ();
+#else
+            json["flashchipid"]   = String ((unsigned long)ESP.getEfuseMac (), HEX);
+            json["realflashsize"] = String(ESP.getFlashChipSize ());
+#endif
+            json["usedflashsize"] = (String)ESP.getFlashChipSize ();
             json["freeheap"] = (String)ESP.getFreeHeap();
 
             String response;
@@ -371,7 +384,12 @@ void procV(uint8_t *data, AsyncWebSocketClient *client) {
 void handle_fw_upload(AsyncWebServerRequest *request, String filename,
         size_t index, uint8_t *data, size_t len, bool final) {
     if (!index) {
-        WiFiUDP::stopAll();
+#ifdef ARDUINO_ARCH_ESP8266
+        WiFiUDP::stopAll ();
+#else
+        // this is not needed
+        // WiFiUDP.stop ();
+#endif
         LOG_PORT.print(F("* Upload Started: "));
         LOG_PORT.println(filename.c_str());
         efupdate.begin();
@@ -399,7 +417,12 @@ void handle_config_upload(AsyncWebServerRequest *request, String filename,
         size_t index, uint8_t *data, size_t len, bool final) {
     static File file;
     if (!index) {
+#ifdef ARDUINO_ARCH_ESP8266
         WiFiUDP::stopAll();
+#else
+        // this is not really needed.
+        // WiFiUDP::stop ();
+#endif
         LOG_PORT.print(F("* Config Upload Started: "));
         LOG_PORT.println(filename.c_str());
 

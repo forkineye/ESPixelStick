@@ -21,7 +21,13 @@
 #define PIXELDRIVER_H_
 
 #define UART_INV_MASK  (0x3f << 19)
-#define UART 1
+#ifdef ARDUINO_ARCH_ESP8266
+#   define UART 1
+#else
+#   include <driver/uart.h>
+#   define UART uart_port_t::UART_NUM_1
+
+#endif
 
 /* Gamma correction table */
 extern uint8_t GAMMA_TABLE[];
@@ -139,6 +145,7 @@ class PixelDriver {
     /* Interrupt Handlers */
     static void ICACHE_RAM_ATTR handleWS2811(void *param);
 
+#ifdef ARDUINO_ARCH_ESP8266
     /* Returns number of bytes waiting in the TX FIFO of UART1 */
     static inline uint8_t getFifoLength() {
         return (U1S >> USTXC) & 0xff;
@@ -148,6 +155,16 @@ class PixelDriver {
     static inline void enqueue(uint8_t byte) {
         U1F = byte;
     }
+#else
+    /* Returns number of bytes waiting in the TX FIFO of UART1 */
+    static inline uint8_t getFifoLength() {
+        return uint8_t((READ_PERI_REG (UART_STATUS_REG (UART)) & UART_TXFIFO_CNT_M) >> UART_TXFIFO_CNT_S);
+    }
+
+    /* Append a byte to the TX FIFO of UART1 */
+#   define enqueue(data) WRITE_PERI_REG(UART_FIFO_REG (UART), (char)(data));
+
+#endif
 };
 
 // Cycle counter
