@@ -30,6 +30,7 @@ const char BUILD_DATE[] = __DATE__;
 #   include <ESPAsyncTCP.h>
 #   include <ESP8266mDNS.h>
 #   include <ESPAsyncUDP.h>
+#   define  GPIO_NUM_2 2
 #elif defined(ARDUINO_ARCH_ESP32)
 #   include <AsyncTCP.h>
 #   include <AsyncUDP.h>
@@ -54,17 +55,17 @@ const char BUILD_DATE[] = __DATE__;
 
 #include "EffectEngine.h"
 
-#define HTTP_PORT       80      /* Default web server port */
-#define MQTT_PORT       1883    /* Default MQTT port */
+#define HTTP_PORT       80         /* Default web server port */
+#define MQTT_PORT       1883       /* Default MQTT port */
 #define DATA_PIN        GPIO_NUM_2 /* Pixel output - GPIO2 (D4 on NodeMCU) */
-#define UNIVERSE_MAX    512     /* Max channels in a DMX Universe */
-#define PIXEL_LIMIT     1360    /* Total pixel limit - 40.85ms for 8 universes */
-#define RENARD_LIMIT    2048    /* Channel limit for serial outputs */
-#define E131_TIMEOUT    1000    /* Force refresh every second an E1.31 packet is not seen */
-#define CLIENT_TIMEOUT  15      /* In station/client mode try to connection for 15 seconds */
-#define AP_TIMEOUT      60      /* In AP mode, wait 60 seconds for a connection or reboot */
-#define REBOOT_DELAY    100     /* Delay for rebooting once reboot flag is set */
-#define LOG_PORT        Serial  /* Serial port for console logging */
+#define UNIVERSE_MAX    512        /* Max channels in a DMX Universe */
+#define PIXEL_LIMIT     1360       /* Total pixel limit - 40.85ms for 8 universes */
+#define RENARD_LIMIT    2048       /* Channel limit for serial outputs */
+#define E131_TIMEOUT    1000       /* Force refresh every second an E1.31 packet is not seen */
+#define CLIENT_TIMEOUT  15         /* In station/client mode try to connection for 15 seconds */
+#define AP_TIMEOUT      60         /* In AP mode, wait 60 seconds for a connection or reboot */
+#define REBOOT_DELAY    100        /* Delay for rebooting once reboot flag is set */
+#define LOG_PORT        Serial     /* Serial port for console logging */
 
 // E1.33 / RDMnet stuff - to be moved to library
 #define RDMNET_DNSSD_SRV_TYPE   "draft-e133.tcp"
