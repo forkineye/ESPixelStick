@@ -136,7 +136,9 @@ void PixelDriver::setPin (uint8_t pin) {
     if (this->pin >= 0)
     {
         this->pin = pin;
+#ifdef ARDUINO_ARCH_ESP32
         uart_set_pin (UART, pin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+#endif // def ARDUINO_ARCH_ESP32
     }
 }
 
@@ -258,7 +260,6 @@ void PixelDriver::updateOrder(PixelColor color) {
 
 void ICACHE_RAM_ATTR PixelDriver::handleWS2811(void *param) {
     /* Process if UART1 */
-    // uart_write_bytes (UART, (char*)uart_buffer, 12);
     if (READ_PERI_REG(UART_INT_ST(UART1))) {
         // Fill the FIFO with new data
         uart_buffer = fillWS2811(uart_buffer, uart_buffer_tail);
@@ -326,7 +327,7 @@ const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillWS2811(const uint8_t *buff,
 }
 
 void ICACHE_RAM_ATTR PixelDriver::show() {
- // todo-restore   if (!pixdata) return;
+    if (!pixdata) return;
 
     if (type == PixelType::WS2811) {
         if (!cntZigzag) {  // Normal / group copy
