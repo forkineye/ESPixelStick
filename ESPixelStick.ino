@@ -275,9 +275,11 @@ void setup() {
 
     // Setup WiFi Handlers
 #ifdef ARDUINO_ARCH_ESP8266
-    wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
+    wifiConnectHandler    = WiFi.onStationModeGotIP(onWifiConnect);
+    wifiDisconnectHandler = WiFi.onStationModeDisconnected (onWiFiDisconnect);
 #else
-    WiFi.onEvent(onWifiConnect, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
+    WiFi.onEvent (onWifiConnect,    WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
+    WiFi.onEvent (onWiFiDisconnect, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
 #endif
     // Setup MQTT Handlers
     if (config.mqtt) {
@@ -315,11 +317,6 @@ void setup() {
         }
     }
 
-#ifdef ARDUINO_ARCH_ESP8266
-    wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWiFiDisconnect);
-#else
-    WiFi.onEvent(onWiFiDisconnect, SYSTEM_EVENT_STA_DISCONNECTED);
-#endif
     LOG_PORT.print("IP : ");
     LOG_PORT.println(ourLocalIP);
     LOG_PORT.print("Subnet mask : ");
@@ -370,7 +367,8 @@ void setup() {
 void initWifi() {
     // Switch to station mode and disconnect just in case
     WiFi.mode(WIFI_STA);
-    WiFi.disconnect();
+    WiFi.persistent (false);
+    WiFi.disconnect (true);
 
     connectWifi();
     uint32_t timeout = millis();
@@ -402,7 +400,7 @@ void connectWifi() {
         LOG_PORT.print(F("Connecting with DHCP"));
     } else {
         // We don't use DNS, so just set it to our gateway
-        WiFi.config(IPAddress(config.ip[0], config.ip[1], config.ip[2], config.ip[3]),
+        WiFi.config(IPAddress(config.ip[0],      config.ip[1],      config.ip[2],      config.ip[3]),
                     IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3]),
                     IPAddress(config.netmask[0], config.netmask[1], config.netmask[2], config.netmask[3]),
                     IPAddress(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3])
