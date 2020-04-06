@@ -4,20 +4,22 @@
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/ShelbyMerrick)
 [![Build Status](https://travis-ci.org/forkineye/ESPixelStick.svg?branch=master)](https://travis-ci.org/forkineye/ESPixelStick)
 
-This is the Arduino firmware for the ESP8266 based ESPixelStick.  The ESPixelStick is a small wireless E1.31 sACN pixel controller designed to control a single strand of pixels.  Pixel limitations are mostly based upon your desired refresh rate, around 680 pixels (4 universes) for a 25ms E1.31 source rate.  MQTT support is provided as well for integration into home automation systems where an E1.31 source may not be present.
+This is the Arduino firmware for the ESP8266 and ESP32 based ESPixelStick.  The ESPixelStick is a small wireless E1.31 sACN pixel controller designed to control a single strand of pixels.  Pixel limitations are mostly based upon your desired refresh rate, around 680 pixels (4 universes) for a 25ms E1.31 source rate.  MQTT support is provided as well for integration into home automation systems where an E1.31 source may not be present.
 
-Since this project began, the firmware has moved beyond just pixel support for those with other ESP8266 based devices.  The ESPixelStick firmware now supports outputting E1.31 streams to serial links as well.  Note this is not supported on the ESPixelStick hardware, but intended for other ESP8266 devices such as Bill's RenardESP.
+Since this project began, the firmware has moved beyond just pixel support for those with other ESP8266/ESP32 based devices.  The ESPixelStick firmware now supports outputting E1.31 streams to serial links as well.  Note this is not supported on the ESPixelStick hardware, but intended for other ESP8266/ESP32 devices such as Bill's RenardESP or the LoLin ESP based devices.
 
 ## Hardware
 
 Being open source, you are free to use the ESPixelStick firmware on the device of your choice.  The code however is written specifically for the [ESPixelStick](http://forkineye.com/espixelstick). The ESPixelStick V2 utilizes an ESP-01 module and provides high current connectors, fusing, power filtering, a programming interface and proper logic level buffering.  If you're in the US and would like to purchase an ESPixelStick, they are available via [Amazon](http://amzn.to/2uqBFuX).  The proceeds go towards things like keeping my wife happy so I can work on this project :)
-
+This code has been ported to work on an ESP32 based LoLin mini. This requires the user to add their own buffer for the WS281x output.
 ## Requirements
 
 Along with the Arduino IDE, you'll need the following software to build this project:
 
 - [Adruino for ESP8266](https://github.com/esp8266/Arduino) - Arduino core for ESP8266
 - [Arduino ESP8266 Filesystem Uploader](https://github.com/esp8266/arduino-esp8266fs-plugin) - Arduino plugin for uploading files to SPIFFS
+- [Adruino for ESP32](https://github.com/espressif/arduino-esp32) - Arduino core for ESP32
+- [Arduino ESP32 Filesystem Uploader](https://github.com/me-no-dev/arduino-esp32fs-plugin) - Arduino plugin for uploading files to SPIFFS
 - [gulp](http://gulpjs.com/) - Build system required to process web sources.  Refer to the html [README](html/README.md) for more information.
 
 The following libraries are required:
@@ -27,6 +29,15 @@ Extract the folder in each of these zip files and place it in the "library" fold
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson) - Arduino JSON Library
 - [ESPAsyncE131](https://github.com/forkineye/ESPAsyncE131) - Asynchronous E1.31 (sACN) library
 - [ESPAsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP) - Asynchronous TCP Library
+- [ESPAsyncUDP](https://github.com/me-no-dev/ESPAsyncUDP) - Asynchronous UDP Library
+- [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) - Asynchronous Web Server Library
+- [async-mqtt-client](https://github.com/marvinroger/async-mqtt-client) - Asynchronous MQTT Client
+
+The ESP32 build will require the following software to build this project:
+
+- [ArduinoJson](https://github.com/bblanchon/ArduinoJson) - Arduino JSON Library
+- [ESPAsyncE131](https://github.com/forkineye/ESPAsyncE131) - Asynchronous E1.31 (sACN) library
+- [AsyncTCP](https://github.com/me-no-dev/AsyncTCP) - Asynchronous TCP Library
 - [ESPAsyncUDP](https://github.com/me-no-dev/ESPAsyncUDP) - Asynchronous UDP Library
 - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) - Asynchronous Web Server Library
 - [async-mqtt-client](https://github.com/marvinroger/async-mqtt-client) - Asynchronous MQTT Client
@@ -105,3 +116,4 @@ mosquitto_pub -t porch/esps/set -m '{"state":"ON","color":{"r":255,"g":128,"b":6
   - penfold42 also maintains PWM support in their fork located [here](https://github.com/penfold42/ESPixelBoard).
 - [Austin Hodges](https://github.com/ahodges9) for effects support and MQTT cleanup.
 - [Matthias C. Hormann](https://github.com/Moonbase59) — some MQTT & effects cleanup.
+- [Martin Mueller](https://github.com/MartinMueller2003) — Port to ESP32.
