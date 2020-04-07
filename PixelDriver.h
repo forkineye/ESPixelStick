@@ -147,14 +147,11 @@ class PixelDriver {
 
 #ifdef ARDUINO_ARCH_ESP8266
     /* Returns number of bytes waiting in the TX FIFO of UART1 */
-    static inline uint8_t getFifoLength() {
-        return (U1S >> USTXC) & 0xff;
-    }
+ #  define getFifoLength ((uint16_t)((U1S >> USTXC) & 0xff))
 
     /* Append a byte to the TX FIFO of UART1 */
-    static inline void enqueue(uint8_t byte) {
-        U1F = byte;
-    }
+ #  define enqueue(data)  (U1F = (char)(data))
+
 #else
     /* Returns number of bytes waiting in the TX FIFO of UART1 */
 #   define getFifoLength ((uint16_t)((READ_PERI_REG (UART_STATUS_REG (UART)) & UART_TXFIFO_CNT_M) >> UART_TXFIFO_CNT_S))
