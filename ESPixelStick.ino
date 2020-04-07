@@ -260,7 +260,6 @@ void setup() {
     // set the effect idle timer
     idleTicker.attach(config.effect_idletimeout, idleTimeout);
 
-    pixels.show();
 #else
     updateConfig();
     // Do one effects cycle as early as possible
