@@ -157,9 +157,7 @@ class PixelDriver {
     }
 #else
     /* Returns number of bytes waiting in the TX FIFO of UART1 */
-    static inline uint8_t getFifoLength() {
-        return uint8_t((READ_PERI_REG (UART_STATUS_REG (UART)) & UART_TXFIFO_CNT_M) >> UART_TXFIFO_CNT_S);
-    }
+#   define getFifoLength ((uint16_t)((READ_PERI_REG (UART_STATUS_REG (UART)) & UART_TXFIFO_CNT_M) >> UART_TXFIFO_CNT_S))
 
     /* Append a byte to the TX FIFO of UART1 */
 #   define enqueue(data) WRITE_PERI_REG(UART_FIFO_REG (UART), (char)(data));
