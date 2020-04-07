@@ -288,7 +288,7 @@ void ICACHE_RAM_ATTR PixelDriver::handleWS2811(void *param) {
 
 const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillWS2811(const uint8_t *buff,
         const uint8_t *tail) {
-    uint16_t PixelSpaceInFifo    = (UART_TX_FIFO_SIZE - getFifoLength) / (NUM_INTENSITY_BYTES_PER_PIXEL * NUM_DATA_BYTES_PER_INTENSITY_BYTE);
+    uint16_t PixelSpaceInFifo    = (((uint16_t)UART_TX_FIFO_SIZE) - getFifoLength) / (NUM_INTENSITY_BYTES_PER_PIXEL * NUM_DATA_BYTES_PER_INTENSITY_BYTE);
     uint16_t RemainingPixelCount = (((uint)(tail - buff)) / NUM_INTENSITY_BYTES_PER_PIXEL);
     uint16_t PixelsToSend        = (PixelSpaceInFifo < RemainingPixelCount) ? (PixelSpaceInFifo-1) : RemainingPixelCount;
 
