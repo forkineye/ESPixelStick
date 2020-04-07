@@ -288,15 +288,14 @@ void ICACHE_RAM_ATTR PixelDriver::handleWS2811(void *param) {
 
 const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillWS2811(const uint8_t *buff,
         const uint8_t *tail) {
-    uint8_t PixelSpaceInFifo    = (UART_TX_FIFO_SIZE - getFifoLength ()) / (NUM_INTENSITY_BYTES_PER_PIXEL * NUM_DATA_BYTES_PER_INTENSITY_BYTE);
-    uint8_t RemainingPixelCount = (((uint)(tail - buff)) / NUM_INTENSITY_BYTES_PER_PIXEL);
-    uint8_t PixelsToSend        = min(PixelSpaceInFifo, RemainingPixelCount);
+    uint16_t PixelSpaceInFifo    = (UART_TX_FIFO_SIZE - getFifoLength) / (NUM_INTENSITY_BYTES_PER_PIXEL * NUM_DATA_BYTES_PER_INTENSITY_BYTE);
+    uint16_t RemainingPixelCount = (((uint)(tail - buff)) / NUM_INTENSITY_BYTES_PER_PIXEL);
+    uint16_t PixelsToSend        = (PixelSpaceInFifo < RemainingPixelCount) ? (PixelSpaceInFifo-1) : RemainingPixelCount;
 
     volatile char luTemp = 0;
     uint8_t subpix = 0;
 
     while (0 != PixelsToSend--) {
-
         subpix = GAMMA_TABLE[buff[rOffset]];
         // for some reason the compiler optimizes things to the point
         // where we have to put the data in a temp register or there is 
@@ -326,7 +325,7 @@ const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillWS2811(const uint8_t *buff,
     return buff;
 }
 
-void ICACHE_RAM_ATTR PixelDriver::show() {
+void PixelDriver::show () {
     if (!pixdata) return;
 
     if (type == PixelType::WS2811) {
@@ -352,7 +351,6 @@ void ICACHE_RAM_ATTR PixelDriver::show() {
                     asyncdata[3 * led + 2] = pixdata[3 * modifier + 2];
                 }
             }
-
         }
 
         uart_buffer = asyncdata;
