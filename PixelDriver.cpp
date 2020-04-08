@@ -86,9 +86,9 @@ int PixelDriver::begin(PixelType type, PixelColor color, uint16_t length) {
 
     updateOrder(color);
 
-    if (pixdata) free(pixdata);
+    if (pixdata) {free (pixdata); pixdata = nullptr; }
     szBuffer = length * NUM_INTENSITY_BYTES_PER_PIXEL;
-    if (nullptr != (pixdata = static_cast<uint8_t *>(malloc(szBuffer)))) {
+    if (nullptr != (pixdata = static_cast<uint8_t *>(malloc(szBuffer+10)))) {
         memset(pixdata, 0, szBuffer);
         numPixels = length;
     } else {
@@ -100,7 +100,7 @@ int PixelDriver::begin(PixelType type, PixelColor color, uint16_t length) {
     uint16_t szAsync = szBuffer;
     if (type == PixelType::GECE) {
         if (pbuff) free(pbuff);
-        if (nullptr != (pbuff = static_cast<uint8_t *>(malloc(GECE_PSIZE)))) {
+        if (nullptr != (pbuff = static_cast<uint8_t *>(malloc(GECE_PSIZE+10)))) {
             memset(pbuff, 0, GECE_PSIZE);
         } else {
             numPixels = 0;
@@ -110,8 +110,8 @@ int PixelDriver::begin(PixelType type, PixelColor color, uint16_t length) {
         szAsync = GECE_PSIZE;
     }
 
-    if (asyncdata) { free (asyncdata); }
-    if (nullptr != (asyncdata = static_cast<uint8_t *>(malloc(szAsync)))) {
+    if (asyncdata) { free (asyncdata); asyncdata = nullptr; }
+    if (nullptr != (asyncdata = static_cast<uint8_t *>(malloc(szAsync+10)))) {
         memset(asyncdata, 0, szAsync);
     } else {
         numPixels = 0;
