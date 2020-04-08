@@ -157,7 +157,9 @@ class PixelDriver {
 #   define getFifoLength ((uint16_t)((READ_PERI_REG (UART_STATUS_REG (UART)) & UART_TXFIFO_CNT_M) >> UART_TXFIFO_CNT_S))
 
     /* Append a byte to the TX FIFO of UART1 */
-#   define enqueue(data) WRITE_PERI_REG(UART_FIFO_REG (UART), (char)(data));
+// #   define enqueue(value) WRITE_PERI_REG(UART_FIFO_AHB_REG (UART), (char)(value))
+#define enqueue(value) (*((volatile uint32_t*)(UART_FIFO_AHB_REG (UART)))) = (uint32_t)(value)
+
 
 #endif
 };
