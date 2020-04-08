@@ -51,7 +51,10 @@ extern "C" {
 #   define PIXEL_CTS            (UART_PIN_NO_CHANGE)
 #   define WS2811_DATA_SPEED    (800000)
     // Set TX FIFO trigger. 80 bytes gives 200 microsecs to refill the FIFO
-#   define PIXEL_FIFO_TRIGGER_LEVEL     (80)
+
+    // TX FIFO trigger level. 40 bytes gives 100us before the FIFO goes empty
+    // We need to fill the FIFO at a rate faster than 0.3us per byte (1.2us/pixel)
+#   define PIXEL_FIFO_TRIGGER_LEVEL (40)
 
 // static uart_intr_config_t IsrConfig;
 #endif
@@ -266,7 +269,9 @@ void ICACHE_RAM_ATTR PixelDriver::handleWS2811(void *param) {
 
         // Disable TX interrupt when done
         if (uart_buffer == uart_buffer_tail)
-            CLEAR_PERI_REG_MASK(UART_INT_ENA(UART1), UART_TXFIFO_EMPTY_INT_ENA);
+        {
+            CLEAR_PERI_REG_MASK (UART_INT_ENA (UART1), UART_TXFIFO_EMPTY_INT_ENA);
+        }
 
         // Clear all interrupts flags (just in case)
         WRITE_PERI_REG(UART_INT_CLR(UART1), 0xffff);
@@ -288,40 +293,33 @@ void ICACHE_RAM_ATTR PixelDriver::handleWS2811(void *param) {
 
 const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillWS2811(const uint8_t *buff,
         const uint8_t *tail) {
-    uint16_t PixelSpaceInFifo    = (((uint16_t)UART_TX_FIFO_SIZE) - getFifoLength) / (NUM_INTENSITY_BYTES_PER_PIXEL * NUM_DATA_BYTES_PER_INTENSITY_BYTE);
-    uint16_t RemainingPixelCount = (((uint)(tail - buff)) / NUM_INTENSITY_BYTES_PER_PIXEL);
-    uint16_t PixelsToSend        = (PixelSpaceInFifo < RemainingPixelCount) ? (PixelSpaceInFifo-1) : RemainingPixelCount;
 
-    volatile char luTemp = 0;
-    uint8_t subpix = 0;
+    // free space in the FIFO divided by the number of data bytes per intensity 
+    // gives the max number of intensities we can process
+    register uint16_t IntensitySpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / NUM_DATA_BYTES_PER_INTENSITY_BYTE;
 
-    while (0 != PixelsToSend--) {
-        subpix = GAMMA_TABLE[buff[rOffset]];
-        // for some reason the compiler optimizes things to the point
-        // where we have to put the data in a temp register or there is 
-        // no way to write the data to the output FIFO without causing
-        // a write to invalid memory exception.
-        luTemp = (LOOKUP_2811[(subpix >> 6) & 0x3]); enqueue (luTemp);
-        luTemp = (LOOKUP_2811[(subpix >> 4) & 0x3]); enqueue (luTemp);
-        luTemp = (LOOKUP_2811[(subpix >> 2) & 0x3]); enqueue (luTemp);
-        luTemp = (LOOKUP_2811[(subpix >> 0) & 0x3]); enqueue (luTemp);
+    // how many intesity bytes are present in the buffer to send?
+    register uint16_t RemainingIntensityCount = (((uint16_t)(tail - buff)));
 
-        subpix = GAMMA_TABLE[buff[gOffset]];
-        luTemp = (LOOKUP_2811[(subpix >> 6) & 0x3]); enqueue (luTemp);
-        luTemp = (LOOKUP_2811[(subpix >> 4) & 0x3]); enqueue (luTemp);
-        luTemp = (LOOKUP_2811[(subpix >> 2) & 0x3]); enqueue (luTemp);
-        luTemp = (LOOKUP_2811[(subpix >> 0) & 0x3]); enqueue (luTemp);
+    // determine how many intensities we can process right now.
+    register uint16_t IntensitiesToSend = (IntensitySpaceInFifo < RemainingIntensityCount) ? (IntensitySpaceInFifo) : RemainingIntensityCount;
 
-        subpix = GAMMA_TABLE[buff[bOffset]];
-        luTemp = (LOOKUP_2811[(subpix >> 6) & 0x3]); enqueue (luTemp);
-        luTemp = (LOOKUP_2811[(subpix >> 4) & 0x3]); enqueue (luTemp);
-        luTemp = (LOOKUP_2811[(subpix >> 2) & 0x3]); enqueue (luTemp);
-        luTemp = (LOOKUP_2811[(subpix >> 0) & 0x3]); enqueue (luTemp);
+    // only read from ram once per intensity
+    register uint8_t subpix = 0;
 
-        // advance to the next pixel in the buffer
-        buff += NUM_INTENSITY_BYTES_PER_PIXEL;
+    while (0 != IntensitiesToSend--)
+    {
+        subpix = buff[0];
+        enqueue ((LOOKUP_2811[(subpix >> 6) & 0x3]));
+        enqueue ((LOOKUP_2811[(subpix >> 4) & 0x3]));
+        enqueue ((LOOKUP_2811[(subpix >> 2) & 0x3]));
+        enqueue ((LOOKUP_2811[(subpix >> 0) & 0x3]));
+
+        // advance to the next intensity byte in the buffer
+        buff++;
     }
 
+    // let the caller know where the next intensity byte to send is located.
     return buff;
 }
 
@@ -332,9 +330,9 @@ void PixelDriver::show () {
         if (!cntZigzag) {  // Normal / group copy
             for (size_t led = 0; led < szBuffer / 3; led++) {
                 uint16_t modifier = led / cntGroup;
-                asyncdata[3 * led + 0] = pixdata[3 * modifier + 0];
-                asyncdata[3 * led + 1] = pixdata[3 * modifier + 1];
-                asyncdata[3 * led + 2] = pixdata[3 * modifier + 2];
+                asyncdata[3 * led + 0] = GAMMA_TABLE[pixdata[3 * modifier + rOffset]];
+                asyncdata[3 * led + 1] = GAMMA_TABLE[pixdata[3 * modifier + gOffset]];
+                asyncdata[3 * led + 2] = GAMMA_TABLE[pixdata[3 * modifier + bOffset]];
             }
         } else {  // Zigzag copy
             for (size_t led = 0; led < szBuffer / 3; led++) {
@@ -342,17 +340,19 @@ void PixelDriver::show () {
                 if (led / cntZigzag % 2) { // Odd "zig"
                     int group = cntZigzag * (led / cntZigzag);
                     int this_led = (group + cntZigzag - (led % cntZigzag) - 1) / cntGroup;
-                    asyncdata[3 * led + 0] = pixdata[3 * this_led + 0];
-                    asyncdata[3 * led + 1] = pixdata[3 * this_led + 1];
-                    asyncdata[3 * led + 2] = pixdata[3 * this_led + 2];
+                    asyncdata[3 * led + 0] = GAMMA_TABLE[pixdata[3 * this_led + rOffset]];
+                    asyncdata[3 * led + 1] = GAMMA_TABLE[pixdata[3 * this_led + gOffset]];
+                    asyncdata[3 * led + 2] = GAMMA_TABLE[pixdata[3 * this_led + bOffset]];
+
                 } else { // Even "zag"
-                    asyncdata[3 * led + 0] = pixdata[3 * modifier + 0];
-                    asyncdata[3 * led + 1] = pixdata[3 * modifier + 1];
-                    asyncdata[3 * led + 2] = pixdata[3 * modifier + 2];
+                    asyncdata[3 * led + 0] = GAMMA_TABLE[pixdata[3 * modifier + rOffset]];
+                    asyncdata[3 * led + 1] = GAMMA_TABLE[pixdata[3 * modifier + gOffset]];
+                    asyncdata[3 * led + 2] = GAMMA_TABLE[pixdata[3 * modifier + bOffset]];
                 }
             }
         }
 
+        // set the inetesity transmit buffer pointers.
         uart_buffer = asyncdata;
         uart_buffer_tail = asyncdata + szBuffer;
 #ifdef ARDUINO_ARCH_ESP8266
