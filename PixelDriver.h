@@ -119,21 +119,21 @@ class PixelDriver {
     }
 
  private:
-    PixelType   type;           // Pixel type
-    PixelColor  color;          // Color Order
-    uint16_t    cntGroup;       // Output modifying interval (in LEDs, not channels)
-    uint16_t    cntZigzag;      // Zigzag every cntZigzag physical pixels
-    uint8_t     pin;            // Pin for bit-banging
-    uint8_t     *pixdata;       // Pixel buffer
-    uint8_t     *asyncdata;     // Async buffer
-    uint8_t     *pbuff;         // GECE Packet Buffer
-    uint16_t    numPixels;      // Number of pixels
-    uint16_t    szBuffer;       // Size of Pixel buffer
-    uint32_t    startTime;      // When the last frame TX started
-    uint32_t    refreshTime;    // Time until we can refresh after starting a TX
-    static uint8_t    rOffset;  // Index of red byte
-    static uint8_t    gOffset;  // Index of green byte
-    static uint8_t    bOffset;  // Index of blue byte
+    PixelType       type;                 // Pixel type
+    PixelColor      color;                // Color Order
+    uint16_t        cntGroup = 1;         // Output modifying interval (in LEDs, not channels)
+    uint16_t        cntZigzag = 0;        // Zigzag every cntZigzag physical pixels
+    uint8_t         pin;                  // Pin for bit-banging
+    uint8_t         *pixdata = nullptr;   // Pixel buffer
+    uint8_t         *asyncdata = nullptr; // Async buffer
+    uint8_t         *pbuff = nullptr;     // GECE Packet Buffer
+    uint16_t        numPixels = 0;        // Number of pixels
+    uint16_t        szBuffer = 0;         // Size of Pixel buffer
+    uint32_t        startTime;            // When the last frame TX started
+    uint32_t        refreshTime;          // Time until we can refresh after starting a TX
+    static uint8_t  rOffset;              // Index of red byte
+    static uint8_t  gOffset;              // Index of green byte
+    static uint8_t  bOffset;              // Index of blue byte
 
     void ws2811_init();
     void gece_init();
