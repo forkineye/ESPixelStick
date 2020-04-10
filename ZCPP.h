@@ -395,20 +395,20 @@ inline uint16_t ZCPP_FromWire16(uint16_t value)
 
 inline uint32_t ZCPP_ToWire32(uint32_t value)
 {
-	uint32_t res;
-	((char*)(&res))[0] = value >> 24;
-	((char*)(&res))[1] = (value & 0xFF0000) >> 16;
-	((char*)(&res))[2] = (value & 0xFF00) >> 8;
-	((char*)(&res))[3] = value & 0xFF;
-    return res;
+    uint8_t res[4];
+    res[0] = value >> 24;
+    res[1] = (value & 0xFF0000) >> 16;
+    res[2] = (value & 0xFF00) >> 8;
+    res[3] = value & 0xFF;
+    return *(uint32_t*)res;
 }
 
-inline uint16_t ZCPP_ToWire16(uint16_t value)
+inline uint16_t ZCPP_ToWire16(uint32_t value)
 {
-	uint16_t res = 0;
-	((char*)(&res))[0] = (value & 0xFF00) >> 8;
-	((char*)(&res))[1] = value & 0xFF;
-	return res;
+    uint8_t res[2];
+    res[0] = (value & 0xFF00) >> 8;
+    res[1] = value & 0xFF;
+    return *(uint16_t*)res;
 }
 
 inline uint16_t ZCPP_GetPacketActualSize(const ZCPP_packet_t& packet)

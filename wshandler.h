@@ -182,7 +182,7 @@ void procG(uint8_t *data, AsyncWebSocketClient *client) {
 #ifdef ARDUINO_ARCH_ESP8266
             json["hostname"] = (String)WiFi.hostname();
 #else
-            json["hostname"] = (String)WiFi.getHostname ();
+            json["hostname"] = String(WiFi.getHostname ());
 #endif
             json["ip"]       = WiFi.localIP().toString();
             json["mac"]      = WiFi.macAddress();
@@ -387,8 +387,7 @@ void handle_fw_upload(AsyncWebServerRequest *request, String filename,
 #ifdef ARDUINO_ARCH_ESP8266
         WiFiUDP::stopAll ();
 #else
-        // this is not needed
-        // WiFiUDP.stop ();
+        // this is not needed for ESP32
 #endif
         LOG_PORT.print(F("* Upload Started: "));
         LOG_PORT.println(filename.c_str());
@@ -420,8 +419,7 @@ void handle_config_upload(AsyncWebServerRequest *request, String filename,
 #ifdef ARDUINO_ARCH_ESP8266
         WiFiUDP::stopAll();
 #else
-        // this is not really needed.
-        // WiFiUDP::stop ();
+        // this is not needed for ESP32.
 #endif
         LOG_PORT.print(F("* Config Upload Started: "));
         LOG_PORT.println(filename.c_str());

@@ -22,7 +22,6 @@
 /*****************************************/
 
 /* Fallback configuration if config.json is empty or fails */
-#include <dummy.h>
 const char ssid[] = "ENTER_SSID_HERE";
 const char passphrase[] = "ENTER_PASSPHRASE_HERE";
 
@@ -414,7 +413,8 @@ void onWifiConnect(const WiFiEventStationModeGotIP & event) {
 void onWifiConnect (const WiFiEvent_t event, const WiFiEventInfo_t info) {
 #endif
     LOG_PORT.println("");
-    LOG_PORT.println(String(F("Connected with IP: ")) + WiFi.localIP().toString());
+    LOG_PORT.print(F("Connected with IP: "));
+    LOG_PORT.println(WiFi.localIP());
 
     ourLocalIP = WiFi.localIP();
     ourSubnetMask = WiFi.subnetMask();
@@ -1465,7 +1465,7 @@ void loop() {
         #endif
                           char version[9];
                           memset(version, 0x00, sizeof(version));
-                          for (uint8_t i = 0; i < min(strlen_P(VERSION), (size_t)(sizeof(version)-1)); i++)
+                          for (uint8_t i = 0; i < min(strlen_P(VERSION), sizeof(version)-1); i++)
                             version[i] = pgm_read_byte(VERSION + i);
 
                           uint8_t mac[WL_MAC_ADDR_LENGTH];

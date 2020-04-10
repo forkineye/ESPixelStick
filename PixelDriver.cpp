@@ -192,11 +192,10 @@ void PixelDriver::ws2811_init() {
     // kill the Arduino driver (if it is runing)
     Serial1.end ();
 
-    // make sure no existing driver is running
+    // make sure no existing low level driver is running
     uart_driver_delete (UART1);
 
-    // start the generic UART driver and install a buffer big 
-    // enough to hold an entire frame.
+    // start the generic UART driver.
     // NOTE: Zero for RX buffer size causes errors in the uart API. 
     // Must be at least one byte larger than the fifo size
 
@@ -210,7 +209,7 @@ void PixelDriver::ws2811_init() {
     uart_config.stop_bits           = uart_stop_bits_t::UART_STOP_BITS_1;
     uart_config.use_ref_tick        = false;
 
-    ESP_ERROR_CHECK (uart_driver_install   (UART, 129, 0, 0, NULL, 0));
+    ESP_ERROR_CHECK (uart_driver_install   (UART, UART_FIFO_LEN+1, 0, 0, NULL, 0));
     ESP_ERROR_CHECK (uart_param_config     (UART, &uart_config));
     ESP_ERROR_CHECK (uart_set_pin          (UART, PIXEL_TXD, PIXEL_RXD, PIXEL_RTS, PIXEL_CTS));
     ESP_ERROR_CHECK (uart_set_line_inverse (UART, UART_INVERSE_TXD));
@@ -335,19 +334,23 @@ const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillWS2811(const uint8_t *buff,
 }
 
 void PixelDriver::show () {
-    if (!pixdata) return;
+
+    // do we have an input buffer?
+    if (!pixdata) { return; }
 
     if (type == PixelType::WS2811) 
     {
-        if (!cntZigzag) 
-        {  // Normal / group copy
+        // set up pointers into the pixel data space
+        uint8_t* pAsyncData = asyncdata; // target buffer
+        uint8_t* pPixData   = pixdata;   // source buffer
 
-            // set up pointers into the pixel data space
-            uint8_t* pAsyncData = asyncdata;
-            uint8_t* pPixData = pixdata;
+        // make sure the group count is valid
+        if (0 == cntGroup) { cntGroup = 1; }
 
-            // make sure the group count is valid
-            if (0 == cntGroup) { cntGroup = 1; }
+        // what type of copy are we making?
+        if (!cntZigzag)
+        {  
+            // Normal / group copy
 
             // for each destination pixel
             for (size_t CurrentDestinationPixelIndex = 0;
@@ -363,40 +366,45 @@ void PixelDriver::show () {
                     *pAsyncData++ = GAMMA_TABLE[pPixData[rOffset]];
                     *pAsyncData++ = GAMMA_TABLE[pPixData[gOffset]];
                     *pAsyncData++ = GAMMA_TABLE[pPixData[bOffset]];
-                }
+                } // End for each intensity in current input pixel
 
                 // point at the next pixel in the input buffer
                 pPixData += NUM_INTENSITY_BYTES_PER_PIXEL;
-            }
-        } 
+
+            } // end for each pixel in the output buffer
+        } // end normal copy
         else 
-        {  // Zigzag copy
+        {  
+            // Zigzag copy
             for (size_t CurrentDestinationPixelIndex = 0; 
                 CurrentDestinationPixelIndex < numPixels; 
                 CurrentDestinationPixelIndex++)
             {
-                uint16_t modifier = CurrentDestinationPixelIndex / cntGroup;
                 if (CurrentDestinationPixelIndex / cntZigzag % 2) 
-                { // Odd "zig"
+                {
+                    // Odd "zig"
                     int group = cntZigzag * (CurrentDestinationPixelIndex / cntZigzag);
-                    int this_led = (group + cntZigzag - (CurrentDestinationPixelIndex % cntZigzag) - 1) / cntGroup;
-                    asyncdata[(3 * CurrentDestinationPixelIndex) + 0] = GAMMA_TABLE[pixdata[(3 * this_led) + rOffset]];
-                    asyncdata[(3 * CurrentDestinationPixelIndex) + 1] = GAMMA_TABLE[pixdata[(3 * this_led) + gOffset]];
-                    asyncdata[(3 * CurrentDestinationPixelIndex) + 2] = GAMMA_TABLE[pixdata[(3 * this_led) + bOffset]];
-
-                } 
+                    pPixData  = pixdata + (NUM_INTENSITY_BYTES_PER_PIXEL * ((group + cntZigzag - (CurrentDestinationPixelIndex % cntZigzag) - 1) / cntGroup));
+                } // end zig
                 else 
-                { // Even "zag"
-                    asyncdata[(3 * CurrentDestinationPixelIndex) + 0] = GAMMA_TABLE[pixdata[(3 * modifier) + rOffset]];
-                    asyncdata[(3 * CurrentDestinationPixelIndex) + 1] = GAMMA_TABLE[pixdata[(3 * modifier) + gOffset]];
-                    asyncdata[(3 * CurrentDestinationPixelIndex) + 2] = GAMMA_TABLE[pixdata[(3 * modifier) + bOffset]];
-                }
-            }
-        }
+                {
+                    // Even "zag"
+                    pPixData = pixdata + (NUM_INTENSITY_BYTES_PER_PIXEL * (CurrentDestinationPixelIndex / cntGroup));
+                } // end zag
 
-        // set the inetesity transmit buffer pointers.
+                // now that we have decided on a data source, copy one 
+                // pixels worth of data
+                *pAsyncData++ = GAMMA_TABLE[pPixData[rOffset]];
+                *pAsyncData++ = GAMMA_TABLE[pPixData[gOffset]];
+                *pAsyncData++ = GAMMA_TABLE[pPixData[bOffset]];
+
+            } // end for each pixel in the output buffer
+        } // end zig zag copy
+
+        // set the intensity transmit buffer pointers.
         uart_buffer = asyncdata;
         uart_buffer_tail = asyncdata + szBuffer;
+
 #ifdef ARDUINO_ARCH_ESP8266
         SET_PERI_REG_MASK(UART_INT_ENA(1), UART_TXFIFO_EMPTY_INT_ENA);
 #else

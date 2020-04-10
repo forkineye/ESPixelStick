@@ -175,13 +175,13 @@ void EffectEngine::clearAll() {
 CRGB EffectEngine::colorWheel(uint8_t pos) {
     pos = 255 - pos;
     if (pos < 85) {
-        return { static_cast<uint8_t>(255 - pos * 3), 0, static_cast<uint8_t>(pos * 3)};
+        return { 255 - pos * 3, 0, pos * 3};
     } else if (pos < 170) {
         pos -= 85;
-        return { 0, static_cast<uint8_t>(pos * 3), static_cast<uint8_t>(255 - pos * 3) };
+        return { 0, pos * 3, 255 - pos * 3 };
     } else {
         pos -= 170;
-        return { static_cast<uint8_t>(pos * 3), static_cast<uint8_t>(255 - pos * 3), 0 };
+        return { pos * 3, 255 - pos * 3, 0 };
     }
 }
 
@@ -238,7 +238,7 @@ uint16_t EffectEngine::effectRainbow() {
 
         double hue = 0;
         if (_effectAllLeds) {
-            hue = _effectStep * 360.0 / 256;	// all same colour
+            hue = _effectStep*360.0d / 256;	// all same colour
         } else {
             hue = 360.0 * (((i * 256 / lc) + _effectStep) & 0xFF) / 255;
         }
@@ -299,7 +299,7 @@ uint16_t EffectEngine::effectFireFlicker() {
   byte lum = max(_effectColor.r, max(_effectColor.g, _effectColor.b)) / rev_intensity;
   for ( int i = 0; i < _ledCount; i++) {
     byte flicker = random(lum);
-    setPixel(i, CRGB { uint8_t (max(_effectColor.r - flicker, 0)), uint8_t (max(_effectColor.g - flicker, 0)), uint8_t (max(_effectColor.b - flicker, 0)) });
+    setPixel(i, CRGB { max(_effectColor.r - flicker, 0), max(_effectColor.g - flicker, 0), max(_effectColor.b - flicker, 0) });
   }
   _effectStep = (1+_effectStep) % _ledCount;
   return _effectDelay / 10;
@@ -332,7 +332,7 @@ uint16_t EffectEngine::effectLightning() {
       // follow-up flashes (stronger)
       intensity = random(128, 256); // next flashes are stronger
     }
-    CRGB temprgb = { uint8_t (_effectColor.r*intensity/256), uint8_t (_effectColor.g*intensity/256), uint8_t (_effectColor.b*intensity/256) };
+    CRGB temprgb = { _effectColor.r*intensity/256, _effectColor.g*intensity/256, _effectColor.b*intensity/256 };
     setRange(ledStart, ledLen, temprgb );
     flashPause = random(4, 21); // flash duration 4-20ms
   }
@@ -369,7 +369,7 @@ uint16_t EffectEngine::effectBreathe() {
    */
   // sin() is in radians, so 2*PI rad is a full period; compiler should optimize.
   float val = (exp(sin(millis()/(_effectDelay*5.0)*2*PI)) - 0.367879441) * 0.106364766 + 0.75;
-  setAll({ uint8_t (_effectColor.r*val), uint8_t (_effectColor.g*val), uint8_t (_effectColor.b*val)});
+  setAll({_effectColor.r*val, _effectColor.g*val, _effectColor.b*val});
   return _effectDelay / 40; // update every 25ms
 }
 
@@ -378,7 +378,7 @@ uint16_t EffectEngine::effectBreathe() {
 dCHSV EffectEngine::rgb2hsv(CRGB in_int)
 {
     dCHSV       out;
-    dCRGB       in = {in_int.r/255.0, in_int.g/255.0, in_int.b/255.0};
+    dCRGB       in = {in_int.r/255.0d, in_int.g/255.0d, in_int.b/255.0d};
     double      min, max, delta;
 
     min = in.r < in.g ? in.r : in.g;
@@ -433,7 +433,7 @@ CRGB EffectEngine::hsv2rgb(dCHSV in)
         out.r = in.v;
         out.g = in.v;
         out.b = in.v;
-        out_int = { uint8_t (255*out.r), uint8_t (255*out.g), uint8_t (255*out.b)};
+        out_int = {255*out.r, 255*out.g, 255*out.b};
         return out_int;
     }
     hh = in.h;
@@ -479,7 +479,7 @@ CRGB EffectEngine::hsv2rgb(dCHSV in)
         out.b = q;
         break;
     }
-    out_int = {uint8_t(255*out.r), uint8_t (255*out.g), uint8_t (255*out.b)};
+    out_int = {255*out.r, 255*out.g, 255*out.b};
     return out_int;
 }
 
