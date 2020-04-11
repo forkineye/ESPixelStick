@@ -33,6 +33,17 @@
 extern uint8_t GAMMA_TABLE[];
 
 /* 
+* Inverted 6N1 UART lookup table for ws2811, first 2 bits ignored.
+* Start and stop bits are part of the pixel stream. 
+*/
+const char LOOKUP_2811[4] = {
+    0b00110111,     // 00 - (1)000 100(0)
+    0b00000111,     // 01 - (1)000 111(0)
+    0b00110100,     // 10 - (1)110 100(0)
+    0b00000100      // 11 - (1)110 111(0)
+};
+
+/* 
 * 7N1 UART lookup table for GECE, first bit is ignored.
 * Start bit and stop bits are part of the packet.
 * Bits are backwards since we need MSB out.

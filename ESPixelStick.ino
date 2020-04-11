@@ -696,8 +696,8 @@ void initWeb() {
 #ifdef ARDUINO_ARCH_ESP8266
     // Handle OTA update from asynchronous callbacks
     Update.runAsync(true);
-#else
-    // This is not needed in the ESP32 implementation
+#
+    //Todo: This is not needed in the ESP32 implementation
 #endif
 
     // Add header for SVG plot support?

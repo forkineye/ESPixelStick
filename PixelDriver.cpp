@@ -63,17 +63,6 @@ extern "C" {
 #define NUM_INTENSITY_BYTES_PER_PIXEL    	3
 #define NUM_DATA_BYTES_PER_INTENSITY_BYTE	4
 
-/*
-* Inverted 6N1 UART lookup table for ws2811, first 2 bits ignored.
-* Start and stop bits are part of the pixel stream.
-*/
-char LOOKUP_2811[4] = {
-    0b00110111,     // 00 - (1)000 100(0)
-    0b00000111,     // 01 - (1)000 111(0)
-    0b00110100,     // 10 - (1)110 100(0)
-    0b00000100      // 11 - (1)110 111(0)
-};
-
 static const uint8_t    *uart_buffer;       // Buffer tracker
 static const uint8_t    *uart_buffer_tail;  // Buffer tracker
 
@@ -335,62 +324,31 @@ const uint8_t* ICACHE_RAM_ATTR PixelDriver::fillWS2811(const uint8_t *buff,
 
 void PixelDriver::show () {
 
-    // do we have an input buffer?
-    if (!pixdata) { return; }
+    if (type == PixelType::WS2811) {
+        if (!cntZigzag) {  // Normal / group copy
+            for (size_t led = 0; led < szBuffer / 3; led++) {
+                uint16_t modifier = led / cntGroup;
+                asyncdata[3 * led + 0] = GAMMA_TABLE[pixdata[3 * modifier + rOffset]];
+                asyncdata[3 * led + 1] = GAMMA_TABLE[pixdata[3 * modifier + gOffset]];
+                asyncdata[3 * led + 2] = GAMMA_TABLE[pixdata[3 * modifier + bOffset]];
+            }
+        } else {  // Zigzag copy
+            for (size_t led = 0; led < szBuffer / 3; led++) {
+                uint16_t modifier = led / cntGroup;
+                if (led / cntZigzag % 2) { // Odd "zig"
+                    int group = cntZigzag * (led / cntZigzag);
+                    int this_led = (group + cntZigzag - (led % cntZigzag) - 1) / cntGroup;
+                    asyncdata[3 * led + 0] = GAMMA_TABLE[pixdata[3 * this_led + rOffset]];
+                    asyncdata[3 * led + 1] = GAMMA_TABLE[pixdata[3 * this_led + gOffset]];
+                    asyncdata[3 * led + 2] = GAMMA_TABLE[pixdata[3 * this_led + bOffset]];
 
-    if (type == PixelType::WS2811) 
-    {
-        // set up pointers into the pixel data space
-        uint8_t* pAsyncData = asyncdata; // target buffer
-        uint8_t* pPixData   = pixdata;   // source buffer
-
-        // make sure the group count is valid
-        if (0 == cntGroup) { cntGroup = 1; }
-
-        // what type of copy are we making?
-        if (!cntZigzag)
-        {  
-            // Normal / group copy
-
-            // for each destination pixel
-            for (size_t CurrentDestinationPixelIndex = 0;
-                CurrentDestinationPixelIndex < numPixels;
-                CurrentDestinationPixelIndex++) 
-            {
-                // for each output pixel in the group (minimum of 1)
-                for (size_t CurrentGroupIndex = 0;
-                    CurrentGroupIndex < cntGroup;
-                    ++CurrentGroupIndex, ++CurrentDestinationPixelIndex)
-                {
-                    // write data to the output buffer
-                    *pAsyncData++ = GAMMA_TABLE[pPixData[rOffset]];
-                    *pAsyncData++ = GAMMA_TABLE[pPixData[gOffset]];
-                    *pAsyncData++ = GAMMA_TABLE[pPixData[bOffset]];
-                } // End for each intensity in current input pixel
-
-                // point at the next pixel in the input buffer
-                pPixData += NUM_INTENSITY_BYTES_PER_PIXEL;
-
-            } // end for each pixel in the output buffer
-        } // end normal copy
-        else 
-        {  
-            // Zigzag copy
-            for (size_t CurrentDestinationPixelIndex = 0; 
-                CurrentDestinationPixelIndex < numPixels; 
-                CurrentDestinationPixelIndex++)
-            {
-                if (CurrentDestinationPixelIndex / cntZigzag % 2) 
-                {
-                    // Odd "zig"
-                    int group = cntZigzag * (CurrentDestinationPixelIndex / cntZigzag);
-                    pPixData  = pixdata + (NUM_INTENSITY_BYTES_PER_PIXEL * ((group + cntZigzag - (CurrentDestinationPixelIndex % cntZigzag) - 1) / cntGroup));
-                } // end zig
-                else 
-                {
-                    // Even "zag"
-                    pPixData = pixdata + (NUM_INTENSITY_BYTES_PER_PIXEL * (CurrentDestinationPixelIndex / cntGroup));
-                } // end zag
+                } else { // Even "zag"
+                    asyncdata[3 * led + 0] = GAMMA_TABLE[pixdata[3 * modifier + rOffset]];
+                    asyncdata[3 * led + 1] = GAMMA_TABLE[pixdata[3 * modifier + gOffset]];
+                    asyncdata[3 * led + 2] = GAMMA_TABLE[pixdata[3 * modifier + bOffset]];
+                }
+            }
+        }
 
                 // now that we have decided on a data source, copy one 
                 // pixels worth of data
