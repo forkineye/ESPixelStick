@@ -274,7 +274,6 @@ void setup() {
     // Setup WiFi Handlers
 #ifdef ARDUINO_ARCH_ESP8266
     wifiConnectHandler    = WiFi.onStationModeGotIP(onWifiConnect);
-    wifiDisconnectHandler = WiFi.onStationModeDisconnected (onWiFiDisconnect);
 #else
     WiFi.onEvent (onWifiConnect,    WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
     WiFi.onEvent (onWiFiDisconnect, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
@@ -314,6 +313,10 @@ void setup() {
             ESP.restart();
         }
     }
+
+#ifdef ARDUINO_ARCH_ESP8266
+    wifiDisconnectHandler = WiFi.onStationModeDisconnected (onWiFiDisconnect);
+#endif
 
     LOG_PORT.print("IP : ");
     LOG_PORT.println(ourLocalIP);
@@ -365,8 +368,12 @@ void setup() {
 void initWifi() {
     // Switch to station mode and disconnect just in case
     WiFi.mode(WIFI_STA);
+#ifdef ARDUINO_ARCH_ESP8266
+	WiFi.disconnect();
+#else
     WiFi.persistent (false);
     WiFi.disconnect (true);
+#endif
 
     connectWifi();
     uint32_t timeout = millis();
