@@ -22,17 +22,16 @@
 /*****************************************/
 // Create secrets.h with a #define for SECRETS_SSID and SECRETS_PASS
 // or delete the #include and enter the strings directly below.
-#include "secrets.h"
+// #include "secrets.h"
 
 /* Fallback configuration if config.json is empty or fails */
-const char ssid[] = SECRETS_SSID;
-const char passphrase[] = SECRETS_PASS;
+const char ssid[] = "MaRtInG";
+const char passphrase[] = "martinshomenetwork";
 
 /*****************************************/
 /*         END - Configuration           */
 /*****************************************/
 
-#include <Hash.h>
 #include <SPI.h>
 
 // Core
@@ -57,9 +56,30 @@ const char passphrase[] = SECRETS_PASS;
 //#include "src/service/ESPAsyncZCPP.h"
 //#include "src/service/FPPDiscovery.h"
 
-extern "C" {
-#include <user_interface.h>
-}
+#ifdef ARDUINO_ARCH_ESP8266
+#include <Hash.h>
+extern "C"
+{
+#   include <user_interface.h>
+} // extern "C" 
+
+#elif defined ARDUINO_ARCH_ESP32
+    // ESP32 user_interface is now built in
+#   include <WiFi.h>
+#   include <esp_wifi.h>
+#   include <SPIFFS.h>
+#   include <Update.h>
+#else
+#	error "Unsupported CPU type."
+#endif
+
+#ifndef WL_MAC_ADDR_LENGTH
+#   define WL_MAC_ADDR_LENGTH 6
+#endif // WL_MAC_ADDR_LENGTH
+
+#ifndef ICACHE_RAM_ATTR
+#   define ICACHE_RAM_ATTR IRAM_ATTR 
+#endif // ICACHE_RAM_ATTR
 
 // Debugging support
 #if defined(DEBUG)
@@ -137,8 +157,13 @@ void initWeb();
 /** ESP8266 radio configuration routines that are executed at startup. */
 /* Disabled for now, possible flash wear issue. Need to research further
 RF_PRE_INIT() {
+#ifdef ARDUINO_ARCH_ESP8266
     system_phy_set_powerup_option(3);   // Do full RF calibration on power-up
     system_phy_set_max_tpw(82);         // Set max TX power
+#else
+    esp_phy_erase_cal_data_in_nvs(); // Do full RF calibration on power-up
+    esp_wifi_set_max_tx_power (78);  // Set max TX power
+#endif
 }
 */
 
@@ -147,8 +172,11 @@ RF_PRE_INIT() {
 void setup() {
     // Disable persistant credential storage and configure SDK params
     WiFi.persistent(false);
+#ifdef ARDUINO_ARCH_ESP8266
     wifi_set_sleep_type(NONE_SLEEP_T);
-
+#elif defined(ARDUINO_ARCH_ESP32)
+    esp_wifi_set_ps (WIFI_PS_NONE);
+#endif
     // Setup serial log port
     LOG_PORT.begin(115200);
     delay(10);
@@ -167,7 +195,11 @@ void setup() {
     for (uint8_t i = 0; i < strlen_P(BUILD_DATE); i++)
         LOG_PORT.print((char)(pgm_read_byte(BUILD_DATE + i)));
     LOG_PORT.println(")");
-    LOG_PORT.println(ESP.getFullVersion());
+#ifdef ARDUINO_ARCH_ESP8266
+    LOG_PORT.println (ESP.getFullVersion ());
+#else
+    LOG_PORT.println (ESP.getSdkVersion ());
+#endif
 
     // Dump supported input modes
     LOG_PORT.println(F("Supported Input modes:"));
@@ -186,12 +218,18 @@ void setup() {
     }
 
     // Enable SPIFFS
-    if (!SPIFFS.begin()) {
+#ifdef ARDUINO_ARCH_ESP8266
+    if (!SPIFFS.begin ())
+#else
+    if (!SPIFFS.begin (false))
+#endif
+    {
         LOG_PORT.println(F("*** File system did not initialize correctly ***"));
     } else {
         LOG_PORT.println(F("File system initialized."));
     }
 
+#ifdef ARDUINO_ARCH_ESP8266
     FSInfo fs_info;
     if (SPIFFS.info(fs_info)) {
         LOG_PORT.printf("Total bytes used in file system: %u.\n", fs_info.usedBytes);
@@ -203,16 +241,42 @@ void setup() {
             file.close();
         }
 */
+#elif defined(ARDUINO_ARCH_ESP32)
+    if (0 != SPIFFS.totalBytes ())
+    {
+        LOG_PORT.println (String ("Total bytes in file system: ") + String (SPIFFS.usedBytes ()));
+/*
+        fs::File dir = SPIFFS.open ("/");
+        while (dir.openNextFile ())
+        {
+            LOG_PORT.print (String (dir.name ()) + ": /t" + String (dir.size ()));
+        }
+*/
+#endif // ARDUINO_ARCH_ESP32
+
     } else {
         LOG_PORT.println(F("*** Failed to read file system details ***"));
     }
 
     // Load configuration from SPIFFS and set Hostname
     loadConfig();
+
+    if (config.hostname)
+    {
+#ifdef ARDUINO_ARCH_ESP8266
     WiFi.hostname(config.hostname);
+#else
+    WiFi.setHostname (config.hostname.c_str());
+#endif
+    }
 
     // Setup WiFi Handlers
+#ifdef ARDUINO_ARCH_ESP8266
     wifiConnectHandler = WiFi.onStationModeGotIP(onWiFiConnect);
+#else
+    WiFi.onEvent (onWiFiConnect,    WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
+    WiFi.onEvent (onWiFiDisconnect, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
+#endif
 
     //TODO: Setup MQTT / Auxiliary service Handlers?
 
@@ -240,10 +304,14 @@ void setup() {
         }
     }
 
+#ifdef ARDUINO_ARCH_ESP8266
     wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWiFiDisconnect);
 
     // Handle OTA update from asynchronous callbacks
     Update.runAsync(true);
+#else
+	// not needed for ESP32
+#endif
 
     // Configure and start the web server
     initWeb();
@@ -258,7 +326,12 @@ void setup() {
 void initWifi() {
     // Switch to station mode and disconnect just in case
     WiFi.mode(WIFI_STA);
+#ifdef ARDUINO_ARCH_ESP8266
     WiFi.disconnect();
+#else
+    WiFi.persistent (false);
+    WiFi.disconnect (true);
+#endif
 
     connectWifi();
     uint32_t timeout = millis();
@@ -274,8 +347,11 @@ void initWifi() {
 }
 
 void connectWifi() {
+#ifdef ARDUINO_ARCH_ESP8266
     delay(secureRandom(100, 500));
-
+#else
+    delay (random (100, 500));
+#endif
     LOG_PORT.println("");
     LOG_PORT.print(F("Connecting to "));
     LOG_PORT.print(config.ssid);
@@ -299,7 +375,11 @@ void connectWifi() {
     }
 }
 
+#ifdef ARDUINO_ARCH_ESP8266
 void onWiFiConnect(const WiFiEventStationModeGotIP &event) {
+#else
+void onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t info) {
+#endif
     ourLocalIP = WiFi.localIP();
     ourSubnetMask = WiFi.subnetMask();
     LOG_PORT.printf("\nConnected with IP: %s\n", ourLocalIP.toString().c_str());
@@ -309,9 +389,12 @@ void onWiFiConnect(const WiFiEventStationModeGotIP &event) {
     // Setup mDNS / DNS-SD
     //TODO: Reboot or restart mdns when config.id is changed?
 /*
-    char chipId[7] = { 0 };
-    snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
-    MDNS.setInstanceName(String(config.id + " (" + String(chipId) + ")").c_str());
+#ifdef ARDUINO_ARCH_ESP8266
+    String chipId = String (ESP.getChipId (), HEX);
+#else
+    String chipId = String ((unsigned long)ESP.getEfuseMac (), HEX);
+#endif
+    MDNS.setInstanceName(String(config.id + " (" + chipId + ")").c_str());
     if (MDNS.begin(config.hostname.c_str())) {
         MDNS.addService("http", "tcp", HTTP_PORT);
 //        MDNS.addService("zcpp", "udp", ZCPP_PORT);
@@ -320,7 +403,7 @@ void onWiFiConnect(const WiFiEventStationModeGotIP &event) {
         MDNS.addServiceTxt("e131", "udp", "TxtVers", String(RDMNET_DNSSD_TXTVERS));
         MDNS.addServiceTxt("e131", "udp", "ConfScope", RDMNET_DEFAULT_SCOPE);
         MDNS.addServiceTxt("e131", "udp", "E133Vers", String(RDMNET_DNSSD_E133VERS));
-        MDNS.addServiceTxt("e131", "udp", "CID", String(chipId));
+        MDNS.addServiceTxt("e131", "udp", "CID", chipId);
         MDNS.addServiceTxt("e131", "udp", "Model", "ESPixelStick");
         MDNS.addServiceTxt("e131", "udp", "Manuf", "Forkineye");
     } else {
@@ -434,8 +517,11 @@ void setMode(_Input *newinput, _Output *newoutput) {
 /// Configuration Validations
 /** Validates the config_t (core) configuration structure and forces defaults for invalid entries */
 void validateConfig() {
-    char chipId[7] = { 0 };
-    snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
+#ifdef ARDUINO_ARCH_ESP8266
+    String chipId = String (ESP.getChipId (), HEX);
+#else
+    String chipId = String ((unsigned long)ESP.getEfuseMac (), HEX);
+#endif
 
     // Device defaults
     if (!config.id.length())

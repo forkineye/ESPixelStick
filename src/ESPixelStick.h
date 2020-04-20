@@ -23,16 +23,24 @@
 const char VERSION[] = "4.0_unified-dev";
 const char BUILD_DATE[] = __DATE__;
 
-#include <ESP8266WiFi.h>
+#if defined(ARDUINO_ARCH_ESP8266)
+#	include <ESP8266WiFi.h>
+#	include <ESPAsyncTCP.h>
+#	include <ESP8266mDNS.h>
+#	include <ESPAsyncUDP.h>
+#elif defined(ARDUINO_ARCH_ESP32)
+#   include <AsyncTCP.h>
+#   include <AsyncUDP.h>
+#   include <ESPmDNS.h>
+#   include <WiFi.h>
+#else
+#	error "Unsupported CPU type"
+#endif
 #include <Ticker.h>
-#include <ESP8266mDNS.h>
-#include <ESPAsyncTCP.h>
-#include <ESPAsyncUDP.h>
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
 #include "input/_Input.h"
 #include "output/_Output.h"
-
 
 #define HTTP_PORT       80      ///< Default web server port
 #define CLIENT_TIMEOUT  15      ///< In station/client mode try to connection for 15 seconds
@@ -65,10 +73,10 @@ typedef struct {
     String      ip;
     String      netmask;
     String      gateway;
-    bool        dhcp = true;    ///< Use DHCP?
-    bool        ap_fallback;    ///< Fallback to AP if fail to associate?
-    uint32_t    ap_timeout;     ///< How long to wait in AP mode with no connection before rebooting
-    uint32_t    sta_timeout;    ///< Timeout when connection as client (station)
+    bool        dhcp        = true;  ///< Use DHCP?
+    bool        ap_fallback = false; ///< Fallback to AP if fail to associate?
+    uint32_t    ap_timeout;          ///< How long to wait in AP mode with no connection before rebooting
+    uint32_t    sta_timeout;         ///< Timeout when connection as client (station)
 } config_t;
 
 String serializeCore(boolean pretty = false, boolean creds = false);
