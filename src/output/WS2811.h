@@ -23,21 +23,17 @@
 #include "_Output.h"
 
 #define UART_INV_MASK  (0x3f << 19)
+#ifdef ARDUINO_ARCH_ESP8266
 #define UART 1
+#else
+#   include <driver/uart.h>
+#   define UART uart_port_t::UART_NUM_1
+
+#endif
 
 #define DATA_PIN        2       ///< Pixel output - GPIO2 (D4 on Wemos / NodeMCU)
 #define PIXEL_LIMIT     1360    ///< Total pixel limit - 40.85ms for 8 universes
 
-/*
-* Inverted 6N1 UART lookup table for ws2811, first 2 bits ignored.
-* Start and stop bits are part of the pixel stream.
-*/
-const char LOOKUP_2811[4] = {
-    0b00110111,     // 00 - (1)000 100(0)
-    0b00000111,     // 01 - (1)000 111(0)
-    0b00110100,     // 10 - (1)110 100(0)
-    0b00000100      // 11 - (1)110 111(0)
-};
 
 #define WS2811_TFRAME   30L     ///< 30us frame time
 #define WS2811_TIDLE    300L    ///< 300us idle time
@@ -67,15 +63,22 @@ class WS2811 : public _Output  {
     /// Interrupt Handler
     static void ICACHE_RAM_ATTR handleWS2811(void *param);
 
-    /// Returns number of bytes waiting in the TX FIFO of UART1
-    static inline uint8_t getFifoLength() {
-        return (U1S >> USTXC) & 0xff;
-    }
+#ifdef ARDUINO_ARCH_ESP8266
+    /* Returns number of bytes waiting in the TX FIFO of UART1 */
+ #  define getFifoLength ((uint16_t)((U1S >> USTXC) & 0xff))
 
-    /// Append a byte to the TX FIFO of UART1
-    static inline void enqueue(uint8_t byte) {
-        U1F = byte;
-    }
+    /* Append a byte to the TX FIFO of UART1 */
+ #  define enqueue(data)  (U1F = (char)(data))
+
+#elif defined(ARDUINO_ARCH_ESP32)
+    /* Returns number of bytes waiting in the TX FIFO of UART1 */
+#   define getFifoLength ((uint16_t)((READ_PERI_REG (UART_STATUS_REG (UART)) & UART_TXFIFO_CNT_M) >> UART_TXFIFO_CNT_S))
+
+    /* Append a byte to the TX FIFO of UART1 */
+// #   define enqueue(value) WRITE_PERI_REG(UART_FIFO_AHB_REG (UART), (char)(value))
+#	define enqueue(value) (*((volatile uint32_t*)(UART_FIFO_AHB_REG (UART)))) = (uint32_t)(value)
+
+#endif
 
     /// Drop the update if our refresh rate is too high
     inline boolean canRefresh() {
