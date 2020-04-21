@@ -165,16 +165,16 @@ void E131Input::save() {
 // Subscribe to "n" universes, starting at "universe"
 void E131Input::multiSub() {
     uint8_t count;
-    ip_addr_t ifaddr;
-    ip_addr_t multicast_addr;
+    IPAddress ifaddr;
+    IPAddress multicast_addr;
 
     count = uniLast - startUniverse + 1;
-    ifaddr.addr = static_cast<uint32_t>(WiFi.localIP());
+    ifaddr = WiFi.localIP ();
     for (uint8_t i = 0; i < count; i++) {
-        multicast_addr.addr = static_cast<uint32_t>(IPAddress(239, 255,
-                (((startUniverse + i) >> 8) & 0xff),
-                (((startUniverse + i) >> 0) & 0xff)));
-        igmp_joingroup(&ifaddr, &multicast_addr);
+        multicast_addr = IPAddress (239, 255,
+            (((startUniverse + i) >> 8) & 0xff),
+            (((startUniverse + i) >> 0) & 0xff));
+        igmp_joingroup ((ip4_addr_t*)&ifaddr[0], (ip4_addr_t*)&multicast_addr[0]);
     }
 }
 
