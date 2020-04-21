@@ -26,6 +26,10 @@
 #include "input/_Input.h"
 #include "output/_Output.h"
 
+#ifdef ARDUINO_ARCH_ESP32
+#include <map>
+#endif
+
 extern bool     reboot;     ///< Reboot flag
 extern _Input   *input;     ///< Pointer to currently enabled input module
 extern _Output  *output;    ///< Pointer to currently enabled output module
@@ -288,7 +292,11 @@ class WebIO {
             size_t index, uint8_t *data, size_t len, bool final) {
         static EFUpdate efupdate; /// EFU Update Handler
         if (!index) {
+#ifdef ARDUINO_ARCH_ESP8266
             WiFiUDP::stopAll();
+#else
+            // this is not supported for ESP32
+#endif
             LOG_PORT.print(F("* Upload Started: "));
             LOG_PORT.println(filename.c_str());
             efupdate.begin();
