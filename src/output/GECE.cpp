@@ -22,11 +22,31 @@
 #include "../FileIO.h"
 
 extern "C" {
-#include <eagle_soc.h>
-#include <ets_sys.h>
-#include <uart.h>
-#include <uart_register.h>
+#ifdef ARDUINO_ARCH_ESP8266
+#   include <eagle_soc.h>
+#   include <ets_sys.h>
+#   include <uart.h>
+#   include <uart_register.h>
+#elif defined(ARDUINO_ARCH_ESP32)
+#   include <esp32-hal-uart.h>
+#   include <soc/soc.h>
+#   include <soc/uart_reg.h>
+#   include <rom/ets_sys.h>
+#   include <driver/uart.h>
+
+#   define UART_CONF0           UART_CONF0_REG
+#   define UART_CONF1           UART_CONF1_REG
+#   define UART_INT_ENA         UART_INT_ENA_REG
+#   define UART_INT_CLR         UART_INT_CLR_REG
+#   define SERIAL_TX_ONLY       UART_INT_CLR_REG
+#   define UART_INT_ST          UART_INT_ST_REG
+#   define UART_TX_FIFO_SIZE    UART_FIFO_LEN
+#   define UART0                uart_port_t::UART_NUM_0
+#   define UART1                uart_port_t::UART_NUM_1
+
+#endif
 }
+
 
 static const uint8_t    *uart_buffer;       // Buffer tracker
 static const uint8_t    *uart_buffer_tail;  // Buffer tracker
@@ -66,7 +86,11 @@ void GECE::init() {
     refreshTime = (GECE_TFRAME + GECE_TIDLE) * pixel_count;
 
     // Serial rate is 3x 100KHz for GECE
+#ifdef ARDUINO_ARCH_ESP8266
     Serial1.begin(300000, SERIAL_7N1, SERIAL_TX_ONLY);
+#elif defined ARDUINO_ARCH_ESP32
+    Serial1.begin (300000, SERIAL_7N1);
+#endif
     SET_PERI_REG_MASK(UART_CONF0(UART), UART_TXD_BRK);
     delayMicroseconds(GECE_TIDLE);
 }
