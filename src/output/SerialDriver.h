@@ -77,6 +77,10 @@ serializeConfig():
 
 #include "HardwareSerial.h"
 
+#ifdef ARDUINO_ARCH_ESP32
+#   include <driver/uart.h>
+#endif // ARDUINO_ARCH_ESP32
+
 /* UART for Renard / DMX output */
 #define SEROUT_UART 1
 
@@ -158,15 +162,22 @@ class SerialDriver {
     /* Serial interrupt handler */
     static void ICACHE_RAM_ATTR serial_handle(void *param);
 
-    /* Returns number of bytes waiting in the TX FIFO of SEROUT_UART */
-    static inline uint8_t getFifoLength() {
-        return (ESP8266_REG(U0F+(0xF00*SEROUT_UART)) >> USTXC) & 0xff;
-    }
+#ifdef ARDUINO_ARCH_ESP8266
+    /* Returns number of bytes waiting in the TX FIFO of UART1 */
+ #  define getFifoLength ((uint16_t)((U1S >> USTXC) & 0xff))
 
-    /* Append a byte to the TX FIFO of SEROUT_UART */
-    static inline void enqueue(uint8_t byte) {
-        ESP8266_REG(U0F+(0xF00*SEROUT_UART)) = byte;
-    }
+    /* Append a byte to the TX FIFO of UART1 */
+ #  define enqueue(data)  (U1F = (char)(data))
+#else
+    /* Returns number of bytes waiting in the TX FIFO of UART1 */
+    /* Returns number of bytes waiting in the TX FIFO of UART1 */
+#   define getFifoLength ((uint16_t)((READ_PERI_REG (UART_STATUS_REG (UART1)) & UART_TXFIFO_CNT_M) >> UART_TXFIFO_CNT_S))
+
+    /* Append a byte to the TX FIFO of UART1 */
+// #   define enqueue(value) WRITE_PERI_REG(UART_FIFO_AHB_REG (UART), (char)(value))
+#	define enqueue(value) (*((volatile uint32_t*)(UART_FIFO_AHB_REG (UART1)))) = (uint32_t)(value)
+
+#endif // !ARDUINO_ARCH_ESP8266
 };
 
 #endif /* SERIALDRIVER_H_ */
