@@ -137,8 +137,10 @@ bool                reboot = false;         // Reboot flag
 AsyncWebServer      web(HTTP_PORT);         // Web Server
 AsyncWebSocket      ws("/ws");              // Web Socket Plugin
 uint32_t            lastUpdate;             // Update timeout tracker
+#ifdef ARDUINO_ARCH_ESP8266
 WiFiEventHandler    wifiConnectHandler;     // WiFi connect handler
 WiFiEventHandler    wifiDisconnectHandler;  // WiFi disconnect handler
+#endif
 Ticker              wifiTicker;             // Ticker to handle WiFi
 IPAddress           ourLocalIP;
 IPAddress           ourSubnetMask;
@@ -413,8 +415,12 @@ void onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t info) {
 }
 
 /// WiFi Disconnect Handler
+#ifdef ARDUINO_ARCH_ESP8266
 /** Attempt to re-connect every 2 seconds */
 void onWiFiDisconnect(const WiFiEventStationModeDisconnected &event) {
+#else
+static void onWiFiDisconnect (const WiFiEvent_t event, const WiFiEventInfo_t info) {
+#endif
     LOG_PORT.println(F("*** WiFi Disconnected ***"));
     wifiTicker.once(2, connectWifi);
 }
