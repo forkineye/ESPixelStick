@@ -22,6 +22,9 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#ifdef ARDUINO_ARCH_ESP32
+#   include <SPIFFS.h>
+#endif
 
 /// Deserialization callback for I/O modules
 typedef std::function<void(DynamicJsonDocument &json)> DeserializationHandler;
