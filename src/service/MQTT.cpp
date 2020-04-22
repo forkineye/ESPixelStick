@@ -21,6 +21,12 @@
 #include <ArduinoJson.h>
 #include "MQTT.h"
 #include "../ESPixelStick.h"
+#include <Ticker.h>
+
+#if defined ARDUINO_ARCH_ESP32
+#   include <SPIFFS.h>
+#   include <functional>
+#endif
 
 void MQTTService::setup() {
     if (enabled) {
@@ -44,9 +50,12 @@ void MQTTService::load() {
         LOG_PORT.println(F("* MQTT configuration file found."));
 
         // Generate default topic
-        char chipId[7] = { 0 };
-        snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
-        topic = "diy/esps/" + String(chipId);
+#ifdef ARDUINO_ARCH_ESP8266
+        String chipId = String (ESP.getChipId (), HEX);
+#else
+        String chipId = String ((unsigned long)ESP.getEfuseMac (), HEX);
+#endif
+        topic = "diy/esps/" + chipId;
 
         // Save configuration
         save();
@@ -166,10 +175,14 @@ void MQTTService::onMqttConnect(bool sessionPresent) {
     publishState();
 }
 
+// void MQTTService::onMqttDisconnect (AsyncMqttClientDisconnectReason reason) {
 void MQTTService::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
     LOG_PORT.println(F("- MQTT Disconnected"));
-    if (WiFi.isConnected())
-        mqttTicker.once(2, std::bind(&MQTTService::connectToMqtt, this));
+    if (WiFi.isConnected ())
+    {
+        // set up a two second delayed action.
+        mqttTicker.once (2, +[](MQTTService* pMe) { pMe->connectToMqtt (); }, this);
+    }
 }
 
 void MQTTService::onMqttMessage(char* topic, char* payload,
@@ -248,9 +261,12 @@ void MQTTService::onMqttMessage(char* topic, char* payload,
 
 void MQTTService::publishHA(bool join) {
     // Setup HA discovery
-    char chipId[7] = { 0 };
-    snprintf(chipId, sizeof(chipId), "%06x", ESP.getChipId());
-    String ha_config = haprefix + "/light/" + String(chipId) + "/config";
+#ifdef ARDUINO_ARCH_ESP8266
+    String chipId = String (ESP.getChipId (), HEX);
+#else
+    String chipId = String ((unsigned long)ESP.getEfuseMac (), HEX);
+#endif
+    String ha_config = haprefix + "/light/" + chipId + "/config";
 
     if (join) {
         DynamicJsonDocument root(1024);
