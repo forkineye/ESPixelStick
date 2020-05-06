@@ -42,6 +42,8 @@ const char BUILD_DATE[] = __DATE__;
 #include "input/_Input.h"
 #include "output/_Output.h"
 
+#include "memdebug.h"
+
 #define HTTP_PORT       80      ///< Default web server port
 #define CLIENT_TIMEOUT  15      ///< In station/client mode try to connection for 15 seconds
 #define AP_TIMEOUT      60      ///< In AP mode, wait 60 seconds for a connection or reboot

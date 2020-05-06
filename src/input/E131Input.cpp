@@ -38,16 +38,22 @@ void E131Input::destroy() {
 }
 
 void E131Input::init() {
+    DEBUG_START;
+
     Serial.println(F("** E1.31 Initialization **"));
 
     // Create a new ESPAsyncE131
     e131 = new ESPAsyncE131(10);
+    DEBUG_V("");
 
     // Load and validate our configuration
     load();
 
+    DEBUG_V ("");
     // Get on with business
     if (multicast) {
+        DEBUG_V ("");
+
         if (e131->begin(E131_MULTICAST, startUniverse,
                 uniLast - startUniverse + 1)) {
             LOG_PORT.println(F("E131 Multicast Enabled."));
@@ -55,13 +61,16 @@ void E131Input::init() {
             LOG_PORT.println(F("*** E131 MULTICAST INIT FAILED ****"));
         }
     } else {
-        if (e131->begin(E131_UNICAST)) {
+        DEBUG_V ("");
+/* todo        if (e131->begin(E131_UNICAST)) {
             LOG_PORT.print(F("E131 Unicast port: "));
             LOG_PORT.println(E131_DEFAULT_PORT);
         } else {
             LOG_PORT.println(F("*** E131 UNICAST INIT FAILED ****"));
         }
+        */
     }
+    DEBUG_END;
 }
 
 const char* E131Input::getKey() {
@@ -73,6 +82,8 @@ const char* E131Input::getBrief() {
 }
 
 void E131Input::validate() {
+    DEBUG_START;
+
     if (startUniverse < 1)
         startUniverse = 1;
     if (universe_limit > UNIVERSE_MAX || universe_limit < 1)
@@ -110,6 +121,8 @@ void E131Input::validate() {
     // Setup IGMP subscriptions if multicast is enabled
     if (multicast)
         multiSub();
+
+    DEBUG_END;
 }
 
 boolean E131Input::deserialize(DynamicJsonDocument &json) {
@@ -126,17 +139,23 @@ boolean E131Input::deserialize(DynamicJsonDocument &json) {
 }
 
 void E131Input::load() {
+    DEBUG_START;
+
     if (FileIO::loadConfig(CONFIG_FILE, std::bind(
             &E131Input::deserialize, this, std::placeholders::_1))) {
+        DEBUG_V ("");
         validate();
+        DEBUG_V ("");
     } else {
         // Load failed, create a new config file and save it
         startUniverse = 1;
         universe_limit = 512;
         channel_start = 1;
         multicast = true;
+        DEBUG_V ("");
         save();
     }
+    DEBUG_END;
 }
 
 String E131Input::serialize(boolean pretty = false) {
@@ -164,6 +183,8 @@ void E131Input::save() {
 
 // Subscribe to "n" universes, starting at "universe"
 void E131Input::multiSub() {
+    DEBUG_START;
+
     uint8_t count;
     IPAddress ifaddr;
     IPAddress multicast_addr;
@@ -176,6 +197,7 @@ void E131Input::multiSub() {
             (((startUniverse + i) >> 0) & 0xff));
         igmp_joingroup ((ip4_addr_t*)&ifaddr[0], (ip4_addr_t*)&multicast_addr[0]);
     }
+    DEBUG_END;
 }
 
 void E131Input::process() {

@@ -45,6 +45,7 @@ const char passphrase[] = "martinshomenetwork";
 //#include "src/input/ESPAsyncDDP.h"
 
 // Output modules
+//#include "src/output/OutputMgr.hpp"
 #include "src/output/WS2811.h"
 #include "src/output/GECE.h"
 //#include "src/output/DMX.h"
@@ -182,7 +183,7 @@ void setup() {
     // Setup serial log port
     LOG_PORT.begin(115200);
     delay(10);
-
+    DEBUG_START;
 #if defined(DEBUG)
     ets_install_putc1((void *) &_u0_putc);
     system_set_os_print(1);
@@ -202,6 +203,7 @@ void setup() {
 #else
     LOG_PORT.println (ESP.getSdkVersion ());
 #endif
+    DEBUG_V ("");
 
     // Dump supported input modes
     LOG_PORT.println(F("Supported Input modes:"));
@@ -210,6 +212,7 @@ void setup() {
         LOG_PORT.printf("- %s : %s\n", itInput->first.c_str(), itInput->second->getBrief());
         itInput++;
     }
+    DEBUG_V ("");
 
     // Dump supported output modes
     LOG_PORT.println(F("Supported Output modes:"));
@@ -218,6 +221,7 @@ void setup() {
         LOG_PORT.printf("- %s : %s\n", itOutput->first.c_str(), itOutput->second->getBrief());
         itOutput++;
     }
+    DEBUG_V ("");
 
     // Enable SPIFFS
 #ifdef ARDUINO_ARCH_ESP8266
@@ -259,9 +263,11 @@ void setup() {
     } else {
         LOG_PORT.println(F("*** Failed to read file system details ***"));
     }
+    DEBUG_V ("");
 
     // Load configuration from SPIFFS and set Hostname
     loadConfig();
+    DEBUG_V ("");
 
     if (config.hostname)
     {
@@ -271,6 +277,7 @@ void setup() {
     WiFi.setHostname (config.hostname.c_str());
 #endif
     }
+    DEBUG_V ("");
 
     // Setup WiFi Handlers
 #ifdef ARDUINO_ARCH_ESP8266
@@ -290,6 +297,7 @@ void setup() {
         config.passphrase = passphrase;
         initWifi();
     }
+    DEBUG_V ("");
 
     // If we fail again, go SoftAP or reboot
     if (WiFi.status() != WL_CONNECTED) {
@@ -305,6 +313,7 @@ void setup() {
             ESP.restart();
         }
     }
+    DEBUG_V ("");
 
 #ifdef ARDUINO_ARCH_ESP8266
     wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWiFiDisconnect);
@@ -317,6 +326,7 @@ void setup() {
 
     // Configure and start the web server
     initWeb();
+    DEBUG_END;
 }
 
 /////////////////////////////////////////////////////////
@@ -433,6 +443,7 @@ static void onWiFiDisconnect (const WiFiEvent_t event, const WiFiEventInfo_t inf
 
 // Configure and start the web server
 void initWeb() {
+    DEBUG_START;
     // Add header for SVG plot support?
     DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
 
@@ -478,6 +489,7 @@ void initWeb() {
 
     LOG_PORT.print(F("- Web Server started on port "));
     LOG_PORT.println(HTTP_PORT);
+    DEBUG_END;
 }
 
 /////////////////////////////////////////////////////////
@@ -490,16 +502,19 @@ void initWeb() {
 /** Cleans up i/o modules as needed and re-initializes showBuffer.
  */
 void setMode(_Input *newinput, _Output *newoutput) {
+    DEBUG_START;
     if (newoutput != nullptr) {
         output->destroy();
         output = newoutput;
         output->init();
     }
+    DEBUG_V ("");
 
     if (newinput != nullptr) {
         input->destroy();
         input = newinput;
     }
+    DEBUG_V ("");
 
     // showBuffer only needs to change if there's an output mode change
     if (newoutput != nullptr) {
@@ -507,22 +522,30 @@ void setMode(_Input *newinput, _Output *newoutput) {
         if (showBuffer) free (showBuffer);
         if (showBuffer = static_cast<uint8_t *>(malloc(szBuffer)))
             memset(showBuffer, 0, szBuffer);
+        DEBUG_V ("");
 
         output->setBuffer(showBuffer);
+
         input->setBuffer(showBuffer, szBuffer);
     }
+    DEBUG_V ("");
 
     // Can't init input until showBuffer is setup
     if (newinput != nullptr)
         input->init();
+    DEBUG_V ("");
 
     // Render an output frame
     output->render();
+
+    DEBUG_END;
 }
 
 /// Configuration Validations
 /** Validates the config_t (core) configuration structure and forces defaults for invalid entries */
 void validateConfig() {
+    DEBUG_START;
+
 #ifdef ARDUINO_ARCH_ESP8266
     String chipId = String (ESP.getChipId (), HEX);
 #else
@@ -544,6 +567,7 @@ void validateConfig() {
 
     if (config.ap_timeout < 15)
         config.ap_timeout = AP_TIMEOUT;
+    DEBUG_V ("");
 
 //TODO: Update this to set to ws2811 and e131 if no config found
     itInput = INPUT_MODES.find(config.input);
@@ -557,6 +581,7 @@ void validateConfig() {
         config.input = itInput->first;
         input = itInput->second;
     }
+    DEBUG_V ("");
 
     itOutput = OUTPUT_MODES.find(config.output);
     if (itOutput != OUTPUT_MODES.end()) {
@@ -569,9 +594,11 @@ void validateConfig() {
         config.output = itOutput->first;
         output = itOutput->second;
     }
+    DEBUG_V ("");
 
     // Set I/O modes
     setMode(input, output);
+    DEBUG_END;
 }
 
 /// Deserialize device confiugration JSON to config structure - returns true if config change detected
@@ -620,15 +647,22 @@ void deserializeCore(DynamicJsonDocument &json) {
  *  If no configuration file is found, a new one will be created.
  */
 void loadConfig() {
+    DEBUG_START;
+
     // Zeroize Config struct
     memset(&config, 0, sizeof(config));
 
     if (FileIO::loadConfig(CONFIG_FILE, &deserializeCore)) {
+        DEBUG_V ("");
+
         validateConfig();
     } else {
         // Load failed, create a new config file and save it
+        DEBUG_V ("");
+
         saveConfig();
     }
+    DEBUG_END;
 
     //TODO: Add auxiliary service load routine
 }
@@ -700,7 +734,8 @@ void loop() {
 
 //TODO: Research this further
 // workaround crash - consume incoming bytes on serial port
-    if (LOG_PORT.available()) {
-        while (LOG_PORT.read() >= 0);
+    while (0 != LOG_PORT.available()) 
+    {
+        LOG_PORT.read();
     }
 }
