@@ -60,7 +60,7 @@ public:
     {
         OutputType_WS2811 = 0,
         OutputType_GECE,
-        OutputType_GenericSerial,
+        OutputType_Serial,
         OutputType_Renard,
         OutputType_DMX,
 #ifdef ARDUINO_ARCH_ESP8266
