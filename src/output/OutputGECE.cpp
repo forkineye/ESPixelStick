@@ -124,7 +124,8 @@ c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId) :
 
         default:
         {
-            LOG_PORT.println (String (F ("EEEEEE ERROR: Port '")) + int (OutputChannelId) + String (F ("' is not a valid WS2811 port. EEEEEE")));
+            dataPin = gpio_num_t (-1);
+            LOG_PORT.println (String (F ("EEEEEE ERROR: Port '")) + int (OutputChannelId) + String (F ("' is not a valid GECE port. EEEEEE")));
             break;
         }
 
@@ -133,6 +134,8 @@ c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId) :
 
 c_OutputGECE::~c_OutputGECE () 
 {
+    if (gpio_num_t (-1) == dataPin) { return; }
+
     // shut down the interface
     pSerialInterface->end ();
 
@@ -143,6 +146,8 @@ c_OutputGECE::~c_OutputGECE ()
 
 void c_OutputGECE::begin() 
 {
+    if (gpio_num_t (-1) == dataPin) { return; }
+
     Serial.println(F("** GECE Initialization **"));
 
     // first make sure the interface is off
@@ -223,6 +228,7 @@ bool c_OutputGECE::validate ()
 
 void c_OutputGECE::render() 
 {
+    if (gpio_num_t (-1) == dataPin) { return; }
     if (!canRefresh()) return;
 
     uint32_t packet = 0;
