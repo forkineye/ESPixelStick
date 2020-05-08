@@ -119,6 +119,7 @@ c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId)
 
         default:
         {
+            dataPin = gpio_num_t(-1);
             LOG_PORT.println (String(F("EEEEEE ERROR: Port '")) + int (OutputChannelId) + String(F("' is not a valid WS2811 port. EEEEEE")));
             break;
         }
@@ -128,6 +129,8 @@ c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId)
 //----------------------------------------------------------------------------
 c_OutputWS2811::~c_OutputWS2811()
 {
+    if (gpio_num_t (-1) == dataPin) { return; }
+
 #ifdef ARDUINO_ARCH_ESP8266
     Serial1.end ();
 #else
@@ -147,6 +150,9 @@ c_OutputWS2811::~c_OutputWS2811()
 void c_OutputWS2811::begin()
 {
     Serial.println (F ("** WS2811 Initialization **"));
+
+    // are we using a valid config?
+    if (gpio_num_t (-1) == dataPin) { return; }
 
     // Set output pins
     pinMode(dataPin, OUTPUT);
@@ -256,7 +262,7 @@ bool c_OutputWS2811::validate()
 
     if (group_size > pixel_count)
     {
-        // LOG_PORT.println (String (F ("*** Requested group size count was too high. Setting to ")) + pixel_count + F (" ***"));
+        LOG_PORT.println (String (F ("*** Requested group size count was too high. Setting to ")) + pixel_count + F (" ***"));
         group_size = pixel_count;
         response = false;
     }
@@ -428,6 +434,7 @@ void c_OutputWS2811::render()
 {
     DEBUG_START;
 
+    if (gpio_num_t (-1) == dataPin) { return; }
     if (!canRefresh())  return;
 
     DEBUG_V ("");
