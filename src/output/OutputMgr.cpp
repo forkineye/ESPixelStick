@@ -24,22 +24,12 @@
 #include <Arduino.h>
 #include "../ESPixelStick.h"
 #include "../FileIO.h"
+
+// bring driver definitions
 #include "OutputWS2811.hpp"
 #include "OutputGECE.hpp"
 // needs to be last
 #include "OutputMgr.hpp"
-
-#ifdef usingmap
-#include <map>
-using namespace std;
-/// Map of output modules
-map<const String, c_OutputMgr*>::const_iterator itOutput;
-const map<const String, c_OutputMgr*> OUTPUT_MODES = 
-{
-    { WS2811::KEY, new WS2811 () },
-    { GECE::KEY, new GECE () }
-}
-#endif
 
 ///< Start up the driver and put it into a safe mode
 c_OutputMgr::c_OutputMgr ()
@@ -304,7 +294,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
             break;
         }
 
-        case e_OutputType::OutputType_GenericSerial:
+        case e_OutputType::OutputType_Serial:
         {
             LOG_PORT.println (String (F ("Generic Serial  Not supported Yet. Using WS2811.")));
             pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811 (ChannelIndex);
