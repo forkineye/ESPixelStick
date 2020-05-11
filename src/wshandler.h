@@ -33,7 +33,7 @@ extern config_t     config;     // Current configuration
 //extern uint16_t     uniLast;    // Last Universe to listen for
 extern bool         reboot;     // Reboot flag
 
-extern const char CONFIG_FILE[];
+extern const char ConfigFileName[];
 
 /*
   Packet Commands

@@ -69,12 +69,15 @@ class FileIO {
     /** Saves configuration file via SPIFFS
      * Returns true on success.
      */
-    static boolean saveConfig(const char *filename, String jsonString) {
+    static boolean saveConfig(const char *filename, String jsonString) 
+    {
         boolean retval = false;
-        File file = SPIFFS.open(filename, "w");
-        if (!file) {
-            LOG_PORT.printf("*** Error saving %s ***\n", filename);
-        } else {
+        fs::File file = SPIFFS.open(filename, "w");
+        if (!file) 
+        {
+            LOG_PORT.printf("*** Error saving %s, Could not open file for writing. ***\n", filename);
+        } else 
+        {
             file.println(jsonString);
             LOG_PORT.printf("Configuration file %s saved.\n", filename);
             retval = true;

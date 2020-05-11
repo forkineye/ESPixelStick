@@ -24,7 +24,7 @@
 #include "ESPixelStick.h"
 #include "EFUpdate.h"
 #include "input/_Input.h"
-#include "output/_Output.h"
+#include "output/OutputMgr.hpp"
 
 #ifdef ARDUINO_ARCH_ESP32
 #include <map>
@@ -32,13 +32,9 @@
 
 extern bool     reboot;     ///< Reboot flag
 extern _Input   *input;     ///< Pointer to currently enabled input module
-extern _Output  *output;    ///< Pointer to currently enabled output module
 
 extern const std::map<const String, _Input*>    INPUT_MODES;        ///< Input Modes
-extern const std::map<const String, _Output*>   OUTPUT_MODES;       ///< Output Modes
 extern std::map<const String, _Input*>::const_iterator itInput;     ///< Input iterator
-extern std::map<const String, _Output*>::const_iterator itOutput;   ///< Output iterator
-
 
 /// Contains static methods utilized for processing and working with Web Services
 /** Two web service text message formats are supported.
@@ -122,13 +118,7 @@ class WebIO {
                         itInput->second->load();
                     client->text("{\"get\":" + itInput->second->serialize() + "}");
                 }
-
-                itOutput = OUTPUT_MODES.find(target);
-                if (itOutput != OUTPUT_MODES.end()) {
-                    if (!itOutput->first.equalsIgnoreCase(output->getKey()))
-                        itOutput->second->load();
-                    client->text("{\"get\":" + itOutput->second->serialize() + "}");
-                }
+                // just give the array to the output manager
             }
 
             // Generate select option list data
@@ -146,14 +136,14 @@ class WebIO {
                         data[itInput->first.c_str()] =  itInput->second->getBrief();
                         itInput++;
                     }
-
+#ifdef foo
                     itOutput = OUTPUT_MODES.begin();
                     while (itOutput != OUTPUT_MODES.end()) {
                         JsonObject data = output.createNestedObject();
                         data[itOutput->first.c_str()] =  itOutput->second->getBrief();
                         itOutput++;
                     }
-
+#endif
                     String jsonString;
                     serializeJson(json, jsonString);
                     client->text("{\"opt\":" + jsonString + "}");
@@ -194,7 +184,7 @@ class WebIO {
                             }
                             client->text("{\"set\":" + itInput->second->serialize() + "}");
                         }
-
+#ifdef foo
                         itOutput = OUTPUT_MODES.find(key);
                         if (itOutput != OUTPUT_MODES.end()) {
                             if (itOutput->second->deserialize(doc)) {
@@ -203,10 +193,10 @@ class WebIO {
                             }
                             client->text("{\"set\":" + itOutput->second->serialize() + "}");
                         }
-
                         // Re-init I/O modules if their config changed
                         if (changed)
                             setMode(input, output);
+#endif
                     }
                 }
             }
