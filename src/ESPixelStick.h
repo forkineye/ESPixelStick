@@ -16,7 +16,7 @@
 *  or use of these programs.
 *
 */
-
+#pragma once
 #ifndef ESPIXELSTICK_H_
 #define ESPIXELSTICK_H_
 
@@ -40,7 +40,7 @@ const char BUILD_DATE[] = __DATE__;
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
 #include "input/_Input.h"
-#include "output/_Output.h"
+#include "output/OutputMgr.hpp"
 
 #include "memdebug.h"
 
@@ -66,7 +66,6 @@ typedef struct {
     // Device
     String      id;         ///< Device ID
     String      input;      ///< Device Input Mode, selectable at runtime
-    String      output;     ///< Device Output Mode, selectable at runtime
 
     // Network
     String      ssid;
@@ -84,7 +83,7 @@ typedef struct {
 String serializeCore(boolean pretty = false, boolean creds = false);
 boolean dsDevice(DynamicJsonDocument &json);
 boolean dsNetwork(DynamicJsonDocument &json);
-void setMode(_Input *newinput, _Output *newoutput);
+void setMode(_Input *newinput);
 void saveConfig();
 
 #endif  // ESPIXELSTICK_H_
