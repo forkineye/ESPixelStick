@@ -45,11 +45,7 @@ const char passphrase[] = "martinshomenetwork";
 //#include "src/input/ESPAsyncDDP.h"
 
 // Output modules
-//#include "src/output/OutputMgr.hpp"
-#include "src/output/WS2811.h"
-#include "src/output/GECE.h"
-//#include "src/output/DMX.h"
-//#include "src/output/Renard.h"
+#include "src/output/OutputMgr.hpp"
 
 // Services
 //#include "src/service/MQTT.h"
@@ -105,13 +101,6 @@ const std::map<const String, _Input*> INPUT_MODES = {
     { E131Input::KEY, new E131Input() }
 };
 
-/// Map of output modules
-std::map<const String, _Output*>::const_iterator itOutput;
-const std::map<const String, _Output*> OUTPUT_MODES = {
-    { WS2811::KEY, new WS2811() },
-    { GECE::KEY, new GECE() }
-};
-
 /////////////////////////////////////////////////////////
 //
 //  Globals
@@ -123,7 +112,6 @@ const char CONFIG_FILE[] = "/config.json";
 
 // Input and Output modules
 _Input  *input;     ///< Pointer to currently enabled input module
-_Output *output;    ///< Pointer to currently enabled output module
 
 uint8_t *showBuffer;        ///< Main show buffer
 
@@ -172,7 +160,8 @@ RF_PRE_INIT() {
 
 /// Arduino Setup
 /** Arduino based setup code that is executed at startup. */
-void setup() {
+void setup() 
+{
     // Disable persistant credential storage and configure SDK params
     WiFi.persistent(false);
 #ifdef ARDUINO_ARCH_ESP8266
@@ -183,7 +172,7 @@ void setup() {
     // Setup serial log port
     LOG_PORT.begin(115200);
     delay(10);
-    DEBUG_START;
+    // DEBUG_START;
 #if defined(DEBUG)
     ets_install_putc1((void *) &_u0_putc);
     system_set_os_print(1);
@@ -203,25 +192,19 @@ void setup() {
 #else
     LOG_PORT.println (ESP.getSdkVersion ());
 #endif
-    DEBUG_V ("");
+    // DEBUG_V ("");
+
+    OutputMgr.Begin ();
 
     // Dump supported input modes
     LOG_PORT.println(F("Supported Input modes:"));
     itInput = INPUT_MODES.begin();
-    while (itInput != INPUT_MODES.end()) {
+    while (itInput != INPUT_MODES.end()) 
+    {
         LOG_PORT.printf("- %s : %s\n", itInput->first.c_str(), itInput->second->getBrief());
         itInput++;
     }
-    DEBUG_V ("");
-
-    // Dump supported output modes
-    LOG_PORT.println(F("Supported Output modes:"));
-    itOutput = OUTPUT_MODES.begin();
-    while (itOutput != OUTPUT_MODES.end()) {
-        LOG_PORT.printf("- %s : %s\n", itOutput->first.c_str(), itOutput->second->getBrief());
-        itOutput++;
-    }
-    DEBUG_V ("");
+    // DEBUG_V ("");
 
     // Enable SPIFFS
 #ifdef ARDUINO_ARCH_ESP8266
@@ -231,7 +214,9 @@ void setup() {
 #endif
     {
         LOG_PORT.println(F("*** File system did not initialize correctly ***"));
-    } else {
+    } 
+    else 
+    {
         LOG_PORT.println(F("File system initialized."));
     }
 
@@ -251,23 +236,27 @@ void setup() {
     if (0 != SPIFFS.totalBytes ())
     {
         LOG_PORT.println (String ("Total bytes in file system: ") + String (SPIFFS.usedBytes ()));
-/*
-        fs::File dir = SPIFFS.open ("/");
-        while (dir.openNextFile ())
+
+        fs::File root = SPIFFS.open ("/");
+        fs::File MyFile = root.openNextFile();
+
+        while (MyFile)
         {
-            LOG_PORT.print (String (dir.name ()) + ": /t" + String (dir.size ()));
+            LOG_PORT.println ("'" + String (MyFile.name ()) + "': \t'" + String (MyFile.size ()) + "'");
+            MyFile = MyFile.openNextFile ();
         }
-*/
 #endif // ARDUINO_ARCH_ESP32
 
-    } else {
+    }
+    else 
+    {
         LOG_PORT.println(F("*** Failed to read file system details ***"));
     }
-    DEBUG_V ("");
+    // DEBUG_V ("");
 
     // Load configuration from SPIFFS and set Hostname
     loadConfig();
-    DEBUG_V ("");
+    // DEBUG_V ("");
 
     if (config.hostname)
     {
@@ -277,7 +266,7 @@ void setup() {
     WiFi.setHostname (config.hostname.c_str());
 #endif
     }
-    DEBUG_V ("");
+    // DEBUG_V ("");
 
     // Setup WiFi Handlers
 #ifdef ARDUINO_ARCH_ESP8266
@@ -291,29 +280,33 @@ void setup() {
 
     // Fallback to default SSID and passphrase if we fail to connect
     initWifi();
-    if (WiFi.status() != WL_CONNECTED) {
+    if (WiFi.status() != WL_CONNECTED) 
+    {
         LOG_PORT.println(F("*** Timeout - Reverting to default SSID ***"));
         config.ssid = ssid;
         config.passphrase = passphrase;
         initWifi();
     }
-    DEBUG_V ("");
+    // DEBUG_V ("");
 
     // If we fail again, go SoftAP or reboot
-    if (WiFi.status() != WL_CONNECTED) {
-        if (config.ap_fallback) {
+    if (WiFi.status() != WL_CONNECTED) 
+    {
+        if (config.ap_fallback) 
+        {
             LOG_PORT.println(F("*** FAILED TO ASSOCIATE WITH AP, GOING SOFTAP ***"));
             WiFi.mode(WIFI_AP);
             String ssid = "ESPixelStick " + String(config.hostname);
             WiFi.softAP(ssid.c_str());
             ourLocalIP = WiFi.softAPIP();
             ourSubnetMask = IPAddress(255,255,255,0);
-        } else {
+        } else 
+        {
             LOG_PORT.println(F("*** FAILED TO ASSOCIATE WITH AP, REBOOTING ***"));
             ESP.restart();
         }
     }
-    DEBUG_V ("");
+    // DEBUG_V ("");
 
 #ifdef ARDUINO_ARCH_ESP8266
     wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWiFiDisconnect);
@@ -326,7 +319,8 @@ void setup() {
 
     // Configure and start the web server
     initWeb();
-    DEBUG_END;
+
+    // DEBUG_END;
 }
 
 /////////////////////////////////////////////////////////
@@ -335,7 +329,8 @@ void setup() {
 //
 /////////////////////////////////////////////////////////
 
-void initWifi() {
+void initWifi() 
+{
     // Switch to station mode and disconnect just in case
     WiFi.mode(WIFI_STA);
 #ifdef ARDUINO_ARCH_ESP8266
@@ -347,10 +342,12 @@ void initWifi() {
 
     connectWifi();
     uint32_t timeout = millis();
-    while (WiFi.status() != WL_CONNECTED) {
+    while (WiFi.status() != WL_CONNECTED) 
+    {
         LOG_PORT.print(".");
         delay(500);
-        if (millis() - timeout > (1000 * config.sta_timeout) ){
+        if (millis() - timeout > (1000 * config.sta_timeout) )
+        {
             LOG_PORT.println("");
             LOG_PORT.println(F("*** Failed to connect ***"));
             break;
@@ -358,7 +355,8 @@ void initWifi() {
     }
 }
 
-void connectWifi() {
+void connectWifi() 
+{
 #ifdef ARDUINO_ARCH_ESP8266
     delay(secureRandom(100, 500));
 #else
@@ -371,26 +369,34 @@ void connectWifi() {
     LOG_PORT.println(config.hostname);
 
     WiFi.begin(config.ssid.c_str(), config.passphrase.c_str());
-    if (config.dhcp) {
+    if (config.dhcp) 
+    {
         LOG_PORT.print(F("Connecting with DHCP"));
-    } else {
+    } 
+    else 
+    {
         // We don't use DNS, so just set it to our gateway
-        if (!config.ip.isEmpty()) {
+        if (!config.ip.isEmpty()) 
+        {
             IPAddress ip = ip.fromString(config.ip);
             IPAddress gateway = gateway.fromString(config.gateway);
             IPAddress netmask = netmask.fromString(config.netmask);
             WiFi.config(ip, gateway, netmask, gateway);
             LOG_PORT.print(F("Connecting with Static IP"));
-        } else {
+        }
+        else
+        {
             LOG_PORT.println(F("** ERROR - STATIC SELECTED WITHOUT IP **"));
         }
     }
 }
 
 #ifdef ARDUINO_ARCH_ESP8266
-void onWiFiConnect(const WiFiEventStationModeGotIP &event) {
+void onWiFiConnect(const WiFiEventStationModeGotIP &event) 
+{
 #else
-void onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t info) {
+void onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t info) 
+{
 #endif
     ourLocalIP = WiFi.localIP();
     ourSubnetMask = WiFi.subnetMask();
@@ -427,9 +433,11 @@ void onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t info) {
 /// WiFi Disconnect Handler
 #ifdef ARDUINO_ARCH_ESP8266
 /** Attempt to re-connect every 2 seconds */
-void onWiFiDisconnect(const WiFiEventStationModeDisconnected &event) {
+void onWiFiDisconnect(const WiFiEventStationModeDisconnected &event) 
+{
 #else
-static void onWiFiDisconnect (const WiFiEvent_t event, const WiFiEventInfo_t info) {
+static void onWiFiDisconnect (const WiFiEvent_t event, const WiFiEventInfo_t info) 
+{
 #endif
     LOG_PORT.println(F("*** WiFi Disconnected ***"));
     wifiTicker.once(2, connectWifi);
@@ -442,8 +450,9 @@ static void onWiFiDisconnect (const WiFiEvent_t event, const WiFiEventInfo_t inf
 /////////////////////////////////////////////////////////
 
 // Configure and start the web server
-void initWeb() {
-    DEBUG_START;
+void initWeb()
+{
+    // DEBUG_START;
     // Add header for SVG plot support?
     DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
 
@@ -452,17 +461,20 @@ void initWeb() {
     web.addHandler(&ws);
 
     // Heap status handler
-    web.on("/heap", HTTP_GET, [](AsyncWebServerRequest *request) {
+    web.on("/heap", HTTP_GET, [](AsyncWebServerRequest *request)
+    {
         request->send(200, "text/plain", String(ESP.getFreeHeap()));
     });
 
     // JSON Config Handler
-    web.on("/conf", HTTP_GET, [](AsyncWebServerRequest *request) {
+    web.on("/conf", HTTP_GET, [](AsyncWebServerRequest *request) 
+    {
         request->send(200, "text/json", serializeCore(true));
     });
 
     // Firmware upload handler - only in station mode
-    web.on("/updatefw", HTTP_POST, [](AsyncWebServerRequest *request) {
+    web.on("/updatefw", HTTP_POST, [](AsyncWebServerRequest *request) 
+    {
         ws.textAll("X6");
     }, WebIO::onFirmwareUpload).setFilter(ON_STA_FILTER);
 
@@ -475,7 +487,8 @@ void initWeb() {
     // Raw config file Handler - but only on station
 //  web.serveStatic("/config.json", SPIFFS, "/config.json").setFilter(ON_STA_FILTER);
 
-    web.onNotFound([](AsyncWebServerRequest *request) {
+    web.onNotFound([](AsyncWebServerRequest *request) 
+    {
         request->send(404, "text/plain", "Page not found");
     });
 
@@ -489,7 +502,7 @@ void initWeb() {
 
     LOG_PORT.print(F("- Web Server started on port "));
     LOG_PORT.println(HTTP_PORT);
-    DEBUG_END;
+    // DEBUG_END;
 }
 
 /////////////////////////////////////////////////////////
@@ -501,50 +514,33 @@ void initWeb() {
 /// Set input / output modes
 /** Cleans up i/o modules as needed and re-initializes showBuffer.
  */
-void setMode(_Input *newinput, _Output *newoutput) {
-    DEBUG_START;
-    if (newoutput != nullptr) {
-        output->destroy();
-        output = newoutput;
-        output->init();
-    }
-    DEBUG_V ("");
+void setMode(_Input *newinput) 
+{
+    // DEBUG_START;
 
-    if (newinput != nullptr) {
+    if (newinput != nullptr) 
+    {
         input->destroy();
         input = newinput;
     }
-    DEBUG_V ("");
+    // DEBUG_V ("");
 
-    // showBuffer only needs to change if there's an output mode change
-    if (newoutput != nullptr) {
-        uint16_t szBuffer = output->getTupleCount() * output->getTupleSize();
-        if (showBuffer) free (showBuffer);
-        if (showBuffer = static_cast<uint8_t *>(malloc(szBuffer)))
-            memset(showBuffer, 0, szBuffer);
-        DEBUG_V ("");
-
-        output->setBuffer(showBuffer);
-
-        input->setBuffer(showBuffer, szBuffer);
-    }
-    DEBUG_V ("");
+//        input->setBuffer(showBuffer, szBuffer);
 
     // Can't init input until showBuffer is setup
     if (newinput != nullptr)
-        input->init();
-    DEBUG_V ("");
+    {
+        input->init ();
+    }
 
-    // Render an output frame
-    output->render();
-
-    DEBUG_END;
+    // DEBUG_END;
 }
 
 /// Configuration Validations
 /** Validates the config_t (core) configuration structure and forces defaults for invalid entries */
-void validateConfig() {
-    DEBUG_START;
+void validateConfig() 
+{
+    // DEBUG_START;
 
 #ifdef ARDUINO_ARCH_ESP8266
     String chipId = String (ESP.getChipId (), HEX);
@@ -567,7 +563,7 @@ void validateConfig() {
 
     if (config.ap_timeout < 15)
         config.ap_timeout = AP_TIMEOUT;
-    DEBUG_V ("");
+    // DEBUG_V ("");
 
 //TODO: Update this to set to ws2811 and e131 if no config found
     itInput = INPUT_MODES.find(config.input);
@@ -581,33 +577,21 @@ void validateConfig() {
         config.input = itInput->first;
         input = itInput->second;
     }
-    DEBUG_V ("");
-
-    itOutput = OUTPUT_MODES.find(config.output);
-    if (itOutput != OUTPUT_MODES.end()) {
-        output = itOutput->second;
-        LOG_PORT.printf("- Output mode set to %s\n", output->getKey());
-    } else {
-        itOutput = OUTPUT_MODES.begin();
-        LOG_PORT.printf("* Input mode from core config invalid, setting to %s.\n",
-                itOutput->first.c_str());
-        config.output = itOutput->first;
-        output = itOutput->second;
-    }
-    DEBUG_V ("");
+    // DEBUG_V ("");
 
     // Set I/O modes
-    setMode(input, output);
-    DEBUG_END;
+    setMode(input);
+    // DEBUG_END;
 }
 
 /// Deserialize device confiugration JSON to config structure - returns true if config change detected
-boolean dsDevice(DynamicJsonDocument &json) {
+boolean dsDevice(DynamicJsonDocument &json) 
+{
     boolean retval = false;
     if (json.containsKey("device")) {
-        retval = retval | FileIO::setFromJSON(config.id, json["device"]["id"]);
-        retval = retval | FileIO::setFromJSON(config.input, json["device"]["input"]);
-        retval = retval | FileIO::setFromJSON(config.output, json["device"]["output"]);
+        retval = retval | FileIO::setFromJSON(config.id,     json["device"]["id"]);
+        retval = retval | FileIO::setFromJSON(config.input,  json["device"]["input"]);
+        // todo retval = retval | FileIO::setFromJSON(config.output, json["device"]["output"]);
     } else {
         LOG_PORT.println("No device settings found.");
     }
@@ -637,7 +621,8 @@ boolean dsNetwork(DynamicJsonDocument &json) {
     return retval;
 }
 
-void deserializeCore(DynamicJsonDocument &json) {
+void deserializeCore(DynamicJsonDocument &json) 
+{
     dsDevice(json);
     dsNetwork(json);
 }
@@ -646,23 +631,31 @@ void deserializeCore(DynamicJsonDocument &json) {
 /** Loads and validates the JSON configuration file via SPIFFS.
  *  If no configuration file is found, a new one will be created.
  */
-void loadConfig() {
-    DEBUG_START;
+void loadConfig() 
+{
+    // DEBUG_START;
 
     // Zeroize Config struct
     memset(&config, 0, sizeof(config));
 
-    if (FileIO::loadConfig(CONFIG_FILE, &deserializeCore)) {
-        DEBUG_V ("");
+    if (FileIO::loadConfig(CONFIG_FILE, &deserializeCore)) 
+    {
+        // DEBUG_V ("");
 
         validateConfig();
-    } else {
+    } 
+    else
+    {
         // Load failed, create a new config file and save it
-        DEBUG_V ("");
+        // DEBUG_V ("");
 
         saveConfig();
     }
-    DEBUG_END;
+
+    // cause the config for the output channels to get reloaded
+    OutputMgr.LoadConfig ();
+
+    // DEBUG_END;
 
     //TODO: Add auxiliary service load routine
 }
@@ -677,7 +670,7 @@ String serializeCore(boolean pretty, boolean creds) {
     JsonObject device = json.createNestedObject("device");
     device["id"] = config.id.c_str();
     device["input"] = config.input.c_str();
-    device["output"] = config.output.c_str();
+    // todo device["output"] = config.output.c_str();
 
     // Network
     JsonObject network = json.createNestedObject("network");
@@ -704,12 +697,16 @@ String serializeCore(boolean pretty, boolean creds) {
 }
 
 // Save configuration JSON file
-void saveConfig() {
+void saveConfig() 
+{
     // Validate Config
     validateConfig();
 
     // Save Config
     FileIO::saveConfig(CONFIG_FILE, serializeCore(false, true));
+
+    // save the config for the output channels
+    OutputMgr.SaveConfig ();
 }
 
 /////////////////////////////////////////////////////////
@@ -730,7 +727,7 @@ void loop() {
     input->process();
 
     // Render output
-    output->render();
+    OutputMgr.Render();
 
 //TODO: Research this further
 // workaround crash - consume incoming bytes on serial port
