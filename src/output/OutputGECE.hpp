@@ -27,14 +27,15 @@
 class c_OutputGECE: public c_OutputCommon
 {
 public:
-    c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId);
+    c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
+                  gpio_num_t outputGpio, uart_port_t uart);
     virtual ~c_OutputGECE ();
 
     // functions to be provided by the derived class
-    void      begin ();                                         ///< set up the operating environment based on the current config (or defaults)
+    void      Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
     bool      SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
     void      GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-    void      render ();                                        ///< Call from loop(),  renders output data
+    void      Render ();                                        ///< Call from loop(),  renders output data
     void      GetDriverName (String& sDriverName) { sDriverName = String (F ("GECE")); }
     c_OutputMgr::e_OutputType GetOutputType () { return c_OutputMgr::e_OutputType::OutputType_GECE; } ///< Have the instance report its type.
 
@@ -50,8 +51,6 @@ private:
 
     // JSON configuration parameters
     uint8_t         pixel_count = 0;
-    gpio_num_t      dataPin     = gpio_num_t::GPIO_NUM_2;
-    uart_port_t     UartId      = uart_port_t::UART_NUM_1;
     uint8_t         brightness  = 0;
 
     // Internal variables

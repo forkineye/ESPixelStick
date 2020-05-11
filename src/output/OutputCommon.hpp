@@ -23,21 +23,27 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
+
+#ifdef ARDUINO_ARCH_ESP32
+#   include <driver/uart.h>
+#endif
+
 #include "OutputMgr.hpp"
 
 class c_OutputCommon
 {
 public:
-    c_OutputCommon (c_OutputMgr::e_OutputChannelIds OutputChannelId);
+    c_OutputCommon (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
+                    gpio_num_t outputGpio, uart_port_t uart);
     virtual ~c_OutputCommon ();
 
     // functions to be provided by the derived class
-    virtual void         begin () = 0;                                         ///< set up the operating environment based on the current config (or defaults)
+    virtual void         Begin () = 0;                                         ///< set up the operating environment based on the current config (or defaults)
     virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig) = 0; ///< Set a new config in the driver
     virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig) = 0; ///< Get the current config used by the driver
             uint8_t    * GetBufferAddress () {return InputDataBuffer;}         ///< Get the address of the buffer into which the E1.31 handler will stuff data
             uint16_t     GetBufferSize () {return sizeof (InputDataBuffer);}   ///< Get the address of the buffer into which the E1.31 handler will stuff data
-    virtual void         render () = 0;                                        ///< Call from loop(),  renders output data
+    virtual void         Render () = 0;                                        ///< Call from loop(),  renders output data
     virtual void         GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
     virtual c_OutputMgr::e_OutputType GetOutputType () = 0;                    ///< Have the instance report its type.
     c_OutputMgr::e_OutputChannelIds GetOuputChannelId () { return OutputChannelId; } ///< return the output channel number
@@ -47,8 +53,11 @@ protected:
 #define WS2812_NUM_INTENSITY_BYTES_PER_PIXEL   3
 #define INPUT_BUFFER_SIZE                      (MAX_NUM_PIXELS * WS2812_NUM_INTENSITY_BYTES_PER_PIXEL)
     
+    gpio_num_t  DataPin;     ///< Output pin to use for this driver
+    uart_port_t UartId;      ///< Id of the UART used by this instance of the driver
+    c_OutputMgr::e_OutputChannelIds OutputChannelId;
+
 private:
     uint8_t InputDataBuffer[INPUT_BUFFER_SIZE];
-    c_OutputMgr::e_OutputChannelIds OutputChannelId;
 
 }; // c_OutputCommon

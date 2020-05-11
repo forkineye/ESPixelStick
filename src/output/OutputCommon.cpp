@@ -24,13 +24,18 @@
 
 //-------------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
-c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds iOutputChannelId)
+c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds iOutputChannelId, 
+	                            gpio_num_t outputGpio, 
+	                            uart_port_t uart)
 {
 	// remember what channel we are
 	OutputChannelId = iOutputChannelId;
-
+	DataPin = outputGpio;
+	UartId  = uart;
+	 
 	// clear the input data buffer
 	memset ((char*)&InputDataBuffer[0], 0, sizeof (InputDataBuffer));
+
 } // c_OutputMgr
 
 //-------------------------------------------------------------------------------

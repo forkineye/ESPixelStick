@@ -82,8 +82,8 @@ static void ICACHE_RAM_ATTR handleWS2811_ISR (void* param);
 /*
 */
 //----------------------------------------------------------------------------
-c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId) : 
-    c_OutputCommon(OutputChannelId),
+c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId, gpio_num_t outputGpio, uart_port_t uart) :
+    c_OutputCommon(OutputChannelId, outputGpio, uart),
     color_order ("rgb"),
     pixel_count (0),
     zig_size (0),
@@ -99,64 +99,39 @@ c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId)
     gOffset (1),
     bOffset (2)
 {
-    // determine uart to use based on channel id
-    switch (OutputChannelId)
-    {
-        case c_OutputMgr::e_OutputChannelIds::OutputChannelId_1:
-        {
-            dataPin = gpio_num_t::GPIO_NUM_2;
-            UartId  = uart_port_t::UART_NUM_1;
-            break;
-        }
-#ifdef ARDUINO_ARCH_ESP32
-        case c_OutputMgr::e_OutputChannelIds::OutputChannelId_2:
-        {
-            dataPin = gpio_num_t::GPIO_NUM_13;
-            UartId  = uart_port_t::UART_NUM_2;
-            break;
-        }
-#endif // def ARCUINO_ARCH_32
-
-        default:
-        {
-            dataPin = gpio_num_t(-1);
-            LOG_PORT.println (String(F("EEEEEE ERROR: Port '")) + int (OutputChannelId) + String(F("' is not a valid WS2811 port. EEEEEE")));
-            break;
-        }
-    }
+    DEBUG_START;
+    DEBUG_END;
 } // c_OutputWS2811
 
 //----------------------------------------------------------------------------
 c_OutputWS2811::~c_OutputWS2811()
 {
-    if (gpio_num_t (-1) == dataPin) { return; }
+    DEBUG_START;
+    if (gpio_num_t (-1) == DataPin) { return; }
 
 #ifdef ARDUINO_ARCH_ESP8266
     Serial1.end ();
 #else
     uart_driver_delete (UartId);
-    ESP_ERROR_CHECK (uart_driver_install (UartId, 
-                                          UART_FIFO_LEN + 1024, 
-                                          UART_FIFO_LEN + 1024, 0, NULL, 0));
-
 #endif
 
-    pinMode (dataPin, INPUT);
-
+    pinMode (DataPin, INPUT);
+    DEBUG_END;
 } // ~c_OutputWS2811
 
 //----------------------------------------------------------------------------
 // Use the current config to set up the output port
-void c_OutputWS2811::begin()
+void c_OutputWS2811::Begin()
 {
-    Serial.println (F ("** WS2811 Initialization **"));
+    DEBUG_START;
+    Serial.println (String (F ("** WS281x Initialization for Chan: ")) + String (OutputChannelId) + " **");
 
     // are we using a valid config?
-    if (gpio_num_t (-1) == dataPin) { return; }
+    if (gpio_num_t (-1) == DataPin) { return; }
 
     // Set output pins
-    pinMode(dataPin, OUTPUT);
-    digitalWrite(dataPin, LOW);
+    pinMode(DataPin, OUTPUT);
+    digitalWrite(DataPin, LOW);
 
     // Setup Output Buffer
     szBuffer = pixel_count * WS2812_NUM_INTENSITY_BYTES_PER_PIXEL;
@@ -196,7 +171,6 @@ void c_OutputWS2811::begin()
 
 #elif defined (ARDUINO_ARCH_ESP32)
 
-    DEBUG_START;
     // In the ESP32 you need to be careful which CPU is being configured 
     // to handle interrupts. These API functions are supposed to handle this 
     // selection.
@@ -219,7 +193,7 @@ void c_OutputWS2811::begin()
     // Must be at least one byte larger than the fifo size
     ESP_ERROR_CHECK (uart_driver_install   (UartId, UART_FIFO_LEN+1, 0, 0, NULL, 0));
     ESP_ERROR_CHECK (uart_param_config     (UartId, &uart_config));
-    ESP_ERROR_CHECK (uart_set_pin          (UartId, dataPin, PIXEL_RXD, PIXEL_RTS, PIXEL_CTS));
+    ESP_ERROR_CHECK (uart_set_pin          (UartId, DataPin, PIXEL_RXD, PIXEL_RTS, PIXEL_CTS));
     ESP_ERROR_CHECK (uart_set_line_inverse (UartId, UART_INVERSE_TXD));
     ESP_ERROR_CHECK (uart_set_mode         (UartId, uart_mode_t::UART_MODE_UART));
 
@@ -246,6 +220,7 @@ void c_OutputWS2811::begin()
 */
 bool c_OutputWS2811::validate()
 {
+    DEBUG_START;
     bool response = true;
 
     if (pixel_count > WS2812_PIXEL_LIMIT)
@@ -300,6 +275,7 @@ bool c_OutputWS2811::validate()
     updateGammaTable();
     updateColorOrder();
 
+    DEBUG_END;
     return response;
 
 } // validate
@@ -315,6 +291,7 @@ bool c_OutputWS2811::validate()
 */
 bool c_OutputWS2811::SetConfig(ArduinoJson::JsonObject & jsonConfig)
 {
+    DEBUG_START;
     uint temp;
     FileIO::setFromJSON(color_order, jsonConfig["color_order"]);
     FileIO::setFromJSON(pixel_count, jsonConfig["pixel_count"]);
@@ -323,10 +300,11 @@ bool c_OutputWS2811::SetConfig(ArduinoJson::JsonObject & jsonConfig)
     FileIO::setFromJSON(gamma,       jsonConfig["gamma"]);
     FileIO::setFromJSON(brightness,  jsonConfig["brightness"]);
     // enums need to be converted to uints for json
-    temp = uint (dataPin);
+    temp = uint (DataPin);
     FileIO::setFromJSON(temp,        jsonConfig["data_pin"]);
-    dataPin = gpio_num_t (temp);
+    DataPin = gpio_num_t (temp);
 
+    DEBUG_END;
     return validate ();
 
 } // SetConfig
@@ -334,8 +312,7 @@ bool c_OutputWS2811::SetConfig(ArduinoJson::JsonObject & jsonConfig)
 //----------------------------------------------------------------------------
 void c_OutputWS2811::GetConfig(ArduinoJson::JsonObject & jsonConfig)
 {
-    String DriverName = ""; GetDriverName (DriverName);
-    jsonConfig["type"]        = DriverName;
+    DEBUG_START;
     jsonConfig["color_order"] = color_order;
     jsonConfig["pixel_count"] = pixel_count;
     jsonConfig["group_size"]  = group_size;
@@ -343,12 +320,13 @@ void c_OutputWS2811::GetConfig(ArduinoJson::JsonObject & jsonConfig)
     jsonConfig["gamma"]       = gamma;
     jsonConfig["brightness"]  = brightness;
     // enums need to be converted to uints for json
-    jsonConfig["data_pin"]    = uint (dataPin);
-
+    jsonConfig["data_pin"]    = uint (DataPin);
+    DEBUG_END;
 } // GetConfig
 
 void c_OutputWS2811::updateColorOrder() 
 {
+    DEBUG_START;
     // make sure the color order is all lower case
     color_order.toLowerCase ();
 
@@ -363,6 +341,7 @@ void c_OutputWS2811::updateColorOrder()
         rOffset = 0; gOffset = 1; bOffset = 2;
     } // default
 
+    DEBUG_END;
 } // updateColorOrder
 
 // shell function to set the 'this' pointer of the real ISR
@@ -424,17 +403,19 @@ void ICACHE_RAM_ATTR c_OutputWS2811::_handleWS2811()
 
 void c_OutputWS2811::updateGammaTable()
 {
-    for (int i = 0; i < 256; i++) 
+    DEBUG_START;
+    for (int i = 0; i < 256; i++)
     {
         gamma_table[i] = (uint8_t) min((255.0 * pow(i * brightness / 255.0, gamma) + 0.5), 255.0);
     }
+    DEBUG_END;
 } // updateGammaTable
 
-void c_OutputWS2811::render()
+void c_OutputWS2811::Render()
 {
     DEBUG_START;
 
-    if (gpio_num_t (-1) == dataPin) { return; }
+    if (gpio_num_t (-1) == DataPin) { return; }
     if (!canRefresh())  return;
 
     DEBUG_V ("");

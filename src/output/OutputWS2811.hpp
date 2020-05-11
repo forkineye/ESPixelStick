@@ -24,7 +24,7 @@
 
 #include "OutputCommon.hpp"
 
-#define UART_INV_MASK  (0x3f << 19)
+// #define UART_INV_MASK  (0x3f << 19)
 #ifdef ARDUINO_ARCH_ESP32
 #   include <driver/uart.h>
 #endif
@@ -33,14 +33,14 @@ class c_OutputWS2811 : public c_OutputCommon
 {
 public:
     // These functions are inherited from c_OutputCommon
-    c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId);
+    c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId, gpio_num_t outputGpio, uart_port_t uart);
     virtual ~c_OutputWS2811 ();
 
     // functions to be provided by the derived class
-    void         begin ();                                         ///< set up the operating environment based on the current config (or defaults)
+    void         Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
     bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
     void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-    void         render ();                                        ///< Call from loop(),  renders output data
+    void         Render ();                                        ///< Call from loop(),  renders output data
     void         GetDriverName (String & sDriverName) { sDriverName = String (F ("WS2811")); }
     c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_WS2811;} ///< Have the instance report its type.
 
@@ -60,8 +60,6 @@ private:
     uint16_t    group_size;  ///< Group size - 1 = no grouping
     float       gamma;       ///< gamma value to use
     float       brightness;  ///< brightness to use
-    gpio_num_t  dataPin;     ///< Output pin to use for this driver
-    uart_port_t UartId;      ///< Id of the UART used by this instance of the driver
 
     // Internal variables
     uint8_t     OutputBuffer[WS2812_OUTPUT_BUFF_SIZE+1]; ///< Data ready to be sent to the UART

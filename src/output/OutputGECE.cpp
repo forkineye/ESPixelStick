@@ -97,9 +97,10 @@ static char LOOKUP_GECE[] =
 
 #define CYCLES_GECE_START   (F_CPU / 100000) // 10us
 
-c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId) :
-    c_OutputCommon (OutputChannelId)
+c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId, gpio_num_t outputGpio, uart_port_t uart) :
+    c_OutputCommon (OutputChannelId, outputGpio, uart)
 {
+    DEBUG_START;
     brightness = GECE_DEFAULT_BRIGHTNESS;
 
     // determine uart to use based on channel id
@@ -107,16 +108,12 @@ c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId) :
     {
         case c_OutputMgr::e_OutputChannelIds::OutputChannelId_1:
         {
-            dataPin = gpio_num_t::GPIO_NUM_2;
-            UartId = uart_port_t::UART_NUM_1;
             pSerialInterface = &Serial1;
             break;
         }
 #ifdef ARDUINO_ARCH_ESP32
         case c_OutputMgr::e_OutputChannelIds::OutputChannelId_2:
         {
-            dataPin = gpio_num_t::GPIO_NUM_13;
-            UartId = uart_port_t::UART_NUM_2;
             pSerialInterface = &Serial2;
             break;
         }
@@ -124,38 +121,41 @@ c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId) :
 
         default:
         {
-            dataPin = gpio_num_t (-1);
             LOG_PORT.println (String (F ("EEEEEE ERROR: Port '")) + int (OutputChannelId) + String (F ("' is not a valid GECE port. EEEEEE")));
             break;
         }
 
     } // end switch on channel ID
+    DEBUG_END;
 } // c_OutputGECE
 
 c_OutputGECE::~c_OutputGECE () 
 {
-    if (gpio_num_t (-1) == dataPin) { return; }
+    DEBUG_START;
+    if (gpio_num_t (-1) == DataPin) { return; }
 
     // shut down the interface
     pSerialInterface->end ();
 
     // put the pin into a safe state
-    pinMode (dataPin, INPUT);
+    pinMode (DataPin, INPUT);
 
+    DEBUG_END;
 } // ~c_OutputGECE
 
-void c_OutputGECE::begin() 
+void c_OutputGECE::Begin() 
 {
-    if (gpio_num_t (-1) == dataPin) { return; }
+    DEBUG_START;
+    Serial.println (String (F ("** GECE Initialization for Chan: ")) + String (OutputChannelId) + " **");
 
-    Serial.println(F("** GECE Initialization **"));
+    if (gpio_num_t (-1) == DataPin) { return; }
 
     // first make sure the interface is off
     pSerialInterface->end ();
 
     // Set output pins
-    pinMode(dataPin, OUTPUT);
-    digitalWrite(dataPin, LOW);
+    pinMode(DataPin, OUTPUT);
+    digitalWrite(DataPin, LOW);
 
     refreshTime = (GECE_FRAME_TIME + GECE_IDLE_TIME) * pixel_count;
 
@@ -167,6 +167,7 @@ void c_OutputGECE::begin()
 #endif
     SET_PERI_REG_MASK(UART_CONF0(UartId), UART_TXD_BRK);
     delayMicroseconds(GECE_IDLE_TIME);
+    DEBUG_END;
 } // begin
 
 //----------------------------------------------------------------------------
@@ -180,14 +181,17 @@ void c_OutputGECE::begin()
 */
 bool c_OutputGECE::SetConfig(ArduinoJson::JsonObject & jsonConfig)
 {
+    DEBUG_START;
+
     uint temp;
     FileIO::setFromJSON(pixel_count, jsonConfig["pixel_count"]);
     FileIO::setFromJSON(brightness,  jsonConfig["brightness"]);
     // enums need to be converted to uints for json
-    temp = uint (dataPin);
+    temp = uint (DataPin);
     FileIO::setFromJSON(temp,        jsonConfig["data_pin"]);
-    dataPin = gpio_num_t (temp);
+    DataPin = gpio_num_t (temp);
 
+    DEBUG_END;
     return validate ();
 
 } // SetConfig
@@ -195,6 +199,7 @@ bool c_OutputGECE::SetConfig(ArduinoJson::JsonObject & jsonConfig)
 //----------------------------------------------------------------------------
 void c_OutputGECE::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
+    DEBUG_START;
     String DriverName = ""; GetDriverName (DriverName);
 
     jsonConfig["type"]        = DriverName;
@@ -202,13 +207,16 @@ void c_OutputGECE::GetConfig (ArduinoJson::JsonObject& jsonConfig)
     jsonConfig["brightness"]  = brightness;
 
     // enums need to be converted to uints for json
-    jsonConfig["data_pin"]    = uint (dataPin);
+    jsonConfig["data_pin"]    = uint (DataPin);
 
+    DEBUG_END;
 } // GetConfig
 
 //----------------------------------------------------------------------------
 bool c_OutputGECE::validate ()
 {
+    DEBUG_START;
+
     bool response = true;
 
     if (pixel_count > GECE_PIXEL_LIMIT)
@@ -222,13 +230,15 @@ bool c_OutputGECE::validate ()
         response = false;
     }
 
+    DEBUG_END;
     return response;
 
 } // validate
 
-void c_OutputGECE::render() 
+void c_OutputGECE::Render() 
 {
-    if (gpio_num_t (-1) == dataPin) { return; }
+    DEBUG_START;
+    if (gpio_num_t (-1) == DataPin) { return; }
     if (!canRefresh()) return;
 
     uint32_t packet = 0;
@@ -268,4 +278,5 @@ void c_OutputGECE::render()
         SET_PERI_REG_MASK(UART_CONF0(UartId), UART_TXD_BRK);
 
     } // for each intensity to send
+    DEBUG_END;
 } // render

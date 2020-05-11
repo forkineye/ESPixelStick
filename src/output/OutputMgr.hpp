@@ -36,9 +36,11 @@ public:
     c_OutputMgr ();
     virtual ~c_OutputMgr ();
 
-    void      begin ();                                     ///< set up the operating environment based on the current config (or defaults)
-    bool      SetConfig (DynamicJsonDocument & jsonConfig); ///< Set a new config in the driver
-    void      GetConfig (String& sConfig, bool pretty);     ///< Get the current config used by the driver
+    void    Begin ();                                     ///< set up the operating environment based on the current config (or defaults)
+    void    LoadConfig ();                                ///< Read the current configuration data from nvram
+    void    SaveConfig ();                                ///< Save the current configuration data to nvram
+    void    GetConfig (DynamicJsonDocument & jsonConfig); ///< Get the current config used by the driver
+    bool    SetConfig (DynamicJsonDocument & jsonConfig); ///< Set a new config in the driver
 
     // handles to determine which output channel we are dealing with
     enum e_OutputChannelIds
@@ -54,7 +56,7 @@ public:
 
     uint8_t * GetBufferAddress (e_OutputChannelIds ChannelId = OutputChannelId_1); ///< Get the address of the buffer into which the E1.31 handler will stuff data
     uint16_t  GetBufferSize    (e_OutputChannelIds ChannelId = OutputChannelId_1); ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
-    void      render ();                                                           ///< Call from loop(),  renders output data
+    void      Render ();                                                           ///< Call from loop(),  renders output data
 
     enum e_OutputType
     {
@@ -64,13 +66,14 @@ public:
         OutputType_Renard,
         OutputType_DMX,
 #ifdef ARDUINO_ARCH_ESP8266
-        OutputType_Start = WS2811,
-        OutputType_End   = DMX,
+        OutputType_End   = OutputType_DMX,
+        OutputType_Disabled, // must be last
 #else
         OutputType_SPI,
-        OutputType_Start = OutputType_WS2811,
-        OutputType_End   = OutputType_SPI,
+        OutputType_Disabled, // must be last
+        OutputType_End   = OutputType_Disabled,
 #endif // def ARDUINO_ARCH_ESP32
+        OutputType_Start = OutputType_WS2811,
     };
 
 private:
@@ -80,12 +83,11 @@ private:
     c_OutputCommon * pOutputChannelDrivers[e_OutputChannelIds::OutputChannelId_End]; ///< pointer(s) to the current active output driver
 
     // configuration parameter names for the channel manager within the config file
-#   define OM_SECTION_NAME         F("cm_config")
-#   define OM_CHANNEL_SECTION_NAME F("cm_channels")
-#   define OM_CHANNEL_TYPE_NAME    F("cm_channel_type")
-#   define OM_CHANNEL_DATA_NAME    F("cm_channel_data")
+#   define OM_SECTION_NAME         F("om_config")
+#   define OM_CHANNEL_SECTION_NAME F("om_channels")
+#   define OM_CHANNEL_TYPE_NAME    F("om_channel_type")
+#   define OM_CHANNEL_DATA_NAME    F("om_channel_data")
 
-    void LoadConfig ();
     bool DeserializeConfig (DynamicJsonDocument & jsonConfig);
     void SerializeConfig   (DynamicJsonDocument & jsonConfig);
 
@@ -93,3 +95,4 @@ protected:
 
 }; // c_OutputMgr
 
+extern c_OutputMgr OutputMgr;
