@@ -56,6 +56,7 @@ protected:
     gpio_num_t  DataPin;     ///< Output pin to use for this driver
     uart_port_t UartId;      ///< Id of the UART used by this instance of the driver
     c_OutputMgr::e_OutputChannelIds OutputChannelId;
+    bool        HasBeenInitialized = false;
 
 private:
     uint8_t InputDataBuffer[INPUT_BUFFER_SIZE];

@@ -29,9 +29,10 @@ c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds iOutputChannelId
 	                            uart_port_t uart)
 {
 	// remember what channel we are
-	OutputChannelId = iOutputChannelId;
-	DataPin = outputGpio;
-	UartId  = uart;
+	HasBeenInitialized = false;
+	OutputChannelId    = iOutputChannelId;
+	DataPin            = outputGpio;
+	UartId             = uart;
 	 
 	// clear the input data buffer
 	memset ((char*)&InputDataBuffer[0], 0, sizeof (InputDataBuffer));

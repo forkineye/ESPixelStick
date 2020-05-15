@@ -33,11 +33,8 @@ extern "C" {
 #include <uart.h>
 #include <uart_register.h>
 #else
-#   include <esp32-hal-uart.h>
-#   include <soc/soc.h>
-#   include <soc/uart_reg.h>
-#   include <rom/ets_sys.h>
-#   include <driver/uart.h>
+#include "driver/uart.h"
+#include "driver/gpio.h"
 
 // Define ESP8266 style macro conversions to limit changes in the rest of the code.
 #   define UART_CONF0           UART_CONF0_REG
@@ -45,11 +42,7 @@ extern "C" {
 #   define UART_INT_ENA         UART_INT_ENA_REG
 #   define UART_INT_CLR         UART_INT_CLR_REG
 #   define UART_INT_ST          UART_INT_ST_REG
-#   define UART0                uart_port_t::UART_NUM_0
 #   define UART_TX_FIFO_SIZE    UART_FIFO_LEN
-#   define PIXEL_RXD            (UART_PIN_NO_CHANGE)
-#   define PIXEL_RTS            (UART_PIN_NO_CHANGE)
-#   define PIXEL_CTS            (UART_PIN_NO_CHANGE)
 #   define WS2811_DATA_SPEED    (800000)
 
     // Depricated: Set TX FIFO trigger. 80 bytes gives 200 microsecs to refill the FIFO
@@ -60,6 +53,15 @@ extern "C" {
 // static uart_intr_config_t IsrConfig;
 #endif
 }
+
+#ifndef UART_INTR_MASK
+#define UART_INTR_MASK 0x1ff
+#endif
+
+//#define PIXEL_TXD  (GPIO_NUM_13)
+#define PIXEL_RXD  (UART_PIN_NO_CHANGE)
+#define PIXEL_RTS  (UART_PIN_NO_CHANGE)
+#define PIXEL_CTS  (UART_PIN_NO_CHANGE)
 
 #define WS2811_TIME_PER_PIXEL   30L     ///< 30us frame time
 #define WS2811_MIN_IDLE_TIME    300L    ///< 300us idle time
@@ -76,11 +78,9 @@ char Convert2BitIntensityToUartDataStream[] =
     0b00000100      // 11 - (1)110 111(0)
 };
 
-// Base interrupt handler for the WS2811 driver
-static void ICACHE_RAM_ATTR handleWS2811_ISR (void* param);
+// forward declaration for the isr handler
+static void IRAM_ATTR uart_intr_handler (void* param);
 
-/*
-*/
 //----------------------------------------------------------------------------
 c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId, gpio_num_t outputGpio, uart_port_t uart) :
     c_OutputCommon(OutputChannelId, outputGpio, uart),
@@ -92,49 +92,74 @@ c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     brightness (1.0),
     pNextIntensityToSend (nullptr),
     RemainingIntensityCount (0),
-    szBuffer (0),
+    NumIntensityBytesInOutputBuffer (0),
     startTime (0),
     refreshTime (0),
     rOffset (0),
     gOffset (1),
     bOffset (2)
 {
-    DEBUG_START;
-    DEBUG_END;
+    // DEBUG_START;
+    // DEBUG_END;
 } // c_OutputWS2811
 
 //----------------------------------------------------------------------------
 c_OutputWS2811::~c_OutputWS2811()
 {
-    DEBUG_START;
+    // DEBUG_START;
     if (gpio_num_t (-1) == DataPin) { return; }
 
 #ifdef ARDUINO_ARCH_ESP8266
     Serial1.end ();
 #else
-    uart_driver_delete (UartId);
+    // uart_driver_delete (UartId);
 #endif
 
     pinMode (DataPin, INPUT);
-    DEBUG_END;
+
+    // make sure no existing low level driver is running
+    ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
+    // DEBUG_V ("");
+
+    ESP_ERROR_CHECK (uart_disable_rx_intr (UartId));
+    // DEBUG_V ("");
+
+    // Disable all interrupts for this uart. It is enabled by uart.c in the SDK
+    CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
+    // DEBUG_V ("");
+
+    // Clear all pending interrupts in the UART
+    WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
+    // DEBUG_V ("");
+
+    // ESP_ERROR_CHECK (uart_isr_free (UartId));
+    // DEBUG_V ("");
+
+    // ESP_ERROR_CHECK (uart_driver_delete (UartId));
+
+    // DEBUG_END;
 } // ~c_OutputWS2811
 
 //----------------------------------------------------------------------------
-// Use the current config to set up the output port
+/* Use the current config to set up the output port
+*/
 void c_OutputWS2811::Begin()
 {
-    DEBUG_START;
-    Serial.println (String (F ("** WS281x Initialization for Chan: ")) + String (OutputChannelId) + " **");
+    // DEBUG_START;
+    Serial.println (String (F (" Initializing WS281x on Chan: '")) + String (OutputChannelId) + "'");
 
     // are we using a valid config?
     if (gpio_num_t (-1) == DataPin) { return; }
+    if (true == HasBeenInitialized) { return; } else { HasBeenInitialized = true; }
 
     // Set output pins
     pinMode(DataPin, OUTPUT);
     digitalWrite(DataPin, LOW);
 
+    pixel_count = 600;
+
     // Setup Output Buffer
-    szBuffer = pixel_count * WS2812_NUM_INTENSITY_BYTES_PER_PIXEL;
+    NumIntensityBytesInOutputBuffer = pixel_count * WS2812_NUM_INTENSITY_BYTES_PER_PIXEL;
     memset((char*)(&OutputBuffer[0]), 0, sizeof(OutputBuffer));
 
     // Calculate our refresh time
@@ -164,7 +189,7 @@ void c_OutputWS2811::Begin()
     CLEAR_PERI_REG_MASK(UART_INT_ENA(UartId), UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
 
     // Clear all pending interrupts in the UART
-    WRITE_PERI_REG(UART_INT_CLR(UartId), 0xffff);
+    WRITE_PERI_REG(UART_INT_CLR(UartId), UART_INTR_MASK);
 
     // Reenable interrupts
     ETS_UART_INTR_ENABLE();
@@ -175,12 +200,19 @@ void c_OutputWS2811::Begin()
     // to handle interrupts. These API functions are supposed to handle this 
     // selection.
 
-    // make sure no existing low level driver is running
-    uart_driver_delete (UartId);
+    // DEBUG_V (String ("UartId  = '") + UartId + "'");
+    // DEBUG_V (String ("DataPin = '") + DataPin + "'");
+
+    // make sure no existing low level ISR is running
+    ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
+    // DEBUG_V ("");
+
+    ESP_ERROR_CHECK (uart_disable_rx_intr (UartId));
+    // DEBUG_V ("");
 
     /* Serial rate is 4x 800KHz for WS2811 */
     uart_config_t uart_config;
-    uart_config.baud_rate           = WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE * 800000;
+    uart_config.baud_rate           = WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE * WS2811_DATA_SPEED;
     uart_config.data_bits           = uart_word_length_t::UART_DATA_6_BITS;
     uart_config.flow_ctrl           = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
     uart_config.parity              = uart_parity_t::UART_PARITY_DISABLE;
@@ -191,123 +223,31 @@ void c_OutputWS2811::Begin()
     // start the generic UART driver.
     // NOTE: Zero for RX buffer size causes errors in the uart API. 
     // Must be at least one byte larger than the fifo size
-    ESP_ERROR_CHECK (uart_driver_install   (UartId, UART_FIFO_LEN+1, 0, 0, NULL, 0));
-    ESP_ERROR_CHECK (uart_param_config     (UartId, &uart_config));
-    ESP_ERROR_CHECK (uart_set_pin          (UartId, DataPin, PIXEL_RXD, PIXEL_RTS, PIXEL_CTS));
-    ESP_ERROR_CHECK (uart_set_line_inverse (UartId, UART_INVERSE_TXD));
-    ESP_ERROR_CHECK (uart_set_mode         (UartId, uart_mode_t::UART_MODE_UART));
+    // Do not set ESP_INTR_FLAG_IRAM here. the driver's ISR handler is not located in IRAM
+    // DEBUG_V ("");
+    // ESP_ERROR_CHECK (uart_driver_install (UartId, UART_FIFO_LEN+1, 0, 0, NULL, 0));
+    // DEBUG_V ("");
+    ESP_ERROR_CHECK (uart_param_config   (UartId, & uart_config));
+    // DEBUG_V ("");
+    ESP_ERROR_CHECK (uart_set_pin        (UartId, DataPin, PIXEL_RXD, PIXEL_RTS, PIXEL_CTS));
 
-    // release the pre registered UART handler/subroutines
+    // release the pre registered UART handler/subroutine and install out own
+    // DEBUG_V ("");
     ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
-    ESP_ERROR_CHECK (uart_disable_rx_intr (UartId));
-    ESP_ERROR_CHECK (uart_isr_free (UartId));
+    // DEBUG_V ("");
+    // Disable ALL interrupts. It is enabled by uart.c in the SDK
+    CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
+    // DEBUG_V ("");
 
-    ESP_ERROR_CHECK (uart_isr_register (UartId, handleWS2811_ISR, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM, nullptr));
+    // Clear all pending interrupts in the UART
+    // WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
+    // DEBUG_V ("");
 
-    DEBUG_END;
+    uart_isr_register (UartId, uart_intr_handler, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM, nullptr);
+
+    // DEBUG_END;
 #endif
 } // init
-
-//----------------------------------------------------------------------------
-/*
-*   Validate that the current values meet our needs
-*
-*   needs
-*       data set in the class elements
-*   returns
-*       true - no issues found
-*       false - had an issue and had to fix things
-*/
-bool c_OutputWS2811::validate()
-{
-    DEBUG_START;
-    bool response = true;
-
-    if (pixel_count > WS2812_PIXEL_LIMIT)
-    {
-        // LOG_PORT.println (String (F ("*** Requested pixel count was too high. Setting to ")) + PIXEL_LIMIT + F(" ***"));
-        pixel_count = WS2812_PIXEL_LIMIT;
-        response = false;
-    }
-    else if (pixel_count < 1)
-    {
-        pixel_count = 170;
-        response = false;
-    }
-
-    if (group_size > pixel_count)
-    {
-        LOG_PORT.println (String (F ("*** Requested group size count was too high. Setting to ")) + pixel_count + F (" ***"));
-        group_size = pixel_count;
-        response = false;
-    }
-    else if (group_size < 1)
-    {
-        group_size = 1;
-        response = false;
-    }
-
-    if (zig_size > pixel_count)
-    {
-        zig_size = pixel_count;
-        response = false;
-    }
-    else if (zig_size < 1)
-    {
-        zig_size = 1;
-        response = false;
-    }
-
-    // Default gamma value
-    if (gamma <= 0)
-    {
-        gamma = 2.2;
-        response = false;
-    }
-
-    // Default brightness value
-    if (brightness <= 0)
-    {
-        brightness = 1.0;
-        response = false;
-    }
-
-    updateGammaTable();
-    updateColorOrder();
-
-    DEBUG_END;
-    return response;
-
-} // validate
-
-//----------------------------------------------------------------------------
-/* Process the config
-*
-*   needs
-*       reference to string to process
-*   returns
-*       true - config has been accepted
-*       false - Config rejected. Using defaults for invalid settings
-*/
-bool c_OutputWS2811::SetConfig(ArduinoJson::JsonObject & jsonConfig)
-{
-    DEBUG_START;
-    uint temp;
-    FileIO::setFromJSON(color_order, jsonConfig["color_order"]);
-    FileIO::setFromJSON(pixel_count, jsonConfig["pixel_count"]);
-    FileIO::setFromJSON(group_size,  jsonConfig["group_size"]);
-    FileIO::setFromJSON(zig_size,    jsonConfig["zig_size"]);
-    FileIO::setFromJSON(gamma,       jsonConfig["gamma"]);
-    FileIO::setFromJSON(brightness,  jsonConfig["brightness"]);
-    // enums need to be converted to uints for json
-    temp = uint (DataPin);
-    FileIO::setFromJSON(temp,        jsonConfig["data_pin"]);
-    DataPin = gpio_num_t (temp);
-
-    DEBUG_END;
-    return validate ();
-
-} // SetConfig
 
 //----------------------------------------------------------------------------
 void c_OutputWS2811::GetConfig(ArduinoJson::JsonObject & jsonConfig)
@@ -324,38 +264,13 @@ void c_OutputWS2811::GetConfig(ArduinoJson::JsonObject & jsonConfig)
     DEBUG_END;
 } // GetConfig
 
-void c_OutputWS2811::updateColorOrder() 
-{
-    DEBUG_START;
-    // make sure the color order is all lower case
-    color_order.toLowerCase ();
-
-         if (String ("grb") == color_order) { rOffset = 1; gOffset = 0; bOffset = 2; }
-    else if (String ("brg") == color_order) { rOffset = 1; gOffset = 2; bOffset = 0; }
-    else if (String ("rbg") == color_order) { rOffset = 0; gOffset = 2; bOffset = 1; }
-    else if (String ("gbr") == color_order) { rOffset = 2; gOffset = 0; bOffset = 1; }
-    else if (String ("bgr") == color_order) { rOffset = 2; gOffset = 1; bOffset = 0; }
-    else
-    {
-        color_order = "rgb";
-        rOffset = 0; gOffset = 1; bOffset = 2;
-    } // default
-
-    DEBUG_END;
-} // updateColorOrder
-
-// shell function to set the 'this' pointer of the real ISR
-// This allows me to use non static variables in the ISR.
-static void ICACHE_RAM_ATTR handleWS2811_ISR (void* param)
-{
-    reinterpret_cast <c_OutputWS2811*>(param)->_handleWS2811 ();
-}
-
+//----------------------------------------------------------------------------
 // Fill the FIFO with as many intensity values as it can hold.
-void ICACHE_RAM_ATTR c_OutputWS2811::_handleWS2811() 
+//void ICACHE_RAM_ATTR c_OutputWS2811::HandleWS2811Interrupt ()
+void IRAM_ATTR c_OutputWS2811::HandleWS2811Interrupt ()
 {
     // Process if the desired UART has raised an interrupt
-    if (READ_PERI_REG(UART_INT_ST(UartId))) 
+    if (READ_PERI_REG (UART_INT_ST (UartId)))
     {
         // Fill the FIFO with new data
         // free space in the FIFO divided by the number of data bytes per intensity 
@@ -387,41 +302,30 @@ void ICACHE_RAM_ATTR c_OutputWS2811::_handleWS2811()
         // are we done?
         if (0 == RemainingIntensityCount)
         {
-            // Disable TX interrupt when done
-            CLEAR_PERI_REG_MASK(UART_INT_ENA(UartId), UART_TXFIFO_EMPTY_INT_ENA);
+            // Disable ALL interrupts when done
+            CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
         }
 
         // Clear all interrupts flags for this uart
-        WRITE_PERI_REG(UART_INT_CLR(UartId), 0xffff);
+        WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
 
     } // end Our uart generated an interrupt
+} // HandleWS2811Interrupt
 
-    /* Clear if UART0 */
-    if (READ_PERI_REG(UART_INT_ST(UART0)))
-        WRITE_PERI_REG(UART_INT_CLR(UART0), 0xffff);
-}
-
-void c_OutputWS2811::updateGammaTable()
-{
-    DEBUG_START;
-    for (int i = 0; i < 256; i++)
-    {
-        gamma_table[i] = (uint8_t) min((255.0 * pow(i * brightness / 255.0, gamma) + 0.5), 255.0);
-    }
-    DEBUG_END;
-} // updateGammaTable
-
+//----------------------------------------------------------------------------
 void c_OutputWS2811::Render()
 {
-    DEBUG_START;
+    // DEBUG_START;
+
+    // DEBUG_V (String ("RemainingIntensityCount: ") + RemainingIntensityCount)
 
     if (gpio_num_t (-1) == DataPin) { return; }
-    if (!canRefresh())  return;
+    if (!canRefresh ()) { return; }
+    if (0 != RemainingIntensityCount) { return; }
 
-    DEBUG_V ("");
     // set up pointers into the pixel data space
     uint8_t *pSourceData = GetBufferAddress();  // source buffer (owned by base class)
-    uint8_t *pTargetData = OutputBuffer; // target buffer
+    uint8_t *pTargetData = OutputBuffer;        // target buffer
 
     // what type of copy are we making?
     if (!zig_size)
@@ -479,7 +383,8 @@ void c_OutputWS2811::Render()
 
     // set the intensity transmit buffer pointer and number of intensities to send
     pNextIntensityToSend    = OutputBuffer;
-    RemainingIntensityCount = szBuffer;
+    RemainingIntensityCount = NumIntensityBytesInOutputBuffer;
+    // DEBUG_V (String ("RemainingIntensityCount: ") + RemainingIntensityCount);
 
 #ifdef ARDUINO_ARCH_ESP8266
     SET_PERI_REG_MASK(UART_INT_ENA(UartId), UART_TXFIFO_EMPTY_INT_ENA);
@@ -488,6 +393,152 @@ void c_OutputWS2811::Render()
 #endif
     startTime = micros();
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // render
+
+//----------------------------------------------------------------------------
+/* Process the config
+*
+*   needs
+*       reference to string to process
+*   returns
+*       true - config has been accepted
+*       false - Config rejected. Using defaults for invalid settings
+*/
+bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject& jsonConfig)
+{
+    DEBUG_START;
+    uint temp;
+    FileIO::setFromJSON (color_order, jsonConfig["color_order"]);
+    FileIO::setFromJSON (pixel_count, jsonConfig["pixel_count"]);
+    FileIO::setFromJSON (group_size, jsonConfig["group_size"]);
+    FileIO::setFromJSON (zig_size, jsonConfig["zig_size"]);
+    FileIO::setFromJSON (gamma, jsonConfig["gamma"]);
+    FileIO::setFromJSON (brightness, jsonConfig["brightness"]);
+    // enums need to be converted to uints for json
+    temp = uint (DataPin);
+    FileIO::setFromJSON (temp, jsonConfig["data_pin"]);
+    DataPin = gpio_num_t (temp);
+
+    DEBUG_END;
+    return validate ();
+
+} // SetConfig
+
+//----------------------------------------------------------------------------
+/* shell function to set the 'this' pointer of the real ISR
+   This allows me to use non static variables in the ISR.
+ */
+static void IRAM_ATTR uart_intr_handler (void* param)
+{
+    reinterpret_cast <c_OutputWS2811*>(param)->HandleWS2811Interrupt ();
+} // uart_intr_handler
+
+//----------------------------------------------------------------------------
+void c_OutputWS2811::updateGammaTable ()
+{
+    DEBUG_START;
+    for (int i = 0; i < 256; i++)
+    {
+        gamma_table[i] = (uint8_t)min ((255.0 * pow (i * brightness / 255.0, gamma) + 0.5), 255.0);
+    }
+    DEBUG_END;
+} // updateGammaTable
+
+//----------------------------------------------------------------------------
+void c_OutputWS2811::updateColorOrder ()
+{
+    DEBUG_START;
+    // make sure the color order is all lower case
+    color_order.toLowerCase ();
+
+    if (String ("grb") == color_order) { rOffset = 1; gOffset = 0; bOffset = 2; }
+    else if (String ("brg") == color_order) { rOffset = 1; gOffset = 2; bOffset = 0; }
+    else if (String ("rbg") == color_order) { rOffset = 0; gOffset = 2; bOffset = 1; }
+    else if (String ("gbr") == color_order) { rOffset = 2; gOffset = 0; bOffset = 1; }
+    else if (String ("bgr") == color_order) { rOffset = 2; gOffset = 1; bOffset = 0; }
+    else
+    {
+        color_order = "rgb";
+        rOffset = 0; gOffset = 1; bOffset = 2;
+    } // default
+
+    DEBUG_END;
+} // updateColorOrder
+ 
+//----------------------------------------------------------------------------
+/*
+*   Validate that the current values meet our needs
+*
+*   needs
+*       data set in the class elements
+*   returns
+*       true - no issues found
+*       false - had an issue and had to fix things
+*/
+bool c_OutputWS2811::validate ()
+{
+    DEBUG_START;
+    bool response = true;
+
+    if (pixel_count > WS2812_PIXEL_LIMIT)
+    {
+        // LOG_PORT.println (String (F ("*** Requested pixel count was too high. Setting to ")) + PIXEL_LIMIT + F(" ***"));
+        pixel_count = WS2812_PIXEL_LIMIT;
+        response = false;
+    }
+    else if (pixel_count < 1)
+    {
+        pixel_count = 170;
+        response = false;
+    }
+
+    if (group_size > pixel_count)
+    {
+        LOG_PORT.println (String (F ("*** Requested group size count was too high. Setting to ")) + pixel_count + F (" ***"));
+        group_size = pixel_count;
+        response = false;
+    }
+    else if (group_size < 1)
+    {
+        group_size = 1;
+        response = false;
+    }
+
+    if (zig_size > pixel_count)
+    {
+        zig_size = pixel_count;
+        response = false;
+    }
+    else if (zig_size < 1)
+    {
+        zig_size = 1;
+        response = false;
+    }
+
+    // Default gamma value
+    if (gamma <= 0)
+    {
+        gamma = 2.2;
+        response = false;
+    }
+
+    // Default brightness value
+    if (brightness <= 0)
+    {
+        brightness = 1.0;
+        response = false;
+    }
+
+    updateGammaTable ();
+    updateColorOrder ();
+
+    // Calculate our refresh time
+    refreshTime = (WS2811_TIME_PER_PIXEL * pixel_count) + WS2811_MIN_IDLE_TIME;
+
+    DEBUG_END;
+    return response;
+
+} // validate
+

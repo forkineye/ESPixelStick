@@ -194,8 +194,6 @@ void setup()
 #endif
     // DEBUG_V ("");
 
-    OutputMgr.Begin ();
-
     // Dump supported input modes
     LOG_PORT.println(F("Supported Input modes:"));
     itInput = INPUT_MODES.begin();
@@ -316,9 +314,13 @@ void setup()
 #else
 	// not needed for ESP32
 #endif
+    // Set up the output manager to start sending data to the serial ports
+    OutputMgr.Begin ();
 
     // Configure and start the web server
     initWeb();
+
+    // DEBUG_V ("");
 
     // DEBUG_END;
 }
@@ -651,9 +653,6 @@ void loadConfig()
 
         saveConfig();
     }
-
-    // cause the config for the output channels to get reloaded
-    OutputMgr.LoadConfig ();
 
     // DEBUG_END;
 

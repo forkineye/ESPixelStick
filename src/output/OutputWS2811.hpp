@@ -45,7 +45,7 @@ public:
     c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_WS2811;} ///< Have the instance report its type.
 
     /// Interrupt Handler
-    void ICACHE_RAM_ATTR _handleWS2811 (); ///< UART ISR
+    void IRAM_ATTR HandleWS2811Interrupt (); ///< UART ISR
 
 #define WS2812_PIXEL_LIMIT                          1360    ///< Total pixel limit - 40.85ms for 8 universes
 #define WS2812_NUM_INTENSITY_BYTES_PER_PIXEL    	3
@@ -65,7 +65,7 @@ private:
     uint8_t     OutputBuffer[WS2812_OUTPUT_BUFF_SIZE+1]; ///< Data ready to be sent to the UART
     uint8_t    *pNextIntensityToSend;                    ///< start of output buffer being sent to the UART
     uint16_t    RemainingIntensityCount;                 ///< Used by ISR to determine how much more data to send
-    uint16_t    szBuffer;                                ///< Size of buffers
+    uint16_t    NumIntensityBytesInOutputBuffer;         ///< Size of buffers
     time_t      startTime;                               ///< When the last frame TX started
     time_t      refreshTime;                             ///< Time until we can refresh after starting a TX
     uint8_t     rOffset;                                 ///< Index of red byte
