@@ -20,13 +20,6 @@
 /*****************************************/
 /*        BEGIN - Configuration          */
 /*****************************************/
-// Create secrets.h with a #define for SECRETS_SSID and SECRETS_PASS
-// or delete the #include and enter the strings directly below.
-// #include "secrets.h"
-
-/* Fallback configuration if config.json is empty or fails */
-const char ssid[] = "MaRtInG";
-const char passphrase[] = "martinshomenetwork";
 
 /*****************************************/
 /*         END - Configuration           */
@@ -46,6 +39,8 @@ const char passphrase[] = "martinshomenetwork";
 
 // Output modules
 #include "src/output/OutputMgr.hpp"
+#include "src/WiFiMgr.hpp"
+
 
 // Services
 //#include "src/service/MQTT.h"
@@ -62,13 +57,13 @@ extern "C"
 
 #elif defined ARDUINO_ARCH_ESP32
     // ESP32 user_interface is now built in
-#   include <WiFi.h>
-#   include <esp_wifi.h>
 #   include <SPIFFS.h>
 #   include <Update.h>
 #else
 #	error "Unsupported CPU type."
 #endif
+
+
 
 #ifndef WL_MAC_ADDR_LENGTH
 #   define WL_MAC_ADDR_LENGTH 6
@@ -126,13 +121,6 @@ bool                reboot = false;         // Reboot flag
 AsyncWebServer      web(HTTP_PORT);         // Web Server
 AsyncWebSocket      ws("/ws");              // Web Socket Plugin
 uint32_t            lastUpdate;             // Update timeout tracker
-#ifdef ARDUINO_ARCH_ESP8266
-WiFiEventHandler    wifiConnectHandler;     // WiFi connect handler
-WiFiEventHandler    wifiDisconnectHandler;  // WiFi disconnect handler
-#endif
-Ticker              wifiTicker;             // Ticker to handle WiFi
-IPAddress           ourLocalIP;
-IPAddress           ourSubnetMask;
 
 /////////////////////////////////////////////////////////
 //
@@ -141,7 +129,6 @@ IPAddress           ourSubnetMask;
 /////////////////////////////////////////////////////////
 
 void loadConfig();
-void initWifi();
 void initWeb();
 
 /// Radio configuration
@@ -162,13 +149,6 @@ RF_PRE_INIT() {
 /** Arduino based setup code that is executed at startup. */
 void setup() 
 {
-    // Disable persistant credential storage and configure SDK params
-    WiFi.persistent(false);
-#ifdef ARDUINO_ARCH_ESP8266
-    wifi_set_sleep_type(NONE_SLEEP_T);
-#elif defined(ARDUINO_ARCH_ESP32)
-    esp_wifi_set_ps (WIFI_PS_NONE);
-#endif
     // Setup serial log port
     LOG_PORT.begin(115200);
     delay(10);
@@ -256,194 +236,19 @@ void setup()
     loadConfig();
     // DEBUG_V ("");
 
-    if (config.hostname)
-    {
-#ifdef ARDUINO_ARCH_ESP8266
-    WiFi.hostname(config.hostname);
-#else
-    WiFi.setHostname (config.hostname.c_str());
-#endif
-    }
+    WiFiMgr.Begin (&config);
     // DEBUG_V ("");
 
-    // Setup WiFi Handlers
-#ifdef ARDUINO_ARCH_ESP8266
-    wifiConnectHandler = WiFi.onStationModeGotIP(onWiFiConnect);
-#else
-    WiFi.onEvent (onWiFiConnect,    WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
-    WiFi.onEvent (onWiFiDisconnect, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
-#endif
-
-    //TODO: Setup MQTT / Auxiliary service Handlers?
-
-    // Fallback to default SSID and passphrase if we fail to connect
-    initWifi();
-    if (WiFi.status() != WL_CONNECTED) 
-    {
-        LOG_PORT.println(F("*** Timeout - Reverting to default SSID ***"));
-        config.ssid = ssid;
-        config.passphrase = passphrase;
-        initWifi();
-    }
-    // DEBUG_V ("");
-
-    // If we fail again, go SoftAP or reboot
-    if (WiFi.status() != WL_CONNECTED) 
-    {
-        if (config.ap_fallback) 
-        {
-            LOG_PORT.println(F("*** FAILED TO ASSOCIATE WITH AP, GOING SOFTAP ***"));
-            WiFi.mode(WIFI_AP);
-            String ssid = "ESPixelStick " + String(config.hostname);
-            WiFi.softAP(ssid.c_str());
-            ourLocalIP = WiFi.softAPIP();
-            ourSubnetMask = IPAddress(255,255,255,0);
-        } else 
-        {
-            LOG_PORT.println(F("*** FAILED TO ASSOCIATE WITH AP, REBOOTING ***"));
-            ESP.restart();
-        }
-    }
-    // DEBUG_V ("");
-
-#ifdef ARDUINO_ARCH_ESP8266
-    wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWiFiDisconnect);
-
-    // Handle OTA update from asynchronous callbacks
-    Update.runAsync(true);
-#else
-	// not needed for ESP32
-#endif
     // Set up the output manager to start sending data to the serial ports
     OutputMgr.Begin ();
+    // DEBUG_V ("");
 
     // Configure and start the web server
     initWeb();
 
-    // DEBUG_V ("");
-
     // DEBUG_END;
-}
+} // Seup
 
-/////////////////////////////////////////////////////////
-//
-//  WiFi Section
-//
-/////////////////////////////////////////////////////////
-
-void initWifi() 
-{
-    // Switch to station mode and disconnect just in case
-    WiFi.mode(WIFI_STA);
-#ifdef ARDUINO_ARCH_ESP8266
-    WiFi.disconnect();
-#else
-    WiFi.persistent (false);
-    WiFi.disconnect (true);
-#endif
-
-    connectWifi();
-    uint32_t timeout = millis();
-    while (WiFi.status() != WL_CONNECTED) 
-    {
-        LOG_PORT.print(".");
-        delay(500);
-        if (millis() - timeout > (1000 * config.sta_timeout) )
-        {
-            LOG_PORT.println("");
-            LOG_PORT.println(F("*** Failed to connect ***"));
-            break;
-        }
-    }
-}
-
-void connectWifi() 
-{
-#ifdef ARDUINO_ARCH_ESP8266
-    delay(secureRandom(100, 500));
-#else
-    delay (random (100, 500));
-#endif
-    LOG_PORT.println("");
-    LOG_PORT.print(F("Connecting to "));
-    LOG_PORT.print(config.ssid);
-    LOG_PORT.print(F(" as "));
-    LOG_PORT.println(config.hostname);
-
-    WiFi.begin(config.ssid.c_str(), config.passphrase.c_str());
-    if (config.dhcp) 
-    {
-        LOG_PORT.print(F("Connecting with DHCP"));
-    } 
-    else 
-    {
-        // We don't use DNS, so just set it to our gateway
-        if (!config.ip.isEmpty()) 
-        {
-            IPAddress ip = ip.fromString(config.ip);
-            IPAddress gateway = gateway.fromString(config.gateway);
-            IPAddress netmask = netmask.fromString(config.netmask);
-            WiFi.config(ip, gateway, netmask, gateway);
-            LOG_PORT.print(F("Connecting with Static IP"));
-        }
-        else
-        {
-            LOG_PORT.println(F("** ERROR - STATIC SELECTED WITHOUT IP **"));
-        }
-    }
-}
-
-#ifdef ARDUINO_ARCH_ESP8266
-void onWiFiConnect(const WiFiEventStationModeGotIP &event) 
-{
-#else
-void onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t info) 
-{
-#endif
-    ourLocalIP = WiFi.localIP();
-    ourSubnetMask = WiFi.subnetMask();
-    LOG_PORT.printf("\nConnected with IP: %s\n", ourLocalIP.toString().c_str());
-
-    // Setup MQTT connection if enabled
-
-    // Setup mDNS / DNS-SD
-    //TODO: Reboot or restart mdns when config.id is changed?
-/*
-#ifdef ARDUINO_ARCH_ESP8266
-    String chipId = String (ESP.getChipId (), HEX);
-#else
-    String chipId = String ((unsigned long)ESP.getEfuseMac (), HEX);
-#endif
-    MDNS.setInstanceName(String(config.id + " (" + chipId + ")").c_str());
-    if (MDNS.begin(config.hostname.c_str())) {
-        MDNS.addService("http", "tcp", HTTP_PORT);
-//        MDNS.addService("zcpp", "udp", ZCPP_PORT);
-//        MDNS.addService("ddp", "udp", DDP_PORT);
-        MDNS.addService("e131", "udp", E131_DEFAULT_PORT);
-        MDNS.addServiceTxt("e131", "udp", "TxtVers", String(RDMNET_DNSSD_TXTVERS));
-        MDNS.addServiceTxt("e131", "udp", "ConfScope", RDMNET_DEFAULT_SCOPE);
-        MDNS.addServiceTxt("e131", "udp", "E133Vers", String(RDMNET_DNSSD_E133VERS));
-        MDNS.addServiceTxt("e131", "udp", "CID", chipId);
-        MDNS.addServiceTxt("e131", "udp", "Model", "ESPixelStick");
-        MDNS.addServiceTxt("e131", "udp", "Manuf", "Forkineye");
-    } else {
-        LOG_PORT.println(F("*** Error setting up mDNS responder ***"));
-    }
-*/
-}
-
-/// WiFi Disconnect Handler
-#ifdef ARDUINO_ARCH_ESP8266
-/** Attempt to re-connect every 2 seconds */
-void onWiFiDisconnect(const WiFiEventStationModeDisconnected &event) 
-{
-#else
-static void onWiFiDisconnect (const WiFiEvent_t event, const WiFiEventInfo_t info) 
-{
-#endif
-    LOG_PORT.println(F("*** WiFi Disconnected ***"));
-    wifiTicker.once(2, connectWifi);
-}
 
 /////////////////////////////////////////////////////////
 //
@@ -553,18 +358,12 @@ void validateConfig()
     // Device defaults
     if (!config.id.length())
         config.id = "No ID Found";
-    if (!config.ssid.length())
-        config.ssid = ssid;
-    if (!config.passphrase.length())
-        config.passphrase = passphrase;
+
     if (!config.hostname.length())
         config.hostname = "esps-" + String(chipId);
 
-    if (config.sta_timeout < 5)
-        config.sta_timeout = CLIENT_TIMEOUT;
+    WiFiMgr.ValidateConfig (&config);
 
-    if (config.ap_timeout < 15)
-        config.ap_timeout = AP_TIMEOUT;
     // DEBUG_V ("");
 
 //TODO: Update this to set to ws2811 and e131 if no config found
