@@ -55,7 +55,7 @@ public:
 
     enum class SerialType
     {
-        GENERIC,
+        GENERIC=0,
         DMX512,
         RENARD,
         MAX_TYPE = RENARD,
