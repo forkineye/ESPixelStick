@@ -22,17 +22,16 @@
 #include <esp_wifi.h>
 #include "ESPixelStick.h"
 #include "WiFiMgr.hpp"
-#include "memdebug.h"
 
 
 //-----------------------------------------------------------------------------
 // Create secrets.h with a #define for SECRETS_SSID and SECRETS_PASS
 // or delete the #include and enter the strings directly below.
-// #include "secrets.h"
+#include "secrets.h"
 
 /* Fallback configuration if config->json is empty or fails */
-const char ssid[] = "MaRtInG";
-const char passphrase[] = "martinshomenetwork";
+const char ssid[]       = SECRETS_SSID;
+const char passphrase[] = SECRETS_PASS;
 
 //-----------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
@@ -84,8 +83,8 @@ void c_WiFiMgr::Begin (config_t* NewConfig)
 #ifdef ARDUINO_ARCH_ESP8266
     wifiConnectHandler = WiFi.onStationModeGotIP (onWiFiConnect);
 #else
-    WiFi.onEvent ([this](WiFiEvent_t event, system_event_info_t info) {this->onWiFiConnect (event, info);}, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
-    WiFi.onEvent ([this](WiFiEvent_t event, system_event_info_t info) {this->onWiFiDisconnect (event, info); }, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
+    WiFi.onEvent ([this](WiFiEvent_t event, system_event_info_t info) {this->onWiFiConnect    (event, info);}, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
+    WiFi.onEvent ([this](WiFiEvent_t event, system_event_info_t info) {this->onWiFiDisconnect (event, info);}, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
 #endif
 
     //TODO: Setup MQTT / Auxiliary service Handlers?
@@ -105,7 +104,7 @@ void c_WiFiMgr::Begin (config_t* NewConfig)
     // If we fail again, go SoftAP or reboot
     if (WiFi.status () != WL_CONNECTED)
     {
-        if (config->ap_fallback)
+        if (config->ap_fallbackIsEnabled)
         {
             LOG_PORT.println (F ("*** FAILED TO ASSOCIATE WITH AP, GOING SOFTAP ***"));
             WiFi.mode (WIFI_AP);
@@ -147,6 +146,8 @@ void c_WiFiMgr::initWifi ()
 #endif
 
     connectWifi ();
+
+    // wait for the connection to complete via the callback function
     uint32_t timeout = millis ();
     while (WiFi.status () != WL_CONNECTED)
     {
@@ -154,12 +155,11 @@ void c_WiFiMgr::initWifi ()
         delay (500);
         if (millis () - timeout > (1000 * config->sta_timeout))
         {
-            LOG_PORT.println ("");
-            LOG_PORT.println (F ("*** Failed to connect ***"));
+            LOG_PORT.println (F ("\n*** Failed to connect ***"));
             break;
         }
     }
-}
+} // initWifi
 
 //-----------------------------------------------------------------------------
 void c_WiFiMgr::connectWifi ()
@@ -176,7 +176,7 @@ void c_WiFiMgr::connectWifi ()
     LOG_PORT.println (config->hostname);
 
     WiFi.begin (config->ssid.c_str (), config->passphrase.c_str ());
-    if (config->dhcp)
+    if (config->UseDhcp)
     {
         LOG_PORT.print (F ("Connecting with DHCP"));
     }
@@ -185,7 +185,7 @@ void c_WiFiMgr::connectWifi ()
         // We don't use DNS, so just set it to our gateway
         if (!config->ip.isEmpty ())
         {
-            IPAddress ip = ip.fromString (config->ip);
+            IPAddress ip      = ip.fromString (config->ip);
             IPAddress gateway = gateway.fromString (config->gateway);
             IPAddress netmask = netmask.fromString (config->netmask);
             WiFi.config (ip, gateway, netmask, gateway);
@@ -196,7 +196,7 @@ void c_WiFiMgr::connectWifi ()
             LOG_PORT.println (F ("** ERROR - STATIC SELECTED WITHOUT IP **"));
         }
     }
-}
+} // connectWifi
 
 //-----------------------------------------------------------------------------
 #ifdef ARDUINO_ARCH_ESP8266
@@ -206,11 +206,13 @@ void c_WiFiMgr::onWiFiConnect (const WiFiEventStationModeGotIP& event)
 void c_WiFiMgr::onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t info)
 {
 #endif
-    CurrentIpAddress = WiFi.localIP ();
+    CurrentIpAddress  = WiFi.localIP ();
     CurrentSubnetMask = WiFi.subnetMask ();
     LOG_PORT.printf ("\nConnected with IP: %s\n", CurrentIpAddress.toString ().c_str ());
+    
+    // Call MQTT setup function
 
-    // Setup MQTT connection if enabled
+    // Remove stuff below.
 
     // Setup mDNS / DNS-SD
     //TODO: Reboot or restart mdns when config->id is changed?
@@ -239,11 +241,6 @@ void c_WiFiMgr::onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t in
 }
 
 //-----------------------------------------------------------------------------
-static void connectWifiTicker ()
-{
-    WiFiMgr.connectWifi ();
-} // connectWifiTick
-//-----------------------------------------------------------------------------
 /// WiFi Disconnect Handler
 #ifdef ARDUINO_ARCH_ESP8266
 /** Attempt to re-connect every 2 seconds */
@@ -254,9 +251,8 @@ void c_WiFiMgr::onWiFiDisconnect (const WiFiEvent_t event, const WiFiEventInfo_t
 {
 #endif
     LOG_PORT.println (F ("*** WiFi Disconnected ***"));
-    // wifiTicker.once (2, connectWifi);
-    wifiTicker.once (2, connectWifiTicker);
-}
+    wifiTicker.once (2, [] { WiFiMgr.connectWifi (); });
+} // onWiFiDisconnect
 
 //-----------------------------------------------------------------------------
 void c_WiFiMgr::ValidateConfig (config_t* NewConfig)
@@ -278,4 +274,3 @@ void c_WiFiMgr::ValidateConfig (config_t* NewConfig)
 //-----------------------------------------------------------------------------
 // create a global instance of the output channel factory
 c_WiFiMgr WiFiMgr;
-
