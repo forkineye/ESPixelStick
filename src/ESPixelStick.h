@@ -74,8 +74,8 @@ typedef struct {
     String      ip;
     String      netmask;
     String      gateway;
-    bool        dhcp        = true;  ///< Use DHCP?
-    bool        ap_fallback = false; ///< Fallback to AP if fail to associate?
+    bool        UseDhcp              = true;  ///< Use DHCP?
+    bool        ap_fallbackIsEnabled = false; ///< Fallback to AP if fail to associate?
     uint32_t    ap_timeout;          ///< How long to wait in AP mode with no connection before rebooting
     uint32_t    sta_timeout;         ///< Timeout when connection as client (station)
 } config_t;
