@@ -243,6 +243,11 @@ void setup()
     OutputMgr.Begin ();
     // DEBUG_V ("");
 
+    // connect the input processing to the output processing. 
+    // Only supports a single channel at the moment
+    input->setBuffer (OutputMgr.GetBufferAddress (c_OutputMgr::e_OutputChannelIds::OutputChannelId_1), 
+                      OutputMgr.GetBufferSize    (c_OutputMgr::e_OutputChannelIds::OutputChannelId_1));
+
     // Configure and start the web server
     initWeb();
 
@@ -389,11 +394,13 @@ void validateConfig()
 boolean dsDevice(DynamicJsonDocument &json) 
 {
     boolean retval = false;
-    if (json.containsKey("device")) {
+    if (json.containsKey("device")) 
+    {
         retval = retval | FileIO::setFromJSON(config.id,     json["device"]["id"]);
         retval = retval | FileIO::setFromJSON(config.input,  json["device"]["input"]);
-        // todo retval = retval | FileIO::setFromJSON(config.output, json["device"]["output"]);
-    } else {
+    }
+    else 
+    {
         LOG_PORT.println("No device settings found.");
     }
 
@@ -411,9 +418,9 @@ boolean dsNetwork(DynamicJsonDocument &json) {
         retval = retval | FileIO::setFromJSON(config.netmask, network["netmask"]);
         retval = retval | FileIO::setFromJSON(config.gateway, network["gateway"]);
         retval = retval | FileIO::setFromJSON(config.hostname, network["hostname"]);
-        retval = retval | FileIO::setFromJSON(config.dhcp, network["dhcp"]);
+        retval = retval | FileIO::setFromJSON(config.UseDhcp, network["dhcp"]);
         retval = retval | FileIO::setFromJSON(config.sta_timeout, network["sta_timeout"]);
-        retval = retval | FileIO::setFromJSON(config.ap_fallback, network["ap_fallback"]);
+        retval = retval | FileIO::setFromJSON(config.ap_fallbackIsEnabled, network["ap_fallback"]);
         retval = retval | FileIO::setFromJSON(config.ap_timeout, network["ap_timeout"]);
     } else {
         LOG_PORT.println("No network settings found.");
@@ -466,30 +473,32 @@ String serializeCore(boolean pretty, boolean creds) {
 
     // Device
     JsonObject device = json.createNestedObject("device");
-    device["id"] = config.id.c_str();
-    device["input"] = config.input.c_str();
-    // todo device["output"] = config.output.c_str();
+    device["id"]           = config.id;
+    device["input"]        = config.input;
 
     // Network
     JsonObject network = json.createNestedObject("network");
-    network["ssid"] = config.ssid.c_str();
-    if (creds)
-        network["passphrase"] = config.passphrase.c_str();
-    network["hostname"] = config.hostname.c_str();
-    network["ip"] = config.ip.c_str();
-    network["netmask"] = config.netmask.c_str();
-    network["gateway"] = config.gateway.c_str();
+    network["ssid"]        = config.ssid;
+    if (creds) { network["passphrase"] = config.passphrase };
+    network["hostname"]    = config.hostname;
+    network["ip"]          = config.ip;
+    network["netmask"]     = config.netmask;
+    network["gateway"]     = config.gateway;
 
-    network["dhcp"] = config.dhcp;
+    network["dhcp"]        = config.UseDhcp;
     network["sta_timeout"] = config.sta_timeout;
 
-    network["ap_fallback"] = config.ap_fallback;
-    network["ap_timeout"] = config.ap_timeout;
+    network["ap_fallback"] = config.ap_fallbackIsEnabled;
+    network["ap_timeout"]  = config.ap_timeout;
 
     if (pretty)
-        serializeJsonPretty(json, jsonString);
+    {
+        serializeJsonPretty (json, jsonString);
+    }
     else
-        serializeJson(json, jsonString);
+    {
+        serializeJson (json, jsonString);
+    }
 
     return jsonString;
 }
@@ -505,7 +514,7 @@ void saveConfig()
 
     // save the config for the output channels
     OutputMgr.SaveConfig ();
-}
+} // saveConfig
 
 /////////////////////////////////////////////////////////
 //
@@ -514,9 +523,11 @@ void saveConfig()
 /////////////////////////////////////////////////////////
 /// Main Loop
 /** Arduino based main loop */
-void loop() {
+void loop() 
+{
     // Reboot handler
-    if (reboot) {
+    if (reboot) 
+    {
         delay(REBOOT_DELAY);
         ESP.restart();
     }
@@ -528,7 +539,7 @@ void loop() {
     OutputMgr.Render();
 
 //TODO: Research this further
-// workaround crash - consume incoming bytes on serial port
+// workaround crash - consume incoming bytes on LOG serial port
     while (0 != LOG_PORT.available()) 
     {
         LOG_PORT.read();
