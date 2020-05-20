@@ -28,13 +28,11 @@
 
 extern "C" {
 #if defined(ARDUINO_ARCH_ESP8266)
-#include <eagle_soc.h>
-#include <ets_sys.h>
-#include <uart.h>
-#include <uart_register.h>
+#   include <eagle_soc.h>
+#   include <ets_sys.h>
+#   include <uart.h>
+#   include <uart_register.h>
 #else
-#include "driver/uart.h"
-#include "driver/gpio.h"
 
 // Define ESP8266 style macro conversions to limit changes in the rest of the code.
 #   define UART_CONF0           UART_CONF0_REG
@@ -45,14 +43,12 @@ extern "C" {
 #   define UART_TX_FIFO_SIZE    UART_FIFO_LEN
 #   define WS2811_DATA_SPEED    (800000)
 
-    // Depricated: Set TX FIFO trigger. 80 bytes gives 200 microsecs to refill the FIFO
-    // TX FIFO trigger level. 40 bytes gives 100us before the FIFO goes empty
-    // We need to fill the FIFO at a rate faster than 0.3us per byte (1.2us/pixel)
-#   define PIXEL_FIFO_TRIGGER_LEVEL (40)
-
-// static uart_intr_config_t IsrConfig;
 #endif
 }
+
+#ifndef UART_INV_MASK
+#define UART_INV_MASK  (0x3f << 19)
+#endif // ndef UART_INV_MASK
 
 #ifndef UART_INTR_MASK
 #define UART_INTR_MASK 0x1ff
@@ -65,6 +61,11 @@ extern "C" {
 
 #define WS2811_TIME_PER_PIXEL   30L     ///< 30us frame time
 #define WS2811_MIN_IDLE_TIME    300L    ///< 300us idle time
+
+// Depricated: Set TX FIFO trigger. 80 bytes gives 200 microsecs to refill the FIFO
+// TX FIFO trigger level. 40 bytes gives 100us before the FIFO goes empty
+// We need to fill the FIFO at a rate faster than 0.3us per byte (1.2us/pixel)
+#define PIXEL_FIFO_TRIGGER_LEVEL (40)
 
 /*
 * Inverted 6N1 UART lookup table for ws2811, first 2 bits ignored.
@@ -109,13 +110,11 @@ c_OutputWS2811::~c_OutputWS2811()
     // DEBUG_START;
     if (gpio_num_t (-1) == DataPin) { return; }
 
+    pinMode (DataPin, INPUT);
+
 #ifdef ARDUINO_ARCH_ESP8266
     Serial1.end ();
 #else
-    // uart_driver_delete (UartId);
-#endif
-
-    pinMode (DataPin, INPUT);
 
     // make sure no existing low level driver is running
     ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
@@ -124,18 +123,14 @@ c_OutputWS2811::~c_OutputWS2811()
     ESP_ERROR_CHECK (uart_disable_rx_intr (UartId));
     // DEBUG_V ("");
 
+#endif
+
     // Disable all interrupts for this uart. It is enabled by uart.c in the SDK
     CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
     // DEBUG_V ("");
 
     // Clear all pending interrupts in the UART
     WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
-    // DEBUG_V ("");
-
-    // ESP_ERROR_CHECK (uart_isr_free (UartId));
-    // DEBUG_V ("");
-
-    // ESP_ERROR_CHECK (uart_driver_delete (UartId));
 
     // DEBUG_END;
 } // ~c_OutputWS2811
@@ -169,18 +164,18 @@ void c_OutputWS2811::Begin()
 #ifdef ARDUINO_ARCH_ESP8266
     // Serial rate is 4x 800KHz for WS2811
     Serial1.begin(3200000, SERIAL_6N1, SERIAL_TX_ONLY);
-    CLEAR_PERI_REG_MASK(UART_CONF0(UartId), UART_INV_MASK);
-    SET_PERI_REG_MASK(UART_CONF0(UartId), (BIT(22)));
+    CLEAR_PERI_REG_MASK (UART_CONF0(UartId), UART_INV_MASK);
+    SET_PERI_REG_MASK   (UART_CONF0(UartId), (BIT(22)));
 
     // Clear FIFOs
-    SET_PERI_REG_MASK(UART_CONF0(UartId), UART_RXFIFO_RST | UART_TXFIFO_RST);
-    CLEAR_PERI_REG_MASK(UART_CONF0(UartId), UART_RXFIFO_RST | UART_TXFIFO_RST);
+    SET_PERI_REG_MASK   (UART_CONF0(UartId), UART_RXFIFO_RST | UART_TXFIFO_RST);
+    CLEAR_PERI_REG_MASK (UART_CONF0(UartId), UART_RXFIFO_RST | UART_TXFIFO_RST);
 
     // Disable all interrupts
     ETS_UART_INTR_DISABLE();
 
     // Atttach interrupt handler
-    ETS_UART_INTR_ATTACH(handleWS2811, NULL);
+    ETS_UART_INTR_ATTACH(uart_intr_handler, NULL);
 
     // Set TX FIFO trigger. 80 bytes gives 200 microsecs to refill the FIFO
     WRITE_PERI_REG(UART_CONF1(UartId), 80 << UART_TXFIFO_EMPTY_THRHD_S);

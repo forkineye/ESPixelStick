@@ -40,11 +40,6 @@ extern "C" {
 #   include <uart.h>
 #   include <uart_register.h>
 #elif defined(ARDUINO_ARCH_ESP32)
-#   include <esp32-hal-uart.h>
-#   include <soc/soc.h>
-#   include <soc/uart_reg.h>
-#   include <rom/ets_sys.h>
-#   include <driver/uart.h>
 
 #   define UART_CONF0           UART_CONF0_REG
 #   define UART_CONF1           UART_CONF1_REG
@@ -58,7 +53,8 @@ extern "C" {
 
 static void ICACHE_RAM_ATTR handleGenericSerial_ISR (void* param);
 
-c_OutputSerial::c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId, gpio_num_t outputGpio, uart_port_t uart) : 
+c_OutputSerial::c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
+                                gpio_num_t outputGpio, uart_port_t uart) : 
     c_OutputCommon(OutputChannelId, outputGpio, uart)
 {
     DEBUG_START;
@@ -113,7 +109,7 @@ void c_OutputSerial::Begin ()
     ETS_UART_INTR_DISABLE ();
 
     /* Atttach interrupt handler */
-    ETS_UART_INTR_ATTACH (serial_handle, NULL);
+    ETS_UART_INTR_ATTACH (handleGenericSerial_ISR, NULL);
 
 #else
     // get the current interrupt control bit values

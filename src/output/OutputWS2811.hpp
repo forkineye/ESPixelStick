@@ -24,7 +24,6 @@
 
 #include "OutputCommon.hpp"
 
-// #define UART_INV_MASK  (0x3f << 19)
 #ifdef ARDUINO_ARCH_ESP32
 #   include <driver/uart.h>
 #endif

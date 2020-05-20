@@ -26,15 +26,37 @@
 
 #ifdef ARDUINO_ARCH_ESP32
 #   include <driver/uart.h>
+#   include "driver/gpio.h"
 #endif
 
 #include "OutputMgr.hpp"
+
+#ifndef gpio_num_t
+typedef enum
+{
+    GPIO_NUM_2  = 2,
+    GPIO_NUM_10 = 10,
+    GPIO_NUM_13 = 13,
+
+} gpio_num_t;
+#endif // ndef gpio_num_t
+
+#ifndef uart_port_t
+typedef enum
+{
+    UART_NUM_0 = 0,
+    UART_NUM_1,
+    UART_NUM_2
+} uart_port_t;
+
+#endif // ndef uart_port_t
 
 class c_OutputCommon
 {
 public:
     c_OutputCommon (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
-                    gpio_num_t outputGpio, uart_port_t uart);
+                    gpio_num_t outputGpio, 
+                    uart_port_t uart);
     virtual ~c_OutputCommon ();
 
     // functions to be provided by the derived class
@@ -45,8 +67,10 @@ public:
             uint16_t     GetBufferSize () {return sizeof (InputDataBuffer);}   ///< Get the address of the buffer into which the E1.31 handler will stuff data
     virtual void         Render () = 0;                                        ///< Call from loop(),  renders output data
     virtual void         GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
+ 
     virtual c_OutputMgr::e_OutputType GetOutputType () = 0;                    ///< Have the instance report its type.
     c_OutputMgr::e_OutputChannelIds GetOuputChannelId () { return OutputChannelId; } ///< return the output channel number
+
 protected:
 
 #define MAX_NUM_PIXELS                         1360

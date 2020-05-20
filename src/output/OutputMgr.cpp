@@ -421,6 +421,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 break;
             }
 
+#ifdef ARDUINO_ARCH_ESP32
             case e_OutputType::OutputType_SPI:
             {
                 LOG_PORT.println (String (F ("************** Starting up SPI for channel '")) + ChannelIndex + "'. **************");
@@ -428,6 +429,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId);
                 break;
             }
+#endif // def ARDUINO_ARCH_ESP8266
 
             case e_OutputType::OutputType_WS2811:
             {

@@ -65,15 +65,12 @@ public:
         OutputType_Serial,
         OutputType_Renard,
         OutputType_DMX,
-#ifdef ARDUINO_ARCH_ESP8266
-        OutputType_End   = OutputType_DMX,
-        OutputType_Disabled, // must be last
-#else
+#ifdef ARDUINO_ARCH_ESP32
         OutputType_SPI,
-        OutputType_Disabled, // must be last
-        OutputType_End   = OutputType_Disabled,
 #endif // def ARDUINO_ARCH_ESP32
+        OutputType_Disabled, // must be last
         OutputType_Start = OutputType_WS2811,
+        OutputType_End   = OutputType_Disabled,
     };
 
 private:
