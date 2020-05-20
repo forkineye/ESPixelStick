@@ -18,8 +18,14 @@
 */
 
 #include <Arduino.h>
-#include <WiFi.h>
-#include <esp_wifi.h>
+
+#ifdef ARDUINO_ARCH_ESP8266
+#   include <eagle_soc.h>
+#   include <ets_sys.h>
+#else
+
+#endif // def ARDUINO_ARCH_ESP8266
+
 #include "ESPixelStick.h"
 #include "WiFiMgr.hpp"
 
@@ -44,9 +50,9 @@ c_WiFiMgr::c_WiFiMgr ()
 ///< deallocate any resources and put the output channels into a safe state
 c_WiFiMgr::~c_WiFiMgr()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // ~c_WiFiMgr
 
@@ -79,9 +85,10 @@ void c_WiFiMgr::Begin (config_t* NewConfig)
     }
     // DEBUG_V ("");
 
+
     // Setup WiFi Handlers
 #ifdef ARDUINO_ARCH_ESP8266
-    wifiConnectHandler = WiFi.onStationModeGotIP (onWiFiConnect);
+    wifiConnectHandler = WiFi.onStationModeGotIP ([this](const WiFiEventStationModeGotIP& event) {this->onWiFiConnect (event); });
 #else
     WiFi.onEvent ([this](WiFiEvent_t event, system_event_info_t info) {this->onWiFiConnect    (event, info);}, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
     WiFi.onEvent ([this](WiFiEvent_t event, system_event_info_t info) {this->onWiFiDisconnect (event, info);}, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
@@ -122,7 +129,7 @@ void c_WiFiMgr::Begin (config_t* NewConfig)
     // DEBUG_V ("");
 
 #ifdef ARDUINO_ARCH_ESP8266
-    wifiDisconnectHandler = WiFi.onStationModeDisconnected (onWiFiDisconnect);
+    wifiDisconnectHandler = WiFi.onStationModeDisconnected ([this](const WiFiEventStationModeDisconnected& event) {this->onWiFiDisconnect (event); });
 
     // Handle OTA update from asynchronous callbacks
     Update.runAsync (true);
@@ -136,6 +143,7 @@ void c_WiFiMgr::Begin (config_t* NewConfig)
 //-----------------------------------------------------------------------------
 void c_WiFiMgr::initWifi ()
 {
+    // DEBUG_START;
     // Switch to station mode and disconnect just in case
     WiFi.mode (WIFI_STA);
 #ifdef ARDUINO_ARCH_ESP8266
@@ -148,17 +156,19 @@ void c_WiFiMgr::initWifi ()
     connectWifi ();
 
     // wait for the connection to complete via the callback function
-    uint32_t timeout = millis ();
+    uint32_t WaitForWiFiStartTime = millis ();
     while (WiFi.status () != WL_CONNECTED)
     {
+        // DEBUG_V ("");
         LOG_PORT.print (".");
         delay (500);
-        if (millis () - timeout > (1000 * config->sta_timeout))
+        if (millis () - WaitForWiFiStartTime > (1000 * config->sta_timeout))
         {
             LOG_PORT.println (F ("\n*** Failed to connect ***"));
             break;
         }
     }
+    // DEBUG_END;
 } // initWifi
 
 //-----------------------------------------------------------------------------
