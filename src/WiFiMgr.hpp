@@ -20,7 +20,13 @@
 */
 
 #include <Arduino.h>
-#include <WiFi.h>
+
+#ifdef ARDUINO_ARCH_ESP8266
+#   include <ESP8266WiFi.h>
+#else
+#   include <WiFi.h>
+#endif // def ARDUINO_ARCH_ESP8266
+
 
 class c_WiFiMgr
 {
@@ -28,11 +34,11 @@ public:
     c_WiFiMgr ();
     virtual ~c_WiFiMgr ();
 
-    void Begin (config_t* NewConfig); ///< set up the operating environment based on the current config (or defaults)
-    void ValidateConfig (config_t * NewConfig);
-    IPAddress getIpAddress () { return CurrentIpAddress; }
+    void      Begin           (config_t* NewConfig); ///< set up the operating environment based on the current config (or defaults)
+    void      ValidateConfig  (config_t * NewConfig);
+    IPAddress getIpAddress    () { return CurrentIpAddress; }
     IPAddress getIpSubNetMask () { return CurrentSubnetMask; }
-    void connectWifi ();
+    void      connectWifi     ();
 
 private:
 #ifdef ARDUINO_ARCH_ESP8266
