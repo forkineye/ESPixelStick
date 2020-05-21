@@ -175,10 +175,10 @@ void c_OutputWS2811::Begin()
     ETS_UART_INTR_DISABLE();
 
     // Atttach interrupt handler
-    ETS_UART_INTR_ATTACH(uart_intr_handler, NULL);
+    ETS_UART_INTR_ATTACH (uart_intr_handler, this);
 
-    // Set TX FIFO trigger. 80 bytes gives 200 microsecs to refill the FIFO
-    WRITE_PERI_REG(UART_CONF1(UartId), 80 << UART_TXFIFO_EMPTY_THRHD_S);
+    // Set TX FIFO trigger. 40 bytes gives 100 us to start to refill the FIFO
+    WRITE_PERI_REG(UART_CONF1(UartId), PIXEL_FIFO_TRIGGER_LEVEL << UART_TXFIFO_EMPTY_THRHD_S);
 
     // Disable RX & TX interrupts. It is enabled by uart.c in the SDK
     CLEAR_PERI_REG_MASK(UART_INT_ENA(UartId), UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
