@@ -44,7 +44,7 @@ public:
     c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_WS2811;} ///< Have the instance report its type.
 
     /// Interrupt Handler
-    void IRAM_ATTR HandleWS2811Interrupt (); ///< UART ISR
+    void IRAM_ATTR ISR_Handler (); ///< UART ISR
 
 #define WS2812_PIXEL_LIMIT                          1360    ///< Total pixel limit - 40.85ms for 8 universes
 #define WS2812_NUM_INTENSITY_BYTES_PER_PIXEL    	3

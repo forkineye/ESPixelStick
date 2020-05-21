@@ -77,7 +77,9 @@ public:
         BR_DEFAULT = BR_57600,
     };
 
-    void ICACHE_RAM_ATTR _handleGenericSerial_ISR (); // interrupt handler
+    /// Interrupt Handler
+    void IRAM_ATTR ISR_Handler (); ///< UART ISR
+//    void ICACHE_RAM_ATTR _handleGenericSerial_ISR (); // interrupt handler
 
 private:
     const size_t    MAX_HDR_SIZE           = 10;      // Max generic serial header size

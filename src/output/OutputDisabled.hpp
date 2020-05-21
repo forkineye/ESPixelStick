@@ -38,6 +38,7 @@ public:
     void         Render ();                                        ///< Call from loop(),  renders output data
     void         GetDriverName (String & sDriverName) { sDriverName = String (F ("Disabled")); }
     c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_Disabled;} ///< Have the instance report its type.
+    void IRAM_ATTR ISR_Handler () {} ///< UART ISR
 
 private:
 

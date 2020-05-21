@@ -31,7 +31,7 @@
 
 #include "OutputMgr.hpp"
 
-#ifndef gpio_num_t
+#ifdef ARDUINO_ARCH_ESP8266
 typedef enum
 {
     GPIO_NUM_2  = 2,
@@ -39,9 +39,7 @@ typedef enum
     GPIO_NUM_13 = 13,
 
 } gpio_num_t;
-#endif // ndef gpio_num_t
 
-#ifndef uart_port_t
 typedef enum
 {
     UART_NUM_0 = 0,
@@ -49,7 +47,11 @@ typedef enum
     UART_NUM_2
 } uart_port_t;
 
-#endif // ndef uart_port_t
+#endif // def ARDUINO_ARCH_ESP8266
+
+#ifndef UART_INTR_MASK
+#   define UART_INTR_MASK 0x1ff
+#endif
 
 class c_OutputCommon
 {
@@ -63,13 +65,14 @@ public:
     virtual void         Begin () = 0;                                         ///< set up the operating environment based on the current config (or defaults)
     virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig) = 0; ///< Set a new config in the driver
     virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig) = 0; ///< Get the current config used by the driver
-            uint8_t    * GetBufferAddress () {return InputDataBuffer;}         ///< Get the address of the buffer into which the E1.31 handler will stuff data
-            uint16_t     GetBufferSize () {return sizeof (InputDataBuffer);}   ///< Get the address of the buffer into which the E1.31 handler will stuff data
     virtual void         Render () = 0;                                        ///< Call from loop(),  renders output data
     virtual void         GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
- 
     virtual c_OutputMgr::e_OutputType GetOutputType () = 0;                    ///< Have the instance report its type.
-    c_OutputMgr::e_OutputChannelIds GetOuputChannelId () { return OutputChannelId; } ///< return the output channel number
+    c_OutputMgr::e_OutputChannelIds   GetOuputChannelId () { return OutputChannelId; } ///< return the output channel number
+            uint8_t    * GetBufferAddress () {return InputDataBuffer;}         ///< Get the address of the buffer into which the E1.31 handler will stuff data
+            uint16_t     GetBufferSize () {return sizeof (InputDataBuffer);}   ///< Get the address of the buffer into which the E1.31 handler will stuff data
+
+    virtual void ISR_Handler (void) = 0;    // Function to perform the actual ISR work
 
 protected:
 
@@ -81,6 +84,16 @@ protected:
     uart_port_t UartId;      ///< Id of the UART used by this instance of the driver
     c_OutputMgr::e_OutputChannelIds OutputChannelId;
     bool        HasBeenInitialized = false;
+
+#ifdef ARDUINO_ARCH_ESP8266
+    void InitializeUart (uint32_t BaudRate, 
+                         uint32_t UartFlags1, 
+                         uint32_t UartFlags2,
+                         uint32_t fifoTriggerLevel = 0);
+#else
+    void InitializeUart (uart_config_t & config,
+                         uint32_t fifoTriggerLevel = 0);
+#endif // ! def ARDUINO_ARCH_ESP8266
 
 private:
     uint8_t InputDataBuffer[INPUT_BUFFER_SIZE];

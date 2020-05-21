@@ -39,6 +39,8 @@ public:
     void      GetDriverName (String& sDriverName) { sDriverName = String (F ("GECE")); }
     c_OutputMgr::e_OutputType GetOutputType () { return c_OutputMgr::e_OutputType::OutputType_GECE; } ///< Have the instance report its type.
 
+    void IRAM_ATTR ISR_Handler () {} ///< UART ISR
+
 private:
 
 #define GECE_PIXEL_LIMIT                        63  ///< Total pixel limit

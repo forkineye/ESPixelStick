@@ -51,101 +51,86 @@ extern "C" {
 #endif
 }
 
+#define FIFO_TRIGGER_LEVEL (UART_TX_FIFO_SIZE / 2)
+
 static void ICACHE_RAM_ATTR handleGenericSerial_ISR (void* param);
+
+uint32_t BaudRateToBps[]
+{
+    38400,
+    57600,
+    115200,
+    230400,
+    250000,
+    460800,
+};
+
 
 c_OutputSerial::c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
                                 gpio_num_t outputGpio, uart_port_t uart) : 
     c_OutputCommon(OutputChannelId, outputGpio, uart)
 {
-    DEBUG_START;
-    DEBUG_END;
+    // DEBUG_START;
+    // DEBUG_END;
 } // c_OutputSerial
 
 c_OutputSerial::~c_OutputSerial ()
 {
-    DEBUG_START;
+    // DEBUG_START;
     if (gpio_num_t (-1) == DataPin) { return; }
 
 #ifdef ARDUINO_ARCH_ESP8266
     Serial1.end ();
 #else
-    uart_driver_delete (UartId);
-    ESP_ERROR_CHECK (uart_driver_install (UartId,
-                                          UART_FIFO_LEN + 1024,
-                                          UART_FIFO_LEN + 1024, 0, NULL, 0));
+
+    // make sure no existing low level driver is running
+    ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
+    // DEBUG_V ("");
+
+    ESP_ERROR_CHECK (uart_disable_rx_intr (UartId));
+    // DEBUG_V ("");
+
 #endif
 
-    pinMode (DataPin, INPUT);
-    DEBUG_END;
+    // DEBUG_END;
 } // ~c_OutputSerial
 
 void c_OutputSerial::Begin () 
 {
-    DEBUG_START;
-    Serial.println (String (F ("** SERIAL Initialization for Chan: ")) + String (OutputChannelId) + " **");
+    // DEBUG_START;
+    LOG_PORT.println (String (F ("** SERIAL Initialization for Chan: ")) + String (OutputChannelId) + " **");
+    int speed = 0;
 
-    // Set output pins
-    pinMode (DataPin, OUTPUT);
-    digitalWrite (DataPin, LOW);
+    if (_type == SerialType::DMX512)
+    {
+        speed = BaudRateToBps[int(BaudRate::BR_250000)];
+    }
+    else
+    {
+        speed = BaudRateToBps[int(_baudrate)];
+    }
 
+#ifdef ARDUINO_ARCH_ESP8266
     /* Initialize uart */
     /* frameTime = szSymbol * 1000000 / baud * szBuffer */
-    if (_type == SerialType::RENARD) 
-    {
-    }
-    else if (_type == SerialType::DMX512)
-    {
-    }
-    else 
-    {
-    }
-
-    /* Clear FIFOs */
-    SET_PERI_REG_MASK   (UART_CONF0 (UartId), UART_RXFIFO_RST | UART_TXFIFO_RST);
-    CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_RXFIFO_RST | UART_TXFIFO_RST);
-
-    /* Disable all interrupts */
-#ifdef ARDUINO_ARCH_ESP8266
-    ETS_UART_INTR_DISABLE ();
-
-    /* Atttach interrupt handler */
-    ETS_UART_INTR_ATTACH (handleGenericSerial_ISR, NULL);
-
+    InitializeUart (speed,
+        SERIAL_8N1,
+        SERIAL_TX_ONLY,
+        FIFO_TRIGGER_LEVEL);
 #else
-    // get the current interrupt control bit values
-    uint64_t CurrentInterruptValues = GET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
-
-    // turn off all of the interrupts for this uart
-    CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
-
-    /* Atttach interrupt handler */
-    uart_isr_register (uart_port_t (UartId), handleGenericSerial_ISR, this, UART_TXFIFO_EMPTY_INT_ENA, nullptr);
+    /* Serial rate is 4x 800KHz for WS2811 */
+    uart_config_t uart_config;
+    uart_config.baud_rate           = speed;
+    uart_config.data_bits           = uart_word_length_t::UART_DATA_8_BITS;
+    uart_config.flow_ctrl           = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
+    uart_config.parity              = uart_parity_t::UART_PARITY_DISABLE;
+    uart_config.rx_flow_ctrl_thresh = 1;
+    uart_config.stop_bits           = uart_stop_bits_t::UART_STOP_BITS_1;
+    uart_config.use_ref_tick        = false;
+    InitializeUart (uart_config, uint32_t(FIFO_TRIGGER_LEVEL));
 #endif
 
-    /* Set TX FIFO trigger. 80 bytes gives 200 microsecs to refill the FIFO */
-    WRITE_PERI_REG (UART_CONF1 (UartId), 80 << UART_TXFIFO_EMPTY_THRHD_S);
-
-#ifdef ARDUINO_ARCH_ESP8266
-    /* Disable RX & TX interrupts. It is enabled by uart.c in the SDK */
-    CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
-
-    /* Clear all pending interrupts in SEROUT_UART */
-    WRITE_PERI_REG (UART_INT_CLR (UartId), 0xffff);
-
-    /* Reenable interrupts */
-    ETS_UART_INTR_ENABLE ();
-#else
-    /* Disable RX & TX interrupts. It is enabled by uart.c in the SDK */
-    CurrentInterruptValues &= !UART_RXFIFO_FULL_INT_ENA;  // RX off
-    CurrentInterruptValues |= UART_TXFIFO_EMPTY_INT_ENA; // TX on
-
-    /* Clear all pending interrupts in UART1 */
-    WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
-
-    /* Reenable interrupts */
-    WRITE_PERI_REG (UART_INT_ENA (UartId), CurrentInterruptValues);
-#endif
-    DEBUG_END;
+//    DEBUG_END;
 }
 
 //----------------------------------------------------------------------------
@@ -255,11 +240,11 @@ void c_OutputSerial::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 // This allows me to use non static variables in the ISR.
 static void ICACHE_RAM_ATTR handleGenericSerial_ISR (void* param)
 {
-    reinterpret_cast <c_OutputSerial*>(param)->_handleGenericSerial_ISR ();
+    reinterpret_cast <c_OutputSerial*>(param)->ISR_Handler ();
 } // handleGenericSerial_ISR
 
 // Fill the FIFO with as many intensity values as it can hold.
-void ICACHE_RAM_ATTR c_OutputSerial::_handleGenericSerial_ISR ()
+void ICACHE_RAM_ATTR c_OutputSerial::ISR_Handler ()
 {
     // Process if the desired UART has raised an interrupt
     if (READ_PERI_REG (UART_INT_ST (UartId)))
@@ -331,7 +316,7 @@ void ICACHE_RAM_ATTR c_OutputSerial::_handleGenericSerial_ISR ()
         } while (false);
     } // end this channel has an interrupt
 
-} // _handleGenericSerial_ISR
+} // ISR_Handler
 
 void c_OutputSerial::Render () 
 {
@@ -378,7 +363,7 @@ void c_OutputSerial::Render ()
     RemainingDataCount = Num_Channels;
 
     // fill the fifo before enableing the transmitter
-    _handleGenericSerial_ISR ();
+    ISR_Handler ();
 
     // enable interrupts
     SET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
