@@ -18,17 +18,16 @@
 */
 
 #include <Arduino.h>
+#include "ESPixelStick.h"
 
 #ifdef ARDUINO_ARCH_ESP8266
 #   include <eagle_soc.h>
 #   include <ets_sys.h>
 #else
-
+#   include <esp_wifi.h>
 #endif // def ARDUINO_ARCH_ESP8266
 
-#include "ESPixelStick.h"
 #include "WiFiMgr.hpp"
-
 
 //-----------------------------------------------------------------------------
 // Create secrets.h with a #define for SECRETS_SSID and SECRETS_PASS
