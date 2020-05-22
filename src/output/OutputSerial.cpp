@@ -53,8 +53,6 @@ extern "C" {
 
 #define FIFO_TRIGGER_LEVEL (UART_TX_FIFO_SIZE / 2)
 
-static void ICACHE_RAM_ATTR handleGenericSerial_ISR (void* param);
-
 uint32_t BaudRateToBps[]
 {
     38400,
@@ -64,7 +62,6 @@ uint32_t BaudRateToBps[]
     250000,
     460800,
 };
-
 
 c_OutputSerial::c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
                                 gpio_num_t outputGpio, uart_port_t uart) : 
@@ -95,6 +92,15 @@ c_OutputSerial::~c_OutputSerial ()
     // DEBUG_END;
 } // ~c_OutputSerial
 
+//----------------------------------------------------------------------------
+/* shell function to set the 'this' pointer of the real ISR
+   This allows me to use non static variables in the ISR.
+ */
+static void IRAM_ATTR uart_intr_handler (void* param)
+{
+    reinterpret_cast <c_OutputSerial*>(param)->ISR_Handler ();
+} // uart_intr_handler
+
 void c_OutputSerial::Begin () 
 {
     // DEBUG_START;
@@ -114,9 +120,9 @@ void c_OutputSerial::Begin ()
     /* Initialize uart */
     /* frameTime = szSymbol * 1000000 / baud * szBuffer */
     InitializeUart (speed,
-        SERIAL_8N1,
-        SERIAL_TX_ONLY,
-        FIFO_TRIGGER_LEVEL);
+                    SERIAL_8N1,
+                    SERIAL_TX_ONLY,
+                    FIFO_TRIGGER_LEVEL);
 #else
     /* Serial rate is 4x 800KHz for WS2811 */
     uart_config_t uart_config;
@@ -129,6 +135,14 @@ void c_OutputSerial::Begin ()
     uart_config.use_ref_tick        = false;
     InitializeUart (uart_config, uint32_t(FIFO_TRIGGER_LEVEL));
 #endif
+
+    // Atttach interrupt handler
+#ifdef ARDUINO_ARCH_ESP8266
+    ETS_UART_INTR_ATTACH (uart_intr_handler, this);
+#else
+    uart_isr_register (UartId, uart_intr_handler, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM, nullptr);
+#endif
+
 
 //    DEBUG_END;
 }
@@ -236,15 +250,8 @@ void c_OutputSerial::GetConfig (ArduinoJson::JsonObject& jsonConfig)
     DEBUG_END;
 } // GetConfig
 
-// shell function to set the 'this' pointer of the real ISR
-// This allows me to use non static variables in the ISR.
-static void ICACHE_RAM_ATTR handleGenericSerial_ISR (void* param)
-{
-    reinterpret_cast <c_OutputSerial*>(param)->ISR_Handler ();
-} // handleGenericSerial_ISR
-
 // Fill the FIFO with as many intensity values as it can hold.
-void ICACHE_RAM_ATTR c_OutputSerial::ISR_Handler ()
+void IRAM_ATTR c_OutputSerial::ISR_Handler ()
 {
     // Process if the desired UART has raised an interrupt
     if (READ_PERI_REG (UART_INT_ST (UartId)))
@@ -263,9 +270,12 @@ void ICACHE_RAM_ATTR c_OutputSerial::ISR_Handler ()
                         enqueue (CurrentData);
                     }
                 } // need to send the footer
+                
+                // Disable ALL interrupts when done
+                CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
 
-                // Disable TX interrupt when done
-                CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
+                // Clear all interrupts flags for this uart
+                WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
 
                 break;
             } // end close of frame
@@ -320,7 +330,7 @@ void ICACHE_RAM_ATTR c_OutputSerial::ISR_Handler ()
 
 void c_OutputSerial::Render () 
 {
-    DEBUG_START;
+    // DEBUG_START;
     // start the next frame
     switch (_type)
     {
@@ -362,12 +372,8 @@ void c_OutputSerial::Render ()
     pNextChannelToSend = GetBufferAddress ();
     RemainingDataCount = Num_Channels;
 
-    // fill the fifo before enableing the transmitter
-    ISR_Handler ();
-
-    // enable interrupts
+    // enable interrupts and start sending
     SET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
 
-    // turn on the transmitter
-    DEBUG_END;
+    // DEBUG_END;
 } // render

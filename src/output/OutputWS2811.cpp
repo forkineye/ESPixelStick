@@ -122,8 +122,19 @@ c_OutputWS2811::~c_OutputWS2811()
     // Clear all pending interrupts in the UART
     WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
 
+    uart_isr_free (UartId);
+
     // DEBUG_END;
 } // ~c_OutputWS2811
+
+//----------------------------------------------------------------------------
+/* shell function to set the 'this' pointer of the real ISR
+   This allows me to use non static variables in the ISR.
+ */
+static void IRAM_ATTR uart_intr_handler (void* param)
+{
+    reinterpret_cast <c_OutputWS2811*>(param)->ISR_Handler ();
+} // uart_intr_handler
 
 //----------------------------------------------------------------------------
 /* Use the current config to set up the output port
@@ -162,6 +173,13 @@ void c_OutputWS2811::Begin()
     // Calculate our refresh time
     refreshTime = (WS2811_TIME_PER_PIXEL * pixel_count) + WS2811_MIN_IDLE_TIME;
 
+    // Atttach interrupt handler
+#ifdef ARDUINO_ARCH_ESP8266
+    ETS_UART_INTR_ATTACH (uart_intr_handler, this);
+#else
+    uart_isr_register (UartId, uart_intr_handler, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM, nullptr);
+#endif
+
     // invert the output
     CLEAR_PERI_REG_MASK (UART_CONF0(UartId), UART_INV_MASK);
     SET_PERI_REG_MASK   (UART_CONF0(UartId), (BIT(22)));
@@ -184,8 +202,9 @@ void c_OutputWS2811::GetConfig(ArduinoJson::JsonObject & jsonConfig)
 } // GetConfig
 
 //----------------------------------------------------------------------------
-// Fill the FIFO with as many intensity values as it can hold.
-//void ICACHE_RAM_ATTR c_OutputWS2811::HandleWS2811Interrupt ()
+/* 
+ * Fill the FIFO with as many intensity values as it can hold.
+ */
 void IRAM_ATTR c_OutputWS2811::ISR_Handler ()
 {
     // Process if the desired UART has raised an interrupt
@@ -216,8 +235,9 @@ void IRAM_ATTR c_OutputWS2811::ISR_Handler ()
             enqueue ((Convert2BitIntensityToUartDataStream[(subpix >> 4) & 0x3]));
             enqueue ((Convert2BitIntensityToUartDataStream[(subpix >> 2) & 0x3]));
             enqueue ((Convert2BitIntensityToUartDataStream[(subpix >> 0) & 0x3]));
-        }; // end send one or more intensity values
 
+        }; // end send one or more intensity values
+        
         // are we done?
         if (0 == RemainingIntensityCount)
         {
@@ -229,6 +249,7 @@ void IRAM_ATTR c_OutputWS2811::ISR_Handler ()
         WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
 
     } // end Our uart generated an interrupt
+
 } // HandleWS2811Interrupt
 
 //----------------------------------------------------------------------------

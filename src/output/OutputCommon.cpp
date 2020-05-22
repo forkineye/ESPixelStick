@@ -130,9 +130,6 @@ void c_OutputCommon::InitializeUart (uint32_t baudrate,
         // Disable all interrupts
         ETS_UART_INTR_DISABLE ();
 
-        // Atttach interrupt handler
-        ETS_UART_INTR_ATTACH (uart_intr_handler, this);
-        
         // Set TX FIFO trigger. 40 bytes gives 100 us to start to refill the FIFO
         WRITE_PERI_REG (UART_CONF1 (UartId), fifoTriggerLevel << UART_TXFIFO_EMPTY_THRHD_S);
         
@@ -189,19 +186,8 @@ void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
 
     // Clear all pending interrupts in the UART
     // WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
-    // DEBUG_V ("");
 
-    uart_isr_register (UartId, uart_intr_handler, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM, nullptr);
     // DEBUG_END;
 } // InitializeUart
 #endif
-
-//----------------------------------------------------------------------------
-/* shell function to set the 'this' pointer of the real ISR
-   This allows me to use non static variables in the ISR.
- */
-static void IRAM_ATTR uart_intr_handler (void* param)
-{
-    reinterpret_cast <c_OutputCommon*>(param)->ISR_Handler ();
-} // uart_intr_handler
 

@@ -72,7 +72,7 @@ public:
             uint8_t    * GetBufferAddress () {return InputDataBuffer;}         ///< Get the address of the buffer into which the E1.31 handler will stuff data
             uint16_t     GetBufferSize () {return sizeof (InputDataBuffer);}   ///< Get the address of the buffer into which the E1.31 handler will stuff data
 
-    virtual void ISR_Handler (void) = 0;    // Function to perform the actual ISR work
+ //   virtual void IRAM_ATTR ISR_Handler (void) = 0;    // Function to perform the actual ISR work
 
 protected:
 
