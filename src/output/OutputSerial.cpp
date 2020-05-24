@@ -63,14 +63,30 @@ uint32_t BaudRateToBps[]
     460800,
 };
 
-c_OutputSerial::c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
-                                gpio_num_t outputGpio, uart_port_t uart) : 
-    c_OutputCommon(OutputChannelId, outputGpio, uart)
+typedef enum RenardFrameDefinitions_t
+{
+	CMD_DATA_START   = 0x80,
+    ESC_CHAR         = 0x7F,
+    FRAME_START_CHAR = 0x7E,
+    FRAME_PAD_CHAR   = 0x7D,
+    ESCAPED_OFFSET   = 0x4E,
+
+    MIN_VAL_TO_ESC   = FRAME_PAD_CHAR,
+    MAX_VAL_TO_ESC   = ESC_CHAR
+};
+
+//----------------------------------------------------------------------------
+c_OutputSerial::c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+                                gpio_num_t outputGpio, 
+                                uart_port_t uart,
+                                c_OutputMgr::e_OutputType outputType) :
+    c_OutputCommon(OutputChannelId, outputGpio, uart, outputType)
 {
     // DEBUG_START;
     // DEBUG_END;
 } // c_OutputSerial
 
+//----------------------------------------------------------------------------
 c_OutputSerial::~c_OutputSerial ()
 {
     // DEBUG_START;
@@ -101,19 +117,20 @@ static void IRAM_ATTR uart_intr_handler (void* param)
     reinterpret_cast <c_OutputSerial*>(param)->ISR_Handler ();
 } // uart_intr_handler
 
-void c_OutputSerial::Begin () 
+//----------------------------------------------------------------------------
+void c_OutputSerial::Begin ()
 {
     // DEBUG_START;
     LOG_PORT.println (String (F ("** SERIAL Initialization for Chan: ")) + String (OutputChannelId) + " **");
     int speed = 0;
 
-    if (_type == SerialType::DMX512)
+    if (OutputType == c_OutputMgr::e_OutputType::OutputType_DMX)
     {
         speed = BaudRateToBps[int(BaudRate::BR_250000)];
     }
     else
     {
-        speed = BaudRateToBps[int(_baudrate)];
+        speed = BaudRateToBps[int(CurrentBaudrate)];
     }
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -169,17 +186,10 @@ bool c_OutputSerial::validate ()
         response = false;
     }
 
-    if ((_baudrate < BaudRate::BR_MIN) || (_baudrate > BaudRate::BR_MAX))
+    if ((CurrentBaudrate < BaudRate::BR_MIN) || (CurrentBaudrate > BaudRate::BR_MAX))
     {
         LOG_PORT.println (String (F ("*** Requested BaudRate is Not Valid. Setting to Default ***")));
-        _baudrate = BaudRate::BR_DEFAULT;
-        response = false;
-    }
-
-    if((_type < SerialType::MIN_TYPE) || (_type > SerialType::MAX_TYPE))
-    {
-        LOG_PORT.println (String (F ("*** Requested Output Type is Not Valid. Setting to Default ***")));
-        _type = SerialType::DEFAULT_TYPE;
+        CurrentBaudrate = BaudRate::BR_DEFAULT;
         response = false;
     }
 
@@ -217,13 +227,9 @@ bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject & jsonConfig)
     FileIO::setFromJSON (Num_Channels,        jsonConfig["num_chan"]);
 
     // enums need to be converted to uints for json
-    temp = uint (_baudrate);
+    temp = uint (CurrentBaudrate);
     FileIO::setFromJSON (temp, jsonConfig["baudrate"]);
-    _baudrate = BaudRate (temp);
-
-    temp = uint (_type);
-    FileIO::setFromJSON (temp, jsonConfig["ser_type"]);
-    _type = SerialType (temp);
+    CurrentBaudrate = BaudRate (temp);
 
     temp = uint (DataPin);
     FileIO::setFromJSON (temp, jsonConfig["data_pin"]);
@@ -244,8 +250,7 @@ void c_OutputSerial::GetConfig (ArduinoJson::JsonObject& jsonConfig)
     jsonConfig["gen_ser_ftr"] = GenericSerialFooter;
     jsonConfig["num_chan"] = Num_Channels;
     // enums need to be converted to uints for json
-    jsonConfig["baudrate"] = uint (_baudrate);
-    jsonConfig["ser_type"] = uint (_type);
+    jsonConfig["baudrate"] = uint (CurrentBaudrate);
     jsonConfig["data_pin"] = uint (DataPin);
     DEBUG_END;
 } // GetConfig
@@ -263,7 +268,7 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
             {
                 // at this point the FIFO has at least 40 free bytes. 10 byte header should fit
                 // are we in generic serial mode?
-                if (_type == SerialType::GENERIC)
+                if (OutputType == c_OutputMgr::e_OutputType::OutputType_Serial)
                 {
                     for (auto CurrentData : GenericSerialFooter)
                     {
@@ -299,14 +304,15 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
                 data = *pNextChannelToSend++;
 
                 // is this a renard port?
-                if (_type == SerialType::RENARD)
+                if (OutputType == c_OutputMgr::e_OutputType::OutputType_Renard)
                 {
                     // do we have to adjust the renard data stream?
-                    if ((data >= RENARD_BREAK_VALUE_LOW) && (data <= RENARD_BREAK_VALUE_HI))
+                    if ((data >= RenardFrameDefinitions_t::MIN_VAL_TO_ESC) && 
+                        (data <= RenardFrameDefinitions_t::MAX_VAL_TO_ESC))
                     {
                         // Send the two byte substitute for the value
-                        enqueue (RENARD_BREAK_VALUE);
-                        enqueue (data - RENARD_ADJUST_VALUE);
+                        enqueue (RenardFrameDefinitions_t::ESC_CHAR);
+                        enqueue (data - RenardFrameDefinitions_t::ESCAPED_OFFSET);
 
                         // show that we had to add an extra data byte to the output stream
                         --DataToSend;
@@ -328,13 +334,14 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
 
 } // ISR_Handler
 
-void c_OutputSerial::Render () 
+//----------------------------------------------------------------------------
+void c_OutputSerial::Render ()
 {
     // DEBUG_START;
     // start the next frame
-    switch (_type)
+    switch (OutputType)
     {
-        case SerialType::DMX512:
+        case c_OutputMgr::e_OutputType::OutputType_DMX:
         {
             SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
             delayMicroseconds (DMX_BREAK);
@@ -344,15 +351,15 @@ void c_OutputSerial::Render ()
             break;
         } // DMX512
 
-        case SerialType::RENARD:
+        case c_OutputMgr::e_OutputType::OutputType_Renard:
         {
-            enqueue (RENARD_FRAME_START1);
-            enqueue (RENARD_FRAME_START2);
+            enqueue (RenardFrameDefinitions_t::FRAME_START_CHAR);
+            enqueue (RenardFrameDefinitions_t::CMD_DATA_START);
 
             break;
         } // RENARD
 
-        case SerialType::GENERIC:
+        case c_OutputMgr::e_OutputType::OutputType_Serial:
         {
             // load the generic header into the fifo
             for (auto currentByte : GenericSerialHeader)
@@ -366,7 +373,7 @@ void c_OutputSerial::Render ()
         default:
         { break; } // this is not possible but the language needs it here
 
-    } // end switch (_type)
+    } // end switch (OutputType)
 
     // point at the input data buffer
     pNextChannelToSend = GetBufferAddress ();

@@ -40,7 +40,10 @@ class c_OutputSerial : public c_OutputCommon
 {
 public:
     // These functions are inherited from c_OutputCommon
-    c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId, gpio_num_t outputGpio, uart_port_t uart);
+    c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
+                      gpio_num_t outputGpio, 
+                      uart_port_t uart,
+                      c_OutputMgr::e_OutputType outputType);
     virtual ~c_OutputSerial ();
 
     // functions to be provided by the derived class
@@ -49,19 +52,8 @@ public:
     void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     void         Render ();                                        ///< Call from loop(),  renders output data
     void         GetDriverName (String & sDriverName) { sDriverName = String (F ("Serial")); }
-    c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_Serial;} ///< Have the instance report its type.
 
 #define GS_CHANNEL_LIMIT 2048
-
-    enum class SerialType
-    {
-        GENERIC=0,
-        DMX512,
-        RENARD,
-        MAX_TYPE = RENARD,
-        MIN_TYPE = GENERIC,
-        DEFAULT_TYPE = RENARD,
-    };
 
     enum class BaudRate
     {
@@ -79,7 +71,6 @@ public:
 
     /// Interrupt Handler
     void IRAM_ATTR ISR_Handler (); ///< UART ISR
-//    void ICACHE_RAM_ATTR _handleGenericSerial_ISR (); // interrupt handler
 
 private:
     const size_t    MAX_HDR_SIZE           = 10;      // Max generic serial header size
@@ -88,29 +79,22 @@ private:
     const uint16_t  DEFAULT_NUM_CHANNELS   = 64;
     const size_t    BUF_SIZE               = (MAX_CHANNELS + MAX_HDR_SIZE + MAX_FOOTER_SIZE);
 
-    const uint8_t   RENARD_FRAME_START1    = 0x7E;
-    const uint8_t   RENARD_FRAME_START2    = 0x80;
-    const uint8_t   RENARD_BREAK_VALUE     = 0x7D;
-    const uint8_t   RENARD_BREAK_VALUE_LOW = 0x70;
-    const uint8_t   RENARD_BREAK_VALUE_HI  = 0x80;
-    const uint8_t   RENARD_ADJUST_VALUE    = 0x40;
-
     /* DMX minimum timings per E1.11 */
     const uint8_t   DMX_BREAK              = 92;
     const uint8_t   DMX_MAB                = 12;
 
-    bool                 validate ();
+    bool            validate ();
 
     // config data
-    String          GenericSerialHeader = "";
-    String          GenericSerialFooter = "";
-    BaudRate        _baudrate           = BaudRate::BR_DEFAULT;     // current transmit rate
-    SerialType      _type               = SerialType::DEFAULT_TYPE; // Output Serial type
+    String          GenericSerialHeader;
+    String          GenericSerialFooter;
+    BaudRate        CurrentBaudrate     = BaudRate::BR_DEFAULT;     // current transmit rate
     uint16_t        Num_Channels        = DEFAULT_NUM_CHANNELS;     // Number of data channels to transmit
 
     // non config data
-    uint16_t        RemainingDataCount  = 0;                        // length of this frame
-    uint8_t       * pNextChannelToSend  = nullptr;                  // current position in the frame
+    uint16_t        RemainingDataCount;
+    uint8_t       * pNextChannelToSend;
+    String          OutputName;
 
 #ifdef ARDUINO_ARCH_ESP8266
     /* Returns number of bytes waiting in the TX FIFO of UART1 */
