@@ -75,8 +75,11 @@ char Convert2BitIntensityToUartDataStream[] =
 static void IRAM_ATTR uart_intr_handler (void* param);
 
 //----------------------------------------------------------------------------
-c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId, gpio_num_t outputGpio, uart_port_t uart) :
-    c_OutputCommon(OutputChannelId, outputGpio, uart),
+c_OutputWS2811::c_OutputWS2811(c_OutputMgr::e_OutputChannelIds OutputChannelId, 
+                               gpio_num_t outputGpio, 
+                               uart_port_t uart,
+                               c_OutputMgr::e_OutputType outputType) :
+    c_OutputCommon(OutputChannelId, outputGpio, uart, outputType),
     color_order ("rgb"),
     pixel_count (170),
     zig_size (0),

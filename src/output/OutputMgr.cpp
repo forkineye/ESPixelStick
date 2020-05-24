@@ -26,19 +26,22 @@
 #include "../FileIO.h"
 
 // bring in driver definitions
-#include "OutputWS2811.hpp"
-#include "OutputGECE.hpp"
 #include "OutputDisabled.hpp"
+#include "OutputGECE.hpp"
+#include "OutputSerial.hpp"
+#include "OutputWS2811.hpp"
 // needs to be last
 #include "OutputMgr.hpp"
 
 
+//-----------------------------------------------------------------------------
 typedef struct OutputChannelIdToGpioAndPortEntry_t
 {
     gpio_num_t dataPin;
     uart_port_t UartId;
 };
 
+//-----------------------------------------------------------------------------
 OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] =
 {
     {gpio_num_t::GPIO_NUM_2,  uart_port_t::UART_NUM_1},
@@ -46,7 +49,7 @@ OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] =
     {gpio_num_t::GPIO_NUM_10, uart_port_t (-1)},
 };
 
-
+//-----------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
 c_OutputMgr::c_OutputMgr ()
 {
@@ -82,7 +85,8 @@ void c_OutputMgr::Begin ()
         // the drivers will put the hardware in a safe state
         pOutputChannelDrivers[ChannelIndex++] = new c_OutputDisabled (c_OutputMgr::e_OutputChannelIds (ChannelIndex),
                                                                       gpio_num_t (-1),
-                                                                      uart_port_t (-1));
+                                                                      uart_port_t (-1), 
+                                                                      OutputType_Disabled);
     }
 
     // load up the configuration from the saved file. This also starts the drivers
@@ -109,8 +113,8 @@ uint16_t c_OutputMgr::GetBufferSize (e_OutputChannelIds ChannelId)
 } // GetBufferSize
 
 //-----------------------------------------------------------------------------
-///< Load and process the current configuration
-/*
+/* Load and process the current configuration
+*
 *   needs
 *       Nothing
 *   returns
@@ -141,9 +145,9 @@ void c_OutputMgr::LoadConfig ()
         SaveConfig (); 
     }
 
-    // todo - remove this
+    // todo - remove this. For debugging without UI
     InstantiateNewOutputChannel (e_OutputChannelIds::OutputChannelId_1,
-                                 e_OutputType::OutputType_WS2811);
+                                 e_OutputType::OutputType_Renard);
 
     // DEBUG_END;
 } // LoadConfig
@@ -282,6 +286,7 @@ bool c_OutputMgr::DeserializeConfig (DynamicJsonDocument & jsonConfig)
 
 } // deserializeConfig
 
+//-----------------------------------------------------------------------------
 void c_OutputMgr::SerializeConfig (DynamicJsonDocument & jsonConfig)
 {
     // DEBUG_START;
@@ -357,8 +362,12 @@ void c_OutputMgr::SerializeConfig (DynamicJsonDocument & jsonConfig)
 } // SerializeConfig
 
 //-----------------------------------------------------------------------------
-///< Create an instance of the desired output type in the desired channel
-/*
+/* Create an instance of the desired output type in the desired channel
+*
+* WARNING:  This function assumes there is a driver running in the identified
+*           out channel. These must be set up and started when the manager is 
+*           started.
+*
     needs
         channel ID
         channel type
@@ -373,10 +382,10 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
     if (pOutputChannelDrivers[ChannelIndex]->GetOutputType() != NewOutputChannelType)
     {
         // DEBUG_V ("shut down the existing driver");
-        // shut down the existing driver
         delete pOutputChannelDrivers[ChannelIndex];
         pOutputChannelDrivers[ChannelIndex] = nullptr;
 
+        // get the new data and UART info
         gpio_num_t dataPin = OutputChannelIdToGpioAndPort[ChannelIndex].dataPin;
         uart_port_t UartId = OutputChannelIdToGpioAndPort[ChannelIndex].UartId;
 
@@ -385,39 +394,35 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
             case e_OutputType::OutputType_Disabled:
             {
                 LOG_PORT.println (String (F ("************** Disabled output type for channel '")) + ChannelIndex + "'. **************");
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId);
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 break;
             }
 
             case e_OutputType::OutputType_DMX:
             {
                 LOG_PORT.println (String (F ("************** Starting up DMX for channel '")) + ChannelIndex + "'. **************");
-                LOG_PORT.println (String (F ("************** DMX Not supported Yet. Using disabled. **************")));
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId);
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputSerial (ChannelIndex, dataPin, UartId, OutputType_DMX);
                 break;
             }
 
             case e_OutputType::OutputType_GECE:
             {
                 LOG_PORT.println (String (F ("************** Starting up GECE for channel '")) + ChannelIndex + "'. **************");
-                LOG_PORT.println (String (F ("************** GECE Not supported Yet. Using disabled. **************")));
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId);
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputGECE (ChannelIndex, dataPin, UartId, OutputType_GECE);
                 break;
             }
 
             case e_OutputType::OutputType_Serial:
             {
                 LOG_PORT.println (String (F ("************** Starting up Generic Serial for channel '")) + ChannelIndex + "'. **************");
-                LOG_PORT.println (String (F ("************** Generic Serial  Not supported Yet. Using disabled. **************")));
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId);
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputSerial (ChannelIndex, dataPin, UartId, OutputType_Serial);
                 break;
             }
 
             case e_OutputType::OutputType_Renard:
             {
                 LOG_PORT.println (String (F ("************** Starting up Renard for channel '")) + ChannelIndex + "'. **************");
-                LOG_PORT.println (String (F ("************** Renard Not supported Yet. Using disabled. **************")));
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId);
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputSerial (ChannelIndex, dataPin, UartId, OutputType_Renard);
                 break;
             }
 
@@ -426,7 +431,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
             {
                 LOG_PORT.println (String (F ("************** Starting up SPI for channel '")) + ChannelIndex + "'. **************");
                 LOG_PORT.println (String (F ("************** SPI Not supported Yet. Using disabled. **************")));
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId);
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 break;
             }
 #endif // def ARDUINO_ARCH_ESP8266
@@ -434,14 +439,14 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
             case e_OutputType::OutputType_WS2811:
             {
                 LOG_PORT.println (String (F ("************** Starting up WS2811 for channel '")) + ChannelIndex + "'. **************");
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811 (ChannelIndex, dataPin, UartId);
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811 (ChannelIndex, dataPin, UartId, OutputType_WS2811);
                 break;
             }
 
             default:
             {
                 LOG_PORT.println (String (F ("************** Unknown output type for channel '")) + ChannelIndex + "'. Using disabled. **************");
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId);
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 break;
             }
 
@@ -456,8 +461,8 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 } // InstantiateNewOutputChannel
 
 //-----------------------------------------------------------------------------
-///< Returns the current configuration for the output channels
-/*
+/* Returns the current configuration for the output channels
+*
 *   needs
 *       Reference to string into which to place the configuration
 *       presentation style
@@ -474,8 +479,8 @@ void c_OutputMgr::GetConfig (DynamicJsonDocument & jsonConfig)
 } // GetConfig
 
 //-----------------------------------------------------------------------------
-///< Sets the configuration for the current active ports
-/*
+/* Sets the configuration for the current active ports
+*
 *   Needs
 *       Reference to the incoming JSON configuration doc
 *   Returns

@@ -97,8 +97,11 @@ static char LOOKUP_GECE[] =
 
 #define CYCLES_GECE_START   (F_CPU / 100000) // 10us
 
-c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId, gpio_num_t outputGpio, uart_port_t uart) :
-    c_OutputCommon (OutputChannelId, outputGpio, uart)
+c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
+                            gpio_num_t outputGpio, 
+                            uart_port_t uart,
+                            c_OutputMgr::e_OutputType outputType) :
+    c_OutputCommon(OutputChannelId, outputGpio, uart, outputType)
 {
     DEBUG_START;
     brightness = GECE_DEFAULT_BRIGHTNESS;

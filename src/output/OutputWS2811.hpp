@@ -32,7 +32,10 @@ class c_OutputWS2811 : public c_OutputCommon
 {
 public:
     // These functions are inherited from c_OutputCommon
-    c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId, gpio_num_t outputGpio, uart_port_t uart);
+    c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
+                      gpio_num_t outputGpio, 
+                      uart_port_t uart,
+                      c_OutputMgr::e_OutputType outputType);
     virtual ~c_OutputWS2811 ();
 
     // functions to be provided by the derived class

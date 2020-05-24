@@ -58,8 +58,12 @@ class c_OutputCommon
 public:
     c_OutputCommon (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
                     gpio_num_t outputGpio, 
-                    uart_port_t uart);
+                    uart_port_t uart,
+                    c_OutputMgr::e_OutputType outputType);
     virtual ~c_OutputCommon ();
+
+    typedef  c_OutputMgr::e_OutputChannelIds OID_t;
+    typedef  c_OutputMgr::e_OutputType       OTYPE_t;
 
     // functions to be provided by the derived class
     virtual void         Begin () = 0;                                         ///< set up the operating environment based on the current config (or defaults)
@@ -67,12 +71,10 @@ public:
     virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig) = 0; ///< Get the current config used by the driver
     virtual void         Render () = 0;                                        ///< Call from loop(),  renders output data
     virtual void         GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
-    virtual c_OutputMgr::e_OutputType GetOutputType () = 0;                    ///< Have the instance report its type.
-    c_OutputMgr::e_OutputChannelIds   GetOuputChannelId () { return OutputChannelId; } ///< return the output channel number
-            uint8_t    * GetBufferAddress () {return InputDataBuffer;}         ///< Get the address of the buffer into which the E1.31 handler will stuff data
-            uint16_t     GetBufferSize () {return sizeof (InputDataBuffer);}   ///< Get the address of the buffer into which the E1.31 handler will stuff data
-
- //   virtual void IRAM_ATTR ISR_Handler (void) = 0;    // Function to perform the actual ISR work
+            OID_t        GetOuputChannelId () { return OutputChannelId; }      ///< return the output channel number
+            uint8_t    * GetBufferAddress ()  { return InputDataBuffer;}       ///< Get the address of the buffer into which the E1.31 handler will stuff data
+            uint16_t     GetBufferSize ()     { return sizeof (InputDataBuffer);} ///< Get the address of the buffer into which the E1.31 handler will stuff data
+            OTYPE_t      GetOutputType ()     { return OutputType; }           ///< Have the instance report its type.
 
 protected:
 
@@ -82,7 +84,8 @@ protected:
     
     gpio_num_t  DataPin;     ///< Output pin to use for this driver
     uart_port_t UartId;      ///< Id of the UART used by this instance of the driver
-    c_OutputMgr::e_OutputChannelIds OutputChannelId;
+    OTYPE_t     OutputType;  ///< Type to report for this driver
+    OID_t       OutputChannelId;
     bool        HasBeenInitialized = false;
 
 #ifdef ARDUINO_ARCH_ESP8266

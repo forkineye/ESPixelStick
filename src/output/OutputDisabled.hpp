@@ -28,7 +28,10 @@ class c_OutputDisabled : public c_OutputCommon
 {
 public:
     // These functions are inherited from c_OutputCommon
-    c_OutputDisabled (c_OutputMgr::e_OutputChannelIds OutputChannelId, gpio_num_t outputGpio, uart_port_t uart);
+    c_OutputDisabled (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
+                      gpio_num_t outputGpio, 
+                      uart_port_t uart,
+                      c_OutputMgr::e_OutputType outputType);
     virtual ~c_OutputDisabled ();
 
     // functions to be provided by the derived class
@@ -37,7 +40,6 @@ public:
     void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     void         Render ();                                        ///< Call from loop(),  renders output data
     void         GetDriverName (String & sDriverName) { sDriverName = String (F ("Disabled")); }
-    c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_Disabled;} ///< Have the instance report its type.
     
     void IRAM_ATTR ISR_Handler () {} ///< UART ISR
 

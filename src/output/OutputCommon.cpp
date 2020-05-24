@@ -48,13 +48,15 @@ static void IRAM_ATTR uart_intr_handler (void* param);
 ///< Start up the driver and put it into a safe mode
 c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds iOutputChannelId, 
 	                            gpio_num_t outputGpio, 
-	                            uart_port_t uart)
+	                            uart_port_t uart,
+                                c_OutputMgr::e_OutputType outputType)
 {
 	// remember what channel we are
 	HasBeenInitialized = false;
 	OutputChannelId    = iOutputChannelId;
 	DataPin            = outputGpio;
 	UartId             = uart;
+    OutputType         = outputType;
 	 
 	// clear the input data buffer
 	memset ((char*)&InputDataBuffer[0], 0, sizeof (InputDataBuffer));

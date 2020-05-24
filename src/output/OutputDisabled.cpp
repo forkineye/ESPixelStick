@@ -27,8 +27,11 @@
 /*
 */
 //----------------------------------------------------------------------------
-c_OutputDisabled::c_OutputDisabled (c_OutputMgr::e_OutputChannelIds OutputChannelId, gpio_num_t outputGpio, uart_port_t uart) :
-    c_OutputCommon(OutputChannelId, outputGpio, uart)
+c_OutputDisabled::c_OutputDisabled (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
+                                    gpio_num_t outputGpio, 
+                                    uart_port_t uart,
+                                    c_OutputMgr::e_OutputType outputType) :
+    c_OutputCommon(OutputChannelId, outputGpio, uart, outputType)
 {
     // DEBUG_START;
 
