@@ -153,6 +153,9 @@ void c_OutputSerial::Begin ()
     InitializeUart (uart_config, uint32_t(FIFO_TRIGGER_LEVEL));
 #endif
 
+    // make sure we are ready to send a new frame
+    RemainingDataCount = 0;
+
     // Atttach interrupt handler
 #ifdef ARDUINO_ARCH_ESP8266
     ETS_UART_INTR_ATTACH (uart_intr_handler, this);
@@ -245,13 +248,13 @@ void c_OutputSerial::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     DEBUG_START;
     String DriverName = ""; GetDriverName (DriverName);
-    jsonConfig["type"] = DriverName;
+    jsonConfig["type"]        = DriverName;
     jsonConfig["gen_ser_hdr"] = GenericSerialHeader;
     jsonConfig["gen_ser_ftr"] = GenericSerialFooter;
-    jsonConfig["num_chan"] = Num_Channels;
+    jsonConfig["num_chan"]    = Num_Channels;
     // enums need to be converted to uints for json
-    jsonConfig["baudrate"] = uint (CurrentBaudrate);
-    jsonConfig["data_pin"] = uint (DataPin);
+    jsonConfig["baudrate"]    = uint (CurrentBaudrate);
+    jsonConfig["data_pin"]    = uint (DataPin);
     DEBUG_END;
 } // GetConfig
 
@@ -288,45 +291,36 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
             // Fill the FIFO with new data
             register uint16_t SpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength));
 
-            // determine how many intensities we can process right now.
-            register uint16_t DataToSend = (SpaceInFifo < RemainingDataCount) ? (SpaceInFifo) : RemainingDataCount;
-
             // only read from ram once per data byte
             register uint8_t data = 0;
 
-            // reduce the remaining count of intensities by the number we are sending now.
-            RemainingDataCount -= DataToSend;
-
-            // are there intensity values to send?
-            while (0 != DataToSend--)
+            // cant precalc this since data sent count is data value dependent (for Renard)
+            // is there an intensity value to send and do we have the space to send it?
+            while ((3 < SpaceInFifo) && (0 < RemainingDataCount))
             {
-                // read the next data value from the buffer and point at the next byte
+                SpaceInFifo--;
+                RemainingDataCount--;
+
+                // read the current data value from the buffer and point at the next byte
                 data = *pNextChannelToSend++;
 
-                // is this a renard port?
-                if (OutputType == c_OutputMgr::e_OutputType::OutputType_Renard)
+                // do we have to adjust the renard data stream?
+                if ((OutputType == c_OutputMgr::e_OutputType::OutputType_Renard) &&
+                    (data >= RenardFrameDefinitions_t::MIN_VAL_TO_ESC) &&
+                    (data <= RenardFrameDefinitions_t::MAX_VAL_TO_ESC))
                 {
-                    // do we have to adjust the renard data stream?
-                    if ((data >= RenardFrameDefinitions_t::MIN_VAL_TO_ESC) && 
-                        (data <= RenardFrameDefinitions_t::MAX_VAL_TO_ESC))
-                    {
-                        // Send the two byte substitute for the value
-                        enqueue (RenardFrameDefinitions_t::ESC_CHAR);
-                        enqueue (data - RenardFrameDefinitions_t::ESCAPED_OFFSET);
+                    // Send a two byte substitute for the value
+                    enqueue (RenardFrameDefinitions_t::ESC_CHAR);
+                    data -= uint8_t(RenardFrameDefinitions_t::ESCAPED_OFFSET);
 
-                        // show that we had to add an extra data byte to the output stream
-                        --DataToSend;
-                        ++RemainingDataCount;
-                    } // end modified data
-                    else
-                    {
-                        enqueue (data);
-                    } // end normal data
-                } // end renard mode
-                else
-                {
-                    enqueue (data);
-                } // end not renard mode
+                    // show that we had to add an extra data byte to the output fifo
+                    --SpaceInFifo;
+
+                } // end modified data
+
+                // send the intensity data
+                enqueue (data);
+
             } // end send one or more channel value
 
         } while (false);
@@ -338,11 +332,17 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
 void c_OutputSerial::Render ()
 {
     // DEBUG_START;
+
+    // has the ISR stopped running?
+    if (0 != GET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA)) { return; }
+
     // start the next frame
     switch (OutputType)
     {
         case c_OutputMgr::e_OutputType::OutputType_DMX:
         {
+            // todo: Make sure all bits have been sent.
+
             SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
             delayMicroseconds (DMX_BREAK);
             CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
