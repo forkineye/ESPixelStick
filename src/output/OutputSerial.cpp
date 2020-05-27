@@ -163,6 +163,8 @@ void c_OutputSerial::Begin ()
     uart_isr_register (UartId, uart_intr_handler, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM, nullptr);
 #endif
 
+    // prime the uart status bits
+    enqueue (0);
 
 //    DEBUG_END;
 }
@@ -336,18 +338,26 @@ void c_OutputSerial::Render ()
     // has the ISR stopped running?
     if (0 != GET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA)) { return; }
 
+//    delayMicroseconds (1000000);
+//    LOG_PORT.println ("4");
+
     // start the next frame
     switch (OutputType)
     {
         case c_OutputMgr::e_OutputType::OutputType_DMX:
         {
-            // todo: Make sure all bits have been sent.
+            // is the fifo empty and all of the data sent?
+            if (UART_TX_DONE_INT_RAW != GET_PERI_REG_MASK (UART_INT_RAW_REG (UartId), UART_TX_DONE_INT_RAW))
+            {
+                return;
+            } // go away if not
 
             SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
             delayMicroseconds (DMX_BREAK);
             CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
             delayMicroseconds (DMX_MAB);
 
+            // send the rest of the frame
             break;
         } // DMX512
 
@@ -361,6 +371,8 @@ void c_OutputSerial::Render ()
 
         case c_OutputMgr::e_OutputType::OutputType_Serial:
         {
+            // LOG_PORT.println ("5 '" + GenericSerialHeader + "'");
+
             // load the generic header into the fifo
             for (auto currentByte : GenericSerialHeader)
             {
