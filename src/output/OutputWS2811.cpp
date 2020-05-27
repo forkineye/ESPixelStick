@@ -48,7 +48,7 @@ extern "C" {
 #define WS2811_DATA_SPEED    (800000)
 
 #ifndef UART_INV_MASK
-#define UART_INV_MASK  (0x3f << 19)
+#   define UART_INV_MASK  (0x3f << 19)
 #endif // ndef UART_INV_MASK
 
 #define WS2811_TIME_PER_PIXEL   30L     ///< 30us frame time
@@ -125,7 +125,9 @@ c_OutputWS2811::~c_OutputWS2811()
     // Clear all pending interrupts in the UART
     WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
 
+#ifdef ARDUINO_ARCH_ESP32
     uart_isr_free (UartId);
+#endif // def ARDUINO_ARCH_ESP32
 
     // DEBUG_END;
 } // ~c_OutputWS2811
