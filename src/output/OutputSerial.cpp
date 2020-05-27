@@ -39,6 +39,11 @@ extern "C" {
 #   include <ets_sys.h>
 #   include <uart.h>
 #   include <uart_register.h>
+
+#define GET_PERI_REG_MASK(reg, mask) (READ_PERI_REG((reg)) & (mask))
+#define UART_INT_RAW_REG             UART_INT_RAW
+#define UART_TX_DONE_INT_RAW         UART_TXFIFO_EMPTY_INT_RAW
+
 #elif defined(ARDUINO_ARCH_ESP32)
 
 #   define UART_CONF0           UART_CONF0_REG
