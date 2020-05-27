@@ -103,7 +103,8 @@ c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId,
                             c_OutputMgr::e_OutputType outputType) :
     c_OutputCommon(OutputChannelId, outputGpio, uart, outputType)
 {
-    DEBUG_START;
+    // DEBUG_START;
+
     brightness = GECE_DEFAULT_BRIGHTNESS;
 
     // determine uart to use based on channel id
@@ -129,12 +130,14 @@ c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId,
         }
 
     } // end switch on channel ID
-    DEBUG_END;
+
+    // DEBUG_END;
+
 } // c_OutputGECE
 
 c_OutputGECE::~c_OutputGECE () 
 {
-    DEBUG_START;
+    // DEBUG_START;
     if (gpio_num_t (-1) == DataPin) { return; }
 
     // shut down the interface
@@ -143,10 +146,11 @@ c_OutputGECE::~c_OutputGECE ()
     // put the pin into a safe state
     pinMode (DataPin, INPUT);
 
-    DEBUG_END;
+    // DEBUG_END;
 } // ~c_OutputGECE
 
-void c_OutputGECE::Begin() 
+//----------------------------------------------------------------------------
+void c_OutputGECE::Begin()
 {
     DEBUG_START;
     Serial.println (String (F ("** GECE Initialization for Chan: ")) + String (OutputChannelId) + " **");
@@ -154,17 +158,23 @@ void c_OutputGECE::Begin()
     if (gpio_num_t (-1) == DataPin) { return; }
 
     // first make sure the interface is off
+//    DEBUG_V ("");;
     pSerialInterface->end ();
+//    DEBUG_V ("");;
 
     // Set output pins
     pinMode(DataPin, OUTPUT);
+//    DEBUG_V ("");;
     digitalWrite(DataPin, LOW);
+//    DEBUG_V ("");;
 
     refreshTime = (GECE_FRAME_TIME + GECE_IDLE_TIME) * pixel_count;
 
     // Serial rate is 3x 100KHz for GECE
 #ifdef ARDUINO_ARCH_ESP8266
+//    DEBUG_V ("");;
     pSerialInterface->begin(300000, SERIAL_7N1, SERIAL_TX_ONLY);
+//    DEBUG_V ("");;
 #elif defined ARDUINO_ARCH_ESP32
     pSerialInterface->begin (300000, SERIAL_7N1);
 #endif
@@ -238,11 +248,16 @@ bool c_OutputGECE::validate ()
 
 } // validate
 
-void c_OutputGECE::Render() 
+//----------------------------------------------------------------------------
+void c_OutputGECE::Render()
 {
-    DEBUG_START;
+    // DEBUG_START;
+
     if (gpio_num_t (-1) == DataPin) { return; }
     if (!canRefresh()) return;
+
+//    delayMicroseconds (1000000);
+//    DEBUG_V ("4");
 
     uint32_t packet = 0;
     uint32_t pTime  = 0;
@@ -250,6 +265,8 @@ void c_OutputGECE::Render()
     // Build a GECE packet
     startTime = micros();
     uint8_t * pCurrentInputData = GetBufferAddress();
+    
+//    pixel_count = 10;
 
     for (uint8_t CurrentAddress = 0; CurrentAddress < pixel_count; ++CurrentAddress)
     {
@@ -262,9 +279,9 @@ void c_OutputGECE::Render()
         // now convert the bits into a byte stream
         uint8_t  OutputBuffer[GECE_PACKET_SIZE + 1]; ///< GECE Packet Buffer
         uint8_t* pCurrentOutputData = OutputBuffer;
-        for (uint8_t currentShiftCount = GECE_PACKET_SIZE-1; currentShiftCount != -1; --currentShiftCount)
+        for (uint8_t currentShiftCount = GECE_PACKET_SIZE; 0 != currentShiftCount; --currentShiftCount)
         {
-            *pCurrentOutputData++ = LOOKUP_GECE[(packet >> currentShiftCount) & 0x1];
+            *pCurrentOutputData++ = LOOKUP_GECE[(packet >> currentShiftCount-1) & 0x1];
         }
 
         // Wait until ready to send
@@ -278,8 +295,10 @@ void c_OutputGECE::Render()
 
         // Send the packet and then idle low (break)
         pSerialInterface->write(OutputBuffer, GECE_PACKET_SIZE);
+
         SET_PERI_REG_MASK(UART_CONF0(UartId), UART_TXD_BRK);
 
     } // for each intensity to send
-    DEBUG_END;
+
+    // DEBUG_END;
 } // render
