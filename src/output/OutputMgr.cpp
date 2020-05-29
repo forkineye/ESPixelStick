@@ -25,6 +25,7 @@
 #include "../ESPixelStick.h"
 #include "../FileIO.h"
 
+//-----------------------------------------------------------------------------
 // bring in driver definitions
 #include "OutputDisabled.hpp"
 #include "OutputGECE.hpp"
@@ -32,7 +33,7 @@
 #include "OutputWS2811.hpp"
 // needs to be last
 #include "OutputMgr.hpp"
-
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 typedef struct OutputChannelIdToGpioAndPortEntry_t
@@ -125,7 +126,12 @@ void c_OutputMgr::LoadConfig ()
     // DEBUG_START;
 
     // try to load and process the config file
-    if (FileIO::loadConfig (String("/" + String(OM_SECTION_NAME) + ".json").c_str(), std::bind (&c_OutputMgr::DeserializeConfig, this, std::placeholders::_1)))
+    if (FileIO::loadConfig (String("/" + String(OM_SECTION_NAME) + ".json").c_str(), 
+        [this](DynamicJsonDocument & JsonConfigDoc)
+        {
+            JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
+            this->DeserializeConfig (JsonConfig);
+        }))
     {
         // go through each output port and tell it to go
         for (auto CurrentOutputChannelDriver : pOutputChannelDrivers)
@@ -147,7 +153,7 @@ void c_OutputMgr::LoadConfig ()
 
     // todo - remove this. For debugging without UI
     InstantiateNewOutputChannel (e_OutputChannelIds::OutputChannelId_1,
-                                 e_OutputType::OutputType_Renard);
+                                 e_OutputType::OutputType_GECE);
 
     // DEBUG_END;
 } // LoadConfig
@@ -165,8 +171,9 @@ void c_OutputMgr::SaveConfig ()
 {
     // try to save the config file
     DynamicJsonDocument JsonConfigDoc(1024);
+    JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
 
-    SerializeConfig (JsonConfigDoc);
+    SerializeConfig (JsonConfig);
 
     String sJsonConfig = "";
     serializeJsonPretty (JsonConfigDoc, sJsonConfig);
@@ -175,6 +182,7 @@ void c_OutputMgr::SaveConfig ()
     LOG_PORT.println (sJsonConfig);
     LOG_PORT.println ("ccccccccccccccccccccccccPrettyJsonConfigccccccccccccccccccccccccccc");
 
+    serializeJson (JsonConfigDoc, sJsonConfig);
     if (FileIO::saveConfig (String ("/" + String (OM_SECTION_NAME) + ".json").c_str (), sJsonConfig))
     {
         LOG_PORT.println (F ("**** Saved Output Manager Config File. ****"));
@@ -197,7 +205,7 @@ void c_OutputMgr::SaveConfig ()
         true - config was properly processes
         false - config had an error.
 */
-bool c_OutputMgr::DeserializeConfig (DynamicJsonDocument & jsonConfig)
+bool c_OutputMgr::DeserializeConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
     boolean retval = false;
@@ -287,7 +295,7 @@ bool c_OutputMgr::DeserializeConfig (DynamicJsonDocument & jsonConfig)
 } // deserializeConfig
 
 //-----------------------------------------------------------------------------
-void c_OutputMgr::SerializeConfig (DynamicJsonDocument & jsonConfig)
+void c_OutputMgr::SerializeConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
@@ -295,28 +303,31 @@ void c_OutputMgr::SerializeConfig (DynamicJsonDocument & jsonConfig)
     if (true == jsonConfig.containsKey (OM_SECTION_NAME))
     {
         OutputMgrData = jsonConfig[OM_SECTION_NAME];
+        // DEBUG_V ("");
     }
     else
     {
         // add our section header
         OutputMgrData = jsonConfig.createNestedObject (OM_SECTION_NAME);
+        // DEBUG_V ("");
     }
 
     // add OM config parameters
+    // DEBUG_V ("");
 
     // add the channels header
     JsonObject OutputMgrChannelsData;
     if (true == OutputMgrData.containsKey (OM_CHANNEL_SECTION_NAME))
     {
+        // DEBUG_V ("");
         OutputMgrChannelsData = OutputMgrData[OM_CHANNEL_SECTION_NAME];
     }
     else
     {
         // add our section header
+        // DEBUG_V ("");
         OutputMgrChannelsData = OutputMgrData.createNestedObject (OM_CHANNEL_SECTION_NAME);
     }
-
-    // DEBUG_V("");
 
     // add the channel configurations
     // DEBUG_V ("For Each Output Channel");
@@ -328,11 +339,13 @@ void c_OutputMgr::SerializeConfig (DynamicJsonDocument & jsonConfig)
         String sChannelId = String (CurrentChannel->GetOuputChannelId ());
         if (true == OutputMgrChannelsData.containsKey (sChannelId))
         {
+            // DEBUG_V ("");
             ChannelConfigData = OutputMgrChannelsData[sChannelId];
         }
         else
         {
             // add our section header
+            // DEBUG_V ("");
             ChannelConfigData = OutputMgrChannelsData.createNestedObject (sChannelId);
         }
         
@@ -344,17 +357,19 @@ void c_OutputMgr::SerializeConfig (DynamicJsonDocument & jsonConfig)
         if (true == ChannelConfigData.containsKey (DriverTypeName))
         {
             ChannelConfigByTypeData = ChannelConfigData[DriverTypeName];
+            // DEBUG_V ("");
         }
         else
         {
             // add our section header
+            // DEBUG_V ("");
             ChannelConfigByTypeData = ChannelConfigData.createNestedObject (DriverTypeName);
         }
 
         // ask the channel to add its data to the record
         // DEBUG_V ("Add the output channel configuration");
         CurrentChannel->GetConfig (ChannelConfigByTypeData);
-        // DEBUG_V ("");
+        //  DEBUG_V ("");
     }
 
     // smile. Your done
@@ -469,7 +484,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 *   returns
 *       string populated with currently available configuration
 */
-void c_OutputMgr::GetConfig (DynamicJsonDocument & jsonConfig)
+void c_OutputMgr::GetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
@@ -487,7 +502,7 @@ void c_OutputMgr::GetConfig (DynamicJsonDocument & jsonConfig)
 *       true - No Errors found
 *       false - Had an issue and it was reported to the log interface
 */
-bool c_OutputMgr::SetConfig (DynamicJsonDocument & jsonConfig)
+bool c_OutputMgr::SetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
     boolean retval = false;

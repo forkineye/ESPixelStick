@@ -29,7 +29,6 @@
 #include "src/ESPixelStick.h"
 #include "src/EFUpdate.h"
 #include "src/FileIO.h"
-#include "src/WebIO.h"
 
 // Input modules
 #include "src/input/E131Input.h"
@@ -41,6 +40,8 @@
 // WiFi interface
 #include "src/WiFiMgr.hpp"
 
+// WEB interface
+#include "src/WebMgr.hpp"
 
 // Services
 //#include "src/service/MQTT.h"
@@ -62,16 +63,6 @@ extern "C"
 #else
 #	error "Unsupported CPU type."
 #endif
-
-
-
-#ifndef WL_MAC_ADDR_LENGTH
-#   define WL_MAC_ADDR_LENGTH 6
-#endif // WL_MAC_ADDR_LENGTH
-
-#ifndef ICACHE_RAM_ATTR
-#   define ICACHE_RAM_ATTR IRAM_ATTR 
-#endif // ICACHE_RAM_ATTR
 
 // Debugging support
 #if defined(DEBUG)
@@ -118,8 +109,6 @@ uint8_t *showBuffer;        ///< Main show buffer
 
 config_t            config;                 // Current configuration
 bool                reboot = false;         // Reboot flag
-AsyncWebServer      web(HTTP_PORT);         // Web Server
-AsyncWebSocket      ws("/ws");              // Web Socket Plugin
 uint32_t            lastUpdate;             // Update timeout tracker
 
 /////////////////////////////////////////////////////////
@@ -129,21 +118,8 @@ uint32_t            lastUpdate;             // Update timeout tracker
 /////////////////////////////////////////////////////////
 
 void loadConfig();
-void initWeb();
+void GetConfig (JsonObject & json);
 
-/// Radio configuration
-/** ESP8266 radio configuration routines that are executed at startup. */
-/* Disabled for now, possible flash wear issue. Need to research further
-RF_PRE_INIT() {
-#ifdef ARDUINO_ARCH_ESP8266
-    system_phy_set_powerup_option(3);   // Do full RF calibration on power-up
-    system_phy_set_max_tpw(82);         // Set max TX power
-#else
-    esp_phy_erase_cal_data_in_nvs(); // Do full RF calibration on power-up
-    esp_wifi_set_max_tx_power (78);  // Set max TX power
-#endif
-}
-*/
 
 /// Arduino Setup
 /** Arduino based setup code that is executed at startup. */
@@ -253,74 +229,11 @@ void setup()
     // DEBUG_V ("");
 
     // Configure and start the web server
-    initWeb();
+    WebMgr.Begin(&config);
 
     // DEBUG_END;
 
 } // setup
-
-
-/////////////////////////////////////////////////////////
-//
-//  Web Section
-//
-/////////////////////////////////////////////////////////
-
-// Configure and start the web server
-void initWeb()
-{
-    // DEBUG_START;
-    // Add header for SVG plot support?
-    DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
-
-    // Setup WebSockets
-    ws.onEvent(WebIO::onEvent);
-    web.addHandler(&ws);
-
-    // Heap status handler
-    web.on("/heap", HTTP_GET, [](AsyncWebServerRequest *request)
-    {
-        request->send(200, "text/plain", String(ESP.getFreeHeap()));
-    });
-
-    // JSON Config Handler
-    web.on("/conf", HTTP_GET, [](AsyncWebServerRequest *request) 
-    {
-        request->send(200, "text/json", serializeCore(true));
-    });
-
-    // Firmware upload handler - only in station mode
-    web.on("/updatefw", HTTP_POST, [](AsyncWebServerRequest *request) 
-    {
-        ws.textAll("X6");
-    }, WebIO::onFirmwareUpload).setFilter(ON_STA_FILTER);
-
-    // Root access for testing
-    web.serveStatic("/root", SPIFFS, "/");
-
-    // Static Handler
-    web.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
-
-    // Raw config file Handler - but only on station
-//  web.serveStatic("/config.json", SPIFFS, "/config.json").setFilter(ON_STA_FILTER);
-
-    web.onNotFound([](AsyncWebServerRequest *request) 
-    {
-        request->send(404, "text/plain", "Page not found");
-    });
-
-/*
-    // Config file upload handler - only in station mode
-    web.on("/config", HTTP_POST, [](AsyncWebServerRequest *request) {
-        ws.textAll("X6");
-    }, handle_config_upload).setFilter(ON_STA_FILTER);
-*/
-    web.begin();
-
-    LOG_PORT.print(F("- Web Server started on port "));
-    LOG_PORT.println(HTTP_PORT);
-    // DEBUG_END;
-}
 
 /////////////////////////////////////////////////////////
 //
@@ -485,12 +398,8 @@ void loadConfig()
 
 } // loadConfig
 
-// Serialize the current config into a JSON string
-String serializeCore(boolean pretty, boolean creds) {
-    // Create buffer and root object
-    DynamicJsonDocument json(1024);
-    String jsonString;
-
+void GetConfig (JsonObject & json)
+{
     // Device
     JsonObject device = json.createNestedObject("device");
     device["id"]           = config.id;
@@ -499,7 +408,6 @@ String serializeCore(boolean pretty, boolean creds) {
     // Network
     JsonObject network = json.createNestedObject("network");
     network["ssid"]        = config.ssid;
-    if (creds) { network["passphrase"] = config.passphrase; };
     network["hostname"]    = config.hostname;
     network["ip"]          = config.ip;
     network["netmask"]     = config.netmask;
@@ -510,17 +418,30 @@ String serializeCore(boolean pretty, boolean creds) {
 
     network["ap_fallback"] = config.ap_fallbackIsEnabled;
     network["ap_timeout"]  = config.ap_timeout;
+}
+// Serialize the current config into a JSON string
+String serializeCore(boolean pretty, boolean creds) 
+{
+    // Create buffer and root object
+    DynamicJsonDocument jsonConfigDoc(2048);
+    JsonObject JsonConfig = jsonConfigDoc.as<JsonObject> ();
+
+    String jsonConfigString;
+
+    GetConfig (JsonConfig);
+
+    if (creds) { JsonConfig["network"]["passphrase"] = config.passphrase; };
 
     if (pretty)
     {
-        serializeJsonPretty (json, jsonString);
+        serializeJsonPretty (JsonConfig, jsonConfigString);
     }
     else
     {
-        serializeJson (json, jsonString);
+        serializeJson (JsonConfig, jsonConfigString);
     }
 
-    return jsonString;
+    return jsonConfigString;
 }
 
 // Save configuration JSON file

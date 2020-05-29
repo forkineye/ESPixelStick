@@ -36,11 +36,11 @@ public:
     c_OutputMgr ();
     virtual ~c_OutputMgr ();
 
-    void    Begin ();                                     ///< set up the operating environment based on the current config (or defaults)
-    void    LoadConfig ();                                ///< Read the current configuration data from nvram
-    void    SaveConfig ();                                ///< Save the current configuration data to nvram
-    void    GetConfig (DynamicJsonDocument & jsonConfig); ///< Get the current config used by the driver
-    bool    SetConfig (DynamicJsonDocument & jsonConfig); ///< Set a new config in the driver
+    void    Begin ();                            ///< set up the operating environment based on the current config (or defaults)
+    void    LoadConfig ();                       ///< Read the current configuration data from nvram
+    void    SaveConfig ();                       ///< Save the current configuration data to nvram
+    void    GetConfig (JsonObject & jsonConfig); ///< Get the current config used by the driver
+    bool    SetConfig (JsonObject & jsonConfig); ///< Set a new config in the driver
 
     // handles to determine which output channel we are dealing with
     enum e_OutputChannelIds
@@ -85,8 +85,9 @@ private:
 #   define OM_CHANNEL_TYPE_NAME    F("om_channel_type")
 #   define OM_CHANNEL_DATA_NAME    F("om_channel_data")
 
-    bool DeserializeConfig (DynamicJsonDocument & jsonConfig);
-    void SerializeConfig   (DynamicJsonDocument & jsonConfig);
+    bool DeserializeConfig (JsonObject & jsonConfig);
+    void SerializeConfig   (JsonObject & jsonConfig);
+    // JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
 
 protected:
 
