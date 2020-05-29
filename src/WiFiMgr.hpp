@@ -41,6 +41,9 @@ public:
     void      connectWifi     ();
 
 private:
+#define CLIENT_TIMEOUT  15      ///< In station/client mode try to connection for 15 seconds
+#define AP_TIMEOUT      60      ///< In AP mode, wait 60 seconds for a connection or reboot
+
 #ifdef ARDUINO_ARCH_ESP8266
     WiFiEventHandler    wifiConnectHandler;     // WiFi connect handler
     WiFiEventHandler    wifiDisconnectHandler;  // WiFi disconnect handler
