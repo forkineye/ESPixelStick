@@ -38,6 +38,20 @@
 const char ssid[]       = SECRETS_SSID;
 const char passphrase[] = SECRETS_PASS;
 
+/// Radio configuration
+/** ESP8266 radio configuration routines that are executed at startup. */
+/* Disabled for now, possible flash wear issue. Need to research further
+RF_PRE_INIT() {
+#ifdef ARDUINO_ARCH_ESP8266
+    system_phy_set_powerup_option(3);   // Do full RF calibration on power-up
+    system_phy_set_max_tpw(82);         // Set max TX power
+#else
+    esp_phy_erase_cal_data_in_nvs(); // Do full RF calibration on power-up
+    esp_wifi_set_max_tx_power (78);  // Set max TX power
+#endif
+}
+*/
+
 //-----------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
 c_WiFiMgr::c_WiFiMgr ()
