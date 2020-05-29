@@ -77,27 +77,25 @@ static char LOOKUP_GECE[] =
 #define GECE_RED_MASK           0xF
 #define GECE_RED_SHIFT          0
 
-// #define GECE_INTENSITY_MASK     0xF
-
 #define GECE_GET_ADDRESS(packet)    (((packet) >> GECE_ADDRESS_SHIFT)    & GECE_ADDRESS_MASK)
 #define GECE_GET_BRIGHTNESS(packet) (((packet) >> GECE_BRIGHTNESS_SHIFT) & GECE_BRIGHTNESS_MASK)
 #define GECE_GET_BLUE(packet)       (((packet) >> GECE_BLUE_SHIFT)       & GECE_BLUE_MASK)
 #define GECE_GET_GREEN(packet)      (((packet) >> GECE_GREEN_SHIFT)      & GECE_GREEN_MASK)
 #define GECE_GET_RED(packet)        (((packet) >> GECE_RED_SHIFT )       & GECE_RED_MASK)
 
-#define GECE_SET_ADDRESS(value)    (((value) & GECE_ADDRESS_MASK)    >> GECE_ADDRESS_SHIFT)
-#define GECE_SET_BRIGHTNESS(value) (((value) & GECE_BRIGHTNESS_MASK) >> GECE_BRIGHTNESS_SHIFT) 
-#define GECE_SET_BLUE(value)       (((value) & GECE_BLUE_MASK)       >> GECE_BLUE_SHIFT)       
-#define GECE_SET_GREEN(value)      (((value) & GECE_GREEN_MASK)      >> GECE_GREEN_SHIFT)     
-#define GECE_SET_RED(value)        (((value) & GECE_RED_MASK)        >> GECE_RED_SHIFT )       
-
+#define GECE_SET_ADDRESS(value)     (((value) & GECE_ADDRESS_MASK)    >> GECE_ADDRESS_SHIFT)
+#define GECE_SET_BRIGHTNESS(value)  (((value) & GECE_BRIGHTNESS_MASK) >> GECE_BRIGHTNESS_SHIFT) 
+#define GECE_SET_BLUE(value)        (((value) & GECE_BLUE_MASK)       >> GECE_BLUE_SHIFT)       
+#define GECE_SET_GREEN(value)       (((value) & GECE_GREEN_MASK)      >> GECE_GREEN_SHIFT)     
+#define GECE_SET_RED(value)         (((value) & GECE_RED_MASK)        >> GECE_RED_SHIFT )       
 
 #define GECE_FRAME_TIME     790L    /* 790us frame time */
 #define GECE_IDLE_TIME      45L     /* 45us idle time - should be 30us */
 
 #define CYCLES_GECE_START   (F_CPU / 100000) // 10us
 
-c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
+//----------------------------------------------------------------------------
+c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId,
                             gpio_num_t outputGpio, 
                             uart_port_t uart,
                             c_OutputMgr::e_OutputType outputType) :
@@ -135,7 +133,8 @@ c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId,
 
 } // c_OutputGECE
 
-c_OutputGECE::~c_OutputGECE () 
+//----------------------------------------------------------------------------
+c_OutputGECE::~c_OutputGECE ()
 {
     // DEBUG_START;
     if (gpio_num_t (-1) == DataPin) { return; }
@@ -152,35 +151,30 @@ c_OutputGECE::~c_OutputGECE ()
 //----------------------------------------------------------------------------
 void c_OutputGECE::Begin()
 {
-    DEBUG_START;
+    // DEBUG_START;
     Serial.println (String (F ("** GECE Initialization for Chan: ")) + String (OutputChannelId) + " **");
 
     if (gpio_num_t (-1) == DataPin) { return; }
 
     // first make sure the interface is off
-//    DEBUG_V ("");;
     pSerialInterface->end ();
-//    DEBUG_V ("");;
 
     // Set output pins
     pinMode(DataPin, OUTPUT);
-//    DEBUG_V ("");;
     digitalWrite(DataPin, LOW);
-//    DEBUG_V ("");;
 
     refreshTime = (GECE_FRAME_TIME + GECE_IDLE_TIME) * pixel_count;
 
     // Serial rate is 3x 100KHz for GECE
 #ifdef ARDUINO_ARCH_ESP8266
-//    DEBUG_V ("");;
     pSerialInterface->begin(300000, SERIAL_7N1, SERIAL_TX_ONLY);
-//    DEBUG_V ("");;
 #elif defined ARDUINO_ARCH_ESP32
     pSerialInterface->begin (300000, SERIAL_7N1);
 #endif
     SET_PERI_REG_MASK(UART_CONF0(UartId), UART_TXD_BRK);
     delayMicroseconds(GECE_IDLE_TIME);
-    DEBUG_END;
+
+    // DEBUG_END;
 } // begin
 
 //----------------------------------------------------------------------------
@@ -266,8 +260,6 @@ void c_OutputGECE::Render()
     startTime = micros();
     uint8_t * pCurrentInputData = GetBufferAddress();
     
-//    pixel_count = 10;
-
     for (uint8_t CurrentAddress = 0; CurrentAddress < pixel_count; ++CurrentAddress)
     {
         packet  = GECE_SET_BRIGHTNESS (brightness); // <= This clears the other fields
