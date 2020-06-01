@@ -38,6 +38,7 @@ public:
     void      ValidateConfig  (config_t * NewConfig);
     IPAddress getIpAddress    () { return CurrentIpAddress; }
     IPAddress getIpSubNetMask () { return CurrentSubnetMask; }
+
     void      connectWifi     ();
 
 private:
