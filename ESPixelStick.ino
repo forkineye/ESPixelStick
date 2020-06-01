@@ -31,8 +31,7 @@
 #include "src/FileIO.h"
 
 // Input modules
-#include "src/input/E131Input.h"
-//#include "src/input/ESPAsyncDDP.h"
+#include "src/input/InputMgr.hpp"
 
 // Output modules
 #include "src/output/OutputMgr.hpp"
@@ -77,27 +76,12 @@ static void _u0_putc(char c){
 
 /////////////////////////////////////////////////////////
 //
-//  Module Maps
-//
-/////////////////////////////////////////////////////////
-
-/// Map of input modules
-std::map<const String, _Input*>::const_iterator itInput;
-const std::map<const String, _Input*> INPUT_MODES = {
-    { E131Input::KEY, new E131Input() }
-};
-
-/////////////////////////////////////////////////////////
-//
 //  Globals
 //
 /////////////////////////////////////////////////////////
 
 // Configuration file
 const char CONFIG_FILE[] = "/config.json";
-
-// Input and Output modules
-_Input* input = nullptr;;     ///< Pointer to currently enabled input module
 
 uint8_t *showBuffer;        ///< Main show buffer
 
@@ -120,13 +104,10 @@ uint32_t            lastUpdate;             // Update timeout tracker
 void loadConfig();
 void GetConfig (JsonObject & json);
 
-
 /// Arduino Setup
 /** Arduino based setup code that is executed at startup. */
 void setup() 
 {
-    input = INPUT_MODES.begin ()->second;
-
     // Setup serial log port
     LOG_PORT.begin(115200);
     delay(10);
@@ -154,13 +135,8 @@ void setup()
     // DEBUG_V ("");
 
     // Dump supported input modes
-    LOG_PORT.println(F("Supported Input modes:"));
-    itInput = INPUT_MODES.begin();
-    while (itInput != INPUT_MODES.end()) 
-    {
-        LOG_PORT.printf("- %s : %s\n", itInput->first.c_str(), itInput->second->getBrief());
-        itInput++;
-    }
+    InputMgr.DumpSupportedModes ();
+
     // DEBUG_V ("");
 
     // Enable SPIFFS
@@ -215,7 +191,7 @@ void setup()
     loadConfig();
     // DEBUG_V ("");
 
-    WiFiMgr.Begin (&config);
+    WiFiMgr.Begin (& config);
     // DEBUG_V ("");
 
     // Set up the output manager to start sending data to the serial ports
@@ -224,8 +200,9 @@ void setup()
 
     // connect the input processing to the output processing. 
     // Only supports a single channel at the moment
-    input->setBuffer (OutputMgr.GetBufferAddress (c_OutputMgr::e_OutputChannelIds::OutputChannelId_1), 
-                      OutputMgr.GetBufferSize    (c_OutputMgr::e_OutputChannelIds::OutputChannelId_1));
+    InputMgr.Begin (OutputMgr.GetBufferAddress (c_OutputMgr::e_OutputChannelIds::OutputChannelId_1),
+                    OutputMgr.GetBufferSize    (c_OutputMgr::e_OutputChannelIds::OutputChannelId_1));
+
     // DEBUG_V ("");
 
     // Configure and start the web server
@@ -240,40 +217,6 @@ void setup()
 //  JSON / Configuration Section
 //
 /////////////////////////////////////////////////////////
-
-/// Set input / output modes
-/** Cleans up i/o modules as needed and re-initializes showBuffer.
- */
-void setMode(_Input *newinput) 
-{
-    do // once
-    {
-        if (newinput == nullptr)
-        {
-            LOG_PORT.println ("- Invalid Input mode requested");
-            break;
-        }
-
-        // does an input exist?
-        if (input != nullptr)
-        {
-            LOG_PORT.printf ("- Releasing Input mode '%s'\n", input->getKey ());
-            input->destroy ();
-            input = nullptr;
-        }
-
-        // set up the new input
-        input = newinput;
-        LOG_PORT.printf ("- Input mode set to %s\n", input->getKey ());
-
-        // Can't init input until showBuffer is setup
-        input->setBuffer(OutputMgr.GetBufferAddress(c_OutputMgr::e_OutputChannelIds::OutputChannelId_1),
-                         OutputMgr.GetBufferSize(c_OutputMgr::e_OutputChannelIds::OutputChannelId_1));
-        input->init ();
-
-    } while (false);
-
-} // setMode
 
 /// Configuration Validations
 /** Validates the config_t (core) configuration structure and forces defaults for invalid entries */
@@ -295,28 +238,6 @@ void validateConfig()
         config.hostname = "esps-" + String(chipId);
 
     WiFiMgr.ValidateConfig (&config);
-
-    // DEBUG_V ("");
-
-//TODO: Update this to set to ws2811 and e131 if no config found
-
-    // set the default value
-    _Input* NewInput = INPUT_MODES.begin ()->second;
-
-    // try to find the desired input type
-    itInput = INPUT_MODES.find (config.input);
-    if (itInput != INPUT_MODES.end())
-    {
-        NewInput = itInput->second;
-    } 
-    else
-    {
-        LOG_PORT.printf("* Input mode from core config invalid, setting to %s.\n", NewInput->getBrief());
-    }
-    // DEBUG_V ("");
-
-    // Set I/O modes
-    setMode(NewInput);
 
     // DEBUG_END;
 } // validateConfig
@@ -369,10 +290,10 @@ boolean dsNetwork(DynamicJsonDocument &json)
 
 void deserializeCore(DynamicJsonDocument &json) 
 {
-//    // DEBUG_START;
+    // DEBUG_START;
     dsDevice(json);
     dsNetwork(json);
-//    // DEBUG_END;
+    // DEBUG_END;
 }
 
 /// Load configuration file
@@ -381,9 +302,12 @@ void deserializeCore(DynamicJsonDocument &json)
  */
 void loadConfig() 
 {
+    // DEBUG_START;
+
     // Zeroize Config struct
     memset (&config, 0, sizeof (config));
 
+    // DEBUG_V ("");
     if (FileIO::loadConfig(CONFIG_FILE, &deserializeCore)) 
     {
         validateConfig();
@@ -396,6 +320,7 @@ void loadConfig()
 
     //TODO: Add auxiliary service load routine
 
+    // DEBUG_START;
 } // loadConfig
 
 void GetConfig (JsonObject & json)
@@ -442,7 +367,7 @@ String serializeCore(boolean pretty, boolean creds)
     }
 
     return jsonConfigString;
-}
+} // serializeCore
 
 // Save configuration JSON file
 void saveConfig() 
@@ -453,8 +378,11 @@ void saveConfig()
     // Save Config
     FileIO::saveConfig(CONFIG_FILE, serializeCore(false, true));
 
-    // save the config for the output channels
+    // save the config for the output and input channels
     OutputMgr.SaveConfig ();
+
+    InputMgr.SaveConfig ();
+
 } // saveConfig
 
 /////////////////////////////////////////////////////////
@@ -474,7 +402,7 @@ void loop()
     }
 
     // Process input data
-    input->process();
+    InputMgr.Process ();
 
     // Render output
     OutputMgr.Render();
