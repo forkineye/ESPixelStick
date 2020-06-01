@@ -1,3 +1,5 @@
+// only include this file once
+#pragma once
 /*
 * E131Input.h - Code to wrap ESPAsyncE131 for input
 *
@@ -17,52 +19,46 @@
 *
 */
 
-#ifndef E131INPUT_H_
-#define E131INPUT_H_
-
 #include <ESPAsyncE131.h>
-#include "_Input.h"
+#include "InputCommon.hpp"
 
-class E131Input : public _Input {
+class c_InputE131 : public c_InputCommon 
+{
   private:
     static const uint16_t   UNIVERSE_MAX = 512;
     static const char       CONFIG_FILE[];
 
-    ESPAsyncE131  *e131;        ///< ESPAsyncE131 pointer
-    e131_packet_t packet;       ///< Packet buffer for parsing
+    ESPAsyncE131  * e131 = nullptr; ///< ESPAsyncE131
+    e131_packet_t packet;           ///< Packet buffer for parsing
 
     /// JSON configuration parameters
-    uint16_t    startUniverse;  ///< Universe to listen for
-    uint16_t    universe_limit; ///< Universe boundary limit
-    uint16_t    channel_start;  ///< Channel to start listening at - 1 based
-    boolean     multicast;      ///< Enable multicast listener
+    uint16_t    startUniverse          = 1;    ///< Universe to listen for
+    uint16_t    universe_channel_limit = 512;  ///< Universe boundary limit
+    uint16_t    channel_start          = 1;    ///< Channel to start listening at - 1 based
+    boolean     multicast              = true; ///< Enable multicast listener
 
     /// from sketch globals
-    uint16_t    channel_count;  ///< Number of channels. Derived from output module configuration.
-    uint16_t    uniLast = 1;    ///< Last Universe to listen for
-    uint8_t     *seqTracker;    ///< Current sequence numbers for each Universe
-    uint32_t    *seqError;      ///< Sequence error tracking for each universe
+    uint16_t    channel_count = 0;    ///< Number of channels. Derived from output module configuration.
+    uint16_t    LastUniverse  = 1;    ///< Last Universe to listen for
+    uint8_t   * seqTracker = nullptr; ///< Current sequence numbers for each Universe
+    uint32_t  * seqError = nullptr;   ///< Sequence error tracking for each universe
 
-    void multiSub();
+    void SubscribeToMulticastDomains();
+    void validateConfiguration ();
 
   public:
-    static const char KEY[];
 
-    ~E131Input();
-    void destroy();
+    c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
+                 c_InputMgr::e_InputType       NewChannelType,
+                 uint8_t                     * BufferStart,
+                 uint16_t                      BufferSize);
+    ~c_InputE131();
 
-    const char* getKey();
-    const char* getBrief();
-
-    void validate();
-    void load();
-    void save();
-
-    void init();
-    void process();
-
-    boolean deserialize(DynamicJsonDocument &json);
-    String serialize(boolean pretty);
+    // functions to be provided by the derived class
+    void  Begin ();                                          ///< set up the operating environment based on the current config (or defaults)
+    bool  SetConfig (ArduinoJson::JsonObject& jsonConfig);   ///< Set a new config in the driver
+    void  GetConfig (ArduinoJson::JsonObject& jsonConfig);   ///< Get the current config used by the driver
+    void  Process ();                                        ///< Call from loop(),  renders Input data
+    void  GetDriverName (String & sDriverName) { sDriverName = "E1.31"; } ///< get the name for the instantiated driver
+    void  SetBufferInfo (uint8_t * BufferStart, uint16_t BufferSize);
 };
-
-#endif /* E131INPUT_H_ */

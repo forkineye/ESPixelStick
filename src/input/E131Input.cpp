@@ -21,168 +21,199 @@
 #include "../ESPixelStick.h"
 #include "../FileIO.h"
 
-const char E131Input::KEY[] = "e131";
-const char E131Input::CONFIG_FILE[] = "/e131.json";
+#include "E131Input.h"
 
-E131Input::~E131Input() {
-    destroy();
+
+//-----------------------------------------------------------------------------
+c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
+                          c_InputMgr::e_InputType       NewChannelType,
+                          uint8_t                     * BufferStart,
+                          uint16_t                      BufferSize) :
+    c_InputCommon(NewInputChannelId, NewChannelType, BufferStart, BufferSize)
+{
+    // DEBUG_START;
+    // DEBUG_END;
+} // c_InputE131
+
+//-----------------------------------------------------------------------------
+c_InputE131::~c_InputE131()
+{
+    if (seqTracker) { free (seqTracker); seqTracker = nullptr; }
+
+    if (seqError)  { free (seqError); seqError = nullptr; }
 }
 
-void E131Input::destroy() {
-    if (seqTracker) free(seqTracker);
-    seqTracker = NULL;
-    if (seqError) free(seqError);
-    seqError = NULL;
-    delete e131;
-    e131 = nullptr;
-}
-
-void E131Input::init() {
+//-----------------------------------------------------------------------------
+void c_InputE131::Begin ()
+{
+    // DEBUG_START;
     Serial.println(F("** E1.31 Initialization **"));
 
     // Create a new ESPAsyncE131
+    if (nullptr != e131) { free (e131); e131 = nullptr; }
+    // DEBUG_V("");
     e131 = new ESPAsyncE131(10);
+    // DEBUG_V ("");
 
-    // Load and validate our configuration
-    load();
+    validateConfiguration ();
+    // DEBUG_V ("");
 
     // Get on with business
-    if (multicast) {
-
-        if (e131->begin(E131_MULTICAST, startUniverse,
-                uniLast - startUniverse + 1)) {
+    if (multicast) 
+    {
+        if (e131->begin(E131_MULTICAST, startUniverse, LastUniverse - startUniverse + 1)) 
+        {
+            // DEBUG_V ("");
             LOG_PORT.println(F("E131 Multicast Enabled."));
-        }  else {
+        }
+        else
+        {
+            // DEBUG_V ("");
             LOG_PORT.println(F("*** E131 MULTICAST INIT FAILED ****"));
         }
-    } else {
-/* todo        if (e131->begin(E131_UNICAST)) {
+    }
+    else
+    {
+        // DEBUG_V ("");
+        /* todo
+        if (e131->begin(E131_UNICAST)) 
+        {
             LOG_PORT.print(F("E131 Unicast port: "));
             LOG_PORT.println(E131_DEFAULT_PORT);
-        } else {
+        }
+        else
+        {
             LOG_PORT.println(F("*** E131 UNICAST INIT FAILED ****"));
         }
-        */
+*/
     }
-}
 
-const char* E131Input::getKey() {
-    return KEY;
-}
+    // DEBUG_END;
+} // Begin
 
-const char* E131Input::getBrief() {
-    return "E1.31 (sACN)";
-}
+//-----------------------------------------------------------------------------
+void c_InputE131::validateConfiguration()
+{
+    // DEBUG_START;
 
-void E131Input::validate() {
-
-    if (startUniverse < 1)
-        startUniverse = 1;
-    if (universe_limit > UNIVERSE_MAX || universe_limit < 1)
-        universe_limit = UNIVERSE_MAX;
+    if (startUniverse < 1) { startUniverse = 1; }
+       
+    // DEBUG_V ("");
+    if (universe_channel_limit > UNIVERSE_MAX || universe_channel_limit < 1) { universe_channel_limit = UNIVERSE_MAX; }
+        
+    // DEBUG_V ("");
     if (channel_start < 1)
+    {
+        // move to the start of the first universe
         channel_start = 1;
-    else if (channel_start > universe_limit)
-        channel_start = universe_limit;
+    }        
+    else if (channel_start > universe_channel_limit)
+    {
+        // channel start must be within the first universe
+        channel_start = universe_channel_limit;
+    }
 
-//From updateConfig():
    // Find the last universe we should listen for
-    uint16_t span = channel_start + showBufferSize - 1;
-    if (span % universe_limit)
-        uniLast = startUniverse + span / universe_limit;
+    // DEBUG_V ("");
+    uint16_t span = channel_start + InputDataBufferSize - 1;
+    if (span % universe_channel_limit)
+    {
+        LastUniverse = startUniverse + span / universe_channel_limit;
+    }
     else
-        uniLast = startUniverse + span / universe_limit - 1;
+    {
+        LastUniverse = startUniverse + span / universe_channel_limit - 1;
+    }
 
     // Setup the sequence error tracker
-    uint8_t uniTotal = (uniLast + 1) - startUniverse;
+    // DEBUG_V ("");
+    uint8_t uniTotal = (LastUniverse + 1) - startUniverse;
 
-    if (seqTracker) free(seqTracker);
-    if ((seqTracker = static_cast<uint8_t *>(malloc(uniTotal))))
-        memset(seqTracker, 0x00, uniTotal);
+    // DEBUG_V ("");
+    if (seqTracker) { free (seqTracker); }
+    // DEBUG_V ("");
+    if ((seqTracker = static_cast<uint8_t *>(malloc(uniTotal)))) { memset (seqTracker, 0x00, uniTotal); }
+    // DEBUG_V ("");
 
-    if (seqError) free(seqError);
-    if ((seqError = static_cast<uint32_t *>(malloc(uniTotal * 4))))
-        memset(seqError, 0x00, uniTotal * 4);
+    if (seqError) { free (seqError); }
+    // DEBUG_V ("");
+    if ((seqError = static_cast<uint32_t *>(malloc(uniTotal * 4)))) { memset (seqError, 0x00, uniTotal * 4); }
+    // DEBUG_V ("");
 
     // Zero out packet stats
+    if (nullptr == e131)
+    {
+        e131 = new ESPAsyncE131 (10);
+    }
     e131->stats.num_packets = 0;
+    // DEBUG_V ("");
+
 
     LOG_PORT.printf("Listening for %u channels from Universe %u to %u.\n",
-            showBufferSize, startUniverse, uniLast);
+            InputDataBufferSize, startUniverse, LastUniverse);
 
     // Setup IGMP subscriptions if multicast is enabled
-    if (multicast)
-        multiSub();
-}
+    if (multicast) { SubscribeToMulticastDomains (); }
+    // DEBUG_END;
 
-boolean E131Input::deserialize(DynamicJsonDocument &json) {
-    boolean retval = false;
-    if (json.containsKey(KEY)) {
-        retval = retval | FileIO::setFromJSON(startUniverse, json[KEY]["universe"]);
-        retval = retval | FileIO::setFromJSON(universe_limit, json[KEY]["universe_limit"]);
-        retval = retval | FileIO::setFromJSON(channel_start, json[KEY]["channel_start"]);
-        retval = retval | FileIO::setFromJSON(multicast, json[KEY]["multicast"]);
-    } else {
-        LOG_PORT.println("No e131 settings found.");
-    }
+} // validate
+
+//-----------------------------------------------------------------------------
+boolean c_InputE131::SetConfig (ArduinoJson::JsonObject & jsonConfig)
+{
+    bool retval = 0;
+    retval = retval | FileIO::setFromJSON(startUniverse,          jsonConfig["universe"]);
+    retval = retval | FileIO::setFromJSON(universe_channel_limit, jsonConfig["universe_limit"]);
+    retval = retval | FileIO::setFromJSON(channel_start,          jsonConfig["channel_start"]);
+    retval = retval | FileIO::setFromJSON(multicast,              jsonConfig["multicast"]);
+
+    validateConfiguration ();
+
     return retval;
-}
+} // deserialize
 
-void E131Input::load() {
-    if (FileIO::loadConfig(CONFIG_FILE, std::bind(
-            &E131Input::deserialize, this, std::placeholders::_1))) {
-        validate();
-    } else {
-        // Load failed, create a new config file and save it
-        startUniverse = 1;
-        universe_limit = 512;
-        channel_start = 1;
-        multicast = true;
-        save();
-    }
-}
+//-----------------------------------------------------------------------------
+void c_InputE131::GetConfig (JsonObject & jsonConfig)
+{
+    jsonConfig["universe"]       = startUniverse;
+    jsonConfig["universe_limit"] = universe_channel_limit;
+    jsonConfig["channel_start"]  = channel_start;
+    jsonConfig["multicast"]      = multicast;
 
-String E131Input::serialize(boolean pretty = false) {
-    DynamicJsonDocument json(1024);
+} // GetConfig
 
-    JsonObject e131 = json.createNestedObject("e131");
-    e131["universe"] = startUniverse;
-    e131["universe_limit"] = universe_limit;
-    e131["channel_start"] = channel_start;
-    e131["multicast"] = multicast;
+void c_InputE131::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
+{
+    InputDataBuffer = BufferStart;
+    InputDataBufferSize = BufferSize;
 
-    String jsonString;
-    if (pretty)
-        serializeJsonPretty(json, jsonString);
-    else
-        serializeJson(json, jsonString);
+    // buffer has moved. Start Over
+    Begin ();
 
-    return jsonString;
-}
+} // SetBufferInfo
 
-void E131Input::save() {
-    validate();
-    FileIO::saveConfig(CONFIG_FILE, serialize());
-}
-
+//-----------------------------------------------------------------------------
 // Subscribe to "n" universes, starting at "universe"
-void E131Input::multiSub() {
-    uint8_t count;
-    IPAddress ifaddr;
+void c_InputE131::SubscribeToMulticastDomains()
+{
+    uint8_t count = LastUniverse - startUniverse + 1;
+    IPAddress ifaddr = WiFi.localIP ();
     IPAddress multicast_addr;
 
-    count = uniLast - startUniverse + 1;
-    ifaddr = WiFi.localIP ();
-    for (uint8_t i = 0; i < count; i++) {
+    for (uint8_t UniverseIndex = 0; UniverseIndex < count; ++UniverseIndex) 
+    {
         multicast_addr = IPAddress (239, 255,
-            (((startUniverse + i) >> 8) & 0xff),
-            (((startUniverse + i) >> 0) & 0xff));
+                                    (((startUniverse + UniverseIndex) >> 8) & 0xff),
+                                    (((startUniverse + UniverseIndex) >> 0) & 0xff));
+
         igmp_joingroup ((ip4_addr_t*)&ifaddr[0], (ip4_addr_t*)&multicast_addr[0]);
     }
-}
+} // multiSub
 
-void E131Input::process() {
-    uint8_t     *data;
+//-----------------------------------------------------------------------------
+void c_InputE131::Process ()
+{
+    uint8_t     *E131Data;
     uint8_t     uniOffset;
     uint16_t    universe;
     uint16_t    offset;
@@ -192,16 +223,21 @@ void E131Input::process() {
     uint16_t    buffloc;
 
     // Parse a packet and update pixels
-    while (!e131->isEmpty()) {
+    while (!e131->isEmpty()) 
+    {
         e131->pull(&packet);
         universe = htons(packet.universe);
-        data = packet.property_values + 1;
+        E131Data = packet.property_values + 1;
+
         //LOG_PORT.print(universe);
         //LOG_PORT.println(packet.sequence_number);
-        if ((universe >= startUniverse) && (universe <= uniLast)) {
+
+        if ((universe >= startUniverse) && (universe <= LastUniverse))
+        {
             // Universe offset and sequence tracking
             uniOffset = (universe - startUniverse);
-            if (packet.sequence_number != seqTracker[uniOffset]++) {
+            if (packet.sequence_number != seqTracker[uniOffset]++)
+            {
                 LOG_PORT.print(F("Sequence Error - expected: "));
                 LOG_PORT.print(seqTracker[uniOffset] - 1);
                 LOG_PORT.print(F(" actual: "));
@@ -216,31 +252,37 @@ void E131Input::process() {
             offset = channel_start - 1;
 
             // Find start of data based off the Universe
-            dataStart = uniOffset * universe_limit - offset;
+            dataStart = uniOffset * universe_channel_limit - offset;
 
             // Calculate how much data we need for this buffer
-            dataStop = showBufferSize;
+            dataStop = InputDataBufferSize;
             channels = htons(packet.property_value_count) - 1;
-            if (universe_limit < channels)
-                channels = universe_limit;
+            if (universe_channel_limit < channels)
+            {
+                channels = universe_channel_limit;
+            }
+
             if ((dataStart + channels) < dataStop)
+            {
                 dataStop = dataStart + channels;
+            }
 
             // Set the data
             buffloc = 0;
 
             // ignore data from start of first Universe before channel_start
-            if (dataStart < 0) {
+            if (dataStart < 0) 
+            {
                 dataStart = 0;
                 buffloc = channel_start - 1;
             }
 
-            for (int i = dataStart; i < dataStop; i++) {
-                showBuffer[i] = data[buffloc];
-//                pixels.setValue(i, data[buffloc]);
+            for (int UniverseIndex = dataStart; UniverseIndex < dataStop; UniverseIndex++) 
+            {
+                InputDataBuffer[UniverseIndex] = E131Data[buffloc];
                 buffloc++;
             }
         }
     }
 //    LOG_PORT.printf("procJSON heap /stack stats: %u:%u:%u:%u\n", ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
-}
+} // process
