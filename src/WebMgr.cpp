@@ -21,7 +21,7 @@
 #include "ESPixelStick.h"
 
 #include "output/OutputMgr.hpp"
-//#include "input/InputMgr.hpp"
+#include "input/InputMgr.hpp"
 
 #include "WebMgr.hpp"
 
@@ -122,9 +122,9 @@ void c_WebMgr::init ()
 /*
     Gather config data from the various config sources and send it to the web page.
 */
-extern void GetConfig (JsonObject & json);
 String c_WebMgr::GetConfiguration ()
 {
+    extern void GetConfig (JsonObject & json);
     // DEBUG_START;
 
     String Response = "";
@@ -141,6 +141,9 @@ String c_WebMgr::GetConfiguration ()
     JsonObject JsonOutputConfig = JsonConfigDoc.createNestedObject ("outputs");
     OutputMgr.GetConfig (JsonOutputConfig);
     // DEBUG_V ("");
+
+    JsonObject JsonInputConfig = JsonConfigDoc.createNestedObject ("inputs");
+    InputMgr.GetConfig (JsonInputConfig);
 
 #ifdef foo
     // todo Get input config
