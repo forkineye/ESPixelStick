@@ -51,7 +51,6 @@ void c_InputE131::Begin ()
 
     // Create a new ESPAsyncE131
     if (nullptr != e131) { free (e131); e131 = nullptr; }
-    // DEBUG_V("");
     e131 = new ESPAsyncE131(10);
     // DEBUG_V ("");
 
@@ -75,17 +74,15 @@ void c_InputE131::Begin ()
     else
     {
         // DEBUG_V ("");
-        /* todo
+
         if (e131->begin(E131_UNICAST)) 
         {
-            LOG_PORT.print(F("E131 Unicast port: "));
-            LOG_PORT.println(E131_DEFAULT_PORT);
+            LOG_PORT.println (String(F("E131 Unicast port: ")) + E131_DEFAULT_PORT);
         }
         else
         {
             LOG_PORT.println(F("*** E131 UNICAST INIT FAILED ****"));
         }
-*/
     }
 
     // DEBUG_END;
