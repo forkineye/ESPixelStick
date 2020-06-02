@@ -25,6 +25,13 @@
 
 #include "WebMgr.hpp"
 
+#ifdef ARDUINO_ARCH_ESP8266
+#elif defined ARDUINO_ARCH_ESP32
+#   include <SPIFFS.h>
+#else
+#	error "Unsupported CPU type."
+#endif
+
 const uint8_t HTTP_PORT = 80;      ///< Default web server port
 
 AsyncWebServer  webServer (HTTP_PORT);  // Web Server
