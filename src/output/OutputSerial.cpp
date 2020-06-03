@@ -253,7 +253,7 @@ bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 //----------------------------------------------------------------------------
 void c_OutputSerial::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
     String DriverName = ""; GetDriverName (DriverName);
     jsonConfig["type"]        = DriverName;
     jsonConfig["gen_ser_hdr"] = GenericSerialHeader;
@@ -262,7 +262,7 @@ void c_OutputSerial::GetConfig (ArduinoJson::JsonObject& jsonConfig)
     // enums need to be converted to uints for json
     jsonConfig["baudrate"]    = uint (CurrentBaudrate);
     jsonConfig["data_pin"]    = uint (DataPin);
-    DEBUG_END;
+    // DEBUG_END;
 } // GetConfig
 
 // Fill the FIFO with as many intensity values as it can hold.
