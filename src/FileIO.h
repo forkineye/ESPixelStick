@@ -51,7 +51,7 @@ class FileIO {
             std::unique_ptr<char[]> buf(new char[size]);
             file.readBytes(buf.get(), size);
 
-            DynamicJsonDocument json(1024);
+            DynamicJsonDocument json(2048);
             DeserializationError error = deserializeJson(json, buf.get());
             if (error) {
                 LOG_PORT.printf("*** JSON Deserialzation Error: %s ***\n", filename);
