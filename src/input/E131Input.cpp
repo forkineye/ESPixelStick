@@ -30,6 +30,7 @@ c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
                           uint8_t                     * BufferStart,
                           uint16_t                      BufferSize) :
     c_InputCommon(NewInputChannelId, NewChannelType, BufferStart, BufferSize)
+
 {
     // DEBUG_START;
     // DEBUG_END;
@@ -49,6 +50,9 @@ void c_InputE131::Begin ()
     // DEBUG_START;
     Serial.println(F("** E1.31 Initialization **"));
 
+    if (true == HasBeenInitialized) { return; }
+    HasBeenInitialized = true;
+
     // Create a new ESPAsyncE131
     if (nullptr != e131) { free (e131); e131 = nullptr; }
     e131 = new ESPAsyncE131(10);
@@ -63,12 +67,12 @@ void c_InputE131::Begin ()
         if (e131->begin(E131_MULTICAST, startUniverse, LastUniverse - startUniverse + 1)) 
         {
             // DEBUG_V ("");
-            LOG_PORT.println(F("E131 Multicast Enabled."));
+            LOG_PORT.println(F("E1.31 Multicast Enabled."));
         }
         else
         {
             // DEBUG_V ("");
-            LOG_PORT.println(F("*** E131 MULTICAST INIT FAILED ****"));
+            LOG_PORT.println(F("*** E1.31 MULTICAST INIT FAILED ****"));
         }
     }
     else
@@ -77,11 +81,11 @@ void c_InputE131::Begin ()
 
         if (e131->begin(E131_UNICAST)) 
         {
-            LOG_PORT.println (String(F("E131 Unicast port: ")) + E131_DEFAULT_PORT);
+            LOG_PORT.println (String(F("E1.31 Unicast port: ")) + E131_DEFAULT_PORT);
         }
         else
         {
-            LOG_PORT.println(F("*** E131 UNICAST INIT FAILED ****"));
+            LOG_PORT.println(F("*** E1.31 UNICAST INIT FAILED ****"));
         }
     }
 
@@ -140,11 +144,12 @@ void c_InputE131::validateConfiguration()
     // Zero out packet stats
     if (nullptr == e131)
     {
+        // DEBUG_V ("");
         e131 = new ESPAsyncE131 (10);
     }
+    // DEBUG_V ("");
     e131->stats.num_packets = 0;
     // DEBUG_V ("");
-
 
     LOG_PORT.printf("Listening for %u channels from Universe %u to %u.\n",
             InputDataBufferSize, startUniverse, LastUniverse);
@@ -153,29 +158,40 @@ void c_InputE131::validateConfiguration()
     if (multicast) { SubscribeToMulticastDomains (); }
     // DEBUG_END;
 
-} // validate
+} // validateConfiguration
 
 //-----------------------------------------------------------------------------
 boolean c_InputE131::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
+    // DEBUG_START;
     bool retval = 0;
-    retval = retval | FileIO::setFromJSON(startUniverse,          jsonConfig["universe"]);
-    retval = retval | FileIO::setFromJSON(universe_channel_limit, jsonConfig["universe_limit"]);
-    retval = retval | FileIO::setFromJSON(channel_start,          jsonConfig["channel_start"]);
-    retval = retval | FileIO::setFromJSON(multicast,              jsonConfig["multicast"]);
 
-    validateConfiguration ();
+    if (true == HasBeenInitialized)
+    {
+        retval = retval | FileIO::setFromJSON(startUniverse,          jsonConfig["universe"]);
+        retval = retval | FileIO::setFromJSON(universe_channel_limit, jsonConfig["universe_limit"]);
+        retval = retval | FileIO::setFromJSON(channel_start,          jsonConfig["channel_start"]);
+        retval = retval | FileIO::setFromJSON(multicast,              jsonConfig["multicast"]);
 
+        // DEBUG_V("");
+        validateConfiguration ();
+    }
+
+    // DEBUG_END;
     return retval;
 } // deserialize
 
 //-----------------------------------------------------------------------------
 void c_InputE131::GetConfig (JsonObject & jsonConfig)
 {
+    // DEBUG_START;
+
     jsonConfig["universe"]       = startUniverse;
     jsonConfig["universe_limit"] = universe_channel_limit;
     jsonConfig["channel_start"]  = channel_start;
     jsonConfig["multicast"]      = multicast;
+
+    // DEBUG_END;
 
 } // GetConfig
 
