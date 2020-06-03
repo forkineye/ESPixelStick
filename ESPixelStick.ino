@@ -245,6 +245,8 @@ void validateConfig()
 /// Deserialize device confiugration JSON to config structure - returns true if config change detected
 boolean dsDevice(DynamicJsonDocument &json) 
 {
+    // DEBUG_START;
+
     boolean retval = false;
     if (json.containsKey("device"))
     {
@@ -255,6 +257,8 @@ boolean dsDevice(DynamicJsonDocument &json)
     {
         LOG_PORT.println("No device settings found.");
     }
+
+    // DEBUG_END;
 
     return retval;
 } // dsDevice
@@ -325,6 +329,8 @@ void loadConfig()
 
 void GetConfig (JsonObject & json)
 {
+    // DEBUG_START;
+
     // Device
     JsonObject device = json.createNestedObject("device");
     device["id"]           = config.id;
@@ -343,10 +349,15 @@ void GetConfig (JsonObject & json)
 
     network["ap_fallback"] = config.ap_fallbackIsEnabled;
     network["ap_timeout"]  = config.ap_timeout;
+
+    // DEBUG_END;
+
 }
 // Serialize the current config into a JSON string
 String serializeCore(boolean pretty, boolean creds) 
 {
+    // DEBUG_START;
+
     // Create buffer and root object
     DynamicJsonDocument jsonConfigDoc(2048);
     JsonObject JsonConfig = jsonConfigDoc.as<JsonObject> ();
@@ -366,12 +377,16 @@ String serializeCore(boolean pretty, boolean creds)
         serializeJson (JsonConfig, jsonConfigString);
     }
 
+    // DEBUG_END;
+
     return jsonConfigString;
 } // serializeCore
 
 // Save configuration JSON file
 void saveConfig() 
 {
+    // DEBUG_START;
+
     // Validate Config
     validateConfig();
 
@@ -383,6 +398,7 @@ void saveConfig()
 
     InputMgr.SaveConfig ();
 
+    // DEBUG_END;
 } // saveConfig
 
 /////////////////////////////////////////////////////////
@@ -407,8 +423,7 @@ void loop()
     // Render output
     OutputMgr.Render();
 
-//TODO: Research this further
-// workaround crash - consume incoming bytes on LOG serial port
+// need to keep the rx pipeline empty
     while (0 != LOG_PORT.available()) 
     {
         LOG_PORT.read();
