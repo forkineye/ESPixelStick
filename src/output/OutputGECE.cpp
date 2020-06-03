@@ -206,7 +206,7 @@ bool c_OutputGECE::SetConfig(ArduinoJson::JsonObject & jsonConfig)
 //----------------------------------------------------------------------------
 void c_OutputGECE::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
     String DriverName = ""; GetDriverName (DriverName);
 
     jsonConfig["type"]        = DriverName;
@@ -216,7 +216,7 @@ void c_OutputGECE::GetConfig (ArduinoJson::JsonObject& jsonConfig)
     // enums need to be converted to uints for json
     jsonConfig["data_pin"]    = uint (DataPin);
 
-    DEBUG_END;
+    // DEBUG_END;
 } // GetConfig
 
 //----------------------------------------------------------------------------
