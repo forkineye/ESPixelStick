@@ -66,6 +66,7 @@ private:
     c_InputCommon * pInputChannelDrivers[InputChannelId_End]; ///< pointer(s) to the current active Input driver
     uint8_t       * InputDataBuffer     = nullptr;
     uint16_t        InputDataBufferSize = 0;
+    bool            HasBeenInitialized = false;
 
     // configuration parameter names for the channel manager within the config file
 #   define IM_SECTION_NAME         F("im_config")

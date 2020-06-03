@@ -61,6 +61,9 @@ void c_InputMgr::Begin (uint8_t* BufferStart, uint16_t BufferSize)
 {
     // DEBUG_START;
 
+    if (true == HasBeenInitialized) { return; }
+    HasBeenInitialized = true;
+
     InputDataBuffer     = BufferStart;
     InputDataBufferSize = BufferSize;
     // DEBUG_V ("");
