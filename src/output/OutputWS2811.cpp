@@ -124,6 +124,7 @@ c_OutputWS2811::~c_OutputWS2811()
 
     // Clear all pending interrupts in the UART
     WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
+    // DEBUG_V ("");
 
 #ifdef ARDUINO_ARCH_ESP32
     uart_isr_free (UartId);
@@ -194,7 +195,7 @@ void c_OutputWS2811::Begin()
 //----------------------------------------------------------------------------
 void c_OutputWS2811::GetConfig(ArduinoJson::JsonObject & jsonConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
     jsonConfig["color_order"] = color_order;
     jsonConfig["pixel_count"] = pixel_count;
     jsonConfig["group_size"]  = group_size;
@@ -203,7 +204,7 @@ void c_OutputWS2811::GetConfig(ArduinoJson::JsonObject & jsonConfig)
     jsonConfig["brightness"]  = brightness;
     // enums need to be converted to uints for json
     jsonConfig["data_pin"]    = uint (DataPin);
-    DEBUG_END;
+    // DEBUG_END;
 } // GetConfig
 
 //----------------------------------------------------------------------------
