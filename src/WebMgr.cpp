@@ -137,7 +137,7 @@ String c_WebMgr::GetConfiguration ()
     String Response = "";
 
     // set up a framework to get the config data
-    DynamicJsonDocument JsonConfigDoc (1024);
+    DynamicJsonDocument JsonConfigDoc (4096);
 
     // DEBUG_V("");
 
@@ -152,18 +152,9 @@ String c_WebMgr::GetConfiguration ()
     JsonObject JsonInputConfig = JsonConfigDoc.createNestedObject ("inputs");
     InputMgr.GetConfig (JsonInputConfig);
 
-#ifdef foo
-    // todo Get input config
-    String sJsonConfig = "";
-    serializeJsonPretty (JsonConfigDoc, sJsonConfig);
-
-    LOG_PORT.println ("sssssssssssssssssssss Pretty JsonConfig sssssssssssssssssssss");
-    LOG_PORT.println (sJsonConfig);
-    LOG_PORT.println ("sssssssssssssssssssss Pretty JsonConfig sssssssssssssssssssss");
-#endif // def foo
-
     // now make it something we can transmit
     serializeJson (JsonConfigDoc, Response);
+    // DEBUG_V (Response);
 
     // DEBUG_END;
 
