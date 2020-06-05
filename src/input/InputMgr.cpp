@@ -103,7 +103,7 @@ void c_InputMgr::LoadConfig ()
     // DEBUG_START;
 
     // try to load and process the config file
-    if (FileIO::loadConfig (String("/" + String(IM_SECTION_NAME) + ".json").c_str(), 
+    if (FileIO::loadConfig (ConfigFileName,
         [this](DynamicJsonDocument & JsonConfigDoc)
         {
             // DEBUG_V ("");
@@ -170,7 +170,7 @@ void c_InputMgr::SaveConfig ()
 
     serializeJson (JsonConfigDoc, sJsonConfig);
     // DEBUG_V ("");
-    if (FileIO::saveConfig (String ("/" + String (IM_SECTION_NAME) + ".json").c_str (), sJsonConfig))
+    if (FileIO::saveConfig (ConfigFileName, sJsonConfig))
     {
         LOG_PORT.println (F ("**** Saved Input Manager Config File. ****"));
     } // end we got a config and it was good

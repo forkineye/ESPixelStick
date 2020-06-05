@@ -77,6 +77,7 @@ private:
     void SerializeConfig   (JsonObject & jsonConfig);
     // JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
 
+    String ConfigFileName = "/" + String (IM_SECTION_NAME) + ".json";
 
 protected:
 
