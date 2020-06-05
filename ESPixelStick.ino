@@ -57,7 +57,6 @@ extern "C"
 
 #elif defined ARDUINO_ARCH_ESP32
     // ESP32 user_interface is now built in
-#   include <SPIFFS.h>
 #   include <Update.h>
 #else
 #	error "Unsupported CPU type."
@@ -81,9 +80,7 @@ static void _u0_putc(char c){
 /////////////////////////////////////////////////////////
 
 // Configuration file
-const char CONFIG_FILE[] = "/config.json";
-
-uint8_t *showBuffer;        ///< Main show buffer
+String ConfigFileName = "/config.json";
 
 //TODO: Add Auxiliary services
 //MQTT
@@ -138,64 +135,17 @@ void setup()
     InputMgr.DumpSupportedModes ();
 
     // DEBUG_V ("");
-
-    // Enable SPIFFS
-#ifdef ARDUINO_ARCH_ESP8266
-    if (!SPIFFS.begin ())
-#else
-    if (!SPIFFS.begin (false))
-#endif
-    {
-        LOG_PORT.println(F("*** File system did not initialize correctly ***"));
-    } 
-    else 
-    {
-        LOG_PORT.println(F("File system initialized."));
-    }
-
-#ifdef ARDUINO_ARCH_ESP8266
-    FSInfo fs_info;
-    if (SPIFFS.info(fs_info)) {
-        LOG_PORT.printf("Total bytes used in file system: %u.\n", fs_info.usedBytes);
-/*
-        Dir dir = SPIFFS.openDir("/");
-        while (dir.next()) {
-            File file = dir.openFile("r");
-            LOG_PORT.printf("%s : %u\n", file.name(), file.size());
-            file.close();
-        }
-*/
-#elif defined(ARDUINO_ARCH_ESP32)
-    if (0 != SPIFFS.totalBytes ())
-    {
-        LOG_PORT.println (String ("Total bytes in file system: ") + String (SPIFFS.usedBytes ()));
-
-        fs::File root = SPIFFS.open ("/");
-        fs::File MyFile = root.openNextFile();
-
-        while (MyFile)
-        {
-            LOG_PORT.println ("'" + String (MyFile.name ()) + "': \t'" + String (MyFile.size ()) + "'");
-            MyFile = MyFile.openNextFile ();
-        }
-#endif // ARDUINO_ARCH_ESP32
-
-    }
-    else 
-    {
-        LOG_PORT.println(F("*** Failed to read file system details ***"));
-    }
-    // DEBUG_V ("");
+    FileIO::Begin ();
 
     // Load configuration from SPIFFS and set Hostname
     loadConfig();
     // DEBUG_V ("");
 
-    WiFiMgr.Begin (& config);
-    // DEBUG_V ("");
-
     // Set up the output manager to start sending data to the serial ports
     OutputMgr.Begin ();
+    // DEBUG_V ("");
+
+    WiFiMgr.Begin (& config);
     // DEBUG_V ("");
 
     // connect the input processing to the output processing. 
@@ -312,7 +262,7 @@ void loadConfig()
     memset (&config, 0, sizeof (config));
 
     // DEBUG_V ("");
-    if (FileIO::loadConfig(CONFIG_FILE, &deserializeCore)) 
+    if (FileIO::loadConfig(ConfigFileName, &deserializeCore)) 
     {
         validateConfig();
     } 
@@ -391,7 +341,8 @@ void saveConfig()
     validateConfig();
 
     // Save Config
-    FileIO::saveConfig(CONFIG_FILE, serializeCore(false, true));
+    String DataToSave = serializeCore (false, true);
+    FileIO::saveConfig(ConfigFileName, DataToSave);
 
     // save the config for the output and input channels
     OutputMgr.SaveConfig ();
