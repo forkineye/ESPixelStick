@@ -32,7 +32,7 @@ extern "C" {
 #   include <ets_sys.h>
 #   include <uart.h>
 #   include <uart_register.h>
-#else
+#elif defined(ARDUINO_ARCH_ESP32)
 
 // Define ESP8266 style macro conversions to limit changes in the rest of the code.
 #   define UART_CONF0           UART_CONF0_REG
@@ -127,7 +127,7 @@ c_OutputWS2811::~c_OutputWS2811()
     // DEBUG_V ("");
 
 #ifdef ARDUINO_ARCH_ESP32
-    uart_isr_free (UartId);
+    // uart_isr_free (UartId);
 #endif // def ARDUINO_ARCH_ESP32
 
     // DEBUG_END;
@@ -148,7 +148,7 @@ static void IRAM_ATTR uart_intr_handler (void* param)
 void c_OutputWS2811::Begin()
 {
     // DEBUG_START;
-    LOG_PORT.println (String (F (" Initializing WS281x on Chan: '")) + String (OutputChannelId) + "'");
+    LOG_PORT.println (String (F ("** WS281x Initialization for Chan: ")) + String (OutputChannelId) + " **");
 
 #ifdef ARDUINO_ARCH_ESP8266
     InitializeUart (WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE * WS2811_DATA_SPEED, 
@@ -196,6 +196,8 @@ void c_OutputWS2811::Begin()
 void c_OutputWS2811::GetConfig(ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
+    String DriverName = ""; GetDriverName (DriverName);
+    jsonConfig["type"]        = DriverName;
     jsonConfig["color_order"] = color_order;
     jsonConfig["pixel_count"] = pixel_count;
     jsonConfig["group_size"]  = group_size;
@@ -355,7 +357,7 @@ void c_OutputWS2811::Render()
 */
 bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
     uint temp;
     FileIO::setFromJSON (color_order, jsonConfig["color_order"]);
     FileIO::setFromJSON (pixel_count, jsonConfig["pixel_count"]);
@@ -368,7 +370,7 @@ bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     FileIO::setFromJSON (temp, jsonConfig["data_pin"]);
     DataPin = gpio_num_t (temp);
 
-    DEBUG_END;
+    // DEBUG_END;
     return validate ();
 
 } // SetConfig
@@ -376,18 +378,18 @@ bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 //----------------------------------------------------------------------------
 void c_OutputWS2811::updateGammaTable ()
 {
-    DEBUG_START;
+    // DEBUG_START;
     for (int i = 0; i < 256; i++)
     {
         gamma_table[i] = (uint8_t)min ((255.0 * pow (i * brightness / 255.0, gamma) + 0.5), 255.0);
     }
-    DEBUG_END;
+    // DEBUG_END;
 } // updateGammaTable
 
 //----------------------------------------------------------------------------
 void c_OutputWS2811::updateColorOrder ()
 {
-    DEBUG_START;
+    // DEBUG_START;
     // make sure the color order is all lower case
     color_order.toLowerCase ();
 
@@ -402,7 +404,7 @@ void c_OutputWS2811::updateColorOrder ()
         rOffset = 0; gOffset = 1; bOffset = 2;
     } // default
 
-    DEBUG_END;
+    // DEBUG_END;
 } // updateColorOrder
  
 //----------------------------------------------------------------------------
@@ -417,7 +419,7 @@ void c_OutputWS2811::updateColorOrder ()
 */
 bool c_OutputWS2811::validate ()
 {
-    DEBUG_START;
+    // DEBUG_START;
     bool response = true;
 
     if (pixel_count > WS2812_PIXEL_LIMIT)
@@ -475,7 +477,7 @@ bool c_OutputWS2811::validate ()
     // Calculate our refresh time
     refreshTime = (WS2811_TIME_PER_PIXEL * pixel_count) + WS2811_MIN_IDLE_TIME;
 
-    DEBUG_END;
+    // DEBUG_END;
     return response;
 
 } // validate
