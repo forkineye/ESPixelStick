@@ -172,7 +172,7 @@ void c_OutputSerial::Begin ()
     // prime the uart status bits
     enqueue (0);
 
-//    DEBUG_END;
+//    // DEBUG_END;
 }
 
 //----------------------------------------------------------------------------
@@ -187,7 +187,7 @@ void c_OutputSerial::Begin ()
 */
 bool c_OutputSerial::validate ()
 {
-    DEBUG_START;
+    // DEBUG_START;
     bool response = true;
 
     if ((Num_Channels > MAX_CHANNELS) || (Num_Channels < 1))
@@ -215,7 +215,7 @@ bool c_OutputSerial::validate ()
         LOG_PORT.println (String (F ("*** Requested Generic Serial Footer is too long. Setting to Default ***")));
         GenericSerialFooter = "";
     }
-    DEBUG_END;
+    // DEBUG_END;
     return response;
 
 } // validate
@@ -231,7 +231,7 @@ bool c_OutputSerial::validate ()
 */
 bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
     uint temp; // Holds enums prior to conversion
     FileIO::setFromJSON (GenericSerialHeader, jsonConfig["gen_ser_hdr"]);
     FileIO::setFromJSON (GenericSerialFooter, jsonConfig["gen_ser_ftr"]);
@@ -246,7 +246,7 @@ bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject & jsonConfig)
     FileIO::setFromJSON (temp, jsonConfig["data_pin"]);
     DataPin = gpio_num_t (temp);
 
-    DEBUG_END;
+    // DEBUG_END;
     return validate ();
 
 } // SetConfig

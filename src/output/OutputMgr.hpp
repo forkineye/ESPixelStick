@@ -70,8 +70,8 @@ public:
         OutputType_SPI,
 #endif // def ARDUINO_ARCH_ESP32
         OutputType_Disabled, // must be last
+        OutputType_End,
         OutputType_Start = OutputType_WS2811,
-        OutputType_End   = OutputType_Disabled,
     };
 
 private:
@@ -95,7 +95,7 @@ private:
     // JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
 
     File ConfigFile;
-    String ConfigFileName = String ("/") + OM_SECTION_NAME + ".json";
+    String ConfigFileName;
 
 protected:
 

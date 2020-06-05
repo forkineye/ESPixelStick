@@ -54,6 +54,8 @@ OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] =
 ///< Start up the driver and put it into a safe mode
 c_OutputMgr::c_OutputMgr ()
 {
+    ConfigFileName = String ("/") + String (OM_SECTION_NAME) + ".json";
+
     // this gets called pre-setup so there is nothing we can do here.
     int pOutputChannelDriversIndex = 0;
     for (auto CurrentOutput : pOutputChannelDrivers)
@@ -89,9 +91,6 @@ void c_OutputMgr::Begin ()
     if (true == HasBeenInitialized) { return; }
     HasBeenInitialized = true;
 
-    // open a persistent file handle
-    ConfigFile = SPIFFS.open (ConfigFileName, "r+");
-
     // make sure the pointers are set up properly
     int ChannelIndex = 0;
     for (auto CurrentOutput : pOutputChannelDrivers)
@@ -102,6 +101,9 @@ void c_OutputMgr::Begin ()
     }
 
     // DEBUG_V ("");
+
+    // open a persistent file handle
+    ConfigFile = SPIFFS.open (ConfigFileName, "r+");
 
     // load up the configuration from the saved file. This also starts the drivers
     LoadConfig ();
@@ -179,7 +181,7 @@ void c_OutputMgr::CreateNewConfig ()
     JsonObject JsonConfig = JsonConfigDoc.createNestedObject (OM_SECTION_NAME);
 
     // DEBUG_V ("for each output type");
-    for (int outputTypeId = int (OutputType_Start); outputTypeId != int (OutputType_End); ++outputTypeId)
+    for (int outputTypeId = int (OutputType_Start); outputTypeId < int (OutputType_End); ++outputTypeId)
     {
         // DEBUG_V ("for each interface");
         int ChannelIndex = 0;
@@ -368,12 +370,12 @@ bool c_OutputMgr::DeserializeConfig (JsonObject & jsonConfig)
             // DEBUG_V ("");
 
             // set a default value for channel type
-            uint32_t ChannelType = uint32_t (OutputType_End)+1;
+            uint32_t ChannelType = uint32_t (OutputType_End);
             FileIO::setFromJSON (ChannelType, OutputChannelConfig[OM_CHANNEL_TYPE_NAME]);
             // DEBUG_V ("");
 
             // is it a valid / supported channel type
-            if ((ChannelType < uint32_t(OutputType_Start)) || (ChannelType > uint32_t(OutputType_End)))
+            if ((ChannelType < uint32_t(OutputType_Start)) || (ChannelType >= uint32_t(OutputType_End)))
             {
                 // if not, flag an error and move on to the next channel
                 LOG_PORT.println (String (F ("Invalid Channel Type in config '")) + ChannelType + String (F ("'. Specified for channel '")) + ChannelIndex + "'. Disabling channel");

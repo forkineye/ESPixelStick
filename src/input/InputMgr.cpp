@@ -37,6 +37,8 @@
 c_InputMgr::c_InputMgr ()
 {
     // this gets called pre-setup so there is nothing we can do here.
+    ConfigFileName = String ("/") + String (IM_SECTION_NAME) + ".json";
+
 } // c_InputMgr
 
 //-----------------------------------------------------------------------------
