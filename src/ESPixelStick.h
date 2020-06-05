@@ -36,10 +36,9 @@ const char BUILD_DATE[] = __DATE__;
 #else
 #	error "Unsupported CPU type"
 #endif
+
 #include <Ticker.h>
 #include <ArduinoJson.h>
-#include "input/_Input.h"
-#include "output/OutputMgr.hpp"
 
 #include "memdebug.h"
 
@@ -79,7 +78,6 @@ typedef struct {
 String serializeCore(boolean pretty = false, boolean creds = false);
 boolean dsDevice(DynamicJsonDocument &json);
 boolean dsNetwork(DynamicJsonDocument &json);
-void setMode(_Input *newinput);
 void saveConfig();
 
 #endif  // ESPIXELSTICK_H_
