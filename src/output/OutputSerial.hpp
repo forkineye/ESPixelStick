@@ -51,7 +51,7 @@ public:
     bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
     void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     void         Render ();                                        ///< Call from loop(),  renders output data
-    void         GetDriverName (String & sDriverName) { sDriverName = String (F ("Serial")); }
+    void         GetDriverName (String& sDriverName);
 
 #define GS_CHANNEL_LIMIT 2048
 

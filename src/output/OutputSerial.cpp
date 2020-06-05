@@ -126,7 +126,8 @@ static void IRAM_ATTR uart_intr_handler (void* param)
 void c_OutputSerial::Begin ()
 {
     // DEBUG_START;
-    LOG_PORT.println (String (F ("** SERIAL Initialization for Chan: ")) + String (OutputChannelId) + " **");
+    String DriverName = ""; GetDriverName (DriverName);
+    LOG_PORT.println (String (F ("** ")) + DriverName + F(" Initialization for Chan: ") + String (OutputChannelId) + F(" **"));
     int speed = 0;
 
     if (OutputType == c_OutputMgr::e_OutputType::OutputType_DMX)
@@ -256,15 +257,51 @@ void c_OutputSerial::GetConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_START;
     String DriverName = ""; GetDriverName (DriverName);
     jsonConfig["type"]        = DriverName;
-    jsonConfig["gen_ser_hdr"] = GenericSerialHeader;
-    jsonConfig["gen_ser_ftr"] = GenericSerialFooter;
     jsonConfig["num_chan"]    = Num_Channels;
-    // enums need to be converted to uints for json
     jsonConfig["baudrate"]    = uint (CurrentBaudrate);
     jsonConfig["data_pin"]    = uint (DataPin);
+    if (OutputType == c_OutputMgr::e_OutputType::OutputType_Serial)
+    {
+        jsonConfig["gen_ser_hdr"] = GenericSerialHeader;
+        jsonConfig["gen_ser_ftr"] = GenericSerialFooter;
+    }
+    // enums need to be converted to uints for json
     // DEBUG_END;
 } // GetConfig
 
+//----------------------------------------------------------------------------
+void  c_OutputSerial::GetDriverName (String& sDriverName)
+{
+    switch (OutputType)
+    {
+        case c_OutputMgr::e_OutputType::OutputType_Serial:
+        {
+            sDriverName = F("Serial");
+            break;
+        }
+
+        case c_OutputMgr::e_OutputType::OutputType_DMX:
+        {
+            sDriverName = "DMX";
+            break;
+        }
+
+        case c_OutputMgr::e_OutputType::OutputType_Renard:
+        {
+            sDriverName = "Renard";
+            break;
+        }
+
+        default:
+        {
+            sDriverName = "Default";
+            break;
+        }
+    } // switch (OutputType)
+
+} // GetDriverName
+
+//----------------------------------------------------------------------------
 // Fill the FIFO with as many intensity values as it can hold.
 void IRAM_ATTR c_OutputSerial::ISR_Handler ()
 {
