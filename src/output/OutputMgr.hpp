@@ -27,6 +27,7 @@
 #include <ArduinoJson.h>
 
 #include "..\memdebug.h"
+#include "..\FileIO.h"
 
 class c_OutputCommon; ///< forward declaration to the pure virtual output class that will be defined later.
 
@@ -77,6 +78,7 @@ private:
 
     void InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, e_OutputType NewChannelType);
     void CreateNewConfig ();
+    void merge (JsonVariant dst, JsonVariantConst src);
 
     c_OutputCommon * pOutputChannelDrivers[e_OutputChannelIds::OutputChannelId_End]; ///< pointer(s) to the current active output driver
 
@@ -86,9 +88,14 @@ private:
 #   define OM_CHANNEL_TYPE_NAME    F("om_channel_type")
 #   define OM_CHANNEL_DATA_NAME    F("om_channel_data")
 
+    bool HasBeenInitialized = false;
+
     bool DeserializeConfig (JsonObject & jsonConfig);
     void SerializeConfig   (JsonObject & jsonConfig);
     // JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
+
+    File ConfigFile;
+    String ConfigFileName = String ("/") + OM_SECTION_NAME + ".json";
 
 protected:
 

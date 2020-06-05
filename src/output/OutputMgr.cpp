@@ -85,6 +85,13 @@ void c_OutputMgr::Begin ()
 {
     // DEBUG_START;
 
+    // prevent recalls
+    if (true == HasBeenInitialized) { return; }
+    HasBeenInitialized = true;
+
+    // open a persistent file handle
+    ConfigFile = SPIFFS.open (ConfigFileName, "r+");
+
     // make sure the pointers are set up properly
     int ChannelIndex = 0;
     for (auto CurrentOutput : pOutputChannelDrivers)
@@ -137,8 +144,7 @@ void c_OutputMgr::LoadConfig ()
     // DEBUG_START;
 
     // try to load and process the config file
-    if (FileIO::loadConfig (String("/" + String(OM_SECTION_NAME) + ".json").c_str(), 
-        [this](DynamicJsonDocument & JsonConfigDoc)
+    if (!FileIO::loadConfig (ConfigFileName.c_str(), ConfigFile, [this](DynamicJsonDocument & JsonConfigDoc)
         {
             // DEBUG_V ("");
             JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
@@ -147,28 +153,14 @@ void c_OutputMgr::LoadConfig ()
             // DEBUG_V ("");
         }))
     {
-        // DEBUG_V ("");
-        // go through each output port and tell it to go
-        for (auto CurrentOutputChannelDriver : pOutputChannelDrivers)
-        {
-            // if a driver is running, then re/start it
-            if (nullptr != CurrentOutputChannelDriver)
-            {
-                // DEBUG_V ("");
-                CurrentOutputChannelDriver->Begin ();
-            }
-        } // end for each output channel
-    } // end we got a config and it was good
-    else
-    {
         LOG_PORT.println (F ("EEEE Error loading Output Manager Config File. EEEE"));
 
-        // create an empty config file
+        // create a config file with default values
         // DEBUG_V ("");
         CreateNewConfig ();
     }
 
-    // DEBUG_END;
+        // DEBUG_END;
 } // LoadConfig
 
 //-----------------------------------------------------------------------------
@@ -183,46 +175,57 @@ void c_OutputMgr::CreateNewConfig ()
     LOG_PORT.println (F ("--- WARNING: Creating a new Output Manager configuration Data set - Start ---"));
 
     // create a place to save the config
-    DynamicJsonDocument JsonConfigDoc (2048);
+    DynamicJsonDocument JsonConfigDoc (4096);
     JsonObject JsonConfig = JsonConfigDoc.createNestedObject (OM_SECTION_NAME);
 
-    // DEBUG_V("for each interface");
+    // DEBUG_V ("for each output type");
+    for (int outputTypeId = int (OutputType_Start); outputTypeId != int (OutputType_End); ++outputTypeId)
+    {
+        // DEBUG_V ("for each interface");
+        int ChannelIndex = 0;
+        for (auto CurrentOutput : pOutputChannelDrivers)
+        {
+            // DEBUG_V (String("instantiate the output type: ") + outputTypeId);
+            InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex++), e_OutputType (outputTypeId));
+        }// end for each interface
+
+        // DEBUG_V ("collect the config data");
+        SerializeConfig (JsonConfig);
+
+        // DEBUG_V ("");
+#ifdef foo
+        String sJsonConfig;
+        serializeJsonPretty (JsonConfigDoc, sJsonConfig);
+
+        LOG_PORT.println ("cccc PrettyJsonConfig cccc");
+        LOG_PORT.println (sJsonConfig);
+        LOG_PORT.println ("cccc PrettyJsonConfig cccc");
+#endif // def foo
+
+    } // end for each output type
+
+    // DEBUG_V ("leave the outputs disabled");
     int ChannelIndex = 0;
     for (auto CurrentOutput : pOutputChannelDrivers)
     {
-        // DEBUG_V ("for each output type");
-        for (int outputTypeId = int (OutputType_Start); outputTypeId != int (OutputType_End); ++outputTypeId)
-        {
-            // DEBUG_V ("instantiate the output type");
-            InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex), e_OutputType (outputTypeId));
-
-            // DEBUG_V ("collect the config data");
-            SerializeConfig (JsonConfig);
-
-            // DEBUG_V ("");
-
-        } // end for each output type
-
-        // DEBUG_V ("leave the output disabled");
         InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex), e_OutputType::OutputType_Disabled);
-
-        ChannelIndex++;
-        // DEBUG_V ("");
-
     }// end for each interface
+
+    // DEBUG_V ("");
 
     String sJsonConfig;
 #ifdef foo
     serializeJsonPretty (JsonConfigDoc, sJsonConfig);
 
-    LOG_PORT.println ("cccccccccccccccccccccccc PrettyJsonConfig ccccccccccccccccccccccccccc");
+    LOG_PORT.println ("nnnn PrettyJsonConfig nnnn");
     LOG_PORT.println (sJsonConfig);
-    LOG_PORT.println ("cccccccccccccccccccccccc PrettyJsonConfig ccccccccccccccccccccccccccc");
+    LOG_PORT.println ("nnnn PrettyJsonConfig nnnn");
+    sJsonConfig = "";
 #endif // def foo
 
     // DEBUG_V ("save the config data to NVRAM");
     serializeJson (JsonConfigDoc, sJsonConfig);
-    if (FileIO::saveConfig (String ("/" + String (OM_SECTION_NAME) + ".json").c_str (), sJsonConfig))
+    if (FileIO::saveConfig (ConfigFileName, sJsonConfig))
     {
         LOG_PORT.println (F ("**** Saved Output Manager Config File. ****"));
     } // end we got a config and it was good
@@ -232,7 +235,7 @@ void c_OutputMgr::CreateNewConfig ()
     }
 
     LOG_PORT.println (F ("--- WARNING: Creating a new Output Manager configuration Data set - Done ---"));
-    // DEBUG_START;
+    // DEBUG_END;
 
 } // CreateNewConfig
 
@@ -251,25 +254,48 @@ void c_OutputMgr::CreateNewConfig ()
 */
 void c_OutputMgr::SaveConfig ()
 {
+    // DEBUG_START;
+
     // try to load the config file
-    if (!FileIO::loadConfig (String ("/" + String (OM_SECTION_NAME) + ".json").c_str (),
-        [this](DynamicJsonDocument& JsonConfigDoc)
+    if (!FileIO::loadConfig (ConfigFileName, ConfigFile, [this](DynamicJsonDocument& JsonConfigDoc)
         {
             // DEBUG_V ("");
             JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
-            this->SerializeConfig (JsonConfig);
+
+            // add the OM header
+            JsonObject OutputMgrData;
+            if (true == JsonConfig.containsKey (OM_SECTION_NAME))
+            {
+                // DEBUG_V ("");
+                OutputMgrData = JsonConfig[OM_SECTION_NAME];
+            }
+            else
+            {
+                // add our section header
+                // DEBUG_V ("");
+                OutputMgrData = JsonConfig.createNestedObject (OM_SECTION_NAME);
+            }
+
+            this->SerializeConfig (OutputMgrData);
 
             String sJsonConfig = "";
 #ifdef foo
             serializeJsonPretty (JsonConfigDoc, sJsonConfig);
 
-            LOG_PORT.println ("cccccccccccccccccccccccc PrettyJsonConfig ccccccccccccccccccccccccccc");
+            LOG_PORT.println ("ssss PrettyJsonConfig ssss");
             LOG_PORT.println (sJsonConfig);
-            LOG_PORT.println ("cccccccccccccccccccccccc PrettyJsonConfig ccccccccccccccccccccccccccc");
+            LOG_PORT.println ("ssss PrettyJsonConfig ssss");
 #endif // def foo
+            // this forces a write to flash
+            ConfigFile.close ();
 
             serializeJson (JsonConfigDoc, sJsonConfig);
-            if (FileIO::saveConfig (String ("/" + String (OM_SECTION_NAME) + ".json").c_str (), sJsonConfig))
+#ifdef foo
+            LOG_PORT.println ("ssss JsonConfig ssss");
+            LOG_PORT.println (sJsonConfig);
+            LOG_PORT.println ("ssss JsonConfig ssss");
+#endif // def foo
+            if (FileIO::saveConfig (ConfigFileName, sJsonConfig))
             {
                 LOG_PORT.println (F ("**** Saved Output Manager Config File. ****"));
             } // end we got a config and it was good
@@ -278,11 +304,15 @@ void c_OutputMgr::SaveConfig ()
                 LOG_PORT.println (F ("EEEE Error Saving Output Manager Config File. EEEE"));
             }
 
+            ConfigFile = SPIFFS.open (ConfigFileName.c_str (), "r+");
         }))
     {
         // could not read the file so we need to create a new image.
         CreateNewConfig ();
     }
+
+    // DEBUG_END;
+
 } // SaveConfig
 
 //-----------------------------------------------------------------------------
@@ -323,8 +353,8 @@ bool c_OutputMgr::DeserializeConfig (JsonObject & jsonConfig)
         // DEBUG_V ("");
 
         // for each output channel
-        for (uint32_t ChannelIndex = OutputChannelId_Start;
-            ChannelIndex < e_OutputChannelIds::OutputChannelId_End;
+        for (uint32_t ChannelIndex = uint32_t(OutputChannelId_Start);
+            ChannelIndex < uint32_t(OutputChannelId_End);
             ChannelIndex++)
         {
             // get access to the channel config
@@ -338,36 +368,34 @@ bool c_OutputMgr::DeserializeConfig (JsonObject & jsonConfig)
             // DEBUG_V ("");
 
             // set a default value for channel type
-            uint32_t TempChannelType = uint32_t (OutputType_End)+1;
-            FileIO::setFromJSON (TempChannelType, OutputChannelConfig[OM_CHANNEL_TYPE_NAME]);
+            uint32_t ChannelType = uint32_t (OutputType_End)+1;
+            FileIO::setFromJSON (ChannelType, OutputChannelConfig[OM_CHANNEL_TYPE_NAME]);
             // DEBUG_V ("");
 
-            // todo - this is wrong. Each type will have a config
-
             // is it a valid / supported channel type
-            if ((TempChannelType < e_OutputType::OutputType_Start) || (TempChannelType > e_OutputType::OutputType_End))
+            if ((ChannelType < uint32_t(OutputType_Start)) || (ChannelType > uint32_t(OutputType_End)))
             {
                 // if not, flag an error and move on to the next channel
-                LOG_PORT.println (String (F ("Invalid Channel Type in config '")) + TempChannelType + String (F ("'. Specified for channel '")) + ChannelIndex + "'. Disabling channel");
+                LOG_PORT.println (String (F ("Invalid Channel Type in config '")) + ChannelType + String (F ("'. Specified for channel '")) + ChannelIndex + "'. Disabling channel");
                 InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex), e_OutputType::OutputType_Disabled);
                 continue;
             }
             // DEBUG_V ("");
 
-            // make sure the proper output type is running
-            InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex), e_OutputType (TempChannelType));
-            // DEBUG_V ("");
-
-            // do we have a configuration for the running channel type?
-            String DriverName = "";
-            pOutputChannelDrivers[ChannelIndex]->GetDriverName (DriverName);
-            if (false == OutputChannelConfig.containsKey (DriverName))
+            // do we have a configuration for the channel type?
+            if (false == OutputChannelConfig.containsKey (String(ChannelType)))
             {
                 // if not, flag an error and stop processing
-                LOG_PORT.println (String (F ("No Output Settings Found for Channel '")) + ChannelIndex + "." + DriverName + String (F ("'. Using Defaults")));
+                LOG_PORT.println (String (F ("No Output Settings Found for Channel '")) + ChannelIndex + String (F ("'. Using Defaults")));
+                InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex), e_OutputType::OutputType_Disabled);
                 continue;
             }
-            JsonObject OutputChannelDriverConfig = OutputChannelConfig[DriverName];
+
+            JsonObject OutputChannelDriverConfig = OutputChannelConfig[String(ChannelType)];
+            // DEBUG_V ("");
+
+            // make sure the proper output type is running
+            InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex), e_OutputType (ChannelType));
             // DEBUG_V ("");
 
             // send the config to the driver. At this level we have no idea what is in it
@@ -385,7 +413,7 @@ bool c_OutputMgr::DeserializeConfig (JsonObject & jsonConfig)
     {
         // save the current config since it is the best we have.
         // DEBUG_V ("");
-        SaveConfig ();
+        CreateNewConfig ();
     }
 
     // DEBUG_END;
@@ -438,22 +466,22 @@ void c_OutputMgr::SerializeConfig (JsonObject & jsonConfig)
         // save the name as the selected channel type
         ChannelConfigData[OM_CHANNEL_TYPE_NAME] = int(CurrentChannel->GetOutputType ());
 
-        String DriverTypeName = ""; CurrentChannel->GetDriverName (DriverTypeName);
+        String DriverTypeId = String(int(CurrentChannel->GetOutputType ()));
         JsonObject ChannelConfigByTypeData;
-        if (true == ChannelConfigData.containsKey (DriverTypeName))
+        if (true == ChannelConfigData.containsKey (String(DriverTypeId)))
         {
-            ChannelConfigByTypeData = ChannelConfigData[DriverTypeName];
+            ChannelConfigByTypeData = ChannelConfigData[DriverTypeId];
             // DEBUG_V ("");
         }
         else
         {
             // add our section header
             // DEBUG_V ("");
-            ChannelConfigByTypeData = ChannelConfigData.createNestedObject (DriverTypeName);
+            ChannelConfigByTypeData = ChannelConfigData.createNestedObject (DriverTypeId);
         }
 
         // ask the channel to add its data to the record
-        // DEBUG_V ("Add the output channel configuration");
+        // DEBUG_V ("Add the output channel configuration for type: " + DriverTypeId);
         CurrentChannel->GetConfig (ChannelConfigByTypeData);
         // DEBUG_V ("");
     }
@@ -484,6 +512,10 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
         // is there an existing driver?
         if (nullptr != pOutputChannelDrivers[ChannelIndex])
         {
+            // int temp = pOutputChannelDrivers[ChannelIndex]->GetOutputType ();
+            // DEBUG_V (String("pOutputChannelDrivers[ChannelIndex]->GetOutputType () '") + temp + String("'"));
+            // DEBUG_V (String("NewOutputChannelType '") + int(NewOutputChannelType) + "'");
+
             // DEBUG_V ("does the driver need to change?");
             if (pOutputChannelDrivers[ChannelIndex]->GetOutputType () == NewOutputChannelType)
             {
@@ -497,6 +529,8 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
             // DEBUG_V ("");
         } // end there is an existing driver
 
+        // DEBUG_V ("");
+
         // get the new data and UART info
         gpio_num_t dataPin = OutputChannelIdToGpioAndPort[ChannelIndex].dataPin;
         uart_port_t UartId = OutputChannelIdToGpioAndPort[ChannelIndex].UartId;
@@ -505,7 +539,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
         {
             case e_OutputType::OutputType_Disabled:
             {
-                LOG_PORT.println (String (F ("************** Disabled output type for channel '")) + ChannelIndex + "'. **************");
+                // LOG_PORT.println (String (F ("************** Disabled output type for channel '")) + ChannelIndex + "'. **************");
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
                 break;
@@ -521,7 +555,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     break;
                 }
 
-                LOG_PORT.println (String (F ("************** Starting DMX for channel '")) + ChannelIndex + "'. **************");
+                // LOG_PORT.println (String (F ("************** Starting DMX for channel '")) + ChannelIndex + "'. **************");
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputSerial (ChannelIndex, dataPin, UartId, OutputType_DMX);
                 // DEBUG_V ("");
                 break;
@@ -536,7 +570,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     // DEBUG_V ("");
                     break;
                 }
-                LOG_PORT.println (String (F ("************** Starting GECE for channel '")) + ChannelIndex + "'. **************");
+                // LOG_PORT.println (String (F ("************** Starting GECE for channel '")) + ChannelIndex + "'. **************");
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputGECE (ChannelIndex, dataPin, UartId, OutputType_GECE);
                 // DEBUG_V ("");
                 break;
@@ -551,7 +585,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     // DEBUG_V ("");
                     break;
                 }
-                LOG_PORT.println (String (F ("************** Starting Generic Serial for channel '")) + ChannelIndex + "'. **************");
+                // LOG_PORT.println (String (F ("************** Starting Generic Serial for channel '")) + ChannelIndex + "'. **************");
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputSerial (ChannelIndex, dataPin, UartId, OutputType_Serial);
                 // DEBUG_V ("");
                 break;
@@ -566,7 +600,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     // DEBUG_V ("");
                     break;
                 }
-                LOG_PORT.println (String (F ("************** Starting Renard for channel '")) + ChannelIndex + "'. **************");
+                // LOG_PORT.println (String (F ("************** Starting Renard for channel '")) + ChannelIndex + "'. **************");
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputSerial (ChannelIndex, dataPin, UartId, OutputType_Renard);
                 // DEBUG_V ("");
                 break;
@@ -582,7 +616,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
             }
             case e_OutputType::OutputType_SPI:
             {
-                LOG_PORT.println (String (F ("************** Starting SPI for channel '")) + ChannelIndex + "'. **************");
+                // LOG_PORT.println (String (F ("************** Starting SPI for channel '")) + ChannelIndex + "'. **************");
                 LOG_PORT.println (String (F ("************** SPI Not supported Yet. Using disabled. **************")));
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
@@ -599,7 +633,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     // DEBUG_V ("");
                     break;
                 }
-                LOG_PORT.println (String (F ("************** Starting WS2811 for channel '")) + ChannelIndex + "'. **************");
+                // LOG_PORT.println (String (F ("************** Starting WS2811 for channel '")) + ChannelIndex + "'. **************");
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811 (ChannelIndex, dataPin, UartId, OutputType_WS2811);
                 // DEBUG_V ("");
                 break;
@@ -632,15 +666,43 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 *   returns
 *       string populated with currently available configuration
 */
-void c_OutputMgr::GetConfig (JsonObject & jsonConfig)
+void c_OutputMgr::GetConfig (JsonObject & jsonConfigResponse)
 {
     // DEBUG_START;
-    JsonObject JsonOutputConfig = jsonConfig.createNestedObject (OM_SECTION_NAME);
 
-    SerializeConfig (JsonOutputConfig);
+    // try to load and process the config file
+    if (!FileIO::loadConfig (ConfigFileName.c_str(), ConfigFile, [this, jsonConfigResponse](DynamicJsonDocument & JsonConfigDoc)
+        {
+            // DEBUG_V ("");
+            JsonObject jsonSrc = JsonConfigDoc.as<JsonObject> ();
+            // DEBUG_V ("");
+            this->merge (jsonConfigResponse, jsonSrc);
+            // DEBUG_V ("");
+        }))
+    {
+        // file read error
+    }
 
     // DEBUG_END;
 } // GetConfig
+
+//-----------------------------------------------------------------------------
+void c_OutputMgr::merge (JsonVariant dst, JsonVariantConst src)
+{
+    // DEBUG_START;
+    if (src.is<JsonObject> ())
+    {
+        for (auto kvp : src.as<JsonObject> ())
+        {
+            merge (dst.getOrAddMember (kvp.key ()), kvp.value ());
+        }
+    }
+    else
+    {
+        dst.set (src);
+    }
+    // DEBUG_END;
+} // merge
 
 //-----------------------------------------------------------------------------
 /* Sets the configuration for the current active ports
