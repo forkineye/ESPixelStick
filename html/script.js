@@ -241,17 +241,23 @@ function submitWiFiConfig() {
     var netmask = $('#netmask').val().split('.');
     var gateway = $('#gateway').val().split('.');
 
-    var json = {
-            'network': {
-                'ssid': $('#ssid').val(),
-                'passphrase': $('#passphrase').val(),
-                'hostname': $('#hostname').val(),
-                'sta_timeout': $('#sta_timeout').val(),
-                'ip': [parseInt(ip[0]), parseInt(ip[1]), parseInt(ip[2]), parseInt(ip[3])],
-                'netmask': [parseInt(netmask[0]), parseInt(netmask[1]), parseInt(netmask[2]), parseInt(netmask[3])],
-                'gateway': [parseInt(gateway[0]), parseInt(gateway[1]), parseInt(gateway[2]), parseInt(gateway[3])],
-                'dhcp': $('#dhcp').prop('checked'),
-                'ap_fallback': $('#ap').prop('checked')
+    var json =
+        {
+            'system':
+            {
+                'network':
+                {
+                    'ssid': $('#ssid').val(),
+                    'passphrase': $('#passphrase').val(),
+                    'hostname': $('#hostname').val(),
+                    'sta_timeout': $('#sta_timeout').val(),
+                    'ip': [parseInt(ip[0]), parseInt(ip[1]), parseInt(ip[2]), parseInt(ip[3])],
+                    'netmask': [parseInt(netmask[0]), parseInt(netmask[1]), parseInt(netmask[2]), parseInt(netmask[3])],
+                    'gateway': [parseInt(gateway[0]), parseInt(gateway[1]), parseInt(gateway[2]), parseInt(gateway[3])],
+                    'dhcp': $('#dhcp').prop('checked'),
+                    'ap_fallback': $('#ap').prop('checked'),
+                    'ap_timeout': $('#apt').prop('checked')
+                }
             }
         };
     wsEnqueue('S1' + JSON.stringify(json));
@@ -315,11 +321,11 @@ function submitDeviceConfig() {
 function wsConnect() {
     if ('WebSocket' in window) {
 
-// accept ?target=10.0.0.123 to make a WS connection to another device
         var target;
         if (!(target = param('target'))) {
             target = document.location.host;
         }
+        target = "192.168.1.28";
 
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');
@@ -328,16 +334,20 @@ function wsConnect() {
         // When connection is opened, get core data.
         // Module data is loaded in module change / load callbacks
         ws.onopen = function() {
-            $('#wserror').modal('hide');                            // Remove error modal
-            $('.wsopt').empty();                                    // Clear out option data built from websockets
-            wsEnqueue(JSON.stringify({'cmd':{'get':'network'}}));   // Get network config
-            wsEnqueue(JSON.stringify({'cmd':{'opt':'device'}}));    // Get device option data
-            wsEnqueue(JSON.stringify({'cmd':{'get':'device'}}));    // Get device config
-            //feed();
+            $('#wserror').modal('hide');                               // Remove error modal
+            $('.wsopt').empty();                                       // Clear out option data built from websockets
+            wsEnqueue(JSON.stringify({'cmd':{'get':'network'}}));      // Get network config
+            // wsEnqueue(JSON.stringify({'cmd':{'opt':'device'}}));       // Get device option data
+            // wsEnqueue(JSON.stringify({'cmd':{'get':'device'}}));       // Get device config
+            // wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
+            // wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
+            feed();                                                       // start self filling status loop
         };
 
         ws.onmessage = function (event) {
             if(typeof event.data === "string") {
+            if (typeof event.data === "string")
+            {
                 // Process "simple" message format
                 if (event.data.startsWith("X")) {
                     var data = event.data.substr(2);
@@ -626,25 +636,26 @@ function getConfig(data) {
 
 // Needs updated
 function getConfigStatus(data) {
-    var status = JSON.parse(data);
+    var ParsedJsonStatus = JSON.parse(data);
 
 //    $('#x_ssid').text(status.ssid);
-    $('#x_hostname').text(status.hostname);
-    $('#x_ip').text(status.ip);
-    $('#x_mac').text(status.mac);
-    $('#x_version').text(status.version);
-    $('#x_built').text(status.built);
-    $('#x_flashchipid').text(status.flashchipid);
-    $('#x_usedflashsize').text(status.usedflashsize);
-    $('#x_realflashsize').text(status.realflashsize);
-    $('#x_freeheap').text(status.freeheap);
+    $('#x_hostname').text      (ParsedJsonStatus.hostname);
+    $('#x_ip').text            (ParsedJsonStatus.ip);
+    $('#x_mac').text           (ParsedJsonStatus.mac);
+    $('#x_version').text       (ParsedJsonStatus.version);
+    $('#x_built').text         (ParsedJsonStatus.built);
+    $('#x_flashchipid').text   (ParsedJsonStatus.flashchipid);
+    $('#x_usedflashsize').text (ParsedJsonStatus.usedflashsize);
+    $('#x_realflashsize').text (ParsedJsonStatus.realflashsize);
+    $('#x_freeheap').text      (ParsedJsonStatus.freeheap);
 }
 
 // Needs updated
 function getJsonStatus(data) {
-    var status = JSON.parse(data);
+    var ParsedJsonStatus = JSON.parse(data);
 
-    var rssi = +status.system.rssi;
+//    var rssi = +status.system.rssi;
+    var rssi = ParsedJsonStatus.status.system.rssi;
     var quality = 2 * (rssi + 100);
 
     if (rssi <= -100)
@@ -654,13 +665,25 @@ function getJsonStatus(data) {
 
     $('#x_rssi').text(rssi);
     $('#x_quality').text(quality);
+    $('#x_ssid').text(ParsedJsonStatus.status.system.ssid);
+    $('#x_ip').text(ParsedJsonStatus.status.system.ip);
+    $('#x_hostname').text(ParsedJsonStatus.status.system.hostname);
+    $('#x_subnet').text(ParsedJsonStatus.status.system.subnet);
+    $('#x_mac').text(ParsedJsonStatus.status.system.mac);
 
 // getHeap(data)
-    $('#x_freeheap').text( status.system.freeheap );
+    $('#x_freeheap').text( ParsedJsonStatus.status.system.freeheap );
 
 // getUptime
-    var date = new Date(+status.system.uptime);
+    // uptime is reported in milliseconds
+    var date = new Date(ParsedJsonStatus.status.system.uptime);
     var str = '';
+
+//    var hoursPerDay = 24;
+//    var MinutesPerHour = 60;
+//    var secondsPerMinute = 60;
+//    var millisecondsPerSecond = 1000;
+//    var MillisecondsPerDay = millisecondsPerSecond * secondsPerMinute * MinutesPerHour * hoursPerDay; = 86400000
 
     str += Math.floor(date.getTime()/86400000) + " days, ";
     str += ("0" + date.getUTCHours()).slice(-2) + ":";
@@ -669,12 +692,12 @@ function getJsonStatus(data) {
     $('#x_uptime').text(str);
 
 // getE131Status(data)
-    $('#uni_first').text(status.e131.universe);
-    $('#uni_last').text(status.e131.uniLast);
-    $('#pkts').text(status.e131.num_packets);
-    $('#serr').text(status.e131.seq_errors);
-    $('#perr').text(status.e131.packet_errors);
-    $('#clientip').text(status.e131.last_clientIP);
+    $('#uni_first').text(ParsedJsonStatus.status.e131.universe);
+    $('#uni_last').text (ParsedJsonStatus.status.e131.uniLast);
+    $('#pkts').text     (ParsedJsonStatus.status.e131.num_packets);
+    $('#serr').text     (ParsedJsonStatus.status.e131.seq_errors);
+    $('#perr').text     (ParsedJsonStatus.status.e131.packet_errors);
+    $('#clientip').text (ParsedJsonStatus.status.e131.last_clientIP);
 }
 
 // Show "save" snackbar for 3sec
