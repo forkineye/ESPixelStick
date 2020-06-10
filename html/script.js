@@ -325,6 +325,7 @@ function wsConnect() {
         if (!(target = param('target'))) {
             target = document.location.host;
         }
+
         target = "192.168.1.28";
 
         // Open a new web socket and set the binary type
@@ -344,10 +345,9 @@ function wsConnect() {
             feed();                                                       // start self filling status loop
         };
 
-        ws.onmessage = function (event) {
+        ws.onmessage = function (event)
+        {
             if(typeof event.data === "string") {
-            if (typeof event.data === "string")
-            {
                 // Process "simple" message format
                 if (event.data.startsWith("X")) {
                     var data = event.data.substr(2);
@@ -692,10 +692,10 @@ function getJsonStatus(data) {
     $('#x_uptime').text(str);
 
 // getE131Status(data)
-    $('#uni_first').text(ParsedJsonStatus.status.e131.universe);
-    $('#uni_last').text (ParsedJsonStatus.status.e131.uniLast);
+    $('#uni_first').text(ParsedJsonStatus.status.e131.unifirst);
+    $('#uni_last').text (ParsedJsonStatus.status.e131.unilast);
     $('#pkts').text     (ParsedJsonStatus.status.e131.num_packets);
-    $('#serr').text     (ParsedJsonStatus.status.e131.seq_errors);
+    $('#chanlim').text  (ParsedJsonStatus.status.e131.unichanlim);
     $('#perr').text     (ParsedJsonStatus.status.e131.packet_errors);
     $('#clientip').text (ParsedJsonStatus.status.e131.last_clientIP);
 }

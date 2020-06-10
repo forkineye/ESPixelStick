@@ -255,7 +255,7 @@ void c_WebMgr::procSimple (uint8_t* data, AsyncWebSocketClient* client)
         WiFiMgr.GetStatus (system);
 
         // Ask Input to add stats
-        // InputMgr.GetStatus (status);
+        InputMgr.GetStatus (status);
 
         // Ask Services to add stats
 

@@ -26,7 +26,7 @@ class c_InputE131 : public c_InputCommon
 {
   private:
     static const uint16_t   UNIVERSE_MAX = 512;
-    static const char       CONFIG_FILE[];
+    static const char       ConfigFileName[];
 
     ESPAsyncE131  * e131 = nullptr; ///< ESPAsyncE131
     e131_packet_t packet;           ///< Packet buffer for parsing
@@ -58,6 +58,7 @@ class c_InputE131 : public c_InputCommon
     void  Begin ();                                          ///< set up the operating environment based on the current config (or defaults)
     bool  SetConfig (ArduinoJson::JsonObject& jsonConfig);   ///< Set a new config in the driver
     void  GetConfig (ArduinoJson::JsonObject& jsonConfig);   ///< Get the current config used by the driver
+    void  GetStatus (JsonObject& jsonStatus);
     void  Process ();                                        ///< Call from loop(),  renders Input data
     void  GetDriverName (String & sDriverName) { sDriverName = "E1.31"; } ///< get the name for the instantiated driver
     void  SetBufferInfo (uint8_t * BufferStart, uint16_t BufferSize);

@@ -38,6 +38,8 @@ public:
     void    LoadConfig ();                       ///< Read the current configuration data from nvram
     void    SaveConfig ();                       ///< Save the current configuration data to nvram
     void    GetConfig (JsonObject & jsonConfig); ///< Get the current config used by the driver
+    String  GetConfig ();                        ///< Get the current config used by the driver
+    void    GetStatus (JsonObject& jsonStatus);
     bool    SetConfig (JsonObject & jsonConfig); ///< Set a new config in the driver
     void    DumpSupportedModes () {/* todo */};
     void    Process ();                          ///< Call from loop(),  renders Input data

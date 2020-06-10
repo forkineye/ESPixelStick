@@ -1,15 +1,14 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title id="title"></title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title id="title"></title>
 
-  <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
-  <link rel="stylesheet" type="text/css" href="style.css">
-
-  <link rel="stylesheet" type="text/css" href="esps.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <!-- todo MEM <link rel="stylesheet" type="text/css" href="esps.css"> -->
 
 </head>
 
@@ -66,8 +65,8 @@
                         <legend class="esps-legend">E1.31 Status</legend>
                         <table class="esps-table">
                             <tr><td width="33%">Universe Range</td><td><span id="uni_first"></span> to <span id="uni_last"></span></td></tr>
+                            <tr><td width="33%">Channels / Universe</td><td><span id="chanlim"></span></td></tr>
                             <tr><td width="33%">Total Packets</td><td><span id="pkts"></span></td></tr>
-                            <tr><td width="33%">Sequence Errors</td><td><span id="serr"></span></td></tr>
                             <tr><td width="33%">Packet Errors</td><td><span id="perr"></span></td></tr>
                             <tr><td width="33%">Source IP</td><td><span id="clientip"></span></td></tr>
                         </table>
@@ -316,9 +315,10 @@
     <script type="text/javascript" src="script.js"></script>
 
     <!-- <script type="text/javascript" src="esps.js"></script> -->
+    <script type="text/javascript" src="script.js"></script>
 
     <script>
         wsConnect();
     </script>
 </body>
-    </html>
+</html>

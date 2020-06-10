@@ -93,6 +93,16 @@ void c_InputMgr::Begin (uint8_t* BufferStart, uint16_t BufferSize)
 } // begin
 
 //-----------------------------------------------------------------------------
+void c_InputMgr::GetStatus (JsonObject& jsonStatus)
+{
+    for (auto CurrentInput : pInputChannelDrivers)
+    {
+        CurrentInput->GetStatus (jsonStatus);
+    }
+
+} // GetStatus
+  
+ //-----------------------------------------------------------------------------
 /* Load and process the current configuration
 *
 *   needs
@@ -412,6 +422,21 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
     // DEBUG_END;
 
 } // InstantiateNewInputChannel
+
+//-----------------------------------------------------------------------------
+String c_InputMgr::GetConfig ()
+{
+    // DEBUG_START;
+    String response;
+
+    DynamicJsonDocument JsonConfigDoc (4096);
+    JsonObject JsonConfig = JsonConfigDoc.createNestedObject("I");
+    GetConfig (JsonConfig);
+    serializeJson (JsonConfig, response);
+    return response;
+
+    // DEBUG_END;
+} // GetConfig
 
 //-----------------------------------------------------------------------------
 /* Returns the current configuration for the Input channels

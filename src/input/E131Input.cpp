@@ -195,6 +195,20 @@ void c_InputE131::GetConfig (JsonObject & jsonConfig)
 
 } // GetConfig
 
+//-----------------------------------------------------------------------------
+void c_InputE131::GetStatus (JsonObject& jsonStatus)
+{
+    JsonObject e131Status = jsonStatus.createNestedObject ("e131");
+    e131Status["unifirst"]      = startUniverse;
+    e131Status["unilast"]       = LastUniverse;
+    e131Status["unichanlim"]    = universe_channel_limit;
+    e131Status["num_packets"]   = e131->stats.num_packets;
+    e131Status["packet_errors"] = e131->stats.packet_errors;
+    e131Status["last_clientIP"] = e131->stats.last_clientIP.toString ();
+
+} // GetStatus
+
+//-----------------------------------------------------------------------------
 void c_InputE131::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
 {
     InputDataBuffer = BufferStart;
@@ -205,6 +219,7 @@ void c_InputE131::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
 
 } // SetBufferInfo
 
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 // Subscribe to "n" universes, starting at "universe"
 void c_InputE131::SubscribeToMulticastDomains()
