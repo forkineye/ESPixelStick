@@ -22,6 +22,7 @@
 
 #include "output/OutputMgr.hpp"
 #include "input/InputMgr.hpp"
+#include "WiFiMgr.hpp"
 
 #include "WebMgr.hpp"
 
@@ -46,7 +47,7 @@ c_WebMgr::c_WebMgr ()
 
 //-----------------------------------------------------------------------------
 ///< deallocate any resources and put the output channels into a safe state
-c_WebMgr::~c_WebMgr()
+c_WebMgr::~c_WebMgr ()
 {
     // DEBUG_START;
 
@@ -56,7 +57,7 @@ c_WebMgr::~c_WebMgr()
 
 //-----------------------------------------------------------------------------
 ///< Start the module
-void c_WebMgr::Begin (config_t * NewConfig)
+void c_WebMgr::Begin (config_t* NewConfig)
 {
     // DEBUG_START;
 
@@ -65,7 +66,7 @@ void c_WebMgr::Begin (config_t * NewConfig)
 
     init ();
 
-   //  DEBUG_END;
+    //  DEBUG_END;
 
 } // begin
 
@@ -78,11 +79,11 @@ void c_WebMgr::init ()
     DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Origin"), "*");
 
     // Setup WebSockets
-    webSocket.onEvent ([this](AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void* arg, uint8_t * data, size_t len) 
-        { 
-            this->onWsEvent(server, client, type, arg, data, len);
+    webSocket.onEvent ([this](AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, size_t len)
+        {
+            this->onWsEvent (server, client, type, arg, data, len);
         });
-    webServer.addHandler (& webSocket);
+    webServer.addHandler (&webSocket);
 
     // Heap status handler
     webServer.on ("/heap", HTTP_GET, [](AsyncWebServerRequest* request)
@@ -93,7 +94,7 @@ void c_WebMgr::init ()
     // JSON Config Handler
     webServer.on ("/conf", HTTP_GET, [this](AsyncWebServerRequest* request)
         {
-            request->send (200, "text/json", this->GetConfiguration());
+            request->send (200, "text/json", this->GetConfiguration ());
         });
 
 #ifdef ToDoFixThis
@@ -117,11 +118,11 @@ void c_WebMgr::init ()
         {
             request->send (404, "text/plain", "Page not found");
         });
-    
+
     webServer.begin ();
 
-    LOG_PORT.println (String(F ("- Web Server started on port ")) + HTTP_PORT);
-    
+    LOG_PORT.println (String (F ("- Web Server started on port ")) + HTTP_PORT);
+
     // DEBUG_END;
 }
 
@@ -170,207 +171,234 @@ String c_WebMgr::GetConfiguration ()
 void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient* client,
     AwsEventType type, void* arg, uint8_t* data, size_t len)
 {
+    // DEBUG_START;
+
     switch (type)
     {
-    case WS_EVT_DATA:
-    {
-        AwsFrameInfo* info = static_cast<AwsFrameInfo*>(arg);
-        if (info->opcode == WS_TEXT)
+        case WS_EVT_DATA:
         {
-            if (data[0] == 'X')
+            // DEBUG_V ("");
+
+            AwsFrameInfo* info = static_cast<AwsFrameInfo*>(arg);
+            if (info->opcode == WS_TEXT)
             {
-                procSimple (data, client);
+                if (data[0] == 'X')
+                {
+                    // DEBUG_V ("");
+                    procSimple (data, client);
+                }
+                else
+                {
+                    // DEBUG_V ("");
+                    procJSON (data, client);
+                }
             }
             else
             {
-                procJSON (data, client);
+                LOG_PORT.println (F ("-- binary message --"));
             }
+            break;
         }
-        else
+
+        case WS_EVT_CONNECT:
         {
-            LOG_PORT.println (F ("-- binary message --"));
+            LOG_PORT.println (String (F ("* WS Connect - ")) + client->id ());
+            break;
         }
-        break;
-    }
 
-    case WS_EVT_CONNECT:
-    {
-        LOG_PORT.println (String (F ("* WS Connect - ")) + client->id ());
-        break;
-    }
+        case WS_EVT_DISCONNECT:
+        {
+            LOG_PORT.println (String (F ("* WS Disconnect - ")) + client->id ());
+            break;
+        }
 
-    case WS_EVT_DISCONNECT:
-    {
-        LOG_PORT.println (String (F ("* WS Disconnect - ")) + client->id ());
-        break;
-    }
+        case WS_EVT_PONG:
+        {
+            LOG_PORT.println (F ("* WS PONG *"));
+            break;
+        }
 
-    case WS_EVT_PONG:
-    {
-        LOG_PORT.println (F ("* WS PONG *"));
-        break;
-    }
-
-    case WS_EVT_ERROR:
-    default:
-    {
-        LOG_PORT.println (F ("** WS ERROR **"));
-        break;
-    }
+        case WS_EVT_ERROR:
+        default:
+        {
+            LOG_PORT.println (F ("** WS ERROR **"));
+            break;
+        }
     } // end switch (type) 
+
+    // DEBUG_END;
+
 } // onEvent
 
 //-----------------------------------------------------------------------------
 /// Process simple format 'X' messages
 void c_WebMgr::procSimple (uint8_t* data, AsyncWebSocketClient* client)
 {
+    // DEBUG_START;
+
     switch (data[1])
     {
-        case SimpleMessage::GET_STATUS:
-        {
-            DynamicJsonDocument json (1024);
+    case SimpleMessage::GET_STATUS:
+    {
+        // DEBUG_V ("");
+        DynamicJsonDocument json (1024);
 
-            // system statistics
-            JsonObject system = json.createNestedObject ("system");
-            system["freeheap"] = (String)ESP.getFreeHeap ();
-            system["uptime"] = (String)millis ();
+        // system statistics
+        JsonObject status = json.createNestedObject ("status");
+        JsonObject system = status.createNestedObject ("system");
 
-            // Ask WiFi to add stats
+        system["freeheap"] = (String)ESP.getFreeHeap ();
+        system["uptime"]   = millis ();
+        // DEBUG_V ("");
 
-            // Ask Input to add stats
+        // Ask WiFi to add stats
+        WiFiMgr.GetStatus (system);
 
-            // Ask Services to add stats
+        // Ask Input to add stats
+        // InputMgr.GetStatus (status);
 
-            String response;
-            serializeJson (json, response);
-            client->text ("XJ" + response);
+        // Ask Services to add stats
 
-            break;
-        }
+        String response;
+        serializeJson (json, response);
+        client->text ("XJ" + response);
+        // DEBUG_V (response);
+
+        break;
     }
+    }
+
+    // DEBUG_END;
+
 } // procSimple
 
 //-----------------------------------------------------------------------------
 /// Process JSON messages
 void c_WebMgr::procJSON (uint8_t* data, AsyncWebSocketClient* client)
 {
+    // DEBUG_START;
     //LOG_PORT.printf("procJSON heap /stack stats: %u:%u:%u:%u\n", ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
 
-    DynamicJsonDocument json (1024);
+    DynamicJsonDocument json (4096);
     DeserializationError error = deserializeJson (json, reinterpret_cast<char*>(data));
-    if (error) 
+    // DEBUG_V ("");
+    if (error)
     {
         LOG_PORT.println (F ("*** WebIO::procJSON(): Parse Error ***"));
         LOG_PORT.println (reinterpret_cast<char*>(data));
         return;
     }
+    // DEBUG_V ("");
 
     /** Following commands are supported:
      * - get: returns requested configuration
      * - set: receive and applies configuration
      * - opt: returns select option lists
      */
-    if (json.containsKey ("cmd")) 
+    if (json.containsKey ("cmd"))
     {
+        // DEBUG_V ("");
         // Process "GET" command - return requested configuration as JSON
-        if (json["cmd"]["get"]) 
+        if (json["cmd"]["get"])
         {
             String target = json["cmd"]["get"].as<String> ();
 
-            if (target.equalsIgnoreCase ("device")) 
+            if (target.equalsIgnoreCase ("device"))
             {
-                client->text ("{\"get\":" + serializeCore (false, true) + "}");
+                // DEBUG_V (serializeCore (false));
+                client->text ("{\"get\":" + serializeCore (false) + "}");
             }
 
-            if (target.equalsIgnoreCase ("network")) 
+            else if (target.equalsIgnoreCase ("network"))
             {
-                client->text ("{\"get\":" + serializeCore (false, true) + "}");
+                // DEBUG_V (serializeCore (false));
+                client->text ("{\"get\":" + serializeCore (false) + "}");
             }
-#ifdef JustAskInputMgr
-            if (INPUT_MODES.end () != (INPUT_MODES::iterator itInput = INPUT_MODES.find (target)))
+
+            else if (target.equalsIgnoreCase ("output"))
             {
-                if (!itInput->first.equalsIgnoreCase (input->getKey ()))
-                {
-                    itInput->second->load ();
-                }
-                client->text ("{\"get\":" + itInput->second->serialize () + "}");
+                // DEBUG_V (OutputMgr.GetConfig ());
+                client->text ("{\"get\":" + OutputMgr.GetConfig () + "}");
             }
-#endif // def JustAskInputMgr
-            // just give the array to the output manager
+
+            else if (target.equalsIgnoreCase ("input"))
+            {
+                // DEBUG_V (InputMgr.GetConfig ());
+                client->text ("{\"get\":" + InputMgr.GetConfig () + "}");
+            }
+            // DEBUG_V ("");
         }
+        // DEBUG_V ("");
 
         // Generate select option list data
-        if (json["cmd"]["opt"]) 
+        if (json["cmd"]["opt"])
         {
+            // DEBUG_V ("");
             String target = json["cmd"]["opt"].as<String> ();
-            if (target.equalsIgnoreCase ("device")) 
+            if (target.equalsIgnoreCase ("device"))
             {
-                DEBUG_V ("");
-                client->text ("{\"opt\":" + GetConfiguration() + "}");
+                // DEBUG_V (GetConfiguration ());
+                client->text ("{\"opt\":" + GetConfiguration () + "}");
             }
 
             if (target.equalsIgnoreCase ("input"))
             {
+                // DEBUG_V ("");
                 LOG_PORT.println ("*** WebIO opt input ***");
             }
 
             if (target.equalsIgnoreCase ("output"))
+            {
+                // DEBUG_V ("");
                 LOG_PORT.println ("*** WebIO opt output ***");
+            }
         }
     }
+    // DEBUG_V ("");
 
     // Process "SET" command - receive configuration as JSON
-    if (JsonObject root = json["cmd"]["set"].as<JsonObject> ()) 
+    if (JsonObject root = json["cmd"]["set"].as<JsonObject> ())
     {
+        // DEBUG_V ("");
         DynamicJsonDocument doc (1024);
         doc.set (root);
 
-        for (JsonPair kv : root) 
+        for (JsonPair kv : root)
         {
             String key = kv.key ().c_str ();
             // Device config
-            if (key.equalsIgnoreCase ("device")) 
+            if (key.equalsIgnoreCase ("device"))
             {
                 if (dsDevice (doc))
                 {
                     saveConfig ();
                 }
-                client->text ("{\"set\":" + serializeCore (false, true) + "}");
+                // DEBUG_V (serializeCore (false));
+                client->text ("{\"set\":" + serializeCore (false) + "}");
                 // Network config
             }
-            else if (key.equalsIgnoreCase ("network")) 
+            else if (key.equalsIgnoreCase ("network"))
             {
                 if (dsNetwork (doc))
                 {
                     saveConfig ();
                 }
-                client->text ("{\"set\":" + serializeCore (false, true) + "}");
+                // DEBUG_V (serializeCore (false));
+                client->text ("{\"set\":" + serializeCore (false) + "}");
             }
-            else 
+            else if (key.equalsIgnoreCase ("input"))
             {
-                // set input and output modules
-                boolean changed = false;
-
-                OutputMgr.SetConfig (root);
-
-#ifdef foo
-                // does the key exist in the input modes map?
-                if (INPUT_MODES.end() != (auto itInput = INPUT_MODES.find (key)))
-                {
-                    if (itInput->second->deserialize (doc)) {
-                        itInput->second->save ();
-                        changed = true;
-                    }
-                    client->text ("{\"set\":" + itInput->second->serialize () + "}");
-                }
-
-                // Re-init I/O modules if their config changed
-                if (changed)
-                    setMode (input, output);
-#endif
+                // DEBUG_V (InputMgr.GetConfig ());
+                client->text ("{\"set\":" + InputMgr.GetConfig () + "}");
+            }
+            else if (key.equalsIgnoreCase ("output"))
+            {
+                // DEBUG_V (OutputMgr.GetConfig ());
+                client->text ("{\"set\":" + OutputMgr.GetConfig () + "}");
             }
         }
     }
+    // DEBUG_V ("");
 
     /* From wshandler:
             bool reboot = false;
@@ -404,15 +432,16 @@ void c_WebMgr::procJSON (uint8_t* data, AsyncWebSocketClient* client)
                     break;
             }
     */
+    // DEBUG_END;
 } // procJSON
 
 
 //-----------------------------------------------------------------------------
 void c_WebMgr::onFirmwareUpload (AsyncWebServerRequest* request, String filename,
-          size_t index, uint8_t* data, size_t len, bool final) 
+    size_t index, uint8_t* data, size_t len, bool final)
 {
     static EFUpdate efupdate; /// EFU Update Handler
-    if (!index) 
+    if (!index)
     {
 #ifdef ARDUINO_ARCH_ESP8266
         WiFiUDP::stopAll ();
@@ -424,7 +453,7 @@ void c_WebMgr::onFirmwareUpload (AsyncWebServerRequest* request, String filename
         efupdate.begin ();
     }
 
-    if (!efupdate.process (data, len)) 
+    if (!efupdate.process (data, len))
     {
         LOG_PORT.print (F ("*** UPDATE ERROR: "));
         LOG_PORT.println (String (efupdate.getError ()));
@@ -435,7 +464,7 @@ void c_WebMgr::onFirmwareUpload (AsyncWebServerRequest* request, String filename
         request->send (200, "text/plain", "Update Error: " + String (efupdate.getError ()));
     }
 
-    if (final) 
+    if (final)
     {
         request->send (200, "text/plain", "Update Finished: " + String (efupdate.getError ()));
         LOG_PORT.println (F ("* Upload Finished."));

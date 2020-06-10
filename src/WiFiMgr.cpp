@@ -154,6 +154,18 @@ void c_WiFiMgr::Begin (config_t* NewConfig)
 } // begin
 
 //-----------------------------------------------------------------------------
+void c_WiFiMgr::GetStatus (JsonObject& jsonStatus)
+{
+    jsonStatus["rssi"]     = WiFi.RSSI ();
+    jsonStatus["ip"]       = getIpAddress ().toString ();
+    jsonStatus["subnet"]   = getIpSubNetMask ().toString ();
+    jsonStatus["mac"]      = WiFi.macAddress ();
+    jsonStatus["hostname"] = WiFi.hostname ();
+    jsonStatus["ssid"]     = WiFi.SSID ();
+
+} // GetStatus
+
+//-----------------------------------------------------------------------------
 void c_WiFiMgr::initWifi ()
 {
     // DEBUG_START;
