@@ -41,6 +41,7 @@ public:
     void    LoadConfig ();                       ///< Read the current configuration data from nvram
     void    SaveConfig ();                       ///< Save the current configuration data to nvram
     void    GetConfig (JsonObject & jsonConfig); ///< Get the current config used by the driver
+    String  GetConfig ();
     bool    SetConfig (JsonObject & jsonConfig); ///< Set a new config in the driver
 
     // handles to determine which output channel we are dealing with

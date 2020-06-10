@@ -660,6 +660,21 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 } // InstantiateNewOutputChannel
 
 //-----------------------------------------------------------------------------
+String c_OutputMgr::GetConfig ()
+{
+    // DEBUG_START;
+    String response;
+
+    DynamicJsonDocument JsonConfigDoc (4096);
+    JsonObject JsonConfig = JsonConfigDoc.createNestedObject("O");
+    GetConfig (JsonConfig);
+    serializeJson (JsonConfig, response);
+    return response;
+
+    // DEBUG_END;
+} // GetConfig
+//-----------------------------------------------------------------------------
+
 /* Returns the current configuration for the output channels
 *
 *   needs
