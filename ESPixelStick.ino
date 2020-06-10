@@ -289,6 +289,7 @@ void GetConfig (JsonObject & json)
     // Network
     JsonObject network = json.createNestedObject("network");
     network["ssid"]        = config.ssid;
+    network["passphrase"]  = config.passphrase;
     network["hostname"]    = config.hostname;
     network["ip"]          = config.ip;
     network["netmask"]     = config.netmask;
@@ -301,22 +302,19 @@ void GetConfig (JsonObject & json)
     network["ap_timeout"]  = config.ap_timeout;
 
     // DEBUG_END;
-
 }
 // Serialize the current config into a JSON string
-String serializeCore(boolean pretty, boolean creds) 
+String serializeCore(boolean pretty) 
 {
     // DEBUG_START;
 
     // Create buffer and root object
-    DynamicJsonDocument jsonConfigDoc(2048);
-    JsonObject JsonConfig = jsonConfigDoc.as<JsonObject> ();
+    DynamicJsonDocument jsonConfigDoc(1024);
+    JsonObject JsonConfig = jsonConfigDoc.createNestedObject("R");
 
     String jsonConfigString;
 
     GetConfig (JsonConfig);
-
-    if (creds) { JsonConfig["network"]["passphrase"] = config.passphrase; };
 
     if (pretty)
     {
@@ -341,7 +339,7 @@ void saveConfig()
     validateConfig();
 
     // Save Config
-    String DataToSave = serializeCore (false, true);
+    String DataToSave = serializeCore (false);
     FileIO::saveConfig(ConfigFileName, DataToSave);
 
     // save the config for the output and input channels
