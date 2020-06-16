@@ -1,5 +1,4 @@
-#ifndef EFFECTENGINE_H_
-#define EFFECTENGINE_H_
+#pragma once
 
 #define MIN_EFFECT_DELAY 10
 #define MAX_EFFECT_DELAY 65535
@@ -266,5 +265,3 @@ private:
     dCHSV rgb2hsv(CRGB in);
     CRGB hsv2rgb(dCHSV in);
 };
-
-#endif
