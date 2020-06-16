@@ -1,4 +1,3 @@
-// only include this file once
 #pragma once
 /*
 * E131Input.h - Code to wrap ESPAsyncE131 for input
