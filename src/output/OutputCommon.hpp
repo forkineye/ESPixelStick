@@ -1,4 +1,3 @@
-// only include this file once
 #pragma once
 /*
 * OutputCommon.hpp - Output base class
@@ -75,6 +74,7 @@ public:
             uint8_t    * GetBufferAddress ()  { return InputDataBuffer;}       ///< Get the address of the buffer into which the E1.31 handler will stuff data
             uint16_t     GetBufferSize ()     { return sizeof (InputDataBuffer);} ///< Get the address of the buffer into which the E1.31 handler will stuff data
             OTYPE_t      GetOutputType ()     { return OutputType; }           ///< Have the instance report its type.
+    virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
 
 protected:
 
@@ -87,6 +87,7 @@ protected:
     OTYPE_t     OutputType;  ///< Type to report for this driver
     OID_t       OutputChannelId;
     bool        HasBeenInitialized = false;
+    time_t      FrameRefreshTimeMs = 0;
 
 #ifdef ARDUINO_ARCH_ESP8266
     void InitializeUart (uint32_t BaudRate, 

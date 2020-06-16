@@ -198,13 +198,19 @@ void c_InputE131::GetConfig (JsonObject & jsonConfig)
 //-----------------------------------------------------------------------------
 void c_InputE131::GetStatus (JsonObject& jsonStatus)
 {
+    // DEBUG_START;
+
     JsonObject e131Status = jsonStatus.createNestedObject ("e131");
     e131Status["unifirst"]      = startUniverse;
     e131Status["unilast"]       = LastUniverse;
     e131Status["unichanlim"]    = universe_channel_limit;
+    // DEBUG_V ("");
+
     e131Status["num_packets"]   = e131->stats.num_packets;
     e131Status["packet_errors"] = e131->stats.packet_errors;
     e131Status["last_clientIP"] = e131->stats.last_clientIP.toString ();
+
+    // DEBUG_END;
 
 } // GetStatus
 

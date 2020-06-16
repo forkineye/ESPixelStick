@@ -24,12 +24,13 @@
 #include "../ESPixelStick.h"
 #include "OutputCommon.hpp"
 
-extern "C" {
 #if defined(ARDUINO_ARCH_ESP8266)
+extern "C" {
 #   include <eagle_soc.h>
 #   include <ets_sys.h>
 #   include <uart.h>
 #   include <uart_register.h>
+}
 #else
     // Define ESP8266 style macro conversions to limit changes in the rest of the code.
 #   define UART_CONF0           UART_CONF0_REG
@@ -40,7 +41,6 @@ extern "C" {
 #   define UART_TX_FIFO_SIZE    UART_FIFO_LEN
 
 #endif
-}
 
 static void IRAM_ATTR uart_intr_handler (void* param);
 
@@ -196,4 +196,16 @@ void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
     // DEBUG_END;
 } // InitializeUart
 #endif
+
+//-----------------------------------------------------------------------------
+void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
+{
+    // DEBUG_START;
+
+#define MilliSecondsInAsecond 1000
+    jsonStatus["framerefreshrate"] = (0 == FrameRefreshTimeMs) ? 0 : int (MilliSecondsInAsecond / FrameRefreshTimeMs);
+
+    // DEBUG_END;
+} // GetStatus
+
 

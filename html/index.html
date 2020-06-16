@@ -86,15 +86,18 @@
                     </div>
                     <div class="form-group" id="fg_password">
                         <label class="control-label col-sm-2" for="passphrase">Password</label>
-                        <div class="col-sm-10"><input type="text" class="form-control" id="passphrase" title="The password for your access point."></div>
+                        <div class="col-sm-10"><input type="password" class="form-control" id="passphrase" title="The password for your access point."></div>
                     </div>
                     <div class="form-group" id="fg_hostname">
                         <label class="control-label col-sm-2" for="hostname">Hostname</label>
                         <div class="col-sm-10"><input type="text" class="form-control has-error" id="hostname" title="Hostname for this device."></div>
                     </div>
                     <div class="form-group" id="fg_staTimeout">
-                        <label class="control-label col-sm-2" for="sta_timeout">Client Timeout</label>
-                        <div class="col-sm-10"><input type="text" class="form-control has-error" id="sta_timeout" title="When connecting as a client, this is the timeout in seconds."></div>
+                        <label class="control-label col-sm-2" for="sta_timeout">Client Timeout:</label>
+                        <div class="col-sm-2">
+                            <input type="number" class="form-control has-feedback has-success has-error" id="sta_timeout" step="1" min="15" max="60" value="0" title="When connecting as a client, this is the timeout in seconds.">
+                            <span class="glyphicon glyphicon-ok glyphicon-error form-control-feedback"></span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <div class="col-sm-offset-2 col-sm-10">
@@ -134,25 +137,26 @@
                     <legend class="esps-legend">Device Configuration</legend>
                     <div class="form-group">
                         <label class="control-label col-sm-2" for="id">Device ID</label>
-                        <div class="col-sm-10"><input type="text" class="form-control" id="id" title="Plain text ID to help identify your device."></div>
+                        <div class="col-sm-6"><input type="text" class="form-control" id="id" title="Plain text ID to help identify your device."></div>
                     </div>
 
                     <div class="form-group">
                         <label class="control-label col-sm-2" for="input">Input Mode</label>
-                        <div class="col-sm-10">
+                        <div class="col-sm-2">
                             <select class="form-control wsopt" id="input"></select>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="control-label col-sm-2" for="output">Output Mode</label>
-                        <div class="col-sm-10">
+                        <div class="col-sm-2">
                             <select class="form-control wsopt" id="output"></select>
                         </div>
                     </div>
                 </fieldset>
 
                 <fieldset id="imode"></fieldset>
+
                 <fieldset id="omode"></fieldset>
 
                 <fieldset>

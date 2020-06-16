@@ -1,4 +1,3 @@
-// only include this file once
 #pragma once
 /*
 * InputCommon.hpp - Input base class

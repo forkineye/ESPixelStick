@@ -31,7 +31,22 @@
 // needs to be last
 #include "InputMgr.hpp"
 //-----------------------------------------------------------------------------
+// Local Data
+//-----------------------------------------------------------------------------
+typedef struct InputTypeXlateMap_t
+{
+    c_InputMgr::e_InputType id;
+    String name;
+};
 
+InputTypeXlateMap_t InputTypeXlateMap[c_InputMgr::e_InputType::InputType_End] =
+{
+    {c_InputMgr::e_InputType::InputType_E1_31,    String ("E1.31") },
+    {c_InputMgr::e_InputType::InputType_Disabled, String ("Disabled") }
+};
+
+//-----------------------------------------------------------------------------
+// Methods
 //-----------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
 c_InputMgr::c_InputMgr ()
@@ -95,14 +110,33 @@ void c_InputMgr::Begin (uint8_t* BufferStart, uint16_t BufferSize)
 //-----------------------------------------------------------------------------
 void c_InputMgr::GetStatus (JsonObject& jsonStatus)
 {
+    // DEBUG_START;
     for (auto CurrentInput : pInputChannelDrivers)
     {
         CurrentInput->GetStatus (jsonStatus);
+        // DEBUG_V ("");
     }
+    // DEBUG_END;
 
 } // GetStatus
-  
- //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+String c_InputMgr::GetOptions (JsonObject & jsonOptions)
+{
+    jsonOptions["selectedoption"] = pInputChannelDrivers[0]->GetInputType ();
+    JsonArray jsonOptionsArray = jsonOptions.createNestedArray ("list");
+
+    // Build a list of Valid options for this device
+    for (auto currentInputType : InputTypeXlateMap)
+    {
+        JsonObject jsonOptionsArrayEntry = jsonOptionsArray.createNestedObject ();
+
+        jsonOptionsArrayEntry["id"]   = currentInputType.id;
+        jsonOptionsArrayEntry["name"] = currentInputType.name;
+    } // end for each output type
+} // GetOptions
+
+//-----------------------------------------------------------------------------
 /* Load and process the current configuration
 *
 *   needs
@@ -253,13 +287,13 @@ bool c_InputMgr::DeserializeConfig (JsonObject & jsonConfig)
             JsonObject InputChannelConfig = InputChannelArray[String (ChannelIndex).c_str ()];
 
             // set a default value for channel type
-            uint32_t TempChannelType = uint32_t (InputType_End)+1;
+            uint32_t TempChannelType = uint32_t (InputType_End);
             FileIO::setFromJSON (TempChannelType, InputChannelConfig[IM_CHANNEL_TYPE_NAME]);
 
             // todo - this is wrong. Each type will have a config
 
             // is it a valid / supported channel type
-            if ((TempChannelType < e_InputType::InputType_Start) || (TempChannelType > e_InputType::InputType_End))
+            if ((TempChannelType < e_InputType::InputType_Start) || (TempChannelType >= e_InputType::InputType_End))
             {
                 // if not, flag an error and move on to the next channel
                 LOG_PORT.println (String (F ("Invalid Channel Type in config '")) + TempChannelType + String (F ("'. Specified for channel '")) + ChannelIndex + "'. Disabling channel");
@@ -496,4 +530,3 @@ void c_InputMgr::Process()
 
 // create a global instance of the Input channel factory
 c_InputMgr InputMgr;
-

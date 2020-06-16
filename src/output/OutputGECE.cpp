@@ -163,7 +163,7 @@ void c_OutputGECE::Begin()
     pinMode(DataPin, OUTPUT);
     digitalWrite(DataPin, LOW);
 
-    refreshTime = (GECE_FRAME_TIME + GECE_IDLE_TIME) * pixel_count;
+    FrameRefreshTimeMs = (GECE_FRAME_TIME + GECE_IDLE_TIME) * pixel_count;
 
     // Serial rate is 3x 100KHz for GECE
 #ifdef ARDUINO_ARCH_ESP8266
@@ -188,7 +188,7 @@ void c_OutputGECE::Begin()
 */
 bool c_OutputGECE::SetConfig(ArduinoJson::JsonObject & jsonConfig)
 {
-    DEBUG_START;
+ DEBUG_START;
 
     uint temp;
     FileIO::setFromJSON(pixel_count, jsonConfig["pixel_count"]);
@@ -198,7 +198,7 @@ bool c_OutputGECE::SetConfig(ArduinoJson::JsonObject & jsonConfig)
     FileIO::setFromJSON(temp,        jsonConfig["data_pin"]);
     DataPin = gpio_num_t (temp);
 
-    DEBUG_END;
+ DEBUG_END;
     return validate ();
 
 } // SetConfig
@@ -222,7 +222,7 @@ void c_OutputGECE::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 //----------------------------------------------------------------------------
 bool c_OutputGECE::validate ()
 {
-    DEBUG_START;
+ DEBUG_START;
 
     bool response = true;
 
@@ -237,7 +237,7 @@ bool c_OutputGECE::validate ()
         response = false;
     }
 
-    DEBUG_END;
+ DEBUG_END;
     return response;
 
 } // validate
@@ -251,7 +251,7 @@ void c_OutputGECE::Render()
     if (!canRefresh()) return;
 
 //    delayMicroseconds (1000000);
-//    DEBUG_V ("4");
+// DEBUG_V ("4");
 
     uint32_t packet = 0;
     uint32_t pTime  = 0;

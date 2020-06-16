@@ -47,11 +47,12 @@ public:
     virtual ~c_OutputSerial ();
 
     // functions to be provided by the derived class
-    void         Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
-    bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
-    void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-    void         Render ();                                        ///< Call from loop(),  renders output data
-    void         GetDriverName (String& sDriverName);
+    void Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
+    bool SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
+    void GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
+    void Render ();                                        ///< Call from loop(),  renders output data
+    void GetDriverName (String& sDriverName);
+    void GetStatus (ArduinoJson::JsonObject& jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
 
 #define GS_CHANNEL_LIMIT 2048
 

@@ -39,7 +39,7 @@ public:
     void      GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     void      Render ();                                        ///< Call from loop(),  renders output data
     void      GetDriverName (String& sDriverName) { sDriverName = String (F ("GECE")); }
-
+    void      GetStatus (ArduinoJson::JsonObject& jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
     void IRAM_ATTR ISR_Handler () {} ///< UART ISR
 
 private:
@@ -58,12 +58,11 @@ private:
 
     // Internal variables
     uint32_t        startTime        = 0;              ///< When the last frame TX started
-    uint32_t        refreshTime      = 0;              ///< Time until we can refresh after starting a TX
     HardwareSerial *pSerialInterface = nullptr;
     /* Drop the update if our refresh rate is too high */
     inline bool canRefresh() 
     {
-        return (micros() - startTime) >= refreshTime;
+        return (micros() - startTime) >= FrameRefreshTimeMs;
     }
 
     bool validate();

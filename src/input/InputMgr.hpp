@@ -1,4 +1,3 @@
-// only include this file once
 #pragma once
 /*
 * InputMgr.hpp - Input Management class
@@ -39,21 +38,21 @@ public:
     void    SaveConfig ();                       ///< Save the current configuration data to nvram
     void    GetConfig (JsonObject & jsonConfig); ///< Get the current config used by the driver
     String  GetConfig ();                        ///< Get the current config used by the driver
-    void    GetStatus (JsonObject& jsonStatus);
+    void    GetStatus (JsonObject & jsonStatus);
     bool    SetConfig (JsonObject & jsonConfig); ///< Set a new config in the driver
     void    DumpSupportedModes () {/* todo */};
     void    Process ();                          ///< Call from loop(),  renders Input data
+    String  GetOptions (JsonObject & jsonStatus);
 
     enum e_InputType
     {
         InputType_Disabled = 0,
         InputType_E1_31,
-
+        InputType_End,
         InputType_Start = InputType_Disabled,
-        InputType_End   = InputType_E1_31,
     };
 
-    // handles to determine which output channel we are dealing with
+    // handles to determine which input channel we are dealing with
     enum e_InputChannelIds
     {
         InputChannelId_1 = 0,

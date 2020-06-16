@@ -1,4 +1,3 @@
-// only include this file once
 #pragma once
 /*
 * WiFiMgr.hpp - Output Management class
@@ -51,7 +50,7 @@ private:
     void   onWsEvent        (AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, size_t len);
     void   onFirmwareUpload (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
     String GetConfiguration ();
-
+    String GetOptions       ();
 protected:
 
 }; // c_WebMgr

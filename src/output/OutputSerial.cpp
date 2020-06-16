@@ -33,13 +33,13 @@ GNU General Public License for more details.
 #include "../ESPixelStick.h"
 #include "../FileIO.h"
 
-extern "C" {
 #ifdef ARDUINO_ARCH_ESP8266
+extern "C" {
 #   include <eagle_soc.h>
 #   include <ets_sys.h>
 #   include <uart.h>
 #   include <uart_register.h>
-
+}
 #define GET_PERI_REG_MASK(reg, mask) (READ_PERI_REG((reg)) & (mask))
 #define UART_INT_RAW_REG             UART_INT_RAW
 #define UART_TX_DONE_INT_RAW         UART_TXFIFO_EMPTY_INT_RAW
@@ -54,7 +54,7 @@ extern "C" {
 #   define UART_INT_ST          UART_INT_ST_REG
 #   define UART_TX_FIFO_SIZE    UART_FIFO_LEN
 #endif
-}
+
 
 #define FIFO_TRIGGER_LEVEL (UART_TX_FIFO_SIZE / 2)
 

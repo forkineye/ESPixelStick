@@ -24,14 +24,14 @@
 #include "../FileIO.h"
 
 #include "OutputWS2811.hpp"
-#include "OutputCommon.hpp"
 
-extern "C" {
 #if defined(ARDUINO_ARCH_ESP8266)
+extern "C" {
 #   include <eagle_soc.h>
 #   include <ets_sys.h>
 #   include <uart.h>
 #   include <uart_register.h>
+}
 #elif defined(ARDUINO_ARCH_ESP32)
 
 // Define ESP8266 style macro conversions to limit changes in the rest of the code.
@@ -41,9 +41,7 @@ extern "C" {
 #   define UART_INT_CLR         UART_INT_CLR_REG
 #   define UART_INT_ST          UART_INT_ST_REG
 #   define UART_TX_FIFO_SIZE    UART_FIFO_LEN
-
 #endif
-}
 
 #define WS2811_DATA_SPEED    (800000)
 
@@ -90,7 +88,6 @@ c_OutputWS2811::c_OutputWS2811(c_OutputMgr::e_OutputChannelIds OutputChannelId,
     RemainingIntensityCount (0),
     NumIntensityBytesInOutputBuffer (0),
     startTime (0),
-    refreshTime (0),
     rOffset (0),
     gOffset (1),
     bOffset (2)
@@ -177,7 +174,7 @@ void c_OutputWS2811::Begin()
     NumIntensityBytesInOutputBuffer = pixel_count * WS2812_NUM_INTENSITY_BYTES_PER_PIXEL;
 
     // Calculate our refresh time
-    refreshTime = (WS2811_TIME_PER_PIXEL * pixel_count) + WS2811_MIN_IDLE_TIME;
+    FrameRefreshTimeMs = (WS2811_TIME_PER_PIXEL * pixel_count) + WS2811_MIN_IDLE_TIME;
 
     // Atttach interrupt handler
 #ifdef ARDUINO_ARCH_ESP8266
@@ -475,7 +472,7 @@ bool c_OutputWS2811::validate ()
     updateColorOrder ();
 
     // Calculate our refresh time
-    refreshTime = (WS2811_TIME_PER_PIXEL * pixel_count) + WS2811_MIN_IDLE_TIME;
+    FrameRefreshTimeMs = (WS2811_TIME_PER_PIXEL * pixel_count) + WS2811_MIN_IDLE_TIME;
 
     // DEBUG_END;
     return response;

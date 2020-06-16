@@ -45,6 +45,7 @@ public:
     void         Render ();                                        ///< Call from loop(),  renders output data
     void         GetDriverName (String & sDriverName) { sDriverName = String (F ("WS2811")); }
     c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_WS2811;} ///< Have the instance report its type.
+    void         GetStatus (ArduinoJson::JsonObject& jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
 
     /// Interrupt Handler
     void IRAM_ATTR ISR_Handler (); ///< UART ISR
@@ -69,7 +70,6 @@ private:
     uint16_t    RemainingIntensityCount;                 ///< Used by ISR to determine how much more data to send
     uint16_t    NumIntensityBytesInOutputBuffer;         ///< Size of buffers
     time_t      startTime;                               ///< When the last frame TX started
-    time_t      refreshTime;                             ///< Time until we can refresh after starting a TX
     uint8_t     rOffset;                                 ///< Index of red byte
     uint8_t     gOffset;                                 ///< Index of green byte
     uint8_t     bOffset;                                 ///< Index of blue byte
@@ -97,7 +97,7 @@ private:
     /// Drop the update if our refresh rate is too high
     inline boolean canRefresh() 
     {
-        return (micros() - startTime) >= refreshTime;
+        return (micros() - startTime) >= FrameRefreshTimeMs;
     }
     
     void updateGammaTable(); ///< Generate gamma correction table
