@@ -1,3 +1,4 @@
+#pragma once
 /*
 * ESPixelStick.h
 *
@@ -16,9 +17,6 @@
 *  or use of these programs.
 *
 */
-#pragma once
-#ifndef ESPIXELSTICK_H_
-#define ESPIXELSTICK_H_
 
 const char VERSION[] = "4.0_unified-dev";
 const char BUILD_DATE[] = __DATE__;
@@ -54,7 +52,7 @@ const char BUILD_DATE[] = __DATE__;
 #define RDMNET_DNSSD_E133VERS   1
 
 // Configuration file params
-#define CONFIG_MAX_SIZE 4096    ///< Sanity limit for config file
+#define CONFIG_MAX_SIZE 2048    ///< Sanity limit for config file
 
 /// Core configuration structure
 typedef struct {
@@ -79,5 +77,3 @@ String serializeCore(boolean pretty = false);
 boolean dsDevice(DynamicJsonDocument &json);
 boolean dsNetwork(DynamicJsonDocument &json);
 void saveConfig();
-
-#endif  // ESPIXELSTICK_H_
