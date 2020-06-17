@@ -159,6 +159,7 @@ public:
 
 			// DEBUG_V ("");
 			dsHandler (json);
+			json.garbageCollect ();
 
 			LOG_PORT.println (CfgFileMessagePrefix + String (F ("loaded.")));
 			retval = true;
