@@ -151,7 +151,7 @@ void c_OutputMgr::CreateNewConfig ()
     LOG_PORT.println (F ("--- WARNING: Creating a new Output Manager configuration Data set - Start ---"));
 
     // create a place to save the config
-    DynamicJsonDocument JsonConfigDoc (4096);
+    DynamicJsonDocument JsonConfigDoc (2048);
     JsonObject JsonConfig = JsonConfigDoc.createNestedObject (OM_SECTION_NAME);
 
     // DEBUG_V ("for each output type");
@@ -209,6 +209,8 @@ void c_OutputMgr::CreateNewConfig ()
     {
         LOG_PORT.println (F ("EEEE Error Saving Output Manager Config File. EEEE"));
     }
+
+    JsonConfigDoc.garbageCollect ();
 
     LOG_PORT.println (F ("--- WARNING: Creating a new Output Manager configuration Data set - Done ---"));
     // DEBUG_END;
@@ -341,15 +343,20 @@ uint16_t c_OutputMgr::GetBufferSize (e_OutputChannelIds ChannelId)
 String c_OutputMgr::GetConfig ()
 {
     // DEBUG_START;
-    String response;
+    String response = "";
 
     DynamicJsonDocument JsonConfigDoc (4096);
-    JsonObject JsonConfig = JsonConfigDoc.createNestedObject ("O");
+    JsonObject JsonConfig = JsonConfigDoc.to<JsonObject>();
+
     GetConfig (JsonConfig);
     serializeJson (JsonConfig, response);
-    return response;
+
+    // DEBUG_V ("");
+    JsonConfigDoc.garbageCollect ();
 
     // DEBUG_END;
+
+    return response;
 } // GetConfig
 
 //-----------------------------------------------------------------------------
@@ -366,10 +373,10 @@ void c_OutputMgr::GetConfig (JsonObject& jsonConfigResponse)
     // DEBUG_START;
 
     // try to load and process the config file
-    if (!FileIO::loadConfig (ConfigFileName.c_str (), ConfigFile, [this, jsonConfigResponse](DynamicJsonDocument& JsonConfigDoc)
+    if (!FileIO::loadConfig (ConfigFileName.c_str (), ConfigFile, [this, jsonConfigResponse](DynamicJsonDocument & JsonConfigDoc)
         {
             // DEBUG_V ("");
-            JsonObject jsonSrc = JsonConfigDoc.as<JsonObject> ();
+            JsonObject jsonSrc = JsonConfigDoc.to<JsonObject> ();
             // DEBUG_V ("");
             this->merge (jsonConfigResponse, jsonSrc);
             // DEBUG_V ("");
@@ -378,12 +385,14 @@ void c_OutputMgr::GetConfig (JsonObject& jsonConfigResponse)
         // file read error
     }
 
-        // DEBUG_END;
+    // DEBUG_END;
 } // GetConfig
 
 //-----------------------------------------------------------------------------
 String c_OutputMgr::GetOptions (JsonObject& jsonOptions)
 {
+    // DEBUG_START;
+
     jsonOptions["selectedoption"] = pOutputChannelDrivers[0]->GetOutputType ();
     JsonArray jsonOptionsArray = jsonOptions.createNestedArray ("list");
 
@@ -396,6 +405,7 @@ String c_OutputMgr::GetOptions (JsonObject& jsonOptions)
         jsonOptionsArrayEntry["name"] = currentOutputType.name;
 
     } // end for each output type
+    // DEBUG_END;
 } // GetOptions
 
 //-----------------------------------------------------------------------------
@@ -656,7 +666,7 @@ void c_OutputMgr::SaveConfig ()
     if (!FileIO::loadConfig (ConfigFileName, ConfigFile, [this](DynamicJsonDocument& JsonConfigDoc)
         {
             // DEBUG_V ("");
-            JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
+            JsonObject JsonConfig = JsonConfigDoc.to<JsonObject> ();
 
             // add the OM header
             JsonObject OutputMgrData;
@@ -684,6 +694,7 @@ void c_OutputMgr::SaveConfig ()
 #endif // def foo
             // this forces a write to flash
             ConfigFile.close ();
+            ConfigFile = SPIFFS.open (ConfigFileName.c_str (), "r+");
 
             serializeJson (JsonConfigDoc, sJsonConfig);
 #ifdef foo
@@ -700,7 +711,6 @@ void c_OutputMgr::SaveConfig ()
                 LOG_PORT.println (F ("EEEE Error Saving Output Manager Config File. EEEE"));
             }
 
-            ConfigFile = SPIFFS.open (ConfigFileName.c_str (), "r+");
         }))
     {
         // could not read the file so we need to create a new image.
