@@ -224,6 +224,9 @@ void c_InputMgr::SaveConfig ()
     {
         LOG_PORT.println (F ("EEEE Error Saving Input Manager Config File. EEEE"));
     }
+
+    JsonConfigDoc.garbageCollect ();
+
     // DEBUG_END;
 
 } // SaveConfig
@@ -463,10 +466,11 @@ String c_InputMgr::GetConfig ()
     // DEBUG_START;
     String response;
 
-    DynamicJsonDocument JsonConfigDoc (4096);
+    DynamicJsonDocument JsonConfigDoc (2048);
     JsonObject JsonConfig = JsonConfigDoc.createNestedObject("I");
     GetConfig (JsonConfig);
     serializeJson (JsonConfig, response);
+    JsonConfigDoc.garbageCollect ();
     return response;
 
     // DEBUG_END;
