@@ -1,6 +1,6 @@
 <div id="ws2811">
     <legend class="esps-legend">WS2811 Configuration</legend>
-    <div class="form-group has-feedback">
+    <div class="form-group has-feedback" id="fg_ws2811">
         <label class="control-label col-sm-2" for="pixel_count">Pixel Count:</label>
         <div class="col-sm-2">
             <input type="number" class="form-control is-valid" id="pixel_count" step="1" min="1" max="1360" value="0" required title="Number of physical pixels" onchange="refreshPixel()">
@@ -118,22 +118,22 @@
         polyline.setAttribute('points', points);
     }
 
-    function refreshPixel() {
-        var NumberOfPixels = $('#pixel_count').val();
-        var PixelTimeMs = 0.030;
-        var InterFrameGapMs = 0.300;
+    function refreshPixel()
+    {
+        // var NumberOfPixels       = parseInt($('#pixel_count').val());
+        // var BytesPerPixel        = 3;
+        // var NumberOfBytesInFrame = NumberOfPixels * BytesPerPixel;
+        // var PixelBaudRate        = 800000;
+        // var TimePerBit           = 1 / PixelBaudRate;
+        // var BitsPerByte          = 8;
+        // var TimePerByte          = TimePerBit * BitsPerByte;
+        // var InterFrameGap        = 0.0004;
+        // var TimePerFrame         = (TimePerByte * NumberOfBytesInFrame) + InterFrameGap;
+        var TimePerFrame            = (0.00001 * (parseInt($('#pixel_count').val()) * 3)) + 0.0004;
 
-        //        if (!proto.localeCompare('WS2811 800kHz')) {
-        //            frame = 30;
-        //            idle = 300;
-        //        } else if (!proto.localeCompare('GE Color Effects')) {
-        //            frame = 790;
-        //            idle = 35;
-        //        }
-
-        var rate = ((PixelTimeMs * NumberOfPixels) + InterFrameGapMs);
-        var hz = 1000 / rate;
-        $('#refresh').html(Math.ceil(rate) + ' ms / ' + Math.floor(hz) + ' fps');
-    }
+        var rateMs = TimePerFrame * 1000;
+        var hz = 1 / TimePerFrame;
+        $('#refresh').html(Math.ceil(rateMs) + ' ms / ' + Math.floor(hz) + ' fps');
+    } // refreshPixel
 
 </script>

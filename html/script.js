@@ -10,6 +10,8 @@ var effectInfo;
 // global data
 var ParsedJsonStatus;
 var ParsedJsonConfig;
+var om_config; // Output Manager configuration record
+var im_config; // Input Manager configuration record
 
 // Default modal properties
 $.fn.modal.Constructor.DEFAULTS.backdrop = 'static';
@@ -116,20 +118,26 @@ $(function ()
     //  I/O module configuration change callbacks
     //
     ////////////////////////////////////////////////////
+
+    // define the input select list action
     $('#config #device #input').change(function ()
     {
         if ($(this).val()) {
-            $('#imode').load($("#config #device #output option:selected").text().toLowerCase() + ".html", function ()
+            $('#imode').load($("#config #device #input option:selected").text().toLowerCase() + ".html", function ()
             {
-                wsEnqueue(JSON.stringify({ 'cmd': { 'get': '#config #device #input' } }));
+                wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));
             });
         }
     });
 
+    // define the output select list action
     $('#config #device #output').change(function ()
     {
         if ($(this).val())
         {
+            // clear the frame rate display (in case we are switching to disabled)
+            $('#refresh').html('0 ms / 0 fps');
+
             $('#omode').load($("#config #device #output option:selected").text().toLowerCase() + ".html", function ()
             {
                 // wsEnqueue(JSON.stringify({ 'cmd': { 'get': '#config #device #output' } }));
@@ -252,6 +260,96 @@ function wifiValidation()
     $('#network #btn_wifi').prop('disabled', WifiSaveDisabled);
 }
 
+
+function ProcessReceivedOutputConfiguration(outputConfiguration)
+{
+    // save the global configuration
+    om_config = outputConfiguration;
+
+    // determine the type of output that has been selected and populate the form
+    var TypeOfOutputId = parseInt($("#config #device #output option:selected").val(), 10);
+
+    // At the moment we only support a single channel
+    var channelId        = 0;
+    var channelConfigSet = om_config.om_channels[channelId];
+    var channelConfig    = channelConfigSet[TypeOfOutputId];
+    var ChannelTypeName  = channelConfig.type.toLowerCase();
+
+    // clear the array
+    selector = [];
+
+    // push the prefix that identifies the object being modified.
+    selector.push("#" + ChannelTypeName + " #fg_" + ChannelTypeName);
+
+    // update the fields based on config data
+    updateFromJSON(channelConfig);
+
+    // clear the array
+    selector = [];
+
+} // ProcessReceivedOutputConfiguration
+
+function ProcessReceivedInputConfiguration(inputConfiguration)
+{
+    // save the global configuration
+    im_config = inputConfiguration;
+
+    // determine the type of output that has been selected and populate the form
+    var TypeOfOutputId = parseInt($("#config #device #output option:selected").val(), 10);
+
+    // At the moment we only support a single channel
+    var channelId = 0;
+    var channelConfigSet = om_config.om_channels[channelId];
+    var channelConfig = channelConfigSet[TypeOfOutputId];
+    var ChannelTypeName = channelConfig.type.toLowerCase();
+
+    // clear the array
+    selector = [];
+
+    // push the prefix that identifies the object being modified.
+    selector.push("#" + ChannelTypeName + " #fg_" + ChannelTypeName);
+
+    // update the fields based on config data
+    updateFromJSON(channelConfig);
+
+    // clear the array
+    selector = [];
+
+} // ProcessReceivedInputConfiguration
+
+function ProcessReceivedJsonConfig(JsonConfigData)
+{
+    // is this an output config?
+    if (JsonConfigData.hasOwnProperty("om_config"))
+    {
+        ProcessReceivedOutputConfiguration(JsonConfigData.om_config);
+    }
+
+    // is this an input config?
+    if (JsonConfigData.hasOwnProperty("im_config"))
+    {
+        ProcessReceivedInputConfiguration(JsonConfigData.im_config);
+    }
+
+    // is this an input config?
+    else if (JsonConfigData.hasOwnProperty("device"))
+    {
+        updateFromJSON(JsonConfigData);
+    }
+
+    // is this an input config?
+    else if (JsonConfigData.hasOwnProperty("network"))
+    {
+        updateFromJSON(JsonConfigData);
+    }
+
+    else
+    {
+        console.error("unknown configuration record type has been ignored.")
+    }
+
+} // ProcessReceivedJsonConfig
+
 // Builds jQuery selectors from JSON data and updates the web interface
 var selector = [];
 function updateFromJSON(obj)
@@ -259,7 +357,7 @@ function updateFromJSON(obj)
     for (var k in obj)
     {
         selector.push('#' + k);
-        if (typeof obj[k] == 'object' && obj[k] !== null)
+        if (typeof obj[k] === 'object' && obj[k] !== null)
         {
             updateFromJSON(obj[k]);
         }
@@ -291,7 +389,7 @@ function addOptionDataFromJSON(JsonOptionList)
     // for each field we need to populate
     Object.keys(JsonOptionList).forEach(function (OptionListName)
     {
-        var ArrayOfOptions = JsonOptionList[OptionListName].list; // value
+        var ArrayOfOptions   = JsonOptionList[OptionListName].list; // value
         var currentSelection = JsonOptionList[OptionListName].selectedoption;
         var jqSelector = "#" + OptionListName;
 
@@ -470,13 +568,13 @@ function wsConnect()
                     // "GET" message is a response to a get request. Populate the frontend.
                     if (msg.hasOwnProperty("get"))
                     {
-                        updateFromJSON(msg.get);
+                        ProcessReceivedJsonConfig(msg.get);
                     }
 
                     // "SET" message is a reponse to a set request. Data has been validated and saved, Populate the frontend.
                     if (msg.hasOwnProperty("set"))
                     {
-                        updateFromJSON(msg.set);
+                        ProcessReceivedJsonConfig(msg.set);
                     }
 
                     // "OPT" message is select option data
@@ -666,19 +764,9 @@ function clearStream()
     }
 }
 
-function ProcessReceivedJsonConfig(data)
-{
-    ParsedJsonConfig = JSON.parse(data);
-
-    // process the top level blocks
-
-} // ProcessReceivedJsonConfig
-
 // Remove?
 function getConfig(data)
 {
-    
-
     // Device and Network config
     $('#title').text('ESPS - ' + config.device.id);
     $('#name').text(config.device.id);
