@@ -251,7 +251,7 @@ void c_OutputGECE::Render()
     if (!canRefresh()) return;
 
 //    delayMicroseconds (1000000);
-// DEBUG_V ("4");
+    // DEBUG_V ("4");
 
     uint32_t packet = 0;
     uint32_t pTime  = 0;
