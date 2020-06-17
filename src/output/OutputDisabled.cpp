@@ -104,8 +104,8 @@ void c_OutputDisabled::GetConfig(ArduinoJson::JsonObject & jsonConfig)
 
 void c_OutputDisabled::Render()
 {
-    // // DEBUG_START;
+    // DEBUG_START;
 
-    // // DEBUG_END;
+    // DEBUG_END;
 
 } // Render
