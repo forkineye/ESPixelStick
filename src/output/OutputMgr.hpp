@@ -94,7 +94,6 @@ private:
 
     bool DeserializeConfig (JsonObject & jsonConfig);
     void SerializeConfig   (JsonObject & jsonConfig);
-    // JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
 
     File ConfigFile;
     String ConfigFileName;
