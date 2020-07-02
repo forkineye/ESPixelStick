@@ -96,8 +96,6 @@ void c_OutputDisabled::GetConfig(ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
-    jsonConfig["nothing"] = String("Nothing Else");
-
     // DEBUG_END;
 
 } // GetConfig
