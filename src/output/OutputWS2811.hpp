@@ -45,7 +45,7 @@ public:
     void         Render ();                                        ///< Call from loop(),  renders output data
     void         GetDriverName (String & sDriverName) { sDriverName = String (F ("WS2811")); }
     c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_WS2811;} ///< Have the instance report its type.
-    void         GetStatus (ArduinoJson::JsonObject& jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
+    void         GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
 
     /// Interrupt Handler
     void IRAM_ATTR ISR_Handler (); ///< UART ISR

@@ -193,16 +193,16 @@ void c_OutputWS2811::Begin()
 void c_OutputWS2811::GetConfig(ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
-    String DriverName = ""; GetDriverName (DriverName);
-    jsonConfig["type"]        = DriverName;
-    jsonConfig["color_order"] = color_order;
-    jsonConfig["pixel_count"] = pixel_count;
-    jsonConfig["group_size"]  = group_size;
-    jsonConfig["zig_size"]    = zig_size;
-    jsonConfig["gamma"]       = gamma;
-    jsonConfig["brightness"]  = brightness;
+
+    jsonConfig[F ("color_order")] = color_order;
+    jsonConfig[F ("pixel_count")] = pixel_count;
+    jsonConfig[F ("group_size")]  = group_size;
+    jsonConfig[F ("zig_size")]    = zig_size;
+    jsonConfig[F ("gamma")]       = gamma;
+    jsonConfig[F ("brightness")]  = brightness;
     // enums need to be converted to uints for json
-    jsonConfig["data_pin"]    = uint (DataPin);
+    jsonConfig[F ("data_pin")]    = uint (DataPin);
+
     // DEBUG_END;
 } // GetConfig
 
@@ -352,19 +352,19 @@ void c_OutputWS2811::Render()
 *       true - config has been accepted
 *       false - Config rejected. Using defaults for invalid settings
 */
-bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject& jsonConfig)
+bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
     uint temp;
-    FileIO::setFromJSON (color_order, jsonConfig["color_order"]);
-    FileIO::setFromJSON (pixel_count, jsonConfig["pixel_count"]);
-    FileIO::setFromJSON (group_size, jsonConfig["group_size"]);
-    FileIO::setFromJSON (zig_size, jsonConfig["zig_size"]);
-    FileIO::setFromJSON (gamma, jsonConfig["gamma"]);
-    FileIO::setFromJSON (brightness, jsonConfig["brightness"]);
+    FileIO::setFromJSON (color_order, jsonConfig[F ("color_order")]);
+    FileIO::setFromJSON (pixel_count, jsonConfig[F ("pixel_count")]);
+    FileIO::setFromJSON (group_size,  jsonConfig[F ("group_size")]);
+    FileIO::setFromJSON (zig_size,    jsonConfig[F ("zig_size")]);
+    FileIO::setFromJSON (gamma,       jsonConfig[F ("gamma")]);
+    FileIO::setFromJSON (brightness,  jsonConfig[F ("brightness")]);
     // enums need to be converted to uints for json
     temp = uint (DataPin);
-    FileIO::setFromJSON (temp, jsonConfig["data_pin"]);
+    FileIO::setFromJSON (temp,        jsonConfig[F ("data_pin")]);
     DataPin = gpio_num_t (temp);
 
     // DEBUG_END;
@@ -390,14 +390,14 @@ void c_OutputWS2811::updateColorOrder ()
     // make sure the color order is all lower case
     color_order.toLowerCase ();
 
-    if (String ("grb") == color_order) { rOffset = 1; gOffset = 0; bOffset = 2; }
-    else if (String ("brg") == color_order) { rOffset = 1; gOffset = 2; bOffset = 0; }
-    else if (String ("rbg") == color_order) { rOffset = 0; gOffset = 2; bOffset = 1; }
-    else if (String ("gbr") == color_order) { rOffset = 2; gOffset = 0; bOffset = 1; }
-    else if (String ("bgr") == color_order) { rOffset = 2; gOffset = 1; bOffset = 0; }
+         if (String (F ("grb")) == color_order) { rOffset = 1; gOffset = 0; bOffset = 2; }
+    else if (String (F ("brg")) == color_order) { rOffset = 1; gOffset = 2; bOffset = 0; }
+    else if (String (F ("rbg")) == color_order) { rOffset = 0; gOffset = 2; bOffset = 1; }
+    else if (String (F ("gbr")) == color_order) { rOffset = 2; gOffset = 0; bOffset = 1; }
+    else if (String (F ("bgr")) == color_order) { rOffset = 2; gOffset = 1; bOffset = 0; }
     else
     {
-        color_order = "rgb";
+        color_order = F ("rgb");
         rOffset = 0; gOffset = 1; bOffset = 2;
     } // default
 
