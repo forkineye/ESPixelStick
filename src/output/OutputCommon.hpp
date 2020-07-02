@@ -74,7 +74,7 @@ public:
             uint8_t    * GetBufferAddress ()  { return InputDataBuffer;}       ///< Get the address of the buffer into which the E1.31 handler will stuff data
             uint16_t     GetBufferSize ()     { return sizeof (InputDataBuffer);} ///< Get the address of the buffer into which the E1.31 handler will stuff data
             OTYPE_t      GetOutputType ()     { return OutputType; }           ///< Have the instance report its type.
-    virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
+    virtual void         GetStatus (ArduinoJson::JsonObject & jsonStatus);
 
 protected:
 
