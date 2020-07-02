@@ -191,11 +191,11 @@ bool c_OutputGECE::SetConfig(ArduinoJson::JsonObject & jsonConfig)
  DEBUG_START;
 
     uint temp;
-    FileIO::setFromJSON(pixel_count, jsonConfig["pixel_count"]);
-    FileIO::setFromJSON(brightness,  jsonConfig["brightness"]);
+    FileIO::setFromJSON(pixel_count, jsonConfig[F ("pixel_count")]);
+    FileIO::setFromJSON(brightness,  jsonConfig[F ("brightness")]);
     // enums need to be converted to uints for json
     temp = uint (DataPin);
-    FileIO::setFromJSON(temp,        jsonConfig["data_pin"]);
+    FileIO::setFromJSON(temp,        jsonConfig[F ("data_pin")]);
     DataPin = gpio_num_t (temp);
 
  DEBUG_END;
@@ -204,17 +204,14 @@ bool c_OutputGECE::SetConfig(ArduinoJson::JsonObject & jsonConfig)
 } // SetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputGECE::GetConfig (ArduinoJson::JsonObject& jsonConfig)
+void c_OutputGECE::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
-    String DriverName = ""; GetDriverName (DriverName);
-
-    jsonConfig["type"]        = DriverName;
-    jsonConfig["pixel_count"] = pixel_count;
-    jsonConfig["brightness"]  = brightness;
+    jsonConfig[F ("pixel_count")] = pixel_count;
+    jsonConfig[F ("brightness")]  = brightness;
 
     // enums need to be converted to uints for json
-    jsonConfig["data_pin"]    = uint (DataPin);
+    jsonConfig[F ("data_pin")]    = uint (DataPin);
 
     // DEBUG_END;
 } // GetConfig
