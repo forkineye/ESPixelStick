@@ -1,5 +1,5 @@
 var mode = 'null';
-var wsQueue = [];
+var wsOutputQueue = [];
 var wsBusy = false;
 var wsTimerId;
 var ws; // Web Socket
@@ -21,7 +21,8 @@ $.fn.modal.Constructor.DEFAULTS.keyboard = false;
 $(function ()
 {
     // Menu navigation for single page layout
-    $('ul.navbar-nav li a').click(function () {
+    $('ul.navbar-nav li a').click(function ()
+    {
         // Highlight proper navbar item
         $('.nav li').removeClass('active');
         $(this).parent().addClass('active');
@@ -36,6 +37,14 @@ $(function ()
             wsEnqueue('V1');
         }
 
+        // kick start the live stream
+        if ($(this).attr('href') == "#config")
+        {
+            wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
+            wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input'  } }));  // Get input config
+            wsEnqueue(JSON.stringify({ 'cmd': { 'opt': 'device' } })); // Get device option data
+        }
+
         // Collapse the menu on smaller screens
         $('#navbar').removeClass('in').attr('aria-expanded', 'false');
         $('.navbar-toggle').attr('aria-expanded', 'false');
@@ -48,7 +57,7 @@ $(function ()
         });
 
         // Set page event feeds
-        feed();
+        // RequestStatusUpdate();
     });
 
     // Drawing canvas - move to diagnostics
@@ -122,7 +131,8 @@ $(function ()
     // define the input select list action
     $('#config #device #input').change(function ()
     {
-        if ($(this).val()) {
+        if ($(this).val())
+        {
             $('#imode').load($("#config #device #input option:selected").text().toLowerCase() + ".html", function ()
             {
                 wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));
@@ -135,14 +145,7 @@ $(function ()
     {
         if ($(this).val())
         {
-            // clear the frame rate display (in case we are switching to disabled)
-            $('#refresh').html('0 ms / 0 fps');
-
-            $('#omode').load($("#config #device #output option:selected").text().toLowerCase() + ".html", function ()
-            {
-                // wsEnqueue(JSON.stringify({ 'cmd': { 'get': '#config #device #output' } }));
-                wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } }));
-            });
+            LoadOutputConfigurationForm();
         }
     });
 
@@ -150,21 +153,42 @@ $(function ()
     var hash = window.location.hash;
     hash && $('ul.navbar-nav li a[href="' + hash + '"]').click();
 
+    // start updating stats
+    RequestStatusUpdate();
+
 });
 
-// Page event feeds
-function feed()
+function LoadOutputConfigurationForm()
 {
+    // clear the frame rate display (in case we are switching to disabled)
+    $('#refresh').html('0 ms / 0 fps');
+
+    $('#omode').load($("#config #device #output option:selected").text().toLowerCase() + ".html", function () {
+        // update the visible fields
+        ProcessReceivedOutputModeConfiguration();
+    });
+} // LoadOutputConfigurationForm
+
+var feedTimer;
+
+// Page event feeds
+function RequestStatusUpdate()
+{
+    // timer runs forever Only need to kick it off once
+    feedTimer = setTimeout(function ()
+    {
+        clearTimeout(feedTimer);
+        feedTimer = null;
+
+        RequestStatusUpdate();
+
+    }, 1000);
+
     if ($('#home').is(':visible'))
     {
         wsEnqueue('XJ');
-
-        setTimeout(function ()
-        {
-            feed();
-        }, 1000);
     }
-}
+} // RequestStatusUpdate
 
 // Param parser
 function param(name)
@@ -260,11 +284,9 @@ function wifiValidation()
     $('#network #btn_wifi').prop('disabled', WifiSaveDisabled);
 }
 
-
-function ProcessReceivedOutputConfiguration(outputConfiguration)
+function ProcessReceivedOutputModeConfiguration()
 {
-    // save the global configuration
-    om_config = outputConfiguration;
+    // console.info("ProcessReceivedOutputModeConfiguration: Start");
 
     // determine the type of output that has been selected and populate the form
     var TypeOfOutputId = parseInt($("#config #device #output option:selected").val(), 10);
@@ -272,6 +294,11 @@ function ProcessReceivedOutputConfiguration(outputConfiguration)
     // At the moment we only support a single channel
     var channelId        = 0;
     var channelConfigSet = om_config.om_channels[channelId];
+    if (isNaN(TypeOfOutputId))
+    {
+        // use the value we got from the controller
+        TypeOfOutputId = channelConfigSet.om_channel_type;
+    }
     var channelConfig    = channelConfigSet[TypeOfOutputId];
     var ChannelTypeName  = channelConfig.type.toLowerCase();
 
@@ -287,21 +314,28 @@ function ProcessReceivedOutputConfiguration(outputConfiguration)
     // clear the array
     selector = [];
 
-} // ProcessReceivedOutputConfiguration
+    // console.info("ProcessReceivedOutputModeConfiguration: End");
 
-function ProcessReceivedInputConfiguration(inputConfiguration)
+} // ProcessReceivedOutputModeConfiguration
+
+function ProcessReceivedInputModeConfiguration()
 {
-    // save the global configuration
-    im_config = inputConfiguration;
+    // console.info("ProcessReceivedInputModeConfiguration: Start");
 
     // determine the type of output that has been selected and populate the form
-    var TypeOfOutputId = parseInt($("#config #device #output option:selected").val(), 10);
+    var TypeOfInputId = parseInt($("#config #device #input option:selected").val(), 10);
 
     // At the moment we only support a single channel
-    var channelId = 0;
-    var channelConfigSet = om_config.om_channels[channelId];
-    var channelConfig = channelConfigSet[TypeOfOutputId];
-    var ChannelTypeName = channelConfig.type.toLowerCase();
+    var channelId        = 0;
+    var channelConfigSet = im_config.im_inputs[channelId];
+    if (isNaN(TypeOfInputId))
+    {
+        // use the value we got from the controller
+        TypeOfInputId = channelConfigSet.im_input_type;
+    }
+
+    var channelConfig    = channelConfigSet[TypeOfInputId];
+    var ChannelTypeName  = channelConfig.type.toLowerCase();
 
     // clear the array
     selector = [];
@@ -315,20 +349,27 @@ function ProcessReceivedInputConfiguration(inputConfiguration)
     // clear the array
     selector = [];
 
-} // ProcessReceivedInputConfiguration
+    // console.info("ProcessReceivedInputModeConfiguration: Done");
 
-function ProcessReceivedJsonConfig(JsonConfigData)
+} // ProcessReceivedInputModeConfiguration
+
+function ProcessReceivedJsonConfigMessage(JsonConfigData)
 {
+    // console.info("ProcessReceivedJsonConfigMessage: Start");
+
     // is this an output config?
     if (JsonConfigData.hasOwnProperty("om_config"))
     {
-        ProcessReceivedOutputConfiguration(JsonConfigData.om_config);
-    }
+        // save the config for later use.
+        om_config = JsonConfigData.om_config;
+        ProcessReceivedOutputModeConfiguration();    }
 
     // is this an input config?
-    if (JsonConfigData.hasOwnProperty("im_config"))
+    else if (JsonConfigData.hasOwnProperty("im_config"))
     {
-        ProcessReceivedInputConfiguration(JsonConfigData.im_config);
+        // save the config for later use.
+        im_config = JsonConfigData.im_config;
+        ProcessReceivedInputModeConfiguration();
     }
 
     // is this an input config?
@@ -343,12 +384,20 @@ function ProcessReceivedJsonConfig(JsonConfigData)
         updateFromJSON(JsonConfigData);
     }
 
+    // is this an input config?
+    else if (JsonConfigData.hasOwnProperty("OK"))
+    {
+        // console.info("Received Acknowledgement to config set command.")
+    }
+
     else
     {
         console.error("unknown configuration record type has been ignored.")
     }
 
-} // ProcessReceivedJsonConfig
+    // console.info("ProcessReceivedJsonConfigMessage: Done");
+
+} // ProcessReceivedJsonConfigMessage
 
 // Builds jQuery selectors from JSON data and updates the web interface
 var selector = [];
@@ -384,7 +433,7 @@ function updateFromJSON(obj)
     $('#device-id').text($('#config #id').val());
 }
 
-function addOptionDataFromJSON(JsonOptionList)
+function ProcessReceivedOptionDataMessage(JsonOptionList)
 {
     // for each field we need to populate
     Object.keys(JsonOptionList).forEach(function (OptionListName)
@@ -393,15 +442,20 @@ function addOptionDataFromJSON(JsonOptionList)
         var currentSelection = JsonOptionList[OptionListName].selectedoption;
         var jqSelector = "#" + OptionListName;
 
+        // remove the existing options
+        $(jqSelector).empty();
+
         // for each option in the list
         ArrayOfOptions.forEach(function (listEntry)
         {
+            // add in a new entry
             $(jqSelector).append('<option value="' + listEntry.id + '">' + listEntry.name + '</option>');
         });
 
+        $(jqSelector).val(-1);
         $(jqSelector).val(currentSelection);
     });
-} // addOptionDataFromJSON
+} // ProcessReceivedOptionDataMessage
 
 // Builds jQuery selectors from JSON data and populates select options
 function addOptionDataElementFromJSON()
@@ -480,38 +534,36 @@ function submitDeviceConfig()
 
     // Build output mode JSON data for submission
     var output = $('#config #device #output').val();
-    var outputJson = {};
+//    var outputJson = {};
     var outputids = $('#config #omode :input').map(function ()
     {
         return $(this).attr('id');
     }).get();
+
+    var ChannelId     = 0;
+    var OutputType    = parseInt($("#config #device #output option:selected").val(),10);
+    var OutputConfig  = om_config;
+    var ChannelConfig = OutputConfig.om_channels[ChannelId][OutputType];
+
+    // tell the ESP what type of output it should be using
+    OutputConfig.om_channels[ChannelId].om_channel_type = OutputType;
 
     outputids.forEach(function (id)
     {
         var select = '#config #omode #' + id;
         if ($(select).is(':checkbox'))
         {
-            outputJson[id] = $(select).prop('checked');
+            ChannelConfig[id] = $(select).prop('checked');
         }
         else
         {
-            outputJson[id] = $(select).val();
+            ChannelConfig[id] = $(select).val();
         }
     });
 
-    var json = {
-        'device': {
-            'id': $('#config #device #id').val(),
-            'input': input,
-            'output': output
-        },
-
-        [input]: inputJson,
-
-        [output]: outputJson
-    }
-
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': json } }));
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'device': { 'id': $('#config #device #id').val() } } } }));
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input' : { 'im_config': im_config } } } }));
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'output': { 'om_config': om_config } } } }));
 }
 
 ////////////////////////////////////////////////////
@@ -524,14 +576,13 @@ function wsConnect()
 {
     if ('WebSocket' in window)
     {
-
         var target;
         if (!(target = param('target')))
         {
             target = document.location.host;
         }
 
-        target = "192.168.1.28";
+        target = "192.168.10.117";
 
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');
@@ -541,26 +592,45 @@ function wsConnect()
         // Module data is loaded in module change / load callbacks
         ws.onopen = function ()
         {
+            // console.info("ws.onopen");
+
             $('#wserror').modal('hide');                               // Remove error modal
             $('.wsopt').empty();                                       // Clear out option data built from websockets
-            wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'network' } }));      // Get network config
-            wsEnqueue(JSON.stringify({ 'cmd': { 'opt': 'device' } }));       // Get device option data
-            // wsEnqueue(JSON.stringify({'cmd':{'get':'device'}}));       // Get device config
-            wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
-            wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
-            feed();                                                       // start self filling status loop
+
+            // throw away any old messages
+            // console.info("ws.onopen: Flush and Halt");
+            FlushAndHaltTheOutputQueue();
+
+            // show we are ready to start processing the output queue
+            // console.info("ws.onopen: Turn On Sending");
+            wsReadyToSend();
+
+            // console.info("ws.onopen: Start Sending");
+            wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get network config
+
+            // kick start the config screen
+            if ($(location).attr("hash") === "#config")
+            {
+                wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
+                wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
+                wsEnqueue(JSON.stringify({ 'cmd': { 'opt': 'device' } })); // Get device option data
+            }
+
+            // RequestStatusUpdate();                                                       // start self filling status loop
         };
 
         ws.onmessage = function (event)
         {
+            // console.info("ws.onmessage: Start");
             if (typeof event.data === "string")
             {
+                // console.info("ws.onmessage: Received: " + event.data);
+
                 // Process "simple" message format
                 if (event.data.startsWith("X"))
                 {
                     var data = event.data.substr(2);
-                    getJsonStatus(data);
-                    // Process as JSON
+                    ProcessRecievedJsonStatusMessage(data);
                 }
                 else
                 {
@@ -568,66 +638,26 @@ function wsConnect()
                     // "GET" message is a response to a get request. Populate the frontend.
                     if (msg.hasOwnProperty("get"))
                     {
-                        ProcessReceivedJsonConfig(msg.get);
+                        ProcessReceivedJsonConfigMessage(msg.get);
                     }
 
                     // "SET" message is a reponse to a set request. Data has been validated and saved, Populate the frontend.
                     if (msg.hasOwnProperty("set"))
                     {
-                        ProcessReceivedJsonConfig(msg.set);
+                        ProcessReceivedJsonConfigMessage(msg.set);
                     }
 
                     // "OPT" message is select option data
                     if (msg.hasOwnProperty("opt"))
                     {
-                        addOptionDataFromJSON(msg.opt);
+                        ProcessReceivedOptionDataMessage(msg.opt);
                     }
                 }
-                /*
-                                var cmd = event.data.substr(0, 2);
-                                var data = event.data.substr(2);
-                                switch (cmd) {
-                                case 'E1':
-                                    getElements(data);
-                                    break;
-                                case 'G1':
-                                    getConfig(data);
-                                    break;
-                                case 'G2':
-                                    getConfigStatus(data);
-                                    break;
-                                case 'G3':
-                                    getEffectInfo(data);
-                                    break;
-                                case 'G4':
-                                    refreshGamma(data);
-                                    break;
-                                case 'S1':
-                                    setConfig(data);
-                                    reboot();
-                                    break;
-                                case 'S2':
-                                    setConfig(data);
-                                    break;
-                                case 'S3':
-                                    snackSave();
-                                    break;
-                                case 'S4':
-                                    break;
-                                case 'XJ':
-                                    getJsonStatus(data);
-                                    break;
-                                case 'X6':
-                                    showReboot();
-                                    break;
-                                default:
-                                    console.log('Unknown Command: ' + event.data);
-                                    break;
-                                }
-                */
             }
             else
             {
+                console.info("Stream Data");
+
                 streamData = new Uint8Array(event.data);
                 drawStream(streamData);
                 if ($('#diag').is(':visible'))
@@ -635,15 +665,20 @@ function wsConnect()
                     wsEnqueue('V1');
                 }
             }
+
+            // show we are ready to send stupp
+            // console.info("ws.onmessage: Ask To Send Next Msg");
             wsReadyToSend();
-        };
+
+            // console.info("ws.onmessage: Done");
+        }; // onmessage
 
         ws.onclose = function ()
         {
+            FlushAndHaltTheOutputQueue();
             $('#wserror').modal();
             wsConnect();
         };
-
     }
     else
     {
@@ -654,70 +689,116 @@ function wsConnect()
 // Websocket message queuer
 function wsEnqueue(message)
 {
-    //only add a message to the queue if there isn't already one of the same type already queued, otherwise update the message with the latest request.
-    //    var wsQueueIndex = wsQueue.findIndex(wsCheckQueue,message);
-    //    if(wsQueueIndex == -1) {
-    //add message
-    wsQueue.push(message);
-    //    } else {
-    //update message
-    //        wsQueue[wsQueueIndex]=message;
-    //    }
-    wsProcessQueue();
-}
-
-// Websocket message queuer
-function wsCheckQueue(value)
-{
-    //messages are of the same type if the first two characters match
-    return value.substr(0, 2) == this.substr(0, 2);
-}
-
-// Websocket message queuer
-function wsProcessQueue()
-{
-    //check if currently waiting for a response
-    if (wsBusy)
+    // only send messages if the WS interface is up
+    if (ws.readyState !== 1)
     {
-        //console.log('WS queue busy : ' + wsQueue);
+        // console.info("WS is down. Discarding msg: " + message);
     }
     else
     {
-        //set wsBusy flag that we are waiting for a response
-        wsBusy = true;
-        //get next message from queue.
-        var message = wsQueue.shift();
-        //set timeout to clear flag and try next message if response isn't recieved. Short timeout for message types that don't generate a response.
-        if (['T0', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'X6'].indexOf(message.substr(0, 2)))
-        {
-            timeout = 40;
-        }
-        else
-        {
-            timeout = 2000;
-        }
-        wsTimerId = setTimeout(wsReadyToSend, timeout);
-        //send it.
-        //console.log('WS sending ' + message);
-        ws.send(message);
+        wsOutputQueue.push(message);
+        wsProcessOutputQueue();
+
+    } // WS is up
+} // wsEnqueue
+
+function FlushAndHaltTheOutputQueue()
+{
+    // do we have a send timer running?
+    if (null !== wsTimerId)
+    {
+        // stop the timer
+        clearTimeout(wsTimerId);
+        wsTimerId = null;
     }
-}
+
+    // show we are ready NOT to send the next message
+    wsBusy = true;
+
+    // empty the output queue
+    while (wsOutputQueue.length > 0)
+    {
+        //get the next message from the queue.
+        var message = wsOutputQueue.shift();
+        // console.info("Discarding msg: " + message);
+    }
+} // FlushAndHaltTheOutputQueue
+
+// Websocket message queuer
+function wsProcessOutputQueue()
+{
+    // console.log('wsProcessOutputQueue');
+
+    // only send messages if the WS interface is up
+    if (ws.readyState !== 1)
+    {
+        // The interface is NOT up. Flush the queue
+        // console.log('wsProcessOutputQueue: WS Down. Flush');
+        FlushAndHaltTheOutputQueue();
+    }
+    
+    //check if we are currently waiting for a response
+    else if (wsBusy === true)
+    {
+        // console.log('wsProcessOutputQueue: Busy');
+    } // cant send yet
+
+    else if (wsOutputQueue.length > 0)
+    {
+        //set the wsBusy flag indicating that we are waiting for a response
+        wsBusy = true;
+
+        //get the next message from the queue.
+        var OutputMessage = wsOutputQueue.shift();
+
+        // set WaitForResponseTimeMS to clear flag and try next message if response 
+        // isn't recieved. 
+        var WaitForResponseTimeMS = 20000; // 20 seconds
+
+        // Short WaitForResponseTimeMS for message types that don't generate a response.
+        var UseShortDelay = ['T0', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'X6'].indexOf(OutputMessage.substr(0, 2));
+        if (UseShortDelay !== -1)
+        {
+            // warning, setting this value too low can cause a rentrance issue
+            WaitForResponseTimeMS = 50;
+        }
+
+        // set up a new timer
+        wsTimerId = setTimeout(function ()
+        {
+            // console.info('WS Send Timer expired');
+
+            // Move on to the next message
+            wsReadyToSend();
+
+        }, WaitForResponseTimeMS);
+
+        //send it.
+        // console.log('WS sending ' + OutputMessage);
+        ws.send(OutputMessage);
+
+    } // message available to send
+
+} // wsProcessOutputQueue
 
 // Websocket message queuer
 function wsReadyToSend()
 {
-    clearTimeout(wsTimerId);
+    // is a timer running?
+    if (null !== wsTimerId)
+    {
+        // stop the timer
+        clearTimeout(wsTimerId);
+        wsTimerId = null;
+    }
+
+    // show we are ready to send the next message
     wsBusy = false;
-    if (wsQueue.length > 0)
-    {
-        //send next message
-        wsProcessQueue();
-    }
-    else
-    {
-        //console.log('WS queue empty');
-    }
-}
+
+    //send next message
+    wsProcessOutputQueue();
+
+} // wsReadyToSend
 
 // Move to diagnostics
 function drawStream(streamData)
@@ -764,166 +845,29 @@ function clearStream()
     }
 }
 
-// Remove?
-function getConfig(data)
-{
-    // Device and Network config
-    $('#title').text('ESPS - ' + config.device.id);
-    $('#name').text(config.device.id);
-    $('#deviceid').val(config.device.id);
-    $('#ssid').val(config.network.ssid);
-    $('#passphrase').val(config.network.passphrase);
-    $('#hostname').val(config.network.hostname);
-    $('#sta_timeout').val(config.network.sta_timeout);
-    $('#dhcp').prop('checked', config.network.dhcp);
-    if (config.network.dhcp)
-    {
-        $('.dhcp').addClass('hidden');
-    } else {
-        $('.dhcp').removeClass('hidden');
-    }
-    $('#ap').prop('checked', config.network.ap_fallback);
-    $('#ip').val(config.network.ip[0] + '.' +
-        config.network.ip[1] + '.' +
-        config.network.ip[2] + '.' +
-        config.network.ip[3]);
-    $('#netmask').val(config.network.netmask[0] + '.' +
-        config.network.netmask[1] + '.' +
-        config.network.netmask[2] + '.' +
-        config.network.netmask[3]);
-    $('#gateway').val(config.network.gateway[0] + '.' +
-        config.network.gateway[1] + '.' +
-        config.network.gateway[2] + '.' +
-        config.network.gateway[3]);
-
-    // MQTT Config
-    $('#mqtt').prop('checked', config.mqtt.enabled);
-    if (config.mqtt.enabled)
-    {
-        $('.mqtt').removeClass('hidden');
-    }
-    else
-    {
-        $('.mqtt').addClass('hidden');
-    }
-    $('#mqtt_ip').val(config.mqtt.ip);
-    $('#mqtt_port').val(config.mqtt.port);
-    $('#mqtt_user').val(config.mqtt.user);
-    $('#mqtt_password').val(config.mqtt.password);
-    $('#mqtt_topic').val(config.mqtt.topic);
-    updateMQTTSet();
-    $('#mqtt_haprefix').val(config.mqtt.haprefix);
-    $('#mqtt_clean').prop('checked', config.mqtt.clean);
-    $('#mqtt_hadisco').prop('checked', config.mqtt.hadisco);
-    if (config.mqtt.hadisco)
-    {
-        $('#mqtt_haprefix').prop('disabled', false);
-    }
-    else
-    {
-        $('#mqtt_haprefix').prop('disabled', true);
-    }
-
-    // E1.31 Config
-    $('#universe').val(config.e131.universe);
-    $('#universe_limit').val(config.e131.universe_limit);
-    $('#channel_start').val(config.e131.channel_start);
-    $('#multicast').prop('checked', config.e131.multicast);
-
-    // Output Config
-    $('.odiv').addClass('hidden');
-    if (config.device.mode & 0x01)
-    {  // Pixel
-        mode = 'pixel';
-        $('#o_pixel').removeClass('hidden');
-        $('#p_count').val(config.e131.channel_count / 3);
-        $('#p_type').val(config.pixel.type);
-        $('#p_color').val(config.pixel.color);
-        $('#p_groupSize').val(config.pixel.groupSize);
-        $('#p_zigSize').val(config.pixel.zigSize);
-        $('#p_gammaVal').val(config.pixel.gammaVal);
-        $('#p_briteVal').val(config.pixel.briteVal);
-
-        //      if(config.e131.channel_count / 3 <8 ) {
-        //          $('#v_columns').val(config.e131.channel_count / 3);
-        //      } else if (config.e131.channel_count / 3 <50 ) {
-        //          $('#v_columns').val(10);
-        //      } else {
-        //          $('#v_columns').val(25);
-        //      }
-        $('#v_columns').val(Math.floor(Math.sqrt(config.e131.channel_count / 3)));
-
-        $("input[name='viewStyle'][value='RGB']").trigger('click');
-        clearStream();
-
-        // Trigger updated elements
-        $('#p_type').trigger('click');
-        $('#p_count').trigger('change');
-    }
-
-    if (config.device.mode & 0x02)
-    {  // Serial
-        mode = 'serial';
-        $('#o_serial').removeClass('hidden');
-        $('#s_count').val(config.e131.channel_count);
-        $('#s_proto').val(config.serial.type);
-        $('#s_baud').val(config.serial.baudrate);
-
-        if (config.e131.channel_count <= 64)
-        {
-            $('#v_columns').val(8);
-        }
-        else
-        {
-            $('#v_columns').val(16);
-        }
-        $("input[name='viewStyle'][value='Channel']").trigger('click');
-        clearStream();
-
-        // Trigger updated elements
-        $('#s_proto').trigger('click');
-        $('#s_count').trigger('change');
-    }
-}
-
-// Needs updated
-function getConfigStatus(data)
+function ProcessRecievedJsonStatusMessage(data)
 {
     ParsedJsonStatus = JSON.parse(data);
 
-    //    $('#x_ssid').text(status.ssid);
-    $('#x_hostname').text(ParsedJsonStatus.hostname);
-    $('#x_ip').text(ParsedJsonStatus.ip);
-    $('#x_mac').text(ParsedJsonStatus.mac);
-    $('#x_version').text(ParsedJsonStatus.version);
-    $('#x_built').text(ParsedJsonStatus.built);
-    $('#x_flashchipid').text(ParsedJsonStatus.flashchipid);
-    $('#x_usedflashsize').text(ParsedJsonStatus.usedflashsize);
-    $('#x_realflashsize').text(ParsedJsonStatus.realflashsize);
-    $('#x_freeheap').text(ParsedJsonStatus.freeheap);
-}
-
-// Needs updated
-function getJsonStatus(data)
-{
-    ParsedJsonStatus = JSON.parse(data);
-
-    //    var rssi = +status.system.rssi;
     var rssi = ParsedJsonStatus.status.system.rssi;
     var quality = 2 * (rssi + 100);
 
     if (rssi <= -100)
+    {
         quality = 0;
+    }
     else if (rssi >= -50)
+    {
         quality = 100;
+    }
 
-    $('#x_rssi').text(rssi);
-    $('#x_quality').text(quality);
-    $('#x_ssid').text(ParsedJsonStatus.status.system.ssid);
-    $('#x_ip').text(ParsedJsonStatus.status.system.ip);
-    $('#x_hostname').text(ParsedJsonStatus.status.system.hostname);
-    $('#x_subnet').text(ParsedJsonStatus.status.system.subnet);
-    $('#x_mac').text(ParsedJsonStatus.status.system.mac);
+    $('#x_rssi').text     (rssi);
+    $('#x_quality').text  (quality);
+    $('#x_ssid').text     (ParsedJsonStatus.status.system.ssid);
+    $('#x_ip').text       (ParsedJsonStatus.status.system.ip);
+    $('#x_hostname').text (ParsedJsonStatus.status.system.hostname);
+    $('#x_subnet').text   (ParsedJsonStatus.status.system.subnet);
+    $('#x_mac').text      (ParsedJsonStatus.status.system.mac);
 
     // getHeap(data)
     $('#x_freeheap').text(ParsedJsonStatus.status.system.freeheap);
@@ -946,12 +890,12 @@ function getJsonStatus(data)
     $('#x_uptime').text(str);
 
     // getE131Status(data)
-    $('#uni_first').text(ParsedJsonStatus.status.e131.unifirst);
-    $('#uni_last').text(ParsedJsonStatus.status.e131.unilast);
-    $('#pkts').text(ParsedJsonStatus.status.e131.num_packets);
-    $('#chanlim').text(ParsedJsonStatus.status.e131.unichanlim);
-    $('#perr').text(ParsedJsonStatus.status.e131.packet_errors);
-    $('#clientip').text(ParsedJsonStatus.status.e131.last_clientIP);
+    $('#uni_first').text (ParsedJsonStatus.status.e131.unifirst);
+    $('#uni_last').text  (ParsedJsonStatus.status.e131.unilast);
+    $('#pkts').text      (ParsedJsonStatus.status.e131.num_packets);
+    $('#chanlim').text   (ParsedJsonStatus.status.e131.unichanlim);
+    $('#perr').text      (ParsedJsonStatus.status.e131.packet_errors);
+    $('#clientip').text  (ParsedJsonStatus.status.e131.last_clientIP);
 
     // Device Refresh is dynamic
     $('#refresh').text(ParsedJsonStatus.status.output[0].framerefreshrate + " fps");
