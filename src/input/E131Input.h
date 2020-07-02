@@ -55,9 +55,9 @@ class c_InputE131 : public c_InputCommon
 
     // functions to be provided by the derived class
     void  Begin ();                                          ///< set up the operating environment based on the current config (or defaults)
-    bool  SetConfig (ArduinoJson::JsonObject& jsonConfig);   ///< Set a new config in the driver
-    void  GetConfig (ArduinoJson::JsonObject& jsonConfig);   ///< Get the current config used by the driver
-    void  GetStatus (JsonObject& jsonStatus);
+    bool  SetConfig (ArduinoJson::JsonObject & jsonConfig);   ///< Set a new config in the driver
+    void  GetConfig (ArduinoJson::JsonObject & jsonConfig);   ///< Get the current config used by the driver
+    void  GetStatus (JsonObject & jsonStatus);
     void  Process ();                                        ///< Call from loop(),  renders Input data
     void  GetDriverName (String & sDriverName) { sDriverName = "E1.31"; } ///< get the name for the instantiated driver
     void  SetBufferInfo (uint8_t * BufferStart, uint16_t BufferSize);
