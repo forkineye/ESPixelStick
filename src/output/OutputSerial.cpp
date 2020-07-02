@@ -58,16 +58,6 @@ extern "C" {
 
 #define FIFO_TRIGGER_LEVEL (UART_TX_FIFO_SIZE / 2)
 
-uint32_t BaudRateToBps[]
-{
-    38400,
-    57600,
-    115200,
-    230400,
-    250000,
-    460800,
-};
-
 typedef enum RenardFrameDefinitions_t
 {
 	CMD_DATA_START   = 0x80,
@@ -132,11 +122,11 @@ void c_OutputSerial::Begin ()
 
     if (OutputType == c_OutputMgr::e_OutputType::OutputType_DMX)
     {
-        speed = BaudRateToBps[int(BaudRate::BR_250000)];
+        speed = uint (BaudRate::BR_DMX);
     }
     else
     {
-        speed = BaudRateToBps[int(CurrentBaudrate)];
+        speed = uint (CurrentBaudrate);
     }
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -197,10 +187,10 @@ bool c_OutputSerial::validate ()
         response = false;
     }
 
-    if ((CurrentBaudrate < BaudRate::BR_MIN) || (CurrentBaudrate > BaudRate::BR_MAX))
+    if ((CurrentBaudrate < uint (BaudRate::BR_MIN)) || (CurrentBaudrate > uint (BaudRate::BR_MAX)))
     {
         LOG_PORT.println (String (F ("*** Requested BaudRate is Not Valid. Setting to Default ***")));
-        CurrentBaudrate = BaudRate::BR_DEFAULT;
+        CurrentBaudrate = uint (BaudRate::BR_DEF);
         response = false;
     }
 
@@ -233,17 +223,13 @@ bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
     uint temp; // Holds enums prior to conversion
-    FileIO::setFromJSON (GenericSerialHeader, jsonConfig["gen_ser_hdr"]);
-    FileIO::setFromJSON (GenericSerialFooter, jsonConfig["gen_ser_ftr"]);
-    FileIO::setFromJSON (Num_Channels,        jsonConfig["num_chan"]);
-
-    // enums need to be converted to uints for json
-    temp = uint (CurrentBaudrate);
-    FileIO::setFromJSON (temp, jsonConfig["baudrate"]);
-    CurrentBaudrate = BaudRate (temp);
+    FileIO::setFromJSON (GenericSerialHeader, jsonConfig[F ("gen_ser_hdr")]);
+    FileIO::setFromJSON (GenericSerialFooter, jsonConfig[F ("gen_ser_ftr")]);
+    FileIO::setFromJSON (Num_Channels,        jsonConfig[F ("num_chan")]);
+    FileIO::setFromJSON (CurrentBaudrate,     jsonConfig[F ("baudrate")]);
 
     temp = uint (DataPin);
-    FileIO::setFromJSON (temp, jsonConfig["data_pin"]);
+    FileIO::setFromJSON (temp, jsonConfig[F ("data_pin")]);
     DataPin = gpio_num_t (temp);
 
     // DEBUG_END;
@@ -252,49 +238,47 @@ bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 } // SetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputSerial::GetConfig (ArduinoJson::JsonObject& jsonConfig)
+void c_OutputSerial::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
-    String DriverName = ""; GetDriverName (DriverName);
-    jsonConfig["type"]        = DriverName;
-    jsonConfig["num_chan"]    = Num_Channels;
-    jsonConfig["baudrate"]    = uint (CurrentBaudrate);
-    jsonConfig["data_pin"]    = uint (DataPin);
+    jsonConfig[F ("num_chan")]    = Num_Channels;
+    jsonConfig[F ("baudrate")]    = CurrentBaudrate;
+    jsonConfig[F ("data_pin")]    = uint (DataPin);
     if (OutputType == c_OutputMgr::e_OutputType::OutputType_Serial)
     {
-        jsonConfig["gen_ser_hdr"] = GenericSerialHeader;
-        jsonConfig["gen_ser_ftr"] = GenericSerialFooter;
+        jsonConfig[F ("gen_ser_hdr")] = GenericSerialHeader;
+        jsonConfig[F ("gen_ser_ftr")] = GenericSerialFooter;
     }
     // enums need to be converted to uints for json
     // DEBUG_END;
 } // GetConfig
 
 //----------------------------------------------------------------------------
-void  c_OutputSerial::GetDriverName (String& sDriverName)
+void  c_OutputSerial::GetDriverName (String & sDriverName)
 {
     switch (OutputType)
     {
         case c_OutputMgr::e_OutputType::OutputType_Serial:
         {
-            sDriverName = F("Serial");
+            sDriverName = F ("Serial");
             break;
         }
 
         case c_OutputMgr::e_OutputType::OutputType_DMX:
         {
-            sDriverName = "DMX";
+            sDriverName = F ("DMX");
             break;
         }
 
         case c_OutputMgr::e_OutputType::OutputType_Renard:
         {
-            sDriverName = "Renard";
+            sDriverName = F ("Renard");
             break;
         }
 
         default:
         {
-            sDriverName = "Default";
+            sDriverName = F ("Default");
             break;
         }
     } // switch (OutputType)

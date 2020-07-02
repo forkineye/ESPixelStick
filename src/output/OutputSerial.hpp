@@ -51,23 +51,17 @@ public:
     bool SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
     void GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     void Render ();                                        ///< Call from loop(),  renders output data
-    void GetDriverName (String& sDriverName);
-    void GetStatus (ArduinoJson::JsonObject& jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
+    void GetDriverName (String & sDriverName);
+    void GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
 
 #define GS_CHANNEL_LIMIT 2048
 
     enum class BaudRate
     {
-        BR_38400 = 0,
-        BR_57600,
-        BR_115200,
-        BR_230400,
-        BR_250000,
-        BR_460800,
-
-        BR_MIN = BR_38400,
-        BR_MAX = BR_460800,
-        BR_DEFAULT = BR_57600,
+        BR_MIN = 38400,
+        BR_DMX = 250000,
+        BR_MAX = 460800,
+        BR_DEF = 57600,
     };
 
     /// Interrupt Handler
@@ -89,8 +83,8 @@ private:
     // config data
     String          GenericSerialHeader;
     String          GenericSerialFooter;
-    BaudRate        CurrentBaudrate     = BaudRate::BR_DEFAULT;     // current transmit rate
-    uint16_t        Num_Channels        = DEFAULT_NUM_CHANNELS;     // Number of data channels to transmit
+    uint            CurrentBaudrate     = int(BaudRate::BR_DEF); // current transmit rate
+    uint16_t        Num_Channels        = DEFAULT_NUM_CHANNELS;      // Number of data channels to transmit
 
     // non config data
     uint16_t        RemainingDataCount;
