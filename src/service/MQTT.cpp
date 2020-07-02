@@ -74,6 +74,7 @@ void MQTTService::load() {
         DeserializationError error = deserializeJson(json, buf.get());
         if (error) {
             LOG_PORT.println(F("*** Configuration File Format Error ***"));
+            LOG_PORT.println (String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
             return;
         }
 
@@ -107,7 +108,7 @@ void MQTTService::save() {
 
     // Serialize Config
     DynamicJsonDocument json(1024);
-    JsonObject _mqtt = json.createNestedObject("mqtt");
+    JsonObject _mqtt = json.createNestedObject(F("mqtt"));
     _mqtt["enabled"] = enabled;
     _mqtt["ip"] = ip.c_str();
     _mqtt["port"] = port;
@@ -192,7 +193,7 @@ void MQTTService::onMqttMessage(char* topic, char* payload,
     DeserializationError error = deserializeJson(r, payload);
 
     if (error) {
-        LOG_PORT.println("MQTT: Parsing failed");
+        LOG_PORT.println (String (F ("MQTT: Deserialzation Error. Error code = ")) + error.c_str ());
         return;
     }
 
@@ -301,7 +302,7 @@ void MQTTService::publishState() {
     else
         root["state"] = OFF;
 
-    JsonObject color = root.createNestedObject("color");
+    JsonObject color = root.createNestedObject(F("color"));
     color["r"] = effects.getColor().r;
     color["g"] = effects.getColor().g;
     color["b"] = effects.getColor().b;
