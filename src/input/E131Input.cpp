@@ -131,12 +131,12 @@ void c_InputE131::validateConfiguration()
     uint8_t uniTotal = (LastUniverse + 1) - startUniverse;
 
     // DEBUG_V ("");
-    if (seqTracker) { free (seqTracker); }
+    if (seqTracker) { free (seqTracker); seqTracker = nullptr;}
     // DEBUG_V ("");
     if ((seqTracker = static_cast<uint8_t *>(malloc(uniTotal)))) { memset (seqTracker, 0x00, uniTotal); }
     // DEBUG_V ("");
 
-    if (seqError) { free (seqError); }
+    if (seqError) {free (seqError); seqError = nullptr; }
     // DEBUG_V ("");
     if ((seqError = static_cast<uint32_t *>(malloc(uniTotal * 4)))) { memset (seqError, 0x00, uniTotal * 4); }
     // DEBUG_V ("");
@@ -196,11 +196,11 @@ void c_InputE131::GetConfig (JsonObject & jsonConfig)
 } // GetConfig
 
 //-----------------------------------------------------------------------------
-void c_InputE131::GetStatus (JsonObject& jsonStatus)
+void c_InputE131::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject e131Status = jsonStatus.createNestedObject ("e131");
+    JsonObject e131Status = jsonStatus.createNestedObject (F("e131"));
     e131Status["unifirst"]      = startUniverse;
     e131Status["unilast"]       = LastUniverse;
     e131Status["unichanlim"]    = universe_channel_limit;
