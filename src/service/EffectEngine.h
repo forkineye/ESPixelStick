@@ -85,7 +85,7 @@ loadConfig():
 
 serializeConfig():
     // Effects
-    JsonObject _effects = json.createNestedObject("effects");
+    JsonObject _effects = json.createNestedObject(F("effects"));
     _effects["name"] = config.effect_name;
 
     _effects["mirror"] = config.effect_mirror;
