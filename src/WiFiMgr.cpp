@@ -154,7 +154,7 @@ void c_WiFiMgr::Begin (config_t* NewConfig)
 } // begin
 
 //-----------------------------------------------------------------------------
-void c_WiFiMgr::GetStatus (JsonObject& jsonStatus)
+void c_WiFiMgr::GetStatus (JsonObject & jsonStatus)
 {
     jsonStatus["rssi"]     = WiFi.RSSI ();
     jsonStatus["ip"]       = getIpAddress ().toString ();
