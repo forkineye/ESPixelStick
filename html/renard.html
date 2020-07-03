@@ -4,13 +4,13 @@
         <div class="form-group has-feedback">
             <label class="control-label col-sm-2" for="channel_count">Channel Count:</label>
             <div class="col-sm-4">
-                <input type="number" class="form-control is-valid" id="num_chan" step="1" min="1" max="4096" value="0" required title="Number of Channels" onchange="RefreshRenardRate()">
+                <input type="number" class="form-control is-valid" id="num_chan" step="1" min="1" max="4096" value="64" required title="Number of Channels" onchange="RefreshRenardRate()">
                 <span class="glyphicon glyphicon-remove form-control-feedback"></span>
             </div>
 
             <label class="control-label col-sm-2" for="baudrate">Baudrate:</label>
             <div class="col-sm-4">
-                <input type="number" class="form-control is-valid" id="baudrate" step="1" min="1" max="400000" value="0" required title="Baudrate" onchange="RefreshRenardRate()">
+                <input type="number" class="form-control is-valid" id="baudrate" step="1" min="38400" max="460800" value="57600" required title="Baudrate" onchange="RefreshRenardRate()">
                 <span class="glyphicon glyphicon-remove form-control-feedback"></span>
             </div>
         </div>
