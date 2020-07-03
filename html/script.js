@@ -133,10 +133,7 @@ $(function ()
     {
         if ($(this).val())
         {
-            $('#imode').load($("#config #device #input option:selected").text().toLowerCase() + ".html", function ()
-            {
-                wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));
-            });
+            LoadInputConfigurationForm()
         }
     });
 
@@ -157,6 +154,18 @@ $(function ()
     RequestStatusUpdate();
 
 });
+
+function LoadInputConfigurationForm()
+{
+    // clear the frame rate display (in case we are switching to disabled)
+    $('#refresh').html('0 ms / 0 fps');
+
+    var filename = $("#config #device #input option:selected").text().toLowerCase() + ".html";
+    $('#imode').load(filename, function () {
+        // update the visible fields
+        ProcessReceivedInputModeConfiguration();
+    });
+} // LoadInputConfigurationForm
 
 function LoadOutputConfigurationForm()
 {
@@ -774,7 +783,7 @@ function wsProcessOutputQueue()
         }, WaitForResponseTimeMS);
 
         //send it.
-        // console.log('WS sending ' + OutputMessage);
+        console.log('WS sending ' + OutputMessage);
         ws.send(OutputMessage);
 
     } // message available to send
@@ -890,12 +899,12 @@ function ProcessRecievedJsonStatusMessage(data)
     $('#x_uptime').text(str);
 
     // getE131Status(data)
-    $('#uni_first').text (ParsedJsonStatus.status.e131.unifirst);
-    $('#uni_last').text  (ParsedJsonStatus.status.e131.unilast);
-    $('#pkts').text      (ParsedJsonStatus.status.e131.num_packets);
-    $('#chanlim').text   (ParsedJsonStatus.status.e131.unichanlim);
-    $('#perr').text      (ParsedJsonStatus.status.e131.packet_errors);
-    $('#clientip').text  (ParsedJsonStatus.status.e131.last_clientIP);
+    $('#uni_first').text (ParsedJsonStatus.status.input[0].e131.unifirst);
+    $('#uni_last').text  (ParsedJsonStatus.status.input[0].e131.unilast);
+    $('#pkts').text      (ParsedJsonStatus.status.input[0].e131.num_packets);
+    $('#chanlim').text   (ParsedJsonStatus.status.input[0].e131.unichanlim);
+    $('#perr').text      (ParsedJsonStatus.status.input[0].e131.packet_errors);
+    $('#clientip').text  (ParsedJsonStatus.status.input[0].e131.last_clientIP);
 
     // Device Refresh is dynamic
     $('#refresh').text(ParsedJsonStatus.status.output[0].framerefreshrate + " fps");
