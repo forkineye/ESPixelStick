@@ -35,8 +35,9 @@ private:
 
     config_t      * config = nullptr;       // Current configuration
     EFUpdate        efupdate;
-//    uint8_t * WSframetemp;
-//    uint8_t * confuploadtemp;
+
+#   define WebSocketFrameCollectionBufferSize 1024
+    char WebSocketFrameCollectionBuffer[WebSocketFrameCollectionBufferSize + 1];
 
     /// Valid "Simple" message types
     enum SimpleMessage 
@@ -44,13 +45,19 @@ private:
         GET_STATUS = 'J'
     };
 
-    void   init             ();
-    void   procSimple       (uint8_t* data, AsyncWebSocketClient* client);
-    void   procJSON         (uint8_t* data, AsyncWebSocketClient* client);
-    void   onWsEvent        (AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, size_t len);
-    void   onFirmwareUpload (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
-    String GetConfiguration ();
-    String GetOptions       ();
+    void init             ();
+    void procSimple       (AsyncWebSocketClient * client);
+    void ProcessReceivedJsonMessage         (AsyncWebSocketClient * client);
+    void onWsEvent        (AsyncWebSocket* server, AsyncWebSocketClient * client, AwsEventType type, void* arg, uint8_t * data, size_t len);
+    void onFirmwareUpload (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
+    void GetConfiguration (String & Response);
+    void GetOptions       ();
+    void processCmd       (JsonObject & jsonCmd, AsyncWebSocketClient * client);
+    void processCmdGet    (JsonObject & jsonCmd);
+    void processCmdSet    (JsonObject & jsonCmd);
+    void processCmdOpt    (JsonObject & jsonCmd);
+    void ConvertMessageDataToString (uint8_t* data, size_t len, String& Response);
+
 protected:
 
 }; // c_WebMgr

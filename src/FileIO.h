@@ -27,7 +27,7 @@
 #endif
 
 /// Deserialization callback for I/O modules
-typedef std::function<void (DynamicJsonDocument& json)> DeserializationHandler;
+typedef std::function<void (DynamicJsonDocument & json)> DeserializationHandler;
 
 /// Contains static methods used for common File IO routines
 class FileIO
@@ -99,7 +99,7 @@ public:
   /** Loads JSON configuration file via SPIFFS.
    *  Returns true on success.
    */
-	static boolean loadConfig (const String& filename, DeserializationHandler dsHandler)
+	static boolean loadConfig (String & filename, DeserializationHandler dsHandler)
 	{
 		boolean retval = false;
 
@@ -107,6 +107,7 @@ public:
 		if (file)
 		{
 			retval = loadConfig (filename, file, dsHandler);
+
 			file.close ();
 		}
 		else
@@ -118,7 +119,14 @@ public:
 
 	} // loadConfig
 
-	static boolean loadConfig (const String& filename, fs::File& file, DeserializationHandler dsHandler)
+	static boolean loadConfig (String & filename, fs::File & file, DeserializationHandler dsHandler)
+	{
+		DynamicJsonDocument json (2048);
+		return loadConfig (filename, file, json, dsHandler);
+
+	} // loadConfig
+	
+	static boolean loadConfig (String & filename, fs::File & file, DynamicJsonDocument & json, DeserializationHandler dsHandler)
 	{
 		// DEBUG_START;
 		boolean retval = false;
@@ -146,13 +154,13 @@ public:
 			String buf = file.readString ();
 
 			// DEBUG_V (buf);
-
-			DynamicJsonDocument json (2048);
 			DeserializationError error = deserializeJson (json, buf);
+
 			// DEBUG_V ("");
 			if (error)
 			{
-				LOG_PORT.println (CfgFileMessagePrefix + String (F ("Deserialzation Error.")));
+				LOG_PORT.println (String("Heap:") + String (ESP.getFreeHeap ()));
+				LOG_PORT.println (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
 				LOG_PORT.println ("++++" + buf + "----");
 				break;
 			}
@@ -170,7 +178,7 @@ public:
 		return retval;
 	} // loadConfig
 
-	static boolean ReadFile (const String& filename, String& Result)
+	static boolean ReadFile (const String & filename, String & Result)
 	{
 		// DEBUG_START;
 		boolean retval = false;
@@ -211,12 +219,11 @@ public:
 
 	} // loadConfig
 
-
 	/// Save configuration file
 	/** Saves configuration file via SPIFFS
 	 * Returns true on success.
 	 */
-	static boolean saveConfig (const String& filename, String& jsonString)
+	static boolean saveConfig (const String & filename, String & jsonString)
 	{
 		boolean retval = false;
 		String CfgFileMessagePrefix = String (F ("Configuration file: '")) + filename + "' ";
@@ -240,7 +247,7 @@ public:
 	} // saveConfig
 
 	  /// Checks if value is empty and sets key to value if they're different. Returns true if key was set
-	static boolean setFromJSON (String& key, JsonVariant val) {
+	static boolean setFromJSON (String   & key, JsonVariant val) {
 		if (!val.isNull () && !val.as<String> ().equals (key)) {
 			//LOG_PORT.printf("**** Setting '%s' ****\n", val.c_str());
 			key = val.as<String> ();
@@ -251,7 +258,7 @@ public:
 		}
 	}
 
-	static boolean setFromJSON (boolean& key, JsonVariant val) {
+	static boolean setFromJSON (boolean  & key, JsonVariant val) {
 		if (!val.isNull () && (val.as<boolean> () != key)) {
 			key = val;
 			return true;
@@ -261,7 +268,7 @@ public:
 		}
 	}
 
-	static boolean setFromJSON (uint8_t& key, JsonVariant val) {
+	static boolean setFromJSON (uint8_t  & key, JsonVariant val) {
 		if (!val.isNull () && (val.as<uint8_t> () != key)) {
 			key = val;
 			return true;
@@ -271,7 +278,7 @@ public:
 		}
 	}
 
-	static boolean setFromJSON (uint16_t& key, JsonVariant val) {
+	static boolean setFromJSON (uint16_t & key, JsonVariant val) {
 		if (!val.isNull () && (val.as<uint16_t> () != key)) {
 			key = val;
 			return true;
@@ -281,7 +288,7 @@ public:
 		}
 	}
 
-	static boolean setFromJSON (uint32_t& key, JsonVariant val) {
+	static boolean setFromJSON (uint32_t & key, JsonVariant val) {
 		if (!val.isNull () && (val.as<uint32_t> () != key)) {
 			key = val;
 			return true;
@@ -291,7 +298,7 @@ public:
 		}
 	}
 
-	static boolean setFromJSON (float& key, JsonVariant val) {
+	static boolean setFromJSON (float    & key, JsonVariant val) {
 		if (!val.isNull () && (val.as<float> () != key)) {
 			key = val;
 			return true;

@@ -25,6 +25,8 @@
 #include "WiFiMgr.hpp"
 
 #include "WebMgr.hpp"
+#include <Int64String.h>
+
 
 #ifdef ARDUINO_ARCH_ESP8266
 #elif defined ARDUINO_ARCH_ESP32
@@ -35,8 +37,21 @@
 
 const uint8_t HTTP_PORT = 80;      ///< Default web server port
 
-AsyncWebServer  webServer (HTTP_PORT);  // Web Server
-AsyncWebSocket  webSocket ("/ws");      // Web Socket Plugin
+AsyncWebServer      webServer (HTTP_PORT);  // Web Server
+AsyncWebSocket      webSocket ("/ws");      // Web Socket Plugin
+DynamicJsonDocument webJsonDoc (2048);
+
+//-----------------------------------------------------------------------------
+void PrettyPrint (JsonObject & jsonStuff)
+{
+
+    // DEBUG_V ("---------------------------------------------");
+    LOG_PORT.println (F("---- Pretty ----"));
+    serializeJson (jsonStuff, LOG_PORT);
+    LOG_PORT.println ("");
+    // DEBUG_V ("---------------------------------------------");
+
+} // PrettyPrint
 
 //-----------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
@@ -79,7 +94,7 @@ void c_WebMgr::init ()
     DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Origin"), "*");
 
     // Setup WebSockets
-    webSocket.onEvent ([this](AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, size_t len)
+    webSocket.onEvent ([this](AsyncWebSocket* server, AsyncWebSocketClient * client, AwsEventType type, void* arg, uint8_t * data, size_t len)
         {
             this->onWsEvent (server, client, type, arg, data, len);
         });
@@ -94,7 +109,9 @@ void c_WebMgr::init ()
     // JSON Config Handler
     webServer.on ("/conf", HTTP_GET, [this](AsyncWebServerRequest* request)
         {
-            request->send (200, "text/json", this->GetConfiguration ());
+            String temp;
+            this->GetConfiguration (temp);
+            request->send (200, "text/json", temp );
         });
 
 #ifdef ToDoFixThis
@@ -130,63 +147,62 @@ void c_WebMgr::init ()
 /*
     Gather config data from the various config sources and send it to the web page.
 */
-String c_WebMgr::GetConfiguration ()
+void c_WebMgr::GetConfiguration (String & Response)
 {
     extern void GetConfig (JsonObject & json);
     // DEBUG_START;
 
-    String Response = "";
-
     // set up a framework to get the config data
-    DynamicJsonDocument JsonConfigDoc (4096);
+    webJsonDoc.clear ();
+    webJsonDoc.garbageCollect ();
 
     // DEBUG_V("");
 
-    JsonObject JsonSystemConfig = JsonConfigDoc.createNestedObject ("system");
-    GetConfig (JsonSystemConfig);
+    JsonObject JsonSystemConfig = webJsonDoc.createNestedObject (F("system"));
+    // GetConfig (JsonSystemConfig);
     // DEBUG_V ("");
 
-    JsonObject JsonOutputConfig = JsonConfigDoc.createNestedObject ("outputs");
-    OutputMgr.GetConfig (JsonOutputConfig);
+    JsonObject JsonOutputConfig = webJsonDoc.createNestedObject (F ("outputs"));
+    // OutputMgr.GetConfig (JsonOutputConfig);
     // DEBUG_V ("");
 
-    JsonObject JsonInputConfig = JsonConfigDoc.createNestedObject ("inputs");
-    InputMgr.GetConfig (JsonInputConfig);
+    JsonObject JsonInputConfig = webJsonDoc.createNestedObject (F ("inputs"));
+    // InputMgr.GetConfig (JsonInputConfig);
 
     // now make it something we can transmit
-    serializeJson (JsonConfigDoc, Response);
+    serializeJson (webJsonDoc, Response);
     // DEBUG_V (Response);
 
-    // DEBUG_END;
+    webJsonDoc.clear ();
+    webJsonDoc.garbageCollect ();
 
-    return Response;
+    // DEBUG_END;
 
 } // GetConfiguration
 
 //-----------------------------------------------------------------------------
-String c_WebMgr::GetOptions ()
+void c_WebMgr::GetOptions ()
 {
-    String Response = "";
+    // DEBUG_START;
 
-    // set up a framework to get the config data
-    DynamicJsonDocument JsonOptionDoc (1024);
-
+    // set up a framework to get the option data
+    JsonObject WebOptions        = webJsonDoc.createNestedObject (F ("options"));
+    JsonObject JsonInputOptions  = WebOptions.createNestedObject (F ("input"));
+    JsonObject JsonOutputOptions = WebOptions.createNestedObject (F ("output"));
     // DEBUG_V("");
 
-    JsonObject JsonOutputOptions = JsonOptionDoc.createNestedObject ("output");
+    InputMgr.GetOptions (JsonInputOptions);
+    DEBUG_V (""); // remove and we crash
+
     OutputMgr.GetOptions (JsonOutputOptions);
     // DEBUG_V ("");
 
-    JsonObject JsonInputOptions = JsonOptionDoc.createNestedObject ("input");
-    InputMgr.GetOptions (JsonInputOptions);
-
     // now make it something we can transmit
-    serializeJson (JsonOptionDoc, Response);
-    // DEBUG_V (Response);
+    size_t msgOffset = strlen (WebSocketFrameCollectionBuffer);
+    serializeJson (WebOptions, & WebSocketFrameCollectionBuffer[msgOffset], (sizeof(WebSocketFrameCollectionBuffer) - msgOffset));
+    // DEBUG_V ("");
 
     // DEBUG_END;
-
-    return Response;
 
 } // GetOptions
 
@@ -195,8 +211,8 @@ String c_WebMgr::GetOptions ()
 /** Handles all Web Service event types and performs initial parsing of Web Service event data.
  * Text messages that start with 'X' are treated as "Simple" format messages, else they're parsed as JSON.
  */
-void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient* client,
-    AwsEventType type, void* arg, uint8_t* data, size_t len)
+void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
+    AwsEventType type, void * arg, uint8_t * data, size_t len)
 {
     // DEBUG_START;
     // DEBUG_V (String ("Heap = ") + ESP.getFreeHeap ());
@@ -207,46 +223,113 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient* client,
         {
             // DEBUG_V ("");
 
-            AwsFrameInfo* info = static_cast<AwsFrameInfo*>(arg);
-            if (info->opcode == WS_TEXT)
+            AwsFrameInfo* MessageInfo = static_cast<AwsFrameInfo*>(arg);
+            // DEBUG_V (String (F ("               len: ")) + len);
+            // DEBUG_V (String (F ("MessageInfo->index: ")) + int64String (MessageInfo->index));
+            // DEBUG_V (String (F ("  MessageInfo->len: ")) + int64String (MessageInfo->len));
+            // DEBUG_V (String (F ("MessageInfo->final: ")) + String (MessageInfo->final));
+
+            // only process text messages
+            if (MessageInfo->opcode != WS_TEXT)
             {
-                // DEBUG_V ("");
-                if (data[0] == 'X')
-                {
-                    // DEBUG_V ("");
-                    procSimple (data, client);
-                }
-                else
-                {
-                    // DEBUG_V ("");
-                    procJSON (data, client);
-                }
-            }
-            else
-            {
-                LOG_PORT.println (F ("-- binary message --"));
+                LOG_PORT.println (F ("-- Ignore binary message --"));
+                break;
             }
             // DEBUG_V ("");
+
+            // is this a message start?
+            if (0 == MessageInfo->index)
+            {
+                // clear the string we are building
+                webJsonDoc.clear ();
+                webJsonDoc.garbageCollect ();
+                memset (WebSocketFrameCollectionBuffer, 0x0, sizeof (WebSocketFrameCollectionBuffer));
+                // DEBUG_V ("");
+            }
+            // DEBUG_V ("");
+
+            // will the message fit into our buffer?
+            if (WebSocketFrameCollectionBufferSize < (MessageInfo->index + len))
+            {
+                // message wont fit. Dont save any of it
+                LOG_PORT.println (String (F ("*** WebIO::onWsEvent(): Error: Incoming message is TOO long.")));
+                break;
+            }
+
+            // add the current data to the aggregate message
+            memcpy (&WebSocketFrameCollectionBuffer[MessageInfo->index], data, len);
+
+            // is the message complete?
+            if ((MessageInfo->index + len) != MessageInfo->len)
+            {
+                // The message is not yet complete
+                // DEBUG_V ("");
+                break;
+            }
+            // DEBUG_V ("");
+
+            // did we get the final part of the message?
+            if (!MessageInfo->final)
+            {
+                // message is not terminated yet
+                // DEBUG_V ("");
+                break;
+            }
+
+            // DEBUG_V ("");
+            // message is all here. Process it
+
+            if (WebSocketFrameCollectionBuffer[0] == 'X')
+            {
+                // DEBUG_V ("procSimple");
+                procSimple (client);
+                webJsonDoc.clear ();
+                webJsonDoc.garbageCollect ();
+
+                break;
+            }
+
+            // convert the input data into a json structure (use json read only mode)
+            DeserializationError error = deserializeJson (webJsonDoc, (const char *)(&WebSocketFrameCollectionBuffer[0]));
+
+            // DEBUG_V ("");
+            if (error)
+            {
+                LOG_PORT.println (String (F ("*** WebIO::onWsEvent(): Parse Error: ")) + error.c_str ());
+                LOG_PORT.println (WebSocketFrameCollectionBuffer);
+                webJsonDoc.clear ();
+                webJsonDoc.garbageCollect ();
+
+                break;
+            }
+            // DEBUG_V ("ProcessReceivedJsonMessage");
+
+            ProcessReceivedJsonMessage (client);
+            // DEBUG_V ("");
+
+            webJsonDoc.clear ();
+            webJsonDoc.garbageCollect ();
+
             break;
-        }
+        } // case WS_EVT_DATA:
 
         case WS_EVT_CONNECT:
         {
             LOG_PORT.println (String (F ("* WS Connect - ")) + client->id ());
             break;
-        }
+        } // case WS_EVT_CONNECT:
 
         case WS_EVT_DISCONNECT:
         {
             LOG_PORT.println (String (F ("* WS Disconnect - ")) + client->id ());
             break;
-        }
+        } // case WS_EVT_DISCONNECT:
 
         case WS_EVT_PONG:
         {
             LOG_PORT.println (F ("* WS PONG *"));
             break;
-        }
+        } // case WS_EVT_PONG:
 
         case WS_EVT_ERROR:
         default:
@@ -255,54 +338,56 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient* client,
             break;
         }
     } // end switch (type) 
+
     // DEBUG_V (String ("Heap = ") + ESP.getFreeHeap());
+
     // DEBUG_END;
 
 } // onEvent
 
 //-----------------------------------------------------------------------------
 /// Process simple format 'X' messages
-void c_WebMgr::procSimple (uint8_t* data, AsyncWebSocketClient* client)
+void c_WebMgr::procSimple (AsyncWebSocketClient * client)
 {
     // DEBUG_START;
 
-    switch (data[1])
+    switch (WebSocketFrameCollectionBuffer[1])
     {
-    case SimpleMessage::GET_STATUS:
-    {
-        // DEBUG_V ("");
-        DynamicJsonDocument json (1024);
+        case SimpleMessage::GET_STATUS:
+        {
+            // DEBUG_V ("");
 
-        // system statistics
-        JsonObject status = json.createNestedObject ("status");
-        JsonObject system = status.createNestedObject ("system");
+            // system statistics
+            JsonObject status = webJsonDoc.createNestedObject (F ("status"));
+            JsonObject system = status.createNestedObject (F ("system"));
 
-        system["freeheap"] = (String)ESP.getFreeHeap ();
-        system["uptime"]   = millis ();
-        // DEBUG_V ("");
+            system[F ("freeheap")] = (String)ESP.getFreeHeap ();
+            system[F ("uptime")]   = millis ();
+            // DEBUG_V ("");
 
-        // Ask WiFi to add stats
-        WiFiMgr.GetStatus (system);
-        // DEBUG_V ("");
+            // Ask WiFi to add stats
+            WiFiMgr.GetStatus (system);
+            // DEBUG_V ("");
 
-        // Ask Input to add stats
-        InputMgr.GetStatus (status);
-        // DEBUG_V ("");
+            // Ask Input to add stats
+            InputMgr.GetStatus (status);
+            // DEBUG_V ("");
 
-        // Ask Input to add stats
-        OutputMgr.GetStatus (status);
-        // DEBUG_V ("");
+            // Ask Input to add stats
+            OutputMgr.GetStatus (status);
+            // DEBUG_V ("");
 
-        // Ask Services to add stats
+            // Ask Services to add stats
 
-        String response;
-        serializeJson (json, response);
-        client->text ("XJ" + response);
-        // DEBUG_V (response);
+            String response;
+            serializeJson (webJsonDoc, response);
+            client->text (String(F ("XJ")) + response);
 
-        break;
-    }
-    }
+            // DEBUG_V (response);
+
+            break;
+        } // end case SimpleMessage::GET_STATUS:
+    } // end switch (data[1])
 
     // DEBUG_END;
 
@@ -310,23 +395,13 @@ void c_WebMgr::procSimple (uint8_t* data, AsyncWebSocketClient* client)
 
 //-----------------------------------------------------------------------------
 /// Process JSON messages
-void c_WebMgr::procJSON (uint8_t* data, AsyncWebSocketClient* client)
+void c_WebMgr::ProcessReceivedJsonMessage (AsyncWebSocketClient * client)
 {
     // DEBUG_START;
-    //LOG_PORT.printf("procJSON heap /stack stats: %u:%u:%u:%u\n", ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
+    //LOG_PORT.printf("ProcessReceivedJsonMessage heap /stack stats: %u:%u:%u:%u\n", ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
 
     do // once
     {
-        DynamicJsonDocument json (4096);
-        DeserializationError error = deserializeJson (json, reinterpret_cast<char*>(data));
-        // DEBUG_V ("");
-        if (error)
-        {
-            LOG_PORT.println (F ("*** WebIO::procJSON(): Parse Error ***"));
-            LOG_PORT.println (reinterpret_cast<char*>(data));
-            break;
-        }
-
         // DEBUG_V ("");
 
         /** Following commands are supported:
@@ -334,121 +409,20 @@ void c_WebMgr::procJSON (uint8_t* data, AsyncWebSocketClient* client)
          * - set: receive and applies configuration
          * - opt: returns select option lists
          */
-        if (json.containsKey ("cmd"))
+        if (webJsonDoc.containsKey ("cmd"))
         {
-            // DEBUG_V ("");
-            // Process "GET" command - return requested configuration as JSON
-            if (json["cmd"]["get"])
+            // DEBUG_V ("cmd");
             {
-                String target = json["cmd"]["get"].as<String> ();
-
-                if (target.equalsIgnoreCase ("device"))
-                {
-                    // DEBUG_V (serializeCore (false));
-                    client->text ("{\"get\":" + serializeCore (false) + "}");
-                    break;
-                }
-
-                if (target.equalsIgnoreCase ("network"))
-                {
-                    // DEBUG_V (serializeCore (false));
-                    client->text ("{\"get\":" + serializeCore (false) + "}");
-                    break;
-                }
-
-                if (target.equalsIgnoreCase ("output"))
-                {
-                    // DEBUG_V (OutputMgr.GetConfig ());
-                    client->text ("{\"get\":" + OutputMgr.GetConfig () + "}");
-                    break;
-                }
-
-                if (target.equalsIgnoreCase ("input"))
-                {
-                    // DEBUG_V (InputMgr.GetConfig ());
-                    client->text ("{\"get\":" + InputMgr.GetConfig () + "}");
-                    break;
-                }
-
-                // DEBUG_V ("Unknown get");
-
-                break;
+                // JsonObject jsonCmd = webJsonDoc.as<JsonObject> ();
+                // PrettyPrint (jsonCmd);
             }
-            // DEBUG_V ("");
+            JsonObject jsonCmd = webJsonDoc["cmd"];
+            processCmd (jsonCmd, client);
+            break;
+        } // webJsonDoc.containsKey ("cmd")
 
-            // Generate select option list data
-            if (json["cmd"]["opt"])
-            {
-                // DEBUG_V ("");
-                String target = json["cmd"]["opt"].as<String> ();
-                if (target.equalsIgnoreCase ("device"))
-                {
-                    // DEBUG_V (GetOptions ());
-                    client->text ("{\"opt\":" + GetOptions () + "}");
-                    break;
-                }
-
-                if (target.equalsIgnoreCase ("input"))
-                {
-                    // DEBUG_V ("");
-                    LOG_PORT.println ("*** WebIO opt input ***");
-                    break;
-                }
-
-                if (target.equalsIgnoreCase ("output"))
-                {
-                    // DEBUG_V ("");
-                    LOG_PORT.println ("*** WebIO opt output ***");
-                    break;
-                }
-            }
-        }
         // DEBUG_V ("");
-
-        // Process "SET" command - receive configuration as JSON
-        if (JsonObject root = json["cmd"]["set"].as<JsonObject> ())
-        {
-            // DEBUG_V ("");
-            DynamicJsonDocument doc (1024);
-            doc.set (root);
-
-            for (JsonPair kv : root)
-            {
-                String key = kv.key ().c_str ();
-                // Device config
-                if (key.equalsIgnoreCase ("device"))
-                {
-                    if (dsDevice (doc))
-                    {
-                        saveConfig ();
-                    }
-                    // DEBUG_V (serializeCore (false));
-                    client->text ("{\"set\":" + serializeCore (false) + "}");
-                    // Network config
-                }
-                else if (key.equalsIgnoreCase ("network"))
-                {
-                    if (dsNetwork (doc))
-                    {
-                        saveConfig ();
-                    }
-                    // DEBUG_V (serializeCore (false));
-                    client->text ("{\"set\":" + serializeCore (false) + "}");
-                }
-                else if (key.equalsIgnoreCase ("input"))
-                {
-                    // DEBUG_V (InputMgr.GetConfig ());
-                    client->text ("{\"set\":" + InputMgr.GetConfig () + "}");
-                }
-                else if (key.equalsIgnoreCase ("output"))
-                {
-                    // DEBUG_V (OutputMgr.GetConfig ());
-                    client->text ("{\"set\":" + OutputMgr.GetConfig () + "}");
-                }
-            }
-        }
-        // DEBUG_V ("");
-
+#ifdef foo
         /* From wshandler:
                 bool reboot = false;
                 switch (data[1]) {
@@ -481,16 +455,200 @@ void c_WebMgr::procJSON (uint8_t* data, AsyncWebSocketClient* client)
                         break;
                 }
         */
+#endif // def foo
 
 
     } while (false);
 
     // DEBUG_END;
-} // procJSON
+} // ProcessReceivedJsonMessage
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::processCmd (JsonObject & jsonCmd, AsyncWebSocketClient * client)
+{
+    // DEBUG_START;
+
+    WebSocketFrameCollectionBuffer[0] = NULL;
+    // PrettyPrint (jsonCmd);
+
+    do // once
+    {
+        // Process "GET" command - return requested configuration as JSON
+        if (jsonCmd.containsKey ("get"))
+        {
+            // DEBUG_V ("get");
+            strcpy(WebSocketFrameCollectionBuffer, "{\"get\":");
+            // DEBUG_V ("");
+            processCmdGet (jsonCmd);
+            // DEBUG_V ("");
+            break;
+        }
+
+        // Process "SET" command - return requested configuration as JSON
+        if (jsonCmd.containsKey ("set"))
+        {
+            // DEBUG_V ("set");
+            strcpy(WebSocketFrameCollectionBuffer, "{\"set\":");
+            JsonObject jsonCmdSet = jsonCmd["set"];
+            // DEBUG_V ("");
+            processCmdSet (jsonCmdSet);
+            // DEBUG_V ("");
+            break;
+        }
+
+        // Generate select option list data
+        if (jsonCmd.containsKey ("opt"))
+        {
+            // DEBUG_V ("opt");
+            strcpy(WebSocketFrameCollectionBuffer, "{\"opt\":");
+            // DEBUG_V ("");
+            processCmdOpt (jsonCmd);
+            // DEBUG_V ("");
+            break;
+        }
+        // log an error
+        LOG_PORT.println (String (F ("ERROR: Unhandled cmd")));
+        PrettyPrint (jsonCmd);
+        strcpy (WebSocketFrameCollectionBuffer, "{\"set\":Error");
+
+
+    } while (false);
+
+    // DEBUG_V ("");
+    // terminate the response
+    strcat (WebSocketFrameCollectionBuffer, "}");
+    // DEBUG_V (WebSocketFrameCollectionBuffer);
+    client->text (WebSocketFrameCollectionBuffer);
+
+    // DEBUG_END;
+
+} // processCmd
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
+{
+    // DEBUG_START;
+    // PrettyPrint (jsonCmd);
+
+    // DEBUG_V ("");
+
+    do // once
+    {
+        if ((jsonCmd["get"] == "device") || 
+            (jsonCmd["get"] == "network")  )
+        {
+            // DEBUG_V ("device/network");
+            strcat(WebSocketFrameCollectionBuffer, serializeCore (false).c_str());
+            // DEBUG_V ("");
+            break;
+        }
+
+        if (jsonCmd["get"] == "output")
+        {
+            // DEBUG_V ("output");
+            OutputMgr.GetConfig (WebSocketFrameCollectionBuffer);
+            // DEBUG_V ("");
+            break;
+        }
+
+        if (jsonCmd["get"] == "input")
+        {
+            // DEBUG_V ("input");
+            InputMgr.GetConfig (WebSocketFrameCollectionBuffer);
+            // DEBUG_V ("");
+            break;
+        }
+
+        // log an error
+        LOG_PORT.println (String (F("ERROR: Unhandled Get Request")));
+        PrettyPrint (jsonCmd);
+
+    } while (false);
+
+    // DEBUG_V (WebSocketFrameCollectionBuffer);
+
+    // DEBUG_END;
+
+} // processCmdGet
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
+{
+    // DEBUG_START;
+    // PrettyPrint (jsonCmd);
+
+    do // once
+    {
+        if ((jsonCmd.containsKey ("device")) || (jsonCmd.containsKey ("network")))
+        {
+            // DEBUG_V ("device/network");
+            deserializeCore (jsonCmd);
+            strcat (WebSocketFrameCollectionBuffer, serializeCore (false).c_str ());
+            // DEBUG_V ("device/network: Done");
+            break;
+        }
+
+        if (jsonCmd.containsKey ("input"))
+        {
+            // DEBUG_V ("input");
+            JsonObject imConfig = jsonCmd["input"];
+            InputMgr.SetConfig (imConfig);
+            InputMgr.GetConfig (WebSocketFrameCollectionBuffer);
+            // DEBUG_V ("input: Done");
+            break;
+        }
+
+        if (jsonCmd.containsKey ("output"))
+        {
+            // DEBUG_V ("output");
+            JsonObject omConfig = jsonCmd[F("output")];
+            OutputMgr.SetConfig (omConfig);
+            OutputMgr.GetConfig (WebSocketFrameCollectionBuffer);
+            // DEBUG_V ("output: Done");
+            break;
+        }
+
+        LOG_PORT.println ("***** ERROR: Undhandled Set request type. *****");
+        PrettyPrint (jsonCmd);
+        strcat (WebSocketFrameCollectionBuffer, "ERROR");
+
+    } while (false);
+
+    // DEBUG_V (WebSocketFrameCollectionBuffer);
+
+    // DEBUG_END;
+
+} // processCmdSet
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::processCmdOpt (JsonObject & jsonCmd)
+{
+    // DEBUG_START;
+    // PrettyPrint (jsonCmd);
+
+    do // once
+    {
+        // DEBUG_V ("");
+        if (jsonCmd["opt"] == "device")
+        {
+            // DEBUG_V ("device");
+            GetOptions ();
+            break;
+        }
+
+        // log error
+        LOG_PORT.println (String (F ("ERROR: Unhandled 'opt' Request: ")));
+        PrettyPrint (jsonCmd);
+
+    } while (false);
+
+    // DEBUG_END;
+
+} // processCmdOpt
 
 //-----------------------------------------------------------------------------
 void c_WebMgr::onFirmwareUpload (AsyncWebServerRequest* request, String filename,
-    size_t index, uint8_t* data, size_t len, bool final)
+    size_t index, uint8_t * data, size_t len, bool final)
 {
     static EFUpdate efupdate; /// EFU Update Handler
     if (!index)

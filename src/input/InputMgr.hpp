@@ -33,16 +33,15 @@ public:
     c_InputMgr ();
     virtual ~c_InputMgr ();
 
-    void    Begin      (uint8_t * BufferStart, uint16_t BufferSize); ///< set up the operating environment based on the current config (or defaults)
-    void    LoadConfig ();                       ///< Read the current configuration data from nvram
-    void    SaveConfig ();                       ///< Save the current configuration data to nvram
-    void    GetConfig (JsonObject & jsonConfig); ///< Get the current config used by the driver
-    String  GetConfig ();                        ///< Get the current config used by the driver
-    void    GetStatus (JsonObject & jsonStatus);
-    bool    SetConfig (JsonObject & jsonConfig); ///< Set a new config in the driver
-    void    DumpSupportedModes () {/* todo */};
-    void    Process ();                          ///< Call from loop(),  renders Input data
-    String  GetOptions (JsonObject & jsonStatus);
+    void Begin      (uint8_t * BufferStart, uint16_t BufferSize); ///< set up the operating environment based on the current config (or defaults)
+    void LoadConfig ();                        ///< Read the current configuration data from nvram
+    void SaveConfig ();                        ///< Save the current configuration data to nvram
+    void GetConfig  (char * Response);         ///< Get the current config used by the driver
+    void GetStatus  (JsonObject & jsonStatus);
+    bool SetConfig  (JsonObject & jsonConfig); ///< Set a new config in the driver
+    void DumpSupportedModes () {/* todo */};
+    void Process    ();                        ///< Call from loop(),  renders Input data
+    void GetOptions (JsonObject & jsonOptions);
 
     enum e_InputType
     {
@@ -50,6 +49,7 @@ public:
         InputType_E1_31,
         InputType_End,
         InputType_Start = InputType_Disabled,
+        InputType_Default = InputType_Disabled,
     };
 
     // handles to determine which input channel we are dealing with
@@ -63,21 +63,26 @@ public:
 private:
 
     void InstantiateNewInputChannel (e_InputChannelIds InputChannelId, e_InputType NewChannelType);
+    void CreateNewConfig ();
 
     c_InputCommon * pInputChannelDrivers[InputChannelId_End]; ///< pointer(s) to the current active Input driver
     uint8_t       * InputDataBuffer     = nullptr;
     uint16_t        InputDataBufferSize = 0;
-    bool            HasBeenInitialized = false;
+    bool            HasBeenInitialized  = false;
+    bool            ConfigSaveNeeded    = false;
 
     // configuration parameter names for the channel manager within the config file
 #   define IM_SECTION_NAME         F("im_config")
 #   define IM_CHANNEL_SECTION_NAME F("im_inputs")
 #   define IM_CHANNEL_TYPE_NAME    F("im_input_type")
 
-    bool DeserializeConfig (JsonObject & jsonConfig);
-    void SerializeConfig   (JsonObject & jsonConfig);
+    bool ProcessJsonConfig        (JsonObject & jsonConfig);
+    void CreateJsonConfig         (JsonObject & jsonConfig);
+    bool ProcessJsonChannelConfig (JsonObject & jsonConfig, uint32_t ChannelIndex);
+    void SetBufferInfo            (uint8_t* BufferStart,    uint16_t BufferSize);
 
     String ConfigFileName;
+    String ConfigData;
 
 protected:
 

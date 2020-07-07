@@ -17,12 +17,9 @@
 *
 */
 
-#include "E131Input.h"
 #include "../ESPixelStick.h"
 #include "../FileIO.h"
-
-#include "E131Input.h"
-
+#include "InputE131.hpp"
 
 //-----------------------------------------------------------------------------
 c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,

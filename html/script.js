@@ -522,51 +522,59 @@ function submitWiFiConfig()
 function submitDeviceConfig()
 {
     // Build input mode JSON data for submission
-    var input = $('#config #device #input').val();
-    var inputJson = {};
-    var inputids = $('#config #imode :input').map(function () {
+    // Build output mode JSON data for submission
+    var inputids = [];
+    inputids = $('#config #imode *[id]').filter(":input").map(function ()
+    {
         return $(this).attr('id');
     }).get();
+
+    var InputChannelId     = 0;
+    var InputType          = parseInt($("#config #device #input option:selected").val(), 10);
+    var InputConfig        = im_config;
+    var InputChannelConfig = InputConfig.im_inputs[InputChannelId][InputType];
+
+    // tell the ESP what type of output it should be using
+    InputConfig.im_inputs[InputChannelId].im_input_type = InputType;
 
     inputids.forEach(function (id)
     {
         var select = '#config #imode #' + id;
         if ($(select).is(':checkbox'))
         {
-            inputJson[id] = $(select).prop('checked');
+            InputChannelConfig[id] = $(select).prop('checked');
         }
         else
         {
-            inputJson[id] = $(select).val();
+            InputChannelConfig[id] = $(select).val();
         }
     });
 
     // Build output mode JSON data for submission
-    var output = $('#config #device #output').val();
-//    var outputJson = {};
-    var outputids = $('#config #omode :input').map(function ()
+    var outputids = [];
+    outputids = $('#config #omode *[id]').filter(":input").map(function ()
     {
         return $(this).attr('id');
     }).get();
 
-    var ChannelId     = 0;
-    var OutputType    = parseInt($("#config #device #output option:selected").val(),10);
-    var OutputConfig  = om_config;
-    var ChannelConfig = OutputConfig.om_channels[ChannelId][OutputType];
+    var OutputChannelId     = 0;
+    var OutputType          = parseInt($("#config #device #output option:selected").val(),10);
+    var OutputConfig        = om_config;
+    var OutputChannelConfig = OutputConfig.om_channels[OutputChannelId][OutputType];
 
-    // tell the ESP what type of output it should be using
-    OutputConfig.om_channels[ChannelId].om_channel_type = OutputType;
+    // tell the ESP what type of input it should be using
+    OutputConfig.om_channels[OutputChannelId].om_channel_type = OutputType;
 
     outputids.forEach(function (id)
     {
         var select = '#config #omode #' + id;
         if ($(select).is(':checkbox'))
         {
-            ChannelConfig[id] = $(select).prop('checked');
+            OutputChannelConfig[id] = $(select).prop('checked');
         }
         else
         {
-            ChannelConfig[id] = $(select).val();
+            OutputChannelConfig[id] = $(select).val();
         }
     });
 
@@ -633,7 +641,7 @@ function wsConnect()
             // console.info("ws.onmessage: Start");
             if (typeof event.data === "string")
             {
-                // console.info("ws.onmessage: Received: " + event.data);
+                console.info("ws.onmessage: Received: " + event.data);
 
                 // Process "simple" message format
                 if (event.data.startsWith("X"))

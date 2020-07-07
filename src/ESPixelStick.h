@@ -73,7 +73,9 @@ typedef struct {
     uint32_t    sta_timeout;         ///< Timeout when connection as client (station)
 } config_t;
 
-String serializeCore(boolean pretty = false);
-boolean dsDevice(DynamicJsonDocument &json);
-boolean dsNetwork(DynamicJsonDocument &json);
-void saveConfig();
+String  serializeCore          (boolean pretty = false);
+void    deserializeCoreHandler (DynamicJsonDocument& jsonDoc);
+void    deserializeCore        (JsonObject & json);
+boolean dsDevice               (JsonObject & json);
+boolean dsNetwork              (JsonObject & json);
+void    saveConfig             ();

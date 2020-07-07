@@ -33,6 +33,7 @@
 #include "OutputWS2811.hpp"
 // needs to be last
 #include "OutputMgr.hpp"
+
 //-----------------------------------------------------------------------------
 // Local Data definitions
 //-----------------------------------------------------------------------------
@@ -44,15 +45,15 @@ typedef struct OutputTypeXlateMap_t
 
 OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::OutputType_End] =
 {
-    {c_OutputMgr::e_OutputType::OutputType_WS2811,   String ("WS2811") },
-    {c_OutputMgr::e_OutputType::OutputType_GECE,     String ("GECE") },
-    {c_OutputMgr::e_OutputType::OutputType_Serial,   String ("Serial") },
-    {c_OutputMgr::e_OutputType::OutputType_Renard,   String ("Renard") },
-    {c_OutputMgr::e_OutputType::OutputType_DMX,      String ("DMX") },
+    {c_OutputMgr::e_OutputType::OutputType_WS2811,   "WS2811"   },
+    {c_OutputMgr::e_OutputType::OutputType_GECE,     "GECE"     },
+    {c_OutputMgr::e_OutputType::OutputType_Serial,   "Serial"   },
+    {c_OutputMgr::e_OutputType::OutputType_Renard,   "Renard"   },
+    {c_OutputMgr::e_OutputType::OutputType_DMX,      "DMX"      },
 #ifdef ARDUINO_ARCH_ESP32
-    {c_OutputMgr::e_OutputType::OutputType_SPI,      String ("SPI") },
+    {c_OutputMgr::e_OutputType::OutputType_SPI,      "SPI"      },
 #endif // def ARDUINO_ARCH_ESP32
-    {c_OutputMgr::e_OutputType::OutputType_Disabled, String ("Disabled") }
+    {c_OutputMgr::e_OutputType::OutputType_Disabled, "Disabled" }
 };
 
 //-----------------------------------------------------------------------------
@@ -76,7 +77,7 @@ OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] =
 ///< Start up the driver and put it into a safe mode
 c_OutputMgr::c_OutputMgr ()
 {
-    ConfigFileName = String ("/") + String (OM_SECTION_NAME) + ".json";
+    ConfigFileName = String (F ("/")) + String (OM_SECTION_NAME) + F(".json");
 
     // this gets called pre-setup so there is nothing we can do here.
     int pOutputChannelDriversIndex = 0;
@@ -122,11 +123,6 @@ void c_OutputMgr::Begin ()
         // DEBUG_V ("");
     }
 
-    // DEBUG_V ("");
-
-    // open a persistent file handle
-    ConfigFile = SPIFFS.open (ConfigFileName, "r+");
-
     // load up the configuration from the saved file. This also starts the drivers
     LoadConfig ();
 
@@ -138,6 +134,80 @@ void c_OutputMgr::Begin ()
     // DEBUG_END;
 
 } // begin
+
+//-----------------------------------------------------------------------------
+void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
+{
+    // DEBUG_START;
+
+    // add OM config parameters
+    // DEBUG_V ("");
+
+    // add the channels header
+    JsonObject OutputMgrChannelsData;
+    if (true == jsonConfig.containsKey (OM_CHANNEL_SECTION_NAME))
+    {
+        // DEBUG_V ("");
+        OutputMgrChannelsData = jsonConfig[OM_CHANNEL_SECTION_NAME];
+    }
+    else
+    {
+        // add our section header
+        // DEBUG_V ("");
+        OutputMgrChannelsData = jsonConfig.createNestedObject (OM_CHANNEL_SECTION_NAME);
+    }
+
+    // add the channel configurations
+    // DEBUG_V ("For Each Output Channel");
+    for (auto CurrentChannel : pOutputChannelDrivers)
+    {
+        // DEBUG_V (String("Create Section in Config file for the output channel: '") + CurrentChannel->GetOuputChannelId() + "'");
+        // create a record for this channel
+        JsonObject ChannelConfigData;
+        String sChannelId = String (CurrentChannel->GetOuputChannelId ());
+        if (true == OutputMgrChannelsData.containsKey (sChannelId))
+        {
+            // DEBUG_V ("");
+            ChannelConfigData = OutputMgrChannelsData[sChannelId];
+        }
+        else
+        {
+            // add our section header
+            // DEBUG_V ("");
+            ChannelConfigData = OutputMgrChannelsData.createNestedObject (sChannelId);
+        }
+
+        // save the name as the selected channel type
+        ChannelConfigData[OM_CHANNEL_TYPE_NAME] = int (CurrentChannel->GetOutputType ());
+
+        String DriverTypeId = String (int (CurrentChannel->GetOutputType ()));
+        JsonObject ChannelConfigByTypeData;
+        if (true == ChannelConfigData.containsKey (String (DriverTypeId)))
+        {
+            ChannelConfigByTypeData = ChannelConfigData[DriverTypeId];
+            // DEBUG_V ("");
+        }
+        else
+        {
+            // add our section header
+            // DEBUG_V ("");
+            ChannelConfigByTypeData = ChannelConfigData.createNestedObject (DriverTypeId);
+        }
+
+        // ask the channel to add its data to the record
+        // DEBUG_V ("Add the output channel configuration for type: " + DriverTypeId);
+
+        // Populate the driver name
+        String DriverName = ""; CurrentChannel->GetDriverName (DriverName);
+        ChannelConfigByTypeData[F ("type")] = DriverName;
+
+        CurrentChannel->GetConfig (ChannelConfigByTypeData);
+        // DEBUG_V ("");
+    }
+
+    // smile. Your done
+    // DEBUG_END;
+} // CreateJsonConfig
 
 //-----------------------------------------------------------------------------
 /*
@@ -166,17 +236,9 @@ void c_OutputMgr::CreateNewConfig ()
         }// end for each interface
 
         // DEBUG_V ("collect the config data");
-        SerializeConfig (JsonConfig);
+        CreateJsonConfig (JsonConfig);
 
         // DEBUG_V ("");
-#ifdef foo
-        String sJsonConfig;
-        serializeJsonPretty (JsonConfigDoc, sJsonConfig);
-
-        LOG_PORT.println ("cccc PrettyJsonConfig cccc");
-        LOG_PORT.println (sJsonConfig);
-        LOG_PORT.println ("cccc PrettyJsonConfig cccc");
-#endif // def foo
 
     } // end for each output type
 
@@ -186,29 +248,14 @@ void c_OutputMgr::CreateNewConfig ()
     {
         InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex), e_OutputType::OutputType_Disabled);
     }// end for each interface
-
     // DEBUG_V ("");
 
-    String sJsonConfig;
-#ifdef foo
-    serializeJsonPretty (JsonConfigDoc, sJsonConfig);
-
-    LOG_PORT.println ("nnnn PrettyJsonConfig nnnn");
-    LOG_PORT.println (sJsonConfig);
-    LOG_PORT.println ("nnnn PrettyJsonConfig nnnn");
-    sJsonConfig = "";
-#endif // def foo
+    ConfigData.clear ();
 
     // DEBUG_V ("save the config data to NVRAM");
-    serializeJson (JsonConfigDoc, sJsonConfig);
-    if (FileIO::saveConfig (ConfigFileName, sJsonConfig))
-    {
-        LOG_PORT.println (F ("**** Saved Output Manager Config File. ****"));
-    } // end we got a config and it was good
-    else
-    {
-        LOG_PORT.println (F ("EEEE Error Saving Output Manager Config File. EEEE"));
-    }
+    serializeJson (JsonConfigDoc, ConfigData);
+    ConfigSaveNeeded = false;
+    SaveConfig ();
 
     JsonConfigDoc.garbageCollect ();
 
@@ -216,112 +263,6 @@ void c_OutputMgr::CreateNewConfig ()
     // DEBUG_END;
 
 } // CreateNewConfig
-
-//-----------------------------------------------------------------------------
-/*
-    check the contents of the config and send
-    the proper portion of the config to the currently instantiated channels
-
-    needs
-        ref to data from config file
-    returns
-        true - config was properly processes
-        false - config had an error.
-*/
-bool c_OutputMgr::DeserializeConfig (JsonObject& jsonConfig)
-{
-    // DEBUG_START;
-    boolean retval = false;
-    do // once
-    {
-        if (false == jsonConfig.containsKey (OM_SECTION_NAME))
-        {
-            LOG_PORT.println (F ("No Output Interface Settings Found. Using Defaults"));
-            break;
-        }
-        JsonObject OutputChannelMgrData = jsonConfig[OM_SECTION_NAME];
-        // DEBUG_V ("");
-
-        // extract my own config data here
-
-        // do we have a channel configuration array?
-        if (false == OutputChannelMgrData.containsKey (OM_CHANNEL_SECTION_NAME))
-        {
-            // if not, flag an error and stop processing
-            LOG_PORT.println (F ("No Output Channel Settings Found. Using Defaults"));
-            break;
-        }
-        JsonObject OutputChannelArray = OutputChannelMgrData[OM_CHANNEL_SECTION_NAME];
-        // DEBUG_V ("");
-
-        // for each output channel
-        for (uint32_t ChannelIndex = uint32_t (OutputChannelId_Start);
-            ChannelIndex < uint32_t (OutputChannelId_End);
-            ChannelIndex++)
-        {
-            // get access to the channel config
-            if (false == OutputChannelArray.containsKey (String (ChannelIndex).c_str ()))
-            {
-                // if not, flag an error and stop processing
-                LOG_PORT.println (String (F ("No Output Settings Found for Channel '")) + ChannelIndex + String (F ("'. Using Defaults")));
-                break;
-            }
-            JsonObject OutputChannelConfig = OutputChannelArray[String (ChannelIndex).c_str ()];
-            // DEBUG_V ("");
-
-            // set a default value for channel type
-            uint32_t ChannelType = uint32_t (OutputType_End);
-            FileIO::setFromJSON (ChannelType, OutputChannelConfig[OM_CHANNEL_TYPE_NAME]);
-            // DEBUG_V ("");
-
-            // is it a valid / supported channel type
-            if ((ChannelType < uint32_t (OutputType_Start)) || (ChannelType >= uint32_t (OutputType_End)))
-            {
-                // if not, flag an error and move on to the next channel
-                LOG_PORT.println (String (F ("Invalid Channel Type in config '")) + ChannelType + String (F ("'. Specified for channel '")) + ChannelIndex + "'. Disabling channel");
-                InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex), e_OutputType::OutputType_Disabled);
-                continue;
-            }
-            // DEBUG_V ("");
-
-            // do we have a configuration for the channel type?
-            if (false == OutputChannelConfig.containsKey (String (ChannelType)))
-            {
-                // if not, flag an error and stop processing
-                LOG_PORT.println (String (F ("No Output Settings Found for Channel '")) + ChannelIndex + String (F ("'. Using Defaults")));
-                InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex), e_OutputType::OutputType_Disabled);
-                continue;
-            }
-
-            JsonObject OutputChannelDriverConfig = OutputChannelConfig[String (ChannelType)];
-            // DEBUG_V ("");
-
-            // make sure the proper output type is running
-            InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex), e_OutputType (ChannelType));
-            // DEBUG_V ("");
-
-            // send the config to the driver. At this level we have no idea what is in it
-            retval |= pOutputChannelDrivers[ChannelIndex]->SetConfig (OutputChannelDriverConfig);
-
-        } // end for each channel
-
-        // all went well
-        retval = true;
-
-    } while (false);
-
-    // did we get a valid config?
-    if (false == retval)
-    {
-        // save the current config since it is the best we have.
-        // DEBUG_V ("");
-        CreateNewConfig ();
-    }
-
-    // DEBUG_END;
-    return retval;
-
-} // deserializeConfig
 
 //-----------------------------------------------------------------------------
 ///< Get the pointer to the input buffer for the desired output channel
@@ -340,80 +281,47 @@ uint16_t c_OutputMgr::GetBufferSize (e_OutputChannelIds ChannelId)
 } // GetBufferSize
 
 //-----------------------------------------------------------------------------
-String c_OutputMgr::GetConfig ()
+void c_OutputMgr::GetConfig (char * Response )
 {
     // DEBUG_START;
-    String response = "";
 
-    DynamicJsonDocument JsonConfigDoc (4096);
-    JsonObject JsonConfig = JsonConfigDoc.to<JsonObject>();
+    strcat (Response, ConfigData.c_str ());
 
-    GetConfig (JsonConfig);
-    serializeJson (JsonConfig, response);
+    // DEBUG_END;
 
+} // GetConfig
+
+//-----------------------------------------------------------------------------
+String c_OutputMgr::GetOptions (JsonObject & jsonOptions)
+{
+    // DEBUG_START;
+
+    jsonOptions[F ("selectedoption")] = pOutputChannelDrivers[0]->GetOutputType ();
     // DEBUG_V ("");
-    JsonConfigDoc.garbageCollect ();
 
-    // DEBUG_END;
-
-    return response;
-} // GetConfig
-
-//-----------------------------------------------------------------------------
-/* Returns the current configuration for the output channels
-*
-*   needs
-*       Reference to string into which to place the configuration
-*       presentation style
-*   returns
-*       string populated with currently available configuration
-*/
-void c_OutputMgr::GetConfig (JsonObject& jsonConfigResponse)
-{
-    // DEBUG_START;
-
-    // try to load and process the config file
-    if (!FileIO::loadConfig (ConfigFileName.c_str (), ConfigFile, [this, jsonConfigResponse](DynamicJsonDocument & JsonConfigDoc)
-        {
-            // DEBUG_V ("");
-            JsonObject jsonSrc = JsonConfigDoc.to<JsonObject> ();
-            // DEBUG_V ("");
-            this->merge (jsonConfigResponse, jsonSrc);
-            // DEBUG_V ("");
-        }))
-    {
-        // file read error
-    }
-
-    // DEBUG_END;
-} // GetConfig
-
-//-----------------------------------------------------------------------------
-String c_OutputMgr::GetOptions (JsonObject& jsonOptions)
-{
-    // DEBUG_START;
-
-    jsonOptions["selectedoption"] = pOutputChannelDrivers[0]->GetOutputType ();
-    JsonArray jsonOptionsArray = jsonOptions.createNestedArray ("list");
+    JsonArray jsonOptionsArray = jsonOptions.createNestedArray (F("list"));
+    // DEBUG_V ("");
 
     // Build a list of Valid options for this device
-    for (auto currentOutputType : OutputTypeXlateMap)
+    for (OutputTypeXlateMap_t currentOutputType : OutputTypeXlateMap)
     {
-        JsonObject jsonOptionsArrayEntry = jsonOptionsArray.createNestedObject ();
+        // DEBUG_V ("");
+        JsonObject jsonOptionsArrayEntry  = jsonOptionsArray.createNestedObject ();
+        jsonOptionsArrayEntry[F ("id")]   = int(currentOutputType.id);
+        jsonOptionsArrayEntry[F ("name")] = currentOutputType.name;
 
-        jsonOptionsArrayEntry["id"]   = currentOutputType.id;
-        jsonOptionsArrayEntry["name"] = currentOutputType.name;
-
+        // DEBUG_V ("");
     } // end for each output type
+
     // DEBUG_END;
 } // GetOptions
 
 //-----------------------------------------------------------------------------
-void c_OutputMgr::GetStatus (JsonObject& jsonStatus)
+void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    JsonArray OutputStatus = jsonStatus.createNestedArray ("output");
+    JsonArray OutputStatus = jsonStatus.createNestedArray (F("output"));
     uint channelIndex = 0;
     for (auto CurrentOutput : pOutputChannelDrivers)
     {
@@ -607,12 +515,12 @@ void c_OutputMgr::LoadConfig ()
     // DEBUG_START;
 
     // try to load and process the config file
-    if (!FileIO::loadConfig (ConfigFileName.c_str (), ConfigFile, [this](DynamicJsonDocument& JsonConfigDoc)
+    if (!FileIO::loadConfig (ConfigFileName, [this](DynamicJsonDocument & JsonConfigDoc)
         {
             // DEBUG_V ("");
             JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
             // DEBUG_V ("");
-            this->DeserializeConfig (JsonConfig);
+            this->ProcessJsonConfig (JsonConfig);
             // DEBUG_V ("");
         }))
     {
@@ -623,27 +531,121 @@ void c_OutputMgr::LoadConfig ()
         CreateNewConfig ();
     }
 
-        // DEBUG_END;
+    // DEBUG_END;
+
 } // LoadConfig
 
 //-----------------------------------------------------------------------------
-void c_OutputMgr::merge (JsonVariant dst, JsonVariantConst src)
+/*
+    check the contents of the config and send
+    the proper portion of the config to the currently instantiated channels
+
+    needs
+        ref to data from config file
+    returns
+        true - config was properly processes
+        false - config had an error.
+*/
+bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
 {
     // DEBUG_START;
-    if (src.is<JsonObject> ())
+    boolean Response = false;
+
+    // save a copy of the config
+    ConfigData.clear ();
+    serializeJson (jsonConfig, ConfigData);
+    // DEBUG_V ("");
+
+    do // once
     {
-        for (auto kvp : src.as<JsonObject> ())
+        if (false == jsonConfig.containsKey (OM_SECTION_NAME))
         {
-            merge (dst.getOrAddMember (kvp.key ()), kvp.value ());
+            LOG_PORT.println (F ("No Output Interface Settings Found. Using Defaults"));
+            break;
         }
-    }
-    else
-    {
-        dst.set (src);
+        JsonObject OutputChannelMgrData = jsonConfig[OM_SECTION_NAME];
         // DEBUG_V ("");
+
+        // extract my own config data here
+
+        // do we have a channel configuration array?
+        if (false == OutputChannelMgrData.containsKey (OM_CHANNEL_SECTION_NAME))
+        {
+            // if not, flag an error and stop processing
+            LOG_PORT.println (F ("No Output Channel Settings Found. Using Defaults"));
+            break;
+        }
+        JsonObject OutputChannelArray = OutputChannelMgrData[OM_CHANNEL_SECTION_NAME];
+        // DEBUG_V ("");
+
+        // for each output channel
+        for (uint32_t ChannelIndex = uint32_t (OutputChannelId_Start);
+            ChannelIndex < uint32_t (OutputChannelId_End);
+            ChannelIndex++)
+        {
+            // get access to the channel config
+            if (false == OutputChannelArray.containsKey (String (ChannelIndex).c_str ()))
+            {
+                // if not, flag an error and stop processing
+                LOG_PORT.println (String (F ("No Output Settings Found for Channel '")) + ChannelIndex + String (F ("'. Using Defaults")));
+                break;
+            }
+            JsonObject OutputChannelConfig = OutputChannelArray[String (ChannelIndex).c_str ()];
+            // DEBUG_V ("");
+
+            // set a default value for channel type
+            uint32_t ChannelType = uint32_t (OutputType_End);
+            FileIO::setFromJSON (ChannelType, OutputChannelConfig[OM_CHANNEL_TYPE_NAME]);
+            // DEBUG_V ("");
+
+            // is it a valid / supported channel type
+            if ((ChannelType < uint32_t (OutputType_Start)) || (ChannelType >= uint32_t (OutputType_End)))
+            {
+                // if not, flag an error and move on to the next channel
+                LOG_PORT.println (String (F ("Invalid Channel Type in config '")) + ChannelType + String (F ("'. Specified for channel '")) + ChannelIndex + "'. Disabling channel");
+                InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex), e_OutputType::OutputType_Disabled);
+                continue;
+            }
+            // DEBUG_V ("");
+
+            // do we have a configuration for the channel type?
+            if (false == OutputChannelConfig.containsKey (String (ChannelType)))
+            {
+                // if not, flag an error and stop processing
+                LOG_PORT.println (String (F ("No Output Settings Found for Channel '")) + ChannelIndex + String (F ("'. Using Defaults")));
+                InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex), e_OutputType::OutputType_Disabled);
+                continue;
+            }
+
+            JsonObject OutputChannelDriverConfig = OutputChannelConfig[String (ChannelType)];
+            // DEBUG_V ("");
+
+            // make sure the proper output type is running
+            InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex), e_OutputType (ChannelType));
+            // DEBUG_V ("");
+
+            // send the config to the driver. At this level we have no idea what is in it
+            Response |= pOutputChannelDrivers[ChannelIndex]->SetConfig (OutputChannelDriverConfig);
+
+        } // end for each channel
+
+        // all went well
+        Response = true;
+
+    } while (false);
+
+    // did we get a valid config?
+    if (false == Response)
+    {
+        // save the current config since it is the best we have.
+        // DEBUG_V ("");
+        CreateNewConfig ();
     }
+
     // DEBUG_END;
-} // merge
+    return Response;
+
+} // ProcessJsonConfig
 
 //-----------------------------------------------------------------------------
 /*
@@ -661,134 +663,18 @@ void c_OutputMgr::merge (JsonVariant dst, JsonVariantConst src)
 void c_OutputMgr::SaveConfig ()
 {
     // DEBUG_START;
-
-    // try to load the config file
-    if (!FileIO::loadConfig (ConfigFileName, ConfigFile, [this](DynamicJsonDocument& JsonConfigDoc)
-        {
-            // DEBUG_V ("");
-            JsonObject JsonConfig = JsonConfigDoc.to<JsonObject> ();
-
-            // add the OM header
-            JsonObject OutputMgrData;
-            if (true == JsonConfig.containsKey (OM_SECTION_NAME))
-            {
-                // DEBUG_V ("");
-                OutputMgrData = JsonConfig[OM_SECTION_NAME];
-            }
-            else
-            {
-                // add our section header
-                // DEBUG_V ("");
-                OutputMgrData = JsonConfig.createNestedObject (OM_SECTION_NAME);
-            }
-
-            this->SerializeConfig (OutputMgrData);
-
-            String sJsonConfig = "";
-#ifdef foo
-            serializeJsonPretty (JsonConfigDoc, sJsonConfig);
-
-            LOG_PORT.println ("ssss PrettyJsonConfig ssss");
-            LOG_PORT.println (sJsonConfig);
-            LOG_PORT.println ("ssss PrettyJsonConfig ssss");
-#endif // def foo
-            // this forces a write to flash
-            ConfigFile.close ();
-            ConfigFile = SPIFFS.open (ConfigFileName.c_str (), "r+");
-
-            serializeJson (JsonConfigDoc, sJsonConfig);
-#ifdef foo
-            LOG_PORT.println ("ssss JsonConfig ssss");
-            LOG_PORT.println (sJsonConfig);
-            LOG_PORT.println ("ssss JsonConfig ssss");
-#endif // def foo
-            if (FileIO::saveConfig (ConfigFileName, sJsonConfig))
-            {
-                LOG_PORT.println (F ("**** Saved Output Manager Config File. ****"));
-            } // end we got a config and it was good
-            else
-            {
-                LOG_PORT.println (F ("EEEE Error Saving Output Manager Config File. EEEE"));
-            }
-
-        }))
+    if (FileIO::saveConfig (ConfigFileName, ConfigData))
     {
-        // could not read the file so we need to create a new image.
-        CreateNewConfig ();
+        LOG_PORT.println (F ("**** Saved Output Manager Config File. ****"));
+    } // end we got a config and it was good
+    else
+    {
+        LOG_PORT.println (F ("EEEE Error Saving Output Manager Config File. EEEE"));
     }
 
     // DEBUG_END;
 
 } // SaveConfig
-
-//-----------------------------------------------------------------------------
-void c_OutputMgr::SerializeConfig (JsonObject & jsonConfig)
-{
-    // DEBUG_START;
-
-    // add OM config parameters
-    // DEBUG_V ("");
-
-    // add the channels header
-    JsonObject OutputMgrChannelsData;
-    if (true == jsonConfig.containsKey (OM_CHANNEL_SECTION_NAME))
-    {
-        // DEBUG_V ("");
-        OutputMgrChannelsData = jsonConfig[OM_CHANNEL_SECTION_NAME];
-    }
-    else
-    {
-        // add our section header
-        // DEBUG_V ("");
-        OutputMgrChannelsData = jsonConfig.createNestedObject (OM_CHANNEL_SECTION_NAME);
-    }
-
-    // add the channel configurations
-    // DEBUG_V ("For Each Output Channel");
-    for (auto CurrentChannel : pOutputChannelDrivers)
-    {
-        // DEBUG_V (String("Create Section in Config file for the output channel: '") + CurrentChannel->GetOuputChannelId() + "'");
-        // create a record for this channel
-        JsonObject ChannelConfigData;
-        String sChannelId = String (CurrentChannel->GetOuputChannelId ());
-        if (true == OutputMgrChannelsData.containsKey (sChannelId))
-        {
-            // DEBUG_V ("");
-            ChannelConfigData = OutputMgrChannelsData[sChannelId];
-        }
-        else
-        {
-            // add our section header
-            // DEBUG_V ("");
-            ChannelConfigData = OutputMgrChannelsData.createNestedObject (sChannelId);
-        }
-        
-        // save the name as the selected channel type
-        ChannelConfigData[OM_CHANNEL_TYPE_NAME] = int(CurrentChannel->GetOutputType ());
-
-        String DriverTypeId = String(int(CurrentChannel->GetOutputType ()));
-        JsonObject ChannelConfigByTypeData;
-        if (true == ChannelConfigData.containsKey (String(DriverTypeId)))
-        {
-            ChannelConfigByTypeData = ChannelConfigData[DriverTypeId];
-            // DEBUG_V ("");
-        }
-        else
-        {
-            // add our section header
-            // DEBUG_V ("");
-            ChannelConfigByTypeData = ChannelConfigData.createNestedObject (DriverTypeId);
-        }
-
-        // ask the channel to add its data to the record
-        // DEBUG_V ("Add the output channel configuration for type: " + DriverTypeId);
-        CurrentChannel->GetConfig (ChannelConfigByTypeData);
-        // DEBUG_V ("");
-    }
-
-    // smile. Your done
-    // DEBUG_END;
-} // SerializeConfig
 
 //-----------------------------------------------------------------------------
 /* Sets the configuration for the current active ports
@@ -802,22 +688,34 @@ void c_OutputMgr::SerializeConfig (JsonObject & jsonConfig)
 bool c_OutputMgr::SetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
-    boolean retval = false;
+    boolean Response = false;
     if (jsonConfig.containsKey (OM_SECTION_NAME))
     {
-        DeserializeConfig (jsonConfig);
+        // DEBUG_V ("");
+        Response = ProcessJsonConfig (jsonConfig);
+
+        // schedule a future save to the file system
+        ConfigSaveNeeded = true;
     }
     else
     {
         LOG_PORT.println (F("EEEE No Output Manager settings found. EEEE"));
     }
     // DEBUG_END;
+    return Response;
 } // SetConfig
 
 //-----------------------------------------------------------------------------
 ///< Called from loop(), renders output data
 void c_OutputMgr::Render()
 {
+    // do we need to save the current config?
+    if (true == ConfigSaveNeeded)
+    {
+        ConfigSaveNeeded = false;
+        SaveConfig ();
+    } // done need to save the current config
+
     // DEBUG_START;
     for (c_OutputCommon * pOutputChannel : pOutputChannelDrivers)
     {
@@ -828,4 +726,3 @@ void c_OutputMgr::Render()
 
 // create a global instance of the output channel factory
 c_OutputMgr OutputMgr;
-

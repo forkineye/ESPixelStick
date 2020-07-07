@@ -36,11 +36,10 @@ public:
     c_OutputMgr ();
     virtual ~c_OutputMgr ();
 
-    void    Begin ();                            ///< set up the operating environment based on the current config (or defaults)
-    void    LoadConfig  ();                       ///< Read the current configuration data from nvram
-    void    SaveConfig  ();                       ///< Save the current configuration data to nvram
-    void    GetConfig  (JsonObject & jsonConfig); ///< Get the current config used by the driver
-    String  GetConfig  ();
+    void    Begin ();                             ///< set up the operating environment based on the current config (or defaults)
+    void    LoadConfig ();                        ///< Read the current configuration data from nvram
+    void    SaveConfig ();                        ///< Save the current configuration data to nvram
+    void    GetConfig  (char * Response);
     bool    SetConfig  (JsonObject & jsonConfig); ///< Set a new config in the driver
     void    GetStatus  (JsonObject & jsonStatus);
     String  GetOptions (JsonObject & jsonStatus);
@@ -80,7 +79,6 @@ private:
 
     void InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, e_OutputType NewChannelType);
     void CreateNewConfig ();
-    void merge (JsonVariant dst, JsonVariantConst src);
 
     c_OutputCommon * pOutputChannelDrivers[e_OutputChannelIds::OutputChannelId_End]; ///< pointer(s) to the current active output driver
 
@@ -91,12 +89,13 @@ private:
 #   define OM_CHANNEL_DATA_NAME    F("om_channel_data")
 
     bool HasBeenInitialized = false;
+    bool ConfigSaveNeeded   = false;
 
-    bool DeserializeConfig (JsonObject & jsonConfig);
-    void SerializeConfig   (JsonObject & jsonConfig);
+    bool ProcessJsonConfig (JsonObject & jsonConfig);
+    void CreateJsonConfig  (JsonObject & jsonConfig);
 
-    File ConfigFile;
     String ConfigFileName;
+    String ConfigData;
 
 protected:
 

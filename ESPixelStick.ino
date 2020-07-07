@@ -158,6 +158,7 @@ void setup()
     // Configure and start the web server
     WebMgr.Begin(&config);
 
+    ESP.wdtEnable (2000);
     // DEBUG_END;
 
 } // setup
@@ -193,7 +194,7 @@ void validateConfig()
 } // validateConfig
 
 /// Deserialize device confiugration JSON to config structure - returns true if config change detected
-boolean dsDevice(DynamicJsonDocument &json) 
+boolean dsDevice(JsonObject & json)
 {
     // DEBUG_START;
 
@@ -214,7 +215,7 @@ boolean dsDevice(DynamicJsonDocument &json)
 } // dsDevice
 
 /// Deserialize network confiugration JSON to config structure - returns true if config change detected
-boolean dsNetwork(DynamicJsonDocument &json) 
+boolean dsNetwork(JsonObject & json)
 {
     // DEBUG_START;
 
@@ -242,11 +243,19 @@ boolean dsNetwork(DynamicJsonDocument &json)
     return retval;
 }
 
-void deserializeCore(DynamicJsonDocument &json) 
+void deserializeCore (JsonObject & json)
 {
     // DEBUG_START;
-    dsDevice(json);
-    dsNetwork(json);
+    dsDevice (json);
+    dsNetwork (json);
+    // DEBUG_END;
+}
+
+void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
+{
+    JsonObject json = jsonDoc.as<JsonObject> ();
+    // DEBUG_START;
+    deserializeCore (json);
     // DEBUG_END;
 }
 
@@ -262,7 +271,7 @@ void loadConfig()
     memset (&config, 0, sizeof (config));
 
     // DEBUG_V ("");
-    if (FileIO::loadConfig(ConfigFileName, &deserializeCore)) 
+    if (FileIO::loadConfig(ConfigFileName, &deserializeCoreHandler))
     {
         validateConfig();
     } 
@@ -282,12 +291,12 @@ void GetConfig (JsonObject & json)
     // DEBUG_START;
 
     // Device
-    JsonObject device = json.createNestedObject("device");
+    JsonObject device = json.createNestedObject(F("device"));
     device["id"]           = config.id;
     device["input"]        = config.input;
 
     // Network
-    JsonObject network = json.createNestedObject("network");
+    JsonObject network = json.createNestedObject(F("network"));
     network["ssid"]        = config.ssid;
     network["passphrase"]  = config.passphrase;
     network["hostname"]    = config.hostname;
@@ -309,8 +318,8 @@ String serializeCore(boolean pretty)
     // DEBUG_START;
 
     // Create buffer and root object
-    DynamicJsonDocument jsonConfigDoc(1024);
-    JsonObject JsonConfig = jsonConfigDoc.createNestedObject("R");
+    DynamicJsonDocument jsonConfigDoc(2048);
+    JsonObject JsonConfig = jsonConfigDoc.createNestedObject(F("R"));
 
     String jsonConfigString;
 
@@ -324,6 +333,9 @@ String serializeCore(boolean pretty)
     {
         serializeJson (JsonConfig, jsonConfigString);
     }
+
+    jsonConfigDoc.clear ();
+    jsonConfigDoc.garbageCollect ();
 
     // DEBUG_END;
 
@@ -362,9 +374,12 @@ void loop()
     // Reboot handler
     if (reboot) 
     {
+        LOG_PORT.println ("Rebooting");
         delay(REBOOT_DELAY);
         ESP.restart();
     }
+
+    ESP.wdtFeed ();
 
     // Process input data
     InputMgr.Process ();
@@ -373,8 +388,11 @@ void loop()
     OutputMgr.Render();
 
 // need to keep the rx pipeline empty
-    while (0 != LOG_PORT.available()) 
+    size_t BytesToDiscard = max (500, LOG_PORT.available ());
+    while (0 < BytesToDiscard)
     {
+        BytesToDiscard--;
         LOG_PORT.read();
-    }
+        ESP.wdtFeed ();
+    } // end discard loop
 }
