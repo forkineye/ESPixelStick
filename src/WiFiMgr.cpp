@@ -160,7 +160,11 @@ void c_WiFiMgr::GetStatus (JsonObject & jsonStatus)
     jsonStatus["ip"]       = getIpAddress ().toString ();
     jsonStatus["subnet"]   = getIpSubNetMask ().toString ();
     jsonStatus["mac"]      = WiFi.macAddress ();
+#ifdef ARDUINO_ARCH_ESP8266
     jsonStatus["hostname"] = WiFi.hostname ();
+#else
+    jsonStatus["hostname"] = WiFi.getHostname ();
+#endif // def ARDUINO_ARCH_ESP8266
     jsonStatus["ssid"]     = WiFi.SSID ();
 
 } // GetStatus
