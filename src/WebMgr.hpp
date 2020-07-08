@@ -45,18 +45,18 @@ private:
         GET_STATUS = 'J'
     };
 
-    void init             ();
-    void procSimple       (AsyncWebSocketClient * client);
-    void ProcessReceivedJsonMessage         (AsyncWebSocketClient * client);
-    void onWsEvent        (AsyncWebSocket* server, AsyncWebSocketClient * client, AwsEventType type, void* arg, uint8_t * data, size_t len);
-    void onFirmwareUpload (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
-    void GetConfiguration (String & Response);
-    void GetOptions       ();
-    void processCmd       (JsonObject & jsonCmd, AsyncWebSocketClient * client);
-    void processCmdGet    (JsonObject & jsonCmd);
-    void processCmdSet    (JsonObject & jsonCmd);
-    void processCmdOpt    (JsonObject & jsonCmd);
-    void ConvertMessageDataToString (uint8_t* data, size_t len, String& Response);
+    void init ();
+    void onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, size_t len);
+    void ProcessXseriesRequests     (AsyncWebSocketClient  * client);
+    void ProcessVseriesRequests     (AsyncWebSocketClient  * client);
+    void ProcessReceivedJsonMessage (AsyncWebSocketClient  * client);
+    void onFirmwareUpload           (AsyncWebServerRequest * request, String filename, size_t index, uint8_t* data, size_t len, bool final);
+    void processCmd                 (AsyncWebSocketClient  * client,  JsonObject & jsonCmd );
+    void processCmdGet              (JsonObject & jsonCmd);
+    void processCmdSet              (JsonObject & jsonCmd);
+    void processCmdOpt              (JsonObject & jsonCmd);
+    void GetConfiguration           ();
+    void GetOptions                 ();
 
 protected:
 

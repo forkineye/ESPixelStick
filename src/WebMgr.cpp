@@ -109,9 +109,8 @@ void c_WebMgr::init ()
     // JSON Config Handler
     webServer.on ("/conf", HTTP_GET, [this](AsyncWebServerRequest* request)
         {
-            String temp;
-            this->GetConfiguration (temp);
-            request->send (200, "text/json", temp );
+            this->GetConfiguration ();
+            request->send (200, "text/json", WebSocketFrameCollectionBuffer);
         });
 
 #ifdef ToDoFixThis
@@ -147,7 +146,7 @@ void c_WebMgr::init ()
 /*
     Gather config data from the various config sources and send it to the web page.
 */
-void c_WebMgr::GetConfiguration (String & Response)
+void c_WebMgr::GetConfiguration ()
 {
     extern void GetConfig (JsonObject & json);
     // DEBUG_START;
@@ -170,7 +169,7 @@ void c_WebMgr::GetConfiguration (String & Response)
     // InputMgr.GetConfig (JsonInputConfig);
 
     // now make it something we can transmit
-    serializeJson (webJsonDoc, Response);
+    serializeJson (webJsonDoc, WebSocketFrameCollectionBuffer);
     // DEBUG_V (Response);
 
     webJsonDoc.clear ();
@@ -281,8 +280,18 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
 
             if (WebSocketFrameCollectionBuffer[0] == 'X')
             {
-                // DEBUG_V ("procSimple");
-                procSimple (client);
+                // DEBUG_V ("ProcessXseriesRequests");
+                ProcessXseriesRequests (client);
+                webJsonDoc.clear ();
+                webJsonDoc.garbageCollect ();
+
+                break;
+            }
+
+            if (WebSocketFrameCollectionBuffer[0] == 'V')
+            {
+                // DEBUG_V ("ProcessVseriesRequests");
+                ProcessVseriesRequests (client);
                 webJsonDoc.clear ();
                 webJsonDoc.garbageCollect ();
 
@@ -347,7 +356,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
 
 //-----------------------------------------------------------------------------
 /// Process simple format 'X' messages
-void c_WebMgr::procSimple (AsyncWebSocketClient * client)
+void c_WebMgr::ProcessXseriesRequests (AsyncWebSocketClient * client)
 {
     // DEBUG_START;
 
@@ -391,7 +400,21 @@ void c_WebMgr::procSimple (AsyncWebSocketClient * client)
 
     // DEBUG_END;
 
-} // procSimple
+} // ProcessXseriesRequests
+
+//-----------------------------------------------------------------------------
+/// Process simple format 'V' messages
+void c_WebMgr::ProcessVseriesRequests (AsyncWebSocketClient* client)
+{
+    // DEBUG_START;
+
+    String response;
+    serializeJson (webJsonDoc, response);
+    client->text (String (F ("V OK")) + response);
+
+    // DEBUG_END;
+
+} // ProcessVseriesRequests
 
 //-----------------------------------------------------------------------------
 /// Process JSON messages
@@ -417,7 +440,7 @@ void c_WebMgr::ProcessReceivedJsonMessage (AsyncWebSocketClient * client)
                 // PrettyPrint (jsonCmd);
             }
             JsonObject jsonCmd = webJsonDoc["cmd"];
-            processCmd (jsonCmd, client);
+            processCmd (client, jsonCmd);
             break;
         } // webJsonDoc.containsKey ("cmd")
 
@@ -464,7 +487,7 @@ void c_WebMgr::ProcessReceivedJsonMessage (AsyncWebSocketClient * client)
 } // ProcessReceivedJsonMessage
 
 //-----------------------------------------------------------------------------
-void c_WebMgr::processCmd (JsonObject & jsonCmd, AsyncWebSocketClient * client)
+void c_WebMgr::processCmd (AsyncWebSocketClient * client, JsonObject & jsonCmd)
 {
     // DEBUG_START;
 
