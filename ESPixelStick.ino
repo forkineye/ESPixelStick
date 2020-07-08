@@ -58,6 +58,7 @@ extern "C"
 #elif defined ARDUINO_ARCH_ESP32
     // ESP32 user_interface is now built in
 #   include <Update.h>
+#   include <esp_task_wdt.h>
 #else
 #	error "Unsupported CPU type."
 #endif
@@ -158,7 +159,11 @@ void setup()
     // Configure and start the web server
     WebMgr.Begin(&config);
 
+#ifdef ARDUINO_ARCH_ESP8266
     ESP.wdtEnable (2000);
+#else
+    esp_task_wdt_init (5, true);
+#endif
     // DEBUG_END;
 
 } // setup
@@ -378,8 +383,11 @@ void loop()
         delay(REBOOT_DELAY);
         ESP.restart();
     }
-
+#ifdef ARDUINO_ARCH_ESP32
+    esp_task_wdt_reset ();
+#else
     ESP.wdtFeed ();
+#endif // def ARDUINO_ARCH_ESP32
 
     // Process input data
     InputMgr.Process ();
@@ -393,6 +401,10 @@ void loop()
     {
         BytesToDiscard--;
         LOG_PORT.read();
+#ifdef ARDUINO_ARCH_ESP32
+        esp_task_wdt_reset ();
+#else
         ESP.wdtFeed ();
+#endif // def ARDUINO_ARCH_ESP32
     } // end discard loop
 }
