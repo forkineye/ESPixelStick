@@ -1,17 +1,19 @@
 var mode = 'null';
 var wsOutputQueue = [];
 var wsBusy = false;
-var wsTimerId;
-var ws; // Web Socket
+var wsTimerId = null;
+var ws = null; // Web Socket
 
 // json with effect definitions
-var effectInfo;
+var effectInfo = null;
 
 // global data
-var ParsedJsonStatus;
-var ParsedJsonConfig;
-var om_config; // Output Manager configuration record
-var im_config; // Input Manager configuration record
+var ParsedJsonStatus = null;
+var ParsedJsonConfig = null;
+var om_config = null; // Output Manager configuration record
+var im_config = null; // Input Manager configuration record
+var selector = [];
+var StatusUpdateRequestTimer = null;
 
 // Default modal properties
 $.fn.modal.Constructor.DEFAULTS.backdrop = 'static';
@@ -32,13 +34,13 @@ $(function ()
         $($(this).attr('href')).removeClass('hidden');
 
         // kick start the live stream
-        if ($(this).attr('href') == "#diag")
+        if ($(this).attr('href') === "#diag")
         {
             wsEnqueue('V1');
         }
 
         // kick start the live stream
-        if ($(this).attr('href') == "#config")
+        if ($(this).attr('href') === "#config")
         {
             wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
             wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input'  } }));  // Get input config
@@ -55,9 +57,6 @@ $(function ()
             $('#updatefw').submit();
             $('#update').modal();
         });
-
-        // Set page event feeds
-        // RequestStatusUpdate();
     });
 
     // Drawing canvas - move to diagnostics
@@ -66,85 +65,8 @@ $(function ()
     ctx.font = "20px Arial";
     ctx.textAlign = "center";
 
-    ////////////////////////////////////////////////////
-    //
-    //  WiFi configuration change callbacks
-    //
-    ////////////////////////////////////////////////////
-    // DHCP field toggles
-    $('#network #dhcp').change(function ()
-    {
-        if ($(this).is(':checked'))
-        {
-            $('.dhcp').addClass('hidden');
-        }
-        else
-        {
-            $('.dhcp').removeClass('hidden');
-        }
-    });
-
-    // Hostname, SSID, and Password validation
-    $('#network #hostname').keyup(function ()
-    {
-        wifiValidation();
-    });
-    $('#network #sta_timeout').keyup(function ()
-    {
-        wifiValidation();
-    });
-    $('#network #ssid').keyup(function ()
-    {
-        wifiValidation();
-    });
-    $('#network #passphrase').keyup(function ()
-    {
-        wifiValidation();
-    });
-    $('#network #ap').change(function ()
-    {
-        wifiValidation();
-    });
-    $('#network #dhcp').change(function ()
-    {
-        wifiValidation();
-    });
-    $('#network #gateway').keyup(function ()
-    {
-        wifiValidation();
-    });
-    $('#network #ip').keyup(function ()
-    {
-        wifiValidation();
-    });
-    $('#network #netmask').keyup(function ()
-    {
-        wifiValidation();
-    });
-
-    ////////////////////////////////////////////////////
-    //
-    //  I/O module configuration change callbacks
-    //
-    ////////////////////////////////////////////////////
-
-    // define the input select list action
-    $('#config #device #input').change(function ()
-    {
-        if ($(this).val())
-        {
-            LoadInputConfigurationForm()
-        }
-    });
-
-    // define the output select list action
-    $('#config #device #output').change(function ()
-    {
-        if ($(this).val())
-        {
-            LoadOutputConfigurationForm();
-        }
-    });
+    SetUpWifiValidationHandlers();
+    SetUpIoChangeHandlers();
 
     // Autoload tab based on URL hash
     var hash = window.location.hash;
@@ -155,57 +77,125 @@ $(function ()
 
 });
 
+function SetUpIoChangeHandlers()
+{
+    ////////////////////////////////////////////////////
+    //
+    //  I/O module configuration change callbacks
+    //
+    ////////////////////////////////////////////////////
+
+    // define the input select list action
+    $('#config #device #input').change(function () {
+        if ($(this).val()) {
+            LoadInputConfigurationForm();
+        }
+    });
+
+    // define the output select list action
+    $('#config #device #output').change(function () {
+        if ($(this).val()) {
+            LoadOutputConfigurationForm();
+        }
+    });
+
+} // SetUpIoChangeHandlers
+
+function SetUpWifiValidationHandlers()
+{
+    ////////////////////////////////////////////////////
+    //
+    //  WiFi configuration change callbacks
+    //
+    ////////////////////////////////////////////////////
+    // DHCP field toggles
+    $('#network #dhcp').change(function () {
+        if ($(this).is(':checked')) {
+            $('.dhcp').addClass('hidden');
+        }
+        else {
+            $('.dhcp').removeClass('hidden');
+        }
+    });
+    $('#network #hostname').keyup(function () {
+        wifiValidation();
+    });
+    $('#network #sta_timeout').keyup(function () {
+        wifiValidation();
+    });
+    $('#network #ssid').keyup(function () {
+        wifiValidation();
+    });
+    $('#network #passphrase').keyup(function () {
+        wifiValidation();
+    });
+    $('#network #ap').change(function () {
+        wifiValidation();
+    });
+    $('#network #dhcp').change(function () {
+        wifiValidation();
+    });
+    $('#network #gateway').keyup(function () {
+        wifiValidation();
+    });
+    $('#network #ip').keyup(function () {
+        wifiValidation();
+    });
+    $('#network #netmask').keyup(function () {
+        wifiValidation();
+    });
+} // SetUpWifiValidationHandlers
+
 function LoadInputConfigurationForm()
 {
-    // clear the frame rate display (in case we are switching to disabled)
     $('#refresh').html('0 ms / 0 fps');
 
     var filename = $("#config #device #input option:selected").text().toLowerCase() + ".html";
-    $('#imode').load(filename, function () {
-        // update the visible fields
-        ProcessReceivedInputModeConfiguration();
+    $('#imode').load(filename, function ()
+    {
+        ProcessInputModeConfiguration();
     });
 } // LoadInputConfigurationForm
 
 function LoadOutputConfigurationForm()
 {
-    // clear the frame rate display (in case we are switching to disabled)
     $('#refresh').html('0 ms / 0 fps');
 
-    $('#omode').load($("#config #device #output option:selected").text().toLowerCase() + ".html", function () {
-        // update the visible fields
-        ProcessReceivedOutputModeConfiguration();
+    $('#omode').load($("#config #device #output option:selected").text().toLowerCase() + ".html", function ()
+    {
+        ProcessOutputModeConfiguration();
     });
 } // LoadOutputConfigurationForm
 
-var feedTimer;
-
-// Page event feeds
 function RequestStatusUpdate()
 {
-    // timer runs forever Only need to kick it off once
-    feedTimer = setTimeout(function ()
+    // is the timer running?
+    if (null == StatusUpdateRequestTimer)
     {
-        clearTimeout(feedTimer);
-        feedTimer = null;
+        // timer runs forever
+        StatusUpdateRequestTimer = setTimeout(function ()
+        {
+            clearTimeout(StatusUpdateRequestTimer);
+            StatusUpdateRequestTimer = null;
 
-        RequestStatusUpdate();
+            RequestStatusUpdate();
 
-    }, 1000);
+        }, 1000);
+    } // end timer was not running
 
     if ($('#home').is(':visible'))
     {
+        // ask for a status update from the server
         wsEnqueue('XJ');
-    }
+    } // end home (aka status) is visible
+
 } // RequestStatusUpdate
 
-// Param parser
-function param(name)
+function ParseParameter(name)
 {
     return (location.search.split(name + '=')[1] || '').split('&')[0];
 }
 
-// WiFi validation routines
 function wifiValidation()
 {
     var WifiSaveDisabled = false;
@@ -293,9 +283,9 @@ function wifiValidation()
     $('#network #btn_wifi').prop('disabled', WifiSaveDisabled);
 }
 
-function ProcessReceivedOutputModeConfiguration()
+function ProcessOutputModeConfiguration()
 {
-    // console.info("ProcessReceivedOutputModeConfiguration: Start");
+    // console.info("ProcessOutputModeConfiguration: Start");
 
     // determine the type of output that has been selected and populate the form
     var TypeOfOutputId = parseInt($("#config #device #output option:selected").val(), 10);
@@ -323,13 +313,13 @@ function ProcessReceivedOutputModeConfiguration()
     // clear the array
     selector = [];
 
-    // console.info("ProcessReceivedOutputModeConfiguration: End");
+    // console.info("ProcessOutputModeConfiguration: End");
 
-} // ProcessReceivedOutputModeConfiguration
+} // ProcessOutputModeConfiguration
 
-function ProcessReceivedInputModeConfiguration()
+function ProcessInputModeConfiguration()
 {
-    // console.info("ProcessReceivedInputModeConfiguration: Start");
+    // console.info("ProcessInputModeConfiguration: Start");
 
     // determine the type of output that has been selected and populate the form
     var TypeOfInputId = parseInt($("#config #device #input option:selected").val(), 10);
@@ -358,9 +348,9 @@ function ProcessReceivedInputModeConfiguration()
     // clear the array
     selector = [];
 
-    // console.info("ProcessReceivedInputModeConfiguration: Done");
+    // console.info("ProcessInputModeConfiguration: Done");
 
-} // ProcessReceivedInputModeConfiguration
+} // ProcessInputModeConfiguration
 
 function ProcessReceivedJsonConfigMessage(JsonConfigData)
 {
@@ -371,14 +361,14 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     {
         // save the config for later use.
         om_config = JsonConfigData.om_config;
-        ProcessReceivedOutputModeConfiguration();    }
+        ProcessOutputModeConfiguration();    }
 
     // is this an input config?
     else if (JsonConfigData.hasOwnProperty("im_config"))
     {
         // save the config for later use.
         im_config = JsonConfigData.im_config;
-        ProcessReceivedInputModeConfiguration();
+        ProcessInputModeConfiguration();
     }
 
     // is this an input config?
@@ -409,7 +399,6 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
 } // ProcessReceivedJsonConfigMessage
 
 // Builds jQuery selectors from JSON data and updates the web interface
-var selector = [];
 function updateFromJSON(obj)
 {
     for (var k in obj)
@@ -449,7 +438,7 @@ function ProcessReceivedOptionDataMessage(JsonOptionList)
     {
         var ArrayOfOptions   = JsonOptionList[OptionListName].list; // value
         var currentSelection = JsonOptionList[OptionListName].selectedoption;
-        var jqSelector = "#" + OptionListName;
+        var jqSelector       = "#" + OptionListName;
 
         // remove the existing options
         $(jqSelector).empty();
@@ -461,9 +450,14 @@ function ProcessReceivedOptionDataMessage(JsonOptionList)
             $(jqSelector).append('<option value="' + listEntry.id + '">' + listEntry.name + '</option>');
         });
 
+        // set the current selector value
         $(jqSelector).val(-1);
         $(jqSelector).val(currentSelection);
-    });
+    }); // end for each option group
+
+    LoadInputConfigurationForm();
+    LoadOutputConfigurationForm();
+
 } // ProcessReceivedOptionDataMessage
 
 // Builds jQuery selectors from JSON data and populates select options
@@ -594,12 +588,12 @@ function wsConnect()
     if ('WebSocket' in window)
     {
         var target;
-        if (!(target = param('target')))
+        if (!(target = ParseParameter('target')))
         {
             target = document.location.host;
         }
 
-        target = "192.168.10.117";
+        target = "192.168.10.99";
 
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');
@@ -616,7 +610,7 @@ function wsConnect()
 
             // throw away any old messages
             // console.info("ws.onopen: Flush and Halt");
-            FlushAndHaltTheOutputQueue();
+            wsFlushAndHaltTheOutputQueue();
 
             // show we are ready to start processing the output queue
             // console.info("ws.onopen: Turn On Sending");
@@ -692,7 +686,7 @@ function wsConnect()
 
         ws.onclose = function ()
         {
-            FlushAndHaltTheOutputQueue();
+            wsFlushAndHaltTheOutputQueue();
             $('#wserror').modal();
             wsConnect();
         };
@@ -719,7 +713,7 @@ function wsEnqueue(message)
     } // WS is up
 } // wsEnqueue
 
-function FlushAndHaltTheOutputQueue()
+function wsFlushAndHaltTheOutputQueue()
 {
     // do we have a send timer running?
     if (null !== wsTimerId)
@@ -739,7 +733,7 @@ function FlushAndHaltTheOutputQueue()
         var message = wsOutputQueue.shift();
         // console.info("Discarding msg: " + message);
     }
-} // FlushAndHaltTheOutputQueue
+} // wsFlushAndHaltTheOutputQueue
 
 // Websocket message queuer
 function wsProcessOutputQueue()
@@ -751,7 +745,7 @@ function wsProcessOutputQueue()
     {
         // The interface is NOT up. Flush the queue
         // console.log('wsProcessOutputQueue: WS Down. Flush');
-        FlushAndHaltTheOutputQueue();
+        wsFlushAndHaltTheOutputQueue();
     }
     
     //check if we are currently waiting for a response
