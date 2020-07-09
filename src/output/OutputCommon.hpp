@@ -70,7 +70,7 @@ public:
     virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig) = 0; ///< Get the current config used by the driver
     virtual void         Render () = 0;                                        ///< Call from loop(),  renders output data
     virtual void         GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
-            OID_t        GetOuputChannelId () { return OutputChannelId; }      ///< return the output channel number
+            OID_t        GetOutputChannelId () { return OutputChannelId; }      ///< return the output channel number
             uint8_t    * GetBufferAddress ()  { return InputDataBuffer;}       ///< Get the address of the buffer into which the E1.31 handler will stuff data
             uint16_t     GetBufferSize ()     { return sizeof (InputDataBuffer);} ///< Get the address of the buffer into which the E1.31 handler will stuff data
             OTYPE_t      GetOutputType ()     { return OutputType; }           ///< Have the instance report its type.
