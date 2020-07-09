@@ -354,7 +354,15 @@ void c_WebMgr::ProcessXseriesRequests (AsyncWebSocketClient * client)
             // DEBUG_V ("");
             ProcessXARequest (client);
             break;
-        } // end case SimpleMessage::GET_STATUS:
+        } // end case SimpleMessage::GET_ADMIN:
+
+        case SimpleMessage::DO_RESET:
+        {
+            // DEBUG_V ("");
+            extern bool reboot;
+            reboot = true;
+            break;
+        } // end case SimpleMessage::DO_RESET:
 
         default:
         {
@@ -479,7 +487,6 @@ void c_WebMgr::ProcessReceivedJsonMessage (DynamicJsonDocument & webJsonDoc, Asy
         // DEBUG_V ("");
 #ifdef foo
         /* From wshandler:
-                bool reboot = false;
                 switch (data[1]) {
                     case '1':   // Set Network Config
                         dsNetworkConfig(json.as<JsonObject>());

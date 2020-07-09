@@ -44,6 +44,7 @@ private:
     {
         GET_STATUS = 'J',
         GET_ADMIN  = 'A',
+        DO_RESET   = '6',
     };
 
     void init ();
