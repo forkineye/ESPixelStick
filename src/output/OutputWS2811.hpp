@@ -46,6 +46,7 @@ public:
     void         GetDriverName (String & sDriverName) { sDriverName = String (F ("WS2811")); }
     c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_WS2811;} ///< Have the instance report its type.
     void         GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
+    uint16_t     GetBufferSize () { return (pixel_count * WS2812_NUM_INTENSITY_BYTES_PER_PIXEL); } ///< Get the address of the buffer into which the E1.31 handler will stuff data
 
     /// Interrupt Handler
     void IRAM_ATTR ISR_Handler (); ///< UART ISR

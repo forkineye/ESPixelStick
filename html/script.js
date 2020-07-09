@@ -33,25 +33,7 @@ $(function ()
         $('.mdiv').addClass('hidden');
         $($(this).attr('href')).removeClass('hidden');
 
-        // kick start the live stream
-        if ($(this).attr('href') === "#diag")
-        {
-            wsEnqueue('V1');
-        }
-
-        Console.log("href = " + $(this).attr('href'));
-
-        if ($(this).attr('href') === "#admin") {
-            wsEnqueue('XA');
-        }
-
-        // kick start the live stream
-        if ($(this).attr('href') === "#config")
-        {
-            wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
-            wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input'  } }));  // Get input config
-            wsEnqueue(JSON.stringify({ 'cmd': { 'opt': 'device' } })); // Get device option data
-        }
+        ProcessWindowChange($($(this))[0].hash);
 
         // Collapse the menu on smaller screens
         $('#navbar').removeClass('in').attr('aria-expanded', 'false');
@@ -82,6 +64,29 @@ $(function ()
     RequestStatusUpdate();
 
 });
+
+function ProcessWindowChange(NextWindow) {
+
+    if (NextWindow === "#diag") {
+        wsEnqueue('V1');
+    }
+
+    else if (NextWindow === "#admin") {
+        wsEnqueue('XA');
+    }
+
+    else if ((NextWindow === "#wifi") || (NextWindow === "#home")) {
+        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
+    }
+
+    // kick start the live stream
+    else if (NextWindow === "#config") {
+        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
+        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
+        wsEnqueue(JSON.stringify({ 'cmd': { 'opt': 'device' } })); // Get device option data
+    }
+
+} // ProcessWindowChange
 
 function SetUpIoChangeHandlers()
 {
@@ -207,7 +212,7 @@ function wifiValidation()
     var WifiSaveDisabled = false;
     var re = /^([a-zA-Z0-9][a-zA-Z0-9][a-zA-Z0-9\-.]*[a-zA-Z0-9.])$/;
 
-    if (re.test($('#network #hostname').val()) && $('#network #hostname').val().length <= 255)
+    if (re.test($('#network #hostname').val()) && $('#network #hostname').val().length <= 31)
     {
         $('#network #fg_hostname').removeClass('has-error');
     }
@@ -265,7 +270,7 @@ function wifiValidation()
             WifiSaveDisabled = true;
         }
 
-        if (iptest.test($('#network #networkmask').val()))
+        if (iptest.test($('#network #netmask').val()))
         {
             $('#network #fg_netmask').removeClass('has-error');
         }
@@ -284,9 +289,10 @@ function wifiValidation()
             $('#network #fg_gateway').addClass('has-error');
             WifiSaveDisabled = true;
         }
-    }
+    } // end dhcp is off
 
-    $('#network #btn_wifi').prop('disabled', WifiSaveDisabled);
+    $('#btn_wifi').prop('disabled', WifiSaveDisabled);
+
 }
 
 function ProcessOutputModeConfiguration()
@@ -498,25 +504,30 @@ function submitWiFiConfig()
 
     var json =
     {
-        'system':
+        'cmd':
         {
-            'network':
+            'set':
             {
-                'ssid': $('#ssid').val(),
-                'passphrase': $('#passphrase').val(),
-                'hostname': $('#hostname').val(),
-                'sta_timeout': $('#sta_timeout').val(),
-                'ip': [parseInt(ip[0]), parseInt(ip[1]), parseInt(ip[2]), parseInt(ip[3])],
-                'netmask': [parseInt(netmask[0]), parseInt(netmask[1]), parseInt(netmask[2]), parseInt(netmask[3])],
-                'gateway': [parseInt(gateway[0]), parseInt(gateway[1]), parseInt(gateway[2]), parseInt(gateway[3])],
-                'dhcp': $('#dhcp').prop('checked'),
-                'ap_fallback': $('#ap').prop('checked'),
-                'ap_timeout': $('#apt').prop('checked')
+                'network':
+                {
+                    'ssid': $('#ssid').val(),
+                    'passphrase': $('#passphrase').val(),
+                    'hostname': $('#hostname').val(),
+                    'sta_timeout': $('#sta_timeout').val(),
+                    'ip': [parseInt(ip[0]), parseInt(ip[1]), parseInt(ip[2]), parseInt(ip[3])],
+                    'netmask': [parseInt(netmask[0]), parseInt(netmask[1]), parseInt(netmask[2]), parseInt(netmask[3])],
+                    'gateway': [parseInt(gateway[0]), parseInt(gateway[1]), parseInt(gateway[2]), parseInt(gateway[3])],
+                    'dhcp': $('#dhcp').prop('checked'),
+                    'ap_fallback': $('#ap').prop('checked'),
+                    'ap_timeout': $('#apt').prop('checked')
+                }
             }
         }
     };
-    wsEnqueue('S1' + JSON.stringify(json));
-}
+
+    wsEnqueue(JSON.stringify(json));
+
+} // submitWiFiConfig
 
 // Build dynamic JSON config submission for "Device" tab
 function submitDeviceConfig()
@@ -626,19 +637,7 @@ function wsConnect()
             // console.info("ws.onopen: Start Sending");
             wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get network config
 
-            // kick start the config screen
-            if ($(location).attr("hash") === "#config")
-            {
-                wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
-                wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
-                wsEnqueue(JSON.stringify({ 'cmd': { 'opt': 'device' } })); // Get device option data
-            }
-
-            // console.info("href = " + $(location).attr("hash"));
-            if ($(location).attr("hash") === "#admin")
-            {
-                wsEnqueue('XA');
-            }
+            ProcessWindowChange($(location).attr("hash"));
 
             RequestStatusUpdate();                                                       // start self filling status loop
         };

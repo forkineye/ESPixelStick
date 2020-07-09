@@ -448,9 +448,26 @@ void c_WebMgr::ProcessVseriesRequests (AsyncWebSocketClient* client)
 {
     // DEBUG_START;
 
-    String response;
+    String Response;
     // serializeJson (webJsonDoc, response);
-    client->text (String (F ("V OK")) + response);
+    switch (WebSocketFrameCollectionBuffer[1])
+    {
+        case '1':
+        {
+            // Diag screen is asking for real time output data
+            client->binary (OutputMgr.GetBufferAddress (c_OutputMgr::e_OutputChannelIds::OutputChannelId_1),
+                            OutputMgr.GetBufferSize (c_OutputMgr::e_OutputChannelIds::OutputChannelId_1));
+            break;
+        }
+
+        default:
+        {
+            client->text (F ("V Error"));
+            LOG_PORT.println (String(F("***** ERROR: Unsupported Web command V")) + WebSocketFrameCollectionBuffer[1] + F(" *****"));
+            break;
+        }
+    } // end switch
+
 
     // DEBUG_END;
 
