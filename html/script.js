@@ -436,22 +436,22 @@ function ProcessReceivedOptionDataMessage(JsonOptionList)
     // for each field we need to populate
     Object.keys(JsonOptionList).forEach(function (OptionListName)
     {
-        var ArrayOfOptions   = JsonOptionList[OptionListName].list; // value
-        var currentSelection = JsonOptionList[OptionListName].selectedoption;
-        var jqSelector       = "#" + OptionListName;
+        var DisplayedChannel  = 0;
+        var ArrayOfOptions    = JsonOptionList[OptionListName].list; // value
+        var ArrayOfSelections = JsonOptionList[OptionListName].selectedoptionlist;
+        var currentSelection  = ArrayOfSelections[DisplayedChannel].selectedoption;
+        var jqSelector        = "#" + OptionListName;
 
         // remove the existing options
         $(jqSelector).empty();
 
         // for each option in the list
-        ArrayOfOptions.forEach(function (listEntry)
-        {
+        ArrayOfOptions.forEach(function (listEntry) {
             // add in a new entry
             $(jqSelector).append('<option value="' + listEntry.id + '">' + listEntry.name + '</option>');
         });
 
         // set the current selector value
-        $(jqSelector).val(-1);
         $(jqSelector).val(currentSelection);
     }); // end for each option group
 
@@ -593,7 +593,8 @@ function wsConnect()
             target = document.location.host;
         }
 
-        target = "192.168.10.99";
+        // target = "192.168.10.99";
+        target = "192.168.10.102";
 
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');
