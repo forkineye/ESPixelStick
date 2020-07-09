@@ -449,7 +449,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
     // keep a local copy of the config
     ConfigData.clear ();
     serializeJson (jsonConfig, ConfigData);
-    // DEBUG_ ("");
+    // DEBUG_V (ConfigData);
 
     do // once
     {
@@ -460,7 +460,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
             break;
         }
         JsonObject InputChannelMgrData = jsonConfig[IM_SECTION_NAME];
-        // DEBUG_ ("");
+        // DEBUG_V ("");
 
         // extract my own config data here
 
@@ -473,7 +473,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
             break;
         }
         JsonObject InputChannelArray = InputChannelMgrData[IM_CHANNEL_SECTION_NAME];
-        // DEBUG_ ("");
+        // DEBUG_V ("");
 
         // for each Input channel
         for (uint32_t ChannelIndex = uint32_t (InputChannelId_Start);
@@ -488,12 +488,12 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
                 break;
             }
             JsonObject InputChannelConfig = InputChannelArray[String (ChannelIndex)];
-            // DEBUG_ ("");
+            // DEBUG_V ("");
 
             // set a default value for channel type
             uint32_t ChannelType = uint32_t (InputType_Default);
             FileIO::setFromJSON (ChannelType, InputChannelConfig[IM_CHANNEL_TYPE_NAME]);
-            // DEBUG_ ("");
+            // DEBUG_V ("");
 
             // is it a valid / supported channel type
             if ((ChannelType < uint32_t (InputType_Start)) || (ChannelType >= uint32_t (InputType_End)))
@@ -503,7 +503,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
                 InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex), e_InputType::InputType_Disabled);
                 continue;
             }
-            // DEBUG_ ("");
+            // DEBUG_V ("");
 
             // do we have a configuration for the channel type?
             if (false == InputChannelConfig.containsKey (String (ChannelType)))
@@ -515,20 +515,17 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
             }
 
             JsonObject InputChannelDriverConfig = InputChannelConfig[String (ChannelType)];
-            // DEBUG_ ("");
+            // DEBUG_V ("");
 
             // make sure the proper Input type is running
             InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex), e_InputType (ChannelType));
-            // DEBUG_ ("");
+            // DEBUG_V ("");
 
             // send the config to the driver. At this level we have no idea what is in it
             Response |= pInputChannelDrivers[ChannelIndex]->SetConfig (InputChannelDriverConfig);
-            // DEBUG_ ("");
+            // DEBUG_V ("");
 
         } // end for each channel
-
-        // all went well
-        Response = true;
 
     } while (false);
 
@@ -558,7 +555,7 @@ void c_InputMgr::SaveConfig ()
 {
     // DEBUG_START;
 
-    if (FileIO::saveConfig (ConfigFileName, ConfigData))
+    if (FileIO::SaveConfig (ConfigFileName, ConfigData))
     {
         LOG_PORT.println (F ("**** Saved Input Manager Config File. ****"));
      // DEBUG_V ("ConfigData");
@@ -590,7 +587,7 @@ bool c_InputMgr::SetConfig (JsonObject & jsonConfig)
     boolean Response = false;
     if (jsonConfig.containsKey (IM_SECTION_NAME))
     {
-        // DEBUG_ ("");
+        // DEBUG_V ("");
         // process the config data
         Response = ProcessJsonConfig (jsonConfig);
 

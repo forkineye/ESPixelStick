@@ -291,7 +291,7 @@ TODO: Add unified mode switching or simplify
 
                 if (zcppPacket.Configuration.flags & ZCPP_CONFIG_FLAG_LAST) {
                     lastZCPPConfig = htons(zcppPacket.Configuration.sequenceNumber);
-                    saveConfig();
+                    SaveConfig();
                     if ((zcppPacket.Configuration.flags & ZCPP_CONFIG_FLAG_QUERY_CONFIGURATION_RESPONSE_REQUIRED) != 0) {
                     sendZCPPConfig(zcppPacket);
                     }

@@ -78,4 +78,4 @@ void    deserializeCoreHandler (DynamicJsonDocument& jsonDoc);
 void    deserializeCore        (JsonObject & json);
 boolean dsDevice               (JsonObject & json);
 boolean dsNetwork              (JsonObject & json);
-void    saveConfig             ();
+void    SaveConfig             ();

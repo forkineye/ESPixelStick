@@ -671,7 +671,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
 void c_OutputMgr::SaveConfig ()
 {
     // DEBUG_START;
-    if (FileIO::saveConfig (ConfigFileName, ConfigData))
+    if (FileIO::SaveConfig (ConfigFileName, ConfigData))
     {
         LOG_PORT.println (F ("**** Saved Output Manager Config File. ****"));
     } // end we got a config and it was good

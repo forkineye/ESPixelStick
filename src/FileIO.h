@@ -223,7 +223,7 @@ public:
 	/** Saves configuration file via SPIFFS
 	 * Returns true on success.
 	 */
-	static boolean saveConfig (const String & filename, String & jsonString)
+	static boolean SaveConfig (const String & filename, String & jsonString)
 	{
 		boolean retval = false;
 		String CfgFileMessagePrefix = String (F ("Configuration file: '")) + filename + "' ";
@@ -244,7 +244,7 @@ public:
 
 		return retval;
 
-	} // saveConfig
+	} // SaveConfig
 
 	  /// Checks if value is empty and sets key to value if they're different. Returns true if key was set
 	static boolean setFromJSON (String   & key, JsonVariant val) {

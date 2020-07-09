@@ -34,7 +34,7 @@ public:
     virtual ~c_WiFiMgr ();
 
     void      Begin           (config_t* NewConfig); ///< set up the operating environment based on the current config (or defaults)
-    void      ValidateConfig  (config_t * NewConfig);
+    int       ValidateConfig  (config_t * NewConfig);
     IPAddress getIpAddress    () { return CurrentIpAddress; }
     IPAddress getIpSubNetMask () { return CurrentSubnetMask; }
     void      GetStatus       (JsonObject & jsonStatus);

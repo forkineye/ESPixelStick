@@ -46,7 +46,10 @@ void c_InputE131::Begin ()
     // DEBUG_START;
     Serial.println(F("** E1.31 Initialization **"));
 
-    if (true == HasBeenInitialized) { return; }
+    if (true == HasBeenInitialized) 
+    {
+        return;
+    }
     HasBeenInitialized = true;
 
     // Create a new ESPAsyncE131
@@ -215,16 +218,14 @@ boolean c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_START;
     bool retval = 0;
 
-    if (true == HasBeenInitialized)
-    {
-        retval = retval | FileIO::setFromJSON (startUniverse, jsonConfig["universe"]);
-        retval = retval | FileIO::setFromJSON (universe_channel_limit, jsonConfig["universe_limit"]);
-        retval = retval | FileIO::setFromJSON (channel_start, jsonConfig["channel_start"]);
-        retval = retval | FileIO::setFromJSON (multicast, jsonConfig["multicast"]);
+    // DEBUG_V ("");
+    retval = retval | FileIO::setFromJSON (startUniverse,          jsonConfig["universe"]);
+    retval = retval | FileIO::setFromJSON (universe_channel_limit, jsonConfig["universe_limit"]);
+    retval = retval | FileIO::setFromJSON (channel_start,          jsonConfig["channel_start"]);
+    retval = retval | FileIO::setFromJSON (multicast,              jsonConfig["multicast"]);
 
-        // DEBUG_V("");
-        validateConfiguration ();
-    }
+    // DEBUG_V ("");
+    validateConfiguration ();
 
     // DEBUG_END;
     return retval;

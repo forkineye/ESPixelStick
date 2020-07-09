@@ -295,19 +295,35 @@ void c_WiFiMgr::onWiFiDisconnect (const WiFiEvent_t event, const WiFiEventInfo_t
 } // onWiFiDisconnect
 
 //-----------------------------------------------------------------------------
-void c_WiFiMgr::ValidateConfig (config_t* NewConfig)
+int c_WiFiMgr::ValidateConfig (config_t* NewConfig)
 {
+    int response = 0;
+
     if (!NewConfig->ssid.length ())
+    {
         NewConfig->ssid = ssid;
+        response++;
+    }
 
     if (!NewConfig->passphrase.length ())
+    {
         NewConfig->passphrase = passphrase;
+        response++;
+    }
 
     if (NewConfig->sta_timeout < 5)
+    {
         NewConfig->sta_timeout = CLIENT_TIMEOUT;
+        response++;
+    }
 
     if (NewConfig->ap_timeout < 15)
+    {
         NewConfig->ap_timeout = AP_TIMEOUT;
+        response++;
+    }
+
+    return response;
 
 } // ValidateConfig
 

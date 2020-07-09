@@ -284,7 +284,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             }
 
             // convert the input data into a json structure (use json read only mode)
-            DynamicJsonDocument webJsonDoc (1024);
+            DynamicJsonDocument webJsonDoc (2048);
             DeserializationError error = deserializeJson (webJsonDoc, (const char *)(&WebSocketFrameCollectionBuffer[0]));
 
             // DEBUG_V ("");
@@ -335,71 +335,6 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
 } // onEvent
 
 //-----------------------------------------------------------------------------
-void c_WebMgr::ProcessXARequest (AsyncWebSocketClient* client)
-{
-    // DEBUG_START;
-
-    DynamicJsonDocument webJsonDoc (1024);
-    JsonObject jsonAdmin = webJsonDoc.createNestedObject (F ("admin"));
-
-    extern const char VERSION[];
-    extern const char BUILD_DATE[];
-
-    jsonAdmin["version"]       = VERSION;
-    jsonAdmin["built"]         = BUILD_DATE;
-    jsonAdmin["usedflashsize"] = "foo3";
-    jsonAdmin["realflashsize"] = String (ESP.getFlashChipSize ());
-    jsonAdmin["flashchipid"]   = int64String (ESP.getEfuseMac (), HEX);
-
-    strcpy (WebSocketFrameCollectionBuffer, "XA");
-    size_t msgOffset = strlen (WebSocketFrameCollectionBuffer);
-    serializeJson (webJsonDoc, &WebSocketFrameCollectionBuffer[msgOffset], (sizeof (WebSocketFrameCollectionBuffer) - msgOffset));
-    // DEBUG_V (String(WebSocketFrameCollectionBuffer));
-
-    client->text (WebSocketFrameCollectionBuffer);
-
-    // DEBUG_END;
-
-} // ProcessXJRequest
-
-//-----------------------------------------------------------------------------
-void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
-{
-    // DEBUG_START;
-
-    DynamicJsonDocument webJsonDoc (1024);
-    JsonObject status = webJsonDoc.createNestedObject (F ("status"));
-    JsonObject system = status.createNestedObject (F ("system"));
-
-    system[F ("freeheap")] = (String)ESP.getFreeHeap ();
-    system[F ("uptime")]   = millis ();
-    // DEBUG_V ("");
-
-    // Ask WiFi to add stats
-    WiFiMgr.GetStatus (system);
-    // DEBUG_V ("");
-
-    // Ask Input to add stats
-    InputMgr.GetStatus (status);
-    // DEBUG_V ("");
-
-    // Ask Input to add stats
-    OutputMgr.GetStatus (status);
-    // DEBUG_V ("");
-
-    // Ask Services to add stats
-
-    String response;
-    serializeJson (webJsonDoc, response);
-    // DEBUG_V (response);
-
-    client->text (String (F ("XJ")) + response);
-
-    // DEBUG_END;
-
-} // ProcessXJRequest
-
-//-----------------------------------------------------------------------------
 /// Process simple format 'X' messages
 void c_WebMgr::ProcessXseriesRequests (AsyncWebSocketClient * client)
 {
@@ -433,6 +368,71 @@ void c_WebMgr::ProcessXseriesRequests (AsyncWebSocketClient * client)
     // DEBUG_END;
 
 } // ProcessXseriesRequests
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::ProcessXARequest (AsyncWebSocketClient* client)
+{
+    // DEBUG_START;
+
+    DynamicJsonDocument webJsonDoc (1024);
+    JsonObject jsonAdmin = webJsonDoc.createNestedObject (F ("admin"));
+
+    extern const char VERSION[];
+    extern const char BUILD_DATE[];
+
+    jsonAdmin["version"] = VERSION;
+    jsonAdmin["built"] = BUILD_DATE;
+    jsonAdmin["usedflashsize"] = "foo3";
+    jsonAdmin["realflashsize"] = String (ESP.getFlashChipSize ());
+    jsonAdmin["flashchipid"] = int64String (ESP.getEfuseMac (), HEX);
+
+    strcpy (WebSocketFrameCollectionBuffer, "XA");
+    size_t msgOffset = strlen (WebSocketFrameCollectionBuffer);
+    serializeJson (webJsonDoc, &WebSocketFrameCollectionBuffer[msgOffset], (sizeof (WebSocketFrameCollectionBuffer) - msgOffset));
+    // DEBUG_V (String(WebSocketFrameCollectionBuffer));
+
+    client->text (WebSocketFrameCollectionBuffer);
+
+    // DEBUG_END;
+
+} // ProcessXARequest
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
+{
+    // DEBUG_START;
+
+    DynamicJsonDocument webJsonDoc (1024);
+    JsonObject status = webJsonDoc.createNestedObject (F ("status"));
+    JsonObject system = status.createNestedObject (F ("system"));
+
+    system[F ("freeheap")] = (String)ESP.getFreeHeap ();
+    system[F ("uptime")] = millis ();
+    // DEBUG_V ("");
+
+    // Ask WiFi to add stats
+    WiFiMgr.GetStatus (system);
+    // DEBUG_V ("");
+
+    // Ask Input to add stats
+    InputMgr.GetStatus (status);
+    // DEBUG_V ("");
+
+    // Ask Input to add stats
+    OutputMgr.GetStatus (status);
+    // DEBUG_V ("");
+
+    // Ask Services to add stats
+
+    String response;
+    serializeJson (webJsonDoc, response);
+    // DEBUG_V (response);
+
+    client->text (String (F ("XJ")) + response);
+
+    // DEBUG_END;
+
+} // ProcessXJRequest
 
 //-----------------------------------------------------------------------------
 /// Process simple format 'V' messages
@@ -483,7 +483,7 @@ void c_WebMgr::ProcessReceivedJsonMessage (DynamicJsonDocument & webJsonDoc, Asy
                 switch (data[1]) {
                     case '1':   // Set Network Config
                         dsNetworkConfig(json.as<JsonObject>());
-                        saveConfig();
+                        SaveConfig();
                         client->text("S1");
                         break;
                     case '2':   // Set Device Config
@@ -492,7 +492,7 @@ void c_WebMgr::ProcessReceivedJsonMessage (DynamicJsonDocument & webJsonDoc, Asy
                             reboot = true;
 
                         dsDeviceConfig(json.as<JsonObject>());
-                        saveConfig();
+                        SaveConfig();
 
                         if (reboot)
                             client->text("S1");
@@ -501,7 +501,7 @@ void c_WebMgr::ProcessReceivedJsonMessage (DynamicJsonDocument & webJsonDoc, Asy
                         break;
                     case '3':   // Set Effect Startup Config
                         dsEffectConfig(json.as<JsonObject>());
-                        saveConfig();
+                        SaveConfig();
                         client->text("S3");
                         break;
                     case '4':   // Set Gamma (but no save)
@@ -637,7 +637,8 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
         if ((jsonCmd.containsKey ("device")) || (jsonCmd.containsKey ("network")))
         {
             // DEBUG_V ("device/network");
-            deserializeCore (jsonCmd);
+            extern void SetConfig (JsonObject &);
+            SetConfig (jsonCmd);
             strcat (WebSocketFrameCollectionBuffer, serializeCore (false).c_str ());
             // DEBUG_V ("device/network: Done");
             break;
@@ -735,7 +736,7 @@ void c_WebMgr::onFirmwareUpload (AsyncWebServerRequest* request, String filename
         LOG_PORT.println (F ("* Upload Finished."));
         efupdate.end ();
         SPIFFS.begin ();
-        //        saveConfig();
+        //        SaveConfig();
         extern bool reboot;
         reboot = true;
     }

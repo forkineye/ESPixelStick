@@ -29,6 +29,7 @@
 #include "src/ESPixelStick.h"
 #include "src/EFUpdate.h"
 #include "src/FileIO.h"
+#include <Int64String.h>
 
 // Input modules
 #include "src/input/InputMgr.hpp"
@@ -92,6 +93,7 @@ String ConfigFileName = "/config.json";
 config_t            config;                 // Current configuration
 bool                reboot = false;         // Reboot flag
 uint32_t            lastUpdate;             // Update timeout tracker
+int                 ConfigSaveNeeded = 0;
 
 /////////////////////////////////////////////////////////
 //
@@ -183,17 +185,23 @@ void validateConfig()
 #ifdef ARDUINO_ARCH_ESP8266
     String chipId = String (ESP.getChipId (), HEX);
 #else
-    String chipId = String ((unsigned long)ESP.getEfuseMac (), HEX);
+    String chipId = int64String (ESP.getEfuseMac (), HEX);
 #endif
 
     // Device defaults
-    if (!config.id.length())
+    if (!config.id.length ())
+    {
         config.id = "No ID Found";
+        ConfigSaveNeeded++;
+    }
 
-    if (!config.hostname.length())
-        config.hostname = "esps-" + String(chipId);
+    if (!config.hostname.length ())
+    {
+        config.hostname = "esps-" + String (chipId);
+        ConfigSaveNeeded++;
+    }
 
-    WiFiMgr.ValidateConfig (&config);
+    ConfigSaveNeeded += WiFiMgr.ValidateConfig (&config);
 
     // DEBUG_END;
 } // validateConfig
@@ -248,12 +256,21 @@ boolean dsNetwork(JsonObject & json)
     return retval;
 }
 
+void SetConfig (JsonObject& json)
+{
+    DEBUG_START;
+    deserializeCore (json);
+    ConfigSaveNeeded++;
+    DEBUG_END;
+
+} // SetConfig
+
 void deserializeCore (JsonObject & json)
 {
-    // DEBUG_START;
+    DEBUG_START;
     dsDevice (json);
     dsNetwork (json);
-    // DEBUG_END;
+    DEBUG_END;
 }
 
 void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
@@ -283,7 +300,8 @@ void loadConfig()
     else
     {
         // Load failed, create a new config file and save it
-        saveConfig();
+        ConfigSaveNeeded = false;
+        SaveConfig();
     }
 
     //TODO: Add auxiliary service load routine
@@ -324,7 +342,7 @@ String serializeCore(boolean pretty)
 
     // Create buffer and root object
     DynamicJsonDocument jsonConfigDoc(2048);
-    JsonObject JsonConfig = jsonConfigDoc.createNestedObject(F("R"));
+    JsonObject JsonConfig = jsonConfigDoc.createNestedObject();
 
     String jsonConfigString;
 
@@ -339,33 +357,25 @@ String serializeCore(boolean pretty)
         serializeJson (JsonConfig, jsonConfigString);
     }
 
-    jsonConfigDoc.clear ();
-    jsonConfigDoc.garbageCollect ();
-
     // DEBUG_END;
 
     return jsonConfigString;
 } // serializeCore
 
 // Save configuration JSON file
-void saveConfig() 
+void SaveConfig() 
 {
-    // DEBUG_START;
+    DEBUG_START;
 
     // Validate Config
     validateConfig();
 
     // Save Config
     String DataToSave = serializeCore (false);
-    FileIO::saveConfig(ConfigFileName, DataToSave);
+    FileIO::SaveConfig(ConfigFileName, DataToSave);
 
-    // save the config for the output and input channels
-    OutputMgr.SaveConfig ();
-
-    InputMgr.SaveConfig ();
-
-    // DEBUG_END;
-} // saveConfig
+    DEBUG_END;
+} // SaveConfig
 
 /////////////////////////////////////////////////////////
 //
@@ -388,6 +398,13 @@ void loop()
 #else
     ESP.wdtFeed ();
 #endif // def ARDUINO_ARCH_ESP32
+
+    // do we need to save the current config?
+    if (0 != ConfigSaveNeeded)
+    {
+        ConfigSaveNeeded = 0;
+        SaveConfig ();
+    } // done need to save the current config
 
     // Process input data
     InputMgr.Process ();
