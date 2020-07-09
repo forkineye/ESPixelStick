@@ -39,7 +39,6 @@ const uint8_t HTTP_PORT = 80;      ///< Default web server port
 
 AsyncWebServer      webServer (HTTP_PORT);  // Web Server
 AsyncWebSocket      webSocket ("/ws");      // Web Socket Plugin
-DynamicJsonDocument webJsonDoc (2048);
 
 //-----------------------------------------------------------------------------
 void PrettyPrint (JsonObject & jsonStuff)
@@ -151,11 +150,7 @@ void c_WebMgr::GetConfiguration ()
     extern void GetConfig (JsonObject & json);
     // DEBUG_START;
 
-    // set up a framework to get the config data
-    webJsonDoc.clear ();
-    webJsonDoc.garbageCollect ();
-
-    // DEBUG_V("");
+    DynamicJsonDocument webJsonDoc (2048);
 
     JsonObject JsonSystemConfig = webJsonDoc.createNestedObject (F("system"));
     // GetConfig (JsonSystemConfig);
@@ -170,10 +165,6 @@ void c_WebMgr::GetConfiguration ()
 
     // now make it something we can transmit
     serializeJson (webJsonDoc, WebSocketFrameCollectionBuffer);
-    // DEBUG_V (Response);
-
-    webJsonDoc.clear ();
-    webJsonDoc.garbageCollect ();
 
     // DEBUG_END;
 
@@ -185,13 +176,15 @@ void c_WebMgr::GetOptions ()
     // DEBUG_START;
 
     // set up a framework to get the option data
+    DynamicJsonDocument webJsonDoc (4096);
+    // DEBUG_V ("");
     JsonObject WebOptions        = webJsonDoc.createNestedObject (F ("options"));
     JsonObject JsonInputOptions  = WebOptions.createNestedObject (F ("input"));
     JsonObject JsonOutputOptions = WebOptions.createNestedObject (F ("output"));
     // DEBUG_V("");
 
     InputMgr.GetOptions (JsonInputOptions);
-    DEBUG_V (""); // remove and we crash
+    // DEBUG_V (""); // remove and we crash
 
     OutputMgr.GetOptions (JsonOutputOptions);
     // DEBUG_V ("");
@@ -240,8 +233,6 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             if (0 == MessageInfo->index)
             {
                 // clear the string we are building
-                webJsonDoc.clear ();
-                webJsonDoc.garbageCollect ();
                 memset (WebSocketFrameCollectionBuffer, 0x0, sizeof (WebSocketFrameCollectionBuffer));
                 // DEBUG_V ("");
             }
@@ -275,30 +266,25 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
                 break;
             }
 
-            // DEBUG_V ("");
+            // DEBUG_V (WebSocketFrameCollectionBuffer);
             // message is all here. Process it
 
             if (WebSocketFrameCollectionBuffer[0] == 'X')
             {
-                // DEBUG_V ("ProcessXseriesRequests");
+                // DEBUG_V ("");
                 ProcessXseriesRequests (client);
-                webJsonDoc.clear ();
-                webJsonDoc.garbageCollect ();
-
                 break;
             }
 
             if (WebSocketFrameCollectionBuffer[0] == 'V')
             {
-                // DEBUG_V ("ProcessVseriesRequests");
+                // DEBUG_V ("");
                 ProcessVseriesRequests (client);
-                webJsonDoc.clear ();
-                webJsonDoc.garbageCollect ();
-
                 break;
             }
 
             // convert the input data into a json structure (use json read only mode)
+            DynamicJsonDocument webJsonDoc (1024);
             DeserializationError error = deserializeJson (webJsonDoc, (const char *)(&WebSocketFrameCollectionBuffer[0]));
 
             // DEBUG_V ("");
@@ -306,18 +292,12 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             {
                 LOG_PORT.println (String (F ("*** WebIO::onWsEvent(): Parse Error: ")) + error.c_str ());
                 LOG_PORT.println (WebSocketFrameCollectionBuffer);
-                webJsonDoc.clear ();
-                webJsonDoc.garbageCollect ();
-
                 break;
             }
-            // DEBUG_V ("ProcessReceivedJsonMessage");
-
-            ProcessReceivedJsonMessage (client);
             // DEBUG_V ("");
 
-            webJsonDoc.clear ();
-            webJsonDoc.garbageCollect ();
+            ProcessReceivedJsonMessage (webJsonDoc, client);
+            // DEBUG_V ("");
 
             break;
         } // case WS_EVT_DATA:
@@ -367,6 +347,7 @@ void c_WebMgr::ProcessXseriesRequests (AsyncWebSocketClient * client)
             // DEBUG_V ("");
 
             // system statistics
+            DynamicJsonDocument webJsonDoc (2048);
             JsonObject status = webJsonDoc.createNestedObject (F ("status"));
             JsonObject system = status.createNestedObject (F ("system"));
 
@@ -409,7 +390,7 @@ void c_WebMgr::ProcessVseriesRequests (AsyncWebSocketClient* client)
     // DEBUG_START;
 
     String response;
-    serializeJson (webJsonDoc, response);
+    // serializeJson (webJsonDoc, response);
     client->text (String (F ("V OK")) + response);
 
     // DEBUG_END;
@@ -418,7 +399,7 @@ void c_WebMgr::ProcessVseriesRequests (AsyncWebSocketClient* client)
 
 //-----------------------------------------------------------------------------
 /// Process JSON messages
-void c_WebMgr::ProcessReceivedJsonMessage (AsyncWebSocketClient * client)
+void c_WebMgr::ProcessReceivedJsonMessage (DynamicJsonDocument & webJsonDoc, AsyncWebSocketClient * client)
 {
     // DEBUG_START;
     //LOG_PORT.printf("ProcessReceivedJsonMessage heap /stack stats: %u:%u:%u:%u\n", ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());

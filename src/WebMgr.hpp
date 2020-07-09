@@ -36,7 +36,7 @@ private:
     config_t      * config = nullptr;       // Current configuration
     EFUpdate        efupdate;
 
-#   define WebSocketFrameCollectionBufferSize 1024
+#   define WebSocketFrameCollectionBufferSize 2048
     char WebSocketFrameCollectionBuffer[WebSocketFrameCollectionBufferSize + 1];
 
     /// Valid "Simple" message types
@@ -49,8 +49,8 @@ private:
     void onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, size_t len);
     void ProcessXseriesRequests     (AsyncWebSocketClient  * client);
     void ProcessVseriesRequests     (AsyncWebSocketClient  * client);
-    void ProcessReceivedJsonMessage (AsyncWebSocketClient  * client);
     void onFirmwareUpload           (AsyncWebServerRequest * request, String filename, size_t index, uint8_t* data, size_t len, bool final);
+    void ProcessReceivedJsonMessage (DynamicJsonDocument   & webJsonDoc, AsyncWebSocketClient  * client);
     void processCmd                 (AsyncWebSocketClient  * client,  JsonObject & jsonCmd );
     void processCmdGet              (JsonObject & jsonCmd);
     void processCmdSet              (JsonObject & jsonCmd);
