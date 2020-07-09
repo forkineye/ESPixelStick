@@ -258,19 +258,19 @@ boolean dsNetwork(JsonObject & json)
 
 void SetConfig (JsonObject& json)
 {
-    DEBUG_START;
+    // DEBUG_START;
     deserializeCore (json);
     ConfigSaveNeeded++;
-    DEBUG_END;
+    // DEBUG_END;
 
 } // SetConfig
 
 void deserializeCore (JsonObject & json)
 {
-    DEBUG_START;
+    // DEBUG_START;
     dsDevice (json);
     dsNetwork (json);
-    DEBUG_END;
+    // DEBUG_END;
 }
 
 void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
@@ -365,7 +365,7 @@ String serializeCore(boolean pretty)
 // Save configuration JSON file
 void SaveConfig() 
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     // Validate Config
     validateConfig();
@@ -374,7 +374,7 @@ void SaveConfig()
     String DataToSave = serializeCore (false);
     FileIO::SaveConfig(ConfigFileName, DataToSave);
 
-    DEBUG_END;
+    // DEBUG_END;
 } // SaveConfig
 
 /////////////////////////////////////////////////////////
