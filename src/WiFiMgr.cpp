@@ -232,7 +232,8 @@ void c_WiFiMgr::connectWifi ()
         }
         else
         {
-            LOG_PORT.println (F ("** ERROR - STATIC SELECTED WITHOUT IP **"));
+            LOG_PORT.println (F ("** ERROR - STATIC SELECTED WITHOUT IP. Using DHCP **"));
+            config->UseDhcp = true;
         }
     }
 } // connectWifi
