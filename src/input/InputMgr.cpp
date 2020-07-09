@@ -255,7 +255,16 @@ void c_InputMgr::GetOptions (JsonObject & jsonOptions)
 {
     // DEBUG_START;
 
-    jsonOptions[F ("selectedoption")] = pInputChannelDrivers[0]->GetInputType ();
+    JsonArray SelectedOptionList = jsonOptions.createNestedArray ("selectedoptionlist");
+
+    // build a list of the current available channels and their output type
+    for (c_InputCommon* currentInput : pInputChannelDrivers)
+    {
+        JsonObject selectedoption = SelectedOptionList.createNestedObject ();
+        selectedoption[F ("id")            ] = currentInput->GetInputChannelId ();
+        selectedoption[F ("selectedoption")] = currentInput->GetInputType ();
+    }
+
     // DEBUG_V ("");
 
     JsonArray jsonOptionsArray = jsonOptions.createNestedArray (F ("list"));
