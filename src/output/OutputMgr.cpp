@@ -161,10 +161,10 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
     // DEBUG_V ("For Each Output Channel");
     for (auto CurrentChannel : pOutputChannelDrivers)
     {
-        // DEBUG_V (String("Create Section in Config file for the output channel: '") + CurrentChannel->GetOuputChannelId() + "'");
+        // DEBUG_V (String("Create Section in Config file for the output channel: '") + CurrentChannel->GetOutputChannelId() + "'");
         // create a record for this channel
         JsonObject ChannelConfigData;
-        String sChannelId = String (CurrentChannel->GetOuputChannelId ());
+        String sChannelId = String (CurrentChannel->GetOutputChannelId ());
         if (true == OutputMgrChannelsData.containsKey (sChannelId))
         {
             // DEBUG_V ("");
@@ -292,11 +292,19 @@ void c_OutputMgr::GetConfig (char * Response )
 } // GetConfig
 
 //-----------------------------------------------------------------------------
-String c_OutputMgr::GetOptions (JsonObject & jsonOptions)
+void c_OutputMgr::GetOptions (JsonObject & jsonOptions)
 {
     // DEBUG_START;
+    JsonArray SelectedOptionList = jsonOptions.createNestedArray (F("selectedoptionlist"));
 
-    jsonOptions[F ("selectedoption")] = pOutputChannelDrivers[0]->GetOutputType ();
+    // build a list of the current available channels and their output type
+    for (c_OutputCommon* currentOutput : pOutputChannelDrivers)
+    {
+        JsonObject selectedoption = SelectedOptionList.createNestedObject ();
+        selectedoption[F ("id")]             = currentOutput->GetOutputChannelId ();
+        selectedoption[F ("selectedoption")] = currentOutput->GetOutputType ();
+    }
+
     // DEBUG_V ("");
 
     JsonArray jsonOptionsArray = jsonOptions.createNestedArray (F("list"));
