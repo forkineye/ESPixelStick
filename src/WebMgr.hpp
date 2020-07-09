@@ -42,12 +42,12 @@ private:
     /// Valid "Simple" message types
     enum SimpleMessage 
     {
-        GET_STATUS = 'J'
+        GET_STATUS = 'J',
+        GET_ADMIN  = 'A',
     };
 
     void init ();
     void onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, size_t len);
-    void ProcessXseriesRequests     (AsyncWebSocketClient  * client);
     void ProcessVseriesRequests     (AsyncWebSocketClient  * client);
     void onFirmwareUpload           (AsyncWebServerRequest * request, String filename, size_t index, uint8_t* data, size_t len, bool final);
     void ProcessReceivedJsonMessage (DynamicJsonDocument   & webJsonDoc, AsyncWebSocketClient  * client);
@@ -57,6 +57,10 @@ private:
     void processCmdOpt              (JsonObject & jsonCmd);
     void GetConfiguration           ();
     void GetOptions                 ();
+    void ProcessXseriesRequests     (AsyncWebSocketClient * client);
+    void ProcessXARequest           (AsyncWebSocketClient * client);
+    void ProcessXJRequest           (AsyncWebSocketClient * client);
+
 
 protected:
 

@@ -39,6 +39,12 @@ $(function ()
             wsEnqueue('V1');
         }
 
+        Console.log("href = " + $(this).attr('href'));
+
+        if ($(this).attr('href') === "#admin") {
+            wsEnqueue('XA');
+        }
+
         // kick start the live stream
         if ($(this).attr('href') === "#config")
         {
@@ -628,7 +634,13 @@ function wsConnect()
                 wsEnqueue(JSON.stringify({ 'cmd': { 'opt': 'device' } })); // Get device option data
             }
 
-            // RequestStatusUpdate();                                                       // start self filling status loop
+            // console.info("href = " + $(location).attr("hash"));
+            if ($(location).attr("hash") === "#admin")
+            {
+                wsEnqueue('XA');
+            }
+
+            RequestStatusUpdate();                                                       // start self filling status loop
         };
 
         ws.onmessage = function (event)
@@ -641,8 +653,16 @@ function wsConnect()
                 // Process "simple" message format
                 if (event.data.startsWith("X"))
                 {
-                    var data = event.data.substr(2);
-                    ProcessRecievedJsonStatusMessage(data);
+                    if (event.data[1] === 'J')
+                    {
+                        var data = event.data.substr(2);
+                        ProcessRecievedJsonStatusMessage(data);
+                    }
+                    else if (event.data[1] === 'A')
+                    {
+                        var data = event.data.substr(2);
+                        ProcessRecievedJsonAdminMessage(data);
+                    }
                 }
                 else
                 {
@@ -857,6 +877,18 @@ function clearStream()
     }
 }
 
+function ProcessRecievedJsonAdminMessage(data)
+{
+    ParsedJsonAdmin = JSON.parse(data);
+
+    $('#version').text(ParsedJsonAdmin.admin.version);
+    $('#built').text(ParsedJsonAdmin.admin.built);
+    $('#usedflashsize').text(ParsedJsonAdmin.admin.usedflashsize);
+    $('#realflashsize').text(ParsedJsonAdmin.admin.realflashsize);
+    $('#flashchipid').text(ParsedJsonAdmin.admin.flashchipid);
+
+} // ProcessRecievedJsonAdminMessage
+
 function ProcessRecievedJsonStatusMessage(data)
 {
     ParsedJsonStatus = JSON.parse(data);
@@ -911,7 +943,7 @@ function ProcessRecievedJsonStatusMessage(data)
 
     // Device Refresh is dynamic
     $('#refresh').text(ParsedJsonStatus.status.output[0].framerefreshrate + " fps");
-}
+} // ProcessRecievedJsonAdminMessage
 
 // Show "save" snackbar for 3sec
 function snackSave()

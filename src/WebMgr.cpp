@@ -335,6 +335,71 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
 } // onEvent
 
 //-----------------------------------------------------------------------------
+void c_WebMgr::ProcessXARequest (AsyncWebSocketClient* client)
+{
+    // DEBUG_START;
+
+    DynamicJsonDocument webJsonDoc (1024);
+    JsonObject jsonAdmin = webJsonDoc.createNestedObject (F ("admin"));
+
+    extern const char VERSION[];
+    extern const char BUILD_DATE[];
+
+    jsonAdmin["version"]       = VERSION;
+    jsonAdmin["built"]         = BUILD_DATE;
+    jsonAdmin["usedflashsize"] = "foo3";
+    jsonAdmin["realflashsize"] = String (ESP.getFlashChipSize ());
+    jsonAdmin["flashchipid"]   = int64String (ESP.getEfuseMac (), HEX);
+
+    strcpy (WebSocketFrameCollectionBuffer, "XA");
+    size_t msgOffset = strlen (WebSocketFrameCollectionBuffer);
+    serializeJson (webJsonDoc, &WebSocketFrameCollectionBuffer[msgOffset], (sizeof (WebSocketFrameCollectionBuffer) - msgOffset));
+    // DEBUG_V (String(WebSocketFrameCollectionBuffer));
+
+    client->text (WebSocketFrameCollectionBuffer);
+
+    // DEBUG_END;
+
+} // ProcessXJRequest
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
+{
+    // DEBUG_START;
+
+    DynamicJsonDocument webJsonDoc (1024);
+    JsonObject status = webJsonDoc.createNestedObject (F ("status"));
+    JsonObject system = status.createNestedObject (F ("system"));
+
+    system[F ("freeheap")] = (String)ESP.getFreeHeap ();
+    system[F ("uptime")]   = millis ();
+    // DEBUG_V ("");
+
+    // Ask WiFi to add stats
+    WiFiMgr.GetStatus (system);
+    // DEBUG_V ("");
+
+    // Ask Input to add stats
+    InputMgr.GetStatus (status);
+    // DEBUG_V ("");
+
+    // Ask Input to add stats
+    OutputMgr.GetStatus (status);
+    // DEBUG_V ("");
+
+    // Ask Services to add stats
+
+    String response;
+    serializeJson (webJsonDoc, response);
+    // DEBUG_V (response);
+
+    client->text (String (F ("XJ")) + response);
+
+    // DEBUG_END;
+
+} // ProcessXJRequest
+
+//-----------------------------------------------------------------------------
 /// Process simple format 'X' messages
 void c_WebMgr::ProcessXseriesRequests (AsyncWebSocketClient * client)
 {
@@ -345,38 +410,24 @@ void c_WebMgr::ProcessXseriesRequests (AsyncWebSocketClient * client)
         case SimpleMessage::GET_STATUS:
         {
             // DEBUG_V ("");
-
-            // system statistics
-            DynamicJsonDocument webJsonDoc (2048);
-            JsonObject status = webJsonDoc.createNestedObject (F ("status"));
-            JsonObject system = status.createNestedObject (F ("system"));
-
-            system[F ("freeheap")] = (String)ESP.getFreeHeap ();
-            system[F ("uptime")]   = millis ();
-            // DEBUG_V ("");
-
-            // Ask WiFi to add stats
-            WiFiMgr.GetStatus (system);
-            // DEBUG_V ("");
-
-            // Ask Input to add stats
-            InputMgr.GetStatus (status);
-            // DEBUG_V ("");
-
-            // Ask Input to add stats
-            OutputMgr.GetStatus (status);
-            // DEBUG_V ("");
-
-            // Ask Services to add stats
-
-            String response;
-            serializeJson (webJsonDoc, response);
-            client->text (String(F ("XJ")) + response);
-
-            // DEBUG_V (response);
-
+            ProcessXJRequest (client);
             break;
         } // end case SimpleMessage::GET_STATUS:
+
+        case SimpleMessage::GET_ADMIN:
+        {
+            // DEBUG_V ("");
+            ProcessXARequest (client);
+            break;
+        } // end case SimpleMessage::GET_STATUS:
+
+        default:
+        {
+            LOG_PORT.println (String (F ("ERROR: Unhandled request: ")) + WebSocketFrameCollectionBuffer);
+            client->text (String (F ("{\"Error\":Error")));
+            break;
+        }
+
     } // end switch (data[1])
 
     // DEBUG_END;
