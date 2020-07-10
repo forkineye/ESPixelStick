@@ -221,7 +221,9 @@ public:
 
 	/// Save configuration file
 	/** Saves configuration file via SPIFFS
-	 * Returns true on success.
+	 * Returns true on 'value has been changed'.
+	 * Returns false if field not found
+	 * Returns false if value is unchanged
 	 */
 	static boolean SaveConfig (const String & filename, String & jsonString)
 	{
