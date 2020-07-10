@@ -300,9 +300,7 @@ function ProcessOutputModeConfiguration()
     // console.info("ProcessOutputModeConfiguration: Start");
 
     // determine the type of output that has been selected and populate the form
-    var TypeOfOutputId = parseInt($("#config #device #output option:selected").val(), 10);
-
-    // At the moment we only support a single channel
+    var TypeOfOutputId   = parseInt($("#config #device #output option:selected").val(), 10);
     var channelId        = 0;
     var channelConfigSet = om_config.om_channels[channelId];
     if (isNaN(TypeOfOutputId))
@@ -333,20 +331,18 @@ function ProcessInputModeConfiguration()
 {
     // console.info("ProcessInputModeConfiguration: Start");
 
-    // determine the type of output that has been selected and populate the form
-    var TypeOfInputId = parseInt($("#config #device #input option:selected").val(), 10);
-
     // At the moment we only support a single channel
     var channelId        = 0;
     var channelConfigSet = im_config.im_inputs[channelId];
+    var TypeOfInputId    = parseInt($("#config #device #input option:selected").val(), 10);
     if (isNaN(TypeOfInputId))
     {
         // use the value we got from the controller
         TypeOfInputId = channelConfigSet.im_input_type;
     }
-
     var channelConfig    = channelConfigSet[TypeOfInputId];
     var ChannelTypeName  = channelConfig.type.toLowerCase();
+    ChannelTypeName = ChannelTypeName.replace('.', '_');
 
     // clear the array
     selector = [];
