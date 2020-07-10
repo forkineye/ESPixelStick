@@ -415,17 +415,23 @@ void c_InputMgr::LoadConfig ()
 ///< Called from loop(), renders Input data
 void c_InputMgr::Process ()
 {
+    // DEBUG_START;
     // do we need to save the current config?
     if (true == ConfigSaveNeeded)
     {
+        // DEBUG_V ("ConfigData: " + ConfigData);
+
         ConfigSaveNeeded = false;
         SaveConfig ();
+        // DEBUG_V("");
+
     } // done need to save the current config
 
-    // DEBUG_START;
+    // DEBUG_V("");
     for (c_InputCommon* pInputChannel : pInputChannelDrivers)
     {
         pInputChannel->Process ();
+        // DEBUG_V("");
     }
     // DEBUG_END;
 } // render
@@ -449,7 +455,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
     // keep a local copy of the config
     ConfigData.clear ();
     serializeJson (jsonConfig, ConfigData);
-    // DEBUG_V (ConfigData);
+    // DEBUG_V ("ConfigData: " + ConfigData);
 
     do // once
     {
@@ -555,11 +561,12 @@ void c_InputMgr::SaveConfig ()
 {
     // DEBUG_START;
 
+    // DEBUG_V ("ConfigData: " + ConfigData);
+
     if (FileIO::SaveConfig (ConfigFileName, ConfigData))
     {
         LOG_PORT.println (F ("**** Saved Input Manager Config File. ****"));
-     // DEBUG_V ("ConfigData");
-     // DEBUG_V (ConfigData);
+        // DEBUG_V ("ConfigData: " + ConfigData);
     } // end we got a config and it was good
     else
     {
