@@ -20,6 +20,13 @@
 #include "InputE131.hpp"
 #include "../FileIO.h"
 
+#define JSON_NAME_UNIVERSE       (F ("universe"))
+#define JSON_NAME_UNIVERSE_LIMIT (F ("universe_limit"))
+#define JSON_NAME_CHANNEL_START  (F ("channel_start"))
+#define JSON_NAME_MULTICAST      (F ("multicast"))
+
+
+
 //-----------------------------------------------------------------------------
 c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
                           c_InputMgr::e_InputType       NewChannelType,
@@ -96,10 +103,10 @@ void c_InputE131::GetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
-    jsonConfig["universe"]       = startUniverse;
-    jsonConfig["universe_limit"] = universe_channel_limit;
-    jsonConfig["channel_start"]  = channel_start;
-    jsonConfig["multicast"]      = multicast;
+    jsonConfig[JSON_NAME_UNIVERSE]       = startUniverse;
+    jsonConfig[JSON_NAME_UNIVERSE_LIMIT] = universe_channel_limit;
+    jsonConfig[JSON_NAME_CHANNEL_START]  = channel_start;
+    jsonConfig[JSON_NAME_MULTICAST]      = multicast;
 
     // DEBUG_END;
 
@@ -216,20 +223,17 @@ void c_InputE131::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
 boolean c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
-    bool retval = 0;
 
-    // DEBUG_V ("");
-    retval = retval | FileIO::setFromJSON (startUniverse,          jsonConfig["universe"]);
-    retval = retval | FileIO::setFromJSON (universe_channel_limit, jsonConfig["universe_limit"]);
-    retval = retval | FileIO::setFromJSON (channel_start,          jsonConfig["channel_start"]);
-    retval = retval | FileIO::setFromJSON (multicast,              jsonConfig["multicast"]);
+    FileIO::setFromJSON (startUniverse,          jsonConfig[JSON_NAME_UNIVERSE]);
+    FileIO::setFromJSON (universe_channel_limit, jsonConfig[JSON_NAME_UNIVERSE_LIMIT]);
+    FileIO::setFromJSON (channel_start,          jsonConfig[JSON_NAME_CHANNEL_START]);
+    FileIO::setFromJSON (multicast,              jsonConfig[JSON_NAME_MULTICAST]);
 
-    // DEBUG_V ("");
     validateConfiguration ();
 
     // DEBUG_END;
-    return retval;
-} // deserialize
+    return true;
+} // SetConfig
 
 //-----------------------------------------------------------------------------
 // Subscribe to "n" universes, starting at "universe"
