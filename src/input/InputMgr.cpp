@@ -2,7 +2,7 @@
 * InputMgr.cpp - Input Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2019 Shelby Merrick
+* Copyright (c) 2020 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -29,6 +29,7 @@
 // bring in driver definitions
 #include "InputDisabled.hpp"
 #include "InputE131.hpp"
+#include "InputEffectEngine.hpp"
 // needs to be last
 #include "InputMgr.hpp"
 
@@ -45,7 +46,8 @@ typedef struct InputTypeXlateMap_t
 
 InputTypeXlateMap_t InputTypeXlateMap[c_InputMgr::e_InputType::InputType_End] =
 {
-    {c_InputMgr::e_InputType::InputType_E1_31,    "E1.31"   },
+    {c_InputMgr::e_InputType::InputType_E1_31,    "E1.31"    },
+    {c_InputMgr::e_InputType::InputType_Effects,  "Effects"  },
     {c_InputMgr::e_InputType::InputType_Disabled, "Disabled" }
 };
 

@@ -1,8 +1,8 @@
 /*
-* E131Input.h - Code to wrap ESPAsyncE131 for input
+* E131Input.cpp - Code to wrap ESPAsyncE131 for input
 *
 * Project: ESPixelStick - An ESP8266 and E1.31 based pixel driver
-* Copyright (c) 2019 Shelby Merrick
+* Copyright (c) 2020 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
