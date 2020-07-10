@@ -491,7 +491,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
             {
                 // if not, flag an error and stop processing
                 LOG_PORT.println (String (F ("No Input Settings Found for Channel '")) + ChannelIndex + String (F ("'. Using Defaults")));
-                break;
+                continue;
             }
             JsonObject InputChannelConfig = InputChannelArray[String (ChannelIndex)];
             // DEBUG_V ("");
@@ -525,13 +525,15 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
 
             // make sure the proper Input type is running
             InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex), e_InputType (ChannelType));
-            // DEBUG_V ("");
+            // DEBUG_V (String ("Response: ") + Response);
 
             // send the config to the driver. At this level we have no idea what is in it
-            Response |= pInputChannelDrivers[ChannelIndex]->SetConfig (InputChannelDriverConfig);
-            // DEBUG_V ("");
+            pInputChannelDrivers[ChannelIndex]->SetConfig (InputChannelDriverConfig);
+            // DEBUG_V (String("Response: ") + Response);
 
         } // end for each channel
+
+		Response = true;
 
     } while (false);
 
