@@ -45,7 +45,6 @@
 
 // Services
 //#include "src/service/MQTT.h"
-//#include "src/service/EffectEngine.h"
 //#include "src/service/ESPAsyncZCPP.h"
 //#include "src/service/FPPDiscovery.h"
 
@@ -86,7 +85,6 @@ String ConfigFileName = "/config.json";
 
 //TODO: Add Auxiliary services
 //MQTT
-//effects
 //zcpp
 //FPPDiscovery
 
