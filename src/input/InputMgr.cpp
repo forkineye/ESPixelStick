@@ -626,21 +626,28 @@ bool c_InputMgr::SetConfig (JsonObject & jsonConfig)
 } // SetConfig
 
 //-----------------------------------------------------------------------------
-void c_InputMgr::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
+void c_InputMgr::SetBufferInfo (c_OutputMgr::e_OutputChannelIds outputChannelId, uint8_t* BufferStart, uint16_t BufferSize)
 {
     // DEBUG_START;
 
-    InputDataBuffer     = BufferStart;
-    InputDataBufferSize = BufferSize;
-
-    // pass through each active interface and set the buffer info
-            // for each Input channel
-    for (int ChannelIndex = int (InputChannelId_Start);
-        ChannelIndex < int (InputChannelId_End);
-        ChannelIndex++)
+    // only accept a buffer for channel 1. We are not multi output channel ready yet
+    if (c_OutputMgr::e_OutputChannelIds::OutputChannelId_1 == outputChannelId)
     {
-        pInputChannelDrivers[ChannelIndex]->SetBufferInfo (InputDataBuffer, InputDataBufferSize);
-    } // end for each channel
+        InputDataBuffer = BufferStart;
+        InputDataBufferSize = BufferSize;
+
+        // pass through each active interface and set the buffer info
+                // for each Input channel
+        for (int ChannelIndex = int (InputChannelId_Start);
+            ChannelIndex < int (InputChannelId_End);
+            ChannelIndex++)
+        {
+            if (nullptr != pInputChannelDrivers[ChannelIndex])
+            {
+                pInputChannelDrivers[ChannelIndex]->SetBufferInfo (InputDataBuffer, InputDataBufferSize);
+            }
+        } // end for each channel
+    }
 
     // DEBUG_END;
 

@@ -34,6 +34,9 @@
 // needs to be last
 #include "OutputMgr.hpp"
 
+#include "../input/InputMgr.hpp"
+
+
 //-----------------------------------------------------------------------------
 // Local Data definitions
 //-----------------------------------------------------------------------------
@@ -376,6 +379,9 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 break;
             }
 
+            // tell the input operations there is no place to put the incoming data
+            InputMgr.SetBufferInfo (ChannelIndex, nullptr, 0);
+
             // DEBUG_V ("shut down the existing driver");
             delete pOutputChannelDrivers[ChannelIndex];
             pOutputChannelDrivers[ChannelIndex] = nullptr;
@@ -503,6 +509,11 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
         // DEBUG_V ("");
         pOutputChannelDrivers[ChannelIndex]->Begin ();
+
+        // tell the inputs where they can put the data
+        InputMgr.SetBufferInfo (ChannelIndex, 
+                                pOutputChannelDrivers[ChannelIndex]->GetBufferAddress(), 
+                                pOutputChannelDrivers[ChannelIndex]->GetBufferSize());
 
     } while (false);
 

@@ -105,7 +105,7 @@ private:
     timeType EffectLastRun         = 0;               /* When did the effect last run ? in millis() */
     uint32_t EffectCounter         = 0;               /* Counter for the number of calls to the active effect */
     uint16_t EffectSpeed           = 6;               /* Externally controlled effect speed 1..10 */
-    uint16_t EffectDelay           = 1000;            /* Internal representation of speed */
+    uint16_t EffectDelay           = DEFAULT_EFFECT_DELAY; /* Internal representation of speed */
     bool EffectReverse             = false;           /* Externally controlled effect reverse option */
     bool EffectMirror              = false;           /* Externally controlled effect mirroring (start at center) */
     bool EffectAllLeds             = false;           /* Externally controlled effect all leds = 1st led */

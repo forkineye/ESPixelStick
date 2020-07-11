@@ -43,14 +43,17 @@ const c_InputEffectEngine::EffectDescriptor_t ListOfEffects[] =
 
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInputChannelId,
-    c_InputMgr::e_InputType       NewChannelType,
-    uint8_t* BufferStart,
-    uint16_t                      BufferSize) :
+                                          c_InputMgr::e_InputType       NewChannelType,
+                                          uint8_t                     * BufferStart,
+                                          uint16_t                      BufferSize) :
     c_InputCommon (NewInputChannelId, NewChannelType, BufferStart, BufferSize)
 {
     // DEBUG_START;
     // set a default effect
     ActiveEffect = &ListOfEffects[0];
+
+    PixelCount = BufferSize / 3;
+
     // DEBUG_END;
 } // c_InputEffectEngine
 
@@ -62,7 +65,7 @@ c_InputEffectEngine::~c_InputEffectEngine ()
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::Begin ()
 {
-    DEBUG_START;
+    // DEBUG_START;
     Serial.println (F ("** Effect Engine Initialization **"));
 
     if (true == HasBeenInitialized)
@@ -75,7 +78,7 @@ void c_InputEffectEngine::Begin ()
     // DEBUG_V ("");
 
 
-    DEBUG_END;
+    // DEBUG_END;
 } // Begin
 
 //-----------------------------------------------------------------------------
@@ -118,13 +121,16 @@ void c_InputEffectEngine::Process ()
 {
     // DEBUG_START;
 
-    if (HasBeenInitialized && ActiveEffect && ActiveEffect->func)
+    PixelCount = 10;
+
+    if (HasBeenInitialized && (0 != PixelCount))
     {
+        // DEBUG_V ("");
         if (millis () - EffectLastRun >= EffectWait)
         {
+            // DEBUG_V ("");
             EffectLastRun = millis ();
-            // todo figure this out: uint16_t wait = *ActiveEffect->func();
-            uint16_t wait = 32;
+            uint16_t wait = (this->*ActiveEffect->func)();
             EffectWait = max ((int)wait, MIN_EFFECT_DELAY);
             EffectCounter++;
         }
@@ -142,6 +148,8 @@ void c_InputEffectEngine::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSi
     InputDataBuffer     = BufferStart;
     InputDataBufferSize = BufferSize;
 
+    PixelCount = BufferSize / 3;
+
     // DEBUG_END;
 
 } // SetBufferInfo
@@ -149,7 +157,7 @@ void c_InputEffectEngine::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSi
 //-----------------------------------------------------------------------------
 boolean c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
     String effectName;
     String effectColor;
 
@@ -166,20 +174,20 @@ boolean c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     setEffect (effectName);
 
-    DEBUG_END;
+    // DEBUG_END;
     return true;
 } // SetConfig
 
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::validateConfiguration ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     setBrightness (EffectBrightness);
     setSpeed (EffectSpeed);
     setDelay (EffectDelay);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // validateConfiguration
 
@@ -209,7 +217,7 @@ void c_InputEffectEngine::setDelay (uint16_t delay)
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::setEffect (const String & effectName)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     int EffectIndex = 0;
     for (EffectDescriptor_t currentEffect : ListOfEffects)
@@ -229,16 +237,16 @@ void c_InputEffectEngine::setEffect (const String & effectName)
         EffectIndex++;
     } // end for each effect
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // setEffect
 
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::setColor (String & NewColor)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    DEBUG_V ("NewColor: " + NewColor);
+    // DEBUG_V ("NewColor: " + NewColor);
 
     // Parse the color string into rgb values
 
@@ -248,19 +256,34 @@ void c_InputEffectEngine::setColor (String & NewColor)
     EffectColor.g = uint8_t ((intValue >>  8) & 0xFF);
     EffectColor.b = uint8_t ((intValue >>  0) & 0xFF);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // setColor
 
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::setPixel (uint16_t pixelId, CRGB color)
 {
+    // DEBUG_START;
 
-    uint8_t* pInputDataBuffer = &InputDataBuffer[3 * pixelId];
+    if (pixelId < PixelCount)
+    {
+        uint8_t* pInputDataBuffer = &InputDataBuffer[3 * pixelId];
 
-    pInputDataBuffer[0] = (uint8_t)(color.r * EffectBrightness);
-    pInputDataBuffer[1] = (uint8_t)(color.g * EffectBrightness);
-    pInputDataBuffer[2] = (uint8_t)(color.b * EffectBrightness);
+        // DEBUG_V (String ("EffectBrightness: ") + String (EffectBrightness));
+        // DEBUG_V (String ("color.r: ") + String (color.r));
+        // DEBUG_V (String ("color.g: ") + String (color.g));
+        // DEBUG_V (String ("color.b: ") + String (color.b));
+
+        pInputDataBuffer[0] = color.r * EffectBrightness;
+        pInputDataBuffer[1] = color.g * EffectBrightness;
+        pInputDataBuffer[2] = color.b * EffectBrightness;
+
+        // DEBUG_V (String ("pInputDataBuffer[0]: ") + String (pInputDataBuffer[0]));
+        // DEBUG_V (String ("pInputDataBuffer[1]: ") + String (pInputDataBuffer[1]));
+        // DEBUG_V (String ("pInputDataBuffer[2]: ") + String (pInputDataBuffer[2]));
+    }
+
+    // DEBUG_END;
 
 } // setPixel
 
@@ -321,16 +344,20 @@ c_InputEffectEngine::CRGB c_InputEffectEngine::colorWheel (uint8_t pos)
 //-----------------------------------------------------------------------------
 uint16_t c_InputEffectEngine::effectSolidColor ()
 {
+    // DEBUG_START;
+
     for (uint16_t i = 0; i < PixelCount; i++)
     {
         setPixel (i, EffectColor);
     }
+    // DEBUG_END;
     return 32;
 } // effectSolidColor
 
 //-----------------------------------------------------------------------------
 uint16_t c_InputEffectEngine::effectChase ()
 {
+    // DEBUG_START;
     // calculate only half the pixels if mirroring
     uint16_t lc = PixelCount;
     if (EffectMirror)
@@ -374,12 +401,14 @@ uint16_t c_InputEffectEngine::effectChase ()
     }
 
     EffectStep = (1 + EffectStep) % lc;
+    // DEBUG_END;
     return EffectDelay / 32;
 } // effectChase
 
 //-----------------------------------------------------------------------------
 uint16_t c_InputEffectEngine::effectRainbow ()
 {
+    // DEBUG_START;
     // calculate only half the pixels if mirroring
     uint16_t lc = PixelCount;
     if (EffectMirror)
@@ -420,12 +449,14 @@ uint16_t c_InputEffectEngine::effectRainbow ()
     }
 
     EffectStep = (1 + EffectStep) & 0xFF;
+    // DEBUG_END;
     return EffectDelay / 256;
 } // effectRainbow
 
 //-----------------------------------------------------------------------------
 uint16_t c_InputEffectEngine::effectBlink ()
 {
+    // DEBUG_START;
     // The Blink effect uses two "time slots": on, off
     // Using default delay, a complete sequence takes 2s.
     if (EffectStep % 2)
@@ -438,12 +469,14 @@ uint16_t c_InputEffectEngine::effectBlink ()
     }
 
     EffectStep = (1 + EffectStep) % 2;
+    // DEBUG_END;
     return EffectDelay / 1;
 } // effectBlink
 
 //-----------------------------------------------------------------------------
 uint16_t c_InputEffectEngine::effectFlash ()
 {
+    // DEBUG_START;
     // The Flash effect uses 6 "time slots": on, off, on, off, off, off
     // Using default delay, a complete sequence takes 2s.
     // Prevent errors if we come from another effect with more steps
@@ -466,12 +499,14 @@ uint16_t c_InputEffectEngine::effectFlash ()
     }
 
     EffectStep = (1 + EffectStep) % 6;
+    // DEBUG_END;
     return EffectDelay / 3;
 } // effectFlash
 
 //-----------------------------------------------------------------------------
 uint16_t c_InputEffectEngine::effectFireFlicker ()
 {
+    // DEBUG_START;
     byte rev_intensity = 6; // more=less intensive, less=more intensive
     byte lum = max (EffectColor.r, max (EffectColor.g, EffectColor.b)) / rev_intensity;
 
@@ -481,12 +516,14 @@ uint16_t c_InputEffectEngine::effectFireFlicker ()
         setPixel (i, CRGB{ max (EffectColor.r - flicker, 0), max (EffectColor.g - flicker, 0), max (EffectColor.b - flicker, 0) });
     }
     EffectStep = (1 + EffectStep) % PixelCount;
+    // DEBUG_END;
     return EffectDelay / 10;
 } // effectFireFlicker
 
 //-----------------------------------------------------------------------------
 uint16_t c_InputEffectEngine::effectLightning ()
 {
+    // DEBUG_START;
     static byte maxFlashes;
     static int timeslot = EffectDelay / 1000; // 1ms
     int flashPause = 10; // 10ms
@@ -535,6 +572,7 @@ uint16_t c_InputEffectEngine::effectLightning ()
         EffectStep = 0;
         flashPause = random (100, 5001); // between 0.1 and 5s
     }
+    // DEBUG_END;
     return timeslot * flashPause;
 }
 
@@ -561,8 +599,10 @@ uint16_t c_InputEffectEngine::effectBreathe () {
      * for a nice explanation of the math.
      */
      // sin() is in radians, so 2*PI rad is a full period; compiler should optimize.
+    // DEBUG_START;
     float val = (exp (sin (millis () / (EffectDelay * 5.0) * 2 * PI)) - 0.367879441) * 0.106364766 + 0.75;
     setAll ({ EffectColor.r * val, EffectColor.g * val, EffectColor.b * val });
+    // DEBUG_END;
     return EffectDelay / 40; // update every 25ms
 }
 

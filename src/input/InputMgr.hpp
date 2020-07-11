@@ -24,6 +24,7 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include "../output/OutputMgr.hpp"
 
 class c_InputCommon; ///< forward declaration to the pure virtual Input class that will be defined later.
 
@@ -42,6 +43,7 @@ public:
     void DumpSupportedModes () {/* todo */};
     void Process    ();                        ///< Call from loop(),  renders Input data
     void GetOptions (JsonObject & jsonOptions);
+    void SetBufferInfo (c_OutputMgr::e_OutputChannelIds channelId, uint8_t* BufferStart, uint16_t BufferSize);
 
     enum e_InputType
     {
@@ -80,7 +82,6 @@ private:
     bool ProcessJsonConfig        (JsonObject & jsonConfig);
     void CreateJsonConfig         (JsonObject & jsonConfig);
     bool ProcessJsonChannelConfig (JsonObject & jsonConfig, uint32_t ChannelIndex);
-    void SetBufferInfo            (uint8_t* BufferStart,    uint16_t BufferSize);
 
     String ConfigFileName;
     String ConfigData;
