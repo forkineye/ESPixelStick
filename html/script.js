@@ -356,6 +356,23 @@ function ProcessInputModeConfiguration()
     // clear the array
     selector = [];
 
+    if ("effects" === ChannelTypeName)
+    {
+        var jqSelector = "#currenteffect";
+
+        // remove the existing options
+        $(jqSelector).empty();
+
+        // for each option in the list
+        channelConfig.effects.forEach(function (listEntry) {
+            // add in a new entry
+            $(jqSelector).append('<option value="' + listEntry.name + '">' + listEntry.name + '</option>');
+        });
+
+        // set the current selector value
+        $(jqSelector).val(channelConfig.currenteffect);
+    }
+
     // console.info("ProcessInputModeConfiguration: Done");
 
 } // ProcessInputModeConfiguration
@@ -467,29 +484,6 @@ function ProcessReceivedOptionDataMessage(JsonOptionList)
     LoadOutputConfigurationForm();
 
 } // ProcessReceivedOptionDataMessage
-
-// Builds jQuery selectors from JSON data and populates select options
-function addOptionDataElementFromJSON()
-{
-    for (var k in obj)
-    {
-        selector.push('#' + k);
-        if (typeof obj[k] === 'object' && obj[k] !== null)
-        {
-            addOptionDataElementFromJSON(obj[k]);
-        }
-        else
-        {
-            // Get the key and remove the json array index
-            var key = selector.pop().substr(1);
-            selector.pop();
-            var jqSelector = selector.join(' ');
-            selector.push('', '');
-            $(jqSelector).append('<option value="' + key + '">' + obj[k] + '</option>');
-        }
-        selector.pop();
-    }
-}
 
 // Buils JSON config submission for "WiFi" tab - Needs updated
 function submitWiFiConfig()

@@ -21,399 +21,566 @@
 #include "../ESPixelStick.h"
 #include "InputEffectEngine.hpp"
 
-extern  config_t        config;
+//-----------------------------------------------------------------------------
+// Local Structure and Data Definitions
+//-----------------------------------------------------------------------------
 
-// List of all the supported effects and their names
-const EffectDesc EFFECT_LIST[] = 
-{
-//                                                                          Mirror     AllLeds
-//    name;             func;                             htmlid;      Color;     Reverse     wsTCode
+    // List of all the supported effects and their names
+const c_InputEffectEngine::EffectDescriptor_t ListOfEffects[] =
+{//                                                                   Mirror     AllLeds
+    //    name;                             func;              htmlid;      Color;     Reverse     wsTCode
 
-    { "Disabled",     nullptr,                           "t_disabled",     1,    1,    1,    1,  "T0"     },
-    { "Solid",        &c_EffectEngine::effectSolidColor, "t_static",       1,    0,    0,    0,  "T1"     },
-    { "Blink",        &c_EffectEngine::effectBlink,      "t_blink",        1,    0,    0,    0,  "T2"     },
-    { "Flash",        &c_EffectEngine::effectFlash,      "t_flash",        1,    0,    0,    0,  "T3"     },
-    { "Rainbow",      &c_EffectEngine::effectRainbow,    "t_rainbow",      0,    1,    1,    1,  "T5"     },
-    { "Chase",        &c_EffectEngine::effectChase,      "t_chase",        1,    1,    1,    0,  "T4"     },
-    { "Fire flicker", &c_EffectEngine::effectFireFlicker,"t_fireflicker",  1,    0,    0,    0,  "T6"     },
-    { "Lightning",    &c_EffectEngine::effectLightning,  "t_lightning",    1,    0,    0,    0,  "T7"     },
-    { "Breathe",      &c_EffectEngine::effectBreathe,    "t_breathe",      1,    0,    0,    0,  "T8"     }
+        // { "Disabled",     nullptr,                           "t_disabled",     1,    1,    1,    1,  "T0"     },
+        { "Solid",        &c_InputEffectEngine::effectSolidColor, "t_static",       1,    0,    0,    0,  "T1"     },
+        { "Blink",        &c_InputEffectEngine::effectBlink,      "t_blink",        1,    0,    0,    0,  "T2"     },
+        { "Flash",        &c_InputEffectEngine::effectFlash,      "t_flash",        1,    0,    0,    0,  "T3"     },
+        { "Rainbow",      &c_InputEffectEngine::effectRainbow,    "t_rainbow",      0,    1,    1,    1,  "T5"     },
+        { "Chase",        &c_InputEffectEngine::effectChase,      "t_chase",        1,    1,    1,    0,  "T4"     },
+        { "Fire flicker", &c_InputEffectEngine::effectFireFlicker,"t_fireflicker",  1,    0,    0,    0,  "T6"     },
+        { "Lightning",    &c_InputEffectEngine::effectLightning,  "t_lightning",    1,    0,    0,    0,  "T7"     },
+        { "Breathe",      &c_InputEffectEngine::effectBreathe,    "t_breathe",      1,    0,    0,    0,  "T8"     }
 };
 
-// Effect defaults
-#define DEFAULT_EFFECT_NAME "Disabled"
-#define DEFAULT_EFFECT_COLOR { 183, 0, 255 }
-#define DEFAULT_EFFECT_BRIGHTNESS 1.0
-#define DEFAULT_EFFECT_REVERSE false
-#define DEFAULT_EFFECT_MIRROR false
-#define DEFAULT_EFFECT_ALLLEDS false
-#define DEFAULT_EFFECT_SPEED 6
-
-c_EffectEngine::c_EffectEngine() {
-    // Initialize with defaults
-    setFromDefaults();
-}
-
-void c_EffectEngine::setFromDefaults() 
+//-----------------------------------------------------------------------------
+c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInputChannelId,
+    c_InputMgr::e_InputType       NewChannelType,
+    uint8_t* BufferStart,
+    uint16_t                      BufferSize) :
+    c_InputCommon (NewInputChannelId, NewChannelType, BufferStart, BufferSize)
 {
-/*
-    effect_name       = DEFAULT_EFFECT_NAME;
-    effect_color      = DEFAULT_EFFECT_COLOR;
-    effect_brightness = DEFAULT_EFFECT_BRIGHTNESS;
-    effect_reverse    = DEFAULT_EFFECT_REVERSE;
-    effect_mirror     = DEFAULT_EFFECT_MIRROR;
-    effect_allleds    = DEFAULT_EFFECT_ALLLEDS;
-    effect_speed      = DEFAULT_EFFECT_SPEED;
-*/
-    setFromConfig();
+    // DEBUG_START;
+    // set a default effect
+    ActiveEffect = &ListOfEffects[0];
+    // DEBUG_END;
+} // c_InputEffectEngine
+
+//-----------------------------------------------------------------------------
+c_InputEffectEngine::~c_InputEffectEngine ()
+{
+} // ~c_InputEffectEngine
+
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::Begin ()
+{
+    DEBUG_START;
+    Serial.println (F ("** Effect Engine Initialization **"));
+
+    if (true == HasBeenInitialized)
+    {
+        return;
+    }
+    HasBeenInitialized = true;
+
+    validateConfiguration ();
+    // DEBUG_V ("");
+
+
+    DEBUG_END;
+} // Begin
+
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
+{
+    // DEBUG_START;
+    char HexColor[] = "#000000 ";
+    sprintf (HexColor, "#%02x%02x%02x", EffectColor.r, EffectColor.g, EffectColor.b);
+
+    jsonConfig[F ("currenteffect")]    = ActiveEffect->name;
+    jsonConfig[F ("EffectSpeed")]      = EffectSpeed;
+    jsonConfig[F ("EffectReverse")]    = EffectReverse;
+    jsonConfig[F ("EffectMirror")]     = EffectMirror;
+    jsonConfig[F ("EffectAllLeds")]    = EffectAllLeds;
+    jsonConfig[F ("EffectBrightness")] = EffectBrightness;
+    jsonConfig[F ("EffectColor")]      = HexColor;
+
+    JsonArray EffectsArray = jsonConfig.createNestedArray (F ("effects"));
+
+    for (EffectDescriptor_t currentEffect : ListOfEffects)
+    {
+        JsonObject currentJsonEntry = EffectsArray.createNestedObject ();
+        currentJsonEntry["name"] = currentEffect.name;
+    }
+    // DEBUG_END;
+
+} // GetConfig
+
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::GetStatus (JsonObject& jsonStatus)
+{
+    // DEBUG_START;
+
+    // DEBUG_END;
+
+} // GetStatus
+
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::Process ()
+{
+    // DEBUG_START;
+
+    if (HasBeenInitialized && ActiveEffect && ActiveEffect->func)
+    {
+        if (millis () - EffectLastRun >= EffectWait)
+        {
+            EffectLastRun = millis ();
+            // todo figure this out: uint16_t wait = *ActiveEffect->func();
+            uint16_t wait = 32;
+            EffectWait = max ((int)wait, MIN_EFFECT_DELAY);
+            EffectCounter++;
+        }
+    }
+
+    // DEBUG_END;
+
+} // process
+
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
+{
+    // DEBUG_START;
+
+    InputDataBuffer     = BufferStart;
+    InputDataBufferSize = BufferSize;
+
+    // DEBUG_END;
+
+} // SetBufferInfo
+
+//-----------------------------------------------------------------------------
+boolean c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
+{
+    DEBUG_START;
+    String effectName;
+    String effectColor;
+
+    FileIO::setFromJSON (EffectSpeed,      jsonConfig[F ("EffectSpeed")]);
+    FileIO::setFromJSON (EffectReverse,    jsonConfig[F ("EffectReverse")]);
+    FileIO::setFromJSON (EffectMirror,     jsonConfig[F ("EffectMirror")]);
+    FileIO::setFromJSON (EffectAllLeds,    jsonConfig[F ("EffectAllLeds")]);
+    FileIO::setFromJSON (EffectBrightness, jsonConfig[F ("EffectBrightness")]);
+    FileIO::setFromJSON (effectName,       jsonConfig[F ("currenteffect")]);
+    FileIO::setFromJSON (effectColor,      jsonConfig[F ("EffectColor")]);
+
+    setColor (effectColor);
+    validateConfiguration ();
+
+    setEffect (effectName);
+
+    DEBUG_END;
+    return true;
+} // SetConfig
+
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::validateConfiguration ()
+{
+    DEBUG_START;
+
+    setBrightness (EffectBrightness);
+    setSpeed (EffectSpeed);
+    setDelay (EffectDelay);
+
+    DEBUG_END;
+
+} // validateConfiguration
+
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::setBrightness (float brightness)
+{
+    EffectBrightness = brightness;
+    if (EffectBrightness > 1.0) { EffectBrightness = 1.0; }
+    if (EffectBrightness < 0.0) { EffectBrightness = 0.0; }
 }
 
-void c_EffectEngine::setFromConfig() {
-    // Initialize with defaults
-    /*
-    setEffect(config.effect_name);
-    setColor(config.effect_color);
-    setBrightness(config.effect_brightness);
-    setReverse(config.effect_reverse);
-    setMirror(config.effect_mirror);
-    setAllLeds(config.effect_allleds);
-    setSpeed(config.effect_speed);
-    */
-}
-
-void c_EffectEngine::setBrightness(float brightness) {
-    _effectBrightness = brightness;
-    if (_effectBrightness > 1.0)
-        _effectBrightness = 1.0;
-    if (_effectBrightness < 0.0)
-        _effectBrightness = 0.0;
-}
-
+//-----------------------------------------------------------------------------
 // Yukky maths here. Input speeds from 1..10 get mapped to 17782..100
-void c_EffectEngine::setSpeed(uint16_t speed) {
-    _effectSpeed = speed;
-    setDelay( pow (10, (10-speed)/4.0 +2 ) );
+void c_InputEffectEngine::setSpeed (uint16_t speed)
+{
+    EffectSpeed = speed;
+    setDelay (pow (10, (10 - speed) / 4.0 + 2));
 }
 
-void c_EffectEngine::setDelay(uint16_t delay) {
-    _effectDelay = delay;
-    if (_effectDelay < MIN_EFFECT_DELAY)
-        _effectDelay = MIN_EFFECT_DELAY;
-}
-/*
-void c_EffectEngine::begin(DRIVER* ledDriver, uint16_t ledCount) {
-    _ledDriver = ledDriver;
-    _ledCount = ledCount;
-    _initialized = true;
-}
-*/
-void c_EffectEngine::run() {
-    if (_initialized && _activeEffect && _activeEffect->func) {
-        if (millis() - _effectLastRun >= _effectWait) {
-            _effectLastRun = millis();
-            uint16_t wait = (this->*_activeEffect->func)();
-            _effectWait = max((int)wait, MIN_EFFECT_DELAY);
-            _effectCounter++;
-        }
-    }
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::setDelay (uint16_t delay)
+{
+    EffectDelay = delay;
+    if (EffectDelay < MIN_EFFECT_DELAY) { EffectDelay = MIN_EFFECT_DELAY; }
 }
 
-void c_EffectEngine::setEffect(const String effectName) {
-    const uint8_t effectCount = sizeof(EFFECT_LIST) / sizeof(EffectDesc);
-    for (uint8_t effect = 0; effect < effectCount; effect++) {
-        if ( effectName.equalsIgnoreCase(EFFECT_LIST[effect].name) ) {
-            if (_activeEffect != &EFFECT_LIST[effect]) {
-                _activeEffect = &EFFECT_LIST[effect];
-                _effectLastRun = millis();
-                _effectWait = MIN_EFFECT_DELAY;
-                _effectCounter = 0;
-                _effectStep = 0;
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::setEffect (const String & effectName)
+{
+    DEBUG_START;
+
+    int EffectIndex = 0;
+    for (EffectDescriptor_t currentEffect : ListOfEffects)
+    {
+        if (effectName.equalsIgnoreCase (currentEffect.name))
+        {
+            if (ActiveEffect->name != currentEffect.name)
+            {
+                ActiveEffect  = &ListOfEffects[EffectIndex];
+                EffectLastRun = millis ();
+                EffectWait    = MIN_EFFECT_DELAY;
+                EffectCounter = 0;
+                EffectStep    = 0;
             }
-            return;
+            break;
         }
+        EffectIndex++;
+    } // end for each effect
+
+    DEBUG_END;
+
+} // setEffect
+
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::setColor (String & NewColor)
+{
+    DEBUG_START;
+
+    DEBUG_V ("NewColor: " + NewColor);
+
+    // Parse the color string into rgb values
+
+    uint32_t intValue = strtoul(NewColor.substring (1).c_str(), nullptr, 16);
+
+    EffectColor.r = uint8_t ((intValue >> 16) & 0xFF);
+    EffectColor.g = uint8_t ((intValue >>  8) & 0xFF);
+    EffectColor.b = uint8_t ((intValue >>  0) & 0xFF);
+
+    DEBUG_END;
+
+} // setColor
+
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::setPixel (uint16_t pixelId, CRGB color)
+{
+
+    uint8_t* pInputDataBuffer = &InputDataBuffer[3 * pixelId];
+
+    pInputDataBuffer[0] = (uint8_t)(color.r * EffectBrightness);
+    pInputDataBuffer[1] = (uint8_t)(color.g * EffectBrightness);
+    pInputDataBuffer[2] = (uint8_t)(color.b * EffectBrightness);
+
+} // setPixel
+
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::setRange (uint16_t FirstPixelId, uint16_t NumberOfPixels, CRGB color)
+{
+    for (uint16_t i = FirstPixelId; i < min (uint16_t (FirstPixelId + NumberOfPixels), PixelCount); i++)
+    {
+        setPixel (i, color);
     }
+} // setRange
 
-    _activeEffect = nullptr;
-    clearAll();
-}
-
-int c_EffectEngine::getEffectCount() {
-    return sizeof(EFFECT_LIST) / sizeof(EffectDesc);
-}
-
-// find effect info by its index in the table
-const EffectDesc* c_EffectEngine::getEffectInfo(unsigned a) {
-    if (a >= sizeof(EFFECT_LIST) / sizeof(EffectDesc))
-	a = 0;
-
-    return &EFFECT_LIST[a];
-}
-
-// find effect info by its web services Tcode
-const EffectDesc* c_EffectEngine::getEffectInfo(const String TCode) {
-    const uint8_t effectCount = sizeof(EFFECT_LIST) / sizeof(EffectDesc);
-    for (uint8_t effect = 0; effect < effectCount; effect++) {
-        if ( TCode.equalsIgnoreCase(EFFECT_LIST[effect].wsTCode) ) {
-            return &EFFECT_LIST[effect];
-        }
-    }
-    return nullptr;
-}
-
-bool c_EffectEngine::isValidEffect(const String effectName) {
-    const uint8_t effectCount = sizeof(EFFECT_LIST) / sizeof(EffectDesc);
-    for (uint8_t effect = 0; effect < effectCount; effect++) {
-        if ( effectName.equalsIgnoreCase(EFFECT_LIST[effect].name) ) {
-            return true;
-        }
-    }
-    return false;
-}
-
-void c_EffectEngine::setPixel(uint16_t idx,  CRGB color) {
-/*
-    _ledDriver->setValue(3 * idx + 0, (uint8_t)(color.r * _effectBrightness) );
-    _ledDriver->setValue(3 * idx + 1, (uint8_t)(color.g * _effectBrightness) );
-    _ledDriver->setValue(3 * idx + 2, (uint8_t)(color.b * _effectBrightness) );
-*/
-}
-
-void c_EffectEngine::setRange(uint16_t first, uint16_t len, CRGB color) {
-    for (uint16_t i=first; i < min(uint16_t(first+len), _ledCount); i++) {
-        setPixel(i, color);
-    }
-}
-
-void c_EffectEngine::clearRange(uint16_t first, uint16_t len) {
-    for (uint16_t i=first; i < min(uint16_t(first+len), _ledCount); i++) {
-        setPixel(i, {0, 0, 0});
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::clearRange (uint16_t FirstPixelId, uint16_t NumberOfPixels)
+{
+    for (uint16_t i = FirstPixelId; i < min (uint16_t (FirstPixelId + NumberOfPixels), PixelCount); i++)
+    {
+        setPixel (i, { 0, 0, 0 });
     }
 }
 
-void c_EffectEngine::setAll(CRGB color) {
-    setRange(0, _ledCount, color);
-}
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::setAll (CRGB color)
+{
+    setRange (0, PixelCount, color);
+} // setAll
 
-void c_EffectEngine::clearAll() {
-    clearRange(0, _ledCount);
-}
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::clearAll ()
+{
+    clearRange (0, PixelCount);
+} // clearAll
 
-CRGB c_EffectEngine::colorWheel(uint8_t pos) {
+//-----------------------------------------------------------------------------
+c_InputEffectEngine::CRGB c_InputEffectEngine::colorWheel (uint8_t pos)
+{
+    CRGB Response = { 0, 0, 0 };
+
     pos = 255 - pos;
-    if (pos < 85) {
-        return { 255 - pos * 3, 0, pos * 3};
-    } else if (pos < 170) {
-        pos -= 85;
-        return { 0, pos * 3, 255 - pos * 3 };
-    } else {
-        pos -= 170;
-        return { pos * 3, 255 - pos * 3, 0 };
+    if (pos < 85)
+    {
+        Response = { 255 - pos * 3, 0, pos * 3 };
     }
-}
+    else if (pos < 170)
+    {
+        pos -= 85;
+        Response = { 0, pos * 3, 255 - pos * 3 };
+    }
+    else
+    {
+        pos -= 170;
+        Response = { pos * 3, 255 - pos * 3, 0 };
+    }
 
-uint16_t c_EffectEngine::effectSolidColor() {
-    for (uint16_t i=0; i < _ledCount; i++) {
-        setPixel(i, _effectColor);
+    return Response;
+} // colorWheel
+
+//-----------------------------------------------------------------------------
+uint16_t c_InputEffectEngine::effectSolidColor ()
+{
+    for (uint16_t i = 0; i < PixelCount; i++)
+    {
+        setPixel (i, EffectColor);
     }
     return 32;
-}
+} // effectSolidColor
 
-uint16_t c_EffectEngine::effectChase() {
+//-----------------------------------------------------------------------------
+uint16_t c_InputEffectEngine::effectChase ()
+{
     // calculate only half the pixels if mirroring
-    uint16_t lc = _ledCount;
-    if (_effectMirror) {
+    uint16_t lc = PixelCount;
+    if (EffectMirror)
+    {
         lc = lc / 2;
     }
     // Prevent errors if we come from another effect with more steps
     // or switch from the upper half of non-mirror to mirror mode
-    _effectStep = _effectStep % lc;
+    EffectStep = EffectStep % lc;
 
-    for (uint16_t i=0; i < lc; i++) {
-        if (i != _effectStep) {
-            if (_effectMirror) {
-                setPixel(i + lc, {0, 0, 0});
-                setPixel(lc - 1 - i, {0, 0, 0});
-            } else {
-                setPixel(i, {0, 0, 0});
+    for (uint16_t i = 0; i < lc; i++)
+    {
+        if (i != EffectStep)
+        {
+            if (EffectMirror)
+            {
+                setPixel (i + lc, { 0, 0, 0 });
+                setPixel (lc - 1 - i, { 0, 0, 0 });
+            }
+            else
+            {
+                setPixel (i, { 0, 0, 0 });
             }
         }
     }
-    uint16_t pixel = _effectStep;
-    if (_effectReverse) {
-      pixel = lc - 1 - pixel;
-    }
-    if (_effectMirror) {
-        setPixel(pixel + lc, _effectColor);
-        setPixel(lc - 1 - pixel, _effectColor);
-    } else {
-        setPixel(pixel, _effectColor);
+
+    uint16_t pixel = EffectStep;
+    if (EffectReverse)
+    {
+        pixel = lc - 1 - pixel;
     }
 
-    _effectStep = (1+_effectStep) % lc;
-    return _effectDelay / 32;
-}
+    if (EffectMirror)
+    {
+        setPixel (pixel + lc, EffectColor);
+        setPixel (lc - 1 - pixel, EffectColor);
+    }
+    else
+    {
+        setPixel (pixel, EffectColor);
+    }
 
-uint16_t c_EffectEngine::effectRainbow() {
+    EffectStep = (1 + EffectStep) % lc;
+    return EffectDelay / 32;
+} // effectChase
+
+//-----------------------------------------------------------------------------
+uint16_t c_InputEffectEngine::effectRainbow ()
+{
     // calculate only half the pixels if mirroring
-    uint16_t lc = _ledCount;
-    if (_effectMirror) {
+    uint16_t lc = PixelCount;
+    if (EffectMirror)
+    {
         lc = lc / 2;
     }
-    for (uint16_t i=0; i < lc; i++) {
-//      CRGB color = colorWheel(((i * 256 / lc) + _effectStep) & 0xFF);
+    for (uint16_t i = 0; i < lc; i++)
+    {
+        //      CRGB color = colorWheel(((i * 256 / lc) + EffectStep) & 0xFF);
 
         double hue = 0;
-        if (_effectAllLeds) {
-            hue = _effectStep*360.0d / 256;	// all same colour
-        } else {
-            hue = 360.0 * (((i * 256 / lc) + _effectStep) & 0xFF) / 255;
+        if (EffectAllLeds)
+        {
+            hue = EffectStep * 360.0d / 256;	// all same colour
+        }
+        else
+        {
+            hue = 360.0 * (((i * 256 / lc) + EffectStep) & 0xFF) / 255;
         }
         double sat = 1.0;
         double val = 1.0;
-        CRGB color = hsv2rgb ( { hue, sat, val } );
+        CRGB color = hsv2rgb ({ hue, sat, val });
 
         uint16_t pixel = i;
-        if (_effectReverse) {
+        if (EffectReverse)
+        {
             pixel = lc - 1 - pixel;
         }
-        if (_effectMirror) {
-            setPixel(pixel + lc, color);
-            setPixel(lc - 1 - pixel, color);
-        } else {
-            setPixel(pixel, color);
+        if (EffectMirror)
+        {
+            setPixel (pixel + lc, color);
+            setPixel (lc - 1 - pixel, color);
+        }
+        else
+        {
+            setPixel (pixel, color);
         }
     }
 
-    _effectStep = (1+_effectStep) & 0xFF;
-    return _effectDelay / 256;
-}
+    EffectStep = (1 + EffectStep) & 0xFF;
+    return EffectDelay / 256;
+} // effectRainbow
 
-uint16_t c_EffectEngine::effectBlink() {
+//-----------------------------------------------------------------------------
+uint16_t c_InputEffectEngine::effectBlink ()
+{
     // The Blink effect uses two "time slots": on, off
     // Using default delay, a complete sequence takes 2s.
-    if (_effectStep % 2) {
-      clearAll();
-    } else {
-      setAll(_effectColor);
+    if (EffectStep % 2)
+    {
+        clearAll ();
+    }
+    else
+    {
+        setAll (EffectColor);
     }
 
-    _effectStep = (1+_effectStep) % 2;
-    return _effectDelay / 1;
-}
+    EffectStep = (1 + EffectStep) % 2;
+    return EffectDelay / 1;
+} // effectBlink
 
-uint16_t c_EffectEngine::effectFlash() {
+//-----------------------------------------------------------------------------
+uint16_t c_InputEffectEngine::effectFlash ()
+{
     // The Flash effect uses 6 "time slots": on, off, on, off, off, off
     // Using default delay, a complete sequence takes 2s.
     // Prevent errors if we come from another effect with more steps
-    _effectStep = _effectStep % 6;
+    EffectStep = EffectStep % 6;
 
-    switch (_effectStep) {
-      case 0:
-      case 2:
-        setAll(_effectColor);
-        break;
-      default:
-        clearAll();
+    switch (EffectStep)
+    {
+        case 0:
+        case 2:
+        {
+            setAll (EffectColor);
+            break;
+        }
+
+        default:
+        {
+            clearAll ();
+            break;
+        }
     }
 
-    _effectStep = (1+_effectStep) % 6;
-    return _effectDelay / 3;
-}
+    EffectStep = (1 + EffectStep) % 6;
+    return EffectDelay / 3;
+} // effectFlash
 
-uint16_t c_EffectEngine::effectFireFlicker() {
-  byte rev_intensity = 6; // more=less intensive, less=more intensive
-  byte lum = max(_effectColor.r, max(_effectColor.g, _effectColor.b)) / rev_intensity;
-  for ( int i = 0; i < _ledCount; i++) {
-    byte flicker = random(lum);
-    setPixel(i, CRGB { max(_effectColor.r - flicker, 0), max(_effectColor.g - flicker, 0), max(_effectColor.b - flicker, 0) });
-  }
-  _effectStep = (1+_effectStep) % _ledCount;
-  return _effectDelay / 10;
-}
+//-----------------------------------------------------------------------------
+uint16_t c_InputEffectEngine::effectFireFlicker ()
+{
+    byte rev_intensity = 6; // more=less intensive, less=more intensive
+    byte lum = max (EffectColor.r, max (EffectColor.g, EffectColor.b)) / rev_intensity;
 
-uint16_t c_EffectEngine::effectLightning() {
-  static byte maxFlashes;
-  static int timeslot = _effectDelay / 1000; // 1ms
-  int flashPause = 10; // 10ms
-  uint16_t ledStart = random(_ledCount);
-  uint16_t ledLen = random(1, _ledCount - ledStart);
-  byte intensity; // flash intensity
-
-  if (_effectStep % 2) {
-    // odd steps = clear
-    clearAll();
-    if (_effectStep == 1) {
-      // pause after 1st flash is longer
-      flashPause = 130;
-    } else {
-      flashPause = random(50, 151); // pause between flashes 50-150ms
+    for (int i = 0; i < PixelCount; i++)
+    {
+        byte flicker = random (lum);
+        setPixel (i, CRGB{ max (EffectColor.r - flicker, 0), max (EffectColor.g - flicker, 0), max (EffectColor.b - flicker, 0) });
     }
-  } else {
-    // even steps = flashes
-    if (_effectStep == 0) {
-      // first flash (weaker and longer pause)
-      maxFlashes = random(3, 8); // 2-6 follow-up flashes
-      intensity = random(128);
-    } else {
-      // follow-up flashes (stronger)
-      intensity = random(128, 256); // next flashes are stronger
+    EffectStep = (1 + EffectStep) % PixelCount;
+    return EffectDelay / 10;
+} // effectFireFlicker
+
+//-----------------------------------------------------------------------------
+uint16_t c_InputEffectEngine::effectLightning ()
+{
+    static byte maxFlashes;
+    static int timeslot = EffectDelay / 1000; // 1ms
+    int flashPause = 10; // 10ms
+    uint16_t ledStart = random (PixelCount);
+    uint16_t ledLen = random (1, PixelCount - ledStart);
+    byte intensity; // flash intensity
+
+    if (EffectStep % 2)
+    {
+        // odd steps = clear
+        clearAll ();
+        if (EffectStep == 1)
+        {
+            // pause after 1st flash is longer
+            flashPause = 130;
+        }
+        else
+        {
+            flashPause = random (50, 151); // pause between flashes 50-150ms
+        }
     }
-    CRGB temprgb = { _effectColor.r*intensity/256, _effectColor.g*intensity/256, _effectColor.b*intensity/256 };
-    setRange(ledStart, ledLen, temprgb );
-    flashPause = random(4, 21); // flash duration 4-20ms
-  }
+    else
+    {
+        // even steps = flashes
+        if (EffectStep == 0)
+        {
+            // FirstPixelId flash (weaker and longer pause)
+            maxFlashes = random (3, 8); // 2-6 follow-up flashes
+            intensity = random (128);
+        }
+        else
+        {
+            // follow-up flashes (stronger)
+            intensity = random (128, 256); // next flashes are stronger
+        }
+        
+        CRGB temprgb = { EffectColor.r * intensity / 256, EffectColor.g * intensity / 256, EffectColor.b * intensity / 256 };
+        setRange (ledStart, ledLen, temprgb);
+        flashPause = random (4, 21); // flash duration 4-20ms
+    }
 
-  _effectStep++;
+    EffectStep++;
 
-  if (_effectStep >= maxFlashes * 2) {
-    _effectStep = 0;
-    flashPause = random(100, 5001); // between 0.1 and 5s
-  }
-  return timeslot * flashPause;
+    if (EffectStep >= maxFlashes * 2)
+    {
+        EffectStep = 0;
+        flashPause = random (100, 5001); // between 0.1 and 5s
+    }
+    return timeslot * flashPause;
 }
 
-uint16_t c_EffectEngine::effectBreathe() {
-  /*
-   * Subtle "breathing" effect, works best with gamma correction on.
-   *
-   * The average resting respiratory rate of an adult is 12–18 breaths/minute.
-   * We use 12 breaths/minute = 5.0s/breath at the default _effectDelay.
-   * The tidal volume (~0.5l) is much less than the total lung capacity,
-   * so we vary only between 75% and 100% of the set brightness.
-   *
-   * Per default, this is subtle enough to use with a flood, spot, ceiling or
-   * even bedside light. If you want more variation, use the values given
-   * below for a 33%/67% variation.
-   *
-   * In the calculation, we use some constants to make it faster:
-   * 0.367879441 is: 1/e
-   * 0.106364766 is: 0.25/(e-1/e)  [25% brightness variation, use 0.140401491 for 33%]
-   * 0.75 is the offset [75% min brightness, use 0.67 for 67%]
-   *
-   * See also https://sean.voisen.org/blog/2011/10/breathing-led-with-arduino/
-   * for a nice explanation of the math.
-   */
-  // sin() is in radians, so 2*PI rad is a full period; compiler should optimize.
-  float val = (exp(sin(millis()/(_effectDelay*5.0)*2*PI)) - 0.367879441) * 0.106364766 + 0.75;
-  setAll({_effectColor.r*val, _effectColor.g*val, _effectColor.b*val});
-  return _effectDelay / 40; // update every 25ms
+//-----------------------------------------------------------------------------
+uint16_t c_InputEffectEngine::effectBreathe () {
+    /*
+     * Subtle "breathing" effect, works best with gamma correction on.
+     *
+     * The average resting respiratory rate of an adult is 12–18 breaths/minute.
+     * We use 12 breaths/minute = 5.0s/breath at the default EffectDelay.
+     * The tidal volume (~0.5l) is much less than the total lung capacity,
+     * so we vary only between 75% and 100% of the set brightness.
+     *
+     * Per default, this is subtle enough to use with a flood, spot, ceiling or
+     * even bedside light. If you want more variation, use the values given
+     * below for a 33%/67% variation.
+     *
+     * In the calculation, we use some constants to make it faster:
+     * 0.367879441 is: 1/e
+     * 0.106364766 is: 0.25/(e-1/e)  [25% brightness variation, use 0.140401491 for 33%]
+     * 0.75 is the offset [75% min brightness, use 0.67 for 67%]
+     *
+     * See also https://sean.voisen.org/blog/2011/10/breathing-led-with-arduino/
+     * for a nice explanation of the math.
+     */
+     // sin() is in radians, so 2*PI rad is a full period; compiler should optimize.
+    float val = (exp (sin (millis () / (EffectDelay * 5.0) * 2 * PI)) - 0.367879441) * 0.106364766 + 0.75;
+    setAll ({ EffectColor.r * val, EffectColor.g * val, EffectColor.b * val });
+    return EffectDelay / 40; // update every 25ms
 }
 
-
+//-----------------------------------------------------------------------------
 // dCHSV hue 0->360 sat 0->1.0 val 0->1.0
-dCHSV c_EffectEngine::rgb2hsv(CRGB in_int)
+c_InputEffectEngine::dCHSV c_InputEffectEngine::rgb2hsv (CRGB in_int)
 {
     dCHSV       out;
-    dCRGB       in = {in_int.r/255.0d, in_int.g/255.0d, in_int.b/255.0d};
+    dCRGB       in = { in_int.r / 255.0d, in_int.g / 255.0d, in_int.b / 255.0d };
     double      min, max, delta;
 
     min = in.r < in.g ? in.r : in.g;
-    min = min  < in.b ? min  : in.b;
+    min = min < in.b ? min : in.b;
 
     max = in.r > in.g ? in.r : in.g;
-    max = max  > in.b ? max  : in.b;
+    max = max > in.b ? max : in.b;
 
-    out.v = max;                                // v
+    out.v = max;
     delta = max - min;
     if (delta < 0.00001)
     {
@@ -421,49 +588,50 @@ dCHSV c_EffectEngine::rgb2hsv(CRGB in_int)
         out.h = 0; // undefined, maybe nan?
         return out;
     }
-    if( max > 0.0 ) { // NOTE: if Max is == 0, this divide would cause a crash
+    if (max > 0.0) { // NOTE: if Max is == 0, this divide would cause a crash
         out.s = (delta / max);                  // s
-    } else {
+    }
+    else {
         // if max is 0, then r = g = b = 0
         // s = 0, v is undefined
         out.s = 0.0;
         out.h = NAN;                            // its now undefined
         return out;
     }
-    if( in.r >= max )                           // > is bogus, just keeps compilor happy
-        out.h = ( in.g - in.b ) / delta;        // between yellow & magenta
+    if (in.r >= max)                           // > is bogus, just keeps compilor happy
+        out.h = (in.g - in.b) / delta;        // between yellow & magenta
     else
-    if( in.g >= max )
-        out.h = 2.0 + ( in.b - in.r ) / delta;  // between cyan & yellow
-    else
-        out.h = 4.0 + ( in.r - in.g ) / delta;  // between magenta & cyan
+        if (in.g >= max)
+            out.h = 2.0 + (in.b - in.r) / delta;  // between cyan & yellow
+        else
+            out.h = 4.0 + (in.r - in.g) / delta;  // between magenta & cyan
 
     out.h *= 60.0;                              // degrees
 
-    if( out.h < 0.0 )
+    if (out.h < 0.0)
         out.h += 360.0;
 
     return out;
 }
 
-
+//-----------------------------------------------------------------------------
 // dCHSV hue 0->360 sat 0->1.0 val 0->1.0
-CRGB c_EffectEngine::hsv2rgb(dCHSV in)
+c_InputEffectEngine::CRGB c_InputEffectEngine::hsv2rgb (dCHSV in)
 {
     double      hh, p, q, t, ff;
     long        i;
     dCRGB       out;
-    CRGB out_int = {0,0,0};
+    CRGB out_int = { 0,0,0 };
 
-    if(in.s <= 0.0) {       // < is bogus, just shuts up warnings
+    if (in.s <= 0.0) {       // < is bogus, just shuts up warnings
         out.r = in.v;
         out.g = in.v;
         out.b = in.v;
-        out_int = {255*out.r, 255*out.g, 255*out.b};
+        out_int = { 255 * out.r, 255 * out.g, 255 * out.b };
         return out_int;
     }
     hh = in.h;
-    if(hh >= 360.0) hh = 0.0;
+    if (hh >= 360.0) hh = 0.0;
     hh /= 60.0;
     i = (long)hh;
     ff = hh - i;
@@ -471,7 +639,7 @@ CRGB c_EffectEngine::hsv2rgb(dCHSV in)
     q = in.v * (1.0 - (in.s * ff));
     t = in.v * (1.0 - (in.s * (1.0 - ff)));
 
-    switch(i) {
+    switch (i) {
     case 0:
         out.r = in.v;
         out.g = t;
@@ -505,7 +673,7 @@ CRGB c_EffectEngine::hsv2rgb(dCHSV in)
         out.b = q;
         break;
     }
-    out_int = {255*out.r, 255*out.g, 255*out.b};
+    out_int = { 255 * out.r, 255 * out.g, 255 * out.b };
     return out_int;
 }
 

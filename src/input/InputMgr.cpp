@@ -109,6 +109,8 @@ void c_InputMgr::Begin (uint8_t* BufferStart, uint16_t BufferSize)
     // load up the configuration from the saved file. This also starts the drivers
     LoadConfig ();
 
+    // CreateNewConfig ();
+
     // DEBUG_END;
 
 } // begin
@@ -358,6 +360,14 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             {
                 // LOG_PORT.println (String (F ("************** Starting E1.31 for channel '")) + ChannelIndex + "'. **************");
                 pInputChannelDrivers[ChannelIndex] = new c_InputE131 (ChannelIndex, InputType_E1_31, InputDataBuffer, InputDataBufferSize);
+                // DEBUG_V ("");
+                break;
+            }
+
+            case e_InputType::InputType_Effects:
+            {
+                // LOG_PORT.println (String (F ("************** Starting Effects Engine for channel '")) + ChannelIndex + "'. **************");
+                pInputChannelDrivers[ChannelIndex] = new c_InputEffectEngine (ChannelIndex, InputType_Effects, InputDataBuffer, InputDataBufferSize);
                 // DEBUG_V ("");
                 break;
             }
