@@ -45,7 +45,7 @@ c_InputE131::~c_InputE131()
     if (seqTracker) { free (seqTracker); seqTracker = nullptr; }
 
     if (seqError)  { free (seqError); seqError = nullptr; }
-}
+} // ~c_InputE131
 
 //-----------------------------------------------------------------------------
 void c_InputE131::Begin ()
