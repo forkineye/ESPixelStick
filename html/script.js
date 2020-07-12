@@ -15,6 +15,12 @@ var im_config = null; // Input Manager configuration record
 var selector = [];
 var StatusUpdateRequestTimer = null;
 
+// Drawing canvas - move to diagnostics
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+ctx.font = "20px Arial";
+ctx.textAlign = "center";
+
 // Default modal properties
 $.fn.modal.Constructor.DEFAULTS.backdrop = 'static';
 $.fn.modal.Constructor.DEFAULTS.keyboard = false;
@@ -46,12 +52,6 @@ $(function ()
             $('#update').modal();
         });
     });
-
-    // Drawing canvas - move to diagnostics
-    var canvas = document.getElementById("canvas");
-    var ctx = canvas.getContext("2d");
-    ctx.font = "20px Arial";
-    ctx.textAlign = "center";
 
     SetUpWifiValidationHandlers();
     SetUpIoChangeHandlers();
@@ -923,12 +923,16 @@ function ProcessRecievedJsonStatusMessage(data)
     $('#x_uptime').text(str);
 
     // getE131Status(data)
-    $('#uni_first').text (ParsedJsonStatus.status.input[0].e131.unifirst);
-    $('#uni_last').text  (ParsedJsonStatus.status.input[0].e131.unilast);
-    $('#pkts').text      (ParsedJsonStatus.status.input[0].e131.num_packets);
-    $('#chanlim').text   (ParsedJsonStatus.status.input[0].e131.unichanlim);
-    $('#perr').text      (ParsedJsonStatus.status.input[0].e131.packet_errors);
-    $('#clientip').text  (ParsedJsonStatus.status.input[0].e131.last_clientIP);
+    var InputStatus = ParsedJsonStatus.status.input[0];
+    if (ParsedJsonStatus.status.input[0].hasOwnProperty('e131'))
+    {
+        $('#uni_first').text(InputStatus.e131.unifirst);
+        $('#uni_last').text (InputStatus.e131.unilast);
+        $('#pkts').text     (InputStatus.e131.num_packets);
+        $('#chanlim').text  (InputStatus.e131.unichanlim);
+        $('#perr').text     (InputStatus.e131.packet_errors);
+        $('#clientip').text (InputStatus.e131.last_clientIP);
+    }
 
     // Device Refresh is dynamic
     $('#refresh').text(ParsedJsonStatus.status.output[0].framerefreshrate + " fps");
