@@ -121,8 +121,6 @@ void c_InputEffectEngine::Process ()
 {
     // DEBUG_START;
 
-    PixelCount = 10;
-
     if (HasBeenInitialized && (0 != PixelCount))
     {
         // DEBUG_V ("");
