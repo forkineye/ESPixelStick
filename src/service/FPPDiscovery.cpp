@@ -1,5 +1,5 @@
 /*
-* FPPDiscovery.cpp
+* c_FPPDiscovery.cpp
 
 * Copyright (c) 2020 Shelby Merrick
 * http://www.forkineye.com
@@ -20,18 +20,40 @@
 #include <string.h>
 
 
-FPPDiscovery::FPPDiscovery(const char *ver) {
-    version = ver;
+typedef union {
+    struct {
+        uint8_t  header[4];  //FPPD
+        uint8_t  packet_type;
+        uint16_t data_len;
+        uint8_t  ping_version;
+        uint8_t  ping_subtype;
+        uint8_t  ping_hardware;
+        uint16_t versionMajor;
+        uint16_t versionMinor;
+        uint8_t  operatingMode;
+        uint8_t  ipAddress[4];
+        char  hostName[65];
+        char  version[41];
+        char  hardwareType[41];
+        char  ranges[41];
+    } __attribute__ ((packed));
+
+    uint8_t raw[256];
+} FPPPingPacket;
+
+
+c_FPPDiscovery::c_FPPDiscovery() {
+    version = "1";
 }
 
 
-bool FPPDiscovery::begin() {
+bool c_FPPDiscovery::begin() {
     bool success = false;
     delay(100);
 
     IPAddress address = IPAddress(239, 70, 80, 80);  
     if (udp.listenMulticast(address, FPP_DISCOVERY_PORT)) {
-        udp.onPacket(std::bind(&FPPDiscovery::parsePacket, this,
+        udp.onPacket(std::bind(&c_FPPDiscovery::parsePacket, this,
                   std::placeholders::_1));
        success = true;
     }
@@ -40,7 +62,7 @@ bool FPPDiscovery::begin() {
 }
 
 
-void FPPDiscovery::parsePacket(AsyncUDPPacket _packet) {
+void c_FPPDiscovery::parsePacket(AsyncUDPPacket _packet) {
     FPPPingPacket *packet = reinterpret_cast<FPPPingPacket *>(_packet.data());
     if (packet->packet_type == 0x04 && packet->ping_subtype == 0x01) {
         //discover ping packet, need to send a ping out
@@ -49,7 +71,7 @@ void FPPDiscovery::parsePacket(AsyncUDPPacket _packet) {
 }
 
 
-void FPPDiscovery::sendPingPacket() {
+void c_FPPDiscovery::sendPingPacket() {
     FPPPingPacket packet;
     packet.header[0] = 'F';
     packet.header[1] = 'P';
@@ -81,3 +103,5 @@ void FPPDiscovery::sendPingPacket() {
     packet.ranges[0] = 0;
     udp.broadcastTo((uint8_t*)&packet, 221, FPP_DISCOVERY_PORT);
 }
+
+c_FPPDiscovery FPPDiscovery;
