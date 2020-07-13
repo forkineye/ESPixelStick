@@ -164,7 +164,18 @@ void ESPAsyncZCPP::sendConfigResponse(ZCPP_packet_t* packet)
   suspend = false;
 }
 
-void ESPAsyncZCPP::sendDiscoveryResponse(ZCPP_packet_t* packet, const char* firmwareVersion, const uint8_t* mac, const char* controllerName, int pixelPorts, int serialPorts, uint32_t maxPixelPortChannels, uint32_t maxSerialPortChannels, uint32_t maximumChannels, uint32_t ipAddress, uint32_t ipMask)
+void ESPAsyncZCPP::sendDiscoveryResponse(
+    ZCPP_packet_t* packet, 
+    const char* firmwareVersion, 
+    const uint8_t* mac, 
+    const char* controllerName, 
+    int pixelPorts, 
+    int serialPorts, 
+    uint32_t maxPixelPortChannels, 
+    uint32_t maxSerialPortChannels, 
+    uint32_t maximumChannels, 
+    uint32_t ipAddress, 
+    uint32_t ipMask)
 {
 	memset(packet, 0x00, sizeof(ZCPP_packet_t));
 	memcpy(packet->DiscoveryResponse.Header.token, ZCPP_token, sizeof(ZCPP_token));

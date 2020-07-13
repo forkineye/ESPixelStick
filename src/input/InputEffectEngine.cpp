@@ -1,7 +1,7 @@
 /*
 * InputEffectEngine.cpp - Code to wrap ESPAsyncE131 for input
 *
-* Project: ESPixelStick - An ESP8266 and E1.31 based pixel driver
+* Project: ESPixelStick - An ESP8266/ESP32 and E1.31 based pixel driver
 * Copyright (c) 2020 Shelby Merrick
 * http://www.forkineye.com
 *
