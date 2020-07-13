@@ -260,7 +260,7 @@ void c_WiFiMgr::onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t in
 #ifdef ARDUINO_ARCH_ESP8266
     String chipId = String (ESP.getChipId (), HEX);
 #else
-    String chipId = String ((unsigned long)ESP.getEfuseMac (), HEX);
+    String chipId = int64String (ESP.getEfuseMac (), HEX);
 #endif
     MDNS.setInstanceName(String(config->id + " (" + chipId + ")").c_str());
     if (MDNS.begin(config->hostname.c_str())) {

@@ -22,6 +22,7 @@
 #include "MQTT.h"
 #include "../ESPixelStick.h"
 #include <Ticker.h>
+#include <Int64String.h>
 
 #if defined ARDUINO_ARCH_ESP32
 #   include <SPIFFS.h>
@@ -53,7 +54,7 @@ void MQTTService::load() {
 #ifdef ARDUINO_ARCH_ESP8266
         String chipId = String (ESP.getChipId (), HEX);
 #else
-        String chipId = String ((unsigned long)ESP.getEfuseMac (), HEX);
+        String chipId = int64String (ESP.getEfuseMac (), HEX);
 #endif
         topic = "diy/esps/" + chipId;
 
@@ -186,8 +187,14 @@ void MQTTService::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
     }
 }
 
-void MQTTService::onMqttMessage(char* topic, char* payload,
-        AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
+void MQTTService::onMqttMessage(
+    char* topic, 
+    char* payload,
+    AsyncMqttClientMessageProperties properties, 
+    size_t len, 
+    size_t index, 
+    size_t total) 
+{
 
     DynamicJsonDocument r(1024);
     DeserializationError error = deserializeJson(r, payload);
@@ -265,11 +272,12 @@ void MQTTService::publishHA(bool join) {
 #ifdef ARDUINO_ARCH_ESP8266
     String chipId = String (ESP.getChipId (), HEX);
 #else
-    String chipId = String ((unsigned long)ESP.getEfuseMac (), HEX);
+    String chipId = int64String (ESP.getEfuseMac (), HEX);
 #endif
     String ha_config = haprefix + "/light/" + chipId + "/config";
 
-    if (join) {
+    if (join) 
+    {
         DynamicJsonDocument root(1024);
 //TODO: Fix - how to reference config.id from here? Pass in pointer to cfg struct from main?
 //        root["name"] = config.id;
