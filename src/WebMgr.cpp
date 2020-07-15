@@ -150,7 +150,7 @@ void c_WebMgr::GetConfiguration ()
     extern void GetConfig (JsonObject & json);
     // DEBUG_START;
 
-    DynamicJsonDocument webJsonDoc (2048);
+    DynamicJsonDocument webJsonDoc (4096);
 
     JsonObject JsonSystemConfig = webJsonDoc.createNestedObject (F("system"));
     // GetConfig (JsonSystemConfig);
@@ -284,7 +284,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             }
 
             // convert the input data into a json structure (use json read only mode)
-            DynamicJsonDocument webJsonDoc (2048);
+            DynamicJsonDocument webJsonDoc (4096);
             DeserializationError error = deserializeJson (webJsonDoc, (const char *)(&WebSocketFrameCollectionBuffer[0]));
 
             // DEBUG_V ("");
