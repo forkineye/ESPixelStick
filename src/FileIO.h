@@ -99,14 +99,14 @@ public:
   /** Loads JSON configuration file via SPIFFS.
    *  Returns true on success.
    */
-	static boolean loadConfig (String & filename, DeserializationHandler dsHandler)
+	static boolean loadConfig (String & filename, DeserializationHandler dsHandler, size_t jsonSize = 2048)
 	{
 		boolean retval = false;
 
 		fs::File file = SPIFFS.open (filename.c_str (), "r");
 		if (file)
 		{
-			retval = loadConfig (filename, file, dsHandler);
+			retval = loadConfig (filename, file, dsHandler, jsonSize);
 
 			file.close ();
 		}
@@ -119,9 +119,9 @@ public:
 
 	} // loadConfig
 
-	static boolean loadConfig (String & filename, fs::File & file, DeserializationHandler dsHandler)
+	static boolean loadConfig (String & filename, fs::File & file, DeserializationHandler dsHandler, size_t jsonSize = 2048)
 	{
-		DynamicJsonDocument json (2048);
+		DynamicJsonDocument json (jsonSize);
 		return loadConfig (filename, file, json, dsHandler);
 
 	} // loadConfig
