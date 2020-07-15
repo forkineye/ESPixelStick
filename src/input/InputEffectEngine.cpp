@@ -60,6 +60,8 @@ c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInput
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::~c_InputEffectEngine ()
 {
+    memset ((void*)InputDataBuffer, 0x0, InputDataBufferSize);
+
 } // ~c_InputEffectEngine
 
 //-----------------------------------------------------------------------------
