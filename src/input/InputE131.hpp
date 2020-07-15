@@ -2,7 +2,7 @@
 /*
 * E131Input.h - Code to wrap ESPAsyncE131 for input
 *
-* Project: ESPixelStick - An ESP8266/ESP32 and E1.31 based pixel driver
+* Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2020 Shelby Merrick
 * http://www.forkineye.com
 *
@@ -42,6 +42,7 @@ class c_InputE131 : public c_InputCommon
     uint16_t    LastUniverse  = 1;    ///< Last Universe to listen for
     uint8_t   * seqTracker = nullptr; ///< Current sequence numbers for each Universe
     uint32_t  * seqError = nullptr;   ///< Sequence error tracking for each universe
+    bool        IsActive = true;
 
     void SubscribeToMulticastDomains();
     void validateConfiguration ();
@@ -55,11 +56,11 @@ class c_InputE131 : public c_InputCommon
     ~c_InputE131();
 
     // functions to be provided by the derived class
-    void  Begin ();                                          ///< set up the operating environment based on the current config (or defaults)
-    bool  SetConfig (JsonObject & jsonConfig);   ///< Set a new config in the driver
-    void  GetConfig (JsonObject & jsonConfig);   ///< Get the current config used by the driver
-    void  GetStatus (JsonObject & jsonStatus);
-    void  Process ();                                        ///< Call from loop(),  renders Input data
-    void  GetDriverName (String & sDriverName) { sDriverName = "E1.31"; } ///< get the name for the instantiated driver
-    void  SetBufferInfo (uint8_t * BufferStart, uint16_t BufferSize);
+    void Begin ();                                          ///< set up the operating environment based on the current config (or defaults)
+    bool SetConfig (JsonObject & jsonConfig);   ///< Set a new config in the driver
+    void GetConfig (JsonObject & jsonConfig);   ///< Get the current config used by the driver
+    void GetStatus (JsonObject & jsonStatus);
+    void Process ();                                        ///< Call from loop(),  renders Input data
+    void GetDriverName (String & sDriverName) { sDriverName = "E1.31"; } ///< get the name for the instantiated driver
+    void SetBufferInfo (uint8_t * BufferStart, uint16_t BufferSize);
 };

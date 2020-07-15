@@ -30,6 +30,7 @@
 #include "InputDisabled.hpp"
 #include "InputE131.hpp"
 #include "InputEffectEngine.hpp"
+#include "InputMQTT.h"
 // needs to be last
 #include "InputMgr.hpp"
 
@@ -48,6 +49,7 @@ InputTypeXlateMap_t InputTypeXlateMap[c_InputMgr::e_InputType::InputType_End] =
 {
     {c_InputMgr::e_InputType::InputType_E1_31,    "E1.31"    },
     {c_InputMgr::e_InputType::InputType_Effects,  "Effects"  },
+    {c_InputMgr::e_InputType::InputType_MQTT,     "MQTT"     },
     {c_InputMgr::e_InputType::InputType_Disabled, "Disabled" }
 };
 
@@ -61,7 +63,7 @@ c_InputMgr::c_InputMgr ()
 
     // this gets called pre-setup so there is nothing we can do here.
     int pInputChannelDriversIndex = 0;
-    for (auto CurrentInput : pInputChannelDrivers)
+    for (c_InputCommon* CurrentInput : pInputChannelDrivers)
     {
         pInputChannelDrivers[pInputChannelDriversIndex++] = nullptr;
     }
@@ -75,10 +77,15 @@ c_InputMgr::~c_InputMgr ()
     // DEBUG_START;
 
     // delete pInputInstances;
-    for (auto CurrentInput : pInputChannelDrivers)
+    int pInputChannelDriversIndex = 0;
+    for (c_InputCommon* CurrentInput : pInputChannelDrivers)
     {
-        // the drivers will put the hardware in a safe state
-        delete CurrentInput;
+        if (nullptr != pInputChannelDrivers[pInputChannelDriversIndex])
+        {
+            // the drivers will put the hardware in a safe state
+            delete pInputChannelDrivers[pInputChannelDriversIndex];
+        }
+        pInputChannelDriversIndex++;
     }
     // DEBUG_END;
 
@@ -99,10 +106,9 @@ void c_InputMgr::Begin (uint8_t* BufferStart, uint16_t BufferSize)
 
     // make sure the pointers are set up properly
     int ChannelIndex = 0;
-    for (auto CurrentInput : pInputChannelDrivers)
+    for (c_InputCommon* CurrentInput : pInputChannelDrivers)
     {
-        InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex++),
-            e_InputType::InputType_Disabled);
+        InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex++), e_InputType::InputType_Disabled);
         // DEBUG_V ("");
     }
 
@@ -139,7 +145,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
 
     // add the channel configurations
     // DEBUG_V ("For Each Input Channel");
-    for (auto CurrentChannel : pInputChannelDrivers)
+    for (c_InputCommon* CurrentChannel : pInputChannelDrivers)
     {
         // DEBUG_V (String("Create Section in Config file for the Input channel: '") + CurrentChannel->GetInputChannelId() + "'");
         // create a record for this channel
@@ -201,7 +207,7 @@ void c_InputMgr::CreateNewConfig ()
     LOG_PORT.println (F ("--- WARNING: Creating a new Input Manager configuration Data set - Start ---"));
 
     // create a place to save the config
-    DynamicJsonDocument JsonConfigDoc (2048);
+    DynamicJsonDocument JsonConfigDoc (IM_JSON_SIZE);
     JsonObject JsonConfig = JsonConfigDoc.createNestedObject (IM_SECTION_NAME);
 
     // DEBUG_V ("for each Input type");
@@ -209,7 +215,7 @@ void c_InputMgr::CreateNewConfig ()
     {
         // DEBUG_V ("for each input channel");
         int ChannelIndex = 0;
-        for (auto CurrentInput : pInputChannelDrivers)
+        for (c_InputCommon* CurrentInput : pInputChannelDrivers)
         {
             // DEBUG_V (String("instantiate the Input type: ") + InputTypeId);
             InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex++), e_InputType (InputTypeId));
@@ -224,9 +230,9 @@ void c_InputMgr::CreateNewConfig ()
 
     // DEBUG_V ("leave the Inputs disabled");
     int ChannelIndex = 0;
-    for (auto CurrentInput : pInputChannelDrivers)
+    for (c_InputCommon* CurrentInput : pInputChannelDrivers)
     {
-        InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex), e_InputType::InputType_Disabled);
+        InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex++), e_InputType::InputType_Disabled);
     }// end for each interface
 
     // DEBUG_V ("");
@@ -294,12 +300,10 @@ void c_InputMgr::GetStatus (JsonObject & jsonStatus)
     // DEBUG_START;
 
     JsonArray InputStatus = jsonStatus.createNestedArray (F ("input"));
-    uint channelIndex = 0;
-    for (auto CurrentInput : pInputChannelDrivers)
+    for (c_InputCommon* CurrentInput : pInputChannelDrivers)
     {
         JsonObject channelStatus = InputStatus.createNestedObject ();
         CurrentInput->GetStatus (channelStatus);
-        channelIndex++;
         // DEBUG_V("");
     }
 
@@ -372,6 +376,14 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                 break;
             }
 
+            case e_InputType::InputType_MQTT:
+            {
+                // LOG_PORT.println (String (F ("************** Starting MQTT for channel '")) + ChannelIndex + "'. **************");
+                pInputChannelDrivers[ChannelIndex] = new c_InputMQTT (ChannelIndex, InputType_MQTT, InputDataBuffer, InputDataBufferSize);
+                // DEBUG_V ("");
+                break;
+            }
+
             default:
             {
                 LOG_PORT.println (String (F ("************** Unknown Input type for channel '")) + ChannelIndex + "'. Using disabled. **************");
@@ -410,7 +422,7 @@ void c_InputMgr::LoadConfig ()
             // DEBUG_V ("");
             this->ProcessJsonConfig (JsonConfig);
             // DEBUG_V ("");
-        }))
+        }, IM_JSON_SIZE))
     {
         LOG_PORT.println (F ("EEEE Error loading Input Manager Config File. EEEE"));
 
@@ -575,7 +587,7 @@ void c_InputMgr::SaveConfig ()
 {
     // DEBUG_START;
 
-    // DEBUG_V ("ConfigData: " + ConfigData);
+    DEBUG_V ("ConfigData: " + ConfigData);
 
     if (FileIO::SaveConfig (ConfigFileName, ConfigData))
     {
@@ -652,6 +664,22 @@ void c_InputMgr::SetBufferInfo (c_OutputMgr::e_OutputChannelIds outputChannelId,
     // DEBUG_END;
 
 } // SetBufferInfo
+
+//-----------------------------------------------------------------------------
+void c_InputMgr::SetOperationalState (bool ActiveFlag)
+{
+    // DEBUG_START;
+
+    // pass through each active interface and set the active state
+    for (c_InputCommon* pInputChannel : pInputChannelDrivers)
+    {
+        pInputChannel->SetOperationalState (ActiveFlag);
+        // DEBUG_V("");
+    }
+
+    // DEBUG_END;
+
+} // SetOutputState
 
 // create a global instance of the Input channel factory
 c_InputMgr InputMgr;

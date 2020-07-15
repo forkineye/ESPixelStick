@@ -1,6 +1,6 @@
 /******************************************************************
 *
-*       Project: ESPixelStick - An ESP8266/ESP32 and E1.31 based pixel (And Serial!) driver
+*       Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel (And Serial!) driver
 *       Orginal ESPixelStickproject by 2015 Shelby Merrick
 *
 *       Brought to you by:

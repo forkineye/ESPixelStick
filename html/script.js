@@ -90,26 +90,6 @@ function ProcessWindowChange(NextWindow) {
 
 function SetUpIoChangeHandlers()
 {
-    ////////////////////////////////////////////////////
-    //
-    //  I/O module configuration change callbacks
-    //
-    ////////////////////////////////////////////////////
-
-    // define the input select list action
-    $('#config #device #input').change(function () {
-        if ($(this).val()) {
-            LoadInputConfigurationForm();
-        }
-    });
-
-    // define the output select list action
-    $('#config #device #output').change(function () {
-        if ($(this).val()) {
-            LoadOutputConfigurationForm();
-        }
-    });
-
 } // SetUpIoChangeHandlers
 
 function SetUpWifiValidationHandlers()
@@ -156,27 +136,6 @@ function SetUpWifiValidationHandlers()
         wifiValidation();
     });
 } // SetUpWifiValidationHandlers
-
-function LoadInputConfigurationForm()
-{
-    $('#refresh').html('0 ms / 0 fps');
-
-    var filename = $("#config #device #input option:selected").text().toLowerCase() + ".html";
-    $('#imode').load(filename, function ()
-    {
-        ProcessInputModeConfiguration();
-    });
-} // LoadInputConfigurationForm
-
-function LoadOutputConfigurationForm()
-{
-    $('#refresh').html('0 ms / 0 fps');
-
-    $('#omode').load($("#config #device #output option:selected").text().toLowerCase() + ".html", function ()
-    {
-        ProcessOutputModeConfiguration();
-    });
-} // LoadOutputConfigurationForm
 
 function RequestStatusUpdate()
 {
@@ -295,13 +254,12 @@ function wifiValidation()
 
 }
 
-function ProcessOutputModeConfiguration()
+function ProcessoutputModeConfiguration(channelId)
 {
     // console.info("ProcessOutputModeConfiguration: Start");
 
     // determine the type of output that has been selected and populate the form
-    var TypeOfOutputId   = parseInt($("#config #device #output option:selected").val(), 10);
-    var channelId        = 0;
+    var TypeOfOutputId = parseInt($("#output" + channelId + " option:selected").val(), 10);
     var channelConfigSet = om_config.om_channels[channelId];
     if (isNaN(TypeOfOutputId))
     {
@@ -315,7 +273,7 @@ function ProcessOutputModeConfiguration()
     selector = [];
 
     // push the prefix that identifies the object being modified.
-    selector.push("#" + ChannelTypeName + " #fg_" + ChannelTypeName);
+    selector.push(" #" + ChannelTypeName);
 
     // update the fields based on config data
     updateFromJSON(channelConfig);
@@ -327,14 +285,13 @@ function ProcessOutputModeConfiguration()
 
 } // ProcessOutputModeConfiguration
 
-function ProcessInputModeConfiguration()
+function ProcessinputModeConfiguration(channelId)
 {
     // console.info("ProcessInputModeConfiguration: Start");
 
     // At the moment we only support a single channel
-    var channelId        = 0;
     var channelConfigSet = im_config.im_inputs[channelId];
-    var TypeOfInputId    = parseInt($("#config #device #input option:selected").val(), 10);
+    var TypeOfInputId    = parseInt($("#input" + channelId + " option:selected").val(), 10);
     if (isNaN(TypeOfInputId))
     {
         // use the value we got from the controller
@@ -342,13 +299,13 @@ function ProcessInputModeConfiguration()
     }
     var channelConfig    = channelConfigSet[TypeOfInputId];
     var ChannelTypeName  = channelConfig.type.toLowerCase();
-    ChannelTypeName = ChannelTypeName.replace('.', '_');
+    ChannelTypeName      = ChannelTypeName.replace('.', '_');
 
     // clear the array
     selector = [];
 
     // push the prefix that identifies the object being modified.
-    selector.push("#" + ChannelTypeName + " #fg_" + ChannelTypeName);
+    selector.push("#" + ChannelTypeName);
 
     // update the fields based on config data
     updateFromJSON(channelConfig);
@@ -386,14 +343,13 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     {
         // save the config for later use.
         om_config = JsonConfigData.om_config;
-        ProcessOutputModeConfiguration();    }
+    }
 
     // is this an input config?
     else if (JsonConfigData.hasOwnProperty("im_config"))
     {
         // save the config for later use.
         im_config = JsonConfigData.im_config;
-        ProcessInputModeConfiguration();
     }
 
     // is this an input config?
@@ -458,30 +414,60 @@ function updateFromJSON(obj)
 
 function ProcessReceivedOptionDataMessage(JsonOptionList)
 {
-    // for each field we need to populate
+    // for each field we need to populate (input vs output)
     Object.keys(JsonOptionList).forEach(function (OptionListName)
     {
-        var DisplayedChannel  = 0;
+        // OptionListName is 'input' or 'output'
         var ArrayOfOptions    = JsonOptionList[OptionListName].list; // value
         var ArrayOfSelections = JsonOptionList[OptionListName].selectedoptionlist;
-        var currentSelection  = ArrayOfSelections[DisplayedChannel].selectedoption;
-        var jqSelector        = "#" + OptionListName;
 
-        // remove the existing options
-        $(jqSelector).empty();
+        // for each option channel:
+        $(ArrayOfSelections).each(function (DisplayedChannelId, currentSelection)
+        {
+            // create the selection box
+            $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + DisplayedChannelId + '">' + OptionListName + ' ' + DisplayedChannelId + ' Mode:</label>');
+            $('#fg_' + OptionListName).append('<div class="col-sm-2"><select class="form-control wsopt" id="' + OptionListName + DisplayedChannelId + '"></select></div>');
+            $('#fg_' + OptionListName + '_mode').append('<fieldset id="' + OptionListName + 'mode' + DisplayedChannelId + '"></fieldset>');
 
-        // for each option in the list
-        ArrayOfOptions.forEach(function (listEntry) {
-            // add in a new entry
-            $(jqSelector).append('<option value="' + listEntry.id + '">' + listEntry.name + '</option>');
-        });
+            // define the input select list action
+            $('#' + OptionListName + DisplayedChannelId).change(function ()
+            {
+                if ($(this).val())
+                {
+                    // try to load the field definition file for this channel type
+                    $('#' + OptionListName + 'mode' + DisplayedChannelId).load($('#' + OptionListName + DisplayedChannelId + ' option:selected').text().toLowerCase() + ".html", function ()
+                    {
+                        window['Process' + OptionListName + 'ModeConfiguration'](DisplayedChannelId);
+                    });
+                }
+            });
 
-        // set the current selector value
-        $(jqSelector).val(currentSelection);
+            var jqSelector = "#" + OptionListName + DisplayedChannelId;
+
+            // remove the existing options
+            $(jqSelector).empty();
+
+            // for each option in the list
+            ArrayOfOptions.forEach(function (listEntry)
+            {
+                // add in a new entry
+                $(jqSelector).append('<option value="' + listEntry.id + '">' + listEntry.name + '</option>');
+            });
+
+            // set the current selector value
+            $(jqSelector).val(ArrayOfSelections[DisplayedChannelId].selectedoption);
+
+            // clear the footer
+            $('#refresh').html('0 ms / 0 fps');
+
+            // try to load the field definition file for this channel type
+            $('#' + OptionListName + 'mode' + DisplayedChannelId).load($('#' + OptionListName + DisplayedChannelId + ' option:selected').text().toLowerCase() + ".html", function ()
+            {
+                window['Process' + OptionListName + 'ModeConfiguration'](DisplayedChannelId);
+            });
+
+        }); // end for each channel
     }); // end for each option group
-
-    LoadInputConfigurationForm();
-    LoadOutputConfigurationForm();
 
 } // ProcessReceivedOptionDataMessage
 

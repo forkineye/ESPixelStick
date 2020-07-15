@@ -1,7 +1,7 @@
 /*
 * InputMQTT.cpp
 *
-* Project: ESPixelStick - An ESP8266/ESP32 and E1.31 based pixel driver
+* Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2020 Shelby Merrick
 * http://www.forkineye.com
 *
@@ -22,6 +22,7 @@
 #include <Ticker.h>
 #include <Int64String.h>
 #include "InputMQTT.h"
+#include "InputEffectEngine.hpp"
 #include "../FileIO.h"
 
 #if defined ARDUINO_ARCH_ESP32
@@ -46,11 +47,20 @@ c_InputMQTT::~c_InputMQTT ()
 {
     mqtt.unsubscribe (topic.c_str ());
     mqtt.disconnect (/*force = */ true);
+    mqttTicker.detach ();
 
+    // allow the other input channels to run
+    InputMgr.SetOperationalState (true);
+
+    if (nullptr != pEffectsEngine)
+    {
+        delete pEffectsEngine;
+        pEffectsEngine = nullptr;
+    }
 } // ~c_InputMQTT
 
 //-----------------------------------------------------------------------------
-void c_InputMQTT::begin() 
+void c_InputMQTT::Begin() 
 {
     DEBUG_START;
 
@@ -94,10 +104,15 @@ void c_InputMQTT::GetConfig (JsonObject & jsonConfig)
     jsonConfig["hadisco"]  = hadisco;
     jsonConfig["haprefix"] = haprefix;
 
+    if (nullptr != pEffectsEngine)
+    {
+        pEffectsEngine->GetConfig (jsonConfig);
+    }
+
+
     DEBUG_END;
 
 } // GetConfig
-
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::GetStatus (JsonObject& jsonStatus)
@@ -115,13 +130,28 @@ void c_InputMQTT::GetStatus (JsonObject& jsonStatus)
 void c_InputMQTT::Process ()
 {
     // DEBUG_START;
-
-    // this process is completly async
+    // ignoring IsActive
+    if (nullptr != pEffectsEngine)
+    {
+        pEffectsEngine->Process ();
+    }
 
     // DEBUG_END;
 
 } // process
 
+//-----------------------------------------------------------------------------
+void c_InputMQTT::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
+{
+    InputDataBuffer = BufferStart;
+    InputDataBufferSize = BufferSize;
+
+    if (nullptr != pEffectsEngine)
+    {
+        pEffectsEngine->SetBufferInfo (BufferStart, BufferSize);
+    }
+
+} // SetBufferInfo
 
 //-----------------------------------------------------------------------------
 boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject& jsonConfig)
@@ -137,11 +167,17 @@ boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     FileIO::setFromJSON (hadisco,  jsonConfig["hadisco"]);
     FileIO::setFromJSON (haprefix, jsonConfig["haprefix"]);
 
+    if (nullptr != pEffectsEngine)
+    {
+        pEffectsEngine->SetConfig (jsonConfig);
+    }
+
     validateConfiguration ();
 
     // DEBUG_END;
     return true;
 } // SetConfig
+
 //-----------------------------------------------------------------------------
 //TODO: Add MQTT configuration validation
 void c_InputMQTT::validateConfiguration ()
@@ -151,6 +187,11 @@ void c_InputMQTT::validateConfiguration ()
 
 } // validate
 
+/////////////////////////////////////////////////////////
+//
+//  MQTT Section
+//
+/////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::onConnect()
@@ -186,12 +227,6 @@ void c_InputMQTT::update()
     DEBUG_END;
 
 } // update
-
-/////////////////////////////////////////////////////////
-//
-//  MQTT Section
-//
-/////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::connectToMqtt()
@@ -276,45 +311,43 @@ void c_InputMQTT::onMqttMessage(
             if (strcmp (root["state"], ON) == 0) 
             {
                 stateOn = true;
+                // blank the other input channels
+                InputMgr.SetOperationalState (false);
+
+                // is the effects engine runing?
+                if (nullptr == pEffectsEngine)
+                {
+                    // start the effects engine
+                    pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputChannelId_1, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
+                }
             }
             else if (strcmp (root["state"], OFF) == 0) 
             {
                 stateOn = false;
+
+                // allow the other input channels to run
+                InputMgr.SetOperationalState (true);
+
+                if (nullptr != pEffectsEngine)
+                {
+                    delete pEffectsEngine;
+                    pEffectsEngine = nullptr;
+                }
             }
         }
 
+        if (nullptr == pEffectsEngine)
+        {
+            pEffectsEngine->SetConfig (root);
+        }
+
         /*
-            if (root.containsKey("brightness")) {
-                effects.setBrightness((float)root["brightness"] / 255.0);
-            }
-
-            if (root.containsKey("speed")) {
-                effects.setSpeed(root["speed"]);
-            }
-
             if (root.containsKey("color")) {
                 effects.setColor({
                     root["color"]["r"],
                     root["color"]["g"],
                     root["color"]["b"]
                 });
-            }
-
-            if (root.containsKey("effect")) {
-                // Set the explict effect provided by the MQTT client
-                effects.setEffect(root["effect"]);
-            }
-
-            if (root.containsKey("reverse")) {
-                effects.setReverse(root["reverse"]);
-            }
-
-            if (root.containsKey("mirror")) {
-                effects.setMirror(root["mirror"]);
-            }
-
-            if (root.containsKey("allleds")) {
-                effects.setAllLeds(root["allleds"]);
             }
 
             // Set data source based on state - Fall back to E131 when off

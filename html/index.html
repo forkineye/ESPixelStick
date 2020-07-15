@@ -81,15 +81,15 @@
                     <legend class="esps-legend">Network Configuration</legend>
                     <div class="form-group" id="fg_ssid">
                         <label class="control-label col-sm-2" for="ssid">SSID</label>
-                        <div class="col-sm-10"><input type="text" class="form-control" id="ssid" title="The SSID for your access point."></div>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="ssid" maxlength="32" title="The SSID for your access point."></div>
                     </div>
                     <div class="form-group" id="fg_password">
                         <label class="control-label col-sm-2" for="passphrase">Password</label>
-                        <div class="col-sm-10"><input type="password" class="form-control" id="passphrase" title="The password for your access point."></div>
+                        <div class="col-sm-10"><input type="password" class="form-control" id="passphrase" maxlength="32" title="The password for your access point."></div>
                     </div>
                     <div class="form-group" id="fg_hostname">
                         <label class="control-label col-sm-2" for="hostname">Hostname</label>
-                        <div class="col-sm-10"><input type="text" class="form-control has-error" id="hostname" title="Hostname for this device."></div>
+                        <div class="col-sm-10"><input type="text" class="form-control has-error" id="hostname" maxlength="64" title="Hostname for this device."></div>
                     </div>
                     <div class="form-group" id="fg_staTimeout">
                         <label class="control-label col-sm-2" for="sta_timeout">Client Timeout:</label>
@@ -103,17 +103,26 @@
                             <div class="checkbox"><label><input type="checkbox" id="dhcp" title="Usage of DHCP with static leases is recommended."> Use DHCP</label></div>
                         </div>
                     </div>
-                    <div class="form-group dhcp" id="fg_ip">
+                    <div class="form-group dhcp has-feedback" id="fg_ip">
                         <label class="control-label col-sm-2" for="ip">IP</label>
-                        <div class="col-sm-10"><input type="text" class="form-control" id="ip" title="Static IP Address"></div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="ip" name="ip" minlength="7" maxlength="15" pattern='\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b' value="0.0.0.0" title="Static IP Address">
+                            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+                        </div>
                     </div>
-                    <div class="form-group dhcp" id="fg_netmask">
+                    <div class="form-group dhcp has-feedback" id="fg_netmask">
                         <label class="control-label col-sm-2" for="netmask">Netmask</label>
-                        <div class="col-sm-10"><input type="text" class="form-control" id="netmask" title="Static Netmask"></div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="netmask" name="netmask" minlength="7" maxlength="15" pattern='\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b' value="0.0.0.0" title="Static Netmask">
+                            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+                        </div>
                     </div>
-                    <div class="form-group dhcp" id="fg_gateway">
+                    <div class="form-group dhcp has-feedback" id="fg_gateway">
                         <label class="control-label col-sm-2" for="gateway">Gateway</label>
-                        <div class="col-sm-10"><input type="text" class="form-control" id="gateway" title="Static Gateway"></div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="gateway" name="gateway" minlength="7" maxlength="15" pattern='\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b' value="0.0.0.0" title="Static Gateway">
+                            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <div class="col-sm-offset-2 col-sm-10">
@@ -139,22 +148,27 @@
                         <div class="col-sm-6"><input type="text" class="form-control" id="id" title="Plain text ID to help identify your device."></div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="control-label col-sm-2" for="input">Input Mode</label>
-                        <div class="col-sm-2">
-                            <select class="form-control wsopt" id="input"></select>
-                        </div>
+                    <div class="form-group" id="fg_input">
+                    </div>
 
-                        <label class="control-label col-sm-2" for="output">Output Mode</label>
-                        <div class="col-sm-2">
-                            <select class="form-control wsopt" id="output"></select>
-                        </div>
+                    <div class="form-group" id="fg_output">
                     </div>
                 </fieldset>
 
-                <fieldset id="imode"></fieldset>
+                <div class="form-group" id="fg_input_mode">
+                <!--
+                    <fieldset id="inputmode0"></fieldset>
+                    <fieldset id="inputmode1"></fieldset>
+                 -->
+                </div>
 
-                <fieldset id="omode"></fieldset>
+                <div class="form-group" id="fg_output_mode">
+                <!--
+                    <fieldset id="outputmode0"></fieldset>
+                    <fieldset id="outputmode1"></fieldset>
+                    <fieldset id="outputmode2"></fieldset>
+                 -->
+                </div>
 
                 <fieldset>
                     <!-- Refresh Rate Display -->

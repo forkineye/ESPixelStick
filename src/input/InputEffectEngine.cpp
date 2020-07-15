@@ -1,7 +1,7 @@
 /*
 * InputEffectEngine.cpp - Code to wrap ESPAsyncE131 for input
 *
-* Project: ESPixelStick - An ESP8266/ESP32 and E1.31 based pixel driver
+* Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2020 Shelby Merrick
 * http://www.forkineye.com
 *
@@ -265,7 +265,7 @@ void c_InputEffectEngine::setPixel (uint16_t pixelId, CRGB color)
 {
     // DEBUG_START;
 
-    if (pixelId < PixelCount)
+    if ((true == IsActive) && (pixelId < PixelCount))
     {
         uint8_t* pInputDataBuffer = &InputDataBuffer[3 * pixelId];
 

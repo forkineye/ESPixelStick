@@ -2,7 +2,7 @@
 /*
 * InputDisabled.h - Do Nothing input driver
 *
-* Project: ESPixelStick - An ESP8266/ESP32 and E1.31 based pixel driver
+* Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
 * http://www.forkineye.com
 *
@@ -35,13 +35,13 @@ public:
     virtual ~c_InputDisabled ();
 
     // functions to be provided by the derived class
-    void  Begin ();                              ///< set up the operating environment based on the current config (or defaults)
-    bool  SetConfig (JsonObject & jsonConfig);   ///< Set a new config in the driver
-    void  GetConfig (JsonObject & jsonConfig);   ///< Get the current config used by the driver
-    void  GetStatus (JsonObject & jsonStatus);
-    void  Process ();                            ///< Call from loop(),  Process Input data
-    void  GetDriverName (String& sDriverName) { sDriverName = "Disabled"; } ///< get the name for the instantiated driver
-    void  SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize) {}
+    void Begin ();                              ///< set up the operating environment based on the current config (or defaults)
+    bool SetConfig (JsonObject & jsonConfig);   ///< Set a new config in the driver
+    void GetConfig (JsonObject & jsonConfig);   ///< Get the current config used by the driver
+    void GetStatus (JsonObject & jsonStatus);
+    void Process ();                            ///< Call from loop(),  Process Input data
+    void GetDriverName (String& sDriverName) { sDriverName = "Disabled"; } ///< get the name for the instantiated driver
+    void SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize) {}
 
 private:
 

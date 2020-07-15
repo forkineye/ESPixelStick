@@ -40,18 +40,19 @@ public:
     void GetConfig  (char * Response);         ///< Get the current config used by the driver
     void GetStatus  (JsonObject & jsonStatus);
     bool SetConfig  (JsonObject & jsonConfig); ///< Set a new config in the driver
-    void DumpSupportedModes () {/* todo */};
     void Process    ();                        ///< Call from loop(),  renders Input data
     void GetOptions (JsonObject & jsonOptions);
     void SetBufferInfo (c_OutputMgr::e_OutputChannelIds channelId, uint8_t* BufferStart, uint16_t BufferSize);
+    void SetOperationalState (bool Active);
 
     enum e_InputType
     {
         InputType_Disabled = 0,
         InputType_E1_31,
         InputType_Effects,
+        InputType_MQTT,
         InputType_End,
-        InputType_Start = InputType_Disabled,
+        InputType_Start   = InputType_Disabled,
         InputType_Default = InputType_Disabled,
     };
 
@@ -59,6 +60,7 @@ public:
     enum e_InputChannelIds
     {
         InputChannelId_1 = 0,
+        InputChannelId_2 = 1,
         InputChannelId_End,
         InputChannelId_Start = InputChannelId_1
     };
@@ -85,6 +87,8 @@ private:
 
     String ConfigFileName;
     String ConfigData;
+
+#define IM_JSON_SIZE (3*1024)
 
 protected:
 

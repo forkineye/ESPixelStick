@@ -2,7 +2,7 @@
 /*
 * c_FPPDiscovery.h
 *
-* Project: ESPixelStick - An ESP8266/ESP32 and E1.31 based pixel driver
+* Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2018 Shelby Merrick
 * http://www.forkineye.com
 *
