@@ -132,9 +132,6 @@ void setup()
 #endif
     // DEBUG_V ("");
 
-    // Dump supported input modes
-    InputMgr.DumpSupportedModes ();
-
     // DEBUG_V ("");
     FileIO::Begin ();
 
