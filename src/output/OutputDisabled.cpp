@@ -92,7 +92,7 @@ bool c_OutputDisabled::SetConfig(ArduinoJson::JsonObject & /* jsonConfig */)
 } // SetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputDisabled::GetConfig(ArduinoJson::JsonObject & jsonConfig)
+void c_OutputDisabled::GetConfig(ArduinoJson::JsonObject & /* jsonConfig */ )
 {
     // DEBUG_START;
 

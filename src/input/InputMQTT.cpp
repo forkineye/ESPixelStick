@@ -38,8 +38,8 @@ c_InputMQTT::c_InputMQTT (
     c_InputCommon (NewInputChannelId, NewChannelType, BufferStart, BufferSize)
 
 {
-    // DEBUG_START;
-    // DEBUG_END;
+    DEBUG_START;
+    DEBUG_END;
 } // c_InputE131
 
 //-----------------------------------------------------------------------------
@@ -62,13 +62,13 @@ c_InputMQTT::~c_InputMQTT ()
 //-----------------------------------------------------------------------------
 void c_InputMQTT::Begin() 
 {
-    DEBUG_START;
+ DEBUG_START;
 
-    Serial.println (F ("** MQTT Input Initialization **"));
+    Serial.println (String (F ("** MQTT Initialization for channel '")) + InputChannelId + String (F ("' **")));
 
     if (true == HasBeenInitialized)
     {
-        DEBUG_END;
+     DEBUG_END;
         return;
     }
     HasBeenInitialized = true;
@@ -85,14 +85,14 @@ void c_InputMQTT::Begin()
         mqtt.setCredentials (user.c_str (), password.c_str ());
     }
 
-    DEBUG_END;
+ DEBUG_END;
 
 } // begin
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::GetConfig (JsonObject & jsonConfig)
 {
-    DEBUG_START;
+ DEBUG_START;
 
     // Serialize Config
     jsonConfig["ip"]       = ip;
@@ -110,19 +110,19 @@ void c_InputMQTT::GetConfig (JsonObject & jsonConfig)
     }
 
 
-    DEBUG_END;
+ DEBUG_END;
 
 } // GetConfig
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::GetStatus (JsonObject& jsonStatus)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
     JsonObject mqttStatus = jsonStatus.createNestedObject (F ("mqtt"));
     // mqttStatus["unifirst"] = startUniverse;
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // GetStatus
 
@@ -156,7 +156,7 @@ void c_InputMQTT::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
 //-----------------------------------------------------------------------------
 boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
     FileIO::setFromJSON (ip,       jsonConfig["ip"]);
     FileIO::setFromJSON (port,     jsonConfig["port"]);
@@ -174,7 +174,7 @@ boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     validateConfiguration ();
 
-    // DEBUG_END;
+    DEBUG_END;
     return true;
 } // SetConfig
 
@@ -182,8 +182,8 @@ boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 //TODO: Add MQTT configuration validation
 void c_InputMQTT::validateConfiguration ()
 {
-    DEBUG_START;
-    DEBUG_END;
+ DEBUG_START;
+ DEBUG_END;
 
 } // validate
 
@@ -196,54 +196,54 @@ void c_InputMQTT::validateConfiguration ()
 //-----------------------------------------------------------------------------
 void c_InputMQTT::onConnect()
 {
-    DEBUG_START;
+ DEBUG_START;
 
     connectToMqtt();
     
-    DEBUG_END;
+ DEBUG_END;
 
 } // onConnect
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::onDisconnect()
 {
-    DEBUG_START;
+ DEBUG_START;
 
     mqttTicker.detach();
 
-    DEBUG_END;
+ DEBUG_END;
 
 } // onDisconnect
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::update()
 {
-    DEBUG_START;
+ DEBUG_START;
 
     // Update Home Assistant Discovery if enabled
     publishHA (hadisco);
     publishState ();
 
-    DEBUG_END;
+ DEBUG_END;
 
 } // update
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::connectToMqtt()
 {
-    DEBUG_START;
+ DEBUG_START;
 
     LOG_PORT.print(F("- Connecting to MQTT Broker "));
     LOG_PORT.println(ip);
     mqtt.connect();
 
-    DEBUG_END;
+ DEBUG_END;
 }
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::onMqttConnect(bool sessionPresent)
 {
-    DEBUG_START;
+ DEBUG_START;
 
     LOG_PORT.println(F("- MQTT Connected"));
 
@@ -257,7 +257,7 @@ void c_InputMQTT::onMqttConnect(bool sessionPresent)
     // Publish state
     publishState();
 
-    DEBUG_END;
+ DEBUG_END;
 
 } // onMqttConnect
 
@@ -265,7 +265,7 @@ void c_InputMQTT::onMqttConnect(bool sessionPresent)
 // void c_InputMQTT::onMqttDisconnect (AsyncMqttClientDisconnectReason reason) {
 void c_InputMQTT::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) 
 {
-    DEBUG_START;
+ DEBUG_START;
 
     LOG_PORT.println(F("- MQTT Disconnected"));
     if (WiFi.isConnected ())
@@ -284,7 +284,7 @@ void c_InputMQTT::onMqttMessage(
     size_t index, 
     size_t total) 
 {
-    DEBUG_START;
+ DEBUG_START;
     do // once
     {
         DynamicJsonDocument r (1024);
@@ -363,14 +363,14 @@ void c_InputMQTT::onMqttMessage(
         publishState ();
     } while (false);
 
-    DEBUG_END;
+ DEBUG_END;
 
 } // onMqttMessage
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::publishHA(bool join)
 {
-    DEBUG_START;
+ DEBUG_START;
 
     // Setup HA discovery
 #ifdef ARDUINO_ARCH_ESP8266
@@ -383,36 +383,36 @@ void c_InputMQTT::publishHA(bool join)
     if (join) 
     {
         DynamicJsonDocument root(1024);
+        JsonObject JsonConfig = root.as<JsonObject> ();
+
 //TODO: Fix - how to reference config.id from here? Pass in pointer to cfg struct from main?
-//        root["name"] = config.id;
-        root["schema"] = "json";
-        root["state_topic"] = topic;
-        root["command_topic"] = topic + "/set";
-        root["rgb"] = "true";
-        root["brightness"] = "true";
-/*
-        root["effect"] = "true";
-        JsonArray effect_list = root.createNestedArray("effect_list");
-        // effect[0] is 'disabled', skip it
-        for (uint8_t i = 1; i < effects.getEffectCount(); i++) {
-            effect_list.add(effects.getEffectInfo(i)->name);
+        JsonConfig["name"]          = "MartinFixMe";
+        JsonConfig["schema"]        = "json";
+        JsonConfig["state_topic"]   = topic;
+        JsonConfig["command_topic"] = topic + "/set";
+        JsonConfig["rgb"]           = "true";
+        JsonConfig["brightness"]    = "true";
+
+        if (nullptr != pEffectsEngine)
+        {
+            pEffectsEngine->GetConfig (JsonConfig);
         }
-*/
-        char buffer[measureJson(root) + 1];
-        serializeJson(root, buffer, sizeof(buffer));
-        mqtt.publish(ha_config.c_str(), 0, true, buffer);
+
+        String HaJsonConfig;
+        serializeJson(root, HaJsonConfig);
+        mqtt.publish(ha_config.c_str(), 0, true, HaJsonConfig.c_str());
     } 
     else 
     {
         mqtt.publish(ha_config.c_str(), 0, true, "");
     }
-    DEBUG_END;
+ DEBUG_END;
 } // publishHA
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::publishState()
 {
-    DEBUG_START;
+ DEBUG_START;
     
     /*
     DynamicJsonDocument root(1024);
@@ -438,6 +438,6 @@ void c_InputMQTT::publishState()
     serializeJson(root, buffer, sizeof(buffer));
     mqtt.publish(config.mqtt_topic.c_str(), 0, true, buffer);
 */
-    DEBUG_END;
+ DEBUG_END;
 
 } // publishState

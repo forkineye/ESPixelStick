@@ -77,9 +77,9 @@ private:
     bool            ConfigSaveNeeded    = false;
 
     // configuration parameter names for the channel manager within the config file
-#   define IM_SECTION_NAME         F("im_config")
-#   define IM_CHANNEL_SECTION_NAME F("im_inputs")
-#   define IM_CHANNEL_TYPE_NAME    F("im_input_type")
+#   define IM_SECTION_NAME         F("input_config")
+#   define IM_CHANNEL_SECTION_NAME F("channels")
+#   define IM_CHANNEL_TYPE_NAME    F("type")
 
     bool ProcessJsonConfig        (JsonObject & jsonConfig);
     void CreateJsonConfig         (JsonObject & jsonConfig);

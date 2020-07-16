@@ -83,10 +83,9 @@ private:
     c_OutputCommon * pOutputChannelDrivers[e_OutputChannelIds::OutputChannelId_End]; ///< pointer(s) to the current active output driver
 
     // configuration parameter names for the channel manager within the config file
-#   define OM_SECTION_NAME         F("om_config")
-#   define OM_CHANNEL_SECTION_NAME F("om_channels")
-#   define OM_CHANNEL_TYPE_NAME    F("om_channel_type")
-#   define OM_CHANNEL_DATA_NAME    F("om_channel_data")
+#   define OM_SECTION_NAME         F("output_config")
+#   define OM_CHANNEL_SECTION_NAME F("channels")
+#   define OM_CHANNEL_TYPE_NAME    F("type")
 
     bool HasBeenInitialized = false;
     bool ConfigSaveNeeded   = false;

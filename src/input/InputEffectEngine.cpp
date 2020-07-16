@@ -68,7 +68,7 @@ c_InputEffectEngine::~c_InputEffectEngine ()
 void c_InputEffectEngine::Begin ()
 {
     // DEBUG_START;
-    Serial.println (F ("** Effect Engine Initialization **"));
+    Serial.println (String (F ("** Effect Engine Initialization for channel '")) + InputChannelId + String (F ("' **")));
 
     if (true == HasBeenInitialized)
     {

@@ -237,6 +237,9 @@ void c_InputMgr::CreateNewConfig ()
 
     // DEBUG_V ("");
 
+    // Record the default configuration
+    CreateJsonConfig (JsonConfig);
+
     ConfigData.clear ();
     serializeJson (JsonConfigDoc, ConfigData);
     ConfigSaveNeeded = false;
@@ -587,12 +590,12 @@ void c_InputMgr::SaveConfig ()
 {
     // DEBUG_START;
 
-    DEBUG_V ("ConfigData: " + ConfigData);
+    // DEBUG_V ("ConfigData: " + ConfigData);
 
     if (FileIO::SaveConfig (ConfigFileName, ConfigData))
     {
         LOG_PORT.println (F ("**** Saved Input Manager Config File. ****"));
-        // DEBUG_V ("ConfigData: " + ConfigData);
+        DEBUG_V ("ConfigData: " + ConfigData);
     } // end we got a config and it was good
     else
     {

@@ -201,7 +201,8 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
         // DEBUG_V ("Add the output channel configuration for type: " + DriverTypeId);
 
         // Populate the driver name
-        String DriverName = ""; CurrentChannel->GetDriverName (DriverName);
+        String DriverName = ""; 
+        CurrentChannel->GetDriverName (DriverName);
         ChannelConfigByTypeData[F ("type")] = DriverName;
 
         CurrentChannel->GetConfig (ChannelConfigByTypeData);

@@ -10,8 +10,8 @@ var effectInfo = null;
 // global data
 var ParsedJsonStatus = null;
 var ParsedJsonConfig = null;
-var om_config = null; // Output Manager configuration record
-var im_config = null; // Input Manager configuration record
+var output_config = null; // Output Manager configuration record
+var input_config = null; // Input Manager configuration record
 var selector = [];
 var StatusUpdateRequestTimer = null;
 
@@ -54,7 +54,6 @@ $(function ()
     });
 
     SetUpWifiValidationHandlers();
-    SetUpIoChangeHandlers();
 
     // Autoload tab based on URL hash
     var hash = window.location.hash;
@@ -87,10 +86,6 @@ function ProcessWindowChange(NextWindow) {
     }
 
 } // ProcessWindowChange
-
-function SetUpIoChangeHandlers()
-{
-} // SetUpIoChangeHandlers
 
 function SetUpWifiValidationHandlers()
 {
@@ -254,20 +249,20 @@ function wifiValidation()
 
 }
 
-function ProcessoutputModeConfiguration(channelId)
+function ProcessModeConfigurationData(channelId, ChannelTypeName, JsonConfig )
 {
-    // console.info("ProcessOutputModeConfiguration: Start");
+    // console.info("ProcessModeConfigurationData: Start");
 
     // determine the type of output that has been selected and populate the form
-    var TypeOfOutputId = parseInt($("#output" + channelId + " option:selected").val(), 10);
-    var channelConfigSet = om_config.om_channels[channelId];
-    if (isNaN(TypeOfOutputId))
-    {
+    var TypeOfChannelId = parseInt($('#' + ChannelTypeName +  channelId + " option:selected").val(), 10);
+    var channelConfigSet = JsonConfig.channels[channelId];
+
+    if (isNaN(TypeOfChannelId)) {
         // use the value we got from the controller
-        TypeOfOutputId = channelConfigSet.om_channel_type;
+        TypeOfChannelId = channelConfigSet.type;
     }
-    var channelConfig    = channelConfigSet[TypeOfOutputId];
-    var ChannelTypeName  = channelConfig.type.toLowerCase();
+    var channelConfig = channelConfigSet[TypeOfChannelId];
+    var ChannelTypeName = channelConfig.type.toLowerCase();
 
     // clear the array
     selector = [];
@@ -281,40 +276,7 @@ function ProcessoutputModeConfiguration(channelId)
     // clear the array
     selector = [];
 
-    // console.info("ProcessOutputModeConfiguration: End");
-
-} // ProcessOutputModeConfiguration
-
-function ProcessinputModeConfiguration(channelId)
-{
-    // console.info("ProcessInputModeConfiguration: Start");
-
-    // At the moment we only support a single channel
-    var channelConfigSet = im_config.im_inputs[channelId];
-    var TypeOfInputId    = parseInt($("#input" + channelId + " option:selected").val(), 10);
-    if (isNaN(TypeOfInputId))
-    {
-        // use the value we got from the controller
-        TypeOfInputId = channelConfigSet.im_input_type;
-    }
-    var channelConfig    = channelConfigSet[TypeOfInputId];
-    var ChannelTypeName  = channelConfig.type.toLowerCase();
-    ChannelTypeName      = ChannelTypeName.replace('.', '_');
-
-    // clear the array
-    selector = [];
-
-    // push the prefix that identifies the object being modified.
-    selector.push("#" + ChannelTypeName);
-
-    // update the fields based on config data
-    updateFromJSON(channelConfig);
-
-    // clear the array
-    selector = [];
-
-    if ("effects" === ChannelTypeName)
-    {
+    if ("effects" === ChannelTypeName) {
         var jqSelector = "#currenteffect";
 
         // remove the existing options
@@ -330,6 +292,24 @@ function ProcessinputModeConfiguration(channelId)
         $(jqSelector).val(channelConfig.currenteffect);
     }
 
+    // console.info("ProcessModeConfigurationData: End");
+
+} // ProcessModeConfigurationData
+
+function ProcessoutputModeConfiguration(channelId)
+{
+    // console.info("ProcessOutputModeConfiguration: Start");
+
+    ProcessModeConfigurationData(channelId, "output", output_config);
+
+} // ProcessOutputModeConfiguration
+
+function ProcessinputModeConfiguration(channelId)
+{
+    // console.info("ProcessInputModeConfiguration: Start");
+
+    ProcessModeConfigurationData(channelId, "input", input_config);
+
     // console.info("ProcessInputModeConfiguration: Done");
 
 } // ProcessInputModeConfiguration
@@ -339,17 +319,17 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     // console.info("ProcessReceivedJsonConfigMessage: Start");
 
     // is this an output config?
-    if (JsonConfigData.hasOwnProperty("om_config"))
+    if (JsonConfigData.hasOwnProperty("output_config"))
     {
         // save the config for later use.
-        om_config = JsonConfigData.om_config;
+        output_config = JsonConfigData.output_config;
     }
 
     // is this an input config?
-    else if (JsonConfigData.hasOwnProperty("im_config"))
+    else if (JsonConfigData.hasOwnProperty("input_config"))
     {
         // save the config for later use.
-        im_config = JsonConfigData.im_config;
+        input_config = JsonConfigData.input_config;
     }
 
     // is this an input config?
@@ -424,10 +404,14 @@ function ProcessReceivedOptionDataMessage(JsonOptionList)
         // for each option channel:
         $(ArrayOfSelections).each(function (DisplayedChannelId, currentSelection)
         {
-            // create the selection box
-            $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + DisplayedChannelId + '">' + OptionListName + ' ' + DisplayedChannelId + ' Mode:</label>');
-            $('#fg_' + OptionListName).append('<div class="col-sm-2"><select class="form-control wsopt" id="' + OptionListName + DisplayedChannelId + '"></select></div>');
-            $('#fg_' + OptionListName + '_mode').append('<fieldset id="' + OptionListName + 'mode' + DisplayedChannelId + '"></fieldset>');
+            // does the selection box we need already exist?
+            if (! $('#' + OptionListName + 'mode' + DisplayedChannelId).length)
+            {
+                // create the selection box
+                $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + DisplayedChannelId + '">' + OptionListName + ' ' + DisplayedChannelId + ' Mode:</label>');
+                $('#fg_' + OptionListName).append('<div class="col-sm-2"><select class="form-control wsopt" id="' + OptionListName + DisplayedChannelId + '"></select></div>');
+                $('#fg_' + OptionListName + '_mode').append('<fieldset id="' + OptionListName + 'mode' + DisplayedChannelId + '"></fieldset>');
+            }
 
             // define the input select list action
             $('#' + OptionListName + DisplayedChannelId).change(function ()
@@ -505,70 +489,53 @@ function submitWiFiConfig()
 
 } // submitWiFiConfig
 
+function ExtractDeviceConfigFromHtmlPage(JsonConfig, SectionName)
+{
+    // for each option channel:
+    $(JsonConfig).each(function (DisplayedChannelId, CurrentChannelConfigurationData)
+    {
+        CurrentChannelConfigurationData = JsonConfig[DisplayedChannelId];
+
+        var elementids = [];
+        var modeControlName = '#' + SectionName + 'mode' + DisplayedChannelId;
+        elementids = $(modeControlName + ' *[id]').filter(":input").map(function ()
+        {
+            return $(this).attr('id');
+        }).get();
+
+        var ChannelType = parseInt($("#" + SectionName + DisplayedChannelId + " option:selected").val(), 10);
+        var ChannelConfig = CurrentChannelConfigurationData[ChannelType];
+
+        // tell the ESP what type of channel it should be using
+        CurrentChannelConfigurationData.type = ChannelType;
+
+        elementids.forEach(function (id)
+        {
+            var SelectedElement = modeControlName + ' #' + id;
+            if ($(SelectedElement).is(':checkbox')) {
+                ChannelConfig[id] = $(SelectedElement).prop('checked');
+            }
+            else
+            {
+                ChannelConfig[id] = $(SelectedElement).val();
+            }
+        });
+    }); // end for each channel
+} // ExtractDeviceConfigFromHtmlPage
+
 // Build dynamic JSON config submission for "Device" tab
 function submitDeviceConfig()
 {
-    // Build input mode JSON data for submission
-    // Build output mode JSON data for submission
-    var inputids = [];
-    inputids = $('#config #imode *[id]').filter(":input").map(function ()
-    {
-        return $(this).attr('id');
-    }).get();
-
-    var InputChannelId     = 0;
-    var InputType          = parseInt($("#config #device #input option:selected").val(), 10);
-    var InputConfig        = im_config;
-    var InputChannelConfig = InputConfig.im_inputs[InputChannelId][InputType];
-
-    // tell the ESP what type of output it should be using
-    InputConfig.im_inputs[InputChannelId].im_input_type = InputType;
-
-    inputids.forEach(function (id)
-    {
-        var select = '#config #imode #' + id;
-        if ($(select).is(':checkbox'))
-        {
-            InputChannelConfig[id] = $(select).prop('checked');
-        }
-        else
-        {
-            InputChannelConfig[id] = $(select).val();
-        }
-    });
-
-    // Build output mode JSON data for submission
-    var outputids = [];
-    outputids = $('#config #omode *[id]').filter(":input").map(function ()
-    {
-        return $(this).attr('id');
-    }).get();
-
-    var OutputChannelId     = 0;
-    var OutputType          = parseInt($("#config #device #output option:selected").val(),10);
-    var OutputConfig        = om_config;
-    var OutputChannelConfig = OutputConfig.om_channels[OutputChannelId][OutputType];
-
-    // tell the ESP what type of input it should be using
-    OutputConfig.om_channels[OutputChannelId].om_channel_type = OutputType;
-
-    outputids.forEach(function (id)
-    {
-        var select = '#config #omode #' + id;
-        if ($(select).is(':checkbox'))
-        {
-            OutputChannelConfig[id] = $(select).prop('checked');
-        }
-        else
-        {
-            OutputChannelConfig[id] = $(select).val();
-        }
-    });
+    ExtractDeviceConfigFromHtmlPage(input_config.channels, "input");
+    ExtractDeviceConfigFromHtmlPage(output_config.channels, "output");
 
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'device': { 'id': $('#config #device #id').val() } } } }));
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input' : { 'im_config': im_config } } } }));
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'output': { 'om_config': om_config } } } }));
-}
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input': { 'input_config': input_config } } } }));
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'output': { 'output_config': output_config } } } }));
+
+    return;
+
+} // submitDeviceConfig
 
 ////////////////////////////////////////////////////
 //

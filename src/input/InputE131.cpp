@@ -51,7 +51,7 @@ c_InputE131::~c_InputE131()
 void c_InputE131::Begin ()
 {
     // DEBUG_START;
-    Serial.println(F("** E1.31 Initialization **"));
+    Serial.println(String(F("** E1.31 Initialization for channel '")) + InputChannelId + String(F("' **")));
 
     if (true == HasBeenInitialized) 
     {
