@@ -62,16 +62,6 @@ void c_InputDisabled::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject e131Status = jsonStatus.createNestedObject (F ("e131"));
-    e131Status["unifirst"]   = 0;
-    e131Status["unilast"]    = 0;
-    e131Status["unichanlim"] = 0;
-    // DEBUG_V ("");
-
-    e131Status["num_packets"]   = 0;
-    e131Status["packet_errors"] = 0;
-    e131Status["last_clientIP"] = "0.0.0.0";
-
     // DEBUG_END;
 
 } // GetStatus
@@ -103,6 +93,7 @@ void c_InputDisabled::GetConfig(ArduinoJson::JsonObject & jsonConfig)
 
 } // GetConfig
 
+//----------------------------------------------------------------------------
 void c_InputDisabled::Process()
 {
     // DEBUG_START;
