@@ -263,6 +263,7 @@ function ProcessModeConfigurationData(channelId, ChannelTypeName, JsonConfig )
     }
     var channelConfig = channelConfigSet[TypeOfChannelId];
     var ChannelTypeName = channelConfig.type.toLowerCase();
+    ChannelTypeName = ChannelTypeName.replace(".", "_");
 
     // clear the array
     selector = [];
