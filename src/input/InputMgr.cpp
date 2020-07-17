@@ -595,7 +595,7 @@ void c_InputMgr::SaveConfig ()
     if (FileIO::SaveConfig (ConfigFileName, ConfigData))
     {
         LOG_PORT.println (F ("**** Saved Input Manager Config File. ****"));
-        DEBUG_V ("ConfigData: " + ConfigData);
+        // DEBUG_V ("ConfigData: " + ConfigData);
     } // end we got a config and it was good
     else
     {
