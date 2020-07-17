@@ -84,9 +84,11 @@ static void _u0_putc(char c){
 String ConfigFileName = "/config.json";
 
 //TODO: Add Auxiliary services
-//MQTT
 //zcpp
 //FPPDiscovery
+
+const String VERSION = "4.0_unified-dev";
+const String BUILD_DATE = String(__DATE__);
 
 config_t            config;                 // Current configuration
 bool                reboot = false;         // Reboot flag
@@ -118,17 +120,11 @@ void setup()
 
     // Dump version and build information
     LOG_PORT.println("");
-    LOG_PORT.print(F("ESPixelStick v"));
-    for (uint8_t i = 0; i < strlen_P(VERSION); i++)
-        LOG_PORT.print((char)(pgm_read_byte(VERSION + i)));
-    LOG_PORT.print(F(" ("));
-    for (uint8_t i = 0; i < strlen_P(BUILD_DATE); i++)
-        LOG_PORT.print((char)(pgm_read_byte(BUILD_DATE + i)));
-    LOG_PORT.println(")");
+    LOG_PORT.println(String(F("ESPixelStick v")) + VERSION + "(" + BUILD_DATE + ")");
 #ifdef ARDUINO_ARCH_ESP8266
-    LOG_PORT.println (ESP.getFullVersion ());
+    LOG_PORT.println (String ("ESP Verion: ") + ESP.getFullVersion ());
 #else
-    LOG_PORT.println (ESP.getSdkVersion ());
+    LOG_PORT.println (String("ESP Verion: ") + ESP.getSdkVersion ());
 #endif
     // DEBUG_V ("");
 

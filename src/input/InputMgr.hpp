@@ -88,7 +88,7 @@ private:
     String ConfigFileName;
     String ConfigData;
 
-#define IM_JSON_SIZE (3*1024)
+#define IM_JSON_SIZE (4*1024)
 
 protected:
 

@@ -18,9 +18,6 @@
 *
 */
 
-const char VERSION[] = "4.0_unified-dev";
-const char BUILD_DATE[] = __DATE__;
-
 #if defined(ARDUINO_ARCH_ESP8266)
 #	include <ESP8266WiFi.h>
 #	include <ESPAsyncTCP.h>
@@ -39,6 +36,9 @@ const char BUILD_DATE[] = __DATE__;
 #include <ArduinoJson.h>
 
 #include "memdebug.h"
+
+extern const String VERSION;
+extern const String BUILD_DATE;
 
 #define REBOOT_DELAY    100     ///< Delay for rebooting once reboot flag is set
 #define LOG_PORT        Serial  ///< Serial port for console logging

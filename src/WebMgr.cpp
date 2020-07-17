@@ -385,14 +385,15 @@ void c_WebMgr::ProcessXARequest (AsyncWebSocketClient* client)
     DynamicJsonDocument webJsonDoc (1024);
     JsonObject jsonAdmin = webJsonDoc.createNestedObject (F ("admin"));
 
-    extern const char VERSION[];
-    extern const char BUILD_DATE[];
-
     jsonAdmin["version"] = VERSION;
     jsonAdmin["built"] = BUILD_DATE;
-    jsonAdmin["usedflashsize"] = "foo3";
+    jsonAdmin["usedflashsize"] = "999999999";
     jsonAdmin["realflashsize"] = String (ESP.getFlashChipSize ());
+#ifdef ARDUINO_ARCH_ESP8266
+    jsonAdmin["flashchipid"] = String (ESP.getChipId (), HEX);
+#else
     jsonAdmin["flashchipid"] = int64String (ESP.getEfuseMac (), HEX);
+#endif
 
     strcpy (WebSocketFrameCollectionBuffer, "XA");
     size_t msgOffset = strlen (WebSocketFrameCollectionBuffer);
