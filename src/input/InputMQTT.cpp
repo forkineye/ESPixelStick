@@ -38,12 +38,12 @@ c_InputMQTT::c_InputMQTT (
     c_InputCommon (NewInputChannelId, NewChannelType, BufferStart, BufferSize)
 
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputChannelId_1, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
     pEffectsEngine->SetOperationalState (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 } // c_InputE131
 
 //-----------------------------------------------------------------------------
@@ -66,13 +66,13 @@ c_InputMQTT::~c_InputMQTT ()
 //-----------------------------------------------------------------------------
 void c_InputMQTT::Begin() 
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     Serial.println (String (F ("** MQTT Initialization for channel '")) + InputChannelId + String (F ("' **")));
 
     if (true == HasBeenInitialized)
     {
-        DEBUG_END;
+        // DEBUG_END;
         return;
     }
     HasBeenInitialized = true;
@@ -81,14 +81,14 @@ void c_InputMQTT::Begin()
 
     RegisterWithMqtt ();
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // begin
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::GetConfig (JsonObject & jsonConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     // Serialize Config
     jsonConfig["ip"]       = ip;
@@ -102,19 +102,19 @@ void c_InputMQTT::GetConfig (JsonObject & jsonConfig)
 
     pEffectsEngine->GetConfig (jsonConfig);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // GetConfig
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::GetStatus (JsonObject& jsonStatus)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     JsonObject mqttStatus = jsonStatus.createNestedObject (F ("mqtt"));
     // mqttStatus["unifirst"] = startUniverse;
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // GetStatus
 
@@ -143,7 +143,7 @@ void c_InputMQTT::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
 //-----------------------------------------------------------------------------
 boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     disconnectFromMqtt ();
 
@@ -162,7 +162,7 @@ boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     RegisterWithMqtt ();
     connectToMqtt ();
 
-    DEBUG_END;
+    // DEBUG_END;
     return true;
 } // SetConfig
 
@@ -170,8 +170,8 @@ boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 //TODO: Add MQTT configuration validation
 void c_InputMQTT::validateConfiguration ()
 {
-    DEBUG_START;
-    DEBUG_END;
+    // DEBUG_START;
+    // DEBUG_END;
 
 } // validate
 
@@ -201,65 +201,65 @@ void c_InputMQTT::RegisterWithMqtt ()
 //-----------------------------------------------------------------------------
 void c_InputMQTT::onConnect()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     connectToMqtt();
     
-    DEBUG_END;
+    // DEBUG_END;
 
 } // onConnect
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::onDisconnect()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     mqttTicker.detach();
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // onDisconnect
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::update()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     // Update Home Assistant Discovery if enabled
     publishHA (hadisco);
     publishState ();
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // update
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::connectToMqtt()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     LOG_PORT.print(F("- Connecting to MQTT Broker "));
     LOG_PORT.println(ip);
     mqtt.connect();
 
-    DEBUG_END;
+    // DEBUG_END;
 } // connectToMqtt
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::disconnectFromMqtt ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     LOG_PORT.println (F ("- Disconnecting from MQTT Broker "));
     mqtt.disconnect ();
 
-    DEBUG_END;
+    // DEBUG_END;
 } // disconnectFromMqtt
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::onMqttConnect(bool sessionPresent)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     LOG_PORT.println(F("- MQTT Connected"));
 
@@ -273,7 +273,7 @@ void c_InputMQTT::onMqttConnect(bool sessionPresent)
     // Publish state
     publishState();
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // onMqttConnect
 
@@ -281,7 +281,7 @@ void c_InputMQTT::onMqttConnect(bool sessionPresent)
 // void c_InputMQTT::onMqttDisconnect (AsyncMqttClientDisconnectReason reason) {
 void c_InputMQTT::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) 
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     LOG_PORT.println(F("- MQTT Disconnected"));
     if (WiFi.isConnected ())
@@ -300,15 +300,15 @@ void c_InputMQTT::onMqttMessage(
     size_t index, 
     size_t total) 
 {
-    DEBUG_START;
+    // DEBUG_START;
     do // once
     {
-        DEBUG_V (String("payload: ") + String(payload));
+        // DEBUG_V (String("payload: ") + String(payload));
 
         DynamicJsonDocument r (1024);
         DeserializationError error = deserializeJson (r, payload, len);
 
-        DEBUG_V ("");
+        // DEBUG_V ("");
         if (error) 
         {
             LOG_PORT.println (String (F ("MQTT: Deserialzation Error. Error code = ")) + error.c_str ());
@@ -316,79 +316,60 @@ void c_InputMQTT::onMqttMessage(
         }
 
         JsonObject root = r.as<JsonObject> ();
-        DEBUG_V ("");
+        // DEBUG_V ("");
 
         // if its a retained message and we want clean session, ignore it
         if (properties.retain && clean) 
         {
-            DEBUG_V ("");
+            // DEBUG_V ("");
             break;
         }
 
-        DEBUG_V ("");
+        // DEBUG_V ("");
 
         if (root.containsKey ("state")) 
         {
-            DEBUG_V ("");
+            // DEBUG_V ("");
             if (strcmp (root["state"], ON) == 0)
             {
-                DEBUG_V ("");
+                // DEBUG_V ("");
                 stateOn = true;
                 // blank the other input channels
                 InputMgr.SetOperationalState (false);
-                DEBUG_V ("");
+                // DEBUG_V ("");
                 pEffectsEngine->SetOperationalState (true);
 
-                DEBUG_V ("");
+                // DEBUG_V ("");
             }
             else if (strcmp (root["state"], OFF) == 0) 
             {
-                DEBUG_V ("");
+                // DEBUG_V ("");
                 stateOn = false;
 
                 // allow the other input channels to run
                 InputMgr.SetOperationalState (true);
-                DEBUG_V ("");
+                // DEBUG_V ("");
                 pEffectsEngine->SetOperationalState (false);
-                DEBUG_V ("");
+                // DEBUG_V ("");
             }
         }
-        DEBUG_V ("");
+        // DEBUG_V ("");
 
         ((c_InputEffectEngine*)(pEffectsEngine))->SetMqttConfig (root);
-        DEBUG_V ("");
+        // DEBUG_V ("");
 
-        /*
-            if (root.containsKey("color")) {
-                effects.setColor({
-                    root["color"]["r"],
-                    root["color"]["g"],
-                    root["color"]["b"]
-                });
-            }
-
-            // Set data source based on state - Fall back to E131 when off
-            if (stateOn) {
-                if (effects.getEffect().equalsIgnoreCase("Disabled"))
-                    effects.setEffect("Solid");
-                config.ds = DataSource::MQTT;
-            } else {
-                config.ds = DataSource::E131;
-                effects.clearAll();
-            }
-        */
         publishState ();
-        DEBUG_V ("");
+        // DEBUG_V ("");
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // onMqttMessage
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::publishHA(bool join)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     // Setup HA discovery
 #ifdef ARDUINO_ARCH_ESP8266
@@ -421,13 +402,13 @@ void c_InputMQTT::publishHA(bool join)
     {
         mqtt.publish(ha_config.c_str(), 0, true, "");
     }
-    DEBUG_END;
+    // DEBUG_END;
 } // publishHA
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::publishState()
 {
-    DEBUG_START;
+    // DEBUG_START;
     
     DynamicJsonDocument root(1024);
     JsonObject JsonConfig = root.createNestedObject("MQTT");
@@ -439,11 +420,11 @@ void c_InputMQTT::publishState()
 
     String JsonConfigString;
     serializeJson(JsonConfig, JsonConfigString);
-    DEBUG_V (String ("JsonConfigString: ") + JsonConfigString);
-    DEBUG_V (String ("topic: ") + topic);
+    // DEBUG_V (String ("JsonConfigString: ") + JsonConfigString);
+    // DEBUG_V (String ("topic: ") + topic);
 
     mqtt.publish(topic.c_str(), 0, true, JsonConfigString.c_str());
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // publishState
