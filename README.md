@@ -44,6 +44,8 @@ The ESP32 build will require the following software to build this project:
 - [ESPAsyncUDP](https://github.com/me-no-dev/ESPAsyncUDP) - Asynchronous UDP Library
 - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) - Asynchronous Web Server Library
 - [async-mqtt-client](https://github.com/marvinroger/async-mqtt-client) - Asynchronous MQTT Client
+- [async-mqtt-client](https://github.com/marvinroger/async-mqtt-client) - Asynchronous MQTT Client
+- [Int64String](http://downloads.arduino.cc/libraries/github.com/djGrrr/Int64String-1.1.1.zip) - Allo
 
 ## Important Notes on Compiling and Flashing
 
@@ -68,7 +70,7 @@ The ESPixelStick firmware can generate the following outputs from incoming E1.31
 
 - DMX512
 - Renard
-- Serial
+- Generic Serial
 
 ## MQTT Support
 

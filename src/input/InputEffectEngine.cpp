@@ -110,6 +110,28 @@ void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
 } // GetConfig
 
 //-----------------------------------------------------------------------------
+void c_InputEffectEngine::GetMqttConfig (JsonObject & jsonConfig)
+{
+    // DEBUG_START;
+
+    jsonConfig[F ("effect")]     = ActiveEffect->name;
+    jsonConfig[F ("speed")]      = EffectSpeed;
+    jsonConfig[F ("reverse")]    = EffectReverse;
+    jsonConfig[F ("mirror")]     = EffectMirror;
+    jsonConfig[F ("allleds")]    = EffectAllLeds;
+    jsonConfig[F ("brightness")] = EffectBrightness * 255;
+
+    // color needs a bit of reprocessing
+    JsonObject color = jsonConfig.createNestedObject (F ("color"));
+    color["r"] = EffectColor.r;
+    color["g"] = EffectColor.g;
+    color["b"] = EffectColor.b;
+
+    // DEBUG_END;
+
+} // GetMqttConfig
+
+  //-----------------------------------------------------------------------------
 void c_InputEffectEngine::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
@@ -122,6 +144,9 @@ void c_InputEffectEngine::GetStatus (JsonObject& jsonStatus)
 void c_InputEffectEngine::Process ()
 {
     // DEBUG_START;
+
+    // DEBUG_V (String ("HasBeenInitialized: ") + HasBeenInitialized);
+    // DEBUG_V (String ("PixelCount: ") + PixelCount);
 
     if (HasBeenInitialized && (0 != PixelCount))
     {
@@ -161,15 +186,43 @@ boolean c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     String effectName;
     String effectColor;
 
-    FileIO::setFromJSON (EffectSpeed,      jsonConfig[F ("EffectSpeed")]);
-    FileIO::setFromJSON (EffectReverse,    jsonConfig[F ("EffectReverse")]);
-    FileIO::setFromJSON (EffectMirror,     jsonConfig[F ("EffectMirror")]);
-    FileIO::setFromJSON (EffectAllLeds,    jsonConfig[F ("EffectAllLeds")]);
+    FileIO::setFromJSON (EffectSpeed, jsonConfig[F ("EffectSpeed")]);
+    FileIO::setFromJSON (EffectReverse, jsonConfig[F ("EffectReverse")]);
+    FileIO::setFromJSON (EffectMirror, jsonConfig[F ("EffectMirror")]);
+    FileIO::setFromJSON (EffectAllLeds, jsonConfig[F ("EffectAllLeds")]);
     FileIO::setFromJSON (EffectBrightness, jsonConfig[F ("EffectBrightness")]);
-    FileIO::setFromJSON (effectName,       jsonConfig[F ("currenteffect")]);
-    FileIO::setFromJSON (effectColor,      jsonConfig[F ("EffectColor")]);
+    FileIO::setFromJSON (effectName, jsonConfig[F ("currenteffect")]);
+    FileIO::setFromJSON (effectColor, jsonConfig[F ("EffectColor")]);
 
     setColor (effectColor);
+    validateConfiguration ();
+
+    setEffect (effectName);
+
+    // DEBUG_END;
+    return true;
+} // SetConfig
+
+//-----------------------------------------------------------------------------
+boolean c_InputEffectEngine::SetMqttConfig (ArduinoJson::JsonObject& jsonConfig)
+{
+    // DEBUG_START;
+    String effectName;
+
+    FileIO::setFromJSON (EffectSpeed,      jsonConfig[F ("speed")]);
+    FileIO::setFromJSON (EffectReverse,    jsonConfig[F ("reverse")]);
+    FileIO::setFromJSON (EffectMirror,     jsonConfig[F ("mirror")]);
+    FileIO::setFromJSON (EffectAllLeds,    jsonConfig[F ("allleds")]);
+    FileIO::setFromJSON (EffectBrightness, jsonConfig[F ("brightness")]);
+    FileIO::setFromJSON (effectName,       jsonConfig[F ("effect")]);
+
+    if (jsonConfig.containsKey ("color"))
+    {
+        FileIO::setFromJSON (EffectColor.r, jsonConfig[F ("color")]["r"]);
+        FileIO::setFromJSON (EffectColor.g, jsonConfig[F ("color")]["g"]);
+        FileIO::setFromJSON (EffectColor.b, jsonConfig[F ("color")]["b"]);
+    }
+
     validateConfiguration ();
 
     setEffect (effectName);
@@ -224,8 +277,10 @@ void c_InputEffectEngine::setEffect (const String & effectName)
     {
         if (effectName.equalsIgnoreCase (currentEffect.name))
         {
+            // DEBUG_V ("Found desired effect");
             if (ActiveEffect->name != currentEffect.name)
             {
+                // DEBUG_V ("Starting Effect");
                 ActiveEffect  = &ListOfEffects[EffectIndex];
                 EffectLastRun = millis ();
                 EffectWait    = MIN_EFFECT_DELAY;
@@ -264,6 +319,10 @@ void c_InputEffectEngine::setColor (String & NewColor)
 void c_InputEffectEngine::setPixel (uint16_t pixelId, CRGB color)
 {
     // DEBUG_START;
+
+    // DEBUG_V (String ("IsActive: ") + IsActive);
+    // DEBUG_V (String ("pixelId: ") + pixelId);
+    // DEBUG_V (String ("PixelCount: ") + PixelCount);
 
     if ((true == IsActive) && (pixelId < PixelCount))
     {
@@ -345,6 +404,8 @@ c_InputEffectEngine::CRGB c_InputEffectEngine::colorWheel (uint8_t pos)
 uint16_t c_InputEffectEngine::effectSolidColor ()
 {
     // DEBUG_START;
+
+    // DEBUG_V (String ("PixelCount: ") + PixelCount);
 
     for (uint16_t i = 0; i < PixelCount; i++)
     {

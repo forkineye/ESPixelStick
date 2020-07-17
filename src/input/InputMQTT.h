@@ -61,6 +61,7 @@ private:
     String      haprefix = "homeassistant";
 
     void validateConfiguration ();
+    void RegisterWithMqtt ();
 
     void setup ();         ///< Call from setup()
     void onConnect ();     ///< Call from onWifiConnect()
@@ -75,6 +76,7 @@ private:
     const char* SET_COMMAND_TOPIC = "/set";
     const char* ON = "ON";
     const char* OFF = "OFF";
+    bool stateOn = false;
 
     /////////////////////////////////////////////////////////
     //
@@ -82,6 +84,7 @@ private:
     //
     /////////////////////////////////////////////////////////
 
+    void disconnectFromMqtt ();
     void connectToMqtt (); // onMqttDisconnect, onWifiConnect
     void onMqttConnect (bool sessionPresent); // setup
     void onMqttDisconnect (AsyncMqttClientDisconnectReason reason); // setup

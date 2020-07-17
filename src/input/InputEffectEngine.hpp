@@ -35,7 +35,9 @@ public:
     // functions to be provided by the derived class
     void Begin ();                             ///< set up the operating environment based on the current config (or defaults)
     bool SetConfig (JsonObject& jsonConfig);   ///< Set a new config in the driver
+    bool SetMqttConfig (JsonObject& jsonConfig);   ///< Set a new config in the driver
     void GetConfig (JsonObject& jsonConfig);   ///< Get the current config used by the driver
+    void GetMqttConfig (JsonObject& jsonConfig);   ///< Get the current config used by the driver
     void GetStatus (JsonObject& jsonStatus);
     void Process ();                           ///< Call from loop(),  renders Input data
     void GetDriverName (String  & sDriverName) { sDriverName = "Effects"; } ///< get the name for the instantiated driver
