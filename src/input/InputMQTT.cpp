@@ -305,6 +305,12 @@ void c_InputMQTT::onMqttMessage(
     {
         // DEBUG_V (String("payload: ") + String(payload));
 
+        if ('{' != payload[0])
+        {
+            // not a json payload.
+            break;
+        }
+
         DynamicJsonDocument r (1024);
         DeserializationError error = deserializeJson (r, payload, len);
 
