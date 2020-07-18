@@ -89,6 +89,6 @@ private:
     void onMqttConnect (bool sessionPresent); // setup
     void onMqttDisconnect (AsyncMqttClientDisconnectReason reason); // setup
     void onMqttMessage (char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total); // setup
-    void publishHA (bool join); // updateConfig
+    void publishHA (); // updateConfig
     void publishState (); // onMqttConnect, onMqttMessage, procT, updateConfig
 };

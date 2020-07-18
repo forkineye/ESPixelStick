@@ -226,7 +226,7 @@ void c_InputMQTT::update()
     // DEBUG_START;
 
     // Update Home Assistant Discovery if enabled
-    publishHA (hadisco);
+    publishHA ();
     publishState ();
 
     // DEBUG_END;
@@ -271,7 +271,7 @@ void c_InputMQTT::onMqttConnect(bool sessionPresent)
     mqtt.subscribe(String(topic + SET_COMMAND_TOPIC).c_str(), 0);
 
     // Publish state
-    publishState();
+    update ();
 
     // DEBUG_END;
 
@@ -373,9 +373,9 @@ void c_InputMQTT::onMqttMessage(
 } // onMqttMessage
 
 //-----------------------------------------------------------------------------
-void c_InputMQTT::publishHA(bool join)
+void c_InputMQTT::publishHA()
 {
-    // DEBUG_START;
+    DEBUG_START;
 
     // Setup HA discovery
 #ifdef ARDUINO_ARCH_ESP8266
@@ -385,30 +385,54 @@ void c_InputMQTT::publishHA(bool join)
 #endif
     String ha_config = haprefix + "/light/" + chipId + "/config";
 
-    if (join) 
+    DEBUG_V (String ("ha_config: ") + ha_config);
+    DEBUG_V (String ("hadisco: ") + hadisco);
+
+    if (hadisco)
     {
+        DEBUG_V ("");
         DynamicJsonDocument root(1024);
-        JsonObject JsonConfig = root.as<JsonObject> ();
+        JsonObject JsonConfig = root.to<JsonObject> ();
 
 //TODO: Fix - how to reference config.id from here? Pass in pointer to cfg struct from main?
+        JsonConfig["platform"]      = "MQTT";
         JsonConfig["name"]          = "MartinFixMe";
         JsonConfig["schema"]        = "json";
         JsonConfig["state_topic"]   = topic;
         JsonConfig["command_topic"] = topic + "/set";
         JsonConfig["rgb"]           = "true";
         JsonConfig["brightness"]    = "true";
+        JsonConfig["effect"]        = "true";
 
-        pEffectsEngine->GetConfig (JsonConfig);
+        ((c_InputEffectEngine*)(pEffectsEngine))->GetMqttEffectList (JsonConfig);
+
+        // Register the attributes topic
+        JsonConfig["json_attributes_topic"] = topic + "/attributes";
+
+        // Create a unique id using the chip id, and fill in the device properties
+        // to enable integration support in HomeAssistant.
+        JsonConfig["unique_id"] = "ESPixelStick_" + chipId;
+
+        JsonObject device = JsonConfig.createNestedObject (F("device"));
+        device["identifiers"]  = WiFi.macAddress ();
+        device["manufacturer"] = "ESPixelStick";
+        device["model"]        = "Pixel Controller";
+        device["name"]         = "MartinFixMe";
+        device["sw_version"]   = "ESPixelStick v" + String (VERSION);
 
         String HaJsonConfig;
-        serializeJson(root, HaJsonConfig);
+        serializeJson(JsonConfig, HaJsonConfig);
+        DEBUG_V (String("HaJsonConfig: ") + HaJsonConfig);
         mqtt.publish(ha_config.c_str(), 0, true, HaJsonConfig.c_str());
+
+        // publishAttributes ();
+
     } 
     else 
     {
         mqtt.publish(ha_config.c_str(), 0, true, "");
     }
-    // DEBUG_END;
+    DEBUG_END;
 } // publishHA
 
 //-----------------------------------------------------------------------------

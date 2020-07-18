@@ -38,6 +38,7 @@ public:
     bool SetMqttConfig (JsonObject& jsonConfig);   ///< Set a new config in the driver
     void GetConfig (JsonObject& jsonConfig);   ///< Get the current config used by the driver
     void GetMqttConfig (JsonObject& jsonConfig);   ///< Get the current config used by the driver
+    void GetMqttEffectList (JsonObject& jsonConfig);   ///< Get the current config used by the driver
     void GetStatus (JsonObject& jsonStatus);
     void Process ();                           ///< Call from loop(),  renders Input data
     void GetDriverName (String  & sDriverName) { sDriverName = "Effects"; } ///< get the name for the instantiated driver

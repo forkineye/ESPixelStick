@@ -110,13 +110,26 @@ void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
 } // GetConfig
 
 //-----------------------------------------------------------------------------
+void c_InputEffectEngine::GetMqttEffectList (JsonObject& jsonConfig)
+{
+    // DEBUG_START;
+    JsonArray EffectsArray = jsonConfig.createNestedArray (F ("effect_list"));
+
+    for (EffectDescriptor_t currentEffect : ListOfEffects)
+    {
+        EffectsArray.add(currentEffect.name);
+    }
+    // DEBUG_END;
+} // GetMqttEffectList
+
+//-----------------------------------------------------------------------------
 void c_InputEffectEngine::GetMqttConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
-    jsonConfig[F ("effect")]     = ActiveEffect->name;
-    jsonConfig[F ("speed")]      = EffectSpeed;
-    jsonConfig[F ("reverse")]    = EffectReverse;
+    // jsonConfig[F ("effect")]     = ActiveEffect->name;
+    // jsonConfig[F ("speed")]      = EffectSpeed;
+    // jsonConfig[F ("reverse")]    = EffectReverse;
     jsonConfig[F ("mirror")]     = EffectMirror;
     jsonConfig[F ("allleds")]    = EffectAllLeds;
     jsonConfig[F ("brightness")] = EffectBrightness * 255;
