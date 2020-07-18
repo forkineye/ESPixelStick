@@ -42,7 +42,6 @@ class c_InputE131 : public c_InputCommon
     uint16_t    LastUniverse  = 1;    ///< Last Universe to listen for
     uint8_t   * seqTracker = nullptr; ///< Current sequence numbers for each Universe
     uint32_t  * seqError = nullptr;   ///< Sequence error tracking for each universe
-    bool        IsActive = true;
 
     void SubscribeToMulticastDomains();
     void validateConfiguration ();

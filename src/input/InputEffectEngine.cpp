@@ -320,11 +320,11 @@ void c_InputEffectEngine::setPixel (uint16_t pixelId, CRGB color)
 {
     // DEBUG_START;
 
-    // DEBUG_V (String ("IsActive: ") + IsActive);
+    // DEBUG_V (String ("IsInputChannelActive: ") + IsInputChannelActive);
     // DEBUG_V (String ("pixelId: ") + pixelId);
     // DEBUG_V (String ("PixelCount: ") + PixelCount);
 
-    if ((true == IsActive) && (pixelId < PixelCount))
+    if ((true == IsInputChannelActive) && (pixelId < PixelCount))
     {
         uint8_t* pInputDataBuffer = &InputDataBuffer[3 * pixelId];
 

@@ -198,9 +198,9 @@ void c_InputE131::Process ()
                 buffloc = channel_start - 1;
             }
 
-            if (false == IsActive)
+            if (false == IsInputChannelActive)
             {
-                // dont out. Just go away
+                // dont output. Just go away
                 break;
             }
 

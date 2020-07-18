@@ -122,7 +122,7 @@ void c_InputMQTT::GetStatus (JsonObject& jsonStatus)
 void c_InputMQTT::Process ()
 {
     // DEBUG_START;
-    // ignoring IsActive
+    // ignoring IsInputChannelActive
     
     pEffectsEngine->Process ();
 
