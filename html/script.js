@@ -493,10 +493,8 @@ function submitWiFiConfig()
 function ExtractDeviceConfigFromHtmlPage(JsonConfig, SectionName)
 {
     // for each option channel:
-    $(JsonConfig).each(function (DisplayedChannelId, CurrentChannelConfigurationData)
+    jQuery.each(JsonConfig, function (DisplayedChannelId, CurrentChannelConfigurationData)
     {
-        CurrentChannelConfigurationData = JsonConfig[DisplayedChannelId];
-
         var elementids = [];
         var modeControlName = '#' + SectionName + 'mode' + DisplayedChannelId;
         elementids = $(modeControlName + ' *[id]').filter(":input").map(function ()
@@ -510,15 +508,15 @@ function ExtractDeviceConfigFromHtmlPage(JsonConfig, SectionName)
         // tell the ESP what type of channel it should be using
         CurrentChannelConfigurationData.type = ChannelType;
 
-        elementids.forEach(function (id)
+        elementids.forEach(function (elementid)
         {
-            var SelectedElement = modeControlName + ' #' + id;
+            var SelectedElement = modeControlName + ' #' + elementid;
             if ($(SelectedElement).is(':checkbox')) {
-                ChannelConfig[id] = $(SelectedElement).prop('checked');
+                ChannelConfig[elementid] = $(SelectedElement).prop('checked');
             }
             else
             {
-                ChannelConfig[id] = $(SelectedElement).val();
+                ChannelConfig[elementid] = $(SelectedElement).val();
             }
         });
     }); // end for each channel
