@@ -19,6 +19,7 @@
 */
 
 #include <Arduino.h>
+#include "ESPixelStick.h"
 #include "EFUpdate.h"
 #include <ESPAsyncWebServer.h>
 #include <EspalexaDevice.h>
@@ -39,7 +40,6 @@ public:
 
 private:
 
-    config_t      * config = nullptr;       // Current configuration
     EFUpdate        efupdate;
     DeviceCallbackFunction pAlexaCallback = nullptr;
     EspalexaDevice * pAlexaDevice = nullptr;
