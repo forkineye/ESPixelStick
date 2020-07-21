@@ -162,21 +162,6 @@ void c_InputAlexa::onMessage(EspalexaDevice * pDevice)
  // DEBUG_START;
     do // once
     {
-     // DEBUG_V (String("pDevice: ") + String((uint32_t(pDevice), HEX)));
-
-        bool CurrentState = pDevice->getState ();
-     // DEBUG_V (String ("CurrentState: ") + String (CurrentState));
-
-        uint8_t brightness = pDevice->getValue ();
-     // DEBUG_V (String ("brightness: ") + String (brightness));
-
-        uint8_t r = pDevice->getR ();
-     // DEBUG_V (String ("r: ") + String (r));
-        uint8_t g = pDevice->getG ();
-     // DEBUG_V (String ("g: ") + String (g));
-        uint8_t b = pDevice->getB ();
-     // DEBUG_V (String ("b: ") + String (b));
-
         char HexColor[] = "#000000 ";
         sprintf (HexColor, "#%02x%02x%02x", pDevice->getR (), pDevice->getG (), pDevice->getB ());
 
