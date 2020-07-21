@@ -107,11 +107,11 @@ void c_InputMQTT::GetConfig (JsonObject & jsonConfig)
 } // GetConfig
 
 //-----------------------------------------------------------------------------
-void c_InputMQTT::GetStatus (JsonObject& jsonStatus)
+void c_InputMQTT::GetStatus (JsonObject& /* jsonStatus */)
 {
     // DEBUG_START;
 
-    JsonObject mqttStatus = jsonStatus.createNestedObject (F ("mqtt"));
+    // JsonObject mqttStatus = jsonStatus.createNestedObject (F ("mqtt"));
     // mqttStatus["unifirst"] = startUniverse;
 
     // DEBUG_END;
@@ -375,7 +375,7 @@ void c_InputMQTT::onMqttMessage(
 //-----------------------------------------------------------------------------
 void c_InputMQTT::publishHA()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     // Setup HA discovery
 #ifdef ARDUINO_ARCH_ESP8266
@@ -385,12 +385,12 @@ void c_InputMQTT::publishHA()
 #endif
     String ha_config = haprefix + "/light/" + chipId + "/config";
 
-    DEBUG_V (String ("ha_config: ") + ha_config);
-    DEBUG_V (String ("hadisco: ") + hadisco);
+    // DEBUG_V (String ("ha_config: ") + ha_config);
+    // DEBUG_V (String ("hadisco: ") + hadisco);
 
     if (hadisco)
     {
-        DEBUG_V ("");
+        // DEBUG_V ("");
         DynamicJsonDocument root(1024);
         JsonObject JsonConfig = root.to<JsonObject> ();
 
@@ -422,7 +422,7 @@ void c_InputMQTT::publishHA()
 
         String HaJsonConfig;
         serializeJson(JsonConfig, HaJsonConfig);
-        DEBUG_V (String("HaJsonConfig: ") + HaJsonConfig);
+        // DEBUG_V (String("HaJsonConfig: ") + HaJsonConfig);
         mqtt.publish(ha_config.c_str(), 0, true, HaJsonConfig.c_str());
 
         // publishAttributes ();
@@ -432,7 +432,7 @@ void c_InputMQTT::publishHA()
     {
         mqtt.publish(ha_config.c_str(), 0, true, "");
     }
-    DEBUG_END;
+    // DEBUG_END;
 } // publishHA
 
 //-----------------------------------------------------------------------------

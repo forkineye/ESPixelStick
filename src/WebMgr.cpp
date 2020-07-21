@@ -27,7 +27,6 @@
 #include "WebMgr.hpp"
 #include <Int64String.h>
 
-
 #ifdef ARDUINO_ARCH_ESP8266
 #elif defined ARDUINO_ARCH_ESP32
 #   include <SPIFFS.h>
@@ -35,7 +34,14 @@
 #	error "Unsupported CPU type."
 #endif
 
+// #define ESPALEXA_DEBUG
+#define ESPALEXA_MAXDEVICES 2
+#define ESPALEXA_ASYNC //it is important to define this before #include <Espalexa.h>!
+#include <Espalexa.h>
+
 const uint8_t HTTP_PORT = 80;      ///< Default web server port
+
+Espalexa espalexa;
 
 AsyncWebServer      webServer (HTTP_PORT);  // Web Server
 AsyncWebSocket      webSocket ("/ws");      // Web Socket Plugin
@@ -111,15 +117,13 @@ void c_WebMgr::init ()
             this->GetConfiguration ();
             request->send (200, "text/json", WebSocketFrameCollectionBuffer);
         });
-
-#ifdef ToDoFixThis
+ /*
     // Firmware upload handler - only in station mode
-    webServer.on ("/updatefw", HTTP_POST, [](AsyncWebServerRequest* request)
+    webServer.on ("/updatefw", HTTP_POST, [this](AsyncWebServerRequest* request)
         {
-            webSocket.textAll ("X6");
+            this->webSocket.textAll ("X6");
         }, [this]() {this->onFirmwareUpload (); }); // todo .setFilter (ON_STA_FILTER);
-#endif // def ToDoFixThis
-
+*/
     // Root access for testing
     webServer.serveStatic ("/root", SPIFFS, "/");
 
@@ -129,17 +133,67 @@ void c_WebMgr::init ()
     // Raw config file Handler - but only on station
     //  webServer.serveStatic("/config.json", SPIFFS, "/config.json").setFilter(ON_STA_FILTER);
 
-    webServer.onNotFound ([](AsyncWebServerRequest* request)
+    webServer.onNotFound ([this](AsyncWebServerRequest* request)
+    {
+        // DEBUG_V ("IsAlexaCallbackValid");
+        if (true == this->IsAlexaCallbackValid())
         {
-            request->send (404, "text/plain", "Page not found");
-        });
+            // DEBUG_V ("IsAlexaCallbackValid == true");
+            if (!espalexa.handleAlexaApiCall (request)) //if you don't know the URI, ask espalexa whether it is an Alexa control request
+            {
+                // DEBUG_V ("Alexa Callback could not resolve the request");
+                request->send (404, "text/plain", "Page Not found");
+            }
+        }
+        else
+        {
+            // DEBUG_V ("IsAlexaCallbackValid == false");
+            request->send (404, "text/plain", "Page Not found");
+        }
+    });
 
-    webServer.begin ();
+    espalexa.begin (&webServer); //give espalexa a pointer to your server object so it can use your server instead of creating its own
+
+    // webServer.begin ();
+
+    pAlexaDevice = new EspalexaDevice (String ("ESP"), [this](EspalexaDevice* pDevice)
+        {
+            this->onAlexaMessage (pDevice);
+        
+        }, EspalexaDeviceType::extendedcolor);
+
+    espalexa.addDevice (pAlexaDevice);
+    espalexa.setDiscoverable ((nullptr != pAlexaCallback) ? true : false);
 
     LOG_PORT.println (String (F ("- Web Server started on port ")) + HTTP_PORT);
 
     // DEBUG_END;
 }
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::RegisterAlexaCallback (DeviceCallbackFunction cb)
+{
+    // DEBUG_START;
+
+    pAlexaCallback = cb;
+    espalexa.setDiscoverable (IsAlexaCallbackValid());
+
+    // DEBUG_END;
+} // RegisterAlexaCallback
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::onAlexaMessage (EspalexaDevice* dev)
+{
+    // DEBUG_START;
+    if (true == IsAlexaCallbackValid())
+    {
+        // DEBUG_V ("");
+
+        pAlexaCallback (dev);
+    }
+    // DEBUG_END;
+
+} // onAlexaMessage
 
 //-----------------------------------------------------------------------------
 /*
@@ -766,6 +820,20 @@ void c_WebMgr::onFirmwareUpload (AsyncWebServerRequest* request, String filename
         reboot = true;
     }
 } // onEvent
+
+//-----------------------------------------------------------------------------
+/*
+ * This function is called as part of the Arudino "loop" and does things that need 
+ * periodic poking.
+ *
+ */
+void c_WebMgr::Process ()
+{
+    if (true == IsAlexaCallbackValid())
+    {
+        espalexa.loop ();
+    }
+} // Process
 
 //-----------------------------------------------------------------------------
 // create a global instance of the WEB UI manager

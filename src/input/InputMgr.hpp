@@ -51,6 +51,7 @@ public:
         InputType_E1_31,
         InputType_Effects,
         InputType_MQTT,
+        InputType_Alexa,
         InputType_End,
         InputType_Start   = InputType_Disabled,
         InputType_Default = InputType_Disabled,

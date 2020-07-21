@@ -21,6 +21,7 @@
 #include <Arduino.h>
 #include "EFUpdate.h"
 #include <ESPAsyncWebServer.h>
+#include <EspalexaDevice.h>
 
 class c_WebMgr
 {
@@ -28,14 +29,20 @@ public:
     c_WebMgr ();
     virtual ~c_WebMgr ();
 
-    void      Begin           (config_t * NewConfig); ///< set up the operating environment based on the current config (or defaults)
-    void      ValidateConfig  (config_t * NewConfig);
+    void Begin           (config_t * NewConfig); ///< set up the operating environment based on the current config (or defaults)
+    void ValidateConfig  (config_t * NewConfig);
+    void Process         ();
+
+    void onAlexaMessage (EspalexaDevice * pDevice);
+    void RegisterAlexaCallback (DeviceCallbackFunction cb); 
+    bool IsAlexaCallbackValid () { return (nullptr != pAlexaCallback); }
 
 private:
 
     config_t      * config = nullptr;       // Current configuration
     EFUpdate        efupdate;
-
+    DeviceCallbackFunction pAlexaCallback = nullptr;
+    EspalexaDevice * pAlexaDevice = nullptr;
 #   define WebSocketFrameCollectionBufferSize 2048
     char WebSocketFrameCollectionBuffer[WebSocketFrameCollectionBufferSize + 1];
 
@@ -61,7 +68,6 @@ private:
     void ProcessXseriesRequests     (AsyncWebSocketClient * client);
     void ProcessXARequest           (AsyncWebSocketClient * client);
     void ProcessXJRequest           (AsyncWebSocketClient * client);
-
 
 protected:
 

@@ -35,6 +35,7 @@ Extract the folder in each of these zip files and place it in the "library" fold
 - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) - Asynchronous Web Server Library
 - [async-mqtt-client](https://github.com/marvinroger/async-mqtt-client) - Asynchronous MQTT Client
 - [Int64String](http://downloads.arduino.cc/libraries/github.com/djGrrr/Int64String-1.1.1.zip) - Allows you to convert 64 bit integers into a string
+- [EspAlexa](https://github.com/Aircoookie/Espalexa) - Alexa Direct control Library
 
 The ESP32 build will require the following software to build this project:
 
@@ -44,8 +45,8 @@ The ESP32 build will require the following software to build this project:
 - [ESPAsyncUDP](https://github.com/me-no-dev/ESPAsyncUDP) - Asynchronous UDP Library
 - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) - Asynchronous Web Server Library
 - [async-mqtt-client](https://github.com/marvinroger/async-mqtt-client) - Asynchronous MQTT Client
-- [async-mqtt-client](https://github.com/marvinroger/async-mqtt-client) - Asynchronous MQTT Client
 - [Int64String](http://downloads.arduino.cc/libraries/github.com/djGrrr/Int64String-1.1.1.zip) - Allo
+- [EspAlexa](https://github.com/Aircoookie/Espalexa) - Alexa Direct control Library
 
 ## Important Notes on Compiling and Flashing
 

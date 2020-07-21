@@ -405,6 +405,8 @@ void loop()
     // Render output
     OutputMgr.Render();
 
+    WebMgr.Process ();
+
 // need to keep the rx pipeline empty
     size_t BytesToDiscard = max (500, LOG_PORT.available ());
     while (0 < BytesToDiscard)
