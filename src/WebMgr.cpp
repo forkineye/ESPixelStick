@@ -77,12 +77,9 @@ c_WebMgr::~c_WebMgr ()
 
 //-----------------------------------------------------------------------------
 ///< Start the module
-void c_WebMgr::Begin (config_t* NewConfig)
+void c_WebMgr::Begin (config_t* /* NewConfig */)
 {
     // DEBUG_START;
-
-    // save the pointer to the config
-    config = NewConfig;
 
     init ();
 
@@ -162,6 +159,7 @@ void c_WebMgr::init ()
         
         }, EspalexaDeviceType::extendedcolor);
 
+    pAlexaDevice->setName (config.id);
     espalexa.addDevice (pAlexaDevice);
     espalexa.setDiscoverable ((nullptr != pAlexaCallback) ? true : false);
 
@@ -719,6 +717,9 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
             extern void SetConfig (JsonObject &);
             SetConfig (jsonCmd);
             strcat (WebSocketFrameCollectionBuffer, serializeCore (false).c_str ());
+
+            pAlexaDevice->setName (config.id);
+
             // DEBUG_V ("device/network: Done");
             break;
         }
