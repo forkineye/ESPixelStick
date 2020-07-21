@@ -79,3 +79,5 @@ void    deserializeCore        (JsonObject & json);
 boolean dsDevice               (JsonObject & json);
 boolean dsNetwork              (JsonObject & json);
 void    SaveConfig             ();
+
+extern config_t config;
