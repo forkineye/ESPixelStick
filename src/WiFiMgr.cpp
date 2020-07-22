@@ -248,7 +248,7 @@ void c_WiFiMgr::onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t in
 #endif
     CurrentIpAddress  = WiFi.localIP ();
     CurrentSubnetMask = WiFi.subnetMask ();
-    LOG_PORT.printf ("\nConnected with IP: %s\n", CurrentIpAddress.toString ().c_str ());
+    LOG_PORT.println (String(F("\nConnected with IP: ")) + CurrentIpAddress.toString ());
     
     // Call MQTT setup function
 

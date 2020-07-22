@@ -744,7 +744,7 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
             break;
         }
 
-        LOG_PORT.println ("***** ERROR: Undhandled Set request type. *****");
+        LOG_PORT.println (F("***** ERROR: Undhandled Set request type. *****"));
         PrettyPrint (jsonCmd);
         strcat (WebSocketFrameCollectionBuffer, "ERROR");
 
