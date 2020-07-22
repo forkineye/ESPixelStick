@@ -59,24 +59,24 @@ public:
 				break;
 			}
 
-			LOG_PORT.printf ("Total bytes used in file system: %u.\n", fs_info.usedBytes);
+			LOG_PORT.println (String(F("Total bytes used in file system: ")) + fs_info.usedBytes);
 
 			Dir dir = SPIFFS.openDir ("/");
 			while (dir.next ())
 			{
 				File file = dir.openFile ("r");
-				LOG_PORT.printf ("%s : %u\n", file.name (), file.size ());
+				LOG_PORT.println (String(file.name ()) + " : " + String(file.size ()));
 				file.close ();
 			}
 
 #elif defined(ARDUINO_ARCH_ESP32)
 			if (0 == SPIFFS.totalBytes ())
 			{
-				LOG_PORT.println (String ("No Data in the File system"));
+				LOG_PORT.println (String (F("No Data in the File system")));
 				break;
 			}
 
-			LOG_PORT.println (String ("Total bytes in file system: ") + String (SPIFFS.usedBytes ()));
+			LOG_PORT.println (String (F("Total bytes in file system: ")) + String (SPIFFS.usedBytes ()));
 
 			fs::File root = SPIFFS.open ("/");
 			fs::File MyFile = root.openNextFile ();
@@ -159,9 +159,9 @@ public:
 			// DEBUG_V ("");
 			if (error)
 			{
-				LOG_PORT.println (String("Heap:") + String (ESP.getFreeHeap ()));
+				LOG_PORT.println (String(F("Heap:")) + String (ESP.getFreeHeap ()));
 				LOG_PORT.println (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
-				LOG_PORT.println ("++++" + buf + "----");
+				LOG_PORT.println (String(F("++++")) + buf + String(F("----")));
 				break;
 			}
 
