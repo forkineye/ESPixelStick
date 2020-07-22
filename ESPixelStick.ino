@@ -207,12 +207,12 @@ boolean dsDevice(JsonObject & json)
     boolean retval = false;
     if (json.containsKey("device"))
     {
-        retval = retval | FileIO::setFromJSON(config.id,     json["device"]["id"]);
-        retval = retval | FileIO::setFromJSON(config.input,  json["device"]["input"]);
+        retval = retval | FileIO::setFromJSON(config.id,     json[F("device")][F("id")]);
+        retval = retval | FileIO::setFromJSON(config.input,  json[F("device")][F("input")]);
     }
     else 
     {
-        LOG_PORT.println("No device settings found.");
+        LOG_PORT.println(F("No device settings found."));
     }
 
     // DEBUG_END;
@@ -242,7 +242,7 @@ boolean dsNetwork(JsonObject & json)
     }
     else
     {
-        LOG_PORT.println("No network settings found.");
+        LOG_PORT.println(F("No network settings found."));
     }
 
     // DEBUG_END;
