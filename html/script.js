@@ -574,7 +574,7 @@ function wsFlushAndHaltTheOutputQueue()
     while (wsOutputQueue.length > 0)
     {
         //get the next message from the queue.
-        // var message = wsOutputQueue.shift();
+        var message = wsOutputQueue.shift();
         // console.info("Discarding msg: " + message);
     }
 } // wsFlushAndHaltTheOutputQueue
