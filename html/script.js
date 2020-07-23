@@ -68,6 +68,13 @@ $(function ()
         submitDeviceConfig();
     });
 
+    $('#btn_RGB').change(function () {
+        clearStream();
+    });
+    $('#btn_Channel').change(function () {
+        clearStream();
+    });
+
     // Autoload tab based on URL hash
     var hash = window.location.hash;
     hash && $('ul.navbar-nav li a[href="' + hash + '"]').click();
