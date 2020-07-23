@@ -44,8 +44,7 @@
 #include "src/WebMgr.hpp"
 
 // Services
-//#include "src/service/MQTT.h"
-//#include "src/service/ESPAsyncZCPP.h"
+#include "src/service/ESPAsyncZCPP.h"
 #include "src/service/FPPDiscovery.h"
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -153,6 +152,8 @@ void setup()
     WebMgr.Begin(&config);
 
     FPPDiscovery.begin ();
+
+    ESPAsyncZCPP.begin ();
 
 #ifdef ARDUINO_ARCH_ESP8266
     ESP.wdtEnable (2000);

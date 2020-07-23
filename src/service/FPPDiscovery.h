@@ -19,6 +19,7 @@
 */
 
 #include <Arduino.h>
+#include "../ESPixelStick.h"
 
 #ifdef ESP32
 #include <WiFi.h>
@@ -31,10 +32,7 @@
 #error Platform not supported
 #endif
 
-
 #define FPP_DISCOVERY_PORT 32320
-
-
 
 class c_FPPDiscovery 
 {

@@ -17,8 +17,6 @@
 */
 
 #include "FPPDiscovery.h"
-#include <string.h>
-
 
 typedef union {
     struct {
@@ -47,31 +45,45 @@ c_FPPDiscovery::c_FPPDiscovery() {
 }
 
 
-bool c_FPPDiscovery::begin() {
+bool c_FPPDiscovery::begin() 
+{
+    DEBUG_START;
+
     bool success = false;
     delay(100);
 
     IPAddress address = IPAddress(239, 70, 80, 80);  
-    if (udp.listenMulticast(address, FPP_DISCOVERY_PORT)) {
+    if (udp.listenMulticast(address, FPP_DISCOVERY_PORT)) 
+    {
         udp.onPacket(std::bind(&c_FPPDiscovery::parsePacket, this,
                   std::placeholders::_1));
        success = true;
     }
     sendPingPacket();
+
+    DEBUG_END;
+
     return success;
 }
 
 
-void c_FPPDiscovery::parsePacket(AsyncUDPPacket _packet) {
+void c_FPPDiscovery::parsePacket(AsyncUDPPacket _packet) 
+{
+    DEBUG_START;
+
     FPPPingPacket *packet = reinterpret_cast<FPPPingPacket *>(_packet.data());
-    if (packet->packet_type == 0x04 && packet->ping_subtype == 0x01) {
+    if (packet->packet_type == 0x04 && packet->ping_subtype == 0x01) 
+    {
         //discover ping packet, need to send a ping out
         sendPingPacket();
     }
+    DEBUG_END;
 }
 
+void c_FPPDiscovery::sendPingPacket() 
+{
+    DEBUG_START;
 
-void c_FPPDiscovery::sendPingPacket() {
     FPPPingPacket packet;
     packet.header[0] = 'F';
     packet.header[1] = 'P';
@@ -90,11 +102,13 @@ void c_FPPDiscovery::sendPingPacket() {
     uint32_t ip = static_cast<uint32_t>(WiFi.localIP());
     memcpy(packet.ipAddress, &ip, 4);
 #ifdef ARDUINO_ARCH_ESP8266
-    if (WiFi.hostname()) {
-    strcpy(packet.hostName, WiFi.hostname().c_str());
+    if (WiFi.hostname()) 
+    {
+        strcpy(packet.hostName, WiFi.hostname().c_str());
     }
 #else
-    if (WiFi.getHostname ()) {
+    if (WiFi.getHostname ()) 
+    {
         strcpy (packet.hostName, WiFi.getHostname ());
     }
 #endif
@@ -102,6 +116,8 @@ void c_FPPDiscovery::sendPingPacket() {
     strcpy(packet.hardwareType, "ESPixelStick");
     packet.ranges[0] = 0;
     udp.broadcastTo((uint8_t*)&packet, 221, FPP_DISCOVERY_PORT);
+
+    DEBUG_END;
 }
 
 c_FPPDiscovery FPPDiscovery;
