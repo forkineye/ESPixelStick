@@ -47,7 +47,7 @@ c_FPPDiscovery::c_FPPDiscovery() {
 
 bool c_FPPDiscovery::begin() 
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     bool success = false;
     delay(100);
@@ -58,10 +58,12 @@ bool c_FPPDiscovery::begin()
         udp.onPacket(std::bind(&c_FPPDiscovery::parsePacket, this,
                   std::placeholders::_1));
        success = true;
+       LOG_PORT.println (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
+
     }
     sendPingPacket();
 
-    DEBUG_END;
+    // DEBUG_END;
 
     return success;
 }
@@ -69,7 +71,7 @@ bool c_FPPDiscovery::begin()
 
 void c_FPPDiscovery::parsePacket(AsyncUDPPacket _packet) 
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     FPPPingPacket *packet = reinterpret_cast<FPPPingPacket *>(_packet.data());
     if (packet->packet_type == 0x04 && packet->ping_subtype == 0x01) 
@@ -77,12 +79,12 @@ void c_FPPDiscovery::parsePacket(AsyncUDPPacket _packet)
         //discover ping packet, need to send a ping out
         sendPingPacket();
     }
-    DEBUG_END;
+    // DEBUG_END;
 }
 
 void c_FPPDiscovery::sendPingPacket() 
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     FPPPingPacket packet;
     packet.header[0] = 'F';
@@ -117,7 +119,7 @@ void c_FPPDiscovery::sendPingPacket()
     packet.ranges[0] = 0;
     udp.broadcastTo((uint8_t*)&packet, 221, FPP_DISCOVERY_PORT);
 
-    DEBUG_END;
+    // DEBUG_END;
 }
 
 c_FPPDiscovery FPPDiscovery;

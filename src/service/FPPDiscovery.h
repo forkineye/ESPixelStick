@@ -18,7 +18,6 @@
 *
 */
 
-#include <Arduino.h>
 #include "../ESPixelStick.h"
 
 #ifdef ESP32
