@@ -20,8 +20,7 @@
 *   for use by the factory class to manage the object.
 */
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
+#include "../ESPixelStick.h"
 #include "InputMgr.hpp"
 
 class c_InputCommon
