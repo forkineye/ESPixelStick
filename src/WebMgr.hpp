@@ -18,7 +18,6 @@
 *
 */
 
-#include <Arduino.h>
 #include "ESPixelStick.h"
 #include "EFUpdate.h"
 #include <ESPAsyncWebServer.h>
