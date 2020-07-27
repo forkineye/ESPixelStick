@@ -17,7 +17,6 @@
 *
 */
 
-#include <Arduino.h>
 #include "ESPixelStick.h"
 
 #include "output/OutputMgr.hpp"
@@ -471,19 +470,19 @@ void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
     system[F ("uptime")] = millis ();
     // DEBUG_V ("");
 
-    // Ask WiFi to add stats
+    // Ask WiFi to add ZcppStats
     WiFiMgr.GetStatus (system);
     // DEBUG_V ("");
 
-    // Ask Input to add stats
+    // Ask Input to add ZcppStats
     InputMgr.GetStatus (status);
     // DEBUG_V ("");
 
-    // Ask Input to add stats
+    // Ask Input to add ZcppStats
     OutputMgr.GetStatus (status);
     // DEBUG_V ("");
 
-    // Ask Services to add stats
+    // Ask Services to add ZcppStats
 
     String response;
     serializeJson (webJsonDoc, response);
@@ -531,7 +530,7 @@ void c_WebMgr::ProcessVseriesRequests (AsyncWebSocketClient* client)
 void c_WebMgr::ProcessReceivedJsonMessage (DynamicJsonDocument & webJsonDoc, AsyncWebSocketClient * client)
 {
     // DEBUG_START;
-    //LOG_PORT.printf("ProcessReceivedJsonMessage heap /stack stats: %u:%u:%u:%u\n", ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
+    //LOG_PORT.printf("ProcessReceivedJsonMessage heap /stack ZcppStats: %u:%u:%u:%u\n", ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
 
     do // once
     {
