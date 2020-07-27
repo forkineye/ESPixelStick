@@ -21,7 +21,7 @@
 
 // Constructor
 ESPAsyncDDP::ESPAsyncDDP(uint8_t buffers) {
-  pbuff = RingBuf_new(sizeof(DDP_packet_t), buffers);  
+  pRingBuffer = RingBuf_new(sizeof(DDP_packet_t), buffers);  
   lastSequenceSeen = 0;
 
   stats.packetsReceived = 0;
@@ -69,7 +69,7 @@ void ESPAsyncDDP::parsePacket(AsyncUDPPacket _packet) {
 
   sbuff = reinterpret_cast<DDP_packet_t *>(_packet.data());
     
-  pbuff->add(pbuff, sbuff);
+  pRingBuffer->add(pRingBuffer, sbuff);
 
   stats.packetsReceived++;
   stats.bytesReceived += _packet.length();

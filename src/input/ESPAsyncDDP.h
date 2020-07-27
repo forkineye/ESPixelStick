@@ -19,6 +19,8 @@
 #ifndef ESPASYNCDDP_H_
 #define ESPASYNCDDP_H_
 
+#include "../ESPixelStick.h"
+
 #ifdef ESP32
 #include <WiFi.h>
 #include <AsyncUDP.h>
@@ -32,7 +34,6 @@
 
 #include <lwip/ip_addr.h>
 #include <lwip/igmp.h>
-#include <Arduino.h>
 #include "RingBuf.h"
 
 #if LWIP_VERSION_MAJOR == 1
@@ -122,7 +123,7 @@ class ESPAsyncDDP {
 
     DDP_packet_t   *sbuff;       // Pointer to scratch packet buffer
     AsyncUDP        udp;         // UDP
-    RingBuf         *pbuff;      // Ring Buffer of universe packet buffers
+    RingBuf         *pRingBuffer;      // Ring Buffer of universe packet buffers
     uint8_t         lastSequenceSeen;
 
     // Internal Initializers
@@ -140,8 +141,8 @@ class ESPAsyncDDP {
     bool begin(IPAddress ourIP);
 
     // Ring buffer access
-    inline bool isEmpty() { return pbuff->isEmpty(pbuff); }
-    inline void *pull(DDP_packet_t *packet) { return pbuff->pull(pbuff, packet); }
+    inline bool isEmpty() { return pRingBuffer->isEmpty(pRingBuffer); }
+    inline void *pull(DDP_packet_t *packet) { return pRingBuffer->pull(pRingBuffer, packet); }
 };
 
 
