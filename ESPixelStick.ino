@@ -44,7 +44,6 @@
 #include "src/WebMgr.hpp"
 
 // Services
-#include "src/service/ESPAsyncZCPP.h"
 #include "src/service/FPPDiscovery.h"
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -83,7 +82,6 @@ static void _u0_putc(char c){
 String ConfigFileName = "/config.json";
 
 //TODO: Add Auxiliary services
-//zcpp
 //FPPDiscovery
 
 const String VERSION = "4.0_unified-dev";
@@ -152,8 +150,6 @@ void setup()
     WebMgr.Begin(&config);
 
     FPPDiscovery.begin ();
-
-    ESPAsyncZCPP.begin ();
 
 #ifdef ARDUINO_ARCH_ESP8266
     ESP.wdtEnable (2000);
