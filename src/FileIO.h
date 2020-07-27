@@ -18,8 +18,6 @@
 *
 */
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
 #include "ESPixelStick.h"
 
 #ifdef ARDUINO_ARCH_ESP32
