@@ -18,7 +18,7 @@
 *
 */
 
-#include <Arduino.h>
+#include "ESPixelStick.h"
 
 #ifdef ARDUINO_ARCH_ESP8266
 #   include <ESP8266WiFi.h>

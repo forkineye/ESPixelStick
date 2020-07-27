@@ -17,7 +17,6 @@
 *
 */
 
-#include <Arduino.h>
 #include "ESPixelStick.h"
 
 #ifdef ARDUINO_ARCH_ESP8266
