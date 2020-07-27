@@ -18,9 +18,8 @@
 *
 */
 
-#include <AsyncMqttClient.h>
-#include <Ticker.h>
 #include "InputCommon.hpp"
+#include <AsyncMqttClient.h>
 
 class c_InputMQTT : public c_InputCommon
 {

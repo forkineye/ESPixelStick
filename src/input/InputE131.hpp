@@ -18,9 +18,8 @@
 *
 */
 
-#include <ESPAsyncE131.h>
-#include "../ESPixelStick.h"
 #include "InputCommon.hpp"
+#include <ESPAsyncE131.h>
 
 class c_InputE131 : public c_InputCommon 
 {

@@ -18,10 +18,8 @@
 *
 */
 
-#include <Arduino.h>
-#include "../ESPixelStick.h"
-#include "../FileIO.h"
 #include "InputCommon.hpp"
+#include "../FileIO.h"
 
 class c_InputEffectEngine : public c_InputCommon
 {

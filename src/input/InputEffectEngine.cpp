@@ -16,8 +16,6 @@
 *  or use of these programs.
 *
 */
-#include <Arduino.h>
-#include <ArduinoJson.h>
 #include "../ESPixelStick.h"
 #include "InputEffectEngine.hpp"
 
