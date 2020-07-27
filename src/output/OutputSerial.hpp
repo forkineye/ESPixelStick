@@ -29,7 +29,6 @@ GNU General Public License for more details.
 *
 */
 
-#include <Arduino.h>
 #include "OutputCommon.hpp"
 
 #ifdef ARDUINO_ARCH_ESP32

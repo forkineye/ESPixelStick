@@ -20,7 +20,6 @@
 *
 */
 
-#include <Arduino.h>
 #include "../ESPixelStick.h"
 #include "OutputCommon.hpp"
 

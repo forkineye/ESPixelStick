@@ -21,7 +21,6 @@
 *
 */
 
-#include <Arduino.h>
 #include "../ESPixelStick.h"
 #include "../FileIO.h"
 

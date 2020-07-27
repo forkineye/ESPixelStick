@@ -22,8 +22,7 @@
 *
 */
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
+#include "../ESPixelStick.h"
 
 #include "..\memdebug.h"
 #include "..\FileIO.h"

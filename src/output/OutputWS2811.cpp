@@ -17,9 +17,6 @@
 *
 */
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
-
 #include "../ESPixelStick.h"
 #include "../FileIO.h"
 

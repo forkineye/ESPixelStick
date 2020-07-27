@@ -20,8 +20,7 @@
 *   for use by the factory class to manage the object.
 */
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
+#include "../ESPixelStick.h"
 
 #ifdef ARDUINO_ARCH_ESP32
 #   include <driver/uart.h>

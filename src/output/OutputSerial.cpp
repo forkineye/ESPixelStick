@@ -22,7 +22,7 @@ GNU General Public License for more details.
 *send a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
 ******************************************************************/
 
-#include <Arduino.h>
+#include "../ESPixelStick.h"
 #include <utility>
 #include <algorithm>
 #include <math.h>
@@ -30,7 +30,6 @@ GNU General Public License for more details.
 #include "OutputSerial.hpp"
 #include "OutputCommon.hpp"
 
-#include "../ESPixelStick.h"
 #include "../FileIO.h"
 
 #ifdef ARDUINO_ARCH_ESP8266
