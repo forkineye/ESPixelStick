@@ -17,7 +17,6 @@
 *
 */
 
-#include <Arduino.h>
 #include "../ESPixelStick.h"
 
 #include "InputDisabled.hpp"
