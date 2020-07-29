@@ -507,8 +507,7 @@ void c_WebMgr::ProcessVseriesRequests (AsyncWebSocketClient* client)
         case '1':
         {
             // Diag screen is asking for real time output data
-            client->binary (OutputMgr.GetBufferAddress (c_OutputMgr::e_OutputChannelIds::OutputChannelId_1),
-                            OutputMgr.GetBufferSize (c_OutputMgr::e_OutputChannelIds::OutputChannelId_1));
+            client->binary (OutputMgr.GetBufferAddress (), OutputMgr.GetBufferSize ());
             break;
         }
 

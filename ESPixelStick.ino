@@ -141,8 +141,7 @@ void setup()
 
     // connect the input processing to the output processing. 
     // Only supports a single channel at the moment
-    InputMgr.Begin (OutputMgr.GetBufferAddress (c_OutputMgr::e_OutputChannelIds::OutputChannelId_1),
-                    OutputMgr.GetBufferSize    (c_OutputMgr::e_OutputChannelIds::OutputChannelId_1));
+    InputMgr.Begin (OutputMgr.GetBufferAddress (), OutputMgr.GetBufferSize ());
 
     // DEBUG_V ("");
 

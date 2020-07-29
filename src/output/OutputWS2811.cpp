@@ -266,7 +266,7 @@ void c_OutputWS2811::Render()
     if (0 != RemainingIntensityCount) { return; }
 
     // set up pointers into the pixel data space
-    uint8_t *pSourceData = GetBufferAddress();  // source buffer (owned by base class)
+    uint8_t *pSourceData = OutputMgr.GetBufferAddress();  // source buffer (owned by base class)
     uint8_t *pTargetData = OutputBuffer;        // target buffer
 
     // what type of copy are we making?
@@ -306,12 +306,12 @@ void c_OutputWS2811::Render()
             {
                 // Odd "zig"
                 int group = zig_size * (CurrentDestinationPixelIndex / zig_size);
-                pSourceData = GetBufferAddress () + (WS2812_NUM_INTENSITY_BYTES_PER_PIXEL * ((group + zig_size - (CurrentDestinationPixelIndex % zig_size) - 1) / group_size));
+                pSourceData = OutputMgr.GetBufferAddress () + (WS2812_NUM_INTENSITY_BYTES_PER_PIXEL * ((group + zig_size - (CurrentDestinationPixelIndex % zig_size) - 1) / group_size));
             } // end zig
             else
             {
                 // Even "zag"
-                pSourceData = GetBufferAddress () + (WS2812_NUM_INTENSITY_BYTES_PER_PIXEL * (CurrentDestinationPixelIndex / group_size));
+                pSourceData = OutputMgr.GetBufferAddress () + (WS2812_NUM_INTENSITY_BYTES_PER_PIXEL * (CurrentDestinationPixelIndex / group_size));
             } // end zag
 
             // now that we have decided on a data source, copy one 

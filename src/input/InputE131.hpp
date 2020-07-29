@@ -34,7 +34,6 @@ class c_InputE131 : public c_InputCommon
     uint16_t    startUniverse          = 1;    ///< Universe to listen for
     uint16_t    universe_channel_limit = 512;  ///< Universe boundary limit
     uint16_t    channel_start          = 1;    ///< Channel to start listening at - 1 based
-    boolean     multicast              = true; ///< Enable multicast listener
 
     /// from sketch globals
     uint16_t    channel_count = 0;    ///< Number of channels. Derived from output module configuration.

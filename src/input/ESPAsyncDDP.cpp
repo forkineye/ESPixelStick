@@ -47,10 +47,12 @@ bool ESPAsyncDDP::begin(IPAddress ourIP) {
 //
 /////////////////////////////////////////////////////////
 
-bool ESPAsyncDDP::initUDP(IPAddress ourIP) {
+bool ESPAsyncDDP::initUDP(IPAddress ourIP) 
+{
     bool success = false;
     delay(100);
-    if (udp.listen(DDP_PORT)) {
+    if (udp.listen(DDP_PORT)) 
+    {
         udp.onPacket(std::bind(&ESPAsyncDDP::parsePacket, this,
                 std::placeholders::_1));
 
@@ -65,7 +67,8 @@ bool ESPAsyncDDP::initUDP(IPAddress ourIP) {
 //
 /////////////////////////////////////////////////////////
 
-void ESPAsyncDDP::parsePacket(AsyncUDPPacket _packet) {
+void ESPAsyncDDP::parsePacket(AsyncUDPPacket _packet) 
+{
 
   sbuff = reinterpret_cast<DDP_packet_t *>(_packet.data());
     
@@ -91,11 +94,12 @@ void ESPAsyncDDP::parsePacket(AsyncUDPPacket _packet) {
     }
     lastSequenceSeen = sn;
   }
-  if (stats.ddpMinChannel > htonl(sbuff->header.channelOffset)) {
-    stats.ddpMinChannel = htonl(sbuff->header.channelOffset);
+  if (stats.ddpMinChannel > ntohl(sbuff->header.channelOffset)) {
+    stats.ddpMinChannel = ntohl (sbuff->header.channelOffset);
   }
-  int mc = htonl(sbuff->header.channelOffset) + htons(sbuff->header.dataLen);
-  if (mc > stats.ddpMaxChannel) {
+  int mc = ntohl (sbuff->header.channelOffset) + ntohs (sbuff->header.dataLen);
+  if (mc > stats.ddpMaxChannel) 
+  {
     stats.ddpMaxChannel = mc;
   }
 }

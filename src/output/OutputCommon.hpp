@@ -69,17 +69,16 @@ public:
     virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig) = 0; ///< Get the current config used by the driver
     virtual void         Render () = 0;                                        ///< Call from loop(),  renders output data
     virtual void         GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
-            OID_t        GetOutputChannelId () { return OutputChannelId; }      ///< return the output channel number
-            uint8_t    * GetBufferAddress ()  { return InputDataBuffer;}       ///< Get the address of the buffer into which the E1.31 handler will stuff data
-    virtual uint16_t     GetBufferSize ()     { return sizeof (InputDataBuffer);} ///< Get the address of the buffer into which the E1.31 handler will stuff data
-            OTYPE_t      GetOutputType ()     { return OutputType; }           ///< Have the instance report its type.
+            OID_t        GetOutputChannelId () { return OutputChannelId; }     ///< return the output channel number
+            uint8_t    * GetBufferAddress ()   { return OutputMgr.GetBufferAddress();}      ///< Get the address of the buffer into which the E1.31 handler will stuff data
+            uint16_t     GetBufferSize ()      { return OutputMgr.GetBufferSize();}  ///< Get the address of the buffer into which the E1.31 handler will stuff data
+            OTYPE_t      GetOutputType ()      { return OutputType; }          ///< Have the instance report its type.
     virtual void         GetStatus (ArduinoJson::JsonObject & jsonStatus);
 
 protected:
 
 #define MAX_NUM_PIXELS                         1360
 #define WS2812_NUM_INTENSITY_BYTES_PER_PIXEL   3
-#define INPUT_BUFFER_SIZE                      (MAX_NUM_PIXELS * WS2812_NUM_INTENSITY_BYTES_PER_PIXEL)
     
     gpio_num_t  DataPin;     ///< Output pin to use for this driver
     uart_port_t UartId;      ///< Id of the UART used by this instance of the driver
@@ -99,6 +98,5 @@ protected:
 #endif // ! def ARDUINO_ARCH_ESP8266
 
 private:
-    uint8_t InputDataBuffer[INPUT_BUFFER_SIZE];
 
 }; // c_OutputCommon

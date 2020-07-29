@@ -81,6 +81,9 @@ c_OutputMgr::c_OutputMgr ()
 {
     ConfigFileName = String (F ("/")) + String (OM_SECTION_NAME) + F(".json");
 
+    // clear the input data buffer
+    memset ((char*)&OutputBuffer[0], 0, sizeof (OutputBuffer));
+
     // this gets called pre-setup so there is nothing we can do here.
     int pOutputChannelDriversIndex = 0;
     for (auto CurrentOutput : pOutputChannelDrivers)
@@ -266,22 +269,6 @@ void c_OutputMgr::CreateNewConfig ()
     // DEBUG_END;
 
 } // CreateNewConfig
-
-//-----------------------------------------------------------------------------
-///< Get the pointer to the input buffer for the desired output channel
-uint8_t * c_OutputMgr::GetBufferAddress (e_OutputChannelIds ChannelId)
-{
-    return pOutputChannelDrivers[ChannelId]->GetBufferAddress ();
-
-} // GetBufferAddress
-
-//-----------------------------------------------------------------------------
-///< Get the length of the input buffer for the desired output channel
-uint16_t c_OutputMgr::GetBufferSize (e_OutputChannelIds ChannelId)
-{
-    return pOutputChannelDrivers[ChannelId]->GetBufferSize ();
-
-} // GetBufferSize
 
 //-----------------------------------------------------------------------------
 void c_OutputMgr::GetConfig (char * Response )
@@ -512,8 +499,8 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
         // tell the inputs where they can put the data
         InputMgr.SetBufferInfo (ChannelIndex, 
-                                pOutputChannelDrivers[ChannelIndex]->GetBufferAddress(), 
-                                pOutputChannelDrivers[ChannelIndex]->GetBufferSize());
+                                GetBufferAddress(), 
+                                GetBufferSize());
 
     } while (false);
 
@@ -735,10 +722,13 @@ void c_OutputMgr::Render()
         SaveConfig ();
     } // done need to save the current config
 
-    // DEBUG_START;
-    for (c_OutputCommon * pOutputChannel : pOutputChannelDrivers)
+    if (false == OutputIsPaused)
     {
-        pOutputChannel->Render ();
+        // DEBUG_START;
+        for (c_OutputCommon* pOutputChannel : pOutputChannelDrivers)
+        {
+            pOutputChannel->Render ();
+        }
     }
     // DEBUG_END;
 } // render

@@ -413,7 +413,7 @@ void c_OutputSerial::Render ()
     } // end switch (OutputType)
 
     // point at the input data buffer
-    pNextChannelToSend = GetBufferAddress ();
+    pNextChannelToSend = OutputMgr.GetBufferAddress ();
     RemainingDataCount = Num_Channels;
 
     // enable interrupts and start sending

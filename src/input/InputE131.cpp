@@ -68,7 +68,7 @@ void c_InputE131::Begin ()
     // DEBUG_V ("");
 
     // Get on with business
-    if (multicast) 
+    // if (multicast) 
     {
         if (e131->begin(E131_MULTICAST, startUniverse, LastUniverse - startUniverse + 1)) 
         {
@@ -81,13 +81,13 @@ void c_InputE131::Begin ()
             LOG_PORT.println(F("*** E1.31 MULTICAST INIT FAILED ****"));
         }
     }
-    else
+    // else
     {
         // DEBUG_V ("");
 
         if (e131->begin(E131_UNICAST)) 
         {
-            LOG_PORT.println (String(F("E1.31 Unicast port: ")) + E131_DEFAULT_PORT);
+            LOG_PORT.println (String(F("E1.31 Unicast Enabled on port: ")) + E131_DEFAULT_PORT);
         }
         else
         {
@@ -106,7 +106,6 @@ void c_InputE131::GetConfig (JsonObject & jsonConfig)
     jsonConfig[JSON_NAME_UNIVERSE]       = startUniverse;
     jsonConfig[JSON_NAME_UNIVERSE_LIMIT] = universe_channel_limit;
     jsonConfig[JSON_NAME_CHANNEL_START]  = channel_start;
-    jsonConfig[JSON_NAME_MULTICAST]      = multicast;
 
     // DEBUG_END;
 
@@ -134,7 +133,7 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
 //-----------------------------------------------------------------------------
 void c_InputE131::Process ()
 {
-    uint8_t* E131Data;
+    uint8_t*    E131Data;
     uint8_t     uniOffset;
     uint16_t    universe;
     uint16_t    offset;
@@ -233,7 +232,6 @@ boolean c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     FileIO::setFromJSON (startUniverse,          jsonConfig[JSON_NAME_UNIVERSE]);
     FileIO::setFromJSON (universe_channel_limit, jsonConfig[JSON_NAME_UNIVERSE_LIMIT]);
     FileIO::setFromJSON (channel_start,          jsonConfig[JSON_NAME_CHANNEL_START]);
-    FileIO::setFromJSON (multicast,              jsonConfig[JSON_NAME_MULTICAST]);
 
     validateConfiguration ();
 
@@ -322,7 +320,8 @@ void c_InputE131::validateConfiguration ()
         InputDataBufferSize, startUniverse, LastUniverse);
 
     // Setup IGMP subscriptions if multicast is enabled
-    if (multicast) { SubscribeToMulticastDomains (); }
+    SubscribeToMulticastDomains ();
+
     // DEBUG_END;
 
 } // validateConfiguration

@@ -35,13 +35,19 @@ public:
     c_OutputMgr ();
     virtual ~c_OutputMgr ();
 
-    void Begin ();                             ///< set up the operating environment based on the current config (or defaults)
-    void LoadConfig ();                        ///< Read the current configuration data from nvram
-    void SaveConfig ();                        ///< Save the current configuration data to nvram
-    void GetConfig  (char * Response);
-    bool SetConfig  (JsonObject & jsonConfig); ///< Set a new config in the driver
-    void GetStatus  (JsonObject & jsonStatus);
-    void GetOptions (JsonObject & jsonStatus);
+    void Begin         ();                        ///< set up the operating environment based on the current config (or defaults)
+    void LoadConfig    ();                        ///< Read the current configuration data from nvram
+    void SaveConfig    ();                        ///< Save the current configuration data to nvram
+    void GetConfig     (char * Response);
+    bool SetConfig     (JsonObject & jsonConfig); ///< Set a new config in the driver
+    void GetStatus     (JsonObject & jsonStatus);
+    void GetOptions    (JsonObject & jsonStatus);
+    void PauseOutput   (bool pauseFlag) { OutputIsPaused = pauseFlag; }
+    void GetPortCounts (uint16_t& PixelCount, uint16_t& SerialCount) {PixelCount = OutputChannelId_End; SerialCount = max ((OutputChannelId_End-1), 1); }
+
+    uint8_t* GetBufferAddress () { return OutputBuffer; } ///< Get the address of the buffer into which the E1.31 handler will stuff data
+    uint16_t GetBufferSize ()    { return sizeof (OutputBuffer); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
+    void      Render ();           ///< Call from loop(),  renders output data
 
     // handles to determine which output channel we are dealing with
     enum e_OutputChannelIds
@@ -54,10 +60,6 @@ public:
         OutputChannelId_End,
         OutputChannelId_Start = OutputChannelId_1
     };
-
-    uint8_t * GetBufferAddress (e_OutputChannelIds ChannelId = OutputChannelId_1); ///< Get the address of the buffer into which the E1.31 handler will stuff data
-    uint16_t  GetBufferSize    (e_OutputChannelIds ChannelId = OutputChannelId_1); ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
-    void      Render ();                                                           ///< Call from loop(),  renders output data
 
     enum e_OutputType
     {
@@ -88,12 +90,15 @@ private:
 
     bool HasBeenInitialized = false;
     bool ConfigSaveNeeded   = false;
+    bool OutputIsPaused     = false;
 
     bool ProcessJsonConfig (JsonObject & jsonConfig);
     void CreateJsonConfig  (JsonObject & jsonConfig);
 
     String ConfigFileName;
     String ConfigData;
+
+    uint8_t OutputBuffer[1024 * 3];
 
 protected:
 

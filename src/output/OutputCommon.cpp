@@ -57,10 +57,7 @@ c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds iOutputChannelId
 	UartId             = uart;
     OutputType         = outputType;
 	 
-	// clear the input data buffer
-	memset ((char*)&InputDataBuffer[0], 0, sizeof (InputDataBuffer));
-
-    // LOG_PORT.println (String ("UartId:          '") + UartId + "'");
+	// LOG_PORT.println (String ("UartId:          '") + UartId + "'");
     // LOG_PORT.println (String ("OutputChannelId: '") + OutputChannelId + "'");
     // LOG_PORT.println (String ("OutputType:      '") + OutputType + "'");
 

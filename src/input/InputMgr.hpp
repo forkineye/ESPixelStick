@@ -22,8 +22,7 @@
 *
 */
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
+#include "../ESPixelStick.h"
 #include "../output/OutputMgr.hpp"
 
 class c_InputCommon; ///< forward declaration to the pure virtual Input class that will be defined later.
@@ -52,6 +51,7 @@ public:
         InputType_Effects,
         InputType_MQTT,
         InputType_Alexa,
+        InputType_SCCP,
         InputType_End,
         InputType_Start   = InputType_Disabled,
         InputType_Default = InputType_Disabled,
