@@ -282,6 +282,87 @@ void c_OutputMgr::GetConfig (char * Response )
 } // GetConfig
 
 //-----------------------------------------------------------------------------
+void c_OutputMgr::GetPortConfig (e_OutputChannelIds portId, String & ConfigResponse)
+{
+    // DEBUG_START;
+
+// try to load and process the config file
+    if (!FileIO::loadConfig (ConfigFileName, [this, portId, &ConfigResponse](DynamicJsonDocument& JsonConfigDoc)
+        {
+            // DEBUG_V ("");
+            JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
+            // DEBUG_V ("");
+
+            do // once
+            {
+                if (false == JsonConfig.containsKey (OM_SECTION_NAME))
+                {
+                    LOG_PORT.println (F ("No Output Interface Settings Found."));
+                    break;
+                }
+                JsonObject OutputChannelMgrData = JsonConfig[OM_SECTION_NAME];
+                // DEBUG_V ("");
+
+                // do we have a channel configuration array?
+                if (false == OutputChannelMgrData.containsKey (OM_CHANNEL_SECTION_NAME))
+                {
+                    // if not, flag an error and stop processing
+                    LOG_PORT.println (F ("No Output Channel Settings Found."));
+                    break;
+                }
+                JsonObject OutputChannelArray = OutputChannelMgrData[OM_CHANNEL_SECTION_NAME];
+                // DEBUG_V ("");
+
+                // get access to the channel config
+                if (false == OutputChannelArray.containsKey (String (portId).c_str ()))
+                {
+                    // if not, flag an error and stop processing
+                    LOG_PORT.println (String (F ("No Output Settings Found for Channel '")) + portId + String (F ("'.")));
+                    break;
+                }
+                JsonObject OutputChannelConfig = OutputChannelArray[String (portId).c_str ()];
+                // DEBUG_V ("");
+
+                // set a default value for channel type
+                uint32_t ChannelType = uint32_t (OutputType_End);
+                FileIO::setFromJSON (ChannelType, OutputChannelConfig[OM_CHANNEL_TYPE_NAME]);
+                // DEBUG_V ("");
+
+                // is it a valid / supported channel type
+                if ((ChannelType < uint32_t (OutputType_Start)) || (ChannelType >= uint32_t (OutputType_End)))
+                {
+                    // if not, flag an error and move on to the next channel
+                    break;
+                }
+                // DEBUG_V ("");
+
+                // do we have a configuration for the channel type?
+                if (false == OutputChannelConfig.containsKey (String (ChannelType)))
+                {
+                    // if not, flag an error and stop processing
+                    LOG_PORT.println (String (F ("No Output Settings Found for Channel '")) + portId + String (F ("'.")));
+                    continue;
+                }
+
+                JsonObject OutputChannelDriverConfig = OutputChannelConfig[String (ChannelType)];
+                // DEBUG_V ("");
+
+                serializeJson (OutputChannelDriverConfig, ConfigResponse);
+                // DEBUG_V (String("ConfigResponse: ") + ConfigResponse);
+
+            } while (false);
+
+            // DEBUG_V ("");
+        }))
+    {
+        LOG_PORT.println (F ("EEEE Error loading Output Manager Config File. EEEE"));
+    }
+        
+   // DEBUG_END;
+
+} // GetPortConfigs
+
+//-----------------------------------------------------------------------------
 void c_OutputMgr::GetOptions (JsonObject & jsonOptions)
 {
     // DEBUG_START;

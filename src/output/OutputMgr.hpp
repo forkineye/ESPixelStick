@@ -43,7 +43,7 @@ public:
     void GetStatus     (JsonObject & jsonStatus);
     void GetOptions    (JsonObject & jsonStatus);
     void PauseOutput   (bool pauseFlag) { OutputIsPaused = pauseFlag; }
-    void GetPortCounts (uint16_t& PixelCount, uint16_t& SerialCount) {PixelCount = OutputChannelId_End; SerialCount = max ((OutputChannelId_End-1), 1); }
+    void GetPortCounts (uint16_t& PixelCount, uint16_t& SerialCount) {PixelCount = OutputChannelId_End; SerialCount = min(OutputChannelId_End, 2); }
 
     uint8_t* GetBufferAddress () { return OutputBuffer; } ///< Get the address of the buffer into which the E1.31 handler will stuff data
     uint16_t GetBufferSize ()    { return sizeof (OutputBuffer); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
@@ -60,6 +60,8 @@ public:
         OutputChannelId_End,
         OutputChannelId_Start = OutputChannelId_1
     };
+
+    void GetPortConfig (e_OutputChannelIds portId, String & Config);
 
     enum e_OutputType
     {
