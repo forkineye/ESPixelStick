@@ -130,7 +130,7 @@ class ESPAsyncDDP {
     bool initUDP(IPAddress ourIP);
 
     // Packet parser callback
-    void parsePacket(AsyncUDPPacket _packet);
+    void ProcessReceivedUdpPacket(AsyncUDPPacket _packet);
 
  public:
     DDP_stats_t  stats;    // Statistics tracker

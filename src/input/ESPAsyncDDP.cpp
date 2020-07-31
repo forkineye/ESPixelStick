@@ -53,7 +53,7 @@ bool ESPAsyncDDP::initUDP(IPAddress ourIP)
     delay(100);
     if (udp.listen(DDP_PORT)) 
     {
-        udp.onPacket(std::bind(&ESPAsyncDDP::parsePacket, this,
+        udp.onPacket(std::bind(&ESPAsyncDDP::ProcessReceivedUdpPacket, this,
                 std::placeholders::_1));
 
         success = true;
@@ -67,7 +67,7 @@ bool ESPAsyncDDP::initUDP(IPAddress ourIP)
 //
 /////////////////////////////////////////////////////////
 
-void ESPAsyncDDP::parsePacket(AsyncUDPPacket _packet) 
+void ESPAsyncDDP::ProcessReceivedUdpPacket(AsyncUDPPacket _packet) 
 {
 
   sbuff = reinterpret_cast<DDP_packet_t *>(_packet.data());
