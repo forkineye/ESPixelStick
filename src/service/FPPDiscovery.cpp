@@ -55,7 +55,7 @@ bool c_FPPDiscovery::begin()
     IPAddress address = IPAddress(239, 70, 80, 80);  
     if (udp.listenMulticast(address, FPP_DISCOVERY_PORT)) 
     {
-        udp.onPacket(std::bind(&c_FPPDiscovery::parsePacket, this,
+        udp.onPacket(std::bind(&c_FPPDiscovery::ProcessReceivedUdpPacket, this,
                   std::placeholders::_1));
        success = true;
        LOG_PORT.println (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
@@ -69,7 +69,7 @@ bool c_FPPDiscovery::begin()
 }
 
 
-void c_FPPDiscovery::parsePacket(AsyncUDPPacket _packet) 
+void c_FPPDiscovery::ProcessReceivedUdpPacket(AsyncUDPPacket _packet) 
 {
     // DEBUG_START;
 

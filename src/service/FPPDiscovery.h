@@ -38,7 +38,7 @@ class c_FPPDiscovery
   private:
     const char *version;
     AsyncUDP udp;
-    void parsePacket(AsyncUDPPacket _packet);
+    void ProcessReceivedUdpPacket(AsyncUDPPacket _packet);
   public:
     c_FPPDiscovery();
     bool begin();
