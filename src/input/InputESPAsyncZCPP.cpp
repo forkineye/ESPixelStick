@@ -30,7 +30,7 @@ c_InputESPAsyncZCPP::c_InputESPAsyncZCPP (c_InputMgr::e_InputChannelIds NewInput
 {
     // DEBUG_START;
 
-    ZcppPacketBuffer.ZcppPacketBufferStatus = ZcppPacketBufferStatus_t::BufferIsFree;
+    ZcppPacketBuffer.ZcppPacketBufferStatus = ZcppPacketBufferStatus_t::BufferIsAvailable;
 
     // DEBUG_END;
 } // c_InputESPAsyncZCPP
@@ -109,7 +109,7 @@ void c_InputESPAsyncZCPP::initUDP ()
     IPAddress MulticastAddress = IPAddress (224, 0, 30, 5);
     if (udp.listenMulticast (MulticastAddress, ZCPP_PORT))
     {
-        udp.onPacket (std::bind (&c_InputESPAsyncZCPP::parsePacket, this, std::placeholders::_1));
+        udp.onPacket (std::bind (&c_InputESPAsyncZCPP::ProcessReceivedUdpPacket, this, std::placeholders::_1));
     }
 
     ip4_addr_t ifaddr; ifaddr.addr = static_cast<uint32_t>(WiFiMgr.getIpAddress ());
@@ -124,20 +124,21 @@ void c_InputESPAsyncZCPP::initUDP ()
 } // initUDP
 
 //-----------------------------------------------------------------------------
-void c_InputESPAsyncZCPP::parsePacket (AsyncUDPPacket ReceivedPacket)
+void c_InputESPAsyncZCPP::ProcessReceivedUdpPacket (AsyncUDPPacket ReceivedPacket)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     ZCPP_error_t error = ERROR_ZCPP_NONE;
 
     do // once
     {
         // do we have a place to put the received data?
-        if (ZcppPacketBuffer.ZcppPacketBufferStatus == ZcppPacketBufferStatus_t::BufferIsInUse)
+        if (ZcppPacketBuffer.ZcppPacketBufferStatus == ZcppPacketBufferStatus_t::BufferIsBeingProcessed)
         {
             DEBUG_V ("Throw away the received packet. We dont have a place to put it.");
             break;
         }
+        // DEBUG_V ("");
 
         // overwrrite the existing data for the case of ZcppPacketBufferStatus_t::BufferIsFilled
 
@@ -148,11 +149,12 @@ void c_InputESPAsyncZCPP::parsePacket (AsyncUDPPacket ReceivedPacket)
             ZCPP_token,
             sizeof (packet.Discovery.Header.token)))
         {
+            // DEBUG_V ("");
             error = ERROR_ZCPP_ID;
             break;
         }
 
-        DEBUG_V ("");
+        // DEBUG_V ("");
         if (packet.Discovery.Header.type != ZCPP_TYPE_DISCOVERY &&
             packet.Discovery.Header.type != ZCPP_TYPE_CONFIG &&
             packet.Discovery.Header.type != ZCPP_TYPE_QUERY_CONFIG &&
@@ -163,7 +165,7 @@ void c_InputESPAsyncZCPP::parsePacket (AsyncUDPPacket ReceivedPacket)
             break;
         }
 
-        DEBUG_V ("");
+        // DEBUG_V ("");
         if (packet.Discovery.Header.protocolVersion > ZCPP_CURRENT_PROTOCOL_VERSION)
         {
             if (packet.Discovery.Header.type != 0x00)
@@ -173,10 +175,10 @@ void c_InputESPAsyncZCPP::parsePacket (AsyncUDPPacket ReceivedPacket)
             }
         }
 
-        DEBUG_V ("");
+        // DEBUG_V ("");
         if ((false == suspend || packet.Discovery.Header.type == ZCPP_TYPE_DISCOVERY))
         {
-            DEBUG_V ("");
+            // DEBUG_V ("");
             if (packet.Discovery.Header.type  == ZCPP_TYPE_DISCOVERY ||
                 packet.Discovery.Header.type  == ZCPP_TYPE_QUERY_CONFIG ||
                 (packet.Discovery.Header.type == ZCPP_TYPE_CONFIG && (packet.Configuration.flags & ZCPP_CONFIG_FLAG_QUERY_CONFIGURATION_RESPONSE_REQUIRED) != 0))
@@ -184,13 +186,20 @@ void c_InputESPAsyncZCPP::parsePacket (AsyncUDPPacket ReceivedPacket)
                 suspend = true;
             }
 
-            DEBUG_V ("");
+            // DEBUG_V ("");
             ZcppStats.num_packets++;
             ZcppStats.last_clientIP = ReceivedPacket.remoteIP ();
             ZcppStats.last_clientPort = ReceivedPacket.remotePort ();
             ZcppStats.last_seen = millis ();
 
             ZcppPacketBuffer.ZcppPacketBufferStatus = ZcppPacketBufferStatus_t::BufferIsFilled;
+
+            // need to fast track data
+            if (packet.Discovery.Header.type == ZCPP_TYPE_DATA)
+            {
+                ProcessReceivedData ();
+                ZcppPacketBuffer.ZcppPacketBufferStatus = ZcppPacketBufferStatus_t::BufferIsAvailable;
+            }
         }
 
     } while (false);
@@ -198,14 +207,14 @@ void c_InputESPAsyncZCPP::parsePacket (AsyncUDPPacket ReceivedPacket)
     if ((error != ERROR_ZCPP_IGNORE) &&
         (error != ERROR_ZCPP_NONE))
     {
-        DEBUG_V ("");
+        // DEBUG_V ("");
         dumpError (error);
         ZcppStats.packet_errors++;
     }
 
-    DEBUG_END;
+    // DEBUG_END;
 
-} // parsePacket
+} // ProcessReceivedUdpPacket
 
 //-----------------------------------------------------------------------------
 void c_InputESPAsyncZCPP::dumpError (ZCPP_error_t error)
@@ -246,7 +255,7 @@ void c_InputESPAsyncZCPP::dumpError (ZCPP_error_t error)
 } // dumpError
 
 //-----------------------------------------------------------------------------
-void c_InputESPAsyncZCPP::sendResponseToLastServer (size_t NumBytesToSend)
+void c_InputESPAsyncZCPP::sendResponseToMostRecentRequester (size_t NumBytesToSend)
 {
     // DEBUG_START;
 
@@ -261,7 +270,7 @@ void c_InputESPAsyncZCPP::sendResponseToLastServer (size_t NumBytesToSend)
 
     // DEBUG_END;
 
-} // sendResponseToLastServer
+} // sendResponseToMostRecentRequester
 
 //-----------------------------------------------------------------------------
 void c_InputESPAsyncZCPP::sendDiscoveryResponse (
@@ -277,6 +286,12 @@ void c_InputESPAsyncZCPP::sendDiscoveryResponse (
     IPAddress ipMask)
 {
     DEBUG_START;
+
+    DEBUG_V (String ("pixelPorts: ") + String (pixelPorts));
+    DEBUG_V (String ("serialPorts: ") + String (serialPorts));
+    DEBUG_V (String ("maxPixelChannelsPerPixelPort: ") + String (maxPixelChannelsPerPixelPort));
+    DEBUG_V (String ("maxSerialChannelsPerSerialPort: ") + String (maxSerialChannelsPerSerialPort));
+    DEBUG_V (String ("TotalMaximumNumChannels: ") + String (TotalMaximumNumChannels));
 
     ZCPP_DiscoveryResponse & packet = ZcppPacketBuffer.zcppPacket.DiscoveryResponse;
 
@@ -308,7 +323,7 @@ void c_InputESPAsyncZCPP::sendDiscoveryResponse (
     packet.protocolsSupported     = htonl (protocolsSupported);
     packet.flags                  = ZCPP_DISCOVERY_FLAG_SEND_DATA_AS_MULTICAST;
 
-    sendResponseToLastServer (sizeof (packet));
+    sendResponseToMostRecentRequester (sizeof (packet));
 
     suspend = false;
 
@@ -330,7 +345,7 @@ void c_InputESPAsyncZCPP::Process ()
         }
         
         DEBUG_V ("There is something in the buffer for us to process");
-        ZcppPacketBuffer.ZcppPacketBufferStatus = ZcppPacketBufferStatus_t::BufferIsInUse;
+        ZcppPacketBuffer.ZcppPacketBufferStatus = ZcppPacketBufferStatus_t::BufferIsBeingProcessed;
 
         // todo idleTicker.attach (config.effect_idletimeout, idleTimeout);
 /* todo
@@ -378,7 +393,7 @@ void c_InputESPAsyncZCPP::Process ()
             }
         } // switch (zcppPacket.Discovery.Header.type)
 
-        ZcppPacketBuffer.ZcppPacketBufferStatus = ZcppPacketBufferStatus_t::BufferIsFree;
+        ZcppPacketBuffer.ZcppPacketBufferStatus = ZcppPacketBufferStatus_t::BufferIsAvailable;
 
     } while (false);
 
@@ -395,16 +410,16 @@ void c_InputESPAsyncZCPP::ProcessReceivedConfig ()
 
     do // once
     {
-        if (ntohs (packet.sequenceNumber) == EndOfFrameZCPPSequenceNumber)
+        if (ntohs (packet.sequenceNumber) == LastReceivedSequenceNumber)
         {
             DEBUG_V ("Ignore duplicate Config Message");
             break;
         }
 
-        EndOfFrameZCPPSequenceNumber = ntohs (packet.sequenceNumber);
+        LastReceivedSequenceNumber = ntohs (packet.sequenceNumber);
 
         // a new config to apply
-        DEBUG_V (String ("The config is new: ") + ntohs (EndOfFrameZCPPSequenceNumber));
+        DEBUG_V (String ("The config is new: ") + ntohs (LastReceivedSequenceNumber));
 
         config.id = String (packet.userControllerName);
         DEBUG_V (String ("Set Controller Name: ") + config.id);
@@ -427,7 +442,7 @@ void c_InputESPAsyncZCPP::ProcessReceivedConfig ()
             }
 
             JsonObject JsonOutputPortConfig = JsonConfig.createNestedObject (String (CurrentPortConfig.port));
-            JsonObject JsonInputPortConfig = JsonConfig.createNestedObject (String (CurrentPortConfig.port));
+            JsonObject JsonInputPortConfig  = JsonConfig.createNestedObject (String (CurrentPortConfig.port));
 
             switch (CurrentPortConfig.protocol)
             {
@@ -539,7 +554,7 @@ void c_InputESPAsyncZCPP::ProcessReceivedConfig ()
 //-----------------------------------------------------------------------------
 void c_InputESPAsyncZCPP::ProcessReceivedData ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     do // once
     {
@@ -548,35 +563,39 @@ void c_InputESPAsyncZCPP::ProcessReceivedData ()
         uint8_t sequenceNumber     = packet.sequenceNumber;
         uint32_t InputBufferOffset = ntohl (packet.frameAddress);
         uint16_t packetDataLength  = ntohs (packet.packetDataLength);
-        bool IsLastFrameInMessage  = ZCPP_DATA_FLAG_LAST == packet.flags & ZCPP_DATA_FLAG_LAST;
+        // bool IsFirstFrameInMessage = ZCPP_DATA_FLAG_FIRST == (packet.flags & ZCPP_DATA_FLAG_FIRST);
+        // bool IsLastFrameInMessage  = ZCPP_DATA_FLAG_LAST  == (packet.flags & ZCPP_DATA_FLAG_LAST);
+
+        // DEBUG_V (String ("packet.flags: 0x") + String (packet.flags, HEX));
 
         if (ZCPP_DATA_FLAG_SYNC_WILL_BE_SENT == (packet.flags & ZCPP_DATA_FLAG_SYNC_WILL_BE_SENT))
         {
             // suppress display until we see a sync
-            OutputMgr.PauseOutput (true);
+            // OutputMgr.PauseOutput (true);
+            // DEBUG_V("Output Suppressed.")
         }
 
-        if (sequenceNumber != EndOfFrameZCPPSequenceNumber + 1)
+        if (sequenceNumber != LastReceivedSequenceNumber + 1)
         {
             LOG_PORT.print (F ("Sequence Error - expected: "));
-            LOG_PORT.print (EndOfFrameZCPPSequenceNumber + 1);
+            LOG_PORT.print (LastReceivedSequenceNumber + 1);
             LOG_PORT.print (F (" actual: "));
             LOG_PORT.println (sequenceNumber);
             ZcppStats.packet_errors++;
         }
 
-        if (IsLastFrameInMessage)
-        {
-            EndOfFrameZCPPSequenceNumber = sequenceNumber;
-        }
+        LastReceivedSequenceNumber = sequenceNumber;
 
         ZcppStats.num_packets++;
+
+        DEBUG_V (String ("InputBufferOffset: ") + String (InputBufferOffset));
+        DEBUG_V (String ("packetDataLength: ") + String (packetDataLength));
 
         memcpy (&InputDataBuffer[InputBufferOffset], packet.data, packetDataLength);
 
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // ProcessReceivedData
 
@@ -612,109 +631,205 @@ void c_InputESPAsyncZCPP::sendZCPPConfig ()
 
     ZCPP_QueryConfigurationResponse & packet = ZcppPacketBuffer.zcppPacket.QueryConfigurationResponse;
 
+    uint16_t PixelPortCount = 0;
+    uint16_t SerialPortCount = 0;
+    OutputMgr.GetPortCounts (PixelPortCount, SerialPortCount);
+
+    uint16_t TotalSizeOfResponse = sizeof (packet);
+
     memset (&packet, 0x00, sizeof (packet));
+
     memcpy (packet.Header.token, ZCPP_token, sizeof (ZCPP_token));
     packet.Header.type = ZCPP_TYPE_QUERY_CONFIG_RESPONSE;
     packet.Header.protocolVersion = ZCPP_CURRENT_PROTOCOL_VERSION;
-    packet.sequenceNumber = ntohs (EndOfFrameZCPPSequenceNumber);
+    packet.sequenceNumber = htons (LastReceivedSequenceNumber);
     memcpy (packet.userControllerName, config.id.c_str (), sizeof (packet.userControllerName));
-    packet.ports = 1; // todo get value from output mgr
+    packet.ports = PixelPortCount;
 
-    packet.PortConfig[0].port = 0;
-    //TODO: Add unified mode switching or simplify
+    // ask output manager for the config record and translate to ZCPP speak.
+    for (int outputPortId = int (c_OutputMgr::e_OutputChannelIds::OutputChannelId_Start); 
+        outputPortId < int (c_OutputMgr::e_OutputChannelIds::OutputChannelId_End);
+        ++outputPortId)
+    {
+        DEBUG_V ("");
 
-    //        #if defined(ESPS_MODE_SERIAL)
-    //        packet.QueryConfigurationResponse.PortConfig[0].port |= 0x80;
-    //        #endif
+        // get config for this channel from the output manager
+        String PortConfig;
+        OutputMgr.GetPortConfig (static_cast<c_OutputMgr::e_OutputChannelIds>(outputPortId), PortConfig);
+        DEBUG_V (String("PortConfig: ") + PortConfig );
 
-#ifdef EndOfPatience
-    packet.PortConfig[0].string = 0;
-    packet.PortConfig[0].startChannel = htonl ((uint32_t)config.channel_start);
+        DynamicJsonDocument JsonConfigDoc (2048);
+        DeserializationError error = deserializeJson (JsonConfigDoc, PortConfig);
 
-    //TODO: Add unified mode switching or simplify
-        //#if defined(ESPS_MODE_PIXEL)
-        switch (config.pixel_type) 
+        if (error)
         {
-            //#elif defined(ESPS_MODE_SERIAL)
-            //        switch(config.serial_type) {
-            //#endif
-            //#if defined(ESPS_MODE_PIXEL)
-        case  PixelType::WS2811:
-            packet.PortConfig[0].protocol = ZCPP_PROTOCOL_WS2811;
-            break;
-        case  PixelType::GECE:
-            packet.PortConfig[0].protocol = ZCPP_PROTOCOL_GECE;
-            break;
-
-        case  SerialType::DMX512:
-            packet.PortConfig[0].protocol = ZCPP_PROTOCOL_DMX;
-            break;
-        case  SerialType::RENARD:
-            packet.PortConfig[0].protocol = ZCPP_PROTOCOL_RENARD;
-            break;
-
-        }
-        packet.PortConfig[0].channels = ntohl ((uint32_t)config.channel_count);
-
-        //TODO: Add unified mode switching or simplify
-        packet.PortConfig[0].grouping = config.groupSize;
-
-        switch (config.pixel_color) 
-        {
-        case PixelColor::RGB:
-            packet.PortConfig[0].directionColourOrder = ZCPP_COLOUR_ORDER_RGB;
-            break;
-        case PixelColor::RBG:
-            packet.QueryConfigurationResponse.PortConfig[0].directionColourOrder = ZCPP_COLOUR_ORDER_RBG;
-            break;
-        case PixelColor::GRB:
-            packet.PortConfig[0].directionColourOrder = ZCPP_COLOUR_ORDER_GRB;
-            break;
-        case PixelColor::GBR:
-            packet.PortConfig[0].directionColourOrder = ZCPP_COLOUR_ORDER_GBR;
-            break;
-        case PixelColor::BRG:
-            packet.PortConfig[0].directionColourOrder = ZCPP_COLOUR_ORDER_BRG;
-            break;
-        case PixelColor::BGR:
-            packet.PortConfig[0].directionColourOrder = ZCPP_COLOUR_ORDER_BGR;
+            LOG_PORT.println (String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
+            LOG_PORT.println (String (F ("++++")) + PortConfig + String (F ("----")));
             break;
         }
+        DEBUG_V ("");
 
-        packet.PortConfig[0].brightness = config.briteVal * 100.0f;
-        packet.PortConfig[0].gamma = config.gammaVal * 10;
-        //TODO: Add unified mode switching or simplify
-        packet.PortConfig[0].grouping = 0;
-        packet.PortConfig[0].directionColourOrder = 0;
-        packet.PortConfig[0].brightness = 100.0f;
-        packet.PortConfig[0].gamma = 0;
+        JsonObject JsonConfig = JsonConfigDoc.to<JsonObject> ();
         
-        sendResponseToLastServer (sizeof(packet));
-#endif // def EndOfPatience
+        TotalSizeOfResponse += AddPortDataToResponsePacket (outputPortId, JsonConfig);
+
+    } // for each port
+
+    DEBUG_V ("");
+
+    sendResponseToMostRecentRequester (TotalSizeOfResponse);
+
+    DEBUG_END;
 
 } // sendZCPPConfig
 
-#ifdef YetToDo
+//-----------------------------------------------------------------------------
+uint16_t c_InputESPAsyncZCPP::AddPortDataToResponsePacket (int PortId, JsonObject & PortConfig)
+{
+    DEBUG_START;
 
+    ZCPP_PortConfig & PortConfigResponse = ZcppPacketBuffer.zcppPacket.QueryConfigurationResponse.PortConfig[PortId];
+    memset ((void*)(&PortConfigResponse), 0x0, sizeof (PortConfigResponse));
 
-/*
-Code ripped from main sketch
-uint32_t            *seqZCPPError;  // Sequence error tracking for each universe
-uint16_t            EndOfFrameZCPPSequenceNumber; // last config we saw
-uint8_t             seqZCPPTracker; // sequence number of zcpp frames
+    PortConfigResponse.port         = PortId;
+    PortConfigResponse.string       = 0;
 
+    uint32_t startChannel = 0;
+    FileIO::setFromJSON (startChannel, PortConfig[F ("start_channel")]);
 
-updateConfig():
-    seqZCPPTracker = 0;
-    seqZCPPError = 0;
-    zcpp.ZcppStats.num_packets = 0;
+    // setFromJSON makes no change to the target value if the key is not found.
+    uint32_t channel_count = 0;
+    FileIO::setFromJSON (channel_count, PortConfig[F ("pixel_count")]);
+    channel_count *= 3;
+    FileIO::setFromJSON (channel_count, PortConfig[F ("num_chan")]);
 
+    uint8_t group_size = 0;
+    FileIO::setFromJSON (group_size, PortConfig[F ("group_size")]);
 
+    float brightness = 1.0;
+    FileIO::setFromJSON (brightness, PortConfig[F ("brightness")]);
 
-loop():
+    float gamma = 0;
+    FileIO::setFromJSON (gamma, PortConfig[F ("gamma")]);
 
+    PortConfigResponse.startChannel         = htonl (startChannel);
+    PortConfigResponse.channels             = htonl (channel_count);
+    PortConfigResponse.grouping             = group_size;
+    PortConfigResponse.protocol             = TranslateOutputType (PortConfig);
+    PortConfigResponse.directionColourOrder = TranslateColorOrder (PortConfig);
+    PortConfigResponse.brightness           = uint8_t(brightness * 100.0f);
+    PortConfigResponse.gamma                = uint8_t(gamma * 10);
 
+    if ((ZCPP_PROTOCOL_DMX == PortConfigResponse.protocol) || (ZCPP_PROTOCOL_RENARD == PortConfigResponse.protocol))
+    {
+        PortConfigResponse.port |= 0x80;
+    }
 
-*/
+    DEBUG_END;
+    return sizeof (ZCPP_PortConfig);
 
-#endif
+} // AddPortDataToResponsePacket
+
+//-----------------------------------------------------------------------------
+uint8_t c_InputESPAsyncZCPP::TranslateColorOrder (JsonObject & PortConfig)
+{
+    DEBUG_START;
+
+    uint8_t response = ZCPP_COLOUR_ORDER_RGB;
+
+    String color_order;
+    FileIO::setFromJSON (color_order, PortConfig[F ("color_order")]);
+
+    do // once (color_order)
+    {
+        if(color_order == "RGB")
+        {
+            response = ZCPP_COLOUR_ORDER_RGB;
+            break;
+        }
+
+        if (color_order == "RBG")
+        {
+            response = ZCPP_COLOUR_ORDER_RBG;
+            break;
+        }
+
+        if (color_order == "GRB")
+        {
+            response = ZCPP_COLOUR_ORDER_GRB;
+            break;
+        }
+
+        if (color_order == "GBR")
+        {
+            response = ZCPP_COLOUR_ORDER_GBR;
+            break;
+        }
+
+        if (color_order == "BRG")
+        {
+            response = ZCPP_COLOUR_ORDER_BRG;
+            break;
+        }
+
+        if (color_order == "BGR")
+        {
+            response = ZCPP_COLOUR_ORDER_BGR;
+            break;
+        }
+
+    } while (false);
+
+    DEBUG_END;
+
+    return response;
+} // TranslateColorOrder
+
+//-----------------------------------------------------------------------------
+uint8_t c_InputESPAsyncZCPP::TranslateOutputType (JsonObject& PortConfig)
+{
+    DEBUG_START;
+
+    uint8_t response = ZCPP_PROTOCOL_WS2811;
+
+    String outputType;
+    FileIO::setFromJSON (outputType, PortConfig[F ("type")]);
+
+    do // once (color_order)
+    {
+        if (outputType == "WS2811")
+        {
+            response = ZCPP_PROTOCOL_WS2811;
+            break;
+        }
+
+        if (outputType == "GECE")
+        {
+            response = ZCPP_PROTOCOL_GECE;
+            break;
+        }
+
+        if (outputType == "DMX")
+        {
+            response = ZCPP_PROTOCOL_DMX;
+            break;
+        }
+
+        if (outputType == "RENARD")
+        {
+            response = ZCPP_PROTOCOL_RENARD;
+            break;
+        }
+
+        if (outputType == "SERIAL")
+        {
+            response = ZCPP_PROTOCOL_RENARD;
+            break;
+        }
+
+    } while (false);
+
+    DEBUG_END;
+
+    return response;
+} // TranslateOutputType

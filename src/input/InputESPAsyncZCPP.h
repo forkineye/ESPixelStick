@@ -63,7 +63,7 @@ private:
         unsigned long last_seen;
     } ZCPP_stats_t;
 
-    uint16_t        EndOfFrameZCPPSequenceNumber = 0;
+    uint8_t         LastReceivedSequenceNumber = 0;
     AsyncUDP        udp;                      // UDP
     bool            suspend = true;           // suspends all ZCPP processing until discovery is responded to
 
@@ -71,20 +71,20 @@ private:
     void initUDP ();
 
     // Packet parser callback
-    void parsePacket (AsyncUDPPacket _packet);
+    void ProcessReceivedUdpPacket (AsyncUDPPacket _packet);
 
     ZCPP_stats_t  ZcppStats;    // Statistics tracker
     
     enum ZcppPacketBufferStatus_t
     {
-        BufferIsFree,
+        BufferIsAvailable,
         BufferIsFilled,
-        BufferIsInUse,
+        BufferIsBeingProcessed,
     };
 
     typedef struct ZcppPacketBuffer_t
     {
-        ZcppPacketBufferStatus_t ZcppPacketBufferStatus = ZcppPacketBufferStatus_t::BufferIsFree;
+        ZcppPacketBufferStatus_t ZcppPacketBufferStatus = ZcppPacketBufferStatus_t::BufferIsAvailable;
         ZCPP_packet_t zcppPacket;
     };
 
@@ -101,11 +101,14 @@ private:
         uint32_t maximumChannels, 
         IPAddress ipAddress, 
         IPAddress ipMask);
-    void sendResponseToLastServer (size_t NumBytesToSend);
-    void ProcessReceivedDiscovery ();
-    void ProcessReceivedConfig    ();
-    void ProcessReceivedData      ();
-    void sendZCPPConfig           ();
+    void     sendResponseToMostRecentRequester (size_t NumBytesToSend);
+    void     ProcessReceivedDiscovery          ();
+    void     ProcessReceivedConfig             ();
+    void     ProcessReceivedData               ();
+    void     sendZCPPConfig                    ();
+    uint16_t AddPortDataToResponsePacket       (int PortId, JsonObject & PortConfig);
+    uint8_t  TranslateColorOrder               (JsonObject & PortConfig);
+    uint8_t  TranslateOutputType               (JsonObject & PortConfig);
 
     // Diag functions
     void dumpError (ZCPP_error_t error);
