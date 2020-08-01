@@ -42,8 +42,8 @@ public:
     bool SetConfig     (JsonObject & jsonConfig); ///< Set a new config in the driver
     void GetStatus     (JsonObject & jsonStatus);
     void GetOptions    (JsonObject & jsonStatus);
-    void PauseOutput   (bool pauseFlag) { OutputIsPaused = pauseFlag; }
-    void GetPortCounts (uint16_t& PixelCount, uint16_t& SerialCount) {PixelCount = OutputChannelId_End; SerialCount = min(OutputChannelId_End, 2); }
+    void PauseOutput   (bool PauseTheOutput) { IsOutputPaused = PauseTheOutput; }
+    void GetPortCounts (uint16_t& PixelCount, uint16_t& SerialCount) {PixelCount = uint16_t(OutputChannelId_End); SerialCount = min(uint16_t(OutputChannelId_End), uint16_t(2)); }
 
     uint8_t* GetBufferAddress () { return OutputBuffer; } ///< Get the address of the buffer into which the E1.31 handler will stuff data
     uint16_t GetBufferSize ()    { return sizeof (OutputBuffer); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
@@ -92,7 +92,7 @@ private:
 
     bool HasBeenInitialized = false;
     bool ConfigSaveNeeded   = false;
-    bool OutputIsPaused     = false;
+    bool IsOutputPaused     = false;
 
     bool ProcessJsonConfig (JsonObject & jsonConfig);
     void CreateJsonConfig  (JsonObject & jsonConfig);

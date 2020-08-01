@@ -803,7 +803,7 @@ void c_OutputMgr::Render()
         SaveConfig ();
     } // done need to save the current config
 
-    if (false == OutputIsPaused)
+    if (false == IsOutputPaused)
     {
         // DEBUG_START;
         for (c_OutputCommon* pOutputChannel : pOutputChannelDrivers)
