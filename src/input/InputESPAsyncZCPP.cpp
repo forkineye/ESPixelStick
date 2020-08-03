@@ -255,9 +255,11 @@ void c_InputESPAsyncZCPP::dumpError (ZCPP_error_t error)
 } // dumpError
 
 //-----------------------------------------------------------------------------
-void c_InputESPAsyncZCPP::sendResponseToMostRecentRequester (size_t NumBytesToSend)
+void c_InputESPAsyncZCPP::sendResponseToMostRecentRequester ()
 {
     // DEBUG_START;
+
+    uint32_t NumBytesToSend = ZCPP_GetPacketActualSize (ZcppPacketBuffer.zcppPacket);
 
     size_t BytesWrittenToUdp = udp.writeTo (ZcppPacketBuffer.zcppPacket.raw, NumBytesToSend, ZcppStats.last_clientIP, ZcppStats.last_clientPort);
 
@@ -302,28 +304,25 @@ void c_InputESPAsyncZCPP::sendDiscoveryResponse (
     packet.Header.protocolVersion = ZCPP_CURRENT_PROTOCOL_VERSION;
     packet.minProtocolVersion     = ZCPP_CURRENT_PROTOCOL_VERSION;
     packet.maxProtocolVersion     = ZCPP_CURRENT_PROTOCOL_VERSION;
-    packet.vendor                 = htons (ZCPP_VENDOR_ESPIXELSTICK);
-    packet.model                  = htons (4);
-    memcpy(packet.firmwareVersion, firmwareVersion.c_str(), sizeof(packet.firmwareVersion));
+    packet.vendor                 = ZCPP_ToWire16 (ZCPP_VENDOR_ESPIXELSTICK);
+    packet.model                  = ZCPP_ToWire16 (4);
+    memcpy(packet.firmwareVersion, firmwareVersion.c_str(), sizeof(packet.firmwareVersion)-1);
     memcpy(packet.macAddress, mac.c_str(), sizeof(packet.macAddress));
-    packet.ipv4Address            = ipAddress;
-    packet.ipv4Mask               = ipMask;
-    memcpy(packet.userControllerName, controllerName.c_str(), sizeof(packet.userControllerName));
-    packet.maxTotalChannels       = htonl (TotalMaximumNumChannels);
+    packet.ipv4Address            = ZCPP_ToWire32(ipAddress);
+    packet.ipv4Mask               = ZCPP_ToWire32(ipMask);
+    memcpy(packet.userControllerName, controllerName.c_str(), sizeof(packet.userControllerName)-1);
+    packet.maxTotalChannels       = ZCPP_ToWire32 (TotalMaximumNumChannels);
     packet.pixelPorts             = pixelPorts;
     packet.rsPorts                = serialPorts;
-    packet.channelsPerPixelPort   = htons (maxPixelChannelsPerPixelPort);
-    packet.channelsPerRSPort      = htons (maxSerialChannelsPerSerialPort);
-    uint32_t protocolsSupported = 
-        ZCPP_DISCOVERY_PROTOCOL_WS2811 |
-        ZCPP_DISCOVERY_PROTOCOL_GECE   |
-        ZCPP_DISCOVERY_PROTOCOL_DMX    |
-        ZCPP_DISCOVERY_PROTOCOL_RENARD;
-
-    packet.protocolsSupported     = htonl (protocolsSupported);
+    packet.channelsPerPixelPort   = ZCPP_ToWire16 (maxPixelChannelsPerPixelPort);
+    packet.channelsPerRSPort      = ZCPP_ToWire16 (maxSerialChannelsPerSerialPort);
     packet.flags                  = ZCPP_DISCOVERY_FLAG_SEND_DATA_AS_MULTICAST;
+    packet.protocolsSupported     = ZCPP_ToWire32 (ZCPP_DISCOVERY_PROTOCOL_WS2811 |
+                                           ZCPP_DISCOVERY_PROTOCOL_GECE |
+                                           ZCPP_DISCOVERY_PROTOCOL_DMX |
+                                           ZCPP_DISCOVERY_PROTOCOL_RENARD);
 
-    sendResponseToMostRecentRequester (sizeof (packet));
+    sendResponseToMostRecentRequester ();
 
     suspend = false;
 
@@ -410,16 +409,16 @@ void c_InputESPAsyncZCPP::ProcessReceivedConfig ()
 
     do // once
     {
-        if (ntohs (packet.sequenceNumber) == LastReceivedSequenceNumber)
+        if (ZCPP_FromWire16 (packet.sequenceNumber) == LastReceivedSequenceNumber)
         {
             DEBUG_V ("Ignore duplicate Config Message");
             break;
         }
 
-        LastReceivedSequenceNumber = ntohs (packet.sequenceNumber);
+        LastReceivedSequenceNumber = ZCPP_FromWire16 (packet.sequenceNumber);
 
         // a new config to apply
-        DEBUG_V (String ("The config is new: ") + ntohs (LastReceivedSequenceNumber));
+        DEBUG_V (String ("The config is new: ") + ZCPP_FromWire16 (LastReceivedSequenceNumber));
 
         config.id = String (packet.userControllerName);
         DEBUG_V (String ("Set Controller Name: ") + config.id);
@@ -484,8 +483,8 @@ void c_InputESPAsyncZCPP::ProcessReceivedConfig ()
             } // switch (CurrentPortConfig.protocol)
 
             //TODO: Add to E1.31 input config
-            // config.channel_start = htonl (CurrentPortConfig.startChannel);
-            // config.channel_count = htonl (CurrentPortConfig.channels);
+            // config.channel_start = ZCPP_ToWire32 (CurrentPortConfig.startChannel);
+            // config.channel_count = ZCPP_ToWire32 (CurrentPortConfig.channels);
 
             // TODO more output config
             // config.groupSize = CurrentPortConfig.grouping;
@@ -561,8 +560,8 @@ void c_InputESPAsyncZCPP::ProcessReceivedData ()
         ZCPP_Data& packet = ZcppPacketBuffer.zcppPacket.Data;
 
         uint8_t sequenceNumber     = packet.sequenceNumber;
-        uint32_t InputBufferOffset = ntohl (packet.frameAddress);
-        uint16_t packetDataLength  = ntohs (packet.packetDataLength);
+        uint32_t InputBufferOffset = ZCPP_FromWire32 (packet.frameAddress);
+        uint16_t packetDataLength  = ZCPP_FromWire16 (packet.packetDataLength);
         // bool IsFirstFrameInMessage = ZCPP_DATA_FLAG_FIRST == (packet.flags & ZCPP_DATA_FLAG_FIRST);
         // bool IsLastFrameInMessage  = ZCPP_DATA_FLAG_LAST  == (packet.flags & ZCPP_DATA_FLAG_LAST);
 
@@ -571,7 +570,7 @@ void c_InputESPAsyncZCPP::ProcessReceivedData ()
         if (ZCPP_DATA_FLAG_SYNC_WILL_BE_SENT == (packet.flags & ZCPP_DATA_FLAG_SYNC_WILL_BE_SENT))
         {
             // suppress display until we see a sync
-            // OutputMgr.PauseOutput (true);
+            // todo - restore - OutputMgr.PauseOutput (true);
             // DEBUG_V("Output Suppressed.")
         }
 
@@ -635,14 +634,12 @@ void c_InputESPAsyncZCPP::sendZCPPConfig ()
     uint16_t SerialPortCount = 0;
     OutputMgr.GetPortCounts (PixelPortCount, SerialPortCount);
 
-    uint16_t TotalSizeOfResponse = sizeof (packet);
-
     memset (&packet, 0x00, sizeof (packet));
 
     memcpy (packet.Header.token, ZCPP_token, sizeof (ZCPP_token));
     packet.Header.type = ZCPP_TYPE_QUERY_CONFIG_RESPONSE;
     packet.Header.protocolVersion = ZCPP_CURRENT_PROTOCOL_VERSION;
-    packet.sequenceNumber = htons (LastReceivedSequenceNumber);
+    packet.sequenceNumber = ZCPP_ToWire16 (LastReceivedSequenceNumber);
     memcpy (packet.userControllerName, config.id.c_str (), sizeof (packet.userControllerName));
     packet.ports = PixelPortCount;
 
@@ -671,20 +668,20 @@ void c_InputESPAsyncZCPP::sendZCPPConfig ()
 
         JsonObject JsonConfig = JsonConfigDoc.to<JsonObject> ();
         
-        TotalSizeOfResponse += AddPortDataToResponsePacket (outputPortId, JsonConfig);
+        AddPortDataToResponsePacket (outputPortId, JsonConfig);
 
     } // for each port
 
     DEBUG_V ("");
 
-    sendResponseToMostRecentRequester (TotalSizeOfResponse);
+    sendResponseToMostRecentRequester ();
 
     DEBUG_END;
 
 } // sendZCPPConfig
 
 //-----------------------------------------------------------------------------
-uint16_t c_InputESPAsyncZCPP::AddPortDataToResponsePacket (int PortId, JsonObject & PortConfig)
+void c_InputESPAsyncZCPP::AddPortDataToResponsePacket (int PortId, JsonObject & PortConfig)
 {
     DEBUG_START;
 
@@ -712,8 +709,8 @@ uint16_t c_InputESPAsyncZCPP::AddPortDataToResponsePacket (int PortId, JsonObjec
     float gamma = 0;
     FileIO::setFromJSON (gamma, PortConfig[F ("gamma")]);
 
-    PortConfigResponse.startChannel         = htonl (startChannel);
-    PortConfigResponse.channels             = htonl (channel_count);
+    PortConfigResponse.startChannel         = ZCPP_ToWire32 (startChannel);
+    PortConfigResponse.channels             = ZCPP_ToWire32 (channel_count);
     PortConfigResponse.grouping             = group_size;
     PortConfigResponse.protocol             = TranslateOutputType (PortConfig);
     PortConfigResponse.directionColourOrder = TranslateColorOrder (PortConfig);
@@ -726,7 +723,6 @@ uint16_t c_InputESPAsyncZCPP::AddPortDataToResponsePacket (int PortId, JsonObjec
     }
 
     DEBUG_END;
-    return sizeof (ZCPP_PortConfig);
 
 } // AddPortDataToResponsePacket
 

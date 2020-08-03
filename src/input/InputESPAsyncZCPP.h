@@ -101,12 +101,12 @@ private:
         uint32_t maximumChannels, 
         IPAddress ipAddress, 
         IPAddress ipMask);
-    void     sendResponseToMostRecentRequester (size_t NumBytesToSend);
+    void     sendResponseToMostRecentRequester ();
     void     ProcessReceivedDiscovery          ();
     void     ProcessReceivedConfig             ();
     void     ProcessReceivedData               ();
     void     sendZCPPConfig                    ();
-    uint16_t AddPortDataToResponsePacket       (int PortId, JsonObject & PortConfig);
+    void     AddPortDataToResponsePacket       (int PortId, JsonObject & PortConfig);
     uint8_t  TranslateColorOrder               (JsonObject & PortConfig);
     uint8_t  TranslateOutputType               (JsonObject & PortConfig);
 
