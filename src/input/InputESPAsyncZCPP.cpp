@@ -289,7 +289,8 @@ void c_InputESPAsyncZCPP::sendDiscoveryResponse (
 {
     DEBUG_START;
 
-    DEBUG_V (String ("pixelPorts: ") + String (pixelPorts));
+    DEBUG_V (String ("ipAddress: ") + String (ipAddress));
+    DEBUG_V (String ("ipMask: ") + String (ipMask));
     DEBUG_V (String ("serialPorts: ") + String (serialPorts));
     DEBUG_V (String ("maxPixelChannelsPerPixelPort: ") + String (maxPixelChannelsPerPixelPort));
     DEBUG_V (String ("maxSerialChannelsPerSerialPort: ") + String (maxSerialChannelsPerSerialPort));
@@ -308,8 +309,10 @@ void c_InputESPAsyncZCPP::sendDiscoveryResponse (
     packet.model                  = ZCPP_ToWire16 (4);
     memcpy(packet.firmwareVersion, firmwareVersion.c_str(), sizeof(packet.firmwareVersion)-1);
     memcpy(packet.macAddress, mac.c_str(), sizeof(packet.macAddress));
-    packet.ipv4Address            = ZCPP_ToWire32(ipAddress);
-    packet.ipv4Mask               = ZCPP_ToWire32(ipMask);
+    // memcpy(&packet.ipv4Address, &ipAddress, sizeof(packet.ipv4Address));
+
+    packet.ipv4Address            = ipAddress;
+    packet.ipv4Mask               = ipMask;
     memcpy(packet.userControllerName, controllerName.c_str(), sizeof(packet.userControllerName)-1);
     packet.maxTotalChannels       = ZCPP_ToWire32 (TotalMaximumNumChannels);
     packet.pixelPorts             = pixelPorts;
@@ -581,6 +584,11 @@ void c_InputESPAsyncZCPP::ProcessReceivedData ()
             LOG_PORT.print (F (" actual: "));
             LOG_PORT.println (sequenceNumber);
             ZcppStats.packet_errors++;
+        }
+        else
+        {
+            LOG_PORT.print (F ("Sequence - actual: "));
+            LOG_PORT.println (sequenceNumber);
         }
 
         LastReceivedSequenceNumber = sequenceNumber;
