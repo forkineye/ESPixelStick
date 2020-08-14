@@ -52,6 +52,7 @@ public:
         InputType_MQTT,
         InputType_Alexa,
         InputType_SCCP,
+        InputType_DDP,
         InputType_End,
         InputType_Start   = InputType_Disabled,
         InputType_Default = InputType_Disabled,
