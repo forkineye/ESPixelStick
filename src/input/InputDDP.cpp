@@ -163,7 +163,7 @@ void c_InputDDP::ProcessReceivedUdpPacket(AsyncUDPPacket ReceivedPacket)
             if (CurrentReceivedSequenceNumber != NextExpectedSequenceNumber)
             {
                 stats.errors++;
-                DEBUG_V (String ("Sequence error: stats.errors") + String (stats.errors));
+                DEBUG_V (String ("Sequence error: stats.errors: ") + String (stats.errors));
             }
 
         } // using sequence numbers
