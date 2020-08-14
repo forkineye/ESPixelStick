@@ -18,8 +18,11 @@
 
 #include "FPPDiscovery.h"
 
-typedef union {
-    struct {
+//-----------------------------------------------------------------------------
+typedef union 
+{
+    struct 
+    {
         uint8_t  header[4];  //FPPD
         uint8_t  packet_type;
         uint16_t data_len;
@@ -39,12 +42,12 @@ typedef union {
     uint8_t raw[256];
 } FPPPingPacket;
 
-
+//-----------------------------------------------------------------------------
 c_FPPDiscovery::c_FPPDiscovery() {
     version = "1";
 }
 
-
+//-----------------------------------------------------------------------------
 bool c_FPPDiscovery::begin() 
 {
     // DEBUG_START;
@@ -68,8 +71,8 @@ bool c_FPPDiscovery::begin()
     return success;
 }
 
-
-void c_FPPDiscovery::ProcessReceivedUdpPacket(AsyncUDPPacket _packet) 
+//-----------------------------------------------------------------------------
+void c_FPPDiscovery::ProcessReceivedUdpPacket(AsyncUDPPacket _packet)
 {
     // DEBUG_START;
 
@@ -77,7 +80,7 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket(AsyncUDPPacket _packet)
     if (packet->packet_type == 0x04 && packet->ping_subtype == 0x01) 
     {
         //discover ping packet, need to send a ping out
-        // todo - put back. sendPingPacket();
+        sendPingPacket();
     }
     // DEBUG_END;
 }
@@ -102,13 +105,13 @@ void c_FPPDiscovery::sendPingPacket()
     packet.versionMinor = (v >> 8) + ((v & 0xFF) << 8);
     packet.operatingMode = 0x01; // we only support bridge mode
     uint32_t ip = static_cast<uint32_t>(WiFi.localIP());
-    memcpy(packet.ipAddress, &ip, 4);
+    memcpy (packet.ipAddress, &ip, 4);
     strcpy (packet.hostName, config.id.c_str());
-    strcpy(packet.version, version);
-    strcpy(packet.hardwareType, "ESPixelStick");
+    strcpy (packet.version, version);
+    strcpy (packet.hardwareType, "ESPixelStick");
     packet.ranges[0] = 0;
     
-    // todo - restore - udp.broadcastTo((uint8_t*)&packet, 221, FPP_DISCOVERY_PORT);
+    udp.broadcastTo(packet.raw, sizeof(packet), FPP_DISCOVERY_PORT);
 
     // DEBUG_END;
 }
