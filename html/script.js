@@ -68,6 +68,10 @@ $(function ()
         submitDeviceConfig();
     });
 
+    $('#btn_wifi').click(function () {
+        submitWiFiConfig();
+    });
+
     $('#btn_RGB').change(function () {
         clearStream();
     });
