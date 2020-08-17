@@ -131,7 +131,23 @@ void c_WebMgr::init ()
 
     webServer.onNotFound ([this](AsyncWebServerRequest* request)
     {
-        // DEBUG_V ("IsAlexaCallbackValid");
+/*
+        DEBUG_V (String("Page Not Found: "));
+
+
+        int paramsNr = request->params ();
+        Serial.println (paramsNr);
+
+        for (int i = 0; i < paramsNr; i++) {
+
+            AsyncWebParameter* p = request->getParam (i);
+            Serial.print ("Param name: ");
+            Serial.println (p->name ());
+            Serial.print ("Param value: ");
+            Serial.println (p->value ());
+            Serial.println ("------");
+        }
+*/
         if (true == this->IsAlexaCallbackValid())
         {
             // DEBUG_V ("IsAlexaCallbackValid == true");
