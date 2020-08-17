@@ -1,7 +1,7 @@
 /*
-* FPPDiscovery.cpp
+* c_FPPDiscovery.cpp
 
-* Copyright (c) 2019 Shelby Merrick
+* Copyright (c) 2020 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -17,39 +17,78 @@
 */
 
 #include "FPPDiscovery.h"
-#include <string.h>
 
+//-----------------------------------------------------------------------------
+typedef union 
+{
+    struct 
+    {
+        uint8_t  header[4];  //FPPD
+        uint8_t  packet_type;
+        uint16_t data_len;
+        uint8_t  ping_version;
+        uint8_t  ping_subtype;
+        uint8_t  ping_hardware;
+        uint16_t versionMajor;
+        uint16_t versionMinor;
+        uint8_t  operatingMode;
+        uint8_t  ipAddress[4];
+        char  hostName[65];
+        char  version[41];
+        char  hardwareType[41];
+        char  ranges[41];
+    } __attribute__ ((packed));
 
-FPPDiscovery::FPPDiscovery(const char *ver) {
-    version = ver;
+    uint8_t raw[256];
+} FPPPingPacket;
+
+//-----------------------------------------------------------------------------
+c_FPPDiscovery::c_FPPDiscovery() {
+    version = "1";
 }
 
+//-----------------------------------------------------------------------------
+bool c_FPPDiscovery::begin() 
+{
+    // DEBUG_START;
 
-bool FPPDiscovery::begin() {
     bool success = false;
     delay(100);
 
     IPAddress address = IPAddress(239, 70, 80, 80);  
-    if (udp.listenMulticast(address, FPP_DISCOVERY_PORT)) {
-        udp.onPacket(std::bind(&FPPDiscovery::parsePacket, this,
+    if (udp.listenMulticast(address, FPP_DISCOVERY_PORT)) 
+    {
+        udp.onPacket(std::bind(&c_FPPDiscovery::ProcessReceivedUdpPacket, this,
                   std::placeholders::_1));
        success = true;
+       LOG_PORT.println (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
+
     }
     sendPingPacket();
+
+    // DEBUG_END;
+
     return success;
 }
 
+//-----------------------------------------------------------------------------
+void c_FPPDiscovery::ProcessReceivedUdpPacket(AsyncUDPPacket _packet)
+{
+    // DEBUG_START;
 
-void FPPDiscovery::parsePacket(AsyncUDPPacket _packet) {
     FPPPingPacket *packet = reinterpret_cast<FPPPingPacket *>(_packet.data());
-    if (packet->packet_type == 0x04 && packet->ping_subtype == 0x01) {
+    if (packet->packet_type == 0x04 && packet->ping_subtype == 0x01) 
+    {
         //discover ping packet, need to send a ping out
         sendPingPacket();
     }
+    // DEBUG_END;
 }
 
+void c_FPPDiscovery::sendPingPacket() 
+{
+    // DEBUG_START;
 
-void FPPDiscovery::sendPingPacket() {
     FPPPingPacket packet;
     packet.header[0] = 'F';
     packet.header[1] = 'P';
@@ -66,10 +105,15 @@ void FPPDiscovery::sendPingPacket() {
     packet.versionMinor = (v >> 8) + ((v & 0xFF) << 8);
     packet.operatingMode = 0x01; // we only support bridge mode
     uint32_t ip = static_cast<uint32_t>(WiFi.localIP());
-    memcpy(packet.ipAddress, &ip, 4);
-    strcpy(packet.hostName, WiFi.hostname().c_str());
-    strcpy(packet.version, version);
-    strcpy(packet.hardwareType, "ESPixelStick");
+    memcpy (packet.ipAddress, &ip, 4);
+    strcpy (packet.hostName, config.id.c_str());
+    strcpy (packet.version, version);
+    strcpy (packet.hardwareType, "ESPixelStick");
     packet.ranges[0] = 0;
-    udp.broadcastTo((uint8_t*)&packet, 221, FPP_DISCOVERY_PORT);
+    
+    udp.broadcastTo(packet.raw, sizeof(packet), FPP_DISCOVERY_PORT);
+
+    // DEBUG_END;
 }
+
+c_FPPDiscovery FPPDiscovery;

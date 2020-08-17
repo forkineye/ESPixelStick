@@ -38,14 +38,14 @@ gulp.task('js', function() {
     return gulp.src(['html/js/jquery*.js', 'html/js/bootstrap.js', 'html/js/jqColorPicker.js', 'html/script.js'])
         .pipe(plumber())
         .pipe(concat('esps.js'))
-        .pipe(terser())
+        .pipe(terser({ 'toplevel': true }))
         .pipe(gzip())
         .pipe(gulp.dest('data/www'));
 });
 
 /* Image Task */
 gulp.task('image', function() {
-    return gulp.src(['html/**/*.png', 'html/**/*.ico'])
+    return gulp.src(['html/**/*.png'])
         .pipe(plumber())
         .pipe(gulp.dest('data/www'));
 });

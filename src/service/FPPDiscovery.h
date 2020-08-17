@@ -1,7 +1,8 @@
+#pragma once
 /*
-* FPPDiscovery.h
+* c_FPPDiscovery.h
 *
-* Project: ESPixelStick - An ESP8266 and E1.31 based pixel driver
+* Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2018 Shelby Merrick
 * http://www.forkineye.com
 *
@@ -17,8 +18,7 @@
 *
 */
 
-#ifndef FPPDISCOVERY
-#define FPPDISCOVERY
+#include "../ESPixelStick.h"
 
 #ifdef ESP32
 #include <WiFi.h>
@@ -31,49 +31,18 @@
 #error Platform not supported
 #endif
 
-
 #define FPP_DISCOVERY_PORT 32320
 
-/*
-Code ripped from main sketch
-setup():
-  fppDiscovery.begin();
-
-*/
-
-typedef union {
-    struct {
-        uint8_t  header[4];  //FPPD
-        uint8_t  packet_type;
-        uint16_t data_len;
-        uint8_t  ping_version;
-        uint8_t  ping_subtype;
-        uint8_t  ping_hardware;
-        uint16_t versionMajor;
-        uint16_t versionMinor;
-        uint8_t  operatingMode;
-        uint8_t  ipAddress[4];
-        char  hostName[65];
-        char  version[41];
-        char  hardwareType[41];
-        char  ranges[41];
-    } __attribute__((packed));
-
-    uint8_t raw[256];
-} FPPPingPacket;
-
-
-class FPPDiscovery {
+class c_FPPDiscovery 
+{
   private:
     const char *version;
     AsyncUDP udp;
-    void parsePacket(AsyncUDPPacket _packet);
+    void ProcessReceivedUdpPacket(AsyncUDPPacket _packet);
   public:
-    FPPDiscovery(const char *ver);
+    c_FPPDiscovery();
     bool begin();
     void sendPingPacket();
 };
 
-
-
-#endif
+extern c_FPPDiscovery FPPDiscovery;

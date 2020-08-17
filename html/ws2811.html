@@ -1,16 +1,28 @@
 <div id="ws2811">
     <legend class="esps-legend">WS2811 Configuration</legend>
+    <div class="form-group has-feedback" id="fg_ws2811">
+        <label class="control-label col-sm-2" for="pixel_count">Pixel Count:</label>
+        <div class="col-sm-2">
+            <input type="number" class="form-control is-valid" id="pixel_count" step="1" min="1" max="1360" value="0" required title="Number of physical pixels" onchange="refreshPixel()">
+            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+        </div>
 
-    <div class="form-group">
-        <label class="control-label col-sm-2" for="pixel_count">Pixel Count</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="pixel_count" title="Number of physical pixels" onchange="refreshPixel()"></div>
-        <label class="control-label col-sm-2" for="group_size">Group Size</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="group_size" title="Group every X number of physical pixels together.  Default of 1 is no grouping." onchange="refreshPixel()"></div>
+        <label class="control-label col-sm-2" for="group_size:">Group Size</label>
+        <div class="col-sm-2">
+            <input type="number" class="form-control is-valid" id="group_size" step="1" min="1" max="1360" value="1" required title="Group every X number of physical pixels together.  Default of 1 is no grouping." onchange="refreshPixel()">
+            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+        </div>
+
+        <label class="control-label col-sm-2" for="zig_size">Zigzag Count:</label>
+        <div class="col-sm-2">
+            <input type="number" class="form-control is-valid" id="zig_size" step="1" min="0" max="680" value="0" required title="Zigzag every X number of physical pixels." onchange="refreshPixel()">
+            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+        </div>
     </div>
 
     <div class="form-group">
-        <label class="control-label col-sm-2" for="color_order">Color Order</label>
-        <div class="col-sm-3">
+        <label class="control-label col-sm-2" for="color_order">Color Order:</label>
+        <div class="col-sm-2">
             <select class="form-control" id="color_order">
                 <option value="rgb">RGB</option>
                 <option value="grb">GRB</option>
@@ -20,105 +32,108 @@
                 <option value="bgr">BGR</option>
             </select>
         </div>
-        <label class="control-label col-sm-2" for="zig_size">Zigzag Count</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="zig_size" title="Zigzag every X number of physical pixels." onchange="refreshPixel()"></div>
     </div>
 
-    <div class="form-group">
-        <label class="control-label col-sm-2" for="gamma">Gamma Value</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="gamma" title="Recommended value is 2.2. Set to 1.0 to disable." onchange="refreshPixel()"></div>
+    <div class="form-group has-feedback">
+        <label class="control-label col-sm-2" for="gamma">Gamma Value:</label>
+        <div class="col-sm-2">
+            <input type="number" class="form-control is-valid" id="gamma" step="0.1" min="1.0" max="5.0" value="1.0" required title="Recommended value is 2.2. Set to 1.0 to disable." onchange="refreshPixel()">
+            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+        </div>
+
         <label class="control-label col-sm-2" for="brightness">Brightness</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="brightness" title="Maximum brightness is 1.0." onchange="refreshPixel()"></div>
+        <div class="col-sm-2">
+            <input type="number" class="form-control is-valid" id="brightness" step="0.01" min="0.1" max="1.0" value="1.0" title="Maximum brightness is 1.0." onchange="refreshPixel()">
+            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+        </div>
         <div class="col-sm-offset-2 col-sm-10">
             <div class="checkbox"><label><input type="checkbox" id="showgamma"> Show Gamma Curve</label></div>
-        </div>
-        <div class="col-sm-offset-2 col-sm-8 hidden gammagraph">
-            <svg viewBox="-25 -30 320 320" width="256" height="256" class="chart">
-                <defs>
-                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
-                        <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
-                    </marker>
-                </defs>
-
-                <line x1="0" y1="256" x2="256" y2="256" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
-                <text x="125" y="275" class="label-title">Input</text>
-
-                <line x1="0" y1="256" x2="0" y2="0" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
-                <text x="-15" y="120" class="label-title" style="writing-mode: tb;">Output</text>
-
-                <polyline
-                    id="cracker"
-                    fill="none"
-                    stroke="#0074d9"
-                    stroke-width="2"
-                    points=""
-                />
-            </svg>
         </div>
     </div>
 </div>
 
+<div class="col-sm-offset-2 col-sm-8 hidden gammagraph">
+    <svg viewBox="-25 -30 320 320" width="256" height="256" class="chart">
+        <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
+            </marker>
+        </defs>
+
+        <line x1="0" y1="256" x2="256" y2="256" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
+        <text x="125" y="275" class="label-title">Input</text>
+
+        <line x1="0" y1="256" x2="0" y2="0" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
+        <text x="-15" y="120" class="label-title" style="writing-mode: tb;">Output</text>
+
+        <polyline id="cracker"
+                  fill="none"
+                  stroke="#0074d9"
+                  stroke-width="2"
+                  points="" />
+    </svg>
+</div>
+
 <script>
 
-// Gamma graph
-$('#ws2811 #showgamma').click(function() {
-    if ($(this).is(':checked')) {
-        $('.gammagraph').removeClass('hidden');
-    } else {
-        $('.gammagraph').addClass('hidden');
-    }
-});
-
-// Gamma graph
-$('#ws2811 #gamma').change(function() {
-    sendGamma();
-});
-$('#ws2811 #brightness').change(function() {
-    sendGamma();
-});
-
-function sendGamma() {
-    var json = {
-        'pixel': {
-            'gammaVal': parseFloat($('#p_gammaVal').val()),
-            'briteVal': parseFloat($('#p_briteVal').val())
+    // Gamma graph
+    $('#ws2811 #showgamma').click(function () {
+        if ($(this).is(':checked')) {
+            $('.gammagraph').removeClass('hidden');
+        } else {
+            $('.gammagraph').addClass('hidden');
         }
-    }
-//    wsEnqueue('S4' + JSON.stringify(json));
-//    wsEnqueue('G4'); // Get Gamma Table
-}
+    });
 
-function refreshGamma(data) {
-    var gammaData = JSON.parse(data);
-    var polyline = document.getElementById('cracker');
-    var points = polyline.getAttribute('points');
+    // Gamma graph
+    $('#ws2811 #gamma').change(function () {
+        sendGamma();
+    });
+    $('#ws2811 #brightness').change(function () {
+        sendGamma();
+    });
 
-    points = "";
-    for (X=0; X<256; X++) {
-        var Y = 255-gammaData.gamma[X];
-        points += X + ", "+ Y +" ";
-    }
-
-    polyline.setAttribute('points', points);
-}
-
-function refreshPixel() {
-    var proto = $('#p_type option:selected').text();
-    var size = parseInt($('#p_count').val());
-    var frame = 30;
-    var idle = 300;
-
-    if (!proto.localeCompare('WS2811 800kHz')) {
-        frame = 30;
-        idle = 300;
-    } else if (!proto.localeCompare('GE Color Effects')) {
-        frame = 790;
-        idle = 35;
+    function sendGamma() {
+        var json = {
+            'pixel': {
+                'gammaVal': parseFloat($('#p_gammaVal').val()),
+                'briteVal': parseFloat($('#p_briteVal').val())
+            }
+        }
+        //    wsEnqueue('S4' + JSON.stringify(json));
+        //    wsEnqueue('G4'); // Get Gamma Table
     }
 
-    var rate = (frame * size + idle) / 1000;
-    var hz = 1000 / rate;
-    $('#refresh').html(Math.ceil(rate) + 'ms / ' + Math.floor(hz) + 'Hz');
-}
+    function refreshGamma(data) {
+        var gammaData = JSON.parse(data);
+        var polyline = document.getElementById('cracker');
+        var points = polyline.getAttribute('points');
+
+        points = "";
+        for (X = 0; X < 256; X++) {
+            var Y = 255 - gammaData.gamma[X];
+            points += X + ", " + Y + " ";
+        }
+
+        polyline.setAttribute('points', points);
+    }
+
+    function refreshPixel()
+    {
+        // var NumberOfPixels       = parseInt($('#pixel_count').val());
+        // var BytesPerPixel        = 3;
+        // var NumberOfBytesInFrame = NumberOfPixels * BytesPerPixel;
+        // var PixelBaudRate        = 800000;
+        // var TimePerBit           = 1 / PixelBaudRate;
+        // var BitsPerByte          = 8;
+        // var TimePerByte          = TimePerBit * BitsPerByte;
+        // var InterFrameGap        = 0.0004;
+        // var TimePerFrame         = (TimePerByte * NumberOfBytesInFrame) + InterFrameGap;
+        var TimePerFrame            = (0.00001 * (parseInt($('#pixel_count').val()) * 3)) + 0.0004;
+
+        var rateMs = TimePerFrame * 1000;
+        var hz = 1 / TimePerFrame;
+        $('#refresh').html(Math.ceil(rateMs) + ' ms / ' + Math.floor(hz) + ' fps');
+    } // refreshPixel
 
 </script>

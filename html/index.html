@@ -1,326 +1,333 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title id="title"></title>
-<!-- for local development
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title id="title"></title>
 
-  <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
-  <link rel="stylesheet" type="text/css" href="style.css">
--->
-  <link rel="stylesheet" type="text/css" href="esps.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="esps.css">
 
 </head>
 
 <body>
-  <nav class="navbar navbar-inverse navbar-fixed-top">
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">ESPixelStick</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#home">Home</a></li>
+                    <li><a href="#wifi">WiFi Setup</a></li>
+                    <li><a href="#config">Device Setup</a></li>
+                    <li><a href="#diag">Diagnostics</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#admin">Admin</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
     <div class="container">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="#">ESPixelStick</a>
-      </div>
-      <div id="navbar" class="collapse navbar-collapse">
-        <ul class="nav navbar-nav">
-          <li class="active"><a href="#home">Home</a></li>
-          <li><a href="#wifi">WiFi Setup</a></li>
-          <li><a href="#config">Device Setup</a></li>
-          <li><a href="#services">Services</a></li>
-          <li><a href="#effects">Effects</a></li>
-          <li><a href="#diag">Diagnostics</a></li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-          <li><a href="#admin">Admin</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-  <div class="container">
-    <!-- Home / Status page -->
-    <div id="home" class="collapse in mdiv anchor">
-      <div class="row">
-        <div class="col-sm-6">
-          <fieldset>
-            <legend class="esps-legend">Network Status</legend>
-            <table class="esps-table">
-              <tr><td width="33%">SSID</td><td><span id="x_ssid"></span></td></tr>
-              <tr><td width="33%">Hostname</td><td><span id="x_hostname"></span></td></tr>
-              <tr><td width="33%">IP</td><td><span id="x_ip"></span></td></tr>
-              <tr><td width="33%">MAC</td><td><span id="x_mac"></span></td></tr>
-              <tr><td width="33%">RSSI</td><td><span id="x_rssi"></span>dBm / <span id="x_quality"></span>%</td></tr>
-              <tr><td width="33%">Free Heap</td><td><span id="x_freeheap"></span></td></tr>
-              <tr><td width="33%">Up Time</td><td><span id="x_uptime"></span></td></tr>
-            </table>
-          </fieldset>
-        </div>
-        <div class="col-sm-6">
-          <fieldset>
-            <legend class="esps-legend">E1.31 Status</legend>
-            <table class="esps-table">
-              <tr><td width="33%">Universe Range</td><td><span id="uni_first"></span> to <span id="uni_last"></span></td></tr>
-              <tr><td width="33%">Total Packets</td><td><span id="pkts"></span></td></tr>
-              <tr><td width="33%">Sequence Errors</td><td><span id="serr"></span></td></tr>
-              <tr><td width="33%">Packet Errors</td><td><span id="perr"></span></td></tr>
-              <tr><td width="33%">Source IP</td><td><span id="clientip"></span></td></tr>
-            </table>
-          </fieldset>
-        </div>
-      </div>
-    </div>
-
-    <!-- Network Configuration -->
-    <div id="wifi" class="mdiv hidden anchor">
-      <form class="form-horizontal">
-        <fieldset id="network">
-          <legend class="esps-legend">Network Configuration</legend>
-          <div class="form-group" id="fg_ssid">
-            <label class="control-label col-sm-2" for="ssid">SSID</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="ssid" title="The SSID for your access point."></div>
-          </div>
-          <div class="form-group" id="fg_password">
-            <label class="control-label col-sm-2" for="passphrase">Password</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="passphrase" title="The password for your access point."></div>
-          </div>
-          <div class="form-group" id="fg_hostname">
-            <label class="control-label col-sm-2" for="hostname">Hostname</label>
-            <div class="col-sm-10"><input type="text" class="form-control has-error" id="hostname" title="Hostname for this device."></div>
-          </div>
-          <div class="form-group" id="fg_staTimeout">
-            <label class="control-label col-sm-2" for="sta_timeout">Client Timeout</label>
-            <div class="col-sm-10"><input type="text" class="form-control has-error" id="sta_timeout" title="When connecting as a client, this is the timeout in seconds."></div>
-          </div>
-          <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-              <div class="checkbox"><label><input type="checkbox" id="dhcp" title="Usage of DHCP with static leases is recommended."> Use DHCP</label></div>
-            </div>
-          </div>
-          <div class="form-group dhcp" id="fg_ip">
-            <label class="control-label col-sm-2" for="ip">IP</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="ip" title="Static IP Address"></div>
-          </div>
-          <div class="form-group dhcp" id="fg_netmask">
-            <label class="control-label col-sm-2" for="netmask">Netmask</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="netmask" title="Static Netmask"></div>
-          </div>
-          <div class="form-group dhcp" id="fg_gateway">
-            <label class="control-label col-sm-2" for="gateway">Gateway</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="gateway" title="Static Gateway"></div>
-          </div>
-          <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-              <div class="checkbox"><label><input type="checkbox" id="ap_fallback" title="Enabling this will cause your device to come up as an Access Point if your configured WiFi connection fails. Not recommended for live / production devices."> AP Fallback</label></div>
-            </div>
-          </div>
-        </fieldset>
-        <div class="form-group">
-          <div class="col-sm-offset-2 col-sm-10">
-            <button id="btn_wifi" type="button" onclick="submitWiFiConfig()" class="btn btn-primary" disabled>Save Changes</button>
-          </div>
-        </div>
-      </form>
-    </div>
-
-    <!-- Device Configuration -->
-    <div id="config" class="mdiv hidden anchor">
-      <form class="form-horizontal">
-        <fieldset id="device">
-          <legend class="esps-legend">Device Configuration</legend>
-          <div class="form-group">
-            <label class="control-label col-sm-2" for="id">Device ID</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="id" title="Plain text ID to help identify your device."></div>
-          </div>
-
-          <div class="form-group">
-            <label class="control-label col-sm-2" for="input">Input Mode</label>
-            <div class="col-sm-10">
-              <select class="form-control wsopt" id="input"></select>
-            </div>
-          </div>
-
-          <div class="form-group">
-              <label class="control-label col-sm-2" for="output">Output Mode</label>
-              <div class="col-sm-10">
-                <select class="form-control wsopt" id="output"></select>
-              </div>
-            </div>
-        </fieldset>
-
-        <fieldset id="imode"></fieldset>
-        <fieldset id="omode"></fieldset>
-
-        <fieldset>
-          <!-- Refresh Rate Display -->
-          <div class="form-group">
-            <label class="control-label col-sm-2" for="refresh">Refresh Rate</label>
-            <div class="col-sm-10"><p class="form-control-static" id="refresh"></p></div>
-          </div>
-        </fieldset>
-
-        <!-- Device Config Save -->
-        <div class="form-group">
-          <div class="col-sm-offset-2 col-sm-10">
-            <button type="button" onclick="submitDeviceConfig()" class="btn btn-primary">Save Changes</button>
-          </div>
-        </div>
-      </form>
-    </div>
-
-    <!-- Service Configuration -->
-    <div id="services" class="mdiv hidden anchor">
-      <form class="form-horizontal">
-
-        <!-- MQTT Configuration -->
-        <fieldset>
-        </fieldset>
-      </form>
-    </div>
-
-    <!-- Effects configuration -->
-    <div id="effects" class="mdiv hidden anchor">
-      <fieldset>
-      </fieldset>
-    </div>
-
-    <!-- Diagnostics -->
-    <div id="diag" class="mdiv hidden anchor">
-      <fieldset>
-        <legend class="esps-legend">View Stream</legend>
-        <form class="form-horizontal" onsubmit="return false">
-          <div id="t_view" class="tdiv">
-            <div class="form-group">
-              <label class="control-label col-sm-2">Display</label>
-              <div class="col-sm-10">
-                <div class="btn-group" data-toggle="buttons">
-                  <label class="btn btn-primary">
-                    <input type="radio" name="viewStyle" value="RGB" autocomplete="off" onchange="clearStream()">RGB
-                  </label>
-                  <label class="btn btn-primary">
-                    <input type="radio" name="viewStyle" value="Channel" autocomplete="off" onchange="clearStream()">Channel
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="control-label col-sm-2" for="v_columns">Columns</label>
-              <div class="col-sm-10"><input type="number" class="form-control" id="v_columns" name="v_columns" oninput="clearStream()"></div>
-            </div>
+        <!-- Home / Status page -->
+        <div id="home" class="collapse in mdiv anchor">
             <div class="row">
-              <div class="col-sm-12"><canvas id="canvas" width="820" height="960"></canvas></div>
+                <div class="col-sm-6">
+                    <fieldset>
+                        <legend class="esps-legend">Network Status</legend>
+                        <table class="esps-table">
+                            <tr><td width="33%">SSID</td><td><span id="x_ssid"></span></td></tr>
+                            <tr><td width="33%">Hostname</td><td><span id="x_hostname"></span></td></tr>
+                            <tr><td width="33%">IP</td><td><span id="x_ip"></span></td></tr>
+                            <tr><td width="33%">SubNet</td><td><span id="x_subnet"></span></td></tr>
+                            <tr><td width="33%">MAC</td><td><span id="x_mac"></span></td></tr>
+                            <tr><td width="33%">RSSI</td><td><span id="x_rssi"></span>dBm / <span id="x_quality"></span>%</td></tr>
+                            <tr><td width="33%">Free Heap</td><td><span id="x_freeheap"></span></td></tr>
+                            <tr><td width="33%">Up Time</td><td><span id="x_uptime"></span></td></tr>
+                        </table>
+                    </fieldset>
+                </div>
+                <div class="col-sm-6">
+                    <fieldset>
+                        <legend class="esps-legend">E1.31 Status</legend>
+                        <table class="esps-table">
+                            <tr><td width="33%">Universe Range</td><td><span id="uni_first"></span> to <span id="uni_last"></span></td></tr>
+                            <tr><td width="33%">Channels / Universe</td><td><span id="chanlim"></span></td></tr>
+                            <tr><td width="33%">Total Packets</td><td><span id="pkts"></span></td></tr>
+                            <tr><td width="33%">Packet Errors</td><td><span id="perr"></span></td></tr>
+                            <tr><td width="33%">Source IP</td><td><span id="clientip"></span></td></tr>
+                        </table>
+                    </fieldset>
+                </div>
             </div>
-          </div>
-        </form>
-      </fieldset>
+        </div>
+
+        <!-- Network Configuration -->
+        <div id="wifi" class="mdiv hidden anchor">
+            <form class="form-horizontal">
+                <fieldset id="network">
+                    <legend class="esps-legend">Network Configuration</legend>
+                    <div class="form-group" id="fg_ssid">
+                        <label class="control-label col-sm-2" for="ssid">SSID</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control is-valid" id="ssid" maxlength="31" title="The SSID for your access point.">
+                            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+                        </div>
+                    </div>
+                    <div class="form-group" id="fg_password">
+                        <label class="control-label col-sm-2" for="passphrase">Password</label>
+                        <div class="col-sm-10">
+                            <input type="password" class="form-control is-valid" id="passphrase" maxlength="64" title="The password for your access point.">
+                            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+                        </div>
+                    </div>
+                    <div class="form-group" id="fg_hostname">
+                        <label class="control-label col-sm-2" for="hostname">Hostname</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control is-valid" id="hostname" maxlength="31" title="Hostname for this device.">
+                            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+                        </div>
+                    </div>
+                    <div class="form-group" id="fg_staTimeout">
+                        <label class="control-label col-sm-2" for="sta_timeout">Client Timeout:</label>
+                        <div class="col-sm-2">
+                            <input type="number" class="form-control is-valid" id="sta_timeout" step="1" min="15" max="60" value="0" title="When connecting as a client, this is the timeout in seconds.">
+                            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <div class="checkbox"><label><input type="checkbox" id="dhcp" title="Usage of DHCP with static leases is recommended."> Use DHCP</label></div>
+                        </div>
+                    </div>
+                    <div class="form-group dhcp has-feedback" id="fg_ip">
+                        <label class="control-label col-sm-2" for="ip">IP</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="ip" name="ip" minlength="7" maxlength="15" pattern='\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b' value="0.0.0.0" title="Static IP Address">
+                            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+                        </div>
+                    </div>
+                    <div class="form-group dhcp has-feedback" id="fg_netmask">
+                        <label class="control-label col-sm-2" for="netmask">Netmask</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="netmask" name="netmask" minlength="7" maxlength="15" pattern='\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b' value="0.0.0.0" title="Static Netmask">
+                            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+                        </div>
+                    </div>
+                    <div class="form-group dhcp has-feedback" id="fg_gateway">
+                        <label class="control-label col-sm-2" for="gateway">Gateway</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="gateway" name="gateway" minlength="7" maxlength="15" pattern='\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b' value="0.0.0.0" title="Static Gateway">
+                            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <div class="checkbox"><label><input type="checkbox" id="ap_fallback" title="Enabling this will cause your device to come up as an Access Point if your configured WiFi connection fails. Not recommended for live / production devices."> AP Fallback</label></div>
+                        </div>
+                    </div>
+                </fieldset>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button id="btn_wifi" type="button" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Device Configuration -->
+        <div id="config" class="mdiv hidden anchor">
+            <form class="form-horizontal">
+                <fieldset id="device">
+                    <legend class="esps-legend">Device Configuration</legend>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="id">Device ID</label>
+                        <div class="col-sm-6"><input type="text" class="form-control" id="id" title="Plain text ID to help identify your device."></div>
+                    </div>
+
+                    <div class="form-group" id="fg_input">
+                    </div>
+
+                    <div class="form-group" id="fg_output">
+                    </div>
+                </fieldset>
+
+                <div class="form-group" id="fg_input_mode">
+                    <!--
+                        <fieldset id="inputmode0"></fieldset>
+                        <fieldset id="inputmode1"></fieldset>
+                     -->
+                </div>
+
+                <div class="form-group" id="fg_output_mode">
+                    <!--
+                        <fieldset id="outputmode0"></fieldset>
+                        <fieldset id="outputmode1"></fieldset>
+                        <fieldset id="outputmode2"></fieldset>
+                     -->
+                </div>
+
+                <fieldset>
+                    <!-- Refresh Rate Display -->
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="refresh">Refresh Rate</label>
+                        <div class="col-sm-10"><p class="form-control-static" id="refresh"></p></div>
+                    </div>
+                </fieldset>
+
+                <!-- Device Config Save -->
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="button" id="DeviceConfigSave" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Diagnostics -->
+        <div id="diag" class="mdiv hidden anchor">
+            <fieldset>
+                <legend class="esps-legend">View Stream</legend>
+                <form class="form-horizontal" onsubmit="return false">
+                    <div id="t_view" class="tdiv">
+                        <div class="form-group">
+                            <label class="control-label col-sm-2">Display As:</label>
+                            <div class="col-sm-10">
+                                <div class="btn-group" data-toggle="buttons">
+                                    <div>
+                                        <input type="radio" name="viewStyle" id="btn_RGB" value="RGB" autocomplete="off" checked>
+                                        <label class="btn btn-primary" for="btn_RGB">RGB</label>
+                                    </div>
+                                    <div>
+                                        <input type="radio" name="viewStyle" id="btn_Channel" value="Channel" autocomplete="off">
+                                        <label class="btn btn-primary" for="btn_Channel">Channel</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group has-feedback">
+                            <label class="control-label col-sm-2" for="v_columns">Columns</label>
+                            <div class="col-sm-2">
+                                <input type="number" class="form-control is-valid" id="v_columns" name="v_columns" step="1" min="1" max="100" value="20" oninput="clearStream()">
+                                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12"><canvas id="canvas" width="820" height="960"></canvas></div>
+                        </div>
+                    </div>
+                </form>
+            </fieldset>
+        </div>
+
+        <!-- Administration -->
+        <div id="admin" class="mdiv hidden anchor">
+            <fieldset>
+                <legend class="esps-legend">Administration</legend>
+                <form class="form-horizontal" id="updatefw" action="/updatefw" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">FW Version</label>
+                        <div class="col-sm-9"><p class="form-control-static" id="version"></p></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Build Date</label>
+                        <div class="col-sm-9"><p class="form-control-static" id="built"></p></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Used Flash Size</label>
+                        <div class="col-sm-9"><p class="form-control-static" id="usedflashsize"></p></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Real Flash Size</label>
+                        <div class="col-sm-9"><p class="form-control-static" id="realflashsize"></p></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Flash Chip ID</label>
+                        <div class="col-sm-9"><p class="form-control-static" id="flashchipid"></p></div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <label class="btn btn-primary btn-file">
+                                Update Firmware <input type="file" id="efu" name="file" accept=".efu" style="display: none;">
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="button" onclick="reboot()" class="btn btn-danger">Reboot</button>
+                        </div>
+                    </div>
+                </form>
+            </fieldset>
+        </div>
     </div>
 
-    <!-- Administration -->
-    <div id="admin" class="mdiv hidden anchor">
-      <fieldset>
-        <legend class="esps-legend">Administration</legend>
-        <form class="form-horizontal" id="updatefw" action="/updatefw" method="post" enctype="multipart/form-data">
-          <div class="form-group">
-            <label class="control-label col-sm-3">FW Version</label>
-            <div class="col-sm-9"><p class="form-control-static" id="x_version"></p></div>
-          </div>
-          <div class="form-group">
-            <label class="control-label col-sm-3">Build Date</label>
-            <div class="col-sm-9"><p class="form-control-static" id="x_built"></p></div>
-          </div>
-          <div class="form-group">
-            <label class="control-label col-sm-3">Used Flash Size</label>
-            <div class="col-sm-9"><p class="form-control-static" id="x_usedflashsize"></p></div>
-          </div>
-          <div class="form-group">
-            <label class="control-label col-sm-3">Real Flash Size</label>
-            <div class="col-sm-9"><p class="form-control-static" id="x_realflashsize"></p></div>
-          </div>
-          <div class="form-group">
-            <label class="control-label col-sm-3">Flash Chip ID</label>
-            <div class="col-sm-9"><p class="form-control-static" id="x_flashchipid"></p></div>
-          </div>
-          <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-              <label class="btn btn-primary btn-file">
-                Update Firmware <input type="file" id="efu" name="file" accept=".efu" style="display: none;">
-              </label>
+    <div id="snackbar">Configuration Saved</div>
+
+    <!-- Reboot Modal -->
+    <div id="reboot" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Restarting, Please Wait</h4>
+                    <div class="bar"></div>
+                </div>
             </div>
-          </div>
-          <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-              <button type="button" onclick="reboot()" class="btn btn-danger">Reboot</button>
+        </div>
+    </div>
+
+    <!-- Update Modal -->
+    <div id="update" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Firmware Updating</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Firmware update in progress...</p>
+                    <div class="bar"></div>
+                </div>
             </div>
-          </div>
-        </form>
-      </fieldset>
-    </div>
-  </div>
-
-  <div id="snackbar">Configuration Saved</div>
-
-  <!-- Reboot Modal -->
-  <div id="reboot" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title">Restarting, Please Wait</h4>
-          <div class="bar"></div>
         </div>
-      </div>
     </div>
-  </div>
 
-<!-- Update Modal -->
-  <div id="update" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title">Firmware Updating</h4>
+    <!-- WebSockets Error Modal -->
+    <div id="wserror" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">WebSocket connection lost, attempting to reconnect...</h4>
+                    <div class="bar"></div>
+                </div>
+            </div>
         </div>
-        <div class="modal-body">
-          <p>Firmware update in progress...</p>
-          <div class="bar"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <i><span id="device-id"></span></i>
         </div>
-      </div>
-    </div>
-  </div>
+    </footer>
 
-  <!-- WebSockets Error Modal -->
-  <div id="wserror" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title">WebSocket connection lost, attempting to reconnect...</h4>
-          <div class="bar"></div>
-        </div>
-      </div>
-    </div>
-  </div>
+    <!--
+       <script type="text/javascript" src="js/jquery-3.1.1.js"></script>
+       <script type="text/javascript" src="js/bootstrap.js"></script>
+       <script type="text/javascript" src="js/jqColorPicker.js"></script>
+       <script type="text/javascript" src="script.js"></script>
+    -->
+    <script type="text/javascript" src="esps.js"></script>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <i><span id="device-id"></span></i>
-    </div>
-  </footer>
-
-  <!-- for local development
-
-  <script type="text/javascript" src="js/jquery-3.1.1.js"></script>
-  <script type="text/javascript" src="js/bootstrap.js"></script>
-  <script type="text/javascript" src="js/jqColorPicker.js"></script>
-  <script type="text/javascript" src="script.js"></script>
--->
-  <script type="text/javascript" src="esps.js"></script>
-
-  <script>
-    wsConnect();
-  </script>
 </body>
-</html>
+    </html>

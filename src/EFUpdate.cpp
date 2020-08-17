@@ -1,7 +1,7 @@
 /*
 * EFUpdate.cpp
 *
-* Project: ESPixelStick - An ESP8266 and E1.31 based pixel driver
+* Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2016 Shelby Merrick
 * http://www.forkineye.com
 *
@@ -21,6 +21,11 @@
 #include <FS.h>
 #include <lwip/def.h>
 #include "EFUpdate.h"
+
+#ifdef ARDUINO_ARCH_ESP32
+#   include <Update.h>
+#   define U_FS U_SPIFFS
+#endif
 
 #ifndef U_SPIFFS
 /*
@@ -75,7 +80,9 @@ bool EFUpdate::process(uint8_t *data, size_t len) {
                         }
                     } else if (_record.type == RecordType::SPIFFS_IMAGE) {
                         // Begin spiffs update
+#ifdef ARDUINO_ARCH_ESP8266
                         SPIFFS.end();
+#endif
                         if (!Update.begin(_record.size, U_SPIFFS)) {
                             _state = State::FAIL;
                             _error = Update.getError();

@@ -1,292 +1,42 @@
-<form class="form-horizontal" onsubmit="return false">
-    <!-- Effect Options -->
-    <div id="t_options">
-        <legend class="esps-legend">Effect Options</legend>
-        <div class="form-group">
-            <label class="control-label col-sm-2" for="t_mode">Effect</label>
-            <div class="col-sm-10">
-                <select class="form-control" id="tmode" name="tmode" onchange="effectChanged()">
-                </select>
-            </div>
+<div id="effects">
+    <legend class="esps-legend">Effect Configuration</legend>
+    <div class="form-group has-feedback" id="fg_effects">
+
+        <label class="control-label col-sm-2" for="currenteffect">Effect:</label>
+        <div class="col-sm-2">
+            <select class="form-control is-valid" id="currenteffect" title="Effect to generate">
+            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
         </div>
-        <div class="form-group">
-            <label class="control-label col-sm-2" id="lab_color" for="t_color">Color</label>
-            <div class="col-sm-10" id="div_color">
-                <input type="button" id="t_color" class="form-control color no-alpha" value="rgb(255,255,255)" />
-            </div>
+
+        <label for="EffectColor">Color:</label>
+        <div class="col-sm-2">
+            <input type="color" class="form-control is-valid" id="EffectColor" value="#000000" />
+        </div>
+
+        <label class="control-label col-sm-2" for="EffectSpeed">Speed:</label>
+        <div class="col-sm-2">
+            <input type="number" class="form-control is-valid" id="EffectSpeed" step="1" min="1" max="10" value="0" required title="Rate at which effect runs">
+            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+        </div>
+
+        <label class="control-label col-sm-2" for="EffectBrightness">Brightness:</label>
+        <div class="col-sm-2">
+            <input type="number" class="form-control is-valid" id="EffectBrightness" step="0.1" min="0.1" max="1.0" value="0" required title="Effect Intensity">
+            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
         </div>
 
         <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10" id="div_reverse">
-                <div class="checkbox"><label><input type="checkbox" id="t_reverse" class="reverse" name="t_reverse">Reverse pattern</label></div>
+            <div class="col-sm-offset-2 col-sm-10" id="d_EffectReverse">
+                <div class="checkbox"><label><input type="checkbox" id="EffectReverse" class="reverse" name="t_reverse">Reverse pattern</label></div>
             </div>
-            <div class="col-sm-offset-2 col-sm-10" id="div_mirror">
-                <div class="checkbox"><label><input type="checkbox" id="t_mirror" class="mirror" name="t_mirror">Mirror pattern</label></div>
+            <div class="col-sm-offset-2 col-sm-10" id="d_EffectMirror">
+                <div class="checkbox"><label><input type="checkbox" id="EffectMirror" class="mirror" name="t_mirror">Mirror pattern</label></div>
             </div>
-            <div class="col-sm-offset-2 col-sm-10" id="div_allleds">
-                <div class="checkbox"><label><input type="checkbox" id="t_allleds" class="allleds" name="t_allleds">All leds same </label></div>
+            <div class="col-sm-offset-2 col-sm-10" id="d_EffectAllLeds">
+                <div class="checkbox"><label><input type="checkbox" id="EffectAllLeds" class="allleds" name="t_allleds">All leds same </label></div>
             </div>
         </div>
-        <div class="form-group">
-            <label class="control-label col-sm-2" for="t_speed">Effect Speed</label>
-            <div class="col-sm-3"><input type="number" min="1" max="10" step="1" class="form-control" id="t_speed" name="t_speed" title="Effect speed, 1(slowest) to 10 (fastest)"></div>
-            <label class="control-label col-sm-2" for="t_brightness">Effect Brightness</label>
-            <div class="col-sm-3"><input type="number" step="0.1" class="form-control" id="t_brightness" name="t_brightness" title="Effect Brightness"></div>
-        </div>
+
     </div>
+</div>
 
-    <!-- Effect Runtime Config -->
-    <div class="t_startup">
-        <legend class="esps-legend">Effect Runtime</legend>
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <div class="checkbox"><label><input type="checkbox" id="t_startenabled" name="t_startenabled"> Enable at Startup</label></div>
-            </div>
-            <div class="col-sm-offset-2 col-sm-10">
-                <div class="checkbox"><label><input type="checkbox" id="t_idleenabled" name="t_idleenabled"> Enable when Idle</label></div>
-            </div>
-        </div>
-        <div class="form-group" id="fg_udpport">
-            <label class="control-label col-sm-2" for="ssid">Idle Timeout</label>
-            <div class="col-sm-10"><input type="text" class="form-control" id="t_idletimeout" name="t_idletimeout" title="Idle time in seconds before effect starts."></div>
-        </div>
-    </div>
-    <div class="form-group t_startup">
-        <div class="col-sm-offset-2 col-sm-10">
-            <button type="button" onclick="submitStartupEffect()" class="btn btn-primary">Save Changes</button>
-        </div>
-    </div>
-
-    <!-- Display Layout -->
-    <div class="t_layout">
-        <legend class="esps-legend">Display Layout</legend>
-        Placeholder for layout configuration to assist in effect rendering. Selectable type (string, matrix, tree, etc..) and size / orientation where applicable (20x30 matrix - horizontal or veritcal? where does feed start?). Should also be used to render view stream which is moved to the Diagnostics tab.
-    </div>
-</form>
-
-<script>
-
-// Reverse checkbox - move to effects
-$('.reverse').click(function() {
-    // On click(), the new checkbox state has already been set
-    var json = { 'reverse': $(this).prop('checked') };
-    var tmode = $('#tmode option:selected').val();
-
-    if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
-        if (effectInfo[tmode].hasReverse) {
-            wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
-        }
-    }
-});
-
-// Mirror checkbox - move to effects
-$('.mirror').click(function() {
-    // On click(), the new checkbox state has already been set
-    var json = { 'mirror': $(this).prop('checked') };
-    var tmode = $('#tmode option:selected').val();
-
-    if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
-        if (effectInfo[tmode].hasMirror) {
-            wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
-        }
-    }
-});
-
-// AllLeds checkbox - move to effects
-$('.allleds').click(function() {
-    // On click(), the new checkbox state has already been set
-    var json = { 'allleds': $(this).prop('checked') };
-    var tmode = $('#tmode option:selected').val();
-
-    if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
-        if (effectInfo[tmode].hasAllLeds) {
-            wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
-        }
-    }
-});
-
-// Effect speed field - move to effects
-$('#t_speed').change(function() {
-    var json = { 'speed': $(this).val() };
-    var tmode = $('#tmode option:selected').val();
-
-    if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
-        wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
-    }
-});
-
-// Effect brightness field - move to effects
-$('#t_brightness').change(function() {
-    var json = { 'brightness': $(this).val() };
-    var tmode = $('#tmode option:selected').val();
-
-    if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
-        wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
-    }
-});
-
-// Test mode toggles - move to effects
-$('#tmode').change(hideShowTestSections());
-
-function getEffectInfo(data) {
-    parsed = JSON.parse(data);
-
-    effectInfo = parsed.effectList;	// global effectInfo
-    var running = parsed.currentEffect;
-
-    // process the effect configuration options
-    $('#tmode').empty(); // clear the dropdown first
-    for (var i in effectInfo) {
-        var htmlid = effectInfo[i].htmlid;
-        var name =   effectInfo[i].name;
-        $('#tmode').append('<option value="' + htmlid + '">' + name + '</option>');
-        if ( ! name.localeCompare(running.name) ) {
-            $('#tmode').val(htmlid);
-            hideShowTestSections();
-        }
-    }
-
-    // set html based on current running effect
-    $('.color').val('rgb(' + running.r + ',' + running.g + ',' + running.b + ')');
-    $('.color').css('background-color', 'rgb(' + running.r + ',' + running.g + ',' + running.b + ')');
-    $('#t_reverse').prop('checked', running.reverse);
-    $('#t_mirror').prop('checked', running.mirror);
-    $('#t_allleds').prop('checked', running.allleds);
-    $('#t_speed').val(running.speed);
-    $('#t_brightness').val(running.brightness);
-    $('#t_startenabled').prop('checked', running.startenabled);
-    $('#t_idleenabled').prop('checked', running.idleenabled);
-    $('#t_idletimeout').val(running.idletimeout);
-
-}
-
-// Move to effects
-function submitStartupEffect() {
-// not pretty - get current r,g,b from color picker
-    var temp = $('.color').val().split(/\D+/);
-
-    var currentEffectName = effectInfo[ $('#tmode option:selected').val() ].name;
-//console.log (currentEffectName);
-
-    var json = {
-            'effects': {
-                'name': currentEffectName,
-                'mirror': $('#t_mirror').prop('checked'),
-                'allleds': $('#t_allleds').prop('checked'),
-                'reverse': $('#t_reverse').prop('checked'),
-                'speed': parseInt($('#t_speed').val()),
-                'r': temp[1],
-                'g': temp[2],
-                'b': temp[3],
-                'brightness': parseFloat($('#t_brightness').val()),
-                'startenabled': $('#t_startenabled').prop('checked'),
-                'idleenabled': $('#t_idleenabled').prop('checked'),
-                'idletimeout': parseInt($('#t_idletimeout').val())
-
-            }
-        };
-
-    wsEnqueue('S3' + JSON.stringify(json));
-}
-
-function hideShowTestSections() {
-    // Test mode toggles
-    var tmode = $('#tmode option:selected').val();
-
-    if ( (typeof tmode !== 'undefined') && (typeof effectInfo[tmode].wsTCode !== 'undefined') ) {
-        // hide/show view stream and testing options+startup
-        if (effectInfo[tmode].hasColor) {
-            $('#lab_color').removeClass('hidden');
-            $('#div_color').removeClass('hidden');
-	} else {
-            $('#lab_color').addClass('hidden');
-            $('#div_color').addClass('hidden');
-        }
-        if (effectInfo[tmode].hasMirror) {
-            $('#div_mirror').removeClass('hidden');
-	} else {
-            $('#div_mirror').addClass('hidden');
-        }
-        if (effectInfo[tmode].hasReverse) {
-            $('#div_reverse').removeClass('hidden');
-	} else {
-            $('#div_reverse').addClass('hidden');
-        }
-        if (effectInfo[tmode].hasAllLeds) {
-            $('#div_allleds').removeClass('hidden');
-	} else {
-            $('#div_allleds').addClass('hidden');
-        }
-    }
-}
-
-// Effect selector changed
-function effectChanged() {
-    hideShowTestSections();
-
-    var tmode = $('#tmode option:selected').val();
-    if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
-        wsEnqueue( effectInfo[tmode].wsTCode );
-    }
-}
-
-// Color Picker - move to effects
-$('.color').colorPicker({
-    buildCallback: function($elm) {
-        var colorInstance = this.color;
-        var colorPicker = this;
-
-        $elm.append('<div class="cp-memory">' +
-            '<div style="background-color: #FFFFFF";></div>' +
-            '<div style="background-color: #FF0000";></div>' +
-            '<div style="background-color: #00FF00";></div>' +
-            '<div style="background-color: #0000FF";></div>').
-        on('click', '.cp-memory div', function(e) {
-            var $this = $(this);
-            if (this.className) {
-                $this.parent().prepend($this.prev()).children().eq(0).
-                    css('background-color', '#' + colorInstance.colors.HEX);
-            } else {
-                colorInstance.setColor($this.css('background-color'));
-                colorPicker.render();
-            }
-        });
-
-        this.$colorPatch = $elm.prepend('<div class="cp-disp">').find('.cp-disp');
-    },
-
-    cssAddon:
-        '.cp-memory {margin-bottom:6px; clear:both;}' +
-        '.cp-memory div {float:left; width:25%; height:40px;' +
-        'background:rgba(0,0,0,1); text-align:center; line-height:40px;}' +
-        '.cp-disp{padding:10px; margin-bottom:6px; font-size:19px; height:40px; line-height:20px}' +
-        '.cp-xy-slider{width:200px; height:200px;}' +
-        '.cp-xy-cursor{width:16px; height:16px; border-width:2px; margin:-8px}' +
-        '.cp-z-slider{height:200px; width:40px;}' +
-        '.cp-z-cursor{border-width:8px; margin-top:-8px;}',
-
-    opacity: false,
-
-    renderCallback: function($elm, toggled) {
-        var colors = this.color.colors.RND;
-        var json = {
-                'r': colors.rgb.r,
-                'g': colors.rgb.g,
-                'b': colors.rgb.b
-            };
-
-        this.$colorPatch.css({
-            backgroundColor: '#' + colors.HEX,
-            color: colors.RGBLuminance > 0.22 ? '#222' : '#ddd'
-        }).text(this.color.toString($elm._colorMode)); // $elm.val();
-
-        var tmode = $('#tmode option:selected').val();
-        if (typeof effectInfo[tmode].wsTCode !== 'undefined') {
-            if (effectInfo[tmode].hasColor) {
-                wsEnqueue( effectInfo[tmode].wsTCode + JSON.stringify(json) );
-            }
-        }
-    }
-});
-
-</script>

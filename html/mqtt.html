@@ -1,70 +1,63 @@
 <div id="mqtt">
     <legend class="esps-legend">MQTT Configuration</legend>
-    <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-            <div class="checkbox"><label><input type="checkbox" id="mqtt" name="mqtt"> Enable MQTT</label></div>
+    <div class="form-group has-feedback" id="fg_mqtt">
+        <div class="form-group has-feedback">
+            <label class="control-label col-sm-2" for="ip">Broker IP:</label>
+            <div class="col-sm-3">
+                <input type="text" class="form-control" id="ip" name="ip" minlength="7" maxlength="15" pattern='\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b' value="0.0.0.0" title="MQTT Broker IP.">
+                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+            </div>
+
+            <label class="control-label col-sm-2" for="port">Broker Port:</label>
+            <div class="col-sm-2">
+                <input type="text" class="form-control" id="port" name="port" minlength="1" maxlength="5" pattern='^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$' value="0" title="MQTT Broker Port.">
+                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+            </div>
         </div>
-    </div>
-    <div class="form-group mqtt">
-        <label class="control-label col-sm-2" for="mqtt_ip">Broker IP</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="mqtt_ip" name="mqtt_ip" title="MQTT Broker IP."></div>
-        <label class="control-label col-sm-2" for="mqtt_port">Broker Port</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="mqtt_port" name="mqtt_port" title="MQTT Broker Port."></div>
-    </div>
-    <div class="form-group mqtt">
-        <label class="control-label col-sm-2" for="mqtt_user">User</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="mqtt_user" name="mqtt_user" title="MQTT Username (optional)."></div>
-        <label class="control-label col-sm-2" for="mqtt_password">Password</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="mqtt_password" name="mqtt_password" title="MQTT Password (optional)."></div>
-    </div>
-    <div class="form-group mqtt">
-        <label class="control-label col-sm-2" for="mqtt_topic">Status Topic</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="mqtt_topic" name="mqtt_topic" title="MQTT Status Topic. Control topic will be appended with /set."></div>
-        <label class="control-label col-sm-2" for="mqtt_topicset">Set Topic</label>
-        <div class="col-sm-3"><input type="text" class="form-control" id="mqtt_topicset" name="mqtt_topicset" title="MQTT Set Topic." readonly="true"></div>
-    </div>
-    <div class="form-group mqtt">
-        <label class="control-label col-sm-2" for="mqtt_haprefix">Home Assistant Prefix</label>
-        <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_haprefix" name="mqtt_haprefix" title="Prefix used for Home Assistant Discovery"></div>
-    </div>
-    <div class="form-group mqtt">
-        <div class="col-sm-offset-2 col-sm-10">
-            <div class="checkbox"><label><input type="checkbox" id="mqtt_hadisco" name="mqtt_hadisco" title="Enables auto-discovery by Home Assistant."> Home Assistant Discovery</label></div>
+
+        <div class="form-group has-feedback">
+            <label class="control-label col-sm-2" for="user">User:</label>
+            <div class="col-sm-3">
+                <input type="text" class="form-control" id="user" name="user" minlength="1" maxlength="20" title="MQTT Username (optional).">
+                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+            </div>
+
+            <label class="control-label col-sm-2" for="password">Password:</label>
+            <div class="col-sm-3">
+                <input type="password" class="form-control" id="password" name="password" minlength="1" maxlength="20" title="MQTT Password (optional).">
+                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+            </div>
         </div>
-        <div class="col-sm-offset-2 col-sm-10">
-            <div class="checkbox"><label><input type="checkbox" id="mqtt_clean" name="mqtt_clean"> Clean Session</label></div>
+
+        <div class="form-group has-feedback">
+            <label class="control-label col-sm-2" for="topic">Status Topic:</label>
+            <div class="col-sm-3">
+                <input type="text" class="form-control" id="topic" name="topic" maxlength="32" title="MQTT Status Topic. Control topic will be appended with /set.">
+                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+            </div>
+
+            <label class="control-label col-sm-2" for="topicset">Set Topic:</label>
+            <div class="col-sm-3">
+                <input type="text" class="form-control" id="topicset" name="topicset" maxlength="32" title="MQTT Set Topic." readonly="true">
+                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+            </div>
+        </div>
+
+        <div class="form-group has-feedback">
+            <label class="control-label col-sm-2" for="haprefix">Home Assistant Prefix:</label>
+            <div class="col-sm-3">
+                <input type="text" class="form-control" id="haprefix" name="haprefix" maxlength="32" title="Prefix used for Home Assistant Discovery">
+                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <div class="checkbox"><label><input type="checkbox" id="hadisco" name="hadisco" title="Enables auto-discovery by Home Assistant."> Home Assistant Discovery</label></div>
+            </div>
+            <div class="col-sm-offset-2 col-sm-10">
+                <div class="checkbox"><label><input type="checkbox" id="clean" name="clean"> Clean Session</label></div>
+            </div>
         </div>
     </div>
 </div>
-
-<script>
-
-// MQTT field toggles
-$('#mqtt_topic').keyup(function() {
-    updateMQTTSet();
-});
-$('#mqtt').click(function() {
-    if ($(this).is(':checked')) {
-        $('.mqtt').removeClass('hidden');
-    } else {
-        $('.mqtt').addClass('hidden');
-    }
-});
-$('#mqtt_hadisco').click(function() {
-    if ($(this).is(':checked')) {
-        $('#mqtt_haprefix').prop('disabled', false);
-    } else {
-        $('#mqtt_haprefix').prop('disabled', true);
-    }
-});
-
-function updateMQTTSet() {
-    if ( $('#mqtt_topic').val() ) {
-        $('#mqtt_topicset').val( $('#mqtt_topic').val() + '/set');
-    } else {
-        $('#mqtt_topicset').val( '' );
-    }
-}
-
-
-</script>

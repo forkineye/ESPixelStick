@@ -1,31 +1,27 @@
 <div id="dmx">
     <legend class="esps-legend">DMX Configuration</legend>
-    <div class="form-group">
-        <label class="control-label col-sm-2" for="channel_count">Channel Count</label>
-        <div class="col-sm-10"><input type="text" class="form-control" id="channel_count" title="Number of channels." onchange="refreshSerial()"></div>
+    <div class="form-group has-feedback" id="fg_dmx">
+        <label class="control-label col-sm-2" for="channel_count">Channel Count:</label>
+        <div class="col-sm-2">
+            <input type="number" class="form-control is-valid" id="num_chan" step="1" min="1" max="512" value="0" required title="Number of Channels" onchange="refreshDmxFrameRate()">
+            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+        </div>
     </div>
 </div>
 
 <script>
+    function refreshDmxFrameRate()
+    {
+        // var NumberOfBytesInFrame = parseInt($('#dmx #fg_dmx #num_chan').val());
+        // var InterFrameDelay      = 0.00005;    // 50us
+        // var BitsPerByte          = 1 + 8 + 1;  // Start + data + Stop
+        // var TimePerBit           = 1 / 250000; // fixed data rate
+        // var TimePerByte          = TimePerBit * BitsPerByte;
+        // var TimePerFrame         = (TimePerByte * NumberOfBytesInFrame) + InterFrameDelay;
+        var TimePerFrame         = (0.000044 * parseInt($('#dmx #fg_dmx #num_chan').val())) + 0.00005;
 
-function refreshSerial() {
-    var proto = $('#s_proto option:selected').text();
-    var baud = parseInt($('#s_baud').val());
-    var size = parseInt($('#s_count').val());
-    var symbol = 11;
-    if (!proto.localeCompare('Renard')) {
-        symbol = 10;
-        size = size + 2;
-        $('#s_baud').prop('disabled', false);
-    } else if (!proto.localeCompare('DMX512')) {
-        symbol = 11;
-        baud = 250000;
-        $('#s_baud').val(baud);
-        $('#s_baud').prop('disabled', true);
-    }
-    var rate = symbol * 1000 / baud * size;
-    var hz = 1000 / rate;
-    $('#refresh').html(Math.ceil(rate) + 'ms / ' + Math.floor(hz) + 'Hz');
-}
-
+        var rateMs = TimePerFrame * 1000;
+        var hz     = 1 / TimePerFrame;
+        $('#refresh').html(Math.ceil(rateMs) + ' ms / ' + Math.floor(hz) + ' fps');
+    } // refreshDmxFrameRate
 </script>

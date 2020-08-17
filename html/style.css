@@ -1,4 +1,4 @@
-body {
+﻿body {
   padding-top: 60px;
   padding-bottom: 20px;
 }
@@ -164,4 +164,16 @@ However, delay the fade out process for 2.5 seconds */
 
 .form-horizontal .control-label.text-left {
     text-align: left;
+}
+
+input:invalid + span:after {
+    content: '✖';
+    padding-left: 5px;
+    color: #FF0000;
+}
+
+input:valid + span:after {
+    content: '✓';
+    padding-left: 5px;
+    color: #00FF00;
 }
