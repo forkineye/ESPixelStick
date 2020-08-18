@@ -20,7 +20,7 @@
 #ifndef ESPIXELSTICK_H_
 #define ESPIXELSTICK_H_
 
-const char VERSION[] = "3.1";
+const char VERSION[] = "3.2";
 const char BUILD_DATE[] = __DATE__;
 
 // Mode configuration moved to Mode.h to ease things with Travis
