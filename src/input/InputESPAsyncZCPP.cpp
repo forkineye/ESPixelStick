@@ -345,13 +345,8 @@ void c_InputESPAsyncZCPP::Process ()
             // DEBUG_V ("There is nothing in the buffer for us to porcess");
             break;
         }
-<<<<<<< HEAD
-
-        DEBUG_V ("There is something in the buffer for us to process");
-=======
 
         // DEBUG_V ("There is something in the buffer for us to process");
->>>>>>> 0adb1bf8c07ebf8707e36b26a6dab5899f7a94fa
         ZcppPacketBuffer.ZcppPacketBufferStatus = ZcppPacketBufferStatus_t::BufferIsBeingProcessed;
 
         // todo idleTicker.attach (config.effect_idletimeout, idleTimeout);
