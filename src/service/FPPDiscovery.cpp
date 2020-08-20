@@ -55,15 +55,21 @@ bool c_FPPDiscovery::begin()
     bool success = false;
     delay(100);
 
-    IPAddress address = IPAddress(239, 70, 80, 80);  
+    IPAddress address = IPAddress(224, 70, 80, 80);  
     if (udp.listenMulticast(address, FPP_DISCOVERY_PORT)) 
     {
         udp.onPacket(std::bind(&c_FPPDiscovery::ProcessReceivedUdpPacket, this,
                   std::placeholders::_1));
        success = true;
        LOG_PORT.println (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
-
     }
+
+    if (udp.listen (FPP_DISCOVERY_PORT))
+    {
+        udp.onPacket (std::bind (&c_FPPDiscovery::ProcessReceivedUdpPacket, this, std::placeholders::_1));
+        LOG_PORT.println (String (F ("FPPDiscovery subscribed to broadcast")));
+    }
+
     sendPingPacket();
 
     // DEBUG_END;

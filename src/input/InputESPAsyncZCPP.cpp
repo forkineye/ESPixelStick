@@ -135,7 +135,7 @@ void c_InputESPAsyncZCPP::ProcessReceivedUdpPacket (AsyncUDPPacket ReceivedPacke
         // do we have a place to put the received data?
         if (ZcppPacketBuffer.ZcppPacketBufferStatus == ZcppPacketBufferStatus_t::BufferIsBeingProcessed)
         {
-            DEBUG_V ("Throw away the received packet. We dont have a place to put it.");
+            // DEBUG_V ("Throw away the received packet. We dont have a place to put it.");
             break;
         }
         // DEBUG_V ("");
@@ -268,7 +268,7 @@ void c_InputESPAsyncZCPP::sendResponseToMostRecentRequester ()
         LOG_PORT.println (F ("Sending response to server failed"));
     }
 
-    DEBUG_V (String ("BytesWrittenToUdp: ") + String (BytesWrittenToUdp));
+    // DEBUG_V (String ("BytesWrittenToUdp: ") + String (BytesWrittenToUdp));
 
     // DEBUG_END;
 
@@ -287,14 +287,14 @@ void c_InputESPAsyncZCPP::sendDiscoveryResponse (
     IPAddress ipAddress,
     IPAddress ipMask)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    DEBUG_V (String ("ipAddress: ") + ipAddress.toString());
-    DEBUG_V (String ("ipMask: ") + ipMask.toString());
-    DEBUG_V (String ("serialPorts: ") + String (serialPorts));
-    DEBUG_V (String ("maxPixelChannelsPerPixelPort: ") + String (maxPixelChannelsPerPixelPort));
-    DEBUG_V (String ("maxSerialChannelsPerSerialPort: ") + String (maxSerialChannelsPerSerialPort));
-    DEBUG_V (String ("TotalMaximumNumChannels: ") + String (TotalMaximumNumChannels));
+    // DEBUG_V (String ("ipAddress: ") + ipAddress.toString());
+    // DEBUG_V (String ("ipMask: ") + ipMask.toString());
+    // DEBUG_V (String ("serialPorts: ") + String (serialPorts));
+    // DEBUG_V (String ("maxPixelChannelsPerPixelPort: ") + String (maxPixelChannelsPerPixelPort));
+    // DEBUG_V (String ("maxSerialChannelsPerSerialPort: ") + String (maxSerialChannelsPerSerialPort));
+    // DEBUG_V (String ("TotalMaximumNumChannels: ") + String (TotalMaximumNumChannels));
 
     ZCPP_DiscoveryResponse & packet = ZcppPacketBuffer.zcppPacket.DiscoveryResponse;
 
@@ -329,7 +329,7 @@ void c_InputESPAsyncZCPP::sendDiscoveryResponse (
 
     suspend = false;
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // sendDiscoveryResponse
 
@@ -345,8 +345,13 @@ void c_InputESPAsyncZCPP::Process ()
             // DEBUG_V ("There is nothing in the buffer for us to porcess");
             break;
         }
+<<<<<<< HEAD
 
         DEBUG_V ("There is something in the buffer for us to process");
+=======
+
+        // DEBUG_V ("There is something in the buffer for us to process");
+>>>>>>> 0adb1bf8c07ebf8707e36b26a6dab5899f7a94fa
         ZcppPacketBuffer.ZcppPacketBufferStatus = ZcppPacketBufferStatus_t::BufferIsBeingProcessed;
 
         // todo idleTicker.attach (config.effect_idletimeout, idleTimeout);
@@ -406,7 +411,7 @@ void c_InputESPAsyncZCPP::Process ()
 //-----------------------------------------------------------------------------
 void c_InputESPAsyncZCPP::ProcessReceivedConfig ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     ZCPP_Configuration& packet = ZcppPacketBuffer.zcppPacket.Configuration;
 
@@ -414,26 +419,26 @@ void c_InputESPAsyncZCPP::ProcessReceivedConfig ()
     {
         if (ZCPP_FromWire16 (packet.sequenceNumber) == LastReceivedSequenceNumber)
         {
-            DEBUG_V ("Ignore duplicate Config Message");
+            // DEBUG_V ("Ignore duplicate Config Message");
             break;
         }
 
         LastReceivedSequenceNumber = ZCPP_FromWire16 (packet.sequenceNumber);
 
         // a new config to apply
-        DEBUG_V (String ("The config is new: ") + ZCPP_FromWire16 (LastReceivedSequenceNumber));
+        // DEBUG_V (String ("The config is new: ") + ZCPP_FromWire16 (LastReceivedSequenceNumber));
 
         config.id = String (packet.userControllerName);
-        DEBUG_V (String ("Set Controller Name: ") + config.id);
+        // DEBUG_V (String ("Set Controller Name: ") + config.id);
 
-        DEBUG_V (String ("packet.ports: ") + String (packet.ports));
+        // DEBUG_V (String ("packet.ports: ") + String (packet.ports));
 
         DynamicJsonDocument JsonConfigRoot (2048);
         JsonObject JsonConfig = JsonConfigRoot.to<JsonObject> ();
 
         for (int CurrentPortIndex = 0; CurrentPortIndex < packet.ports; CurrentPortIndex++)
         {
-            DEBUG_V (String ("CurrentPortIndex: ") + String (CurrentPortIndex));
+            // DEBUG_V (String ("CurrentPortIndex: ") + String (CurrentPortIndex));
 
             ZCPP_PortConfig& CurrentPortConfig = packet.PortConfig[CurrentPortIndex];
 
@@ -451,7 +456,7 @@ void c_InputESPAsyncZCPP::ProcessReceivedConfig ()
                 //TODO: Add unified mode switching or simplify
             case ZCPP_PROTOCOL_WS2811:
             {
-                DEBUG_V ("ZCPP_PROTOCOL_WS2811");
+                // DEBUG_V ("ZCPP_PROTOCOL_WS2811");
 
                 JsonOutputPortConfig["type"] = c_OutputMgr::e_OutputType::OutputType_WS2811;
                 break;
@@ -459,21 +464,21 @@ void c_InputESPAsyncZCPP::ProcessReceivedConfig ()
 
             case ZCPP_PROTOCOL_GECE:
             {
-                DEBUG_V ("ZCPP_PROTOCOL_GECE");
+                // DEBUG_V ("ZCPP_PROTOCOL_GECE");
                 JsonOutputPortConfig["type"] = c_OutputMgr::e_OutputType::OutputType_GECE;
                 break;
             }
 
             case ZCPP_PROTOCOL_DMX:
             {
-                DEBUG_V ("ZCPP_PROTOCOL_DMX");
+                // DEBUG_V ("ZCPP_PROTOCOL_DMX");
                 JsonOutputPortConfig["type"] = c_OutputMgr::e_OutputType::OutputType_DMX;
                 break;
             }
 
             case ZCPP_PROTOCOL_RENARD:
             {
-                DEBUG_V ("ZCPP_PROTOCOL_RENARD");
+                // DEBUG_V ("ZCPP_PROTOCOL_RENARD");
                 JsonOutputPortConfig["type"] = c_OutputMgr::e_OutputType::OutputType_Renard;
                 break;
             }
@@ -550,7 +555,7 @@ void c_InputESPAsyncZCPP::ProcessReceivedConfig ()
         }
     } // final config
 
-    DEBUG_END;
+    // DEBUG_END;
 } // ProcessReceivedConfig
 
 //-----------------------------------------------------------------------------
@@ -595,8 +600,8 @@ void c_InputESPAsyncZCPP::ProcessReceivedData ()
 
         ZcppStats.num_packets++;
 
-        DEBUG_V (String ("InputBufferOffset: ") + String (InputBufferOffset));
-        DEBUG_V (String ("packetDataLength: ") + String (packetDataLength));
+        // DEBUG_V (String ("InputBufferOffset: ") + String (InputBufferOffset));
+        // DEBUG_V (String ("packetDataLength: ") + String (packetDataLength));
 
         memcpy (&InputDataBuffer[InputBufferOffset], packet.data, packetDataLength);
 
@@ -609,7 +614,7 @@ void c_InputESPAsyncZCPP::ProcessReceivedData ()
 //-----------------------------------------------------------------------------
 void c_InputESPAsyncZCPP::ProcessReceivedDiscovery ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     uint16_t pixelPorts  = 0;
     uint16_t serialPorts = 0;
@@ -627,14 +632,14 @@ void c_InputESPAsyncZCPP::ProcessReceivedDiscovery ()
         WiFiMgr.getIpAddress (),
         WiFiMgr.getIpSubNetMask ());
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // ProcessReceivedDiscovery
 
 //-----------------------------------------------------------------------------
 void c_InputESPAsyncZCPP::sendZCPPConfig ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     ZCPP_QueryConfigurationResponse & packet = ZcppPacketBuffer.zcppPacket.QueryConfigurationResponse;
 
@@ -656,12 +661,12 @@ void c_InputESPAsyncZCPP::sendZCPPConfig ()
         outputPortId < int (c_OutputMgr::e_OutputChannelIds::OutputChannelId_End);
         ++outputPortId)
     {
-        DEBUG_V ("");
+        // DEBUG_V ("");
 
         // get config for this channel from the output manager
         String PortConfig;
         OutputMgr.GetPortConfig (static_cast<c_OutputMgr::e_OutputChannelIds>(outputPortId), PortConfig);
-        DEBUG_V (String("PortConfig: ") + PortConfig );
+        // DEBUG_V (String("PortConfig: ") + PortConfig );
 
         DynamicJsonDocument JsonConfigDoc (2048);
         DeserializationError error = deserializeJson (JsonConfigDoc, PortConfig);
@@ -672,7 +677,7 @@ void c_InputESPAsyncZCPP::sendZCPPConfig ()
             LOG_PORT.println (String (F ("++++")) + PortConfig + String (F ("----")));
             break;
         }
-        DEBUG_V ("");
+        // DEBUG_V ("");
 
         JsonObject JsonConfig = JsonConfigDoc.to<JsonObject> ();
 
@@ -680,18 +685,18 @@ void c_InputESPAsyncZCPP::sendZCPPConfig ()
 
     } // for each port
 
-    DEBUG_V ("");
+    // DEBUG_V ("");
 
     sendResponseToMostRecentRequester ();
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // sendZCPPConfig
 
 //-----------------------------------------------------------------------------
 void c_InputESPAsyncZCPP::AddPortDataToResponsePacket (int PortId, JsonObject & PortConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     ZCPP_PortConfig & PortConfigResponse = ZcppPacketBuffer.zcppPacket.QueryConfigurationResponse.PortConfig[PortId];
     memset ((void*)(&PortConfigResponse), 0x0, sizeof (PortConfigResponse));
@@ -730,14 +735,14 @@ void c_InputESPAsyncZCPP::AddPortDataToResponsePacket (int PortId, JsonObject & 
         PortConfigResponse.port |= 0x80;
     }
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // AddPortDataToResponsePacket
 
 //-----------------------------------------------------------------------------
 uint8_t c_InputESPAsyncZCPP::TranslateColorOrder (JsonObject & PortConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     uint8_t response = ZCPP_COLOUR_ORDER_RGB;
 
@@ -784,7 +789,7 @@ uint8_t c_InputESPAsyncZCPP::TranslateColorOrder (JsonObject & PortConfig)
 
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 
     return response;
 } // TranslateColorOrder
@@ -792,7 +797,7 @@ uint8_t c_InputESPAsyncZCPP::TranslateColorOrder (JsonObject & PortConfig)
 //-----------------------------------------------------------------------------
 uint8_t c_InputESPAsyncZCPP::TranslateOutputType (JsonObject& PortConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     uint8_t response = ZCPP_PROTOCOL_WS2811;
 
@@ -833,7 +838,7 @@ uint8_t c_InputESPAsyncZCPP::TranslateOutputType (JsonObject& PortConfig)
 
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 
     return response;
 } // TranslateOutputType
