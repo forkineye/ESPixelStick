@@ -248,7 +248,7 @@ void c_InputESPAsyncZCPP::dumpError (ZCPP_error_t error)
             break;
         }
 
-    } // switch (error) 
+    } // switch (error)
 
     // DEBUG_END;
 
@@ -289,8 +289,8 @@ void c_InputESPAsyncZCPP::sendDiscoveryResponse (
 {
     DEBUG_START;
 
-    DEBUG_V (String ("ipAddress: ") + String (ipAddress));
-    DEBUG_V (String ("ipMask: ") + String (ipMask));
+    DEBUG_V (String ("ipAddress: ") + ipAddress.toString());
+    DEBUG_V (String ("ipMask: ") + ipMask.toString());
     DEBUG_V (String ("serialPorts: ") + String (serialPorts));
     DEBUG_V (String ("maxPixelChannelsPerPixelPort: ") + String (maxPixelChannelsPerPixelPort));
     DEBUG_V (String ("maxSerialChannelsPerSerialPort: ") + String (maxSerialChannelsPerSerialPort));
@@ -299,7 +299,7 @@ void c_InputESPAsyncZCPP::sendDiscoveryResponse (
     ZCPP_DiscoveryResponse & packet = ZcppPacketBuffer.zcppPacket.DiscoveryResponse;
 
     memset (ZcppPacketBuffer.zcppPacket.raw, 0x00, sizeof (ZcppPacketBuffer.zcppPacket.raw));
-    
+
     memcpy (packet.Header.token, ZCPP_token, sizeof (ZCPP_token));
     packet.Header.type            = ZCPP_TYPE_DISCOVERY_RESPONSE;
     packet.Header.protocolVersion = ZCPP_CURRENT_PROTOCOL_VERSION;
@@ -345,7 +345,7 @@ void c_InputESPAsyncZCPP::Process ()
             // DEBUG_V ("There is nothing in the buffer for us to porcess");
             break;
         }
-        
+
         DEBUG_V ("There is something in the buffer for us to process");
         ZcppPacketBuffer.ZcppPacketBufferStatus = ZcppPacketBufferStatus_t::BufferIsBeingProcessed;
 
@@ -652,7 +652,7 @@ void c_InputESPAsyncZCPP::sendZCPPConfig ()
     packet.ports = PixelPortCount;
 
     // ask output manager for the config record and translate to ZCPP speak.
-    for (int outputPortId = int (c_OutputMgr::e_OutputChannelIds::OutputChannelId_Start); 
+    for (int outputPortId = int (c_OutputMgr::e_OutputChannelIds::OutputChannelId_Start);
         outputPortId < int (c_OutputMgr::e_OutputChannelIds::OutputChannelId_End);
         ++outputPortId)
     {
@@ -675,7 +675,7 @@ void c_InputESPAsyncZCPP::sendZCPPConfig ()
         DEBUG_V ("");
 
         JsonObject JsonConfig = JsonConfigDoc.to<JsonObject> ();
-        
+
         AddPortDataToResponsePacket (outputPortId, JsonConfig);
 
     } // for each port
