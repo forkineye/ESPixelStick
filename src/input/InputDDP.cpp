@@ -266,13 +266,12 @@ void c_InputDDP::ProcessReceivedData ()
 //-----------------------------------------------------------------------------
 void c_InputDDP::ProcessReceivedQuery ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     uint16_t pixelPorts = 0;
     uint16_t serialPorts = 0;
     OutputMgr.GetPortCounts (pixelPorts, serialPorts);
 
-    /*
     sendDiscoveryResponse (
         VERSION,
         WiFi.macAddress (),
@@ -284,8 +283,8 @@ void c_InputDDP::ProcessReceivedQuery ()
         InputDataBufferSize,
         WiFiMgr.getIpAddress (),
         WiFiMgr.getIpSubNetMask ());
-        */
-    DEBUG_END;
+        
+    // DEBUG_END;
 
 } // ProcessReceivedDiscovery
 
