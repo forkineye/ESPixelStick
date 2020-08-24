@@ -407,7 +407,7 @@ void c_InputESPAsyncZCPP::Process ()
 void c_InputESPAsyncZCPP::ProcessReceivedConfig ()
 {
     // DEBUG_START;
-
+#ifdef SupportRxConfig
     ZCPP_Configuration& packet = ZcppPacketBuffer.zcppPacket.Configuration;
 
     do // once
@@ -549,6 +549,7 @@ void c_InputESPAsyncZCPP::ProcessReceivedConfig ()
             sendZCPPConfig ();
         }
     } // final config
+#endif // def SupportRxConfig
 
     // DEBUG_END;
 } // ProcessReceivedConfig
