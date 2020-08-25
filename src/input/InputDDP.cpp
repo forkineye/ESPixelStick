@@ -18,6 +18,7 @@
 
 #include "InputDDP.h"
 #include <string.h>
+#include "..\WiFiMgr.hpp"
 
 //-----------------------------------------------------------------------------
 c_InputDDP::c_InputDDP (c_InputMgr::e_InputChannelIds NewInputChannelId,
@@ -67,10 +68,10 @@ void c_InputDDP::Begin ()
 //-----------------------------------------------------------------------------
 void c_InputDDP::GetConfig (JsonObject& jsonConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // GetConfig
 
@@ -86,14 +87,22 @@ void c_InputDDP::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 bool c_InputDDP::SetConfig (JsonObject& jsonConfig)
 {
+    // DEBUG_START;
+
+    // DEBUG_END;
 
 } // SetConfig
 
 //-----------------------------------------------------------------------------
 void c_InputDDP::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
 {
+    // DEBUG_START;
+
     InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
+
+    // DEBUG_END;
+
 } // SetBufferInfo
 
 //-----------------------------------------------------------------------------
@@ -267,7 +276,7 @@ void c_InputDDP::ProcessReceivedData ()
 void c_InputDDP::ProcessReceivedQuery ()
 {
     // DEBUG_START;
-
+/*
     uint16_t pixelPorts = 0;
     uint16_t serialPorts = 0;
     OutputMgr.GetPortCounts (pixelPorts, serialPorts);
@@ -283,7 +292,7 @@ void c_InputDDP::ProcessReceivedQuery ()
         InputDataBufferSize,
         WiFiMgr.getIpAddress (),
         WiFiMgr.getIpSubNetMask ());
-        
+*/        
     // DEBUG_END;
 
 } // ProcessReceivedDiscovery
