@@ -82,8 +82,12 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket(AsyncUDPPacket _packet)
 {
     // DEBUG_START;
 
-    FPPPingPacket *packet = reinterpret_cast<FPPPingPacket *>(_packet.data());
-    if (packet->packet_type == 0x04 && packet->ping_subtype == 0x01) 
+    FPPPingPacket * packet = reinterpret_cast<FPPPingPacket*>(_packet.data ());
+
+    // DEBUG_V (String ("packet_type:  ") + String (packet->packet_type));
+    // DEBUG_V (String ("ping_subtype: ") + String (packet->ping_subtype));
+
+    if (packet->packet_type == 0x04 && packet->ping_subtype == 0x00) 
     {
         //discover ping packet, need to send a ping out
         sendPingPacket();
