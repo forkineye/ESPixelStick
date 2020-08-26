@@ -18,6 +18,9 @@
 
 #include "FPPDiscovery.h"
 
+extern const String VERSION;
+
+
 //-----------------------------------------------------------------------------
 typedef union 
 {
@@ -44,7 +47,6 @@ typedef union
 
 //-----------------------------------------------------------------------------
 c_FPPDiscovery::c_FPPDiscovery() {
-    version = "1";
 }
 
 //-----------------------------------------------------------------------------
@@ -86,6 +88,8 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket(AsyncUDPPacket _packet)
 
     // DEBUG_V (String ("packet_type:  ") + String (packet->packet_type));
     // DEBUG_V (String ("ping_subtype: ") + String (packet->ping_subtype));
+    
+    LOG_PORT.println (String (F ("FPPDiscovery packet")));
 
     if (packet->packet_type == 0x04 && ((packet->ping_subtype == 0x00) || (packet->ping_subtype == 0x01)))
     {
@@ -98,7 +102,6 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket(AsyncUDPPacket _packet)
 void c_FPPDiscovery::sendPingPacket() 
 {
     // DEBUG_START;
-
     FPPPingPacket packet;
     packet.header[0] = 'F';
     packet.header[1] = 'P';
@@ -108,7 +111,14 @@ void c_FPPDiscovery::sendPingPacket()
     packet.data_len = 214;
     packet.ping_version = 0x2;
     packet.ping_subtype = 0x0; // 1 is to "discover" others, we don't need that
-    packet.ping_hardware = 0xC2;  // 0xC2 is assigned for ESPixelStick
+    
+#ifdef ARDUINO_ARCH_ESP32
+    packet.ping_hardware = 0xC3;  // 0xC3 is assigned for ESPixelStick on ESP32
+#else
+    packet.ping_hardware = 0xC2;  // 0xC2 is assigned for ESPixelStick on ESP8266
+#endif
+    
+    const char *version = VERSION.c_str();
     uint16_t v = (uint16_t)atoi(version);
     packet.versionMajor = (v >> 8) + ((v & 0xFF) << 8);
     v = (uint16_t)atoi(&version[2]);
@@ -122,7 +132,6 @@ void c_FPPDiscovery::sendPingPacket()
     packet.ranges[0] = 0;
     
     udp.broadcastTo(packet.raw, sizeof(packet), FPP_DISCOVERY_PORT);
-
     // DEBUG_END;
 }
 

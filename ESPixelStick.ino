@@ -119,9 +119,9 @@ void setup()
     LOG_PORT.println("");
     LOG_PORT.println(String(F("ESPixelStick v")) + VERSION + "(" + BUILD_DATE + ")");
 #ifdef ARDUINO_ARCH_ESP8266
-    LOG_PORT.println (String ("ESP Verion: ") + ESP.getFullVersion ());
+    LOG_PORT.println (String ("ESP Version: ") + ESP.getFullVersion ());
 #else
-    LOG_PORT.println (String("ESP Verion: ") + ESP.getSdkVersion ());
+    LOG_PORT.println (String("ESP Version: ") + ESP.getSdkVersion ());
 #endif
     // DEBUG_V ("");
 
