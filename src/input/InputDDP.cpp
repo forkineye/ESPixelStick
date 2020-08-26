@@ -18,7 +18,7 @@
 
 #include "InputDDP.h"
 #include <string.h>
-#include "..\WiFiMgr.hpp"
+#include "../WiFiMgr.hpp"
 
 //-----------------------------------------------------------------------------
 c_InputDDP::c_InputDDP (c_InputMgr::e_InputChannelIds NewInputChannelId,
