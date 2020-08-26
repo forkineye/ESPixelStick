@@ -31,7 +31,6 @@
 #include "InputEffectEngine.hpp"
 #include "InputMQTT.h"
 #include "InputAlexa.h"
-#include "InputESPAsyncZCPP.h"
 #include "InputDDP.h"
 // needs to be last
 #include "InputMgr.hpp"
@@ -53,7 +52,6 @@ InputTypeXlateMap_t InputTypeXlateMap[c_InputMgr::e_InputType::InputType_End] =
     {c_InputMgr::e_InputType::InputType_Effects,  "Effects"  },
     {c_InputMgr::e_InputType::InputType_MQTT,     "MQTT"     },
     {c_InputMgr::e_InputType::InputType_Alexa,    "Alexa"    },
-    {c_InputMgr::e_InputType::InputType_SCCP,     "ZCPP"     },
     {c_InputMgr::e_InputType::InputType_DDP,      "DDP"      },
     {c_InputMgr::e_InputType::InputType_Disabled, "Disabled" }
 };
@@ -396,14 +394,6 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             {
                 // LOG_PORT.println (String (F ("************** Starting Alexa for channel '")) + ChannelIndex + "'. **************");
                 pInputChannelDrivers[ChannelIndex] = new c_InputAlexa (ChannelIndex, InputType_Alexa, InputDataBuffer, InputDataBufferSize);
-                // DEBUG_V ("");
-                break;
-            }
-
-            case e_InputType::InputType_SCCP:
-            {
-                // LOG_PORT.println (String (F ("************** Starting ZCPP for channel '")) + ChannelIndex + "'. **************");
-                pInputChannelDrivers[ChannelIndex] = new c_InputESPAsyncZCPP (ChannelIndex, InputType_SCCP, InputDataBuffer, InputDataBufferSize);
                 // DEBUG_V ("");
                 break;
             }

@@ -51,7 +51,6 @@ public:
         InputType_Effects,
         InputType_MQTT,
         InputType_Alexa,
-        InputType_SCCP,
         InputType_DDP,
         InputType_End,
         InputType_Start   = InputType_Disabled,
