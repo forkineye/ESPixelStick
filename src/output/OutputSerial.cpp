@@ -86,17 +86,13 @@ c_OutputSerial::~c_OutputSerial ()
     // DEBUG_START;
     if (gpio_num_t (-1) == DataPin) { return; }
 
-#ifdef ARDUINO_ARCH_ESP8266
-    Serial1.end ();
-#else
-
+#ifdef ARDUINO_ARCH_ESP32
     // make sure no existing low level driver is running
     ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
     // DEBUG_V ("");
 
     ESP_ERROR_CHECK (uart_disable_rx_intr (UartId));
     // DEBUG_V ("");
-
 #endif
 
     // DEBUG_END;

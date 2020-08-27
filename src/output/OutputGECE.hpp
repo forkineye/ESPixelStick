@@ -19,10 +19,6 @@
 */
 
 #include "OutputCommon.hpp"
-#include <HardwareSerial.h>
-#ifdef ARDUINO_ARCH_ESP32
-#   include <driver/uart.h>
-#endif
 
 class c_OutputGECE: public c_OutputCommon
 {
@@ -61,8 +57,8 @@ private:
 
     // Internal variables
     uint32_t        startTime        = 0;              ///< When the last frame TX started
-    HardwareSerial *pSerialInterface = nullptr;
-    /* Drop the update if our refresh rate is too high */
+
+                                                       /* Drop the update if our refresh rate is too high */
     inline bool canRefresh() 
     {
         return (micros() - startTime) >= FrameRefreshTimeMs;

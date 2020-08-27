@@ -77,9 +77,10 @@ public:
 
 protected:
 
-#define MAX_NUM_PIXELS                         1360
-#define WS2812_NUM_INTENSITY_BYTES_PER_PIXEL   3
-    
+#define MAX_NUM_PIXELS                          1360
+#define WS2812_NUM_INTENSITY_BYTES_PER_PIXEL    3
+#define OM_CMN_NO_CUSTOM_ISR                    (-1)
+
     gpio_num_t  DataPin;     ///< Output pin to use for this driver
     uart_port_t UartId;      ///< Id of the UART used by this instance of the driver
     OTYPE_t     OutputType;  ///< Type to report for this driver
@@ -96,6 +97,9 @@ protected:
     void InitializeUart (uart_config_t & config,
                          uint32_t fifoTriggerLevel = 0);
 #endif // ! def ARDUINO_ARCH_ESP8266
+
+    void TerminateUartOperation ();
+    void CommonSerialWrite      (uint8_t * OutputBuffer, size_t NumBytesToSend);
 
 private:
 
