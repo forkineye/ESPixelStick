@@ -68,6 +68,7 @@ private:
     void ProcessXseriesRequests     (AsyncWebSocketClient * client);
     void ProcessXARequest           (AsyncWebSocketClient * client);
     void ProcessXJRequest           (AsyncWebSocketClient * client);
+    void ProcessGseriesRequests     (AsyncWebSocketClient  * client);
 
 protected:
 

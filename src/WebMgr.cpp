@@ -347,6 +347,12 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
                 ProcessVseriesRequests (client);
                 break;
             }
+            if (WebSocketFrameCollectionBuffer[0] == 'G')
+            {
+                // DEBUG_V ("");
+                ProcessGseriesRequests (client);
+                break;
+            }
 
             if (WebSocketFrameCollectionBuffer[0] == 'G')
             {
@@ -491,19 +497,17 @@ void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
     system[F ("uptime")] = millis ();
     // DEBUG_V ("");
 
-    // Ask WiFi to add ZcppStats
+    // Ask WiFi Stats
     WiFiMgr.GetStatus (system);
     // DEBUG_V ("");
 
-    // Ask Input to add ZcppStats
+    // Ask Input Stats
     InputMgr.GetStatus (status);
     // DEBUG_V ("");
 
-    // Ask Input to add ZcppStats
+    // Ask Output Stats
     OutputMgr.GetStatus (status);
     // DEBUG_V ("");
-
-    // Ask Services to add ZcppStats
 
     String response;
     serializeJson (webJsonDoc, response);
@@ -546,7 +550,7 @@ void c_WebMgr::ProcessVseriesRequests (AsyncWebSocketClient* client)
 } // ProcessVseriesRequests
 
 //-----------------------------------------------------------------------------
-/// Process simple format 'V' messages
+/// Process simple format 'G' messages
 void c_WebMgr::ProcessGseriesRequests (AsyncWebSocketClient* client)
 {
     // DEBUG_START;
@@ -555,19 +559,25 @@ void c_WebMgr::ProcessGseriesRequests (AsyncWebSocketClient* client)
     // serializeJson (webJsonDoc, response);
     switch (WebSocketFrameCollectionBuffer[1])
     {
+        case '2':
+        {
+            // xLights asking the "version"
+            client->text (String (F ("G2{\"version\": \"")) + VERSION + "\"}");
+            break;
+        }
+
         default:
         {
-            client->text (F ("G Error"));
-            LOG_PORT.println (String (F ("***** ERROR: Unsupported Web command G")) + WebSocketFrameCollectionBuffer[1] + F (" *****"));
+            client->text (F ("V Error"));
+            LOG_PORT.println (String(F("***** ERROR: Unsupported Web command V")) + WebSocketFrameCollectionBuffer[1] + F(" *****"));
             break;
         }
     } // end switch
 
+
     // DEBUG_END;
 
-} // ProcessGseriesRequests
-
-//-----------------------------------------------------------------------------
+} // ProcessVseriesRequests
 /// Process JSON messages
 void c_WebMgr::ProcessReceivedJsonMessage (DynamicJsonDocument & webJsonDoc, AsyncWebSocketClient * client)
 {
