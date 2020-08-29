@@ -264,7 +264,6 @@ void c_WiFiMgr::onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t in
     MDNS.setInstanceName(String(config->id + " (" + chipId + ")").c_str());
     if (MDNS.begin(config->hostname.c_str())) {
         MDNS.addService("http", "tcp", HTTP_PORT);
-//        MDNS.addService("zcpp", "udp", ZCPP_PORT);
 //        MDNS.addService("ddp", "udp", DDP_PORT);
         MDNS.addService("e131", "udp", E131_DEFAULT_PORT);
         MDNS.addServiceTxt("e131", "udp", "TxtVers", String(RDMNET_DNSSD_TXTVERS));
