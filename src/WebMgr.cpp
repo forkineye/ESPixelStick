@@ -40,15 +40,14 @@
 
 const uint8_t HTTP_PORT = 80;      ///< Default web server port
 
-Espalexa espalexa;
-
-AsyncWebServer      webServer (HTTP_PORT);  // Web Server
-AsyncWebSocket      webSocket ("/ws");      // Web Socket Plugin
+static Espalexa         espalexa;
+static EFUpdate         efupdate; /// EFU Update Handler
+static AsyncWebServer   webServer (HTTP_PORT);  // Web Server
+static AsyncWebSocket   webSocket ("/ws");      // Web Socket Plugin
 
 //-----------------------------------------------------------------------------
 void PrettyPrint (JsonObject & jsonStuff)
 {
-
     // DEBUG_V ("---------------------------------------------");
     LOG_PORT.println (F("---- Pretty ----"));
     serializeJson (jsonStuff, LOG_PORT);
@@ -113,13 +112,13 @@ void c_WebMgr::init ()
             this->GetConfiguration ();
             request->send (200, "text/json", WebSocketFrameCollectionBuffer);
         });
- /*
+
     // Firmware upload handler - only in station mode
-    webServer.on ("/updatefw", HTTP_POST, [this](AsyncWebServerRequest* request)
+    webServer.on ("/updatefw", HTTP_POST, [](AsyncWebServerRequest* request)
         {
-            this->webSocket.textAll ("X6");
-        }, [this]() {this->onFirmwareUpload (); }); // todo .setFilter (ON_STA_FILTER);
-*/
+            webSocket.textAll ("X6");
+        }, [](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final) {WebMgr.FirmwareUpload (request, filename, index, data, len,  final); }).setFilter (ON_STA_FILTER);
+        
     // Root access for testing
     webServer.serveStatic ("/root", SPIFFS, "/");
 
@@ -164,7 +163,8 @@ void c_WebMgr::init ()
         }
     });
 
-    espalexa.begin (&webServer); //give espalexa a pointer to your server object so it can use your server instead of creating its own
+    //give espalexa a pointer to the server object so it can use your server instead of creating its own
+    espalexa.begin (&webServer);
 
     // webServer.begin ();
 
@@ -319,8 +319,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             // is the message complete?
             if ((MessageInfo->index + len) != MessageInfo->len)
             {
-                // The message is not yet complete
-                // DEBUG_V ("");
+                // DEBUG_V ("The message is not yet complete");
                 break;
             }
             // DEBUG_V ("");
@@ -328,8 +327,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             // did we get the final part of the message?
             if (!MessageInfo->final)
             {
-                // message is not terminated yet
-                // DEBUG_V ("");
+                // DEBUG_V ("message is not terminated yet");
                 break;
             }
 
@@ -347,6 +345,13 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             {
                 // DEBUG_V ("");
                 ProcessVseriesRequests (client);
+                break;
+            }
+
+            if (WebSocketFrameCollectionBuffer[0] == 'G')
+            {
+                // DEBUG_V ("");
+                ProcessGseriesRequests (client);
                 break;
             }
 
@@ -516,7 +521,7 @@ void c_WebMgr::ProcessVseriesRequests (AsyncWebSocketClient* client)
 {
     // DEBUG_START;
 
-    String Response;
+    // String Response;
     // serializeJson (webJsonDoc, response);
     switch (WebSocketFrameCollectionBuffer[1])
     {
@@ -539,6 +544,28 @@ void c_WebMgr::ProcessVseriesRequests (AsyncWebSocketClient* client)
     // DEBUG_END;
 
 } // ProcessVseriesRequests
+
+//-----------------------------------------------------------------------------
+/// Process simple format 'V' messages
+void c_WebMgr::ProcessGseriesRequests (AsyncWebSocketClient* client)
+{
+    // DEBUG_START;
+
+    // String Response;
+    // serializeJson (webJsonDoc, response);
+    switch (WebSocketFrameCollectionBuffer[1])
+    {
+        default:
+        {
+            client->text (F ("G Error"));
+            LOG_PORT.println (String (F ("***** ERROR: Unsupported Web command G")) + WebSocketFrameCollectionBuffer[1] + F (" *****"));
+            break;
+        }
+    } // end switch
+
+    // DEBUG_END;
+
+} // ProcessGseriesRequests
 
 //-----------------------------------------------------------------------------
 /// Process JSON messages
@@ -569,44 +596,11 @@ void c_WebMgr::ProcessReceivedJsonMessage (DynamicJsonDocument & webJsonDoc, Asy
         } // webJsonDoc.containsKey ("cmd")
 
         // DEBUG_V ("");
-#ifdef foo
-        /* From wshandler:
-                switch (data[1]) {
-                    case '1':   // Set Network Config
-                        dsNetworkConfig(json.as<JsonObject>());
-                        SaveConfig();
-                        client->text("S1");
-                        break;
-                    case '2':   // Set Device Config
-                        // Reboot if MQTT changed
-                        if (config.mqtt != json["mqtt"]["enabled"])
-                            reboot = true;
-
-                        dsDeviceConfig(json.as<JsonObject>());
-                        SaveConfig();
-
-                        if (reboot)
-                            client->text("S1");
-                        else
-                            client->text("S2");
-                        break;
-                    case '3':   // Set Effect Startup Config
-                        dsEffectConfig(json.as<JsonObject>());
-                        SaveConfig();
-                        client->text("S3");
-                        break;
-                    case '4':   // Set Gamma (but no save)
-                        dsGammaConfig(json.as<JsonObject>());
-                        client->text("S4");
-                        break;
-                }
-        */
-#endif // def foo
-
 
     } while (false);
 
     // DEBUG_END;
+
 } // ProcessReceivedJsonMessage
 
 //-----------------------------------------------------------------------------
@@ -797,43 +791,69 @@ void c_WebMgr::processCmdOpt (JsonObject & jsonCmd)
 } // processCmdOpt
 
 //-----------------------------------------------------------------------------
-void c_WebMgr::onFirmwareUpload (AsyncWebServerRequest* request, String filename,
-    size_t index, uint8_t * data, size_t len, bool final)
+void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request, 
+                               String filename,
+                               size_t index, 
+                               uint8_t * data, 
+                               size_t len, 
+                               bool final)
 {
-    static EFUpdate efupdate; /// EFU Update Handler
-    if (!index)
+    DEBUG_START;
+
+    do // once
     {
+        // make sure we are in AP mode
+        if (0 == WiFi.softAPgetStationNum ())
+        {
+            // DEBUG_V("Not in AP Mode");
+
+            // we are not talking to a station so we are not in AP mode
+            // break;
+        }
+        DEBUG_V ("");
+
+        // is the first message in the upload?
+        if (0 == index)
+        {
 #ifdef ARDUINO_ARCH_ESP8266
-        WiFiUDP::stopAll ();
+            WiFiUDP::stopAll ();
 #else
-        // this is not supported for ESP32
+            // this is not supported for ESP32
 #endif
-        LOG_PORT.print (F ("* Upload Started: "));
-        LOG_PORT.println (filename.c_str ());
-        efupdate.begin ();
-    }
+            LOG_PORT.println (String(F ("* Upload Started: ")) + filename);
+            efupdate.begin ();
+        }
 
-    if (!efupdate.process (data, len))
-    {
-        LOG_PORT.print (F ("*** UPDATE ERROR: "));
-        LOG_PORT.println (String (efupdate.getError ()));
-    }
+        DEBUG_V ("");
 
-    if (efupdate.hasError ())
-    {
-        request->send (200, "text/plain", "Update Error: " + String (efupdate.getError ()));
-    }
+        if (!efupdate.process (data, len))
+        {
+            LOG_PORT.println (String(F ("*** UPDATE ERROR: ")) + String (efupdate.getError ()));
+        }
 
-    if (final)
-    {
-        request->send (200, "text/plain", "Update Finished: " + String (efupdate.getError ()));
-        LOG_PORT.println (F ("* Upload Finished."));
-        efupdate.end ();
-        SPIFFS.begin ();
-        //        SaveConfig();
-        extern bool reboot;
-        reboot = true;
-    }
+        if (efupdate.hasError ())
+        {
+            DEBUG_V ("efupdate.hasError");
+            request->send (200, "text/plain", "Update Error: " + String (efupdate.getError ()));
+            break;
+        }
+        DEBUG_V ("");
+
+        if (final)
+        {
+            request->send (200, "text/plain", "Update Finished: " + String (efupdate.getError ()));
+            LOG_PORT.println (F ("* Upload Finished."));
+            efupdate.end ();
+            SPIFFS.begin ();
+            SaveConfig();
+            extern bool reboot;
+            reboot = true;
+        }
+
+    } while (false);
+
+    DEBUG_END;
+
 } // onEvent
 
 //-----------------------------------------------------------------------------

@@ -36,6 +36,7 @@ public:
     void onAlexaMessage (EspalexaDevice * pDevice);
     void RegisterAlexaCallback (DeviceCallbackFunction cb); 
     bool IsAlexaCallbackValid () { return (nullptr != pAlexaCallback); }
+    void FirmwareUpload (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
 
 private:
 
@@ -56,7 +57,7 @@ private:
     void init ();
     void onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, size_t len);
     void ProcessVseriesRequests     (AsyncWebSocketClient  * client);
-    void onFirmwareUpload           (AsyncWebServerRequest * request, String filename, size_t index, uint8_t* data, size_t len, bool final);
+    void ProcessGseriesRequests     (AsyncWebSocketClient  * client);
     void ProcessReceivedJsonMessage (DynamicJsonDocument   & webJsonDoc, AsyncWebSocketClient  * client);
     void processCmd                 (AsyncWebSocketClient  * client,  JsonObject & jsonCmd );
     void processCmdGet              (JsonObject & jsonCmd);
