@@ -544,7 +544,6 @@ void c_WebMgr::ProcessVseriesRequests (AsyncWebSocketClient* client)
         }
     } // end switch
 
-
     // DEBUG_END;
 
 } // ProcessVseriesRequests
@@ -568,17 +567,18 @@ void c_WebMgr::ProcessGseriesRequests (AsyncWebSocketClient* client)
 
         default:
         {
-            client->text (F ("V Error"));
+            client->text (F ("G Error"));
             LOG_PORT.println (String(F("***** ERROR: Unsupported Web command V")) + WebSocketFrameCollectionBuffer[1] + F(" *****"));
             break;
         }
     } // end switch
 
-
     // DEBUG_END;
 
 } // ProcessVseriesRequests
-/// Process JSON messages
+
+//-----------------------------------------------------------------------------
+// Process JSON messages
 void c_WebMgr::ProcessReceivedJsonMessage (DynamicJsonDocument & webJsonDoc, AsyncWebSocketClient * client)
 {
     // DEBUG_START;
