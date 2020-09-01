@@ -808,7 +808,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
                                size_t len, 
                                bool final)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     do // once
     {
@@ -820,7 +820,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
             // we are not talking to a station so we are not in AP mode
             // break;
         }
-        DEBUG_V ("");
+        // DEBUG_V ("");
 
         // is the first message in the upload?
         if (0 == index)
@@ -834,7 +834,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
             efupdate.begin ();
         }
 
-        DEBUG_V ("");
+        // DEBUG_V ("");
 
         if (!efupdate.process (data, len))
         {
@@ -843,11 +843,11 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
 
         if (efupdate.hasError ())
         {
-            DEBUG_V ("efupdate.hasError");
+            // DEBUG_V ("efupdate.hasError");
             request->send (200, "text/plain", "Update Error: " + String (efupdate.getError ()));
             break;
         }
-        DEBUG_V ("");
+        // DEBUG_V ("");
 
         if (final)
         {
@@ -862,7 +862,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
 
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // onEvent
 
