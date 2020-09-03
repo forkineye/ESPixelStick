@@ -66,15 +66,14 @@ private:
     float       brightness;  ///< brightness to use
 
     // Internal variables
-    uint8_t     OutputBuffer[WS2812_OUTPUT_BUFF_SIZE+1]; ///< Data ready to be sent to the UART
-    uint8_t    *pNextIntensityToSend;                    ///< start of output buffer being sent to the UART
-    uint16_t    RemainingIntensityCount;                 ///< Used by ISR to determine how much more data to send
-    uint16_t    NumIntensityBytesInOutputBuffer;         ///< Size of buffers
-    time_t      startTime;                               ///< When the last frame TX started
-    uint8_t     rOffset;                                 ///< Index of red byte
-    uint8_t     gOffset;                                 ///< Index of green byte
-    uint8_t     bOffset;                                 ///< Index of blue byte
-    uint8_t     gamma_table[256] = { 0 };                ///< Gamma Adjustment table
+    uint8_t     IsrOutputBuffer[WS2812_OUTPUT_BUFF_SIZE+1]; ///< Data ready to be sent to the UART
+    uint8_t    *pNextIntensityToSend;                       ///< start of output buffer being sent to the UART
+    uint16_t    RemainingIntensityCount;                    ///< Used by ISR to determine how much more data to send
+    time_t      startTime;                                  ///< When the last frame TX started
+    uint8_t     rOffset;                                    ///< Index of red byte
+    uint8_t     gOffset;                                    ///< Index of green byte
+    uint8_t     bOffset;                                    ///< Index of blue byte
+    uint8_t     gamma_table[256] = { 0 };                   ///< Gamma Adjustment table
 
 #ifdef ARDUINO_ARCH_ESP8266
     /* Returns number of bytes waiting in the TX FIFO of UART1 */

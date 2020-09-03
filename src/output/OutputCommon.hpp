@@ -70,10 +70,12 @@ public:
     virtual void         Render () = 0;                                        ///< Call from loop(),  renders output data
     virtual void         GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
             OID_t        GetOutputChannelId () { return OutputChannelId; }     ///< return the output channel number
-            uint8_t    * GetBufferAddress ()   { return OutputMgr.GetBufferAddress();}      ///< Get the address of the buffer into which the E1.31 handler will stuff data
-            uint16_t     GetBufferSize ()      { return OutputMgr.GetBufferSize();}  ///< Get the address of the buffer into which the E1.31 handler will stuff data
+            uint8_t    * GetBufferAddress ()   { return pOutputBuffer;}        ///< Get the address of the buffer into which the E1.31 handler will stuff data
+            uint16_t     GetBufferSize ()      { return OutputBufferSize;}     ///< Get the address of the buffer into which the E1.31 handler will stuff data
             OTYPE_t      GetOutputType ()      { return OutputType; }          ///< Have the instance report its type.
     virtual void         GetStatus (ArduinoJson::JsonObject & jsonStatus);
+            void         SetOutputBufferAddress (uint8_t * pNewOutputBuffer) { pOutputBuffer = pNewOutputBuffer; }
+            void         SetOutputBufferSize (uint16_t NewOutputBufferSize)  { OutputBufferSize = NewOutputBufferSize; };
 
 protected:
 
@@ -87,6 +89,8 @@ protected:
     OID_t       OutputChannelId;
     bool        HasBeenInitialized = false;
     time_t      FrameRefreshTimeMs = 0;
+    uint8_t   * pOutputBuffer      = 0;
+    uint16_t    OutputBufferSize   = 0;
 
 #ifdef ARDUINO_ARCH_ESP8266
     void InitializeUart (uint32_t BaudRate, 

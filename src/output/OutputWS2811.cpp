@@ -83,7 +83,6 @@ c_OutputWS2811::c_OutputWS2811(c_OutputMgr::e_OutputChannelIds OutputChannelId,
     brightness (1.0),
     pNextIntensityToSend (nullptr),
     RemainingIntensityCount (0),
-    NumIntensityBytesInOutputBuffer (0),
     startTime (0),
     rOffset (0),
     gOffset (1),
@@ -163,12 +162,12 @@ void c_OutputWS2811::Begin()
 #endif
 
     // Setup Output Buffer
-    memset ((char*)(&OutputBuffer[0]), 0, sizeof (OutputBuffer));
-    
+    memset (IsrOutputBuffer, 0x0, sizeof (IsrOutputBuffer));
+
     pixel_count = 100;
 
-    // Setup Output Buffer
-    NumIntensityBytesInOutputBuffer = pixel_count * WS2812_NUM_INTENSITY_BYTES_PER_PIXEL;
+    // Setup common Output Buffer
+    SetOutputBufferSize (pixel_count * WS2812_NUM_INTENSITY_BYTES_PER_PIXEL);
 
     // Calculate our refresh time
     FrameRefreshTimeMs = (WS2811_TIME_PER_PIXEL * pixel_count) + WS2811_MIN_IDLE_TIME;
@@ -266,8 +265,8 @@ void c_OutputWS2811::Render()
     if (0 != RemainingIntensityCount) { return; }
 
     // set up pointers into the pixel data space
-    uint8_t *pSourceData = OutputMgr.GetBufferAddress();  // source buffer (owned by base class)
-    uint8_t *pTargetData = OutputBuffer;        // target buffer
+    uint8_t *pSourceData = OutputMgr.GetBufferAddress(); // source buffer (owned by base class)
+    uint8_t *pTargetData = IsrOutputBuffer;              // target buffer
 
     // what type of copy are we making?
     if (!zig_size)
@@ -324,8 +323,8 @@ void c_OutputWS2811::Render()
     } // end zig zag copy
 
     // set the intensity transmit buffer pointer and number of intensities to send
-    pNextIntensityToSend    = OutputBuffer;
-    RemainingIntensityCount = NumIntensityBytesInOutputBuffer;
+    pNextIntensityToSend    = IsrOutputBuffer;
+    RemainingIntensityCount = GetBufferSize ();
     // DEBUG_V (String ("RemainingIntensityCount: ") + RemainingIntensityCount);
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -427,6 +426,7 @@ bool c_OutputWS2811::validate ()
         pixel_count = 170;
         response = false;
     }
+    SetOutputBufferSize (pixel_count * WS2812_NUM_INTENSITY_BYTES_PER_PIXEL);
 
     if (group_size > pixel_count)
     {

@@ -729,6 +729,8 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
         CreateNewConfig ();
     }
 
+    UpdateDisplayBufferReferences ();
+
     // DEBUG_END;
     return Response;
 
@@ -813,6 +815,34 @@ void c_OutputMgr::Render()
     }
     // DEBUG_END;
 } // render
+
+//-----------------------------------------------------------------------------
+void c_OutputMgr::UpdateDisplayBufferReferences (void)
+{
+    // DEBUG_START;
+
+    uint16_t OutputBufferOffset = 0;
+    // DEBUG_V (String ("BufferSize: ") + String (sizeof(OutputBuffer)));
+    // DEBUG_V (String ("OutputBufferOffset") + String (OutputBufferOffset));
+
+    for (c_OutputCommon* pOutputChannel : pOutputChannelDrivers)
+    {
+        pOutputChannel->SetOutputBufferAddress (&OutputBuffer[OutputBufferOffset]);
+
+        OutputBufferOffset += pOutputChannel->GetBufferSize ();
+        // DEBUG_V (String ("pOutputChannel->GetBufferSize: ") + String (pOutputChannel->GetBufferSize ()));
+        // DEBUG_V (String ("OutputBufferOffset: ") + String(OutputBufferOffset));
+    }
+
+    if (sizeof (OutputBuffer) < OutputBufferOffset)
+    {
+        LOG_PORT.println (String (F ("--- ERROR: Too many output channels have been defined: ")) + String (OutputBufferOffset));
+    }
+
+    // DEBUG_END;
+
+} // UpdateDisplayBufferReferences
+
 
 // create a global instance of the output channel factory
 c_OutputMgr OutputMgr;

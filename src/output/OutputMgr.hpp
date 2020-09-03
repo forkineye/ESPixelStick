@@ -96,6 +96,7 @@ private:
 
     bool ProcessJsonConfig (JsonObject & jsonConfig);
     void CreateJsonConfig  (JsonObject & jsonConfig);
+    void UpdateDisplayBufferReferences (void);
 
     String ConfigFileName;
     String ConfigData;

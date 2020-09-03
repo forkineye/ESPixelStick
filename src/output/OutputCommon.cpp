@@ -56,7 +56,8 @@ c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds iOutputChannelId
 	DataPin            = outputGpio;
 	UartId             = uart;
     OutputType         = outputType;
-	 
+    pOutputBuffer      = OutputMgr.GetBufferAddress ();
+
 	// LOG_PORT.println (String ("UartId:          '") + UartId + "'");
     // LOG_PORT.println (String ("OutputChannelId: '") + OutputChannelId + "'");
     // LOG_PORT.println (String ("OutputType:      '") + OutputType + "'");

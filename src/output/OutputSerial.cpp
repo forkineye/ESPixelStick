@@ -124,6 +124,8 @@ void c_OutputSerial::Begin ()
         speed = uint (CurrentBaudrate);
     }
 
+    SetOutputBufferSize (Num_Channels);
+
 #ifdef ARDUINO_ARCH_ESP8266
     /* Initialize uart */
     /* frameTime = szSymbol * 1000000 / baud * szBuffer */
@@ -181,6 +183,7 @@ bool c_OutputSerial::validate ()
         Num_Channels = DEFAULT_NUM_CHANNELS;
         response = false;
     }
+    SetOutputBufferSize (Num_Channels);
 
     if ((CurrentBaudrate < uint (BaudRate::BR_MIN)) || (CurrentBaudrate > uint (BaudRate::BR_MAX)))
     {

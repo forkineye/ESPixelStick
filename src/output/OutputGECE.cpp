@@ -99,6 +99,8 @@ static char LOOKUP_GECE[] =
 
 #define CYCLES_GECE_START   (F_CPU / 100000) // 10us
 
+#define GECE_NUM_CHAN_PER_PIXEL 3
+
 //----------------------------------------------------------------------------
 c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId,
                             gpio_num_t outputGpio, 
@@ -130,6 +132,7 @@ void c_OutputGECE::Begin()
     if (gpio_num_t (-1) == DataPin) { return; }
 
     FrameRefreshTimeMs = (GECE_FRAME_TIME + GECE_IDLE_TIME) * pixel_count;
+    SetOutputBufferSize (pixel_count * GECE_NUM_CHAN_PER_PIXEL);
 
     // Serial rate is 3x 100KHz for GECE
 #ifdef ARDUINO_ARCH_ESP8266
@@ -211,6 +214,8 @@ bool c_OutputGECE::validate ()
         pixel_count = GECE_PIXEL_LIMIT;
         response = false;
     }
+
+    SetOutputBufferSize (pixel_count * GECE_NUM_CHAN_PER_PIXEL);
 
  DEBUG_END;
     return response;
