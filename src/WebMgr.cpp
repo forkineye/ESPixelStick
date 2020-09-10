@@ -21,6 +21,7 @@
 
 #include "output/OutputMgr.hpp"
 #include "input/InputMgr.hpp"
+#include "service/FPPDiscovery.h"
 #include "WiFiMgr.hpp"
 
 #include "WebMgr.hpp"
@@ -118,7 +119,19 @@ void c_WebMgr::init ()
         {
             webSocket.textAll ("X6");
         }, [](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final) {WebMgr.FirmwareUpload (request, filename, index, data, len,  final); }).setFilter (ON_STA_FILTER);
-        
+    
+    // URL's needed for FPP Connect fseq uploading and querying
+    webServer.on ("/fpp", HTTP_GET, [](AsyncWebServerRequest* request) {
+        FPPDiscovery.ProcessGET(request);
+    });
+    webServer.on ("/fpp", HTTP_POST | HTTP_PUT, [](AsyncWebServerRequest* request) {
+        FPPDiscovery.ProcessPOST(request);
+    }, [](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
+        FPPDiscovery.ProcessFile(request, filename, index, data, len, final);
+    }, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+        FPPDiscovery.ProcessBody(request, data, len, index, total);
+    });
+    
     // Root access for testing
     webServer.serveStatic ("/root", SPIFFS, "/");
 
