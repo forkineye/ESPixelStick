@@ -25,8 +25,6 @@
 #define JSON_NAME_CHANNEL_START  (F ("channel_start"))
 #define JSON_NAME_MULTICAST      (F ("multicast"))
 
-
-
 //-----------------------------------------------------------------------------
 c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
                           c_InputMgr::e_InputType       NewChannelType,
@@ -51,7 +49,7 @@ c_InputE131::~c_InputE131()
 void c_InputE131::Begin ()
 {
     // DEBUG_START;
-    Serial.println(String(F("** E1.31 Initialization for channel '")) + InputChannelId + String(F("' **")));
+    Serial.println (String (F ("** 'E1.31' Initialization for input: '")) + InputChannelId + String (F ("' **")));
 
     if (true == HasBeenInitialized) 
     {
