@@ -31,16 +31,50 @@
 #error Platform not supported
 #endif
 
+
+#include <ESPAsyncWebServer.h>
+
 #define FPP_DISCOVERY_PORT 32320
+
+
 
 class c_FPPDiscovery 
 {
   private:
     AsyncUDP udp;
     void ProcessReceivedUdpPacket(AsyncUDPPacket _packet);
+    void ProcessSyncPacket(uint8_t action, String filename, uint32_t frame);
+    void ProcessBlankPacket();
+    
+    bool isRemoteRunning;
+    File fseqFile;
+    String fseqName;
+    String failedFseqName;
+    unsigned long fseqStartMillis;
+    int fseqCurrentFrame;
+    uint32_t dataOffset;
+    uint32_t channelsPerFrame;
+    uint8_t  frameStepTime;
+    
+    bool hasSDStorage;
+    bool inFileUpload;
+    uint8_t *buffer;
+    int bufCurPos;
+    
+    uint8_t * outputBuffer;
+    uint16_t outputBufferSize;
+    
   public:
     c_FPPDiscovery();
-    bool begin();
+    
+    bool begin(uint8_t * BufferStart, uint16_t BufferSize);
+    void Process();
+    
+    void ProcessGET(AsyncWebServerRequest* request);
+    void ProcessPOST(AsyncWebServerRequest* request);
+    void ProcessFile(AsyncWebServerRequest* request, String filename, size_t index, uint8_t *data, size_t len, bool final);
+    void ProcessBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);
+
     void sendPingPacket();
 };
 

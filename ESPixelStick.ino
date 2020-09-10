@@ -148,7 +148,7 @@ void setup()
     // Configure and start the web server
     WebMgr.Begin(&config);
 
-    FPPDiscovery.begin ();
+    FPPDiscovery.begin (OutputMgr.GetBufferAddress (), OutputMgr.GetBufferSize ());
 
 #ifdef ARDUINO_ARCH_ESP8266
     ESP.wdtEnable (2000);
@@ -397,6 +397,9 @@ void loop()
 
     // Process input data
     InputMgr.Process ();
+
+    // FPP Remote Mode process fseq
+    FPPDiscovery.Process ();
 
     // Render output
     OutputMgr.Render();
