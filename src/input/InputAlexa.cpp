@@ -65,7 +65,7 @@ void c_InputAlexa::Begin()
 {
     // DEBUG_START;
 
-    Serial.println (String (F ("** 'Alexa' Initialization for input: '")) + InputChannelId + String (F ("' **")));
+    LOG_PORT.println (String (F ("** 'Alexa' Initialization for input: '")) + InputChannelId + String (F ("' **")));
 
     if (true == HasBeenInitialized)
     {

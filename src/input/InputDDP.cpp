@@ -51,7 +51,7 @@ void c_InputDDP::Begin ()
 {
     // DEBUG_START;
 
-    Serial.println (String (F ("** 'DDP' Initialization for input: '")) + InputChannelId + String (F ("' **")));
+    LOG_PORT.println (String (F ("** 'DDP' Initialization for input: '")) + InputChannelId + String (F ("' **")));
 
     suspend = false;
 
