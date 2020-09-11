@@ -25,8 +25,10 @@ extern const String VERSION;
 
 #ifdef ARDUINO_ARCH_ESP32
 #define SD_CARD_PIN 5
+#define SD_OPEN_WRITEFLAGS   "rw"
 #else
 #define SD_CARD_PIN D8
+#define SD_OPEN_WRITEFLAGS   sdfat::O_READ | sdfat::O_WRITE | sdfat::O_CREAT | sdfat::O_TRUNC
 #endif
 
 
@@ -133,6 +135,26 @@ bool c_FPPDiscovery::begin(uint8_t * BufferStart, uint16_t BufferSize)
         if (SD.begin(SD_CARD_PIN)) {
             LOG_PORT.println();
             LOG_PORT.print("Found SD Card - Type: ");
+            hasSDStorage = true;
+#ifdef ARDUINO_ARCH_ESP32
+            switch (SD.cardType()) {
+              case CARD_NONE:
+                hasSDStorage = false;
+                LOG_PORT.println("NONE");
+                break;
+              case CARD_MMC:
+                LOG_PORT.println("MMC");
+                break;
+              case CARD_SD:
+                LOG_PORT.println("SD");
+                break;
+              case CARD_SDHC:
+                LOG_PORT.println("SDHC");
+                break;
+              default:
+                LOG_PORT.println("Unknown");
+            }
+#else
             switch (SD.type()) {
               case sdfat::SD_CARD_TYPE_SD1:
                 LOG_PORT.println("SD1");
@@ -146,7 +168,7 @@ bool c_FPPDiscovery::begin(uint8_t * BufferStart, uint16_t BufferSize)
               default:
                 LOG_PORT.println("Unknown");
             }
-            hasSDStorage = true;
+#endif
         } else {
             LOG_PORT.println (String (F ("No SD card")));
             hasSDStorage = false;
@@ -519,7 +541,8 @@ void c_FPPDiscovery::ProcessBody(AsyncWebServerRequest *request, uint8_t *data, 
             String filename = request->getParam("filename")->value();
             ProcessSyncPacket(0x1, "", 0); //must stop
             inFileUpload = true;
-            fseqFile = SD.open(filename, sdfat::O_READ | sdfat::O_WRITE | sdfat::O_CREAT | sdfat::O_TRUNC);
+            SD.remove(filename);
+            fseqFile = SD.open(filename, SD_OPEN_WRITEFLAGS);
             bufCurPos = 0;
             if (buffer == nullptr) {
                 buffer = (uint8_t*)malloc(BUFFER_LEN);
