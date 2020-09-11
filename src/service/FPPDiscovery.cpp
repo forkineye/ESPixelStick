@@ -26,9 +26,15 @@ extern const String VERSION;
 #ifdef ARDUINO_ARCH_ESP32
 #define SD_CARD_PIN 5
 #define SD_OPEN_WRITEFLAGS   "rw"
+#define FPP_TYPE_ID 0xC3
+#define FPP_VARIANT_NAME "ESPixelStick-ESP32"
+#define GET_HOST_NAME WiFi.getHostname()
 #else
 #define SD_CARD_PIN D8
 #define SD_OPEN_WRITEFLAGS   sdfat::O_READ | sdfat::O_WRITE | sdfat::O_CREAT | sdfat::O_TRUNC
+#define FPP_TYPE_ID 0xC2
+#define FPP_VARIANT_NAME "ESPixelStick-ESP8266"
+#define GET_HOST_NAME  WiFi.hostname().c_str()
 #endif
 
 
@@ -323,6 +329,7 @@ void c_FPPDiscovery::ProcessSyncPacket(uint8_t action, String filename, uint32_t
                         dataOffset = fsqHeader->dataOffset;
                         channelsPerFrame = fsqHeader->channelCount;
                         frameStepTime = fsqHeader->stepTime;
+                        numFrames = fsqHeader->numFrames;
                     }
                 } else {
                     failedFseqName = filename;
@@ -354,12 +361,7 @@ void c_FPPDiscovery::sendPingPacket()
     packet.data_len = 294;
     packet.ping_version = 0x3;
     packet.ping_subtype = 0x0; // 1 is to "discover" others, we don't need that
-    
-#ifdef ARDUINO_ARCH_ESP32
-    packet.ping_hardware = 0xC3;  // 0xC3 is assigned for ESPixelStick on ESP32
-#else
-    packet.ping_hardware = 0xC2;  // 0xC2 is assigned for ESPixelStick on ESP8266
-#endif
+    packet.ping_hardware = FPP_TYPE_ID;
     
     const char *version = VERSION.c_str();
     uint16_t v = (uint16_t)atoi(version);
@@ -373,9 +375,9 @@ void c_FPPDiscovery::sendPingPacket()
     }
     uint32_t ip = static_cast<uint32_t>(WiFi.localIP());
     memcpy (packet.ipAddress, &ip, 4);
-    strcpy (packet.hostName, config.id.c_str());
+    strcpy (packet.hostName, GET_HOST_NAME);
     strcpy (packet.version, version);
-    strcpy (packet.hardwareType, "ESPixelStick");
+    strcpy (packet.hardwareType, FPP_VARIANT_NAME);
     packet.ranges[0] = 0;
     
     udp.broadcastTo(packet.raw, sizeof(packet), FPP_DISCOVERY_PORT);
@@ -497,6 +499,7 @@ void c_FPPDiscovery::ProcessGET(AsyncWebServerRequest* request) {
                         String resp = printFSEQJSON(seq, file);
                         file.close();
                         request->send(200, "application/json", resp);
+                        return;
                     }
                 }
             }
@@ -514,6 +517,7 @@ void c_FPPDiscovery::ProcessPOST(AsyncWebServerRequest* request) {
             String resp = printFSEQJSON(filename, file);
             file.close();
             request->send(200, "application/json", resp);
+            return;
         } else {
             LOG_PORT.printf("File doesn't exist\n");
         }
@@ -575,5 +579,125 @@ void c_FPPDiscovery::ProcessBody(AsyncWebServerRequest *request, uint8_t *data, 
     }
 }
 
+String c_FPPDiscovery::GetSysInfoJSON() {
+    String resp = "{\"HostName\":\"";
+    resp += GET_HOST_NAME;
+    resp += "\",\"HostDescription\":\"";
+    resp += config.id;
+    resp += "\",\"Platform\":\"ESPixelStick\",\"Variant\":\"";
+    resp += FPP_VARIANT_NAME;
+    resp += "\",\"Mode\":\"";
+    if (hasSDStorage) {
+        resp += "remote";
+    } else {
+        resp += "bridge";
+    }
+    resp += "\",\"Version\":\"";
+    
+    const char *version = VERSION.c_str();
+    uint16_t v = (uint16_t)atoi(version);
+    int versionMajor = (uint16_t)atoi(version);
+    int versionMinor = (uint16_t)atoi(&version[2]);
+    resp += VERSION;
+    resp += "\",\"majorVersion\":";
+    resp += versionMajor;
+    resp += ",\"minorVersion\":";
+    resp += versionMinor;
+    resp += ",\"typeId\":";
+    resp += FPP_TYPE_ID;
+    resp += ",\"Utilization\":{";
+    //resp += "\"Memory\":";
+    //resp += memory;
+    //resp += ",\"CPU\":";
+    //resp += cpu;
+    resp += "\"MemoryFree\":";
+    resp += ESP.getFreeHeap();
+    resp += ",\"Uptime\":";
+    resp += millis();
+    resp += "}";
+    resp += ",\"rssi\":";
+    resp +=  WiFi.RSSI ();
+    resp += ",\"IPS\":[\"";
+    resp += WiFi.localIP().toString();
+    resp += "\"]}";
+    return resp;
+}
+
+void c_FPPDiscovery::ProcessFPPJson(AsyncWebServerRequest* request) {
+    //LOG_PORT.println("In process get");
+    //printReq(request, false);
+    
+    if (request->hasParam("command")) {
+        String command = request->getParam("command")->value();
+        if (command == "getFPPstatus") {
+            String adv = "false";
+            if (request->hasParam("advancedView")) {
+                adv = request->getParam("advancedView")->value();
+            }
+            String resp = "{\"MQTT\":{\"configured\":false,\"connected\":false},\"current_playlist\":{\"count\":\"0\"";
+            resp += ",\"description\":\"\",\"index\":\"0\",\"playlist\":\"\",\"type\":\"\"},"
+                    "\"volume\":70,\"media_filename\":\"\",\"fppd\":\"running\",\"current_song\":\"\",";
+            if (isRemoteRunning) {
+                int mseconds = fseqCurrentFrame * frameStepTime;
+                int msecondsTotal = frameStepTime * numFrames;
+                
+                int secs = mseconds / 1000;
+                int secsTot = msecondsTotal / 1000;
+
+                resp += "\"current_sequence\":\"" + fseqName + "\","
+                    + "\"playlist\":\""+fseqName+"\","
+                    + "\"seconds_elapsed\":\""+String(secs)+"\",\"seconds_played\":\""
+                    + String(secs)+"\",\"seconds_remaining\":\""+String(secsTot-secs)+"\","
+                    + "\"sequence_filename\":\""+fseqName+"\",\"status\":1,\"status_name\":\"playing\",";
+                
+                int mins = secs / 60;
+                secs = secs % 60;
+                
+                secsTot = secsTot - secs;
+                int minRem = secsTot / 60;
+                secsTot = secsTot % 60;
+                
+                char buf[8];
+                sprintf(buf, "%02d:%02d", mins, secs);
+
+                resp += "\"time_elapsed\":\"";
+                resp += buf;
+                resp += "\",\"time_remaining\":\"";
+                sprintf(buf, "%02d:%02d", minRem, secsTot);
+                resp += buf;
+                resp += "\",";
+            } else {
+                resp += "\"current_sequence\":\"\","
+                     "\"playlist\":\"\",\"seconds_elapsed\":\"0\",\"seconds_played\":\"0\",\"seconds_remaining\":\"0\","
+                     "\"sequence_filename\":\"\",\"status\":0,\"status_name\":\"idle\",\"time_elapsed\":\"00:00\","
+                     "\"time_remaining\":\"00:00\",";
+            }
+            if (hasSDStorage) {
+                resp += "\"mode\":8,\"mode_name\":\"remote\"";
+            } else {
+                resp += "\"mode\":1,\"mode_name\":\"bridge\"";
+            }
+            if (adv == "true") {
+                resp += ",\"advancedView\": " + GetSysInfoJSON();
+            }
+            resp += "}";
+            request->send(200, "application/json", resp);
+            return;
+        } else if (command == "getSysInfo") {
+            String resp = GetSysInfoJSON();
+            request->send(200, "application/json", resp);
+            return;
+        } else if (command == "getHostNameInfo") {
+            String resp = "{\"HostName\":\"";
+            resp += GET_HOST_NAME;
+            resp += "\",\"HostDescription\":\"";
+            resp += config.id;
+            resp += "\"}";
+            request->send(200, "application/json", resp);
+            return;
+        }
+    }
+    request->send(404);
+}
 
 c_FPPDiscovery FPPDiscovery;

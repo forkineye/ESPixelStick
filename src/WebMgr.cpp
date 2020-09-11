@@ -131,7 +131,12 @@ void c_WebMgr::init ()
     }, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
         FPPDiscovery.ProcessBody(request, data, len, index, total);
     });
-    
+    // URL that FPP's status pages use to grab JSON about the current status, what's playing, etc...
+    // This can be used to mimic the behavior of atual FPP remotes
+    webServer.on ("/fppjson.php", HTTP_GET, [](AsyncWebServerRequest* request) {
+        FPPDiscovery.ProcessFPPJson(request);
+    });
+
     // Root access for testing
     webServer.serveStatic ("/root", SPIFFS, "/");
 

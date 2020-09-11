@@ -55,6 +55,7 @@ class c_FPPDiscovery
     uint32_t dataOffset;
     uint32_t channelsPerFrame;
     uint8_t  frameStepTime;
+    uint32_t numFrames;
     
     bool hasSDStorage;
     bool inFileUpload;
@@ -64,12 +65,15 @@ class c_FPPDiscovery
     uint8_t * outputBuffer;
     uint16_t outputBufferSize;
     
+    String GetSysInfoJSON();
+    
   public:
     c_FPPDiscovery();
     
     bool begin(uint8_t * BufferStart, uint16_t BufferSize);
     void Process();
     
+    void ProcessFPPJson(AsyncWebServerRequest* request);
     void ProcessGET(AsyncWebServerRequest* request);
     void ProcessPOST(AsyncWebServerRequest* request);
     void ProcessFile(AsyncWebServerRequest* request, String filename, size_t index, uint8_t *data, size_t len, bool final);
