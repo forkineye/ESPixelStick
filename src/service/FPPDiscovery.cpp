@@ -25,11 +25,10 @@ extern const String VERSION;
 
 #ifdef ARDUINO_ARCH_ESP32
 #   define SD_CARD_DATA_PIN     5
-#   define SD_OPEN_WRITEFLAGS   "rw"
+#   define SD_OPEN_WRITEFLAGS   "w"
 #   define FPP_TYPE_ID          0xC3
 #   define FPP_VARIANT_NAME     "ESPixelStick-ESP32"
 #   define GET_HOST_NAME        WiFi.getHostname()
-
 #   define SD_CARD_MISO_PIN    19
 #   define SD_CARD_MOSI_PIN    23 
 #   define SD_CARD_CLK_PIN     18
@@ -779,6 +778,10 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                         file.close ();
                         request->send (200, "application/json", resp);
                         break;
+                    }
+					else 
+					{
+                        LOG_PORT.printf("File doesn't exist: %s\n", seq.c_str());
                     }
                 }
             }
