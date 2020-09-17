@@ -38,48 +38,50 @@
 
 
 
-class c_FPPDiscovery 
+class c_FPPDiscovery
 {
-  private:
+private:
     AsyncUDP udp;
-    void ProcessReceivedUdpPacket(AsyncUDPPacket _packet);
-    void ProcessSyncPacket(uint8_t action, String filename, uint32_t frame);
-    void ProcessBlankPacket();
-    
-    bool isRemoteRunning;
-    File fseqFile;
-    String fseqName;
-    String failedFseqName;
-    unsigned long fseqStartMillis;
-    int fseqCurrentFrame;
-    uint32_t dataOffset;
-    uint32_t channelsPerFrame;
-    uint8_t  frameStepTime;
-    uint32_t numFrames;
-    
-    bool hasSDStorage;
-    bool inFileUpload;
-    uint8_t *buffer;
-    int bufCurPos;
-    
-    uint8_t * outputBuffer;
-    uint16_t outputBufferSize;
-    
-    String GetSysInfoJSON();
-    
-  public:
-    c_FPPDiscovery();
-    
-    bool begin(uint8_t * BufferStart, uint16_t BufferSize);
-    void Process();
-    
-    void ProcessFPPJson(AsyncWebServerRequest* request);
-    void ProcessGET(AsyncWebServerRequest* request);
-    void ProcessPOST(AsyncWebServerRequest* request);
-    void ProcessFile(AsyncWebServerRequest* request, String filename, size_t index, uint8_t *data, size_t len, bool final);
-    void ProcessBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);
+    void ProcessReceivedUdpPacket (AsyncUDPPacket _packet);
+    void ProcessSyncPacket (uint8_t action, String filename, uint32_t frame);
+    void ProcessBlankPacket ();
 
-    void sendPingPacket();
+    bool isRemoteRunning = false;
+    File fseqFile;
+    String fseqName = "";
+    String failedFseqName = "";
+    unsigned long fseqStartMillis = 0;
+    int fseqCurrentFrameId = 0;
+    uint32_t dataOffset = 0;
+    uint32_t channelsPerFrame = 0;
+    uint8_t  frameStepTime = 0;
+    uint32_t TotalNumberOfFramesInSequence = 0;
+
+    bool hasSDStorage = false;
+    bool inFileUpload = false;
+    uint8_t* buffer = nullptr;
+    int bufCurPos = 0;
+
+    void GetSysInfoJSON (JsonObject& jsonResponse);
+    void DescribeSdCardToUser ();
+    void BuildFseqResponse (String fname, File fseq, String & resp);
+    void StopPlaying ();
+    void printDirectory (File dir, int numTabs);
+
+
+public:
+    c_FPPDiscovery ();
+
+    void begin ();
+    void Process ();
+
+    void ProcessFPPJson (AsyncWebServerRequest* request);
+    void ProcessGET     (AsyncWebServerRequest* request);
+    void ProcessPOST    (AsyncWebServerRequest* request);
+    void ProcessFile    (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
+    void ProcessBody    (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total);
+
+    void sendPingPacket ();
 };
 
 extern c_FPPDiscovery FPPDiscovery;
