@@ -412,7 +412,9 @@ static void printReq(AsyncWebServerRequest* request, bool post) {
 
 String printFSEQJSON(String fname, File fseq) {
     uint8_t buf[48];
-    fseq.read(buf, 48);
+    
+    fseq.seek(0);
+    int i = fseq.read(buf, 48);
     
     FSEQHeader * fsqHeader = reinterpret_cast<FSEQHeader*>(buf);
 
@@ -452,15 +454,18 @@ String printFSEQJSON(String fname, File fseq) {
     resp += ", \"ChannelCount\": ";
     resp += String(fsqHeader->channelCount);
 
+
     int compressionType = fsqHeader->compressionType;
     uint32_t pos = read16(buf, 8);
     uint32_t dataPos = read16(buf, 4);
     String headers = "";
+
     while (pos < dataPos) {
         fseq.seek(pos);
         fseq.read(buf, 4);
         buf[4] = 0;
         int l = read16(buf, 0);
+
         if ((buf[2] == 'm' && buf[3] == 'f')
             || (buf[2] == 's' && buf[3] == 'p')) {
             if (headers != "") {
@@ -474,7 +479,7 @@ String printFSEQJSON(String fname, File fseq) {
             free(buf2);
             headers += "\"";
         }
-        pos += l;
+        pos += l + 4;
     }
     if (headers != "") {
         resp += ", \"variableHeaders\": {";
