@@ -25,7 +25,7 @@ extern const String VERSION;
 
 #ifdef ARDUINO_ARCH_ESP32
 #define SD_CARD_PIN 5
-#define SD_OPEN_WRITEFLAGS   "rw"
+#define SD_OPEN_WRITEFLAGS   "w"
 #define FPP_TYPE_ID 0xC3
 #define FPP_VARIANT_NAME "ESPixelStick-ESP32"
 #define GET_HOST_NAME WiFi.getHostname()
@@ -111,9 +111,19 @@ c_FPPDiscovery::c_FPPDiscovery() {
     bufCurPos = 0;
 }
 
+
+
 //-----------------------------------------------------------------------------
 bool c_FPPDiscovery::begin(uint8_t * BufferStart, uint16_t BufferSize)
 {
+    /*
+    #define TFT_MISO            22
+    #define TFT_MOSI            19
+    #define TFT_SCLK            21
+    #define TFT_CS              SD_CARD_PIN
+    SPI.begin(TFT_SCLK, TFT_MISO, TFT_MOSI, TFT_CS);
+    */
+
     outputBuffer = BufferStart;
     outputBufferSize = BufferSize;
     isRemoteRunning = false;
@@ -314,7 +324,7 @@ void c_FPPDiscovery::ProcessSyncPacket(uint8_t action, String filename, uint32_t
                 ProcessSyncPacket(0x01, filename, frame); //need to stop first
             }
             if (!inFileUpload && failedFseqName != filename) {
-                fseqFile = SD.open(filename);
+                fseqFile = SD.open("/" + filename);
                 if (fseqFile.size() > 0) {
                     uint8_t buf[48];
                     fseqFile.read(buf, 48);
@@ -402,7 +412,9 @@ static void printReq(AsyncWebServerRequest* request, bool post) {
 
 String printFSEQJSON(String fname, File fseq) {
     uint8_t buf[48];
-    fseq.read(buf, 48);
+    
+    fseq.seek(0);
+    int i = fseq.read(buf, 48);
     
     FSEQHeader * fsqHeader = reinterpret_cast<FSEQHeader*>(buf);
 
@@ -442,15 +454,18 @@ String printFSEQJSON(String fname, File fseq) {
     resp += ", \"ChannelCount\": ";
     resp += String(fsqHeader->channelCount);
 
+
     int compressionType = fsqHeader->compressionType;
     uint32_t pos = read16(buf, 8);
     uint32_t dataPos = read16(buf, 4);
     String headers = "";
+
     while (pos < dataPos) {
         fseq.seek(pos);
         fseq.read(buf, 4);
         buf[4] = 0;
         int l = read16(buf, 0);
+
         if ((buf[2] == 'm' && buf[3] == 'f')
             || (buf[2] == 's' && buf[3] == 'p')) {
             if (headers != "") {
@@ -464,7 +479,7 @@ String printFSEQJSON(String fname, File fseq) {
             free(buf2);
             headers += "\"";
         }
-        pos += l;
+        pos += l + 4;
     }
     if (headers != "") {
         resp += ", \"variableHeaders\": {";
@@ -492,14 +507,16 @@ void c_FPPDiscovery::ProcessGET(AsyncWebServerRequest* request) {
             if (seq.endsWith("/meta")) {
                 seq = seq.substring(0, seq.length() - 5);
                 ProcessSyncPacket(0x1, "", 0); //must stop
-                if (SD.exists(seq)) {
-                    File file = SD.open(seq);
+                if (SD.exists("/" + seq)) {
+                    File file = SD.open("/" + seq);
                     if (file.size() > 0) {
                         // found the file.... return metadata as json
                         String resp = printFSEQJSON(seq, file);
                         file.close();
                         request->send(200, "application/json", resp);
                         return;
+                    } else {
+                        LOG_PORT.printf("File doesn't exist: %s\n", seq.c_str());
                     }
                 }
             }
@@ -512,14 +529,14 @@ void c_FPPDiscovery::ProcessPOST(AsyncWebServerRequest* request) {
     String path = request->getParam("path")->value();
     if (path == "uploadFile") {
         String filename = request->getParam("filename")->value();
-        if (SD.exists(filename)) {
-            File file = SD.open(filename);
+        if (SD.exists("/" + filename)) {
+            File file = SD.open("/" + filename);
             String resp = printFSEQJSON(filename, file);
             file.close();
             request->send(200, "application/json", resp);
             return;
         } else {
-            LOG_PORT.printf("File doesn't exist\n");
+            LOG_PORT.printf("File doesn't exist: %s\n", filename.c_str());
         }
     }
     
@@ -545,8 +562,9 @@ void c_FPPDiscovery::ProcessBody(AsyncWebServerRequest *request, uint8_t *data, 
             String filename = request->getParam("filename")->value();
             ProcessSyncPacket(0x1, "", 0); //must stop
             inFileUpload = true;
+            
             SD.remove(filename);
-            fseqFile = SD.open(filename, SD_OPEN_WRITEFLAGS);
+            fseqFile = SD.open("/" + filename, SD_OPEN_WRITEFLAGS);
             bufCurPos = 0;
             if (buffer == nullptr) {
                 buffer = (uint8_t*)malloc(BUFFER_LEN);
