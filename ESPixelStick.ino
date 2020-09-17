@@ -148,7 +148,7 @@ void setup()
     // Configure and start the web server
     WebMgr.Begin(&config);
 
-    FPPDiscovery.begin (OutputMgr.GetBufferAddress (), OutputMgr.GetBufferSize ());
+    FPPDiscovery.begin ();
 
 #ifdef ARDUINO_ARCH_ESP8266
     ESP.wdtEnable (2000);
