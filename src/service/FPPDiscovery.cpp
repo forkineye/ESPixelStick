@@ -77,6 +77,7 @@ typedef union
     } __attribute__ ((packed));
     uint8_t raw[301];
 } FPPPingPacket;
+
 typedef union
 {
     struct
@@ -93,21 +94,37 @@ typedef union
     uint8_t raw[301];
 } FPPMultiSyncPacket;
 
+struct FSEQVariableDataHeader
+{
+    uint16_t    length;
+    char        type[2];
+//  uint8_t     data[???];
 
-struct FSEQHeader {
-    uint8_t header[4];
+} __attribute__ ((packed));
+
+struct FSEQRangeEntry
+{
+    uint8_t Start[3];
+    uint8_t Length[3];
+
+} __attribute__ ((packed));
+
+
+struct FSEQHeader
+{
+    uint8_t  header[4];    // FSEQ
     uint16_t dataOffset;
-    uint8_t minorVersion;
-    uint8_t majorVersion;
+    uint8_t  minorVersion;
+    uint8_t  majorVersion;
     uint16_t headerLen;
     uint32_t channelCount;
     uint32_t TotalNumberOfFramesInSequence;
-    uint8_t stepTime;
-    uint8_t flags;
-    uint8_t compressionType;
-    uint8_t numCompressedBlocks;
-    uint8_t numSparseRanges;
-    uint8_t flags2;
+    uint8_t  stepTime;
+    uint8_t  flags;
+    uint8_t  compressionType;
+    uint8_t  numCompressedBlocks;
+    uint8_t  numSparseRanges;
+    uint8_t  flags2;
     uint64_t id;
 } __attribute__ ((packed));
 
@@ -296,7 +313,7 @@ void c_FPPDiscovery::Process ()
             int toRead = channelsPerFrame > outputBufferSize ? outputBufferSize : channelsPerFrame;
 
             fseqFile.read (outputBuffer, toRead);
-            //LOG_PORT.printf("New Frame!   Old: %d     New:  %d      Offset: %d\n", fseqCurrentFrameId, frame, pos);
+            //LOG_PORT.printf("New Frame!   Old: %d     New:  %d      Offset: %d\n", fseqCurrentFrameId, frame, FileOffsetToCurrentHeaderRecord);
             fseqCurrentFrame = frame;
         }
     }
@@ -332,7 +349,24 @@ uint32_t read24 (uint8_t* buf, int idx) {
     r |= (int)(buf[idx]);
     return r;
 }
-uint16_t read16 (uint8_t* buf, int idx) {
+
+uint32_t read24 (uint8_t* pData)
+{
+    uint32_t r = (int)(pData[2]) << 16;
+    r |= (int)(pData[1]) << 8;
+    r |= (int)(pData[0]);
+    return r;
+} // read24
+
+uint16_t read16 (uint8_t* pData)
+{
+    uint16_t r = (uint16_t)(pData[0]);
+    r |= (uint16_t)(pData[1]) << 8;
+    return r;
+} // read16
+
+uint16_t read16 (uint8_t* buf, int idx)
+{
     uint16_t r = (int)(buf[idx]);
     r |= (int)(buf[idx + 1]) << 8;
     return r;
@@ -482,17 +516,17 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_
                 break;
             }
 
-            uint8_t buf[48];
+            FSEQHeader fsqHeader;
             fseqFile.seek (0);
-            fseqFile.read (buf, sizeof(buf));
-            FSEQHeader* fsqHeader = reinterpret_cast<FSEQHeader*>(buf);
-            if (fsqHeader->majorVersion != 2 || fsqHeader->compressionType != 0)
+            fseqFile.read ((uint8_t*)&fsqHeader, sizeof (fsqHeader));
+
+            String resp;
+            BuildFseqResponse (filename, fseqFile, resp); // todo - remove
+            DEBUG_V (resp);
+
+            if (fsqHeader.majorVersion != 2 || fsqHeader.compressionType != 0)
             {
                 DEBUG_V ("not a v2 uncompressed sequence");
-
-                String resp;
-                BuildFseqResponse (filename, fseqFile, resp); // todo - remove
-                DEBUG_V (resp);
 
                 failedFseqName = filename;
                 fseqFile.close ();
@@ -505,10 +539,10 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_
 
             fseqName                      = filename;
             fseqCurrentFrameId            = 0;
-            dataOffset                    = fsqHeader->dataOffset;
-            channelsPerFrame              = fsqHeader->channelCount;
-            frameStepTime                 = fsqHeader->stepTime;
-            TotalNumberOfFramesInSequence = fsqHeader->TotalNumberOfFramesInSequence;
+            dataOffset                    = fsqHeader.dataOffset;
+            channelsPerFrame              = fsqHeader.channelCount;
+            frameStepTime                 = fsqHeader.stepTime;
+            TotalNumberOfFramesInSequence = fsqHeader.TotalNumberOfFramesInSequence;
 
             break;
         }
@@ -544,10 +578,10 @@ void c_FPPDiscovery::sendPingPacket ()
     // DEBUG_START;
     FPPPingPacket packet;
     memset (packet.raw, 0, sizeof (packet));
-    packet.header[0] = 'F';
-    packet.header[1] = 'P';
-    packet.header[2] = 'P';
-    packet.header[3] = 'D';
+    packet.raw[0] = 'F';
+    packet.raw[1] = 'P';
+    packet.raw[2] = 'P';
+    packet.raw[3] = 'D';
     packet.packet_type = 0x04;
     packet.data_len = 294;
     packet.ping_version = 0x3;
@@ -605,141 +639,99 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, File fseq, String & resp)
 {
     DEBUG_START;
 
-    DynamicJsonDocument JsonDoc (16*1024);
+    DynamicJsonDocument JsonDoc (4*1024);
     JsonObject JsonData = JsonDoc.to<JsonObject> ();
 
-    uint8_t buf[48];
+    FSEQHeader fsqHeader;
     fseq.seek (0);
-    fseq.read (buf, sizeof(buf));
+    fseq.read ((uint8_t*)&fsqHeader, sizeof (fsqHeader));
 
-    FSEQHeader * fsqHeader = reinterpret_cast<FSEQHeader *>(buf);
+    JsonData["Name"]            = fname;
+    JsonData["Version"]         = String (fsqHeader.majorVersion) + "." + String (fsqHeader.minorVersion);
+    JsonData["ID"]              = int64String (fsqHeader.id);
+    JsonData["StepTime"]        = String (fsqHeader.stepTime);
+    JsonData["NumFrames"]       = String (fsqHeader.TotalNumberOfFramesInSequence);
+    JsonData["CompressionType"] = fsqHeader.compressionType;
 
-    JsonData["Name"]      = fname;
-    JsonData["Version"]   = String (fsqHeader->majorVersion) + "." + String (fsqHeader->minorVersion);
-    JsonData["ID"]        = int64String (fsqHeader->id);
-    JsonData["StepTime"]  = String (fsqHeader->stepTime);
-    JsonData["NumFrames"] = String (fsqHeader->TotalNumberOfFramesInSequence);
+    uint32_t maxChannel = fsqHeader.channelCount;
 
-    resp = "{\"Name\": \"" + fname + "\", \"Version\": \"";
-    resp += String (fsqHeader->majorVersion);
-    resp += ".";
-    resp += String (fsqHeader->minorVersion);
-    resp += "\", \"ID\": \"" + int64String (fsqHeader->id) + "\"";
-    resp += ", \"StepTime\": ";
-    resp += String (fsqHeader->stepTime);
-    resp += ", \"NumFrames\": ";
-    resp += String (fsqHeader->TotalNumberOfFramesInSequence);
-
-    uint32_t maxChannel = fsqHeader->channelCount;
-    String ranges = "";
-    JsonArray  JsonDataRanges = JsonData.createNestedArray ("Ranges");
-
-    if (fsqHeader->numSparseRanges)
+    if (0 != fsqHeader.numSparseRanges)
     {
+        JsonArray  JsonDataRanges = JsonData.createNestedArray ("Ranges");
+
         maxChannel = 0;
-        uint8_t* buf2 = (uint8_t*)malloc (6 * fsqHeader->numSparseRanges);
-        fseq.seek (fsqHeader->numCompressedBlocks * 8 + 32);
-        fseq.read (buf2, 6 * fsqHeader->numSparseRanges);
-        for (int x = 0; x < fsqHeader->numSparseRanges; x++)
+
+        uint8_t* RangeDataBuffer = (uint8_t*)malloc (6 * fsqHeader.numSparseRanges);
+        FSEQRangeEntry* CurrentFSEQRangeEntry = (FSEQRangeEntry*)RangeDataBuffer;
+
+        fseq.seek (fsqHeader.numCompressedBlocks * 8 + 32);
+        fseq.read (RangeDataBuffer, sizeof(FSEQRangeEntry) * fsqHeader.numSparseRanges);
+
+        for (int CurrentRangeIndex = 0; 
+             CurrentRangeIndex < fsqHeader.numSparseRanges; 
+             CurrentRangeIndex++, CurrentFSEQRangeEntry++)
         {
-            uint32_t st = read24 (buf2, x * 6);
-            uint16_t len = read24 (buf2, x * 6 + 3);
-            if (ranges != "")
-            {
-                ranges += ", ";
-            }
+            uint32_t RangeStart  = read24 (CurrentFSEQRangeEntry->Start);
+            uint32_t RangeLength = read24 (CurrentFSEQRangeEntry->Length);
 
             JsonObject JsonRange = JsonDataRanges.createNestedObject ();
-            if (true == JsonRange.isNull ())
-            {
-                DEBUG_V ("Out of Doc Memory");
-            }
-            JsonRange["Start"]  = String (st);
-            JsonRange["Length"] = String (len);
+            JsonRange["Start"]  = String (RangeStart);
+            JsonRange["Length"] = String (RangeLength);
 
-            ranges += "{\"Start\": " + String (st) + ", \"Length\": " + String (len) + "}";
-            if ((st + len - 1) > maxChannel)
+            if ((RangeStart + RangeLength - 1) > maxChannel)
             {
-                maxChannel = st + len - 1;
+                maxChannel = RangeStart + RangeLength - 1;
             }
         }
-        free (buf2);
+
+        free (RangeDataBuffer);
     }
 
     JsonData["MaxChannel"]   = String (maxChannel);
-    JsonData["ChannelCount"] = String (fsqHeader->channelCount);
+    JsonData["ChannelCount"] = String (fsqHeader.channelCount);
 
-    resp += ", \"MaxChannel\": ";
-    resp += String (maxChannel);
-    resp += ", \"ChannelCount\": ";
-    resp += String (fsqHeader->channelCount);
+    uint32_t FileOffsetToCurrentHeaderRecord = read16 ((uint8_t*)&fsqHeader.headerLen);
+    uint32_t FileOffsetToStartOfSequenceData = read16 ((uint8_t*)&fsqHeader.dataOffset); // DataOffset
 
-    int compressionType = fsqHeader->compressionType;
+    // DEBUG_V (String ("FileOffsetToCurrentHeaderRecord: ") + String (FileOffsetToCurrentHeaderRecord));
+    // DEBUG_V (String ("FileOffsetToStartOfSequenceData: ") + String (FileOffsetToStartOfSequenceData));
 
-    JsonArray  JsonDataHeaders = JsonData.createNestedArray ("variableHeaders");
-
-    uint32_t pos = read16 (buf, 8);
-    uint32_t dataPos = read16 (buf, 4);
-    String headers = "";
-    while (pos < dataPos) 
+    if (FileOffsetToCurrentHeaderRecord < FileOffsetToStartOfSequenceData)
     {
-        fseq.seek (pos);
-        fseq.read (buf, 4);
-        buf[4] = 0;
-        int l = read16 (buf, 0);
+        JsonArray  JsonDataHeaders = JsonData.createNestedArray ("variableHeaders");
 
-        if ((buf[2] == 'm' && buf[3] == 'f') ||
-            (buf[2] == 's' && buf[3] == 'p'))
+        char FSEQVariableDataHeaderBuffer[sizeof (FSEQVariableDataHeader) + 1];
+        memset ((uint8_t*)FSEQVariableDataHeaderBuffer, 0x00, sizeof (FSEQVariableDataHeaderBuffer));
+        FSEQVariableDataHeader* pCurrentVariableHeader = (FSEQVariableDataHeader*)FSEQVariableDataHeaderBuffer;
+
+        while (FileOffsetToCurrentHeaderRecord < FileOffsetToStartOfSequenceData)
         {
-            if (headers != "")
+            fseq.seek (FileOffsetToCurrentHeaderRecord);
+            fseq.read ((uint8_t*)FSEQVariableDataHeaderBuffer, sizeof (FSEQVariableDataHeader));
+
+            int VariableDataHeaderTotalLength = read16 ((uint8_t*)&(pCurrentVariableHeader->length));
+            int VariableDataHeaderDataLength  = VariableDataHeaderTotalLength - sizeof (FSEQVariableDataHeader);
+            
+            String HeaderTypeCode (pCurrentVariableHeader->type);
+
+            if ((HeaderTypeCode == "mf") || (HeaderTypeCode == "sp") )
             {
-                headers += ", ";
+                char * VariableDataHeaderDataBuffer = (char*)malloc (VariableDataHeaderDataLength + 1);
+                memset (VariableDataHeaderDataBuffer, 0x00, VariableDataHeaderDataLength + 1);
+
+                fseq.read ((uint8_t*)VariableDataHeaderDataBuffer, VariableDataHeaderDataLength);
+
+                JsonObject JsonDataHeader = JsonDataHeaders.createNestedObject ();
+                JsonDataHeader[HeaderTypeCode] = String (VariableDataHeaderDataBuffer);
+
+                free (VariableDataHeaderDataBuffer);
             }
 
-            String h = (const char*)(&buf[2]);
-            headers += "\"" + h + "\": \"";
-            char* buf2 = (char*)malloc (l);
-            fseq.read ((uint8_t*)buf2, l - 4);
-            headers += buf2;
+            FileOffsetToCurrentHeaderRecord += VariableDataHeaderTotalLength + sizeof (FSEQVariableDataHeader);
+        } // while there are headers to process
+    } // there are headers to process
 
-            JsonObject JsonDataHeader = JsonDataHeaders.createNestedObject ();
-            JsonDataHeader[h] = String (buf2);
-
-            free (buf2);
-            headers += "\"";
-        }
-        pos += l + 4;
-    }
-
-    if (0 == JsonDataHeaders.size ())
-    {
-        JsonData.remove ("variableHeaders");
-    }
-    if (headers != "")
-    {
-        resp += ", \"variableHeaders\": {";
-        resp += headers;
-        resp += "}";
-    }
-
-    if (0 == JsonDataRanges.size ())
-    {
-        JsonData.remove ("Ranges");
-    }
-    if (ranges != "")
-    {
-        resp += ", \"Ranges\": [" + ranges + "]";
-    }
-
-    JsonData["CompressionType"] = compressionType;
-
-    resp += ", \"CompressionType\": ";
-    resp += compressionType;
-    resp += "}";
-
-    String temp;
-    serializeJson (JsonData, temp);
-    DEBUG_V (temp);
+    serializeJson (JsonData, resp);
 
     DEBUG_END;
 
@@ -836,7 +828,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
 void c_FPPDiscovery::ProcessFile (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final)
 {
     // DEBUG_START;
-    //LOG_PORT.printf("In ProcessFile: %s    idx: %d    len: %d    final: %d\n",filename.c_str(), index, len, final? 1 : 0);
+    //LOG_PORT.printf("In ProcessFile: %s    idx: %d    RangeLength: %d    final: %d\n",filename.c_str(), index, RangeLength, final? 1 : 0);
     //printReq(request, false);
     request->send (404);
     // DEBUG_END;
@@ -854,7 +846,7 @@ void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data,
 
     if (!index)
     {
-        //LOG_PORT.printf("In process Body:    idx: %d    len: %d    total: %d\n", index, len, total);
+        //LOG_PORT.printf("In process Body:    idx: %d    RangeLength: %d    total: %d\n", index, RangeLength, total);
         printReq (request, false);
 
         String path = request->getParam ("path")->value ();
