@@ -398,9 +398,6 @@ void loop()
     // Process input data
     InputMgr.Process ();
 
-    // FPP Remote Mode process fseq
-    FPPDiscovery.Process ();
-
     // Render output
     OutputMgr.Render();
 
