@@ -68,18 +68,17 @@ private:
     void StopPlaying ();
     void printDirectory (File dir, int numTabs);
 
-
 public:
     c_FPPDiscovery ();
 
     void begin ();
-    void Process ();
 
     void ProcessFPPJson (AsyncWebServerRequest* request);
     void ProcessGET     (AsyncWebServerRequest* request);
     void ProcessPOST    (AsyncWebServerRequest* request);
     void ProcessFile    (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
     void ProcessBody    (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total);
+    void ReadNextFrame (uint8_t* outputBuffer, uint16_t outputBufferSize);
 
     void sendPingPacket ();
 };

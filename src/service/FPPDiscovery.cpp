@@ -299,14 +299,14 @@ void c_FPPDiscovery::printDirectory (File dir, int numTabs)
 } // printDirectory
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::Process ()
+void c_FPPDiscovery::ReadNextFrame (uint8_t * outputBuffer, uint16_t outputBufferSize)
 {
     // DEBUG_START;
-#ifdef foo
+
     if (isRemoteRunning)
     {
         uint32_t frame = (millis () - fseqStartMillis) / frameStepTime;
-        if (frame != fseqCurrentFrame)
+        if (frame != fseqCurrentFrameId)
         {
             uint32_t pos = dataOffset + channelsPerFrame * frame;
             fseqFile.seek (pos);
@@ -314,12 +314,12 @@ void c_FPPDiscovery::Process ()
 
             fseqFile.read (outputBuffer, toRead);
             //LOG_PORT.printf("New Frame!   Old: %d     New:  %d      Offset: %d\n", fseqCurrentFrameId, frame, FileOffsetToCurrentHeaderRecord);
-            fseqCurrentFrame = frame;
+            fseqCurrentFrameId = frame;
         }
     }
-#endif // def foo
+
     // DEBUG_END;
-} // Process
+} // ReadNextFrame
 
 uint64_t read64 (uint8_t* buf, int idx) {
     uint32_t r1 = (int)(buf[idx + 3]) << 24;
@@ -343,34 +343,19 @@ uint32_t read32 (uint8_t* buf, int idx) {
     r |= (int)(buf[idx]);
     return r;
 }
-uint32_t read24 (uint8_t* buf, int idx) {
-    uint32_t r = (int)(buf[idx + 2]) << 16;
-    r |= (int)(buf[idx + 1]) << 8;
-    r |= (int)(buf[idx]);
-    return r;
-}
 
 uint32_t read24 (uint8_t* pData)
 {
-    uint32_t r = (int)(pData[2]) << 16;
-    r |= (int)(pData[1]) << 8;
-    r |= (int)(pData[0]);
-    return r;
+    return ((uint32_t)(pData[0]) | 
+            (uint32_t)(pData[1]) << 8 |
+            (uint32_t)(pData[2]) << 16);
 } // read24
 
 uint16_t read16 (uint8_t* pData)
 {
-    uint16_t r = (uint16_t)(pData[0]);
-    r |= (uint16_t)(pData[1]) << 8;
-    return r;
+    return ((uint16_t)(pData[0]) | 
+            (uint16_t)(pData[1]) << 8);
 } // read16
-
-uint16_t read16 (uint8_t* buf, int idx)
-{
-    uint16_t r = (int)(buf[idx]);
-    r |= (int)(buf[idx + 1]) << 8;
-    return r;
-}
 
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
@@ -835,11 +820,10 @@ void c_FPPDiscovery::ProcessFile (AsyncWebServerRequest* request, String filenam
 
 } // ProcessFile
 
+//-----------------------------------------------------------------------------
 // the blocks come in very small (~500 bytes) we'll accumulate in a buffer
 // so the writes out to SD can be more in line with what the SD file system can handle
 #define BUFFER_LEN 8192
-
-//-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total)
 {
     DEBUG_START;
@@ -905,6 +889,7 @@ void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data,
     DEBUG_END;
 }
 
+//-----------------------------------------------------------------------------
 void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
 {
     // DEBUG_START;
@@ -935,6 +920,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
 
 } // GetSysInfoJSON
 
+//-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 {
     // DEBUG_START;
@@ -1079,6 +1065,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 
 } // ProcessFPPJson
 
+//-----------------------------------------------------------------------------
 void c_FPPDiscovery::StopPlaying ()
 {
     DEBUG_START;
