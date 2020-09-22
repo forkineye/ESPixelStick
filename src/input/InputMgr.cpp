@@ -49,13 +49,13 @@ typedef struct InputTypeXlateMap_t
 
 InputTypeXlateMap_t InputTypeXlateMap[c_InputMgr::e_InputType::InputType_End] =
 {
-    {c_InputMgr::e_InputType::InputType_E1_31,    "E1.31"     },
-    {c_InputMgr::e_InputType::InputType_Effects,  "Effects"   },
-    {c_InputMgr::e_InputType::InputType_MQTT,     "MQTT"      },
-    {c_InputMgr::e_InputType::InputType_Alexa,    "Alexa"     },
-    {c_InputMgr::e_InputType::InputType_DDP,      "DDP"       },
-    {c_InputMgr::e_InputType::InputType_FPP,      "FPPRemote" },
-    {c_InputMgr::e_InputType::InputType_Disabled, "Disabled"  }
+    {c_InputMgr::e_InputType::InputType_E1_31,    "E1.31"      },
+    {c_InputMgr::e_InputType::InputType_Effects,  "Effects"    },
+    {c_InputMgr::e_InputType::InputType_MQTT,     "MQTT"       },
+    {c_InputMgr::e_InputType::InputType_Alexa,    "Alexa"      },
+    {c_InputMgr::e_InputType::InputType_DDP,      "DDP"        },
+    {c_InputMgr::e_InputType::InputType_FPP,      "FPP Remote" },
+    {c_InputMgr::e_InputType::InputType_Disabled, "Disabled"   }
 };
 
 //-----------------------------------------------------------------------------

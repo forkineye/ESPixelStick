@@ -154,6 +154,7 @@ function ProcessModeConfigurationData(channelId, ChannelTypeName, JsonConfig )
     var channelConfig = channelConfigSet[TypeOfChannelId];
     ChannelTypeName = channelConfig.type.toLowerCase();
     ChannelTypeName = ChannelTypeName.replace(".", "_");
+    ChannelTypeName = ChannelTypeName.replace(" ", "_");
 
     // clear the array
     selector = [];
@@ -291,8 +292,15 @@ function ProcessReceivedOptionDataMessage(JsonOptionList)
             {
                 if ($(this).val())
                 {
+                    var HtmlLoadFileName = $('#' + OptionListName + DisplayedChannelId + ' option:selected').text().toLowerCase();
+                    // console.info("HtmlLoadName: " + HtmlLoadName);
+                    HtmlLoadFileName = HtmlLoadFileName.replace(".", "_");
+                    HtmlLoadFileName = HtmlLoadFileName.replace(" ", "_");
+                    HtmlLoadFileName = HtmlLoadFileName + ".html";
+                    // console.info("Adjusted HtmlLoadName: " + HtmlLoadName);
+
                     // try to load the field definition file for this channel type
-                    $('#' + OptionListName + 'mode' + DisplayedChannelId).load($('#' + OptionListName + DisplayedChannelId + ' option:selected').text().toLowerCase() + ".html", function ()
+                    $('#' + OptionListName + 'mode' + DisplayedChannelId).load(HtmlLoadFileName, function ()
                     {
                         if ("input" === OptionListName)
                         {
@@ -438,7 +446,7 @@ function wsConnect()
             target = document.location.host;
         }
 
-        // target = "192.168.10.99";
+        // target = "192.168.10.155";
         // target = "192.168.10.102";
 
         // Open a new web socket and set the binary type
