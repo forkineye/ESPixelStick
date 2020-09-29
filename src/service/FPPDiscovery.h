@@ -46,7 +46,7 @@ public:
 #   define SD_CARD_MOSI_PIN    23 
 #   define SD_CARD_CLK_PIN     18
 #   define SD_CARD_CS_PIN      4
-
+#   define Stop_FPP_RemotePlay F("...")
 private:
 
     AsyncUDP udp;
@@ -58,7 +58,7 @@ private:
     File fseqFile;
     String fseqName = "";
     String failedFseqName = "";
-    String AutoPlayFileName = "";
+    String AutoPlayFileName = Stop_FPP_RemotePlay;
     unsigned long fseqStartMillis = 0;
     int fseqCurrentFrameId = 0;
     uint32_t dataOffset = 0;
@@ -69,7 +69,8 @@ private:
     uint8_t  mosi_pin = SD_CARD_MOSI_PIN;
     uint8_t  clk_pin  = SD_CARD_CLK_PIN;
     uint8_t  cs_pin   = SD_CARD_CS_PIN;
-
+    uint8_t* outputBuffer;
+    uint16_t outputBufferSize;
     bool hasSDStorage = false;
     bool inFileUpload = false;
     bool hasBeenInitialized = false;
@@ -82,6 +83,7 @@ private:
     void StopPlaying ();
     void StartPlaying (String & filename, uint32_t frameId);
     void printDirectory (File dir, int numTabs);
+    bool AllowedToRemotePlayFiles ();
 
 public:
     c_FPPDiscovery ();

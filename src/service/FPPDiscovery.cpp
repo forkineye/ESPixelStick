@@ -301,13 +301,24 @@ void c_FPPDiscovery::printDirectory (File dir, int numTabs)
 } // printDirectory
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::ReadNextFrame (uint8_t * outputBuffer, uint16_t outputBufferSize)
+void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t CurrentOutputBufferSize)
 {
     // DEBUG_START;
+
+    outputBuffer = CurrentOutputBuffer;
+    outputBufferSize = CurrentOutputBufferSize;
 
     if (isRemoteRunning)
     {
         uint32_t frame = (millis () - fseqStartMillis) / frameStepTime;
+
+        // have we reached the end of the file?
+        if (TotalNumberOfFramesInSequence < frame)
+        {
+            StopPlaying ();
+            StartPlaying (AutoPlayFileName, 0);
+        }
+
         if (frame != fseqCurrentFrameId)
         {
             uint32_t pos = dataOffset + channelsPerFrame * frame;
@@ -416,7 +427,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_
 {
     // DEBUG_START;
 
-    if (!hasSDStorage) 
+    if (!AllowedToRemotePlayFiles())
     {
         return;
     }
@@ -430,15 +441,10 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_
             // DEBUG_V("Start")
             if (filename != fseqName)
             {
+                ProcessSyncPacket (0x01, filename, frame); // stop
                 ProcessSyncPacket (0x03, filename, frame); // need to open the file
             }
 
-            if (fseqName != "")
-            {
-                isRemoteRunning = true;
-                fseqStartMillis = millis () - frameStepTime * frame;
-                fseqCurrentFrameId = 99999999;
-            }
             break;
         }
 
@@ -496,13 +502,10 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_
 void c_FPPDiscovery::ProcessBlankPacket () 
 {
     // DEBUG_START;
-#ifdef foo
-    if (!hasSDStorage)
+    if (AllowedToRemotePlayFiles())
     {
-        return;
+        memset (outputBuffer, 0x0, outputBufferSize);
     }
-    memset (outputBuffer, 0x0, outputBufferSize);
-#endif // def foo
     // DEBUG_END;
 } // ProcessBlankPacket
 
@@ -528,7 +531,7 @@ void c_FPPDiscovery::sendPingPacket ()
     v = (uint16_t)atoi (&version[2]);
     packet.versionMinor = (v >> 8) + ((v & 0xFF) << 8);
 
-    packet.operatingMode = (hasSDStorage) ? 0x08 : 0x01; // Support remote mode : Bridge Mode
+    packet.operatingMode = (AllowedToRemotePlayFiles()) ? 0x08 : 0x01; // Support remote mode : Bridge Mode
 
     uint32_t ip = static_cast<uint32_t>(WiFi.localIP ());
     memcpy (packet.ipAddress, &ip, 4);
@@ -686,7 +689,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
         }
         
         String path = request->getParam ("path")->value ();
-        if (path.startsWith ("/api/sequence/") && hasSDStorage)
+        if (path.startsWith ("/api/sequence/") && AllowedToRemotePlayFiles())
         {
             String seq = path.substring (14);
             if (seq.endsWith ("/meta"))
@@ -847,7 +850,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     jsonResponse[F ("HostDescription")] = config.id;
     jsonResponse[F ("Platform")]        = "ESPixelStick";
     jsonResponse[F ("Variant")]         = FPP_VARIANT_NAME;
-    jsonResponse[F ("Mode")]            = (true == hasSDStorage) ? "remote" : "bridge";
+    jsonResponse[F ("Mode")]            = (true == AllowedToRemotePlayFiles()) ? "remote" : "bridge";
     jsonResponse[F ("Version")]         = VERSION;
 
     const char* version = VERSION.c_str ();
@@ -955,7 +958,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             sprintf (buf, "%02d:%02d", minRem, secsTot);
             JsonData[F ("time_remaining")] = buf;
 
-            if (hasSDStorage)
+            if (AllowedToRemotePlayFiles())
             {
                 JsonData[F("mode")] = 8;
                 JsonData[F("mode_name")] = F ("remote");
@@ -1063,12 +1066,14 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
 
         // DEBUG_V ("Starting file output");
 
+        isRemoteRunning = true;
         fseqName = filename;
-        fseqCurrentFrameId = 0;
+        fseqCurrentFrameId = frameId;
         dataOffset = fsqHeader.dataOffset;
         channelsPerFrame = fsqHeader.channelCount;
         frameStepTime = fsqHeader.stepTime;
         TotalNumberOfFramesInSequence = fsqHeader.TotalNumberOfFramesInSequence;
+        fseqStartMillis = millis () - frameStepTime * frameId;
 
         LOG_PORT.println (String (F ("FPPDiscovery::StartPlaying:: Playing:  ")) + filename );
 
@@ -1082,6 +1087,8 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
 void c_FPPDiscovery::StopPlaying ()
 {
     // DEBUG_START;
+
+    LOG_PORT.println (String (F ("FPPDiscovery::StartPlaying:: Playing:  ")) + fseqName);
 
     isRemoteRunning = false;
 
@@ -1205,5 +1212,11 @@ void c_FPPDiscovery::PlayFile (String & NewFileName)
     // DEBUG_END;
 
 } // PlayFile
+
+bool c_FPPDiscovery::AllowedToRemotePlayFiles()
+{
+    return ((hasSDStorage == true) && (String(F(Stop_FPP_RemotePlay)) != AutoPlayFileName));
+
+} // AllowedToRemotePlayFiles
 
 c_FPPDiscovery FPPDiscovery;
