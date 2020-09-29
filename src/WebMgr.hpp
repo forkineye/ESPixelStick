@@ -43,7 +43,7 @@ private:
     EFUpdate        efupdate;
     DeviceCallbackFunction pAlexaCallback = nullptr;
     EspalexaDevice * pAlexaDevice = nullptr;
-#   define WebSocketFrameCollectionBufferSize 2048
+#   define WebSocketFrameCollectionBufferSize (3*1024)
     char WebSocketFrameCollectionBuffer[WebSocketFrameCollectionBufferSize + 1];
 
     /// Valid "Simple" message types
@@ -63,6 +63,7 @@ private:
     void processCmdGet              (JsonObject & jsonCmd);
     void processCmdSet              (JsonObject & jsonCmd);
     void processCmdOpt              (JsonObject & jsonCmd);
+    void processCmdDelete           (JsonObject & jsonCmd);
     void GetConfiguration           ();
     void GetOptions                 ();
     void ProcessXseriesRequests     (AsyncWebSocketClient * client);

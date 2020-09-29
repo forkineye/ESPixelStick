@@ -365,12 +365,6 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
                 ProcessVseriesRequests (client);
                 break;
             }
-            if (WebSocketFrameCollectionBuffer[0] == 'G')
-            {
-                // DEBUG_V ("");
-                ProcessGseriesRequests (client);
-                break;
-            }
 
             if (WebSocketFrameCollectionBuffer[0] == 'G')
             {
@@ -380,7 +374,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             }
 
             // convert the input data into a json structure (use json read only mode)
-            DynamicJsonDocument webJsonDoc (4096);
+            DynamicJsonDocument webJsonDoc (5*1023);
             DeserializationError error = deserializeJson (webJsonDoc, (const char *)(&WebSocketFrameCollectionBuffer[0]));
 
             // DEBUG_V ("");
@@ -674,11 +668,22 @@ void c_WebMgr::processCmd (AsyncWebSocketClient * client, JsonObject & jsonCmd)
             // DEBUG_V ("");
             break;
         }
+
+        // Generate select option list data
+        if (jsonCmd.containsKey ("delete"))
+        {
+            // DEBUG_V ("opt");
+            strcpy (WebSocketFrameCollectionBuffer, "{\"get\":");
+            // DEBUG_V ("");
+            processCmdDelete (jsonCmd);
+            // DEBUG_V ("");
+            break;
+        }
+
         // log an error
         LOG_PORT.println (String (F ("ERROR: Unhandled cmd")));
         PrettyPrint (jsonCmd);
-        strcpy (WebSocketFrameCollectionBuffer, "{\"set\":Error");
-
+        strcpy (WebSocketFrameCollectionBuffer, "{\"cmd\":Error");
 
     } while (false);
 
@@ -727,8 +732,17 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
             break;
         }
 
+        if (jsonCmd["get"] == "files")
+        {
+            // DEBUG_V ("input");
+            FPPDiscovery.GetListOfFiles (WebSocketFrameCollectionBuffer);
+            // DEBUG_V ("");
+            break;
+        }
+
         // log an error
         LOG_PORT.println (String (F("ERROR: Unhandled Get Request")));
+        strcat (WebSocketFrameCollectionBuffer, "\"ERROR: Request Not Supported\"");
         PrettyPrint (jsonCmd);
 
     } while (false);
@@ -817,6 +831,28 @@ void c_WebMgr::processCmdOpt (JsonObject & jsonCmd)
     // DEBUG_END;
 
 } // processCmdOpt
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::processCmdDelete (JsonObject& jsonCmd)
+{
+    DEBUG_START;
+    PrettyPrint (jsonCmd);
+
+    do // once
+    {
+        DEBUG_V ("");
+
+        String FileToDelete = jsonCmd["delete"];
+        DEBUG_V ("FileToDelete: " + FileToDelete);
+        FPPDiscovery.DeleteFseqFile (FileToDelete);
+
+        FPPDiscovery.GetListOfFiles (WebSocketFrameCollectionBuffer);
+
+    } while (false);
+
+    DEBUG_END;
+
+} // processCmdDelete
 
 //-----------------------------------------------------------------------------
 void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request, 
