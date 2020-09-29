@@ -321,9 +321,9 @@ void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t Curr
 
         if (frame != fseqCurrentFrameId)
         {
-            uint32_t pos = dataOffset + channelsPerFrame * frame;
+            uint32_t pos = dataOffset + (channelsPerFrame * frame);
             fseqFile.seek (pos);
-            int toRead = channelsPerFrame > outputBufferSize ? outputBufferSize : channelsPerFrame;
+            int toRead = (channelsPerFrame > outputBufferSize) ? outputBufferSize : channelsPerFrame;
 
             fseqFile.read (outputBuffer, toRead);
             //LOG_PORT.printf("New Frame!   Old: %d     New:  %d      Offset: %d\n", fseqCurrentFrameId, frame, FileOffsetToCurrentHeaderRecord);
@@ -1066,14 +1066,14 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
 
         // DEBUG_V ("Starting file output");
 
-        isRemoteRunning = true;
-        fseqName = filename;
-        fseqCurrentFrameId = frameId;
-        dataOffset = fsqHeader.dataOffset;
-        channelsPerFrame = fsqHeader.channelCount;
-        frameStepTime = fsqHeader.stepTime;
+        isRemoteRunning               = true;
+        fseqName                      = filename;
+        fseqCurrentFrameId            = 0;
+        dataOffset                    = fsqHeader.dataOffset;
+        channelsPerFrame              = fsqHeader.channelCount;
+        frameStepTime                 = fsqHeader.stepTime;
         TotalNumberOfFramesInSequence = fsqHeader.TotalNumberOfFramesInSequence;
-        fseqStartMillis = millis () - frameStepTime * frameId;
+        fseqStartMillis               = millis () - (frameStepTime * frameId);
 
         LOG_PORT.println (String (F ("FPPDiscovery::StartPlaying:: Playing:  ")) + filename );
 
