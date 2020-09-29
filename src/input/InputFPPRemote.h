@@ -20,6 +20,7 @@
 
 #include "InputCommon.hpp"
 #include "../WebMgr.hpp"
+#include "../service/FPPDiscovery.h"
 
 class c_InputFPPRemote : public c_InputCommon
 {
@@ -49,5 +50,18 @@ private:
 
     void load ();          ///< Load configuration from SPIFFS
     void save ();          ///< Save configuration to SPIFFS
+
+#   define JSON_NAME_MISO         F("miso_pin")
+#   define JSON_NAME_MOSI         F("mosi_pin")
+#   define JSON_NAME_CLOCK        F("clock_pin")
+#   define JSON_NAME_CS           F("cs_pin")
+#   define JSON_NAME_FILE_TO_PLAY F("fseqfilename")
+
+    uint8_t  miso_pin = SD_CARD_MISO_PIN;
+    uint8_t  mosi_pin = SD_CARD_MOSI_PIN;
+    uint8_t  clk_pin  = SD_CARD_CLK_PIN;
+    uint8_t  cs_pin   = SD_CARD_CS_PIN;
+
+    String  FseqFileToPlay;
 
 };

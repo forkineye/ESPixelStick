@@ -73,13 +73,18 @@ void c_InputFPPRemote::GetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
+    jsonConfig[JSON_NAME_MISO]         = miso_pin;
+    jsonConfig[JSON_NAME_MOSI]         = mosi_pin;
+    jsonConfig[JSON_NAME_CLOCK]        = clk_pin;
+    jsonConfig[JSON_NAME_CS]           = cs_pin;
+    jsonConfig[JSON_NAME_FILE_TO_PLAY] = FseqFileToPlay;
 
     // DEBUG_END;
 
 } // GetConfig
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemote::GetStatus (JsonObject& /* jsonStatus */)
+void c_InputFPPRemote::GetStatus (JsonObject & /* jsonStatus */)
 {
     // DEBUG_START;
 
@@ -110,9 +115,19 @@ void c_InputFPPRemote::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
 } // SetBufferInfo
 
 //-----------------------------------------------------------------------------
-boolean c_InputFPPRemote::SetConfig (ArduinoJson::JsonObject&  /* jsonConfig */)
+boolean c_InputFPPRemote::SetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
+
+    FileIO::setFromJSON (miso_pin, jsonConfig[JSON_NAME_MISO]);
+    FileIO::setFromJSON (mosi_pin, jsonConfig[JSON_NAME_MOSI]);
+    FileIO::setFromJSON (clk_pin,  jsonConfig[JSON_NAME_CLOCK]);
+    FileIO::setFromJSON (cs_pin,   jsonConfig[JSON_NAME_CS]);
+
+    FileIO::setFromJSON (FseqFileToPlay, jsonConfig[JSON_NAME_FILE_TO_PLAY]);
+
+    FPPDiscovery.SetSpiIoPins (miso_pin, mosi_pin, clk_pin, cs_pin);
+    FPPDiscovery.PlayFile (FseqFileToPlay);
 
     // DEBUG_END;
     return true;
