@@ -1101,6 +1101,9 @@ void c_FPPDiscovery::StopPlaying ()
 
     fseqFile.close ();
 
+    // blank the display
+    memset (outputBuffer, 0x0, outputBufferSize);
+
     // DEBUG_END;
 
 } // StopPlaying
