@@ -53,7 +53,7 @@ OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::OutputType_En
     {c_OutputMgr::e_OutputType::OutputType_Renard,   "Renard"   },
     {c_OutputMgr::e_OutputType::OutputType_DMX,      "DMX"      },
 #ifdef ARDUINO_ARCH_ESP32
-    {c_OutputMgr::e_OutputType::OutputType_SPI,      "SPI"      },
+    // {c_OutputMgr::e_OutputType::OutputType_SPI,      "SPI"      },
 #endif // def ARDUINO_ARCH_ESP32
     {c_OutputMgr::e_OutputType::OutputType_Disabled, "Disabled" }
 };
