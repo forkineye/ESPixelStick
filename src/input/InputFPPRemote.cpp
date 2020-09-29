@@ -34,7 +34,6 @@ c_InputFPPRemote::c_InputFPPRemote (
     uint8_t                     * BufferStart,
     uint16_t                      BufferSize) :
     c_InputCommon (NewInputChannelId, NewChannelType, BufferStart, BufferSize)
-
 {
     // DEBUG_START;
 
@@ -46,6 +45,8 @@ c_InputFPPRemote::c_InputFPPRemote (
 //-----------------------------------------------------------------------------
 c_InputFPPRemote::~c_InputFPPRemote ()
 {
+    FseqFileToPlay = Stop_FPP_RemotePlay;
+    FPPDiscovery.PlayFile (FseqFileToPlay);
 
 } // ~c_InputFPPRemote
 
