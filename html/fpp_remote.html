@@ -1,6 +1,44 @@
 <div id="FPP Remote">
     <legend class="esps-legend">FPP Remote Configuration</legend>
-    <div class="form-group">
-        <p>No Configuration Needed for Input mode : FPP Remote</p>
+    <div class="form-group" id="fppremote">
+
+        <div class="form-group">
+            <label class="control-label col-sm-4" for="fseqfilename">FSEQ File To Play:</label>
+            <div class="col-sm-6">
+                <select class="form-control" id="fseqfilename"></select>
+            </div>
+        </div>
+
+        <div class="form-group has-feedback">
+            <label class="control-label col-sm-4" for="miso_pin">SD Card MISO Pin (GPIO #):</label>
+            <div class="col-sm-2">
+                <input type="number" class="form-control is-valid" id="miso_pin" step="1" min="1" max="24" value="0" required title="GPIO on which MISO will be received">
+                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+            </div>
+        </div>
+
+        <div class="form-group has-feedback">
+            <label class="control-label col-sm-4" for="mosi_pin">SD Card MOSI Pin (GPIO #):</label>
+            <div class="col-sm-2">
+                <input type="number" class="form-control is-valid" id="mosi_pin" step="1" min="1" max="24" value="0" required title="GPIO on which MOSI will be sent">
+                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+            </div>
+        </div>
+
+        <div class="form-group has-feedback">
+            <label class="control-label col-sm-4" for="clock_pin">SD Card Clock Pin (GPIO #):</label>
+            <div class="col-sm-2">
+                <input type="number" class="form-control is-valid" id="clock_pin" step="1" min="1" max="24" value="0" required title="GPIO on which CLOCK will be sent">
+                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+            </div>
+        </div>
+
+        <div class="form-group has-feedback">
+            <label class="control-label col-sm-4" for="cs_pin">SD Card Chip Select Pin (GPIO #):</label>
+            <div class="col-sm-2">
+                <input type="number" class="form-control is-valid" id="cs_pin" step="1" min="1" max="24" value="0" required title="GPIO on which Chip Select will be sent">
+                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+            </div>
+        </div>
+
     </div>
-</div>

@@ -31,6 +31,7 @@
                     <li><a href="#wifi">WiFi Setup</a></li>
                     <li><a href="#config">Device Setup</a></li>
                     <li><a href="#diag">Diagnostics</a></li>
+                    <li><a href="#filemanagement">File Management</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="#admin">Admin</a></li>
@@ -165,17 +166,17 @@
 
                 <div class="form-group" id="fg_input_mode">
                     <!--
-                        <fieldset id="inputmode0"></fieldset>
-                        <fieldset id="inputmode1"></fieldset>
-                     -->
+                       <fieldset id="inputmode0"></fieldset>
+                       <fieldset id="inputmode1"></fieldset>
+                    -->
                 </div>
 
                 <div class="form-group" id="fg_output_mode">
                     <!--
-                        <fieldset id="outputmode0"></fieldset>
-                        <fieldset id="outputmode1"></fieldset>
-                        <fieldset id="outputmode2"></fieldset>
-                     -->
+                       <fieldset id="outputmode0"></fieldset>
+                       <fieldset id="outputmode1"></fieldset>
+                       <fieldset id="outputmode2"></fieldset>
+                    -->
                 </div>
 
                 <fieldset>
@@ -231,7 +232,25 @@
             </fieldset>
         </div>
 
-        <!-- Administration -->
+        <!-- FIleManagement -->
+        <div id="filemanagement" class="mdiv hidden anchor">
+            <fieldset>
+                <legend class="esps-legend">File Management</legend>
+                <div>
+                    <a id="FileDeleteButton" class="button">Remove Selected File(s)</a>
+                    <div id="FileTree"></div>
+                </div>
+                <div id="filemanagementupload">
+                    <form class="form-horizontal">
+                        <p>Upload multiple files with the file dialog or by dragging and dropping images onto the dashed region</p>
+                        <input type="file" id="fileUpload" multiple accept="image/*">
+                        <!-- <label class="button" for="fileUpload">Select file(s)</label>-->
+                    </form>
+                </div>
+            </fieldset>
+        </div>
+
+    <!-- Administration -->
         <div id="admin" class="mdiv hidden anchor">
             <fieldset>
                 <legend class="esps-legend">Administration</legend>
@@ -321,13 +340,15 @@
         </div>
     </footer>
 
-    <!--
-       <script type="text/javascript" src="js/jquery-3.1.1.js"></script>
-       <script type="text/javascript" src="js/bootstrap.js"></script>
-       <script type="text/javascript" src="js/jqColorPicker.js"></script>
-       <script type="text/javascript" src="script.js"></script>
-    -->
-    <script type="text/javascript" src="esps.js"></script>
+
+    <link rel="stylesheet" href="css/treejs.css" id="treejs_styles">
+    <script type="text/javascript" src="js/jquery-3.1.1.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
+    <script type="text/javascript" src="js/jqColorPicker.js"></script>
+    <script type="text/javascript" src="js/tree.js"></script>
+    <script type="text/javascript" src="script.js"></script>
+
+    <!-- <script type="text/javascript" src="esps.js"></script> -->
 
 </body>
-    </html>
+        </html>
