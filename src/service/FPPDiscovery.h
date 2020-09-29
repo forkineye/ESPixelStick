@@ -40,7 +40,15 @@
 
 class c_FPPDiscovery
 {
+public:
+
+#   define SD_CARD_MISO_PIN    19
+#   define SD_CARD_MOSI_PIN    23 
+#   define SD_CARD_CLK_PIN     18
+#   define SD_CARD_CS_PIN      4
+
 private:
+
     AsyncUDP udp;
     void ProcessReceivedUdpPacket (AsyncUDPPacket _packet);
     void ProcessSyncPacket (uint8_t action, String filename, uint32_t frame);
@@ -50,15 +58,21 @@ private:
     File fseqFile;
     String fseqName = "";
     String failedFseqName = "";
+    String AutoPlayFileName = "";
     unsigned long fseqStartMillis = 0;
     int fseqCurrentFrameId = 0;
     uint32_t dataOffset = 0;
     uint32_t channelsPerFrame = 0;
     uint8_t  frameStepTime = 0;
     uint32_t TotalNumberOfFramesInSequence = 0;
+    uint8_t  miso_pin = SD_CARD_MISO_PIN;
+    uint8_t  mosi_pin = SD_CARD_MOSI_PIN;
+    uint8_t  clk_pin  = SD_CARD_CLK_PIN;
+    uint8_t  cs_pin   = SD_CARD_CS_PIN;
 
     bool hasSDStorage = false;
     bool inFileUpload = false;
+    bool hasBeenInitialized = false;
     uint8_t* buffer = nullptr;
     int bufCurPos = 0;
 
@@ -66,6 +80,7 @@ private:
     void DescribeSdCardToUser ();
     void BuildFseqResponse (String fname, File fseq, String & resp);
     void StopPlaying ();
+    void StartPlaying (String & filename, uint32_t frameId);
     void printDirectory (File dir, int numTabs);
 
 public:
@@ -78,9 +93,12 @@ public:
     void ProcessPOST    (AsyncWebServerRequest* request);
     void ProcessFile    (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
     void ProcessBody    (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total);
-    void ReadNextFrame (uint8_t* outputBuffer, uint16_t outputBufferSize);
-
+    void ReadNextFrame  (uint8_t* outputBuffer, uint16_t outputBufferSize);
+    void GetListOfFiles (char * ResponseBuffer);
+    void DeleteFseqFile (String & FileNameToDelete);
     void sendPingPacket ();
+    void SetSpiIoPins   (uint8_t miso, uint8_t mosi, uint8_t clock, uint8_t cs);
+    void PlayFile       (String & FileToPlay);
 };
 
 extern c_FPPDiscovery FPPDiscovery;

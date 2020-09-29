@@ -24,19 +24,12 @@
 extern const String VERSION;
 
 #ifdef ARDUINO_ARCH_ESP32
-#   define SD_CARD_DATA_PIN     5
 #   define SD_OPEN_WRITEFLAGS   "w"
 #   define FPP_TYPE_ID          0xC3
 #   define FPP_VARIANT_NAME     "ESPixelStick-ESP32"
 #   define GET_HOST_NAME        WiFi.getHostname()
-#   define SD_CARD_MISO_PIN    19
-#   define SD_CARD_MOSI_PIN    23 
-#   define SD_CARD_CLK_PIN     18
-#   define SD_CARD_CS_PIN      4
 
 #else
-#   define SD_CARD_DATA_PIN     D8
-#   define SD_CARD_CS_PIN       SD_CARD_DATA_PIN
 #   define SD_OPEN_WRITEFLAGS   sdfat::O_READ | sdfat::O_WRITE | sdfat::O_CREAT | sdfat::O_TRUNC
 #   define FPP_TYPE_ID          0xC2
 #   define FPP_VARIANT_NAME     "ESPixelStick-ESP8266"
@@ -146,6 +139,7 @@ void c_FPPDiscovery::begin ()
 
         inFileUpload = false;
         hasSDStorage = false;
+        hasBeenInitialized = true;
 
         // delay (100);
 
@@ -167,9 +161,9 @@ void c_FPPDiscovery::begin ()
         LOG_PORT.println (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
         udp.onPacket (std::bind (&c_FPPDiscovery::ProcessReceivedUdpPacket, this, std::placeholders::_1));
 
-        SPI.begin (SD_CARD_CLK_PIN, SD_CARD_MISO_PIN, SD_CARD_MOSI_PIN, SD_CARD_CS_PIN);
+        SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
 
-        if (!SD.begin (SD_CARD_CS_PIN))
+        if (!SD.begin (cs_pin))
         {
             LOG_PORT.println (String (F ("FPPDiscovery: No SD card")));
             break;
@@ -177,7 +171,15 @@ void c_FPPDiscovery::begin ()
 
         hasSDStorage = true;
 
+        // todo - Remove
+        File Test = SD.open ("/testme", SD_OPEN_WRITEFLAGS);
+        Test.write ((uint8_t*)(String ("Foo").c_str ()), 0);
+        Test.close ();
+        // todo - Remove
+
         DescribeSdCardToUser ();
+
+        PlayFile (AutoPlayFileName);
 
     } while (false);
 
@@ -343,14 +345,12 @@ uint32_t read32 (uint8_t* buf, int idx) {
     r |= (int)(buf[idx]);
     return r;
 }
-
 uint32_t read24 (uint8_t* pData)
 {
     return ((uint32_t)(pData[0]) | 
             (uint32_t)(pData[1]) << 8 |
             (uint32_t)(pData[2]) << 16);
 } // read24
-
 uint16_t read16 (uint8_t* pData)
 {
     return ((uint16_t)(pData[0]) | 
@@ -360,11 +360,11 @@ uint16_t read16 (uint8_t* pData)
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     FPPPacket* packet = reinterpret_cast<FPPPacket*>(_packet.data ());
-    DEBUG_V ("Received FPP packet");
-    DEBUG_V (String("packet->packet_type: ") + String(packet->packet_type));
+    // DEBUG_V ("Received FPP packet");
+    // DEBUG_V (String("packet->packet_type: ") + String(packet->packet_type));
 
     switch (packet->packet_type) 
     {
@@ -373,7 +373,7 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
             FPPPingPacket* pingPacket = reinterpret_cast<FPPPingPacket*>(_packet.data ());
             if ((pingPacket->ping_subtype == 0x00) || (pingPacket->ping_subtype == 0x01)) 
             {
-                DEBUG_V (String (F ("FPPPing discovery packet")));
+                // DEBUG_V (String (F ("FPPPing discovery packet")));
                 // received a discover ping packet, need to send a ping out
                 sendPingPacket ();
             }
@@ -383,12 +383,12 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
         case 0x01: //Multisync packet
         {
             FPPMultiSyncPacket* msPacket = reinterpret_cast<FPPMultiSyncPacket*>(_packet.data ());
-            DEBUG_V (String (F ("msPacket->sync_type: ")) + String(msPacket->sync_type));
+            // DEBUG_V (String (F ("msPacket->sync_type: ")) + String(msPacket->sync_type));
 
             if (msPacket->sync_type == 0x00)
             {
                 //FSEQ type, not media
-                DEBUG_V (String (F ("Received FPP FSEQ sync packet")));
+                // DEBUG_V (String (F ("Received FPP FSEQ sync packet")));
                 ProcessSyncPacket (msPacket->sync_action, msPacket->filename, msPacket->frame_number);
             }
             break;
@@ -396,38 +396,38 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
 
         case 0x03: //Blank packet
         {
-            DEBUG_V (String (F ("FPP Blank packet")));
+            // DEBUG_V (String (F ("FPP Blank packet")));
             ProcessBlankPacket ();
             break;
         }
 
         default:
         {
-            DEBUG_V (String ("UnHandled PDU: packet_type:  ") + String (packet->packet_type));
+            // DEBUG_V (String ("UnHandled PDU: packet_type:  ") + String (packet->packet_type));
             break;
         }
     }
 
-    DEBUG_END;
+    // DEBUG_END;
 }
 
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_t frame)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     if (!hasSDStorage) 
     {
         return;
     }
 
-    DEBUG_V (String("action: ") + String(action));
+    // DEBUG_V (String("action: ") + String(action));
 
     switch (action) 
     {
         case 0x00: // Start
         {
-            DEBUG_V("Start")
+            // DEBUG_V("Start")
             if (filename != fseqName)
             {
                 ProcessSyncPacket (0x03, filename, frame); // need to open the file
@@ -444,7 +444,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_
 
         case 0x01: // Stop
         {
-            DEBUG_V ("Stop");
+            // DEBUG_V ("Stop");
             if (fseqName != "")
             {
                 fseqFile.close ();
@@ -455,7 +455,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_
 
         case 0x02: // Sync
         {
-            DEBUG_V ("Sync");
+            // DEBUG_V ("Sync");
 
             if (!isRemoteRunning || filename != fseqName) 
             {
@@ -477,76 +477,25 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_
 
         case 0x03: // Open
         {
-            DEBUG_V (String("Open:: filename: ") + filename);
-
-            if (isRemoteRunning || filename != "")
-            {
-                ProcessSyncPacket (0x01, filename, frame); //need to stop first
-            }
-
-            if (inFileUpload || failedFseqName == filename)
-            {
-                DEBUG_V ("Uploading or this file failed to previously open");
-                break;
-            }
-
-            fseqFile = SD.open (String("/") + filename);
-
-            if (fseqFile.size () < 1)
-            {
-                DEBUG_V (String ("Open:: Could not open: filename: ") + filename);
-                failedFseqName = filename;
-                fseqFile.close ();
-                StopPlaying ();
-                break;
-            }
-
-            FSEQHeader fsqHeader;
-            fseqFile.seek (0);
-            fseqFile.read ((uint8_t*)&fsqHeader, sizeof (fsqHeader));
-
-            String resp;
-            BuildFseqResponse (filename, fseqFile, resp); // todo - remove
-            DEBUG_V (resp);
-
-            if (fsqHeader.majorVersion != 2 || fsqHeader.compressionType != 0)
-            {
-                DEBUG_V ("not a v2 uncompressed sequence");
-
-                failedFseqName = filename;
-                fseqFile.close ();
-                StopPlaying ();
-
-                break;
-            }
-
-            DEBUG_V ("Starting file output");
-
-            fseqName                      = filename;
-            fseqCurrentFrameId            = 0;
-            dataOffset                    = fsqHeader.dataOffset;
-            channelsPerFrame              = fsqHeader.channelCount;
-            frameStepTime                 = fsqHeader.stepTime;
-            TotalNumberOfFramesInSequence = fsqHeader.TotalNumberOfFramesInSequence;
-
+            StartPlaying (filename, frame);
             break;
         }
 
         default:
         {
-            DEBUG_V (String (F ("ERROR: Unknown Action: ")) + String (action));
+            // DEBUG_V (String (F ("ERROR: Unknown Action: ")) + String (action));
             break;
         }
 
     } // switch
 
-    DEBUG_END;
+    // DEBUG_END;
 } // ProcessSyncPacket
 
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessBlankPacket () 
 {
-    DEBUG_START;
+    // DEBUG_START;
 #ifdef foo
     if (!hasSDStorage)
     {
@@ -554,7 +503,7 @@ void c_FPPDiscovery::ProcessBlankPacket ()
     }
     memset (outputBuffer, 0x0, outputBufferSize);
 #endif // def foo
-    DEBUG_END;
+    // DEBUG_END;
 } // ProcessBlankPacket
 
 //-----------------------------------------------------------------------------
@@ -622,7 +571,7 @@ static void printReq (AsyncWebServerRequest* request, bool post)
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::BuildFseqResponse (String fname, File fseq, String & resp)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     DynamicJsonDocument JsonDoc (4*1024);
     JsonObject JsonData = JsonDoc.to<JsonObject> ();
@@ -718,14 +667,14 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, File fseq, String & resp)
 
     serializeJson (JsonData, resp);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // BuildFseqResponse
 
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 {
-    DEBUG_START;
+    // DEBUG_START;
     printReq(request, false);
 
     do // once
@@ -767,14 +716,14 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 
     } while (false); // do once
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // ProcessGET
   
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
 {
-    DEBUG_START;
+    // DEBUG_START;
     printReq(request, true);
 
     do // once
@@ -789,7 +738,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
         }
         
         String filename = request->getParam ("filename")->value ();
-        DEBUG_V (String(F("filename: ")) + filename);
+        // DEBUG_V (String(F("filename: ")) + filename);
 
         if (!SD.exists (filename))
         {
@@ -806,7 +755,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
 
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 }
 
 //-----------------------------------------------------------------------------
@@ -826,7 +775,7 @@ void c_FPPDiscovery::ProcessFile (AsyncWebServerRequest* request, String filenam
 #define BUFFER_LEN 8192
 void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     if (!index)
     {
@@ -886,7 +835,7 @@ void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data,
         buffer = nullptr;
     }
 
-    DEBUG_END;
+    // DEBUG_END;
 }
 
 //-----------------------------------------------------------------------------
@@ -931,7 +880,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
         if (!request->hasParam ("command"))
         {
             request->send (404);
-            DEBUG_V (String ("Missing Param: 'command' "));
+            // DEBUG_V (String ("Missing Param: 'command' "));
 
             break;
         }
@@ -1056,7 +1005,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             break;
         }
 
-        DEBUG_V (String ("Unknown command: ") + command);
+        // DEBUG_V (String ("Unknown command: ") + command);
         request->send (404);
 
     } while (false);
@@ -1066,9 +1015,73 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 } // ProcessFPPJson
 
 //-----------------------------------------------------------------------------
+void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
+{
+    // DEBUG_START;
+    // DEBUG_V (String("Open:: filename: ") + filename);
+
+    do // once
+    {
+        if (isRemoteRunning || filename != "")
+        {
+            ProcessSyncPacket (0x01, filename, frameId); //need to stop first
+        }
+
+        // clear the play file tracking data
+        StopPlaying ();
+
+        if (inFileUpload || failedFseqName == filename)
+        {
+            // DEBUG_V ("Uploading or this file failed to previously open");
+            break;
+        }
+
+        fseqFile = SD.open (String ("/") + filename);
+
+        if (fseqFile.size () < 1)
+        {
+            LOG_PORT.println (String (F("FPPDiscovery::StartPlaying:: Could not open: filename: ")) + filename);
+            failedFseqName = filename;
+            fseqFile.close ();
+            break;
+        }
+
+        FSEQHeader fsqHeader;
+        fseqFile.seek (0);
+        fseqFile.read ((uint8_t*)&fsqHeader, sizeof (fsqHeader));
+
+        if (fsqHeader.majorVersion != 2 || fsqHeader.compressionType != 0)
+        {
+            LOG_PORT.println (String (F("FPPDiscovery::StartPlaying:: Could not start. ")) + filename + F(" is not a v2 uncompressed sequence"));
+            // DEBUG_V ("not a v2 uncompressed sequence");
+
+            failedFseqName = filename;
+            fseqFile.close ();
+
+            break;
+        }
+
+        // DEBUG_V ("Starting file output");
+
+        fseqName = filename;
+        fseqCurrentFrameId = 0;
+        dataOffset = fsqHeader.dataOffset;
+        channelsPerFrame = fsqHeader.channelCount;
+        frameStepTime = fsqHeader.stepTime;
+        TotalNumberOfFramesInSequence = fsqHeader.TotalNumberOfFramesInSequence;
+
+        LOG_PORT.println (String (F ("FPPDiscovery::StartPlaying:: Playing:  ")) + filename );
+
+    } while (false);
+
+    // DEBUG_END;
+
+} // StartPlaying
+
+//-----------------------------------------------------------------------------
 void c_FPPDiscovery::StopPlaying ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     isRemoteRunning = false;
 
@@ -1079,9 +1092,118 @@ void c_FPPDiscovery::StopPlaying ()
     dataOffset = 0;
     channelsPerFrame = 0;
 
-    DEBUG_END;
+    fseqFile.close ();
+
+    // DEBUG_END;
 
 } // StopPlaying
 
+//-----------------------------------------------------------------------------
+void c_FPPDiscovery::GetListOfFiles (char * ResponseBuffer)
+{
+    // DEBUG_START;
+
+    DynamicJsonDocument ResponseJsonDoc (4096);
+    JsonArray FileArray = ResponseJsonDoc.createNestedArray (F ("files"));
+
+    File dir = SD.open ("/");
+
+    while (true)
+    {
+        File entry = dir.openNextFile ();
+
+        if (!entry)
+        {
+            // no more files
+            break;
+        }
+
+        String EntryName = String(entry.name ());
+        // DEBUG_V ("EntryName: " + EntryName);
+        // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
+
+        if ((0 != EntryName.length()) && (EntryName != String(F("/System Volume Information"))))
+        {
+            // DEBUG_V ("Adding FIle");
+
+            JsonObject CurrentFile = FileArray.createNestedObject ();
+            CurrentFile[F ("name")] = EntryName.substring(1);
+        }
+
+        entry.close ();
+    }
+
+    String ResponseText;
+    serializeJson (ResponseJsonDoc, ResponseText);
+
+    // DEBUG_V (ResponseText);
+    strcat (ResponseBuffer, ResponseText.c_str ());
+
+    // DEBUG_END;
+
+} // GetListOfFiles
+
+//-----------------------------------------------------------------------------
+void c_FPPDiscovery::DeleteFseqFile (String & FileNameToDelete)
+{
+    // DEBUG_START;
+
+    // DEBUG_V (FileNameToDelete);
+
+    SD.remove (String(F("/")) + FileNameToDelete);
+
+    // DEBUG_END;
+} // DeleteFseqFile
+
+//-----------------------------------------------------------------------------
+void c_FPPDiscovery::SetSpiIoPins (uint8_t miso, uint8_t mosi, uint8_t clock, uint8_t cs)
+{
+    miso_pin = miso;
+    mosi_pin = mosi;
+    clk_pin  = clock;
+    cs_pin   = cs;
+
+    SPI.end ();
+    SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
+
+    SD.end ();
+
+    if (!SD.begin (cs_pin))
+    {
+        LOG_PORT.println (String (F ("FPPDiscovery: No SD card")));
+    }
+
+} // SetSpiIoPins
+
+//-----------------------------------------------------------------------------
+void c_FPPDiscovery::PlayFile (String & NewFileName)
+{
+    // DEBUG_START;
+    // Having an autoplay file means the AutoPlay file takes precedence over the remote player 
+    // if no file is playing then just start the new autoplay file.
+    // if the AP file is empty then revert to remote operation.
+    // if already in remote, do nothing
+
+    // are we playing a file
+    if ((0 != fseqName.length ()) && (AutoPlayFileName != NewFileName))
+    {
+        // Whatever we are playing, it is not the new autoplay file
+        StopPlaying ();
+    }
+
+    AutoPlayFileName = NewFileName;
+    
+    // DEBUG_V ();
+
+    // do we have an autoplay file to play?
+    if ((0 != AutoPlayFileName.length ()) && (true == hasBeenInitialized))
+    {
+        // start playing the new autoplay file
+        StartPlaying (AutoPlayFileName, 0);
+    }
+
+    // DEBUG_END;
+
+} // PlayFile
 
 c_FPPDiscovery FPPDiscovery;
