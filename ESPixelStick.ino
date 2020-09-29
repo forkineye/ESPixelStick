@@ -81,9 +81,6 @@ static void _u0_putc(char c){
 // Configuration file
 String ConfigFileName = "/config.json";
 
-//TODO: Add Auxiliary services
-//FPPDiscovery
-
 const String VERSION = "4.0_unified-dev";
 const String BUILD_DATE = String(__DATE__);
 
