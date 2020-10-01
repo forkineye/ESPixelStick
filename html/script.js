@@ -564,7 +564,7 @@ function wsConnect()
             target = document.location.host;
         }
 
-        target = "192.168.10.155";
+        // target = "192.168.10.155";
         // target = "192.168.10.102";
 
         // Open a new web socket and set the binary type
