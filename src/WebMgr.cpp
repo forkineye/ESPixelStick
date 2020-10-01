@@ -27,6 +27,10 @@
 #include "WebMgr.hpp"
 #include <Int64String.h>
 
+#ifdef SUPPORT_FILE_UPLOAD
+#include "Update.h"
+#endif // def SUPPORT_FILE_UPLOAD
+
 #ifdef ARDUINO_ARCH_ESP8266
 #elif defined ARDUINO_ARCH_ESP32
 #   include <SPIFFS.h>
@@ -143,6 +147,18 @@ void c_WebMgr::init ()
     // Static Handler
     webServer.serveStatic ("/", SPIFFS, "/www/").setDefaultFile ("index.html");
 
+#ifdef SUPPORT_FILE_UPLOAD
+    // if the client posts to the upload page
+    webServer.on ("/upload", HTTP_POST, [](AsyncWebServerRequest * request)
+        {
+            // Send status 200 (OK) to tell the client we are ready to receive
+            request.send (200);
+            WebMgr.handleFileUpload // Receive and save the file
+        },
+        // WebMgr.handleFileUpload // Receive and save the file
+    );
+#endif // def SUPPORT_FILE_UPLOAD
+
     // Raw config file Handler - but only on station
     //  webServer.serveStatic("/config.json", SPIFFS, "/config.json").setFilter(ON_STA_FILTER);
 
@@ -200,6 +216,51 @@ void c_WebMgr::init ()
 
     // DEBUG_END;
 }
+
+#ifdef SUPPORT_FILE_UPLOAD
+void c_WebMgr::handleFileUpload ()
+{
+        HTTPUpload & upload = webServer.upload ();
+
+        if (upload.status == UPLOAD_FILE_START)
+        {
+            String filename = upload.filename;
+            if (!filename.startsWith ("/"))
+            {
+                filename = "/" + filename;
+            }
+
+            LOG_PORT.print ("handleFileUpload Name: ");
+            LOG_PORT.println (filename);
+
+            // Open the file for writing 
+            // fsUploadFile = SD.open (filename, "w");
+            filename = String ();
+        }
+        else if (upload.status == UPLOAD_FILE_WRITE)
+        {
+            if (fsUploadFile)
+            {
+                // Write the received bytes to the file
+                // fsUploadFile.write (upload.buf, upload.currentSize);
+            }
+        }
+        else if (upload.status == UPLOAD_FILE_END)
+        {
+            if (fsUploadFile)
+            {                                    // If the file was successfully created
+                // fsUploadFile.close ();
+                LOG_PORT.print (F("handleFileUpload Size: ")); LOG_PORT.println (upload.totalSize);
+                webServer.sendHeader ("Location", "/success.html");      // Redirect the client to the success page
+                webServer.send (303);
+            }
+            else
+            {
+                webServer.send (500, "text/plain", "500: couldn't create file");
+            }
+        }
+} // handleFileUpload
+#endif // def SUPPORT_FILE_UPLOAD
 
 //-----------------------------------------------------------------------------
 void c_WebMgr::RegisterAlexaCallback (DeviceCallbackFunction cb)

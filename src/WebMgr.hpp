@@ -22,6 +22,7 @@
 #include "EFUpdate.h"
 #include <ESPAsyncWebServer.h>
 #include <EspalexaDevice.h>
+#include <SD.h>
 
 class c_WebMgr
 {
@@ -37,6 +38,9 @@ public:
     void RegisterAlexaCallback (DeviceCallbackFunction cb); 
     bool IsAlexaCallbackValid () { return (nullptr != pAlexaCallback); }
     void FirmwareUpload (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
+#ifdef SUPPORT_FILE_UPLOAD
+    void handleFileUpload ();
+#endif // def SUPPORT_FILE_UPLOAD
 
 private:
 
@@ -45,6 +49,7 @@ private:
     EspalexaDevice * pAlexaDevice = nullptr;
 #   define WebSocketFrameCollectionBufferSize (3*1024)
     char WebSocketFrameCollectionBuffer[WebSocketFrameCollectionBufferSize + 1];
+    File fsUploadFile;
 
     /// Valid "Simple" message types
     enum SimpleMessage 
@@ -69,7 +74,6 @@ private:
     void ProcessXseriesRequests     (AsyncWebSocketClient * client);
     void ProcessXARequest           (AsyncWebSocketClient * client);
     void ProcessXJRequest           (AsyncWebSocketClient * client);
-
 protected:
 
 }; // c_WebMgr
