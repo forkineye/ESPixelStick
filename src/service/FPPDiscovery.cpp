@@ -36,6 +36,7 @@ extern const String VERSION;
 #   define GET_HOST_NAME        WiFi.hostname().c_str()
 #endif
 
+#define FPP_DISCOVERY_PORT 32320
 
 //-----------------------------------------------------------------------------
 typedef union
@@ -161,7 +162,11 @@ void c_FPPDiscovery::begin ()
         LOG_PORT.println (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
         udp.onPacket (std::bind (&c_FPPDiscovery::ProcessReceivedUdpPacket, this, std::placeholders::_1));
 
+#ifdef ESP32
         SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
+#else
+        SPI.begin ();
+#endif
 
         if (!SD.begin (cs_pin))
         {
@@ -257,8 +262,10 @@ void c_FPPDiscovery::DescribeSdCardToUser ()
 
     LOG_PORT.println (BaseMessage);
 
+#ifdef ESP32
     uint64_t cardSize = SD.cardSize () / (1024 * 1024);
     LOG_PORT.println (String(F("SD Card Size: ")) + int64String(cardSize) + "MB");
+#endif // def ESP32
 
     File root = SD.open ("/");
 
@@ -1174,7 +1181,11 @@ void c_FPPDiscovery::SetSpiIoPins (uint8_t miso, uint8_t mosi, uint8_t clock, ui
     cs_pin   = cs;
 
     SPI.end ();
+#ifdef ESP32
     SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
+#else
+    SPI.begin ();
+#endif
 
     SD.end ();
 
@@ -1218,7 +1229,7 @@ void c_FPPDiscovery::PlayFile (String & NewFileName)
 
 bool c_FPPDiscovery::AllowedToRemotePlayFiles()
 {
-    return ((hasSDStorage == true) && (String(F(Stop_FPP_RemotePlay)) != AutoPlayFileName));
+    return ((hasSDStorage == true) && (String(F(Stop_FPP_RemotePlay)) == AutoPlayFileName));
 
 } // AllowedToRemotePlayFiles
 

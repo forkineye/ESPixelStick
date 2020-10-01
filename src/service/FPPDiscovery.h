@@ -34,10 +34,6 @@
 
 #include <ESPAsyncWebServer.h>
 
-#define FPP_DISCOVERY_PORT 32320
-
-
-
 class c_FPPDiscovery
 {
 public:
@@ -46,7 +42,7 @@ public:
 #   define SD_CARD_MOSI_PIN    23 
 #   define SD_CARD_CLK_PIN     18
 #   define SD_CARD_CS_PIN      4
-#   define Stop_FPP_RemotePlay F("...")
+#   define Stop_FPP_RemotePlay "..."
 private:
 
     AsyncUDP udp;
