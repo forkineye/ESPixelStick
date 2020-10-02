@@ -35,7 +35,7 @@ gulp.task('css', function() {
 
 /* JavaScript Task */
 gulp.task('js', function() {
-    return gulp.src(['html/js/jquery*.js', 'html/js/bootstrap.js', 'html/js/jqColorPicker.js', 'html/script.js'])
+    return gulp.src(['html/js/jquery*.js', 'html/js/bootstrap.js', 'html/js/jqColorPicker.js', 'html/script.js', 'html/js/tree.js'])
         .pipe(plumber())
         .pipe(concat('esps.js'))
         .pipe(terser({ 'toplevel': true }))
