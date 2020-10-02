@@ -176,12 +176,6 @@ void c_FPPDiscovery::begin ()
 
         hasSDStorage = true;
 
-        // todo - Remove
-        File Test = SD.open ("/testme", SD_OPEN_WRITEFLAGS);
-        Test.write ((uint8_t*)(String ("Foo").c_str ()), 0);
-        Test.close ();
-        // todo - Remove
-
         DescribeSdCardToUser ();
 
         PlayFile (AutoPlayFileName);
@@ -268,7 +262,6 @@ void c_FPPDiscovery::DescribeSdCardToUser ()
 #endif // def ESP32
 
     File root = SD.open ("/");
-
     printDirectory (root, 0);
 
     // DEBUG_END;
@@ -1144,7 +1137,11 @@ void c_FPPDiscovery::GetListOfFiles (char * ResponseBuffer)
             // DEBUG_V ("Adding FIle");
 
             JsonObject CurrentFile = FileArray.createNestedObject ();
+#ifdef ESP32
             CurrentFile[F ("name")] = EntryName.substring(1);
+#else
+            CurrentFile[F ("name")] = EntryName;
+#endif
         }
 
         entry.close ();
@@ -1167,7 +1164,11 @@ void c_FPPDiscovery::DeleteFseqFile (String & FileNameToDelete)
 
     // DEBUG_V (FileNameToDelete);
 
+#ifdef ESP32
     SD.remove (String(F("/")) + FileNameToDelete);
+#else
+    SD.remove (FileNameToDelete);
+#endif
 
     // DEBUG_END;
 } // DeleteFseqFile
