@@ -4,7 +4,7 @@
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/ShelbyMerrick)
 [![Build Status](https://travis-ci.org/forkineye/ESPixelStick.svg?branch=master)](https://travis-ci.org/forkineye/ESPixelStick)
 
-## ***Code in this branch is currently being refactored and many things are broken or not yet implemented. If you're wanting code that works, get it from the main branch.  In the current state, e131 input and ws2811 work off json configs, but that's it. No web configuration, auxiliary services or other outputs are implemented yet. Much of the code is commented out and being worked in sections.***
+## ***Code in this branch is currently being refactored and some things are broken or not yet implemented. If you're wanting code that works, get it from the main branch.  In the current state, e131 input, Alexa, Effects Engine, DDF, FPP Remote, GECE, Serial, Renard and ws2811 work. Some of the code is commented out and being worked in sections.***
 
 This is the Arduino firmware for the ESP8266 and ESP32 based ESPixelStick.  The ESPixelStick is a small wireless E1.31 sACN pixel controller designed to control a single strand of pixels.  Pixel limitations are mostly based upon your desired refresh rate, around 680 pixels (4 universes) for a 25ms E1.31 source rate.  MQTT support is provided as well for integration into home automation systems where an E1.31 source may not be present.
 
@@ -13,7 +13,7 @@ Since this project began, the firmware has moved beyond just pixel support for t
 ## Hardware
 
 Being open source, you are free to use the ESPixelStick firmware on the device of your choice.  The code however is written specifically for the [ESPixelStick](http://forkineye.com/espixelstick). The ESPixelStick V2 utilizes an ESP-01 module and provides high current connectors, fusing, power filtering, a programming interface and proper logic level buffering.  If you're in the US and would like to purchase an ESPixelStick, they are available via [Amazon](http://amzn.to/2uqBFuX).  The proceeds go towards things like keeping my wife happy so I can work on this project :)
-This code has been ported to work on an ESP32 based LoLin mini. This requires the user to add their own buffer for the WS281x output.
+This code has been ported to work on an ESP32 based LoLin pro. This requires the user to add their own buffer for the WS281x output, but allows the user to support local fseq files and FPP Remote operation.
 ## Requirements
 
 Along with the Arduino IDE, you'll need the following software to build this project:
