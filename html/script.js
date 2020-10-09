@@ -17,6 +17,7 @@ var StatusUpdateRequestTimer = null;
 var FileTree = null;
 var target = null;
 var myDropzone = null;
+var SdCardIsInstalled = false;
 
 // Drawing canvas - move to diagnostics
 var canvas = document.getElementById("canvas");
@@ -86,7 +87,7 @@ $(function ()
     });
 
     var finalUrl = "http://" + target + "/upload";
-    console.log(finalUrl);
+    // console.log(finalUrl);
     const uploader = new Dropzone('#filemanagementupload', 
     {
         url: finalUrl,
@@ -214,13 +215,22 @@ function RequestListOfFiles()
 function ProcessGetFileResponse(JsonConfigData)
 {
     // console.info("ProcessGetFileResponse");
+
+
+    SdCardIsInstalled = JsonConfigData.SdCardPresent;
+
+    $("#li-filemanagement").removeClass("hidden");
+    if (false === SdCardIsInstalled)
+    {
+        $("#li-filemanagement").addClass("hidden");
+    }
+
     Fseq_File_List = JsonConfigData;
 
     clearTimeout(FseqFileListRequestTimer);
     FseqFileListRequestTimer = null;
 
     var TreeRoot = new TreeNode("List Of Files");
-
     JsonConfigData.files.forEach(function (file)
     {
         var NewFileNode = new TreeNode(file.name);
@@ -598,7 +608,7 @@ function wsConnect()
         }
 
         // target = "192.168.10.155";
-        // target = "192.168.10.102";
+        // target = "192.168.10.162";
 
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');

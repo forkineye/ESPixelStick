@@ -321,6 +321,7 @@ void GetConfig (JsonObject & json)
 
     // DEBUG_END;
 }
+
 // Serialize the current config into a JSON string
 String serializeCore(boolean pretty) 
 {

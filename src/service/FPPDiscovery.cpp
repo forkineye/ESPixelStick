@@ -176,12 +176,6 @@ void c_FPPDiscovery::begin ()
 
         hasSDStorage = true;
 
-        // todo - Remove
-        File Test = SD.open ("/testme", SD_OPEN_WRITEFLAGS);
-        Test.write ((uint8_t*)(String ("Foo").c_str ()), 0);
-        Test.close ();
-        // todo - Remove
-
         DescribeSdCardToUser ();
 
         PlayFile (AutoPlayFileName);
@@ -1124,6 +1118,7 @@ void c_FPPDiscovery::GetListOfFiles (char * ResponseBuffer)
     JsonArray FileArray = ResponseJsonDoc.createNestedArray (F ("files"));
 
     File dir = SD.open ("/");
+    ResponseJsonDoc["SdCardPresent"] = SdcardIsInstalled ();
 
     while (true)
     {

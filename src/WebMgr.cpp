@@ -610,6 +610,8 @@ void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
 
     system[F ("freeheap")] = (String)ESP.getFreeHeap ();
     system[F ("uptime")] = millis ();
+    system[F ("SDinstalled")] = FPPDiscovery.SdcardIsInstalled();
+
     // DEBUG_V ("");
 
     // Ask WiFi Stats
