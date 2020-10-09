@@ -106,6 +106,7 @@ $(function ()
                 // console.log("Success");
                 // console.log(file);
                 // console.log(resp);
+                Dropzone.forElement('#filemanagementupload').removeAllFiles(true)
                 RequestListOfFiles();
             });
 
@@ -125,6 +126,7 @@ $(function ()
             return done(); // triggers a send
         }
     });
+    $("#filemanagementupload").addClass("dropzone");
 
     $('#FileDeleteButton').click(function ()
     {
