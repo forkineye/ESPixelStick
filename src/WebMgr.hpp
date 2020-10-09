@@ -38,9 +38,7 @@ public:
     void RegisterAlexaCallback (DeviceCallbackFunction cb); 
     bool IsAlexaCallbackValid () { return (nullptr != pAlexaCallback); }
     void FirmwareUpload (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
-#ifdef SUPPORT_FILE_UPLOAD
-    void handleFileUpload ();
-#endif // def SUPPORT_FILE_UPLOAD
+    void handleFileUpload (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
 
 private:
 
@@ -50,6 +48,7 @@ private:
 #   define WebSocketFrameCollectionBufferSize (3*1024)
     char WebSocketFrameCollectionBuffer[WebSocketFrameCollectionBufferSize + 1];
     File fsUploadFile;
+    String fsUploadFileName;
 
     /// Valid "Simple" message types
     enum SimpleMessage 

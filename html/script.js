@@ -15,6 +15,8 @@ var Fseq_File_List = null;
 var selector = [];
 var StatusUpdateRequestTimer = null;
 var FileTree = null;
+var target = null;
+var myDropzone = null;
 
 // Drawing canvas - move to diagnostics
 var canvas = document.getElementById("canvas");
@@ -83,11 +85,48 @@ $(function ()
         clearStream();
     });
 
-    $('#fileUpload').change(function () {
-        console.info('File Upload Changed: Not implemented yet');
+    var finalUrl = "http://" + target + "/upload";
+    console.log(finalUrl);
+    const uploader = new Dropzone('#filemanagementupload', 
+    {
+        url: finalUrl,
+        paramName: 'file',
+        maxFilesize: 200, // MB
+        maxFiles: 1,
+        parallelUploads: 1,
+        createImageThumbnails: false,
+        dictDefaultMessage: 'Drag an image here to upload, or click to select one',
+        acceptedFiles: '.fseq,.jpg,.zip',
+        timeout: 999999, /*milliseconds*/
+        init: function ()
+        {
+            this.on('success', function (file, resp)
+            {
+                // console.log("Success");
+                // console.log(file);
+                // console.log(resp);
+                RequestListOfFiles();
+            });
+
+            this.on('addedfile', function (file, resp)
+            {
+                // console.log("addedfile");
+                // console.log(file);
+                // console.log(resp);
+            });
+
+        },
+
+        accept: function (file, done)
+        {
+            // console.log("accept");
+            // console.log(file);
+            return done(); // triggers a send
+        }
     });
 
-    $('#FileDeleteButton').click(function () {
+    $('#FileDeleteButton').click(function ()
+    {
         RequestFileDeletion();
     });
 
@@ -195,24 +234,19 @@ function ProcessGetFileResponse(JsonConfigData)
 function RequestFileDeletion()
 {
     var ListOfSelectedFiles = FileTree.getSelectedNodes(); 
-    if (0 < ListOfSelectedFiles.length)
-    {
+    if (0 < ListOfSelectedFiles.length) {
 
-        var files = "[";
+        var files = [];
 
-        ListOfSelectedFiles.forEach(function (file)
-        {
-            files += "{'name' : '" + file.toString() + "'},";
+        ListOfSelectedFiles.forEach(function (file) {
+            var FileEntry = {};
+            FileEntry["name"] = file.toString();
+            files.push(FileEntry);
+
             // console.info(file.toString());
         });
 
-        files = files.substring(0, files.length - 1);
-        files += "]";
-
-        var temp = JSON.stringify({ 'cmd': { 'delete': { files } } });
-
-        wsEnqueue(JSON.stringify({ 'cmd': { 'delete': { files } } }));
-
+        wsEnqueue(JSON.stringify({ 'cmd': { 'delete': { 'files' : files }}}));
     }
 
 } // RequestFileDeletion
@@ -558,13 +592,12 @@ function wsConnect()
 {
     if ('WebSocket' in window)
     {
-        var target;
         if (!(target = ParseParameter('target')))
         {
             target = document.location.host;
         }
 
-        // target = "192.168.10.155";
+        target = "192.168.10.155";
         // target = "192.168.10.102";
 
         // Open a new web socket and set the binary type

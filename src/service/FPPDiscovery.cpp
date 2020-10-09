@@ -1167,7 +1167,13 @@ void c_FPPDiscovery::DeleteFseqFile (String & FileNameToDelete)
 
     // DEBUG_V (FileNameToDelete);
 
-    SD.remove (String(F("/")) + FileNameToDelete);
+    if (!FileNameToDelete.startsWith ("/"))
+    {
+        FileNameToDelete = "/" + FileNameToDelete;
+    }
+
+    LOG_PORT.println (String(F("Deleting FIle: '")) + FileNameToDelete + "'");
+    SD.remove (FileNameToDelete);
 
     // DEBUG_END;
 } // DeleteFseqFile
