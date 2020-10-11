@@ -92,12 +92,14 @@ $(function ()
     {
         url: finalUrl,
         paramName: 'file',
-        maxFilesize: 200, // MB
+        maxFilesize: 1000, // MB
         maxFiles: 1,
         parallelUploads: 1,
+        clickable: true,
+        uploadMultiple: false, 
         createImageThumbnails: false,
         dictDefaultMessage: 'Drag an image here to upload, or click to select one',
-        acceptedFiles: '.fseq,.jpg,.zip',
+        acceptedFiles: '.fseq',
         timeout: 999999, /*milliseconds*/
         init: function ()
         {
