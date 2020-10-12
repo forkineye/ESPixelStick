@@ -1131,15 +1131,17 @@ void c_FPPDiscovery::GetListOfFiles (char * ResponseBuffer)
         }
 
         String EntryName = String(entry.name ());
+        EntryName = EntryName.substring ((('/' == EntryName[0]) ? 1 : 0));
         // DEBUG_V ("EntryName: " + EntryName);
         // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
 
-        if ((0 != EntryName.length()) && (EntryName != String(F("/System Volume Information"))))
+        if ((0 != EntryName.length()) && (EntryName != String(F("System Volume Information"))))
         {
-            // DEBUG_V ("Adding FIle");
+            // DEBUG_V ("Adding File: '" + EntryName + "'");
 
             JsonObject CurrentFile = FileArray.createNestedObject ();
-            CurrentFile[F ("name")] = EntryName.substring(1);
+           
+            CurrentFile[F ("name")] = EntryName;
         }
 
         entry.close ();
@@ -1167,7 +1169,7 @@ void c_FPPDiscovery::DeleteFseqFile (String & FileNameToDelete)
         FileNameToDelete = "/" + FileNameToDelete;
     }
 
-    LOG_PORT.println (String(F("Deleting FIle: '")) + FileNameToDelete + "'");
+    LOG_PORT.println (String(F("Deleting File: '")) + FileNameToDelete + "'");
     SD.remove (FileNameToDelete);
 
     // DEBUG_END;
@@ -1228,6 +1230,7 @@ void c_FPPDiscovery::PlayFile (String & NewFileName)
 
 } // PlayFile
 
+//-----------------------------------------------------------------------------
 bool c_FPPDiscovery::AllowedToRemotePlayFiles()
 {
     return ((hasSDStorage == true) && (String(F(Stop_FPP_RemotePlay)) == AutoPlayFileName));
