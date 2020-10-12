@@ -25,7 +25,7 @@ gulp.task('html', function() {
 
 /* CSS Task */
 gulp.task('css', function() {
-    return gulp.src(['html/css/bootstrap.css', 'html/style.css'])
+    return gulp.src(['html/css/bootstrap.css', 'html/css/dropzone.css', 'html/css/treejs.css', 'html/style.css'])
         .pipe(plumber())
         .pipe(concat('esps.css'))
         .pipe(cleancss())
@@ -35,7 +35,7 @@ gulp.task('css', function() {
 
 /* JavaScript Task */
 gulp.task('js', function() {
-    return gulp.src(['html/js/jquery*.js', 'html/js/bootstrap.js', 'html/js/jqColorPicker.js', 'html/script.js', 'html/js/tree.js'])
+    return gulp.src(['html/js/jquery*.js', 'html/js/bootstrap.js', 'html/js/jqColorPicker.js', 'html/script.js', 'html/js/tree.js', 'html/js/dropzone.js'])
         .pipe(plumber())
         .pipe(concat('esps.js'))
         .pipe(terser({ 'toplevel': true }))

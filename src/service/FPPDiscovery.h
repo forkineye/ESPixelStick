@@ -97,6 +97,8 @@ public:
     void sendPingPacket ();
     void SetSpiIoPins   (uint8_t miso, uint8_t mosi, uint8_t clock, uint8_t cs);
     void PlayFile       (String & FileToPlay);
+
+    bool SdcardIsInstalled () { return hasSDStorage; }
 };
 
 extern c_FPPDiscovery FPPDiscovery;

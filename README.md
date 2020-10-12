@@ -4,7 +4,7 @@
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/ShelbyMerrick)
 [![Build Status](https://travis-ci.org/forkineye/ESPixelStick.svg?branch=master)](https://travis-ci.org/forkineye/ESPixelStick)
 
-## ***Code in this branch is currently being refactored and many things are broken or not yet implemented. If you're wanting code that works, get it from the main branch.  In the current state, e131 input and ws2811 work off json configs, but that's it. No web configuration, auxiliary services or other outputs are implemented yet. Much of the code is commented out and being worked in sections.***
+## ***Code in this branch is currently being refactored and some things are broken or not yet implemented. If you're wanting code that works, get it from the main branch.  In the current state, e131 input, Alexa, Effects Engine, DDF, FPP Remote, GECE, Serial, Renard and ws2811 work. Some of the code is commented out and being worked in sections.***
 
 This is the Arduino firmware for the ESP8266 and ESP32 based ESPixelStick.  The ESPixelStick is a small wireless E1.31 sACN pixel controller designed to control a single strand of pixels.  Pixel limitations are mostly based upon your desired refresh rate, around 680 pixels (4 universes) for a 25ms E1.31 source rate.  MQTT support is provided as well for integration into home automation systems where an E1.31 source may not be present.
 
@@ -13,7 +13,7 @@ Since this project began, the firmware has moved beyond just pixel support for t
 ## Hardware
 
 Being open source, you are free to use the ESPixelStick firmware on the device of your choice.  The code however is written specifically for the [ESPixelStick](http://forkineye.com/espixelstick). The ESPixelStick V2 utilizes an ESP-01 module and provides high current connectors, fusing, power filtering, a programming interface and proper logic level buffering.  If you're in the US and would like to purchase an ESPixelStick, they are available via [Amazon](http://amzn.to/2uqBFuX).  The proceeds go towards things like keeping my wife happy so I can work on this project :)
-This code has been ported to work on an ESP32 based LoLin mini. This requires the user to add their own buffer for the WS281x output.
+This code has been ported to work on an ESP32 based LoLin pro. This requires the user to add their own buffer for the WS281x output, but allows the user to support local fseq files and FPP Remote operation.
 ## Requirements
 
 Along with the Arduino IDE, you'll need the following software to build this project:
@@ -58,22 +58,43 @@ The ESP32 build will require the following software to build this project:
 - For best performance, set the CPU frequency to 160MHz (Tools->CPU Frequency).  You may experience lag and other issues if running at 80MHz.
 - The upload must be redone each time after you rebuild and upload the software
 
-## Supported Outputs
+## Supported Inputs 
 
-The ESPixelStick firmware can generate the following outputs from incoming E1.31 streams, however your hardware must support the physical interface.
+The configuration has been modified the support multiple (two) input types concurrently. For example you can select E1.31 and Effects at the same time. E1.31 will have higher priority than Effects. Valid input types are:
+- Alexa
+- DDP
+- E1.31
+- Effect Engine
+- FPP Remote / FSEQ file auto Play
+- MQTT
 
-### Pixel Protocols
+### Alexa Support
 
-- WS2811 / WS2812 / WS2812b
-- GE Color Effects
+Alexa is supported in direct mode. No additional hubs or applications are needed. When Alexa is selected as an input mode, the ESP will be discoverable by the Alexa app as a device that support 24bit color. The entire output string will be treated (from Alexa's point of view) as a single light bulb 
 
-### Serial Protocols
+### DDP
 
-- DMX512
-- Renard
-- Generic Serial
+No additional configuration is needed for DDP Support. Simply select it as an input mode and it will listen for DDP messages being sent to the ESP
 
-## MQTT Support
+### E1.31
+
+E1.31 requires additional configuration:
+
+- Starting Universe
+- Channels / universe
+- Offset into the first univers to first channel (Typically zero)
+
+### Effect Engine
+
+Effect engine provides a list of effects and colors for the effects. Effects will repeat until the engine is turned off.
+
+### FPP Remote / Play FSEQ
+
+FPP / FSEQ support allows the ESP to play files stored on a local SD card. The configuration allows the SPI pins used for the SD Card to be set. 
+When the "FSEQ File to Play" configuration parameter is set to "Play Remote Sequence", the ESP will respond to FPP Sync and play commands.
+When the "FSEQ File to Play" configuration parameter is set to one of the files stored on the ESP, the ESP will play that file on an endless loop.
+
+### MQTT Support
 
 MQTT can be configured via the web interface.  When enabled, a payload of "ON" will tell the ESPixelStick to override any incoming E1.31 data with MQTT data.  When a payload of "OFF" is received, E1.31 processing will resume.  The configured topic is used for state, and the command topic will be the state topic appended with ```/set```.
 
@@ -108,6 +129,29 @@ Here's an example using the mosquitto_pub command line tool:
 mosquitto_pub -t porch/esps/set -m '{"state":"ON","color":{"r":255,"g":128,"b":64},"brightness":255,"effect":"solid","reverse":false,"mirror":false}'
 ```
 
+### Additional Input Features
+
+The input channels will respond to FPP and xLights discovery requests. xLights also has the ability to auto configure the ESP.
+
+## Supported Outputs
+
+The ESPixelStick firmware can generate the following outputs from incoming data streams, however your hardware must support the physical interface. 
+ESP8266 platforms support a single output
+ESP32 platforms support two outputs
+
+Each output can be configured to support any of the output protocols (no pixel vs serial image).
+
+### Pixel Protocols
+
+- WS2811 / WS2812 / WS2812b
+- GE Color Effects
+
+### Serial Protocols
+
+- DMX512
+- Renard
+- Generic Serial
+
 ## Resources
 
 - Firmware: [http://github.com/forkineye/ESPixelStick](http://github.com/forkineye/ESPixelStick)
@@ -123,4 +167,4 @@ mosquitto_pub -t porch/esps/set -m '{"state":"ON","color":{"r":255,"g":128,"b":6
   - penfold42 also maintains PWM support in their fork located [here](https://github.com/penfold42/ESPixelBoard).
 - [Austin Hodges](https://github.com/ahodges9) for effects support and MQTT cleanup.
 - [Matthias C. Hormann](https://github.com/Moonbase59) — some MQTT & effects cleanup.
-- [Martin Mueller](https://github.com/MartinMueller2003) — Port to ESP32. Clean up the unity branch.
+- [Martin Mueller](https://github.com/MartinMueller2003) — Port to ESP32. Clean up the unify branch.

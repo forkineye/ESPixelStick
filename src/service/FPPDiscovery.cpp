@@ -1117,6 +1117,7 @@ void c_FPPDiscovery::GetListOfFiles (char * ResponseBuffer)
     JsonArray FileArray = ResponseJsonDoc.createNestedArray (F ("files"));
 
     File dir = SD.open ("/");
+    ResponseJsonDoc["SdCardPresent"] = SdcardIsInstalled ();
 
     while (true)
     {
@@ -1129,19 +1130,16 @@ void c_FPPDiscovery::GetListOfFiles (char * ResponseBuffer)
         }
 
         String EntryName = String(entry.name ());
+        EntryName = EntryName.substring ((('/' == EntryName[0]) ? 1 : 0));
         // DEBUG_V ("EntryName: " + EntryName);
         // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
 
-        if ((0 != EntryName.length()) && (EntryName != String(F("/System Volume Information"))))
+        if ((0 != EntryName.length()) && (EntryName != String(F("System Volume Information"))))
         {
-            // DEBUG_V ("Adding FIle");
+            // DEBUG_V ("Adding File: '" + EntryName + "'");
 
             JsonObject CurrentFile = FileArray.createNestedObject ();
-#ifdef ESP32
-            CurrentFile[F ("name")] = EntryName.substring(1);
-#else
             CurrentFile[F ("name")] = EntryName;
-#endif
         }
 
         entry.close ();
@@ -1164,11 +1162,13 @@ void c_FPPDiscovery::DeleteFseqFile (String & FileNameToDelete)
 
     // DEBUG_V (FileNameToDelete);
 
-#ifdef ESP32
-    SD.remove (String(F("/")) + FileNameToDelete);
-#else
+    if (!FileNameToDelete.startsWith ("/"))
+    {
+        FileNameToDelete = "/" + FileNameToDelete;
+    }
+
+    LOG_PORT.println (String(F("Deleting File: '")) + FileNameToDelete + "'");
     SD.remove (FileNameToDelete);
-#endif
 
     // DEBUG_END;
 } // DeleteFseqFile
@@ -1228,6 +1228,7 @@ void c_FPPDiscovery::PlayFile (String & NewFileName)
 
 } // PlayFile
 
+//-----------------------------------------------------------------------------
 bool c_FPPDiscovery::AllowedToRemotePlayFiles()
 {
     return ((hasSDStorage == true) && (String(F(Stop_FPP_RemotePlay)) == AutoPlayFileName));
