@@ -262,7 +262,6 @@ void c_FPPDiscovery::DescribeSdCardToUser ()
 #endif // def ESP32
 
     File root = SD.open ("/");
-
     printDirectory (root, 0);
 
     // DEBUG_END;
@@ -1140,7 +1139,6 @@ void c_FPPDiscovery::GetListOfFiles (char * ResponseBuffer)
             // DEBUG_V ("Adding File: '" + EntryName + "'");
 
             JsonObject CurrentFile = FileArray.createNestedObject ();
-           
             CurrentFile[F ("name")] = EntryName;
         }
 
