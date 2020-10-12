@@ -55,7 +55,7 @@ public:
         OutputChannelId_1 = 0,
 #ifdef ARDUINO_ARCH_ESP32
         OutputChannelId_2,
-        OutputChannelId_3,
+        // OutputChannelId_3,
 #endif // def ARDUINO_ARCH_ESP32
         OutputChannelId_End,
         OutputChannelId_Start = OutputChannelId_1
