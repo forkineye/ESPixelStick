@@ -50,7 +50,7 @@ c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInput
     // set a default effect
     ActiveEffect = &ListOfEffects[0];
 
-    PixelCount = BufferSize / 3;
+    PixelCount = BufferSize / ChannelsPerPixel;
 
     // DEBUG_END;
 } // c_InputEffectEngine
@@ -88,13 +88,14 @@ void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
     char HexColor[] = "#000000 ";
     sprintf (HexColor, "#%02x%02x%02x", EffectColor.r, EffectColor.g, EffectColor.b);
 
-    jsonConfig[F ("currenteffect")]    = ActiveEffect->name;
-    jsonConfig[F ("EffectSpeed")]      = EffectSpeed;
-    jsonConfig[F ("EffectReverse")]    = EffectReverse;
-    jsonConfig[F ("EffectMirror")]     = EffectMirror;
-    jsonConfig[F ("EffectAllLeds")]    = EffectAllLeds;
-    jsonConfig[F ("EffectBrightness")] = EffectBrightness;
-    jsonConfig[F ("EffectColor")]      = HexColor;
+    jsonConfig[F ("currenteffect")]      = ActiveEffect->name;
+    jsonConfig[F ("EffectSpeed")]        = EffectSpeed;
+    jsonConfig[F ("EffectReverse")]      = EffectReverse;
+    jsonConfig[F ("EffectMirror")]       = EffectMirror;
+    jsonConfig[F ("EffectAllLeds")]      = EffectAllLeds;
+    jsonConfig[F ("EffectBrightness")]   = EffectBrightness;
+    jsonConfig[F ("EffectWhiteChannel")] = EffectWhiteChannel;
+    jsonConfig[F ("EffectColor")]        = HexColor;
 
     JsonArray EffectsArray = jsonConfig.createNestedArray (F ("effects"));
 
@@ -128,9 +129,10 @@ void c_InputEffectEngine::GetMqttConfig (JsonObject & jsonConfig)
     // jsonConfig[F ("effect")]     = ActiveEffect->name;
     // jsonConfig[F ("speed")]      = EffectSpeed;
     // jsonConfig[F ("reverse")]    = EffectReverse;
-    jsonConfig[F ("mirror")]     = EffectMirror;
-    jsonConfig[F ("allleds")]    = EffectAllLeds;
-    jsonConfig[F ("brightness")] = EffectBrightness * 255;
+    jsonConfig[F ("mirror")]       = EffectMirror;
+    jsonConfig[F ("allleds")]      = EffectAllLeds;
+    jsonConfig[F ("brightness")]   = EffectBrightness * 255;
+    jsonConfig[F ("whitechannel")] = EffectWhiteChannel;
 
     // color needs a bit of reprocessing
     JsonObject color = jsonConfig.createNestedObject (F ("color"));
@@ -184,7 +186,7 @@ void c_InputEffectEngine::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSi
     InputDataBuffer     = BufferStart;
     InputDataBufferSize = BufferSize;
 
-    PixelCount = BufferSize / 3;
+    PixelCount = InputDataBufferSize / ChannelsPerPixel;
 
     // DEBUG_END;
 
@@ -202,8 +204,12 @@ boolean c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     FileIO::setFromJSON (EffectMirror, jsonConfig[F ("EffectMirror")]);
     FileIO::setFromJSON (EffectAllLeds, jsonConfig[F ("EffectAllLeds")]);
     FileIO::setFromJSON (EffectBrightness, jsonConfig[F ("EffectBrightness")]);
+    FileIO::setFromJSON (EffectWhiteChannel, jsonConfig[F ("EffectWhiteChannel")]);
     FileIO::setFromJSON (effectName, jsonConfig[F ("currenteffect")]);
     FileIO::setFromJSON (effectColor, jsonConfig[F ("EffectColor")]);
+
+    ChannelsPerPixel = (true == EffectWhiteChannel) ? 4 : 3;
+    PixelCount = InputDataBufferSize / ChannelsPerPixel;
 
     setColor (effectColor);
     validateConfiguration ();
@@ -220,12 +226,16 @@ boolean c_InputEffectEngine::SetMqttConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_START;
     String effectName;
 
-    FileIO::setFromJSON (EffectSpeed,      jsonConfig[F ("speed")]);
-    FileIO::setFromJSON (EffectReverse,    jsonConfig[F ("reverse")]);
-    FileIO::setFromJSON (EffectMirror,     jsonConfig[F ("mirror")]);
-    FileIO::setFromJSON (EffectAllLeds,    jsonConfig[F ("allleds")]);
-    FileIO::setFromJSON (EffectBrightness, jsonConfig[F ("brightness")]);
-    FileIO::setFromJSON (effectName,       jsonConfig[F ("effect")]);
+    FileIO::setFromJSON (EffectSpeed,        jsonConfig[F ("speed")]);
+    FileIO::setFromJSON (EffectReverse,      jsonConfig[F ("reverse")]);
+    FileIO::setFromJSON (EffectMirror,       jsonConfig[F ("mirror")]);
+    FileIO::setFromJSON (EffectAllLeds,      jsonConfig[F ("allleds")]);
+    FileIO::setFromJSON (EffectBrightness,   jsonConfig[F ("brightness")]);
+    FileIO::setFromJSON (EffectWhiteChannel, jsonConfig[F ("EffectWhiteChannel")]);
+    FileIO::setFromJSON (effectName,         jsonConfig[F ("effect")]);
+
+    ChannelsPerPixel = (true == EffectWhiteChannel) ? 4 : 3;
+    PixelCount = InputDataBufferSize / ChannelsPerPixel;
 
     if (jsonConfig.containsKey ("color"))
     {
@@ -337,7 +347,7 @@ void c_InputEffectEngine::setPixel (uint16_t pixelId, CRGB color)
 
     if ((true == IsInputChannelActive) && (pixelId < PixelCount))
     {
-        uint8_t* pInputDataBuffer = &InputDataBuffer[3 * pixelId];
+        uint8_t* pInputDataBuffer = &InputDataBuffer[ChannelsPerPixel * pixelId];
 
         // DEBUG_V (String ("EffectBrightness: ") + String (EffectBrightness));
         // DEBUG_V (String ("color.r: ") + String (color.r));
@@ -347,6 +357,7 @@ void c_InputEffectEngine::setPixel (uint16_t pixelId, CRGB color)
         pInputDataBuffer[0] = color.r * EffectBrightness;
         pInputDataBuffer[1] = color.g * EffectBrightness;
         pInputDataBuffer[2] = color.b * EffectBrightness;
+        pInputDataBuffer[3] = 0; // no white data
 
         // DEBUG_V (String ("pInputDataBuffer[0]: ") + String (pInputDataBuffer[0]));
         // DEBUG_V (String ("pInputDataBuffer[1]: ") + String (pInputDataBuffer[1]));

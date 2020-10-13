@@ -70,11 +70,11 @@ char Convert2BitIntensityToUartDataStream[] =
 static void IRAM_ATTR uart_intr_handler (void* param);
 
 //----------------------------------------------------------------------------
-c_OutputWS2811::c_OutputWS2811(c_OutputMgr::e_OutputChannelIds OutputChannelId, 
-                               gpio_num_t outputGpio, 
-                               uart_port_t uart,
-                               c_OutputMgr::e_OutputType outputType) :
-    c_OutputCommon(OutputChannelId, outputGpio, uart, outputType),
+c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+    gpio_num_t outputGpio,
+    uart_port_t uart,
+    c_OutputMgr::e_OutputType outputType) :
+    c_OutputCommon (OutputChannelId, outputGpio, uart, outputType),
     color_order ("rgb"),
     pixel_count (170),
     zig_size (0),
@@ -84,11 +84,13 @@ c_OutputWS2811::c_OutputWS2811(c_OutputMgr::e_OutputChannelIds OutputChannelId,
     pNextIntensityToSend (nullptr),
     RemainingIntensityCount (0),
     startTime (0),
-    rOffset (0),
-    gOffset (1),
-    bOffset (2)
+    numIntensityBytesPerPixel(3)
 {
     // DEBUG_START;
+    ColorOffsets.offset.r = 0;
+    ColorOffsets.offset.g = 1;
+    ColorOffsets.offset.b = 2;
+    ColorOffsets.offset.w = 3;
     // DEBUG_END;
 } // c_OutputWS2811
 
@@ -167,7 +169,7 @@ void c_OutputWS2811::Begin()
     pixel_count = 100;
 
     // Setup common Output Buffer
-    SetOutputBufferSize (pixel_count * WS2812_NUM_INTENSITY_BYTES_PER_PIXEL);
+    SetOutputBufferSize (pixel_count * numIntensityBytesPerPixel);
 
     // Calculate our refresh time
     FrameRefreshTimeMs = (WS2811_TIME_PER_PIXEL * pixel_count) + WS2811_MIN_IDLE_TIME;
@@ -284,13 +286,14 @@ void c_OutputWS2811::Render()
                 ++CurrentGroupIndex, ++CurrentDestinationPixelIndex)
             {
                 // write data to the output buffer
-                *pTargetData++ = gamma_table[pSourceData[rOffset]];
-                *pTargetData++ = gamma_table[pSourceData[gOffset]];
-                *pTargetData++ = gamma_table[pSourceData[bOffset]];
+                for (int colorOffsetId = 0; colorOffsetId < numIntensityBytesPerPixel; ++colorOffsetId)
+                {
+                    *pTargetData++ = gamma_table[pSourceData[ColorOffsets.Array[colorOffsetId]]];
+                }
             } // End for each intensity in current input pixel
 
             // point at the next pixel in the input buffer
-            pSourceData += WS2812_NUM_INTENSITY_BYTES_PER_PIXEL;
+            pSourceData += numIntensityBytesPerPixel;
 
         } // end for each pixel in the output buffer
     } // end normal copy
@@ -305,20 +308,21 @@ void c_OutputWS2811::Render()
             {
                 // Odd "zig"
                 int group = zig_size * (CurrentDestinationPixelIndex / zig_size);
-                pSourceData = OutputMgr.GetBufferAddress () + (WS2812_NUM_INTENSITY_BYTES_PER_PIXEL * ((group + zig_size - (CurrentDestinationPixelIndex % zig_size) - 1) / group_size));
+                pSourceData = OutputMgr.GetBufferAddress () + (numIntensityBytesPerPixel * ((group + zig_size - (CurrentDestinationPixelIndex % zig_size) - 1) / group_size));
             } // end zig
             else
             {
                 // Even "zag"
-                pSourceData = OutputMgr.GetBufferAddress () + (WS2812_NUM_INTENSITY_BYTES_PER_PIXEL * (CurrentDestinationPixelIndex / group_size));
+                pSourceData = OutputMgr.GetBufferAddress () + (numIntensityBytesPerPixel * (CurrentDestinationPixelIndex / group_size));
             } // end zag
 
             // now that we have decided on a data source, copy one 
             // pixels worth of data
-            *pTargetData++ = gamma_table[pSourceData[rOffset]];
-            *pTargetData++ = gamma_table[pSourceData[gOffset]];
-            *pTargetData++ = gamma_table[pSourceData[bOffset]];
-
+                // write data to the output buffer
+            for (int colorOffsetId = 0; colorOffsetId < numIntensityBytesPerPixel; ++colorOffsetId)
+            {
+                *pTargetData++ = gamma_table[pSourceData[ColorOffsets.Array[colorOffsetId]]];
+            }
         } // end for each pixel in the output buffer
     } // end zig zag copy
 
@@ -380,25 +384,35 @@ void c_OutputWS2811::updateGammaTable ()
 } // updateGammaTable
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811::updateColorOrder ()
+void c_OutputWS2811::updateColorOrderOffsets ()
 {
     // DEBUG_START;
     // make sure the color order is all lower case
     color_order.toLowerCase ();
 
-         if (String (F ("grb")) == color_order) { rOffset = 1; gOffset = 0; bOffset = 2; }
-    else if (String (F ("brg")) == color_order) { rOffset = 1; gOffset = 2; bOffset = 0; }
-    else if (String (F ("rbg")) == color_order) { rOffset = 0; gOffset = 2; bOffset = 1; }
-    else if (String (F ("gbr")) == color_order) { rOffset = 2; gOffset = 0; bOffset = 1; }
-    else if (String (F ("bgr")) == color_order) { rOffset = 2; gOffset = 1; bOffset = 0; }
+         if (String (F ("rgbw")) == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
+    else if (String (F ("grbw")) == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
+    else if (String (F ("brgw")) == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
+    else if (String (F ("rbgw")) == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
+    else if (String (F ("gbrw")) == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
+    else if (String (F ("bgrw")) == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
+    else if (String (F ("grb"))  == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
+    else if (String (F ("brg"))  == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
+    else if (String (F ("rbg"))  == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
+    else if (String (F ("gbr"))  == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
+    else if (String (F ("bgr"))  == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
     else
     {
         color_order = F ("rgb");
-        rOffset = 0; gOffset = 1; bOffset = 2;
+        ColorOffsets.offset.r = 0;
+        ColorOffsets.offset.g = 1;
+        ColorOffsets.offset.b = 2;
+        ColorOffsets.offset.w = 3;
+        numIntensityBytesPerPixel = 3;
     } // default
 
     // DEBUG_END;
-} // updateColorOrder
+} // updateColorOrderOffsets
  
 //----------------------------------------------------------------------------
 /*
@@ -415,10 +429,10 @@ bool c_OutputWS2811::validate ()
     // DEBUG_START;
     bool response = true;
 
-    if (pixel_count > WS2812_PIXEL_LIMIT)
+    if (pixel_count > OM_MAX_NUM_PIXELS)
     {
         // LOG_PORT.println (String (F ("*** Requested pixel count was too high. Setting to ")) + PIXEL_LIMIT + F(" ***"));
-        pixel_count = WS2812_PIXEL_LIMIT;
+        pixel_count = OM_MAX_NUM_PIXELS;
         response = false;
     }
     else if (pixel_count < 1)
@@ -426,7 +440,7 @@ bool c_OutputWS2811::validate ()
         pixel_count = 170;
         response = false;
     }
-    SetOutputBufferSize (pixel_count * WS2812_NUM_INTENSITY_BYTES_PER_PIXEL);
+    SetOutputBufferSize (pixel_count * numIntensityBytesPerPixel);
 
     if (group_size > pixel_count)
     {
@@ -466,7 +480,7 @@ bool c_OutputWS2811::validate ()
     }
 
     updateGammaTable ();
-    updateColorOrder ();
+    updateColorOrderOffsets ();
 
     // Calculate our refresh time
     FrameRefreshTimeMs = (WS2811_TIME_PER_PIXEL * pixel_count) + WS2811_MIN_IDLE_TIME;

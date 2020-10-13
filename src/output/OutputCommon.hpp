@@ -78,9 +78,6 @@ public:
             void         SetOutputBufferSize (uint16_t NewOutputBufferSize)  { OutputBufferSize = NewOutputBufferSize; };
 
 protected:
-
-#define MAX_NUM_PIXELS                          1360
-#define WS2812_NUM_INTENSITY_BYTES_PER_PIXEL    3
 #define OM_CMN_NO_CUSTOM_ISR                    (-1)
 
     gpio_num_t  DataPin;     ///< Output pin to use for this driver

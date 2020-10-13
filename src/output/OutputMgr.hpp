@@ -78,6 +78,14 @@ public:
         OutputType_Start = OutputType_WS2811,
     };
 
+#define OM_MAX_NUM_INTENSITY_BYTES_PER_PIXEL    4
+#ifdef ARDUINO_ARCH_ESP8266
+#   define OM_MAX_NUM_PIXELS                    1200
+#else
+#   define OM_MAX_NUM_PIXELS                    2000
+#endif // !def ARDUINO_ARCH_ESP8266
+
+
 private:
 
     void InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, e_OutputType NewChannelType);
@@ -101,7 +109,7 @@ private:
     String ConfigFileName;
     String ConfigData;
 
-    uint8_t OutputBuffer[1024 * 3];
+    uint8_t OutputBuffer[OM_MAX_NUM_PIXELS * OM_MAX_NUM_INTENSITY_BYTES_PER_PIXEL];
 
 protected:
 

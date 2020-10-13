@@ -63,6 +63,7 @@ public:
         bool        hasMirror;
         bool        hasReverse;
         bool        hasAllLeds;
+        bool        hasWhiteChannel;
         String      wsTCode;
     } EffectDescriptor_t;
 
@@ -110,11 +111,13 @@ private:
     bool EffectReverse             = false;           /* Externally controlled effect reverse option */
     bool EffectMirror              = false;           /* Externally controlled effect mirroring (start at center) */
     bool EffectAllLeds             = false;           /* Externally controlled effect all leds = 1st led */
+    bool EffectWhiteChannel        = false;
     float EffectBrightness         = 1.0;             /* Externally controlled effect brightness [0, 255] */
     CRGB EffectColor               = { 183, 0, 255 }; /* Externally controlled effect color */
 
     uint32_t EffectStep            = 0;            /* Shared mutable effect step counter */
     uint16_t PixelCount            = 0;            /* Number of RGB leds (not channels) */
+    uint8_t  ChannelsPerPixel      = 3;
 
     void setPixel(uint16_t idx,  CRGB color);
     void setRange(uint16_t first, uint16_t len, CRGB color);

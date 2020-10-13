@@ -46,17 +46,27 @@ public:
     void         GetDriverName (String & sDriverName) { sDriverName = String (F ("WS2811")); }
     c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_WS2811;} ///< Have the instance report its type.
     void         GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
-    uint16_t     GetBufferSize () { return (pixel_count * WS2812_NUM_INTENSITY_BYTES_PER_PIXEL); } ///< Get the address of the buffer into which the E1.31 handler will stuff data
+    uint16_t     GetBufferSize () { return (pixel_count * numIntensityBytesPerPixel); } ///< Get the address of the buffer into which the E1.31 handler will stuff data
 
     /// Interrupt Handler
     void IRAM_ATTR ISR_Handler (); ///< UART ISR
 
-#define WS2812_PIXEL_LIMIT                          1360    ///< Total pixel limit - 40.85ms for 8 universes
-#define WS2812_NUM_INTENSITY_BYTES_PER_PIXEL    	3
-#define WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE	4
-#define WS2812_OUTPUT_BUFF_SIZE                     (WS2812_PIXEL_LIMIT * WS2812_NUM_INTENSITY_BYTES_PER_PIXEL)
+#define WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE    4
 
 private:
+
+    typedef union ColorOffsets_s
+    {
+        struct offsets
+        {
+            uint8_t r;
+            uint8_t g;
+            uint8_t b;
+            uint8_t w;
+        } offset;
+        uint8_t Array[];
+    } ColorOffsets_t;
+
     // JSON configuration parameters
     String      color_order; ///< Pixel color order
     uint16_t    pixel_count; ///< Number of pixels
@@ -66,14 +76,13 @@ private:
     float       brightness;  ///< brightness to use
 
     // Internal variables
-    uint8_t     IsrOutputBuffer[WS2812_OUTPUT_BUFF_SIZE+1]; ///< Data ready to be sent to the UART
-    uint8_t    *pNextIntensityToSend;                       ///< start of output buffer being sent to the UART
-    uint16_t    RemainingIntensityCount;                    ///< Used by ISR to determine how much more data to send
-    time_t      startTime;                                  ///< When the last frame TX started
-    uint8_t     rOffset;                                    ///< Index of red byte
-    uint8_t     gOffset;                                    ///< Index of green byte
-    uint8_t     bOffset;                                    ///< Index of blue byte
-    uint8_t     gamma_table[256] = { 0 };                   ///< Gamma Adjustment table
+    uint8_t         IsrOutputBuffer[(OM_MAX_NUM_PIXELS * OM_MAX_NUM_INTENSITY_BYTES_PER_PIXEL) +1]; ///< Data ready to be sent to the UART
+    uint8_t        *pNextIntensityToSend;                       ///< start of output buffer being sent to the UART
+    uint16_t        RemainingIntensityCount;                    ///< Used by ISR to determine how much more data to send
+    time_t          startTime;                                  ///< When the last frame TX started
+    uint8_t         numIntensityBytesPerPixel = 3;              ///< number of bytes per pixel
+    uint8_t         gamma_table[256] = { 0 };                   ///< Gamma Adjustment table
+    ColorOffsets_t  ColorOffsets;
 
 #ifdef ARDUINO_ARCH_ESP8266
     /* Returns number of bytes waiting in the TX FIFO of UART1 */
@@ -101,7 +110,7 @@ private:
     }
     
     void updateGammaTable(); ///< Generate gamma correction table
-    void updateColorOrder(); ///< Update color order
+    void updateColorOrderOffsets(); ///< Update color order
     bool validate ();        ///< confirm that the current configuration is valid
 
 }; // c_OutputWS2811
