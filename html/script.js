@@ -3,6 +3,7 @@ var wsOutputQueue = [];
 var wsBusy = false;
 var wsOutputQueueTimer = null;
 var StatusRequestTimer = null;
+var FseqFileListRequestTimer = null;
 var ws = null; // Web Socket
 
 // global data
@@ -10,8 +11,13 @@ var ParsedJsonStatus = null;
 var ParsedJsonConfig = null;
 var Output_Config = null; // Output Manager configuration record
 var Input_Config = null; // Input Manager configuration record
+var Fseq_File_List = null;
 var selector = [];
 var StatusUpdateRequestTimer = null;
+var FileTree = null;
+var target = null;
+var myDropzone = null;
+var SdCardIsInstalled = false;
 
 // Drawing canvas - move to diagnostics
 var canvas = document.getElementById("canvas");
@@ -75,13 +81,65 @@ $(function ()
     $('#btn_RGB').change(function () {
         clearStream();
     });
+
     $('#btn_Channel').change(function () {
         clearStream();
+    });
+
+    var finalUrl = "http://" + target + "/upload";
+    // console.log(finalUrl);
+    const uploader = new Dropzone('#filemanagementupload', 
+    {
+        url: finalUrl,
+        paramName: 'file',
+        maxFilesize: 1000, // MB
+        maxFiles: 1,
+        parallelUploads: 1,
+        clickable: true,
+        uploadMultiple: false, 
+        createImageThumbnails: false,
+        dictDefaultMessage: 'Drag an image here to upload, or click to select one',
+        acceptedFiles: '.fseq',
+        timeout: 999999, /*milliseconds*/
+        init: function ()
+        {
+            this.on('success', function (file, resp)
+            {
+                // console.log("Success");
+                // console.log(file);
+                // console.log(resp);
+                Dropzone.forElement('#filemanagementupload').removeAllFiles(true)
+                RequestListOfFiles();
+            });
+
+            this.on('addedfile', function (file, resp)
+            {
+                // console.log("addedfile");
+                // console.log(file);
+                // console.log(resp);
+            });
+
+        },
+
+        accept: function (file, done)
+        {
+            // console.log("accept");
+            // console.log(file);
+            return done(); // triggers a send
+        }
+    });
+    $("#filemanagementupload").addClass("dropzone");
+
+    $('#FileDeleteButton').click(function ()
+    {
+        RequestFileDeletion();
     });
 
     // Autoload tab based on URL hash
     var hash = window.location.hash;
     hash && $('ul.navbar-nav li a[href="' + hash + '"]').click();
+
+    RequestListOfFiles();
 
     // start updating stats
     RequestStatusUpdate();
@@ -103,10 +161,13 @@ function ProcessWindowChange(NextWindow) {
 
     // kick start the live stream
     else if (NextWindow === "#config") {
+        RequestListOfFiles();
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
         wsEnqueue(JSON.stringify({ 'cmd': { 'opt': 'device' } })); // Get device option data
     }
+
+    RequestListOfFiles();
 
 } // ProcessWindowChange
 
@@ -134,6 +195,76 @@ function RequestStatusUpdate()
 
 } // RequestStatusUpdate
 
+function RequestListOfFiles()
+{
+    // is the timer running?
+    if (null === FseqFileListRequestTimer)
+    {
+        // timer runs until we get a response
+        FseqFileListRequestTimer = setTimeout(function ()
+        {
+            clearTimeout(FseqFileListRequestTimer);
+            FseqFileListRequestTimer = null;
+
+            RequestListOfFiles();
+
+        }, 1000);
+    } // end timer was not running
+
+    // ask for a file list from the server
+    wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'files' } })); // Get File List
+
+} // RequestListOfFseqFiles
+
+function ProcessGetFileResponse(JsonConfigData)
+{
+    // console.info("ProcessGetFileResponse");
+
+
+    SdCardIsInstalled = JsonConfigData.SdCardPresent;
+
+    $("#li-filemanagement").removeClass("hidden");
+    if (false === SdCardIsInstalled)
+    {
+        $("#li-filemanagement").addClass("hidden");
+    }
+
+    Fseq_File_List = JsonConfigData;
+
+    clearTimeout(FseqFileListRequestTimer);
+    FseqFileListRequestTimer = null;
+
+    var TreeRoot = new TreeNode("List Of Files");
+    JsonConfigData.files.forEach(function (file)
+    {
+        var NewFileNode = new TreeNode(file.name);
+        TreeRoot.addChild(NewFileNode);
+    });
+
+    FileTree = new TreeView(TreeRoot, "#FileTree");
+
+} // ProcessGetFileResponse
+
+function RequestFileDeletion()
+{
+    var ListOfSelectedFiles = FileTree.getSelectedNodes(); 
+    if (0 < ListOfSelectedFiles.length) {
+
+        var files = [];
+
+        ListOfSelectedFiles.forEach(function (file) {
+            var FileEntry = {};
+            FileEntry["name"] = file.toString();
+            files.push(FileEntry);
+
+            // console.info(file.toString());
+        });
+
+        wsEnqueue(JSON.stringify({ 'cmd': { 'delete': { 'files' : files }}}));
+    }
+
+} // RequestFileDeletion
+
 function ParseParameter(name)
 {
     return (location.search.split(name + '=')[1] || '').split('&')[0];
@@ -147,13 +278,16 @@ function ProcessModeConfigurationData(channelId, ChannelTypeName, JsonConfig )
     var TypeOfChannelId = parseInt($('#' + ChannelTypeName +  channelId + " option:selected").val(), 10);
     var channelConfigSet = JsonConfig.channels[channelId];
 
-    if (isNaN(TypeOfChannelId)) {
+    if (isNaN(TypeOfChannelId))
+    {
         // use the value we got from the controller
         TypeOfChannelId = channelConfigSet.type;
     }
     var channelConfig = channelConfigSet[TypeOfChannelId];
     ChannelTypeName = channelConfig.type.toLowerCase();
     ChannelTypeName = ChannelTypeName.replace(".", "_");
+    ChannelTypeName = ChannelTypeName.replace(" ", "_");
+    // console.info("ChannelTypeName: " + ChannelTypeName);
 
     // clear the array
     selector = [];
@@ -166,6 +300,27 @@ function ProcessModeConfigurationData(channelId, ChannelTypeName, JsonConfig )
 
     // clear the array
     selector = [];
+
+    if (("fppremote" === ChannelTypeName) && (null !== Fseq_File_List))
+    {
+        var jqSelector = "#fseqfilename";
+
+        // remove the existing options
+        $(jqSelector).empty();
+
+        $(jqSelector).append('<option value=>Play Remote Sequence</option>');
+
+        // for each file in the list
+        Fseq_File_List.files.forEach(function (listEntry)
+        {
+            // add in a new entry
+            $(jqSelector).append('<option value="' + listEntry.name + '">' + listEntry.name + '</option>');
+        });
+
+        // set the current selector value
+        $(jqSelector).val(channelConfig.fseqfilename);
+
+    }
 
     if ("effects" === ChannelTypeName) {
         var jqSelector = "#currenteffect";
@@ -205,19 +360,25 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
         Input_Config = JsonConfigData.input_config;
     }
 
-    // is this an input config?
+    // is this a device config?
     else if (JsonConfigData.hasOwnProperty("device"))
     {
         updateFromJSON(JsonConfigData);
     }
 
-    // is this an input config?
+    // is this a network config?
     else if (JsonConfigData.hasOwnProperty("network"))
     {
         updateFromJSON(JsonConfigData);
     }
 
-    // is this an input config?
+    // is this a file list?
+    else if (JsonConfigData.hasOwnProperty("files"))
+    {
+        ProcessGetFileResponse(JsonConfigData);
+    }
+
+    // is this an ACK response?
     else if (JsonConfigData.hasOwnProperty("OK"))
     {
         // console.info("Received Acknowledgement to config set command.")
@@ -267,6 +428,8 @@ function updateFromJSON(obj)
 
 function ProcessReceivedOptionDataMessage(JsonOptionList)
 {
+    // console.info("ProcessReceivedOptionDataMessage");
+
     // for each field we need to populate (input vs output)
     Object.keys(JsonOptionList).forEach(function (OptionListName)
     {
@@ -291,8 +454,15 @@ function ProcessReceivedOptionDataMessage(JsonOptionList)
             {
                 if ($(this).val())
                 {
+                    var HtmlLoadFileName = $('#' + OptionListName + DisplayedChannelId + ' option:selected').text().toLowerCase();
+                    // console.info("HtmlLoadName: " + HtmlLoadName);
+                    HtmlLoadFileName = HtmlLoadFileName.replace(".", "_");
+                    HtmlLoadFileName = HtmlLoadFileName.replace(" ", "_");
+                    HtmlLoadFileName = HtmlLoadFileName + ".html";
+                    // console.info("Adjusted HtmlLoadName: " + HtmlLoadName);
+
                     // try to load the field definition file for this channel type
-                    $('#' + OptionListName + 'mode' + DisplayedChannelId).load($('#' + OptionListName + DisplayedChannelId + ' option:selected').text().toLowerCase() + ".html", function ()
+                    $('#' + OptionListName + 'mode' + DisplayedChannelId).load(HtmlLoadFileName, function ()
                     {
                         if ("input" === OptionListName)
                         {
@@ -324,8 +494,12 @@ function ProcessReceivedOptionDataMessage(JsonOptionList)
             // clear the footer
             $('#refresh').html('0 ms / 0 fps');
 
+            var fileName = $('#' + OptionListName + DisplayedChannelId + ' option:selected').text().toLowerCase();
+            fileName = fileName.replace(" ", "_").replace(".", "_");
+            // console.info("fileName: " + fileName);
+
             // try to load the field definition file for this channel type
-            $('#' + OptionListName + 'mode' + DisplayedChannelId).load($('#' + OptionListName + DisplayedChannelId + ' option:selected').text().toLowerCase() + ".html", function ()
+            $('#' + OptionListName + 'mode' + DisplayedChannelId).load(fileName + ".html", function ()
             {
                 if ("input" === OptionListName)
                 {
@@ -432,14 +606,13 @@ function wsConnect()
 {
     if ('WebSocket' in window)
     {
-        var target;
         if (!(target = ParseParameter('target')))
         {
             target = document.location.host;
         }
 
-        // target = "192.168.10.99";
-        // target = "192.168.10.102";
+        // target = "192.168.10.155";
+        // target = "192.168.10.162";
 
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');
@@ -515,7 +688,7 @@ function wsConnect()
             }
             else
             {
-                console.info("Stream Data");
+                // console.info("Stream Data");
 
                 streamData = new Uint8Array(event.data);
                 drawStream(streamData);

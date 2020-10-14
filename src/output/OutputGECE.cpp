@@ -22,6 +22,11 @@
 #include "OutputGECE.hpp"
 #include "../ESPixelStick.h"
 #include "../FileIO.h"
+#include <HardwareSerial.h>
+#ifdef ARDUINO_ARCH_ESP32
+#   include <driver/uart.h>
+#endif
+
 
 extern "C" {
 #ifdef ARDUINO_ARCH_ESP8266
@@ -94,6 +99,8 @@ static char LOOKUP_GECE[] =
 
 #define CYCLES_GECE_START   (F_CPU / 100000) // 10us
 
+#define GECE_NUM_CHAN_PER_PIXEL 3
+
 //----------------------------------------------------------------------------
 c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId,
                             gpio_num_t outputGpio, 
@@ -105,30 +112,6 @@ c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId,
 
     brightness = GECE_DEFAULT_BRIGHTNESS;
 
-    // determine uart to use based on channel id
-    switch (OutputChannelId)
-    {
-        case c_OutputMgr::e_OutputChannelIds::OutputChannelId_1:
-        {
-            pSerialInterface = &Serial1;
-            break;
-        }
-#ifdef ARDUINO_ARCH_ESP32
-        case c_OutputMgr::e_OutputChannelIds::OutputChannelId_2:
-        {
-            pSerialInterface = &Serial2;
-            break;
-        }
-#endif // def ARCUINO_ARCH_32
-
-        default:
-        {
-            LOG_PORT.println (String (F ("EEEEEE ERROR: Port '")) + int (OutputChannelId) + String (F ("' is not a valid GECE port. EEEEEE")));
-            break;
-        }
-
-    } // end switch on channel ID
-
     // DEBUG_END;
 
 } // c_OutputGECE
@@ -137,14 +120,6 @@ c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId,
 c_OutputGECE::~c_OutputGECE ()
 {
     // DEBUG_START;
-    if (gpio_num_t (-1) == DataPin) { return; }
-
-    // shut down the interface
-    pSerialInterface->end ();
-
-    // put the pin into a safe state
-    pinMode (DataPin, INPUT);
-
     // DEBUG_END;
 } // ~c_OutputGECE
 
@@ -156,21 +131,27 @@ void c_OutputGECE::Begin()
 
     if (gpio_num_t (-1) == DataPin) { return; }
 
-    // first make sure the interface is off
-    pSerialInterface->end ();
-
-    // Set output pins
-    pinMode(DataPin, OUTPUT);
-    digitalWrite(DataPin, LOW);
-
     FrameRefreshTimeMs = (GECE_FRAME_TIME + GECE_IDLE_TIME) * pixel_count;
+    SetOutputBufferSize (pixel_count * GECE_NUM_CHAN_PER_PIXEL);
 
     // Serial rate is 3x 100KHz for GECE
 #ifdef ARDUINO_ARCH_ESP8266
-    pSerialInterface->begin(300000, SERIAL_7N1, SERIAL_TX_ONLY);
-#elif defined ARDUINO_ARCH_ESP32
-    pSerialInterface->begin (300000, SERIAL_7N1);
+    InitializeUart (300000,
+                    SERIAL_7N1,
+                    SERIAL_TX_ONLY,
+                    OM_CMN_NO_CUSTOM_ISR);
+#else
+    uart_config_t uart_config;
+    uart_config.baud_rate           = 300000;
+    uart_config.data_bits           = uart_word_length_t::UART_DATA_7_BITS;
+    uart_config.flow_ctrl           = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
+    uart_config.parity              = uart_parity_t::UART_PARITY_DISABLE;
+    uart_config.rx_flow_ctrl_thresh = 1;
+    uart_config.stop_bits           = uart_stop_bits_t::UART_STOP_BITS_1;
+    uart_config.use_ref_tick        = false;
+    InitializeUart (uart_config, OM_CMN_NO_CUSTOM_ISR);
 #endif
+
     SET_PERI_REG_MASK(UART_CONF0(UartId), UART_TXD_BRK);
     delayMicroseconds(GECE_IDLE_TIME);
 
@@ -234,6 +215,8 @@ bool c_OutputGECE::validate ()
         response = false;
     }
 
+    SetOutputBufferSize (pixel_count * GECE_NUM_CHAN_PER_PIXEL);
+
  DEBUG_END;
     return response;
 
@@ -283,7 +266,7 @@ void c_OutputGECE::Render()
         while ((_getCycleCount() - c) < CYCLES_GECE_START - 100) {}
 
         // Send the packet and then idle low (break)
-        pSerialInterface->write(OutputBuffer, GECE_PACKET_SIZE);
+        CommonSerialWrite(OutputBuffer, GECE_PACKET_SIZE);
 
         SET_PERI_REG_MASK(UART_CONF0(UartId), UART_TXD_BRK);
 

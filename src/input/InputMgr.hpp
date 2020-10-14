@@ -51,8 +51,8 @@ public:
         InputType_Effects,
         InputType_MQTT,
         InputType_Alexa,
-        InputType_SCCP,
         InputType_DDP,
+        InputType_FPP,
         InputType_End,
         InputType_Start   = InputType_Disabled,
         InputType_Default = InputType_Disabled,
@@ -90,7 +90,7 @@ private:
     String ConfigFileName;
     String ConfigData;
 
-#define IM_JSON_SIZE (4*1024)
+#define IM_JSON_SIZE (5*1024)
 
 protected:
 

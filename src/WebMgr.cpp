@@ -21,14 +21,18 @@
 
 #include "output/OutputMgr.hpp"
 #include "input/InputMgr.hpp"
+#include "service/FPPDiscovery.h"
 #include "WiFiMgr.hpp"
 
 #include "WebMgr.hpp"
 #include <Int64String.h>
 
 #ifdef ARDUINO_ARCH_ESP8266
+#   define SD_OPEN_WRITEFLAGS   sdfat::O_READ | sdfat::O_WRITE | sdfat::O_CREAT | sdfat::O_TRUNC
 #elif defined ARDUINO_ARCH_ESP32
 #   include <SPIFFS.h>
+#   define SD_OPEN_WRITEFLAGS   "w"
+
 #else
 #	error "Unsupported CPU type."
 #endif
@@ -40,15 +44,14 @@
 
 const uint8_t HTTP_PORT = 80;      ///< Default web server port
 
-Espalexa espalexa;
-
-AsyncWebServer      webServer (HTTP_PORT);  // Web Server
-AsyncWebSocket      webSocket ("/ws");      // Web Socket Plugin
+static Espalexa         espalexa;
+static EFUpdate         efupdate; /// EFU Update Handler
+static AsyncWebServer   webServer (HTTP_PORT);  // Web Server
+static AsyncWebSocket   webSocket ("/ws");      // Web Socket Plugin
 
 //-----------------------------------------------------------------------------
 void PrettyPrint (JsonObject & jsonStuff)
 {
-
     // DEBUG_V ("---------------------------------------------");
     LOG_PORT.println (F("---- Pretty ----"));
     serializeJson (jsonStuff, LOG_PORT);
@@ -92,7 +95,9 @@ void c_WebMgr::init ()
 {
     // DEBUG_START;
     // Add header for SVG plot support?
-    DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Origin"), "*");
+    DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Origin"),  "*");
+    DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Headers"), "Content-Type, Content-Range, Content-Disposition, Content-Description, cache-control, x-requested-with");
+    DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Methods"), "GET, PUT, POST, OPTIONS");
 
     // Setup WebSockets
     webSocket.onEvent ([this](AsyncWebSocket* server, AsyncWebSocketClient * client, AwsEventType type, void* arg, uint8_t * data, size_t len)
@@ -113,41 +118,97 @@ void c_WebMgr::init ()
             this->GetConfiguration ();
             request->send (200, "text/json", WebSocketFrameCollectionBuffer);
         });
- /*
+
     // Firmware upload handler - only in station mode
-    webServer.on ("/updatefw", HTTP_POST, [this](AsyncWebServerRequest* request)
+    webServer.on ("/updatefw", HTTP_POST, [](AsyncWebServerRequest* request)
         {
-            this->webSocket.textAll ("X6");
-        }, [this]() {this->onFirmwareUpload (); }); // todo .setFilter (ON_STA_FILTER);
-*/
+            webSocket.textAll ("X6");
+        }, [](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final) {WebMgr.FirmwareUpload (request, filename, index, data, len,  final); }).setFilter (ON_STA_FILTER);
+    
+    // URL's needed for FPP Connect fseq uploading and querying
+    webServer.on ("/fpp", HTTP_GET, 
+        [](AsyncWebServerRequest* request)
+        {
+        FPPDiscovery.ProcessGET(request);
+        });
+
+    webServer.on ("/fpp", HTTP_POST | HTTP_PUT, 
+        [](AsyncWebServerRequest* request) 
+        {
+            FPPDiscovery.ProcessPOST(request);
+        },
+        
+        [](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
+        {
+            FPPDiscovery.ProcessFile(request, filename, index, data, len, final);
+        },
+        
+        [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+        {
+            FPPDiscovery.ProcessBody(request, data, len, index, total);
+        });
+
+    // URL that FPP's status pages use to grab JSON about the current status, what's playing, etc...
+    // This can be used to mimic the behavior of atual FPP remotes
+    webServer.on ("/fppjson.php", HTTP_GET, [](AsyncWebServerRequest* request)
+        {
+            FPPDiscovery.ProcessFPPJson(request);
+        });
+
     // Root access for testing
     webServer.serveStatic ("/root", SPIFFS, "/");
 
     // Static Handler
     webServer.serveStatic ("/", SPIFFS, "/www/").setDefaultFile ("index.html");
 
+    // if the client posts to the upload page
+    webServer.on ("/upload", HTTP_POST | HTTP_PUT | HTTP_OPTIONS, 
+        [](AsyncWebServerRequest * request)
+        {
+            // DEBUG_V ("Got upload post request");
+            if (true == FPPDiscovery.SdcardIsInstalled())
+            {
+                // Send status 200 (OK) to tell the client we are ready to receive
+                request->send (200);
+            }
+            else
+            {
+                request->send (404, "text/plain", "Page Not found");
+            }
+        },
+
+        [this](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final)
+        {
+            // DEBUG_V ("Got process FIle request");
+            // DEBUG_V (String ("Got process File request: name: ")  + filename);
+            // DEBUG_V (String ("Got process File request: index: ") + String (index));
+            // DEBUG_V (String ("Got process File request: len:   ") + String (len));
+            // DEBUG_V (String ("Got process File request: final: ") + String (final));
+            if (true == FPPDiscovery.SdcardIsInstalled())
+            {
+                this->handleFileUpload (request, filename, index, data, len, final); // Receive and save the file 
+            }
+            else
+            {
+                request->send (404, "text/plain", "Page Not found");
+            }
+        },
+
+        [this](AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total)
+        {
+            // DEBUG_V (String ("Got process Body request: index: ") + String (index));
+            // DEBUG_V (String ("Got process Body request: len:   ") + String (len));
+            // DEBUG_V (String ("Got process Body request: total: ") + String (total));
+            request->send (404, "text/plain", "Page Not found");
+        }
+    );
+
     // Raw config file Handler - but only on station
     //  webServer.serveStatic("/config.json", SPIFFS, "/config.json").setFilter(ON_STA_FILTER);
 
     webServer.onNotFound ([this](AsyncWebServerRequest* request)
     {
-/*
-        DEBUG_V (String("Page Not Found: "));
-
-
-        int paramsNr = request->params ();
-        Serial.println (paramsNr);
-
-        for (int i = 0; i < paramsNr; i++) {
-
-            AsyncWebParameter* p = request->getParam (i);
-            Serial.print ("Param name: ");
-            Serial.println (p->name ());
-            Serial.print ("Param value: ");
-            Serial.println (p->value ());
-            Serial.println ("------");
-        }
-*/
+        // DEBUG_V ("onNotFound");
         if (true == this->IsAlexaCallbackValid())
         {
             // DEBUG_V ("IsAlexaCallbackValid == true");
@@ -164,7 +225,8 @@ void c_WebMgr::init ()
         }
     });
 
-    espalexa.begin (&webServer); //give espalexa a pointer to your server object so it can use your server instead of creating its own
+    //give espalexa a pointer to the server object so it can use your server instead of creating its own
+    espalexa.begin (&webServer);
 
     // webServer.begin ();
 
@@ -182,6 +244,65 @@ void c_WebMgr::init ()
 
     // DEBUG_END;
 }
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::handleFileUpload (AsyncWebServerRequest* request, 
+                                 String filename,
+                                 size_t index, 
+                                 uint8_t * data, 
+                                 size_t len, 
+                                 bool final)
+{
+    // DEBUG_START;
+
+    if (0 == index) 
+    {
+        // save the filename
+        // DEBUG_V ("UploadStart: " + filename);
+        if (!filename.startsWith ("/"))
+        {
+            filename = "/" + filename;
+        }
+
+        // are we terminating the previous download?
+        if (0 != fsUploadFileName.length())
+        {
+            LOG_PORT.println (String (F ("Aborting Previous File Upload For: '")) + fsUploadFileName + String (F ("'")));
+            fsUploadFile.close ();
+            fsUploadFileName = "";
+        }
+
+        fsUploadFileName = filename;
+
+        LOG_PORT.println (String (F ("Upload File: '")) + fsUploadFileName + String(F("' Started")));
+
+        SD.remove (fsUploadFileName);
+
+        // Open the file for writing 
+        fsUploadFile = SD.open (fsUploadFileName, SD_OPEN_WRITEFLAGS);
+        fsUploadFile.seek (0);
+    }
+
+    if ((0 != len) && (0 != fsUploadFileName.length()))
+    {
+        // Write data
+        // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
+        fsUploadFile.write (data, len);
+        LOG_PORT.print (String("Writting bytes: ") + String (index) + "\r");
+    }
+
+    if ((true == final) && (0 != fsUploadFileName.length ()))
+    {
+        LOG_PORT.println ("");
+        // DEBUG_V ("UploadEnd: " + String(index + len) + String(" bytes"));
+        LOG_PORT.println (String (F ("Upload File: '")) + fsUploadFileName + String (F ("' Done")));
+
+        fsUploadFile.close ();
+        fsUploadFileName = "";
+    }
+
+    // DEBUG_END;
+} // handleFileUpload
 
 //-----------------------------------------------------------------------------
 void c_WebMgr::RegisterAlexaCallback (DeviceCallbackFunction cb)
@@ -319,8 +440,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             // is the message complete?
             if ((MessageInfo->index + len) != MessageInfo->len)
             {
-                // The message is not yet complete
-                // DEBUG_V ("");
+                // DEBUG_V ("The message is not yet complete");
                 break;
             }
             // DEBUG_V ("");
@@ -328,8 +448,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             // did we get the final part of the message?
             if (!MessageInfo->final)
             {
-                // message is not terminated yet
-                // DEBUG_V ("");
+                // DEBUG_V ("message is not terminated yet");
                 break;
             }
 
@@ -350,8 +469,15 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
                 break;
             }
 
+            if (WebSocketFrameCollectionBuffer[0] == 'G')
+            {
+                // DEBUG_V ("");
+                ProcessGseriesRequests (client);
+                break;
+            }
+
             // convert the input data into a json structure (use json read only mode)
-            DynamicJsonDocument webJsonDoc (4096);
+            DynamicJsonDocument webJsonDoc (5*1023);
             DeserializationError error = deserializeJson (webJsonDoc, (const char *)(&WebSocketFrameCollectionBuffer[0]));
 
             // DEBUG_V ("");
@@ -484,21 +610,21 @@ void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
 
     system[F ("freeheap")] = (String)ESP.getFreeHeap ();
     system[F ("uptime")] = millis ();
+    system[F ("SDinstalled")] = FPPDiscovery.SdcardIsInstalled();
+
     // DEBUG_V ("");
 
-    // Ask WiFi to add ZcppStats
+    // Ask WiFi Stats
     WiFiMgr.GetStatus (system);
     // DEBUG_V ("");
 
-    // Ask Input to add ZcppStats
+    // Ask Input Stats
     InputMgr.GetStatus (status);
     // DEBUG_V ("");
 
-    // Ask Input to add ZcppStats
+    // Ask Output Stats
     OutputMgr.GetStatus (status);
     // DEBUG_V ("");
-
-    // Ask Services to add ZcppStats
 
     String response;
     serializeJson (webJsonDoc, response);
@@ -516,7 +642,7 @@ void c_WebMgr::ProcessVseriesRequests (AsyncWebSocketClient* client)
 {
     // DEBUG_START;
 
-    String Response;
+    // String Response;
     // serializeJson (webJsonDoc, response);
     switch (WebSocketFrameCollectionBuffer[1])
     {
@@ -535,13 +661,41 @@ void c_WebMgr::ProcessVseriesRequests (AsyncWebSocketClient* client)
         }
     } // end switch
 
+    // DEBUG_END;
+
+} // ProcessVseriesRequests
+
+//-----------------------------------------------------------------------------
+/// Process simple format 'G' messages
+void c_WebMgr::ProcessGseriesRequests (AsyncWebSocketClient* client)
+{
+    // DEBUG_START;
+
+    // String Response;
+    // serializeJson (webJsonDoc, response);
+    switch (WebSocketFrameCollectionBuffer[1])
+    {
+        case '2':
+        {
+            // xLights asking the "version"
+            client->text (String (F ("G2{\"version\": \"")) + VERSION + "\"}");
+            break;
+        }
+
+        default:
+        {
+            client->text (F ("G Error"));
+            LOG_PORT.println (String(F("***** ERROR: Unsupported Web command V")) + WebSocketFrameCollectionBuffer[1] + F(" *****"));
+            break;
+        }
+    } // end switch
 
     // DEBUG_END;
 
 } // ProcessVseriesRequests
 
 //-----------------------------------------------------------------------------
-/// Process JSON messages
+// Process JSON messages
 void c_WebMgr::ProcessReceivedJsonMessage (DynamicJsonDocument & webJsonDoc, AsyncWebSocketClient * client)
 {
     // DEBUG_START;
@@ -569,44 +723,11 @@ void c_WebMgr::ProcessReceivedJsonMessage (DynamicJsonDocument & webJsonDoc, Asy
         } // webJsonDoc.containsKey ("cmd")
 
         // DEBUG_V ("");
-#ifdef foo
-        /* From wshandler:
-                switch (data[1]) {
-                    case '1':   // Set Network Config
-                        dsNetworkConfig(json.as<JsonObject>());
-                        SaveConfig();
-                        client->text("S1");
-                        break;
-                    case '2':   // Set Device Config
-                        // Reboot if MQTT changed
-                        if (config.mqtt != json["mqtt"]["enabled"])
-                            reboot = true;
-
-                        dsDeviceConfig(json.as<JsonObject>());
-                        SaveConfig();
-
-                        if (reboot)
-                            client->text("S1");
-                        else
-                            client->text("S2");
-                        break;
-                    case '3':   // Set Effect Startup Config
-                        dsEffectConfig(json.as<JsonObject>());
-                        SaveConfig();
-                        client->text("S3");
-                        break;
-                    case '4':   // Set Gamma (but no save)
-                        dsGammaConfig(json.as<JsonObject>());
-                        client->text("S4");
-                        break;
-                }
-        */
-#endif // def foo
-
 
     } while (false);
 
     // DEBUG_END;
+
 } // ProcessReceivedJsonMessage
 
 //-----------------------------------------------------------------------------
@@ -652,11 +773,23 @@ void c_WebMgr::processCmd (AsyncWebSocketClient * client, JsonObject & jsonCmd)
             // DEBUG_V ("");
             break;
         }
+
+        // Generate select option list data
+        if (jsonCmd.containsKey ("delete"))
+        {
+            // DEBUG_V ("opt");
+            strcpy (WebSocketFrameCollectionBuffer, "{\"get\":");
+            // DEBUG_V ("");
+            JsonObject temp = jsonCmd["delete"];
+            processCmdDelete (temp);
+            // DEBUG_V ("");
+            break;
+        }
+
         // log an error
         LOG_PORT.println (String (F ("ERROR: Unhandled cmd")));
         PrettyPrint (jsonCmd);
-        strcpy (WebSocketFrameCollectionBuffer, "{\"set\":Error");
-
+        strcpy (WebSocketFrameCollectionBuffer, "{\"cmd\":\"Error\"");
 
     } while (false);
 
@@ -705,8 +838,17 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
             break;
         }
 
+        if (jsonCmd["get"] == "files")
+        {
+            // DEBUG_V ("input");
+            FPPDiscovery.GetListOfFiles (WebSocketFrameCollectionBuffer);
+            // DEBUG_V ("");
+            break;
+        }
+
         // log an error
         LOG_PORT.println (String (F("ERROR: Unhandled Get Request")));
+        strcat (WebSocketFrameCollectionBuffer, "\"ERROR: Request Not Supported\"");
         PrettyPrint (jsonCmd);
 
     } while (false);
@@ -797,43 +939,107 @@ void c_WebMgr::processCmdOpt (JsonObject & jsonCmd)
 } // processCmdOpt
 
 //-----------------------------------------------------------------------------
-void c_WebMgr::onFirmwareUpload (AsyncWebServerRequest* request, String filename,
-    size_t index, uint8_t * data, size_t len, bool final)
+void c_WebMgr::processCmdDelete (JsonObject& jsonCmd)
 {
-    static EFUpdate efupdate; /// EFU Update Handler
-    if (!index)
+    // DEBUG_START;
+
+    do // once
     {
+        // DEBUG_V ("");
+
+        if (jsonCmd.containsKey ("files"))
+        {
+            // DEBUG_V ("");
+
+            JsonArray JsonFilesToDelete = jsonCmd["files"];
+
+            // DEBUG_V ("");
+            for (JsonObject JsonFile : JsonFilesToDelete)
+            {
+                String FileToDelete = JsonFile["name"];
+
+                // DEBUG_V ("FileToDelete: " + FileToDelete);
+                FPPDiscovery.DeleteFseqFile (FileToDelete);
+            }
+
+            FPPDiscovery.GetListOfFiles (WebSocketFrameCollectionBuffer);
+            break;
+        }
+
+        LOG_PORT.println (String (F ("* Unsupported Delete command: ")));
+        PrettyPrint (jsonCmd);
+        strcat (WebSocketFrameCollectionBuffer, "Page Not found");
+
+    } while (false);
+
+    // DEBUG_END;
+
+} // processCmdDelete
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request, 
+                               String filename,
+                               size_t index, 
+                               uint8_t * data, 
+                               size_t len, 
+                               bool final)
+{
+    // DEBUG_START;
+
+    do // once
+    {
+        // make sure we are in AP mode
+        if (0 == WiFi.softAPgetStationNum ())
+        {
+            // DEBUG_V("Not in AP Mode");
+
+            // we are not talking to a station so we are not in AP mode
+            // break;
+        }
+        // DEBUG_V ("");
+
+        // is the first message in the upload?
+        if (0 == index)
+        {
 #ifdef ARDUINO_ARCH_ESP8266
-        WiFiUDP::stopAll ();
+            WiFiUDP::stopAll ();
 #else
-        // this is not supported for ESP32
+            // this is not supported for ESP32
 #endif
-        LOG_PORT.print (F ("* Upload Started: "));
-        LOG_PORT.println (filename.c_str ());
-        efupdate.begin ();
-    }
+            LOG_PORT.println (String(F ("* Upload Started: ")) + filename);
+            efupdate.begin ();
+        }
 
-    if (!efupdate.process (data, len))
-    {
-        LOG_PORT.print (F ("*** UPDATE ERROR: "));
-        LOG_PORT.println (String (efupdate.getError ()));
-    }
+        // DEBUG_V ("");
 
-    if (efupdate.hasError ())
-    {
-        request->send (200, "text/plain", "Update Error: " + String (efupdate.getError ()));
-    }
+        if (!efupdate.process (data, len))
+        {
+            LOG_PORT.println (String(F ("*** UPDATE ERROR: ")) + String (efupdate.getError ()));
+        }
 
-    if (final)
-    {
-        request->send (200, "text/plain", "Update Finished: " + String (efupdate.getError ()));
-        LOG_PORT.println (F ("* Upload Finished."));
-        efupdate.end ();
-        SPIFFS.begin ();
-        //        SaveConfig();
-        extern bool reboot;
-        reboot = true;
-    }
+        if (efupdate.hasError ())
+        {
+            // DEBUG_V ("efupdate.hasError");
+            request->send (200, "text/plain", "Update Error: " + String (efupdate.getError ()));
+            break;
+        }
+        // DEBUG_V ("");
+
+        if (final)
+        {
+            request->send (200, "text/plain", "Update Finished: " + String (efupdate.getError ()));
+            LOG_PORT.println (F ("* Upload Finished."));
+            efupdate.end ();
+            SPIFFS.begin ();
+            SaveConfig();
+            extern bool reboot;
+            reboot = true;
+        }
+
+    } while (false);
+
+    // DEBUG_END;
+
 } // onEvent
 
 //-----------------------------------------------------------------------------

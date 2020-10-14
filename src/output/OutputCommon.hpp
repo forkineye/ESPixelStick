@@ -70,22 +70,27 @@ public:
     virtual void         Render () = 0;                                        ///< Call from loop(),  renders output data
     virtual void         GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
             OID_t        GetOutputChannelId () { return OutputChannelId; }     ///< return the output channel number
-            uint8_t    * GetBufferAddress ()   { return OutputMgr.GetBufferAddress();}      ///< Get the address of the buffer into which the E1.31 handler will stuff data
-            uint16_t     GetBufferSize ()      { return OutputMgr.GetBufferSize();}  ///< Get the address of the buffer into which the E1.31 handler will stuff data
+            uint8_t    * GetBufferAddress ()   { return pOutputBuffer;}        ///< Get the address of the buffer into which the E1.31 handler will stuff data
+            uint16_t     GetBufferSize ()      { return OutputBufferSize;}     ///< Get the address of the buffer into which the E1.31 handler will stuff data
             OTYPE_t      GetOutputType ()      { return OutputType; }          ///< Have the instance report its type.
     virtual void         GetStatus (ArduinoJson::JsonObject & jsonStatus);
+            void         SetOutputBufferAddress (uint8_t * pNewOutputBuffer) { pOutputBuffer = pNewOutputBuffer; }
+            void         SetOutputBufferSize (uint16_t NewOutputBufferSize)  { OutputBufferSize = NewOutputBufferSize; };
 
 protected:
 
-#define MAX_NUM_PIXELS                         1360
-#define WS2812_NUM_INTENSITY_BYTES_PER_PIXEL   3
-    
+#define MAX_NUM_PIXELS                          1360
+#define WS2812_NUM_INTENSITY_BYTES_PER_PIXEL    3
+#define OM_CMN_NO_CUSTOM_ISR                    (-1)
+
     gpio_num_t  DataPin;     ///< Output pin to use for this driver
     uart_port_t UartId;      ///< Id of the UART used by this instance of the driver
     OTYPE_t     OutputType;  ///< Type to report for this driver
     OID_t       OutputChannelId;
     bool        HasBeenInitialized = false;
     time_t      FrameRefreshTimeMs = 0;
+    uint8_t   * pOutputBuffer      = 0;
+    uint16_t    OutputBufferSize   = 0;
 
 #ifdef ARDUINO_ARCH_ESP8266
     void InitializeUart (uint32_t BaudRate, 
@@ -96,6 +101,9 @@ protected:
     void InitializeUart (uart_config_t & config,
                          uint32_t fifoTriggerLevel = 0);
 #endif // ! def ARDUINO_ARCH_ESP8266
+
+    void TerminateUartOperation ();
+    void CommonSerialWrite      (uint8_t * OutputBuffer, size_t NumBytesToSend);
 
 private:
 

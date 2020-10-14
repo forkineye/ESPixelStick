@@ -31,8 +31,8 @@
 #include "InputEffectEngine.hpp"
 #include "InputMQTT.h"
 #include "InputAlexa.h"
-#include "InputESPAsyncZCPP.h"
 #include "InputDDP.h"
+#include "InputFPPRemote.h"
 // needs to be last
 #include "InputMgr.hpp"
 
@@ -49,13 +49,13 @@ typedef struct InputTypeXlateMap_t
 
 InputTypeXlateMap_t InputTypeXlateMap[c_InputMgr::e_InputType::InputType_End] =
 {
-    {c_InputMgr::e_InputType::InputType_E1_31,    "E1.31"    },
-    {c_InputMgr::e_InputType::InputType_Effects,  "Effects"  },
-    {c_InputMgr::e_InputType::InputType_MQTT,     "MQTT"     },
-    {c_InputMgr::e_InputType::InputType_Alexa,    "Alexa"    },
-    {c_InputMgr::e_InputType::InputType_SCCP,     "ZCPP"     },
-    {c_InputMgr::e_InputType::InputType_DDP,      "DDP"      },
-    {c_InputMgr::e_InputType::InputType_Disabled, "Disabled" }
+    {c_InputMgr::e_InputType::InputType_E1_31,    "E1.31"      },
+    {c_InputMgr::e_InputType::InputType_Effects,  "Effects"    },
+    {c_InputMgr::e_InputType::InputType_MQTT,     "MQTT"       },
+    {c_InputMgr::e_InputType::InputType_Alexa,    "Alexa"      },
+    {c_InputMgr::e_InputType::InputType_DDP,      "DDP"        },
+    {c_InputMgr::e_InputType::InputType_FPP,      "FPP Remote" },
+    {c_InputMgr::e_InputType::InputType_Disabled, "Disabled"   }
 };
 
 //-----------------------------------------------------------------------------
@@ -400,18 +400,18 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                 break;
             }
 
-            case e_InputType::InputType_SCCP:
-            {
-                // LOG_PORT.println (String (F ("************** Starting ZCPP for channel '")) + ChannelIndex + "'. **************");
-                pInputChannelDrivers[ChannelIndex] = new c_InputESPAsyncZCPP (ChannelIndex, InputType_SCCP, InputDataBuffer, InputDataBufferSize);
-                // DEBUG_V ("");
-                break;
-            }
-
             case e_InputType::InputType_DDP:
             {
                 // LOG_PORT.println (String (F ("************** Starting DDP for channel '")) + ChannelIndex + "'. **************");
                 pInputChannelDrivers[ChannelIndex] = new c_InputDDP (ChannelIndex, InputType_DDP, InputDataBuffer, InputDataBufferSize);
+                // DEBUG_V ("");
+                break;
+            }
+
+            case e_InputType::InputType_FPP:
+            {
+                // LOG_PORT.println (String (F ("************** Starting DDP for channel '")) + ChannelIndex + "'. **************");
+                pInputChannelDrivers[ChannelIndex] = new c_InputFPPRemote (ChannelIndex, InputType_FPP, InputDataBuffer, InputDataBufferSize);
                 // DEBUG_V ("");
                 break;
             }

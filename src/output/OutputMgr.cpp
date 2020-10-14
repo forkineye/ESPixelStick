@@ -53,7 +53,7 @@ OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::OutputType_En
     {c_OutputMgr::e_OutputType::OutputType_Renard,   "Renard"   },
     {c_OutputMgr::e_OutputType::OutputType_DMX,      "DMX"      },
 #ifdef ARDUINO_ARCH_ESP32
-    {c_OutputMgr::e_OutputType::OutputType_SPI,      "SPI"      },
+    // {c_OutputMgr::e_OutputType::OutputType_SPI,      "SPI"      },
 #endif // def ARDUINO_ARCH_ESP32
     {c_OutputMgr::e_OutputType::OutputType_Disabled, "Disabled" }
 };
@@ -464,115 +464,116 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
         switch (NewOutputChannelType)
         {
-        case e_OutputType::OutputType_Disabled:
-        {
-            // LOG_PORT.println (String (F ("************** Disabled output type for channel '")) + ChannelIndex + "'. **************");
-            pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
-            // DEBUG_V ("");
-            break;
-        }
-
-        case e_OutputType::OutputType_DMX:
-        {
-            if (-1 == UartId)
+            case e_OutputType::OutputType_Disabled:
             {
-                LOG_PORT.println (String (F ("************** Cannot Start DMX for channel '")) + ChannelIndex + "'. **************");
+                // LOG_PORT.println (String (F ("************** Disabled output type for channel '")) + ChannelIndex + "'. **************");
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
                 break;
             }
 
-            // LOG_PORT.println (String (F ("************** Starting DMX for channel '")) + ChannelIndex + "'. **************");
-            pOutputChannelDrivers[ChannelIndex] = new c_OutputSerial (ChannelIndex, dataPin, UartId, OutputType_DMX);
-            // DEBUG_V ("");
-            break;
-        }
-
-        case e_OutputType::OutputType_GECE:
-        {
-            if (-1 == UartId)
+            case e_OutputType::OutputType_DMX:
             {
-                LOG_PORT.println (String (F ("************** Cannot Start GECE for channel '")) + ChannelIndex + "'. **************");
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                if (-1 == UartId)
+                {
+                    LOG_PORT.println (String (F ("************** Cannot Start DMX for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                    // DEBUG_V ("");
+                    break;
+                }
+
+                // LOG_PORT.println (String (F ("************** Starting DMX for channel '")) + ChannelIndex + "'. **************");
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputSerial (ChannelIndex, dataPin, UartId, OutputType_DMX);
                 // DEBUG_V ("");
                 break;
             }
-            // LOG_PORT.println (String (F ("************** Starting GECE for channel '")) + ChannelIndex + "'. **************");
-            pOutputChannelDrivers[ChannelIndex] = new c_OutputGECE (ChannelIndex, dataPin, UartId, OutputType_GECE);
-            // DEBUG_V ("");
-            break;
-        }
 
-        case e_OutputType::OutputType_Serial:
-        {
-            if (-1 == UartId)
+            case e_OutputType::OutputType_GECE:
             {
-                LOG_PORT.println (String (F ("************** Cannot Start Generic Serial for channel '")) + ChannelIndex + "'. **************");
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                if (-1 == UartId)
+                {
+                    LOG_PORT.println (String (F ("************** Cannot Start GECE for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                    // DEBUG_V ("");
+                    break;
+                }
+                // LOG_PORT.println (String (F ("************** Starting GECE for channel '")) + ChannelIndex + "'. **************");
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputGECE (ChannelIndex, dataPin, UartId, OutputType_GECE);
                 // DEBUG_V ("");
                 break;
             }
-            // LOG_PORT.println (String (F ("************** Starting Generic Serial for channel '")) + ChannelIndex + "'. **************");
-            pOutputChannelDrivers[ChannelIndex] = new c_OutputSerial (ChannelIndex, dataPin, UartId, OutputType_Serial);
-            // DEBUG_V ("");
-            break;
-        }
 
-        case e_OutputType::OutputType_Renard:
-        {
-            if (-1 == UartId)
+            case e_OutputType::OutputType_Serial:
             {
-                LOG_PORT.println (String (F ("************** Cannot Start Renard for channel '")) + ChannelIndex + "'. **************");
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                if (-1 == UartId)
+                {
+                    LOG_PORT.println (String (F ("************** Cannot Start Generic Serial for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                    // DEBUG_V ("");
+                    break;
+                }
+                // LOG_PORT.println (String (F ("************** Starting Generic Serial for channel '")) + ChannelIndex + "'. **************");
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputSerial (ChannelIndex, dataPin, UartId, OutputType_Serial);
                 // DEBUG_V ("");
                 break;
             }
-            // LOG_PORT.println (String (F ("************** Starting Renard for channel '")) + ChannelIndex + "'. **************");
-            pOutputChannelDrivers[ChannelIndex] = new c_OutputSerial (ChannelIndex, dataPin, UartId, OutputType_Renard);
-            // DEBUG_V ("");
-            break;
-        }
+
+            case e_OutputType::OutputType_Renard:
+            {
+                if (-1 == UartId)
+                {
+                    LOG_PORT.println (String (F ("************** Cannot Start Renard for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                    // DEBUG_V ("");
+                    break;
+                }
+                // LOG_PORT.println (String (F ("************** Starting Renard for channel '")) + ChannelIndex + "'. **************");
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputSerial (ChannelIndex, dataPin, UartId, OutputType_Renard);
+                // DEBUG_V ("");
+                break;
+            }
 
 #ifdef ARDUINO_ARCH_ESP32
-        if (-1 != UartId)
-        {
-            LOG_PORT.println (String (F ("************** Cannot Start SPI for channel '")) + ChannelIndex + "'. **************");
-            pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
-            // DEBUG_V ("");
-            break;
-        }
-        case e_OutputType::OutputType_SPI:
-        {
-            // LOG_PORT.println (String (F ("************** Starting SPI for channel '")) + ChannelIndex + "'. **************");
-            LOG_PORT.println (String (F ("************** SPI Not supported Yet. Using disabled. **************")));
-            pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
-            // DEBUG_V ("");
-            break;
-        }
-#endif // def ARDUINO_ARCH_ESP8266
-
-        case e_OutputType::OutputType_WS2811:
-        {
-            if (-1 == UartId)
+            case e_OutputType::OutputType_SPI:
             {
-                LOG_PORT.println (String (F ("************** Cannot Start WS2811 for channel '")) + ChannelIndex + "'. **************");
+                if (-1 != UartId)
+                {
+                    LOG_PORT.println (String (F ("************** Cannot Start SPI for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                    // DEBUG_V ("");
+                    break;
+                }
+
+                // LOG_PORT.println (String (F ("************** Starting SPI for channel '")) + ChannelIndex + "'. **************");
+                LOG_PORT.println (String (F ("************** SPI Not supported Yet. Using disabled. **************")));
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
                 break;
             }
-            // LOG_PORT.println (String (F ("************** Starting WS2811 for channel '")) + ChannelIndex + "'. **************");
-            pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811 (ChannelIndex, dataPin, UartId, OutputType_WS2811);
-            // DEBUG_V ("");
-            break;
-        }
+#endif // def ARDUINO_ARCH_ESP8266
 
-        default:
-        {
-            LOG_PORT.println (String (F ("************** Unknown output type for channel '")) + ChannelIndex + "'. Using disabled. **************");
-            pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
-            // DEBUG_V ("");
-            break;
-        }
+            case e_OutputType::OutputType_WS2811:
+            {
+                if (-1 == UartId)
+                {
+                    LOG_PORT.println (String (F ("************** Cannot Start WS2811 for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                    // DEBUG_V ("");
+                    break;
+                }
+                // LOG_PORT.println (String (F ("************** Starting WS2811 for channel '")) + ChannelIndex + "'. **************");
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811 (ChannelIndex, dataPin, UartId, OutputType_WS2811);
+                // DEBUG_V ("");
+                break;
+            }
+
+            default:
+            {
+                LOG_PORT.println (String (F ("************** Unknown output type for channel '")) + ChannelIndex + "'. Using disabled. **************");
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                // DEBUG_V ("");
+                break;
+            }
         } // end switch (NewChannelType)
 
         // DEBUG_V ("");
@@ -729,6 +730,8 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
         CreateNewConfig ();
     }
 
+    UpdateDisplayBufferReferences ();
+
     // DEBUG_END;
     return Response;
 
@@ -813,6 +816,34 @@ void c_OutputMgr::Render()
     }
     // DEBUG_END;
 } // render
+
+//-----------------------------------------------------------------------------
+void c_OutputMgr::UpdateDisplayBufferReferences (void)
+{
+    // DEBUG_START;
+
+    uint16_t OutputBufferOffset = 0;
+    // DEBUG_V (String ("BufferSize: ") + String (sizeof(OutputBuffer)));
+    // DEBUG_V (String ("OutputBufferOffset") + String (OutputBufferOffset));
+
+    for (c_OutputCommon* pOutputChannel : pOutputChannelDrivers)
+    {
+        pOutputChannel->SetOutputBufferAddress (&OutputBuffer[OutputBufferOffset]);
+
+        OutputBufferOffset += pOutputChannel->GetBufferSize ();
+        // DEBUG_V (String ("pOutputChannel->GetBufferSize: ") + String (pOutputChannel->GetBufferSize ()));
+        // DEBUG_V (String ("OutputBufferOffset: ") + String(OutputBufferOffset));
+    }
+
+    if (sizeof (OutputBuffer) < OutputBufferOffset)
+    {
+        LOG_PORT.println (String (F ("--- ERROR: Too many output channels have been defined: ")) + String (OutputBufferOffset));
+    }
+
+    // DEBUG_END;
+
+} // UpdateDisplayBufferReferences
+
 
 // create a global instance of the output channel factory
 c_OutputMgr OutputMgr;

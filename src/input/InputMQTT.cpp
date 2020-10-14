@@ -68,7 +68,7 @@ void c_InputMQTT::Begin()
 {
     // DEBUG_START;
 
-    Serial.println (String (F ("** MQTT Initialization for channel '")) + InputChannelId + String (F ("' **")));
+    Serial.println (String (F ("** 'MQTT' Initialization for input: '")) + InputChannelId + String (F ("' **")));
 
     if (true == HasBeenInitialized)
     {

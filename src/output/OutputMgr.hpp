@@ -24,8 +24,8 @@
 
 #include "../ESPixelStick.h"
 
-#include "..\memdebug.h"
-#include "..\FileIO.h"
+#include "../memdebug.h"
+#include "../FileIO.h"
 
 class c_OutputCommon; ///< forward declaration to the pure virtual output class that will be defined later.
 
@@ -55,7 +55,7 @@ public:
         OutputChannelId_1 = 0,
 #ifdef ARDUINO_ARCH_ESP32
         OutputChannelId_2,
-        OutputChannelId_3,
+        // OutputChannelId_3,
 #endif // def ARDUINO_ARCH_ESP32
         OutputChannelId_End,
         OutputChannelId_Start = OutputChannelId_1
@@ -96,6 +96,7 @@ private:
 
     bool ProcessJsonConfig (JsonObject & jsonConfig);
     void CreateJsonConfig  (JsonObject & jsonConfig);
+    void UpdateDisplayBufferReferences (void);
 
     String ConfigFileName;
     String ConfigData;

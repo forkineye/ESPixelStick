@@ -177,3 +177,187 @@ input:valid + span:after {
     padding-left: 5px;
     color: #00FF00;
 }
+
+#filemanagementupload
+{
+    border: 2px dashed #ccc;
+    border-radius: 20px;
+    width: 480px;
+    font-family: sans-serif;
+    margin: 100px auto;
+    padding: 20px;
+}
+
+#drop-area.highlight
+{
+    border-color: purple;
+}
+
+p
+{
+    margin-top: 0;
+}
+
+.my-form
+{
+    margin-bottom: 10px;
+}
+
+#gallery
+{
+    margin-top: 10px;
+}
+
+#gallery img
+{
+        width: 150px;
+        margin-bottom: 10px;
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+
+.button
+{
+    display: inline-block;
+    padding: 10px;
+    background: #ccc;
+    cursor: pointer;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.button:hover
+{
+    background: #ddd;
+}
+
+#fileElem
+{
+    display: none;
+}
+
+/* simple tree from https://www.cssscript.com/folder-tree-json/ */
+.simple-tree {
+    user-select: none;
+    -moz-user-select: none;
+}
+
+    .simple-tree > details > summary {
+        display: none;
+    }
+
+    .simple-tree a,
+    .simple-tree summary {
+        display: block;
+        width: fit-content;
+        width: -moz-fit-content;
+        border: solid 1px transparent;
+        padding: 0 2px;
+        outline: none;
+        cursor: pointer;
+    }
+
+    .simple-tree a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .simple-tree ::-webkit-details-marker {
+        display: none;
+    }
+
+    .simple-tree summary {
+        list-style-type: none;
+        background-color: #eee;
+        outline: none;
+    }
+
+    .simple-tree.dark summary {
+        background-color: #444;
+    }
+
+    .simple-tree details > :not(details),
+    .simple-tree details {
+        position: relative;
+    }
+
+        .simple-tree details :not(summary) {
+            margin-left: 20px;
+        }
+
+    .simple-tree.nodots details :not(summary) {
+        margin-left: 12px;
+    }
+
+    .simple-tree details::before,
+    .simple-tree details > :not(details)::before {
+        content: '';
+        width: 10px;
+        display: block;
+        position: absolute;
+    }
+
+    .simple-tree details::before,
+    .simple-tree details > :not(details)::before {
+        background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 2 2" xmlns="http://www.w3.org/2000/svg"><g><rect x="0" y="0" width="1" height="1"/></g></svg>') left top / 2px 2px;
+    }
+
+    .simple-tree.dark details::before,
+    .simple-tree.dark details > :not(summary)::before {
+        background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 2 2" xmlns="http://www.w3.org/2000/svg"><g><rect x="0" y="0" width="1" height="1" fill="white"/></g></svg>');
+    }
+
+    .simple-tree.nodots details::before,
+    .simple-tree.nodots details > :not(summary)::before {
+        background-image: none;
+    }
+
+    .simple-tree details::before {
+        top: 0;
+        height: 100%;
+        background-repeat: repeat-y;
+        left: 5px;
+        z-index: -1;
+    }
+
+    .simple-tree details > :not(details)::before {
+        top: 8px;
+        height: calc(100% - 8px);
+        background-repeat: repeat-x;
+        left: -15px;
+    }
+
+    .simple-tree details > summary::before {
+        background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><g><rect x="0" y="0" width="12" height="12" fill="white" stroke="gray" stroke-width="1"/><line x1="3" y1="6" x2="9" y2="6" stroke="black" stroke-width="2"/><line x1="6" y1="3" x2="6" y2="9" stroke="black" stroke-width="2"/></g></svg>') center center / 12px 12px no-repeat;
+        left: -22px;
+        top: 2px;
+        width: 16px;
+        height: 16px;
+    }
+
+    .simple-tree details[open] > summary::before {
+        background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><title/><g><rect x="0" y="0" width="12" height="12" fill="white" stroke="gray" stroke-width="1"/><line x1="3" y1="6" x2="9" y2="6" stroke="black" stroke-width="2"/></g></svg>');
+    }
+/* async tree */
+.async-tree details[open][data-loaded=false] {
+    pointer-events: none;
+}
+
+    .async-tree details[open][data-loaded=false] > summary::before {
+        background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><g><animateTransform attributeName="transform" type="rotate" from="0 32 32" to="360 32 32" dur="1s" repeatCount="indefinite"/><circle cx="32" cy="32" r="32" fill="whitesmoke"/><path d="M 62 32 A 30 30 0 0 0 32 2" style="stroke: black; stroke-width:6; fill:none;"/></g></svg>');
+    }
+
+.async-tree.black details[open][data-loaded=false] > summary::before {
+    background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><g><animateTransform attributeName="transform" type="rotate" from="0 32 32" to="360 32 32" dur="1s" repeatCount="indefinite"/><circle cx="32" cy="32" r="32" fill="whitesmoke"/><path d="M 62 32 A 30 30 0 0 0 32 2" style="stroke: white; stroke-width:6; fill:none;"/></g></svg>');
+}
+/* select tree */
+.select-tree .selected {
+    background-color: #beebff;
+    border-color: #99defd;
+    z-index: 1;
+}
+
+.select-tree.dark .selected {
+    background-color: #3a484e;
+    border-color: #99defd;
+}

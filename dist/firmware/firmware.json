@@ -5,6 +5,18 @@
             "description": "Default firmware",
             "version": "4.0-dev",
             "file": "ESPixelStick-4.0-1m_128k.bin"
+        },
+        {
+            "name": "ESPixelStick",
+            "description": "Default firmware",
+            "version": "4.0-dev",
+            "file": "ESPixelStick.ino.d1_mini.bin"
+        },
+        {
+            "name": "ESPixelStick-32",
+            "description": "Default firmware",
+            "version": "4.0-dev",
+            "file": "ESPixelStick.ino.d32_pro.bin"
         }
     ],
 
@@ -20,6 +32,32 @@
                 "page": "256",
                 "block": "4096",
                 "size": "131072"
+            }
+        },
+        {
+            "name": "ESP12_4MB_2MB",
+            "esptool": {
+                "reset": "nodemcu",
+                "baudrate": "115200",
+                "spiffsloc": "0x200000"
+            },
+            "mkspiffs": {
+                "page": "256",
+                "block": "8192",
+                "size": "2072576"
+            }
+        },
+        {
+            "name": "ESP32_16MB_1.5MB",
+            "esptool": {
+                "reset": "nodemcu",
+                "baudrate": "115200",
+                "spiffsloc": "0x00290000"
+            },
+            "mkspiffs": {
+                "page": "256",
+                "block": "4096",
+                "size": "1507328"
             }
         }
     ]

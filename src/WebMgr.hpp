@@ -22,6 +22,7 @@
 #include "EFUpdate.h"
 #include <ESPAsyncWebServer.h>
 #include <EspalexaDevice.h>
+#include <SD.h>
 
 class c_WebMgr
 {
@@ -36,14 +37,18 @@ public:
     void onAlexaMessage (EspalexaDevice * pDevice);
     void RegisterAlexaCallback (DeviceCallbackFunction cb); 
     bool IsAlexaCallbackValid () { return (nullptr != pAlexaCallback); }
+    void FirmwareUpload (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
+    void handleFileUpload (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
 
 private:
 
     EFUpdate        efupdate;
     DeviceCallbackFunction pAlexaCallback = nullptr;
     EspalexaDevice * pAlexaDevice = nullptr;
-#   define WebSocketFrameCollectionBufferSize 2048
+#   define WebSocketFrameCollectionBufferSize (3*1024)
     char WebSocketFrameCollectionBuffer[WebSocketFrameCollectionBufferSize + 1];
+    File fsUploadFile;
+    String fsUploadFileName;
 
     /// Valid "Simple" message types
     enum SimpleMessage 
@@ -56,18 +61,18 @@ private:
     void init ();
     void onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, size_t len);
     void ProcessVseriesRequests     (AsyncWebSocketClient  * client);
-    void onFirmwareUpload           (AsyncWebServerRequest * request, String filename, size_t index, uint8_t* data, size_t len, bool final);
+    void ProcessGseriesRequests     (AsyncWebSocketClient  * client);
     void ProcessReceivedJsonMessage (DynamicJsonDocument   & webJsonDoc, AsyncWebSocketClient  * client);
     void processCmd                 (AsyncWebSocketClient  * client,  JsonObject & jsonCmd );
     void processCmdGet              (JsonObject & jsonCmd);
     void processCmdSet              (JsonObject & jsonCmd);
     void processCmdOpt              (JsonObject & jsonCmd);
+    void processCmdDelete           (JsonObject & jsonCmd);
     void GetConfiguration           ();
     void GetOptions                 ();
     void ProcessXseriesRequests     (AsyncWebSocketClient * client);
     void ProcessXARequest           (AsyncWebSocketClient * client);
     void ProcessXJRequest           (AsyncWebSocketClient * client);
-
 protected:
 
 }; // c_WebMgr

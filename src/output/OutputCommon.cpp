@@ -56,7 +56,8 @@ c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds iOutputChannelId
 	DataPin            = outputGpio;
 	UartId             = uart;
     OutputType         = outputType;
-	 
+    pOutputBuffer      = OutputMgr.GetBufferAddress ();
+
 	// LOG_PORT.println (String ("UartId:          '") + UartId + "'");
     // LOG_PORT.println (String ("OutputChannelId: '") + OutputChannelId + "'");
     // LOG_PORT.println (String ("OutputType:      '") + OutputType + "'");
@@ -72,7 +73,8 @@ c_OutputCommon::~c_OutputCommon ()
 
     pinMode (DataPin, INPUT);
 
-
+    TerminateUartOperation ();
+   
 } // ~c_OutputMgr
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -85,7 +87,6 @@ void c_OutputCommon::InitializeUart (uint32_t baudrate,
                                      uint32_t fifoTriggerLevel)
 {
     // DEBUG_START;
-    LOG_PORT.println (String (F (" Initializing UART on Chan: '")) + String (OutputChannelId) + "'");
 
     do // once
     {
@@ -95,6 +96,8 @@ void c_OutputCommon::InitializeUart (uint32_t baudrate,
             Serial.println (F ("ERROR: Data pin has not been defined"));
             break;
         }
+
+        TerminateUartOperation ();
 
         // prevent disturbing the system if we are already running
         if (true == HasBeenInitialized) {break; }
@@ -129,24 +132,25 @@ void c_OutputCommon::InitializeUart (uint32_t baudrate,
         SET_PERI_REG_MASK   (UART_CONF0 (UartId), UART_RXFIFO_RST | UART_TXFIFO_RST);
         CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_RXFIFO_RST | UART_TXFIFO_RST);
 
-        // Disable all interrupts
-        ETS_UART_INTR_DISABLE ();
+        if (OM_CMN_NO_CUSTOM_ISR != fifoTriggerLevel)
+        {
+            // Disable all interrupts
+            ETS_UART_INTR_DISABLE ();
 
-        // Set TX FIFO trigger. 40 bytes gives 100 us to start to refill the FIFO
-        WRITE_PERI_REG (UART_CONF1 (UartId), fifoTriggerLevel << UART_TXFIFO_EMPTY_THRHD_S);
-        
-        // Disable RX & TX interrupts. It is enabled by uart.c in the SDK
-        CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
+            // Set TX FIFO trigger. 40 bytes gives 100 us to start to refill the FIFO
+            WRITE_PERI_REG (UART_CONF1 (UartId), fifoTriggerLevel << UART_TXFIFO_EMPTY_THRHD_S);
 
-        // Clear all pending interrupts in the UART
-        WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
+            // Disable RX & TX interrupts. It is enabled by uart.c in the SDK
+            CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
 
-        // Reenable interrupts
-        ETS_UART_INTR_ENABLE ();
+            // Clear all pending interrupts in the UART
+            WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
+
+            // Reenable interrupts
+            ETS_UART_INTR_ENABLE ();
+        }
 
     } while (false);
-
-    LOG_PORT.println (String (F (" Initializing UART on Chan: '")) + String (OutputChannelId) + "' Done");
 
 } // init
 
@@ -154,6 +158,17 @@ void c_OutputCommon::InitializeUart (uint32_t baudrate,
 void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
                                      uint32_t fifoTriggerLevel)
 {
+    // DEBUG_START;
+
+    // are we using a valid config?
+    if (gpio_num_t (-1) == DataPin)
+    {
+        Serial.println (F ("ERROR: Data pin has not been defined"));
+        return;
+    }
+
+    TerminateUartOperation ();
+
     // In the ESP32 you need to be careful which CPU is being configured 
     // to handle interrupts. These API functions are supposed to handle this 
     // selection.
@@ -161,12 +176,19 @@ void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
     // DEBUG_V (String ("UartId  = '") + UartId + "'");
     // DEBUG_V (String ("DataPin = '") + DataPin + "'");
 
-    // make sure no existing low level ISR is running
-    ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
-    // DEBUG_V ("");
+    // Set output pins
+    pinMode (DataPin, OUTPUT);
+    digitalWrite (DataPin, LOW);
 
-    ESP_ERROR_CHECK (uart_disable_rx_intr (UartId));
-    // DEBUG_V ("");
+    if (OM_CMN_NO_CUSTOM_ISR != fifoTriggerLevel)
+    {
+        // make sure no existing low level ISR is running
+        ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
+        // DEBUG_V ("");
+
+        ESP_ERROR_CHECK (uart_disable_rx_intr (UartId));
+        // DEBUG_V ("");
+    }
 
     // start the generic UART driver.
     // NOTE: Zero for RX buffer size causes errors in the uart API. 
@@ -179,17 +201,22 @@ void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
     // DEBUG_V ("");
     ESP_ERROR_CHECK (uart_set_pin (UartId, DataPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
     // DEBUG_V ("");
-    ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
-    // DEBUG_V ("");
 
-    // Disable ALL interrupts. They are enabled by uart.c in the SDK
-    CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
-    // DEBUG_V ("");
+    if (OM_CMN_NO_CUSTOM_ISR != fifoTriggerLevel)
+    {
+        ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
+        // DEBUG_V ("");
 
-    // Clear all pending interrupts in the UART
-    // WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
+        // Disable ALL interrupts. They are enabled by uart.c in the SDK
+        CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
+        // DEBUG_V ("");
+
+        // Clear all pending interrupts in the UART
+        // WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
+    }
 
     // DEBUG_END;
+
 } // InitializeUart
 #endif
 
@@ -203,5 +230,76 @@ void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
 
     // DEBUG_END;
 } // GetStatus
+
+
+//----------------------------------------------------------------------------
+void c_OutputCommon::CommonSerialWrite (uint8_t* OutputBuffer, size_t NumBytesToSend)
+{
+    // DEBUG_START;
+    switch (UartId)
+    {
+        case UART_NUM_0:
+        {
+            Serial.write (OutputBuffer, NumBytesToSend);
+            break;
+        }
+        case UART_NUM_1:
+        {
+            Serial1.write (OutputBuffer, NumBytesToSend);
+            break;
+        }
+
+#ifdef ARDUINO_ARCH_ESP32
+        case UART_NUM_2:
+        {
+            Serial2.write (OutputBuffer, NumBytesToSend);
+            break;
+        }
+#endif // def ARDUINO_ARCH_ESP32
+
+        default:
+        {
+            break;
+        }
+    } // end switch (UartId)
+
+    // DEBUG_END;
+} // CommonSerialWrite
+
+
+//----------------------------------------------------------------------------
+void c_OutputCommon::TerminateUartOperation ()
+{
+    // DEBUG_START;
+    switch (UartId)
+    {
+        case UART_NUM_0:
+        {
+            Serial.end ();
+            break;
+        }
+        case UART_NUM_1:
+        {
+            Serial1.end ();
+            break;
+        }
+
+#ifdef ARDUINO_ARCH_ESP32
+        case UART_NUM_2:
+        {
+            Serial2.end ();
+            break;
+        }
+#endif // def ARDUINO_ARCH_ESP32
+
+        default:
+        {
+            break;
+        }
+    } // end switch (UartId)
+    
+    // DEBUG_END;
+
+} // TerminateUartOperation
 
 

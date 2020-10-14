@@ -18,6 +18,7 @@
 
 #include "InputDDP.h"
 #include <string.h>
+#include "../WiFiMgr.hpp"
 
 //-----------------------------------------------------------------------------
 c_InputDDP::c_InputDDP (c_InputMgr::e_InputChannelIds NewInputChannelId,
@@ -50,7 +51,7 @@ void c_InputDDP::Begin ()
 {
     // DEBUG_START;
 
-    Serial.println (String (F ("** DDP Initialization for input channel '")) + InputChannelId + String (F ("' **")));
+    LOG_PORT.println (String (F ("** 'DDP' Initialization for input: '")) + InputChannelId + String (F ("' **")));
 
     suspend = false;
 
@@ -67,10 +68,10 @@ void c_InputDDP::Begin ()
 //-----------------------------------------------------------------------------
 void c_InputDDP::GetConfig (JsonObject& jsonConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // GetConfig
 
@@ -86,14 +87,22 @@ void c_InputDDP::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 bool c_InputDDP::SetConfig (JsonObject& jsonConfig)
 {
+    // DEBUG_START;
+
+    // DEBUG_END;
 
 } // SetConfig
 
 //-----------------------------------------------------------------------------
 void c_InputDDP::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
 {
+    // DEBUG_START;
+
     InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
+
+    // DEBUG_END;
+
 } // SetBufferInfo
 
 //-----------------------------------------------------------------------------
@@ -146,7 +155,7 @@ void c_InputDDP::ProcessReceivedUdpPacket(AsyncUDPPacket ReceivedPacket)
             // ignore duplicate packets. They are allowed
             if (CurrentReceivedSequenceNumber == lastReceivedSequenceNumber)
             {
-                DEBUG_V ("Duplicate PDU received");
+                // DEBUG_V ("Duplicate PDU received");
                 break;
             }
 
@@ -163,7 +172,7 @@ void c_InputDDP::ProcessReceivedUdpPacket(AsyncUDPPacket ReceivedPacket)
             if (CurrentReceivedSequenceNumber != NextExpectedSequenceNumber)
             {
                 stats.errors++;
-                DEBUG_V (String ("Sequence error: stats.errors: ") + String (stats.errors));
+                // DEBUG_V (String ("Sequence error: stats.errors: ") + String (stats.errors));
             }
 
         } // using sequence numbers
@@ -181,6 +190,12 @@ void c_InputDDP::ProcessReceivedUdpPacket(AsyncUDPPacket ReceivedPacket)
             break;
         }
 
+#ifdef SUPPORT_QUERY
+#else
+        PacketBuffer.PacketBufferStatus = PacketBufferStatus_t::BufferIsAvailable;
+#endif // def SUPPORT_QUERY
+
+
     } while (false);
 
     // DEBUG_END;
@@ -190,6 +205,7 @@ void c_InputDDP::ProcessReceivedUdpPacket(AsyncUDPPacket ReceivedPacket)
 //-----------------------------------------------------------------------------
 void c_InputDDP::Process ()
 {
+#ifdef SUPPORT_QUERY
     // DEBUG_START;
 
     do // once
@@ -224,6 +240,7 @@ void c_InputDDP::Process ()
     } while (false);
 
     // DEBUG_END;
+#endif // def SUPPORT_QUERY
 
 } // Process
 
@@ -266,13 +283,14 @@ void c_InputDDP::ProcessReceivedData ()
 //-----------------------------------------------------------------------------
 void c_InputDDP::ProcessReceivedQuery ()
 {
-    DEBUG_START;
+#ifdef SUPPORT_QUERY
+
+    // DEBUG_START;
 
     uint16_t pixelPorts = 0;
     uint16_t serialPorts = 0;
     OutputMgr.GetPortCounts (pixelPorts, serialPorts);
 
-    /*
     sendDiscoveryResponse (
         VERSION,
         WiFi.macAddress (),
@@ -284,8 +302,9 @@ void c_InputDDP::ProcessReceivedQuery ()
         InputDataBufferSize,
         WiFiMgr.getIpAddress (),
         WiFiMgr.getIpSubNetMask ());
-        */
-    DEBUG_END;
+
+    // DEBUG_END;
+#endif // def SUPPORT_QUERY
 
 } // ProcessReceivedDiscovery
 

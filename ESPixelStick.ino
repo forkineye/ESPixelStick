@@ -81,9 +81,6 @@ static void _u0_putc(char c){
 // Configuration file
 String ConfigFileName = "/config.json";
 
-//TODO: Add Auxiliary services
-//FPPDiscovery
-
 const String VERSION = "4.0_unified-dev";
 const String BUILD_DATE = String(__DATE__);
 
@@ -119,9 +116,9 @@ void setup()
     LOG_PORT.println("");
     LOG_PORT.println(String(F("ESPixelStick v")) + VERSION + "(" + BUILD_DATE + ")");
 #ifdef ARDUINO_ARCH_ESP8266
-    LOG_PORT.println (String ("ESP Verion: ") + ESP.getFullVersion ());
+    LOG_PORT.println (String ("ESP Version: ") + ESP.getFullVersion ());
 #else
-    LOG_PORT.println (String("ESP Verion: ") + ESP.getSdkVersion ());
+    LOG_PORT.println (String("ESP Version: ") + ESP.getSdkVersion ());
 #endif
     // DEBUG_V ("");
 
@@ -324,6 +321,7 @@ void GetConfig (JsonObject & json)
 
     // DEBUG_END;
 }
+
 // Serialize the current config into a JSON string
 String serializeCore(boolean pretty) 
 {
