@@ -13,8 +13,12 @@ Since this project began, the firmware has moved beyond just pixel support for t
 ## Hardware
 
 Being open source, you are free to use the ESPixelStick firmware on the device of your choice.  The code however is written specifically for the [ESPixelStick](http://forkineye.com/espixelstick). The ESPixelStick V2 utilizes an ESP-01 module and provides high current connectors, fusing, power filtering, a programming interface and proper logic level buffering.  If you're in the US and would like to purchase an ESPixelStick, they are available via [Amazon](http://amzn.to/2uqBFuX).  The proceeds go towards things like keeping my wife happy so I can work on this project :)
-This code has been ported to work on an ESP32 based LoLin pro. This requires the user to add their own buffer for the WS281x output, but allows the user to support local fseq files and FPP Remote operation.
+<<<<<<< HEAD
+This code has been ported to work on an ESP32 based LoLin mini. This requires the user to add their own buffer for the WS281x output.
 
+=======
+This code has been ported to work on an ESP32 based LoLin pro. This requires the user to add their own buffer for the WS281x output, but allows the user to support local fseq files and FPP Remote operation.
+>>>>>>> 353f6226983ee11a5b0770eafc74a5dcda10e418
 ## Requirements
 
 Along with the Arduino IDE, you'll need the following software to build this project:
