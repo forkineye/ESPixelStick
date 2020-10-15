@@ -523,10 +523,6 @@ function ProcessReceivedOptionDataMessage(JsonOptionList)
 // Builds JSON config submission for "WiFi" tab
 function submitWiFiConfig()
 {
-    var ip = $('#ip').val().split('.');
-    var netmask = $('#netmask').val().split('.');
-    var gateway = $('#gateway').val().split('.');
-
     var json =
     {
         'cmd':
@@ -539,9 +535,9 @@ function submitWiFiConfig()
                     'passphrase': $('#passphrase').val(),
                     'hostname': $('#hostname').val(),
                     'sta_timeout': $('#sta_timeout').val(),
-                    'ip': [parseInt(ip[0]), parseInt(ip[1]), parseInt(ip[2]), parseInt(ip[3])],
-                    'netmask': [parseInt(netmask[0]), parseInt(netmask[1]), parseInt(netmask[2]), parseInt(netmask[3])],
-                    'gateway': [parseInt(gateway[0]), parseInt(gateway[1]), parseInt(gateway[2]), parseInt(gateway[3])],
+                    'ip': $('#ip').val(),
+                    'netmask': $('#netmask').val(),
+                    'gateway': $('#gateway').val(),
                     'dhcp': $('#dhcp').prop('checked'),
                     'ap_fallback': $('#ap').prop('checked'),
                     'ap_timeout': $('#apt').prop('checked')
