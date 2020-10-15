@@ -39,7 +39,7 @@ public:
     IPAddress getIpSubNetMask () { return CurrentSubnetMask; }
     void      GetStatus       (JsonObject & jsonStatus);
     void      connectWifi     ();
-
+    void      reset           ();
 private:
 #define CLIENT_TIMEOUT  15      ///< In station/client mode try to connection for 15 seconds
 #define AP_TIMEOUT      60      ///< In AP mode, wait 60 seconds for a connection or reboot
@@ -49,11 +49,12 @@ private:
     WiFiEventHandler    wifiDisconnectHandler;  // WiFi disconnect handler
 #endif
     config_t           *config = nullptr;                           // Current configuration
-    IPAddress           CurrentIpAddress  = IPAddress(0,0,0,0);
+    IPAddress           CurrentIpAddress  = IPAddress (0, 0, 0, 0);
     IPAddress           CurrentSubnetMask = IPAddress (0, 0, 0, 0);
     Ticker              wifiTicker;                                 // Ticker to handle WiFi
 
     void initWifi ();
+    void SetUpIp ();
 
 #ifdef ARDUINO_ARCH_ESP8266
     void onWiFiConnect (const WiFiEventStationModeGotIP& event);
