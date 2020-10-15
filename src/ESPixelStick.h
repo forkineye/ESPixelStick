@@ -66,9 +66,9 @@ typedef struct {
     String      ssid;
     String      passphrase;
     String      hostname;
-    String      ip;
-    String      netmask;
-    String      gateway;
+    IPAddress   ip;
+    IPAddress   netmask;
+    IPAddress   gateway;
     bool        UseDhcp              = true;  ///< Use DHCP?
     bool        ap_fallbackIsEnabled = false; ///< Fallback to AP if fail to associate?
     uint32_t    ap_timeout;          ///< How long to wait in AP mode with no connection before rebooting
@@ -77,7 +77,7 @@ typedef struct {
 
 String  serializeCore          (boolean pretty = false);
 void    deserializeCoreHandler (DynamicJsonDocument& jsonDoc);
-void    deserializeCore        (JsonObject & json);
+bool    deserializeCore        (JsonObject & json);
 boolean dsDevice               (JsonObject & json);
 boolean dsNetwork              (JsonObject & json);
 void    SaveConfig             ();
