@@ -88,6 +88,7 @@ config_t            config;                 // Current configuration
 bool                reboot = false;         // Reboot flag
 uint32_t            lastUpdate;             // Update timeout tracker
 int                 ConfigSaveNeeded = 0;
+bool                ResetWiFi = false;
 
 /////////////////////////////////////////////////////////
 //
@@ -221,17 +222,35 @@ boolean dsNetwork(JsonObject & json)
     boolean retval = false;
     if (json.containsKey("network")) 
     {
+        String ip      = config.ip.toString ();
+        String gateway = config.gateway.toString ();
+        String netmask = config.netmask.toString ();
+
         JsonObject network = json["network"];
-        retval = retval | FileIO::setFromJSON(config.ssid,                 network["ssid"]);
-        retval = retval | FileIO::setFromJSON(config.passphrase,           network["passphrase"]);
-        retval = retval | FileIO::setFromJSON(config.ip,                   network["ip"]);
-        retval = retval | FileIO::setFromJSON(config.netmask,              network["netmask"]);
-        retval = retval | FileIO::setFromJSON(config.gateway,              network["gateway"]);
-        retval = retval | FileIO::setFromJSON(config.hostname,             network["hostname"]);
-        retval = retval | FileIO::setFromJSON(config.UseDhcp,              network["dhcp"]);
-        retval = retval | FileIO::setFromJSON(config.sta_timeout,          network["sta_timeout"]);
-        retval = retval | FileIO::setFromJSON(config.ap_fallbackIsEnabled, network["ap_fallback"]);
-        retval = retval | FileIO::setFromJSON(config.ap_timeout,           network["ap_timeout"]);
+        retval |= FileIO::setFromJSON(config.ssid,                 network["ssid"]);
+        retval |= FileIO::setFromJSON(config.passphrase,           network["passphrase"]);
+        retval |= FileIO::setFromJSON(ip,                          network["ip"]);
+        retval |= FileIO::setFromJSON(netmask,                     network["netmask"]);
+        retval |= FileIO::setFromJSON(gateway,                     network["gateway"]);
+        retval |= FileIO::setFromJSON(config.hostname,             network["hostname"]);
+        retval |= FileIO::setFromJSON(config.UseDhcp,              network["dhcp"]);
+        retval |= FileIO::setFromJSON(config.sta_timeout,          network["sta_timeout"]);
+        retval |= FileIO::setFromJSON(config.ap_fallbackIsEnabled, network["ap_fallback"]);
+        retval |= FileIO::setFromJSON(config.ap_timeout,           network["ap_timeout"]);
+    
+        // DEBUG_V ("     ip: " + ip);
+        // DEBUG_V ("gateway: " + gateway);
+        // DEBUG_V ("netmask: " + netmask);
+
+        config.ip.fromString (ip);
+        config.gateway.fromString (gateway);
+        config.netmask.fromString (netmask);
+
+        // DEBUG_V ("     config.ip: " + config.ip.toString());
+        // DEBUG_V ("config.gateway: " + config.gateway.toString ());
+        // DEBUG_V ("config.netmask: " + config.netmask.toString ());
+
+        ResetWiFi = retval;
     }
     else
     {
@@ -245,18 +264,21 @@ boolean dsNetwork(JsonObject & json)
 void SetConfig (JsonObject& json)
 {
     // DEBUG_START;
-    deserializeCore (json);
-    ConfigSaveNeeded++;
+    reboot = deserializeCore (json);
+    ConfigSaveNeeded = 1;
     // DEBUG_END;
 
 } // SetConfig
 
-void deserializeCore (JsonObject & json)
+bool deserializeCore (JsonObject & json)
 {
+    bool response = false;
     // DEBUG_START;
     dsDevice (json);
-    dsNetwork (json);
+    response = dsNetwork (json);
+
     // DEBUG_END;
+    return response;
 }
 
 void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
@@ -309,9 +331,9 @@ void GetConfig (JsonObject & json)
     network["ssid"]        = config.ssid;
     network["passphrase"]  = config.passphrase;
     network["hostname"]    = config.hostname;
-    network["ip"]          = config.ip;
-    network["netmask"]     = config.netmask;
-    network["gateway"]     = config.gateway;
+    network["ip"]          = config.ip.toString();
+    network["netmask"]     = config.netmask.toString ();
+    network["gateway"]     = config.gateway.toString ();
 
     network["dhcp"]        = config.UseDhcp;
     network["sta_timeout"] = config.sta_timeout;
@@ -373,6 +395,13 @@ void SaveConfig()
 /** Arduino based main loop */
 void loop() 
 {
+    // do we need to save the current config?
+    if (0 != ConfigSaveNeeded)
+    {
+        ConfigSaveNeeded = 0;
+        SaveConfig ();
+    } // done need to save the current config
+
     // Reboot handler
     if (reboot) 
     {
@@ -380,18 +409,18 @@ void loop()
         delay(REBOOT_DELAY);
         ESP.restart();
     }
+
+    if (true == ResetWiFi)
+    {
+        ResetWiFi = false;
+        WiFiMgr.reset ();
+    }
+
 #ifdef ARDUINO_ARCH_ESP32
     esp_task_wdt_reset ();
 #else
     ESP.wdtFeed ();
 #endif // def ARDUINO_ARCH_ESP32
-
-    // do we need to save the current config?
-    if (0 != ConfigSaveNeeded)
-    {
-        ConfigSaveNeeded = 0;
-        SaveConfig ();
-    } // done need to save the current config
 
     // Process input data
     InputMgr.Process ();
