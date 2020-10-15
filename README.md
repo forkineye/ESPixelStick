@@ -14,6 +14,7 @@ Since this project began, the firmware has moved beyond just pixel support for t
 
 Being open source, you are free to use the ESPixelStick firmware on the device of your choice.  The code however is written specifically for the [ESPixelStick](http://forkineye.com/espixelstick). The ESPixelStick V2 utilizes an ESP-01 module and provides high current connectors, fusing, power filtering, a programming interface and proper logic level buffering.  If you're in the US and would like to purchase an ESPixelStick, they are available via [Amazon](http://amzn.to/2uqBFuX).  The proceeds go towards things like keeping my wife happy so I can work on this project :)
 This code has been ported to work on an ESP32 based LoLin pro. This requires the user to add their own buffer for the WS281x output, but allows the user to support local fseq files and FPP Remote operation.
+
 ## Requirements
 
 Along with the Arduino IDE, you'll need the following software to build this project:
@@ -34,7 +35,7 @@ Extract the folder in each of these zip files and place it in the "library" fold
 - [ESPAsyncUDP](https://github.com/me-no-dev/ESPAsyncUDP) - Asynchronous UDP Library
 - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) - Asynchronous Web Server Library
 - [async-mqtt-client](https://github.com/marvinroger/async-mqtt-client) - Asynchronous MQTT Client
-- [Int64String](http://downloads.arduino.cc/libraries/github.com/djGrrr/Int64String-1.1.1.zip) - Allows you to convert 64 bit integers into a string
+- [Int64String](https://github.com/djGrrr/Int64String) - Converts 64 bit integers into a string
 - [EspAlexa](https://github.com/Aircoookie/Espalexa) - Alexa Direct control Library
 
 The ESP32 build will require the following software to build this project:
@@ -45,7 +46,7 @@ The ESP32 build will require the following software to build this project:
 - [ESPAsyncUDP](https://github.com/me-no-dev/ESPAsyncUDP) - Asynchronous UDP Library
 - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) - Asynchronous Web Server Library
 - [async-mqtt-client](https://github.com/marvinroger/async-mqtt-client) - Asynchronous MQTT Client
-- [Int64String](http://downloads.arduino.cc/libraries/github.com/djGrrr/Int64String-1.1.1.zip) - Allo
+- [Int64String](https://github.com/djGrrr/Int64String) - Converts 64 bit integers into a string
 - [EspAlexa](https://github.com/Aircoookie/Espalexa) - Alexa Direct control Library
 
 ## Important Notes on Compiling and Flashing
