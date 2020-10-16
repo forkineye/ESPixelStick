@@ -80,7 +80,7 @@ public:
 
 #define OM_MAX_NUM_INTENSITY_BYTES_PER_PIXEL    4
 #ifdef ARDUINO_ARCH_ESP8266
-#   define OM_MAX_NUM_PIXELS                    1200
+#   define OM_MAX_NUM_PIXELS                    1000
 #else
 #   define OM_MAX_NUM_PIXELS                    2000
 #endif // !def ARDUINO_ARCH_ESP8266
