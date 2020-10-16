@@ -131,6 +131,8 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
 //-----------------------------------------------------------------------------
 void c_InputE131::Process ()
 {
+    // DEBUG_START;
+
     uint8_t*    E131Data;
     uint8_t     uniOffset;
     uint16_t    universe;
@@ -206,8 +208,10 @@ void c_InputE131::Process ()
                 InputDataBuffer[UniverseIndex] = E131Data[buffloc];
                 buffloc++;
             }
+            InputMgr.ResetBlankTimer ();
         }
     }
+    // DEBUG_END;
     //    LOG_PORT.printf("procJSON heap /stack stats: %u:%u:%u:%u\n", ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
 } // process
 

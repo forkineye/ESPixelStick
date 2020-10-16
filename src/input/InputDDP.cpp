@@ -274,6 +274,8 @@ void c_InputDDP::ProcessReceivedData ()
 
         memcpy (&InputDataBuffer[InputBufferOffset], header.data, packetDataLength);
 
+        InputMgr.ResetBlankTimer ();
+
     } while (false);
 
     // DEBUG_END;
