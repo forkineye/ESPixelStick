@@ -66,9 +66,9 @@ typedef struct {
     String      ssid;
     String      passphrase;
     String      hostname;
-    IPAddress   ip;
-    IPAddress   netmask;
-    IPAddress   gateway;
+    IPAddress   ip                   = (uint32_t)0;
+    IPAddress   netmask              = (uint32_t)0;
+    IPAddress   gateway              = (uint32_t)0;
     bool        UseDhcp              = true;  ///< Use DHCP?
     bool        ap_fallbackIsEnabled = false; ///< Fallback to AP if fail to associate?
     uint32_t    ap_timeout;          ///< How long to wait in AP mode with no connection before rebooting

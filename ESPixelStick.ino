@@ -103,11 +103,17 @@ void GetConfig (JsonObject & json);
 /** Arduino based setup code that is executed at startup. */
 void setup() 
 {
+    config.ip = (uint32_t)0;
+    config.netmask = (uint32_t)0;
+    config.gateway = (uint32_t)0;
+    config.UseDhcp = true;
+    config.ap_fallbackIsEnabled = false;
+
     // Setup serial log port
     LOG_PORT.begin(115200);
     delay(10);
 
-    // DEBUG_START;
+ // DEBUG_START;
 #if defined(DEBUG)
     ets_install_putc1((void *) &_u0_putc);
     system_set_os_print(1);
@@ -121,27 +127,27 @@ void setup()
 #else
     LOG_PORT.println (String("ESP Version: ") + ESP.getSdkVersion ());
 #endif
-    // DEBUG_V ("");
+ // DEBUG_V ("");
 
-    // DEBUG_V ("");
+ // DEBUG_V ("");
     FileIO::Begin ();
 
     // Load configuration from SPIFFS and set Hostname
     loadConfig();
-    // DEBUG_V ("");
+ // DEBUG_V ("");
 
     // Set up the output manager to start sending data to the serial ports
     OutputMgr.Begin ();
-    // DEBUG_V ("");
+ // DEBUG_V ("");
 
     WiFiMgr.Begin (& config);
-    // DEBUG_V ("");
+ // DEBUG_V ("");
 
     // connect the input processing to the output processing. 
     // Only supports a single channel at the moment
     InputMgr.Begin (OutputMgr.GetBufferAddress (), OutputMgr.GetBufferSize ());
 
-    // DEBUG_V ("");
+ // DEBUG_V ("");
 
     // Configure and start the web server
     WebMgr.Begin(&config);
@@ -153,7 +159,7 @@ void setup()
 #else
     esp_task_wdt_init (5, true);
 #endif
-    // DEBUG_END;
+ // DEBUG_END;
 
 } // setup
 
@@ -167,7 +173,7 @@ void setup()
 /** Validates the config_t (core) configuration structure and forces defaults for invalid entries */
 void validateConfig() 
 {
-    // DEBUG_START;
+ // DEBUG_START;
 
 #ifdef ARDUINO_ARCH_ESP8266
     String chipId = String (ESP.getChipId (), HEX);
@@ -190,13 +196,13 @@ void validateConfig()
 
     ConfigSaveNeeded += WiFiMgr.ValidateConfig (&config);
 
-    // DEBUG_END;
+ // DEBUG_END;
 } // validateConfig
 
 /// Deserialize device confiugration JSON to config structure - returns true if config change detected
 boolean dsDevice(JsonObject & json)
 {
-    // DEBUG_START;
+ // DEBUG_START;
 
     boolean retval = false;
     if (json.containsKey("device"))
@@ -209,7 +215,7 @@ boolean dsDevice(JsonObject & json)
         LOG_PORT.println(F("No device settings found."));
     }
 
-    // DEBUG_END;
+ // DEBUG_END;
 
     return retval;
 } // dsDevice
@@ -217,14 +223,23 @@ boolean dsDevice(JsonObject & json)
 /// Deserialize network confiugration JSON to config structure - returns true if config change detected
 boolean dsNetwork(JsonObject & json)
 {
-    // DEBUG_START;
+ // DEBUG_START;
 
     boolean retval = false;
     if (json.containsKey("network")) 
     {
+#ifdef ARDUINO_ARCH_ESP8266
+        IPAddress Temp = config.ip;
+        String ip = Temp.toString ();
+        Temp = config.gateway;
+        String gateway = Temp.toString ();
+        Temp = config.netmask;
+        String netmask = Temp.toString ();
+#else
         String ip      = config.ip.toString ();
         String gateway = config.gateway.toString ();
         String netmask = config.netmask.toString ();
+#endif // def ARDUINO_ARCH_ESP8266
 
         JsonObject network = json["network"];
         retval |= FileIO::setFromJSON(config.ssid,                 network["ssid"]);
@@ -238,17 +253,13 @@ boolean dsNetwork(JsonObject & json)
         retval |= FileIO::setFromJSON(config.ap_fallbackIsEnabled, network["ap_fallback"]);
         retval |= FileIO::setFromJSON(config.ap_timeout,           network["ap_timeout"]);
     
-        // DEBUG_V ("     ip: " + ip);
-        // DEBUG_V ("gateway: " + gateway);
-        // DEBUG_V ("netmask: " + netmask);
+     // DEBUG_V ("     ip: " + ip);
+     // DEBUG_V ("gateway: " + gateway);
+     // DEBUG_V ("netmask: " + netmask);
 
         config.ip.fromString (ip);
         config.gateway.fromString (gateway);
         config.netmask.fromString (netmask);
-
-        // DEBUG_V ("     config.ip: " + config.ip.toString());
-        // DEBUG_V ("config.gateway: " + config.gateway.toString ());
-        // DEBUG_V ("config.netmask: " + config.netmask.toString ());
 
         ResetWiFi = retval;
     }
@@ -257,36 +268,36 @@ boolean dsNetwork(JsonObject & json)
         LOG_PORT.println(F("No network settings found."));
     }
 
-    // DEBUG_END;
+ // DEBUG_END;
     return retval;
 }
 
 void SetConfig (JsonObject& json)
 {
-    // DEBUG_START;
+ // DEBUG_START;
     reboot = deserializeCore (json);
     ConfigSaveNeeded = 1;
-    // DEBUG_END;
+ // DEBUG_END;
 
 } // SetConfig
 
 bool deserializeCore (JsonObject & json)
 {
     bool response = false;
-    // DEBUG_START;
+ // DEBUG_START;
     dsDevice (json);
     response = dsNetwork (json);
 
-    // DEBUG_END;
+ // DEBUG_END;
     return response;
 }
 
 void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
 {
     JsonObject json = jsonDoc.as<JsonObject> ();
-    // DEBUG_START;
+ // DEBUG_START;
     deserializeCore (json);
-    // DEBUG_END;
+ // DEBUG_END;
 }
 
 /// Load configuration file
@@ -295,31 +306,29 @@ void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
  */
 void loadConfig() 
 {
-    // DEBUG_START;
+ DEBUG_START;
 
     // Zeroize Config struct
     memset (&config, 0, sizeof (config));
 
-    // DEBUG_V ("");
+ // DEBUG_V ("");
     if (FileIO::loadConfig(ConfigFileName, &deserializeCoreHandler))
     {
         validateConfig();
     } 
     else
     {
-        // Load failed, create a new config file and save it
+  // DEBUG_V ("Load failed, create a new config file and save it");
         ConfigSaveNeeded = false;
         SaveConfig();
     }
 
-    //TODO: Add auxiliary service load routine
-
-    // DEBUG_START;
+ DEBUG_START;
 } // loadConfig
 
 void GetConfig (JsonObject & json)
 {
-    // DEBUG_START;
+ // DEBUG_START;
 
     // Device
     JsonObject device = json.createNestedObject(F("device"));
@@ -331,9 +340,18 @@ void GetConfig (JsonObject & json)
     network["ssid"]        = config.ssid;
     network["passphrase"]  = config.passphrase;
     network["hostname"]    = config.hostname;
-    network["ip"]          = config.ip.toString();
-    network["netmask"]     = config.netmask.toString ();
-    network["gateway"]     = config.gateway.toString ();
+#ifdef ARDUINO_ARCH_ESP8266
+    IPAddress Temp = config.ip;
+    network["ip"]      = Temp.toString ();
+    Temp = config.netmask;
+    network["netmask"] = Temp.toString ();
+    Temp = config.gateway;
+    network["gateway"] = Temp.toString ();
+#else
+    network["ip"]      = config.ip.toString ();
+    network["netmask"] = config.netmask.toString ();
+    network["gateway"] = config.gateway.toString ();
+#endif // !def ARDUINO_ARCH_ESP8266
 
     network["dhcp"]        = config.UseDhcp;
     network["sta_timeout"] = config.sta_timeout;
@@ -341,13 +359,13 @@ void GetConfig (JsonObject & json)
     network["ap_fallback"] = config.ap_fallbackIsEnabled;
     network["ap_timeout"]  = config.ap_timeout;
 
-    // DEBUG_END;
-}
+ // DEBUG_END;
+} // GetConfig
 
 // Serialize the current config into a JSON string
 String serializeCore(boolean pretty) 
 {
-    // DEBUG_START;
+ // DEBUG_START;
 
     // Create buffer and root object
     DynamicJsonDocument jsonConfigDoc(2048);
@@ -366,7 +384,7 @@ String serializeCore(boolean pretty)
         serializeJson (JsonConfig, jsonConfigString);
     }
 
-    // DEBUG_END;
+ // DEBUG_END;
 
     return jsonConfigString;
 } // serializeCore
@@ -374,16 +392,17 @@ String serializeCore(boolean pretty)
 // Save configuration JSON file
 void SaveConfig() 
 {
-    // DEBUG_START;
+ DEBUG_START;
 
     // Validate Config
     validateConfig();
 
     // Save Config
     String DataToSave = serializeCore (false);
+ DEBUG_V ("ConfigFileName: " + ConfigFileName);
     FileIO::SaveConfig(ConfigFileName, DataToSave);
 
-    // DEBUG_END;
+ DEBUG_END;
 } // SaveConfig
 
 /////////////////////////////////////////////////////////
@@ -413,7 +432,7 @@ void loop()
     if (true == ResetWiFi)
     {
         ResetWiFi = false;
-        WiFiMgr.reset ();
+        // WiFiMgr.reset ();
     }
 
 #ifdef ARDUINO_ARCH_ESP32
