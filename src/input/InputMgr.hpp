@@ -43,6 +43,7 @@ public:
     void GetOptions (JsonObject & jsonOptions);
     void SetBufferInfo (c_OutputMgr::e_OutputChannelIds channelId, uint8_t* BufferStart, uint16_t BufferSize);
     void SetOperationalState (bool Active);
+    void ResetBlankTimer ();
 
     enum e_InputType
     {

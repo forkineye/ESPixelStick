@@ -713,5 +713,21 @@ void c_InputMgr::SetOperationalState (bool ActiveFlag)
 
 } // SetOutputState
 
+//-----------------------------------------------------------------------------
+void c_InputMgr::ResetBlankTimer ()
+{
+    // DEBUG_START;
+
+    // pass through each active interface and set the blank state
+    for (c_InputCommon* pInputChannel : pInputChannelDrivers)
+    {
+        pInputChannel->ResetBlankTimer ();
+        // DEBUG_V("");
+    }
+
+    // DEBUG_END;
+
+} // SetOutputState
+
 // create a global instance of the Input channel factory
 c_InputMgr InputMgr;
