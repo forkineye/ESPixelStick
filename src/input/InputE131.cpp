@@ -149,7 +149,9 @@ void c_InputE131::Process ()
         universe = htons (packet.universe);
         E131Data = packet.property_values + 1;
 
-        //LOG_PORT.print(universe);
+        // DEBUG_V ("              universe: " + String(universe));
+        // DEBUG_V ("packet.sequence_number: " + String(packet.sequence_number));
+
         //LOG_PORT.println(packet.sequence_number);
 
         if ((universe >= startUniverse) && (universe <= LastUniverse))

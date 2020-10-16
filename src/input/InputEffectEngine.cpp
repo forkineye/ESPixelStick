@@ -94,6 +94,7 @@ void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
     jsonConfig[F ("EffectMirror")]       = EffectMirror;
     jsonConfig[F ("EffectAllLeds")]      = EffectAllLeds;
     jsonConfig[F ("EffectBrightness")]   = EffectBrightness;
+    jsonConfig[F ("EffectBlankTime")]    = EffectBlankTime;
     jsonConfig[F ("EffectWhiteChannel")] = EffectWhiteChannel;
     jsonConfig[F ("EffectColor")]        = HexColor;
 
@@ -132,6 +133,7 @@ void c_InputEffectEngine::GetMqttConfig (JsonObject & jsonConfig)
     jsonConfig[F ("mirror")]       = EffectMirror;
     jsonConfig[F ("allleds")]      = EffectAllLeds;
     jsonConfig[F ("brightness")]   = EffectBrightness * 255;
+    jsonConfig[F ("blanktime")]    = EffectBlankTime;
     jsonConfig[F ("whitechannel")] = EffectWhiteChannel;
 
     // color needs a bit of reprocessing
@@ -161,18 +163,38 @@ void c_InputEffectEngine::Process ()
     // DEBUG_V (String ("HasBeenInitialized: ") + HasBeenInitialized);
     // DEBUG_V (String ("PixelCount: ") + PixelCount);
 
-    if (HasBeenInitialized && (0 != PixelCount))
+    do // once
     {
-        // DEBUG_V ("");
-        if (millis () - EffectLastRun >= EffectWait)
+        if (!HasBeenInitialized)
         {
-            // DEBUG_V ("");
-            EffectLastRun = millis ();
-            uint16_t wait = (this->*ActiveEffect->func)();
-            EffectWait = max ((int)wait, MIN_EFFECT_DELAY);
-            EffectCounter++;
+            break;
         }
-    }
+        // DEBUG_V ("");
+
+        if (0 == PixelCount)
+        {
+            break;
+        }
+        // DEBUG_V ("");
+
+        if (millis () < EffectBlankEnd)
+        {
+            break;
+        }
+        // DEBUG_V ("");
+
+        if (millis () < (EffectLastRun + EffectWait))
+        {
+            break;
+        }
+
+        // DEBUG_V ("");
+        EffectLastRun = millis ();
+        uint16_t wait = (this->*ActiveEffect->func)();
+        EffectWait = max ((int)wait, MIN_EFFECT_DELAY);
+        EffectCounter++;
+
+    } while (false);
 
     // DEBUG_END;
 
@@ -204,6 +226,7 @@ boolean c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     FileIO::setFromJSON (EffectMirror, jsonConfig[F ("EffectMirror")]);
     FileIO::setFromJSON (EffectAllLeds, jsonConfig[F ("EffectAllLeds")]);
     FileIO::setFromJSON (EffectBrightness, jsonConfig[F ("EffectBrightness")]);
+    FileIO::setFromJSON (EffectBlankTime, jsonConfig[F ("EffectBlankTime")]);
     FileIO::setFromJSON (EffectWhiteChannel, jsonConfig[F ("EffectWhiteChannel")]);
     FileIO::setFromJSON (effectName, jsonConfig[F ("currenteffect")]);
     FileIO::setFromJSON (effectColor, jsonConfig[F ("EffectColor")]);
@@ -230,6 +253,7 @@ boolean c_InputEffectEngine::SetMqttConfig (ArduinoJson::JsonObject& jsonConfig)
     FileIO::setFromJSON (EffectReverse,      jsonConfig[F ("reverse")]);
     FileIO::setFromJSON (EffectMirror,       jsonConfig[F ("mirror")]);
     FileIO::setFromJSON (EffectAllLeds,      jsonConfig[F ("allleds")]);
+    FileIO::setFromJSON (EffectBlankTime,    jsonConfig[F ("blanktime")]);
     FileIO::setFromJSON (EffectBrightness,   jsonConfig[F ("brightness")]);
     FileIO::setFromJSON (EffectWhiteChannel, jsonConfig[F ("EffectWhiteChannel")]);
     FileIO::setFromJSON (effectName,         jsonConfig[F ("effect")]);
@@ -284,9 +308,23 @@ void c_InputEffectEngine::setSpeed (uint16_t speed)
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::setDelay (uint16_t delay)
 {
+    // DEBUG_START;
+
     EffectDelay = delay;
-    if (EffectDelay < MIN_EFFECT_DELAY) { EffectDelay = MIN_EFFECT_DELAY; }
-}
+    if (EffectDelay < MIN_EFFECT_DELAY)
+    {
+        EffectDelay = MIN_EFFECT_DELAY;
+    }
+    // DEBUG_END;
+} // setDelay
+
+void c_InputEffectEngine::ResetBlankTimer ()
+{
+    // DEBUG_START;
+    EffectBlankEnd = millis () + (EffectBlankTime * 1000);
+    // DEBUG_END;
+
+} // ResetBlankTimer
 
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::setEffect (const String & effectName)

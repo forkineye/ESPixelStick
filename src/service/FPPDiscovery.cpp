@@ -17,6 +17,7 @@
 */
 
 #include "FPPDiscovery.h"
+#include "../input/InputMgr.hpp"
 
 #include <SD.h>
 #include <Int64String.h>
@@ -328,6 +329,8 @@ void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t Curr
             fseqFile.read (outputBuffer, toRead);
             //LOG_PORT.printf("New Frame!   Old: %d     New:  %d      Offset: %d\n", fseqCurrentFrameId, frame, FileOffsetToCurrentHeaderRecord);
             fseqCurrentFrameId = frame;
+
+            InputMgr.ResetBlankTimer ();
         }
     }
 
