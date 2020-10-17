@@ -957,6 +957,13 @@ function ProcessRecievedJsonStatusMessage(data)
         $('#clientip').text (InputStatus.e131.last_clientIP);
     }
 
+    if (Status.input[0].hasOwnProperty('ddp'))
+    {
+        $('#ddppacketsreceived').text(InputStatus.ddp.packetsreceived);
+        $('#ddpbytesreceived').text(InputStatus.ddp.bytesreceived);
+        $('#ddperrors').text(InputStatus.ddp.errors);
+    }
+
     // Device Refresh is dynamic
     $('#refresh').text(Status.output[0].framerefreshrate + " fps");
 } // ProcessRecievedJsonStatusMessage

@@ -80,6 +80,13 @@ void c_InputDDP::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
+    JsonObject ddpStatus = jsonStatus.createNestedObject (F ("ddp"));
+    // DEBUG_V ("");
+
+    ddpStatus["packetsreceived"] = stats.packetsReceived;
+    ddpStatus["bytesreceived"]   = stats.bytesReceived;
+    ddpStatus["errors"]          = stats.errors;
+
     // DEBUG_END;
 
 } // GetStatus
