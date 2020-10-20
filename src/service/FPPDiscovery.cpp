@@ -1116,7 +1116,11 @@ void c_FPPDiscovery::GetListOfFiles (char * ResponseBuffer)
 {
     // DEBUG_START;
 
-    DynamicJsonDocument ResponseJsonDoc (4096);
+    DynamicJsonDocument ResponseJsonDoc (2048);
+    if (0 == ResponseJsonDoc.capacity ())
+    {
+        LOG_PORT.println (F ("ERROR: Failed to allocate memory for the GetListOfFiles web request response."));
+    }
     JsonArray FileArray = ResponseJsonDoc.createNestedArray (F ("files"));
 
     File dir = SD.open ("/");
