@@ -41,7 +41,7 @@ public:
     bool SetConfig  (JsonObject & jsonConfig); ///< Set a new config in the driver
     void Process    ();                        ///< Call from loop(),  renders Input data
     void GetOptions (JsonObject & jsonOptions);
-    void SetBufferInfo (c_OutputMgr::e_OutputChannelIds channelId, uint8_t* BufferStart, uint16_t BufferSize);
+    void SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize);
     void SetOperationalState (bool Active);
     void ResetBlankTimer ();
 
