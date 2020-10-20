@@ -74,8 +74,9 @@ public:
             uint16_t     GetBufferSize ()      { return OutputBufferSize;}     ///< Get the address of the buffer into which the E1.31 handler will stuff data
             OTYPE_t      GetOutputType ()      { return OutputType; }          ///< Have the instance report its type.
     virtual void         GetStatus (ArduinoJson::JsonObject & jsonStatus);
-            void         SetOutputBufferAddress (uint8_t * pNewOutputBuffer) { pOutputBuffer = pNewOutputBuffer; }
-            void         SetOutputBufferSize (uint16_t NewOutputBufferSize)  { OutputBufferSize = NewOutputBufferSize; };
+            void         SetOutputBufferAddress (uint8_t* pNewOutputBuffer) { pOutputBuffer = pNewOutputBuffer; }
+    virtual void         SetOutputBufferSize (uint16_t NewOutputBufferSize)  { OutputBufferSize = NewOutputBufferSize; };
+    virtual uint16_t     GetNumChannelsNeeded () = 0;
 
 protected:
 #define OM_CMN_NO_CUSTOM_ISR                    (-1)
@@ -86,7 +87,7 @@ protected:
     OID_t       OutputChannelId;
     bool        HasBeenInitialized = false;
     time_t      FrameRefreshTimeMs = 0;
-    uint8_t   * pOutputBuffer      = 0;
+    uint8_t   * pOutputBuffer      = nullptr;
     uint16_t    OutputBufferSize   = 0;
 
 #ifdef ARDUINO_ARCH_ESP8266

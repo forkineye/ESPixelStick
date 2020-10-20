@@ -198,6 +198,13 @@ void c_OutputGECE::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 } // GetConfig
 
 //----------------------------------------------------------------------------
+uint16_t c_OutputGECE::GetNumChannelsNeeded ()
+{
+    return pixel_count * GECE_NUM_INTENSITY_BYTES_PER_PIXEL;
+
+} // GetNumChannelsNeeded
+
+//----------------------------------------------------------------------------
 bool c_OutputGECE::validate ()
 {
  DEBUG_START;
@@ -235,12 +242,13 @@ void c_OutputGECE::Render()
 
     uint32_t packet = 0;
     uint32_t pTime  = 0;
+    uint8_t  NumOutputPixels = GetBufferSize () / GECE_NUM_INTENSITY_BYTES_PER_PIXEL;
 
     // Build a GECE packet
     startTime = micros();
     uint8_t * pCurrentInputData = GetBufferAddress();
     
-    for (uint8_t CurrentAddress = 0; CurrentAddress < pixel_count; ++CurrentAddress)
+    for (uint8_t CurrentAddress = 0; CurrentAddress < NumOutputPixels; ++CurrentAddress)
     {
         packet  = GECE_SET_BRIGHTNESS (brightness); // <= This clears the other fields
         packet |= GECE_SET_ADDRESS    (CurrentAddress);

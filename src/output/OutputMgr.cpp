@@ -131,11 +131,6 @@ void c_OutputMgr::Begin ()
     // load up the configuration from the saved file. This also starts the drivers
     LoadConfig ();
 
-    // DEBUG_V ("");
-    // todo - remove this. For debugging without UI
-/*    InstantiateNewOutputChannel (e_OutputChannelIds::OutputChannelId_1,
-                                 e_OutputType::OutputType_WS2811);
-*/
     // DEBUG_END;
 
 } // begin
@@ -447,9 +442,6 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 break;
             }
 
-            // tell the input operations there is no place to put the incoming data
-            InputMgr.SetBufferInfo (ChannelIndex, nullptr, 0);
-
             // DEBUG_V ("shut down the existing driver");
             delete pOutputChannelDrivers[ChannelIndex];
             pOutputChannelDrivers[ChannelIndex] = nullptr;
@@ -578,11 +570,6 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
         // DEBUG_V ("");
         pOutputChannelDrivers[ChannelIndex]->Begin ();
-
-        // tell the inputs where they can put the data
-        InputMgr.SetBufferInfo (ChannelIndex, 
-                                GetBufferAddress(), 
-                                GetBufferSize());
 
     } while (false);
 
@@ -799,6 +786,7 @@ bool c_OutputMgr::SetConfig (JsonObject & jsonConfig)
 ///< Called from loop(), renders output data
 void c_OutputMgr::Render()
 {
+    // DEBUG_START;
     // do we need to save the current config?
     if (true == ConfigSaveNeeded)
     {
@@ -823,22 +811,36 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
     // DEBUG_START;
 
     uint16_t OutputBufferOffset = 0;
-    // DEBUG_V (String ("BufferSize: ") + String (sizeof(OutputBuffer)));
-    // DEBUG_V (String ("OutputBufferOffset") + String (OutputBufferOffset));
+
+    // DEBUG_V (String ("        BufferSize: ") + String (sizeof(OutputBuffer)));
+    // DEBUG_V (String ("OutputBufferOffset: ") + String (OutputBufferOffset));
 
     for (c_OutputCommon* pOutputChannel : pOutputChannelDrivers)
     {
         pOutputChannel->SetOutputBufferAddress (&OutputBuffer[OutputBufferOffset]);
+        uint16_t ChannelsNeeded     = pOutputChannel->GetNumChannelsNeeded ();
+        uint16_t AvailableChannels  = sizeof(OutputBuffer) - OutputBufferOffset;
+        uint16_t ChannelsToAllocate = min (ChannelsNeeded, AvailableChannels);
+        
+        // DEBUG_V (String ("    ChannelsNeeded: ") + String (ChannelsNeeded));
+        // DEBUG_V (String (" AvailableChannels: ") + String (AvailableChannels));
+        // DEBUG_V (String ("ChannelsToAllocate: ") + String (ChannelsToAllocate));
 
-        OutputBufferOffset += pOutputChannel->GetBufferSize ();
+        pOutputChannel->SetOutputBufferSize (ChannelsToAllocate);
+
+        if (AvailableChannels < ChannelsNeeded)
+        {
+            LOG_PORT.println (String (F ("--- ERROR: Too many output channels have been defined: ")) + String (OutputBufferOffset));
+        }
+
+        OutputBufferOffset += ChannelsToAllocate;
         // DEBUG_V (String ("pOutputChannel->GetBufferSize: ") + String (pOutputChannel->GetBufferSize ()));
         // DEBUG_V (String ("OutputBufferOffset: ") + String(OutputBufferOffset));
     }
 
-    if (sizeof (OutputBuffer) < OutputBufferOffset)
-    {
-        LOG_PORT.println (String (F ("--- ERROR: Too many output channels have been defined: ")) + String (OutputBufferOffset));
-    }
+    // DEBUG_V (String ("   TotalBufferSize: ") + String (OutputBufferOffset));
+    UsedBufferSize = OutputBufferOffset;
+    InputMgr.SetBufferInfo (OutputBuffer, OutputBufferOffset);
 
     // DEBUG_END;
 

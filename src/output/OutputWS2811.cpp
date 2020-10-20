@@ -46,7 +46,8 @@ extern "C" {
 #   define UART_INV_MASK  (0x3f << 19)
 #endif // ndef UART_INV_MASK
 
-#define WS2811_TIME_PER_PIXEL   30L     ///< 30us frame time
+#define WS2811_TIME_PER_INTENSITY 10L
+// #define WS2811_TIME_PER_PIXEL   30L     ///< 30us frame time
 #define WS2811_MIN_IDLE_TIME    300L    ///< 300us idle time
 
 // Depricated: Set TX FIFO trigger. 80 bytes gives 200 microsecs to refill the FIFO
@@ -76,7 +77,7 @@ c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     c_OutputMgr::e_OutputType outputType) :
     c_OutputCommon (OutputChannelId, outputGpio, uart, outputType),
     color_order ("rgb"),
-    pixel_count (170),
+    pixel_count (100),
     zig_size (0),
     group_size (1),
     gamma (1.0),
@@ -163,17 +164,6 @@ void c_OutputWS2811::Begin()
     InitializeUart (uart_config, PIXEL_FIFO_TRIGGER_LEVEL);
 #endif
 
-    // Setup Output Buffer
-    memset (IsrOutputBuffer, 0x0, sizeof (IsrOutputBuffer));
-
-    pixel_count = 100;
-
-    // Setup common Output Buffer
-    SetOutputBufferSize (pixel_count * numIntensityBytesPerPixel);
-
-    // Calculate our refresh time
-    FrameRefreshTimeMs = (WS2811_TIME_PER_PIXEL * pixel_count) + WS2811_MIN_IDLE_TIME;
-
     // Atttach interrupt handler
 #ifdef ARDUINO_ARCH_ESP8266
     ETS_UART_INTR_ATTACH (uart_intr_handler, this);
@@ -203,6 +193,66 @@ void c_OutputWS2811::GetConfig(ArduinoJson::JsonObject & jsonConfig)
 
     // DEBUG_END;
 } // GetConfig
+
+//----------------------------------------------------------------------------
+void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+{
+    // DEBUG_START;
+    // DEBUG_V ("NumChannelsAvailable: " + String(NumChannelsAvailable));
+    // DEBUG_V ("       GetBufferSize: " + String(GetBufferSize()));
+    // DEBUG_V ("         pixel_count: " + String(pixel_count));
+
+    do // once
+    {
+        // are we changing size?
+        if (NumChannelsAvailable == GetBufferSize ())
+        {
+            // DEBUG_V ("NO Need to change the ISR buffer");
+            break;
+        }
+
+        // DEBUG_V ("Need to change the ISR buffer");
+
+        // Stop current output operation
+#ifdef ARDUINO_ARCH_ESP8266
+        CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
+#else
+        ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
+#endif
+        c_OutputCommon::SetOutputBufferSize (NumChannelsAvailable);
+
+        if (nullptr != pIsrOutputBuffer)
+        {
+            // DEBUG_V ("Free ISR Buffer");
+            free (pIsrOutputBuffer);
+            pIsrOutputBuffer = nullptr;
+        }
+
+        if (0 == NumChannelsAvailable)
+        {
+            // DEBUG_V ("Dont need an ISR Buffer");
+            break;
+        }
+
+        if (nullptr == (pIsrOutputBuffer = (uint8_t*)malloc (NumChannelsAvailable)))
+        {
+            // DEBUG_V ("malloc failed");
+            LOG_PORT.println ("ERROR: WS2811 driver failed to allocate an IsrOutputBuffer. Shutting down output.");
+            c_OutputCommon::SetOutputBufferSize ((uint16_t)0);
+            FrameRefreshTimeMs = WS2811_MIN_IDLE_TIME;
+            break;
+        }
+
+        // DEBUG_V ("malloc ok");
+
+        memset (pIsrOutputBuffer, 0x0, NumChannelsAvailable);
+        // Calculate our refresh time
+        FrameRefreshTimeMs = (WS2811_TIME_PER_INTENSITY * NumChannelsAvailable) + WS2811_MIN_IDLE_TIME;
+
+    } while (false);
+    
+    // DEBUG_END;
+} // SetBufferSize
 
 //----------------------------------------------------------------------------
 /* 
@@ -265,10 +315,12 @@ void c_OutputWS2811::Render()
     if (gpio_num_t (-1) == DataPin) { return; }
     if (!canRefresh ()) { return; }
     if (0 != RemainingIntensityCount) { return; }
+    if (nullptr == pIsrOutputBuffer) { return; }
 
     // set up pointers into the pixel data space
     uint8_t *pSourceData = OutputMgr.GetBufferAddress(); // source buffer (owned by base class)
-    uint8_t *pTargetData = IsrOutputBuffer;              // target buffer
+    uint8_t *pTargetData = pIsrOutputBuffer;              // target buffer
+    uint16_t OutputPixelCount = GetBufferSize () / numIntensityBytesPerPixel;
 
     // what type of copy are we making?
     if (!zig_size)
@@ -277,7 +329,7 @@ void c_OutputWS2811::Render()
 
         // for each destination pixel
         for (size_t CurrentDestinationPixelIndex = 0;
-            CurrentDestinationPixelIndex < pixel_count;
+            CurrentDestinationPixelIndex < OutputPixelCount;
             CurrentDestinationPixelIndex++)
         {
             // for each output pixel in the group (minimum of 1)
@@ -301,7 +353,7 @@ void c_OutputWS2811::Render()
     {
         // Zigzag copy
         for (size_t CurrentDestinationPixelIndex = 0;
-            CurrentDestinationPixelIndex < pixel_count;
+            CurrentDestinationPixelIndex < OutputPixelCount;
             CurrentDestinationPixelIndex++)
         {
             if (CurrentDestinationPixelIndex / zig_size % 2)
@@ -327,7 +379,7 @@ void c_OutputWS2811::Render()
     } // end zig zag copy
 
     // set the intensity transmit buffer pointer and number of intensities to send
-    pNextIntensityToSend    = IsrOutputBuffer;
+    pNextIntensityToSend    = pIsrOutputBuffer;
     RemainingIntensityCount = GetBufferSize ();
     // DEBUG_V (String ("RemainingIntensityCount: ") + RemainingIntensityCount);
 
@@ -429,10 +481,10 @@ bool c_OutputWS2811::validate ()
     // DEBUG_START;
     bool response = true;
 
-    if (pixel_count > OM_MAX_NUM_PIXELS)
+    if (pixel_count > WS2812_MAX_NUM_PIXELS)
     {
         // LOG_PORT.println (String (F ("*** Requested pixel count was too high. Setting to ")) + PIXEL_LIMIT + F(" ***"));
-        pixel_count = OM_MAX_NUM_PIXELS;
+        pixel_count = WS2812_MAX_NUM_PIXELS;
         response = false;
     }
     else if (pixel_count < 1)
@@ -440,7 +492,6 @@ bool c_OutputWS2811::validate ()
         pixel_count = 170;
         response = false;
     }
-    SetOutputBufferSize (pixel_count * numIntensityBytesPerPixel);
 
     if (group_size > pixel_count)
     {
@@ -481,9 +532,6 @@ bool c_OutputWS2811::validate ()
 
     updateGammaTable ();
     updateColorOrderOffsets ();
-
-    // Calculate our refresh time
-    FrameRefreshTimeMs = (WS2811_TIME_PER_PIXEL * pixel_count) + WS2811_MIN_IDLE_TIME;
 
     // DEBUG_END;
     return response;

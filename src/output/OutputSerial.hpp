@@ -52,7 +52,7 @@ public:
     void Render ();                                        ///< Call from loop(),  renders output data
     void GetDriverName (String & sDriverName);
     void GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
-    uint16_t GetBufferSize () { return Num_Channels; } ///< Get the address of the buffer into which the E1.31 handler will stuff data
+    uint16_t GetNumChannelsNeeded () { return Num_Channels; }
 
 #define GS_CHANNEL_LIMIT 2048
 

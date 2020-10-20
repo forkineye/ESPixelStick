@@ -46,12 +46,14 @@ public:
     void         GetDriverName (String & sDriverName) { sDriverName = String (F ("WS2811")); }
     c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_WS2811;} ///< Have the instance report its type.
     void         GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
-    uint16_t     GetBufferSize () { return (pixel_count * numIntensityBytesPerPixel); } ///< Get the address of the buffer into which the E1.31 handler will stuff data
+    uint16_t     GetNumChannelsNeeded () { return (pixel_count * numIntensityBytesPerPixel); };
+    void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
 
     /// Interrupt Handler
     void IRAM_ATTR ISR_Handler (); ///< UART ISR
 
 #define WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE    4
+#define WS2812_MAX_NUM_PIXELS                       1200
 
 private:
 
@@ -69,19 +71,19 @@ private:
 
     // JSON configuration parameters
     String      color_order; ///< Pixel color order
-    uint16_t    pixel_count; ///< Number of pixels
+    uint16_t    pixel_count = 100; ///< Number of pixels
     uint16_t    zig_size;    ///< Zigsize count - 0 = no zigzag
     uint16_t    group_size;  ///< Group size - 1 = no grouping
     float       gamma;       ///< gamma value to use
     float       brightness;  ///< brightness to use
 
     // Internal variables
-    uint8_t         IsrOutputBuffer[(OM_MAX_NUM_PIXELS * OM_MAX_NUM_INTENSITY_BYTES_PER_PIXEL) +1]; ///< Data ready to be sent to the UART
-    uint8_t        *pNextIntensityToSend;                       ///< start of output buffer being sent to the UART
-    uint16_t        RemainingIntensityCount;                    ///< Used by ISR to determine how much more data to send
-    time_t          startTime;                                  ///< When the last frame TX started
-    uint8_t         numIntensityBytesPerPixel = 3;              ///< number of bytes per pixel
-    uint8_t         gamma_table[256] = { 0 };                   ///< Gamma Adjustment table
+    uint8_t        *pIsrOutputBuffer = nullptr;         ///< Data ready to be sent to the UART
+    uint8_t        *pNextIntensityToSend;               ///< start of output buffer being sent to the UART
+    uint16_t        RemainingIntensityCount;            ///< Used by ISR to determine how much more data to send
+    time_t          startTime;                          ///< When the last frame TX started
+    uint8_t         numIntensityBytesPerPixel = 3;      ///< number of bytes per pixel
+    uint8_t         gamma_table[256] = { 0 };           ///< Gamma Adjustment table
     ColorOffsets_t  ColorOffsets;
 
 #ifdef ARDUINO_ARCH_ESP8266
