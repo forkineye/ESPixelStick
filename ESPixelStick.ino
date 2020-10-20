@@ -421,20 +421,6 @@ void loop()
         SaveConfig ();
     } // done need to save the current config
 
-    // Reboot handler
-    if (reboot) 
-    {
-        LOG_PORT.println ("Rebooting");
-        delay(REBOOT_DELAY);
-        ESP.restart();
-    }
-
-    if (true == ResetWiFi)
-    {
-        ResetWiFi = false;
-        // WiFiMgr.reset ();
-    }
-
 #ifdef ARDUINO_ARCH_ESP32
     esp_task_wdt_reset ();
 #else
@@ -461,4 +447,19 @@ void loop()
         ESP.wdtFeed ();
 #endif // def ARDUINO_ARCH_ESP32
     } // end discard loop
-}
+
+    // Reboot handler
+    if (reboot)
+    {
+        LOG_PORT.println ("Rebooting");
+        delay (REBOOT_DELAY);
+        ESP.restart ();
+    }
+
+    if (true == ResetWiFi)
+    {
+        ResetWiFi = false;
+        // WiFiMgr.reset ();
+    }
+
+} // loop
