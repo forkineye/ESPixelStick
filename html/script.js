@@ -168,7 +168,8 @@ function ProcessWindowChange(NextWindow) {
         RequestListOfFiles();
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
-        wsEnqueue(JSON.stringify({ 'cmd': { 'opt': 'device' } })); // Get device option data
+        wsEnqueue(JSON.stringify({ 'cmd': { 'opt': 'input' } })); // Get device option data
+        wsEnqueue(JSON.stringify({ 'cmd': { 'opt': 'output' } })); // Get device option data
     }
 
     RequestListOfFiles();
