@@ -242,7 +242,7 @@ void c_OutputGECE::Render()
 
     uint32_t packet = 0;
     uint32_t pTime  = 0;
-    uint8_t  NumOutputPixels = GetBufferSize () / GECE_NUM_INTENSITY_BYTES_PER_PIXEL;
+    uint8_t  NumOutputPixels = GetBufferUsedSize () / GECE_NUM_INTENSITY_BYTES_PER_PIXEL;
 
     // Build a GECE packet
     startTime = micros();

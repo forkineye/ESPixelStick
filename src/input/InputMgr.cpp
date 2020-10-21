@@ -104,7 +104,7 @@ void c_InputMgr::Begin (uint8_t* BufferStart, uint16_t BufferSize)
 
     InputDataBuffer     = BufferStart;
     InputDataBufferSize = BufferSize;
-    // DEBUG_V ("InputDataBufferSize: " + String (InputDataBufferSize));
+    // DEBUG_ ("InputDataBufferSize: " + String (InputDataBufferSize));
 
     // prevent recalls
     if (true == HasBeenInitialized) { return; }

@@ -834,7 +834,7 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
         }
 
         OutputBufferOffset += ChannelsToAllocate;
-        // DEBUG_V (String ("pOutputChannel->GetBufferSize: ") + String (pOutputChannel->GetBufferSize ()));
+        // DEBUG_V (String ("pOutputChannel->GetBufferUsedSize: ") + String (pOutputChannel->GetBufferUsedSize ()));
         // DEBUG_V (String ("OutputBufferOffset: ") + String(OutputBufferOffset));
     }
 

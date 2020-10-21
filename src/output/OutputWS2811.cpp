@@ -199,13 +199,13 @@ void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 {
     // DEBUG_START;
     // DEBUG_V ("NumChannelsAvailable: " + String(NumChannelsAvailable));
-    // DEBUG_V ("       GetBufferSize: " + String(GetBufferSize()));
+    // DEBUG_V ("       GetBufferUsedSize: " + String(GetBufferUsedSize()));
     // DEBUG_V ("         pixel_count: " + String(pixel_count));
 
     do // once
     {
         // are we changing size?
-        if (NumChannelsAvailable == GetBufferSize ())
+        if (NumChannelsAvailable == GetBufferUsedSize ())
         {
             // DEBUG_V ("NO Need to change the ISR buffer");
             break;
@@ -320,7 +320,7 @@ void c_OutputWS2811::Render()
     // set up pointers into the pixel data space
     uint8_t *pSourceData = OutputMgr.GetBufferAddress(); // source buffer (owned by base class)
     uint8_t *pTargetData = pIsrOutputBuffer;              // target buffer
-    uint16_t OutputPixelCount = GetBufferSize () / numIntensityBytesPerPixel;
+    uint16_t OutputPixelCount = GetBufferUsedSize () / numIntensityBytesPerPixel;
 
     // what type of copy are we making?
     if (!zig_size)
@@ -380,7 +380,7 @@ void c_OutputWS2811::Render()
 
     // set the intensity transmit buffer pointer and number of intensities to send
     pNextIntensityToSend    = pIsrOutputBuffer;
-    RemainingIntensityCount = GetBufferSize ();
+    RemainingIntensityCount = GetBufferUsedSize ();
     // DEBUG_V (String ("RemainingIntensityCount: ") + RemainingIntensityCount);
 
 #ifdef ARDUINO_ARCH_ESP8266
