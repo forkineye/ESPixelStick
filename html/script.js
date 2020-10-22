@@ -431,6 +431,28 @@ function updateFromJSON(obj)
     $('#device-id').text($('#config #id').val());
 }
 
+function GenerateInputOutputControlName(OptionListName, DisplayedChannelId)
+{
+    var NewName;
+
+    if (0 === DisplayedChannelId)
+    {
+        NewName = "Primary " + OptionListName + " ";
+    }
+
+    if (1 === DisplayedChannelId)
+    {
+        NewName = "Secondary " + OptionListName + " ";
+    }
+
+    if (3 === DisplayedChannelId)
+    {
+        NewName = "Tertiary " + OptionListName + " ";
+    }
+
+    return NewName;
+} // GenerateInputOutputControlName
+
 function ProcessReceivedOptionDataMessage(JsonOptionList)
 {
     // console.info("ProcessReceivedOptionDataMessage");
@@ -449,7 +471,7 @@ function ProcessReceivedOptionDataMessage(JsonOptionList)
             if (! $('#' + OptionListName + 'mode' + DisplayedChannelId).length)
             {
                 // create the selection box
-                $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + DisplayedChannelId + '">' + OptionListName + ' ' + DisplayedChannelId + ' Mode:</label>');
+                $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + DisplayedChannelId + '">' + GenerateInputOutputControlName(OptionListName, DisplayedChannelId) + ' Mode:</label>');
                 $('#fg_' + OptionListName).append('<div class="col-sm-2"><select class="form-control wsopt" id="' + OptionListName + DisplayedChannelId + '"></select></div>');
                 $('#fg_' + OptionListName + '_mode').append('<fieldset id="' + OptionListName + 'mode' + DisplayedChannelId + '"></fieldset>');
             }
