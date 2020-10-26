@@ -85,10 +85,11 @@ protected:
     uart_port_t UartId;      ///< Id of the UART used by this instance of the driver
     OTYPE_t     OutputType;  ///< Type to report for this driver
     OID_t       OutputChannelId;
-    bool        HasBeenInitialized = false;
-    time_t      FrameRefreshTimeMs = 0;
-    uint8_t   * pOutputBuffer      = nullptr;
-    uint16_t    OutputBufferSize   = 0;
+    bool        HasBeenInitialized         = false;
+    uint32_t    FrameRefreshTimeInMicroSec = 0;
+    uint32_t    FrameStartTimeInMicroSec   = 0;
+    uint8_t   * pOutputBuffer              = nullptr;
+    uint16_t    OutputBufferSize           = 0;
 
 #ifdef ARDUINO_ARCH_ESP8266
     void InitializeUart (uint32_t BaudRate, 

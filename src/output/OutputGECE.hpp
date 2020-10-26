@@ -54,13 +54,9 @@ private:
     uint8_t         pixel_count = 0;
     uint8_t         brightness  = 0;
 
-    // Internal variables
-    uint32_t        startTime        = 0;              ///< When the last frame TX started
-
-                                                       /* Drop the update if our refresh rate is too high */
     inline bool canRefresh() 
     {
-        return (micros() - startTime) >= FrameRefreshTimeMs;
+        return (micros() - FrameStartTimeInMicroSec) >= FrameRefreshTimeInMicroSec;
     }
 
     bool validate();

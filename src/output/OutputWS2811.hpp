@@ -81,10 +81,10 @@ private:
     uint8_t        *pIsrOutputBuffer = nullptr;         ///< Data ready to be sent to the UART
     uint8_t        *pNextIntensityToSend;               ///< start of output buffer being sent to the UART
     uint16_t        RemainingIntensityCount;            ///< Used by ISR to determine how much more data to send
-    time_t          startTime;                          ///< When the last frame TX started
     uint8_t         numIntensityBytesPerPixel = 3;      ///< number of bytes per pixel
     uint8_t         gamma_table[256] = { 0 };           ///< Gamma Adjustment table
     ColorOffsets_t  ColorOffsets;
+    uint16_t        InterFrameGapInMicroSec;
 
 #ifdef ARDUINO_ARCH_ESP8266
     /* Returns number of bytes waiting in the TX FIFO of UART1 */
@@ -105,10 +105,9 @@ private:
 
 #endif
 
-    /// Drop the update if our refresh rate is too high
     inline boolean canRefresh() 
     {
-        return (micros() - startTime) >= FrameRefreshTimeMs;
+        return (micros() - FrameStartTimeInMicroSec) >= FrameRefreshTimeInMicroSec;
     }
     
     void updateGammaTable(); ///< Generate gamma correction table

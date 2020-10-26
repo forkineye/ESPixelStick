@@ -51,12 +51,13 @@ c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds iOutputChannelId
                                 c_OutputMgr::e_OutputType outputType)
 {
 	// remember what channel we are
-	HasBeenInitialized = false;
-	OutputChannelId    = iOutputChannelId;
-	DataPin            = outputGpio;
-	UartId             = uart;
-    OutputType         = outputType;
-    pOutputBuffer      = OutputMgr.GetBufferAddress ();
+	HasBeenInitialized       = false;
+	OutputChannelId          = iOutputChannelId;
+	DataPin                  = outputGpio;
+	UartId                   = uart;
+    OutputType               = outputType;
+    pOutputBuffer            = OutputMgr.GetBufferAddress ();
+    FrameStartTimeInMicroSec = 0;
 
 	// LOG_PORT.println (String ("UartId:          '") + UartId + "'");
     // LOG_PORT.println (String ("OutputChannelId: '") + OutputChannelId + "'");
@@ -225,8 +226,8 @@ void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-#define MilliSecondsInAsecond 1000
-    jsonStatus["framerefreshrate"] = (0 == FrameRefreshTimeMs) ? 0 : int (MilliSecondsInAsecond / FrameRefreshTimeMs);
+#define MicroSecondsInAsecond 1000000
+    jsonStatus["framerefreshrate"] = (0 == FrameRefreshTimeInMicroSec) ? 0 : int (MicroSecondsInAsecond / FrameRefreshTimeInMicroSec);
 
     // DEBUG_END;
 } // GetStatus

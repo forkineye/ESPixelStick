@@ -18,12 +18,19 @@
             <input type="number" class="form-control is-valid" id="zig_size" step="1" min="0" max="680" value="0" required title="Zigzag every X number of physical pixels." onchange="refreshPixel()">
             <span class="glyphicon glyphicon-remove form-control-feedback"></span>
         </div>
+
+        <label class="control-label col-sm-2" for="interframetime">Inter Frame Time (us):</label>
+        <div class="col-sm-2">
+            <input type="number" class="form-control is-valid" id="interframetime" step="1" min="300" max="10000" value="300" required title="Number of Micro Seconds between each frame." onchange="refreshPixel()">
+            <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+        </div>
+
     </div>
 
     <div class="form-group">
         <label class="control-label col-sm-2" for="color_order">Color Order:</label>
         <div class="col-sm-2">
-            <select class="form-control" id="color_order">
+            <select class="form-control" id="color_order" onchange="refreshPixel()">
                 <option value="rgb">RGB</option>
                 <option value="grb">GRB</option>
                 <option value="brg">BRG</option>
@@ -127,15 +134,16 @@
     function refreshPixel()
     {
         // var NumberOfPixels       = parseInt($('#pixel_count').val());
-        // var BytesPerPixel        = 3;
+        // var BytesPerPixel = $('#color_order option:selected').val().length;
+        // console.info("BytesPerPixel: " + BytesPerPixel);
         // var NumberOfBytesInFrame = NumberOfPixels * BytesPerPixel;
         // var PixelBaudRate        = 800000;
         // var TimePerBit           = 1 / PixelBaudRate;
         // var BitsPerByte          = 8;
-        // var TimePerByte          = TimePerBit * BitsPerByte;
-        // var InterFrameGap        = 0.0004;
+        // var TimePerByte          = TimePerBit * BitsPerByte; = 0.00001
+        // var InterFrameGap        = parseInt($('#interframetime').val()) / 1000000;
         // var TimePerFrame         = (TimePerByte * NumberOfBytesInFrame) + InterFrameGap;
-        var TimePerFrame            = (0.00001 * (parseInt($('#pixel_count').val()) * 3)) + 0.0004;
+        var TimePerFrame = (0.00001 * (parseInt($('#pixel_count').val()) * $('#color_order option:selected').val().length)) + (parseInt($('#interframetime').val()) / 1000000);
 
         var rateMs = TimePerFrame * 1000;
         var hz = 1 / TimePerFrame;

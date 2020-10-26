@@ -131,7 +131,7 @@ void c_OutputGECE::Begin()
 
     if (gpio_num_t (-1) == DataPin) { return; }
 
-    FrameRefreshTimeMs = (GECE_FRAME_TIME + GECE_IDLE_TIME) * pixel_count;
+    FrameRefreshTimeInMicroSec = (GECE_FRAME_TIME + GECE_IDLE_TIME) * pixel_count;
     SetOutputBufferSize (pixel_count * GECE_NUM_CHAN_PER_PIXEL);
 
     // Serial rate is 3x 100KHz for GECE
@@ -245,7 +245,7 @@ void c_OutputGECE::Render()
     uint8_t  NumOutputPixels = GetBufferUsedSize () / GECE_NUM_INTENSITY_BYTES_PER_PIXEL;
 
     // Build a GECE packet
-    startTime = micros();
+    FrameStartTimeInMicroSec = micros();
     uint8_t * pCurrentInputData = GetBufferAddress();
     
     for (uint8_t CurrentAddress = 0; CurrentAddress < NumOutputPixels; ++CurrentAddress)

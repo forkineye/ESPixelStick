@@ -46,11 +46,9 @@ extern "C" {
 #   define UART_INV_MASK  (0x3f << 19)
 #endif // ndef UART_INV_MASK
 
-#define WS2811_TIME_PER_INTENSITY 10L
-// #define WS2811_TIME_PER_PIXEL   30L     ///< 30us frame time
-#define WS2811_MIN_IDLE_TIME    300L    ///< 300us idle time
+#define WS2811_MICRO_SEC_PER_INTENSITY  10L     // ((1/800000) * 8 bits) = 10us
+#define WS2811_MIN_IDLE_TIME            300L    ///< 300us idle time
 
-// Depricated: Set TX FIFO trigger. 80 bytes gives 200 microsecs to refill the FIFO
 // TX FIFO trigger level. 40 bytes gives 100us before the FIFO goes empty
 // We need to fill the FIFO at a rate faster than 0.3us per byte (1.2us/pixel)
 #define PIXEL_FIFO_TRIGGER_LEVEL (40)
@@ -84,8 +82,8 @@ c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     brightness (1.0),
     pNextIntensityToSend (nullptr),
     RemainingIntensityCount (0),
-    startTime (0),
-    numIntensityBytesPerPixel(3)
+    numIntensityBytesPerPixel(3),
+    InterFrameGapInMicroSec(WS2811_MIN_IDLE_TIME)
 {
     // DEBUG_START;
     ColorOffsets.offset.r = 0;
@@ -182,14 +180,15 @@ void c_OutputWS2811::GetConfig(ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
-    jsonConfig[F ("color_order")] = color_order;
-    jsonConfig[F ("pixel_count")] = pixel_count;
-    jsonConfig[F ("group_size")]  = group_size;
-    jsonConfig[F ("zig_size")]    = zig_size;
-    jsonConfig[F ("gamma")]       = gamma;
-    jsonConfig[F ("brightness")]  = brightness;
+    jsonConfig[F ("color_order")]    = color_order;
+    jsonConfig[F ("pixel_count")]    = pixel_count;
+    jsonConfig[F ("group_size")]     = group_size;
+    jsonConfig[F ("zig_size")]       = zig_size;
+    jsonConfig[F ("gamma")]          = gamma;
+    jsonConfig[F ("brightness")]     = brightness;
+    jsonConfig[F ("interframetime")] = InterFrameGapInMicroSec;
     // enums need to be converted to uints for json
-    jsonConfig[F ("data_pin")]    = uint (DataPin);
+    jsonConfig[F ("data_pin")]       = uint (DataPin);
 
     // DEBUG_END;
 } // GetConfig
@@ -239,7 +238,7 @@ void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
             // DEBUG_V ("malloc failed");
             LOG_PORT.println ("ERROR: WS2811 driver failed to allocate an IsrOutputBuffer. Shutting down output.");
             c_OutputCommon::SetOutputBufferSize ((uint16_t)0);
-            FrameRefreshTimeMs = WS2811_MIN_IDLE_TIME;
+            FrameRefreshTimeInMicroSec = InterFrameGapInMicroSec;
             break;
         }
 
@@ -247,7 +246,7 @@ void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 
         memset (pIsrOutputBuffer, 0x0, NumChannelsAvailable);
         // Calculate our refresh time
-        FrameRefreshTimeMs = (WS2811_TIME_PER_INTENSITY * NumChannelsAvailable) + WS2811_MIN_IDLE_TIME;
+        FrameRefreshTimeInMicroSec = (WS2811_MICRO_SEC_PER_INTENSITY * NumChannelsAvailable) + InterFrameGapInMicroSec;
 
     } while (false);
     
@@ -389,7 +388,7 @@ void c_OutputWS2811::Render()
 //     (*((volatile uint32_t*)(UART_FIFO_AHB_REG (UART_NUM_0)))) = (uint32_t)('7');
     ESP_ERROR_CHECK (uart_enable_tx_intr (UartId, 1, PIXEL_FIFO_TRIGGER_LEVEL));
 #endif
-    startTime = micros();
+    FrameStartTimeInMicroSec = micros();
 
     // DEBUG_END;
 
@@ -407,17 +406,19 @@ void c_OutputWS2811::Render()
 bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
-    uint temp;
-    FileIO::setFromJSON (color_order, jsonConfig[F ("color_order")]);
-    FileIO::setFromJSON (pixel_count, jsonConfig[F ("pixel_count")]);
-    FileIO::setFromJSON (group_size,  jsonConfig[F ("group_size")]);
-    FileIO::setFromJSON (zig_size,    jsonConfig[F ("zig_size")]);
-    FileIO::setFromJSON (gamma,       jsonConfig[F ("gamma")]);
-    FileIO::setFromJSON (brightness,  jsonConfig[F ("brightness")]);
+
     // enums need to be converted to uints for json
-    temp = uint (DataPin);
-    FileIO::setFromJSON (temp,        jsonConfig[F ("data_pin")]);
-    DataPin = gpio_num_t (temp);
+    uint tempDataPin = uint (DataPin);
+
+    FileIO::setFromJSON (color_order,             jsonConfig[F ("color_order")]);
+    FileIO::setFromJSON (pixel_count,             jsonConfig[F ("pixel_count")]);
+    FileIO::setFromJSON (group_size,              jsonConfig[F ("group_size")]);
+    FileIO::setFromJSON (zig_size,                jsonConfig[F ("zig_size")]);
+    FileIO::setFromJSON (gamma,                   jsonConfig[F ("gamma")]);
+    FileIO::setFromJSON (brightness,              jsonConfig[F ("brightness")]);
+    FileIO::setFromJSON (InterFrameGapInMicroSec, jsonConfig[F ("interframetime")]);
+    FileIO::setFromJSON (tempDataPin,             jsonConfig[F ("data_pin")]);
+    DataPin = gpio_num_t (tempDataPin);
 
     // DEBUG_END;
     return validate ();
