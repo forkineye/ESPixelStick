@@ -60,7 +60,6 @@ extern const String BUILD_DATE;
 typedef struct {
     // Device
     String      id;         ///< Device ID
-    String      input;      ///< Device Input Mode, selectable at runtime
 
     // Network
     String      ssid;
