@@ -155,9 +155,6 @@ void c_WebMgr::init ()
             FPPDiscovery.ProcessFPPJson(request);
         });
 
-    // Root access for testing
-    webServer.serveStatic ("/root", SPIFFS, "/");
-
     // Static Handler
     webServer.serveStatic ("/", SPIFFS, "/www/").setDefaultFile ("index.html");
 
@@ -202,9 +199,6 @@ void c_WebMgr::init ()
             request->send (404, "text/plain", "Page Not found");
         }
     );
-
-    // Raw config file Handler - but only on station
-    //  webServer.serveStatic("/config.json", SPIFFS, "/config.json").setFilter(ON_STA_FILTER);
 
     webServer.onNotFound ([this](AsyncWebServerRequest* request)
     {
