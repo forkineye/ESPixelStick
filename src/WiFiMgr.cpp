@@ -31,7 +31,11 @@
 //-----------------------------------------------------------------------------
 // Create secrets.h with a #define for SECRETS_SSID and SECRETS_PASS
 // or delete the #include and enter the strings directly below.
-#include "secrets.h"
+// #include "secrets.h"
+#ifndef SECRETS_SSID
+#   define SECRETS_SSID "SSID_NOT_SET"
+#   define SECRETS_PASS "PASSPHRASE_NOT_SET"
+#endif // ndef SECRETS_SSID
 
 /* Fallback configuration if config->json is empty or fails */
 const char ssid[]       = SECRETS_SSID;
@@ -307,24 +311,28 @@ int c_WiFiMgr::ValidateConfig (config_t* NewConfig)
     if (!NewConfig->ssid.length ())
     {
         NewConfig->ssid = ssid;
+        // DEBUG_V ();
         response++;
     }
 
     if (!NewConfig->passphrase.length ())
     {
         NewConfig->passphrase = passphrase;
+        // DEBUG_V ();
         response++;
     }
 
     if (NewConfig->sta_timeout < 5)
     {
         NewConfig->sta_timeout = CLIENT_TIMEOUT;
+        // DEBUG_V ();
         response++;
     }
 
     if (NewConfig->ap_timeout < 15)
     {
         NewConfig->ap_timeout = AP_TIMEOUT;
+        // DEBUG_V ();
         response++;
     }
 
