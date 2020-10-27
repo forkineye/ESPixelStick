@@ -87,7 +87,7 @@ const String BUILD_DATE = String(__DATE__);
 config_t            config;                 // Current configuration
 bool                reboot = false;         // Reboot flag
 uint32_t            lastUpdate;             // Update timeout tracker
-int                 ConfigSaveNeeded = 0;
+uint32_t            ConfigSaveNeeded = 0;
 bool                ResetWiFi = false;
 
 /////////////////////////////////////////////////////////
@@ -184,12 +184,14 @@ void validateConfig()
     if (!config.id.length ())
     {
         config.id = "No ID Found";
+        // DEBUG_V ();
         ConfigSaveNeeded++;
     }
 
     if (!config.hostname.length ())
     {
         config.hostname = "esps-" + String (chipId);
+        // DEBUG_V ();
         ConfigSaveNeeded++;
     }
 
@@ -206,8 +208,8 @@ boolean dsDevice(JsonObject & json)
     boolean retval = false;
     if (json.containsKey("device"))
     {
-        retval = retval | FileIO::setFromJSON(config.id,     json[F("device")][F("id")]);
-        retval = retval | FileIO::setFromJSON(config.input,  json[F("device")][F("input")]);
+        retval = retval | FileIO::setFromJSON (config.id,        json[F ("device")][F ("id")]);
+                          FileIO::setFromJSON (ConfigSaveNeeded, json[F ("device")][F ("ConfigSaveNeeded")]);
     }
     else 
     {
@@ -275,6 +277,7 @@ void SetConfig (JsonObject& json)
 {
     // DEBUG_START;
     reboot = deserializeCore (json);
+    // DEBUG_V ();
     ConfigSaveNeeded = 1;
     // DEBUG_END;
 
@@ -332,7 +335,6 @@ void GetConfig (JsonObject & json)
     // Device
     JsonObject device = json.createNestedObject(F("device"));
     device["id"]           = config.id;
-    device["input"]        = config.input;
 
     // Network
     JsonObject network = json.createNestedObject(F("network"));
@@ -399,6 +401,7 @@ void SaveConfig()
     // Save Config
     String DataToSave = serializeCore (false);
     // DEBUG_V ("ConfigFileName: " + ConfigFileName);
+    // DEBUG_V ("DataToSave: " + DataToSave);
     FileIO::SaveConfig(ConfigFileName, DataToSave);
 
     // DEBUG_END;
