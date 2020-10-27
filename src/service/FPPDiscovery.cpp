@@ -704,7 +704,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                     File file = SD.open (seq);
                     if (file.size () > 0)
                     {
-                        // found the file.... return metadata as json
+                        // found the file. return metadata as json
                         String resp = "";
                         BuildFseqResponse (seq, file, resp);
                         file.close ();
@@ -1042,6 +1042,12 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
             break;
         }
 
+        if ((String("...") == filename) || (0 == filename.length()))
+        {
+            // DEBUG_V("ignore the not playing a file indicator");
+            break;
+        }
+
         fseqFile = SD.open (String ("/") + filename);
 
         if (fseqFile.size () < 1)
@@ -1078,7 +1084,7 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
         TotalNumberOfFramesInSequence = fsqHeader.TotalNumberOfFramesInSequence;
         fseqStartMillis               = millis () - (frameStepTime * frameId);
 
-        LOG_PORT.println (String (F ("FPPDiscovery::StartPlaying:: Playing:  ")) + filename );
+        LOG_PORT.println (String (F ("FPPDiscovery::StartPlaying:: Playing:  '")) + filename + "'" );
 
     } while (false);
 
@@ -1091,7 +1097,10 @@ void c_FPPDiscovery::StopPlaying ()
 {
     // DEBUG_START;
 
-    LOG_PORT.println (String (F ("FPPDiscovery::StartPlaying:: Playing:  ")) + fseqName);
+    if (0 != fseqName.length ())
+    {
+        LOG_PORT.println (String (F ("FPPDiscovery::StopPlaying '")) + fseqName + "'");
+    }
 
     isRemoteRunning = false;
 
