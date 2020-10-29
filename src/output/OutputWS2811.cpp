@@ -46,10 +46,9 @@ extern "C" {
 #   define UART_INV_MASK  (0x3f << 19)
 #endif // ndef UART_INV_MASK
 
-#define WS2811_TIME_PER_PIXEL   30L     ///< 30us frame time
-#define WS2811_MIN_IDLE_TIME    300L    ///< 300us idle time
+#define WS2811_MICRO_SEC_PER_INTENSITY  10L     // ((1/800000) * 8 bits) = 10us
+#define WS2811_MIN_IDLE_TIME            300L    ///< 300us idle time
 
-// Depricated: Set TX FIFO trigger. 80 bytes gives 200 microsecs to refill the FIFO
 // TX FIFO trigger level. 40 bytes gives 100us before the FIFO goes empty
 // We need to fill the FIFO at a rate faster than 0.3us per byte (1.2us/pixel)
 #define PIXEL_FIFO_TRIGGER_LEVEL (40)
@@ -70,25 +69,27 @@ char Convert2BitIntensityToUartDataStream[] =
 static void IRAM_ATTR uart_intr_handler (void* param);
 
 //----------------------------------------------------------------------------
-c_OutputWS2811::c_OutputWS2811(c_OutputMgr::e_OutputChannelIds OutputChannelId, 
-                               gpio_num_t outputGpio, 
-                               uart_port_t uart,
-                               c_OutputMgr::e_OutputType outputType) :
-    c_OutputCommon(OutputChannelId, outputGpio, uart, outputType),
+c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+    gpio_num_t outputGpio,
+    uart_port_t uart,
+    c_OutputMgr::e_OutputType outputType) :
+    c_OutputCommon (OutputChannelId, outputGpio, uart, outputType),
     color_order ("rgb"),
-    pixel_count (170),
+    pixel_count (100),
     zig_size (0),
     group_size (1),
     gamma (1.0),
     brightness (1.0),
     pNextIntensityToSend (nullptr),
     RemainingIntensityCount (0),
-    startTime (0),
-    rOffset (0),
-    gOffset (1),
-    bOffset (2)
+    numIntensityBytesPerPixel(3),
+    InterFrameGapInMicroSec(WS2811_MIN_IDLE_TIME)
 {
     // DEBUG_START;
+    ColorOffsets.offset.r = 0;
+    ColorOffsets.offset.g = 1;
+    ColorOffsets.offset.b = 2;
+    ColorOffsets.offset.w = 3;
     // DEBUG_END;
 } // c_OutputWS2811
 
@@ -161,17 +162,6 @@ void c_OutputWS2811::Begin()
     InitializeUart (uart_config, PIXEL_FIFO_TRIGGER_LEVEL);
 #endif
 
-    // Setup Output Buffer
-    memset (IsrOutputBuffer, 0x0, sizeof (IsrOutputBuffer));
-
-    pixel_count = 100;
-
-    // Setup common Output Buffer
-    SetOutputBufferSize (pixel_count * WS2812_NUM_INTENSITY_BYTES_PER_PIXEL);
-
-    // Calculate our refresh time
-    FrameRefreshTimeMs = (WS2811_TIME_PER_PIXEL * pixel_count) + WS2811_MIN_IDLE_TIME;
-
     // Atttach interrupt handler
 #ifdef ARDUINO_ARCH_ESP8266
     ETS_UART_INTR_ATTACH (uart_intr_handler, this);
@@ -190,17 +180,78 @@ void c_OutputWS2811::GetConfig(ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
-    jsonConfig[F ("color_order")] = color_order;
-    jsonConfig[F ("pixel_count")] = pixel_count;
-    jsonConfig[F ("group_size")]  = group_size;
-    jsonConfig[F ("zig_size")]    = zig_size;
-    jsonConfig[F ("gamma")]       = gamma;
-    jsonConfig[F ("brightness")]  = brightness;
+    jsonConfig[F ("color_order")]    = color_order;
+    jsonConfig[F ("pixel_count")]    = pixel_count;
+    jsonConfig[F ("group_size")]     = group_size;
+    jsonConfig[F ("zig_size")]       = zig_size;
+    jsonConfig[F ("gamma")]          = gamma;
+    jsonConfig[F ("brightness")]     = brightness;
+    jsonConfig[F ("interframetime")] = InterFrameGapInMicroSec;
     // enums need to be converted to uints for json
-    jsonConfig[F ("data_pin")]    = uint (DataPin);
+    jsonConfig[F ("data_pin")]       = uint (DataPin);
 
     // DEBUG_END;
 } // GetConfig
+
+//----------------------------------------------------------------------------
+void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+{
+    // DEBUG_START;
+    // DEBUG_V ("NumChannelsAvailable: " + String(NumChannelsAvailable));
+    // DEBUG_V ("       GetBufferUsedSize: " + String(GetBufferUsedSize()));
+    // DEBUG_V ("         pixel_count: " + String(pixel_count));
+
+    do // once
+    {
+        // are we changing size?
+        if (NumChannelsAvailable == GetBufferUsedSize ())
+        {
+            // DEBUG_V ("NO Need to change the ISR buffer");
+            break;
+        }
+
+        // DEBUG_V ("Need to change the ISR buffer");
+
+        // Stop current output operation
+#ifdef ARDUINO_ARCH_ESP8266
+        CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
+#else
+        ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
+#endif
+        c_OutputCommon::SetOutputBufferSize (NumChannelsAvailable);
+
+        if (nullptr != pIsrOutputBuffer)
+        {
+            // DEBUG_V ("Free ISR Buffer");
+            free (pIsrOutputBuffer);
+            pIsrOutputBuffer = nullptr;
+        }
+
+        if (0 == NumChannelsAvailable)
+        {
+            // DEBUG_V ("Dont need an ISR Buffer");
+            break;
+        }
+
+        if (nullptr == (pIsrOutputBuffer = (uint8_t*)malloc (NumChannelsAvailable)))
+        {
+            // DEBUG_V ("malloc failed");
+            LOG_PORT.println ("ERROR: WS2811 driver failed to allocate an IsrOutputBuffer. Shutting down output.");
+            c_OutputCommon::SetOutputBufferSize ((uint16_t)0);
+            FrameRefreshTimeInMicroSec = InterFrameGapInMicroSec;
+            break;
+        }
+
+        // DEBUG_V ("malloc ok");
+
+        memset (pIsrOutputBuffer, 0x0, NumChannelsAvailable);
+        // Calculate our refresh time
+        FrameRefreshTimeInMicroSec = (WS2811_MICRO_SEC_PER_INTENSITY * NumChannelsAvailable) + InterFrameGapInMicroSec;
+
+    } while (false);
+    
+    // DEBUG_END;
+} // SetBufferSize
 
 //----------------------------------------------------------------------------
 /* 
@@ -263,10 +314,12 @@ void c_OutputWS2811::Render()
     if (gpio_num_t (-1) == DataPin) { return; }
     if (!canRefresh ()) { return; }
     if (0 != RemainingIntensityCount) { return; }
+    if (nullptr == pIsrOutputBuffer) { return; }
 
     // set up pointers into the pixel data space
     uint8_t *pSourceData = OutputMgr.GetBufferAddress(); // source buffer (owned by base class)
-    uint8_t *pTargetData = IsrOutputBuffer;              // target buffer
+    uint8_t *pTargetData = pIsrOutputBuffer;              // target buffer
+    uint16_t OutputPixelCount = GetBufferUsedSize () / numIntensityBytesPerPixel;
 
     // what type of copy are we making?
     if (!zig_size)
@@ -275,7 +328,7 @@ void c_OutputWS2811::Render()
 
         // for each destination pixel
         for (size_t CurrentDestinationPixelIndex = 0;
-            CurrentDestinationPixelIndex < pixel_count;
+            CurrentDestinationPixelIndex < OutputPixelCount;
             CurrentDestinationPixelIndex++)
         {
             // for each output pixel in the group (minimum of 1)
@@ -284,13 +337,14 @@ void c_OutputWS2811::Render()
                 ++CurrentGroupIndex, ++CurrentDestinationPixelIndex)
             {
                 // write data to the output buffer
-                *pTargetData++ = gamma_table[pSourceData[rOffset]];
-                *pTargetData++ = gamma_table[pSourceData[gOffset]];
-                *pTargetData++ = gamma_table[pSourceData[bOffset]];
+                for (int colorOffsetId = 0; colorOffsetId < numIntensityBytesPerPixel; ++colorOffsetId)
+                {
+                    *pTargetData++ = gamma_table[pSourceData[ColorOffsets.Array[colorOffsetId]]];
+                }
             } // End for each intensity in current input pixel
 
             // point at the next pixel in the input buffer
-            pSourceData += WS2812_NUM_INTENSITY_BYTES_PER_PIXEL;
+            pSourceData += numIntensityBytesPerPixel;
 
         } // end for each pixel in the output buffer
     } // end normal copy
@@ -298,33 +352,34 @@ void c_OutputWS2811::Render()
     {
         // Zigzag copy
         for (size_t CurrentDestinationPixelIndex = 0;
-            CurrentDestinationPixelIndex < pixel_count;
+            CurrentDestinationPixelIndex < OutputPixelCount;
             CurrentDestinationPixelIndex++)
         {
             if (CurrentDestinationPixelIndex / zig_size % 2)
             {
                 // Odd "zig"
                 int group = zig_size * (CurrentDestinationPixelIndex / zig_size);
-                pSourceData = OutputMgr.GetBufferAddress () + (WS2812_NUM_INTENSITY_BYTES_PER_PIXEL * ((group + zig_size - (CurrentDestinationPixelIndex % zig_size) - 1) / group_size));
+                pSourceData = OutputMgr.GetBufferAddress () + (numIntensityBytesPerPixel * ((group + zig_size - (CurrentDestinationPixelIndex % zig_size) - 1) / group_size));
             } // end zig
             else
             {
                 // Even "zag"
-                pSourceData = OutputMgr.GetBufferAddress () + (WS2812_NUM_INTENSITY_BYTES_PER_PIXEL * (CurrentDestinationPixelIndex / group_size));
+                pSourceData = OutputMgr.GetBufferAddress () + (numIntensityBytesPerPixel * (CurrentDestinationPixelIndex / group_size));
             } // end zag
 
             // now that we have decided on a data source, copy one 
             // pixels worth of data
-            *pTargetData++ = gamma_table[pSourceData[rOffset]];
-            *pTargetData++ = gamma_table[pSourceData[gOffset]];
-            *pTargetData++ = gamma_table[pSourceData[bOffset]];
-
+                // write data to the output buffer
+            for (int colorOffsetId = 0; colorOffsetId < numIntensityBytesPerPixel; ++colorOffsetId)
+            {
+                *pTargetData++ = gamma_table[pSourceData[ColorOffsets.Array[colorOffsetId]]];
+            }
         } // end for each pixel in the output buffer
     } // end zig zag copy
 
     // set the intensity transmit buffer pointer and number of intensities to send
-    pNextIntensityToSend    = IsrOutputBuffer;
-    RemainingIntensityCount = GetBufferSize ();
+    pNextIntensityToSend    = pIsrOutputBuffer;
+    RemainingIntensityCount = GetBufferUsedSize ();
     // DEBUG_V (String ("RemainingIntensityCount: ") + RemainingIntensityCount);
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -333,7 +388,7 @@ void c_OutputWS2811::Render()
 //     (*((volatile uint32_t*)(UART_FIFO_AHB_REG (UART_NUM_0)))) = (uint32_t)('7');
     ESP_ERROR_CHECK (uart_enable_tx_intr (UartId, 1, PIXEL_FIFO_TRIGGER_LEVEL));
 #endif
-    startTime = micros();
+    FrameStartTimeInMicroSec = micros();
 
     // DEBUG_END;
 
@@ -351,17 +406,19 @@ void c_OutputWS2811::Render()
 bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
-    uint temp;
-    FileIO::setFromJSON (color_order, jsonConfig[F ("color_order")]);
-    FileIO::setFromJSON (pixel_count, jsonConfig[F ("pixel_count")]);
-    FileIO::setFromJSON (group_size,  jsonConfig[F ("group_size")]);
-    FileIO::setFromJSON (zig_size,    jsonConfig[F ("zig_size")]);
-    FileIO::setFromJSON (gamma,       jsonConfig[F ("gamma")]);
-    FileIO::setFromJSON (brightness,  jsonConfig[F ("brightness")]);
+
     // enums need to be converted to uints for json
-    temp = uint (DataPin);
-    FileIO::setFromJSON (temp,        jsonConfig[F ("data_pin")]);
-    DataPin = gpio_num_t (temp);
+    uint tempDataPin = uint (DataPin);
+
+    FileIO::setFromJSON (color_order,             jsonConfig[F ("color_order")]);
+    FileIO::setFromJSON (pixel_count,             jsonConfig[F ("pixel_count")]);
+    FileIO::setFromJSON (group_size,              jsonConfig[F ("group_size")]);
+    FileIO::setFromJSON (zig_size,                jsonConfig[F ("zig_size")]);
+    FileIO::setFromJSON (gamma,                   jsonConfig[F ("gamma")]);
+    FileIO::setFromJSON (brightness,              jsonConfig[F ("brightness")]);
+    FileIO::setFromJSON (InterFrameGapInMicroSec, jsonConfig[F ("interframetime")]);
+    FileIO::setFromJSON (tempDataPin,             jsonConfig[F ("data_pin")]);
+    DataPin = gpio_num_t (tempDataPin);
 
     // DEBUG_END;
     return validate ();
@@ -380,25 +437,35 @@ void c_OutputWS2811::updateGammaTable ()
 } // updateGammaTable
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811::updateColorOrder ()
+void c_OutputWS2811::updateColorOrderOffsets ()
 {
     // DEBUG_START;
     // make sure the color order is all lower case
     color_order.toLowerCase ();
 
-         if (String (F ("grb")) == color_order) { rOffset = 1; gOffset = 0; bOffset = 2; }
-    else if (String (F ("brg")) == color_order) { rOffset = 1; gOffset = 2; bOffset = 0; }
-    else if (String (F ("rbg")) == color_order) { rOffset = 0; gOffset = 2; bOffset = 1; }
-    else if (String (F ("gbr")) == color_order) { rOffset = 2; gOffset = 0; bOffset = 1; }
-    else if (String (F ("bgr")) == color_order) { rOffset = 2; gOffset = 1; bOffset = 0; }
+         if (String (F ("rgbw")) == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
+    else if (String (F ("grbw")) == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
+    else if (String (F ("brgw")) == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
+    else if (String (F ("rbgw")) == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
+    else if (String (F ("gbrw")) == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
+    else if (String (F ("bgrw")) == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
+    else if (String (F ("grb"))  == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
+    else if (String (F ("brg"))  == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
+    else if (String (F ("rbg"))  == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
+    else if (String (F ("gbr"))  == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
+    else if (String (F ("bgr"))  == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
     else
     {
         color_order = F ("rgb");
-        rOffset = 0; gOffset = 1; bOffset = 2;
+        ColorOffsets.offset.r = 0;
+        ColorOffsets.offset.g = 1;
+        ColorOffsets.offset.b = 2;
+        ColorOffsets.offset.w = 3;
+        numIntensityBytesPerPixel = 3;
     } // default
 
     // DEBUG_END;
-} // updateColorOrder
+} // updateColorOrderOffsets
  
 //----------------------------------------------------------------------------
 /*
@@ -415,10 +482,10 @@ bool c_OutputWS2811::validate ()
     // DEBUG_START;
     bool response = true;
 
-    if (pixel_count > WS2812_PIXEL_LIMIT)
+    if (pixel_count > WS2812_MAX_NUM_PIXELS)
     {
         // LOG_PORT.println (String (F ("*** Requested pixel count was too high. Setting to ")) + PIXEL_LIMIT + F(" ***"));
-        pixel_count = WS2812_PIXEL_LIMIT;
+        pixel_count = WS2812_MAX_NUM_PIXELS;
         response = false;
     }
     else if (pixel_count < 1)
@@ -426,7 +493,6 @@ bool c_OutputWS2811::validate ()
         pixel_count = 170;
         response = false;
     }
-    SetOutputBufferSize (pixel_count * WS2812_NUM_INTENSITY_BYTES_PER_PIXEL);
 
     if (group_size > pixel_count)
     {
@@ -466,10 +532,7 @@ bool c_OutputWS2811::validate ()
     }
 
     updateGammaTable ();
-    updateColorOrder ();
-
-    // Calculate our refresh time
-    FrameRefreshTimeMs = (WS2811_TIME_PER_PIXEL * pixel_count) + WS2811_MIN_IDLE_TIME;
+    updateColorOrderOffsets ();
 
     // DEBUG_END;
     return response;

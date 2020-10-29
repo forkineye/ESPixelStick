@@ -31,7 +31,11 @@
 //-----------------------------------------------------------------------------
 // Create secrets.h with a #define for SECRETS_SSID and SECRETS_PASS
 // or delete the #include and enter the strings directly below.
-#include "secrets.h"
+// #include "secrets.h"
+#ifndef SECRETS_SSID
+#   define SECRETS_SSID "SSID_NOT_SET"
+#   define SECRETS_PASS "PASSPHRASE_NOT_SET"
+#endif // ndef SECRETS_SSID
 
 /* Fallback configuration if config->json is empty or fails */
 const char ssid[]       = SECRETS_SSID;
@@ -214,28 +218,57 @@ void c_WiFiMgr::connectWifi ()
     LOG_PORT.println (config->hostname);
 
     WiFi.begin (config->ssid.c_str (), config->passphrase.c_str ());
-    if (config->UseDhcp)
-    {
-        LOG_PORT.print (F ("Connecting with DHCP"));
-    }
-    else
-    {
-        // We don't use DNS, so just set it to our gateway
-        if (!config->ip.isEmpty ())
-        {
-            IPAddress ip      = ip.fromString (config->ip);
-            IPAddress gateway = gateway.fromString (config->gateway);
-            IPAddress netmask = netmask.fromString (config->netmask);
-            WiFi.config (ip, gateway, netmask, gateway);
-            LOG_PORT.print (F ("Connecting with Static IP"));
-        }
-        else
-        {
-            LOG_PORT.println (F ("** ERROR - STATIC SELECTED WITHOUT IP. Using DHCP **"));
-            config->UseDhcp = true;
-        }
-    }
 } // connectWifi
+
+//-----------------------------------------------------------------------------
+void c_WiFiMgr::reset ()
+{
+    initWifi ();
+} // reset
+
+//-----------------------------------------------------------------------------
+void c_WiFiMgr::SetUpIp ()
+{
+    // DEBUG_START;
+
+    do // once
+    {
+        if (true == config->UseDhcp)
+        {
+            LOG_PORT.println (F ("Connected with DHCP"));
+            break;
+        }
+
+        IPAddress temp = (uint32_t)0;
+        // DEBUG_V ("   temp: " + temp.toString ());
+        // DEBUG_V ("     ip: " + config->ip.toString());
+        // DEBUG_V ("netmask: " + config->netmask.toString ());
+        // DEBUG_V ("gateway: " + config->gateway.toString ());
+
+        if (temp == config->ip)
+        {
+            LOG_PORT.println (F ("** ERROR - STATIC SELECTED WITHOUT IP. Using DHCP assigned address **"));
+            config->UseDhcp = true;
+            break;
+        }
+
+        if ((config->ip      == WiFi.localIP ())    && 
+            (config->netmask == WiFi.subnetMask ()) && 
+            (config->gateway == WiFi.gatewayIP ()))
+        {
+            // correct IP is already set
+            break;
+        }
+        // We don't use DNS, so just set it to our gateway
+        WiFi.config (config->ip, config->gateway, config->netmask, config->gateway);
+
+        LOG_PORT.println (F ("Connected with Static IP"));
+
+    } while (false);
+
+    // DEBUG_END;
+
+} // SetUpIp
 
 //-----------------------------------------------------------------------------
 #ifdef ARDUINO_ARCH_ESP8266
@@ -245,38 +278,16 @@ void c_WiFiMgr::onWiFiConnect (const WiFiEventStationModeGotIP& event)
 void c_WiFiMgr::onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t info)
 {
 #endif
+    // DEBUG_START;
+
+    SetUpIp ();
+
     CurrentIpAddress  = WiFi.localIP ();
     CurrentSubnetMask = WiFi.subnetMask ();
     LOG_PORT.println (String(F("\nConnected with IP: ")) + CurrentIpAddress.toString ());
-    
-    // Call MQTT setup function
 
-    // Remove stuff below.
-
-    // Setup mDNS / DNS-SD
-    //TODO: Reboot or restart mdns when config->id is changed?
-/*
-#ifdef ARDUINO_ARCH_ESP8266
-    String chipId = String (ESP.getChipId (), HEX);
-#else
-    String chipId = int64String (ESP.getEfuseMac (), HEX);
-#endif
-    MDNS.setInstanceName(String(config->id + " (" + chipId + ")").c_str());
-    if (MDNS.begin(config->hostname.c_str())) {
-        MDNS.addService("http", "tcp", HTTP_PORT);
-//        MDNS.addService("ddp", "udp", DDP_PORT);
-        MDNS.addService("e131", "udp", E131_DEFAULT_PORT);
-        MDNS.addServiceTxt("e131", "udp", "TxtVers", String(RDMNET_DNSSD_TXTVERS));
-        MDNS.addServiceTxt("e131", "udp", "ConfScope", RDMNET_DEFAULT_SCOPE);
-        MDNS.addServiceTxt("e131", "udp", "E133Vers", String(RDMNET_DNSSD_E133VERS));
-        MDNS.addServiceTxt("e131", "udp", "CID", chipId);
-        MDNS.addServiceTxt("e131", "udp", "Model", "ESPixelStick");
-        MDNS.addServiceTxt("e131", "udp", "Manuf", "Forkineye");
-    } else {
-        LOG_PORT.println(F("*** Error setting up mDNS responder ***"));
-    }
-*/
-}
+    // DEBUG_END;
+} // onWiFiConnect
 
 //-----------------------------------------------------------------------------
 /// WiFi Disconnect Handler
@@ -300,24 +311,28 @@ int c_WiFiMgr::ValidateConfig (config_t* NewConfig)
     if (!NewConfig->ssid.length ())
     {
         NewConfig->ssid = ssid;
+        // DEBUG_V ();
         response++;
     }
 
     if (!NewConfig->passphrase.length ())
     {
         NewConfig->passphrase = passphrase;
+        // DEBUG_V ();
         response++;
     }
 
     if (NewConfig->sta_timeout < 5)
     {
         NewConfig->sta_timeout = CLIENT_TIMEOUT;
+        // DEBUG_V ();
         response++;
     }
 
     if (NewConfig->ap_timeout < 15)
     {
         NewConfig->ap_timeout = AP_TIMEOUT;
+        // DEBUG_V ();
         response++;
     }
 

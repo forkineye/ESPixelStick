@@ -104,6 +104,7 @@ void c_InputMgr::Begin (uint8_t* BufferStart, uint16_t BufferSize)
 
     InputDataBuffer     = BufferStart;
     InputDataBufferSize = BufferSize;
+    // DEBUG_ ("InputDataBufferSize: " + String (InputDataBufferSize));
 
     // prevent recalls
     if (true == HasBeenInitialized) { return; }
@@ -356,7 +357,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             // DEBUG_V ("");
         } // end there is an existing driver
 
-        // DEBUG_V ("");
+     // DEBUG_V ("InputDataBufferSize: " + String(InputDataBufferSize));
 
         switch (NewInputChannelType)
         {
@@ -490,7 +491,7 @@ void c_InputMgr::Process ()
         // DEBUG_V("");
     }
     // DEBUG_END;
-} // render
+} // Process
 
 //-----------------------------------------------------------------------------
 /*
@@ -507,6 +508,8 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
     boolean Response = false;
+
+    // DEBUG_V ("InputDataBufferSize: " + String (InputDataBufferSize));
 
     // keep a local copy of the config
     ConfigData.clear ();
@@ -601,6 +604,8 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
         CreateNewConfig ();
     }
 
+    // DEBUG_V ("InputDataBufferSize: " + String (InputDataBufferSize));
+
     // DEBUG_END;
     return Response;
 
@@ -670,28 +675,26 @@ bool c_InputMgr::SetConfig (JsonObject & jsonConfig)
 } // SetConfig
 
 //-----------------------------------------------------------------------------
-void c_InputMgr::SetBufferInfo (c_OutputMgr::e_OutputChannelIds outputChannelId, uint8_t* BufferStart, uint16_t BufferSize)
+void c_InputMgr::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
 {
     // DEBUG_START;
 
-    // only accept a buffer for channel 1. We are not multi output channel ready yet
-    if (c_OutputMgr::e_OutputChannelIds::OutputChannelId_1 == outputChannelId)
-    {
-        InputDataBuffer = BufferStart;
-        InputDataBufferSize = BufferSize;
+    InputDataBuffer = BufferStart;
+    InputDataBufferSize = BufferSize;
 
-        // pass through each active interface and set the buffer info
-                // for each Input channel
-        for (int ChannelIndex = int (InputChannelId_Start);
-            ChannelIndex < int (InputChannelId_End);
-            ChannelIndex++)
+    // DEBUG_V ("InputDataBufferSize: " + String (InputDataBufferSize));
+
+    // pass through each active interface and set the buffer info
+            // for each Input channel
+    for (int ChannelIndex = int (InputChannelId_Start);
+        ChannelIndex < int (InputChannelId_End);
+        ChannelIndex++)
+    {
+        if (nullptr != pInputChannelDrivers[ChannelIndex])
         {
-            if (nullptr != pInputChannelDrivers[ChannelIndex])
-            {
-                pInputChannelDrivers[ChannelIndex]->SetBufferInfo (InputDataBuffer, InputDataBufferSize);
-            }
-        } // end for each channel
-    }
+            pInputChannelDrivers[ChannelIndex]->SetBufferInfo (InputDataBuffer, InputDataBufferSize);
+        }
+    } // end for each channel
 
     // DEBUG_END;
 
@@ -706,6 +709,22 @@ void c_InputMgr::SetOperationalState (bool ActiveFlag)
     for (c_InputCommon* pInputChannel : pInputChannelDrivers)
     {
         pInputChannel->SetOperationalState (ActiveFlag);
+        // DEBUG_V("");
+    }
+
+    // DEBUG_END;
+
+} // SetOutputState
+
+//-----------------------------------------------------------------------------
+void c_InputMgr::ResetBlankTimer ()
+{
+    // DEBUG_START;
+
+    // pass through each active interface and set the blank state
+    for (c_InputCommon* pInputChannel : pInputChannelDrivers)
+    {
+        pInputChannel->ResetBlankTimer ();
         // DEBUG_V("");
     }
 

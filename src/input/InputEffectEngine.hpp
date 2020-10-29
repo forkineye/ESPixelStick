@@ -41,6 +41,7 @@ public:
     void Process ();                           ///< Call from loop(),  renders Input data
     void GetDriverName (String  & sDriverName) { sDriverName = "Effects"; } ///< get the name for the instantiated driver
     void SetBufferInfo (uint8_t * BufferStart, uint16_t BufferSize);
+    void ResetBlankTimer ();
 
     // Effect functions
     uint16_t effectSolidColor ();
@@ -63,6 +64,7 @@ public:
         bool        hasMirror;
         bool        hasReverse;
         bool        hasAllLeds;
+        bool        hasWhiteChannel;
         String      wsTCode;
     } EffectDescriptor_t;
 
@@ -104,17 +106,21 @@ private:
 
     uint32_t EffectWait            = 32;              /* How long to wait for the effect to run again */
     timeType EffectLastRun         = 0;               /* When did the effect last run ? in millis() */
+    timeType EffectBlankEnd        = 0;               /* When does the blankout period end */
     uint32_t EffectCounter         = 0;               /* Counter for the number of calls to the active effect */
     uint16_t EffectSpeed           = 6;               /* Externally controlled effect speed 1..10 */
     uint16_t EffectDelay           = DEFAULT_EFFECT_DELAY; /* Internal representation of speed */
     bool EffectReverse             = false;           /* Externally controlled effect reverse option */
     bool EffectMirror              = false;           /* Externally controlled effect mirroring (start at center) */
     bool EffectAllLeds             = false;           /* Externally controlled effect all leds = 1st led */
+    bool EffectWhiteChannel        = false;
     float EffectBrightness         = 1.0;             /* Externally controlled effect brightness [0, 255] */
+    uint8_t EffectBlankTime        = 0;
     CRGB EffectColor               = { 183, 0, 255 }; /* Externally controlled effect color */
 
     uint32_t EffectStep            = 0;            /* Shared mutable effect step counter */
     uint16_t PixelCount            = 0;            /* Number of RGB leds (not channels) */
+    uint8_t  ChannelsPerPixel      = 3;
 
     void setPixel(uint16_t idx,  CRGB color);
     void setRange(uint16_t first, uint16_t len, CRGB color);

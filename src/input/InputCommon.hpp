@@ -41,6 +41,7 @@ public:
     virtual void GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
     virtual void SetBufferInfo (uint8_t * BufferStart, uint16_t BufferSize) = 0;
     virtual void SetOperationalState (bool ActiveFlag) { IsInputChannelActive = ActiveFlag; }
+    virtual void ResetBlankTimer () {}; // only implemented by Effects Engine to delay return to operation
 
     c_InputMgr::e_InputChannelIds GetInputChannelId () { return InputChannelId; }
     c_InputMgr::e_InputType       GetInputType ()      { return ChannelType; }

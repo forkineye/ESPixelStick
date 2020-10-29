@@ -72,6 +72,16 @@
                             </table>
                         </fieldset>
                     </div>
+                    <div class="col-sm-6">
+                        <fieldset>
+                            <legend class="esps-legend">DDP Status</legend>
+                            <table class="esps-table">
+                                <tr><td width="33%">Total Packets: </td><td><span id="ddppacketsreceived"></span></td></tr>
+                                <tr><td width="33%">Total Bytes: </td><td><span id="ddpbytesreceived"></span></td></tr>
+                                <tr><td width="33%">Errors: </td><td><span id="ddperrors"></span></td></tr>
+                            </table>
+                        </fieldset>
+                    </div>
                 </div>
             </div>
 
@@ -158,18 +168,14 @@
                             <div class="col-sm-6"><input type="text" class="form-control" id="id" title="Plain text ID to help identify your device."></div>
                         </div>
 
-                        <div class="form-group" id="fg_input">
-                        </div>
+                        <div class="form-group" id="fg_input"></div>
 
-                        <div class="form-group" id="fg_output">
-                        </div>
+                        <div class="form-group" id="fg_output"></div>
                     </fieldset>
 
-                    <div class="form-group" id="fg_input_mode">
-                    </div>
+                    <div class="form-group" id="fg_input_mode"></div>
 
-                    <div class="form-group" id="fg_output_mode">
-                    </div>
+                    <div class="form-group" id="fg_output_mode"></div>
 
                     <fieldset>
                         <!-- Refresh Rate Display -->
@@ -201,6 +207,10 @@
                                         <div>
                                             <input type="radio" name="viewStyle" id="btn_RGB" value="RGB" autocomplete="off" checked>
                                             <label class="btn btn-primary" for="btn_RGB">RGB</label>
+                                        </div>
+                                        <div>
+                                            <input type="radio" name="viewStyle" id="btn_RGBW" value="RGBW" autocomplete="off">
+                                            <label class="btn btn-primary" for="btn_RGBW">RGBW</label>
                                         </div>
                                         <div>
                                             <input type="radio" name="viewStyle" id="btn_Channel" value="Channel" autocomplete="off">

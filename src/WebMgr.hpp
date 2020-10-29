@@ -73,6 +73,11 @@ private:
     void ProcessXseriesRequests     (AsyncWebSocketClient * client);
     void ProcessXARequest           (AsyncWebSocketClient * client);
     void ProcessXJRequest           (AsyncWebSocketClient * client);
+
+    void GetDeviceOptions           ();
+    void GetInputOptions            ();
+    void GetOutputOptions           ();
+
 protected:
 
 }; // c_WebMgr

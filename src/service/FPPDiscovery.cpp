@@ -17,6 +17,7 @@
 */
 
 #include "FPPDiscovery.h"
+#include "../input/InputMgr.hpp"
 
 #include <SD.h>
 #include <Int64String.h>
@@ -328,6 +329,8 @@ void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t Curr
             fseqFile.read (outputBuffer, toRead);
             //LOG_PORT.printf("New Frame!   Old: %d     New:  %d      Offset: %d\n", fseqCurrentFrameId, frame, FileOffsetToCurrentHeaderRecord);
             fseqCurrentFrameId = frame;
+
+            InputMgr.ResetBlankTimer ();
         }
     }
 
@@ -701,7 +704,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                     File file = SD.open (seq);
                     if (file.size () > 0)
                     {
-                        // found the file.... return metadata as json
+                        // found the file. return metadata as json
                         String resp = "";
                         BuildFseqResponse (seq, file, resp);
                         file.close ();
@@ -1039,6 +1042,12 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
             break;
         }
 
+        if ((String("...") == filename) || (0 == filename.length()))
+        {
+            // DEBUG_V("ignore the not playing a file indicator");
+            break;
+        }
+
         fseqFile = SD.open (String ("/") + filename);
 
         if (fseqFile.size () < 1)
@@ -1075,7 +1084,7 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
         TotalNumberOfFramesInSequence = fsqHeader.TotalNumberOfFramesInSequence;
         fseqStartMillis               = millis () - (frameStepTime * frameId);
 
-        LOG_PORT.println (String (F ("FPPDiscovery::StartPlaying:: Playing:  ")) + filename );
+        LOG_PORT.println (String (F ("FPPDiscovery::StartPlaying:: Playing:  '")) + filename + "'" );
 
     } while (false);
 
@@ -1088,7 +1097,10 @@ void c_FPPDiscovery::StopPlaying ()
 {
     // DEBUG_START;
 
-    LOG_PORT.println (String (F ("FPPDiscovery::StartPlaying:: Playing:  ")) + fseqName);
+    if (0 != fseqName.length ())
+    {
+        LOG_PORT.println (String (F ("FPPDiscovery::StopPlaying '")) + fseqName + "'");
+    }
 
     isRemoteRunning = false;
 
@@ -1113,7 +1125,11 @@ void c_FPPDiscovery::GetListOfFiles (char * ResponseBuffer)
 {
     // DEBUG_START;
 
-    DynamicJsonDocument ResponseJsonDoc (4096);
+    DynamicJsonDocument ResponseJsonDoc (2048);
+    if (0 == ResponseJsonDoc.capacity ())
+    {
+        LOG_PORT.println (F ("ERROR: Failed to allocate memory for the GetListOfFiles web request response."));
+    }
     JsonArray FileArray = ResponseJsonDoc.createNestedArray (F ("files"));
 
     File dir = SD.open ("/");

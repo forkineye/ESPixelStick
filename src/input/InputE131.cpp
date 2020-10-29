@@ -34,66 +34,93 @@ c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
 
 {
     // DEBUG_START;
+    // DEBUG_V ("BufferSize: " + String (BufferSize));
     // DEBUG_END;
 } // c_InputE131
 
 //-----------------------------------------------------------------------------
 c_InputE131::~c_InputE131()
 {
-    if (seqTracker) { free (seqTracker); seqTracker = nullptr; }
+    // DEBUG_START;
 
-    if (seqError)  { free (seqError); seqError = nullptr; }
+    // The E1.31 layer and UDP layer do not handle a shut down well (at all). Ask for a reboot.
+    LOG_PORT.println (String (F ("** 'E1.31' Shut Down for input: '")) + String (InputChannelId) + String (F ("' Requires a reboot. **")));
+
+    extern bool reboot;
+    reboot = true;
+
+    // DEBUG_END;
+
 } // ~c_InputE131
 
 //-----------------------------------------------------------------------------
 void c_InputE131::Begin ()
 {
     // DEBUG_START;
-    Serial.println (String (F ("** 'E1.31' Initialization for input: '")) + InputChannelId + String (F ("' **")));
+    LOG_PORT.println (String (F ("** 'E1.31' Initialization for input: '")) + String(InputChannelId) + String (F ("' **")));
 
-    if (true == HasBeenInitialized) 
+    do // once
     {
-        return;
-    }
-    HasBeenInitialized = true;
-
-    // Create a new ESPAsyncE131
-    if (nullptr != e131) { free (e131); e131 = nullptr; }
-    e131 = new ESPAsyncE131(10);
-    // DEBUG_V ("");
-
-    validateConfiguration ();
-    // DEBUG_V ("");
-
-    // Get on with business
-    // if (multicast) 
-    {
-        if (e131->begin(E131_MULTICAST, startUniverse, LastUniverse - startUniverse + 1)) 
+        if (true == HasBeenInitialized)
         {
             // DEBUG_V ("");
-            LOG_PORT.println(F("E1.31 Multicast Enabled."));
+            // break;
         }
-        else
+
+        // DEBUG_V ("InputDataBufferSize: " + String(InputDataBufferSize));
+
+        if (0 >= InputDataBufferSize)
         {
             // DEBUG_V ("");
-            LOG_PORT.println(F("*** E1.31 MULTICAST INIT FAILED ****"));
+            break;
         }
-    }
-    // else
-    {
         // DEBUG_V ("");
 
-        if (e131->begin(E131_UNICAST)) 
+        validateConfiguration ();
+        // DEBUG_V ("");
+
+        // Create a new ESPAsyncE131
+        if (nullptr == e131)
         {
-            LOG_PORT.println (String(F("E1.31 Unicast Enabled on port: ")) + E131_DEFAULT_PORT);
+            // DEBUG_V ("Instantiate E1.31");
+            e131 = new ESPAsyncE131 (10);
+        }
+        // DEBUG_V ("");
+
+        // Get on with business
+        if (e131->begin (E131_MULTICAST, startUniverse, LastUniverse - startUniverse + 1))
+        {
+            LOG_PORT.println (F ("E1.31 Multicast Enabled."));
         }
         else
         {
-            LOG_PORT.println(F("*** E1.31 UNICAST INIT FAILED ****"));
+            LOG_PORT.println (F ("*** E1.31 MULTICAST INIT FAILED ****"));
         }
-    }
+
+        // DEBUG_V ("");
+
+        if (e131->begin (E131_UNICAST))
+        {
+            LOG_PORT.println (String (F ("E1.31 Unicast Enabled on port: ")) + E131_DEFAULT_PORT);
+        }
+        else
+        {
+            LOG_PORT.println (F ("*** E1.31 UNICAST INIT FAILED ****"));
+        }
+
+        LOG_PORT.printf ("Listening for %u channels from Universe %u to %u.\n",
+                          InputDataBufferSize, startUniverse, LastUniverse);
+
+        // Setup IGMP subscriptions if multicast is enabled
+        SubscribeToMulticastDomains ();
+
+        // DEBUG_V ("");
+        HasBeenInitialized = true;
+
+    } while (false);
 
     // DEBUG_END;
+
 } // Begin
 
 //-----------------------------------------------------------------------------
@@ -131,6 +158,8 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
 //-----------------------------------------------------------------------------
 void c_InputE131::Process ()
 {
+    // DEBUG_START;
+
     uint8_t*    E131Data;
     uint8_t     uniOffset;
     uint16_t    universe;
@@ -147,8 +176,8 @@ void c_InputE131::Process ()
         universe = htons (packet.universe);
         E131Data = packet.property_values + 1;
 
-        //LOG_PORT.print(universe);
-        //LOG_PORT.println(packet.sequence_number);
+        // DEBUG_V ("              universe: " + String(universe));
+        // DEBUG_V ("packet.sequence_number: " + String(packet.sequence_number));
 
         if ((universe >= startUniverse) && (universe <= LastUniverse))
         {
@@ -206,19 +235,26 @@ void c_InputE131::Process ()
                 InputDataBuffer[UniverseIndex] = E131Data[buffloc];
                 buffloc++;
             }
+            InputMgr.ResetBlankTimer ();
         }
     }
+    // DEBUG_END;
     //    LOG_PORT.printf("procJSON heap /stack stats: %u:%u:%u:%u\n", ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
 } // process
 
 //-----------------------------------------------------------------------------
 void c_InputE131::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
 {
+    // DEBUG_START;
+
     InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
 
     // buffer has moved. Start Over
+    HasBeenInitialized = false;
     Begin ();
+
+    // DEBUG_END;
 
 } // SetBufferInfo
 
@@ -312,13 +348,6 @@ void c_InputE131::validateConfiguration ()
     }
     // DEBUG_V ("");
     e131->stats.num_packets = 0;
-    // DEBUG_V ("");
-
-    LOG_PORT.printf ("Listening for %u channels from Universe %u to %u.\n",
-        InputDataBufferSize, startUniverse, LastUniverse);
-
-    // Setup IGMP subscriptions if multicast is enabled
-    SubscribeToMulticastDomains ();
 
     // DEBUG_END;
 

@@ -82,6 +82,10 @@ $(function ()
         clearStream();
     });
 
+    $('#btn_RGBW').change(function () {
+        clearStream();
+    });
+
     $('#btn_Channel').change(function () {
         clearStream();
     });
@@ -164,7 +168,8 @@ function ProcessWindowChange(NextWindow) {
         RequestListOfFiles();
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
-        wsEnqueue(JSON.stringify({ 'cmd': { 'opt': 'device' } })); // Get device option data
+        wsEnqueue(JSON.stringify({ 'cmd': { 'opt': 'input' } })); // Get device option data
+        wsEnqueue(JSON.stringify({ 'cmd': { 'opt': 'output' } })); // Get device option data
     }
 
     RequestListOfFiles();
@@ -426,6 +431,28 @@ function updateFromJSON(obj)
     $('#device-id').text($('#config #id').val());
 }
 
+function GenerateInputOutputControlName(OptionListName, DisplayedChannelId)
+{
+    var NewName;
+
+    if (0 === DisplayedChannelId)
+    {
+        NewName = "Primary " + OptionListName + " ";
+    }
+
+    if (1 === DisplayedChannelId)
+    {
+        NewName = "Secondary " + OptionListName + " ";
+    }
+
+    if (3 === DisplayedChannelId)
+    {
+        NewName = "Tertiary " + OptionListName + " ";
+    }
+
+    return NewName;
+} // GenerateInputOutputControlName
+
 function ProcessReceivedOptionDataMessage(JsonOptionList)
 {
     // console.info("ProcessReceivedOptionDataMessage");
@@ -444,7 +471,7 @@ function ProcessReceivedOptionDataMessage(JsonOptionList)
             if (! $('#' + OptionListName + 'mode' + DisplayedChannelId).length)
             {
                 // create the selection box
-                $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + DisplayedChannelId + '">' + OptionListName + ' ' + DisplayedChannelId + ' Mode:</label>');
+                $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + DisplayedChannelId + '">' + GenerateInputOutputControlName(OptionListName, DisplayedChannelId) + ' Mode:</label>');
                 $('#fg_' + OptionListName).append('<div class="col-sm-2"><select class="form-control wsopt" id="' + OptionListName + DisplayedChannelId + '"></select></div>');
                 $('#fg_' + OptionListName + '_mode').append('<fieldset id="' + OptionListName + 'mode' + DisplayedChannelId + '"></fieldset>');
             }
@@ -519,10 +546,6 @@ function ProcessReceivedOptionDataMessage(JsonOptionList)
 // Builds JSON config submission for "WiFi" tab
 function submitWiFiConfig()
 {
-    var ip = $('#ip').val().split('.');
-    var netmask = $('#netmask').val().split('.');
-    var gateway = $('#gateway').val().split('.');
-
     var json =
     {
         'cmd':
@@ -535,9 +558,9 @@ function submitWiFiConfig()
                     'passphrase': $('#passphrase').val(),
                     'hostname': $('#hostname').val(),
                     'sta_timeout': $('#sta_timeout').val(),
-                    'ip': [parseInt(ip[0]), parseInt(ip[1]), parseInt(ip[2]), parseInt(ip[3])],
-                    'netmask': [parseInt(netmask[0]), parseInt(netmask[1]), parseInt(netmask[2]), parseInt(netmask[3])],
-                    'gateway': [parseInt(gateway[0]), parseInt(gateway[1]), parseInt(gateway[2]), parseInt(gateway[3])],
+                    'ip': $('#ip').val(),
+                    'netmask': $('#netmask').val(),
+                    'gateway': $('#gateway').val(),
                     'dhcp': $('#dhcp').prop('checked'),
                     'ap_fallback': $('#ap').prop('checked'),
                     'ap_timeout': $('#apt').prop('checked')
@@ -848,6 +871,15 @@ function drawStream(streamData)
             ctx.fillRect(10 + (col * size), 10 + (row * size), size - 1, size - 1);
         }
     }
+    else if ($("input[name='viewStyle'][value='RGBW']").prop('checked')) {
+        maxDisplay = Math.min(streamData.length, (cols * Math.floor((canvas.height - 30) / size)) * 4);
+        for (i = 0; i < maxDisplay; i += 4) {
+            ctx.fillStyle = 'rgb(' + streamData[i + 0] + ',' + streamData[i + 1] + ',' + streamData[i + 2] + ')';
+            var col = (i / 4) % cols;
+            var row = Math.floor((i / 4) / cols);
+            ctx.fillRect(10 + (col * size), 10 + (row * size), size - 1, size - 1);
+        }
+    }
     else
     {
         maxDisplay = Math.min(streamData.length, (cols * Math.floor((canvas.height - 30) / size)));
@@ -946,6 +978,13 @@ function ProcessRecievedJsonStatusMessage(data)
         $('#chanlim').text  (InputStatus.e131.unichanlim);
         $('#perr').text     (InputStatus.e131.packet_errors);
         $('#clientip').text (InputStatus.e131.last_clientIP);
+    }
+
+    if (Status.input[0].hasOwnProperty('ddp'))
+    {
+        $('#ddppacketsreceived').text(InputStatus.ddp.packetsreceived);
+        $('#ddpbytesreceived').text(InputStatus.ddp.bytesreceived);
+        $('#ddperrors').text(InputStatus.ddp.errors);
     }
 
     // Device Refresh is dynamic

@@ -155,9 +155,6 @@ void c_WebMgr::init ()
             FPPDiscovery.ProcessFPPJson(request);
         });
 
-    // Root access for testing
-    webServer.serveStatic ("/root", SPIFFS, "/");
-
     // Static Handler
     webServer.serveStatic ("/", SPIFFS, "/www/").setDefaultFile ("index.html");
 
@@ -202,9 +199,6 @@ void c_WebMgr::init ()
             request->send (404, "text/plain", "Page Not found");
         }
     );
-
-    // Raw config file Handler - but only on station
-    //  webServer.serveStatic("/config.json", SPIFFS, "/config.json").setFilter(ON_STA_FILTER);
 
     webServer.onNotFound ([this](AsyncWebServerRequest* request)
     {
@@ -359,32 +353,103 @@ void c_WebMgr::GetConfiguration ()
 } // GetConfiguration
 
 //-----------------------------------------------------------------------------
-void c_WebMgr::GetOptions ()
+void c_WebMgr::GetDeviceOptions ()
+{
+    // DEBUG_START;
+#ifdef SUPPORT_DEVICE_OPTION_LIST
+    // set up a framework to get the option data
+    DynamicJsonDocument webJsonDoc (2048);
+
+    if (0 == webJsonDoc.capacity ())
+    {
+        LOG_PORT.println (F ("ERROR: Failed to allocate memory for the GetDeviceOptions web request response."));
+    }
+
+    // DEBUG_V ("");
+    JsonObject WebOptions = webJsonDoc.createNestedObject (F ("options"));
+    JsonObject JsonDeviceOptions = WebOptions.createNestedObject (F ("device"));
+    // DEBUG_V("");
+
+    // PrettyPrint (WebOptions);
+
+    // PrettyPrint (WebOptions);
+
+    // now make it something we can transmit
+    size_t msgOffset = strlen (WebSocketFrameCollectionBuffer);
+    serializeJson (WebOptions, &WebSocketFrameCollectionBuffer[msgOffset], (sizeof (WebSocketFrameCollectionBuffer) - msgOffset));
+#endif // def SUPPORT_DEVICE_OPTION_LIST
+
+    // DEBUG_END;
+
+} // GetDeviceOptions
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::GetInputOptions ()
 {
     // DEBUG_START;
 
     // set up a framework to get the option data
-    DynamicJsonDocument webJsonDoc (4096);
+    DynamicJsonDocument webJsonDoc (2048);
+
+    if (0 == webJsonDoc.capacity ())
+    {
+        LOG_PORT.println (F("ERROR: Failed to allocate memory for the GetOptions web request response."));
+    }
+
     // DEBUG_V ("");
     JsonObject WebOptions        = webJsonDoc.createNestedObject (F ("options"));
     JsonObject JsonInputOptions  = WebOptions.createNestedObject (F ("input"));
+    // DEBUG_V("");
+
+    // PrettyPrint (WebOptions);
+
+    InputMgr.GetOptions (JsonInputOptions);
+    // DEBUG_V (""); // remove and we crash
+
+    // PrettyPrint (WebOptions);
+
+    // now make it something we can transmit
+    size_t msgOffset = strlen (WebSocketFrameCollectionBuffer);
+    serializeJson (WebOptions, & WebSocketFrameCollectionBuffer[msgOffset], (sizeof(WebSocketFrameCollectionBuffer) - msgOffset));
+
+    // DEBUG_END;
+
+} // GetInputOptions
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::GetOutputOptions ()
+{
+    // DEBUG_START;
+
+    // set up a framework to get the option data
+    DynamicJsonDocument webJsonDoc (2048);
+
+    if (0 == webJsonDoc.capacity ())
+    {
+        LOG_PORT.println (F ("ERROR: Failed to allocate memory for the GetOutputOptions web request response."));
+    }
+
+    // DEBUG_V ("");
+    JsonObject WebOptions = webJsonDoc.createNestedObject (F ("options"));
     JsonObject JsonOutputOptions = WebOptions.createNestedObject (F ("output"));
     // DEBUG_V("");
 
-    InputMgr.GetOptions (JsonInputOptions);
+    // PrettyPrint (WebOptions);
+
     // DEBUG_V (""); // remove and we crash
 
     OutputMgr.GetOptions (JsonOutputOptions);
     // DEBUG_V ("");
 
+    // PrettyPrint (WebOptions);
+
     // now make it something we can transmit
     size_t msgOffset = strlen (WebSocketFrameCollectionBuffer);
-    serializeJson (WebOptions, & WebSocketFrameCollectionBuffer[msgOffset], (sizeof(WebSocketFrameCollectionBuffer) - msgOffset));
-    // DEBUG_V ("");
+    serializeJson (WebOptions, &WebSocketFrameCollectionBuffer[msgOffset], (sizeof (WebSocketFrameCollectionBuffer) - msgOffset));
 
     // DEBUG_END;
 
-} // GetOptions
+} // GetOutputOptions
 
 //-----------------------------------------------------------------------------
 /// Handle Web Service events
@@ -649,7 +714,7 @@ void c_WebMgr::ProcessVseriesRequests (AsyncWebSocketClient* client)
         case '1':
         {
             // Diag screen is asking for real time output data
-            client->binary (OutputMgr.GetBufferAddress (), OutputMgr.GetBufferSize ());
+            client->binary (OutputMgr.GetBufferAddress (), OutputMgr.GetBufferUsedSize ());
             break;
         }
 
@@ -908,7 +973,7 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
 
     // DEBUG_V (WebSocketFrameCollectionBuffer);
 
-    // DEBUG_END;
+ // DEBUG_END;
 
 } // processCmdSet
 
@@ -924,7 +989,21 @@ void c_WebMgr::processCmdOpt (JsonObject & jsonCmd)
         if (jsonCmd["opt"] == "device")
         {
             // DEBUG_V ("device");
-            GetOptions ();
+            GetDeviceOptions ();
+            break;
+        }
+
+        if (jsonCmd["opt"] == "input")
+        {
+            // DEBUG_V ("input");
+            GetInputOptions ();
+            break;
+        }
+
+        if (jsonCmd["opt"] == "output")
+        {
+            // DEBUG_V ("output");
+            GetOutputOptions ();
             break;
         }
 

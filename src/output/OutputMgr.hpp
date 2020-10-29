@@ -44,9 +44,9 @@ public:
     void GetOptions    (JsonObject & jsonStatus);
     void PauseOutput   (bool PauseTheOutput) { IsOutputPaused = PauseTheOutput; }
     void GetPortCounts (uint16_t& PixelCount, uint16_t& SerialCount) {PixelCount = uint16_t(OutputChannelId_End); SerialCount = min(uint16_t(OutputChannelId_End), uint16_t(2)); }
-
-    uint8_t* GetBufferAddress () { return OutputBuffer; } ///< Get the address of the buffer into which the E1.31 handler will stuff data
-    uint16_t GetBufferSize ()    { return sizeof (OutputBuffer); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
+    uint8_t*  GetBufferAddress ()  { return OutputBuffer; } ///< Get the address of the buffer into which the E1.31 handler will stuff data
+    uint16_t  GetBufferUsedSize () { return UsedBufferSize; } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
+    uint16_t  GetBufferSize ()     { return sizeof(OutputBuffer); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
     void      Render ();           ///< Call from loop(),  renders output data
 
     // handles to determine which output channel we are dealing with
@@ -78,6 +78,13 @@ public:
         OutputType_Start = OutputType_WS2811,
     };
 
+#ifdef ARDUINO_ARCH_ESP8266
+#   define OM_MAX_NUM_CHANNELS  (1200 * 3)
+#else
+#   define OM_MAX_NUM_CHANNELS  (2000 * 3)
+#endif // !def ARDUINO_ARCH_ESP8266
+
+
 private:
 
     void InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, e_OutputType NewChannelType);
@@ -101,7 +108,8 @@ private:
     String ConfigFileName;
     String ConfigData;
 
-    uint8_t OutputBuffer[1024 * 3];
+    uint8_t OutputBuffer[OM_MAX_NUM_CHANNELS];
+    uint16_t UsedBufferSize = 0;
 
 protected:
 

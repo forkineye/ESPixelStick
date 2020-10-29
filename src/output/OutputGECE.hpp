@@ -36,8 +36,11 @@ public:
     void      Render ();                                        ///< Call from loop(),  renders output data
     void      GetDriverName (String & sDriverName) { sDriverName = String (F ("GECE")); }
     void      GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
+    uint16_t  GetNumChannelsNeeded ();
 
     void IRAM_ATTR ISR_Handler () {} ///< UART ISR
+
+private:
 
 #define GECE_PIXEL_LIMIT                        63  ///< Total pixel limit
 #define GECE_NUM_INTENSITY_BYTES_PER_PIXEL    	3
@@ -47,21 +50,13 @@ public:
 #define GECE_PACKET_SIZE                        ((GECE_NUM_INTENSITY_BYTES_PER_PIXEL * GECE_NUM_DATA_BYTES_PER_INTENSITY_BYTE) + GECE_OVERHEAD_BYTES) //   26
 #define GECE_OUTPUT_BUFF_SIZE                   ()
 
-    uint16_t  GetBufferSize () { return (pixel_count * GECE_NUM_INTENSITY_BYTES_PER_PIXEL); } ///< Get the address of the buffer into which the E1.31 handler will stuff data
-
-private:
-
     // JSON configuration parameters
     uint8_t         pixel_count = 0;
     uint8_t         brightness  = 0;
 
-    // Internal variables
-    uint32_t        startTime        = 0;              ///< When the last frame TX started
-
-                                                       /* Drop the update if our refresh rate is too high */
     inline bool canRefresh() 
     {
-        return (micros() - startTime) >= FrameRefreshTimeMs;
+        return (micros() - FrameStartTimeInMicroSec) >= FrameRefreshTimeInMicroSec;
     }
 
     bool validate();
