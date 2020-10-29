@@ -1,0 +1,1 @@
+File names for firmware binaries located in this directory are defined by espsflashtool.json
