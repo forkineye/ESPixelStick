@@ -1,32 +1,34 @@
 {
     "modes": [
         {
-            "name": "ESPixelStick",
-            "description": "Default firmware",
-            "version": "4.0-dev",
-            "file": "ESPixelStick-4.0-1m_128k.bin"
+            "name": "ESPixelStick Unified Generic",
+            "description": "Unified ESP PixelStick",
+            "version": "4.0-dev1 (20201023)",
+            "file": "ESPixelStick.ino.generic.bin"
         },
         {
-            "name": "ESPixelStick",
-            "description": "Default firmware",
-            "version": "4.0-dev",
+            "name": "ESPixelStick Unified LoLin D1 R1 Mini",
+            "description": "Unified ESP PixelStick",
+            "version": "4.0-dev1 (20201023)",
             "file": "ESPixelStick.ino.d1_mini.bin"
         },
         {
-            "name": "ESPixelStick-32",
-            "description": "Default firmware",
-            "version": "4.0-dev",
+            "name": "ESPixelStick Unified LoLin ESP32 Pro",
+            "description": "Unified ESP PixelStick",
+            "version": "4.0-dev1 (20201023)",
             "file": "ESPixelStick.ino.d32_pro.bin"
         }
     ],
-
+    
     "devices": [
         {
             "name": "ESP01_1MB_128K",
+            "espplatformname": "ESP8266",
             "esptool": {
-                "reset": "nodemcu",
+                "reset": "none",
                 "baudrate": "115200",
-                "spiffsloc": "0xDB000"
+                "spiffsloc": "0xDB000",
+                "binloc": "0x0"
             },
             "mkspiffs": {
                 "page": "256",
@@ -35,24 +37,29 @@
             }
         },
         {
-            "name": "ESP12_4MB_2MB",
+            "name": "ESP01_LoLin_D1_Mini_4MB_1MB",
+            "espplatformname": "ESP8266",
             "esptool": {
                 "reset": "nodemcu",
                 "baudrate": "115200",
-                "spiffsloc": "0x200000"
+                "spiffsloc": "0x200000",
+                "binloc": "0x0"
             },
             "mkspiffs": {
                 "page": "256",
                 "block": "8192",
-                "size": "2072576"
+                "size": "1048576"
             }
         },
         {
-            "name": "ESP32_16MB_1.5MB",
+            "name": "ESP32_LoLin_16MB_1.5M",
+            "espplatformname": "ESP32",
             "esptool": {
-                "reset": "nodemcu",
+                "reset": "ck",
                 "baudrate": "115200",
-                "spiffsloc": "0x00290000"
+                "spiffsloc": "0x290000",
+                "binloc": "0x10000"
+
             },
             "mkspiffs": {
                 "page": "256",
