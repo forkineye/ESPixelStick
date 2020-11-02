@@ -52,9 +52,6 @@ OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::OutputType_En
     {c_OutputMgr::e_OutputType::OutputType_Serial,   "Serial"   },
     {c_OutputMgr::e_OutputType::OutputType_Renard,   "Renard"   },
     {c_OutputMgr::e_OutputType::OutputType_DMX,      "DMX"      },
-#ifdef ARDUINO_ARCH_ESP32
-    // {c_OutputMgr::e_OutputType::OutputType_SPI,      "SPI"      },
-#endif // def ARDUINO_ARCH_ESP32
     {c_OutputMgr::e_OutputType::OutputType_Disabled, "Disabled" }
 };
 
@@ -524,25 +521,6 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 // DEBUG_V ("");
                 break;
             }
-
-#ifdef ARDUINO_ARCH_ESP32
-            case e_OutputType::OutputType_SPI:
-            {
-                if (-1 != UartId)
-                {
-                    LOG_PORT.println (String (F ("************** Cannot Start SPI for channel '")) + ChannelIndex + "'. **************");
-                    pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
-                    // DEBUG_V ("");
-                    break;
-                }
-
-                // LOG_PORT.println (String (F ("************** Starting SPI for channel '")) + ChannelIndex + "'. **************");
-                LOG_PORT.println (String (F ("************** SPI Not supported Yet. Using disabled. **************")));
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
-                // DEBUG_V ("");
-                break;
-            }
-#endif // def ARDUINO_ARCH_ESP8266
 
             case e_OutputType::OutputType_WS2811:
             {

@@ -55,7 +55,6 @@ public:
         OutputChannelId_1 = 0,
 #ifdef ARDUINO_ARCH_ESP32
         OutputChannelId_2,
-        // OutputChannelId_3,
 #endif // def ARDUINO_ARCH_ESP32
         OutputChannelId_End,
         OutputChannelId_Start = OutputChannelId_1
@@ -70,16 +69,13 @@ public:
         OutputType_Serial,
         OutputType_Renard,
         OutputType_DMX,
-#ifdef ARDUINO_ARCH_ESP32
-        OutputType_SPI,
-#endif // def ARDUINO_ARCH_ESP32
         OutputType_Disabled, // must be last
         OutputType_End,
         OutputType_Start = OutputType_WS2811,
     };
 
 #ifdef ARDUINO_ARCH_ESP8266
-#   define OM_MAX_NUM_CHANNELS  (1200 * 3)
+#   define OM_MAX_NUM_CHANNELS  (800 * 3)
 #else
 #   define OM_MAX_NUM_CHANNELS  (2000 * 3)
 #endif // !def ARDUINO_ARCH_ESP8266
