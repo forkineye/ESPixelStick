@@ -50,8 +50,8 @@ private:
     void validateConfiguration ();
     void onMessage (EspalexaDevice* pDevice);
 
-    void load ();          ///< Load configuration from SPIFFS
-    void save ();          ///< Save configuration to SPIFFS
+    void load ();          ///< Load configuration from File System
+    void save ();          ///< Save configuration to File System
 
     const char* ON = "ON";
     const char* OFF = "OFF";
