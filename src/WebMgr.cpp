@@ -27,10 +27,14 @@
 #include "WebMgr.hpp"
 #include <Int64String.h>
 
+#include <FS.h>
+
 #ifdef ARDUINO_ARCH_ESP8266
+#	include <LittleFS.h>
+#   define LITTLEFS LittleFS
 #   define SD_OPEN_WRITEFLAGS   sdfat::O_READ | sdfat::O_WRITE | sdfat::O_CREAT | sdfat::O_TRUNC
 #elif defined ARDUINO_ARCH_ESP32
-#   include <SPIFFS.h>
+#	include <LITTLEFS.h>
 #   define SD_OPEN_WRITEFLAGS   "w"
 
 #else
@@ -156,7 +160,7 @@ void c_WebMgr::init ()
         });
 
     // Static Handler
-    webServer.serveStatic ("/", SPIFFS, "/www/").setDefaultFile ("index.html");
+    webServer.serveStatic ("/", LITTLEFS, "/www/").setDefaultFile ("index.html");
 
     // if the client posts to the upload page
     webServer.on ("/upload", HTTP_POST | HTTP_PUT | HTTP_OPTIONS, 
@@ -1109,7 +1113,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
             request->send (200, "text/plain", "Update Finished: " + String (efupdate.getError ()));
             LOG_PORT.println (F ("* Upload Finished."));
             efupdate.end ();
-            SPIFFS.begin ();
+            LITTLEFS.begin ();
             SaveConfig();
             extern bool reboot;
             reboot = true;
