@@ -19,10 +19,16 @@
 */
 
 #include "ESPixelStick.h"
-
+#include <FS.h>
 #ifdef ARDUINO_ARCH_ESP32
-#   include <SPIFFS.h>
+#   include <LITTLEFS.h>
+#   include <Update.h>
+#else
+#   include <LittleFS.h>
+#   define LITTLEFS LittleFS
 #endif
+
+#define FORMAT_LITTLEFS_IF_FAILED true
 
 /// Deserialization callback for I/O modules
 typedef std::function<void (DynamicJsonDocument & json)> DeserializationHandler;
@@ -32,17 +38,54 @@ class FileIO
 {
 public:
 
+	static void listDir (fs::FS& fs, String dirname, uint8_t levels)
+	{
+		do // once
+		{
+			LOG_PORT.println (String (F ("Listing directory: ")) + dirname);
+
+			File root = fs.open (dirname, "r");
+			if (!root)
+			{
+				LOG_PORT.println (String (F ("failed to open directory: ")) + dirname);
+				break;
+			}
+
+			if (!root.isDirectory ())
+			{
+				LOG_PORT.println (String (F ("Is not a directory: ")) + dirname);
+				break;
+			}
+
+			File MyFile = root.openNextFile ();
+
+			while (MyFile)
+			{
+				if (MyFile.isDirectory ())
+				{
+					if (levels)
+					{
+						listDir (fs, MyFile.name (), levels - 1);
+					}
+				}
+				else
+				{
+					LOG_PORT.println ("'" + String (MyFile.name ()) + "': \t'" + String (MyFile.size ()) + "'");
+				}
+				MyFile = root.openNextFile ();
+			}
+
+		} while (false);
+
+	} // listDir
+
 	static void Begin ()
 	{
 		// DEBUG_START;
 
 		do // once
 		{
-#ifdef ARDUINO_ARCH_ESP8266
-			if (!SPIFFS.begin ())
-#else
-			if (!SPIFFS.begin (false))
-#endif
+			if (!LITTLEFS.begin ())
 			{
 				LOG_PORT.println (F ("*** File system did not initialize correctly ***"));
 				break;
@@ -50,43 +93,7 @@ public:
 
 			LOG_PORT.println (F ("File system initialized."));
 
-#ifdef ARDUINO_ARCH_ESP8266
-			FSInfo fs_info;
-			if (!SPIFFS.info (fs_info))
-			{
-				break;
-			}
-
-			LOG_PORT.println (String(F("Total bytes used in file system: ")) + fs_info.usedBytes);
-
-			Dir dir = SPIFFS.openDir ("/");
-			while (dir.next ())
-			{
-				File file = dir.openFile ("r");
-				LOG_PORT.println (String(file.name ()) + " : " + String(file.size ()));
-				file.close ();
-			}
-
-#elif defined(ARDUINO_ARCH_ESP32)
-			if (0 == SPIFFS.totalBytes ())
-			{
-				LOG_PORT.println (String (F("No Data in the File system")));
-				break;
-			}
-
-			LOG_PORT.println (String (F("Total bytes in file system: ")) + String (SPIFFS.usedBytes ()));
-
-			fs::File root = SPIFFS.open ("/");
-			fs::File MyFile = root.openNextFile ();
-
-			while (MyFile)
-			{
-				LOG_PORT.println ("'" + String (MyFile.name ()) + "': \t'" + String (MyFile.size ()) + "'");
-				MyFile.close ();
-				MyFile = root.openNextFile ();
-			}
-			root.close ();
-#endif // ARDUINO_ARCH_ESP32
+			listDir (LITTLEFS, String ("/"), 3);
 
 		} while (false);
 
@@ -94,14 +101,14 @@ public:
 	} // begin
 
   /// Load configuration file
-  /** Loads JSON configuration file via SPIFFS.
+  /** Loads JSON configuration file via File System.
    *  Returns true on success.
    */
 	static boolean loadConfig (String & filename, DeserializationHandler dsHandler, size_t jsonSize = 2048)
 	{
 		boolean retval = false;
 
-		fs::File file = SPIFFS.open (filename.c_str (), "r");
+		fs::File file = LITTLEFS.open (filename.c_str (), "r");
 		if (file)
 		{
 			retval = loadConfig (filename, file, dsHandler, jsonSize);
@@ -185,7 +192,7 @@ public:
 		{
 			String CfgFileMessagePrefix = String (F ("File: '")) + filename + "' ";
 			// DEBUG_V ("");
-			fs::File file = SPIFFS.open (filename.c_str (), "r");
+			fs::File file = LITTLEFS.open (filename.c_str (), "r");
 			if (!file)
 			{
 				LOG_PORT.println (CfgFileMessagePrefix + String (F ("not valid.")));
@@ -218,7 +225,7 @@ public:
 	} // loadConfig
 
 	/// Save configuration file
-	/** Saves configuration file via SPIFFS
+	/** Saves configuration file via File System
 	 * Returns true on 'value has been changed'.
 	 * Returns false if field not found
 	 * Returns false if value is unchanged
@@ -228,7 +235,7 @@ public:
 		boolean retval = false;
 		String CfgFileMessagePrefix = String (F ("Configuration file: '")) + filename + "' ";
 
-		fs::File file = SPIFFS.open (filename.c_str (), "w");
+		fs::File file = LITTLEFS.open (filename.c_str (), "w");
 		if (!file)
 		{
 			LOG_PORT.println (CfgFileMessagePrefix + String (F ("Could not open file for writing..")));
