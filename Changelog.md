@@ -3,10 +3,11 @@
 
 ### 3.2
 
-- Compiled against [2.6.4 Arduino Core](https://github.com/esp8266/Arduino/releases/tag/2.7.4)
-- Updated to [AdruinoJson 6.16.1](https://github.com/bblanchon/ArduinoJson/releases/tag/v6.16.1)
+- Compiled against [2.7.4 Arduino Core](https://github.com/esp8266/Arduino/releases/tag/2.7.4)
+- Updated to [AdruinoJson 6.17.0](https://github.com/bblanchon/ArduinoJson/releases/tag/v6.17.0)
 - Updated to [async-mqtt-client 2019.12.08](https://github.com/marvinroger/async-mqtt-client/tree/7f1ba481a22d56ccf123e4b2f6e555d134c956d0)
 - Fix for Client Timeout not Changing [Issue #201](https://github.com/forkineye/ESPixelStick/issues/201)
+- Updated the flash tool included in binary releases to fix issues flashing on newer releases of MacOS.
 
 ### 3.1
 
