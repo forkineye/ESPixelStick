@@ -19,11 +19,11 @@
             "file": "ESPixelStick.ino.d32_pro.bin"
         }
     ],
-    
+
     "devices": [
         {
             "name": "ESP01_1MB_128K",
-            "espplatformname": "ESP8266",
+            "espplatformname": "esp8266",
             "esptool": {
                 "reset": "none",
                 "baudrate": "115200",
@@ -38,7 +38,7 @@
         },
         {
             "name": "ESP01_LoLin_D1_Mini_4MB_1MB",
-            "espplatformname": "ESP8266",
+            "espplatformname": "esp8266",
             "esptool": {
                 "reset": "nodemcu",
                 "baudrate": "115200",
@@ -53,7 +53,7 @@
         },
         {
             "name": "ESP32_LoLin_16MB_1.5M",
-            "espplatformname": "ESP32",
+            "espplatformname": "esp32",
             "esptool": {
                 "reset": "ck",
                 "baudrate": "115200",
