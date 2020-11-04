@@ -20,9 +20,9 @@ This code has been ported to work on an ESP32 based LoLin pro. This requires the
 Along with the Arduino IDE, you'll need the following software to build this project:
 
 - [Adruino for ESP8266](https://github.com/esp8266/Arduino) - Arduino core for ESP8266
-- [Arduino ESP8266 Filesystem Uploader](https://github.com/esp8266/arduino-esp8266fs-plugin) - Arduino plugin for uploading files to SPIFFS
+- [Arduino ESP8266 Filesystem Uploader](https://github.com/earlephilhower/arduino-esp8266littlefs-plugin/releases/ ESP8266LittleFS-2.6.0.zip) - Arduino plugin for uploading files to the File System
 - [Adruino for ESP32](https://github.com/espressif/arduino-esp32) - Arduino core for ESP32
-- [Arduino ESP32 Filesystem Uploader](https://github.com/me-no-dev/arduino-esp32fs-plugin) - Arduino plugin for uploading files to SPIFFS
+- [Arduino ESP32 Filesystem Uploader](https://github.com/lorol/arduino-esp32fs-plugin/releases/ esp32fs.zip) - Arduino plugin for uploading files to the File System
 - [gulp](http://gulpjs.com/) - Build system required to process web sources.  Refer to the html [README](html/README.md) for more information.
 
 The following libraries are required:
@@ -49,13 +49,15 @@ The ESP32 build will require the following software to build this project:
 - [Int64String](https://github.com/djGrrr/Int64String) - Converts 64 bit integers into a string
 - [EspAlexa](https://github.com/Aircoookie/Espalexa) - Alexa Direct control Library
 
+Using library manager:
+- Install littlefs-32 for esp32 support.
 ## Important Notes on Compiling and Flashing
 
 - In order to upload your code to the ESP8266 you must put it in flash mode and then take it out of flash mode to run the code. To place your ESP8266 in flash mode your GPIO-0 pin must be connected to ground.
 - Device mode is now a compile time option to set your device type and is configured in the top of the main sketch file.  Current options are ```ESPS_MODE_PIXEL``` and ```ESPS_MODE_SERIAL```.  The default is ```ESPS_MODE_PIXEL``` for the ESPixelStick hardware.
 - Web pages **must** be processed, placed into ```data/www```, and uploaded with the upload plugin. Gulp will process the pages and put them in ```data/www``` for you. Refer to the html [README](html/README.md) for more information.
 - In order to use the upload plugin, the ESP8266 **must** be placed into programming mode and the Arduino serial monitor **must** be closed.
-- ESP-01 modules **must** be configured for 1M flash and 128k SPIFFS within the Arduino IDE for OTA updates to work.
+- ESP-01 modules **must** be configured for 1M flash and 128k File System within the Arduino IDE for OTA updates to work.
 - For best performance, set the CPU frequency to 160MHz (Tools->CPU Frequency).  You may experience lag and other issues if running at 80MHz.
 - The upload must be redone each time after you rebuild and upload the software
 

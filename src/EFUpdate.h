@@ -39,7 +39,7 @@ class EFUpdate {
     enum class RecordType : uint16_t {
         NULL_RECORD,
         SKETCH_IMAGE,
-        SPIFFS_IMAGE,
+        FS_IMAGE,
         EEPROM_IMAGE
     };
 

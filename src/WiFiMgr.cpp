@@ -33,8 +33,8 @@
 // or delete the #include and enter the strings directly below.
 // #include "secrets.h"
 #ifndef SECRETS_SSID
-#   define SECRETS_SSID "SSID_NOT_SET"
-#   define SECRETS_PASS "PASSPHRASE_NOT_SET"
+#   define SECRETS_SSID "DEFAULT_SSID_NOT_SET"
+#   define SECRETS_PASS "DEFAULT_PASSPHRASE_NOT_SET"
 #endif // ndef SECRETS_SSID
 
 /* Fallback configuration if config->json is empty or fails */

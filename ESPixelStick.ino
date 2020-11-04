@@ -132,7 +132,7 @@ void setup()
     // DEBUG_V ("");
     FileIO::Begin ();
 
-    // Load configuration from SPIFFS and set Hostname
+    // Load configuration from the File System and set Hostname
     loadConfig();
     // DEBUG_V ("");
 
@@ -303,7 +303,7 @@ void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
 }
 
 /// Load configuration file
-/** Loads and validates the JSON configuration file via SPIFFS.
+/** Loads and validates the JSON configuration file from the file system.
  *  If no configuration file is found, a new one will be created.
  */
 void loadConfig() 

@@ -23,8 +23,11 @@
 #include "EFUpdate.h"
 
 #ifdef ARDUINO_ARCH_ESP32
+#   include <LITTLEFS.h>
 #   include <Update.h>
-#   define U_FS U_SPIFFS
+#else
+#   include <LittleFS.h>
+#   define LITTLEFS LittleFS
 #endif
 
 #ifndef U_SPIFFS
@@ -34,8 +37,9 @@
  *
  * Substitute the value here, while not breaking things for people using older SDKs.
  */
-#define U_SPIFFS U_FS
+#	define U_SPIFFS U_FS
 #endif
+
 
 void EFUpdate::begin() {
     _maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
@@ -78,10 +82,10 @@ bool EFUpdate::process(uint8_t *data, size_t len) {
                         } else {
                             _state = State::DATA;
                         }
-                    } else if (_record.type == RecordType::SPIFFS_IMAGE) {
-                        // Begin spiffs update
+                    } else if (_record.type == RecordType::FS_IMAGE) {
+                        // Begin file system update
 #ifdef ARDUINO_ARCH_ESP8266
-                        SPIFFS.end();
+                        LITTLEFS.end();
 #endif
                         if (!Update.begin(_record.size, U_SPIFFS)) {
                             _state = State::FAIL;
