@@ -68,8 +68,8 @@ private:
     void validate ();      ///< Call from validateConfig()
     void update ();        ///< Call from updateConfig()
 
-    void load ();          ///< Load configuration from SPIFFS
-    void save ();          ///< Save configuration to SPIFFS
+    void load ();          ///< Load configuration from File System
+    void save ();          ///< Save configuration to File System
 
     // const char* CONFIG_FILE = "/mqtt.json";
     const char* SET_COMMAND_TOPIC = "/set";

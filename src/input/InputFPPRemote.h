@@ -48,8 +48,8 @@ private:
     void validateConfiguration ();
     // void onMessage (EspFPPRemoteDevice* pDevice);
 
-    void load ();          ///< Load configuration from SPIFFS
-    void save ();          ///< Save configuration to SPIFFS
+    void load ();          ///< Load configuration from File System
+    void save ();          ///< Save configuration to File System
 
 #   define JSON_NAME_MISO         F("miso_pin")
 #   define JSON_NAME_MOSI         F("mosi_pin")
