@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: ESPixelStick Bug Report
+about: Submit a bug report for this project
 title: ''
 labels: ''
 assignees: ''
