@@ -27,6 +27,7 @@
     "gulp-markdown-github-style": "^1.1.1",
     "gulp-plumber": "^1.2.1",
     "gulp-rename": "^1.4.0",
+    "gulp-terser": "^1.4.1",
     "gulp-uglify": "^3.0.1"
   }
 }
