@@ -30,11 +30,11 @@
 #include "OutputGECE.hpp"
 #include "OutputSerial.hpp"
 #include "OutputWS2811.hpp"
+#include "OutputRelay.hpp"
 // needs to be last
 #include "OutputMgr.hpp"
 
 #include "../input/InputMgr.hpp"
-
 
 //-----------------------------------------------------------------------------
 // Local Data definitions
@@ -52,6 +52,7 @@ OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::OutputType_En
     {c_OutputMgr::e_OutputType::OutputType_Serial,   "Serial"   },
     {c_OutputMgr::e_OutputType::OutputType_Renard,   "Renard"   },
     {c_OutputMgr::e_OutputType::OutputType_DMX,      "DMX"      },
+    {c_OutputMgr::e_OutputType::OutputType_Relay,    "Relay"    },
     {c_OutputMgr::e_OutputType::OutputType_Disabled, "Disabled" }
 };
 
@@ -219,7 +220,7 @@ void c_OutputMgr::CreateNewConfig ()
     LOG_PORT.println (F ("--- WARNING: Creating a new Output Manager configuration Data set - Start ---"));
 
     // create a place to save the config
-    DynamicJsonDocument JsonConfigDoc (2048);
+    DynamicJsonDocument JsonConfigDoc (3*1024);
     JsonObject JsonConfig = JsonConfigDoc.createNestedObject (OM_SECTION_NAME);
 
     // DEBUG_V ("for each output type");
@@ -376,6 +377,8 @@ void c_OutputMgr::GetOptions (JsonObject & jsonOptions)
     // Build a list of Valid options for this device
     for (OutputTypeXlateMap_t currentOutputType : OutputTypeXlateMap)
     {
+        // AllowedOutputs
+
         // DEBUG_V ("");
         JsonObject jsonOptionsArrayEntry  = jsonOptionsArray.createNestedObject ();
         jsonOptionsArrayEntry[F ("id")]   = int(currentOutputType.id);
@@ -503,6 +506,21 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 }
                 // LOG_PORT.println (String (F ("************** Starting Generic Serial for channel '")) + ChannelIndex + "'. **************");
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputSerial (ChannelIndex, dataPin, UartId, OutputType_Serial);
+                // DEBUG_V ("");
+                break;
+            }
+
+            case e_OutputType::OutputType_Relay:
+            {
+                if (-1 == UartId)
+                {
+                    LOG_PORT.println (String (F ("************** Cannot Start RELAY for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                    // DEBUG_V ("");
+                    break;
+                }
+                // LOG_PORT.println (String (F ("************** Starting RELAY for channel '")) + ChannelIndex + "'. **************");
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputRelay (ChannelIndex, dataPin, UartId, OutputType_Relay);
                 // DEBUG_V ("");
                 break;
             }

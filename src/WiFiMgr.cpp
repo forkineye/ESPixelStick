@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
 // Create secrets.h with a #define for SECRETS_SSID and SECRETS_PASS
 // or delete the #include and enter the strings directly below.
-// #include "secrets.h"
+#include "secrets.h"
 #ifndef SECRETS_SSID
 #   define SECRETS_SSID "DEFAULT_SSID_NOT_SET"
 #   define SECRETS_PASS "DEFAULT_PASSPHRASE_NOT_SET"
@@ -127,6 +127,7 @@ void c_WiFiMgr::Begin (config_t* NewConfig)
     // If we fail again, go SoftAP or reboot
     if (WiFi.status () != WL_CONNECTED)
     {
+        config->ap_fallbackIsEnabled = true;
         if (config->ap_fallbackIsEnabled)
         {
             LOG_PORT.println (F ("*** FAILED TO ASSOCIATE WITH AP, GOING SOFTAP ***"));
@@ -135,6 +136,7 @@ void c_WiFiMgr::Begin (config_t* NewConfig)
             WiFi.softAP (ssid.c_str ());
             CurrentIpAddress = WiFi.softAPIP ();
             CurrentSubnetMask = IPAddress (255, 255, 255, 0);
+            LOG_PORT.println (String(F ("*** SOFTAP: IP Address: '")) + CurrentIpAddress.toString() + F("' ***"));
         }
         else
         {

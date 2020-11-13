@@ -55,6 +55,7 @@ public:
         OutputChannelId_1 = 0,
 #ifdef ARDUINO_ARCH_ESP32
         OutputChannelId_2,
+        OutputChannelId_Relay,
 #endif // def ARDUINO_ARCH_ESP32
         OutputChannelId_End,
         OutputChannelId_Start = OutputChannelId_1
@@ -69,6 +70,7 @@ public:
         OutputType_Serial,
         OutputType_Renard,
         OutputType_DMX,
+        OutputType_Relay,
         OutputType_Disabled, // must be last
         OutputType_End,
         OutputType_Start = OutputType_WS2811,
