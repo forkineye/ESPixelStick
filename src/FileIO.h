@@ -104,7 +104,7 @@ public:
   /** Loads JSON configuration file via File System.
    *  Returns true on success.
    */
-	static boolean loadConfig (String & filename, DeserializationHandler dsHandler, size_t jsonSize = 2048)
+	static boolean loadConfig (String & filename, DeserializationHandler dsHandler, size_t jsonSize = 3000)
 	{
 		boolean retval = false;
 
