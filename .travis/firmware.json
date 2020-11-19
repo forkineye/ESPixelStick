@@ -1,8 +1,8 @@
 {
     "modes": [
         {
-            "name": "ESPixelStick",
-            "description": "Default firmware",
+            "name": "ESPixelStick Unify",
+            "description": "Unified build for ESPixelStick V3 hardware",
             "version": "DEV (Travis-CI Build)",
             "file": "espixelstick-travis.bin"
         }
@@ -10,16 +10,17 @@
 
     "devices": [
         {
-            "name": "ESP01_1MB_128K",
+            "name": "ESPixelStick V3 (LoLin_D1_Mini_4MB_2MB)",
+            "espplatformname": "esp8266",
             "esptool": {
                 "reset": "nodemcu",
                 "baudrate": "115200",
-                "spiffsloc": "0xDB000"
-            },
-            "mkspiffs": {
+                "fsloc": "0x200000",
+                "binloc": "0x0"            },
+            "filesystem": {
                 "page": "256",
-                "block": "4096",
-                "size": "131072"
+                "block": "8192",
+                "size": "2072576"
             }
         }
     ]
