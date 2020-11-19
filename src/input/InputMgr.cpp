@@ -425,12 +425,9 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
         {
             case e_InputType::InputType_Disabled:
             {
-                if (InputTypeIsAllowedOnChannel (InputType_Disabled, ChannelIndex))
-                {
-                    // LOG_PORT.println (String (F ("************** Disabled Input type for channel '")) + ChannelIndex + "'. **************");
-                    pInputChannelDrivers[ChannelIndex] = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
-                    // DEBUG_V ("");
-                }
+                // LOG_PORT.println (String (F ("************** Disabled Input type for channel '")) + ChannelIndex + "'. **************");
+                pInputChannelDrivers[ChannelIndex] = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
+                // DEBUG_V ("");
                 break;
             }
 
@@ -441,6 +438,10 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                     // LOG_PORT.println (String (F ("************** Starting E1.31 for channel '")) + ChannelIndex + "'. **************");
                     pInputChannelDrivers[ChannelIndex] = new c_InputE131 (ChannelIndex, InputType_E1_31, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
+                }
+                else
+                {
+                    pInputChannelDrivers[ChannelIndex] = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
                 }
                 break;
             }
@@ -453,6 +454,10 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                     pInputChannelDrivers[ChannelIndex] = new c_InputEffectEngine (ChannelIndex, InputType_Effects, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
+                else
+                {
+                    pInputChannelDrivers[ChannelIndex] = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
+                }
                 break;
             }
 
@@ -463,6 +468,10 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                     // LOG_PORT.println (String (F ("************** Starting MQTT for channel '")) + ChannelIndex + "'. **************");
                     pInputChannelDrivers[ChannelIndex] = new c_InputMQTT (ChannelIndex, InputType_MQTT, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
+                }
+                else
+                {
+                    pInputChannelDrivers[ChannelIndex] = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
                 }
                 break;
             }
@@ -475,6 +484,10 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                     pInputChannelDrivers[ChannelIndex] = new c_InputAlexa (ChannelIndex, InputType_Alexa, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
+                else
+                {
+                    pInputChannelDrivers[ChannelIndex] = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
+                }
                 break;
             }
 
@@ -486,6 +499,10 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                     pInputChannelDrivers[ChannelIndex] = new c_InputDDP (ChannelIndex, InputType_DDP, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
+                else
+                {
+                    pInputChannelDrivers[ChannelIndex] = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
+                }
                 break;
             }
 
@@ -496,6 +513,10 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                     // LOG_PORT.println (String (F ("************** Starting DDP for channel '")) + ChannelIndex + "'. **************");
                     pInputChannelDrivers[ChannelIndex] = new c_InputFPPRemote (ChannelIndex, InputType_FPP, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
+                }
+                else
+                {
+                    pInputChannelDrivers[ChannelIndex] = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
                 }
                 break;
             }
@@ -510,10 +531,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
         } // end switch (NewChannelType)
           
         // DEBUG_V ("");
-        if (pInputChannelDrivers[ChannelIndex] != nullptr)
-        {
-            pInputChannelDrivers[ChannelIndex]->Begin ();
-        }
+        pInputChannelDrivers[ChannelIndex]->Begin ();
 
     } while (false);
 
@@ -573,10 +591,7 @@ void c_InputMgr::Process ()
     // DEBUG_V("");
     for (c_InputCommon* pInputChannel : pInputChannelDrivers)
     {
-        if (nullptr != pInputChannel)
-        {
-            pInputChannel->Process ();
-        }
+        pInputChannel->Process ();
         // DEBUG_V("");
     }
     // DEBUG_END;
