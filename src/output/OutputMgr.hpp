@@ -55,9 +55,9 @@ public:
         OutputChannelId_1 = 0,
 #ifdef ARDUINO_ARCH_ESP32
         OutputChannelId_2,
-        OutputChannelId_Relay,
 #endif // def ARDUINO_ARCH_ESP32
-        OutputChannelId_End,
+        OutputChannelId_Relay,
+        OutputChannelId_End, // must be last in the list
         OutputChannelId_Start = OutputChannelId_1
     };
 
@@ -81,7 +81,6 @@ public:
 #else
 #   define OM_MAX_NUM_CHANNELS  (2000 * 3)
 #endif // !def ARDUINO_ARCH_ESP8266
-
 
 private:
 

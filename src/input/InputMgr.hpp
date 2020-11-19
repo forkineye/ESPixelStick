@@ -65,7 +65,8 @@ public:
         InputChannelId_1 = 0,
         InputChannelId_2 = 1,
         InputChannelId_End,
-        InputChannelId_Start = InputChannelId_1
+        InputChannelId_Start = InputChannelId_1,
+        InputChannelId_ALL = InputChannelId_End
     };
 
 private:
@@ -84,9 +85,10 @@ private:
 #   define IM_CHANNEL_SECTION_NAME F("channels")
 #   define IM_CHANNEL_TYPE_NAME    F("type")
 
-    bool ProcessJsonConfig        (JsonObject & jsonConfig);
-    void CreateJsonConfig         (JsonObject & jsonConfig);
-    bool ProcessJsonChannelConfig (JsonObject & jsonConfig, uint32_t ChannelIndex);
+    bool ProcessJsonConfig           (JsonObject & jsonConfig);
+    void CreateJsonConfig            (JsonObject & jsonConfig);
+    bool ProcessJsonChannelConfig    (JsonObject & jsonConfig, uint32_t ChannelIndex);
+    bool InputTypeIsAllowedOnChannel (e_InputType type, e_InputChannelIds ChannelId);
 
     String ConfigFileName;
     String ConfigData;

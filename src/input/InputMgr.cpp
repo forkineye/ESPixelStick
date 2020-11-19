@@ -45,17 +45,18 @@ typedef struct InputTypeXlateMap_t
 {
     c_InputMgr::e_InputType id;
     String name;
+    c_InputMgr::e_InputChannelIds ChannelId;
 };
 
 InputTypeXlateMap_t InputTypeXlateMap[c_InputMgr::e_InputType::InputType_End] =
 {
-    {c_InputMgr::e_InputType::InputType_E1_31,    "E1.31"      },
-    {c_InputMgr::e_InputType::InputType_Effects,  "Effects"    },
-    {c_InputMgr::e_InputType::InputType_MQTT,     "MQTT"       },
-    {c_InputMgr::e_InputType::InputType_Alexa,    "Alexa"      },
-    {c_InputMgr::e_InputType::InputType_DDP,      "DDP"        },
-    {c_InputMgr::e_InputType::InputType_FPP,      "FPP Remote" },
-    {c_InputMgr::e_InputType::InputType_Disabled, "Disabled"   }
+    {c_InputMgr::e_InputType::InputType_E1_31,    "E1.31",      c_InputMgr::e_InputChannelIds::InputChannelId_1},
+    {c_InputMgr::e_InputType::InputType_Effects,  "Effects",    c_InputMgr::e_InputChannelIds::InputChannelId_2},
+    {c_InputMgr::e_InputType::InputType_MQTT,     "MQTT",       c_InputMgr::e_InputChannelIds::InputChannelId_1},
+    {c_InputMgr::e_InputType::InputType_Alexa,    "Alexa",      c_InputMgr::e_InputChannelIds::InputChannelId_1},
+    {c_InputMgr::e_InputType::InputType_DDP,      "DDP",        c_InputMgr::e_InputChannelIds::InputChannelId_1},
+    {c_InputMgr::e_InputType::InputType_FPP,      "FPP Remote", c_InputMgr::e_InputChannelIds::InputChannelId_1},
+    {c_InputMgr::e_InputType::InputType_Disabled, "Disabled",   c_InputMgr::e_InputChannelIds::InputChannelId_ALL}
 };
 
 //-----------------------------------------------------------------------------
@@ -85,10 +86,11 @@ c_InputMgr::~c_InputMgr ()
     int pInputChannelDriversIndex = 0;
     for (c_InputCommon* CurrentInput : pInputChannelDrivers)
     {
-        if (nullptr != pInputChannelDrivers[pInputChannelDriversIndex])
+        if (nullptr != CurrentInput)
         {
             // the drivers will put the hardware in a safe state
-            delete pInputChannelDrivers[pInputChannelDriversIndex];
+            delete CurrentInput;
+            pInputChannelDrivers[pInputChannelDriversIndex] = nullptr;
         }
         pInputChannelDriversIndex++;
     }
@@ -104,7 +106,7 @@ void c_InputMgr::Begin (uint8_t* BufferStart, uint16_t BufferSize)
 
     InputDataBuffer     = BufferStart;
     InputDataBufferSize = BufferSize;
-    // DEBUG_ ("InputDataBufferSize: " + String (InputDataBufferSize));
+    // DEBUG_V (String("InputDataBufferSize: ") + String (InputDataBufferSize));
 
     // prevent recalls
     if (true == HasBeenInitialized) { return; }
@@ -153,6 +155,12 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
     // DEBUG_V ("For Each Input Channel");
     for (c_InputCommon* CurrentChannel : pInputChannelDrivers)
     {
+        if (nullptr == CurrentChannel)
+        {
+            // DEBUG_V ("");
+            continue;
+        }
+
         // DEBUG_V (String("Create Section in Config file for the Input channel: '") + CurrentChannel->GetInputChannelId() + "'");
         // create a record for this channel
         JsonObject ChannelConfigData;
@@ -217,7 +225,9 @@ void c_InputMgr::CreateNewConfig ()
     JsonObject JsonConfig = JsonConfigDoc.createNestedObject (IM_SECTION_NAME);
 
     // DEBUG_V ("for each Input type");
-    for (int InputTypeId = int (InputType_Start); InputTypeId < int (InputType_End); ++InputTypeId)
+    for (int InputTypeId = int (InputType_Start); 
+         InputTypeId < int (InputType_End); 
+         ++InputTypeId)
     {
         // DEBUG_V ("for each input channel");
         int ChannelIndex = 0;
@@ -259,7 +269,7 @@ void c_InputMgr::CreateNewConfig ()
 } // CreateNewConfig
 
 //-----------------------------------------------------------------------------
-void c_InputMgr::GetConfig (char * Response)
+void c_InputMgr::GetConfig (char* Response)
 {
     // DEBUG_START;
 
@@ -270,41 +280,48 @@ void c_InputMgr::GetConfig (char * Response)
 } // GetConfig
 
 //-----------------------------------------------------------------------------
-void c_InputMgr::GetOptions (JsonObject & jsonOptions)
+void c_InputMgr::GetOptions (JsonObject& jsonOptions)
 {
     // DEBUG_START;
 
-    JsonArray SelectedOptionList = jsonOptions.createNestedArray ("selectedoptionlist");
+    JsonArray jsonChannelsArray = jsonOptions.createNestedArray ("channels");
 
-    // build a list of the current available channels and their output type
+    // build a list of the current available channels and their input type
     for (c_InputCommon* currentInput : pInputChannelDrivers)
     {
-        JsonObject selectedoption = SelectedOptionList.createNestedObject ();
-        selectedoption[F ("id")            ] = currentInput->GetInputChannelId ();
-        selectedoption[F ("selectedoption")] = currentInput->GetInputType ();
+        JsonObject channelOptionData = jsonChannelsArray.createNestedObject ();
+        e_InputChannelIds InputChannelId = currentInput->GetInputChannelId ();
+        channelOptionData[F ("id")] = InputChannelId;
+        channelOptionData[F ("selectedoption")] = currentInput->GetInputType ();
+
+        // DEBUG_V ("");
+        JsonArray jsonOptionsArray = channelOptionData.createNestedArray (F ("list"));
+
+        // Build a list of Valid options for this device
+        for (InputTypeXlateMap_t currentInputType : InputTypeXlateMap)
+        {
+            // DEBUG_V ("");
+            if (InputTypeIsAllowedOnChannel(currentInputType.id, InputChannelId))
+            {
+                // DEBUG_V ("");
+                JsonObject jsonOptionsArrayEntry = jsonOptionsArray.createNestedObject ();
+                jsonOptionsArrayEntry[F ("id")] = int (currentInputType.id);
+                jsonOptionsArrayEntry[F ("name")] = currentInputType.name;
+                // DEBUG_V ("");
+            }
+            else
+            {
+                // DEBUG_V (String("Type: ") + currentInputType.name + String(" not allowed on channel: ") + String(InputChannelId));
+            }
+
+        } // end for each Input type
     }
-
-    // DEBUG_V ("");
-
-    JsonArray jsonOptionsArray = jsonOptions.createNestedArray (F ("list"));
-    // DEBUG_V ("");
-
-    // Build a list of Valid options for this device
-    for (InputTypeXlateMap_t currentInputType : InputTypeXlateMap)
-    {
-        // DEBUG_V ("");
-        JsonObject jsonOptionsArrayEntry  = jsonOptionsArray.createNestedObject ();
-        jsonOptionsArrayEntry[F ("id")]   = int(currentInputType.id);
-        jsonOptionsArrayEntry[F ("name")] = currentInputType.name;
-
-        // DEBUG_V ("");
-    } // end for each Input type
 
     // DEBUG_END;
 } // GetOptions
 
 //-----------------------------------------------------------------------------
-void c_InputMgr::GetStatus (JsonObject & jsonStatus)
+void c_InputMgr::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
@@ -318,6 +335,51 @@ void c_InputMgr::GetStatus (JsonObject & jsonStatus)
 
     // DEBUG_END;
 } // GetStatus
+
+//-----------------------------------------------------------------------------
+/* Determine whether the input type is allowed on the desired input channel
+*
+    needs
+        channel type
+        channel id
+    returns
+        true - input type is allowed on the input channel
+*/
+bool c_InputMgr::InputTypeIsAllowedOnChannel (e_InputType type, e_InputChannelIds ChannelId)
+{
+    // DEBUG_START;
+
+    bool response = false;
+
+    // DEBUG_V (String("type: ") + String(type));
+
+    // find the input type
+    for (InputTypeXlateMap_t currentInputType : InputTypeXlateMap)
+    {
+        // DEBUG_V ("");
+        // is this the entry we are looking for?
+        if (currentInputType.id == type)
+        {
+            // DEBUG_V ("");
+            // is the input allowed on the desired channel?
+            if ((currentInputType.ChannelId == ChannelId) ||
+                (currentInputType.ChannelId == InputChannelId_ALL))
+            {
+                // DEBUG_V ("Allowed");
+                response = true;
+            }
+            // DEBUG_V ("");
+
+            break;
+        } // found the entry we are looking for
+        // DEBUG_V ("");
+    } // loop entries
+
+    // DEBUG_V (String ("response: ") + String (response));
+
+    // DEBUG_END;
+    return response;
+} // InputTypeIsAllowedOnChannel
 
 //-----------------------------------------------------------------------------
 /* Create an instance of the desired Input type in the desired channel
@@ -363,57 +425,78 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
         {
             case e_InputType::InputType_Disabled:
             {
-                // LOG_PORT.println (String (F ("************** Disabled Input type for channel '")) + ChannelIndex + "'. **************");
-                pInputChannelDrivers[ChannelIndex] = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
-                // DEBUG_V ("");
+                if (InputTypeIsAllowedOnChannel (InputType_Disabled, ChannelIndex))
+                {
+                    // LOG_PORT.println (String (F ("************** Disabled Input type for channel '")) + ChannelIndex + "'. **************");
+                    pInputChannelDrivers[ChannelIndex] = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
+                    // DEBUG_V ("");
+                }
                 break;
             }
 
             case e_InputType::InputType_E1_31:
             {
-                // LOG_PORT.println (String (F ("************** Starting E1.31 for channel '")) + ChannelIndex + "'. **************");
-                pInputChannelDrivers[ChannelIndex] = new c_InputE131 (ChannelIndex, InputType_E1_31, InputDataBuffer, InputDataBufferSize);
-                // DEBUG_V ("");
+                if (InputTypeIsAllowedOnChannel (InputType_E1_31, ChannelIndex))
+                {
+                    // LOG_PORT.println (String (F ("************** Starting E1.31 for channel '")) + ChannelIndex + "'. **************");
+                    pInputChannelDrivers[ChannelIndex] = new c_InputE131 (ChannelIndex, InputType_E1_31, InputDataBuffer, InputDataBufferSize);
+                    // DEBUG_V ("");
+                }
                 break;
             }
 
             case e_InputType::InputType_Effects:
             {
-                // LOG_PORT.println (String (F ("************** Starting Effects Engine for channel '")) + ChannelIndex + "'. **************");
-                pInputChannelDrivers[ChannelIndex] = new c_InputEffectEngine (ChannelIndex, InputType_Effects, InputDataBuffer, InputDataBufferSize);
-                // DEBUG_V ("");
+                if (InputTypeIsAllowedOnChannel (InputType_Effects, ChannelIndex))
+                {
+                    // LOG_PORT.println (String (F ("************** Starting Effects Engine for channel '")) + ChannelIndex + "'. **************");
+                    pInputChannelDrivers[ChannelIndex] = new c_InputEffectEngine (ChannelIndex, InputType_Effects, InputDataBuffer, InputDataBufferSize);
+                    // DEBUG_V ("");
+                }
                 break;
             }
 
             case e_InputType::InputType_MQTT:
             {
-                // LOG_PORT.println (String (F ("************** Starting MQTT for channel '")) + ChannelIndex + "'. **************");
-                pInputChannelDrivers[ChannelIndex] = new c_InputMQTT (ChannelIndex, InputType_MQTT, InputDataBuffer, InputDataBufferSize);
-                // DEBUG_V ("");
+                if (InputTypeIsAllowedOnChannel (InputType_MQTT, ChannelIndex))
+                {
+                    // LOG_PORT.println (String (F ("************** Starting MQTT for channel '")) + ChannelIndex + "'. **************");
+                    pInputChannelDrivers[ChannelIndex] = new c_InputMQTT (ChannelIndex, InputType_MQTT, InputDataBuffer, InputDataBufferSize);
+                    // DEBUG_V ("");
+                }
                 break;
             }
 
             case e_InputType::InputType_Alexa:
             {
-                // LOG_PORT.println (String (F ("************** Starting Alexa for channel '")) + ChannelIndex + "'. **************");
-                pInputChannelDrivers[ChannelIndex] = new c_InputAlexa (ChannelIndex, InputType_Alexa, InputDataBuffer, InputDataBufferSize);
-                // DEBUG_V ("");
+                if (InputTypeIsAllowedOnChannel (InputType_Alexa, ChannelIndex))
+                {
+                    // LOG_PORT.println (String (F ("************** Starting Alexa for channel '")) + ChannelIndex + "'. **************");
+                    pInputChannelDrivers[ChannelIndex] = new c_InputAlexa (ChannelIndex, InputType_Alexa, InputDataBuffer, InputDataBufferSize);
+                    // DEBUG_V ("");
+                }
                 break;
             }
 
             case e_InputType::InputType_DDP:
             {
-                // LOG_PORT.println (String (F ("************** Starting DDP for channel '")) + ChannelIndex + "'. **************");
-                pInputChannelDrivers[ChannelIndex] = new c_InputDDP (ChannelIndex, InputType_DDP, InputDataBuffer, InputDataBufferSize);
-                // DEBUG_V ("");
+                if (InputTypeIsAllowedOnChannel (InputType_DDP, ChannelIndex))
+                {
+                    // LOG_PORT.println (String (F ("************** Starting DDP for channel '")) + ChannelIndex + "'. **************");
+                    pInputChannelDrivers[ChannelIndex] = new c_InputDDP (ChannelIndex, InputType_DDP, InputDataBuffer, InputDataBufferSize);
+                    // DEBUG_V ("");
+                }
                 break;
             }
 
             case e_InputType::InputType_FPP:
             {
-                // LOG_PORT.println (String (F ("************** Starting DDP for channel '")) + ChannelIndex + "'. **************");
-                pInputChannelDrivers[ChannelIndex] = new c_InputFPPRemote (ChannelIndex, InputType_FPP, InputDataBuffer, InputDataBufferSize);
-                // DEBUG_V ("");
+                if (InputTypeIsAllowedOnChannel (InputType_FPP, ChannelIndex))
+                {
+                    // LOG_PORT.println (String (F ("************** Starting DDP for channel '")) + ChannelIndex + "'. **************");
+                    pInputChannelDrivers[ChannelIndex] = new c_InputFPPRemote (ChannelIndex, InputType_FPP, InputDataBuffer, InputDataBufferSize);
+                    // DEBUG_V ("");
+                }
                 break;
             }
 
@@ -427,7 +510,10 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
         } // end switch (NewChannelType)
           
         // DEBUG_V ("");
-        pInputChannelDrivers[ChannelIndex]->Begin ();
+        if (pInputChannelDrivers[ChannelIndex] != nullptr)
+        {
+            pInputChannelDrivers[ChannelIndex]->Begin ();
+        }
 
     } while (false);
 
@@ -487,7 +573,10 @@ void c_InputMgr::Process ()
     // DEBUG_V("");
     for (c_InputCommon* pInputChannel : pInputChannelDrivers)
     {
-        pInputChannel->Process ();
+        if (nullptr != pInputChannel)
+        {
+            pInputChannel->Process ();
+        }
         // DEBUG_V("");
     }
     // DEBUG_END;
@@ -708,8 +797,12 @@ void c_InputMgr::SetOperationalState (bool ActiveFlag)
     // pass through each active interface and set the active state
     for (c_InputCommon* pInputChannel : pInputChannelDrivers)
     {
-        pInputChannel->SetOperationalState (ActiveFlag);
-        // DEBUG_V("");
+        // DEBUG_V ("");
+        if (nullptr != pInputChannel)
+        {
+            pInputChannel->SetOperationalState (ActiveFlag);
+            // DEBUG_V ("");
+        }
     }
 
     // DEBUG_END;

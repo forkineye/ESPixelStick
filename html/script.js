@@ -517,6 +517,27 @@ function GenerateInputOutputControlName(OptionListName, DisplayedChannelId)
     return NewName;
 } // GenerateInputOutputControlName
 
+function ProcessReceivedOptionDataMessageLoadOption(OptionListName, DisplayedChannelId )
+{
+    var HtmlLoadFileName = $('#' + OptionListName + DisplayedChannelId + ' option:selected').text().toLowerCase();
+    // console.info("HtmlLoadName: " + HtmlLoadName);
+    HtmlLoadFileName = HtmlLoadFileName.replace(".", "_");
+    HtmlLoadFileName = HtmlLoadFileName.replace(" ", "_");
+    HtmlLoadFileName = HtmlLoadFileName + ".html";
+    // console.info("Adjusted HtmlLoadName: " + HtmlLoadName);
+
+    // try to load the field definition file for this channel type
+    $('#' + OptionListName + 'mode' + DisplayedChannelId).load(HtmlLoadFileName, function () {
+        if ("input" === OptionListName) {
+            ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Input_Config);
+        }
+        else if ("output" === OptionListName) {
+            ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Output_Config);
+        }
+    });
+
+} // ProcessReceivedOptionDataMessageLoadOption
+
 function ProcessReceivedOptionDataMessage(JsonOptionList)
 {
     // console.info("ProcessReceivedOptionDataMessage");
@@ -525,14 +546,15 @@ function ProcessReceivedOptionDataMessage(JsonOptionList)
     Object.keys(JsonOptionList).forEach(function (OptionListName)
     {
         // OptionListName is 'input' or 'output'
-        var ArrayOfOptions    = JsonOptionList[OptionListName].list; // value
-        var ArrayOfSelections = JsonOptionList[OptionListName].selectedoptionlist;
-
-        // for each option channel:
-        $(ArrayOfSelections).each(function (DisplayedChannelId, currentSelection)
+        var ArrayOfChannels = JsonOptionList[OptionListName].channels;
+        $(ArrayOfChannels).each(function (CurrentChannelIndex)
         {
+            var CurrentChannel       = ArrayOfChannels[CurrentChannelIndex]; // value
+            var DisplayedChannelId   = CurrentChannel.id;
+            var ListOfChannelOptions = ArrayOfChannels[CurrentChannelIndex].list;
+
             // does the selection box we need already exist?
-            if (! $('#' + OptionListName + 'mode' + DisplayedChannelId).length)
+            if (!$('#' + OptionListName + 'mode' + DisplayedChannelId).length)
             {
                 // create the selection box
                 $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + DisplayedChannelId + '">' + GenerateInputOutputControlName(OptionListName, DisplayedChannelId) + ' Mode:</label>');
@@ -545,27 +567,9 @@ function ProcessReceivedOptionDataMessage(JsonOptionList)
             {
                 if ($(this).val())
                 {
-                    var HtmlLoadFileName = $('#' + OptionListName + DisplayedChannelId + ' option:selected').text().toLowerCase();
-                    // console.info("HtmlLoadName: " + HtmlLoadName);
-                    HtmlLoadFileName = HtmlLoadFileName.replace(".", "_");
-                    HtmlLoadFileName = HtmlLoadFileName.replace(" ", "_");
-                    HtmlLoadFileName = HtmlLoadFileName + ".html";
-                    // console.info("Adjusted HtmlLoadName: " + HtmlLoadName);
-
-                    // try to load the field definition file for this channel type
-                    $('#' + OptionListName + 'mode' + DisplayedChannelId).load(HtmlLoadFileName, function ()
-                    {
-                        if ("input" === OptionListName)
-                        {
-                            ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Input_Config);
-                        }
-                        else if ("output" === OptionListName)
-                        {
-                            ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Output_Config);
-                        }
-                    });
+                    ProcessReceivedOptionDataMessageLoadOption(OptionListName, DisplayedChannelId);
                 }
-            });
+            }); // End channel select onchange handler
 
             var jqSelector = "#" + OptionListName + DisplayedChannelId;
 
@@ -573,37 +577,22 @@ function ProcessReceivedOptionDataMessage(JsonOptionList)
             $(jqSelector).empty();
 
             // for each option in the list
-            ArrayOfOptions.forEach(function (listEntry)
+            ListOfChannelOptions.forEach(function (listEntry)
             {
-                // add in a new entry
+                // add a new entry
                 $(jqSelector).append('<option value="' + listEntry.id + '">' + listEntry.name + '</option>');
             });
 
             // set the current selector value
-            $(jqSelector).val(ArrayOfSelections[DisplayedChannelId].selectedoption);
+            $(jqSelector).val(CurrentChannel.selectedoption);
 
-            // clear the footer
-            $('#refresh').html('0 ms / 0 fps');
-
-            var fileName = $('#' + OptionListName + DisplayedChannelId + ' option:selected').text().toLowerCase();
-            fileName = fileName.replace(" ", "_").replace(".", "_");
-            // console.info("fileName: " + fileName);
-
-            // try to load the field definition file for this channel type
-            $('#' + OptionListName + 'mode' + DisplayedChannelId).load(fileName + ".html", function ()
-            {
-                if ("input" === OptionListName)
-                {
-                    ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Input_Config);
-                }
-                else if ("output" === OptionListName)
-                {
-                    ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Output_Config);
-                }
-            });
+            ProcessReceivedOptionDataMessageLoadOption(OptionListName, DisplayedChannelId);
 
         }); // end for each channel
-    }); // end for each option group
+    }); // end for each option type
+
+    // clear the footer
+    $('#refresh').html('0 ms / 0 fps');
 
 } // ProcessReceivedOptionDataMessage
 

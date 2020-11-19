@@ -67,7 +67,9 @@ typedef struct OutputChannelIdToGpioAndPortEntry_t
 OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] =
 {
     {gpio_num_t::GPIO_NUM_2,  uart_port_t::UART_NUM_1},
+#ifdef ARDUINO_ARCH_ESP32
     {gpio_num_t::GPIO_NUM_13, uart_port_t::UART_NUM_2},
+#endif // def ARDUINO_ARCH_ESP32
     {gpio_num_t::GPIO_NUM_10, uart_port_t (-1)},
 };
 
@@ -359,35 +361,71 @@ void c_OutputMgr::GetPortConfig (e_OutputChannelIds portId, String & ConfigRespo
 void c_OutputMgr::GetOptions (JsonObject & jsonOptions)
 {
     // DEBUG_START;
-    JsonArray SelectedOptionList = jsonOptions.createNestedArray (F("selectedoptionlist"));
+    JsonArray jsonChannelsArray = jsonOptions.createNestedArray (OM_CHANNEL_SECTION_NAME);
+    // DEBUG_V (String("ConfigData: ") + ConfigData);
+
+    DynamicJsonDocument OutputConfigData(3000);
+    DeserializationError deError = deserializeJson (OutputConfigData, ConfigData);
+    // DEBUG_V (String("deError: ") + String(deError.c_str()));
+
+    // JsonObject OC_info = OutputConfigData["output_config"];
+    // PrettyPrint (OC_info, String ("OC_info"));
+
+    JsonObject OutputChannelConfigDataArray = OutputConfigData["output_config"]["channels"];
+    // PrettyPrint (OutputChannelConfigDataArray, String ("OutputChannelConfigDataArray"));
+    // DEBUG_V ("");
 
     // build a list of the current available channels and their output type
-    for (c_OutputCommon* currentOutput : pOutputChannelDrivers)
+    for (c_OutputCommon * currentOutput : pOutputChannelDrivers)
     {
-        JsonObject selectedoption = SelectedOptionList.createNestedObject ();
-        selectedoption[F ("id")]             = currentOutput->GetOutputChannelId ();
-        selectedoption[F ("selectedoption")] = currentOutput->GetOutputType ();
+        e_OutputChannelIds ChannelId = currentOutput->GetOutputChannelId ();
+        JsonObject OutputChannelConfigData = OutputChannelConfigDataArray[String(ChannelId)];
+        // DEBUG_V ("");
+        // PrettyPrint (OutputChannelConfigData, String("OutputChannelConfigData"));
+
+        JsonObject channelOptionData = jsonChannelsArray.createNestedObject ();
+        channelOptionData[F ("id")]             = ChannelId;
+        channelOptionData[F ("selectedoption")] = currentOutput->GetOutputType ();
+
+        // DEBUG_V ("");
+        JsonArray jsonOptionsArray = channelOptionData.createNestedArray (F ("list"));
+
+        // Build a list of Valid options for this device
+        for (int currentOutputType = OutputType_Start;
+            currentOutputType < OutputType_End;
+            currentOutputType++)
+        {
+            // DEBUG_V ("");
+            if (OutputChannelConfigData.containsKey (String((int)currentOutputType)))
+            {
+                JsonObject CurrentOutputChannelConfigData = OutputChannelConfigData[String(currentOutputType)];
+                // PrettyPrint (CurrentOutputChannelConfigData, String ("CurrentOutputChannelConfigData"));
+                // DEBUG_V ("");
+
+                JsonObject jsonOptionsArrayEntry = jsonOptionsArray.createNestedObject ();
+                // DEBUG_V ("");
+
+                String name;
+                FileIO::setFromJSON (name, CurrentOutputChannelConfigData[F ("type") ]);
+                // DEBUG_V (String("name: ") + name);
+                // DEBUG_V (String ("id: ") + currentOutputType);
+
+                jsonOptionsArrayEntry[F ("id")]   = currentOutputType;
+                jsonOptionsArrayEntry[F ("name")] = name;
+                // DEBUG_V ("");
+            }
+            else
+            {
+                // DEBUG_V ("");
+            }
+
+            // DEBUG_V ("");
+
+        } // end for each output type
     }
 
-    // DEBUG_V ("");
-
-    JsonArray jsonOptionsArray = jsonOptions.createNestedArray (F("list"));
-    // DEBUG_V ("");
-
-    // Build a list of Valid options for this device
-    for (OutputTypeXlateMap_t currentOutputType : OutputTypeXlateMap)
-    {
-        // AllowedOutputs
-
-        // DEBUG_V ("");
-        JsonObject jsonOptionsArrayEntry  = jsonOptionsArray.createNestedObject ();
-        jsonOptionsArrayEntry[F ("id")]   = int(currentOutputType.id);
-        jsonOptionsArrayEntry[F ("name")] = currentOutputType.name;
-
-        // DEBUG_V ("");
-    } // end for each output type
-
     // DEBUG_END;
+
 } // GetOptions
 
 //-----------------------------------------------------------------------------
@@ -512,13 +550,14 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
             case e_OutputType::OutputType_Relay:
             {
-                if (-1 == UartId)
+                if (ChannelIndex != OutputChannelId_Relay)
                 {
                     LOG_PORT.println (String (F ("************** Cannot Start RELAY for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                     // DEBUG_V ("");
                     break;
                 }
+
                 // LOG_PORT.println (String (F ("************** Starting RELAY for channel '")) + ChannelIndex + "'. **************");
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputRelay (ChannelIndex, dataPin, UartId, OutputType_Relay);
                 // DEBUG_V ("");
