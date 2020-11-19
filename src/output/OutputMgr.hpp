@@ -71,8 +71,8 @@ public:
         OutputType_Renard,
         OutputType_DMX,
         OutputType_Relay,
-        OutputType_Disabled, // must be last
-        OutputType_End,
+        OutputType_Disabled,
+        OutputType_End, // must be last
         OutputType_Start = OutputType_WS2811,
     };
 
@@ -93,6 +93,12 @@ private:
 #   define OM_SECTION_NAME         F("output_config")
 #   define OM_CHANNEL_SECTION_NAME F("channels")
 #   define OM_CHANNEL_TYPE_NAME    F("type")
+
+#ifdef ARDUINO_ARCH_ESP32
+#   define OM_MAX_CONFIG_SIZE      (4*1024)
+#else
+#   define OM_MAX_CONFIG_SIZE      (3*1024)
+#endif // def ARDUINO_ARCH_ESP32
 
     bool HasBeenInitialized = false;
     bool ConfigSaveNeeded   = false;
