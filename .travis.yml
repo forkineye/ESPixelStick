@@ -17,7 +17,10 @@ before_install:
 - mkdir -p $LIB_HOME
 - mkdir -p $ESP_HOME
 - mkdir -p $BUILD
-- git clone --recurse-submodules -j8 https://github.com/esp8266/Arduino.git $ESP_HOME/esp8266
+- git clone https://github.com/esp8266/Arduino.git $ESP_HOME/esp8266
+- cd $ESP_HOME/esp8266
+- git checkout 2.7.4
+- git submodule update --init
 - cd $ESP_HOME/esp8266/tools
 - python get.py
 - git clone https://github.com/bblanchon/ArduinoJson $LIB_HOME/ArduinoJson
@@ -26,6 +29,8 @@ before_install:
 - git clone https://github.com/me-no-dev/ESPAsyncUDP $LIB_HOME/ESPAsyncUDP
 - git clone https://github.com/me-no-dev/ESPAsyncWebServer $LIB_HOME/ESPAsyncWebServer
 - git clone https://github.com/marvinroger/async-mqtt-client $LIB_HOME/async-mqtt-client
+- git clone https://github.com/djGrrr/Int64String $LIB_HOME/Int64String
+- git clone https://github.com/Aircoookie/Espalexa $LIB_HOME/Espalexa
 install:
 - cp -r $TRAVIS_BUILD_DIR $ESPS_HOME
 - arduino --board esp8266com:esp8266:generic:xtal=160,vt=flash,exception=disabled,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=40,FlashMode=dio,eesz=1M128,led=2,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200
@@ -42,7 +47,7 @@ script:
 - gulp
 - gulp md
 - gulp travis
-- mv $ESPS_HOME/data $DIST/spiffs
+- mv $ESPS_HOME/data $DIST/fs
 - mv $ESPS_HOME/.travis/firmware.json $DIST/firmware/firmware.json
 - cd $DIST
 - zip -r $HOME/$DIST_FILE *
