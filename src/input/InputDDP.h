@@ -118,11 +118,11 @@ private:
         BufferIsBeingProcessed,
     };
 
-    typedef struct PacketBuffer_t
+    typedef struct 
     {
         PacketBufferStatus_t PacketBufferStatus = PacketBufferStatus_t::BufferIsAvailable;
         DDP_packet_t Packet;
-    };
+    } PacketBuffer_t;
 
     PacketBuffer_t PacketBuffer;
 

@@ -127,6 +127,7 @@ void c_WiFiMgr::Begin (config_t* NewConfig)
     // If we fail again, go SoftAP or reboot
     if (WiFi.status () != WL_CONNECTED)
     {
+        // config->ap_fallbackIsEnabled = true;
         if (config->ap_fallbackIsEnabled)
         {
             LOG_PORT.println (F ("*** FAILED TO ASSOCIATE WITH AP, GOING SOFTAP ***"));

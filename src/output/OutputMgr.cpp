@@ -39,11 +39,11 @@
 //-----------------------------------------------------------------------------
 // Local Data definitions
 //-----------------------------------------------------------------------------
-typedef struct OutputTypeXlateMap_t
+typedef struct 
 {
     c_OutputMgr::e_OutputType id;
     String name;
-};
+}OutputTypeXlateMap_t;
 
 OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::OutputType_End] =
 {
@@ -57,11 +57,11 @@ OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::OutputType_En
 };
 
 //-----------------------------------------------------------------------------
-typedef struct OutputChannelIdToGpioAndPortEntry_t
+typedef struct 
 {
     gpio_num_t dataPin;
     uart_port_t UartId;
-};
+}OutputChannelIdToGpioAndPortEntry_t;
 
 //-----------------------------------------------------------------------------
 OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] =
@@ -376,7 +376,7 @@ void c_OutputMgr::GetPortConfig (e_OutputChannelIds portId, String & ConfigRespo
             } while (false);
 
             // DEBUG_V ("");
-        }))
+        }, OM_MAX_CONFIG_SIZE))
     {
         LOG_PORT.println (F ("EEEE Error loading Output Manager Config File. EEEE"));
     }
@@ -674,7 +674,7 @@ void c_OutputMgr::LoadConfig ()
             // DEBUG_V ("");
             this->ProcessJsonConfig (JsonConfig);
             // DEBUG_V ("");
-        }))
+        }, OM_MAX_CONFIG_SIZE))
     {
         LOG_PORT.println (F ("EEEE Error loading Output Manager Config File. EEEE"));
 
