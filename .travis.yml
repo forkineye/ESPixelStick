@@ -17,7 +17,10 @@ before_install:
 - mkdir -p $LIB_HOME
 - mkdir -p $ESP_HOME
 - mkdir -p $BUILD
-- git clone --recurse-submodules -j8 https://github.com/esp8266/Arduino.git $ESP_HOME/esp8266
+- git clone https://github.com/esp8266/Arduino.git $ESP_HOME/esp8266
+- cd $ESP_HOME/esp8266
+- git checkout 2.7.4
+- git submodule update --init
 - cd $ESP_HOME/esp8266/tools
 - python get.py
 - git clone https://github.com/bblanchon/ArduinoJson $LIB_HOME/ArduinoJson
@@ -26,23 +29,25 @@ before_install:
 - git clone https://github.com/me-no-dev/ESPAsyncUDP $LIB_HOME/ESPAsyncUDP
 - git clone https://github.com/me-no-dev/ESPAsyncWebServer $LIB_HOME/ESPAsyncWebServer
 - git clone https://github.com/marvinroger/async-mqtt-client $LIB_HOME/async-mqtt-client
+- git clone https://github.com/djGrrr/Int64String $LIB_HOME/Int64String
+- git clone https://github.com/Aircoookie/Espalexa $LIB_HOME/Espalexa
 install:
 - cp -r $TRAVIS_BUILD_DIR $ESPS_HOME
-- arduino --board esp8266com:esp8266:generic:xtal=160,vt=flash,exception=disabled,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=40,FlashMode=dio,eesz=1M128,led=2,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200
+- arduino --board esp8266com:esp8266:generic:xtal=160,vt=flash,exception=disabled,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=40,FlashMode=dio,eesz=4M2M,led=2,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200
   --pref build.path=$BUILD --save-prefs
 before_script:
 - cd $ESPS_HOME
 - npm install -g gulp-cli
 - npm install
 script:
-- echo '#define SECRETS_SSID "SSID_NOT_SET"' > $ESPS_HOME/secrets.h
-- echo '#define SECRETS_PASS "PASSPHRASE_NOT_SET"' >> $ESPS_HOME/secrets.h
+- echo '#define SECRETS_SSID "SSID_NOT_SET"' > $ESPS_HOME/src/secrets.h
+- echo '#define SECRETS_PASS "PASSPHRASE_NOT_SET"' >> $ESPS_HOME/src/secrets.h
 - arduino --verify $ESPS_HOME/ESPixelStick.ino
 - mv $BUILD/ESPixelStick.ino.bin $DIST/firmware/espixelstick-travis.bin
 - gulp
 - gulp md
 - gulp travis
-- mv $ESPS_HOME/data $DIST/spiffs
+- mv $ESPS_HOME/data/* $DIST/fs
 - mv $ESPS_HOME/.travis/firmware.json $DIST/firmware/firmware.json
 - cd $DIST
 - zip -r $HOME/$DIST_FILE *
@@ -54,11 +59,11 @@ deploy:
   provider: releases
   api_key:
     secure: VJ/XLiQfMz7HOf8iA5p6ctRezOjiQzF69YZTzeji6eSB7kTbqpnLg+qcgaF6wmEchJHfe+7nDFuMClyOgnlF9htrnmumY6ssr/070Ehw276/CylrV8POCfL3WF6LEK/s04I7n6Lq6mDH/jQKDiQ/byp+Ir8BIXgznrJyt1Vsd9V/+w2IPZaJq4K/BbbbByzdhvWF+CF2fZDC6NdYw2ec/vxUFDqE5DnN9t5HvhzNo2/QyWeerWViRXIgSZOq72NxCcurNxPvQhY+H7iRHOJoCd7X4RdvAPNic3Fc+3tEpuMSMDjiIlzTTibATtBS3esl6I2h58nqhqdvjbDC2/pvCXCnWUWBmzB4VR1gKoDq7S5IlWhTJjhi5nOAnMKHdMBkJ7pOPJ1TIzxNq/Fqx/VRbTAZyt0s9MOOv/lfwlPj0WR98Lc0Xy5L0EzcWMZiUfnTcowg9GXLPibGQBF9l4vL8+isfAvgijcjwiPl7dG1dK4NHnggN9168rb6r4eQ5lJrsU6zc/jt6B6q4joD6IyvoNDIUOrJAtL26rzMvOZ1yVTXxynGzoGNmmd60jIcnC93KK7q9crf/4ofFii3PnHpz29asd/2s0VEC43vQWfw267t3iuXyBpiA47r6aggcoyEPk1FA0h2B5LK1uUJ1u+pBvTQsS3JKZpJ+24Z0H1PgfQ=
-  name: ESPixelStick Firmware (Travis-CI build)
+  name: ESPixelStick Unify Development Firmware (Travis-CI build - NOT TESTED)
   body: This release includes binaries which were automatically built by Travis-CI and should not be considered stable.
   prerelease: true
   file: $HOME/$DIST_FILE
   skip_cleanup: true
   on:
     repo: forkineye/ESPixelStick
-    branch: master
+    branch: unify

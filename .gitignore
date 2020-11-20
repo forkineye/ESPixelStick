@@ -5,3 +5,4 @@ node_modules
 *.ino.generic.bin
 .doxygen/doc
 secrets.h
+__pycache__
