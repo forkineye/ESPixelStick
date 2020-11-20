@@ -41,12 +41,12 @@
 //-----------------------------------------------------------------------------
 // Local Data definitions
 //-----------------------------------------------------------------------------
-typedef struct InputTypeXlateMap_t
+typedef struct 
 {
     c_InputMgr::e_InputType id;
     String name;
     c_InputMgr::e_InputChannelIds ChannelId;
-};
+} InputTypeXlateMap_t;
 
 InputTypeXlateMap_t InputTypeXlateMap[c_InputMgr::e_InputType::InputType_End] =
 {
