@@ -94,11 +94,7 @@ private:
 #   define OM_CHANNEL_SECTION_NAME F("channels")
 #   define OM_CHANNEL_TYPE_NAME    F("type")
 
-#ifdef ARDUINO_ARCH_ESP32
 #   define OM_MAX_CONFIG_SIZE      ((size_t)(4*1024))
-#else
-#   define OM_MAX_CONFIG_SIZE      ((size_t)(3*1024))
-#endif // def ARDUINO_ARCH_ESP32
 
     bool HasBeenInitialized = false;
     bool ConfigSaveNeeded   = false;
