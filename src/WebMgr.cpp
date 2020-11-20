@@ -54,10 +54,21 @@ static AsyncWebServer   webServer (HTTP_PORT);  // Web Server
 static AsyncWebSocket   webSocket ("/ws");      // Web Socket Plugin
 
 //-----------------------------------------------------------------------------
-void PrettyPrint (JsonObject & jsonStuff)
+void PrettyPrint (JsonArray& jsonStuff, String Name)
 {
     // DEBUG_V ("---------------------------------------------");
-    LOG_PORT.println (F("---- Pretty ----"));
+    LOG_PORT.println (String (F ("---- Pretty Print: '")) + Name + "'");
+    serializeJson (jsonStuff, LOG_PORT);
+    LOG_PORT.println ("");
+    // DEBUG_V ("---------------------------------------------");
+
+} // PrettyPrint
+
+//-----------------------------------------------------------------------------
+void PrettyPrint (JsonObject& jsonStuff, String Name)
+{
+    // DEBUG_V ("---------------------------------------------");
+    LOG_PORT.println (String (F ("---- Pretty Print: '")) + Name + "'");
     serializeJson (jsonStuff, LOG_PORT);
     LOG_PORT.println ("");
     // DEBUG_V ("---------------------------------------------");
@@ -856,8 +867,7 @@ void c_WebMgr::processCmd (AsyncWebSocketClient * client, JsonObject & jsonCmd)
         }
 
         // log an error
-        LOG_PORT.println (String (F ("ERROR: Unhandled cmd")));
-        PrettyPrint (jsonCmd);
+        PrettyPrint (jsonCmd, String (F ("ERROR: Unhandled cmd")));
         strcpy (WebSocketFrameCollectionBuffer, "{\"cmd\":\"Error\"");
 
     } while (false);
@@ -916,9 +926,8 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
         }
 
         // log an error
-        LOG_PORT.println (String (F("ERROR: Unhandled Get Request")));
+        PrettyPrint (jsonCmd, String (F ("ERROR: Unhandled Get Request")));
         strcat (WebSocketFrameCollectionBuffer, "\"ERROR: Request Not Supported\"");
-        PrettyPrint (jsonCmd);
 
     } while (false);
 
@@ -969,8 +978,8 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
             break;
         }
 
-        LOG_PORT.println (F("***** ERROR: Undhandled Set request type. *****"));
-        PrettyPrint (jsonCmd);
+        LOG_PORT.println ();
+        PrettyPrint (jsonCmd, String(F ("***** ERROR: Undhandled Set request type. *****")));
         strcat (WebSocketFrameCollectionBuffer, "ERROR");
 
     } while (false);
@@ -1012,8 +1021,7 @@ void c_WebMgr::processCmdOpt (JsonObject & jsonCmd)
         }
 
         // log error
-        LOG_PORT.println (String (F ("ERROR: Unhandled 'opt' Request: ")));
-        PrettyPrint (jsonCmd);
+        PrettyPrint (jsonCmd, String (F ("ERROR: Unhandled 'opt' Request: ")));
 
     } while (false);
 
@@ -1049,8 +1057,7 @@ void c_WebMgr::processCmdDelete (JsonObject& jsonCmd)
             break;
         }
 
-        LOG_PORT.println (String (F ("* Unsupported Delete command: ")));
-        PrettyPrint (jsonCmd);
+        PrettyPrint (jsonCmd, String (F ("* Unsupported Delete command: ")));
         strcat (WebSocketFrameCollectionBuffer, "Page Not found");
 
     } while (false);
