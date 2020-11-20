@@ -815,7 +815,7 @@ void c_WebMgr::processCmd (AsyncWebSocketClient * client, JsonObject & jsonCmd)
 {
     // DEBUG_START;
 
-    WebSocketFrameCollectionBuffer[0] = NULL;
+    WebSocketFrameCollectionBuffer[0] = ((char)NULL);
     // PrettyPrint (jsonCmd);
 
     do // once
