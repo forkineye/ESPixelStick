@@ -103,11 +103,11 @@ void GetConfig (JsonObject & json);
 /** Arduino based setup code that is executed at startup. */
 void setup() 
 {
-    config.ip = (uint32_t)0;
-    config.netmask = (uint32_t)0;
-    config.gateway = (uint32_t)0;
+    config.ip      = IPAddress ((uint32_t)0);
+    config.netmask = IPAddress ((uint32_t)0);
+    config.gateway = IPAddress ((uint32_t)0);
     config.UseDhcp = true;
-    config.ap_fallbackIsEnabled = false;
+    config.ap_fallbackIsEnabled = true;
 
     // Setup serial log port
     LOG_PORT.begin(115200);
@@ -453,7 +453,7 @@ void loop()
     // Reboot handler
     if (reboot)
     {
-        LOG_PORT.println ("Rebooting");
+        LOG_PORT.println (F ("Internal Reboot Requested. Rebooting Now"));
         delay (REBOOT_DELAY);
         ESP.restart ();
     }

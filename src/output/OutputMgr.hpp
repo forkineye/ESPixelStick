@@ -56,7 +56,8 @@ public:
 #ifdef ARDUINO_ARCH_ESP32
         OutputChannelId_2,
 #endif // def ARDUINO_ARCH_ESP32
-        OutputChannelId_End,
+        OutputChannelId_Relay,
+        OutputChannelId_End, // must be last in the list
         OutputChannelId_Start = OutputChannelId_1
     };
 
@@ -69,8 +70,9 @@ public:
         OutputType_Serial,
         OutputType_Renard,
         OutputType_DMX,
-        OutputType_Disabled, // must be last
-        OutputType_End,
+        OutputType_Relay,
+        OutputType_Disabled,
+        OutputType_End, // must be last
         OutputType_Start = OutputType_WS2811,
     };
 
@@ -79,7 +81,6 @@ public:
 #else
 #   define OM_MAX_NUM_CHANNELS  (2000 * 3)
 #endif // !def ARDUINO_ARCH_ESP8266
-
 
 private:
 
@@ -92,6 +93,12 @@ private:
 #   define OM_SECTION_NAME         F("output_config")
 #   define OM_CHANNEL_SECTION_NAME F("channels")
 #   define OM_CHANNEL_TYPE_NAME    F("type")
+
+#ifdef ARDUINO_ARCH_ESP32
+#   define OM_MAX_CONFIG_SIZE      (4*1024)
+#else
+#   define OM_MAX_CONFIG_SIZE      (3*1024)
+#endif // def ARDUINO_ARCH_ESP32
 
     bool HasBeenInitialized = false;
     bool ConfigSaveNeeded   = false;

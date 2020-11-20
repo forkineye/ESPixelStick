@@ -275,6 +275,92 @@ function ParseParameter(name)
     return (location.search.split(name + '=')[1] || '').split('&')[0];
 }
 
+function ProcessModeConfigurationDatafppremote(channelConfig)
+{
+    var jqSelector = "#fseqfilename";
+
+    // remove the existing options
+    $(jqSelector).empty();
+
+    $(jqSelector).append('<option value=>Play Remote Sequence</option>');
+
+    // for each file in the list
+    Fseq_File_List.files.forEach(function (listEntry) {
+        // add in a new entry
+        $(jqSelector).append('<option value="' + listEntry.name + '">' + listEntry.name + '</option>');
+    });
+
+    // set the current selector value
+    $(jqSelector).val(channelConfig.fseqfilename);
+
+
+} // ProcessModeConfigurationDatafppremote
+
+function ProcessModeConfigurationDataEffects(channelConfig)
+{
+    var jqSelector = "#currenteffect";
+
+    // remove the existing options
+    $(jqSelector).empty();
+
+    // for each option in the list
+    channelConfig.effects.forEach(function (listEntry) {
+        // add in a new entry
+        $(jqSelector).append('<option value="' + listEntry.name + '">' + listEntry.name + '</option>');
+    });
+
+    // set the current selector value
+    $(jqSelector).val(channelConfig.currenteffect);
+
+} // ProcessModeConfigurationDataEffects
+
+function ProcessModeConfigurationDataRelay(RelayConfig)
+{
+    // console.log("relaychannelconfigurationtable.rows.length = " + $('#relaychannelconfigurationtable tr').length);
+
+    $('#updateinterval').val(parseInt(RelayConfig.updateinterval,10));
+
+    var ChannelConfigs = RelayConfig.channels;
+
+    while (1 < $('#relaychannelconfigurationtable tr').length) {
+        // console.log("Deleting $('#relaychannelconfigurationtable tr').length " + $('#relaychannelconfigurationtable tr').length);
+        RelayTableRef.last().remove();
+        // console.log("After Delete: $('#relaychannelconfigurationtable tr').length " + $('#relaychannelconfigurationtable tr').length);
+    }
+
+    // add as many rows as we need
+    for (CurrentRowId = 1; CurrentRowId <= ChannelConfigs.length; CurrentRowId++)
+    {
+        console.log("CurrentRowId = " + CurrentRowId);
+        var ChanIdPattern     = '<td id="chanId_'                            + (CurrentRowId) + '">a</td>';
+        var EnabledPattern    = '<td><input type="checkbox" id="Enabled_'    + (CurrentRowId) + '"></td>';
+        var InvertedPattern   = '<td><input type="checkbox" id="Inverted_'   + (CurrentRowId) + '"></td>';
+        var gpioPattern       = '<td><input type="number"   id="gpioId_'     + (CurrentRowId) + '"step="1" min="0" max="24"  value="30"  class="form-control is-valid"></td>';
+        var threshholdPattern = '<td><input type="number"   id="threshhold_' + (CurrentRowId) + '"step="1" min="0" max="255" value="300" class="form-control is-valid"></td>';
+
+        var rowPattern = '<tr>' + ChanIdPattern + EnabledPattern + InvertedPattern + gpioPattern + threshholdPattern + '</tr>';
+        $('#relaychannelconfigurationtable tr:last').after(rowPattern);
+
+        $('#chanId_'     + CurrentRowId).attr('style', $('#chanId_hr').attr('style'));
+        $('#Enabled_'    + CurrentRowId).attr('style', $('#Enabled_hr').attr('style'));
+        $('#Inverted_'   + CurrentRowId).attr('style', $('#Inverted_hr').attr('style'));
+        $('#gpioId_'     + CurrentRowId).attr('style', $('#gpioId_hr').attr('style'));
+        $('#threshhold_' + CurrentRowId).attr('style', $('#threshhold_hr').attr('style'));
+    }
+
+    $.each(ChannelConfigs, function (i, CurrentChannelConfig)
+    {
+        console.log("Current Channel Id = " + CurrentChannelConfig.id);
+        var currentChannelRowId = CurrentChannelConfig.id + 1;
+        $('#chanId_'     + (currentChannelRowId)).html(currentChannelRowId);
+        $('#Enabled_'    + (currentChannelRowId)).prop("checked", CurrentChannelConfig.enabled);
+        $('#Inverted_'   + (currentChannelRowId)).prop("checked", CurrentChannelConfig.invertoutput);
+        $('#gpioId_'     + (currentChannelRowId)).val(parseInt(CurrentChannelConfig.gpioid,10));
+        $('#threshhold_' + (currentChannelRowId)).val(parseInt(CurrentChannelConfig.onofftriggerlevel, 10));
+    });
+
+} // ProcessModeConfigurationDataRelay
+
 function ProcessModeConfigurationData(channelId, ChannelTypeName, JsonConfig )
 {
     // console.info("ProcessModeConfigurationData: Start");
@@ -308,41 +394,19 @@ function ProcessModeConfigurationData(channelId, ChannelTypeName, JsonConfig )
 
     if (("fppremote" === ChannelTypeName) && (null !== Fseq_File_List))
     {
-        var jqSelector = "#fseqfilename";
-
-        // remove the existing options
-        $(jqSelector).empty();
-
-        $(jqSelector).append('<option value=>Play Remote Sequence</option>');
-
-        // for each file in the list
-        Fseq_File_List.files.forEach(function (listEntry)
-        {
-            // add in a new entry
-            $(jqSelector).append('<option value="' + listEntry.name + '">' + listEntry.name + '</option>');
-        });
-
-        // set the current selector value
-        $(jqSelector).val(channelConfig.fseqfilename);
-
+        ProcessModeConfigurationDatafppremote(channelConfig);
     }
 
-    if ("effects" === ChannelTypeName) {
-        var jqSelector = "#currenteffect";
-
-        // remove the existing options
-        $(jqSelector).empty();
-
-        // for each option in the list
-        channelConfig.effects.forEach(function (listEntry) {
-            // add in a new entry
-            $(jqSelector).append('<option value="' + listEntry.name + '">' + listEntry.name + '</option>');
-        });
-
-        // set the current selector value
-        $(jqSelector).val(channelConfig.currenteffect);
+    if ("effects" === ChannelTypeName)
+    {
+        ProcessModeConfigurationDataEffects(channelConfig);
     }
 
+    if ("relay" === ChannelTypeName)
+    {
+        console.info("ProcessModeConfigurationData: relay");
+        ProcessModeConfigurationDataRelay(channelConfig);
+    }
     // console.info("ProcessModeConfigurationData: End");
 
 } // ProcessModeConfigurationData
@@ -453,6 +517,27 @@ function GenerateInputOutputControlName(OptionListName, DisplayedChannelId)
     return NewName;
 } // GenerateInputOutputControlName
 
+function ProcessReceivedOptionDataMessageLoadOption(OptionListName, DisplayedChannelId )
+{
+    var HtmlLoadFileName = $('#' + OptionListName + DisplayedChannelId + ' option:selected').text().toLowerCase();
+    // console.info("HtmlLoadName: " + HtmlLoadName);
+    HtmlLoadFileName = HtmlLoadFileName.replace(".", "_");
+    HtmlLoadFileName = HtmlLoadFileName.replace(" ", "_");
+    HtmlLoadFileName = HtmlLoadFileName + ".html";
+    // console.info("Adjusted HtmlLoadName: " + HtmlLoadName);
+
+    // try to load the field definition file for this channel type
+    $('#' + OptionListName + 'mode' + DisplayedChannelId).load(HtmlLoadFileName, function () {
+        if ("input" === OptionListName) {
+            ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Input_Config);
+        }
+        else if ("output" === OptionListName) {
+            ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Output_Config);
+        }
+    });
+
+} // ProcessReceivedOptionDataMessageLoadOption
+
 function ProcessReceivedOptionDataMessage(JsonOptionList)
 {
     // console.info("ProcessReceivedOptionDataMessage");
@@ -461,14 +546,15 @@ function ProcessReceivedOptionDataMessage(JsonOptionList)
     Object.keys(JsonOptionList).forEach(function (OptionListName)
     {
         // OptionListName is 'input' or 'output'
-        var ArrayOfOptions    = JsonOptionList[OptionListName].list; // value
-        var ArrayOfSelections = JsonOptionList[OptionListName].selectedoptionlist;
-
-        // for each option channel:
-        $(ArrayOfSelections).each(function (DisplayedChannelId, currentSelection)
+        var ArrayOfChannels = JsonOptionList[OptionListName].channels;
+        $(ArrayOfChannels).each(function (CurrentChannelIndex)
         {
+            var CurrentChannel       = ArrayOfChannels[CurrentChannelIndex]; // value
+            var DisplayedChannelId   = CurrentChannel.id;
+            var ListOfChannelOptions = ArrayOfChannels[CurrentChannelIndex].list;
+
             // does the selection box we need already exist?
-            if (! $('#' + OptionListName + 'mode' + DisplayedChannelId).length)
+            if (!$('#' + OptionListName + 'mode' + DisplayedChannelId).length)
             {
                 // create the selection box
                 $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + DisplayedChannelId + '">' + GenerateInputOutputControlName(OptionListName, DisplayedChannelId) + ' Mode:</label>');
@@ -481,27 +567,9 @@ function ProcessReceivedOptionDataMessage(JsonOptionList)
             {
                 if ($(this).val())
                 {
-                    var HtmlLoadFileName = $('#' + OptionListName + DisplayedChannelId + ' option:selected').text().toLowerCase();
-                    // console.info("HtmlLoadName: " + HtmlLoadName);
-                    HtmlLoadFileName = HtmlLoadFileName.replace(".", "_");
-                    HtmlLoadFileName = HtmlLoadFileName.replace(" ", "_");
-                    HtmlLoadFileName = HtmlLoadFileName + ".html";
-                    // console.info("Adjusted HtmlLoadName: " + HtmlLoadName);
-
-                    // try to load the field definition file for this channel type
-                    $('#' + OptionListName + 'mode' + DisplayedChannelId).load(HtmlLoadFileName, function ()
-                    {
-                        if ("input" === OptionListName)
-                        {
-                            ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Input_Config);
-                        }
-                        else if ("output" === OptionListName)
-                        {
-                            ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Output_Config);
-                        }
-                    });
+                    ProcessReceivedOptionDataMessageLoadOption(OptionListName, DisplayedChannelId);
                 }
-            });
+            }); // End channel select onchange handler
 
             var jqSelector = "#" + OptionListName + DisplayedChannelId;
 
@@ -509,37 +577,22 @@ function ProcessReceivedOptionDataMessage(JsonOptionList)
             $(jqSelector).empty();
 
             // for each option in the list
-            ArrayOfOptions.forEach(function (listEntry)
+            ListOfChannelOptions.forEach(function (listEntry)
             {
-                // add in a new entry
+                // add a new entry
                 $(jqSelector).append('<option value="' + listEntry.id + '">' + listEntry.name + '</option>');
             });
 
             // set the current selector value
-            $(jqSelector).val(ArrayOfSelections[DisplayedChannelId].selectedoption);
+            $(jqSelector).val(CurrentChannel.selectedoption);
 
-            // clear the footer
-            $('#refresh').html('0 ms / 0 fps');
-
-            var fileName = $('#' + OptionListName + DisplayedChannelId + ' option:selected').text().toLowerCase();
-            fileName = fileName.replace(" ", "_").replace(".", "_");
-            // console.info("fileName: " + fileName);
-
-            // try to load the field definition file for this channel type
-            $('#' + OptionListName + 'mode' + DisplayedChannelId).load(fileName + ".html", function ()
-            {
-                if ("input" === OptionListName)
-                {
-                    ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Input_Config);
-                }
-                else if ("output" === OptionListName)
-                {
-                    ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Output_Config);
-                }
-            });
+            ProcessReceivedOptionDataMessageLoadOption(OptionListName, DisplayedChannelId);
 
         }); // end for each channel
-    }); // end for each option group
+    }); // end for each option type
+
+    // clear the footer
+    $('#refresh').html('0 ms / 0 fps');
 
 } // ProcessReceivedOptionDataMessage
 
@@ -602,13 +655,26 @@ function ExtractDeviceConfigFromHtmlPage(JsonConfig, SectionName)
                 ChannelConfig[elementid] = $(SelectedElement).val();
             }
         });
+
+        if ((ChannelConfig.type === "Relay") && ($("#relaychannelconfigurationtable").length))
+        {
+            $.each(ChannelConfig.channels, function (i, CurrentChannelConfig)
+            {
+                console.log("Current Channel Id = " + CurrentChannelConfig.id);
+                var currentChannelRowId = CurrentChannelConfig.id + 1;
+                CurrentChannelConfig.enabled           = $('#Enabled_'    + (currentChannelRowId)).prop("checked");
+                CurrentChannelConfig.invertoutput      = $('#Inverted_'   + (currentChannelRowId)).prop("checked");
+                CurrentChannelConfig.gpioid            = $('#gpioId_'     + (currentChannelRowId)).val();
+                CurrentChannelConfig.onofftriggerlevel = $('#threshhold_' + (currentChannelRowId)).val();
+            });
+        }
     }); // end for each channel
 } // ExtractDeviceConfigFromHtmlPage
 
 // Build dynamic JSON config submission for "Device" tab
 function submitDeviceConfig()
 {
-    ExtractDeviceConfigFromHtmlPage(Input_Config.channels, "input");
+    ExtractDeviceConfigFromHtmlPage(Input_Config.channels,  "input");
     ExtractDeviceConfigFromHtmlPage(Output_Config.channels, "output");
 
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'device': { 'id': $('#config #device #id').val() } } } }));
