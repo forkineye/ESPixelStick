@@ -57,7 +57,7 @@ extern "C" {
 
 #define FIFO_TRIGGER_LEVEL (UART_TX_FIFO_SIZE / 2)
 
-typedef enum RenardFrameDefinitions_t
+typedef enum 
 {
 	CMD_DATA_START   = 0x80,
     ESC_CHAR         = 0x7F,
@@ -67,7 +67,7 @@ typedef enum RenardFrameDefinitions_t
 
     MIN_VAL_TO_ESC   = FRAME_PAD_CHAR,
     MAX_VAL_TO_ESC   = ESC_CHAR
-};
+} RenardFrameDefinitions_t;
 
 //----------------------------------------------------------------------------
 c_OutputSerial::c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId,
