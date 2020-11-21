@@ -90,6 +90,10 @@ $(function ()
         clearStream();
     });
 
+    $('#adminReboot').click(function () {
+        reboot();
+    });
+
     var finalUrl = "http://" + target + "/upload";
     // console.log(finalUrl);
     const uploader = new Dropzone('#filemanagementupload', 

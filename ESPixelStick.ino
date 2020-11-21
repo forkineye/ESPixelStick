@@ -438,9 +438,10 @@ void loop()
     WebMgr.Process ();
 
 // need to keep the rx pipeline empty
-    size_t BytesToDiscard = max (500, LOG_PORT.available ());
+    size_t BytesToDiscard = min (1000, LOG_PORT.available ());
     while (0 < BytesToDiscard)
     {
+        // DEBUG_V (String("BytesToDiscard: ") + String(BytesToDiscard));
         BytesToDiscard--;
         LOG_PORT.read();
 #ifdef ARDUINO_ARCH_ESP32
