@@ -388,11 +388,12 @@ void c_OutputMgr::GetPortConfig (e_OutputChannelIds portId, String & ConfigRespo
 //-----------------------------------------------------------------------------
 void c_OutputMgr::GetOptions (JsonObject & jsonOptions)
 {
+    // extern void PrettyPrint (JsonObject&, String);
     // DEBUG_START;
     JsonArray jsonChannelsArray = jsonOptions.createNestedArray (OM_CHANNEL_SECTION_NAME);
     // DEBUG_V (String("ConfigData: ") + ConfigData);
 
-    DynamicJsonDocument OutputConfigData(3000);
+    DynamicJsonDocument OutputConfigData(OM_MAX_CONFIG_SIZE);
     DeserializationError deError = deserializeJson (OutputConfigData, ConfigData);
     // DEBUG_V (String("deError: ") + String(deError.c_str()));
 
@@ -444,7 +445,7 @@ void c_OutputMgr::GetOptions (JsonObject & jsonOptions)
             }
             else
             {
-                // DEBUG_V ("");
+                // DEBUG_V ("Output Type Not in list");
             }
 
             // DEBUG_V ("");
