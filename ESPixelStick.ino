@@ -243,17 +243,18 @@ boolean dsNetwork(JsonObject & json)
 #endif // def ARDUINO_ARCH_ESP8266
 
         JsonObject network = json["network"];
-        retval |= FileIO::setFromJSON(config.ssid,                 network["ssid"]);
-        retval |= FileIO::setFromJSON(config.passphrase,           network["passphrase"]);
-        retval |= FileIO::setFromJSON(ip,                          network["ip"]);
-        retval |= FileIO::setFromJSON(netmask,                     network["netmask"]);
-        retval |= FileIO::setFromJSON(gateway,                     network["gateway"]);
-        retval |= FileIO::setFromJSON(config.hostname,             network["hostname"]);
-        retval |= FileIO::setFromJSON(config.UseDhcp,              network["dhcp"]);
-        retval |= FileIO::setFromJSON(config.sta_timeout,          network["sta_timeout"]);
-        retval |= FileIO::setFromJSON(config.ap_fallbackIsEnabled, network["ap_fallback"]);
-        retval |= FileIO::setFromJSON(config.ap_timeout,           network["ap_timeout"]);
-    
+        retval |= FileIO::setFromJSON(config.ssid,                          network["ssid"]);
+        retval |= FileIO::setFromJSON(config.passphrase,                    network["passphrase"]);
+        retval |= FileIO::setFromJSON(ip,                                   network["ip"]);
+        retval |= FileIO::setFromJSON(netmask,                              network["netmask"]);
+        retval |= FileIO::setFromJSON(gateway,                              network["gateway"]);
+        retval |= FileIO::setFromJSON(config.hostname,                      network["hostname"]);
+        retval |= FileIO::setFromJSON(config.UseDhcp,                       network["dhcp"]);
+        retval |= FileIO::setFromJSON(config.sta_timeout,                   network["sta_timeout"]);
+        retval |= FileIO::setFromJSON(config.ap_fallbackIsEnabled,          network["ap_fallback"]);
+        retval |= FileIO::setFromJSON(config.ap_timeout,                    network["ap_timeout"]);
+        retval |= FileIO::setFromJSON (config.RebootOnWiFiFailureToConnect, network["ap_reboot"]);
+
         // DEBUG_V ("     ip: " + ip);
         // DEBUG_V ("gateway: " + gateway);
         // DEBUG_V ("netmask: " + netmask);
@@ -261,14 +262,13 @@ boolean dsNetwork(JsonObject & json)
         config.ip.fromString (ip);
         config.gateway.fromString (gateway);
         config.netmask.fromString (netmask);
-
-        ResetWiFi = retval;
     }
     else
     {
         LOG_PORT.println(F("No network settings found."));
     }
 
+    // DEBUG_V (String("retval: ") + String(retval));
     // DEBUG_END;
     return retval;
 }
@@ -276,7 +276,8 @@ boolean dsNetwork(JsonObject & json)
 void SetConfig (JsonObject& json)
 {
     // DEBUG_START;
-    reboot = deserializeCore (json);
+    ResetWiFi = deserializeCore (json);
+
     // DEBUG_V ();
     ConfigSaveNeeded = 1;
     // DEBUG_END;
@@ -359,6 +360,7 @@ void GetConfig (JsonObject & json)
 
     network["ap_fallback"] = config.ap_fallbackIsEnabled;
     network["ap_timeout"]  = config.ap_timeout;
+    network["ap_reboot"]   = config.RebootOnWiFiFailureToConnect;
 
     // DEBUG_END;
 } // GetConfig
@@ -437,6 +439,8 @@ void loop()
 
     WebMgr.Process ();
 
+    WiFiMgr.Poll ();
+
 // need to keep the rx pipeline empty
     size_t BytesToDiscard = min (1000, LOG_PORT.available ());
     while (0 < BytesToDiscard)
@@ -462,7 +466,7 @@ void loop()
     if (true == ResetWiFi)
     {
         ResetWiFi = false;
-        // WiFiMgr.reset ();
+        WiFiMgr.reset ();
     }
 
 } // loop
