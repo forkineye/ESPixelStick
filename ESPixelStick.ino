@@ -108,6 +108,9 @@ void setup()
     config.gateway = IPAddress ((uint32_t)0);
     config.UseDhcp = true;
     config.ap_fallbackIsEnabled = true;
+    config.RebootOnWiFiFailureToConnect = true;
+    config.ap_timeout = AP_TIMEOUT;
+    config.sta_timeout = CLIENT_TIMEOUT;
 
     // Setup serial log port
     LOG_PORT.begin(115200);
