@@ -44,6 +44,8 @@ extern const String BUILD_DATE;
 
 #define REBOOT_DELAY    100     ///< Delay for rebooting once reboot flag is set
 #define LOG_PORT        Serial  ///< Serial port for console logging
+#define CLIENT_TIMEOUT  15      ///< In station/client mode try to connection for 15 seconds
+#define AP_TIMEOUT      120     ///< In AP mode, wait 60 seconds for a connection or reboot
 
 //TODO: Remove this?
 // E1.33 / RDMnet stuff - to be moved to library
@@ -68,10 +70,10 @@ typedef struct {
     IPAddress   ip                   = (uint32_t)0;
     IPAddress   netmask              = (uint32_t)0;
     IPAddress   gateway              = (uint32_t)0;
-    bool        UseDhcp              = true;  ///< Use DHCP?
-    bool        ap_fallbackIsEnabled = false; ///< Fallback to AP if fail to associate?
-    uint32_t    ap_timeout;          ///< How long to wait in AP mode with no connection before rebooting
-    uint32_t    sta_timeout;         ///< Timeout when connection as client (station)
+    bool        UseDhcp              = true;           ///< Use DHCP?
+    bool        ap_fallbackIsEnabled = true;           ///< Fallback to AP if fail to associate?
+    uint32_t    ap_timeout           = AP_TIMEOUT;     ///< How long to wait in AP mode with no connection before rebooting
+    uint32_t    sta_timeout          = CLIENT_TIMEOUT; ///< Timeout when connection as client (station)
     bool        RebootOnWiFiFailureToConnect = true;
 } config_t;
 
