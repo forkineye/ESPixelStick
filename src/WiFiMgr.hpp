@@ -62,8 +62,6 @@ public:
     uint32_t  GetFsmStartTime (void)                     { return FsmTimerWiFiStartTime; }
     config_t* GetConfigPtr    () { return config; }
 private:
-#define CLIENT_TIMEOUT  15      ///< In station/client mode try to connection for 15 seconds
-#define AP_TIMEOUT      120     ///< In AP mode, wait 60 seconds for a connection or reboot
 
 #ifdef ARDUINO_ARCH_ESP8266
     WiFiEventHandler    wifiConnectHandler;     // WiFi connect handler

@@ -129,75 +129,7 @@ void c_WiFiMgr::Begin (config_t* NewConfig)
     pCurrentFsmState->Poll ();
     pCurrentFsmState->Poll ();
 
-#ifdef WAIT_FOR_WIFI
-    // Wait for the WiFi to get worked out
-    String StateName;
-    String ConnectedToApName;
-    String ConnectedAsApName;
-    fsm_WiFi_state_ConnectedToAP_imp.GetStateName (ConnectedToApName);
-    fsm_WiFi_state_ConnectedToSta_imp.GetStateName (ConnectedAsApName);
-
-    do
-    {
-        delay (500);
-        pCurrentFsmState->Poll ();
-        pCurrentFsmState->GetStateName (StateName);
-
-    } while ((!StateName.equals(ConnectedToApName)) && (!StateName.equals (ConnectedAsApName)));
-#endif // def WAIT_FOR_WIFI
-
-#ifdef OldStuff
-    // all this gets moved to the FSM
-
-    // Fallback to default SSID and passphrase if we fail to connect
-    initWifi ();
-
-    if (WiFi.status () != WL_CONNECTED)
-    {
-        LOG_PORT.println (F ("*** FAILED TO ASSOCIATE WITH AP - Trying the default SSID ***"));
-     // DEBUG_V (String("ssid: ") + String(ssid));
-     // DEBUG_V (String ("passphrase: ") + String (passphrase));
-        config->ssid = ssid;
-        config->passphrase = passphrase;
-        initWifi ();
-    }
- // DEBUG_V ("");
-
-    // If we fail again, go SoftAP or reboot
-    if (WiFi.status () != WL_CONNECTED)
-    {
-     // DEBUG_V ("");
-        // config->ap_fallbackIsEnabled = true;
-        if (config->ap_fallbackIsEnabled)
-        {
-            LOG_PORT.println (F ("*** FAILED TO ASSOCIATE WITH AP, GOING SOFTAP ***"));
-            WiFi.mode (WIFI_AP);
-            String ssid = "ESPixelStick " + String (config->hostname);
-            WiFi.softAP (ssid.c_str ());
-            CurrentIpAddress = WiFi.softAPIP ();
-            CurrentSubnetMask = IPAddress (255, 255, 255, 0);
-            LOG_PORT.println (String(F ("*** SOFTAP: IP Address: '")) + CurrentIpAddress.toString() + F("' ***"));
-        }
-        else
-        {
-            LOG_PORT.println (F ("*** FAILED TO ASSOCIATE WITH AP, REBOOTING ***"));
-            ESP.restart ();
-        }
-    }
- // DEBUG_V ("");
-
-#ifdef ARDUINO_ARCH_ESP8266
-    wifiDisconnectHandler = WiFi.onStationModeDisconnected ([this](const WiFiEventStationModeDisconnected& event) {this->onWiFiDisconnect (event); });
-
-    // Handle OTA update from asynchronous callbacks
-    Update.runAsync (true);
-#else
-    // not needed for ESP32
-#endif
-
-#endif // def OldStuff
-
-   // DEBUG_END;
+    // DEBUG_END;
 
 } // begin
 
@@ -472,7 +404,7 @@ void fsm_WiFi_state_ConnectingConfig::Poll ()
     {
         if (CurrentTimeMS - WiFiMgr.GetFsmStartTime() > (1000 * WiFiMgr.GetConfigPtr()->sta_timeout))
         {
-            LOG_PORT.println (F ("\n*** WiFi Failed to connect using Configured Credentials ***"));
+            LOG_PORT.println (F ("\nWiFi Failed to connect using Configured Credentials"));
             fsm_WiFi_state_ConnectingDefault_imp.Init ();
         }
     }
@@ -535,7 +467,7 @@ void fsm_WiFi_state_ConnectingDefault::Poll ()
     {
         if (CurrentTimeMS - WiFiMgr.GetFsmStartTime () > (1000 * WiFiMgr.GetConfigPtr ()->sta_timeout))
         {
-            LOG_PORT.println (F ("\n*** WiFi Failed to connect using default Credentials ***"));
+            LOG_PORT.println (F ("\nWiFi Failed to connect using default Credentials"));
             fsm_WiFi_state_ConnectingAsAP_imp.Init ();
         }
     }
@@ -597,7 +529,7 @@ void fsm_WiFi_state_ConnectingAsAP::Poll ()
 
         if (millis () - WiFiMgr.GetFsmStartTime () > (1000 * WiFiMgr.GetConfigPtr ()->ap_timeout))
         {
-            LOG_PORT.println (F ("\n*** WiFi STA Failed to connect ***"));
+            LOG_PORT.println (F ("\nWiFi STA Failed to connect"));
             fsm_WiFi_state_ConnectionFailed_imp.Init ();
         }
     }
@@ -614,18 +546,26 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
     WiFiMgr.SetFsmState (this);
     WiFiMgr.AnnounceState ();
 
-    WiFi.mode (WIFI_AP);
+    if (true == WiFiMgr.GetConfigPtr ()->ap_fallbackIsEnabled)
+    {
+        WiFi.mode (WIFI_AP);
 
-    String ssid = "ESPixelStick " + String (WiFiMgr.GetConfigPtr()->hostname);
-    WiFi.softAP (ssid.c_str ());
+        String ssid = "ESPixelStick " + String (WiFiMgr.GetConfigPtr ()->hostname);
+        WiFi.softAP (ssid.c_str ());
 
-    IPAddress CurrentIpAddress  = WiFi.softAPIP ();
-    IPAddress CurrentSubnetMask = IPAddress (255, 255, 255, 0);
+        IPAddress CurrentIpAddress = WiFi.softAPIP ();
+        IPAddress CurrentSubnetMask = IPAddress (255, 255, 255, 0);
 
-    WiFiMgr.setIpAddress (CurrentIpAddress);
-    WiFiMgr.setIpSubNetMask (CurrentSubnetMask);
+        WiFiMgr.setIpAddress (CurrentIpAddress);
+        WiFiMgr.setIpSubNetMask (CurrentSubnetMask);
 
-    LOG_PORT.println (String (F ("*** SOFTAP: IP Address: '")) + CurrentIpAddress.toString () + F ("' ***"));
+        LOG_PORT.println (String (F ("WiFi SOFTAP: IP Address: '")) + CurrentIpAddress.toString ());
+    }
+    else
+    {
+        LOG_PORT.println (String (F ("WiFi SOFTAP: Not enabled")));
+        fsm_WiFi_state_ConnectionFailed_imp.Init ();
+    }
 
     // DEBUG_END;
 
@@ -739,7 +679,7 @@ void fsm_WiFi_state_ConnectedToSta::OnDisconnect ()
 {
     // DEBUG_START;
 
-    LOG_PORT.println (F ("*** WiFi STA Disconnected ***"));
+    LOG_PORT.println (F ("WiFi STA Disconnected"));
     fsm_WiFi_state_ConnectionFailed_imp.Init ();
 
     // DEBUG_END;
@@ -759,12 +699,14 @@ void fsm_WiFi_state_ConnectionFailed::Init ()
     if (true == WiFiMgr.GetConfigPtr ()->RebootOnWiFiFailureToConnect)
     {
         extern bool reboot;
-        LOG_PORT.println (F ("*** WiFi Requesting Reboot ***"));
+        LOG_PORT.println (F ("WiFi Requesting Reboot"));
 
         reboot = true;
     }
     else
     {
+        LOG_PORT.println (F ("WiFi Reboot Disable."));
+
         // start over
         fsm_WiFi_state_Boot_imp.Init ();
     }
