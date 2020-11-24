@@ -1,0 +1,32 @@
+<div id="relay">
+    <legend class="esps-legend">Relay Configuration</legend>
+    <div class="form-group has-feedback" id="fg_relay">
+        <div class="form-group has-feedback">
+            <label class="control-label col-sm-2" for="updateinterval">Frame Delay (ms):</label>
+            <div class="col-sm-4">
+                <input type="number" class="form-control is-valid" id="updateinterval" step="1" min="0" max="10000" value="1" required title="Minimum time between output updates" onchange="RefreshRelayRate()">
+                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+            </div>
+        </div>
+        <table class="col-sm-offset-2">
+            <tbody id="relaychannelconfigurationtable">
+                <tr>
+                    <th id="chanId_hr"     style="text-align: center; vertical-align: middle; width: 80px;">Channel</th>
+                    <th id="Enabled_hr"    style="text-align: center; vertical-align: middle; width: 80px;">Enabled</th>
+                    <th id="Inverted_hr"   style="text-align: center; vertical-align: middle; width: 80px;">Inverted</th>
+                    <th id="gpioId_hr"     style="text-align: center; vertical-align: middle; width: 100px;">GPIO ID</th>
+                    <th id="threshhold_hr" style="text-align: center; vertical-align: middle; width: 100px;">Trigger Threshold</th>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function RefreshRelayRate()
+    {
+        var rateMs = updateinterval;
+        var hz = 1 / updateinterval;
+        $('#refresh').html(Math.ceil(rateMs) + ' ms / ' + Math.floor(hz) + ' fps');
+    } // RefreshRelayRate
+</script>
