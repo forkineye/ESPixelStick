@@ -61,6 +61,8 @@ public:
     void      SetFsmStartTime (uint32_t NewStartTime)    { FsmTimerWiFiStartTime = NewStartTime; }
     uint32_t  GetFsmStartTime (void)                     { return FsmTimerWiFiStartTime; }
     config_t* GetConfigPtr    () { return config; }
+    bool      IsWiFiConnected ();
+
 private:
 
 #define PollInterval 1000
