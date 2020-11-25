@@ -27,6 +27,7 @@
 #endif // def ARDUINO_ARCH_ESP8266
 
 #include "WiFiMgr.hpp"
+#include "input/InputMgr.hpp"
 
 //-----------------------------------------------------------------------------
 // Create secrets.h with a #define for SECRETS_SSID and SECRETS_PASS
@@ -174,6 +175,7 @@ void c_WiFiMgr::reset ()
     LOG_PORT.println (F ("WiFi Reset has been requested"));
 
     fsm_WiFi_state_Boot_imp.Init ();
+    InputMgr.WiFiStateChanged (false);
 
     // DEBUG_END;
 } // reset
@@ -585,6 +587,8 @@ void fsm_WiFi_state_ConnectedToAP::Init ()
     // DEBUG_V (String ("localIp: ") + localIp.toString ());
     LOG_PORT.println (String (F ("WiFi Connected with IP: ")) + localIp.toString ());
 
+    InputMgr.WiFiStateChanged (true);
+
     // DEBUG_END;
 } // fsm_WiFi_state_ConnectingAsAP::Init
 
@@ -635,6 +639,8 @@ void fsm_WiFi_state_ConnectedToSta::Init ()
     WiFiMgr.setIpAddress (CurrentIpAddress);
     WiFiMgr.setIpSubNetMask (CurrentSubnetMask);
 
+    InputMgr.WiFiStateChanged (true);
+
     // DEBUG_END;
 } // fsm_WiFi_state_ConnectedToSta::Init
 
@@ -660,6 +666,7 @@ void fsm_WiFi_state_ConnectionFailed::Init ()
 
     WiFiMgr.SetFsmState (this);
     WiFiMgr.AnnounceState ();
+    InputMgr.WiFiStateChanged (false);
 
     if (true == WiFiMgr.GetConfigPtr ()->RebootOnWiFiFailureToConnect)
     {

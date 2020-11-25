@@ -840,5 +840,20 @@ void c_InputMgr::ResetBlankTimer ()
 
 } // SetOutputState
 
+//-----------------------------------------------------------------------------
+void c_InputMgr::WiFiStateChanged (bool IsConnected)
+{
+    // DEBUG_START;
+
+    // pass through each active interface and notify WiFi changed state
+    for (c_InputCommon* pInputChannel : pInputChannelDrivers)
+    {
+        // DEBUG_V("");
+        pInputChannel->WiFiStateChanged (IsConnected);
+    }
+
+    // DEBUG_END;
+} // WiFiStateChanged
+
 // create a global instance of the Input channel factory
 c_InputMgr InputMgr;

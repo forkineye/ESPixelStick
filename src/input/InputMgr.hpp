@@ -44,6 +44,7 @@ public:
     void SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize);
     void SetOperationalState (bool Active);
     void ResetBlankTimer ();
+    void WiFiStateChanged (bool IsConnected); // used by poorly designed rx functions
 
     enum e_InputType
     {
