@@ -43,6 +43,7 @@ class c_InputE131 : public c_InputCommon
 
     void SubscribeToMulticastDomains();
     void validateConfiguration ();
+    void WiFiStateChanged (bool IsConnected, bool RebootAllowed); // used by poorly designed rx functions
 
   public:
 

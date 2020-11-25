@@ -73,7 +73,7 @@ void c_InputE131::Begin ()
         validateConfiguration ();
         // DEBUG_V ("");
 
-        WiFiStateChanged (WiFiMgr.IsWiFiConnected ());
+        WiFiStateChanged (WiFiMgr.IsWiFiConnected (), false);
 
         // DEBUG_V ("");
         HasBeenInitialized = true;
@@ -317,6 +317,12 @@ void c_InputE131::validateConfiguration ()
 //-----------------------------------------------------------------------------
 void c_InputE131::WiFiStateChanged (bool IsConnected)
 {
+    WiFiStateChanged (IsConnected, true);
+}
+
+//-----------------------------------------------------------------------------
+void c_InputE131::WiFiStateChanged (bool IsConnected, bool ReBootAllowed)
+{
     // DEBUG_START;
 
     if (nullptr == e131)
@@ -355,7 +361,7 @@ void c_InputE131::WiFiStateChanged (bool IsConnected)
         // Setup IGMP subscriptions if multicast is enabled
         SubscribeToMulticastDomains ();
     }
-    else
+    else if (ReBootAllowed)
     {
         // handle a disconnect
         // E1.31 does not do this gracefully. A loss of connection needs a reboot
