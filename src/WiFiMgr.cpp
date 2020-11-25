@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
 // Create secrets.h with a #define for SECRETS_SSID and SECRETS_PASS
 // or delete the #include and enter the strings directly below.
-#include "secrets.h"
+// #include "secrets.h"
 #ifndef SECRETS_SSID
 #   define SECRETS_SSID "DEFAULT_SSID_NOT_SET"
 #   define SECRETS_PASS "DEFAULT_PASSPHRASE_NOT_SET"
@@ -58,13 +58,13 @@ RF_PRE_INIT() {
 /*****************************************************************************/
 /* FSM                                                                       */
 /*****************************************************************************/
-fsm_WiFi_state_Boot              fsm_WiFi_state_Boot_imp;
-fsm_WiFi_state_ConnectingConfig  fsm_WiFi_state_ConnectingConfig_imp;
-fsm_WiFi_state_ConnectingDefault fsm_WiFi_state_ConnectingDefault_imp;
-fsm_WiFi_state_ConnectedToAP     fsm_WiFi_state_ConnectedToAP_imp;
-fsm_WiFi_state_ConnectingAsAP    fsm_WiFi_state_ConnectingAsAP_imp;
-fsm_WiFi_state_ConnectedToSta    fsm_WiFi_state_ConnectedToSta_imp;
-fsm_WiFi_state_ConnectionFailed  fsm_WiFi_state_ConnectionFailed_imp;
+fsm_WiFi_state_Boot                    fsm_WiFi_state_Boot_imp;
+fsm_WiFi_state_ConnectingUsingConfig   fsm_WiFi_state_ConnectingUsingConfig_imp;
+fsm_WiFi_state_ConnectingUsingDefaults fsm_WiFi_state_ConnectingDefault_imp;
+fsm_WiFi_state_ConnectedToAP           fsm_WiFi_state_ConnectedToAP_imp;
+fsm_WiFi_state_ConnectingAsAP          fsm_WiFi_state_ConnectingAsAP_imp;
+fsm_WiFi_state_ConnectedToSta          fsm_WiFi_state_ConnectedToSta_imp;
+fsm_WiFi_state_ConnectionFailed        fsm_WiFi_state_ConnectionFailed_imp;
 
 //-----------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
@@ -122,11 +122,10 @@ void c_WiFiMgr::Begin (config_t* NewConfig)
     WiFi.onEvent ([this](WiFiEvent_t event, system_event_info_t info) {this->onWiFiDisconnect (event, info);}, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
 #endif
 
+    // set up the poll interval
+    NextPollTime = millis () + PollInterval;
+
     // get the FSM moving
-    pCurrentFsmState->Poll ();
-    pCurrentFsmState->Poll ();
-    pCurrentFsmState->Poll ();
-    pCurrentFsmState->Poll ();
     pCurrentFsmState->Poll ();
 
     // DEBUG_END;
@@ -152,51 +151,11 @@ void c_WiFiMgr::GetStatus (JsonObject & jsonStatus)
  // DEBUG_END;
 } // GetStatus
 
-//-----------------------------------------------------------------------------
-void c_WiFiMgr::initWifi ()
-{
- // DEBUG_START;
-    // Switch to station mode and disconnect just in case
-    WiFi.mode (WIFI_STA);
- // DEBUG_V ("");
-#ifdef ARDUINO_ARCH_ESP8266
-    WiFi.disconnect ();
-#else
-    WiFi.persistent (false);
- // DEBUG_V ("");
-    // WiFi.disconnect (true);
-#endif
- // DEBUG_V ("");
-
-    connectWifi ();
-
- // DEBUG_V ("");
-
-    // wait for the connection to complete via the callback function
-    uint32_t WaitForWiFiStartTime = millis ();
-    while (WiFi.status () != WL_CONNECTED)
-    {
-     // DEBUG_V ("");
-        LOG_PORT.print (".");
-        delay (500);
-        if (millis () - WaitForWiFiStartTime > (1000 * config->sta_timeout))
-        {
-            LOG_PORT.println (F ("\n*** WiFi Failed to connect ***"));
-            break;
-        }
-    }
- // DEBUG_END;
-} // initWifi
 
 //-----------------------------------------------------------------------------
 void c_WiFiMgr::connectWifi ()
 {
     // DEBUG_START;
-#ifdef ARDUINO_ARCH_ESP8266
-    delay (secureRandom (100, 500));
-#else
-    delay (random (100, 500));
-#endif
     LOG_PORT.println (String(F ("\nWiFi Connecting to ")) + 
                       String(config->ssid) + 
                       String (F (" as ")) + 
@@ -240,7 +199,7 @@ void c_WiFiMgr::SetUpIp ()
 
         if (temp == config->ip)
         {
-            LOG_PORT.println (F ("** ERROR - STATIC SELECTED WITHOUT IP. Using DHCP assigned address **"));
+            LOG_PORT.println (F ("WiFI: ERROR: STATIC SELECTED WITHOUT IP. Using DHCP assigned address"));
             config->UseDhcp = true;
             break;
         }
@@ -350,12 +309,15 @@ void c_WiFiMgr::AnnounceState ()
 
 } // AnnounceState
 
+//-----------------------------------------------------------------------------
 void c_WiFiMgr::Poll ()
 {
     // DEBUG_START;
 
-    if (nullptr != pCurrentFsmState)
+    if (millis () > NextPollTime)
     {
+        // DEBUG_V ("");
+        NextPollTime += PollInterval;
         pCurrentFsmState->Poll ();
     }
 
@@ -372,8 +334,8 @@ void fsm_WiFi_state_Boot::Poll ()
 {
     // DEBUG_START;
 
-    // get ready for some real work
-    fsm_WiFi_state_ConnectingConfig_imp.Init ();
+    // Start trying to connect to the AP
+    fsm_WiFi_state_ConnectingUsingConfig_imp.Init ();
 
     // DEBUG_END;
 } // fsm_WiFi_state_boot
@@ -385,6 +347,9 @@ void fsm_WiFi_state_Boot::Init ()
     // DEBUG_START;
 
     WiFiMgr.SetFsmState( this );
+
+    // This can get called before the system is up and running.
+    // No log port available yet
     // WiFiMgr.AnnounceState ();
 
     // DEBUG_END;
@@ -393,7 +358,7 @@ void fsm_WiFi_state_Boot::Init ()
 /*****************************************************************************/
 /*****************************************************************************/
 // Wait for events
-void fsm_WiFi_state_ConnectingConfig::Poll ()
+void fsm_WiFi_state_ConnectingUsingConfig::Poll ()
 {
     // DEBUG_START;
 
@@ -410,11 +375,11 @@ void fsm_WiFi_state_ConnectingConfig::Poll ()
     }
 
     // DEBUG_END;
-} // fsm_WiFi_state_ConnectingConfig::Poll
+} // fsm_WiFi_state_ConnectingUsingConfig::Poll
 
 /*****************************************************************************/
 // Wait for events
-void fsm_WiFi_state_ConnectingConfig::Init ()
+void fsm_WiFi_state_ConnectingUsingConfig::Init ()
 {
     // DEBUG_START;
 
@@ -439,11 +404,11 @@ void fsm_WiFi_state_ConnectingConfig::Init ()
 
     // DEBUG_END;
 
-} // fsm_WiFi_state_ConnectingConfig::Init
+} // fsm_WiFi_state_ConnectingUsingConfig::Init
 
 /*****************************************************************************/
 // Wait for events
-void fsm_WiFi_state_ConnectingConfig::OnConnect ()
+void fsm_WiFi_state_ConnectingUsingConfig::OnConnect ()
 {
     // DEBUG_START;
 
@@ -451,12 +416,12 @@ void fsm_WiFi_state_ConnectingConfig::OnConnect ()
 
     // DEBUG_END;
 
-} // fsm_WiFi_state_ConnectingConfig::OnConnect
+} // fsm_WiFi_state_ConnectingUsingConfig::OnConnect
 
 /*****************************************************************************/
 /*****************************************************************************/
 // Wait for events
-void fsm_WiFi_state_ConnectingDefault::Poll ()
+void fsm_WiFi_state_ConnectingUsingDefaults::Poll ()
 {
     // DEBUG_START;
 
@@ -473,11 +438,11 @@ void fsm_WiFi_state_ConnectingDefault::Poll ()
     }
 
     // DEBUG_END;
-} // fsm_WiFi_state_ConnectingDefault::Poll
+} // fsm_WiFi_state_ConnectingUsingDefaults::Poll
 
 /*****************************************************************************/
 // Wait for events
-void fsm_WiFi_state_ConnectingDefault::Init ()
+void fsm_WiFi_state_ConnectingUsingDefaults::Init ()
 {
     // DEBUG_START;
 
@@ -498,11 +463,11 @@ void fsm_WiFi_state_ConnectingDefault::Init ()
     WiFiMgr.connectWifi ();
 
     // DEBUG_END;
-} // fsm_WiFi_state_ConnectingDefault::Init
+} // fsm_WiFi_state_ConnectingUsingDefaults::Init
 
 /*****************************************************************************/
 // Wait for events
-void fsm_WiFi_state_ConnectingDefault::OnConnect ()
+void fsm_WiFi_state_ConnectingUsingDefaults::OnConnect ()
 {
     // DEBUG_START;
 
@@ -510,7 +475,7 @@ void fsm_WiFi_state_ConnectingDefault::OnConnect ()
 
     // DEBUG_END;
 
-} // fsm_WiFi_state_ConnectingDefault::OnConnect
+} // fsm_WiFi_state_ConnectingUsingDefaults::OnConnect
 
 /*****************************************************************************/
 /*****************************************************************************/

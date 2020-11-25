@@ -54,14 +54,16 @@ public:
     void      GetStatus       (JsonObject & jsonStatus);
     void      connectWifi     ();
     void      reset           ();
-    void      Poll            ();
+    void      Poll ();
 
-    void      SetFsmState     (fsm_WiFi_state* NewState) { pCurrentFsmState = NewState; }
+    void      SetFsmState     (fsm_WiFi_state * NewState) { pCurrentFsmState = NewState; }
     void      AnnounceState   ();
     void      SetFsmStartTime (uint32_t NewStartTime)    { FsmTimerWiFiStartTime = NewStartTime; }
     uint32_t  GetFsmStartTime (void)                     { return FsmTimerWiFiStartTime; }
     config_t* GetConfigPtr    () { return config; }
 private:
+
+#define PollInterval 1000
 
 #ifdef ARDUINO_ARCH_ESP8266
     WiFiEventHandler    wifiConnectHandler;     // WiFi connect handler
@@ -70,8 +72,8 @@ private:
     config_t           *config = nullptr;                           // Current configuration
     IPAddress           CurrentIpAddress  = IPAddress (0, 0, 0, 0);
     IPAddress           CurrentSubnetMask = IPAddress (0, 0, 0, 0);
+    time_t              NextPollTime = 0;
 
-    void initWifi ();
     void SetUpIp ();
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -84,8 +86,8 @@ private:
 
 protected:
     friend class fsm_WiFi_state_Boot;
-    friend class fsm_WiFi_state_ConnectingConfig;
-    friend class fsm_WiFi_state_ConnectingDefault;
+    friend class fsm_WiFi_state_ConnectingUsingConfig;
+    friend class fsm_WiFi_state_ConnectingUsingDefaults;
     friend class fsm_WiFi_state_ConnectedToAP;
     friend class fsm_WiFi_state_ConnectingAsAP;
     friend class fsm_WiFi_state_ConnectedToSta;
@@ -116,7 +118,7 @@ public:
 }; // fsm_WiFi_state_Boot
 
 /*****************************************************************************/
-class fsm_WiFi_state_ConnectingConfig : public fsm_WiFi_state
+class fsm_WiFi_state_ConnectingUsingConfig : public fsm_WiFi_state
 {
 public:
     virtual void Poll (void);
@@ -125,10 +127,10 @@ public:
     virtual void OnConnect (void);
     virtual void OnDisconnect (void)          { LOG_PORT.print ("."); }
 
-}; // fsm_WiFi_state_ConnectingConfig
+}; // fsm_WiFi_state_ConnectingUsingConfig
 
 /*****************************************************************************/
-class fsm_WiFi_state_ConnectingDefault : public fsm_WiFi_state
+class fsm_WiFi_state_ConnectingUsingDefaults : public fsm_WiFi_state
 {
 public:
     virtual void Poll (void);
@@ -137,7 +139,7 @@ public:
     virtual void OnConnect (void);
     virtual void OnDisconnect (void)          { LOG_PORT.print ("."); }
 
-}; // fsm_WiFi_state_ConnectingConfig
+}; // fsm_WiFi_state_ConnectingUsingConfig
 
 /*****************************************************************************/
 class fsm_WiFi_state_ConnectedToAP : public fsm_WiFi_state
