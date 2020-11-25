@@ -434,6 +434,9 @@ void loop()
     ESP.wdtFeed ();
 #endif // def ARDUINO_ARCH_ESP32
 
+    // Keep the WiFi Open
+    WiFiMgr.Poll ();
+
     // Process input data
     InputMgr.Process ();
 
@@ -442,9 +445,7 @@ void loop()
 
     WebMgr.Process ();
 
-    WiFiMgr.Poll ();
-
-// need to keep the rx pipeline empty
+    // need to keep the rx pipeline empty
     size_t BytesToDiscard = min (1000, LOG_PORT.available ());
     while (0 < BytesToDiscard)
     {
