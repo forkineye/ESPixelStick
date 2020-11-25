@@ -333,9 +333,9 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
     }
 
     // add as many rows as we need
-    for (CurrentRowId = 1; CurrentRowId <= ChannelConfigs.length; CurrentRowId++)
+    for (var CurrentRowId = 1; CurrentRowId <= ChannelConfigs.length; CurrentRowId++)
     {
-        console.log("CurrentRowId = " + CurrentRowId);
+        // console.log("CurrentRowId = " + CurrentRowId);
         var ChanIdPattern     = '<td id="chanId_'                            + (CurrentRowId) + '">a</td>';
         var EnabledPattern    = '<td><input type="checkbox" id="Enabled_'    + (CurrentRowId) + '"></td>';
         var InvertedPattern   = '<td><input type="checkbox" id="Inverted_'   + (CurrentRowId) + '"></td>';
@@ -354,7 +354,7 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
 
     $.each(ChannelConfigs, function (i, CurrentChannelConfig)
     {
-        console.log("Current Channel Id = " + CurrentChannelConfig.id);
+        // console.log("Current Channel Id = " + CurrentChannelConfig.id);
         var currentChannelRowId = CurrentChannelConfig.id + 1;
         $('#chanId_'     + (currentChannelRowId)).html(currentChannelRowId);
         $('#Enabled_'    + (currentChannelRowId)).prop("checked", CurrentChannelConfig.enabled);
@@ -408,7 +408,7 @@ function ProcessModeConfigurationData(channelId, ChannelTypeName, JsonConfig )
 
     if ("relay" === ChannelTypeName)
     {
-        console.info("ProcessModeConfigurationData: relay");
+        // console.info("ProcessModeConfigurationData: relay");
         ProcessModeConfigurationDataRelay(channelConfig);
     }
     // console.info("ProcessModeConfigurationData: End");
@@ -505,17 +505,17 @@ function GenerateInputOutputControlName(OptionListName, DisplayedChannelId)
 
     if (0 === DisplayedChannelId)
     {
-        NewName = "Primary " + OptionListName + " ";
+        NewName = "First " + OptionListName + " ";
     }
 
     if (1 === DisplayedChannelId)
     {
-        NewName = "Secondary " + OptionListName + " ";
+        NewName = "Second " + OptionListName + " ";
     }
 
-    if (3 === DisplayedChannelId)
+    if (2 === DisplayedChannelId)
     {
-        NewName = "Tertiary " + OptionListName + " ";
+        NewName = "Third " + OptionListName + " ";
     }
 
     return NewName;
@@ -523,12 +523,15 @@ function GenerateInputOutputControlName(OptionListName, DisplayedChannelId)
 
 function ProcessReceivedOptionDataMessageLoadOption(OptionListName, DisplayedChannelId )
 {
+    // console.info("OptionListName: " + OptionListName);
+    // console.info("DisplayedChannelId: " + DisplayedChannelId);
+
     var HtmlLoadFileName = $('#' + OptionListName + DisplayedChannelId + ' option:selected').text().toLowerCase();
-    // console.info("HtmlLoadName: " + HtmlLoadName);
+    // console.info("Base HtmlLoadFileName: " + HtmlLoadFileName);
     HtmlLoadFileName = HtmlLoadFileName.replace(".", "_");
     HtmlLoadFileName = HtmlLoadFileName.replace(" ", "_");
     HtmlLoadFileName = HtmlLoadFileName + ".html";
-    // console.info("Adjusted HtmlLoadName: " + HtmlLoadName);
+    // console.info("Adjusted HtmlLoadFileName: " + HtmlLoadFileName);
 
     // try to load the field definition file for this channel type
     $('#' + OptionListName + 'mode' + DisplayedChannelId).load(HtmlLoadFileName, function () {
@@ -619,7 +622,8 @@ function submitWiFiConfig()
                     'netmask': $('#netmask').val(),
                     'gateway': $('#gateway').val(),
                     'dhcp': $('#dhcp').prop('checked'),
-                    'ap_fallback': $('#ap').prop('checked'),
+                    'ap_fallback': $('#ap_fallback').prop('checked'),
+                    'ap_reboot': $('#ap_reboot').prop('checked'),
                     'ap_timeout': $('#apt').prop('checked')
                 }
             }
