@@ -27,6 +27,7 @@
 #endif // def ARDUINO_ARCH_ESP8266
 
 #include "WiFiMgr.hpp"
+#include "input/InputMgr.hpp"
 
 //-----------------------------------------------------------------------------
 // Create secrets.h with a #define for SECRETS_SSID and SECRETS_PASS
@@ -151,7 +152,6 @@ void c_WiFiMgr::GetStatus (JsonObject & jsonStatus)
  // DEBUG_END;
 } // GetStatus
 
-
 //-----------------------------------------------------------------------------
 void c_WiFiMgr::connectWifi ()
 {
@@ -166,6 +166,27 @@ void c_WiFiMgr::connectWifi ()
     // DEBUG_END;
 } // connectWifi
 
+bool c_WiFiMgr::IsWiFiConnected ()
+{
+    bool response = false;
+
+    String CurrentStateName;
+    String ConnectedToAP;
+    String ConnectedToSTA;
+
+    pCurrentFsmState->GetStateName (CurrentStateName);
+    fsm_WiFi_state_ConnectedToAP_imp.GetStateName (ConnectedToAP);
+    fsm_WiFi_state_ConnectedToSta_imp.GetStateName (ConnectedToSTA);
+
+    if (CurrentStateName.equals(ConnectedToAP) ||
+        CurrentStateName.equals(ConnectedToSTA))
+    {
+        response = true;
+    }
+
+    return response;
+} // IsWiFiConnected
+
 //-----------------------------------------------------------------------------
 void c_WiFiMgr::reset ()
 {
@@ -174,6 +195,7 @@ void c_WiFiMgr::reset ()
     LOG_PORT.println (F ("WiFi Reset has been requested"));
 
     fsm_WiFi_state_Boot_imp.Init ();
+    InputMgr.WiFiStateChanged (false);
 
     // DEBUG_END;
 } // reset
@@ -585,6 +607,8 @@ void fsm_WiFi_state_ConnectedToAP::Init ()
     // DEBUG_V (String ("localIp: ") + localIp.toString ());
     LOG_PORT.println (String (F ("WiFi Connected with IP: ")) + localIp.toString ());
 
+    InputMgr.WiFiStateChanged (true);
+
     // DEBUG_END;
 } // fsm_WiFi_state_ConnectingAsAP::Init
 
@@ -635,6 +659,8 @@ void fsm_WiFi_state_ConnectedToSta::Init ()
     WiFiMgr.setIpAddress (CurrentIpAddress);
     WiFiMgr.setIpSubNetMask (CurrentSubnetMask);
 
+    InputMgr.WiFiStateChanged (true);
+
     // DEBUG_END;
 } // fsm_WiFi_state_ConnectedToSta::Init
 
@@ -660,6 +686,7 @@ void fsm_WiFi_state_ConnectionFailed::Init ()
 
     WiFiMgr.SetFsmState (this);
     WiFiMgr.AnnounceState ();
+    InputMgr.WiFiStateChanged (false);
 
     if (true == WiFiMgr.GetConfigPtr ()->RebootOnWiFiFailureToConnect)
     {

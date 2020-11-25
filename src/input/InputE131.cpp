@@ -19,6 +19,7 @@
 
 #include "InputE131.hpp"
 #include "../FileIO.h"
+#include "../WiFiMgr.hpp"
 
 #define JSON_NAME_UNIVERSE       (F ("universe"))
 #define JSON_NAME_UNIVERSE_LIMIT (F ("universe_limit"))
@@ -69,50 +70,10 @@ void c_InputE131::Begin ()
 
         // DEBUG_V ("InputDataBufferSize: " + String(InputDataBufferSize));
 
-        if (0 >= InputDataBufferSize)
-        {
-            // DEBUG_V ("");
-            break;
-        }
-        // DEBUG_V ("");
-
         validateConfiguration ();
         // DEBUG_V ("");
 
-        // Create a new ESPAsyncE131
-        if (nullptr == e131)
-        {
-            // DEBUG_V ("Instantiate E1.31");
-            e131 = new ESPAsyncE131 (10);
-        }
-        // DEBUG_V ("");
-
-        // Get on with business
-        if (e131->begin (E131_MULTICAST, startUniverse, LastUniverse - startUniverse + 1))
-        {
-            LOG_PORT.println (F ("E1.31 Multicast Enabled."));
-        }
-        else
-        {
-            LOG_PORT.println (F ("*** E1.31 MULTICAST INIT FAILED ****"));
-        }
-
-        // DEBUG_V ("");
-
-        if (e131->begin (E131_UNICAST))
-        {
-            LOG_PORT.println (String (F ("E1.31 Unicast Enabled on port: ")) + E131_DEFAULT_PORT);
-        }
-        else
-        {
-            LOG_PORT.println (F ("*** E1.31 UNICAST INIT FAILED ****"));
-        }
-
-        LOG_PORT.printf ("Listening for %u channels from Universe %u to %u.\n",
-                          InputDataBufferSize, startUniverse, LastUniverse);
-
-        // Setup IGMP subscriptions if multicast is enabled
-        SubscribeToMulticastDomains ();
+        WiFiStateChanged (WiFiMgr.IsWiFiConnected (), false);
 
         // DEBUG_V ("");
         HasBeenInitialized = true;
@@ -352,3 +313,63 @@ void c_InputE131::validateConfiguration ()
     // DEBUG_END;
 
 } // validateConfiguration
+
+//-----------------------------------------------------------------------------
+void c_InputE131::WiFiStateChanged (bool IsConnected)
+{
+    WiFiStateChanged (IsConnected, true);
+}
+
+//-----------------------------------------------------------------------------
+void c_InputE131::WiFiStateChanged (bool IsConnected, bool ReBootAllowed)
+{
+    // DEBUG_START;
+
+    if (nullptr == e131)
+    {
+        // DEBUG_V ("Instantiate E1.31");
+        e131 = new ESPAsyncE131 (10);
+    }
+    // DEBUG_V ("");
+
+    if (IsConnected)
+    {
+        // Get on with business
+        if (e131->begin (E131_MULTICAST, startUniverse, LastUniverse - startUniverse + 1))
+        {
+            LOG_PORT.println (F ("E1.31 Multicast Enabled."));
+        }
+        else
+        {
+            LOG_PORT.println (F ("*** E1.31 MULTICAST INIT FAILED ****"));
+        }
+
+        // DEBUG_V ("");
+
+        if (e131->begin (E131_UNICAST))
+        {
+            LOG_PORT.println (String (F ("E1.31 Unicast Enabled on port: ")) + E131_DEFAULT_PORT);
+        }
+        else
+        {
+            LOG_PORT.println (F ("*** E1.31 UNICAST INIT FAILED ****"));
+        }
+
+        LOG_PORT.printf ("Listening for %u channels from Universe %u to %u.\n",
+            InputDataBufferSize, startUniverse, LastUniverse);
+
+        // Setup IGMP subscriptions if multicast is enabled
+        SubscribeToMulticastDomains ();
+    }
+    else if (ReBootAllowed)
+    {
+        // handle a disconnect
+        // E1.31 does not do this gracefully. A loss of connection needs a reboot
+        extern bool reboot;
+        reboot = true;
+        LOG_PORT.println (F ("E1.31 Input requesting reboot on loss of WiFi connection."));
+    }
+
+    // DEBUG_END;
+
+} // WiFiStateChanged

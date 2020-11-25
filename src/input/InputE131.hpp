@@ -43,6 +43,7 @@ class c_InputE131 : public c_InputCommon
 
     void SubscribeToMulticastDomains();
     void validateConfiguration ();
+    void WiFiStateChanged (bool IsConnected, bool RebootAllowed); // used by poorly designed rx functions
 
   public:
 
@@ -60,4 +61,6 @@ class c_InputE131 : public c_InputCommon
     void Process ();                                        ///< Call from loop(),  renders Input data
     void GetDriverName (String & sDriverName) { sDriverName = "E1.31"; } ///< get the name for the instantiated driver
     void SetBufferInfo (uint8_t * BufferStart, uint16_t BufferSize);
+    void WiFiStateChanged (bool IsConnected); // used by poorly designed rx functions
+
 };
