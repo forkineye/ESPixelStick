@@ -32,23 +32,23 @@ GNU General Public License for more details.
 
 #include "../FileIO.h"
 
-#   define Relay_OUTPUT_ENABLED         true
-#   define Relay_OUTPUT_DISABLED        false
-#   define Relay_OUTPUT_INVERTED        true
-#   define Relay_OUTPUT_NOT_INVERTED    false
-#   define Relay_DEFAULT_TRIGGER_LEVEL  128
-#   define Relay_DEFAULT_GPIO_ID        ((gpio_num_t)-1)
+#define Relay_OUTPUT_ENABLED         true
+#define Relay_OUTPUT_DISABLED        false
+#define Relay_OUTPUT_INVERTED        true
+#define Relay_OUTPUT_NOT_INVERTED    false
+#define Relay_DEFAULT_TRIGGER_LEVEL  128
+#define Relay_DEFAULT_GPIO_ID        ((gpio_num_t)-1) 
 
 static const c_OutputRelay::RelayChannel_t RelayChannelDefaultSettings[] =
 {
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH},
 };
 
 //----------------------------------------------------------------------------
@@ -69,7 +69,7 @@ c_OutputRelay::~c_OutputRelay ()
 {
     // DEBUG_START;
 
-    for (RelayChannel_t currentRelay : OutputList)
+    for (RelayChannel_t & currentRelay : OutputList)
     {
         if (currentRelay.Enabled)
         {
@@ -132,12 +132,12 @@ bool c_OutputRelay::validate ()
     }
 
     SetOutputBufferSize (Num_Channels);
-
-    for (RelayChannel_t currentRelay : OutputList)
+    uint8_t CurrentRelayChanIndex = 0;
+    for (RelayChannel_t & currentRelay : OutputList)
     {
         if (currentRelay.GpioId == Relay_DEFAULT_GPIO_ID)
         {
-            pinMode (currentRelay.GpioId, INPUT);
+            // pinMode (currentRelay.GpioId, INPUT);
             currentRelay.Enabled = Relay_OUTPUT_DISABLED;
         }
 
@@ -156,6 +156,13 @@ bool c_OutputRelay::validate ()
             currentRelay.OffValue = LOW;
             currentRelay.OnValue  = HIGH;
         }
+
+        // DEBUGV (String ("CurrentRelayChanIndex: ") + String (CurrentRelayChanIndex++));
+        // DEBUGV (String ("currentRelay.OnValue: ")  + String (currentRelay.OnValue));
+        // DEBUGV (String ("currentRelay.OffValue: ") + String (currentRelay.OffValue));
+        // DEBUGV (String ("currentRelay.Enabled: ")  + String (currentRelay.Enabled));
+        // DEBUGV (String ("currentRelay.GpioId: ")   + String (currentRelay.GpioId));
+
     } // for each output channel
 
     // DEBUG_END;
@@ -175,10 +182,13 @@ bool c_OutputRelay::validate ()
 bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
-    uint temp; // Holds enums prior to conversion
+    int temp; // Holds enums prior to conversion
 
     do // once
     {
+        // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
+
+        // PrettyPrint (jsonConfig, String("c_OutputRelay::SetConfig"));
         FileIO::setFromJSON (UpdateInterval, jsonConfig[OM_RELAY_UPDATE_INTERVAL_NAME]);
 
         // do we have a channel configuration array?
@@ -198,18 +208,40 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             // do we have a valid channel configuration ID?
             if (ChannelId >= OM_RELAY_CHANNEL_LIMIT)
             {
-                // if not, flag an error and stop processing
+                // if not, flag an error and stop processing this channel
                 LOG_PORT.println (String(F ("No Relay Output Channel Settings Found for Channel '")) + String(ChannelId) + "'");
                 continue;
             }
 
-            FileIO::setFromJSON (OutputList[ChannelId].Enabled,           JsonChannelData[OM_RELAY_CHANNEL_ENABLED_NAME]);
-            FileIO::setFromJSON (OutputList[ChannelId].InvertOutput,      JsonChannelData[OM_RELAY_CHANNEL_INVERT_NAME]);
-            FileIO::setFromJSON (OutputList[ChannelId].OnOffTriggerLevel, JsonChannelData[OM_RELAY_CHANNEL_TRIGGER_NAME]);
+            RelayChannel_t * CurrentOutputChannel = & OutputList[ChannelId];
 
-            temp = OutputList[ChannelId].GpioId;
+            FileIO::setFromJSON (CurrentOutputChannel->Enabled,           JsonChannelData[OM_RELAY_CHANNEL_ENABLED_NAME]);
+            FileIO::setFromJSON (CurrentOutputChannel->InvertOutput,      JsonChannelData[OM_RELAY_CHANNEL_INVERT_NAME]);
+            FileIO::setFromJSON (CurrentOutputChannel->OnOffTriggerLevel, JsonChannelData[OM_RELAY_CHANNEL_TRIGGER_NAME]);
+
+            // DEBUGV (String ("currentRelay.GpioId: ") + String (CurrentOutputChannel->GpioId));
+            temp = CurrentOutputChannel->GpioId;
             FileIO::setFromJSON (temp, JsonChannelData[OM_RELAY_CHANNEL_GPIO_NAME]);
-            OutputList[ChannelId].GpioId = (gpio_num_t)temp;
+            // DEBUGV (String ("temp: ") + String (temp));
+
+            if ((temp != CurrentOutputChannel->GpioId) && 
+                (Relay_DEFAULT_GPIO_ID != CurrentOutputChannel->GpioId))
+            {
+                // DEBUGV ("Revert Pin to input");
+                // The pin has changed and the original pin was not the default pin
+                pinMode (CurrentOutputChannel->GpioId, INPUT);
+            }
+            CurrentOutputChannel->GpioId = (gpio_num_t)temp;
+
+            // DEBUGV (String ("CurrentRelayChanIndex: ")          + String (ChannelId));
+            // DEBUGV (String ("currentRelay.OnValue: ")           + String (CurrentOutputChannel->OnValue));
+            // DEBUGV (String ("currentRelay.OffValue: ")          + String (CurrentOutputChannel->OffValue));
+            // DEBUGV (String ("currentRelay.Enabled: ")           + String (CurrentOutputChannel->Enabled));
+            // DEBUGV (String ("currentRelay.InvertOutput: ")      + String (CurrentOutputChannel->InvertOutput));
+            // DEBUGV (String ("currentRelay.OnOffTriggerLevel: ") + String (CurrentOutputChannel->OnOffTriggerLevel));
+            // DEBUGV (String ("currentRelay.GpioId: ")            + String (CurrentOutputChannel->GpioId));
+        
+            ++ChannelId;
         }
 
     } while (false);
@@ -229,15 +261,23 @@ void c_OutputRelay::GetConfig (ArduinoJson::JsonObject & jsonConfig)
     JsonArray JsonChannelList = jsonConfig.createNestedArray (OM_RELAY_CHANNELS_NAME);
 
     uint8_t ChannelId = 0;
-    for (RelayChannel_t currentRelay : OutputList)
+    for (RelayChannel_t & currentRelay : OutputList)
     {
         JsonObject JsonChannelData = JsonChannelList.createNestedObject ();
 
-        JsonChannelData[OM_RELAY_CHANNEL_ID_NAME]      = ChannelId++;
+        JsonChannelData[OM_RELAY_CHANNEL_ID_NAME]      = ChannelId;
         JsonChannelData[OM_RELAY_CHANNEL_ENABLED_NAME] = currentRelay.Enabled;
         JsonChannelData[OM_RELAY_CHANNEL_INVERT_NAME]  = currentRelay.InvertOutput;
         JsonChannelData[OM_RELAY_CHANNEL_TRIGGER_NAME] = currentRelay.OnOffTriggerLevel;
         JsonChannelData[OM_RELAY_CHANNEL_GPIO_NAME]    = currentRelay.GpioId;
+
+        // DEBUGV (String ("CurrentRelayChanIndex: ") + String (ChannelId));
+        // DEBUGV (String ("currentRelay.OnValue: ")  + String (currentRelay.OnValue));
+        // DEBUGV (String ("currentRelay.OffValue: ") + String (currentRelay.OffValue));
+        // DEBUGV (String ("currentRelay.Enabled: ")  + String (currentRelay.Enabled));
+        // DEBUGV (String ("currentRelay.GpioId: ")   + String (currentRelay.GpioId));
+    
+        ++ChannelId;
     }
 
     // DEBUG_END;
@@ -257,13 +297,25 @@ void c_OutputRelay::Render ()
 
     uint8_t OutputDataIndex = 0;
 
-    for (RelayChannel_t currentRelay : OutputList)
+    for (RelayChannel_t & currentRelay : OutputList)
     {
+        // DEBUG_V (String("OutputDataIndex: ") + String(OutputDataIndex));
         if (currentRelay.Enabled)
         {
-            digitalWrite (currentRelay.GpioId, 
-                ((pOutputBuffer[OutputDataIndex++] > currentRelay.OnOffTriggerLevel) ? currentRelay.OnValue : currentRelay.OffValue));
+            uint8_t newOutputValue = (pOutputBuffer[OutputDataIndex] > currentRelay.OnOffTriggerLevel) ? currentRelay.OnValue : currentRelay.OffValue;
+            if (newOutputValue != currentRelay.previousValue)
+            {
+                // DEBUGV (String ("OutputDataIndex: ")       + String (OutputDataIndex++));
+                // DEBUGV (String ("currentRelay.OnValue: ")  + String (currentRelay.OnValue));
+                // DEBUGV (String ("currentRelay.OffValue: ") + String (currentRelay.OffValue));
+                // DEBUGV (String ("currentRelay.Enabled: ")  + String (currentRelay.Enabled));
+                // DEBUGV (String ("currentRelay.GpioId: ")   + String (currentRelay.GpioId));
+                // DEBUGV (String ("newOutputValue: ")        + String (newOutputValue));
+                digitalWrite (currentRelay.GpioId, newOutputValue);
+                currentRelay.previousValue = newOutputValue;
+            }
         }
+        ++OutputDataIndex;
     }
 
     // DEBUG_END;
