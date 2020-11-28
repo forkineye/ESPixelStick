@@ -41,6 +41,7 @@ public:
         gpio_num_t  GpioId;
         uint8_t     OnValue;
         uint8_t     OffValue;
+        uint8_t     previousValue;
 
     } RelayChannel_t;
 
