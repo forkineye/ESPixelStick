@@ -55,7 +55,7 @@ void c_InputFPPRemote::Begin()
 {
     // DEBUG_START;
 
-    LOG_PORT.println (String (F ("** 'FPPRemote' Initialization for Input: '")) + InputChannelId + String (F ("' **")));
+    LOG_PORT.println (String (F ("** 'FPP Remote' Initialization for Input: '")) + InputChannelId + String (F ("' **")));
 
     if (true == HasBeenInitialized)
     {

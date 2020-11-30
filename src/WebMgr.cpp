@@ -399,74 +399,6 @@ void c_WebMgr::GetDeviceOptions ()
 } // GetDeviceOptions
 
 //-----------------------------------------------------------------------------
-void c_WebMgr::GetInputOptions ()
-{
-    // DEBUG_START;
-
-    // set up a framework to get the option data
-    DynamicJsonDocument webJsonDoc (2048);
-
-    if (0 == webJsonDoc.capacity ())
-    {
-        LOG_PORT.println (F("ERROR: Failed to allocate memory for the GetOptions web request response."));
-    }
-
-    // DEBUG_V ("");
-    JsonObject WebOptions        = webJsonDoc.createNestedObject (F ("options"));
-    JsonObject JsonInputOptions  = WebOptions.createNestedObject (F ("input"));
-    // DEBUG_V("");
-
-    // PrettyPrint (WebOptions);
-
-    InputMgr.GetOptions (JsonInputOptions);
-    // DEBUG_V (""); // remove and we crash
-
-    // PrettyPrint (WebOptions);
-
-    // now make it something we can transmit
-    size_t msgOffset = strlen (WebSocketFrameCollectionBuffer);
-    serializeJson (WebOptions, & WebSocketFrameCollectionBuffer[msgOffset], (sizeof(WebSocketFrameCollectionBuffer) - msgOffset));
-
-    // DEBUG_END;
-
-} // GetInputOptions
-
-//-----------------------------------------------------------------------------
-void c_WebMgr::GetOutputOptions ()
-{
-    // DEBUG_START;
-
-    // set up a framework to get the option data
-    DynamicJsonDocument webJsonDoc (2048);
-
-    if (0 == webJsonDoc.capacity ())
-    {
-        LOG_PORT.println (F ("ERROR: Failed to allocate memory for the GetOutputOptions web request response."));
-    }
-
-    // DEBUG_V ("");
-    JsonObject WebOptions = webJsonDoc.createNestedObject (F ("options"));
-    JsonObject JsonOutputOptions = WebOptions.createNestedObject (F ("output"));
-    // DEBUG_V("");
-
-    // PrettyPrint (WebOptions);
-
-    // DEBUG_V (""); // remove and we crash
-
-    OutputMgr.GetOptions (JsonOutputOptions);
-    // DEBUG_V ("");
-
-    // PrettyPrint (WebOptions);
-
-    // now make it something we can transmit
-    size_t msgOffset = strlen (WebSocketFrameCollectionBuffer);
-    serializeJson (WebOptions, &WebSocketFrameCollectionBuffer[msgOffset], (sizeof (WebSocketFrameCollectionBuffer) - msgOffset));
-
-    // DEBUG_END;
-
-} // GetOutputOptions
-
-//-----------------------------------------------------------------------------
 /// Handle Web Service events
 /** Handles all Web Service event types and performs initial parsing of Web Service event data.
  * Text messages that start with 'X' are treated as "Simple" format messages, else they're parsed as JSON.
@@ -1003,20 +935,6 @@ void c_WebMgr::processCmdOpt (JsonObject & jsonCmd)
         {
             // DEBUG_V ("device");
             GetDeviceOptions ();
-            break;
-        }
-
-        if (jsonCmd["opt"] == "input")
-        {
-            // DEBUG_V ("input");
-            GetInputOptions ();
-            break;
-        }
-
-        if (jsonCmd["opt"] == "output")
-        {
-            // DEBUG_V ("output");
-            GetOutputOptions ();
             break;
         }
 

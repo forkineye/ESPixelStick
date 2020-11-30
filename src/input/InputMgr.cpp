@@ -292,47 +292,6 @@ void c_InputMgr::GetConfig (char* Response)
 } // GetConfig
 
 //-----------------------------------------------------------------------------
-void c_InputMgr::GetOptions (JsonObject& jsonOptions)
-{
-    // DEBUG_START;
-
-    JsonArray jsonChannelsArray = jsonOptions.createNestedArray ("channels");
-
-    // build a list of the current available channels and their input type
-    for (c_InputCommon* currentInput : pInputChannelDrivers)
-    {
-        JsonObject channelOptionData = jsonChannelsArray.createNestedObject ();
-        e_InputChannelIds InputChannelId = currentInput->GetInputChannelId ();
-        channelOptionData[F ("id")] = InputChannelId;
-        channelOptionData[F ("selectedoption")] = currentInput->GetInputType ();
-
-        // DEBUG_V ("");
-        JsonArray jsonOptionsArray = channelOptionData.createNestedArray (F ("list"));
-
-        // Build a list of Valid options for this device
-        for (InputTypeXlateMap_t currentInputType : InputTypeXlateMap)
-        {
-            // DEBUG_V ("");
-            if (InputTypeIsAllowedOnChannel(currentInputType.id, InputChannelId))
-            {
-                // DEBUG_V ("");
-                JsonObject jsonOptionsArrayEntry = jsonOptionsArray.createNestedObject ();
-                jsonOptionsArrayEntry[F ("id")] = int (currentInputType.id);
-                jsonOptionsArrayEntry[F ("name")] = currentInputType.name;
-                // DEBUG_V ("");
-            }
-            else
-            {
-                // DEBUG_V (String("Type: ") + currentInputType.name + String(" not allowed on channel: ") + String(InputChannelId));
-            }
-
-        } // end for each Input type
-    }
-
-    // DEBUG_END;
-} // GetOptions
-
-//-----------------------------------------------------------------------------
 void c_InputMgr::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
