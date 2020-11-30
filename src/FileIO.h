@@ -153,6 +153,7 @@ public:
 			if (file.size () > CONFIG_MAX_SIZE)
 			{
 				LOG_PORT.println (CfgFileMessagePrefix + String (F ("file is too large.")));
+				break;
 			}
 
 			// DEBUG_V ("");
