@@ -48,7 +48,7 @@ typedef struct
     c_InputMgr::e_InputChannelIds ChannelId;
 } InputTypeXlateMap_t;
 
-InputTypeXlateMap_t InputTypeXlateMap[c_InputMgr::e_InputType::InputType_End] =
+static const InputTypeXlateMap_t InputTypeXlateMap[c_InputMgr::e_InputType::InputType_End] =
 {
     {c_InputMgr::e_InputType::InputType_E1_31,    "E1.31",      c_InputMgr::e_InputChannelIds::InputChannelId_1},
     {c_InputMgr::e_InputType::InputType_Effects,  "Effects",    c_InputMgr::e_InputChannelIds::InputChannelId_2},
@@ -271,12 +271,24 @@ void c_InputMgr::CreateNewConfig ()
 //-----------------------------------------------------------------------------
 void c_InputMgr::GetConfig (char* Response)
 {
-    // DEBUG_START;
+    // DEBUGSTART;
 
-    strcat (Response, ConfigData.c_str ());
+    // is a new config waiting to be saved?
+    if (0 != ConfigData.length ())
+    {
+        // DEBUGV (String ("ConfigData: ") + ConfigData);
+        // use the pending config
+        strcat (Response, ConfigData.c_str ());
+    }
+    else
+    {
+        String TempConfigData;
+        FileIO::ReadFile (ConfigFileName, TempConfigData);
+        // DEBUGV (String ("TempConfigData: ") + TempConfigData);
+        strcat (Response, TempConfigData.c_str ());
+    }
 
-    // DEBUG_END;
-
+    // DEBUGEND;
 } // GetConfig
 
 //-----------------------------------------------------------------------------
@@ -614,10 +626,6 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
     boolean Response = false;
 
     // DEBUG_V ("InputDataBufferSize: " + String (InputDataBufferSize));
-
-    // keep a local copy of the config
-    ConfigData.clear ();
-    serializeJson (jsonConfig, ConfigData);
     // DEBUG_V ("ConfigData: " + ConfigData);
 
     do // once
@@ -625,7 +633,6 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
         if (false == jsonConfig.containsKey (IM_SECTION_NAME))
         {
             LOG_PORT.println (F ("No Input Interface Settings Found. Using Defaults"));
-            ConfigData.clear ();
             break;
         }
         JsonObject InputChannelMgrData = jsonConfig[IM_SECTION_NAME];
@@ -638,7 +645,6 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
         {
             // if not, flag an error and stop processing
             LOG_PORT.println (F ("No Input Channel Settings Found. Using Defaults"));
-            ConfigData.clear ();
             break;
         }
         JsonObject InputChannelArray = InputChannelMgrData[IM_CHANNEL_SECTION_NAME];
@@ -728,13 +734,14 @@ void c_InputMgr::SaveConfig ()
 {
     // DEBUG_START;
 
-    // DEBUG_V ("ConfigData: " + ConfigData);
+    // DEBUGV (String("ConfigData: ") + ConfigData);
 
     if (FileIO::SaveConfig (ConfigFileName, ConfigData))
     {
         LOG_PORT.println (F ("**** Saved Input Manager Config File. ****"));
         // DEBUG_V ("ConfigData: " + ConfigData);
-    } // end we got a config and it was good
+        ConfigData.clear ();
+    } // end we saved the config
     else
     {
         LOG_PORT.println (F ("EEEE Error Saving Input Manager Config File. EEEE"));
@@ -766,6 +773,7 @@ bool c_InputMgr::SetConfig (JsonObject & jsonConfig)
         Response = ProcessJsonConfig (jsonConfig);
 
         // schedule a future save of the config file
+        serializeJson (jsonConfig, ConfigData);
         ConfigSaveNeeded = true;
     }
     else
