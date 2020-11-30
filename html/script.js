@@ -172,8 +172,6 @@ function ProcessWindowChange(NextWindow) {
         RequestListOfFiles();
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
-        wsEnqueue(JSON.stringify({ 'cmd': { 'opt': 'input' } })); // Get device option data
-        wsEnqueue(JSON.stringify({ 'cmd': { 'opt': 'output' } })); // Get device option data
     }
 
     RequestListOfFiles();
@@ -396,7 +394,7 @@ function ProcessModeConfigurationData(channelId, ChannelTypeName, JsonConfig )
     // clear the array
     selector = [];
 
-    if (("fppremote" === ChannelTypeName) && (null !== Fseq_File_List))
+    if (("fpp_remote" === ChannelTypeName) && (null !== Fseq_File_List))
     {
         ProcessModeConfigurationDatafppremote(channelConfig);
     }
@@ -424,6 +422,7 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     {
         // save the config for later use.
         Output_Config = JsonConfigData.output_config;
+        CreateOptionsFromConfig("output", Output_Config);
     }
 
     // is this an input config?
@@ -431,6 +430,7 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     {
         // save the config for later use.
         Input_Config = JsonConfigData.input_config;
+        CreateOptionsFromConfig("input", Input_Config);
     }
 
     // is this a device config?
@@ -503,17 +503,17 @@ function GenerateInputOutputControlName(OptionListName, DisplayedChannelId)
 {
     var NewName;
 
-    if (0 === DisplayedChannelId)
+    if ("0" === DisplayedChannelId)
     {
         NewName = "First " + OptionListName + " ";
     }
 
-    if (1 === DisplayedChannelId)
+    if ("1" === DisplayedChannelId)
     {
         NewName = "Second " + OptionListName + " ";
     }
 
-    if (2 === DisplayedChannelId)
+    if ("2" === DisplayedChannelId)
     {
         NewName = "Third " + OptionListName + " ";
     }
@@ -521,7 +521,7 @@ function GenerateInputOutputControlName(OptionListName, DisplayedChannelId)
     return NewName;
 } // GenerateInputOutputControlName
 
-function ProcessReceivedOptionDataMessageLoadOption(OptionListName, DisplayedChannelId )
+function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId )
 {
     // console.info("OptionListName: " + OptionListName);
     // console.info("DisplayedChannelId: " + DisplayedChannelId);
@@ -543,65 +543,61 @@ function ProcessReceivedOptionDataMessageLoadOption(OptionListName, DisplayedCha
         }
     });
 
-} // ProcessReceivedOptionDataMessageLoadOption
+} // LoadDeviceSetupSelectedOption
 
-function ProcessReceivedOptionDataMessage(JsonOptionList)
+function CreateOptionsFromConfig(OptionListName, Config)
 {
-    // console.info("ProcessReceivedOptionDataMessage");
+    // console.info("CreateOptionsFromConfig");
+
+    var Channels = Config.channels;
+
+    // Input_Config
 
     // for each field we need to populate (input vs output)
-    Object.keys(JsonOptionList).forEach(function (OptionListName)
+    Object.keys(Channels).forEach(function (ChannelId)
     {
         // OptionListName is 'input' or 'output'
-        var ArrayOfChannels = JsonOptionList[OptionListName].channels;
-        $(ArrayOfChannels).each(function (CurrentChannelIndex)
+        // console.info("ChannelId: " + ChannelId);
+        var CurrentChannel = Channels[ChannelId];
+
+        // does the selection box we need already exist?
+        if (!$('#' + OptionListName + 'mode' + ChannelId).length)
         {
-            var CurrentChannel       = ArrayOfChannels[CurrentChannelIndex]; // value
-            var DisplayedChannelId   = CurrentChannel.id;
-            var ListOfChannelOptions = ArrayOfChannels[CurrentChannelIndex].list;
+            // create the selection box
+            $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + ChannelId + '">' + GenerateInputOutputControlName(OptionListName, ChannelId) + ' Mode:</label>');
+            $('#fg_' + OptionListName).append('<div class="col-sm-2"><select class="form-control wsopt" id="' + OptionListName + ChannelId + '"></select></div>');
+            $('#fg_' + OptionListName + '_mode').append('<fieldset id="' + OptionListName + 'mode' + ChannelId + '"></fieldset>');
+        }
 
-            // does the selection box we need already exist?
-            if (!$('#' + OptionListName + 'mode' + DisplayedChannelId).length)
-            {
-                // create the selection box
-                $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + DisplayedChannelId + '">' + GenerateInputOutputControlName(OptionListName, DisplayedChannelId) + ' Mode:</label>');
-                $('#fg_' + OptionListName).append('<div class="col-sm-2"><select class="form-control wsopt" id="' + OptionListName + DisplayedChannelId + '"></select></div>');
-                $('#fg_' + OptionListName + '_mode').append('<fieldset id="' + OptionListName + 'mode' + DisplayedChannelId + '"></fieldset>');
-            }
+        var jqSelector = "#" + OptionListName + ChannelId;
 
-            // define the input select list action
-            $('#' + OptionListName + DisplayedChannelId).change(function ()
+        // remove the existing options
+        $(jqSelector).empty();
+
+        // for each Channel type in the list
+        Object.keys(CurrentChannel).forEach(function (SelectionTypeId)
+        {
+            // console.info("SelectionId: " + SelectionTypeId);
+            if ("type" === SelectionTypeId)
             {
-                if ($(this).val())
+                // console.info("Set the selector type to: " + CurrentChannel.type);
+                $(jqSelector).val(CurrentChannel.type);
+                LoadDeviceSetupSelectedOption(OptionListName, ChannelId);
+                $(jqSelector).change(function ()
                 {
-                    ProcessReceivedOptionDataMessageLoadOption(OptionListName, DisplayedChannelId);
-                }
-            }); // End channel select onchange handler
-
-            var jqSelector = "#" + OptionListName + DisplayedChannelId;
-
-            // remove the existing options
-            $(jqSelector).empty();
-
-            // for each option in the list
-            ListOfChannelOptions.forEach(function (listEntry)
+                    console.info("Set the selector type to: " + CurrentChannel.type);
+                    LoadDeviceSetupSelectedOption(OptionListName, ChannelId);
+                });
+            }
+            else
             {
-                // add a new entry
-                $(jqSelector).append('<option value="' + listEntry.id + '">' + listEntry.name + '</option>');
-            });
-
-            // set the current selector value
-            $(jqSelector).val(CurrentChannel.selectedoption);
-
-            ProcessReceivedOptionDataMessageLoadOption(OptionListName, DisplayedChannelId);
-
-        }); // end for each channel
-    }); // end for each option type
-
-    // clear the footer
-    $('#refresh').html('0 ms / 0 fps');
-
-} // ProcessReceivedOptionDataMessage
+                var CurrentSection = CurrentChannel[SelectionTypeId];
+                // console.info("Add '" + CurrentSection.type + "' to selector");
+                $(jqSelector).append('<option value="' + SelectionTypeId + '">' + CurrentSection.type + '</option>');
+            }
+        }); // end for each selection type
+    }); // end for each channel
+} // CreateOptionsFromConfig
 
 // Builds JSON config submission for "WiFi" tab
 function submitWiFiConfig()
@@ -773,12 +769,6 @@ function wsConnect()
                     if (msg.hasOwnProperty("set"))
                     {
                         ProcessReceivedJsonConfigMessage(msg.set);
-                    }
-
-                    // "OPT" message is select option data
-                    if (msg.hasOwnProperty("opt"))
-                    {
-                        ProcessReceivedOptionDataMessage(msg.opt);
                     }
                 }
             }

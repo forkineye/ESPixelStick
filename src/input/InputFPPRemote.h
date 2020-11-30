@@ -40,7 +40,7 @@ class c_InputFPPRemote : public c_InputCommon
       void GetConfig (JsonObject& jsonConfig); ///< Get the current config used by the driver
       void GetStatus (JsonObject& jsonStatus);
       void Process ();                         ///< Call from loop(),  renders Input data
-      void GetDriverName (String& sDriverName) { sDriverName = "FPPRemote"; } ///< get the name for the instantiated driver
+      void GetDriverName (String& sDriverName) { sDriverName = "FPP Remote"; } ///< get the name for the instantiated driver
       void SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize);
 
 private:

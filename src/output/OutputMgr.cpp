@@ -64,7 +64,7 @@ typedef struct
 }OutputChannelIdToGpioAndPortEntry_t;
 
 //-----------------------------------------------------------------------------
-OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] =
+static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] =
 {
     {gpio_num_t::GPIO_NUM_2,  uart_port_t::UART_NUM_1},
 #ifdef ARDUINO_ARCH_ESP32
@@ -314,79 +314,6 @@ void c_OutputMgr::GetConfig (char * Response )
     // DEBUG_END;
 
 } // GetConfig
-
-//-----------------------------------------------------------------------------
-void c_OutputMgr::GetOptions (JsonObject & jsonOptions)
-{
-    // extern void PrettyPrint (JsonObject&, String);
-    // DEBUG_START;
-    JsonArray jsonChannelsArray = jsonOptions.createNestedArray (OM_CHANNEL_SECTION_NAME);
-    // DEBUG_V (String("ConfigData: ") + ConfigData);
-    String TempConfigData;
-    FileIO::ReadFile (ConfigFileName, TempConfigData);
-    DynamicJsonDocument OutputConfigData(OM_MAX_CONFIG_SIZE);
-    DeserializationError deError = deserializeJson (OutputConfigData, TempConfigData);
-    // DEBUG_V (String("deError: ") + String(deError.c_str()));
-
-    // JsonObject OC_info = OutputConfigData["output_config"];
-    // PrettyPrint (OC_info, String ("OC_info"));
-
-    JsonObject OutputChannelConfigDataArray = OutputConfigData["output_config"]["channels"];
-    // PrettyPrint (OutputChannelConfigDataArray, String ("OutputChannelConfigDataArray"));
-    // DEBUG_V ("");
-
-    // build a list of the current available channels and their output type
-    for (c_OutputCommon * currentOutput : pOutputChannelDrivers)
-    {
-        e_OutputChannelIds ChannelId = currentOutput->GetOutputChannelId ();
-        JsonObject OutputChannelConfigData = OutputChannelConfigDataArray[String(ChannelId)];
-        // DEBUG_V ("");
-        // PrettyPrint (OutputChannelConfigData, String("OutputChannelConfigData"));
-
-        JsonObject channelOptionData = jsonChannelsArray.createNestedObject ();
-        channelOptionData[F ("id")]             = ChannelId;
-        channelOptionData[F ("selectedoption")] = currentOutput->GetOutputType ();
-
-        // DEBUG_V ("");
-        JsonArray jsonOptionsArray = channelOptionData.createNestedArray (F ("list"));
-
-        // Build a list of Valid options for this device
-        for (int currentOutputType = OutputType_Start;
-            currentOutputType < OutputType_End;
-            currentOutputType++)
-        {
-            // DEBUG_V ("");
-            if (OutputChannelConfigData.containsKey (String((int)currentOutputType)))
-            {
-                JsonObject CurrentOutputChannelConfigData = OutputChannelConfigData[String(currentOutputType)];
-                // PrettyPrint (CurrentOutputChannelConfigData, String ("CurrentOutputChannelConfigData"));
-                // DEBUG_V ("");
-
-                JsonObject jsonOptionsArrayEntry = jsonOptionsArray.createNestedObject ();
-                // DEBUG_V ("");
-
-                String name;
-                FileIO::setFromJSON (name, CurrentOutputChannelConfigData[F ("type") ]);
-                // DEBUG_V (String("name: ") + name);
-                // DEBUG_V (String ("id: ") + currentOutputType);
-
-                jsonOptionsArrayEntry[F ("id")]   = currentOutputType;
-                jsonOptionsArrayEntry[F ("name")] = name;
-                // DEBUG_V ("");
-            }
-            else
-            {
-                // DEBUG_V ("Output Type Not in list");
-            }
-
-            // DEBUG_V ("");
-
-        } // end for each output type
-    }
-
-    // DEBUG_END;
-
-} // GetOptions
 
 //-----------------------------------------------------------------------------
 void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
@@ -856,7 +783,6 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
     // DEBUG_END;
 
 } // UpdateDisplayBufferReferences
-
 
 // create a global instance of the output channel factory
 c_OutputMgr OutputMgr;
