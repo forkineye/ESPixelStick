@@ -20,6 +20,7 @@
 
 #include "ESPixelStick.h"
 #include <FS.h>
+
 #ifdef ARDUINO_ARCH_ESP32
 #   include <LITTLEFS.h>
 #   include <Update.h>
@@ -152,6 +153,7 @@ public:
 			if (file.size () > CONFIG_MAX_SIZE)
 			{
 				LOG_PORT.println (CfgFileMessagePrefix + String (F ("file is too large.")));
+				break;
 			}
 
 			// DEBUG_V ("");
@@ -305,8 +307,18 @@ public:
 		}
 	}
 
-	static boolean setFromJSON (float    & key, JsonVariant val) {
+	static boolean setFromJSON (float& key, JsonVariant val) {
 		if (!val.isNull () && (val.as<float> () != key)) {
+			key = val;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	static boolean setFromJSON (int& key, JsonVariant val) {
+		if (!val.isNull () && (val.as<int> () != key)) {
 			key = val;
 			return true;
 		}

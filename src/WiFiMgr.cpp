@@ -166,27 +166,6 @@ void c_WiFiMgr::connectWifi ()
     // DEBUG_END;
 } // connectWifi
 
-bool c_WiFiMgr::IsWiFiConnected ()
-{
-    bool response = false;
-
-    String CurrentStateName;
-    String ConnectedToAP;
-    String ConnectedToSTA;
-
-    pCurrentFsmState->GetStateName (CurrentStateName);
-    fsm_WiFi_state_ConnectedToAP_imp.GetStateName (ConnectedToAP);
-    fsm_WiFi_state_ConnectedToSta_imp.GetStateName (ConnectedToSTA);
-
-    if (CurrentStateName.equals(ConnectedToAP) ||
-        CurrentStateName.equals(ConnectedToSTA))
-    {
-        response = true;
-    }
-
-    return response;
-} // IsWiFiConnected
-
 //-----------------------------------------------------------------------------
 void c_WiFiMgr::reset ()
 {
@@ -195,7 +174,10 @@ void c_WiFiMgr::reset ()
     LOG_PORT.println (F ("WiFi Reset has been requested"));
 
     fsm_WiFi_state_Boot_imp.Init ();
-    InputMgr.WiFiStateChanged (false);
+    if (IsWiFiConnected())
+    {
+        InputMgr.WiFiStateChanged (false);
+    }
 
     // DEBUG_END;
 } // reset
@@ -607,6 +589,7 @@ void fsm_WiFi_state_ConnectedToAP::Init ()
     // DEBUG_V (String ("localIp: ") + localIp.toString ());
     LOG_PORT.println (String (F ("WiFi Connected with IP: ")) + localIp.toString ());
 
+    WiFiMgr.SetIsWiFiConnected (true);
     InputMgr.WiFiStateChanged (true);
 
     // DEBUG_END;
@@ -618,7 +601,7 @@ void fsm_WiFi_state_ConnectedToAP::OnDisconnect ()
 {
     // DEBUG_START;
 
-    LOG_PORT.println (F ("*** WiFi Disconnected ***"));
+    LOG_PORT.println (F ("WiFi Lost the connection to the AP"));
     fsm_WiFi_state_ConnectionFailed_imp.Init ();
 
     // DEBUG_END;
@@ -635,6 +618,7 @@ void fsm_WiFi_state_ConnectedToSta::Poll ()
     // did we get silently disconnected?
     if (0 == WiFi.softAPgetStationNum ())
     {
+        LOG_PORT.println (F ("WiFi Lost the connection to the STA"));
         fsm_WiFi_state_ConnectionFailed_imp.Init ();
     }
 
@@ -658,8 +642,9 @@ void fsm_WiFi_state_ConnectedToSta::Init ()
 
     WiFiMgr.setIpAddress (CurrentIpAddress);
     WiFiMgr.setIpSubNetMask (CurrentSubnetMask);
-
+    WiFiMgr.SetIsWiFiConnected (true);
     InputMgr.WiFiStateChanged (true);
+
 
     // DEBUG_END;
 } // fsm_WiFi_state_ConnectedToSta::Init
@@ -686,21 +671,28 @@ void fsm_WiFi_state_ConnectionFailed::Init ()
 
     WiFiMgr.SetFsmState (this);
     WiFiMgr.AnnounceState ();
-    InputMgr.WiFiStateChanged (false);
 
-    if (true == WiFiMgr.GetConfigPtr ()->RebootOnWiFiFailureToConnect)
+    if (WiFiMgr.IsWiFiConnected())
     {
-        extern bool reboot;
-        LOG_PORT.println (F ("WiFi Requesting Reboot"));
-
-        reboot = true;
+        WiFiMgr.SetIsWiFiConnected (false);
+        InputMgr.WiFiStateChanged (false);
     }
     else
     {
-        LOG_PORT.println (F ("WiFi Reboot Disable."));
+        if (true == WiFiMgr.GetConfigPtr ()->RebootOnWiFiFailureToConnect)
+        {
+            extern bool reboot;
+            LOG_PORT.println (F ("WiFi Requesting Reboot"));
 
-        // start over
-        fsm_WiFi_state_Boot_imp.Init ();
+            reboot = true;
+        }
+        else
+        {
+            LOG_PORT.println (F ("WiFi Reboot Disabled."));
+
+            // start over
+            fsm_WiFi_state_Boot_imp.Init ();
+        }
     }
 
  // DEBUG_END;

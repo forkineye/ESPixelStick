@@ -359,8 +359,8 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
         $('#chanId_'     + (currentChannelRowId)).html(currentChannelRowId);
         $('#Enabled_'    + (currentChannelRowId)).prop("checked", CurrentChannelConfig.enabled);
         $('#Inverted_'   + (currentChannelRowId)).prop("checked", CurrentChannelConfig.invertoutput);
-        $('#gpioId_'     + (currentChannelRowId)).val(parseInt(CurrentChannelConfig.gpioid,10));
-        $('#threshhold_' + (currentChannelRowId)).val(parseInt(CurrentChannelConfig.onofftriggerlevel, 10));
+        $('#gpioId_'     + (currentChannelRowId)).val(CurrentChannelConfig.gpioid);
+        $('#threshhold_' + (currentChannelRowId)).val(CurrentChannelConfig.onofftriggerlevel);
     });
 
 } // ProcessModeConfigurationDataRelay
@@ -652,31 +652,30 @@ function ExtractDeviceConfigFromHtmlPage(JsonConfig, SectionName)
         // tell the ESP what type of channel it should be using
         CurrentChannelConfigurationData.type = ChannelType;
 
-        elementids.forEach(function (elementid)
-        {
-            var SelectedElement = modeControlName + ' #' + elementid;
-            if ($(SelectedElement).is(':checkbox')) {
-                ChannelConfig[elementid] = $(SelectedElement).prop('checked');
-            }
-            else
-            {
-                ChannelConfig[elementid] = $(SelectedElement).val();
-            }
-        });
-
-        if ((ChannelConfig.type === "Relay") && ($("#relaychannelconfigurationtable").length))
-        {
-            $.each(ChannelConfig.channels, function (i, CurrentChannelConfig)
-            {
+        if ((ChannelConfig.type === "Relay") && ($("#relaychannelconfigurationtable").length)) {
+            $.each(ChannelConfig.channels, function (i, CurrentChannelConfig) {
                 console.log("Current Channel Id = " + CurrentChannelConfig.id);
                 var currentChannelRowId = CurrentChannelConfig.id + 1;
-                CurrentChannelConfig.enabled           = $('#Enabled_'    + (currentChannelRowId)).prop("checked");
-                CurrentChannelConfig.invertoutput      = $('#Inverted_'   + (currentChannelRowId)).prop("checked");
-                CurrentChannelConfig.gpioid            = $('#gpioId_'     + (currentChannelRowId)).val();
-                CurrentChannelConfig.onofftriggerlevel = $('#threshhold_' + (currentChannelRowId)).val();
+                CurrentChannelConfig.enabled = $('#Enabled_' + (currentChannelRowId)).prop("checked");
+                CurrentChannelConfig.invertoutput = $('#Inverted_' + (currentChannelRowId)).prop("checked");
+                CurrentChannelConfig.gpioid = parseInt($('#gpioId_' + (currentChannelRowId)).val(), 10);
+                CurrentChannelConfig.onofftriggerlevel = parseInt($('#threshhold_' + (currentChannelRowId)).val(), 10);
+            });
+        }
+        else
+        {
+            elementids.forEach(function (elementid) {
+                var SelectedElement = modeControlName + ' #' + elementid;
+                if ($(SelectedElement).is(':checkbox')) {
+                    ChannelConfig[elementid] = $(SelectedElement).prop('checked');
+                }
+                else {
+                    ChannelConfig[elementid] = $(SelectedElement).val();
+                }
             });
         }
     }); // end for each channel
+
 } // ExtractDeviceConfigFromHtmlPage
 
 // Build dynamic JSON config submission for "Device" tab

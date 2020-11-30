@@ -45,7 +45,7 @@ typedef struct
     String name;
 }OutputTypeXlateMap_t;
 
-OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::OutputType_End] =
+static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::OutputType_End] =
 {
     {c_OutputMgr::e_OutputType::OutputType_WS2811,   "WS2811"   },
     {c_OutputMgr::e_OutputType::OutputType_GECE,     "GECE"     },
@@ -298,92 +298,22 @@ void c_OutputMgr::GetConfig (char * Response )
 {
     // DEBUG_START;
 
-    strcat (Response, ConfigData.c_str ());
+    // is a new config waiting to be saved?
+    if (0 != ConfigData.length ())
+    {
+        // use the pending config
+        strcat (Response, ConfigData.c_str ());
+    }
+    else
+    {
+        String TempConfigData;
+        FileIO::ReadFile (ConfigFileName, TempConfigData);
+        strcat (Response, TempConfigData.c_str ());
+    }
 
     // DEBUG_END;
 
 } // GetConfig
-
-//-----------------------------------------------------------------------------
-void c_OutputMgr::GetPortConfig (e_OutputChannelIds portId, String & ConfigResponse)
-{
-    // DEBUG_START;
-
-// try to load and process the config file
-    if (!FileIO::loadConfig (ConfigFileName, [this, portId, &ConfigResponse](DynamicJsonDocument& JsonConfigDoc)
-        {
-            // DEBUG_V ("");
-            JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
-            // DEBUG_V ("");
-
-            do // once
-            {
-                if (false == JsonConfig.containsKey (OM_SECTION_NAME))
-                {
-                    LOG_PORT.println (F ("No Output Interface Settings Found."));
-                    break;
-                }
-                JsonObject OutputChannelMgrData = JsonConfig[OM_SECTION_NAME];
-                // DEBUG_V ("");
-
-                // do we have a channel configuration array?
-                if (false == OutputChannelMgrData.containsKey (OM_CHANNEL_SECTION_NAME))
-                {
-                    // if not, flag an error and stop processing
-                    LOG_PORT.println (F ("No Output Channel Settings Found."));
-                    break;
-                }
-                JsonObject OutputChannelArray = OutputChannelMgrData[OM_CHANNEL_SECTION_NAME];
-                // DEBUG_V ("");
-
-                // get access to the channel config
-                if (false == OutputChannelArray.containsKey (String (portId).c_str ()))
-                {
-                    // if not, flag an error and stop processing
-                    LOG_PORT.println (String (F ("No Output Settings Found for Channel '")) + portId + String (F ("'.")));
-                    break;
-                }
-                JsonObject OutputChannelConfig = OutputChannelArray[String (portId).c_str ()];
-                // DEBUG_V ("");
-
-                // set a default value for channel type
-                uint32_t ChannelType = uint32_t (OutputType_End);
-                FileIO::setFromJSON (ChannelType, OutputChannelConfig[OM_CHANNEL_TYPE_NAME]);
-                // DEBUG_V ("");
-
-                // is it a valid / supported channel type
-                if ((ChannelType < uint32_t (OutputType_Start)) || (ChannelType >= uint32_t (OutputType_End)))
-                {
-                    // if not, flag an error and move on to the next channel
-                    break;
-                }
-                // DEBUG_V ("");
-
-                // do we have a configuration for the channel type?
-                if (false == OutputChannelConfig.containsKey (String (ChannelType)))
-                {
-                    // if not, flag an error and stop processing
-                    LOG_PORT.println (String (F ("No Output Settings Found for Channel '")) + portId + String (F ("'.")));
-                    continue;
-                }
-
-                JsonObject OutputChannelDriverConfig = OutputChannelConfig[String (ChannelType)];
-                // DEBUG_V ("");
-
-                serializeJson (OutputChannelDriverConfig, ConfigResponse);
-                // DEBUG_V (String("ConfigResponse: ") + ConfigResponse);
-
-            } while (false);
-
-            // DEBUG_V ("");
-        }, OM_MAX_CONFIG_SIZE))
-    {
-        LOG_PORT.println (F ("EEEE Error loading Output Manager Config File. EEEE"));
-    }
-        
-   // DEBUG_END;
-
-} // GetPortConfigs
 
 //-----------------------------------------------------------------------------
 void c_OutputMgr::GetOptions (JsonObject & jsonOptions)
@@ -392,9 +322,10 @@ void c_OutputMgr::GetOptions (JsonObject & jsonOptions)
     // DEBUG_START;
     JsonArray jsonChannelsArray = jsonOptions.createNestedArray (OM_CHANNEL_SECTION_NAME);
     // DEBUG_V (String("ConfigData: ") + ConfigData);
-
+    String TempConfigData;
+    FileIO::ReadFile (ConfigFileName, TempConfigData);
     DynamicJsonDocument OutputConfigData(OM_MAX_CONFIG_SIZE);
-    DeserializationError deError = deserializeJson (OutputConfigData, ConfigData);
+    DeserializationError deError = deserializeJson (OutputConfigData, TempConfigData);
     // DEBUG_V (String("deError: ") + String(deError.c_str()));
 
     // JsonObject OC_info = OutputConfigData["output_config"];
@@ -704,9 +635,6 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
     // DEBUG_START;
     boolean Response = false;
 
-    // save a copy of the config
-    ConfigData.clear ();
-    serializeJson (jsonConfig, ConfigData);
     // DEBUG_V ("");
 
     do // once
@@ -824,6 +752,7 @@ void c_OutputMgr::SaveConfig ()
     if (FileIO::SaveConfig (ConfigFileName, ConfigData))
     {
         LOG_PORT.println (F ("**** Saved Output Manager Config File. ****"));
+        ConfigData.clear ();
     } // end we got a config and it was good
     else
     {
@@ -853,6 +782,7 @@ bool c_OutputMgr::SetConfig (JsonObject & jsonConfig)
         Response = ProcessJsonConfig (jsonConfig);
 
         // schedule a future save to the file system
+        serializeJson (jsonConfig, ConfigData);
         ConfigSaveNeeded = true;
     }
     else

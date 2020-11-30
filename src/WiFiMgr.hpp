@@ -61,7 +61,8 @@ public:
     void      SetFsmStartTime (uint32_t NewStartTime)    { FsmTimerWiFiStartTime = NewStartTime; }
     uint32_t  GetFsmStartTime (void)                     { return FsmTimerWiFiStartTime; }
     config_t* GetConfigPtr    () { return config; }
-    bool      IsWiFiConnected ();
+    bool      IsWiFiConnected () { return ReportedIsWiFiConnected; }
+    void      SetIsWiFiConnected (bool value) { ReportedIsWiFiConnected = value; }
 
 private:
 
@@ -75,6 +76,7 @@ private:
     IPAddress           CurrentIpAddress  = IPAddress (0, 0, 0, 0);
     IPAddress           CurrentSubnetMask = IPAddress (0, 0, 0, 0);
     time_t              NextPollTime = 0;
+    bool                ReportedIsWiFiConnected = false;
 
     void SetUpIp ();
 

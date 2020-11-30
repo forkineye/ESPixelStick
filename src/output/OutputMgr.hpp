@@ -61,8 +61,6 @@ public:
         OutputChannelId_Start = OutputChannelId_1
     };
 
-    void GetPortConfig (e_OutputChannelIds portId, String & Config);
-
     enum e_OutputType
     {
         OutputType_WS2811 = 0,
