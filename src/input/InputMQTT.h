@@ -58,6 +58,7 @@ private:
     bool        clean = false;
     bool        hadisco = false;
     String      haprefix = "homeassistant";
+    String      lwt = "";
 
     void validateConfiguration ();
     void RegisterWithMqtt ();
