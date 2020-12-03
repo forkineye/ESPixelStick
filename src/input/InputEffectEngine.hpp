@@ -42,6 +42,7 @@ public:
     void GetDriverName (String  & sDriverName) { sDriverName = "Effects"; } ///< get the name for the instantiated driver
     void SetBufferInfo (uint8_t * BufferStart, uint16_t BufferSize);
     void ResetBlankTimer ();
+    void NextEffect ();
 
     // Effect functions
     uint16_t effectSolidColor ();

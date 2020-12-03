@@ -24,6 +24,7 @@
 
 #include "../ESPixelStick.h"
 #include "../output/OutputMgr.hpp"
+#include "externalInput.h"
 
 class c_InputCommon; ///< forward declaration to the pure virtual Input class that will be defined later.
 
@@ -66,7 +67,8 @@ public:
         InputChannelId_2 = 1,
         InputChannelId_End,
         InputChannelId_Start = InputChannelId_1,
-        InputChannelId_ALL = InputChannelId_End
+        InputChannelId_ALL = InputChannelId_End,
+        EffectsChannel = InputChannelId_2
     };
 
 private:
@@ -79,16 +81,20 @@ private:
     uint16_t        InputDataBufferSize = 0;
     bool            HasBeenInitialized  = false;
     bool            ConfigSaveNeeded    = false;
+    c_ExternalInput ExternalInput;
+    bool            EffectEngineIsConfiguredToRun[InputChannelId_End];
 
     // configuration parameter names for the channel manager within the config file
-#   define IM_SECTION_NAME         F("input_config")
-#   define IM_CHANNEL_SECTION_NAME F("channels")
-#   define IM_CHANNEL_TYPE_NAME    F("type")
-
+#   define IM_SECTION_NAME             F("input_config")
+#   define IM_CHANNEL_SECTION_NAME     F("channels")
+#   define IM_CHANNEL_TYPE_NAME        F("type")
+#   define IM_EffectsControlButtonName F("ecb")
+    
     bool ProcessJsonConfig           (JsonObject & jsonConfig);
     void CreateJsonConfig            (JsonObject & jsonConfig);
     bool ProcessJsonChannelConfig    (JsonObject & jsonConfig, uint32_t ChannelIndex);
     bool InputTypeIsAllowedOnChannel (e_InputType type, e_InputChannelIds ChannelId);
+    void ProcessEffectsButtonActions (void);
 
     String ConfigFileName;
     String ConfigData;

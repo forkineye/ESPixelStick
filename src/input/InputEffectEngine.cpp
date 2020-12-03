@@ -24,11 +24,11 @@
 //-----------------------------------------------------------------------------
 
     // List of all the supported effects and their names
-const c_InputEffectEngine::EffectDescriptor_t ListOfEffects[] =
+static const c_InputEffectEngine::EffectDescriptor_t ListOfEffects[] =
 {//                                                                   Mirror     AllLeds
     //    name;                             func;              htmlid;      Color;     Reverse     wsTCode
 
-        // { "Disabled",     nullptr,                           "t_disabled",     1,    1,    1,    1,  "T0"     },
+        // { "Disabled",     nullptr,                             "t_disabled",     1,    1,    1,    1,  "T0"     },
         { "Solid",        &c_InputEffectEngine::effectSolidColor, "t_static",       1,    0,    0,    0,  "T1"     },
         { "Blink",        &c_InputEffectEngine::effectBlink,      "t_blink",        1,    0,    0,    0,  "T2"     },
         { "Flash",        &c_InputEffectEngine::effectFlash,      "t_flash",        1,    0,    0,    0,  "T3"     },
@@ -146,7 +146,7 @@ void c_InputEffectEngine::GetMqttConfig (JsonObject & jsonConfig)
 
 } // GetMqttConfig
 
-  //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void c_InputEffectEngine::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
@@ -154,6 +154,39 @@ void c_InputEffectEngine::GetStatus (JsonObject& jsonStatus)
     // DEBUG_END;
 
 } // GetStatus
+
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::NextEffect ()
+{
+    DEBUG_START;
+
+    DEBUG_V ("Find the current effect");
+    int CurrentEffectIndex = 0;
+    for (EffectDescriptor_t currentEffect : ListOfEffects)
+    {
+        DEBUG_V (String ("currentEffect.name: ") + currentEffect.name);
+        if (ActiveEffect->name == currentEffect.name)
+        {
+            DEBUG_V ("Names Match");
+            break;
+        }
+
+        ++CurrentEffectIndex;
+    }
+
+    // we now have the index of the current effect
+    ++CurrentEffectIndex;
+    if (String ("T8") == ActiveEffect->wsTCode)
+    {
+        DEBUG_V ("Wrap to first effect");
+        CurrentEffectIndex = 0;
+    }
+
+    setEffect (ListOfEffects[CurrentEffectIndex].name);
+    DEBUG_V (String ("ActiveEffect->name: ") + ActiveEffect->name);
+
+    DEBUG_END;
+} // NextEffect
 
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::Process ()
@@ -318,6 +351,7 @@ void c_InputEffectEngine::setDelay (uint16_t delay)
     // DEBUG_END;
 } // setDelay
 
+//-----------------------------------------------------------------------------
 void c_InputEffectEngine::ResetBlankTimer ()
 {
     // DEBUG_START;

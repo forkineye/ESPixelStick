@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // Create secrets.h with a #define for SECRETS_SSID and SECRETS_PASS
 // or delete the #include and enter the strings directly below.
-// #include "secrets.h"
+#include "secrets.h"
 #ifndef SECRETS_SSID
 #   define SECRETS_SSID "DEFAULT_SSID_NOT_SET"
 #   define SECRETS_PASS "DEFAULT_PASSPHRASE_NOT_SET"
