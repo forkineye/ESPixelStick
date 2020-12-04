@@ -179,7 +179,7 @@ bool c_ExternalInput::ReadInput (void)
 	bool bInputValue = digitalRead (m_iPinId);
 
 	// do we need to invert the input?
-	if (Polarity_t::ActiveHigh == m_polarity)
+	if (Polarity_t::ActiveLow == m_polarity)
 	{
 		// invert the input value
 		bInputValue = !bInputValue;
