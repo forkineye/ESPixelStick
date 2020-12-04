@@ -158,16 +158,16 @@ void c_InputEffectEngine::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::NextEffect ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    DEBUG_V ("Find the current effect");
+    // DEBUG_V ("Find the current effect");
     int CurrentEffectIndex = 0;
-    for (EffectDescriptor_t currentEffect : ListOfEffects)
+    for (const EffectDescriptor_t currentEffect : ListOfEffects)
     {
-        DEBUG_V (String ("currentEffect.name: ") + currentEffect.name);
+        // DEBUG_V (String ("currentEffect.name: ") + currentEffect.name);
         if (ActiveEffect->name == currentEffect.name)
         {
-            DEBUG_V ("Names Match");
+            // DEBUG_V (String ("currentEffect.name: ") + currentEffect.name);
             break;
         }
 
@@ -176,16 +176,18 @@ void c_InputEffectEngine::NextEffect ()
 
     // we now have the index of the current effect
     ++CurrentEffectIndex;
-    if (String ("T8") == ActiveEffect->wsTCode)
+    if (String ("Breathe") == ActiveEffect->name)
     {
-        DEBUG_V ("Wrap to first effect");
+        // DEBUG_V ("Wrap to first effect");
         CurrentEffectIndex = 0;
     }
 
+    // DEBUG_V (String ("CurrentEffectIndex: ") + String(CurrentEffectIndex));
     setEffect (ListOfEffects[CurrentEffectIndex].name);
-    DEBUG_V (String ("ActiveEffect->name: ") + ActiveEffect->name);
+    LOG_PORT.println (String (F ("Setting new effect: ")) + ActiveEffect->name);
+    // DEBUG_V (String ("ActiveEffect->name: ") + ActiveEffect->name);
 
-    DEBUG_END;
+    // DEBUG_END;
 } // NextEffect
 
 //-----------------------------------------------------------------------------
