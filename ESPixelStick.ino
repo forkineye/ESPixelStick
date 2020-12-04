@@ -332,6 +332,14 @@ void loadConfig()
     // DEBUG_START;
 } // loadConfig
 
+void DeleteConfig ()
+{
+    // DEBUG_START;
+    FileIO::DeleteFile (ConfigFileName);
+    // DEBUG_END;
+
+} // DeleteConfig
+
 void GetConfig (JsonObject & json)
 {
     // DEBUG_START;

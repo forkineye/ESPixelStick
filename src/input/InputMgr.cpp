@@ -137,7 +137,7 @@ void c_InputMgr::Begin (uint8_t* BufferStart, uint16_t BufferSize)
 //-----------------------------------------------------------------------------
 void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     // add IM config parameters
     // DEBUG_V ("");
@@ -232,7 +232,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
     }
 
     // smile. Your done
-    DEBUG_END;
+    // DEBUG_END;
 } // CreateJsonConfig
 
 //-----------------------------------------------------------------------------

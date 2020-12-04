@@ -53,9 +53,10 @@ private:
     /// Valid "Simple" message types
     enum SimpleMessage 
     {
-        GET_STATUS = 'J',
-        GET_ADMIN  = 'A',
-        DO_RESET   = '6',
+        GET_STATUS      = 'J',
+        GET_ADMIN       = 'A',
+        DO_RESET        = '6',
+        DO_FACTORYRESET = '7',
     };
 
     void init ();

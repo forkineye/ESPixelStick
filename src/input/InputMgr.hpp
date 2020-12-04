@@ -45,6 +45,7 @@ public:
     void SetOperationalState (bool Active);
     void ResetBlankTimer ();
     void WiFiStateChanged (bool IsConnected); // used by poorly designed rx functions
+    void DeleteConfig () { FileIO::DeleteFile (ConfigFileName); }
 
     enum e_InputType
     {
