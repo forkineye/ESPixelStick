@@ -49,7 +49,6 @@ protected:
 #   define M_ID         "id"
 
 	String                    m_name;
-	uint32_t                  m_iInputId            = 0; // ID used by calling entities to access this input
 	uint32_t                  m_iPinId              = 0;
 	Polarity_t                m_polarity            = Polarity_t::ActiveLow;
 	time_t                    m_ExpirationTime      = 0;

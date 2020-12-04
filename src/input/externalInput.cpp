@@ -16,7 +16,7 @@ fsm_ExternalInput_boot                fsm_ExternalInput_boot_imp;
 fsm_ExternalInput_off_state           fsm_ExternalInput_off_state_imp;
 fsm_ExternalInput_on_wait_short_state fsm_ExternalInput_on_wait_short_state_imp;
 fsm_ExternalInput_on_wait_long_state  fsm_ExternalInput_on_wait_long_state_imp;
-fsm_ExternalInput_wait_for_off_state   fsm_ExternalInput_wait_for_off_state_imp;
+fsm_ExternalInput_wait_for_off_state  fsm_ExternalInput_wait_for_off_state_imp;
 
 /*****************************************************************************/
 /* Code                                                                      */
@@ -37,7 +37,6 @@ void c_ExternalInput::Init(uint32_t iInputId, uint32_t iPinId, Polarity_t Polari
 	// Remember the pin number for future calls
 	m_iPinId   = iPinId;
 	m_name     = sName;
-	m_iInputId = iInputId;
 	m_polarity = Polarity;
 
 	// set the pin direction to input
@@ -77,14 +76,15 @@ c_ExternalInput::InputValue_t c_ExternalInput::Get()
  */
 void c_ExternalInput::GetConfig (JsonObject JsonData)
 {
-	DEBUG_START;
+	// DEBUG_START;
 
 	JsonData[M_IO_ENABLED] = m_bIsEnabled;
 	JsonData[M_NAME]       = m_name;
-	JsonData[M_ID]         = m_iInputId;
+	JsonData[M_ID]         = m_iPinId;
 	JsonData[M_POLARITY]   = (ActiveHigh == m_polarity) ? "ActiveHigh" : "ActiveLow";
+	// DEBUG_V (String ("m_iPinId: ") + String (m_iPinId));
 
-	DEBUG_END;
+	// DEBUG_END;
 
 } // GetConfig
 
@@ -101,7 +101,7 @@ void c_ExternalInput::GetStatistics (JsonObject JsonData)
 {
 	// DEBUG_START;
 
-	JsonData[M_ID]    = m_iInputId;
+	JsonData[M_ID]    = m_iPinId;
 	JsonData[M_STATE] = (InputValue_t::on == Get ()) ? "on" : "off";
 
 	// DEBUG_END;
@@ -123,22 +123,24 @@ void c_ExternalInput::ProcessConfig (JsonObject JsonData)
 
 	String sPolarity = (ActiveHigh == m_polarity) ? "ActiveHigh" : "ActiveLow";
 
-	uint32_t oldInputId = m_iInputId;
+	uint32_t oldInputId = m_iPinId;
 	
 	FileIO::setFromJSON (m_bIsEnabled, JsonData[M_IO_ENABLED]);
 	FileIO::setFromJSON (m_name,       JsonData[M_NAME]);
-	FileIO::setFromJSON (m_iInputId,   JsonData[M_ID]);
+	FileIO::setFromJSON (m_iPinId,     JsonData[M_ID]);
 	FileIO::setFromJSON (sPolarity,    JsonData[M_POLARITY]);
 
 	m_polarity = (String("ActiveHigh") == sPolarity) ? ActiveHigh : ActiveLow;
 
-	if ((oldInputId != m_iInputId) || (false == m_bIsEnabled))
+	if ((oldInputId != m_iPinId) || (false == m_bIsEnabled))
 	{
 		pinMode (m_iPinId, INPUT);
 		m_bHadLongPush  = false;
 		m_bHadShortPush = false;
 		fsm_ExternalInput_boot_imp.Init (this);
 	}
+
+	// DEBUG_V (String ("m_iPinId: ") + String (m_iPinId));
 
 	// DEBUG_END;
 
@@ -183,7 +185,8 @@ bool c_ExternalInput::ReadInput (void)
 		bInputValue = !bInputValue;
 	}
 
-	// DEBUG_V (String("bInputValue: ") + String(bInputValue));
+	// DEBUG_V (String ("m_iPinId:    ") + String (m_iPinId));
+	// DEBUG_V (String ("bInputValue: ") + String (bInputValue));
 	return bInputValue;
 
 } // ReadInput
