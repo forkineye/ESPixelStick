@@ -684,7 +684,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
         // extract my own config data here
         if (true == InputChannelMgrData.containsKey (IM_EffectsControlButtonName))
         {
-            DEBUG_V ("Found Input Button Config");
+            // DEBUG_V ("Found Input Button Config");
             JsonObject InputButtonConfig = InputChannelMgrData[IM_EffectsControlButtonName];
             ExternalInput.ProcessConfig (InputButtonConfig);
         }
