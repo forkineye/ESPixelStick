@@ -94,6 +94,10 @@ $(function ()
         reboot();
     });
 
+    $('#adminFactoryReset').click(function () {
+        factoryReset();
+    });
+
     var finalUrl = "http://" + target + "/upload";
     // console.log(finalUrl);
     const uploader = new Dropzone('#filemanagementupload', 
@@ -365,7 +369,7 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
 
 function ProcessInputConfig ()
 {
-    $("#ecb_enable").val(Input_Config.ecb.enabled);
+    $("#ecb_enable").prop("checked", Input_Config.ecb.enabled);
     $("#ecb_gpioid").val(Input_Config.ecb.id);
     $("#ecb_polarity").val(Input_Config.ecb.polarity);
 
@@ -692,7 +696,7 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
 function submitDeviceConfig()
 {
     ExtractChannelConfigFromHtmlPage(Input_Config.channels, "input");
-    Input_Config.ecb.enabled  = $("#ecb_enable").val();
+    Input_Config.ecb.enabled  = $("#ecb_enable").is(':checked');
     Input_Config.ecb.id       = $("#ecb_gpioid").val();
     Input_Config.ecb.polarity = $("#ecb_polarity").val();
 
@@ -1115,4 +1119,11 @@ function reboot()
     showReboot();
     wsEnqueue('X6');
 }
+
+// reset config
+function factoryReset()
+{
+    showReboot();
+    wsEnqueue('X7');
+} // factoryReset
 
