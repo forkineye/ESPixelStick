@@ -569,6 +569,20 @@ void c_WebMgr::ProcessXseriesRequests (AsyncWebSocketClient * client)
             break;
         } // end case SimpleMessage::DO_RESET:
 
+        case SimpleMessage::DO_FACTORYRESET:
+        {
+            extern void DeleteConfig ();
+            // DEBUG_V ("");
+            InputMgr.DeleteConfig ();
+            OutputMgr.DeleteConfig ();
+            DeleteConfig ();
+
+            // DEBUG_V ("");
+            extern bool reboot;
+            reboot = true;
+            break;
+        } // end case SimpleMessage::DO_RESET:
+
         default:
         {
             LOG_PORT.println (String (F ("ERROR: Unhandled request: ")) + WebSocketFrameCollectionBuffer);

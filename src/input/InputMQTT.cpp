@@ -99,6 +99,7 @@ void c_InputMQTT::GetConfig (JsonObject & jsonConfig)
     jsonConfig["clean"]    = clean;
     jsonConfig["hadisco"]  = hadisco;
     jsonConfig["haprefix"] = haprefix;
+    jsonConfig["lwt"]      = lwt;
 
     pEffectsEngine->GetConfig (jsonConfig);
 
@@ -155,6 +156,7 @@ boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     FileIO::setFromJSON (clean,    jsonConfig["clean"]);
     FileIO::setFromJSON (hadisco,  jsonConfig["hadisco"]);
     FileIO::setFromJSON (haprefix, jsonConfig["haprefix"]);
+    FileIO::setFromJSON (lwt,      jsonConfig["lwt"]);
 
     pEffectsEngine->SetConfig (jsonConfig);
 
@@ -241,6 +243,7 @@ void c_InputMQTT::connectToMqtt()
     LOG_PORT.print(F("- Connecting to MQTT Broker "));
     LOG_PORT.println(ip);
     mqtt.connect();
+    mqtt.setWill (topic.c_str(), 1, true, lwt.c_str(), lwt.length());
 
     // DEBUG_END;
 } // connectToMqtt

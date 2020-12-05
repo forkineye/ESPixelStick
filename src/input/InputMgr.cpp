@@ -71,7 +71,9 @@ c_InputMgr::c_InputMgr ()
     int pInputChannelDriversIndex = 0;
     for (c_InputCommon* CurrentInput : pInputChannelDrivers)
     {
-        pInputChannelDrivers[pInputChannelDriversIndex++] = nullptr;
+        pInputChannelDrivers[pInputChannelDriversIndex] = nullptr;
+        EffectEngineIsConfiguredToRun[pInputChannelDriversIndex] = false;
+        ++pInputChannelDriversIndex;
     }
 
 } // c_InputMgr
@@ -112,6 +114,9 @@ void c_InputMgr::Begin (uint8_t* BufferStart, uint16_t BufferSize)
     if (true == HasBeenInitialized) { return; }
     HasBeenInitialized = true;
 
+    String temp = String ("Effects Control");
+    ExternalInput.Init (0,0, c_ExternalInput::Polarity_t::ActiveLow, temp);
+
     // make sure the pointers are set up properly
     int ChannelIndex = 0;
     for (c_InputCommon* CurrentInput : pInputChannelDrivers)
@@ -135,6 +140,27 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
     // DEBUG_START;
 
     // add IM config parameters
+    // DEBUG_V ("");
+
+    JsonObject InputMgrButtonData;
+    
+    if (true == jsonConfig.containsKey (IM_EffectsControlButtonName))
+    {
+        // DEBUG_V ("");
+        InputMgrButtonData = jsonConfig[IM_EffectsControlButtonName];
+    }
+    else
+    {
+        // DEBUG_V ("");
+        InputMgrButtonData = jsonConfig.createNestedObject (IM_EffectsControlButtonName);
+    }
+    // DEBUG_V ("");
+    extern void PrettyPrint (JsonObject & jsonStuff, String Name);
+    
+    PrettyPrint (InputMgrButtonData, String("Before"));
+    ExternalInput.GetConfig (InputMgrButtonData);
+    PrettyPrint (InputMgrButtonData, String("After"));
+
     // DEBUG_V ("");
 
     // add the channels header
@@ -296,6 +322,9 @@ void c_InputMgr::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
+    JsonObject InputButtonStatus = jsonStatus.createNestedObject (F ("inputbutton"));
+    ExternalInput.GetStatistics (InputButtonStatus);
+
     JsonArray InputStatus = jsonStatus.createNestedArray (F ("input"));
     for (c_InputCommon* CurrentInput : pInputChannelDrivers)
     {
@@ -387,6 +416,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             // DEBUG_V ("shut down the existing driver");
             delete pInputChannelDrivers[ChannelIndex];
             pInputChannelDrivers[ChannelIndex] = nullptr;
+
             // DEBUG_V ("");
         } // end there is an existing driver
 
@@ -559,6 +589,9 @@ void c_InputMgr::Process ()
 
     } // done need to save the current config
 
+    ExternalInput.Poll ();
+    ProcessEffectsButtonActions ();
+
     // DEBUG_V("");
     for (c_InputCommon* pInputChannel : pInputChannelDrivers)
     {
@@ -569,6 +602,57 @@ void c_InputMgr::Process ()
 } // Process
 
 //-----------------------------------------------------------------------------
+void c_InputMgr::ProcessEffectsButtonActions ()
+{
+    // DEBUG_START;
+
+    if (false == ExternalInput.IsEnabled ())
+    {
+        // DEBUG_V ("Effects Button is disabled");
+        // is the effects engine running?
+        if (e_InputType::InputType_Effects == pInputChannelDrivers[EffectsChannel]->GetInputType ())
+        {
+            // is the effects engine configured to be running?
+            if (false == EffectEngineIsConfiguredToRun[EffectsChannel])
+            {
+                // DEBUG_V ("turn off effects engine");
+                InstantiateNewInputChannel (e_InputChannelIds (EffectsChannel), e_InputType::InputType_Disabled);
+            }
+        }
+    }
+
+    else if (ExternalInput.InputHadLongPush (true))
+    {
+        // DEBUG_V ("Had a Long Push");
+        // Is the effects engine already running?
+        if (e_InputType::InputType_Effects == pInputChannelDrivers[EffectsChannel]->GetInputType ())
+        {
+            // DEBUG_V ("turn off effects engine");
+            InstantiateNewInputChannel (e_InputChannelIds (EffectsChannel), e_InputType::InputType_Disabled);
+        }
+        else
+        {
+            // DEBUG_V ("turn on effects engine");
+            InstantiateNewInputChannel (e_InputChannelIds (EffectsChannel), e_InputType::InputType_Effects);
+        }
+    }
+
+    else if (ExternalInput.InputHadShortPush (true))
+    {
+        // DEBUG_V ("Had a Short Push");
+        // is the effects engine running?
+        if (e_InputType::InputType_Effects == pInputChannelDrivers[EffectsChannel]->GetInputType ())
+        {
+            // DEBUG_V ("tell the effects engine to go to the next effect");
+            ((c_InputEffectEngine*)(pInputChannelDrivers[EffectsChannel]))->NextEffect ();
+        }
+    }
+
+    // DEBUG_END;
+
+} // ProcessEffectsButtonActions
+
+//-----------------------------------------------------------------------------
 /*
     check the contents of the config and send
     the proper portion of the config to the currently instantiated channels
@@ -576,7 +660,7 @@ void c_InputMgr::Process ()
     needs
         ref to data from config file
     returns
-        true - config was properly processes
+        true  - config was properly processed
         false - config had an error.
 */
 bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
@@ -598,6 +682,16 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
         // DEBUG_V ("");
 
         // extract my own config data here
+        if (true == InputChannelMgrData.containsKey (IM_EffectsControlButtonName))
+        {
+            // DEBUG_V ("Found Input Button Config");
+            JsonObject InputButtonConfig = InputChannelMgrData[IM_EffectsControlButtonName];
+            ExternalInput.ProcessConfig (InputButtonConfig);
+        }
+        else
+        {
+            LOG_PORT.println (F ("No Input Button Settings Found. Using Defaults"));
+        }
 
         // do we have a channel configuration array?
         if (false == InputChannelMgrData.containsKey (IM_CHANNEL_SECTION_NAME))
@@ -654,6 +748,8 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
             // make sure the proper Input type is running
             InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex), e_InputType (ChannelType));
             // DEBUG_V (String ("Response: ") + Response);
+
+            EffectEngineIsConfiguredToRun[ChannelIndex] = (e_InputType::InputType_Effects == pInputChannelDrivers[ChannelIndex]->GetInputType()) ? true : false ;
 
             // send the config to the driver. At this level we have no idea what is in it
             pInputChannelDrivers[ChannelIndex]->SetConfig (InputChannelDriverConfig);

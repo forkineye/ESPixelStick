@@ -94,6 +94,10 @@ $(function ()
         reboot();
     });
 
+    $('#adminFactoryReset').click(function () {
+        factoryReset();
+    });
+
     var finalUrl = "http://" + target + "/upload";
     // console.log(finalUrl);
     const uploader = new Dropzone('#filemanagementupload', 
@@ -363,6 +367,14 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
 
 } // ProcessModeConfigurationDataRelay
 
+function ProcessInputConfig ()
+{
+    $("#ecb_enable").prop("checked", Input_Config.ecb.enabled);
+    $("#ecb_gpioid").val(Input_Config.ecb.id);
+    $("#ecb_polarity").val(Input_Config.ecb.polarity);
+
+} // ProcessInputConfig
+
 function ProcessModeConfigurationData(channelId, ChannelTypeName, JsonConfig )
 {
     // console.info("ProcessModeConfigurationData: Start");
@@ -535,10 +547,13 @@ function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId )
 
     // try to load the field definition file for this channel type
     $('#' + OptionListName + 'mode' + DisplayedChannelId).load(HtmlLoadFileName, function () {
-        if ("input" === OptionListName) {
+        if ("input" === OptionListName)
+        {
+            ProcessInputConfig();
             ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Input_Config);
         }
-        else if ("output" === OptionListName) {
+        else if ("output" === OptionListName)
+        {
             ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Output_Config);
         }
     });
@@ -551,7 +566,10 @@ function CreateOptionsFromConfig(OptionListName, Config)
 
     var Channels = Config.channels;
 
-    // Input_Config
+    if ("input" === OptionListName)
+    {
+        $('#ecpin').val(Config.ecpin);
+    }
 
     // for each field we need to populate (input vs output)
     Object.keys(Channels).forEach(function (ChannelId)
@@ -630,7 +648,7 @@ function submitWiFiConfig()
 
 } // submitWiFiConfig
 
-function ExtractDeviceConfigFromHtmlPage(JsonConfig, SectionName)
+function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
 {
     // for each option channel:
     jQuery.each(JsonConfig, function (DisplayedChannelId, CurrentChannelConfigurationData)
@@ -672,16 +690,20 @@ function ExtractDeviceConfigFromHtmlPage(JsonConfig, SectionName)
         }
     }); // end for each channel
 
-} // ExtractDeviceConfigFromHtmlPage
+} // ExtractChannelConfigFromHtmlPage
 
 // Build dynamic JSON config submission for "Device" tab
 function submitDeviceConfig()
 {
-    ExtractDeviceConfigFromHtmlPage(Input_Config.channels,  "input");
-    ExtractDeviceConfigFromHtmlPage(Output_Config.channels, "output");
+    ExtractChannelConfigFromHtmlPage(Input_Config.channels, "input");
+    Input_Config.ecb.enabled  = $("#ecb_enable").is(':checked');
+    Input_Config.ecb.id       = $("#ecb_gpioid").val();
+    Input_Config.ecb.polarity = $("#ecb_polarity").val();
+
+    ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'device': { 'id': $('#config #device #id').val() } } } }));
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input': { 'input_config': Input_Config } } } }));
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input':  { 'input_config': Input_Config } } } }));
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'output': { 'output_config': Output_Config } } } }));
 
     return;
@@ -1097,4 +1119,11 @@ function reboot()
     showReboot();
     wsEnqueue('X6');
 }
+
+// reset config
+function factoryReset()
+{
+    showReboot();
+    wsEnqueue('X7');
+} // factoryReset
 

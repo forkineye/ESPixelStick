@@ -101,6 +101,13 @@ public:
 		// DEBUG_END;
 	} // begin
 
+	static void DeleteFile (String & FileName)
+	{
+		// DEBUG_START;
+		LITTLEFS.remove (FileName);
+		// DEBUG_END;
+	} // DeleteFile
+
   /// Load configuration file
   /** Loads JSON configuration file via File System.
    *  Returns true on success.
