@@ -215,7 +215,7 @@ void c_WiFiMgr::SetUpIp ()
             // correct IP is already set
             break;
         }
-        // We don't use DNS, so just set it to our gateway
+        // We didn't use DNS, so just set it to our configured gateway
         WiFi.config (config->ip, config->gateway, config->netmask, config->gateway);
 
         LOG_PORT.println (F ("Connected with Static IP"));
@@ -522,13 +522,10 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
         String ssid = "ESPixelStick " + String (WiFiMgr.GetConfigPtr ()->hostname);
         WiFi.softAP (ssid.c_str ());
 
-        IPAddress CurrentIpAddress = WiFi.softAPIP ();
-        IPAddress CurrentSubnetMask = IPAddress (255, 255, 255, 0);
+        WiFiMgr.setIpAddress (WiFi.localIP ());
+        WiFiMgr.setIpSubNetMask (WiFi.subnetMask ());
 
-        WiFiMgr.setIpAddress (CurrentIpAddress);
-        WiFiMgr.setIpSubNetMask (CurrentSubnetMask);
-
-        LOG_PORT.println (String (F ("WiFi SOFTAP: IP Address: '")) + CurrentIpAddress.toString ());
+        LOG_PORT.println (String (F ("WiFi SOFTAP: IP Address: '")) + WiFiMgr.getIpAddress().toString ());
     }
     else
     {
@@ -580,14 +577,10 @@ void fsm_WiFi_state_ConnectedToAP::Init ()
 
     WiFiMgr.SetUpIp ();
 
-    config_t * config = WiFiMgr.GetConfigPtr ();
-    IPAddress localIp = WiFi.localIP ();
-    config->ip = localIp;
-    config->netmask = WiFi.subnetMask ();
-    config->gateway = WiFi.gatewayIP ();
+    WiFiMgr.setIpAddress( WiFi.localIP () );
+    WiFiMgr.setIpSubNetMask( WiFi.subnetMask () );
 
-    // DEBUG_V (String ("localIp: ") + localIp.toString ());
-    LOG_PORT.println (String (F ("WiFi Connected with IP: ")) + localIp.toString ());
+    LOG_PORT.println (String (F ("WiFi Connected with IP: ")) + WiFiMgr.getIpAddress ().toString ());
 
     WiFiMgr.SetIsWiFiConnected (true);
     InputMgr.WiFiStateChanged (true);
@@ -636,12 +629,11 @@ void fsm_WiFi_state_ConnectedToSta::Init ()
 
     WiFiMgr.SetUpIp ();
 
-    IPAddress CurrentIpAddress = WiFi.softAPIP ();
-    IPAddress CurrentSubnetMask = WiFi.subnetMask ();
-    LOG_PORT.println (String (F ("\nWiFi Connected to STA with IP: ")) + CurrentIpAddress.toString ());
+    WiFiMgr.setIpAddress (WiFi.softAPIP ());
+    WiFiMgr.setIpSubNetMask (IPAddress (255, 255, 255, 0));
 
-    WiFiMgr.setIpAddress (CurrentIpAddress);
-    WiFiMgr.setIpSubNetMask (CurrentSubnetMask);
+    LOG_PORT.println (String (F ("\nWiFi Connected to STA with IP: ")) + WiFiMgr.getIpAddress ().toString ());
+
     WiFiMgr.SetIsWiFiConnected (true);
     InputMgr.WiFiStateChanged (true);
 
