@@ -603,7 +603,7 @@ function CreateOptionsFromConfig(OptionListName, Config)
                 LoadDeviceSetupSelectedOption(OptionListName, ChannelId);
                 $(jqSelector).change(function ()
                 {
-                    console.info("Set the selector type to: " + CurrentChannel.type);
+                    // console.info("Set the selector type to: " + CurrentChannel.type);
                     LoadDeviceSetupSelectedOption(OptionListName, ChannelId);
                 });
             }
@@ -668,7 +668,7 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
 
         if ((ChannelConfig.type === "Relay") && ($("#relaychannelconfigurationtable").length)) {
             $.each(ChannelConfig.channels, function (i, CurrentChannelConfig) {
-                console.log("Current Channel Id = " + CurrentChannelConfig.id);
+                // console.info("Current Channel Id = " + CurrentChannelConfig.id);
                 var currentChannelRowId = CurrentChannelConfig.id + 1;
                 CurrentChannelConfig.enabled = $('#Enabled_' + (currentChannelRowId)).prop("checked");
                 CurrentChannelConfig.invertoutput = $('#Inverted_' + (currentChannelRowId)).prop("checked");
@@ -762,7 +762,7 @@ function wsConnect()
             // console.info("ws.onmessage: Start");
             if (typeof event.data === "string")
             {
-                console.info("ws.onmessage: Received: " + event.data);
+                // console.info("ws.onmessage: Received: " + event.data);
 
                 // Process "simple" message format
                 if (event.data.startsWith("X"))
@@ -914,7 +914,7 @@ function wsProcessOutputQueue()
         }, WaitForResponseTimeMS);
 
         //send it.
-        console.log('WS sending ' + OutputMessage);
+        // console.info('WS sending ' + OutputMessage);
         ws.send(OutputMessage);
 
     } // message available to send
