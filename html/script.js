@@ -945,6 +945,8 @@ function drawStream(streamData)
 {
     var cols = parseInt($('#v_columns').val());
     var size = Math.floor((canvas.width - 20) / cols);
+    var maxDisplay = 0;
+
     if ($("input[name='viewStyle'][value='RGB']").prop('checked'))
     {
         maxDisplay = Math.min(streamData.length, (cols * Math.floor((canvas.height - 30) / size)) * 3);
@@ -957,9 +959,12 @@ function drawStream(streamData)
         }
     }
     else if ($("input[name='viewStyle'][value='RGBW']").prop('checked')) {
+    {
         maxDisplay = Math.min(streamData.length, (cols * Math.floor((canvas.height - 30) / size)) * 4);
         for (i = 0; i < maxDisplay; i += 4) {
-            ctx.fillStyle = 'rgb(' + streamData[i + 0] + ',' + streamData[i + 1] + ',' + streamData[i + 2] + ')';
+        {
+            var WhiteLevel = streamData[i + 3];
+            ctx.fillStyle = 'rgb(' + Math.max(streamData[i + 0], WhiteLevel) + ',' + Math.max(streamData[i + 1], WhiteLevel) + ',' + Math.max(streamData[i + 2], WhiteLevel) + ')';
             var col = (i / 4) % cols;
             var row = Math.floor((i / 4) / cols);
             ctx.fillRect(10 + (col * size), 10 + (row * size), size - 1, size - 1);
