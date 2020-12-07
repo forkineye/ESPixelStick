@@ -103,15 +103,6 @@ void c_WiFiMgr::Begin (config_t* NewConfig)
     esp_wifi_set_ps (WIFI_PS_NONE);
 #endif
 
-    // DEBUG_V("");
-    if (0 != config->hostname.length())
-    {
-#ifdef ARDUINO_ARCH_ESP8266
-        WiFi.hostname (config->hostname);
-#else
-        WiFi.setHostname (config->hostname.c_str ());
-#endif
-    }
     // DEBUG_V ("");
 
     // Setup WiFi Handlers
@@ -155,7 +146,34 @@ void c_WiFiMgr::GetStatus (JsonObject & jsonStatus)
 //-----------------------------------------------------------------------------
 void c_WiFiMgr::connectWifi ()
 {
-    // DEBUG_START;
+    DEBUG_START;
+
+    // disconnect just in case
+#ifdef ARDUINO_ARCH_ESP8266
+    WiFi.disconnect ();
+#else
+    WiFi.persistent (false);
+    // DEBUG_V ("");
+    WiFi.disconnect (true);
+#endif
+    // DEBUG_V ("");
+
+    // Switch to station mode
+    WiFi.mode (WIFI_STA);
+    // DEBUG_V ("");
+
+    DEBUG_V (String ("config->hostname: ") + config->hostname);
+    if (0 != config->hostname.length ())
+    {
+        DEBUG_V (String ("Setting WiFi hostname: ") + config->hostname);
+
+#ifdef ARDUINO_ARCH_ESP8266
+        WiFi.hostname (config->hostname);
+#else
+        WiFi.setHostname (config->hostname.c_str ());
+#endif
+    }
+
     LOG_PORT.println (String(F ("\nWiFi Connecting to ")) + 
                       String(config->ssid) + 
                       String (F (" as ")) + 
@@ -163,7 +181,7 @@ void c_WiFiMgr::connectWifi ()
 
     WiFi.begin (config->ssid.c_str (), config->passphrase.c_str ());
 
-    // DEBUG_END;
+    DEBUG_END;
 } // connectWifi
 
 //-----------------------------------------------------------------------------
@@ -391,19 +409,6 @@ void fsm_WiFi_state_ConnectingUsingConfig::Init ()
     WiFiMgr.AnnounceState ();
     WiFiMgr.SetFsmStartTime (millis ());
 
-    // Switch to station mode and disconnect just in case
-    WiFi.mode (WIFI_STA);
-    // DEBUG_V ("");
-
-#ifdef ARDUINO_ARCH_ESP8266
-    WiFi.disconnect ();
-#else
-    WiFi.persistent (false);
-    // DEBUG_V ("");
-    WiFi.disconnect (true);
-#endif
-    // DEBUG_V ("");
-
     WiFiMgr.connectWifi ();
 
     // DEBUG_END;
@@ -456,13 +461,6 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Init ()
 
     // Switch to station mode and disconnect just in case
     // DEBUG_V ("");
-
-    config_t* config = WiFiMgr.GetConfigPtr ();
-
-    // DEBUG_V (String ("ssid: ") + String (ssid));
-    // DEBUG_V (String ("passphrase: ") + String (passphrase));
-    config->ssid = ssid;
-    config->passphrase = passphrase;
 
     WiFiMgr.connectWifi ();
 
