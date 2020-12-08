@@ -51,7 +51,7 @@ c_InputFPPRemote::~c_InputFPPRemote ()
 } // ~c_InputFPPRemote
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemote::Begin() 
+void c_InputFPPRemote::Begin()
 {
     // DEBUG_START;
 

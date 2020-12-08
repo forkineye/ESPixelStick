@@ -51,7 +51,7 @@
 extern "C"
 {
 #   include <user_interface.h>
-} // extern "C" 
+} // extern "C"
 
 #elif defined ARDUINO_ARCH_ESP32
     // ESP32 user_interface is now built in
@@ -81,8 +81,8 @@ static void _u0_putc(char c){
 // Configuration file
 String ConfigFileName = "/config.json";
 
-const String VERSION = "4.0_unified-dev";
-const String BUILD_DATE = String(__DATE__);
+const String VERSION = "4.0-dev (NOT STABLE)";
+const String BUILD_DATE = String(__DATE__) + " - " + String(__TIME__);
 
 config_t            config;                 // Current configuration
 bool                reboot = false;         // Reboot flag
@@ -101,7 +101,7 @@ void GetConfig (JsonObject & json);
 
 /// Arduino Setup
 /** Arduino based setup code that is executed at startup. */
-void setup() 
+void setup()
 {
     config.ip      = IPAddress ((uint32_t)0);
     config.netmask = IPAddress ((uint32_t)0);
@@ -146,7 +146,7 @@ void setup()
     WiFiMgr.Begin (& config);
     // DEBUG_V ("");
 
-    // connect the input processing to the output processing. 
+    // connect the input processing to the output processing.
     InputMgr.Begin (OutputMgr.GetBufferAddress (), OutputMgr.GetBufferUsedSize ());
 
     // DEBUG_V ("");
@@ -173,7 +173,7 @@ void setup()
 
 /// Configuration Validations
 /** Validates the config_t (core) configuration structure and forces defaults for invalid entries */
-void validateConfig() 
+void validateConfig()
 {
     // DEBUG_START;
 
@@ -214,7 +214,7 @@ boolean dsDevice(JsonObject & json)
         retval = retval | FileIO::setFromJSON (config.id,        json[F ("device")][F ("id")]);
                           FileIO::setFromJSON (ConfigSaveNeeded, json[F ("device")][F ("ConfigSaveNeeded")]);
     }
-    else 
+    else
     {
         LOG_PORT.println(F("No device settings found."));
     }
@@ -230,7 +230,7 @@ boolean dsNetwork(JsonObject & json)
     // DEBUG_START;
 
     boolean retval = false;
-    if (json.containsKey("network")) 
+    if (json.containsKey("network"))
     {
 #ifdef ARDUINO_ARCH_ESP8266
         IPAddress Temp = config.ip;
@@ -310,7 +310,7 @@ void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
 /** Loads and validates the JSON configuration file from the file system.
  *  If no configuration file is found, a new one will be created.
  */
-void loadConfig() 
+void loadConfig()
 {
     // DEBUG_START;
 
@@ -321,7 +321,7 @@ void loadConfig()
     if (FileIO::loadConfig(ConfigFileName, &deserializeCoreHandler))
     {
         validateConfig();
-    } 
+    }
     else
     {
     // DEBUG_V ("Load failed, create a new config file and save it");
@@ -377,7 +377,7 @@ void GetConfig (JsonObject & json)
 } // GetConfig
 
 // Serialize the current config into a JSON string
-String serializeCore(boolean pretty) 
+String serializeCore(boolean pretty)
 {
     // DEBUG_START;
 
@@ -404,7 +404,7 @@ String serializeCore(boolean pretty)
 } // serializeCore
 
 // Save configuration JSON file
-void SaveConfig() 
+void SaveConfig()
 {
     // DEBUG_START;
 
@@ -427,7 +427,7 @@ void SaveConfig()
 /////////////////////////////////////////////////////////
 /// Main Loop
 /** Arduino based main loop */
-void loop() 
+void loop()
 {
     // do we need to save the current config?
     if (0 != ConfigSaveNeeded)
