@@ -146,7 +146,7 @@ void c_WiFiMgr::GetStatus (JsonObject & jsonStatus)
 //-----------------------------------------------------------------------------
 void c_WiFiMgr::connectWifi ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     // disconnect just in case
 #ifdef ARDUINO_ARCH_ESP8266
@@ -162,10 +162,10 @@ void c_WiFiMgr::connectWifi ()
     WiFi.mode (WIFI_STA);
     // DEBUG_V ("");
 
-    DEBUG_V (String ("config->hostname: ") + config->hostname);
+    // DEBUG_V (String ("config->hostname: ") + config->hostname);
     if (0 != config->hostname.length ())
     {
-        DEBUG_V (String ("Setting WiFi hostname: ") + config->hostname);
+        // DEBUG_V (String ("Setting WiFi hostname: ") + config->hostname);
 
 #ifdef ARDUINO_ARCH_ESP8266
         WiFi.hostname (config->hostname);
@@ -174,9 +174,9 @@ void c_WiFiMgr::connectWifi ()
 #endif
     }
 
-    LOG_PORT.println (String(F ("\nWiFi Connecting to ")) + 
-                      String(config->ssid) + 
-                      String (F (" as ")) + 
+    LOG_PORT.println (String(F ("\nWiFi Connecting to ")) +
+                      String(config->ssid) +
+                      String (F (" as ")) +
                       String (config->hostname));
 
     WiFi.begin (config->ssid.c_str (), config->passphrase.c_str ());

@@ -19,7 +19,7 @@
 #include "FPPDiscovery.h"
 #include "../input/InputMgr.hpp"
 
-#include <SD.h>
+#include <SDFS.h>
 #include <Int64String.h>
 
 extern const String VERSION;
@@ -30,7 +30,7 @@ extern const String VERSION;
 #   define FPP_VARIANT_NAME     "ESPixelStick-ESP32"
 
 #else
-#   define SD_OPEN_WRITEFLAGS   sdfat::O_READ | sdfat::O_WRITE | sdfat::O_CREAT | sdfat::O_TRUNC
+//#   define SD_OPEN_WRITEFLAGS   sdfat::O_READ | sdfat::O_WRITE | sdfat::O_CREAT | sdfat::O_TRUNC
 #   define FPP_TYPE_ID          0xC2
 #   define FPP_VARIANT_NAME     "ESPixelStick-ESP8266"
 #endif
@@ -164,11 +164,17 @@ void c_FPPDiscovery::begin ()
 #ifdef ESP32
         SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
 #else
-        SPI.begin ();
+//        SPI.begin ();
 #endif
 
-        if (!SD.begin (cs_pin))
-        {
+        SDFSConfig sdcfg;
+        SPISettings spicfg;
+
+        spicfg._clock = 80;
+        sdcfg.setSPI(spicfg);
+        sdcfg.setCSPin(15);
+
+        if (!SDFS.begin()) {
             LOG_PORT.println (String (F ("FPPDiscovery: No SD card")));
             break;
         }
@@ -228,7 +234,12 @@ void c_FPPDiscovery::DescribeSdCardToUser ()
         }
     } // switch (SD.cardType ())
 #else
-    switch (SD.type ())
+    FSInfo64 fsinfo;
+    SDFS.info64(fsinfo);
+    LOG_PORT.printf("SD Card Size: %llu / %llu\n", fsinfo.usedBytes, fsinfo.totalBytes);
+
+/*
+    switch (SDFS.type())
     {
         case sdfat::SD_CARD_TYPE_SD1:
         {
@@ -251,6 +262,7 @@ void c_FPPDiscovery::DescribeSdCardToUser ()
             break;
         }
     } // switch (SD.type ())
+*/
 #endif
 
     LOG_PORT.println (BaseMessage);
@@ -260,43 +272,18 @@ void c_FPPDiscovery::DescribeSdCardToUser ()
     LOG_PORT.println (String(F("SD Card Size: ")) + int64String(cardSize) + "MB");
 #endif // def ESP32
 
-    File root = SD.open ("/");
-    printDirectory (root, 0);
+    Dir root = SDFS.openDir("/");
+    printDirectory(root, 0);
 
     // DEBUG_END;
 
 } // DescribeSdCardToUser
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::printDirectory (File dir, int numTabs)
+void c_FPPDiscovery::printDirectory(Dir dir, int numTabs)
 {
-    while (true)
-    {
-        File entry = dir.openNextFile ();
-
-        if (!entry)
-        {
-            // no more files
-            break;
-        }
-        for (uint8_t i = 0; i < numTabs; i++)
-        {
-            Serial.print ('\t');
-        }
-        Serial.print (entry.name ());
-        if (entry.isDirectory ())
-        {
-            Serial.println ("/");
-            printDirectory (entry, numTabs + 1);
-        }
-        else
-        {
-            // files have sizes, directories do not
-            Serial.print ("\t\t");
-            Serial.println (entry.size (), DEC);
-        }
-        entry.close ();
-    }
+    while (dir.next())
+        LOG_PORT.printf("%s - %u\n", dir.fileName().c_str(), dir.fileSize());
 } // printDirectory
 
 //-----------------------------------------------------------------------------
@@ -477,7 +464,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_
                 {
                     // reset the start time which will then trigger a new frame time
                     fseqStartMillis = millis () - frameStepTime * frame;
-                    // DEBUG_V (String (F ("Large diff: ")) + String (diff));
+                    DEBUG_V (String (F ("Large diff: ")) + String (diff));
                 }
             }
             break;
@@ -698,9 +685,9 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
             {
                 seq = seq.substring (0, seq.length () - 5);
                 ProcessSyncPacket (0x1, "", 0); //must stop
-                if (SD.exists (seq))
+                if (SDFS.exists (seq))
                 {
-                    File file = SD.open (seq);
+                    File file = SDFS.open(seq, "r");
                     if (file.size () > 0)
                     {
                         // found the file. return metadata as json
@@ -745,14 +732,14 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
         String filename = request->getParam ("filename")->value ();
         // DEBUG_V (String(F("filename: ")) + filename);
 
-        if (!SD.exists (filename))
+        if (!SDFS.exists (filename))
         {
             LOG_PORT.println (String (F ("c_FPPDiscovery::ProcessPOST: File Does Not Exist - filename: ")) + filename);
             request->send (404);
             break;
         }
 
-        File file = SD.open (filename);
+        File file = SDFS.open(filename, "r");
         String resp = "";
         BuildFseqResponse (filename, file, resp);
         file.close ();
@@ -795,8 +782,8 @@ void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data,
             inFileUpload = true;
 
             String filename = request->getParam ("filename")->value ();
-            SD.remove (filename);
-            fseqFile = SD.open (filename, SD_OPEN_WRITEFLAGS);
+            SDFS.remove (filename);
+            fseqFile = SDFS.open (filename, "w");
             bufCurPos = 0;
             if (buffer == nullptr)
             {
@@ -1047,7 +1034,7 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
             break;
         }
 
-        fseqFile = SD.open (String ("/") + filename);
+        fseqFile = SDFS.open(String ("/") + filename, "r");
 
         if (fseqFile.size () < 1)
         {
@@ -1131,7 +1118,7 @@ void c_FPPDiscovery::GetListOfFiles (char * ResponseBuffer)
     }
     JsonArray FileArray = ResponseJsonDoc.createNestedArray (F ("files"));
 
-    File dir = SD.open ("/");
+    File dir = SDFS.open("/", "r");
     ResponseJsonDoc["SdCardPresent"] = SdcardIsInstalled ();
 
     while (true)
@@ -1183,7 +1170,7 @@ void c_FPPDiscovery::DeleteFseqFile (String & FileNameToDelete)
     }
 
     LOG_PORT.println (String(F("Deleting File: '")) + FileNameToDelete + "'");
-    SD.remove (FileNameToDelete);
+    SDFS.remove(FileNameToDelete);
 
     // DEBUG_END;
 } // DeleteFseqFile
@@ -1196,16 +1183,24 @@ void c_FPPDiscovery::SetSpiIoPins (uint8_t miso, uint8_t mosi, uint8_t clock, ui
     clk_pin  = clock;
     cs_pin   = cs;
 
-    SPI.end ();
+ //   SPI.end ();
 #ifdef ESP32
     SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
 #else
-    SPI.begin ();
+//    SPI.begin ();
 #endif
 
-    SD.end ();
+    SDFS.end();
 
-    if (!SD.begin (cs_pin))
+    SDFSConfig sdcfg;
+    SPISettings spicfg;
+
+//    spicfg._clock = 10;
+//    sdcfg.setSPI(spicfg);
+    sdcfg.setCSPin(cs_pin);
+
+
+    if (!SDFS.begin())
     {
         LOG_PORT.println (String (F ("FPPDiscovery: No SD card")));
     }

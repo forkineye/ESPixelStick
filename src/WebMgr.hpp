@@ -22,7 +22,7 @@
 #include "EFUpdate.h"
 #include <ESPAsyncWebServer.h>
 #include <EspalexaDevice.h>
-#include <SD.h>
+#include <SDFS.h>
 
 class c_WebMgr
 {
@@ -35,7 +35,7 @@ public:
     void Process         ();
 
     void onAlexaMessage (EspalexaDevice * pDevice);
-    void RegisterAlexaCallback (DeviceCallbackFunction cb); 
+    void RegisterAlexaCallback (DeviceCallbackFunction cb);
     bool IsAlexaCallbackValid () { return (nullptr != pAlexaCallback); }
     void FirmwareUpload (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
     void handleFileUpload (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
@@ -51,7 +51,7 @@ private:
     String fsUploadFileName;
 
     /// Valid "Simple" message types
-    enum SimpleMessage 
+    enum SimpleMessage
     {
         GET_STATUS      = 'J',
         GET_ADMIN       = 'A',

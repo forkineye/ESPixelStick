@@ -78,7 +78,7 @@ private:
     void BuildFseqResponse (String fname, File fseq, String & resp);
     void StopPlaying ();
     void StartPlaying (String & filename, uint32_t frameId);
-    void printDirectory (File dir, int numTabs);
+    void printDirectory (Dir dir, int numTabs);
     bool AllowedToRemotePlayFiles ();
 
 public:
