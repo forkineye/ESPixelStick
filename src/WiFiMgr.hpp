@@ -38,7 +38,6 @@ public:
     virtual void OnDisconnect (void) = 0;
 }; // fsm_WiFi_state
 
-
 class c_WiFiMgr
 {
 public:

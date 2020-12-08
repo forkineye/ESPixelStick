@@ -191,7 +191,7 @@ void validateConfig()
         ConfigSaveNeeded++;
     }
 
-    if (!config.hostname.length ())
+    if (0 == config.hostname.length ())
     {
         config.hostname = "esps-" + String (chipId);
         // DEBUG_V ();

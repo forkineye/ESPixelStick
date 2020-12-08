@@ -603,7 +603,7 @@ function CreateOptionsFromConfig(OptionListName, Config)
                 LoadDeviceSetupSelectedOption(OptionListName, ChannelId);
                 $(jqSelector).change(function ()
                 {
-                    console.info("Set the selector type to: " + CurrentChannel.type);
+                    // console.info("Set the selector type to: " + CurrentChannel.type);
                     LoadDeviceSetupSelectedOption(OptionListName, ChannelId);
                 });
             }
@@ -668,7 +668,7 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
 
         if ((ChannelConfig.type === "Relay") && ($("#relaychannelconfigurationtable").length)) {
             $.each(ChannelConfig.channels, function (i, CurrentChannelConfig) {
-                console.log("Current Channel Id = " + CurrentChannelConfig.id);
+                // console.info("Current Channel Id = " + CurrentChannelConfig.id);
                 var currentChannelRowId = CurrentChannelConfig.id + 1;
                 CurrentChannelConfig.enabled = $('#Enabled_' + (currentChannelRowId)).prop("checked");
                 CurrentChannelConfig.invertoutput = $('#Inverted_' + (currentChannelRowId)).prop("checked");
@@ -762,7 +762,7 @@ function wsConnect()
             // console.info("ws.onmessage: Start");
             if (typeof event.data === "string")
             {
-                console.info("ws.onmessage: Received: " + event.data);
+                // console.info("ws.onmessage: Received: " + event.data);
 
                 // Process "simple" message format
                 if (event.data.startsWith("X"))
@@ -914,7 +914,7 @@ function wsProcessOutputQueue()
         }, WaitForResponseTimeMS);
 
         //send it.
-        console.log('WS sending ' + OutputMessage);
+        // console.info('WS sending ' + OutputMessage);
         ws.send(OutputMessage);
 
     } // message available to send
@@ -945,6 +945,8 @@ function drawStream(streamData)
 {
     var cols = parseInt($('#v_columns').val());
     var size = Math.floor((canvas.width - 20) / cols);
+    var maxDisplay = 0;
+
     if ($("input[name='viewStyle'][value='RGB']").prop('checked'))
     {
         maxDisplay = Math.min(streamData.length, (cols * Math.floor((canvas.height - 30) / size)) * 3);
@@ -957,9 +959,12 @@ function drawStream(streamData)
         }
     }
     else if ($("input[name='viewStyle'][value='RGBW']").prop('checked')) {
+    {
         maxDisplay = Math.min(streamData.length, (cols * Math.floor((canvas.height - 30) / size)) * 4);
         for (i = 0; i < maxDisplay; i += 4) {
-            ctx.fillStyle = 'rgb(' + streamData[i + 0] + ',' + streamData[i + 1] + ',' + streamData[i + 2] + ')';
+        {
+            var WhiteLevel = streamData[i + 3];
+            ctx.fillStyle = 'rgb(' + Math.max(streamData[i + 0], WhiteLevel) + ',' + Math.max(streamData[i + 1], WhiteLevel) + ',' + Math.max(streamData[i + 2], WhiteLevel) + ')';
             var col = (i / 4) % cols;
             var row = Math.floor((i / 4) / cols);
             ctx.fillRect(10 + (col * size), 10 + (row * size), size - 1, size - 1);
