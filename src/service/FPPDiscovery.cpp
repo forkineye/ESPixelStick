@@ -193,6 +193,18 @@ void c_FPPDiscovery::begin ()
 } // begin
 
 //-----------------------------------------------------------------------------
+void c_FPPDiscovery::Disable ()
+{
+    IsEnabled = false;
+} // Disable
+
+//-----------------------------------------------------------------------------
+void c_FPPDiscovery::Enable ()
+{
+    IsEnabled = true;
+} // Enable
+
+//-----------------------------------------------------------------------------
 void c_FPPDiscovery::DescribeSdCardToUser ()
 {
     // DEBUG_START;
@@ -371,7 +383,8 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
         case 0x04: //Ping Packet
         {
             FPPPingPacket* pingPacket = reinterpret_cast<FPPPingPacket*>(_packet.data ());
-            if ((pingPacket->ping_subtype == 0x00) || (pingPacket->ping_subtype == 0x01))
+
+            if (pingPacket->ping_subtype == 0x01)
             {
                 // DEBUG_V (String (F ("FPPPing discovery packet")));
                 // received a discover ping packet, need to send a ping out
@@ -415,74 +428,81 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
 void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_t frame)
 {
     // DEBUG_START;
-
-    // DEBUG_V (String("action: ") + String(action) + " ; filename: " + filename + " ; frame: " + String(frame));
-
-    if (!AllowedToRemotePlayFiles())
+    do // once
     {
-        return;
-    }
-
-    switch (action)
-    {
-        case 0x00: // Start
+        if (false == IsEnabled)
         {
-            // DEBUG_V("Start");
-            if (filename != fseqName)
-            {
-                ProcessSyncPacket (0x01, filename, frame); // stop
-                ProcessSyncPacket (0x03, filename, frame); // need to open the file
-            }
-
             break;
         }
 
-        case 0x01: // Stop
+        if (!AllowedToRemotePlayFiles ())
         {
-            // DEBUG_V ("Stop");
-            if (fseqName != "")
-            {
-                fseqFile.close ();
-            }
-            StopPlaying ();
             break;
         }
 
-        case 0x02: // Sync
+        // DEBUG_V (String("action: ") + String(action));
+
+        switch (action)
         {
-            // DEBUG_V ("Sync");
-
-            if (!isRemoteRunning || filename != fseqName)
+            case 0x00: // Start
             {
-                ProcessSyncPacket (0x00, filename, frame); // need to start first
-            }
-
-            if (isRemoteRunning)
-            {
-                int diff = (frame - fseqCurrentFrameId);
-                if (diff > 2 || diff < -2)
+                // DEBUG_V("Start")
+                if (filename != fseqName)
                 {
-                    // reset the start time which will then trigger a new frame time
-                    fseqStartMillis = millis () - frameStepTime * frame;
-                    DEBUG_V (String (F ("Large diff: ")) + String (diff));
+                    ProcessSyncPacket (0x01, filename, frame); // stop
+                    ProcessSyncPacket (0x03, filename, frame); // need to open the file
                 }
+
+                break;
             }
-            break;
-        }
 
-        case 0x03: // Open
-        {
-            StartPlaying (filename, frame);
-            break;
-        }
+            case 0x01: // Stop
+            {
+                // DEBUG_V ("Stop");
+                if (fseqName != "")
+                {
+                    fseqFile.close ();
+                }
+                StopPlaying ();
+                break;
+            }
 
-        default:
-        {
-            // DEBUG_V (String (F ("ERROR: Unknown Action: ")) + String (action));
-            break;
-        }
+            case 0x02: // Sync
+            {
+                // DEBUG_V ("Sync");
 
-    } // switch
+                if (!isRemoteRunning || filename != fseqName)
+                {
+                    ProcessSyncPacket (0x00, filename, frame); // need to start first
+                }
+
+                if (isRemoteRunning)
+                {
+                    int diff = (frame - fseqCurrentFrameId);
+                    if (diff > 2 || diff < -2)
+                    {
+                        // reset the start time which will then trigger a new frame time
+                        fseqStartMillis = millis () - frameStepTime * frame;
+                        // DEBUF_V("Large diff %d\n", diff);
+                    }
+                }
+                break;
+            }
+
+            case 0x03: // Open
+            {
+                StartPlaying (filename, frame);
+                break;
+            }
+
+            default:
+            {
+                // DEBUG_V (String (F ("ERROR: Unknown Action: ")) + String (action));
+                break;
+            }
+
+        } // switch
+    } while (false);
 
     // DEBUG_END;
 } // ProcessSyncPacket

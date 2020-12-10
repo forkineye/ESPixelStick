@@ -70,6 +70,7 @@ private:
     bool hasSDStorage = false;
     bool inFileUpload = false;
     bool hasBeenInitialized = false;
+    bool IsEnabled = false;
     uint8_t* buffer = nullptr;
     int bufCurPos = 0;
 
@@ -97,7 +98,8 @@ public:
     void sendPingPacket ();
     void SetSpiIoPins   (uint8_t miso, uint8_t mosi, uint8_t clock, uint8_t cs);
     void PlayFile       (String & FileToPlay);
-
+    void Enable         (void);
+    void Disable        (void);
     bool SdcardIsInstalled () { return hasSDStorage; }
 };
 

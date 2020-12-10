@@ -181,7 +181,7 @@ void c_WiFiMgr::connectWifi ()
 
     WiFi.begin (config->ssid.c_str (), config->passphrase.c_str ());
 
-    DEBUG_END;
+    // DEBUG_END;
 } // connectWifi
 
 //-----------------------------------------------------------------------------
