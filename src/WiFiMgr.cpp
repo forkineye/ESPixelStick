@@ -174,9 +174,9 @@ void c_WiFiMgr::connectWifi ()
 #endif
     }
 
-    LOG_PORT.println (String(F ("\nWiFi Connecting to ")) + 
-                      String(config->ssid) + 
-                      String (F (" as ")) + 
+    LOG_PORT.println (String(F ("\nWiFi Connecting to ")) +
+                      String(config->ssid) +
+                      String (F (" as ")) +
                       String (config->hostname));
 
     WiFi.begin (config->ssid.c_str (), config->passphrase.c_str ());

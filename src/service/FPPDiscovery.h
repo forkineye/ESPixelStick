@@ -39,9 +39,9 @@ class c_FPPDiscovery
 public:
 
 #   define SD_CARD_MISO_PIN    19
-#   define SD_CARD_MOSI_PIN    23 
+#   define SD_CARD_MOSI_PIN    23
 #   define SD_CARD_CLK_PIN     18
-#   define SD_CARD_CS_PIN      4
+#   define SD_CARD_CS_PIN      15
 #   define Stop_FPP_RemotePlay "..."
 private:
 
@@ -79,7 +79,7 @@ private:
     void BuildFseqResponse (String fname, File fseq, String & resp);
     void StopPlaying ();
     void StartPlaying (String & filename, uint32_t frameId);
-    void printDirectory (File dir, int numTabs);
+    void printDirectory (Dir dir, int numTabs);
     bool AllowedToRemotePlayFiles ();
 
 public:

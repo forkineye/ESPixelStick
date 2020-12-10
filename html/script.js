@@ -100,7 +100,7 @@ $(function ()
 
     var finalUrl = "http://" + target + "/upload";
     // console.log(finalUrl);
-    const uploader = new Dropzone('#filemanagementupload', 
+    const uploader = new Dropzone('#filemanagementupload',
     {
         url: finalUrl,
         paramName: 'file',
@@ -108,7 +108,7 @@ $(function ()
         maxFiles: 1,
         parallelUploads: 1,
         clickable: true,
-        uploadMultiple: false, 
+        uploadMultiple: false,
         createImageThumbnails: false,
         dictDefaultMessage: 'Drag an image here to upload, or click to select one',
         acceptedFiles: '.fseq',
@@ -258,7 +258,7 @@ function ProcessGetFileResponse(JsonConfigData)
 
 function RequestFileDeletion()
 {
-    var ListOfSelectedFiles = FileTree.getSelectedNodes(); 
+    var ListOfSelectedFiles = FileTree.getSelectedNodes();
     if (0 < ListOfSelectedFiles.length) {
 
         var files = [];
@@ -876,7 +876,7 @@ function wsProcessOutputQueue()
         // console.log('wsProcessOutputQueue: WS Down. Flush');
         wsFlushAndHaltTheOutputQueue();
     }
-    
+
     //check if we are currently waiting for a response
     else if (wsBusy === true)
     {
@@ -891,8 +891,8 @@ function wsProcessOutputQueue()
         //get the next message from the queue.
         var OutputMessage = wsOutputQueue.shift();
 
-        // set WaitForResponseTimeMS to clear flag and try next message if response 
-        // isn't recieved. 
+        // set WaitForResponseTimeMS to clear flag and try next message if response
+        // isn't recieved.
         var WaitForResponseTimeMS = 20000; // 20 seconds
 
         // Short WaitForResponseTimeMS for message types that don't generate a response.
@@ -958,10 +958,10 @@ function drawStream(streamData)
             ctx.fillRect(10 + (col * size), 10 + (row * size), size - 1, size - 1);
         }
     }
-    else if ($("input[name='viewStyle'][value='RGBW']").prop('checked')) {
+    else if ($("input[name='viewStyle'][value='RGBW']").prop('checked'))
     {
         maxDisplay = Math.min(streamData.length, (cols * Math.floor((canvas.height - 30) / size)) * 4);
-        for (i = 0; i < maxDisplay; i += 4) {
+        for (i = 0; i < maxDisplay; i += 4)
         {
             var WhiteLevel = streamData[i + 3];
             ctx.fillStyle = 'rgb(' + Math.max(streamData[i + 0], WhiteLevel) + ',' + Math.max(streamData[i + 1], WhiteLevel) + ',' + Math.max(streamData[i + 2], WhiteLevel) + ')';

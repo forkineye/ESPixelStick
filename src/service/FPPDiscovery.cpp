@@ -19,7 +19,7 @@
 #include "FPPDiscovery.h"
 #include "../input/InputMgr.hpp"
 
-#include <SD.h>
+#include <SDFS.h>
 #include <Int64String.h>
 
 extern const String VERSION;
@@ -28,13 +28,11 @@ extern const String VERSION;
 #   define SD_OPEN_WRITEFLAGS   "w"
 #   define FPP_TYPE_ID          0xC3
 #   define FPP_VARIANT_NAME     "ESPixelStick-ESP32"
-#   define GET_HOST_NAME        WiFi.getHostname()
 
 #else
-#   define SD_OPEN_WRITEFLAGS   sdfat::O_READ | sdfat::O_WRITE | sdfat::O_CREAT | sdfat::O_TRUNC
+//#   define SD_OPEN_WRITEFLAGS   sdfat::O_READ | sdfat::O_WRITE | sdfat::O_CREAT | sdfat::O_TRUNC
 #   define FPP_TYPE_ID          0xC2
 #   define FPP_VARIANT_NAME     "ESPixelStick-ESP8266"
-#   define GET_HOST_NAME        WiFi.hostname().c_str()
 #endif
 
 #define FPP_DISCOVERY_PORT 32320
@@ -124,7 +122,7 @@ struct FSEQHeader
 } __attribute__ ((packed));
 
 //-----------------------------------------------------------------------------
-c_FPPDiscovery::c_FPPDiscovery () 
+c_FPPDiscovery::c_FPPDiscovery ()
 {
     // DEBUG_START;
     // DEBUG_END;
@@ -166,11 +164,17 @@ void c_FPPDiscovery::begin ()
 #ifdef ESP32
         SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
 #else
-        SPI.begin ();
+//        SPI.begin ();
 #endif
 
-        if (!SD.begin (cs_pin))
-        {
+        SDFSConfig sdcfg;
+        SPISettings spicfg;
+
+        spicfg._clock = 80;
+        sdcfg.setSPI(spicfg);
+        sdcfg.setCSPin(15);
+
+        if (!SDFS.begin()) {
             LOG_PORT.println (String (F ("FPPDiscovery: No SD card")));
             break;
         }
@@ -242,7 +246,12 @@ void c_FPPDiscovery::DescribeSdCardToUser ()
         }
     } // switch (SD.cardType ())
 #else
-    switch (SD.type ())
+    FSInfo64 fsinfo;
+    SDFS.info64(fsinfo);
+    LOG_PORT.printf("SD Card Size: %llu / %llu\n", fsinfo.usedBytes, fsinfo.totalBytes);
+
+/*
+    switch (SDFS.type())
     {
         case sdfat::SD_CARD_TYPE_SD1:
         {
@@ -265,6 +274,7 @@ void c_FPPDiscovery::DescribeSdCardToUser ()
             break;
         }
     } // switch (SD.type ())
+*/
 #endif
 
     LOG_PORT.println (BaseMessage);
@@ -274,43 +284,18 @@ void c_FPPDiscovery::DescribeSdCardToUser ()
     LOG_PORT.println (String(F("SD Card Size: ")) + int64String(cardSize) + "MB");
 #endif // def ESP32
 
-    File root = SD.open ("/");
-    printDirectory (root, 0);
+    Dir root = SDFS.openDir("/");
+    printDirectory(root, 0);
 
     // DEBUG_END;
 
 } // DescribeSdCardToUser
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::printDirectory (File dir, int numTabs)
+void c_FPPDiscovery::printDirectory(Dir dir, int numTabs)
 {
-    while (true)
-    {
-        File entry = dir.openNextFile ();
-
-        if (!entry)
-        {
-            // no more files
-            break;
-        }
-        for (uint8_t i = 0; i < numTabs; i++)
-        {
-            Serial.print ('\t');
-        }
-        Serial.print (entry.name ());
-        if (entry.isDirectory ())
-        {
-            Serial.println ("/");
-            printDirectory (entry, numTabs + 1);
-        }
-        else
-        {
-            // files have sizes, directories do not
-            Serial.print ("\t\t");
-            Serial.println (entry.size (), DEC);
-        }
-        entry.close ();
-    }
+    while (dir.next())
+        LOG_PORT.printf("%s - %u\n", dir.fileName().c_str(), dir.fileSize());
 } // printDirectory
 
 //-----------------------------------------------------------------------------
@@ -338,6 +323,7 @@ void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t Curr
             fseqFile.seek (pos);
             int toRead = (channelsPerFrame > outputBufferSize) ? outputBufferSize : channelsPerFrame;
 
+            //LOG_PORT.printf("%d / %d / %d / %d / %d\n", dataOffset, channelsPerFrame, outputBufferSize, toRead, pos);
             fseqFile.read (outputBuffer, toRead);
             //LOG_PORT.printf("New Frame!   Old: %d     New:  %d      Offset: %d\n", fseqCurrentFrameId, frame, FileOffsetToCurrentHeaderRecord);
             fseqCurrentFrameId = frame;
@@ -373,13 +359,13 @@ uint32_t read32 (uint8_t* buf, int idx) {
 }
 uint32_t read24 (uint8_t* pData)
 {
-    return ((uint32_t)(pData[0]) | 
+    return ((uint32_t)(pData[0]) |
             (uint32_t)(pData[1]) << 8 |
             (uint32_t)(pData[2]) << 16);
 } // read24
 uint16_t read16 (uint8_t* pData)
 {
-    return ((uint16_t)(pData[0]) | 
+    return ((uint16_t)(pData[0]) |
             (uint16_t)(pData[1]) << 8);
 } // read16
 
@@ -392,11 +378,12 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
     // DEBUG_V ("Received FPP packet");
     // DEBUG_V (String("packet->packet_type: ") + String(packet->packet_type));
 
-    switch (packet->packet_type) 
+    switch (packet->packet_type)
     {
         case 0x04: //Ping Packet
         {
             FPPPingPacket* pingPacket = reinterpret_cast<FPPPingPacket*>(_packet.data ());
+
             if (pingPacket->ping_subtype == 0x01)
             {
                 // DEBUG_V (String (F ("FPPPing discovery packet")));
@@ -521,7 +508,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_
 } // ProcessSyncPacket
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::ProcessBlankPacket () 
+void c_FPPDiscovery::ProcessBlankPacket ()
 {
     // DEBUG_START;
     if (AllowedToRemotePlayFiles())
@@ -557,7 +544,7 @@ void c_FPPDiscovery::sendPingPacket ()
 
     uint32_t ip = static_cast<uint32_t>(WiFi.localIP ());
     memcpy (packet.ipAddress, &ip, 4);
-    strcpy (packet.hostName, GET_HOST_NAME);
+    strcpy (packet.hostName, config.hostname.c_str());
     strcpy (packet.version, version);
     strcpy (packet.hardwareType, FPP_VARIANT_NAME);
     packet.ranges[0] = 0;
@@ -572,18 +559,18 @@ void c_FPPDiscovery::sendPingPacket ()
 static void printReq (AsyncWebServerRequest* request, bool post)
 {
     int params = request->params ();
-    for (int i = 0; i < params; i++) 
+    for (int i = 0; i < params; i++)
     {
         AsyncWebParameter* p = request->getParam (i);
-        if (p->isFile ()) 
+        if (p->isFile ())
         { //p->isPost() is also true
             LOG_PORT.printf ("FILE[%s]: %s, size: %u\n", p->name ().c_str (), p->value ().c_str (), p->size ());
         }
-        else if (p->isPost ()) 
+        else if (p->isPost ())
         {
             LOG_PORT.printf ("POST[%s]: %s\n", p->name ().c_str (), p->value ().c_str ());
         }
-        else 
+        else
         {
             LOG_PORT.printf ("GET[%s]: %s\n", p->name ().c_str (), p->value ().c_str ());
         }
@@ -626,8 +613,8 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, File fseq, String & resp)
         fseq.seek (fsqHeader.numCompressedBlocks * 8 + 32);
         fseq.read (RangeDataBuffer, sizeof(FSEQRangeEntry) * fsqHeader.numSparseRanges);
 
-        for (int CurrentRangeIndex = 0; 
-             CurrentRangeIndex < fsqHeader.numSparseRanges; 
+        for (int CurrentRangeIndex = 0;
+             CurrentRangeIndex < fsqHeader.numSparseRanges;
              CurrentRangeIndex++, CurrentFSEQRangeEntry++)
         {
             uint32_t RangeStart  = read24 (CurrentFSEQRangeEntry->Start);
@@ -670,7 +657,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, File fseq, String & resp)
 
             int VariableDataHeaderTotalLength = read16 ((uint8_t*)&(pCurrentVariableHeader->length));
             int VariableDataHeaderDataLength  = VariableDataHeaderTotalLength - sizeof (FSEQVariableDataHeader);
-            
+
             String HeaderTypeCode (pCurrentVariableHeader->type);
 
             if ((HeaderTypeCode == "mf") || (HeaderTypeCode == "sp") )
@@ -709,7 +696,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
             request->send (404);
             break;
         }
-        
+
         String path = request->getParam ("path")->value ();
         if (path.startsWith ("/api/sequence/") && AllowedToRemotePlayFiles())
         {
@@ -718,9 +705,9 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
             {
                 seq = seq.substring (0, seq.length () - 5);
                 ProcessSyncPacket (0x1, "", 0); //must stop
-                if (SD.exists (seq))
+                if (SDFS.exists (seq))
                 {
-                    File file = SD.open (seq);
+                    File file = SDFS.open(seq, "r");
                     if (file.size () > 0)
                     {
                         // found the file. return metadata as json
@@ -730,7 +717,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                         request->send (200, "application/json", resp);
                         break;
                     }
-					else 
+					else
 					{
                         LOG_PORT.printf("File doesn't exist: %s\n", seq.c_str());
                     }
@@ -744,7 +731,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
     // DEBUG_END;
 
 } // ProcessGET
-  
+
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
 {
@@ -761,18 +748,18 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
             request->send (404);
             break;
         }
-        
+
         String filename = request->getParam ("filename")->value ();
         // DEBUG_V (String(F("filename: ")) + filename);
 
-        if (!SD.exists (filename))
+        if (!SDFS.exists (filename))
         {
             LOG_PORT.println (String (F ("c_FPPDiscovery::ProcessPOST: File Does Not Exist - filename: ")) + filename);
             request->send (404);
             break;
         }
 
-        File file = SD.open (filename);
+        File file = SDFS.open(filename, "r");
         String resp = "";
         BuildFseqResponse (filename, file, resp);
         file.close ();
@@ -815,8 +802,8 @@ void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data,
             inFileUpload = true;
 
             String filename = request->getParam ("filename")->value ();
-            SD.remove (filename);
-            fseqFile = SD.open (filename, SD_OPEN_WRITEFLAGS);
+            SDFS.remove (filename);
+            fseqFile = SDFS.open (filename, "w");
             bufCurPos = 0;
             if (buffer == nullptr)
             {
@@ -846,9 +833,9 @@ void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data,
         }
     }
 
-    if (index + len == total) 
+    if (index + len == total)
     {
-        if (bufCurPos) 
+        if (bufCurPos)
         {
             int i = fseqFile.write (buffer, bufCurPos);
             //LOG_PORT.printf("Write3: %u/%u   Pos: %d   Resp: %d\n", index, total, bufCurPos, i);
@@ -868,7 +855,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
 {
     // DEBUG_START;
 
-    jsonResponse[F ("HostName")]        = GET_HOST_NAME;
+    jsonResponse[F ("HostName")]        = config.hostname;
     jsonResponse[F ("HostDescription")] = config.id;
     jsonResponse[F ("Platform")]        = "ESPixelStick";
     jsonResponse[F ("Variant")]         = FPP_VARIANT_NAME;
@@ -1019,7 +1006,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 
         if (command == "getHostNameInfo")
         {
-            JsonData[F("HostName")] = GET_HOST_NAME;
+            JsonData[F("HostName")] = config.hostname;
             JsonData[F("HostDescription")] = config.id;
 
             String resp;
@@ -1067,7 +1054,7 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
             break;
         }
 
-        fseqFile = SD.open (String ("/") + filename);
+        fseqFile = SDFS.open(String ("/") + filename, "r");
 
         if (fseqFile.size () < 1)
         {
@@ -1151,7 +1138,7 @@ void c_FPPDiscovery::GetListOfFiles (char * ResponseBuffer)
     }
     JsonArray FileArray = ResponseJsonDoc.createNestedArray (F ("files"));
 
-    File dir = SD.open ("/");
+    File dir = SDFS.open("/", "r");
     ResponseJsonDoc["SdCardPresent"] = SdcardIsInstalled ();
 
     while (true)
@@ -1203,7 +1190,7 @@ void c_FPPDiscovery::DeleteFseqFile (String & FileNameToDelete)
     }
 
     LOG_PORT.println (String(F("Deleting File: '")) + FileNameToDelete + "'");
-    SD.remove (FileNameToDelete);
+    SDFS.remove(FileNameToDelete);
 
     // DEBUG_END;
 } // DeleteFseqFile
@@ -1216,16 +1203,24 @@ void c_FPPDiscovery::SetSpiIoPins (uint8_t miso, uint8_t mosi, uint8_t clock, ui
     clk_pin  = clock;
     cs_pin   = cs;
 
-    SPI.end ();
+ //   SPI.end ();
 #ifdef ESP32
     SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
 #else
-    SPI.begin ();
+//    SPI.begin ();
 #endif
 
-    SD.end ();
+    SDFS.end();
 
-    if (!SD.begin (cs_pin))
+    SDFSConfig sdcfg;
+    SPISettings spicfg;
+
+//    spicfg._clock = 10;
+//    sdcfg.setSPI(spicfg);
+    sdcfg.setCSPin(cs_pin);
+
+
+    if (!SDFS.begin())
     {
         LOG_PORT.println (String (F ("FPPDiscovery: No SD card")));
     }
@@ -1236,7 +1231,7 @@ void c_FPPDiscovery::SetSpiIoPins (uint8_t miso, uint8_t mosi, uint8_t clock, ui
 void c_FPPDiscovery::PlayFile (String & NewFileName)
 {
     // DEBUG_START;
-    // Having an autoplay file means the AutoPlay file takes precedence over the remote player 
+    // Having an autoplay file means the AutoPlay file takes precedence over the remote player
     // if no file is playing then just start the new autoplay file.
     // if the AP file is empty then revert to remote operation.
     // if already in remote, do nothing
@@ -1249,7 +1244,7 @@ void c_FPPDiscovery::PlayFile (String & NewFileName)
     }
 
     AutoPlayFileName = NewFileName;
-    
+
     // DEBUG_V ();
 
     // do we have an autoplay file to play?
@@ -1266,8 +1261,8 @@ void c_FPPDiscovery::PlayFile (String & NewFileName)
 //-----------------------------------------------------------------------------
 bool c_FPPDiscovery::AllowedToRemotePlayFiles()
 {
-    return ((hasSDStorage == true) && (String(F(Stop_FPP_RemotePlay)) == AutoPlayFileName));
-
+//    return ((hasSDStorage == true) && (String(F(Stop_FPP_RemotePlay)) == AutoPlayFileName));
+    return (hasSDStorage == true);
 } // AllowedToRemotePlayFiles
 
 c_FPPDiscovery FPPDiscovery;
