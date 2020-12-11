@@ -108,7 +108,7 @@ $(function ()
         maxFiles: 1,
         parallelUploads: 1,
         clickable: true,
-        uploadMultiple: false, 
+        uploadMultiple: false,
         createImageThumbnails: false,
         dictDefaultMessage: 'Drag an image here to upload, or click to select one',
         acceptedFiles: '.fseq',
