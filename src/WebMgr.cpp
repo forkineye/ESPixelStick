@@ -32,11 +32,9 @@
 #ifdef ARDUINO_ARCH_ESP8266
 #	include <LittleFS.h>
 #   define LITTLEFS LittleFS
-#   define SD_OPEN_WRITEFLAGS   sdfat::O_READ | sdfat::O_WRITE | sdfat::O_CREAT | sdfat::O_TRUNC
 #elif defined ARDUINO_ARCH_ESP32
 #	include <LITTLEFS.h>
-#   define SD_OPEN_WRITEFLAGS   "w"
-
+#	define SDFS SD
 #else
 #	error "Unsupported CPU type."
 #endif
@@ -139,25 +137,25 @@ void c_WebMgr::init ()
         {
             webSocket.textAll ("X6");
         }, [](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final) {WebMgr.FirmwareUpload (request, filename, index, data, len,  final); }).setFilter (ON_STA_FILTER);
-    
+
     // URL's needed for FPP Connect fseq uploading and querying
-    webServer.on ("/fpp", HTTP_GET, 
+    webServer.on ("/fpp", HTTP_GET,
         [](AsyncWebServerRequest* request)
         {
         FPPDiscovery.ProcessGET(request);
         });
 
-    webServer.on ("/fpp", HTTP_POST | HTTP_PUT, 
-        [](AsyncWebServerRequest* request) 
+    webServer.on ("/fpp", HTTP_POST | HTTP_PUT,
+        [](AsyncWebServerRequest* request)
         {
             FPPDiscovery.ProcessPOST(request);
         },
-        
+
         [](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
         {
             FPPDiscovery.ProcessFile(request, filename, index, data, len, final);
         },
-        
+
         [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
         {
             FPPDiscovery.ProcessBody(request, data, len, index, total);
@@ -174,7 +172,7 @@ void c_WebMgr::init ()
     webServer.serveStatic ("/", LITTLEFS, "/www/").setDefaultFile ("index.html");
 
     // if the client posts to the upload page
-    webServer.on ("/upload", HTTP_POST | HTTP_PUT | HTTP_OPTIONS, 
+    webServer.on ("/upload", HTTP_POST | HTTP_PUT | HTTP_OPTIONS,
         [](AsyncWebServerRequest * request)
         {
             // DEBUG_V ("Got upload post request");
@@ -198,7 +196,7 @@ void c_WebMgr::init ()
             // DEBUG_V (String ("Got process File request: final: ") + String (final));
             if (true == FPPDiscovery.SdcardIsInstalled())
             {
-                this->handleFileUpload (request, filename, index, data, len, final); // Receive and save the file 
+                this->handleFileUpload (request, filename, index, data, len, final); // Receive and save the file
             }
             else
             {
@@ -242,7 +240,7 @@ void c_WebMgr::init ()
     pAlexaDevice = new EspalexaDevice (String ("ESP"), [this](EspalexaDevice* pDevice)
         {
             this->onAlexaMessage (pDevice);
-        
+
         }, EspalexaDeviceType::extendedcolor);
 
     pAlexaDevice->setName (config.id);
@@ -255,60 +253,16 @@ void c_WebMgr::init ()
 }
 
 //-----------------------------------------------------------------------------
-void c_WebMgr::handleFileUpload (AsyncWebServerRequest* request, 
+void c_WebMgr::handleFileUpload (AsyncWebServerRequest* request,
                                  String filename,
-                                 size_t index, 
-                                 uint8_t * data, 
-                                 size_t len, 
+                                 size_t index,
+                                 uint8_t * data,
+                                 size_t len,
                                  bool final)
 {
     // DEBUG_START;
-
-    if (0 == index) 
-    {
-        // save the filename
-        // DEBUG_V ("UploadStart: " + filename);
-        if (!filename.startsWith ("/"))
-        {
-            filename = "/" + filename;
-        }
-
-        // are we terminating the previous download?
-        if (0 != fsUploadFileName.length())
-        {
-            LOG_PORT.println (String (F ("Aborting Previous File Upload For: '")) + fsUploadFileName + String (F ("'")));
-            fsUploadFile.close ();
-            fsUploadFileName = "";
-        }
-
-        fsUploadFileName = filename;
-
-        LOG_PORT.println (String (F ("Upload File: '")) + fsUploadFileName + String(F("' Started")));
-
-        SD.remove (fsUploadFileName);
-
-        // Open the file for writing 
-        fsUploadFile = SD.open (fsUploadFileName, SD_OPEN_WRITEFLAGS);
-        fsUploadFile.seek (0);
-    }
-
-    if ((0 != len) && (0 != fsUploadFileName.length()))
-    {
-        // Write data
-        // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
-        fsUploadFile.write (data, len);
-        LOG_PORT.print (String("Writting bytes: ") + String (index) + "\r");
-    }
-
-    if ((true == final) && (0 != fsUploadFileName.length ()))
-    {
-        LOG_PORT.println ("");
-        // DEBUG_V ("UploadEnd: " + String(index + len) + String(" bytes"));
-        LOG_PORT.println (String (F ("Upload File: '")) + fsUploadFileName + String (F ("' Done")));
-
-        fsUploadFile.close ();
-        fsUploadFileName = "";
-    }
+    
+    FPPDiscovery.handleFileUpload (filename, index, data, len, final);
 
     // DEBUG_END;
 } // handleFileUpload
@@ -531,7 +485,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             LOG_PORT.println (F ("** WS ERROR **"));
             break;
         }
-    } // end switch (type) 
+    } // end switch (type)
 
     // DEBUG_V (String ("Heap = ") + ESP.getFreeHeap());
 
@@ -837,7 +791,7 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
 
     do // once
     {
-        if ((jsonCmd["get"] == "device") || 
+        if ((jsonCmd["get"] == "device") ||
             (jsonCmd["get"] == "network")  )
         {
             // DEBUG_V ("device/network");
@@ -998,11 +952,11 @@ void c_WebMgr::processCmdDelete (JsonObject& jsonCmd)
 } // processCmdDelete
 
 //-----------------------------------------------------------------------------
-void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request, 
+void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
                                String filename,
-                               size_t index, 
-                               uint8_t * data, 
-                               size_t len, 
+                               size_t index,
+                               uint8_t * data,
+                               size_t len,
                                bool final)
 {
     // DEBUG_START;
@@ -1065,7 +1019,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
 
 //-----------------------------------------------------------------------------
 /*
- * This function is called as part of the Arudino "loop" and does things that need 
+ * This function is called as part of the Arudino "loop" and does things that need
  * periodic poking.
  *
  */
