@@ -100,7 +100,7 @@ $(function ()
 
     var finalUrl = "http://" + target + "/upload";
     // console.log(finalUrl);
-    const uploader = new Dropzone('#filemanagementupload',
+    const uploader = new Dropzone('#filemanagementupload', 
     {
         url: finalUrl,
         paramName: 'file',
@@ -258,7 +258,7 @@ function ProcessGetFileResponse(JsonConfigData)
 
 function RequestFileDeletion()
 {
-    var ListOfSelectedFiles = FileTree.getSelectedNodes();
+    var ListOfSelectedFiles = FileTree.getSelectedNodes(); 
     if (0 < ListOfSelectedFiles.length) {
 
         var files = [];
@@ -876,7 +876,7 @@ function wsProcessOutputQueue()
         // console.log('wsProcessOutputQueue: WS Down. Flush');
         wsFlushAndHaltTheOutputQueue();
     }
-
+    
     //check if we are currently waiting for a response
     else if (wsBusy === true)
     {
@@ -891,8 +891,8 @@ function wsProcessOutputQueue()
         //get the next message from the queue.
         var OutputMessage = wsOutputQueue.shift();
 
-        // set WaitForResponseTimeMS to clear flag and try next message if response
-        // isn't recieved.
+        // set WaitForResponseTimeMS to clear flag and try next message if response 
+        // isn't recieved. 
         var WaitForResponseTimeMS = 20000; // 20 seconds
 
         // Short WaitForResponseTimeMS for message types that don't generate a response.
@@ -950,7 +950,7 @@ function drawStream(streamData)
     if ($("input[name='viewStyle'][value='RGB']").prop('checked'))
     {
         maxDisplay = Math.min(streamData.length, (cols * Math.floor((canvas.height - 30) / size)) * 3);
-        for (i = 0; i < maxDisplay; i += 3)
+        for (var i = 0; i < maxDisplay; i += 3)
         {
             ctx.fillStyle = 'rgb(' + streamData[i + 0] + ',' + streamData[i + 1] + ',' + streamData[i + 2] + ')';
             var col = (i / 3) % cols;

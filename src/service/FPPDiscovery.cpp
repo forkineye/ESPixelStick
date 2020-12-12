@@ -19,18 +19,19 @@
 #include "FPPDiscovery.h"
 #include "../input/InputMgr.hpp"
 
-#include <SDFS.h>
+
 #include <Int64String.h>
 
 extern const String VERSION;
 
 #ifdef ARDUINO_ARCH_ESP32
-#   define SD_OPEN_WRITEFLAGS   "w"
+#	include <SD.h>
+#	define SDFS SD
 #   define FPP_TYPE_ID          0xC3
 #   define FPP_VARIANT_NAME     "ESPixelStick-ESP32"
 
 #else
-//#   define SD_OPEN_WRITEFLAGS   sdfat::O_READ | sdfat::O_WRITE | sdfat::O_CREAT | sdfat::O_TRUNC
+#	include <SDFS.h>
 #   define FPP_TYPE_ID          0xC2
 #   define FPP_VARIANT_NAME     "ESPixelStick-ESP8266"
 #endif
@@ -161,11 +162,11 @@ void c_FPPDiscovery::begin ()
         LOG_PORT.println (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
         udp.onPacket (std::bind (&c_FPPDiscovery::ProcessReceivedUdpPacket, this, std::placeholders::_1));
 
-#ifdef ESP32
+#ifdef ARDUINO_ARCH_ESP32
         SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
+
+        if (!SD.begin (cs_pin))
 #else
-//        SPI.begin ();
-#endif
 
         SDFSConfig sdcfg;
         SPISettings spicfg;
@@ -174,7 +175,10 @@ void c_FPPDiscovery::begin ()
         sdcfg.setSPI(spicfg);
         sdcfg.setCSPin(15);
 
-        if (!SDFS.begin()) {
+        if (!SDFS.begin())
+#endif
+		{
+
             LOG_PORT.println (String (F ("FPPDiscovery: No SD card")));
             break;
         }
@@ -209,82 +213,21 @@ void c_FPPDiscovery::DescribeSdCardToUser ()
 {
     // DEBUG_START;
 
-    String BaseMessage = F ("*** Found SD Card - Type: ");
+    String BaseMessage = F ("*** Found SD Card ***");
 
 #ifdef ARDUINO_ARCH_ESP32
-    switch (SD.cardType ())
-    {
-        case CARD_NONE:
-        {
-            hasSDStorage = false;
-            BaseMessage += F ("NONE");
-            break;
-        }
+    uint64_t cardSize = SD.cardSize () / (1024 * 1024);
+    LOG_PORT.println (String (F ("SD Card Size: ")) + int64String (cardSize) + "MB");
 
-        case CARD_MMC:
-        {
-            BaseMessage += F ("MMC");
-            break;
-        }
-
-        case CARD_SD:
-        {
-            BaseMessage += F ("SD");
-            break;
-        }
-
-        case CARD_SDHC:
-        {
-            BaseMessage += F ("SDHC");
-            break;
-        }
-
-        default:
-        {
-            BaseMessage += F ("Unknown");
-            break;
-        }
-    } // switch (SD.cardType ())
+    File root = SD.open ("/");
 #else
     FSInfo64 fsinfo;
     SDFS.info64(fsinfo);
     LOG_PORT.printf("SD Card Size: %llu / %llu\n", fsinfo.usedBytes, fsinfo.totalBytes);
 
-/*
-    switch (SDFS.type())
-    {
-        case sdfat::SD_CARD_TYPE_SD1:
-        {
-            BaseMessage += F ("SD1");
-            break;
-        }
-        case sdfat::SD_CARD_TYPE_SD2:
-        {
-            BaseMessage += F ("SD2");
-            break;
-        }
-        case sdfat::SD_CARD_TYPE_SDHC:
-        {
-            BaseMessage += F ("SDHC");
-            break;
-        }
-        default:
-        {
-            BaseMessage += F ("Unknown");
-            break;
-        }
-    } // switch (SD.type ())
-*/
-#endif
-
-    LOG_PORT.println (BaseMessage);
-
-#ifdef ESP32
-    uint64_t cardSize = SD.cardSize () / (1024 * 1024);
-    LOG_PORT.println (String(F("SD Card Size: ")) + int64String(cardSize) + "MB");
-#endif // def ESP32
-
     Dir root = SDFS.openDir("/");
+#endif // def ARDUINO_ARCH_ESP32
+
     printDirectory(root, 0);
 
     // DEBUG_END;
@@ -292,10 +235,44 @@ void c_FPPDiscovery::DescribeSdCardToUser ()
 } // DescribeSdCardToUser
 
 //-----------------------------------------------------------------------------
+#ifdef ARDUINO_ARCH_ESP32
+void c_FPPDiscovery::printDirectory (File dir, int numTabs)
+{
+    while (true)
+    {
+        File entry = dir.openNextFile ();
+
+        if (!entry)
+        {
+            // no more files
+            break;
+        }
+        for (uint8_t i = 0; i < numTabs; i++)
+        {
+            LOG_PORT.print ('\t');
+        }
+        Serial.print (entry.name ());
+        if (entry.isDirectory ())
+        {
+            LOG_PORT.println ("/");
+            printDirectory (entry, numTabs + 1);
+        }
+        else
+        {
+            // files have sizes, directories do not
+            LOG_PORT.print ("\t\t");
+            LOG_PORT.println (entry.size (), DEC);
+        }
+        entry.close ();
+    }
+#else
 void c_FPPDiscovery::printDirectory(Dir dir, int numTabs)
 {
     while (dir.next())
+	{
         LOG_PORT.printf("%s - %u\n", dir.fileName().c_str(), dir.fileSize());
+	}
+#endif // def ARDUINO_ARCH_ESP32
 } // printDirectory
 
 //-----------------------------------------------------------------------------
@@ -1203,13 +1180,13 @@ void c_FPPDiscovery::SetSpiIoPins (uint8_t miso, uint8_t mosi, uint8_t clock, ui
     clk_pin  = clock;
     cs_pin   = cs;
 
- //   SPI.end ();
-#ifdef ESP32
-    SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
-#else
-//    SPI.begin ();
-#endif
 
+#ifdef ARDUINO_ARCH_ESP32
+    SPI.end ();
+    SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
+
+    SD.end ();
+#else
     SDFS.end();
 
     SDFSConfig sdcfg;
@@ -1218,7 +1195,7 @@ void c_FPPDiscovery::SetSpiIoPins (uint8_t miso, uint8_t mosi, uint8_t clock, ui
 //    spicfg._clock = 10;
 //    sdcfg.setSPI(spicfg);
     sdcfg.setCSPin(cs_pin);
-
+#endif
 
     if (!SDFS.begin())
     {
@@ -1261,8 +1238,82 @@ void c_FPPDiscovery::PlayFile (String & NewFileName)
 //-----------------------------------------------------------------------------
 bool c_FPPDiscovery::AllowedToRemotePlayFiles()
 {
-//    return ((hasSDStorage == true) && (String(F(Stop_FPP_RemotePlay)) == AutoPlayFileName));
-    return (hasSDStorage == true);
+    return ((hasSDStorage == true) && (String(F(Stop_FPP_RemotePlay)) == AutoPlayFileName));
+//    return (hasSDStorage == true);
 } // AllowedToRemotePlayFiles
+
+//-----------------------------------------------------------------------------
+void c_FPPDiscovery::handleFileUpload (String filename,
+                                       size_t index,
+                                       uint8_t* data,
+                                       size_t len,
+                                       bool final)
+{
+    // DEBUG_START;
+    if (0 == index)
+    {
+        handleFileUploadNewFile (filename);
+    }
+
+    if ((0 != len) && (0 != fsUploadFileName.length ()))
+    {
+        // Write data
+        // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
+        fsUploadFile.write (data, len);
+        LOG_PORT.print (String ("Writting bytes: ") + String (index) + '\r');
+    }
+
+    if ((true == final) && (0 != fsUploadFileName.length ()))
+    {
+        LOG_PORT.println ("");
+        // DEBUG_V ("UploadEnd: " + String(index + len) + String(" bytes"));
+        LOG_PORT.println (String (F ("Upload File: '")) + fsUploadFileName + String (F ("' Done")));
+
+        fsUploadFile.close ();
+        fsUploadFileName = "";
+    }
+
+    // DEBUG_END;
+} // handleFileUpload
+
+//-----------------------------------------------------------------------------
+void c_FPPDiscovery::handleFileUploadNewFile (String filename)
+{
+    // DEBUG_START;
+
+    // save the filename
+        // DEBUG_V ("UploadStart: " + filename);
+    if (!filename.startsWith ("/"))
+    {
+        filename = "/" + filename;
+    }
+
+    // are we terminating the previous download?
+    if (0 != fsUploadFileName.length ())
+    {
+        LOG_PORT.println (String (F ("Aborting Previous File Upload For: '")) + fsUploadFileName + String (F ("'")));
+        fsUploadFile.close ();
+        fsUploadFileName = "";
+        IsEnabled = fsUploadFileSavedIsEnabled;
+    }
+
+    // Stop any current activities to prevent SD collisions
+    IsEnabled = false;
+    fsUploadFileSavedIsEnabled = IsEnabled;
+
+    // Set up to receive a file
+    fsUploadFileName = filename;
+
+    LOG_PORT.println (String (F ("Upload File: '")) + fsUploadFileName + String (F ("' Started")));
+
+    SDFS.remove (fsUploadFileName);
+
+    // Open the file for writing
+    fsUploadFile = SDFS.open (fsUploadFileName, "w");
+    fsUploadFile.seek (0);
+
+    // DEBUG_END;
+
+} // handleFileUploadNewFile
 
 c_FPPDiscovery FPPDiscovery;

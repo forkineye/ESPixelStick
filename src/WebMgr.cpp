@@ -32,11 +32,9 @@
 #ifdef ARDUINO_ARCH_ESP8266
 #	include <LittleFS.h>
 #   define LITTLEFS LittleFS
-//#   define SD_OPEN_WRITEFLAGS   sdfat::O_READ | sdfat::O_WRITE | sdfat::O_CREAT | sdfat::O_TRUNC
 #elif defined ARDUINO_ARCH_ESP32
 #	include <LITTLEFS.h>
-#   define SD_OPEN_WRITEFLAGS   "w"
-
+#	define SDFS SD
 #else
 #	error "Unsupported CPU type."
 #endif
@@ -263,52 +261,8 @@ void c_WebMgr::handleFileUpload (AsyncWebServerRequest* request,
                                  bool final)
 {
     // DEBUG_START;
-
-    if (0 == index)
-    {
-        // save the filename
-        // DEBUG_V ("UploadStart: " + filename);
-        if (!filename.startsWith ("/"))
-        {
-            filename = "/" + filename;
-        }
-
-        // are we terminating the previous download?
-        if (0 != fsUploadFileName.length())
-        {
-            LOG_PORT.println (String (F ("Aborting Previous File Upload For: '")) + fsUploadFileName + String (F ("'")));
-            fsUploadFile.close ();
-            fsUploadFileName = "";
-        }
-
-        fsUploadFileName = filename;
-
-        LOG_PORT.println (String (F ("Upload File: '")) + fsUploadFileName + String(F("' Started")));
-
-        SDFS.remove (fsUploadFileName);
-
-        // Open the file for writing
-        fsUploadFile = SDFS.open(fsUploadFileName, "w");
-        fsUploadFile.seek (0);
-    }
-
-    if ((0 != len) && (0 != fsUploadFileName.length()))
-    {
-        // Write data
-        // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
-        fsUploadFile.write (data, len);
-        LOG_PORT.print (String("Writting bytes: ") + String (index) + "\r");
-    }
-
-    if ((true == final) && (0 != fsUploadFileName.length ()))
-    {
-        LOG_PORT.println ("");
-        // DEBUG_V ("UploadEnd: " + String(index + len) + String(" bytes"));
-        LOG_PORT.println (String (F ("Upload File: '")) + fsUploadFileName + String (F ("' Done")));
-
-        fsUploadFile.close ();
-        fsUploadFileName = "";
-    }
+    
+    FPPDiscovery.handleFileUpload (filename, index, data, len, final);
 
     // DEBUG_END;
 } // handleFileUpload

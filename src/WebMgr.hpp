@@ -22,7 +22,12 @@
 #include "EFUpdate.h"
 #include <ESPAsyncWebServer.h>
 #include <EspalexaDevice.h>
-#include <SDFS.h>
+#ifdef ARDUINO_ARCH_ESP32
+#	include <SD.h>
+#else
+#	include <SDFS.h>
+#endif // def ARDUINO_ARCH_ESP32
+
 
 class c_WebMgr
 {
@@ -47,8 +52,6 @@ private:
     EspalexaDevice * pAlexaDevice = nullptr;
 #   define WebSocketFrameCollectionBufferSize (3*1024)
     char WebSocketFrameCollectionBuffer[WebSocketFrameCollectionBufferSize + 1];
-    File fsUploadFile;
-    String fsUploadFileName;
 
     /// Valid "Simple" message types
     enum SimpleMessage
