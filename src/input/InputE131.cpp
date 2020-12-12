@@ -200,7 +200,7 @@ void c_InputE131::Process ()
         }
     }
     // DEBUG_END;
-    //    LOG_PORT.printf("procJSON heap /stack stats: %u:%u:%u:%u\n", ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
+    //    LOG_PORT.printf_P( PSTR("procJSON heap /stack stats: %u:%u:%u:%u\n"), ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
 } // process
 
 //-----------------------------------------------------------------------------
@@ -242,7 +242,7 @@ void c_InputE131::SubscribeToMulticastDomains()
     IPAddress ifaddr = WiFi.localIP ();
     IPAddress multicast_addr;
 
-    for (uint8_t UniverseIndex = 0; UniverseIndex < count; ++UniverseIndex) 
+    for (uint8_t UniverseIndex = 0; UniverseIndex < count; ++UniverseIndex)
     {
         multicast_addr = IPAddress (239, 255,
                                     (((startUniverse + UniverseIndex) >> 8) & 0xff),
@@ -355,7 +355,7 @@ void c_InputE131::WiFiStateChanged (bool IsConnected, bool ReBootAllowed)
             LOG_PORT.println (F ("*** E1.31 UNICAST INIT FAILED ****"));
         }
 
-        LOG_PORT.printf ("Listening for %u channels from Universe %u to %u.\n",
+        LOG_PORT.printf_P (PSTR ("Listening for %u channels from Universe %u to %u.\n"),
             InputDataBufferSize, startUniverse, LastUniverse);
 
         // Setup IGMP subscriptions if multicast is enabled

@@ -261,7 +261,7 @@ void c_WebMgr::handleFileUpload (AsyncWebServerRequest* request,
                                  bool final)
 {
     // DEBUG_START;
-    
+
     FPPDiscovery.handleFileUpload (filename, index, data, len, final);
 
     // DEBUG_END;
@@ -678,7 +678,7 @@ void c_WebMgr::ProcessGseriesRequests (AsyncWebSocketClient* client)
 void c_WebMgr::ProcessReceivedJsonMessage (DynamicJsonDocument & webJsonDoc, AsyncWebSocketClient * client)
 {
     // DEBUG_START;
-    //LOG_PORT.printf("ProcessReceivedJsonMessage heap /stack ZcppStats: %u:%u:%u:%u\n", ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
+    //LOG_PORT.printf_P( PSTR("ProcessReceivedJsonMessage heap / stack ZcppStats: %u:%u:%u:%u\n"), ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
 
     do // once
     {
