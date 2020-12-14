@@ -422,7 +422,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_
         {
             case 0x00: // Start
             {
-                // DEBUG_V("Start")
+                // DEBUG_V ("Start");
                 if (filename != fseqName)
                 {
                     ProcessSyncPacket (0x01, filename, frame); // stop
@@ -695,7 +695,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                     }
 					else
 					{
-                        LOG_PORT.printf_P( PSTR("File doesn't exist: %s\n"), seq.c_str());
+                        LOG_PORT.println(String(F("File doesn't exist: ")) + seq);
                     }
                 }
             }
@@ -751,6 +751,7 @@ void c_FPPDiscovery::ProcessFile (AsyncWebServerRequest* request, String filenam
 {
     // DEBUG_START;
     //LOG_PORT.printf_P( PSTR("In ProcessFile: %s    idx: %d    RangeLength: %d    final: %d\n)",filename.c_str(), index, RangeLength, final? 1 : 0);
+
     //printReq(request, false);
     request->send (404);
     // DEBUG_END;

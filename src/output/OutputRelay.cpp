@@ -246,8 +246,13 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 
     } while (false);
 
+    bool response = validate ();
+
+    // Update the config fields in case the validator changed them
+    GetConfig (jsonConfig);
+
     // DEBUG_END;
-    return validate ();
+    return response;
 
 } // SetConfig
 

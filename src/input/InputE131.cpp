@@ -230,6 +230,9 @@ boolean c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     validateConfiguration ();
 
+    // Update the config fields in case the validator changed them
+    GetConfig (jsonConfig);
+
     // DEBUG_END;
     return true;
 } // SetConfig
