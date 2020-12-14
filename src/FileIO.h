@@ -138,7 +138,7 @@ public:
 		return loadConfig (filename, file, json, dsHandler);
 
 	} // loadConfig
-	
+
 	static boolean loadConfig (String & filename, fs::File & file, DynamicJsonDocument & json, DeserializationHandler dsHandler)
 	{
 		// DEBUG_START;
@@ -265,7 +265,6 @@ public:
 	  /// Checks if value is empty and sets key to value if they're different. Returns true if key was set
 	static boolean setFromJSON (String   & key, JsonVariant val) {
 		if (!val.isNull () && !val.as<String> ().equals (key)) {
-			//LOG_PORT.printf("**** Setting '%s' ****\n", val.c_str());
 			key = val.as<String> ();
 			return true;
 		}

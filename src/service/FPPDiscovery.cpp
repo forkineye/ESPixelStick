@@ -168,12 +168,8 @@ void c_FPPDiscovery::begin ()
         if (!SD.begin (cs_pin))
 #else
 
-        SDFSConfig sdcfg;
-        SPISettings spicfg;
-
-        spicfg._clock = 80;
-        sdcfg.setSPI(spicfg);
-        sdcfg.setCSPin(15);
+        SDFSConfig cfg(15, SD_SCK_MHZ(80));
+        SDFS.setConfig(cfg);
 
         if (!SDFS.begin())
 #endif
@@ -223,7 +219,10 @@ void c_FPPDiscovery::DescribeSdCardToUser ()
 #else
     FSInfo64 fsinfo;
     SDFS.info64(fsinfo);
-    LOG_PORT.printf("SD Card Size: %llu / %llu\n", fsinfo.usedBytes, fsinfo.totalBytes);
+
+    LOG_PORT.printf_P( PSTR("SD Card Size: %lluMB (%llukB used)\n"),
+            (uint64_t)(fsinfo.totalBytes / (1024 * 1024)),
+            (uint64_t)(fsinfo.usedBytes / (1024)));
 
     Dir root = SDFS.openDir("/");
 #endif // def ARDUINO_ARCH_ESP32
@@ -270,7 +269,7 @@ void c_FPPDiscovery::printDirectory(Dir dir, int numTabs)
 {
     while (dir.next())
 	{
-        LOG_PORT.printf("%s - %u\n", dir.fileName().c_str(), dir.fileSize());
+        LOG_PORT.printf_P( PSTR("%s - %u\n"), dir.fileName().c_str(), dir.fileSize());
 	}
 #endif // def ARDUINO_ARCH_ESP32
 } // printDirectory
@@ -300,9 +299,9 @@ void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t Curr
             fseqFile.seek (pos);
             int toRead = (channelsPerFrame > outputBufferSize) ? outputBufferSize : channelsPerFrame;
 
-            //LOG_PORT.printf("%d / %d / %d / %d / %d\n", dataOffset, channelsPerFrame, outputBufferSize, toRead, pos);
+            //LOG_PORT.printf_P ( PSTR("%d / %d / %d / %d / %d\n"), dataOffset, channelsPerFrame, outputBufferSize, toRead, pos);
             fseqFile.read (outputBuffer, toRead);
-            //LOG_PORT.printf("New Frame!   Old: %d     New:  %d      Offset: %d\n", fseqCurrentFrameId, frame, FileOffsetToCurrentHeaderRecord);
+            //LOG_PORT.printf_P( PSTR("New Frame!   Old: %d     New:  %d      Offset: %d\n)", fseqCurrentFrameId, frame, FileOffsetToCurrentHeaderRecord);
             fseqCurrentFrameId = frame;
 
             InputMgr.ResetBlankTimer ();
@@ -541,15 +540,15 @@ static void printReq (AsyncWebServerRequest* request, bool post)
         AsyncWebParameter* p = request->getParam (i);
         if (p->isFile ())
         { //p->isPost() is also true
-            LOG_PORT.printf ("FILE[%s]: %s, size: %u\n", p->name ().c_str (), p->value ().c_str (), p->size ());
+            LOG_PORT.printf_P( PSTR("FILE[%s]: %s, size: %u\n"), p->name ().c_str (), p->value ().c_str (), p->size ());
         }
         else if (p->isPost ())
         {
-            LOG_PORT.printf ("POST[%s]: %s\n", p->name ().c_str (), p->value ().c_str ());
+            LOG_PORT.printf_P( PSTR("POST[%s]: %s\n"), p->name ().c_str (), p->value ().c_str ());
         }
         else
         {
-            LOG_PORT.printf ("GET[%s]: %s\n", p->name ().c_str (), p->value ().c_str ());
+            LOG_PORT.printf_P ( PSTR("GET[%s]: %s\n"), p->name ().c_str (), p->value ().c_str ());
         }
     }
 } // printReq
@@ -696,7 +695,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                     }
 					else
 					{
-                        LOG_PORT.printf("File doesn't exist: %s\n", seq.c_str());
+                        LOG_PORT.printf_P( PSTR("File doesn't exist: %s\n"), seq.c_str());
                     }
                 }
             }
@@ -750,8 +749,9 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessFile (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final)
 {
- // DEBUG_START;
-    //LOG_PORT.printf("In ProcessFile: %s    idx: %d    RangeLength: %d    final: %d\n",filename.c_str(), index, RangeLength, final? 1 : 0);
+    // DEBUG_START;
+    //LOG_PORT.printf_P( PSTR("In ProcessFile: %s    idx: %d    RangeLength: %d    final: %d\n)",filename.c_str(), index, RangeLength, final? 1 : 0);
+
     //printReq(request, false);
     request->send (404);
  // DEBUG_END;
@@ -768,7 +768,7 @@ void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data,
 
     if (!index)
     {
-        //LOG_PORT.printf("In process Body:    idx: %d    RangeLength: %d    total: %d\n", index, RangeLength, total);
+        //LOG_PORT.printf_P( PSTR("In process Body:    idx: %d    RangeLength: %d    total: %d\n)", index, RangeLength, total);
         printReq (request, false);
 
         String path = request->getParam ("path")->value ();
@@ -794,14 +794,14 @@ void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data,
         if (buffer && ((bufCurPos + len) > BUFFER_LEN))
         {
             int i = fseqFile.write (buffer, bufCurPos);
-            // LOG_PORT.printf("Write1: %u/%u    Pos: %d   Resp: %d\n", index, total, bufCurPos,  i);
+            // LOG_PORT.printf_P( PSTR("Write1: %u/%u    Pos: %d   Resp: %d\n)", index, total, bufCurPos,  i);
             bufCurPos = 0;
         }
 
         if ((buffer == nullptr) || (len >= BUFFER_LEN))
         {
             int i = fseqFile.write (data, len);
-            // LOG_PORT.printf("Write2: %u/%u    Resp: %d\n", index, total, i);
+            // LOG_PORT.printf_P( PSTR("Write2: %u/%u    Resp: %d\n"), index, total, i);
         }
         else
         {
@@ -815,7 +815,7 @@ void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data,
         if (bufCurPos)
         {
             int i = fseqFile.write (buffer, bufCurPos);
-            //LOG_PORT.printf("Write3: %u/%u   Pos: %d   Resp: %d\n", index, total, bufCurPos, i);
+            //LOG_PORT.printf_P( PSTR("Write3: %u/%u   Pos: %d   Resp: %d\n"), index, total, bufCurPos, i);
         }
 
         fseqFile.close ();
@@ -1192,9 +1192,8 @@ void c_FPPDiscovery::SetSpiIoPins (uint8_t miso, uint8_t mosi, uint8_t clock, ui
     SDFSConfig sdcfg;
     SPISettings spicfg;
 
-//    spicfg._clock = 10;
-//    sdcfg.setSPI(spicfg);
-    sdcfg.setCSPin(cs_pin);
+    SDFSConfig cfg(cs_pin, SD_SCK_MHZ(80));
+    SDFS.setConfig(cfg);
 #endif
 
     if (!SDFS.begin())
