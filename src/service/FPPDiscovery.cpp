@@ -220,9 +220,9 @@ void c_FPPDiscovery::DescribeSdCardToUser ()
     FSInfo64 fsinfo;
     SDFS.info64(fsinfo);
 
-    LOG_PORT.printf_P( PSTR("SD Card Size: %lluMB (%lluMB used\n"),
+    LOG_PORT.printf_P( PSTR("SD Card Size: %lluMB (%llukB used)\n"),
             (uint64_t)(fsinfo.totalBytes / (1024 * 1024)),
-            (uint64_t)(fsinfo.usedBytes / (1024 * 1024)));
+            (uint64_t)(fsinfo.usedBytes / (1024)));
 
     Dir root = SDFS.openDir("/");
 #endif // def ARDUINO_ARCH_ESP32
