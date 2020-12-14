@@ -230,8 +230,13 @@ bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject & jsonConfig)
     FileIO::setFromJSON (temp, jsonConfig[F ("data_pin")]);
     DataPin = gpio_num_t (temp);
 
+    bool response = validate ();
+
+    // Update the config fields in case the validator changed them
+    GetConfig (jsonConfig);
+
     // DEBUG_END;
-    return validate ();
+    return response;
 
 } // SetConfig
 

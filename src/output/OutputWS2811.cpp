@@ -420,8 +420,13 @@ bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject & jsonConfig)
     FileIO::setFromJSON (tempDataPin,             jsonConfig[F ("data_pin")]);
     DataPin = gpio_num_t (tempDataPin);
 
+    bool response = validate ();
+
+    // Update the config fields in case the validator changed them
+    GetConfig (jsonConfig);
+
     // DEBUG_END;
-    return validate ();
+    return response;
 
 } // SetConfig
 
@@ -482,18 +487,6 @@ bool c_OutputWS2811::validate ()
     // DEBUG_START;
     bool response = true;
 
-    if (pixel_count > WS2812_MAX_NUM_PIXELS)
-    {
-        // LOG_PORT.println (String (F ("*** Requested pixel count was too high. Setting to ")) + PIXEL_LIMIT + F(" ***"));
-        pixel_count = WS2812_MAX_NUM_PIXELS;
-        response = false;
-    }
-    else if (pixel_count < 1)
-    {
-        pixel_count = 170;
-        response = false;
-    }
-
     if (group_size > pixel_count)
     {
         LOG_PORT.println (String (F ("*** Requested group size count was too high. Setting to ")) + pixel_count + F (" ***"));
@@ -502,17 +495,20 @@ bool c_OutputWS2811::validate ()
     }
     else if (group_size < 1)
     {
+        LOG_PORT.println (String (F ("*** Requested group size count was too low. Setting to 1 ***")));
         group_size = 1;
         response = false;
     }
 
     if (zig_size > pixel_count)
     {
+        LOG_PORT.println (String (F ("*** Requested ZigZag size count was too high. Setting to ")) + pixel_count + F (" ***"));
         zig_size = pixel_count;
         response = false;
     }
     else if (zig_size < 1)
     {
+        LOG_PORT.println (String (F ("*** Requested ZigZag size count was too low. Setting to 1 ***")));
         zig_size = 1;
         response = false;
     }

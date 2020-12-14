@@ -161,6 +161,10 @@ boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     pEffectsEngine->SetConfig (jsonConfig);
 
     validateConfiguration ();
+
+    // Update the config fields in case the validator changed them
+    GetConfig (jsonConfig);
+
     RegisterWithMqtt ();
     connectToMqtt ();
 

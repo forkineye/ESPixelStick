@@ -272,6 +272,9 @@ boolean c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     setColor (effectColor);
     validateConfiguration ();
 
+    // Update the config fields in case the validator changed them
+    GetConfig (jsonConfig);
+
     setEffect (effectName);
 
     // DEBUG_END;

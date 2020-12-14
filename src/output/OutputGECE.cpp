@@ -169,7 +169,7 @@ void c_OutputGECE::Begin()
 */
 bool c_OutputGECE::SetConfig(ArduinoJson::JsonObject & jsonConfig)
 {
- DEBUG_START;
+    // DEBUG_START;
 
     uint temp;
     FileIO::setFromJSON(pixel_count, jsonConfig[F ("pixel_count")]);
@@ -179,8 +179,13 @@ bool c_OutputGECE::SetConfig(ArduinoJson::JsonObject & jsonConfig)
     FileIO::setFromJSON(temp,        jsonConfig[F ("data_pin")]);
     DataPin = gpio_num_t (temp);
 
- DEBUG_END;
-    return validate ();
+    bool response = validate ();
+
+    // Update the config fields in case the validator changed them
+    GetConfig (jsonConfig);
+
+    // DEBUG_END;
+    return response;
 
 } // SetConfig
 
@@ -207,7 +212,7 @@ uint16_t c_OutputGECE::GetNumChannelsNeeded ()
 //----------------------------------------------------------------------------
 bool c_OutputGECE::validate ()
 {
- DEBUG_START;
+    // DEBUG_START;
 
     bool response = true;
 
@@ -224,7 +229,7 @@ bool c_OutputGECE::validate ()
 
     SetOutputBufferSize (pixel_count * GECE_NUM_CHAN_PER_PIXEL);
 
- DEBUG_END;
+    // DEBUG_END;
     return response;
 
 } // validate
