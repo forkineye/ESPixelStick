@@ -170,14 +170,15 @@ void c_WiFiMgr::connectWifi ()
 #ifdef ARDUINO_ARCH_ESP8266
         WiFi.hostname (config->hostname);
 #else
+        WiFi.config (INADDR_NONE, INADDR_NONE, INADDR_NONE);
         WiFi.setHostname (config->hostname.c_str ());
 #endif
     }
 
     LOG_PORT.println (String(F ("\nWiFi Connecting to ")) +
-                      String(config->ssid) +
+                      config->ssid +
                       String (F (" as ")) +
-                      String (config->hostname));
+                      config->hostname);
 
     WiFi.begin (config->ssid.c_str (), config->passphrase.c_str ());
 
