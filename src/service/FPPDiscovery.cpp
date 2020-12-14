@@ -364,7 +364,10 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
             {
                 // DEBUG_V (String (F ("FPPPing discovery packet")));
                 // received a discover ping packet, need to send a ping out
-                sendPingPacket ();
+                if(_packet.isBroadcast() || _packet.isMulticast())
+                    sendPingPacket();
+                else
+                    sendPingPacket(_packet.remoteIP());
             }
             break;
         }
@@ -495,7 +498,7 @@ void c_FPPDiscovery::ProcessBlankPacket ()
 } // ProcessBlankPacket
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::sendPingPacket ()
+void c_FPPDiscovery::sendPingPacket (IPAddress destination)
 {
     // DEBUG_START;
     FPPPingPacket packet;
@@ -525,7 +528,8 @@ void c_FPPDiscovery::sendPingPacket ()
     strcpy (packet.hardwareType, FPP_VARIANT_NAME);
     packet.ranges[0] = 0;
 
-    udp.broadcastTo (packet.raw, sizeof (packet), FPP_DISCOVERY_PORT);
+    // DEBUG_V ("Ping reply to " + destination.toString());
+    udp.writeTo (packet.raw, sizeof (packet), destination, FPP_DISCOVERY_PORT);
 
     // DEBUG_END;
 } // sendPingPacket
@@ -1237,8 +1241,8 @@ void c_FPPDiscovery::PlayFile (String & NewFileName)
 //-----------------------------------------------------------------------------
 bool c_FPPDiscovery::AllowedToRemotePlayFiles()
 {
-    return ((hasSDStorage == true) && (String(F(Stop_FPP_RemotePlay)) == AutoPlayFileName));
-//    return (hasSDStorage == true);
+//    return ((hasSDStorage == true) && (String(F(Stop_FPP_RemotePlay)) == AutoPlayFileName));
+    return (hasSDStorage == true);
 } // AllowedToRemotePlayFiles
 
 //-----------------------------------------------------------------------------

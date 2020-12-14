@@ -103,7 +103,7 @@ public:
     void ReadNextFrame     (uint8_t* outputBuffer, uint16_t outputBufferSize);
     void GetListOfFiles    (char * ResponseBuffer);
     void DeleteFseqFile    (String & FileNameToDelete);
-    void sendPingPacket    ();
+    void sendPingPacket    (IPAddress destination = IPAddress(255, 255, 255, 255));
     void SetSpiIoPins      (uint8_t miso, uint8_t mosi, uint8_t clock, uint8_t cs);
     void PlayFile          (String & FileToPlay);
     void Enable            (void);
