@@ -633,10 +633,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
             // DEBUG_V ("");
 
             // send the config to the driver. At this level we have no idea what is in it
-            if (false == pOutputChannelDrivers[ChannelIndex]->SetConfig (OutputChannelDriverConfig))
-            {
-
-            }
+            pOutputChannelDrivers[ChannelIndex]->SetConfig (OutputChannelDriverConfig);
 
         } // end for each channel
 
