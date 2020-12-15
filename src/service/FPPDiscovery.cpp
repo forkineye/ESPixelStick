@@ -521,7 +521,7 @@ void c_FPPDiscovery::sendPingPacket ()
     uint32_t ip = static_cast<uint32_t>(WiFi.localIP ());
     memcpy (packet.ipAddress, &ip, 4);
     strcpy (packet.hostName, config.hostname.c_str());
-    strcpy (packet.version, version);
+    strcpy (packet.version, (VERSION + String (":") + BUILD_DATE).c_str());
     strcpy (packet.hardwareType, FPP_VARIANT_NAME);
     packet.ranges[0] = 0;
 
@@ -837,7 +837,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     jsonResponse[F ("Platform")]        = "ESPixelStick";
     jsonResponse[F ("Variant")]         = FPP_VARIANT_NAME;
     jsonResponse[F ("Mode")]            = (true == AllowedToRemotePlayFiles()) ? "remote" : "bridge";
-    jsonResponse[F ("Version")]         = VERSION;
+    jsonResponse[F ("Version")]         = VERSION + String (":") + BUILD_DATE;
 
     const char* version = VERSION.c_str ();
     uint16_t v = (uint16_t)atoi (version);
