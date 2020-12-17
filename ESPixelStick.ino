@@ -117,6 +117,7 @@ void setup()
     delay(10);
 
     // DEBUG_START;
+    // DEBUG_HW_START;
 #if defined(DEBUG)
     ets_install_putc1((void *) &_u0_putc);
     system_set_os_print(1);

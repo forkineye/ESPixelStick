@@ -168,7 +168,7 @@ void c_FPPDiscovery::begin ()
         if (!SD.begin (cs_pin))
 #else
 
-        SDFSConfig cfg(15, SD_SCK_MHZ(80));
+        SDFSConfig cfg(SD_CARD_CS_PIN, SD_CARD_CLK_MHZ);
         SDFS.setConfig(cfg);
 
         if (!SDFS.begin())
@@ -1196,7 +1196,7 @@ void c_FPPDiscovery::SetSpiIoPins (uint8_t miso, uint8_t mosi, uint8_t clock, ui
     SDFSConfig sdcfg;
     SPISettings spicfg;
 
-    SDFSConfig cfg(cs_pin, SD_SCK_MHZ(80));
+    SDFSConfig cfg(cs_pin, SD_CARD_CLK_MHZ);
     SDFS.setConfig(cfg);
 #endif
 
@@ -1262,8 +1262,10 @@ void c_FPPDiscovery::handleFileUpload (String filename,
     {
         // Write data
         // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
+        // DEBUG_HW_SET;
         fsUploadFile.write (data, len);
-        LOG_PORT.print (String ("Writting bytes: ") + String (index) + '\r');
+        // DEBUG_HW_CLEAR;
+        // LOG_PORT.print (String ("Writing bytes: ") + String (index) + '\r');
     }
 
     if ((true == final) && (0 != fsUploadFileName.length ()))
