@@ -155,11 +155,11 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
         InputMgrButtonData = jsonConfig.createNestedObject (IM_EffectsControlButtonName);
     }
     // DEBUG_V ("");
-    extern void PrettyPrint (JsonObject & jsonStuff, String Name);
+    // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
     
-    PrettyPrint (InputMgrButtonData, String("Before"));
+    // PrettyPrint (InputMgrButtonData, String("Before"));
     ExternalInput.GetConfig (InputMgrButtonData);
-    PrettyPrint (InputMgrButtonData, String("After"));
+    // PrettyPrint (InputMgrButtonData, String("After"));
 
     // DEBUG_V ("");
 
