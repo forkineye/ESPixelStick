@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 // Local Data definitions
 //-----------------------------------------------------------------------------
-typedef struct 
+typedef struct
 {
     c_InputMgr::e_InputType id;
     String name;
@@ -51,11 +51,11 @@ typedef struct
 static const InputTypeXlateMap_t InputTypeXlateMap[c_InputMgr::e_InputType::InputType_End] =
 {
     {c_InputMgr::e_InputType::InputType_E1_31,    "E1.31",      c_InputMgr::e_InputChannelIds::InputChannelId_1},
-    {c_InputMgr::e_InputType::InputType_Effects,  "Effects",    c_InputMgr::e_InputChannelIds::InputChannelId_2},
-    {c_InputMgr::e_InputType::InputType_MQTT,     "MQTT",       c_InputMgr::e_InputChannelIds::InputChannelId_1},
-    {c_InputMgr::e_InputType::InputType_Alexa,    "Alexa",      c_InputMgr::e_InputChannelIds::InputChannelId_1},
     {c_InputMgr::e_InputType::InputType_DDP,      "DDP",        c_InputMgr::e_InputChannelIds::InputChannelId_1},
     {c_InputMgr::e_InputType::InputType_FPP,      "FPP Remote", c_InputMgr::e_InputChannelIds::InputChannelId_1},
+    {c_InputMgr::e_InputType::InputType_Effects,  "Effects",    c_InputMgr::e_InputChannelIds::InputChannelId_2},
+    {c_InputMgr::e_InputType::InputType_MQTT,     "MQTT",       c_InputMgr::e_InputChannelIds::InputChannelId_2},
+    {c_InputMgr::e_InputType::InputType_Alexa,    "Alexa",      c_InputMgr::e_InputChannelIds::InputChannelId_2},
     {c_InputMgr::e_InputType::InputType_Disabled, "Disabled",   c_InputMgr::e_InputChannelIds::InputChannelId_ALL}
 };
 
@@ -143,7 +143,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
     // DEBUG_V ("");
 
     JsonObject InputMgrButtonData;
-    
+
     if (true == jsonConfig.containsKey (IM_EffectsControlButtonName))
     {
         // DEBUG_V ("");
@@ -156,7 +156,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
     }
     // DEBUG_V ("");
     extern void PrettyPrint (JsonObject & jsonStuff, String Name);
-    
+
     PrettyPrint (InputMgrButtonData, String("Before"));
     ExternalInput.GetConfig (InputMgrButtonData);
     PrettyPrint (InputMgrButtonData, String("After"));
@@ -251,8 +251,8 @@ void c_InputMgr::CreateNewConfig ()
     JsonObject JsonConfig = JsonConfigDoc.createNestedObject (IM_SECTION_NAME);
 
     // DEBUG_V ("for each Input type");
-    for (int InputTypeId = int (InputType_Start); 
-         InputTypeId < int (InputType_End); 
+    for (int InputTypeId = int (InputType_Start);
+         InputTypeId < int (InputType_End);
          ++InputTypeId)
     {
         // DEBUG_V ("for each input channel");
@@ -530,7 +530,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                 break;
             }
         } // end switch (NewChannelType)
-          
+
         // DEBUG_V ("");
         pInputChannelDrivers[ChannelIndex]->Begin ();
 
@@ -807,7 +807,7 @@ void c_InputMgr::SaveConfig ()
 } // SaveConfig
 
 //-----------------------------------------------------------------------------
-/* Sets the configuration for the current active ports: 
+/* Sets the configuration for the current active ports:
 *
 *   WARNING: This runs in the Web server context and cannot access the File system
 *
@@ -835,9 +835,9 @@ bool c_InputMgr::SetConfig (JsonObject & jsonConfig)
     {
         LOG_PORT.println (F ("EEEE No Input Manager settings found in new config. EEEE"));
     }
-    
+
     // DEBUG_END;
-    
+
     return Response;
 } // SetConfig
 

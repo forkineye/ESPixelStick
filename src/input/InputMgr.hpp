@@ -17,7 +17,7 @@
 *  or use of these programs.
 *
 *   This is a factory class used to manage the input channels. It creates and deletes
-*   the input channel functionality as needed to support any new configurations 
+*   the input channel functionality as needed to support any new configurations
 *   that get sent from from the WebPage.
 *
 */
@@ -62,6 +62,7 @@ public:
     };
 
     // handles to determine which input channel we are dealing with
+    // Channel 1 = primary / show input; Channel 2 = service input
     enum e_InputChannelIds
     {
         InputChannelId_1 = 0,
@@ -90,7 +91,7 @@ private:
 #   define IM_CHANNEL_SECTION_NAME     F("channels")
 #   define IM_CHANNEL_TYPE_NAME        F("type")
 #   define IM_EffectsControlButtonName F("ecb")
-    
+
     bool ProcessJsonConfig           (JsonObject & jsonConfig);
     void CreateJsonConfig            (JsonObject & jsonConfig);
     bool ProcessJsonChannelConfig    (JsonObject & jsonConfig, uint32_t ChannelIndex);

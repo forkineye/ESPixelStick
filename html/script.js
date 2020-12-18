@@ -544,19 +544,23 @@ function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId )
     HtmlLoadFileName = HtmlLoadFileName.replace(" ", "_");
     HtmlLoadFileName = HtmlLoadFileName + ".html";
     // console.info("Adjusted HtmlLoadFileName: " + HtmlLoadFileName);
-
-    // try to load the field definition file for this channel type
-    $('#' + OptionListName + 'mode' + DisplayedChannelId).load(HtmlLoadFileName, function () {
-        if ("input" === OptionListName)
-        {
-            ProcessInputConfig();
-            ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Input_Config);
-        }
-        else if ("output" === OptionListName)
-        {
-            ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Output_Config);
-        }
-    });
+//TODO: Handle this better for items which don't require config pages - alexa, ddp, etc...
+    if ("disabled.html" === HtmlLoadFileName) {
+        $('#' + OptionListName + 'mode' + DisplayedChannelId).empty();
+    } else {
+        // try to load the field definition file for this channel type
+        $('#' + OptionListName + 'mode' + DisplayedChannelId).load(HtmlLoadFileName, function () {
+            if ("input" === OptionListName)
+            {
+                ProcessInputConfig();
+                ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Input_Config);
+            }
+            else if ("output" === OptionListName)
+            {
+                ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Output_Config);
+            }
+        });
+    }
 
 } // LoadDeviceSetupSelectedOption
 
@@ -582,8 +586,8 @@ function CreateOptionsFromConfig(OptionListName, Config)
         if (!$('#' + OptionListName + 'mode' + ChannelId).length)
         {
             // create the selection box
-            $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + ChannelId + '">' + GenerateInputOutputControlName(OptionListName, ChannelId) + ' Mode:</label>');
-            $('#fg_' + OptionListName).append('<div class="col-sm-2"><select class="form-control wsopt" id="' + OptionListName + ChannelId + '"></select></div>');
+            $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + ChannelId + '">' + GenerateInputOutputControlName(OptionListName, ChannelId) + ' Mode</label>');
+            $('#fg_' + OptionListName).append('<div class="col-sm-4"><select class="form-control wsopt" id="' + OptionListName + ChannelId + '"></select></div>');
             $('#fg_' + OptionListName + '_mode').append('<fieldset id="' + OptionListName + 'mode' + ChannelId + '"></fieldset>');
         }
 

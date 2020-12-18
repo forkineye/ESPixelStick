@@ -57,7 +57,7 @@ extern "C" {
 * Inverted 6N1 UART lookup table for ws2811, first 2 bits ignored.
 * Start and stop bits are part of the pixel stream.
 */
-char Convert2BitIntensityToUartDataStream[] = 
+char Convert2BitIntensityToUartDataStream[] =
 {
     0b00110111,     // 00 - (1)000 100(0)
     0b00000111,     // 01 - (1)000 111(0)
@@ -145,8 +145,8 @@ void c_OutputWS2811::Begin()
     LOG_PORT.println (String (F ("** WS281x Initialization for Chan: ")) + String (OutputChannelId) + " **");
 
 #ifdef ARDUINO_ARCH_ESP8266
-    InitializeUart (WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE * WS2811_DATA_SPEED, 
-                    SERIAL_6N1, 
+    InitializeUart (WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE * WS2811_DATA_SPEED,
+                    SERIAL_6N1,
                     SERIAL_TX_ONLY,
                     PIXEL_FIFO_TRIGGER_LEVEL);
 #else
@@ -249,12 +249,12 @@ void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
         FrameRefreshTimeInMicroSec = (WS2811_MICRO_SEC_PER_INTENSITY * NumChannelsAvailable) + InterFrameGapInMicroSec;
 
     } while (false);
-    
+
     // DEBUG_END;
 } // SetBufferSize
 
 //----------------------------------------------------------------------------
-/* 
+/*
  * Fill the FIFO with as many intensity values as it can hold.
  */
 void IRAM_ATTR c_OutputWS2811::ISR_Handler ()
@@ -263,7 +263,7 @@ void IRAM_ATTR c_OutputWS2811::ISR_Handler ()
     if (READ_PERI_REG (UART_INT_ST (UartId)))
     {
         // Fill the FIFO with new data
-        // free space in the FIFO divided by the number of data bytes per intensity 
+        // free space in the FIFO divided by the number of data bytes per intensity
         // gives the max number of intensities we can add to the FIFO
         register uint16_t IntensitySpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE;
 
@@ -289,7 +289,7 @@ void IRAM_ATTR c_OutputWS2811::ISR_Handler ()
             enqueue ((Convert2BitIntensityToUartDataStream[(subpix >> 0) & 0x3]));
 
         }; // end send one or more intensity values
-        
+
         // are we done?
         if (0 == RemainingIntensityCount)
         {
@@ -367,7 +367,7 @@ void c_OutputWS2811::Render()
                 pSourceData = OutputMgr.GetBufferAddress () + (numIntensityBytesPerPixel * (CurrentDestinationPixelIndex / group_size));
             } // end zag
 
-            // now that we have decided on a data source, copy one 
+            // now that we have decided on a data source, copy one
             // pixels worth of data
                 // write data to the output buffer
             for (int colorOffsetId = 0; colorOffsetId < numIntensityBytesPerPixel; ++colorOffsetId)
@@ -471,7 +471,7 @@ void c_OutputWS2811::updateColorOrderOffsets ()
 
     // DEBUG_END;
 } // updateColorOrderOffsets
- 
+
 //----------------------------------------------------------------------------
 /*
 *   Validate that the current values meet our needs
@@ -506,10 +506,10 @@ bool c_OutputWS2811::validate ()
         zig_size = pixel_count;
         response = false;
     }
-    else if (zig_size < 1)
+    else if (zig_size < 0)
     {
-        LOG_PORT.println (String (F ("*** Requested ZigZag size count was too low. Setting to 1 ***")));
-        zig_size = 1;
+        LOG_PORT.println (String (F ("*** Requested ZigZag size count was too low. Setting to 0 ***")));
+        zig_size = 0;
         response = false;
     }
 

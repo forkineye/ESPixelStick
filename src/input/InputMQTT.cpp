@@ -64,7 +64,7 @@ c_InputMQTT::~c_InputMQTT ()
 } // ~c_InputMQTT
 
 //-----------------------------------------------------------------------------
-void c_InputMQTT::Begin() 
+void c_InputMQTT::Begin()
 {
     // DEBUG_START;
 
@@ -124,7 +124,7 @@ void c_InputMQTT::Process ()
 {
     // DEBUG_START;
     // ignoring IsInputChannelActive
-    
+
     pEffectsEngine->Process ();
 
     // DEBUG_END;
@@ -194,7 +194,7 @@ void c_InputMQTT::RegisterWithMqtt ()
     mqtt.onDisconnect (std::bind (&c_InputMQTT::onMqttDisconnect, this, _1));
     mqtt.onMessage (std::bind (&c_InputMQTT::onMqttMessage, this, _1, _2, _3, _4, _5, _6));
     mqtt.setServer (ip.c_str (), port);
-    
+
     // Unset clean session (defaults to true) so we get retained messages of QoS > 0
     mqtt.setCleanSession (clean);
     if (user.length () > 0)
@@ -210,7 +210,7 @@ void c_InputMQTT::onConnect()
     // DEBUG_START;
 
     connectToMqtt();
-    
+
     // DEBUG_END;
 
 } // onConnect
@@ -286,7 +286,7 @@ void c_InputMQTT::onMqttConnect(bool sessionPresent)
 
 //-----------------------------------------------------------------------------
 // void c_InputMQTT::onMqttDisconnect (AsyncMqttClientDisconnectReason reason) {
-void c_InputMQTT::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) 
+void c_InputMQTT::onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
 {
     // DEBUG_START;
 
@@ -300,12 +300,12 @@ void c_InputMQTT::onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::onMqttMessage(
-    char* topic, 
+    char* topic,
     char* payload,
-    AsyncMqttClientMessageProperties properties, 
-    size_t len, 
-    size_t index, 
-    size_t total) 
+    AsyncMqttClientMessageProperties properties,
+    size_t len,
+    size_t index,
+    size_t total)
 {
     // DEBUG_START;
     do // once
@@ -322,7 +322,7 @@ void c_InputMQTT::onMqttMessage(
         DeserializationError error = deserializeJson (r, payload, len);
 
         // DEBUG_V ("");
-        if (error) 
+        if (error)
         {
             LOG_PORT.println (String (F ("MQTT: Deserialzation Error. Error code = ")) + error.c_str ());
             break;
@@ -332,7 +332,7 @@ void c_InputMQTT::onMqttMessage(
         // DEBUG_V ("");
 
         // if its a retained message and we want clean session, ignore it
-        if (properties.retain && clean) 
+        if (properties.retain && clean)
         {
             // DEBUG_V ("");
             break;
@@ -340,7 +340,7 @@ void c_InputMQTT::onMqttMessage(
 
         // DEBUG_V ("");
 
-        if (root.containsKey ("state")) 
+        if (root.containsKey ("state"))
         {
             // DEBUG_V ("");
             if (strcmp (root["state"], ON) == 0)
@@ -354,7 +354,7 @@ void c_InputMQTT::onMqttMessage(
 
                 // DEBUG_V ("");
             }
-            else if (strcmp (root["state"], OFF) == 0) 
+            else if (strcmp (root["state"], OFF) == 0)
             {
                 // DEBUG_V ("");
                 stateOn = false;
@@ -424,6 +424,7 @@ void c_InputMQTT::publishHA()
         device["identifiers"]  = WiFi.macAddress ();
         device["manufacturer"] = "ESPixelStick";
         device["model"]        = "Pixel Controller";
+//TODO: Fix this
         device["name"]         = "MartinFixMe";
         device["sw_version"]   = "ESPixelStick v" + String (VERSION);
 
@@ -434,8 +435,8 @@ void c_InputMQTT::publishHA()
 
         // publishAttributes ();
 
-    } 
-    else 
+    }
+    else
     {
         mqtt.publish(ha_config.c_str(), 0, true, "");
     }
@@ -446,7 +447,7 @@ void c_InputMQTT::publishHA()
 void c_InputMQTT::publishState()
 {
     // DEBUG_START;
-    
+
     DynamicJsonDocument root(1024);
     JsonObject JsonConfig = root.createNestedObject("MQTT");
 
