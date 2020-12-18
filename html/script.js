@@ -951,7 +951,7 @@ function drawStream(streamData)
     var size = Math.floor((canvas.width - 20) / cols);
     var maxDisplay = 0;
 
-    if ($("input[name='viewStyle'][value='RGB']").prop('checked'))
+    if ($("#diag #viewStyle option:selected").val() === "rgb")
     {
         maxDisplay = Math.min(streamData.length, (cols * Math.floor((canvas.height - 30) / size)) * 3);
         for (var i = 0; i < maxDisplay; i += 3)
@@ -962,7 +962,7 @@ function drawStream(streamData)
             ctx.fillRect(10 + (col * size), 10 + (row * size), size - 1, size - 1);
         }
     }
-    else if ($("input[name='viewStyle'][value='RGBW']").prop('checked'))
+    else     if ($("#diag #viewStyle option:selected").val() === "rgbw")
     {
         maxDisplay = Math.min(streamData.length, (cols * Math.floor((canvas.height - 30) / size)) * 4);
         for (i = 0; i < maxDisplay; i += 4)
