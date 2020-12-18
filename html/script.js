@@ -795,6 +795,7 @@ function wsConnect()
                     if (msg.hasOwnProperty("set"))
                     {
                         ProcessReceivedJsonConfigMessage(msg.set);
+                        snackSave();
                     }
                 }
             }
