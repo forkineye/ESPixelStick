@@ -16,7 +16,7 @@
 *  damages in connection with, or arising out of, the furnishing, performance
 *  or use of these programs.
 *
-*   This is a derived class that converts data in the output buffer into 
+*   This is a derived class that converts data in the output buffer into
 *   pixel intensities and then transmits them through the configured serial
 *   interface.
 *
@@ -28,12 +28,12 @@
 #   include <driver/uart.h>
 #endif
 
-class c_OutputWS2811 : public c_OutputCommon  
+class c_OutputWS2811 : public c_OutputCommon
 {
 public:
     // These functions are inherited from c_OutputCommon
-    c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
-                      gpio_num_t outputGpio, 
+    c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+                      gpio_num_t outputGpio,
                       uart_port_t uart,
                       c_OutputMgr::e_OutputType outputType);
     virtual ~c_OutputWS2811 ();
@@ -66,7 +66,7 @@ private:
             uint8_t b;
             uint8_t w;
         } offset;
-        uint8_t Array[];
+        uint8_t Array[4];
     } ColorOffsets_t;
 
     // JSON configuration parameters
@@ -105,11 +105,11 @@ private:
 
 #endif
 
-    inline boolean canRefresh() 
+    inline boolean canRefresh()
     {
         return (micros() - FrameStartTimeInMicroSec) >= FrameRefreshTimeInMicroSec;
     }
-    
+
     void updateGammaTable(); ///< Generate gamma correction table
     void updateColorOrderOffsets(); ///< Update color order
     bool validate ();        ///< confirm that the current configuration is valid

@@ -57,7 +57,7 @@ extern "C" {
 
 #define FIFO_TRIGGER_LEVEL (UART_TX_FIFO_SIZE / 2)
 
-typedef enum 
+typedef enum
 {
 	CMD_DATA_START   = 0x80,
     ESC_CHAR         = 0x7F,
@@ -71,7 +71,7 @@ typedef enum
 
 //----------------------------------------------------------------------------
 c_OutputSerial::c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId,
-                                gpio_num_t outputGpio, 
+                                gpio_num_t outputGpio,
                                 uart_port_t uart,
                                 c_OutputMgr::e_OutputType outputType) :
     c_OutputCommon(OutputChannelId, outputGpio, uart, outputType)
@@ -309,7 +309,7 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
                         enqueue (CurrentData);
                     }
                 } // need to send the footer
-                
+
                 // Disable ALL interrupts when done
                 CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
 
@@ -320,10 +320,10 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
             } // end close of frame
 
             // Fill the FIFO with new data
-            register uint16_t SpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength));
+            uint16_t SpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength));
 
             // only read from ram once per data byte
-            register uint8_t data = 0;
+            uint8_t data = 0;
 
             // cant precalc this since data sent count is data value dependent (for Renard)
             // is there an intensity value to send and do we have the space to send it?
