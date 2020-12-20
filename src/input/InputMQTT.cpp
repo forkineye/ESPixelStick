@@ -23,7 +23,6 @@
 #include <Int64String.h>
 #include "InputMQTT.h"
 #include "InputEffectEngine.hpp"
-#include "../FileIO.h"
 
 #if defined ARDUINO_ARCH_ESP32
 #   include <functional>
@@ -148,15 +147,15 @@ boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     disconnectFromMqtt ();
 
-    FileIO::setFromJSON (ip,       jsonConfig["ip"]);
-    FileIO::setFromJSON (port,     jsonConfig["port"]);
-    FileIO::setFromJSON (user,     jsonConfig["user"]);
-    FileIO::setFromJSON (password, jsonConfig["password"]);
-    FileIO::setFromJSON (topic,    jsonConfig["topic"]);
-    FileIO::setFromJSON (clean,    jsonConfig["clean"]);
-    FileIO::setFromJSON (hadisco,  jsonConfig["hadisco"]);
-    FileIO::setFromJSON (haprefix, jsonConfig["haprefix"]);
-    FileIO::setFromJSON (lwt,      jsonConfig["lwt"]);
+    setFromJSON (ip,       jsonConfig, F ("ip"));
+    setFromJSON (port,     jsonConfig, F ("port"));
+    setFromJSON (user,     jsonConfig, F ("user"));
+    setFromJSON (password, jsonConfig, F ("password"));
+    setFromJSON (topic,    jsonConfig, F ("topic"));
+    setFromJSON (clean,    jsonConfig, F ("clean"));
+    setFromJSON (hadisco,  jsonConfig, F ("hadisco"));
+    setFromJSON (haprefix, jsonConfig, F ("haprefix"));
+    setFromJSON (lwt,      jsonConfig, F ("lwt"));
 
     pEffectsEngine->SetConfig (jsonConfig);
 
@@ -420,7 +419,7 @@ void c_InputMQTT::publishHA()
         // to enable integration support in HomeAssistant.
         JsonConfig["unique_id"] = "ESPixelStick_" + chipId;
 
-        JsonObject device = JsonConfig.createNestedObject (F("device"));
+        JsonObject device = JsonConfig.createNestedObject (DEVICE_NAME);
         device["identifiers"]  = WiFi.macAddress ();
         device["manufacturer"] = "ESPixelStick";
         device["model"]        = "Pixel Controller";

@@ -18,7 +18,6 @@
 */
 
 #include "InputE131.hpp"
-#include "../FileIO.h"
 #include "../WiFiMgr.hpp"
 
 #define JSON_NAME_UNIVERSE       (F ("universe"))
@@ -224,9 +223,9 @@ boolean c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
-    FileIO::setFromJSON (startUniverse,          jsonConfig[JSON_NAME_UNIVERSE]);
-    FileIO::setFromJSON (universe_channel_limit, jsonConfig[JSON_NAME_UNIVERSE_LIMIT]);
-    FileIO::setFromJSON (channel_start,          jsonConfig[JSON_NAME_CHANNEL_START]);
+    setFromJSON (startUniverse,          jsonConfig, JSON_NAME_UNIVERSE);
+    setFromJSON (universe_channel_limit, jsonConfig, JSON_NAME_UNIVERSE_LIMIT);
+    setFromJSON (channel_start,          jsonConfig, JSON_NAME_CHANNEL_START);
 
     validateConfiguration ();
 

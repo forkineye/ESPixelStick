@@ -336,7 +336,7 @@ void c_WebMgr::GetDeviceOptions ()
 
     // DEBUG_V ("");
     JsonObject WebOptions = webJsonDoc.createNestedObject (F ("options"));
-    JsonObject JsonDeviceOptions = WebOptions.createNestedObject (F ("device"));
+    JsonObject JsonDeviceOptions = WebOptions.createNestedObject (DEVICE_NAME);
     // DEBUG_V("");
 
     // PrettyPrint (WebOptions);
@@ -791,8 +791,8 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
 
     do // once
     {
-        if ((jsonCmd["get"] == "device") ||
-            (jsonCmd["get"] == "network")  )
+        if ((jsonCmd["get"] == DEVICE_NAME) ||
+            (jsonCmd["get"] == NETWORK_NAME)  )
         {
             // DEBUG_V ("device/network");
             strcat(WebSocketFrameCollectionBuffer, serializeCore (false).c_str());
@@ -844,7 +844,7 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
 
     do // once
     {
-        if ((jsonCmd.containsKey ("device")) || (jsonCmd.containsKey ("network")))
+        if ((jsonCmd.containsKey (DEVICE_NAME)) || (jsonCmd.containsKey (NETWORK_NAME)))
         {
             // DEBUG_V ("device/network");
             extern void SetConfig (JsonObject &);
@@ -898,9 +898,9 @@ void c_WebMgr::processCmdOpt (JsonObject & jsonCmd)
     do // once
     {
         // DEBUG_V ("");
-        if (jsonCmd["opt"] == "device")
+        if (jsonCmd["opt"] == DEVICE_NAME)
         {
-            // DEBUG_V ("device");
+            // DEBUG_V (DEVICE_NAME);
             GetDeviceOptions ();
             break;
         }

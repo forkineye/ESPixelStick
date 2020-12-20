@@ -526,7 +526,7 @@ void c_OutputMgr::LoadConfig ()
     // DEBUG_START;
 
     // try to load and process the config file
-    if (!FileIO::loadConfig (ConfigFileName, [this](DynamicJsonDocument & JsonConfigDoc)
+    if (!FileMgr.LoadConfigFile (ConfigFileName, [this](DynamicJsonDocument & JsonConfigDoc)
         {
             // DEBUG_V ("");
             JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
@@ -603,7 +603,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
 
             // set a default value for channel type
             uint32_t ChannelType = uint32_t (OutputType_End);
-            FileIO::setFromJSON (ChannelType, OutputChannelConfig[OM_CHANNEL_TYPE_NAME]);
+            setFromJSON (ChannelType, OutputChannelConfig, OM_CHANNEL_TYPE_NAME);
             // DEBUG_V ("");
 
             // is it a valid / supported channel type
@@ -676,7 +676,7 @@ void c_OutputMgr::SaveConfig ()
 
     // DEBUG_V (String ("ConfigData: ") + ConfigData);
 
-    if (FileIO::SaveConfig (ConfigFileName, ConfigData))
+    if (FileMgr.SaveConfigFile (ConfigFileName, ConfigData))
     {
         LOG_PORT.println (F ("**** Saved Output Manager Config File. ****"));
         ConfigData.clear ();

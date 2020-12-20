@@ -50,7 +50,7 @@ void EFUpdate::begin() {
 
 bool EFUpdate::process(uint8_t *data, size_t len) {
     size_t index = 0;
-    bool retval = true;
+    bool ConfigChanged = true;
 
     while (index < len) {
         switch (_state) {
@@ -116,12 +116,12 @@ bool EFUpdate::process(uint8_t *data, size_t len) {
                 break;
             case State::FAIL:
                 index = len;
-                retval = false;
+                ConfigChanged = false;
                 break;
         }
     }
 
-    return retval;
+    return ConfigChanged;
 }
 
 bool EFUpdate::hasError() {

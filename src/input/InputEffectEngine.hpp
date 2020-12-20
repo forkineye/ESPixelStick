@@ -19,7 +19,6 @@
 */
 
 #include "InputCommon.hpp"
-#include "../FileIO.h"
 
 class c_InputEffectEngine : public c_InputCommon
 {

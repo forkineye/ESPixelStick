@@ -21,7 +21,6 @@
 
 #include "OutputGECE.hpp"
 #include "../ESPixelStick.h"
-#include "../FileIO.h"
 #include <HardwareSerial.h>
 #ifdef ARDUINO_ARCH_ESP32
 #   include <driver/uart.h>
@@ -172,11 +171,11 @@ bool c_OutputGECE::SetConfig(ArduinoJson::JsonObject & jsonConfig)
     // DEBUG_START;
 
     uint temp;
-    FileIO::setFromJSON(pixel_count, jsonConfig[F ("pixel_count")]);
-    FileIO::setFromJSON(brightness,  jsonConfig[F ("brightness")]);
+    setFromJSON(pixel_count, jsonConfig, F ("pixel_count"));
+    setFromJSON(brightness,  jsonConfig, F ("brightness"));
     // enums need to be converted to uints for json
     temp = uint (DataPin);
-    FileIO::setFromJSON(temp,        jsonConfig[F ("data_pin")]);
+    setFromJSON(temp,        jsonConfig, F ("data_pin"));
     DataPin = gpio_num_t (temp);
 
     bool response = validate ();

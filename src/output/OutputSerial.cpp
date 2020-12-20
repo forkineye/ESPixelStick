@@ -30,8 +30,6 @@ GNU General Public License for more details.
 #include "OutputSerial.hpp"
 #include "OutputCommon.hpp"
 
-#include "../FileIO.h"
-
 #ifdef ARDUINO_ARCH_ESP8266
 extern "C" {
 #   include <eagle_soc.h>
@@ -221,13 +219,13 @@ bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
     uint temp; // Holds enums prior to conversion
-    FileIO::setFromJSON (GenericSerialHeader, jsonConfig[F ("gen_ser_hdr")]);
-    FileIO::setFromJSON (GenericSerialFooter, jsonConfig[F ("gen_ser_ftr")]);
-    FileIO::setFromJSON (Num_Channels,        jsonConfig[F ("num_chan")]);
-    FileIO::setFromJSON (CurrentBaudrate,     jsonConfig[F ("baudrate")]);
+    setFromJSON (GenericSerialHeader, jsonConfig, F ("gen_ser_hdr"));
+    setFromJSON (GenericSerialFooter, jsonConfig, F ("gen_ser_ftr"));
+    setFromJSON (Num_Channels,        jsonConfig, F ("num_chan"));
+    setFromJSON (CurrentBaudrate,     jsonConfig, F ("baudrate"));
 
     temp = uint (DataPin);
-    FileIO::setFromJSON (temp, jsonConfig[F ("data_pin")]);
+    setFromJSON (temp, jsonConfig, F ("data_pin"));
     DataPin = gpio_num_t (temp);
 
     bool response = validate ();

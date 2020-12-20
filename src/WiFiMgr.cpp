@@ -130,15 +130,15 @@ void c_WiFiMgr::GetStatus (JsonObject & jsonStatus)
  // DEBUG_START;
 
     jsonStatus["rssi"]     = WiFi.RSSI ();
-    jsonStatus["ip"]       = getIpAddress ().toString ();
+    jsonStatus[IP_NAME]    = getIpAddress ().toString ();
     jsonStatus["subnet"]   = getIpSubNetMask ().toString ();
     jsonStatus["mac"]      = WiFi.macAddress ();
 #ifdef ARDUINO_ARCH_ESP8266
-    jsonStatus["hostname"] = WiFi.hostname ();
+    jsonStatus[HOSTNAME_NAME] = WiFi.hostname ();
 #else
-    jsonStatus["hostname"] = WiFi.getHostname ();
+    jsonStatus[HOSTNAME_NAME] = WiFi.getHostname ();
 #endif // def ARDUINO_ARCH_ESP8266
-    jsonStatus["ssid"]     = WiFi.SSID ();
+    jsonStatus[SSID_NAME]     = WiFi.SSID ();
 
  // DEBUG_END;
 } // GetStatus
@@ -223,7 +223,6 @@ void c_WiFiMgr::SetUpIp ()
         if (temp == config->ip)
         {
             LOG_PORT.println (F ("WiFI: ERROR: STATIC SELECTED WITHOUT IP. Using DHCP assigned address"));
-            config->UseDhcp = true;
             break;
         }
 

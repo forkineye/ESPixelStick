@@ -23,7 +23,6 @@
 #include <Int64String.h>
 #include "InputAlexa.h"
 #include "InputEffectEngine.hpp"
-#include "../FileIO.h"
 
 #if defined ARDUINO_ARCH_ESP32
 #   include <functional>
@@ -166,7 +165,7 @@ void c_InputAlexa::onMessage(EspalexaDevice * pDevice)
         sprintf (HexColor, "#%02x%02x%02x", pDevice->getR (), pDevice->getG (), pDevice->getB ());
 
         DynamicJsonDocument JsonConfigDoc (1024);
-        JsonObject JsonConfig = JsonConfigDoc.createNestedObject ("config");
+        JsonObject JsonConfig = JsonConfigDoc.createNestedObject (F("config"));
 
         JsonConfig["EffectSpeed"]      = 1;
         JsonConfig["EffectReverse"]    = false;

@@ -30,8 +30,6 @@ GNU General Public License for more details.
 #include "OutputRelay.hpp"
 #include "OutputCommon.hpp"
 
-#include "../FileIO.h"
-
 #define Relay_OUTPUT_ENABLED         true
 #define Relay_OUTPUT_DISABLED        false
 #define Relay_OUTPUT_INVERTED        true
@@ -189,7 +187,7 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
         // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
 
         // PrettyPrint (jsonConfig, String("c_OutputRelay::SetConfig"));
-        FileIO::setFromJSON (UpdateInterval, jsonConfig[OM_RELAY_UPDATE_INTERVAL_NAME]);
+        setFromJSON (UpdateInterval, jsonConfig, OM_RELAY_UPDATE_INTERVAL_NAME);
 
         // do we have a channel configuration array?
         if (false == jsonConfig.containsKey (OM_RELAY_CHANNELS_NAME))
@@ -203,7 +201,7 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
         for (JsonVariant JsonChannelData : JsonChannelList)
         {
             uint8_t ChannelId = OM_RELAY_CHANNEL_LIMIT;
-            FileIO::setFromJSON (ChannelId, JsonChannelData[OM_RELAY_CHANNEL_ID_NAME]);
+            setFromJSON (ChannelId, JsonChannelData, OM_RELAY_CHANNEL_ID_NAME);
 
             // do we have a valid channel configuration ID?
             if (ChannelId >= OM_RELAY_CHANNEL_LIMIT)
@@ -215,13 +213,13 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 
             RelayChannel_t * CurrentOutputChannel = & OutputList[ChannelId];
 
-            FileIO::setFromJSON (CurrentOutputChannel->Enabled,           JsonChannelData[OM_RELAY_CHANNEL_ENABLED_NAME]);
-            FileIO::setFromJSON (CurrentOutputChannel->InvertOutput,      JsonChannelData[OM_RELAY_CHANNEL_INVERT_NAME]);
-            FileIO::setFromJSON (CurrentOutputChannel->OnOffTriggerLevel, JsonChannelData[OM_RELAY_CHANNEL_TRIGGER_NAME]);
+            setFromJSON (CurrentOutputChannel->Enabled,           JsonChannelData, OM_RELAY_CHANNEL_ENABLED_NAME);
+            setFromJSON (CurrentOutputChannel->InvertOutput,      JsonChannelData, OM_RELAY_CHANNEL_INVERT_NAME);
+            setFromJSON (CurrentOutputChannel->OnOffTriggerLevel, JsonChannelData, OM_RELAY_CHANNEL_TRIGGER_NAME);
 
             // DEBUGV (String ("currentRelay.GpioId: ") + String (CurrentOutputChannel->GpioId));
             temp = CurrentOutputChannel->GpioId;
-            FileIO::setFromJSON (temp, JsonChannelData[OM_RELAY_CHANNEL_GPIO_NAME]);
+            setFromJSON (temp, JsonChannelData, OM_RELAY_CHANNEL_GPIO_NAME);
             // DEBUGV (String ("temp: ") + String (temp));
 
             if ((temp != CurrentOutputChannel->GpioId) && 

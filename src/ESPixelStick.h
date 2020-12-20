@@ -84,4 +84,39 @@ boolean dsDevice               (JsonObject & json);
 boolean dsNetwork              (JsonObject & json);
 void    SaveConfig             ();
 
+template <typename T, typename J, typename N>
+bool setFromJSON (T& OutValue, J& Json, N Name)
+{
+    bool HasBeenModified = false;
+
+    if (true == Json.containsKey (Name))
+    {
+        T temp = Json[Name];
+        if (temp != OutValue)
+        {
+            OutValue = temp;
+            HasBeenModified = true;
+        }
+    }
+
+    return HasBeenModified;
+};
+extern const String CurrentConfigVersion;
+
+extern const String DEVICE_NAME;
+extern const String VERSION_NAME;
+extern const String ID_NAME;
+extern const String NETWORK_NAME;
+extern const String SSID_NAME;
+extern const String PASSPHRASE_NAME;
+extern const String IP_NAME;
+extern const String NETMASK_NAME;
+extern const String GATEWAY_NAME;
+extern const String HOSTNAME_NAME;
+extern const String DHCP_NAME;
+extern const String STA_TIMEOUT_NAME;
+extern const String AP_FALLBACK_NAME;
+extern const String AP_REBOOT_NAME;
+extern const String AP_TIMEOUT_NAME;
+
 extern config_t config;

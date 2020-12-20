@@ -22,7 +22,6 @@
 */
 
 #include "../ESPixelStick.h"
-#include "../FileIO.h"
 
 //-----------------------------------------------------------------------------
 // bring in driver definitions
@@ -309,7 +308,7 @@ void c_InputMgr::GetConfig (char* Response)
     else
     {
         String TempConfigData;
-        FileIO::ReadFile (ConfigFileName, TempConfigData);
+        FileMgr.ReadConfigFile (ConfigFileName, TempConfigData);
         // DEBUGV (String ("TempConfigData: ") + TempConfigData);
         strcat (Response, TempConfigData.c_str ());
     }
@@ -553,7 +552,7 @@ void c_InputMgr::LoadConfig ()
     // DEBUG_START;
 
     // try to load and process the config file
-    if (!FileIO::loadConfig (ConfigFileName, [this](DynamicJsonDocument & JsonConfigDoc)
+    if (!FileMgr.LoadConfigFile (ConfigFileName, [this](DynamicJsonDocument & JsonConfigDoc)
         {
             // DEBUG_V ("");
             JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
@@ -720,7 +719,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
 
             // set a default value for channel type
             uint32_t ChannelType = uint32_t (InputType_Default);
-            FileIO::setFromJSON (ChannelType, InputChannelConfig[IM_CHANNEL_TYPE_NAME]);
+            setFromJSON (ChannelType, InputChannelConfig, IM_CHANNEL_TYPE_NAME);
             // DEBUG_V ("");
 
             // is it a valid / supported channel type
@@ -791,7 +790,7 @@ void c_InputMgr::SaveConfig ()
 
     // DEBUGV (String("ConfigData: ") + ConfigData);
 
-    if (FileIO::SaveConfig (ConfigFileName, ConfigData))
+    if (FileMgr.SaveConfigFile (ConfigFileName, ConfigData))
     {
         LOG_PORT.println (F ("**** Saved Input Manager Config File. ****"));
         // DEBUG_V ("ConfigData: " + ConfigData);

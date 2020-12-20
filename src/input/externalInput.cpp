@@ -2,7 +2,7 @@
  * Manage a single input line
  */
 #include "externalInput.h"
-#include "../FileIO.h"
+#include "../FileMgr.hpp"
 
 /*****************************************************************************/
 /*	Global Data                                                              */
@@ -125,12 +125,12 @@ void c_ExternalInput::ProcessConfig (JsonObject JsonData)
 
 	uint32_t oldInputId = m_iPinId;
 	
-	FileIO::setFromJSON (m_bIsEnabled, JsonData[M_IO_ENABLED]);
-	FileIO::setFromJSON (m_name,       JsonData[M_NAME]);
-	FileIO::setFromJSON (m_iPinId,     JsonData[M_ID]);
-	FileIO::setFromJSON (sPolarity,    JsonData[M_POLARITY]);
+	setFromJSON (m_bIsEnabled, JsonData, M_IO_ENABLED);
+	setFromJSON (m_name,       JsonData, M_NAME);
+	setFromJSON (m_iPinId,     JsonData, M_ID);
+	setFromJSON (sPolarity,    JsonData, M_POLARITY);
 
-	m_polarity = (String("ActiveHigh") == sPolarity) ? ActiveHigh : ActiveLow;
+	m_polarity = (String(F("ActiveHigh")) == sPolarity) ? ActiveHigh : ActiveLow;
 
 	if ((oldInputId != m_iPinId) || (false == m_bIsEnabled))
 	{
