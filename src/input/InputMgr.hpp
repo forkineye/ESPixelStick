@@ -49,15 +49,15 @@ public:
 
     enum e_InputType
     {
-        InputType_Disabled = 0,
-        InputType_E1_31,
+        InputType_E1_31 = 0,
         InputType_Effects,
         InputType_MQTT,
         InputType_Alexa,
         InputType_DDP,
         InputType_FPP,
+        InputType_Disabled,
         InputType_End,
-        InputType_Start   = InputType_Disabled,
+        InputType_Start   = InputType_E1_31,
         InputType_Default = InputType_Disabled,
     };
 

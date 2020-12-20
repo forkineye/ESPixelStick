@@ -327,9 +327,8 @@ void c_OutputWS2811::Render()
         // Normal / group copy
 
         // for each destination pixel
-        for (size_t CurrentDestinationPixelIndex = 0;
-            CurrentDestinationPixelIndex < OutputPixelCount;
-            CurrentDestinationPixelIndex++)
+        size_t CurrentDestinationPixelIndex = 0;
+        while (CurrentDestinationPixelIndex < OutputPixelCount)
         {
             // for each output pixel in the group (minimum of 1)
             for (size_t CurrentGroupIndex = 0;
@@ -347,6 +346,7 @@ void c_OutputWS2811::Render()
             pSourceData += numIntensityBytesPerPixel;
 
         } // end for each pixel in the output buffer
+
     } // end normal copy
     else
     {
