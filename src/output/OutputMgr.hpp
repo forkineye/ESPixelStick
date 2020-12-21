@@ -25,6 +25,7 @@
 #include "../ESPixelStick.h"
 
 #include "../memdebug.h"
+#include "../FileMgr.hpp"
 
 class c_OutputCommon; ///< forward declaration to the pure virtual output class that will be defined later.
 
