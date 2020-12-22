@@ -130,7 +130,7 @@ boolean c_InputFPPRemote::SetConfig (JsonObject & jsonConfig)
 
     setFromJSON (FseqFileToPlay, jsonConfig, JSON_NAME_FILE_TO_PLAY);
 
-    FPPDiscovery.SetSpiIoPins (miso_pin, mosi_pin, clk_pin, cs_pin);
+    FileMgr.SetSpiIoPins (miso_pin, mosi_pin, clk_pin, cs_pin);
     FPPDiscovery.PlayFile (FseqFileToPlay);
 
     // DEBUG_END;

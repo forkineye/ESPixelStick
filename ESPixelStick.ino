@@ -195,7 +195,7 @@ void setup()
 /** Validates the config_t (core) configuration structure and forces defaults for invalid entries */
 void validateConfig()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
 #ifdef ARDUINO_ARCH_ESP8266
     String chipId = String (ESP.getChipId (), HEX);
@@ -220,7 +220,7 @@ void validateConfig()
 
     ConfigSaveNeeded |= WiFiMgr.ValidateConfig (&config);
 
-    DEBUG_END;
+    // DEBUG_END;
 } // validateConfig
 
 /// Deserialize device confiugration JSON to config structure - returns true if config change detected
@@ -232,6 +232,22 @@ boolean dsDevice(JsonObject & json)
     if (json.containsKey(DEVICE_NAME))
     {
         JsonObject JsonDeviceConfig = json[DEVICE_NAME];
+
+        String TempVersion;
+        setFromJSON (TempVersion, JsonDeviceConfig, VERSION_NAME);
+
+        // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
+        // DEBUG_V (String ("CurrentConfigVersion: ") + String (CurrentConfigVersion));
+        // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
+        // PrettyPrint (JsonDeviceConfig, "Main Config");
+
+        if (TempVersion != CurrentConfigVersion)
+        {
+            // need to do something in the future
+            LOG_PORT.println ("Incorrect Device Config Version ID found in config");
+            ConfigSaveNeeded = true;
+            // break;
+        }
 
         ConfigChanged |= setFromJSON (config.id,        JsonDeviceConfig, ID_NAME);
                          // setFromJSON (ConfigSaveNeeded, JsonDeviceConfig, "ConfigSaveNeeded");
@@ -268,6 +284,23 @@ boolean dsNetwork(JsonObject & json)
 #endif // def ARDUINO_ARCH_ESP8266
 
         JsonObject network = json[NETWORK_NAME];
+
+        String TempVersion;
+        setFromJSON (TempVersion, network, VERSION_NAME);
+
+        // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
+        // DEBUG_V (String ("CurrentConfigVersion: ") + String (CurrentConfigVersion));
+        // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
+        // PrettyPrint (network, "Main Config");
+
+        if (TempVersion != CurrentConfigVersion)
+        {
+            // need to do something in the future
+            LOG_PORT.println ("Incorrect Version ID found in config");
+            ConfigSaveNeeded = true;
+            // break;
+        }
+
         ConfigChanged |= setFromJSON (config.ssid,                         network, SSID_NAME);
         ConfigChanged |= setFromJSON (config.passphrase,                   network, PASSPHRASE_NAME);
         ConfigChanged |= setFromJSON(ip,                                   network, IP_NAME);
@@ -300,33 +333,22 @@ boolean dsNetwork(JsonObject & json)
 
 void SetConfig (JsonObject& json)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     ConfigSaveNeeded = deserializeCore (json);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // SetConfig
 
 bool deserializeCore (JsonObject & json)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     bool DataHasBeenAccepted = false;
 
     do // once
     {
-        String TempVersion;
-        setFromJSON (TempVersion, json, VERSION_NAME);
-
-        if (TempVersion != CurrentConfigVersion)
-        {
-            // need to do something in the future
-            LOG_PORT.println ("Incorrect Version ID found in config");
-            ConfigSaveNeeded = true;
-            // break;
-        }
-
         ConfigSaveNeeded |= dsDevice  (json);
         ResetWiFi = dsNetwork (json);
         ConfigSaveNeeded |= ResetWiFi;
@@ -335,7 +357,7 @@ bool deserializeCore (JsonObject & json)
 
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 
     return DataHasBeenAccepted;
 }
@@ -398,6 +420,7 @@ void GetConfig (JsonObject & json)
 
     // Network
     JsonObject network = json.createNestedObject(NETWORK_NAME);
+    network[VERSION_NAME]     = CurrentConfigVersion;
     network[SSID_NAME]        = config.ssid;
     network[PASSPHRASE_NAME]  = config.passphrase;
     network[HOSTNAME_NAME]    = config.hostname;

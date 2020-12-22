@@ -39,17 +39,18 @@ public:
     void ValidateConfig  (config_t * NewConfig);
     void Process         ();
 
-    void onAlexaMessage (EspalexaDevice * pDevice);
+    void onAlexaMessage        (EspalexaDevice * pDevice);
     void RegisterAlexaCallback (DeviceCallbackFunction cb);
-    bool IsAlexaCallbackValid () { return (nullptr != pAlexaCallback); }
-    void FirmwareUpload (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
-    void handleFileUpload (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
+    bool IsAlexaCallbackValid  () { return (nullptr != pAlexaCallback); }
+    void FirmwareUpload        (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
+    void handleFileUpload      (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
 
 private:
 
-    EFUpdate        efupdate;
+    EFUpdate               efupdate;
     DeviceCallbackFunction pAlexaCallback = nullptr;
-    EspalexaDevice * pAlexaDevice = nullptr;
+    EspalexaDevice *       pAlexaDevice = nullptr;
+
 #   define WebSocketFrameCollectionBufferSize (3*1024)
     char WebSocketFrameCollectionBuffer[WebSocketFrameCollectionBufferSize + 1];
 

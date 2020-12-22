@@ -249,6 +249,8 @@ void c_InputMgr::CreateNewConfig ()
     DynamicJsonDocument JsonConfigDoc (IM_JSON_SIZE);
     JsonObject JsonConfig = JsonConfigDoc.createNestedObject (IM_SECTION_NAME);
 
+    JsonConfig[VERSION_NAME] = CurrentConfigVersion;
+
     // DEBUG_V ("for each Input type");
     for (int InputTypeId = int (InputType_Start); 
          InputTypeId < int (InputType_End); 
@@ -680,6 +682,20 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
         JsonObject InputChannelMgrData = jsonConfig[IM_SECTION_NAME];
         // DEBUG_V ("");
 
+        String TempVersion;
+        setFromJSON (TempVersion, InputChannelMgrData, VERSION_NAME);
+
+        // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
+        // DEBUG_V (String ("CurrentConfigVersion: ") + String (CurrentConfigVersion));
+        // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
+        // PrettyPrint (InputChannelMgrData, "Output Config");
+
+        if (TempVersion != CurrentConfigVersion)
+        {
+            LOG_PORT.println (F ("InputMgr: Incorrect Version found. Using existing/default config."));
+            // break;
+        }
+
         // extract my own config data here
         if (true == InputChannelMgrData.containsKey (IM_EffectsControlButtonName))
         {
@@ -689,7 +705,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
         }
         else
         {
-            LOG_PORT.println (F ("No Input Button Settings Found. Using Defaults"));
+            LOG_PORT.println (F ("InputMgr: No Input Button Settings Found. Using Defaults"));
         }
 
         // do we have a channel configuration array?
@@ -790,7 +806,7 @@ void c_InputMgr::SaveConfig ()
 
     // DEBUGV (String("ConfigData: ") + ConfigData);
 
-    if (FileMgr.SaveConfigFile (ConfigFileName, ConfigData))
+    if (true == FileMgr.SaveConfigFile (ConfigFileName, ConfigData))
     {
         LOG_PORT.println (F ("**** Saved Input Manager Config File. ****"));
         // DEBUG_V ("ConfigData: " + ConfigData);
