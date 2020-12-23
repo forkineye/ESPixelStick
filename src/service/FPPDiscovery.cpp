@@ -19,7 +19,6 @@
 #include "FPPDiscovery.h"
 #include "../input/InputMgr.hpp"
 
-
 #include <Int64String.h>
 #include "../FileMgr.hpp"
 
@@ -100,7 +99,6 @@ struct FSEQRangeEntry
     uint8_t Length[3];
 
 } __attribute__ ((packed));
-
 
 struct FSEQHeader
 {
@@ -193,10 +191,11 @@ void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t Curr
         uint32_t frame = (millis () - fseqStartMillis) / frameStepTime;
 
         // have we reached the end of the file?
-        if (TotalNumberOfFramesInSequence < frame)
+        if (TotalNumberOfFramesInSequence <= frame)
         {
             StopPlaying ();
             StartPlaying (AutoPlayFileName, 0);
+            frame = (millis () - fseqStartMillis) / frameStepTime;
         }
 
         if (frame != fseqCurrentFrameId)
@@ -207,9 +206,21 @@ void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t Curr
             //LOG_PORT.printf_P ( PSTR("%d / %d / %d / %d / %d\n"), dataOffset, channelsPerFrame, outputBufferSize, toRead, pos);
             size_t bytesRead = FileMgr.ReadSdFile (fseqFile, outputBuffer, toRead, pos);
 
+            // DEBUG_V (String ("pos:       ") + String (pos));
+            // DEBUG_V (String ("toRead:    ") + String (toRead));
+            // DEBUG_V (String ("bytesRead: ") + String (bytesRead));
+
             if (bytesRead != toRead)
             {
+                // DEBUG_V (String ("pos:                           ") + String (pos));
+                // DEBUG_V (String ("toRead:                        ") + String (toRead));
+                // DEBUG_V (String ("bytesRead:                     ") + String (bytesRead));
+                // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (TotalNumberOfFramesInSequence));
+                // DEBUG_V (String ("frame:                         ") + String (frame));
+
+                LOG_PORT.println (F ("File Playback Failed to read enough data"));
                 StopPlaying ();
+                StartPlaying (AutoPlayFileName, 0);
             }
             else
             {
@@ -374,7 +385,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_
                     if (diff > 2 || diff < -2)
                     {
                         // reset the start time which will then trigger a new frame time
-                        fseqStartMillis = millis () - frameStepTime * frame;
+                        fseqStartMillis = millis () - (frameStepTime * frame);
                         // DEBUF_V("Large diff %d\n", diff);
                     }
                 }
@@ -949,6 +960,11 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
         frameStepTime                 = fsqHeader.stepTime;
         TotalNumberOfFramesInSequence = fsqHeader.TotalNumberOfFramesInSequence;
         fseqStartMillis               = millis () - (frameStepTime * frameId);
+
+        // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (TotalNumberOfFramesInSequence));
+        // DEBUG_V (String ("frameStepTime:                 ") + String (frameStepTime));
+        // DEBUG_V (String ("channelsPerFrame:              ") + String (channelsPerFrame));
+        // DEBUG_V (String ("dataOffset:                    ") + String (dataOffset));
 
         LOG_PORT.println (String (F ("FPPDiscovery::StartPlaying:: Playing:  '")) + filename + "'" );
 
