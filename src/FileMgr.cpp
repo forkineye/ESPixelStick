@@ -18,10 +18,10 @@
 */
 
 #include "ESPixelStick.h"
+#include <int64String.h>
 
 #ifdef ARDUINO_ARCH_ESP8266
 #else
-# include <int64String.h>
 #endif // def ARDUINO_ARCH_ESP8266
 
 #include "FileMgr.hpp"
