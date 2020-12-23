@@ -28,7 +28,6 @@
 // Core
 #include "src/ESPixelStick.h"
 #include "src/EFUpdate.h"
-#include "src/FileMgr.hpp"
 #include <Int64String.h>
 
 // Input modules
