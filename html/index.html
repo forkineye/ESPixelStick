@@ -65,6 +65,8 @@
                             </table>
                         </fieldset>
                     </div>
+
+<!-- TODO: Only show one of these, depending on input configuration -->
                     <div class="col-sm-6">
                         <fieldset>
                             <legend class="esps-legend">E1.31 Status</legend>
@@ -97,71 +99,64 @@
                         <legend class="esps-legend">Network Configuration</legend>
                         <div class="form-group" id="fg_ssid">
                             <label class="control-label col-sm-2" for="ssid">SSID</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control is-valid" id="ssid" maxlength="31" title="The SSID for your access point.">
-                                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control is-valid" id="ssid" maxlength="32" title="The SSID for your access point.">
                             </div>
                         </div>
                         <div class="form-group" id="fg_password">
                             <label class="control-label col-sm-2" for="passphrase">Password</label>
-                            <div class="col-sm-10">
+                            <div class="col-sm-6">
                                 <input type="password" class="form-control is-valid" id="passphrase" maxlength="64" title="The password for your access point.">
-                                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
                             </div>
                         </div>
                         <div class="form-group" id="fg_hostname">
                             <label class="control-label col-sm-2" for="hostname">Hostname</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control is-valid" id="hostname" maxlength="31" title="Hostname for this device.">
-                                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control is-valid" id="hostname" required pattern="^[a-zA-Z][a-zA-Z\d-]{1,30}[a-zA-Z\d]$" title="Hostname for this device.">
                             </div>
                         </div>
                         <div class="form-group" id="fg_staTimeout">
-                            <label class="control-label col-sm-2" for="sta_timeout">Client Timeout:</label>
+                            <label class="control-label col-sm-2" for="sta_timeout">Client Timeout</label>
                             <div class="col-sm-2">
                                 <input type="number" class="form-control is-valid" id="sta_timeout" step="1" min="15" max="60" value="0" title="When connecting as a client, this is the timeout in seconds.">
-                                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
                             </div>
                         </div>
                         <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
+                            <div class="col-sm-offset-2 col-sm-8">
                                 <div class="checkbox"><label><input type="checkbox" id="dhcp" title="Usage of DHCP with static leases is recommended."> Use DHCP</label></div>
                             </div>
                         </div>
                         <div class="form-group dhcp has-feedback" id="fg_ip">
                             <label class="control-label col-sm-2" for="ip">IP</label>
-                            <div class="col-sm-10">
+                            <div class="col-sm-8">
                                 <input type="text" class="form-control" id="ip" name="ip" minlength="7" maxlength="15" pattern='\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b' value="0.0.0.0" title="Static IP Address">
-                                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
                             </div>
                         </div>
                         <div class="form-group dhcp has-feedback" id="fg_netmask">
                             <label class="control-label col-sm-2" for="netmask">Netmask</label>
-                            <div class="col-sm-10">
+                            <div class="col-sm-8">
                                 <input type="text" class="form-control" id="netmask" name="netmask" minlength="7" maxlength="15" pattern='\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b' value="0.0.0.0" title="Static Netmask">
-                                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
                             </div>
                         </div>
                         <div class="form-group dhcp has-feedback" id="fg_gateway">
                             <label class="control-label col-sm-2" for="gateway">Gateway</label>
-                            <div class="col-sm-10">
+                            <div class="col-sm-8">
                                 <input type="text" class="form-control" id="gateway" name="gateway" minlength="7" maxlength="15" pattern='\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b' value="0.0.0.0" title="Static Gateway">
-                                <span class="glyphicon glyphicon-remove form-control-feedback"></span>
                             </div>
                         </div>
                         <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
+                            <div class="col-sm-offset-2 col-sm-8">
                                 <div class="checkbox"><label><input type="checkbox" id="ap_fallback" title="Enabling this will cause your device to come up as an Access Point if your configured WiFi connection fails. Not recommended for live / production devices."> AP Fallback</label></div>
                             </div>
                         </div>
                         <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
+                            <div class="col-sm-offset-2 col-sm-8">
                                 <div class="checkbox"><label><input type="checkbox" id="ap_reboot" title="Enabling this will cause your device to Reboot when all connections fail."> AP ReBoot</label></div>
                             </div>
                         </div>
                     </fieldset>
                     <div class="form-group">
-                        <div class="col-sm-offset-2 col-sm-10">
+                        <div class="col-sm-offset-2 col-sm-8">
                             <button id="btn_wifi" type="button" class="btn btn-primary">Save Changes</button>
                         </div>
                     </div>
@@ -175,9 +170,17 @@
                         <legend class="esps-legend">Device Configuration</legend>
                         <div class="form-group">
                             <label class="control-label col-sm-2" for="id">Device ID</label>
-                            <div class="col-sm-6"><input type="text" class="form-control" id="id" title="Plain text ID to help identify your device."></div>
+                            <div class="col-sm-10"><input type="text" class="form-control" id="id" title="Plain text ID to help identify your device."></div>
                         </div>
+                        <!-- Dynamic input / ouput config -->
+                        <div class="form-group" id="fg_input"></div>
+                        <div class="form-group" id="fg_output"></div>
+                    </fieldset>
 
+                    <!-- Dynamic input / ouput config -->
+                    <div id="fg_input_mode"></div>
+                    <div id="fg_output_mode"></div>
+<!--  Move elsewhere
                         <legend class="esps-legend">Input Effect Trigger Configuration</legend>
                         <div class="col-sm-10">
                             <div class="form-group has-feedback" id="ecb">
@@ -190,7 +193,6 @@
                                 <label class="control-label col-sm-2" for="ecb_gpioid">GPIO</label>
                                 <div class="col-sm-2">
                                     <input type="number" class="form-control is-valid" id="ecb_gpioid" name="ecb_gpioid" step="1" min="0" max="24" value="0" title="GPIO to monitor for effects trigger">
-                                    <span class="glyphicon glyphicon-remove form-control-feedback"></span>
                                 </div>
 
                                 <label class="control-label col-sm-2" for="ecb_polarity">Polarity</label>
@@ -200,20 +202,7 @@
                                 </select>
                             </div>
                         </div>
-
-                    </fieldset>
-                    <fieldset>
-                        <legend class="esps-legend">Input Configuration</legend>
-                        <div class="form-group" id="fg_input"></div>
-
-                        <div class="form-group" id="fg_input_mode"></div>
-
-                        <legend class="esps-legend">Output Configuration</legend>
-                        <div class="form-group" id="fg_output"></div>
-
-                        <div class="form-group" id="fg_output_mode"></div>
-
-                    </fieldset>
+-->
                     <fieldset>
                         <!-- Refresh Rate Display -->
                         <div class="form-group">
@@ -233,42 +222,30 @@
 
             <!-- Diagnostics -->
             <div id="diag" class="mdiv hidden anchor">
-                <fieldset>
-                    <legend class="esps-legend">View Stream</legend>
-                    <form class="form-horizontal" onsubmit="return false">
-                        <div id="t_view" class="tdiv">
-                            <div class="form-group">
-                                <label class="control-label col-sm-2">Display As:</label>
-                                <div class="col-sm-10">
-                                    <div class="btn-group" data-toggle="buttons">
-                                        <div>
-                                            <input type="radio" name="viewStyle" id="btn_RGB" value="RGB" autocomplete="off" checked>
-                                            <label class="btn btn-primary" for="btn_RGB">RGB</label>
-                                        </div>
-                                        <div>
-                                            <input type="radio" name="viewStyle" id="btn_RGBW" value="RGBW" autocomplete="off">
-                                            <label class="btn btn-primary" for="btn_RGBW">RGBW</label>
-                                        </div>
-                                        <div>
-                                            <input type="radio" name="viewStyle" id="btn_Channel" value="Channel" autocomplete="off">
-                                            <label class="btn btn-primary" for="btn_Channel">Channel</label>
-                                        </div>
-                                    </div>
-                                </div>
+                <form class="form-horizontal">
+                    <fieldset>
+                        <legend class="esps-legend">View Stream</legend>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2">Display As</label>
+                            <div class="col-sm-2">
+                                <select class="form-control" id="viewStyle" onchange="clearStream()">
+                                    <option value="rgb">RGB</option>
+                                    <option value="rgbw">RGBW</option>
+                                    <option value="channels">Channels</option>
+                                </select>
                             </div>
-                            <div class="form-group has-feedback">
-                                <label class="control-label col-sm-2" for="v_columns">Columns</label>
-                                <div class="col-sm-2">
-                                    <input type="number" class="form-control is-valid" id="v_columns" name="v_columns" step="1" min="1" max="100" value="20" oninput="clearStream()">
-                                    <span class="glyphicon glyphicon-remove form-control-feedback"></span>
-                                </div>
+
+                            <label class="control-label col-sm-2" for="v_columns">Columns</label>
+                            <div class="col-sm-2 has-feedback">
+                                <input type="number" class="form-control is-valid" id="v_columns" name="v_columns" step="1" min="1" max="100" value="20" oninput="clearStream()">
                             </div>
-                            <div class="row">
-                                <div class="col-sm-12"><canvas id="canvas" width="820" height="960"></canvas></div>
-                            </div>
+
                         </div>
-                    </form>
-                </fieldset>
+                        <div class="row">
+                            <div class="col-sm-12"><canvas id="canvas" width="820" height="960"></canvas></div>
+                        </div>
+                    </fieldset>
+                </form>
             </div>
 
             <!-- FIleManagement -->
@@ -380,7 +357,7 @@
 
         <!--
         <script type="text/javascript" src="js/dropzone.js"></script>
-        <script type="text/javascript" src="js/jquery-3.1.1.js"></script>
+        <script type="text/javascript" src="js/jquery-3.5.1.js"></script>
         <script type="text/javascript" src="js/bootstrap.js"></script>
         <script type="text/javascript" src="js/jqColorPicker.js"></script>
         <script type="text/javascript" src="js/tree.js"></script>

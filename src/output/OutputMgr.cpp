@@ -16,7 +16,7 @@
 *  or use of these programs.
 *
 *   This is a factory class used to manage the output port. It creates and deletes
-*   the output channel functionality as needed to support any new configurations 
+*   the output channel functionality as needed to support any new configurations
 *   that get sent from from the WebPage.
 *
 */
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // Local Data definitions
 //-----------------------------------------------------------------------------
-typedef struct 
+typedef struct
 {
     c_OutputMgr::e_OutputType id;
     String name;
@@ -49,15 +49,15 @@ static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::
 {
     {c_OutputMgr::e_OutputType::OutputType_WS2811,   "WS2811"   },
     {c_OutputMgr::e_OutputType::OutputType_GECE,     "GECE"     },
-    {c_OutputMgr::e_OutputType::OutputType_Serial,   "Serial"   },
-    {c_OutputMgr::e_OutputType::OutputType_Renard,   "Renard"   },
     {c_OutputMgr::e_OutputType::OutputType_DMX,      "DMX"      },
+    {c_OutputMgr::e_OutputType::OutputType_Renard,   "Renard"   },
+    {c_OutputMgr::e_OutputType::OutputType_Serial,   "Serial"   },
     {c_OutputMgr::e_OutputType::OutputType_Relay,    "Relay"    },
     {c_OutputMgr::e_OutputType::OutputType_Disabled, "Disabled" }
 };
 
 //-----------------------------------------------------------------------------
-typedef struct 
+typedef struct
 {
     gpio_num_t dataPin;
     uart_port_t UartId;
@@ -207,7 +207,7 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
         // DEBUG_V ("Add the output channel configuration for type: " + DriverTypeId);
 
         // Populate the driver name
-        String DriverName = ""; 
+        String DriverName = "";
         CurrentChannel->GetDriverName (DriverName);
         // DEBUG_V (String ("DriverName: ") + DriverName);
 
@@ -250,8 +250,8 @@ void c_OutputMgr::CreateNewConfig ()
     JsonConfig[VERSION_NAME] = CurrentConfigVersion;
 
     // DEBUG_V ("for each output type");
-    for (int outputTypeId = int (OutputType_Start); 
-         outputTypeId < int (OutputType_End); 
+    for (int outputTypeId = int (OutputType_Start);
+         outputTypeId < int (OutputType_End);
          ++outputTypeId)
     {
         // DEBUG_V ("for each interface");
@@ -672,7 +672,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
 
 //-----------------------------------------------------------------------------
 /*
-    This is a bit tricky. The running config is only a portion of the total 
+    This is a bit tricky. The running config is only a portion of the total
     configuration. We need to get the existing saved configuration and add the
     current configuration to it.
 
@@ -772,7 +772,7 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
         uint16_t ChannelsNeeded     = pOutputChannel->GetNumChannelsNeeded ();
         uint16_t AvailableChannels  = sizeof(OutputBuffer) - OutputBufferOffset;
         uint16_t ChannelsToAllocate = min (ChannelsNeeded, AvailableChannels);
-        
+
         // DEBUG_V (String ("    ChannelsNeeded: ") + String (ChannelsNeeded));
         // DEBUG_V (String (" AvailableChannels: ") + String (AvailableChannels));
         // DEBUG_V (String ("ChannelsToAllocate: ") + String (ChannelsToAllocate));

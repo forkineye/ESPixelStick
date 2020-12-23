@@ -40,6 +40,7 @@ class c_FPPDiscovery
 public:
 
 #   define Stop_FPP_RemotePlay "..."
+
 private:
 
     AsyncUDP udp;
@@ -61,11 +62,11 @@ private:
     uint8_t* outputBuffer;
     uint16_t outputBufferSize;
     bool inFileUpload = false;
-    String UploadFileName;
     bool hasBeenInitialized = false;
     bool IsEnabled = false;
     uint8_t* buffer = nullptr;
     int bufCurPos = 0;
+    String UploadFileName;
 
     void GetSysInfoJSON    (JsonObject& jsonResponse);
     void BuildFseqResponse (String fname, c_FileMgr::FileId fseq, String & resp);
@@ -84,7 +85,7 @@ public:
     void ProcessFile      (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
     void ProcessBody      (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total);
     void ReadNextFrame    (uint8_t* outputBuffer, uint16_t outputBufferSize);
-    void sendPingPacket   ();
+    void sendPingPacket    (IPAddress destination = IPAddress(255, 255, 255, 255));
     void PlayFile         (String & FileToPlay);
     void Enable           (void);
     void Disable          (void);

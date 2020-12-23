@@ -65,8 +65,7 @@ void c_FileMgr::Begin ()
 
         if (!SD.begin (cs_pin))
 #else
-
-        SDFSConfig cfg (15, SD_SCK_MHZ (80));
+        SDFSConfig cfg (SD_CARD_CS_PIN, SD_CARD_CLK_MHZ);
         SDFS.setConfig (cfg);
 
         if (!SDFS.begin ())

@@ -17,7 +17,7 @@
 *  or use of these programs.
 *
 *   This is a factory class used to manage the output port. It creates and deletes
-*   the output channel functionality as needed to support any new configurations 
+*   the output channel functionality as needed to support any new configurations
 *   that get sent from from the WebPage.
 *
 */
@@ -65,9 +65,9 @@ public:
     {
         OutputType_WS2811 = 0,
         OutputType_GECE,
-        OutputType_Serial,
-        OutputType_Renard,
         OutputType_DMX,
+        OutputType_Renard,
+        OutputType_Serial,
         OutputType_Relay,
         OutputType_Disabled,
         OutputType_End, // must be last

@@ -82,10 +82,17 @@ public:
 #   // define CONFIG_MAX_SIZE (4*1024)    ///< Sanity limit for config file
 #endif
 private:
+
 #   define SD_CARD_MISO_PIN    19
 #   define SD_CARD_MOSI_PIN    23
 #   define SD_CARD_CLK_PIN     18
+#   define SD_CARD_CLK_MHZ     SD_SCK_MHZ(50)  // 50 MHz SPI clock
+
+#ifdef ARDUINO_ARCH_ESP32
 #   define SD_CARD_CS_PIN      4
+#else
+#   define SD_CARD_CS_PIN      15
+#endif
 
     void listDir (fs::FS& fs, String dirname, uint8_t levels);
     void DescribeSdCardToUser ();

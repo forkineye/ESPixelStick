@@ -17,7 +17,7 @@
 *  or use of these programs.
 *
 *   This is a factory class used to manage the input channels. It creates and deletes
-*   the input channel functionality as needed to support any new configurations 
+*   the input channel functionality as needed to support any new configurations
 *   that get sent from from the WebPage.
 *
 */
@@ -50,19 +50,20 @@ public:
 
     enum e_InputType
     {
-        InputType_Disabled = 0,
-        InputType_E1_31,
+        InputType_E1_31 = 0,
         InputType_Effects,
         InputType_MQTT,
         InputType_Alexa,
         InputType_DDP,
         InputType_FPP,
+        InputType_Disabled,
         InputType_End,
-        InputType_Start   = InputType_Disabled,
+        InputType_Start   = InputType_E1_31,
         InputType_Default = InputType_Disabled,
     };
 
     // handles to determine which input channel we are dealing with
+    // Channel 1 = primary / show input; Channel 2 = service input
     enum e_InputChannelIds
     {
         InputChannelId_1 = 0,
@@ -91,7 +92,7 @@ private:
 #   define IM_CHANNEL_SECTION_NAME     F("channels")
 #   define IM_CHANNEL_TYPE_NAME        F("type")
 #   define IM_EffectsControlButtonName F("ecb")
-    
+
     bool ProcessJsonConfig           (JsonObject & jsonConfig);
     void CreateJsonConfig            (JsonObject & jsonConfig);
     bool ProcessJsonChannelConfig    (JsonObject & jsonConfig, uint32_t ChannelIndex);
