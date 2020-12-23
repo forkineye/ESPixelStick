@@ -225,7 +225,7 @@ bool c_FileMgr::SaveConfigFile (String& FileName, String& FileData)
     }
     else
     {
-        file.seek (0);
+        file.seek (0, SeekSet);
         file.print (FileData);
         LOG_PORT.println (CfgFileMessagePrefix + String (F ("saved.")));
         file.close ();
@@ -263,7 +263,7 @@ bool c_FileMgr::ReadConfigFile (String& FileName, String& FileData)
     if (file)
     {
         // DEBUG_V (String("File '") + FileName + "' is open.");
-        file.seek (0);
+        file.seek (0, SeekSet);
         FileData = file.readString ();
         file.close ();
         GotFileData = true;
@@ -525,7 +525,7 @@ bool c_FileMgr::OpenSdFile (String & FileName, FileMode Mode, FileId & FileHandl
 
         if (FileMode::FileWrite == Mode)
         {
-            FileList[FileHandle].seek (0);
+            FileList[FileHandle].seek (0, SeekSet);
         }
 
         FileIsOpen = true;
@@ -539,7 +539,7 @@ bool c_FileMgr::OpenSdFile (String & FileName, FileMode Mode, FileId & FileHandl
 //-----------------------------------------------------------------------------
 size_t c_FileMgr::ReadSdFile (FileId& FileHandle, byte* FileData, size_t NumBytesToRead, size_t StartingPosition)
 {
-    FileList[FileHandle].seek (StartingPosition);
+    FileList[FileHandle].seek (StartingPosition, SeekSet);
     return ReadSdFile (FileHandle, FileData, NumBytesToRead);
 
 } // ReadSdFile
@@ -567,7 +567,7 @@ size_t c_FileMgr::WriteSdFile (FileId& FileHandle, byte* FileData, size_t NumByt
 //-----------------------------------------------------------------------------
 size_t c_FileMgr::WriteSdFile (FileId& FileHandle, byte* FileData, size_t NumBytesToWrite, size_t StartingPosition)
 {
-    FileList[FileHandle].seek(StartingPosition);
+    FileList[FileHandle].seek(StartingPosition, SeekSet);
     return WriteSdFile (FileHandle, FileData, NumBytesToWrite);
 
 } // WriteSdFile
@@ -597,7 +597,8 @@ void c_FileMgr::handleFileUpload (String filename,
         // Write data
         // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
         FileMgr.WriteSdFile (fsUploadFile, data, len);
-        LOG_PORT.print (String ("Writting bytes: ") + String (index) + '\r');
+        // LOG_PORT.print (String ("Writting bytes: ") + String (index) + '\r');
+        LOG_PORT.print (".");
     }
 
     if ((true == final) && (0 != fsUploadFileName.length ()))
