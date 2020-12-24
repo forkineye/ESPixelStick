@@ -20,7 +20,6 @@
 #include "../ESPixelStick.h"
 #include <Int64String.h>
 #include "InputFPPRemote.h"
-#include "../FileIO.h"
 #include "../service/FPPDiscovery.h"
 
 #if defined ARDUINO_ARCH_ESP32
