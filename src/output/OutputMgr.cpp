@@ -22,7 +22,7 @@
 */
 
 #include "../ESPixelStick.h"
-#include "../FileIO.h"
+#include "../FileMgr.hpp"
 
 //-----------------------------------------------------------------------------
 // bring in driver definitions
@@ -309,7 +309,7 @@ void c_OutputMgr::GetConfig (char * Response )
     else
     {
         String TempConfigData;
-        FileIO::ReadFile (ConfigFileName, TempConfigData);
+        FileMgr.ReadConfigFile (ConfigFileName, TempConfigData);
         strcat (Response, TempConfigData.c_str ());
     }
 
