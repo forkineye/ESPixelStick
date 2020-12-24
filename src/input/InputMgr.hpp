@@ -23,6 +23,7 @@
 */
 
 #include "../ESPixelStick.h"
+#include "../FileMgr.hpp"
 #include "../output/OutputMgr.hpp"
 #include "externalInput.h"
 
@@ -45,7 +46,7 @@ public:
     void SetOperationalState (bool Active);
     void ResetBlankTimer ();
     void WiFiStateChanged (bool IsConnected); // used by poorly designed rx functions
-    void DeleteConfig () { FileIO::DeleteFile (ConfigFileName); }
+    void DeleteConfig () { FileMgr.DeleteConfigFile (ConfigFileName); }
 
     enum e_InputType
     {

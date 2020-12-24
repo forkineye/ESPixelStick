@@ -19,19 +19,16 @@
 #include "FPPDiscovery.h"
 #include "../input/InputMgr.hpp"
 
-
 #include <Int64String.h>
+#include "../FileMgr.hpp"
 
 extern const String VERSION;
 
 #ifdef ARDUINO_ARCH_ESP32
-#	include <SD.h>
-#	define SDFS SD
 #   define FPP_TYPE_ID          0xC3
 #   define FPP_VARIANT_NAME     "ESPixelStick-ESP32"
 
 #else
-#	include <SDFS.h>
 #   define FPP_TYPE_ID          0xC2
 #   define FPP_VARIANT_NAME     "ESPixelStick-ESP8266"
 #endif
@@ -103,7 +100,6 @@ struct FSEQRangeEntry
 
 } __attribute__ ((packed));
 
-
 struct FSEQHeader
 {
     uint8_t  header[4];    // FSEQ
@@ -139,7 +135,6 @@ void c_FPPDiscovery::begin ()
         StopPlaying ();
 
         inFileUpload = false;
-        hasSDStorage = false;
         hasBeenInitialized = true;
 
         // delay (100);
@@ -161,27 +156,6 @@ void c_FPPDiscovery::begin ()
         }
         LOG_PORT.println (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
         udp.onPacket (std::bind (&c_FPPDiscovery::ProcessReceivedUdpPacket, this, std::placeholders::_1));
-
-#ifdef ARDUINO_ARCH_ESP32
-        SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
-
-        if (!SD.begin (cs_pin))
-#else
-
-        SDFSConfig cfg(SD_CARD_CS_PIN, SD_CARD_CLK_MHZ);
-        SDFS.setConfig(cfg);
-
-        if (!SDFS.begin())
-#endif
-		{
-
-            LOG_PORT.println (String (F ("FPPDiscovery: No SD card")));
-            break;
-        }
-
-        hasSDStorage = true;
-
-        DescribeSdCardToUser ();
 
         PlayFile (AutoPlayFileName);
 
@@ -205,76 +179,6 @@ void c_FPPDiscovery::Enable ()
 } // Enable
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::DescribeSdCardToUser ()
-{
-    // DEBUG_START;
-
-    String BaseMessage = F ("*** Found SD Card ***");
-
-#ifdef ARDUINO_ARCH_ESP32
-    uint64_t cardSize = SD.cardSize () / (1024 * 1024);
-    LOG_PORT.println (String (F ("SD Card Size: ")) + int64String (cardSize) + "MB");
-
-    File root = SD.open ("/");
-#else
-    FSInfo64 fsinfo;
-    SDFS.info64(fsinfo);
-
-    LOG_PORT.printf_P( PSTR("SD Card Size: %lluMB (%llukB used)\n"),
-            (uint64_t)(fsinfo.totalBytes / (1024 * 1024)),
-            (uint64_t)(fsinfo.usedBytes / (1024)));
-
-    Dir root = SDFS.openDir("/");
-#endif // def ARDUINO_ARCH_ESP32
-
-    printDirectory(root, 0);
-
-    // DEBUG_END;
-
-} // DescribeSdCardToUser
-
-//-----------------------------------------------------------------------------
-#ifdef ARDUINO_ARCH_ESP32
-void c_FPPDiscovery::printDirectory (File dir, int numTabs)
-{
-    while (true)
-    {
-        File entry = dir.openNextFile ();
-
-        if (!entry)
-        {
-            // no more files
-            break;
-        }
-        for (uint8_t i = 0; i < numTabs; i++)
-        {
-            LOG_PORT.print ('\t');
-        }
-        Serial.print (entry.name ());
-        if (entry.isDirectory ())
-        {
-            LOG_PORT.println ("/");
-            printDirectory (entry, numTabs + 1);
-        }
-        else
-        {
-            // files have sizes, directories do not
-            LOG_PORT.print ("\t\t");
-            LOG_PORT.println (entry.size (), DEC);
-        }
-        entry.close ();
-    }
-#else
-void c_FPPDiscovery::printDirectory(Dir dir, int numTabs)
-{
-    while (dir.next())
-	{
-        LOG_PORT.printf_P( PSTR("%s - %u\n"), dir.fileName().c_str(), dir.fileSize());
-	}
-#endif // def ARDUINO_ARCH_ESP32
-} // printDirectory
-
-//-----------------------------------------------------------------------------
 void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t CurrentOutputBufferSize)
 {
     // DEBUG_START;
@@ -287,24 +191,44 @@ void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t Curr
         uint32_t frame = (millis () - fseqStartMillis) / frameStepTime;
 
         // have we reached the end of the file?
-        if (TotalNumberOfFramesInSequence < frame)
+        if (TotalNumberOfFramesInSequence <= frame)
         {
             StopPlaying ();
             StartPlaying (AutoPlayFileName, 0);
+            frame = (millis () - fseqStartMillis) / frameStepTime;
         }
 
         if (frame != fseqCurrentFrameId)
         {
             uint32_t pos = dataOffset + (channelsPerFrame * frame);
-            fseqFile.seek (pos);
             int toRead = (channelsPerFrame > outputBufferSize) ? outputBufferSize : channelsPerFrame;
 
             //LOG_PORT.printf_P ( PSTR("%d / %d / %d / %d / %d\n"), dataOffset, channelsPerFrame, outputBufferSize, toRead, pos);
-            fseqFile.read (outputBuffer, toRead);
-            //LOG_PORT.printf_P( PSTR("New Frame!   Old: %d     New:  %d      Offset: %d\n)", fseqCurrentFrameId, frame, FileOffsetToCurrentHeaderRecord);
-            fseqCurrentFrameId = frame;
+            size_t bytesRead = FileMgr.ReadSdFile (fseqFile, outputBuffer, toRead, pos);
 
-            InputMgr.ResetBlankTimer ();
+            // DEBUG_V (String ("pos:       ") + String (pos));
+            // DEBUG_V (String ("toRead:    ") + String (toRead));
+            // DEBUG_V (String ("bytesRead: ") + String (bytesRead));
+
+            if (bytesRead != toRead)
+            {
+                // DEBUG_V (String ("pos:                           ") + String (pos));
+                // DEBUG_V (String ("toRead:                        ") + String (toRead));
+                // DEBUG_V (String ("bytesRead:                     ") + String (bytesRead));
+                // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (TotalNumberOfFramesInSequence));
+                // DEBUG_V (String ("frame:                         ") + String (frame));
+
+                LOG_PORT.println (F ("File Playback Failed to read enough data"));
+                StopPlaying ();
+                StartPlaying (AutoPlayFileName, 0);
+            }
+            else
+            {
+                //LOG_PORT.printf_P( PSTR("New Frame!   Old: %d     New:  %d      Offset: %d\n)", fseqCurrentFrameId, frame, FileOffsetToCurrentHeaderRecord);
+                fseqCurrentFrameId = frame;
+
+                InputMgr.ResetBlankTimer ();
+            }
         }
     }
 
@@ -440,7 +364,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_
                 // DEBUG_V ("Stop");
                 if (fseqName != "")
                 {
-                    fseqFile.close ();
+                    FileMgr.CloseSdFile (fseqFile);
                 }
                 StopPlaying ();
                 break;
@@ -461,7 +385,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_
                     if (diff > 2 || diff < -2)
                     {
                         // reset the start time which will then trigger a new frame time
-                        fseqStartMillis = millis () - frameStepTime * frame;
+                        fseqStartMillis = millis () - (frameStepTime * frame);
                         // DEBUF_V("Large diff %d\n", diff);
                     }
                 }
@@ -561,7 +485,7 @@ static void printReq (AsyncWebServerRequest* request, bool post)
 #endif // !def PRINT_DEBUG
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::BuildFseqResponse (String fname, File fseq, String & resp)
+void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, String & resp)
 {
     // DEBUG_START;
 
@@ -569,29 +493,27 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, File fseq, String & resp)
     JsonObject JsonData = JsonDoc.to<JsonObject> ();
 
     FSEQHeader fsqHeader;
-    fseq.seek (0);
-    fseq.read ((uint8_t*)&fsqHeader, sizeof (fsqHeader));
+    FileMgr.ReadSdFile (fseq, (byte*)&fsqHeader, sizeof (fsqHeader), 0);
 
-    JsonData["Name"]            = fname;
-    JsonData["Version"]         = String (fsqHeader.majorVersion) + "." + String (fsqHeader.minorVersion);
-    JsonData["ID"]              = int64String (fsqHeader.id);
-    JsonData["StepTime"]        = String (fsqHeader.stepTime);
-    JsonData["NumFrames"]       = String (fsqHeader.TotalNumberOfFramesInSequence);
-    JsonData["CompressionType"] = fsqHeader.compressionType;
+    JsonData[F("Name")]            = fname;
+    JsonData[F("Version")]         = String (fsqHeader.majorVersion) + "." + String (fsqHeader.minorVersion);
+    JsonData[F("ID")]              = int64String (fsqHeader.id);
+    JsonData[F("StepTime")]        = String (fsqHeader.stepTime);
+    JsonData[F("NumFrames")]       = String (fsqHeader.TotalNumberOfFramesInSequence);
+    JsonData[F("CompressionType")] = fsqHeader.compressionType;
 
     uint32_t maxChannel = fsqHeader.channelCount;
 
     if (0 != fsqHeader.numSparseRanges)
     {
-        JsonArray  JsonDataRanges = JsonData.createNestedArray ("Ranges");
+        JsonArray  JsonDataRanges = JsonData.createNestedArray (F("Ranges"));
 
         maxChannel = 0;
 
         uint8_t* RangeDataBuffer = (uint8_t*)malloc (6 * fsqHeader.numSparseRanges);
         FSEQRangeEntry* CurrentFSEQRangeEntry = (FSEQRangeEntry*)RangeDataBuffer;
 
-        fseq.seek (fsqHeader.numCompressedBlocks * 8 + 32);
-        fseq.read (RangeDataBuffer, sizeof(FSEQRangeEntry) * fsqHeader.numSparseRanges);
+        FileMgr.ReadSdFile (fseq, RangeDataBuffer, sizeof (FSEQRangeEntry), fsqHeader.numCompressedBlocks * 8 + 32);
 
         for (int CurrentRangeIndex = 0;
              CurrentRangeIndex < fsqHeader.numSparseRanges;
@@ -601,8 +523,8 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, File fseq, String & resp)
             uint32_t RangeLength = read24 (CurrentFSEQRangeEntry->Length);
 
             JsonObject JsonRange = JsonDataRanges.createNestedObject ();
-            JsonRange["Start"]  = String (RangeStart);
-            JsonRange["Length"] = String (RangeLength);
+            JsonRange[F("Start")]  = String (RangeStart);
+            JsonRange[F("Length")] = String (RangeLength);
 
             if ((RangeStart + RangeLength - 1) > maxChannel)
             {
@@ -613,8 +535,8 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, File fseq, String & resp)
         free (RangeDataBuffer);
     }
 
-    JsonData["MaxChannel"]   = String (maxChannel);
-    JsonData["ChannelCount"] = String (fsqHeader.channelCount);
+    JsonData[F("MaxChannel")]   = String (maxChannel);
+    JsonData[F("ChannelCount")] = String (fsqHeader.channelCount);
 
     uint32_t FileOffsetToCurrentHeaderRecord = read16 ((uint8_t*)&fsqHeader.headerLen);
     uint32_t FileOffsetToStartOfSequenceData = read16 ((uint8_t*)&fsqHeader.dataOffset); // DataOffset
@@ -624,7 +546,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, File fseq, String & resp)
 
     if (FileOffsetToCurrentHeaderRecord < FileOffsetToStartOfSequenceData)
     {
-        JsonArray  JsonDataHeaders = JsonData.createNestedArray ("variableHeaders");
+        JsonArray  JsonDataHeaders = JsonData.createNestedArray (F("variableHeaders"));
 
         char FSEQVariableDataHeaderBuffer[sizeof (FSEQVariableDataHeader) + 1];
         memset ((uint8_t*)FSEQVariableDataHeaderBuffer, 0x00, sizeof (FSEQVariableDataHeaderBuffer));
@@ -632,8 +554,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, File fseq, String & resp)
 
         while (FileOffsetToCurrentHeaderRecord < FileOffsetToStartOfSequenceData)
         {
-            fseq.seek (FileOffsetToCurrentHeaderRecord);
-            fseq.read ((uint8_t*)FSEQVariableDataHeaderBuffer, sizeof (FSEQVariableDataHeader));
+            FileMgr.ReadSdFile (fseq, (byte*)FSEQVariableDataHeaderBuffer, sizeof (FSEQVariableDataHeader), FileOffsetToCurrentHeaderRecord);
 
             int VariableDataHeaderTotalLength = read16 ((uint8_t*)&(pCurrentVariableHeader->length));
             int VariableDataHeaderDataLength  = VariableDataHeaderTotalLength - sizeof (FSEQVariableDataHeader);
@@ -645,7 +566,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, File fseq, String & resp)
                 char * VariableDataHeaderDataBuffer = (char*)malloc (VariableDataHeaderDataLength + 1);
                 memset (VariableDataHeaderDataBuffer, 0x00, VariableDataHeaderDataLength + 1);
 
-                fseq.read ((uint8_t*)VariableDataHeaderDataBuffer, VariableDataHeaderDataLength);
+                FileMgr.ReadSdFile (fseq, (byte*)VariableDataHeaderDataBuffer, VariableDataHeaderDataLength, FileOffsetToCurrentHeaderRecord);
 
                 JsonObject JsonDataHeader = JsonDataHeaders.createNestedObject ();
                 JsonDataHeader[HeaderTypeCode] = String (VariableDataHeaderDataBuffer);
@@ -671,37 +592,35 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 
     do // once
     {
-        if (!request->hasParam ("path"))
+        if (!request->hasParam (F("path")))
         {
             request->send (404);
             break;
         }
 
-        String path = request->getParam ("path")->value ();
-        if (path.startsWith ("/api/sequence/") && AllowedToRemotePlayFiles())
+        String path = request->getParam (F("path"))->value ();
+        if (path.startsWith (F("/api/sequence/")) && AllowedToRemotePlayFiles())
         {
             String seq = path.substring (14);
-            if (seq.endsWith ("/meta"))
+            if (seq.endsWith (F("/meta")))
             {
                 seq = seq.substring (0, seq.length () - 5);
                 ProcessSyncPacket (0x1, "", 0); //must stop
-                if (SDFS.exists (seq))
+
+                c_FileMgr::FileId FileHandle;
+                if (FileMgr.OpenSdFile (seq, c_FileMgr::FileMode::FileRead, FileHandle))
                 {
-                    File file = SDFS.open(seq, "r");
-                    if (file.size () > 0)
+                    if (FileMgr.GetSdFileSize(FileHandle) > 0)
                     {
                         // found the file. return metadata as json
                         String resp = "";
-                        BuildFseqResponse (seq, file, resp);
-                        file.close ();
-                        request->send (200, "application/json", resp);
+                        BuildFseqResponse (seq, FileHandle, resp);
+                        FileMgr.CloseSdFile (FileHandle);
+                        request->send (200, F ("application/json"), resp);
                         break;
                     }
-					else
-					{
-                        LOG_PORT.println(String(F("File doesn't exist: ")) + seq);
-                    }
                 }
+                LOG_PORT.println (String (F ("FPP Discovery: Could not open: ")) + seq);
             }
         }
         request->send (404);
@@ -720,29 +639,29 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
 
     do // once
     {
-        String path = request->getParam ("path")->value ();
+        String path = request->getParam (F("path"))->value ();
         // DEBUG_V (String(F("path: ")) + path);
 
-        if (path != "uploadFile")
+        if (path != F("uploadFile"))
         {
             request->send (404);
             break;
         }
 
-        String filename = request->getParam ("filename")->value ();
+        String filename = request->getParam (F("filename"))->value ();
         // DEBUG_V (String(F("filename: ")) + filename);
 
-        if (!SDFS.exists (filename))
+        c_FileMgr::FileId FileHandle;
+        if (false == FileMgr.OpenSdFile (filename, c_FileMgr::FileMode::FileRead, FileHandle))
         {
             LOG_PORT.println (String (F ("c_FPPDiscovery::ProcessPOST: File Does Not Exist - filename: ")) + filename);
             request->send (404);
             break;
         }
 
-        File file = SDFS.open(filename, "r");
         String resp = "";
-        BuildFseqResponse (filename, file, resp);
-        file.close ();
+        BuildFseqResponse (filename, FileHandle, resp);
+        FileMgr.CloseSdFile (FileHandle);
         request->send (200, F ("application/json"), resp);
 
     } while (false);
@@ -775,57 +694,25 @@ void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data,
         //LOG_PORT.printf_P( PSTR("In process Body:    idx: %d    RangeLength: %d    total: %d\n)", index, RangeLength, total);
         printReq (request, false);
 
-        String path = request->getParam ("path")->value ();
-        if (path == "uploadFile")
+        String path = request->getParam (F("path"))->value ();
+        if (path == F("uploadFile"))
         {
             ProcessSyncPacket (0x1, "", 0); //must stop
 
             inFileUpload = true;
 
-            String filename = request->getParam ("filename")->value ();
-            SDFS.remove (filename);
-            fseqFile = SDFS.open (filename, "w");
-            bufCurPos = 0;
-            if (buffer == nullptr)
-            {
-                buffer = (uint8_t*)malloc (BUFFER_LEN);
-            }
+            UploadFileName = request->getParam (F("filename"))->value ();
         }
     }
 
     if (inFileUpload)
     {
-        if (buffer && ((bufCurPos + len) > BUFFER_LEN))
-        {
-            int i = fseqFile.write (buffer, bufCurPos);
-            // LOG_PORT.printf_P( PSTR("Write1: %u/%u    Pos: %d   Resp: %d\n)", index, total, bufCurPos,  i);
-            bufCurPos = 0;
-        }
+        FileMgr.handleFileUpload (UploadFileName, index, data, len, total <= (index + len));
 
-        if ((buffer == nullptr) || (len >= BUFFER_LEN))
+        if (index + len == total)
         {
-            int i = fseqFile.write (data, len);
-            // LOG_PORT.printf_P( PSTR("Write2: %u/%u    Resp: %d\n"), index, total, i);
+            inFileUpload = false;
         }
-        else
-        {
-            memcpy (&buffer[bufCurPos], data, len);
-            bufCurPos += len;
-        }
-    }
-
-    if (index + len == total)
-    {
-        if (bufCurPos)
-        {
-            int i = fseqFile.write (buffer, bufCurPos);
-            //LOG_PORT.printf_P( PSTR("Write3: %u/%u   Pos: %d   Resp: %d\n"), index, total, bufCurPos, i);
-        }
-
-        fseqFile.close ();
-        inFileUpload = false;
-        free (buffer);
-        buffer = nullptr;
     }
 
     // DEBUG_END;
@@ -838,7 +725,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
 
     jsonResponse[F ("HostName")]        = config.hostname;
     jsonResponse[F ("HostDescription")] = config.id;
-    jsonResponse[F ("Platform")]        = "ESPixelStick";
+    jsonResponse[F ("Platform")]        = F("ESPixelStick");
     jsonResponse[F ("Variant")]         = FPP_VARIANT_NAME;
     jsonResponse[F ("Mode")]            = (true == AllowedToRemotePlayFiles()) ? "remote" : "bridge";
     jsonResponse[F ("Version")]         = VERSION + String (":") + BUILD_DATE;
@@ -851,8 +738,8 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     jsonResponse[F ("typeId")]       = FPP_TYPE_ID;
 
     JsonObject jsonResponseUtilization = jsonResponse.createNestedObject (F("Utilization"));
-    jsonResponseUtilization["MemoryFree"] = ESP.getFreeHeap ();
-    jsonResponseUtilization["Uptime"]     = millis ();
+    jsonResponseUtilization[F("MemoryFree")] = ESP.getFreeHeap ();
+    jsonResponseUtilization[F("Uptime")]     = millis ();
 
     jsonResponse[F ("rssi")] = WiFi.RSSI ();
     JsonArray jsonResponseIpAddresses = jsonResponse.createNestedArray (F ("IPS"));
@@ -905,10 +792,10 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             JsonDataCurrentPlaylist[F ("playlist")]    = "";
             JsonDataCurrentPlaylist[F ("type")]        = "";
 
-            JsonData["volume"]         = 70;
-            JsonData["media_filename"] = "";
-            JsonData["fppd"]           = "running";
-            JsonData["current_song"]   = "";
+            JsonData[F("volume")]         = 70;
+            JsonData[F("media_filename")] = "";
+            JsonData[F("fppd")]           = F("running");
+            JsonData[F("current_song")]   = "";
 
             int mseconds      = fseqCurrentFrameId * frameStepTime;
             int msecondsTotal = frameStepTime * TotalNumberOfFramesInSequence;
@@ -955,8 +842,8 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             }
             else
             {
-                JsonData["mode"] = 1;
-                JsonData["mode_name"] = F("bridge");
+                JsonData[F("mode")] = 1;
+                JsonData[F("mode_name")] = F("bridge");
             }
 
             if (adv == "true")
@@ -973,7 +860,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             break;
         }
 
-        if (command == "getSysInfo")
+        if (command == F("getSysInfo"))
         {
             GetSysInfoJSON (JsonData);
 
@@ -985,7 +872,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             break;
         }
 
-        if (command == "getHostNameInfo")
+        if (command == F("getHostNameInfo"))
         {
             JsonData[F("HostName")] = config.hostname;
             JsonData[F("HostDescription")] = config.id;
@@ -1035,19 +922,22 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
             break;
         }
 
-        fseqFile = SDFS.open(String ("/") + filename, "r");
-
-        if (fseqFile.size () < 1)
+         if(false == FileMgr.OpenSdFile (filename, c_FileMgr::FileMode::FileRead, fseqFile))
         {
-            LOG_PORT.println (String (F("FPPDiscovery::StartPlaying:: Could not open: filename: ")) + filename);
+            LOG_PORT.println (String (F("FPPDiscovery::StartPlaying:: Could not open file: filename: ")) + filename);
             failedFseqName = filename;
-            fseqFile.close ();
+            FileMgr.CloseSdFile (fseqFile);
             break;
         }
 
         FSEQHeader fsqHeader;
-        fseqFile.seek (0);
-        fseqFile.read ((uint8_t*)&fsqHeader, sizeof (fsqHeader));
+        size_t BytesRead = FileMgr.ReadSdFile (fseqFile , (uint8_t*)&fsqHeader, sizeof (fsqHeader));
+
+        if (BytesRead != sizeof (fsqHeader))
+        {
+            LOG_PORT.println (String (F ("FPPDiscovery::StartPlaying:: Could not start. ")) + filename + F (" File is too short"));
+            break;
+        }
 
         if (fsqHeader.majorVersion != 2 || fsqHeader.compressionType != 0)
         {
@@ -1055,7 +945,7 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
             // DEBUG_V ("not a v2 uncompressed sequence");
 
             failedFseqName = filename;
-            fseqFile.close ();
+            FileMgr.CloseSdFile (fseqFile);
 
             break;
         }
@@ -1070,6 +960,11 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
         frameStepTime                 = fsqHeader.stepTime;
         TotalNumberOfFramesInSequence = fsqHeader.TotalNumberOfFramesInSequence;
         fseqStartMillis               = millis () - (frameStepTime * frameId);
+
+        // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (TotalNumberOfFramesInSequence));
+        // DEBUG_V (String ("frameStepTime:                 ") + String (frameStepTime));
+        // DEBUG_V (String ("channelsPerFrame:              ") + String (channelsPerFrame));
+        // DEBUG_V (String ("dataOffset:                    ") + String (dataOffset));
 
         LOG_PORT.println (String (F ("FPPDiscovery::StartPlaying:: Playing:  '")) + filename + "'" );
 
@@ -1098,7 +993,7 @@ void c_FPPDiscovery::StopPlaying ()
     dataOffset = 0;
     channelsPerFrame = 0;
 
-    fseqFile.close ();
+    FileMgr.CloseSdFile (fseqFile);
 
     // blank the display
     memset (outputBuffer, 0x0, outputBufferSize);
@@ -1106,106 +1001,6 @@ void c_FPPDiscovery::StopPlaying ()
     // DEBUG_END;
 
 } // StopPlaying
-
-//-----------------------------------------------------------------------------
-void c_FPPDiscovery::GetListOfFiles (char * ResponseBuffer)
-{
-    // DEBUG_START;
-
-    DynamicJsonDocument ResponseJsonDoc (2048);
-    if (0 == ResponseJsonDoc.capacity ())
-    {
-        LOG_PORT.println (F ("ERROR: Failed to allocate memory for the GetListOfFiles web request response."));
-    }
-    JsonArray FileArray = ResponseJsonDoc.createNestedArray (F ("files"));
-
-    File dir = SDFS.open("/", "r");
-    ResponseJsonDoc["SdCardPresent"] = SdcardIsInstalled ();
-
-    while (true)
-    {
-        File entry = dir.openNextFile ();
-
-        if (!entry)
-        {
-            // no more files
-            break;
-        }
-
-        String EntryName = String(entry.name ());
-        EntryName = EntryName.substring ((('/' == EntryName[0]) ? 1 : 0));
-        // DEBUG_V ("EntryName: " + EntryName);
-        // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
-
-        if ((0 != EntryName.length()) && (EntryName != String(F("System Volume Information"))))
-        {
-            // DEBUG_V ("Adding File: '" + EntryName + "'");
-
-            JsonObject CurrentFile = FileArray.createNestedObject ();
-            CurrentFile[F ("name")] = EntryName;
-        }
-
-        entry.close ();
-    }
-
-    String ResponseText;
-    serializeJson (ResponseJsonDoc, ResponseText);
-
-    // DEBUG_V (ResponseText);
-    strcat (ResponseBuffer, ResponseText.c_str ());
-
-    // DEBUG_END;
-
-} // GetListOfFiles
-
-//-----------------------------------------------------------------------------
-void c_FPPDiscovery::DeleteFseqFile (String & FileNameToDelete)
-{
-    // DEBUG_START;
-
-    // DEBUG_V (FileNameToDelete);
-
-    if (!FileNameToDelete.startsWith ("/"))
-    {
-        FileNameToDelete = "/" + FileNameToDelete;
-    }
-
-    LOG_PORT.println (String(F("Deleting File: '")) + FileNameToDelete + "'");
-    SDFS.remove(FileNameToDelete);
-
-    // DEBUG_END;
-} // DeleteFseqFile
-
-//-----------------------------------------------------------------------------
-void c_FPPDiscovery::SetSpiIoPins (uint8_t miso, uint8_t mosi, uint8_t clock, uint8_t cs)
-{
-    miso_pin = miso;
-    mosi_pin = mosi;
-    clk_pin  = clock;
-    cs_pin   = cs;
-
-
-#ifdef ARDUINO_ARCH_ESP32
-    SPI.end ();
-    SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
-
-    SD.end ();
-#else
-    SDFS.end();
-
-    SDFSConfig sdcfg;
-    SPISettings spicfg;
-
-    SDFSConfig cfg(cs_pin, SD_CARD_CLK_MHZ);
-    SDFS.setConfig(cfg);
-#endif
-
-    if (!SDFS.begin())
-    {
-        LOG_PORT.println (String (F ("FPPDiscovery: No SD card")));
-    }
-
-} // SetSpiIoPins
 
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::PlayFile (String & NewFileName)
@@ -1241,84 +1036,9 @@ void c_FPPDiscovery::PlayFile (String & NewFileName)
 //-----------------------------------------------------------------------------
 bool c_FPPDiscovery::AllowedToRemotePlayFiles()
 {
-//    return ((hasSDStorage == true) && (String(F(Stop_FPP_RemotePlay)) == AutoPlayFileName));
-    return (hasSDStorage == true);
+    return ((FileMgr.SdCardIsInstalled() == true) && (String(F(Stop_FPP_RemotePlay)) == AutoPlayFileName));
+//    return (hasSDStorage == true);
 } // AllowedToRemotePlayFiles
 
-//-----------------------------------------------------------------------------
-void c_FPPDiscovery::handleFileUpload (String filename,
-                                       size_t index,
-                                       uint8_t* data,
-                                       size_t len,
-                                       bool final)
-{
-    // DEBUG_START;
-    if (0 == index)
-    {
-        handleFileUploadNewFile (filename);
-    }
-
-    if ((0 != len) && (0 != fsUploadFileName.length ()))
-    {
-        // Write data
-        // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
-        // DEBUG_HW_SET;
-        fsUploadFile.write (data, len);
-        // DEBUG_HW_CLEAR;
-        // LOG_PORT.print (String ("Writing bytes: ") + String (index) + '\r');
-    }
-
-    if ((true == final) && (0 != fsUploadFileName.length ()))
-    {
-        LOG_PORT.println ("");
-        // DEBUG_V ("UploadEnd: " + String(index + len) + String(" bytes"));
-        LOG_PORT.println (String (F ("Upload File: '")) + fsUploadFileName + String (F ("' Done")));
-
-        fsUploadFile.close ();
-        fsUploadFileName = "";
-    }
-
-    // DEBUG_END;
-} // handleFileUpload
-
-//-----------------------------------------------------------------------------
-void c_FPPDiscovery::handleFileUploadNewFile (String filename)
-{
-    // DEBUG_START;
-
-    // save the filename
-        // DEBUG_V ("UploadStart: " + filename);
-    if (!filename.startsWith ("/"))
-    {
-        filename = "/" + filename;
-    }
-
-    // are we terminating the previous download?
-    if (0 != fsUploadFileName.length ())
-    {
-        LOG_PORT.println (String (F ("Aborting Previous File Upload For: '")) + fsUploadFileName + String (F ("'")));
-        fsUploadFile.close ();
-        fsUploadFileName = "";
-        IsEnabled = fsUploadFileSavedIsEnabled;
-    }
-
-    // Stop any current activities to prevent SD collisions
-    IsEnabled = false;
-    fsUploadFileSavedIsEnabled = IsEnabled;
-
-    // Set up to receive a file
-    fsUploadFileName = filename;
-
-    LOG_PORT.println (String (F ("Upload File: '")) + fsUploadFileName + String (F ("' Started")));
-
-    SDFS.remove (fsUploadFileName);
-
-    // Open the file for writing
-    fsUploadFile = SDFS.open (fsUploadFileName, "w");
-    fsUploadFile.seek (0);
-
-    // DEBUG_END;
-
-} // handleFileUploadNewFile
 
 c_FPPDiscovery FPPDiscovery;

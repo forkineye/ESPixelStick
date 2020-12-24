@@ -28,7 +28,6 @@
 // Core
 #include "src/ESPixelStick.h"
 #include "src/EFUpdate.h"
-#include "src/FileIO.h"
 #include <Int64String.h>
 
 // Input modules
@@ -42,6 +41,9 @@
 
 // WEB interface
 #include "src/WebMgr.hpp"
+
+// File System Interface
+#include "src/FileMgr.hpp"
 
 // Services
 #include "src/service/FPPDiscovery.h"
@@ -83,12 +85,30 @@ String ConfigFileName = "/config.json";
 
 const String VERSION = "4.0-dev (NOT STABLE)";
 const String BUILD_DATE = String(__DATE__) + " - " + String(__TIME__);
+const String CurrentConfigVersion = "1";
 
-config_t            config;                 // Current configuration
-bool                reboot = false;         // Reboot flag
-uint32_t            lastUpdate;             // Update timeout tracker
-uint32_t            ConfigSaveNeeded = 0;
-bool                ResetWiFi = false;
+// json object names.
+const String DEVICE_NAME =      ("device");
+const String VERSION_NAME =     ("cfgver");
+const String ID_NAME =          ("id");
+const String NETWORK_NAME =     ("network");
+const String SSID_NAME =        ("ssid");
+const String PASSPHRASE_NAME =  ("passphrase");
+const String IP_NAME =          ("ip");
+const String NETMASK_NAME =     ("netmask");
+const String GATEWAY_NAME =     ("gateway");
+const String HOSTNAME_NAME =    ("hostname");
+const String DHCP_NAME =        ("dhcp");
+const String STA_TIMEOUT_NAME = ("sta_timeout");
+const String AP_FALLBACK_NAME = ("ap_fallback");
+const String AP_REBOOT_NAME   = ("ap_reboot");
+const String AP_TIMEOUT_NAME  = ("ap_timeout");
+
+config_t config;                 // Current configuration
+bool     reboot = false;         // Reboot flag
+uint32_t lastUpdate;             // Update timeout tracker
+bool     ConfigSaveNeeded = false;
+bool     ResetWiFi = false;
 
 /////////////////////////////////////////////////////////
 //
@@ -131,10 +151,9 @@ void setup()
 #else
     LOG_PORT.println (String("ESP Version: ") + ESP.getSdkVersion ());
 #endif
-    // DEBUG_V ("");
 
     // DEBUG_V ("");
-    FileIO::Begin ();
+    FileMgr.Begin ();
 
     // Load configuration from the File System and set Hostname
     loadConfig();
@@ -189,17 +208,17 @@ void validateConfig()
     {
         config.id = "No ID Found";
         // DEBUG_V ();
-        ConfigSaveNeeded++;
+        ConfigSaveNeeded = true;
     }
 
     if (0 == config.hostname.length ())
     {
         config.hostname = "esps-" + String (chipId);
         // DEBUG_V ();
-        ConfigSaveNeeded++;
+        ConfigSaveNeeded = true;
     }
 
-    ConfigSaveNeeded += WiFiMgr.ValidateConfig (&config);
+    ConfigSaveNeeded |= WiFiMgr.ValidateConfig (&config);
 
     // DEBUG_END;
 } // validateConfig
@@ -209,11 +228,29 @@ boolean dsDevice(JsonObject & json)
 {
     // DEBUG_START;
 
-    boolean retval = false;
-    if (json.containsKey("device"))
+    boolean ConfigChanged = false;
+    if (json.containsKey(DEVICE_NAME))
     {
-        retval = retval | FileIO::setFromJSON (config.id,        json[F ("device")][F ("id")]);
-                          FileIO::setFromJSON (ConfigSaveNeeded, json[F ("device")][F ("ConfigSaveNeeded")]);
+        JsonObject JsonDeviceConfig = json[DEVICE_NAME];
+
+        String TempVersion;
+        setFromJSON (TempVersion, JsonDeviceConfig, VERSION_NAME);
+
+        // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
+        // DEBUG_V (String ("CurrentConfigVersion: ") + String (CurrentConfigVersion));
+        // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
+        // PrettyPrint (JsonDeviceConfig, "Main Config");
+
+        if (TempVersion != CurrentConfigVersion)
+        {
+            // need to do something in the future
+            LOG_PORT.println ("Incorrect Device Config Version ID found in config");
+            ConfigSaveNeeded = true;
+            // break;
+        }
+
+        ConfigChanged |= setFromJSON (config.id,        JsonDeviceConfig, ID_NAME);
+                         // setFromJSON (ConfigSaveNeeded, JsonDeviceConfig, "ConfigSaveNeeded");
     }
     else
     {
@@ -222,7 +259,7 @@ boolean dsDevice(JsonObject & json)
 
     // DEBUG_END;
 
-    return retval;
+    return ConfigChanged;
 } // dsDevice
 
 /// Deserialize network confiugration JSON to config structure - returns true if config change detected
@@ -230,8 +267,8 @@ boolean dsNetwork(JsonObject & json)
 {
     // DEBUG_START;
 
-    boolean retval = false;
-    if (json.containsKey("network"))
+    boolean ConfigChanged = false;
+    if (json.containsKey(NETWORK_NAME))
     {
 #ifdef ARDUINO_ARCH_ESP8266
         IPAddress Temp = config.ip;
@@ -246,18 +283,35 @@ boolean dsNetwork(JsonObject & json)
         String netmask = config.netmask.toString ();
 #endif // def ARDUINO_ARCH_ESP8266
 
-        JsonObject network = json["network"];
-        retval |= FileIO::setFromJSON(config.ssid,                          network["ssid"]);
-        retval |= FileIO::setFromJSON(config.passphrase,                    network["passphrase"]);
-        retval |= FileIO::setFromJSON(ip,                                   network["ip"]);
-        retval |= FileIO::setFromJSON(netmask,                              network["netmask"]);
-        retval |= FileIO::setFromJSON(gateway,                              network["gateway"]);
-        retval |= FileIO::setFromJSON(config.hostname,                      network["hostname"]);
-        retval |= FileIO::setFromJSON(config.UseDhcp,                       network["dhcp"]);
-        retval |= FileIO::setFromJSON(config.sta_timeout,                   network["sta_timeout"]);
-        retval |= FileIO::setFromJSON(config.ap_fallbackIsEnabled,          network["ap_fallback"]);
-        retval |= FileIO::setFromJSON(config.ap_timeout,                    network["ap_timeout"]);
-        retval |= FileIO::setFromJSON (config.RebootOnWiFiFailureToConnect, network["ap_reboot"]);
+        JsonObject network = json[NETWORK_NAME];
+
+        String TempVersion;
+        setFromJSON (TempVersion, network, VERSION_NAME);
+
+        // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
+        // DEBUG_V (String ("CurrentConfigVersion: ") + String (CurrentConfigVersion));
+        // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
+        // PrettyPrint (network, "Main Config");
+
+        if (TempVersion != CurrentConfigVersion)
+        {
+            // need to do something in the future
+            LOG_PORT.println ("Incorrect Version ID found in config");
+            ConfigSaveNeeded = true;
+            // break;
+        }
+
+        ConfigChanged |= setFromJSON (config.ssid,                         network, SSID_NAME);
+        ConfigChanged |= setFromJSON (config.passphrase,                   network, PASSPHRASE_NAME);
+        ConfigChanged |= setFromJSON(ip,                                   network, IP_NAME);
+        ConfigChanged |= setFromJSON(netmask,                              network, NETMASK_NAME);
+        ConfigChanged |= setFromJSON(gateway,                              network, GATEWAY_NAME);
+        ConfigChanged |= setFromJSON(config.hostname,                      network, HOSTNAME_NAME);
+        ConfigChanged |= setFromJSON(config.UseDhcp,                       network, DHCP_NAME);
+        ConfigChanged |= setFromJSON(config.sta_timeout,                   network, STA_TIMEOUT_NAME);
+        ConfigChanged |= setFromJSON(config.ap_fallbackIsEnabled,          network, AP_FALLBACK_NAME);
+        ConfigChanged |= setFromJSON(config.ap_timeout,                    network, AP_TIMEOUT_NAME);
+        ConfigChanged |= setFromJSON (config.RebootOnWiFiFailureToConnect, network, AP_REBOOT_NAME);
 
         // DEBUG_V ("     ip: " + ip);
         // DEBUG_V ("gateway: " + gateway);
@@ -272,38 +326,49 @@ boolean dsNetwork(JsonObject & json)
         LOG_PORT.println(F("No network settings found."));
     }
 
-    // DEBUG_V (String("retval: ") + String(retval));
+    // DEBUG_V (String("ConfigChanged: ") + String(ConfigChanged));
     // DEBUG_END;
-    return retval;
-}
+    return ConfigChanged;
+} // dsNetwork
 
 void SetConfig (JsonObject& json)
 {
     // DEBUG_START;
-    ResetWiFi = deserializeCore (json);
 
-    // DEBUG_V ();
-    ConfigSaveNeeded = 1;
+    ConfigSaveNeeded = deserializeCore (json);
+
     // DEBUG_END;
 
 } // SetConfig
 
 bool deserializeCore (JsonObject & json)
 {
-    bool response = false;
     // DEBUG_START;
-    dsDevice (json);
-    response = dsNetwork (json);
+
+    bool DataHasBeenAccepted = false;
+
+    do // once
+    {
+        ConfigSaveNeeded |= dsDevice  (json);
+        ResetWiFi = dsNetwork (json);
+        ConfigSaveNeeded |= ResetWiFi;
+
+        DataHasBeenAccepted = true;
+
+    } while (false);
 
     // DEBUG_END;
-    return response;
+
+    return DataHasBeenAccepted;
 }
 
 void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
 {
-    JsonObject json = jsonDoc.as<JsonObject> ();
     // DEBUG_START;
+
+    JsonObject json = jsonDoc.as<JsonObject> ();
     deserializeCore (json);
+
     // DEBUG_END;
 }
 
@@ -318,15 +383,17 @@ void loadConfig()
     // Zeroize Config struct
     memset (&config, 0, sizeof (config));
 
+    String temp;
     // DEBUG_V ("");
-    if (FileIO::loadConfig(ConfigFileName, &deserializeCoreHandler))
+    if (FileMgr.LoadConfigFile (ConfigFileName, &deserializeCoreHandler))
     {
+        ConfigSaveNeeded = false;
+        // DEBUG_V ("Validate");
         validateConfig();
     }
     else
     {
-    // DEBUG_V ("Load failed, create a new config file and save it");
-        ConfigSaveNeeded = false;
+        // DEBUG_V ("Load failed, create a new config file and save it");
         SaveConfig();
     }
 
@@ -336,7 +403,8 @@ void loadConfig()
 void DeleteConfig ()
 {
     // DEBUG_START;
-    FileIO::DeleteFile (ConfigFileName);
+    FileMgr.DeleteConfigFile (ConfigFileName);
+
     // DEBUG_END;
 
 } // DeleteConfig
@@ -346,33 +414,35 @@ void GetConfig (JsonObject & json)
     // DEBUG_START;
 
     // Device
-    JsonObject device = json.createNestedObject(F("device"));
-    device["id"]           = config.id;
+    JsonObject device = json.createNestedObject(DEVICE_NAME);
+    device[ID_NAME]      = config.id;
+    device[VERSION_NAME] = CurrentConfigVersion;
 
     // Network
-    JsonObject network = json.createNestedObject(F("network"));
-    network["ssid"]        = config.ssid;
-    network["passphrase"]  = config.passphrase;
-    network["hostname"]    = config.hostname;
+    JsonObject network = json.createNestedObject(NETWORK_NAME);
+    network[VERSION_NAME]     = CurrentConfigVersion;
+    network[SSID_NAME]        = config.ssid;
+    network[PASSPHRASE_NAME]  = config.passphrase;
+    network[HOSTNAME_NAME]    = config.hostname;
 #ifdef ARDUINO_ARCH_ESP8266
     IPAddress Temp = config.ip;
-    network["ip"]      = Temp.toString ();
+    network[IP_NAME]      = Temp.toString ();
     Temp = config.netmask;
-    network["netmask"] = Temp.toString ();
+    network[NETMASK_NAME] = Temp.toString ();
     Temp = config.gateway;
-    network["gateway"] = Temp.toString ();
+    network[GATEWAY_NAME] = Temp.toString ();
 #else
-    network["ip"]      = config.ip.toString ();
-    network["netmask"] = config.netmask.toString ();
-    network["gateway"] = config.gateway.toString ();
+    network[IP_NAME]      = config.ip.toString ();
+    network[NETMASK_NAME] = config.netmask.toString ();
+    network[GATEWAY_NAME] = config.gateway.toString ();
 #endif // !def ARDUINO_ARCH_ESP8266
 
-    network["dhcp"]        = config.UseDhcp;
-    network["sta_timeout"] = config.sta_timeout;
+    network[DHCP_NAME]        = config.UseDhcp;
+    network[STA_TIMEOUT_NAME] = config.sta_timeout;
 
-    network["ap_fallback"] = config.ap_fallbackIsEnabled;
-    network["ap_timeout"]  = config.ap_timeout;
-    network["ap_reboot"]   = config.RebootOnWiFiFailureToConnect;
+    network[AP_FALLBACK_NAME] = config.ap_fallbackIsEnabled;
+    network[AP_TIMEOUT_NAME]  = config.ap_timeout;
+    network[AP_REBOOT_NAME]   = config.RebootOnWiFiFailureToConnect;
 
     // DEBUG_END;
 } // GetConfig
@@ -416,7 +486,7 @@ void SaveConfig()
     String DataToSave = serializeCore (false);
     // DEBUG_V ("ConfigFileName: " + ConfigFileName);
     // DEBUG_V ("DataToSave: " + DataToSave);
-    FileIO::SaveConfig(ConfigFileName, DataToSave);
+    FileMgr.SaveConfigFile(ConfigFileName, DataToSave);
 
     // DEBUG_END;
 } // SaveConfig
@@ -431,9 +501,9 @@ void SaveConfig()
 void loop()
 {
     // do we need to save the current config?
-    if (0 != ConfigSaveNeeded)
+    if (true == ConfigSaveNeeded)
     {
-        ConfigSaveNeeded = 0;
+        ConfigSaveNeeded = false;
         SaveConfig ();
     } // done need to save the current config
 

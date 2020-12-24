@@ -22,7 +22,7 @@
 */
 
 #include "../ESPixelStick.h"
-#include "../FileIO.h"
+#include "../FileMgr.hpp"
 
 //-----------------------------------------------------------------------------
 // bring in driver definitions
@@ -247,6 +247,8 @@ void c_OutputMgr::CreateNewConfig ()
     DynamicJsonDocument JsonConfigDoc (OM_MAX_CONFIG_SIZE);
     JsonObject JsonConfig = JsonConfigDoc.createNestedObject (OM_SECTION_NAME);
 
+    JsonConfig[VERSION_NAME] = CurrentConfigVersion;
+
     // DEBUG_V ("for each output type");
     for (int outputTypeId = int (OutputType_Start);
          outputTypeId < int (OutputType_End);
@@ -307,7 +309,7 @@ void c_OutputMgr::GetConfig (char * Response )
     else
     {
         String TempConfigData;
-        FileIO::ReadFile (ConfigFileName, TempConfigData);
+        FileMgr.ReadConfigFile (ConfigFileName, TempConfigData);
         strcat (Response, TempConfigData.c_str ());
     }
 
@@ -526,7 +528,7 @@ void c_OutputMgr::LoadConfig ()
     // DEBUG_START;
 
     // try to load and process the config file
-    if (!FileIO::loadConfig (ConfigFileName, [this](DynamicJsonDocument & JsonConfigDoc)
+    if (!FileMgr.LoadConfigFile (ConfigFileName, [this](DynamicJsonDocument & JsonConfigDoc)
         {
             // DEBUG_V ("");
             JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
@@ -574,7 +576,18 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
         JsonObject OutputChannelMgrData = jsonConfig[OM_SECTION_NAME];
         // DEBUG_V ("");
 
-        // extract my own config data here
+        String TempVersion;
+        setFromJSON (TempVersion, OutputChannelMgrData, VERSION_NAME);
+
+        // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
+        // DEBUG_V (String ("CurrentConfigVersion: ") + String (CurrentConfigVersion));
+        // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
+        // PrettyPrint (OutputChannelMgrData, "Output Config");
+        if (TempVersion != CurrentConfigVersion)
+        {
+            LOG_PORT.println (F ("OutputMgr: Incorrect Version found. Using existing/default config."));
+            // break;
+        }
 
         // do we have a channel configuration array?
         if (false == OutputChannelMgrData.containsKey (OM_CHANNEL_SECTION_NAME))
@@ -603,7 +616,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
 
             // set a default value for channel type
             uint32_t ChannelType = uint32_t (OutputType_End);
-            FileIO::setFromJSON (ChannelType, OutputChannelConfig[OM_CHANNEL_TYPE_NAME]);
+            setFromJSON (ChannelType, OutputChannelConfig, OM_CHANNEL_TYPE_NAME);
             // DEBUG_V ("");
 
             // is it a valid / supported channel type
@@ -676,7 +689,7 @@ void c_OutputMgr::SaveConfig ()
 
     // DEBUG_V (String ("ConfigData: ") + ConfigData);
 
-    if (FileIO::SaveConfig (ConfigFileName, ConfigData))
+    if (true == FileMgr.SaveConfigFile (ConfigFileName, ConfigData))
     {
         LOG_PORT.println (F ("**** Saved Output Manager Config File. ****"));
         ConfigData.clear ();

@@ -19,6 +19,7 @@
 */
 
 #include "../ESPixelStick.h"
+#include "../FileMgr.hpp"
 
 #ifdef ESP32
 #	include <WiFi.h>
@@ -38,17 +39,6 @@ class c_FPPDiscovery
 {
 public:
 
-#   define SD_CARD_MISO_PIN    19
-#   define SD_CARD_MOSI_PIN    23
-#   define SD_CARD_CLK_PIN     18
-#   define SD_CARD_CLK_MHZ     SD_SCK_MHZ(50)  // 50 MHz SPI clock
-
-#   ifdef ARDUINO_ARCH_ESP32
-#     define SD_CARD_CS_PIN      4
-#   else
-#     define SD_CARD_CS_PIN      15
-#   endif
-
 #   define Stop_FPP_RemotePlay "..."
 
 private:
@@ -57,10 +47,9 @@ private:
     void ProcessReceivedUdpPacket (AsyncUDPPacket _packet);
     void ProcessSyncPacket (uint8_t action, String filename, uint32_t frame);
     void ProcessBlankPacket ();
-    void handleFileUploadNewFile (String filename);
 
     bool isRemoteRunning = false;
-    File fseqFile;
+    c_FileMgr::FileId fseqFile;
     String fseqName = "";
     String failedFseqName = "";
     String AutoPlayFileName = Stop_FPP_RemotePlay;
@@ -70,32 +59,19 @@ private:
     uint32_t channelsPerFrame = 0;
     uint8_t  frameStepTime = 0;
     uint32_t TotalNumberOfFramesInSequence = 0;
-    uint8_t  miso_pin = SD_CARD_MISO_PIN;
-    uint8_t  mosi_pin = SD_CARD_MOSI_PIN;
-    uint8_t  clk_pin  = SD_CARD_CLK_PIN;
-    uint8_t  cs_pin   = SD_CARD_CS_PIN;
     uint8_t* outputBuffer;
     uint16_t outputBufferSize;
-    bool hasSDStorage = false;
     bool inFileUpload = false;
     bool hasBeenInitialized = false;
     bool IsEnabled = false;
     uint8_t* buffer = nullptr;
     int bufCurPos = 0;
-    File fsUploadFile;
-    String fsUploadFileName;
-    bool fsUploadFileSavedIsEnabled = false;
+    String UploadFileName;
 
-    void GetSysInfoJSON (JsonObject& jsonResponse);
-    void DescribeSdCardToUser ();
-    void BuildFseqResponse (String fname, File fseq, String & resp);
-    void StopPlaying ();
-    void StartPlaying (String & filename, uint32_t frameId);
-#ifdef ESP32
-    void printDirectory (File dir, int numTabs);
-#else
-    void printDirectory (Dir dir, int numTabs);
-#endif // def ESP32
+    void GetSysInfoJSON    (JsonObject& jsonResponse);
+    void BuildFseqResponse (String fname, c_FileMgr::FileId fseq, String & resp);
+    void StopPlaying       ();
+    void StartPlaying      (String & filename, uint32_t frameId);
     bool AllowedToRemotePlayFiles ();
 
 public:
@@ -103,21 +79,16 @@ public:
 
     void begin ();
 
-    void ProcessFPPJson    (AsyncWebServerRequest* request);
-    void ProcessGET        (AsyncWebServerRequest* request);
-    void ProcessPOST       (AsyncWebServerRequest* request);
-    void ProcessFile       (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
-    void ProcessBody       (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total);
-    void ReadNextFrame     (uint8_t* outputBuffer, uint16_t outputBufferSize);
-    void GetListOfFiles    (char * ResponseBuffer);
-    void DeleteFseqFile    (String & FileNameToDelete);
+    void ProcessFPPJson   (AsyncWebServerRequest* request);
+    void ProcessGET       (AsyncWebServerRequest* request);
+    void ProcessPOST      (AsyncWebServerRequest* request);
+    void ProcessFile      (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
+    void ProcessBody      (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total);
+    void ReadNextFrame    (uint8_t* outputBuffer, uint16_t outputBufferSize);
     void sendPingPacket    (IPAddress destination = IPAddress(255, 255, 255, 255));
-    void SetSpiIoPins      (uint8_t miso, uint8_t mosi, uint8_t clock, uint8_t cs);
-    void PlayFile          (String & FileToPlay);
-    void Enable            (void);
-    void Disable           (void);
-    bool SdcardIsInstalled () { return hasSDStorage; }
-    void handleFileUpload (String filename, size_t index, uint8_t* data, size_t len, bool final);
+    void PlayFile         (String & FileToPlay);
+    void Enable           (void);
+    void Disable          (void);
 };
 
 extern c_FPPDiscovery FPPDiscovery;

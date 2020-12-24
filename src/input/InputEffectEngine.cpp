@@ -256,15 +256,15 @@ boolean c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     String effectName;
     String effectColor;
 
-    FileIO::setFromJSON (EffectSpeed, jsonConfig[F ("EffectSpeed")]);
-    FileIO::setFromJSON (EffectReverse, jsonConfig[F ("EffectReverse")]);
-    FileIO::setFromJSON (EffectMirror, jsonConfig[F ("EffectMirror")]);
-    FileIO::setFromJSON (EffectAllLeds, jsonConfig[F ("EffectAllLeds")]);
-    FileIO::setFromJSON (EffectBrightness, jsonConfig[F ("EffectBrightness")]);
-    FileIO::setFromJSON (EffectBlankTime, jsonConfig[F ("EffectBlankTime")]);
-    FileIO::setFromJSON (EffectWhiteChannel, jsonConfig[F ("EffectWhiteChannel")]);
-    FileIO::setFromJSON (effectName, jsonConfig[F ("currenteffect")]);
-    FileIO::setFromJSON (effectColor, jsonConfig[F ("EffectColor")]);
+    setFromJSON (EffectSpeed,        jsonConfig, F ("EffectSpeed"));
+    setFromJSON (EffectReverse,      jsonConfig, F ("EffectReverse"));
+    setFromJSON (EffectMirror,       jsonConfig, F ("EffectMirror"));
+    setFromJSON (EffectAllLeds,      jsonConfig, F ("EffectAllLeds"));
+    setFromJSON (EffectBrightness,   jsonConfig, F ("EffectBrightness"));
+    setFromJSON (EffectBlankTime,    jsonConfig, F ("EffectBlankTime"));
+    setFromJSON (EffectWhiteChannel, jsonConfig, F ("EffectWhiteChannel"));
+    setFromJSON (effectName,         jsonConfig, F ("currenteffect"));
+    setFromJSON (effectColor,        jsonConfig, F ("EffectColor"));
 
     ChannelsPerPixel = (true == EffectWhiteChannel) ? 4 : 3;
     PixelCount = InputDataBufferSize / ChannelsPerPixel;
@@ -287,23 +287,24 @@ boolean c_InputEffectEngine::SetMqttConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_START;
     String effectName;
 
-    FileIO::setFromJSON (EffectSpeed,        jsonConfig[F ("speed")]);
-    FileIO::setFromJSON (EffectReverse,      jsonConfig[F ("reverse")]);
-    FileIO::setFromJSON (EffectMirror,       jsonConfig[F ("mirror")]);
-    FileIO::setFromJSON (EffectAllLeds,      jsonConfig[F ("allleds")]);
-    FileIO::setFromJSON (EffectBlankTime,    jsonConfig[F ("blanktime")]);
-    FileIO::setFromJSON (EffectBrightness,   jsonConfig[F ("brightness")]);
-    FileIO::setFromJSON (EffectWhiteChannel, jsonConfig[F ("EffectWhiteChannel")]);
-    FileIO::setFromJSON (effectName,         jsonConfig[F ("effect")]);
+    setFromJSON (EffectSpeed,        jsonConfig, F ("speed"));
+    setFromJSON (EffectReverse,      jsonConfig, F ("reverse"));
+    setFromJSON (EffectMirror,       jsonConfig, F ("mirror"));
+    setFromJSON (EffectAllLeds,      jsonConfig, F ("allleds"));
+    setFromJSON (EffectBlankTime,    jsonConfig, F ("blanktime"));
+    setFromJSON (EffectBrightness,   jsonConfig, F ("brightness"));
+    setFromJSON (EffectWhiteChannel, jsonConfig, F ("EffectWhiteChannel"));
+    setFromJSON (effectName,         jsonConfig, F ("effect"));
 
     ChannelsPerPixel = (true == EffectWhiteChannel) ? 4 : 3;
     PixelCount = InputDataBufferSize / ChannelsPerPixel;
 
     if (jsonConfig.containsKey ("color"))
     {
-        FileIO::setFromJSON (EffectColor.r, jsonConfig[F ("color")]["r"]);
-        FileIO::setFromJSON (EffectColor.g, jsonConfig[F ("color")]["g"]);
-        FileIO::setFromJSON (EffectColor.b, jsonConfig[F ("color")]["b"]);
+        JsonObject JsonColor = jsonConfig[F ("color")];
+        setFromJSON (EffectColor.r, JsonColor, "r");
+        setFromJSON (EffectColor.g, JsonColor, "g");
+        setFromJSON (EffectColor.b, JsonColor, "b");
     }
 
     validateConfiguration ();

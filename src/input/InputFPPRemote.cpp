@@ -20,7 +20,6 @@
 #include "../ESPixelStick.h"
 #include <Int64String.h>
 #include "InputFPPRemote.h"
-#include "../FileIO.h"
 #include "../service/FPPDiscovery.h"
 
 #if defined ARDUINO_ARCH_ESP32
@@ -123,14 +122,14 @@ boolean c_InputFPPRemote::SetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
-    FileIO::setFromJSON (miso_pin, jsonConfig[JSON_NAME_MISO]);
-    FileIO::setFromJSON (mosi_pin, jsonConfig[JSON_NAME_MOSI]);
-    FileIO::setFromJSON (clk_pin,  jsonConfig[JSON_NAME_CLOCK]);
-    FileIO::setFromJSON (cs_pin,   jsonConfig[JSON_NAME_CS]);
+    setFromJSON (miso_pin, jsonConfig, JSON_NAME_MISO);
+    setFromJSON (mosi_pin, jsonConfig, JSON_NAME_MOSI);
+    setFromJSON (clk_pin,  jsonConfig, JSON_NAME_CLOCK);
+    setFromJSON (cs_pin,   jsonConfig, JSON_NAME_CS);
 
-    FileIO::setFromJSON (FseqFileToPlay, jsonConfig[JSON_NAME_FILE_TO_PLAY]);
+    setFromJSON (FseqFileToPlay, jsonConfig, JSON_NAME_FILE_TO_PLAY);
 
-    FPPDiscovery.SetSpiIoPins (miso_pin, mosi_pin, clk_pin, cs_pin);
+    FileMgr.SetSpiIoPins (miso_pin, mosi_pin, clk_pin, cs_pin);
     FPPDiscovery.PlayFile (FseqFileToPlay);
 
     // DEBUG_END;

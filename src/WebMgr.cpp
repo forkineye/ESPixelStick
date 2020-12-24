@@ -25,6 +25,7 @@
 #include "WiFiMgr.hpp"
 
 #include "WebMgr.hpp"
+#include "FileMgr.hpp"
 #include <Int64String.h>
 
 #include <FS.h>
@@ -34,7 +35,6 @@
 #   define LITTLEFS LittleFS
 #elif defined ARDUINO_ARCH_ESP32
 #	include <LITTLEFS.h>
-#	define SDFS SD
 #else
 #	error "Unsupported CPU type."
 #endif
@@ -176,7 +176,7 @@ void c_WebMgr::init ()
         [](AsyncWebServerRequest * request)
         {
             // DEBUG_V ("Got upload post request");
-            if (true == FPPDiscovery.SdcardIsInstalled())
+            if (true == FileMgr.SdCardIsInstalled())
             {
                 // Send status 200 (OK) to tell the client we are ready to receive
                 request->send (200);
@@ -194,7 +194,7 @@ void c_WebMgr::init ()
             // DEBUG_V (String ("Got process File request: index: ") + String (index));
             // DEBUG_V (String ("Got process File request: len:   ") + String (len));
             // DEBUG_V (String ("Got process File request: final: ") + String (final));
-            if (true == FPPDiscovery.SdcardIsInstalled())
+            if (true == FileMgr.SdCardIsInstalled())
             {
                 this->handleFileUpload (request, filename, index, data, len, final); // Receive and save the file
             }
@@ -262,7 +262,7 @@ void c_WebMgr::handleFileUpload (AsyncWebServerRequest* request,
 {
     // DEBUG_START;
 
-    FPPDiscovery.handleFileUpload (filename, index, data, len, final);
+    FileMgr.handleFileUpload (filename, index, data, len, final);
 
     // DEBUG_END;
 } // handleFileUpload
@@ -336,7 +336,7 @@ void c_WebMgr::GetDeviceOptions ()
 
     // DEBUG_V ("");
     JsonObject WebOptions = webJsonDoc.createNestedObject (F ("options"));
-    JsonObject JsonDeviceOptions = WebOptions.createNestedObject (F ("device"));
+    JsonObject JsonDeviceOptions = WebOptions.createNestedObject (DEVICE_NAME);
     // DEBUG_V("");
 
     // PrettyPrint (WebOptions);
@@ -589,7 +589,7 @@ void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
 
     system[F ("freeheap")] = (String)ESP.getFreeHeap ();
     system[F ("uptime")] = millis ();
-    system[F ("SDinstalled")] = FPPDiscovery.SdcardIsInstalled();
+    system[F ("SDinstalled")] = FileMgr.SdCardIsInstalled();
 
     // DEBUG_V ("");
 
@@ -791,8 +791,8 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
 
     do // once
     {
-        if ((jsonCmd["get"] == "device") ||
-            (jsonCmd["get"] == "network")  )
+        if ((jsonCmd["get"] == DEVICE_NAME) ||
+            (jsonCmd["get"] == NETWORK_NAME)  )
         {
             // DEBUG_V ("device/network");
             strcat(WebSocketFrameCollectionBuffer, serializeCore (false).c_str());
@@ -819,7 +819,9 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
         if (jsonCmd["get"] == "files")
         {
             // DEBUG_V ("input");
-            FPPDiscovery.GetListOfFiles (WebSocketFrameCollectionBuffer);
+            String Temp;
+            FileMgr.GetListOfSdFiles (Temp);
+            strcat (WebSocketFrameCollectionBuffer, Temp.c_str ());
             // DEBUG_V ("");
             break;
         }
@@ -844,7 +846,7 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
 
     do // once
     {
-        if ((jsonCmd.containsKey ("device")) || (jsonCmd.containsKey ("network")))
+        if ((jsonCmd.containsKey (DEVICE_NAME)) || (jsonCmd.containsKey (NETWORK_NAME)))
         {
             // DEBUG_V ("device/network");
             extern void SetConfig (JsonObject &);
@@ -898,9 +900,9 @@ void c_WebMgr::processCmdOpt (JsonObject & jsonCmd)
     do // once
     {
         // DEBUG_V ("");
-        if (jsonCmd["opt"] == "device")
+        if (jsonCmd["opt"] == DEVICE_NAME)
         {
-            // DEBUG_V ("device");
+            // DEBUG_V (DEVICE_NAME);
             GetDeviceOptions ();
             break;
         }
@@ -935,10 +937,13 @@ void c_WebMgr::processCmdDelete (JsonObject& jsonCmd)
                 String FileToDelete = JsonFile["name"];
 
                 // DEBUG_V ("FileToDelete: " + FileToDelete);
-                FPPDiscovery.DeleteFseqFile (FileToDelete);
+                FileMgr.DeleteSdFile (FileToDelete);
             }
 
-            FPPDiscovery.GetListOfFiles (WebSocketFrameCollectionBuffer);
+            String Temp;
+            FileMgr.GetListOfSdFiles (Temp);
+            memcpy (WebSocketFrameCollectionBuffer, Temp.c_str (), (size_t)(Temp.length()));
+
             break;
         }
 

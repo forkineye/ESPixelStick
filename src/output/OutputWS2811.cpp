@@ -18,7 +18,6 @@
 */
 
 #include "../ESPixelStick.h"
-#include "../FileIO.h"
 
 #include "OutputWS2811.hpp"
 
@@ -410,14 +409,14 @@ bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject & jsonConfig)
     // enums need to be converted to uints for json
     uint tempDataPin = uint (DataPin);
 
-    FileIO::setFromJSON (color_order,             jsonConfig[F ("color_order")]);
-    FileIO::setFromJSON (pixel_count,             jsonConfig[F ("pixel_count")]);
-    FileIO::setFromJSON (group_size,              jsonConfig[F ("group_size")]);
-    FileIO::setFromJSON (zig_size,                jsonConfig[F ("zig_size")]);
-    FileIO::setFromJSON (gamma,                   jsonConfig[F ("gamma")]);
-    FileIO::setFromJSON (brightness,              jsonConfig[F ("brightness")]);
-    FileIO::setFromJSON (InterFrameGapInMicroSec, jsonConfig[F ("interframetime")]);
-    FileIO::setFromJSON (tempDataPin,             jsonConfig[F ("data_pin")]);
+    setFromJSON (color_order,             jsonConfig, F ("color_order"));
+    setFromJSON (pixel_count,             jsonConfig, F ("pixel_count"));
+    setFromJSON (group_size,              jsonConfig, F ("group_size"));
+    setFromJSON (zig_size,                jsonConfig, F ("zig_size"));
+    setFromJSON (gamma,                   jsonConfig, F ("gamma"));
+    setFromJSON (brightness,              jsonConfig, F ("brightness"));
+    setFromJSON (InterFrameGapInMicroSec, jsonConfig, F ("interframetime"));
+    setFromJSON (tempDataPin,             jsonConfig, F ("data_pin"));
     DataPin = gpio_num_t (tempDataPin);
 
     bool response = validate ();
