@@ -405,7 +405,9 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
                 // DEBUG_V ("Adding File: '" + EntryName + "'");
 
                 JsonObject CurrentFile = FileArray.createNestedObject ();
-                CurrentFile[F ("name")] = EntryName;
+                CurrentFile[F ("name")]   = EntryName;
+                CurrentFile[F ("date")]   = entry.getLastWrite ();
+                CurrentFile[F ("length")] = entry.size ();
             }
 
             entry.close ();
