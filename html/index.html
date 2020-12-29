@@ -254,12 +254,29 @@
                     <legend class="esps-legend">File Management</legend>
                     <div>
                         <a id="FileDeleteButton" class="button">Remove Selected File(s)</a>
-                        <div id="FileTree"></div>
                     </div>
                     <div>
-                        <div id="filemanagementupload">
-                            <p>Click to Upload a file with the file dialog or drag and drop a file into the dashed region</p>
-                        </div>
+                        <fieldset>
+                            <legend class="esps-legend">Files</legend>
+                            <table class="esps-table">
+                                <thead>
+                                    <tr>
+                                        <th width="10%">Selected</th>
+                                        <th width="50%">File Name</th>
+                                        <th width="30%">File Date</th>
+                                        <th width="15%">File Size</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="FileManagementTable">
+                                    <tr></tr>
+                                </tbody>
+                            </table>
+
+                            <div id="filemanagementupload">
+                                <p>Click to Upload a file with the file dialog or drag and drop a file into the dashed region</p>
+                            </div>
+
+                        </fieldset>
                     </div>
                 </fieldset>
             </div>
@@ -360,7 +377,6 @@
         <script type="text/javascript" src="js/jquery-3.5.1.js"></script>
         <script type="text/javascript" src="js/bootstrap.js"></script>
         <script type="text/javascript" src="js/jqColorPicker.js"></script>
-        <script type="text/javascript" src="js/tree.js"></script>
         <script type="text/javascript" src="script.js"></script>
         -->
 
