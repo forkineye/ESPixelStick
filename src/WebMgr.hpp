@@ -73,6 +73,8 @@ private:
     void processCmdSet              (JsonObject & jsonCmd);
     void processCmdOpt              (JsonObject & jsonCmd);
     void processCmdDelete           (JsonObject & jsonCmd);
+    void processCmdSetTime          (JsonObject & jsonCmd);
+
     void GetConfiguration           ();
     void GetOptions                 ();
     void ProcessXseriesRequests     (AsyncWebSocketClient * client);
