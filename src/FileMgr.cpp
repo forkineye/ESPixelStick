@@ -400,7 +400,10 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
             // DEBUG_V ("EntryName: " + EntryName);
             // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
 
-            if ((0 != EntryName.length ()) && (EntryName != String (F ("System Volume Information"))))
+            if ((0 != EntryName.length ()) && 
+                (EntryName != String (F ("System Volume Information"))) &&
+                (0 != entry.size ())
+               )
             {
                 // DEBUG_V ("Adding File: '" + EntryName + "'");
 
