@@ -14,7 +14,6 @@ var Input_Config = null; // Input Manager configuration record
 var Fseq_File_List = null;
 var selector = [];
 var StatusUpdateRequestTimer = null;
-var FileTree = null;
 var target = null;
 var myDropzone = null;
 var SdCardIsInstalled = false;
@@ -231,7 +230,6 @@ function ProcessGetFileResponse(JsonConfigData)
 {
     // console.info("ProcessGetFileResponse");
 
-
     SdCardIsInstalled = JsonConfigData.SdCardPresent;
 
     $("#li-filemanagement").removeClass("hidden");
@@ -245,34 +243,50 @@ function ProcessGetFileResponse(JsonConfigData)
     clearTimeout(FseqFileListRequestTimer);
     FseqFileListRequestTimer = null;
 
-    var TreeRoot = new TreeNode("List Of Files");
+    // console.info("$('#FileManagementTable > tr').length " + $('#FileManagementTable > tr').length);
+
+    while (1 < $('#FileManagementTable > tr').length)
+    {
+        // console.info("Deleting $('#FileManagementTable tr').length " + $('#FileManagementTable tr').length);
+        $('#FileManagementTable tr').last().remove();
+        // console.log("After Delete: $('#FileManagementTable tr').length " + $('#FileManagementTable tr').length);
+    }
+
+    var CurrentRowId = 0;
     JsonConfigData.files.forEach(function (file)
     {
-        var NewFileNode = new TreeNode(file.name);
-        TreeRoot.addChild(NewFileNode);
+        var SelectedPattern = '<td><input  type="checkbox" id="FileSelected_' + (CurrentRowId) + '"></td>';
+        var NamePattern     = '<td><output type="text"     id="FileName_'     + (CurrentRowId) + '"></td>';
+        var DatePattern     = '<td><output type="text"     id="FileDate_'     + (CurrentRowId) + '"></td>';
+        var SizePattern     = '<td><output type="text"     id="FileSize_'     + (CurrentRowId) + '"></td>';
+
+        var rowPattern = '<tr>' + SelectedPattern + NamePattern + DatePattern + SizePattern + '</tr>';
+        $('#FileManagementTable tr:last').after(rowPattern);
+
+        $('#FileName_' + (CurrentRowId)).val(file.name);
+        $('#FileDate_' + (CurrentRowId)).val(new Date(file.date * 1000).toISOString());
+        $('#FileSize_' + (CurrentRowId)).val(file.length);
+
+        CurrentRowId++;
     });
-
-    FileTree = new TreeView(TreeRoot, "#FileTree");
-
 } // ProcessGetFileResponse
 
 function RequestFileDeletion()
 {
-    var ListOfSelectedFiles = FileTree.getSelectedNodes();
-    if (0 < ListOfSelectedFiles.length) {
+    var files = [];
 
-        var files = [];
-
-        ListOfSelectedFiles.forEach(function (file) {
+    $('#FileManagementTable > tr').each(function (CurRowId)
+    {
+        if (true === $('#FileSelected_' + CurRowId).prop("checked"))
+        {
             var FileEntry = {};
-            FileEntry["name"] = file.toString();
+            FileEntry["name"] = $('#FileName_' + CurRowId).val().toString();
             files.push(FileEntry);
+        }
+    });
 
-            // console.info(file.toString());
-        });
-
-        wsEnqueue(JSON.stringify({ 'cmd': { 'delete': { 'files' : files }}}));
-    }
+    wsEnqueue(JSON.stringify({ 'cmd': { 'delete': { 'files': files } } }));
+    RequestListOfFiles();
 
 } // RequestFileDeletion
 
@@ -714,6 +728,16 @@ function submitDeviceConfig()
 
 } // submitDeviceConfig
 
+function convertUTCDateToLocalDate(date)
+{
+    date = new Date(date);
+    var localOffset = date.getTimezoneOffset() * 60000;
+    var localTime = date.getTime();
+    date = localTime - localOffset;
+
+    return date;
+} // convertUTCDateToLocalDate
+
 ////////////////////////////////////////////////////
 //
 //  Websocket stuff
@@ -729,7 +753,7 @@ function wsConnect()
             target = document.location.host;
         }
 
-        // target = "192.168.10.155";
+        // target = "192.168.10.215";
         // target = "192.168.10.162";
 
         // Open a new web socket and set the binary type
@@ -754,6 +778,7 @@ function wsConnect()
             wsReadyToSend();
 
             // console.info("ws.onopen: Start Sending");
+            wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'time': { 'time_t': convertUTCDateToLocalDate(Date())/1000 } } } }));
             wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get network config
 
             ProcessWindowChange($(location).attr("hash"));
@@ -784,6 +809,7 @@ function wsConnect()
                 }
                 else
                 {
+                    console.info("ws.onmessage: Received: " + event.data);
                     var msg = JSON.parse(event.data);
                     // "GET" message is a response to a get request. Populate the frontend.
                     if (msg.hasOwnProperty("get"))
@@ -919,7 +945,7 @@ function wsProcessOutputQueue()
         }, WaitForResponseTimeMS);
 
         //send it.
-        // console.info('WS sending ' + OutputMessage);
+        console.info('WS sending ' + OutputMessage);
         ws.send(OutputMessage);
 
     } // message available to send

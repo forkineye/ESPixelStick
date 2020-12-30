@@ -30,6 +30,9 @@
 
 #include <FS.h>
 
+#include <time.h>
+#include <sys/time.h>
+
 #ifdef ARDUINO_ARCH_ESP8266
 #	include <LittleFS.h>
 #   define LITTLEFS LittleFS
@@ -816,7 +819,7 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
             break;
         }
 
-        if (jsonCmd["get"] == "files")
+        if (jsonCmd["get"] == F ("files"))
         {
             // DEBUG_V ("input");
             String Temp;
@@ -879,6 +882,17 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
             break;
         }
 
+        if (jsonCmd.containsKey ("time"))
+        {
+            // PrettyPrint (jsonCmd, String ("processCmdSet"));
+
+            // DEBUG_V ("output");
+            JsonObject otConfig = jsonCmd[F ("time")];
+            processCmdSetTime (otConfig);
+            // DEBUG_V ("output: Done");
+            break;
+        }
+
         LOG_PORT.println ();
         PrettyPrint (jsonCmd, String(F ("***** ERROR: Undhandled Set request type. *****")));
         strcat (WebSocketFrameCollectionBuffer, "ERROR");
@@ -890,6 +904,29 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
  // DEBUG_END;
 
 } // processCmdSet
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::processCmdSetTime (JsonObject& jsonCmd)
+{
+    // DEBUG_START;
+
+    // PrettyPrint (jsonCmd, String("processCmdSetTime"));
+
+    time_t TimeToSet = 0;
+    setFromJSON (TimeToSet, jsonCmd, F ("time_t"));
+
+    struct timeval now = { .tv_sec = TimeToSet };
+
+    settimeofday (&now, NULL);
+
+    // DEBUG_V (String ("TimeToSet: ") + String (TimeToSet));
+    // DEBUG_V (String ("TimeToSet: ") + String (ctime(&TimeToSet)));
+
+    strcat (WebSocketFrameCollectionBuffer, "{\"OK\" : true}");
+
+    // DEBUG_END;
+
+} // ProcessXTRequest
 
 //-----------------------------------------------------------------------------
 void c_WebMgr::processCmdOpt (JsonObject & jsonCmd)
@@ -925,16 +962,16 @@ void c_WebMgr::processCmdDelete (JsonObject& jsonCmd)
     {
         // DEBUG_V ("");
 
-        if (jsonCmd.containsKey ("files"))
+        if (jsonCmd.containsKey (F ("files")))
         {
             // DEBUG_V ("");
 
-            JsonArray JsonFilesToDelete = jsonCmd["files"];
+            JsonArray JsonFilesToDelete = jsonCmd[F ("files")];
 
             // DEBUG_V ("");
             for (JsonObject JsonFile : JsonFilesToDelete)
             {
-                String FileToDelete = JsonFile["name"];
+                String FileToDelete = JsonFile[F ("name")];
 
                 // DEBUG_V ("FileToDelete: " + FileToDelete);
                 FileMgr.DeleteSdFile (FileToDelete);
@@ -942,7 +979,9 @@ void c_WebMgr::processCmdDelete (JsonObject& jsonCmd)
 
             String Temp;
             FileMgr.GetListOfSdFiles (Temp);
-            memcpy (WebSocketFrameCollectionBuffer, Temp.c_str (), (size_t)(Temp.length()));
+            Temp += "}";
+            strcpy (WebSocketFrameCollectionBuffer, "{\"cmd\": { \"delete\": ");
+            strcat (WebSocketFrameCollectionBuffer, Temp.c_str ());
 
             break;
         }

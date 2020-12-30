@@ -400,12 +400,17 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
             // DEBUG_V ("EntryName: " + EntryName);
             // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
 
-            if ((0 != EntryName.length ()) && (EntryName != String (F ("System Volume Information"))))
+            if ((0 != EntryName.length ()) && 
+                (EntryName != String (F ("System Volume Information"))) &&
+                (0 != entry.size ())
+               )
             {
                 // DEBUG_V ("Adding File: '" + EntryName + "'");
 
                 JsonObject CurrentFile = FileArray.createNestedObject ();
-                CurrentFile[F ("name")] = EntryName;
+                CurrentFile[F ("name")]   = EntryName;
+                CurrentFile[F ("date")]   = entry.getLastWrite ();
+                CurrentFile[F ("length")] = entry.size ();
             }
 
             entry.close ();
