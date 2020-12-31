@@ -47,6 +47,7 @@
 
 // Services
 #include "src/service/FPPDiscovery.h"
+#include "src/service/mDNS.hpp"
 
 #ifdef ARDUINO_ARCH_ESP8266
 #include <Hash.h>
@@ -550,6 +551,9 @@ void loop()
     {
         ResetWiFi = false;
         WiFiMgr.reset ();
+        mDNS.Begin(&config);
     }
+
+    mDNS.Update();
 
 } // loop
