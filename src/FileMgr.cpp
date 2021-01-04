@@ -92,15 +92,12 @@ void c_FileMgr::SetSpiIoPins (uint8_t miso, uint8_t mosi, uint8_t clock, uint8_t
     clk_pin  = clock;
     cs_pin   = cs;
 
+    SDFS.end ();
 
 #ifdef ARDUINO_ARCH_ESP32
     SPI.end ();
     SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
-
-    SD.end ();
 #else
-    SDFS.end ();
-
     SDFSConfig sdcfg;
     SPISettings spicfg;
 
@@ -329,7 +326,22 @@ bool c_FileMgr::ReadConfigFile (String& FileName, JsonDocument& FileData)
 //-----------------------------------------------------------------------------
 void c_FileMgr::DeleteSdFile (String& FileName)
 {
-    SDFS.remove (FileName);
+    // DEBUG_START;
+
+    if (!FileName.startsWith ("/"))
+    {
+        FileName = "/" + FileName;
+    }
+    // DEBUG_V ();
+
+    if (SDFS.exists (FileName))
+    {
+        // DEBUG_V (String ("Deleting '") + FileName + "'");
+        SDFS.remove (FileName);
+    }
+
+    // DEBUG_END;
+
 } // DeleteSdFile
 
 //-----------------------------------------------------------------------------
@@ -499,6 +511,8 @@ void c_FileMgr::SaveSdFile (String& FileName, JsonVariant& FileData)
 //-----------------------------------------------------------------------------
 bool c_FileMgr::OpenSdFile (String & FileName, FileMode Mode, FileId & FileHandle)
 {
+    // DEBUG_START;
+
     bool FileIsOpen = false;
     FileHandle = 0;
     char ReadWrite[2] = { XlateFileMode[Mode], 0 };
@@ -511,13 +525,17 @@ bool c_FileMgr::OpenSdFile (String & FileName, FileMode Mode, FileId & FileHandl
             break;
         }
 
+        // DEBUG_V ();
+
         if (!FileName.startsWith ("/"))
         {
             FileName = "/" + FileName;
         }
+        // DEBUG_V ();
 
         if (FileMode::FileRead == Mode)
         {
+            // DEBUG_V ();
             if (false == SDFS.exists (FileName))
             {
                 LOG_PORT.println (String (F ("ERROR: Cannot open '")) + FileName + F("' for reading. File does not exist."));
@@ -525,18 +543,23 @@ bool c_FileMgr::OpenSdFile (String & FileName, FileMode Mode, FileId & FileHandl
             }
         }
 
+        // DEBUG_V ();
         FileHandle = millis ();
         FileList[FileHandle] = SDFS.open (FileName, ReadWrite);
 
+        // DEBUG_V ();
         if (FileMode::FileWrite == Mode)
         {
+            // DEBUG_V ();
             FileList[FileHandle].seek (0, SeekSet);
         }
+        // DEBUG_V ();
 
         FileIsOpen = true;
 
     } while (false);
 
+    // DEBUG_END;
     return FileIsOpen;
 
 } // OpenSdFile
