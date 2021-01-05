@@ -600,6 +600,9 @@ void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
     WiFiMgr.GetStatus (system);
     // DEBUG_V ("");
 
+    FPPDiscovery.GetStatus (system);
+    // DEBUG_V ("");
+
     // Ask Input Stats
     InputMgr.GetStatus (status);
     // DEBUG_V ("");
@@ -844,7 +847,7 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
 //-----------------------------------------------------------------------------
 void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
 {
-    // DEBUG_START;
+    DEBUG_START;
     // PrettyPrint (jsonCmd);
 
     do // once
@@ -864,11 +867,11 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
 
         if (jsonCmd.containsKey ("input"))
         {
-            // DEBUG_V ("input");
+            DEBUG_V ("input");
             JsonObject imConfig = jsonCmd["input"];
             InputMgr.SetConfig (imConfig);
             InputMgr.GetConfig (WebSocketFrameCollectionBuffer);
-            // DEBUG_V ("input: Done");
+            DEBUG_V ("input: Done");
             break;
         }
 
@@ -901,7 +904,7 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
 
     // DEBUG_V (WebSocketFrameCollectionBuffer);
 
- // DEBUG_END;
+    DEBUG_END;
 
 } // processCmdSet
 
