@@ -101,10 +101,9 @@ private:
 
     String ConfigFileName;
     String ConfigData;
+    bool   rebootNeeded = false;
 
 #define IM_JSON_SIZE (5*1024)
-
-protected:
 
 }; // c_InputMgr
 

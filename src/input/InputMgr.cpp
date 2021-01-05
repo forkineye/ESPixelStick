@@ -415,6 +415,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             }
 
             // DEBUG_V ("shut down the existing driver");
+            rebootNeeded |= pInputChannelDrivers[ChannelIndex]->isShutDownRebootNeeded();
             delete pInputChannelDrivers[ChannelIndex];
             pInputChannelDrivers[ChannelIndex] = nullptr;
 
@@ -580,18 +581,23 @@ void c_InputMgr::Process ()
 {
     // DEBUG_START;
     // do we need to save the current config?
+
+    ExternalInput.Poll ();
+    ProcessEffectsButtonActions ();
+
     if (true == ConfigSaveNeeded)
     {
         // DEBUG_V ("ConfigData: " + ConfigData);
 
+        // DEBUG_V ("Start Save Config");
+
         ConfigSaveNeeded = false;
         SaveConfig ();
-        // DEBUG_V("");
+        // DEBUG_V ("Reload the config");
+        LoadConfig ();
+        // DEBUG_V ("End Save Config");
 
     } // done need to save the current config
-
-    ExternalInput.Poll ();
-    ProcessEffectsButtonActions ();
 
     // DEBUG_V("");
     for (c_InputCommon* pInputChannel : pInputChannelDrivers)
@@ -599,6 +605,13 @@ void c_InputMgr::Process ()
         pInputChannel->Process ();
         // DEBUG_V("");
     }
+
+    if (rebootNeeded)
+    {
+        // DEBUG_V("Requesting Reboot");
+        reboot = true;
+    }
+
     // DEBUG_END;
 } // Process
 
@@ -836,14 +849,14 @@ bool c_InputMgr::SetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
     boolean Response = false;
+
     if (jsonConfig.containsKey (IM_SECTION_NAME))
     {
         // DEBUG_V ("");
-        // process the config data
-        Response = ProcessJsonConfig (jsonConfig);
 
         // schedule a future save of the config file
         serializeJson (jsonConfig, ConfigData);
+        // DEBUG_V ("Request Config Save");
         ConfigSaveNeeded = true;
     }
     else

@@ -62,5 +62,6 @@ class c_InputE131 : public c_InputCommon
     void GetDriverName (String & sDriverName) { sDriverName = "E1.31"; } ///< get the name for the instantiated driver
     void SetBufferInfo (uint8_t * BufferStart, uint16_t BufferSize);
     void WiFiStateChanged (bool IsConnected); // used by poorly designed rx functions
+    bool isShutDownRebootNeeded () { return true; }
 
 };

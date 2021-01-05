@@ -43,6 +43,7 @@ public:
     virtual void SetOperationalState (bool ActiveFlag) { IsInputChannelActive = ActiveFlag; }
     virtual void ResetBlankTimer () {}; // only implemented by Effects Engine to delay return to operation
     virtual void WiFiStateChanged (bool IsConnected) {}; // used by poorly designed rx functions
+    virtual bool isShutDownRebootNeeded () { return false; }
 
     c_InputMgr::e_InputChannelIds GetInputChannelId () { return InputChannelId; }
     c_InputMgr::e_InputType       GetInputType ()      { return ChannelType; }
