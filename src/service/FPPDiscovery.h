@@ -67,6 +67,9 @@ private:
     uint8_t* buffer = nullptr;
     int bufCurPos = 0;
     String UploadFileName;
+    uint64_t SyncCount = 0;
+    uint64_t SyncAdjustmentCount = 0;
+    IPAddress FppRemoteIp = IPAddress (uint32_t(0));
 
     void GetSysInfoJSON    (JsonObject& jsonResponse);
     void BuildFseqResponse (String fname, c_FileMgr::FileId fseq, String & resp);
@@ -89,6 +92,7 @@ public:
     void PlayFile         (String & FileToPlay);
     void Enable           (void);
     void Disable          (void);
+    void GetStatus        (JsonObject& jsonStatus);
 };
 
 extern c_FPPDiscovery FPPDiscovery;

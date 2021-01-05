@@ -179,6 +179,22 @@ void c_FPPDiscovery::Enable ()
 } // Enable
 
 //-----------------------------------------------------------------------------
+void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
+{
+    // DEBUG_START;
+
+    if (IsEnabled)
+    {
+        JsonObject JsonStatus = jsonStatus.createNestedObject (F ("FPPDiscovery"));
+        JsonStatus[F ("SyncCount")]           = SyncCount;
+        JsonStatus[F ("SyncAdjustmentCount")] = SyncAdjustmentCount;
+        JsonStatus[F ("FppRemoteIp")]         = FppRemoteIp.toString();
+    }
+
+    // DEBUG_END;
+} // GetStatus
+
+//-----------------------------------------------------------------------------
 void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t CurrentOutputBufferSize)
 {
     // DEBUG_START;
@@ -305,6 +321,8 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
             {
                 //FSEQ type, not media
                 // DEBUG_V (String (F ("Received FPP FSEQ sync packet")));
+                SyncCount++;
+                FppRemoteIp = _packet.remoteIP ();
                 ProcessSyncPacket (msPacket->sync_action, msPacket->filename, msPacket->frame_number);
             }
             break;
@@ -386,6 +404,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_
                     {
                         // reset the start time which will then trigger a new frame time
                         fseqStartMillis = millis () - (frameStepTime * frame);
+                        SyncAdjustmentCount++;
                         // DEBUF_V("Large diff %d\n", diff);
                     }
                 }
