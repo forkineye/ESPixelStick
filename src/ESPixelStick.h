@@ -83,6 +83,7 @@ bool    deserializeCore        (JsonObject & json);
 boolean dsDevice               (JsonObject & json);
 boolean dsNetwork              (JsonObject & json);
 void    SaveConfig             ();
+extern  bool reboot;
 
 template <typename T, typename J, typename N>
 bool setFromJSON (T& OutValue, J& Json, N Name)
