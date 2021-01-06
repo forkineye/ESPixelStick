@@ -67,8 +67,8 @@ private:
     uint8_t* buffer = nullptr;
     int bufCurPos = 0;
     String UploadFileName;
-    uint64_t SyncCount = 0;
-    uint64_t SyncAdjustmentCount = 0;
+    uint32_t SyncCount = 0;
+    uint32_t SyncAdjustmentCount = 0;
     IPAddress FppRemoteIp = IPAddress (uint32_t(0));
 
     void GetSysInfoJSON    (JsonObject& jsonResponse);
