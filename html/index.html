@@ -66,8 +66,7 @@
                         </fieldset>
                     </div>
 
-<!-- TODO: Only show one of these, depending on input configuration -->
-                    <div class="col-sm-6">
+                    <div class="col-sm-6" id="E131Status">
                         <fieldset>
                             <legend class="esps-legend">E1.31 Status</legend>
                             <table class="esps-table">
@@ -79,13 +78,23 @@
                             </table>
                         </fieldset>
                     </div>
-                    <div class="col-sm-6">
+                    <div class="col-sm-6" id="ddpStatus">
                         <fieldset>
                             <legend class="esps-legend">DDP Status</legend>
                             <table class="esps-table">
                                 <tr><td width="33%">Total Packets: </td><td><span id="ddppacketsreceived"></span></td></tr>
                                 <tr><td width="33%">Total Bytes: </td><td><span id="ddpbytesreceived"></span></td></tr>
                                 <tr><td width="33%">Errors: </td><td><span id="ddperrors"></span></td></tr>
+                            </table>
+                        </fieldset>
+                    </div>
+                    <div class="col-sm-6" id="FPPRemoteStatus">
+                        <fieldset>
+                            <legend class="esps-legend">FPP Remote Status</legend>
+                            <table class="esps-table">
+                                <tr><td width="50%">Total Sync Packets: </td><td><span id="fppsyncreceived"></span></td></tr>
+                                <tr><td width="50%">Sync Adjustments: </td><td><span id="fppsyncadjustments"></span></td></tr>
+                                <tr><td width="50%">Remote IP: </td><td><span id="fppremoteip"></span></td></tr>
                             </table>
                         </fieldset>
                     </div>

@@ -51,7 +51,7 @@ public:
     IPAddress getIpSubNetMask () { return CurrentSubnetMask; }
     void      setIpSubNetMask (IPAddress NewAddress) { CurrentSubnetMask = NewAddress; }
     void      GetStatus       (JsonObject & jsonStatus);
-    void      connectWifi     ();
+    void      connectWifi     (const String & ssid, const String & passphrase);
     void      reset           ();
     void      Poll ();
 
@@ -83,8 +83,11 @@ private:
     void onWiFiConnect (const WiFiEventStationModeGotIP& event);
     void onWiFiDisconnect (const WiFiEventStationModeDisconnected& event);
 #else
-    void onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t info);
+    void onWiFiConnect    (const WiFiEvent_t event, const WiFiEventInfo_t info);
     void onWiFiDisconnect (const WiFiEvent_t event, const WiFiEventInfo_t info);
+
+    void onWiFiStaConn    (const WiFiEvent_t event, const WiFiEventInfo_t info);
+    void onWiFiStaDisc    (const WiFiEvent_t event, const WiFiEventInfo_t info);
 #endif
 
 protected:

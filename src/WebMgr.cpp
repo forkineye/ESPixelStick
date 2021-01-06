@@ -600,6 +600,9 @@ void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
     WiFiMgr.GetStatus (system);
     // DEBUG_V ("");
 
+    FPPDiscovery.GetStatus (system);
+    // DEBUG_V ("");
+
     // Ask Input Stats
     InputMgr.GetStatus (status);
     // DEBUG_V ("");
@@ -901,7 +904,7 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
 
     // DEBUG_V (WebSocketFrameCollectionBuffer);
 
- // DEBUG_END;
+    // DEBUG_END;
 
 } // processCmdSet
 

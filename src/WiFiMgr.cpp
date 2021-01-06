@@ -39,8 +39,8 @@
 #endif // ndef SECRETS_SSID
 
 /* Fallback configuration if config->json is empty or fails */
-const char ssid[]       = SECRETS_SSID;
-const char passphrase[] = SECRETS_PASS;
+const String ssid       = SECRETS_SSID;
+const String passphrase = SECRETS_PASS;
 
 /// Radio configuration
 /** ESP8266 radio configuration routines that are executed at startup. */
@@ -110,6 +110,9 @@ void c_WiFiMgr::Begin (config_t* NewConfig)
     wifiConnectHandler    = WiFi.onStationModeGotIP        ([this](const WiFiEventStationModeGotIP& event) {this->onWiFiConnect (event); });
     wifiDisconnectHandler = WiFi.onStationModeDisconnected ([this](const WiFiEventStationModeDisconnected& event) {this->onWiFiDisconnect (event); });
 #else
+    WiFi.onEvent ([this](WiFiEvent_t event, system_event_info_t info) {this->onWiFiStaConn (event, info); }, WiFiEvent_t::SYSTEM_EVENT_STA_CONNECTED);
+    WiFi.onEvent ([this](WiFiEvent_t event, system_event_info_t info) {this->onWiFiStaDisc (event, info); }, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
+
     WiFi.onEvent ([this](WiFiEvent_t event, system_event_info_t info) {this->onWiFiConnect    (event, info);}, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
     WiFi.onEvent ([this](WiFiEvent_t event, system_event_info_t info) {this->onWiFiDisconnect (event, info);}, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
 #endif
@@ -144,7 +147,7 @@ void c_WiFiMgr::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-void c_WiFiMgr::connectWifi ()
+void c_WiFiMgr::connectWifi (const String & ssid, const String & passphrase)
 {
     // DEBUG_START;
 
@@ -175,12 +178,12 @@ void c_WiFiMgr::connectWifi ()
 #endif
     }
 
-    LOG_PORT.println (String(F ("\nWiFi Connecting to ")) +
-                      config->ssid +
-                      String (F (" as ")) +
+    LOG_PORT.println (String(F ("\nWiFi Connecting to '")) +
+                      ssid +
+                      String (F ("' as ")) +
                       config->hostname);
 
-    WiFi.begin (config->ssid.c_str (), config->passphrase.c_str ());
+    WiFi.begin (ssid.c_str (), passphrase.c_str ());
 
     // DEBUG_END;
 } // connectWifi
@@ -245,6 +248,23 @@ void c_WiFiMgr::SetUpIp ()
 } // SetUpIp
 
 //-----------------------------------------------------------------------------
+#ifdef ARDUINO_ARCH_ESP32
+
+//-----------------------------------------------------------------------------
+void c_WiFiMgr::onWiFiStaConn (const WiFiEvent_t event, const WiFiEventInfo_t info)
+{
+    // DEBUG_V ("ESP has associated with the AP");
+} // onWiFiStaConn
+
+//-----------------------------------------------------------------------------
+void c_WiFiMgr::onWiFiStaDisc (const WiFiEvent_t event, const WiFiEventInfo_t info)
+{
+    // DEBUG_V ("ESP has disconnected from the AP");
+} // onWiFiStaDisc
+
+#endif // def ARDUINO_ARCH_ESP32
+
+//-----------------------------------------------------------------------------
 #ifdef ARDUINO_ARCH_ESP8266
 void c_WiFiMgr::onWiFiConnect (const WiFiEventStationModeGotIP& event)
 {
@@ -286,14 +306,14 @@ int c_WiFiMgr::ValidateConfig (config_t* NewConfig)
 
     if (!NewConfig->ssid.length ())
     {
-        NewConfig->ssid = ssid;
+        // NewConfig->ssid = ssid;
      // DEBUG_V ();
         response++;
     }
 
     if (!NewConfig->passphrase.length ())
     {
-        NewConfig->passphrase = passphrase;
+        // NewConfig->passphrase = passphrase;
      // DEBUG_V ();
         response++;
     }
@@ -405,11 +425,18 @@ void fsm_WiFi_state_ConnectingUsingConfig::Init ()
 {
     // DEBUG_START;
 
-    WiFiMgr.SetFsmState (this);
-    WiFiMgr.AnnounceState ();
-    WiFiMgr.SetFsmStartTime (millis ());
+    if ((0 == config.ssid.length ()) || (String("null") == config.ssid))
+    {
+        fsm_WiFi_state_ConnectingDefault_imp.Init ();
+    }
+    else
+    {
+        WiFiMgr.SetFsmState (this);
+        WiFiMgr.AnnounceState ();
+        WiFiMgr.SetFsmStartTime (millis ());
 
-    WiFiMgr.connectWifi ();
+        WiFiMgr.connectWifi (config.ssid, config.passphrase);
+    }
 
     // DEBUG_END;
 
@@ -462,7 +489,7 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Init ()
     // Switch to station mode and disconnect just in case
     // DEBUG_V ("");
 
-    WiFiMgr.connectWifi ();
+    WiFiMgr.connectWifi (ssid, passphrase);
 
     // DEBUG_END;
 } // fsm_WiFi_state_ConnectingUsingDefaults::Init

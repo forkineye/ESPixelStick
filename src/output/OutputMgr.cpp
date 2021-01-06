@@ -715,11 +715,10 @@ void c_OutputMgr::SaveConfig ()
 bool c_OutputMgr::SetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
-    boolean Response = false;
+    boolean Response = true;
     if (jsonConfig.containsKey (OM_SECTION_NAME))
     {
         // DEBUG_V ("");
-        Response = ProcessJsonConfig (jsonConfig);
 
         // schedule a future save to the file system
         serializeJson (jsonConfig, ConfigData);
@@ -743,6 +742,7 @@ void c_OutputMgr::Render()
     {
         ConfigSaveNeeded = false;
         SaveConfig ();
+        LoadConfig ();
     } // done need to save the current config
 
     if (false == IsOutputPaused)

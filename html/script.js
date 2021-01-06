@@ -11,6 +11,8 @@ var ParsedJsonStatus = null;
 var ParsedJsonConfig = null;
 var Output_Config = null; // Output Manager configuration record
 var Input_Config = null; // Input Manager configuration record
+var Device_Config = null;
+var Network_Config = null;
 var Fseq_File_List = null;
 var selector = [];
 var StatusUpdateRequestTimer = null;
@@ -462,13 +464,14 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     // is this a device config?
     else if (JsonConfigData.hasOwnProperty("device"))
     {
+        Device_Config = JsonConfigData.device;
         updateFromJSON(JsonConfigData);
-    }
 
-    // is this a network config?
-    else if (JsonConfigData.hasOwnProperty("network"))
-    {
-        updateFromJSON(JsonConfigData);
+        // is this a network config?
+        if (JsonConfigData.hasOwnProperty("network")) {
+            Network_Config = JsonConfigData.network;
+            updateFromJSON(JsonConfigData);
+        }
     }
 
     // is this a file list?
@@ -638,31 +641,19 @@ function CreateOptionsFromConfig(OptionListName, Config)
 // Builds JSON config submission for "WiFi" tab
 function submitWiFiConfig()
 {
-    var json =
-    {
-        'cmd':
-        {
-            'set':
-            {
-                'network':
-                {
-                    'ssid': $('#ssid').val(),
-                    'passphrase': $('#passphrase').val(),
-                    'hostname': $('#hostname').val(),
-                    'sta_timeout': $('#sta_timeout').val(),
-                    'ip': $('#ip').val(),
-                    'netmask': $('#netmask').val(),
-                    'gateway': $('#gateway').val(),
-                    'dhcp': $('#dhcp').prop('checked'),
-                    'ap_fallback': $('#ap_fallback').prop('checked'),
-                    'ap_reboot': $('#ap_reboot').prop('checked'),
-                    'ap_timeout': $('#apt').prop('checked')
-                }
-            }
-        }
-    };
+    Network_Config.ssid        = $('#ssid').val();
+    Network_Config.passphrase  = $('#passphrase').val();
+    Network_Config.hostname    = $('#hostname').val();
+    Network_Config.sta_timeout = $('#sta_timeout').val();
+    Network_Config.ip          = $('#ip').val();
+    Network_Config.netmask     = $('#netmask').val();
+    Network_Config.gateway     = $('#gateway').val();
+    Network_Config.dhcp        = $('#dhcp').prop('checked');
+    Network_Config.ap_fallback = $('#ap_fallback').prop('checked');
+    Network_Config.ap_reboot   = $('#ap_reboot').prop('checked');
+    Network_Config.ap_timeout  = $('#apt').prop('checked');
 
-    wsEnqueue(JSON.stringify(json));
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'network': Network_Config } } }));
 
 } // submitWiFiConfig
 
@@ -720,7 +711,8 @@ function submitDeviceConfig()
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'device': { 'id': $('#config #device #id').val() } } } }));
+    Device_Config.id = $('#config #device #id').val();
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'device': Device_Config } } }));
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input':  { 'input_config': Input_Config } } } }));
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'output': { 'output_config': Output_Config } } } }));
 
@@ -754,7 +746,7 @@ function wsConnect()
         }
 
         // target = "192.168.10.215";
-        // target = "192.168.10.162";
+        // target = "192.168.10.193";
 
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');
@@ -1093,6 +1085,8 @@ function ProcessRecievedJsonStatusMessage(data)
     var InputStatus = Status.input[0];
     if (Status.input[0].hasOwnProperty('e131'))
     {
+        $('#E131Status').removeClass("hidden")
+
         $('#uni_first').text(InputStatus.e131.unifirst);
         $('#uni_last').text (InputStatus.e131.unilast);
         $('#pkts').text     (InputStatus.e131.num_packets);
@@ -1100,12 +1094,35 @@ function ProcessRecievedJsonStatusMessage(data)
         $('#perr').text     (InputStatus.e131.packet_errors);
         $('#clientip').text (InputStatus.e131.last_clientIP);
     }
+    else
+    {
+        $('#E131Status').addClass("hidden")
+    }
 
     if (Status.input[0].hasOwnProperty('ddp'))
     {
+        $('#ddpStatus').removeClass("hidden")
+
         $('#ddppacketsreceived').text(InputStatus.ddp.packetsreceived);
         $('#ddpbytesreceived').text(InputStatus.ddp.bytesreceived);
         $('#ddperrors').text(InputStatus.ddp.errors);
+    }
+    else
+    {
+        $('#ddpStatus').addClass("hidden")
+    }
+
+    if (Status.system.hasOwnProperty('FPPDiscovery'))
+    {
+        $('#FPPRemoteStatus').removeClass("hidden")
+
+        $('#fppsyncreceived').text(Status.system.FPPDiscovery.SyncCount);
+        $('#fppsyncadjustments').text(Status.system.FPPDiscovery.SyncAdjustmentCount);
+        $('#fppremoteip').text(Status.system.FPPDiscovery.FppRemoteIp);
+    }
+    else
+    {
+        $('#FPPRemoteStatus').addClass("hidden")
     }
 
     // Device Refresh is dynamic
