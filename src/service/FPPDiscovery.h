@@ -32,14 +32,13 @@
 #	error Platform not supported
 #endif
 
-
 #include <ESPAsyncWebServer.h>
 
 class c_FPPDiscovery
 {
 public:
 
-#   define Stop_FPP_RemotePlay "..."
+#   define No_FPP_LocalFileToPlay "..."
 
 private:
 
@@ -52,7 +51,7 @@ private:
     c_FileMgr::FileId fseqFile;
     String fseqName = "";
     String failedFseqName = "";
-    String AutoPlayFileName = Stop_FPP_RemotePlay;
+    String AutoPlayFileName = No_FPP_LocalFileToPlay;
     unsigned long fseqStartMillis = 0;
     int fseqCurrentFrameId = 0;
     uint32_t dataOffset = 0;
@@ -77,6 +76,14 @@ private:
     void StartPlaying      (String & filename, uint32_t frameId);
     bool AllowedToRemotePlayFiles ();
 
+#ifdef ARDUINO_ARCH_ESP8266
+    WiFiEventHandler    wifiConnectHandler;     // WiFi connect handler
+    void onWiFiConnect (const WiFiEventStationModeGotIP& event);
+#else
+    void onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t info);
+#endif
+
+
 public:
     c_FPPDiscovery ();
 
@@ -88,7 +95,7 @@ public:
     void ProcessFile      (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
     void ProcessBody      (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total);
     void ReadNextFrame    (uint8_t* outputBuffer, uint16_t outputBufferSize);
-    void sendPingPacket    (IPAddress destination = IPAddress(255, 255, 255, 255));
+    void sendPingPacket   (IPAddress destination = IPAddress(255, 255, 255, 255));
     void PlayFile         (String & FileToPlay);
     void Enable           (void);
     void Disable          (void);

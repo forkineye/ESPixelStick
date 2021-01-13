@@ -44,7 +44,7 @@ c_InputFPPRemote::c_InputFPPRemote (
 //-----------------------------------------------------------------------------
 c_InputFPPRemote::~c_InputFPPRemote ()
 {
-    FseqFileToPlay = Stop_FPP_RemotePlay;
+    FseqFileToPlay = No_FPP_LocalFileToPlay;
     FPPDiscovery.PlayFile (FseqFileToPlay);
     FPPDiscovery.Disable ();
 
