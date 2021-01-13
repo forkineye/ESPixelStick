@@ -123,13 +123,15 @@ void GetConfig (JsonObject & json);
 /** Arduino based setup code that is executed at startup. */
 void setup()
 {
-    config.ip      = IPAddress ((uint32_t)0);
-    config.netmask = IPAddress ((uint32_t)0);
-    config.gateway = IPAddress ((uint32_t)0);
-    config.UseDhcp = true;
+    config.ssid.clear ();
+    config.passphrase.clear ();
+    config.ip         = IPAddress ((uint32_t)0);
+    config.netmask    = IPAddress ((uint32_t)0);
+    config.gateway    = IPAddress ((uint32_t)0);
+    config.UseDhcp    = true;
     config.ap_fallbackIsEnabled = true;
     config.RebootOnWiFiFailureToConnect = true;
-    config.ap_timeout = AP_TIMEOUT;
+    config.ap_timeout  = AP_TIMEOUT;
     config.sta_timeout = CLIENT_TIMEOUT;
 
     // Setup serial log port
@@ -303,14 +305,14 @@ boolean dsNetwork(JsonObject & json)
 
         ConfigChanged |= setFromJSON (config.ssid,                         network, SSID_NAME);
         ConfigChanged |= setFromJSON (config.passphrase,                   network, PASSPHRASE_NAME);
-        ConfigChanged |= setFromJSON(ip,                                   network, IP_NAME);
-        ConfigChanged |= setFromJSON(netmask,                              network, NETMASK_NAME);
-        ConfigChanged |= setFromJSON(gateway,                              network, GATEWAY_NAME);
-        ConfigChanged |= setFromJSON(config.hostname,                      network, HOSTNAME_NAME);
-        ConfigChanged |= setFromJSON(config.UseDhcp,                       network, DHCP_NAME);
-        ConfigChanged |= setFromJSON(config.sta_timeout,                   network, STA_TIMEOUT_NAME);
-        ConfigChanged |= setFromJSON(config.ap_fallbackIsEnabled,          network, AP_FALLBACK_NAME);
-        ConfigChanged |= setFromJSON(config.ap_timeout,                    network, AP_TIMEOUT_NAME);
+        ConfigChanged |= setFromJSON (ip,                                  network, IP_NAME);
+        ConfigChanged |= setFromJSON (netmask,                             network, NETMASK_NAME);
+        ConfigChanged |= setFromJSON (gateway,                             network, GATEWAY_NAME);
+        ConfigChanged |= setFromJSON (config.hostname,                     network, HOSTNAME_NAME);
+        ConfigChanged |= setFromJSON (config.UseDhcp,                      network, DHCP_NAME);
+        ConfigChanged |= setFromJSON (config.sta_timeout,                  network, STA_TIMEOUT_NAME);
+        ConfigChanged |= setFromJSON (config.ap_fallbackIsEnabled,         network, AP_FALLBACK_NAME);
+        ConfigChanged |= setFromJSON (config.ap_timeout,                   network, AP_TIMEOUT_NAME);
         ConfigChanged |= setFromJSON (config.RebootOnWiFiFailureToConnect, network, AP_REBOOT_NAME);
 
         // DEBUG_V ("     ip: " + ip);
@@ -379,9 +381,6 @@ void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
 void loadConfig()
 {
     // DEBUG_START;
-
-    // Zeroize Config struct
-    memset (&config, 0, sizeof (config));
 
     String temp;
     // DEBUG_V ("");
@@ -503,8 +502,9 @@ void loop()
     // do we need to save the current config?
     if (true == ConfigSaveNeeded)
     {
-        ConfigSaveNeeded = false;
+        // DEBUG_V ("Config Save has been requested.");
         SaveConfig ();
+        ConfigSaveNeeded = false;
     } // done need to save the current config
 
 #ifdef ARDUINO_ARCH_ESP32
