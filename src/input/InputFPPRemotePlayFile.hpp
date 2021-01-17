@@ -19,7 +19,7 @@
 *   PlayFile object used to parse and play an FSEQ File
 */
 
-#include "../espixelstick.h"
+#include "../ESPixelStick.h"
 #include "InputFPPRemotePlayItem.hpp"
 
 class c_InputFPPRemotePlayFile : c_InputFPPRemotePlayItem

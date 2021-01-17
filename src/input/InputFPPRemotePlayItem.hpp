@@ -19,7 +19,7 @@
 *   Common Play object use to parse and play a play list or file
 */
 
-#include "../espixelstick.h"
+#include "../ESPixelStick.h"
 
 class c_InputFPPRemotePlayItem
 {

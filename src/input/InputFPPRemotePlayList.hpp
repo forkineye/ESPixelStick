@@ -19,9 +19,14 @@
 *   Playlist object use to parse and play a playlist
 */
 
-#include "../espixelstick.h"
+#include "../ESPixelStick.h"
 #include "InputFPPRemotePlayItem.hpp"
 
+// forward declaration
+/*****************************************************************************/
+class fsm_PlayList_state;
+
+/*****************************************************************************/
 class c_InputFPPRemotePlayList : c_InputFPPRemotePlayItem
 {
 public:
@@ -34,4 +39,87 @@ public:
 
 private:
 
+
+protected:
+    friend class fsm_PlayList_state_Idle;
+    friend class fsm_PlayList_state_PlayingFile;
+    friend class fsm_PlayList_state_PlayingEffect;
+    friend class fsm_PlayList_state_Paused;
+    friend class fsm_PlayList_state;
+
+    fsm_PlayList_state * pCurrentFsmState = nullptr;
+    uint32_t             FsmTimerPlayStartTime = 0;
+
 }; // c_InputFPPRemotePlayList
+
+/*****************************************************************************/
+/*
+*	Generic fsm base class.
+*/
+/*****************************************************************************/
+/*****************************************************************************/
+class fsm_PlayList_state
+{
+public:
+    virtual void Poll (void) = 0;
+    virtual void Init (c_InputFPPRemotePlayList * Parent) = 0;
+    virtual void GetStateName (String & sName) = 0;
+    virtual void Start (void) = 0;
+    virtual void Stop (void) = 0;
+protected:
+    c_InputFPPRemotePlayList * pInputFPPRemotePlayList;
+
+}; // fsm_PlayList_state
+
+/*****************************************************************************/
+class fsm_PlayList_state_Idle : fsm_PlayList_state
+{
+public:
+    virtual void Poll (void);
+    virtual void Init (c_InputFPPRemotePlayList* Parent);
+    virtual void GetStateName (String& sName);
+    virtual void Start (void);
+    virtual void Stop (void);
+
+}; // fsm_PlayList_state_Idle
+
+/*****************************************************************************/
+class fsm_PlayList_state_PlayingFile : fsm_PlayList_state
+{
+public:
+    virtual void Poll (void);
+    virtual void Init (c_InputFPPRemotePlayList* Parent);
+    virtual void GetStateName (String& sName);
+    virtual void Start (void);
+    virtual void Stop (void);
+
+}; // fsm_PlayList_state_PlayingFile
+
+/*****************************************************************************/
+class fsm_PlayList_state_PlayingEffect : fsm_PlayList_state
+{
+public:
+    virtual void Poll (void);
+    virtual void Init (c_InputFPPRemotePlayList* Parent);
+    virtual void GetStateName (String& sName);
+    virtual void Start (void);
+    virtual void Stop (void);
+
+}; // fsm_PlayList_state_PlayingEffect
+
+/*****************************************************************************/
+class fsm_PlayList_state_Paused : fsm_PlayList_state
+{
+public:
+    virtual void Poll (void);
+    virtual void Init (c_InputFPPRemotePlayList* Parent);
+    virtual void GetStateName (String& sName);
+    virtual void Start (void);
+    virtual void Stop (void);
+
+}; // fsm_PlayList_state_Paused
+
+
+
+
+

@@ -19,7 +19,7 @@
 *   PlayFile object used to parse and play an effect
 */
 
-#include "../espixelstick.h"
+#include "../ESPixelStick.h"
 #include "InputFPPRemotePlayItem.hpp"
 
 class c_InputFPPRemotePlayEffect : c_InputFPPRemotePlayItem
