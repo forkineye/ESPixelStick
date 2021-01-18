@@ -21,6 +21,7 @@
 
 #include "../ESPixelStick.h"
 #include "InputFPPRemotePlayItem.hpp"
+#include "InputFPPRemotePlayFileFsm.hpp"
 
 class c_InputFPPRemotePlayFile : c_InputFPPRemotePlayItem
 {
@@ -35,5 +36,15 @@ public:
     virtual void GetStatus (JsonObject & jsonStatus);
 
 private:
+    friend class fsm_PlayFile_state_Idle;
+    friend class fsm_PlayFile_state_PlayingFile;
+    friend class fsm_PlayFile_state_Paused;
+    friend class fsm_PlayFile_state;
+
+    fsm_PlayFile_state_Idle          fsm_PlayFile_state_Idle_imp;
+    fsm_PlayFile_state_PlayingFile   fsm_PlayFile_state_PlayingFile_imp;
+    fsm_PlayFile_state_Paused        fsm_PlayFile_state_Paused_imp;
+
+    fsm_PlayFile_state* pCurrentFsmState = nullptr;
 
 }; // c_InputFPPRemotePlayFile

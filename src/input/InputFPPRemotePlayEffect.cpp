@@ -41,6 +41,7 @@ void c_InputFPPRemotePlayEffect::Start ()
 {
     // DEBUG_START;
 
+    pCurrentFsmState->Start ();
 
     // DEBUG_END;
 } // Start
