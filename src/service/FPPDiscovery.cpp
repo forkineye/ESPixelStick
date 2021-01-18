@@ -21,6 +21,7 @@
 
 #include <Int64String.h>
 #include "../FileMgr.hpp"
+#include "../WiFiMgr.hpp"
 
 extern const String VERSION;
 
@@ -122,6 +123,9 @@ struct FSEQHeader
 c_FPPDiscovery::c_FPPDiscovery ()
 {
     // DEBUG_START;
+
+    AutoPlayFileName = String(No_FPP_LocalFileToPlay);
+
     // DEBUG_END;
 }
 
@@ -157,6 +161,11 @@ void c_FPPDiscovery::begin ()
         LOG_PORT.println (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
         udp.onPacket (std::bind (&c_FPPDiscovery::ProcessReceivedUdpPacket, this, std::placeholders::_1));
 
+#ifdef ARDUINO_ARCH_ESP8266
+        wifiConnectHandler = WiFi.onStationModeGotIP ([this](const WiFiEventStationModeGotIP& event) {this->onWiFiConnect (event); });
+#else
+        WiFi.onEvent ([this](WiFiEvent_t event, system_event_info_t info) {this->onWiFiConnect (event, info); }, WiFiEvent_t::SYSTEM_EVENT_STA_CONNECTED);
+#endif
         PlayFile (AutoPlayFileName);
 
     } while (false);
@@ -285,24 +294,44 @@ uint16_t read16 (uint8_t* pData)
             (uint16_t)(pData[1]) << 8);
 } // read16
 
+
+//-----------------------------------------------------------------------------
+#ifdef ARDUINO_ARCH_ESP8266
+void c_FPPDiscovery::onWiFiConnect (const WiFiEventStationModeGotIP& event)
+{
+#else
+void c_FPPDiscovery::onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t info)
+{
+#endif
+    // DEBUG_START;
+
+    sendPingPacket ();
+
+    // DEBUG_END;
+} // onWiFiConnect
+
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
 {
     // DEBUG_START;
 
     FPPPacket* packet = reinterpret_cast<FPPPacket*>(_packet.data ());
-    // DEBUG_V ("Received FPP packet");
-    // DEBUG_V (String("packet->packet_type: ") + String(packet->packet_type));
+    // DEBUG_V (String ("Received packet from: ") + _packet.remoteIP ().toString ());
+    // DEBUG_V (String ("             Sent to: ") + _packet.localIP ().toString ());
+    // DEBUG_V (String (" packet->packet_type: ") + String(packet->packet_type));
 
     switch (packet->packet_type)
     {
         case 0x04: //Ping Packet
         {
-            FPPPingPacket* pingPacket = reinterpret_cast<FPPPingPacket*>(_packet.data ());
+            // DEBUG_V (String (F ("Ping Packet")));
 
-            if (pingPacket->ping_subtype == 0x01)
+            FPPPingPacket* pingPacket = reinterpret_cast<FPPPingPacket*>(_packet.data ());
+            // DEBUG_V (String (F ("Ping Packet subtype: ")) + String (pingPacket->ping_subtype));
+
+            if (pingPacket->ping_subtype == 0x00)
             {
-                // DEBUG_V (String (F ("FPPPing discovery packet")));
+                // DEBUG_V (String (F ("FPP Ping discovery packet")));
                 // received a discover ping packet, need to send a ping out
                 if(_packet.isBroadcast() || _packet.isMulticast())
                     sendPingPacket();
@@ -444,6 +473,7 @@ void c_FPPDiscovery::ProcessBlankPacket ()
 void c_FPPDiscovery::sendPingPacket (IPAddress destination)
 {
     // DEBUG_START;
+
     FPPPingPacket packet;
     memset (packet.raw, 0, sizeof (packet));
     packet.raw[0] = 'F';
@@ -453,7 +483,7 @@ void c_FPPDiscovery::sendPingPacket (IPAddress destination)
     packet.packet_type = 0x04;
     packet.data_len = 294;
     packet.ping_version = 0x3;
-    packet.ping_subtype = 0x0; // 1 is to "discover" others, we don't need that
+    packet.ping_subtype = 0x1; // 0 is to "discover" others, we don't need that
     packet.ping_hardware = FPP_TYPE_ID;
 
     const char* version = VERSION.c_str ();
@@ -462,16 +492,16 @@ void c_FPPDiscovery::sendPingPacket (IPAddress destination)
     v = (uint16_t)atoi (&version[2]);
     packet.versionMinor = (v >> 8) + ((v & 0xFF) << 8);
 
-    packet.operatingMode = (AllowedToRemotePlayFiles()) ? 0x08 : 0x01; // Support remote mode : Bridge Mode
+    packet.operatingMode = (AllowedToRemotePlayFiles ()) ? 0x08 : 0x01; // Support remote mode : Bridge Mode
 
     uint32_t ip = static_cast<uint32_t>(WiFi.localIP ());
     memcpy (packet.ipAddress, &ip, 4);
-    strcpy (packet.hostName, config.hostname.c_str());
-    strcpy (packet.version, (VERSION + String (":") + BUILD_DATE).c_str());
+    strcpy (packet.hostName, config.hostname.c_str ());
+    strcpy (packet.version, (VERSION + String (":") + BUILD_DATE).c_str ());
     strcpy (packet.hardwareType, FPP_VARIANT_NAME);
     packet.ranges[0] = 0;
 
-    // DEBUG_V ("Ping reply to " + destination.toString());
+    // DEBUG_V ("Ping to " + destination.toString());
     udp.writeTo (packet.raw, sizeof (packet), destination, FPP_DISCOVERY_PORT);
 
     // DEBUG_END;
@@ -746,7 +776,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     jsonResponse[F ("HostDescription")] = config.id;
     jsonResponse[F ("Platform")]        = F("ESPixelStick");
     jsonResponse[F ("Variant")]         = FPP_VARIANT_NAME;
-    jsonResponse[F ("Mode")]            = (true == AllowedToRemotePlayFiles()) ? "remote" : "bridge";
+    jsonResponse[F ("Mode")]            = (true == AllowedToRemotePlayFiles()) ? 8 : 1;
     jsonResponse[F ("Version")]         = VERSION + String (":") + BUILD_DATE;
 
     const char* version = VERSION.c_str ();
@@ -935,9 +965,9 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
             break;
         }
 
-        if ((String("...") == filename) || (0 == filename.length()))
+        if ((0 == filename.length()) || (String(No_FPP_LocalFileToPlay) == filename))
         {
-            // DEBUG_V("ignore the not playing a file indicator");
+            // DEBUG_V("Do not start over if the same file is being selected");
             break;
         }
 
@@ -981,9 +1011,9 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
         fseqStartMillis               = millis () - (frameStepTime * frameId);
 
         // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (TotalNumberOfFramesInSequence));
-        // DEBUG_V (String ("frameStepTime:                 ") + String (frameStepTime));
-        // DEBUG_V (String ("channelsPerFrame:              ") + String (channelsPerFrame));
-        // DEBUG_V (String ("dataOffset:                    ") + String (dataOffset));
+        // DEBUG_V (String ("                frameStepTime: ") + String (frameStepTime));
+        // DEBUG_V (String ("             channelsPerFrame: ") + String (channelsPerFrame));
+        // DEBUG_V (String ("                   dataOffset: ") + String (dataOffset));
 
         LOG_PORT.println (String (F ("FPPDiscovery::StartPlaying:: Playing:  '")) + filename + "'" );
 
@@ -1030,22 +1060,22 @@ void c_FPPDiscovery::PlayFile (String & NewFileName)
     // if the AP file is empty then revert to remote operation.
     // if already in remote, do nothing
 
+    AutoPlayFileName = NewFileName;
+
     // are we playing a file
-    if ((0 != fseqName.length ()) && (AutoPlayFileName != NewFileName))
+    if ((0 != fseqName.length ()) && (fseqName != NewFileName))
     {
         // Whatever we are playing, it is not the new autoplay file
         StopPlaying ();
     }
 
-    AutoPlayFileName = NewFileName;
-
     // DEBUG_V ();
 
     // do we have an autoplay file to play?
-    if ((0 != AutoPlayFileName.length ()) && (true == hasBeenInitialized))
+    if ((0 != NewFileName.length ()) && (true == hasBeenInitialized))
     {
         // start playing the new autoplay file
-        StartPlaying (AutoPlayFileName, 0);
+        StartPlaying (NewFileName, 0);
     }
 
     // DEBUG_END;
@@ -1055,9 +1085,18 @@ void c_FPPDiscovery::PlayFile (String & NewFileName)
 //-----------------------------------------------------------------------------
 bool c_FPPDiscovery::AllowedToRemotePlayFiles()
 {
-    return ((FileMgr.SdCardIsInstalled() == true) && (String(F(Stop_FPP_RemotePlay)) == AutoPlayFileName));
-//    return (hasSDStorage == true);
-} // AllowedToRemotePlayFiles
+    // DEBUG_START;
 
+    // DEBUG_V (String ("     SdCardIsInstalled: ")  + String (FileMgr.SdCardIsInstalled ()));
+    // DEBUG_V (String ("      AutoPlayFileName: '") + AutoPlayFileName + "'");
+    // DEBUG_V (String ("No_FPP_LocalFileToPlay: '") + String(No_FPP_LocalFileToPlay) + "'");
+
+    // DEBUG_END;
+
+    return ((FileMgr.SdCardIsInstalled()) && 
+            ((String(F(No_FPP_LocalFileToPlay)) == AutoPlayFileName) || (0 == AutoPlayFileName.length())) &&
+            IsEnabled
+           );
+} // AllowedToRemotePlayFiles
 
 c_FPPDiscovery FPPDiscovery;

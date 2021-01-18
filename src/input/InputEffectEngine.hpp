@@ -120,12 +120,15 @@ private:
 
     uint32_t EffectStep            = 0;            /* Shared mutable effect step counter */
     uint16_t PixelCount            = 0;            /* Number of RGB leds (not channels) */
+    uint16_t MirroredPixelCount    = 0;            /* Number of RGB leds (not channels) */
     uint8_t  ChannelsPerPixel      = 3;
+    uint16_t PixelOffset           = 0;
 
     void setPixel(uint16_t idx,  CRGB color);
     void setRange(uint16_t first, uint16_t len, CRGB color);
     void clearRange(uint16_t first, uint16_t len);
     void setAll(CRGB color);
+    void outputEffectColor (uint16_t pixelId, CRGB outputColor);
 
     CRGB colorWheel(uint8_t pos);
     dCHSV rgb2hsv(CRGB in);

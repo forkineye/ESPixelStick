@@ -50,7 +50,7 @@ c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInput
     // set a default effect
     ActiveEffect = &ListOfEffects[0];
 
-    PixelCount = BufferSize / ChannelsPerPixel;
+    SetBufferInfo (BufferStart, BufferSize);
 
     // DEBUG_END;
 } // c_InputEffectEngine
@@ -243,7 +243,16 @@ void c_InputEffectEngine::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSi
     InputDataBuffer     = BufferStart;
     InputDataBufferSize = BufferSize;
 
+    ChannelsPerPixel = (true == EffectWhiteChannel) ? 4 : 3;
     PixelCount = InputDataBufferSize / ChannelsPerPixel;
+
+    PixelOffset = PixelCount & 0x0001; // handle odd number of pixels
+
+    MirroredPixelCount = PixelCount;
+    if (EffectMirror)
+    {
+        MirroredPixelCount = (PixelCount / 2) + PixelOffset;
+    }
 
     // DEBUG_END;
 
@@ -266,8 +275,7 @@ boolean c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     setFromJSON (effectName,         jsonConfig, F ("currenteffect"));
     setFromJSON (effectColor,        jsonConfig, F ("EffectColor"));
 
-    ChannelsPerPixel = (true == EffectWhiteChannel) ? 4 : 3;
-    PixelCount = InputDataBufferSize / ChannelsPerPixel;
+    SetBufferInfo (InputDataBuffer, InputDataBufferSize);
 
     setColor (effectColor);
     validateConfiguration ();
@@ -296,8 +304,7 @@ boolean c_InputEffectEngine::SetMqttConfig (ArduinoJson::JsonObject& jsonConfig)
     setFromJSON (EffectWhiteChannel, jsonConfig, F ("EffectWhiteChannel"));
     setFromJSON (effectName,         jsonConfig, F ("effect"));
 
-    ChannelsPerPixel = (true == EffectWhiteChannel) ? 4 : 3;
-    PixelCount = InputDataBufferSize / ChannelsPerPixel;
+    SetBufferInfo (InputDataBuffer, InputDataBufferSize);
 
     if (jsonConfig.containsKey ("color"))
     {
@@ -516,52 +523,46 @@ uint16_t c_InputEffectEngine::effectSolidColor ()
 } // effectSolidColor
 
 //-----------------------------------------------------------------------------
+void c_InputEffectEngine::outputEffectColor (uint16_t pixelId, CRGB outputColor)
+{
+    uint16_t NumPixels = MirroredPixelCount;
+
+    if (EffectReverse)
+    {
+        pixelId = NumPixels - 1 - pixelId;
+    }
+
+    if (EffectMirror)
+    {
+        setPixel ((NumPixels - 1)  - pixelId,                outputColor);
+        setPixel (((NumPixels    ) + pixelId) - PixelOffset, outputColor);
+    }
+    else
+    {
+        setPixel (pixelId, outputColor);
+    }
+} // outputEffectColor
+
+//-----------------------------------------------------------------------------
 uint16_t c_InputEffectEngine::effectChase ()
 {
     // DEBUG_START;
+
+    // remove the current output data
+    clearAll ();
+
     // calculate only half the pixels if mirroring
-    uint16_t lc = PixelCount;
-    if (EffectMirror)
-    {
-        lc = lc / 2;
-    }
+    uint16_t lc = MirroredPixelCount;
+
     // Prevent errors if we come from another effect with more steps
     // or switch from the upper half of non-mirror to mirror mode
     EffectStep = EffectStep % lc;
 
-    for (uint16_t i = 0; i < lc; i++)
-    {
-        if (i != EffectStep)
-        {
-            if (EffectMirror)
-            {
-                setPixel (i + lc, { 0, 0, 0 });
-                setPixel (lc - 1 - i, { 0, 0, 0 });
-            }
-            else
-            {
-                setPixel (i, { 0, 0, 0 });
-            }
-        }
-    }
+    outputEffectColor (EffectStep, EffectColor);
 
-    uint16_t pixel = EffectStep;
-    if (EffectReverse)
-    {
-        pixel = lc - 1 - pixel;
-    }
+    // EffectStep = (1 + EffectStep) % lc;
+    ++EffectStep;
 
-    if (EffectMirror)
-    {
-        setPixel (pixel + lc, EffectColor);
-        setPixel (lc - 1 - pixel, EffectColor);
-    }
-    else
-    {
-        setPixel (pixel, EffectColor);
-    }
-
-    EffectStep = (1 + EffectStep) % lc;
     // DEBUG_END;
     return EffectDelay / 32;
 } // effectChase
@@ -571,14 +572,11 @@ uint16_t c_InputEffectEngine::effectRainbow ()
 {
     // DEBUG_START;
     // calculate only half the pixels if mirroring
-    uint16_t lc = PixelCount;
-    if (EffectMirror)
-    {
-        lc = lc / 2;
-    }
+    uint16_t lc = MirroredPixelCount;
+
     for (uint16_t i = 0; i < lc; i++)
     {
-        //      CRGB color = colorWheel(((i * 256 / lc) + EffectStep) & 0xFF);
+        // CRGB color = colorWheel(((i * 256 / lc) + EffectStep) & 0xFF);
 
         double hue = 0;
         if (EffectAllLeds)
@@ -593,23 +591,11 @@ uint16_t c_InputEffectEngine::effectRainbow ()
         double val = 1.0;
         CRGB color = hsv2rgb ({ hue, sat, val });
 
-        uint16_t pixel = i;
-        if (EffectReverse)
-        {
-            pixel = lc - 1 - pixel;
-        }
-        if (EffectMirror)
-        {
-            setPixel (pixel + lc, color);
-            setPixel (lc - 1 - pixel, color);
-        }
-        else
-        {
-            setPixel (pixel, color);
-        }
+        outputEffectColor (i, color);
     }
 
     EffectStep = (1 + EffectStep) & 0xFF;
+
     // DEBUG_END;
     return EffectDelay / 256;
 } // effectRainbow
@@ -620,7 +606,7 @@ uint16_t c_InputEffectEngine::effectBlink ()
     // DEBUG_START;
     // The Blink effect uses two "time slots": on, off
     // Using default delay, a complete sequence takes 2s.
-    if (EffectStep % 2)
+    if (EffectStep & 0x1)
     {
         clearAll ();
     }
@@ -629,7 +615,8 @@ uint16_t c_InputEffectEngine::effectBlink ()
         setAll (EffectColor);
     }
 
-    EffectStep = (1 + EffectStep) % 2;
+    ++EffectStep;
+
     // DEBUG_END;
     return EffectDelay / 1;
 } // effectBlink
