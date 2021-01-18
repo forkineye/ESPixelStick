@@ -328,8 +328,12 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
 
             FPPPingPacket* pingPacket = reinterpret_cast<FPPPingPacket*>(_packet.data ());
             // DEBUG_V (String (F ("Ping Packet subtype: ")) + String (pingPacket->ping_subtype));
+            // DEBUG_V (String (F ("Ping Packet packet.versionMajor: ")) + String (pingPacket->versionMajor));
+            // DEBUG_V (String (F ("Ping Packet packet.versionMinor: ")) + String (pingPacket->versionMinor));
+            // DEBUG_V (String (F ("Ping Packet packet.hostName:     ")) + String (pingPacket->hostName));
+            // DEBUG_V (String (F ("Ping Packet packet.hardwareType: ")) + String (pingPacket->hardwareType));
 
-            if (pingPacket->ping_subtype == 0x00)
+            if (pingPacket->ping_subtype == 0x01)
             {
                 // DEBUG_V (String (F ("FPP Ping discovery packet")));
                 // received a discover ping packet, need to send a ping out
@@ -483,7 +487,7 @@ void c_FPPDiscovery::sendPingPacket (IPAddress destination)
     packet.packet_type = 0x04;
     packet.data_len = 294;
     packet.ping_version = 0x3;
-    packet.ping_subtype = 0x1; // 0 is to "discover" others, we don't need that
+    packet.ping_subtype = 0x0;
     packet.ping_hardware = FPP_TYPE_ID;
 
     const char* version = VERSION.c_str ();
