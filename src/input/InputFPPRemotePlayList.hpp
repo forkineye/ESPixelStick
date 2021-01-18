@@ -38,7 +38,6 @@ public:
 
 private:
 
-
 protected:
     friend class fsm_PlayList_state_Idle;
     friend class fsm_PlayList_state_PlayingFile;
@@ -52,6 +51,5 @@ protected:
     fsm_PlayList_state_Paused        fsm_PlayList_state_Paused_imp;
 
     fsm_PlayList_state * pCurrentFsmState = nullptr;
-    uint32_t             FsmTimerPlayStartTime = 0;
 
 }; // c_InputFPPRemotePlayList
