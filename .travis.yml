@@ -1,8 +1,9 @@
 language: generic
 env:
   global:
-  - IDE_VERSION=1.8.1
+  - IDE_VERSION=1.8.13
   - ESP_HOME=$HOME/ide/hardware/esp8266com
+  - ESP32_HOME=$HOME/ide/hardware/esp32com
   - LIB_HOME=$HOME/Arduino/libraries
   - ESPS_HOME=$HOME/Arduino/ESPixelStick
   - BUILD=$HOME/build
@@ -16,12 +17,19 @@ before_install:
 - export PATH="$HOME/ide:$PATH"
 - mkdir -p $LIB_HOME
 - mkdir -p $ESP_HOME
+- mkdir -p $ESP32_HOME
 - mkdir -p $BUILD
 - git clone https://github.com/esp8266/Arduino.git $ESP_HOME/esp8266
+- git clone https://github.com/esp32/Arduino.git $ESP32_HOME/esp8266
 - cd $ESP_HOME/esp8266
 - git checkout 2.7.4
 - git submodule update --init
+- cd $ESP32_HOME/esp32
+- git checkout 2.7.4
+- git submodule update --init
 - cd $ESP_HOME/esp8266/tools
+- python get.py
+- cd $ESP32_HOME/esp32/tools
 - python get.py
 - git clone https://github.com/bblanchon/ArduinoJson $LIB_HOME/ArduinoJson
 - git clone https://github.com/forkineye/ESPAsyncE131 $LIB_HOME/ESPAsyncE131
@@ -37,6 +45,9 @@ install:
   --pref build.path=$BUILD --save-prefs
 before_script:
 - cd $ESPS_HOME
+- npm install -g gulp-cli
+- npm install
+- cd $ESPS32_HOME
 - npm install -g gulp-cli
 - npm install
 script:
