@@ -3,7 +3,7 @@
 * InputFPPRemotePlayItem.hpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2020 Shelby Merrick
+* Copyright (c) 2021 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -30,6 +30,8 @@ public:
     virtual void Start () = 0;
     virtual void Stop  () = 0;
     virtual void Sync  (time_t syncTime) = 0;
+    virtual void Poll  () = 0;
+    virtual void GetStatus (JsonObject& jsonStatus) = 0;
 
 private:
     String PlayItemName;

@@ -2,7 +2,7 @@
 * InputFPPRemotePlayEffect.cpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2020 Shelby Merrick
+* Copyright (c) 2021 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -62,3 +62,21 @@ void c_InputFPPRemotePlayEffect::Sync (time_t syncTime)
 
     // DEBUG_END;
 } // Sync
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemotePlayEffect::Poll ()
+{
+    // DEBUG_START;
+
+    // DEBUG_END;
+
+} // Poll
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemotePlayEffect::GetStatus (JsonObject & jsonStatus)
+{
+    // DEBUG_START;
+
+    // DEBUG_END;
+
+} // GetStatus

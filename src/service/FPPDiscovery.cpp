@@ -1,7 +1,7 @@
 /*
 * c_FPPDiscovery.cpp
 
-* Copyright (c) 2020 Shelby Merrick
+* Copyright (c) 2021 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,

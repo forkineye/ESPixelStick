@@ -2,7 +2,7 @@
 * InputFPPRemotePlayList.cpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2020 Shelby Merrick
+* Copyright (c) 2021 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -27,6 +27,7 @@ c_InputFPPRemotePlayList::c_InputFPPRemotePlayList (String & NameOfPlaylist) :
 {
     // DEBUG_START;
 
+    fsm_PlayList_state_Idle_imp.Init (this);
 
     // DEBUG_END;
 } // c_InputFPPRemotePlayList
@@ -34,6 +35,11 @@ c_InputFPPRemotePlayList::c_InputFPPRemotePlayList (String & NameOfPlaylist) :
 //-----------------------------------------------------------------------------
 c_InputFPPRemotePlayList::~c_InputFPPRemotePlayList ()
 {
+    // DEBUG_START;
+
+    pCurrentFsmState->Stop ();
+
+    // DEBUG_END;
 
 } // ~c_InputFPPRemotePlayList
 
@@ -42,8 +48,10 @@ void c_InputFPPRemotePlayList::Start ()
 {
     // DEBUG_START;
 
+    pCurrentFsmState->Start ();
 
     // DEBUG_END;
+
 } // Start
 
 //-----------------------------------------------------------------------------
@@ -51,8 +59,11 @@ void c_InputFPPRemotePlayList::Stop ()
 {
     // DEBUG_START;
 
+    pCurrentFsmState->Stop ();
+    fsm_PlayList_state_Idle_imp.Init (this);
 
     // DEBUG_END;
+
 } // Stop
 
 //-----------------------------------------------------------------------------
@@ -60,6 +71,28 @@ void c_InputFPPRemotePlayList::Sync (time_t syncTime)
 {
     // DEBUG_START;
 
+    pCurrentFsmState->Sync (syncTime);
 
     // DEBUG_END;
+
 } // Sync
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemotePlayList::Poll ()
+{
+    // DEBUG_START;
+
+    pCurrentFsmState->Poll ();
+
+    // DEBUG_END;
+
+} // Poll
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemotePlayList::GetStatus (JsonObject & jsonStatus)
+{
+    // DEBUG_START;
+
+    // DEBUG_END;
+
+} // GetStatus
