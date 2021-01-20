@@ -32,12 +32,12 @@ class c_InputFPPRemotePlayEffect;
 class fsm_PlayEffect_state
 {
 public:
-    virtual void Poll (void) = 0;
+    virtual void Poll (uint8_t * Buffer, size_t BufferSize) = 0;
     virtual void Init (c_InputFPPRemotePlayEffect * Parent) = 0;
     virtual void GetStateName (String & sName) = 0;
-    virtual void Start (void) = 0;
+    virtual void Start (String & FileName, uint32_t FrameId) = 0;
     virtual void Stop (void) = 0;
-    virtual void Sync (time_t syncTime) = 0;
+    virtual bool Sync (uint32_t FrameId) = 0;
 
 protected:
     c_InputFPPRemotePlayEffect* p_InputFPPRemotePlayEffect = nullptr;
@@ -45,45 +45,27 @@ protected:
 }; // fsm_PlayEffect_state
 
 /*****************************************************************************/
-class fsm_PlayEffect_state_Idle : fsm_PlayEffect_state
+class fsm_PlayEffect_state_Idle : public fsm_PlayEffect_state
 {
 public:
-    virtual void Poll (void);
+    virtual void Poll (uint8_t * Buffer, size_t BufferSize);
     virtual void Init (c_InputFPPRemotePlayEffect* Parent);
-    virtual void GetStateName (String& sName) { sName = F ("Idle"); }
-    virtual void Start (void);
+    virtual void GetStateName (String & sName) { sName = F ("Idle"); }
+    virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop (void);
-    virtual void Sync (time_t syncTime);
+    virtual bool Sync (uint32_t FrameId);
 
 }; // fsm_PlayEffect_state_Idle
 
 /*****************************************************************************/
-class fsm_PlayEffect_state_PlayingEffect : fsm_PlayEffect_state
+class fsm_PlayEffect_state_PlayingEffect : public fsm_PlayEffect_state
 {
 public:
-    virtual void Poll (void);
+    virtual void Poll (uint8_t * Buffer, size_t BufferSize);
     virtual void Init (c_InputFPPRemotePlayEffect* Parent);
-    virtual void GetStateName (String& sName) { sName = F ("Effect"); }
-    virtual void Start (void);
+    virtual void GetStateName (String & sName) { sName = F ("Effect"); }
+    virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop (void);
-    virtual void Sync (time_t syncTime);
+    virtual bool Sync (uint32_t FrameId);
 
 }; // fsm_PlayEffect_state_PlayingEffect
-
-/*****************************************************************************/
-class fsm_PlayEffect_state_Paused : fsm_PlayEffect_state
-{
-public:
-    virtual void Poll (void);
-    virtual void Init (c_InputFPPRemotePlayEffect* Parent);
-    virtual void GetStateName (String& sName) { sName = F ("Paused"); }
-    virtual void Start (void);
-    virtual void Stop (void);
-    virtual void Sync (time_t syncTime);
-
-}; // fsm_PlayEffect_state_Paused
-
-
-
-
-

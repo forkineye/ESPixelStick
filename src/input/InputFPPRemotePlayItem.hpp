@@ -24,14 +24,17 @@
 class c_InputFPPRemotePlayItem
 {
 public:
-    c_InputFPPRemotePlayItem (String & NameOfPlayItem);
+    c_InputFPPRemotePlayItem ();
     ~c_InputFPPRemotePlayItem ();
 
-    virtual void Start () = 0;
+    virtual void Poll  (uint8_t * Buffer, size_t BufferSize) = 0;
+    virtual void Start (String & FileName, uint32_t FrameId) = 0;
     virtual void Stop  () = 0;
-    virtual void Sync  (time_t syncTime) = 0;
-    virtual void Poll  () = 0;
-    virtual void GetStatus (JsonObject& jsonStatus) = 0;
+    virtual bool Sync  (uint32_t FrameId) = 0;
+    virtual void GetStatus (JsonObject & jsonStatus) = 0;
+    virtual bool IsIdle () = 0;
+
+    String GetFileName () { return PlayItemName; }
 
 private:
     String PlayItemName;

@@ -22,7 +22,7 @@
 #include "../service/FPPDiscovery.h"
 
 //-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_Idle::Poll (void)
+void fsm_PlayEffect_state_Idle::Poll (uint8_t * Buffer, size_t BufferSize)
 {
     // DEBUG_START;
 
@@ -45,7 +45,7 @@ void fsm_PlayEffect_state_Idle::Init (c_InputFPPRemotePlayEffect* Parent)
 } // fsm_PlayEffect_state_Idle::Init
 
 //-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_Idle::Start (void)
+void fsm_PlayEffect_state_Idle::Start (String & FileName, uint32_t FrameId)
 {
     // DEBUG_START;
 
@@ -71,7 +71,7 @@ void fsm_PlayEffect_state_Idle::Stop (void)
 } // fsm_PlayEffect_state_Idle::Stop
 
 //-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_Idle::Sync (time_t syncTime)
+bool fsm_PlayEffect_state_Idle::Sync (uint32_t FrameId)
 {
     // DEBUG_START;
 
@@ -84,7 +84,7 @@ void fsm_PlayEffect_state_Idle::Sync (time_t syncTime)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_PlayingEffect::Poll (void)
+void fsm_PlayEffect_state_PlayingEffect::Poll (uint8_t * Buffer, size_t BufferSize)
 {
     // DEBUG_START;
 
@@ -102,7 +102,7 @@ void fsm_PlayEffect_state_PlayingEffect::Init (c_InputFPPRemotePlayEffect* Paren
 } // fsm_PlayEffect_state_PlayingEffect::Init
 
 //-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_PlayingEffect::Start (void)
+void fsm_PlayEffect_state_PlayingEffect::Start (String & FileName, uint32_t FrameId)
 {
     // DEBUG_START;
 
@@ -120,58 +120,10 @@ void fsm_PlayEffect_state_PlayingEffect::Stop (void)
 } // fsm_PlayEffect_state_PlayingEffect::Stop
 
 //-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_PlayingEffect::Sync (time_t syncTime)
+bool fsm_PlayEffect_state_PlayingEffect::Sync (uint32_t FrameId)
 {
     // DEBUG_START;
 
     // DEBUG_END;
 
 } // fsm_PlayEffect_state_PlayingEffect::Sync
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_Paused::Poll (void)
-{
-    // DEBUG_START;
-
-    // DEBUG_END;
-
-} // fsm_PlayEffect_state_Paused::Poll
-
-//-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_Paused::Init (c_InputFPPRemotePlayEffect* Parent)
-{
-    // DEBUG_START;
-
-    // DEBUG_END;
-
-} // fsm_PlayEffect_state_Paused::Init
-
-//-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_Paused::Start (void)
-{
-    // DEBUG_START;
-
-    // DEBUG_END;
-
-} // fsm_PlayEffect_state_Paused::Start
-
-//-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_Paused::Stop (void)
-{
-    // DEBUG_START;
-
-    // DEBUG_END;
-
-} // fsm_PlayEffect_state_Paused::Stop
-
-//-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_Paused::Sync (time_t syncTime)
-{
-    // DEBUG_START;
-
-    // DEBUG_END;
-
-} // fsm_PlayEffect_state_Paused::Sync
-

@@ -26,25 +26,24 @@
 class c_InputFPPRemotePlayEffect : c_InputFPPRemotePlayItem
 {
 public:
-    c_InputFPPRemotePlayEffect (String & NameOfPlayFile);
+    c_InputFPPRemotePlayEffect ();
     ~c_InputFPPRemotePlayEffect ();
 
-    virtual void Start ();
+    virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop  ();
-    virtual void Sync  (time_t syncTime);
-    virtual void Poll  ();
+    virtual bool Sync  (uint32_t FrameId);
+    virtual void Poll  (uint8_t * Buffer, size_t BufferSize);
     virtual void GetStatus (JsonObject & jsonStatus);
+    virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayEffect_state_Idle_imp); }
 
 private:
 
     friend class fsm_PlayEffect_state_Idle;
     friend class fsm_PlayEffect_state_PlayingEffect;
-    friend class fsm_PlayEffect_state_Paused;
     friend class fsm_PlayEffect_state;
 
     fsm_PlayEffect_state_Idle          fsm_PlayEffect_state_Idle_imp;
     fsm_PlayEffect_state_PlayingEffect fsm_PlayEffect_state_PlayingEffect_imp;
-    fsm_PlayEffect_state_Paused        fsm_PlayEffect_state_Paused_imp;
 
     fsm_PlayEffect_state* pCurrentFsmState = nullptr;
 

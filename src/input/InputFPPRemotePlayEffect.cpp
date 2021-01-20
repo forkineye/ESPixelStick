@@ -21,8 +21,8 @@
 #include "InputFPPRemotePlayEffect.hpp"
 
 //-----------------------------------------------------------------------------
-c_InputFPPRemotePlayEffect::c_InputFPPRemotePlayEffect (String& NameOfPlayFile) :
-    c_InputFPPRemotePlayItem (NameOfPlayFile)
+c_InputFPPRemotePlayEffect::c_InputFPPRemotePlayEffect () :
+    c_InputFPPRemotePlayItem ()
 {
     // DEBUG_START;
 
@@ -37,11 +37,11 @@ c_InputFPPRemotePlayEffect::~c_InputFPPRemotePlayEffect ()
 } // ~c_InputFPPRemotePlayEffect
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayEffect::Start ()
+void c_InputFPPRemotePlayEffect::Start (String & FileName, uint32_t FrameId)
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Start ();
+    pCurrentFsmState->Start (FileName, FrameId);
 
     // DEBUG_END;
 } // Start
@@ -56,7 +56,7 @@ void c_InputFPPRemotePlayEffect::Stop ()
 } // Stop
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayEffect::Sync (time_t syncTime)
+bool c_InputFPPRemotePlayEffect::Sync (uint32_t FrameId)
 {
     // DEBUG_START;
 
@@ -65,7 +65,7 @@ void c_InputFPPRemotePlayEffect::Sync (time_t syncTime)
 } // Sync
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayEffect::Poll ()
+void c_InputFPPRemotePlayEffect::Poll (uint8_t * Buffer, size_t BufferSize)
 {
     // DEBUG_START;
 

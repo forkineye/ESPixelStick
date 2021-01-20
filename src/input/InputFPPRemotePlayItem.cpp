@@ -22,7 +22,7 @@
 #include "InputFPPRemotePlayItem.hpp"
 
 //-----------------------------------------------------------------------------
-c_InputFPPRemotePlayItem::c_InputFPPRemotePlayItem (String & NameOfPlaylist)
+c_InputFPPRemotePlayItem::c_InputFPPRemotePlayItem ()
 {
     // DEBUG_START;
 

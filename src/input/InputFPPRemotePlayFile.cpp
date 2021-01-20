@@ -22,8 +22,8 @@
 #include "../service/FPPDiscovery.h"
 
 //-----------------------------------------------------------------------------
-c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile (String& NameOfPlayFile) :
-    c_InputFPPRemotePlayItem (NameOfPlayFile)
+c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile () :
+    c_InputFPPRemotePlayItem ()
 {
     // DEBUG_START;
 
@@ -38,7 +38,7 @@ c_InputFPPRemotePlayFile::~c_InputFPPRemotePlayFile ()
 } // ~c_InputFPPRemotePlayFile
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::Start ()
+void c_InputFPPRemotePlayFile::Start (String & FileName, uint32_t FrameId)
 {
     // DEBUG_START;
 
@@ -56,7 +56,7 @@ void c_InputFPPRemotePlayFile::Stop ()
 } // Stop
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::Sync (time_t syncTime)
+bool c_InputFPPRemotePlayFile::Sync (uint32_t FrameId)
 {
     // DEBUG_START;
 
@@ -65,7 +65,7 @@ void c_InputFPPRemotePlayFile::Sync (time_t syncTime)
 } // Sync
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::Poll ()
+void c_InputFPPRemotePlayFile::Poll (uint8_t * Buffer, size_t BufferSize)
 {
     // DEBUG_START;
 

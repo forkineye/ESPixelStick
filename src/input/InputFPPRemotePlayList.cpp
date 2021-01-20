@@ -22,8 +22,8 @@
 #include "../service/FPPDiscovery.h"
 
 //-----------------------------------------------------------------------------
-c_InputFPPRemotePlayList::c_InputFPPRemotePlayList (String & NameOfPlaylist) :
-    c_InputFPPRemotePlayItem(NameOfPlaylist)
+c_InputFPPRemotePlayList::c_InputFPPRemotePlayList () :
+    c_InputFPPRemotePlayItem()
 {
     // DEBUG_START;
 
@@ -44,11 +44,11 @@ c_InputFPPRemotePlayList::~c_InputFPPRemotePlayList ()
 } // ~c_InputFPPRemotePlayList
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayList::Start ()
+void c_InputFPPRemotePlayList::Start (String & FileName, uint32_t FrameId)
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Start ();
+    pCurrentFsmState->Start (FileName, FrameId);
 
     // DEBUG_END;
 
@@ -67,22 +67,22 @@ void c_InputFPPRemotePlayList::Stop ()
 } // Stop
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayList::Sync (time_t syncTime)
+bool c_InputFPPRemotePlayList::Sync (uint32_t FrameId)
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Sync (syncTime);
+    pCurrentFsmState->Sync (FrameId);
 
     // DEBUG_END;
 
 } // Sync
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayList::Poll ()
+void c_InputFPPRemotePlayList::Poll (uint8_t * Buffer, size_t BufferSize)
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Poll ();
+    pCurrentFsmState->Poll (Buffer, BufferSize);
 
     // DEBUG_END;
 
