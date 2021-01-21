@@ -196,9 +196,10 @@ void c_OutputWS2811::GetConfig(ArduinoJson::JsonObject & jsonConfig)
 void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 {
     // DEBUG_START;
-    // DEBUG_V ("NumChannelsAvailable: " + String(NumChannelsAvailable));
-    // DEBUG_V ("       GetBufferUsedSize: " + String(GetBufferUsedSize()));
-    // DEBUG_V ("         pixel_count: " + String(pixel_count));
+    // DEBUG_V (String ("NumChannelsAvailable: ") + String (NumChannelsAvailable));
+    // DEBUG_V (String ("   GetBufferUsedSize: ") + String (c_OutputCommon::GetBufferUsedSize ()));
+    // DEBUG_V (String ("         pixel_count: ") + String (pixel_count));
+    // DEBUG_V (String ("       BufferAddress: ") + String ((uint32_t)(c_OutputCommon::GetBufferAddress ())));
 
     do // once
     {
@@ -316,9 +317,9 @@ void c_OutputWS2811::Render()
     if (nullptr == pIsrOutputBuffer) { return; }
 
     // set up pointers into the pixel data space
-    uint8_t *pSourceData = OutputMgr.GetBufferAddress(); // source buffer (owned by base class)
+    uint8_t *pSourceData = c_OutputCommon::GetBufferAddress(); // source buffer (owned by base class)
     uint8_t *pTargetData = pIsrOutputBuffer;              // target buffer
-    uint16_t OutputPixelCount = GetBufferUsedSize () / numIntensityBytesPerPixel;
+    uint16_t OutputPixelCount = c_OutputCommon::GetBufferUsedSize () / numIntensityBytesPerPixel;
 
     // what type of copy are we making?
     if (!zig_size)
