@@ -20,6 +20,7 @@
 */
 
 #include "../ESPixelStick.h"
+#include "../FileMgr.hpp"
 
 class c_InputFPPRemotePlayFile;
 
@@ -40,7 +41,7 @@ public:
     virtual bool Sync (uint32_t FrameId) = 0;
 
 protected:
-    c_InputFPPRemotePlayFile* p_InputFPPRemotePlayFile = nullptr;
+    c_InputFPPRemotePlayFile * p_InputFPPRemotePlayFile = nullptr;
 
 }; // fsm_PlayFile_state
 
@@ -68,20 +69,11 @@ public:
     virtual void Stop (void);
     virtual bool Sync (uint32_t FrameId);
 
+private:
+
+
 }; // fsm_PlayFile_state_PlayingFile
 
-/*****************************************************************************/
-class fsm_PlayFile_state_Paused : public fsm_PlayFile_state
-{
-public:
-    virtual void Poll (uint8_t * Buffer, size_t BufferSize);
-    virtual void Init (c_InputFPPRemotePlayFile* Parent);
-    virtual void GetStateName (String & sName) { sName = F ("Paused"); }
-    virtual void Start (String & FileName, uint32_t FrameId);
-    virtual void Stop (void);
-    virtual bool Sync (uint32_t FrameId);
-
-}; // fsm_PlayFile_state_Paused
 
 
 

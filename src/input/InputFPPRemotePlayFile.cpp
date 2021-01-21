@@ -27,6 +27,7 @@ c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile () :
 {
     // DEBUG_START;
 
+    fsm_PlayFile_state_Idle_imp.Init (this);
 
     // DEBUG_END;
 } // c_InputFPPRemotePlayFile
@@ -34,6 +35,11 @@ c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile () :
 //-----------------------------------------------------------------------------
 c_InputFPPRemotePlayFile::~c_InputFPPRemotePlayFile ()
 {
+    // DEBUG_START;
+
+    pCurrentFsmState->Stop ();
+
+    // DEBUG_END;
 
 } // ~c_InputFPPRemotePlayFile
 
@@ -42,6 +48,7 @@ void c_InputFPPRemotePlayFile::Start (String & FileName, uint32_t FrameId)
 {
     // DEBUG_START;
 
+    pCurrentFsmState->Start (FileName, FrameId);
 
     // DEBUG_END;
 } // Start
@@ -51,6 +58,7 @@ void c_InputFPPRemotePlayFile::Stop ()
 {
     // DEBUG_START;
 
+    pCurrentFsmState->Stop ();
 
     // DEBUG_END;
 } // Stop
@@ -62,12 +70,16 @@ bool c_InputFPPRemotePlayFile::Sync (uint32_t FrameId)
 
 
     // DEBUG_END;
+    return     pCurrentFsmState->Sync (FrameId);
+
 } // Sync
 
 //-----------------------------------------------------------------------------
 void c_InputFPPRemotePlayFile::Poll (uint8_t * Buffer, size_t BufferSize)
 {
     // DEBUG_START;
+
+    pCurrentFsmState->Poll (Buffer, BufferSize);
 
     // DEBUG_END;
 
@@ -77,6 +89,7 @@ void c_InputFPPRemotePlayFile::Poll (uint8_t * Buffer, size_t BufferSize)
 void c_InputFPPRemotePlayFile::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
+
 
     // DEBUG_END;
 

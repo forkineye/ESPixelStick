@@ -23,7 +23,7 @@
 #include "InputFPPRemotePlayItem.hpp"
 #include "InputFPPRemotePlayFileFsm.hpp"
 
-class c_InputFPPRemotePlayFile : c_InputFPPRemotePlayItem
+class c_InputFPPRemotePlayFile : public c_InputFPPRemotePlayItem
 {
 public:
     c_InputFPPRemotePlayFile ();
@@ -43,8 +43,15 @@ private:
 
     fsm_PlayFile_state_Idle          fsm_PlayFile_state_Idle_imp;
     fsm_PlayFile_state_PlayingFile   fsm_PlayFile_state_PlayingFile_imp;
-    fsm_PlayFile_state_Paused        fsm_PlayFile_state_Paused_imp;
 
-    fsm_PlayFile_state* pCurrentFsmState = nullptr;
+    fsm_PlayFile_state * pCurrentFsmState = nullptr;
+    c_FileMgr::FileId FileBeingPlayed = 0;
+    uint32_t          CurrentFrameId = 0;
+    size_t            DataOffset = 0;
+    uint32_t          ChannelsPerFrame = 0;
+    uint32_t          FrameStepTime = 0;
+    uint32_t          TotalNumberOfFramesInSequence = 0;
+    uint32_t          StartTimeInMillis = 0;
+
 
 }; // c_InputFPPRemotePlayFile

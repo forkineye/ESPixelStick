@@ -174,3 +174,50 @@ bool fsm_PlayList_state_PlayingEffect::Sync (uint32_t FrameId)
     // DEBUG_END;
 
 } // fsm_PlayList_state_PlayingEffect::Sync
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void fsm_PlayList_state_Paused::Poll (uint8_t* Buffer, size_t BufferSize)
+{
+    // DEBUG_START;
+
+    // DEBUG_END;
+
+} // fsm_PlayList_state_Paused::Poll
+
+//-----------------------------------------------------------------------------
+void fsm_PlayList_state_Paused::Init (c_InputFPPRemotePlayList* Parent)
+{
+    // DEBUG_START;
+
+    // DEBUG_END;
+
+} // fsm_PlayList_state_Paused::Init
+
+//-----------------------------------------------------------------------------
+void fsm_PlayList_state_Paused::Start (String& FileName, uint32_t FrameId)
+{
+    // DEBUG_START;
+
+    // DEBUG_END;
+
+} // fsm_PlayList_state_Paused::Start
+
+//-----------------------------------------------------------------------------
+void fsm_PlayList_state_Paused::Stop (void)
+{
+    // DEBUG_START;
+
+    // DEBUG_END;
+
+} // fsm_PlayList_state_Paused::Stop
+
+//-----------------------------------------------------------------------------
+bool fsm_PlayList_state_Paused::Sync (uint32_t FrameId)
+{
+    // DEBUG_START;
+
+    // DEBUG_END;
+
+} // fsm_PlayList_state_Paused::Sync

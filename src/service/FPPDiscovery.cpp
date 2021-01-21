@@ -17,6 +17,8 @@
 */
 
 #include "FPPDiscovery.h"
+#include "fseq.h"
+
 #include "../input/InputMgr.hpp"
 
 #include <Int64String.h>
@@ -35,89 +37,6 @@ extern const String VERSION;
 #endif
 
 #define FPP_DISCOVERY_PORT 32320
-
-//-----------------------------------------------------------------------------
-typedef union
-{
-    struct
-    {
-        uint8_t  header[4];  //FPPD
-        uint8_t  packet_type;
-        uint16_t data_len;
-    } __attribute__ ((packed));
-    uint8_t raw[301];
-} FPPPacket;
-
-typedef union
-{
-    struct
-    {
-        uint8_t  header[4];  //FPPD
-        uint8_t  packet_type;
-        uint16_t data_len;
-        uint8_t  ping_version;
-        uint8_t  ping_subtype;
-        uint8_t  ping_hardware;
-        uint16_t versionMajor;
-        uint16_t versionMinor;
-        uint8_t  operatingMode;
-        uint8_t  ipAddress[4];
-        char  hostName[65];
-        char  version[41];
-        char  hardwareType[41];
-        char  ranges[121];
-    } __attribute__ ((packed));
-    uint8_t raw[301];
-} FPPPingPacket;
-
-typedef union
-{
-    struct
-    {
-        uint8_t  header[4];  //FPPD
-        uint8_t  packet_type;
-        uint16_t data_len;
-        uint8_t sync_action;
-        uint8_t sync_type;
-        uint32_t frame_number;
-        float  seconds_elapsed;
-        char filename[250];
-    } __attribute__ ((packed));
-    uint8_t raw[301];
-} FPPMultiSyncPacket;
-
-struct FSEQVariableDataHeader
-{
-    uint16_t    length;
-    char        type[2];
-//  uint8_t     data[???];
-
-} __attribute__ ((packed));
-
-struct FSEQRangeEntry
-{
-    uint8_t Start[3];
-    uint8_t Length[3];
-
-} __attribute__ ((packed));
-
-struct FSEQHeader
-{
-    uint8_t  header[4];    // FSEQ
-    uint16_t dataOffset;
-    uint8_t  minorVersion;
-    uint8_t  majorVersion;
-    uint16_t headerLen;
-    uint32_t channelCount;
-    uint32_t TotalNumberOfFramesInSequence;
-    uint8_t  stepTime;
-    uint8_t  flags;
-    uint8_t  compressionType;
-    uint8_t  numCompressedBlocks;
-    uint8_t  numSparseRanges;
-    uint8_t  flags2;
-    uint64_t id;
-} __attribute__ ((packed));
 
 //-----------------------------------------------------------------------------
 c_FPPDiscovery::c_FPPDiscovery ()

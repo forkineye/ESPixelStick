@@ -21,6 +21,8 @@
 #include <Int64String.h>
 #include "InputFPPRemote.h"
 #include "../service/FPPDiscovery.h"
+#include "InputFPPRemotePlayFile.hpp"
+#include "InputFPPRemotePlayList.hpp"
 
 #if defined ARDUINO_ARCH_ESP32
 #   include <functional>
@@ -44,8 +46,8 @@ c_InputFPPRemote::c_InputFPPRemote (
 //-----------------------------------------------------------------------------
 c_InputFPPRemote::~c_InputFPPRemote ()
 {
-    FseqFileToPlay = No_FPP_LocalFileToPlay;
-    FPPDiscovery.PlayFile (FseqFileToPlay);
+    FileToPlay = No_FPP_LocalFileToPlay;
+    FPPDiscovery.PlayFile (FileToPlay);
     FPPDiscovery.Disable ();
 
 } // ~c_InputFPPRemote
@@ -80,7 +82,7 @@ void c_InputFPPRemote::GetConfig (JsonObject & jsonConfig)
     jsonConfig[JSON_NAME_MOSI]         = mosi_pin;
     jsonConfig[JSON_NAME_CLOCK]        = clk_pin;
     jsonConfig[JSON_NAME_CS]           = cs_pin;
-    jsonConfig[JSON_NAME_FILE_TO_PLAY] = FseqFileToPlay;
+    jsonConfig[JSON_NAME_FILE_TO_PLAY] = FileToPlay;
 
     // DEBUG_END;
 
@@ -100,9 +102,18 @@ void c_InputFPPRemote::Process ()
 {
     // DEBUG_START;
 
-    if (true == HasBeenInitialized)
+    if (nullptr != pInputFPPRemotePlayItem)
     {
-        FPPDiscovery.ReadNextFrame (InputDataBuffer, InputDataBufferSize);
+        pInputFPPRemotePlayItem->Poll (InputDataBuffer, InputDataBufferSize);
+
+        if (pInputFPPRemotePlayItem->IsIdle ())
+        {
+            StartPlaying ();
+        }
+    }
+    else
+    {
+        // poll the FPP Discovery process
     }
 
     // DEBUG_END;
@@ -127,14 +138,54 @@ boolean c_InputFPPRemote::SetConfig (JsonObject & jsonConfig)
     setFromJSON (clk_pin,  jsonConfig, JSON_NAME_CLOCK);
     setFromJSON (cs_pin,   jsonConfig, JSON_NAME_CS);
 
-    setFromJSON (FseqFileToPlay, jsonConfig, JSON_NAME_FILE_TO_PLAY);
+    setFromJSON (FileToPlay, jsonConfig, JSON_NAME_FILE_TO_PLAY);
 
     FileMgr.SetSpiIoPins (miso_pin, mosi_pin, clk_pin, cs_pin);
-    FPPDiscovery.PlayFile (FseqFileToPlay);
+
+    StartPlaying ();
 
     // DEBUG_END;
     return true;
 } // SetConfig
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemote::StartPlaying ()
+{
+    DEBUG_START;
+
+    do // once
+    {
+        if ((0 == FileToPlay.length ()) || (FileToPlay == No_LocalFileToPlay))
+        {
+            // we are in FPP Remote Mode. Shut down the player
+            if (nullptr != pInputFPPRemotePlayItem)
+            {
+                pInputFPPRemotePlayItem->Stop ();
+                delete pInputFPPRemotePlayItem;
+                pInputFPPRemotePlayItem = nullptr;
+            }
+            break;
+        }
+
+        if (-1 != FileToPlay.indexOf (".pl"))
+        {
+            // we have a playlist we need to play
+            pInputFPPRemotePlayItem = new c_InputFPPRemotePlayList ();
+            break;
+        }
+        else
+        {
+            // we have a file we need to play
+            pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile ();
+        }
+
+        pInputFPPRemotePlayItem->Start (FileToPlay, 0);
+
+    } while (false);
+
+    DEBUG_END;
+
+} // StartPlaying
 
 //-----------------------------------------------------------------------------
 //TODO: Add MQTT configuration validation

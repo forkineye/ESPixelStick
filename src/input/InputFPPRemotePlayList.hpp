@@ -24,7 +24,7 @@
 #include "InputFPPRemotePlayListFsm.hpp"
 
 /*****************************************************************************/
-class c_InputFPPRemotePlayList : c_InputFPPRemotePlayItem
+class c_InputFPPRemotePlayList : public c_InputFPPRemotePlayItem
 {
 public:
     c_InputFPPRemotePlayList ();
