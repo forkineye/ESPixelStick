@@ -246,11 +246,11 @@ void c_OutputGECE::Render()
 
     uint32_t packet = 0;
     uint32_t pTime  = 0;
-    uint8_t  NumOutputPixels = GetBufferUsedSize () / GECE_NUM_INTENSITY_BYTES_PER_PIXEL;
+    uint8_t  NumOutputPixels = OutputBufferSize / GECE_NUM_INTENSITY_BYTES_PER_PIXEL;
 
     // Build a GECE packet
     FrameStartTimeInMicroSec = micros();
-    uint8_t * pCurrentInputData = GetBufferAddress();
+    uint8_t * pCurrentInputData = pOutputBuffer;
     
     for (uint8_t CurrentAddress = 0; CurrentAddress < NumOutputPixels; ++CurrentAddress)
     {
@@ -261,11 +261,11 @@ void c_OutputGECE::Render()
         packet |= GECE_SET_BLUE       (*pCurrentInputData++);
 
         // now convert the bits into a byte stream
-        uint8_t  OutputBuffer[GECE_PACKET_SIZE + 1]; ///< GECE Packet Buffer
-        uint8_t* pCurrentOutputData = OutputBuffer;
+        uint8_t  OutputPacketBuffer[GECE_PACKET_SIZE + 1]; ///< GECE Packet Buffer
+        uint8_t* pCurrentOutputPacketData = OutputPacketBuffer;
         for (uint8_t currentShiftCount = GECE_PACKET_SIZE; 0 != currentShiftCount; --currentShiftCount)
         {
-            *pCurrentOutputData++ = LOOKUP_GECE[(packet >> currentShiftCount-1) & 0x1];
+            *pCurrentOutputPacketData++ = LOOKUP_GECE[(packet >> currentShiftCount-1) & 0x1];
         }
 
         // Wait until ready to send
@@ -278,7 +278,7 @@ void c_OutputGECE::Render()
         while ((_getCycleCount() - c) < CYCLES_GECE_START - 100) {}
 
         // Send the packet and then idle low (break)
-        CommonSerialWrite(OutputBuffer, GECE_PACKET_SIZE);
+        CommonSerialWrite(OutputPacketBuffer, GECE_PACKET_SIZE);
 
         SET_PERI_REG_MASK(UART_CONF0(UartId), UART_TXD_BRK);
 

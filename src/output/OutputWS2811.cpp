@@ -204,7 +204,7 @@ void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
     do // once
     {
         // are we changing size?
-        if (NumChannelsAvailable == GetBufferUsedSize ())
+        if (NumChannelsAvailable == OutputBufferSize)
         {
             // DEBUG_V ("NO Need to change the ISR buffer");
             break;
@@ -317,9 +317,9 @@ void c_OutputWS2811::Render()
     if (nullptr == pIsrOutputBuffer) { return; }
 
     // set up pointers into the pixel data space
-    uint8_t *pSourceData = c_OutputCommon::GetBufferAddress(); // source buffer (owned by base class)
+    uint8_t *pSourceData = pOutputBuffer; // source buffer (owned by base class)
     uint8_t *pTargetData = pIsrOutputBuffer;              // target buffer
-    uint16_t OutputPixelCount = c_OutputCommon::GetBufferUsedSize () / numIntensityBytesPerPixel;
+    uint16_t OutputPixelCount = OutputBufferSize / numIntensityBytesPerPixel;
 
     // what type of copy are we making?
     if (!zig_size)
@@ -359,12 +359,12 @@ void c_OutputWS2811::Render()
             {
                 // Odd "zig"
                 int group = zig_size * (CurrentDestinationPixelIndex / zig_size);
-                pSourceData = OutputMgr.GetBufferAddress () + (numIntensityBytesPerPixel * ((group + zig_size - (CurrentDestinationPixelIndex % zig_size) - 1) / group_size));
+                pSourceData = pOutputBuffer + (numIntensityBytesPerPixel * ((group + zig_size - (CurrentDestinationPixelIndex % zig_size) - 1) / group_size));
             } // end zig
             else
             {
                 // Even "zag"
-                pSourceData = OutputMgr.GetBufferAddress () + (numIntensityBytesPerPixel * (CurrentDestinationPixelIndex / group_size));
+                pSourceData = pOutputBuffer + (numIntensityBytesPerPixel * (CurrentDestinationPixelIndex / group_size));
             } // end zag
 
             // now that we have decided on a data source, copy one
@@ -379,7 +379,7 @@ void c_OutputWS2811::Render()
 
     // set the intensity transmit buffer pointer and number of intensities to send
     pNextIntensityToSend    = pIsrOutputBuffer;
-    RemainingIntensityCount = GetBufferUsedSize ();
+    RemainingIntensityCount = OutputBufferSize;
     // DEBUG_V (String ("RemainingIntensityCount: ") + RemainingIntensityCount);
 
 #ifdef ARDUINO_ARCH_ESP8266
