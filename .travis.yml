@@ -16,7 +16,6 @@ before_install:
 - export PATH="$HOME/ide:$PATH"
 - mkdir -p $LIB_HOME
 - mkdir -p $ESP_HOME
-- mkdir -p $ESP32_HOME
 - mkdir -p $BUILD
 - git clone https://github.com/esp8266/Arduino.git $ESP_HOME/esp8266
 - cd $ESP_HOME/esp8266
@@ -38,9 +37,6 @@ install:
   --pref build.path=$BUILD --save-prefs
 before_script:
 - cd $ESPS_HOME
-- npm install -g gulp-cli
-- npm install
-- cd $ESPS32_HOME
 - npm install -g gulp-cli
 - npm install
 script:
