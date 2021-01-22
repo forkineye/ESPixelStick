@@ -37,7 +37,7 @@ public:
     virtual void GetStateName (String & sName) = 0;
     virtual void Start (String & FileName, uint32_t FrameId) = 0;
     virtual void Stop (void) = 0;
-    virtual bool Sync (uint32_t FrameId) = 0;
+    virtual bool Sync (uint32_t FrameId) {};
 
 protected:
     c_InputFPPRemotePlayList * pInputFPPRemotePlayList;
@@ -53,7 +53,7 @@ public:
     virtual void GetStateName (String & sName) { sName = F ("Idle"); }
     virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop (void);
-    virtual bool Sync (uint32_t FrameId);
+private:
 
 }; // fsm_PlayList_state_Idle
 
@@ -66,7 +66,6 @@ public:
     virtual void GetStateName (String & sName) { sName = F ("File"); }
     virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop (void);
-    virtual bool Sync (uint32_t FrameId);
 
 }; // fsm_PlayList_state_PlayingFile
 
@@ -79,7 +78,6 @@ public:
     virtual void GetStateName (String & sName) { sName = F ("Effect"); }
     virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop (void);
-    virtual bool Sync (uint32_t FrameId);
 
 }; // fsm_PlayList_state_PlayingEffect
 
@@ -92,7 +90,6 @@ public:
     virtual void GetStateName (String & sName) { sName = F ("Paused"); }
     virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop (void);
-    virtual bool Sync (uint32_t FrameId);
 
 }; // fsm_PlayList_state_Paused
 

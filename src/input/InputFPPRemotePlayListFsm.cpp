@@ -71,17 +71,6 @@ void fsm_PlayList_state_Idle::Stop (void)
 } // fsm_PlayList_state_Idle::Stop
 
 //-----------------------------------------------------------------------------
-bool fsm_PlayList_state_Idle::Sync (uint32_t FrameId)
-{
-    // DEBUG_START;
-
-    // Do Nothing
-
-    // DEBUG_END;
-
-} // fsm_PlayList_state_Idle::Sync
-
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_PlayingFile::Poll (uint8_t * Buffer, size_t BufferSize)
@@ -118,15 +107,6 @@ void fsm_PlayList_state_PlayingFile::Stop (void)
     // DEBUG_END;
 
 } // fsm_PlayList_state_PlayingFile::Stop
-
-//-----------------------------------------------------------------------------
-bool fsm_PlayList_state_PlayingFile::Sync (uint32_t FrameId)
-{
-    // DEBUG_START;
-
-    // DEBUG_END;
-
-} // fsm_PlayList_state_PlayingFile::Sync
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -167,15 +147,6 @@ void fsm_PlayList_state_PlayingEffect::Stop (void)
 } // fsm_PlayList_state_PlayingEffect::Stop
 
 //-----------------------------------------------------------------------------
-bool fsm_PlayList_state_PlayingEffect::Sync (uint32_t FrameId)
-{
-    // DEBUG_START;
-
-    // DEBUG_END;
-
-} // fsm_PlayList_state_PlayingEffect::Sync
-
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_Paused::Poll (uint8_t* Buffer, size_t BufferSize)
@@ -212,12 +183,3 @@ void fsm_PlayList_state_Paused::Stop (void)
     // DEBUG_END;
 
 } // fsm_PlayList_state_Paused::Stop
-
-//-----------------------------------------------------------------------------
-bool fsm_PlayList_state_Paused::Sync (uint32_t FrameId)
-{
-    // DEBUG_START;
-
-    // DEBUG_END;
-
-} // fsm_PlayList_state_Paused::Sync
