@@ -64,13 +64,14 @@ void c_InputFPPRemotePlayFile::Stop ()
 } // Stop
 
 //-----------------------------------------------------------------------------
-bool c_InputFPPRemotePlayFile::Sync (uint32_t FrameId)
+void c_InputFPPRemotePlayFile::Sync (uint32_t FrameId)
 {
     // DEBUG_START;
 
+    SyncCount++;
+    SyncAdjustmentCount += pCurrentFsmState->Sync (FrameId);
 
     // DEBUG_END;
-    return     pCurrentFsmState->Sync (FrameId);
 
 } // Sync
 
@@ -86,10 +87,42 @@ void c_InputFPPRemotePlayFile::Poll (uint8_t * Buffer, size_t BufferSize)
 } // Poll
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::GetStatus (JsonObject& jsonStatus)
+void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
 {
     // DEBUG_START;
 
+    uint32_t mseconds = CurrentFrameId * FrameStepTime;
+    uint32_t msecondsTotal = FrameStepTime * TotalNumberOfFramesInSequence;
+
+    uint32_t secs = mseconds / 1000;
+    uint32_t secsTot = msecondsTotal / 1000;
+
+    JsonStatus[F ("SyncCount")]           = SyncCount;
+    JsonStatus[F ("SyncAdjustmentCount")] = SyncAdjustmentCount;
+
+    String temp = GetFileName ();
+
+    JsonStatus[F ("current_sequence")]  = temp;
+    JsonStatus[F ("playlist")]          = temp;
+    JsonStatus[F ("seconds_elapsed")]   = String (secs);
+    JsonStatus[F ("seconds_played")]    = String (secs);
+    JsonStatus[F ("seconds_remaining")] = String (secsTot - secs);
+    JsonStatus[F ("sequence_filename")] = temp;
+
+
+    int mins = secs / 60;
+    secs = secs % 60;
+
+    secsTot = secsTot - secs;
+    int minRem = secsTot / 60;
+    secsTot = secsTot % 60;
+
+    char buf[8];
+    sprintf (buf, "%02d:%02d", mins, secs);
+    JsonStatus[F ("time_elapsed")] = buf;
+
+    sprintf (buf, "%02d:%02d", minRem, secsTot);
+    JsonStatus[F ("time_remaining")] = buf;
 
     // DEBUG_END;
 

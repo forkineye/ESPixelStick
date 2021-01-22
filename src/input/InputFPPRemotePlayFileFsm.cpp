@@ -53,11 +53,12 @@ void fsm_PlayFile_state_Idle::Start (String & FileName, uint32_t FrameId)
 
     do // once
     {
-        if (false == FileMgr.OpenSdFile (FileName,
+        p_InputFPPRemotePlayFile->PlayItemName = FileName;
+        if (false == FileMgr.OpenSdFile (p_InputFPPRemotePlayFile->PlayItemName,
             c_FileMgr::FileMode::FileRead,
             p_InputFPPRemotePlayFile->FileBeingPlayed))
         {
-            LOG_PORT.println (String (F ("StartPlaying:: Could not open file: filename: ")) + FileName);
+            LOG_PORT.println (String (F ("StartPlaying:: Could not open file: filename: ")) + p_InputFPPRemotePlayFile->PlayItemName);
             p_InputFPPRemotePlayFile->fsm_PlayFile_state_PlayingFile_imp.Stop ();
             break;
         }
@@ -68,7 +69,7 @@ void fsm_PlayFile_state_Idle::Start (String & FileName, uint32_t FrameId)
 
         if (BytesRead != sizeof (fsqHeader))
         {
-            LOG_PORT.println (String (F ("StartPlaying:: Could not start. ")) + FileName + F (" File is too short"));
+            LOG_PORT.println (String (F ("StartPlaying:: Could not start. ")) + p_InputFPPRemotePlayFile->PlayItemName + F (" File is too short"));
             p_InputFPPRemotePlayFile->fsm_PlayFile_state_PlayingFile_imp.Stop ();
             break;
         }
@@ -76,7 +77,7 @@ void fsm_PlayFile_state_Idle::Start (String & FileName, uint32_t FrameId)
 
         if (fsqHeader.majorVersion != 2 || fsqHeader.compressionType != 0)
         {
-            LOG_PORT.println (String (F ("StartPlaying:: Could not start. ")) + FileName + F (" is not a v2 uncompressed sequence"));
+            LOG_PORT.println (String (F ("StartPlaying:: Could not start. ")) + p_InputFPPRemotePlayFile->PlayItemName + F (" is not a v2 uncompressed sequence"));
             p_InputFPPRemotePlayFile->fsm_PlayFile_state_PlayingFile_imp.Stop ();
             break;
         }
@@ -98,7 +99,7 @@ void fsm_PlayFile_state_Idle::Start (String & FileName, uint32_t FrameId)
 
         // start playing the file
         p_InputFPPRemotePlayFile->fsm_PlayFile_state_PlayingFile_imp.Init (p_InputFPPRemotePlayFile);
-        LOG_PORT.println (String (F ("Start Playing:: FileName:  '")) + FileName + "'");
+        LOG_PORT.println (String (F ("Start Playing:: FileName:  '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
 
     } while (false);
 

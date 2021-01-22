@@ -52,6 +52,9 @@ private:
 
     void validateConfiguration ();
     void StartPlaying ();
+    void StopPlaying ();
+    bool PlayingFile () { return nullptr != pInputFPPRemotePlayItem; }
+
     // void onMessage (EspFPPRemoteDevice* pDevice);
 
     void load ();          ///< Load configuration from File System

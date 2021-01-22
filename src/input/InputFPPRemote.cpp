@@ -46,9 +46,8 @@ c_InputFPPRemote::c_InputFPPRemote (
 //-----------------------------------------------------------------------------
 c_InputFPPRemote::~c_InputFPPRemote ()
 {
-    FileToPlay = No_FPP_LocalFileToPlay;
-    FPPDiscovery.PlayFile (FileToPlay);
-    FPPDiscovery.Disable ();
+    FileToPlay = No_LocalFileToPlay;
+    StopPlaying ();
 
 } // ~c_InputFPPRemote
 
@@ -66,8 +65,6 @@ void c_InputFPPRemote::Begin()
     }
 
     HasBeenInitialized = true;
-
-    FPPDiscovery.Enable ();
 
     // DEBUG_END;
 
@@ -102,7 +99,7 @@ void c_InputFPPRemote::Process ()
 {
     // DEBUG_START;
 
-    if (nullptr != pInputFPPRemotePlayItem)
+    if (PlayingFile ())
     {
         pInputFPPRemotePlayItem->Poll (InputDataBuffer, InputDataBufferSize);
 
@@ -113,7 +110,7 @@ void c_InputFPPRemote::Process ()
     }
     else
     {
-        // poll the FPP Discovery process
+        FPPDiscovery.ReadNextFrame (InputDataBuffer, InputDataBufferSize);
     }
 
     // DEBUG_END;
@@ -149,24 +146,49 @@ boolean c_InputFPPRemote::SetConfig (JsonObject & jsonConfig)
 } // SetConfig
 
 //-----------------------------------------------------------------------------
+void c_InputFPPRemote::StopPlaying ()
+{
+    // we are in FPP Remote Mode. Shut down the player
+    if (PlayingFile ())
+    {
+        pInputFPPRemotePlayItem->Stop ();
+        delete pInputFPPRemotePlayItem;
+        pInputFPPRemotePlayItem = nullptr;
+    }
+
+} // StopPlaying
+
+//-----------------------------------------------------------------------------
 void c_InputFPPRemote::StartPlaying ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     do // once
     {
         if ((0 == FileToPlay.length ()) || (FileToPlay == No_LocalFileToPlay))
         {
-            // we are in FPP Remote Mode. Shut down the player
-            if (nullptr != pInputFPPRemotePlayItem)
-            {
-                pInputFPPRemotePlayItem->Stop ();
-                delete pInputFPPRemotePlayItem;
-                pInputFPPRemotePlayItem = nullptr;
-            }
+            StopPlaying ();
+            FPPDiscovery.Enable ();
             break;
         }
 
+        // are we already playing a file?
+        if (PlayingFile ())
+        {
+            // has the file changed?
+            if (pInputFPPRemotePlayItem->GetFileName () != FileToPlay)
+            {
+                StopPlaying ();
+            }
+            else
+            {
+                // play the same file again
+                pInputFPPRemotePlayItem->Start (FileToPlay, 0);
+                break;
+            }
+        }
+
+        // no file is playing. Start one.
         if (-1 != FileToPlay.indexOf (".pl"))
         {
             // we have a playlist we need to play
@@ -179,11 +201,13 @@ void c_InputFPPRemote::StartPlaying ()
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile ();
         }
 
+        FPPDiscovery.Disable ();
+
         pInputFPPRemotePlayItem->Start (FileToPlay, 0);
 
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // StartPlaying
 

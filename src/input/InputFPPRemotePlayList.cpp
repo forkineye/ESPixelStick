@@ -67,7 +67,7 @@ void c_InputFPPRemotePlayList::Stop ()
 } // Stop
 
 //-----------------------------------------------------------------------------
-bool c_InputFPPRemotePlayList::Sync (uint32_t FrameId)
+void c_InputFPPRemotePlayList::Sync (uint32_t FrameId)
 {
     // DEBUG_START;
 

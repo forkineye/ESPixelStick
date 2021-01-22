@@ -56,7 +56,7 @@ void c_InputFPPRemotePlayEffect::Stop ()
 } // Stop
 
 //-----------------------------------------------------------------------------
-bool c_InputFPPRemotePlayEffect::Sync (uint32_t FrameId)
+void c_InputFPPRemotePlayEffect::Sync (uint32_t FrameId)
 {
     // DEBUG_START;
 

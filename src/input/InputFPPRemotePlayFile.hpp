@@ -31,7 +31,7 @@ public:
 
     virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop ();
-    virtual bool Sync (uint32_t FrameId);
+    virtual void Sync (uint32_t FrameId);
     virtual void Poll (uint8_t* Buffer, size_t BufferSize);
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
@@ -53,5 +53,7 @@ private:
     uint32_t          TotalNumberOfFramesInSequence = 0;
     uint32_t          StartTimeInMillis = 0;
 
+    uint32_t          SyncCount = 0;
+    uint32_t          SyncAdjustmentCount = 0;
 
 }; // c_InputFPPRemotePlayFile
