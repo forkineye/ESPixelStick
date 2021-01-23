@@ -113,7 +113,7 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
         // DEBUG_V ("");
         JsonObject MyJsonStatus = jsonStatus.createNestedObject (F ("FPPDiscovery"));
         MyJsonStatus[F ("FppRemoteIp")] = FppRemoteIp.toString ();
-        InputFPPRemotePlayFile->GetStatus (MyJsonStatus);
+        InputFPPRemotePlayFile.GetStatus (MyJsonStatus);
     }
 
     // DEBUG_END;
@@ -126,7 +126,8 @@ void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t Curr
 
     if (PlayingFile())
     {
-        InputFPPRemotePlayFile->Poll (CurrentOutputBuffer, CurrentOutputBufferSize);
+        // DEBUG_V ("");
+        InputFPPRemotePlayFile.Poll (CurrentOutputBuffer, CurrentOutputBufferSize);
     }
 
     // DEBUG_END;
@@ -209,10 +210,14 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
             {
                 // DEBUG_V (String (F ("FPP Ping discovery packet")));
                 // received a discover ping packet, need to send a ping out
-                if(_packet.isBroadcast() || _packet.isMulticast())
-                    sendPingPacket();
+                if (_packet.isBroadcast () || _packet.isMulticast ())
+                {
+                    sendPingPacket ();
+                }
                 else
-                    sendPingPacket(_packet.remoteIP());
+                {
+                    sendPingPacket (_packet.remoteIP ());
+                }
             }
             break;
         }
@@ -251,7 +256,7 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
 } // ProcessReceivedUdpPacket
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_t frame)
+void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_t FrameId)
 {
     // DEBUG_START;
     do // once
@@ -268,7 +273,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_
             case 0x00: // Start
             {
                 // DEBUG_V ("Start");
-                StartPlaying (filename, frame);
+                StartPlaying (FileName, FrameId);
                 break;
             }
 
@@ -282,14 +287,18 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_
             case 0x02: // Sync
             {
                 // DEBUG_V ("Sync");
+                // DEBUG_V (String ("PlayingFile: ") + PlayingFile ());
+                // DEBUG_V (String ("FileName: ") + FileName);
+                // DEBUG_V (String ("GetFileName: ") + InputFPPRemotePlayFile.GetFileName ());
 
-                if (!PlayingFile() || filename != fseqName)
+                if (!PlayingFile() || FileName != InputFPPRemotePlayFile.GetFileName())
                 {
-                    StartPlaying (filename, frame);
+                    StartPlaying (FileName, FrameId);
                 }
                 else if (PlayingFile())
                 {
-                    InputFPPRemotePlayFile->Sync (frame);
+                    // DEBUG_V ("Do Sync");
+                    InputFPPRemotePlayFile.Sync (FrameId);
                 }
                 break;
             }
@@ -298,7 +307,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String filename, uint32_
             {
                 // DEBUG_V ("Start");
 
-                StartPlaying (filename, frame);
+                StartPlaying (FileName, FrameId);
                 break;
             }
 
@@ -554,13 +563,13 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
             break;
         }
 
-        String filename = request->getParam (F("filename"))->value ();
-        // DEBUG_V (String(F("filename: ")) + filename);
+        String filename = request->getParam (F("FileName"))->value ();
+        // DEBUG_V (String(F("FileName: ")) + filename);
 
         c_FileMgr::FileId FileHandle;
         if (false == FileMgr.OpenSdFile (filename, c_FileMgr::FileMode::FileRead, FileHandle))
         {
-            LOG_PORT.println (String (F ("c_FPPDiscovery::ProcessPOST: File Does Not Exist - filename: ")) + filename);
+            LOG_PORT.println (String (F ("c_FPPDiscovery::ProcessPOST: File Does Not Exist - FileName: ")) + filename);
             request->send (404);
             break;
         }
@@ -579,7 +588,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
 void c_FPPDiscovery::ProcessFile (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final)
 {
     // DEBUG_START;
-    //LOG_PORT.printf_P( PSTR("In ProcessFile: %s    idx: %d    RangeLength: %d    final: %d\n)",filename.c_str(), index, RangeLength, final? 1 : 0);
+    //LOG_PORT.printf_P( PSTR("In ProcessFile: %s    idx: %d    RangeLength: %d    final: %d\n)",FileName.c_str(), index, RangeLength, final? 1 : 0);
 
     //printReq(request, false);
     request->send (404);
@@ -607,7 +616,7 @@ void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data,
 
             inFileUpload = true;
 
-            UploadFileName = request->getParam (F("filename"))->value ();
+            UploadFileName = request->getParam (F("FileName"))->value ();
         }
     }
 
@@ -722,7 +731,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             }
             else
             {
-                InputFPPRemotePlayFile->GetStatus (JsonData);
+                InputFPPRemotePlayFile.GetStatus (JsonData);
                 JsonData[F ("status")] = 1;
                 JsonData[F ("status_name")] = F ("playing");
 
@@ -782,7 +791,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
 {
     // DEBUG_START;
-    // DEBUG_V (String("Open:: filename: ") + filename);
+    // DEBUG_V (String("Open:: FileName: ") + filename);
 
     do // once
     {
@@ -807,20 +816,9 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
             break;
         }
 
-        InputFPPRemotePlayFile = new c_InputFPPRemotePlayFile ();
-        InputFPPRemotePlayFile->Start (filename, frameId);
+        InputFPPRemotePlayFile.Start (filename, frameId);
 
-        if (InputFPPRemotePlayFile->IsIdle ())
-        {
-            // DEBUG_V ("Output did not start");
-            fseqName = "";
-            break;
-        }
-
-        // DEBUG_V ("Starting file output");
-        fseqName = filename;
-
-        // LOG_PORT.println (String (F ("FPPDiscovery::Playing:  '")) + filename + "'" );
+        // LOG_PORT.println (String (F ("FPPDiscovery::Playing:  '")) + FileName + "'" );
 
     } while (false);
 
@@ -836,14 +834,10 @@ void c_FPPDiscovery::StopPlaying ()
     if (PlayingFile())
     {
         // DEBUG_V ("");
-        LOG_PORT.println (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile->GetFileName() + "'");
-        InputFPPRemotePlayFile->Stop ();
-        delete InputFPPRemotePlayFile;
-        InputFPPRemotePlayFile = nullptr;
+        LOG_PORT.println (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
+        InputFPPRemotePlayFile.Stop ();
     }
     // DEBUG_V ("");
-
-    fseqName = "";
 
     // blank the display
     ProcessBlankPacket ();

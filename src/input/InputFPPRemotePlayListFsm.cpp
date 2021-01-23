@@ -20,15 +20,16 @@
 
 #include "InputFPPRemotePlayList.hpp"
 #include "../service/FPPDiscovery.h"
+#include "../FileMgr.hpp"
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_Idle::Poll (uint8_t * Buffer, size_t BufferSize)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
     // do nothing
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // fsm_PlayList_state_Idle::Poll
 
@@ -47,26 +48,51 @@ void fsm_PlayList_state_Idle::Init (c_InputFPPRemotePlayList* Parent)
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_Idle::Start (String & FileName, uint32_t FrameId)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
-    // open the playlist file
+    do // once
+    {
+        // open the playlist file
+        String FileData;
+        if (0 == FileMgr.ReadSdFile (FileName, FileData))
+        {
+            LOG_PORT.println (String (F ("Could not read Playlist file: '")) + FileName + "'");
+            break;
+        }
+        DEBUG_V ("");
 
-    // set context to the first entry in the file
+        pInputFPPRemotePlayList->PlayListFile = FileName;
+        /*
+        DeserializationError error = deserializeJson (pInputFPPRemotePlayList->JsonPlayList, (const String)FileData);
 
-    // do the first item in the file
+        DEBUG_V ("Error Check");
+        if (error)
+        {
+            String CfgFileMessagePrefix = String (F ("SD file: '")) + FileName + "' ";
+            LOG_PORT.println (String (F ("Heap:")) + String (ESP.getFreeHeap ()));
+            LOG_PORT.println (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
+            LOG_PORT.println (String (F ("++++")) + FileData + String (F ("----")));
+            break;
+        }
+*/
+        // set context to the first entry in the file
 
-    // DEBUG_END;
+        // do the first item in the file
+
+    } while (false);
+
+    DEBUG_END;
 
 } // fsm_PlayList_state_Idle::Start
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_Idle::Stop (void)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
     // Do nothing
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // fsm_PlayList_state_Idle::Stop
 
@@ -75,36 +101,36 @@ void fsm_PlayList_state_Idle::Stop (void)
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_PlayingFile::Poll (uint8_t * Buffer, size_t BufferSize)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // fsm_PlayList_state_PlayingFile::Poll
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_PlayingFile::Init (c_InputFPPRemotePlayList* Parent)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // fsm_PlayList_state_PlayingFile::Init
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_PlayingFile::Start (String & FileName, uint32_t FrameId)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // fsm_PlayList_state_PlayingFile::Start
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_PlayingFile::Stop (void)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // fsm_PlayList_state_PlayingFile::Stop
 
@@ -113,36 +139,36 @@ void fsm_PlayList_state_PlayingFile::Stop (void)
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_PlayingEffect::Poll (uint8_t * Buffer, size_t BufferSize)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // fsm_PlayList_state_PlayingEffect::Poll
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_PlayingEffect::Init (c_InputFPPRemotePlayList* Parent)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // fsm_PlayList_state_PlayingEffect::Init
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_PlayingEffect::Start (String & FileName, uint32_t FrameId)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // fsm_PlayList_state_PlayingEffect::Start
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_PlayingEffect::Stop (void)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // fsm_PlayList_state_PlayingEffect::Stop
 
@@ -151,35 +177,35 @@ void fsm_PlayList_state_PlayingEffect::Stop (void)
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_Paused::Poll (uint8_t* Buffer, size_t BufferSize)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // fsm_PlayList_state_Paused::Poll
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_Paused::Init (c_InputFPPRemotePlayList* Parent)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // fsm_PlayList_state_Paused::Init
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_Paused::Start (String& FileName, uint32_t FrameId)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // fsm_PlayList_state_Paused::Start
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_Paused::Stop (void)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // fsm_PlayList_state_Paused::Stop

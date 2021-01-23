@@ -22,6 +22,7 @@
 #include "../ESPixelStick.h"
 #include "InputFPPRemotePlayItem.hpp"
 #include "InputFPPRemotePlayListFsm.hpp"
+#include "../FileMgr.hpp"
 
 /*****************************************************************************/
 class c_InputFPPRemotePlayList : public c_InputFPPRemotePlayItem
@@ -53,6 +54,8 @@ protected:
 
     fsm_PlayList_state * pCurrentFsmState = nullptr;
 
-    DynamicJsonDocument<> JsonPlayList;
+    // DynamicJsonDocument JsonPlayList (2048);
+
+    String PlayListFile;
 
 }; // c_InputFPPRemotePlayList
