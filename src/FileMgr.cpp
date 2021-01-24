@@ -2,7 +2,7 @@
 * FileMgr.cpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2020 Shelby Merrick
+* Copyright (c) 2021 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -277,7 +277,7 @@ bool c_FileMgr::ReadConfigFile (String& FileName, String& FileData)
 } // ReadConfigFile
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::ReadConfigFile (String& FileName, JsonDocument& FileData)
+bool c_FileMgr::ReadConfigFile (String& FileName, JsonDocument & FileData)
 {
     // DEBUG_START;
     bool GotFileData = false;
@@ -324,20 +324,20 @@ bool c_FileMgr::ReadConfigFile (String& FileName, JsonDocument& FileData)
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void c_FileMgr::DeleteSdFile (String& FileName)
+void c_FileMgr::DeleteSdFile (String & FileName)
 {
     // DEBUG_START;
-
+    String FileNamePrefix;
     if (!FileName.startsWith ("/"))
     {
-        FileName = "/" + FileName;
+        FileNamePrefix = "/";
     }
     // DEBUG_V ();
 
-    if (SDFS.exists (FileName))
+    if (SDFS.exists (FileNamePrefix+FileName))
     {
         // DEBUG_V (String ("Deleting '") + FileName + "'");
-        SDFS.remove (FileName);
+        SDFS.remove (FileNamePrefix+FileName);
     }
 
     // DEBUG_END;
@@ -479,7 +479,7 @@ void c_FileMgr::printDirectory (Dir dir, int numTabs)
 } // printDirectory
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::SaveSdFile (String& FileName, String FileData)
+void c_FileMgr::SaveSdFile (String & FileName, String & FileData)
 {
     do // once
     {
@@ -500,7 +500,7 @@ void c_FileMgr::SaveSdFile (String& FileName, String FileData)
 } // SaveSdFile
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::SaveSdFile (String& FileName, JsonVariant& FileData)
+void c_FileMgr::SaveSdFile (String & FileName, JsonVariant & FileData)
 {
     String Temp;
     serializeJson (FileData, Temp);
@@ -527,16 +527,18 @@ bool c_FileMgr::OpenSdFile (String & FileName, FileMode Mode, FileId & FileHandl
 
         // DEBUG_V ();
 
+        String FileNamePrefix;
         if (!FileName.startsWith ("/"))
         {
-            FileName = "/" + FileName;
+            FileNamePrefix = "/";
         }
+
         // DEBUG_V ();
 
         if (FileMode::FileRead == Mode)
         {
             // DEBUG_V ();
-            if (false == SDFS.exists (FileName))
+            if (false == SDFS.exists (FileNamePrefix + FileName))
             {
                 LOG_PORT.println (String (F ("ERROR: Cannot open '")) + FileName + F("' for reading. File does not exist."));
                 break;
@@ -545,7 +547,7 @@ bool c_FileMgr::OpenSdFile (String & FileName, FileMode Mode, FileId & FileHandl
 
         // DEBUG_V ();
         FileHandle = millis ();
-        FileList[FileHandle] = SDFS.open (FileName, ReadWrite);
+        FileList[FileHandle] = SDFS.open (FileNamePrefix + FileName, ReadWrite);
 
         // DEBUG_V ();
         if (FileMode::FileWrite == Mode)
@@ -563,6 +565,36 @@ bool c_FileMgr::OpenSdFile (String & FileName, FileMode Mode, FileId & FileHandl
     return FileIsOpen;
 
 } // OpenSdFile
+
+//-----------------------------------------------------------------------------
+bool c_FileMgr::ReadSdFile (String & FileName, String & FileData)
+{
+    // DEBUG_START;
+
+    bool GotFileData = false;
+    FileId FileHandle = 0;
+
+    // DEBUG_V (String("File '") + FileName + "' is being opened.");
+    if (true == OpenSdFile (FileName, FileMode::FileRead, FileHandle))
+    {
+        // DEBUG_V (String("File '") + FileName + "' is open.");
+        FileList[FileHandle].seek (0, SeekSet);
+        FileData = FileList[FileHandle].readString ();
+
+        CloseSdFile (FileHandle);
+        GotFileData = (0 != FileData.length());
+
+        // DEBUG_V (FileData);
+    }
+    else
+    {
+        LOG_PORT.println (String (F ("SD file: '")) + FileName + String (F ("' not found.")));
+    }
+
+    // DEBUG_END;
+    return GotFileData;
+
+} // ReadSdFile
 
 //-----------------------------------------------------------------------------
 size_t c_FileMgr::ReadSdFile (FileId& FileHandle, byte* FileData, size_t NumBytesToRead, size_t StartingPosition)
@@ -624,7 +656,7 @@ void c_FileMgr::handleFileUpload (String filename,
     {
         // Write data
         // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
-        FileMgr.WriteSdFile (fsUploadFile, data, len);
+        WriteSdFile (fsUploadFile, data, len);
         // LOG_PORT.print (String ("Writting bytes: ") + String (index) + '\r');
         LOG_PORT.print (".");
     }

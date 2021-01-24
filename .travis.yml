@@ -19,7 +19,7 @@ before_install:
 - mkdir -p $BUILD
 - git clone https://github.com/esp8266/Arduino.git $ESP_HOME/esp8266
 - cd $ESP_HOME/esp8266
-- git checkout 2.7.4
+- git checkout 2.7.1
 - git submodule update --init
 - cd $ESP_HOME/esp8266/tools
 - python get.py

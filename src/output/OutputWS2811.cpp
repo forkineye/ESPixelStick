@@ -196,14 +196,15 @@ void c_OutputWS2811::GetConfig(ArduinoJson::JsonObject & jsonConfig)
 void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 {
     // DEBUG_START;
-    // DEBUG_V ("NumChannelsAvailable: " + String(NumChannelsAvailable));
-    // DEBUG_V ("       GetBufferUsedSize: " + String(GetBufferUsedSize()));
-    // DEBUG_V ("         pixel_count: " + String(pixel_count));
+    // DEBUG_V (String ("NumChannelsAvailable: ") + String (NumChannelsAvailable));
+    // DEBUG_V (String ("   GetBufferUsedSize: ") + String (c_OutputCommon::GetBufferUsedSize ()));
+    // DEBUG_V (String ("         pixel_count: ") + String (pixel_count));
+    // DEBUG_V (String ("       BufferAddress: ") + String ((uint32_t)(c_OutputCommon::GetBufferAddress ())));
 
     do // once
     {
         // are we changing size?
-        if (NumChannelsAvailable == GetBufferUsedSize ())
+        if (NumChannelsAvailable == OutputBufferSize)
         {
             // DEBUG_V ("NO Need to change the ISR buffer");
             break;
@@ -316,9 +317,9 @@ void c_OutputWS2811::Render()
     if (nullptr == pIsrOutputBuffer) { return; }
 
     // set up pointers into the pixel data space
-    uint8_t *pSourceData = OutputMgr.GetBufferAddress(); // source buffer (owned by base class)
+    uint8_t *pSourceData = pOutputBuffer; // source buffer (owned by base class)
     uint8_t *pTargetData = pIsrOutputBuffer;              // target buffer
-    uint16_t OutputPixelCount = GetBufferUsedSize () / numIntensityBytesPerPixel;
+    uint16_t OutputPixelCount = OutputBufferSize / numIntensityBytesPerPixel;
 
     // what type of copy are we making?
     if (!zig_size)
@@ -358,12 +359,12 @@ void c_OutputWS2811::Render()
             {
                 // Odd "zig"
                 int group = zig_size * (CurrentDestinationPixelIndex / zig_size);
-                pSourceData = OutputMgr.GetBufferAddress () + (numIntensityBytesPerPixel * ((group + zig_size - (CurrentDestinationPixelIndex % zig_size) - 1) / group_size));
+                pSourceData = pOutputBuffer + (numIntensityBytesPerPixel * ((group + zig_size - (CurrentDestinationPixelIndex % zig_size) - 1) / group_size));
             } // end zig
             else
             {
                 // Even "zag"
-                pSourceData = OutputMgr.GetBufferAddress () + (numIntensityBytesPerPixel * (CurrentDestinationPixelIndex / group_size));
+                pSourceData = pOutputBuffer + (numIntensityBytesPerPixel * (CurrentDestinationPixelIndex / group_size));
             } // end zag
 
             // now that we have decided on a data source, copy one
@@ -378,7 +379,7 @@ void c_OutputWS2811::Render()
 
     // set the intensity transmit buffer pointer and number of intensities to send
     pNextIntensityToSend    = pIsrOutputBuffer;
-    RemainingIntensityCount = GetBufferUsedSize ();
+    RemainingIntensityCount = OutputBufferSize;
     // DEBUG_V (String ("RemainingIntensityCount: ") + RemainingIntensityCount);
 
 #ifdef ARDUINO_ARCH_ESP8266

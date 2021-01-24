@@ -19,7 +19,8 @@
 */
 
 #include "../ESPixelStick.h"
-#include "../FileMgr.hpp"
+// #include "../FileMgr.hpp"
+#include "../input/InputFPPRemotePlayFile.hpp"
 
 #ifdef ESP32
 #	include <WiFi.h>
@@ -36,39 +37,24 @@
 
 class c_FPPDiscovery
 {
-public:
-
-#   define No_FPP_LocalFileToPlay "..."
-
 private:
 
     AsyncUDP udp;
     void ProcessReceivedUdpPacket (AsyncUDPPacket _packet);
     void ProcessSyncPacket (uint8_t action, String filename, uint32_t frame);
     void ProcessBlankPacket ();
+    bool PlayingFile () { return String(F("idle")) != InputFPPRemotePlayFile.GetFileName(); }
 
-    bool isRemoteRunning = false;
-    c_FileMgr::FileId fseqFile;
-    String fseqName = "";
-    String failedFseqName = "";
-    String AutoPlayFileName = No_FPP_LocalFileToPlay;
-    unsigned long fseqStartMillis = 0;
-    int fseqCurrentFrameId = 0;
-    uint32_t dataOffset = 0;
-    uint32_t channelsPerFrame = 0;
-    uint8_t  frameStepTime = 0;
-    uint32_t TotalNumberOfFramesInSequence = 0;
-    uint8_t* outputBuffer;
-    uint16_t outputBufferSize;
     bool inFileUpload = false;
     bool hasBeenInitialized = false;
     bool IsEnabled = false;
-    uint8_t* buffer = nullptr;
-    int bufCurPos = 0;
+//    uint8_t* buffer = nullptr;
+//    int bufCurPos = 0;
     String UploadFileName;
-    uint32_t SyncCount = 0;
-    uint32_t SyncAdjustmentCount = 0;
+//    uint32_t SyncCount = 0;
+//    uint32_t SyncAdjustmentCount = 0;
     IPAddress FppRemoteIp = IPAddress (uint32_t(0));
+    c_InputFPPRemotePlayFile InputFPPRemotePlayFile;
 
     void GetSysInfoJSON    (JsonObject& jsonResponse);
     void BuildFseqResponse (String fname, c_FileMgr::FileId fseq, String & resp);

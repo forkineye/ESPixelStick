@@ -3,7 +3,7 @@
 * InputFPPRemote.h
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2020 Shelby Merrick
+* Copyright (c) 2021 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -21,6 +21,7 @@
 #include "InputCommon.hpp"
 #include "../WebMgr.hpp"
 #include "../service/FPPDiscovery.h"
+#include "InputFPPRemotePlayItem.hpp"
 
 class c_InputFPPRemote : public c_InputCommon
 {
@@ -43,9 +44,17 @@ class c_InputFPPRemote : public c_InputCommon
       void GetDriverName (String& sDriverName) { sDriverName = "FPP Remote"; } ///< get the name for the instantiated driver
       void SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize);
 
+protected:
+    c_InputFPPRemotePlayItem * pInputFPPRemotePlayItem = nullptr;
+#   define No_LocalFileToPlay "..."
+
 private:
 
     void validateConfiguration ();
+    void StartPlaying ();
+    void StopPlaying ();
+    bool PlayingFile () { return nullptr != pInputFPPRemotePlayItem; }
+
     // void onMessage (EspFPPRemoteDevice* pDevice);
 
     void load ();          ///< Load configuration from File System
@@ -62,6 +71,6 @@ private:
     uint8_t  clk_pin  = SD_CARD_CLK_PIN;
     uint8_t  cs_pin   = SD_CARD_CS_PIN;
 
-    String  FseqFileToPlay;
+    String  FileToPlay;
 
 };

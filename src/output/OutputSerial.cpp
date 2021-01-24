@@ -415,8 +415,8 @@ void c_OutputSerial::Render ()
     } // end switch (OutputType)
 
     // point at the input data buffer
-    pNextChannelToSend = OutputMgr.GetBufferAddress ();
-    RemainingDataCount = GetBufferUsedSize ();
+    pNextChannelToSend = pOutputBuffer;
+    RemainingDataCount = OutputBufferSize;
 
     // enable interrupts and start sending
     SET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);

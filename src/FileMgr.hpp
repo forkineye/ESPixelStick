@@ -3,7 +3,7 @@
 * FileMgr.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2020 Shelby Merrick
+* Copyright (c) 2021 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -64,11 +64,12 @@ public:
 
     bool   SdCardIsInstalled () { return SdCardInstalled; }
     void   DeleteSdFile     (String & FileName);
-    void   SaveSdFile       (String & FileName,   String FileData);
+    void   SaveSdFile       (String & FileName,   String & FileData);
     void   SaveSdFile       (String & FileName,   JsonVariant & FileData);
     bool   OpenSdFile       (String & FileName,   FileMode Mode, FileId & FileHandle);
     size_t ReadSdFile       (FileId & FileHandle, byte * FileData, size_t NumBytesToRead);
     size_t ReadSdFile       (FileId & FileHandle, byte * FileData, size_t NumBytesToRead,  size_t StartingPosition);
+    bool   ReadSdFile       (String & FileName,   String & FileData);
     size_t WriteSdFile      (FileId & FileHandle, byte * FileData, size_t NumBytesToWrite);
     size_t WriteSdFile      (FileId & FileHandle, byte * FileData, size_t NumBytesToWrite, size_t StartingPosition);
     void   CloseSdFile      (FileId & FileHandle);

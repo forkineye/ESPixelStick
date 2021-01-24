@@ -2,7 +2,7 @@
 * InputFPPRemotePlayList.cpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2020 Shelby Merrick
+* Copyright (c) 2021 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -22,11 +22,12 @@
 #include "../service/FPPDiscovery.h"
 
 //-----------------------------------------------------------------------------
-c_InputFPPRemotePlayList::c_InputFPPRemotePlayList (String & NameOfPlaylist) :
-    c_InputFPPRemotePlayItem(NameOfPlaylist)
+c_InputFPPRemotePlayList::c_InputFPPRemotePlayList () :
+    c_InputFPPRemotePlayItem()
 {
     // DEBUG_START;
 
+    fsm_PlayList_state_Idle_imp.Init (this);
 
     // DEBUG_END;
 } // c_InputFPPRemotePlayList
@@ -34,16 +35,23 @@ c_InputFPPRemotePlayList::c_InputFPPRemotePlayList (String & NameOfPlaylist) :
 //-----------------------------------------------------------------------------
 c_InputFPPRemotePlayList::~c_InputFPPRemotePlayList ()
 {
+    // DEBUG_START;
+
+    pCurrentFsmState->Stop ();
+
+    // DEBUG_END;
 
 } // ~c_InputFPPRemotePlayList
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayList::Start ()
+void c_InputFPPRemotePlayList::Start (String & FileName, uint32_t FrameId)
 {
     // DEBUG_START;
 
+    pCurrentFsmState->Start (FileName, FrameId);
 
     // DEBUG_END;
+
 } // Start
 
 //-----------------------------------------------------------------------------
@@ -51,15 +59,40 @@ void c_InputFPPRemotePlayList::Stop ()
 {
     // DEBUG_START;
 
+    pCurrentFsmState->Stop ();
+    fsm_PlayList_state_Idle_imp.Init (this);
 
     // DEBUG_END;
+
 } // Stop
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayList::Sync (time_t syncTime)
+void c_InputFPPRemotePlayList::Sync (uint32_t FrameId)
 {
     // DEBUG_START;
 
+    pCurrentFsmState->Sync (FrameId);
 
     // DEBUG_END;
+
 } // Sync
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemotePlayList::Poll (uint8_t * Buffer, size_t BufferSize)
+{
+    // DEBUG_START;
+
+    pCurrentFsmState->Poll (Buffer, BufferSize);
+
+    // DEBUG_END;
+
+} // Poll
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemotePlayList::GetStatus (JsonObject & jsonStatus)
+{
+    // DEBUG_START;
+
+    // DEBUG_END;
+
+} // GetStatus
