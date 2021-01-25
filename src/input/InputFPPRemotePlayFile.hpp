@@ -45,7 +45,7 @@ private:
     fsm_PlayFile_state_PlayingFile   fsm_PlayFile_state_PlayingFile_imp;
 
     fsm_PlayFile_state * pCurrentFsmState = nullptr;
-    c_FileMgr::FileId FileBeingPlayed = 0;
+    c_FileMgr::FileId FileHandleForFileBeingPlayed = 0;
     uint32_t          CurrentFrameId = 0;
     size_t            DataOffset = 0;
     uint32_t          ChannelsPerFrame = 0;

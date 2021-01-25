@@ -39,6 +39,7 @@ void fsm_PlayFile_state_Idle::Init (c_InputFPPRemotePlayFile* Parent)
 {
     // DEBUG_START;
 
+    // DEBUG_V (String (" Parent: '") + String ((uint32_t)Parent) + "'");
     p_InputFPPRemotePlayFile = Parent;
     p_InputFPPRemotePlayFile->pCurrentFsmState = &(Parent->fsm_PlayFile_state_Idle_imp);
 
@@ -51,57 +52,9 @@ void fsm_PlayFile_state_Idle::Start (String & FileName, uint32_t FrameId)
 {
     // DEBUG_START;
 
-    do // once
-    {
-        p_InputFPPRemotePlayFile->PlayItemName = FileName;
-        if (false == FileMgr.OpenSdFile (p_InputFPPRemotePlayFile->PlayItemName,
-            c_FileMgr::FileMode::FileRead,
-            p_InputFPPRemotePlayFile->FileBeingPlayed))
-        {
-            LOG_PORT.println (String (F ("StartPlaying:: Could not open file: filename: ")) + p_InputFPPRemotePlayFile->PlayItemName);
-            p_InputFPPRemotePlayFile->fsm_PlayFile_state_PlayingFile_imp.Stop ();
-            break;
-        }
-        // DEBUG_V ("");
-
-        FSEQHeader fsqHeader;
-        size_t BytesRead = FileMgr.ReadSdFile (p_InputFPPRemotePlayFile->FileBeingPlayed, (uint8_t*)&fsqHeader, sizeof (fsqHeader));
-
-        if (BytesRead != sizeof (fsqHeader))
-        {
-            LOG_PORT.println (String (F ("StartPlaying:: Could not start. ")) + p_InputFPPRemotePlayFile->PlayItemName + F (" File is too short"));
-            p_InputFPPRemotePlayFile->fsm_PlayFile_state_PlayingFile_imp.Stop ();
-            break;
-        }
-        // DEBUG_V ("");
-
-        if (fsqHeader.majorVersion != 2 || fsqHeader.compressionType != 0)
-        {
-            LOG_PORT.println (String (F ("StartPlaying:: Could not start. ")) + p_InputFPPRemotePlayFile->PlayItemName + F (" is not a v2 uncompressed sequence"));
-            p_InputFPPRemotePlayFile->fsm_PlayFile_state_PlayingFile_imp.Stop ();
-            break;
-        }
-        // DEBUG_V ("");
-
-        p_InputFPPRemotePlayFile->CurrentFrameId = FrameId;
-        p_InputFPPRemotePlayFile->DataOffset = fsqHeader.dataOffset;
-        p_InputFPPRemotePlayFile->ChannelsPerFrame = fsqHeader.channelCount;
-        p_InputFPPRemotePlayFile->FrameStepTime = fsqHeader.stepTime;
-        p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence = fsqHeader.TotalNumberOfFramesInSequence;
-        p_InputFPPRemotePlayFile->StartTimeInMillis = millis () - (p_InputFPPRemotePlayFile->FrameStepTime * FrameId);
-
-        // DEBUG_V (String ("               CurrentFrameId: ") + String (p_InputFPPRemotePlayFile->CurrentFrameId));
-        // DEBUG_V (String ("                   DataOffset: ") + String (p_InputFPPRemotePlayFile->DataOffset));
-        // DEBUG_V (String ("             ChannelsPerFrame: ") + String (p_InputFPPRemotePlayFile->ChannelsPerFrame));
-        // DEBUG_V (String ("                FrameStepTime: ") + String (p_InputFPPRemotePlayFile->FrameStepTime));
-        // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence));
-        // DEBUG_V (String ("            StartTimeInMillis: ") + String (p_InputFPPRemotePlayFile->StartTimeInMillis));
-
-        // start playing the file
-        p_InputFPPRemotePlayFile->fsm_PlayFile_state_PlayingFile_imp.Init (p_InputFPPRemotePlayFile);
-        LOG_PORT.println (String (F ("Start Playing:: FileName:  '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
-
-    } while (false);
+    p_InputFPPRemotePlayFile->PlayItemName = FileName;
+    p_InputFPPRemotePlayFile->CurrentFrameId = FrameId;
+    p_InputFPPRemotePlayFile->fsm_PlayFile_state_PlayingFile_imp.Init (p_InputFPPRemotePlayFile);
 
     // DEBUG_END;
 
@@ -156,7 +109,7 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t * Buffer, size_t BufferSize)
         int toRead = (p_InputFPPRemotePlayFile->ChannelsPerFrame > BufferSize) ? BufferSize : p_InputFPPRemotePlayFile->ChannelsPerFrame;
 
         //LOG_PORT.printf_P ( PSTR("%d / %d / %d / %d / %d\n"), dataOffset, channelsPerFrame, outputBufferSize, toRead, pos);
-        size_t bytesRead = FileMgr.ReadSdFile (p_InputFPPRemotePlayFile->FileBeingPlayed, Buffer, toRead, pos);
+        size_t bytesRead = FileMgr.ReadSdFile (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed, Buffer, toRead, pos);
 
         // DEBUG_V (String ("pos:       ") + String (pos));
         // DEBUG_V (String ("toRead:    ") + String (toRead));
@@ -193,6 +146,59 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
     p_InputFPPRemotePlayFile = Parent;
     p_InputFPPRemotePlayFile->pCurrentFsmState = &(Parent->fsm_PlayFile_state_PlayingFile_imp);
 
+    do // once
+    {
+        // DEBUG_V (String ("FileName: '") + p_InputFPPRemotePlayFile->PlayItemName + "'");
+        // DEBUG_V (String (" FrameId: '") + p_InputFPPRemotePlayFile->CurrentFrameId + "'");
+
+        if (false == FileMgr.OpenSdFile (p_InputFPPRemotePlayFile->PlayItemName,
+            c_FileMgr::FileMode::FileRead,
+            p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed))
+        {
+            LOG_PORT.println (String (F ("StartPlaying:: Could not open file: filename: '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
+            p_InputFPPRemotePlayFile->pCurrentFsmState->Stop ();
+            break;
+        }
+        // DEBUG_V ("");
+
+        FSEQHeader fsqHeader;
+        size_t BytesRead = FileMgr.ReadSdFile (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed, (uint8_t*)&fsqHeader, sizeof (fsqHeader));
+
+        if (BytesRead != sizeof (fsqHeader))
+        {
+            LOG_PORT.println (String (F ("StartPlaying:: Could not start. ")) + p_InputFPPRemotePlayFile->PlayItemName + F (" File is too short"));
+            p_InputFPPRemotePlayFile->pCurrentFsmState->Stop ();
+            break;
+        }
+        // DEBUG_V ("");
+
+        if (fsqHeader.majorVersion != 2 || fsqHeader.compressionType != 0)
+        {
+            LOG_PORT.println (String (F ("StartPlaying:: Could not start. ")) + p_InputFPPRemotePlayFile->PlayItemName + F (" is not a v2 uncompressed sequence"));
+            p_InputFPPRemotePlayFile->pCurrentFsmState->Stop ();
+            break;
+        }
+        // DEBUG_V ("");
+
+        p_InputFPPRemotePlayFile->DataOffset = fsqHeader.dataOffset;
+        p_InputFPPRemotePlayFile->ChannelsPerFrame = fsqHeader.channelCount;
+        p_InputFPPRemotePlayFile->FrameStepTime = fsqHeader.stepTime;
+        p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence = fsqHeader.TotalNumberOfFramesInSequence;
+        p_InputFPPRemotePlayFile->StartTimeInMillis = millis () - (p_InputFPPRemotePlayFile->FrameStepTime * p_InputFPPRemotePlayFile->CurrentFrameId);
+
+        // DEBUG_V (String ("               CurrentFrameId: ") + String (p_InputFPPRemotePlayFile->CurrentFrameId));
+        // DEBUG_V (String ("                   DataOffset: ") + String (p_InputFPPRemotePlayFile->DataOffset));
+        // DEBUG_V (String ("             ChannelsPerFrame: ") + String (p_InputFPPRemotePlayFile->ChannelsPerFrame));
+        // DEBUG_V (String ("                FrameStepTime: ") + String (p_InputFPPRemotePlayFile->FrameStepTime));
+        // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence));
+        // DEBUG_V (String ("            StartTimeInMillis: ") + String (p_InputFPPRemotePlayFile->StartTimeInMillis));
+
+        // start playing the file
+        p_InputFPPRemotePlayFile->fsm_PlayFile_state_PlayingFile_imp.Init (p_InputFPPRemotePlayFile);
+        LOG_PORT.println (String (F ("Start Playing:: FileName:  '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
+
+    } while (false);
+
     // DEBUG_END;
 
 } // fsm_PlayFile_state_PlayingFile::Init
@@ -211,7 +217,8 @@ void fsm_PlayFile_state_PlayingFile::Stop (void)
 {
     // DEBUG_START;
 
-    FileMgr.CloseSdFile (p_InputFPPRemotePlayFile->FileBeingPlayed);
+    FileMgr.CloseSdFile (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed);
+    p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed = 0;
     p_InputFPPRemotePlayFile->fsm_PlayFile_state_Idle_imp.Init(p_InputFPPRemotePlayFile);
 
     // DEBUG_END;

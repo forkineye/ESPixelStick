@@ -780,7 +780,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 
             String resp;
             serializeJson (JsonData, resp);
-            // DEBUG_V (String ("resp: ") + resp);
+            DEBUG_V (String ("resp: ") + resp);
             request->send (200, F("application/json"), resp);
 
             break;
