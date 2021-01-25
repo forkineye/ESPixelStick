@@ -177,12 +177,15 @@ void c_InputFPPRemote::StartPlaying (String & FileName)
 
     do // once
     {
-        if ((0 == FileName.length ()) || (FileName == No_LocalFileToPlay))
+        if ((0 == FileName.length ()) || 
+            (FileName == No_LocalFileToPlay) ||
+            (FileName == String("null")) )
         {
             StopPlaying ();
             FPPDiscovery.Enable ();
             break;
         }
+
         // DEBUG_V ("Disable FPP Remote");
         FPPDiscovery.Disable ();
 
