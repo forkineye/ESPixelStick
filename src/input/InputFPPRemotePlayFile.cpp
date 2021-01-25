@@ -59,6 +59,7 @@ void c_InputFPPRemotePlayFile::Stop ()
     // DEBUG_START;
 
     pCurrentFsmState->Stop ();
+    PlayItemName = String ("");
 
     // DEBUG_END;
 } // Stop
