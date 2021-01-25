@@ -51,7 +51,7 @@ protected:
 private:
 
     void validateConfiguration ();
-    void StartPlaying ();
+    void StartPlaying (String & FileName);
     void StopPlaying ();
     bool PlayingFile () { return nullptr != pInputFPPRemotePlayItem; }
 
@@ -71,6 +71,5 @@ private:
     uint8_t  clk_pin  = SD_CARD_CLK_PIN;
     uint8_t  cs_pin   = SD_CARD_CS_PIN;
 
-    String  FileToPlay;
 
 };
