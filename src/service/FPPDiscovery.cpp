@@ -93,8 +93,13 @@ void c_FPPDiscovery::begin ()
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::Disable ()
 {
+    // DEBUG_START;
+
     IsEnabled = false;
     StopPlaying ();
+    
+    // DEBUG_END;
+
 } // Disable
 
 //-----------------------------------------------------------------------------
@@ -288,11 +293,14 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
             {
                 // DEBUG_V ("Sync");
                 // DEBUG_V (String ("PlayingFile: ") + PlayingFile ());
-                // DEBUG_V (String ("FileName: ") + FileName);
+                // DEBUG_V (String ("   FileName: ") + FileName);
+                // DEBUG_V (String ("  IsEnabled: ") + IsEnabled);
                 // DEBUG_V (String ("GetFileName: ") + InputFPPRemotePlayFile.GetFileName ());
+                // DEBUG_V (String ("    FrameId: ") + FrameId);
 
                 if (!PlayingFile() || FileName != InputFPPRemotePlayFile.GetFileName())
                 {
+                    // DEBUG_V ("Do Sync based Start");
                     StartPlaying (FileName, FrameId);
                 }
                 else if (PlayingFile())
@@ -837,6 +845,7 @@ void c_FPPDiscovery::StopPlaying ()
         LOG_PORT.println (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
         InputFPPRemotePlayFile.Stop ();
     }
+    
     // DEBUG_V ("");
 
     // blank the display

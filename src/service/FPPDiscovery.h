@@ -43,7 +43,7 @@ private:
     void ProcessReceivedUdpPacket (AsyncUDPPacket _packet);
     void ProcessSyncPacket (uint8_t action, String filename, uint32_t frame);
     void ProcessBlankPacket ();
-    bool PlayingFile () { return String(F("idle")) != InputFPPRemotePlayFile.GetFileName(); }
+    bool PlayingFile () { return !InputFPPRemotePlayFile.IsIdle (); }
 
     bool inFileUpload = false;
     bool hasBeenInitialized = false;
