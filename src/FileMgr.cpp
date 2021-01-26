@@ -126,6 +126,7 @@ void c_FileMgr::DeleteConfigFile (String& FileName)
 //-----------------------------------------------------------------------------
 void c_FileMgr::listDir (fs::FS& fs, String dirname, uint8_t levels)
 {
+    // DEBUG_START;
     do // once
     {
         LOG_PORT.println (String (F ("Listing directory: ")) + dirname);
@@ -551,11 +552,11 @@ bool c_FileMgr::OpenSdFile (String & FileName, FileMode Mode, FileId & FileHandl
             FileNamePrefix = "/";
         }
 
-        // DEBUG_V ();
+        // DEBUG_V (String("FileName: '") + FileName + "'");
 
         if (FileMode::FileRead == Mode)
         {
-            // DEBUG_V ();
+            // DEBUG_V (String("Read FIle"));
             if (false == SDFS.exists (FileNamePrefix + FileName))
             {
                 LOG_PORT.println (String (F ("ERROR: Cannot open '")) + FileName + F("' for reading. File does not exist."));
@@ -570,7 +571,7 @@ bool c_FileMgr::OpenSdFile (String & FileName, FileMode Mode, FileId & FileHandl
         // DEBUG_V ();
         if (FileMode::FileWrite == Mode)
         {
-            // DEBUG_V ();
+            // DEBUG_V ("Write Mode");
             FileList[FileHandle].seek (0, SeekSet);
         }
         // DEBUG_V ();
