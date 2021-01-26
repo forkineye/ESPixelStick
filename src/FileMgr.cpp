@@ -126,6 +126,7 @@ void c_FileMgr::DeleteConfigFile (String& FileName)
 //-----------------------------------------------------------------------------
 void c_FileMgr::listDir (fs::FS& fs, String dirname, uint8_t levels)
 {
+    // DEBUG_START;
     do // once
     {
         LOG_PORT.println (String (F ("Listing directory: ")) + dirname);
@@ -323,6 +324,24 @@ bool c_FileMgr::ReadConfigFile (String& FileName, JsonDocument & FileData)
 } // ReadConfigFile
 
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+c_FileMgr::FileId c_FileMgr::CreateFileHandle ()
+{
+    // DEBUG_START;
+
+    FileId FileHandle = millis ();
+
+    if (FileList.end () != FileList.find (FileHandle))
+    {
+        ++FileHandle;
+    }
+
+    // DEBUG_END;
+
+    return FileHandle;
+} // CreateFileHandle
+
 //-----------------------------------------------------------------------------
 void c_FileMgr::DeleteSdFile (String & FileName)
 {
@@ -533,11 +552,11 @@ bool c_FileMgr::OpenSdFile (String & FileName, FileMode Mode, FileId & FileHandl
             FileNamePrefix = "/";
         }
 
-        // DEBUG_V ();
+        // DEBUG_V (String("FileName: '") + FileName + "'");
 
         if (FileMode::FileRead == Mode)
         {
-            // DEBUG_V ();
+            // DEBUG_V (String("Read FIle"));
             if (false == SDFS.exists (FileNamePrefix + FileName))
             {
                 LOG_PORT.println (String (F ("ERROR: Cannot open '")) + FileName + F("' for reading. File does not exist."));
@@ -546,13 +565,13 @@ bool c_FileMgr::OpenSdFile (String & FileName, FileMode Mode, FileId & FileHandl
         }
 
         // DEBUG_V ();
-        FileHandle = millis ();
+        FileHandle = CreateFileHandle ();
         FileList[FileHandle] = SDFS.open (FileNamePrefix + FileName, ReadWrite);
 
         // DEBUG_V ();
         if (FileMode::FileWrite == Mode)
         {
-            // DEBUG_V ();
+            // DEBUG_V ("Write Mode");
             FileList[FileHandle].seek (0, SeekSet);
         }
         // DEBUG_V ();
@@ -607,28 +626,54 @@ size_t c_FileMgr::ReadSdFile (FileId& FileHandle, byte* FileData, size_t NumByte
 //-----------------------------------------------------------------------------
 size_t c_FileMgr::ReadSdFile (FileId& FileHandle, byte* FileData, size_t NumBytesToRead)
 {
-    return FileList[FileHandle].read (FileData, NumBytesToRead);
+    // DEBUG_START;
+
+    size_t response = 0;
+    if (FileList.end() != FileList.find (FileHandle))
+    {
+        response = FileList[FileHandle].read (FileData, NumBytesToRead);
+    }
+
+    // DEBUG_END;
+    return response;
+
 } // ReadSdFile
 
 //-----------------------------------------------------------------------------
 void c_FileMgr::CloseSdFile (FileId& FileHandle)
 {
-    FileList[FileHandle].close ();
-    FileList.erase(FileHandle);
+    if (FileList.end () != FileList.find (FileHandle))
+    {
+        FileList[FileHandle].close ();
+        FileList.erase (FileHandle);
+    }
 
 } // CloseSdFile
 
 //-----------------------------------------------------------------------------
 size_t c_FileMgr::WriteSdFile (FileId& FileHandle, byte* FileData, size_t NumBytesToWrite)
 {
-    return FileList[FileHandle].write (FileData, NumBytesToWrite);
+    size_t response = 0;
+    if (FileList.end () != FileList.find (FileHandle))
+    {
+        response = FileList[FileHandle].write (FileData, NumBytesToWrite);
+    }
+
+    return response;
+
 } // WriteSdFile
 
 //-----------------------------------------------------------------------------
 size_t c_FileMgr::WriteSdFile (FileId& FileHandle, byte* FileData, size_t NumBytesToWrite, size_t StartingPosition)
 {
-    FileList[FileHandle].seek(StartingPosition, SeekSet);
-    return WriteSdFile (FileHandle, FileData, NumBytesToWrite);
+    size_t response = 0;
+    if (FileList.end () != FileList.find (FileHandle))
+    {
+        FileList[FileHandle].seek (StartingPosition, SeekSet);
+        response = WriteSdFile (FileHandle, FileData, NumBytesToWrite);
+    }
+
+    return response;
 
 } // WriteSdFile
 

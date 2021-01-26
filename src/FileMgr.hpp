@@ -63,6 +63,7 @@ public:
     bool   LoadConfigFile   (String & FileName,   DeserializationHandler Handler, size_t JsonDocSize);
 
     bool   SdCardIsInstalled () { return SdCardInstalled; }
+    FileId CreateFileHandle ();
     void   DeleteSdFile     (String & FileName);
     void   SaveSdFile       (String & FileName,   String & FileData);
     void   SaveSdFile       (String & FileName,   JsonVariant & FileData);
@@ -115,7 +116,7 @@ private:
     bool     fsUploadFileSavedIsEnabled = false;
     char     XlateFileMode[3] = { 'r', 'w', 'w' };
 
-    std::map<uint32_t, File> FileList;
+    std::map<FileId, File> FileList;
 
 protected:
 

@@ -177,14 +177,18 @@ void c_InputFPPRemote::StartPlaying (String & FileName)
 
     do // once
     {
-        if ((0 == FileName.length ()) || (FileName == No_LocalFileToPlay))
+        if ((0 == FileName.length ()) || 
+            (FileName == No_LocalFileToPlay) ||
+            (FileName == String("null")) )
         {
             StopPlaying ();
             FPPDiscovery.Enable ();
             break;
         }
+
         // DEBUG_V ("Disable FPP Remote");
         FPPDiscovery.Disable ();
+        // DEBUG_V ("Disable FPP Remote Done");
 
         // are we already playing a file?
         if (PlayingFile ())
@@ -214,7 +218,7 @@ void c_InputFPPRemote::StartPlaying (String & FileName)
         }
         else
         {
-            // DEBUG_V ("Start Local FSEQ file");
+            // DEBUG_V ("Start Local FSEQ file player");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile ();
         }
 
