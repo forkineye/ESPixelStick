@@ -92,7 +92,7 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
 {
     // DEBUG_START;
 
-    uint32_t mseconds = CurrentFrameId * FrameStepTime;
+    uint32_t mseconds = LastFrameId * FrameStepTime;
     uint32_t msecondsTotal = FrameStepTime * TotalNumberOfFramesInSequence;
 
     uint32_t secs = mseconds / 1000;

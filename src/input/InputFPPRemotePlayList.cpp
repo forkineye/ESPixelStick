@@ -168,7 +168,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile ();
 
             uint32_t PlayListEntryRepeatCount = 0;
-            setFromJSON (PlayListEntryType, JsonPlayListArrayEntry, "repeat");
+            setFromJSON (PlayListEntryRepeatCount, JsonPlayListArrayEntry, "repeat");
             // DEBUG_V (String ("PlayListEntryRepeatCount: '") + String (PlayListEntryRepeatCount) + "'");
             pInputFPPRemotePlayItem->SetRepeatCount (PlayListEntryRepeatCount);
 
