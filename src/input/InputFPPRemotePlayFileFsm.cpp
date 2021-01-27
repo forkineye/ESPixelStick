@@ -85,6 +85,8 @@ bool fsm_PlayFile_state_Idle::Sync (uint32_t FrameId)
 
     // DEBUG_END;
 
+    return false;
+
 } // fsm_PlayFile_state_Idle::Sync
 
 //-----------------------------------------------------------------------------
@@ -247,6 +249,7 @@ void fsm_PlayFile_state_PlayingFile::Stop (void)
 bool fsm_PlayFile_state_PlayingFile::Sync (uint32_t TargetFrameId)
 {
     // DEBUG_START;
+    bool response = false;
 
     uint32_t CurrentFrame = (millis () - p_InputFPPRemotePlayFile->StartTimeInMillis) / p_InputFPPRemotePlayFile->FrameStepTime;
     uint32_t FrameDiff = CurrentFrame - TargetFrameId;
@@ -270,10 +273,11 @@ bool fsm_PlayFile_state_PlayingFile::Sync (uint32_t TargetFrameId)
 
         p_InputFPPRemotePlayFile->StartTimeInMillis =
             millis () - (TargetFrameId * p_InputFPPRemotePlayFile->FrameStepTime);
-
+        response = true;
         // DEBUG_V (String ("StartTimeInMillis: ") + String (p_InputFPPRemotePlayFile->StartTimeInMillis));
     }
 
     // DEBUG_END;
+    return response;
 
 } // fsm_PlayFile_state_PlayingFile::Sync
