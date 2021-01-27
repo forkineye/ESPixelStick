@@ -93,19 +93,24 @@ void c_FPPDiscovery::begin ()
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::Disable ()
 {
-    // DEBUG_START;
+    DEBUG_START;
 
     IsEnabled = false;
     StopPlaying ();
     
-    // DEBUG_END;
+    DEBUG_END;
 
 } // Disable
 
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::Enable ()
 {
+    DEBUG_START;
+
     IsEnabled = true;
+    
+    DEBUG_END;
+
 } // Enable
 
 //-----------------------------------------------------------------------------
@@ -836,22 +841,24 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
             // DEBUG_V ("Not Enabled");
             break;
         }
+        DEBUG_V ("");
 
         if (inFileUpload)
         {
             // DEBUG_V ("Uploading");
             break;
         }
+        DEBUG_V ("");
 
         if (0 == filename.length())
         {
             // DEBUG_V("Do not have a file to start");
             break;
         }
+        DEBUG_V ("");
 
         InputFPPRemotePlayFile.Start (filename, frameId);
-
-        // LOG_PORT.println (String (F ("FPPDiscovery::Playing:  '")) + FileName + "'" );
+        LOG_PORT.println (String (F ("FPPDiscovery::Playing:  '")) + filename + "'" );
 
     } while (false);
 
@@ -866,15 +873,14 @@ void c_FPPDiscovery::StopPlaying ()
 
     if (PlayingFile())
     {
-        // DEBUG_V ("");
+        DEBUG_V ("");
         LOG_PORT.println (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
         InputFPPRemotePlayFile.Stop ();
-    }
-    
-    // DEBUG_V ("");
 
-    // blank the display
-    ProcessBlankPacket ();
+        DEBUG_V ("");
+        // blank the display
+        ProcessBlankPacket ();
+    }
 
     // DEBUG_END;
 
