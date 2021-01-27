@@ -97,9 +97,12 @@ void c_InputFPPRemote::GetStatus (JsonObject & jsonStatus)
     // DEBUG_START;
 
     JsonObject LocalPlayerStatus = jsonStatus.createNestedObject (F ("LocalPlayer"));
+    LocalPlayerStatus[F ("active")] = PlayingFile ();
+
     if (PlayingFile ())
     {
-        pInputFPPRemotePlayItem->GetStatus (LocalPlayerStatus);
+        JsonObject PlayerObjectStatus = LocalPlayerStatus.createNestedObject (StatusType);
+        pInputFPPRemotePlayItem->GetStatus (PlayerObjectStatus);
     }
 
     // DEBUG_END;
@@ -223,11 +226,13 @@ void c_InputFPPRemote::StartPlaying (String & FileName)
         {
             // DEBUG_V ("Start Playlist");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayList ();
+            StatusType = F ("PlayList");
         }
         else
         {
             // DEBUG_V ("Start Local FSEQ file player");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile ();
+            StatusType = F ("File");
         }
 
         // DEBUG_V (String ("FileName: '") + FileName + "'");

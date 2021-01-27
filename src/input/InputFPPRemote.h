@@ -46,6 +46,7 @@ class c_InputFPPRemote : public c_InputCommon
 
 protected:
     c_InputFPPRemotePlayItem * pInputFPPRemotePlayItem = nullptr;
+    String StatusType;
 #   define No_LocalFileToPlay "..."
 
 private:
