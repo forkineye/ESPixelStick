@@ -244,9 +244,35 @@ void fsm_PlayFile_state_PlayingFile::Stop (void)
 } // fsm_PlayFile_state_PlayingFile::Stop
 
 //-----------------------------------------------------------------------------
-bool fsm_PlayFile_state_PlayingFile::Sync (uint32_t FrameId)
+bool fsm_PlayFile_state_PlayingFile::Sync (uint32_t TargetFrameId)
 {
     // DEBUG_START;
+
+    uint32_t CurrentFrame = (millis () - p_InputFPPRemotePlayFile->StartTimeInMillis) / p_InputFPPRemotePlayFile->FrameStepTime;
+    uint32_t FrameDiff = CurrentFrame - TargetFrameId;
+
+    if (CurrentFrame < TargetFrameId)
+    {
+        FrameDiff = TargetFrameId - CurrentFrame;
+    }
+
+    // DEBUG_V (String (" CurrentFrame: ") + String (CurrentFrame));
+    // DEBUG_V (String ("TargetFrameId: ") + String (TargetFrameId));
+    // DEBUG_V (String ("    FrameDiff: ") + String (FrameDiff));
+
+    if (2 < FrameDiff)
+    {
+        // DEBUG_V ("Need to adjust the start time");
+        // DEBUG_V (String ("     CurrentFrame: ") + String (CurrentFrame));
+        // DEBUG_V (String ("    TargetFrameId: ") + String (TargetFrameId));
+        // DEBUG_V (String ("        FrameDiff: ") + String (FrameDiff));
+        // DEBUG_V (String ("StartTimeInMillis: ") + String (p_InputFPPRemotePlayFile->StartTimeInMillis));
+
+        p_InputFPPRemotePlayFile->StartTimeInMillis =
+            millis () - (TargetFrameId * p_InputFPPRemotePlayFile->FrameStepTime);
+
+        // DEBUG_V (String ("StartTimeInMillis: ") + String (p_InputFPPRemotePlayFile->StartTimeInMillis));
+    }
 
     // DEBUG_END;
 
