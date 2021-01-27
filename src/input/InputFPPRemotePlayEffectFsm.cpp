@@ -45,11 +45,33 @@ void fsm_PlayEffect_state_Idle::Init (c_InputFPPRemotePlayEffect* Parent)
 } // fsm_PlayEffect_state_Idle::Init
 
 //-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_Idle::Start (String & FileName, uint32_t )
+void fsm_PlayEffect_state_Idle::Start (String & ConfigString, uint32_t )
 {
     // DEBUG_START;
 
+    // DEBUG_V (String ("ConfigString: '") + ConfigString + "'");
     p_InputFPPRemotePlayEffect->PLayEffectEndTime = millis () + (1000 * p_InputFPPRemotePlayEffect->PlayDurationSec);
+    
+    // tell the effect engine what it is supposed to be doing
+    DynamicJsonDocument EffectConfig (512);
+    DeserializationError error = deserializeJson ((EffectConfig), (const String)ConfigString);
+
+    // DEBUG_V ("Error Check");
+    if (error)
+    {
+        String CfgFileMessagePrefix = String (F ("Effect Config: '")) + ConfigString + "' ";
+        LOG_PORT.println (String (F ("Heap:")) + String (ESP.getFreeHeap ()));
+        LOG_PORT.println (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
+        LOG_PORT.println (String (F ("++++")) + ConfigString + String (F ("----")));
+    }
+
+    JsonObject ConfigObject = EffectConfig.as<JsonObject> ();
+
+    String EffectName;
+    setFromJSON (EffectName, ConfigObject, F("currenteffect"));
+    LOG_PORT.println (String (F ("Playing Effect: '")) + EffectName + "'");
+
+    p_InputFPPRemotePlayEffect->pEffectsEngine->SetConfig (ConfigObject);
     p_InputFPPRemotePlayEffect->fsm_PlayEffect_state_PlayingEffect_imp.Init (p_InputFPPRemotePlayEffect);
 
     // DEBUG_END;
@@ -85,6 +107,9 @@ void fsm_PlayEffect_state_PlayingEffect::Poll (uint8_t * Buffer, size_t BufferSi
 {
     // DEBUG_START;
 
+    p_InputFPPRemotePlayEffect->pEffectsEngine->SetBufferInfo (Buffer, BufferSize);
+    p_InputFPPRemotePlayEffect->pEffectsEngine->Process ();
+
     if (p_InputFPPRemotePlayEffect->PLayEffectEndTime <= millis ())
     {
         // DEBUG_V ("");
@@ -103,6 +128,8 @@ void fsm_PlayEffect_state_PlayingEffect::Init (c_InputFPPRemotePlayEffect* Paren
     p_InputFPPRemotePlayEffect = Parent;
     p_InputFPPRemotePlayEffect->pCurrentFsmState = &(Parent->fsm_PlayEffect_state_PlayingEffect_imp);
 
+    p_InputFPPRemotePlayEffect->pEffectsEngine->SetOperationalState (true);
+
     // DEBUG_END;
 
 } // fsm_PlayEffect_state_PlayingEffect::Init
@@ -112,7 +139,8 @@ void fsm_PlayEffect_state_PlayingEffect::Start (String & FileName, uint32_t Fram
 {
     // DEBUG_START;
 
-    // do nothing
+    p_InputFPPRemotePlayEffect->pEffectsEngine->SetOperationalState (true);
+    InputMgr.SetOperationalState (false);
 
     // DEBUG_END;
 
@@ -122,6 +150,9 @@ void fsm_PlayEffect_state_PlayingEffect::Start (String & FileName, uint32_t Fram
 void fsm_PlayEffect_state_PlayingEffect::Stop (void)
 {
     // DEBUG_START;
+
+    p_InputFPPRemotePlayEffect->pEffectsEngine->SetOperationalState (false);
+    InputMgr.SetOperationalState (true);
 
     p_InputFPPRemotePlayEffect->fsm_PlayEffect_state_Idle_imp.Init (p_InputFPPRemotePlayEffect);
 
