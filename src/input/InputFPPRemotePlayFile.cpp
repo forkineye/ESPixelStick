@@ -70,7 +70,10 @@ void c_InputFPPRemotePlayFile::Sync (uint32_t FrameId)
     // DEBUG_START;
 
     SyncCount++;
-    SyncAdjustmentCount += pCurrentFsmState->Sync (FrameId);
+    if (pCurrentFsmState->Sync (FrameId))
+    {
+        SyncAdjustmentCount++;
+    }
 
     // DEBUG_END;
 
