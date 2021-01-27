@@ -92,9 +92,15 @@ void c_InputFPPRemote::GetConfig (JsonObject & jsonConfig)
 } // GetConfig
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemote::GetStatus (JsonObject & /* jsonStatus */)
+void c_InputFPPRemote::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
+
+    JsonObject LocalPlayerStatus = jsonStatus.createNestedObject (F ("LocalPlayer"));
+    if (PlayingFile ())
+    {
+        pInputFPPRemotePlayItem->GetStatus (LocalPlayerStatus);
+    }
 
     // DEBUG_END;
 
