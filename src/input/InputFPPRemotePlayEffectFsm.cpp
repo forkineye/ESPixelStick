@@ -101,6 +101,15 @@ bool fsm_PlayEffect_state_Idle::Sync (uint32_t FrameId)
 } // fsm_PlayEffect_state_Idle::Sync
 
 //-----------------------------------------------------------------------------
+void fsm_PlayEffect_state_Idle::GetStatus (JsonObject& jsonStatus)
+{
+    // DEBUG_START;
+
+    // DEBUG_END;
+
+} // fsm_PlayEffect_state_Idle::GetStatus
+
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void fsm_PlayEffect_state_PlayingEffect::Poll (uint8_t * Buffer, size_t BufferSize)
@@ -170,3 +179,15 @@ bool fsm_PlayEffect_state_PlayingEffect::Sync (uint32_t FrameId)
     // DEBUG_END;
 
 } // fsm_PlayEffect_state_PlayingEffect::Sync
+
+//-----------------------------------------------------------------------------
+void fsm_PlayEffect_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
+{
+    // DEBUG_START;
+
+    p_InputFPPRemotePlayEffect->pEffectsEngine->GetStatus (jsonStatus);
+
+    // DEBUG_END;
+
+} // fsm_PlayEffect_state_PlayingEffect::GetStatus
+

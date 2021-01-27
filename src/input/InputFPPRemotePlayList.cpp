@@ -95,6 +95,11 @@ void c_InputFPPRemotePlayList::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
+    JsonObject PlayListStatus = jsonStatus.createNestedObject ("Playlist");
+    jsonStatus[F ("name")] = GetFileName ();
+
+    pCurrentFsmState->GetStatus (PlayListStatus);
+
     // DEBUG_END;
 
 } // GetStatus

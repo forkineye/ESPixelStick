@@ -1,5 +1,5 @@
 /*
-* InputFPPRemotePlayList.cpp
+* InputFPPRemotePlayListFsm.cpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2021 Shelby Merrick
@@ -81,6 +81,17 @@ void fsm_PlayList_state_Idle::Stop (void)
 } // fsm_PlayList_state_Idle::Stop
 
 //-----------------------------------------------------------------------------
+void fsm_PlayList_state_Idle::GetStatus (JsonObject& jsonStatus)
+{
+    // DEBUG_START;
+
+    JsonObject FileStatus = jsonStatus.createNestedObject (F ("Idle"));
+
+    // DEBUG_END;
+
+} // fsm_PlayList_state_Idle::GetStatus
+
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_PlayingFile::Poll (uint8_t * Buffer, size_t BufferSize)
@@ -143,6 +154,18 @@ void fsm_PlayList_state_PlayingFile::Stop (void)
     // DEBUG_END;
 
 } // fsm_PlayList_state_PlayingFile::Stop
+
+//-----------------------------------------------------------------------------
+void fsm_PlayList_state_PlayingFile::GetStatus (JsonObject& jsonStatus)
+{
+    // DEBUG_START;
+
+    JsonObject FileStatus = jsonStatus.createNestedObject (F("File"));
+    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->GetStatus (FileStatus);
+
+    // DEBUG_END;
+
+} // fsm_PlayList_state_PlayingFile::GetStatus
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -209,6 +232,18 @@ void fsm_PlayList_state_PlayingEffect::Stop (void)
 } // fsm_PlayList_state_PlayingEffect::Stop
 
 //-----------------------------------------------------------------------------
+void fsm_PlayList_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
+{
+    // DEBUG_START;
+
+    JsonObject EffectStatus = jsonStatus.createNestedObject (F ("Effect"));
+    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->GetStatus (EffectStatus);
+
+    // DEBUG_END;
+
+} // fsm_PlayList_state_PlayingEffect::GetStatus
+
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_Paused::Poll (uint8_t* Buffer, size_t BufferSize)
@@ -262,3 +297,14 @@ void fsm_PlayList_state_Paused::Stop (void)
     // DEBUG_END;
 
 } // fsm_PlayList_state_Paused::Stop
+
+//-----------------------------------------------------------------------------
+void fsm_PlayList_state_Paused::GetStatus (JsonObject& jsonStatus)
+{
+    // DEBUG_START;
+
+    JsonObject FileStatus = jsonStatus.createNestedObject (F ("Paused"));
+
+    // DEBUG_END;
+
+} // fsm_PlayList_state_Paused::GetStatus

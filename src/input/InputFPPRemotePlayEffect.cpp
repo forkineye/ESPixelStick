@@ -100,6 +100,8 @@ void c_InputFPPRemotePlayEffect::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
+    pCurrentFsmState->GetStatus (jsonStatus);
+
     // DEBUG_END;
 
 } // GetStatus
