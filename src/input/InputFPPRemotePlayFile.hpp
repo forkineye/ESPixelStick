@@ -49,7 +49,7 @@ private:
     uint32_t          CurrentFrameId = 0;
     size_t            DataOffset = 0;
     uint32_t          ChannelsPerFrame = 0;
-    uint32_t          FrameStepTime = 0;
+    uint8_t           FrameStepTime = 1;
     uint32_t          TotalNumberOfFramesInSequence = 0;
     uint32_t          StartTimeInMillis = 0;
 

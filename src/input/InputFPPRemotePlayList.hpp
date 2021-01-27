@@ -54,8 +54,11 @@ protected:
 
     fsm_PlayList_state * pCurrentFsmState = nullptr;
 
-    // DynamicJsonDocument JsonPlayList (2048);
+    c_InputFPPRemotePlayItem * pInputFPPRemotePlayItem = nullptr;
 
-    String PlayListFile;
+    uint32_t PlayListEntryId;
+    time_t PauseEndTime = 0;
+
+    bool ProcessPlayListEntry ();
 
 }; // c_InputFPPRemotePlayList

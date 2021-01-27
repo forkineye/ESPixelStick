@@ -182,7 +182,7 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
 
         p_InputFPPRemotePlayFile->DataOffset = fsqHeader.dataOffset;
         p_InputFPPRemotePlayFile->ChannelsPerFrame = fsqHeader.channelCount;
-        p_InputFPPRemotePlayFile->FrameStepTime = fsqHeader.stepTime;
+        p_InputFPPRemotePlayFile->FrameStepTime = max((uint8_t)1, fsqHeader.stepTime);
         p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence = fsqHeader.TotalNumberOfFramesInSequence;
         p_InputFPPRemotePlayFile->StartTimeInMillis = millis () - (p_InputFPPRemotePlayFile->FrameStepTime * p_InputFPPRemotePlayFile->CurrentFrameId);
 

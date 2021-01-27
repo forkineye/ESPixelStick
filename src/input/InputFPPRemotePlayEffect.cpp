@@ -26,6 +26,7 @@ c_InputFPPRemotePlayEffect::c_InputFPPRemotePlayEffect () :
 {
     // DEBUG_START;
 
+    fsm_PlayEffect_state_Idle_imp.Init (this);
 
     // DEBUG_END;
 } // c_InputFPPRemotePlayEffect
@@ -33,15 +34,20 @@ c_InputFPPRemotePlayEffect::c_InputFPPRemotePlayEffect () :
 //-----------------------------------------------------------------------------
 c_InputFPPRemotePlayEffect::~c_InputFPPRemotePlayEffect ()
 {
+    // DEBUG_START;
+
+    Stop ();
+
+    // DEBUG_END;
 
 } // ~c_InputFPPRemotePlayEffect
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayEffect::Start (String & FileName, uint32_t FrameId)
+void c_InputFPPRemotePlayEffect::Start (String & FileName, uint32_t duration)
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Start (FileName, FrameId);
+    pCurrentFsmState->Start (FileName, duration);
 
     // DEBUG_END;
 } // Start
@@ -51,6 +57,7 @@ void c_InputFPPRemotePlayEffect::Stop ()
 {
     // DEBUG_START;
 
+    pCurrentFsmState->Stop ();
 
     // DEBUG_END;
 } // Stop
@@ -60,6 +67,7 @@ void c_InputFPPRemotePlayEffect::Sync (uint32_t FrameId)
 {
     // DEBUG_START;
 
+    pCurrentFsmState->Sync (FrameId);
 
     // DEBUG_END;
 } // Sync
@@ -68,6 +76,8 @@ void c_InputFPPRemotePlayEffect::Sync (uint32_t FrameId)
 void c_InputFPPRemotePlayEffect::Poll (uint8_t * Buffer, size_t BufferSize)
 {
     // DEBUG_START;
+
+    pCurrentFsmState->Poll (Buffer, BufferSize);
 
     // DEBUG_END;
 

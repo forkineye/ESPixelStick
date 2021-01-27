@@ -35,25 +35,22 @@ void fsm_PlayEffect_state_Idle::Poll (uint8_t * Buffer, size_t BufferSize)
 //-----------------------------------------------------------------------------
 void fsm_PlayEffect_state_Idle::Init (c_InputFPPRemotePlayEffect* Parent)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     p_InputFPPRemotePlayEffect = Parent;
     p_InputFPPRemotePlayEffect->pCurrentFsmState = &(Parent->fsm_PlayEffect_state_Idle_imp);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_PlayEffect_state_Idle::Init
 
 //-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_Idle::Start (String & FileName, uint32_t FrameId)
+void fsm_PlayEffect_state_Idle::Start (String & FileName, uint32_t )
 {
     // DEBUG_START;
 
-    // open the Fsm file
-
-    // set context to the first entry in the file
-
-    // do the first item in the file
+    p_InputFPPRemotePlayEffect->PLayEffectEndTime = millis () + (1000 * p_InputFPPRemotePlayEffect->PlayDurationSec);
+    p_InputFPPRemotePlayEffect->fsm_PlayEffect_state_PlayingEffect_imp.Init (p_InputFPPRemotePlayEffect);
 
     // DEBUG_END;
 
@@ -88,6 +85,12 @@ void fsm_PlayEffect_state_PlayingEffect::Poll (uint8_t * Buffer, size_t BufferSi
 {
     // DEBUG_START;
 
+    if (p_InputFPPRemotePlayEffect->PLayEffectEndTime <= millis ())
+    {
+        // DEBUG_V ("");
+        Stop ();
+    }
+
     // DEBUG_END;
 
 } // fsm_PlayEffect_state_PlayingEffect::Poll
@@ -96,6 +99,9 @@ void fsm_PlayEffect_state_PlayingEffect::Poll (uint8_t * Buffer, size_t BufferSi
 void fsm_PlayEffect_state_PlayingEffect::Init (c_InputFPPRemotePlayEffect* Parent)
 {
     // DEBUG_START;
+
+    p_InputFPPRemotePlayEffect = Parent;
+    p_InputFPPRemotePlayEffect->pCurrentFsmState = &(Parent->fsm_PlayEffect_state_PlayingEffect_imp);
 
     // DEBUG_END;
 
@@ -106,6 +112,8 @@ void fsm_PlayEffect_state_PlayingEffect::Start (String & FileName, uint32_t Fram
 {
     // DEBUG_START;
 
+    // do nothing
+
     // DEBUG_END;
 
 } // fsm_PlayEffect_state_PlayingEffect::Start
@@ -115,6 +123,8 @@ void fsm_PlayEffect_state_PlayingEffect::Stop (void)
 {
     // DEBUG_START;
 
+    p_InputFPPRemotePlayEffect->fsm_PlayEffect_state_Idle_imp.Init (p_InputFPPRemotePlayEffect);
+
     // DEBUG_END;
 
 } // fsm_PlayEffect_state_PlayingEffect::Stop
@@ -123,6 +133,8 @@ void fsm_PlayEffect_state_PlayingEffect::Stop (void)
 bool fsm_PlayEffect_state_PlayingEffect::Sync (uint32_t FrameId)
 {
     // DEBUG_START;
+
+    // do nothing
 
     // DEBUG_END;
 

@@ -111,6 +111,7 @@ void c_InputFPPRemote::Process ()
 
         if (pInputFPPRemotePlayItem->IsIdle ())
         {
+            // DEBUG_V ("Idle Processing");
             String FileName = pInputFPPRemotePlayItem->GetFileName ();
             StartPlaying (FileName);
         }
@@ -147,6 +148,7 @@ boolean c_InputFPPRemote::SetConfig (JsonObject & jsonConfig)
 
     FileMgr.SetSpiIoPins (miso_pin, mosi_pin, clk_pin, cs_pin);
 
+    // DEBUG_V ("Config Processing");
     StartPlaying (FileToPlay);
 
     // DEBUG_END;
@@ -177,15 +179,16 @@ void c_InputFPPRemote::StartPlaying (String & FileName)
 
     do // once
     {
-        if ((0 == FileName.length ()) || 
+        // DEBUG_V (String ("FileName: '") + FileName + "'");
+        if ((0 == FileName.length ()) ||
             (FileName == No_LocalFileToPlay) ||
             (FileName == String("null")) )
         {
             StopPlaying ();
+            // DEBUG_V ("Enable FPP Remote");
             FPPDiscovery.Enable ();
             break;
         }
-
         // DEBUG_V ("Disable FPP Remote");
         FPPDiscovery.Disable ();
         // DEBUG_V ("Disable FPP Remote Done");
@@ -214,7 +217,6 @@ void c_InputFPPRemote::StartPlaying (String & FileName)
         {
             // DEBUG_V ("Start Playlist");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayList ();
-            break;
         }
         else
         {
@@ -222,6 +224,7 @@ void c_InputFPPRemote::StartPlaying (String & FileName)
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile ();
         }
 
+        // DEBUG_V (String ("FileName: '") + FileName + "'");
         // DEBUG_V ("Start Playing");
         pInputFPPRemotePlayItem->Start (FileName, 0);
 
