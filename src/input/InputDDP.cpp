@@ -139,7 +139,7 @@ void c_InputDDP::ProcessReceivedUdpPacket(AsyncUDPPacket ReceivedPacket)
         // do we have a place to put the received data?
         if (PacketBuffer.PacketBufferStatus == PacketBufferStatus_t::BufferIsBeingProcessed)
         {
-            DEBUG_V ("Throw away the received packet. We dont have a place to put it.");
+            // DEBUG_V ("Throw away the received packet. We dont have a place to put it.");
             break;
         }
         // DEBUG_V ("");
@@ -223,7 +223,7 @@ void c_InputDDP::Process ()
             break;
         }
 
-        DEBUG_V ("There is something in the buffer for us to process");
+        // DEBUG_V ("There is something in the buffer for us to process");
         PacketBuffer.PacketBufferStatus = PacketBufferStatus_t::BufferIsBeingProcessed;
 
         if (true == IsData(PacketBuffer.Packet.header.flags))
@@ -242,7 +242,7 @@ void c_InputDDP::Process ()
 
         // not sure what this thing is but we are going to ignore it
         PacketBuffer.PacketBufferStatus = PacketBufferStatus_t::BufferIsAvailable;
-        DEBUG_V("UnSupported PDU type");
+        // DEBUG_V("UnSupported PDU type");
 
     } while (false);
 
