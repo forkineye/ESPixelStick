@@ -163,6 +163,9 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
 
         // DEBUG_V (String("PlayListEntryType: '") + PlayListEntryType + "'");
 
+        String PlayListEntryName;
+        setFromJSON (PlayListEntryName, JsonPlayListArrayEntry, "name");
+
         if (String (F ("file")) == PlayListEntryType)
         {
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile ();
@@ -183,6 +186,9 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
             setFromJSON (PlayListEntryDuration, JsonPlayListArrayEntry, "duration");
             // DEBUG_V (String ("PlayListEntryDuration: '") + String (PlayListEntryDuration) + "'");
             pInputFPPRemotePlayItem->SetDuration (PlayListEntryDuration);
+
+            JsonObject EffectConfig = JsonPlayListArrayEntry["config"];
+            serializeJson (EffectConfig, PlayListEntryName);
 
             fsm_PlayList_state_PlayingEffect_imp.Init (this);
         }
@@ -206,10 +212,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
             break;
         }
 
-        String PlayListEntryName;
-        setFromJSON (PlayListEntryName, JsonPlayListArrayEntry, "name");
         // DEBUG_V (String ("PlayListEntryName: '") + String (PlayListEntryName) + "'");
-
         pInputFPPRemotePlayItem->Start (PlayListEntryName, 0);
 
         response = true;
