@@ -68,7 +68,7 @@ The configuration has been modified the support multiple (two) input types concu
 - DDP
 - E1.31
 - Effect Engine
-- FPP Remote / FSEQ file auto Play
+- FPP Remote / FSEQ file auto Play / Play Lists
 - MQTT
 
 ### Alexa Support
@@ -96,6 +96,89 @@ Effect engine provides a list of effects and colors for the effects. Effects wil
 FPP / FSEQ support allows the ESP to play files stored on a local SD card. The configuration allows the SPI pins used for the SD Card to be set. 
 When the "FSEQ File to Play" configuration parameter is set to "Play Remote Sequence", the ESP will respond to FPP Sync and play commands.
 When the "FSEQ File to Play" configuration parameter is set to one of the files stored on the ESP, the ESP will play that file on an endless loop.
+When the "FSEQ File To Play" configuration parameter is set to a file with a .pl extension, the file will be parsed and used to control a set of actions performed by the FPP Play List Player.
+
+#### Play List
+The ESPixelstick can follow a set of instructions found in a play list file. A playlist file can have any name and up to 20 actions to take. Play List actions are one of the following:
+- Play a file (must be an fseq file)
+- Play an effect (Effect list can be found in the Effect configuration dropdown)
+- Pause
+
+- The play list file is case sensitive. 
+- The effect configuration sections must be present for the effects to function properly.
+
+Here is an example of a Play List File:
+[
+	{
+		"type": "file",
+		"name": "MySequence.fseq",
+		"playcount": 2
+	},
+	{
+		"type": "pause",
+		"duration": 5
+	},
+	{
+		"type": "effect",
+		"config": 
+		{
+			"currenteffect": "Chase",
+			"EffectSpeed": 6,
+			"EffectReverse": false,
+			"EffectMirror": false,
+			"EffectAllLeds": false,
+			"EffectBrightness": 1,
+			"EffectBlankTime": 0,
+			"EffectWhiteChannel": false,
+			"EffectColor": "#0000ff"
+		},
+		"duration": 10
+	},
+	{
+		"type": "effect",
+		"config": 
+		{
+			"currenteffect": "Rainbow",
+			"EffectSpeed": 6,
+			"EffectReverse": false,
+			"EffectMirror": false,
+			"EffectAllLeds": false,
+			"EffectBrightness": 1,
+			"EffectBlankTime": 0,
+			"EffectWhiteChannel": false,
+			"EffectColor": "#b700ff"
+		},
+		"duration": 5
+	},
+	{
+		"type": "effect",
+		"config": 
+		{
+			"currenteffect": "Blink",
+			"EffectSpeed": 6,
+			"EffectReverse": false,
+			"EffectMirror": false,
+			"EffectAllLeds": false,
+			"EffectBrightness": 1,
+			"EffectBlankTime": 0,
+			"EffectWhiteChannel": false,
+			"EffectColor": "#FF0055"
+		},
+		"duration": 10
+	},
+	{
+		"type": "file",
+		"name": "MyOtherSequence.fseq",
+		"playcount": 1
+	},
+	{
+		"type": "pause",
+		"duration": 5
+	}
+]
+
+
+
 
 ### MQTT Support
 
