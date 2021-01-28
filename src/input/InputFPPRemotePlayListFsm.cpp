@@ -306,7 +306,16 @@ void fsm_PlayList_state_Paused::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject FileStatus = jsonStatus.createNestedObject (F ("Paused"));
+    JsonObject PauseStatus = jsonStatus.createNestedObject (F ("Paused"));
+
+    time_t SecondsRemaining = (pInputFPPRemotePlayList->PauseEndTime - millis ()) / 1000;
+
+    time_t MinutesRemaining = SecondsRemaining / 60;
+    SecondsRemaining = SecondsRemaining % 60;
+
+    char buf[8];
+    sprintf (buf, "%02d:%02d", MinutesRemaining, SecondsRemaining);
+    PauseStatus[F ("TimeRemaining")] = buf;
 
     // DEBUG_END;
 

@@ -1184,12 +1184,21 @@ function ProcessRecievedJsonStatusMessage(data)
             $('#LocalEffectPlayerStatus').addClass("hidden")
         }
 
+        if (LocalPlayerStatus.hasOwnProperty('Paused')) {
+            $('#PausedPlayerStatus').removeClass("hidden");
+
+            $('#PausedTimeRemaining').text(LocalPlayerStatus.Paused.TimeRemaining);
+        }
+        else {
+            $('#PausedPlayerStatus').addClass("hidden")
+        }
     }
     else
     {
         $('#LocalPlayListPlayerStatus').addClass("hidden")
         $('#LocalFilePlayerStatus').addClass("hidden")
         $('#LocalEffectPlayerStatus').addClass("hidden")
+        $('#PausedPlayerStatus').addClass("hidden")
     }
 
     // Device Refresh is dynamic
