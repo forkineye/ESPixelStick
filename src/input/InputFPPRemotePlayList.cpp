@@ -145,6 +145,8 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
             LOG_PORT.println (String (F ("Heap:")) + String (ESP.getFreeHeap ()));
             LOG_PORT.println (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
             LOG_PORT.println (String (F ("++++")) + FileData + String (F ("----")));
+            PauseEndTime = millis () + 10000;
+            fsm_PlayList_state_Paused_imp.Init (this);
             break;
         }
 
@@ -155,6 +157,8 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         {
             // DEBUG_V ("No more entries to play");
             PlayListRepeatCount++;
+            PauseEndTime = millis () + 10000;
+            fsm_PlayList_state_Paused_imp.Init (this);
             break;
         }
 
@@ -166,7 +170,10 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         // DEBUG_V (String ("JsonPlayListArrayEntry:size: '") + String (JsonPlayListArrayEntry.size ()) + "'");
         if ((0 == JsonPlayListArrayEntry.size ()))
         {
-            // DEBUG_V ("Entry is empty. Move on");
+            // DEBUG_V ("Entry is empty. Do a Pause");
+
+            PauseEndTime = millis () + 10000;
+            fsm_PlayList_state_Paused_imp.Init (this);
             break;
         }
 
@@ -224,6 +231,8 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         else
         {
             LOG_PORT.println (String (F ("Unsupported Play List Entry type: '")) + PlayListEntryType + "'");
+            PauseEndTime = millis () - 1;
+            fsm_PlayList_state_Paused_imp.Init (this);
             break;
         }
 
