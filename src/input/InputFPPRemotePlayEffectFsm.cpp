@@ -105,6 +105,8 @@ void fsm_PlayEffect_state_Idle::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
+    jsonStatus[F ("TimeRemaining")] = F("00:00");
+
     // DEBUG_END;
 
 } // fsm_PlayEffect_state_Idle::GetStatus
@@ -184,6 +186,15 @@ bool fsm_PlayEffect_state_PlayingEffect::Sync (uint32_t FrameId)
 void fsm_PlayEffect_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
+
+    time_t SecondsRemaining = (p_InputFPPRemotePlayEffect->PLayEffectEndTime - millis ()) / 1000;
+    
+    time_t MinutesRemaining = SecondsRemaining / 60;
+    SecondsRemaining = SecondsRemaining % 60;
+
+    char buf[8];
+    sprintf (buf, "%02d:%02d", MinutesRemaining, SecondsRemaining);
+    jsonStatus[F ("TimeRemaining")] = buf;
 
     p_InputFPPRemotePlayEffect->pEffectsEngine->GetStatus (jsonStatus);
 

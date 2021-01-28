@@ -35,6 +35,7 @@ public:
     virtual bool   IsIdle         () = 0;
             String GetFileName    () { return PlayItemName; }
             void   SetRepeatCount (uint32_t value) { RepeatCount = value; }
+            uint32_t GetRepeatCount () { return RepeatCount; }
             void   SetDuration    (time_t value) { PlayDurationSec = value; }
 
 protected:

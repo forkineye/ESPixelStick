@@ -160,6 +160,8 @@ void fsm_PlayList_state_PlayingFile::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
+    jsonStatus[F ("repeat")] = pInputFPPRemotePlayList->pInputFPPRemotePlayItem->GetRepeatCount ();
+
     JsonObject FileStatus = jsonStatus.createNestedObject (F("File"));
     pInputFPPRemotePlayList->pInputFPPRemotePlayItem->GetStatus (FileStatus);
 

@@ -95,10 +95,10 @@ void c_InputFPPRemotePlayList::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject PlayListStatus = jsonStatus.createNestedObject ("Playlist");
     jsonStatus[F ("name")] = GetFileName ();
+    jsonStatus[F ("entry")] = PlayListEntryId;
 
-    pCurrentFsmState->GetStatus (PlayListStatus);
+    pCurrentFsmState->GetStatus (jsonStatus);
 
     // DEBUG_END;
 
@@ -175,10 +175,15 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         {
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile ();
 
-            uint32_t PlayListEntryRepeatCount = 0;
-            setFromJSON (PlayListEntryRepeatCount, JsonPlayListArrayEntry, "repeat");
-            // DEBUG_V (String ("PlayListEntryRepeatCount: '") + String (PlayListEntryRepeatCount) + "'");
-            pInputFPPRemotePlayItem->SetRepeatCount (PlayListEntryRepeatCount);
+            uint32_t PlayListEntryPlayCount = 1;
+            setFromJSON (PlayListEntryPlayCount, JsonPlayListArrayEntry, "playcount");
+            // DEBUG_V (String ("PlayListEntryPlayCount: '") + String (PlayListEntryPlayCount) + "'");
+            if (0 == PlayListEntryPlayCount)
+            {
+                // entry has been disabled
+                break;
+            }
+            pInputFPPRemotePlayItem->SetRepeatCount (PlayListEntryPlayCount-1);
 
             fsm_PlayList_state_PlayingFile_imp.Init (this);
         }
@@ -187,7 +192,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         {
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayEffect ();
 
-            uint32_t PlayListEntryDuration = 0;
+            uint32_t PlayListEntryDuration = 10;
             setFromJSON (PlayListEntryDuration, JsonPlayListArrayEntry, "duration");
             // DEBUG_V (String ("PlayListEntryDuration: '") + String (PlayListEntryDuration) + "'");
             pInputFPPRemotePlayItem->SetDuration (PlayListEntryDuration);
