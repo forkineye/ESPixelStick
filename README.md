@@ -101,15 +101,16 @@ FPP / FSEQ support allows the ESP to play files stored on a local SD card. The c
 #### Play List
 The ESPixelstick can follow a set of instructions found in a play list file. A playlist file can have any name and up to 20 actions to take. Play List actions are one of the following:
 - Play a file (must be an fseq file)
--- Requires the Filename and the number of times to play the file (max 255)
+	- Requires the Filename and the number of times to play the file (max 255)
 - Play an effect (Effect list can be found in the Effect configuration dropdown)
--- Requires an effect configuration that includes how long to play the effect (max 1000 seconds)
+	- Requires an effect configuration that includes how long to play the effect (max 1000 seconds)
 - Pause
--- Requires a time value (up to 1000 seconds)
+	- Requires a time value (up to 1000 seconds)
 - The play list file is case sensitive. 
 - The effect configuration sections must be present for the effects to function properly.
 
 Here is an example of a Play List File:
+```
 [
 	{
 		"type": "file",
@@ -178,9 +179,7 @@ Here is an example of a Play List File:
 		"duration": 5
 	}
 ]
-
-
-
+```
 
 ### MQTT Support
 
