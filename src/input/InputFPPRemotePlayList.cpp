@@ -114,14 +114,15 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
 
     // extern void PrettyPrint (JsonArray & jsonStuff, String Name);
     // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
+    c_InputFPPRemotePlayItem * pOldInputFPPRemotePlayItem = pInputFPPRemotePlayItem;
 
     do // once
     {
         if (nullptr != pInputFPPRemotePlayItem)
         {
+            // DEBUG_V ("");
             pInputFPPRemotePlayItem->Stop ();
-            delete pInputFPPRemotePlayItem;
-            pInputFPPRemotePlayItem = nullptr;
+            // DEBUG_V ("");
         }
 
         // open the playlist file
@@ -178,12 +179,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
             uint32_t PlayListEntryPlayCount = 1;
             setFromJSON (PlayListEntryPlayCount, JsonPlayListArrayEntry, "playcount");
             // DEBUG_V (String ("PlayListEntryPlayCount: '") + String (PlayListEntryPlayCount) + "'");
-            if (0 == PlayListEntryPlayCount)
-            {
-                // entry has been disabled
-                break;
-            }
-            pInputFPPRemotePlayItem->SetRepeatCount (PlayListEntryPlayCount-1);
+            pInputFPPRemotePlayItem->SetPlayCount (PlayListEntryPlayCount);
 
             fsm_PlayList_state_PlayingFile_imp.Init (this);
         }
@@ -228,6 +224,12 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         response = true;
 
     } while (false);
+
+    if ((nullptr != pOldInputFPPRemotePlayItem) && 
+        (pOldInputFPPRemotePlayItem != pInputFPPRemotePlayItem))
+    {
+        delete pOldInputFPPRemotePlayItem;
+    }
 
     // DEBUG_END;
 

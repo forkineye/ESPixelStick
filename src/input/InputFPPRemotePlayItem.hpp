@@ -34,13 +34,13 @@ public:
     virtual void   GetStatus      (JsonObject & jsonStatus) = 0;
     virtual bool   IsIdle         () = 0;
             String GetFileName    () { return PlayItemName; }
-            void   SetRepeatCount (uint32_t value) { RepeatCount = value; }
-            uint32_t GetRepeatCount () { return RepeatCount; }
+            void   SetPlayCount   (uint32_t value) { RemainingPlayCount = value; }
+            uint32_t GetRepeatCount () { return RemainingPlayCount; }
             void   SetDuration    (time_t value) { PlayDurationSec = value; }
 
 protected:
     String   PlayItemName;
-    uint32_t RepeatCount = 0;
+    uint32_t RemainingPlayCount = 0;
     time_t   PlayDurationSec = 0;
 
 }; // c_InputFPPRemotePlayItem

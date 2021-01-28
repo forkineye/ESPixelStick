@@ -186,6 +186,7 @@ void fsm_PlayList_state_PlayingEffect::Poll (uint8_t * Buffer, size_t BufferSize
             // DEBUG_V ("Done with all entries");
             Stop ();
         }
+        // DEBUG_V ("Idle Processing Done");
     }
 
     // DEBUG_END;

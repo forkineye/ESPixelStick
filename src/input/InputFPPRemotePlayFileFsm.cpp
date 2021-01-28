@@ -57,7 +57,7 @@ void fsm_PlayFile_state_Idle::Start (String & FileName, uint32_t FrameId)
 
     // DEBUG_V (String ("    FileName: ") + p_InputFPPRemotePlayFile->PlayItemName);
     // DEBUG_V (String ("     FrameId: ") + p_InputFPPRemotePlayFile->LastFrameId);
-    // DEBUG_V (String (" RepeatCount: ") + p_InputFPPRemotePlayFile->RepeatCount);
+    // DEBUG_V (String (" RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
 
     p_InputFPPRemotePlayFile->fsm_PlayFile_state_PlayingFile_imp.Init (p_InputFPPRemotePlayFile);
 
@@ -102,12 +102,12 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t * Buffer, size_t BufferSize)
         // have we reached the end of the file?
         if (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence <= frame)
         {
-            // DEBUG_V (String ("RepeatCount: ") + p_InputFPPRemotePlayFile->RepeatCount);
-            if (0 != p_InputFPPRemotePlayFile->RepeatCount)
+            // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
+            if (0 != p_InputFPPRemotePlayFile->RemainingPlayCount)
             {
                 LOG_PORT.println (String("Start Playing:: FileName:  '") + p_InputFPPRemotePlayFile->GetFileName() + "'");
-                --p_InputFPPRemotePlayFile->RepeatCount;
-                // DEBUG_V (String ("RepeatCount: ") + p_InputFPPRemotePlayFile->RepeatCount);
+                --p_InputFPPRemotePlayFile->RemainingPlayCount;
+                // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
 
                 p_InputFPPRemotePlayFile->StartTimeInMillis = millis ();
                 p_InputFPPRemotePlayFile->LastFrameId = -1;
@@ -172,6 +172,11 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
     {
         // DEBUG_V (String ("FileName: '") + p_InputFPPRemotePlayFile->PlayItemName + "'");
         // DEBUG_V (String (" FrameId: '") + p_InputFPPRemotePlayFile->LastFrameId + "'");
+        if (0 == p_InputFPPRemotePlayFile->RemainingPlayCount)
+        {
+            Stop ();
+            break;
+        }
 
         if (false == FileMgr.OpenSdFile (p_InputFPPRemotePlayFile->PlayItemName,
             c_FileMgr::FileMode::FileRead,
