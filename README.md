@@ -94,16 +94,18 @@ Effect engine provides a list of effects and colors for the effects. Effects wil
 ### FPP Remote / Play FSEQ
 
 FPP / FSEQ support allows the ESP to play files stored on a local SD card. The configuration allows the SPI pins used for the SD Card to be set. 
-When the "FSEQ File to Play" configuration parameter is set to "Play Remote Sequence", the ESP will respond to FPP Sync and play commands.
-When the "FSEQ File to Play" configuration parameter is set to one of the files stored on the ESP, the ESP will play that file on an endless loop.
-When the "FSEQ File To Play" configuration parameter is set to a file with a .pl extension, the file will be parsed and used to control a set of actions performed by the FPP Play List Player.
+- When the "FSEQ File to Play" configuration parameter is set to "Play Remote Sequence", the ESP will respond to FPP Sync and play commands.
+- When the "FSEQ File to Play" configuration parameter is set to one of the files stored on the ESP, the ESP will play that file on an endless loop.
+- When the "FSEQ File To Play" configuration parameter is set to a file with a .pl extension, the file will be parsed and used to control a set of actions performed by the FPP Play List Player.
 
 #### Play List
 The ESPixelstick can follow a set of instructions found in a play list file. A playlist file can have any name and up to 20 actions to take. Play List actions are one of the following:
 - Play a file (must be an fseq file)
+-- Requires the Filename and the number of times to play the file (max 255)
 - Play an effect (Effect list can be found in the Effect configuration dropdown)
+-- Requires an effect configuration that includes how long to play the effect (max 1000 seconds)
 - Pause
-
+-- Requires a time value (up to 1000 seconds)
 - The play list file is case sensitive. 
 - The effect configuration sections must be present for the effects to function properly.
 
