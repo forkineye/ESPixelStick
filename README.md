@@ -123,6 +123,7 @@ Here is an example of a Play List File:
 	},
 	{
 		"type": "effect",
+		"duration": 10,
 		"config": 
 		{
 			"currenteffect": "Chase",
@@ -134,11 +135,11 @@ Here is an example of a Play List File:
 			"EffectBlankTime": 0,
 			"EffectWhiteChannel": false,
 			"EffectColor": "#0000ff"
-		},
-		"duration": 10
+		}
 	},
 	{
 		"type": "effect",
+		"duration": 5,
 		"config": 
 		{
 			"currenteffect": "Rainbow",
@@ -150,11 +151,11 @@ Here is an example of a Play List File:
 			"EffectBlankTime": 0,
 			"EffectWhiteChannel": false,
 			"EffectColor": "#b700ff"
-		},
-		"duration": 5
+		}
 	},
 	{
 		"type": "effect",
+		"duration": 10,
 		"config": 
 		{
 			"currenteffect": "Blink",
@@ -166,8 +167,7 @@ Here is an example of a Play List File:
 			"EffectBlankTime": 0,
 			"EffectWhiteChannel": false,
 			"EffectColor": "#FF0055"
-		},
-		"duration": 10
+		}
 	},
 	{
 		"type": "file",
@@ -238,6 +238,12 @@ Each output can be configured to support any of the output protocols (no pixel v
 - DMX512
 - Renard
 - Generic Serial
+
+### Relay Outputs
+We support an output configuration that drives up to eight (8) relay outputs. 
+- Each relay output can be configured to be active high or active low. 
+- The trip point (on/off) is configurable per output.
+- The GPIO for each output is configurable
 
 ## Resources
 
