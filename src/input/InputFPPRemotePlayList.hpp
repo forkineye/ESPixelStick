@@ -56,8 +56,9 @@ protected:
 
     c_InputFPPRemotePlayItem * pInputFPPRemotePlayItem = nullptr;
 
-    uint32_t PlayListEntryId;
-    time_t PauseEndTime = 0;
+    uint32_t PlayListEntryId     = 0;
+    time_t   PauseEndTime        = 0;
+    uint32_t PlayListRepeatCount = 1;
 
     bool ProcessPlayListEntry ();
 

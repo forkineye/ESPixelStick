@@ -1145,6 +1145,7 @@ function ProcessRecievedJsonStatusMessage(data)
             
             $('#localPlayListName').text(LocalPlayerStatus.name);
             $('#localPlayListEntry').text(LocalPlayerStatus.entry);
+            $('#localPlayListCount').text(LocalPlayerStatus.count);
 
             if (LocalPlayerStatus.hasOwnProperty('File'))
             {

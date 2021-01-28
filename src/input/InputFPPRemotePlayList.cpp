@@ -95,8 +95,9 @@ void c_InputFPPRemotePlayList::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    jsonStatus[F ("name")] = GetFileName ();
+    jsonStatus[F ("name")]  = GetFileName ();
     jsonStatus[F ("entry")] = PlayListEntryId;
+    jsonStatus[F ("count")] = PlayListRepeatCount;
 
     pCurrentFsmState->GetStatus (jsonStatus);
 
@@ -153,6 +154,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         if (PlayListEntryId >= JsonPlayListDoc.size ())
         {
             // DEBUG_V ("No more entries to play");
+            PlayListRepeatCount++;
             break;
         }
 
