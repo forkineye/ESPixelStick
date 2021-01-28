@@ -607,6 +607,7 @@ bool c_FileMgr::ReadSdFile (String & FileName, String & FileData)
     }
     else
     {
+        CloseSdFile (FileHandle);
         LOG_PORT.println (String (F ("SD file: '")) + FileName + String (F ("' not found.")));
     }
 
