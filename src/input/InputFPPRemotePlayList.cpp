@@ -122,8 +122,9 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         {
             // DEBUG_V ("");
             pInputFPPRemotePlayItem->Stop ();
-            // DEBUG_V ("");
         }
+
+        // DEBUG_V ("");
 
         // open the playlist file
         String FileData;
@@ -149,15 +150,21 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         JsonArray JsonPlayListArray = JsonPlayListDoc.as<JsonArray> ();
         // PrettyPrint (JsonPlayListArray, String ("PlayList Array"));
 
+        if (PlayListEntryId >= JsonPlayListDoc.size ())
+        {
+            // DEBUG_V ("No more entries to play");
+            break;
+        }
+
         // DEBUG_V (String ("            PlayListEntryId: '") + String(PlayListEntryId) + "'");
         JsonObject JsonPlayListArrayEntry = JsonPlayListArray[PlayListEntryId];
         // PrettyPrint (JsonPlayListArrayEntry, String ("PlayList Array Entry"));
 
         // DEBUG_V (String ("       JsonPlayListDoc:size: '") + String (JsonPlayListDoc.size ()) + "'");
         // DEBUG_V (String ("JsonPlayListArrayEntry:size: '") + String (JsonPlayListArrayEntry.size ()) + "'");
-        if ((0 == JsonPlayListArrayEntry.size ()) || (PlayListEntryId >= JsonPlayListDoc.size ()))
+        if ((0 == JsonPlayListArrayEntry.size ()))
         {
-            // DEBUG_V ("No more entries to play");
+            // DEBUG_V ("Entry is empty. Move on");
             break;
         }
 
