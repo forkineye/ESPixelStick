@@ -313,7 +313,7 @@ void fsm_PlayList_state_Paused::GetStatus (JsonObject& jsonStatus)
     time_t MinutesRemaining = SecondsRemaining / 60;
     SecondsRemaining = SecondsRemaining % 60;
 
-    char buf[8];
+    char buf[10];
     sprintf (buf, "%02d:%02d", MinutesRemaining, SecondsRemaining);
     PauseStatus[F ("TimeRemaining")] = buf;
 
