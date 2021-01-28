@@ -105,7 +105,12 @@ void c_FPPDiscovery::Disable ()
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::Enable ()
 {
+    // DEBUG_START;
+
     IsEnabled = true;
+    
+    // DEBUG_END;
+
 } // Enable
 
 //-----------------------------------------------------------------------------
@@ -138,6 +143,7 @@ void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t Curr
     // DEBUG_END;
 } // ReadNextFrame
 
+//-----------------------------------------------------------------------------
 uint64_t read64 (uint8_t* buf, int idx) {
     uint32_t r1 = (int)(buf[idx + 3]) << 24;
     r1 |= (int)(buf[idx + 2]) << 16;
@@ -153,6 +159,7 @@ uint64_t read64 (uint8_t* buf, int idx) {
     r |= r1;
     return r;
 }
+//-----------------------------------------------------------------------------
 uint32_t read32 (uint8_t* buf, int idx) {
     uint32_t r = (int)(buf[idx + 3]) << 24;
     r |= (int)(buf[idx + 2]) << 16;
@@ -160,18 +167,19 @@ uint32_t read32 (uint8_t* buf, int idx) {
     r |= (int)(buf[idx]);
     return r;
 }
+//-----------------------------------------------------------------------------
 uint32_t read24 (uint8_t* pData)
 {
     return ((uint32_t)(pData[0]) |
             (uint32_t)(pData[1]) << 8 |
             (uint32_t)(pData[2]) << 16);
 } // read24
+//-----------------------------------------------------------------------------
 uint16_t read16 (uint8_t* pData)
 {
     return ((uint16_t)(pData[0]) |
             (uint16_t)(pData[1]) << 8);
 } // read16
-
 
 //-----------------------------------------------------------------------------
 #ifdef ARDUINO_ARCH_ESP8266
@@ -217,10 +225,12 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
                 // received a discover ping packet, need to send a ping out
                 if (_packet.isBroadcast () || _packet.isMulticast ())
                 {
+                    // DEBUG_V ("Broadcast Ping Response");
                     sendPingPacket ();
                 }
                 else
                 {
+                    // DEBUG_V ("Unicast Ping Response");
                     sendPingPacket (_packet.remoteIP ());
                 }
             }
@@ -502,6 +512,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
     } // there are headers to process
 
     serializeJson (JsonData, resp);
+    // DEBUG_V (String ("resp: ") + resp);
 
     // DEBUG_END;
 
@@ -521,16 +532,27 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
             break;
         }
 
+        // DEBUG_V ("");
+
         String path = request->getParam (F("path"))->value ();
+
+        // DEBUG_V (String ("Path: ") + path);
+
         if (path.startsWith (F("/api/sequence/")) && AllowedToRemotePlayFiles())
         {
+            // DEBUG_V ("");
+
             String seq = path.substring (14);
             if (seq.endsWith (F("/meta")))
             {
+                // DEBUG_V ("");
+
                 seq = seq.substring (0, seq.length () - 5);
-                ProcessSyncPacket (0x1, "", 0); //must stop
+                StopPlaying ();
 
                 c_FileMgr::FileId FileHandle;
+                // DEBUG_V (String (" seq: ") + seq);
+
                 if (FileMgr.OpenSdFile (seq, c_FileMgr::FileMode::FileRead, FileHandle))
                 {
                     if (FileMgr.GetSdFileSize(FileHandle) > 0)
@@ -734,8 +756,16 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
                 JsonData[F ("status")] = 0;
                 JsonData[F ("status_name")] = F ("idle");
 
-                JsonData[F ("mode")] = 8;
-                JsonData[F ("mode_name")] = F ("remote");
+                if (IsEnabled)
+                {
+                    JsonData[F ("mode")] = 8;
+                    JsonData[F ("mode_name")] = F ("remote");
+                }
+                else
+                {
+                    JsonData[F ("mode")] = 1;
+                    JsonData[F ("mode_name")] = F ("bridge");
+                }
             }
             else
             {
@@ -743,8 +773,8 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
                 JsonData[F ("status")] = 1;
                 JsonData[F ("status_name")] = F ("playing");
 
-                JsonData[F ("mode")] = 1;
-                JsonData[F ("mode_name")] = F ("bridge");
+                JsonData[F ("mode")] = 8;
+                JsonData[F ("mode_name")] = F ("remote");
             }
 
             if (adv == "true")
@@ -780,7 +810,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 
             String resp;
             serializeJson (JsonData, resp);
-            DEBUG_V (String ("resp: ") + resp);
+            // DEBUG_V (String ("resp: ") + resp);
             request->send (200, F("application/json"), resp);
 
             break;
@@ -811,22 +841,24 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
             // DEBUG_V ("Not Enabled");
             break;
         }
+        // DEBUG_V ("");
 
         if (inFileUpload)
         {
             // DEBUG_V ("Uploading");
             break;
         }
+        // DEBUG_V ("");
 
         if (0 == filename.length())
         {
             // DEBUG_V("Do not have a file to start");
             break;
         }
+        // DEBUG_V ("");
 
         InputFPPRemotePlayFile.Start (filename, frameId);
-
-        // LOG_PORT.println (String (F ("FPPDiscovery::Playing:  '")) + FileName + "'" );
+        LOG_PORT.println (String (F ("FPPDiscovery::Playing:  '")) + filename + "'" );
 
     } while (false);
 
@@ -844,12 +876,11 @@ void c_FPPDiscovery::StopPlaying ()
         // DEBUG_V ("");
         LOG_PORT.println (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
         InputFPPRemotePlayFile.Stop ();
-    }
-    
-    // DEBUG_V ("");
 
-    // blank the display
-    ProcessBlankPacket ();
+        // DEBUG_V ("");
+        // blank the display
+        ProcessBlankPacket ();
+    }
 
     // DEBUG_END;
 

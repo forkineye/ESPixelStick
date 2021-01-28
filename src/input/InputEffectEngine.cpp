@@ -151,6 +151,8 @@ void c_InputEffectEngine::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
+    jsonStatus[F ("currenteffect")] = ActiveEffect->name;
+
     // DEBUG_END;
 
 } // GetStatus

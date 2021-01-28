@@ -38,6 +38,7 @@ public:
     virtual void Start (String & FileName, uint32_t FrameId) = 0;
     virtual void Stop (void) = 0;
     virtual bool Sync (uint32_t FrameId) = 0;
+    virtual void GetStatus (JsonObject& jsonStatus) = 0;
 
 protected:
     c_InputFPPRemotePlayEffect* p_InputFPPRemotePlayEffect = nullptr;
@@ -54,6 +55,7 @@ public:
     virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop (void);
     virtual bool Sync (uint32_t FrameId);
+    virtual void GetStatus (JsonObject& jsonStatus);
 
 }; // fsm_PlayEffect_state_Idle
 
@@ -67,5 +69,6 @@ public:
     virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop (void);
     virtual bool Sync (uint32_t FrameId);
+    virtual void GetStatus (JsonObject& jsonStatus);
 
 }; // fsm_PlayEffect_state_PlayingEffect

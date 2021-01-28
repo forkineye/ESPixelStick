@@ -70,7 +70,10 @@ void c_InputFPPRemotePlayFile::Sync (uint32_t FrameId)
     // DEBUG_START;
 
     SyncCount++;
-    SyncAdjustmentCount += pCurrentFsmState->Sync (FrameId);
+    if (pCurrentFsmState->Sync (FrameId))
+    {
+        SyncAdjustmentCount++;
+    }
 
     // DEBUG_END;
 
@@ -92,7 +95,7 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
 {
     // DEBUG_START;
 
-    uint32_t mseconds = CurrentFrameId * FrameStepTime;
+    uint32_t mseconds = LastFrameId * FrameStepTime;
     uint32_t msecondsTotal = FrameStepTime * TotalNumberOfFramesInSequence;
 
     uint32_t secs = mseconds / 1000;

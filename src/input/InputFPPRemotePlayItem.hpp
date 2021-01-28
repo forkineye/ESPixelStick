@@ -27,15 +27,19 @@ public:
     c_InputFPPRemotePlayItem ();
     ~c_InputFPPRemotePlayItem ();
 
-    virtual void Poll  (uint8_t * Buffer, size_t BufferSize) = 0;
-    virtual void Start (String & FileName, uint32_t FrameId) = 0;
-    virtual void Stop  () = 0;
-    virtual void Sync  (uint32_t FrameId) = 0;
-    virtual void GetStatus (JsonObject & jsonStatus) = 0;
-    virtual bool IsIdle () = 0;
-    String GetFileName () { return PlayItemName; }
+    virtual void   Poll           (uint8_t * Buffer, size_t BufferSize) = 0;
+    virtual void   Start          (String & FileName, uint32_t FrameId) = 0;
+    virtual void   Stop           () = 0;
+    virtual void   Sync           (uint32_t FrameId) = 0;
+    virtual void   GetStatus      (JsonObject & jsonStatus) = 0;
+    virtual bool   IsIdle         () = 0;
+            String GetFileName    () { return PlayItemName; }
+            void   SetRepeatCount (uint32_t value) { RepeatCount = value; }
+            void   SetDuration    (time_t value) { PlayDurationSec = value; }
 
 protected:
-    String PlayItemName;
+    String   PlayItemName;
+    uint32_t RepeatCount = 0;
+    time_t   PlayDurationSec = 0;
 
 }; // c_InputFPPRemotePlayItem

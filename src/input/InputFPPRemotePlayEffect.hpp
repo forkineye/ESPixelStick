@@ -22,21 +22,22 @@
 #include "../ESPixelStick.h"
 #include "InputFPPRemotePlayItem.hpp"
 #include "InputFPPRemotePlayEffectFsm.hpp"
+#include "InputCommon.hpp"
 
-class c_InputFPPRemotePlayEffect : c_InputFPPRemotePlayItem
+class c_InputFPPRemotePlayEffect : public c_InputFPPRemotePlayItem
 {
 public:
     c_InputFPPRemotePlayEffect ();
     ~c_InputFPPRemotePlayEffect ();
 
-    virtual void Start (String & FileName, uint32_t FrameId);
+    virtual void Start (String & FileName, uint32_t duration);
     virtual void Stop  ();
     virtual void Sync  (uint32_t FrameId);
     virtual void Poll  (uint8_t * Buffer, size_t BufferSize);
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayEffect_state_Idle_imp); }
 
-private:
+protected:
 
     friend class fsm_PlayEffect_state_Idle;
     friend class fsm_PlayEffect_state_PlayingEffect;
@@ -46,5 +47,8 @@ private:
     fsm_PlayEffect_state_PlayingEffect fsm_PlayEffect_state_PlayingEffect_imp;
 
     fsm_PlayEffect_state* pCurrentFsmState = nullptr;
+    time_t PLayEffectEndTime = 0;
+
+    c_InputCommon* pEffectsEngine = nullptr;
 
 }; // c_InputFPPRemotePlayEffect

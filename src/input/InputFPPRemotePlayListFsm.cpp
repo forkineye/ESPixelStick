@@ -1,5 +1,5 @@
 /*
-* InputFPPRemotePlayList.cpp
+* InputFPPRemotePlayListFsm.cpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2021 Shelby Merrick
@@ -25,187 +25,286 @@
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_Idle::Poll (uint8_t * Buffer, size_t BufferSize)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     // do nothing
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_PlayList_state_Idle::Poll
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_Idle::Init (c_InputFPPRemotePlayList* Parent)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     pInputFPPRemotePlayList = Parent;
     pInputFPPRemotePlayList->pCurrentFsmState = &(Parent->fsm_PlayList_state_Idle_imp);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_PlayList_state_Idle::Init
 
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_Idle::Start (String & FileName, uint32_t FrameId)
+void fsm_PlayList_state_Idle::Start (String & FileName, uint32_t )
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     do // once
     {
-        // open the playlist file
-        String FileData;
-        if (0 == FileMgr.ReadSdFile (FileName, FileData))
+        pInputFPPRemotePlayList->PlayItemName = FileName;
+        pInputFPPRemotePlayList->PlayListEntryId = 0;
+
+        if (!pInputFPPRemotePlayList->ProcessPlayListEntry ())
         {
-            LOG_PORT.println (String (F ("Could not read Playlist file: '")) + FileName + "'");
+            LOG_PORT.println (String (F ("Could not start PlayList: '")) + FileName + "'");
             break;
         }
-        DEBUG_V ("");
-
-        pInputFPPRemotePlayList->PlayListFile = FileName;
-        /*
-        DeserializationError error = deserializeJson (pInputFPPRemotePlayList->JsonPlayList, (const String)FileData);
-
-        DEBUG_V ("Error Check");
-        if (error)
-        {
-            String CfgFileMessagePrefix = String (F ("SD file: '")) + FileName + "' ";
-            LOG_PORT.println (String (F ("Heap:")) + String (ESP.getFreeHeap ()));
-            LOG_PORT.println (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
-            LOG_PORT.println (String (F ("++++")) + FileData + String (F ("----")));
-            break;
-        }
-*/
-        // set context to the first entry in the file
-
-        // do the first item in the file
+    
+        // DEBUG_V (String ("PlayItemName: '") + pInputFPPRemotePlayList->PlayItemName + "'");
 
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_PlayList_state_Idle::Start
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_Idle::Stop (void)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     // Do nothing
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_PlayList_state_Idle::Stop
+
+//-----------------------------------------------------------------------------
+void fsm_PlayList_state_Idle::GetStatus (JsonObject& jsonStatus)
+{
+    // DEBUG_START;
+
+    JsonObject FileStatus = jsonStatus.createNestedObject (F ("Idle"));
+
+    // DEBUG_END;
+
+} // fsm_PlayList_state_Idle::GetStatus
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_PlayingFile::Poll (uint8_t * Buffer, size_t BufferSize)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    DEBUG_END;
+    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll (Buffer, BufferSize);
+    
+    if (pInputFPPRemotePlayList->pInputFPPRemotePlayItem->IsIdle ())
+    {
+        // DEBUG_V ("Idle Processing");
+        if (false == pInputFPPRemotePlayList->ProcessPlayListEntry ())
+        {
+            // DEBUG_V ("Done with all entries");
+            Stop ();
+        }
+    }
+
+    // DEBUG_END;
 
 } // fsm_PlayList_state_PlayingFile::Poll
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_PlayingFile::Init (c_InputFPPRemotePlayList* Parent)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    DEBUG_END;
+    pInputFPPRemotePlayList = Parent;
+    pInputFPPRemotePlayList->pCurrentFsmState = &(Parent->fsm_PlayList_state_PlayingFile_imp);
+
+    // DEBUG_END;
 
 } // fsm_PlayList_state_PlayingFile::Init
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_PlayingFile::Start (String & FileName, uint32_t FrameId)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    DEBUG_END;
+    // ignore
+
+    // DEBUG_END;
 
 } // fsm_PlayList_state_PlayingFile::Start
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_PlayingFile::Stop (void)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    DEBUG_END;
+    if (nullptr != pInputFPPRemotePlayList->pInputFPPRemotePlayItem)
+    {
+        // DEBUG_V ("");
+        pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Stop ();
+        delete pInputFPPRemotePlayList->pInputFPPRemotePlayItem;
+    }
+    // DEBUG_V ("");
+    pInputFPPRemotePlayList->fsm_PlayList_state_Idle_imp.Init (pInputFPPRemotePlayList);
+
+    // DEBUG_END;
 
 } // fsm_PlayList_state_PlayingFile::Stop
+
+//-----------------------------------------------------------------------------
+void fsm_PlayList_state_PlayingFile::GetStatus (JsonObject& jsonStatus)
+{
+    // DEBUG_START;
+
+    JsonObject FileStatus = jsonStatus.createNestedObject (F("File"));
+    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->GetStatus (FileStatus);
+
+    // DEBUG_END;
+
+} // fsm_PlayList_state_PlayingFile::GetStatus
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_PlayingEffect::Poll (uint8_t * Buffer, size_t BufferSize)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    DEBUG_END;
+    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll (Buffer, BufferSize);
+
+    if (pInputFPPRemotePlayList->pInputFPPRemotePlayItem->IsIdle ())
+    {
+        // DEBUG_V ("Idle Processing");
+        if (false == pInputFPPRemotePlayList->ProcessPlayListEntry ())
+        {
+            // DEBUG_V ("Done with all entries");
+            Stop ();
+        }
+    }
+
+    // DEBUG_END;
 
 } // fsm_PlayList_state_PlayingEffect::Poll
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_PlayingEffect::Init (c_InputFPPRemotePlayList* Parent)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    DEBUG_END;
+    pInputFPPRemotePlayList = Parent;
+    pInputFPPRemotePlayList->pCurrentFsmState = &(Parent->fsm_PlayList_state_PlayingEffect_imp);
+
+    // DEBUG_END;
 
 } // fsm_PlayList_state_PlayingEffect::Init
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_PlayingEffect::Start (String & FileName, uint32_t FrameId)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    DEBUG_END;
+    // ignore
+
+    // DEBUG_END;
 
 } // fsm_PlayList_state_PlayingEffect::Start
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_PlayingEffect::Stop (void)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    DEBUG_END;
+    if (nullptr != pInputFPPRemotePlayList->pInputFPPRemotePlayItem)
+    {
+        // DEBUG_V ("");
+        pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Stop ();
+        delete pInputFPPRemotePlayList->pInputFPPRemotePlayItem;
+    }
+    // DEBUG_V ("");
+    pInputFPPRemotePlayList->fsm_PlayList_state_Idle_imp.Init (pInputFPPRemotePlayList);
+
+    // DEBUG_END;
 
 } // fsm_PlayList_state_PlayingEffect::Stop
+
+//-----------------------------------------------------------------------------
+void fsm_PlayList_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
+{
+    // DEBUG_START;
+
+    JsonObject EffectStatus = jsonStatus.createNestedObject (F ("Effect"));
+    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->GetStatus (EffectStatus);
+
+    // DEBUG_END;
+
+} // fsm_PlayList_state_PlayingEffect::GetStatus
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_Paused::Poll (uint8_t* Buffer, size_t BufferSize)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    DEBUG_END;
+    if (pInputFPPRemotePlayList->PauseEndTime <= millis ())
+    {
+        // DEBUG_V ("");
+        if (false == pInputFPPRemotePlayList->ProcessPlayListEntry ())
+        {
+            // DEBUG_V ("Done with all entries");
+            Stop ();
+        }
+    }
+
+    // DEBUG_END;
 
 } // fsm_PlayList_state_Paused::Poll
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_Paused::Init (c_InputFPPRemotePlayList* Parent)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    DEBUG_END;
+    pInputFPPRemotePlayList = Parent;
+    pInputFPPRemotePlayList->pCurrentFsmState = &(Parent->fsm_PlayList_state_Paused_imp);
+
+    // DEBUG_END;
 
 } // fsm_PlayList_state_Paused::Init
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_Paused::Start (String& FileName, uint32_t FrameId)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    DEBUG_END;
+    // ignore
+
+    // DEBUG_END;
 
 } // fsm_PlayList_state_Paused::Start
 
 //-----------------------------------------------------------------------------
 void fsm_PlayList_state_Paused::Stop (void)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    DEBUG_END;
+    pInputFPPRemotePlayList->fsm_PlayList_state_Idle_imp.Init (pInputFPPRemotePlayList);
+
+    // DEBUG_END;
 
 } // fsm_PlayList_state_Paused::Stop
+
+//-----------------------------------------------------------------------------
+void fsm_PlayList_state_Paused::GetStatus (JsonObject& jsonStatus)
+{
+    // DEBUG_START;
+
+    JsonObject FileStatus = jsonStatus.createNestedObject (F ("Paused"));
+
+    // DEBUG_END;
+
+} // fsm_PlayList_state_Paused::GetStatus
