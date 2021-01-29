@@ -48,18 +48,36 @@ c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInput
 {
     // DEBUG_START;
     // set a default effect
-    ActiveEffect = &ListOfEffects[0];
+    // ActiveEffect = &ListOfEffects[0];
 
-    SetBufferInfo (BufferStart, BufferSize);
+    // SetBufferInfo (BufferStart, BufferSize);
 
     // DEBUG_END;
 } // c_InputEffectEngine
 
+
+//-----------------------------------------------------------------------------
+c_InputEffectEngine::c_InputEffectEngine () :
+    c_InputCommon (c_InputMgr::e_InputChannelIds::InputChannelId_1, 
+        c_InputMgr::e_InputType::InputType_Effects, 
+        nullptr, 0)
+{
+    // DEBUG_START;
+    // set a default effect
+    ActiveEffect = &ListOfEffects[0];
+
+    SetBufferInfo (nullptr, 0);
+
+    // DEBUG_END;
+
+} // c_InputEffectEngine
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::~c_InputEffectEngine ()
 {
-    memset ((void*)InputDataBuffer, 0x0, InputDataBufferSize);
-
+    if (nullptr != InputDataBuffer)
+    {
+        memset ((void*)InputDataBuffer, 0x0, InputDataBufferSize);
+    }
 } // ~c_InputEffectEngine
 
 //-----------------------------------------------------------------------------
