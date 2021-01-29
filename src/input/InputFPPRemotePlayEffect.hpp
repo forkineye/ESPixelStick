@@ -22,7 +22,7 @@
 #include "../ESPixelStick.h"
 #include "InputFPPRemotePlayItem.hpp"
 #include "InputFPPRemotePlayEffectFsm.hpp"
-#include "InputCommon.hpp"
+#include "InputEffectEngine.hpp"
 
 class c_InputFPPRemotePlayEffect : public c_InputFPPRemotePlayItem
 {
@@ -49,6 +49,6 @@ protected:
     fsm_PlayEffect_state* pCurrentFsmState = nullptr;
     time_t PLayEffectEndTime = 0;
 
-    c_InputCommon* pEffectsEngine = nullptr;
+    c_InputEffectEngine EffectsEngine;
 
 }; // c_InputFPPRemotePlayEffect
