@@ -552,7 +552,7 @@ bool c_FileMgr::OpenSdFile (String & FileName, FileMode Mode, FileId & FileHandl
             FileNamePrefix = "/";
         }
 
-        // DEBUG_V (String("FileName: '") + FileName + "'");
+        // DEBUG_V (String("FileName: '") + FileNamePrefix + FileName + "'");
 
         if (FileMode::FileRead == Mode)
         {
@@ -566,6 +566,8 @@ bool c_FileMgr::OpenSdFile (String & FileName, FileMode Mode, FileId & FileHandl
 
         // DEBUG_V ();
         FileHandle = CreateFileHandle ();
+        // DEBUG_V (String("FileHandle: ") + String(FileHandle));
+
         FileList[FileHandle] = SDFS.open (FileNamePrefix + FileName, ReadWrite);
 
         // DEBUG_V ();
@@ -619,8 +621,26 @@ bool c_FileMgr::ReadSdFile (String & FileName, String & FileData)
 //-----------------------------------------------------------------------------
 size_t c_FileMgr::ReadSdFile (FileId& FileHandle, byte* FileData, size_t NumBytesToRead, size_t StartingPosition)
 {
-    FileList[FileHandle].seek (StartingPosition, SeekSet);
-    return ReadSdFile (FileHandle, FileData, NumBytesToRead);
+    // DEBUG_START;
+
+    size_t response = 0;
+
+    // DEBUG_V (String ("      FileHandle: ") + String (FileHandle));
+    // DEBUG_V (String ("  NumBytesToRead: ") + String (NumBytesToRead));
+    // DEBUG_V (String ("StartingPosition: ") + String (StartingPosition));
+
+    if (FileList.end () != FileList.find (FileHandle))
+    {
+        FileList[FileHandle].seek (StartingPosition, SeekSet);
+        response = ReadSdFile (FileHandle, FileData, NumBytesToRead);
+    }
+    else
+    {
+        LOG_PORT.println ("FileMgr::ReadSdFile::ERROR::Invalid File Handle.");
+    }
+
+    // DEBUG_END;
+    return response;
 
 } // ReadSdFile
 
@@ -629,10 +649,17 @@ size_t c_FileMgr::ReadSdFile (FileId& FileHandle, byte* FileData, size_t NumByte
 {
     // DEBUG_START;
 
+    // DEBUG_V (String ("    FileHandle: ") + String (FileHandle));
+    // DEBUG_V (String ("NumBytesToRead: ") + String (NumBytesToRead));
+
     size_t response = 0;
     if (FileList.end() != FileList.find (FileHandle))
     {
         response = FileList[FileHandle].read (FileData, NumBytesToRead);
+    }
+    else
+    {
+        LOG_PORT.println ("FileMgr::ReadSdFile::ERROR::Invalid File Handle.");
     }
 
     // DEBUG_END;
@@ -647,6 +674,10 @@ void c_FileMgr::CloseSdFile (FileId& FileHandle)
     {
         FileList[FileHandle].close ();
         FileList.erase (FileHandle);
+    }
+    else
+    {
+        // LOG_PORT.println ("FileMgr::CloseSdFile::ERROR::Invalid File Handle.");
     }
 
 } // CloseSdFile
