@@ -48,9 +48,9 @@ c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInput
 {
     // DEBUG_START;
     // set a default effect
-    // ActiveEffect = &ListOfEffects[0];
+    ActiveEffect = &ListOfEffects[0];
 
-    // SetBufferInfo (BufferStart, BufferSize);
+    SetBufferInfo (BufferStart, BufferSize);
 
     // DEBUG_END;
 } // c_InputEffectEngine
@@ -105,6 +105,7 @@ void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
     // DEBUG_START;
     char HexColor[] = "#000000 ";
     sprintf (HexColor, "#%02x%02x%02x", EffectColor.r, EffectColor.g, EffectColor.b);
+    // DEBUG_V ("");
 
     jsonConfig[F ("currenteffect")]      = ActiveEffect->name;
     jsonConfig[F ("EffectSpeed")]        = EffectSpeed;
@@ -115,11 +116,14 @@ void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
     jsonConfig[F ("EffectBlankTime")]    = EffectBlankTime;
     jsonConfig[F ("EffectWhiteChannel")] = EffectWhiteChannel;
     jsonConfig[F ("EffectColor")]        = HexColor;
+    // DEBUG_V ("");
 
     JsonArray EffectsArray = jsonConfig.createNestedArray (F ("effects"));
+    // DEBUG_V ("");
 
     for (EffectDescriptor_t currentEffect : ListOfEffects)
     {
+        // DEBUG_V ("");
         JsonObject currentJsonEntry = EffectsArray.createNestedObject ();
         currentJsonEntry["name"] = currentEffect.name;
     }
