@@ -187,12 +187,17 @@ void fsm_PlayEffect_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    time_t SecondsRemaining = (p_InputFPPRemotePlayEffect->PLayEffectEndTime - millis ()) / 1000;
-    
-    time_t MinutesRemaining = SecondsRemaining / 60;
+    time_t now = millis ();
+    time_t SecondsRemaining = (p_InputFPPRemotePlayEffect->PLayEffectEndTime - now) / 1000;
+    if (now > p_InputFPPRemotePlayEffect->PLayEffectEndTime)
+    {
+        SecondsRemaining = 0;
+    }
+
+    time_t MinutesRemaining = min (time_t (999), time_t (SecondsRemaining / 60));
     SecondsRemaining = SecondsRemaining % 60;
 
-    char buf[8];
+    char buf[10];
     sprintf (buf, "%02d:%02d", MinutesRemaining, SecondsRemaining);
     jsonStatus[F ("TimeRemaining")] = buf;
 
