@@ -126,7 +126,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         {
             LOG_PORT.println (String (F ("Could not read Playlist file: '")) + PlayItemName + "'");
             fsm_PlayList_state_Paused_imp.Init (this);
-            pInputFPPRemotePlayItem->Start (PlayItemName, PauseEndTime);
+            pCurrentFsmState->Start (PlayItemName, PauseEndTime);
             break;
         }
         // DEBUG_V ("");
