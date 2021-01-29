@@ -670,6 +670,8 @@ size_t c_FileMgr::ReadSdFile (FileId& FileHandle, byte* FileData, size_t NumByte
 //-----------------------------------------------------------------------------
 void c_FileMgr::CloseSdFile (FileId& FileHandle)
 {
+    // DEBUG_START;
+
     if (FileList.end () != FileList.find (FileHandle))
     {
         FileList[FileHandle].close ();
@@ -679,6 +681,8 @@ void c_FileMgr::CloseSdFile (FileId& FileHandle)
     {
         // LOG_PORT.println ("FileMgr::CloseSdFile::ERROR::Invalid File Handle.");
     }
+
+    // DEBUG_END;
 
 } // CloseSdFile
 
