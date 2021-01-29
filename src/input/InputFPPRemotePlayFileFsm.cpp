@@ -189,11 +189,13 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
         // DEBUG_V ("");
 
         FSEQHeader fsqHeader;
-        size_t BytesRead = FileMgr.ReadSdFile (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed, (uint8_t*)&fsqHeader, sizeof (fsqHeader));
+        size_t BytesRead = FileMgr.ReadSdFile (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed, (uint8_t*)&fsqHeader, sizeof (fsqHeader), 0);
+        // DEBUG_V (String ("BytesRead: ") + String (BytesRead));
+        // DEBUG_V (String ("sizeof (fsqHeader): ") + String (sizeof (fsqHeader)));
 
         if (BytesRead != sizeof (fsqHeader))
         {
-            LOG_PORT.println (String (F ("StartPlaying:: Could not start. ")) + p_InputFPPRemotePlayFile->PlayItemName + F (" File is too short"));
+            LOG_PORT.println (String (F ("StartPlaying:: Could not start. ")) + p_InputFPPRemotePlayFile->PlayItemName + F (" Failed to read file header"));
             p_InputFPPRemotePlayFile->pCurrentFsmState->Stop ();
             break;
         }
