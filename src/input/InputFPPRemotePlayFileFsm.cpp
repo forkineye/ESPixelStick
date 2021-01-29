@@ -19,8 +19,9 @@
 */
 
 #include "InputFPPRemotePlayFile.hpp"
-#include "../service/FPPDiscovery.h"
 #include "InputMgr.hpp"
+#include "../service/fseq.h"
+
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Idle::Poll (uint8_t * Buffer, size_t BufferSize)
@@ -54,8 +55,8 @@ void fsm_PlayFile_state_Idle::Start (String & FileName, uint32_t FrameId)
     p_InputFPPRemotePlayFile->PlayItemName = FileName;
     p_InputFPPRemotePlayFile->LastFrameId = FrameId;
 
-    // DEBUG_V (String ("    FileName: ") + p_InputFPPRemotePlayFile->PlayItemName);
-    // DEBUG_V (String ("     FrameId: ") + p_InputFPPRemotePlayFile->LastFrameId);
+    // DEBUG_V (String ("           FileName: ") + p_InputFPPRemotePlayFile->PlayItemName);
+    // DEBUG_V (String ("            FrameId: ") + p_InputFPPRemotePlayFile->LastFrameId);
     // DEBUG_V (String (" RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
 
     p_InputFPPRemotePlayFile->fsm_PlayFile_state_PlayingFile_imp.Init (p_InputFPPRemotePlayFile);
@@ -180,27 +181,34 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
         // DEBUG_V ("");
 
         FSEQHeader fsqHeader;
-        size_t BytesRead = OpenFseqFile (fsqHeader);
+        p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed = 0;
+        if (false == FileMgr.OpenSdFile (p_InputFPPRemotePlayFile->PlayItemName,
+            c_FileMgr::FileMode::FileRead,
+            p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed))
+        {
+            LOG_PORT.println (String (F ("StartPlaying:: Could not open file: filename: '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
+            break;
+        }
+
+        size_t BytesRead = FileMgr.ReadSdFile (
+            p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed,
+            (uint8_t*)&fsqHeader,
+            sizeof (FSEQHeader), 0);
         // DEBUG_V (String ("BytesRead: ") + String (BytesRead));
+        // DEBUG_V (String ("sizeof (fsqHeader): ") + String (sizeof (fsqHeader)));
 
         if (BytesRead != sizeof (fsqHeader))
         {
-            FileMgr.CloseSdFile (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed);
-            BytesRead == OpenFseqFile (fsqHeader);
-            // DEBUG_V (String ("BytesRead: ") + String (BytesRead));
-            if (BytesRead != sizeof (fsqHeader))
-            {
-                LOG_PORT.println (String (F ("StartPlaying:: Could not read FSEQ header: filename: '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
-                p_InputFPPRemotePlayFile->pCurrentFsmState->Stop ();
-                break;
-            }
+            LOG_PORT.println (String (F ("StartPlaying:: Could not read FSEQ header: filename: '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
+            Stop ();
+            break;
         }
         // DEBUG_V ("");
 
         if (fsqHeader.majorVersion != 2 || fsqHeader.compressionType != 0)
         {
             LOG_PORT.println (String (F ("StartPlaying:: Could not start. ")) + p_InputFPPRemotePlayFile->PlayItemName + F (" is not a v2 uncompressed sequence"));
-            p_InputFPPRemotePlayFile->pCurrentFsmState->Stop ();
+            Stop ();
             break;
         }
         // DEBUG_V ("");
@@ -284,32 +292,3 @@ bool fsm_PlayFile_state_PlayingFile::Sync (uint32_t TargetFrameId)
     return response;
 
 } // fsm_PlayFile_state_PlayingFile::Sync
-
-//-----------------------------------------------------------------------------
-size_t fsm_PlayFile_state_PlayingFile::OpenFseqFile (FSEQHeader& fsqHeader)
-{
-    size_t response = 0;
-
-    do // once
-    {
-        p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed = 0;
-        if (false == FileMgr.OpenSdFile (p_InputFPPRemotePlayFile->PlayItemName,
-            c_FileMgr::FileMode::FileRead,
-            p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed))
-        {
-            LOG_PORT.println (String (F ("StartPlaying:: Could not open file: filename: '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
-            break;
-        }
-
-        size_t BytesRead = FileMgr.ReadSdFile (
-            p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed, 
-            (uint8_t*)&fsqHeader, 
-            sizeof (FSEQHeader), 0);
-        // DEBUG_V (String ("BytesRead: ") + String (BytesRead));
-        // DEBUG_V (String ("sizeof (fsqHeader): ") + String (sizeof (fsqHeader)));
-
-    } while (false);
-
-    return response;
-
-} // OpenFseqFile

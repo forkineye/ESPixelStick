@@ -21,7 +21,6 @@
 
 #include "../ESPixelStick.h"
 #include "../FileMgr.hpp"
-#include "../service/fseq.h"
 
 class c_InputFPPRemotePlayFile;
 
@@ -69,10 +68,6 @@ public:
     virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop (void);
     virtual bool Sync (uint32_t FrameId);
-
-private:
-    size_t OpenFseqFile (FSEQHeader & fsqHeader);
-
 
 }; // fsm_PlayFile_state_PlayingFile
 
