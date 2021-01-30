@@ -71,7 +71,7 @@ void fsm_PlayEffect_state_Idle::Start (String & ConfigString, uint32_t )
     setFromJSON (EffectName, ConfigObject, F("currenteffect"));
     LOG_PORT.println (String (F ("Playing Effect: '")) + EffectName + "'");
 
-    p_InputFPPRemotePlayEffect->pEffectsEngine->SetConfig (ConfigObject);
+    p_InputFPPRemotePlayEffect->EffectsEngine.SetConfig (ConfigObject);
     p_InputFPPRemotePlayEffect->fsm_PlayEffect_state_PlayingEffect_imp.Init (p_InputFPPRemotePlayEffect);
 
     // DEBUG_END;
@@ -105,6 +105,8 @@ void fsm_PlayEffect_state_Idle::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
+    jsonStatus[F ("TimeRemaining")] = F("00:00");
+
     // DEBUG_END;
 
 } // fsm_PlayEffect_state_Idle::GetStatus
@@ -116,8 +118,8 @@ void fsm_PlayEffect_state_PlayingEffect::Poll (uint8_t * Buffer, size_t BufferSi
 {
     // DEBUG_START;
 
-    p_InputFPPRemotePlayEffect->pEffectsEngine->SetBufferInfo (Buffer, BufferSize);
-    p_InputFPPRemotePlayEffect->pEffectsEngine->Process ();
+    p_InputFPPRemotePlayEffect->EffectsEngine.SetBufferInfo (Buffer, BufferSize);
+    p_InputFPPRemotePlayEffect->EffectsEngine.Process ();
 
     if (p_InputFPPRemotePlayEffect->PLayEffectEndTime <= millis ())
     {
@@ -137,7 +139,7 @@ void fsm_PlayEffect_state_PlayingEffect::Init (c_InputFPPRemotePlayEffect* Paren
     p_InputFPPRemotePlayEffect = Parent;
     p_InputFPPRemotePlayEffect->pCurrentFsmState = &(Parent->fsm_PlayEffect_state_PlayingEffect_imp);
 
-    p_InputFPPRemotePlayEffect->pEffectsEngine->SetOperationalState (true);
+    p_InputFPPRemotePlayEffect->EffectsEngine.SetOperationalState (true);
 
     // DEBUG_END;
 
@@ -148,7 +150,7 @@ void fsm_PlayEffect_state_PlayingEffect::Start (String & FileName, uint32_t Fram
 {
     // DEBUG_START;
 
-    p_InputFPPRemotePlayEffect->pEffectsEngine->SetOperationalState (true);
+    p_InputFPPRemotePlayEffect->EffectsEngine.SetOperationalState (true);
     InputMgr.SetOperationalState (false);
 
     // DEBUG_END;
@@ -160,7 +162,7 @@ void fsm_PlayEffect_state_PlayingEffect::Stop (void)
 {
     // DEBUG_START;
 
-    p_InputFPPRemotePlayEffect->pEffectsEngine->SetOperationalState (false);
+    p_InputFPPRemotePlayEffect->EffectsEngine.SetOperationalState (false);
     InputMgr.SetOperationalState (true);
 
     p_InputFPPRemotePlayEffect->fsm_PlayEffect_state_Idle_imp.Init (p_InputFPPRemotePlayEffect);
@@ -185,7 +187,21 @@ void fsm_PlayEffect_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    p_InputFPPRemotePlayEffect->pEffectsEngine->GetStatus (jsonStatus);
+    time_t now = millis ();
+    time_t SecondsRemaining = (p_InputFPPRemotePlayEffect->PLayEffectEndTime - now) / 1000;
+    if (now > p_InputFPPRemotePlayEffect->PLayEffectEndTime)
+    {
+        SecondsRemaining = 0;
+    }
+
+    time_t MinutesRemaining = min (time_t (999), time_t (SecondsRemaining / 60));
+    SecondsRemaining = SecondsRemaining % 60;
+
+    char buf[10];
+    sprintf (buf, "%02d:%02d", MinutesRemaining, SecondsRemaining);
+    jsonStatus[F ("TimeRemaining")] = buf;
+
+    p_InputFPPRemotePlayEffect->EffectsEngine.GetStatus (jsonStatus);
 
     // DEBUG_END;
 

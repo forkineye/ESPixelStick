@@ -69,9 +69,6 @@ public:
     virtual void Stop (void);
     virtual bool Sync (uint32_t FrameId);
 
-private:
-
-
 }; // fsm_PlayFile_state_PlayingFile
 
 

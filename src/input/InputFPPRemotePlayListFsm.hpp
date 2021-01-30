@@ -46,13 +46,26 @@ protected:
 }; // fsm_PlayList_state
 
 /*****************************************************************************/
-class fsm_PlayList_state_Idle : public fsm_PlayList_state
+class fsm_PlayList_state_WaitForStart : public fsm_PlayList_state
 {
 public:
     virtual void Poll (uint8_t * Buffer, size_t BufferSize);
     virtual void Init (c_InputFPPRemotePlayList* Parent);
     virtual void GetStateName (String & sName) { sName = F ("Idle"); }
     virtual void Start (String & FileName, uint32_t FrameId);
+    virtual void Stop (void);
+    virtual void GetStatus (JsonObject& jsonStatus);
+
+}; // fsm_PlayList_state_Idle
+
+/*****************************************************************************/
+class fsm_PlayList_state_Idle : public fsm_PlayList_state
+{
+public:
+    virtual void Poll (uint8_t* Buffer, size_t BufferSize);
+    virtual void Init (c_InputFPPRemotePlayList* Parent);
+    virtual void GetStateName (String& sName) { sName = F ("Idle"); }
+    virtual void Start (String& FileName, uint32_t FrameId);
     virtual void Stop (void);
     virtual void GetStatus (JsonObject& jsonStatus);
 

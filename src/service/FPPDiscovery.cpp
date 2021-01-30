@@ -857,6 +857,7 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
         }
         // DEBUG_V ("");
 
+        InputFPPRemotePlayFile.SetPlayCount (1);
         InputFPPRemotePlayFile.Start (filename, frameId);
         LOG_PORT.println (String (F ("FPPDiscovery::Playing:  '")) + filename + "'" );
 

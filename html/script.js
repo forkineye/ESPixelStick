@@ -1035,13 +1035,15 @@ function ProcessRecievedJsonAdminMessage(data)
 
 } // ProcessRecievedJsonAdminMessage
 
-//ProcessRecievedJsonStatusMessage
+// ProcessRecievedJsonStatusMessage
 function ProcessRecievedJsonStatusMessage(data)
 {
-    JsonStat = JSON.parse(data);
-    var Status = JsonStat.status;
-    var System = Status.system;
-    var rssi = System.rssi;
+    console.info("Status: " + data);
+
+    var JsonStat = JSON.parse(data);
+    var Status  = JsonStat.status;
+    var System  = Status.system;
+    var rssi    = System.rssi;
     var quality = 2 * (rssi + 100);
 
     if (rssi <= -100)
@@ -1116,13 +1118,88 @@ function ProcessRecievedJsonStatusMessage(data)
     {
         $('#FPPRemoteStatus').removeClass("hidden")
 
-        $('#fppsyncreceived').text(Status.system.FPPDiscovery.SyncCount);
-        $('#fppsyncadjustments').text(Status.system.FPPDiscovery.SyncAdjustmentCount);
-        $('#fppremoteip').text(Status.system.FPPDiscovery.FppRemoteIp);
+        var FPPDstatus = Status.system.FPPDiscovery
+
+        $('#fppsyncreceived').text(FPPDstatus.SyncCount);
+        $('#fppsyncadjustments').text(FPPDstatus.SyncAdjustmentCount);
+        $('#fppremoteip').text(FPPDstatus.FppRemoteIp);
+
+        $('#fppremoteFilePlayerFilename').text(FPPDstatus.current_sequence);
+        $('#fppremoteFilePlayerTimeElapsed').text(FPPDstatus.time_elapsed);
+        $('#fppremoteFilePlayerTimeRemaining').text(FPPDstatus.time_remaining);
     }
     else
     {
         $('#FPPRemoteStatus').addClass("hidden")
+    }
+
+    if (Status.input[0].hasOwnProperty('LocalPlayer'))
+    {
+        var LocalPlayerStatus = Status.input[0].LocalPlayer;
+
+        if (LocalPlayerStatus.hasOwnProperty('PlayList'))
+        {
+            $('#LocalPlayListPlayerStatus').removeClass("hidden");
+
+            LocalPlayerStatus = LocalPlayerStatus.PlayList;
+            
+            $('#localPlayListName').text(LocalPlayerStatus.name);
+            $('#localPlayListEntry').text(LocalPlayerStatus.entry);
+            $('#localPlayListCount').text(LocalPlayerStatus.count);
+
+            if (LocalPlayerStatus.hasOwnProperty('File'))
+            {
+                $('#localPlayListRepeat').text(LocalPlayerStatus.repeat);
+            }
+            else
+            {
+                $('#localPlayListRepeat').text("0");
+            }
+        }
+        else
+        {
+            $('#LocalPlayListPlayerStatus').addClass("hidden")
+        }
+
+        if (LocalPlayerStatus.hasOwnProperty('File')) {
+            $('#LocalFilePlayerStatus').removeClass("hidden");
+
+            $('#localFilePlayerFilename').text(LocalPlayerStatus.File.current_sequence);
+            $('#localFilePlayerTimeElapsed').text(LocalPlayerStatus.File.time_elapsed);
+            $('#localFilePlayerTimeRemaining').text(LocalPlayerStatus.File.time_remaining);
+        }
+        else
+        {
+            $('#LocalFilePlayerStatus').addClass("hidden")
+        }
+
+        if (LocalPlayerStatus.hasOwnProperty('Effect'))
+        {
+            $('#LocalEffectPlayerStatus').removeClass("hidden");
+
+            $('#localFilePlayerEffectName').text(LocalPlayerStatus.Effect.currenteffect);
+            $('#localFilePlayerEffectTimeRemaining').text(LocalPlayerStatus.Effect.TimeRemaining);
+        }
+        else
+        {
+            $('#LocalEffectPlayerStatus').addClass("hidden")
+        }
+
+        if (LocalPlayerStatus.hasOwnProperty('Paused')) {
+            $('#PausedPlayerStatus').removeClass("hidden");
+
+            $('#PausedTimeRemaining').text(LocalPlayerStatus.Paused.TimeRemaining);
+        }
+        else {
+            $('#PausedPlayerStatus').addClass("hidden")
+        }
+    }
+    else
+    {
+        $('#LocalPlayListPlayerStatus').addClass("hidden")
+        $('#LocalFilePlayerStatus').addClass("hidden")
+        $('#LocalEffectPlayerStatus').addClass("hidden")
+        $('#PausedPlayerStatus').addClass("hidden")
     }
 
     // Device Refresh is dynamic

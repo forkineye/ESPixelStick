@@ -29,6 +29,8 @@ public:
                          uint16_t                      BufferSize);
     ~c_InputEffectEngine ();
 
+    c_InputEffectEngine ();
+
     // functions to be provided by the derived class
     void Begin ();                             ///< set up the operating environment based on the current config (or defaults)
     bool SetConfig (JsonObject& jsonConfig);   ///< Set a new config in the driver

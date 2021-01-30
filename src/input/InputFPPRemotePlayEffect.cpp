@@ -27,14 +27,13 @@ c_InputFPPRemotePlayEffect::c_InputFPPRemotePlayEffect () :
 {
     // DEBUG_START;
 
-    pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputChannelId_1, c_InputMgr::e_InputType::InputType_Effects, nullptr, 0);
-    
     // Tell input manager to not put any data into the input buffer
-    pEffectsEngine->SetOperationalState (false);
+    InputMgr.SetOperationalState (false);
 
     fsm_PlayEffect_state_Idle_imp.Init (this);
 
-    pEffectsEngine->Begin ();
+    EffectsEngine.Begin ();
+    EffectsEngine.SetOperationalState (false);
 
     // DEBUG_END;
 } // c_InputFPPRemotePlayEffect
@@ -44,11 +43,9 @@ c_InputFPPRemotePlayEffect::~c_InputFPPRemotePlayEffect ()
 {
     // DEBUG_START;
 
-    Stop ();
-    delete pEffectsEngine;
-
     // allow the other input channels to run
     InputMgr.SetOperationalState (true);
+    EffectsEngine.SetOperationalState (false);
 
     // DEBUG_END;
 

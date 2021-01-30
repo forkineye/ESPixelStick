@@ -44,7 +44,7 @@ private:
     fsm_PlayFile_state_Idle          fsm_PlayFile_state_Idle_imp;
     fsm_PlayFile_state_PlayingFile   fsm_PlayFile_state_PlayingFile_imp;
 
-    fsm_PlayFile_state * pCurrentFsmState = nullptr;
+    fsm_PlayFile_state * pCurrentFsmState = &fsm_PlayFile_state_Idle_imp;
     c_FileMgr::FileId FileHandleForFileBeingPlayed = 0;
     uint32_t          LastFrameId = -1;
     size_t            DataOffset = 0;
