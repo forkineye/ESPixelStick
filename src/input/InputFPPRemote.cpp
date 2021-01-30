@@ -231,7 +231,7 @@ void c_InputFPPRemote::StartPlaying (String & FileName)
         }
         else
         {
-            DEBUG_V ("Start Local FSEQ file player");
+            // DEBUG_V ("Start Local FSEQ file player");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile ();
             StatusType = F ("File");
             pInputFPPRemotePlayItem->SetPlayCount (1);
