@@ -215,6 +215,7 @@ void c_InputFPPRemote::StartPlaying (String & FileName)
             else
             {
                 // DEBUG_V ("Play It Again");
+                pInputFPPRemotePlayItem->SetPlayCount (1);
                 pInputFPPRemotePlayItem->Start (FileName, 0);
                 break;
             }
@@ -230,9 +231,10 @@ void c_InputFPPRemote::StartPlaying (String & FileName)
         }
         else
         {
-            // DEBUG_V ("Start Local FSEQ file player");
+            DEBUG_V ("Start Local FSEQ file player");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile ();
             StatusType = F ("File");
+            pInputFPPRemotePlayItem->SetPlayCount (1);
         }
 
         // DEBUG_V (String ("FileName: '") + FileName + "'");
