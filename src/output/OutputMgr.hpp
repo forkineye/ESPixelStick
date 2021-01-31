@@ -40,6 +40,7 @@ public:
     void      LoadConfig        ();                        ///< Read the current configuration data from nvram
     void      SaveConfig        ();                        ///< Save the current configuration data to nvram
     void      GetConfig         (char * Response);
+    void      GetConfig         (String & Response);
     bool      SetConfig         (JsonObject & jsonConfig); ///< Set a new config in the driver
     void      GetStatus         (JsonObject & jsonStatus);
     void      PauseOutput       (bool PauseTheOutput) { IsOutputPaused = PauseTheOutput; }

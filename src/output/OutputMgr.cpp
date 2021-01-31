@@ -296,6 +296,26 @@ void c_OutputMgr::CreateNewConfig ()
 } // CreateNewConfig
 
 //-----------------------------------------------------------------------------
+void c_OutputMgr::GetConfig (String & Response)
+{
+    // DEBUG_START;
+
+    // is a new config waiting to be saved?
+    if (0 != ConfigData.length ())
+    {
+        // use the pending config
+        Response = ConfigData;
+    }
+    else
+    {
+        FileMgr.ReadConfigFile (ConfigFileName, Response);
+    }
+
+    // DEBUG_END;
+
+} // GetConfig
+
+//-----------------------------------------------------------------------------
 void c_OutputMgr::GetConfig (char * Response )
 {
     // DEBUG_START;
