@@ -118,7 +118,7 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    if (PlayingFile())
+    if (IsEnabled)
     {
         // DEBUG_V ("");
         JsonObject MyJsonStatus = jsonStatus.createNestedObject (F ("FPPDiscovery"));
