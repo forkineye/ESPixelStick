@@ -802,7 +802,7 @@ function wsConnect()
         }
 
         // target = "192.168.10.215";
-        target = "192.168.10.193";
+        // target = "192.168.10.193";
 
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');
