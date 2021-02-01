@@ -383,7 +383,49 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
 
 } // ProcessModeConfigurationDataRelay
 
-function ProcessInputConfig ()
+function ProcessModeConfigurationDataServoPCA9685(ServoConfig)
+{
+    // console.log("Servochannelconfigurationtable.rows.length = " + $('#servo_pca9685channelconfigurationtable tr').length);
+
+    $('#updateinterval').val(parseInt(ServoConfig.updateinterval, 10));
+
+    var ChannelConfigs = ServoConfig.channels;
+
+    while (1 < $('#servo_pca9685channelconfigurationtable tr').length) {
+        // console.log("Deleting $('#servo_pca9685channelconfigurationtable tr').length " + $('#servo_pca9685channelconfigurationtable tr').length);
+        ServoTableRef.last().remove();
+        // console.log("After Delete: $('#servo_pca9685channelconfigurationtable tr').length " + $('#servo_pca9685channelconfigurationtable tr').length);
+    }
+
+    // add as many rows as we need
+    for (var CurrentRowId = 1; CurrentRowId <= ChannelConfigs.length; CurrentRowId++) {
+        // console.log("CurrentRowId = " + CurrentRowId);
+        var ChanIdPattern   = '<td                        id="ServoChanId_'   + (CurrentRowId) + '">a</td>';
+        var EnabledPattern  = '<td><input type="checkbox" id="ServoEnabled_'  + (CurrentRowId) + '"></td>';
+        var MinLevelPattern = '<td><input type="number"   id="ServoMinLevel_' + (CurrentRowId) + '"step="1" min="10" max="4095"  value="0"  class="form-control is-valid"></td>';
+        var MaxLevelPattern = '<td><input type="number"   id="ServoMaxLevel_' + (CurrentRowId) + '"step="1" min="10" max="4095"  value="0"  class="form-control is-valid"></td>';
+
+        var rowPattern = '<tr>' + ChanIdPattern + EnabledPattern + MinLevelPattern + MaxLevelPattern + '</tr>';
+        $('#servo_pca9685channelconfigurationtable tr:last').after(rowPattern);
+
+        $('#ServoChanId_'   + CurrentRowId).attr('style', $('#ServoChanId_hr').attr('style'));
+        $('#ServoEnabled_'  + CurrentRowId).attr('style', $('#ServoEnabled_hr').attr('style'));
+        $('#ServoMinLevel_' + CurrentRowId).attr('style', $('#ServoMinLevel_hr').attr('style'));
+        $('#ServoMaxLevel_' + CurrentRowId).attr('style', $('#ServoMaxLevel_hr').attr('style'));
+    }
+
+    $.each(ChannelConfigs, function (i, CurrentChannelConfig) {
+        // console.log("Current Channel Id = " + CurrentChannelConfig.id);
+        var currentChannelRowId = CurrentChannelConfig.id + 1;
+        $('#ServoChanId_'   + (currentChannelRowId)).html(currentChannelRowId);
+        $('#ServoEnabled_'  + (currentChannelRowId)).prop("checked", CurrentChannelConfig.enabled);
+        $('#ServoMinLevel_' + (currentChannelRowId)).val(CurrentChannelConfig.MinLevel);
+        $('#ServoMaxLevel_' + (currentChannelRowId)).val(CurrentChannelConfig.MaxLevel);
+    });
+
+} // ProcessModeConfigurationDataServoPCA9685
+
+function ProcessInputConfig()
 {
     $("#ecb_enable").prop("checked", Input_Config.ecb.enabled);
     $("#ecb_gpioid").val(Input_Config.ecb.id);
@@ -432,11 +474,16 @@ function ProcessModeConfigurationData(channelId, ChannelTypeName, JsonConfig )
         ProcessModeConfigurationDataEffects(channelConfig);
     }
 
-    if ("relay" === ChannelTypeName)
-    {
+    if ("relay" === ChannelTypeName) {
         // console.info("ProcessModeConfigurationData: relay");
         ProcessModeConfigurationDataRelay(channelConfig);
     }
+
+    if ("servo_pca9685" === ChannelTypeName) {
+        // console.info("ProcessModeConfigurationData: servo");
+        ProcessModeConfigurationDataServoPCA9685(channelConfig);
+    }
+
     // console.info("ProcessModeConfigurationData: End");
 
 } // ProcessModeConfigurationData
@@ -685,6 +732,15 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
                 CurrentChannelConfig.onofftriggerlevel = parseInt($('#threshhold_' + (currentChannelRowId)).val(), 10);
             });
         }
+        else if ((ChannelConfig.type === "Servo PCA9685") && ($("#servo_pca9685channelconfigurationtable").length)) {
+            $.each(ChannelConfig.channels, function (i, CurrentChannelConfig) {
+                // console.info("Current Channel Id = " + CurrentChannelConfig.id);
+                var currentChannelRowId = CurrentChannelConfig.id + 1;
+                CurrentChannelConfig.enabled = $('#ServoEnabled_' + (currentChannelRowId)).prop("checked");
+                CurrentChannelConfig.MinLevel = parseInt($('#ServoMinLevel_' + (currentChannelRowId)).val(), 10);
+                CurrentChannelConfig.MaxLevel = parseInt($('#ServoMaxLevel_' + (currentChannelRowId)).val(), 10);
+            });
+        }
         else
         {
             elementids.forEach(function (elementid) {
@@ -746,7 +802,7 @@ function wsConnect()
         }
 
         // target = "192.168.10.215";
-        // target = "192.168.10.193";
+        target = "192.168.10.193";
 
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');

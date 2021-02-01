@@ -105,6 +105,9 @@ private:
 
 #define IM_JSON_SIZE (5*1024)
 
+public:
+    size_t    GetConfigSize () { return IM_JSON_SIZE; }
+
 }; // c_InputMgr
 
 extern c_InputMgr InputMgr;

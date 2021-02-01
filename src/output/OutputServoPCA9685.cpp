@@ -37,6 +37,14 @@ static const c_OutputServoPCA9685::ServoPCA9685Channel_t ServoPCA9685ChannelDefa
     {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
     {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
     {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
+    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
+    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
+    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
+    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
+    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
+    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
+    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
+    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
 };
 
 //----------------------------------------------------------------------------
@@ -74,7 +82,7 @@ void c_OutputServoPCA9685::Begin ()
     SetOutputBufferSize (Num_Channels);
 
     pwm.begin ();
-    pwm.setPWMFreq (UpdateFrequenct);
+    pwm.setPWMFreq (UpdateFrequency);
 
     validate ();
 
@@ -147,8 +155,8 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
         // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
 
         // PrettyPrint (jsonConfig, String("c_OutputServoPCA9685::SetConfig"));
-        setFromJSON (UpdateFrequenct, jsonConfig, OM_SERVO_PCA9685_UPDATE_INTERVAL_NAME);
-        pwm.setPWMFreq (UpdateFrequenct);
+        setFromJSON (UpdateFrequency, jsonConfig, OM_SERVO_PCA9685_UPDATE_INTERVAL_NAME);
+        pwm.setPWMFreq (UpdateFrequency);
 
         // do we have a channel configuration array?
         if (false == jsonConfig.containsKey (OM_SERVO_PCA9685_CHANNELS_NAME))
@@ -203,7 +211,7 @@ void c_OutputServoPCA9685::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
-    jsonConfig[OM_SERVO_PCA9685_UPDATE_INTERVAL_NAME] = UpdateFrequenct;
+    jsonConfig[OM_SERVO_PCA9685_UPDATE_INTERVAL_NAME] = UpdateFrequency;
 
     JsonArray JsonChannelList = jsonConfig.createNestedArray (OM_SERVO_PCA9685_CHANNELS_NAME);
 
@@ -258,10 +266,11 @@ void c_OutputServoPCA9685::Render ()
 
                 // send data to pwm
 
-                int pulse_width = 0;
-                int analog_value = 0;
-                pulse_wide = map (angle, 0, 255, currentServoPCA9685.MinLevel, currentServoPCA9685.MaxLevel);
-                analog_value = int (float (pulse_width) / 1000000 * UpdateFrequenct * 4096);
+                uint16_t pulse_width = 0;
+                uint16_t Final_value = 0;
+                pulse_width = map (newOutputValue, 0, 255, currentServoPCA9685.MinLevel, currentServoPCA9685.MaxLevel);
+                Final_value = int (float (pulse_width) / 1000000.0 * float(UpdateFrequency) * 4096.0);
+                pwm.setPWM (OutputDataIndex, 0, Final_value);
             }
         }
         ++OutputDataIndex;

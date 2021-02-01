@@ -27,8 +27,8 @@ public:
     typedef struct ServoPCA9685Channel_s
     {
         bool        Enabled;
-        uint8_t     MinLevel;
-        uint8_t     MaxLevel;
+        uint16_t    MinLevel;
+        uint16_t    MaxLevel;
         uint8_t     PreviousValue;
 
     } ServoPCA9685Channel_t;
@@ -64,9 +64,8 @@ private:
 
     // config data
     ServoPCA9685Channel_t   OutputList[OM_SERVO_PCA9685_CHANNEL_LIMIT];
-    uint16_t                UpdateFrequenct = 0;
     Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver ();
-    uint8_t                 UpdateFrequenct = SERVO_PCA9685_UPDATE_FREQUENCY;
+    float                   UpdateFrequency = SERVO_PCA9685_UPDATE_FREQUENCY;
 
     // non config data
     String      OutputName;
