@@ -23,9 +23,8 @@ GNU General Public License for more details.
 #define SERVO_PCA9685_OUTPUT_DISABLED        false
 #define SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH 650
 #define SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH 2350
-#define SERVO_PCA9685_DEFAULT_GPIO_ID        ((gpio_num_t)-1) 
 
-#define SERVO_PCA9685_DEFAULT_PULSE_WIDTH    1500
+#define SERVO_PCA9685_DEFAULT_PULSE_WIDTH    0
 
 static const c_OutputServoPCA9685::ServoPCA9685Channel_t ServoPCA9685ChannelDefaultSettings[] =
 {
