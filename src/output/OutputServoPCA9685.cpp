@@ -243,6 +243,7 @@ void c_OutputServoPCA9685::Render ()
         if (currentServoPCA9685.Enabled)
         {
             uint16_t MaxScaledValue = 255;
+            uint16_t MinScaledValue = 0;
             uint16_t newOutputValue = pOutputBuffer[OutputDataIndex];
             if (currentServoPCA9685.Is16Bit)
             {
@@ -261,13 +262,15 @@ void c_OutputServoPCA9685::Render ()
                 if (currentServoPCA9685.IsReversed)
                 {
                     // newOutputValue = (newOutputValue << 8) + (newOutputValue >> 8);
-                    newOutputValue = ((!newOutputValue) & MaxScaledValue);
+                    // newOutputValue = ((!newOutputValue) & MaxScaledValue);
+                    MinScaledValue = MaxScaledValue;
+                    MaxScaledValue = 0;
                 }
 
                 uint16_t Final_value = newOutputValue;
                 if (currentServoPCA9685.IsScaled)
                 {
-                    uint16_t pulse_width = map (newOutputValue, 0, MaxScaledValue, currentServoPCA9685.MinLevel, currentServoPCA9685.MaxLevel);
+                    uint16_t pulse_width = map (newOutputValue, MinScaledValue, MaxScaledValue, currentServoPCA9685.MinLevel, currentServoPCA9685.MaxLevel);
                     Final_value = int (float (pulse_width) / (1000000.0 * float (UpdateFrequency)) * 4096.0);
                 }
                 pwm.setPWM (OutputDataIndex, 0, Final_value);
