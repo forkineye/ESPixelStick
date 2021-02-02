@@ -169,13 +169,6 @@ void c_FileMgr::listDir (fs::FS& fs, String dirname, uint8_t levels)
 //-----------------------------------------------------------------------------
 bool c_FileMgr::LoadConfigFile (String& FileName, DeserializationHandler Handler)
 {
-    return LoadConfigFile (FileName, Handler, CONFIG_MAX_SIZE);
-
-} // LoadConfigFile
-
-//-----------------------------------------------------------------------------
-bool c_FileMgr::LoadConfigFile (String& FileName, DeserializationHandler Handler, size_t JsonDocSize)
-{
     // DEBUG_START;
     boolean retval = false;
 
@@ -184,11 +177,29 @@ bool c_FileMgr::LoadConfigFile (String& FileName, DeserializationHandler Handler
         String CfgFileMessagePrefix = String (F ("Configuration file: '")) + FileName + "' ";
 
         // DEBUG_V ("allocate the JSON Doc");
-        DynamicJsonDocument jsonDoc (JsonDocSize);
 
-        if (false == ReadConfigFile (FileName, jsonDoc))
+        String RawFileData;
+        if (false == ReadConfigFile (FileName, RawFileData))
         {
             LOG_PORT.println (CfgFileMessagePrefix + String (F ("Could not read file.")));
+            break;
+        }
+
+        // DEBUG_V ("Convert File to JSON document");
+        size_t JsonDocSize = RawFileData.length () * 3;
+        // DEBUG_V (String ("RawFileData.length: ") + String (RawFileData.length ()));
+        // DEBUG_V (String (" Final JsonDocSize: ") + String (JsonDocSize));
+
+        DynamicJsonDocument jsonDoc (JsonDocSize);
+        DeserializationError error = deserializeJson (jsonDoc, (const String)RawFileData);
+
+        // DEBUG_V ("Error Check");
+        if (error)
+        {
+            String CfgFileMessagePrefix = String (F ("Configuration file: '")) + FileName + "' ";
+            LOG_PORT.println (String (F ("Heap:")) + String (ESP.getFreeHeap ()));
+            LOG_PORT.println (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
+            LOG_PORT.println (String (F ("++++")) + RawFileData + String (F ("----")));
             break;
         }
 

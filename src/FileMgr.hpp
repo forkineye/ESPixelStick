@@ -60,7 +60,6 @@ public:
     bool   ReadConfigFile   (String & FileName,   String & FileData);
     bool   ReadConfigFile   (String & FileName,   JsonDocument & FileData);
     bool   LoadConfigFile   (String & FileName,   DeserializationHandler Handler);
-    bool   LoadConfigFile   (String & FileName,   DeserializationHandler Handler, size_t JsonDocSize);
 
     bool   SdCardIsInstalled () { return SdCardInstalled; }
     FileId CreateFileHandle ();
