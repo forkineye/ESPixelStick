@@ -29,7 +29,10 @@ public:
         bool        Enabled;
         uint16_t    MinLevel;
         uint16_t    MaxLevel;
-        uint8_t     PreviousValue;
+        uint16_t    PreviousValue;
+        bool        IsReversed;
+        bool        Is16Bit;
+        bool        IsScaled;
 
     } ServoPCA9685Channel_t;
 
@@ -51,13 +54,16 @@ public:
 
 private:
 #   define OM_SERVO_PCA9685_CHANNEL_LIMIT           16
-#   define OM_SERVO_PCA9685_UPDATE_INTERVAL_NAME    F("updateinterval")
+#   define OM_SERVO_PCA9685_UPDATE_INTERVAL_NAME    F("ui")
 #   define OM_SERVO_PCA9685_CHANNELS_NAME           F("channels")
-#   define OM_SERVO_PCA9685_CHANNEL_ENABLED_NAME    F("enabled")
-#   define OM_SERVO_PCA9685_CHANNEL_MINLEVEL_NAME   F("MinLevel")
-#   define OM_SERVO_PCA9685_CHANNEL_MAXLEVEL_NAME   F("MaxLevel")
-#   define OM_SERVO_PCA9685_CHANNEL_GPIO_NAME       F("gpioid")
+#   define OM_SERVO_PCA9685_CHANNEL_ENABLED_NAME    F("en")
+#   define OM_SERVO_PCA9685_CHANNEL_MINLEVEL_NAME   F("Min")
+#   define OM_SERVO_PCA9685_CHANNEL_MAXLEVEL_NAME   F("Max")
+#   define OM_SERVO_PCA9685_CHANNEL_GPIO_NAME       F("gid")
 #   define OM_SERVO_PCA9685_CHANNEL_ID_NAME         F("id")
+#   define OM_SERVO_PCA9685_CHANNEL_REVERSED        F("rev")
+#   define OM_SERVO_PCA9685_CHANNEL_16BITS          F("b16")
+#   define OM_SERVO_PCA9685_CHANNEL_SCALED          F("sca")
 #   define SERVO_PCA9685_UPDATE_FREQUENCY           50
 
     bool    validate ();
