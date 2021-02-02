@@ -574,7 +574,7 @@ void c_OutputMgr::LoadConfig ()
             // DEBUG_V ("");
             this->ProcessJsonConfig (JsonConfig);
             // DEBUG_V ("");
-        }, OM_MAX_CONFIG_SIZE))
+        }))
     {
         LOG_PORT.println (F ("EEEE Error loading Output Manager Config File. EEEE"));
 

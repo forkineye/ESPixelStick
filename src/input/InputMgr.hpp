@@ -103,10 +103,7 @@ private:
     String ConfigData;
     bool   rebootNeeded = false;
 
-#define IM_JSON_SIZE (5*1024)
-
-public:
-    size_t    GetConfigSize () { return IM_JSON_SIZE; }
+#define IM_JSON_SIZE (5 * 1024)
 
 }; // c_InputMgr
 

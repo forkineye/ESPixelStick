@@ -562,7 +562,7 @@ void c_InputMgr::LoadConfig ()
             // DEBUG_V ("");
             this->ProcessJsonConfig (JsonConfig);
             // DEBUG_V ("");
-        }, IM_JSON_SIZE))
+        }))
     {
         LOG_PORT.println (F ("EEEE Error loading Input Manager Config File. EEEE"));
 
