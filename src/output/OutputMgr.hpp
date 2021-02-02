@@ -40,6 +40,7 @@ public:
     void      LoadConfig        ();                        ///< Read the current configuration data from nvram
     void      SaveConfig        ();                        ///< Save the current configuration data to nvram
     void      GetConfig         (char * Response);
+    void      GetConfig         (String & Response);
     bool      SetConfig         (JsonObject & jsonConfig); ///< Set a new config in the driver
     void      GetStatus         (JsonObject & jsonStatus);
     void      PauseOutput       (bool PauseTheOutput) { IsOutputPaused = PauseTheOutput; }
@@ -69,6 +70,7 @@ public:
         OutputType_Renard,
         OutputType_Serial,
         OutputType_Relay,
+        OutputType_Servo_PCA9685,
         OutputType_Disabled,
         OutputType_End, // must be last
         OutputType_Start = OutputType_WS2811,
@@ -93,9 +95,9 @@ private:
 #   define OM_CHANNEL_TYPE_NAME    F("type")
 
 #ifdef ARDUINO_ARCH_ESP8266
-#   define OM_MAX_CONFIG_SIZE      ((size_t)(3*1024))
+#   define OM_MAX_CONFIG_SIZE      ((size_t)(5*1024))
 #else
-#   define OM_MAX_CONFIG_SIZE      ((size_t)(4*1024))
+#   define OM_MAX_CONFIG_SIZE      ((size_t)(6*1024))
 #endif // !def ARDUINO_ARCH_ESP8266
 
     bool HasBeenInitialized = false;
@@ -114,6 +116,8 @@ private:
 
 protected:
 
+public:
+    size_t    GetConfigSize () { return OM_MAX_CONFIG_SIZE; }
 }; // c_OutputMgr
 
 extern c_OutputMgr OutputMgr;

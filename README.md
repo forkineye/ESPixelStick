@@ -37,6 +37,7 @@ Extract the folder in each of these zip files and place it in the "library" fold
 - [async-mqtt-client](https://github.com/marvinroger/async-mqtt-client) - Asynchronous MQTT Client
 - [Int64String](https://github.com/djGrrr/Int64String) - Converts 64 bit integers into a string
 - [EspAlexa](https://github.com/Aircoookie/Espalexa) - Alexa Direct control Library
+- [Adafruit-PWM-Servo-Driver-Library](https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library) - Servo Motor I2C control
 
 The ESP32 build will require the following software to build this project:
 
@@ -48,6 +49,7 @@ The ESP32 build will require the following software to build this project:
 - [async-mqtt-client](https://github.com/marvinroger/async-mqtt-client) - Asynchronous MQTT Client
 - [Int64String](https://github.com/djGrrr/Int64String) - Converts 64 bit integers into a string
 - [EspAlexa](https://github.com/Aircoookie/Espalexa) - Alexa Direct control Library
+- [Adafruit-PWM-Servo-Driver-Library](https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library)
 
 Using library manager:
 - Install littlefs-32 for esp32 support.

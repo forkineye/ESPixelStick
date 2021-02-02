@@ -446,7 +446,8 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             }
 
             // convert the input data into a json structure (use json read only mode)
-            DynamicJsonDocument webJsonDoc (5*1023);
+            size_t docSize = max (InputMgr.GetConfigSize(), OutputMgr.GetConfigSize()) + 256;
+            DynamicJsonDocument webJsonDoc (docSize);
             DeserializationError error = deserializeJson (webJsonDoc, (const char *)(&WebSocketFrameCollectionBuffer[0]));
 
             // DEBUG_V ("");

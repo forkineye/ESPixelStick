@@ -31,6 +31,7 @@
 #include "OutputSerial.hpp"
 #include "OutputWS2811.hpp"
 #include "OutputRelay.hpp"
+#include "OutputServoPCA9685.hpp"
 // needs to be last
 #include "OutputMgr.hpp"
 
@@ -47,13 +48,14 @@ typedef struct
 
 static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::OutputType_End] =
 {
-    {c_OutputMgr::e_OutputType::OutputType_WS2811,   "WS2811"   },
-    {c_OutputMgr::e_OutputType::OutputType_GECE,     "GECE"     },
-    {c_OutputMgr::e_OutputType::OutputType_DMX,      "DMX"      },
-    {c_OutputMgr::e_OutputType::OutputType_Renard,   "Renard"   },
-    {c_OutputMgr::e_OutputType::OutputType_Serial,   "Serial"   },
-    {c_OutputMgr::e_OutputType::OutputType_Relay,    "Relay"    },
-    {c_OutputMgr::e_OutputType::OutputType_Disabled, "Disabled" }
+    {c_OutputMgr::e_OutputType::OutputType_WS2811,        "WS2811"        },
+    {c_OutputMgr::e_OutputType::OutputType_GECE,          "GECE"          },
+    {c_OutputMgr::e_OutputType::OutputType_DMX,           "DMX"           },
+    {c_OutputMgr::e_OutputType::OutputType_Renard,        "Renard"        },
+    {c_OutputMgr::e_OutputType::OutputType_Serial,        "Serial"        },
+    {c_OutputMgr::e_OutputType::OutputType_Relay,         "Relay"         },
+    {c_OutputMgr::e_OutputType::OutputType_Servo_PCA9685, "Servo_PCA9685" },
+    {c_OutputMgr::e_OutputType::OutputType_Disabled,      "Disabled"      }
 };
 
 //-----------------------------------------------------------------------------
@@ -296,6 +298,26 @@ void c_OutputMgr::CreateNewConfig ()
 } // CreateNewConfig
 
 //-----------------------------------------------------------------------------
+void c_OutputMgr::GetConfig (String & Response)
+{
+    // DEBUG_START;
+
+    // is a new config waiting to be saved?
+    if (0 != ConfigData.length ())
+    {
+        // use the pending config
+        Response = ConfigData;
+    }
+    else
+    {
+        FileMgr.ReadConfigFile (ConfigFileName, Response);
+    }
+
+    // DEBUG_END;
+
+} // GetConfig
+
+//-----------------------------------------------------------------------------
 void c_OutputMgr::GetConfig (char * Response )
 {
     // DEBUG_START;
@@ -471,6 +493,23 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 {
                     // LOG_PORT.println (String (F ("************** Starting Renard for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputSerial (ChannelIndex, dataPin, UartId, OutputType_Renard);
+                    // DEBUG_V ("");
+                }
+                break;
+            }
+
+            case e_OutputType::OutputType_Servo_PCA9685:
+            {
+                if (-1 != UartId)
+                {
+                    LOG_PORT.println (String (F ("************** Cannot Start Servo PCA9685 for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                    // DEBUG_V ("");
+                }
+                else
+                {
+                    // LOG_PORT.println (String (F ("************** Starting Servo PCA9685 for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputServoPCA9685 (ChannelIndex, dataPin, UartId, OutputType_Servo_PCA9685);
                     // DEBUG_V ("");
                 }
                 break;

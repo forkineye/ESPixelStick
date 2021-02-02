@@ -36,6 +36,9 @@ extern const String VERSION;
 #endif
 
 #define FPP_DISCOVERY_PORT 32320
+static const String ulrFilename = "filename";
+static const String ulrCommand  = "command";
+static const String ulrPath     = "path";
 
 //-----------------------------------------------------------------------------
 c_FPPDiscovery::c_FPPDiscovery ()
@@ -391,14 +394,23 @@ void c_FPPDiscovery::sendPingPacket (IPAddress destination)
     // DEBUG_END;
 } // sendPingPacket
 
+// #define PRINT_DEBUG
 #ifdef PRINT_DEBUG
 //-----------------------------------------------------------------------------
 static void printReq (AsyncWebServerRequest* request, bool post)
 {
+    // DEBUG_START;
+
     int params = request->params ();
+    // DEBUG_V (String ("   Num Params: ") + String (params));
+
     for (int i = 0; i < params; i++)
     {
+        // DEBUG_V (String ("current Param: ") + String (i));
         AsyncWebParameter* p = request->getParam (i);
+        // DEBUG_V (String ("      p->name: ") + String (p->name()));
+        // DEBUG_V (String ("     p->value: ") + String (p->value()));
+
         if (p->isFile ())
         { //p->isPost() is also true
             LOG_PORT.printf_P( PSTR("FILE[%s]: %s, size: %u\n"), p->name ().c_str (), p->value ().c_str (), p->size ());
@@ -412,6 +424,7 @@ static void printReq (AsyncWebServerRequest* request, bool post)
             LOG_PORT.printf_P ( PSTR("GET[%s]: %s\n"), p->name ().c_str (), p->value ().c_str ());
         }
     }
+    // DEBUG_END;
 } // printReq
 #else
 #define printReq
@@ -526,15 +539,16 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 
     do // once
     {
-        if (!request->hasParam (F("path")))
+        if (!request->hasParam (ulrPath))
         {
             request->send (404);
+            // DEBUG_V ("");
             break;
         }
 
         // DEBUG_V ("");
 
-        String path = request->getParam (F("path"))->value ();
+        String path = request->getParam (ulrPath)->value ();
 
         // DEBUG_V (String ("Path: ") + path);
 
@@ -557,7 +571,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                 {
                     if (FileMgr.GetSdFileSize(FileHandle) > 0)
                     {
-                        // found the file. return metadata as json
+                        // DEBUG_V ("found the file. return metadata as json");
                         String resp = "";
                         BuildFseqResponse (seq, FileHandle, resp);
                         FileMgr.CloseSdFile (FileHandle);
@@ -584,16 +598,17 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
 
     do // once
     {
-        String path = request->getParam (F("path"))->value ();
+        String path = request->getParam (ulrPath)->value ();
         // DEBUG_V (String(F("path: ")) + path);
 
         if (path != F("uploadFile"))
         {
+            // DEBUG_V ("");
             request->send (404);
             break;
         }
 
-        String filename = request->getParam (F("FileName"))->value ();
+        String filename = request->getParam (ulrFilename)->value ();
         // DEBUG_V (String(F("FileName: ")) + filename);
 
         c_FileMgr::FileId FileHandle;
@@ -604,6 +619,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
             break;
         }
 
+        // DEBUG_V ("BuildFseqResponse");
         String resp = "";
         BuildFseqResponse (filename, FileHandle, resp);
         FileMgr.CloseSdFile (FileHandle);
@@ -629,24 +645,32 @@ void c_FPPDiscovery::ProcessFile (AsyncWebServerRequest* request, String filenam
 //-----------------------------------------------------------------------------
 // the blocks come in very small (~500 bytes) we'll accumulate in a buffer
 // so the writes out to SD can be more in line with what the SD file system can handle
-#define BUFFER_LEN 8192
+// #define BUFFER_LEN 8192
 void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total)
 {
     // DEBUG_START;
+    printReq (request, false);
 
     if (!index)
     {
-        //LOG_PORT.printf_P( PSTR("In process Body:    idx: %d    RangeLength: %d    total: %d\n)", index, RangeLength, total);
+        // LOG_PORT.printf_P( PSTR("In process Body:    idx: %d    RangeLength: %d    total: %d\n)", index, RangeLength, total);
         printReq (request, false);
 
-        String path = request->getParam (F("path"))->value ();
+        String path = request->getParam (ulrPath)->value ();
         if (path == F("uploadFile"))
         {
-            ProcessSyncPacket (0x1, "", 0); //must stop
-
-            inFileUpload = true;
-
-            UploadFileName = request->getParam (F("FileName"))->value ();
+            if (!request->hasParam (ulrFilename))
+            {
+                // DEBUG_V ("Missing Filename Parameter");
+            }
+            else
+            {
+                StopPlaying ();
+                inFileUpload = true;
+                // DEBUG_V (String ("request: ") + String (uint32_t (request), HEX));
+                UploadFileName = String (request->getParam (ulrFilename)->value ());
+                // DEBUG_V ("");
+            }
         }
     }
 
@@ -661,7 +685,7 @@ void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data,
     }
 
     // DEBUG_END;
-}
+} // ProcessBody
 
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
@@ -702,7 +726,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 
     do // once
     {
-        if (!request->hasParam ("command"))
+        if (!request->hasParam (ulrCommand))
         {
             request->send (404);
             // DEBUG_V (String ("Missing Param: 'command' "));
@@ -713,10 +737,10 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
         DynamicJsonDocument JsonDoc (2048);
         JsonObject JsonData = JsonDoc.to<JsonObject> ();
 
-        String command = request->getParam ("command")->value ();
+        String command = request->getParam (ulrCommand)->value ();
         // DEBUG_V (String ("command: ") + command);
 
-        if (command == "getFPPstatus")
+        if (command == F("getFPPstatus"))
         {
             String adv = "false";
             if (request->hasParam ("advancedView"))
@@ -814,6 +838,24 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             request->send (200, F("application/json"), resp);
 
             break;
+        }
+
+        if (command == F ("getChannelOutputs"))
+        {
+            if (request->hasParam (F("file")))
+            {
+                String filename = request->getParam (F ("file"))->value ();
+                if (String(F ("co-other")) == filename)
+                {
+                    String resp;
+                    OutputMgr.GetConfig (resp);
+
+                    // DEBUG_V (String ("resp: ") + resp);
+                    request->send (200, F ("application/json"), resp);
+
+                    break;
+                }
+            }
         }
 
         // DEBUG_V (String ("Unknown command: ") + command);
