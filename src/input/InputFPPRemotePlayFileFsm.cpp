@@ -286,7 +286,7 @@ bool fsm_PlayFile_state_PlayingFile::Sync (uint32_t TargetFrameId)
 
         p_InputFPPRemotePlayFile->StartTimeInMillis =
             now - (TargetFrameId * p_InputFPPRemotePlayFile->FrameStepTime);
-#ifndef DEBUG_SYNC
+#ifdef DEBUG_SYNC
         if (CurrentFrame < TargetFrameId)
         {
             LOG_PORT.print ("+");
