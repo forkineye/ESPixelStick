@@ -170,10 +170,10 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             setFromJSON (CurrentOutputChannel->Is16Bit,    JsonChannelData, OM_SERVO_PCA9685_CHANNEL_16BITS);
             setFromJSON (CurrentOutputChannel->IsScaled,   JsonChannelData, OM_SERVO_PCA9685_CHANNEL_SCALED);
 
-            // DEBUGV (String ("ChannelId: ") + String (ChannelId));
-            // DEBUGV (String ("  Enabled: ") + String (CurrentOutputChannel->Enabled));
-            // DEBUGV (String (" MinLevel: ") + String (CurrentOutputChannel->MinLevel));
-            // DEBUGV (String (" MaxLevel: ") + String (CurrentOutputChannel->MaxLevel));
+            // DEBUG_V (String ("ChannelId: ") + String (ChannelId));
+            // DEBUG_V (String ("  Enabled: ") + String (CurrentOutputChannel->Enabled));
+            // DEBUG_V (String (" MinLevel: ") + String (CurrentOutputChannel->MinLevel));
+            // DEBUG_V (String (" MaxLevel: ") + String (CurrentOutputChannel->MaxLevel));
         
             ++ChannelId;
         }
@@ -212,10 +212,10 @@ void c_OutputServoPCA9685::GetConfig (ArduinoJson::JsonObject & jsonConfig)
         JsonChannelData[OM_SERVO_PCA9685_CHANNEL_16BITS]        = currentServoPCA9685.Is16Bit;
         JsonChannelData[OM_SERVO_PCA9685_CHANNEL_SCALED]        = currentServoPCA9685.IsScaled;
 
-        // DEBUGV (String ("ChannelId: ") + String (ChannelId));
-        // DEBUGV (String ("  Enabled: ") + String (currentServoPCA9685.Enabled));
-        // DEBUGV (String (" MinLevel: ") + String (currentServoPCA9685.MinLevel));
-        // DEBUGV (String (" MaxLevel: ") + String (currentServoPCA9685.MaxLevel));
+        // DEBUG_V (String ("ChannelId: ") + String (ChannelId));
+        // DEBUG_V (String ("  Enabled: ") + String (currentServoPCA9685.Enabled));
+        // DEBUG_V (String (" MinLevel: ") + String (currentServoPCA9685.MinLevel));
+        // DEBUG_V (String (" MaxLevel: ") + String (currentServoPCA9685.MaxLevel));
 
         ++ChannelId;
     }
@@ -240,29 +240,34 @@ void c_OutputServoPCA9685::Render ()
     for (ServoPCA9685Channel_t & currentServoPCA9685 : OutputList)
     {
         // DEBUG_V (String("OutputDataIndex: ") + String(OutputDataIndex));
+        // DEBUG_V (String ("       Enabled: ") + String (currentServoPCA9685.Enabled));
         if (currentServoPCA9685.Enabled)
         {
             uint16_t MaxScaledValue = 255;
             uint16_t MinScaledValue = 0;
             uint16_t newOutputValue = pOutputBuffer[OutputDataIndex];
+
             if (currentServoPCA9685.Is16Bit)
             {
-                newOutputValue += (pOutputBuffer[++OutputDataIndex] << 8);
+                // DEBUG_V ("16 Bit Mode");
+                newOutputValue  = (pOutputBuffer[(OutputDataIndex * 2) + 0] << 0);
+                newOutputValue += (pOutputBuffer[(OutputDataIndex * 2) + 1] << 8);
                 MaxScaledValue = uint16_t (-1);
             }
 
+            // DEBUG_V (String ("newOutputValue: ") + String (newOutputValue));
+            // DEBUG_V (String (" PreviousValue: ") + String (currentServoPCA9685.PreviousValue));
+
             if (newOutputValue != currentServoPCA9685.PreviousValue)
             {
-                // DEBUGV (String ("ChannelId: ") + String (ChannelId));
-                // DEBUGV (String ("  Enabled: ") + String (currentServoPCA9685.Enabled));
-                // DEBUGV (String (" MinLevel: ") + String (currentServoPCA9685.MinLevel));
-                // DEBUGV (String (" MaxLevel: ") + String (currentServoPCA9685.MaxLevel));
+                // DEBUG_V (String ("ChannelId: ") + String (OutputDataIndex));
+                // DEBUG_V (String (" MinLevel: ") + String (currentServoPCA9685.MinLevel));
+                // DEBUG_V (String (" MaxLevel: ") + String (currentServoPCA9685.MaxLevel));
                 currentServoPCA9685.PreviousValue = newOutputValue;
 
                 if (currentServoPCA9685.IsReversed)
                 {
-                    // newOutputValue = (newOutputValue << 8) + (newOutputValue >> 8);
-                    // newOutputValue = ((!newOutputValue) & MaxScaledValue);
+                    // DEBUG_V (String("Reverse Lookup"));
                     MinScaledValue = MaxScaledValue;
                     MaxScaledValue = 0;
                 }
@@ -270,8 +275,21 @@ void c_OutputServoPCA9685::Render ()
                 uint16_t Final_value = newOutputValue;
                 if (currentServoPCA9685.IsScaled)
                 {
-                    uint16_t pulse_width = map (newOutputValue, MinScaledValue, MaxScaledValue, currentServoPCA9685.MinLevel, currentServoPCA9685.MaxLevel);
-                    Final_value = int (float (pulse_width) / (1000000.0 * float (UpdateFrequency)) * 4096.0);
+                    // DEBUG_V (String ("Is Scalled"));
+                    // DEBUG_V (String ("newOutputValue: ") + String (newOutputValue));
+                    // DEBUG_V (String ("      MinLevel: ") + String (currentServoPCA9685.MinLevel));
+                    // DEBUG_V (String ("      MaxLevel: ") + String (currentServoPCA9685.MaxLevel));
+                    // DEBUG_V (String ("MinScaledValue: ") + String (MinScaledValue));
+                    // DEBUG_V (String ("MaxScaledValue: ") + String (MaxScaledValue));
+
+                    uint16_t pulse_width = map (newOutputValue, 
+                                                MinScaledValue, 
+                                                MaxScaledValue, 
+                                                currentServoPCA9685.MinLevel, 
+                                                currentServoPCA9685.MaxLevel);
+                    Final_value = int ((float (pulse_width) / 1000000.0) * float (UpdateFrequency) * 4096.0);
+                    // DEBUG_V (String ("pulse_width: ") + String (pulse_width));
+                    // DEBUG_V (String ("Final_value: ") + String (Final_value));
                 }
                 pwm.setPWM (OutputDataIndex, 0, Final_value);
             }
