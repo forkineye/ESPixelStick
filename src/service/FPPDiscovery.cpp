@@ -290,14 +290,26 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
         {
             case 0x00: // Start
             {
-                // DEBUG_V ("Start");
+                // DEBUG_V ("Sync::Start");
+                // DEBUG_V (String ("   FileName: ") + FileName);
+                // DEBUG_V (String ("    FrameId: ") + FrameId);
+
                 StartPlaying (FileName, FrameId);
                 break;
             }
 
             case 0x01: // Stop
             {
-                // DEBUG_V ("Stop");
+                // DEBUG_V ("Sync::Stop");
+                // DEBUG_V (String ("   FileName: ") + FileName);
+                // DEBUG_V (String ("    FrameId: ") + FrameId);
+
+                if (!PlayingFile () || FileName != InputFPPRemotePlayFile.GetFileName ())
+                {
+                    // DEBUG_V ("Sync::Stop::Ignored");
+                    break;
+                }
+
                 StopPlaying ();
                 break;
             }
@@ -313,12 +325,14 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
 
                 if (!PlayingFile() || FileName != InputFPPRemotePlayFile.GetFileName())
                 {
-                    // DEBUG_V ("Do Sync based Start");
+                    // DEBUG_V ("Sync::Sync::Start Playing New File");
+                    // DEBUG_V (String ("   FileName: ") + FileName);
+                    // DEBUG_V (String ("    FrameId: ") + FrameId);
                     StartPlaying (FileName, FrameId);
                 }
                 else if (PlayingFile())
                 {
-                    // DEBUG_V ("Do Sync");
+                    // DEBUG_V ("Sync::Sync");
                     InputFPPRemotePlayFile.Sync (FrameId);
                 }
                 break;
@@ -326,14 +340,16 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
 
             case 0x03: // Open
             {
-                // DEBUG_V ("Open");
+                // DEBUG_V ("Sync::Open");
+                // DEBUG_V (String ("   FileName: ") + FileName);
+                // DEBUG_V (String ("    FrameId: ") + FrameId);
                 // StartPlaying (FileName, FrameId);
                 break;
             }
 
             default:
             {
-                // DEBUG_V (String (F ("ERROR: Unknown Action: ")) + String (action));
+                // DEBUG_V (String (F ("Sync: ERROR: Unknown Action: ")) + String (action));
                 break;
             }
 
@@ -867,16 +883,13 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 } // ProcessFPPJson
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
+void c_FPPDiscovery::StartPlaying (String & FileName, uint32_t FrameId)
 {
     // DEBUG_START;
     // DEBUG_V (String("Open:: FileName: ") + filename);
 
     do // once
     {
-        // clear the play file tracking data
-        StopPlaying ();
-
         if (!IsEnabled)
         {
             // DEBUG_V ("Not Enabled");
@@ -891,15 +904,24 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
         }
         // DEBUG_V ("");
 
-        if (0 == filename.length())
+        if (0 == FileName.length())
         {
             // DEBUG_V("Do not have a file to start");
             break;
         }
         // DEBUG_V ("Asking for file to play");
 
+        if (PlayingFile () && (FileName == InputFPPRemotePlayFile.GetFileName ()))
+        {
+            // DEBUG_V ("Do Sync instead of start");
+            InputFPPRemotePlayFile.Sync (FrameId);
+            break;
+        }
+
+        StopPlaying ();
+
         InputFPPRemotePlayFile.SetPlayCount (1);
-        InputFPPRemotePlayFile.Start (filename, frameId);
+        InputFPPRemotePlayFile.Start (FileName, FrameId);
         // LOG_PORT.println (String (F ("FPPDiscovery::Playing:  '")) + filename + "'" );
 
     } while (false);
@@ -916,7 +938,7 @@ void c_FPPDiscovery::StopPlaying ()
     if (PlayingFile())
     {
         // DEBUG_V ("");
-        LOG_PORT.println (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
+        // LOG_PORT.println (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
         InputFPPRemotePlayFile.Stop ();
 
         // DEBUG_V ("");
