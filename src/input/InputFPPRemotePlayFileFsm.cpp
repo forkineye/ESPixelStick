@@ -112,12 +112,12 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t * Buffer, size_t BufferSize)
                 // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
 
                 p_InputFPPRemotePlayFile->StartTimeInMillis = now;
-                p_InputFPPRemotePlayFile->LastFrameId = 0;
+                p_InputFPPRemotePlayFile->LastFrameId = -1;
                 frame = 0;
             }
             else
             {
-                // DEBUG_V (String ("Stop Playing:: FileName:  '") + p_InputFPPRemotePlayFile->GetFileName () + "'");
+                // DEBUG_V (String ("Done Playing:: FileName:  '") + p_InputFPPRemotePlayFile->GetFileName () + "'");
                 Stop ();
                 break;
             }
@@ -180,6 +180,7 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
             break;
         }
 
+        --p_InputFPPRemotePlayFile->RemainingPlayCount;
         // DEBUG_V ("");
 
         FSEQHeader fsqHeader;
@@ -250,6 +251,8 @@ void fsm_PlayFile_state_PlayingFile::Start (String & FileName, uint32_t FrameId)
 void fsm_PlayFile_state_PlayingFile::Stop (void)
 {
     // DEBUG_START;
+
+    LOG_PORT.println (String (F ("Stop Playing:: FileName:  '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
 
     FileMgr.CloseSdFile (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed);
     p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed = 0;
