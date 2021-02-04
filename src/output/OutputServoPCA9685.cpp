@@ -19,32 +19,8 @@ GNU General Public License for more details.
 
 #include "OutputServoPCA9685.hpp"
 
-#define SERVO_PCA9685_OUTPUT_ENABLED         true
-#define SERVO_PCA9685_OUTPUT_DISABLED        false
 #define SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH 650
 #define SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH 2350
-
-#define SERVO_PCA9685_DEFAULT_PULSE_WIDTH    0
-
-static const c_OutputServoPCA9685::ServoPCA9685Channel_t ServoPCA9685ChannelDefaultSettings[] =
-{
-    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
-    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
-    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
-    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
-    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
-    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
-    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
-    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
-    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
-    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
-    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
-    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
-    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
-    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
-    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
-    {SERVO_PCA9685_OUTPUT_DISABLED, SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH, SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH, SERVO_PCA9685_DEFAULT_PULSE_WIDTH },
-};
 
 //----------------------------------------------------------------------------
 c_OutputServoPCA9685::c_OutputServoPCA9685 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
@@ -53,10 +29,16 @@ c_OutputServoPCA9685::c_OutputServoPCA9685 (c_OutputMgr::e_OutputChannelIds Outp
                                 c_OutputMgr::e_OutputType outputType) :
     c_OutputCommon(OutputChannelId, outputGpio, uart, outputType)
 {
-    // DEBUG_START;
-    memcpy((char*)OutputList, 
-        (char*)ServoPCA9685ChannelDefaultSettings, 
-        sizeof(OutputList));
+    for (ServoPCA9685Channel_t& currentServoPCA9685 : OutputList)
+    {
+        currentServoPCA9685.Enabled       = false;
+        currentServoPCA9685.MinLevel      = SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH;
+        currentServoPCA9685.MaxLevel      = SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH;
+        currentServoPCA9685.PreviousValue = 0;
+        currentServoPCA9685.IsReversed    = false;
+        currentServoPCA9685.Is16Bit       = false;
+        currentServoPCA9685.IsScaled      = true;
+    }
 
     // DEBUG_END;
 } // c_OutputServoPCA9685
@@ -181,14 +163,17 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 
             ServoPCA9685Channel_t * CurrentOutputChannel = & OutputList[ChannelId];
 
-            setFromJSON (CurrentOutputChannel->Enabled,  JsonChannelData, OM_SERVO_PCA9685_CHANNEL_ENABLED_NAME);
-            setFromJSON (CurrentOutputChannel->MinLevel, JsonChannelData, OM_SERVO_PCA9685_CHANNEL_MINLEVEL_NAME);
-            setFromJSON (CurrentOutputChannel->MaxLevel, JsonChannelData, OM_SERVO_PCA9685_CHANNEL_MAXLEVEL_NAME);
+            setFromJSON (CurrentOutputChannel->Enabled,    JsonChannelData, OM_SERVO_PCA9685_CHANNEL_ENABLED_NAME);
+            setFromJSON (CurrentOutputChannel->MinLevel,   JsonChannelData, OM_SERVO_PCA9685_CHANNEL_MINLEVEL_NAME);
+            setFromJSON (CurrentOutputChannel->MaxLevel,   JsonChannelData, OM_SERVO_PCA9685_CHANNEL_MAXLEVEL_NAME);
+            setFromJSON (CurrentOutputChannel->IsReversed, JsonChannelData, OM_SERVO_PCA9685_CHANNEL_REVERSED);
+            setFromJSON (CurrentOutputChannel->Is16Bit,    JsonChannelData, OM_SERVO_PCA9685_CHANNEL_16BITS);
+            setFromJSON (CurrentOutputChannel->IsScaled,   JsonChannelData, OM_SERVO_PCA9685_CHANNEL_SCALED);
 
-            // DEBUGV (String ("ChannelId: ") + String (ChannelId));
-            // DEBUGV (String ("  Enabled: ") + String (CurrentOutputChannel->Enabled));
-            // DEBUGV (String (" MinLevel: ") + String (CurrentOutputChannel->MinLevel));
-            // DEBUGV (String (" MaxLevel: ") + String (CurrentOutputChannel->MaxLevel));
+            // DEBUG_V (String ("ChannelId: ") + String (ChannelId));
+            // DEBUG_V (String ("  Enabled: ") + String (CurrentOutputChannel->Enabled));
+            // DEBUG_V (String (" MinLevel: ") + String (CurrentOutputChannel->MinLevel));
+            // DEBUG_V (String (" MaxLevel: ") + String (CurrentOutputChannel->MaxLevel));
         
             ++ChannelId;
         }
@@ -223,11 +208,14 @@ void c_OutputServoPCA9685::GetConfig (ArduinoJson::JsonObject & jsonConfig)
         JsonChannelData[OM_SERVO_PCA9685_CHANNEL_ENABLED_NAME]  = currentServoPCA9685.Enabled;
         JsonChannelData[OM_SERVO_PCA9685_CHANNEL_MINLEVEL_NAME] = currentServoPCA9685.MinLevel;
         JsonChannelData[OM_SERVO_PCA9685_CHANNEL_MAXLEVEL_NAME] = currentServoPCA9685.MaxLevel;
+        JsonChannelData[OM_SERVO_PCA9685_CHANNEL_REVERSED]      = currentServoPCA9685.IsReversed;
+        JsonChannelData[OM_SERVO_PCA9685_CHANNEL_16BITS]        = currentServoPCA9685.Is16Bit;
+        JsonChannelData[OM_SERVO_PCA9685_CHANNEL_SCALED]        = currentServoPCA9685.IsScaled;
 
-        // DEBUGV (String ("ChannelId: ") + String (ChannelId));
-        // DEBUGV (String ("  Enabled: ") + String (currentServoPCA9685.Enabled));
-        // DEBUGV (String (" MinLevel: ") + String (currentServoPCA9685.MinLevel));
-        // DEBUGV (String (" MaxLevel: ") + String (currentServoPCA9685.MaxLevel));
+        // DEBUG_V (String ("ChannelId: ") + String (ChannelId));
+        // DEBUG_V (String ("  Enabled: ") + String (currentServoPCA9685.Enabled));
+        // DEBUG_V (String (" MinLevel: ") + String (currentServoPCA9685.MinLevel));
+        // DEBUG_V (String (" MaxLevel: ") + String (currentServoPCA9685.MaxLevel));
 
         ++ChannelId;
     }
@@ -252,23 +240,57 @@ void c_OutputServoPCA9685::Render ()
     for (ServoPCA9685Channel_t & currentServoPCA9685 : OutputList)
     {
         // DEBUG_V (String("OutputDataIndex: ") + String(OutputDataIndex));
+        // DEBUG_V (String ("       Enabled: ") + String (currentServoPCA9685.Enabled));
         if (currentServoPCA9685.Enabled)
         {
-            uint8_t newOutputValue = pOutputBuffer[OutputDataIndex];
+            uint16_t MaxScaledValue = 255;
+            uint16_t MinScaledValue = 0;
+            uint16_t newOutputValue = pOutputBuffer[OutputDataIndex];
+
+            if (currentServoPCA9685.Is16Bit)
+            {
+                // DEBUG_V ("16 Bit Mode");
+                newOutputValue  = (pOutputBuffer[(OutputDataIndex * 2) + 0] << 0);
+                newOutputValue += (pOutputBuffer[(OutputDataIndex * 2) + 1] << 8);
+                MaxScaledValue = uint16_t (-1);
+            }
+
+            // DEBUG_V (String ("newOutputValue: ") + String (newOutputValue));
+            // DEBUG_V (String (" PreviousValue: ") + String (currentServoPCA9685.PreviousValue));
+
             if (newOutputValue != currentServoPCA9685.PreviousValue)
             {
-                // DEBUGV (String ("ChannelId: ") + String (ChannelId));
-                // DEBUGV (String ("  Enabled: ") + String (currentServoPCA9685.Enabled));
-                // DEBUGV (String (" MinLevel: ") + String (currentServoPCA9685.MinLevel));
-                // DEBUGV (String (" MaxLevel: ") + String (currentServoPCA9685.MaxLevel));
+                // DEBUG_V (String ("ChannelId: ") + String (OutputDataIndex));
+                // DEBUG_V (String (" MinLevel: ") + String (currentServoPCA9685.MinLevel));
+                // DEBUG_V (String (" MaxLevel: ") + String (currentServoPCA9685.MaxLevel));
                 currentServoPCA9685.PreviousValue = newOutputValue;
 
-                // send data to pwm
+                if (currentServoPCA9685.IsReversed)
+                {
+                    // DEBUG_V (String("Reverse Lookup"));
+                    MinScaledValue = MaxScaledValue;
+                    MaxScaledValue = 0;
+                }
 
-                uint16_t pulse_width = 0;
-                uint16_t Final_value = 0;
-                pulse_width = map (newOutputValue, 0, 255, currentServoPCA9685.MinLevel, currentServoPCA9685.MaxLevel);
-                Final_value = int (float (pulse_width) / 1000000.0 * float(UpdateFrequency) * 4096.0);
+                uint16_t Final_value = newOutputValue;
+                if (currentServoPCA9685.IsScaled)
+                {
+                    // DEBUG_V (String ("Is Scalled"));
+                    // DEBUG_V (String ("newOutputValue: ") + String (newOutputValue));
+                    // DEBUG_V (String ("      MinLevel: ") + String (currentServoPCA9685.MinLevel));
+                    // DEBUG_V (String ("      MaxLevel: ") + String (currentServoPCA9685.MaxLevel));
+                    // DEBUG_V (String ("MinScaledValue: ") + String (MinScaledValue));
+                    // DEBUG_V (String ("MaxScaledValue: ") + String (MaxScaledValue));
+
+                    uint16_t pulse_width = map (newOutputValue, 
+                                                MinScaledValue, 
+                                                MaxScaledValue, 
+                                                currentServoPCA9685.MinLevel, 
+                                                currentServoPCA9685.MaxLevel);
+                    Final_value = int ((float (pulse_width) / 1000000.0) * float (UpdateFrequency) * 4096.0);
+                    // DEBUG_V (String ("pulse_width: ") + String (pulse_width));
+                    // DEBUG_V (String ("Final_value: ") + String (Final_value));
+                }
                 pwm.setPWM (OutputDataIndex, 0, Final_value);
             }
         }

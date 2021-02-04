@@ -326,9 +326,8 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
 
             case 0x03: // Open
             {
-                // DEBUG_V ("Start");
-
-                StartPlaying (FileName, FrameId);
+                // DEBUG_V ("Open");
+                // StartPlaying (FileName, FrameId);
                 break;
             }
 
@@ -897,11 +896,11 @@ void c_FPPDiscovery::StartPlaying (String & filename, uint32_t frameId)
             // DEBUG_V("Do not have a file to start");
             break;
         }
-        // DEBUG_V ("");
+        // DEBUG_V ("Asking for file to play");
 
         InputFPPRemotePlayFile.SetPlayCount (1);
         InputFPPRemotePlayFile.Start (filename, frameId);
-        LOG_PORT.println (String (F ("FPPDiscovery::Playing:  '")) + filename + "'" );
+        // LOG_PORT.println (String (F ("FPPDiscovery::Playing:  '")) + filename + "'" );
 
     } while (false);
 

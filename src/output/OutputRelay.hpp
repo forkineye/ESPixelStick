@@ -63,12 +63,12 @@ public:
 
 private:
 #   define OM_RELAY_CHANNEL_LIMIT           8
-#   define OM_RELAY_UPDATE_INTERVAL_NAME    F("updateinterval")
+#   define OM_RELAY_UPDATE_INTERVAL_NAME    F("ui")
 #   define OM_RELAY_CHANNELS_NAME           F("channels")
-#   define OM_RELAY_CHANNEL_ENABLED_NAME    F("enabled")
-#   define OM_RELAY_CHANNEL_INVERT_NAME     F("invertoutput")
-#   define OM_RELAY_CHANNEL_TRIGGER_NAME    F("onofftriggerlevel")
-#   define OM_RELAY_CHANNEL_GPIO_NAME       F("gpioid")
+#   define OM_RELAY_CHANNEL_ENABLED_NAME    F("en")
+#   define OM_RELAY_CHANNEL_INVERT_NAME     F("inv")
+#   define OM_RELAY_CHANNEL_TRIGGER_NAME    F("trig")
+#   define OM_RELAY_CHANNEL_GPIO_NAME       F("gid")
 #   define OM_RELAY_CHANNEL_ID_NAME         F("id")
 
     bool    validate ();

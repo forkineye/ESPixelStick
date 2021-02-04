@@ -114,10 +114,6 @@ private:
     uint8_t OutputBuffer[OM_MAX_NUM_CHANNELS];
     uint16_t UsedBufferSize = 0;
 
-protected:
-
-public:
-    size_t    GetConfigSize () { return OM_MAX_CONFIG_SIZE; }
 }; // c_OutputMgr
 
 extern c_OutputMgr OutputMgr;
