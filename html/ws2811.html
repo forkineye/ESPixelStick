@@ -9,7 +9,7 @@
             </div>
             <label class="control-label col-sm-2" for="group_size">Group Size</label>
             <div class="col-sm-4">
-                <input type="number" class="form-control is-valid" id="group_size" step="1" min="1" max="1360" value="1" required title="Group every X number of physical pixels together.  Default of 1 is no grouping." onchange="refreshPixel()">
+                <input type="number" class="form-control is-valid" id="group_size" step="1" min="1" max="1360" value="1" required title="Group every X number of physical pixels together.  Default of 1 is no grouping.">
             </div>
         </div>
 
@@ -33,19 +33,19 @@
             </div>
             <label class="control-label col-sm-2" for="zig_size">Zigzag Count</label>
             <div class="col-sm-4">
-                <input type="number" class="form-control is-valid" id="zig_size" step="1" min="0" max="680" value="0" required title="Zigzag every X number of physical pixels." onchange="refreshPixel()">
+                <input type="number" class="form-control is-valid" id="zig_size" step="1" min="0" max="680" value="0" required title="Zigzag every X number of physical pixels.">
             </div>
         </div>
 
         <div class="form-group">
             <label class="control-label col-sm-2" for="gamma">Gamma Value</label>
             <div class="col-sm-4">
-                <input type="number" class="form-control is-valid" id="gamma" step="0.1" min="1.0" max="5.0" value="1.0" required title="Recommended value is 2.2. Set to 1.0 to disable." onchange="refreshPixel()">
+                <input type="number" class="form-control is-valid" id="gamma" step="0.1" min="1.0" max="5.0" value="1.0" required title="Recommended value is 2.2. Set to 1.0 to disable.">
             </div>
 
-            <label class="control-label col-sm-2" for="brightness">Brightness</label>
+            <label class="control-label col-sm-2" for="brightness">Brightness (%)</label>
             <div class="col-sm-4">
-                <input type="number" class="form-control is-valid" id="brightness" step="0.01" min="0.1" max="1.0" value="1.0" title="Maximum brightness is 1.0." onchange="refreshPixel()">
+                <input type="number" class="form-control is-valid" id="brightness" step="1" min="1" max="100" value="100" title="Set brightness as a percentage">
             </div>
         </div>
 
