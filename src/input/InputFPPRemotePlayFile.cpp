@@ -103,6 +103,7 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
 
     JsonStatus[F ("SyncCount")]           = SyncCount;
     JsonStatus[F ("SyncAdjustmentCount")] = SyncAdjustmentCount;
+    JsonStatus[F ("TimeOffset")]          = TimeOffset;
 
     String temp = GetFileName ();
 
@@ -112,7 +113,6 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
     JsonStatus[F ("seconds_played")]    = String (secs);
     JsonStatus[F ("seconds_remaining")] = String (secsTot - secs);
     JsonStatus[F ("sequence_filename")] = temp;
-
 
     int mins = secs / 60;
     secs = secs % 60;
