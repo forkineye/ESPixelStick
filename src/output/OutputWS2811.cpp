@@ -184,7 +184,7 @@ void c_OutputWS2811::GetConfig(ArduinoJson::JsonObject & jsonConfig)
     jsonConfig[F ("group_size")]     = group_size;
     jsonConfig[F ("zig_size")]       = zig_size;
     jsonConfig[F ("gamma")]          = gamma;
-    jsonConfig[F ("brightness")]     = brightness;
+    jsonConfig[F ("brightness")]     = (brightness * 100.0); // save as a 1 - 100 percentage
     jsonConfig[F ("interframetime")] = InterFrameGapInMicroSec;
     // enums need to be converted to uints for json
     jsonConfig[F ("data_pin")]       = uint (DataPin);
@@ -419,6 +419,7 @@ bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject & jsonConfig)
     setFromJSON (InterFrameGapInMicroSec, jsonConfig, F ("interframetime"));
     setFromJSON (tempDataPin,             jsonConfig, F ("data_pin"));
     DataPin = gpio_num_t (tempDataPin);
+    brightness /= 100.0; // turn into a 0-1.0 multiplier
 
     bool response = validate ();
 
