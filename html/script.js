@@ -304,7 +304,7 @@ function ProcessModeConfigurationDatafppremote(channelConfig)
     // remove the existing options
     $(jqSelector).empty();
 
-    $(jqSelector).append('<option value=>Play Remote Sequence</option>');
+    $(jqSelector).append('<option value="...">Play Remote Sequence</option>');
 
     // for each file in the list
     Fseq_File_List.files.forEach(function (listEntry) {
