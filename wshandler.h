@@ -22,10 +22,10 @@
 
 #if defined(ESPS_MODE_PIXEL)
 #include "PixelDriver.h"
-extern PixelDriver  pixels;     // Pixel object
+extern PixelDriver  out_driver;     // Pixel object
 #elif defined(ESPS_MODE_SERIAL)
 #include "SerialDriver.h"
-extern SerialDriver serial;     // Serial object
+extern SerialDriver out_driver;     // Serial object
 #endif
 
 extern EffectEngine effects;    // EffectEngine for test modes
@@ -356,12 +356,12 @@ void procV(uint8_t *data, AsyncWebSocketClient *client) {
     switch (data[1]) {
         case '1': {  // View stream
 #if defined(ESPS_MODE_PIXEL)
-            client->binary(pixels.getData(), config.channel_count);
+            client->binary(out_driver.getData(), config.channel_count);
 #elif defined(ESPS_MODE_SERIAL)
             if (config.serial_type == SerialType::DMX512)
-                client->binary(&serial.getData()[1], config.channel_count);
+                client->binary(&out_driver.getData()[1], config.channel_count);
             else
-                client->binary(&serial.getData()[2], config.channel_count);
+                client->binary(&out_driver.getData()[2], config.channel_count);
 #endif
             break;
         }

@@ -99,9 +99,9 @@ IPAddress           ourSubnetMask;
 
 // Output Drivers
 #if defined(ESPS_MODE_PIXEL)
-PixelDriver     pixels;         // Pixel object
+PixelDriver     out_driver;         // Pixel object
 #elif defined(ESPS_MODE_SERIAL)
-SerialDriver    serial;         // Serial object
+SerialDriver    out_driver;         // Serial object
 #else
 #error "No valid output mode defined."
 #endif
@@ -128,10 +128,11 @@ void setup() {
     // Configure SDK params
     wifi_set_sleep_type(NONE_SLEEP_T);
 
+#if defined (DATA_PIN)
     // Initial pin states
     pinMode(DATA_PIN, OUTPUT);
     digitalWrite(DATA_PIN, LOW);
-
+#endif
     // Setup serial log port
     LOG_PORT.begin(115200);
     delay(10);
@@ -187,29 +188,19 @@ void setup() {
     if (config.hostname)
         WiFi.hostname(config.hostname);
 
-#if defined (ESPS_MODE_PIXEL)
-    pixels.setPin(DATA_PIN);
-    updateConfig();
-
-    // Do one effects cycle as early as possible
-    if (config.ds == DataSource::WEB) {
-        effects.run();
-    }
-    // set the effect idle timer
-    idleTicker.attach(config.effect_idletimeout, idleTimeout);
-
-    pixels.show();
-#else
-    updateConfig();
-    // Do one effects cycle as early as possible
-    if (config.ds == DataSource::WEB) {
-        effects.run();
-    }
-    // set the effect idle timer
-    idleTicker.attach(config.effect_idletimeout, idleTimeout);
-
-    serial.show();
+#if defined (DATA_PIN)
+    out_driver.setPin(DATA_PIN);
 #endif
+    updateConfig();
+
+    // Do one effects cycle as early as possible
+    if (config.ds == DataSource::WEB) {
+        effects.run();
+    }
+    // set the effect idle timer
+    idleTicker.attach(config.effect_idletimeout, idleTimeout);
+
+    out_driver.show();
 
     // Setup WiFi Handlers
     wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
@@ -810,15 +801,15 @@ void updateConfig() {
 
     // Initialize for our pixel type
 #if defined(ESPS_MODE_PIXEL)
-    pixels.begin(config.pixel_type, config.pixel_color, config.channel_count / 3);
-    pixels.setGroup(config.groupSize, config.zigSize);
+    out_driver.begin(config.pixel_type, config.pixel_color, config.channel_count / 3);
+    out_driver.setGroup(config.groupSize, config.zigSize);
     updateGammaTable(config.gammaVal, config.briteVal);
     if (config.groupSize == 0) config.groupSize = 1;
-    effects.begin(&pixels, config.channel_count / 3 / config.groupSize);
+    effects.begin(&out_driver, config.channel_count / 3 / config.groupSize);
 
 #elif defined(ESPS_MODE_SERIAL)
-    serial.begin(&SEROUT_PORT, config.serial_type, config.channel_count, config.baudrate);
-    effects.begin(&serial, config.channel_count / 3 );
+    out_driver.begin(&SEROUT_PORT, config.serial_type, config.channel_count, config.baudrate);
+    effects.begin(&out_driver, config.channel_count / 3 );
 
 #endif
 
@@ -1179,27 +1170,28 @@ void sendZCPPConfig(ZCPP_packet_t& packet) {
         #endif
         packet.QueryConfigurationResponse.PortConfig[0].string = 0;
         packet.QueryConfigurationResponse.PortConfig[0].startChannel = ntohl((uint32_t)config.channel_start);
+
 #if defined(ESPS_MODE_PIXEL)
         switch(config.pixel_type) {
-#elif defined(ESPS_MODE_SERIAL)
-        switch(config.serial_type) {
-#endif
-#if defined(ESPS_MODE_PIXEL)
           case  PixelType::WS2811:
               packet.QueryConfigurationResponse.PortConfig[0].protocol = ZCPP_PROTOCOL_WS2811;
               break;
           case  PixelType::GECE:
               packet.QueryConfigurationResponse.PortConfig[0].protocol = ZCPP_PROTOCOL_GECE;
               break;
+        }
+
 #elif defined(ESPS_MODE_SERIAL)
+        switch(config.serial_type) {
           case  SerialType::DMX512:
               packet.QueryConfigurationResponse.PortConfig[0].protocol = ZCPP_PROTOCOL_DMX;
               break;
           case  SerialType::RENARD:
               packet.QueryConfigurationResponse.PortConfig[0].protocol = ZCPP_PROTOCOL_RENARD;
               break;
-#endif
         }
+
+#endif
         packet.QueryConfigurationResponse.PortConfig[0].channels = ntohl((uint32_t)config.channel_count);
 
 #if defined(ESPS_MODE_PIXEL)
@@ -1307,11 +1299,7 @@ void loop() {
                     }
 
                     for (int i = dataStart; i < dataStop; i++) {
-    #if defined(ESPS_MODE_PIXEL)
-                        pixels.setValue(i, data[buffloc]);
-    #elif defined(ESPS_MODE_SERIAL)
-                        serial.setValue(i, data[buffloc]);
-    #endif
+                        out_driver.setValue(i, data[buffloc]);
                         buffloc++;
                     }
                 }
@@ -1333,11 +1321,7 @@ void loop() {
               }
               for (int i = offset; i < offset + len; i++) {
                 if (i < config.channel_count) {
-    #if defined(ESPS_MODE_PIXEL)
-                 pixels.setValue(i, data[i - offset]);
-    #elif defined(ESPS_MODE_SERIAL)
-                 serial.setValue(i, data[i - offset]);
-    #endif
+                 out_driver.setValue(i, data[i - offset]);
                 }
               }
             }
@@ -1511,11 +1495,7 @@ void loop() {
                       zcpp.stats.num_packets++;
 
                       for (int i = offset; i < offset + len; i++) {
-    #if defined(ESPS_MODE_PIXEL)
-                        pixels.setValue(i, zcppPacket.Data.data[i - offset]);
-    #elif defined(ESPS_MODE_SERIAL)
-                        serial.setValue(i, zcppPacket.Data.data[i - offset]);
-    #endif
+                         out_driver.setValue(i, zcppPacket.Data.data[i - offset]);
                       }
 
                       break;
@@ -1533,13 +1513,8 @@ void loop() {
         }
 
     /* Streaming refresh */
-    #if defined(ESPS_MODE_PIXEL)
-        if (pixels.canRefresh())
-            pixels.show();
-    #elif defined(ESPS_MODE_SERIAL)
-        if (serial.canRefresh())
-            serial.show();
-    #endif
+        if (out_driver.canRefresh())
+            out_driver.show();
   }
 
 // workaround crash - consume incoming bytes on serial port
