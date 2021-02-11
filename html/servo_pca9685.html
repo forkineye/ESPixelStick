@@ -1,28 +1,30 @@
 <div id="servo_pca9685">
     <legend class="esps-legend">Servo PCA9685 Configuration</legend>
     <div class="has-feedback" id="fg_servo_pca9685">
-        <div class="form-group has-feedback">
-            <label class="control-label col-sm-2" for="updateinterval">Update Frequency (hz)</label>
-            <div class="col-sm-4">
-                <input type="number" class="form-control is-valid" id="ServoUpdateinterval" step="1" min="20" max="100" value="50" required title="Frequency used to calculate pulse width" onchange="Refreshservo_pca9685Rate()">
+        <fieldset id="fs_servo_pca9685">
+            <div class="form-group has-feedback">
+                <label class="control-label col-sm-2" for="updateinterval">Update Frequency (hz)</label>
+                <div class="col-sm-4">
+                    <input type="number" class="form-control is-valid" id="ServoUpdateinterval" step="1" min="20" max="100" value="50" required title="Frequency used to calculate pulse width" onchange="Refreshservo_pca9685Rate()">
+                </div>
             </div>
-        </div>
-        <div class="col-sm-offset-2">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th id="ServoChanId_hr">Channel</th>
-                    <th id="ServoEnabled_hr">Enabled</th>
-                    <th id="ServoMinLevel_hr">Min Pulse Width</th>
-                    <th id="ServoMaxLevel_hr">Max Pulse Width</th>
-                    <th id="ServoDataType_hr">Input Data Type</th>
-                </tr>
-            </thead>
-            <tbody id="servo_pca9685channelconfigurationtable">
-                <tr></tr>
-            </tbody>
-        </table>
-        </div>
+            <div class="col-sm-offset-2">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th id="ServoChanId_hr">Channel</th>
+                            <th id="ServoEnabled_hr">Enabled</th>
+                            <th id="ServoMinLevel_hr">Min Pulse Width</th>
+                            <th id="ServoMaxLevel_hr">Max Pulse Width</th>
+                            <th id="ServoDataType_hr">Input Data Type</th>
+                        </tr>
+                    </thead>
+                    <tbody id="servo_pca9685channelconfigurationtable">
+                        <tr></tr>
+                    </tbody>
+                </table>
+            </div>
+        </fieldset>
     </div>
 </div>
 

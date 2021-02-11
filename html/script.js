@@ -71,7 +71,12 @@ $(function ()
         }
     });
 
-    $('#DeviceConfigSave').click(function () {
+    $('#network').on("input", (function () {
+        $('#btn_wifi').prop("disabled", ValidateConfigFields($("#network input")));
+    }));
+
+    $('#DeviceConfigSave').click(function ()
+    {
         submitDeviceConfig();
     });
 
@@ -304,7 +309,7 @@ function ProcessModeConfigurationDatafppremote(channelConfig)
     // remove the existing options
     $(jqSelector).empty();
 
-    $(jqSelector).append('<option value=>Play Remote Sequence</option>');
+    $(jqSelector).append('<option value="...">Play Remote Sequence</option>');
 
     // for each file in the list
     Fseq_File_List.files.forEach(function (listEntry) {
@@ -458,7 +463,7 @@ function ProcessModeConfigurationData(channelId, ChannelTypeName, JsonConfig )
 {
     // console.info("ProcessModeConfigurationData: Start");
 
-    // determine the type of output that has been selected and populate the form
+    // determine the type of in/output that has been selected and populate the form
     var TypeOfChannelId = parseInt($('#' + ChannelTypeName +  channelId + " option:selected").val(), 10);
     var channelConfigSet = JsonConfig.channels[channelId];
 
@@ -473,6 +478,15 @@ function ProcessModeConfigurationData(channelId, ChannelTypeName, JsonConfig )
     ChannelTypeName = ChannelTypeName.replace(" ", "_");
     // console.info("ChannelTypeName: " + ChannelTypeName);
 
+    var FieldSet = $('#fs_' + ChannelTypeName + ' input');
+    if (0 < FieldSet.length)
+    {
+        $('#fs_' + ChannelTypeName).on("input", (function ()
+        {
+            $('#DeviceConfigSave').prop("disabled", ValidateConfigFields(FieldSet));
+        }));
+    }
+
     // clear the array
     selector = [];
 
@@ -485,22 +499,27 @@ function ProcessModeConfigurationData(channelId, ChannelTypeName, JsonConfig )
     // clear the array
     selector = [];
 
-    if (("fpp_remote" === ChannelTypeName) && (null !== Fseq_File_List))
+    if ("fpp_remote" === ChannelTypeName)
     {
-        ProcessModeConfigurationDatafppremote(channelConfig);
+        if (null !== Fseq_File_List)
+        {
+            ProcessModeConfigurationDatafppremote(channelConfig);
+        }
     }
 
-    if ("effects" === ChannelTypeName)
+    else if ("effects" === ChannelTypeName)
     {
         ProcessModeConfigurationDataEffects(channelConfig);
     }
 
-    if ("relay" === ChannelTypeName) {
+    else if ("relay" === ChannelTypeName)
+    {
         // console.info("ProcessModeConfigurationData: relay");
         ProcessModeConfigurationDataRelay(channelConfig);
     }
 
-    if ("servo_pca9685" === ChannelTypeName) {
+    else if ("servo_pca9685" === ChannelTypeName)
+    {
         // console.info("ProcessModeConfigurationData: servo");
         ProcessModeConfigurationDataServoPCA9685(channelConfig);
     }
@@ -783,6 +802,34 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
 
 } // ExtractChannelConfigFromHtmlPage
 
+function ValidateConfigFields(ElementList)
+{
+    // return true if errors were found
+    var response = false;
+
+    for (var ChildElementId = 0;
+         ChildElementId < ElementList.length;
+         ChildElementId++)
+    {
+        var ChildElement = ElementList[ChildElementId];
+        var ChildType = ChildElement.type;
+
+        if (ChildElement.validity.valid !== undefined)
+        {
+            // console.info("ChildElement.validity.valid: " + ChildElement.validity.valid);
+            if (false === ChildElement.validity.valid)
+            {
+                console.info("          Element: " + ChildElement.id);
+                console.info("   ChildElementId: " + ChildElementId);
+                console.info("ChildElement Type: " + ChildType);
+                response = true;
+            }
+        }
+    }
+    return response;
+
+} // ValidateConfigFields
+
 // Build dynamic JSON config submission for "Device" tab
 function submitDeviceConfig()
 {
@@ -797,8 +844,6 @@ function submitDeviceConfig()
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'device': Device_Config } } }));
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input':  { 'input_config': Input_Config } } } }));
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'output': { 'output_config': Output_Config } } } }));
-
-    return;
 
 } // submitDeviceConfig
 
@@ -1209,6 +1254,7 @@ function ProcessRecievedJsonStatusMessage(data)
         $('#fppremoteFilePlayerFilename').text(FPPDstatus.current_sequence);
         $('#fppremoteFilePlayerTimeElapsed').text(FPPDstatus.time_elapsed);
         $('#fppremoteFilePlayerTimeRemaining').text(FPPDstatus.time_remaining);
+        $('#fppremoteFilePlayerTimeOffset').text(FPPDstatus.TimeOffset);
     }
     else
     {

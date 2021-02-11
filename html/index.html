@@ -1,12 +1,12 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
     <head>
-        <!-- for local development
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title id="title"></title>
 
+        <!-- for local development
         <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
         <link rel="stylesheet" type="text/css" href="style.css">
         <link rel="stylesheet" href="css/treejs.css" id="treejs_styles">
@@ -94,10 +94,11 @@
                             <table class="esps-table">
                                 <tr><td width="50%">Total Sync Packets: </td><td><span id="fppsyncreceived"></span></td></tr>
                                 <tr><td width="50%">Sync Adjustments: </td><td><span id="fppsyncadjustments"></span></td></tr>
-                                <tr><td width="50%">Remote IP: </td><td><span id="fppremoteip"></span></td></tr>
+                                <tr><td width="50%">Master IP: </td><td><span id="fppremoteip"></span></td></tr>
                                 <tr><td width="50%">Filename: </td><td><span id="fppremoteFilePlayerFilename"></span></td></tr>
                                 <tr><td width="50%">Time Elapsed: </td><td><span id="fppremoteFilePlayerTimeElapsed"></span></td></tr>
                                 <tr><td width="50%">Time Remaining: </td><td><span id="fppremoteFilePlayerTimeRemaining"></span></td></tr>
+                                <tr><td width="50%">Frame Time Adjustment: </td><td><span id="fppremoteFilePlayerTimeOffset"></span></td></tr>
                             </table>
                         </fieldset>
                     </div>
@@ -179,19 +180,19 @@
                         <div class="form-group dhcp has-feedback" id="fg_ip">
                             <label class="control-label col-sm-2" for="ip">IP</label>
                             <div class="col-sm-8">
-                                <input type="text" class="form-control" id="ip" name="ip" minlength="7" maxlength="15" required pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$' value="0.0.0.0" title="Static IP Address">
+                                <input type="text" class="form-control is-valid" id="ip" name="ip" minlength="7" maxlength="15" required pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$' value="0.0.0.0" title="Static IP Address">
                             </div>
                         </div>
                         <div class="form-group dhcp has-feedback" id="fg_netmask">
                             <label class="control-label col-sm-2" for="netmask">Netmask</label>
                             <div class="col-sm-8">
-                                <input type="text" class="form-control" id="netmask" name="netmask" minlength="7" maxlength="15" required pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$' value="0.0.0.0" title="Static Netmask">
+                                <input type="text" class="form-control is-valid" id="netmask" name="netmask" minlength="7" maxlength="15" required pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$' value="0.0.0.0" title="Static Netmask">
                             </div>
                         </div>
                         <div class="form-group dhcp has-feedback" id="fg_gateway">
                             <label class="control-label col-sm-2" for="gateway">Gateway</label>
                             <div class="col-sm-8">
-                                <input type="text" class="form-control" id="gateway" name="gateway" minlength="7" maxlength="15" required pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$' value="0.0.0.0" title="Static Gateway">
+                                <input type="text" class="form-control is-valid" id="gateway" name="gateway" minlength="7" maxlength="15" required pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$' value="0.0.0.0" title="Static Gateway">
                             </div>
                         </div>
                         <div class="form-group">

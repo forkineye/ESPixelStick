@@ -35,6 +35,8 @@ public:
     virtual void Poll (uint8_t* Buffer, size_t BufferSize);
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
+    uint32_t GetLastFrameId () { return LastFrameId; }
+    float GetTimeOffset () { return TimeOffset; }
 
 private:
     friend class fsm_PlayFile_state_Idle;
@@ -52,8 +54,13 @@ private:
     uint8_t           FrameStepTime = 1;
     uint32_t          TotalNumberOfFramesInSequence = 0;
     uint32_t          StartTimeInMillis = 0;
+    float             TimeOffset = 1.0;
 
     uint32_t          SyncCount = 0;
     uint32_t          SyncAdjustmentCount = 0;
+
+    uint32_t          CalculateFrameId(time_t now) {return (uint32_t(float(now - StartTimeInMillis) * TimeOffset) / FrameStepTime); }
+
+#define TimeOffsetStep 0.00001
 
 }; // c_InputFPPRemotePlayFile

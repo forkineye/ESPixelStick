@@ -41,7 +41,7 @@ private:
 
     AsyncUDP udp;
     void ProcessReceivedUdpPacket (AsyncUDPPacket _packet);
-    void ProcessSyncPacket (uint8_t action, String filename, uint32_t frame);
+    void ProcessSyncPacket (uint8_t action, String filename, uint32_t frame, float seconds_elapsed);
     void ProcessBlankPacket ();
     bool PlayingFile () { return !InputFPPRemotePlayFile.IsIdle (); }
 

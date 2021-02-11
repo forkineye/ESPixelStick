@@ -39,6 +39,16 @@ static const c_InputEffectEngine::EffectDescriptor_t ListOfEffects[] =
         { "Breathe",      &c_InputEffectEngine::effectBreathe,    "t_breathe",      1,    0,    0,    0,  "T8"     }
 };
 
+static const char EffectSpeedName[] = "EffectSpeed";
+static const char EffectReverseName[] = "EffectReverse";
+static const char EffectMirrorName[] = "EffectMirror";
+static const char EffectAllLedsName[] = "EffectAllLeds";
+static const char EffectBrightnessName[] = "EffectBrightness";
+static const char EffectBlankTimeName[] = "EffectBlankTime";
+static const char EffectWhiteChannelName[] = "EffectWhiteChannel";
+static const char currenteffectName[] = "currenteffect";
+static const char EffectColorName[] = "EffectColor";
+
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInputChannelId,
                                           c_InputMgr::e_InputType       NewChannelType,
@@ -107,15 +117,15 @@ void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
     sprintf (HexColor, "#%02x%02x%02x", EffectColor.r, EffectColor.g, EffectColor.b);
     // DEBUG_V ("");
 
-    jsonConfig[F ("currenteffect")]      = ActiveEffect->name;
-    jsonConfig[F ("EffectSpeed")]        = EffectSpeed;
-    jsonConfig[F ("EffectReverse")]      = EffectReverse;
-    jsonConfig[F ("EffectMirror")]       = EffectMirror;
-    jsonConfig[F ("EffectAllLeds")]      = EffectAllLeds;
-    jsonConfig[F ("EffectBrightness")]   = EffectBrightness;
-    jsonConfig[F ("EffectBlankTime")]    = EffectBlankTime;
-    jsonConfig[F ("EffectWhiteChannel")] = EffectWhiteChannel;
-    jsonConfig[F ("EffectColor")]        = HexColor;
+    jsonConfig[currenteffectName]      = ActiveEffect->name;
+    jsonConfig[EffectSpeedName]        = EffectSpeed;
+    jsonConfig[EffectReverseName]      = EffectReverse;
+    jsonConfig[EffectMirrorName]       = EffectMirror;
+    jsonConfig[EffectAllLedsName]      = EffectAllLeds;
+    jsonConfig[EffectBrightnessName]   = uint32_t(EffectBrightness * 100.0);
+    jsonConfig[EffectBlankTimeName]    = EffectBlankTime;
+    jsonConfig[EffectWhiteChannelName] = EffectWhiteChannel;
+    jsonConfig[EffectColorName]        = HexColor;
     // DEBUG_V ("");
 
     JsonArray EffectsArray = jsonConfig.createNestedArray (F ("effects"));
@@ -173,7 +183,7 @@ void c_InputEffectEngine::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    jsonStatus[F ("currenteffect")] = ActiveEffect->name;
+    jsonStatus[currenteffectName] = ActiveEffect->name;
 
     // DEBUG_END;
 
@@ -289,15 +299,17 @@ boolean c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     String effectName;
     String effectColor;
 
-    setFromJSON (EffectSpeed,        jsonConfig, F ("EffectSpeed"));
-    setFromJSON (EffectReverse,      jsonConfig, F ("EffectReverse"));
-    setFromJSON (EffectMirror,       jsonConfig, F ("EffectMirror"));
-    setFromJSON (EffectAllLeds,      jsonConfig, F ("EffectAllLeds"));
-    setFromJSON (EffectBrightness,   jsonConfig, F ("EffectBrightness"));
-    setFromJSON (EffectBlankTime,    jsonConfig, F ("EffectBlankTime"));
-    setFromJSON (EffectWhiteChannel, jsonConfig, F ("EffectWhiteChannel"));
-    setFromJSON (effectName,         jsonConfig, F ("currenteffect"));
-    setFromJSON (effectColor,        jsonConfig, F ("EffectColor"));
+    setFromJSON (EffectSpeed,        jsonConfig, EffectSpeedName);
+    setFromJSON (EffectReverse,      jsonConfig, EffectReverseName);
+    setFromJSON (EffectMirror,       jsonConfig, EffectMirrorName);
+    setFromJSON (EffectAllLeds,      jsonConfig, EffectAllLedsName);
+    setFromJSON (EffectBrightness,   jsonConfig, EffectBrightnessName);
+    setFromJSON (EffectBlankTime,    jsonConfig, EffectBlankTimeName);
+    setFromJSON (EffectWhiteChannel, jsonConfig, EffectWhiteChannelName);
+    setFromJSON (effectName,         jsonConfig, currenteffectName);
+    setFromJSON (effectColor,        jsonConfig, EffectColorName);
+
+    EffectBrightness /= 100.0;
 
     SetBufferInfo (InputDataBuffer, InputDataBufferSize);
 
@@ -325,7 +337,7 @@ boolean c_InputEffectEngine::SetMqttConfig (ArduinoJson::JsonObject& jsonConfig)
     setFromJSON (EffectAllLeds,      jsonConfig, F ("allleds"));
     setFromJSON (EffectBlankTime,    jsonConfig, F ("blanktime"));
     setFromJSON (EffectBrightness,   jsonConfig, F ("brightness"));
-    setFromJSON (EffectWhiteChannel, jsonConfig, F ("EffectWhiteChannel"));
+    setFromJSON (EffectWhiteChannel, jsonConfig, EffectWhiteChannelName);
     setFromJSON (effectName,         jsonConfig, F ("effect"));
 
     SetBufferInfo (InputDataBuffer, InputDataBufferSize);

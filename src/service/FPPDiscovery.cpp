@@ -250,7 +250,7 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
                 //FSEQ type, not media
                 // DEBUG_V (String (F ("Received FPP FSEQ sync packet")));
                 FppRemoteIp = _packet.remoteIP ();
-                ProcessSyncPacket (msPacket->sync_action, msPacket->filename, msPacket->frame_number);
+                ProcessSyncPacket (msPacket->sync_action, msPacket->filename, msPacket->frame_number, msPacket->seconds_elapsed);
             }
             break;
         }
@@ -274,7 +274,7 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
 } // ProcessReceivedUdpPacket
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_t FrameId)
+void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_t FrameId, float seconds_elapsed)
 {
     // DEBUG_START;
     do // once
@@ -333,6 +333,13 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
                 else if (PlayingFile())
                 {
                     // DEBUG_V ("Sync::Sync");
+                    /*
+                    LOG_PORT.println (String(float(millis()/1000.0)) + "," + 
+                                      String(InputFPPRemotePlayFile.GetLastFrameId()) + "," + 
+                                      String (seconds_elapsed) + "," + 
+                                      String (FrameId) + "," + 
+                                      String(InputFPPRemotePlayFile.GetTimeOffset(),5));
+                    */
                     InputFPPRemotePlayFile.Sync (FrameId);
                 }
                 break;
@@ -923,7 +930,13 @@ void c_FPPDiscovery::StartPlaying (String & FileName, uint32_t FrameId)
         InputFPPRemotePlayFile.SetPlayCount (1);
         InputFPPRemotePlayFile.Start (FileName, FrameId);
         // LOG_PORT.println (String (F ("FPPDiscovery::Playing:  '")) + filename + "'" );
-
+        /*
+        LOG_PORT.println (String ("\nESP Sec") + "," + 
+            String ("ESP Frame ID") + "," + 
+            String ("FPP Seconds") + "," + 
+            String ("FPP Frame ID") + "," + 
+            String("ESP TimeOffset"));
+        */
     } while (false);
 
     // DEBUG_END;
