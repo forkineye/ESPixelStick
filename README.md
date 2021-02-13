@@ -39,7 +39,7 @@ Extract the folder in each of these zip files and place it in the "library" fold
 - [EspAlexa](https://github.com/Aircoookie/Espalexa) - Alexa Direct control Library
 - [Adafruit-PWM-Servo-Driver-Library](https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library) - Servo Motor I2C control
 
-The ESP32 build will require the following software to build this project:
+The ESP32 build will require the following software libraries to build this project:
 
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson) - Arduino JSON Library
 - [ESPAsyncE131](https://github.com/forkineye/ESPAsyncE131) - Asynchronous E1.31 (sACN) library
@@ -55,7 +55,7 @@ Using library manager:
 - Install littlefs-32 for esp32 support.
 ## Important Notes on Compiling and Flashing
 
-- In order to upload your code to the ESP8266 you must put it in flash mode and then take it out of flash mode to run the code. To place your ESP8266 in flash mode your GPIO-0 pin must be connected to ground.
+- In order to upload your code to the ESP you must put it in flash mode and then take it out of flash mode to run the code. To place your ESP8266 in flash mode your GPIO-0 pin must be connected to ground.
 - Device mode is now a compile time option to set your device type and is configured in the top of the main sketch file.  Current options are ```ESPS_MODE_PIXEL``` and ```ESPS_MODE_SERIAL```.  The default is ```ESPS_MODE_PIXEL``` for the ESPixelStick hardware.
 - Web pages **must** be processed, placed into ```data/www```, and uploaded with the upload plugin. Gulp will process the pages and put them in ```data/www``` for you. Refer to the html [README](html/README.md) for more information.
 - In order to use the upload plugin, the ESP8266 **must** be placed into programming mode and the Arduino serial monitor **must** be closed.
@@ -65,7 +65,7 @@ Using library manager:
 
 ## Supported Inputs 
 
-The configuration has been modified the support multiple (two) input types concurrently. For example you can select E1.31 and Effects at the same time. E1.31 will have higher priority than Effects. Valid input types are:
+The configuration has been modified to support multiple (two) input types concurrently. For example you can select E1.31 and Effects at the same time. E1.31 will have higher priority than Effects. Valid input types are:
 - Alexa
 - DDP
 - E1.31
@@ -75,7 +75,7 @@ The configuration has been modified the support multiple (two) input types concu
 
 ### Alexa Support
 
-Alexa is supported in direct mode. No additional hubs or applications are needed. When Alexa is selected as an input mode, the ESP will be discoverable by the Alexa app as a device that support 24bit color. The entire output string will be treated (from Alexa's point of view) as a single light bulb 
+Alexa is supported in direct mode. No additional hubs or applications are needed. When Alexa is selected as an input mode, the ESP will be discoverable by the Alexa app as a device that supports 24 bit color. The entire output buffer will be treated (from Alexa's point of view) as a single light bulb 
 
 ### DDP
 
@@ -212,6 +212,19 @@ light:
       - Breathe
 ```
 
+Here is an example of playing an fseq file via mqtt
+
+```yaml
+light:
+  - platform: mqtt
+    schema: json
+    name: "Front Porch ESPixelStick"
+    state_topic: "porch/esps"
+    command_topic: "porch/esps/set"
+    play: FileName
+	count: 5
+```
+
 Here's an example using the mosquitto_pub command line tool:
 
 ```bash
@@ -225,10 +238,16 @@ The input channels will respond to FPP and xLights discovery requests. xLights a
 ## Supported Outputs
 
 The ESPixelStick firmware can generate the following outputs from incoming data streams, however your hardware must support the physical interface. 
-ESP8266 platforms support a single output
-ESP32 platforms support two outputs
+ESP8266-12F platforms support:
+- a single serial / Pixel output
+- 8 Relay Outputs
+- 16 PWM Outputs (I2C bus)
+ESP32 platforms support
+- two serial / pixel outputs
+- 8 Relay outputs
+- 16 PWM Outputs (I2C bus)
 
-Each output can be configured to support any of the output protocols (no pixel vs serial image).
+Each Serial / pixel output can be configured to support any of the output protocols (no pixel vs serial image).
 
 ### Pixel Protocols
 
@@ -247,6 +266,10 @@ We support an output configuration that drives up to eight (8) relay outputs.
 - The trip point (on/off) is configurable per output.
 - The GPIO for each output is configurable
 
+### PWM Outputs
+We support up to 16 PWM outputs via the I2C bus. Each output can be configured to map the 8 bit channel intensity values to 4096 PWM timings.
+PWM is supported via the PCM9685 16 channel PWM output module.
+
 ## Resources
 
 - Firmware: [http://github.com/forkineye/ESPixelStick](http://github.com/forkineye/ESPixelStick)
@@ -262,4 +285,4 @@ We support an output configuration that drives up to eight (8) relay outputs.
   - penfold42 also maintains PWM support in their fork located [here](https://github.com/penfold42/ESPixelBoard).
 - [Austin Hodges](https://github.com/ahodges9) for effects support and MQTT cleanup.
 - [Matthias C. Hormann](https://github.com/Moonbase59) — some MQTT & effects cleanup.
-- [Martin Mueller](https://github.com/MartinMueller2003) — Port to ESP32. Clean up the unify branch.
+- [Martin Mueller](https://github.com/MartinMueller2003) — Port to ESP32. Clean up the unify branch. Added Alexa, Play FIle, Relay and native PWM supprt.
