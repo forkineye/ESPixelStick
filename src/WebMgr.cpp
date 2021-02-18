@@ -324,7 +324,7 @@ void c_WebMgr::onAlexaMessage (EspalexaDevice* dev)
 /*
     Gather config data from the various config sources and send it to the web page.
 */
-void c_WebMgr::GetConfiguration (AsyncWebServerRequest* request)
+void c_WebMgr::GetConfiguration ()
 {
     extern void GetConfig (JsonObject & json);
     // DEBUG_START;
