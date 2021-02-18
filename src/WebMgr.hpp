@@ -85,6 +85,13 @@ private:
     void GetInputOptions            ();
     void GetOutputOptions           ();
 
+#ifdef USE_REST
+    void RestProcessGET (AsyncWebServerRequest* request);
+    void RestProcessPOST (AsyncWebServerRequest* request);
+    void RestProcessFile (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
+    void RestProcessBody (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total);
+#endif // def USE_REST
+
 protected:
 
 }; // c_WebMgr

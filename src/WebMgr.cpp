@@ -171,6 +171,31 @@ void c_WebMgr::init ()
             FPPDiscovery.ProcessFPPJson(request);
         });
 
+#ifdef USE_REST
+    // URL's needed for FPP Connect fseq uploading and querying
+    webServer.on ("/rest", HTTP_GET,
+        [this](AsyncWebServerRequest* request)
+        {
+            RestProcessGET (request);
+        });
+
+    webServer.on ("/rest", HTTP_POST | HTTP_PUT,
+        [this](AsyncWebServerRequest* request)
+        {
+            RestProcessPOST (request);
+        },
+
+        [this] (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final)
+        {
+            RestProcessFile (request, filename, index, data, len, final);
+        },
+
+        [this] (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total)
+        {
+            RestProcessBody (request, data, len, index, total);
+        });
+#endif // def USE_REST
+
     // Static Handler
     webServer.serveStatic ("/", LITTLEFS, "/www/").setDefaultFile ("index.html");
 
@@ -299,7 +324,7 @@ void c_WebMgr::onAlexaMessage (EspalexaDevice* dev)
 /*
     Gather config data from the various config sources and send it to the web page.
 */
-void c_WebMgr::GetConfiguration ()
+void c_WebMgr::GetConfiguration (AsyncWebServerRequest* request)
 {
     extern void GetConfig (JsonObject & json);
     // DEBUG_START;
@@ -307,14 +332,14 @@ void c_WebMgr::GetConfiguration ()
     DynamicJsonDocument webJsonDoc (4096);
 
     JsonObject JsonSystemConfig = webJsonDoc.createNestedObject (F("system"));
-    // GetConfig (JsonSystemConfig);
+    GetConfig (JsonSystemConfig);
     // DEBUG_V ("");
 
-    JsonObject JsonOutputConfig = webJsonDoc.createNestedObject (F ("outputs"));
+    // JsonObject JsonOutputConfig = webJsonDoc.createNestedObject (F ("outputs"));
     // OutputMgr.GetConfig (JsonOutputConfig);
     // DEBUG_V ("");
 
-    JsonObject JsonInputConfig = webJsonDoc.createNestedObject (F ("inputs"));
+    // JsonObject JsonInputConfig = webJsonDoc.createNestedObject (F ("inputs"));
     // InputMgr.GetConfig (JsonInputConfig);
 
     // now make it something we can transmit
@@ -1078,6 +1103,79 @@ void c_WebMgr::Process ()
         espalexa.loop ();
     }
 } // Process
+
+#ifdef USE_REST
+void printRequest (AsyncWebServerRequest* request)
+{
+    DEBUG_V (String ("      version: '") + String (request->version ()) + "'");
+    DEBUG_V (String ("       method: '") + String (request->method ()) + "'");
+    DEBUG_V (String ("          url: '") + String (request->url ()) + "'");
+    DEBUG_V (String ("         host: '") + String (request->host ()) + "'");
+    DEBUG_V (String ("  contentType: '") + String (request->contentType ()) + "'");
+    DEBUG_V (String ("contentLength: '") + String (request->contentLength ()) + "'");
+    DEBUG_V (String ("    multipart: '") + String (request->multipart ()) + "'");
+
+    //List all collected headers
+    int headers = request->headers ();
+    int i;
+    for (i = 0; i < headers; i++)
+    {
+        AsyncWebHeader* h = request->getHeader (i);
+        DEBUG_V (String ("       HEADER: '") + h->name () + "', '" + h->value () + "'");
+    }
+
+} // printRequest
+//-----------------------------------------------------------------------------
+void c_WebMgr::RestProcessGET (AsyncWebServerRequest* request)
+{
+    DEBUG_START;
+    printRequest (request);
+
+    // request->send (200, "text/json", WebSocketFrameCollectionBuffer);
+
+
+    request->send (200, "text/plain", "Hello");
+
+    DEBUG_END;
+
+} // RestProcessPOST
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::RestProcessPOST (AsyncWebServerRequest* request)
+{
+    DEBUG_START;
+    printRequest (request);
+
+    request->send (404, "text/plain", "Page Not found");
+
+    DEBUG_END;
+
+} // RestProcessGET
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::RestProcessFile (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final)
+{
+    DEBUG_START;
+    printRequest (request);
+
+    request->send (404, "text/plain", "Page Not found");
+
+    DEBUG_END;
+
+} // RestProcessFile
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::RestProcessBody (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total)
+{
+    DEBUG_START;
+    printRequest (request);
+
+    request->send (404, "text/plain", "Page Not found");
+
+    DEBUG_END;
+
+} // RestProcessBody
+#endif // def USE_REST
 
 //-----------------------------------------------------------------------------
 // create a global instance of the WEB UI manager
