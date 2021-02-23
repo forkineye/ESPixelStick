@@ -82,7 +82,7 @@ void fsm_PlayList_state_WaitForStart::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject FileStatus = jsonStatus.createNestedObject (F ("Idle"));
+    JsonObject FileStatus = jsonStatus.createNestedObject (CN_Idle);
 
     // DEBUG_END;
 
@@ -141,7 +141,7 @@ void fsm_PlayList_state_Idle::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject FileStatus = jsonStatus.createNestedObject (F ("Idle"));
+    JsonObject FileStatus = jsonStatus.createNestedObject (CN_Idle);
 
     // DEBUG_END;
 
@@ -217,7 +217,7 @@ void fsm_PlayList_state_PlayingFile::GetStatus (JsonObject& jsonStatus)
 
     jsonStatus[F ("repeat")] = pInputFPPRemotePlayList->pInputFPPRemotePlayItem->GetRepeatCount ();
 
-    JsonObject FileStatus = jsonStatus.createNestedObject (F ("File"));
+    JsonObject FileStatus = jsonStatus.createNestedObject (CN_File);
     pInputFPPRemotePlayList->pInputFPPRemotePlayItem->GetStatus (FileStatus);
 
     // DEBUG_END;
@@ -295,7 +295,7 @@ void fsm_PlayList_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject EffectStatus = jsonStatus.createNestedObject (F ("Effect"));
+    JsonObject EffectStatus = jsonStatus.createNestedObject (CN_Effect);
     pInputFPPRemotePlayList->pInputFPPRemotePlayItem->GetStatus (EffectStatus);
 
     // DEBUG_END;
@@ -357,7 +357,7 @@ void fsm_PlayList_state_Paused::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject PauseStatus = jsonStatus.createNestedObject (F ("Paused"));
+    JsonObject PauseStatus = jsonStatus.createNestedObject (CN_Paused);
     
     time_t now = millis ();
 

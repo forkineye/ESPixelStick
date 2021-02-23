@@ -64,7 +64,7 @@ static const InputTypeXlateMap_t InputTypeXlateMap[c_InputMgr::e_InputType::Inpu
 ///< Start up the driver and put it into a safe mode
 c_InputMgr::c_InputMgr ()
 {
-    ConfigFileName = String (F ("/")) + String (IM_SECTION_NAME) + F (".json");
+    ConfigFileName = String (F ("/")) + String (CN_input_config) + F (".json");
 
     // this gets called pre-setup so there is nothing we can do here.
     int pInputChannelDriversIndex = 0;
@@ -164,16 +164,16 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
 
     // add the channels header
     JsonObject InputMgrChannelsData;
-    if (true == jsonConfig.containsKey (IM_CHANNEL_SECTION_NAME))
+    if (true == jsonConfig.containsKey (CN_channels))
     {
         // DEBUG_V ("");
-        InputMgrChannelsData = jsonConfig[IM_CHANNEL_SECTION_NAME];
+        InputMgrChannelsData = jsonConfig[CN_channels];
     }
     else
     {
         // add our section header
         // DEBUG_V ("");
-        InputMgrChannelsData = jsonConfig.createNestedObject (IM_CHANNEL_SECTION_NAME);
+        InputMgrChannelsData = jsonConfig.createNestedObject (CN_channels);
     }
 
     // add the channel configurations
@@ -203,7 +203,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
         }
 
         // save the name as the selected channel type
-        ChannelConfigData[IM_CHANNEL_TYPE_NAME] = int (CurrentChannel->GetInputType ());
+        ChannelConfigData[CN_type] = int (CurrentChannel->GetInputType ());
 
         String DriverTypeId = String (int (CurrentChannel->GetInputType ()));
         JsonObject ChannelConfigByTypeData;
@@ -224,7 +224,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
 
         // Populate the driver name
         String DriverName = ""; CurrentChannel->GetDriverName (DriverName);
-        ChannelConfigByTypeData[F ("type")] = DriverName;
+        ChannelConfigByTypeData[CN_type] = DriverName;
 
         CurrentChannel->GetConfig (ChannelConfigByTypeData);
         // DEBUG_V ("");
@@ -247,9 +247,9 @@ void c_InputMgr::CreateNewConfig ()
 
     // create a place to save the config
     DynamicJsonDocument JsonConfigDoc (IM_JSON_SIZE);
-    JsonObject JsonConfig = JsonConfigDoc.createNestedObject (IM_SECTION_NAME);
+    JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_input_config);
 
-    JsonConfig[VERSION_NAME] = CurrentConfigVersion;
+    JsonConfig[CN_cfgver] = CurrentConfigVersion;
 
     // DEBUG_V ("for each Input type");
     for (int InputTypeId = int (InputType_Start);
@@ -534,6 +534,9 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
         } // end switch (NewChannelType)
 
         // DEBUG_V ("");
+        String sDriverName;
+        pInputChannelDrivers[ChannelIndex]->GetDriverName (sDriverName);
+        Serial.println (String (CN_stars) + " '" + sDriverName + F("' Initialization for input: '") + String(ChannelIndex) + "'" + CN_stars);
         pInputChannelDrivers[ChannelIndex]->Begin ();
 
     } while (false);
@@ -687,16 +690,16 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
 
     do // once
     {
-        if (false == jsonConfig.containsKey (IM_SECTION_NAME))
+        if (false == jsonConfig.containsKey (CN_input_config))
         {
             LOG_PORT.println (F ("No Input Interface Settings Found. Using Defaults"));
             break;
         }
-        JsonObject InputChannelMgrData = jsonConfig[IM_SECTION_NAME];
+        JsonObject InputChannelMgrData = jsonConfig[CN_input_config];
         // DEBUG_V ("");
 
         String TempVersion;
-        setFromJSON (TempVersion, InputChannelMgrData, VERSION_NAME);
+        setFromJSON (TempVersion, InputChannelMgrData, CN_cfgver);
 
         // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
         // DEBUG_V (String ("CurrentConfigVersion: ") + String (CurrentConfigVersion));
@@ -722,13 +725,13 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
         }
 
         // do we have a channel configuration array?
-        if (false == InputChannelMgrData.containsKey (IM_CHANNEL_SECTION_NAME))
+        if (false == InputChannelMgrData.containsKey (CN_channels))
         {
             // if not, flag an error and stop processing
             LOG_PORT.println (F ("No Input Channel Settings Found. Using Defaults"));
             break;
         }
-        JsonObject InputChannelArray = InputChannelMgrData[IM_CHANNEL_SECTION_NAME];
+        JsonObject InputChannelArray = InputChannelMgrData[CN_channels];
         // DEBUG_V ("");
 
         // for each Input channel
@@ -748,7 +751,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
 
             // set a default value for channel type
             uint32_t ChannelType = uint32_t (InputType_Default);
-            setFromJSON (ChannelType, InputChannelConfig, IM_CHANNEL_TYPE_NAME);
+            setFromJSON (ChannelType, InputChannelConfig, CN_type);
             // DEBUG_V ("");
 
             // is it a valid / supported channel type
@@ -850,7 +853,7 @@ bool c_InputMgr::SetConfig (JsonObject & jsonConfig)
     // DEBUG_START;
     boolean Response = false;
 
-    if (jsonConfig.containsKey (IM_SECTION_NAME))
+    if (jsonConfig.containsKey (CN_input_config))
     {
         // DEBUG_V ("");
 
@@ -932,7 +935,7 @@ void c_InputMgr::ResetBlankTimer ()
 } // SetOutputState
 
 //-----------------------------------------------------------------------------
-void c_InputMgr::WiFiStateChanged (bool IsConnected)
+void c_InputMgr::NetworkStateChanged (bool IsConnected)
 {
     // DEBUG_START;
 
@@ -940,7 +943,7 @@ void c_InputMgr::WiFiStateChanged (bool IsConnected)
     for (c_InputCommon* pInputChannel : pInputChannelDrivers)
     {
         // DEBUG_V("");
-        pInputChannel->WiFiStateChanged (IsConnected);
+        pInputChannel->NetworkStateChanged (IsConnected);
     }
 
     // DEBUG_END;

@@ -42,7 +42,7 @@ public:
     virtual void SetBufferInfo (uint8_t * BufferStart, uint16_t BufferSize) = 0;
     virtual void SetOperationalState (bool ActiveFlag) { IsInputChannelActive = ActiveFlag; }
     virtual void ResetBlankTimer () {}; // only implemented by Effects Engine to delay return to operation
-    virtual void WiFiStateChanged (bool IsConnected) {}; // used by poorly designed rx functions
+    virtual void NetworkStateChanged (bool IsConnected) {}; // used by poorly designed rx functions
     virtual bool isShutDownRebootNeeded () { return false; }
 
     c_InputMgr::e_InputChannelIds GetInputChannelId () { return InputChannelId; }

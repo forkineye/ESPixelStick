@@ -42,11 +42,11 @@ protected:
 	// read the adjusted value of the input pin
 	bool ReadInput (void);
 
-#	define M_NAME       "name"
-#	define M_IO_ENABLED "enabled"
-#	define M_STATE      "state"
-#	define M_POLARITY   "polarity"
-#   define M_ID         "id"
+#	define M_NAME       CN_name
+#	define M_IO_ENABLED CN_enabled
+#	define M_STATE      CN_state
+#	define M_POLARITY   CN_polarity
+#   define M_ID         CN_id
 
 	String                    m_name;
 	uint32_t                  m_iPinId              = 0;

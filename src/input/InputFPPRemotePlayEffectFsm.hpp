@@ -51,7 +51,7 @@ class fsm_PlayEffect_state_Idle : public fsm_PlayEffect_state
 public:
     virtual void Poll (uint8_t * Buffer, size_t BufferSize);
     virtual void Init (c_InputFPPRemotePlayEffect* Parent);
-    virtual void GetStateName (String & sName) { sName = F ("Idle"); }
+    virtual void GetStateName (String & sName) { sName = CN_Idle; }
     virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop (void);
     virtual bool Sync (uint32_t FrameId);
@@ -65,7 +65,7 @@ class fsm_PlayEffect_state_PlayingEffect : public fsm_PlayEffect_state
 public:
     virtual void Poll (uint8_t * Buffer, size_t BufferSize);
     virtual void Init (c_InputFPPRemotePlayEffect* Parent);
-    virtual void GetStateName (String & sName) { sName = F ("Effect"); }
+    virtual void GetStateName (String & sName) { sName = CN_Effect; }
     virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop (void);
     virtual bool Sync (uint32_t FrameId);

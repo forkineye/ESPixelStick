@@ -81,7 +81,7 @@ static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] 
 ///< Start up the driver and put it into a safe mode
 c_OutputMgr::c_OutputMgr ()
 {
-    ConfigFileName = String (F ("/")) + String (OM_SECTION_NAME) + F(".json");
+    ConfigFileName = String (F ("/")) + String (CN_output_config) + F (".json");
 
     // clear the input data buffer
     memset ((char*)&OutputBuffer[0], 0, sizeof (OutputBuffer));
@@ -153,16 +153,16 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
 
     // add the channels header
     JsonObject OutputMgrChannelsData;
-    if (true == jsonConfig.containsKey (OM_CHANNEL_SECTION_NAME))
+    if (true == jsonConfig.containsKey (CN_channels))
     {
         // DEBUG_V ("");
-        OutputMgrChannelsData = jsonConfig[OM_CHANNEL_SECTION_NAME];
+        OutputMgrChannelsData = jsonConfig[CN_channels];
     }
     else
     {
         // add our section header
         // DEBUG_V ("");
-        OutputMgrChannelsData = jsonConfig.createNestedObject (OM_CHANNEL_SECTION_NAME);
+        OutputMgrChannelsData = jsonConfig.createNestedObject (CN_channels);
     }
 
     // add the channel configurations
@@ -186,7 +186,7 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
         }
 
         // save the name as the selected channel type
-        ChannelConfigData[OM_CHANNEL_TYPE_NAME] = int (CurrentChannel->GetOutputType ());
+        ChannelConfigData[CN_type] = int (CurrentChannel->GetOutputType ());
 
         String DriverTypeId = String (int (CurrentChannel->GetOutputType ()));
         JsonObject ChannelConfigByTypeData;
@@ -213,7 +213,7 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
         CurrentChannel->GetDriverName (DriverName);
         // DEBUG_V (String ("DriverName: ") + DriverName);
 
-        ChannelConfigByTypeData[F ("type")] = DriverName;
+        ChannelConfigByTypeData[CN_type] = DriverName;
 
         // DEBUG_V ("");
         // PrettyPrint (ChannelConfigByTypeData, String ("jsonConfig"));
@@ -247,9 +247,9 @@ void c_OutputMgr::CreateNewConfig ()
 
     // create a place to save the config
     DynamicJsonDocument JsonConfigDoc (OM_MAX_CONFIG_SIZE);
-    JsonObject JsonConfig = JsonConfigDoc.createNestedObject (OM_SECTION_NAME);
+    JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_output_config);
 
-    JsonConfig[VERSION_NAME] = CurrentConfigVersion;
+    JsonConfig[CN_cfgver] = CurrentConfigVersion;
 
     // DEBUG_V ("for each output type");
     for (int outputTypeId = int (OutputType_Start);
@@ -344,7 +344,7 @@ void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    JsonArray OutputStatus = jsonStatus.createNestedArray (F("output"));
+    JsonArray OutputStatus = jsonStatus.createNestedArray (F ("output"));
     uint channelIndex = 0;
     for (auto CurrentOutput : pOutputChannelDrivers)
     {
@@ -542,6 +542,9 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
         } // end switch (NewChannelType)
 
         // DEBUG_V ("");
+        String sDriverName;
+        pOutputChannelDrivers[ChannelIndex]->GetDriverName (sDriverName);
+        Serial.println (String (CN_stars) + " '" + sDriverName + F ("' Initialization for Output: '") + String (ChannelIndex) + "'" + CN_stars);
         pOutputChannelDrivers[ChannelIndex]->Begin ();
 
     } while (false);
@@ -607,16 +610,16 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
 
     do // once
     {
-        if (false == jsonConfig.containsKey (OM_SECTION_NAME))
+        if (false == jsonConfig.containsKey (CN_output_config))
         {
             LOG_PORT.println (F ("No Output Interface Settings Found. Using Defaults"));
             break;
         }
-        JsonObject OutputChannelMgrData = jsonConfig[OM_SECTION_NAME];
+        JsonObject OutputChannelMgrData = jsonConfig[CN_output_config];
         // DEBUG_V ("");
 
         String TempVersion;
-        setFromJSON (TempVersion, OutputChannelMgrData, VERSION_NAME);
+        setFromJSON (TempVersion, OutputChannelMgrData, CN_cfgver);
 
         // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
         // DEBUG_V (String ("CurrentConfigVersion: ") + String (CurrentConfigVersion));
@@ -629,13 +632,13 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
         }
 
         // do we have a channel configuration array?
-        if (false == OutputChannelMgrData.containsKey (OM_CHANNEL_SECTION_NAME))
+        if (false == OutputChannelMgrData.containsKey (CN_channels))
         {
             // if not, flag an error and stop processing
             LOG_PORT.println (F ("No Output Channel Settings Found. Using Defaults"));
             break;
         }
-        JsonObject OutputChannelArray = OutputChannelMgrData[OM_CHANNEL_SECTION_NAME];
+        JsonObject OutputChannelArray = OutputChannelMgrData[CN_channels];
         // DEBUG_V ("");
 
         // for each output channel
@@ -655,7 +658,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
 
             // set a default value for channel type
             uint32_t ChannelType = uint32_t (OutputType_End);
-            setFromJSON (ChannelType, OutputChannelConfig, OM_CHANNEL_TYPE_NAME);
+            setFromJSON (ChannelType, OutputChannelConfig, CN_type);
             // DEBUG_V ("");
 
             // is it a valid / supported channel type
@@ -755,7 +758,7 @@ bool c_OutputMgr::SetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
     boolean Response = true;
-    if (jsonConfig.containsKey (OM_SECTION_NAME))
+    if (jsonConfig.containsKey (CN_output_config))
     {
         // DEBUG_V ("");
 
@@ -765,7 +768,7 @@ bool c_OutputMgr::SetConfig (JsonObject & jsonConfig)
     }
     else
     {
-        LOG_PORT.println (F("EEEE No Output Manager settings found. EEEE"));
+        LOG_PORT.println (F ("EEEE No Output Manager settings found. EEEE"));
     }
     // DEBUG_END;
     return Response;

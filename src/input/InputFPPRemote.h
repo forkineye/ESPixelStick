@@ -61,11 +61,11 @@ private:
     void load ();          ///< Load configuration from File System
     void save ();          ///< Save configuration to File System
 
-#   define JSON_NAME_MISO         F("miso_pin")
-#   define JSON_NAME_MOSI         F("mosi_pin")
-#   define JSON_NAME_CLOCK        F("clock_pin")
-#   define JSON_NAME_CS           F("cs_pin")
-#   define JSON_NAME_FILE_TO_PLAY F("fseqfilename")
+#   define JSON_NAME_MISO         CN_miso_pin
+#   define JSON_NAME_MOSI         CN_mosi_pin
+#   define JSON_NAME_CLOCK        CN_clock_pin
+#   define JSON_NAME_CS           CN_cs_pin
+#   define JSON_NAME_FILE_TO_PLAY CN_fseqfilename
 
     uint8_t  miso_pin = SD_CARD_MISO_PIN;
     uint8_t  mosi_pin = SD_CARD_MOSI_PIN;

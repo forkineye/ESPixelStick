@@ -57,8 +57,6 @@ c_OutputServoPCA9685::~c_OutputServoPCA9685 ()
 void c_OutputServoPCA9685::Begin ()
 {
     // DEBUG_START;
-    String DriverName = ""; GetDriverName (DriverName);
-    LOG_PORT.println (String (F ("** ")) + DriverName + F(" Initialization for Chan: ") + String (OutputChannelId) + F(" **"));
 
     SetOutputBufferSize (Num_Channels);
 
@@ -87,7 +85,7 @@ bool c_OutputServoPCA9685::validate ()
 
     if ((Num_Channels > OM_SERVO_PCA9685_CHANNEL_LIMIT) || (Num_Channels < 1))
     {
-        LOG_PORT.println (String (F ("*** Requested channel count was Not Valid. Setting to ")) + OM_SERVO_PCA9685_CHANNEL_LIMIT + F(" ***"));
+        LOG_PORT.println (String (F ("*** Requested channel count was Not Valid. Setting to ")) + OM_SERVO_PCA9685_CHANNEL_LIMIT + F (" ***"));
         Num_Channels = OM_SERVO_PCA9685_CHANNEL_LIMIT;
         response = false;
     }

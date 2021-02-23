@@ -81,7 +81,7 @@ void c_ExternalInput::GetConfig (JsonObject JsonData)
 	JsonData[M_IO_ENABLED] = m_bIsEnabled;
 	JsonData[M_NAME]       = m_name;
 	JsonData[M_ID]         = m_iPinId;
-	JsonData[M_POLARITY]   = (ActiveHigh == m_polarity) ? "ActiveHigh" : "ActiveLow";
+	JsonData[M_POLARITY]   = (ActiveHigh == m_polarity) ? CN_ActiveHigh : CN_ActiveLow;
 	// DEBUG_V (String ("m_iPinId: ") + String (m_iPinId));
 
 	// DEBUG_END;
@@ -121,7 +121,7 @@ void c_ExternalInput::ProcessConfig (JsonObject JsonData)
 {
 	// DEBUG_START;
 
-	String sPolarity = (ActiveHigh == m_polarity) ? "ActiveHigh" : "ActiveLow";
+	String sPolarity = (ActiveHigh == m_polarity) ? CN_ActiveHigh : CN_ActiveLow;
 
 	uint32_t oldInputId = m_iPinId;
 	
@@ -130,7 +130,7 @@ void c_ExternalInput::ProcessConfig (JsonObject JsonData)
 	setFromJSON (m_iPinId,     JsonData, M_ID);
 	setFromJSON (sPolarity,    JsonData, M_POLARITY);
 
-	m_polarity = (String(F("ActiveHigh")) == sPolarity) ? ActiveHigh : ActiveLow;
+	m_polarity = (String(CN_ActiveHigh) == sPolarity) ? ActiveHigh : ActiveLow;
 
 	if ((oldInputId != m_iPinId) || (false == m_bIsEnabled))
 	{

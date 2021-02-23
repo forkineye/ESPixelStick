@@ -81,28 +81,11 @@ static void _u0_putc(char c){
 /////////////////////////////////////////////////////////
 
 // Configuration file
-String ConfigFileName = "/config.json";
+const String ConfigFileName = "/config.json";
 
 const String VERSION = "4.0-dev (NOT STABLE)";
 const String BUILD_DATE = String(__DATE__) + " - " + String(__TIME__);
 const String CurrentConfigVersion = "1";
-
-// json object names.
-const String DEVICE_NAME =      ("device");
-const String VERSION_NAME =     ("cfgver");
-const String ID_NAME =          ("id");
-const String NETWORK_NAME =     ("network");
-const String SSID_NAME =        ("ssid");
-const String PASSPHRASE_NAME =  ("passphrase");
-const String IP_NAME =          ("ip");
-const String NETMASK_NAME =     ("netmask");
-const String GATEWAY_NAME =     ("gateway");
-const String HOSTNAME_NAME =    ("hostname");
-const String DHCP_NAME =        ("dhcp");
-const String STA_TIMEOUT_NAME = ("sta_timeout");
-const String AP_FALLBACK_NAME = ("ap_fallback");
-const String AP_REBOOT_NAME   = ("ap_reboot");
-const String AP_TIMEOUT_NAME  = ("ap_timeout");
 
 config_t config;                 // Current configuration
 bool     reboot = false;         // Reboot flag
@@ -147,11 +130,11 @@ void setup()
 
     // Dump version and build information
     LOG_PORT.println("");
-    LOG_PORT.println(String(F("ESPixelStick v")) + VERSION + "(" + BUILD_DATE + ")");
+    LOG_PORT.println( String(CN_ESPixelStick) + " v" + VERSION + "(" + BUILD_DATE + ")");
 #ifdef ARDUINO_ARCH_ESP8266
-    LOG_PORT.println (String ("ESP Version: ") + ESP.getFullVersion ());
+    LOG_PORT.println (String (F ("ESP Version: ")) + ESP.getFullVersion ());
 #else
-    LOG_PORT.println (String("ESP Version: ") + ESP.getSdkVersion ());
+    LOG_PORT.println (String(F ("ESP Version: ")) + ESP.getSdkVersion ());
 #endif
 
     // DEBUG_V ("");
@@ -231,12 +214,12 @@ boolean dsDevice(JsonObject & json)
     // DEBUG_START;
 
     boolean ConfigChanged = false;
-    if (json.containsKey(DEVICE_NAME))
+    if (json.containsKey(CN_device))
     {
-        JsonObject JsonDeviceConfig = json[DEVICE_NAME];
+        JsonObject JsonDeviceConfig = json[CN_device];
 
         String TempVersion;
-        setFromJSON (TempVersion, JsonDeviceConfig, VERSION_NAME);
+        setFromJSON (TempVersion, JsonDeviceConfig, CN_cfgver);
 
         // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
         // DEBUG_V (String ("CurrentConfigVersion: ") + String (CurrentConfigVersion));
@@ -251,12 +234,12 @@ boolean dsDevice(JsonObject & json)
             // break;
         }
 
-        ConfigChanged |= setFromJSON (config.id,        JsonDeviceConfig, ID_NAME);
+        ConfigChanged |= setFromJSON (config.id,        JsonDeviceConfig, CN_id);
                          // setFromJSON (ConfigSaveNeeded, JsonDeviceConfig, "ConfigSaveNeeded");
     }
     else
     {
-        LOG_PORT.println(F("No device settings found."));
+        LOG_PORT.println(F ("No device settings found."));
     }
 
     // DEBUG_END;
@@ -270,7 +253,7 @@ boolean dsNetwork(JsonObject & json)
     // DEBUG_START;
 
     boolean ConfigChanged = false;
-    if (json.containsKey(NETWORK_NAME))
+    if (json.containsKey(CN_network))
     {
 #ifdef ARDUINO_ARCH_ESP8266
         IPAddress Temp = config.ip;
@@ -285,10 +268,10 @@ boolean dsNetwork(JsonObject & json)
         String netmask = config.netmask.toString ();
 #endif // def ARDUINO_ARCH_ESP8266
 
-        JsonObject network = json[NETWORK_NAME];
+        JsonObject network = json[CN_network];
 
         String TempVersion;
-        setFromJSON (TempVersion, network, VERSION_NAME);
+        setFromJSON (TempVersion, network, CN_cfgver);
 
         // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
         // DEBUG_V (String ("CurrentConfigVersion: ") + String (CurrentConfigVersion));
@@ -303,17 +286,17 @@ boolean dsNetwork(JsonObject & json)
             // break;
         }
 
-        ConfigChanged |= setFromJSON (config.ssid,                         network, SSID_NAME);
-        ConfigChanged |= setFromJSON (config.passphrase,                   network, PASSPHRASE_NAME);
-        ConfigChanged |= setFromJSON (ip,                                  network, IP_NAME);
-        ConfigChanged |= setFromJSON (netmask,                             network, NETMASK_NAME);
-        ConfigChanged |= setFromJSON (gateway,                             network, GATEWAY_NAME);
-        ConfigChanged |= setFromJSON (config.hostname,                     network, HOSTNAME_NAME);
-        ConfigChanged |= setFromJSON (config.UseDhcp,                      network, DHCP_NAME);
-        ConfigChanged |= setFromJSON (config.sta_timeout,                  network, STA_TIMEOUT_NAME);
-        ConfigChanged |= setFromJSON (config.ap_fallbackIsEnabled,         network, AP_FALLBACK_NAME);
-        ConfigChanged |= setFromJSON (config.ap_timeout,                   network, AP_TIMEOUT_NAME);
-        ConfigChanged |= setFromJSON (config.RebootOnWiFiFailureToConnect, network, AP_REBOOT_NAME);
+        ConfigChanged |= setFromJSON (config.ssid,                         network, CN_ssid);
+        ConfigChanged |= setFromJSON (config.passphrase,                   network, CN_passphrase);
+        ConfigChanged |= setFromJSON (ip,                                  network, CN_ip);
+        ConfigChanged |= setFromJSON (netmask,                             network, CN_netmask);
+        ConfigChanged |= setFromJSON (gateway,                             network, CN_gateway);
+        ConfigChanged |= setFromJSON (config.hostname,                     network, CN_hostname);
+        ConfigChanged |= setFromJSON (config.UseDhcp,                      network, CN_dhcp);
+        ConfigChanged |= setFromJSON (config.sta_timeout,                  network, CN_sta_timeout);
+        ConfigChanged |= setFromJSON (config.ap_fallbackIsEnabled,         network, CN_ap_fallback);
+        ConfigChanged |= setFromJSON (config.ap_timeout,                   network, CN_ap_timeout);
+        ConfigChanged |= setFromJSON (config.RebootOnWiFiFailureToConnect, network, CN_ap_reboot);
 
         // DEBUG_V ("     ip: " + ip);
         // DEBUG_V ("gateway: " + gateway);
@@ -325,7 +308,7 @@ boolean dsNetwork(JsonObject & json)
     }
     else
     {
-        LOG_PORT.println(F("No network settings found."));
+        LOG_PORT.println(F ("No network settings found."));
     }
 
     // DEBUG_V (String("ConfigChanged: ") + String(ConfigChanged));
@@ -413,35 +396,35 @@ void GetConfig (JsonObject & json)
     // DEBUG_START;
 
     // Device
-    JsonObject device = json.createNestedObject(DEVICE_NAME);
-    device[ID_NAME]      = config.id;
-    device[VERSION_NAME] = CurrentConfigVersion;
+    JsonObject device = json.createNestedObject(CN_device);
+    device[CN_id]     = config.id;
+    device[CN_cfgver] = CurrentConfigVersion;
 
     // Network
-    JsonObject network = json.createNestedObject(NETWORK_NAME);
-    network[VERSION_NAME]     = CurrentConfigVersion;
-    network[SSID_NAME]        = config.ssid;
-    network[PASSPHRASE_NAME]  = config.passphrase;
-    network[HOSTNAME_NAME]    = config.hostname;
+    JsonObject network = json.createNestedObject(CN_network);
+    network[CN_cfgver]     = CurrentConfigVersion;
+    network[CN_ssid]       = config.ssid;
+    network[CN_passphrase] = config.passphrase;
+    network[CN_hostname] = config.hostname;
 #ifdef ARDUINO_ARCH_ESP8266
     IPAddress Temp = config.ip;
-    network[IP_NAME]      = Temp.toString ();
+    network[CN_ip]      = Temp.toString ();
     Temp = config.netmask;
-    network[NETMASK_NAME] = Temp.toString ();
+    network[CN_netmask] = Temp.toString ();
     Temp = config.gateway;
-    network[GATEWAY_NAME] = Temp.toString ();
+    network[CN_gateway] = Temp.toString ();
 #else
-    network[IP_NAME]      = config.ip.toString ();
-    network[NETMASK_NAME] = config.netmask.toString ();
-    network[GATEWAY_NAME] = config.gateway.toString ();
+    network[CN_ip]      = config.ip.toString ();
+    network[CN_netmask] = config.netmask.toString ();
+    network[CN_gateway] = config.gateway.toString ();
 #endif // !def ARDUINO_ARCH_ESP8266
 
-    network[DHCP_NAME]        = config.UseDhcp;
-    network[STA_TIMEOUT_NAME] = config.sta_timeout;
+    network[CN_dhcp]        = config.UseDhcp;
+    network[CN_sta_timeout] = config.sta_timeout;
 
-    network[AP_FALLBACK_NAME] = config.ap_fallbackIsEnabled;
-    network[AP_TIMEOUT_NAME]  = config.ap_timeout;
-    network[AP_REBOOT_NAME]   = config.RebootOnWiFiFailureToConnect;
+    network[CN_ap_fallback] = config.ap_fallbackIsEnabled;
+    network[CN_ap_timeout]  = config.ap_timeout;
+    network[CN_ap_reboot]   = config.RebootOnWiFiFailureToConnect;
 
     // DEBUG_END;
 } // GetConfig
@@ -541,7 +524,7 @@ void loop()
     // Reboot handler
     if (reboot)
     {
-        LOG_PORT.println (F ("Internal Reboot Requested. Rebooting Now"));
+        LOG_PORT.println (String(CN_stars) + CN_minussigns + F ("Internal Reboot Requested. Rebooting Now"));
         delay (REBOOT_DELAY);
         ESP.restart ();
     }

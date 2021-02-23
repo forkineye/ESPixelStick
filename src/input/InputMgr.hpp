@@ -45,7 +45,7 @@ public:
     void SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize);
     void SetOperationalState (bool Active);
     void ResetBlankTimer ();
-    void WiFiStateChanged (bool IsConnected); // used by poorly designed rx functions
+    void NetworkStateChanged (bool IsConnected); // used by poorly designed rx functions
     void DeleteConfig () { FileMgr.DeleteConfigFile (ConfigFileName); }
 
     enum e_InputType
@@ -88,10 +88,7 @@ private:
     bool            EffectEngineIsConfiguredToRun[InputChannelId_End];
 
     // configuration parameter names for the channel manager within the config file
-#   define IM_SECTION_NAME             F("input_config")
-#   define IM_CHANNEL_SECTION_NAME     F("channels")
-#   define IM_CHANNEL_TYPE_NAME        F("type")
-#   define IM_EffectsControlButtonName F("ecb")
+#   define IM_EffectsControlButtonName F ("ecb")
 
     bool ProcessJsonConfig           (JsonObject & jsonConfig);
     void CreateJsonConfig            (JsonObject & jsonConfig);

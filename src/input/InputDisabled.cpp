@@ -50,8 +50,6 @@ void c_InputDisabled::Begin()
 {
     // DEBUG_START;
 
-    Serial.println (String (F ("** 'Disabled' Initialization for input: '")) + InputChannelId + String (F ("' **")));
-
     // DEBUG_END;
 
 } // begin

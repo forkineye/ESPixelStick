@@ -60,15 +60,15 @@ void fsm_PlayEffect_state_Idle::Start (String & ConfigString, uint32_t )
     if (error)
     {
         String CfgFileMessagePrefix = String (F ("Effect Config: '")) + ConfigString + "' ";
-        LOG_PORT.println (String (F ("Heap:")) + String (ESP.getFreeHeap ()));
+        LOG_PORT.println (CN_Heap_colon + String (ESP.getFreeHeap ()));
         LOG_PORT.println (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
-        LOG_PORT.println (String (F ("++++")) + ConfigString + String (F ("----")));
+        LOG_PORT.println (CN_plussigns + ConfigString + CN_minussigns);
     }
 
     JsonObject ConfigObject = EffectConfig.as<JsonObject> ();
 
     String EffectName;
-    setFromJSON (EffectName, ConfigObject, F("currenteffect"));
+    setFromJSON (EffectName, ConfigObject, CN_currenteffect);
     LOG_PORT.println (String (F ("Playing Effect: '")) + EffectName + "'");
 
     p_InputFPPRemotePlayEffect->EffectsEngine.SetConfig (ConfigObject);
@@ -105,7 +105,7 @@ void fsm_PlayEffect_state_Idle::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    jsonStatus[F ("TimeRemaining")] = F("00:00");
+    jsonStatus[CN_TimeRemaining] = F ("00:00");
 
     // DEBUG_END;
 
@@ -199,7 +199,7 @@ void fsm_PlayEffect_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
 
     char buf[10];
     sprintf (buf, "%02d:%02d", MinutesRemaining, SecondsRemaining);
-    jsonStatus[F ("TimeRemaining")] = buf;
+    jsonStatus[CN_TimeRemaining] = buf;
 
     p_InputFPPRemotePlayEffect->EffectsEngine.GetStatus (jsonStatus);
 

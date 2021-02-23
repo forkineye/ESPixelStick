@@ -51,8 +51,6 @@ void c_InputDDP::Begin ()
 {
     // DEBUG_START;
 
-    LOG_PORT.println (String (F ("** 'DDP' Initialization for input: '")) + InputChannelId + String (F ("' **")));
-
     suspend = false;
 
     memset (&stats, 0x00, sizeof (stats));

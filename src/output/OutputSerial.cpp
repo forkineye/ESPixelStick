@@ -109,8 +109,6 @@ static void IRAM_ATTR uart_intr_handler (void* param)
 void c_OutputSerial::Begin ()
 {
     // DEBUG_START;
-    String DriverName = ""; GetDriverName (DriverName);
-    LOG_PORT.println (String (F ("** ")) + DriverName + F(" Initialization for Chan: ") + String (OutputChannelId) + F(" **"));
     int speed = 0;
 
     if (OutputType == c_OutputMgr::e_OutputType::OutputType_DMX)
@@ -177,7 +175,7 @@ bool c_OutputSerial::validate ()
 
     if ((Num_Channels > MAX_CHANNELS) || (Num_Channels < 1))
     {
-        LOG_PORT.println (String (F ("*** Requested channel count was Not Valid. Setting to ")) + MAX_CHANNELS + F(" ***"));
+        LOG_PORT.println (String (F ("*** Requested channel count was Not Valid. Setting to ")) + MAX_CHANNELS + F (" ***"));
         Num_Channels = DEFAULT_NUM_CHANNELS;
         response = false;
     }
@@ -219,13 +217,13 @@ bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
     uint temp; // Holds enums prior to conversion
-    setFromJSON (GenericSerialHeader, jsonConfig, F ("gen_ser_hdr"));
-    setFromJSON (GenericSerialFooter, jsonConfig, F ("gen_ser_ftr"));
-    setFromJSON (Num_Channels,        jsonConfig, F ("num_chan"));
-    setFromJSON (CurrentBaudrate,     jsonConfig, F ("baudrate"));
+    setFromJSON (GenericSerialHeader, jsonConfig, CN_gen_ser_hdr);
+    setFromJSON (GenericSerialFooter, jsonConfig, CN_gen_ser_ftr);
+    setFromJSON (Num_Channels,        jsonConfig, CN_num_chan);
+    setFromJSON (CurrentBaudrate,     jsonConfig, CN_baudrate);
 
     temp = uint (DataPin);
-    setFromJSON (temp, jsonConfig, F ("data_pin"));
+    setFromJSON (temp, jsonConfig, CN_data_pin);
     DataPin = gpio_num_t (temp);
 
     bool response = validate ();
@@ -242,13 +240,13 @@ bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 void c_OutputSerial::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
-    jsonConfig[F ("num_chan")]    = Num_Channels;
-    jsonConfig[F ("baudrate")]    = CurrentBaudrate;
-    jsonConfig[F ("data_pin")]    = uint (DataPin);
+    jsonConfig[CN_num_chan]    = Num_Channels;
+    jsonConfig[CN_baudrate]    = CurrentBaudrate;
+    jsonConfig[CN_data_pin]    = uint (DataPin);
     if (OutputType == c_OutputMgr::e_OutputType::OutputType_Serial)
     {
-        jsonConfig[F ("gen_ser_hdr")] = GenericSerialHeader;
-        jsonConfig[F ("gen_ser_ftr")] = GenericSerialFooter;
+        jsonConfig[CN_gen_ser_hdr] = GenericSerialHeader;
+        jsonConfig[CN_gen_ser_ftr] = GenericSerialFooter;
     }
     // enums need to be converted to uints for json
     // DEBUG_END;
