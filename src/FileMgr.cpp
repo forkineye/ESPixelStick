@@ -348,6 +348,8 @@ c_FileMgr::FileId c_FileMgr::CreateFileHandle ()
         ++FileHandle;
     }
 
+    // DEBUG_V (String ("FileHandle: ") + String (FileHandle));
+
     // DEBUG_END;
 
     return FileHandle;
@@ -647,7 +649,7 @@ size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t N
     }
     else
     {
-        LOG_PORT.println ("FileMgr::ReadSdFile::ERROR::Invalid File Handle.");
+        LOG_PORT.println (String (F ("FileMgr::ReadSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
 
     // DEBUG_END;
@@ -670,7 +672,7 @@ size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t N
     }
     else
     {
-        LOG_PORT.println ("FileMgr::ReadSdFile::ERROR::Invalid File Handle.");
+        LOG_PORT.println (String (F ("FileMgr::ReadSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
 
     // DEBUG_END;
@@ -690,7 +692,7 @@ void c_FileMgr::CloseSdFile (const FileId& FileHandle)
     }
     else
     {
-        // LOG_PORT.println ("FileMgr::CloseSdFile::ERROR::Invalid File Handle.");
+        LOG_PORT.println (String (F ("FileMgr::CloseSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
 
     // DEBUG_END;
@@ -704,6 +706,10 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
     if (FileList.end () != FileList.find (FileHandle))
     {
         response = FileList[FileHandle].write (FileData, NumBytesToWrite);
+    }
+    else
+    {
+        LOG_PORT.println (String (F ("FileMgr::WriteSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
 
     return response;
@@ -719,6 +725,10 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
         FileList[FileHandle].seek (StartingPosition, SeekSet);
         response = WriteSdFile (FileHandle, FileData, NumBytesToWrite);
     }
+    else
+    {
+        LOG_PORT.println (String (F ("FileMgr::WriteSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
+    }
 
     return response;
 
@@ -727,7 +737,17 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
 //-----------------------------------------------------------------------------
 size_t c_FileMgr::GetSdFileSize (const FileId& FileHandle)
 {
-    return FileList[FileHandle].size ();
+    size_t response = 0;
+    if (FileList.end () != FileList.find (FileHandle))
+    {
+        response = FileList[FileHandle].size ();
+    }
+    else
+    {
+        LOG_PORT.println (String (F ("FileMgr::GetSdFileSize::ERROR::Invalid File Handle: ")) + String (FileHandle));
+    }
+
+    return response;
 
 } // GetSdFileSize
 
