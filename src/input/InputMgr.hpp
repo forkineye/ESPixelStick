@@ -47,6 +47,7 @@ public:
     void ResetBlankTimer ();
     void NetworkStateChanged (bool IsConnected); // used by poorly designed rx functions
     void DeleteConfig () { FileMgr.DeleteConfigFile (ConfigFileName); }
+    bool GetNetworkState () { return IsConnected; }
 
     enum e_InputType
     {
@@ -86,6 +87,7 @@ private:
     bool            ConfigSaveNeeded    = false;
     c_ExternalInput ExternalInput;
     bool            EffectEngineIsConfiguredToRun[InputChannelId_End];
+    bool            IsConnected = false;
 
     // configuration parameter names for the channel manager within the config file
 #   define IM_EffectsControlButtonName F ("ecb")

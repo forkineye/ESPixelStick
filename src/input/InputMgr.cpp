@@ -935,9 +935,11 @@ void c_InputMgr::ResetBlankTimer ()
 } // SetOutputState
 
 //-----------------------------------------------------------------------------
-void c_InputMgr::NetworkStateChanged (bool IsConnected)
+void c_InputMgr::NetworkStateChanged (bool _IsConnected)
 {
     // DEBUG_START;
+
+    IsConnected = _IsConnected;
 
     // pass through each active interface and notify WiFi changed state
     for (c_InputCommon* pInputChannel : pInputChannelDrivers)
