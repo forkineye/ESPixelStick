@@ -185,62 +185,62 @@ void c_InputMQTT::validateConfiguration ()
 
 void c_InputMQTT::RegisterWithMqtt ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     using namespace std::placeholders;
     mqtt.onConnect    (std::bind (&c_InputMQTT::onMqttConnect, this, _1));
     mqtt.onDisconnect (std::bind (&c_InputMQTT::onMqttDisconnect, this, _1));
     mqtt.onMessage    (std::bind (&c_InputMQTT::onMqttMessage, this, _1, _2, _3, _4, _5, _6));
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // RegisterWithMqtt
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::onNetworkConnect()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     connectToMqtt();
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // onConnect
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::onNetworkDisconnect()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     mqttTicker.detach();
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // onDisconnect
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::update()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     // Update Home Assistant Discovery if enabled
     publishHA ();
     publishState ();
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // update
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::connectToMqtt()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     mqtt.setCleanSession (CleanSessionRequired);
 
     if (user.length () > 0)
     {
-        DEBUG_V (String ("User: ") + user);
+        // DEBUG_V (String ("User: ") + user);
         mqtt.setCredentials (user.c_str (), password.c_str ());
     }
     mqtt.setServer (ip.c_str (), port);
@@ -249,25 +249,25 @@ void c_InputMQTT::connectToMqtt()
     mqtt.connect();
     mqtt.setWill (topic.c_str(), 1, true, lwt.c_str(), lwt.length());
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // connectToMqtt
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::disconnectFromMqtt ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     LOG_PORT.println (F ("- Disconnecting from MQTT Broker "));
     mqtt.disconnect ();
 
-    DEBUG_END;
+    // DEBUG_END;
 } // disconnectFromMqtt
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::onMqttConnect(bool sessionPresent)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     LOG_PORT.println(F ("- MQTT Connected"));
 
@@ -283,7 +283,7 @@ void c_InputMQTT::onMqttConnect(bool sessionPresent)
     // Publish state
     update ();
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // onMqttConnect
 
@@ -312,23 +312,23 @@ static const char* DisconnectReasons[] =
 // void c_InputMQTT::onMqttDisconnect (AsyncMqttClientDisconnectReason reason) {
 void c_InputMQTT::onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     LOG_PORT.println(String(F ("- MQTT Disconnected: DisconnectReason: ")) + String(DisconnectReasons[uint8_t(reason)]));
     
     if (InputMgr.GetNetworkState ())
     {
-        DEBUG_V ("");
+        // DEBUG_V ("");
         // set up a two second delayed retry.
         mqttTicker.once (2, +[](c_InputMQTT* pMe)
             {
-                DEBUG_V ("");
+                // DEBUG_V ("");
                 pMe->disconnectFromMqtt ();
                 pMe->connectToMqtt ();
-                DEBUG_V ("");
+                // DEBUG_V ("");
             }, this);
     }
-    DEBUG_END;
+    // DEBUG_END;
 
 } // onMqttDisconnect
 
@@ -341,10 +341,10 @@ void c_InputMQTT::onMqttMessage(
     size_t index,
     size_t total)
 {
-    DEBUG_START;
+    // DEBUG_START;
     do // once
     {
-        DEBUG_V (String("payload: ") + String(payload));
+        // DEBUG_V (String("payload: ") + String(payload));
 
         if ('{' != payload[0])
         {
@@ -407,14 +407,14 @@ void c_InputMQTT::onMqttMessage(
         // DEBUG_V ("");
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // onMqttMessage
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::publishHA()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     // Setup HA discovery
 #ifdef ARDUINO_ARCH_ESP8266
@@ -480,14 +480,14 @@ void c_InputMQTT::publishHA()
     {
         mqtt.publish(ha_config.c_str(), 0, true, "");
     }
-    DEBUG_END;
+    // DEBUG_END;
 
 } // publishHA
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::publishState()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     DynamicJsonDocument root(1024);
     JsonObject JsonConfig = root.createNestedObject(F ("MQTT"));
@@ -507,7 +507,7 @@ void c_InputMQTT::publishState()
 
     mqtt.publish(topic.c_str(), 0, true, JsonConfigString.c_str());
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // publishState
 
@@ -520,7 +520,7 @@ void c_InputMQTT::NetworkStateChanged (bool IsConnected)
 //-----------------------------------------------------------------------------
 void c_InputMQTT::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     if (IsConnected)
     {
@@ -540,6 +540,6 @@ void c_InputMQTT::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         onNetworkDisconnect ();
     }
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // NetworkStateChanged
