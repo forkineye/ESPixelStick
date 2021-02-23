@@ -53,7 +53,7 @@ void fsm_PlayFile_state_Idle::Start (String & FileName, uint32_t FrameId)
     // DEBUG_START;
 
     p_InputFPPRemotePlayFile->PlayItemName = FileName;
-    p_InputFPPRemotePlayFile->LastFrameId = FrameId;
+    p_InputFPPRemotePlayFile->LastFrameId  = FrameId;
 
     // DEBUG_V (String ("           FileName: ") + p_InputFPPRemotePlayFile->PlayItemName);
     // DEBUG_V (String ("            FrameId: ") + p_InputFPPRemotePlayFile->LastFrameId);
@@ -145,12 +145,13 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t * Buffer, size_t BufferSize)
 
         if (bytesRead != toRead)
         {
-            // DEBUG_V (String ("pos:                           ") + String (pos));
-            // DEBUG_V (String ("toRead:                        ") + String (toRead));
-            // DEBUG_V (String ("bytesRead:                     ") + String (bytesRead));
+            // DEBUG_V (String ("                          pos: ") + String (pos));
+            // DEBUG_V (String ("                       toRead: ") + String (toRead));
+            // DEBUG_V (String ("                    bytesRead: ") + String (bytesRead));
             // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence));
-            // DEBUG_V (String ("frame:                         ") + String (frame));
+            // DEBUG_V (String ("                 CurrentFrame: ") + String (CurrentFrame));
 
+            // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed));
             LOG_PORT.println (F ("File Playback Failed to read enough data"));
             Stop ();
         }
@@ -169,7 +170,6 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
     // DEBUG_START;
 
     p_InputFPPRemotePlayFile = Parent;
-    p_InputFPPRemotePlayFile->pCurrentFsmState = &(Parent->fsm_PlayFile_state_PlayingFile_imp);
 
     do // once
     {
@@ -193,6 +193,8 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
             LOG_PORT.println (String (F ("StartPlaying:: Could not open file: filename: '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
             break;
         }
+
+        // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed));
 
         size_t BytesRead = FileMgr.ReadSdFile (
             p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed,
@@ -224,7 +226,7 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
         p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence = fsqHeader.TotalNumberOfFramesInSequence;
         p_InputFPPRemotePlayFile->StartTimeInMillis = millis () - (p_InputFPPRemotePlayFile->FrameStepTime * p_InputFPPRemotePlayFile->LastFrameId);
 
-        // DEBUG_V (String ("               LastFrameId: ") + String (p_InputFPPRemotePlayFile->LastFrameId));
+        // DEBUG_V (String ("                  LastFrameId: ") + String (p_InputFPPRemotePlayFile->LastFrameId));
         // DEBUG_V (String ("                   DataOffset: ") + String (p_InputFPPRemotePlayFile->DataOffset));
         // DEBUG_V (String ("             ChannelsPerFrame: ") + String (p_InputFPPRemotePlayFile->ChannelsPerFrame));
         // DEBUG_V (String ("                FrameStepTime: ") + String (p_InputFPPRemotePlayFile->FrameStepTime));
@@ -232,6 +234,8 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
         // DEBUG_V (String ("            StartTimeInMillis: ") + String (p_InputFPPRemotePlayFile->StartTimeInMillis));
 
         LOG_PORT.println (String (F ("Start Playing:: FileName:  '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
+
+        p_InputFPPRemotePlayFile->pCurrentFsmState = &(Parent->fsm_PlayFile_state_PlayingFile_imp);
 
     } while (false);
 
@@ -254,10 +258,11 @@ void fsm_PlayFile_state_PlayingFile::Stop (void)
     // DEBUG_START;
 
     LOG_PORT.println (String (F ("Stop Playing:: FileName:  '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
+    // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed));
 
+    p_InputFPPRemotePlayFile->fsm_PlayFile_state_Idle_imp.Init (p_InputFPPRemotePlayFile);
     FileMgr.CloseSdFile (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed);
     p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed = 0;
-    p_InputFPPRemotePlayFile->fsm_PlayFile_state_Idle_imp.Init(p_InputFPPRemotePlayFile);
 
     // DEBUG_END;
 
