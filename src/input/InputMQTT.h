@@ -20,7 +20,6 @@
 
 #include "InputCommon.hpp"
 #include <AsyncMqttClient.h>
-#include "InputFppRemotePlayItem.hpp"
 
 class c_InputMQTT : public c_InputCommon
 {
@@ -47,10 +46,9 @@ class c_InputMQTT : public c_InputCommon
 private:
 #define MQTT_PORT       1883    ///< Default MQTT port
 
-    AsyncMqttClient            mqtt;           // MQTT object
-    Ticker                     mqttTicker;     // Ticker to handle MQTT
-    c_InputCommon            * pEffectsEngine = nullptr;
-    c_InputFPPRemotePlayItem * pPlayItem = nullptr;
+    AsyncMqttClient mqtt;           // MQTT object
+    Ticker          mqttTicker;     // Ticker to handle MQTT
+    c_InputCommon * pEffectsEngine = nullptr;
 
     // from original config struct
     String      ip;
@@ -67,8 +65,8 @@ private:
     void RegisterWithMqtt ();
 
     void setup ();         ///< Call from setup()
-    void onConnect ();     ///< Call from onWifiConnect()
-    void onDisconnect ();  ///< Call from onWiFiDisconnect()
+    void onNetworkConnect ();     ///< Call from onWifiConnect()
+    void onNetworkDisconnect ();  ///< Call from onWiFiDisconnect()
     void validate ();      ///< Call from validateConfig()
     void update ();        ///< Call from updateConfig()
     void NetworkStateChanged (bool IsConnected, bool RebootAllowed); // used by poorly designed rx functions

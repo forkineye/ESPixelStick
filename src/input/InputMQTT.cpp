@@ -23,6 +23,7 @@
 #include <Int64String.h>
 #include "InputMQTT.h"
 #include "InputEffectEngine.hpp"
+#include "InputFPPRemotePlayItem.hpp"
 
 #if defined ARDUINO_ARCH_ESP32
 #   include <functional>
@@ -39,10 +40,8 @@ c_InputMQTT::c_InputMQTT (
 {
     // DEBUG_START;
 
-#ifndef SupportFilePlay
     pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputChannelId_1, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
     pEffectsEngine->SetOperationalState (false);
-#endif // ndef SupportFilePlay
 
     // DEBUG_END;
 } // c_InputE131
@@ -57,17 +56,8 @@ c_InputMQTT::~c_InputMQTT ()
     // allow the other input channels to run
     InputMgr.SetOperationalState (true);
 
-    if (nullptr != pEffectsEngine)
-    {
-        delete pEffectsEngine;
-        pEffectsEngine = nullptr;
-    }
-
-    if (nullptr != pPlayItem)
-    {
-        delete pPlayItem;
-        pPlayItem = nullptr;
-    }
+    delete pEffectsEngine;
+    pEffectsEngine = nullptr;
 
 } // ~c_InputMQTT
 
@@ -83,14 +73,12 @@ void c_InputMQTT::Begin()
     }
     HasBeenInitialized = true;
 
-#ifndef SupportFilePlay
-    if (nullptr != pEffectsEngine)
-    {
-        pEffectsEngine->Begin ();
-    }
-#endif // ndef SupportFilePlay
-
     RegisterWithMqtt ();
+
+    pEffectsEngine->Begin ();
+
+    // get things started
+    NetworkStateChanged (InputMgr.GetNetworkState ());
 
     // DEBUG_END;
 
@@ -112,15 +100,7 @@ void c_InputMQTT::GetConfig (JsonObject & jsonConfig)
     jsonConfig[CN_effects]  = true;
     jsonConfig[CN_play]     = true;
 
-    if (nullptr != pEffectsEngine)
-    {
-        pEffectsEngine->GetConfig (jsonConfig);
-    }
-
-    if (nullptr != pPlayItem)
-    {
-
-    }
+    pEffectsEngine->GetConfig (jsonConfig);
 
     // DEBUG_END;
 
@@ -142,15 +122,7 @@ void c_InputMQTT::Process ()
 {
     // DEBUG_START;
     // ignoring IsInputChannelActive
-    if (nullptr != pEffectsEngine)
-    {
-        pEffectsEngine->Process ();
-    }
-
-    if (nullptr != pPlayItem)
-    {
-        pPlayItem->Poll (InputDataBuffer, InputDataBufferSize);
-    }
+    pEffectsEngine->Process ();
 
     // DEBUG_END;
 
@@ -162,10 +134,7 @@ void c_InputMQTT::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
     InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
 
-    if (nullptr != pEffectsEngine)
-    {
-        pEffectsEngine->SetBufferInfo (BufferStart, BufferSize);
-    }
+    pEffectsEngine->SetBufferInfo (BufferStart, BufferSize);
 
 } // SetBufferInfo
 
@@ -186,14 +155,7 @@ boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     setFromJSON (haprefix,             jsonConfig, CN_haprefix);
     setFromJSON (lwt,                  jsonConfig, CN_lwt);
 
-    if (nullptr != pEffectsEngine)
-    {
-        pEffectsEngine->SetConfig (jsonConfig);
-    }
-
-    if (nullptr != pPlayItem)
-    {
-    }
+    pEffectsEngine->SetConfig (jsonConfig);
 
     validateConfiguration ();
 
@@ -226,17 +188,16 @@ void c_InputMQTT::RegisterWithMqtt ()
     DEBUG_START;
 
     using namespace std::placeholders;
-    mqtt.onConnect (std::bind (&c_InputMQTT::onMqttConnect, this, _1));
+    mqtt.onConnect    (std::bind (&c_InputMQTT::onMqttConnect, this, _1));
     mqtt.onDisconnect (std::bind (&c_InputMQTT::onMqttDisconnect, this, _1));
-    mqtt.onMessage (std::bind (&c_InputMQTT::onMqttMessage, this, _1, _2, _3, _4, _5, _6));
-    mqtt.setServer (ip.c_str (), port);
+    mqtt.onMessage    (std::bind (&c_InputMQTT::onMqttMessage, this, _1, _2, _3, _4, _5, _6));
 
     DEBUG_END;
 
 } // RegisterWithMqtt
 
 //-----------------------------------------------------------------------------
-void c_InputMQTT::onConnect()
+void c_InputMQTT::onNetworkConnect()
 {
     DEBUG_START;
 
@@ -247,7 +208,7 @@ void c_InputMQTT::onConnect()
 } // onConnect
 
 //-----------------------------------------------------------------------------
-void c_InputMQTT::onDisconnect()
+void c_InputMQTT::onNetworkDisconnect()
 {
     DEBUG_START;
 
@@ -275,7 +236,6 @@ void c_InputMQTT::connectToMqtt()
 {
     DEBUG_START;
 
-    // Unset clean session (defaults to true) so we get retained messages of QoS > 0
     mqtt.setCleanSession (CleanSessionRequired);
 
     if (user.length () > 0)
@@ -283,9 +243,9 @@ void c_InputMQTT::connectToMqtt()
         DEBUG_V (String ("User: ") + user);
         mqtt.setCredentials (user.c_str (), password.c_str ());
     }
+    mqtt.setServer (ip.c_str (), port);
 
-    LOG_PORT.print(F ("- Connecting to MQTT Broker "));
-    LOG_PORT.println(ip + ":" + String(port));
+    LOG_PORT.println(String(F ("- Connecting to MQTT Broker ")) + ip + ":" + String(port));
     mqtt.connect();
     mqtt.setWill (topic.c_str(), 1, true, lwt.c_str(), lwt.length());
 
@@ -317,6 +277,8 @@ void c_InputMQTT::onMqttConnect(bool sessionPresent)
 
     // Setup subscriptions
     mqtt.subscribe(String(topic + SET_COMMAND_TOPIC).c_str(), 0);
+
+    mqtt.publish (topic.c_str(), 0, true, "ESP0");
 
     // Publish state
     update ();
@@ -354,7 +316,7 @@ void c_InputMQTT::onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
 
     LOG_PORT.println(String(F ("- MQTT Disconnected: DisconnectReason: ")) + String(DisconnectReasons[uint8_t(reason)]));
     
-    if (WiFi.isConnected ())
+    if (InputMgr.GetNetworkState ())
     {
         DEBUG_V ("");
         // set up a two second delayed retry.
@@ -424,7 +386,7 @@ void c_InputMQTT::onMqttMessage(
 
             ((c_InputEffectEngine*)(pEffectsEngine))->SetMqttConfig (root);
         }
-
+/*
         if (nullptr != pPlayItem)
         {
             if (stateOn)
@@ -438,7 +400,7 @@ void c_InputMQTT::onMqttMessage(
                 pPlayItem->Stop ();
             }
         }
-
+*/
         // DEBUG_V ("");
 
         publishState ();
@@ -484,7 +446,7 @@ void c_InputMQTT::publishHA()
             JsonConfig[CN_effect]     = CN_true;
             ((c_InputEffectEngine*)(pEffectsEngine))->GetMqttEffectList (JsonConfig);
         }
-
+/*
         if (nullptr != pPlayItem)
         {
             JsonConfig[CN_brightness] = CN_false;
@@ -492,7 +454,7 @@ void c_InputMQTT::publishHA()
             JsonConfig[CN_filename]   = pPlayItem->GetFileName ();
             JsonConfig[CN_count]      = pPlayItem->GetRepeatCount ();
         }
-
+*/
         // Register the attributes topic
         JsonConfig[F ("json_attributes_topic")] = topic + F ("/attributes");
 
@@ -538,10 +500,6 @@ void c_InputMQTT::publishState()
         ((c_InputEffectEngine*)(pEffectsEngine))->GetMqttConfig (JsonConfig);
     }
     
-    if (nullptr != pPlayItem)
-    {
-    }
-
     String JsonConfigString;
     serializeJson(JsonConfig, JsonConfigString);
     // DEBUG_V (String ("JsonConfigString: ") + JsonConfigString);
@@ -556,25 +514,17 @@ void c_InputMQTT::publishState()
 //-----------------------------------------------------------------------------
 void c_InputMQTT::NetworkStateChanged (bool IsConnected)
 {
-    NetworkStateChanged (IsConnected, true);
+    NetworkStateChanged (IsConnected, false);
 } // NetworkStateChanged
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
 {
     DEBUG_START;
-/*
+
     if (IsConnected)
     {
-        // Get on with business
-        if (mqtt.begin ())
-        {
-            LOG_PORT.println (F ("MQTT Enabled."));
-        }
-        else
-        {
-            LOG_PORT.println (F ("MQTT Init Failed."));
-        }
+        onNetworkConnect ();
         // DEBUG_V ("");
     }
     else if (ReBootAllowed)
@@ -583,13 +533,12 @@ void c_InputMQTT::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         // E1.31 does not do this gracefully. A loss of connection needs a reboot
         extern bool reboot;
         reboot = true;
-        LOG_PORT.println (F ("MQTT Input requesting reboot on loss of Network connection."));
+        LOG_PORT.println (F ("MQTT requesting reboot on loss of Network connection."));
     }
     else
     {
-
+        onNetworkDisconnect ();
     }
-*/
 
     DEBUG_END;
 
