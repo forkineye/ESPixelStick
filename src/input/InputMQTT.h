@@ -41,6 +41,7 @@ class c_InputMQTT : public c_InputCommon
       void Process ();                         ///< Call from loop(),  renders Input data
       void GetDriverName (String& sDriverName) { sDriverName = "MQTT"; } ///< get the name for the instantiated driver
       void SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize);
+      void NetworkStateChanged (bool IsConnected); // used by poorly designed rx functions
 
 private:
 #define MQTT_PORT       1883    ///< Default MQTT port
@@ -55,7 +56,7 @@ private:
     String      user;
     String      password;
     String      topic;
-    bool        clean = false;
+    bool        CleanSessionRequired = false;
     bool        hadisco = false;
     String      haprefix = "homeassistant";
     String      lwt = "";
@@ -64,10 +65,11 @@ private:
     void RegisterWithMqtt ();
 
     void setup ();         ///< Call from setup()
-    void onConnect ();     ///< Call from onWifiConnect()
-    void onDisconnect ();  ///< Call from onWiFiDisconnect()
+    void onNetworkConnect ();     ///< Call from onWifiConnect()
+    void onNetworkDisconnect ();  ///< Call from onWiFiDisconnect()
     void validate ();      ///< Call from validateConfig()
     void update ();        ///< Call from updateConfig()
+    void NetworkStateChanged (bool IsConnected, bool RebootAllowed); // used by poorly designed rx functions
 
     void load ();          ///< Load configuration from File System
     void save ();          ///< Save configuration to File System

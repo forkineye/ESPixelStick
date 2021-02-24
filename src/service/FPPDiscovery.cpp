@@ -24,19 +24,16 @@
 #include "../WiFiMgr.hpp"
 #include "../output/OutputMgr.hpp"
 
-extern const String VERSION;
-
 #ifdef ARDUINO_ARCH_ESP32
 #   define FPP_TYPE_ID          0xC3
-#   define FPP_VARIANT_NAME     "ESPixelStick-ESP32"
+#   define FPP_VARIANT_NAME     (String(CN_ESPixelStick) + "-ESP32")
 
 #else
 #   define FPP_TYPE_ID          0xC2
-#   define FPP_VARIANT_NAME     "ESPixelStick-ESP8266"
+#   define FPP_VARIANT_NAME     (String(CN_ESPixelStick) + "-ESP8266")
 #endif
 
 #define FPP_DISCOVERY_PORT 32320
-static const String ulrFilename = "filename";
 static const String ulrCommand  = "command";
 static const String ulrPath     = "path";
 
@@ -407,7 +404,7 @@ void c_FPPDiscovery::sendPingPacket (IPAddress destination)
     memcpy (packet.ipAddress, &ip, 4);
     strcpy (packet.hostName, config.hostname.c_str ());
     strcpy (packet.version, (VERSION + String (":") + BUILD_DATE).c_str ());
-    strcpy (packet.hardwareType, FPP_VARIANT_NAME);
+    strcpy (packet.hardwareType, FPP_VARIANT_NAME.c_str());
     packet.ranges[0] = 0;
 
     // DEBUG_V ("Ping to " + destination.toString());
@@ -463,18 +460,18 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
     FSEQHeader fsqHeader;
     FileMgr.ReadSdFile (fseq, (byte*)&fsqHeader, sizeof (fsqHeader), 0);
 
-    JsonData[F("Name")]            = fname;
-    JsonData[F("Version")]         = String (fsqHeader.majorVersion) + "." + String (fsqHeader.minorVersion);
-    JsonData[F("ID")]              = int64String (fsqHeader.id);
-    JsonData[F("StepTime")]        = String (fsqHeader.stepTime);
-    JsonData[F("NumFrames")]       = String (fsqHeader.TotalNumberOfFramesInSequence);
-    JsonData[F("CompressionType")] = fsqHeader.compressionType;
+    JsonData[F ("Name")]            = fname;
+    JsonData[F ("Version")]         = String (fsqHeader.majorVersion) + "." + String (fsqHeader.minorVersion);
+    JsonData[F ("ID")]              = int64String (fsqHeader.id);
+    JsonData[F ("StepTime")]        = String (fsqHeader.stepTime);
+    JsonData[F ("NumFrames")]       = String (fsqHeader.TotalNumberOfFramesInSequence);
+    JsonData[F ("CompressionType")] = fsqHeader.compressionType;
 
     uint32_t maxChannel = fsqHeader.channelCount;
 
     if (0 != fsqHeader.numSparseRanges)
     {
-        JsonArray  JsonDataRanges = JsonData.createNestedArray (F("Ranges"));
+        JsonArray  JsonDataRanges = JsonData.createNestedArray (F ("Ranges"));
 
         maxChannel = 0;
 
@@ -491,8 +488,8 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
             uint32_t RangeLength = read24 (CurrentFSEQRangeEntry->Length);
 
             JsonObject JsonRange = JsonDataRanges.createNestedObject ();
-            JsonRange[F("Start")]  = String (RangeStart);
-            JsonRange[F("Length")] = String (RangeLength);
+            JsonRange[F ("Start")]  = String (RangeStart);
+            JsonRange[F ("Length")] = String (RangeLength);
 
             if ((RangeStart + RangeLength - 1) > maxChannel)
             {
@@ -503,8 +500,8 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
         free (RangeDataBuffer);
     }
 
-    JsonData[F("MaxChannel")]   = String (maxChannel);
-    JsonData[F("ChannelCount")] = String (fsqHeader.channelCount);
+    JsonData[F ("MaxChannel")]   = String (maxChannel);
+    JsonData[F ("ChannelCount")] = String (fsqHeader.channelCount);
 
     uint32_t FileOffsetToCurrentHeaderRecord = read16 ((uint8_t*)&fsqHeader.headerLen);
     uint32_t FileOffsetToStartOfSequenceData = read16 ((uint8_t*)&fsqHeader.dataOffset); // DataOffset
@@ -514,7 +511,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
 
     if (FileOffsetToCurrentHeaderRecord < FileOffsetToStartOfSequenceData)
     {
-        JsonArray  JsonDataHeaders = JsonData.createNestedArray (F("variableHeaders"));
+        JsonArray  JsonDataHeaders = JsonData.createNestedArray (F ("variableHeaders"));
 
         char FSEQVariableDataHeaderBuffer[sizeof (FSEQVariableDataHeader) + 1];
         memset ((uint8_t*)FSEQVariableDataHeaderBuffer, 0x00, sizeof (FSEQVariableDataHeaderBuffer));
@@ -574,12 +571,12 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 
         // DEBUG_V (String ("Path: ") + path);
 
-        if (path.startsWith (F("/api/sequence/")) && AllowedToRemotePlayFiles())
+        if (path.startsWith (F ("/api/sequence/")) && AllowedToRemotePlayFiles())
         {
             // DEBUG_V ("");
 
             String seq = path.substring (14);
-            if (seq.endsWith (F("/meta")))
+            if (seq.endsWith (F ("/meta")))
             {
                 // DEBUG_V ("");
 
@@ -621,17 +618,17 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
     do // once
     {
         String path = request->getParam (ulrPath)->value ();
-        // DEBUG_V (String(F("path: ")) + path);
+        // DEBUG_V (String(F ("path: ")) + path);
 
-        if (path != F("uploadFile"))
+        if (path != F ("uploadFile"))
         {
             // DEBUG_V ("");
             request->send (404);
             break;
         }
 
-        String filename = request->getParam (ulrFilename)->value ();
-        // DEBUG_V (String(F("FileName: ")) + filename);
+        String filename = request->getParam (CN_filename)->value ();
+        // DEBUG_V (String(F ("FileName: ")) + filename);
 
         c_FileMgr::FileId FileHandle;
         if (false == FileMgr.OpenSdFile (filename, c_FileMgr::FileMode::FileRead, FileHandle))
@@ -679,9 +676,9 @@ void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data,
         printReq (request, false);
 
         String path = request->getParam (ulrPath)->value ();
-        if (path == F("uploadFile"))
+        if (path == F ("uploadFile"))
         {
-            if (!request->hasParam (ulrFilename))
+            if (!request->hasParam (CN_filename))
             {
                 // DEBUG_V ("Missing Filename Parameter");
             }
@@ -690,7 +687,7 @@ void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data,
                 StopPlaying ();
                 inFileUpload = true;
                 // DEBUG_V (String ("request: ") + String (uint32_t (request), HEX));
-                UploadFileName = String (request->getParam (ulrFilename)->value ());
+                UploadFileName = String (request->getParam (CN_filename)->value ());
                 // DEBUG_V ("");
             }
         }
@@ -714,9 +711,9 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
 {
     // DEBUG_START;
 
-    jsonResponse[F ("HostName")]        = config.hostname;
+    jsonResponse[CN_HostName]        = config.hostname;
     jsonResponse[F ("HostDescription")] = config.id;
-    jsonResponse[F ("Platform")]        = F("ESPixelStick");
+    jsonResponse[F ("Platform")]        = CN_ESPixelStick;
     jsonResponse[F ("Variant")]         = FPP_VARIANT_NAME;
     jsonResponse[F ("Mode")]            = (true == AllowedToRemotePlayFiles()) ? 8 : 1;
     jsonResponse[F ("Version")]         = VERSION + String (":") + BUILD_DATE;
@@ -728,9 +725,9 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     jsonResponse[F ("minorVersion")] = (uint16_t)atoi (&version[2]);
     jsonResponse[F ("typeId")]       = FPP_TYPE_ID;
 
-    JsonObject jsonResponseUtilization = jsonResponse.createNestedObject (F("Utilization"));
-    jsonResponseUtilization[F("MemoryFree")] = ESP.getFreeHeap ();
-    jsonResponseUtilization[F("Uptime")]     = millis ();
+    JsonObject jsonResponseUtilization = jsonResponse.createNestedObject (F ("Utilization"));
+    jsonResponseUtilization[F ("MemoryFree")] = ESP.getFreeHeap ();
+    jsonResponseUtilization[F ("Uptime")]     = millis ();
 
     jsonResponse[F ("rssi")] = WiFi.RSSI ();
     JsonArray jsonResponseIpAddresses = jsonResponse.createNestedArray (F ("IPS"));
@@ -762,68 +759,68 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
         String command = request->getParam (ulrCommand)->value ();
         // DEBUG_V (String ("command: ") + command);
 
-        if (command == F("getFPPstatus"))
+        if (command == F ("getFPPstatus"))
         {
-            String adv = "false";
-            if (request->hasParam ("advancedView"))
+            String adv = CN_false;
+            if (request->hasParam (CN_advancedView))
             {
-                adv = request->getParam ("advancedView")->value ();
+                adv = request->getParam (CN_advancedView)->value ();
             }
 
-            JsonObject JsonDataMqtt = JsonData.createNestedObject(F("MQTT"));
+            JsonObject JsonDataMqtt = JsonData.createNestedObject(F ("MQTT"));
 
             JsonDataMqtt[F ("configured")] = false;
             JsonDataMqtt[F ("connected")]  = false;
 
             JsonObject JsonDataCurrentPlaylist = JsonData.createNestedObject (F ("current_playlist"));
 
-            JsonDataCurrentPlaylist[F ("count")]       = "0";
+            JsonDataCurrentPlaylist[CN_count]          = "0";
             JsonDataCurrentPlaylist[F ("description")] = "";
             JsonDataCurrentPlaylist[F ("index")]       = "0";
-            JsonDataCurrentPlaylist[F ("playlist")]    = "";
-            JsonDataCurrentPlaylist[F ("type")]        = "";
+            JsonDataCurrentPlaylist[CN_playlist]       = "";
+            JsonDataCurrentPlaylist[CN_type]           = "";
 
-            JsonData[F("volume")]         = 70;
-            JsonData[F("media_filename")] = "";
-            JsonData[F("fppd")]           = F("running");
-            JsonData[F("current_song")]   = "";
+            JsonData[F ("volume")]         = 70;
+            JsonData[F ("media_filename")] = "";
+            JsonData[F ("fppd")]           = F ("running");
+            JsonData[F ("current_song")]   = "";
 
             if (false == PlayingFile())
             {
-                JsonData[F ("current_sequence")]  = "";
-                JsonData[F ("playlist")]          = "";
-                JsonData[F ("seconds_elapsed")]   = String (0);
-                JsonData[F ("seconds_played")]    = String (0);
-                JsonData[F ("seconds_remaining")] = String (0);
-                JsonData[F ("sequence_filename")] = "";
-                JsonData[F ("time_elapsed")]      = String("00:00");
-                JsonData[F ("time_remaining")]    = String ("00:00");
+                JsonData[CN_current_sequence]  = "";
+                JsonData[CN_playlist]          = "";
+                JsonData[CN_seconds_elapsed]   = String (0);
+                JsonData[CN_seconds_played]    = String (0);
+                JsonData[CN_seconds_remaining] = String (0);
+                JsonData[CN_sequence_filename] = "";
+                JsonData[CN_time_elapsed]      = String("00:00");
+                JsonData[CN_time_remaining]    = String ("00:00");
 
-                JsonData[F ("status")] = 0;
-                JsonData[F ("status_name")] = F ("idle");
+                JsonData[CN_status] = 0;
+                JsonData[CN_status_name] = F ("idle");
 
                 if (IsEnabled)
                 {
-                    JsonData[F ("mode")] = 8;
-                    JsonData[F ("mode_name")] = F ("remote");
+                    JsonData[CN_mode] = 8;
+                    JsonData[CN_mode_name] = CN_remote;
                 }
                 else
                 {
-                    JsonData[F ("mode")] = 1;
-                    JsonData[F ("mode_name")] = F ("bridge");
+                    JsonData[CN_mode] = 1;
+                    JsonData[CN_mode_name] = F ("bridge");
                 }
             }
             else
             {
                 InputFPPRemotePlayFile.GetStatus (JsonData);
-                JsonData[F ("status")] = 1;
-                JsonData[F ("status_name")] = F ("playing");
+                JsonData[CN_status] = 1;
+                JsonData[CN_status_name] = F ("playing");
 
-                JsonData[F ("mode")] = 8;
-                JsonData[F ("mode_name")] = F ("remote");
+                JsonData[CN_mode] = 8;
+                JsonData[CN_mode_name] = CN_remote;
             }
 
-            if (adv == "true")
+            if (adv == CN_true)
             {
                 JsonObject JsonDataAdvancedView = JsonData.createNestedObject (F ("advancedView"));
                 GetSysInfoJSON (JsonDataAdvancedView);
@@ -832,41 +829,41 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             String Response;
             serializeJson (JsonDoc, Response);
             // DEBUG_V (String ("JsonDoc: ") + Response);
-            request->send (200, F("application/json"), Response);
+            request->send (200, F ("application/json"), Response);
 
             break;
         }
 
-        if (command == F("getSysInfo"))
+        if (command == F ("getSysInfo"))
         {
             GetSysInfoJSON (JsonData);
 
             String resp = "";
             serializeJson (JsonData, resp);
             // DEBUG_V (String ("JsonDoc: ") + resp);
-            request->send (200, F("application/json"), resp);
+            request->send (200, F ("application/json"), resp);
 
             break;
         }
 
-        if (command == F("getHostNameInfo"))
+        if (command == F ("getHostNameInfo"))
         {
-            JsonData[F("HostName")] = config.hostname;
-            JsonData[F("HostDescription")] = config.id;
+            JsonData[CN_HostName] = config.hostname;
+            JsonData[F ("HostDescription")] = config.id;
 
             String resp;
             serializeJson (JsonData, resp);
             // DEBUG_V (String ("resp: ") + resp);
-            request->send (200, F("application/json"), resp);
+            request->send (200, F ("application/json"), resp);
 
             break;
         }
 
         if (command == F ("getChannelOutputs"))
         {
-            if (request->hasParam (F("file")))
+            if (request->hasParam (CN_file))
             {
-                String filename = request->getParam (F ("file"))->value ();
+                String filename = request->getParam (CN_file)->value ();
                 if (String(F ("co-other")) == filename)
                 {
                     String resp;

@@ -52,7 +52,7 @@ void c_FileMgr::Begin ()
     {
         if (!LITTLEFS.begin ())
         {
-            LOG_PORT.println (F ("*** Flash File system did not initialize correctly ***"));
+            LOG_PORT.println ( String(CN_stars) + F (" Flash File system did not initialize correctly ") + CN_stars);
         }
         else
         {
@@ -113,7 +113,7 @@ void c_FileMgr::SetSpiIoPins (uint8_t miso, uint8_t mosi, uint8_t clock, uint8_t
 } // SetSpiIoPins
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::DeleteConfigFile (String& FileName)
+void c_FileMgr::DeleteConfigFile (const String& FileName)
 {
     // DEBUG_START;
 
@@ -131,10 +131,10 @@ void c_FileMgr::listDir (fs::FS& fs, String dirname, uint8_t levels)
     {
         LOG_PORT.println (String (F ("Listing directory: ")) + dirname);
 
-        File root = fs.open (dirname, "r");
+        File root = fs.open (dirname, CN_r);
         if (!root)
         {
-            LOG_PORT.println (String (F ("failed to open directory: ")) + dirname);
+            LOG_PORT.println (String (CN_stars) + F ("failed to open directory: ") + dirname + CN_stars);
             break;
         }
 
@@ -167,21 +167,21 @@ void c_FileMgr::listDir (fs::FS& fs, String dirname, uint8_t levels)
 } // listDir
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::LoadConfigFile (String& FileName, DeserializationHandler Handler)
+bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler Handler)
 {
     // DEBUG_START;
     boolean retval = false;
 
     do // once
     {
-        String CfgFileMessagePrefix = String (F ("Configuration file: '")) + FileName + "' ";
+        String CfgFileMessagePrefix = String (CN_Configuration_File_colon) + "'" + FileName + "' ";
 
         // DEBUG_V ("allocate the JSON Doc");
 
         String RawFileData;
         if (false == ReadConfigFile (FileName, RawFileData))
         {
-            LOG_PORT.println (CfgFileMessagePrefix + String (F ("Could not read file.")));
+            LOG_PORT.println (String(CN_stars) + CfgFileMessagePrefix + F ("Could not read file.") + CN_stars);
             break;
         }
 
@@ -196,10 +196,10 @@ bool c_FileMgr::LoadConfigFile (String& FileName, DeserializationHandler Handler
         // DEBUG_V ("Error Check");
         if (error)
         {
-            String CfgFileMessagePrefix = String (F ("Configuration file: '")) + FileName + "' ";
-            LOG_PORT.println (String (F ("Heap:")) + String (ESP.getFreeHeap ()));
-            LOG_PORT.println (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
-            LOG_PORT.println (String (F ("++++")) + RawFileData + String (F ("----")));
+            String CfgFileMessagePrefix = String (CN_Configuration_File_colon) + "'" + FileName + "' ";
+            LOG_PORT.println (CN_Heap_colon + String (ESP.getFreeHeap ()));
+            LOG_PORT.println (String(CN_stars) + CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str () + CN_stars);
+            LOG_PORT.println (CN_plussigns + RawFileData + CN_minussigns);
             break;
         }
 
@@ -219,18 +219,18 @@ bool c_FileMgr::LoadConfigFile (String& FileName, DeserializationHandler Handler
 } // LoadConfigFile
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::SaveConfigFile (String& FileName, String& FileData)
+bool c_FileMgr::SaveConfigFile (const String& FileName, String& FileData)
 {
     // DEBUG_START;
 
     bool Response = false;
-    String CfgFileMessagePrefix = String (F ("Configuration file: '")) + FileName + "' ";
+    String CfgFileMessagePrefix = String (CN_Configuration_File_colon) + "'" + FileName + "' ";
     // DEBUG_V (FileData);
 
     fs::File file = LITTLEFS.open (FileName.c_str (), "w");
     if (!file)
     {
-        LOG_PORT.println (CfgFileMessagePrefix + String (F ("Could not open file for writing..")));
+        LOG_PORT.println (String(CN_stars) + CfgFileMessagePrefix + String (F ("Could not open file for writing..")) + CN_stars);
     }
     else
     {
@@ -246,7 +246,7 @@ bool c_FileMgr::SaveConfigFile (String& FileName, String& FileData)
 } // SaveConfigFile
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::SaveConfigFile (String& FileName, JsonVariant& FileData)
+bool c_FileMgr::SaveConfigFile (const String& FileName, JsonVariant& FileData)
 {
     // DEBUG_START;
     bool Response = false;
@@ -261,14 +261,14 @@ bool c_FileMgr::SaveConfigFile (String& FileName, JsonVariant& FileData)
 } // SaveConfigFile
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::ReadConfigFile (String& FileName, String& FileData)
+bool c_FileMgr::ReadConfigFile (const String& FileName, String& FileData)
 {
     // DEBUG_START;
 
     bool GotFileData = false;
 
     // DEBUG_V (String("File '") + FileName + "' is being opened.");
-    fs::File file = LITTLEFS.open (FileName.c_str (), "r");
+    fs::File file = LITTLEFS.open (FileName.c_str (), CN_r);
     if (file)
     {
         // DEBUG_V (String("File '") + FileName + "' is open.");
@@ -281,7 +281,7 @@ bool c_FileMgr::ReadConfigFile (String& FileName, String& FileData)
     }
     else
     {
-        LOG_PORT.println (String (F ("Configuration file: '")) + FileName + String (F ("' not found.")));
+        LOG_PORT.println (String (CN_stars) + CN_Configuration_File_colon + "'" + FileName + F ("' not found.") + CN_stars);
     }
 
     // DEBUG_END;
@@ -289,7 +289,7 @@ bool c_FileMgr::ReadConfigFile (String& FileName, String& FileData)
 } // ReadConfigFile
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::ReadConfigFile (String& FileName, JsonDocument & FileData)
+bool c_FileMgr::ReadConfigFile (const String& FileName, JsonDocument & FileData)
 {
     // DEBUG_START;
     bool GotFileData = false;
@@ -317,10 +317,10 @@ bool c_FileMgr::ReadConfigFile (String& FileName, JsonDocument & FileData)
         // DEBUG_V ("Error Check");
         if (error)
         {
-            String CfgFileMessagePrefix = String (F ("Configuration file: '")) + FileName + "' ";
-            LOG_PORT.println (String (F ("Heap:")) + String (ESP.getFreeHeap ()));
+            String CfgFileMessagePrefix = String (CN_Configuration_File_colon) + "'" + FileName + "' ";
+            LOG_PORT.println (CN_Heap_colon + String (ESP.getFreeHeap ()));
             LOG_PORT.println (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
-            LOG_PORT.println (String (F ("++++")) + RawFileData + String (F ("----")));
+            LOG_PORT.println (CN_plussigns + RawFileData + CN_minussigns);
             break;
         }
 
@@ -348,13 +348,15 @@ c_FileMgr::FileId c_FileMgr::CreateFileHandle ()
         ++FileHandle;
     }
 
+    // DEBUG_V (String ("FileHandle: ") + String (FileHandle));
+
     // DEBUG_END;
 
     return FileHandle;
 } // CreateFileHandle
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::DeleteSdFile (String & FileName)
+void c_FileMgr::DeleteSdFile (const String & FileName)
 {
     // DEBUG_START;
     String FileNamePrefix;
@@ -414,18 +416,18 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
     {
         if (0 == ResponseJsonDoc.capacity ())
         {
-            LOG_PORT.println (F ("ERROR: Failed to allocate memory for the GetListOfSdFiles web request response."));
+            LOG_PORT.println (String(CN_stars) + F ("ERROR: Failed to allocate memory for the GetListOfSdFiles web request response.") + CN_stars);
             break;
         }
 
-        JsonArray FileArray = ResponseJsonDoc.createNestedArray (F ("files"));
-        ResponseJsonDoc["SdCardPresent"] = SdCardIsInstalled ();
+        JsonArray FileArray = ResponseJsonDoc.createNestedArray (CN_files);
+        ResponseJsonDoc[F ("SdCardPresent")] = SdCardIsInstalled ();
         if (false == SdCardIsInstalled ())
         {
             break;
         }
 
-        File dir = SDFS.open ("/", "r");
+        File dir = SDFS.open ("/", CN_r);
 
         while (true)
         {
@@ -450,7 +452,7 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
                 // DEBUG_V ("Adding File: '" + EntryName + "'");
 
                 JsonObject CurrentFile = FileArray.createNestedObject ();
-                CurrentFile[F ("name")]   = EntryName;
+                CurrentFile[CN_name]      = EntryName;
                 CurrentFile[F ("date")]   = entry.getLastWrite ();
                 CurrentFile[F ("length")] = entry.size ();
             }
@@ -509,14 +511,14 @@ void c_FileMgr::printDirectory (Dir dir, int numTabs)
 } // printDirectory
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::SaveSdFile (String & FileName, String & FileData)
+void c_FileMgr::SaveSdFile (const String & FileName, String & FileData)
 {
     do // once
     {
         FileId FileHandle = 0;
         if (false == OpenSdFile (FileName, FileMode::FileWrite, FileHandle))
         {
-            LOG_PORT.println (String (F ("File Manager: Could not open '")) + FileName + F("' for writting."));
+            LOG_PORT.println (String (F ("File Manager: Could not open '")) + FileName + F ("' for writting."));
             break;
         }
 
@@ -530,7 +532,7 @@ void c_FileMgr::SaveSdFile (String & FileName, String & FileData)
 } // SaveSdFile
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::SaveSdFile (String & FileName, JsonVariant & FileData)
+void c_FileMgr::SaveSdFile (const String & FileName, JsonVariant & FileData)
 {
     String Temp;
     serializeJson (FileData, Temp);
@@ -539,7 +541,7 @@ void c_FileMgr::SaveSdFile (String & FileName, JsonVariant & FileData)
 } // SaveSdFile
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::OpenSdFile (String & FileName, FileMode Mode, FileId & FileHandle)
+bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & FileHandle)
 {
     // DEBUG_START;
 
@@ -570,7 +572,7 @@ bool c_FileMgr::OpenSdFile (String & FileName, FileMode Mode, FileId & FileHandl
             // DEBUG_V (String("Read FIle"));
             if (false == SDFS.exists (FileNamePrefix + FileName))
             {
-                LOG_PORT.println (String (F ("ERROR: Cannot open '")) + FileName + F("' for reading. File does not exist."));
+                LOG_PORT.println (String (F ("ERROR: Cannot open '")) + FileName + F ("' for reading. File does not exist."));
                 break;
             }
         }
@@ -599,7 +601,7 @@ bool c_FileMgr::OpenSdFile (String & FileName, FileMode Mode, FileId & FileHandl
 } // OpenSdFile
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::ReadSdFile (String & FileName, String & FileData)
+bool c_FileMgr::ReadSdFile (const String & FileName, String & FileData)
 {
     // DEBUG_START;
 
@@ -630,7 +632,7 @@ bool c_FileMgr::ReadSdFile (String & FileName, String & FileData)
 } // ReadSdFile
 
 //-----------------------------------------------------------------------------
-size_t c_FileMgr::ReadSdFile (FileId& FileHandle, byte* FileData, size_t NumBytesToRead, size_t StartingPosition)
+size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t NumBytesToRead, size_t StartingPosition)
 {
     // DEBUG_START;
 
@@ -647,7 +649,7 @@ size_t c_FileMgr::ReadSdFile (FileId& FileHandle, byte* FileData, size_t NumByte
     }
     else
     {
-        LOG_PORT.println ("FileMgr::ReadSdFile::ERROR::Invalid File Handle.");
+        LOG_PORT.println (String (F ("FileMgr::ReadSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
 
     // DEBUG_END;
@@ -656,7 +658,7 @@ size_t c_FileMgr::ReadSdFile (FileId& FileHandle, byte* FileData, size_t NumByte
 } // ReadSdFile
 
 //-----------------------------------------------------------------------------
-size_t c_FileMgr::ReadSdFile (FileId& FileHandle, byte* FileData, size_t NumBytesToRead)
+size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t NumBytesToRead)
 {
     // DEBUG_START;
 
@@ -670,7 +672,7 @@ size_t c_FileMgr::ReadSdFile (FileId& FileHandle, byte* FileData, size_t NumByte
     }
     else
     {
-        LOG_PORT.println ("FileMgr::ReadSdFile::ERROR::Invalid File Handle.");
+        LOG_PORT.println (String (F ("FileMgr::ReadSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
 
     // DEBUG_END;
@@ -679,7 +681,7 @@ size_t c_FileMgr::ReadSdFile (FileId& FileHandle, byte* FileData, size_t NumByte
 } // ReadSdFile
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::CloseSdFile (FileId& FileHandle)
+void c_FileMgr::CloseSdFile (const FileId& FileHandle)
 {
     // DEBUG_START;
 
@@ -690,7 +692,7 @@ void c_FileMgr::CloseSdFile (FileId& FileHandle)
     }
     else
     {
-        // LOG_PORT.println ("FileMgr::CloseSdFile::ERROR::Invalid File Handle.");
+        LOG_PORT.println (String (F ("FileMgr::CloseSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
 
     // DEBUG_END;
@@ -698,12 +700,16 @@ void c_FileMgr::CloseSdFile (FileId& FileHandle)
 } // CloseSdFile
 
 //-----------------------------------------------------------------------------
-size_t c_FileMgr::WriteSdFile (FileId& FileHandle, byte* FileData, size_t NumBytesToWrite)
+size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t NumBytesToWrite)
 {
     size_t response = 0;
     if (FileList.end () != FileList.find (FileHandle))
     {
         response = FileList[FileHandle].write (FileData, NumBytesToWrite);
+    }
+    else
+    {
+        LOG_PORT.println (String (F ("FileMgr::WriteSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
 
     return response;
@@ -711,7 +717,7 @@ size_t c_FileMgr::WriteSdFile (FileId& FileHandle, byte* FileData, size_t NumByt
 } // WriteSdFile
 
 //-----------------------------------------------------------------------------
-size_t c_FileMgr::WriteSdFile (FileId& FileHandle, byte* FileData, size_t NumBytesToWrite, size_t StartingPosition)
+size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t NumBytesToWrite, size_t StartingPosition)
 {
     size_t response = 0;
     if (FileList.end () != FileList.find (FileHandle))
@@ -719,20 +725,34 @@ size_t c_FileMgr::WriteSdFile (FileId& FileHandle, byte* FileData, size_t NumByt
         FileList[FileHandle].seek (StartingPosition, SeekSet);
         response = WriteSdFile (FileHandle, FileData, NumBytesToWrite);
     }
+    else
+    {
+        LOG_PORT.println (String (F ("FileMgr::WriteSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
+    }
 
     return response;
 
 } // WriteSdFile
 
 //-----------------------------------------------------------------------------
-size_t c_FileMgr::GetSdFileSize (FileId& FileHandle)
+size_t c_FileMgr::GetSdFileSize (const FileId& FileHandle)
 {
-    return FileList[FileHandle].size ();
+    size_t response = 0;
+    if (FileList.end () != FileList.find (FileHandle))
+    {
+        response = FileList[FileHandle].size ();
+    }
+    else
+    {
+        LOG_PORT.println (String (F ("FileMgr::GetSdFileSize::ERROR::Invalid File Handle: ")) + String (FileHandle));
+    }
+
+    return response;
 
 } // GetSdFileSize
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::handleFileUpload (String filename,
+void c_FileMgr::handleFileUpload (const String & filename,
     size_t index,
     uint8_t* data,
     size_t len,
@@ -767,7 +787,7 @@ void c_FileMgr::handleFileUpload (String filename,
 } // handleFileUpload
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::handleFileUploadNewFile (String & filename)
+void c_FileMgr::handleFileUploadNewFile (const String & filename)
 {
     // DEBUG_START;
 

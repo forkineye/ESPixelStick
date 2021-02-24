@@ -64,11 +64,13 @@ $(function ()
     // DHCP field toggles
     $('#network #dhcp').change(function () {
         if ($(this).is(':checked')) {
+            $('.dhcp').removeClass('hidden');
             $('.dhcp').addClass('hidden');
         }
         else {
             $('.dhcp').removeClass('hidden');
         }
+        $('#btn_wifi').prop("disabled", ValidateConfigFields($("#network input")));
     });
 
     $('#network').on("input", (function () {
@@ -814,14 +816,14 @@ function ValidateConfigFields(ElementList)
         var ChildElement = ElementList[ChildElementId];
         var ChildType = ChildElement.type;
 
-        if (ChildElement.validity.valid !== undefined)
+        if ((ChildElement.validity.valid !== undefined) && (!$(ChildElement).hasClass('hidden')))
         {
             // console.info("ChildElement.validity.valid: " + ChildElement.validity.valid);
             if (false === ChildElement.validity.valid)
             {
-                console.info("          Element: " + ChildElement.id);
-                console.info("   ChildElementId: " + ChildElementId);
-                console.info("ChildElement Type: " + ChildType);
+                // console.info("          Element: " + ChildElement.id);
+                // console.info("   ChildElementId: " + ChildElementId);
+                // console.info("ChildElement Type: " + ChildType);
                 response = true;
             }
         }

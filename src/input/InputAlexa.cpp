@@ -64,8 +64,6 @@ void c_InputAlexa::Begin()
 {
     // DEBUG_START;
 
-    LOG_PORT.println (String (F ("** 'Alexa' Initialization for input: '")) + InputChannelId + String (F ("' **")));
-
     if (true == HasBeenInitialized)
     {
         // DEBUG_END;
@@ -165,15 +163,15 @@ void c_InputAlexa::onMessage(EspalexaDevice * pDevice)
         sprintf (HexColor, "#%02x%02x%02x", pDevice->getR (), pDevice->getG (), pDevice->getB ());
 
         DynamicJsonDocument JsonConfigDoc (1024);
-        JsonObject JsonConfig = JsonConfigDoc.createNestedObject (F("config"));
+        JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_config);
 
-        JsonConfig["EffectSpeed"]      = 1;
-        JsonConfig["EffectReverse"]    = false;
-        JsonConfig["EffectMirror"]     = false;
-        JsonConfig["EffectAllLeds"]    = true;
-        JsonConfig["EffectBrightness"] = pDevice->getValue ();
-        JsonConfig["currenteffect"]    = "Solid";
-        JsonConfig["EffectColor"]      = HexColor;
+        JsonConfig[CN_EffectSpeed]      = 1;
+        JsonConfig[CN_EffectReverse]    = false;
+        JsonConfig[CN_EffectMirror]     = false;
+        JsonConfig[CN_EffectAllLeds]    = true;
+        JsonConfig[CN_EffectBrightness] = pDevice->getValue ();
+        JsonConfig[CN_currenteffect]    = F ("Solid");
+        JsonConfig[CN_EffectColor]      = HexColor;
 
         pEffectsEngine->SetConfig (JsonConfig);
 

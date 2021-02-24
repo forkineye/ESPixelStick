@@ -38,9 +38,7 @@
 #include <ArduinoJson.h>
 
 #include "memdebug.h"
-
-extern const String VERSION;
-extern const String BUILD_DATE;
+#include "ConstNames.hpp"
 
 #define REBOOT_DELAY    100     ///< Delay for rebooting once reboot flag is set
 #define LOG_PORT        Serial  ///< Serial port for console logging
@@ -102,22 +100,5 @@ bool setFromJSON (T& OutValue, J& Json, N Name)
 
     return HasBeenModified;
 };
-extern const String CurrentConfigVersion;
-
-extern const String DEVICE_NAME;
-extern const String VERSION_NAME;
-extern const String ID_NAME;
-extern const String NETWORK_NAME;
-extern const String SSID_NAME;
-extern const String PASSPHRASE_NAME;
-extern const String IP_NAME;
-extern const String NETMASK_NAME;
-extern const String GATEWAY_NAME;
-extern const String HOSTNAME_NAME;
-extern const String DHCP_NAME;
-extern const String STA_TIMEOUT_NAME;
-extern const String AP_FALLBACK_NAME;
-extern const String AP_REBOOT_NAME;
-extern const String AP_TIMEOUT_NAME;
 
 extern config_t config;

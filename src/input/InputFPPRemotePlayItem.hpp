@@ -34,7 +34,7 @@ public:
     virtual void   GetStatus      (JsonObject & jsonStatus) = 0;
     virtual bool   IsIdle         () = 0;
             String GetFileName    () { return PlayItemName; }
-            void   SetPlayCount   (uint32_t value) { RemainingPlayCount = value; }
+            void   SetPlayCount (uint32_t value) { RemainingPlayCount = value; }
             uint32_t GetRepeatCount () { return RemainingPlayCount; }
             void   SetDuration    (time_t value) { PlayDurationSec = value; }
 

@@ -51,7 +51,7 @@ class fsm_PlayList_state_WaitForStart : public fsm_PlayList_state
 public:
     virtual void Poll (uint8_t * Buffer, size_t BufferSize);
     virtual void Init (c_InputFPPRemotePlayList* Parent);
-    virtual void GetStateName (String & sName) { sName = F ("Idle"); }
+    virtual void GetStateName (String & sName) { sName = CN_Idle; }
     virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop (void);
     virtual void GetStatus (JsonObject& jsonStatus);
@@ -64,7 +64,7 @@ class fsm_PlayList_state_Idle : public fsm_PlayList_state
 public:
     virtual void Poll (uint8_t* Buffer, size_t BufferSize);
     virtual void Init (c_InputFPPRemotePlayList* Parent);
-    virtual void GetStateName (String& sName) { sName = F ("Idle"); }
+    virtual void GetStateName (String& sName) { sName = CN_Idle; }
     virtual void Start (String& FileName, uint32_t FrameId);
     virtual void Stop (void);
     virtual void GetStatus (JsonObject& jsonStatus);
@@ -77,7 +77,7 @@ class fsm_PlayList_state_PlayingFile : public fsm_PlayList_state
 public:
     virtual void Poll (uint8_t * Buffer, size_t BufferSize);
     virtual void Init (c_InputFPPRemotePlayList* Parent);
-    virtual void GetStateName (String & sName) { sName = F ("File"); }
+    virtual void GetStateName (String & sName) { sName = CN_File; }
     virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop (void);
     virtual void GetStatus (JsonObject& jsonStatus);
@@ -90,7 +90,7 @@ class fsm_PlayList_state_PlayingEffect : public fsm_PlayList_state
 public:
     virtual void Poll (uint8_t * Buffer, size_t BufferSize);
     virtual void Init (c_InputFPPRemotePlayList* Parent);
-    virtual void GetStateName (String & sName) { sName = F ("Effect"); }
+    virtual void GetStateName (String & sName) { sName = CN_Effect; }
     virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop (void);
     virtual void GetStatus (JsonObject& jsonStatus);
@@ -103,7 +103,7 @@ class fsm_PlayList_state_Paused : public fsm_PlayList_state
 public:
     virtual void Poll (uint8_t * Buffer, size_t BufferSize);
     virtual void Init (c_InputFPPRemotePlayList* Parent);
-    virtual void GetStateName (String & sName) { sName = F ("Paused"); }
+    virtual void GetStateName (String & sName) { sName = CN_Paused; }
     virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop (void);
     virtual void GetStatus (JsonObject& jsonStatus);

@@ -51,7 +51,7 @@ class fsm_PlayFile_state_Idle : public fsm_PlayFile_state
 public:
     virtual void Poll (uint8_t * Buffer, size_t BufferSize);
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
-    virtual void GetStateName (String & sName) { sName = F ("Idle"); }
+    virtual void GetStateName (String & sName) { sName = CN_Idle; }
     virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop (void);
     virtual bool Sync (uint32_t FrameId);
@@ -64,7 +64,7 @@ class fsm_PlayFile_state_PlayingFile : public fsm_PlayFile_state
 public:
     virtual void Poll (uint8_t * Buffer, size_t BufferSize);
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
-    virtual void GetStateName (String & sName) { sName = F ("File"); }
+    virtual void GetStateName (String & sName) { sName = CN_File; }
     virtual void Start (String & FileName, uint32_t FrameId);
     virtual void Stop (void);
     virtual bool Sync (uint32_t FrameId);

@@ -171,6 +171,31 @@ void c_WebMgr::init ()
             FPPDiscovery.ProcessFPPJson(request);
         });
 
+#ifdef USE_REST
+    // URL's needed for FPP Connect fseq uploading and querying
+    webServer.on ("/rest", HTTP_GET,
+        [this](AsyncWebServerRequest* request)
+        {
+            RestProcessGET (request);
+        });
+
+    webServer.on ("/rest", HTTP_POST | HTTP_PUT,
+        [this](AsyncWebServerRequest* request)
+        {
+            RestProcessPOST (request);
+        },
+
+        [this] (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final)
+        {
+            RestProcessFile (request, filename, index, data, len, final);
+        },
+
+        [this] (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total)
+        {
+            RestProcessBody (request, data, len, index, total);
+        });
+#endif // def USE_REST
+
     // Static Handler
     webServer.serveStatic ("/", LITTLEFS, "/www/").setDefaultFile ("index.html");
 
@@ -306,15 +331,15 @@ void c_WebMgr::GetConfiguration ()
 
     DynamicJsonDocument webJsonDoc (4096);
 
-    JsonObject JsonSystemConfig = webJsonDoc.createNestedObject (F("system"));
-    // GetConfig (JsonSystemConfig);
+    JsonObject JsonSystemConfig = webJsonDoc.createNestedObject (F ("system"));
+    GetConfig (JsonSystemConfig);
     // DEBUG_V ("");
 
-    JsonObject JsonOutputConfig = webJsonDoc.createNestedObject (F ("outputs"));
+    // JsonObject JsonOutputConfig = webJsonDoc.createNestedObject (F ("outputs"));
     // OutputMgr.GetConfig (JsonOutputConfig);
     // DEBUG_V ("");
 
-    JsonObject JsonInputConfig = webJsonDoc.createNestedObject (F ("inputs"));
+    // JsonObject JsonInputConfig = webJsonDoc.createNestedObject (F ("inputs"));
     // InputMgr.GetConfig (JsonInputConfig);
 
     // now make it something we can transmit
@@ -339,7 +364,7 @@ void c_WebMgr::GetDeviceOptions ()
 
     // DEBUG_V ("");
     JsonObject WebOptions = webJsonDoc.createNestedObject (F ("options"));
-    JsonObject JsonDeviceOptions = WebOptions.createNestedObject (DEVICE_NAME);
+    JsonObject JsonDeviceOptions = WebOptions.createNestedObject (CN_device);
     // DEBUG_V("");
 
     // PrettyPrint (WebOptions);
@@ -364,7 +389,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
     AwsEventType type, void * arg, uint8_t * data, size_t len)
 {
     // DEBUG_START;
-    // DEBUG_V (String ("Heap = ") + ESP.getFreeHeap ());
+    // DEBUG_V (CN_Heap_colon + ESP.getFreeHeap ());
 
     switch (type)
     {
@@ -491,7 +516,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
         }
     } // end switch (type)
 
-    // DEBUG_V (String ("Heap = ") + ESP.getFreeHeap());
+    // DEBUG_V (CN_Heap_colon + ESP.getFreeHeap());
 
     // DEBUG_END;
 
@@ -642,7 +667,7 @@ void c_WebMgr::ProcessVseriesRequests (AsyncWebSocketClient* client)
         default:
         {
             client->text (F ("V Error"));
-            LOG_PORT.println (String(F("***** ERROR: Unsupported Web command V")) + WebSocketFrameCollectionBuffer[1] + F(" *****"));
+            LOG_PORT.println (String(F ("***** ERROR: Unsupported Web command V")) + WebSocketFrameCollectionBuffer[1] + F (" *****"));
             break;
         }
     } // end switch
@@ -671,7 +696,7 @@ void c_WebMgr::ProcessGseriesRequests (AsyncWebSocketClient* client)
         default:
         {
             client->text (F ("G Error"));
-            LOG_PORT.println (String(F("***** ERROR: Unsupported Web command V")) + WebSocketFrameCollectionBuffer[1] + F(" *****"));
+            LOG_PORT.println (String(F ("***** ERROR: Unsupported Web command V")) + WebSocketFrameCollectionBuffer[1] + F (" *****"));
             break;
         }
     } // end switch
@@ -798,8 +823,8 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
 
     do // once
     {
-        if ((jsonCmd["get"] == DEVICE_NAME) ||
-            (jsonCmd["get"] == NETWORK_NAME)  )
+        if ((jsonCmd["get"] == CN_device) ||
+            (jsonCmd["get"] == CN_network)  )
         {
             // DEBUG_V ("device/network");
             strcat(WebSocketFrameCollectionBuffer, serializeCore (false).c_str());
@@ -823,7 +848,7 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
             break;
         }
 
-        if (jsonCmd["get"] == F ("files"))
+        if (jsonCmd[F ("get")] == CN_files)
         {
             // DEBUG_V ("input");
             String Temp;
@@ -853,7 +878,7 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
 
     do // once
     {
-        if ((jsonCmd.containsKey (DEVICE_NAME)) || (jsonCmd.containsKey (NETWORK_NAME)))
+        if ((jsonCmd.containsKey (CN_device)) || (jsonCmd.containsKey (CN_network)))
         {
             // DEBUG_V ("device/network");
             extern void SetConfig (JsonObject &);
@@ -879,7 +904,7 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
         if (jsonCmd.containsKey ("output"))
         {
             // DEBUG_V ("output");
-            JsonObject omConfig = jsonCmd[F("output")];
+            JsonObject omConfig = jsonCmd[F ("output")];
             OutputMgr.SetConfig (omConfig);
             OutputMgr.GetConfig (WebSocketFrameCollectionBuffer);
             // DEBUG_V ("output: Done");
@@ -941,9 +966,9 @@ void c_WebMgr::processCmdOpt (JsonObject & jsonCmd)
     do // once
     {
         // DEBUG_V ("");
-        if (jsonCmd["opt"] == DEVICE_NAME)
+        if (jsonCmd["opt"] == CN_device)
         {
-            // DEBUG_V (DEVICE_NAME);
+            // DEBUG_V (CN_device);
             GetDeviceOptions ();
             break;
         }
@@ -966,16 +991,16 @@ void c_WebMgr::processCmdDelete (JsonObject& jsonCmd)
     {
         // DEBUG_V ("");
 
-        if (jsonCmd.containsKey (F ("files")))
+        if (jsonCmd.containsKey (CN_files))
         {
             // DEBUG_V ("");
 
-            JsonArray JsonFilesToDelete = jsonCmd[F ("files")];
+            JsonArray JsonFilesToDelete = jsonCmd[CN_files];
 
             // DEBUG_V ("");
             for (JsonObject JsonFile : JsonFilesToDelete)
             {
-                String FileToDelete = JsonFile[F ("name")];
+                String FileToDelete = JsonFile[CN_name];
 
                 // DEBUG_V ("FileToDelete: " + FileToDelete);
                 FileMgr.DeleteSdFile (FileToDelete);
@@ -1078,6 +1103,79 @@ void c_WebMgr::Process ()
         espalexa.loop ();
     }
 } // Process
+
+#ifdef USE_REST
+void printRequest (AsyncWebServerRequest* request)
+{
+    DEBUG_V (String ("      version: '") + String (request->version ()) + "'");
+    DEBUG_V (String ("       method: '") + String (request->method ()) + "'");
+    DEBUG_V (String ("          url: '") + String (request->url ()) + "'");
+    DEBUG_V (String ("         host: '") + String (request->host ()) + "'");
+    DEBUG_V (String ("  contentType: '") + String (request->contentType ()) + "'");
+    DEBUG_V (String ("contentLength: '") + String (request->contentLength ()) + "'");
+    DEBUG_V (String ("    multipart: '") + String (request->multipart ()) + "'");
+
+    //List all collected headers
+    int headers = request->headers ();
+    int i;
+    for (i = 0; i < headers; i++)
+    {
+        AsyncWebHeader* h = request->getHeader (i);
+        DEBUG_V (String ("       HEADER: '") + h->name () + "', '" + h->value () + "'");
+    }
+
+} // printRequest
+//-----------------------------------------------------------------------------
+void c_WebMgr::RestProcessGET (AsyncWebServerRequest* request)
+{
+    DEBUG_START;
+    printRequest (request);
+
+    // request->send (200, "text/json", WebSocketFrameCollectionBuffer);
+
+
+    request->send (200, "text/plain", "Hello");
+
+    DEBUG_END;
+
+} // RestProcessPOST
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::RestProcessPOST (AsyncWebServerRequest* request)
+{
+    DEBUG_START;
+    printRequest (request);
+
+    request->send (404, "text/plain", "Page Not found");
+
+    DEBUG_END;
+
+} // RestProcessGET
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::RestProcessFile (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final)
+{
+    DEBUG_START;
+    printRequest (request);
+
+    request->send (404, "text/plain", "Page Not found");
+
+    DEBUG_END;
+
+} // RestProcessFile
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::RestProcessBody (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total)
+{
+    DEBUG_START;
+    printRequest (request);
+
+    request->send (404, "text/plain", "Page Not found");
+
+    DEBUG_END;
+
+} // RestProcessBody
+#endif // def USE_REST
 
 //-----------------------------------------------------------------------------
 // create a global instance of the WEB UI manager

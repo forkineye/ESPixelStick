@@ -43,7 +43,7 @@ public:
     void   Begin            ();
     void   Poll             ();
     void   SetSpiIoPins     (uint8_t miso, uint8_t mosi, uint8_t clock, uint8_t cs);
-    void   handleFileUpload (String filename, size_t index, uint8_t * data, size_t len, bool final);
+    void   handleFileUpload (const String & filename, size_t index, uint8_t * data, size_t len, bool final);
 
     typedef std::function<void (DynamicJsonDocument& json)> DeserializationHandler;
 
@@ -54,27 +54,27 @@ public:
         FileAppend,
     } FileMode;
 
-    void   DeleteConfigFile (String & FileName);
-    bool   SaveConfigFile   (String & FileName,   String & FileData);
-    bool   SaveConfigFile   (String & FileName,   JsonVariant & FileData);
-    bool   ReadConfigFile   (String & FileName,   String & FileData);
-    bool   ReadConfigFile   (String & FileName,   JsonDocument & FileData);
-    bool   LoadConfigFile   (String & FileName,   DeserializationHandler Handler);
+    void   DeleteConfigFile (const String & FileName);
+    bool   SaveConfigFile   (const String & FileName,   String & FileData);
+    bool   SaveConfigFile   (const String & FileName,   JsonVariant & FileData);
+    bool   ReadConfigFile   (const String & FileName,   String & FileData);
+    bool   ReadConfigFile   (const String & FileName,   JsonDocument & FileData);
+    bool   LoadConfigFile   (const String & FileName,   DeserializationHandler Handler);
 
     bool   SdCardIsInstalled () { return SdCardInstalled; }
     FileId CreateFileHandle ();
-    void   DeleteSdFile     (String & FileName);
-    void   SaveSdFile       (String & FileName,   String & FileData);
-    void   SaveSdFile       (String & FileName,   JsonVariant & FileData);
-    bool   OpenSdFile       (String & FileName,   FileMode Mode, FileId & FileHandle);
-    size_t ReadSdFile       (FileId & FileHandle, byte * FileData, size_t NumBytesToRead);
-    size_t ReadSdFile       (FileId & FileHandle, byte * FileData, size_t NumBytesToRead,  size_t StartingPosition);
-    bool   ReadSdFile       (String & FileName,   String & FileData);
-    size_t WriteSdFile      (FileId & FileHandle, byte * FileData, size_t NumBytesToWrite);
-    size_t WriteSdFile      (FileId & FileHandle, byte * FileData, size_t NumBytesToWrite, size_t StartingPosition);
-    void   CloseSdFile      (FileId & FileHandle);
+    void   DeleteSdFile     (const String & FileName);
+    void   SaveSdFile       (const String & FileName,   String & FileData);
+    void   SaveSdFile       (const String & FileName,   JsonVariant & FileData);
+    bool   OpenSdFile       (const String & FileName,   FileMode Mode, FileId & FileHandle);
+    size_t ReadSdFile       (const FileId & FileHandle, byte * FileData, size_t NumBytesToRead);
+    size_t ReadSdFile       (const FileId & FileHandle, byte * FileData, size_t NumBytesToRead,  size_t StartingPosition);
+    bool   ReadSdFile       (const String & FileName,   String & FileData);
+    size_t WriteSdFile      (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite);
+    size_t WriteSdFile      (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite, size_t StartingPosition);
+    void   CloseSdFile      (const FileId & FileHandle);
     void   GetListOfSdFiles (String & Response);
-    size_t GetSdFileSize    (FileId & FileHandle);
+    size_t GetSdFileSize    (const FileId & FileHandle);
 
     // Configuration file params
 #if defined ARDUINO_ARCH_ESP8266
@@ -97,7 +97,7 @@ private:
 
     void listDir (fs::FS& fs, String dirname, uint8_t levels);
     void DescribeSdCardToUser ();
-    void handleFileUploadNewFile (String & filename);
+    void handleFileUploadNewFile (const String & filename);
 
 #ifdef ESP32
     void printDirectory (File dir, int numTabs);

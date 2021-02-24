@@ -84,8 +84,6 @@ c_OutputRelay::~c_OutputRelay ()
 void c_OutputRelay::Begin ()
 {
     // DEBUG_START;
-    String DriverName = ""; GetDriverName (DriverName);
-    LOG_PORT.println (String (F ("** ")) + DriverName + F(" Initialization for Chan: ") + String (OutputChannelId) + F(" **"));
 
     SetOutputBufferSize (Num_Channels);
 
@@ -111,7 +109,7 @@ bool c_OutputRelay::validate ()
 
     if ((Num_Channels > OM_RELAY_CHANNEL_LIMIT) || (Num_Channels < 1))
     {
-        LOG_PORT.println (String (F ("*** Requested channel count was Not Valid. Setting to ")) + OM_RELAY_CHANNEL_LIMIT + F(" ***"));
+        LOG_PORT.println (String (F ("*** Requested channel count was Not Valid. Setting to ")) + OM_RELAY_CHANNEL_LIMIT + F (" ***"));
         Num_Channels = OM_RELAY_CHANNEL_LIMIT;
         response = false;
     }
@@ -190,18 +188,18 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
         setFromJSON (UpdateInterval, jsonConfig, OM_RELAY_UPDATE_INTERVAL_NAME);
 
         // do we have a channel configuration array?
-        if (false == jsonConfig.containsKey (OM_RELAY_CHANNELS_NAME))
+        if (false == jsonConfig.containsKey (CN_channels))
         {
             // if not, flag an error and stop processing
             LOG_PORT.println (F ("No Relay Output Channel Settings Found. Using Defaults"));
             break;
         }
-        JsonArray JsonChannelList = jsonConfig[OM_RELAY_CHANNELS_NAME];
+        JsonArray JsonChannelList = jsonConfig[CN_channels];
 
         for (JsonVariant JsonChannelData : JsonChannelList)
         {
             uint8_t ChannelId = OM_RELAY_CHANNEL_LIMIT;
-            setFromJSON (ChannelId, JsonChannelData, OM_RELAY_CHANNEL_ID_NAME);
+            setFromJSON (ChannelId, JsonChannelData, CN_id);
 
             // do we have a valid channel configuration ID?
             if (ChannelId >= OM_RELAY_CHANNEL_LIMIT)
@@ -215,11 +213,11 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 
             setFromJSON (CurrentOutputChannel->Enabled,           JsonChannelData, OM_RELAY_CHANNEL_ENABLED_NAME);
             setFromJSON (CurrentOutputChannel->InvertOutput,      JsonChannelData, OM_RELAY_CHANNEL_INVERT_NAME);
-            setFromJSON (CurrentOutputChannel->OnOffTriggerLevel, JsonChannelData, OM_RELAY_CHANNEL_TRIGGER_NAME);
+            setFromJSON (CurrentOutputChannel->OnOffTriggerLevel, JsonChannelData, CN_trig);
 
             // DEBUGV (String ("currentRelay.GpioId: ") + String (CurrentOutputChannel->GpioId));
             temp = CurrentOutputChannel->GpioId;
-            setFromJSON (temp, JsonChannelData, OM_RELAY_CHANNEL_GPIO_NAME);
+            setFromJSON (temp, JsonChannelData, CN_gid);
             // DEBUGV (String ("temp: ") + String (temp));
 
             if ((temp != CurrentOutputChannel->GpioId) && 
@@ -261,18 +259,18 @@ void c_OutputRelay::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 
     jsonConfig[OM_RELAY_UPDATE_INTERVAL_NAME] = UpdateInterval;
 
-    JsonArray JsonChannelList = jsonConfig.createNestedArray (OM_RELAY_CHANNELS_NAME);
+    JsonArray JsonChannelList = jsonConfig.createNestedArray (CN_channels);
 
     uint8_t ChannelId = 0;
     for (RelayChannel_t & currentRelay : OutputList)
     {
         JsonObject JsonChannelData = JsonChannelList.createNestedObject ();
 
-        JsonChannelData[OM_RELAY_CHANNEL_ID_NAME]      = ChannelId;
+        JsonChannelData[CN_id]      = ChannelId;
         JsonChannelData[OM_RELAY_CHANNEL_ENABLED_NAME] = currentRelay.Enabled;
         JsonChannelData[OM_RELAY_CHANNEL_INVERT_NAME]  = currentRelay.InvertOutput;
-        JsonChannelData[OM_RELAY_CHANNEL_TRIGGER_NAME] = currentRelay.OnOffTriggerLevel;
-        JsonChannelData[OM_RELAY_CHANNEL_GPIO_NAME]    = currentRelay.GpioId;
+        JsonChannelData[CN_trig] = currentRelay.OnOffTriggerLevel;
+        JsonChannelData[CN_gid]    = currentRelay.GpioId;
 
         // DEBUGV (String ("CurrentRelayChanIndex: ") + String (ChannelId));
         // DEBUGV (String ("currentRelay.OnValue: ")  + String (currentRelay.OnValue));

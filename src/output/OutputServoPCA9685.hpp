@@ -54,16 +54,16 @@ public:
 
 private:
 #   define OM_SERVO_PCA9685_CHANNEL_LIMIT           16
-#   define OM_SERVO_PCA9685_UPDATE_INTERVAL_NAME    F("ui")
-#   define OM_SERVO_PCA9685_CHANNELS_NAME           F("channels")
-#   define OM_SERVO_PCA9685_CHANNEL_ENABLED_NAME    F("en")
-#   define OM_SERVO_PCA9685_CHANNEL_MINLEVEL_NAME   F("Min")
-#   define OM_SERVO_PCA9685_CHANNEL_MAXLEVEL_NAME   F("Max")
-#   define OM_SERVO_PCA9685_CHANNEL_GPIO_NAME       F("gid")
-#   define OM_SERVO_PCA9685_CHANNEL_ID_NAME         F("id")
-#   define OM_SERVO_PCA9685_CHANNEL_REVERSED        F("rev")
-#   define OM_SERVO_PCA9685_CHANNEL_16BITS          F("b16")
-#   define OM_SERVO_PCA9685_CHANNEL_SCALED          F("sca")
+#   define OM_SERVO_PCA9685_UPDATE_INTERVAL_NAME    CN_ui
+#   define OM_SERVO_PCA9685_CHANNELS_NAME           CN_channels
+#   define OM_SERVO_PCA9685_CHANNEL_ENABLED_NAME    CN_en
+#   define OM_SERVO_PCA9685_CHANNEL_MINLEVEL_NAME   CN_Min
+#   define OM_SERVO_PCA9685_CHANNEL_MAXLEVEL_NAME   CN_Max
+#   define OM_SERVO_PCA9685_CHANNEL_GPIO_NAME       CN_gid
+#   define OM_SERVO_PCA9685_CHANNEL_ID_NAME         CN_id
+#   define OM_SERVO_PCA9685_CHANNEL_REVERSED        CN_rev
+#   define OM_SERVO_PCA9685_CHANNEL_16BITS          CN_b16
+#   define OM_SERVO_PCA9685_CHANNEL_SCALED          CN_sca
 #   define SERVO_PCA9685_UPDATE_FREQUENCY           50
 
     bool    validate ();

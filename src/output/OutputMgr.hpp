@@ -90,9 +90,6 @@ private:
     c_OutputCommon * pOutputChannelDrivers[e_OutputChannelIds::OutputChannelId_End]; ///< pointer(s) to the current active output driver
 
     // configuration parameter names for the channel manager within the config file
-#   define OM_SECTION_NAME         F("output_config")
-#   define OM_CHANNEL_SECTION_NAME F("channels")
-#   define OM_CHANNEL_TYPE_NAME    F("type")
 
 #ifdef ARDUINO_ARCH_ESP8266
 #   define OM_MAX_CONFIG_SIZE      ((size_t)(5*1024))

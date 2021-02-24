@@ -141,7 +141,6 @@ static void IRAM_ATTR uart_intr_handler (void* param)
 void c_OutputWS2811::Begin()
 {
     // DEBUG_START;
-    LOG_PORT.println (String (F ("** WS281x Initialization for Chan: ")) + String (OutputChannelId) + " **");
 
 #ifdef ARDUINO_ARCH_ESP8266
     InitializeUart (WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE * WS2811_DATA_SPEED,
@@ -179,15 +178,15 @@ void c_OutputWS2811::GetConfig(ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
-    jsonConfig[F ("color_order")]    = color_order;
-    jsonConfig[F ("pixel_count")]    = pixel_count;
-    jsonConfig[F ("group_size")]     = group_size;
-    jsonConfig[F ("zig_size")]       = zig_size;
-    jsonConfig[F ("gamma")]          = gamma;
-    jsonConfig[F ("brightness")]     = (brightness * 100.0); // save as a 1 - 100 percentage
-    jsonConfig[F ("interframetime")] = InterFrameGapInMicroSec;
+    jsonConfig[CN_color_order]    = color_order;
+    jsonConfig[CN_pixel_count]    = pixel_count;
+    jsonConfig[CN_group_size]     = group_size;
+    jsonConfig[CN_zig_size]       = zig_size;
+    jsonConfig[CN_gamma]          = gamma;
+    jsonConfig[CN_brightness]     = uint8_t(brightness * 100.0); // save as a 1 - 100 percentage
+    jsonConfig[CN_interframetime] = InterFrameGapInMicroSec;
     // enums need to be converted to uints for json
-    jsonConfig[F ("data_pin")]       = uint (DataPin);
+    jsonConfig[CN_data_pin]       = uint (DataPin);
 
     // DEBUG_END;
 } // GetConfig
@@ -410,16 +409,19 @@ bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject & jsonConfig)
     // enums need to be converted to uints for json
     uint tempDataPin = uint (DataPin);
 
-    setFromJSON (color_order,             jsonConfig, F ("color_order"));
-    setFromJSON (pixel_count,             jsonConfig, F ("pixel_count"));
-    setFromJSON (group_size,              jsonConfig, F ("group_size"));
-    setFromJSON (zig_size,                jsonConfig, F ("zig_size"));
-    setFromJSON (gamma,                   jsonConfig, F ("gamma"));
-    setFromJSON (brightness,              jsonConfig, F ("brightness"));
-    setFromJSON (InterFrameGapInMicroSec, jsonConfig, F ("interframetime"));
-    setFromJSON (tempDataPin,             jsonConfig, F ("data_pin"));
+    setFromJSON (color_order,             jsonConfig, CN_color_order);
+    setFromJSON (pixel_count,             jsonConfig, CN_pixel_count);
+    setFromJSON (group_size,              jsonConfig, CN_group_size);
+    setFromJSON (zig_size,                jsonConfig, CN_zig_size);
+    setFromJSON (gamma,                   jsonConfig, CN_gamma);
+    setFromJSON (brightness,              jsonConfig, CN_brightness);
+    setFromJSON (InterFrameGapInMicroSec, jsonConfig, CN_interframetime);
+    setFromJSON (tempDataPin,             jsonConfig, CN_data_pin);
     DataPin = gpio_num_t (tempDataPin);
+
+    // DEBUG_V (String ("brightness: ") + String (brightness));
     brightness /= 100.0; // turn into a 0-1.0 multiplier
+    // DEBUG_V (String ("brightness: ") + String (brightness));
 
     bool response = validate ();
 
@@ -522,9 +524,10 @@ bool c_OutputWS2811::validate ()
     }
 
     // Default brightness value
-    if (brightness <= 0)
+    if (brightness <= 0.0)
     {
         brightness = 1.0;
+        // DEBUG_V (String ("brightness: ") + String (brightness));
         response = false;
     }
 

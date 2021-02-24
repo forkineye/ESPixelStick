@@ -126,7 +126,6 @@ c_OutputGECE::~c_OutputGECE ()
 void c_OutputGECE::Begin()
 {
     // DEBUG_START;
-    Serial.println (String (F ("** GECE Initialization for Chan: ")) + String (OutputChannelId) + " **");
 
     if (gpio_num_t (-1) == DataPin) { return; }
 
@@ -171,11 +170,11 @@ bool c_OutputGECE::SetConfig(ArduinoJson::JsonObject & jsonConfig)
     // DEBUG_START;
 
     uint temp;
-    setFromJSON(pixel_count, jsonConfig, F ("pixel_count"));
-    setFromJSON(brightness,  jsonConfig, F ("brightness"));
+    setFromJSON(pixel_count, jsonConfig, CN_pixel_count);
+    setFromJSON(brightness,  jsonConfig, CN_brightness);
     // enums need to be converted to uints for json
     temp = uint (DataPin);
-    setFromJSON(temp,        jsonConfig, F ("data_pin"));
+    setFromJSON(temp,        jsonConfig, CN_data_pin);
     DataPin = gpio_num_t (temp);
 
     bool response = validate ();
@@ -192,11 +191,11 @@ bool c_OutputGECE::SetConfig(ArduinoJson::JsonObject & jsonConfig)
 void c_OutputGECE::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
-    jsonConfig[F ("pixel_count")] = pixel_count;
-    jsonConfig[F ("brightness")]  = brightness;
+    jsonConfig[CN_pixel_count] = pixel_count;
+    jsonConfig[CN_brightness]  = brightness;
 
     // enums need to be converted to uints for json
-    jsonConfig[F ("data_pin")]    = uint (DataPin);
+    jsonConfig[CN_data_pin]    = uint (DataPin);
 
     // DEBUG_END;
 } // GetConfig

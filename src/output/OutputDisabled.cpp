@@ -61,8 +61,6 @@ void c_OutputDisabled::Begin()
 {
     // DEBUG_START;
 
-    Serial.println (String(F ("** OutputDisabled Initialization for Chan: ")) + String(OutputChannelId) +  " **");
-
     if (gpio_num_t (-1) != DataPin)
     {
         pinMode (DataPin, INPUT);

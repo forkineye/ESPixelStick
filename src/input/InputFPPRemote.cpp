@@ -56,8 +56,6 @@ void c_InputFPPRemote::Begin()
 {
     // DEBUG_START;
 
-    LOG_PORT.println (String (F ("** 'FPP Remote' Initialization for Input: '")) + InputChannelId + String (F ("' **")));
-
     if (true == HasBeenInitialized)
     {
         // DEBUG_END;
@@ -98,7 +96,7 @@ void c_InputFPPRemote::GetStatus (JsonObject & jsonStatus)
     // DEBUG_START;
 
     JsonObject LocalPlayerStatus = jsonStatus.createNestedObject (F ("LocalPlayer"));
-    LocalPlayerStatus[F ("active")] = PlayingFile ();
+    LocalPlayerStatus[CN_active] = PlayingFile ();
 
     if (PlayingFile ())
     {
@@ -234,7 +232,7 @@ void c_InputFPPRemote::StartPlaying (String & FileName)
         {
             // DEBUG_V ("Start Local FSEQ file player");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile ();
-            StatusType = F ("File");
+            StatusType = CN_File;
             pInputFPPRemotePlayItem->SetPlayCount (1);
         }
 

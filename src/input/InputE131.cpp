@@ -20,11 +20,6 @@
 #include "InputE131.hpp"
 #include "../WiFiMgr.hpp"
 
-#define JSON_NAME_UNIVERSE       (F ("universe"))
-#define JSON_NAME_UNIVERSE_LIMIT (F ("universe_limit"))
-#define JSON_NAME_CHANNEL_START  (F ("channel_start"))
-#define JSON_NAME_MULTICAST      (F ("multicast"))
-
 //-----------------------------------------------------------------------------
 c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
                           c_InputMgr::e_InputType       NewChannelType,
@@ -54,7 +49,6 @@ c_InputE131::~c_InputE131()
 void c_InputE131::Begin ()
 {
     // DEBUG_START;
-    LOG_PORT.println (String (F ("** 'E1.31' Initialization for input: '")) + String(InputChannelId) + String (F ("' **")));
 
     do // once
     {
@@ -69,7 +63,7 @@ void c_InputE131::Begin ()
         validateConfiguration ();
         // DEBUG_V ("");
 
-        WiFiStateChanged (WiFiMgr.IsWiFiConnected (), false);
+        NetworkStateChanged (WiFiMgr.IsWiFiConnected (), false);
 
         // DEBUG_V ("");
         HasBeenInitialized = true;
@@ -85,9 +79,9 @@ void c_InputE131::GetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
-    jsonConfig[JSON_NAME_UNIVERSE]       = startUniverse;
-    jsonConfig[JSON_NAME_UNIVERSE_LIMIT] = universe_channel_limit;
-    jsonConfig[JSON_NAME_CHANNEL_START]  = channel_start;
+    jsonConfig[CN_universe]       = startUniverse;
+    jsonConfig[CN_universe_limit] = universe_channel_limit;
+    jsonConfig[CN_universe_start]  = channel_start;
 
     // DEBUG_END;
 
@@ -98,7 +92,7 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject e131Status = jsonStatus.createNestedObject (F("e131"));
+    JsonObject e131Status = jsonStatus.createNestedObject (F ("e131"));
     e131Status["unifirst"]      = startUniverse;
     e131Status["unilast"]       = LastUniverse;
     e131Status["unichanlim"]    = universe_channel_limit;
@@ -146,7 +140,7 @@ void c_InputE131::Process ()
                 LOG_PORT.print (seqTracker[uniOffset] - 1);
                 LOG_PORT.print (F (" actual: "));
                 LOG_PORT.print (packet.sequence_number);
-                LOG_PORT.print (F (" universe: "));
+                LOG_PORT.print (String(CN_universe) + ":");
                 LOG_PORT.println (universe);
                 seqError[uniOffset]++;
                 seqTracker[uniOffset] = packet.sequence_number + 1;
@@ -220,9 +214,9 @@ boolean c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
-    setFromJSON (startUniverse,          jsonConfig, JSON_NAME_UNIVERSE);
-    setFromJSON (universe_channel_limit, jsonConfig, JSON_NAME_UNIVERSE_LIMIT);
-    setFromJSON (channel_start,          jsonConfig, JSON_NAME_CHANNEL_START);
+    setFromJSON (startUniverse,          jsonConfig, CN_universe);
+    setFromJSON (universe_channel_limit, jsonConfig, CN_universe_limit);
+    setFromJSON (channel_start,          jsonConfig, CN_universe_start);
 
     validateConfiguration ();
 
@@ -314,13 +308,13 @@ void c_InputE131::validateConfiguration ()
 } // validateConfiguration
 
 //-----------------------------------------------------------------------------
-void c_InputE131::WiFiStateChanged (bool IsConnected)
+void c_InputE131::NetworkStateChanged (bool IsConnected)
 {
-    WiFiStateChanged (IsConnected, true);
-}
+    NetworkStateChanged (IsConnected, true);
+} // NetworkStateChanged
 
 //-----------------------------------------------------------------------------
-void c_InputE131::WiFiStateChanged (bool IsConnected, bool ReBootAllowed)
+void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
 {
     // DEBUG_START;
 
@@ -371,4 +365,4 @@ void c_InputE131::WiFiStateChanged (bool IsConnected, bool ReBootAllowed)
 
     // DEBUG_END;
 
-} // WiFiStateChanged
+} // NetworkStateChanged
