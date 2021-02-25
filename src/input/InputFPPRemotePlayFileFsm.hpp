@@ -36,9 +36,9 @@ public:
     virtual void Poll (uint8_t * Buffer, size_t BufferSize) = 0;
     virtual void Init (c_InputFPPRemotePlayFile * Parent) = 0;
     virtual void GetStateName (String & sName) = 0;
-    virtual void Start (String & FileName, uint32_t FrameId) = 0;
+    virtual void Start (String & FileName, uint32_t FrameId, uint32_t RemainingPlayCount) = 0;
     virtual void Stop (void) = 0;
-    virtual bool Sync (uint32_t FrameId) = 0;
+    virtual bool Sync (String& FileName, uint32_t FrameId) = 0;
 
 protected:
     c_InputFPPRemotePlayFile * p_InputFPPRemotePlayFile = nullptr;
@@ -52,11 +52,24 @@ public:
     virtual void Poll (uint8_t * Buffer, size_t BufferSize);
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Idle; }
-    virtual void Start (String & FileName, uint32_t FrameId);
+    virtual void Start (String & FileName, uint32_t FrameId, uint32_t RemainingPlayCount);
     virtual void Stop (void);
-    virtual bool Sync (uint32_t FrameId);
+    virtual bool Sync (String& FileName, uint32_t FrameId);
 
 }; // fsm_PlayFile_state_Idle
+
+/*****************************************************************************/
+class fsm_PlayFile_state_Starting : public fsm_PlayFile_state
+{
+public:
+    virtual void Poll (uint8_t* Buffer, size_t BufferSize);
+    virtual void Init (c_InputFPPRemotePlayFile* Parent);
+    virtual void GetStateName (String& sName) { sName = F ("Starting"); }
+    virtual void Start (String& FileName, uint32_t FrameId, uint32_t RemainingPlayCount);
+    virtual void Stop (void);
+    virtual bool Sync (String& FileName, uint32_t FrameId);
+
+}; // fsm_PlayFile_state_Starting
 
 /*****************************************************************************/
 class fsm_PlayFile_state_PlayingFile : public fsm_PlayFile_state
@@ -65,14 +78,8 @@ public:
     virtual void Poll (uint8_t * Buffer, size_t BufferSize);
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String & sName) { sName = CN_File; }
-    virtual void Start (String & FileName, uint32_t FrameId);
+    virtual void Start (String & FileName, uint32_t FrameId, uint32_t RemainingPlayCount);
     virtual void Stop (void);
-    virtual bool Sync (uint32_t FrameId);
+    virtual bool Sync (String & FileName, uint32_t FrameId);
 
 }; // fsm_PlayFile_state_PlayingFile
-
-
-
-
-
-

@@ -47,7 +47,7 @@ void fsm_PlayList_state_WaitForStart::Init (c_InputFPPRemotePlayList* Parent)
 } // fsm_PlayList_state_WaitForStart::Init
 
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_WaitForStart::Start (String& FileName, uint32_t)
+void fsm_PlayList_state_WaitForStart::Start (String& FileName, uint32_t, uint32_t)
 {
     // DEBUG_START;
 
@@ -115,7 +115,7 @@ void fsm_PlayList_state_Idle::Init (c_InputFPPRemotePlayList* Parent)
 } // fsm_PlayList_state_Idle::Init
 
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_Idle::Start (String & FileName, uint32_t )
+void fsm_PlayList_state_Idle::Start (String &, uint32_t, uint32_t )
 {
     // DEBUG_START;
 
@@ -181,12 +181,11 @@ void fsm_PlayList_state_PlayingFile::Init (c_InputFPPRemotePlayList* Parent)
 } // fsm_PlayList_state_PlayingFile::Init
 
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_PlayingFile::Start (String & FileName, uint32_t FrameId)
+void fsm_PlayList_state_PlayingFile::Start (String & FileName, uint32_t FrameId, uint32_t PlayCount)
 {
     // DEBUG_START;
 
-    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->SetPlayCount (FrameId);
-    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Start (FileName, 0);
+    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Start (FileName, FrameId, PlayCount);
 
     // DEBUG_END;
 
@@ -258,7 +257,7 @@ void fsm_PlayList_state_PlayingEffect::Init (c_InputFPPRemotePlayList* Parent)
 } // fsm_PlayList_state_PlayingEffect::Init
 
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_PlayingEffect::Start (String & FileName, uint32_t FrameId)
+void fsm_PlayList_state_PlayingEffect::Start (String & FileName, uint32_t FrameId, uint32_t PlayCount)
 {
     // DEBUG_START;
 
@@ -266,7 +265,7 @@ void fsm_PlayList_state_PlayingEffect::Start (String & FileName, uint32_t FrameI
     // DEBUG_V (String ("FrameId: '") + String (FrameId) + "'");
 
     pInputFPPRemotePlayList->pInputFPPRemotePlayItem->SetDuration (FrameId);
-    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Start (FileName, 0);
+    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Start (FileName, 0, PlayCount);
     
     // DEBUG_END;
 
@@ -331,7 +330,7 @@ void fsm_PlayList_state_Paused::Init (c_InputFPPRemotePlayList* Parent)
 } // fsm_PlayList_state_Paused::Init
 
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_Paused::Start (String& FileName, uint32_t FrameId)
+void fsm_PlayList_state_Paused::Start (String& , uint32_t , uint32_t )
 {
     // DEBUG_START;
 

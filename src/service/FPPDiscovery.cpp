@@ -301,12 +301,6 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
                 // DEBUG_V (String ("   FileName: ") + FileName);
                 // DEBUG_V (String ("    FrameId: ") + FrameId);
 
-                if (!PlayingFile () || FileName != InputFPPRemotePlayFile.GetFileName ())
-                {
-                    // DEBUG_V ("Sync::Stop::Ignored");
-                    break;
-                }
-
                 StopPlaying ();
                 break;
             }
@@ -320,25 +314,14 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
                 // DEBUG_V (String ("GetFileName: ") + InputFPPRemotePlayFile.GetFileName ());
                 // DEBUG_V (String ("    FrameId: ") + FrameId);
 
-                if (!PlayingFile() || FileName != InputFPPRemotePlayFile.GetFileName())
-                {
-                    // DEBUG_V ("Sync::Sync::Start Playing New File");
-                    // DEBUG_V (String ("   FileName: ") + FileName);
-                    // DEBUG_V (String ("    FrameId: ") + FrameId);
-                    StartPlaying (FileName, FrameId);
-                }
-                else if (PlayingFile())
-                {
-                    // DEBUG_V ("Sync::Sync");
-                    /*
-                    LOG_PORT.println (String(float(millis()/1000.0)) + "," + 
-                                      String(InputFPPRemotePlayFile.GetLastFrameId()) + "," + 
-                                      String (seconds_elapsed) + "," + 
-                                      String (FrameId) + "," + 
-                                      String(InputFPPRemotePlayFile.GetTimeOffset(),5));
-                    */
-                    InputFPPRemotePlayFile.Sync (FrameId);
-                }
+                /*
+                LOG_PORT.println (String(float(millis()/1000.0)) + "," +
+                                  String(InputFPPRemotePlayFile.GetLastFrameId()) + "," +
+                                  String (seconds_elapsed) + "," +
+                                  String (FrameId) + "," +
+                                  String(InputFPPRemotePlayFile.GetTimeOffset(),5));
+                */
+                InputFPPRemotePlayFile.Sync (FileName, FrameId);
                 break;
             }
 
@@ -347,7 +330,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
                 // DEBUG_V ("Sync::Open");
                 // DEBUG_V (String ("   FileName: ") + FileName);
                 // DEBUG_V (String ("    FrameId: ") + FrameId);
-                // StartPlaying (FileName, FrameId);
+                StartPlaying (FileName, FrameId);
                 break;
             }
 
@@ -915,25 +898,8 @@ void c_FPPDiscovery::StartPlaying (String & FileName, uint32_t FrameId)
         }
         // DEBUG_V ("Asking for file to play");
 
-        if (PlayingFile () && (FileName == InputFPPRemotePlayFile.GetFileName ()))
-        {
-            // DEBUG_V ("Do Sync instead of start");
-            InputFPPRemotePlayFile.Sync (FrameId);
-            break;
-        }
+        InputFPPRemotePlayFile.Start (FileName, FrameId, 1);
 
-        StopPlaying ();
-
-        InputFPPRemotePlayFile.SetPlayCount (1);
-        InputFPPRemotePlayFile.Start (FileName, FrameId);
-        // LOG_PORT.println (String (F ("FPPDiscovery::Playing:  '")) + filename + "'" );
-        /*
-        LOG_PORT.println (String ("\nESP Sec") + "," + 
-            String ("ESP Frame ID") + "," + 
-            String ("FPP Seconds") + "," + 
-            String ("FPP Frame ID") + "," + 
-            String("ESP TimeOffset"));
-        */
     } while (false);
 
     // DEBUG_END;
@@ -945,17 +911,13 @@ void c_FPPDiscovery::StopPlaying ()
 {
     // DEBUG_START;
 
-    if (PlayingFile())
-    {
-        // DEBUG_V ("");
-        // LOG_PORT.println (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
-        InputFPPRemotePlayFile.Stop ();
+    // LOG_PORT.println (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
+    InputFPPRemotePlayFile.Stop ();
 
-        // DEBUG_V ("");
-        // blank the display
-        ProcessBlankPacket ();
-    }
+    // DEBUG_V ("");
 
+    ProcessBlankPacket ();
+    
     // DEBUG_END;
 
 } // StopPlaying
