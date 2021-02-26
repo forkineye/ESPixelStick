@@ -146,7 +146,7 @@ boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_START;
 
     disconnectFromMqtt ();
-
+    String OldTopic = topic;
     setFromJSON (ip,                   jsonConfig, CN_ip);
     setFromJSON (port,                 jsonConfig, CN_port);
     setFromJSON (user,                 jsonConfig, CN_user);
@@ -163,6 +163,12 @@ boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     // Update the config fields in case the validator changed them
     GetConfig (jsonConfig);
+
+    if (OldTopic != topic)
+    {
+        mqtt.unsubscribe (OldTopic.c_str ());
+        mqtt.unsubscribe ((OldTopic + CN_slashset).c_str ());
+    }
 
     connectToMqtt ();
 
@@ -276,12 +282,11 @@ void c_InputMQTT::onMqttConnect(bool sessionPresent)
 
     // Get retained MQTT state
     mqtt.subscribe (topic.c_str (), 0);
-    // mqtt.unsubscribe(topic.c_str());
 
     // Setup subscriptions
     mqtt.subscribe(String(topic + SET_COMMAND_TOPIC).c_str(), 0);
 
-    mqtt.publish (topic.c_str(), 0, true, "ESP0");
+    mqtt.publish (topic.c_str(), 0, true, config.id.c_str());
 
     // Publish state
     update ();
