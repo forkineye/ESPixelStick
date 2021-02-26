@@ -37,18 +37,18 @@ c_InputFPPRemotePlayFile::~c_InputFPPRemotePlayFile ()
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Stop ();
+    Stop ();
 
     // DEBUG_END;
 
 } // ~c_InputFPPRemotePlayFile
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::Start (String & FileName, uint32_t FrameId)
+void c_InputFPPRemotePlayFile::Start (String & FileName, uint32_t FrameId, uint32_t PlayCount)
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Start (FileName, FrameId);
+    pCurrentFsmState->Start (FileName, FrameId, PlayCount);
 
     // DEBUG_END;
 } // Start
@@ -59,18 +59,17 @@ void c_InputFPPRemotePlayFile::Stop ()
     // DEBUG_START;
 
     pCurrentFsmState->Stop ();
-    PlayItemName = String ("");
 
     // DEBUG_END;
 } // Stop
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::Sync (uint32_t FrameId)
+void c_InputFPPRemotePlayFile::Sync (String & FileName, uint32_t FrameId)
 {
     // DEBUG_START;
 
     SyncCount++;
-    if (pCurrentFsmState->Sync (FrameId))
+    if (pCurrentFsmState->Sync (FileName, FrameId))
     {
         SyncAdjustmentCount++;
     }

@@ -29,22 +29,25 @@ public:
     c_InputFPPRemotePlayFile ();
     ~c_InputFPPRemotePlayFile ();
 
-    virtual void Start (String & FileName, uint32_t FrameId);
+    virtual void Start (String & FileName, uint32_t FrameId, uint32_t RemainingPlayCount);
     virtual void Stop ();
-    virtual void Sync (uint32_t FrameId);
+    virtual void Sync (String& FileName, uint32_t FrameId);
     virtual void Poll (uint8_t* Buffer, size_t BufferSize);
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
+    
     uint32_t GetLastFrameId () { return LastFrameId; }
     float GetTimeOffset () { return TimeOffset; }
 
 private:
     friend class fsm_PlayFile_state_Idle;
+    friend class fsm_PlayFile_state_Starting;
     friend class fsm_PlayFile_state_PlayingFile;
     friend class fsm_PlayFile_state;
 
-    fsm_PlayFile_state_Idle          fsm_PlayFile_state_Idle_imp;
-    fsm_PlayFile_state_PlayingFile   fsm_PlayFile_state_PlayingFile_imp;
+    fsm_PlayFile_state_Idle        fsm_PlayFile_state_Idle_imp;
+    fsm_PlayFile_state_Starting    fsm_PlayFile_state_Starting_imp;
+    fsm_PlayFile_state_PlayingFile fsm_PlayFile_state_PlayingFile_imp;
 
     fsm_PlayFile_state * pCurrentFsmState = &fsm_PlayFile_state_Idle_imp;
     c_FileMgr::FileId FileHandleForFileBeingPlayed = 0;

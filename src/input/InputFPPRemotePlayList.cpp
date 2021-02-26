@@ -44,11 +44,11 @@ c_InputFPPRemotePlayList::~c_InputFPPRemotePlayList ()
 } // ~c_InputFPPRemotePlayList
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayList::Start (String & FileName, uint32_t FrameId)
+void c_InputFPPRemotePlayList::Start (String & FileName, uint32_t FrameId, uint32_t PlayCount)
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Start (FileName, FrameId);
+    pCurrentFsmState->Start (FileName, FrameId, PlayCount);
 
     // DEBUG_END;
 
@@ -67,11 +67,11 @@ void c_InputFPPRemotePlayList::Stop ()
 } // Stop
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayList::Sync (uint32_t FrameId)
+void c_InputFPPRemotePlayList::Sync (String & FileName, uint32_t FrameId)
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Sync (FrameId);
+    pCurrentFsmState->Sync (FileName, FrameId);
 
     // DEBUG_END;
 
@@ -118,6 +118,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
     {
         // DEBUG_V ("");
         uint32_t FrameId = 0;
+        uint32_t PlayCount = 1;
         PauseEndTime = millis () + 10000;
 
         // Get the playlist file
@@ -126,7 +127,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         {
             LOG_PORT.println (String (F ("Could not read Playlist file: '")) + PlayItemName + "'");
             fsm_PlayList_state_Paused_imp.Init (this);
-            pCurrentFsmState->Start (PlayItemName, PauseEndTime);
+            pCurrentFsmState->Start (PlayItemName, PauseEndTime, 1);
             break;
         }
         // DEBUG_V ("");
@@ -141,7 +142,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
             LOG_PORT.println (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
             LOG_PORT.println (String (F ("++++")) + FileData + String (F ("----")));
             fsm_PlayList_state_Paused_imp.Init (this);
-            pCurrentFsmState->Start (PlayItemName, PauseEndTime);
+            pCurrentFsmState->Start (PlayItemName, PauseEndTime, PlayCount);
             break;
         }
 
@@ -167,7 +168,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
 
             PauseEndTime = millis () + 1000;
             fsm_PlayList_state_Paused_imp.Init (this);
-            pCurrentFsmState->Start (PlayItemName, PauseEndTime);
+            pCurrentFsmState->Start (PlayItemName, PauseEndTime, PlayCount);
             break;
         }
 
@@ -186,7 +187,8 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         if (String(CN_file) == PlayListEntryType)
         {
             FrameId = 1;
-            setFromJSON (FrameId, JsonPlayListArrayEntry, "playcount");
+            PlayCount = 1;
+            setFromJSON (PlayCount, JsonPlayListArrayEntry, F ("playcount"));
             // DEBUG_V (String ("PlayListEntryPlayCount: '") + String (FrameId) + "'");
 
             fsm_PlayList_state_PlayingFile_imp.Init (this);
@@ -220,12 +222,12 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
             LOG_PORT.println (String (F ("Unsupported Play List Entry type: '")) + PlayListEntryType + "'");
             PauseEndTime = millis () + 10000;
             fsm_PlayList_state_Paused_imp.Init (this);
-            pCurrentFsmState->Start (PlayListEntryName, FrameId);
+            pCurrentFsmState->Start (PlayListEntryName, FrameId, PlayCount);
             break;
         }
 
         // DEBUG_V (String ("PlayListEntryName: '") + String (PlayListEntryName) + "'");
-        pCurrentFsmState->Start (PlayListEntryName, FrameId);
+        pCurrentFsmState->Start (PlayListEntryName, FrameId, PlayCount);
 
         response = true;
 

@@ -318,25 +318,30 @@ boolean c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 boolean c_InputEffectEngine::SetMqttConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
+    boolean response = false;
     String effectName;
 
-    setFromJSON (EffectSpeed,        jsonConfig, CN_speed);
-    setFromJSON (EffectReverse,      jsonConfig, CN_reverse);
-    setFromJSON (EffectMirror,       jsonConfig, CN_mirror);
-    setFromJSON (EffectAllLeds,      jsonConfig, CN_allleds);
-    setFromJSON (EffectBlankTime,    jsonConfig, CN_blanktime);
-    setFromJSON (EffectBrightness,   jsonConfig, CN_brightness);
-    setFromJSON (EffectWhiteChannel, jsonConfig, CN_EffectWhiteChannel);
-    setFromJSON (effectName,         jsonConfig, CN_effect);
+    response |= setFromJSON (EffectSpeed,        jsonConfig, CN_speed);
+    response |= setFromJSON (EffectReverse,      jsonConfig, CN_reverse);
+    response |= setFromJSON (EffectMirror,       jsonConfig, CN_mirror);
+    response |= setFromJSON (EffectAllLeds,      jsonConfig, CN_allleds);
+    response |= setFromJSON (EffectBlankTime,    jsonConfig, CN_blanktime);
+
+    uint8_t tempBrightness = uint8_t(EffectBrightness * 255);
+    response |= setFromJSON (tempBrightness,   jsonConfig, CN_brightness);
+    EffectBrightness = tempBrightness / 255;
+
+    response |= setFromJSON (EffectWhiteChannel, jsonConfig, CN_EffectWhiteChannel);
+    response |= setFromJSON (effectName,         jsonConfig, CN_effect);
 
     SetBufferInfo (InputDataBuffer, InputDataBufferSize);
 
     if (jsonConfig.containsKey (CN_color))
     {
         JsonObject JsonColor = jsonConfig[CN_color];
-        setFromJSON (EffectColor.r, JsonColor, CN_r);
-        setFromJSON (EffectColor.g, JsonColor, CN_g);
-        setFromJSON (EffectColor.b, JsonColor, CN_b);
+        response |= setFromJSON (EffectColor.r, JsonColor, CN_r);
+        response |= setFromJSON (EffectColor.g, JsonColor, CN_g);
+        response |= setFromJSON (EffectColor.b, JsonColor, CN_b);
     }
 
     validateConfiguration ();
@@ -344,7 +349,7 @@ boolean c_InputEffectEngine::SetMqttConfig (ArduinoJson::JsonObject& jsonConfig)
     setEffect (effectName);
 
     // DEBUG_END;
-    return true;
+    return response;
 } // SetConfig
 
 //-----------------------------------------------------------------------------

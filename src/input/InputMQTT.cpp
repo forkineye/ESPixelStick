@@ -43,6 +43,8 @@ c_InputMQTT::c_InputMQTT (
     pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputChannelId_1, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
     pEffectsEngine->SetOperationalState (false);
 
+    topic = config.hostname;
+
     // DEBUG_END;
 } // c_InputE131
 
@@ -188,9 +190,9 @@ void c_InputMQTT::RegisterWithMqtt ()
     // DEBUG_START;
 
     using namespace std::placeholders;
-    mqtt.onConnect    (std::bind (&c_InputMQTT::onMqttConnect, this, _1));
+    mqtt.onConnect    (std::bind (&c_InputMQTT::onMqttConnect,    this, _1));
     mqtt.onDisconnect (std::bind (&c_InputMQTT::onMqttDisconnect, this, _1));
-    mqtt.onMessage    (std::bind (&c_InputMQTT::onMqttMessage, this, _1, _2, _3, _4, _5, _6));
+    mqtt.onMessage    (std::bind (&c_InputMQTT::onMqttMessage,    this, _1, _2, _3, _4, _5, _6));
 
     // DEBUG_END;
 
@@ -213,6 +215,7 @@ void c_InputMQTT::onNetworkDisconnect()
     // DEBUG_START;
 
     mqttTicker.detach();
+    disconnectFromMqtt ();
 
     // DEBUG_END;
 
@@ -245,7 +248,7 @@ void c_InputMQTT::connectToMqtt()
     }
     mqtt.setServer (ip.c_str (), port);
 
-    LOG_PORT.println(String(F ("- Connecting to MQTT Broker ")) + ip + ":" + String(port));
+    LOG_PORT.println(String(F ("MQTT Connecting to Broker ")) + ip + ":" + String(port));
     mqtt.connect();
     mqtt.setWill (topic.c_str(), 1, true, lwt.c_str(), lwt.length());
 
@@ -258,7 +261,7 @@ void c_InputMQTT::disconnectFromMqtt ()
 {
     // DEBUG_START;
 
-    LOG_PORT.println (F ("- Disconnecting from MQTT Broker "));
+    LOG_PORT.println (F ("MQTT Disconnecting from Broker "));
     mqtt.disconnect ();
 
     // DEBUG_END;
@@ -269,7 +272,7 @@ void c_InputMQTT::onMqttConnect(bool sessionPresent)
 {
     // DEBUG_START;
 
-    LOG_PORT.println(F ("- MQTT Connected"));
+    LOG_PORT.println(F ("MQTT Connected"));
 
     // Get retained MQTT state
     mqtt.subscribe (topic.c_str (), 0);
@@ -314,7 +317,7 @@ void c_InputMQTT::onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
 {
     // DEBUG_START;
 
-    LOG_PORT.println(String(F ("- MQTT Disconnected: DisconnectReason: ")) + String(DisconnectReasons[uint8_t(reason)]));
+    LOG_PORT.println(String(F ("MQTT Disconnected: DisconnectReason: ")) + String(DisconnectReasons[uint8_t(reason)]));
     
     if (InputMgr.GetNetworkState ())
     {
@@ -334,7 +337,7 @@ void c_InputMQTT::onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::onMqttMessage(
-    char* topic,
+    char* RcvTopic,
     char* payload,
     AsyncMqttClientMessageProperties properties,
     size_t len,
@@ -342,27 +345,30 @@ void c_InputMQTT::onMqttMessage(
     size_t total)
 {
     // DEBUG_START;
+
     do // once
     {
-        // DEBUG_V (String("payload: ") + String(payload));
+        // DEBUG_V (String ("   topic: ") + String (topic));
+        // DEBUG_V (String ("RcvTopic: ") + String (RcvTopic));
+        // DEBUG_V (String (" payload: ") + String (payload));
 
-        if ('{' != payload[0])
+        if (String (RcvTopic) != topic + CN_slashset)
         {
-            // not a json payload.
+            // not a set for us
             break;
         }
 
-        DynamicJsonDocument r (1024);
-        DeserializationError error = deserializeJson (r, payload, len);
+        DynamicJsonDocument rootDoc (1024);
+        DeserializationError error = deserializeJson (rootDoc, payload, len);
 
-        // DEBUG_V ("");
+        // DEBUG_V ("Set new values");
         if (error)
         {
             LOG_PORT.println (String (F ("MQTT: Deserialzation Error. Error code = ")) + error.c_str ());
             break;
         }
 
-        JsonObject root = r.as<JsonObject> ();
+        JsonObject root = rootDoc.as<JsonObject> ();
         // DEBUG_V ("");
 
         // if its a retained message and we want a clean session, ignore it
@@ -402,8 +408,8 @@ void c_InputMQTT::onMqttMessage(
         }
 */
         // DEBUG_V ("");
-
         publishState ();
+    
         // DEBUG_V ("");
     } while (false);
 

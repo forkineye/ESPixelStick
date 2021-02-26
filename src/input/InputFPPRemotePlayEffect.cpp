@@ -52,7 +52,7 @@ c_InputFPPRemotePlayEffect::~c_InputFPPRemotePlayEffect ()
 } // ~c_InputFPPRemotePlayEffect
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayEffect::Start (String & FileName, uint32_t duration)
+void c_InputFPPRemotePlayEffect::Start (String & FileName, uint32_t duration, uint32_t )
 {
     // DEBUG_START;
 
@@ -72,7 +72,7 @@ void c_InputFPPRemotePlayEffect::Stop ()
 } // Stop
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayEffect::Sync (uint32_t FrameId)
+void c_InputFPPRemotePlayEffect::Sync (String& FileName, uint32_t FrameId)
 {
     // DEBUG_START;
 
