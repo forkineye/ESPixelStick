@@ -43,6 +43,8 @@ c_InputMQTT::c_InputMQTT (
     pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputChannelId_1, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
     pEffectsEngine->SetOperationalState (false);
 
+    topic = config.hostname;
+
     // DEBUG_END;
 } // c_InputE131
 
@@ -335,22 +337,31 @@ void c_InputMQTT::onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::onMqttMessage(
-    char* topic,
+    char* RcvTopic,
     char* payload,
     AsyncMqttClientMessageProperties properties,
     size_t len,
     size_t index,
     size_t total)
 {
-    DEBUG_START;
+    // DEBUG_START;
+
     do // once
     {
-        // DEBUG_V (String("payload: ") + String(payload));
+        // DEBUG_V (String ("   topic: ") + String (topic));
+        // DEBUG_V (String ("RcvTopic: ") + String (RcvTopic));
+        // DEBUG_V (String (" payload: ") + String (payload));
+
+        if (String (RcvTopic) != topic + CN_slashset)
+        {
+            // not a set for us
+            break;
+        }
 
         DynamicJsonDocument rootDoc (1024);
         DeserializationError error = deserializeJson (rootDoc, payload, len);
 
-        // DEBUG_V ("");
+        // DEBUG_V ("Set new values");
         if (error)
         {
             LOG_PORT.println (String (F ("MQTT: Deserialzation Error. Error code = ")) + error.c_str ());
@@ -397,19 +408,19 @@ void c_InputMQTT::onMqttMessage(
         }
 */
         // DEBUG_V ("");
-
         publishState ();
+    
         // DEBUG_V ("");
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // onMqttMessage
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::publishHA()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     // Setup HA discovery
 #ifdef ARDUINO_ARCH_ESP8266
@@ -475,14 +486,14 @@ void c_InputMQTT::publishHA()
     {
         mqtt.publish(ha_config.c_str(), 0, true, "");
     }
-    DEBUG_END;
+    // DEBUG_END;
 
 } // publishHA
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::publishState()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     DynamicJsonDocument root(1024);
     JsonObject JsonConfig = root.createNestedObject(F ("MQTT"));
@@ -502,7 +513,7 @@ void c_InputMQTT::publishState()
 
     mqtt.publish(topic.c_str(), 0, true, JsonConfigString.c_str());
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // publishState
 
