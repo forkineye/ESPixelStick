@@ -18,8 +18,10 @@
 *
 */
 
+#include <Arduino.h>
 #include "InputCommon.hpp"
 #include <AsyncMqttClient.h>
+#include "InputFPPRemotePlayItem.hpp"
 
 class c_InputMQTT : public c_InputCommon
 {
@@ -49,6 +51,7 @@ private:
     AsyncMqttClient mqtt;           // MQTT object
     Ticker          mqttTicker;     // Ticker to handle MQTT
     c_InputCommon * pEffectsEngine = nullptr;
+    c_InputFPPRemotePlayItem* pPlayFileEngine = nullptr;
 
     // from original config struct
     String      ip;
@@ -70,6 +73,10 @@ private:
     void validate ();      ///< Call from validateConfig()
     void update ();        ///< Call from updateConfig()
     void NetworkStateChanged (bool IsConnected, bool RebootAllowed); // used by poorly designed rx functions
+    void PlayFseq (JsonObject & JsonConfig);
+    void PlayEffect (JsonObject & JsonConfig);
+    void GetEngineConfig (JsonObject & JsonConfig);
+    void GetEffectList (JsonObject & JsonConfig);
 
     void load ();          ///< Load configuration from File System
     void save ();          ///< Save configuration to File System

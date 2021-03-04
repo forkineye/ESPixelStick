@@ -210,6 +210,7 @@ light:
       - Fire flicker
       - Lightning
       - Breathe
+	  - playFseq
 ```
 
 Here is an example of playing an fseq file via mqtt
@@ -218,10 +219,11 @@ Here is an example of playing an fseq file via mqtt
 light:
   - platform: mqtt
     schema: json
-    name: "Front Porch ESPixelStick"
+    name: "Porch ESPixelStick"
     state_topic: "porch/esps"
     command_topic: "porch/esps/set"
-    play: FileName
+    effect: playFseq
+	filename: NameOfFileToPlay
 	count: 5
 ```
 
@@ -229,6 +231,10 @@ Here's an example using the mosquitto_pub command line tool:
 
 ```bash
 mosquitto_pub -t porch/esps/set -m '{"state":"ON","color":{"r":255,"g":128,"b":64},"brightness":255,"effect":"solid","reverse":false,"mirror":false}'
+```
+An example of playing a file three times.
+```bash
+mosquitto_pub -t porch/esps/set -m '{"state":"ON","brightness":255,"effect":"playFseq","filename":"ESPTuneToTest.fseq","count":3}'
 ```
 
 ### Additional Input Features

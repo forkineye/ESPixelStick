@@ -108,6 +108,7 @@ const char CN_password                 [] = "password";
 const char CN_Paused                   [] = "Paused";
 const char CN_pixel_count              [] = "pixel_count";
 const char CN_play                     [] = "play";
+const char CN_playFseq                 [] = "playFseq";
 const char CN_playlist                 [] = "playlist";
 const char CN_plussigns                [] = "+++++";
 const char CN_polarity                 [] = "polarity";

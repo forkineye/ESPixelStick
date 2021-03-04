@@ -17,13 +17,12 @@
 *
 */
 
-#include <ArduinoJson.h>
 #include "../ESPixelStick.h"
 #include <Ticker.h>
 #include <Int64String.h>
 #include "InputMQTT.h"
 #include "InputEffectEngine.hpp"
-#include "InputFPPRemotePlayItem.hpp"
+#include "InputFPPRemotePlayFile.hpp"
 
 #if defined ARDUINO_ARCH_ESP32
 #   include <functional>
@@ -40,9 +39,6 @@ c_InputMQTT::c_InputMQTT (
 {
     // DEBUG_START;
 
-    pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputChannelId_1, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
-    pEffectsEngine->SetOperationalState (false);
-
     topic = config.hostname;
 
     // DEBUG_END;
@@ -58,8 +54,20 @@ c_InputMQTT::~c_InputMQTT ()
     // allow the other input channels to run
     InputMgr.SetOperationalState (true);
 
-    delete pEffectsEngine;
-    pEffectsEngine = nullptr;
+    if (nullptr != pEffectsEngine)
+    {
+        // DEBUG_V ("");
+        delete pEffectsEngine;
+        pEffectsEngine = nullptr;
+    }
+    // DEBUG_V ("");
+
+    if (nullptr != pPlayFileEngine)
+    {
+        // DEBUG_V ("");
+        delete pPlayFileEngine;
+        pPlayFileEngine = nullptr;
+    }
 
 } // ~c_InputMQTT
 
@@ -76,8 +84,6 @@ void c_InputMQTT::Begin()
     HasBeenInitialized = true;
 
     RegisterWithMqtt ();
-
-    pEffectsEngine->Begin ();
 
     // get things started
     NetworkStateChanged (InputMgr.GetNetworkState ());
@@ -102,14 +108,12 @@ void c_InputMQTT::GetConfig (JsonObject & jsonConfig)
     jsonConfig[CN_effects]  = true;
     jsonConfig[CN_play]     = true;
 
-    pEffectsEngine->GetConfig (jsonConfig);
-
     // DEBUG_END;
 
 } // GetConfig
 
 //-----------------------------------------------------------------------------
-void c_InputMQTT::GetStatus (JsonObject& jsonStatus)
+void c_InputMQTT::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
@@ -123,8 +127,16 @@ void c_InputMQTT::GetStatus (JsonObject& jsonStatus)
 void c_InputMQTT::Process ()
 {
     // DEBUG_START;
-    // ignoring IsInputChannelActive
-    pEffectsEngine->Process ();
+
+    if (nullptr != pEffectsEngine)
+    {
+        pEffectsEngine->Process ();
+    }
+
+    if (nullptr != pPlayFileEngine)
+    {
+        pPlayFileEngine->Poll (InputDataBuffer, InputDataBufferSize);
+    }
 
     // DEBUG_END;
 
@@ -136,12 +148,15 @@ void c_InputMQTT::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
     InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
 
-    pEffectsEngine->SetBufferInfo (BufferStart, BufferSize);
+    if (nullptr != pEffectsEngine)
+    {
+        pEffectsEngine->SetBufferInfo (BufferStart, BufferSize);
+    }
 
 } // SetBufferInfo
 
 //-----------------------------------------------------------------------------
-boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject& jsonConfig)
+boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
@@ -156,8 +171,6 @@ boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     setFromJSON (hadisco,              jsonConfig, CN_hadisco);
     setFromJSON (haprefix,             jsonConfig, CN_haprefix);
     setFromJSON (lwt,                  jsonConfig, CN_lwt);
-
-    pEffectsEngine->SetConfig (jsonConfig);
 
     validateConfiguration ();
 
@@ -386,33 +399,46 @@ void c_InputMQTT::onMqttMessage(
         // DEBUG_V ("");
         String NewState;
         setFromJSON (NewState, root, CN_state);
+        // DEBUG_V ("NewState: " + NewState);
 
         stateOn = (NewState == ON);
         InputMgr.SetOperationalState (!stateOn);
         // DEBUG_V ("");
-        if (nullptr != pEffectsEngine)
-        {
-            pEffectsEngine->SetOperationalState (stateOn);
-            // DEBUG_V ("");
 
-            ((c_InputEffectEngine*)(pEffectsEngine))->SetMqttConfig (root);
-        }
-/*
-        if (nullptr != pPlayItem)
+        if (stateOn)
         {
-            if (stateOn)
+            // DEBUG_V ("");
+            String effectName;
+            setFromJSON (effectName, root, CN_effect);
+            // DEBUG_V ("effectName: " + effectName);
+
+            if (effectName == CN_playFseq)
             {
-                String FileName = pPlayItem->GetFileName ();
-                pPlayItem->SetPlayCount (1);
-                pPlayItem->Start (FileName, 0);
+                PlayFseq (root);
             }
             else
             {
-                pPlayItem->Stop ();
+                PlayEffect (root);
             }
         }
-*/
-        // DEBUG_V ("");
+        else
+        {
+            // DEBUG_V ("");
+
+            if (nullptr != pEffectsEngine)
+            {
+                delete pEffectsEngine;
+                pEffectsEngine = nullptr;
+            }
+
+            if (nullptr != pPlayFileEngine)
+            {
+                delete pPlayFileEngine;
+                pPlayFileEngine = nullptr;
+            }
+            // DEBUG_V ("");
+        }
+
         publishState ();
     
         // DEBUG_V ("");
@@ -421,6 +447,140 @@ void c_InputMQTT::onMqttMessage(
     // DEBUG_END;
 
 } // onMqttMessage
+
+//-----------------------------------------------------------------------------
+void c_InputMQTT::PlayFseq (JsonObject & JsonConfig)
+{
+    // DEBUG_START;
+
+    if (nullptr != pEffectsEngine)
+    {
+        // DEBUG_V ("Delete Effect Engine");
+        delete pEffectsEngine;
+        pEffectsEngine = nullptr;
+    }
+    // DEBUG_V ("");
+
+    if (nullptr == pPlayFileEngine)
+    {
+        // DEBUG_V ("Instantiate File Engine");
+        pPlayFileEngine = new c_InputFPPRemotePlayFile ();
+    }
+    // DEBUG_V ("");
+
+    String FileName = pPlayFileEngine->GetFileName ();
+    setFromJSON (FileName, JsonConfig, CN_filename);
+
+    uint32_t PlayCount = 1;
+    setFromJSON (PlayCount, JsonConfig, CN_count);
+    // DEBUG_V (String ("FileName: ") + FileName);
+    // DEBUG_V (String ("PlayCount: ") + String(PlayCount));
+
+    pPlayFileEngine->Start (FileName, 0, PlayCount);
+
+    // DEBUG_END;
+
+} // PlayFseq
+
+//-----------------------------------------------------------------------------
+void c_InputMQTT::PlayEffect (JsonObject & JsonConfig)
+{
+    // DEBUG_START;
+
+    if (nullptr != pPlayFileEngine)
+    {
+        // DEBUG_V ("");
+        delete pPlayFileEngine;
+        pPlayFileEngine = nullptr;
+    }
+    // DEBUG_V ("");
+
+    if (nullptr == pEffectsEngine)
+    {
+        // DEBUG_V ("");
+        pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputChannelId_1, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
+        pEffectsEngine->Begin ();
+    }
+    // DEBUG_V ("");
+
+    pEffectsEngine->SetOperationalState (stateOn);
+    // DEBUG_V ("");
+
+    ((c_InputEffectEngine*)(pEffectsEngine))->SetMqttConfig (JsonConfig);
+
+    // DEBUG_END;
+
+} // PlayEffect
+
+//-----------------------------------------------------------------------------
+void c_InputMQTT::GetEngineConfig (JsonObject & JsonConfig)
+{
+    // DEBUG_START;
+
+    bool EffectEngineIsRunning = (nullptr != pEffectsEngine);
+    if (nullptr == pEffectsEngine)
+    {
+        // DEBUG_V ("");
+        pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputChannelId_1, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
+        pEffectsEngine->Begin ();
+    }
+    // DEBUG_V ("");
+
+    pEffectsEngine->SetOperationalState (false);
+
+    ((c_InputEffectEngine*)(pEffectsEngine))->GetMqttConfig (JsonConfig);
+
+    if (!EffectEngineIsRunning)
+    {
+        delete pEffectsEngine;
+        pEffectsEngine = nullptr;
+    }
+
+    if (nullptr != pPlayFileEngine)
+    {
+        JsonConfig[CN_effect] = CN_playFseq;
+        JsonConfig[CN_filename] = pPlayFileEngine->GetFileName ();
+    }
+    else
+    {
+        JsonConfig[CN_filename] = String ("");
+    }
+
+    // DEBUG_END;
+
+} // GetEngineConfig
+
+//-----------------------------------------------------------------------------
+void c_InputMQTT::GetEffectList (JsonObject & JsonConfig)
+{
+    // DEBUG_START;
+
+    bool EffectEngineIsRunning = (nullptr != pEffectsEngine);
+    if (nullptr == pEffectsEngine)
+    {
+        // DEBUG_V ("");
+        pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputChannelId_1, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
+        pEffectsEngine->Begin ();
+        pEffectsEngine->SetOperationalState (false);
+    }
+    // DEBUG_V ("");
+
+    JsonConfig[CN_brightness] = CN_true;
+    ((c_InputEffectEngine*)(pEffectsEngine))->GetMqttEffectList (JsonConfig);
+    JsonConfig[CN_effect] = CN_true;
+
+    if (!EffectEngineIsRunning)
+    {
+        delete pEffectsEngine;
+        pEffectsEngine = nullptr;
+    }
+
+    JsonConfig[CN_effect_list].add (CN_playFseq);
+
+    // add the file play fields.
+    // DEBUG_END;
+
+} // GetEffectList
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::publishHA()
@@ -448,24 +608,11 @@ void c_InputMQTT::publishHA()
         JsonConfig[CN_name]             = config.hostname;
         JsonConfig[F ("schema")]        = F ("json");
         JsonConfig[F ("state_topic")]   = topic;
-        JsonConfig[F ("command_topic")] = topic + F ("/set");
+        JsonConfig[F ("command_topic")] = topic + CN_slashset;
         JsonConfig[F ("rgb")]           = CN_true;
 
-        if (nullptr != pEffectsEngine)
-        {
-            JsonConfig[CN_brightness] = CN_true;
-            JsonConfig[CN_effect]     = CN_true;
-            ((c_InputEffectEngine*)(pEffectsEngine))->GetMqttEffectList (JsonConfig);
-        }
-/*
-        if (nullptr != pPlayItem)
-        {
-            JsonConfig[CN_brightness] = CN_false;
-            JsonConfig[CN_file]       = true;
-            JsonConfig[CN_filename]   = pPlayItem->GetFileName ();
-            JsonConfig[CN_count]      = pPlayItem->GetRepeatCount ();
-        }
-*/
+        GetEffectList (JsonConfig);
+
         // Register the attributes topic
         JsonConfig[F ("json_attributes_topic")] = topic + F ("/attributes");
 
@@ -482,7 +629,8 @@ void c_InputMQTT::publishHA()
 
         String HaJsonConfig;
         serializeJson(JsonConfig, HaJsonConfig);
-        // DEBUG_V (String("HaJsonConfig: ") + HaJsonConfig);
+        
+        // DEBUG_V (String ("HaJsonConfig: ") + HaJsonConfig);
         mqtt.publish(ha_config.c_str(), 0, true, HaJsonConfig.c_str());
 
         // publishAttributes ();
@@ -506,13 +654,11 @@ void c_InputMQTT::publishState()
     JsonConfig[CN_state] = (true == stateOn) ? String(ON) : String(OFF);
 
     // populate the effect information
-    if (nullptr != pEffectsEngine)
-    {
-        ((c_InputEffectEngine*)(pEffectsEngine))->GetMqttConfig (JsonConfig);
-    }
-    
+    GetEngineConfig (JsonConfig);
+
     String JsonConfigString;
     serializeJson(JsonConfig, JsonConfigString);
+
     // DEBUG_V (String ("JsonConfigString: ") + JsonConfigString);
     // DEBUG_V (String ("topic: ") + topic);
 
