@@ -114,6 +114,7 @@ extern const char CN_pixel_count[];
 extern const char CN_polarity[];
 extern const char CN_port[];
 extern const char CN_play[];
+extern const char CN_playFseq[];
 extern const char CN_playlist [];
 extern const char CN_plussigns [];
 extern const char CN_remote [];

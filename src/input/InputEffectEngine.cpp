@@ -148,7 +148,7 @@ void c_InputEffectEngine::GetMqttConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
-    // jsonConfig[CN_effect]     = ActiveEffect->name;
+    jsonConfig[CN_effect]             = ActiveEffect->name;
     // jsonConfig[CN_speed]      = EffectSpeed;
     // jsonConfig[CN_reverse]    = EffectReverse;
     jsonConfig[CN_mirror]             = EffectMirror;
