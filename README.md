@@ -56,12 +56,13 @@ Using library manager:
 ## Important Notes on Compiling and Flashing
 
 - In order to upload your code to the ESP you must put it in flash mode and then take it out of flash mode to run the code. To place your ESP8266 in flash mode your GPIO-0 pin must be connected to ground.
-- Device mode is now a compile time option to set your device type and is configured in the top of the main sketch file.  Current options are ```ESPS_MODE_PIXEL``` and ```ESPS_MODE_SERIAL```.  The default is ```ESPS_MODE_PIXEL``` for the ESPixelStick hardware.
-- Web pages **must** be processed, placed into ```data/www```, and uploaded with the upload plugin. Gulp will process the pages and put them in ```data/www``` for you. Refer to the html [README](html/README.md) for more information.
-- In order to use the upload plugin, the ESP8266 **must** be placed into programming mode and the Arduino serial monitor **must** be closed.
+- - Web pages **must** be processed, placed into ```data/www```, and uploaded with the upload plugin. Gulp will process the pages and put them in ```data/www``` for you. Refer to the html [README](html/README.md) for more information.
+- In order to use the upload plugin, the ESP **must** be placed into programming mode and the Arduino serial monitor **must** be closed.
 - ESP-01 modules **must** be configured for 1M flash and 128k File System within the Arduino IDE for OTA updates to work.
-- For best performance, set the CPU frequency to 160MHz (Tools->CPU Frequency).  You may experience lag and other issues if running at 80MHz.
+- For best performance on ESP8266 modules, set the CPU frequency to 160MHz (Tools->CPU Frequency).  You may experience lag and other issues if running at 80MHz.
+- For best performance on ESP32 modules, set the PSRAM option to ENABLED (Tools->CPU Frequency).  You may experience lag and other issues if running at 80MHz.
 - The upload must be redone each time after you rebuild and upload the software
+- it is reccomended that you do a factory reset via the browser admin page after uploading a new version of the software.
 
 ## Supported Inputs 
 
@@ -87,7 +88,7 @@ E1.31 requires additional configuration:
 
 - Starting Universe
 - Channels / universe
-- Offset into the first univers to first channel (Typically zero)
+- Offset into the first universe to first channel (Typically zero)
 
 ### Effect Engine
 
@@ -210,7 +211,7 @@ light:
       - Fire flicker
       - Lightning
       - Breathe
-	  - playFseq
+      - playFseq
 ```
 
 Here is an example of playing an fseq file via mqtt
@@ -223,8 +224,8 @@ light:
     state_topic: "porch/esps"
     command_topic: "porch/esps/set"
     effect: playFseq
-	filename: NameOfFileToPlay
-	count: 5
+    filename: NameOfFileToPlay
+    count: 5
 ```
 
 Here's an example using the mosquitto_pub command line tool:
@@ -248,33 +249,35 @@ ESP8266-12F platforms support:
 - a single serial / Pixel output
 - 8 Relay Outputs
 - 16 PWM Outputs (I2C bus)
+
 ESP32 platforms support
 - two serial / pixel outputs
 - 8 Relay outputs
 - 16 PWM Outputs (I2C bus)
 
-Each Serial / pixel output can be configured to support any of the output protocols (no pixel vs serial image).
+Each Serial / Pixel output can be configured to support any of the output protocols (no pixel vs serial image).
 
 ### Pixel Protocols
 
-- WS2811 / WS2812 / WS2812b
+- WS2811 / WS2812 / WS2812b (WS281x)
 - GE Color Effects
 
 ### Serial Protocols
 
-- DMX512
+- DMX 512
 - Renard
 - Generic Serial
 
 ### Relay Outputs
 We support an output configuration that drives up to eight (8) relay outputs. 
 - Each relay output can be configured to be active high or active low. 
-- The trip point (on/off) is configurable per output.
+- The channel intensity trip point (on/off) is configurable per output.
 - The GPIO for each output is configurable
 
 ### PWM Outputs
 We support up to 16 PWM outputs via the I2C bus. Each output can be configured to map the 8 bit channel intensity values to 4096 PWM timings.
-PWM is supported via the PCM9685 16 channel PWM output module.
+PWM is supported via the PCM9685 16 channel PWM output module. 
+This CAN be used to drive DC SSRs to support upto 5 dumb RGB light strings.
 
 ## Resources
 
