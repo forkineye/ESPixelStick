@@ -66,27 +66,26 @@ Using library manager:
 
 ### How to build for the ESP32
 
-install the Arduino IDE and tell it your default workbook folder is documents\Arduino. In ...\Documents\Arduino create two sub directories
-- ...\Documents\Arduino\Libraries
-- ...\Documents\Arduino\Tools
-Download / Clone the libraries identified in the readme into sub directories in the ...\Arduino\libraries directory
-Create the ...\Documents\Arduino\ESPixelStick\src\secrets.h file and enter your WiFi ID and WiFi Password as described in WiFiMgr.cpp
-Download the littleFS utility into the Tools directory
-Clone ESPixelStick-Unify into ...\Documents\Arduino\ESPixelStick
-- NOTE: The capitalization and spelling
-Connect your LoLin D32 PRO to the computer using a USB cable (not the Serial Port the gets opened)
-In the ESPixelStick directory double click on the ESPixelStick.ino file
-In the Arduino IDE click: File->Preferences
-- Make sure Sketchbook location is set to point at your Arduino directory (note espixelstick dir)
-Set the following into the "Additional Boards Manager URLs" field:
-- https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json,https://arduino.esp8266.com/stable/package_esp8266com_index.json
-Exit the preferences menu
-Click on "Tools->Board->ESP32->LOLIN D32 PRO
-Next click on Tools->PSRAM->enabled
-Set the port on which the LoLin is connected: Tools->port->YouPortNumberGoesHere
-Click Sketch->Upload - This will build and upload to the LoLin device
-
-
+- install the Arduino IDE and tell it your default workbook folder is ..\Documents\Arduino. 
+- In ...\Documents\Arduino create two sub directories
+- - ...\Documents\Arduino\Libraries
+- - ...\Documents\Arduino\Tools
+- Download / Clone the libraries identified in this readme (above) into sub directories in the ...\Arduino\libraries directory
+- Create the ...\Documents\Arduino\ESPixelStick\src\secrets.h file and enter your WiFi ID and WiFi Password as described in WiFiMgr.cpp
+- Download the littleFS utility into the Tools directory
+- Clone ESPixelStick-Unify into ...\Documents\Arduino\ESPixelStick
+- - NOTE: The capitalization and spelling
+- Connect your LoLin D32 PRO to the computer using a USB cable (not the Serial Port the gets opened)
+- In the ESPixelStick directory double click on the ESPixelStick.ino file
+- In the Arduino IDE click: File->Preferences
+- - Make sure the Sketchbook location is set to point at your Arduino directory (note espixelstick dir)
+- Set the following into the "Additional Boards Manager URLs" field:
+- - https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json,https://arduino.esp8266.com/stable/package_esp8266com_index.json
+- Exit the preferences menu
+- Click on "Tools->Board->ESP32->LOLIN D32 PRO
+- Next click on Tools->PSRAM->enabled
+- Set the port on which the LoLin is connected: Tools->port->YouPortNumberGoesHere
+- Click Sketch->Upload - This will build and upload to the LoLin device
 
 ## Supported Inputs 
 
