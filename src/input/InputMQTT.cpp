@@ -23,6 +23,7 @@
 #include "InputMQTT.h"
 #include "InputEffectEngine.hpp"
 #include "InputFPPRemotePlayFile.hpp"
+#include "InputFPPRemotePlayList.hpp"
 
 #if defined ARDUINO_ARCH_ESP32
 #   include <functional>
@@ -130,6 +131,7 @@ void c_InputMQTT::Process ()
 
     if (nullptr != pEffectsEngine)
     {
+        // DEBUG_V ("");
         pEffectsEngine->Process ();
     }
 
@@ -145,6 +147,8 @@ void c_InputMQTT::Process ()
 //-----------------------------------------------------------------------------
 void c_InputMQTT::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
 {
+    // DEBUG_START;
+
     InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
 
@@ -153,6 +157,8 @@ void c_InputMQTT::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
         pEffectsEngine->SetBufferInfo (BufferStart, BufferSize);
     }
 
+    // DEBUG_END;
+    
 } // SetBufferInfo
 
 //-----------------------------------------------------------------------------
@@ -401,29 +407,31 @@ void c_InputMQTT::onMqttMessage(
         setFromJSON (NewState, root, CN_state);
         // DEBUG_V ("NewState: " + NewState);
 
-        stateOn = (NewState == ON);
+        stateOn = NewState.equalsIgnoreCase(ON);
         InputMgr.SetOperationalState (!stateOn);
-        // DEBUG_V ("");
+        // DEBUG_V (String("stateOn: ") + String(stateOn));
 
         if (stateOn)
         {
-            // DEBUG_V ("");
+            // DEBUG_V ("State ON");
             String effectName;
             setFromJSON (effectName, root, CN_effect);
             // DEBUG_V ("effectName: " + effectName);
 
-            if (effectName == CN_playFseq)
+            if (effectName.equals(CN_playFseq))
             {
+                // DEBUG_V ("");
                 PlayFseq (root);
             }
             else
             {
+                // DEBUG_V ("");
                 PlayEffect (root);
             }
         }
         else
         {
-            // DEBUG_V ("");
+            // DEBUG_V ("State OFF");
 
             if (nullptr != pEffectsEngine)
             {
@@ -453,30 +461,79 @@ void c_InputMQTT::PlayFseq (JsonObject & JsonConfig)
 {
     // DEBUG_START;
 
-    if (nullptr != pEffectsEngine)
+    do // once
     {
-        // DEBUG_V ("Delete Effect Engine");
-        delete pEffectsEngine;
-        pEffectsEngine = nullptr;
-    }
-    // DEBUG_V ("");
+        if (nullptr != pEffectsEngine)
+        {
+            // DEBUG_V ("Delete Effect Engine");
+            delete pEffectsEngine;
+            pEffectsEngine = nullptr;
+        }
+        // DEBUG_V ("");
 
-    if (nullptr == pPlayFileEngine)
-    {
-        // DEBUG_V ("Instantiate File Engine");
-        pPlayFileEngine = new c_InputFPPRemotePlayFile ();
-    }
-    // DEBUG_V ("");
+        String FileName;
+        setFromJSON (FileName, JsonConfig, CN_filename);
 
-    String FileName = pPlayFileEngine->GetFileName ();
-    setFromJSON (FileName, JsonConfig, CN_filename);
+        uint32_t PlayCount = 1;
+        setFromJSON (PlayCount, JsonConfig, CN_count);
+        // DEBUG_V (String (" FileName: ") + FileName);
+        // DEBUG_V (String ("PlayCount: ") + String(PlayCount));
 
-    uint32_t PlayCount = 1;
-    setFromJSON (PlayCount, JsonConfig, CN_count);
-    // DEBUG_V (String ("FileName: ") + FileName);
-    // DEBUG_V (String ("PlayCount: ") + String(PlayCount));
+        bool FileIsPlayList   = FileName.endsWith (String (F (".pl")));
+        bool FileIsStandalone = FileName.endsWith (String (F (".fseq")));
 
-    pPlayFileEngine->Start (FileName, 0, PlayCount);
+        if (!FileIsPlayList && !FileIsStandalone)
+        {
+            // not a file we can process
+            LOG_PORT.println (String (F ("ERROR: MQTT: Unsupported file type for File Play operation. File:'")) + FileName + "'");
+            break;
+        }
+
+        bool EngineFileIsPlayList   = false;
+        bool EngineFileIsStandalone = false;
+        String PlayingFile;
+
+        // do we have an engine running?
+        if (nullptr != pPlayFileEngine)
+        {
+            PlayingFile = pPlayFileEngine->GetFileName ();
+
+            EngineFileIsPlayList   = PlayingFile.endsWith (String (F (".pl")));
+            EngineFileIsStandalone = PlayingFile.endsWith (String (F (".fseq")));
+
+            // is it the right engine?
+            if (EngineFileIsPlayList != FileIsPlayList)
+            {
+                StopPlayFileEngine ();
+
+                EngineFileIsPlayList   = false;
+                EngineFileIsStandalone = false;
+            }
+            else
+            {
+                // DEBUG_V ("Starting File");
+                pPlayFileEngine->Start (FileName, 0, PlayCount);
+                break;
+            }
+        }
+
+        // DEBUG_V ("no engine is running.");
+
+        if (FileIsPlayList)
+        {
+            // DEBUG_V ("Instantiate Play List Engine");
+            pPlayFileEngine = new c_InputFPPRemotePlayList ();
+        }
+        else
+        {
+            // DEBUG_V ("Instantiate Play File Engine");
+            pPlayFileEngine = new c_InputFPPRemotePlayFile ();
+        }
+
+        // DEBUG_V ("Start Playing");
+        pPlayFileEngine->Start (FileName, 0, PlayCount);
+
+    } while (false);
 
     // DEBUG_END;
 
@@ -487,23 +544,23 @@ void c_InputMQTT::PlayEffect (JsonObject & JsonConfig)
 {
     // DEBUG_START;
 
-    if (nullptr != pPlayFileEngine)
-    {
-        // DEBUG_V ("");
-        delete pPlayFileEngine;
-        pPlayFileEngine = nullptr;
-    }
+    StopPlayFileEngine ();
+
     // DEBUG_V ("");
 
     if (nullptr == pEffectsEngine)
     {
-        // DEBUG_V ("");
+        // DEBUG_V ("Create Effect Engine");
         pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputChannelId_1, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
         pEffectsEngine->Begin ();
+        pEffectsEngine->SetBufferInfo (InputDataBuffer, InputDataBufferSize);
+
+        // DEBUG_V (String ("    InputDataBuffer: ") + String (uint32_t(InputDataBuffer)));
+        // DEBUG_V (String ("InputDataBufferSize: ") + String (InputDataBufferSize));
     }
     // DEBUG_V ("");
 
-    pEffectsEngine->SetOperationalState (stateOn);
+    pEffectsEngine->SetOperationalState (true);
     // DEBUG_V ("");
 
     ((c_InputEffectEngine*)(pEffectsEngine))->SetMqttConfig (JsonConfig);
@@ -511,6 +568,21 @@ void c_InputMQTT::PlayEffect (JsonObject & JsonConfig)
     // DEBUG_END;
 
 } // PlayEffect
+
+//-----------------------------------------------------------------------------
+void c_InputMQTT::StopPlayFileEngine ()
+{
+    // DEBUG_START;
+
+    if (nullptr != pPlayFileEngine)
+    {
+        delete pPlayFileEngine;
+        pPlayFileEngine = nullptr;
+    }
+
+    // DEBUG_END;
+
+} // StopPlayFileEngine
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::GetEngineConfig (JsonObject & JsonConfig)
@@ -523,10 +595,10 @@ void c_InputMQTT::GetEngineConfig (JsonObject & JsonConfig)
         // DEBUG_V ("");
         pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputChannelId_1, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
         pEffectsEngine->Begin ();
+        pEffectsEngine->SetOperationalState (false);
     }
     // DEBUG_V ("");
 
-    pEffectsEngine->SetOperationalState (false);
 
     ((c_InputEffectEngine*)(pEffectsEngine))->GetMqttConfig (JsonConfig);
 

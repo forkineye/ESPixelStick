@@ -77,7 +77,7 @@ Using library manager:
 - Connect your LoLin D32 PRO to the computer using a USB cable (not the Serial Port the gets opened)
 - In the ESPixelStick directory double click on the ESPixelStick.ino file
 - In the Arduino IDE click: File->Preferences
-- - Make sure the Sketchbook location is set to point at your Arduino directory (note espixelstick dir)
+- - Make sure the Sketchbook location is set to point at your Arduino directory (note ESPixelStick dir)
 - Set the following into the "Additional Boards Manager URLs" field:
 - - https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json,https://arduino.esp8266.com/stable/package_esp8266com_index.json
 - Exit the preferences menu
