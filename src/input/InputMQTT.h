@@ -77,6 +77,7 @@ private:
     void PlayEffect (JsonObject & JsonConfig);
     void GetEngineConfig (JsonObject & JsonConfig);
     void GetEffectList (JsonObject & JsonConfig);
+    void StopPlayFileEngine ();
 
     void load ();          ///< Load configuration from File System
     void save ();          ///< Save configuration to File System

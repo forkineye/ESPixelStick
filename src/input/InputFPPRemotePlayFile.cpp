@@ -38,7 +38,10 @@ c_InputFPPRemotePlayFile::~c_InputFPPRemotePlayFile ()
     // DEBUG_START;
 
     Stop ();
-
+    while (!IsIdle ())
+    {
+        Poll (nullptr, 0);
+    }
     // DEBUG_END;
 
 } // ~c_InputFPPRemotePlayFile

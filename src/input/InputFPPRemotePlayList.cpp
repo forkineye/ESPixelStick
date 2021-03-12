@@ -37,7 +37,7 @@ c_InputFPPRemotePlayList::~c_InputFPPRemotePlayList ()
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Stop ();
+    Stop ();
 
     // DEBUG_END;
 
@@ -60,7 +60,6 @@ void c_InputFPPRemotePlayList::Stop ()
     // DEBUG_START;
 
     pCurrentFsmState->Stop ();
-    fsm_PlayList_state_Idle_imp.Init (this);
 
     // DEBUG_END;
 

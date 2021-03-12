@@ -23,7 +23,7 @@
 // Local Structure and Data Definitions
 //-----------------------------------------------------------------------------
 
-    // List of all the supported effects and their names
+// List of all the supported effects and their names
 static const c_InputEffectEngine::EffectDescriptor_t ListOfEffects[] =
 {//                                                                   Mirror     AllLeds
     //    name;                             func;              htmlid;      Color;     Reverse     wsTCode
@@ -153,7 +153,7 @@ void c_InputEffectEngine::GetMqttConfig (JsonObject & jsonConfig)
     // jsonConfig[CN_reverse]    = EffectReverse;
     jsonConfig[CN_mirror]             = EffectMirror;
     jsonConfig[CN_allleds]            = EffectAllLeds;
-    jsonConfig[CN_brightness]         = EffectBrightness * 255;
+    jsonConfig[CN_brightness]         = uint16_t(EffectBrightness * 255.0);
     jsonConfig[CN_blanktime]          = EffectBlankTime;
     jsonConfig[CN_EffectWhiteChannel] = EffectWhiteChannel;
 
@@ -227,13 +227,13 @@ void c_InputEffectEngine::Process ()
         {
             break;
         }
-        // DEBUG_V ("");
+        // DEBUG_V ("Init OK");
 
         if (0 == PixelCount)
         {
             break;
         }
-        // DEBUG_V ("");
+        // DEBUG_V ("Pixel Count OK");
 
         if (millis () < EffectBlankEnd)
         {
@@ -246,7 +246,7 @@ void c_InputEffectEngine::Process ()
             break;
         }
 
-        // DEBUG_V ("");
+        // DEBUG_V ("Update output");
         EffectLastRun = millis ();
         uint16_t wait = (this->*ActiveEffect->func)();
         EffectWait = max ((int)wait, MIN_EFFECT_DELAY);
@@ -327,9 +327,9 @@ boolean c_InputEffectEngine::SetMqttConfig (ArduinoJson::JsonObject& jsonConfig)
     response |= setFromJSON (EffectAllLeds,      jsonConfig, CN_allleds);
     response |= setFromJSON (EffectBlankTime,    jsonConfig, CN_blanktime);
 
-    uint8_t tempBrightness = uint8_t(EffectBrightness * 255);
+    uint16_t tempBrightness = uint8_t(EffectBrightness * 255.0);
     response |= setFromJSON (tempBrightness,   jsonConfig, CN_brightness);
-    EffectBrightness = tempBrightness / 255;
+    EffectBrightness = float(tempBrightness) / 255.0;
 
     response |= setFromJSON (EffectWhiteChannel, jsonConfig, CN_EffectWhiteChannel);
     response |= setFromJSON (effectName,         jsonConfig, CN_effect);
@@ -414,7 +414,7 @@ void c_InputEffectEngine::setEffect (const String & effectName)
         if (effectName.equalsIgnoreCase (currentEffect.name))
         {
             // DEBUG_V ("Found desired effect");
-            if (ActiveEffect->name != currentEffect.name)
+            if (!ActiveEffect->name.equalsIgnoreCase(currentEffect.name))
             {
                 // DEBUG_V ("Starting Effect");
                 ActiveEffect  = &ListOfEffects[EffectIndex];
@@ -456,7 +456,7 @@ void c_InputEffectEngine::setPixel (uint16_t pixelId, CRGB color)
 {
     // DEBUG_START;
 
-    // DEBUG_V (String ("IsInputChannelActive: ") + IsInputChannelActive);
+    // DEBUG_V (String ("IsInputChannelActive: ") + String(IsInputChannelActive));
     // DEBUG_V (String ("pixelId: ") + pixelId);
     // DEBUG_V (String ("PixelCount: ") + PixelCount);
 
@@ -555,6 +555,8 @@ uint16_t c_InputEffectEngine::effectSolidColor ()
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::outputEffectColor (uint16_t pixelId, CRGB outputColor)
 {
+    // DEBUG_START;
+
     uint16_t NumPixels = MirroredPixelCount;
 
     if (EffectReverse)
@@ -571,6 +573,8 @@ void c_InputEffectEngine::outputEffectColor (uint16_t pixelId, CRGB outputColor)
     {
         setPixel (pixelId, outputColor);
     }
+
+    // DEBUG_END;
 } // outputEffectColor
 
 //-----------------------------------------------------------------------------
@@ -604,6 +608,9 @@ uint16_t c_InputEffectEngine::effectRainbow ()
     // calculate only half the pixels if mirroring
     uint16_t lc = MirroredPixelCount;
 
+    // DEBUG_V (String ("MirroredPixelCount: ") + String (MirroredPixelCount));
+    // DEBUG_V (String ("        EffectStep: ") + String (EffectStep));
+
     for (uint16_t i = 0; i < lc; i++)
     {
         // CRGB color = colorWheel(((i * 256 / lc) + EffectStep) & 0xFF);
@@ -611,7 +618,7 @@ uint16_t c_InputEffectEngine::effectRainbow ()
         double hue = 0;
         if (EffectAllLeds)
         {
-            hue = EffectStep * 360.0d / 256;	// all same colour
+            hue = EffectStep * 360.0d / 256.0;	// all same colour
         }
         else
         {

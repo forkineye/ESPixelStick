@@ -538,7 +538,8 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
         pInputChannelDrivers[ChannelIndex]->GetDriverName (sDriverName);
         Serial.println (String (CN_stars) + " '" + sDriverName + F("' Initialization for input: '") + String(ChannelIndex) + "'" + CN_stars);
         pInputChannelDrivers[ChannelIndex]->Begin ();
-
+        pInputChannelDrivers[ChannelIndex]->SetBufferInfo (InputDataBuffer, InputDataBufferSize);
+        
     } while (false);
 
     // DEBUG_END;
