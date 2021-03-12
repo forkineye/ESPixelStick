@@ -44,7 +44,6 @@ The ESP32 build will require the following software libraries to build this proj
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson) - Arduino JSON Library
 - [ESPAsyncE131](https://github.com/forkineye/ESPAsyncE131) - Asynchronous E1.31 (sACN) library
 - [AsyncTCP](https://github.com/me-no-dev/AsyncTCP) - Asynchronous TCP Library
-- [ESPAsyncUDP](https://github.com/me-no-dev/ESPAsyncUDP) - Asynchronous UDP Library
 - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) - Asynchronous Web Server Library
 - [async-mqtt-client](https://github.com/marvinroger/async-mqtt-client) - Asynchronous MQTT Client
 - [Int64String](https://github.com/djGrrr/Int64String) - Converts 64 bit integers into a string
@@ -52,7 +51,7 @@ The ESP32 build will require the following software libraries to build this proj
 - [Adafruit-PWM-Servo-Driver-Library](https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library)
 
 Using library manager:
-- Install littlefs-32 for esp32 support.
+- Install littlefs_ESP32 for esp32 support.
 ## Important Notes on Compiling and Flashing
 
 - In order to upload your code to the ESP you must put it in flash mode and then take it out of flash mode to run the code. To place your ESP8266 in flash mode your GPIO-0 pin must be connected to ground.
