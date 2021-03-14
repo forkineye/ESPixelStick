@@ -132,7 +132,6 @@ void c_OutputSerial::StartUart ()
     if (OutputType == c_OutputMgr::e_OutputType::OutputType_DMX)
     {
         speed = uint (BaudRate::BR_DMX);
-        speed = uint (BaudRate::BR_DEF);
     }
     else
     {
