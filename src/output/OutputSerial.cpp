@@ -132,6 +132,7 @@ void c_OutputSerial::StartUart ()
     if (OutputType == c_OutputMgr::e_OutputType::OutputType_DMX)
     {
         speed = uint (BaudRate::BR_DMX);
+        speed = uint (BaudRate::BR_DEF);
     }
     else
     {
@@ -424,6 +425,13 @@ void c_OutputSerial::Render ()
             } // go away if not
 
             delayMicroseconds (DMX_MAB);
+
+#ifdef ARDUINO_ARCH_ESP8266
+            SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
+            delayMicroseconds (DMX_BREAK);
+            CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
+            delayMicroseconds (DMX_MAB);
+#else
             pinMatrixOutDetach (DataPin, false, false); //Detach our
             pinMode (DataPin, OUTPUT);
             digitalWrite (DataPin, LOW); //88 uS break
@@ -431,6 +439,7 @@ void c_OutputSerial::Render ()
             digitalWrite (DataPin, HIGH); //4 Us Mark After Break
             delayMicroseconds (DMX_MAB);
             pinMatrixOutAttach (DataPin, UART_TXD_IDX (UartId), false, false);
+#endif // def ARDUINO_ARCHITECTURE_ESP8266
 
             // send the rest of the frame
             break;
