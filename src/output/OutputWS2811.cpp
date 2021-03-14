@@ -324,21 +324,6 @@ void c_OutputWS2811::Render()
 
     // DEBUG_V (String ("RemainingIntensityCount: ") + RemainingIntensityCount)
 
-    WaitCount++;
-
-    if (1000000 < WaitCount)
-    {
-        uint32_t UartIntSt = GET_PERI_REG_MASK (UART_INT_ST (UartId), UART_TXFIFO_EMPTY_INT_ENA);
-        uint16_t SpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength));
-
-        DEBUG_V (String ("   pNextIntensityToSend: ") + String (uint32_t (pNextIntensityToSend)));
-        DEBUG_V (String ("RemainingIntensityCount: ") + String (RemainingIntensityCount));
-        DEBUG_V (String ("              UartIntSt: ") + String (UartIntSt));
-        DEBUG_V (String ("            SpaceInFifo: ") + String (SpaceInFifo));
-
-        WaitCount = 0;
-    }
-
     if (gpio_num_t (-1) == DataPin) { return; }
     // if (!canRefresh ()) { return; }
     if (0 != RemainingIntensityCount) { return; }
