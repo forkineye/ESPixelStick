@@ -37,9 +37,9 @@ c_InputFPPRemotePlayFile::~c_InputFPPRemotePlayFile ()
 {
     // DEBUG_START;
 
-    Stop ();
-    while (!IsIdle ())
+    for (uint32_t LoopCount = 10000; (LoopCount != 0) && (!IsIdle ()); LoopCount--)
     {
+        Stop ();
         Poll (nullptr, 0);
     }
     // DEBUG_END;
