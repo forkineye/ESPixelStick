@@ -83,6 +83,8 @@ private:
     // config data
     String          GenericSerialHeader;
     String          GenericSerialFooter;
+    char           *pGenericSerialFooter      = nullptr;
+    size_t          LengthGenericSerialFooter = 0;
     uint            CurrentBaudrate     = int(BaudRate::BR_DEF); // current transmit rate
     uint16_t        Num_Channels        = DEFAULT_NUM_CHANNELS;      // Number of data channels to transmit
 

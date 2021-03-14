@@ -226,6 +226,9 @@ bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject & jsonConfig)
     setFromJSON (temp, jsonConfig, CN_data_pin);
     DataPin = gpio_num_t (temp);
 
+    pGenericSerialFooter      = (char*)GenericSerialFooter.c_str ();
+    LengthGenericSerialFooter = GenericSerialFooter.length ();
+
     bool response = validate ();
 
     // Update the config fields in case the validator changed them
@@ -300,9 +303,9 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
                 // are we in generic serial mode?
                 if (OutputType == c_OutputMgr::e_OutputType::OutputType_Serial)
                 {
-                    for (auto CurrentData : GenericSerialFooter)
+                    for (size_t HeaderIndex = 0; HeaderIndex < LengthGenericSerialFooter; HeaderIndex++)
                     {
-                        enqueue (CurrentData);
+                        enqueue (pGenericSerialFooter[HeaderIndex]);
                     }
                 } // need to send the footer
 
@@ -373,6 +376,7 @@ void c_OutputSerial::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     // jsonStatus["intena"] = uint32_t (intena);
 
 } // GetStatus
+
 //----------------------------------------------------------------------------
 void c_OutputSerial::Render ()
 {
@@ -441,8 +445,8 @@ void c_OutputSerial::Render ()
     } // end switch (OutputType)
 
     // point at the input data buffer
-    pNextChannelToSend = pOutputBuffer;
-    RemainingDataCount = OutputBufferSize;
+    pNextChannelToSend        = pOutputBuffer;
+    RemainingDataCount        = OutputBufferSize;
 
     // enable interrupts and start sending
     SET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
