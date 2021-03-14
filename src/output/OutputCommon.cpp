@@ -228,7 +228,8 @@ void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
 
 #define MicroSecondsInAsecond 1000000
     jsonStatus["framerefreshrate"] = (0 == FrameRefreshTimeInMicroSec) ? 0 : int (MicroSecondsInAsecond / FrameRefreshTimeInMicroSec);
-
+    jsonStatus["FrameCount"] = FrameCount;
+    
     // DEBUG_END;
 } // GetStatus
 
@@ -303,4 +304,14 @@ void c_OutputCommon::TerminateUartOperation ()
 
 } // TerminateUartOperation
 
+void c_OutputCommon::ReportNewFrame ()
+{
+    uint32_t Now = micros ();
+    FrameRefreshTimeInMicroSec = Now - FrameStartTimeInMicroSec;
+    FrameStartTimeInMicroSec = Now;
 
+    FrameCount++;
+
+    // DEBUG_END;
+
+} // ReportNewFrame

@@ -318,6 +318,7 @@ void c_OutputRelay::Render ()
         }
         ++OutputDataIndex;
     }
+    ReportNewFrame ();
 
     // DEBUG_END;
 } // render

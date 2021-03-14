@@ -280,7 +280,7 @@ void c_OutputGECE::Render()
         CommonSerialWrite(OutputPacketBuffer, GECE_PACKET_SIZE);
 
         SET_PERI_REG_MASK(UART_CONF0(UartId), UART_TXD_BRK);
-
+        ReportNewFrame ();
     } // for each intensity to send
 
     // DEBUG_END;

@@ -192,6 +192,20 @@ void c_OutputWS2811::GetConfig(ArduinoJson::JsonObject & jsonConfig)
 } // GetConfig
 
 //----------------------------------------------------------------------------
+void c_OutputWS2811::GetStatus (ArduinoJson::JsonObject& jsonStatus)
+{
+    c_OutputCommon::GetStatus (jsonStatus);
+    // uint32_t UartIntSt = GET_PERI_REG_MASK (UART_INT_ST (UartId), UART_TXFIFO_EMPTY_INT_ENA);
+    // uint16_t SpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength));
+
+    // jsonStatus["pNextIntensityToSend"] = uint32_t(pNextIntensityToSend);
+    // jsonStatus["RemainingIntensityCount"] = uint32_t(RemainingIntensityCount);
+    // jsonStatus["UartIntSt"] = UartIntSt;
+    // jsonStatus["SpaceInFifo"] = SpaceInFifo;
+
+} // GetStatus
+
+//----------------------------------------------------------------------------
 void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 {
     // DEBUG_START;
@@ -310,8 +324,23 @@ void c_OutputWS2811::Render()
 
     // DEBUG_V (String ("RemainingIntensityCount: ") + RemainingIntensityCount)
 
+    WaitCount++;
+
+    if (1000000 < WaitCount)
+    {
+        uint32_t UartIntSt = GET_PERI_REG_MASK (UART_INT_ST (UartId), UART_TXFIFO_EMPTY_INT_ENA);
+        uint16_t SpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength));
+
+        DEBUG_V (String ("   pNextIntensityToSend: ") + String (uint32_t (pNextIntensityToSend)));
+        DEBUG_V (String ("RemainingIntensityCount: ") + String (RemainingIntensityCount));
+        DEBUG_V (String ("              UartIntSt: ") + String (UartIntSt));
+        DEBUG_V (String ("            SpaceInFifo: ") + String (SpaceInFifo));
+
+        WaitCount = 0;
+    }
+
     if (gpio_num_t (-1) == DataPin) { return; }
-    if (!canRefresh ()) { return; }
+    // if (!canRefresh ()) { return; }
     if (0 != RemainingIntensityCount) { return; }
     if (nullptr == pIsrOutputBuffer) { return; }
 
@@ -388,6 +417,7 @@ void c_OutputWS2811::Render()
     ESP_ERROR_CHECK (uart_enable_tx_intr (UartId, 1, PIXEL_FIFO_TRIGGER_LEVEL));
 #endif
     FrameStartTimeInMicroSec = micros();
+    ReportNewFrame ();
 
     // DEBUG_END;
 
