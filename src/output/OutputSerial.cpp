@@ -41,6 +41,12 @@ extern "C" {
 #define UART_INT_RAW_REG             UART_INT_RAW
 #define UART_TX_DONE_INT_RAW         UART_TXFIFO_EMPTY_INT_RAW
 
+#define pinMatrixOutDetach
+#define pinMatrixOutAttach
+#define UART_TXD_IDX
+
+#define UART_STATUS_REG UART_STATUS
+
 #elif defined(ARDUINO_ARCH_ESP32)
 
 #   define UART_CONF0           UART_CONF0_REG
@@ -51,9 +57,9 @@ extern "C" {
 #   define UART_INT_ST          UART_INT_ST_REG
 #   define UART_TX_FIFO_SIZE    UART_FIFO_LEN
 
-#endif
-
 #define UART_TXD_IDX(u)     ((u==0)?U0TXD_OUT_IDX:((u==1)?U1TXD_OUT_IDX:((u==2)?U2TXD_OUT_IDX:0)))
+
+#endif
 
 #define FIFO_TRIGGER_LEVEL (UART_TX_FIFO_SIZE / 2)
 
