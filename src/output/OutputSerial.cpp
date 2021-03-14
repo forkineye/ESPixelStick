@@ -109,37 +109,44 @@ static void IRAM_ATTR uart_intr_handler (void* param)
 void c_OutputSerial::Begin ()
 {
     // DEBUG_START;
+
+    SetOutputBufferSize (Num_Channels);
+
+    // DEBUG_END;
+} // Begin
+
+//----------------------------------------------------------------------------
+void c_OutputSerial::StartUart ()
+{
+    // DEBUG_START;
     int speed = 0;
 
     if (OutputType == c_OutputMgr::e_OutputType::OutputType_DMX)
     {
         speed = uint (BaudRate::BR_DMX);
+        // speed = uint (BaudRate::BR_DEF);
     }
     else
     {
         speed = uint (CurrentBaudrate);
     }
 
-    SetOutputBufferSize (Num_Channels);
-
 #ifdef ARDUINO_ARCH_ESP8266
     /* Initialize uart */
-    /* frameTime = szSymbol * 1000000 / baud * szBuffer */
     InitializeUart (speed,
-                    SERIAL_8N1,
-                    SERIAL_TX_ONLY,
-                    FIFO_TRIGGER_LEVEL);
+        SERIAL_8N1,
+        SERIAL_TX_ONLY,
+        FIFO_TRIGGER_LEVEL);
 #else
-    /* Serial rate is 4x 800KHz for WS2811 */
     uart_config_t uart_config;
-    uart_config.baud_rate           = speed;
-    uart_config.data_bits           = uart_word_length_t::UART_DATA_8_BITS;
-    uart_config.flow_ctrl           = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
-    uart_config.parity              = uart_parity_t::UART_PARITY_DISABLE;
+    uart_config.baud_rate = speed;
+    uart_config.data_bits = uart_word_length_t::UART_DATA_8_BITS;
+    uart_config.flow_ctrl = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
+    uart_config.parity = uart_parity_t::UART_PARITY_DISABLE;
     uart_config.rx_flow_ctrl_thresh = 1;
-    uart_config.stop_bits           = uart_stop_bits_t::UART_STOP_BITS_1;
-    uart_config.use_ref_tick        = false;
-    InitializeUart (uart_config, uint32_t(FIFO_TRIGGER_LEVEL));
+    uart_config.stop_bits = uart_stop_bits_t::UART_STOP_BITS_1;
+    uart_config.use_ref_tick = false;
+    InitializeUart (uart_config, uint32_t (FIFO_TRIGGER_LEVEL));
 #endif
 
     // make sure we are ready to send a new frame
@@ -155,8 +162,8 @@ void c_OutputSerial::Begin ()
     // prime the uart status bits
     enqueue (0);
 
-//    // DEBUG_END;
-}
+    // DEBUG_END;
+} // StartUart
 
 //----------------------------------------------------------------------------
 /*
@@ -199,6 +206,10 @@ bool c_OutputSerial::validate ()
         LOG_PORT.println (String (F ("*** Requested Generic Serial Footer is too long. Setting to Default ***")));
         GenericSerialFooter = "";
     }
+
+    pGenericSerialFooter = (char*)GenericSerialFooter.c_str ();
+    LengthGenericSerialFooter = GenericSerialFooter.length ();
+
     // DEBUG_END;
     return response;
 
@@ -226,13 +237,12 @@ bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject & jsonConfig)
     setFromJSON (temp, jsonConfig, CN_data_pin);
     DataPin = gpio_num_t (temp);
 
-    pGenericSerialFooter      = (char*)GenericSerialFooter.c_str ();
-    LengthGenericSerialFooter = GenericSerialFooter.length ();
-
     bool response = validate ();
 
     // Update the config fields in case the validator changed them
     GetConfig (jsonConfig);
+
+    StartUart ();
 
     // DEBUG_END;
     return response;

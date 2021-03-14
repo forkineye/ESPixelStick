@@ -78,7 +78,8 @@ private:
     const uint8_t   DMX_BREAK              = 92;
     const uint8_t   DMX_MAB                = 12;
 
-    bool            validate ();
+    bool validate ();
+    void StartUart ();
 
     // config data
     String          GenericSerialHeader;
