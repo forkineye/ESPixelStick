@@ -51,7 +51,7 @@ public:
     void GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     void Render ();                                        ///< Call from loop(),  renders output data
     void GetDriverName (String & sDriverName);
-    void GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
+    void GetStatus (ArduinoJson::JsonObject& jsonStatus);
     uint16_t GetNumChannelsNeeded () { return Num_Channels; }
 
 #define GS_CHANNEL_LIMIT 2048
@@ -87,8 +87,8 @@ private:
     uint16_t        Num_Channels        = DEFAULT_NUM_CHANNELS;      // Number of data channels to transmit
 
     // non config data
-    uint16_t        RemainingDataCount;
-    uint8_t       * pNextChannelToSend;
+    volatile uint16_t        RemainingDataCount;
+    volatile uint8_t       * pNextChannelToSend;
     String          OutputName;
 
 #ifdef ARDUINO_ARCH_ESP8266
