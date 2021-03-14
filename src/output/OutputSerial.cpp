@@ -311,7 +311,6 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
 
                 // Clear all interrupts flags for this uart
                 WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
-
                 break;
             } // end close of frame
 
@@ -356,12 +355,35 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
 } // ISR_Handler
 
 //----------------------------------------------------------------------------
+void c_OutputSerial::GetStatus (ArduinoJson::JsonObject& jsonStatus)
+{
+    c_OutputCommon::GetStatus (jsonStatus);
+    // uint32_t conf0 = READ_PERI_REG (UART_CONF0 (UartId));
+    // uint32_t conf1 = READ_PERI_REG (UART_CONF1 (UartId));
+    // uint32_t intena = READ_PERI_REG (UART_INT_ENA (UartId));
+    // uint32_t UartIntSt = READ_PERI_REG (UART_INT_ST (UartId));
+    // uint16_t SpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength));
+
+    // jsonStatus["pNextChannelToSend"] = uint32_t (pNextChannelToSend);
+    // jsonStatus["RemainingDataCount"] = uint32_t (RemainingDataCount);
+    // jsonStatus["UartIntSt"] = UartIntSt;
+    // jsonStatus["SpaceInFifo"] = SpaceInFifo;
+    // jsonStatus["conf0"] = uint32_t (conf0);
+    // jsonStatus["conf1"] = uint32_t (conf1);
+    // jsonStatus["intena"] = uint32_t (intena);
+
+} // GetStatus
+//----------------------------------------------------------------------------
 void c_OutputSerial::Render ()
 {
     // DEBUG_START;
 
     // has the ISR stopped running?
-    if (0 != GET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA)) { return; }
+    uint32_t UartMask = GET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
+    if (UartMask)
+    { 
+        return;
+    }
 
 //    delayMicroseconds (1000000);
 //    LOG_PORT.println ("4");
@@ -372,11 +394,17 @@ void c_OutputSerial::Render ()
         case c_OutputMgr::e_OutputType::OutputType_DMX:
         {
             // is the fifo empty and all of the data sent?
+            if (0 != getFifoLength)
+            {
+                return;
+            }
+
             if (UART_TX_DONE_INT_RAW != GET_PERI_REG_MASK (UART_INT_RAW_REG (UartId), UART_TX_DONE_INT_RAW))
             {
                 return;
             } // go away if not
 
+            delayMicroseconds (10);
             SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
             delayMicroseconds (DMX_BREAK);
             CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
@@ -418,6 +446,8 @@ void c_OutputSerial::Render ()
 
     // enable interrupts and start sending
     SET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
+
+    ReportNewFrame ();
 
     // DEBUG_END;
 } // render
