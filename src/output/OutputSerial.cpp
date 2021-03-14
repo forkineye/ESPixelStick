@@ -50,8 +50,10 @@ extern "C" {
 #   define SERIAL_TX_ONLY       UART_INT_CLR_REG
 #   define UART_INT_ST          UART_INT_ST_REG
 #   define UART_TX_FIFO_SIZE    UART_FIFO_LEN
+
 #endif
 
+#define UART_TXD_IDX(u)     ((u==0)?U0TXD_OUT_IDX:((u==1)?U1TXD_OUT_IDX:((u==2)?U2TXD_OUT_IDX:0)))
 
 #define FIFO_TRIGGER_LEVEL (UART_TX_FIFO_SIZE / 2)
 
@@ -124,7 +126,6 @@ void c_OutputSerial::StartUart ()
     if (OutputType == c_OutputMgr::e_OutputType::OutputType_DMX)
     {
         speed = uint (BaudRate::BR_DMX);
-        // speed = uint (BaudRate::BR_DEF);
     }
     else
     {
@@ -139,13 +140,13 @@ void c_OutputSerial::StartUart ()
         FIFO_TRIGGER_LEVEL);
 #else
     uart_config_t uart_config;
-    uart_config.baud_rate = speed;
-    uart_config.data_bits = uart_word_length_t::UART_DATA_8_BITS;
-    uart_config.flow_ctrl = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
-    uart_config.parity = uart_parity_t::UART_PARITY_DISABLE;
+    uart_config.baud_rate           = speed;
+    uart_config.data_bits           = uart_word_length_t::UART_DATA_8_BITS;
+    uart_config.flow_ctrl           = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
+    uart_config.parity              = uart_parity_t::UART_PARITY_DISABLE;
     uart_config.rx_flow_ctrl_thresh = 1;
-    uart_config.stop_bits = uart_stop_bits_t::UART_STOP_BITS_1;
-    uart_config.use_ref_tick = false;
+    uart_config.stop_bits           = uart_stop_bits_t::UART_STOP_BITS_1;
+    uart_config.use_ref_tick        = false;
     InitializeUart (uart_config, uint32_t (FIFO_TRIGGER_LEVEL));
 #endif
 
@@ -371,19 +372,23 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
 void c_OutputSerial::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     c_OutputCommon::GetStatus (jsonStatus);
-    // uint32_t conf0 = READ_PERI_REG (UART_CONF0 (UartId));
-    // uint32_t conf1 = READ_PERI_REG (UART_CONF1 (UartId));
-    // uint32_t intena = READ_PERI_REG (UART_INT_ENA (UartId));
-    // uint32_t UartIntSt = READ_PERI_REG (UART_INT_ST (UartId));
-    // uint16_t SpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength));
+    uint32_t conf0       = READ_PERI_REG (UART_CONF0 (UartId));
+    uint32_t conf1       = READ_PERI_REG (UART_CONF1 (UartId));
+    uint32_t intena      = READ_PERI_REG (UART_INT_ENA (UartId));
+    uint32_t intRaw      = READ_PERI_REG (UART_INT_RAW_REG (UartId));
+    uint32_t UartIntSt   = READ_PERI_REG (UART_INT_ST (UartId));
+    uint32_t UartStatus  = READ_PERI_REG (UART_STATUS_REG (UartId));
+    uint16_t CharsInFifo = getFifoLength;
 
-    // jsonStatus["pNextChannelToSend"] = uint32_t (pNextChannelToSend);
-    // jsonStatus["RemainingDataCount"] = uint32_t (RemainingDataCount);
-    // jsonStatus["UartIntSt"] = UartIntSt;
-    // jsonStatus["SpaceInFifo"] = SpaceInFifo;
-    // jsonStatus["conf0"] = uint32_t (conf0);
-    // jsonStatus["conf1"] = uint32_t (conf1);
-    // jsonStatus["intena"] = uint32_t (intena);
+    jsonStatus["pNextChannelToSend"] = String(uint32_t (pNextChannelToSend), HEX);
+    jsonStatus["RemainingDataCount"] = uint32_t (RemainingDataCount);
+    jsonStatus["UartIntSt"]          = String (UartIntSt, HEX);
+    jsonStatus["CharsInFifo"]        = CharsInFifo;
+    jsonStatus["conf0"]              = String(uint32_t (conf0), HEX);
+    jsonStatus["conf1"]              = String(uint32_t (conf1), HEX);
+    jsonStatus["intena"]             = String(uint32_t (intena), HEX);
+    jsonStatus["UartIntRaw"]         = String (intRaw, HEX);
+    jsonStatus["UartStatus"]         = String (UartStatus, HEX);
 
 } // GetStatus
 
@@ -407,22 +412,19 @@ void c_OutputSerial::Render ()
     {
         case c_OutputMgr::e_OutputType::OutputType_DMX:
         {
-            // is the fifo empty and all of the data sent?
-            if (0 != getFifoLength)
-            {
-                return;
-            }
-
             if (UART_TX_DONE_INT_RAW != GET_PERI_REG_MASK (UART_INT_RAW_REG (UartId), UART_TX_DONE_INT_RAW))
             {
                 return;
             } // go away if not
 
-            delayMicroseconds (10);
-            SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
-            delayMicroseconds (DMX_BREAK);
-            CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
             delayMicroseconds (DMX_MAB);
+            pinMatrixOutDetach (DataPin, false, false); //Detach our
+            pinMode (DataPin, OUTPUT);
+            digitalWrite (DataPin, LOW); //88 uS break
+            delayMicroseconds (DMX_BREAK);
+            digitalWrite (DataPin, HIGH); //4 Us Mark After Break
+            delayMicroseconds (DMX_MAB);
+            pinMatrixOutAttach (DataPin, UART_TXD_IDX (UartId), false, false);
 
             // send the rest of the frame
             break;
@@ -455,8 +457,8 @@ void c_OutputSerial::Render ()
     } // end switch (OutputType)
 
     // point at the input data buffer
-    pNextChannelToSend        = pOutputBuffer;
-    RemainingDataCount        = OutputBufferSize;
+    pNextChannelToSend = pOutputBuffer;
+    RemainingDataCount = OutputBufferSize;
 
     // enable interrupts and start sending
     SET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
