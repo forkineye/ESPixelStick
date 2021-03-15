@@ -41,11 +41,15 @@ extern "C" {
 #define UART_INT_RAW_REG             UART_INT_RAW
 #define UART_TX_DONE_INT_RAW         UART_TXFIFO_EMPTY_INT_RAW
 
-#define pinMatrixOutDetach
-#define pinMatrixOutAttach
-#define UART_TXD_IDX
-
 #define UART_STATUS_REG UART_STATUS
+
+#ifndef UART_TXD_INV
+#   define UART_TXD_INV BIT(22)
+#endif // ndef UART_TXD_INV
+
+#define UART_INT_CLR_REG UART_INT_CLR
+
+#define UART_TX_DONE_INT_CLR BIT(1)
 
 #elif defined(ARDUINO_ARCH_ESP32)
 
@@ -151,7 +155,7 @@ void c_OutputSerial::StartUart ()
     uart_config.flow_ctrl           = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
     uart_config.parity              = uart_parity_t::UART_PARITY_DISABLE;
     uart_config.rx_flow_ctrl_thresh = 1;
-    uart_config.stop_bits           = uart_stop_bits_t::UART_STOP_BITS_1;
+    uart_config.stop_bits           = uart_stop_bits_t::UART_STOP_BITS_2;
     uart_config.use_ref_tick        = false;
     InitializeUart (uart_config, uint32_t (FIFO_TRIGGER_LEVEL));
 #endif
@@ -165,9 +169,6 @@ void c_OutputSerial::StartUart ()
 #else
     uart_isr_register (UartId, uart_intr_handler, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM, nullptr);
 #endif
-
-    // prime the uart status bits
-    enqueue (0);
 
     // DEBUG_END;
 } // StartUart
@@ -418,27 +419,39 @@ void c_OutputSerial::Render ()
     {
         case c_OutputMgr::e_OutputType::OutputType_DMX:
         {
+            if (0 != getFifoLength)
+            {
+                return;
+            }
+
             if (UART_TX_DONE_INT_RAW != GET_PERI_REG_MASK (UART_INT_RAW_REG (UartId), UART_TX_DONE_INT_RAW))
             {
                 return;
             } // go away if not
 
-            delayMicroseconds (DMX_MAB);
+            SET_PERI_REG_MASK (UART_INT_CLR_REG (UartId), UART_TX_DONE_INT_CLR);
+            SET_PERI_REG_MASK (UART_INT_CLR_REG (UartId), UART_TXFIFO_EMPTY_INT_CLR);
 
-#ifdef ARDUINO_ARCH_ESP8266
-            SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
-            delayMicroseconds (DMX_BREAK);
-            CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
             delayMicroseconds (DMX_MAB);
+#ifdef ARDUINO_ARCH_ESP8266
+            SET_PERI_REG_MASK (UART_INT_CLR_REG (UartId), UART_TX_DONE_INT_CLR);
+            SET_PERI_REG_MASK (UART_INT_CLR_REG (UartId), UART_TXFIFO_EMPTY_INT_CLR);
+
+            SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_INV);
+            delayMicroseconds (5 * DMX_BREAK);
+            CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_INV);
 #else
-            pinMatrixOutDetach (DataPin, false, false); //Detach our
+            pinMatrixOutDetach (DataPin, false, false);
             pinMode (DataPin, OUTPUT);
             digitalWrite (DataPin, LOW); //88 uS break
             delayMicroseconds (DMX_BREAK);
             digitalWrite (DataPin, HIGH); //4 Us Mark After Break
-            delayMicroseconds (DMX_MAB);
             pinMatrixOutAttach (DataPin, UART_TXD_IDX (UartId), false, false);
-#endif // def ARDUINO_ARCHITECTURE_ESP8266
+#endif // def ARDUINO_ARCH_ESP8266
+
+            delayMicroseconds (DMX_MAB);
+
+            enqueue (0x00); // DMX Lighting frame start
 
             // send the rest of the frame
             break;
