@@ -147,6 +147,9 @@ void c_OutputCommon::InitializeUart (uint32_t baudrate,
             // Clear all pending interrupts in the UART
             WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
 
+            CLEAR_PERI_REG_MASK (UART_FLOW_CONF (UartId), UART_SW_FLOW_CON_EN);
+            CLEAR_PERI_REG_MASK (UART_CONF1 (UartId), UART_RX_FLOW_EN);
+
             // Reenable interrupts
             ETS_UART_INTR_ENABLE ();
         }
@@ -180,6 +183,9 @@ void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
     // Set output pins
     pinMode (DataPin, OUTPUT);
     digitalWrite (DataPin, LOW);
+
+    ESP_ERROR_CHECK (uart_set_hw_flow_ctrl (UartId, uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE, 0));
+    ESP_ERROR_CHECK (uart_set_sw_flow_ctrl (UartId, false, 0, 0));
 
     if (OM_CMN_NO_CUSTOM_ISR != fifoTriggerLevel)
     {
