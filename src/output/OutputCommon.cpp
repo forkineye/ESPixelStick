@@ -147,8 +147,8 @@ void c_OutputCommon::InitializeUart (uint32_t baudrate,
             // Clear all pending interrupts in the UART
             WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
 
-            CLEAR_PERI_REG_MASK (UART_FLOW_CONF (UartId), UART_SW_FLOW_CON_EN);
-            CLEAR_PERI_REG_MASK (UART_CONF1 (UartId), UART_RX_FLOW_EN);
+            // CLEAR_PERI_REG_MASK (UART_FLOW_CONF (UartId), UART_SW_FLOW_CON_EN);
+            CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TX_FLOW_EN);
 
             // Reenable interrupts
             ETS_UART_INTR_ENABLE ();
