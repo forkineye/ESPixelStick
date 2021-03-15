@@ -75,8 +75,8 @@ private:
     const size_t    BUF_SIZE               = (MAX_CHANNELS + MAX_HDR_SIZE + MAX_FOOTER_SIZE);
 
     /* DMX minimum timings per E1.11 */
-    const uint8_t   DMX_BREAK              = 92;
-    const uint8_t   DMX_MAB                = 12;
+    const uint8_t   DMX_BREAK              = 92; // 23 bits
+    const uint8_t   DMX_MAB                = 12; //  3 bits
 
     bool validate ();
     void StartUart ();
