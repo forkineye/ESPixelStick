@@ -432,13 +432,13 @@ void c_OutputSerial::Render ()
             SET_PERI_REG_MASK (UART_INT_CLR_REG (UartId), UART_TX_DONE_INT_CLR);
             SET_PERI_REG_MASK (UART_INT_CLR_REG (UartId), UART_TXFIFO_EMPTY_INT_CLR);
 
-            delayMicroseconds (DMX_MAB);
+            delayMicroseconds (12 * DMX_MAB);
 #ifdef ARDUINO_ARCH_ESP8266
             SET_PERI_REG_MASK (UART_INT_CLR_REG (UartId), UART_TX_DONE_INT_CLR);
             SET_PERI_REG_MASK (UART_INT_CLR_REG (UartId), UART_TXFIFO_EMPTY_INT_CLR);
 
             SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_INV);
-            delayMicroseconds (5 * DMX_BREAK);
+            delayMicroseconds (DMX_BREAK);
             CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_INV);
 #else
             pinMatrixOutDetach (DataPin, false, false);
