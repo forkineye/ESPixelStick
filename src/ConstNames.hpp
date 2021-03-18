@@ -148,5 +148,6 @@ extern const char CN_ui[];
 extern const char CN_universe[];
 extern const char CN_universe_limit [];
 extern const char CN_universe_start [];
+extern const char CN_updateinterval[];
 extern const char CN_user[];
 extern const char CN_zig_size[];
