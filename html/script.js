@@ -77,6 +77,10 @@ $(function ()
         $('#btn_wifi').prop("disabled", ValidateConfigFields($("#network input")));
     }));
 
+    $('#config').on("input", (function () {
+        $('#DeviceConfigSave').prop("disabled", ValidateConfigFields($('#config input')));
+    }));
+
     $('#DeviceConfigSave').click(function ()
     {
         submitDeviceConfig();
@@ -461,12 +465,12 @@ function ProcessInputConfig()
 
 } // ProcessInputConfig
 
-function ProcessModeConfigurationData(channelId, ChannelTypeName, JsonConfig )
+function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig )
 {
     // console.info("ProcessModeConfigurationData: Start");
 
     // determine the type of in/output that has been selected and populate the form
-    var TypeOfChannelId = parseInt($('#' + ChannelTypeName +  channelId + " option:selected").val(), 10);
+    var TypeOfChannelId = parseInt($('#' + ChannelType +  channelId + " option:selected").val(), 10);
     var channelConfigSet = JsonConfig.channels[channelId];
 
     if (isNaN(TypeOfChannelId))
@@ -475,31 +479,30 @@ function ProcessModeConfigurationData(channelId, ChannelTypeName, JsonConfig )
         TypeOfChannelId = channelConfigSet.type;
     }
     var channelConfig = channelConfigSet[TypeOfChannelId];
-    ChannelTypeName = channelConfig.type.toLowerCase();
+    var ChannelTypeName = channelConfig.type.toLowerCase();
     ChannelTypeName = ChannelTypeName.replace(".", "_");
     ChannelTypeName = ChannelTypeName.replace(" ", "_");
     // console.info("ChannelTypeName: " + ChannelTypeName);
 
-    var FieldSet = $('#fs_' + ChannelTypeName + ' input');
-    if (0 < FieldSet.length)
+    var elementids = [];
+    var modeControlName = '#' + ChannelType + 'mode' + channelId;
+    elementids = $(modeControlName + ' *[id]').filter(":input").map(function ()
     {
-        $('#fs_' + ChannelTypeName).on("input", (function ()
+        return $(this).attr('id');
+    }).get();
+
+    elementids.forEach(function (elementid)
+    {
+        var SelectedElement = modeControlName + ' #' + elementid;
+        if ($(SelectedElement).is(':checkbox'))
         {
-            $('#DeviceConfigSave').prop("disabled", ValidateConfigFields(FieldSet));
-        }));
-    }
-
-    // clear the array
-    selector = [];
-
-    // push the prefix that identifies the object being modified.
-    selector.push(" #" + ChannelTypeName);
-
-    // update the fields based on config data
-    updateFromJSON(channelConfig);
-
-    // clear the array
-    selector = [];
+            $(SelectedElement).prop('checked') = channelConfig[elementid];
+        }
+        else
+        {
+            $(SelectedElement).val(channelConfig[elementid]);
+        }
+    });
 
     if ("fpp_remote" === ChannelTypeName)
     {
@@ -650,12 +653,18 @@ function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId )
     HtmlLoadFileName = HtmlLoadFileName.replace(" ", "_");
     HtmlLoadFileName = HtmlLoadFileName + ".html";
     // console.info("Adjusted HtmlLoadFileName: " + HtmlLoadFileName);
+
 //TODO: Handle this better for items which don't require config pages - alexa, ddp, etc...
-    if ("disabled.html" === HtmlLoadFileName) {
+
+    if ("disabled.html" === HtmlLoadFileName)
+    {
         $('#' + OptionListName + 'mode' + DisplayedChannelId).empty();
-    } else {
+    }
+    else
+    {
         // try to load the field definition file for this channel type
-        $('#' + OptionListName + 'mode' + DisplayedChannelId).load(HtmlLoadFileName, function () {
+        $('#' + OptionListName + 'mode' + DisplayedChannelId).load(HtmlLoadFileName, function ()
+        {
             if ("input" === OptionListName)
             {
                 ProcessInputConfig();
@@ -814,7 +823,7 @@ function ValidateConfigFields(ElementList)
          ChildElementId++)
     {
         var ChildElement = ElementList[ChildElementId];
-        var ChildType = ChildElement.type;
+        // var ChildType = ChildElement.type;
 
         if ((ChildElement.validity.valid !== undefined) && (!$(ChildElement).hasClass('hidden')))
         {
