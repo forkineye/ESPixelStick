@@ -496,7 +496,7 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig )
         var SelectedElement = modeControlName + ' #' + elementid;
         if ($(SelectedElement).is(':checkbox'))
         {
-            $(SelectedElement).prop('checked') = channelConfig[elementid];
+            $(SelectedElement).prop('checked', channelConfig[elementid]);
         }
         else
         {
