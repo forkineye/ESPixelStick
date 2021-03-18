@@ -351,8 +351,6 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
 {
     // console.log("relaychannelconfigurationtable.rows.length = " + $('#relaychannelconfigurationtable tr').length);
 
-    $('#updateinterval').val(parseInt(RelayConfig.ui,10));
-
     var ChannelConfigs = RelayConfig.channels;
 
     while (1 < $('#relaychannelconfigurationtable tr').length) {
@@ -398,8 +396,6 @@ function ProcessModeConfigurationDataServoPCA9685(ServoConfig)
 {
     // console.log("Servochannelconfigurationtable.rows.length = " + $('#servo_pca9685channelconfigurationtable tr').length);
 
-    $('#updateinterval').val(parseInt(ServoConfig.ui, 10));
-
     var ChannelConfigs = ServoConfig.channels;
 
     while (1 < $('#servo_pca9685channelconfigurationtable tr').length) {
@@ -426,7 +422,6 @@ function ProcessModeConfigurationDataServoPCA9685(ServoConfig)
         $('#ServoMaxLevel_' + CurrentRowId).attr('style', $('#ServoMaxLevel_hr').attr('style'));
         $('#ServoDataType_' + CurrentRowId).attr('style', $('#ServoDataType_hr').attr('style'));
     }
-
 
     $.each(ChannelConfigs, function (i, CurrentChannelConfig) {
         // console.log("Current Channel Id = " + CurrentChannelConfig.id);
@@ -773,7 +768,9 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
         // tell the ESP what type of channel it should be using
         CurrentChannelConfigurationData.type = ChannelType;
 
-        if ((ChannelConfig.type === "Relay") && ($("#relaychannelconfigurationtable").length)) {
+        if ((ChannelConfig.type === "Relay") && ($("#relaychannelconfigurationtable").length))
+        {
+            ChannelConfig.updateinterval = parseInt($('#updateinterval').val(), 10);
             $.each(ChannelConfig.channels, function (i, CurrentChannelConfig) {
                 // console.info("Current Channel Id = " + CurrentChannelConfig.id);
                 var currentChannelRowId = CurrentChannelConfig.id + 1;
@@ -783,7 +780,9 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
                 CurrentChannelConfig.trig = parseInt($('#threshhold_' + (currentChannelRowId)).val(), 10);
             });
         }
-        else if ((ChannelConfig.type === "Servo PCA9685") && ($("#servo_pca9685channelconfigurationtable").length)) {
+        else if ((ChannelConfig.type === "Servo PCA9685") && ($("#servo_pca9685channelconfigurationtable").length))
+        {
+            ChannelConfig.updateinterval = parseInt($('#updateinterval').val(), 10);
             $.each(ChannelConfig.channels, function (i, CurrentChannelConfig) {
                 // console.info("Current Channel Id = " + CurrentChannelConfig.id);
                 var currentChannelRowId = CurrentChannelConfig.id + 1;
