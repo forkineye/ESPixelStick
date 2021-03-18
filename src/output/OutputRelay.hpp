@@ -63,7 +63,7 @@ public:
 
 private:
 #   define OM_RELAY_CHANNEL_LIMIT           8
-#   define OM_RELAY_UPDATE_INTERVAL_NAME    CN_ui
+#   define OM_RELAY_UPDATE_INTERVAL_NAME    CN_updateinterval
 #   define OM_RELAY_CHANNEL_ENABLED_NAME    CN_en
 #   define OM_RELAY_CHANNEL_INVERT_NAME     CN_inv
 
