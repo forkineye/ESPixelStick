@@ -144,6 +144,7 @@ const char CN_ui                       [] = "ui";
 const char CN_universe                 [] = "universe";
 const char CN_universe_limit           [] = "universe_limit";
 const char CN_universe_start           [] = "universe_start";
+const char CN_updateinterval           [] = "updateinterval";
 const char CN_user                     [] = "user";
 const char CN_zig_size                 [] = "zig_size";
 

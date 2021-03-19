@@ -197,22 +197,22 @@ void c_FPPDiscovery::onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo
 } // onWiFiConnect
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
+void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
 {
     // DEBUG_START;
 
-    FPPPacket* packet = reinterpret_cast<FPPPacket*>(_packet.data ());
-    // DEBUG_V (String ("Received packet from: ") + _packet.remoteIP ().toString ());
-    // DEBUG_V (String ("             Sent to: ") + _packet.localIP ().toString ());
-    // DEBUG_V (String (" packet->packet_type: ") + String(packet->packet_type));
+    FPPPacket* fppPacket = reinterpret_cast<FPPPacket*>(UDPpacket.data ());
+    // DEBUG_V (String ("Received UDP packet from: ") + UDPpacket.remoteIP ().toString ());
+    // DEBUG_V (String ("                 Sent to: ") + UDPpacket.localIP ().toString ());
+    // DEBUG_V (String ("         FPP packet_type: ") + String(fppPacket->packet_type));
 
-    switch (packet->packet_type)
+    switch (fppPacket->packet_type)
     {
         case 0x04: //Ping Packet
         {
             // DEBUG_V (String (F ("Ping Packet")));
 
-            FPPPingPacket* pingPacket = reinterpret_cast<FPPPingPacket*>(_packet.data ());
+            FPPPingPacket* pingPacket = reinterpret_cast<FPPPingPacket*>(UDPpacket.data ());
             // DEBUG_V (String (F ("Ping Packet subtype: ")) + String (pingPacket->ping_subtype));
             // DEBUG_V (String (F ("Ping Packet packet.versionMajor: ")) + String (pingPacket->versionMajor));
             // DEBUG_V (String (F ("Ping Packet packet.versionMinor: ")) + String (pingPacket->versionMinor));
@@ -223,7 +223,7 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
             {
                 // DEBUG_V (String (F ("FPP Ping discovery packet")));
                 // received a discover ping packet, need to send a ping out
-                if (_packet.isBroadcast () || _packet.isMulticast ())
+                if (UDPpacket.isBroadcast () || UDPpacket.isMulticast ())
                 {
                     // DEBUG_V ("Broadcast Ping Response");
                     sendPingPacket ();
@@ -231,7 +231,7 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
                 else
                 {
                     // DEBUG_V ("Unicast Ping Response");
-                    sendPingPacket (_packet.remoteIP ());
+                    sendPingPacket (UDPpacket.remoteIP ());
                 }
             }
             break;
@@ -239,14 +239,14 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket _packet)
 
         case 0x01: //Multisync packet
         {
-            FPPMultiSyncPacket* msPacket = reinterpret_cast<FPPMultiSyncPacket*>(_packet.data ());
+            FPPMultiSyncPacket* msPacket = reinterpret_cast<FPPMultiSyncPacket*>(UDPpacket.data ());
             // DEBUG_V (String (F ("msPacket->sync_type: ")) + String(msPacket->sync_type));
 
             if (msPacket->sync_type == 0x00)
             {
                 //FSEQ type, not media
                 // DEBUG_V (String (F ("Received FPP FSEQ sync packet")));
-                FppRemoteIp = _packet.remoteIP ();
+                FppRemoteIp = UDPpacket.remoteIP ();
                 ProcessSyncPacket (msPacket->sync_action, msPacket->filename, msPacket->frame_number, msPacket->seconds_elapsed);
             }
             break;
@@ -390,7 +390,7 @@ void c_FPPDiscovery::sendPingPacket (IPAddress destination)
     strcpy (packet.hardwareType, FPP_VARIANT_NAME.c_str());
     packet.ranges[0] = 0;
 
-    // DEBUG_V ("Ping to " + destination.toString());
+    // DEBUG_V ("Send Ping to " + destination.toString());
     udp.writeTo (packet.raw, sizeof (packet), destination, FPP_DISCOVERY_PORT);
 
     // DEBUG_END;

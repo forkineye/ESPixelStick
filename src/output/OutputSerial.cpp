@@ -41,6 +41,16 @@ extern "C" {
 #define UART_INT_RAW_REG             UART_INT_RAW
 #define UART_TX_DONE_INT_RAW         UART_TXFIFO_EMPTY_INT_RAW
 
+#define UART_STATUS_REG UART_STATUS
+
+#ifndef UART_TXD_INV
+#   define UART_TXD_INV BIT(22)
+#endif // ndef UART_TXD_INV
+
+#define UART_INT_CLR_REG UART_INT_CLR
+
+#define UART_TX_DONE_INT_CLR BIT(1)
+
 #elif defined(ARDUINO_ARCH_ESP32)
 
 #   define UART_CONF0           UART_CONF0_REG
@@ -50,8 +60,10 @@ extern "C" {
 #   define SERIAL_TX_ONLY       UART_INT_CLR_REG
 #   define UART_INT_ST          UART_INT_ST_REG
 #   define UART_TX_FIFO_SIZE    UART_FIFO_LEN
-#endif
 
+#define UART_TXD_IDX(u)     ((u==0)?U0TXD_OUT_IDX:((u==1)?U1TXD_OUT_IDX:((u==2)?U2TXD_OUT_IDX:0)))
+
+#endif
 
 #define FIFO_TRIGGER_LEVEL (UART_TX_FIFO_SIZE / 2)
 
@@ -109,6 +121,16 @@ static void IRAM_ATTR uart_intr_handler (void* param)
 void c_OutputSerial::Begin ()
 {
     // DEBUG_START;
+
+    SetOutputBufferSize (Num_Channels);
+
+    // DEBUG_END;
+} // Begin
+
+//----------------------------------------------------------------------------
+void c_OutputSerial::StartUart ()
+{
+    // DEBUG_START;
     int speed = 0;
 
     if (OutputType == c_OutputMgr::e_OutputType::OutputType_DMX)
@@ -120,26 +142,22 @@ void c_OutputSerial::Begin ()
         speed = uint (CurrentBaudrate);
     }
 
-    SetOutputBufferSize (Num_Channels);
-
 #ifdef ARDUINO_ARCH_ESP8266
     /* Initialize uart */
-    /* frameTime = szSymbol * 1000000 / baud * szBuffer */
     InitializeUart (speed,
-                    SERIAL_8N1,
-                    SERIAL_TX_ONLY,
-                    FIFO_TRIGGER_LEVEL);
+        SERIAL_8N1,
+        SERIAL_TX_ONLY,
+        FIFO_TRIGGER_LEVEL);
 #else
-    /* Serial rate is 4x 800KHz for WS2811 */
     uart_config_t uart_config;
     uart_config.baud_rate           = speed;
     uart_config.data_bits           = uart_word_length_t::UART_DATA_8_BITS;
     uart_config.flow_ctrl           = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
     uart_config.parity              = uart_parity_t::UART_PARITY_DISABLE;
     uart_config.rx_flow_ctrl_thresh = 1;
-    uart_config.stop_bits           = uart_stop_bits_t::UART_STOP_BITS_1;
+    uart_config.stop_bits           = uart_stop_bits_t::UART_STOP_BITS_2;
     uart_config.use_ref_tick        = false;
-    InitializeUart (uart_config, uint32_t(FIFO_TRIGGER_LEVEL));
+    InitializeUart (uart_config, uint32_t (FIFO_TRIGGER_LEVEL));
 #endif
 
     // make sure we are ready to send a new frame
@@ -152,11 +170,8 @@ void c_OutputSerial::Begin ()
     uart_isr_register (UartId, uart_intr_handler, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM, nullptr);
 #endif
 
-    // prime the uart status bits
-    enqueue (0);
-
-//    // DEBUG_END;
-}
+    // DEBUG_END;
+} // StartUart
 
 //----------------------------------------------------------------------------
 /*
@@ -199,6 +214,10 @@ bool c_OutputSerial::validate ()
         LOG_PORT.println (String (F ("*** Requested Generic Serial Footer is too long. Setting to Default ***")));
         GenericSerialFooter = "";
     }
+
+    pGenericSerialFooter = (char*)GenericSerialFooter.c_str ();
+    LengthGenericSerialFooter = GenericSerialFooter.length ();
+
     // DEBUG_END;
     return response;
 
@@ -230,6 +249,8 @@ bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 
     // Update the config fields in case the validator changed them
     GetConfig (jsonConfig);
+
+    StartUart ();
 
     // DEBUG_END;
     return response;
@@ -300,9 +321,9 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
                 // are we in generic serial mode?
                 if (OutputType == c_OutputMgr::e_OutputType::OutputType_Serial)
                 {
-                    for (auto CurrentData : GenericSerialFooter)
+                    for (size_t HeaderIndex = 0; HeaderIndex < LengthGenericSerialFooter; HeaderIndex++)
                     {
-                        enqueue (CurrentData);
+                        enqueue (pGenericSerialFooter[HeaderIndex]);
                     }
                 } // need to send the footer
 
@@ -311,7 +332,6 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
 
                 // Clear all interrupts flags for this uart
                 WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
-
                 break;
             } // end close of frame
 
@@ -356,12 +376,40 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
 } // ISR_Handler
 
 //----------------------------------------------------------------------------
+void c_OutputSerial::GetStatus (ArduinoJson::JsonObject& jsonStatus)
+{
+    c_OutputCommon::GetStatus (jsonStatus);
+    uint32_t conf0       = READ_PERI_REG (UART_CONF0 (UartId));
+    uint32_t conf1       = READ_PERI_REG (UART_CONF1 (UartId));
+    uint32_t intena      = READ_PERI_REG (UART_INT_ENA (UartId));
+    uint32_t intRaw      = READ_PERI_REG (UART_INT_RAW_REG (UartId));
+    uint32_t UartIntSt   = READ_PERI_REG (UART_INT_ST (UartId));
+    uint32_t UartStatus  = READ_PERI_REG (UART_STATUS_REG (UartId));
+    uint16_t CharsInFifo = getFifoLength;
+
+    jsonStatus["pNextChannelToSend"] = String(uint32_t (pNextChannelToSend), HEX);
+    jsonStatus["RemainingDataCount"] = uint32_t (RemainingDataCount);
+    jsonStatus["UartIntSt"]          = String (UartIntSt, HEX);
+    jsonStatus["CharsInFifo"]        = CharsInFifo;
+    jsonStatus["conf0"]              = String(uint32_t (conf0), HEX);
+    jsonStatus["conf1"]              = String(uint32_t (conf1), HEX);
+    jsonStatus["intena"]             = String(uint32_t (intena), HEX);
+    jsonStatus["UartIntRaw"]         = String (intRaw, HEX);
+    jsonStatus["UartStatus"]         = String (UartStatus, HEX);
+
+} // GetStatus
+
+//----------------------------------------------------------------------------
 void c_OutputSerial::Render ()
 {
     // DEBUG_START;
 
     // has the ISR stopped running?
-    if (0 != GET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA)) { return; }
+    uint32_t UartMask = GET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
+    if (UartMask)
+    { 
+        return;
+    }
 
 //    delayMicroseconds (1000000);
 //    LOG_PORT.println ("4");
@@ -371,16 +419,39 @@ void c_OutputSerial::Render ()
     {
         case c_OutputMgr::e_OutputType::OutputType_DMX:
         {
-            // is the fifo empty and all of the data sent?
+            if (0 != getFifoLength)
+            {
+                return;
+            }
+
             if (UART_TX_DONE_INT_RAW != GET_PERI_REG_MASK (UART_INT_RAW_REG (UartId), UART_TX_DONE_INT_RAW))
             {
                 return;
             } // go away if not
 
-            SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
+            SET_PERI_REG_MASK (UART_INT_CLR_REG (UartId), UART_TX_DONE_INT_CLR);
+            SET_PERI_REG_MASK (UART_INT_CLR_REG (UartId), UART_TXFIFO_EMPTY_INT_CLR);
+
+            delayMicroseconds (12 * DMX_MAB);
+#ifdef ARDUINO_ARCH_ESP8266
+            SET_PERI_REG_MASK (UART_INT_CLR_REG (UartId), UART_TX_DONE_INT_CLR);
+            SET_PERI_REG_MASK (UART_INT_CLR_REG (UartId), UART_TXFIFO_EMPTY_INT_CLR);
+
+            SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_INV);
             delayMicroseconds (DMX_BREAK);
-            CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
+            CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_INV);
+#else
+            pinMatrixOutDetach (DataPin, false, false);
+            pinMode (DataPin, OUTPUT);
+            digitalWrite (DataPin, LOW); //88 uS break
+            delayMicroseconds (DMX_BREAK);
+            digitalWrite (DataPin, HIGH); //4 Us Mark After Break
+            pinMatrixOutAttach (DataPin, UART_TXD_IDX (UartId), false, false);
+#endif // def ARDUINO_ARCH_ESP8266
+
             delayMicroseconds (DMX_MAB);
+
+            enqueue (0x00); // DMX Lighting frame start
 
             // send the rest of the frame
             break;
@@ -418,6 +489,8 @@ void c_OutputSerial::Render ()
 
     // enable interrupts and start sending
     SET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
+
+    ReportNewFrame ();
 
     // DEBUG_END;
 } // render

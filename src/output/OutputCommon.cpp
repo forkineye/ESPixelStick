@@ -181,6 +181,9 @@ void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
     pinMode (DataPin, OUTPUT);
     digitalWrite (DataPin, LOW);
 
+    ESP_ERROR_CHECK (uart_set_hw_flow_ctrl (UartId, uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE, 0));
+    ESP_ERROR_CHECK (uart_set_sw_flow_ctrl (UartId, false, 0, 0));
+
     if (OM_CMN_NO_CUSTOM_ISR != fifoTriggerLevel)
     {
         // make sure no existing low level ISR is running
@@ -228,7 +231,8 @@ void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
 
 #define MicroSecondsInAsecond 1000000
     jsonStatus["framerefreshrate"] = (0 == FrameRefreshTimeInMicroSec) ? 0 : int (MicroSecondsInAsecond / FrameRefreshTimeInMicroSec);
-
+    jsonStatus["FrameCount"] = FrameCount;
+    
     // DEBUG_END;
 } // GetStatus
 
@@ -303,4 +307,14 @@ void c_OutputCommon::TerminateUartOperation ()
 
 } // TerminateUartOperation
 
+void c_OutputCommon::ReportNewFrame ()
+{
+    uint32_t Now = micros ();
+    FrameRefreshTimeInMicroSec = Now - FrameStartTimeInMicroSec;
+    FrameStartTimeInMicroSec = Now;
 
+    FrameCount++;
+
+    // DEBUG_END;
+
+} // ReportNewFrame

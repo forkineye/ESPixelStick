@@ -234,6 +234,7 @@ void c_OutputServoPCA9685::Render ()
     // DEBUG_START;
 
     uint8_t OutputDataIndex = 0;
+    ReportNewFrame ();
 
     for (ServoPCA9685Channel_t & currentServoPCA9685 : OutputList)
     {

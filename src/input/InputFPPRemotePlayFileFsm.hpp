@@ -83,3 +83,16 @@ public:
     virtual bool Sync (String & FileName, uint32_t FrameId);
 
 }; // fsm_PlayFile_state_PlayingFile
+
+/*****************************************************************************/
+class fsm_PlayFile_state_Stopping : public fsm_PlayFile_state
+{
+public:
+    virtual void Poll (uint8_t* Buffer, size_t BufferSize);
+    virtual void Init (c_InputFPPRemotePlayFile* Parent);
+    virtual void GetStateName (String& sName) { sName = F("Stopping"); }
+    virtual void Start (String& FileName, uint32_t FrameId, uint32_t RemainingPlayCount);
+    virtual void Stop (void);
+    virtual bool Sync (String& FileName, uint32_t FrameId);
+
+}; // fsm_PlayFile_state_Stopping

@@ -350,10 +350,7 @@ void fsm_PlayFile_state_PlayingFile::Stop (void)
     LOG_PORT.println (String (F ("Stop Playing:: FileName:  '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
     // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed));
 
-    p_InputFPPRemotePlayFile->fsm_PlayFile_state_Idle_imp.Init (p_InputFPPRemotePlayFile);
-    FileMgr.CloseSdFile (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed);
-    p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed = 0;
-    p_InputFPPRemotePlayFile->PlayItemName = String ("");
+    p_InputFPPRemotePlayFile->fsm_PlayFile_state_Stopping_imp.Init (p_InputFPPRemotePlayFile);
 
     // DEBUG_END;
 
@@ -417,3 +414,64 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, uint32_t TargetFram
     return response;
 
 } // fsm_PlayFile_state_PlayingFile::Sync
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void fsm_PlayFile_state_Stopping::Poll (uint8_t* Buffer, size_t BufferSize)
+{
+    // DEBUG_START;
+
+    // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed));
+
+    FileMgr.CloseSdFile (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed);
+    p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed = 0;
+    p_InputFPPRemotePlayFile->PlayItemName = String ("");
+
+    p_InputFPPRemotePlayFile->fsm_PlayFile_state_Idle_imp.Init (p_InputFPPRemotePlayFile);
+
+    // DEBUG_END;
+
+} // fsm_PlayFile_state_PlayingFile::Poll
+
+//-----------------------------------------------------------------------------
+void fsm_PlayFile_state_Stopping::Init (c_InputFPPRemotePlayFile* Parent)
+{
+    // DEBUG_START;
+
+    p_InputFPPRemotePlayFile = Parent;
+    Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_Stopping_imp);
+
+    // DEBUG_END;
+
+} // fsm_PlayFile_state_Stopping::Init
+
+//-----------------------------------------------------------------------------
+void fsm_PlayFile_state_Stopping::Start (String& FileName, uint32_t FrameId, uint32_t PlayCount)
+{
+    // DEBUG_START;
+
+    // DEBUG_END
+
+} // fsm_PlayFile_state_Stopping::Start
+
+//-----------------------------------------------------------------------------
+void fsm_PlayFile_state_Stopping::Stop (void)
+{
+    // DEBUG_START;
+
+    // DEBUG_END;
+
+} // fsm_PlayFile_state_Stopping::Stop
+
+//-----------------------------------------------------------------------------
+bool fsm_PlayFile_state_Stopping::Sync (String& FileName, uint32_t TargetFrameId)
+{
+    // DEBUG_START;
+    bool response = false;
+
+
+    // DEBUG_END;
+    return response;
+
+} // fsm_PlayFile_state_Stopping::Sync

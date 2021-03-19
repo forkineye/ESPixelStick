@@ -51,7 +51,7 @@ public:
     void GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     void Render ();                                        ///< Call from loop(),  renders output data
     void GetDriverName (String & sDriverName);
-    void GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
+    void GetStatus (ArduinoJson::JsonObject& jsonStatus);
     uint16_t GetNumChannelsNeeded () { return Num_Channels; }
 
 #define GS_CHANNEL_LIMIT 2048
@@ -75,20 +75,23 @@ private:
     const size_t    BUF_SIZE               = (MAX_CHANNELS + MAX_HDR_SIZE + MAX_FOOTER_SIZE);
 
     /* DMX minimum timings per E1.11 */
-    const uint8_t   DMX_BREAK              = 92;
-    const uint8_t   DMX_MAB                = 12;
+    const uint8_t   DMX_BREAK              = 92; // 23 bits
+    const uint8_t   DMX_MAB                = 12; //  3 bits
 
-    bool            validate ();
+    bool validate ();
+    void StartUart ();
 
     // config data
     String          GenericSerialHeader;
     String          GenericSerialFooter;
+    char           *pGenericSerialFooter      = nullptr;
+    size_t          LengthGenericSerialFooter = 0;
     uint            CurrentBaudrate     = int(BaudRate::BR_DEF); // current transmit rate
     uint16_t        Num_Channels        = DEFAULT_NUM_CHANNELS;      // Number of data channels to transmit
 
     // non config data
-    uint16_t        RemainingDataCount;
-    uint8_t       * pNextChannelToSend;
+    volatile uint16_t        RemainingDataCount;
+    volatile uint8_t       * pNextChannelToSend;
     String          OutputName;
 
 #ifdef ARDUINO_ARCH_ESP8266

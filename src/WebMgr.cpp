@@ -612,13 +612,13 @@ void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
 {
     // DEBUG_START;
 
-    DynamicJsonDocument webJsonDoc (1024);
+    DynamicJsonDocument webJsonDoc (2048);
     JsonObject status = webJsonDoc.createNestedObject (F ("status"));
     JsonObject system = status.createNestedObject (F ("system"));
 
     system[F ("freeheap")] = (String)ESP.getFreeHeap ();
     system[F ("uptime")] = millis ();
-    system[F ("SDinstalled")] = FileMgr.SdCardIsInstalled();
+    system[F ("SDinstalled")] = FileMgr.SdCardIsInstalled ();
 
     // DEBUG_V ("");
 

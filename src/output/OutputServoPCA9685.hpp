@@ -54,7 +54,7 @@ public:
 
 private:
 #   define OM_SERVO_PCA9685_CHANNEL_LIMIT           16
-#   define OM_SERVO_PCA9685_UPDATE_INTERVAL_NAME    CN_ui
+#   define OM_SERVO_PCA9685_UPDATE_INTERVAL_NAME    CN_updateinterval
 #   define OM_SERVO_PCA9685_CHANNELS_NAME           CN_channels
 #   define OM_SERVO_PCA9685_CHANNEL_ENABLED_NAME    CN_en
 #   define OM_SERVO_PCA9685_CHANNEL_MINLEVEL_NAME   CN_Min
