@@ -7,9 +7,7 @@ env:
   - LIB_HOME=$HOME/Arduino/libraries
   - ESPS_HOME=$HOME/Arduino/ESPixelStick
   - BUILD=$HOME/build
-  - BUILD32=$HOME/build32
   - DIST=$ESPS_HOME/dist
-  - DIST32=$ESPS_HOME32/dist
   - STAMP=$(date +'%Y%m%d%H%M%S')
   - DIST_FILE=ESPixelStick_TRAVIS-$STAMP.zip
   - DIST_FILE32=ESPixelStick32_TRAVIS-$STAMP.zip
@@ -22,7 +20,6 @@ before_install:
 - mkdir -p $ESP_HOME
 - mkdir -p $ESP32_HOME
 - mkdir -p $BUILD
-- mkdir -p $BUILD32
 - git clone https://github.com/esp8266/Arduino.git $ESP_HOME/esp8266
 - cd $ESP_HOME/esp8266
 - git checkout 2.7.4
@@ -60,8 +57,10 @@ script:
 - echo '#define SECRETS_PASS "PASSPHRASE_NOT_SET"' >> $ESPS_HOME/src/secrets.h
 - arduino --verify $ESPS_HOME/ESPixelStick.ino
 - mv $BUILD/ESPixelStick.ino.bin $DIST/firmware/espixelstick-travis.bin
-- arduino --board esp32com:esp32:d32_pro:PSRAM=enabled,PartitionScheme=default,FlashFreq=80,UploadSpeed=921600,DebugLevel=none --pref build.path=$BUILD32 --save-prefs
+- arduino --board esp32com:esp32:d32_pro:PSRAM=enabled,PartitionScheme=default,FlashFreq=80,UploadSpeed=921600,DebugLevel=none --pref build.path=$BUILD --save-prefs
 - arduino --verify $ESPS_HOME/ESPixelStick.ino
+- mv $BUILD/ESPixelStick.ino.bin $DIST/firmware/espixelstick-travis32.bin
+- ls $DIST
 - gulp
 - gulp md
 - gulp travis
@@ -83,5 +82,5 @@ deploy:
   file: $HOME/$DIST_FILE
   skip_cleanup: true
   on:
-    repo: forkineye/ESPixelStick
+    repo: martinmueller2003/ESPixelStick
     branch: unify
