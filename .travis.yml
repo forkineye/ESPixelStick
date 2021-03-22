@@ -3,8 +3,10 @@ env:
   global:
   - IDE_VERSION=1.8.1
   - ESP_HOME=$HOME/ide/hardware/esp8266com
+  - ESP32_HOME=$HOME/ide/hardware/esp32com
   - LIB_HOME=$HOME/Arduino/libraries
-  - ESPS_HOME=$HOME/Arduino/ESPixelStick
+  - ESPS_HOME=$HOME/Arduino/esp8266/ESPixelStick
+  - ESPS32_HOME=$HOME/Arduino/esp32/ESPixelStick
   - BUILD=$HOME/build
   - DIST=$ESPS_HOME/dist
   - STAMP=$(date +'%Y%m%d%H%M%S')
@@ -22,10 +24,15 @@ before_install:
 - git checkout 2.7.1
 - git submodule update --init
 - cd $ESP_HOME/esp8266/tools
+- git clone https://github.com/espressif/arduino-esp32.git $ESP32_HOME/esp32
+- cd $ESP32_HOME/esp32
+- git checkout 1.0.3
+- git submodule update --init
 - python get.py
 - git clone https://github.com/bblanchon/ArduinoJson $LIB_HOME/ArduinoJson
 - git clone https://github.com/forkineye/ESPAsyncE131 $LIB_HOME/ESPAsyncE131
 - git clone https://github.com/me-no-dev/ESPAsyncTCP $LIB_HOME/ESPAsyncTCP
+- git clone https://github.com/me-no-dev/AsyncTCP $LIB_HOME/AsyncTCP
 - git clone https://github.com/me-no-dev/ESPAsyncUDP $LIB_HOME/ESPAsyncUDP
 - git clone https://github.com/me-no-dev/ESPAsyncWebServer $LIB_HOME/ESPAsyncWebServer
 - git clone https://github.com/marvinroger/async-mqtt-client $LIB_HOME/async-mqtt-client
