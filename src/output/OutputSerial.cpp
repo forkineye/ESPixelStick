@@ -170,6 +170,8 @@ void c_OutputSerial::StartUart ()
     uart_isr_register (UartId, uart_intr_handler, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM, nullptr);
 #endif
 
+    enqueue (0xff);
+
     // DEBUG_END;
 } // StartUart
 
