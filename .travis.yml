@@ -60,7 +60,7 @@ script:
 - arduino --board esp32com:esp32:d32_pro:PSRAM=enabled,PartitionScheme=default,FlashFreq=80,UploadSpeed=921600,DebugLevel=none --pref build.path=$BUILD --save-prefs
 - arduino --verify $ESPS_HOME/ESPixelStick.ino
 - mv $BUILD/ESPixelStick.ino.bin $DIST/firmware/espixelstick-travis32.bin
-- ls $DIST
+- ls $DIST/firmware
 - gulp
 - gulp md
 - gulp travis
