@@ -82,5 +82,5 @@ deploy:
   file: $HOME/$DIST_FILE
   skip_cleanup: true
   on:
-    repo: martinmueller2003/ESPixelStick
+    repo: MartinMueller2003/ESPixelStick
     branch: unify
