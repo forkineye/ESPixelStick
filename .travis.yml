@@ -60,7 +60,7 @@ before_script:
 script:
 - echo '#define SECRETS_SSID "SSID_NOT_SET"' > $ESPS_HOME/src/secrets.h
 - echo '#define SECRETS_PASS "PASSPHRASE_NOT_SET"' >> $ESPS_HOME/src/secrets.h
-- arduino --verify $ESPS_HOME/ESPixelStick.ino
+- arduino --pref build.path=$BUILD --verify $ESPS_HOME/ESPixelStick.ino
 - mv $BUILD/ESPixelStick.ino.bin $DIST/firmware/espixelstick-travis.bin
 - gulp
 - gulp md
