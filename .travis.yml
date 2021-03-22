@@ -1,7 +1,7 @@
 language: generic
 env:
   global:
-  - IDE_VERSION=1.8.1
+  - IDE_VERSION=1.8.13
   - ESP_HOME=$HOME/ide/hardware/esp8266com
   - ESP32_HOME=$HOME/ide/hardware/esp32com
   - LIB_HOME=$HOME/Arduino/libraries
@@ -11,6 +11,8 @@ env:
   - DIST=$ESPS_HOME/dist
   - STAMP=$(date +'%Y%m%d%H%M%S')
   - DIST_FILE=ESPixelStick_TRAVIS-$STAMP.zip
+  - ESP_BOARD_OPTIONS=--board esp8266com:esp8266:generic:xtal=160,vt=flash,exception=legacy,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=40,FlashMode=dio,eesz=4M2M,led=2,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200
+  - ESP32_BOARD_OPTIONS=--board esp32com:esp32:d32_pro:PSRAM=enabled,PartitionScheme=default,FlashFreq=80,UploadSpeed=921600,DebugLevel=none
 before_install:
 - wget http://downloads.arduino.cc/arduino-$IDE_VERSION-linux64.tar.xz
 - tar xf arduino-$IDE_VERSION-linux64.tar.xz
@@ -21,12 +23,13 @@ before_install:
 - mkdir -p $BUILD
 - git clone https://github.com/esp8266/Arduino.git $ESP_HOME/esp8266
 - cd $ESP_HOME/esp8266
-- git checkout 2.7.1
+- git checkout 2.7.4
 - git submodule update --init
 - cd $ESP_HOME/esp8266/tools
+- python get.py
 - git clone https://github.com/espressif/arduino-esp32.git $ESP32_HOME/esp32
 - cd $ESP32_HOME/esp32
-- git checkout 1.0.3
+- git checkout 1.0.5
 - git submodule update --init
 - python get.py
 - git clone https://github.com/bblanchon/ArduinoJson $LIB_HOME/ArduinoJson
@@ -75,3 +78,7 @@ deploy:
   on:
     repo: forkineye/ESPixelStick
     branch: unify
+
+
+- arduino --board esp32com:esp32:d32_pro:PSRAM=enabled,PartitionScheme=default,FlashFreq=80,UploadSpeed=921600,DebugLevel=none 
+  --pref build.path=$BUILD32 --save-prefs

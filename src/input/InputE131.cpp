@@ -80,8 +80,8 @@ void c_InputE131::GetConfig (JsonObject & jsonConfig)
     // DEBUG_START;
 
     jsonConfig[CN_universe]       = startUniverse;
-    jsonConfig[CN_universe_limit] = universe_channel_limit;
-    jsonConfig[CN_universe_start]  = channel_start;
+    jsonConfig[CN_universe_limit] = ChannelsPerUniverse;
+    jsonConfig[CN_universe_start] = FirstUniverseChannelOffset;
 
     // DEBUG_END;
 
@@ -95,7 +95,7 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
     JsonObject e131Status = jsonStatus.createNestedObject (F ("e131"));
     e131Status["unifirst"]      = startUniverse;
     e131Status["unilast"]       = LastUniverse;
-    e131Status["unichanlim"]    = universe_channel_limit;
+    e131Status["unichanlim"]    = ChannelsPerUniverse;
     // DEBUG_V ("");
 
     e131Status["num_packets"]   = e131->stats.num_packets;
@@ -112,85 +112,53 @@ void c_InputE131::Process ()
     // DEBUG_START;
 
     uint8_t*    E131Data;
-    uint8_t     uniOffset;
-    uint16_t    universe;
-    uint16_t    offset;
-    uint16_t    dataStart;
-    uint16_t    dataStop;
-    uint16_t    channels;
-    uint16_t    buffloc;
+    uint8_t     AdjustedUniverseIndex;
+    uint16_t    CurrentUniverse;
 
     // Parse a packet and update pixels
     while (!e131->isEmpty ())
     {
         e131->pull (&packet);
-        universe = htons (packet.universe);
+        CurrentUniverse = ntohs (packet.universe);
         E131Data = packet.property_values + 1;
 
         // DEBUG_V ("              universe: " + String(universe));
         // DEBUG_V ("packet.sequence_number: " + String(packet.sequence_number));
 
-        if ((universe >= startUniverse) && (universe <= LastUniverse))
+        if ((CurrentUniverse < startUniverse) || (CurrentUniverse > LastUniverse))
         {
-            // Universe offset and sequence tracking
-            uniOffset = (universe - startUniverse);
-            if (packet.sequence_number != seqTracker[uniOffset]++)
-            {
-                LOG_PORT.print (F ("Sequence Error - expected: "));
-                LOG_PORT.print (seqTracker[uniOffset] - 1);
-                LOG_PORT.print (F (" actual: "));
-                LOG_PORT.print (packet.sequence_number);
-                LOG_PORT.print (String(CN_universe) + ":");
-                LOG_PORT.println (universe);
-                seqError[uniOffset]++;
-                seqTracker[uniOffset] = packet.sequence_number + 1;
-            }
-
-            // Offset the channels if required
-            offset = channel_start - 1;
-
-            // Find start of data based off the Universe
-            dataStart = uniOffset * universe_channel_limit - offset;
-
-            // Calculate how much data we need for this buffer
-            dataStop = InputDataBufferSize;
-            channels = htons (packet.property_value_count) - 1;
-            if (universe_channel_limit < channels)
-            {
-                channels = universe_channel_limit;
-            }
-
-            if ((dataStart + channels) < dataStop)
-            {
-                dataStop = dataStart + channels;
-            }
-
-            // Set the data
-            buffloc = 0;
-
-            // ignore data from start of first Universe before channel_start
-            if (dataStart < 0)
-            {
-                dataStart = 0;
-                buffloc = channel_start - 1;
-            }
-
-            if (false == IsInputChannelActive)
-            {
-                // dont output. Just go away
-                break;
-            }
-
-            for (int UniverseIndex = dataStart; UniverseIndex < dataStop; UniverseIndex++)
-            {
-                InputDataBuffer[UniverseIndex] = E131Data[buffloc];
-                buffloc++;
-            }
-            InputMgr.ResetBlankTimer ();
+            DEBUG_V ("Not interested in this universe");
+            continue;
         }
-    }
+
+        // Universe offset and sequence tracking
+        AdjustedUniverseIndex = (CurrentUniverse - startUniverse);
+        
+        // Do we need to update a sequnce error?
+        if (packet.sequence_number != seqTracker[AdjustedUniverseIndex]++)
+        {
+            LOG_PORT.print (F ("Sequence Error - expected: "));
+            LOG_PORT.print (seqTracker[AdjustedUniverseIndex] - 1);
+            LOG_PORT.print (F (" actual: "));
+            LOG_PORT.print (packet.sequence_number);
+            LOG_PORT.print (String (CN_universe) + ":");
+            LOG_PORT.println (CurrentUniverse);
+            seqError[AdjustedUniverseIndex]++;
+            seqTracker[AdjustedUniverseIndex] = packet.sequence_number + 1;
+        }
+
+        uint16_t NumBytesOfE131Data = ntohs (packet.property_value_count) - 1;
+        UniverseIdToBufferXlate_t & CurrentTranslationEntry = UniverseIdToBufferXlate[AdjustedUniverseIndex];
+        memcpy (CurrentTranslationEntry.Destination,
+                &E131Data[CurrentTranslationEntry.SourceDataOffset],
+                min(CurrentTranslationEntry.BytesToCopy, NumBytesOfE131Data) );
+
+        InputMgr.ResetBlankTimer ();
+
+    } // end while there is data to process
+
     // DEBUG_END;
-    //    LOG_PORT.printf_P( PSTR("procJSON heap /stack stats: %u:%u:%u:%u\n"), ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
+
 } // process
 
 //-----------------------------------------------------------------------------
@@ -205,6 +173,8 @@ void c_InputE131::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
     HasBeenInitialized = false;
     Begin ();
 
+    SetBufferTranslation ();
+
     // DEBUG_END;
 
 } // SetBufferInfo
@@ -214,9 +184,9 @@ boolean c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
-    setFromJSON (startUniverse,          jsonConfig, CN_universe);
-    setFromJSON (universe_channel_limit, jsonConfig, CN_universe_limit);
-    setFromJSON (channel_start,          jsonConfig, CN_universe_start);
+    setFromJSON (startUniverse,              jsonConfig, CN_universe);
+    setFromJSON (ChannelsPerUniverse,        jsonConfig, CN_universe_limit);
+    setFromJSON (FirstUniverseChannelOffset, jsonConfig, CN_universe_start);
 
     validateConfiguration ();
 
@@ -253,46 +223,48 @@ void c_InputE131::validateConfiguration ()
     if (startUniverse < 1) { startUniverse = 1; }
 
     // DEBUG_V ("");
-    if (universe_channel_limit > UNIVERSE_MAX || universe_channel_limit < 1) { universe_channel_limit = UNIVERSE_MAX; }
+    if (ChannelsPerUniverse > UNIVERSE_MAX || ChannelsPerUniverse < 1) { ChannelsPerUniverse = UNIVERSE_MAX; }
 
     // DEBUG_V ("");
-    if (channel_start < 1)
+    if (FirstUniverseChannelOffset < 1)
     {
         // move to the start of the first universe
-        channel_start = 1;
+        FirstUniverseChannelOffset = 1;
     }
-    else if (channel_start > universe_channel_limit)
+    else if (FirstUniverseChannelOffset > ChannelsPerUniverse)
     {
         // channel start must be within the first universe
-        channel_start = universe_channel_limit;
+        FirstUniverseChannelOffset = ChannelsPerUniverse;
     }
 
     // Find the last universe we should listen for
      // DEBUG_V ("");
-    uint16_t span = channel_start + InputDataBufferSize - 1;
-    if (span % universe_channel_limit)
+    uint16_t span = FirstUniverseChannelOffset + InputDataBufferSize - 1;
+    if (span % ChannelsPerUniverse)
     {
-        LastUniverse = startUniverse + span / universe_channel_limit;
+        LastUniverse = startUniverse + span / ChannelsPerUniverse;
     }
     else
     {
-        LastUniverse = startUniverse + span / universe_channel_limit - 1;
+        LastUniverse = startUniverse + span / ChannelsPerUniverse - 1;
     }
 
     // Setup the sequence error tracker
     // DEBUG_V ("");
-    uint8_t uniTotal = (LastUniverse + 1) - startUniverse;
+    uint8_t NumberOfUniversesToProccess = (LastUniverse + 1) - startUniverse;
 
     // DEBUG_V ("");
     if (seqTracker) { free (seqTracker); seqTracker = nullptr; }
     // DEBUG_V ("");
-    if ((seqTracker = static_cast<uint8_t*>(malloc (uniTotal)))) { memset (seqTracker, 0x00, uniTotal); }
+    if ((seqTracker = static_cast<uint8_t*>(malloc (NumberOfUniversesToProccess)))) { memset (seqTracker, 0x00, NumberOfUniversesToProccess); }
     // DEBUG_V ("");
 
     if (seqError) { free (seqError); seqError = nullptr; }
     // DEBUG_V ("");
-    if ((seqError = static_cast<uint32_t*>(malloc (uniTotal * 4)))) { memset (seqError, 0x00, uniTotal * 4); }
+    if ((seqError = static_cast<uint32_t*>(malloc (NumberOfUniversesToProccess * 4)))) { memset (seqError, 0x00, NumberOfUniversesToProccess * 4); }
     // DEBUG_V ("");
+
+    SetBufferTranslation ();
 
     // Zero out packet stats
     if (nullptr == e131)
@@ -306,6 +278,42 @@ void c_InputE131::validateConfiguration ()
     // DEBUG_END;
 
 } // validateConfiguration
+
+//-----------------------------------------------------------------------------
+void c_InputE131::SetBufferTranslation ()
+{
+    DEBUG_START;
+
+    memset ((void*)UniverseIdToBufferXlate, 0x00, sizeof (UniverseIdToBufferXlate));
+
+    // for each possible universe, set the start and size
+
+    // uint16_t    ChannelsPerUniverse        = 512;  ///< Universe boundary limit
+    // uint16_t    FirstUniverseChannelOffset = 1;    ///< Channel to start listening at - 1 based
+
+    uint16_t InputOffset = FirstUniverseChannelOffset - 1;
+    uint16_t DestinationOffset = 0;
+
+    // set up the bytes for the First Universe
+    int BytesInUniverse = ChannelsPerUniverse - InputOffset;
+
+    for (UniverseIdToBufferXlate_t CurrentTranslation : UniverseIdToBufferXlate)
+    {
+        CurrentTranslation.Destination      = &InputDataBuffer[DestinationOffset];
+        CurrentTranslation.BytesToCopy      = BytesInUniverse;
+        CurrentTranslation.SourceDataOffset = InputOffset;
+
+        DestinationOffset += BytesInUniverse;
+
+        BytesInUniverse = ChannelsPerUniverse;
+        InputOffset = 0;
+    }
+
+    // DEBUG_V ("");
+
+    DEBUG_END;
+
+} // SetBufferTranslation
 
 //-----------------------------------------------------------------------------
 void c_InputE131::NetworkStateChanged (bool IsConnected)

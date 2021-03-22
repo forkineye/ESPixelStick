@@ -88,7 +88,7 @@ private:
 
 #ifdef ARDUINO_ARCH_ESP8266
     /* Returns number of bytes waiting in the TX FIFO of UART1 */
- #  define getFifoLength ((uint16_t)((U1S >> USTXC) & 0xff))
+ #  define getWS2811FifoLength ((uint16_t)((U1S >> USTXC) & 0xff))
 
     /* Append a byte to the TX FIFO of UART1 */
  #  define enqueue(data)  (U1F = (char)(data))
@@ -96,8 +96,8 @@ private:
 #elif defined(ARDUINO_ARCH_ESP32)
 
     /* Returns number of bytes waiting in the TX FIFO of UART1 */
-//#   define getFifoLength ((uint16_t)((READ_PERI_REG (UART_STATUS_REG (UartId)) & UART_TXFIFO_CNT_M) >> UART_TXFIFO_CNT_S))
-#   define getFifoLength 80
+#   define getWS2811FifoLength ((uint16_t)((READ_PERI_REG (UART_STATUS_REG (UartId)) & UART_TXFIFO_CNT_M) >> UART_TXFIFO_CNT_S))
+// #   define getFifoLength 80
 
     /* Append a byte to the TX FIFO of UART1 */
 // #   define enqueue(value) WRITE_PERI_REG(UART_FIFO_AHB_REG (UART), (char)(value))

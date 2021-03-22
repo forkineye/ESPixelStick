@@ -25,7 +25,7 @@ class c_InputFPPRemotePlayItem
 {
 public:
     c_InputFPPRemotePlayItem ();
-    ~c_InputFPPRemotePlayItem ();
+    virtual ~c_InputFPPRemotePlayItem ();
 
     virtual void     Poll           (uint8_t * Buffer, size_t BufferSize) = 0;
     virtual void     Start          (String & FileName, uint32_t FrameId, uint32_t RemainingPlayCount) = 0;

@@ -118,7 +118,7 @@ void c_InputMQTT::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject mqttStatus = jsonStatus.createNestedObject (F ("mqtt"));
+    // JsonObject mqttStatus = jsonStatus.createNestedObject (F ("mqtt"));
 
     // DEBUG_END;
 
@@ -490,7 +490,7 @@ void c_InputMQTT::PlayFseq (JsonObject & JsonConfig)
         }
 
         bool EngineFileIsPlayList   = false;
-        bool EngineFileIsStandalone = false;
+        // bool EngineFileIsStandalone = false;
         String PlayingFile;
 
         // do we have an engine running?
@@ -499,7 +499,7 @@ void c_InputMQTT::PlayFseq (JsonObject & JsonConfig)
             PlayingFile = pPlayFileEngine->GetFileName ();
 
             EngineFileIsPlayList   = PlayingFile.endsWith (String (F (".pl")));
-            EngineFileIsStandalone = PlayingFile.endsWith (String (F (".fseq")));
+            // EngineFileIsStandalone = PlayingFile.endsWith (String (F (".fseq")));
 
             // is it the right engine?
             if (EngineFileIsPlayList != FileIsPlayList)
@@ -507,7 +507,7 @@ void c_InputMQTT::PlayFseq (JsonObject & JsonConfig)
                 StopPlayFileEngine ();
 
                 EngineFileIsPlayList   = false;
-                EngineFileIsStandalone = false;
+                // EngineFileIsStandalone = false;
             }
             else
             {

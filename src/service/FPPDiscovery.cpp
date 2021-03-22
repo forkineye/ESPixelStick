@@ -429,7 +429,7 @@ static void printReq (AsyncWebServerRequest* request, bool post)
     // DEBUG_END;
 } // printReq
 #else
-#define printReq
+#define printReq(a,b)
 #endif // !def PRINT_DEBUG
 
 //-----------------------------------------------------------------------------
@@ -702,7 +702,6 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     jsonResponse[F ("Version")]         = VERSION + String (":") + BUILD_DATE;
 
     const char* version = VERSION.c_str ();
-    uint16_t v = (uint16_t)atoi (version);
 
     jsonResponse[F ("majorVersion")] = (uint16_t)atoi (version);
     jsonResponse[F ("minorVersion")] = (uint16_t)atoi (&version[2]);

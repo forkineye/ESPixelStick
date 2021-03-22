@@ -104,12 +104,14 @@ bool c_OutputServoPCA9685::validate ()
     }
 
     SetOutputBufferSize (Num_Channels);
+
+    /*
     uint8_t CurrentServoPCA9685ChanIndex = 0;
     for (ServoPCA9685Channel_t & currentServoPCA9685 : OutputList)
     {
 
     } // for each output channel
-
+    */
     // DEBUG_END;
     return response;
 
@@ -127,7 +129,6 @@ bool c_OutputServoPCA9685::validate ()
 bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
-    int temp; // Holds enums prior to conversion
 
     do // once
     {

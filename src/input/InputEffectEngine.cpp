@@ -695,10 +695,12 @@ uint16_t c_InputEffectEngine::effectFireFlicker ()
     byte rev_intensity = 6; // more=less intensive, less=more intensive
     byte lum = max (EffectColor.r, max (EffectColor.g, EffectColor.b)) / rev_intensity;
 
-    for (int i = 0; i < PixelCount; i++)
+    for (uint16_t i = 0; i < PixelCount; i++)
     {
-        byte flicker = random (lum);
-        setPixel (i, CRGB{ max (EffectColor.r - flicker, 0), max (EffectColor.g - flicker, 0), max (EffectColor.b - flicker, 0) });
+        uint8_t flicker = random (lum);
+        setPixel (i, CRGB{ uint8_t(max (EffectColor.r - flicker, 0)), 
+                           uint8_t(max (EffectColor.g - flicker, 0)),
+                           uint8_t(max (EffectColor.b - flicker, 0)) });
     }
     EffectStep = (1 + EffectStep) % PixelCount;
     // DEBUG_END;
@@ -714,7 +716,7 @@ uint16_t c_InputEffectEngine::effectLightning ()
     int flashPause = 10; // 10ms
     uint16_t ledStart = random (PixelCount);
     uint16_t ledLen = random (1, PixelCount - ledStart);
-    byte intensity; // flash intensity
+    uint32_t intensity; // flash intensity
 
     if (EffectStep % 2)
     {
@@ -745,7 +747,9 @@ uint16_t c_InputEffectEngine::effectLightning ()
             intensity = random (128, 256); // next flashes are stronger
         }
         
-        CRGB temprgb = { EffectColor.r * intensity / 256, EffectColor.g * intensity / 256, EffectColor.b * intensity / 256 };
+        CRGB temprgb = { uint8_t (uint32_t (EffectColor.r) * intensity / 256),
+                         uint8_t (uint32_t (EffectColor.g) * intensity / 256),
+                         uint8_t (uint32_t (EffectColor.b) * intensity / 256) };
         setRange (ledStart, ledLen, temprgb);
         flashPause = random (4, 21); // flash duration 4-20ms
     }
@@ -786,7 +790,9 @@ uint16_t c_InputEffectEngine::effectBreathe () {
      // sin() is in radians, so 2*PI rad is a full period; compiler should optimize.
     // DEBUG_START;
     float val = (exp (sin (millis () / (EffectDelay * 5.0) * 2 * PI)) - 0.367879441) * 0.106364766 + 0.75;
-    setAll ({ EffectColor.r * val, EffectColor.g * val, EffectColor.b * val });
+    setAll ({ uint8_t (EffectColor.r * val),
+              uint8_t (EffectColor.g * val),
+              uint8_t (EffectColor.b * val) });
     // DEBUG_END;
     return EffectDelay / 40; // update every 25ms
 }
@@ -852,7 +858,7 @@ c_InputEffectEngine::CRGB c_InputEffectEngine::hsv2rgb (dCHSV in)
         out.r = in.v;
         out.g = in.v;
         out.b = in.v;
-        out_int = { 255 * out.r, 255 * out.g, 255 * out.b };
+        out_int = { uint8_t(255 * out.r), uint8_t(255 * out.g), uint8_t(255 * out.b) };
         return out_int;
     }
     hh = in.h;
@@ -867,38 +873,38 @@ c_InputEffectEngine::CRGB c_InputEffectEngine::hsv2rgb (dCHSV in)
     switch (i) {
     case 0:
         out.r = in.v;
-        out.g = t;
-        out.b = p;
+        out.g = uint8_t (t);
+        out.b = uint8_t (p);
         break;
     case 1:
-        out.r = q;
+        out.r = uint8_t (q);
         out.g = in.v;
-        out.b = p;
+        out.b = uint8_t (p);
         break;
     case 2:
-        out.r = p;
+        out.r = uint8_t (p);
         out.g = in.v;
-        out.b = t;
+        out.b = uint8_t (t);
         break;
 
     case 3:
-        out.r = p;
-        out.g = q;
+        out.r = uint8_t (p);
+        out.g = uint8_t (q);
         out.b = in.v;
         break;
     case 4:
-        out.r = t;
-        out.g = p;
+        out.r = uint8_t (t);
+        out.g = uint8_t (p);
         out.b = in.v;
         break;
     case 5:
     default:
         out.r = in.v;
-        out.g = p;
-        out.b = q;
+        out.g = uint8_t (p);
+        out.b = uint8_t (q);
         break;
     }
-    out_int = { 255 * out.r, 255 * out.g, 255 * out.b };
+    out_int = { uint8_t (255 * out.r), uint8_t (255 * out.g), uint8_t (255 * out.b) };
     return out_int;
 }
 
