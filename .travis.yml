@@ -5,7 +5,7 @@ env:
   - ESP_HOME=$HOME/ide/hardware/esp8266com
   - ESP32_HOME=$HOME/ide/hardware/esp32com
   - LIB_HOME=$HOME/Arduino/libraries
-  - ESPS_HOME=$HOME/Arduino/esp8266/ESPixelStick
+  - ESPS_HOME=$HOME/Arduino/ESPixelStick
   - ESPS32_HOME=$HOME/Arduino/esp32/ESPixelStick
   - BUILD=$HOME/build
   - DIST=$ESPS_HOME/dist
