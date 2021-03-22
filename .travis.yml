@@ -1,7 +1,7 @@
 language: generic
 env:
   global:
-  - IDE_VERSION=1.8.1
+  - IDE_VERSION=1.8.13
   - ESP_HOME=$HOME/ide/hardware/esp8266com
   - ESP32_HOME=$HOME/ide/hardware/esp32com
   - LIB_HOME=$HOME/Arduino/libraries
@@ -21,12 +21,13 @@ before_install:
 - mkdir -p $BUILD
 - git clone https://github.com/esp8266/Arduino.git $ESP_HOME/esp8266
 - cd $ESP_HOME/esp8266
-- git checkout 2.7.1
+- git checkout 2.7.4
 - git submodule update --init
 - cd $ESP_HOME/esp8266/tools
+- python get.py
 - git clone https://github.com/espressif/arduino-esp32.git $ESP32_HOME/esp32
 - cd $ESP32_HOME/esp32
-- git checkout 1.0.3
+- git checkout 1.0.5
 - git submodule update --init
 - python get.py
 - git clone https://github.com/bblanchon/ArduinoJson $LIB_HOME/ArduinoJson
