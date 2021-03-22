@@ -29,6 +29,7 @@ before_install:
 - cd $ESP32_HOME/esp32
 - git checkout 1.0.5
 - git submodule update --init
+- cd $ESP32_HOME/esp32/tools
 - python get.py
 - git clone https://github.com/bblanchon/ArduinoJson $LIB_HOME/ArduinoJson
 - git clone https://github.com/forkineye/ESPAsyncE131 $LIB_HOME/ESPAsyncE131
