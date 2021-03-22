@@ -59,7 +59,7 @@ script:
 - echo '#define SECRETS_PASS "PASSPHRASE_NOT_SET"' >> $ESPS_HOME/src/secrets.h
 - arduino --verify $ESPS_HOME/ESPixelStick.ino
 - mv $BUILD/ESPixelStick.ino.bin $DIST/firmware/espixelstick-travis.bin
-- arduino --board esp32com:esp32:d32_pro:PSRAM=enabled,PartitionScheme=default,FlashFreq=80,UploadSpeed=921600,DebugLevel=none --verify $ESPS_HOME/ESPixelStick.ino
+- arduino --install-library LittleFS_esp32 --board esp32com:esp32:d32_pro:PSRAM=enabled,PartitionScheme=default,FlashFreq=80,UploadSpeed=921600,DebugLevel=none --verify $ESPS_HOME/ESPixelStick.ino
 - gulp
 - gulp md
 - gulp travis
