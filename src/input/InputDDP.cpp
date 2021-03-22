@@ -96,6 +96,8 @@ bool c_InputDDP::SetConfig (JsonObject& jsonConfig)
 
     // DEBUG_END;
 
+    return false;
+
 } // SetConfig
 
 //-----------------------------------------------------------------------------
