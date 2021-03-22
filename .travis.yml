@@ -50,9 +50,6 @@ install:
 - cp -r $TRAVIS_BUILD_DIR $ESPS_HOME
 - arduino --board esp8266com:esp8266:generic:xtal=160,vt=flash,exception=legacy,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=40,FlashMode=dio,eesz=4M2M,led=2,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200
   --pref build.path=$BUILD --save-prefs
-- cd $ESP32_HOME/esp32/tools
-- arduino --board esp32com:esp32:d32_pro:PSRAM=enabled,PartitionScheme=default,FlashFreq=80,UploadSpeed=921600,DebugLevel=none 
-  --pref build.path=$BUILD32 --save-prefs
 before_script:
 - cd $ESPS_HOME
 - npm install -g gulp-cli
@@ -60,8 +57,9 @@ before_script:
 script:
 - echo '#define SECRETS_SSID "SSID_NOT_SET"' > $ESPS_HOME/src/secrets.h
 - echo '#define SECRETS_PASS "PASSPHRASE_NOT_SET"' >> $ESPS_HOME/src/secrets.h
-- arduino --pref build.path=$BUILD --verify $ESPS_HOME/ESPixelStick.ino
+- arduino --verify $ESPS_HOME/ESPixelStick.ino
 - mv $BUILD/ESPixelStick.ino.bin $DIST/firmware/espixelstick-travis.bin
+- arduino --board esp32com:esp32:d32_pro:PSRAM=enabled,PartitionScheme=default,FlashFreq=80,UploadSpeed=921600,DebugLevel=none --verify $ESPS_HOME/ESPixelStick.ino
 - gulp
 - gulp md
 - gulp travis
