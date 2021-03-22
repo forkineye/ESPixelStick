@@ -8,9 +8,12 @@ env:
   - ESPS_HOME=$HOME/Arduino/ESPixelStick
   - ESPS32_HOME=$HOME/Arduino/esp32/ESPixelStick
   - BUILD=$HOME/build
+  - BUILD32=$HOME/build32
   - DIST=$ESPS_HOME/dist
+  - DIST32=$ESPS_HOME32/dist
   - STAMP=$(date +'%Y%m%d%H%M%S')
   - DIST_FILE=ESPixelStick_TRAVIS-$STAMP.zip
+  - DIST_FILE32=ESPixelStick32_TRAVIS-$STAMP.zip
 before_install:
 - wget http://downloads.arduino.cc/arduino-$IDE_VERSION-linux64.tar.xz
 - tar xf arduino-$IDE_VERSION-linux64.tar.xz
@@ -18,7 +21,9 @@ before_install:
 - export PATH="$HOME/ide:$PATH"
 - mkdir -p $LIB_HOME
 - mkdir -p $ESP_HOME
+- mkdir -p $ESP32_HOME
 - mkdir -p $BUILD
+- mkdir -p $BUILD32
 - git clone https://github.com/esp8266/Arduino.git $ESP_HOME/esp8266
 - cd $ESP_HOME/esp8266
 - git checkout 2.7.4
@@ -42,10 +47,14 @@ before_install:
 - git clone https://github.com/Aircoookie/Espalexa $LIB_HOME/Espalexa
 - git clone https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library $LIB_HOME/Adafruit-PWM-Servo-Driver
 install:
+- cd $ESP_HOME/esp8266/tools
 - cp -r $TRAVIS_BUILD_DIR $ESPS_HOME
 - arduino --board esp8266com:esp8266:generic:xtal=160,vt=flash,exception=legacy,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=40,FlashMode=dio,eesz=4M2M,led=2,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200
   --pref build.path=$BUILD --save-prefs
-before_script:
+  - cd $ESP32_HOME/esp32/tools
+- cp -r $TRAVIS_BUILD_DIR $ESPS32_HOME
+- arduino --board esp32com:esp32:lolin d32 pro:vt=flash,exception=legacy,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=80, PSRAM=enabled,  FlashMode=dio,eesz=4M2M,led=2,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200
+  --pref build.path=$BUILD32 --save-prefsbefore_script:
 - cd $ESPS_HOME
 - npm install -g gulp-cli
 - npm install
