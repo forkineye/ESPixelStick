@@ -72,8 +72,7 @@ notifications:
     on_failure: change
 deploy:
   provider: releases
-  user: "MartinMueller2003"
-  password: "FartManPoo@03"
+  secure: a5ac772a3c1bc0af01ee1c7fbbdfc7c46426a189
   name: ESPixelStick Unify Development Firmware (Travis-CI build - NOT TESTED)
   body: This release includes binaries which were automatically built by Travis-CI and should not be considered stable.
   prerelease: true
