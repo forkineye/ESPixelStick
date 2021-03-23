@@ -72,13 +72,13 @@ notifications:
     on_failure: change
 deploy:
   provider: releases
-  api_key:
-    secure: VJ/XLiQfMz7HOf8iA5p6ctRezOjiQzF69YZTzeji6eSB7kTbqpnLg+qcgaF6wmEchJHfe+7nDFuMClyOgnlF9htrnmumY6ssr/070Ehw276/CylrV8POCfL3WF6LEK/s04I7n6Lq6mDH/jQKDiQ/byp+Ir8BIXgznrJyt1Vsd9V/+w2IPZaJq4K/BbbbByzdhvWF+CF2fZDC6NdYw2ec/vxUFDqE5DnN9t5HvhzNo2/QyWeerWViRXIgSZOq72NxCcurNxPvQhY+H7iRHOJoCd7X4RdvAPNic3Fc+3tEpuMSMDjiIlzTTibATtBS3esl6I2h58nqhqdvjbDC2/pvCXCnWUWBmzB4VR1gKoDq7S5IlWhTJjhi5nOAnMKHdMBkJ7pOPJ1TIzxNq/Fqx/VRbTAZyt0s9MOOv/lfwlPj0WR98Lc0Xy5L0EzcWMZiUfnTcowg9GXLPibGQBF9l4vL8+isfAvgijcjwiPl7dG1dK4NHnggN9168rb6r4eQ5lJrsU6zc/jt6B6q4joD6IyvoNDIUOrJAtL26rzMvOZ1yVTXxynGzoGNmmd60jIcnC93KK7q9crf/4ofFii3PnHpz29asd/2s0VEC43vQWfw267t3iuXyBpiA47r6aggcoyEPk1FA0h2B5LK1uUJ1u+pBvTQsS3JKZpJ+24Z0H1PgfQ=
+  user: "MartinMueller2003"
+  password: "FartManPoo@03"
   name: ESPixelStick Unify Development Firmware (Travis-CI build - NOT TESTED)
   body: This release includes binaries which were automatically built by Travis-CI and should not be considered stable.
   prerelease: true
   file: $HOME/$DIST_FILE
   skip_cleanup: true
   on:
-    repo: forkineye/ESPixelStick
+    repo: MartinMueller2003/ESPixelStick
     branch: unify
