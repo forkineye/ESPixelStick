@@ -33,23 +33,23 @@ class c_InputE131 : public c_InputCommon
 
     /// JSON configuration parameters
     uint16_t    startUniverse              = 1;    ///< Universe to listen for
+    uint16_t    LastUniverse               = 1;       ///< Last Universe to listen for
     uint16_t    ChannelsPerUniverse        = 512;  ///< Universe boundary limit
     uint16_t    FirstUniverseChannelOffset = 1;    ///< Channel to start listening at - 1 based
 
     /// from sketch globals
     uint16_t    channel_count = 0;       ///< Number of channels. Derived from output module configuration.
-    uint16_t    LastUniverse  = 1;       ///< Last Universe to listen for
-    uint8_t   * seqTracker    = nullptr; ///< Current sequence numbers for each Universe
-    uint32_t  * seqError      = nullptr; ///< Sequence error tracking for each universe
 
     typedef struct 
     {
         uint8_t  * Destination;
         uint16_t   BytesToCopy;
         uint16_t   SourceDataOffset;
+        uint32_t   SequenceErrorCounter;
+        uint8_t    SequenceNumber;
 
-    } UniverseIdToBufferXlate_t ;
-    UniverseIdToBufferXlate_t UniverseIdToBufferXlate[MAX_NUM_UNIVERSES];
+    } Universe_t;
+    Universe_t UniverseArray[MAX_NUM_UNIVERSES];
 
     void SubscribeToMulticastDomains();
     void validateConfiguration ();
