@@ -80,5 +80,5 @@ deploy:
   file: $HOME/$DIST_FILE
   skip_cleanup: true
   on:
-    repo: MartinMueller2003/ESPixelStick
+    repo: forkineye/ESPixelStick
     branch: unify
