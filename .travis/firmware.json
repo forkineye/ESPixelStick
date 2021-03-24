@@ -1,10 +1,16 @@
 {
     "modes": [
         {
-            "name": "ESPixelStick Unify",
+            "name": "ESPixelStick Unify - Generic",
             "description": "Unified build for ESPixelStick V3 hardware",
-            "version": "DEV (Travis-CI Build)",
+            "version": "4.0-dev1 (Travis-CI Build)",
             "file": "espixelstick-travis.bin"
+        },
+        {
+            "name": "ESPixelStick Unify - ESP32",
+            "description": "Unified build for ESP32 hardware",
+            "version": "4.0-dev1 (Travis-CI Build)",
+            "file": "espixelstick-travis32.bin"
         }
     ],
 
@@ -16,10 +22,26 @@
                 "reset": "nodemcu",
                 "baudrate": "115200",
                 "fsloc": "0x200000",
-                "binloc": "0x0"            },
+                "binloc": "0x0"
+            },
             "filesystem": {
                 "page": "256",
                 "block": "8192",
+                "size": "2072576"
+            }
+        },
+        {
+            "name": "ESPixelStick Unify (LoLin_ESP32_PRO_16MB_2MB)",
+            "espplatformname": "esp32",
+            "esptool": {
+                "reset": "nodemcu",
+                "baudrate": "921600",
+                "fsloc": "0x290000",
+                "binloc": "0x00010000"
+            },
+            "filesystem": {
+                "page": "256",
+                "block": "4096",
                 "size": "2072576"
             }
         }
