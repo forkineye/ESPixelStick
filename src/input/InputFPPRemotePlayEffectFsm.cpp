@@ -98,6 +98,8 @@ bool fsm_PlayEffect_state_Idle::Sync (uint32_t FrameId)
 
     // DEBUG_END;
 
+    return false;
+
 } // fsm_PlayEffect_state_Idle::Sync
 
 //-----------------------------------------------------------------------------
@@ -180,6 +182,8 @@ bool fsm_PlayEffect_state_PlayingEffect::Sync (uint32_t FrameId)
 
     // DEBUG_END;
 
+    return false;
+
 } // fsm_PlayEffect_state_PlayingEffect::Sync
 
 //-----------------------------------------------------------------------------
@@ -198,7 +202,7 @@ void fsm_PlayEffect_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
     SecondsRemaining = SecondsRemaining % 60;
 
     char buf[10];
-    sprintf (buf, "%02d:%02d", MinutesRemaining, SecondsRemaining);
+    sprintf (buf, "%02u:%02u", uint32_t(MinutesRemaining), uint32_t(SecondsRemaining));
     jsonStatus[CN_TimeRemaining] = buf;
 
     p_InputFPPRemotePlayEffect->EffectsEngine.GetStatus (jsonStatus);

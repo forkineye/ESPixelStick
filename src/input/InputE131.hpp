@@ -26,24 +26,35 @@ class c_InputE131 : public c_InputCommon
   private:
     static const uint16_t   UNIVERSE_MAX = 512;
     static const char       ConfigFileName[];
+    static const uint8_t    MAX_NUM_UNIVERSES = 10;
 
     ESPAsyncE131  * e131 = nullptr; ///< ESPAsyncE131
     e131_packet_t packet;           ///< Packet buffer for parsing
 
     /// JSON configuration parameters
-    uint16_t    startUniverse          = 1;    ///< Universe to listen for
-    uint16_t    universe_channel_limit = 512;  ///< Universe boundary limit
-    uint16_t    channel_start          = 1;    ///< Channel to start listening at - 1 based
+    uint16_t    startUniverse              = 1;    ///< Universe to listen for
+    uint16_t    LastUniverse               = 1;       ///< Last Universe to listen for
+    uint16_t    ChannelsPerUniverse        = 512;  ///< Universe boundary limit
+    uint16_t    FirstUniverseChannelOffset = 1;    ///< Channel to start listening at - 1 based
 
     /// from sketch globals
-    uint16_t    channel_count = 0;    ///< Number of channels. Derived from output module configuration.
-    uint16_t    LastUniverse  = 1;    ///< Last Universe to listen for
-    uint8_t   * seqTracker = nullptr; ///< Current sequence numbers for each Universe
-    uint32_t  * seqError = nullptr;   ///< Sequence error tracking for each universe
+    uint16_t    channel_count = 0;       ///< Number of channels. Derived from output module configuration.
+
+    typedef struct 
+    {
+        uint8_t  * Destination;
+        uint16_t   BytesToCopy;
+        uint16_t   SourceDataOffset;
+        uint32_t   SequenceErrorCounter;
+        uint8_t    SequenceNumber;
+
+    } Universe_t;
+    Universe_t UniverseArray[MAX_NUM_UNIVERSES];
 
     void SubscribeToMulticastDomains();
     void validateConfiguration ();
     void NetworkStateChanged (bool IsConnected, bool RebootAllowed); // used by poorly designed rx functions
+    void SetBufferTranslation ();
 
   public:
 

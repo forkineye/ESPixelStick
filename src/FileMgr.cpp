@@ -308,7 +308,8 @@ bool c_FileMgr::ReadConfigFile (const String& FileName, JsonDocument & FileData)
         {
             // DEBUG_V ("File is empty");
             // nope, no data
-            false;
+            GotFileData = false;
+            break;
         }
 
         // DEBUG_V ("Convert File to JSON document");

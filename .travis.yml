@@ -1,8 +1,9 @@
 language: generic
 env:
   global:
-  - IDE_VERSION=1.8.1
+  - IDE_VERSION=1.8.13
   - ESP_HOME=$HOME/ide/hardware/esp8266com
+  - ESP32_HOME=$HOME/ide/hardware/esp32com
   - LIB_HOME=$HOME/Arduino/libraries
   - ESPS_HOME=$HOME/Arduino/ESPixelStick
   - BUILD=$HOME/build
@@ -16,16 +17,25 @@ before_install:
 - export PATH="$HOME/ide:$PATH"
 - mkdir -p $LIB_HOME
 - mkdir -p $ESP_HOME
+- mkdir -p $ESP32_HOME
 - mkdir -p $BUILD
 - git clone https://github.com/esp8266/Arduino.git $ESP_HOME/esp8266
 - cd $ESP_HOME/esp8266
-- git checkout 2.7.1
+- git checkout 2.7.4
 - git submodule update --init
 - cd $ESP_HOME/esp8266/tools
 - python get.py
+- git clone https://github.com/espressif/arduino-esp32.git $ESP32_HOME/esp32
+- cd $ESP32_HOME/esp32
+- git checkout 1.0.5
+- git submodule update --init
+- cd $ESP32_HOME/esp32/tools
+- python get.py
+- cd $ESP_HOME/esp8266/tools
 - git clone https://github.com/bblanchon/ArduinoJson $LIB_HOME/ArduinoJson
 - git clone https://github.com/forkineye/ESPAsyncE131 $LIB_HOME/ESPAsyncE131
 - git clone https://github.com/me-no-dev/ESPAsyncTCP $LIB_HOME/ESPAsyncTCP
+- git clone https://github.com/me-no-dev/AsyncTCP $LIB_HOME/AsyncTCP
 - git clone https://github.com/me-no-dev/ESPAsyncUDP $LIB_HOME/ESPAsyncUDP
 - git clone https://github.com/me-no-dev/ESPAsyncWebServer $LIB_HOME/ESPAsyncWebServer
 - git clone https://github.com/marvinroger/async-mqtt-client $LIB_HOME/async-mqtt-client
@@ -34,6 +44,7 @@ before_install:
 - git clone https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library $LIB_HOME/Adafruit-PWM-Servo-Driver
 install:
 - cp -r $TRAVIS_BUILD_DIR $ESPS_HOME
+- arduino --install-library LittleFS_esp32
 - arduino --board esp8266com:esp8266:generic:xtal=160,vt=flash,exception=legacy,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=40,FlashMode=dio,eesz=4M2M,led=2,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200
   --pref build.path=$BUILD --save-prefs
 before_script:
@@ -45,6 +56,9 @@ script:
 - echo '#define SECRETS_PASS "PASSPHRASE_NOT_SET"' >> $ESPS_HOME/src/secrets.h
 - arduino --verify $ESPS_HOME/ESPixelStick.ino
 - mv $BUILD/ESPixelStick.ino.bin $DIST/firmware/espixelstick-travis.bin
+- arduino --board esp32com:esp32:d32_pro:PSRAM=enabled,PartitionScheme=default,FlashFreq=80,UploadSpeed=921600,DebugLevel=none --pref build.path=$BUILD --save-prefs
+- arduino --verify $ESPS_HOME/ESPixelStick.ino
+- mv $BUILD/ESPixelStick.ino.bin $DIST/firmware/espixelstick-travis32.bin
 - gulp
 - gulp md
 - gulp travis

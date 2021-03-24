@@ -32,8 +32,7 @@ c_InputCommon::c_InputCommon (c_InputMgr::e_InputChannelIds NewInputChannelId,
     InputDataBuffer(BufferStart),
     InputDataBufferSize(BufferSize),
     InputChannelId(NewInputChannelId),
-    ChannelType(NewChannelType),
-    HasBeenInitialized(false)
+    ChannelType(NewChannelType)
 {
 } // c_InputMgr
 

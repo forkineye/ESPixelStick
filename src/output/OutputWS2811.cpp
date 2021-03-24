@@ -196,7 +196,7 @@ void c_OutputWS2811::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     c_OutputCommon::GetStatus (jsonStatus);
     // uint32_t UartIntSt = GET_PERI_REG_MASK (UART_INT_ST (UartId), UART_TXFIFO_EMPTY_INT_ENA);
-    // uint16_t SpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength));
+    // uint16_t SpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getWS2811FifoLength));
 
     // jsonStatus["pNextIntensityToSend"] = uint32_t(pNextIntensityToSend);
     // jsonStatus["RemainingIntensityCount"] = uint32_t(RemainingIntensityCount);
@@ -278,7 +278,7 @@ void IRAM_ATTR c_OutputWS2811::ISR_Handler ()
         // Fill the FIFO with new data
         // free space in the FIFO divided by the number of data bytes per intensity
         // gives the max number of intensities we can add to the FIFO
-        uint16_t IntensitySpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE;
+        uint16_t IntensitySpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getWS2811FifoLength)) / WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE;
 
         // determine how many intensities we can process right now.
         uint16_t IntensitiesToSend = (IntensitySpaceInFifo < RemainingIntensityCount) ? (IntensitySpaceInFifo) : RemainingIntensityCount;
@@ -522,12 +522,6 @@ bool c_OutputWS2811::validate ()
     {
         LOG_PORT.println (String (F ("*** Requested ZigZag size count was too high. Setting to ")) + pixel_count + F (" ***"));
         zig_size = pixel_count;
-        response = false;
-    }
-    else if (zig_size < 0)
-    {
-        LOG_PORT.println (String (F ("*** Requested ZigZag size count was too low. Setting to 0 ***")));
-        zig_size = 0;
         response = false;
     }
 

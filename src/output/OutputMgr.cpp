@@ -662,7 +662,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
             // DEBUG_V ("");
 
             // is it a valid / supported channel type
-            if ((ChannelType < uint32_t (OutputType_Start)) || (ChannelType >= uint32_t (OutputType_End)))
+            if (/*(ChannelType < uint32_t (OutputType_Start)) || */ (ChannelType >= uint32_t (OutputType_End)))
             {
                 // if not, flag an error and move on to the next channel
                 LOG_PORT.println (String (F ("Invalid Channel Type in config '")) + ChannelType + String (F ("'. Specified for channel '")) + ChannelIndex + "'. Disabling channel");

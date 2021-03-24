@@ -128,7 +128,6 @@ bool c_OutputRelay::validate ()
     }
 
     SetOutputBufferSize (Num_Channels);
-    uint8_t CurrentRelayChanIndex = 0;
     for (RelayChannel_t & currentRelay : OutputList)
     {
         if (currentRelay.GpioId == Relay_DEFAULT_GPIO_ID)

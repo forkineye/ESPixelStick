@@ -37,7 +37,7 @@ public:
     virtual void GetStateName (String & sName) = 0;
     virtual void Start (String & FileName, uint32_t FrameId, uint32_t PlayCount) = 0;
     virtual void Stop (void) = 0;
-    virtual bool Sync (String & sName, uint32_t FrameId) {};
+    virtual bool Sync (String& sName, uint32_t FrameId) { return false; };
     virtual void GetStatus (JsonObject& jsonStatus) = 0;
 
 protected:

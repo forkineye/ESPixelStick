@@ -82,7 +82,7 @@ void fsm_PlayList_state_WaitForStart::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject FileStatus = jsonStatus.createNestedObject (CN_Idle);
+    // JsonObject FileStatus = jsonStatus.createNestedObject (CN_Idle);
 
     // DEBUG_END;
 
@@ -141,7 +141,7 @@ void fsm_PlayList_state_Idle::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject FileStatus = jsonStatus.createNestedObject (CN_Idle);
+    // JsonObject FileStatus = jsonStatus.createNestedObject (CN_Idle);
 
     // DEBUG_END;
 
@@ -370,7 +370,7 @@ void fsm_PlayList_state_Paused::GetStatus (JsonObject& jsonStatus)
     SecondsRemaining = SecondsRemaining % 60;
 
     char buf[10];
-    sprintf (buf, "%02d:%02d", MinutesRemaining, SecondsRemaining);
+    sprintf (buf, "%02u:%02u", uint32_t(MinutesRemaining), uint32_t(SecondsRemaining));
     PauseStatus[F ("TimeRemaining")] = buf;
 
     // DEBUG_END;

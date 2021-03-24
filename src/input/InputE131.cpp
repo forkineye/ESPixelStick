@@ -80,8 +80,8 @@ void c_InputE131::GetConfig (JsonObject & jsonConfig)
     // DEBUG_START;
 
     jsonConfig[CN_universe]       = startUniverse;
-    jsonConfig[CN_universe_limit] = universe_channel_limit;
-    jsonConfig[CN_universe_start]  = channel_start;
+    jsonConfig[CN_universe_limit] = ChannelsPerUniverse;
+    jsonConfig[CN_universe_start] = FirstUniverseChannelOffset;
 
     // DEBUG_END;
 
@@ -93,14 +93,23 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
     // DEBUG_START;
 
     JsonObject e131Status = jsonStatus.createNestedObject (F ("e131"));
-    e131Status["unifirst"]      = startUniverse;
-    e131Status["unilast"]       = LastUniverse;
-    e131Status["unichanlim"]    = universe_channel_limit;
+    e131Status[F ("unifirst")]      = startUniverse;
+    e131Status[F ("unilast")]       = LastUniverse;
+    e131Status[F ("unichanlim")]    = ChannelsPerUniverse;
     // DEBUG_V ("");
 
-    e131Status["num_packets"]   = e131->stats.num_packets;
-    e131Status["packet_errors"] = e131->stats.packet_errors;
-    e131Status["last_clientIP"] = e131->stats.last_clientIP.toString ();
+    e131Status[F ("num_packets")]   = e131->stats.num_packets;
+    e131Status[F ("packet_errors")] = e131->stats.packet_errors;
+    e131Status[F ("last_clientIP")] = e131->stats.last_clientIP.toString ();
+
+    JsonArray e131UniverseStatus = e131Status.createNestedArray (CN_channels);
+
+    for (auto & CurrentUniverse : UniverseArray)
+    {
+        JsonObject e131CurrentUniverseStatus = e131UniverseStatus.createNestedObject ();
+
+        e131CurrentUniverseStatus[F ("errors")] = CurrentUniverse.SequenceErrorCounter;
+    }
 
     // DEBUG_END;
 
@@ -112,85 +121,56 @@ void c_InputE131::Process ()
     // DEBUG_START;
 
     uint8_t*    E131Data;
-    uint8_t     uniOffset;
-    uint16_t    universe;
-    uint16_t    offset;
-    uint16_t    dataStart;
-    uint16_t    dataStop;
-    uint16_t    channels;
-    uint16_t    buffloc;
+    uint16_t    CurrentUniverseId;
 
     // Parse a packet and update pixels
     while (!e131->isEmpty ())
     {
         e131->pull (&packet);
-        universe = htons (packet.universe);
+        CurrentUniverseId = ntohs (packet.universe);
         E131Data = packet.property_values + 1;
 
-        // DEBUG_V ("              universe: " + String(universe));
+        // DEBUG_V ("     CurrentUniverseId: " + String(CurrentUniverseId));
         // DEBUG_V ("packet.sequence_number: " + String(packet.sequence_number));
 
-        if ((universe >= startUniverse) && (universe <= LastUniverse))
+        if ((startUniverse <= CurrentUniverseId ) && (LastUniverse >= CurrentUniverseId))
         {
             // Universe offset and sequence tracking
-            uniOffset = (universe - startUniverse);
-            if (packet.sequence_number != seqTracker[uniOffset]++)
+            Universe_t& CurrentUniverse = UniverseArray[CurrentUniverseId - startUniverse];
+
+            // Do we need to update a sequnce error?
+            if (packet.sequence_number != CurrentUniverse.SequenceNumber)
             {
-                LOG_PORT.print (F ("Sequence Error - expected: "));
-                LOG_PORT.print (seqTracker[uniOffset] - 1);
+                LOG_PORT.print (F ("E1.31 Sequence Error - expected: "));
+                LOG_PORT.print (CurrentUniverse.SequenceNumber);
                 LOG_PORT.print (F (" actual: "));
                 LOG_PORT.print (packet.sequence_number);
-                LOG_PORT.print (String(CN_universe) + ":");
-                LOG_PORT.println (universe);
-                seqError[uniOffset]++;
-                seqTracker[uniOffset] = packet.sequence_number + 1;
+                LOG_PORT.print (" " + String (CN_universe) + " : ");
+                LOG_PORT.println (CurrentUniverseId);
+
+                CurrentUniverse.SequenceErrorCounter++;
+                CurrentUniverse.SequenceNumber = packet.sequence_number;
             }
 
-            // Offset the channels if required
-            offset = channel_start - 1;
+            ++CurrentUniverse.SequenceNumber;
 
-            // Find start of data based off the Universe
-            dataStart = uniOffset * universe_channel_limit - offset;
+            uint16_t NumBytesOfE131Data = ntohs (packet.property_value_count) - 1;
 
-            // Calculate how much data we need for this buffer
-            dataStop = InputDataBufferSize;
-            channels = htons (packet.property_value_count) - 1;
-            if (universe_channel_limit < channels)
-            {
-                channels = universe_channel_limit;
-            }
+            memcpy (CurrentUniverse.Destination,
+                    &E131Data[CurrentUniverse.SourceDataOffset],
+                    min (CurrentUniverse.BytesToCopy, NumBytesOfE131Data));
 
-            if ((dataStart + channels) < dataStop)
-            {
-                dataStop = dataStart + channels;
-            }
-
-            // Set the data
-            buffloc = 0;
-
-            // ignore data from start of first Universe before channel_start
-            if (dataStart < 0)
-            {
-                dataStart = 0;
-                buffloc = channel_start - 1;
-            }
-
-            if (false == IsInputChannelActive)
-            {
-                // dont output. Just go away
-                break;
-            }
-
-            for (int UniverseIndex = dataStart; UniverseIndex < dataStop; UniverseIndex++)
-            {
-                InputDataBuffer[UniverseIndex] = E131Data[buffloc];
-                buffloc++;
-            }
             InputMgr.ResetBlankTimer ();
         }
-    }
+        else
+        {
+            // DEBUG_V ("Not interested in this universe");
+        }
+
+    } // end while there is data to process
+
     // DEBUG_END;
-    //    LOG_PORT.printf_P( PSTR("procJSON heap /stack stats: %u:%u:%u:%u\n"), ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
+
 } // process
 
 //-----------------------------------------------------------------------------
@@ -205,18 +185,63 @@ void c_InputE131::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
     HasBeenInitialized = false;
     Begin ();
 
+    SetBufferTranslation ();
+
     // DEBUG_END;
 
 } // SetBufferInfo
+
+//-----------------------------------------------------------------------------
+void c_InputE131::SetBufferTranslation ()
+{
+    // DEBUG_START;
+
+    // for each possible universe, set the start and size
+
+    uint16_t InputOffset = FirstUniverseChannelOffset - 1;
+    uint16_t DestinationOffset = 0;
+    uint16_t BytesLeftToMap = InputDataBufferSize;
+
+    // set up the bytes for the First Universe
+    uint16_t BytesInUniverse = ChannelsPerUniverse - InputOffset;
+    // DEBUG_V (String ("ChannelsPerUniverse: ") + String (uint32_t (ChannelsPerUniverse), HEX));
+
+    for (auto& CurrentUniverse : UniverseArray)
+    {
+        uint16_t BytesInThisUniverse = min (BytesInUniverse, BytesLeftToMap);
+        CurrentUniverse.Destination = &InputDataBuffer[DestinationOffset];
+        CurrentUniverse.BytesToCopy = BytesInThisUniverse;
+        CurrentUniverse.SourceDataOffset = InputOffset;
+        CurrentUniverse.SequenceErrorCounter = 0;
+        CurrentUniverse.SequenceNumber = 0;
+
+        // DEBUG_V (String ("        Destination: ") + String (uint32_t (CurrentUniverse.Destination), HEX));
+        // DEBUG_V (String ("        BytesToCopy: ") + String (CurrentUniverse.BytesToCopy, HEX));
+        // DEBUG_V (String ("   SourceDataOffset: ") + String (CurrentUniverse.SourceDataOffset, HEX));
+
+        DestinationOffset += BytesInThisUniverse;
+        BytesLeftToMap -= BytesInThisUniverse;
+        BytesInUniverse = ChannelsPerUniverse;
+        InputOffset = 0;
+    }
+
+    if (0 != BytesLeftToMap)
+    {
+        LOG_PORT.println (F ("ERROR: Universe configuration is too small to fill output buffer. Outputs have been truncated."));
+    }
+
+    // DEBUG_END;
+
+} // SetBufferTranslation
 
 //-----------------------------------------------------------------------------
 boolean c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
-    setFromJSON (startUniverse,          jsonConfig, CN_universe);
-    setFromJSON (universe_channel_limit, jsonConfig, CN_universe_limit);
-    setFromJSON (channel_start,          jsonConfig, CN_universe_start);
+    setFromJSON (startUniverse,              jsonConfig, CN_universe);
+    setFromJSON (ChannelsPerUniverse,        jsonConfig, CN_universe_limit);
+    setFromJSON (FirstUniverseChannelOffset, jsonConfig, CN_universe_start);
 
     validateConfiguration ();
 
@@ -250,49 +275,55 @@ void c_InputE131::validateConfiguration ()
 {
     // DEBUG_START;
 
-    if (startUniverse < 1) { startUniverse = 1; }
+    // DEBUG_V (String ("             startUniverse: ") + String (startUniverse));
+    // DEBUG_V (String ("       ChannelsPerUniverse: ") + String (ChannelsPerUniverse));
+    // DEBUG_V (String ("FirstUniverseChannelOffset: ") + String (FirstUniverseChannelOffset));
+    // DEBUG_V (String ("              LastUniverse: ") + String (startUniverse));
 
-    // DEBUG_V ("");
-    if (universe_channel_limit > UNIVERSE_MAX || universe_channel_limit < 1) { universe_channel_limit = UNIVERSE_MAX; }
-
-    // DEBUG_V ("");
-    if (channel_start < 1)
+    if (startUniverse < 1) 
     {
-        // move to the start of the first universe
-        channel_start = 1;
+        // DEBUG_V (String("ERROR: startUniverse: ") + String(startUniverse));
+
+        startUniverse = 1; 
     }
-    else if (channel_start > universe_channel_limit)
+
+    // DEBUG_V ("");
+    if (ChannelsPerUniverse > UNIVERSE_MAX || ChannelsPerUniverse < 1)
     {
+        // DEBUG_V (String ("ERROR: ChannelsPerUniverse: ") + String (ChannelsPerUniverse));
+        ChannelsPerUniverse = UNIVERSE_MAX;
+    }
+
+    // DEBUG_V ("");
+    if (FirstUniverseChannelOffset < 1)
+    {
+        // DEBUG_V (String ("ERROR: FirstUniverseChannelOffset: ") + String (FirstUniverseChannelOffset));
+        // move to the start of the first universe
+        FirstUniverseChannelOffset = 1;
+    }
+    else if (FirstUniverseChannelOffset > ChannelsPerUniverse)
+    {
+        // DEBUG_V (String ("ERROR: FirstUniverseChannelOffset: ") + String (FirstUniverseChannelOffset));
+
         // channel start must be within the first universe
-        channel_start = universe_channel_limit;
+        FirstUniverseChannelOffset = ChannelsPerUniverse - 1;
     }
 
     // Find the last universe we should listen for
      // DEBUG_V ("");
-    uint16_t span = channel_start + InputDataBufferSize - 1;
-    if (span % universe_channel_limit)
+    uint16_t span = FirstUniverseChannelOffset + InputDataBufferSize - 1;
+    if (span % ChannelsPerUniverse)
     {
-        LastUniverse = startUniverse + span / universe_channel_limit;
+        LastUniverse = startUniverse + span / ChannelsPerUniverse;
     }
     else
     {
-        LastUniverse = startUniverse + span / universe_channel_limit - 1;
+        LastUniverse = startUniverse + span / ChannelsPerUniverse - 1;
     }
 
-    // Setup the sequence error tracker
-    // DEBUG_V ("");
-    uint8_t uniTotal = (LastUniverse + 1) - startUniverse;
-
-    // DEBUG_V ("");
-    if (seqTracker) { free (seqTracker); seqTracker = nullptr; }
-    // DEBUG_V ("");
-    if ((seqTracker = static_cast<uint8_t*>(malloc (uniTotal)))) { memset (seqTracker, 0x00, uniTotal); }
     // DEBUG_V ("");
 
-    if (seqError) { free (seqError); seqError = nullptr; }
-    // DEBUG_V ("");
-    if ((seqError = static_cast<uint32_t*>(malloc (uniTotal * 4)))) { memset (seqError, 0x00, uniTotal * 4); }
-    // DEBUG_V ("");
+    SetBufferTranslation ();
 
     // Zero out packet stats
     if (nullptr == e131)
@@ -300,6 +331,7 @@ void c_InputE131::validateConfiguration ()
         // DEBUG_V ("");
         e131 = new ESPAsyncE131 (10);
     }
+
     // DEBUG_V ("");
     e131->stats.num_packets = 0;
 
@@ -310,7 +342,8 @@ void c_InputE131::validateConfiguration ()
 //-----------------------------------------------------------------------------
 void c_InputE131::NetworkStateChanged (bool IsConnected)
 {
-    NetworkStateChanged (IsConnected, true);
+    // NetworkStateChanged (IsConnected, true);
+    NetworkStateChanged (IsConnected, false);
 } // NetworkStateChanged
 
 //-----------------------------------------------------------------------------

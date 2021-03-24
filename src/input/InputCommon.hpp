@@ -53,8 +53,8 @@ protected:
     uint8_t    *InputDataBuffer     = nullptr;
     uint16_t    InputDataBufferSize = 0;
     bool        IsInputChannelActive = true;
-    c_InputMgr::e_InputChannelIds InputChannelId;
-    c_InputMgr::e_InputType       ChannelType;
+    c_InputMgr::e_InputChannelIds InputChannelId = c_InputMgr::e_InputChannelIds::InputChannelId_ALL;
+    c_InputMgr::e_InputType       ChannelType = c_InputMgr::e_InputType::InputType_Disabled;
 
 private:
 

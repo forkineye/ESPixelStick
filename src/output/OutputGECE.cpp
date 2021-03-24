@@ -264,7 +264,7 @@ void c_OutputGECE::Render()
         uint8_t* pCurrentOutputPacketData = OutputPacketBuffer;
         for (uint8_t currentShiftCount = GECE_PACKET_SIZE; 0 != currentShiftCount; --currentShiftCount)
         {
-            *pCurrentOutputPacketData++ = LOOKUP_GECE[(packet >> currentShiftCount-1) & 0x1];
+            *pCurrentOutputPacketData++ = LOOKUP_GECE[(packet >> (currentShiftCount-1)) & 0x1];
         }
 
         // Wait until ready to send

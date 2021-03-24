@@ -68,7 +68,7 @@ c_InputMgr::c_InputMgr ()
 
     // this gets called pre-setup so there is nothing we can do here.
     int pInputChannelDriversIndex = 0;
-    for (c_InputCommon* CurrentInput : pInputChannelDrivers)
+    for (c_InputCommon * CurrentInput : pInputChannelDrivers)
     {
         pInputChannelDrivers[pInputChannelDriversIndex] = nullptr;
         EffectEngineIsConfiguredToRun[pInputChannelDriversIndex] = false;
@@ -756,7 +756,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
             // DEBUG_V ("");
 
             // is it a valid / supported channel type
-            if ((ChannelType < uint32_t (InputType_Start)) || (ChannelType >= uint32_t (InputType_End)))
+            if (/*(ChannelType < uint32_t (InputType_Start)) ||*/ (ChannelType >= uint32_t (InputType_End)))
             {
                 // if not, flag an error and move on to the next channel
                 LOG_PORT.println (String (F ("Invalid Channel Type in config '")) + ChannelType + String (F ("'. Specified for channel '")) + ChannelIndex + "'. Disabling channel");
