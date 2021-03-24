@@ -90,15 +90,11 @@ $(function ()
         submitWiFiConfig();
     });
 
-    $('#btn_RGB').change(function () {
+    $('#viewStyle').change(function () {
         clearStream();
     });
 
-    $('#btn_RGBW').change(function () {
-        clearStream();
-    });
-
-    $('#btn_Channel').change(function () {
+    $('#v_columns').on('input', function () {
         clearStream();
     });
 
