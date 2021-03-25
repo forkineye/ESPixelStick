@@ -86,8 +86,7 @@ protected:
     OTYPE_t     OutputType;  ///< Type to report for this driver
     OID_t       OutputChannelId;
     bool        HasBeenInitialized         = false;
-    uint32_t    FrameRefreshTimeInMicroSec = 0;
-    uint32_t    FrameStartTimeInMicroSec   = 0;
+    uint32_t    FrameMinDurationInMicroSec = 0;
     uint8_t   * pOutputBuffer              = nullptr;
     uint16_t    OutputBufferSize           = 0;
     uint32_t    FrameCount                 = 0;
@@ -106,6 +105,13 @@ protected:
     void CommonSerialWrite      (uint8_t * OutputBuffer, size_t NumBytesToSend);
     void ReportNewFrame ();
 
+    inline boolean canRefresh ()
+    {
+        return (micros () - FrameStartTimeInMicroSec) >= FrameMinDurationInMicroSec;
+    }
+
 private:
+    uint32_t    FrameRefreshTimeInMicroSec = 0;
+    uint32_t    FrameStartTimeInMicroSec   = 0;
 
 }; // c_OutputCommon
