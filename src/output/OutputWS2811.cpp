@@ -251,7 +251,7 @@ void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
             // DEBUG_V ("malloc failed");
             LOG_PORT.println ("ERROR: WS2811 driver failed to allocate an IsrOutputBuffer. Shutting down output.");
             c_OutputCommon::SetOutputBufferSize ((uint16_t)0);
-            FrameRefreshTimeInMicroSec = InterFrameGapInMicroSec;
+            FrameMinDurationInMicroSec = InterFrameGapInMicroSec;
             break;
         }
 
@@ -259,7 +259,7 @@ void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 
         memset (pIsrOutputBuffer, 0x0, NumChannelsAvailable);
         // Calculate our refresh time
-        FrameRefreshTimeInMicroSec = (WS2811_MICRO_SEC_PER_INTENSITY * NumChannelsAvailable) + InterFrameGapInMicroSec;
+        FrameMinDurationInMicroSec = (WS2811_MICRO_SEC_PER_INTENSITY * NumChannelsAvailable) + InterFrameGapInMicroSec;
 
     } while (false);
 
@@ -325,9 +325,9 @@ void c_OutputWS2811::Render()
     // DEBUG_V (String ("RemainingIntensityCount: ") + RemainingIntensityCount)
 
     if (gpio_num_t (-1) == DataPin) { return; }
-    // if (!canRefresh ()) { return; }
-    if (0 != RemainingIntensityCount) { return; }
     if (nullptr == pIsrOutputBuffer) { return; }
+    if (0 != RemainingIntensityCount) { return; }
+    if (!canRefresh ()) { return; }
 
     // set up pointers into the pixel data space
     uint8_t *pSourceData = pOutputBuffer; // source buffer (owned by base class)
@@ -401,7 +401,7 @@ void c_OutputWS2811::Render()
 //     (*((volatile uint32_t*)(UART_FIFO_AHB_REG (UART_NUM_0)))) = (uint32_t)('7');
     ESP_ERROR_CHECK (uart_enable_tx_intr (UartId, 1, PIXEL_FIFO_TRIGGER_LEVEL));
 #endif
-    FrameStartTimeInMicroSec = micros();
+
     ReportNewFrame ();
 
     // DEBUG_END;
@@ -547,4 +547,3 @@ bool c_OutputWS2811::validate ()
     return response;
 
 } // validate
-

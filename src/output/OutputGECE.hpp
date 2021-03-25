@@ -54,11 +54,6 @@ private:
     uint8_t         pixel_count = 0;
     uint8_t         brightness  = 0;
 
-    inline bool canRefresh() 
-    {
-        return (micros() - FrameStartTimeInMicroSec) >= FrameRefreshTimeInMicroSec;
-    }
-
     bool validate();
 };
 
