@@ -693,7 +693,7 @@ function CreateOptionsFromConfig(OptionListName, Config)
         {
             // create the selection box
             $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + ChannelId + '">' + GenerateInputOutputControlName(OptionListName, ChannelId) + ' Mode</label>');
-            $('#fg_' + OptionListName).append('<div class="col-sm-4"><select class="form-control wsopt" id="' + OptionListName + ChannelId + '"></select></div>');
+            $('#fg_' + OptionListName).append('<div class="col-sm-2"><select class="form-control wsopt" id="' + OptionListName + ChannelId + '"></select></div>');
             $('#fg_' + OptionListName + '_mode').append('<fieldset id="' + OptionListName + 'mode' + ChannelId + '"></fieldset>');
         }
 
