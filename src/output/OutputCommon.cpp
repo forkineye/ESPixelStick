@@ -100,10 +100,6 @@ void c_OutputCommon::InitializeUart (uint32_t baudrate,
 
         TerminateUartOperation ();
 
-        // prevent disturbing the system if we are already running
-        if (true == HasBeenInitialized) {break; }
-        HasBeenInitialized = true;
-
         // Set output pins
         pinMode (DataPin, OUTPUT);
         digitalWrite (DataPin, LOW);

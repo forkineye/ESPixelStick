@@ -105,7 +105,7 @@ protected:
     void CommonSerialWrite      (uint8_t * OutputBuffer, size_t NumBytesToSend);
     void ReportNewFrame ();
 
-    inline boolean canRefresh ()
+    inline bool canRefresh ()
     {
         return (micros () - FrameStartTimeInMicroSec) >= FrameMinDurationInMicroSec;
     }
