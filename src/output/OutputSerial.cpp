@@ -145,7 +145,7 @@ void c_OutputSerial::StartUart ()
 #ifdef ARDUINO_ARCH_ESP8266
     /* Initialize uart */
     InitializeUart (speed,
-        SERIAL_8N1,
+        SERIAL_8N2,
         SERIAL_TX_ONLY,
         FIFO_TRIGGER_LEVEL);
 #else
@@ -402,6 +402,35 @@ void c_OutputSerial::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
+void c_OutputSerial::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+{
+    // DEBUG_START;
+    // DEBUG_V (String ("NumChannelsAvailable: ") + String (NumChannelsAvailable));
+    // DEBUG_V (String ("   GetBufferUsedSize: ") + String (c_OutputCommon::GetBufferUsedSize ()));
+    // DEBUG_V (String ("    OutputBufferSize: ") + String (OutputBufferSize));
+    // DEBUG_V (String ("       BufferAddress: ") + String ((uint32_t)(c_OutputCommon::GetBufferAddress ())));
+
+    do // once
+    {
+        // are we changing size?
+        if (NumChannelsAvailable == OutputBufferSize)
+        {
+            // DEBUG_V ("NO Need to change anything");
+            break;
+        }
+
+        c_OutputCommon::SetOutputBufferSize (NumChannelsAvailable);
+
+        // Calculate our refresh time
+        FrameMinDurationInMicroSec = DMX_US_PER_BIT * DMX_BITS_PER_BYTE * (NumChannelsAvailable + 2) ;
+        // DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
+        // DEBUG_V (String ("      NumChannelsAvailable: ") + String (NumChannelsAvailable));
+    } while (false);
+
+    // DEBUG_END;
+} // SetBufferSize
+
+//----------------------------------------------------------------------------
 void c_OutputSerial::Render ()
 {
     // DEBUG_START;
@@ -421,33 +450,21 @@ void c_OutputSerial::Render ()
     {
         case c_OutputMgr::e_OutputType::OutputType_DMX:
         {
-            if (0 != getFifoLength)
+            if (!canRefresh())
             {
                 return;
             }
 
-            if (UART_TX_DONE_INT_RAW != GET_PERI_REG_MASK (UART_INT_RAW_REG (UartId), UART_TX_DONE_INT_RAW))
-            {
-                return;
-            } // go away if not
-
-            SET_PERI_REG_MASK (UART_INT_CLR_REG (UartId), UART_TX_DONE_INT_CLR);
-            SET_PERI_REG_MASK (UART_INT_CLR_REG (UartId), UART_TXFIFO_EMPTY_INT_CLR);
-
-            delayMicroseconds (12 * DMX_MAB);
 #ifdef ARDUINO_ARCH_ESP8266
-            SET_PERI_REG_MASK (UART_INT_CLR_REG (UartId), UART_TX_DONE_INT_CLR);
-            SET_PERI_REG_MASK (UART_INT_CLR_REG (UartId), UART_TXFIFO_EMPTY_INT_CLR);
-
-            SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_INV);
+            SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
             delayMicroseconds (DMX_BREAK);
-            CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_INV);
+            CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
 #else
             pinMatrixOutDetach (DataPin, false, false);
             pinMode (DataPin, OUTPUT);
             digitalWrite (DataPin, LOW); //88 uS break
             delayMicroseconds (DMX_BREAK);
-            digitalWrite (DataPin, HIGH); //4 Us Mark After Break
+            digitalWrite (DataPin, HIGH); //4 uS Mark After Break
             pinMatrixOutAttach (DataPin, UART_TXD_IDX (UartId), false, false);
 #endif // def ARDUINO_ARCH_ESP8266
 
@@ -470,6 +487,12 @@ void c_OutputSerial::Render ()
         case c_OutputMgr::e_OutputType::OutputType_Serial:
         {
             // LOG_PORT.println ("5 '" + GenericSerialHeader + "'");
+
+            if (GenericSerialHeader.length() > (UART_TX_FIFO_SIZE - getFifoLength))
+            {
+                // wait longer
+                return;
+            }
 
             // load the generic header into the fifo
             for (auto currentByte : GenericSerialHeader)
