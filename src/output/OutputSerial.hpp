@@ -53,6 +53,7 @@ public:
     void GetDriverName (String & sDriverName);
     void GetStatus (ArduinoJson::JsonObject& jsonStatus);
     uint16_t GetNumChannelsNeeded () { return Num_Channels; }
+    void SetOutputBufferSize (uint16_t NumChannelsAvailable);
 
 #define GS_CHANNEL_LIMIT 2048
 
@@ -73,6 +74,9 @@ private:
     const size_t    MAX_CHANNELS           = 1024;
     const uint16_t  DEFAULT_NUM_CHANNELS   = 64;
     const size_t    BUF_SIZE               = (MAX_CHANNELS + MAX_HDR_SIZE + MAX_FOOTER_SIZE);
+    const uint32_t  DMX_BITS_PER_BYTE      = (1.0 + 8.0 + 2.0);
+
+#define  DMX_US_PER_BIT uint32_t((1.0 / 250000.0) * 1000000.0)
 
     /* DMX minimum timings per E1.11 */
     const uint8_t   DMX_BREAK              = 92; // 23 bits
@@ -86,8 +90,8 @@ private:
     String          GenericSerialFooter;
     char           *pGenericSerialFooter      = nullptr;
     size_t          LengthGenericSerialFooter = 0;
-    uint            CurrentBaudrate     = int(BaudRate::BR_DEF); // current transmit rate
-    uint16_t        Num_Channels        = DEFAULT_NUM_CHANNELS;      // Number of data channels to transmit
+    uint            CurrentBaudrate           = int(BaudRate::BR_DEF); // current transmit rate
+    uint16_t        Num_Channels              = DEFAULT_NUM_CHANNELS;      // Number of data channels to transmit
 
     // non config data
     volatile uint16_t        RemainingDataCount;

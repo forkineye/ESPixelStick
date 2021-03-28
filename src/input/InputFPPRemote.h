@@ -56,10 +56,10 @@ private:
     void StopPlaying ();
     bool PlayingFile () { return nullptr != pInputFPPRemotePlayItem; }
 
-    // void onMessage (EspFPPRemoteDevice* pDevice);
-
     void load ();          ///< Load configuration from File System
     void save ();          ///< Save configuration to File System
+
+    String FileBeingPlayed;
 
 #   define JSON_NAME_MISO         CN_miso_pin
 #   define JSON_NAME_MOSI         CN_mosi_pin

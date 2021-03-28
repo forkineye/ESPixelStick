@@ -79,12 +79,12 @@ private:
 
     // Internal variables
     uint8_t        *pIsrOutputBuffer = nullptr;         ///< Data ready to be sent to the UART
-    uint8_t        *pNextIntensityToSend;               ///< start of output buffer being sent to the UART
-    uint16_t        RemainingIntensityCount;            ///< Used by ISR to determine how much more data to send
+    uint8_t        *pNextIntensityToSend = nullptr;     ///< start of output buffer being sent to the UART
+    uint16_t        RemainingIntensityCount = 0;        ///< Used by ISR to determine how much more data to send
     uint8_t         numIntensityBytesPerPixel = 3;      ///< number of bytes per pixel
     uint8_t         gamma_table[256] = { 0 };           ///< Gamma Adjustment table
     ColorOffsets_t  ColorOffsets;
-    uint16_t        InterFrameGapInMicroSec;
+    uint16_t        InterFrameGapInMicroSec = 0;
 
 #ifdef ARDUINO_ARCH_ESP8266
     /* Returns number of bytes waiting in the TX FIFO of UART1 */
@@ -104,11 +104,6 @@ private:
 #	define enqueue(value) (*((volatile uint32_t*)(UART_FIFO_AHB_REG (UartId)))) = (uint32_t)(value)
 
 #endif
-
-    inline boolean canRefresh()
-    {
-        return (micros() - FrameStartTimeInMicroSec) >= FrameRefreshTimeInMicroSec;
-    }
 
     void updateGammaTable(); ///< Generate gamma correction table
     void updateColorOrderOffsets(); ///< Update color order

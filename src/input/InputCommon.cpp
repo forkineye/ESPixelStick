@@ -42,6 +42,13 @@ c_InputCommon::~c_InputCommon ()
 {
     // DEBUG_START;
 
+    if (nullptr != InputDataBuffer)
+    {
+        memset (InputDataBuffer, 0x00, InputDataBufferSize);
+    }
+
+    // DEBUG_END;
+
 } // ~c_InputMgr
 
 

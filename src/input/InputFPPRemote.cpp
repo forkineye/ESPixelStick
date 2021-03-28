@@ -120,8 +120,7 @@ void c_InputFPPRemote::Process ()
         if (pInputFPPRemotePlayItem->IsIdle ())
         {
             // DEBUG_V ("Idle Processing");
-            String FileName = pInputFPPRemotePlayItem->GetFileName ();
-            StartPlaying (FileName);
+            StartPlaying (FileBeingPlayed);
         }
     }
     else
@@ -194,7 +193,12 @@ void c_InputFPPRemote::StartPlaying (String & FileName)
         {
             StopPlaying ();
             // DEBUG_V ("Enable FPP Remote");
-            FPPDiscovery.Enable ();
+
+            if (FileName == No_LocalFileToPlay)
+            {
+                FPPDiscovery.Enable ();
+            }
+
             break;
         }
         // DEBUG_V ("Disable FPP Remote");
@@ -206,7 +210,7 @@ void c_InputFPPRemote::StartPlaying (String & FileName)
         {
             // DEBUG_V ("PlayingFile");
             // has the file changed?
-            if (pInputFPPRemotePlayItem->GetFileName () != FileName)
+            if (FileBeingPlayed != FileName)
             {
                 // DEBUG_V ("StopPlaying");
                 StopPlaying ();
@@ -237,6 +241,7 @@ void c_InputFPPRemote::StartPlaying (String & FileName)
         // DEBUG_V (String ("FileName: '") + FileName + "'");
         // DEBUG_V ("Start Playing");
         pInputFPPRemotePlayItem->Start (FileName, 0, 1);
+        FileBeingPlayed = FileName;
 
     } while (false);
 
