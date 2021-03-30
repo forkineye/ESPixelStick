@@ -42,26 +42,33 @@ public:
 
 private:
 
+#define GECE_BAUDRATE                           300000
 #define GECE_PIXEL_LIMIT                        63  ///< Total pixel limit
 #define GECE_NUM_INTENSITY_BYTES_PER_PIXEL    	3
-#define GECE_BITS_PER_INTENSITY                 8
-#define GECE_NUM_DATA_BYTES_PER_INTENSITY_BYTE  (1 * GECE_BITS_PER_INTENSITY)
-#define GECE_OVERHEAD_BYTES                     2
-#define GECE_PACKET_SIZE                        ((GECE_NUM_INTENSITY_BYTES_PER_PIXEL * GECE_NUM_DATA_BYTES_PER_INTENSITY_BYTE) + GECE_OVERHEAD_BYTES) //   26
-#define GECE_OUTPUT_BUFF_SIZE                   ()
+#define GECE_BITS_PER_INTENSITY                 4
+#define GECE_BITS_BRIGHTNESS                    8
+#define GECE_BITS_ADDRESS                       6
+#define GECE_OVERHEAD_BYTES                     (GECE_BITS_BRIGHTNESS + GECE_BITS_ADDRESS)
+#define GECE_PACKET_SIZE                        ((GECE_NUM_INTENSITY_BYTES_PER_PIXEL * GECE_BITS_PER_INTENSITY) + GECE_OVERHEAD_BYTES) //   26
 
     // JSON configuration parameters
-    uint8_t         pixel_count = 0;
-    uint8_t         brightness  = 0;
+    uint8_t         pixel_count = GECE_PIXEL_LIMIT;
+    uint8_t         brightness  = 100;
 
     bool validate();
+
+    typedef struct OutputFrame_t
+    {
+        uint32_t CurrentPixelID;
+        uint8_t* pCurrentInputData;
+    };
+    OutputFrame_t OutputFrame;
 };
 
 // Cycle counter
-static uint32_t _getCycleCount(void) __attribute__((always_inline));
-static inline uint32_t _getCycleCount(void) {
+static uint32_t _getCycleCount (void) __attribute__ ((always_inline));
+static inline uint32_t _getCycleCount (void) {
     uint32_t ccount;
-    __asm__ __volatile__("rsr %0,ccount":"=a" (ccount));
+    __asm__ __volatile__ ("rsr %0,ccount":"=a" (ccount));
     return ccount;
 }
-

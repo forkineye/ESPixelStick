@@ -87,14 +87,14 @@ static char LOOKUP_GECE[] =
 #define GECE_GET_GREEN(packet)      (((packet) >> GECE_GREEN_SHIFT)      & GECE_GREEN_MASK)
 #define GECE_GET_RED(packet)        (((packet) >> GECE_RED_SHIFT )       & GECE_RED_MASK)
 
-#define GECE_SET_ADDRESS(value)     (((value) & GECE_ADDRESS_MASK)    >> GECE_ADDRESS_SHIFT)
-#define GECE_SET_BRIGHTNESS(value)  (((value) & GECE_BRIGHTNESS_MASK) >> GECE_BRIGHTNESS_SHIFT) 
-#define GECE_SET_BLUE(value)        (((value) & GECE_BLUE_MASK)       >> GECE_BLUE_SHIFT)       
-#define GECE_SET_GREEN(value)       (((value) & GECE_GREEN_MASK)      >> GECE_GREEN_SHIFT)     
-#define GECE_SET_RED(value)         (((value) & GECE_RED_MASK)        >> GECE_RED_SHIFT )       
+#define GECE_SET_ADDRESS(value)     ((uint32_t(value) & GECE_ADDRESS_MASK)    << GECE_ADDRESS_SHIFT)
+#define GECE_SET_BRIGHTNESS(value)  ((uint32_t(value) & GECE_BRIGHTNESS_MASK) << GECE_BRIGHTNESS_SHIFT) 
+#define GECE_SET_BLUE(value)        ((uint32_t(value) & GECE_BLUE_MASK)       << GECE_BLUE_SHIFT)       
+#define GECE_SET_GREEN(value)       ((uint32_t(value) & GECE_GREEN_MASK)      << GECE_GREEN_SHIFT)     
+#define GECE_SET_RED(value)         ((uint32_t(value) & GECE_RED_MASK)        << GECE_RED_SHIFT )       
 
-#define GECE_FRAME_TIME     790L    /* 790us frame time */
-#define GECE_IDLE_TIME      45L     /* 45us idle time - should be 30us */
+#define GECE_FRAME_TIME     uint32_t(((1.0/GECE_BAUDRATE) * 1000000.0) * (1 + 7 + 1) * GECE_PACKET_SIZE) // 790L    /* 790us frame time */
+#define GECE_IDLE_TIME      45     /* 45us idle time - should be 30us */
 
 #define CYCLES_GECE_START   (F_CPU / 100000) // 10us
 
@@ -129,18 +129,17 @@ void c_OutputGECE::Begin()
 
     if (gpio_num_t (-1) == DataPin) { return; }
 
-    FrameMinDurationInMicroSec = (GECE_FRAME_TIME + GECE_IDLE_TIME) * pixel_count;
     SetOutputBufferSize (pixel_count * GECE_NUM_CHAN_PER_PIXEL);
 
     // Serial rate is 3x 100KHz for GECE
 #ifdef ARDUINO_ARCH_ESP8266
-    InitializeUart (300000,
+    InitializeUart (GECE_BAUDRATE,
                     SERIAL_7N1,
                     SERIAL_TX_ONLY,
                     OM_CMN_NO_CUSTOM_ISR);
 #else
     uart_config_t uart_config;
-    uart_config.baud_rate           = 300000;
+    uart_config.baud_rate           = GECE_BAUDRATE;
     uart_config.data_bits           = uart_word_length_t::UART_DATA_7_BITS;
     uart_config.flow_ctrl           = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
     uart_config.parity              = uart_parity_t::UART_PARITY_DISABLE;
@@ -150,8 +149,11 @@ void c_OutputGECE::Begin()
     InitializeUart (uart_config, OM_CMN_NO_CUSTOM_ISR);
 #endif
 
-    SET_PERI_REG_MASK(UART_CONF0(UartId), UART_TXD_BRK);
-    delayMicroseconds(GECE_IDLE_TIME);
+    // FrameMinDurationInMicroSec = (GECE_FRAME_TIME + GECE_IDLE_TIME) * pixel_count;
+    FrameMinDurationInMicroSec = GECE_FRAME_TIME + GECE_IDLE_TIME;
+    DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
+    // SET_PERI_REG_MASK(UART_CONF0(UartId), UART_TXD_BRK);
+    // delayMicroseconds(GECE_IDLE_TIME);
 
     // DEBUG_END;
 } // begin
@@ -225,9 +227,15 @@ bool c_OutputGECE::validate ()
         response = false;
     }
 
+    // DEBUG_V (String ("pixel_count: ") + String (pixel_count));
+
     SetOutputBufferSize (pixel_count * GECE_NUM_CHAN_PER_PIXEL);
 
+    OutputFrame.CurrentPixelID = 0;
+    OutputFrame.pCurrentInputData = pOutputBuffer;
+
     // DEBUG_END;
+
     return response;
 
 } // validate
@@ -238,50 +246,42 @@ void c_OutputGECE::Render()
     // DEBUG_START;
 
     if (gpio_num_t (-1) == DataPin) { return; }
-    if (!canRefresh()) return;
+    if (!canRefresh ()) { return; }
 
-//    delayMicroseconds (1000000);
-    // DEBUG_V ("4");
+    // enqueue (char('P' + OutputFrame.CurrentPixelID));
+
+    // DEBUG_V ("");
 
     uint32_t packet = 0;
-    uint32_t pTime  = 0;
-    uint8_t  NumOutputPixels = OutputBufferSize / GECE_NUM_INTENSITY_BYTES_PER_PIXEL;
 
     // Build a GECE packet
+    // DEBUG_V ("");
+    packet  = GECE_SET_BRIGHTNESS (brightness); // <= This clears the other fields
+    packet |= GECE_SET_ADDRESS    (OutputFrame.CurrentPixelID);
+    packet |= GECE_SET_RED        (*OutputFrame.pCurrentInputData++);
+    packet |= GECE_SET_GREEN      (*OutputFrame.pCurrentInputData++);
+    packet |= GECE_SET_BLUE       (*OutputFrame.pCurrentInputData++);
+
+    // DEBUG_V ("");
+    // 10us start bit
+    GenerateBreak (10);
+    // DEBUG_V ("");
+
     ReportNewFrame ();
-    uint8_t * pCurrentInputData = pOutputBuffer;
-    
-    for (uint8_t CurrentAddress = 0; CurrentAddress < NumOutputPixels; ++CurrentAddress)
+
+    // now convert the bits into a byte stream
+    for (uint8_t currentShiftCount = GECE_PACKET_SIZE; 0 != currentShiftCount; --currentShiftCount)
     {
-        packet  = GECE_SET_BRIGHTNESS (brightness); // <= This clears the other fields
-        packet |= GECE_SET_ADDRESS    (CurrentAddress);
-        packet |= GECE_SET_RED        (*pCurrentInputData++);
-        packet |= GECE_SET_GREEN      (*pCurrentInputData++);
-        packet |= GECE_SET_BLUE       (*pCurrentInputData++);
+        enqueue (LOOKUP_GECE[(packet >> (currentShiftCount - 1)) & 0x1]);
+    }
 
-        // now convert the bits into a byte stream
-        uint8_t  OutputPacketBuffer[GECE_PACKET_SIZE + 1]; ///< GECE Packet Buffer
-        uint8_t* pCurrentOutputPacketData = OutputPacketBuffer;
-        for (uint8_t currentShiftCount = GECE_PACKET_SIZE; 0 != currentShiftCount; --currentShiftCount)
-        {
-            *pCurrentOutputPacketData++ = LOOKUP_GECE[(packet >> (currentShiftCount-1)) & 0x1];
-        }
-
-        // Wait until ready to send
-        while ((micros() - pTime) < (GECE_FRAME_TIME + GECE_IDLE_TIME)) {}
-
-        // 10us start bit
-        pTime = micros();
-        uint32_t c = _getCycleCount();
-        CLEAR_PERI_REG_MASK(UART_CONF0(UartId), UART_TXD_BRK);
-        while ((_getCycleCount() - c) < CYCLES_GECE_START - 100) {}
-
-        // Send the packet and then idle low (break)
-        CommonSerialWrite(OutputPacketBuffer, GECE_PACKET_SIZE);
-
-        SET_PERI_REG_MASK(UART_CONF0(UartId), UART_TXD_BRK);
-
-    } // for each intensity to send
+    // have we sent all of the pixel data?
+    if (++OutputFrame.CurrentPixelID >= pixel_count)
+    {
+        OutputFrame.CurrentPixelID    = 0;
+        OutputFrame.pCurrentInputData = pOutputBuffer;
+    }
 
     // DEBUG_END;
+
 } // render
