@@ -23,24 +23,31 @@
 #include "../ESPixelStick.h"
 #include "OutputCommon.hpp"
 
-#if defined(ARDUINO_ARCH_ESP8266)
 extern "C" {
+#ifdef ARDUINO_ARCH_ESP8266
 #   include <eagle_soc.h>
 #   include <ets_sys.h>
 #   include <uart.h>
 #   include <uart_register.h>
-}
-#else
-    // Define ESP8266 style macro conversions to limit changes in the rest of the code.
+#elif defined(ARDUINO_ARCH_ESP32)
+#   include <esp32-hal-uart.h>
+#   include <soc/soc.h>
+#   include <soc/uart_reg.h>
+#   include <rom/ets_sys.h>
+#   include <driver/uart.h>
+
 #   define UART_CONF0           UART_CONF0_REG
 #   define UART_CONF1           UART_CONF1_REG
 #   define UART_INT_ENA         UART_INT_ENA_REG
 #   define UART_INT_CLR         UART_INT_CLR_REG
+#   define SERIAL_TX_ONLY       UART_INT_CLR_REG
 #   define UART_INT_ST          UART_INT_ST_REG
 #   define UART_TX_FIFO_SIZE    UART_FIFO_LEN
 
-#endif
+#define UART_TXD_IDX(u)     ((u==0)?U0TXD_OUT_IDX:((u==1)?U1TXD_OUT_IDX:((u==2)?U2TXD_OUT_IDX:0)))
 
+#endif
+}
 static void IRAM_ATTR uart_intr_handler (void* param);
 
 //-------------------------------------------------------------------------------
