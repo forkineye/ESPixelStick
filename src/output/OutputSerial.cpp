@@ -61,8 +61,6 @@ extern "C" {
 #   define UART_INT_ST          UART_INT_ST_REG
 #   define UART_TX_FIFO_SIZE    UART_FIFO_LEN
 
-#define UART_TXD_IDX(u)     ((u==0)?U0TXD_OUT_IDX:((u==1)?U1TXD_OUT_IDX:((u==2)?U2TXD_OUT_IDX:0)))
-
 #endif
 
 #define FIFO_TRIGGER_LEVEL (UART_TX_FIFO_SIZE / 2)
