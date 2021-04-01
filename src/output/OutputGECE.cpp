@@ -349,7 +349,7 @@ void c_OutputGECE::Render()
     SET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
 #else
 //     (*((volatile uint32_t*)(UART_FIFO_AHB_REG (UART_NUM_0)))) = (uint32_t)('7');
-    ESP_ERROR_CHECK (uart_enable_tx_intr (UartId, 1, PIXEL_FIFO_TRIGGER_LEVEL));
+    ESP_ERROR_CHECK (uart_enable_tx_intr (UartId, 1, 0));
 #endif
 
     // DEBUG_END;
