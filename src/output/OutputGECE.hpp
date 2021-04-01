@@ -38,11 +38,9 @@ public:
     void      GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
     uint16_t  GetNumChannelsNeeded ();
 
-    void IRAM_ATTR ISR_Handler () {} ///< UART ISR
+    void IRAM_ATTR ISR_Handler (); ///< UART ISR
 
 private:
-
-#define GECE_BAUDRATE                           300000
 #define GECE_PIXEL_LIMIT                        63  ///< Total pixel limit
 #define GECE_NUM_INTENSITY_BYTES_PER_PIXEL    	3
 #define GECE_BITS_PER_INTENSITY                 4

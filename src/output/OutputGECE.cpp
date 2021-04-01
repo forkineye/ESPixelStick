@@ -57,12 +57,36 @@ extern "C" {
 * Bits are backwards since we need MSB out.
 */
 
-static char LOOKUP_GECE[] = 
+static const char LOOKUP_GECE[] = 
 {
     0b01111100,     // 0 - (0)00 111 11(1)
     0b01100000      // 1 - (0)00 000 11(1)
 };
 
+/*
+output looks like this
+
+Start bit = High for 10us
+26 data bits. 
+    Each bit is 30us
+    0 = 10 us low, 20 us high
+    1 = 20 us low, 10 us high
+stop bit = low for at least 30us
+*/
+
+#define GECE_uSec_PER_GECE_BIT      30.0
+// #define GECE_uSec_PER_GECE_BIT      300.0
+#define GECE_UART_BITS_PER_GECE_BIT (1.0 + 7.0 + 1.0)
+#define GECE_UART_uSec_PER_BIT      (GECE_uSec_PER_GECE_BIT / GECE_UART_BITS_PER_GECE_BIT)
+#define GECE_BAUDRATE               uint32_t( (1.0/(GECE_UART_uSec_PER_BIT / 1000000))   )
+
+#define GECE_FRAME_TIME            (GECE_PACKET_SIZE * GECE_uSec_PER_GECE_BIT) /* 790us packet frame time */
+#define GECE_IDLE_TIME             (2 * GECE_uSec_PER_GECE_BIT)     /* 45us idle time - should be 30us */
+
+#define CPU_ClockTimeNS             ((1.0 / float(F_CPU)) * 1000000000)
+#define NUM_GECE_BITS_TO_WAIT       (2.0 + 3.0 + 2.0) // 2 being sent + 3 for interframe gap + 1 spare
+#define NUM_NS_TO_WAIT              (GECE_uSec_PER_GECE_BIT * NUM_GECE_BITS_TO_WAIT * 100)
+#define GECE_CCOUNT_DELAY           uint32_t(NUM_NS_TO_WAIT / CPU_ClockTimeNS)
 
 #define GECE_DEFAULT_BRIGHTNESS 0xCC
 
@@ -93,12 +117,8 @@ static char LOOKUP_GECE[] =
 #define GECE_SET_GREEN(value)       ((uint32_t(value) & GECE_GREEN_MASK)      << GECE_GREEN_SHIFT)     
 #define GECE_SET_RED(value)         ((uint32_t(value) & GECE_RED_MASK)        << GECE_RED_SHIFT )       
 
-#define GECE_FRAME_TIME     uint32_t(((1.0/GECE_BAUDRATE) * 1000000.0) * (1 + 7 + 1) * GECE_PACKET_SIZE) // 790L    /* 790us frame time */
-#define GECE_IDLE_TIME      45     /* 45us idle time - should be 30us */
-
-#define CYCLES_GECE_START   (F_CPU / 100000) // 10us
-
-#define GECE_NUM_CHAN_PER_PIXEL 3
+// forward declaration for the isr handler
+static void IRAM_ATTR uart_intr_handler (void* param);
 
 //----------------------------------------------------------------------------
 c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId,
@@ -123,20 +143,31 @@ c_OutputGECE::~c_OutputGECE ()
 } // ~c_OutputGECE
 
 //----------------------------------------------------------------------------
+/* shell function to set the 'this' pointer of the real ISR
+   This allows me to use non static variables in the ISR.
+ */
+static void IRAM_ATTR uart_intr_handler (void* param)
+{
+    reinterpret_cast <c_OutputGECE*>(param)->ISR_Handler ();
+} // uart_intr_handler
+
+//----------------------------------------------------------------------------
 void c_OutputGECE::Begin()
 {
     // DEBUG_START;
 
     if (gpio_num_t (-1) == DataPin) { return; }
 
-    SetOutputBufferSize (pixel_count * GECE_NUM_CHAN_PER_PIXEL);
+    SetOutputBufferSize (pixel_count * GECE_NUM_INTENSITY_BYTES_PER_PIXEL);
+
+    DEBUG_V (String ("GECE_BAUDRATE: ") + String (GECE_BAUDRATE));
 
     // Serial rate is 3x 100KHz for GECE
 #ifdef ARDUINO_ARCH_ESP8266
     InitializeUart (GECE_BAUDRATE,
                     SERIAL_7N1,
                     SERIAL_TX_ONLY,
-                    OM_CMN_NO_CUSTOM_ISR);
+                    0);
 #else
     uart_config_t uart_config;
     uart_config.baud_rate           = GECE_BAUDRATE;
@@ -146,14 +177,24 @@ void c_OutputGECE::Begin()
     uart_config.rx_flow_ctrl_thresh = 1;
     uart_config.stop_bits           = uart_stop_bits_t::UART_STOP_BITS_1;
     uart_config.use_ref_tick        = false;
-    InitializeUart (uart_config, OM_CMN_NO_CUSTOM_ISR);
+    InitializeUart (uart_config, 0);
 #endif
+
+    // Atttach interrupt handler
+#ifdef ARDUINO_ARCH_ESP8266
+    ETS_UART_INTR_ATTACH (uart_intr_handler, this);
+#else
+    uart_isr_register (UartId, uart_intr_handler, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM, nullptr);
+#endif
+
+    DEBUG_V (String ("GECE_CCOUNT_DELAY: ") + String (GECE_CCOUNT_DELAY));
 
     // FrameMinDurationInMicroSec = (GECE_FRAME_TIME + GECE_IDLE_TIME) * pixel_count;
     FrameMinDurationInMicroSec = GECE_FRAME_TIME + GECE_IDLE_TIME;
-    DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
-    // SET_PERI_REG_MASK(UART_CONF0(UartId), UART_TXD_BRK);
-    // delayMicroseconds(GECE_IDLE_TIME);
+    // DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
+
+    SET_PERI_REG_MASK(UART_CONF0(UartId), UART_TXD_BRK);
+    ReportNewFrame (); // starts a timeout that include IDLE time
 
     // DEBUG_END;
 } // begin
@@ -229,7 +270,7 @@ bool c_OutputGECE::validate ()
 
     // DEBUG_V (String ("pixel_count: ") + String (pixel_count));
 
-    SetOutputBufferSize (pixel_count * GECE_NUM_CHAN_PER_PIXEL);
+    SetOutputBufferSize (pixel_count * GECE_NUM_INTENSITY_BYTES_PER_PIXEL);
 
     OutputFrame.CurrentPixelID = 0;
     OutputFrame.pCurrentInputData = pOutputBuffer;
@@ -241,46 +282,75 @@ bool c_OutputGECE::validate ()
 } // validate
 
 //----------------------------------------------------------------------------
+/*
+ * Fill the FIFO with as many intensity values as it can hold.
+ */
+void IRAM_ATTR c_OutputGECE::ISR_Handler ()
+{
+    // Process if the desired UART has raised an interrupt
+    if (READ_PERI_REG (UART_INT_ST (UartId)))
+    {
+        uint32_t StartingCycleCount = _getCycleCount ();
+
+        uint32_t packet = 0;
+
+        // Build a GECE packet
+        // DEBUG_V ("");
+        packet  = GECE_SET_BRIGHTNESS (brightness); // <= This clears the other fields
+        packet |= GECE_SET_ADDRESS (OutputFrame.CurrentPixelID);
+        packet |= GECE_SET_RED (*OutputFrame.pCurrentInputData++);
+        packet |= GECE_SET_GREEN (*OutputFrame.pCurrentInputData++);
+        packet |= GECE_SET_BLUE (*OutputFrame.pCurrentInputData++);
+
+        // DEBUG_V ("");
+
+        // wait until all of the data has been clocked out 
+        // (hate waits but there are no status bits to watch)
+        while((_getCycleCount () - StartingCycleCount) < GECE_CCOUNT_DELAY) {}
+
+        // this ensures a minimum break time and a Start bit
+        enqueue (LOOKUP_GECE[1]);
+
+        // now convert the bits into a byte stream
+        for (uint32_t currentShiftMask = bit (GECE_PACKET_SIZE - 1);
+            0 != currentShiftMask; currentShiftMask >>= 1)
+        {
+            enqueue (LOOKUP_GECE[((packet & currentShiftMask) == 0) ? 0 : 1]);
+        }
+
+        // Clear all interrupts flags for this uart
+        WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
+
+        // enable the send (uart is stopped while sending a break. 
+        // Output does not return to '1' prior to sending first data byte.
+        CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
+        // enable the stop bit after the last data is sent
+        SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
+
+        // have we sent all of the pixel data?
+        if (++OutputFrame.CurrentPixelID >= pixel_count)
+        {
+            OutputFrame.CurrentPixelID = 0;
+            OutputFrame.pCurrentInputData = pOutputBuffer;
+        }
+
+    } // end Our uart generated an interrupt
+
+} // HandleWS2811Interrupt
+//----------------------------------------------------------------------------
 void c_OutputGECE::Render()
 {
     // DEBUG_START;
 
     if (gpio_num_t (-1) == DataPin) { return; }
-    if (!canRefresh ()) { return; }
+    // if (!canRefresh ()) { return; }
 
-    // enqueue (char('P' + OutputFrame.CurrentPixelID));
-
-    // DEBUG_V ("");
-
-    uint32_t packet = 0;
-
-    // Build a GECE packet
-    // DEBUG_V ("");
-    packet  = GECE_SET_BRIGHTNESS (brightness); // <= This clears the other fields
-    packet |= GECE_SET_ADDRESS    (OutputFrame.CurrentPixelID);
-    packet |= GECE_SET_RED        (*OutputFrame.pCurrentInputData++);
-    packet |= GECE_SET_GREEN      (*OutputFrame.pCurrentInputData++);
-    packet |= GECE_SET_BLUE       (*OutputFrame.pCurrentInputData++);
-
-    // DEBUG_V ("");
-    // 10us start bit
-    GenerateBreak (10);
-    // DEBUG_V ("");
-
-    ReportNewFrame ();
-
-    // now convert the bits into a byte stream
-    for (uint8_t currentShiftCount = GECE_PACKET_SIZE; 0 != currentShiftCount; --currentShiftCount)
-    {
-        enqueue (LOOKUP_GECE[(packet >> (currentShiftCount - 1)) & 0x1]);
-    }
-
-    // have we sent all of the pixel data?
-    if (++OutputFrame.CurrentPixelID >= pixel_count)
-    {
-        OutputFrame.CurrentPixelID    = 0;
-        OutputFrame.pCurrentInputData = pOutputBuffer;
-    }
+#ifdef ARDUINO_ARCH_ESP8266
+    SET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
+#else
+//     (*((volatile uint32_t*)(UART_FIFO_AHB_REG (UART_NUM_0)))) = (uint32_t)('7');
+    ESP_ERROR_CHECK (uart_enable_tx_intr (UartId, 1, PIXEL_FIFO_TRIGGER_LEVEL));
+#endif
 
     // DEBUG_END;
 
