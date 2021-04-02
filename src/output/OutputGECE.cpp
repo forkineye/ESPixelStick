@@ -57,7 +57,10 @@ extern "C" {
 * Bits are backwards since we need MSB out.
 */
 
-static const char LOOKUP_GECE[] = 
+#define GECE_DATA_ZERO 0b01111100
+#define GECE_DATA_ONE  0b01100000
+
+static char LOOKUP_GECE[] = 
 {
     0b01111100,     // 0 - (0)00 111 11(1)
     0b01100000      // 1 - (0)00 000 11(1)
@@ -160,7 +163,7 @@ void c_OutputGECE::Begin()
 
     SetOutputBufferSize (pixel_count * GECE_NUM_INTENSITY_BYTES_PER_PIXEL);
 
-    DEBUG_V (String ("GECE_BAUDRATE: ") + String (GECE_BAUDRATE));
+    // DEBUG_V (String ("GECE_BAUDRATE: ") + String (GECE_BAUDRATE));
 
     // Serial rate is 3x 100KHz for GECE
 #ifdef ARDUINO_ARCH_ESP8266
@@ -187,14 +190,14 @@ void c_OutputGECE::Begin()
     uart_isr_register (UartId, uart_intr_handler, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM, nullptr);
 #endif
 
-    DEBUG_V (String ("GECE_CCOUNT_DELAY: ") + String (GECE_CCOUNT_DELAY));
+    // DEBUG_V (String ("GECE_CCOUNT_DELAY: ") + String (GECE_CCOUNT_DELAY));
 
     // FrameMinDurationInMicroSec = (GECE_FRAME_TIME + GECE_IDLE_TIME) * pixel_count;
     FrameMinDurationInMicroSec = GECE_FRAME_TIME + GECE_IDLE_TIME;
     // DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
 
     SET_PERI_REG_MASK(UART_CONF0(UartId), UART_TXD_BRK);
-    ReportNewFrame (); // starts a timeout that include IDLE time
+    // ReportNewFrame (); // starts a timeout that include IDLE time
 
     // DEBUG_END;
 } // begin
@@ -214,10 +217,14 @@ bool c_OutputGECE::SetConfig(ArduinoJson::JsonObject & jsonConfig)
 
     uint temp;
     setFromJSON(pixel_count, jsonConfig, CN_pixel_count);
-    setFromJSON(brightness,  jsonConfig, CN_brightness);
+
+    temp = map(brightness, 0, 255, 0, 100);
+    setFromJSON(temp,  jsonConfig, CN_brightness);
+    brightness = map (temp, 0, 100, 0, 255);
+
     // enums need to be converted to uints for json
     temp = uint (DataPin);
-    setFromJSON(temp,        jsonConfig, CN_data_pin);
+    setFromJSON(temp, jsonConfig, CN_data_pin);
     DataPin = gpio_num_t (temp);
 
     bool response = validate ();
@@ -235,7 +242,7 @@ void c_OutputGECE::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
     jsonConfig[CN_pixel_count] = pixel_count;
-    jsonConfig[CN_brightness]  = brightness;
+    jsonConfig[CN_brightness]  = map (brightness, 0, 255, 0, 100);
 
     // enums need to be converted to uints for json
     jsonConfig[CN_data_pin]    = uint (DataPin);
@@ -309,13 +316,13 @@ void IRAM_ATTR c_OutputGECE::ISR_Handler ()
         while((_getCycleCount () - StartingCycleCount) < GECE_CCOUNT_DELAY) {}
 
         // this ensures a minimum break time and a Start bit
-        enqueue (LOOKUP_GECE[1]);
+        enqueue (GECE_DATA_ONE);
 
         // now convert the bits into a byte stream
         for (uint32_t currentShiftMask = bit (GECE_PACKET_SIZE - 1);
             0 != currentShiftMask; currentShiftMask >>= 1)
         {
-            enqueue (LOOKUP_GECE[((packet & currentShiftMask) == 0) ? 0 : 1]);
+            enqueue (((packet & currentShiftMask) == 0) ? GECE_DATA_ZERO : GECE_DATA_ONE);
         }
 
         // Clear all interrupts flags for this uart

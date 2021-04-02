@@ -6,9 +6,9 @@
             <div class="col-sm-4">
                 <input type="number" class="form-control is-valid" id="pixel_count" step="1" min="1" max="1360" value="0" required title="Number of physical pixels" onchange="refreshGeceFrameRate()">
             </div>
-            <label class="control-label col-sm-2" for="brightness">Brightness</label>
+            <label class="control-label col-sm-2" for="brightness">Brightness (%)</label>
             <div class="col-sm-4">
-                <input type="number" class="form-control is-valid" id="brightness" step="1" min="1" max="255" value="0" required title="Max brightness for string">
+                <input type="number" class="form-control is-valid" id="brightness" step="1" min="0" max="100" value="100" required title="Max brightness for string">
             </div>
         </fieldset>
     </div>
