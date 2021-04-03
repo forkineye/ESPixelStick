@@ -99,11 +99,28 @@ void c_WebMgr::Begin (config_t* /* NewConfig */)
 {
     // DEBUG_START;
 
-    init ();
+    if (WiFiMgr.IsWiFiConnected ())
+    {
+        init ();
+    }
 
     // DEBUG_END;
 
 } // begin
+
+//-----------------------------------------------------------------------------
+// Configure and start the web server
+void c_WebMgr::NetworkStateChanged (bool NewNetworkState)
+{
+    // DEBUG_START;
+
+    if (true == NewNetworkState)
+    {
+        init ();
+    }
+
+    // DEBUG_END;
+} // NetworkStateChanged
 
 //-----------------------------------------------------------------------------
 // Configure and start the web server
