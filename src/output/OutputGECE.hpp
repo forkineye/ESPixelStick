@@ -41,17 +41,13 @@ public:
     void IRAM_ATTR ISR_Handler (); ///< UART ISR
 
 private:
-#define GECE_PIXEL_LIMIT                        63  ///< Total pixel limit
-#define GECE_NUM_INTENSITY_BYTES_PER_PIXEL    	3
-#define GECE_BITS_PER_INTENSITY                 4
-#define GECE_BITS_BRIGHTNESS                    8
-#define GECE_BITS_ADDRESS                       6
-#define GECE_OVERHEAD_BYTES                     (GECE_BITS_BRIGHTNESS + GECE_BITS_ADDRESS)
-#define GECE_PACKET_SIZE                        ((GECE_NUM_INTENSITY_BYTES_PER_PIXEL * GECE_BITS_PER_INTENSITY) + GECE_OVERHEAD_BYTES) //   26
+
+#define GECE_PIXEL_LIMIT        63  ///< Total pixel limit
+#define GECE_DEFAULT_BRIGHTNESS 0xCC
 
     // JSON configuration parameters
     uint8_t         pixel_count = GECE_PIXEL_LIMIT;
-    uint8_t         brightness  = 100;
+    uint8_t         brightness  = GECE_DEFAULT_BRIGHTNESS;
 
     bool validate();
 

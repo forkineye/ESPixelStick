@@ -91,34 +91,34 @@ stop bit = low for at least 30us
 #define NUM_NS_TO_WAIT              (GECE_uSec_PER_GECE_BIT * NUM_GECE_BITS_TO_WAIT * 100)
 #define GECE_CCOUNT_DELAY           uint32_t(NUM_NS_TO_WAIT / CPU_ClockTimeNS)
 
-#define GECE_DEFAULT_BRIGHTNESS 0xCC
+#define GECE_NUM_INTENSITY_BYTES_PER_PIXEL    	3
+#define GECE_BITS_PER_INTENSITY                 4
+#define GECE_BITS_BRIGHTNESS                    8
+#define GECE_BITS_ADDRESS                       6
+#define GECE_OVERHEAD_BYTES                     (GECE_BITS_BRIGHTNESS + GECE_BITS_ADDRESS)
+#define GECE_PACKET_SIZE                        ((GECE_NUM_INTENSITY_BYTES_PER_PIXEL * GECE_BITS_PER_INTENSITY) + GECE_OVERHEAD_BYTES) //   26
 
-#define GECE_ADDRESS_MASK       0x3F
+// frame layout: 0x0AAIIBGR
+#define GECE_ADDRESS_MASK       0x03F00000
 #define GECE_ADDRESS_SHIFT      20
 
-#define GECE_BRIGHTNESS_MASK    0xFF
-#define GECE_BRIGHTNESS_SHIFT   12
+#define GECE_INTENSITY_MASK     0x000FF000
+#define GECE_INTENSITY_SHIFT    12
 
-#define GECE_BLUE_MASK          0xF
+#define GECE_BLUE_MASK          0x00000F00
 #define GECE_BLUE_SHIFT         8
 
-#define GECE_GREEN_MASK         0xF
-#define GECE_GREEN_SHIFT        4
+#define GECE_GREEN_MASK         0x000000F0
+#define GECE_GREEN_SHIFT        0
 
-#define GECE_RED_MASK           0xF
-#define GECE_RED_SHIFT          0
+#define GECE_RED_MASK           0x0000000F
+#define GECE_RED_SHIFT          4
 
-#define GECE_GET_ADDRESS(packet)    (((packet) >> GECE_ADDRESS_SHIFT)    & GECE_ADDRESS_MASK)
-#define GECE_GET_BRIGHTNESS(packet) (((packet) >> GECE_BRIGHTNESS_SHIFT) & GECE_BRIGHTNESS_MASK)
-#define GECE_GET_BLUE(packet)       (((packet) >> GECE_BLUE_SHIFT)       & GECE_BLUE_MASK)
-#define GECE_GET_GREEN(packet)      (((packet) >> GECE_GREEN_SHIFT)      & GECE_GREEN_MASK)
-#define GECE_GET_RED(packet)        (((packet) >> GECE_RED_SHIFT )       & GECE_RED_MASK)
-
-#define GECE_SET_ADDRESS(value)     ((uint32_t(value) & GECE_ADDRESS_MASK)    << GECE_ADDRESS_SHIFT)
-#define GECE_SET_BRIGHTNESS(value)  ((uint32_t(value) & GECE_BRIGHTNESS_MASK) << GECE_BRIGHTNESS_SHIFT) 
-#define GECE_SET_BLUE(value)        ((uint32_t(value) & GECE_BLUE_MASK)       << GECE_BLUE_SHIFT)       
-#define GECE_SET_GREEN(value)       ((uint32_t(value) & GECE_GREEN_MASK)      << GECE_GREEN_SHIFT)     
-#define GECE_SET_RED(value)         ((uint32_t(value) & GECE_RED_MASK)        << GECE_RED_SHIFT )       
+#define GECE_SET_ADDRESS(value)     ((uint32_t(value) << GECE_ADDRESS_SHIFT)   & GECE_ADDRESS_MASK)
+#define GECE_SET_BRIGHTNESS(value)  ((uint32_t(value) << GECE_INTENSITY_SHIFT) & GECE_INTENSITY_MASK)
+#define GECE_SET_BLUE(value)        ((uint32_t(value) << GECE_BLUE_SHIFT)      & GECE_BLUE_MASK)       
+#define GECE_SET_GREEN(value)       ((uint32_t(value)                   )      & GECE_GREEN_MASK)       
+#define GECE_SET_RED(value)         ((uint32_t(value) >> GECE_RED_SHIFT )      & GECE_RED_MASK)       
 
 // forward declaration for the isr handler
 static void IRAM_ATTR uart_intr_handler (void* param);
