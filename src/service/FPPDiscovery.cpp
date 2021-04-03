@@ -50,12 +50,31 @@ void c_FPPDiscovery::begin ()
 {
     // DEBUG_START;
 
+    StopPlaying ();
+
+    inFileUpload = false;
+    hasBeenInitialized = true;
+
+    NetworkStateChanged (WiFiMgr.IsWiFiConnected ());
+
+    // DEBUG_END;
+} // begin
+
+
+//-----------------------------------------------------------------------------
+// Configure and start the web server
+void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
+{
+    DEBUG_START;
+
     do // once
     {
-        StopPlaying ();
+        if (false == NewNetworkState)
+        {
+            break;
+        }
 
-        inFileUpload = false;
-        hasBeenInitialized = true;
+        DEBUG_V ();
 
         // delay (100);
 
@@ -83,12 +102,14 @@ void c_FPPDiscovery::begin ()
         WiFi.onEvent ([this](WiFiEvent_t event, system_event_info_t info) {this->onWiFiConnect (event, info); }, WiFiEvent_t::SYSTEM_EVENT_STA_CONNECTED);
 #endif
 
+        sendPingPacket ();
+
     } while (false);
 
-    sendPingPacket ();
+    DEBUG_END;
 
-    // DEBUG_END;
-} // begin
+} // NetworkStateChanged
+
 
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::Disable ()

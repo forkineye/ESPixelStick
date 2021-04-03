@@ -86,6 +86,8 @@ public:
     void Enable           (void);
     void Disable          (void);
     void GetStatus        (JsonObject& jsonStatus);
+    void NetworkStateChanged (bool NewNetworkState);
+
 };
 
 extern c_FPPDiscovery FPPDiscovery;
