@@ -332,6 +332,9 @@ bool deserializeCore (JsonObject & json)
 
     bool DataHasBeenAccepted = false;
 
+    // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
+    // PrettyPrint (json, "Main Config");
+
     do // once
     {
         ConfigSaveNeeded |= dsDevice  (json);
