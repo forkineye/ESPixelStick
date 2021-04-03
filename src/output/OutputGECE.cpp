@@ -87,7 +87,7 @@ stop bit = low for at least 30us
 #define GECE_IDLE_TIME             (2 * GECE_uSec_PER_GECE_BIT)     /* 45us idle time - should be 30us */
 
 #define CPU_ClockTimeNS             ((1.0 / float(F_CPU)) * 1000000000)
-#define NUM_GECE_BITS_TO_WAIT       (2.0 + 3.0 + 2.0) // 2 being sent + 3 for interframe gap + 1 spare
+#define NUM_GECE_BITS_TO_WAIT       (17)
 #define NUM_NS_TO_WAIT              (GECE_uSec_PER_GECE_BIT * NUM_GECE_BITS_TO_WAIT * 100)
 #define GECE_CCOUNT_DELAY           uint32_t(NUM_NS_TO_WAIT / CPU_ClockTimeNS)
 
