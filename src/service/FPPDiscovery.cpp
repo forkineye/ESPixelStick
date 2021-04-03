@@ -65,7 +65,7 @@ void c_FPPDiscovery::begin ()
 // Configure and start the web server
 void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     do // once
     {
@@ -74,9 +74,7 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
             break;
         }
 
-        DEBUG_V ();
-
-        // delay (100);
+        // DEBUG_V ();
 
         IPAddress address = IPAddress (239, 70, 80, 80);
 
@@ -96,20 +94,13 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         LOG_PORT.println (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
         udp.onPacket (std::bind (&c_FPPDiscovery::ProcessReceivedUdpPacket, this, std::placeholders::_1));
 
-#ifdef ARDUINO_ARCH_ESP8266
-        wifiConnectHandler = WiFi.onStationModeGotIP ([this](const WiFiEventStationModeGotIP& event) {this->onWiFiConnect (event); });
-#else
-        WiFi.onEvent ([this](WiFiEvent_t event, system_event_info_t info) {this->onWiFiConnect (event, info); }, WiFiEvent_t::SYSTEM_EVENT_STA_CONNECTED);
-#endif
-
         sendPingPacket ();
 
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // NetworkStateChanged
-
 
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::Disable ()
@@ -203,19 +194,6 @@ uint16_t read16 (uint8_t* pData)
 } // read16
 
 //-----------------------------------------------------------------------------
-#ifdef ARDUINO_ARCH_ESP8266
-void c_FPPDiscovery::onWiFiConnect (const WiFiEventStationModeGotIP& event)
-{
-#else
-void c_FPPDiscovery::onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t info)
-{
-#endif
-    // DEBUG_START;
-
-    sendPingPacket ();
-
-    // DEBUG_END;
-} // onWiFiConnect
 
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
