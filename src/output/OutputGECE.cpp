@@ -222,10 +222,7 @@ bool c_OutputGECE::SetConfig(ArduinoJson::JsonObject & jsonConfig)
     setFromJSON(temp,  jsonConfig, CN_brightness);
     brightness = map (temp, 0, 100, 0, 255);
 
-    // enums need to be converted to uints for json
-    temp = uint (DataPin);
-    setFromJSON(temp, jsonConfig, CN_data_pin);
-    DataPin = gpio_num_t (temp);
+    c_OutputCommon::SetConfig (jsonConfig);
 
     bool response = validate ();
 
@@ -244,8 +241,7 @@ void c_OutputGECE::GetConfig (ArduinoJson::JsonObject & jsonConfig)
     jsonConfig[CN_pixel_count] = pixel_count;
     jsonConfig[CN_brightness]  = map (brightness, 0, 255, 0, 100);
 
-    // enums need to be converted to uints for json
-    jsonConfig[CN_data_pin]    = uint (DataPin);
+    c_OutputCommon::GetConfig (jsonConfig);
 
     // DEBUG_END;
 } // GetConfig

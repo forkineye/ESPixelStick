@@ -65,8 +65,8 @@ public:
 
     // functions to be provided by the derived class
     virtual void         Begin () = 0;                                         ///< set up the operating environment based on the current config (or defaults)
-    virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig) = 0; ///< Set a new config in the driver
-    virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig) = 0; ///< Get the current config used by the driver
+    virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig);     ///< Set a new config in the driver
+    virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     virtual void         Render () = 0;                                        ///< Call from loop(),  renders output data
     virtual void         GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
             OID_t        GetOutputChannelId () { return OutputChannelId; }     ///< return the output channel number
@@ -81,7 +81,7 @@ public:
 protected:
 #define OM_CMN_NO_CUSTOM_ISR                    (-1)
 
-    gpio_num_t  DataPin;     ///< Output pin to use for this driver
+    gpio_num_t  DataPin                    = gpio_num_t (-1); ///< Output pin to use for this driver
     uart_port_t UartId;      ///< Id of the UART used by this instance of the driver
     OTYPE_t     OutputType;  ///< Type to report for this driver
     OID_t       OutputChannelId;

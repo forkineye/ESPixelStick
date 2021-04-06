@@ -241,9 +241,7 @@ bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject & jsonConfig)
     setFromJSON (Num_Channels,        jsonConfig, CN_num_chan);
     setFromJSON (CurrentBaudrate,     jsonConfig, CN_baudrate);
 
-    temp = uint (DataPin);
-    setFromJSON (temp, jsonConfig, CN_data_pin);
-    DataPin = gpio_num_t (temp);
+    c_OutputCommon::SetConfig (jsonConfig);
 
     bool response = validate ();
 
@@ -263,13 +261,14 @@ void c_OutputSerial::GetConfig (ArduinoJson::JsonObject & jsonConfig)
     // DEBUG_START;
     jsonConfig[CN_num_chan]    = Num_Channels;
     jsonConfig[CN_baudrate]    = CurrentBaudrate;
-    jsonConfig[CN_data_pin]    = uint (DataPin);
     if (OutputType == c_OutputMgr::e_OutputType::OutputType_Serial)
     {
         jsonConfig[CN_gen_ser_hdr] = GenericSerialHeader;
         jsonConfig[CN_gen_ser_ftr] = GenericSerialFooter;
     }
-    // enums need to be converted to uints for json
+
+    c_OutputCommon::GetConfig (jsonConfig);
+
     // DEBUG_END;
 } // GetConfig
 

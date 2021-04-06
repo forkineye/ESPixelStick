@@ -333,3 +333,39 @@ void c_OutputCommon::GenerateBreak (uint32_t DurationInUs)
 
 } // GenerateBreak
 
+//----------------------------------------------------------------------------
+bool c_OutputCommon::SetConfig (JsonObject & jsonConfig)
+{
+    // DEBUG_START;
+
+    uint tempDataPin = uint (DataPin);
+
+    bool response = setFromJSON (tempDataPin, jsonConfig, CN_data_pin);
+
+#ifdef ARDUINO_ARCH_ESP32
+
+    if ((tempDataPin != DataPin) && (uart_port_t(-1) != UartId))
+    {
+        ESP_ERROR_CHECK (uart_set_pin (UartId, tempDataPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+    }
+
+#endif
+
+    DataPin = gpio_num_t (tempDataPin);
+
+    // DEBUG_END;
+
+    return response;
+
+} // SetConfig
+
+//----------------------------------------------------------------------------
+void c_OutputCommon::GetConfig (JsonObject & jsonConfig)
+{
+    // DEBUG_START;
+
+    // enums need to be converted to uints for json
+    jsonConfig[CN_data_pin] = uint (DataPin);
+
+    // DEBUG_END;
+} // GetConfig
