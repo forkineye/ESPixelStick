@@ -24,6 +24,10 @@
                     <input type="text" class="form-control is-valid" id="gen_ser_ftr" min="0" max="10" value="" required title="String to send at end of frame." onchange="RefreshSerialRate()">
                 </div>
             </div>
+            <label class="control-label col-sm-2 hidden AdvancedMode" for="data_pin">GPIO Output</label>
+            <div class="col-sm-4">
+                <input type="number" class="form-control is-valid hidden AdvancedMode" id="data_pin" step="1" min="0" max="64" value="65" required title="GPIO pn which to output data">
+            </div>
         </fieldset>
     </div>
 </div>

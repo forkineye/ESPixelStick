@@ -23,24 +23,31 @@
 #include "../ESPixelStick.h"
 #include "OutputCommon.hpp"
 
-#if defined(ARDUINO_ARCH_ESP8266)
 extern "C" {
+#ifdef ARDUINO_ARCH_ESP8266
 #   include <eagle_soc.h>
 #   include <ets_sys.h>
 #   include <uart.h>
 #   include <uart_register.h>
-}
-#else
-    // Define ESP8266 style macro conversions to limit changes in the rest of the code.
+#elif defined(ARDUINO_ARCH_ESP32)
+#   include <esp32-hal-uart.h>
+#   include <soc/soc.h>
+#   include <soc/uart_reg.h>
+#   include <rom/ets_sys.h>
+#   include <driver/uart.h>
+
 #   define UART_CONF0           UART_CONF0_REG
 #   define UART_CONF1           UART_CONF1_REG
 #   define UART_INT_ENA         UART_INT_ENA_REG
 #   define UART_INT_CLR         UART_INT_CLR_REG
+#   define SERIAL_TX_ONLY       UART_INT_CLR_REG
 #   define UART_INT_ST          UART_INT_ST_REG
 #   define UART_TX_FIFO_SIZE    UART_FIFO_LEN
 
-#endif
+#define UART_TXD_IDX(u)     ((u==0)?U0TXD_OUT_IDX:((u==1)?U1TXD_OUT_IDX:((u==2)?U2TXD_OUT_IDX:0)))
 
+#endif
+}
 static void IRAM_ATTR uart_intr_handler (void* param);
 
 //-------------------------------------------------------------------------------
@@ -232,42 +239,6 @@ void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
     // DEBUG_END;
 } // GetStatus
 
-
-//----------------------------------------------------------------------------
-void c_OutputCommon::CommonSerialWrite (uint8_t* OutputBuffer, size_t NumBytesToSend)
-{
-    // DEBUG_START;
-    switch (UartId)
-    {
-        case UART_NUM_0:
-        {
-            Serial.write (OutputBuffer, NumBytesToSend);
-            break;
-        }
-        case UART_NUM_1:
-        {
-            Serial1.write (OutputBuffer, NumBytesToSend);
-            break;
-        }
-
-#ifdef ARDUINO_ARCH_ESP32
-        case UART_NUM_2:
-        {
-            Serial2.write (OutputBuffer, NumBytesToSend);
-            break;
-        }
-#endif // def ARDUINO_ARCH_ESP32
-
-        default:
-        {
-            break;
-        }
-    } // end switch (UartId)
-
-    // DEBUG_END;
-} // CommonSerialWrite
-
-
 //----------------------------------------------------------------------------
 void c_OutputCommon::TerminateUartOperation ()
 {
@@ -303,6 +274,7 @@ void c_OutputCommon::TerminateUartOperation ()
 
 } // TerminateUartOperation
 
+//----------------------------------------------------------------------------
 void c_OutputCommon::ReportNewFrame ()
 {
     uint32_t Now = micros ();
@@ -314,3 +286,86 @@ void c_OutputCommon::ReportNewFrame ()
     // DEBUG_END;
 
 } // ReportNewFrame
+
+//----------------------------------------------------------------------------
+void c_OutputCommon::StartBreak ()
+{
+    // DEBUG_START;
+
+#ifdef ARDUINO_ARCH_ESP8266
+    SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
+#else
+    pinMatrixOutDetach (DataPin, false, false);
+    pinMode (DataPin, OUTPUT);
+    digitalWrite (DataPin, LOW);
+#endif // def ARDUINO_ARCH_ESP8266
+
+    // DEBUG_END;
+
+} // StartBreak
+
+//----------------------------------------------------------------------------
+void c_OutputCommon::EndBreak ()
+{
+    // DEBUG_START;
+
+#ifdef ARDUINO_ARCH_ESP8266
+    CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
+#else
+    digitalWrite (DataPin, HIGH);
+    pinMatrixOutAttach (DataPin, UART_TXD_IDX (UartId), false, false);
+#endif // def ARDUINO_ARCH_ESP8266
+
+    // DEBUG_END;
+
+} // EndBreak
+
+//----------------------------------------------------------------------------
+void c_OutputCommon::GenerateBreak (uint32_t DurationInUs)
+{
+    // DEBUG_START;
+
+    StartBreak ();
+    delayMicroseconds (DurationInUs);
+    EndBreak ();
+
+    // DEBUG_END;
+
+} // GenerateBreak
+
+//----------------------------------------------------------------------------
+bool c_OutputCommon::SetConfig (JsonObject & jsonConfig)
+{
+    // DEBUG_START;
+
+    uint tempDataPin = uint (DataPin);
+
+    bool response = setFromJSON (tempDataPin, jsonConfig, CN_data_pin);
+
+#ifdef ARDUINO_ARCH_ESP32
+
+    if ((tempDataPin != DataPin) && (uart_port_t(-1) != UartId))
+    {
+        ESP_ERROR_CHECK (uart_set_pin (UartId, tempDataPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+    }
+
+#endif
+
+    DataPin = gpio_num_t (tempDataPin);
+
+    // DEBUG_END;
+
+    return response;
+
+} // SetConfig
+
+//----------------------------------------------------------------------------
+void c_OutputCommon::GetConfig (JsonObject & jsonConfig)
+{
+    // DEBUG_START;
+
+    // enums need to be converted to uints for json
+    jsonConfig[CN_data_pin] = uint (DataPin);
+
+    // DEBUG_END;
+} // GetConfig

@@ -28,6 +28,8 @@
 
 #include "WiFiMgr.hpp"
 #include "input/InputMgr.hpp"
+#include "WebMgr.hpp"
+#include "service/FPPDiscovery.h"
 
 //-----------------------------------------------------------------------------
 // Create secrets.h with a #define for SECRETS_SSID and SECRETS_PASS
@@ -609,6 +611,8 @@ void fsm_WiFi_state_ConnectedToAP::Init ()
 
     WiFiMgr.SetIsWiFiConnected (true);
     InputMgr.NetworkStateChanged (true);
+    WebMgr.NetworkStateChanged (true);
+    FPPDiscovery.NetworkStateChanged (true);
 
     // DEBUG_END;
 } // fsm_WiFi_state_ConnectingAsAP::Init

@@ -6,9 +6,13 @@
             <div class="col-sm-4">
                 <input type="number" class="form-control is-valid" id="pixel_count" step="1" min="1" max="1360" value="0" required title="Number of physical pixels" onchange="refreshGeceFrameRate()">
             </div>
-            <label class="control-label col-sm-2" for="brightness">Brightness</label>
+            <label class="control-label col-sm-2" for="brightness">Brightness (%)</label>
             <div class="col-sm-4">
-                <input type="number" class="form-control is-valid" id="brightness" step="1" min="1" max="255" value="0" required title="Max brightness for string">
+                <input type="number" class="form-control is-valid" id="brightness" step="1" min="0" max="100" value="100" required title="Max brightness for string">
+            </div>
+            <label class="control-label col-sm-2 hidden AdvancedMode" for="data_pin">GPIO Output</label>
+            <div class="col-sm-4">
+                <input type="number" class="form-control is-valid hidden AdvancedMode" id="data_pin" step="1" min="0" max="64" value="65" required title="GPIO pn which to output data">
             </div>
         </fieldset>
     </div>
@@ -20,9 +24,9 @@
     {
         // var NumberOfPixels = parseInt($('#pixel_count').val());
         // var PixelTime      = 0.00030;
-        // var InterFrameGap  = 0.00035;
+        // var InterFrameGap  = 0.00055;
         // var TimePerFrame   = (PixelTime * NumberOfPixels) + InterFrameGap;
-        var TimePerFrame = (0.00030 * parseInt($('#pixel_count').val())) + 0.00035;
+        var TimePerFrame = (0.00030 * parseInt($('#pixel_count').val())) + 0.00055;
 
         var rateMs = TimePerFrame * 1000;
         var hz     = 1 / TimePerFrame;

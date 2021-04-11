@@ -61,8 +61,6 @@ extern "C" {
 #   define UART_INT_ST          UART_INT_ST_REG
 #   define UART_TX_FIFO_SIZE    UART_FIFO_LEN
 
-#define UART_TXD_IDX(u)     ((u==0)?U0TXD_OUT_IDX:((u==1)?U1TXD_OUT_IDX:((u==2)?U2TXD_OUT_IDX:0)))
-
 #endif
 
 #define FIFO_TRIGGER_LEVEL (UART_TX_FIFO_SIZE / 2)
@@ -243,9 +241,7 @@ bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject & jsonConfig)
     setFromJSON (Num_Channels,        jsonConfig, CN_num_chan);
     setFromJSON (CurrentBaudrate,     jsonConfig, CN_baudrate);
 
-    temp = uint (DataPin);
-    setFromJSON (temp, jsonConfig, CN_data_pin);
-    DataPin = gpio_num_t (temp);
+    c_OutputCommon::SetConfig (jsonConfig);
 
     bool response = validate ();
 
@@ -265,13 +261,14 @@ void c_OutputSerial::GetConfig (ArduinoJson::JsonObject & jsonConfig)
     // DEBUG_START;
     jsonConfig[CN_num_chan]    = Num_Channels;
     jsonConfig[CN_baudrate]    = CurrentBaudrate;
-    jsonConfig[CN_data_pin]    = uint (DataPin);
     if (OutputType == c_OutputMgr::e_OutputType::OutputType_Serial)
     {
         jsonConfig[CN_gen_ser_hdr] = GenericSerialHeader;
         jsonConfig[CN_gen_ser_ftr] = GenericSerialFooter;
     }
-    // enums need to be converted to uints for json
+
+    c_OutputCommon::GetConfig (jsonConfig);
+
     // DEBUG_END;
 } // GetConfig
 
@@ -455,19 +452,7 @@ void c_OutputSerial::Render ()
                 return;
             }
 
-#ifdef ARDUINO_ARCH_ESP8266
-            SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
-            delayMicroseconds (DMX_BREAK);
-            CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
-#else
-            pinMatrixOutDetach (DataPin, false, false);
-            pinMode (DataPin, OUTPUT);
-            digitalWrite (DataPin, LOW); //88 uS break
-            delayMicroseconds (DMX_BREAK);
-            digitalWrite (DataPin, HIGH); //4 uS Mark After Break
-            pinMatrixOutAttach (DataPin, UART_TXD_IDX (UartId), false, false);
-#endif // def ARDUINO_ARCH_ESP8266
-
+            GenerateBreak (DMX_BREAK);
             delayMicroseconds (DMX_MAB);
 
             enqueue (0x00); // DMX Lighting frame start

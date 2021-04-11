@@ -106,6 +106,10 @@ $(function ()
         factoryReset();
     });
 
+    $('#AdvancedOptions').change(function () {
+        UpdateAdvancedOptionsMode();
+    });
+
     var finalUrl = "http://" + target + "/upload";
     // console.log(finalUrl);
     const uploader = new Dropzone('#filemanagementupload',
@@ -165,6 +169,27 @@ $(function ()
     RequestStatusUpdate();
 });
 
+function UpdateAdvancedOptionsMode()
+{
+    console.info("UpdateAdvancedOptionsMode");
+
+    var am = $('#AdvancedOptions');
+    var AdvancedModeState = am.prop("checked");
+
+    $(".AdvancedMode").each(function ()
+    {
+        if (true === AdvancedModeState)
+        {
+            $(this).removeClass("hidden");
+        }
+        else
+        {
+            $(this).addClass("hidden");
+        }
+    });
+
+} // UpdateAdvancedOptionsMode
+
 function ProcessWindowChange(NextWindow) {
 
     if (NextWindow === "#diag") {
@@ -186,6 +211,7 @@ function ProcessWindowChange(NextWindow) {
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
     }
 
+    UpdateAdvancedOptionsMode();
     RequestListOfFiles();
 
 } // ProcessWindowChange
@@ -519,6 +545,8 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig )
         // console.info("ProcessModeConfigurationData: servo");
         ProcessModeConfigurationDataServoPCA9685(channelConfig);
     }
+
+    UpdateAdvancedOptionsMode();
 
     // console.info("ProcessModeConfigurationData: End");
 

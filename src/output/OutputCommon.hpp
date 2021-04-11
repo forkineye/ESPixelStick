@@ -65,8 +65,8 @@ public:
 
     // functions to be provided by the derived class
     virtual void         Begin () = 0;                                         ///< set up the operating environment based on the current config (or defaults)
-    virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig) = 0; ///< Set a new config in the driver
-    virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig) = 0; ///< Get the current config used by the driver
+    virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig);     ///< Set a new config in the driver
+    virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     virtual void         Render () = 0;                                        ///< Call from loop(),  renders output data
     virtual void         GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
             OID_t        GetOutputChannelId () { return OutputChannelId; }     ///< return the output channel number
@@ -81,7 +81,7 @@ public:
 protected:
 #define OM_CMN_NO_CUSTOM_ISR                    (-1)
 
-    gpio_num_t  DataPin;     ///< Output pin to use for this driver
+    gpio_num_t  DataPin                    = gpio_num_t (-1); ///< Output pin to use for this driver
     uart_port_t UartId;      ///< Id of the UART used by this instance of the driver
     OTYPE_t     OutputType;  ///< Type to report for this driver
     OID_t       OutputChannelId;
@@ -102,13 +102,34 @@ protected:
 #endif // ! def ARDUINO_ARCH_ESP8266
 
     void TerminateUartOperation ();
-    void CommonSerialWrite      (uint8_t * OutputBuffer, size_t NumBytesToSend);
     void ReportNewFrame ();
+    void StartBreak ();
+    void EndBreak ();
+    void GenerateBreak (uint32_t DurationInUs);
 
     inline bool canRefresh ()
     {
         return (micros () - FrameStartTimeInMicroSec) >= FrameMinDurationInMicroSec;
     }
+
+#ifdef ARDUINO_ARCH_ESP8266
+    /* Returns number of bytes waiting in the TX FIFO of UART1 */
+#  define getFifoLength ((uint16_t)((U1S >> USTXC) & 0xff))
+
+   /* Append a byte to the TX FIFO of UART1 */
+#  define enqueue(data)  (U1F = (char)(data))
+
+#elif defined(ARDUINO_ARCH_ESP32)
+
+    /* Returns number of bytes waiting in the TX FIFO of UART1 */
+#   define getFifoLength ((uint16_t)((READ_PERI_REG (UART_STATUS_REG (UartId)) & UART_TXFIFO_CNT_M) >> UART_TXFIFO_CNT_S))
+// #   define getFifoLength 80
+
+    /* Append a byte to the TX FIFO of UART1 */
+// #   define enqueue(value) WRITE_PERI_REG(UART_FIFO_AHB_REG (UART), (char)(value))
+#	define enqueue(value) (*((volatile uint32_t*)(UART_FIFO_AHB_REG (UartId)))) = (uint32_t)(value)
+
+#endif
 
 private:
     uint32_t    FrameRefreshTimeInMicroSec = 0;

@@ -185,8 +185,8 @@ void c_OutputWS2811::GetConfig(ArduinoJson::JsonObject & jsonConfig)
     jsonConfig[CN_gamma]          = gamma;
     jsonConfig[CN_brightness]     = uint8_t(brightness * 100.0); // save as a 1 - 100 percentage
     jsonConfig[CN_interframetime] = InterFrameGapInMicroSec;
-    // enums need to be converted to uints for json
-    jsonConfig[CN_data_pin]       = uint (DataPin);
+
+    c_OutputCommon::GetConfig (jsonConfig);
 
     // DEBUG_END;
 } // GetConfig
@@ -278,7 +278,7 @@ void IRAM_ATTR c_OutputWS2811::ISR_Handler ()
         // Fill the FIFO with new data
         // free space in the FIFO divided by the number of data bytes per intensity
         // gives the max number of intensities we can add to the FIFO
-        uint16_t IntensitySpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getWS2811FifoLength)) / WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE;
+        uint16_t IntensitySpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE;
 
         // determine how many intensities we can process right now.
         uint16_t IntensitiesToSend = (IntensitySpaceInFifo < RemainingIntensityCount) ? (IntensitySpaceInFifo) : RemainingIntensityCount;
@@ -422,8 +422,6 @@ bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject & jsonConfig)
     // DEBUG_START;
 
     // enums need to be converted to uints for json
-    uint tempDataPin = uint (DataPin);
-
     setFromJSON (color_order,             jsonConfig, CN_color_order);
     setFromJSON (pixel_count,             jsonConfig, CN_pixel_count);
     setFromJSON (group_size,              jsonConfig, CN_group_size);
@@ -431,8 +429,8 @@ bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject & jsonConfig)
     setFromJSON (gamma,                   jsonConfig, CN_gamma);
     setFromJSON (brightness,              jsonConfig, CN_brightness);
     setFromJSON (InterFrameGapInMicroSec, jsonConfig, CN_interframetime);
-    setFromJSON (tempDataPin,             jsonConfig, CN_data_pin);
-    DataPin = gpio_num_t (tempDataPin);
+
+    c_OutputCommon::SetConfig (jsonConfig);
 
     // DEBUG_V (String ("brightness: ") + String (brightness));
     brightness /= 100.0; // turn into a 0-1.0 multiplier

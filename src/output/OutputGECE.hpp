@@ -38,30 +38,31 @@ public:
     void      GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
     uint16_t  GetNumChannelsNeeded ();
 
-    void IRAM_ATTR ISR_Handler () {} ///< UART ISR
+    void IRAM_ATTR ISR_Handler (); ///< UART ISR
 
 private:
 
-#define GECE_PIXEL_LIMIT                        63  ///< Total pixel limit
-#define GECE_NUM_INTENSITY_BYTES_PER_PIXEL    	3
-#define GECE_BITS_PER_INTENSITY                 8
-#define GECE_NUM_DATA_BYTES_PER_INTENSITY_BYTE  (1 * GECE_BITS_PER_INTENSITY)
-#define GECE_OVERHEAD_BYTES                     2
-#define GECE_PACKET_SIZE                        ((GECE_NUM_INTENSITY_BYTES_PER_PIXEL * GECE_NUM_DATA_BYTES_PER_INTENSITY_BYTE) + GECE_OVERHEAD_BYTES) //   26
-#define GECE_OUTPUT_BUFF_SIZE                   ()
+#define GECE_PIXEL_LIMIT        63  ///< Total pixel limit
+#define GECE_DEFAULT_BRIGHTNESS 0xCC
 
     // JSON configuration parameters
-    uint8_t         pixel_count = 0;
-    uint8_t         brightness  = 0;
+    uint8_t         pixel_count = GECE_PIXEL_LIMIT;
+    uint8_t         brightness  = GECE_DEFAULT_BRIGHTNESS;
 
     bool validate();
+
+    typedef struct OutputFrame_t
+    {
+        uint32_t CurrentPixelID;
+        uint8_t* pCurrentInputData;
+    };
+    OutputFrame_t OutputFrame;
 };
 
 // Cycle counter
-static uint32_t _getCycleCount(void) __attribute__((always_inline));
-static inline uint32_t _getCycleCount(void) {
+static uint32_t _getCycleCount (void) __attribute__ ((always_inline));
+static inline uint32_t _getCycleCount (void) {
     uint32_t ccount;
-    __asm__ __volatile__("rsr %0,ccount":"=a" (ccount));
+    __asm__ __volatile__ ("rsr %0,ccount":"=a" (ccount));
     return ccount;
 }
-

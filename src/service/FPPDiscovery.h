@@ -62,14 +62,6 @@ private:
     void StartPlaying      (String & filename, uint32_t frameId);
     bool AllowedToRemotePlayFiles ();
 
-#ifdef ARDUINO_ARCH_ESP8266
-    WiFiEventHandler    wifiConnectHandler;     // WiFi connect handler
-    void onWiFiConnect (const WiFiEventStationModeGotIP& event);
-#else
-    void onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t info);
-#endif
-
-
 public:
     c_FPPDiscovery ();
 
@@ -86,6 +78,8 @@ public:
     void Enable           (void);
     void Disable          (void);
     void GetStatus        (JsonObject& jsonStatus);
+    void NetworkStateChanged (bool NewNetworkState);
+
 };
 
 extern c_FPPDiscovery FPPDiscovery;
