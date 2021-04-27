@@ -129,10 +129,13 @@ void c_InputMQTT::Process ()
 {
     // DEBUG_START;
 
-    if (nullptr != pEffectsEngine)
+    if (IsInputChannelActive)
     {
-        // DEBUG_V ("");
-        pEffectsEngine->Process ();
+        if (nullptr != pEffectsEngine)
+        {
+            // DEBUG_V ("");
+            pEffectsEngine->Process ();
+        }
     }
 
     if (nullptr != pPlayFileEngine)
