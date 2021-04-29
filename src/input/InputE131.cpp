@@ -30,6 +30,9 @@ c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
 {
     // DEBUG_START;
     // DEBUG_V ("BufferSize: " + String (BufferSize));
+
+    memset ((void*)UniverseArray, 0x00, sizeof (UniverseArray));
+
     // DEBUG_END;
 } // c_InputE131
 
