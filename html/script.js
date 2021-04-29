@@ -1262,6 +1262,20 @@ function ProcessRecievedJsonStatusMessage(data)
         $('#E131Status').addClass("hidden")
     }
 
+    if (Status.input[0].hasOwnProperty('Artnet')) {
+        $('#ArtnetStatus').removeClass("hidden")
+
+        $('#an_uni_first').text(InputStatus.Artnet.unifirst);
+        $('#an_uni_last').text(InputStatus.Artnet.unilast);
+        $('#an_pkts').text(InputStatus.Artnet.num_packets);
+        $('#an_chanlim').text(InputStatus.Artnet.unichanlim);
+        $('#an_perr').text(InputStatus.Artnet.packet_errors);
+        $('#an_clientip').text(InputStatus.Artnet.last_clientIP);
+    }
+    else {
+        $('#ArtnetStatus').addClass("hidden")
+    }
+
     if (Status.input[0].hasOwnProperty('ddp'))
     {
         $('#ddpStatus').removeClass("hidden")

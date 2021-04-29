@@ -32,6 +32,7 @@
 #include "InputAlexa.h"
 #include "InputDDP.h"
 #include "InputFPPRemote.h"
+#include "InputArtnet.hpp"
 // needs to be last
 #include "InputMgr.hpp"
 
@@ -52,6 +53,7 @@ static const InputTypeXlateMap_t InputTypeXlateMap[c_InputMgr::e_InputType::Inpu
     {c_InputMgr::e_InputType::InputType_E1_31,    "E1.31",      c_InputMgr::e_InputChannelIds::InputChannelId_1},
     {c_InputMgr::e_InputType::InputType_DDP,      "DDP",        c_InputMgr::e_InputChannelIds::InputChannelId_1},
     {c_InputMgr::e_InputType::InputType_FPP,      "FPP Remote", c_InputMgr::e_InputChannelIds::InputChannelId_1},
+    {c_InputMgr::e_InputType::InputType_Artnet,   "Artnet",     c_InputMgr::e_InputChannelIds::InputChannelId_1},
     {c_InputMgr::e_InputType::InputType_Effects,  "Effects",    c_InputMgr::e_InputChannelIds::InputChannelId_2},
     {c_InputMgr::e_InputType::InputType_MQTT,     "MQTT",       c_InputMgr::e_InputChannelIds::InputChannelId_2},
     {c_InputMgr::e_InputType::InputType_Alexa,    "Alexa",      c_InputMgr::e_InputChannelIds::InputChannelId_2},
@@ -513,8 +515,23 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             {
                 if (InputTypeIsAllowedOnChannel (InputType_FPP, ChannelIndex))
                 {
-                    // LOG_PORT.println (String (F ("************** Starting DDP for channel '")) + ChannelIndex + "'. **************");
+                    // LOG_PORT.println (String (F ("************** Starting FPP for channel '")) + ChannelIndex + "'. **************");
                     pInputChannelDrivers[ChannelIndex] = new c_InputFPPRemote (ChannelIndex, InputType_FPP, InputDataBuffer, InputDataBufferSize);
+                    // DEBUG_V ("");
+                }
+                else
+                {
+                    pInputChannelDrivers[ChannelIndex] = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
+                }
+                break;
+            }
+
+            case e_InputType::InputType_Artnet:
+            {
+                if (InputTypeIsAllowedOnChannel (InputType_Artnet, ChannelIndex))
+                {
+                    // LOG_PORT.println (String (F ("************** Starting Artnet for channel '")) + ChannelIndex + "'. **************");
+                    pInputChannelDrivers[ChannelIndex] = new c_InputArtnet (ChannelIndex, InputType_Artnet, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
                 else

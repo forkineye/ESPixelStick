@@ -57,6 +57,7 @@ public:
         InputType_Alexa,
         InputType_DDP,
         InputType_FPP,
+        InputType_Artnet,
         InputType_Disabled,
         InputType_End,
         InputType_Start   = InputType_E1_31,
