@@ -42,10 +42,10 @@ before_install:
 - git clone https://github.com/djGrrr/Int64String $LIB_HOME/Int64String
 - git clone https://github.com/Aircoookie/Espalexa $LIB_HOME/Espalexa
 - git clone https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library $LIB_HOME/Adafruit-PWM-Servo-Driver
+- git clone https://github.com/natcl/Artnet $LIB_HOME/Artnet
 install:
 - cp -r $TRAVIS_BUILD_DIR $ESPS_HOME
 - arduino --install-library LittleFS_esp32
-- arduino --install-library Artnet
 - arduino --board esp8266com:esp8266:generic:xtal=160,vt=flash,exception=legacy,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=40,FlashMode=dio,eesz=4M2M,led=2,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200
   --pref build.path=$BUILD --save-prefs
 before_script:
