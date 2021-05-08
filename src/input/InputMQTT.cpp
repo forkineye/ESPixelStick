@@ -118,7 +118,8 @@ void c_InputMQTT::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    // JsonObject mqttStatus = jsonStatus.createNestedObject (F ("mqtt"));
+    JsonObject Status = jsonStatus.createNestedObject (F ("mqtt"));
+    Status[CN_id] = InputChannelId;
 
     // DEBUG_END;
 

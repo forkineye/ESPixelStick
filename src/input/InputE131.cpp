@@ -96,6 +96,7 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
     // DEBUG_START;
 
     JsonObject e131Status = jsonStatus.createNestedObject (F ("e131"));
+    e131Status[CN_id]               = InputChannelId;
     e131Status[F ("unifirst")]      = startUniverse;
     e131Status[F ("unilast")]       = LastUniverse;
     e131Status[F ("unichanlim")]    = ChannelsPerUniverse;
