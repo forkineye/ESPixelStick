@@ -344,10 +344,11 @@ void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    JsonArray OutputStatus = jsonStatus.createNestedArray (F ("output"));
+    JsonArray OutputStatus = jsonStatus.createNestedArray (CN_output);
     uint channelIndex = 0;
     for (auto CurrentOutput : pOutputChannelDrivers)
     {
+        // DEBUG_V("");
         JsonObject channelStatus = OutputStatus.createNestedObject ();
         CurrentOutput->GetStatus (channelStatus);
         channelIndex++;
