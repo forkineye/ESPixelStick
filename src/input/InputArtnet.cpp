@@ -1,7 +1,7 @@
 /*
-* E131Input.cpp - Code to wrap ESPAsyncE131 for input
+* ArtnetInput.cpp - Code to wrap ESPAsyncArtnet for input
 *
-* Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
+* Project: ESPixelStick - An ESP8266 / ESP32 and Artnet based pixel driver
 * Copyright (c) 2021 Shelby Merrick
 * http://www.forkineye.com
 *
@@ -17,39 +17,37 @@
 *
 */
 
-#include "InputE131.hpp"
+#include "InputArtnet.hpp"
 #include "../WiFiMgr.hpp"
 
 //-----------------------------------------------------------------------------
-c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
-                          c_InputMgr::e_InputType       NewChannelType,
-                          uint8_t                     * BufferStart,
-                          uint16_t                      BufferSize) :
+c_InputArtnet::c_InputArtnet (c_InputMgr::e_InputChannelIds NewInputChannelId,
+                              c_InputMgr::e_InputType       NewChannelType,
+                              uint8_t                     * BufferStart,
+                              uint16_t                      BufferSize) :
     c_InputCommon(NewInputChannelId, NewChannelType, BufferStart, BufferSize)
 
 {
     // DEBUG_START;
     // DEBUG_V ("BufferSize: " + String (BufferSize));
-
     memset ((void*)UniverseArray, 0x00, sizeof (UniverseArray));
-
     // DEBUG_END;
-} // c_InputE131
+} // c_InputArtnet
 
 //-----------------------------------------------------------------------------
-c_InputE131::~c_InputE131()
+c_InputArtnet::~c_InputArtnet()
 {
     // DEBUG_START;
 
-    // The E1.31 layer and UDP layer do not handle a shut down well (at all). Ask for a reboot.
-    LOG_PORT.println (String (F ("** 'E1.31' Shut Down for input: '")) + String (InputChannelId) + String (F ("' Requires a reboot. **")));
+    // The Artnet layer and UDP layer do not handle a shut down well (at all). Ask for a reboot.
+    LOG_PORT.println (String (F ("** 'Artnet' Shut Down for input: '")) + String (InputChannelId) + String (F ("' Requires a reboot. **")));
 
     // DEBUG_END;
 
-} // ~c_InputE131
+} // ~c_InputArtnet
 
 //-----------------------------------------------------------------------------
-void c_InputE131::Begin ()
+void c_InputArtnet::Begin ()
 {
     // DEBUG_START;
 
@@ -78,7 +76,7 @@ void c_InputE131::Begin ()
 } // Begin
 
 //-----------------------------------------------------------------------------
-void c_InputE131::GetConfig (JsonObject & jsonConfig)
+void c_InputArtnet::GetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
@@ -91,27 +89,29 @@ void c_InputE131::GetConfig (JsonObject & jsonConfig)
 } // GetConfig
 
 //-----------------------------------------------------------------------------
-void c_InputE131::GetStatus (JsonObject & jsonStatus)
+void c_InputArtnet::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject e131Status = jsonStatus.createNestedObject (F ("e131"));
-    e131Status[F ("unifirst")]      = startUniverse;
-    e131Status[F ("unilast")]       = LastUniverse;
-    e131Status[F ("unichanlim")]    = ChannelsPerUniverse;
+    JsonObject ArtnetStatus = jsonStatus.createNestedObject (F ("Artnet"));
+    ArtnetStatus[F ("unifirst")]      = startUniverse;
+    ArtnetStatus[F ("unilast")]       = LastUniverse;
+    ArtnetStatus[F ("unichanlim")]    = ChannelsPerUniverse;
     // DEBUG_V ("");
 
-    e131Status[F ("num_packets")]   = e131->stats.num_packets;
-    e131Status[F ("packet_errors")] = e131->stats.packet_errors;
-    e131Status[F ("last_clientIP")] = e131->stats.last_clientIP.toString ();
+    ArtnetStatus[F ("lastData")]      = lastData;
+    ArtnetStatus[F ("num_packets")]   = num_packets;
+    ArtnetStatus[F ("packet_errors")] = packet_errors;
+    ArtnetStatus[F ("last_clientIP")] = LastRemoteIP.toString ();
 
-    JsonArray e131UniverseStatus = e131Status.createNestedArray (CN_channels);
+    JsonArray ArtnetUniverseStatus = ArtnetStatus.createNestedArray (CN_channels);
 
     for (auto & CurrentUniverse : UniverseArray)
     {
-        JsonObject e131CurrentUniverseStatus = e131UniverseStatus.createNestedObject ();
+        JsonObject ArtnetCurrentUniverseStatus = ArtnetUniverseStatus.createNestedObject ();
 
-        e131CurrentUniverseStatus[F ("errors")] = CurrentUniverse.SequenceErrorCounter;
+        ArtnetCurrentUniverseStatus[F ("errors")] = CurrentUniverse.SequenceErrorCounter;
+        ArtnetCurrentUniverseStatus[F ("num_packets")] = CurrentUniverse.num_packets;
     }
 
     // DEBUG_END;
@@ -119,65 +119,73 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-void c_InputE131::Process ()
+void c_InputArtnet::Process ()
 {
     // DEBUG_START;
-
-    uint8_t*    E131Data;
-    uint16_t    CurrentUniverseId;
-
-    // Parse a packet and update pixels
-    while (!e131->isEmpty ())
+    if ((nullptr != pArtnet) && (WiFiMgr.IsWiFiConnected ()))
     {
-        e131->pull (&packet);
-        CurrentUniverseId = ntohs (packet.universe);
-        E131Data = packet.property_values + 1;
-
-        // DEBUG_V ("     CurrentUniverseId: " + String(CurrentUniverseId));
-        // DEBUG_V ("packet.sequence_number: " + String(packet.sequence_number));
-
-        if ((startUniverse <= CurrentUniverseId ) && (LastUniverse >= CurrentUniverseId))
-        {
-            // Universe offset and sequence tracking
-            Universe_t& CurrentUniverse = UniverseArray[CurrentUniverseId - startUniverse];
-
-            // Do we need to update a sequnce error?
-            if (packet.sequence_number != CurrentUniverse.SequenceNumber)
-            {
-                LOG_PORT.print (F ("E1.31 Sequence Error - expected: "));
-                LOG_PORT.print (CurrentUniverse.SequenceNumber);
-                LOG_PORT.print (F (" actual: "));
-                LOG_PORT.print (packet.sequence_number);
-                LOG_PORT.print (" " + String (CN_universe) + " : ");
-                LOG_PORT.println (CurrentUniverseId);
-
-                CurrentUniverse.SequenceErrorCounter++;
-                CurrentUniverse.SequenceNumber = packet.sequence_number;
-            }
-
-            ++CurrentUniverse.SequenceNumber;
-
-            uint16_t NumBytesOfE131Data = ntohs (packet.property_value_count) - 1;
-
-            memcpy (CurrentUniverse.Destination,
-                    &E131Data[CurrentUniverse.SourceDataOffset],
-                    min (CurrentUniverse.BytesToCopy, NumBytesOfE131Data));
-
-            InputMgr.ResetBlankTimer ();
-        }
-        else
-        {
-            // DEBUG_V ("Not interested in this universe");
-        }
-
-    } // end while there is data to process
+        // DEBUG_V ("");
+        pArtnet->read ();
+    }
 
     // DEBUG_END;
 
 } // process
 
 //-----------------------------------------------------------------------------
-void c_InputE131::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
+void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
+                                uint16_t  length, 
+                                uint8_t   SequenceNumber,
+                                uint8_t * data, 
+                                IPAddress remoteIP)
+{
+    // DEBUG_START;
+
+    if ((startUniverse <= CurrentUniverseId) && (LastUniverse >= CurrentUniverseId))
+    {
+        LastRemoteIP = remoteIP;
+
+        // Universe offset and sequence tracking
+        Universe_t& CurrentUniverse = UniverseArray[CurrentUniverseId - startUniverse];
+
+        // Do we need to update a sequnce error?
+        if (SequenceNumber != CurrentUniverse.SequenceNumber)
+        {
+            /*
+            LOG_PORT.print (F ("Artnet Sequence Error - expected: "));
+            LOG_PORT.print (CurrentUniverse.SequenceNumber);
+            LOG_PORT.print (F (" actual: "));
+            LOG_PORT.print (SequenceNumber);
+            LOG_PORT.print (" " + String (CN_universe) + " : ");
+            LOG_PORT.println (CurrentUniverseId);
+            */
+            CurrentUniverse.SequenceErrorCounter++;
+            CurrentUniverse.SequenceNumber = SequenceNumber;
+            ++packet_errors;
+        }
+
+        ++CurrentUniverse.SequenceNumber;
+        ++CurrentUniverse.num_packets;
+        ++num_packets;
+
+        // DEBUG_V (String ("data[0]: ") + String (data[0], HEX));
+
+        lastData = data[0];
+
+        memcpy (CurrentUniverse.Destination,
+                &data[CurrentUniverse.SourceDataOffset],
+                min (CurrentUniverse.BytesToCopy, length));
+
+        InputMgr.ResetBlankTimer ();
+    }
+    else
+    {
+        // DEBUG_V ("Not interested in this universe");
+    }
+    // DEBUG_END;
+}
+//-----------------------------------------------------------------------------
+void c_InputArtnet::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
 {
     // DEBUG_START;
 
@@ -195,7 +203,7 @@ void c_InputE131::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
 } // SetBufferInfo
 
 //-----------------------------------------------------------------------------
-void c_InputE131::SetBufferTranslation ()
+void c_InputArtnet::SetBufferTranslation ()
 {
     // DEBUG_START;
 
@@ -215,8 +223,8 @@ void c_InputE131::SetBufferTranslation ()
         CurrentUniverse.Destination = &InputDataBuffer[DestinationOffset];
         CurrentUniverse.BytesToCopy = BytesInThisUniverse;
         CurrentUniverse.SourceDataOffset = InputOffset;
-        CurrentUniverse.SequenceErrorCounter = 0;
-        CurrentUniverse.SequenceNumber = 0;
+        // CurrentUniverse.SequenceErrorCounter = 0;
+        // CurrentUniverse.SequenceNumber = 0;
 
         // DEBUG_V (String ("        Destination: ") + String (uint32_t (CurrentUniverse.Destination), HEX));
         // DEBUG_V (String ("        BytesToCopy: ") + String (CurrentUniverse.BytesToCopy, HEX));
@@ -238,7 +246,7 @@ void c_InputE131::SetBufferTranslation ()
 } // SetBufferTranslation
 
 //-----------------------------------------------------------------------------
-boolean c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
+boolean c_InputArtnet::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
@@ -255,26 +263,44 @@ boolean c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     return true;
 } // SetConfig
 
+static c_InputArtnet * fMe = nullptr;
+
 //-----------------------------------------------------------------------------
 // Subscribe to "n" universes, starting at "universe"
-void c_InputE131::SubscribeToMulticastDomains()
+void c_InputArtnet::SetUpArtnet ()
 {
-    uint8_t count = LastUniverse - startUniverse + 1;
-    IPAddress ifaddr = WiFi.localIP ();
-    IPAddress multicast_addr;
+    // DEBUG_START;
 
-    for (uint8_t UniverseIndex = 0; UniverseIndex < count; ++UniverseIndex)
+    if (nullptr == pArtnet)
     {
-        multicast_addr = IPAddress (239, 255,
-                                    (((startUniverse + UniverseIndex) >> 8) & 0xff),
-                                    (((startUniverse + UniverseIndex) >> 0) & 0xff));
+        // DEBUG_V ("");
+        pArtnet = new Artnet ();
+        pArtnet->begin ();
 
-        igmp_joingroup ((ip4_addr_t*)&ifaddr[0], (ip4_addr_t*)&multicast_addr[0]);
+        byte broadcast[] = { 10, 0, 1, 255 };
+        pArtnet->setBroadcast (broadcast);
+        LOG_PORT.println (F ("Artnet Subscribed to Broadcast"));
+
+        // DEBUG_V ("");
+
+        fMe = this; // hate this
+        pArtnet->setArtDmxCallback ([](uint16_t UniverseId, uint16_t length, uint8_t sequence, uint8_t* data, IPAddress remoteIP)
+            {
+                // LOG_PORT.println ("fMe");
+                fMe->onDmxFrame (UniverseId, length, sequence, data, remoteIP);
+            });
     }
-} // multiSub
+    // DEBUG_V ("");
+
+    LOG_PORT.printf_P (PSTR ("Artnet: Listening for %u channels from Universe %u to %u.\n"),
+        InputDataBufferSize, startUniverse, LastUniverse);
+
+    // DEBUG_END;
+
+} // SubscribeToBroadcastDomain
 
 //-----------------------------------------------------------------------------
-void c_InputE131::validateConfiguration ()
+void c_InputArtnet::validateConfiguration ()
 {
     // DEBUG_START;
 
@@ -328,75 +354,33 @@ void c_InputE131::validateConfiguration ()
 
     SetBufferTranslation ();
 
-    // Zero out packet stats
-    if (nullptr == e131)
-    {
-        // DEBUG_V ("");
-        e131 = new ESPAsyncE131 (10);
-    }
-
     // DEBUG_V ("");
-    e131->stats.num_packets = 0;
+    // pArtnet->stats.num_packets = 0;
 
     // DEBUG_END;
 
 } // validateConfiguration
 
 //-----------------------------------------------------------------------------
-void c_InputE131::NetworkStateChanged (bool IsConnected)
-{
-    // NetworkStateChanged (IsConnected, true);
-    NetworkStateChanged (IsConnected, false);
-} // NetworkStateChanged
-
-//-----------------------------------------------------------------------------
-void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
+void c_InputArtnet::NetworkStateChanged (bool IsConnected)
 {
     // DEBUG_START;
 
-    if (nullptr == e131)
-    {
-        // DEBUG_V ("Instantiate E1.31");
-        e131 = new ESPAsyncE131 (10);
-    }
-    // DEBUG_V ("");
+    // NetworkStateChanged (IsConnected, true);
+    NetworkStateChanged (IsConnected, false);
+
+    // DEBUG_END;
+
+} // NetworkStateChanged
+
+//-----------------------------------------------------------------------------
+void c_InputArtnet::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
+{
+    // DEBUG_START;
 
     if (IsConnected)
     {
-        // Get on with business
-        if (e131->begin (E131_MULTICAST, startUniverse, LastUniverse - startUniverse + 1))
-        {
-            LOG_PORT.println (F ("E1.31 Multicast Enabled."));
-        }
-        else
-        {
-            LOG_PORT.println (F ("*** E1.31 MULTICAST INIT FAILED ****"));
-        }
-
-        // DEBUG_V ("");
-
-        if (e131->begin (E131_UNICAST))
-        {
-            LOG_PORT.println (String (F ("E1.31 Unicast Enabled on port: ")) + E131_DEFAULT_PORT);
-        }
-        else
-        {
-            LOG_PORT.println (F ("*** E1.31 UNICAST INIT FAILED ****"));
-        }
-
-        LOG_PORT.printf_P (PSTR ("Listening for %u channels from Universe %u to %u.\n"),
-            InputDataBufferSize, startUniverse, LastUniverse);
-
-        // Setup IGMP subscriptions if multicast is enabled
-        SubscribeToMulticastDomains ();
-    }
-    else if (ReBootAllowed)
-    {
-        // handle a disconnect
-        // E1.31 does not do this gracefully. A loss of connection needs a reboot
-        extern bool reboot;
-        reboot = true;
-        LOG_PORT.println (F ("E1.31 Input requesting reboot on loss of WiFi connection."));
+        SetUpArtnet ();
     }
 
     // DEBUG_END;

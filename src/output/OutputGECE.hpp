@@ -51,7 +51,7 @@ private:
 
     bool validate();
 
-    typedef struct OutputFrame_t
+    struct OutputFrame_t
     {
         uint32_t CurrentPixelID;
         uint8_t* pCurrentInputData;

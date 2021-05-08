@@ -42,6 +42,7 @@ before_install:
 - git clone https://github.com/djGrrr/Int64String $LIB_HOME/Int64String
 - git clone https://github.com/Aircoookie/Espalexa $LIB_HOME/Espalexa
 - git clone https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library $LIB_HOME/Adafruit-PWM-Servo-Driver
+- git clone https://github.com/natcl/Artnet $LIB_HOME/Artnet
 install:
 - cp -r $TRAVIS_BUILD_DIR $ESPS_HOME
 - arduino --install-library LittleFS_esp32

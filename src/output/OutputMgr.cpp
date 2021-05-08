@@ -823,7 +823,10 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
 
         if (AvailableChannels < ChannelsNeeded)
         {
-            LOG_PORT.println (String (F ("--- ERROR: Too many output channels have been defined: ")) + String (OutputBufferOffset));
+            LOG_PORT.println (String (F ("--- OutputMgr: ERROR: Too many output channels have been Requested: ")) + String (ChannelsNeeded));
+            DEBUG_V (String ("    ChannelsNeeded: ") + String (ChannelsNeeded));
+            DEBUG_V (String (" AvailableChannels: ") + String (AvailableChannels));
+            DEBUG_V (String ("ChannelsToAllocate: ") + String (ChannelsToAllocate));
         }
 
         OutputBufferOffset += ChannelsToAllocate;

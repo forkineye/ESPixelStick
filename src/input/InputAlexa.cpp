@@ -103,9 +103,10 @@ void c_InputAlexa::GetStatus (JsonObject& /* jsonStatus */)
 void c_InputAlexa::Process ()
 {
     // DEBUG_START;
-    // ignoring IsInputChannelActive
-    
-    pEffectsEngine->Process ();
+    if (IsInputChannelActive)
+    {
+        pEffectsEngine->Process ();
+    }
 
     // DEBUG_END;
 
