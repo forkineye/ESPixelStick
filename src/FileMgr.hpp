@@ -62,7 +62,7 @@ public:
     bool   LoadConfigFile   (const String & FileName,   DeserializationHandler Handler);
 
     bool   SdCardIsInstalled () { return SdCardInstalled; }
-    FileId CreateFileHandle ();
+    FileId CreateSdFileHandle ();
     void   DeleteSdFile     (const String & FileName);
     void   SaveSdFile       (const String & FileName,   String & FileData);
     void   SaveSdFile       (const String & FileName,   JsonVariant & FileData);
@@ -115,7 +115,18 @@ private:
     bool     fsUploadFileSavedIsEnabled = false;
     char     XlateFileMode[3] = { 'r', 'w', 'w' };
 
-    std::map<FileId, File> FileList;
+#define MaxOpenFiles 5
+    struct FileListEntry_t
+    {
+        FileId handle;
+        File   info;
+        int    entryId;
+    };
+    FileListEntry_t FileList[MaxOpenFiles];
+    int FileListFindSdFileHandle (FileId HandleToFind);
+    void InitSdFileList ();
+
+    // std::map<FileId, File> FileList;
 
 protected:
 
