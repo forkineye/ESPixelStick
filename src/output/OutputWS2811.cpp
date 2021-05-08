@@ -96,6 +96,12 @@ c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
 c_OutputWS2811::~c_OutputWS2811()
 {
     // DEBUG_START;
+    if (nullptr != pIsrOutputBuffer)
+    {
+        free (pIsrOutputBuffer);
+        pIsrOutputBuffer = nullptr;
+    }
+
     if (gpio_num_t (-1) == DataPin) { return; }
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -120,7 +126,7 @@ c_OutputWS2811::~c_OutputWS2811()
     // DEBUG_V ("");
 
 #ifdef ARDUINO_ARCH_ESP32
-    // uart_isr_free (UartId);
+    uart_isr_free (UartId);
 #endif // def ARDUINO_ARCH_ESP32
 
     // DEBUG_END;
