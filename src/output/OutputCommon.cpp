@@ -233,6 +233,7 @@ void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
     // DEBUG_START;
 
 #define MicroSecondsInAsecond 1000000
+    jsonStatus[CN_id] = OutputChannelId;
     jsonStatus["framerefreshrate"] = (0 == FrameRefreshTimeInMicroSec) ? 0 : int (MicroSecondsInAsecond / FrameRefreshTimeInMicroSec);
     jsonStatus["FrameCount"] = FrameCount;
     

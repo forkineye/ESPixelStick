@@ -172,7 +172,9 @@ void c_InputEffectEngine::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    jsonStatus[CN_currenteffect] = ActiveEffect->name;
+    JsonObject Status = jsonStatus.createNestedObject (F ("effects"));
+    Status[CN_currenteffect] = ActiveEffect->name;
+    Status[CN_id]            = InputChannelId;
 
     // DEBUG_END;
 

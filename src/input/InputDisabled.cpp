@@ -59,6 +59,9 @@ void c_InputDisabled::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
+    JsonObject Status = jsonStatus.createNestedObject (F ("disabled"));
+    Status[CN_id] = InputChannelId;
+
     // DEBUG_END;
 
 } // GetStatus

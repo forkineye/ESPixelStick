@@ -96,6 +96,7 @@ void c_InputFPPRemote::GetStatus (JsonObject & jsonStatus)
     // DEBUG_START;
 
     JsonObject LocalPlayerStatus = jsonStatus.createNestedObject (F ("LocalPlayer"));
+    LocalPlayerStatus[CN_id]     = InputChannelId;
     LocalPlayerStatus[CN_active] = PlayingFile ();
 
     if (PlayingFile ())
