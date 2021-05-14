@@ -54,7 +54,6 @@
 #define RDMNET_DNSSD_E133VERS   1
 
 // Configuration file params
-#define CONFIG_MAX_SIZE (3*1024)    ///< Sanity limit for config file
 
 /// Core configuration structure
 typedef struct {
