@@ -127,51 +127,60 @@ void c_InputE131::Process ()
     uint8_t*    E131Data;
     uint16_t    CurrentUniverseId;
 
-    // Parse a packet and update pixels
-    while (!e131->isEmpty ())
+    do // once
     {
-        e131->pull (&packet);
-        CurrentUniverseId = ntohs (packet.universe);
-        E131Data = packet.property_values + 1;
-
-        // DEBUG_V ("     CurrentUniverseId: " + String(CurrentUniverseId));
-        // DEBUG_V ("packet.sequence_number: " + String(packet.sequence_number));
-
-        if ((startUniverse <= CurrentUniverseId ) && (LastUniverse >= CurrentUniverseId))
+        if ((0 == InputDataBufferSize) || (nullptr == e131))
         {
-            // Universe offset and sequence tracking
-            Universe_t& CurrentUniverse = UniverseArray[CurrentUniverseId - startUniverse];
+            // no place to put any data
+            break;
+        }
 
-            // Do we need to update a sequnce error?
-            if (packet.sequence_number != CurrentUniverse.SequenceNumber)
+        // Parse a packet and update pixels
+        while (!e131->isEmpty ())
+        {
+            e131->pull (&packet);
+            CurrentUniverseId = ntohs (packet.universe);
+            E131Data = packet.property_values + 1;
+
+            // DEBUG_V ("     CurrentUniverseId: " + String(CurrentUniverseId));
+            // DEBUG_V ("packet.sequence_number: " + String(packet.sequence_number));
+
+            if ((startUniverse <= CurrentUniverseId) && (LastUniverse >= CurrentUniverseId))
             {
-                LOG_PORT.print (F ("E1.31 Sequence Error - expected: "));
-                LOG_PORT.print (CurrentUniverse.SequenceNumber);
-                LOG_PORT.print (F (" actual: "));
-                LOG_PORT.print (packet.sequence_number);
-                LOG_PORT.print (" " + String (CN_universe) + " : ");
-                LOG_PORT.println (CurrentUniverseId);
+                // Universe offset and sequence tracking
+                Universe_t& CurrentUniverse = UniverseArray[CurrentUniverseId - startUniverse];
 
-                CurrentUniverse.SequenceErrorCounter++;
-                CurrentUniverse.SequenceNumber = packet.sequence_number;
+                // Do we need to update a sequnce error?
+                if (packet.sequence_number != CurrentUniverse.SequenceNumber)
+                {
+                    LOG_PORT.print (F ("E1.31 Sequence Error - expected: "));
+                    LOG_PORT.print (CurrentUniverse.SequenceNumber);
+                    LOG_PORT.print (F (" actual: "));
+                    LOG_PORT.print (packet.sequence_number);
+                    LOG_PORT.print (" " + String (CN_universe) + " : ");
+                    LOG_PORT.println (CurrentUniverseId);
+
+                    CurrentUniverse.SequenceErrorCounter++;
+                    CurrentUniverse.SequenceNumber = packet.sequence_number;
+                }
+
+                ++CurrentUniverse.SequenceNumber;
+
+                uint16_t NumBytesOfE131Data = ntohs (packet.property_value_count) - 1;
+
+                memcpy (CurrentUniverse.Destination,
+                        & E131Data[CurrentUniverse.SourceDataOffset],
+                        min (CurrentUniverse.BytesToCopy, NumBytesOfE131Data));
+
+                InputMgr.ResetBlankTimer ();
+            }
+            else
+            {
+                // DEBUG_V ("Not interested in this universe");
             }
 
-            ++CurrentUniverse.SequenceNumber;
-
-            uint16_t NumBytesOfE131Data = ntohs (packet.property_value_count) - 1;
-
-            memcpy (CurrentUniverse.Destination,
-                    &E131Data[CurrentUniverse.SourceDataOffset],
-                    min (CurrentUniverse.BytesToCopy, NumBytesOfE131Data));
-
-            InputMgr.ResetBlankTimer ();
-        }
-        else
-        {
-            // DEBUG_V ("Not interested in this universe");
-        }
-
-    } // end while there is data to process
+        } // end while there is data to process
+    } while (false);
 
     // DEBUG_END;
 
@@ -362,7 +371,7 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
     }
     // DEBUG_V ("");
 
-    if (IsConnected)
+    if (IsConnected && channel_count)
     {
         // Get on with business
         if (e131->begin (E131_MULTICAST, startUniverse, LastUniverse - startUniverse + 1))
