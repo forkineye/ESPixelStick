@@ -88,7 +88,8 @@ private:
     bool            ConfigSaveNeeded    = false;
     c_ExternalInput ExternalInput;
     bool            EffectEngineIsConfiguredToRun[InputChannelId_End];
-    bool            IsConnected = false;
+    bool            IsConnected         = false;
+    bool            configInProgress    = false;
 
     // configuration parameter names for the channel manager within the config file
 #   define IM_EffectsControlButtonName F ("ecb")

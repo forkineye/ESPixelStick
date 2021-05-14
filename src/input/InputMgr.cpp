@@ -115,7 +115,7 @@ void c_InputMgr::Begin (uint8_t* BufferStart, uint16_t BufferSize)
     if (true == HasBeenInitialized) { return; }
     HasBeenInitialized = true;
 
-    String temp = String ("Effects Control");
+    String temp = String (F("Effects Control"));
     ExternalInput.Init (0,0, c_ExternalInput::Polarity_t::ActiveLow, temp);
 
     // make sure the pointers are set up properly
@@ -603,35 +603,46 @@ void c_InputMgr::Process ()
     // DEBUG_START;
     // do we need to save the current config?
 
-    ExternalInput.Poll ();
-    ProcessEffectsButtonActions ();
-
-    if (true == ConfigSaveNeeded)
+    do // once
     {
-        // DEBUG_V ("ConfigData: " + ConfigData);
+        if (configInProgress)
+        {
+            // prevent calls to process when we are doing a long operation
+            break;
+        }
 
-        // DEBUG_V ("Start Save Config");
+        ExternalInput.Poll ();
+        ProcessEffectsButtonActions ();
 
-        ConfigSaveNeeded = false;
-        SaveConfig ();
-        // DEBUG_V ("Reload the config");
-        LoadConfig ();
-        // DEBUG_V ("End Save Config");
+        if (true == ConfigSaveNeeded)
+        {
+            // DEBUG_V ("ConfigData: " + ConfigData);
 
-    } // done need to save the current config
+            // DEBUG_V ("Start Save Config");
+            configInProgress = true;
+            ConfigSaveNeeded = false;
+            SaveConfig ();
+            // DEBUG_V ("Reload the config");
+            LoadConfig ();
+            // DEBUG_V ("End Save Config");
+            configInProgress = false;
 
-    // DEBUG_V("");
-    for (c_InputCommon* pInputChannel : pInputChannelDrivers)
-    {
-        pInputChannel->Process ();
+        } // done need to save the current config
+
         // DEBUG_V("");
-    }
+        for (c_InputCommon* pInputChannel : pInputChannelDrivers)
+        {
+            pInputChannel->Process ();
+            // DEBUG_V("");
+        }
 
-    if (rebootNeeded)
-    {
-        // DEBUG_V("Requesting Reboot");
-        reboot = true;
-    }
+        if (rebootNeeded)
+        {
+            // DEBUG_V("Requesting Reboot");
+            reboot = true;
+        }
+
+    } while (false);
 
     // DEBUG_END;
 } // Process
@@ -711,6 +722,8 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
         if (false == jsonConfig.containsKey (CN_input_config))
         {
             LOG_PORT.println (F ("No Input Interface Settings Found. Using Defaults"));
+            extern void PrettyPrint (JsonObject & jsonStuff, String Name);
+            PrettyPrint (jsonConfig, String(F ("c_InputMgr::ProcessJsonConfig")));
             break;
         }
         JsonObject InputChannelMgrData = jsonConfig[CN_input_config];
