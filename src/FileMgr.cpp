@@ -167,7 +167,6 @@ void c_FileMgr::listDir (fs::FS& fs, String dirname, uint8_t levels)
 //-----------------------------------------------------------------------------
 bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler Handler)
 {
-    // DEBUG_START;
     boolean retval = false;
 
     do // once
@@ -175,28 +174,39 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
         String CfgFileMessagePrefix = String (CN_Configuration_File_colon) + "'" + FileName + "' ";
 
         // DEBUG_V ("allocate the JSON Doc");
-
+/*
         String RawFileData;
         if (false == ReadConfigFile (FileName, RawFileData))
         {
             LOG_PORT.println (String(CN_stars) + CfgFileMessagePrefix + F ("Could not read file.") + CN_stars);
             break;
         }
+*/
+        fs::File file = LITTLEFS.open (FileName.c_str (), "r");
+        if (!file)
+        {
+            LOG_PORT.println (String (CN_stars) + CfgFileMessagePrefix + String (F ("Could not open file for reading.")) + CN_stars);
+            break;
+        }
 
         // DEBUG_V ("Convert File to JSON document");
-        size_t JsonDocSize = RawFileData.length () * 3;
-        // DEBUG_V (String ("RawFileData.length: ") + String (RawFileData.length ()));
-        // DEBUG_V (String (" Final JsonDocSize: ") + String (JsonDocSize));
-
+        size_t JsonDocSize = file.size () * 3;
         DynamicJsonDocument jsonDoc (JsonDocSize);
-        DeserializationError error = deserializeJson (jsonDoc, (const String)RawFileData);
+
+        DeserializationError error = deserializeJson (jsonDoc, file);
+        file.close ();
 
         // DEBUG_V ("Error Check");
         if (error)
         {
-            LOG_PORT.println (CN_Heap_colon + String (ESP.getFreeHeap ()));
+            LOG_PORT.println (CN_Heap_colon + String (ESP.getMaxFreeBlockSize ()));
             LOG_PORT.println (String(CN_stars) + CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str () + CN_stars);
-            LOG_PORT.println (CN_plussigns + RawFileData + CN_minussigns);
+//            LOG_PORT.println (CN_plussigns + RawFileData + CN_minussigns);
+	        // DEBUG_V (String ("                heap: ") + String (ESP.getFreeHeap ()));
+    	    // DEBUG_V (String (" getMaxFreeBlockSize: ") + String (ESP.getMaxFreeBlockSize ()));
+        	// DEBUG_V (String ("           file.size: ") + String (file.size ()));
+	        // DEBUG_V (String ("Expected JsonDocSize: ") + String (JsonDocSize));
+    	    // DEBUG_V (String ("    jsonDoc.capacity: ") + String (jsonDoc.capacity ()));
             break;
         }
 
