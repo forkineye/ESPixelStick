@@ -96,13 +96,15 @@ c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
 c_OutputWS2811::~c_OutputWS2811()
 {
     // DEBUG_START;
-    if (nullptr != pIsrOutputBuffer)
-    {
-        free (pIsrOutputBuffer);
-        pIsrOutputBuffer = nullptr;
-    }
-
     if (gpio_num_t (-1) == DataPin) { return; }
+
+    // Disable all interrupts for this uart.
+    CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
+    // DEBUG_V ("");
+
+    // Clear all pending interrupts in the UART
+    WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
+    // DEBUG_V ("");
 
 #ifdef ARDUINO_ARCH_ESP8266
     Serial1.end ();
@@ -113,21 +115,17 @@ c_OutputWS2811::~c_OutputWS2811()
     // DEBUG_V ("");
 
     ESP_ERROR_CHECK (uart_disable_rx_intr (UartId));
-    // DEBUG_V ("");
+    // DEBUG_V (String("UartId: ") + String(UartId));
 
-#endif
+    // todo: put back uart_isr_free (UartId);
 
-    // Disable all interrupts for this uart. It is enabled by uart.c in the SDK
-    CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
-    // DEBUG_V ("");
-
-    // Clear all pending interrupts in the UART
-    WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
-    // DEBUG_V ("");
-
-#ifdef ARDUINO_ARCH_ESP32
-    uart_isr_free (UartId);
 #endif // def ARDUINO_ARCH_ESP32
+
+    if (nullptr != pIsrOutputBuffer)
+    {
+        free (pIsrOutputBuffer);
+        pIsrOutputBuffer = nullptr;
+    }
 
     // DEBUG_END;
 } // ~c_OutputWS2811
