@@ -843,5 +843,18 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
 
 } // UpdateDisplayBufferReferences
 
+//-----------------------------------------------------------------------------
+void c_OutputMgr::PauseOutputs (void)
+{
+    // DEBUG_START;
+
+    for (auto CurrentOutput : pOutputChannelDrivers)
+    {
+        CurrentOutput->PauseOutput ();
+    }
+
+    // DEBUG_END;
+} // PauseOutputs
+
 // create a global instance of the output channel factory
 c_OutputMgr OutputMgr;

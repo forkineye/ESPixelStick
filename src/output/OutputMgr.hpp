@@ -49,6 +49,7 @@ public:
     uint16_t  GetBufferUsedSize () { return UsedBufferSize; } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
     uint16_t  GetBufferSize     () { return sizeof(OutputBuffer); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
     void      DeleteConfig      () { FileMgr.DeleteConfigFile (ConfigFileName); }
+    void      PauseOutputs      ();
 
     // handles to determine which output channel we are dealing with
     enum e_OutputChannelIds

@@ -409,6 +409,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
 {
     // DEBUG_START;
     // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));
+    OutputMgr.PauseOutputs ();
 
     switch (type)
     {

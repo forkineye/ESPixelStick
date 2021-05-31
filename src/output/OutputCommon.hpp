@@ -77,6 +77,7 @@ public:
             void         SetOutputBufferAddress (uint8_t* pNewOutputBuffer) { pOutputBuffer = pNewOutputBuffer; }
     virtual void         SetOutputBufferSize (uint16_t NewOutputBufferSize)  { OutputBufferSize = NewOutputBufferSize; };
     virtual uint16_t     GetNumChannelsNeeded () = 0;
+    virtual void         PauseOutput () {}
 
 protected:
 #define OM_CMN_NO_CUSTOM_ISR                    (-1)
