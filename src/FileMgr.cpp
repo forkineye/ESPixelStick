@@ -354,27 +354,41 @@ bool c_FileMgr::ReadConfigFile (const String& FileName, JsonDocument & FileData)
 //-----------------------------------------------------------------------------
 void c_FileMgr::InitSdFileList ()
 {
+    // DEBUG_START;
+
     int index = 0;
     for (auto& currentFileListEntry : FileList)
     {
         currentFileListEntry.handle  = 0;
         currentFileListEntry.entryId = index++;
     }
+
+    // DEBUG_END;
+
 } // InitFileList
 
 //-----------------------------------------------------------------------------
 int c_FileMgr::FileListFindSdFileHandle (FileId HandleToFind)
 {
+    // DEBUG_START;
+
     int response = -1;
+    // DEBUG_V (String ("HandleToFind: ") + String (HandleToFind));
 
     for (auto & currentFileListEntry : FileList)
     {
+        // DEBUG_V (String ("currentFileListEntry.handle: ")  + String (currentFileListEntry.handle));
+        // DEBUG_V (String ("currentFileListEntry.entryId: ") + String (currentFileListEntry.entryId));
+
         if (currentFileListEntry.handle == HandleToFind)
         {
             response = currentFileListEntry.entryId;
             break;
         }
     }
+
+    // DEBUG_END;
+
     return response;
 } // FileListFindSdFileHandle
 
@@ -397,6 +411,7 @@ c_FileMgr::FileId c_FileMgr::CreateSdFileHandle ()
     {
         if (currentFileListEntry.handle == 0)
         {
+            currentFileListEntry.handle = FileHandle;
             response = FileHandle;
             break;
         }
@@ -571,6 +586,8 @@ void c_FileMgr::printDirectory (Dir dir, int numTabs)
 //-----------------------------------------------------------------------------
 void c_FileMgr::SaveSdFile (const String & FileName, String & FileData)
 {
+    // DEBUG_START;
+
     do // once
     {
         FileId FileHandle = 0;
@@ -586,6 +603,8 @@ void c_FileMgr::SaveSdFile (const String & FileName, String & FileData)
         CloseSdFile (FileHandle);
 
     } while (false);
+
+    // DEBUG_END;
 
 } // SaveSdFile
 
