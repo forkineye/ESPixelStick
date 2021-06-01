@@ -199,9 +199,9 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
         // DEBUG_V ("Error Check");
         if (error)
         {
-            LOG_PORT.println (CN_Heap_colon + String (ESP.getMaxFreeBlockSize ()));
+            // LOG_PORT.println (CN_Heap_colon + String (ESP.getMaxFreeBlockSize ()));
             LOG_PORT.println (String(CN_stars) + CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str () + CN_stars);
-//            LOG_PORT.println (CN_plussigns + RawFileData + CN_minussigns);
+            // LOG_PORT.println (CN_plussigns + RawFileData + CN_minussigns);
 	        // DEBUG_V (String ("                heap: ") + String (ESP.getFreeHeap ()));
     	    // DEBUG_V (String (" getMaxFreeBlockSize: ") + String (ESP.getMaxFreeBlockSize ()));
         	// DEBUG_V (String ("           file.size: ") + String (file.size ()));
@@ -230,6 +230,17 @@ bool c_FileMgr::SaveConfigFile (const String& FileName, String& FileData)
 {
     // DEBUG_START;
 
+    bool Response = SaveConfigFile (FileName, FileData.c_str ());
+
+    // DEBUG_END;
+    return Response;
+} // SaveConfigFile
+
+//-----------------------------------------------------------------------------
+bool c_FileMgr::SaveConfigFile (const String& FileName, const char * FileData)
+{
+    // DEBUG_START;
+
     bool Response = false;
     String CfgFileMessagePrefix = String (CN_Configuration_File_colon) + "'" + FileName + "' ";
     // DEBUG_V (FileData);
@@ -237,7 +248,7 @@ bool c_FileMgr::SaveConfigFile (const String& FileName, String& FileData)
     fs::File file = LITTLEFS.open (FileName.c_str (), "w");
     if (!file)
     {
-        LOG_PORT.println (String(CN_stars) + CfgFileMessagePrefix + String (F ("Could not open file for writing..")) + CN_stars);
+        LOG_PORT.println (String (CN_stars) + CfgFileMessagePrefix + String (F ("Could not open file for writing..")) + CN_stars);
     }
     else
     {
@@ -246,7 +257,11 @@ bool c_FileMgr::SaveConfigFile (const String& FileName, String& FileData)
         file.close ();
 
         file = LITTLEFS.open (FileName.c_str (), "r");
-        LOG_PORT.println (CfgFileMessagePrefix + String (F ("saved ")) + String(file.size()) + F(" bytes.") );
+        LOG_PORT.print (CN_Configuration_File_colon);
+        LOG_PORT.print (FileName);
+        LOG_PORT.printf( " saved %ul bytes.\n", file.size ());
+
+        // LOG_PORT.println (CfgFileMessagePrefix + String (F ("saved ")) + String (file.size ()) + F (" bytes."));
         file.close ();
 
         Response = true;
