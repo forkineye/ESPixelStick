@@ -250,6 +250,7 @@ void c_OutputMgr::CreateNewConfig ()
     JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_output_config);
 
     JsonConfig[CN_cfgver] = CurrentConfigVersion;
+    JsonConfig[F ("MaxChannels")] = sizeof(OutputBuffer);
 
     // DEBUG_V ("for each output type");
     for (int outputTypeId = int (OutputType_Start);
@@ -280,17 +281,12 @@ void c_OutputMgr::CreateNewConfig ()
     // DEBUG_V ("");
     CreateJsonConfig (JsonConfig);
 
-    ConfigData.clear ();
-
     // DEBUG_V ("");
+    String ConfigData;
     serializeJson (JsonConfigDoc, ConfigData);
     // DEBUG_V (String("ConfigData: ") + ConfigData);
-
-    ConfigSaveNeeded = false;
-    SaveConfig ();
+    SetConfig (ConfigData.c_str());
     // DEBUG_V (String ("ConfigData: ") + ConfigData);
-
-    JsonConfigDoc.garbageCollect ();
 
     LOG_PORT.println (F ("--- WARNING: Creating a new Output Manager configuration Data set - Done ---"));
     // DEBUG_END;
@@ -302,16 +298,7 @@ void c_OutputMgr::GetConfig (String & Response)
 {
     // DEBUG_START;
 
-    // is a new config waiting to be saved?
-    if (0 != ConfigData.length ())
-    {
-        // use the pending config
-        Response = ConfigData;
-    }
-    else
-    {
-        FileMgr.ReadConfigFile (ConfigFileName, Response);
-    }
+    FileMgr.ReadConfigFile (ConfigFileName, Response);
 
     // DEBUG_END;
 
@@ -322,18 +309,9 @@ void c_OutputMgr::GetConfig (char * Response )
 {
     // DEBUG_START;
 
-    // is a new config waiting to be saved?
-    if (0 != ConfigData.length ())
-    {
-        // use the pending config
-        strcat (Response, ConfigData.c_str ());
-    }
-    else
-    {
-        String TempConfigData;
-        FileMgr.ReadConfigFile (ConfigFileName, TempConfigData);
-        strcat (Response, TempConfigData.c_str ());
-    }
+    String TempConfigData;
+    FileMgr.ReadConfigFile (ConfigFileName, TempConfigData);
+    strcat (Response, TempConfigData.c_str ());
 
     // DEBUG_END;
 
@@ -353,7 +331,6 @@ void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
         CurrentOutput->GetStatus (channelStatus);
         channelIndex++;
         // DEBUG_V("");
-
     }
 
     // DEBUG_END;
@@ -726,7 +703,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
 *   returns
 *       Nothing
 */
-void c_OutputMgr::SaveConfig ()
+void c_OutputMgr::SetConfig (const char * ConfigData)
 {
     // DEBUG_START;
 
@@ -734,8 +711,8 @@ void c_OutputMgr::SaveConfig ()
 
     if (true == FileMgr.SaveConfigFile (ConfigFileName, ConfigData))
     {
+        ConfigLoadNeeded = true;
         LOG_PORT.println (F ("**** Saved Output Manager Config File. ****"));
-        ConfigData.clear ();
     } // end we got a config and it was good
     else
     {
@@ -747,44 +724,14 @@ void c_OutputMgr::SaveConfig ()
 } // SaveConfig
 
 //-----------------------------------------------------------------------------
-/* Sets the configuration for the current active ports
-*
-*   Needs
-*       Reference to the incoming JSON configuration doc
-*   Returns
-*       true - No Errors found
-*       false - Had an issue and it was reported to the log interface
-*/
-bool c_OutputMgr::SetConfig (JsonObject & jsonConfig)
-{
-    // DEBUG_START;
-    boolean Response = true;
-    if (jsonConfig.containsKey (CN_output_config))
-    {
-        // DEBUG_V ("");
-
-        // schedule a future save to the file system
-        serializeJson (jsonConfig, ConfigData);
-        ConfigSaveNeeded = true;
-    }
-    else
-    {
-        LOG_PORT.println (F ("EEEE No Output Manager settings found. EEEE"));
-    }
-    // DEBUG_END;
-    return Response;
-} // SetConfig
-
-//-----------------------------------------------------------------------------
 ///< Called from loop(), renders output data
 void c_OutputMgr::Render()
 {
     // DEBUG_START;
     // do we need to save the current config?
-    if (true == ConfigSaveNeeded)
+    if (true == ConfigLoadNeeded)
     {
-        ConfigSaveNeeded = false;
-        SaveConfig ();
+        ConfigLoadNeeded = false;
         LoadConfig ();
     } // done need to save the current config
 

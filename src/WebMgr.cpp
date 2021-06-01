@@ -767,7 +767,6 @@ void c_WebMgr::processCmd (AsyncWebSocketClient * client, JsonObject & jsonCmd)
 {
     // DEBUG_START;
 
-    WebSocketFrameCollectionBuffer[0] = ((char)NULL);
     // PrettyPrint (jsonCmd);
 
     do // once
@@ -779,6 +778,7 @@ void c_WebMgr::processCmd (AsyncWebSocketClient * client, JsonObject & jsonCmd)
             strcpy(WebSocketFrameCollectionBuffer, "{\"get\":");
             // DEBUG_V ("");
             processCmdGet (jsonCmd);
+            strcat (WebSocketFrameCollectionBuffer, "}");
             // DEBUG_V ("");
             break;
         }
@@ -787,10 +787,11 @@ void c_WebMgr::processCmd (AsyncWebSocketClient * client, JsonObject & jsonCmd)
         if (jsonCmd.containsKey ("set"))
         {
             // DEBUG_V ("set");
-            strcpy(WebSocketFrameCollectionBuffer, "{\"set\":");
+            // strcpy(WebSocketFrameCollectionBuffer, "{\"set\":");
             JsonObject jsonCmdSet = jsonCmd["set"];
             // DEBUG_V ("");
             processCmdSet (jsonCmdSet);
+            strcpy (WebSocketFrameCollectionBuffer, "{\"cmd\":\"OK\"}");
             // DEBUG_V ("");
             break;
         }
@@ -802,6 +803,8 @@ void c_WebMgr::processCmd (AsyncWebSocketClient * client, JsonObject & jsonCmd)
             strcpy(WebSocketFrameCollectionBuffer, "{\"opt\":");
             // DEBUG_V ("");
             processCmdOpt (jsonCmd);
+            strcat (WebSocketFrameCollectionBuffer, "}");
+
             // DEBUG_V ("");
             break;
         }
@@ -809,24 +812,19 @@ void c_WebMgr::processCmd (AsyncWebSocketClient * client, JsonObject & jsonCmd)
         if (jsonCmd.containsKey ("delete"))
         {
             // DEBUG_V ("opt");
-            strcpy (WebSocketFrameCollectionBuffer, "{\"get\":");
-            // DEBUG_V ("");
             JsonObject temp = jsonCmd["delete"];
             processCmdDelete (temp);
+            strcpy (WebSocketFrameCollectionBuffer, "{\"cmd\":\"OK\"}");
             // DEBUG_V ("");
             break;
         }
 
         // log an error
         PrettyPrint (jsonCmd, String (F ("ERROR: Unhandled cmd")));
-        strcpy (WebSocketFrameCollectionBuffer, "{\"cmd\":\"Error\"");
+        strcpy (WebSocketFrameCollectionBuffer, "{\"cmd\":\"Error\"}");
 
     } while (false);
 
-    // DEBUG_V ("");
-    // terminate the response
-    strcat (WebSocketFrameCollectionBuffer, "}");
-    // DEBUG_V (WebSocketFrameCollectionBuffer);
     client->text (WebSocketFrameCollectionBuffer);
 
     // DEBUG_END;
@@ -903,8 +901,6 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
             // DEBUG_V ("device/network");
             extern void SetConfig (JsonObject &);
             SetConfig (jsonCmd);
-            strcat (WebSocketFrameCollectionBuffer, serializeCore (false).c_str ());
-
             pAlexaDevice->setName (config.id);
 
             // DEBUG_V ("device/network: Done");
@@ -915,8 +911,8 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
         {
             // DEBUG_V ("input");
             JsonObject imConfig = jsonCmd[CN_input];
-            InputMgr.SetConfig (imConfig);
-            InputMgr.GetConfig (WebSocketFrameCollectionBuffer);
+            serializeJson (imConfig, WebSocketFrameCollectionBuffer, sizeof (WebSocketFrameCollectionBuffer) - 1);
+            InputMgr.SetConfig (WebSocketFrameCollectionBuffer);
             // DEBUG_V ("input: Done");
             break;
         }
@@ -925,8 +921,8 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
         {
             // DEBUG_V (CN_output);
             JsonObject omConfig = jsonCmd[CN_output];
-            OutputMgr.SetConfig (omConfig);
-            OutputMgr.GetConfig (WebSocketFrameCollectionBuffer);
+            serializeJson (omConfig, WebSocketFrameCollectionBuffer, sizeof(WebSocketFrameCollectionBuffer) - 1);
+            OutputMgr.SetConfig (WebSocketFrameCollectionBuffer);
             // DEBUG_V ("output: Done");
             break;
         }
@@ -947,8 +943,6 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
         strcat (WebSocketFrameCollectionBuffer, "ERROR");
 
     } while (false);
-
-    // DEBUG_V (WebSocketFrameCollectionBuffer);
 
     // DEBUG_END;
 

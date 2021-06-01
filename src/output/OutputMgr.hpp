@@ -38,10 +38,9 @@ public:
     void      Begin             ();                        ///< set up the operating environment based on the current config (or defaults)
     void      Render            ();                        ///< Call from loop(),  renders output data
     void      LoadConfig        ();                        ///< Read the current configuration data from nvram
-    void      SaveConfig        ();                        ///< Save the current configuration data to nvram
     void      GetConfig         (char * Response);
     void      GetConfig         (String & Response);
-    bool      SetConfig         (JsonObject & jsonConfig); ///< Set a new config in the driver
+    void      SetConfig         (const char * NewConfig);  ///< Save the current configuration data to nvram
     void      GetStatus         (JsonObject & jsonStatus);
     void      PauseOutput       (bool PauseTheOutput) { IsOutputPaused = PauseTheOutput; }
     void      GetPortCounts     (uint16_t& PixelCount, uint16_t& SerialCount) {PixelCount = uint16_t(OutputChannelId_End); SerialCount = min(uint16_t(OutputChannelId_End), uint16_t(2)); }
@@ -99,7 +98,7 @@ private:
 #endif // !def ARDUINO_ARCH_ESP8266
 
     bool HasBeenInitialized = false;
-    bool ConfigSaveNeeded   = false;
+    bool ConfigLoadNeeded   = false;
     bool IsOutputPaused     = false;
 
     bool ProcessJsonConfig (JsonObject & jsonConfig);
@@ -107,7 +106,6 @@ private:
     void UpdateDisplayBufferReferences (void);
 
     String ConfigFileName;
-    String ConfigData;
 
     uint8_t OutputBuffer[OM_MAX_NUM_CHANNELS];
     uint16_t UsedBufferSize = 0;

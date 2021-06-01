@@ -285,12 +285,9 @@ void c_InputMgr::CreateNewConfig ()
     // Record the default configuration
     CreateJsonConfig (JsonConfig);
 
-    ConfigData.clear ();
+    String ConfigData;
     serializeJson (JsonConfigDoc, ConfigData);
-    ConfigSaveNeeded = false;
-    SaveConfig ();
-
-    JsonConfigDoc.garbageCollect ();
+    SetConfig (ConfigData.c_str());
 
     LOG_PORT.println (F ("--- WARNING: Creating a new Input Manager configuration Data set - Done ---"));
     // DEBUG_END;
@@ -298,24 +295,14 @@ void c_InputMgr::CreateNewConfig ()
 } // CreateNewConfig
 
 //-----------------------------------------------------------------------------
-void c_InputMgr::GetConfig (char* Response)
+void c_InputMgr::GetConfig (char * Response)
 {
     // DEBUGSTART;
 
-    // is a new config waiting to be saved?
-    if (0 != ConfigData.length ())
-    {
-        // DEBUGV (String ("ConfigData: ") + ConfigData);
-        // use the pending config
-        strcat (Response, ConfigData.c_str ());
-    }
-    else
-    {
-        String TempConfigData;
-        FileMgr.ReadConfigFile (ConfigFileName, TempConfigData);
-        // DEBUGV (String ("TempConfigData: ") + TempConfigData);
-        strcat (Response, TempConfigData.c_str ());
-    }
+    String TempConfigData;
+    FileMgr.ReadConfigFile (ConfigFileName, TempConfigData);
+    // DEBUGV (String ("TempConfigData: ") + TempConfigData);
+    strcat (Response, TempConfigData.c_str ());
 
     // DEBUGEND;
 } // GetConfig
@@ -614,20 +601,15 @@ void c_InputMgr::Process ()
         ExternalInput.Poll ();
         ProcessEffectsButtonActions ();
 
-        if (true == ConfigSaveNeeded)
+        if (true == configLoadNeeded)
         {
-            // DEBUG_V ("ConfigData: " + ConfigData);
-
-            // DEBUG_V ("Start Save Config");
+            configLoadNeeded = false;
             configInProgress = true;
-            ConfigSaveNeeded = false;
-            SaveConfig ();
             // DEBUG_V ("Reload the config");
             LoadConfig ();
             // DEBUG_V ("End Save Config");
             configInProgress = false;
-
-        } // done need to save the current config
+        }
 
         // DEBUG_V("");
         for (c_InputCommon* pInputChannel : pInputChannelDrivers)
@@ -839,36 +821,6 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
 } // ProcessJsonConfig
 
 //-----------------------------------------------------------------------------
-/*
-*   Save the current configuration to NVRAM
-*
-*   needs
-*       Nothing
-*   returns
-*       Nothing
-*/
-void c_InputMgr::SaveConfig ()
-{
-    // DEBUG_START;
-
-    // DEBUGV (String("ConfigData: ") + ConfigData);
-
-    if (true == FileMgr.SaveConfigFile (ConfigFileName, ConfigData))
-    {
-        LOG_PORT.println (F ("**** Saved Input Manager Config File. ****"));
-        // DEBUG_V ("ConfigData: " + ConfigData);
-        ConfigData.clear ();
-    } // end we saved the config
-    else
-    {
-        LOG_PORT.println (F ("EEEE Error Saving Input Manager Config File. EEEE"));
-    }
-
-    // DEBUG_END;
-
-} // SaveConfig
-
-//-----------------------------------------------------------------------------
 /* Sets the configuration for the current active ports:
 *
 *   WARNING: This runs in the Web server context and cannot access the File system
@@ -876,31 +828,27 @@ void c_InputMgr::SaveConfig ()
 *   Needs
 *       Reference to the incoming JSON configuration doc
 *   Returns
-*       true - No Errors found
-*       false - Had an issue and it was reported to the log interface
+*       nothing
 */
-bool c_InputMgr::SetConfig (JsonObject & jsonConfig)
+void c_InputMgr::SetConfig (const char * NewConfigData)
 {
-    // DEBUG_START;
-    boolean Response = false;
+    DEBUG_START;
 
-    if (jsonConfig.containsKey (CN_input_config))
+    if (true == FileMgr.SaveConfigFile (ConfigFileName, NewConfigData))
     {
-        // DEBUG_V ("");
+        // DEBUG_V (String("NewConfigData: ") + NewConfigData);
+        LOG_PORT.println (F ("**** Saved Input Manager Config File. ****"));
 
-        // schedule a future save of the config file
-        serializeJson (jsonConfig, ConfigData);
-        // DEBUG_V ("Request Config Save");
-        ConfigSaveNeeded = true;
-    }
+        configLoadNeeded = true;
+
+    } // end we saved the config
     else
     {
-        LOG_PORT.println (F ("EEEE No Input Manager settings found in new config. EEEE"));
+        LOG_PORT.println (F ("EEEE Error Saving Input Manager Config File. EEEE"));
     }
 
-    // DEBUG_END;
+    DEBUG_END;
 
-    return Response;
 } // SetConfig
 
 //-----------------------------------------------------------------------------
