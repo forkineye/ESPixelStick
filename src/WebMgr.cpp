@@ -409,7 +409,6 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
 {
     // DEBUG_START;
     // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));
-    OutputMgr.PauseOutputs ();
 
     switch (type)
     {
@@ -489,6 +488,8 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
                 ProcessGseriesRequests (client);
                 break;
             }
+
+            OutputMgr.PauseOutputs ();
 
             // convert the input data into a json structure (use json read only mode)
             size_t docSize = strlen ((const char*)(&WebSocketFrameCollectionBuffer[0])) * 3;
@@ -1126,13 +1127,13 @@ void c_WebMgr::Process ()
 #ifdef USE_REST
 void printRequest (AsyncWebServerRequest* request)
 {
-    DEBUG_V (String ("      version: '") + String (request->version ()) + "'");
-    DEBUG_V (String ("       method: '") + String (request->method ()) + "'");
-    DEBUG_V (String ("          url: '") + String (request->url ()) + "'");
-    DEBUG_V (String ("         host: '") + String (request->host ()) + "'");
-    DEBUG_V (String ("  contentType: '") + String (request->contentType ()) + "'");
-    DEBUG_V (String ("contentLength: '") + String (request->contentLength ()) + "'");
-    DEBUG_V (String ("    multipart: '") + String (request->multipart ()) + "'");
+    // DEBUG_V (String ("      version: '") + String (request->version ()) + "'");
+    // DEBUG_V (String ("       method: '") + String (request->method ()) + "'");
+    // DEBUG_V (String ("          url: '") + String (request->url ()) + "'");
+    // DEBUG_V (String ("         host: '") + String (request->host ()) + "'");
+    // DEBUG_V (String ("  contentType: '") + String (request->contentType ()) + "'");
+    // DEBUG_V (String ("contentLength: '") + String (request->contentLength ()) + "'");
+    // DEBUG_V (String ("    multipart: '") + String (request->multipart ()) + "'");
 
     //List all collected headers
     int headers = request->headers ();
@@ -1140,14 +1141,14 @@ void printRequest (AsyncWebServerRequest* request)
     for (i = 0; i < headers; i++)
     {
         AsyncWebHeader* h = request->getHeader (i);
-        DEBUG_V (String ("       HEADER: '") + h->name () + "', '" + h->value () + "'");
+        // DEBUG_V (String ("       HEADER: '") + h->name () + "', '" + h->value () + "'");
     }
 
 } // printRequest
 //-----------------------------------------------------------------------------
 void c_WebMgr::RestProcessGET (AsyncWebServerRequest* request)
 {
-    DEBUG_START;
+    // DEBUG_START;
     printRequest (request);
 
     // request->send (200, "text/json", WebSocketFrameCollectionBuffer);
@@ -1155,43 +1156,43 @@ void c_WebMgr::RestProcessGET (AsyncWebServerRequest* request)
 
     request->send (200, CN_textSLASHplain, "Hello");
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // RestProcessPOST
 
 //-----------------------------------------------------------------------------
 void c_WebMgr::RestProcessPOST (AsyncWebServerRequest* request)
 {
-    DEBUG_START;
+    // DEBUG_START;
     printRequest (request);
 
     request->send (404, CN_textSLASHplain, "Page Not found");
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // RestProcessGET
 
 //-----------------------------------------------------------------------------
 void c_WebMgr::RestProcessFile (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final)
 {
-    DEBUG_START;
+    // DEBUG_START;
     printRequest (request);
 
     request->send (404, CN_textSLASHplain, "Page Not found");
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // RestProcessFile
 
 //-----------------------------------------------------------------------------
 void c_WebMgr::RestProcessBody (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total)
 {
-    DEBUG_START;
+    // DEBUG_START;
     printRequest (request);
 
     request->send (404, CN_textSLASHplain, "Page Not found");
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // RestProcessBody
 #endif // def USE_REST
