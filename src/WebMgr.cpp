@@ -899,8 +899,9 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
         if ((jsonCmd.containsKey (CN_device)) || (jsonCmd.containsKey (CN_network)))
         {
             // DEBUG_V ("device/network");
-            extern void SetConfig (JsonObject &);
-            SetConfig (jsonCmd);
+            extern void SetConfig (JsonObject &, const char* DataString);
+            serializeJson (jsonCmd, WebSocketFrameCollectionBuffer, sizeof (WebSocketFrameCollectionBuffer) - 1);
+            SetConfig (jsonCmd, WebSocketFrameCollectionBuffer);
             pAlexaDevice->setName (config.id);
 
             // DEBUG_V ("device/network: Done");
@@ -1093,7 +1094,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
             LOG_PORT.println (F ("* Upload Finished."));
             efupdate.end ();
             LITTLEFS.begin ();
-            SaveConfig();
+
             extern bool reboot;
             reboot = true;
         }
