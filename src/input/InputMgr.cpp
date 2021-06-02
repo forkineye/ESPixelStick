@@ -832,7 +832,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
 */
 void c_InputMgr::SetConfig (const char * NewConfigData)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     if (true == FileMgr.SaveConfigFile (ConfigFileName, NewConfigData))
     {
@@ -847,7 +847,7 @@ void c_InputMgr::SetConfig (const char * NewConfigData)
         LOG_PORT.println (F ("EEEE Error Saving Input Manager Config File. EEEE"));
     }
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // SetConfig
 
