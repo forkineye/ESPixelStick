@@ -269,6 +269,8 @@ boolean c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 // Subscribe to "n" universes, starting at "universe"
 void c_InputE131::SubscribeToMulticastDomains()
 {
+    // DEBUG_START;
+
     uint8_t count = LastUniverse - startUniverse + 1;
     IPAddress ifaddr = WiFi.localIP ();
     IPAddress multicast_addr;
@@ -280,7 +282,9 @@ void c_InputE131::SubscribeToMulticastDomains()
                                     (((startUniverse + UniverseIndex) >> 0) & 0xff));
 
         igmp_joingroup ((ip4_addr_t*)&ifaddr[0], (ip4_addr_t*)&multicast_addr[0]);
+        LOG_PORT.printf ("E1.31: Registered for address: %s\n", multicast_addr.toString().c_str());
     }
+    // DEBUG_END;
 } // multiSub
 
 //-----------------------------------------------------------------------------
@@ -341,7 +345,7 @@ void c_InputE131::validateConfiguration ()
     // Zero out packet stats
     if (nullptr == e131)
     {
-        // DEBUG_V ("");
+        // DEBUG_V ("Start E1.31 driver");
         e131 = new ESPAsyncE131 (10);
     }
 
@@ -355,7 +359,6 @@ void c_InputE131::validateConfiguration ()
 //-----------------------------------------------------------------------------
 void c_InputE131::NetworkStateChanged (bool IsConnected)
 {
-    // NetworkStateChanged (IsConnected, true);
     NetworkStateChanged (IsConnected, false);
 } // NetworkStateChanged
 
@@ -371,7 +374,7 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
     }
     // DEBUG_V ("");
 
-    if (IsConnected && channel_count)
+    if (IsConnected)
     {
         // Get on with business
         if (e131->begin (E131_MULTICAST, startUniverse, LastUniverse - startUniverse + 1))
@@ -394,11 +397,11 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
             LOG_PORT.println (F ("*** E1.31 UNICAST INIT FAILED ****"));
         }
 
+        // Setup IGMP subscriptions
+        SubscribeToMulticastDomains ();
+
         LOG_PORT.printf_P (PSTR ("Listening for %u channels from Universe %u to %u.\n"),
             InputDataBufferSize, startUniverse, LastUniverse);
-
-        // Setup IGMP subscriptions if multicast is enabled
-        SubscribeToMulticastDomains ();
     }
     else if (ReBootAllowed)
     {
