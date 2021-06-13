@@ -268,6 +268,7 @@ void c_InputEffectEngine::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSi
     InputDataBuffer     = BufferStart;
     InputDataBufferSize = BufferSize;
 
+    // DEBUG_V (String ("BufferSize: ") + String (BufferSize));
     ChannelsPerPixel = (true == EffectWhiteChannel) ? 4 : 3;
     PixelCount = InputDataBufferSize / ChannelsPerPixel;
 
@@ -299,6 +300,7 @@ boolean c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     setFromJSON (EffectWhiteChannel, jsonConfig, CN_EffectWhiteChannel);
     setFromJSON (effectName,         jsonConfig, CN_currenteffect);
     setFromJSON (effectColor,        jsonConfig, CN_EffectColor);
+    // DEBUG_V (String ("effectColor: ") + effectColor);
 
     EffectBrightness /= 100.0;
 
@@ -311,6 +313,8 @@ boolean c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     GetConfig (jsonConfig);
 
     setEffect (effectName);
+
+    // DEBUG_V (String ("IsInputChannelActive: ") + String (IsInputChannelActive));
 
     // DEBUG_END;
     return true;
@@ -370,9 +374,13 @@ void c_InputEffectEngine::validateConfiguration ()
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::setBrightness (float brightness)
 {
+    // DEBUG_START;
+
     EffectBrightness = brightness;
     if (EffectBrightness > 1.0) { EffectBrightness = 1.0; }
     if (EffectBrightness < 0.0) { EffectBrightness = 0.0; }
+
+    // DEBUG_END;
 }
 
 //-----------------------------------------------------------------------------
@@ -444,6 +452,7 @@ void c_InputEffectEngine::setColor (String & NewColor)
     // Parse the color string into rgb values
 
     uint32_t intValue = strtoul(NewColor.substring (1).c_str(), nullptr, 16);
+    // DEBUG_V (String ("intValue: ") + String (intValue, 16));
 
     EffectColor.r = uint8_t ((intValue >> 16) & 0xFF);
     EffectColor.g = uint8_t ((intValue >>  8) & 0xFF);
@@ -546,10 +555,8 @@ uint16_t c_InputEffectEngine::effectSolidColor ()
 
     // DEBUG_V (String ("PixelCount: ") + PixelCount);
 
-    for (uint16_t i = 0; i < PixelCount; i++)
-    {
-        setPixel (i, EffectColor);
-    }
+    setAll (EffectColor);
+
     // DEBUG_END;
     return 32;
 } // effectSolidColor
@@ -557,7 +564,7 @@ uint16_t c_InputEffectEngine::effectSolidColor ()
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::outputEffectColor (uint16_t pixelId, CRGB outputColor)
 {
-    // DEBUG_START;
+   //  DEBUG_START;
 
     uint16_t NumPixels = MirroredPixelCount;
 
