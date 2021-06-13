@@ -115,10 +115,16 @@ void c_InputAlexa::Process ()
 //-----------------------------------------------------------------------------
 void c_InputAlexa::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
 {
+    // DEBUG_START;
+
     InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
 
+    // DEBUG_V (String ("InputDataBufferSize: ") + String (InputDataBufferSize));
+
     pEffectsEngine->SetBufferInfo (BufferStart, BufferSize);
+
+    // DEBUG_END;
 
 } // SetBufferInfo
 
@@ -127,20 +133,12 @@ boolean c_InputAlexa::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
-    // disconnectFromMqtt ();
-
-    // pEffectsEngine->SetConfig (jsonConfig);
-
-    // validateConfiguration ();
-    // RegisterWithMqtt ();
-    // connectToMqtt ();
-
     // DEBUG_END;
+
     return true;
 } // SetConfig
 
 //-----------------------------------------------------------------------------
-//TODO: Add MQTT configuration validation
 void c_InputAlexa::validateConfiguration ()
 {
     // DEBUG_START;
@@ -157,11 +155,16 @@ void c_InputAlexa::validateConfiguration ()
 //-----------------------------------------------------------------------------
 void c_InputAlexa::onMessage(EspalexaDevice * pDevice)
 {
- // DEBUG_START;
+    // DEBUG_START;
     do // once
     {
+        memset (InputDataBuffer, 0x0, InputDataBufferSize);
+
         char HexColor[] = "#000000 ";
         sprintf (HexColor, "#%02x%02x%02x", pDevice->getR (), pDevice->getG (), pDevice->getB ());
+        // DEBUG_V (String ("pDevice->getR: ") + String (pDevice->getR ()));
+        // DEBUG_V (String ("pDevice->getG: ") + String (pDevice->getG ()));
+        // DEBUG_V (String ("pDevice->getB: ") + String (pDevice->getB ()));
 
         DynamicJsonDocument JsonConfigDoc (1024);
         JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_config);
@@ -170,22 +173,22 @@ void c_InputAlexa::onMessage(EspalexaDevice * pDevice)
         JsonConfig[CN_EffectReverse]    = false;
         JsonConfig[CN_EffectMirror]     = false;
         JsonConfig[CN_EffectAllLeds]    = true;
-        JsonConfig[CN_EffectBrightness] = pDevice->getValue ();
+        JsonConfig[CN_EffectBrightness] = map (pDevice->getValue (), 0, 255, 0, 100);
         JsonConfig[CN_currenteffect]    = F ("Solid");
         JsonConfig[CN_EffectColor]      = HexColor;
-
-        pEffectsEngine->SetConfig (JsonConfig);
+        // DEBUG_V (String ("CN_EffectBrightness: ") + String (pDevice->getValue ()));
+        // DEBUG_V (String ("getState: ") + String (pDevice->getState ()));
 
         InputMgr.SetOperationalState (!(pDevice->getState ()));
+        SetOperationalState (pDevice->getState ());
         pEffectsEngine->SetOperationalState (pDevice->getState ());
-
-        memset (InputDataBuffer, 0x0, InputDataBufferSize);
+        pEffectsEngine->SetConfig (JsonConfig);
 
         // DEBUG_V ("");
 
     } while (false);
 
- // DEBUG_END;
+    // DEBUG_END;
 
 } // onMessage
 
