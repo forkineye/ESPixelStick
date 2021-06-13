@@ -99,7 +99,7 @@ The configuration has been modified to support multiple (two) input types concur
 
 ### Alexa Support
 
-Alexa is supported in direct mode. No additional hubs or applications are needed. When Alexa is selected as an input mode, the ESP will be discoverable by the Alexa app as a device that supports 24 bit color. The entire output buffer will be treated (from Alexa's point of view) as a single light bulb 
+Alexa is supported in direct mode. No additional hubs or applications are needed. When Alexa is selected as an input mode, the ESP will be discoverable by the Alexa app as a device that supports 24 bit color. The entire output buffer will be treated (from Alexa's point of view) as a single light bulb. Connect by giving your device a name in the device config screen and then telling alexe "alexa discover new devices"
 
 ### DDP
 
