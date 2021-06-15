@@ -3,11 +3,11 @@
     <div class="form-group has-feedback" id="fg_dmx">
         <fieldset id="fs_dmx">
             <label class="control-label col-sm-2" for="channel_count">Channel Count</label>
-            <div class="col-sm-4">
+            <div class="col-sm-2">
                 <input type="number" class="form-control is-valid" id="num_chan" step="1" min="1" max="512" value="0" required title="Number of Channels" onchange="refreshDmxFrameRate()">
             </div>
             <label class="control-label col-sm-2 hidden AdvancedMode" for="data_pin">GPIO Output</label>
-            <div class="col-sm-4">
+            <div class="col-sm-2">
                 <input type="number" class="form-control is-valid hidden AdvancedMode" id="data_pin" step="1" min="0" max="64" value="65" required title="GPIO pn which to output data">
             </div>
         </fieldset>

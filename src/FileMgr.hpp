@@ -55,11 +55,12 @@ public:
     } FileMode;
 
     void   DeleteConfigFile (const String & FileName);
-    bool   SaveConfigFile   (const String & FileName,   String & FileData);
-    bool   SaveConfigFile   (const String & FileName,   JsonVariant & FileData);
-    bool   ReadConfigFile   (const String & FileName,   String & FileData);
-    bool   ReadConfigFile   (const String & FileName,   JsonDocument & FileData);
-    bool   LoadConfigFile   (const String & FileName,   DeserializationHandler Handler);
+    bool   SaveConfigFile   (const String & FileName, String & FileData);
+    bool   SaveConfigFile   (const String & FileName, const char * FileData);
+    bool   SaveConfigFile   (const String & FileName, JsonVariant & FileData);
+    bool   ReadConfigFile   (const String & FileName, String & FileData);
+    bool   ReadConfigFile   (const String & FileName, JsonDocument & FileData);
+    bool   LoadConfigFile   (const String & FileName, DeserializationHandler Handler);
 
     bool   SdCardIsInstalled () { return SdCardInstalled; }
     FileId CreateSdFileHandle ();

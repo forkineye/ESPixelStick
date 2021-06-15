@@ -127,51 +127,60 @@ void c_InputE131::Process ()
     uint8_t*    E131Data;
     uint16_t    CurrentUniverseId;
 
-    // Parse a packet and update pixels
-    while (!e131->isEmpty ())
+    do // once
     {
-        e131->pull (&packet);
-        CurrentUniverseId = ntohs (packet.universe);
-        E131Data = packet.property_values + 1;
-
-        // DEBUG_V ("     CurrentUniverseId: " + String(CurrentUniverseId));
-        // DEBUG_V ("packet.sequence_number: " + String(packet.sequence_number));
-
-        if ((startUniverse <= CurrentUniverseId ) && (LastUniverse >= CurrentUniverseId))
+        if ((0 == InputDataBufferSize) || (nullptr == e131))
         {
-            // Universe offset and sequence tracking
-            Universe_t& CurrentUniverse = UniverseArray[CurrentUniverseId - startUniverse];
+            // no place to put any data
+            break;
+        }
 
-            // Do we need to update a sequnce error?
-            if (packet.sequence_number != CurrentUniverse.SequenceNumber)
+        // Parse a packet and update pixels
+        while (!e131->isEmpty ())
+        {
+            e131->pull (&packet);
+            CurrentUniverseId = ntohs (packet.universe);
+            E131Data = packet.property_values + 1;
+
+            // DEBUG_V ("     CurrentUniverseId: " + String(CurrentUniverseId));
+            // DEBUG_V ("packet.sequence_number: " + String(packet.sequence_number));
+
+            if ((startUniverse <= CurrentUniverseId) && (LastUniverse >= CurrentUniverseId))
             {
-                LOG_PORT.print (F ("E1.31 Sequence Error - expected: "));
-                LOG_PORT.print (CurrentUniverse.SequenceNumber);
-                LOG_PORT.print (F (" actual: "));
-                LOG_PORT.print (packet.sequence_number);
-                LOG_PORT.print (" " + String (CN_universe) + " : ");
-                LOG_PORT.println (CurrentUniverseId);
+                // Universe offset and sequence tracking
+                Universe_t& CurrentUniverse = UniverseArray[CurrentUniverseId - startUniverse];
 
-                CurrentUniverse.SequenceErrorCounter++;
-                CurrentUniverse.SequenceNumber = packet.sequence_number;
+                // Do we need to update a sequnce error?
+                if (packet.sequence_number != CurrentUniverse.SequenceNumber)
+                {
+                    LOG_PORT.print (F ("E1.31 Sequence Error - expected: "));
+                    LOG_PORT.print (CurrentUniverse.SequenceNumber);
+                    LOG_PORT.print (F (" actual: "));
+                    LOG_PORT.print (packet.sequence_number);
+                    LOG_PORT.print (" " + String (CN_universe) + " : ");
+                    LOG_PORT.println (CurrentUniverseId);
+
+                    CurrentUniverse.SequenceErrorCounter++;
+                    CurrentUniverse.SequenceNumber = packet.sequence_number;
+                }
+
+                ++CurrentUniverse.SequenceNumber;
+
+                uint16_t NumBytesOfE131Data = ntohs (packet.property_value_count) - 1;
+
+                memcpy (CurrentUniverse.Destination,
+                        & E131Data[CurrentUniverse.SourceDataOffset],
+                        min (CurrentUniverse.BytesToCopy, NumBytesOfE131Data));
+
+                InputMgr.ResetBlankTimer ();
+            }
+            else
+            {
+                // DEBUG_V ("Not interested in this universe");
             }
 
-            ++CurrentUniverse.SequenceNumber;
-
-            uint16_t NumBytesOfE131Data = ntohs (packet.property_value_count) - 1;
-
-            memcpy (CurrentUniverse.Destination,
-                    &E131Data[CurrentUniverse.SourceDataOffset],
-                    min (CurrentUniverse.BytesToCopy, NumBytesOfE131Data));
-
-            InputMgr.ResetBlankTimer ();
-        }
-        else
-        {
-            // DEBUG_V ("Not interested in this universe");
-        }
-
-    } // end while there is data to process
+        } // end while there is data to process
+    } while (false);
 
     // DEBUG_END;
 
@@ -260,6 +269,8 @@ boolean c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 // Subscribe to "n" universes, starting at "universe"
 void c_InputE131::SubscribeToMulticastDomains()
 {
+    // DEBUG_START;
+
     uint8_t count = LastUniverse - startUniverse + 1;
     IPAddress ifaddr = WiFi.localIP ();
     IPAddress multicast_addr;
@@ -271,7 +282,9 @@ void c_InputE131::SubscribeToMulticastDomains()
                                     (((startUniverse + UniverseIndex) >> 0) & 0xff));
 
         igmp_joingroup ((ip4_addr_t*)&ifaddr[0], (ip4_addr_t*)&multicast_addr[0]);
+        LOG_PORT.printf ("E1.31: Registered for address: %s\n", multicast_addr.toString().c_str());
     }
+    // DEBUG_END;
 } // multiSub
 
 //-----------------------------------------------------------------------------
@@ -332,7 +345,7 @@ void c_InputE131::validateConfiguration ()
     // Zero out packet stats
     if (nullptr == e131)
     {
-        // DEBUG_V ("");
+        // DEBUG_V ("Start E1.31 driver");
         e131 = new ESPAsyncE131 (10);
     }
 
@@ -346,7 +359,6 @@ void c_InputE131::validateConfiguration ()
 //-----------------------------------------------------------------------------
 void c_InputE131::NetworkStateChanged (bool IsConnected)
 {
-    // NetworkStateChanged (IsConnected, true);
     NetworkStateChanged (IsConnected, false);
 } // NetworkStateChanged
 
@@ -385,11 +397,11 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
             LOG_PORT.println (F ("*** E1.31 UNICAST INIT FAILED ****"));
         }
 
+        // Setup IGMP subscriptions
+        SubscribeToMulticastDomains ();
+
         LOG_PORT.printf_P (PSTR ("Listening for %u channels from Universe %u to %u.\n"),
             InputDataBufferSize, startUniverse, LastUniverse);
-
-        // Setup IGMP subscriptions if multicast is enabled
-        SubscribeToMulticastDomains ();
     }
     else if (ReBootAllowed)
     {

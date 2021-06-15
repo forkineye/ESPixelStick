@@ -489,6 +489,8 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
                 break;
             }
 
+            OutputMgr.PauseOutputs ();
+
             // convert the input data into a json structure (use json read only mode)
             size_t docSize = strlen ((const char*)(&WebSocketFrameCollectionBuffer[0])) * 3;
             DynamicJsonDocument webJsonDoc (docSize);
@@ -765,7 +767,6 @@ void c_WebMgr::processCmd (AsyncWebSocketClient * client, JsonObject & jsonCmd)
 {
     // DEBUG_START;
 
-    WebSocketFrameCollectionBuffer[0] = ((char)NULL);
     // PrettyPrint (jsonCmd);
 
     do // once
@@ -777,6 +778,7 @@ void c_WebMgr::processCmd (AsyncWebSocketClient * client, JsonObject & jsonCmd)
             strcpy(WebSocketFrameCollectionBuffer, "{\"get\":");
             // DEBUG_V ("");
             processCmdGet (jsonCmd);
+            strcat (WebSocketFrameCollectionBuffer, "}");
             // DEBUG_V ("");
             break;
         }
@@ -785,10 +787,11 @@ void c_WebMgr::processCmd (AsyncWebSocketClient * client, JsonObject & jsonCmd)
         if (jsonCmd.containsKey ("set"))
         {
             // DEBUG_V ("set");
-            strcpy(WebSocketFrameCollectionBuffer, "{\"set\":");
+            // strcpy(WebSocketFrameCollectionBuffer, "{\"set\":");
             JsonObject jsonCmdSet = jsonCmd["set"];
             // DEBUG_V ("");
             processCmdSet (jsonCmdSet);
+            strcpy (WebSocketFrameCollectionBuffer, "{\"cmd\":\"OK\"}");
             // DEBUG_V ("");
             break;
         }
@@ -800,6 +803,8 @@ void c_WebMgr::processCmd (AsyncWebSocketClient * client, JsonObject & jsonCmd)
             strcpy(WebSocketFrameCollectionBuffer, "{\"opt\":");
             // DEBUG_V ("");
             processCmdOpt (jsonCmd);
+            strcat (WebSocketFrameCollectionBuffer, "}");
+
             // DEBUG_V ("");
             break;
         }
@@ -807,24 +812,19 @@ void c_WebMgr::processCmd (AsyncWebSocketClient * client, JsonObject & jsonCmd)
         if (jsonCmd.containsKey ("delete"))
         {
             // DEBUG_V ("opt");
-            strcpy (WebSocketFrameCollectionBuffer, "{\"get\":");
-            // DEBUG_V ("");
             JsonObject temp = jsonCmd["delete"];
             processCmdDelete (temp);
+            strcpy (WebSocketFrameCollectionBuffer, "{\"cmd\":\"OK\"}");
             // DEBUG_V ("");
             break;
         }
 
         // log an error
         PrettyPrint (jsonCmd, String (F ("ERROR: Unhandled cmd")));
-        strcpy (WebSocketFrameCollectionBuffer, "{\"cmd\":\"Error\"");
+        strcpy (WebSocketFrameCollectionBuffer, "{\"cmd\":\"Error\"}");
 
     } while (false);
 
-    // DEBUG_V ("");
-    // terminate the response
-    strcat (WebSocketFrameCollectionBuffer, "}");
-    // DEBUG_V (WebSocketFrameCollectionBuffer);
     client->text (WebSocketFrameCollectionBuffer);
 
     // DEBUG_END;
@@ -899,10 +899,9 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
         if ((jsonCmd.containsKey (CN_device)) || (jsonCmd.containsKey (CN_network)))
         {
             // DEBUG_V ("device/network");
-            extern void SetConfig (JsonObject &);
-            SetConfig (jsonCmd);
-            strcat (WebSocketFrameCollectionBuffer, serializeCore (false).c_str ());
-
+            extern void SetConfig (JsonObject &, const char* DataString);
+            serializeJson (jsonCmd, WebSocketFrameCollectionBuffer, sizeof (WebSocketFrameCollectionBuffer) - 1);
+            SetConfig (jsonCmd, WebSocketFrameCollectionBuffer);
             pAlexaDevice->setName (config.id);
 
             // DEBUG_V ("device/network: Done");
@@ -913,8 +912,8 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
         {
             // DEBUG_V ("input");
             JsonObject imConfig = jsonCmd[CN_input];
-            InputMgr.SetConfig (imConfig);
-            InputMgr.GetConfig (WebSocketFrameCollectionBuffer);
+            serializeJson (imConfig, WebSocketFrameCollectionBuffer, sizeof (WebSocketFrameCollectionBuffer) - 1);
+            InputMgr.SetConfig (WebSocketFrameCollectionBuffer);
             // DEBUG_V ("input: Done");
             break;
         }
@@ -923,8 +922,8 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
         {
             // DEBUG_V (CN_output);
             JsonObject omConfig = jsonCmd[CN_output];
-            OutputMgr.SetConfig (omConfig);
-            OutputMgr.GetConfig (WebSocketFrameCollectionBuffer);
+            serializeJson (omConfig, WebSocketFrameCollectionBuffer, sizeof(WebSocketFrameCollectionBuffer) - 1);
+            OutputMgr.SetConfig (WebSocketFrameCollectionBuffer);
             // DEBUG_V ("output: Done");
             break;
         }
@@ -945,8 +944,6 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
         strcat (WebSocketFrameCollectionBuffer, "ERROR");
 
     } while (false);
-
-    // DEBUG_V (WebSocketFrameCollectionBuffer);
 
     // DEBUG_END;
 
@@ -1097,7 +1094,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
             LOG_PORT.println (F ("* Upload Finished."));
             efupdate.end ();
             LITTLEFS.begin ();
-            SaveConfig();
+
             extern bool reboot;
             reboot = true;
         }
@@ -1125,13 +1122,13 @@ void c_WebMgr::Process ()
 #ifdef USE_REST
 void printRequest (AsyncWebServerRequest* request)
 {
-    DEBUG_V (String ("      version: '") + String (request->version ()) + "'");
-    DEBUG_V (String ("       method: '") + String (request->method ()) + "'");
-    DEBUG_V (String ("          url: '") + String (request->url ()) + "'");
-    DEBUG_V (String ("         host: '") + String (request->host ()) + "'");
-    DEBUG_V (String ("  contentType: '") + String (request->contentType ()) + "'");
-    DEBUG_V (String ("contentLength: '") + String (request->contentLength ()) + "'");
-    DEBUG_V (String ("    multipart: '") + String (request->multipart ()) + "'");
+    // DEBUG_V (String ("      version: '") + String (request->version ()) + "'");
+    // DEBUG_V (String ("       method: '") + String (request->method ()) + "'");
+    // DEBUG_V (String ("          url: '") + String (request->url ()) + "'");
+    // DEBUG_V (String ("         host: '") + String (request->host ()) + "'");
+    // DEBUG_V (String ("  contentType: '") + String (request->contentType ()) + "'");
+    // DEBUG_V (String ("contentLength: '") + String (request->contentLength ()) + "'");
+    // DEBUG_V (String ("    multipart: '") + String (request->multipart ()) + "'");
 
     //List all collected headers
     int headers = request->headers ();
@@ -1139,14 +1136,14 @@ void printRequest (AsyncWebServerRequest* request)
     for (i = 0; i < headers; i++)
     {
         AsyncWebHeader* h = request->getHeader (i);
-        DEBUG_V (String ("       HEADER: '") + h->name () + "', '" + h->value () + "'");
+        // DEBUG_V (String ("       HEADER: '") + h->name () + "', '" + h->value () + "'");
     }
 
 } // printRequest
 //-----------------------------------------------------------------------------
 void c_WebMgr::RestProcessGET (AsyncWebServerRequest* request)
 {
-    DEBUG_START;
+    // DEBUG_START;
     printRequest (request);
 
     // request->send (200, "text/json", WebSocketFrameCollectionBuffer);
@@ -1154,43 +1151,43 @@ void c_WebMgr::RestProcessGET (AsyncWebServerRequest* request)
 
     request->send (200, CN_textSLASHplain, "Hello");
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // RestProcessPOST
 
 //-----------------------------------------------------------------------------
 void c_WebMgr::RestProcessPOST (AsyncWebServerRequest* request)
 {
-    DEBUG_START;
+    // DEBUG_START;
     printRequest (request);
 
     request->send (404, CN_textSLASHplain, "Page Not found");
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // RestProcessGET
 
 //-----------------------------------------------------------------------------
 void c_WebMgr::RestProcessFile (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final)
 {
-    DEBUG_START;
+    // DEBUG_START;
     printRequest (request);
 
     request->send (404, CN_textSLASHplain, "Page Not found");
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // RestProcessFile
 
 //-----------------------------------------------------------------------------
 void c_WebMgr::RestProcessBody (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total)
 {
-    DEBUG_START;
+    // DEBUG_START;
     printRequest (request);
 
     request->send (404, CN_textSLASHplain, "Page Not found");
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // RestProcessBody
 #endif // def USE_REST

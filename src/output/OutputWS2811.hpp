@@ -48,14 +48,31 @@ public:
     void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
     uint16_t     GetNumChannelsNeeded () { return (pixel_count * numIntensityBytesPerPixel); };
     void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
+    void         PauseOutput ();
 
     /// Interrupt Handler
     void IRAM_ATTR ISR_Handler (); ///< UART ISR
 
 #define WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE    4
+#define WS2812_NUM_DATA_BYTES_PER_PIXEL             16
 #define WS2812_MAX_NUM_PIXELS                       1200
 
 private:
+    uint8_t   * pNextIntensityToSend = nullptr;     ///< start of output buffer being sent to the UART
+    uint16_t    RemainingPixelCount = 0;            ///< Used by ISR to determine how much more data to send
+    uint8_t     numIntensityBytesPerPixel = 3;      ///< number of bytes per pixel
+    uint8_t     gamma_table[256] = { 0 };           ///< Gamma Adjustment table
+    float       gamma = 2.2;                        ///< gamma value to use
+    uint8_t     AdjustedBrightness = 255;           ///< brightness to use
+    uint8_t     brightness = 100;                   ///< brightness to use
+    uint16_t    zig_size = 0;                       ///< Zigsize count - 0 = no zigzag
+    uint16_t    ZigPixelCount = 0;
+    uint16_t    CurrentZigPixelCount = 0;
+    uint16_t    CurrentZagPixelCount = 0;
+    uint16_t    group_size = 0;                     ///< Group size - 1 = no grouping
+    uint16_t    GroupPixelCount = 0;
+    uint16_t    CurrentGroupPixelCount = 0;
+    uint16_t    pixel_count = 100;                  ///< Number of pixels
 
     typedef union ColorOffsets_s
     {
@@ -68,22 +85,12 @@ private:
         } offset;
         uint8_t Array[4];
     } ColorOffsets_t;
+    ColorOffsets_t  ColorOffsets;
 
     // JSON configuration parameters
     String      color_order; ///< Pixel color order
-    uint16_t    pixel_count = 100; ///< Number of pixels
-    uint16_t    zig_size;    ///< Zigsize count - 0 = no zigzag
-    uint16_t    group_size;  ///< Group size - 1 = no grouping
-    float       gamma;       ///< gamma value to use
-    float       brightness;  ///< brightness to use
 
     // Internal variables
-    uint8_t        *pIsrOutputBuffer = nullptr;         ///< Data ready to be sent to the UART
-    uint8_t        *pNextIntensityToSend = nullptr;     ///< start of output buffer being sent to the UART
-    uint16_t        RemainingIntensityCount = 0;        ///< Used by ISR to determine how much more data to send
-    uint8_t         numIntensityBytesPerPixel = 3;      ///< number of bytes per pixel
-    uint8_t         gamma_table[256] = { 0 };           ///< Gamma Adjustment table
-    ColorOffsets_t  ColorOffsets;
     uint16_t        InterFrameGapInMicroSec = 0;
 
     void updateGammaTable(); ///< Generate gamma correction table

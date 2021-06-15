@@ -54,7 +54,6 @@
 #define RDMNET_DNSSD_E133VERS   1
 
 // Configuration file params
-#define CONFIG_MAX_SIZE (3*1024)    ///< Sanity limit for config file
 
 /// Core configuration structure
 typedef struct {
@@ -80,7 +79,6 @@ void    deserializeCoreHandler (DynamicJsonDocument& jsonDoc);
 bool    deserializeCore        (JsonObject & json);
 boolean dsDevice               (JsonObject & json);
 boolean dsNetwork              (JsonObject & json);
-void    SaveConfig             ();
 extern  bool reboot;
 
 template <typename T, typename J, typename N>

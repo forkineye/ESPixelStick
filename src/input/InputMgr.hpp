@@ -37,10 +37,9 @@ public:
 
     void Begin      (uint8_t * BufferStart, uint16_t BufferSize); ///< set up the operating environment based on the current config (or defaults)
     void LoadConfig ();                        ///< Read the current configuration data from nvram
-    void SaveConfig ();                        ///< Save the current configuration data to nvram
     void GetConfig  (char * Response);         ///< Get the current config used by the driver
     void GetStatus  (JsonObject & jsonStatus);
-    bool SetConfig  (JsonObject & jsonConfig); ///< Set a new config in the driver
+    void SetConfig  (const char * NewConfig); ///< Set a new config in the driver
     void Process    ();                        ///< Call from loop(),  renders Input data
     void SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize);
     void SetOperationalState (bool Active);
@@ -85,10 +84,11 @@ private:
     uint8_t       * InputDataBuffer     = nullptr;
     uint16_t        InputDataBufferSize = 0;
     bool            HasBeenInitialized  = false;
-    bool            ConfigSaveNeeded    = false;
     c_ExternalInput ExternalInput;
     bool            EffectEngineIsConfiguredToRun[InputChannelId_End];
-    bool            IsConnected = false;
+    bool            IsConnected         = false;
+    bool            configInProgress    = false;
+    bool            configLoadNeeded    = false;
 
     // configuration parameter names for the channel manager within the config file
 #   define IM_EffectsControlButtonName F ("ecb")
@@ -100,7 +100,6 @@ private:
     void ProcessEffectsButtonActions (void);
 
     String ConfigFileName;
-    String ConfigData;
     bool   rebootNeeded = false;
 
 #define IM_JSON_SIZE (5 * 1024)
