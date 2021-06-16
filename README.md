@@ -36,7 +36,7 @@ Extract the folder in each of these zip files and place it in the "library" fold
 - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) - Asynchronous Web Server Library
 - [async-mqtt-client](https://github.com/marvinroger/async-mqtt-client) - Asynchronous MQTT Client
 - [Int64String](https://github.com/djGrrr/Int64String) - Converts 64 bit integers into a string
-- [EspAlexa](https://github.com/Aircoookie/Espalexa) - Alexa Direct control Library
+- [EspAlexa](https://github.com/MartinMueller2003/Espalexa) - Alexa Direct control Library
 - [Adafruit-PWM-Servo-Driver-Library](https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library) - Servo Motor I2C control
 - [Artnet](https://github.com/natcl/Artnet) - Artnet access library
 
@@ -48,7 +48,7 @@ The ESP32 build will require the following software libraries to build this proj
 - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) - Asynchronous Web Server Library
 - [async-mqtt-client](https://github.com/marvinroger/async-mqtt-client) - Asynchronous MQTT Client
 - [Int64String](https://github.com/djGrrr/Int64String) - Converts 64 bit integers into a string
-- [EspAlexa](https://github.com/Aircoookie/Espalexa) - Alexa Direct control Library
+- [EspAlexa](https://github.com/MartinMueller2003/Espalexa) - Alexa Direct control Library
 - [Adafruit-PWM-Servo-Driver-Library](https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library)
 - [Artnet](https://github.com/natcl/Artnet) - Artnet access library
 
@@ -100,7 +100,7 @@ The configuration has been modified to support multiple (two) input types concur
 ### Alexa Support
 
 Alexa is supported in direct mode. No additional hubs or applications are needed. When Alexa is selected as an input mode, the ESP will be discoverable by the Alexa app as a device that supports 24 bit color. The entire output buffer will be treated (from Alexa's point of view) as a single light bulb. Connect by giving your device a name in the device config screen and then telling alexe "alexa discover new devices"
-
+When adding the ESPixelstick using the alexa app: Select devices, add device, device type = light, manufacturer is "other", discover devices.
 ### DDP
 
 No additional configuration is needed for DDP Support. Simply select it as an input mode and it will listen for DDP messages being sent to the ESP
