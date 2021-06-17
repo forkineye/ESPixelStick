@@ -17,9 +17,7 @@
 *
 */
 
-#include <ArduinoJson.h>
 #include "../ESPixelStick.h"
-#include <Ticker.h>
 #include <Int64String.h>
 #include "InputAlexa.h"
 #include "InputEffectEngine.hpp"
@@ -60,7 +58,7 @@ c_InputAlexa::~c_InputAlexa ()
 } // ~c_InputAlexa
 
 //-----------------------------------------------------------------------------
-void c_InputAlexa::Begin() 
+void c_InputAlexa::Begin()
 {
     // DEBUG_START;
 

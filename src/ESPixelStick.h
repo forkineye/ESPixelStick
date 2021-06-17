@@ -34,6 +34,8 @@
 #	error "Unsupported CPU type"
 #endif
 
+#define ARDUINOJSON_USE_LONG_LONG 1
+
 #include <Ticker.h>
 #include <ArduinoJson.h>
 
