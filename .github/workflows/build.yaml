@@ -1,0 +1,146 @@
+name: ESPixelStick CI
+on: [push, pull_request]
+env:
+  ESP8266_PLAT: 'esp8266:esp8266@3.0.0'
+  ESP8266_FQBN: 'esp8266:esp8266:generic:xtal=160,vt=flash,exception=disabled,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=40,FlashMode=dio,eesz=4M2M,led=2,ip=hb2f,dbg=Disabled'
+  ESP32_PLAT: 'esp32:esp32@1.0.6'
+  ESP32_FQBN: 'esp32:esp32:d32_pro:PSRAM=enabled,PartitionScheme=default,FlashFreq=80,DebugLevel=none'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Set Release Archive Filename
+      - run: echo "ARCHFILE=ESPixelStick_CI-$(date +'%Y%m%d%H%M%S').zip" >> $GITHUB_ENV
+
+      # Checkout ESPixelStick
+      - uses: actions/checkout@v2
+
+      # Arduino stuff
+      - uses: arduino/setup-arduino-cli@v1
+      - name: Update board indexes and set paths
+        run: |
+          arduino-cli config init
+          arduino-cli config add board_manager.additional_urls https://arduino.esp8266.com/stable/package_esp8266com_index.json https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+          arduino-cli config set directories.user ~/arduino
+      - name: Install platforms
+        run: |
+          arduino-cli core install $ESP8266_PLAT
+          arduino-cli core install $ESP32_PLAT
+
+      # Node Stuff
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: npm install
+
+      # Grab all the required libraries
+      # Checkout won't allow paths outside of our workspace, so we put them in alib and move later.
+      - name: Checkout ArduinoJson
+        uses: actions/checkout@v2
+        with:
+          repository: bblanchon/ArduinoJson
+          path: alib/ArduinoJson
+          ref: 6.x
+      - name: Checkout ESPAsyncE131
+        uses: actions/checkout@v2
+        with:
+          repository: forkineye/ESPAsyncE131
+          path: alib/ESPAsyncE131
+      - name: Checkout ESPAsyncTCP
+        uses: actions/checkout@v2
+        with:
+          repository: me-no-dev/ESPAsyncTCP
+          path: alib/ESPAsyncTCP
+      - name: Checkout ESPAsyncUDP
+        uses: actions/checkout@v2
+        with:
+          repository: me-no-dev/ESPAsyncUDP
+          path: alib/ESPAsyncUDP
+      - name: Checkout ESPAsyncWebServer
+        uses: actions/checkout@v2
+        with:
+          repository: me-no-dev/ESPAsyncWebServer
+          path: alib/ESPAsyncWebServer
+      - name: Checkout async-mqtt-client
+        uses: actions/checkout@v2
+        with:
+          repository: marvinroger/async-mqtt-client
+          path: alib/async-mqtt-client
+      - name: Checkout Int64String
+        uses: actions/checkout@v2
+        with:
+          repository: djGrrr/Int64String
+          path: alib/Int64String
+      - name: Checkout Espalexa
+        uses: actions/checkout@v2
+        with:
+          repository: MartinMueller2003/Espalexa
+          path: alib/Espalexa
+      - name: Checkout Adafruit PWM Servo Driver
+        uses: actions/checkout@v2
+        with:
+          repository: adafruit/Adafruit-PWM-Servo-Driver-Library
+          path: alib/Adafruit-PWM-Servo-Driver-Library
+      - name: Checkout Artnet
+        uses: actions/checkout@v2
+        with:
+          repository: natcl/Artnet
+          path: alib/Artnet
+
+      # ESP32 Specific Stuff
+      - name: Checkout AsyncTCP
+        uses: actions/checkout@v2
+        with:
+          repository: me-no-dev/AsyncTCP
+          path: alib/AsyncTCP
+      - name: Checkout LittleFS_esp32
+        uses: actions/checkout@v2
+        with:
+          repository: lorol/LITTLEFS
+          path: alib/LITTLEFS
+
+      # Move Arduino libraries where they need to be.
+      - name: Move Arduino Libraries
+        run: |
+          mkdir -p ~/arduino/libraries
+          mv alib/* ~/arduino/libraries
+          rmdir alib
+
+      - name: Create secrets.h
+        run: |
+          echo '#define SECRETS_SSID "SSID_NOT_SET"' > src/secrets.h
+          echo '#define SECRETS_PASS "PASSPHRASE_NOT_SET"' >> src/secrets.h
+
+      # Build and move the binaries
+      - name: Compile for ESP8266
+        run: |
+          arduino-cli compile --fqbn $ESP8266_FQBN --build-path ~/build ESPixelStick
+          mv ~/build/ESPixelStick.ino.bin dist/firmware/espixelstick-ci.bin
+
+      - name: Compile for ESP32
+        run: |
+          arduino-cli compile --fqbn $ESP32_FQBN --build-path ~/build ESPixelStick
+          mv ~/build/ESPixelStick.ino.bin dist/firmware/espixelstick-ci32.bin
+
+      # Build and move the web pages
+      - name: Compile Web Pages
+        run: |
+          gulp
+          gulp md
+          gulp travis
+          mv data/* dist/fs
+
+      - name: Move CI specific release files into place
+        run: |
+          mv .travis/firmware.json dist/firmware/firmware.json
+
+      - name: Create Release Archive
+        run: zip -r ../${{env.ARCHFILE}} *
+        working-directory: dist
+
+      - name: Upload Release Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Release Archive
+          path: ${{env.ARCHFILE}}

@@ -3,14 +3,14 @@
         {
             "name": "ESPixelStick Unify - Generic",
             "description": "Unified build for ESPixelStick V3 hardware",
-            "version": "4.0-dev1 (Travis-CI Build)",
-            "file": "espixelstick-travis.bin"
+            "version": "4.0-dev (CI Build - Not Tested)",
+            "file": "espixelstick-ci.bin"
         },
         {
             "name": "ESPixelStick Unify - ESP32",
             "description": "Unified build for ESP32 hardware",
-            "version": "4.0-dev1 (Travis-CI Build)",
-            "file": "espixelstick-travis32.bin"
+            "version": "4.0-dev (CI Build - Not Tested)",
+            "file": "espixelstick-ci32.bin"
         }
     ],
 
