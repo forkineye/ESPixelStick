@@ -40,7 +40,7 @@ before_install:
 - git clone https://github.com/me-no-dev/ESPAsyncWebServer $LIB_HOME/ESPAsyncWebServer
 - git clone https://github.com/marvinroger/async-mqtt-client $LIB_HOME/async-mqtt-client
 - git clone https://github.com/djGrrr/Int64String $LIB_HOME/Int64String
-- git clone https://github.com/Aircoookie/Espalexa $LIB_HOME/Espalexa
+- git clone https://github.com/MartinMueller2003/Espalexa $LIB_HOME/Espalexa
 - git clone https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library $LIB_HOME/Adafruit-PWM-Servo-Driver
 - git clone https://github.com/natcl/Artnet $LIB_HOME/Artnet
 install:
