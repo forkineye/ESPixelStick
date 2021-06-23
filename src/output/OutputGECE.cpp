@@ -17,10 +17,8 @@
 *
 */
 
-#include <ArduinoJson.h>
-
-#include "OutputGECE.hpp"
 #include "../ESPixelStick.h"
+#include "OutputGECE.hpp"
 #include <HardwareSerial.h>
 #ifdef ARDUINO_ARCH_ESP32
 #   include <driver/uart.h>
@@ -60,7 +58,7 @@ extern "C" {
 #define GECE_DATA_ZERO 0b01111100
 #define GECE_DATA_ONE  0b01100000
 
-static char LOOKUP_GECE[] = 
+static char LOOKUP_GECE[] =
 {
     0b01111100,     // 0 - (0)00 111 11(1)
     0b01100000      // 1 - (0)00 000 11(1)
@@ -70,7 +68,7 @@ static char LOOKUP_GECE[] =
 output looks like this
 
 Start bit = High for 10us
-26 data bits. 
+26 data bits.
     Each bit is 30us
     0 = 10 us low, 20 us high
     1 = 20 us low, 10 us high
@@ -115,16 +113,16 @@ stop bit = low for at least 30us
 
 #define GECE_SET_ADDRESS(value)     ((uint32_t(value) << GECE_ADDRESS_SHIFT)   & GECE_ADDRESS_MASK)
 #define GECE_SET_BRIGHTNESS(value)  ((uint32_t(value) << GECE_INTENSITY_SHIFT) & GECE_INTENSITY_MASK)
-#define GECE_SET_BLUE(value)        ((uint32_t(value) << GECE_BLUE_SHIFT)      & GECE_BLUE_MASK)       
-#define GECE_SET_GREEN(value)       ((uint32_t(value)                   )      & GECE_GREEN_MASK)       
-#define GECE_SET_RED(value)         ((uint32_t(value) >> GECE_RED_SHIFT )      & GECE_RED_MASK)       
+#define GECE_SET_BLUE(value)        ((uint32_t(value) << GECE_BLUE_SHIFT)      & GECE_BLUE_MASK)
+#define GECE_SET_GREEN(value)       ((uint32_t(value)                   )      & GECE_GREEN_MASK)
+#define GECE_SET_RED(value)         ((uint32_t(value) >> GECE_RED_SHIFT )      & GECE_RED_MASK)
 
 // forward declaration for the isr handler
 static void IRAM_ATTR uart_intr_handler (void* param);
 
 //----------------------------------------------------------------------------
 c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId,
-                            gpio_num_t outputGpio, 
+                            gpio_num_t outputGpio,
                             uart_port_t uart,
                             c_OutputMgr::e_OutputType outputType) :
     c_OutputCommon(OutputChannelId, outputGpio, uart, outputType)
@@ -308,7 +306,7 @@ void IRAM_ATTR c_OutputGECE::ISR_Handler ()
 
         // DEBUG_V ("");
 
-        // wait until all of the data has been clocked out 
+        // wait until all of the data has been clocked out
         // (hate waits but there are no status bits to watch)
         while((_getCycleCount () - StartingCycleCount) < GECE_CCOUNT_IDLETIME) {}
 
