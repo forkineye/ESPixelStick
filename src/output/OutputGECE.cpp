@@ -77,19 +77,18 @@ Start bit = High for 10us
 stop bit = low for at least 30us
 */
 
-#define GECE_uSec_PER_GECE_BIT      30.0
-// #define GECE_uSec_PER_GECE_BIT      300.0
-#define GECE_UART_BITS_PER_GECE_BIT (1.0 + 7.0 + 1.0)
-#define GECE_UART_uSec_PER_BIT      (GECE_uSec_PER_GECE_BIT / GECE_UART_BITS_PER_GECE_BIT)
-#define GECE_BAUDRATE               uint32_t( (1.0/(GECE_UART_uSec_PER_BIT / 1000000))   )
+#define GECE_uSec_PER_GECE_BIT          30.0
+#define GECE_uSec_PER_GECE_START_BIT    10.0
+#define GECE_UART_BITS_PER_GECE_BIT     (1.0 + 7.0 + 1.0)
+#define GECE_UART_uSec_PER_BIT          (GECE_uSec_PER_GECE_BIT / GECE_UART_BITS_PER_GECE_BIT)
+#define GECE_BAUDRATE                   uint32_t( (1.0/(GECE_UART_uSec_PER_BIT / 1000000))   )
 
-#define GECE_FRAME_TIME            (GECE_PACKET_SIZE * GECE_uSec_PER_GECE_BIT) /* 790us packet frame time */
-#define GECE_IDLE_TIME             (2 * GECE_uSec_PER_GECE_BIT)     /* 45us idle time - should be 30us */
+#define GECE_FRAME_TIME                 (GECE_PACKET_SIZE * GECE_uSec_PER_GECE_BIT) /* 790us packet frame time */
+#define GECE_IDLE_TIME                  (2.5 * GECE_uSec_PER_GECE_BIT)                /* 30us idle time */
 
-#define CPU_ClockTimeNS             ((1.0 / float(F_CPU)) * 1000000000)
-#define NUM_GECE_BITS_TO_WAIT       (17)
-#define NUM_NS_TO_WAIT              (GECE_uSec_PER_GECE_BIT * NUM_GECE_BITS_TO_WAIT * 100)
-#define GECE_CCOUNT_DELAY           uint32_t(NUM_NS_TO_WAIT / CPU_ClockTimeNS)
+#define CPU_ClockTimeNS                 ((1.0 / float(F_CPU)) * 1000000000)
+#define GECE_CCOUNT_IDLETIME            uint32_t((GECE_IDLE_TIME * 1000) / CPU_ClockTimeNS)
+#define GECE_CCOUNT_STARTBIT            uint32_t((GECE_uSec_PER_GECE_START_BIT * 1000) / CPU_ClockTimeNS) // 10us (min) start bit
 
 #define GECE_NUM_INTENSITY_BYTES_PER_PIXEL    	3
 #define GECE_BITS_PER_INTENSITY                 4
@@ -98,7 +97,7 @@ stop bit = low for at least 30us
 #define GECE_OVERHEAD_BYTES                     (GECE_BITS_BRIGHTNESS + GECE_BITS_ADDRESS)
 #define GECE_PACKET_SIZE                        ((GECE_NUM_INTENSITY_BYTES_PER_PIXEL * GECE_BITS_PER_INTENSITY) + GECE_OVERHEAD_BYTES) //   26
 
-// frame layout: 0x0AAIIBGR
+// frame layout: 0x0AAIIBGR (26 bits)
 #define GECE_ADDRESS_MASK       0x03F00000
 #define GECE_ADDRESS_SHIFT      20
 
@@ -192,8 +191,8 @@ void c_OutputGECE::Begin()
 
     // DEBUG_V (String ("GECE_CCOUNT_DELAY: ") + String (GECE_CCOUNT_DELAY));
 
-    // FrameMinDurationInMicroSec = (GECE_FRAME_TIME + GECE_IDLE_TIME) * pixel_count;
-    FrameMinDurationInMicroSec = GECE_FRAME_TIME + GECE_IDLE_TIME;
+    FrameMinDurationInMicroSec = min(uint32_t(25000), uint32_t((GECE_FRAME_TIME + GECE_IDLE_TIME) * pixel_count));
+    // FrameMinDurationInMicroSec = GECE_FRAME_TIME + GECE_IDLE_TIME;
     // DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
 
     SET_PERI_REG_MASK(UART_CONF0(UartId), UART_TXD_BRK);
@@ -299,20 +298,24 @@ void IRAM_ATTR c_OutputGECE::ISR_Handler ()
 
         // Build a GECE packet
         // DEBUG_V ("");
-        packet  = GECE_SET_BRIGHTNESS (brightness); // <= This clears the other fields
+        // packet |= GECE_SET_BRIGHTNESS (brightness);
+        packet |= GECE_SET_BRIGHTNESS (0xcc);
         packet |= GECE_SET_ADDRESS (OutputFrame.CurrentPixelID);
-        packet |= GECE_SET_RED (*OutputFrame.pCurrentInputData++);
-        packet |= GECE_SET_GREEN (*OutputFrame.pCurrentInputData++);
-        packet |= GECE_SET_BLUE (*OutputFrame.pCurrentInputData++);
+        packet |= GECE_SET_RED     (OutputFrame.pCurrentInputData[0]);
+        packet |= GECE_SET_GREEN   (OutputFrame.pCurrentInputData[1]);
+        packet |= GECE_SET_BLUE    (OutputFrame.pCurrentInputData[2]);
+        OutputFrame.pCurrentInputData += 3;
 
         // DEBUG_V ("");
 
         // wait until all of the data has been clocked out 
         // (hate waits but there are no status bits to watch)
-        while((_getCycleCount () - StartingCycleCount) < GECE_CCOUNT_DELAY) {}
+        while((_getCycleCount () - StartingCycleCount) < GECE_CCOUNT_IDLETIME) {}
 
-        // this ensures a minimum break time and a Start bit
-        enqueue (GECE_DATA_ONE);
+        // 10us start bit
+        CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
+        StartingCycleCount = _getCycleCount ();
+        while ((_getCycleCount () - StartingCycleCount) < (GECE_CCOUNT_STARTBIT - 10)) {}
 
         // now convert the bits into a byte stream
         for (uint32_t currentShiftMask = bit (GECE_PACKET_SIZE - 1);
@@ -321,18 +324,16 @@ void IRAM_ATTR c_OutputGECE::ISR_Handler ()
             enqueue (((packet & currentShiftMask) == 0) ? GECE_DATA_ZERO : GECE_DATA_ONE);
         }
 
-        // Clear all interrupts flags for this uart
-        WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
-
-        // enable the send (uart is stopped while sending a break. 
-        // Output does not return to '1' prior to sending first data byte.
-        CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
         // enable the stop bit after the last data is sent
         SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
+
+        // Clear all interrupt flags for this uart
+        WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
 
         // have we sent all of the pixel data?
         if (++OutputFrame.CurrentPixelID >= pixel_count)
         {
+            // CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
             OutputFrame.CurrentPixelID = 0;
             OutputFrame.pCurrentInputData = pOutputBuffer;
         }
@@ -347,6 +348,12 @@ void c_OutputGECE::Render()
 
     if (gpio_num_t (-1) == DataPin) { return; }
     // if (!canRefresh ()) { return; }
+    // if (0 != (READ_PERI_REG (UART_INT_ENA (UartId)) & UART_TXFIFO_EMPTY_INT_ENA)) { return; }
+
+    // ReportNewFrame ();
+
+    // OutputFrame.CurrentPixelID = 0;
+    // OutputFrame.pCurrentInputData = pOutputBuffer;
 
 #ifdef ARDUINO_ARCH_ESP8266
     SET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
