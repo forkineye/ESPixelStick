@@ -55,34 +55,34 @@ extern "C" {
 * Bits are backwards since we need MSB out.
 */
 
-#define GECE_DATA_ZERO 0b01111100
-#define GECE_DATA_ONE  0b01100000
+#define GECE_DATA_ZERO 0b01111110
+#define GECE_DATA_ONE  0b01000000
 
 static char LOOKUP_GECE[] =
 {
-    0b01111100,     // 0 - (0)00 111 11(1)
-    0b01100000      // 1 - (0)00 000 11(1)
+    GECE_DATA_ZERO,    // 0 - (0)01 111 11(1)
+    GECE_DATA_ONE      // 1 - (0)00 000 01(1)
 };
 
 /*
 output looks like this
 
-Start bit = High for 10us
+Start bit = High for 8us
 26 data bits.
     Each bit is 30us
-    0 = 10 us low, 20 us high
-    1 = 20 us low, 10 us high
-stop bit = low for at least 30us
+    0 = 6 us low, 25 us high
+    1 = 23 us low, 6 us high
+stop bit = low for at least 45us
 */
 
-#define GECE_uSec_PER_GECE_BIT          30.0
-#define GECE_uSec_PER_GECE_START_BIT    10.0
+#define GECE_uSec_PER_GECE_BIT          31.0
+#define GECE_uSec_PER_GECE_START_BIT    8.0
 #define GECE_UART_BITS_PER_GECE_BIT     (1.0 + 7.0 + 1.0)
 #define GECE_UART_uSec_PER_BIT          (GECE_uSec_PER_GECE_BIT / GECE_UART_BITS_PER_GECE_BIT)
 #define GECE_BAUDRATE                   uint32_t( (1.0/(GECE_UART_uSec_PER_BIT / 1000000))   )
 
 #define GECE_FRAME_TIME                 (GECE_PACKET_SIZE * GECE_uSec_PER_GECE_BIT) /* 790us packet frame time */
-#define GECE_IDLE_TIME                  (2.5 * GECE_uSec_PER_GECE_BIT)                /* 30us idle time */
+#define GECE_IDLE_TIME                  (45 + GECE_uSec_PER_GECE_BIT)               /* 45us not 30us idle time */
 
 #define CPU_ClockTimeNS                 ((1.0 / float(F_CPU)) * 1000000000)
 #define GECE_CCOUNT_IDLETIME            uint32_t((GECE_IDLE_TIME * 1000) / CPU_ClockTimeNS)
@@ -92,8 +92,8 @@ stop bit = low for at least 30us
 #define GECE_BITS_PER_INTENSITY                 4
 #define GECE_BITS_BRIGHTNESS                    8
 #define GECE_BITS_ADDRESS                       6
-#define GECE_OVERHEAD_BYTES                     (GECE_BITS_BRIGHTNESS + GECE_BITS_ADDRESS)
-#define GECE_PACKET_SIZE                        ((GECE_NUM_INTENSITY_BYTES_PER_PIXEL * GECE_BITS_PER_INTENSITY) + GECE_OVERHEAD_BYTES) //   26
+#define GECE_OVERHEAD_BITS                      (GECE_BITS_BRIGHTNESS + GECE_BITS_ADDRESS)
+#define GECE_PACKET_SIZE                        ((GECE_NUM_INTENSITY_BYTES_PER_PIXEL * GECE_BITS_PER_INTENSITY) + GECE_OVERHEAD_BITS) //   26
 
 // frame layout: 0x0AAIIBGR (26 bits)
 #define GECE_ADDRESS_MASK       0x03F00000
@@ -296,13 +296,12 @@ void IRAM_ATTR c_OutputGECE::ISR_Handler ()
 
         // Build a GECE packet
         // DEBUG_V ("");
-        // packet |= GECE_SET_BRIGHTNESS (brightness);
-        packet |= GECE_SET_BRIGHTNESS (0xcc);
+        packet |= GECE_SET_BRIGHTNESS (brightness);
         packet |= GECE_SET_ADDRESS (OutputFrame.CurrentPixelID);
         packet |= GECE_SET_RED     (OutputFrame.pCurrentInputData[0]);
         packet |= GECE_SET_GREEN   (OutputFrame.pCurrentInputData[1]);
         packet |= GECE_SET_BLUE    (OutputFrame.pCurrentInputData[2]);
-        OutputFrame.pCurrentInputData += 3;
+        OutputFrame.pCurrentInputData += GECE_NUM_INTENSITY_BYTES_PER_PIXEL;
 
         // DEBUG_V ("");
 
