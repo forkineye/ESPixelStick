@@ -82,7 +82,11 @@ stop bit = low for at least 45us
 #define GECE_BAUDRATE                   uint32_t( (1.0/(GECE_UART_uSec_PER_BIT / 1000000))   )
 
 #define GECE_FRAME_TIME                 (GECE_PACKET_SIZE * GECE_uSec_PER_GECE_BIT) /* 790us packet frame time */
-#define GECE_IDLE_TIME                  (45 + GECE_uSec_PER_GECE_BIT)               /* 45us not 30us idle time */
+#ifdef ARDUINO_ARCH_ESP8266
+#   define GECE_IDLE_TIME               (45 + GECE_uSec_PER_GECE_BIT) /* 45us */
+#else
+#   define GECE_IDLE_TIME               45.0 /* 45us */
+#endif
 
 #define TIMER_FREQUENCY                 80000000
 #define CPU_ClockTimeNS                 ((1.0 / float(F_CPU)) * 1000000000)
@@ -100,6 +104,7 @@ stop bit = low for at least 45us
 #define GECE_FRAME_TIME_USEC    ((GECE_PACKET_SIZE * GECE_uSec_PER_GECE_BIT) + 90)
 #define GECE_FRAME_TIME_NSEC    (GECE_FRAME_TIME_USEC * 1000)
 #define GECE_CCOUNT_FRAME_TIME  uint32_t((GECE_FRAME_TIME_NSEC / TIMER_ClockTimeNS))
+#define GECE_UART_BREAK_BITS    uint32_t((GECE_IDLE_TIME / GECE_UART_uSec_PER_BIT) + 1)
 
 // frame layout: 0x0AAIIBGR (26 bits)
 #define GECE_ADDRESS_MASK       0x03F00000
@@ -239,7 +244,7 @@ void c_OutputGECE::Begin ()
     uart_config.use_ref_tick = false;
     InitializeUart (uart_config, 0);
 
-    SET_PERI_REG_BITS (UART_IDLE_CONF_REG (UartId), UART_TX_BRK_NUM_V, 23, UART_TX_BRK_NUM_S);
+    SET_PERI_REG_BITS (UART_IDLE_CONF_REG (UartId), UART_TX_BRK_NUM_V, GECE_UART_BREAK_BITS, UART_TX_BRK_NUM_S);
 
 #endif
 
