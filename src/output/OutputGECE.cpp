@@ -193,7 +193,9 @@ c_OutputGECE::~c_OutputGECE ()
  */
 static void IRAM_ATTR timer_intr_handler ()
 {
+#ifdef ARDUINO_ARCH_ESP32
     portENTER_CRITICAL_ISR (&timerMux);
+#endif
     // (*((volatile uint32_t*)(UART_FIFO_AHB_REG (0)))) = (uint32_t)('.');
     for (auto currentChannel : GECE_OutputChanArray)
     {
@@ -202,7 +204,9 @@ static void IRAM_ATTR timer_intr_handler ()
             currentChannel->ISR_Handler ();
         }
     }
+#ifdef ARDUINO_ARCH_ESP32
     portEXIT_CRITICAL_ISR (&timerMux);
+#endif
 
 } // timer_intr_handler
 
