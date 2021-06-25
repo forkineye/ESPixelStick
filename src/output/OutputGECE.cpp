@@ -152,7 +152,7 @@ c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId,
 //----------------------------------------------------------------------------
 c_OutputGECE::~c_OutputGECE ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     GECE_OutputChanArray[OutputChannelId] = nullptr;
 
@@ -160,20 +160,20 @@ c_OutputGECE::~c_OutputGECE ()
     bool foundActiveChannel = false;
     for (auto currentChannel : GECE_OutputChanArray)
     {
-        DEBUG_V (String ("currentChannel: ") + String (uint(currentChannel), HEX));
+        // DEBUG_V (String ("currentChannel: ") + String (uint(currentChannel), HEX));
         if (nullptr != currentChannel)
         {
-            DEBUG_V ("foundActiveChannel");
+            // DEBUG_V ("foundActiveChannel");
             foundActiveChannel = true;
         }
     }
 
-    DEBUG_V ();
+    // DEBUG_V ();
 
     // have all of the GECE channels been killed?
     if (!foundActiveChannel)
     {
-        DEBUG_V ("Detach Interrupts");
+        // DEBUG_V ("Detach Interrupts");
 #ifdef ARDUINO_ARCH_ESP8266
         timer1_detachInterrupt ();
 #else if defined(ARDUINO_ARCH_ESP32)
@@ -184,7 +184,7 @@ c_OutputGECE::~c_OutputGECE ()
 #endif
     }
 
-    DEBUG_END;
+    // DEBUG_END;
 } // ~c_OutputGECE
 
 //----------------------------------------------------------------------------
@@ -201,6 +201,7 @@ static void IRAM_ATTR timer_intr_handler ()
     {
         if (nullptr != currentChannel)
         {
+            // U0F = '.';
             currentChannel->ISR_Handler ();
         }
     }
@@ -213,7 +214,7 @@ static void IRAM_ATTR timer_intr_handler ()
 //----------------------------------------------------------------------------
 void c_OutputGECE::Begin ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     if (gpio_num_t (-1) == DataPin) { return; }
 
@@ -242,17 +243,17 @@ void c_OutputGECE::Begin ()
 
 #endif
 
-    DEBUG_V (String ("       TIMER_FREQUENCY: ") + String (TIMER_FREQUENCY));
-    DEBUG_V (String ("     TIMER_ClockTimeNS: ") + String (TIMER_ClockTimeNS));
-    DEBUG_V (String ("                 F_CPU: ") + String (F_CPU));
-    DEBUG_V (String ("       CPU_ClockTimeNS: ") + String (CPU_ClockTimeNS));
-    DEBUG_V (String ("  GECE_FRAME_TIME_USEC: ") + String (GECE_FRAME_TIME_USEC));
-    DEBUG_V (String ("  GECE_FRAME_TIME_NSEC: ") + String (GECE_FRAME_TIME_NSEC));
-    DEBUG_V (String ("GECE_CCOUNT_FRAME_TIME: ") + String (GECE_CCOUNT_FRAME_TIME));
+    // DEBUG_V (String ("       TIMER_FREQUENCY: ") + String (TIMER_FREQUENCY));
+    // DEBUG_V (String ("     TIMER_ClockTimeNS: ") + String (TIMER_ClockTimeNS));
+    // DEBUG_V (String ("                 F_CPU: ") + String (F_CPU));
+    // DEBUG_V (String ("       CPU_ClockTimeNS: ") + String (CPU_ClockTimeNS));
+    // DEBUG_V (String ("  GECE_FRAME_TIME_USEC: ") + String (GECE_FRAME_TIME_USEC));
+    // DEBUG_V (String ("  GECE_FRAME_TIME_NSEC: ") + String (GECE_FRAME_TIME_NSEC));
+    // DEBUG_V (String ("GECE_CCOUNT_FRAME_TIME: ") + String (GECE_CCOUNT_FRAME_TIME));
 
 #ifdef ARDUINO_ARCH_ESP8266
 
-    DEBUG_V ();
+    // DEBUG_V ();
 
     timer1_attachInterrupt (timer_intr_handler); // Add ISR Function
     timer1_enable (TIM_DIV1, TIM_EDGE, TIM_LOOP);
@@ -286,9 +287,10 @@ void c_OutputGECE::Begin ()
     // timerAlarmWrite (pHwTimer, GECE_CCOUNT_FRAME_TIME, true);
     timerAlarmEnable (pHwTimer);
 
-    GECE_OutputChanArray[OutputChannelId] = this;
-
 #endif
+
+    // start processing the timer interrupts
+    GECE_OutputChanArray[OutputChannelId] = this;
 
     // DEBUG_END;
 } // begin
