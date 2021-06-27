@@ -293,10 +293,6 @@ void c_OutputGECE::Begin ()
     timerAlarmEnable (pHwTimer);
 
 #endif
-
-    // start processing the timer interrupts
-    GECE_OutputChanArray[OutputChannelId] = this;
-
     // DEBUG_END;
 } // begin
 
@@ -430,6 +426,13 @@ void IRAM_ATTR c_OutputGECE::ISR_Handler ()
 void c_OutputGECE::Render()
 {
     // DEBUG_START;
+
+    // start processing the timer interrupts
+    if (nullptr != pOutputBuffer)
+    {
+        GECE_OutputChanArray[OutputChannelId] = this;
+    }
+
     // DEBUG_END;
 
 } // render
