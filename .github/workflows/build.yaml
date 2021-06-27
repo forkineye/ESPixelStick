@@ -1,7 +1,7 @@
 name: ESPixelStick CI
 on: [push, pull_request]
 env:
-  ESP8266_PLAT: 'esp8266:esp8266@3.0.0'
+  ESP8266_PLAT: 'esp8266:esp8266@3.0.1'
   ESP8266_FQBN: 'esp8266:esp8266:generic:xtal=160,vt=flash,exception=disabled,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=40,FlashMode=dio,eesz=4M2M,led=2,ip=hb2f,dbg=Disabled'
   ESP32_PLAT: 'esp32:esp32@1.0.6'
   ESP32_FQBN: 'esp32:esp32:d32_pro:PSRAM=enabled,PartitionScheme=default,FlashFreq=80,DebugLevel=none'
