@@ -55,48 +55,58 @@ extern "C" {
 * Bits are backwards since we need MSB out.
 */
 
-#define GECE_DATA_ZERO 0b01111100
-#define GECE_DATA_ONE  0b01100000
+#define GECE_DATA_ZERO 0b01111110
+#define GECE_DATA_ONE  0b01000000
 
 static char LOOKUP_GECE[] =
 {
-    0b01111100,     // 0 - (0)00 111 11(1)
-    0b01100000      // 1 - (0)00 000 11(1)
+    GECE_DATA_ZERO,    // 0 - (0)01 111 11(1)
+    GECE_DATA_ONE      // 1 - (0)00 000 01(1)
 };
 
 /*
 output looks like this
 
-Start bit = High for 10us
+Start bit = High for 8us
 26 data bits.
     Each bit is 30us
-    0 = 10 us low, 20 us high
-    1 = 20 us low, 10 us high
-stop bit = low for at least 30us
+    0 = 6 us low, 25 us high
+    1 = 23 us low, 6 us high
+stop bit = low for at least 45us
 */
 
-#define GECE_uSec_PER_GECE_BIT      30.0
-// #define GECE_uSec_PER_GECE_BIT      300.0
-#define GECE_UART_BITS_PER_GECE_BIT (1.0 + 7.0 + 1.0)
-#define GECE_UART_uSec_PER_BIT      (GECE_uSec_PER_GECE_BIT / GECE_UART_BITS_PER_GECE_BIT)
-#define GECE_BAUDRATE               uint32_t( (1.0/(GECE_UART_uSec_PER_BIT / 1000000))   )
+#define GECE_uSec_PER_GECE_BIT          31.0
+#define GECE_uSec_PER_GECE_START_BIT    8.0
+#define GECE_UART_BITS_PER_GECE_BIT     (1.0 + 7.0 + 1.0)
+#define GECE_UART_uSec_PER_BIT          (GECE_uSec_PER_GECE_BIT / GECE_UART_BITS_PER_GECE_BIT)
+#define GECE_BAUDRATE                   uint32_t( (1.0/(GECE_UART_uSec_PER_BIT / 1000000))   )
 
-#define GECE_FRAME_TIME            (GECE_PACKET_SIZE * GECE_uSec_PER_GECE_BIT) /* 790us packet frame time */
-#define GECE_IDLE_TIME             (2 * GECE_uSec_PER_GECE_BIT)     /* 45us idle time - should be 30us */
+#define GECE_FRAME_TIME                 (GECE_PACKET_SIZE * GECE_uSec_PER_GECE_BIT) /* 790us packet frame time */
+#ifdef ARDUINO_ARCH_ESP8266
+#   define GECE_IDLE_TIME               (45 + GECE_uSec_PER_GECE_BIT) /* 45us */
+#else
+#   define GECE_IDLE_TIME               45.0 /* 45us */
+#endif
 
-#define CPU_ClockTimeNS             ((1.0 / float(F_CPU)) * 1000000000)
-#define NUM_GECE_BITS_TO_WAIT       (17)
-#define NUM_NS_TO_WAIT              (GECE_uSec_PER_GECE_BIT * NUM_GECE_BITS_TO_WAIT * 100)
-#define GECE_CCOUNT_DELAY           uint32_t(NUM_NS_TO_WAIT / CPU_ClockTimeNS)
+#define TIMER_FREQUENCY                 80000000
+#define CPU_ClockTimeNS                 ((1.0 / float(F_CPU)) * 1000000000)
+#define TIMER_ClockTimeNS               ((1.0 / float(TIMER_FREQUENCY)) * 1000000000)
+#define GECE_CCOUNT_IDLETIME            uint32_t((GECE_IDLE_TIME * 1000) / CPU_ClockTimeNS)
+#define GECE_CCOUNT_STARTBIT            uint32_t((GECE_uSec_PER_GECE_START_BIT * 1000) / CPU_ClockTimeNS) // 10us (min) start bit
 
 #define GECE_NUM_INTENSITY_BYTES_PER_PIXEL    	3
 #define GECE_BITS_PER_INTENSITY                 4
 #define GECE_BITS_BRIGHTNESS                    8
 #define GECE_BITS_ADDRESS                       6
-#define GECE_OVERHEAD_BYTES                     (GECE_BITS_BRIGHTNESS + GECE_BITS_ADDRESS)
-#define GECE_PACKET_SIZE                        ((GECE_NUM_INTENSITY_BYTES_PER_PIXEL * GECE_BITS_PER_INTENSITY) + GECE_OVERHEAD_BYTES) //   26
+#define GECE_OVERHEAD_BITS                      (GECE_BITS_BRIGHTNESS + GECE_BITS_ADDRESS)
+#define GECE_PACKET_SIZE                        ((GECE_NUM_INTENSITY_BYTES_PER_PIXEL * GECE_BITS_PER_INTENSITY) + GECE_OVERHEAD_BITS) //   26
 
-// frame layout: 0x0AAIIBGR
+#define GECE_FRAME_TIME_USEC    ((GECE_PACKET_SIZE * GECE_uSec_PER_GECE_BIT) + 90)
+#define GECE_FRAME_TIME_NSEC    (GECE_FRAME_TIME_USEC * 1000)
+#define GECE_CCOUNT_FRAME_TIME  uint32_t((GECE_FRAME_TIME_NSEC / TIMER_ClockTimeNS))
+#define GECE_UART_BREAK_BITS    uint32_t((GECE_IDLE_TIME / GECE_UART_uSec_PER_BIT) + 1)
+
+// frame layout: 0x0AAIIBGR (26 bits)
 #define GECE_ADDRESS_MASK       0x03F00000
 #define GECE_ADDRESS_SHIFT      20
 
@@ -121,6 +131,17 @@ stop bit = low for at least 30us
 // forward declaration for the isr handler
 static void IRAM_ATTR uart_intr_handler (void* param);
 
+#ifdef ARDUINO_ARCH_ESP8266
+static c_OutputGECE* GECE_OutputChanArray[c_OutputMgr::e_OutputChannelIds::OutputChannelId_End] = { nullptr, nullptr };
+#else
+static c_OutputGECE* GECE_OutputChanArray[c_OutputMgr::e_OutputChannelIds::OutputChannelId_End] = { nullptr, nullptr, nullptr };
+#endif
+
+#ifdef ARDUINO_ARCH_ESP32
+static hw_timer_t * pHwTimer = nullptr;
+static portMUX_TYPE timerMux;
+#endif
+
 //----------------------------------------------------------------------------
 c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId,
                             gpio_num_t outputGpio,
@@ -129,9 +150,6 @@ c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     c_OutputCommon(OutputChannelId, outputGpio, uart, outputType)
 {
     // DEBUG_START;
-
-    brightness = GECE_DEFAULT_BRIGHTNESS;
-
     // DEBUG_END;
 
 } // c_OutputGECE
@@ -140,6 +158,37 @@ c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId,
 c_OutputGECE::~c_OutputGECE ()
 {
     // DEBUG_START;
+
+    GECE_OutputChanArray[OutputChannelId] = nullptr;
+
+    // clean up the timer ISR
+    bool foundActiveChannel = false;
+    for (auto currentChannel : GECE_OutputChanArray)
+    {
+        // DEBUG_V (String ("currentChannel: ") + String (uint(currentChannel), HEX));
+        if (nullptr != currentChannel)
+        {
+            // DEBUG_V ("foundActiveChannel");
+            foundActiveChannel = true;
+        }
+    }
+
+    // DEBUG_V ();
+
+    // have all of the GECE channels been killed?
+    if (!foundActiveChannel)
+    {
+        // DEBUG_V ("Detach Interrupts");
+#ifdef ARDUINO_ARCH_ESP8266
+        timer1_detachInterrupt ();
+#else if defined(ARDUINO_ARCH_ESP32)
+        if (pHwTimer)
+        {
+            timerAlarmDisable (pHwTimer);
+        }
+#endif
+    }
+
     // DEBUG_END;
 } // ~c_OutputGECE
 
@@ -147,13 +196,28 @@ c_OutputGECE::~c_OutputGECE ()
 /* shell function to set the 'this' pointer of the real ISR
    This allows me to use non static variables in the ISR.
  */
-static void IRAM_ATTR uart_intr_handler (void* param)
+static void IRAM_ATTR timer_intr_handler ()
 {
-    reinterpret_cast <c_OutputGECE*>(param)->ISR_Handler ();
-} // uart_intr_handler
+#ifdef ARDUINO_ARCH_ESP32
+    portENTER_CRITICAL_ISR (&timerMux);
+#endif
+    // (*((volatile uint32_t*)(UART_FIFO_AHB_REG (0)))) = (uint32_t)('.');
+    for (auto currentChannel : GECE_OutputChanArray)
+    {
+        if (nullptr != currentChannel)
+        {
+            // U0F = '.';
+            currentChannel->ISR_Handler ();
+        }
+    }
+#ifdef ARDUINO_ARCH_ESP32
+    portEXIT_CRITICAL_ISR (&timerMux);
+#endif
+
+} // timer_intr_handler
 
 //----------------------------------------------------------------------------
-void c_OutputGECE::Begin()
+void c_OutputGECE::Begin ()
 {
     // DEBUG_START;
 
@@ -166,37 +230,69 @@ void c_OutputGECE::Begin()
     // Serial rate is 3x 100KHz for GECE
 #ifdef ARDUINO_ARCH_ESP8266
     InitializeUart (GECE_BAUDRATE,
-                    SERIAL_7N1,
-                    SERIAL_TX_ONLY,
-                    0);
+        SERIAL_7N1,
+        SERIAL_TX_ONLY,
+        0);
 #else
     uart_config_t uart_config;
-    uart_config.baud_rate           = GECE_BAUDRATE;
-    uart_config.data_bits           = uart_word_length_t::UART_DATA_7_BITS;
-    uart_config.flow_ctrl           = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
-    uart_config.parity              = uart_parity_t::UART_PARITY_DISABLE;
+    uart_config.baud_rate = GECE_BAUDRATE;
+    uart_config.data_bits = uart_word_length_t::UART_DATA_7_BITS;
+    uart_config.flow_ctrl = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
+    uart_config.parity = uart_parity_t::UART_PARITY_DISABLE;
     uart_config.rx_flow_ctrl_thresh = 1;
-    uart_config.stop_bits           = uart_stop_bits_t::UART_STOP_BITS_1;
-    uart_config.use_ref_tick        = false;
+    uart_config.stop_bits = uart_stop_bits_t::UART_STOP_BITS_1;
+    uart_config.use_ref_tick = false;
     InitializeUart (uart_config, 0);
+
+    SET_PERI_REG_BITS (UART_IDLE_CONF_REG (UartId), UART_TX_BRK_NUM_V, GECE_UART_BREAK_BITS, UART_TX_BRK_NUM_S);
+
 #endif
 
-    // Atttach interrupt handler
+    // DEBUG_V (String ("       TIMER_FREQUENCY: ") + String (TIMER_FREQUENCY));
+    // DEBUG_V (String ("     TIMER_ClockTimeNS: ") + String (TIMER_ClockTimeNS));
+    // DEBUG_V (String ("                 F_CPU: ") + String (F_CPU));
+    // DEBUG_V (String ("       CPU_ClockTimeNS: ") + String (CPU_ClockTimeNS));
+    // DEBUG_V (String ("  GECE_FRAME_TIME_USEC: ") + String (GECE_FRAME_TIME_USEC));
+    // DEBUG_V (String ("  GECE_FRAME_TIME_NSEC: ") + String (GECE_FRAME_TIME_NSEC));
+    // DEBUG_V (String ("GECE_CCOUNT_FRAME_TIME: ") + String (GECE_CCOUNT_FRAME_TIME));
+
 #ifdef ARDUINO_ARCH_ESP8266
-    ETS_UART_INTR_ATTACH (uart_intr_handler, this);
-#else
-    uart_isr_register (UartId, uart_intr_handler, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM, nullptr);
+
+    // DEBUG_V ();
+
+    timer1_attachInterrupt (timer_intr_handler); // Add ISR Function
+    timer1_enable (TIM_DIV1, TIM_EDGE, TIM_LOOP);
+    /* Dividers:
+        TIM_DIV1 = 0,   // 80MHz (80 ticks/us - 104857.588 us max)
+        TIM_DIV16 = 1,  // 5MHz (5 ticks/us - 1677721.4 us max)
+        TIM_DIV256 = 3  // 312.5Khz (1 tick = 3.2us - 26843542.4 us max)
+    Reloads:
+        TIM_SINGLE	0 //on interrupt routine you need to write a new value to start the timer again
+        TIM_LOOP	1 //on interrupt the counter will start with the same value again
+    */
+
+    // Arm the Timer for our Interval
+    timer1_write (GECE_CCOUNT_FRAME_TIME);
+
+#else if defined(ARDUINO_ARCH_ESP32)
+
+    // Configure Prescaler to 1, as our timer runs @ 80Mhz
+    // Giving an output of 80,000,000 / 80 = 1,000,000 ticks / second
+    if (nullptr == pHwTimer)
+    {
+        // Prescaler to 1 (min value) reuslts in a divide by 2 on the clock.
+        pHwTimer = timerBegin (0, 1, true);
+        timerAttachInterrupt (pHwTimer, &timer_intr_handler, true);
+        // ESP32 is a multi core / multi processing chip. It is mandatory to disable task switches during ISR
+        timerMux = portMUX_INITIALIZER_UNLOCKED;
+    }
+
+    // compensate for prescale divide by two.
+    timerAlarmWrite (pHwTimer, GECE_CCOUNT_FRAME_TIME / 2, true);
+    // timerAlarmWrite (pHwTimer, GECE_CCOUNT_FRAME_TIME, true);
+    timerAlarmEnable (pHwTimer);
+
 #endif
-
-    // DEBUG_V (String ("GECE_CCOUNT_DELAY: ") + String (GECE_CCOUNT_DELAY));
-
-    // FrameMinDurationInMicroSec = (GECE_FRAME_TIME + GECE_IDLE_TIME) * pixel_count;
-    FrameMinDurationInMicroSec = GECE_FRAME_TIME + GECE_IDLE_TIME;
-    // DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
-
-    SET_PERI_REG_MASK(UART_CONF0(UartId), UART_TXD_BRK);
-    // ReportNewFrame (); // starts a timeout that include IDLE time
-
     // DEBUG_END;
 } // begin
 
@@ -288,70 +384,54 @@ bool c_OutputGECE::validate ()
  */
 void IRAM_ATTR c_OutputGECE::ISR_Handler ()
 {
-    // Process if the desired UART has raised an interrupt
-    if (READ_PERI_REG (UART_INT_ST (UartId)))
+#ifdef ARDUINO_ARCH_ESP8266
+    // begin start bit
+    CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
+    uint32_t StartingCycleCount = _getCycleCount ();
+#endif
+
+    // Build a GECE packet
+    uint32_t packet = 0;
+    packet |= GECE_SET_BRIGHTNESS (brightness);
+    packet |= GECE_SET_ADDRESS (OutputFrame.CurrentPixelID);
+    packet |= GECE_SET_RED     (OutputFrame.pCurrentInputData[0]);
+    packet |= GECE_SET_GREEN   (OutputFrame.pCurrentInputData[1]);
+    packet |= GECE_SET_BLUE    (OutputFrame.pCurrentInputData[2]);
+    OutputFrame.pCurrentInputData += GECE_NUM_INTENSITY_BYTES_PER_PIXEL;
+
+#ifdef ARDUINO_ARCH_ESP8266
+    // finish  start bit
+    while ((_getCycleCount () - StartingCycleCount) < (GECE_CCOUNT_STARTBIT - 10)) {}
+#endif
+    // now convert the bits into a byte stream
+    for (uint32_t currentShiftMask = bit (GECE_PACKET_SIZE - 1);
+        0 != currentShiftMask; currentShiftMask >>= 1)
     {
-        uint32_t StartingCycleCount = _getCycleCount ();
+        enqueue (((packet & currentShiftMask) == 0) ? GECE_DATA_ZERO : GECE_DATA_ONE);
+    }
 
-        uint32_t packet = 0;
+    // enable the stop bit after the last data is sent
+    SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
 
-        // Build a GECE packet
-        // DEBUG_V ("");
-        packet  = GECE_SET_BRIGHTNESS (brightness); // <= This clears the other fields
-        packet |= GECE_SET_ADDRESS (OutputFrame.CurrentPixelID);
-        packet |= GECE_SET_RED (*OutputFrame.pCurrentInputData++);
-        packet |= GECE_SET_GREEN (*OutputFrame.pCurrentInputData++);
-        packet |= GECE_SET_BLUE (*OutputFrame.pCurrentInputData++);
+    // have we sent all of the pixel data?
+    if (++OutputFrame.CurrentPixelID >= pixel_count)
+    {
+        OutputFrame.CurrentPixelID = 0;
+        OutputFrame.pCurrentInputData = pOutputBuffer;
+    }
 
-        // DEBUG_V ("");
+} // ISR_Handler
 
-        // wait until all of the data has been clocked out
-        // (hate waits but there are no status bits to watch)
-        while((_getCycleCount () - StartingCycleCount) < GECE_CCOUNT_DELAY) {}
-
-        // this ensures a minimum break time and a Start bit
-        enqueue (GECE_DATA_ONE);
-
-        // now convert the bits into a byte stream
-        for (uint32_t currentShiftMask = bit (GECE_PACKET_SIZE - 1);
-            0 != currentShiftMask; currentShiftMask >>= 1)
-        {
-            enqueue (((packet & currentShiftMask) == 0) ? GECE_DATA_ZERO : GECE_DATA_ONE);
-        }
-
-        // Clear all interrupts flags for this uart
-        WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
-
-        // enable the send (uart is stopped while sending a break.
-        // Output does not return to '1' prior to sending first data byte.
-        CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
-        // enable the stop bit after the last data is sent
-        SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
-
-        // have we sent all of the pixel data?
-        if (++OutputFrame.CurrentPixelID >= pixel_count)
-        {
-            OutputFrame.CurrentPixelID = 0;
-            OutputFrame.pCurrentInputData = pOutputBuffer;
-        }
-
-    } // end Our uart generated an interrupt
-
-} // HandleWS2811Interrupt
 //----------------------------------------------------------------------------
 void c_OutputGECE::Render()
 {
     // DEBUG_START;
 
-    if (gpio_num_t (-1) == DataPin) { return; }
-    // if (!canRefresh ()) { return; }
-
-#ifdef ARDUINO_ARCH_ESP8266
-    SET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
-#else
-//     (*((volatile uint32_t*)(UART_FIFO_AHB_REG (UART_NUM_0)))) = (uint32_t)('7');
-    ESP_ERROR_CHECK (uart_enable_tx_intr (UartId, 1, 0));
-#endif
+    // start processing the timer interrupts
+    if (nullptr != pOutputBuffer)
+    {
+        GECE_OutputChanArray[OutputChannelId] = this;
+    }
 
     // DEBUG_END;
 
