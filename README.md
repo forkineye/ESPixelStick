@@ -302,6 +302,11 @@ We support up to 16 PWM outputs via the I2C bus. Each output can be configured t
 PWM is supported via the PCM9685 16 channel PWM output module. 
 This CAN be used to drive DC SSRs to support upto 5 dumb RGB light strings.
 
+## Configuration Backup / Restore
+The current device configuration can be saved to a local drive using the Backup button on the Admin page. Pressing the Backup button will result in a local file save operation to the default download directory. The file will be named using the Device name from the device configuration page PLUS the ESP unique ID found on the admin page.
+The current configuration can be over written from a file located on the local drive (in any directory you chose) by pressing the Restore button on the admin page. A popup will help you select the file to upload.
+NOTE: A restore is an OVER WRITE, not a merge. Any changes made since the backup file was created will be lost.
+
 ## Resources
 
 - Firmware: [http://github.com/forkineye/ESPixelStick](http://github.com/forkineye/ESPixelStick)

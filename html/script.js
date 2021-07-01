@@ -9,6 +9,7 @@ var ws = null; // Web Socket
 // global data
 var ParsedJsonStatus = null;
 var ParsedJsonConfig = null;
+var AdminInfo = null;
 var Output_Config = null; // Output Manager configuration record
 var Input_Config = null; // Input Manager configuration record
 var Device_Config = null;
@@ -98,6 +99,34 @@ $(function ()
         clearStream();
     });
 
+    $('#backupconfig').click(function ()
+    {
+        ExtractNetworkConfigFromHtmlPage();
+        ExtractChannelConfigFromHtmlPage(Input_Config.channels, "input");
+        ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
+        Device_Config.id = $('#config #device #id').val();
+
+        var TotalConfig = JSON.stringify({ 'device': Device_Config, 'network': Network_Config, 'input': Input_Config, 'output': Output_Config });
+
+        var blob = new Blob([TotalConfig], { type: "text/json;charset=utf-8" });
+        var FileName = Device_Config.id.replace(".", "-").replace(" ", "-").replace(",", "-") + "-" + AdminInfo.flashchipid;
+        saveAs(blob, FileName + ".json");
+    });
+
+    $('#restoreconfig').change(function ()
+    {
+        if (this.files.length !== 0)
+        {
+            const reader = new FileReader();
+            reader.onload = function fileReadCompleted()
+            {
+                // when the reader is done, the content is in reader.result.
+                ProcessLocalConfig(reader.result);
+            };
+            reader.readAsText(this.files[0]);
+        }
+    });
+
     $('#adminReboot').click(function () {
         reboot();
     });
@@ -169,6 +198,17 @@ $(function ()
     RequestStatusUpdate();
 });
 
+function ProcessLocalConfig(data)
+{
+    // console.info(data);
+    var ParsedLocalConfig = JSON.parse(data);
+
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'device' : ParsedLocalConfig.device, 'network': ParsedLocalConfig.network } } }));
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input'  : { 'input_config' : ParsedLocalConfig.input  } } } }));
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'output' : { 'output_config': ParsedLocalConfig.output } } } }));
+
+} // ProcessLocalConfig
+
 function UpdateAdvancedOptionsMode()
 {
     console.info("UpdateAdvancedOptionsMode");
@@ -198,6 +238,9 @@ function ProcessWindowChange(NextWindow) {
 
     else if (NextWindow === "#admin") {
         wsEnqueue('XA');
+        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
+        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
+        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
     }
 
     else if ((NextWindow === "#wifi") || (NextWindow === "#home")) {
@@ -756,7 +799,7 @@ function CreateOptionsFromConfig(OptionListName, Config)
 } // CreateOptionsFromConfig
 
 // Builds JSON config submission for "WiFi" tab
-function submitWiFiConfig()
+function ExtractNetworkConfigFromHtmlPage()
 {
     Network_Config.ssid        = $('#ssid').val();
     Network_Config.passphrase  = $('#passphrase').val();
@@ -769,8 +812,12 @@ function submitWiFiConfig()
     Network_Config.ap_fallback = $('#ap_fallback').prop('checked');
     Network_Config.ap_reboot   = $('#ap_reboot').prop('checked');
     Network_Config.ap_timeout  = $('#apt').prop('checked');
+} // ExtractNetworkConfigFromHtmlPage
 
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'network': Network_Config } } }));
+// Builds JSON config submission for "WiFi" tab
+function submitWiFiConfig() {
+    ExtractNetworkConfigFromHtmlPage();
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'device': Device_Config, 'network': Network_Config } } }));
 
 } // submitWiFiConfig
 
@@ -875,7 +922,7 @@ function submitDeviceConfig()
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
     Device_Config.id = $('#config #device #id').val();
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'device': Device_Config } } }));
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'device': Device_Config, 'network': Network_Config } } }));
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input':  { 'input_config': Input_Config } } } }));
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'output': { 'output_config': Output_Config } } } }));
 
@@ -1185,14 +1232,14 @@ function clearStream()
 
 function ProcessRecievedJsonAdminMessage(data)
 {
-    ParsedJsonAdmin = JSON.parse(data);
-    var Admin = ParsedJsonAdmin.admin;
+    var ParsedJsonAdmin = JSON.parse(data);
+    AdminInfo = ParsedJsonAdmin.admin;
 
-    $('#version').text(Admin.version);
-    $('#built').text(Admin.built);
-    $('#usedflashsize').text(Admin.usedflashsize);
-    $('#realflashsize').text(Admin.realflashsize);
-    $('#flashchipid').text(Admin.flashchipid);
+    $('#version').text(AdminInfo.version);
+    $('#built').text(AdminInfo.built);
+    $('#usedflashsize').text(AdminInfo.usedflashsize);
+    $('#realflashsize').text(AdminInfo.realflashsize);
+    $('#flashchipid').text(AdminInfo.flashchipid);
 
 } // ProcessRecievedJsonAdminMessage
 
