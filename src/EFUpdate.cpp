@@ -25,6 +25,7 @@
 #ifdef ARDUINO_ARCH_ESP32
 #   include <LITTLEFS.h>
 #   include <Update.h>
+#   include <esp_task_wdt.h>
 #else
 #   include <LittleFS.h>
 #   define LITTLEFS LittleFS
@@ -98,7 +99,9 @@ bool EFUpdate::process(uint8_t *data, size_t len) {
                             // DEBUG_V ("PASS");
                             _state = State::DATA;
                         }
+#ifdef ARDUINO_ARCH_ESP8266
                         Update.runAsync (true);
+#endif
                         // DEBUG_V ();
                     } else if (_record.type == RecordType::FS_IMAGE) {
                         // DEBUG_V ();
