@@ -1059,7 +1059,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
             // we are not talking to a station so we are not in AP mode
             // break;
         }
-        // DEBUG_V ("");
+        // DEBUG_V ("In AP Mode");
 
         // is the first message in the upload?
         if (0 == index)
@@ -1073,12 +1073,15 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
             efupdate.begin ();
         }
 
-        // DEBUG_V ("");
+        // DEBUG_V ("Sending data to efupdate");
+        // DEBUG_V (String ("data: 0x") + String (uint32(data), HEX));
+        // DEBUG_V (String (" len: ") + String (len));
 
         if (!efupdate.process (data, len))
         {
             LOG_PORT.println (String(CN_stars) + F (" UPDATE ERROR: ") + String (efupdate.getError ()));
         }
+        // DEBUG_V ("Packet has been processed");
 
         if (efupdate.hasError ())
         {
@@ -1086,7 +1089,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
             request->send (200, CN_textSLASHplain, (String (F ("Update Error: ")) + String (efupdate.getError ()).c_str()));
             break;
         }
-        // DEBUG_V ("");
+        // DEBUG_V ("No Error");
 
         if (final)
         {
