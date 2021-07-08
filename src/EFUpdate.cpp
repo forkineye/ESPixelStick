@@ -119,7 +119,9 @@ bool EFUpdate::process(uint8_t *data, size_t len) {
                             // DEBUG_V ();
                             _state = State::DATA;
                         }
+#ifdef ARDUINO_ARCH_ESP8266
                         Update.runAsync (true);
+#endif
                     } else {
                         // DEBUG_V ();
                         _state = State::FAIL;
