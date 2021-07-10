@@ -57,8 +57,42 @@ $(function ()
         // Firmware selection and upload
         $('#efu').change(function ()
         {
-            $('#updatefw').submit();
-            $('#update').modal();
+            var file = _('efu').files[0];
+            var formdata = new FormData();
+            formdata.append("file", file);
+            var FileXfer = new XMLHttpRequest();
+
+            FileXfer.upload.addEventListener("progress", progressHandler, false);
+            FileXfer.addEventListener("load", completeHandler, false);
+            FileXfer.addEventListener("error", errorHandler, false);
+            FileXfer.addEventListener("abort", abortHandler, false);
+            FileXfer.open("POST", "http://" + target + "/updatefw");
+            FileXfer.send(formdata);
+            $("#EfuProgressBar").removeClass("hidden");
+
+            function _(el) {
+                return document.getElementById(el);
+            }
+            function progressHandler(event) {
+                var percent = (event.loaded / event.total) * 100;
+                _("EfuProgressBar").value = Math.round(percent);
+            }
+
+            function completeHandler(event) {
+                // _("status").innerHTML = event.target.responseText;
+                _("EfuProgressBar").value = 0; //will clear progress bar after successful upload
+                showReboot();
+            }
+
+            function errorHandler(event) {
+                console.error("Transfer Error");
+                // _("status").innerHTML = "Upload Failed";
+            }
+
+            function abortHandler(event) {
+                console.error("Transfer Abort");
+                // _("status").innerHTML = "Upload Aborted";
+            }
         });
     });
 
@@ -1451,6 +1485,7 @@ function setConfig()
 // Show reboot modal
 function showReboot()
 {
+    $("#EfuProgressBar").addClass("hidden");
     $('#update').modal('hide');
     $('#reboot').modal();
     setTimeout(function ()
