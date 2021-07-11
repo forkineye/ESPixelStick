@@ -187,7 +187,7 @@ $(function ()
         createImageThumbnails: false,
         dictDefaultMessage: 'Drag an image here to upload, or click to select one',
         acceptedFiles: '.fseq,.pl',
-        timeout: 999999, /*milliseconds*/
+        timeout: 99999999, /*milliseconds*/
         init: function ()
         {
             this.on('success', function (file, resp)
