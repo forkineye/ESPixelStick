@@ -87,6 +87,11 @@ jobs:
         with:
           repository: natcl/Artnet
           path: alib/Artnet
+      - name: Checkout ArduinoStreamUtils
+        uses: actions/checkout@v2
+        with:
+          repository: bblanchon/ArduinoStreamUtils
+          path: alib/ArduinoStreamUtils
 
       # ESP32 Specific Stuff
       - name: Checkout AsyncTCP
