@@ -21,6 +21,7 @@
 #include <Int64String.h>
 
 #include "FileMgr.hpp"
+#include <StreamUtils.h>
 
 //-----------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
@@ -253,6 +254,9 @@ bool c_FileMgr::SaveConfigFile (const String& FileName, const char * FileData)
     else
     {
         file.seek (0, SeekSet);
+        WriteBufferingStream bufferedFileWrite{ file, 128 };
+        bufferedFileWrite.print (FileData);
+
         file.print (FileData);
         file.close ();
 
@@ -302,7 +306,8 @@ bool c_FileMgr::ReadConfigFile (const String& FileName, String& FileData)
 
         // DEBUG_V (String("File '") + FileName + "' is open.");
         file.seek (0, SeekSet);
-        FileData = file.readString ();
+        ReadBufferingStream bufferedFileRead{ file, 128 };
+        FileData = bufferedFileRead.readString ();
         file.close ();
         GotFileData = true;
 
@@ -712,7 +717,8 @@ bool c_FileMgr::ReadSdFile (const String & FileName, String & FileData)
         if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
         {
             FileList[FileListIndex].info.seek (0, SeekSet);
-            FileData = FileList[FileListIndex].info.readString ();
+            ReadBufferingStream bufferedFileRead{ FileList[FileListIndex].info, 128 };
+            FileData = bufferedFileRead.readString ();
         }
 
         CloseSdFile (FileHandle);
@@ -770,7 +776,8 @@ size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t N
     int FileListIndex;
     if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
     {
-        response = FileList[FileListIndex].info.read (FileData, NumBytesToRead);
+        ReadBufferingStream bufferedFileRead{ FileList[FileListIndex].info, 128 };
+        response = bufferedFileRead.readBytes (((char*)FileData), NumBytesToRead);
     }
     else
     {
@@ -808,7 +815,8 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
     int FileListIndex;
     if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
     {
-        response = FileList[FileListIndex].info.write (FileData, NumBytesToWrite);
+        WriteBufferingStream bufferedFileWrite{ FileList[FileListIndex].info, 128 };
+        response = bufferedFileWrite.write (FileData, NumBytesToWrite);
     }
     else
     {
@@ -869,13 +877,17 @@ void c_FileMgr::handleFileUpload (const String & filename,
         handleFileUploadNewFile (filename);
     }
 
+    // DEBUG_V (String ("index: ") + String (index));
+    // DEBUG_V (String ("  len: ") + String (len));
+    // DEBUG_V (String ("final: ") + String (final));
+
     if ((0 != len) && (0 != fsUploadFileName.length ()))
     {
         // Write data
         // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
         WriteSdFile (fsUploadFile, data, len);
         // LOG_PORT.print (String ("Writting bytes: ") + String (index) + '\r');
-        LOG_PORT.print (".");
+        // LOG_PORT.print (".");
     }
 
     if ((true == final) && (0 != fsUploadFileName.length ()))
