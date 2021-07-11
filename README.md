@@ -39,6 +39,7 @@ Extract the folder in each of these zip files and place it in the "library" fold
 - [EspAlexa](https://github.com/MartinMueller2003/Espalexa) - Alexa Direct control Library
 - [Adafruit-PWM-Servo-Driver-Library](https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library) - Servo Motor I2C control
 - [Artnet](https://github.com/natcl/Artnet) - Artnet access library
+- [ArduinoStreamUtils](https://github.com/bblanchon/ArduinoStreamUtils) - Streaming library
 
 The ESP32 build will require the following software libraries to build this project:
 
@@ -51,6 +52,7 @@ The ESP32 build will require the following software libraries to build this proj
 - [EspAlexa](https://github.com/MartinMueller2003/Espalexa) - Alexa Direct control Library
 - [Adafruit-PWM-Servo-Driver-Library](https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library)
 - [Artnet](https://github.com/natcl/Artnet) - Artnet access library
+- [ArduinoStreamUtils](https://github.com/bblanchon/ArduinoStreamUtils) - Streaming library
 
 Using library manager:
 - Install littlefs_ESP32 for esp32 support.
