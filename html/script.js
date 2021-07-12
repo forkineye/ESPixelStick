@@ -20,6 +20,7 @@ var StatusUpdateRequestTimer = null;
 var target = null;
 var myDropzone = null;
 var SdCardIsInstalled = false;
+var FseqFileTransferStartTime = new Date();
 
 // Drawing canvas - move to diagnostics
 var canvas = document.getElementById("canvas");
@@ -197,6 +198,11 @@ $(function ()
                 // console.log(resp);
                 Dropzone.forElement('#filemanagementupload').removeAllFiles(true)
                 RequestListOfFiles();
+                $('#fseqprogress_fg').addClass("hidden");
+
+                var DeltaTime = (new Date().getTime() - FseqFileTransferStartTime.getTime()) / 1000;
+                var rate = Math.floor((file.size / DeltaTime) / 1000);
+                console.info("Final Transfer Rate: " + rate + "KBps");
             });
 
             this.on('addedfile', function (file, resp)
@@ -204,8 +210,20 @@ $(function ()
                 // console.log("addedfile");
                 // console.log(file);
                 // console.log(resp);
+                FseqFileTransferStartTime = new Date();
             });
 
+            this.on('uploadprogress', function (file, percentProgress, bytesSent) {
+                // console.log("percentProgress: " + percentProgress);
+                // console.log("bytesSent: " + bytesSent);
+                $('#fseqprogress_fg').removeClass("hidden");
+                $('#fseqprogressbytes').html(bytesSent);
+
+                var now = new Date().getTime();
+                var DeltaTime = (now - FseqFileTransferStartTime.getTime()) / 1000;
+                var rate = Math.floor((bytesSent / DeltaTime)/1000);
+                $('#fseqprogressrate').html(rate + "KBps");
+            });
         },
 
         accept: function (file, done)
@@ -987,7 +1005,7 @@ function wsConnect()
             target = document.location.host;
         }
 
-        // target = "192.168.10.215";
+        target = "192.168.10.215";
         // target = "192.168.10.193";
 
         // Open a new web socket and set the binary type
