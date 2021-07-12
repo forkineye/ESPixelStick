@@ -127,7 +127,8 @@ private:
     int FileListFindSdFileHandle (FileId HandleToFind);
     void InitSdFileList ();
 
-    // std::map<FileId, File> FileList;
+    byte   * FileUploadBuffer = nullptr;
+    uint32_t FileUploadBufferOffset = 0;
 
 protected:
 
