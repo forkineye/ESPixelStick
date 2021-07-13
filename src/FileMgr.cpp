@@ -263,10 +263,11 @@ bool c_FileMgr::SaveConfigFile (const String& FileName, const char * FileData)
     else
     {
         file.seek (0, SeekSet);
+
         WriteBufferingStream bufferedFileWrite{ file, 128 };
         bufferedFileWrite.print (FileData);
+        // file.print (FileData);
 
-        file.print (FileData);
         file.close ();
 
         file = LITTLEFS.open (FileName.c_str (), "r");
@@ -315,8 +316,9 @@ bool c_FileMgr::ReadConfigFile (const String& FileName, String& FileData)
 
         // DEBUG_V (String("File '") + FileName + "' is open.");
         file.seek (0, SeekSet);
-        ReadBufferingStream bufferedFileRead{ file, 128 };
-        FileData = bufferedFileRead.readString ();
+        // ReadBufferingStream bufferedFileRead{ file, 128 };
+        // FileData = bufferedFileRead.readString ();
+        FileData = file.readString ();
         file.close ();
         GotFileData = true;
 
