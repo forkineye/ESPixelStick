@@ -1,21 +1,21 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title id="title"></title>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title id="title"></title>
 
-        <!-- for local development
-        <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
-        <link rel="stylesheet" type="text/css" href="style.css">
-        <link rel="stylesheet" href="css/treejs.css" id="treejs_styles">
-        <link rel="stylesheet" href="css/dropzone.css" id="dropzone_styles">
-        -->
+    <!-- for local development
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" href="css/treejs.css" id="treejs_styles">
+    <link rel="stylesheet" href="css/dropzone.css" id="dropzone_styles">
+    -->
 
-        <link rel="stylesheet" type="text/css" href="esps.css">
+    <link rel="stylesheet" type="text/css" href="esps.css">
 
-    </head>
+</head>
 
     <body>
         <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -333,6 +333,12 @@
                                 </tbody>
                             </table>
 
+                            <div id="fseqprogress_fg" class="form-group col-sm-10 hidden">
+                                <label class="control-label col-sm-4" for="fseqprogressbytes">Bytes Sent:</label>
+                                <p class="form-control-static" id="fseqprogressbytes"></p>
+                                <label class="control-label col-sm-4" for="fseqprogressbytes">Transfer Rate:</label>
+                                <p class="form-control-static" id="fseqprogressrate"></p>
+                            </div>
                             <div id="filemanagementupload">
                                 <p>Click to Upload a file with the file dialog or drag and drop a file into the dashed region</p>
                             </div>
@@ -369,7 +375,7 @@
                             </div>
                             <div class="col-sm-3">
                                 <label class="btn btn-primary btn-file">
-                                    Update Firmware <input type="file" id="efu" name="file" accept=".efu" style="display: none;">
+                                    Update Firmware <input type="file" id="efu" name="file" accept=".efu" style="display: none;"><br /><progress class="hidden" id="EfuProgressBar" value="0" max="100"></progress>
                                 </label>
                             </div>
                             <div class="col-sm-3">
@@ -453,7 +459,7 @@
         <script type="text/javascript" src="js/jqColorPicker.js"></script>
         <script type="text/javascript" src="script.js"></script>
         <script type="text/javascript" src="js/FileSaver.js"></script>
-    -->
+        -->
 
         <script type="text/javascript" src="esps.js"></script>
 

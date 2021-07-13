@@ -21,6 +21,16 @@
 #include <Int64String.h>
 
 #include "FileMgr.hpp"
+#include <StreamUtils.h>
+
+#define HTML_TRANSFER_BLOCK_SIZE    563
+#ifdef ARDUINO_ARCH_ESP32
+#   define NumBlocksToBuffer        21
+#else
+#   define NumBlocksToBuffer         9
+#endif
+
+static const uint32_t FileUploadBufferSize = HTML_TRANSFER_BLOCK_SIZE * NumBlocksToBuffer;
 
 //-----------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
@@ -253,6 +263,9 @@ bool c_FileMgr::SaveConfigFile (const String& FileName, const char * FileData)
     else
     {
         file.seek (0, SeekSet);
+        WriteBufferingStream bufferedFileWrite{ file, 128 };
+        bufferedFileWrite.print (FileData);
+
         file.print (FileData);
         file.close ();
 
@@ -302,7 +315,8 @@ bool c_FileMgr::ReadConfigFile (const String& FileName, String& FileData)
 
         // DEBUG_V (String("File '") + FileName + "' is open.");
         file.seek (0, SeekSet);
-        FileData = file.readString ();
+        ReadBufferingStream bufferedFileRead{ file, 128 };
+        FileData = bufferedFileRead.readString ();
         file.close ();
         GotFileData = true;
 
@@ -712,7 +726,8 @@ bool c_FileMgr::ReadSdFile (const String & FileName, String & FileData)
         if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
         {
             FileList[FileListIndex].info.seek (0, SeekSet);
-            FileData = FileList[FileListIndex].info.readString ();
+            ReadBufferingStream bufferedFileRead{ FileList[FileListIndex].info, 128 };
+            FileData = bufferedFileRead.readString ();
         }
 
         CloseSdFile (FileHandle);
@@ -770,7 +785,8 @@ size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t N
     int FileListIndex;
     if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
     {
-        response = FileList[FileListIndex].info.read (FileData, NumBytesToRead);
+        ReadBufferingStream bufferedFileRead{ FileList[FileListIndex].info, 128 };
+        response = bufferedFileRead.readBytes (((char*)FileData), NumBytesToRead);
     }
     else
     {
@@ -808,7 +824,8 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
     int FileListIndex;
     if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
     {
-        response = FileList[FileListIndex].info.write (FileData, NumBytesToWrite);
+        WriteBufferingStream bufferedFileWrite{ FileList[FileListIndex].info, 128 };
+        response = bufferedFileWrite.write (FileData, NumBytesToWrite);
     }
     else
     {
@@ -869,23 +886,60 @@ void c_FileMgr::handleFileUpload (const String & filename,
         handleFileUploadNewFile (filename);
     }
 
+    // DEBUG_V (String ("index: ") + String (index));
+    // DEBUG_V (String ("  len: ") + String (len));
+    // DEBUG_V (String ("final: ") + String (final));
+
     if ((0 != len) && (0 != fsUploadFileName.length ()))
     {
-        // Write data
-        // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
-        WriteSdFile (fsUploadFile, data, len);
-        // LOG_PORT.print (String ("Writting bytes: ") + String (index) + '\r');
-        LOG_PORT.print (".");
+        if (nullptr == FileUploadBuffer)
+        {
+            // Write data
+            // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
+            WriteSdFile (fsUploadFile, data, len);
+            // LOG_PORT.print (String ("Writting bytes: ") + String (index) + '\r');
+            // LOG_PORT.print (".");
+        }
+        else
+        {
+            // is there space in the buffer for this chunk?
+            if (((len + FileUploadBufferOffset) >= FileUploadBufferSize) &&
+                (0 != FileUploadBufferOffset))
+            {
+                // write out the buffer
+                WriteSdFile (fsUploadFile, FileUploadBuffer, FileUploadBufferOffset);
+                FileUploadBufferOffset = 0;
+            }
+
+            // will this chunk fit in the buffer
+            if (len < FileUploadBufferSize)
+            {
+                memcpy (&FileUploadBuffer[FileUploadBufferOffset], data, len);
+                FileUploadBufferOffset += len;
+            }
+            else
+            {
+                // chunk is bigger than our buffer just write it out
+                WriteSdFile (fsUploadFile, data, len);
+            }
+        }
     }
 
     if ((true == final) && (0 != fsUploadFileName.length ()))
     {
-        LOG_PORT.println ("");
         // DEBUG_V ("UploadEnd: " + String(index + len) + String(" bytes"));
         LOG_PORT.println (String (F ("Upload File: '")) + fsUploadFileName + String (F ("' Done")));
 
         FileMgr.CloseSdFile (fsUploadFile);
         fsUploadFileName = "";
+
+        if (nullptr != FileUploadBuffer)
+        {
+            // DEBUG_V (String (" Free Upload Buffer. Heap: ") + String (ESP.getFreeHeap ()));
+            free (FileUploadBuffer);
+            // DEBUG_V (String ("Freed Upload Buffer. Heap: ") + String (ESP.getFreeHeap ()));
+            FileUploadBufferOffset = 0;
+        }
     }
 
     // DEBUG_END;
@@ -916,6 +970,21 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
 
     // Open the file for writing
     FileMgr.OpenSdFile (fsUploadFileName, FileMode::FileWrite, fsUploadFile);
+
+    if (nullptr == FileUploadBuffer)
+    {
+        FileUploadBuffer = (byte*)malloc (FileUploadBufferSize);
+        if (nullptr != FileUploadBuffer)
+        {
+            // DEBUG_V ("Allocated file upload buffer");
+        }
+        else
+        {
+            // DEBUG_V ("Failed to Allocate file upload buffer");
+        }
+    }
+
+    FileUploadBufferOffset = 0;
 
     // DEBUG_END;
 
