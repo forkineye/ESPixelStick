@@ -191,13 +191,18 @@ $(function ()
         timeout: 99999999, /*milliseconds*/
         init: function ()
         {
-            this.on('success', function (file, resp)
-            {
+            this.on('success', function (file, resp) {
                 // console.log("Success");
                 // console.log(file);
                 // console.log(resp);
                 Dropzone.forElement('#filemanagementupload').removeAllFiles(true)
                 RequestListOfFiles();
+            });
+
+            this.on('complete', function (file, resp) {
+                // console.log("complete");
+                // console.log(file);
+                // console.log(resp);
                 $('#fseqprogress_fg').addClass("hidden");
 
                 var DeltaTime = (new Date().getTime() - FseqFileTransferStartTime.getTime()) / 1000;
