@@ -381,6 +381,52 @@ bool c_FileMgr::ReadConfigFile (const String& FileName, JsonDocument & FileData)
 } // ReadConfigFile
 
 //-----------------------------------------------------------------------------
+bool c_FileMgr::ReadConfigFile (const String & FileName, byte * FileData, size_t maxlen)
+{
+    // DEBUG_START;
+    bool GotFileData = false;
+
+    do // once
+    {
+        // DEBUG_V (String("File '") + FileName + "' is being opened.");
+        fs::File file = LITTLEFS.open (FileName.c_str (), CN_r);
+        if (!file)
+        {
+            LOG_PORT.println (String (CN_stars) + CN_Configuration_File_colon + "'" + FileName + F ("' not found.") + CN_stars);
+            break;
+        }
+
+        if (file.size() >= maxlen)
+        {
+            LOG_PORT.println (String (CN_stars) + CN_Configuration_File_colon + "'" + FileName + F ("' too large for buffer. ") + CN_stars);
+            file.close ();
+            break;
+        }
+
+        LOG_PORT.print   (FileName);
+        LOG_PORT.print   (" reading ");
+        LOG_PORT.print   (file.size ());
+        LOG_PORT.println (" bytes.");
+
+        // DEBUG_V (String("File '") + FileName + "' is open.");
+        file.seek (0, SeekSet);
+        // ReadBufferingStream bufferedFileRead{ file, 128 };
+        // FileData = bufferedFileRead.readString ();
+        file.read (FileData, file.size());
+        file.close ();
+
+        GotFileData = true;
+
+        // DEBUG_V (FileData);
+
+    } while (false);
+
+    // DEBUG_END;
+    return GotFileData;
+
+} // ReadConfigFile
+
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void c_FileMgr::InitSdFileList ()
