@@ -677,6 +677,13 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
         Device_Config = JsonConfigData.device;
         updateFromJSON(JsonConfigData);
 
+        if (false === JsonConfigData.SdCardPresent) {
+            $("#li-filemanagement").addClass("hidden");
+        }
+        else {
+            $("#li-filemanagement").removeClass("hidden");
+		}
+
         // is this a network config?
         if (JsonConfigData.hasOwnProperty("network")) {
             Network_Config = JsonConfigData.network;
