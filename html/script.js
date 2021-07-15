@@ -249,8 +249,6 @@ $(function ()
     var hash = window.location.hash;
     hash && $('ul.navbar-nav li a[href="' + hash + '"]').click();
 
-    RequestListOfFiles();
-
     // start updating stats
     RequestStatusUpdate();
 });
@@ -304,15 +302,16 @@ function ProcessWindowChange(NextWindow) {
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
     }
 
-    // kick start the live stream
     else if (NextWindow === "#config") {
-        RequestListOfFiles();
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
     }
 
+    else if (NextWindow === "#filemanagement") {
+        RequestListOfFiles();
+    }
+
     UpdateAdvancedOptionsMode();
-    RequestListOfFiles();
 
 } // ProcessWindowChange
 
@@ -359,7 +358,7 @@ function RequestListOfFiles()
     // ask for a file list from the server
     wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'files' } })); // Get File List
 
-} // RequestListOfFseqFiles
+} // RequestListOfFiles
 
 function ProcessGetFileResponse(JsonConfigData)
 {
