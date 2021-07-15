@@ -154,7 +154,7 @@ void c_WebMgr::init ()
             // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));
         });
 
-    // Firmware upload handler - only in station mode
+    // Firmware upload handler
     webServer.on ("/updatefw", HTTP_POST, [](AsyncWebServerRequest* request)
         {
             webSocket.textAll ("X6");
