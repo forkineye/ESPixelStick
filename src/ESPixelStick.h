@@ -82,6 +82,7 @@ bool    deserializeCore        (JsonObject & json);
 boolean dsDevice               (JsonObject & json);
 boolean dsNetwork              (JsonObject & json);
 extern  bool reboot;
+static const String ConfigFileName = "/config.json";
 
 template <typename T, typename J, typename N>
 bool setFromJSON (T& OutValue, J& Json, N Name)
