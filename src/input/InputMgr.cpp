@@ -295,14 +295,12 @@ void c_InputMgr::CreateNewConfig ()
 } // CreateNewConfig
 
 //-----------------------------------------------------------------------------
-void c_InputMgr::GetConfig (char * Response)
+void c_InputMgr::GetConfig (byte * Response, size_t maxlen)
 {
     // DEBUGSTART;
 
-    String TempConfigData;
-    FileMgr.ReadConfigFile (ConfigFileName, TempConfigData);
+    FileMgr.ReadConfigFile (ConfigFileName, Response, maxlen);
     // DEBUGV (String ("TempConfigData: ") + TempConfigData);
-    strcat (Response, TempConfigData.c_str ());
 
     // DEBUGEND;
 } // GetConfig

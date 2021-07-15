@@ -38,7 +38,7 @@ public:
     void      Begin             ();                        ///< set up the operating environment based on the current config (or defaults)
     void      Render            ();                        ///< Call from loop(),  renders output data
     void      LoadConfig        ();                        ///< Read the current configuration data from nvram
-    void      GetConfig         (char * Response);
+    void      GetConfig         (byte * Response, size_t maxlen);
     void      GetConfig         (String & Response);
     void      SetConfig         (const char * NewConfig);  ///< Save the current configuration data to nvram
     void      GetStatus         (JsonObject & jsonStatus);

@@ -36,11 +36,11 @@ public:
     virtual ~c_InputMgr ();
 
     void Begin      (uint8_t * BufferStart, uint16_t BufferSize); ///< set up the operating environment based on the current config (or defaults)
-    void LoadConfig ();                        ///< Read the current configuration data from nvram
-    void GetConfig  (char * Response);         ///< Get the current config used by the driver
+    void LoadConfig ();                                           ///< Read the current configuration data from nvram
+    void GetConfig  (byte * Response, size_t maxlen);             ///< Get the current config used by the driver
     void GetStatus  (JsonObject & jsonStatus);
-    void SetConfig  (const char * NewConfig); ///< Set a new config in the driver
-    void Process    ();                        ///< Call from loop(),  renders Input data
+    void SetConfig  (const char * NewConfig);                     ///< Set a new config in the driver
+    void Process    ();                                           ///< Call from loop(),  renders Input data
     void SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize);
     void SetOperationalState (bool Active);
     void ResetBlankTimer ();

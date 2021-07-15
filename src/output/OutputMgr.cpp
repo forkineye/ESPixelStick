@@ -305,13 +305,11 @@ void c_OutputMgr::GetConfig (String & Response)
 } // GetConfig
 
 //-----------------------------------------------------------------------------
-void c_OutputMgr::GetConfig (char * Response )
+void c_OutputMgr::GetConfig (byte * Response, size_t maxlen )
 {
     // DEBUG_START;
 
-    String TempConfigData;
-    FileMgr.ReadConfigFile (ConfigFileName, TempConfigData);
-    strcat (Response, TempConfigData.c_str ());
+    FileMgr.ReadConfigFile (ConfigFileName, Response, maxlen);
 
     // DEBUG_END;
 
