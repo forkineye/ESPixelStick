@@ -967,7 +967,7 @@ void c_FileMgr::handleFileUpload (const String & filename,
             }
             else
             {
-                // chunk is bigger than our buffer just write it out
+                // chunk is bigger than our buffer
                 WriteSdFile (fsUploadFile, data, len);
             }
         }
@@ -975,10 +975,17 @@ void c_FileMgr::handleFileUpload (const String & filename,
 
     if ((true == final) && (0 != fsUploadFileName.length ()))
     {
+        // save the last bits
+        if (FileUploadBufferOffset)
+        {
+            WriteSdFile (fsUploadFile, FileUploadBuffer, FileUploadBufferOffset);
+            FileUploadBufferOffset = 0;
+        }
+
         // DEBUG_V ("UploadEnd: " + String(index + len) + String(" bytes"));
         LOG_PORT.println (String (F ("Upload File: '")) + fsUploadFileName + String (F ("' Done")));
 
-        FileMgr.CloseSdFile (fsUploadFile);
+        CloseSdFile (fsUploadFile);
         fsUploadFileName = "";
 
         if (nullptr != FileUploadBuffer)
