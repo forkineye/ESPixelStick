@@ -878,7 +878,7 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
             // DEBUG_V ("input");
             String Temp;
             FileMgr.GetListOfSdFiles (Temp);
-            if (BufferFreeSize >= Temp.length ())
+            if (Temp.length () >= BufferFreeSize )
             {
                 strcat (WebSocketFrameCollectionBuffer, "\"ERROR\": \"File List Too Long\"");
             }
