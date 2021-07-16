@@ -992,8 +992,9 @@ void c_FileMgr::handleFileUpload (const String & filename,
         {
             // DEBUG_V (String (" Free Upload Buffer. Heap: ") + String (ESP.getFreeHeap ()));
             free (FileUploadBuffer);
-            // DEBUG_V (String ("Freed Upload Buffer. Heap: ") + String (ESP.getFreeHeap ()));
+            FileUploadBuffer = nullptr;
             FileUploadBufferOffset = 0;
+            // DEBUG_V (String ("Freed Upload Buffer. Heap: ") + String (ESP.getFreeHeap ()));
         }
     }
 
