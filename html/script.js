@@ -305,6 +305,7 @@ function ProcessWindowChange(NextWindow) {
     else if (NextWindow === "#config") {
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
+        RequestListOfFiles();
     }
 
     else if (NextWindow === "#filemanagement") {
