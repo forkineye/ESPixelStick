@@ -665,7 +665,7 @@ void fsm_WiFi_state_ConnectedToSta::Init ()
 
     WiFiMgr.SetIsWiFiConnected (true);
     InputMgr.NetworkStateChanged (true);
-
+    WebMgr.NetworkStateChanged (true);
 
     // DEBUG_END;
 } // fsm_WiFi_state_ConnectedToSta::Init

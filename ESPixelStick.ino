@@ -81,7 +81,6 @@ static void _u0_putc(char c){
 /////////////////////////////////////////////////////////
 
 // Configuration file
-const String ConfigFileName = "/config.json";
 
 const String VERSION = "4.0-dev (NOT STABLE)";
 const String BUILD_DATE = String(__DATE__) + " - " + String(__TIME__);

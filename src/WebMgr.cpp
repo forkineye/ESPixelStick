@@ -154,7 +154,7 @@ void c_WebMgr::init ()
             // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));
         });
 
-    // Firmware upload handler - only in station mode
+    // Firmware upload handler
     webServer.on ("/updatefw", HTTP_POST, [](AsyncWebServerRequest* request)
         {
             webSocket.textAll ("X6");
@@ -841,11 +841,16 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
 
     do // once
     {
+        size_t bufferoffset = strlen(WebSocketFrameCollectionBuffer);
+        size_t BufferFreeSize = sizeof (WebSocketFrameCollectionBuffer) - bufferoffset;
+
         if ((jsonCmd[CN_get] == CN_device) ||
             (jsonCmd[CN_get] == CN_network)  )
         {
             // DEBUG_V ("device/network");
-            strcat(WebSocketFrameCollectionBuffer, serializeCore (false).c_str());
+            FileMgr.ReadConfigFile (ConfigFileName, 
+                                    (byte*)&WebSocketFrameCollectionBuffer[bufferoffset],
+                                    BufferFreeSize);
             // DEBUG_V ("");
             break;
         }
@@ -853,7 +858,8 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
         if (jsonCmd[CN_get] == CN_output)
         {
             // DEBUG_V (CN_output);
-            OutputMgr.GetConfig (WebSocketFrameCollectionBuffer);
+            OutputMgr.GetConfig ((byte*)&WebSocketFrameCollectionBuffer[bufferoffset],
+                                 BufferFreeSize);
             // DEBUG_V ("");
             break;
         }
@@ -861,7 +867,8 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
         if (jsonCmd[CN_get] == CN_input)
         {
             // DEBUG_V ("input");
-            InputMgr.GetConfig (WebSocketFrameCollectionBuffer);
+            InputMgr.GetConfig ((byte*)&WebSocketFrameCollectionBuffer[bufferoffset],
+                                BufferFreeSize);
             // DEBUG_V ("");
             break;
         }
@@ -871,14 +878,21 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
             // DEBUG_V ("input");
             String Temp;
             FileMgr.GetListOfSdFiles (Temp);
-            strcat (WebSocketFrameCollectionBuffer, Temp.c_str ());
+            if (Temp.length () >= BufferFreeSize )
+            {
+                strcat (WebSocketFrameCollectionBuffer, "\"ERROR\": \"File List Too Long\"");
+            }
+            else
+            {
+                strcat (WebSocketFrameCollectionBuffer, Temp.c_str ());
+            }
             // DEBUG_V ("");
             break;
         }
 
         // log an error
         PrettyPrint (jsonCmd, String (F ("ERROR: Unhandled Get Request")));
-        strcat (WebSocketFrameCollectionBuffer, "\"ERROR: Request Not Supported\"");
+        strcat (WebSocketFrameCollectionBuffer, "\"ERROR\": \"Request Not Supported\"");
 
     } while (false);
 

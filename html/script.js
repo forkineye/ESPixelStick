@@ -191,13 +191,18 @@ $(function ()
         timeout: 99999999, /*milliseconds*/
         init: function ()
         {
-            this.on('success', function (file, resp)
-            {
+            this.on('success', function (file, resp) {
                 // console.log("Success");
                 // console.log(file);
                 // console.log(resp);
                 Dropzone.forElement('#filemanagementupload').removeAllFiles(true)
                 RequestListOfFiles();
+            });
+
+            this.on('complete', function (file, resp) {
+                // console.log("complete");
+                // console.log(file);
+                // console.log(resp);
                 $('#fseqprogress_fg').addClass("hidden");
 
                 var DeltaTime = (new Date().getTime() - FseqFileTransferStartTime.getTime()) / 1000;
@@ -243,8 +248,6 @@ $(function ()
     // Autoload tab based on URL hash
     var hash = window.location.hash;
     hash && $('ul.navbar-nav li a[href="' + hash + '"]').click();
-
-    RequestListOfFiles();
 
     // start updating stats
     RequestStatusUpdate();
@@ -299,15 +302,17 @@ function ProcessWindowChange(NextWindow) {
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
     }
 
-    // kick start the live stream
     else if (NextWindow === "#config") {
-        RequestListOfFiles();
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
+        RequestListOfFiles();
+    }
+
+    else if (NextWindow === "#filemanagement") {
+        RequestListOfFiles();
     }
 
     UpdateAdvancedOptionsMode();
-    RequestListOfFiles();
 
 } // ProcessWindowChange
 
@@ -354,7 +359,7 @@ function RequestListOfFiles()
     // ask for a file list from the server
     wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'files' } })); // Get File List
 
-} // RequestListOfFseqFiles
+} // RequestListOfFiles
 
 function ProcessGetFileResponse(JsonConfigData)
 {
@@ -672,6 +677,13 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     {
         Device_Config = JsonConfigData.device;
         updateFromJSON(JsonConfigData);
+
+        if (false === JsonConfigData.SdCardPresent) {
+            $("#li-filemanagement").addClass("hidden");
+        }
+        else {
+            $("#li-filemanagement").removeClass("hidden");
+		}
 
         // is this a network config?
         if (JsonConfigData.hasOwnProperty("network")) {

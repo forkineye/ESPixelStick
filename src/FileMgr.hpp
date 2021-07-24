@@ -60,6 +60,7 @@ public:
     bool   SaveConfigFile   (const String & FileName, JsonVariant & FileData);
     bool   ReadConfigFile   (const String & FileName, String & FileData);
     bool   ReadConfigFile   (const String & FileName, JsonDocument & FileData);
+    bool   ReadConfigFile   (const String & FileName, byte * FileData, size_t maxlen);
     bool   LoadConfigFile   (const String & FileName, DeserializationHandler Handler);
 
     bool   SdCardIsInstalled () { return SdCardInstalled; }

@@ -381,6 +381,52 @@ bool c_FileMgr::ReadConfigFile (const String& FileName, JsonDocument & FileData)
 } // ReadConfigFile
 
 //-----------------------------------------------------------------------------
+bool c_FileMgr::ReadConfigFile (const String & FileName, byte * FileData, size_t maxlen)
+{
+    // DEBUG_START;
+    bool GotFileData = false;
+
+    do // once
+    {
+        // DEBUG_V (String("File '") + FileName + "' is being opened.");
+        fs::File file = LITTLEFS.open (FileName.c_str (), CN_r);
+        if (!file)
+        {
+            LOG_PORT.println (String (CN_stars) + CN_Configuration_File_colon + "'" + FileName + F ("' not found.") + CN_stars);
+            break;
+        }
+
+        if (file.size() >= maxlen)
+        {
+            LOG_PORT.println (String (CN_stars) + CN_Configuration_File_colon + "'" + FileName + F ("' too large for buffer. ") + CN_stars);
+            file.close ();
+            break;
+        }
+
+        LOG_PORT.print   (FileName);
+        LOG_PORT.print   (" reading ");
+        LOG_PORT.print   (file.size ());
+        LOG_PORT.println (" bytes.");
+
+        // DEBUG_V (String("File '") + FileName + "' is open.");
+        file.seek (0, SeekSet);
+        // ReadBufferingStream bufferedFileRead{ file, 128 };
+        // FileData = bufferedFileRead.readString ();
+        file.read (FileData, file.size());
+        file.close ();
+
+        GotFileData = true;
+
+        // DEBUG_V (FileData);
+
+    } while (false);
+
+    // DEBUG_END;
+    return GotFileData;
+
+} // ReadConfigFile
+
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void c_FileMgr::InitSdFileList ()
@@ -921,7 +967,7 @@ void c_FileMgr::handleFileUpload (const String & filename,
             }
             else
             {
-                // chunk is bigger than our buffer just write it out
+                // chunk is bigger than our buffer
                 WriteSdFile (fsUploadFile, data, len);
             }
         }
@@ -929,18 +975,26 @@ void c_FileMgr::handleFileUpload (const String & filename,
 
     if ((true == final) && (0 != fsUploadFileName.length ()))
     {
+        // save the last bits
+        if (FileUploadBufferOffset)
+        {
+            WriteSdFile (fsUploadFile, FileUploadBuffer, FileUploadBufferOffset);
+            FileUploadBufferOffset = 0;
+        }
+
         // DEBUG_V ("UploadEnd: " + String(index + len) + String(" bytes"));
         LOG_PORT.println (String (F ("Upload File: '")) + fsUploadFileName + String (F ("' Done")));
 
-        FileMgr.CloseSdFile (fsUploadFile);
+        CloseSdFile (fsUploadFile);
         fsUploadFileName = "";
 
         if (nullptr != FileUploadBuffer)
         {
             // DEBUG_V (String (" Free Upload Buffer. Heap: ") + String (ESP.getFreeHeap ()));
             free (FileUploadBuffer);
-            // DEBUG_V (String ("Freed Upload Buffer. Heap: ") + String (ESP.getFreeHeap ()));
+            FileUploadBuffer = nullptr;
             FileUploadBufferOffset = 0;
+            // DEBUG_V (String ("Freed Upload Buffer. Heap: ") + String (ESP.getFreeHeap ()));
         }
     }
 
