@@ -1,6 +1,6 @@
 #pragma once
 /*
-* OutputWS2811Uart.h - WS2811 driver code for ESPixelStick UART
+* OutputWS2811Rmt.h - WS2811 driver code for ESPixelStick RMT Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -25,15 +25,19 @@
 #include "OutputCommon.hpp"
 #include "OutputWS2811.hpp"
 
-class c_OutputWS2811Uart : public c_OutputWS2811
+#ifdef ARDUINO_ARCH_ESP32
+// #   include <driver/uart.h>
+#endif
+
+class c_OutputWS2811Rmt : public c_OutputWS2811
 {
 public:
     // These functions are inherited from c_OutputCommon
-    c_OutputWS2811Uart (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+    c_OutputWS2811Rmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
                       gpio_num_t outputGpio,
                       uart_port_t uart,
                       c_OutputMgr::e_OutputType outputType);
-    virtual ~c_OutputWS2811Uart ();
+    virtual ~c_OutputWS2811Rmt ();
 
     // functions to be provided by the derived class
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
@@ -42,13 +46,10 @@ public:
     void    PauseOutput ();
 
     /// Interrupt Handler
-    void IRAM_ATTR ISR_Handler (); ///< UART ISR
+    void IRAM_ATTR ISR_Handler (); ///< ISR
 
 #define WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE    4
 #define WS2812_NUM_DATA_BYTES_PER_PIXEL             16
 
-private:
-    bool validate ();        ///< confirm that the current configuration is valid
-
-}; // c_OutputWS2811Uart
+}; // c_OutputWS2811Rmt
 
