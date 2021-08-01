@@ -29,7 +29,7 @@
 #include "OutputDisabled.hpp"
 #include "OutputGECE.hpp"
 #include "OutputSerial.hpp"
-#include "OutputWS2811.hpp"
+#include "OutputWS2811Uart.hpp"
 #include "OutputRelay.hpp"
 #include "OutputServoPCA9685.hpp"
 // needs to be last
@@ -502,7 +502,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 else
                 {
                     // LOG_PORT.println (String (F ("************** Starting WS2811 for channel '")) + ChannelIndex + "'. **************");
-                    pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811 (ChannelIndex, dataPin, UartId, OutputType_WS2811);
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811Uart (ChannelIndex, dataPin, UartId, OutputType_WS2811);
                     // DEBUG_V ("");
                 }
                 break;

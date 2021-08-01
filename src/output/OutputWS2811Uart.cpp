@@ -1,5 +1,5 @@
 /*
-* WS2811.cpp - WS2811 driver code for ESPixelStick
+* WS2811Uart.cpp - WS2811 driver code for ESPixelStick UART
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -19,7 +19,7 @@
 
 #include "../ESPixelStick.h"
 
-#include "OutputWS2811.hpp"
+#include "OutputWS2811Uart.hpp"
 
 #if defined(ARDUINO_ARCH_ESP8266)
 extern "C" {
@@ -68,7 +68,7 @@ char Convert2BitIntensityToUartDataStream[] =
 static void IRAM_ATTR uart_intr_handler (void* param);
 
 //----------------------------------------------------------------------------
-c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+c_OutputWS2811Uart::c_OutputWS2811Uart (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     gpio_num_t outputGpio,
     uart_port_t uart,
     c_OutputMgr::e_OutputType outputType) :
@@ -91,10 +91,10 @@ c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     ColorOffsets.offset.w = 3;
 
     // DEBUG_END;
-} // c_OutputWS2811
+} // c_OutputWS2811Uart
 
 //----------------------------------------------------------------------------
-c_OutputWS2811::~c_OutputWS2811 ()
+c_OutputWS2811Uart::~c_OutputWS2811Uart ()
 {
     // DEBUG_START;
     if (gpio_num_t (-1) == DataPin) { return; }
@@ -123,7 +123,7 @@ c_OutputWS2811::~c_OutputWS2811 ()
 #endif // def ARDUINO_ARCH_ESP32
 
     // DEBUG_END;
-} // ~c_OutputWS2811
+} // ~c_OutputWS2811Uart
 
 //----------------------------------------------------------------------------
 /* shell function to set the 'this' pointer of the real ISR
@@ -131,13 +131,13 @@ c_OutputWS2811::~c_OutputWS2811 ()
  */
 static void IRAM_ATTR uart_intr_handler (void* param)
 {
-    reinterpret_cast <c_OutputWS2811*>(param)->ISR_Handler ();
+    reinterpret_cast <c_OutputWS2811Uart*>(param)->ISR_Handler ();
 } // uart_intr_handler
 
 //----------------------------------------------------------------------------
 /* Use the current config to set up the output port
 */
-void c_OutputWS2811::Begin ()
+void c_OutputWS2811Uart::Begin ()
 {
     // DEBUG_START;
 
@@ -173,7 +173,7 @@ void c_OutputWS2811::Begin ()
 } // init
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811::GetConfig (ArduinoJson::JsonObject& jsonConfig)
+void c_OutputWS2811Uart::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
@@ -191,7 +191,7 @@ void c_OutputWS2811::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // GetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811::GetStatus (ArduinoJson::JsonObject& jsonStatus)
+void c_OutputWS2811Uart::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     c_OutputCommon::GetStatus (jsonStatus);
     // uint32_t UartIntSt = GET_PERI_REG_MASK (UART_INT_ST (UartId), UART_TXFIFO_EMPTY_INT_ENA);
@@ -205,7 +205,7 @@ void c_OutputWS2811::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputWS2811Uart::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 {
     // DEBUG_START;
     // DEBUG_V (String ("NumChannelsAvailable: ") + String (NumChannelsAvailable));
@@ -244,7 +244,7 @@ void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 /*
      * Fill the FIFO with as many intensity values as it can hold.
      */
-void IRAM_ATTR c_OutputWS2811::ISR_Handler ()
+void IRAM_ATTR c_OutputWS2811Uart::ISR_Handler ()
 {
     // Process if the desired UART has raised an interrupt
     if (READ_PERI_REG (UART_INT_ST (UartId)))
@@ -329,7 +329,7 @@ void IRAM_ATTR c_OutputWS2811::ISR_Handler ()
 } // HandleWS2811Interrupt
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811::Render ()
+void c_OutputWS2811Uart::Render ()
 {
     // DEBUG_START;
 
@@ -364,7 +364,7 @@ void c_OutputWS2811::Render ()
 *       true - config has been accepted
 *       false - Config rejected. Using defaults for invalid settings
 */
-bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject & jsonConfig)
+bool c_OutputWS2811Uart::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
@@ -400,7 +400,7 @@ bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 } // SetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811::updateGammaTable ()
+void c_OutputWS2811Uart::updateGammaTable ()
 {
     // DEBUG_START;
     double tempBrightness = double (brightness) / 100.0;
@@ -418,7 +418,7 @@ void c_OutputWS2811::updateGammaTable ()
 } // updateGammaTable
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811::updateColorOrderOffsets ()
+void c_OutputWS2811Uart::updateColorOrderOffsets ()
 {
     // DEBUG_START;
     // make sure the color order is all lower case
@@ -458,7 +458,7 @@ void c_OutputWS2811::updateColorOrderOffsets ()
 *       true - no issues found
 *       false - had an issue and had to fix things
 */
-bool c_OutputWS2811::validate ()
+bool c_OutputWS2811Uart::validate ()
 {
     // DEBUG_START;
     bool response = true;
@@ -491,7 +491,7 @@ bool c_OutputWS2811::validate ()
 } // validate
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811::PauseOutput ()
+void c_OutputWS2811Uart::PauseOutput ()
 {
     // DEBUG_START;
 

@@ -1,6 +1,6 @@
 #pragma once
 /*
-* OutputWS2811.h - WS2811 driver code for ESPixelStick
+* OutputWS2811Uart.h - WS2811 driver code for ESPixelStick UART
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -28,15 +28,15 @@
 #   include <driver/uart.h>
 #endif
 
-class c_OutputWS2811 : public c_OutputCommon
+class c_OutputWS2811Uart : public c_OutputCommon
 {
 public:
     // These functions are inherited from c_OutputCommon
-    c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+    c_OutputWS2811Uart (c_OutputMgr::e_OutputChannelIds OutputChannelId,
                       gpio_num_t outputGpio,
                       uart_port_t uart,
                       c_OutputMgr::e_OutputType outputType);
-    virtual ~c_OutputWS2811 ();
+    virtual ~c_OutputWS2811Uart ();
 
     // functions to be provided by the derived class
     void         Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
@@ -91,11 +91,11 @@ private:
     String      color_order; ///< Pixel color order
 
     // Internal variables
-    uint16_t        InterFrameGapInMicroSec = 0;
+    uint16_t    InterFrameGapInMicroSec = 0;
 
     void updateGammaTable(); ///< Generate gamma correction table
     void updateColorOrderOffsets(); ///< Update color order
     bool validate ();        ///< confirm that the current configuration is valid
 
-}; // c_OutputWS2811
+}; // c_OutputWS2811Uart
 
