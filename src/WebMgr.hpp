@@ -51,7 +51,11 @@ private:
     DeviceCallbackFunction pAlexaCallback = nullptr;
     EspalexaDevice *       pAlexaDevice = nullptr;
 
+#ifdef ARDUINO_ARCH_ESP32
+#   define WebSocketFrameCollectionBufferSize (6*1024)
+#else
 #   define WebSocketFrameCollectionBufferSize (3*1024)
+#endif // def ARDUINO_ARCH_ESP8266
     char WebSocketFrameCollectionBuffer[WebSocketFrameCollectionBufferSize + 1];
 
     /// Valid "Simple" message types
