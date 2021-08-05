@@ -21,6 +21,7 @@
 *   interface.
 *
 */
+#ifdef ARDUINO_ARCH_ESP32
 
 #include "OutputCommon.hpp"
 #include "OutputWS2811.hpp"
@@ -68,3 +69,4 @@ public:
 
 }; // c_OutputWS2811Rmt
 
+#endif // def ARDUINO_ARCH_ESP32

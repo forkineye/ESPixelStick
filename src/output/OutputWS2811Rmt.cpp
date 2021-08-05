@@ -16,6 +16,7 @@
 *  or use of these programs.
 *
 */
+#ifdef ARDUINO_ARCH_ESP32
 
 #include "../ESPixelStick.h"
 #include <driver/rmt.h>
@@ -432,3 +433,5 @@ void c_OutputWS2811Rmt::PauseOutput ()
 
     // DEBUG_END;
 } // PauseOutput
+
+#endif // def ARDUINO_ARCH_ESP32
