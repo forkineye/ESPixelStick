@@ -53,23 +53,23 @@ public:
     // handles to determine which output channel we are dealing with
     enum e_OutputChannelIds
     {
-        OutputChannelId_1 = 0,
+        OutputChannelId_UART_1 = 0,
 #ifdef ARDUINO_ARCH_ESP32
-        OutputChannelId_2,
-        OutputChannelId_3,
-        /*
-        OutputChannelId_4,
-        OutputChannelId_5,
-        OutputChannelId_6,
-        OutputChannelId_7,
-        OutputChannelId_8,
-        OutputChannelId_9,
-        OutputChannelId_10,
-        */
+        OutputChannelId_UART_2,
+        // RMT channels
+        OutputChannelId_RMT_1,
+        OutputChannelId_RMT_2,
+        OutputChannelId_RMT_3,
+        OutputChannelId_RMT_4,
+        OutputChannelId_RMT_5,
+        OutputChannelId_RMT_6,
+        OutputChannelId_RMT_7,
+        OutputChannelId_RMT_8,
+
 #endif // def ARDUINO_ARCH_ESP32
         OutputChannelId_Relay,
         OutputChannelId_End, // must be last in the list
-        OutputChannelId_Start = OutputChannelId_1
+        OutputChannelId_Start = OutputChannelId_UART_1
     };
 
     enum e_OutputType
@@ -104,7 +104,7 @@ private:
 #ifdef ARDUINO_ARCH_ESP8266
 #   define OM_MAX_CONFIG_SIZE      ((size_t)(5*1024))
 #else
-#   define OM_MAX_CONFIG_SIZE      ((size_t)(6*1024))
+#   define OM_MAX_CONFIG_SIZE      ((size_t)(8*1024))
 #endif // !def ARDUINO_ARCH_ESP8266
 
     bool HasBeenInitialized = false;
