@@ -25,9 +25,7 @@
 #include "OutputCommon.hpp"
 #include "OutputWS2811.hpp"
 
-#ifdef ARDUINO_ARCH_ESP32
-// #   include <driver/uart.h>
-#endif
+#include <driver/rmt.h>
 
 class c_OutputWS2811Rmt : public c_OutputWS2811
 {
@@ -41,15 +39,32 @@ public:
 
     // functions to be provided by the derived class
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
+    bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);  ///< Set a new config in the driver
     void    Render ();                                        ///< Call from loop(),  renders output data
     void    SetOutputBufferSize (uint16_t NumChannelsAvailable);
     void    PauseOutput ();
+    void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
 
     /// Interrupt Handler
     void IRAM_ATTR ISR_Handler (); ///< ISR
+    void IRAM_ATTR ISR_Handler_SendIntensityData (); ///< ISR
+    void IRAM_ATTR ISR_Handler_StartNewFrame (); ///< ISR
+    
+#define RMT_base_address                            0x1000
+#define RMT_ENTRIES_PER_MEM_BLOCK                   64
+#define RMT_MEM_BLOCK_ENTRY_SIZE                    sizeof(rmt_item32_t)
+#define RMT_MEM_BLOCK_SIZE                          (RMT_ENTRIES_PER_MEM_BLOCK * RMT_MEM_BLOCK_ENTRY_SIZE)
 
-#define WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE    4
-#define WS2812_NUM_DATA_BYTES_PER_PIXEL             16
+    volatile rmt_item32_t * RmtStartAddr   = nullptr;
+    volatile rmt_item32_t * RmtCurrentAddr = nullptr;
+    volatile rmt_item32_t * RmtEndAddr     = nullptr;
+    intr_handle_t RMT_intr_handle = NULL;
+    uint8_t NumPixelsPerInterrupt = 2;
+
+    uint32_t FrameStartCounter = 0;
+    // uint32_t DataISRcounter = 0;
+    // uint32_t FrameDoneCounter = 0;
+    // uint32_t FrameEndISRcounter = 0;
 
 }; // c_OutputWS2811Rmt
 

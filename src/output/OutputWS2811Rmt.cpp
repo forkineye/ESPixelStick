@@ -18,16 +18,48 @@
 */
 
 #include "../ESPixelStick.h"
-
+#include <driver/rmt.h>
 #include "OutputWS2811Rmt.hpp"
 
-#if defined(ARDUINO_ARCH_ESP8266)
-#elif defined(ARDUINO_ARCH_ESP32)
+#define NumBitsPerByte      8
 
-#endif
+#define RMT__INT_TX_END     (1)
+#define RMT__INT_RX_END     (2)
+#define RMT__INT_ERROR      (4)
+#define RMT__INT_THR_EVNT   (1<<24)
+
+#define RMT_INT_TX_END(channel)     (RMT__INT_TX_END   << (uint32_t(channel)*3))
+#define RMT_INT_RX_END(channel)     (RMT__INT_RX_END   << (uint32_t(channel)*3))
+#define RMT_INT_ERROR(channel)      (RMT__INT_ERROR    << (uint32_t(channel)*3))
+#define RMT_INT_THR_EVNT(channel)  ((RMT__INT_THR_EVNT)<< (uint32_t(channel)))
+
+#define RMT_ClockRate                               80000000.0
+#define RMT_Clock_Divisor                           2.0
+#define RMT_TickLengthNS                            float((1/(RMT_ClockRate/RMT_Clock_Divisor))*1000000000.0)
+
+#define WS2811_PIXEL_RMT_NS_BIT_0_HIGH_WS2812         350.0 // 350ns +/- 150ns per datasheet
+#define WS2811_PIXEL_RMT_NS_BIT_0_LOW_WS2812          900.0 // 900ns +/- 150ns per datasheet
+#define WS2811_PIXEL_RMT_NS_BIT_1_HIGH_WS2812         900.0 // 900ns +/- 150ns per datasheet
+#define WS2811_PIXEL_RMT_NS_BIT_1_LOW_WS2812          350.0 // 350ns +/- 150ns per datasheet
+#define WS2811_PIXEL_RMT_NS_IDLE_WS2812             50000.0 // 50us multiple times to get 300us per datasheet
+
+#define WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH_WS2812    uint16_t (WS2811_PIXEL_RMT_NS_BIT_0_HIGH_WS2812 / RMT_TickLengthNS)
+#define WS2811_PIXEL_RMT_TICKS_BIT_0_LOW_WS2812     uint16_t (WS2811_PIXEL_RMT_NS_BIT_0_LOW_WS2812  / RMT_TickLengthNS)
+#define WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH_WS2812    uint16_t (WS2811_PIXEL_RMT_NS_BIT_1_HIGH_WS2812 / RMT_TickLengthNS)
+#define WS2811_PIXEL_RMT_TICKS_BIT_1_LOW_WS2812     uint16_t (WS2811_PIXEL_RMT_NS_BIT_1_LOW_WS2812  / RMT_TickLengthNS)
+#define WS2811_PIXEL_RMT_TICKS_IDLE_WS2812          uint16_t (WS2811_PIXEL_RMT_NS_IDLE_WS2812  / RMT_TickLengthNS)
+
+#define INTERFRAME_GAP_ID   2
+#define STARTBIT_ID         3
+#define STOPBIT_ID          4
+
+rmt_item32_t Rgb2Rmt[] = 
+{
+    0,0,0,0,0
+};
 
 // forward declaration for the isr handler
-static void IRAM_ATTR uart_intr_handler (void* param);
+static void IRAM_ATTR rmt_intr_handler (void* param);
 
 //----------------------------------------------------------------------------
 c_OutputWS2811Rmt::c_OutputWS2811Rmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
@@ -36,9 +68,42 @@ c_OutputWS2811Rmt::c_OutputWS2811Rmt (c_OutputMgr::e_OutputChannelIds OutputChan
     c_OutputMgr::e_OutputType outputType) :
     c_OutputWS2811 (OutputChannelId, outputGpio, uart, outputType)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
-    // DEBUG_END;
+    Rgb2Rmt[0].duration0 = WS2811_PIXEL_RMT_TICKS_BIT_0_LOW_WS2812;
+    Rgb2Rmt[0].level0 = 0;
+    Rgb2Rmt[0].duration1 = WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH_WS2812;
+    Rgb2Rmt[0].level1 = 1;
+
+    Rgb2Rmt[1].duration0 = WS2811_PIXEL_RMT_TICKS_BIT_1_LOW_WS2812;
+    Rgb2Rmt[1].level0 = 0;
+    Rgb2Rmt[1].duration1 = WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH_WS2812;
+    Rgb2Rmt[1].level1 = 1;
+
+    // 100us Interframe gap
+    Rgb2Rmt[INTERFRAME_GAP_ID].duration0 = WS2811_PIXEL_RMT_TICKS_IDLE_WS2812;
+    Rgb2Rmt[INTERFRAME_GAP_ID].level0 = 0;
+    Rgb2Rmt[INTERFRAME_GAP_ID].duration1 = WS2811_PIXEL_RMT_TICKS_IDLE_WS2812;
+    Rgb2Rmt[INTERFRAME_GAP_ID].level1 = 0;
+
+    // Start Bit
+    Rgb2Rmt[STARTBIT_ID].duration0 = WS2811_PIXEL_RMT_TICKS_BIT_0_LOW_WS2812;
+    Rgb2Rmt[STARTBIT_ID].level0 = 1;
+    Rgb2Rmt[STARTBIT_ID].duration1 = WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH_WS2812;
+    Rgb2Rmt[STARTBIT_ID].level1 = 1;
+
+    // Stop Bit
+    Rgb2Rmt[STOPBIT_ID].duration0 = 0;
+    Rgb2Rmt[STOPBIT_ID].level0 = 0;
+    Rgb2Rmt[STOPBIT_ID].duration1 = 0;
+    Rgb2Rmt[STOPBIT_ID].level1 = 0;
+
+    DEBUG_V (String ("WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH_WS2812: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH_WS2812, HEX));
+    DEBUG_V (String (" WS2811_PIXEL_RMT_TICKS_BIT_0_LOW_WS2812: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_0_LOW_WS2812,  HEX));
+    DEBUG_V (String ("WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH_WS2812: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH_WS2812, HEX));
+    DEBUG_V (String (" WS2811_PIXEL_RMT_TICKS_BIT_1_LOW_WS2812: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_1_LOW_WS2812,  HEX));
+
+    DEBUG_END;
 } // c_OutputWS2811Rmt
 
 //----------------------------------------------------------------------------
@@ -52,12 +117,16 @@ c_OutputWS2811Rmt::~c_OutputWS2811Rmt ()
 
     // Clear all pending interrupts in the RMT Channel
     // DEBUG_V ("");
+    ESP_ERROR_CHECK (rmt_set_tx_intr_en (rmt_channel_t (UartId), false));
+    ESP_ERROR_CHECK (rmt_set_tx_thr_intr_en (rmt_channel_t (UartId), false, 24));
+
+    esp_intr_free (RMT_intr_handle);
 
     // make sure no existing low level driver is running
     // DEBUG_V ("");
 
     // DEBUG_V (String("UartId: ") + String(UartId));
-
+    // rmtEnd (RmtObject);
     // DEBUG_END;
 } // ~c_OutputWS2811Rmt
 
@@ -65,30 +134,66 @@ c_OutputWS2811Rmt::~c_OutputWS2811Rmt ()
 /* shell function to set the 'this' pointer of the real ISR
    This allows me to use non static variables in the ISR.
  */
-static void IRAM_ATTR uart_intr_handler (void* param)
+static void IRAM_ATTR rmt_intr_handler (void* param)
 {
     reinterpret_cast <c_OutputWS2811Rmt*>(param)->ISR_Handler ();
-} // uart_intr_handler
+} // rmt_intr_handler
 
 //----------------------------------------------------------------------------
 /* Use the current config to set up the output port
 */
 void c_OutputWS2811Rmt::Begin ()
 {
-    // DEBUG_START;
+    DEBUG_START;
+    // UartId = 0;
+    DEBUG_V (String ("DataPin: ") + String (DataPin));
+    DEBUG_V (String (" UartId: ") + String (UartId));
 
     // Configure RMT channel
+    rmt_config_t RmtConfig;
+    RmtConfig.rmt_mode = rmt_mode_t::RMT_MODE_TX;
+    RmtConfig.channel = rmt_channel_t (UartId);
+    RmtConfig.clk_div = RMT_Clock_Divisor;
+    RmtConfig.gpio_num = DataPin;
+    RmtConfig.mem_block_num = rmt_reserve_memsize_t::RMT_MEM_64;
 
-    // Atttach interrupt handler
+    RmtConfig.tx_config.loop_en = false;
+    RmtConfig.tx_config.carrier_freq_hz = uint32_t (100); // cannot be zero due to a driver bug
+    RmtConfig.tx_config.carrier_duty_percent = 50;
+    RmtConfig.tx_config.carrier_level = rmt_carrier_level_t::RMT_CARRIER_LEVEL_LOW;
+    RmtConfig.tx_config.carrier_en = false;
+    RmtConfig.tx_config.idle_level = rmt_idle_level_t::RMT_IDLE_LEVEL_HIGH;
+    RmtConfig.tx_config.idle_output_en = true;
+
+    RmtStartAddr = &RMTMEM.chan[rmt_channel_t (UartId)].data32[0];
+    RmtEndAddr   = &RMTMEM.chan[rmt_channel_t (UartId)].data32[63];
+
+    ESP_ERROR_CHECK (rmt_config (&RmtConfig));
+    ESP_ERROR_CHECK (rmt_set_source_clk (RmtConfig.channel, rmt_source_clk_t::RMT_BASECLK_APB));
+    ESP_ERROR_CHECK (esp_intr_alloc (ETS_RMT_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3 | ESP_INTR_FLAG_SHARED, rmt_intr_handler, this, &RMT_intr_handle));
+
+    RMT.apb_conf.fifo_mask = 1;         // enable access to the mem blocks
+    RMT.apb_conf.mem_tx_wrap_en = 1;    // allow data greater than one block
+
+    DEBUG_V (String ("                Rgb2Rmt[0]: 0x") + String (uint32_t (Rgb2Rmt[0].val), HEX));
+    DEBUG_V (String ("                Rgb2Rmt[1]: 0x") + String (uint32_t (Rgb2Rmt[1].val), HEX));
+    DEBUG_V (String ("Rgb2Rmt[INTERFRAME_GAP_ID]: 0x") + String (uint32_t (Rgb2Rmt[INTERFRAME_GAP_ID].val), HEX));
+    DEBUG_V (String ("      Rgb2Rmt[STARTBIT_ID]: 0x") + String (uint32_t (Rgb2Rmt[STARTBIT_ID].val), HEX));
+    DEBUG_V (String ("       Rgb2Rmt[STOPBIT_ID]: 0x") + String (uint32_t (Rgb2Rmt[STOPBIT_ID].val), HEX));
+
+    pixel_count = 1;
+    ISR_Handler_StartNewFrame ();
+    DEBUG_V (String ("RemainingPixelCount: 0x") + String (RemainingPixelCount, HEX));
 
     // Start output
+    DEBUG_END;
 
 } // init
 
 //----------------------------------------------------------------------------
 void c_OutputWS2811Rmt::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 {
-    // DEBUG_START;
+    DEBUG_START;
     // DEBUG_V (String ("NumChannelsAvailable: ") + String (NumChannelsAvailable));
     // DEBUG_V (String ("   GetBufferUsedSize: ") + String (c_OutputCommon::GetBufferUsedSize ()));
     // DEBUG_V (String ("         pixel_count: ") + String (pixel_count));
@@ -96,134 +201,223 @@ void c_OutputWS2811Rmt::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 
     do // once
     {
-        // are we changing size?
-        if (NumChannelsAvailable == OutputBufferSize)
-        {
-            // DEBUG_V ("NO Need to change the ISR buffer");
-            break;
-        }
-
-        // DEBUG_V ("Need to change the ISR buffer");
-
-        // Stop current output operation
-
         // notify the base class
         c_OutputWS2811::SetOutputBufferSize (NumChannelsAvailable);
 
+        DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
+
     } while (false);
 
-    // DEBUG_END;
+    DEBUG_END;
+
 } // SetBufferSize
 
 //----------------------------------------------------------------------------
-/*
-     * Fill the FIFO with as many intensity values as it can hold.
-     */
-void IRAM_ATTR c_OutputWS2811Rmt::ISR_Handler ()
+bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
-    // Process if the desired UART has raised an interrupt
-    // if (READ_PERI_REG (UART_INT_ST (UartId)))
-    {
-        // Fill the FIFO with new data
-        // free space in the FIFO divided by the number of data bytes per intensity
-        // gives the max number of intensities we can add to the FIFO
-        uint32_t NumEmptyPixelSlots = 0; //  ((((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / WS2812_NUM_DATA_BYTES_PER_PIXEL);
-        while (NumEmptyPixelSlots--)
-        {
-            for (uint8_t CurrentIntensityIndex = 0;
-                CurrentIntensityIndex < numIntensityBytesPerPixel;
-                CurrentIntensityIndex++)
-            {
-                uint8_t IntensityValue = (pNextIntensityToSend[ColorOffsets.Array[CurrentIntensityIndex]]);
+    DEBUG_START;
+    bool response = c_OutputWS2811::SetConfig (jsonConfig);
 
-                IntensityValue = gamma_table[IntensityValue];
+    uint32_t ifgNS = (InterFrameGapInMicroSec * 1000);
+    uint32_t ifgTicks = ifgNS / RMT_TickLengthNS;
 
-                // adjust intensity
-                // IntensityValue = uint8_t( (uint32_t(IntensityValue) * uint32_t(AdjustedBrightness)) >> 8);
+    /*
+        Interframe gap object gets sent three times and each transmit sends 2
+        gap periods 3 * 2 = 6
+    */
 
-                // convert the intensity data into UART data
-                // enqueue ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 6) & 0x3]));
-                // enqueue ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 4) & 0x3]));
-                // enqueue ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 2) & 0x3]));
-                // enqueue ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 0) & 0x3]));
-            }
+    Rgb2Rmt[INTERFRAME_GAP_ID].duration0 = ifgTicks / 6;
+    Rgb2Rmt[INTERFRAME_GAP_ID].level0 = 0;
+    Rgb2Rmt[INTERFRAME_GAP_ID].duration1 = ifgTicks / 6;
+    Rgb2Rmt[INTERFRAME_GAP_ID].level1 = 0;
 
-            // has the group completed?
-            if (--CurrentGroupPixelCount)
-            {
-                // not finished with the group yet
-                continue;
-            }
-            // refresh the group count
-            CurrentGroupPixelCount = GroupPixelCount;
+    DEBUG_END;
+    return response;
 
-            --RemainingPixelCount;
-            if (0 == RemainingPixelCount)
-            {
-                // CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
-                break;
-            }
-
-            // have we completed the forward traverse
-            if (CurrentZigPixelCount)
-            {
-                --CurrentZigPixelCount;
-                // not finished with the set yet.
-                pNextIntensityToSend += numIntensityBytesPerPixel;
-                continue;
-            }
-
-            if (CurrentZagPixelCount == ZigPixelCount)
-            {
-                // first backward pixel
-                pNextIntensityToSend += numIntensityBytesPerPixel * (ZigPixelCount + 1);
-            }
-
-            // have we completed the backward traverse
-            if (CurrentZagPixelCount)
-            {
-                --CurrentZagPixelCount;
-                // not finished with the set yet.
-                pNextIntensityToSend -= numIntensityBytesPerPixel;
-                continue;
-            }
-
-            // move to next forward pixel
-            pNextIntensityToSend += numIntensityBytesPerPixel * (ZigPixelCount);
-
-            // refresh the zigZag
-            CurrentZigPixelCount = ZigPixelCount - 1;
-            CurrentZagPixelCount = ZigPixelCount;
-        }
-
-        // Clear all interrupts flags for this uart
-        // WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
-
-    } // end Our uart generated an interrupt
-
-} // HandleWS2811Interrupt
+} // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811Rmt::Render ()
+void c_OutputWS2811Rmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
-    // DEBUG_START;
+    c_OutputWS2811::GetStatus (jsonStatus);
 
-    // DEBUG_V (String ("RemainingIntensityCount: ") + RemainingIntensityCount)
+    // jsonStatus["FrameStartCounter"] = FrameStartCounter;
+    // jsonStatus["DataISRcounter"] = DataISRcounter;
+    // jsonStatus["FrameDoneCounter"] = FrameDoneCounter;
+    // jsonStatus["FrameEndISRcounter"] = FrameEndISRcounter;
 
-    if (gpio_num_t (-1) == DataPin) { return; }
-    if (!canRefresh ()) { return; }
+} // GetStatus
 
-    // get the next frame started
+//----------------------------------------------------------------------------
+void IRAM_ATTR c_OutputWS2811Rmt::ISR_Handler ()
+{
+    if (RMT.int_st.val & RMT_INT_TX_END (UartId))
+    {
+        // FrameEndISRcounter++;
+
+        RMT.int_ena.val &= ~RMT_INT_TX_END (UartId);
+        RMT.int_ena.val &= ~RMT_INT_THR_EVNT (UartId);
+
+        RMT.int_clr.val = RMT_INT_TX_END (UartId);
+        RMT.int_clr.val = RMT_INT_THR_EVNT (UartId);
+
+        ISR_Handler_StartNewFrame ();
+    }
+    else if (RMT.int_st.val & RMT_INT_THR_EVNT (UartId))
+    {
+        // DataISRcounter++;
+
+        // RMT.int_ena.val &= ~RMT_INT_THR_EVNT (UartId);
+        RMT.int_clr.val = RMT_INT_THR_EVNT (UartId);
+
+        if (0 != RemainingPixelCount)
+        {
+            ISR_Handler_SendIntensityData ();
+        }
+        else
+        {
+            RMT.int_ena.val &= ~RMT_INT_THR_EVNT (UartId);
+        }
+    }
+} // ISR_Handler
+
+//----------------------------------------------------------------------------
+void IRAM_ATTR c_OutputWS2811Rmt::ISR_Handler_StartNewFrame ()
+{
+    FrameStartCounter++;
+
+    RMT.conf_ch[rmt_channel_t (UartId)].conf1.mem_rd_rst = 1; // set the internal pointer to the start of the mem block
+    RMT.conf_ch[rmt_channel_t (UartId)].conf1.mem_rd_rst = 0;
+
+    uint32_t* pMem = (uint32_t*)RmtStartAddr;
+    // memset ((void*)pMem, 0x00, 256);
+    *pMem++ = Rgb2Rmt[INTERFRAME_GAP_ID].val; // 100 us
+    *pMem++ = Rgb2Rmt[INTERFRAME_GAP_ID].val; // 100 us
+    *pMem++ = Rgb2Rmt[INTERFRAME_GAP_ID].val; // 100 us
+    *pMem++ = Rgb2Rmt[STARTBIT_ID].val;       // Start bit
+    RmtCurrentAddr = (volatile rmt_item32_t*)pMem;
+
     CurrentZigPixelCount = ZigPixelCount - 1;
     CurrentZagPixelCount = ZigPixelCount;
     CurrentGroupPixelCount = GroupPixelCount;
     pNextIntensityToSend = GetBufferAddress ();
     RemainingPixelCount = pixel_count;
 
-    // enable output
-    // TODO - Something
+    RMT.int_clr.val  = RMT_INT_THR_EVNT (UartId);
+    RMT.int_ena.val |= RMT_INT_THR_EVNT (UartId);
 
-    ReportNewFrame ();
+    ISR_Handler_SendIntensityData ();
+
+    RMT.tx_lim_ch[rmt_channel_t (UartId)].limit = NumPixelsPerInterrupt * numIntensityBytesPerPixel * NumBitsPerByte;
+
+    RMT.int_clr.val  = RMT_INT_TX_END (UartId);
+    RMT.int_ena.val |= RMT_INT_TX_END (UartId);
+    RMT.conf_ch[rmt_channel_t (UartId)].conf1.tx_start = 1;
+
+} // ISR_Handler_StartNewFrame
+
+//----------------------------------------------------------------------------
+/*
+ * Fill the MEMBLK with a fixed number of intensity values.
+ */
+void IRAM_ATTR c_OutputWS2811Rmt::ISR_Handler_SendIntensityData ()
+{
+    uint32_t* pMem = (uint32_t*)RmtCurrentAddr;
+    register uint32_t OneValue  = Rgb2Rmt[1].val;
+    register uint32_t ZeroValue = Rgb2Rmt[0].val;
+
+    uint32_t NumEmptyPixelSlots = NumPixelsPerInterrupt;
+    while (NumEmptyPixelSlots--)
+    {
+        for (uint8_t CurrentIntensityIndex = 0;
+            CurrentIntensityIndex < numIntensityBytesPerPixel;
+            CurrentIntensityIndex++)
+        {
+            uint8_t IntensityValue = (pNextIntensityToSend[ColorOffsets.Array[CurrentIntensityIndex]]);
+
+            IntensityValue = gamma_table[IntensityValue];
+
+            // adjust intensity
+            IntensityValue = uint8_t ((uint32_t (IntensityValue) * uint32_t (AdjustedBrightness)) >> 8);
+
+            // convert the intensity data into RMT data
+            for (uint8_t bitmask = 0x80; 0 != bitmask; bitmask >>= 1)
+            {
+                *pMem++ = (IntensityValue & bitmask) ? OneValue : ZeroValue;
+                if (pMem > (uint32_t*)RmtEndAddr)
+                {
+                    pMem = (uint32_t*)RmtStartAddr;
+                }
+            }
+        }
+
+        // has the group completed?
+        --CurrentGroupPixelCount;
+        if (0 != CurrentGroupPixelCount)
+        {
+            // not finished with the group yet
+            continue;
+        }
+
+        // refresh the group count
+        CurrentGroupPixelCount = GroupPixelCount;
+
+        --RemainingPixelCount;
+        if (0 == RemainingPixelCount)
+        {
+            // FrameDoneCounter++;
+
+            *pMem = Rgb2Rmt[STOPBIT_ID].val;
+            // *pMem = 0x0;
+            RMT.int_ena.val &= ~RMT_INT_THR_EVNT (UartId);
+            break;
+        }
+
+        // have we completed the forward traverse
+        if (CurrentZigPixelCount)
+        {
+            --CurrentZigPixelCount;
+            // not finished with the set yet.
+            pNextIntensityToSend += numIntensityBytesPerPixel;
+            continue;
+        }
+
+        if (CurrentZagPixelCount == ZigPixelCount)
+        {
+            // first backward pixel
+            pNextIntensityToSend += numIntensityBytesPerPixel * (ZigPixelCount + 1);
+        }
+
+        // have we completed the backward traverse
+        if (CurrentZagPixelCount)
+        {
+            --CurrentZagPixelCount;
+            // not finished with the set yet.
+            pNextIntensityToSend -= numIntensityBytesPerPixel;
+            continue;
+        }
+
+        // move to next forward pixel
+        pNextIntensityToSend += numIntensityBytesPerPixel * (ZigPixelCount);
+
+        // refresh the zigZag
+        CurrentZigPixelCount = ZigPixelCount - 1;
+        CurrentZagPixelCount = ZigPixelCount;
+    }
+
+    RmtCurrentAddr = (volatile rmt_item32_t*)pMem;
+
+} // ISR_Handler_SendIntensityData
+
+//----------------------------------------------------------------------------
+void c_OutputWS2811Rmt::Render ()
+{
+    // DEBUG_START;
+
+    if (0 == FrameStartCounter)
+    {
+        ISR_Handler_StartNewFrame ();
+    }
 
     // DEBUG_END;
 
