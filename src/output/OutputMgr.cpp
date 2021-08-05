@@ -32,6 +32,9 @@
 #include "OutputWS2811Uart.hpp"
 #include "OutputRelay.hpp"
 #include "OutputServoPCA9685.hpp"
+#ifdef ARDUINO_ARCH_ESP32
+#   include "OutputWS2811Rmt.hpp"
+#endif // def ARDUINO_ARCH_ESP32
 // needs to be last
 #include "OutputMgr.hpp"
 
@@ -71,6 +74,16 @@ static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] 
     {gpio_num_t::GPIO_NUM_2,  uart_port_t::UART_NUM_1},
 #ifdef ARDUINO_ARCH_ESP32
     {gpio_num_t::GPIO_NUM_13, uart_port_t::UART_NUM_2},
+    {gpio_num_t::GPIO_NUM_12,  uart_port_t (0)},
+    /*
+    {gpio_num_t::GPIO_NUM_14,  uart_port_t (1)},
+    {gpio_num_t::GPIO_NUM_21,  uart_port_t (2)},
+    {gpio_num_t::GPIO_NUM_22,  uart_port_t (3)},
+    {gpio_num_t::GPIO_NUM_25,  uart_port_t (4)},
+    {gpio_num_t::GPIO_NUM_26,  uart_port_t (5)},
+    {gpio_num_t::GPIO_NUM_27,  uart_port_t (6)},
+    {gpio_num_t::GPIO_NUM_34,  uart_port_t (7)},
+    */
 #endif // def ARDUINO_ARCH_ESP32
     {gpio_num_t::GPIO_NUM_10, uart_port_t (-1)},
 };
@@ -391,7 +404,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
             case e_OutputType::OutputType_DMX:
             {
-                if (-1 == UartId)
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_2))
                 {
                     LOG_PORT.println (String (F ("************** Cannot Start DMX for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
@@ -408,7 +421,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
             case e_OutputType::OutputType_GECE:
             {
-                if (-1 == UartId)
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_2))
                 {
                     LOG_PORT.println (String (F ("************** Cannot Start GECE for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
@@ -425,7 +438,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
             case e_OutputType::OutputType_Serial:
             {
-                if (-1 == UartId)
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_2))
                 {
                     LOG_PORT.println (String (F ("************** Cannot Start Generic Serial for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
@@ -442,7 +455,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
             case e_OutputType::OutputType_Relay:
             {
-                if (-1 != UartId)
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_2))
                 {
                     LOG_PORT.println (String (F ("************** Cannot Start RELAY for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
@@ -459,7 +472,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
             case e_OutputType::OutputType_Renard:
             {
-                if (-1 == UartId)
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_2))
                 {
                     LOG_PORT.println (String (F ("************** Cannot Start Renard for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
@@ -499,10 +512,17 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                     // DEBUG_V ("");
                 }
-                else
+                else if (ChannelIndex < OutputChannelId_3)
                 {
                     // LOG_PORT.println (String (F ("************** Starting WS2811 for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811Uart (ChannelIndex, dataPin, UartId, OutputType_WS2811);
+                    // DEBUG_V ("");
+                }
+                else
+                {
+                    // LOG_PORT.println (String (F ("************** Starting WS2811 for channel '")) + ChannelIndex + "'. **************");
+                    // pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811Uart (ChannelIndex, dataPin, UartId, OutputType_WS2811);
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811Rmt (ChannelIndex, dataPin, UartId, OutputType_WS2811);
                     // DEBUG_V ("");
                 }
                 break;
