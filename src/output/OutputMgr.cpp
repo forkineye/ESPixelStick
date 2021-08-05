@@ -74,16 +74,16 @@ static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] 
     {gpio_num_t::GPIO_NUM_2,  uart_port_t::UART_NUM_1},
 #ifdef ARDUINO_ARCH_ESP32
     {gpio_num_t::GPIO_NUM_13, uart_port_t::UART_NUM_2},
+    // RMT ports
     {gpio_num_t::GPIO_NUM_12,  uart_port_t (0)},
-    /*
     {gpio_num_t::GPIO_NUM_14,  uart_port_t (1)},
-    {gpio_num_t::GPIO_NUM_21,  uart_port_t (2)},
-    {gpio_num_t::GPIO_NUM_22,  uart_port_t (3)},
+    {gpio_num_t::GPIO_NUM_32,  uart_port_t (2)},
+    {gpio_num_t::GPIO_NUM_33,  uart_port_t (3)},
     {gpio_num_t::GPIO_NUM_25,  uart_port_t (4)},
     {gpio_num_t::GPIO_NUM_26,  uart_port_t (5)},
     {gpio_num_t::GPIO_NUM_27,  uart_port_t (6)},
     {gpio_num_t::GPIO_NUM_34,  uart_port_t (7)},
-    */
+
 #endif // def ARDUINO_ARCH_ESP32
     {gpio_num_t::GPIO_NUM_10, uart_port_t (-1)},
 };
@@ -260,7 +260,10 @@ void c_OutputMgr::CreateNewConfig ()
 
     // create a place to save the config
     DynamicJsonDocument JsonConfigDoc (OM_MAX_CONFIG_SIZE);
+    // DEBUG_V ("");
+
     JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_output_config);
+    // DEBUG_V ("");
 
     JsonConfig[CN_cfgver] = CurrentConfigVersion;
     JsonConfig[F ("MaxChannels")] = sizeof(OutputBuffer);
@@ -274,8 +277,11 @@ void c_OutputMgr::CreateNewConfig ()
         int ChannelIndex = 0;
         for (auto CurrentOutput : pOutputChannelDrivers)
         {
-            // DEBUG_V (String("instantiate output type: ") + String(outputTypeId));
+            // DEBUG_V (String ("ChannelIndex: ") + String (ChannelIndex));
+            // DEBUG_V (String ("instantiate output type: ") + String (outputTypeId));
             InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex++), e_OutputType (outputTypeId));
+            // DEBUG_V ("");
+
         }// end for each interface
 
         // DEBUG_V ("collect the config data for this output type");
@@ -405,7 +411,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
             case e_OutputType::OutputType_DMX:
             {
 #ifdef ARDUINO_ARCH_ESP32
-                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_2))
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_UART_2))
 #else
                 if (-1 == UartId)
 #endif // def ARDUINO_ARCH_ESP32
@@ -427,7 +433,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
             case e_OutputType::OutputType_GECE:
             {
 #ifdef ARDUINO_ARCH_ESP32
-                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_2))
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_UART_2))
 #else
                 if (-1 == UartId)
 #endif // def ARDUINO_ARCH_ESP32
@@ -448,7 +454,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
             case e_OutputType::OutputType_Serial:
             {
 #ifdef ARDUINO_ARCH_ESP32
-                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_2))
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_UART_2))
 #else
                 if (-1 == UartId)
 #endif // def ARDUINO_ARCH_ESP32
@@ -469,7 +475,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
             case e_OutputType::OutputType_Relay:
             {
 #ifdef ARDUINO_ARCH_ESP32
-                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_2))
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_UART_2))
 #else
                 if (-1 == UartId)
 #endif // def ARDUINO_ARCH_ESP32
@@ -490,7 +496,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
             case e_OutputType::OutputType_Renard:
             {
 #ifdef ARDUINO_ARCH_ESP32
-                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_2))
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_UART_2))
 #else
                 if (-1 == UartId)
 #endif // def ARDUINO_ARCH_ESP32
@@ -535,16 +541,16 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 }
 
 #ifdef ARDUINO_ARCH_ESP32
-                if (ChannelIndex > OutputChannelId_2)
+                else if (ChannelIndex >= OutputChannelId_RMT_1)
                 {
-                    // LOG_PORT.println (String (F ("************** Starting WS2811 for channel '")) + ChannelIndex + "'. **************");
+                    // LOG_PORT.println (String (F ("************** Starting WS2811 RMT for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811Rmt (ChannelIndex, dataPin, UartId, OutputType_WS2811);
                     // DEBUG_V ("");
                 }
 #endif // def ARDUINO_ARCH_ESP32
                 else 
                 {
-                    // LOG_PORT.println (String (F ("************** Starting WS2811 for channel '")) + ChannelIndex + "'. **************");
+                    // LOG_PORT.println (String (F ("************** Starting WS2811 UART for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811Uart (ChannelIndex, dataPin, UartId, OutputType_WS2811);
                     // DEBUG_V ("");
                 }
@@ -813,9 +819,9 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
         if (AvailableChannels < ChannelsNeeded)
         {
             LOG_PORT.println (String (F ("--- OutputMgr: ERROR: Too many output channels have been Requested: ")) + String (ChannelsNeeded));
-            DEBUG_V (String ("    ChannelsNeeded: ") + String (ChannelsNeeded));
-            DEBUG_V (String (" AvailableChannels: ") + String (AvailableChannels));
-            DEBUG_V (String ("ChannelsToAllocate: ") + String (ChannelsToAllocate));
+            // DEBUG_V (String ("    ChannelsNeeded: ") + String (ChannelsNeeded));
+            // DEBUG_V (String (" AvailableChannels: ") + String (AvailableChannels));
+            // DEBUG_V (String ("ChannelsToAllocate: ") + String (ChannelsToAllocate));
         }
 
         OutputBufferOffset += ChannelsToAllocate;
