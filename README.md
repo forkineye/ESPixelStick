@@ -268,16 +268,43 @@ The ESPixelStick firmware can generate the following outputs from incoming data 
 ESP8266-12F platforms:
 
 - Single Serial / Pixel output
+    - GPIO_NUM_2, UART_NUM_1,
 - 8 Relay Outputs
 - 16 PWM Outputs (I2C bus)
+    - GPIO_NUM_21,  SDA
+    - GPIO_NUM_22,  SCL
+- SD Card GPIO
+    - GPIO_NUM_23,  MOSI
+    - GPIO_NUM_19,  MISO
+    - GPIO_NUM_18,  SCK
+    - GPIO_NUM_15,  CS
 
 ESP32 platforms:
 
 - Two Serial / Pixel outputs
+    - GPIO_NUM_2,  UART_NUM_1,
+    - GPIO_NUM_13, UART_NUM_2
+- Eight RMT based pixel outputs
+    - GPIO_NUM_12,  RMT (0)
+    - GPIO_NUM_14,  RMT (1)
+    - GPIO_NUM_32,  RMT (2)
+    - GPIO_NUM_33,  RMT (3)
+    - GPIO_NUM_25,  RMT (4)
+    - GPIO_NUM_26,  RMT (5)
+    - GPIO_NUM_27,  RMT (6)
+    - GPIO_NUM_34,  RMT (7)
 - 8 Relay outputs
 - 16 PWM Outputs (I2C bus)
+    - GPIO_NUM_21,  SDA
+    - GPIO_NUM_22,  SCL
+    - SD Card GPIO
+    - GPIO_NUM_23,  MOSI
+    - GPIO_NUM_19,  MISO
+    - GPIO_NUM_18,  SCK
+    - GPIO_NUM_4,   CS
 
 Each Serial / Pixel output can be configured to support any of the output protocols.
+RMT Ports only support WS281x pixels
 
 ### Pixel Protocols
 
