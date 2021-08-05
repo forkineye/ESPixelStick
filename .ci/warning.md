@@ -1,5 +1,5 @@
-Unify Development Release (Auto-Generated)
-==========================================
+Development Release (Auto-Generated)
+====================================
 
 This release is meant for testing purposes and **is not** considered stable. The latest stable release can be found on the [GitHub Release Page](https://github.com/forkineye/ESPixelStick/releases/latest).
 
