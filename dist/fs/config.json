@@ -1,13 +1,13 @@
 {
   "network": {
-    "ssid": "MaRtInG",
-    "passphrase": "Martinshomenetwork",
-    "hostname": "unify",
+    "ssid": "",
+    "passphrase": "",
+    "hostname": "",
     "ip": "192.168.1.10",
     "netmask": "255.255.255.0",
     "gateway": "192.168.1.1",
     "dhcp": true,
-    "ap_fallback": true
+    "ap_fallback": false
   },
   "device": {
     "id": "ESPixelStick"
