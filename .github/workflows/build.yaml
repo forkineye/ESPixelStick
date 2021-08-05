@@ -133,12 +133,12 @@ jobs:
         run: |
           gulp
           gulp md
-          gulp travis
+          gulp ci
           mv data/* dist/fs
 
       - name: Move CI specific release files into place
         run: |
-          mv .travis/firmware.json dist/firmware/firmware.json
+          mv .ci/firmware.json dist/firmware/firmware.json
 
       - name: Create Release Archive
         run: zip -r ../${{env.ARCHFILE}} *

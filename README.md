@@ -2,7 +2,7 @@
 
 [![Join the chat at https://gitter.im/forkineye/ESPixelStick](https://badges.gitter.im/forkineye/ESPixelStick.svg)](https://gitter.im/forkineye/ESPixelStick)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/ShelbyMerrick)
-[![Build Status](https://travis-ci.org/forkineye/ESPixelStick.svg?branch=master)](https://travis-ci.org/forkineye/ESPixelStick)
+[![Build Status](https://github.com/forkineye/ESPixelStick/actions/workflows/build.yaml/badge.svg)](https://github.com/forkineye/ESPixelStick/actions/workflows/build.yaml)
 
 ## ***Code in this branch is currently being refactored. It is an Alpha state. All features have been developed and feedback is needed on usability***
 
@@ -69,7 +69,7 @@ Using library manager:
 
 ### How to build for the ESP32
 
-- install the Arduino IDE and tell it your default workbook folder is ..\Documents\Arduino. 
+- install the Arduino IDE and tell it your default workbook folder is ..\Documents\Arduino.
 - In ...\Documents\Arduino create two sub directories
 - - ...\Documents\Arduino\Libraries
 - - ...\Documents\Arduino\Tools
@@ -89,7 +89,7 @@ Using library manager:
 - Set the port on which the LoLin is connected: Tools->port->YourPortNumberGoesHere
 - Click Sketch->Upload - This will build and upload to the LoLin device
 
-## Supported Inputs 
+## Supported Inputs
 
 The configuration has been modified to support multiple (two) input types concurrently. For example you can select E1.31 and Effects at the same time. E1.31 will have higher priority than Effects. Valid input types are:
 - Alexa
@@ -121,7 +121,7 @@ Effect engine provides a list of effects and colors for the effects. Effects wil
 
 ### FPP Remote / Play FSEQ
 
-FPP / FSEQ support allows the ESP to play files stored on a local SD card. The configuration allows the SPI pins used for the SD Card to be set. 
+FPP / FSEQ support allows the ESP to play files stored on a local SD card. The configuration allows the SPI pins used for the SD Card to be set.
 - When the "FSEQ File to Play" configuration parameter is set to "Play Remote Sequence", the ESP will respond to FPP Sync and play commands.
 - When the "FSEQ File to Play" configuration parameter is set to one of the files stored on the ESP, the ESP will play that file on an endless loop.
 - When the "FSEQ File To Play" configuration parameter is set to a file with a .pl extension, the file will be parsed and used to control a set of actions performed by the FPP Play List Player.
@@ -134,7 +134,7 @@ The ESPixelstick can follow a set of instructions found in a play list file. A p
 	- Requires an effect configuration that includes how long to play the effect (max 1000 seconds)
 - Pause
 	- Requires a time value (up to 1000 seconds)
-- The play list file is case sensitive. 
+- The play list file is case sensitive.
 - The effect configuration sections must be present for the effects to function properly.
 
 Here is an example of a Play List File:
@@ -152,7 +152,7 @@ Here is an example of a Play List File:
 	{
 		"type": "effect",
 		"duration": 10,
-		"config": 
+		"config":
 		{
 			"currenteffect": "Chase",
 			"EffectSpeed": 6,
@@ -168,7 +168,7 @@ Here is an example of a Play List File:
 	{
 		"type": "effect",
 		"duration": 5,
-		"config": 
+		"config":
 		{
 			"currenteffect": "Rainbow",
 			"EffectSpeed": 6,
@@ -184,7 +184,7 @@ Here is an example of a Play List File:
 	{
 		"type": "effect",
 		"duration": 10,
-		"config": 
+		"config":
 		{
 			"currenteffect": "Blink",
 			"EffectSpeed": 6,
@@ -269,7 +269,7 @@ The input channels will respond to FPP and xLights discovery requests. xLights a
 
 ## Supported Outputs
 
-The ESPixelStick firmware can generate the following outputs from incoming data streams, however your hardware must support the physical interface. 
+The ESPixelStick firmware can generate the following outputs from incoming data streams, however your hardware must support the physical interface.
 ESP8266-12F platforms support:
 - a single serial / Pixel output
 - 8 Relay Outputs
@@ -294,14 +294,14 @@ Each Serial / Pixel output can be configured to support any of the output protoc
 - Generic Serial
 
 ### Relay Outputs
-We support an output configuration that drives up to eight (8) relay outputs. 
-- Each relay output can be configured to be active high or active low. 
+We support an output configuration that drives up to eight (8) relay outputs.
+- Each relay output can be configured to be active high or active low.
 - The channel intensity trip point (on/off) is configurable per output.
 - The GPIO for each output is configurable
 
 ### PWM Outputs
 We support up to 16 PWM outputs via the I2C bus. Each output can be configured to map the 8 bit channel intensity values to 4096 PWM timings.
-PWM is supported via the PCM9685 16 channel PWM output module. 
+PWM is supported via the PCM9685 16 channel PWM output module.
 This CAN be used to drive DC SSRs to support upto 5 dumb RGB light strings.
 
 ## Configuration Backup / Restore

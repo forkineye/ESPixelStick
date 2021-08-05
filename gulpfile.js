@@ -75,9 +75,9 @@ gulp.task('md', function(done) {
     done();
 });
 
-/* Travis specific stuff */
-gulp.task('travis', function(done) {
-    gulp.src(['.travis/travis.md', 'dist/README.md'])
+/* CI specific stuff */
+gulp.task('ci', function(done) {
+    gulp.src(['.ci/warning.md', 'dist/README.md'])
         .pipe(plumber())
         .pipe(concat('README.html'))
         .pipe(markdown())
