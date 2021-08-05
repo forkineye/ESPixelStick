@@ -424,14 +424,4 @@ void c_OutputWS2811Rmt::Render ()
 
 } // render
 
-//----------------------------------------------------------------------------
-void c_OutputWS2811Rmt::PauseOutput ()
-{
-    // DEBUG_START;
-
-    // TODO - Something
-
-    // DEBUG_END;
-} // PauseOutput
-
 #endif // def ARDUINO_ARCH_ESP32
