@@ -746,27 +746,14 @@ function updateFromJSON(obj)
     $('#device-id').text($('#config #id').val());
 }
 
-function GenerateInputOutputControlName(OptionListName, DisplayedChannelId)
+function GenerateInputOutputControlLabel(OptionListName, DisplayedChannelId)
 {
-    var NewName;
-
-    if ("0" === DisplayedChannelId)
-    {
-        NewName = "First " + OptionListName + " ";
-    }
-
-    if ("1" === DisplayedChannelId)
-    {
-        NewName = "Second " + OptionListName + " ";
-    }
-
-    if ("2" === DisplayedChannelId)
-    {
-        NewName = "Third " + OptionListName + " ";
-    }
+    var Id = parseInt(DisplayedChannelId) + 1;
+    var NewName = OptionListName.charAt(0).toUpperCase() + OptionListName.slice(1) + ": " + Id;
 
     return NewName;
-} // GenerateInputOutputControlName
+
+} // GenerateInputOutputControlLabel
 
 function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId )
 {
@@ -827,7 +814,7 @@ function CreateOptionsFromConfig(OptionListName, Config)
         if (!$('#' + OptionListName + 'mode' + ChannelId).length)
         {
             // create the selection box
-            $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + ChannelId + '">' + GenerateInputOutputControlName(OptionListName, ChannelId) + ' Mode</label>');
+            $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + ChannelId + '">' + GenerateInputOutputControlLabel(OptionListName, ChannelId) + ' Mode</label>');
             $('#fg_' + OptionListName).append('<div class="col-sm-2"><select class="form-control wsopt" id="' + OptionListName + ChannelId + '"></select></div>');
             $('#fg_' + OptionListName + '_mode').append('<fieldset id="' + OptionListName + 'mode' + ChannelId + '"></fieldset>');
         }
