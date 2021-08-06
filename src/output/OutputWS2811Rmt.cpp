@@ -38,26 +38,15 @@
 #define RMT_Clock_Divisor                           2.0
 #define RMT_TickLengthNS                            float((1/(RMT_ClockRate/RMT_Clock_Divisor))*1000000000.0)
 
-#define WS2811_PIXEL_RMT_NS_BIT_0_HIGH_WS2812         350.0 // 350ns +/- 150ns per datasheet
-#define WS2811_PIXEL_RMT_NS_BIT_0_LOW_WS2812          900.0 // 900ns +/- 150ns per datasheet
-#define WS2811_PIXEL_RMT_NS_BIT_1_HIGH_WS2812         900.0 // 900ns +/- 150ns per datasheet
-#define WS2811_PIXEL_RMT_NS_BIT_1_LOW_WS2812          350.0 // 350ns +/- 150ns per datasheet
-#define WS2811_PIXEL_RMT_NS_IDLE_WS2812             50000.0 // 50us multiple times to get 300us per datasheet
-
-#define WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH_WS2812    uint16_t (WS2811_PIXEL_RMT_NS_BIT_0_HIGH_WS2812 / RMT_TickLengthNS)
-#define WS2811_PIXEL_RMT_TICKS_BIT_0_LOW_WS2812     uint16_t (WS2811_PIXEL_RMT_NS_BIT_0_LOW_WS2812  / RMT_TickLengthNS)
-#define WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH_WS2812    uint16_t (WS2811_PIXEL_RMT_NS_BIT_1_HIGH_WS2812 / RMT_TickLengthNS)
-#define WS2811_PIXEL_RMT_TICKS_BIT_1_LOW_WS2812     uint16_t (WS2811_PIXEL_RMT_NS_BIT_1_LOW_WS2812  / RMT_TickLengthNS)
-#define WS2811_PIXEL_RMT_TICKS_IDLE_WS2812          uint16_t (WS2811_PIXEL_RMT_NS_IDLE_WS2812  / RMT_TickLengthNS)
+#define WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH_WS2812    uint16_t (WS2811_PIXEL_NS_BIT_0_HIGH_WS2812 / RMT_TickLengthNS)
+#define WS2811_PIXEL_RMT_TICKS_BIT_0_LOW_WS2812     uint16_t (WS2811_PIXEL_NS_BIT_0_LOW_WS2812  / RMT_TickLengthNS)
+#define WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH_WS2812    uint16_t (WS2811_PIXEL_NS_BIT_1_HIGH_WS2812 / RMT_TickLengthNS)
+#define WS2811_PIXEL_RMT_TICKS_BIT_1_LOW_WS2812     uint16_t (WS2811_PIXEL_NS_BIT_1_LOW_WS2812  / RMT_TickLengthNS)
+#define WS2811_PIXEL_RMT_TICKS_IDLE_WS2812          uint16_t (WS2811_PIXEL_NS_IDLE_WS2812  / RMT_TickLengthNS)
 
 #define INTERFRAME_GAP_ID   2
 #define STARTBIT_ID         3
 #define STOPBIT_ID          4
-
-rmt_item32_t Rgb2Rmt[] = 
-{
-    0,0,0,0,0
-};
 
 // forward declaration for the isr handler
 static void IRAM_ATTR rmt_intr_handler (void* param);
@@ -69,7 +58,7 @@ c_OutputWS2811Rmt::c_OutputWS2811Rmt (c_OutputMgr::e_OutputChannelIds OutputChan
     c_OutputMgr::e_OutputType outputType) :
     c_OutputWS2811 (OutputChannelId, outputGpio, uart, outputType)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     Rgb2Rmt[0].duration0 = WS2811_PIXEL_RMT_TICKS_BIT_0_LOW_WS2812;
     Rgb2Rmt[0].level0 = 0;
@@ -99,12 +88,12 @@ c_OutputWS2811Rmt::c_OutputWS2811Rmt (c_OutputMgr::e_OutputChannelIds OutputChan
     Rgb2Rmt[STOPBIT_ID].duration1 = 0;
     Rgb2Rmt[STOPBIT_ID].level1 = 0;
 
-    DEBUG_V (String ("WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH_WS2812: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH_WS2812, HEX));
-    DEBUG_V (String (" WS2811_PIXEL_RMT_TICKS_BIT_0_LOW_WS2812: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_0_LOW_WS2812,  HEX));
-    DEBUG_V (String ("WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH_WS2812: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH_WS2812, HEX));
-    DEBUG_V (String (" WS2811_PIXEL_RMT_TICKS_BIT_1_LOW_WS2812: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_1_LOW_WS2812,  HEX));
+    // DEBUG_V (String ("WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH_WS2812: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH_WS2812, HEX));
+    // DEBUG_V (String (" WS2811_PIXEL_RMT_TICKS_BIT_0_LOW_WS2812: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_0_LOW_WS2812,  HEX));
+    // DEBUG_V (String ("WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH_WS2812: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH_WS2812, HEX));
+    // DEBUG_V (String (" WS2811_PIXEL_RMT_TICKS_BIT_1_LOW_WS2812: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_1_LOW_WS2812,  HEX));
 
-    DEBUG_END;
+    // DEBUG_END;
 } // c_OutputWS2811Rmt
 
 //----------------------------------------------------------------------------
@@ -145,10 +134,10 @@ static void IRAM_ATTR rmt_intr_handler (void* param)
 */
 void c_OutputWS2811Rmt::Begin ()
 {
-    DEBUG_START;
+    // DEBUG_START;
     // UartId = 0;
-    DEBUG_V (String ("DataPin: ") + String (DataPin));
-    DEBUG_V (String (" UartId: ") + String (UartId));
+    // DEBUG_V (String ("DataPin: ") + String (DataPin));
+    // DEBUG_V (String (" UartId: ") + String (UartId));
 
     // Configure RMT channel
     rmt_config_t RmtConfig;
@@ -176,47 +165,21 @@ void c_OutputWS2811Rmt::Begin ()
     RMT.apb_conf.fifo_mask = 1;         // enable access to the mem blocks
     RMT.apb_conf.mem_tx_wrap_en = 1;    // allow data greater than one block
 
-    DEBUG_V (String ("                Rgb2Rmt[0]: 0x") + String (uint32_t (Rgb2Rmt[0].val), HEX));
-    DEBUG_V (String ("                Rgb2Rmt[1]: 0x") + String (uint32_t (Rgb2Rmt[1].val), HEX));
-    DEBUG_V (String ("Rgb2Rmt[INTERFRAME_GAP_ID]: 0x") + String (uint32_t (Rgb2Rmt[INTERFRAME_GAP_ID].val), HEX));
-    DEBUG_V (String ("      Rgb2Rmt[STARTBIT_ID]: 0x") + String (uint32_t (Rgb2Rmt[STARTBIT_ID].val), HEX));
-    DEBUG_V (String ("       Rgb2Rmt[STOPBIT_ID]: 0x") + String (uint32_t (Rgb2Rmt[STOPBIT_ID].val), HEX));
-
-    pixel_count = 1;
-    ISR_Handler_StartNewFrame ();
-    DEBUG_V (String ("RemainingPixelCount: 0x") + String (RemainingPixelCount, HEX));
+    // DEBUG_V (String ("                Rgb2Rmt[0]: 0x") + String (uint32_t (Rgb2Rmt[0].val), HEX));
+    // DEBUG_V (String ("                Rgb2Rmt[1]: 0x") + String (uint32_t (Rgb2Rmt[1].val), HEX));
+    // DEBUG_V (String ("Rgb2Rmt[INTERFRAME_GAP_ID]: 0x") + String (uint32_t (Rgb2Rmt[INTERFRAME_GAP_ID].val), HEX));
+    // DEBUG_V (String ("      Rgb2Rmt[STARTBIT_ID]: 0x") + String (uint32_t (Rgb2Rmt[STARTBIT_ID].val), HEX));
+    // DEBUG_V (String ("       Rgb2Rmt[STOPBIT_ID]: 0x") + String (uint32_t (Rgb2Rmt[STOPBIT_ID].val), HEX));
 
     // Start output
-    DEBUG_END;
+    // DEBUG_END;
 
 } // init
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811Rmt::SetOutputBufferSize (uint16_t NumChannelsAvailable)
-{
-    DEBUG_START;
-    // DEBUG_V (String ("NumChannelsAvailable: ") + String (NumChannelsAvailable));
-    // DEBUG_V (String ("   GetBufferUsedSize: ") + String (c_OutputCommon::GetBufferUsedSize ()));
-    // DEBUG_V (String ("         pixel_count: ") + String (pixel_count));
-    // DEBUG_V (String ("       BufferAddress: ") + String ((uint32_t)(c_OutputCommon::GetBufferAddress ())));
-
-    do // once
-    {
-        // notify the base class
-        c_OutputWS2811::SetOutputBufferSize (NumChannelsAvailable);
-
-        DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
-
-    } while (false);
-
-    DEBUG_END;
-
-} // SetBufferSize
-
-//----------------------------------------------------------------------------
 bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
     bool response = c_OutputWS2811::SetConfig (jsonConfig);
 
     uint32_t ifgNS = (InterFrameGapInMicroSec * 1000);
@@ -232,7 +195,7 @@ bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     Rgb2Rmt[INTERFRAME_GAP_ID].duration1 = ifgTicks / 6;
     Rgb2Rmt[INTERFRAME_GAP_ID].level1 = 0;
 
-    DEBUG_END;
+    // DEBUG_END;
     return response;
 
 } // GetStatus
@@ -326,9 +289,9 @@ void IRAM_ATTR c_OutputWS2811Rmt::ISR_Handler_SendIntensityData ()
     uint32_t* pMem = (uint32_t*)RmtCurrentAddr;
     register uint32_t OneValue  = Rgb2Rmt[1].val;
     register uint32_t ZeroValue = Rgb2Rmt[0].val;
-
     uint32_t NumEmptyPixelSlots = NumPixelsPerInterrupt;
-    while (NumEmptyPixelSlots--)
+
+    while ((NumEmptyPixelSlots--) && (RemainingPixelCount))
     {
         for (uint8_t CurrentIntensityIndex = 0;
             CurrentIntensityIndex < numIntensityBytesPerPixel;
@@ -352,59 +315,12 @@ void IRAM_ATTR c_OutputWS2811Rmt::ISR_Handler_SendIntensityData ()
             }
         }
 
-        // has the group completed?
-        --CurrentGroupPixelCount;
-        if (0 != CurrentGroupPixelCount)
-        {
-            // not finished with the group yet
-            continue;
-        }
+        UpdateToNextPixel ();
 
-        // refresh the group count
-        CurrentGroupPixelCount = GroupPixelCount;
+    } // end while there is space in the buffer
 
-        --RemainingPixelCount;
-        if (0 == RemainingPixelCount)
-        {
-            // FrameDoneCounter++;
-
-            *pMem = Rgb2Rmt[STOPBIT_ID].val;
-            // *pMem = 0x0;
-            RMT.int_ena.val &= ~RMT_INT_THR_EVNT (UartId);
-            break;
-        }
-
-        // have we completed the forward traverse
-        if (CurrentZigPixelCount)
-        {
-            --CurrentZigPixelCount;
-            // not finished with the set yet.
-            pNextIntensityToSend += numIntensityBytesPerPixel;
-            continue;
-        }
-
-        if (CurrentZagPixelCount == ZigPixelCount)
-        {
-            // first backward pixel
-            pNextIntensityToSend += numIntensityBytesPerPixel * (ZigPixelCount + 1);
-        }
-
-        // have we completed the backward traverse
-        if (CurrentZagPixelCount)
-        {
-            --CurrentZagPixelCount;
-            // not finished with the set yet.
-            pNextIntensityToSend -= numIntensityBytesPerPixel;
-            continue;
-        }
-
-        // move to next forward pixel
-        pNextIntensityToSend += numIntensityBytesPerPixel * (ZigPixelCount);
-
-        // refresh the zigZag
-        CurrentZigPixelCount = ZigPixelCount - 1;
-        CurrentZagPixelCount = ZigPixelCount;
-    }
+    // terminate the current data in the buffer
+    *pMem = Rgb2Rmt[STOPBIT_ID].val;
 
     RmtCurrentAddr = (volatile rmt_item32_t*)pMem;
 

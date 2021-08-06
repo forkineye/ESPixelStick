@@ -42,7 +42,6 @@ public:
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);  ///< Set a new config in the driver
     void    Render ();                                        ///< Call from loop(),  renders output data
-    void    SetOutputBufferSize (uint16_t NumChannelsAvailable);
     void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
 
     /// Interrupt Handler
@@ -50,16 +49,12 @@ public:
     void IRAM_ATTR ISR_Handler_SendIntensityData (); ///< ISR
     void IRAM_ATTR ISR_Handler_StartNewFrame (); ///< ISR
     
-#define RMT_base_address                            0x1000
-#define RMT_ENTRIES_PER_MEM_BLOCK                   64
-#define RMT_MEM_BLOCK_ENTRY_SIZE                    sizeof(rmt_item32_t)
-#define RMT_MEM_BLOCK_SIZE                          (RMT_ENTRIES_PER_MEM_BLOCK * RMT_MEM_BLOCK_ENTRY_SIZE)
-
     volatile rmt_item32_t * RmtStartAddr   = nullptr;
     volatile rmt_item32_t * RmtCurrentAddr = nullptr;
     volatile rmt_item32_t * RmtEndAddr     = nullptr;
     intr_handle_t RMT_intr_handle = NULL;
     uint8_t NumPixelsPerInterrupt = 2;
+    rmt_item32_t Rgb2Rmt[5];
 
     uint32_t FrameStartCounter = 0;
     // uint32_t DataISRcounter = 0;

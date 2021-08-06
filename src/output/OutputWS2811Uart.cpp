@@ -203,7 +203,7 @@ void IRAM_ATTR c_OutputWS2811Uart::ISR_Handler ()
         // free space in the FIFO divided by the number of data bytes per intensity
         // gives the max number of intensities we can add to the FIFO
         uint32_t NumEmptyPixelSlots = ((((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / WS2812_NUM_DATA_BYTES_PER_PIXEL);
-        while (NumEmptyPixelSlots--)
+        while ((NumEmptyPixelSlots--) && (RemainingPixelCount))
         {
             for (uint8_t CurrentIntensityIndex = 0;
                 CurrentIntensityIndex < numIntensityBytesPerPixel;
@@ -223,52 +223,12 @@ void IRAM_ATTR c_OutputWS2811Uart::ISR_Handler ()
                 enqueue ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 0) & 0x3]));
             }
 
-            // has the group completed?
-            if (--CurrentGroupPixelCount)
-            {
-                // not finished with the group yet
-                continue;
-            }
-            // refresh the group count
-            CurrentGroupPixelCount = GroupPixelCount;
+            UpdateToNextPixel ();
+        } // end while there is data to be sent
 
-            --RemainingPixelCount;
-            if (0 == RemainingPixelCount)
-            {
-                CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
-                break;
-            }
-
-            // have we completed the forward traverse
-            if (CurrentZigPixelCount)
-            {
-                --CurrentZigPixelCount;
-                // not finished with the set yet.
-                pNextIntensityToSend += numIntensityBytesPerPixel;
-                continue;
-            }
-
-            if (CurrentZagPixelCount == ZigPixelCount)
-            {
-                // first backward pixel
-                pNextIntensityToSend += numIntensityBytesPerPixel * (ZigPixelCount + 1);
-            }
-
-            // have we completed the backward traverse
-            if (CurrentZagPixelCount)
-            {
-                --CurrentZagPixelCount;
-                // not finished with the set yet.
-                pNextIntensityToSend -= numIntensityBytesPerPixel;
-                continue;
-            }
-
-            // move to next forward pixel
-            pNextIntensityToSend += numIntensityBytesPerPixel * (ZigPixelCount);
-
-            // refresh the zigZag
-            CurrentZigPixelCount = ZigPixelCount - 1;
-            CurrentZagPixelCount = ZigPixelCount;
+        if (0 == RemainingPixelCount)
+        {
+            CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
         }
 
         // Clear all interrupts flags for this uart
