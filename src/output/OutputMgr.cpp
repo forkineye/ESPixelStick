@@ -23,7 +23,6 @@
 
 #include "../ESPixelStick.h"
 #include "../FileMgr.hpp"
-#include "../GPIO_Defs.hpp"
 
 //-----------------------------------------------------------------------------
 // bring in driver definitions

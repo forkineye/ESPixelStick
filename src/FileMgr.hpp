@@ -19,7 +19,6 @@
 */
 
 #include "ESPixelStick.h"
-#include "GPIO_Defs.hpp"
 #include <FS.h>
 #include <map>
 

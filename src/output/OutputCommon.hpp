@@ -21,7 +21,6 @@
 */
 
 #include "../ESPixelStick.h"
-#include "../GPIO_Defs.hpp"
 
 #ifdef ARDUINO_ARCH_ESP32
 #   include <driver/uart.h>
