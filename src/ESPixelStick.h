@@ -41,6 +41,7 @@
 
 #include "memdebug.h"
 #include "ConstNames.hpp"
+#include "GPIO_Defs.hpp"
 
 #define REBOOT_DELAY    100     ///< Delay for rebooting once reboot flag is set
 #define LOG_PORT        Serial  ///< Serial port for console logging
