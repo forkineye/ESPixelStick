@@ -3,21 +3,43 @@
 
 ### 4.0-dev (in progress)
 
-- Code refactored to allow easier implementation of extensions.
-- All output modes are now selecatble at runtime.
-- JSON configuration layout changed. Each module has its own configuration file.
+- Compiled against [Arduino Core 3.0.2](https://github.com/esp8266/Arduino/releases/tag/3.0.2) for ESP8266 platform.
+- Compiled against [Arduino Core 1.0.6](https://github.com/espressif/arduino-esp32/releases/tag/1.0.6) for ESP32 platform.
+- ***ESP-01 modules are no longer supported***. Version 4.0 requires 4MB of flash and ESP-01 modules only have 1MB of flash. For the ESPixelStick V1 or V2, 3.2 is the latest version you can load.
+- Requires local upload to controller. OTA update from 3.x via EFU is not supported due to the new flash layout.  Upgrades to future 4.x version from 4.0 however will be supported.
+- Complete refactor of the code to allow easier implementation of extensions.
+- Pixel and Serial code has been unified and all output modes are now selectable at runtime.
+- Added support for the ESP32 platform.
+- Added Artnet support.
+- Added Alexa support.
+- Added SD card support.
+- Added FPP remote support (requires board with SD card support).
+- Added Relay output support (8 channels, DIY hardware solution with GPIO mapping).
+- Added PCA9685 Servo output support (16 channels, requires PCA9685 module).
 
-### 3.1-dev
+### 3.2
 
+- Compiled against [2.7.4 Arduino Core](https://github.com/esp8266/Arduino/releases/tag/2.7.4)
+- Updated to [AdruinoJson 6.17.0](https://github.com/bblanchon/ArduinoJson/releases/tag/v6.17.0)
+- Updated to [async-mqtt-client 2019.12.08](https://github.com/marvinroger/async-mqtt-client/tree/7f1ba481a22d56ccf123e4b2f6e555d134c956d0)
+- Fix for Client Timeout not Changing [Issue #201](https://github.com/forkineye/ESPixelStick/issues/201)
+- Updated the flash tool included in binary releases to fix issues flashing on newer releases of MacOS.
+
+### 3.1
+
+- Compiled against [2.6.3 Arduino Core](https://github.com/esp8266/Arduino/releases/tag/2.6.3)
+- ESPSFlashTool support for ESPixelStick v3.0 Hardware
+- Fixed DMX issues - [Issue #101](https://github.com/forkineye/ESPixelStick/issues/101)
 - Added brightness support.
 - Added calculated gamma support.
 - Added grouping and zigzag for pixels.
 - Added startup and idle effect options.
+- Added FPP Discovery support.
+- Added xLights ZCPP support.
+- Added DDP support.
 - Added Home Assistant MQTT Discovery support.
-- Better MQTT support (usage detailed in the README).
-- New effects for standalone or MQTT usage.
+- New effects for standalone and MQTT usage.
 - Changed GECE output from bit-banging to a UART based implementation.
-- Removed PWM support. A version supporting PWM is maintaned by [penfold42](https://github.com/penfold42/ESPixelBoard).
 
 ### 3.0
 
