@@ -23,6 +23,7 @@
 
 #include "../ESPixelStick.h"
 #include "../FileMgr.hpp"
+#include "../GPIO_Defs.hpp"
 
 //-----------------------------------------------------------------------------
 // bring in driver definitions
@@ -71,18 +72,18 @@ typedef struct
 //-----------------------------------------------------------------------------
 static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] =
 {
-    {gpio_num_t::GPIO_NUM_2,  uart_port_t::UART_NUM_1},
+    {DEFAULT_UART_1_GPIO,  uart_port_t::UART_NUM_1},
 #ifdef ARDUINO_ARCH_ESP32
-    {gpio_num_t::GPIO_NUM_13, uart_port_t::UART_NUM_2},
+    {DEFAULT_UART_2_GPIO, uart_port_t::UART_NUM_2},
     // RMT ports
-    {gpio_num_t::GPIO_NUM_12,  uart_port_t (0)},
-    {gpio_num_t::GPIO_NUM_14,  uart_port_t (1)},
-    {gpio_num_t::GPIO_NUM_32,  uart_port_t (2)},
-    {gpio_num_t::GPIO_NUM_33,  uart_port_t (3)},
-    {gpio_num_t::GPIO_NUM_25,  uart_port_t (4)},
-    {gpio_num_t::GPIO_NUM_26,  uart_port_t (5)},
-    {gpio_num_t::GPIO_NUM_27,  uart_port_t (6)},
-    {gpio_num_t::GPIO_NUM_34,  uart_port_t (7)},
+    {DEFAULT_RMT_0_GPIO,  uart_port_t (0)},
+    {DEFAULT_RMT_1_GPIO,  uart_port_t (1)},
+    {DEFAULT_RMT_2_GPIO,  uart_port_t (2)},
+    {DEFAULT_RMT_3_GPIO,  uart_port_t (3)},
+    {DEFAULT_RMT_4_GPIO,  uart_port_t (4)},
+    {DEFAULT_RMT_5_GPIO,  uart_port_t (5)},
+    {DEFAULT_RMT_6_GPIO,  uart_port_t (6)},
+    {DEFAULT_RMT_7_GPIO,  uart_port_t (7)},
 
 #endif // def ARDUINO_ARCH_ESP32
     {gpio_num_t::GPIO_NUM_10, uart_port_t (-1)},
