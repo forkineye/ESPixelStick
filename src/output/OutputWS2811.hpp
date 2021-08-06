@@ -50,8 +50,16 @@ public:
     virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
     virtual void         PauseOutput () {};
 
-#define WS2811_MICRO_SEC_PER_INTENSITY  10L     // ((1/800000) * 8 bits) = 10us
-#define WS2811_MIN_IDLE_TIME            300L    ///< 300us idle time
+    void IRAM_ATTR UpdateToNextPixel ();
+
+#define WS2811_PIXEL_NS_BIT_0_HIGH_WS2812          350.0 // 350ns +/- 150ns per datasheet
+#define WS2811_PIXEL_NS_BIT_0_LOW_WS2812           900.0 // 900ns +/- 150ns per datasheet
+#define WS2811_PIXEL_NS_BIT_1_HIGH_WS2812          900.0 // 900ns +/- 150ns per datasheet
+#define WS2811_PIXEL_NS_BIT_1_LOW_WS2812           350.0 // 350ns +/- 150ns per datasheet
+#define WS2811_PIXEL_NS_IDLE_WS2812             300000.0 // 300us per datasheet
+
+#define WS2811_MICRO_SEC_PER_INTENSITY          10L     // ((1/800000) * 8 bits) = 10us
+#define WS2811_MIN_IDLE_TIME_US                 (WS2811_PIXEL_NS_IDLE_WS2812 / 10000.0)
 
 protected:
     uint8_t   * pNextIntensityToSend = nullptr;     ///< start of output buffer being sent to the UART
