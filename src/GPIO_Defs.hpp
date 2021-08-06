@@ -20,7 +20,11 @@
 
 #include "ESPixelStick.h"
 
-#ifndef gpio_num_t
+#ifdef ARDUINO_ARCH_ESP32
+#   include "driver/gpio.h"
+#endif
+
+#ifdef ARDUINO_ARCH_ESP8266
 typedef enum
 {
     GPIO_NUM_0 = 0,
@@ -59,16 +63,14 @@ typedef enum
     GPIO_NUM_33,
     GPIO_NUM_34,
 } gpio_num_t;
-#endif // ndef gpio_num_t
 
-#ifndef uart_port_t
 typedef enum
 {
     UART_NUM_0 = 0,
     UART_NUM_1,
     UART_NUM_2
 } uart_port_t;
-#endif // ndef uart_port_t
+#endif // def ARDUINO_ARCH_ESP8266
 
 #define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_2
 #define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_13
@@ -91,5 +93,3 @@ typedef enum
 #else
 #   define SD_CARD_CS_PIN      gpio_num_t::GPIO_NUM_15
 #endif
-
-
