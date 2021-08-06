@@ -267,6 +267,7 @@ The ESPixelStick firmware can generate the following outputs from incoming data 
 
 ESP8266-12F platforms:
 
+- Max 2400 Channels (800 RGB pixels)
 - Single Serial / Pixel output
     - GPIO_NUM_2, UART_NUM_1,
 - 8 Relay Outputs
@@ -281,6 +282,7 @@ ESP8266-12F platforms:
 
 ESP32 platforms:
 
+- Max 9000 Channels (3000 RGB pixels)
 - Two Serial / Pixel outputs
     - GPIO_NUM_2,  UART_NUM_1,
     - GPIO_NUM_13, UART_NUM_2
