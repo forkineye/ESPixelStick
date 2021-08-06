@@ -35,7 +35,7 @@ c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     pNextIntensityToSend (nullptr),
     RemainingPixelCount (0),
     numIntensityBytesPerPixel (3),
-    InterFrameGapInMicroSec (WS2811_MIN_IDLE_TIME)
+    InterFrameGapInMicroSec (WS2811_MIN_IDLE_TIME_US)
 {
     // DEBUG_START;
     ColorOffsets.offset.r = 0;
@@ -254,3 +254,69 @@ bool c_OutputWS2811::validate ()
     return response;
 
 } // validate
+
+//----------------------------------------------------------------------------
+void IRAM_ATTR c_OutputWS2811::UpdateToNextPixel ()
+{
+    uint8_t* response = pNextIntensityToSend;
+
+    do // once
+    {
+        if (0 == RemainingPixelCount)
+        {
+            // nothign left to send
+            break;
+        }
+
+        // has the group completed?
+        --CurrentGroupPixelCount;
+        if (0 != CurrentGroupPixelCount)
+        {
+            // not finished with the group yet
+            continue;
+        }
+
+        // refresh the group count
+        CurrentGroupPixelCount = GroupPixelCount;
+
+        --RemainingPixelCount;
+        if (0 == RemainingPixelCount)
+        {
+            // FrameDoneCounter++;
+            break;
+        }
+
+        // have we completed the forward traverse
+        if (CurrentZigPixelCount)
+        {
+            --CurrentZigPixelCount;
+            // not finished with the set yet.
+            pNextIntensityToSend += numIntensityBytesPerPixel;
+            continue;
+        }
+
+        if (CurrentZagPixelCount == ZigPixelCount)
+        {
+            // first backward pixel
+            pNextIntensityToSend += numIntensityBytesPerPixel * (ZigPixelCount + 1);
+        }
+
+        // have we completed the backward traverse
+        if (CurrentZagPixelCount)
+        {
+            --CurrentZagPixelCount;
+            // not finished with the set yet.
+            pNextIntensityToSend -= numIntensityBytesPerPixel;
+            continue;
+        }
+
+        // move to next forward pixel
+        pNextIntensityToSend += numIntensityBytesPerPixel * (ZigPixelCount);
+
+        // refresh the zigZag
+        CurrentZigPixelCount = ZigPixelCount - 1;
+        CurrentZagPixelCount = ZigPixelCount;
+
+    } while (false);
+
+} // UpdateToNextPixel
