@@ -68,24 +68,7 @@ void c_FileMgr::Begin ()
             listDir (LITTLEFS, String ("/"), 3);
         }
 
-#ifdef ARDUINO_ARCH_ESP32
-        SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
-
-        if (!SD.begin (cs_pin))
-#else
-        SDFSConfig cfg (SD_CARD_CS_PIN, SD_CARD_CLK_MHZ);
-        SDFS.setConfig (cfg);
-
-        if (!SDFS.begin ())
-#endif
-        {
-            LOG_PORT.println (String (F ("No SD card installed")));
-            break;
-        }
-
-        SdCardInstalled = true;
-
-        DescribeSdCardToUser ();
+        SetSpiIoPins ();
 
     } while (false);
 
@@ -93,30 +76,88 @@ void c_FileMgr::Begin ()
 } // begin
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::SetSpiIoPins (uint8_t miso, uint8_t mosi, uint8_t clock, uint8_t cs)
+boolean c_FileMgr::SetConfig (JsonObject & json)
 {
-    miso_pin = miso;
-    mosi_pin = mosi;
-    clk_pin  = clock;
-    cs_pin   = cs;
+    // DEBUG_START;
 
-    SDFS.end ();
+    boolean ConfigChanged = false;
+    if (json.containsKey (CN_device))
+    {
+        JsonObject JsonDeviceConfig = json[CN_device];
+
+        ConfigChanged |= setFromJSON (miso_pin, JsonDeviceConfig, CN_miso_pin);
+        ConfigChanged |= setFromJSON (mosi_pin, JsonDeviceConfig, CN_mosi_pin);
+        ConfigChanged |= setFromJSON (clk_pin,  JsonDeviceConfig, CN_clock_pin);
+        ConfigChanged |= setFromJSON (cs_pin,   JsonDeviceConfig, CN_cs_pin);
+    }
+    else
+    {
+        LOG_PORT.println (F ("No File Manager settings found."));
+    }
+
+    // DEBUG_V (String ("ConfigChanged: ") + String (ConfigChanged));
+
+    if (ConfigChanged)
+    {
+        SetSpiIoPins ();
+    }
+
+    // DEBUG_END;
+
+    return ConfigChanged;
+
+} // SetConfig
+
+//-----------------------------------------------------------------------------
+void c_FileMgr::GetConfig (JsonObject& json)
+{
+    // DEBUG_START;
+
+    json[CN_miso_pin]  = miso_pin;
+    json[CN_mosi_pin]  = mosi_pin;
+    json[CN_clock_pin] = clk_pin;
+    json[CN_cs_pin]    = cs_pin;
+
+    // DEBUG_END;
+
+} // GetConfig
+
+//-----------------------------------------------------------------------------
+void c_FileMgr::SetSpiIoPins ()
+{
+    // DEBUG_START;
+
+    // DEBUG_V (String ("miso_pin: ") + String (miso_pin));
+    // DEBUG_V (String ("mosi_pin: ") + String (mosi_pin));
+    // DEBUG_V (String (" clk_pin: ") + String (clk_pin));
+    // DEBUG_V (String ("  cs_pin: ") + String (cs_pin));
+
+    if (SdCardInstalled)
+    {
+        SDFS.end ();
+    }
 
 #ifdef ARDUINO_ARCH_ESP32
-    SPI.end ();
     SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
-#else
-    SDFSConfig sdcfg;
-    SPISettings spicfg;
 
-    SDFSConfig cfg (cs_pin, SD_SCK_MHZ (80));
+    if (!SD.begin (cs_pin))
+#else
+    SDFSConfig cfg (SD_CARD_CS_PIN, SD_CARD_CLK_MHZ);
     SDFS.setConfig (cfg);
-#endif
 
     if (!SDFS.begin ())
+#endif
     {
-        LOG_PORT.println (String (F ("File Manager: No SD card")));
+        LOG_PORT.println (String (F ("No SD card installed")));
+        SdCardInstalled = false;
     }
+    else
+    {
+        SdCardInstalled = true;
+        DescribeSdCardToUser ();
+    }
+
+    // DEBUG_END;
 
 } // SetSpiIoPins
 

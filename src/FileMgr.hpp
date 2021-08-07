@@ -40,10 +40,12 @@ public:
 
     typedef uint32_t FileId;
 
-    void   Begin            ();
-    void   Poll             ();
-    void   SetSpiIoPins     (uint8_t miso, uint8_t mosi, uint8_t clock, uint8_t cs);
-    void   handleFileUpload (const String & filename, size_t index, uint8_t * data, size_t len, bool final);
+    void    Begin     ();
+    void    Poll      ();
+    void    GetConfig (JsonObject& json);
+    boolean SetConfig (JsonObject& json);
+
+    void    handleFileUpload (const String & filename, size_t index, uint8_t * data, size_t len, bool final);
 
     typedef std::function<void (DynamicJsonDocument& json)> DeserializationHandler;
 
@@ -85,6 +87,8 @@ public:
 #   // define CONFIG_MAX_SIZE (4*1024)    ///< Sanity limit for config file
 #endif
 private:
+    void   SetSpiIoPins ();
+
 #   define SD_CARD_CLK_MHZ     SD_SCK_MHZ(50)  // 50 MHz SPI clock
 
     void listDir (fs::FS& fs, String dirname, uint8_t levels);

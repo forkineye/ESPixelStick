@@ -332,6 +332,7 @@ bool deserializeCore (JsonObject & json)
     do // once
     {
         dsDevice  (json);
+        FileMgr.SetConfig (json);
         ResetWiFi = dsNetwork (json);
         ResetWiFi;
 
@@ -395,6 +396,8 @@ void GetConfig (JsonObject & json)
     JsonObject device = json.createNestedObject(CN_device);
     device[CN_id]     = config.id;
     device[CN_cfgver] = CurrentConfigVersion;
+
+    FileMgr.GetConfig (device);
 
     // Network
     JsonObject network = json.createNestedObject(CN_network);

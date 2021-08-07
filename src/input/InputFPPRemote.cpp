@@ -73,10 +73,6 @@ void c_InputFPPRemote::GetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
-    jsonConfig[JSON_NAME_MISO]         = miso_pin;
-    jsonConfig[JSON_NAME_MOSI]         = mosi_pin;
-    jsonConfig[JSON_NAME_CLOCK]        = clk_pin;
-    jsonConfig[JSON_NAME_CS]           = cs_pin;
     if (PlayingFile ())
     {
         jsonConfig[JSON_NAME_FILE_TO_PLAY] = pInputFPPRemotePlayItem->GetFileName();
@@ -146,15 +142,8 @@ boolean c_InputFPPRemote::SetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
-    setFromJSON (miso_pin, jsonConfig, JSON_NAME_MISO);
-    setFromJSON (mosi_pin, jsonConfig, JSON_NAME_MOSI);
-    setFromJSON (clk_pin,  jsonConfig, JSON_NAME_CLOCK);
-    setFromJSON (cs_pin,   jsonConfig, JSON_NAME_CS);
-
     String FileToPlay;
     setFromJSON (FileToPlay, jsonConfig, JSON_NAME_FILE_TO_PLAY);
-
-    FileMgr.SetSpiIoPins (miso_pin, mosi_pin, clk_pin, cs_pin);
 
     // DEBUG_V ("Config Processing");
     StartPlaying (FileToPlay);

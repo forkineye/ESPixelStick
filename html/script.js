@@ -972,7 +972,12 @@ function submitDeviceConfig()
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
-    Device_Config.id = $('#config #device #id').val();
+    Device_Config.id        = $('#config #device #id').val();
+    Device_Config.miso_pin  = $('#config #device #miso_pin').val();
+    Device_Config.mosi_pin  = $('#config #device #mosi_pin').val();
+    Device_Config.clock_pin = $('#config #device #clock_pin').val();
+    Device_Config.cs_pin    = $('#config #device #cs_pin').val();
+
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'device': Device_Config, 'network': Network_Config } } }));
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input':  { 'input_config': Input_Config } } } }));
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'output': { 'output_config': Output_Config } } } }));
