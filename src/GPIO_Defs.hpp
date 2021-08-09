@@ -20,7 +20,7 @@
 
 #include "ESPixelStick.h"
 
-#define ESP32_CAM
+// #define ESP32_CAM
 
 #ifdef ARDUINO_ARCH_ESP32
 #   include "driver/gpio.h"
