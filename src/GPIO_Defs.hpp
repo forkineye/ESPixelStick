@@ -20,6 +20,8 @@
 
 #include "ESPixelStick.h"
 
+#define ESP32_CAM
+
 #ifdef ARDUINO_ARCH_ESP32
 #   include "driver/gpio.h"
 #endif
@@ -72,6 +74,24 @@ typedef enum
 } uart_port_t;
 #endif // def ARDUINO_ARCH_ESP8266
 
+#ifdef ESP32_CAM
+
+//Output Manager definitions
+#define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_0
+#define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_1
+
+#define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_3
+#define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_16
+
+// File Manager SPI definitions
+#define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_2
+#define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_15
+#define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14
+#define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_13
+
+#else
+
+//Output Manager definitions
 #define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_2
 #define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_13
 
@@ -84,6 +104,7 @@ typedef enum
 #define DEFAULT_RMT_6_GPIO      gpio_num_t::GPIO_NUM_27
 #define DEFAULT_RMT_7_GPIO      gpio_num_t::GPIO_NUM_34
 
+// File Manager SPI definitions
 #define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_19
 #define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_23
 #define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_18
@@ -93,3 +114,4 @@ typedef enum
 #else
 #   define SD_CARD_CS_PIN      gpio_num_t::GPIO_NUM_15
 #endif
+#endif // ndef ESP32_CAM

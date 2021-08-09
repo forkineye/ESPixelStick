@@ -77,12 +77,14 @@ static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] 
     // RMT ports
     {DEFAULT_RMT_0_GPIO,  uart_port_t (0)},
     {DEFAULT_RMT_1_GPIO,  uart_port_t (1)},
+#ifndef ESP32_CAM
     {DEFAULT_RMT_2_GPIO,  uart_port_t (2)},
     {DEFAULT_RMT_3_GPIO,  uart_port_t (3)},
     {DEFAULT_RMT_4_GPIO,  uart_port_t (4)},
     {DEFAULT_RMT_5_GPIO,  uart_port_t (5)},
     {DEFAULT_RMT_6_GPIO,  uart_port_t (6)},
     {DEFAULT_RMT_7_GPIO,  uart_port_t (7)},
+#endif // ndef ESP32_CAM
 
 #endif // def ARDUINO_ARCH_ESP32
     {gpio_num_t::GPIO_NUM_10, uart_port_t (-1)},
@@ -158,7 +160,6 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
     // DEBUG_START;
 
     // extern void PrettyPrint (JsonObject&, String);
-    // DEBUG_V ("");
     // PrettyPrint (jsonConfig, String ("jsonConfig"));
 
     // add OM config parameters
@@ -386,7 +387,9 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 break;
             }
 
-            // DEBUG_V ("shut down the existing driver");
+            String Temp;
+            pOutputChannelDrivers[ChannelIndex]->GetDriverName (Temp);
+            // DEBUG_V (String ("shut down the existing driver: ") + Temp);
             delete pOutputChannelDrivers[ChannelIndex];
             pOutputChannelDrivers[ChannelIndex] = nullptr;
             // DEBUG_V ("");
