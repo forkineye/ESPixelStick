@@ -69,6 +69,10 @@ c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds iOutputChannelId
 	// LOG_PORT.println (String ("UartId:          '") + UartId + "'");
     // LOG_PORT.println (String ("OutputChannelId: '") + OutputChannelId + "'");
     // LOG_PORT.println (String ("OutputType:      '") + OutputType + "'");
+    if (gpio_num_t (-1) != DataPin)
+    { 
+        pinMode (DataPin, INPUT_PULLUP);
+    }
 
 } // c_OutputMgr
 
@@ -79,10 +83,11 @@ c_OutputCommon::~c_OutputCommon ()
     // DEBUG_START;
     if (gpio_num_t (-1) == DataPin) { return; }
 
-    pinMode (DataPin, INPUT);
+    pinMode (DataPin, INPUT_PULLUP);
 
+    // DEBUG_V ("");
     TerminateUartOperation ();
-   
+    // DEBUG_END;
 } // ~c_OutputMgr
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -244,32 +249,40 @@ void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
 void c_OutputCommon::TerminateUartOperation ()
 {
     // DEBUG_START;
-    switch (UartId)
+
+    if (OutputChannelId <= c_OutputMgr::OutputChannelId_UART_LAST)
     {
-        case UART_NUM_0:
+        switch (UartId)
         {
-            Serial.end ();
-            break;
-        }
-        case UART_NUM_1:
-        {
-            Serial1.end ();
-            break;
-        }
+            case UART_NUM_0:
+            {
+                // DEBUG_V ("UART_NUM_0");
+                Serial.end ();
+                break;
+            }
+            case UART_NUM_1:
+            {
+                // DEBUG_V ("UART_NUM_1");
+                Serial1.end ();
+                break;
+            }
 
-#ifdef ARDUINO_ARCH_ESP32
-        case UART_NUM_2:
-        {
-            Serial2.end ();
-            break;
-        }
-#endif // def ARDUINO_ARCH_ESP32
+    #ifdef ARDUINO_ARCH_ESP32
+            case UART_NUM_2:
+            {
+                // DEBUG_V ("UART_NUM_2");
+                Serial2.end ();
+                break;
+            }
+    #endif // def ARDUINO_ARCH_ESP32
 
-        default:
-        {
-            break;
-        }
-    } // end switch (UartId)
+            default:
+            {
+                // DEBUG_V ("default");
+                break;
+            }
+        } // end switch (UartId)
+    }
     
     // DEBUG_END;
 
