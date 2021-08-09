@@ -61,14 +61,6 @@ private:
 
     String FileBeingPlayed;
 
-#   define JSON_NAME_MISO         CN_miso_pin
-#   define JSON_NAME_MOSI         CN_mosi_pin
-#   define JSON_NAME_CLOCK        CN_clock_pin
-#   define JSON_NAME_CS           CN_cs_pin
 #   define JSON_NAME_FILE_TO_PLAY CN_fseqfilename
 
-    uint8_t  miso_pin = SD_CARD_MISO_PIN;
-    uint8_t  mosi_pin = SD_CARD_MOSI_PIN;
-    uint8_t  clk_pin  = SD_CARD_CLK_PIN;
-    uint8_t  cs_pin   = SD_CARD_CS_PIN;
 };

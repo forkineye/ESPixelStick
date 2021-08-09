@@ -235,6 +235,28 @@
                             <label class="control-label col-sm-2" for="id">Device ID</label>
                             <div class="col-sm-10"><input type="text" class="form-control" id="id" maxlength="64" title="Plain text ID to help identify your device."></div>
                         </div>
+                        <div class="form-group has-feedback">
+                            <label class="control-label col-sm-2 hidden AdvancedMode" for="miso_pin">SD MISO Pin</label>
+                            <div class="col-sm-4">
+                                <input type="number" class="form-control is-valid hidden AdvancedMode" id="miso_pin" step="1" min="1" max="24" value="0" required title="GPIO on which MISO will be received">
+                            </div>
+                            <label class="control-label col-sm-2 hidden AdvancedMode" for="mosi_pin">SD MOSI Pin</label>
+                            <div class="col-sm-4">
+                                <input type="number" class="form-control is-valid hidden AdvancedMode" id="mosi_pin" step="1" min="1" max="24" value="0" required title="GPIO on which MOSI will be sent">
+                            </div>
+                        </div>
+
+                        <div class="form-group has-feedback">
+                            <label class="control-label col-sm-2 hidden AdvancedMode" for="clock_pin">SD Clock Pin</label>
+                            <div class="col-sm-4">
+                                <input type="number" class="form-control is-valid hidden AdvancedMode" id="clock_pin" step="1" min="1" max="24" value="0" required title="GPIO on which CLOCK will be sent">
+                            </div>
+                            <label class="control-label col-sm-2 hidden AdvancedMode" for="cs_pin">SD Chip Select Pin</label>
+                            <div class="col-sm-4">
+                                <input type="number" class="form-control is-valid hidden AdvancedMode" id="cs_pin" step="1" min="1" max="24" value="0" required title="GPIO on which Chip Select will be sent">
+                            </div>
+                        </div>
+
                         <!-- Dynamic input / ouput config -->
                         <div class="form-group" id="fg_input"></div>
                         <div class="form-group" id="fg_output"></div>
@@ -402,9 +424,22 @@
                     </form>
                 </fieldset>
             </div>
+<<<<<<< HEAD
         </div>
 
         <div id="snackbar">Configuration Saved</div>
+=======
+          </div>
+          <div class="form-group t_startup">
+            <div class="col-sm-offset-2 col-sm-10">
+              <button type="button" onclick="submitStartupEffect()" class="btn btn-primary">Save Changes</button>
+            </div>
+          </div>
+
+        </form>
+      </fieldset>
+    </div>
+>>>>>>> 479f85205c1e500127ee715f5864a5ed1cec874c
 
         <!-- Reboot Modal -->
         <div id="reboot" class="modal fade" tabindex="-1" role="dialog">

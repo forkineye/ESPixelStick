@@ -30,14 +30,9 @@ c_OutputDisabled::c_OutputDisabled (c_OutputMgr::e_OutputChannelIds OutputChanne
                                     gpio_num_t outputGpio, 
                                     uart_port_t uart,
                                     c_OutputMgr::e_OutputType outputType) :
-    c_OutputCommon(OutputChannelId, outputGpio, uart, outputType)
+    c_OutputCommon(OutputChannelId, gpio_num_t(-1), uart_port_t (-1), outputType)
 {
     // DEBUG_START;
-
-    if (gpio_num_t (-1) != DataPin)
-    {
-        pinMode (DataPin, INPUT);
-    }
 
     // DEBUG_END;
 } // c_OutputDisabled
@@ -47,11 +42,6 @@ c_OutputDisabled::~c_OutputDisabled()
 {
     // DEBUG_START;
 
-    if (gpio_num_t (-1) != DataPin)
-    {
-        pinMode (DataPin, INPUT);
-    }
-
     // DEBUG_END;
 } // ~c_OutputDisabled
 
@@ -60,11 +50,6 @@ c_OutputDisabled::~c_OutputDisabled()
 void c_OutputDisabled::Begin()
 {
     // DEBUG_START;
-
-    if (gpio_num_t (-1) != DataPin)
-    {
-        pinMode (DataPin, INPUT);
-    }
 
     // DEBUG_END;
 

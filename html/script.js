@@ -746,27 +746,14 @@ function updateFromJSON(obj)
     $('#device-id').text($('#config #id').val());
 }
 
-function GenerateInputOutputControlName(OptionListName, DisplayedChannelId)
+function GenerateInputOutputControlLabel(OptionListName, DisplayedChannelId)
 {
-    var NewName;
-
-    if ("0" === DisplayedChannelId)
-    {
-        NewName = "First " + OptionListName + " ";
-    }
-
-    if ("1" === DisplayedChannelId)
-    {
-        NewName = "Second " + OptionListName + " ";
-    }
-
-    if ("2" === DisplayedChannelId)
-    {
-        NewName = "Third " + OptionListName + " ";
-    }
+    var Id = parseInt(DisplayedChannelId) + 1;
+    var NewName = OptionListName.charAt(0).toUpperCase() + OptionListName.slice(1) + ": " + Id;
 
     return NewName;
-} // GenerateInputOutputControlName
+
+} // GenerateInputOutputControlLabel
 
 function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId )
 {
@@ -827,7 +814,7 @@ function CreateOptionsFromConfig(OptionListName, Config)
         if (!$('#' + OptionListName + 'mode' + ChannelId).length)
         {
             // create the selection box
-            $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + ChannelId + '">' + GenerateInputOutputControlName(OptionListName, ChannelId) + ' Mode</label>');
+            $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + ChannelId + '">' + GenerateInputOutputControlLabel(OptionListName, ChannelId) + ' Mode</label>');
             $('#fg_' + OptionListName).append('<div class="col-sm-2"><select class="form-control wsopt" id="' + OptionListName + ChannelId + '"></select></div>');
             $('#fg_' + OptionListName + '_mode').append('<fieldset id="' + OptionListName + 'mode' + ChannelId + '"></fieldset>');
         }
@@ -986,6 +973,11 @@ function submitDeviceConfig()
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
     Device_Config.id = $('#config #device #id').val();
+    Device_Config.miso_pin  = $('#config #device #miso_pin').val();
+    Device_Config.mosi_pin  = $('#config #device #mosi_pin').val();
+    Device_Config.clock_pin = $('#config #device #clock_pin').val();
+    Device_Config.cs_pin    = $('#config #device #cs_pin').val();
+
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'device': Device_Config, 'network': Network_Config } } }));
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input':  { 'input_config': Input_Config } } } }));
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'output': { 'output_config': Output_Config } } } }));
@@ -1410,6 +1402,7 @@ function ProcessRecievedJsonStatusMessage(data)
         $('#fppsyncadjustments').text(FPPDstatus.SyncAdjustmentCount);
         $('#fppremoteip').text(FPPDstatus.FppRemoteIp);
 
+<<<<<<< HEAD
         $('#fppremoteFilePlayerFilename').text(FPPDstatus.current_sequence);
         $('#fppremoteFilePlayerTimeElapsed').text(FPPDstatus.time_elapsed);
         $('#fppremoteFilePlayerTimeRemaining').text(FPPDstatus.time_remaining);
@@ -1419,6 +1412,28 @@ function ProcessRecievedJsonStatusMessage(data)
     {
         $('#FPPRemoteStatus').addClass("hidden")
     }
+=======
+function submitWiFi() {
+    var ip = $('#ip').val().split('.');
+    var netmask = $('#netmask').val().split('.');
+    var gateway = $('#gateway').val().split('.');
+
+    var json = {
+            'network': {
+                'ssid': $('#ssid').val(),
+                'passphrase': $('#password').val(),
+                'hostname': $('#hostname').val(),
+                'sta_timeout': parseInt($('#staTimeout').val()),
+                'ip': [parseInt(ip[0]), parseInt(ip[1]), parseInt(ip[2]), parseInt(ip[3])],
+                'netmask': [parseInt(netmask[0]), parseInt(netmask[1]), parseInt(netmask[2]), parseInt(netmask[3])],
+                'gateway': [parseInt(gateway[0]), parseInt(gateway[1]), parseInt(gateway[2]), parseInt(gateway[3])],
+                'dhcp': $('#dhcp').prop('checked'),
+                'ap_fallback': $('#ap').prop('checked')
+            }
+        };
+    wsEnqueue('S1' + JSON.stringify(json));
+}
+>>>>>>> 479f85205c1e500127ee715f5864a5ed1cec874c
 
     if (Status.input[0].hasOwnProperty('LocalPlayer'))
     {

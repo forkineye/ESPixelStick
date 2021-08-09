@@ -29,24 +29,6 @@
 
 #include "OutputMgr.hpp"
 
-#ifdef ARDUINO_ARCH_ESP8266
-typedef enum
-{
-    GPIO_NUM_2  = 2,
-    GPIO_NUM_10 = 10,
-    GPIO_NUM_13 = 13,
-
-} gpio_num_t;
-
-typedef enum
-{
-    UART_NUM_0 = 0,
-    UART_NUM_1,
-    UART_NUM_2
-} uart_port_t;
-
-#endif // def ARDUINO_ARCH_ESP8266
-
 #ifndef UART_INTR_MASK
 #   define UART_INTR_MASK 0x1ff
 #endif

@@ -39,25 +39,29 @@ public:
     virtual ~c_OutputWS2811 ();
 
     // functions to be provided by the derived class
-    void         Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
-    bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
-    void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-    void         Render ();                                        ///< Call from loop(),  renders output data
+    virtual void         Begin () {};
+    virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
+    virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
+    virtual void         Render () {};
     void         GetDriverName (String & sDriverName) { sDriverName = String (F ("WS2811")); }
     c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_WS2811;} ///< Have the instance report its type.
-    void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
+    virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
     uint16_t     GetNumChannelsNeeded () { return (pixel_count * numIntensityBytesPerPixel); };
-    void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
-    void         PauseOutput ();
+    virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
+    virtual void         PauseOutput () {};
 
-    /// Interrupt Handler
-    void IRAM_ATTR ISR_Handler (); ///< UART ISR
+    void IRAM_ATTR UpdateToNextPixel ();
 
-#define WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE    4
-#define WS2812_NUM_DATA_BYTES_PER_PIXEL             16
-#define WS2812_MAX_NUM_PIXELS                       1200
+#define WS2811_PIXEL_NS_BIT_0_HIGH_WS2812          350.0 // 350ns +/- 150ns per datasheet
+#define WS2811_PIXEL_NS_BIT_0_LOW_WS2812           900.0 // 900ns +/- 150ns per datasheet
+#define WS2811_PIXEL_NS_BIT_1_HIGH_WS2812          900.0 // 900ns +/- 150ns per datasheet
+#define WS2811_PIXEL_NS_BIT_1_LOW_WS2812           350.0 // 350ns +/- 150ns per datasheet
+#define WS2811_PIXEL_NS_IDLE_WS2812             300000.0 // 300us per datasheet
 
-private:
+#define WS2811_MICRO_SEC_PER_INTENSITY          10L     // ((1/800000) * 8 bits) = 10us
+#define WS2811_MIN_IDLE_TIME_US                 (WS2811_PIXEL_NS_IDLE_WS2812 / 10000.0)
+
+protected:
     uint8_t   * pNextIntensityToSend = nullptr;     ///< start of output buffer being sent to the UART
     uint16_t    RemainingPixelCount = 0;            ///< Used by ISR to determine how much more data to send
     uint8_t     numIntensityBytesPerPixel = 3;      ///< number of bytes per pixel
@@ -65,13 +69,13 @@ private:
     float       gamma = 2.2;                        ///< gamma value to use
     uint8_t     AdjustedBrightness = 255;           ///< brightness to use
     uint8_t     brightness = 100;                   ///< brightness to use
-    uint16_t    zig_size = 0;                       ///< Zigsize count - 0 = no zigzag
-    uint16_t    ZigPixelCount = 0;
-    uint16_t    CurrentZigPixelCount = 0;
-    uint16_t    CurrentZagPixelCount = 0;
-    uint16_t    group_size = 0;                     ///< Group size - 1 = no grouping
-    uint16_t    GroupPixelCount = 0;
-    uint16_t    CurrentGroupPixelCount = 0;
+    uint16_t    zig_size = 1;                       ///< Zigsize count - 0 = no zigzag
+    uint16_t    ZigPixelCount = 1;
+    uint16_t    CurrentZigPixelCount = 1;
+    uint16_t    CurrentZagPixelCount = 1;
+    uint16_t    group_size = 1;                     ///< Group size - 1 = no grouping
+    uint16_t    GroupPixelCount = 1;
+    uint16_t    CurrentGroupPixelCount = 1;
     uint16_t    pixel_count = 100;                  ///< Number of pixels
 
     typedef union ColorOffsets_s
@@ -91,7 +95,7 @@ private:
     String      color_order; ///< Pixel color order
 
     // Internal variables
-    uint16_t        InterFrameGapInMicroSec = 0;
+    uint16_t    InterFrameGapInMicroSec = 300;
 
     void updateGammaTable(); ///< Generate gamma correction table
     void updateColorOrderOffsets(); ///< Update color order

@@ -29,9 +29,12 @@
 #include "OutputDisabled.hpp"
 #include "OutputGECE.hpp"
 #include "OutputSerial.hpp"
-#include "OutputWS2811.hpp"
+#include "OutputWS2811Uart.hpp"
 #include "OutputRelay.hpp"
 #include "OutputServoPCA9685.hpp"
+#ifdef ARDUINO_ARCH_ESP32
+#   include "OutputWS2811Rmt.hpp"
+#endif // def ARDUINO_ARCH_ESP32
 // needs to be last
 #include "OutputMgr.hpp"
 
@@ -68,9 +71,21 @@ typedef struct
 //-----------------------------------------------------------------------------
 static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] =
 {
-    {gpio_num_t::GPIO_NUM_2,  uart_port_t::UART_NUM_1},
+    {DEFAULT_UART_1_GPIO,  uart_port_t::UART_NUM_1},
 #ifdef ARDUINO_ARCH_ESP32
-    {gpio_num_t::GPIO_NUM_13, uart_port_t::UART_NUM_2},
+    {DEFAULT_UART_2_GPIO, uart_port_t::UART_NUM_2},
+    // RMT ports
+    {DEFAULT_RMT_0_GPIO,  uart_port_t (0)},
+    {DEFAULT_RMT_1_GPIO,  uart_port_t (1)},
+#ifndef ESP32_CAM
+    {DEFAULT_RMT_2_GPIO,  uart_port_t (2)},
+    {DEFAULT_RMT_3_GPIO,  uart_port_t (3)},
+    {DEFAULT_RMT_4_GPIO,  uart_port_t (4)},
+    {DEFAULT_RMT_5_GPIO,  uart_port_t (5)},
+    {DEFAULT_RMT_6_GPIO,  uart_port_t (6)},
+    {DEFAULT_RMT_7_GPIO,  uart_port_t (7)},
+#endif // ndef ESP32_CAM
+
 #endif // def ARDUINO_ARCH_ESP32
     {gpio_num_t::GPIO_NUM_10, uart_port_t (-1)},
 };
@@ -145,7 +160,6 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
     // DEBUG_START;
 
     // extern void PrettyPrint (JsonObject&, String);
-    // DEBUG_V ("");
     // PrettyPrint (jsonConfig, String ("jsonConfig"));
 
     // add OM config parameters
@@ -247,7 +261,10 @@ void c_OutputMgr::CreateNewConfig ()
 
     // create a place to save the config
     DynamicJsonDocument JsonConfigDoc (OM_MAX_CONFIG_SIZE);
+    // DEBUG_V ("");
+
     JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_output_config);
+    // DEBUG_V ("");
 
     JsonConfig[CN_cfgver] = CurrentConfigVersion;
     JsonConfig[F ("MaxChannels")] = sizeof(OutputBuffer);
@@ -261,8 +278,11 @@ void c_OutputMgr::CreateNewConfig ()
         int ChannelIndex = 0;
         for (auto CurrentOutput : pOutputChannelDrivers)
         {
+            // DEBUG_V (String ("ChannelIndex: ") + String (ChannelIndex));
             // DEBUG_V (String("instantiate output type: ") + String(outputTypeId));
             InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex++), e_OutputType (outputTypeId));
+            // DEBUG_V ("");
+
         }// end for each interface
 
         // DEBUG_V ("collect the config data for this output type");
@@ -367,7 +387,9 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 break;
             }
 
-            // DEBUG_V ("shut down the existing driver");
+            // String Temp;
+            // pOutputChannelDrivers[ChannelIndex]->GetDriverName (Temp);
+            // DEBUG_V (String ("shut down the existing driver: ") + Temp);
             delete pOutputChannelDrivers[ChannelIndex];
             pOutputChannelDrivers[ChannelIndex] = nullptr;
             // DEBUG_V ("");
@@ -391,7 +413,12 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
             case e_OutputType::OutputType_DMX:
             {
+#ifdef ARDUINO_ARCH_ESP32
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_UART_2))
+#else
                 if (-1 == UartId)
+#endif // def ARDUINO_ARCH_ESP32
+
                 {
                     LOG_PORT.println (String (F ("************** Cannot Start DMX for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
@@ -408,7 +435,11 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
             case e_OutputType::OutputType_GECE:
             {
+#ifdef ARDUINO_ARCH_ESP32
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_UART_2))
+#else
                 if (-1 == UartId)
+#endif // def ARDUINO_ARCH_ESP32
                 {
                     LOG_PORT.println (String (F ("************** Cannot Start GECE for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
@@ -425,7 +456,11 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
             case e_OutputType::OutputType_Serial:
             {
+#ifdef ARDUINO_ARCH_ESP32
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_UART_2))
+#else
                 if (-1 == UartId)
+#endif // def ARDUINO_ARCH_ESP32
                 {
                     LOG_PORT.println (String (F ("************** Cannot Start Generic Serial for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
@@ -442,7 +477,11 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
             case e_OutputType::OutputType_Relay:
             {
-                if (-1 != UartId)
+#ifdef ARDUINO_ARCH_ESP32
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_UART_2))
+#else
+                if (-1 == UartId)
+#endif // def ARDUINO_ARCH_ESP32
                 {
                     LOG_PORT.println (String (F ("************** Cannot Start RELAY for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
@@ -459,7 +498,11 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
             case e_OutputType::OutputType_Renard:
             {
+#ifdef ARDUINO_ARCH_ESP32
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_UART_2))
+#else
                 if (-1 == UartId)
+#endif // def ARDUINO_ARCH_ESP32
                 {
                     LOG_PORT.println (String (F ("************** Cannot Start Renard for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
@@ -499,10 +542,19 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                     // DEBUG_V ("");
                 }
+
+#ifdef ARDUINO_ARCH_ESP32
+                else if (ChannelIndex >= OutputChannelId_RMT_1)
+                {
+                    // LOG_PORT.println (String (F ("************** Starting WS2811 RMT for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811Rmt (ChannelIndex, dataPin, UartId, OutputType_WS2811);
+                    // DEBUG_V ("");
+                }
+#endif // def ARDUINO_ARCH_ESP32
                 else
                 {
-                    // LOG_PORT.println (String (F ("************** Starting WS2811 for channel '")) + ChannelIndex + "'. **************");
-                    pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811 (ChannelIndex, dataPin, UartId, OutputType_WS2811);
+                    // LOG_PORT.println (String (F ("************** Starting WS2811 UART for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811Uart (ChannelIndex, dataPin, UartId, OutputType_WS2811);
                     // DEBUG_V ("");
                 }
                 break;
@@ -770,9 +822,9 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
         if (AvailableChannels < ChannelsNeeded)
         {
             LOG_PORT.println (String (F ("--- OutputMgr: ERROR: Too many output channels have been Requested: ")) + String (ChannelsNeeded));
-            DEBUG_V (String ("    ChannelsNeeded: ") + String (ChannelsNeeded));
-            DEBUG_V (String (" AvailableChannels: ") + String (AvailableChannels));
-            DEBUG_V (String ("ChannelsToAllocate: ") + String (ChannelsToAllocate));
+            // DEBUG_V (String ("    ChannelsNeeded: ") + String (ChannelsNeeded));
+            // DEBUG_V (String (" AvailableChannels: ") + String (AvailableChannels));
+            // DEBUG_V (String ("ChannelsToAllocate: ") + String (ChannelsToAllocate));
         }
 
         OutputBufferOffset += ChannelsToAllocate;
