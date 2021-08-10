@@ -279,7 +279,7 @@ void c_OutputMgr::CreateNewConfig ()
         for (auto CurrentOutput : pOutputChannelDrivers)
         {
             // DEBUG_V (String ("ChannelIndex: ") + String (ChannelIndex));
-            // DEBUG_V (String("instantiate output type: ") + String(outputTypeId));
+            // DEBUG_V (String ("instantiate output type: ") + String (outputTypeId));
             InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex++), e_OutputType (outputTypeId));
             // DEBUG_V ("");
 
@@ -551,7 +551,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     // DEBUG_V ("");
                 }
 #endif // def ARDUINO_ARCH_ESP32
-                else
+                else 
                 {
                     // LOG_PORT.println (String (F ("************** Starting WS2811 UART for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811Uart (ChannelIndex, dataPin, UartId, OutputType_WS2811);

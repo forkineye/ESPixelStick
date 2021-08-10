@@ -40,12 +40,12 @@ public:
 
     typedef uint32_t FileId;
 
-    void   Begin            ();
-    void   Poll             ();
+    void    Begin     ();
+    void    Poll      ();
     void    GetConfig (JsonObject& json);
     boolean SetConfig (JsonObject& json);
 
-    void   handleFileUpload (const String & filename, size_t index, uint8_t * data, size_t len, bool final);
+    void    handleFileUpload (const String & filename, size_t index, uint8_t * data, size_t len, bool final);
 
     typedef std::function<void (DynamicJsonDocument& json)> DeserializationHandler;
 

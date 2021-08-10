@@ -77,7 +77,7 @@ void c_FileMgr::Begin ()
 
 //-----------------------------------------------------------------------------
 boolean c_FileMgr::SetConfig (JsonObject & json)
-        {
+{
     // DEBUG_START;
 
     boolean ConfigChanged = false;
@@ -93,7 +93,7 @@ boolean c_FileMgr::SetConfig (JsonObject & json)
     else
     {
         LOG_PORT.println (F ("No File Manager settings found."));
-        }
+    }
 
     // DEBUG_V (String ("ConfigChanged: ") + String (ConfigChanged));
 
@@ -134,7 +134,7 @@ void c_FileMgr::SetSpiIoPins ()
 
     if (SdCardInstalled)
     {
-    SDFS.end ();
+        SDFS.end ();
     }
 
 #ifdef ARDUINO_ARCH_ESP32

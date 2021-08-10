@@ -972,7 +972,7 @@ function submitDeviceConfig()
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
-    Device_Config.id = $('#config #device #id').val();
+    Device_Config.id        = $('#config #device #id').val();
     Device_Config.miso_pin  = $('#config #device #miso_pin').val();
     Device_Config.mosi_pin  = $('#config #device #mosi_pin').val();
     Device_Config.clock_pin = $('#config #device #clock_pin').val();
@@ -1402,7 +1402,6 @@ function ProcessRecievedJsonStatusMessage(data)
         $('#fppsyncadjustments').text(FPPDstatus.SyncAdjustmentCount);
         $('#fppremoteip').text(FPPDstatus.FppRemoteIp);
 
-<<<<<<< HEAD
         $('#fppremoteFilePlayerFilename').text(FPPDstatus.current_sequence);
         $('#fppremoteFilePlayerTimeElapsed').text(FPPDstatus.time_elapsed);
         $('#fppremoteFilePlayerTimeRemaining').text(FPPDstatus.time_remaining);
@@ -1412,28 +1411,6 @@ function ProcessRecievedJsonStatusMessage(data)
     {
         $('#FPPRemoteStatus').addClass("hidden")
     }
-=======
-function submitWiFi() {
-    var ip = $('#ip').val().split('.');
-    var netmask = $('#netmask').val().split('.');
-    var gateway = $('#gateway').val().split('.');
-
-    var json = {
-            'network': {
-                'ssid': $('#ssid').val(),
-                'passphrase': $('#password').val(),
-                'hostname': $('#hostname').val(),
-                'sta_timeout': parseInt($('#staTimeout').val()),
-                'ip': [parseInt(ip[0]), parseInt(ip[1]), parseInt(ip[2]), parseInt(ip[3])],
-                'netmask': [parseInt(netmask[0]), parseInt(netmask[1]), parseInt(netmask[2]), parseInt(netmask[3])],
-                'gateway': [parseInt(gateway[0]), parseInt(gateway[1]), parseInt(gateway[2]), parseInt(gateway[3])],
-                'dhcp': $('#dhcp').prop('checked'),
-                'ap_fallback': $('#ap').prop('checked')
-            }
-        };
-    wsEnqueue('S1' + JSON.stringify(json));
-}
->>>>>>> 479f85205c1e500127ee715f5864a5ed1cec874c
 
     if (Status.input[0].hasOwnProperty('LocalPlayer'))
     {

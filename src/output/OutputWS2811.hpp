@@ -43,10 +43,10 @@ public:
     virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
     virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     virtual void         Render () {};
-    void         GetDriverName (String & sDriverName) { sDriverName = String (F ("WS2811")); }
+            void         GetDriverName (String & sDriverName) { sDriverName = String (F ("WS2811")); }
     c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_WS2811;} ///< Have the instance report its type.
     virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
-    uint16_t     GetNumChannelsNeeded () { return (pixel_count * numIntensityBytesPerPixel); };
+    uint16_t             GetNumChannelsNeeded () { return (pixel_count * numIntensityBytesPerPixel); };
     virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
     virtual void         PauseOutput () {};
 

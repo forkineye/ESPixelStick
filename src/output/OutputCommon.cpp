@@ -252,36 +252,36 @@ void c_OutputCommon::TerminateUartOperation ()
 
     if (OutputChannelId <= c_OutputMgr::OutputChannelId_UART_LAST)
     {
-    switch (UartId)
-    {
-        case UART_NUM_0:
+        switch (UartId)
         {
+            case UART_NUM_0:
+            {
                 // DEBUG_V ("UART_NUM_0");
-            Serial.end ();
-            break;
-        }
-        case UART_NUM_1:
-        {
+                Serial.end ();
+                break;
+            }
+            case UART_NUM_1:
+            {
                 // DEBUG_V ("UART_NUM_1");
-            Serial1.end ();
-            break;
-        }
+                Serial1.end ();
+                break;
+            }
 
-#ifdef ARDUINO_ARCH_ESP32
-        case UART_NUM_2:
-        {
+    #ifdef ARDUINO_ARCH_ESP32
+            case UART_NUM_2:
+            {
                 // DEBUG_V ("UART_NUM_2");
-            Serial2.end ();
-            break;
-        }
-#endif // def ARDUINO_ARCH_ESP32
+                Serial2.end ();
+                break;
+            }
+    #endif // def ARDUINO_ARCH_ESP32
 
-        default:
-        {
+            default:
+            {
                 // DEBUG_V ("default");
-            break;
-        }
-    } // end switch (UartId)
+                break;
+            }
+        } // end switch (UartId)
     }
     
     // DEBUG_END;

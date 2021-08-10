@@ -22,7 +22,6 @@
 #include "OutputDisabled.hpp"
 #include "OutputCommon.hpp"
 
-
 /*
 */
 //----------------------------------------------------------------------------
