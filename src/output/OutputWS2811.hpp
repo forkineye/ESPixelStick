@@ -59,7 +59,7 @@ public:
 #define WS2811_PIXEL_NS_IDLE_WS2812             300000.0 // 300us per datasheet
 
 #define WS2811_MICRO_SEC_PER_INTENSITY          10L     // ((1/800000) * 8 bits) = 10us
-#define WS2811_MIN_IDLE_TIME_US                 (WS2811_PIXEL_NS_IDLE_WS2812 / 10000.0)
+#define WS2811_MIN_IDLE_TIME_US                 (WS2811_PIXEL_NS_IDLE_WS2812 / 1000.0)
 
 protected:
     uint8_t   * pNextIntensityToSend = nullptr;     ///< start of output buffer being sent to the UART
