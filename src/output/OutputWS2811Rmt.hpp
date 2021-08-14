@@ -48,12 +48,17 @@ public:
     void IRAM_ATTR ISR_Handler (); ///< ISR
     void IRAM_ATTR ISR_Handler_SendIntensityData (); ///< ISR
     void IRAM_ATTR ISR_Handler_StartNewFrame (); ///< ISR
-    
+
+private:
+
+#   define NUM_PIXELS_PER_INTERRUPT 
+
     volatile rmt_item32_t * RmtStartAddr   = nullptr;
     volatile rmt_item32_t * RmtCurrentAddr = nullptr;
     volatile rmt_item32_t * RmtEndAddr     = nullptr;
     intr_handle_t RMT_intr_handle = NULL;
-    uint8_t NumPixelsPerInterrupt = 2;
+    uint8_t NumIntensityValuesPerInterrupt = 0;
+    uint8_t NumIntensityBitsPerInterrupt = 0;
     rmt_item32_t Rgb2Rmt[5];
 
     uint32_t FrameStartCounter = 0;
