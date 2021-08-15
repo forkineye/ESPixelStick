@@ -165,8 +165,8 @@ void c_OutputWS2811Rmt::Begin ()
     NumIntensityValuesPerInterrupt = ((MAX_NUM_INTENSITY_BIT_SLOTS_PER_INTERRUPT - NUM_FRAME_START_SLOTS) / NumBitsPerByte);
     NumIntensityBitsPerInterrupt = NumIntensityValuesPerInterrupt * NumBitsPerByte;
 
-    DEBUG_V (String ("NumIntensityValuesPerInterrupt: ") + String (NumIntensityValuesPerInterrupt));
-    DEBUG_V (String ("  NumIntensityBitsPerInterrupt: ") + String (NumIntensityBitsPerInterrupt));
+    // DEBUG_V (String ("NumIntensityValuesPerInterrupt: ") + String (NumIntensityValuesPerInterrupt));
+    // DEBUG_V (String ("  NumIntensityBitsPerInterrupt: ") + String (NumIntensityBitsPerInterrupt));
 
     ESP_ERROR_CHECK (rmt_config (&RmtConfig));
     ESP_ERROR_CHECK (rmt_set_source_clk (RmtConfig.channel, rmt_source_clk_t::RMT_BASECLK_APB));
