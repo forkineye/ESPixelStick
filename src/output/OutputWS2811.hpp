@@ -50,8 +50,6 @@ public:
     virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
     virtual void         PauseOutput () {};
 
-    void IRAM_ATTR UpdateToNextPixel ();
-
 #define WS2811_PIXEL_NS_BIT_0_HIGH_WS2812          350.0 // 350ns +/- 150ns per datasheet
 #define WS2811_PIXEL_NS_BIT_0_LOW_WS2812           900.0 // 900ns +/- 150ns per datasheet
 #define WS2811_PIXEL_NS_BIT_1_HIGH_WS2812          900.0 // 900ns +/- 150ns per datasheet
@@ -59,15 +57,20 @@ public:
 #define WS2811_PIXEL_NS_IDLE_WS2812             300000.0 // 300us per datasheet
 
 #define WS2811_MICRO_SEC_PER_INTENSITY          10L     // ((1/800000) * 8 bits) = 10us
-#define WS2811_MIN_IDLE_TIME_US                 (WS2811_PIXEL_NS_IDLE_WS2812 / 10000.0)
+#define WS2811_MIN_IDLE_TIME_US                 (WS2811_PIXEL_NS_IDLE_WS2812 / 1000.0)
+#define WS2811_DEFAULT_INTENSITY_PER_PIXEL      3
 
 protected:
-    uint8_t   * pNextIntensityToSend = nullptr;     ///< start of output buffer being sent to the UART
+    IRAM_ATTR void    StartNewFrame ();
+    IRAM_ATTR uint8_t GetNextIntensityToSend ();
+
+    bool      MoreDataToSend = false;
+    uint16_t  InterFrameGapInMicroSec = 300;
+
+private:
+    uint8_t*    pNextIntensityToSend = nullptr;     ///< start of output buffer being sent to the UART
     uint16_t    RemainingPixelCount = 0;            ///< Used by ISR to determine how much more data to send
-    uint8_t     numIntensityBytesPerPixel = 3;      ///< number of bytes per pixel
-    uint8_t     gamma_table[256] = { 0 };           ///< Gamma Adjustment table
-    float       gamma = 2.2;                        ///< gamma value to use
-    uint8_t     AdjustedBrightness = 255;           ///< brightness to use
+    uint8_t     numIntensityBytesPerPixel = WS2811_DEFAULT_INTENSITY_PER_PIXEL;
     uint8_t     brightness = 100;                   ///< brightness to use
     uint16_t    zig_size = 1;                       ///< Zigsize count - 0 = no zigzag
     uint16_t    ZigPixelCount = 1;
@@ -77,6 +80,11 @@ protected:
     uint16_t    GroupPixelCount = 1;
     uint16_t    CurrentGroupPixelCount = 1;
     uint16_t    pixel_count = 100;                  ///< Number of pixels
+    uint16_t    PrependNullCount = 0;
+    uint16_t    CurrentPrependNullCount = 0;
+    uint16_t    AppendNullCount = 0;
+    uint16_t    CurrentAppendNullCount = 0;
+    uint8_t     CurrentIntensityIndex = 0;
 
     typedef union ColorOffsets_s
     {
@@ -91,11 +99,14 @@ protected:
     } ColorOffsets_t;
     ColorOffsets_t  ColorOffsets;
 
+    uint8_t     gamma_table[256] = { 0 };           ///< Gamma Adjustment table
+    float       gamma = 2.2;                        ///< gamma value to use
+    uint8_t     AdjustedBrightness = 255;           ///< brightness to use
+
     // JSON configuration parameters
     String      color_order; ///< Pixel color order
 
     // Internal variables
-    uint16_t    InterFrameGapInMicroSec = 300;
 
     void updateGammaTable(); ///< Generate gamma correction table
     void updateColorOrderOffsets(); ///< Update color order

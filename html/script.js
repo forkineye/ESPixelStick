@@ -361,9 +361,9 @@ function RequestListOfFiles()
 
 } // RequestListOfFiles
 
-function ProcessGetFileResponse(JsonConfigData)
+function ProcessGetFileListResponse(JsonConfigData)
 {
-    // console.info("ProcessGetFileResponse");
+    // console.info("ProcessGetFileListResponse");
 
     SdCardIsInstalled = JsonConfigData.SdCardPresent;
 
@@ -404,7 +404,7 @@ function ProcessGetFileResponse(JsonConfigData)
 
         CurrentRowId++;
     });
-} // ProcessGetFileResponse
+} // ProcessGetFileListResponse
 
 function RequestFileDeletion()
 {
@@ -603,6 +603,15 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig )
 
     var elementids = [];
     var modeControlName = '#' + ChannelType + 'mode' + channelId;
+    console.info("modeControlName: " + modeControlName);
+
+    // modify page title
+    var ModeDisplayName = GenerateInputOutputControlLabel(ChannelType, channelId) + " - " + $(modeControlName + ' #Title')[0].innerHTML;
+    console.info("ModeDisplayName: " + ModeDisplayName);
+    $(modeControlName + ' #Title')[0].innerHTML = ModeDisplayName;
+
+    //document.getElementById("blahblah").innerHTML="NewText".
+
     elementids = $(modeControlName + ' *[id]').filter(":input").map(function ()
     {
         return $(this).attr('id');
@@ -695,7 +704,7 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     // is this a file list?
     else if (JsonConfigData.hasOwnProperty("files"))
     {
-        ProcessGetFileResponse(JsonConfigData);
+        ProcessGetFileListResponse(JsonConfigData);
     }
 
     // is this an ACK response?
@@ -766,8 +775,6 @@ function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId )
     HtmlLoadFileName = HtmlLoadFileName.replace(" ", "_");
     HtmlLoadFileName = HtmlLoadFileName + ".html";
     // console.info("Adjusted HtmlLoadFileName: " + HtmlLoadFileName);
-
-//TODO: Handle this better for items which don't require config pages - alexa, ddp, etc...
 
     if ("disabled.html" === HtmlLoadFileName)
     {
@@ -1010,7 +1017,7 @@ function wsConnect()
         }
 
         // target = "192.168.10.215";
-        // target = "192.168.10.193";
+        // target = "192.168.10.155";
 
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');

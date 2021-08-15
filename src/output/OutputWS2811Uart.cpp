@@ -202,31 +202,19 @@ void IRAM_ATTR c_OutputWS2811Uart::ISR_Handler ()
         // Fill the FIFO with new data
         // free space in the FIFO divided by the number of data bytes per intensity
         // gives the max number of intensities we can add to the FIFO
-        uint32_t NumEmptyPixelSlots = ((((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / WS2812_NUM_DATA_BYTES_PER_PIXEL);
-        while ((NumEmptyPixelSlots--) && (RemainingPixelCount))
+        uint32_t NumEmptyIntensitySlots = ((((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE);
+        while ((NumEmptyIntensitySlots--) && (MoreDataToSend))
         {
-            for (uint8_t CurrentIntensityIndex = 0;
-                CurrentIntensityIndex < numIntensityBytesPerPixel;
-                CurrentIntensityIndex++)
-            {
-                uint8_t IntensityValue = (pNextIntensityToSend[ColorOffsets.Array[CurrentIntensityIndex]]);
+            uint8_t IntensityValue = GetNextIntensityToSend ();
 
-                IntensityValue = gamma_table[IntensityValue];
-
-                // adjust intensity
-                // IntensityValue = uint8_t( (uint32_t(IntensityValue) * uint32_t(AdjustedBrightness)) >> 8);
-
-                // convert the intensity data into UART data
-                enqueue ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 6) & 0x3]));
-                enqueue ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 4) & 0x3]));
-                enqueue ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 2) & 0x3]));
-                enqueue ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 0) & 0x3]));
-            }
-
-            UpdateToNextPixel ();
+            // convert the intensity data into UART data
+            enqueue ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 6) & 0x3]));
+            enqueue ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 4) & 0x3]));
+            enqueue ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 2) & 0x3]));
+            enqueue ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 0) & 0x3]));
         } // end while there is data to be sent
 
-        if (0 == RemainingPixelCount)
+        if (!MoreDataToSend)
         {
             CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
         }
@@ -249,11 +237,7 @@ void c_OutputWS2811Uart::Render ()
     if (!canRefresh ()) { return; }
 
     // get the next frame started
-    CurrentZigPixelCount   = ZigPixelCount - 1;
-    CurrentZagPixelCount   = ZigPixelCount;
-    CurrentGroupPixelCount = GroupPixelCount;
-    pNextIntensityToSend   = GetBufferAddress ();
-    RemainingPixelCount    = pixel_count;
+    StartNewFrame ();
 
     // enable interrupts
     WRITE_PERI_REG (UART_CONF1 (UartId), PIXEL_FIFO_TRIGGER_LEVEL << UART_TXFIFO_EMPTY_THRHD_S);

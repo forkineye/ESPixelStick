@@ -66,6 +66,8 @@ void c_OutputWS2811::GetConfig (ArduinoJson::JsonObject& jsonConfig)
     jsonConfig[CN_gamma] = gamma;
     jsonConfig[CN_brightness] = brightness; // save as a 0 - 100 percentage
     jsonConfig[CN_interframetime] = InterFrameGapInMicroSec;
+    jsonConfig[CN_prependnullcount] = PrependNullCount;
+    jsonConfig[CN_appendnullcount] = AppendNullCount;
 
     c_OutputCommon::GetConfig (jsonConfig);
 
@@ -138,6 +140,11 @@ bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     setFromJSON (gamma, jsonConfig, CN_gamma);
     setFromJSON (brightness, jsonConfig, CN_brightness);
     setFromJSON (InterFrameGapInMicroSec, jsonConfig, CN_interframetime);
+    setFromJSON (PrependNullCount, jsonConfig, CN_prependnullcount);
+    setFromJSON (AppendNullCount, jsonConfig, CN_appendnullcount);
+
+    // DEBUG_V (String ("PrependNullCount: ") + String (PrependNullCount));
+    // DEBUG_V (String (" AppendNullCount: ") + String (AppendNullCount));
 
     c_OutputCommon::SetConfig (jsonConfig);
 
@@ -157,10 +164,7 @@ bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     GroupPixelCount = (2 > group_size) ? 1 : group_size;
 
     // Calculate our refresh time
-    FrameMinDurationInMicroSec = (WS2811_MICRO_SEC_PER_INTENSITY * OutputBufferSize) + InterFrameGapInMicroSec;
-
-    // Calculate our refresh time
-    FrameMinDurationInMicroSec = (WS2811_MICRO_SEC_PER_INTENSITY * OutputBufferSize) + InterFrameGapInMicroSec;
+    FrameMinDurationInMicroSec = (WS2811_MICRO_SEC_PER_INTENSITY * numIntensityBytesPerPixel * OutputBufferSize) + InterFrameGapInMicroSec;
 
     // DEBUG_END;
     return response;
@@ -192,17 +196,17 @@ void c_OutputWS2811::updateColorOrderOffsets ()
     // make sure the color order is all lower case
     color_order.toLowerCase ();
 
-    if (String (F ("rgbw")) == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
+         if (String (F ("rgbw")) == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
     else if (String (F ("grbw")) == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
     else if (String (F ("brgw")) == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
     else if (String (F ("rbgw")) == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
     else if (String (F ("gbrw")) == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
     else if (String (F ("bgrw")) == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
-    else if (String (F ("grb")) == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
-    else if (String (F ("brg")) == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
-    else if (String (F ("rbg")) == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
-    else if (String (F ("gbr")) == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
-    else if (String (F ("bgr")) == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
+    else if (String (F ("grb"))  == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
+    else if (String (F ("brg"))  == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
+    else if (String (F ("rbg"))  == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
+    else if (String (F ("gbr"))  == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
+    else if (String (F ("bgr"))  == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
     else
     {
         color_order = F ("rgb");
@@ -212,6 +216,8 @@ void c_OutputWS2811::updateColorOrderOffsets ()
         ColorOffsets.offset.w = 3;
         numIntensityBytesPerPixel = 3;
     } // default
+
+    // DEBUG_V (String ("numIntensityBytesPerPixel: ") + String (numIntensityBytesPerPixel));
 
     // DEBUG_END;
 } // updateColorOrderOffsets
@@ -259,17 +265,66 @@ bool c_OutputWS2811::validate ()
 } // validate
 
 //----------------------------------------------------------------------------
-void IRAM_ATTR c_OutputWS2811::UpdateToNextPixel ()
+void IRAM_ATTR c_OutputWS2811::StartNewFrame ()
 {
-    uint8_t* response = pNextIntensityToSend;
+    // DEBUG_START;
+
+    CurrentZigPixelCount    = ZigPixelCount - 1;
+    CurrentZagPixelCount    = ZigPixelCount;
+    CurrentGroupPixelCount  = GroupPixelCount;
+    pNextIntensityToSend    = GetBufferAddress ();
+    RemainingPixelCount     = pixel_count;
+    CurrentIntensityIndex   = 0;
+    CurrentPrependNullCount = PrependNullCount * numIntensityBytesPerPixel;
+    CurrentAppendNullCount  = AppendNullCount  * numIntensityBytesPerPixel;
+
+    MoreDataToSend = (0 == pixel_count) ? false : true;
+
+    // DEBUG_END;
+} // StartNewFrame
+
+//----------------------------------------------------------------------------
+uint8_t IRAM_ATTR c_OutputWS2811::GetNextIntensityToSend ()
+{
+    uint8_t response = (pNextIntensityToSend[ColorOffsets.Array[CurrentIntensityIndex]]);
+    response = gamma_table[response];
+    response = uint8_t( (uint32_t(response) * uint32_t(AdjustedBrightness)) >> 8);
 
     do // once
     {
-        if (0 == RemainingPixelCount)
+        // Are we prepending NULL data?
+        if (CurrentPrependNullCount)
         {
-            // nothign left to send
+            --CurrentPrependNullCount;
+            response = 0x00;
             break;
         }
+
+        // have we sent all of the frame data?
+        if (0 == RemainingPixelCount)
+        {
+            response = 0x00;
+
+            // Are we sending NULL data?
+            if (CurrentAppendNullCount)
+            {
+                --CurrentAppendNullCount;
+                if (0 == CurrentAppendNullCount)
+                {
+                    MoreDataToSend = false;
+                }
+            }
+            break;
+        }
+
+        // has the current pixel completed?
+        ++CurrentIntensityIndex;
+        if (CurrentIntensityIndex < numIntensityBytesPerPixel)
+        {
+            // still working on the current pixel
+            break;
+        }
+        CurrentIntensityIndex = 0;
 
         // has the group completed?
         --CurrentGroupPixelCount;
@@ -286,6 +341,12 @@ void IRAM_ATTR c_OutputWS2811::UpdateToNextPixel ()
         if (0 == RemainingPixelCount)
         {
             // FrameDoneCounter++;
+            // Do we need to append NULL data?
+            if (0 == CurrentAppendNullCount)
+            {
+                MoreDataToSend = false;
+            }
+
             break;
         }
 
@@ -322,4 +383,5 @@ void IRAM_ATTR c_OutputWS2811::UpdateToNextPixel ()
 
     } while (false);
 
-} // UpdateToNextPixel
+    return response;
+} // NextIntensityToSend
