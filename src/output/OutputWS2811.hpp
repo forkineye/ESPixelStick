@@ -22,13 +22,13 @@
 *
 */
 
-#include "OutputCommon.hpp"
+#include "OutputPixel.hpp"
 
 #ifdef ARDUINO_ARCH_ESP32
 #   include <driver/uart.h>
 #endif
 
-class c_OutputWS2811 : public c_OutputCommon
+class c_OutputWS2811 : public c_OutputPixel
 {
 public:
     // These functions are inherited from c_OutputCommon
@@ -39,16 +39,15 @@ public:
     virtual ~c_OutputWS2811 ();
 
     // functions to be provided by the derived class
-    virtual void         Begin () {};
+    virtual void         Begin () { c_OutputPixel::Begin (); };
     virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
     virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-    virtual void         Render () {};
+    virtual void         Render () = 0;
             void         GetDriverName (String & sDriverName) { sDriverName = String (F ("WS2811")); }
     c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_WS2811;} ///< Have the instance report its type.
     virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
-    uint16_t             GetNumChannelsNeeded () { return (pixel_count * numIntensityBytesPerPixel); };
     virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
-    virtual void         PauseOutput () {};
+    virtual void         PauseOutput () = 0;
 
 #define WS2811_PIXEL_NS_BIT_0_HIGH_WS2812          350.0 // 350ns +/- 150ns per datasheet
 #define WS2811_PIXEL_NS_BIT_0_LOW_WS2812           900.0 // 900ns +/- 150ns per datasheet
@@ -59,58 +58,6 @@ public:
 #define WS2811_MICRO_SEC_PER_INTENSITY          10L     // ((1/800000) * 8 bits) = 10us
 #define WS2811_MIN_IDLE_TIME_US                 (WS2811_PIXEL_NS_IDLE_WS2812 / 1000.0)
 #define WS2811_DEFAULT_INTENSITY_PER_PIXEL      3
-
-protected:
-    IRAM_ATTR void    StartNewFrame ();
-    IRAM_ATTR uint8_t GetNextIntensityToSend ();
-
-    bool      MoreDataToSend = false;
-    uint16_t  InterFrameGapInMicroSec = 300;
-
-private:
-    uint8_t*    pNextIntensityToSend = nullptr;     ///< start of output buffer being sent to the UART
-    uint16_t    RemainingPixelCount = 0;            ///< Used by ISR to determine how much more data to send
-    uint8_t     numIntensityBytesPerPixel = WS2811_DEFAULT_INTENSITY_PER_PIXEL;
-    uint8_t     brightness = 100;                   ///< brightness to use
-    uint16_t    zig_size = 1;                       ///< Zigsize count - 0 = no zigzag
-    uint16_t    ZigPixelCount = 1;
-    uint16_t    CurrentZigPixelCount = 1;
-    uint16_t    CurrentZagPixelCount = 1;
-    uint16_t    group_size = 1;                     ///< Group size - 1 = no grouping
-    uint16_t    GroupPixelCount = 1;
-    uint16_t    CurrentGroupPixelCount = 1;
-    uint16_t    pixel_count = 100;                  ///< Number of pixels
-    uint16_t    PrependNullCount = 0;
-    uint16_t    CurrentPrependNullCount = 0;
-    uint16_t    AppendNullCount = 0;
-    uint16_t    CurrentAppendNullCount = 0;
-    uint8_t     CurrentIntensityIndex = 0;
-
-    typedef union ColorOffsets_s
-    {
-        struct offsets
-        {
-            uint8_t r;
-            uint8_t g;
-            uint8_t b;
-            uint8_t w;
-        } offset;
-        uint8_t Array[4];
-    } ColorOffsets_t;
-    ColorOffsets_t  ColorOffsets;
-
-    uint8_t     gamma_table[256] = { 0 };           ///< Gamma Adjustment table
-    float       gamma = 2.2;                        ///< gamma value to use
-    uint8_t     AdjustedBrightness = 255;           ///< brightness to use
-
-    // JSON configuration parameters
-    String      color_order; ///< Pixel color order
-
-    // Internal variables
-
-    void updateGammaTable(); ///< Generate gamma correction table
-    void updateColorOrderOffsets(); ///< Update color order
-    bool validate ();        ///< confirm that the current configuration is valid
 
 }; // c_OutputWS2811
 

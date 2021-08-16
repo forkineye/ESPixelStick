@@ -43,6 +43,7 @@ public:
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);  ///< Set a new config in the driver
     void    Render ();                                        ///< Call from loop(),  renders output data
     void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
+    void    PauseOutput () {};
 
     /// Interrupt Handler
     void IRAM_ATTR ISR_Handler (); ///< ISR
