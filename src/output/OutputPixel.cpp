@@ -142,7 +142,7 @@ bool c_OutputPixel::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     bool response = validate ();
 
-    AdjustedBrightness = map (brightness, 0, 100, 0, 255);
+    AdjustedBrightness = map (brightness, 0, 100, 0, 256);
     // DEBUG_V (String ("brightness: ") + String (brightness));
     // DEBUG_V (String ("AdjustedBrightness: ") + String (AdjustedBrightness));
 
@@ -277,7 +277,7 @@ uint8_t IRAM_ATTR c_OutputPixel::GetNextIntensityToSend ()
 {
     uint8_t response = (pNextIntensityToSend[ColorOffsets.Array[CurrentIntensityIndex]]);
     response = gamma_table[response];
-    response = uint8_t( (uint32_t(response) * uint32_t(AdjustedBrightness)) >> 8);
+    response = uint8_t( (uint32_t(response) * AdjustedBrightness) >> 8);
 
     do // once
     {
