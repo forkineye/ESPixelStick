@@ -1,5 +1,5 @@
 /*
-* OutputWS2811Rmt.cpp - WS2811 driver code for ESPixelStick RMT Channel
+* OutputTM1814Rmt.cpp - TM1814 driver code for ESPixelStick RMT Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -19,14 +19,14 @@
 #ifdef ARDUINO_ARCH_ESP32
 
 #include "../ESPixelStick.h"
-#include "OutputWS2811Rmt.hpp"
+#include "OutputTM1814Rmt.hpp"
 #include "OutputRmt.hpp"
 
-#define WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH    uint16_t (WS2811_PIXEL_NS_BIT_0_HIGH / RMT_TickLengthNS)
-#define WS2811_PIXEL_RMT_TICKS_BIT_0_LOW     uint16_t (WS2811_PIXEL_NS_BIT_0_LOW  / RMT_TickLengthNS)
-#define WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH    uint16_t (WS2811_PIXEL_NS_BIT_1_HIGH / RMT_TickLengthNS)
-#define WS2811_PIXEL_RMT_TICKS_BIT_1_LOW     uint16_t (WS2811_PIXEL_NS_BIT_1_LOW  / RMT_TickLengthNS)
-#define WS2811_PIXEL_RMT_TICKS_IDLE          uint16_t (WS2811_PIXEL_NS_IDLE       / RMT_TickLengthNS)
+#define TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH    uint16_t (TM1814_PIXEL_NS_BIT_0_HIGH / RMT_TickLengthNS)
+#define TM1814_PIXEL_RMT_TICKS_BIT_0_LOW     uint16_t (TM1814_PIXEL_NS_BIT_0_LOW  / RMT_TickLengthNS)
+#define TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH    uint16_t (TM1814_PIXEL_NS_BIT_1_HIGH / RMT_TickLengthNS)
+#define TM1814_PIXEL_RMT_TICKS_BIT_1_LOW     uint16_t (TM1814_PIXEL_NS_BIT_1_LOW  / RMT_TickLengthNS)
+#define TM1814_PIXEL_RMT_TICKS_IDLE          uint16_t (TM1814_PIXEL_NS_IDLE       / RMT_TickLengthNS)
 
 #define INTERFRAME_GAP_ID   2
 #define STARTBIT_ID         3
@@ -36,34 +36,34 @@
 static void IRAM_ATTR rmt_intr_handler (void* param);
 
 //----------------------------------------------------------------------------
-c_OutputWS2811Rmt::c_OutputWS2811Rmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+c_OutputTM1814Rmt::c_OutputTM1814Rmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     gpio_num_t outputGpio,
     uart_port_t uart,
     c_OutputMgr::e_OutputType outputType) :
-    c_OutputWS2811 (OutputChannelId, outputGpio, uart, outputType)
+    c_OutputTM1814 (OutputChannelId, outputGpio, uart, outputType)
 {
     // DEBUG_START;
 
-    Rgb2Rmt[0].duration0 = WS2811_PIXEL_RMT_TICKS_BIT_0_LOW;
+    Rgb2Rmt[0].duration0 = TM1814_PIXEL_RMT_TICKS_BIT_0_LOW;
     Rgb2Rmt[0].level0 = 0;
-    Rgb2Rmt[0].duration1 = WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH;
+    Rgb2Rmt[0].duration1 = TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH;
     Rgb2Rmt[0].level1 = 1;
 
-    Rgb2Rmt[1].duration0 = WS2811_PIXEL_RMT_TICKS_BIT_1_LOW;
+    Rgb2Rmt[1].duration0 = TM1814_PIXEL_RMT_TICKS_BIT_1_LOW;
     Rgb2Rmt[1].level0 = 0;
-    Rgb2Rmt[1].duration1 = WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH;
+    Rgb2Rmt[1].duration1 = TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH;
     Rgb2Rmt[1].level1 = 1;
 
     // 300us Interframe gap
-    Rgb2Rmt[INTERFRAME_GAP_ID].duration0 = WS2811_PIXEL_RMT_TICKS_IDLE / 2;
-    Rgb2Rmt[INTERFRAME_GAP_ID].level0 = 0;
-    Rgb2Rmt[INTERFRAME_GAP_ID].duration1 = WS2811_PIXEL_RMT_TICKS_IDLE / 2;
-    Rgb2Rmt[INTERFRAME_GAP_ID].level1 = 0;
+    Rgb2Rmt[INTERFRAME_GAP_ID].duration0 = TM1814_PIXEL_RMT_TICKS_IDLE / 2;
+    Rgb2Rmt[INTERFRAME_GAP_ID].level0 = 1;
+    Rgb2Rmt[INTERFRAME_GAP_ID].duration1 = TM1814_PIXEL_RMT_TICKS_IDLE / 2;
+    Rgb2Rmt[INTERFRAME_GAP_ID].level1 = 1;
 
     // Start Bit
-    Rgb2Rmt[STARTBIT_ID].duration0 = WS2811_PIXEL_RMT_TICKS_BIT_0_LOW;
+    Rgb2Rmt[STARTBIT_ID].duration0 = TM1814_PIXEL_RMT_TICKS_BIT_0_LOW;
     Rgb2Rmt[STARTBIT_ID].level0 = 1;
-    Rgb2Rmt[STARTBIT_ID].duration1 = WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH;
+    Rgb2Rmt[STARTBIT_ID].duration1 = TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH;
     Rgb2Rmt[STARTBIT_ID].level1 = 1;
 
     // Stop Bit
@@ -72,16 +72,16 @@ c_OutputWS2811Rmt::c_OutputWS2811Rmt (c_OutputMgr::e_OutputChannelIds OutputChan
     Rgb2Rmt[STOPBIT_ID].duration1 = 0;
     Rgb2Rmt[STOPBIT_ID].level1 = 0;
 
-    // DEBUG_V (String ("WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH, HEX));
-    // DEBUG_V (String (" WS2811_PIXEL_RMT_TICKS_BIT_0_LOW: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_0_LOW,  HEX));
-    // DEBUG_V (String ("WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH, HEX));
-    // DEBUG_V (String (" WS2811_PIXEL_RMT_TICKS_BIT_1_LOW: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_1_LOW,  HEX));
+    // DEBUG_V (String ("TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH: 0x") + String (TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH, HEX));
+    // DEBUG_V (String (" TM1814_PIXEL_RMT_TICKS_BIT_0_LOW: 0x") + String (TM1814_PIXEL_RMT_TICKS_BIT_0_LOW,  HEX));
+    // DEBUG_V (String ("TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH: 0x") + String (TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH, HEX));
+    // DEBUG_V (String (" TM1814_PIXEL_RMT_TICKS_BIT_1_LOW: 0x") + String (TM1814_PIXEL_RMT_TICKS_BIT_1_LOW,  HEX));
 
     // DEBUG_END;
-} // c_OutputWS2811Rmt
+} // c_OutputTM1814Rmt
 
 //----------------------------------------------------------------------------
-c_OutputWS2811Rmt::~c_OutputWS2811Rmt ()
+c_OutputTM1814Rmt::~c_OutputTM1814Rmt ()
 {
     // DEBUG_START;
     if (gpio_num_t (-1) == DataPin) { return; }
@@ -103,7 +103,7 @@ c_OutputWS2811Rmt::~c_OutputWS2811Rmt ()
     // DEBUG_V (String("RmtChannelId: ") + String(RmtChannelId));
     // rmtEnd (RmtObject);
     // DEBUG_END;
-} // ~c_OutputWS2811Rmt
+} // ~c_OutputTM1814Rmt
 
 //----------------------------------------------------------------------------
 /* shell function to set the 'this' pointer of the real ISR
@@ -111,13 +111,13 @@ c_OutputWS2811Rmt::~c_OutputWS2811Rmt ()
  */
 static void IRAM_ATTR rmt_intr_handler (void* param)
 {
-    reinterpret_cast <c_OutputWS2811Rmt*>(param)->ISR_Handler ();
+    reinterpret_cast <c_OutputTM1814Rmt*>(param)->ISR_Handler ();
 } // rmt_intr_handler
 
 //----------------------------------------------------------------------------
 /* Use the current config to set up the output port
 */
-void c_OutputWS2811Rmt::Begin ()
+void c_OutputTM1814Rmt::Begin ()
 {
     // DEBUG_START;
     // RmtChannelId = 0;
@@ -169,20 +169,22 @@ void c_OutputWS2811Rmt::Begin ()
 } // init
 
 //----------------------------------------------------------------------------
-bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
+bool c_OutputTM1814Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
-    bool response = c_OutputWS2811::SetConfig (jsonConfig);
+    bool response = c_OutputTM1814::SetConfig (jsonConfig);
+
+    // TODO Handle DataPin change
 
     uint32_t ifgNS = (InterFrameGapInMicroSec * 1000);
     uint32_t ifgTicks = ifgNS / RMT_TickLengthNS;
 
     // Default is 100us * 3
     Rgb2Rmt[INTERFRAME_GAP_ID].duration0 = ifgTicks / 10;
-    Rgb2Rmt[INTERFRAME_GAP_ID].level0 = 0;
+    Rgb2Rmt[INTERFRAME_GAP_ID].level0 = 1;
     Rgb2Rmt[INTERFRAME_GAP_ID].duration1 = ifgTicks / 10;
-    Rgb2Rmt[INTERFRAME_GAP_ID].level1 = 0;
+    Rgb2Rmt[INTERFRAME_GAP_ID].level1 = 1;
 
     rmt_set_pin (RmtChannelId, rmt_mode_t::RMT_MODE_TX, DataPin);
 
@@ -192,7 +194,18 @@ bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void IRAM_ATTR c_OutputWS2811Rmt::ISR_Handler ()
+void c_OutputTM1814Rmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
+{
+    c_OutputTM1814::GetStatus (jsonStatus);
+
+    // jsonStatus["DataISRcounter"] = DataISRcounter;
+    // jsonStatus["FrameStartCounter"] = FrameStartCounter;
+    // jsonStatus["FrameEndISRcounter"] = FrameEndISRcounter;
+
+} // GetStatus
+
+//----------------------------------------------------------------------------
+void IRAM_ATTR c_OutputTM1814Rmt::ISR_Handler ()
 {
     if (RMT.int_st.val & RMT_INT_TX_END (RmtChannelId))
     {
@@ -226,9 +239,9 @@ void IRAM_ATTR c_OutputWS2811Rmt::ISR_Handler ()
 } // ISR_Handler
 
 //----------------------------------------------------------------------------
-void IRAM_ATTR c_OutputWS2811Rmt::ISR_Handler_StartNewFrame ()
+void IRAM_ATTR c_OutputTM1814Rmt::ISR_Handler_StartNewFrame ()
 {
-    FrameStartCounter++;
+    // FrameStartCounter++;
 
     RMT.conf_ch[RmtChannelId].conf1.mem_rd_rst = 1; // set the internal pointer to the start of the mem block
     RMT.conf_ch[RmtChannelId].conf1.mem_rd_rst = 0;
@@ -264,8 +277,10 @@ void IRAM_ATTR c_OutputWS2811Rmt::ISR_Handler_StartNewFrame ()
 /*
  * Fill the MEMBLK with a fixed number of intensity values.
  */
-void IRAM_ATTR c_OutputWS2811Rmt::ISR_Handler_SendIntensityData ()
+void IRAM_ATTR c_OutputTM1814Rmt::ISR_Handler_SendIntensityData ()
 {
+    // DataISRcounter++;
+
     uint32_t* pMem = (uint32_t*)RmtCurrentAddr;
     register uint32_t OneValue  = Rgb2Rmt[1].val;
     register uint32_t ZeroValue = Rgb2Rmt[0].val;
@@ -294,7 +309,7 @@ void IRAM_ATTR c_OutputWS2811Rmt::ISR_Handler_SendIntensityData ()
 } // ISR_Handler_SendIntensityData
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811Rmt::Render ()
+void c_OutputTM1814Rmt::Render ()
 {
     // DEBUG_START;
 

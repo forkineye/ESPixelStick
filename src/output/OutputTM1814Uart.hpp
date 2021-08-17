@@ -1,6 +1,6 @@
 #pragma once
 /*
-* OutputWS2811Uart.h - WS2811 driver code for ESPixelStick UART
+* OutputTM1814Uart.h - TM1814 driver code for ESPixelStick UART
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -22,18 +22,17 @@
 *
 */
 
-#include "OutputCommon.hpp"
-#include "OutputWS2811.hpp"
+#include "OutputTM1814.hpp"
 
-class c_OutputWS2811Uart : public c_OutputWS2811
+class c_OutputTM1814Uart : public c_OutputTM1814
 {
 public:
     // These functions are inherited from c_OutputCommon
-    c_OutputWS2811Uart (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+    c_OutputTM1814Uart (c_OutputMgr::e_OutputChannelIds OutputChannelId,
                       gpio_num_t outputGpio,
                       uart_port_t uart,
                       c_OutputMgr::e_OutputType outputType);
-    virtual ~c_OutputWS2811Uart ();
+    virtual ~c_OutputTM1814Uart ();
 
     // functions to be provided by the derived class
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
@@ -45,11 +44,14 @@ public:
     /// Interrupt Handler
     void IRAM_ATTR ISR_Handler (); ///< UART ISR
 
-#define WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE    4
-#define WS2812_NUM_DATA_BYTES_PER_PIXEL             16
-
 private:
+#define TM1814_DATA_SPEED                           (800000.0)
+
+#define TM1814_NUM_DATA_BITS_PER_INTENSITY_BIT      11
+#define TM1814_NUM_DATA_BYTES_PER_INTENSITY_BYTE    8
+#define TM1814_BAUD_RATE                            int(1.0 * TM1814_DATA_SPEED * TM1814_NUM_DATA_BITS_PER_INTENSITY_BIT)
+
     bool validate ();        ///< confirm that the current configuration is valid
 
-}; // c_OutputWS2811Uart
+}; // c_OutputTM1814Uart
 

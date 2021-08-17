@@ -1,5 +1,5 @@
 /*
-* OutputWS2811.cpp - WS2811 driver code for ESPixelStick UART
+* OutputTM1814.cpp - TM1814 driver code for ESPixelStick UART
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -18,10 +18,10 @@
 */
 
 #include "../ESPixelStick.h"
-#include "OutputWS2811.hpp"
+#include "OutputTM1814.hpp"
 
 //----------------------------------------------------------------------------
-c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+c_OutputTM1814::c_OutputTM1814 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     gpio_num_t outputGpio,
     uart_port_t uart,
     c_OutputMgr::e_OutputType outputType) :
@@ -29,21 +29,21 @@ c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
 {
     // DEBUG_START;
 
-    InterFrameGapInMicroSec = WS2811_MIN_IDLE_TIME_US;
+    InterFrameGapInMicroSec = TM1814_MIN_IDLE_TIME_US;
 
     // DEBUG_END;
-} // c_OutputWS2811
+} // c_OutputTM1814
 
 //----------------------------------------------------------------------------
-c_OutputWS2811::~c_OutputWS2811 ()
+c_OutputTM1814::~c_OutputTM1814 ()
 {
     // DEBUG_START;
 
     // DEBUG_END;
-} // ~c_OutputWS2811
+} // ~c_OutputTM1814
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811::GetConfig (ArduinoJson::JsonObject& jsonConfig)
+void c_OutputTM1814::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
@@ -53,19 +53,14 @@ void c_OutputWS2811::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // GetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811::GetStatus (ArduinoJson::JsonObject& jsonStatus)
+void c_OutputTM1814::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     c_OutputPixel::GetStatus (jsonStatus);
-
-    // uint32_t UartIntSt = GET_PERI_REG_MASK (UART_INT_ST (UartId), UART_TXFIFO_EMPTY_INT_ENA);
-    // uint16_t SpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getWS2811FifoLength));
-    // jsonStatus["UartIntSt"] = UartIntSt;
-    // jsonStatus["SpaceInFifo"] = SpaceInFifo;
 
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputTM1814::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 {
     // DEBUG_START;
 
@@ -73,7 +68,7 @@ void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
     c_OutputPixel::SetOutputBufferSize (NumChannelsAvailable);
 
     // Calculate our refresh time
-    FrameMinDurationInMicroSec = (WS2811_MICRO_SEC_PER_INTENSITY * OutputBufferSize) + InterFrameGapInMicroSec;
+    FrameMinDurationInMicroSec = (TM1814_MICRO_SEC_PER_INTENSITY * OutputBufferSize) + InterFrameGapInMicroSec;
 
     // DEBUG_END;
 
@@ -88,14 +83,14 @@ void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 *       true - config has been accepted
 *       false - Config rejected. Using defaults for invalid settings
 */
-bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject& jsonConfig)
+bool c_OutputTM1814::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
     bool response = c_OutputPixel::SetConfig (jsonConfig);
 
     // Calculate our refresh time
-    FrameMinDurationInMicroSec = (WS2811_MICRO_SEC_PER_INTENSITY * numIntensityBytesPerPixel * OutputBufferSize) + InterFrameGapInMicroSec;
+    FrameMinDurationInMicroSec = (TM1814_MICRO_SEC_PER_INTENSITY * numIntensityBytesPerPixel * OutputBufferSize) + InterFrameGapInMicroSec;
 
     // DEBUG_END;
     return response;

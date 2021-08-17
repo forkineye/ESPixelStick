@@ -30,10 +30,12 @@
 #include "OutputGECE.hpp"
 #include "OutputSerial.hpp"
 #include "OutputWS2811Uart.hpp"
+#include "OutputTM1814Uart.hpp"
 #include "OutputRelay.hpp"
 #include "OutputServoPCA9685.hpp"
 #ifdef ARDUINO_ARCH_ESP32
 #   include "OutputWS2811Rmt.hpp"
+#   include "OutputTM1814Rmt.hpp"
 #endif // def ARDUINO_ARCH_ESP32
 // needs to be last
 #include "OutputMgr.hpp"
@@ -58,7 +60,8 @@ static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::
     {c_OutputMgr::e_OutputType::OutputType_Serial,        "Serial"        },
     {c_OutputMgr::e_OutputType::OutputType_Relay,         "Relay"         },
     {c_OutputMgr::e_OutputType::OutputType_Servo_PCA9685, "Servo_PCA9685" },
-    {c_OutputMgr::e_OutputType::OutputType_Disabled,      "Disabled"      }
+    {c_OutputMgr::e_OutputType::OutputType_Disabled,      "Disabled"      },
+    {c_OutputMgr::e_OutputType::OutputType_TM1814,        "TM1814"        }
 };
 
 //-----------------------------------------------------------------------------
@@ -296,9 +299,9 @@ void c_OutputMgr::CreateNewConfig ()
     int ChannelIndex = 0;
     for (auto CurrentOutput : pOutputChannelDrivers)
     {
-        InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex), e_OutputType::OutputType_Disabled);
+        InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex++), e_OutputType::OutputType_Disabled);
     }// end for each interface
-    // DEBUG_V ("");
+    // DEBUG_V ("Outputs Are disabled");
     CreateJsonConfig (JsonConfig);
 
     // DEBUG_V ("");
@@ -555,6 +558,32 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 {
                     // LOG_PORT.println (String (F ("************** Starting WS2811 UART for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811Uart (ChannelIndex, dataPin, UartId, OutputType_WS2811);
+                    // DEBUG_V ("");
+                }
+                break;
+            }
+
+            case e_OutputType::OutputType_TM1814:
+            {
+                if (-1 == UartId)
+                {
+                    LOG_PORT.println (String (F ("************** Cannot Start TM1814 for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                    // DEBUG_V ("");
+                }
+
+#ifdef ARDUINO_ARCH_ESP32
+                else if (ChannelIndex >= OutputChannelId_RMT_1)
+                {
+                    // LOG_PORT.println (String (F ("************** Starting TM1814 RMT for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputTM1814Rmt (ChannelIndex, dataPin, UartId, OutputType_TM1814);
+                    // DEBUG_V ("");
+                }
+#endif // def ARDUINO_ARCH_ESP32
+                else
+                {
+                    // LOG_PORT.println (String (F ("************** Starting TM1814 UART for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputTM1814Uart (ChannelIndex, dataPin, UartId, OutputType_TM1814);
                     // DEBUG_V ("");
                 }
                 break;

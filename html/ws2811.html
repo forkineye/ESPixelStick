@@ -50,16 +50,6 @@
             </div>
 
             <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-2">
-                    <div class="checkbox"><label><input type="checkbox" id="showgamma"> Show Gamma Curve</label></div>
-                </div>
-                <label class="control-label col-sm-2" for="interframetime">Inter Frame Time (us)</label>
-                <div class="col-sm-2">
-                    <input type="number" class="form-control is-valid" id="interframetime" step="1" min="300" max="10000" value="300" required title="Number of Micro Seconds between each frame." onchange="WS2811_OnChange()">
-                </div>
-            </div>
-
-            <div class="form-group">
                 <label class="control-label col-sm-2" for="prependnullcount">Start NULL Count</label>
                 <div class="col-sm-2">
                     <input type="number" class="form-control is-valid" id="prependnullcount" step="1" min="0" max="100" value="0" title="Number of NULL Pixels to send before Pixel Data" onchange="WS2811_OnChange()">
@@ -67,6 +57,16 @@
                 <label class="control-label col-sm-2" for="appendnullcount">End NULL Count</label>
                 <div class="col-sm-2">
                     <input type="number" class="form-control is-valid" id="appendnullcount" step="1" min="0" max="100" value="0" title="Number of NULL Pixels to send after Pixel Data" onchange="WS2811_OnChange()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-2">
+                    <div class="checkbox"><label><input type="checkbox" id="showgamma"> Show Gamma Curve</label></div>
+                </div>
+                <label class="control-label col-sm-2" for="interframetime">Inter Frame Time (us)</label>
+                <div class="col-sm-2">
+                    <input type="number" class="form-control is-valid" id="interframetime" step="1" min="300" max="10000" value="300" required title="Number of Micro Seconds between each frame." onchange="WS2811_OnChange()">
                 </div>
             </div>
 

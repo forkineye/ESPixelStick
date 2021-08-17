@@ -266,7 +266,7 @@ function ProcessLocalConfig(data)
 
 function UpdateAdvancedOptionsMode()
 {
-    console.info("UpdateAdvancedOptionsMode");
+    // console.info("UpdateAdvancedOptionsMode");
 
     var am = $('#AdvancedOptions');
     var AdvancedModeState = am.prop("checked");
@@ -603,11 +603,11 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig )
 
     var elementids = [];
     var modeControlName = '#' + ChannelType + 'mode' + channelId;
-    console.info("modeControlName: " + modeControlName);
+    // console.info("modeControlName: " + modeControlName);
 
     // modify page title
     var ModeDisplayName = GenerateInputOutputControlLabel(ChannelType, channelId) + " - " + $(modeControlName + ' #Title')[0].innerHTML;
-    console.info("ModeDisplayName: " + ModeDisplayName);
+    // console.info("ModeDisplayName: " + ModeDisplayName);
     $(modeControlName + ' #Title')[0].innerHTML = ModeDisplayName;
 
     //document.getElementById("blahblah").innerHTML="NewText".
