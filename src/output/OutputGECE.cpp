@@ -318,6 +318,10 @@ bool c_OutputGECE::SetConfig(ArduinoJson::JsonObject & jsonConfig)
 
     c_OutputCommon::SetConfig (jsonConfig);
 
+#ifdef ARDUINO_ARCH_ESP32
+    ESP_ERROR_CHECK (uart_set_pin (UartId, DataPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+#endif
+
     bool response = validate ();
 
     // Update the config fields in case the validator changed them
