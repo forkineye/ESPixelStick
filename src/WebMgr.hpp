@@ -52,9 +52,9 @@ private:
     EspalexaDevice *       pAlexaDevice = nullptr;
 
 #ifdef ARDUINO_ARCH_ESP32
-#   define WebSocketFrameCollectionBufferSize (6*1024)
+#   define WebSocketFrameCollectionBufferSize (8*1024)
 #else
-#   define WebSocketFrameCollectionBufferSize (3*1024)
+#   define WebSocketFrameCollectionBufferSize (4*1024)
 #endif // def ARDUINO_ARCH_ESP8266
     char WebSocketFrameCollectionBuffer[WebSocketFrameCollectionBufferSize + 1];
 
