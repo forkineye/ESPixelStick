@@ -41,6 +41,7 @@ public:
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);  ///< Set a new config in the driver
     void    Render ();                                        ///< Call from loop(),  renders output data
+    void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
 
     /// Interrupt Handler
     void IRAM_ATTR ISR_Handler (); ///< ISR
@@ -57,10 +58,10 @@ private:
     uint8_t NumIntensityBitsPerInterrupt = 0;
     rmt_item32_t Rgb2Rmt[5];
 
-    uint32_t FrameStartCounter = 0;
+    // debug counters
     // uint32_t DataISRcounter = 0;
-    // uint32_t FrameDoneCounter = 0;
     // uint32_t FrameEndISRcounter = 0;
+    // uint32_t FrameStartCounter = 0;
 
 }; // c_OutputTM1814Rmt
 

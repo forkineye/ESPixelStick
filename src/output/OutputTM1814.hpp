@@ -46,14 +46,15 @@ public:
     virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
     virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
 
-#define TM1814_PIXEL_NS_BIT_0_HIGH_WS2812          900.0 // 350ns +/- 150ns per datasheet
-#define TM1814_PIXEL_NS_BIT_0_LOW_WS2812           350.0 // 900ns +/- 150ns per datasheet
-#define TM1814_PIXEL_NS_BIT_1_HIGH_WS2812          350.0 // 900ns +/- 150ns per datasheet
-#define TM1814_PIXEL_NS_BIT_1_LOW_WS2812           900.0 // 350ns +/- 150ns per datasheet
-#define TM1814_PIXEL_NS_IDLE_WS2812             300000.0 // 300us per datasheet
+#define TM1814_PIXEL_NS_BIT_TOTAL          1250.0
+#define TM1814_PIXEL_NS_BIT_0_LOW           360.0 // 360ns +/- 50ns per datasheet
+#define TM1814_PIXEL_NS_BIT_0_HIGH          (TM1814_PIXEL_NS_BIT_TOTAL - TM1814_PIXEL_NS_BIT_0_LOW)
+#define TM1814_PIXEL_NS_BIT_1_LOW           720.0 // 720ns -70ns / +280ns per datasheet
+#define TM1814_PIXEL_NS_BIT_1_HIGH          (TM1814_PIXEL_NS_BIT_TOTAL - TM1814_PIXEL_NS_BIT_1_LOW)
+#define TM1814_PIXEL_NS_IDLE             300000.0 // 300us per datasheet
 
 #define TM1814_MICRO_SEC_PER_INTENSITY          10L     // ((1/800000) * 8 bits) = 10us
-#define TM1814_MIN_IDLE_TIME_US                 (TM1814_PIXEL_NS_IDLE_WS2812 / 1000.0)
+#define TM1814_MIN_IDLE_TIME_US                 (TM1814_PIXEL_NS_IDLE / 1000.0)
 #define TM1814_DEFAULT_INTENSITY_PER_PIXEL      3
 
 }; // c_OutputTM1814

@@ -88,6 +88,7 @@ public:
         OutputType_Serial,
         OutputType_Relay,
         OutputType_Servo_PCA9685,
+        OutputType_TM1814,
         OutputType_Disabled,
         OutputType_End, // must be last
         OutputType_Start = OutputType_WS2811,
@@ -111,7 +112,7 @@ private:
 #ifdef ARDUINO_ARCH_ESP8266
 #   define OM_MAX_CONFIG_SIZE      ((size_t)(5*1024))
 #else
-#   define OM_MAX_CONFIG_SIZE      ((size_t)(8*1024))
+#   define OM_MAX_CONFIG_SIZE      ((size_t)(10*1024))
 #endif // !def ARDUINO_ARCH_ESP8266
 
     bool HasBeenInitialized = false;

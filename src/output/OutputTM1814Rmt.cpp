@@ -19,33 +19,14 @@
 #ifdef ARDUINO_ARCH_ESP32
 
 #include "../ESPixelStick.h"
-#include <driver/rmt.h>
 #include "OutputTM1814Rmt.hpp"
+#include "OutputRmt.hpp"
 
-#define RmtChannelId                              rmt_channel_t(UartId)
-#define NumBitsPerByte                            8
-#define MAX_NUM_INTENSITY_BIT_SLOTS_PER_INTERRUPT (sizeof(RMTMEM.chan[0].data32) / sizeof (rmt_item32_t))
-#define NUM_FRAME_START_SLOTS                     6
-
-#define RMT__INT_TX_END     (1)
-#define RMT__INT_RX_END     (2)
-#define RMT__INT_ERROR      (4)
-#define RMT__INT_THR_EVNT   (1<<24)
-
-#define RMT_INT_TX_END(channel)     (RMT__INT_TX_END   << (uint32_t(channel)*3))
-#define RMT_INT_RX_END(channel)     (RMT__INT_RX_END   << (uint32_t(channel)*3))
-#define RMT_INT_ERROR(channel)      (RMT__INT_ERROR    << (uint32_t(channel)*3))
-#define RMT_INT_THR_EVNT(channel)  ((RMT__INT_THR_EVNT)<< (uint32_t(channel)))
-
-#define RMT_ClockRate                               80000000.0
-#define RMT_Clock_Divisor                           2.0
-#define RMT_TickLengthNS                            float((1/(RMT_ClockRate/RMT_Clock_Divisor))*1000000000.0)
-
-#define TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH_WS2812    uint16_t (TM1814_PIXEL_NS_BIT_0_HIGH_WS2812 / RMT_TickLengthNS)
-#define TM1814_PIXEL_RMT_TICKS_BIT_0_LOW_WS2812     uint16_t (TM1814_PIXEL_NS_BIT_0_LOW_WS2812  / RMT_TickLengthNS)
-#define TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH_WS2812    uint16_t (TM1814_PIXEL_NS_BIT_1_HIGH_WS2812 / RMT_TickLengthNS)
-#define TM1814_PIXEL_RMT_TICKS_BIT_1_LOW_WS2812     uint16_t (TM1814_PIXEL_NS_BIT_1_LOW_WS2812  / RMT_TickLengthNS)
-#define TM1814_PIXEL_RMT_TICKS_IDLE_WS2812          uint16_t (TM1814_PIXEL_NS_IDLE_WS2812       / RMT_TickLengthNS)
+#define TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH    uint16_t (TM1814_PIXEL_NS_BIT_0_HIGH / RMT_TickLengthNS)
+#define TM1814_PIXEL_RMT_TICKS_BIT_0_LOW     uint16_t (TM1814_PIXEL_NS_BIT_0_LOW  / RMT_TickLengthNS)
+#define TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH    uint16_t (TM1814_PIXEL_NS_BIT_1_HIGH / RMT_TickLengthNS)
+#define TM1814_PIXEL_RMT_TICKS_BIT_1_LOW     uint16_t (TM1814_PIXEL_NS_BIT_1_LOW  / RMT_TickLengthNS)
+#define TM1814_PIXEL_RMT_TICKS_IDLE          uint16_t (TM1814_PIXEL_NS_IDLE       / RMT_TickLengthNS)
 
 #define INTERFRAME_GAP_ID   2
 #define STARTBIT_ID         3
@@ -63,26 +44,26 @@ c_OutputTM1814Rmt::c_OutputTM1814Rmt (c_OutputMgr::e_OutputChannelIds OutputChan
 {
     // DEBUG_START;
 
-    Rgb2Rmt[0].duration0 = TM1814_PIXEL_RMT_TICKS_BIT_0_LOW_WS2812;
+    Rgb2Rmt[0].duration0 = TM1814_PIXEL_RMT_TICKS_BIT_0_LOW;
     Rgb2Rmt[0].level0 = 0;
-    Rgb2Rmt[0].duration1 = TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH_WS2812;
+    Rgb2Rmt[0].duration1 = TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH;
     Rgb2Rmt[0].level1 = 1;
 
-    Rgb2Rmt[1].duration0 = TM1814_PIXEL_RMT_TICKS_BIT_1_LOW_WS2812;
+    Rgb2Rmt[1].duration0 = TM1814_PIXEL_RMT_TICKS_BIT_1_LOW;
     Rgb2Rmt[1].level0 = 0;
-    Rgb2Rmt[1].duration1 = TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH_WS2812;
+    Rgb2Rmt[1].duration1 = TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH;
     Rgb2Rmt[1].level1 = 1;
 
     // 300us Interframe gap
-    Rgb2Rmt[INTERFRAME_GAP_ID].duration0 = TM1814_PIXEL_RMT_TICKS_IDLE_WS2812 / 2;
+    Rgb2Rmt[INTERFRAME_GAP_ID].duration0 = TM1814_PIXEL_RMT_TICKS_IDLE / 2;
     Rgb2Rmt[INTERFRAME_GAP_ID].level0 = 1;
-    Rgb2Rmt[INTERFRAME_GAP_ID].duration1 = TM1814_PIXEL_RMT_TICKS_IDLE_WS2812 / 2;
+    Rgb2Rmt[INTERFRAME_GAP_ID].duration1 = TM1814_PIXEL_RMT_TICKS_IDLE / 2;
     Rgb2Rmt[INTERFRAME_GAP_ID].level1 = 1;
 
     // Start Bit
-    Rgb2Rmt[STARTBIT_ID].duration0 = TM1814_PIXEL_RMT_TICKS_BIT_0_LOW_WS2812;
+    Rgb2Rmt[STARTBIT_ID].duration0 = TM1814_PIXEL_RMT_TICKS_BIT_0_LOW;
     Rgb2Rmt[STARTBIT_ID].level0 = 1;
-    Rgb2Rmt[STARTBIT_ID].duration1 = TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH_WS2812;
+    Rgb2Rmt[STARTBIT_ID].duration1 = TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH;
     Rgb2Rmt[STARTBIT_ID].level1 = 1;
 
     // Stop Bit
@@ -91,10 +72,10 @@ c_OutputTM1814Rmt::c_OutputTM1814Rmt (c_OutputMgr::e_OutputChannelIds OutputChan
     Rgb2Rmt[STOPBIT_ID].duration1 = 0;
     Rgb2Rmt[STOPBIT_ID].level1 = 0;
 
-    // DEBUG_V (String ("TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH_WS2812: 0x") + String (TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH_WS2812, HEX));
-    // DEBUG_V (String (" TM1814_PIXEL_RMT_TICKS_BIT_0_LOW_WS2812: 0x") + String (TM1814_PIXEL_RMT_TICKS_BIT_0_LOW_WS2812,  HEX));
-    // DEBUG_V (String ("TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH_WS2812: 0x") + String (TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH_WS2812, HEX));
-    // DEBUG_V (String (" TM1814_PIXEL_RMT_TICKS_BIT_1_LOW_WS2812: 0x") + String (TM1814_PIXEL_RMT_TICKS_BIT_1_LOW_WS2812,  HEX));
+    // DEBUG_V (String ("TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH: 0x") + String (TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH, HEX));
+    // DEBUG_V (String (" TM1814_PIXEL_RMT_TICKS_BIT_0_LOW: 0x") + String (TM1814_PIXEL_RMT_TICKS_BIT_0_LOW,  HEX));
+    // DEBUG_V (String ("TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH: 0x") + String (TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH, HEX));
+    // DEBUG_V (String (" TM1814_PIXEL_RMT_TICKS_BIT_1_LOW: 0x") + String (TM1814_PIXEL_RMT_TICKS_BIT_1_LOW,  HEX));
 
     // DEBUG_END;
 } // c_OutputTM1814Rmt
@@ -112,6 +93,7 @@ c_OutputTM1814Rmt::~c_OutputTM1814Rmt ()
     // DEBUG_V ("");
     RMT.int_ena.val &= ~RMT_INT_TX_END (RmtChannelId);
     RMT.int_ena.val &= ~RMT_INT_THR_EVNT (RmtChannelId);
+    rmt_tx_stop (RmtChannelId);
 
     esp_intr_free (RMT_intr_handle);
 
@@ -193,17 +175,32 @@ bool c_OutputTM1814Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     bool response = c_OutputTM1814::SetConfig (jsonConfig);
 
+    // TODO Handle DataPin change
+
     uint32_t ifgNS = (InterFrameGapInMicroSec * 1000);
     uint32_t ifgTicks = ifgNS / RMT_TickLengthNS;
 
     // Default is 100us * 3
     Rgb2Rmt[INTERFRAME_GAP_ID].duration0 = ifgTicks / 10;
-    Rgb2Rmt[INTERFRAME_GAP_ID].level0 = 0;
+    Rgb2Rmt[INTERFRAME_GAP_ID].level0 = 1;
     Rgb2Rmt[INTERFRAME_GAP_ID].duration1 = ifgTicks / 10;
-    Rgb2Rmt[INTERFRAME_GAP_ID].level1 = 0;
+    Rgb2Rmt[INTERFRAME_GAP_ID].level1 = 1;
+
+    rmt_set_pin (RmtChannelId, rmt_mode_t::RMT_MODE_TX, DataPin);
 
     // DEBUG_END;
     return response;
+
+} // GetStatus
+
+//----------------------------------------------------------------------------
+void c_OutputTM1814Rmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
+{
+    c_OutputTM1814::GetStatus (jsonStatus);
+
+    // jsonStatus["DataISRcounter"] = DataISRcounter;
+    // jsonStatus["FrameStartCounter"] = FrameStartCounter;
+    // jsonStatus["FrameEndISRcounter"] = FrameEndISRcounter;
 
 } // GetStatus
 
@@ -244,7 +241,7 @@ void IRAM_ATTR c_OutputTM1814Rmt::ISR_Handler ()
 //----------------------------------------------------------------------------
 void IRAM_ATTR c_OutputTM1814Rmt::ISR_Handler_StartNewFrame ()
 {
-    FrameStartCounter++;
+    // FrameStartCounter++;
 
     RMT.conf_ch[RmtChannelId].conf1.mem_rd_rst = 1; // set the internal pointer to the start of the mem block
     RMT.conf_ch[RmtChannelId].conf1.mem_rd_rst = 0;
@@ -282,6 +279,8 @@ void IRAM_ATTR c_OutputTM1814Rmt::ISR_Handler_StartNewFrame ()
  */
 void IRAM_ATTR c_OutputTM1814Rmt::ISR_Handler_SendIntensityData ()
 {
+    // DataISRcounter++;
+
     uint32_t* pMem = (uint32_t*)RmtCurrentAddr;
     register uint32_t OneValue  = Rgb2Rmt[1].val;
     register uint32_t ZeroValue = Rgb2Rmt[0].val;
@@ -317,6 +316,7 @@ void c_OutputTM1814Rmt::Render ()
     if ( 0 == (RMT.int_ena.val & (RMT_INT_TX_END (RmtChannelId) | RMT_INT_THR_EVNT (RmtChannelId))))
     {
         ISR_Handler_StartNewFrame ();
+        ReportNewFrame ();
     }
 
     // DEBUG_END;

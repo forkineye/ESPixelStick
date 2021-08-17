@@ -23,7 +23,6 @@
 */
 #ifdef ARDUINO_ARCH_ESP32
 
-#include "OutputCommon.hpp"
 #include "OutputWS2811.hpp"
 
 #include <driver/rmt.h>
@@ -42,7 +41,6 @@ public:
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);  ///< Set a new config in the driver
     void    Render ();                                        ///< Call from loop(),  renders output data
-    void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
     void    PauseOutput () {};
 
     /// Interrupt Handler
@@ -51,8 +49,6 @@ public:
     void IRAM_ATTR ISR_Handler_StartNewFrame (); ///< ISR
 
 private:
-
-#   define NUM_PIXELS_PER_INTERRUPT 
 
     volatile rmt_item32_t * RmtStartAddr   = nullptr;
     volatile rmt_item32_t * RmtCurrentAddr = nullptr;
