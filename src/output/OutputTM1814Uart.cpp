@@ -138,7 +138,7 @@ void c_OutputTM1814Uart::Begin ()
     InitializeUart (uart_config, PIXEL_FIFO_TRIGGER_LEVEL);
 #endif
 
-    DEBUG_V (String ("TM1814_BAUD_RATE: ") + String (TM1814_BAUD_RATE));
+    // DEBUG_V (String ("TM1814_BAUD_RATE: ") + String (TM1814_BAUD_RATE));
 
     // Atttach interrupt handler
 #ifdef ARDUINO_ARCH_ESP8266
