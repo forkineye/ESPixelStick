@@ -351,19 +351,9 @@ void c_OutputCommon::GenerateBreak (uint32_t DurationInUs)
 bool c_OutputCommon::SetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
-
     uint tempDataPin = uint (DataPin);
 
     bool response = setFromJSON (tempDataPin, jsonConfig, CN_data_pin);
-
-#ifdef ARDUINO_ARCH_ESP32
-
-    if ((tempDataPin != DataPin) && (uart_port_t(-1) != UartId))
-    {
-        ESP_ERROR_CHECK (uart_set_pin (UartId, tempDataPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
-    }
-
-#endif
 
     DataPin = gpio_num_t (tempDataPin);
 
