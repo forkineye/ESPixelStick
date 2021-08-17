@@ -39,20 +39,18 @@ public:
     virtual ~c_OutputPixel ();
 
     // functions to be provided by the derived class
-    virtual void         Begin () {};
+    // virtual void         Begin () {};
     virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
     virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-    virtual void         Render () = 0;
     virtual void         GetDriverName (String& sDriverName) = 0;
     virtual c_OutputMgr::e_OutputType GetOutputType () = 0;
     virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
     uint16_t             GetNumChannelsNeeded () { return (pixel_count * numIntensityBytesPerPixel); };
     virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
-    virtual void         PauseOutput () = 0;
-
-#define PIXEL_DEFAULT_INTENSITY_PER_PIXEL      3
 
 protected:
+#define PIXEL_DEFAULT_INTENSITY_PER_PIXEL      3
+
     IRAM_ATTR void    StartNewFrame ();
     IRAM_ATTR uint8_t GetNextIntensityToSend ();
 
@@ -61,6 +59,7 @@ protected:
     uint8_t   numIntensityBytesPerPixel = PIXEL_DEFAULT_INTENSITY_PER_PIXEL;
 
 private:
+
     uint8_t*    pNextIntensityToSend = nullptr;     ///< start of output buffer being sent to the UART
     uint16_t    RemainingPixelCount = 0;            ///< Used by ISR to determine how much more data to send
     uint8_t     brightness = 100;                   ///< brightness to use
@@ -93,7 +92,7 @@ private:
 
     uint8_t     gamma_table[256] = { 0 };           ///< Gamma Adjustment table
     float       gamma = 2.2;                        ///< gamma value to use
-    uint8_t     AdjustedBrightness = 255;           ///< brightness to use
+    uint32_t    AdjustedBrightness = 256;           ///< brightness to use
 
     // JSON configuration parameters
     String      color_order; ///< Pixel color order
