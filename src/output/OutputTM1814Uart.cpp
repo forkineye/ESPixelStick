@@ -257,6 +257,28 @@ void c_OutputTM1814Uart::Render ()
     // get the next frame started
     StartNewFrame ();
 
+    // Write the command bytes
+    register uint8_t Command    = 63;
+    register uint32_t OneValue  = Convert2BitIntensityToUartDataStream[1];
+    register uint32_t ZeroValue = Convert2BitIntensityToUartDataStream[0];
+
+    for (uint8_t NumCommands = 4; NumCommands > 0; --NumCommands)
+    {
+        for (uint8_t bitmask = 0x80; 0 != bitmask; bitmask >>= 1)
+        {
+            enqueue ((Command & bitmask) ? OneValue : ZeroValue);
+        }
+    }
+
+    // Send it again but invert it
+    for (uint8_t NumCommands = 4; NumCommands > 0; --NumCommands)
+    {
+        for (uint8_t bitmask = 0x80; 0 != bitmask; bitmask >>= 1)
+        {
+            enqueue ((Command & bitmask) ? ZeroValue : OneValue);
+        }
+    }
+
     // enable interrupts
     WRITE_PERI_REG (UART_CONF1 (UartId), PIXEL_FIFO_TRIGGER_LEVEL << UART_TXFIFO_EMPTY_THRHD_S);
     SET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
