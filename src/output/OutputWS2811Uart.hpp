@@ -40,6 +40,7 @@ public:
     void    Render ();                                        ///< Call from loop(),  renders output data
     void    SetOutputBufferSize (uint16_t NumChannelsAvailable);
     void    PauseOutput ();
+    bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);
 
     /// Interrupt Handler
     void IRAM_ATTR ISR_Handler (); ///< UART ISR

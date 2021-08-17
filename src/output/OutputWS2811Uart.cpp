@@ -56,7 +56,7 @@ extern "C" {
 * Inverted 6N1 UART lookup table for ws2811, first 2 bits ignored.
 * Start and stop bits are part of the pixel stream.
 */
-char Convert2BitIntensityToUartDataStream[] =
+static char Convert2BitIntensityToUartDataStream[] =
 {
     0b00110111,     // 00 - (1)000 100(0)
     0b00000111,     // 01 - (1)000 111(0)
@@ -157,6 +157,31 @@ void c_OutputWS2811Uart::Begin ()
     SET_PERI_REG_MASK (UART_CONF0 (UartId), (BIT (22)));
 
 } // init
+
+//----------------------------------------------------------------------------
+/* Process the config
+*
+*   needs
+*       reference to string to process
+*   returns
+*       true - config has been accepted
+*       false - Config rejected. Using defaults for invalid settings
+*/
+bool c_OutputWS2811Uart::SetConfig (ArduinoJson::JsonObject& jsonConfig)
+{
+    // DEBUG_START;
+
+    bool response = c_OutputWS2811::SetConfig (jsonConfig);
+
+#ifdef ARDUINO_ARCH_ESP32
+    ESP_ERROR_CHECK (uart_set_pin (UartId, DataPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+#endif
+
+    // DEBUG_END;
+    return response;
+
+} // SetConfig
+
 
 //----------------------------------------------------------------------------
 void c_OutputWS2811Uart::SetOutputBufferSize (uint16_t NumChannelsAvailable)
