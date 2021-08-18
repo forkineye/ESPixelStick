@@ -20,6 +20,9 @@
 #include "../ESPixelStick.h"
 #include "OutputTM1814.hpp"
 
+#define TM1814_COMMAND_DATA_VALUE               63 // 0x3f ~3F = C1 = 193
+static uint8_t PreambleData[8] = { 63, 63, 63, 63, 193, 193, 193, 193 };
+
 //----------------------------------------------------------------------------
 c_OutputTM1814::c_OutputTM1814 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     gpio_num_t outputGpio,
@@ -41,6 +44,18 @@ c_OutputTM1814::~c_OutputTM1814 ()
 
     // DEBUG_END;
 } // ~c_OutputTM1814
+
+//----------------------------------------------------------------------------
+void c_OutputTM1814::Begin ()
+{
+    // DEBUG_START;
+    
+    // c_OutputPixel::Begin ();
+
+    SetPreambleInformation (PreambleData, sizeof (PreambleData));
+
+    // DEBUG_END;
+} // GetConfig
 
 //----------------------------------------------------------------------------
 void c_OutputTM1814::GetConfig (ArduinoJson::JsonObject& jsonConfig)
@@ -68,7 +83,7 @@ void c_OutputTM1814::SetOutputBufferSize (uint16_t NumChannelsAvailable)
     c_OutputPixel::SetOutputBufferSize (NumChannelsAvailable);
 
     // Calculate our refresh time
-    FrameMinDurationInMicroSec = (TM1814_MICRO_SEC_PER_INTENSITY * OutputBufferSize) + InterFrameGapInMicroSec;
+    FrameMinDurationInMicroSec = (TM1814_MICRO_SEC_PER_INTENSITY * OutputBufferSize) + InterFrameGapInMicroSec + TM1814_COMMAND_DATA_TIME_US;
 
     // DEBUG_END;
 

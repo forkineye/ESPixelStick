@@ -39,12 +39,15 @@ public:
     virtual ~c_OutputTM1814 ();
 
     // functions to be provided by the derived class
+    virtual void         Begin ();
     virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
     virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
             void         GetDriverName (String & sDriverName) { sDriverName = String (F ("TM1814")); }
     c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_TM1814;} ///< Have the instance report its type.
     virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
     virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
+
+protected:
 
 #define TM1814_PIXEL_NS_BIT_TOTAL          1250.0
 #define TM1814_PIXEL_NS_BIT_0_LOW           360.0 // 360ns +/- 50ns per datasheet
@@ -56,6 +59,9 @@ public:
 #define TM1814_MICRO_SEC_PER_INTENSITY          10L     // ((1/800000) * 8 bits) = 10us
 #define TM1814_MIN_IDLE_TIME_US                 (TM1814_PIXEL_NS_IDLE / 1000.0)
 #define TM1814_DEFAULT_INTENSITY_PER_PIXEL      3
+#define TM1814_COMMAND_DATA_TIME_US             (8 * TM1814_MICRO_SEC_PER_INTENSITY)
+
+private:
 
 }; // c_OutputTM1814
 
