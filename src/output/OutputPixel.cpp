@@ -112,6 +112,18 @@ void c_OutputPixel::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 } // SetBufferSize
 
 //----------------------------------------------------------------------------
+void c_OutputPixel::SetPreambleInformation (uint8_t* PreambleStart, uint8_t NewPreambleSize)
+{
+    DEBUG_START;
+
+    pPreamble = PreambleStart;
+    PreambleSize = NewPreambleSize;
+
+    DEBUG_END;
+
+} // SetPreambleInformation
+
+//----------------------------------------------------------------------------
 /* Process the config
 *
 *   needs
@@ -266,6 +278,7 @@ void IRAM_ATTR c_OutputPixel::StartNewFrame ()
     CurrentIntensityIndex   = 0;
     CurrentPrependNullCount = PrependNullCount * numIntensityBytesPerPixel;
     CurrentAppendNullCount  = AppendNullCount  * numIntensityBytesPerPixel;
+    PreambleCurrentCount    = 0;
 
     MoreDataToSend = (0 == pixel_count) ? false : true;
 
@@ -281,6 +294,12 @@ uint8_t IRAM_ATTR c_OutputPixel::GetNextIntensityToSend ()
 
     do // once
     {
+        if (PreambleSize != PreambleCurrentCount)
+        {
+            response = pPreamble[PreambleCurrentCount++];
+            break;
+        }
+
         // Are we prepending NULL data?
         if (CurrentPrependNullCount)
         {
