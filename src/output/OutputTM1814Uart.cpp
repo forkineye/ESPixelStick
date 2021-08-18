@@ -51,7 +51,7 @@ extern "C" {
 * 8N2 UART lookup table for TM1814, first 2 bits ignored.
 * Start and stop bits are part of the pixel stream.
 */
-static char Convert2BitIntensityToUartDataStream[] =
+static char ConvertIntensityToUartDataStream[] =
 {
     0b11111100,     // (0) 0011 1111 (11)
     0b11100000,     // (0) 0000 0111 (11)
@@ -120,6 +120,8 @@ void c_OutputTM1814Uart::Begin ()
 {
     // DEBUG_START;
 
+    c_OutputTM1814::Begin ();
+
 #ifdef ARDUINO_ARCH_ESP8266
     InitializeUart (TM1814_BAUD_RATE,
         SERIAL_8N2,
@@ -177,29 +179,14 @@ bool c_OutputTM1814Uart::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 void c_OutputTM1814Uart::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 {
     // DEBUG_START;
-    // DEBUG_V (String ("NumChannelsAvailable: ") + String (NumChannelsAvailable));
-    // DEBUG_V (String ("   GetBufferUsedSize: ") + String (c_OutputCommon::GetBufferUsedSize ()));
-    // DEBUG_V (String ("         pixel_count: ") + String (pixel_count));
-    // DEBUG_V (String ("       BufferAddress: ") + String ((uint32_t)(c_OutputCommon::GetBufferAddress ())));
 
-    do // once
-    {
-        // are we changing size?
-        if (NumChannelsAvailable == OutputBufferSize)
-        {
-            // DEBUG_V ("NO Need to change the ISR buffer");
-            break;
-        }
-
-        // Stop current output operation
+    // Stop current output operation
 #ifdef ARDUINO_ARCH_ESP8266
-        CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
+    CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
 #else
-        ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
+    ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
 #endif
-        c_OutputTM1814::SetOutputBufferSize (NumChannelsAvailable);
-
-    } while (false);
+    c_OutputTM1814::SetOutputBufferSize (NumChannelsAvailable);
 
     // DEBUG_END;
 
@@ -217,8 +204,8 @@ void IRAM_ATTR c_OutputTM1814Uart::ISR_Handler ()
         // Fill the FIFO with new data
         // free space in the FIFO divided by the number of data bytes per intensity
         // gives the max number of intensities we can add to the FIFO
-        register uint32_t OneValue  = Convert2BitIntensityToUartDataStream[1];
-        register uint32_t ZeroValue = Convert2BitIntensityToUartDataStream[0];
+        register uint32_t OneValue  = ConvertIntensityToUartDataStream[1];
+        register uint32_t ZeroValue = ConvertIntensityToUartDataStream[0];
         uint32_t NumEmptyIntensitySlots = ((((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / TM1814_NUM_DATA_BYTES_PER_INTENSITY_BYTE);
         while ((NumEmptyIntensitySlots--) && (MoreDataToSend))
         {
@@ -256,28 +243,6 @@ void c_OutputTM1814Uart::Render ()
 
     // get the next frame started
     StartNewFrame ();
-
-    // Write the command bytes
-    register uint8_t Command    = 63;
-    register uint32_t OneValue  = Convert2BitIntensityToUartDataStream[1];
-    register uint32_t ZeroValue = Convert2BitIntensityToUartDataStream[0];
-
-    for (uint8_t NumCommands = 4; NumCommands > 0; --NumCommands)
-    {
-        for (uint8_t bitmask = 0x80; 0 != bitmask; bitmask >>= 1)
-        {
-            enqueue ((Command & bitmask) ? OneValue : ZeroValue);
-        }
-    }
-
-    // Send it again but invert it
-    for (uint8_t NumCommands = 4; NumCommands > 0; --NumCommands)
-    {
-        for (uint8_t bitmask = 0x80; 0 != bitmask; bitmask >>= 1)
-        {
-            enqueue ((Command & bitmask) ? ZeroValue : OneValue);
-        }
-    }
 
     // enable interrupts
     WRITE_PERI_REG (UART_CONF1 (UartId), PIXEL_FIFO_TRIGGER_LEVEL << UART_TXFIFO_EMPTY_THRHD_S);
