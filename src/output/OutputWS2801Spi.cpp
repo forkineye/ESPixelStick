@@ -16,9 +16,9 @@
 *  or use of these programs.
 *
 */
-#ifdef USE_WS2801
 
 #include "../ESPixelStick.h"
+#ifdef USE_WS2801
 #include "OutputWS2801Spi.hpp"
 
 
@@ -102,15 +102,15 @@ void c_OutputWS2801Spi::Begin ()
     // devcfg.address_bits = 0; // No bus address to send
     // devcfg.dummy_bits = 0; // No dummy bits to send
     // devcfg.duty_cycle_pos = 0; // 50% Duty cycle
-    devcfg.clock_speed_hz = SPI_MASTER_FREQ_1M;     //Initial clock out at 5 MHz
-    // devcfg.mode = 0;                                //SPI mode 0
-    devcfg.spics_io_num = -1;                       //we will NOT use CS pin
-    devcfg.queue_size = 2;                          //We want to be able to queue 7 transactions at a time
-    // devcfg.pre_cb = nullptr;                        //Specify pre-transfer callback to handle D/C line
-    // devcfg.post_cb = ws2801_transfer_callback;      //Specify post-transfer callback to handle D/C line
+    devcfg.clock_speed_hz = WS2801_BIT_RATE;        // Initial clock out at 1 MHz
+    // devcfg.mode = 0;                             // SPI mode 0
+    devcfg.spics_io_num = -1;                       // we will NOT use CS pin
+    devcfg.queue_size = 2;                          // We want to be able to queue 2 transactions at a time
+    // devcfg.pre_cb = nullptr;                     // Specify pre-transfer callback to handle D/C line
+    // devcfg.post_cb = ws2801_transfer_callback;      // Specify post-transfer callback to handle D/C line
     // devcfg.flags = 0;
 
-    // spi_bus_initialize (spi_host_device_thost, constspi_bus_config_t * bus_config, int dma_chan);
+    // spi_bus_initialize (spi_host_device_thost, buscfg, int dma_chan);
 
     // spicommon_dma_chan_claim (int dma_chan)
     // spicommon_periph_claim (spi_host_device_thost);

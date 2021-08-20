@@ -16,9 +16,9 @@
 *  or use of these programs.
 *
 */
-#ifdef USE_WS2801
 
 #include "../ESPixelStick.h"
+#ifdef USE_WS2801
 #include "OutputWS2801.hpp"
 
 //----------------------------------------------------------------------------

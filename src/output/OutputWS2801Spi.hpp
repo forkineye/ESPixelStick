@@ -21,9 +21,9 @@
 *   interface.
 *
 */
-#ifdef USE_WS2801
 
 #include "OutputWS2801.hpp"
+#ifdef USE_WS2801
 
 #include <driver/spi_master.h>
 
