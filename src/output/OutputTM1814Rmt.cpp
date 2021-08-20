@@ -120,7 +120,9 @@ static void IRAM_ATTR rmt_intr_handler (void* param)
 void c_OutputTM1814Rmt::Begin ()
 {
     // DEBUG_START;
-    // RmtChannelId = 0;
+
+    c_OutputTM1814::Begin ();
+
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
     // DEBUG_V (String (" RmtChannelId: ") + String (RmtChannelId));
 

@@ -1,5 +1,5 @@
 /*
-* OutputTM1814.cpp - TM1814 driver code for ESPixelStick UART
+* OutputWS2801.cpp - WS2801 driver code for ESPixelStick UART
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -16,15 +16,13 @@
 *  or use of these programs.
 *
 */
+#ifdef USE_WS2801
 
 #include "../ESPixelStick.h"
-#include "OutputTM1814.hpp"
-
-#define TM1814_COMMAND_DATA_VALUE               63 // 0x3f ~3F = C1 = 193
-static uint8_t PreambleData[8] = { 63, 63, 63, 63, 193, 193, 193, 193 };
+#include "OutputWS2801.hpp"
 
 //----------------------------------------------------------------------------
-c_OutputTM1814::c_OutputTM1814 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+c_OutputWS2801::c_OutputWS2801 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     gpio_num_t outputGpio,
     uart_port_t uart,
     c_OutputMgr::e_OutputType outputType) :
@@ -32,33 +30,21 @@ c_OutputTM1814::c_OutputTM1814 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
 {
     // DEBUG_START;
 
-    InterFrameGapInMicroSec = TM1814_MIN_IDLE_TIME_US;
+    InterFrameGapInMicroSec = WS2801_MIN_IDLE_TIME_US;
 
     // DEBUG_END;
-} // c_OutputTM1814
+} // c_OutputWS2801
 
 //----------------------------------------------------------------------------
-c_OutputTM1814::~c_OutputTM1814 ()
+c_OutputWS2801::~c_OutputWS2801 ()
 {
     // DEBUG_START;
 
     // DEBUG_END;
-} // ~c_OutputTM1814
+} // ~c_OutputWS2801
 
 //----------------------------------------------------------------------------
-void c_OutputTM1814::Begin ()
-{
-    // DEBUG_START;
-    
-    // c_OutputPixel::Begin ();
-
-    SetPreambleInformation (PreambleData, sizeof (PreambleData));
-
-    // DEBUG_END;
-} // GetConfig
-
-//----------------------------------------------------------------------------
-void c_OutputTM1814::GetConfig (ArduinoJson::JsonObject& jsonConfig)
+void c_OutputWS2801::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
@@ -68,14 +54,14 @@ void c_OutputTM1814::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // GetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputTM1814::GetStatus (ArduinoJson::JsonObject& jsonStatus)
+void c_OutputWS2801::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     c_OutputPixel::GetStatus (jsonStatus);
 
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputTM1814::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputWS2801::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 {
     // DEBUG_START;
 
@@ -83,7 +69,7 @@ void c_OutputTM1814::SetOutputBufferSize (uint16_t NumChannelsAvailable)
     c_OutputPixel::SetOutputBufferSize (NumChannelsAvailable);
 
     // Calculate our refresh time
-    FrameMinDurationInMicroSec = (TM1814_MICRO_SEC_PER_INTENSITY * OutputBufferSize) + InterFrameGapInMicroSec + TM1814_COMMAND_DATA_TIME_US;
+    FrameMinDurationInMicroSec = (WS2801_MICRO_SEC_PER_INTENSITY * OutputBufferSize) + InterFrameGapInMicroSec;
 
     // DEBUG_END;
 
@@ -98,16 +84,18 @@ void c_OutputTM1814::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 *       true - config has been accepted
 *       false - Config rejected. Using defaults for invalid settings
 */
-bool c_OutputTM1814::SetConfig (ArduinoJson::JsonObject& jsonConfig)
+bool c_OutputWS2801::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
     bool response = c_OutputPixel::SetConfig (jsonConfig);
 
     // Calculate our refresh time
-    FrameMinDurationInMicroSec = (TM1814_MICRO_SEC_PER_INTENSITY * numIntensityBytesPerPixel * OutputBufferSize) + InterFrameGapInMicroSec;
+    FrameMinDurationInMicroSec = (WS2801_MICRO_SEC_PER_INTENSITY * numIntensityBytesPerPixel * OutputBufferSize) + InterFrameGapInMicroSec;
 
     // DEBUG_END;
     return response;
 
 } // SetConfig
+
+#endif // def USE_WS2801

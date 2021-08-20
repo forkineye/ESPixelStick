@@ -53,6 +53,7 @@ protected:
 
     IRAM_ATTR void    StartNewFrame ();
     IRAM_ATTR uint8_t GetNextIntensityToSend ();
+    void SetPreambleInformation (uint8_t* PreambleStart, uint8_t PreambleSize);
 
     bool      MoreDataToSend = false;
     uint16_t  InterFrameGapInMicroSec = 300;
@@ -62,6 +63,11 @@ private:
 
     uint8_t*    pNextIntensityToSend = nullptr;     ///< start of output buffer being sent to the UART
     uint16_t    RemainingPixelCount = 0;            ///< Used by ISR to determine how much more data to send
+
+    uint8_t*    pPreamble = nullptr;
+    uint8_t     PreambleSize = 0;
+    uint8_t     PreambleCurrentCount = 0;
+
     uint8_t     brightness = 100;                   ///< brightness to use
     uint16_t    zig_size = 1;                       ///< Zigsize count - 0 = no zigzag
     uint16_t    ZigPixelCount = 1;

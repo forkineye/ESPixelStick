@@ -1,6 +1,6 @@
 #pragma once
 /*
-* OutputTM1814.h - TM1814 driver code for ESPixelStick
+* OutputWS2801.h - WS2801 driver code for ESPixelStick
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -21,47 +21,39 @@
 *   interface.
 *
 */
-
+#ifdef USE_WS2801
 #include "OutputPixel.hpp"
 
-#ifdef ARDUINO_ARCH_ESP32
-#   include <driver/uart.h>
-#endif
-
-class c_OutputTM1814 : public c_OutputPixel
+class c_OutputWS2801 : public c_OutputPixel
 {
 public:
     // These functions are inherited from c_OutputCommon
-    c_OutputTM1814 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+    c_OutputWS2801 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
                       gpio_num_t outputGpio,
                       uart_port_t uart,
                       c_OutputMgr::e_OutputType outputType);
-    virtual ~c_OutputTM1814 ();
+    virtual ~c_OutputWS2801 ();
 
     // functions to be provided by the derived class
-    virtual void         Begin ();
     virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
     virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-            void         GetDriverName (String & sDriverName) { sDriverName = String (F ("TM1814")); }
-    c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_TM1814;} ///< Have the instance report its type.
+            void         GetDriverName (String & sDriverName) { sDriverName = String (F ("WS2801")); }
+    c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_WS2801;} ///< Have the instance report its type.
     virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
     virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
 
 protected:
 
-#define TM1814_PIXEL_NS_BIT_TOTAL          1250.0
-#define TM1814_PIXEL_NS_BIT_0_LOW           360.0 // 360ns +/- 50ns per datasheet
-#define TM1814_PIXEL_NS_BIT_0_HIGH          (TM1814_PIXEL_NS_BIT_TOTAL - TM1814_PIXEL_NS_BIT_0_LOW)
-#define TM1814_PIXEL_NS_BIT_1_LOW           720.0 // 720ns -70ns / +280ns per datasheet
-#define TM1814_PIXEL_NS_BIT_1_HIGH          (TM1814_PIXEL_NS_BIT_TOTAL - TM1814_PIXEL_NS_BIT_1_LOW)
-#define TM1814_PIXEL_NS_IDLE             300000.0 // 300us per datasheet
+#define WS2801_PIXEL_NS_BIT_0_HIGH          350.0 // 350ns +/- 150ns per datasheet
+#define WS2801_PIXEL_NS_BIT_0_LOW           900.0 // 900ns +/- 150ns per datasheet
+#define WS2801_PIXEL_NS_BIT_1_HIGH          900.0 // 900ns +/- 150ns per datasheet
+#define WS2801_PIXEL_NS_BIT_1_LOW           350.0 // 350ns +/- 150ns per datasheet
+#define WS2801_PIXEL_NS_IDLE             300000.0 // 300us per datasheet
 
-#define TM1814_MICRO_SEC_PER_INTENSITY          10L     // ((1/800000) * 8 bits) = 10us
-#define TM1814_MIN_IDLE_TIME_US                 (TM1814_PIXEL_NS_IDLE / 1000.0)
-#define TM1814_DEFAULT_INTENSITY_PER_PIXEL      3
-#define TM1814_COMMAND_DATA_TIME_US             (8 * TM1814_MICRO_SEC_PER_INTENSITY)
+#define WS2801_MICRO_SEC_PER_INTENSITY          10L     // ((1/800000) * 8 bits) = 10us
+#define WS2801_MIN_IDLE_TIME_US                 (WS2801_PIXEL_NS_IDLE / 1000.0)
+// #define WS2801_DEFAULT_INTENSITY_PER_PIXEL      3
 
-private:
-
-}; // c_OutputTM1814
+}; // c_OutputWS2801
+#endif // def USE_WS2801
 
