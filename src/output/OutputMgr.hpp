@@ -91,7 +91,9 @@ public:
         OutputType_Servo_PCA9685,
         OutputType_TM1814,
         OutputType_Disabled,
+#ifdef USE_WS2801
         OutputType_WS2801,
+#endif // def USE_WS2801
         OutputType_End, // must be last
         OutputType_Start = OutputType_WS2811,
     };

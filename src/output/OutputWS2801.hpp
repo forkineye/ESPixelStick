@@ -21,7 +21,7 @@
 *   interface.
 *
 */
-
+#ifdef USE_WS2801
 #include "OutputPixel.hpp"
 
 class c_OutputWS2801 : public c_OutputPixel
@@ -55,4 +55,5 @@ protected:
 // #define WS2801_DEFAULT_INTENSITY_PER_PIXEL      3
 
 }; // c_OutputWS2801
+#endif // def USE_WS2801
 

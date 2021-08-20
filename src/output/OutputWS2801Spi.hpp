@@ -21,7 +21,7 @@
 *   interface.
 *
 */
-#ifdef ARDUINO_ARCH_ESP32
+#ifdef USE_WS2801
 
 #include "OutputWS2801.hpp"
 
@@ -62,4 +62,4 @@ private:
 
 }; // c_OutputWS2801Spi
 
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def USE_WS2801

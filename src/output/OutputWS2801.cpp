@@ -16,6 +16,7 @@
 *  or use of these programs.
 *
 */
+#ifdef USE_WS2801
 
 #include "../ESPixelStick.h"
 #include "OutputWS2801.hpp"
@@ -96,3 +97,5 @@ bool c_OutputWS2801::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     return response;
 
 } // SetConfig
+
+#endif // def USE_WS2801

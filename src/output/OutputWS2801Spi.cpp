@@ -16,7 +16,7 @@
 *  or use of these programs.
 *
 */
-#ifdef ARDUINO_ARCH_ESP32
+#ifdef USE_WS2801
 
 #include "../ESPixelStick.h"
 #include "OutputWS2801Spi.hpp"
@@ -190,4 +190,4 @@ void c_OutputWS2801Spi::Render ()
 
 } // render
 
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def USE_WS2801
