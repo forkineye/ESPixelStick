@@ -67,6 +67,7 @@ public:
         OutputChannelId_RMT_7,
         OutputChannelId_RMT_8,
 #endif // ndef ESP32_CAM
+        OutputChannelId_SPI_1,
 #endif // def ARDUINO_ARCH_ESP32
         OutputChannelId_Relay,
         OutputChannelId_End, // must be last in the list
@@ -90,6 +91,7 @@ public:
         OutputType_Servo_PCA9685,
         OutputType_TM1814,
         OutputType_Disabled,
+        OutputType_WS2801,
         OutputType_End, // must be last
         OutputType_Start = OutputType_WS2811,
     };
