@@ -114,12 +114,12 @@ void c_OutputPixel::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 //----------------------------------------------------------------------------
 void c_OutputPixel::SetPreambleInformation (uint8_t* PreambleStart, uint8_t NewPreambleSize)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     pPreamble = PreambleStart;
     PreambleSize = NewPreambleSize;
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // SetPreambleInformation
 
