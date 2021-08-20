@@ -214,7 +214,7 @@ void IRAM_ATTR c_OutputTM1814Uart::ISR_Handler ()
             // convert the intensity data into RMT data
             for (uint8_t bitmask = 0x80; 0 != bitmask; bitmask >>= 1)
             {
-                enqueue( (IntensityValue & bitmask) ? OneValue : ZeroValue);
+                enqueueUart( (IntensityValue & bitmask) ? OneValue : ZeroValue);
             }
 
         } // end while there is data to be sent

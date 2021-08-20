@@ -110,7 +110,7 @@ protected:
 
     /* Append a byte to the TX FIFO of UART1 */
 // #   define enqueue(value) WRITE_PERI_REG(UART_FIFO_AHB_REG (UART), (char)(value))
-#	define enqueue(value) (*((volatile uint32_t*)(UART_FIFO_AHB_REG (UartId)))) = (uint32_t)(value)
+#	define enqueueUart(value) (*((volatile uint32_t*)(UART_FIFO_AHB_REG (UartId)))) = (uint32_t)(value)
 
 #endif
 

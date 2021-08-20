@@ -36,6 +36,10 @@
 #ifdef ARDUINO_ARCH_ESP32
 #   include "OutputWS2811Rmt.hpp"
 #   include "OutputTM1814Rmt.hpp"
+#ifdef USE_WS2801
+#   include "OutputWS2801Spi.hpp"
+#endif // def USE_WS2801
+
 #endif // def ARDUINO_ARCH_ESP32
 // needs to be last
 #include "OutputMgr.hpp"
@@ -570,6 +574,26 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 // DEBUG_V ("");
                 break;
             }
+#ifdef ARDUINO_ARCH_ESP32
+#ifdef USE_WS2801
+            case e_OutputType::OutputType_WS2801:
+            {
+                if (ChannelIndex == OutputChannelId_SPI_1)
+                {
+                    // LOG_PORT.println (CN_stars + String (F (" Starting WS2811 RMT for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2801Spi (ChannelIndex, dataPin, UartId, OutputType_WS2811);
+                    // DEBUG_V ("");
+                    break;
+                }
+
+                LOG_PORT.println (CN_stars + String (F (" Cannot Start WS2801 for channel '")) + ChannelIndex + "'. " + CN_stars);
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                // DEBUG_V ("");
+
+                break;
+            }
+#endif // def USE_WS2801
+#endif // def ARDUINO_ARCH_ESP32
 
             default:
             {

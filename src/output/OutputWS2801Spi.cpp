@@ -183,8 +183,8 @@ void c_OutputWS2801Spi::Render ()
 {
     // DEBUG_START;
 
-    ISR_Handler_StartNewFrame ();
-    ReportNewFrame ();
+    // ISR_Handler_StartNewFrame ();
+    // ReportNewFrame ();
 
     // DEBUG_END;
 
