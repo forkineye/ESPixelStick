@@ -63,19 +63,28 @@ public:
         OutputChannelId_RMT_3,
         OutputChannelId_RMT_4,
         OutputChannelId_RMT_5,
-        OutputChannelId_RMT_6,
-        OutputChannelId_RMT_7,
-        OutputChannelId_RMT_8,
+        // OutputChannelId_RMT_6,
+        // OutputChannelId_RMT_7,
+        // OutputChannelId_RMT_8,
 #endif // ndef ESP32_CAM
         OutputChannelId_SPI_1,
 #endif // def ARDUINO_ARCH_ESP32
         OutputChannelId_Relay,
         OutputChannelId_End, // must be last in the list
         OutputChannelId_Start = OutputChannelId_UART_1,
+
 #ifdef ARDUINO_ARCH_ESP32
-        OutputChannelId_UART_LAST = OutputChannelId_UART_2
+        OutputChannelId_UART_FIRST = OutputChannelId_UART_1,
+        OutputChannelId_UART_LAST  = OutputChannelId_UART_2,
+        OutputChannelId_RMT_FIRST  = OutputChannelId_RMT_1,
+        OutputChannelId_RMT_LAST   = OutputChannelId_SPI_1 - 1,
 #else
-        OutputChannelId_UART_LAST = OutputChannelId_UART_1
+        OutputChannelId_UART_FIRST = OutputChannelId_UART_1,
+        OutputChannelId_UART_LAST  = OutputChannelId_UART_1
+        OutputChannelId_RMT_FIRST  = OutputChannelId_End + 1,
+        OutputChannelId_RMT_LAST   = OutputChannelId_End + 1,
+        OutputChannelId_SPI_1      = OutputChannelId_End + 1,
+
 #endif // def ARDUINO_ARCH_ESP32
 
     };
@@ -106,7 +115,7 @@ public:
 
 private:
 
-    void InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, e_OutputType NewChannelType);
+    void InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, e_OutputType NewChannelType, bool StartDriver = true);
     void CreateNewConfig ();
 
     c_OutputCommon * pOutputChannelDrivers[e_OutputChannelIds::OutputChannelId_End]; ///< pointer(s) to the current active output driver
@@ -131,6 +140,9 @@ private:
 
     uint8_t OutputBuffer[OM_MAX_NUM_CHANNELS];
     uint16_t UsedBufferSize = 0;
+
+#define OM_IS_UART ((ChannelIndex >= OutputChannelId_UART_FIRST) && (ChannelIndex <= OutputChannelId_UART_LAST))
+#define OM_IS_RMT ((ChannelIndex >= OutputChannelId_RMT_FIRST) && (ChannelIndex <= OutputChannelId_RMT_LAST))
 
 }; // c_OutputMgr
 
