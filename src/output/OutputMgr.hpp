@@ -80,10 +80,10 @@ public:
         OutputChannelId_RMT_LAST   = OutputChannelId_SPI_1 - 1,
 #else
         OutputChannelId_UART_FIRST = OutputChannelId_UART_1,
-        OutputChannelId_UART_LAST  = OutputChannelId_UART_1
-        OutputChannelId_RMT_FIRST  = OutputChannelId_End + 1,
-        OutputChannelId_RMT_LAST   = OutputChannelId_End + 1,
-        OutputChannelId_SPI_1      = OutputChannelId_End + 1,
+        OutputChannelId_UART_LAST  = OutputChannelId_UART_1,
+        OutputChannelId_RMT_FIRST  = OutputChannelId_End,
+        OutputChannelId_RMT_LAST   = OutputChannelId_End,
+        OutputChannelId_SPI_1      = OutputChannelId_End,
 
 #endif // def ARDUINO_ARCH_ESP32
 
