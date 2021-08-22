@@ -65,7 +65,10 @@ static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::
     {c_OutputMgr::e_OutputType::OutputType_Relay,         "Relay"         },
     {c_OutputMgr::e_OutputType::OutputType_Servo_PCA9685, "Servo_PCA9685" },
     {c_OutputMgr::e_OutputType::OutputType_Disabled,      "Disabled"      },
-    {c_OutputMgr::e_OutputType::OutputType_TM1814,        "TM1814"        }
+    {c_OutputMgr::e_OutputType::OutputType_TM1814,        "TM1814"        },
+#ifdef USE_WS2801
+    {c_OutputMgr::e_OutputType::OutputType_WS2801,        "WS2801"        }
+#endif // def USE_WS2801
 };
 
 //-----------------------------------------------------------------------------
@@ -92,6 +95,7 @@ static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] 
     // {DEFAULT_RMT_6_GPIO,  uart_port_t (6)},
     // {DEFAULT_RMT_7_GPIO,  uart_port_t (7)},
 #endif // ndef ESP32_CAM
+    {DEFAULT_WS2801_DATA_GPIO, uart_port_t (-1)},
 
 #endif // def ARDUINO_ARCH_ESP32
     {gpio_num_t::GPIO_NUM_10, uart_port_t (-1)},
@@ -581,7 +585,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 if (ChannelIndex == OutputChannelId_SPI_1)
                 {
                     // LOG_PORT.println (CN_stars + String (F (" Starting WS2811 RMT for channel '")) + ChannelIndex + "'. " + CN_stars);
-                    pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2801Spi (ChannelIndex, dataPin, UartId, OutputType_WS2811);
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2801Spi (ChannelIndex, dataPin, UartId, OutputType_WS2801);
                     // DEBUG_V ("");
                     break;
                 }
