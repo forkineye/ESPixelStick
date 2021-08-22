@@ -70,9 +70,14 @@
                 </div>
             </div>
 
-            <label class="control-label col-sm-2 hidden AdvancedMode" for="data_pin">GPIO Output</label>
+            <label class="control-label col-sm-2 hidden AdvancedMode" for="data_pin">GPIO Data Output</label>
             <div class="col-sm-2">
-                <input type="number" class="form-control is-valid hidden AdvancedMode" id="data_pin" step="1" min="0" max="64" value="65" required title="GPIO pn which to output data">
+                <input type="number" class="form-control is-valid hidden AdvancedMode" id="data_pin" step="1" min="0" max="64" value="65" required title="GPIO pn which to output Data">
+            </div>
+
+            <label class="control-label col-sm-2 hidden AdvancedMode" for="clock_pin">GPIO Clock Output</label>
+            <div class="col-sm-2">
+                <input type="number" class="form-control is-valid hidden AdvancedMode" id="clock_pin" step="1" min="0" max="64" value="65" required title="GPIO pn which to output Clock">
             </div>
         </fieldset>
     </div>
