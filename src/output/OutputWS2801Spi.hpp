@@ -38,27 +38,42 @@ public:
     virtual ~c_OutputWS2801Spi ();
 
     // functions to be provided by the derived class
-    void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
+    void    Begin ();
+    void    GetConfig (ArduinoJson::JsonObject& jsonConfig);
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);  ///< Set a new config in the driver
+    void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
     void    Render ();                                        ///< Call from loop(),  renders output data
     void    PauseOutput () {};
 
     /// Interrupt Handler
-    void IRAM_ATTR ISR_Handler (); ///< ISR
-    void IRAM_ATTR ISR_Handler_SendIntensityData (); ///< ISR
-    void IRAM_ATTR ISR_Handler_StartNewFrame (); ///< ISR
+    void IRAM_ATTR CB_Handler_SendIntensityData (); ///< ISR
 
 private:
 
-#define SPI_MASTER_FREQ_1M      (APB_CLK_FREQ/80) // 1Mhz
+#define SPI_MASTER_FREQ_1M                      (APB_CLK_FREQ/80) // 1Mhz
+#define WS2801_NUM_TRANSACTIONS                 2
+#define WS2801_NUM_INTENSITY_PER_TRANSACTION    128
+#define WS2801_BITS_PER_INTENSITY               8
+#define WS2801_SPI_HOST                         VSPI_HOST
+#define WS2801_SPI_DMA_CHANNEL                  2
 
     uint8_t NumIntensityValuesPerInterrupt = 0;
     uint8_t NumIntensityBitsPerInterrupt = 0;
+    spi_device_handle_t spi_device_handle = 0;
+    gpio_num_t ClockPin = DEFAULT_WS2801_CLOCK_GPIO;
 
-    uint32_t FrameStartCounter = 0;
-    // uint32_t DataISRcounter = 0;
+    // uint32_t FrameStartCounter = 0;
+    uint32_t DataISRcounter = 0;
     // uint32_t FrameDoneCounter = 0;
     // uint32_t FrameEndISRcounter = 0;
+    struct Transaction_t
+    {
+        spi_transaction_t SpiTransaction;
+        byte buffer[WS2801_NUM_INTENSITY_PER_TRANSACTION];
+    };
+
+    Transaction_t Transactions[WS2801_NUM_TRANSACTIONS];
+    uint8_t NextTransactionToFill = 0;
 
 }; // c_OutputWS2801Spi
 
