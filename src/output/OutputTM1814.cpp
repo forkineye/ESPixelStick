@@ -83,7 +83,7 @@ void c_OutputTM1814::SetOutputBufferSize (uint16_t NumChannelsAvailable)
     c_OutputPixel::SetOutputBufferSize (NumChannelsAvailable);
 
     // Calculate our refresh time
-    FrameMinDurationInMicroSec = (TM1814_MICRO_SEC_PER_INTENSITY * OutputBufferSize) + InterFrameGapInMicroSec + TM1814_COMMAND_DATA_TIME_US;
+    SetFrameDurration (float (TM1814_PIXEL_NS_BIT_TOTAL) / 1000.0);
 
     // DEBUG_END;
 
@@ -105,7 +105,7 @@ bool c_OutputTM1814::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     bool response = c_OutputPixel::SetConfig (jsonConfig);
 
     // Calculate our refresh time
-    FrameMinDurationInMicroSec = (TM1814_MICRO_SEC_PER_INTENSITY * numIntensityBytesPerPixel * OutputBufferSize) + InterFrameGapInMicroSec;
+    SetFrameDurration (float (TM1814_PIXEL_NS_BIT_TOTAL) / 1000.0);
 
     // DEBUG_END;
     return response;

@@ -21,7 +21,6 @@
 #ifdef USE_WS2801
 #include "OutputWS2801Spi.hpp"
 #include <driver/spi_master.h>
-#include <driver/spi_common.h>
 
 //----------------------------------------------------------------------------
 /* shell function to set the 'this' pointer of the real ISR
@@ -53,6 +52,7 @@ c_OutputWS2801Spi::~c_OutputWS2801Spi ()
 
     if (spi_device_handle)
     {
+        spi_device_release_bus (spi_device_handle);
         spi_bus_remove_device (spi_device_handle);
     }
     spi_bus_free (VSPI_HOST);
@@ -84,16 +84,17 @@ void c_OutputWS2801Spi::Begin ()
     // SpiDeviceConfiguration.address_bits = 0; // No bus address to send
     // SpiDeviceConfiguration.dummy_bits = 0; // No dummy bits to send
     // SpiDeviceConfiguration.duty_cycle_pos = 0; // 50% Duty cycle
-    SpiDeviceConfiguration.clock_speed_hz = WS2801_BIT_RATE;
-    // SpiDeviceConfiguration.mode = 0;                             // SPI mode 0
+    SpiDeviceConfiguration.clock_speed_hz = WS2801_SPI_MASTER_FREQ_1M;
+    SpiDeviceConfiguration.mode = 1;                                // SPI mode 1
     SpiDeviceConfiguration.spics_io_num = -1;                       // we will NOT use CS pin
     SpiDeviceConfiguration.queue_size = WS2801_NUM_TRANSACTIONS;    // We want to be able to queue 2 transactions at a time
     // SpiDeviceConfiguration.pre_cb = nullptr;                     // Specify pre-transfer callback to handle D/C line
-    SpiDeviceConfiguration.post_cb = ws2801_transfer_callback;      // Specify post-transfer callback to handle D/C line
+    // SpiDeviceConfiguration.post_cb = ws2801_transfer_callback;      // Specify post-transfer callback to handle D/C line
     // SpiDeviceConfiguration.flags = 0;
 
     ESP_ERROR_CHECK (spi_bus_initialize (WS2801_SPI_HOST, &SpiBusConfiguration, WS2801_SPI_DMA_CHANNEL));
     ESP_ERROR_CHECK (spi_bus_add_device (WS2801_SPI_HOST, &SpiDeviceConfiguration, &spi_device_handle));
+    ESP_ERROR_CHECK (spi_device_acquire_bus (spi_device_handle, portMAX_DELAY));
 
     memset ((void*)&Transactions[0], 0x00, sizeof (Transactions));
     for (Transaction_t & TransactionToFillToFill : Transactions)
@@ -179,18 +180,24 @@ void IRAM_ATTR c_OutputWS2801Spi::CB_Handler_SendIntensityData ()
         uint32_t NumEmptyIntensitySlots = sizeof (Transactions[0].buffer);
         byte* pMem = &TransactionToFill.buffer[0];
 
-        while ((NumEmptyIntensitySlots--) && (MoreDataToSend))
+        while ((NumEmptyIntensitySlots) && (MoreDataToSend))
         {
             *pMem++ = GetNextIntensityToSend ();
+            --NumEmptyIntensitySlots;
         } // end while there is space in the buffer
 
         TransactionToFill.SpiTransaction.length = WS2801_BITS_PER_INTENSITY * (sizeof (Transactions[0].buffer) - NumEmptyIntensitySlots);
+        if (!MoreDataToSend)
+        {
+            TransactionToFill.SpiTransaction.length++;
+        }
+        
         if (++NextTransactionToFill >= WS2801_NUM_TRANSACTIONS)
         {
             NextTransactionToFill = 0;
         }
 
-        ESP_ERROR_CHECK (spi_device_queue_trans (spi_device_handle, &(TransactionToFill.SpiTransaction), TickType_t (0)));
+        ESP_ERROR_CHECK (spi_device_queue_trans (spi_device_handle, &(TransactionToFill.SpiTransaction), TickType_t (portMAX_DELAY)));
     }
 
 } // CB_Handler_SendIntensityData

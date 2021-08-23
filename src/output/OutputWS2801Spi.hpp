@@ -50,7 +50,7 @@ public:
 
 private:
 
-#define SPI_MASTER_FREQ_1M                      (APB_CLK_FREQ/80) // 1Mhz
+#define WS2801_SPI_MASTER_FREQ_1M                      (APB_CLK_FREQ/80) // 1Mhz
 #define WS2801_NUM_TRANSACTIONS                 2
 #define WS2801_NUM_INTENSITY_PER_TRANSACTION    128
 #define WS2801_BITS_PER_INTENSITY               8

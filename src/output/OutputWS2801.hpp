@@ -43,10 +43,10 @@ public:
     virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
 
 protected:
-#define WS2801_BIT_RATE                 1000000
+#define WS2801_BIT_RATE                 (APB_CLK_FREQ/80)
 #define WS2801_BITS_PER_INTENSITY       8
 #define WS2801_MICRO_SEC_PER_INTENSITY  int(((1.0/float(WS2801_BIT_RATE)) * WS2801_BITS_PER_INTENSITY))
-#define WS2801_MIN_IDLE_TIME_US         510
+#define WS2801_MIN_IDLE_TIME_US         500
 
 }; // c_OutputWS2801
 #endif // def USE_WS2801
