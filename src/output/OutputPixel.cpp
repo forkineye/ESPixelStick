@@ -268,7 +268,7 @@ bool c_OutputPixel::validate ()
 //----------------------------------------------------------------------------
 void c_OutputPixel::SetFrameDurration (float IntensityBitTimeInUs)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     float TotalIntensityBytes = OutputBufferSize * group_size;
     float TotalNullBytes = (PrependNullCount + AppendNullCount) * numIntensityBytesPerPixel;
@@ -276,19 +276,19 @@ void c_OutputPixel::SetFrameDurration (float IntensityBitTimeInUs)
 
     FrameMinDurationInMicroSec = (IntensityBitTimeInUs * TotalBits) + InterFrameGapInMicroSec;
 
-    DEBUG_V (String ("      IntensityBitTimeInUs: ") + String (IntensityBitTimeInUs));
-    DEBUG_V (String ("          OutputBufferSize: ") + String (OutputBufferSize));
-    DEBUG_V (String ("                group_size: ") + String (group_size));
-    DEBUG_V (String ("          PrependNullCount: ") + String (PrependNullCount));
-    DEBUG_V (String ("           AppendNullCount: ") + String (AppendNullCount));
-    DEBUG_V (String (" numIntensityBytesPerPixel: ") + String (numIntensityBytesPerPixel));
-    DEBUG_V (String ("       TotalIntensityBytes: ") + String (TotalIntensityBytes));
-    DEBUG_V (String ("            TotalNullBytes: ") + String (TotalNullBytes));
-    DEBUG_V (String ("                 TotalBits: ") + String (TotalBits));
-    DEBUG_V (String ("   InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
-    DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
+    // DEBUG_V (String ("      IntensityBitTimeInUs: ") + String (IntensityBitTimeInUs));
+    // DEBUG_V (String ("          OutputBufferSize: ") + String (OutputBufferSize));
+    // DEBUG_V (String ("                group_size: ") + String (group_size));
+    // DEBUG_V (String ("          PrependNullCount: ") + String (PrependNullCount));
+    // DEBUG_V (String ("           AppendNullCount: ") + String (AppendNullCount));
+    // DEBUG_V (String (" numIntensityBytesPerPixel: ") + String (numIntensityBytesPerPixel));
+    // DEBUG_V (String ("       TotalIntensityBytes: ") + String (TotalIntensityBytes));
+    // DEBUG_V (String ("            TotalNullBytes: ") + String (TotalNullBytes));
+    // DEBUG_V (String ("                 TotalBits: ") + String (TotalBits));
+    // DEBUG_V (String ("   InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
+    // DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // SetInterframeGap
 
