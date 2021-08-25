@@ -85,43 +85,43 @@ c_OutputWS2801Spi::~c_OutputWS2801Spi ()
 //----------------------------------------------------------------------------
 void c_OutputWS2801Spi::Shutdown ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     if (spi_device_handle)
     {
-        DEBUG_V ();
+        // DEBUG_V ();
         for (auto & Transaction : Transactions)
         {
-            DEBUG_V ();
+            // DEBUG_V ();
             spi_transaction_t * temp = & Transaction;
             spi_device_get_trans_result (spi_device_handle, &temp, portMAX_DELAY);
-            DEBUG_V ();
+            // DEBUG_V ();
         }
 
-        DEBUG_V ();
+        // DEBUG_V ();
         for (auto & TransactionBuffer : TransactionBuffers)
         {
-            DEBUG_V ();
+            // DEBUG_V ();
             if (TransactionBuffer)
             {
-                DEBUG_V ();
+                // DEBUG_V ();
                 free (TransactionBuffer);
-                DEBUG_V ();
+                // DEBUG_V ();
                 TransactionBuffer = nullptr;
-                DEBUG_V ();
+                // DEBUG_V ();
             }
         }
-        DEBUG_V ();
+        // DEBUG_V ();
 
         spi_device_release_bus (spi_device_handle);
-        DEBUG_V ();
+        // DEBUG_V ();
         spi_bus_remove_device (spi_device_handle);
-        DEBUG_V ();
+        // DEBUG_V ();
     }
 
     spi_bus_free (VSPI_HOST);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // Shutdown
 
@@ -215,7 +215,7 @@ bool c_OutputWS2801Spi::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     
     if ((OldDataPin != DataPin) || (OldClockPin != ClockPin))
     {
-        DEBUG_V (String ("start over."));
+        // DEBUG_V (String ("start over."));
         Shutdown ();
         Begin ();
     }

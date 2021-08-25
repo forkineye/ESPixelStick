@@ -262,7 +262,7 @@ void c_InputMgr::CreateNewConfig ()
         int ChannelIndex = 0;
         for (c_InputCommon* CurrentInput : pInputChannelDrivers)
         {
-            DEBUG_V (String("instantiate the Input type: ") + InputTypeId);
+            // DEBUG_V (String("instantiate the Input type: ") + InputTypeId);
             InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex++), e_InputType (InputTypeId), false);
         }// end for each interface
 
@@ -378,8 +378,8 @@ bool c_InputMgr::InputTypeIsAllowedOnChannel (e_InputType type, e_InputChannelId
 */
 void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_InputType NewInputChannelType, bool StartDriver)
 {
-    DEBUG_START;
-    DEBUG_V (String ("StartDriver: ") + String (StartDriver));
+    // DEBUG_START;
+    // DEBUG_V (String ("StartDriver: ") + String (StartDriver));
 
     do // once
     {
@@ -398,7 +398,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
 
             // DEBUG_V ("shut down the existing driver");
             rebootNeeded |= pInputChannelDrivers[ChannelIndex]->isShutDownRebootNeeded();
-            DEBUG_V (String ("rebootNeeded: ") + String (rebootNeeded));
+            // DEBUG_V (String ("rebootNeeded: ") + String (rebootNeeded));
             delete pInputChannelDrivers[ChannelIndex];
             pInputChannelDrivers[ChannelIndex] = nullptr;
 
@@ -421,9 +421,9 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             {
                 if (InputTypeIsAllowedOnChannel (InputType_E1_31, ChannelIndex))
                 {
-                    DEBUG_V (CN_stars + String (F (" Starting E1.31 for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    // DEBUG_V (CN_stars + String (F (" Starting E1.31 for channel '")) + ChannelIndex + "'. " + CN_stars);
                     pInputChannelDrivers[ChannelIndex] = new c_InputE131 (ChannelIndex, InputType_E1_31, InputDataBuffer, InputDataBufferSize);
-                    DEBUG_V ("");
+                    // DEBUG_V ("");
                 }
                 else
                 {
@@ -531,22 +531,22 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             }
         } // end switch (NewChannelType)
 
-        DEBUG_V ("");
+        // DEBUG_V ("");
         String sDriverName;
         pInputChannelDrivers[ChannelIndex]->GetDriverName (sDriverName);
         Serial.println (String (CN_stars) + " '" + sDriverName + F("' Initialization for input: '") + String(ChannelIndex) + "' " + CN_stars);
         if (StartDriver)
         {
-            DEBUG_V (String ("StartDriver: ") + String (StartDriver));
+            // DEBUG_V (String ("StartDriver: ") + String (StartDriver));
             // pInputChannelDrivers[ChannelIndex]->Begin ();
         }
-        DEBUG_V ("");
+        // DEBUG_V ("");
         pInputChannelDrivers[ChannelIndex]->SetBufferInfo (InputDataBuffer, InputDataBufferSize);
-        DEBUG_V ("");
+        // DEBUG_V ("");
 
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // InstantiateNewInputChannel
 
