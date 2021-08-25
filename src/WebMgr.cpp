@@ -443,7 +443,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             if (WebSocketFrameCollectionBufferSize < (MessageInfo->index + len))
             {
                 // message wont fit. Dont save any of it
-                LOG_PORT.println (String (F ("*** WebIO::onWsEvent(): Error: Incoming message is TOO long.")));
+                LOG_PORT.println (CN_stars + String (F (" WebIO::onWsEvent(): Error: Incoming message is TOO long.")));
                 break;
             }
 
@@ -499,7 +499,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             // DEBUG_V ("");
             if (error)
             {
-                LOG_PORT.println (String (F ("*** WebIO::onWsEvent(): Parse Error: ")) + error.c_str ());
+                LOG_PORT.println (CN_stars + String (F (" WebIO::onWsEvent(): Parse Error: ")) + error.c_str ());
                 LOG_PORT.println (WebSocketFrameCollectionBuffer);
                 break;
             }

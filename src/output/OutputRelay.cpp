@@ -109,18 +109,18 @@ bool c_OutputRelay::validate ()
 
     if ((Num_Channels > OM_RELAY_CHANNEL_LIMIT) || (Num_Channels < 1))
     {
-        LOG_PORT.println (String (F ("*** Requested channel count was Not Valid. Setting to ")) + OM_RELAY_CHANNEL_LIMIT + F (" ***"));
+        LOG_PORT.println (CN_stars + String (F (" Requested channel count was Not Valid. Setting to ")) + OM_RELAY_CHANNEL_LIMIT + " " + CN_stars);
         Num_Channels = OM_RELAY_CHANNEL_LIMIT;
         response = false;
     }
 
     if (Num_Channels < OM_RELAY_CHANNEL_LIMIT)
     {
-        LOG_PORT.println (String (F ("*** Requested channel count was Not Valid. Insuficient number of input channels avaialable ***")));
+        LOG_PORT.println (CN_stars + String (F (" Requested channel count was Not Valid. Insuficient number of input channels avaialable ")) + CN_stars);
 
         for (int ChannelIndex = OM_RELAY_CHANNEL_LIMIT - 1; ChannelIndex > Num_Channels; ChannelIndex--)
         {
-            LOG_PORT.println (String (String(F ("*** Disabling channel '")) + String(ChannelIndex + 1) + String("' ***")));
+            LOG_PORT.println (String (CN_stars + String(F (" Disabling channel '")) + String(ChannelIndex + 1) + "' " + CN_stars));
             OutputList[ChannelIndex].Enabled = false;
         }
 

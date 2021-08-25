@@ -799,7 +799,7 @@ void c_OutputMgr::SetConfig (const char * ConfigData)
     if (true == FileMgr.SaveConfigFile (ConfigFileName, ConfigData))
     {
         ConfigLoadNeeded = true;
-        LOG_PORT.println (F ("**** Saved Output Manager Config File. ****"));
+        LOG_PORT.println (CN_stars + String (F (" Saved Output Manager Config File. ")) + CN_stars);
     } // end we got a config and it was good
     else
     {

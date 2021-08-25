@@ -190,7 +190,7 @@ bool c_OutputSerial::validate ()
 
     if ((Num_Channels > MAX_CHANNELS) || (Num_Channels < 1))
     {
-        LOG_PORT.println (String (F ("*** Requested channel count was Not Valid. Setting to ")) + MAX_CHANNELS + F (" ***"));
+        LOG_PORT.println (CN_stars + String (F (" Requested channel count was Not Valid. Setting to ")) + MAX_CHANNELS + " " + CN_stars);
         Num_Channels = DEFAULT_NUM_CHANNELS;
         response = false;
     }
@@ -198,20 +198,20 @@ bool c_OutputSerial::validate ()
 
     if ((CurrentBaudrate < uint (BaudRate::BR_MIN)) || (CurrentBaudrate > uint (BaudRate::BR_MAX)))
     {
-        LOG_PORT.println (String (F ("*** Requested BaudRate is Not Valid. Setting to Default ***")));
+        LOG_PORT.println (CN_stars + String (F (" Requested BaudRate is Not Valid. Setting to Default ")) + CN_stars);
         CurrentBaudrate = uint (BaudRate::BR_DEF);
         response = false;
     }
 
     if (GenericSerialHeader.length() > MAX_HDR_SIZE)
     {
-        LOG_PORT.println (String (F ("*** Requested Generic Serial Header is too long. Setting to Default ***")));
+        LOG_PORT.println (CN_stars + String (F (" Requested Generic Serial Header is too long. Setting to Default ")) + CN_stars);
         GenericSerialHeader = "";
     }
 
     if (GenericSerialFooter.length() > MAX_FOOTER_SIZE)
     {
-        LOG_PORT.println (String (F ("*** Requested Generic Serial Footer is too long. Setting to Default ***")));
+        LOG_PORT.println (CN_stars + String (F (" Requested Generic Serial Footer is too long. Setting to Default ")) + CN_stars);
         GenericSerialFooter = "";
     }
 

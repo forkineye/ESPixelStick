@@ -262,8 +262,8 @@ void c_InputMgr::CreateNewConfig ()
         int ChannelIndex = 0;
         for (c_InputCommon* CurrentInput : pInputChannelDrivers)
         {
-            // DEBUG_V (String("instantiate the Input type: ") + InputTypeId);
-            InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex++), e_InputType (InputTypeId));
+            DEBUG_V (String("instantiate the Input type: ") + InputTypeId);
+            InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex++), e_InputType (InputTypeId), false);
         }// end for each interface
 
         // DEBUG_V ("collect the config data");
@@ -277,7 +277,7 @@ void c_InputMgr::CreateNewConfig ()
     int ChannelIndex = 0;
     for (c_InputCommon* CurrentInput : pInputChannelDrivers)
     {
-        InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex++), e_InputType::InputType_Disabled);
+        InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex++), e_InputType::InputType_Disabled, false);
     }// end for each interface
 
     // DEBUG_V ("");
@@ -375,16 +375,11 @@ bool c_InputMgr::InputTypeIsAllowedOnChannel (e_InputType type, e_InputChannelId
 * WARNING:  This function assumes there is a driver running in the identified
 *           out channel. These must be set up and started when the manager is
 *           started.
-*
-    needs
-        channel ID
-        channel type
-    returns
-        nothing
 */
-void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_InputType NewInputChannelType)
+void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_InputType NewInputChannelType, bool StartDriver)
 {
-    // DEBUG_START;
+    DEBUG_START;
+    DEBUG_V (String ("StartDriver: ") + String (StartDriver));
 
     do // once
     {
@@ -403,6 +398,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
 
             // DEBUG_V ("shut down the existing driver");
             rebootNeeded |= pInputChannelDrivers[ChannelIndex]->isShutDownRebootNeeded();
+            DEBUG_V (String ("rebootNeeded: ") + String (rebootNeeded));
             delete pInputChannelDrivers[ChannelIndex];
             pInputChannelDrivers[ChannelIndex] = nullptr;
 
@@ -415,7 +411,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
         {
             case e_InputType::InputType_Disabled:
             {
-                // LOG_PORT.println (String (F ("************** Disabled Input type for channel '")) + ChannelIndex + "'. **************");
+                // LOG_PORT.println (CN_stars + String (F ("*********** Disabled Input type for channel '")) + ChannelIndex + "'. **************");
                 pInputChannelDrivers[ChannelIndex] = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
                 // DEBUG_V ("");
                 break;
@@ -425,9 +421,9 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             {
                 if (InputTypeIsAllowedOnChannel (InputType_E1_31, ChannelIndex))
                 {
-                    // LOG_PORT.println (String (F ("************** Starting E1.31 for channel '")) + ChannelIndex + "'. **************");
+                    DEBUG_V (CN_stars + String (F (" Starting E1.31 for channel '")) + ChannelIndex + "'. " + CN_stars);
                     pInputChannelDrivers[ChannelIndex] = new c_InputE131 (ChannelIndex, InputType_E1_31, InputDataBuffer, InputDataBufferSize);
-                    // DEBUG_V ("");
+                    DEBUG_V ("");
                 }
                 else
                 {
@@ -440,7 +436,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             {
                 if (InputTypeIsAllowedOnChannel (InputType_Effects, ChannelIndex))
                 {
-                    // LOG_PORT.println (String (F ("************** Starting Effects Engine for channel '")) + ChannelIndex + "'. **************");
+                    // LOG_PORT.println (CN_stars + String (F ("*********** Starting Effects Engine for channel '")) + ChannelIndex + "'. **************");
                     pInputChannelDrivers[ChannelIndex] = new c_InputEffectEngine (ChannelIndex, InputType_Effects, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
@@ -455,7 +451,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             {
                 if (InputTypeIsAllowedOnChannel (InputType_MQTT, ChannelIndex))
                 {
-                    // LOG_PORT.println (String (F ("************** Starting MQTT for channel '")) + ChannelIndex + "'. **************");
+                    // LOG_PORT.println (CN_stars + String (F ("*********** Starting MQTT for channel '")) + ChannelIndex + "'. **************");
                     pInputChannelDrivers[ChannelIndex] = new c_InputMQTT (ChannelIndex, InputType_MQTT, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
@@ -470,7 +466,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             {
                 if (InputTypeIsAllowedOnChannel (InputType_Alexa, ChannelIndex))
                 {
-                    // LOG_PORT.println (String (F ("************** Starting Alexa for channel '")) + ChannelIndex + "'. **************");
+                    // LOG_PORT.println (CN_stars + String (F ("*********** Starting Alexa for channel '")) + ChannelIndex + "'. **************");
                     pInputChannelDrivers[ChannelIndex] = new c_InputAlexa (ChannelIndex, InputType_Alexa, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
@@ -485,7 +481,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             {
                 if (InputTypeIsAllowedOnChannel (InputType_DDP, ChannelIndex))
                 {
-                    // LOG_PORT.println (String (F ("************** Starting DDP for channel '")) + ChannelIndex + "'. **************");
+                    // LOG_PORT.println (CN_stars + String (F ("*********** Starting DDP for channel '")) + ChannelIndex + "'. **************");
                     pInputChannelDrivers[ChannelIndex] = new c_InputDDP (ChannelIndex, InputType_DDP, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
@@ -500,7 +496,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             {
                 if (InputTypeIsAllowedOnChannel (InputType_FPP, ChannelIndex))
                 {
-                    // LOG_PORT.println (String (F ("************** Starting FPP for channel '")) + ChannelIndex + "'. **************");
+                    // LOG_PORT.println (CN_stars + String (F ("*********** Starting FPP for channel '")) + ChannelIndex + "'. **************");
                     pInputChannelDrivers[ChannelIndex] = new c_InputFPPRemote (ChannelIndex, InputType_FPP, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
@@ -515,7 +511,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             {
                 if (InputTypeIsAllowedOnChannel (InputType_Artnet, ChannelIndex))
                 {
-                    // LOG_PORT.println (String (F ("************** Starting Artnet for channel '")) + ChannelIndex + "'. **************");
+                    // LOG_PORT.println (CN_stars + String (F ("*********** Starting Artnet for channel '")) + ChannelIndex + "'. **************");
                     pInputChannelDrivers[ChannelIndex] = new c_InputArtnet (ChannelIndex, InputType_Artnet, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
@@ -528,23 +524,29 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
 
             default:
             {
-                LOG_PORT.println (String (F ("************** Unknown Input type for channel '")) + ChannelIndex + "'. Using disabled. **************");
+                LOG_PORT.println (CN_stars + String (F (" Unknown Input type for channel '")) + ChannelIndex + String(F ("'. Using disabled. ")) + CN_stars);
                 pInputChannelDrivers[ChannelIndex] = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
                 // DEBUG_V ("");
                 break;
             }
         } // end switch (NewChannelType)
 
-        // DEBUG_V ("");
+        DEBUG_V ("");
         String sDriverName;
         pInputChannelDrivers[ChannelIndex]->GetDriverName (sDriverName);
-        Serial.println (String (CN_stars) + " '" + sDriverName + F("' Initialization for input: '") + String(ChannelIndex) + "'" + CN_stars);
-        pInputChannelDrivers[ChannelIndex]->Begin ();
+        Serial.println (String (CN_stars) + " '" + sDriverName + F("' Initialization for input: '") + String(ChannelIndex) + "' " + CN_stars);
+        if (StartDriver)
+        {
+            DEBUG_V (String ("StartDriver: ") + String (StartDriver));
+            // pInputChannelDrivers[ChannelIndex]->Begin ();
+        }
+        DEBUG_V ("");
         pInputChannelDrivers[ChannelIndex]->SetBufferInfo (InputDataBuffer, InputDataBufferSize);
-        
+        DEBUG_V ("");
+
     } while (false);
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // InstantiateNewInputChannel
 
@@ -682,12 +684,6 @@ void c_InputMgr::ProcessEffectsButtonActions ()
 /*
     check the contents of the config and send
     the proper portion of the config to the currently instantiated channels
-
-    needs
-        ref to data from config file
-    returns
-        true  - config was properly processed
-        false - config had an error.
 */
 bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
 {
@@ -822,11 +818,6 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
 /* Sets the configuration for the current active ports:
 *
 *   WARNING: This runs in the Web server context and cannot access the File system
-*
-*   Needs
-*       Reference to the incoming JSON configuration doc
-*   Returns
-*       nothing
 */
 void c_InputMgr::SetConfig (const char * NewConfigData)
 {
@@ -835,7 +826,7 @@ void c_InputMgr::SetConfig (const char * NewConfigData)
     if (true == FileMgr.SaveConfigFile (ConfigFileName, NewConfigData))
     {
         // DEBUG_V (String("NewConfigData: ") + NewConfigData);
-        LOG_PORT.println (F ("**** Saved Input Manager Config File. ****"));
+        LOG_PORT.println (CN_stars + String (F (" Saved Input Manager Config File. ")) + CN_stars);
 
         configLoadNeeded = true;
 

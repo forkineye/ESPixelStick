@@ -42,7 +42,14 @@ c_InputE131::~c_InputE131()
     // DEBUG_START;
 
     // The E1.31 layer and UDP layer do not handle a shut down well (at all). Ask for a reboot.
-    LOG_PORT.println (String (F ("** 'E1.31' Shut Down for input: '")) + String (InputChannelId) + String (F ("' Requires a reboot. **")));
+    if (HasBeenInitialized)
+    {
+        LOG_PORT.println (CN_stars + String (F (" 'E1.31' Shut Down for input: '")) + String (InputChannelId) + String (F ("' Requires a reboot. ")) + CN_stars);
+    }
+    else
+    {
+        LOG_PORT.println (CN_stars + String (F (" 'E1.31' Shut Down for input: '")) + String (InputChannelId) + CN_stars);
+    }
 
     // DEBUG_END;
 
@@ -55,12 +62,6 @@ void c_InputE131::Begin ()
 
     do // once
     {
-        if (true == HasBeenInitialized)
-        {
-            // DEBUG_V ("");
-            // break;
-        }
-
         // DEBUG_V ("InputDataBufferSize: " + String(InputDataBufferSize));
 
         validateConfiguration ();
@@ -194,9 +195,12 @@ void c_InputE131::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
     InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
 
-    // buffer has moved. Start Over
-    HasBeenInitialized = false;
-    Begin ();
+    if (HasBeenInitialized)
+    {
+        // buffer has moved. Start Over
+        HasBeenInitialized = false;
+        Begin ();
+    }
 
     SetBufferTranslation ();
 
@@ -383,7 +387,7 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         }
         else
         {
-            LOG_PORT.println (F ("*** E1.31 MULTICAST INIT FAILED ****"));
+            LOG_PORT.println (CN_stars + String (F (" E1.31 MULTICAST INIT FAILED ")) + CN_stars);
         }
 
         // DEBUG_V ("");
@@ -394,7 +398,7 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         }
         else
         {
-            LOG_PORT.println (F ("*** E1.31 UNICAST INIT FAILED ****"));
+            LOG_PORT.println (CN_stars + String (F (" E1.31 UNICAST INIT FAILED ")) + CN_stars);
         }
 
         // Setup IGMP subscriptions
