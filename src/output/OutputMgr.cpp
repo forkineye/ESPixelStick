@@ -291,7 +291,7 @@ void c_OutputMgr::CreateNewConfig ()
         {
             // DEBUG_V (String ("ChannelIndex: ") + String (ChannelIndex));
             // DEBUG_V (String ("instantiate output type: ") + String (outputTypeId));
-            InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex++), e_OutputType (outputTypeId));
+            InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex++), e_OutputType (outputTypeId), false);
             // DEBUG_V ("");
 
         }// end for each interface
