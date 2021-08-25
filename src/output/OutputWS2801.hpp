@@ -47,6 +47,8 @@ protected:
 #define WS2801_BITS_PER_INTENSITY       8
 #define WS2801_MICRO_SEC_PER_INTENSITY  int(((1.0/float(WS2801_BIT_RATE)) * WS2801_BITS_PER_INTENSITY))
 #define WS2801_MIN_IDLE_TIME_US         500
+    uint16_t    BlockSize = 1;
+    float       BlockDelay = 0;
 
 }; // c_OutputWS2801
 #endif // def USE_WS2801
