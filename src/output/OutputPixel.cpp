@@ -266,15 +266,19 @@ bool c_OutputPixel::validate ()
 } // validate
 
 //----------------------------------------------------------------------------
-void c_OutputPixel::SetFrameDurration (float IntensityBitTimeInUs)
+void c_OutputPixel::SetFrameDurration (float IntensityBitTimeInUs, uint16_t BlockSize, float BlockDelayUs)
 {
     // DEBUG_START;
+    if (0 == BlockSize) { BlockSize = 1; }
 
     float TotalIntensityBytes = OutputBufferSize * group_size;
     float TotalNullBytes = (PrependNullCount + AppendNullCount) * numIntensityBytesPerPixel;
-    float TotalBits = (TotalIntensityBytes + TotalNullBytes) * 8.0;
+    float TotalBytesOfIntensityData = (TotalIntensityBytes + TotalNullBytes);
+    float TotalBits = TotalBytesOfIntensityData * 8.0;
+    uint16_t NumBlocks = uint16_t (TotalBytesOfIntensityData / float (BlockSize));
+    int TotalBlockDelayUs = int (float (NumBlocks) * BlockDelayUs);
 
-    FrameMinDurationInMicroSec = (IntensityBitTimeInUs * TotalBits) + InterFrameGapInMicroSec;
+    FrameMinDurationInMicroSec = (IntensityBitTimeInUs * TotalBits) + InterFrameGapInMicroSec + TotalBlockDelayUs;
 
     // DEBUG_V (String ("      IntensityBitTimeInUs: ") + String (IntensityBitTimeInUs));
     // DEBUG_V (String ("          OutputBufferSize: ") + String (OutputBufferSize));

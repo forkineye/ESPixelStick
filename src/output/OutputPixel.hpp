@@ -57,7 +57,7 @@ protected:
     bool      MoreDataToSend = false;
     uint16_t  InterFrameGapInMicroSec = 300;
 
-    void SetFrameDurration (float IntensityBitTimeInUs);
+    void SetFrameDurration (float IntensityBitTimeInUs, uint16_t BlockSize = 1, float BlockDelayUs = 0.0);
 
 private:
 #define PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL 3
