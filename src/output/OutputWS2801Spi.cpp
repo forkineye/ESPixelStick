@@ -18,7 +18,7 @@
 */
 
 #include "../ESPixelStick.h"
-#ifdef USE_WS2801
+#ifdef ARDUINO_ARCH_ESP32
 #include "OutputWS2801Spi.hpp"
 #include "driver/spi_master.h"
 #include <esp_heap_alloc_caps.h>
@@ -287,4 +287,4 @@ void c_OutputWS2801Spi::Render ()
 
 } // render
 
-#endif // def USE_WS2801
+#endif // def ARDUINO_ARCH_ESP32

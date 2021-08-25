@@ -62,7 +62,7 @@ public:
 #ifndef ESP32_CAM
         OutputChannelId_RMT_3,
         OutputChannelId_RMT_4,
-        OutputChannelId_RMT_5,
+        // OutputChannelId_RMT_5,
         // OutputChannelId_RMT_6,
         // OutputChannelId_RMT_7,
         // OutputChannelId_RMT_8,
@@ -100,9 +100,9 @@ public:
         OutputType_Servo_PCA9685,
         OutputType_TM1814,
         OutputType_Disabled,
-#ifdef USE_WS2801
+#ifdef ARDUINO_ARCH_ESP32
         OutputType_WS2801,
-#endif // def USE_WS2801
+#endif // def ARDUINO_ARCH_ESP32
         OutputType_End, // must be last
         OutputType_Start = OutputType_WS2811,
     };

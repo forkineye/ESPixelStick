@@ -22,7 +22,7 @@
 *
 */
 #include "OutputPixel.hpp"
-#ifdef USE_WS2801
+#ifdef ARDUINO_ARCH_ESP32
 
 class c_OutputWS2801 : public c_OutputPixel
 {
@@ -51,5 +51,5 @@ protected:
     float       BlockDelay = 0;
 
 }; // c_OutputWS2801
-#endif // def USE_WS2801
+#endif // def ARDUINO_ARCH_ESP32
 

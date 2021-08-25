@@ -23,7 +23,7 @@
 */
 
 #include "OutputWS2801.hpp"
-#ifdef USE_WS2801
+#ifdef ARDUINO_ARCH_ESP32
 
 #include <driver/spi_master.h>
 #include <esp_task.h>
@@ -81,4 +81,4 @@ private:
 
 }; // c_OutputWS2801Spi
 
-#endif // def USE_WS2801
+#endif // def ARDUINO_ARCH_ESP32

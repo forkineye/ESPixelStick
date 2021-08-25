@@ -30,8 +30,6 @@
 #   include <AsyncUDP.h>
 #   include <ESPmDNS.h>
 #   include <WiFi.h>
-
-// #   define USE_WS2801 1
 #else
 #	error "Unsupported CPU type"
 #endif

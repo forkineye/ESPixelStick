@@ -36,10 +36,7 @@
 #ifdef ARDUINO_ARCH_ESP32
 #   include "OutputWS2811Rmt.hpp"
 #   include "OutputTM1814Rmt.hpp"
-#ifdef USE_WS2801
 #   include "OutputWS2801Spi.hpp"
-#endif // def USE_WS2801
-
 #endif // def ARDUINO_ARCH_ESP32
 // needs to be last
 #include "OutputMgr.hpp"
@@ -66,9 +63,9 @@ static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::
     {c_OutputMgr::e_OutputType::OutputType_Servo_PCA9685, "Servo_PCA9685" },
     {c_OutputMgr::e_OutputType::OutputType_Disabled,      "Disabled"      },
     {c_OutputMgr::e_OutputType::OutputType_TM1814,        "TM1814"        },
-#ifdef USE_WS2801
+#ifdef ARDUINO_ARCH_ESP32
     {c_OutputMgr::e_OutputType::OutputType_WS2801,        "WS2801"        }
-#endif // def USE_WS2801
+#endif // def ARDUINO_ARCH_ESP32
 };
 
 //-----------------------------------------------------------------------------
@@ -579,7 +576,6 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 break;
             }
 #ifdef ARDUINO_ARCH_ESP32
-#ifdef USE_WS2801
             case e_OutputType::OutputType_WS2801:
             {
                 if (ChannelIndex == OutputChannelId_SPI_1)
@@ -596,7 +592,6 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
                 break;
             }
-#endif // def USE_WS2801
 #endif // def ARDUINO_ARCH_ESP32
 
             default:
