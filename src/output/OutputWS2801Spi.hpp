@@ -26,6 +26,7 @@
 #ifdef USE_WS2801
 
 #include <driver/spi_master.h>
+#include <esp_task.h>
 
 class c_OutputWS2801Spi : public c_OutputWS2801
 {
@@ -44,11 +45,16 @@ public:
     void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
     void    Render ();                                        ///< Call from loop(),  renders output data
     void    PauseOutput () {};
+    TaskHandle_t GetTaskHandle () { return SendIntensityDataTaskHandle; }
 
-    /// Interrupt Handler
-    void IRAM_ATTR CB_Handler_SendIntensityData (); ///< ISR
+    void DataOutputTask (void* pvParameters);
+    void SendIntensityData ();
+
+    uint32_t DataTaskcounter = 0;
+    uint32_t DataCbCounter = 0;
 
 private:
+    void Shutdown ();
 
 #define WS2801_SPI_MASTER_FREQ_1M                      (APB_CLK_FREQ/80) // 1Mhz
 #define WS2801_NUM_TRANSACTIONS                 2
@@ -63,17 +69,15 @@ private:
     gpio_num_t ClockPin = DEFAULT_WS2801_CLOCK_GPIO;
 
     // uint32_t FrameStartCounter = 0;
-    uint32_t DataISRcounter = 0;
+    uint32_t SendIntensityDataCounter = 0;
     // uint32_t FrameDoneCounter = 0;
     // uint32_t FrameEndISRcounter = 0;
-    struct Transaction_t
-    {
-        spi_transaction_t SpiTransaction;
-        byte buffer[WS2801_NUM_INTENSITY_PER_TRANSACTION];
-    };
 
-    Transaction_t Transactions[WS2801_NUM_TRANSACTIONS];
+    byte * TransactionBuffers[WS2801_NUM_TRANSACTIONS];
+    spi_transaction_t Transactions[WS2801_NUM_TRANSACTIONS];
     uint8_t NextTransactionToFill = 0;
+
+    TaskHandle_t SendIntensityDataTaskHandle = NULL;
 
 }; // c_OutputWS2801Spi
 
