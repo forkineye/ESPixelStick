@@ -87,7 +87,7 @@ static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] 
 #ifndef ESP32_CAM
     {DEFAULT_RMT_2_GPIO,  uart_port_t (2)},
     {DEFAULT_RMT_3_GPIO,  uart_port_t (3)},
-    {DEFAULT_RMT_4_GPIO,  uart_port_t (4)},
+    // {DEFAULT_RMT_4_GPIO,  uart_port_t (4)},
     // {DEFAULT_RMT_5_GPIO,  uart_port_t (5)},
     // {DEFAULT_RMT_6_GPIO,  uart_port_t (6)},
     // {DEFAULT_RMT_7_GPIO,  uart_port_t (7)},
