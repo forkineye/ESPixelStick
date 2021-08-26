@@ -395,9 +395,9 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 break;
             }
 
-            // String Temp;
-            // pOutputChannelDrivers[ChannelIndex]->GetDriverName (Temp);
-            // DEBUG_V (String ("shut down the existing driver: ") + Temp);
+            String DriverName;
+            pOutputChannelDrivers[ChannelIndex]->GetDriverName (DriverName);
+            LOG_PORT.println (CN_stars + String (F (" Shutting Down '")) + DriverName + String (F ("' on Output: ")) + String (ChannelIndex) + " " + CN_stars);
             delete pOutputChannelDrivers[ChannelIndex];
             pOutputChannelDrivers[ChannelIndex] = nullptr;
             // DEBUG_V ("");
@@ -606,7 +606,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
         // DEBUG_V ("");
         String sDriverName;
         pOutputChannelDrivers[ChannelIndex]->GetDriverName (sDriverName);
-        Serial.println (String (CN_stars) + " '" + sDriverName + F ("' Initialization for Output: '") + String (ChannelIndex) + "'" + CN_stars);
+        Serial.println (String (CN_stars) + " '" + sDriverName + F ("' Initialization for Output: ") + String (ChannelIndex) + " " + CN_stars);
         if (StartDriver)
         {
             pOutputChannelDrivers[ChannelIndex]->Begin ();
