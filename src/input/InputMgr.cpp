@@ -379,7 +379,10 @@ bool c_InputMgr::InputTypeIsAllowedOnChannel (e_InputType type, e_InputChannelId
 void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_InputType NewInputChannelType, bool StartDriver)
 {
     // DEBUG_START;
-    // DEBUG_V (String ("StartDriver: ") + String (StartDriver));
+    // DEBUG_V (String ("       ChannelIndex: ") + String (ChannelIndex));
+    // DEBUG_V (String ("NewInputChannelType: ") + String (NewInputChannelType));
+    // DEBUG_V (String ("        StartDriver: ") + String (StartDriver));
+    // DEBUG_V (String ("InputDataBufferSize: ") + String (InputDataBufferSize));
 
     do // once
     {
@@ -395,17 +398,19 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                 // DEBUG_V ("nothing to change");
                 break;
             }
-
-            // DEBUG_V ("shut down the existing driver");
+            String DriverName;
+            pInputChannelDrivers[ChannelIndex]->GetDriverName (DriverName);
             rebootNeeded |= pInputChannelDrivers[ChannelIndex]->isShutDownRebootNeeded();
             // DEBUG_V (String ("rebootNeeded: ") + String (rebootNeeded));
+            LOG_PORT.println (CN_stars + String(F(" Shutting Down '")) + DriverName + String(F("' on Channel: ")) + String(ChannelIndex) + " " + CN_stars);
+
             delete pInputChannelDrivers[ChannelIndex];
+            // DEBUG_V ();
             pInputChannelDrivers[ChannelIndex] = nullptr;
 
             // DEBUG_V ("");
         } // end there is an existing driver
-
-     // DEBUG_V ("InputDataBufferSize: " + String(InputDataBufferSize));
+        // DEBUG_V ();
 
         switch (NewInputChannelType)
         {
@@ -538,10 +543,10 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
         if (StartDriver)
         {
             // DEBUG_V (String ("StartDriver: ") + String (StartDriver));
-            // pInputChannelDrivers[ChannelIndex]->Begin ();
+            pInputChannelDrivers[ChannelIndex]->Begin ();
+            // DEBUG_V ("");
+            pInputChannelDrivers[ChannelIndex]->SetBufferInfo (InputDataBuffer, InputDataBufferSize);
         }
-        // DEBUG_V ("");
-        pInputChannelDrivers[ChannelIndex]->SetBufferInfo (InputDataBuffer, InputDataBufferSize);
         // DEBUG_V ("");
 
     } while (false);

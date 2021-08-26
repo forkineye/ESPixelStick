@@ -39,9 +39,6 @@ c_InputArtnet::~c_InputArtnet()
 {
     // DEBUG_START;
 
-    // The Artnet layer and UDP layer do not handle a shut down well (at all). Ask for a reboot.
-    LOG_PORT.println (String (F ("** 'Artnet' Shut Down for input: '")) + String (InputChannelId) + String (F ("' Requires a reboot. **")));
-
     // DEBUG_END;
 
 } // ~c_InputArtnet
@@ -53,6 +50,8 @@ void c_InputArtnet::Begin ()
 
     do // once
     {
+        if (HasBeenInitialized) { break; }
+
         // DEBUG_V ("InputDataBufferSize: " + String(InputDataBufferSize));
 
         validateConfiguration ();

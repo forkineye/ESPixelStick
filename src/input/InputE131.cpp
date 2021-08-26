@@ -41,16 +41,6 @@ c_InputE131::~c_InputE131()
 {
     // DEBUG_START;
 
-    // The E1.31 layer and UDP layer do not handle a shut down well (at all). Ask for a reboot.
-    if (HasBeenInitialized)
-    {
-        LOG_PORT.println (CN_stars + String (F (" 'E1.31' Shut Down for input: '")) + String (InputChannelId) + String (F ("' Requires a reboot. ")) + CN_stars);
-    }
-    else
-    {
-        LOG_PORT.println (CN_stars + String (F (" 'E1.31' Shut Down for input: '")) + String (InputChannelId) + CN_stars);
-    }
-
     // DEBUG_END;
 
 } // ~c_InputE131
