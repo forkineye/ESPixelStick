@@ -273,7 +273,7 @@ void c_OutputPixel::SetFrameDurration (float IntensityBitTimeInUs, uint16_t Bloc
 
     float TotalIntensityBytes = OutputBufferSize * group_size;
     float TotalNullBytes = (PrependNullCount + AppendNullCount) * numIntensityBytesPerPixel;
-    float TotalBytesOfIntensityData = (TotalIntensityBytes + TotalNullBytes);
+    float TotalBytesOfIntensityData = (TotalIntensityBytes + TotalNullBytes + PreambleSize);
     float TotalBits = TotalBytesOfIntensityData * 8.0;
     uint16_t NumBlocks = uint16_t (TotalBytesOfIntensityData / float (BlockSize));
     int TotalBlockDelayUs = int (float (NumBlocks) * BlockDelayUs);
