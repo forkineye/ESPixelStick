@@ -402,7 +402,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             pInputChannelDrivers[ChannelIndex]->GetDriverName (DriverName);
             rebootNeeded |= pInputChannelDrivers[ChannelIndex]->isShutDownRebootNeeded();
             // DEBUG_V (String ("rebootNeeded: ") + String (rebootNeeded));
-            LOG_PORT.println (CN_stars + String(F(" Shutting Down '")) + DriverName + String(F("' on Channel: ")) + String(ChannelIndex) + " " + CN_stars);
+            LOG_PORT.println (CN_stars + String(F(" Shutting Down '")) + DriverName + String(F("' on Input: ")) + String(ChannelIndex) + " " + CN_stars);
 
             delete pInputChannelDrivers[ChannelIndex];
             // DEBUG_V ();
