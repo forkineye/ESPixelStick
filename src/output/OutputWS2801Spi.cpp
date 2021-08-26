@@ -86,8 +86,11 @@ c_OutputWS2801Spi::~c_OutputWS2801Spi ()
     // DEBUG_START;
 
     ws2801_transfer_callback_enabled = false;
-    LOG_PORT.println (CN_stars + String (F (" SPI Interface Shutdown requires a reboot ")) + CN_stars);
-    reboot = true;
+    if (HasBeenInitialized)
+    {
+        LOG_PORT.println (CN_stars + String (F (" SPI Interface Shutdown requires a reboot ")) + CN_stars);
+        reboot = true;
+    }
     // DEBUG_END;
 
 } // ~c_OutputWS2801Spi
@@ -140,6 +143,8 @@ void c_OutputWS2801Spi::Begin ()
     ESP_ERROR_CHECK (spi_device_acquire_bus (spi_device_handle, portMAX_DELAY));
 
     ws2801_transfer_callback_enabled = true;
+
+    HasBeenInitialized = true;
 
     // DEBUG_END;
 
