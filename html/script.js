@@ -996,6 +996,17 @@ function convertUTCDateToLocalDate(date)
     return date;
 } // convertUTCDateToLocalDate
 
+function int2ip(num)
+{
+    var d = num % 256;
+    for (var i = 3; i > 0; i--)
+    {
+        num = Math.floor(num / 256);
+        d = d + '.' + num % 256;
+    }
+    return d;
+}
+
 ////////////////////////////////////////////////////
 //
 //  Websocket stuff
@@ -1360,7 +1371,7 @@ function ProcessRecievedJsonStatusMessage(data)
         $('#pkts').text     (InputStatus.e131.num_packets);
         $('#chanlim').text  (InputStatus.e131.unichanlim);
         $('#perr').text     (InputStatus.e131.packet_errors);
-        $('#clientip').text (InputStatus.e131.last_clientIP);
+        $('#clientip').text (int2ip(parseInt(InputStatus.e131.last_clientIP)));
     }
     else
     {
