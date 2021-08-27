@@ -30,6 +30,7 @@ c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
 {
     // DEBUG_START;
     // DEBUG_V ("BufferSize: " + String (BufferSize));
+    e131 = new ESPAsyncE131 (0);
 
     memset ((void*)UniverseArray, 0x00, sizeof (UniverseArray));
 
@@ -60,6 +61,11 @@ void c_InputE131::Begin ()
         NetworkStateChanged (WiFiMgr.IsWiFiConnected (), false);
 
         // DEBUG_V ("");
+        e131->RegisterCallback ( (void*)this, [] (e131_packet_t* Packet, void * pThis)
+            {
+                ((c_InputE131*)pThis)->ProcessIncomingE131Data (Packet); 
+            });
+        
         HasBeenInitialized = true;
 
     } while (false);
@@ -91,10 +97,10 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
     e131Status[F ("unifirst")]      = startUniverse;
     e131Status[F ("unilast")]       = LastUniverse;
     e131Status[F ("unichanlim")]    = ChannelsPerUniverse;
-    // DEBUG_V ("");
 
     e131Status[F ("num_packets")]   = e131->stats.num_packets;
-    e131Status[F ("last_clientIP")] = e131->stats.last_clientIP.toString ();
+    e131Status[F ("last_clientIP")] = uint32_t(e131->stats.last_clientIP);
+    // DEBUG_V ("");
 
     JsonArray e131UniverseStatus = e131Status.createNestedArray (CN_channels);
     uint32_t TotalErrors = e131->stats.packet_errors;
@@ -117,62 +123,66 @@ void c_InputE131::Process ()
 {
     // DEBUG_START;
 
-    uint8_t*    E131Data;
+    // DEBUG_END;
+
+} // process
+
+//-----------------------------------------------------------------------------
+void c_InputE131::ProcessIncomingE131Data (e131_packet_t * packet)
+{
+    // DEBUG_START;
+
+    uint8_t   * E131Data;
     uint16_t    CurrentUniverseId;
 
     do // once
     {
-        if ((0 == InputDataBufferSize) || (nullptr == e131))
+        if (0 == InputDataBufferSize)
         {
             // no place to put any data
             break;
         }
 
-        // Parse a packet and update pixels
-        while (!e131->isEmpty ())
+        CurrentUniverseId = ntohs (packet->universe);
+        E131Data = packet->property_values + 1;
+
+        // DEBUG_V ("     CurrentUniverseId: " + String(CurrentUniverseId));
+        // DEBUG_V ("packet.sequence_number: " + String(packet.sequence_number));
+
+        if ((startUniverse <= CurrentUniverseId) && (LastUniverse >= CurrentUniverseId))
         {
-            e131->pull (&packet);
-            CurrentUniverseId = ntohs (packet.universe);
-            E131Data = packet.property_values + 1;
+            // Universe offset and sequence tracking
+            Universe_t& CurrentUniverse = UniverseArray[CurrentUniverseId - startUniverse];
 
-            // DEBUG_V ("     CurrentUniverseId: " + String(CurrentUniverseId));
-            // DEBUG_V ("packet.sequence_number: " + String(packet.sequence_number));
-
-            if ((startUniverse <= CurrentUniverseId) && (LastUniverse >= CurrentUniverseId))
+            // Do we need to update a sequnce error?
+            if (packet->sequence_number != CurrentUniverse.SequenceNumber)
             {
-                // Universe offset and sequence tracking
-                Universe_t& CurrentUniverse = UniverseArray[CurrentUniverseId - startUniverse];
+                // DEBUG_V (F ("E1.31 Sequence Error - expected: "));
+                // DEBUG_V (CurrentUniverse.SequenceNumber);
+                // DEBUG_V (F (" actual: "));
+                // DEBUG_V (packet->sequence_number);
+                // DEBUG_V (" " + String (CN_universe) + " : ");
+                // DEBUG_V (CurrentUniverseId);
 
-                // Do we need to update a sequnce error?
-                if (packet.sequence_number != CurrentUniverse.SequenceNumber)
-                {
-                    LOG_PORT.print (F ("E1.31 Sequence Error - expected: "));
-                    LOG_PORT.print (CurrentUniverse.SequenceNumber);
-                    LOG_PORT.print (F (" actual: "));
-                    LOG_PORT.print (packet.sequence_number);
-                    LOG_PORT.print (" " + String (CN_universe) + " : ");
-                    LOG_PORT.println (CurrentUniverseId);
-
-                    CurrentUniverse.SequenceErrorCounter++;
-                    CurrentUniverse.SequenceNumber = packet.sequence_number;
-                }
-
-                ++CurrentUniverse.SequenceNumber;
-
-                uint16_t NumBytesOfE131Data = ntohs (packet.property_value_count) - 1;
-
-                memcpy (CurrentUniverse.Destination,
-                        & E131Data[CurrentUniverse.SourceDataOffset],
-                        min (CurrentUniverse.BytesToCopy, NumBytesOfE131Data));
-
-                InputMgr.ResetBlankTimer ();
-            }
-            else
-            {
-                // DEBUG_V ("Not interested in this universe");
+                CurrentUniverse.SequenceErrorCounter++;
+                CurrentUniverse.SequenceNumber = packet->sequence_number;
             }
 
-        } // end while there is data to process
+            ++CurrentUniverse.SequenceNumber;
+
+            uint16_t NumBytesOfE131Data = ntohs (packet->property_value_count) - 1;
+
+            memcpy (CurrentUniverse.Destination,
+                &E131Data[CurrentUniverse.SourceDataOffset],
+                min (CurrentUniverse.BytesToCopy, NumBytesOfE131Data));
+
+            InputMgr.ResetBlankTimer ();
+        }
+        else
+        {
+            // DEBUG_V ("Not interested in this universe");
+        }
+
     } while (false);
 
     // DEBUG_END;
@@ -338,16 +348,6 @@ void c_InputE131::validateConfiguration ()
 
     SetBufferTranslation ();
 
-    // Zero out packet stats
-    if (nullptr == e131)
-    {
-        // DEBUG_V ("Start E1.31 driver");
-        e131 = new ESPAsyncE131 (10);
-    }
-
-    // DEBUG_V ("");
-    e131->stats.num_packets = 0;
-
     // DEBUG_END;
 
 } // validateConfiguration
@@ -362,13 +362,6 @@ void c_InputE131::NetworkStateChanged (bool IsConnected)
 void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
 {
     // DEBUG_START;
-
-    if (nullptr == e131)
-    {
-        // DEBUG_V ("Instantiate E1.31");
-        e131 = new ESPAsyncE131 (10);
-    }
-    // DEBUG_V ("");
 
     if (IsConnected)
     {
