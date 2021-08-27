@@ -94,17 +94,19 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
     // DEBUG_V ("");
 
     e131Status[F ("num_packets")]   = e131->stats.num_packets;
-    e131Status[F ("packet_errors")] = e131->stats.packet_errors;
     e131Status[F ("last_clientIP")] = e131->stats.last_clientIP.toString ();
 
     JsonArray e131UniverseStatus = e131Status.createNestedArray (CN_channels);
-
+    uint32_t TotalErrors = e131->stats.packet_errors;
     for (auto & CurrentUniverse : UniverseArray)
     {
         JsonObject e131CurrentUniverseStatus = e131UniverseStatus.createNestedObject ();
 
         e131CurrentUniverseStatus[F ("errors")] = CurrentUniverse.SequenceErrorCounter;
+        TotalErrors += CurrentUniverse.SequenceErrorCounter;
     }
+
+    e131Status[F ("packet_errors")] = TotalErrors;
 
     // DEBUG_END;
 
