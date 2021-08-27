@@ -16,6 +16,7 @@
 *  or use of these programs.
 *
 */
+#ifdef ARDUINO_ARCH_ESP32
 
 #include "../ESPixelStick.h"
 #include "OutputTM1814.hpp"
@@ -111,3 +112,5 @@ bool c_OutputTM1814::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     return response;
 
 } // SetConfig
+
+#endif // def ARDUINO_ARCH_ESP32

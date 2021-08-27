@@ -16,6 +16,7 @@
 *  or use of these programs.
 *
 */
+#ifdef ARDUINO_ARCH_ESP32
 
 #include "../ESPixelStick.h"
 
@@ -263,3 +264,5 @@ void c_OutputTM1814Uart::PauseOutput ()
 
     // DEBUG_END;
 } // PauseOutput
+
+#endif // def ARDUINO_ARCH_ESP32

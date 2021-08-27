@@ -62,8 +62,8 @@ static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::
     {c_OutputMgr::e_OutputType::OutputType_Relay,         "Relay"         },
     {c_OutputMgr::e_OutputType::OutputType_Servo_PCA9685, "Servo_PCA9685" },
     {c_OutputMgr::e_OutputType::OutputType_Disabled,      "Disabled"      },
-    {c_OutputMgr::e_OutputType::OutputType_TM1814,        "TM1814"        },
 #ifdef ARDUINO_ARCH_ESP32
+    {c_OutputMgr::e_OutputType::OutputType_TM1814,        "TM1814"        },
     {c_OutputMgr::e_OutputType::OutputType_WS2801,        "WS2801"        }
 #endif // def ARDUINO_ARCH_ESP32
 };
@@ -550,9 +550,9 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 break;
             }
 
+#ifdef ARDUINO_ARCH_ESP32
             case e_OutputType::OutputType_TM1814:
             {
-#ifdef ARDUINO_ARCH_ESP32
                 if (OM_IS_RMT)
                 {
                     // LOG_PORT.println (CN_stars + String (F (" Starting TM1814 RMT for channel '")) + ChannelIndex + "'. " + CN_stars);
@@ -560,7 +560,6 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     // DEBUG_V ("");
                     break;
                 }
-#endif // def ARDUINO_ARCH_ESP32
                 // DEBUG_V ("");
                 if (OM_IS_UART)
                 {
@@ -575,6 +574,8 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 // DEBUG_V ("");
                 break;
             }
+#endif // def ARDUINO_ARCH_ESP32
+
 #ifdef ARDUINO_ARCH_ESP32
             case e_OutputType::OutputType_WS2801:
             {

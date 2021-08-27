@@ -91,16 +91,16 @@ public:
 
     enum e_OutputType
     {
-        OutputType_WS2811 = 0,
+        OutputType_Disabled = 0,
+        OutputType_WS2811,
         OutputType_GECE,
         OutputType_DMX,
         OutputType_Renard,
         OutputType_Serial,
         OutputType_Relay,
         OutputType_Servo_PCA9685,
-        OutputType_TM1814,
-        OutputType_Disabled,
 #ifdef ARDUINO_ARCH_ESP32
+        OutputType_TM1814,
         OutputType_WS2801,
 #endif // def ARDUINO_ARCH_ESP32
         OutputType_End, // must be last
