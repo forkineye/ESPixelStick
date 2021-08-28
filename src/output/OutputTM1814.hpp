@@ -22,10 +22,7 @@
 *
 */
 
-#ifdef ARDUINO_ARCH_ESP32
 #include "OutputPixel.hpp"
-
-#   include <driver/uart.h>
 
 class c_OutputTM1814 : public c_OutputPixel
 {
@@ -63,4 +60,3 @@ protected:
 private:
 
 }; // c_OutputTM1814
-#endif // def ARDUINO_ARCH_ESP32

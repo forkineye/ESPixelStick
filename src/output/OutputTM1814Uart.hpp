@@ -21,7 +21,6 @@
 *   interface.
 *
 */
-#ifdef ARDUINO_ARCH_ESP32
 
 #include "OutputTM1814.hpp"
 
@@ -56,4 +55,3 @@ private:
 
 }; // c_OutputTM1814Uart
 
-#endif // def ARDUINO_ARCH_ESP32
