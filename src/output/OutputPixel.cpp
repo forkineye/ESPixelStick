@@ -97,18 +97,18 @@ void c_OutputPixel::SetOutputBufferSize (uint16_t NumChannelsAvailable)
         // are we changing size?
         if (NumChannelsAvailable == OutputBufferSize)
         {
-            // DEBUG_V ("NO Need to change the ISR buffer");
+            // DEBUG_V ("NO Need to change the buffer");
             break;
         }
 
-        // DEBUG_V ("Need to change the ISR buffer");
+        // DEBUG_V ("Need to change the output buffers");
 
         // Stop current output operation
         c_OutputCommon::SetOutputBufferSize (NumChannelsAvailable);
 
-        } while (false);
+    } while (false);
 
-        // DEBUG_END;
+    // DEBUG_END;
 } // SetBufferSize
 
 //----------------------------------------------------------------------------
@@ -197,7 +197,10 @@ void c_OutputPixel::updateColorOrderOffsets ()
     // make sure the color order is all lower case
     color_order.toLowerCase ();
 
-         if (String (F ("rgbw")) == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
+    // DEBUG_V (String ("color_order: ") + color_order);
+
+         if (String (F ("wrgb")) == color_order) { ColorOffsets.offset.r = 3; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 2; numIntensityBytesPerPixel = 4; }
+    else if (String (F ("rgbw")) == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
     else if (String (F ("grbw")) == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
     else if (String (F ("brgw")) == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
     else if (String (F ("rbgw")) == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
@@ -280,15 +283,21 @@ void c_OutputPixel::SetFrameDurration (float IntensityBitTimeInUs, uint16_t Bloc
 
     FrameMinDurationInMicroSec = (IntensityBitTimeInUs * TotalBits) + InterFrameGapInMicroSec + TotalBlockDelayUs;
 
-    // DEBUG_V (String ("      IntensityBitTimeInUs: ") + String (IntensityBitTimeInUs));
     // DEBUG_V (String ("          OutputBufferSize: ") + String (OutputBufferSize));
     // DEBUG_V (String ("                group_size: ") + String (group_size));
+    // DEBUG_V (String ("       TotalIntensityBytes: ") + String (TotalIntensityBytes));
     // DEBUG_V (String ("          PrependNullCount: ") + String (PrependNullCount));
     // DEBUG_V (String ("           AppendNullCount: ") + String (AppendNullCount));
     // DEBUG_V (String (" numIntensityBytesPerPixel: ") + String (numIntensityBytesPerPixel));
-    // DEBUG_V (String ("       TotalIntensityBytes: ") + String (TotalIntensityBytes));
     // DEBUG_V (String ("            TotalNullBytes: ") + String (TotalNullBytes));
+    // DEBUG_V (String ("              PreambleSize: ") + String (PreambleSize));
+    // DEBUG_V (String (" TotalBytesOfIntensityData: ") + String (TotalBytesOfIntensityData));
     // DEBUG_V (String ("                 TotalBits: ") + String (TotalBits));
+    // DEBUG_V (String ("                 BlockSize: ") + String (BlockSize));
+    // DEBUG_V (String ("                 NumBlocks: ") + String (NumBlocks));
+    // DEBUG_V (String ("              BlockDelayUs: ") + String (BlockDelayUs));
+    // DEBUG_V (String ("         TotalBlockDelayUs: ") + String (TotalBlockDelayUs));
+    // DEBUG_V (String ("      IntensityBitTimeInUs: ") + String (IntensityBitTimeInUs));
     // DEBUG_V (String ("   InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
     // DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
 
