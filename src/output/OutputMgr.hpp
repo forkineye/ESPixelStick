@@ -99,8 +99,8 @@ public:
         OutputType_Serial,
         OutputType_Relay,
         OutputType_Servo_PCA9685,
-#ifdef ARDUINO_ARCH_ESP32
         OutputType_TM1814,
+#ifdef ARDUINO_ARCH_ESP32
         OutputType_WS2801,
 #endif // def ARDUINO_ARCH_ESP32
         OutputType_End, // must be last
