@@ -59,4 +59,12 @@ protected:
 
 private:
 
+    uint8_t CurrentLimit = 50;
+    typedef struct PreambleData_t
+    {
+        uint8_t positive[4];
+        uint8_t negative[4];
+    };
+    PreambleData_t PreambleData;
+
 }; // c_OutputTM1814

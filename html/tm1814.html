@@ -61,12 +61,20 @@
             </div>
 
             <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-2">
-                    <div class="checkbox"><label><input type="checkbox" id="showgamma"> Show Gamma Curve</label></div>
+                <label class="control-label col-sm-2" for="currentlimit">Current Limit</label>
+                <div class="col-sm-2">
+                    <input type="number" class="form-control is-valid" id="currentlimit" step="1" min="1" max="100" value="0" required title="Current Limiting Factor applied by driver." onchange="tm1814_OnChange()">
                 </div>
+
                 <label class="control-label col-sm-2" for="interframetime">Inter Frame Time (us)</label>
                 <div class="col-sm-2">
                     <input type="number" class="form-control is-valid" id="interframetime" step="1" min="300" max="10000" value="300" required title="Number of Micro Seconds between each frame." onchange="tm1814_OnChange()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-2">
+                    <div class="checkbox"><label><input type="checkbox" id="showgamma"> Show Gamma Curve</label></div>
                 </div>
             </div>
 

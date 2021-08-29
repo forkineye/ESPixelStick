@@ -20,18 +20,6 @@
 #include "../ESPixelStick.h"
 #include "OutputTM1814.hpp"
 
-#define TM1814_COMMAND_DATA_VALUE  0x32 // full intensity 64ma
-static uint8_t PreambleData[8] = 
-{
-    TM1814_COMMAND_DATA_VALUE,
-    TM1814_COMMAND_DATA_VALUE,
-    TM1814_COMMAND_DATA_VALUE,
-    TM1814_COMMAND_DATA_VALUE,
-    ~TM1814_COMMAND_DATA_VALUE,
-    ~TM1814_COMMAND_DATA_VALUE,
-    ~TM1814_COMMAND_DATA_VALUE,
-    ~TM1814_COMMAND_DATA_VALUE
-};
 
 //----------------------------------------------------------------------------
 c_OutputTM1814::c_OutputTM1814 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
@@ -62,8 +50,6 @@ void c_OutputTM1814::Begin ()
     
     // c_OutputPixel::Begin ();
 
-    SetPreambleInformation (PreambleData, sizeof (PreambleData));
-
     // DEBUG_END;
 } // GetConfig
 
@@ -73,6 +59,7 @@ void c_OutputTM1814::GetConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_START;
 
     c_OutputPixel::GetConfig (jsonConfig);
+    jsonConfig[CN_currentlimit] = CurrentLimit;
 
     // DEBUG_END;
 } // GetConfig
@@ -104,12 +91,20 @@ bool c_OutputTM1814::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
-    jsonConfig[CN_color_order] = "grbw";
+    // jsonConfig[CN_color_order] = "grbw";
 
     bool response = c_OutputPixel::SetConfig (jsonConfig);
 
     // Calculate our refresh time
     SetFrameDurration (float (TM1814_PIXEL_NS_BIT_TOTAL) / 1000.0);
+
+    setFromJSON (CurrentLimit, jsonConfig, CN_currentlimit);
+
+    uint8_t PreambleValue = map (CurrentLimit, 1, 100, 0, 63);
+    memset ((void*)(&PreambleData.positive[0]),  PreambleValue, sizeof (PreambleData.positive));
+    memset ((void*)(&PreambleData.negative[0]), ~PreambleValue, sizeof (PreambleData.negative));
+
+    SetPreambleInformation ((uint8_t*)&PreambleData, sizeof (PreambleData));
 
     // DEBUG_END;
     return response;
