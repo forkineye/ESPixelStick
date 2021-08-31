@@ -2,17 +2,17 @@
     "configurations": [
         {
             "name": "ESP8266",
-            "includePath": [
-                "${workspaceFolder}/**",
-                "${workspaceFolder}/../libraries/**",
-                "${workspaceFolder}/../tools/**",
-                "${workspaceFolder}/../hardware/esp8266com/esp8266/**"
-            ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE",
                 "ARDUINO_ARCH_ESP8266"
+            ],
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/../hardware/esp8266com/esp8266/tools/sdk/**",
+                "${workspaceFolder}/../hardware/esp8266com/esp8266/**",
+                "${workspaceFolder}/../libraries/**"
             ],
             "compilerPath": "${workspaceFolder}/../hardware/esp8266com/esp8266/tools/xtensa-lx106-elf/bin/xtensa-lx106-elf-gcc.exe",
             "cStandard": "c11",
