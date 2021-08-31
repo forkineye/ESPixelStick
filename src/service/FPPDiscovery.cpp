@@ -98,7 +98,7 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         //LOG_PORT.println (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
 
         if (!fail)
-            LOG_PORT.println (String (F ("- FPPDiscovery service started")));
+            LOG_PORT.println (String (F ("- FPPDiscovery started on port ")) + String(FPP_DISCOVERY_PORT));
 
         udp.onPacket (std::bind (&c_FPPDiscovery::ProcessReceivedUdpPacket, this, std::placeholders::_1));
 

@@ -209,7 +209,7 @@ void c_InputEffectEngine::NextEffect ()
 
     // DEBUG_V (String ("CurrentEffectIndex: ") + String(CurrentEffectIndex));
     setEffect (ListOfEffects[CurrentEffectIndex].name);
-    LOG_PORT.println (String (F ("Setting new effect: ")) + ActiveEffect->name);
+    log (String (F ("Setting new effect: ")) + ActiveEffect->name);
     // DEBUG_V (String ("ActiveEffect->name: ") + ActiveEffect->name);
 
     // DEBUG_END;

@@ -17,6 +17,7 @@
 *
 */
 
+#include <Arduino.h>
 #include "InputE131.hpp"
 #include "../WiFiMgr.hpp"
 
@@ -42,7 +43,8 @@ c_InputE131::~c_InputE131()
     // DEBUG_START;
 
     // The E1.31 layer and UDP layer do not handle a shut down well (at all). Ask for a reboot.
-    LOG_PORT.println (String (F ("** 'E1.31' Shut Down for input: '")) + String (InputChannelId) + String (F ("' Requires a reboot. **")));
+    log ((F ("** Shutdown for input ")) + String (InputChannelId) +
+            (F (" -  Reboot required **")));
 
     // DEBUG_END;
 
@@ -153,12 +155,9 @@ void c_InputE131::Process ()
                 // Do we need to update a sequnce error?
                 if (packet.sequence_number != CurrentUniverse.SequenceNumber)
                 {
-                    LOG_PORT.print (F ("E1.31 Sequence Error - expected: "));
-                    LOG_PORT.print (CurrentUniverse.SequenceNumber);
-                    LOG_PORT.print (F (" actual: "));
-                    LOG_PORT.print (packet.sequence_number);
-                    LOG_PORT.print (" " + String (CN_universe) + " : ");
-                    LOG_PORT.println (CurrentUniverseId);
+                    log (String (F ("Sequence Error - expected: ")) + CurrentUniverse.SequenceNumber +
+                            F (" actual: ") + packet.sequence_number +
+                            " " + CN_universe + " : " + CurrentUniverseId);
 
                     CurrentUniverse.SequenceErrorCounter++;
                     CurrentUniverse.SequenceNumber = packet.sequence_number;
@@ -240,7 +239,7 @@ void c_InputE131::SetBufferTranslation ()
 
     if (0 != BytesLeftToMap)
     {
-        LOG_PORT.println (F ("ERROR: Universe configuration is too small to fill output buffer. Outputs have been truncated."));
+        log (F ("ERROR: Universe configuration is too small to fill output buffer. Outputs have been truncated."));
     }
 
     // DEBUG_END;
@@ -282,7 +281,7 @@ void c_InputE131::SubscribeToMulticastDomains()
                                     (((startUniverse + UniverseIndex) >> 0) & 0xff));
 
         igmp_joingroup ((ip4_addr_t*)&ifaddr[0], (ip4_addr_t*)&multicast_addr[0]);
-        LOG_PORT.printf ("E1.31: Registered for address: %s\n", multicast_addr.toString().c_str());
+        log (F ("Multicast subscribed to ") + multicast_addr.toString());
     }
     // DEBUG_END;
 } // multiSub
@@ -379,29 +378,30 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         // Get on with business
         if (e131->begin (E131_MULTICAST, startUniverse, LastUniverse - startUniverse + 1))
         {
-            LOG_PORT.println (F ("E1.31 Multicast Enabled."));
+            log (F ("Multicast enabled"));
         }
         else
         {
-            LOG_PORT.println (F ("*** E1.31 MULTICAST INIT FAILED ****"));
+            log (F ("*** MULTICAST INIT FAILED ****"));
         }
 
         // DEBUG_V ("");
 
         if (e131->begin (E131_UNICAST))
         {
-            LOG_PORT.println (String (F ("E1.31 Unicast Enabled on port: ")) + E131_DEFAULT_PORT);
+            log (String (F ("Unicast enabled on port ")) + E131_DEFAULT_PORT);
         }
         else
         {
-            LOG_PORT.println (F ("*** E1.31 UNICAST INIT FAILED ****"));
+            log (F ("*** UNICAST INIT FAILED ****"));
         }
 
         // Setup IGMP subscriptions
         SubscribeToMulticastDomains ();
 
-        LOG_PORT.printf_P (PSTR ("Listening for %u channels from Universe %u to %u.\n"),
-            InputDataBufferSize, startUniverse, LastUniverse);
+        log (String (F ("Listening for ")) + InputDataBufferSize +
+            F (" channels from Universe ") + startUniverse +
+            F (" to ") + LastUniverse);
     }
     else if (ReBootAllowed)
     {
@@ -409,7 +409,7 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         // E1.31 does not do this gracefully. A loss of connection needs a reboot
         extern bool reboot;
         reboot = true;
-        LOG_PORT.println (F ("E1.31 Input requesting reboot on loss of WiFi connection."));
+        log (F ("Input requesting reboot on loss of WiFi connection."));
     }
 
     // DEBUG_END;

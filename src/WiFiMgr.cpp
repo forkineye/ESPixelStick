@@ -200,7 +200,8 @@ void c_WiFiMgr::reset ()
 {
     // DEBUG_START;
 
-    LOG_PORT.println (F ("WiFi Reset has been requested"));
+    // The WiFi states announce what they're doing, cleans up boot log a bit.
+    //LOG_PORT.println (F ("WiFi Reset has been requested"));
 
     fsm_WiFi_state_Boot_imp.Init ();
     if (IsWiFiConnected())

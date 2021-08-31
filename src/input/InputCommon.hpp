@@ -28,7 +28,7 @@ class c_InputCommon
 public:
     c_InputCommon (c_InputMgr::e_InputChannelIds NewInputChannelId,
                    c_InputMgr::e_InputType       NewChannelType,
-                   uint8_t                     * BufferStart, 
+                   uint8_t                     * BufferStart,
                    uint16_t                      BufferSize);
     virtual ~c_InputCommon ();
 
@@ -55,6 +55,8 @@ protected:
     bool        IsInputChannelActive = true;
     c_InputMgr::e_InputChannelIds InputChannelId = c_InputMgr::e_InputChannelIds::InputChannelId_ALL;
     c_InputMgr::e_InputType       ChannelType = c_InputMgr::e_InputType::InputType_Disabled;
+
+    void log(String message);
 
 private:
 

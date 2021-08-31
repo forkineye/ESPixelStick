@@ -240,7 +240,7 @@ bool c_OutputPixel::validate ()
 
     if (zig_size > pixel_count)
     {
-        LOG_PORT.println (String (F ("*** Requested ZigZag size count was too high. Setting to ")) + pixel_count + F (" ***"));
+        log (String (F ("*** Requested ZigZag size count was too high. Setting to ")) + pixel_count + F (" ***"));
         zig_size = pixel_count;
         response = false;
     }

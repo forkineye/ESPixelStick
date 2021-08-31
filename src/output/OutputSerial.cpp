@@ -133,11 +133,11 @@ void c_OutputSerial::StartUart ()
 
     if (OutputType == c_OutputMgr::e_OutputType::OutputType_DMX)
     {
-        speed = uint (BaudRate::BR_DMX);
+        speed = uint32_t (BaudRate::BR_DMX);
     }
     else
     {
-        speed = uint (CurrentBaudrate);
+        speed = uint32_t (CurrentBaudrate);
     }
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -190,28 +190,28 @@ bool c_OutputSerial::validate ()
 
     if ((Num_Channels > MAX_CHANNELS) || (Num_Channels < 1))
     {
-        LOG_PORT.println (String (F ("*** Requested channel count was Not Valid. Setting to ")) + MAX_CHANNELS + F (" ***"));
+        log (String (F ("*** Requested channel count was Not Valid. Setting to ")) + MAX_CHANNELS + F (" ***"));
         Num_Channels = DEFAULT_NUM_CHANNELS;
         response = false;
     }
     SetOutputBufferSize (Num_Channels);
 
-    if ((CurrentBaudrate < uint (BaudRate::BR_MIN)) || (CurrentBaudrate > uint (BaudRate::BR_MAX)))
+    if ((CurrentBaudrate < uint32_t (BaudRate::BR_MIN)) || (CurrentBaudrate > uint32_t (BaudRate::BR_MAX)))
     {
-        LOG_PORT.println (String (F ("*** Requested BaudRate is Not Valid. Setting to Default ***")));
-        CurrentBaudrate = uint (BaudRate::BR_DEF);
+        log (String (F ("*** Requested baudrate is not valid. Setting to default ***")));
+        CurrentBaudrate = uint32_t (BaudRate::BR_DEF);
         response = false;
     }
 
     if (GenericSerialHeader.length() > MAX_HDR_SIZE)
     {
-        LOG_PORT.println (String (F ("*** Requested Generic Serial Header is too long. Setting to Default ***")));
+        log (String (F ("*** Requested header is too long. Setting to default ***")));
         GenericSerialHeader = "";
     }
 
     if (GenericSerialFooter.length() > MAX_FOOTER_SIZE)
     {
-        LOG_PORT.println (String (F ("*** Requested Generic Serial Footer is too long. Setting to Default ***")));
+        log (String (F ("*** Requested footer is too long. Setting to default ***")));
         GenericSerialFooter = "";
     }
 
@@ -235,7 +235,6 @@ bool c_OutputSerial::validate ()
 bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
-    uint temp; // Holds enums prior to conversion
     setFromJSON (GenericSerialHeader, jsonConfig, CN_gen_ser_hdr);
     setFromJSON (GenericSerialFooter, jsonConfig, CN_gen_ser_ftr);
     setFromJSON (Num_Channels,        jsonConfig, CN_num_chan);
@@ -439,7 +438,7 @@ void c_OutputSerial::Render ()
     // has the ISR stopped running?
     uint32_t UartMask = GET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
     if (UartMask)
-    { 
+    {
         return;
     }
 

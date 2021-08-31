@@ -15,7 +15,7 @@
 *  damages in connection with, or arising out of, the furnishing, performance
 *  or use of these programs.
 *
-*   This is an Interface base class used to manage the output port. It provides 
+*   This is an Interface base class used to manage the output port. It provides
 *   a common API for use by the factory class to manage the object.
 *
 */
@@ -52,8 +52,8 @@ static void IRAM_ATTR uart_intr_handler (void* param);
 
 //-------------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
-c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds iOutputChannelId, 
-	                            gpio_num_t outputGpio, 
+c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds iOutputChannelId,
+	                            gpio_num_t outputGpio,
 	                            uart_port_t uart,
                                 c_OutputMgr::e_OutputType outputType)
 {
@@ -70,7 +70,7 @@ c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds iOutputChannelId
     // LOG_PORT.println (String ("OutputChannelId: '") + OutputChannelId + "'");
     // LOG_PORT.println (String ("OutputType:      '") + OutputType + "'");
     if (gpio_num_t (-1) != DataPin)
-    { 
+    {
         pinMode (DataPin, INPUT_PULLUP);
     }
 
@@ -95,7 +95,7 @@ c_OutputCommon::~c_OutputCommon ()
 /* Use the current config to set up the output port
 */
 void c_OutputCommon::InitializeUart (uint32_t baudrate,
-                                     uint32_t uartFlags, 
+                                     uint32_t uartFlags,
                                      uint32_t uartFlags2,
                                      uint32_t fifoTriggerLevel)
 {
@@ -178,8 +178,8 @@ void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
 
     TerminateUartOperation ();
 
-    // In the ESP32 you need to be careful which CPU is being configured 
-    // to handle interrupts. These API functions are supposed to handle this 
+    // In the ESP32 you need to be careful which CPU is being configured
+    // to handle interrupts. These API functions are supposed to handle this
     // selection.
 
     // DEBUG_V (String ("UartId  = '") + UartId + "'");
@@ -203,7 +203,7 @@ void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
     }
 
     // start the generic UART driver.
-    // NOTE: Zero for RX buffer size causes errors in the uart API. 
+    // NOTE: Zero for RX buffer size causes errors in the uart API.
     // Must be at least one byte larger than the fifo size
     // Do not set ESP_INTR_FLAG_IRAM here. the driver's ISR handler is not located in IRAM
     // DEBUG_V ("");
@@ -241,7 +241,7 @@ void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
     jsonStatus[CN_id] = OutputChannelId;
     jsonStatus["framerefreshrate"] = (0 == FrameRefreshTimeInMicroSec) ? 0 : int (MicroSecondsInAsecond / FrameRefreshTimeInMicroSec);
     jsonStatus["FrameCount"] = FrameCount;
-    
+
     // DEBUG_END;
 } // GetStatus
 
@@ -283,7 +283,7 @@ void c_OutputCommon::TerminateUartOperation ()
             }
         } // end switch (UartId)
     }
-    
+
     // DEBUG_END;
 
 } // TerminateUartOperation
@@ -351,7 +351,7 @@ void c_OutputCommon::GenerateBreak (uint32_t DurationInUs)
 bool c_OutputCommon::SetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
-    uint tempDataPin = uint (DataPin);
+    uint8_t tempDataPin = uint8_t (DataPin);
 
     bool response = setFromJSON (tempDataPin, jsonConfig, CN_data_pin);
 
@@ -369,7 +369,13 @@ void c_OutputCommon::GetConfig (JsonObject & jsonConfig)
     // DEBUG_START;
 
     // enums need to be converted to uints for json
-    jsonConfig[CN_data_pin] = uint (DataPin);
+    jsonConfig[CN_data_pin] = uint8_t (DataPin);
 
     // DEBUG_END;
 } // GetConfig
+
+void c_OutputCommon::log(String message) {
+    String DriverName = "";
+    GetDriverName (DriverName);
+    LOG_PORT.println("[" + DriverName + "] " + message);
+} // log

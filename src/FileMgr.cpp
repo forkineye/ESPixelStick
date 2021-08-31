@@ -68,7 +68,9 @@ void c_FileMgr::Begin ()
             //listDir (LITTLEFS, String ("/"), 3);
         }
 
-        SetSpiIoPins ();
+        // SetSpiIoPins will be called via SetConfig when we boot and config.json is loaded.
+        // No need to call it yet.
+        //SetSpiIoPins ();
 
     } while (false);
 
