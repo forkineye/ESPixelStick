@@ -157,7 +157,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
     }
     // DEBUG_V ("");
     // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
-    
+
     // PrettyPrint (InputMgrButtonData, String("Before"));
     ExternalInput.GetConfig (InputMgrButtonData);
     // PrettyPrint (InputMgrButtonData, String("After"));
@@ -536,12 +536,12 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
         } // end switch (NewChannelType)
 
         // DEBUG_V ("");
-        String sDriverName;
-        pInputChannelDrivers[ChannelIndex]->GetDriverName (sDriverName);
-        Serial.println (String (CN_stars) + " '" + sDriverName + F("' Initialization for input: '") + String(ChannelIndex) + "'" + CN_stars);
+        //String sDriverName;
+        //pInputChannelDrivers[ChannelIndex]->GetDriverName (sDriverName);
+        //Serial.println (String (CN_stars) + " '" + sDriverName + F("' Initialization for input: '") + String(ChannelIndex) + "'" + CN_stars);
         pInputChannelDrivers[ChannelIndex]->Begin ();
         pInputChannelDrivers[ChannelIndex]->SetBufferInfo (InputDataBuffer, InputDataBufferSize);
-        
+
     } while (false);
 
     // DEBUG_END;
@@ -692,7 +692,7 @@ void c_InputMgr::ProcessEffectsButtonActions ()
 bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
-    boolean Response = false;
+    bool Response = false;
 
     // DEBUG_V ("InputDataBufferSize: " + String (InputDataBufferSize));
     // DEBUG_V ("ConfigData: " + ConfigData);

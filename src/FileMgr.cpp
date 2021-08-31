@@ -65,7 +65,7 @@ void c_FileMgr::Begin ()
         else
         {
             LOG_PORT.println (F ("Flash File system initialized."));
-            listDir (LITTLEFS, String ("/"), 3);
+            //listDir (LITTLEFS, String ("/"), 3);
         }
 
         SetSpiIoPins ();
@@ -76,11 +76,11 @@ void c_FileMgr::Begin ()
 } // begin
 
 //-----------------------------------------------------------------------------
-boolean c_FileMgr::SetConfig (JsonObject & json)
+bool c_FileMgr::SetConfig (JsonObject & json)
 {
     // DEBUG_START;
 
-    boolean ConfigChanged = false;
+    bool ConfigChanged = false;
     if (json.containsKey (CN_device))
     {
         JsonObject JsonDeviceConfig = json[CN_device];
@@ -218,7 +218,7 @@ void c_FileMgr::listDir (fs::FS& fs, String dirname, uint8_t levels)
 //-----------------------------------------------------------------------------
 bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler Handler)
 {
-    boolean retval = false;
+    bool retval = false;
 
     do // once
     {
@@ -635,7 +635,7 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
             // DEBUG_V ("EntryName: " + EntryName);
             // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
 
-            if ((0 != EntryName.length ()) && 
+            if ((0 != EntryName.length ()) &&
                 (EntryName != String (F ("System Volume Information"))) &&
                 (0 != entry.size ())
                )

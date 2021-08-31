@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "WSL",
+            "name": "ESP8266",
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/../libraries/**",
@@ -14,6 +14,7 @@
                 "_UNICODE",
                 "ARDUINO_ARCH_ESP8266"
             ],
+            "compilerPath": "${workspaceFolder}/../hardware/esp8266com/esp8266/tools/xtensa-lx106-elf/bin/xtensa-lx106-elf-gcc.exe",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "gcc-x64",

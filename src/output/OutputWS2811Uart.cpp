@@ -46,7 +46,7 @@ extern "C" {
 #endif // ndef UART_INV_MASK
 
 #define WS2811_MICRO_SEC_PER_INTENSITY  10L     // ((1/800000) * 8 bits) = 10us
-#define WS2811_MIN_IDLE_TIME_US            300L    ///< 300us idle time
+//#define WS2811_MIN_IDLE_TIME_US            300L    ///< 300us idle time
 
 // TX FIFO trigger level. 40 bytes gives 100us before the FIFO goes empty
 // We need to fill the FIFO at a rate faster than 0.3us per byte (1.2us/pixel)

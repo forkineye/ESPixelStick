@@ -58,8 +58,8 @@ c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInput
 
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::c_InputEffectEngine () :
-    c_InputCommon (c_InputMgr::e_InputChannelIds::InputChannelId_1, 
-        c_InputMgr::e_InputType::InputType_Effects, 
+    c_InputCommon (c_InputMgr::e_InputChannelIds::InputChannelId_1,
+        c_InputMgr::e_InputType::InputType_Effects,
         nullptr, 0)
 {
     // DEBUG_START;
@@ -285,7 +285,7 @@ void c_InputEffectEngine::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSi
 } // SetBufferInfo
 
 //-----------------------------------------------------------------------------
-boolean c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
+bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
     String effectName;
@@ -321,10 +321,10 @@ boolean c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // SetConfig
 
 //-----------------------------------------------------------------------------
-boolean c_InputEffectEngine::SetMqttConfig (ArduinoJson::JsonObject& jsonConfig)
+bool c_InputEffectEngine::SetMqttConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
-    boolean response = false;
+    bool response = false;
     String effectName;
 
     response |= setFromJSON (EffectSpeed,        jsonConfig, CN_speed);
@@ -707,7 +707,7 @@ uint16_t c_InputEffectEngine::effectFireFlicker ()
     for (uint16_t i = 0; i < PixelCount; i++)
     {
         uint8_t flicker = random (lum);
-        setPixel (i, CRGB{ uint8_t(max (EffectColor.r - flicker, 0)), 
+        setPixel (i, CRGB{ uint8_t(max (EffectColor.r - flicker, 0)),
                            uint8_t(max (EffectColor.g - flicker, 0)),
                            uint8_t(max (EffectColor.b - flicker, 0)) });
     }
@@ -755,7 +755,7 @@ uint16_t c_InputEffectEngine::effectLightning ()
             // follow-up flashes (stronger)
             intensity = random (128, 256); // next flashes are stronger
         }
-        
+
         CRGB temprgb = { uint8_t (uint32_t (EffectColor.r) * intensity / 256),
                          uint8_t (uint32_t (EffectColor.g) * intensity / 256),
                          uint8_t (uint32_t (EffectColor.b) * intensity / 256) };

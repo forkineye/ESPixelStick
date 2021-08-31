@@ -248,7 +248,7 @@ void c_InputE131::SetBufferTranslation ()
 } // SetBufferTranslation
 
 //-----------------------------------------------------------------------------
-boolean c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
+bool c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
@@ -297,11 +297,11 @@ void c_InputE131::validateConfiguration ()
     // DEBUG_V (String ("FirstUniverseChannelOffset: ") + String (FirstUniverseChannelOffset));
     // DEBUG_V (String ("              LastUniverse: ") + String (startUniverse));
 
-    if (startUniverse < 1) 
+    if (startUniverse < 1)
     {
         // DEBUG_V (String("ERROR: startUniverse: ") + String(startUniverse));
 
-        startUniverse = 1; 
+        startUniverse = 1;
     }
 
     // DEBUG_V ("");

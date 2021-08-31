@@ -138,7 +138,7 @@ void c_InputFPPRemote::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
 } // SetBufferInfo
 
 //-----------------------------------------------------------------------------
-boolean c_InputFPPRemote::SetConfig (JsonObject & jsonConfig)
+bool c_InputFPPRemote::SetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
 

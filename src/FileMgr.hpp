@@ -43,7 +43,7 @@ public:
     void    Begin     ();
     void    Poll      ();
     void    GetConfig (JsonObject& json);
-    boolean SetConfig (JsonObject& json);
+    bool SetConfig (JsonObject& json);
 
     void    handleFileUpload (const String & filename, size_t index, uint8_t * data, size_t len, bool final);
 

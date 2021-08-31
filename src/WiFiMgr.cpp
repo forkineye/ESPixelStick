@@ -153,6 +153,11 @@ void c_WiFiMgr::connectWifi (const String & ssid, const String & passphrase)
 {
     // DEBUG_START;
 
+    // WiFi reset flag is set which will be handled in the next iteration of the main loop.
+    // Ignore connect request to lessen boot spam.
+    if (ResetWiFi)
+        return;
+
     // disconnect just in case
 #ifdef ARDUINO_ARCH_ESP8266
     WiFi.disconnect ();
@@ -434,7 +439,7 @@ void fsm_WiFi_state_ConnectingUsingConfig::Init ()
     else
     {
         WiFiMgr.SetFsmState (this);
-        WiFiMgr.AnnounceState ();
+        //WiFiMgr.AnnounceState ();
         WiFiMgr.SetFsmStartTime (millis ());
 
         WiFiMgr.connectWifi (config.ssid, config.passphrase);
@@ -485,7 +490,7 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Init ()
     // DEBUG_START;
 
     WiFiMgr.SetFsmState (this);
-    WiFiMgr.AnnounceState ();
+    //WiFiMgr.AnnounceState ();
     WiFiMgr.SetFsmStartTime (millis ());
 
     // Switch to station mode and disconnect just in case
@@ -600,7 +605,7 @@ void fsm_WiFi_state_ConnectedToAP::Init ()
     // DEBUG_START;
 
     WiFiMgr.SetFsmState (this);
-    WiFiMgr.AnnounceState ();
+    //WiFiMgr.AnnounceState ();
 
     WiFiMgr.SetUpIp ();
 
@@ -654,7 +659,7 @@ void fsm_WiFi_state_ConnectedToSta::Init ()
     // DEBUG_START;
 
     WiFiMgr.SetFsmState (this);
-    WiFiMgr.AnnounceState ();
+    //WiFiMgr.AnnounceState ();
 
     WiFiMgr.SetUpIp ();
 

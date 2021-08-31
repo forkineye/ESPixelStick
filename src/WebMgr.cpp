@@ -218,6 +218,9 @@ void c_WebMgr::init ()
     // Static Handler
     webServer.serveStatic ("/", LITTLEFS, "/www/").setDefaultFile ("index.html");
 
+    // FS Debugging Handler
+    webServer.serveStatic ("/fs", LITTLEFS, "/" );
+
     // if the client posts to the upload page
     webServer.on ("/upload", HTTP_POST | HTTP_PUT | HTTP_OPTIONS,
         [](AsyncWebServerRequest * request)
@@ -848,7 +851,7 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
             (jsonCmd[CN_get] == CN_network)  )
         {
             // DEBUG_V ("device/network");
-            FileMgr.ReadConfigFile (ConfigFileName, 
+            FileMgr.ReadConfigFile (ConfigFileName,
                                     (byte*)&WebSocketFrameCollectionBuffer[bufferoffset],
                                     BufferFreeSize);
             // DEBUG_V ("");

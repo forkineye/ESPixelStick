@@ -554,7 +554,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     // DEBUG_V ("");
                 }
 #endif // def ARDUINO_ARCH_ESP32
-                else 
+                else
                 {
                     // LOG_PORT.println (String (F ("************** Starting WS2811 UART for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811Uart (ChannelIndex, dataPin, UartId, OutputType_WS2811);
@@ -599,9 +599,9 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
         } // end switch (NewChannelType)
 
         // DEBUG_V ("");
-        String sDriverName;
-        pOutputChannelDrivers[ChannelIndex]->GetDriverName (sDriverName);
-        Serial.println (String (CN_stars) + " '" + sDriverName + F ("' Initialization for Output: '") + String (ChannelIndex) + "'" + CN_stars);
+        //String sDriverName;
+        //pOutputChannelDrivers[ChannelIndex]->GetDriverName (sDriverName);
+        //Serial.println (String (CN_stars) + " '" + sDriverName + F ("' Initialization for Output: '") + String (ChannelIndex) + "'" + CN_stars);
         pOutputChannelDrivers[ChannelIndex]->Begin ();
 
     } while (false);
@@ -661,7 +661,7 @@ void c_OutputMgr::LoadConfig ()
 bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
 {
     // DEBUG_START;
-    boolean Response = false;
+    bool Response = false;
 
     // DEBUG_V ("");
 

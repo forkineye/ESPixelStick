@@ -127,7 +127,7 @@ void c_InputAlexa::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
 } // SetBufferInfo
 
 //-----------------------------------------------------------------------------
-boolean c_InputAlexa::SetConfig (ArduinoJson::JsonObject& jsonConfig)
+bool c_InputAlexa::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 

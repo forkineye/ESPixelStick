@@ -162,11 +162,11 @@ void c_InputMQTT::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
     }
 
     // DEBUG_END;
-    
+
 } // SetBufferInfo
 
 //-----------------------------------------------------------------------------
-boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject & jsonConfig)
+bool c_InputMQTT::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
@@ -346,7 +346,7 @@ void c_InputMQTT::onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
     // DEBUG_START;
 
     LOG_PORT.println(String(F ("MQTT Disconnected: DisconnectReason: ")) + String(DisconnectReasons[uint8_t(reason)]));
-    
+
     if (InputMgr.GetNetworkState ())
     {
         // DEBUG_V ("");
@@ -452,7 +452,7 @@ void c_InputMQTT::onMqttMessage(
         }
 
         publishState ();
-    
+
         // DEBUG_V ("");
     } while (false);
 
@@ -705,7 +705,7 @@ void c_InputMQTT::publishHA()
 
         String HaJsonConfig;
         serializeJson(JsonConfig, HaJsonConfig);
-        
+
         // DEBUG_V (String ("HaJsonConfig: ") + HaJsonConfig);
         mqtt.publish(ha_config.c_str(), 0, true, HaJsonConfig.c_str());
 

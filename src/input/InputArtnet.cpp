@@ -134,9 +134,9 @@ void c_InputArtnet::Process ()
 
 //-----------------------------------------------------------------------------
 void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
-                                uint16_t  length, 
+                                uint16_t  length,
                                 uint8_t   SequenceNumber,
-                                uint8_t * data, 
+                                uint8_t * data,
                                 IPAddress remoteIP)
 {
     // DEBUG_START;
@@ -246,7 +246,7 @@ void c_InputArtnet::SetBufferTranslation ()
 } // SetBufferTranslation
 
 //-----------------------------------------------------------------------------
-boolean c_InputArtnet::SetConfig (ArduinoJson::JsonObject& jsonConfig)
+bool c_InputArtnet::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
@@ -309,11 +309,11 @@ void c_InputArtnet::validateConfiguration ()
     // DEBUG_V (String ("FirstUniverseChannelOffset: ") + String (FirstUniverseChannelOffset));
     // DEBUG_V (String ("              LastUniverse: ") + String (startUniverse));
 
-    if (startUniverse < 1) 
+    if (startUniverse < 1)
     {
         // DEBUG_V (String("ERROR: startUniverse: ") + String(startUniverse));
 
-        startUniverse = 1; 
+        startUniverse = 1;
     }
 
     // DEBUG_V ("");
