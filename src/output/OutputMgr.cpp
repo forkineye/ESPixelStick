@@ -344,7 +344,7 @@ void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
     // DEBUG_START;
 
     JsonArray OutputStatus = jsonStatus.createNestedArray (CN_output);
-    uint channelIndex = 0;
+    uint8_t channelIndex = 0;
     for (auto CurrentOutput : pOutputChannelDrivers)
     {
         // DEBUG_V("");

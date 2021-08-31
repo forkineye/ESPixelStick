@@ -16,6 +16,7 @@
 *
 */
 
+#include <Arduino.h>
 #include "FPPDiscovery.h"
 #include "fseq.h"
 
@@ -77,21 +78,28 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         // DEBUG_V ();
 
         IPAddress address = IPAddress (239, 70, 80, 80);
+        bool fail = false;
 
         // Try to listen to the broadcast port
         if (!udp.listen (FPP_DISCOVERY_PORT))
         {
             LOG_PORT.println (String (F ("FPPDiscovery FAILED to subscribed to broadcast messages")));
+            fail = true;
             break;
         }
-        LOG_PORT.println (String (F ("FPPDiscovery subscribed to broadcast")));
+        //LOG_PORT.println (String (F ("FPPDiscovery subscribed to broadcast")));
 
         if (!udp.listenMulticast (address, FPP_DISCOVERY_PORT))
         {
             LOG_PORT.println (String (F ("FPPDiscovery FAILED to subscribed to multicast messages")));
+            fail = true;
             break;
         }
-        LOG_PORT.println (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
+        //LOG_PORT.println (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
+
+        if (!fail)
+            LOG_PORT.println (String (F ("- FPPDiscovery service started")));
+
         udp.onPacket (std::bind (&c_FPPDiscovery::ProcessReceivedUdpPacket, this, std::placeholders::_1));
 
         sendPingPacket ();
@@ -109,7 +117,7 @@ void c_FPPDiscovery::Disable ()
 
     IsEnabled = false;
     StopPlaying ();
-    
+
     // DEBUG_END;
 
 } // Disable
@@ -120,7 +128,7 @@ void c_FPPDiscovery::Enable ()
     // DEBUG_START;
 
     IsEnabled = true;
-    
+
     // DEBUG_END;
 
 } // Enable
@@ -915,7 +923,7 @@ void c_FPPDiscovery::StopPlaying ()
     // DEBUG_V ("");
 
     ProcessBlankPacket ();
-    
+
     // DEBUG_END;
 
 } // StopPlaying
