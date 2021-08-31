@@ -83,7 +83,7 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         // Try to listen to the broadcast port
         if (!udp.listen (FPP_DISCOVERY_PORT))
         {
-            LOG_PORT.println (String (F ("FPPDiscovery FAILED to subscribed to broadcast messages")));
+            log (String (F ("FAILED to subscribed to broadcast messages")));
             fail = true;
             break;
         }
@@ -91,14 +91,14 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
 
         if (!udp.listenMulticast (address, FPP_DISCOVERY_PORT))
         {
-            LOG_PORT.println (String (F ("FPPDiscovery FAILED to subscribed to multicast messages")));
+            log (String (F ("FAILED to subscribed to multicast messages")));
             fail = true;
             break;
         }
         //LOG_PORT.println (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
 
         if (!fail)
-            LOG_PORT.println (String (F ("- FPPDiscovery started on port ")) + String(FPP_DISCOVERY_PORT));
+            log (String (F ("Listening on port ")) + String(FPP_DISCOVERY_PORT));
 
         udp.onPacket (std::bind (&c_FPPDiscovery::ProcessReceivedUdpPacket, this, std::placeholders::_1));
 
@@ -588,7 +588,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                         break;
                     }
                 }
-                LOG_PORT.println (String (F ("FPP Discovery: Could not open: ")) + seq);
+                log (String (F ("Could not open: ")) + seq);
             }
         }
         request->send (404);
@@ -623,7 +623,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
         c_FileMgr::FileId FileHandle;
         if (false == FileMgr.OpenSdFile (filename, c_FileMgr::FileMode::FileRead, FileHandle))
         {
-            LOG_PORT.println (String (F ("c_FPPDiscovery::ProcessPOST: File Does Not Exist - FileName: ")) + filename);
+            log (String (F ("c_FPPDiscovery::ProcessPOST: File Does Not Exist - FileName: ")) + filename);
             request->send (404);
             break;
         }
@@ -940,5 +940,11 @@ bool c_FPPDiscovery::AllowedToRemotePlayFiles()
 
     return (FileMgr.SdCardIsInstalled() && IsEnabled);
 } // AllowedToRemotePlayFiles
+
+// No service module parent class like i/o has for logging. Fake it til we make it.
+void c_FPPDiscovery::log(String message) {
+    LOG_PORT.println("[FPPDiscovery] " + message);
+} // log
+
 
 c_FPPDiscovery FPPDiscovery;

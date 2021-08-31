@@ -355,7 +355,8 @@ bool c_FileMgr::ReadConfigFile (const String& FileName, String& FileData)
     fs::File file = LITTLEFS.open (FileName.c_str (), CN_r);
     if (file)
     {
-        LOG_PORT.println (CfgFileMessagePrefix + String (F ("reading ")) + String (file.size()) + F (" bytes."));
+        // Supress this for now, may add it back later
+        //LOG_PORT.println (CfgFileMessagePrefix + String (F ("reading ")) + String (file.size()) + F (" bytes."));
 
         // DEBUG_V (String("File '") + FileName + "' is open.");
         file.seek (0, SeekSet);
@@ -446,10 +447,13 @@ bool c_FileMgr::ReadConfigFile (const String & FileName, byte * FileData, size_t
             break;
         }
 
+        // Supress this for now, may add it back later
+        /*
         LOG_PORT.print   (FileName);
         LOG_PORT.print   (" reading ");
         LOG_PORT.print   (file.size ());
         LOG_PORT.println (" bytes.");
+        */
 
         // DEBUG_V (String("File '") + FileName + "' is open.");
         file.seek (0, SeekSet);

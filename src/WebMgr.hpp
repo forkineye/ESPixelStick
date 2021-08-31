@@ -89,6 +89,8 @@ private:
     void GetInputOptions            ();
     void GetOutputOptions           ();
 
+    void log (String message);
+
 #ifdef USE_REST
     void RestProcessGET (AsyncWebServerRequest* request);
     void RestProcessPOST (AsyncWebServerRequest* request);

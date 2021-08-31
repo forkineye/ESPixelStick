@@ -389,7 +389,7 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
 
         if (e131->begin (E131_UNICAST))
         {
-            log (String (F ("Unicast enabled on port ")) + E131_DEFAULT_PORT);
+            log (String (F ("Listening on port ")) + E131_DEFAULT_PORT);
         }
         else
         {
