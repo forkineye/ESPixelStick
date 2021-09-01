@@ -31,6 +31,7 @@ c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
 {
     // DEBUG_START;
     // DEBUG_V ("BufferSize: " + String (BufferSize));
+    e131 = new ESPAsyncE131 (0);
 
     memset ((void*)UniverseArray, 0x00, sizeof (UniverseArray));
 
@@ -41,10 +42,6 @@ c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
 c_InputE131::~c_InputE131()
 {
     // DEBUG_START;
-
-    // The E1.31 layer and UDP layer do not handle a shut down well (at all). Ask for a reboot.
-    log (String (F ("** Shutdown for input ")) + String (InputChannelId) +
-            (F (" -  Reboot required **")));
 
     // DEBUG_END;
 
@@ -57,12 +54,6 @@ void c_InputE131::Begin ()
 
     do // once
     {
-        if (true == HasBeenInitialized)
-        {
-            // DEBUG_V ("");
-            // break;
-        }
-
         // DEBUG_V ("InputDataBufferSize: " + String(InputDataBufferSize));
 
         validateConfiguration ();
@@ -71,6 +62,11 @@ void c_InputE131::Begin ()
         NetworkStateChanged (WiFiMgr.IsWiFiConnected (), false);
 
         // DEBUG_V ("");
+        e131->RegisterCallback ( (void*)this, [] (e131_packet_t* Packet, void * pThis)
+            {
+                ((c_InputE131*)pThis)->ProcessIncomingE131Data (Packet);
+            });
+
         HasBeenInitialized = true;
 
     } while (false);
@@ -102,20 +98,22 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
     e131Status[F ("unifirst")]      = startUniverse;
     e131Status[F ("unilast")]       = LastUniverse;
     e131Status[F ("unichanlim")]    = ChannelsPerUniverse;
-    // DEBUG_V ("");
 
     e131Status[F ("num_packets")]   = e131->stats.num_packets;
-    e131Status[F ("packet_errors")] = e131->stats.packet_errors;
-    e131Status[F ("last_clientIP")] = e131->stats.last_clientIP.toString ();
+    e131Status[F ("last_clientIP")] = uint32_t(e131->stats.last_clientIP);
+    // DEBUG_V ("");
 
     JsonArray e131UniverseStatus = e131Status.createNestedArray (CN_channels);
-
+    uint32_t TotalErrors = e131->stats.packet_errors;
     for (auto & CurrentUniverse : UniverseArray)
     {
         JsonObject e131CurrentUniverseStatus = e131UniverseStatus.createNestedObject ();
 
         e131CurrentUniverseStatus[F ("errors")] = CurrentUniverse.SequenceErrorCounter;
+        TotalErrors += CurrentUniverse.SequenceErrorCounter;
     }
+
+    e131Status[F ("packet_errors")] = TotalErrors;
 
     // DEBUG_END;
 
@@ -126,59 +124,66 @@ void c_InputE131::Process ()
 {
     // DEBUG_START;
 
-    uint8_t*    E131Data;
+    // DEBUG_END;
+
+} // process
+
+//-----------------------------------------------------------------------------
+void c_InputE131::ProcessIncomingE131Data (e131_packet_t * packet)
+{
+    // DEBUG_START;
+
+    uint8_t   * E131Data;
     uint16_t    CurrentUniverseId;
 
     do // once
     {
-        if ((0 == InputDataBufferSize) || (nullptr == e131))
+        if (0 == InputDataBufferSize)
         {
             // no place to put any data
             break;
         }
 
-        // Parse a packet and update pixels
-        while (!e131->isEmpty ())
+        CurrentUniverseId = ntohs (packet->universe);
+        E131Data = packet->property_values + 1;
+
+        // DEBUG_V ("     CurrentUniverseId: " + String(CurrentUniverseId));
+        // DEBUG_V ("packet.sequence_number: " + String(packet.sequence_number));
+
+        if ((startUniverse <= CurrentUniverseId) && (LastUniverse >= CurrentUniverseId))
         {
-            e131->pull (&packet);
-            CurrentUniverseId = ntohs (packet.universe);
-            E131Data = packet.property_values + 1;
+            // Universe offset and sequence tracking
+            Universe_t& CurrentUniverse = UniverseArray[CurrentUniverseId - startUniverse];
 
-            // DEBUG_V ("     CurrentUniverseId: " + String(CurrentUniverseId));
-            // DEBUG_V ("packet.sequence_number: " + String(packet.sequence_number));
-
-            if ((startUniverse <= CurrentUniverseId) && (LastUniverse >= CurrentUniverseId))
+            // Do we need to update a sequnce error?
+            if (packet->sequence_number != CurrentUniverse.SequenceNumber)
             {
-                // Universe offset and sequence tracking
-                Universe_t& CurrentUniverse = UniverseArray[CurrentUniverseId - startUniverse];
+                // DEBUG_V (F ("E1.31 Sequence Error - expected: "));
+                // DEBUG_V (CurrentUniverse.SequenceNumber);
+                // DEBUG_V (F (" actual: "));
+                // DEBUG_V (packet->sequence_number);
+                // DEBUG_V (" " + String (CN_universe) + " : ");
+                // DEBUG_V (CurrentUniverseId);
 
-                // Do we need to update a sequnce error?
-                if (packet.sequence_number != CurrentUniverse.SequenceNumber)
-                {
-                    log (String (F ("Sequence Error - expected: ")) + CurrentUniverse.SequenceNumber +
-                            F (" actual: ") + packet.sequence_number +
-                            " " + CN_universe + " : " + CurrentUniverseId);
-
-                    CurrentUniverse.SequenceErrorCounter++;
-                    CurrentUniverse.SequenceNumber = packet.sequence_number;
-                }
-
-                ++CurrentUniverse.SequenceNumber;
-
-                uint16_t NumBytesOfE131Data = ntohs (packet.property_value_count) - 1;
-
-                memcpy (CurrentUniverse.Destination,
-                        & E131Data[CurrentUniverse.SourceDataOffset],
-                        min (CurrentUniverse.BytesToCopy, NumBytesOfE131Data));
-
-                InputMgr.ResetBlankTimer ();
-            }
-            else
-            {
-                // DEBUG_V ("Not interested in this universe");
+                CurrentUniverse.SequenceErrorCounter++;
+                CurrentUniverse.SequenceNumber = packet->sequence_number;
             }
 
-        } // end while there is data to process
+            ++CurrentUniverse.SequenceNumber;
+
+            uint16_t NumBytesOfE131Data = ntohs (packet->property_value_count) - 1;
+
+            memcpy (CurrentUniverse.Destination,
+                &E131Data[CurrentUniverse.SourceDataOffset],
+                min (CurrentUniverse.BytesToCopy, NumBytesOfE131Data));
+
+            InputMgr.ResetBlankTimer ();
+        }
+        else
+        {
+            // DEBUG_V ("Not interested in this universe");
+        }
+
     } while (false);
 
     // DEBUG_END;
@@ -193,9 +198,12 @@ void c_InputE131::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
     InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
 
-    // buffer has moved. Start Over
-    HasBeenInitialized = false;
-    Begin ();
+    if (HasBeenInitialized)
+    {
+        // buffer has moved. Start Over
+        HasBeenInitialized = false;
+        Begin ();
+    }
 
     SetBufferTranslation ();
 
@@ -341,16 +349,6 @@ void c_InputE131::validateConfiguration ()
 
     SetBufferTranslation ();
 
-    // Zero out packet stats
-    if (nullptr == e131)
-    {
-        // DEBUG_V ("Start E1.31 driver");
-        e131 = new ESPAsyncE131 (10);
-    }
-
-    // DEBUG_V ("");
-    e131->stats.num_packets = 0;
-
     // DEBUG_END;
 
 } // validateConfiguration
@@ -366,13 +364,6 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
 {
     // DEBUG_START;
 
-    if (nullptr == e131)
-    {
-        // DEBUG_V ("Instantiate E1.31");
-        e131 = new ESPAsyncE131 (10);
-    }
-    // DEBUG_V ("");
-
     if (IsConnected)
     {
         // Get on with business
@@ -382,7 +373,7 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         }
         else
         {
-            log (F ("*** MULTICAST INIT FAILED ****"));
+            log (CN_stars + String (F (" E1.31 MULTICAST INIT FAILED ")) + CN_stars);
         }
 
         // DEBUG_V ("");
@@ -393,7 +384,7 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         }
         else
         {
-            log (F ("*** UNICAST INIT FAILED ****"));
+            log (CN_stars + String (F (" E1.31 UNICAST INIT FAILED ")) + CN_stars);
         }
 
         // Setup IGMP subscriptions

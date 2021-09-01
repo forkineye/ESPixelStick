@@ -50,11 +50,12 @@ extern "C" {
 /*
 * 8N2 UART lookup table for TM1814, first 2 bits ignored.
 * Start and stop bits are part of the pixel stream.
+* Data intensity bits are inverted wrt the spec. 
 */
 static char ConvertIntensityToUartDataStream[] =
 {
+    0b11000000,     // (0) 0000 0011 (11)
     0b11111100,     // (0) 0011 1111 (11)
-    0b11100000,     // (0) 0000 0111 (11)
 };
 
 // forward declaration for the isr handler
@@ -105,17 +106,12 @@ c_OutputTM1814Uart::~c_OutputTM1814Uart ()
 } // ~c_OutputTM1814Uart
 
 //----------------------------------------------------------------------------
-/* shell function to set the 'this' pointer of the real ISR
-   This allows me to use non static variables in the ISR.
- */
 static void IRAM_ATTR uart_intr_handler (void* param)
 {
     reinterpret_cast <c_OutputTM1814Uart*>(param)->ISR_Handler ();
 } // uart_intr_handler
 
 //----------------------------------------------------------------------------
-/* Use the current config to set up the output port
-*/
 void c_OutputTM1814Uart::Begin ()
 {
     // DEBUG_START;
@@ -151,14 +147,6 @@ void c_OutputTM1814Uart::Begin ()
 } // init
 
 //----------------------------------------------------------------------------
-/* Process the config
-*
-*   needs
-*       reference to string to process
-*   returns
-*       true - config has been accepted
-*       false - Config rejected. Using defaults for invalid settings
-*/
 bool c_OutputTM1814Uart::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
@@ -192,9 +180,6 @@ void c_OutputTM1814Uart::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 } // SetOutputBufferSize
 
 //----------------------------------------------------------------------------
-/*
-     * Fill the FIFO with as many intensity values as it can hold.
-     */
 void IRAM_ATTR c_OutputTM1814Uart::ISR_Handler ()
 {
     // Process if the desired UART has raised an interrupt
@@ -213,7 +198,7 @@ void IRAM_ATTR c_OutputTM1814Uart::ISR_Handler ()
             // convert the intensity data into RMT data
             for (uint8_t bitmask = 0x80; 0 != bitmask; bitmask >>= 1)
             {
-                enqueue( (IntensityValue & bitmask) ? OneValue : ZeroValue);
+                enqueueUart( (IntensityValue & bitmask) ? OneValue : ZeroValue);
             }
 
         } // end while there is data to be sent

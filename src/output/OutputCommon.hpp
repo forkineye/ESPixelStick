@@ -102,7 +102,7 @@ protected:
 #  define getFifoLength ((uint16_t)((U1S >> USTXC) & 0xff))
 
    /* Append a byte to the TX FIFO of UART1 */
-#  define enqueue(data)  (U1F = (char)(data))
+#  define enqueueUart(data)  (U1F = (char)(data))
 
 #elif defined(ARDUINO_ARCH_ESP32)
 
@@ -112,7 +112,7 @@ protected:
 
     /* Append a byte to the TX FIFO of UART1 */
 // #   define enqueue(value) WRITE_PERI_REG(UART_FIFO_AHB_REG (UART), (char)(value))
-#	define enqueue(value) (*((volatile uint32_t*)(UART_FIFO_AHB_REG (UartId)))) = (uint32_t)(value)
+#	define enqueueUart(value) (*((volatile uint32_t*)(UART_FIFO_AHB_REG (UartId)))) = (uint32_t)(value)
 
 #endif
 

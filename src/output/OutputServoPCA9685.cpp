@@ -85,18 +85,18 @@ bool c_OutputServoPCA9685::validate ()
 
     if ((Num_Channels > OM_SERVO_PCA9685_CHANNEL_LIMIT) || (Num_Channels < 1))
     {
-        log (String (F ("*** Requested channel count was not valid. Setting to ")) + OM_SERVO_PCA9685_CHANNEL_LIMIT + F (" ***"));
+        log (CN_stars + String (F (" Requested channel count was not valid. Setting to ")) + OM_SERVO_PCA9685_CHANNEL_LIMIT + " " + CN_stars);
         Num_Channels = OM_SERVO_PCA9685_CHANNEL_LIMIT;
         response = false;
     }
 
     if (Num_Channels < OM_SERVO_PCA9685_CHANNEL_LIMIT)
     {
-        log (String (F ("*** Requested channel count was not valid. Insuficient number of input channels avaialable ***")));
+        log (CN_stars + String (F (" Requested channel count was not valid. Insuficient number of input channels avaialable ")) + CN_stars);
 
         for (int ChannelIndex = OM_SERVO_PCA9685_CHANNEL_LIMIT - 1; ChannelIndex > Num_Channels; ChannelIndex--)
         {
-            log (String (String(F ("*** Disabling channel '")) + String(ChannelIndex + 1) + String("' ***")));
+            log (String (CN_stars + String(F (" Disabling channel '")) + String(ChannelIndex + 1) + "' " + CN_stars));
             OutputList[ChannelIndex].Enabled = false;
         }
 

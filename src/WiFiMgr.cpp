@@ -168,22 +168,16 @@ void c_WiFiMgr::connectWifi (const String & ssid, const String & passphrase)
 #endif
     // DEBUG_V ("");
 
-    // Switch to station mode
-    WiFi.mode (WIFI_STA);
-    // DEBUG_V ("");
-
     // DEBUG_V (String ("config->hostname: ") + config->hostname);
     if (0 != config->hostname.length ())
     {
         // DEBUG_V (String ("Setting WiFi hostname: ") + config->hostname);
-
-#ifdef ARDUINO_ARCH_ESP8266
         WiFi.hostname (config->hostname);
-#else
-        WiFi.config (INADDR_NONE, INADDR_NONE, INADDR_NONE);
-        WiFi.setHostname (config->hostname.c_str ());
-#endif
     }
+
+    // Switch to station mode
+    WiFi.mode (WIFI_STA);
+    // DEBUG_V ("");
 
     LOG_PORT.println (String(F ("\nWiFi Connecting to '")) +
                       ssid +
@@ -281,7 +275,6 @@ void c_WiFiMgr::onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t in
 {
 #endif
     // DEBUG_START;
-
     pCurrentFsmState->OnConnect ();
 
     // DEBUG_END;
@@ -440,7 +433,7 @@ void fsm_WiFi_state_ConnectingUsingConfig::Init ()
     else
     {
         WiFiMgr.SetFsmState (this);
-        //WiFiMgr.AnnounceState ();
+        WiFiMgr.AnnounceState ();
         WiFiMgr.SetFsmStartTime (millis ());
 
         WiFiMgr.connectWifi (config.ssid, config.passphrase);
@@ -491,7 +484,7 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Init ()
     // DEBUG_START;
 
     WiFiMgr.SetFsmState (this);
-    //WiFiMgr.AnnounceState ();
+    WiFiMgr.AnnounceState ();
     WiFiMgr.SetFsmStartTime (millis ());
 
     // Switch to station mode and disconnect just in case
@@ -606,7 +599,7 @@ void fsm_WiFi_state_ConnectedToAP::Init ()
     // DEBUG_START;
 
     WiFiMgr.SetFsmState (this);
-    //WiFiMgr.AnnounceState ();
+    WiFiMgr.AnnounceState ();
 
     WiFiMgr.SetUpIp ();
 
@@ -660,7 +653,7 @@ void fsm_WiFi_state_ConnectedToSta::Init ()
     // DEBUG_START;
 
     WiFiMgr.SetFsmState (this);
-    //WiFiMgr.AnnounceState ();
+    WiFiMgr.AnnounceState ();
 
     WiFiMgr.SetUpIp ();
 
