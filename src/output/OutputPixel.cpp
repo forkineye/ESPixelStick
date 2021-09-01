@@ -124,14 +124,6 @@ void c_OutputPixel::SetPreambleInformation (uint8_t* PreambleStart, uint8_t NewP
 } // SetPreambleInformation
 
 //----------------------------------------------------------------------------
-/* Process the config
-*
-*   needs
-*       reference to string to process
-*   returns
-*       true - config has been accepted
-*       false - Config rejected. Using defaults for invalid settings
-*/
 bool c_OutputPixel::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
@@ -149,7 +141,7 @@ bool c_OutputPixel::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     // DEBUG_V (String ("PrependNullCount: ") + String (PrependNullCount));
     // DEBUG_V (String (" AppendNullCount: ") + String (AppendNullCount));
-
+ 
     c_OutputCommon::SetConfig (jsonConfig);
 
     bool response = validate ();
