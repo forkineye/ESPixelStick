@@ -291,8 +291,6 @@ void c_OutputCommon::TerminateUartOperation ()
 //----------------------------------------------------------------------------
 void c_OutputCommon::ReportNewFrame ()
 {
-    // DEBUG_START;
-
     uint32_t Now = micros ();
     FrameRefreshTimeInMicroSec = Now - FrameStartTimeInMicroSec;
     FrameStartTimeInMicroSec = Now;

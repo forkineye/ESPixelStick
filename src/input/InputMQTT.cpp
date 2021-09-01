@@ -48,15 +48,12 @@ c_InputMQTT::c_InputMQTT (
 //-----------------------------------------------------------------------------
 c_InputMQTT::~c_InputMQTT ()
 {
-    if (HasBeenInitialized)
-    {
-        mqtt.unsubscribe (topic.c_str ());
-        mqtt.disconnect (/*force = */ true);
-        mqttTicker.detach ();
+    mqtt.unsubscribe (topic.c_str ());
+    mqtt.disconnect (/*force = */ true);
+    mqttTicker.detach ();
 
-        // allow the other input channels to run
-        InputMgr.SetOperationalState (true);
-    }
+    // allow the other input channels to run
+    InputMgr.SetOperationalState (true);
 
     if (nullptr != pEffectsEngine)
     {

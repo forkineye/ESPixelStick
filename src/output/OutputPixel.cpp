@@ -97,18 +97,18 @@ void c_OutputPixel::SetOutputBufferSize (uint16_t NumChannelsAvailable)
         // are we changing size?
         if (NumChannelsAvailable == OutputBufferSize)
         {
-            // DEBUG_V ("NO Need to change the buffer");
+            // DEBUG_V ("NO Need to change the ISR buffer");
             break;
         }
 
-        // DEBUG_V ("Need to change the output buffers");
+        // DEBUG_V ("Need to change the ISR buffer");
 
         // Stop current output operation
         c_OutputCommon::SetOutputBufferSize (NumChannelsAvailable);
 
-    } while (false);
+        } while (false);
 
-    // DEBUG_END;
+        // DEBUG_END;
 } // SetBufferSize
 
 //----------------------------------------------------------------------------
@@ -124,6 +124,14 @@ void c_OutputPixel::SetPreambleInformation (uint8_t* PreambleStart, uint8_t NewP
 } // SetPreambleInformation
 
 //----------------------------------------------------------------------------
+/* Process the config
+*
+*   needs
+*       reference to string to process
+*   returns
+*       true - config has been accepted
+*       false - Config rejected. Using defaults for invalid settings
+*/
 bool c_OutputPixel::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
@@ -141,7 +149,7 @@ bool c_OutputPixel::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     // DEBUG_V (String ("PrependNullCount: ") + String (PrependNullCount));
     // DEBUG_V (String (" AppendNullCount: ") + String (AppendNullCount));
- 
+
     c_OutputCommon::SetConfig (jsonConfig);
 
     bool response = validate ();
@@ -189,10 +197,7 @@ void c_OutputPixel::updateColorOrderOffsets ()
     // make sure the color order is all lower case
     color_order.toLowerCase ();
 
-    // DEBUG_V (String ("color_order: ") + color_order);
-
-         if (String (F ("wrgb")) == color_order) { ColorOffsets.offset.r = 3; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 2; numIntensityBytesPerPixel = 4; }
-    else if (String (F ("rgbw")) == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
+         if (String (F ("rgbw")) == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
     else if (String (F ("grbw")) == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
     else if (String (F ("brgw")) == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
     else if (String (F ("rbgw")) == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
@@ -235,7 +240,7 @@ bool c_OutputPixel::validate ()
 
     if (zig_size > pixel_count)
     {
-        log (CN_stars + String (F (" Requested ZigZag size count was too high. Setting to ")) + pixel_count + " " + CN_stars);
+        log (String (F ("*** Requested ZigZag size count was too high. Setting to ")) + pixel_count + F (" ***"));
         zig_size = pixel_count;
         response = false;
     }
@@ -259,43 +264,6 @@ bool c_OutputPixel::validate ()
     return response;
 
 } // validate
-
-//----------------------------------------------------------------------------
-void c_OutputPixel::SetFrameDurration (float IntensityBitTimeInUs, uint16_t BlockSize, float BlockDelayUs)
-{
-    // DEBUG_START;
-    if (0 == BlockSize) { BlockSize = 1; }
-
-    float TotalIntensityBytes = OutputBufferSize * group_size;
-    float TotalNullBytes = (PrependNullCount + AppendNullCount) * numIntensityBytesPerPixel;
-    float TotalBytesOfIntensityData = (TotalIntensityBytes + TotalNullBytes + PreambleSize);
-    float TotalBits = TotalBytesOfIntensityData * 8.0;
-    uint16_t NumBlocks = uint16_t (TotalBytesOfIntensityData / float (BlockSize));
-    int TotalBlockDelayUs = int (float (NumBlocks) * BlockDelayUs);
-
-    FrameMinDurationInMicroSec = (IntensityBitTimeInUs * TotalBits) + InterFrameGapInMicroSec + TotalBlockDelayUs;
-
-    // DEBUG_V (String ("          OutputBufferSize: ") + String (OutputBufferSize));
-    // DEBUG_V (String ("                group_size: ") + String (group_size));
-    // DEBUG_V (String ("       TotalIntensityBytes: ") + String (TotalIntensityBytes));
-    // DEBUG_V (String ("          PrependNullCount: ") + String (PrependNullCount));
-    // DEBUG_V (String ("           AppendNullCount: ") + String (AppendNullCount));
-    // DEBUG_V (String (" numIntensityBytesPerPixel: ") + String (numIntensityBytesPerPixel));
-    // DEBUG_V (String ("            TotalNullBytes: ") + String (TotalNullBytes));
-    // DEBUG_V (String ("              PreambleSize: ") + String (PreambleSize));
-    // DEBUG_V (String (" TotalBytesOfIntensityData: ") + String (TotalBytesOfIntensityData));
-    // DEBUG_V (String ("                 TotalBits: ") + String (TotalBits));
-    // DEBUG_V (String ("                 BlockSize: ") + String (BlockSize));
-    // DEBUG_V (String ("                 NumBlocks: ") + String (NumBlocks));
-    // DEBUG_V (String ("              BlockDelayUs: ") + String (BlockDelayUs));
-    // DEBUG_V (String ("         TotalBlockDelayUs: ") + String (TotalBlockDelayUs));
-    // DEBUG_V (String ("      IntensityBitTimeInUs: ") + String (IntensityBitTimeInUs));
-    // DEBUG_V (String ("   InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
-    // DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
-
-    // DEBUG_END;
-
-} // SetInterframeGap
 
 //----------------------------------------------------------------------------
 void IRAM_ATTR c_OutputPixel::StartNewFrame ()

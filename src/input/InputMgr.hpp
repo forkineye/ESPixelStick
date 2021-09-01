@@ -77,7 +77,7 @@ public:
 
 private:
 
-    void InstantiateNewInputChannel (e_InputChannelIds InputChannelId, e_InputType NewChannelType, bool StartDriver = true);
+    void InstantiateNewInputChannel (e_InputChannelIds InputChannelId, e_InputType NewChannelType);
     void CreateNewConfig ();
 
     c_InputCommon * pInputChannelDrivers[InputChannelId_End]; ///< pointer(s) to the current active Input driver

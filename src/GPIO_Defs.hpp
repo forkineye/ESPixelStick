@@ -99,14 +99,10 @@ typedef enum
 #define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_14
 #define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_32
 #define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_33
-// #define DEFAULT_RMT_4_GPIO      gpio_num_t::GPIO_NUM_
-// #define DEFAULT_RMT_5_GPIO      gpio_num_t::GPIO_NUM_
-// #define DEFAULT_RMT_6_GPIO      gpio_num_t::GPIO_NUM_
-// #define DEFAULT_RMT_7_GPIO      gpio_num_t::GPIO_NUM_
-
-// WS2801 SPI definitions
-#define DEFAULT_WS2801_DATA_GPIO  gpio_num_t::GPIO_NUM_15
-#define DEFAULT_WS2801_CLOCK_GPIO gpio_num_t::GPIO_NUM_25
+#define DEFAULT_RMT_4_GPIO      gpio_num_t::GPIO_NUM_25
+#define DEFAULT_RMT_5_GPIO      gpio_num_t::GPIO_NUM_26
+#define DEFAULT_RMT_6_GPIO      gpio_num_t::GPIO_NUM_27
+#define DEFAULT_RMT_7_GPIO      gpio_num_t::GPIO_NUM_27
 
 // File Manager SPI definitions
 #define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_19

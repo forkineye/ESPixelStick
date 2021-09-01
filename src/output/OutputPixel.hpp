@@ -49,6 +49,7 @@ public:
     virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
 
 protected:
+#define PIXEL_DEFAULT_INTENSITY_PER_PIXEL      3
 
     IRAM_ATTR void    StartNewFrame ();
     IRAM_ATTR uint8_t GetNextIntensityToSend ();
@@ -56,15 +57,12 @@ protected:
 
     bool      MoreDataToSend = false;
     uint16_t  InterFrameGapInMicroSec = 300;
-
-    void SetFrameDurration (float IntensityBitTimeInUs, uint16_t BlockSize = 1, float BlockDelayUs = 0.0);
+    uint8_t   numIntensityBytesPerPixel = PIXEL_DEFAULT_INTENSITY_PER_PIXEL;
 
 private:
-#define PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL 3
 
     uint8_t*    pNextIntensityToSend = nullptr;     ///< start of output buffer being sent to the UART
     uint16_t    RemainingPixelCount = 0;            ///< Used by ISR to determine how much more data to send
-    uint8_t     numIntensityBytesPerPixel = PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL;
 
     uint8_t*    pPreamble = nullptr;
     uint8_t     PreambleSize = 0;

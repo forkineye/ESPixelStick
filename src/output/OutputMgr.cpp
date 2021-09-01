@@ -31,12 +31,11 @@
 #include "OutputSerial.hpp"
 #include "OutputWS2811Uart.hpp"
 #include "OutputTM1814Uart.hpp"
-#include "OutputTM1814Rmt.hpp"
 #include "OutputRelay.hpp"
 #include "OutputServoPCA9685.hpp"
 #ifdef ARDUINO_ARCH_ESP32
 #   include "OutputWS2811Rmt.hpp"
-#   include "OutputWS2801Spi.hpp"
+#   include "OutputTM1814Rmt.hpp"
 #endif // def ARDUINO_ARCH_ESP32
 // needs to be last
 #include "OutputMgr.hpp"
@@ -62,10 +61,7 @@ static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::
     {c_OutputMgr::e_OutputType::OutputType_Relay,         "Relay"         },
     {c_OutputMgr::e_OutputType::OutputType_Servo_PCA9685, "Servo_PCA9685" },
     {c_OutputMgr::e_OutputType::OutputType_Disabled,      "Disabled"      },
-    {c_OutputMgr::e_OutputType::OutputType_TM1814,        "TM1814"        },
-#ifdef ARDUINO_ARCH_ESP32
-    {c_OutputMgr::e_OutputType::OutputType_WS2801,        "WS2801"        }
-#endif // def ARDUINO_ARCH_ESP32
+    {c_OutputMgr::e_OutputType::OutputType_TM1814,        "TM1814"        }
 };
 
 //-----------------------------------------------------------------------------
@@ -87,12 +83,11 @@ static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] 
 #ifndef ESP32_CAM
     {DEFAULT_RMT_2_GPIO,  uart_port_t (2)},
     {DEFAULT_RMT_3_GPIO,  uart_port_t (3)},
-    // {DEFAULT_RMT_4_GPIO,  uart_port_t (4)},
-    // {DEFAULT_RMT_5_GPIO,  uart_port_t (5)},
-    // {DEFAULT_RMT_6_GPIO,  uart_port_t (6)},
-    // {DEFAULT_RMT_7_GPIO,  uart_port_t (7)},
+    {DEFAULT_RMT_4_GPIO,  uart_port_t (4)},
+    {DEFAULT_RMT_5_GPIO,  uart_port_t (5)},
+    {DEFAULT_RMT_6_GPIO,  uart_port_t (6)},
+    {DEFAULT_RMT_7_GPIO,  uart_port_t (7)},
 #endif // ndef ESP32_CAM
-    {DEFAULT_WS2801_DATA_GPIO, uart_port_t (-1)},
 
 #endif // def ARDUINO_ARCH_ESP32
     {gpio_num_t::GPIO_NUM_10, uart_port_t (-1)},
@@ -288,7 +283,7 @@ void c_OutputMgr::CreateNewConfig ()
         {
             // DEBUG_V (String ("ChannelIndex: ") + String (ChannelIndex));
             // DEBUG_V (String ("instantiate output type: ") + String (outputTypeId));
-            InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex++), e_OutputType (outputTypeId), false);
+            InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex++), e_OutputType (outputTypeId));
             // DEBUG_V ("");
 
         }// end for each interface
@@ -375,7 +370,7 @@ void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
     returns
         nothing
 */
-void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, e_OutputType NewOutputChannelType, bool StartDriver)
+void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, e_OutputType NewOutputChannelType)
 {
     // DEBUG_START;
 
@@ -395,9 +390,9 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 break;
             }
 
-            String DriverName;
-            pOutputChannelDrivers[ChannelIndex]->GetDriverName (DriverName);
-            LOG_PORT.println (CN_stars + String (F (" Shutting Down '")) + DriverName + String (F ("' on Output: ")) + String (ChannelIndex) + " " + CN_stars);
+            // String Temp;
+            // pOutputChannelDrivers[ChannelIndex]->GetDriverName (Temp);
+            // DEBUG_V (String ("shut down the existing driver: ") + Temp);
             delete pOutputChannelDrivers[ChannelIndex];
             pOutputChannelDrivers[ChannelIndex] = nullptr;
             // DEBUG_V ("");
@@ -413,7 +408,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
         {
             case e_OutputType::OutputType_Disabled:
             {
-                // LOG_PORT.println (CN_stars + String (F (" Disabled output type for channel '")) + ChannelIndex + "'. **************");
+                // LOG_PORT.println (String (F ("************** Disabled output type for channel '")) + ChannelIndex + "'. **************");
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
                 break;
@@ -421,184 +416,182 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
             case e_OutputType::OutputType_DMX:
             {
-                if ((ChannelIndex >= OutputChannelId_UART_FIRST) && (ChannelIndex <= OutputChannelId_UART_LAST))
+#ifdef ARDUINO_ARCH_ESP32
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_UART_2))
+#else
+                if (-1 == UartId)
+#endif // def ARDUINO_ARCH_ESP32
+
                 {
-                    // LOG_PORT.println (CN_stars + String (F (" Starting DMX for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    LOG_PORT.println (String (F ("************** Cannot Start DMX for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                    // DEBUG_V ("");
+                }
+                else
+                {
+                    // LOG_PORT.println (String (F ("************** Starting DMX for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputSerial (ChannelIndex, dataPin, UartId, OutputType_DMX);
                     // DEBUG_V ("");
-                    break;
                 }
-
-                // DEBUG_V ("");
-                LOG_PORT.println (CN_stars + String (F (" Cannot Start DMX for channel '")) + ChannelIndex + "'. " + CN_stars);
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
-                // DEBUG_V ("");
                 break;
             }
 
             case e_OutputType::OutputType_GECE:
             {
-                if ((ChannelIndex >= OutputChannelId_UART_FIRST) && (ChannelIndex <= OutputChannelId_UART_LAST))
+#ifdef ARDUINO_ARCH_ESP32
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_UART_2))
+#else
+                if (-1 == UartId)
+#endif // def ARDUINO_ARCH_ESP32
                 {
-                    // LOG_PORT.println (CN_stars + String (F (" Starting GECE for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    LOG_PORT.println (String (F ("************** Cannot Start GECE for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                    // DEBUG_V ("");
+                }
+                else
+                {
+                    // LOG_PORT.println (String (F ("************** Starting GECE for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputGECE (ChannelIndex, dataPin, UartId, OutputType_GECE);
                     // DEBUG_V ("");
-                    break;
                 }
-                // DEBUG_V ("");
-
-                LOG_PORT.println (CN_stars + String (F (" Cannot Start GECE for channel '")) + ChannelIndex + "'. " + CN_stars);
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
-                // DEBUG_V ("");
-
                 break;
             }
 
             case e_OutputType::OutputType_Serial:
             {
-                if (OM_IS_UART)
+#ifdef ARDUINO_ARCH_ESP32
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_UART_2))
+#else
+                if (-1 == UartId)
+#endif // def ARDUINO_ARCH_ESP32
                 {
-                    // LOG_PORT.println (CN_stars + String (F (" Starting Generic Serial for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    LOG_PORT.println (String (F ("************** Cannot Start Generic Serial for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                    // DEBUG_V ("");
+                }
+                else
+                {
+                    // LOG_PORT.println (String (F ("************** Starting Generic Serial for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputSerial (ChannelIndex, dataPin, UartId, OutputType_Serial);
                     // DEBUG_V ("");
-                    break;
                 }
-                // DEBUG_V ("");
-
-                LOG_PORT.println (CN_stars + String (F (" Cannot Start Generic Serial for channel '")) + ChannelIndex + "'. " + CN_stars);
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
-                // DEBUG_V ("");
-
                 break;
             }
 
             case e_OutputType::OutputType_Relay:
             {
-                if (ChannelIndex == OutputChannelId_Relay)
+#ifdef ARDUINO_ARCH_ESP32
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_UART_2))
+#else
+                if (-1 == UartId)
+#endif // def ARDUINO_ARCH_ESP32
                 {
-                    // LOG_PORT.println (CN_stars + String (F (" Starting RELAY for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    LOG_PORT.println (String (F ("************** Cannot Start RELAY for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                    // DEBUG_V ("");
+                }
+                else
+                {
+                    // LOG_PORT.println (String (F ("************** Starting RELAY for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputRelay (ChannelIndex, dataPin, UartId, OutputType_Relay);
                     // DEBUG_V ("");
-                    break;
                 }
-                // DEBUG_V ("");
-
-                LOG_PORT.println (CN_stars + String (F (" Cannot Start RELAY for channel '")) + ChannelIndex + "'. " + CN_stars);
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
-                // DEBUG_V ("");
                 break;
             }
 
             case e_OutputType::OutputType_Renard:
             {
-                if (OM_IS_UART)
+#ifdef ARDUINO_ARCH_ESP32
+                if ((-1 == UartId) || (ChannelIndex > OutputChannelId_UART_2))
+#else
+                if (-1 == UartId)
+#endif // def ARDUINO_ARCH_ESP32
                 {
-                    // LOG_PORT.println (CN_stars + String (F (" Starting Renard for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    LOG_PORT.println (String (F ("************** Cannot Start Renard for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                    // DEBUG_V ("");
+                }
+                else
+                {
+                    // LOG_PORT.println (String (F ("************** Starting Renard for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputSerial (ChannelIndex, dataPin, UartId, OutputType_Renard);
                     // DEBUG_V ("");
-                    break;
                 }
-                // DEBUG_V ("");
-
-                LOG_PORT.println (CN_stars + String (F (" Cannot Start Renard for channel '")) + ChannelIndex + "'. " + CN_stars);
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
-                // DEBUG_V ("");
                 break;
             }
 
             case e_OutputType::OutputType_Servo_PCA9685:
             {
-                if (ChannelIndex == OutputChannelId_Relay)
+                if (-1 != UartId)
                 {
-                    // LOG_PORT.println (CN_stars + String (F (" Starting Servo PCA9685 for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    LOG_PORT.println (String (F ("************** Cannot Start Servo PCA9685 for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                    // DEBUG_V ("");
+                }
+                else
+                {
+                    // LOG_PORT.println (String (F ("************** Starting Servo PCA9685 for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputServoPCA9685 (ChannelIndex, dataPin, UartId, OutputType_Servo_PCA9685);
                     // DEBUG_V ("");
-                    break;
                 }
-                // DEBUG_V ("");
-
-                LOG_PORT.println (CN_stars + String (F (" Cannot Start Servo PCA9685 for channel '")) + ChannelIndex + "'. " + CN_stars);
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
-                // DEBUG_V ("");
                 break;
             }
 
             case e_OutputType::OutputType_WS2811:
             {
-#ifdef ARDUINO_ARCH_ESP32
-                if (OM_IS_RMT)
+                if (-1 == UartId)
                 {
-                    // LOG_PORT.println (CN_stars + String (F (" Starting WS2811 RMT for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    LOG_PORT.println (String (F ("************** Cannot Start WS2811 for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                    // DEBUG_V ("");
+                }
+
+#ifdef ARDUINO_ARCH_ESP32
+                else if (ChannelIndex >= OutputChannelId_RMT_1)
+                {
+                    // LOG_PORT.println (String (F ("************** Starting WS2811 RMT for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811Rmt (ChannelIndex, dataPin, UartId, OutputType_WS2811);
                     // DEBUG_V ("");
-                    break;
                 }
 #endif // def ARDUINO_ARCH_ESP32
-
-                // DEBUG_V ("");
-                if (OM_IS_UART)
+                else
                 {
-                    // LOG_PORT.println (CN_stars + String (F (" Starting WS2811 UART for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    // LOG_PORT.println (String (F ("************** Starting WS2811 UART for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2811Uart (ChannelIndex, dataPin, UartId, OutputType_WS2811);
                     // DEBUG_V ("");
-                    break;
                 }
-
-                LOG_PORT.println (CN_stars + String (F (" Cannot Start WS2811 for channel '")) + ChannelIndex + "'. " + CN_stars);
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
-                // DEBUG_V ("");
-
                 break;
             }
 
             case e_OutputType::OutputType_TM1814:
             {
-#ifdef ARDUINO_ARCH_ESP32
-                if (OM_IS_RMT)
+                if (-1 == UartId)
                 {
-                    // LOG_PORT.println (CN_stars + String (F (" Starting TM1814 RMT for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    LOG_PORT.println (String (F ("************** Cannot Start TM1814 for channel '")) + ChannelIndex + "'. **************");
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                    // DEBUG_V ("");
+                }
+
+#ifdef ARDUINO_ARCH_ESP32
+                else if (ChannelIndex >= OutputChannelId_RMT_1)
+                {
+                    // LOG_PORT.println (String (F ("************** Starting TM1814 RMT for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputTM1814Rmt (ChannelIndex, dataPin, UartId, OutputType_TM1814);
                     // DEBUG_V ("");
-                    break;
                 }
 #endif // def ARDUINO_ARCH_ESP32
-                // DEBUG_V ("");
-                if (OM_IS_UART)
+                else
                 {
-                    // LOG_PORT.println (CN_stars + String (F (" Starting TM1814 UART for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    // LOG_PORT.println (String (F ("************** Starting TM1814 UART for channel '")) + ChannelIndex + "'. **************");
                     pOutputChannelDrivers[ChannelIndex] = new c_OutputTM1814Uart (ChannelIndex, dataPin, UartId, OutputType_TM1814);
                     // DEBUG_V ("");
-                    break;
                 }
-
-                LOG_PORT.println (CN_stars + String (F (" Cannot Start WS2811 for channel '")) + ChannelIndex + "'. " + CN_stars);
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
-                // DEBUG_V ("");
                 break;
             }
-
-#ifdef ARDUINO_ARCH_ESP32
-            case e_OutputType::OutputType_WS2801:
-            {
-                if (ChannelIndex == OutputChannelId_SPI_1)
-                {
-                    // LOG_PORT.println (CN_stars + String (F (" Starting WS2811 RMT for channel '")) + ChannelIndex + "'. " + CN_stars);
-                    pOutputChannelDrivers[ChannelIndex] = new c_OutputWS2801Spi (ChannelIndex, dataPin, UartId, OutputType_WS2801);
-                    // DEBUG_V ("");
-                    break;
-                }
-
-                LOG_PORT.println (CN_stars + String (F (" Cannot Start WS2801 for channel '")) + ChannelIndex + "'. " + CN_stars);
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
-                // DEBUG_V ("");
-
-                break;
-            }
-#endif // def ARDUINO_ARCH_ESP32
 
             default:
             {
-                LOG_PORT.println (CN_stars + String (F (" Unknown output type: '")) + String (NewOutputChannelType) + String(F(" for channel '")) + ChannelIndex + String(F("'. Using disabled. ")) + CN_stars );
+                LOG_PORT.println (String (F ("************** Unknown output type for channel '")) + ChannelIndex + "'. Using disabled. **************");
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
                 break;
@@ -606,14 +599,10 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
         } // end switch (NewChannelType)
 
         // DEBUG_V ("");
-
-        String sDriverName;
-        pOutputChannelDrivers[ChannelIndex]->GetDriverName (sDriverName);
-        log (String (CN_stars) + " '" + sDriverName + F ("' Initialization for Output: ") + String (ChannelIndex) + " " + CN_stars);
-        if (StartDriver)
-        {
-            pOutputChannelDrivers[ChannelIndex]->Begin ();
-        }
+        //String sDriverName;
+        //pOutputChannelDrivers[ChannelIndex]->GetDriverName (sDriverName);
+        //Serial.println (String (CN_stars) + " '" + sDriverName + F ("' Initialization for Output: '") + String (ChannelIndex) + "'" + CN_stars);
+        pOutputChannelDrivers[ChannelIndex]->Begin ();
 
     } while (false);
 
@@ -802,7 +791,7 @@ void c_OutputMgr::SetConfig (const char * ConfigData)
     if (true == FileMgr.SaveConfigFile (ConfigFileName, ConfigData))
     {
         ConfigLoadNeeded = true;
-        LOG_PORT.println (CN_stars + String (F (" Saved Output Manager Config File. ")) + CN_stars);
+        LOG_PORT.println (F ("**** Saved Output Manager Config File. ****"));
     } // end we got a config and it was good
     else
     {

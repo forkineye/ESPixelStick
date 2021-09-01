@@ -74,7 +74,10 @@ c_InputEffectEngine::c_InputEffectEngine () :
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::~c_InputEffectEngine ()
 {
-
+    if (nullptr != InputDataBuffer)
+    {
+        memset ((void*)InputDataBuffer, 0x0, InputDataBufferSize);
+    }
 } // ~c_InputEffectEngine
 
 //-----------------------------------------------------------------------------

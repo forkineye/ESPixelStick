@@ -44,7 +44,6 @@ const char CN_Configuration_File_colon [] = "Configuration File: ";
 const char CN_config                   [] = "config";
 const char CN_count                    [] = "count";
 const char CN_currenteffect            [] = "currenteffect";
-const char CN_currentlimit             [] = "currentlimit";
 const char CN_cs_pin                   [] = "cs_pin";
 const char CN_current_sequence         [] = "current_sequence";
 const char CN_data_pin                 [] = "data_pin";

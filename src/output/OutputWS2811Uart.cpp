@@ -53,10 +53,10 @@ extern "C" {
 #define PIXEL_FIFO_TRIGGER_LEVEL (16)
 
 /*
- * Inverted 6N1 UART lookup table for ws2811, first 2 bits ignored.
- * Start and stop bits are part of the pixel stream.
- */
-char Convert2BitIntensityToUartDataStream[] =
+* Inverted 6N1 UART lookup table for ws2811, first 2 bits ignored.
+* Start and stop bits are part of the pixel stream.
+*/
+static char Convert2BitIntensityToUartDataStream[] =
 {
     0b00110111,     // 00 - (1)000 100(0)
     0b00000111,     // 01 - (1)000 111(0)
@@ -182,6 +182,7 @@ bool c_OutputWS2811Uart::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
 } // SetConfig
 
+
 //----------------------------------------------------------------------------
 void c_OutputWS2811Uart::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 {
@@ -232,10 +233,10 @@ void IRAM_ATTR c_OutputWS2811Uart::ISR_Handler ()
             uint8_t IntensityValue = GetNextIntensityToSend ();
 
             // convert the intensity data into UART data
-            enqueueUart ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 6) & 0x3]));
-            enqueueUart ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 4) & 0x3]));
-            enqueueUart ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 2) & 0x3]));
-            enqueueUart ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 0) & 0x3]));
+            enqueue ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 6) & 0x3]));
+            enqueue ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 4) & 0x3]));
+            enqueue ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 2) & 0x3]));
+            enqueue ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 0) & 0x3]));
         } // end while there is data to be sent
 
         if (!MoreDataToSend)

@@ -39,17 +39,22 @@ extern "C" {
 #   define UART_TX_FIFO_SIZE    UART_FIFO_LEN
 #endif
 
+#ifndef UART_INV_MASK
+#   define UART_INV_MASK  (0x3f << 19)
+#endif // ndef UART_INV_MASK
+
+// TX FIFO trigger level.
+// We need to fill the FIFO at a rate faster than 0.3us per byte (1.2us/pixel)
 #define PIXEL_FIFO_TRIGGER_LEVEL (16)
 
 /*
 * 8N2 UART lookup table for TM1814, first 2 bits ignored.
 * Start and stop bits are part of the pixel stream.
-* Data intensity bits are inverted wrt the spec. 
 */
 static char ConvertIntensityToUartDataStream[] =
 {
     0b11111100,     // (0) 0011 1111 (11)
-    0b11000000,     // (0) 0000 0011 (11)
+    0b11100000,     // (0) 0000 0111 (11)
 };
 
 // forward declaration for the isr handler
@@ -100,12 +105,17 @@ c_OutputTM1814Uart::~c_OutputTM1814Uart ()
 } // ~c_OutputTM1814Uart
 
 //----------------------------------------------------------------------------
+/* shell function to set the 'this' pointer of the real ISR
+   This allows me to use non static variables in the ISR.
+ */
 static void IRAM_ATTR uart_intr_handler (void* param)
 {
     reinterpret_cast <c_OutputTM1814Uart*>(param)->ISR_Handler ();
 } // uart_intr_handler
 
 //----------------------------------------------------------------------------
+/* Use the current config to set up the output port
+*/
 void c_OutputTM1814Uart::Begin ()
 {
     // DEBUG_START;
@@ -120,7 +130,7 @@ void c_OutputTM1814Uart::Begin ()
 #else
     /* Serial rate is 4x 800KHz for TM1814 */
     uart_config_t uart_config;
-    uart_config.baud_rate = (TM1814_BAUD_RATE - 100000);
+    uart_config.baud_rate = TM1814_BAUD_RATE;
     uart_config.data_bits = uart_word_length_t::UART_DATA_8_BITS;
     uart_config.flow_ctrl = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
     uart_config.parity = uart_parity_t::UART_PARITY_DISABLE;
@@ -142,6 +152,14 @@ void c_OutputTM1814Uart::Begin ()
 } // init
 
 //----------------------------------------------------------------------------
+/* Process the config
+*
+*   needs
+*       reference to string to process
+*   returns
+*       true - config has been accepted
+*       false - Config rejected. Using defaults for invalid settings
+*/
 bool c_OutputTM1814Uart::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
@@ -175,6 +193,9 @@ void c_OutputTM1814Uart::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 } // SetOutputBufferSize
 
 //----------------------------------------------------------------------------
+/*
+     * Fill the FIFO with as many intensity values as it can hold.
+     */
 void IRAM_ATTR c_OutputTM1814Uart::ISR_Handler ()
 {
     // Process if the desired UART has raised an interrupt
@@ -188,12 +209,12 @@ void IRAM_ATTR c_OutputTM1814Uart::ISR_Handler ()
         uint32_t NumEmptyIntensitySlots = ((((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / TM1814_NUM_DATA_BYTES_PER_INTENSITY_BYTE);
         while ((NumEmptyIntensitySlots--) && (MoreDataToSend))
         {
-            uint8_t IntensityValue = ~GetNextIntensityToSend ();
+            uint8_t IntensityValue = GetNextIntensityToSend ();
 
             // convert the intensity data into RMT data
             for (uint8_t bitmask = 0x80; 0 != bitmask; bitmask >>= 1)
             {
-                enqueueUart( (IntensityValue & bitmask) ? OneValue : ZeroValue);
+                enqueue( (IntensityValue & bitmask) ? OneValue : ZeroValue);
             }
 
         } // end while there is data to be sent

@@ -73,7 +73,7 @@ void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
     c_OutputPixel::SetOutputBufferSize (NumChannelsAvailable);
 
     // Calculate our refresh time
-    SetFrameDurration (float(WS2811_PIXEL_NS_BIT_0_HIGH + WS2811_PIXEL_NS_BIT_0_LOW) / 1000.0);
+    FrameMinDurationInMicroSec = (WS2811_MICRO_SEC_PER_INTENSITY * OutputBufferSize) + InterFrameGapInMicroSec;
 
     // DEBUG_END;
 
@@ -95,7 +95,7 @@ bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     bool response = c_OutputPixel::SetConfig (jsonConfig);
 
     // Calculate our refresh time
-    SetFrameDurration (float (WS2811_PIXEL_NS_BIT_0_HIGH + WS2811_PIXEL_NS_BIT_0_LOW) / 1000.0);
+    FrameMinDurationInMicroSec = (WS2811_MICRO_SEC_PER_INTENSITY * numIntensityBytesPerPixel * OutputBufferSize) + InterFrameGapInMicroSec;
 
     // DEBUG_END;
     return response;

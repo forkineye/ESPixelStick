@@ -41,7 +41,7 @@ c_InputDDP::~c_InputDDP ()
     // DEBUG_START;
 
     // OutputMgr.PauseOutput (false);
-    // udp->stop ();
+    // udp.stop ();
 
     // DEBUG_END;
 } // ~c_InputDDP
@@ -56,10 +56,9 @@ void c_InputDDP::Begin ()
     memset (&stats, 0x00, sizeof (stats));
 
     // DEBUG_V("");
-    udp = new AsyncUDP ();
+
     initUDP ();
 
-    HasBeenInitialized = true;
     // DEBUG_END;
 
 } // Begin
@@ -121,9 +120,9 @@ void c_InputDDP::initUDP ()
 
     delay (100);
 
-    if (udp->listen (DDP_PORT))
+    if (udp.listen (DDP_PORT))
     {
-        udp->onPacket (std::bind (&c_InputDDP::ProcessReceivedUdpPacket, this, std::placeholders::_1));
+        udp.onPacket (std::bind (&c_InputDDP::ProcessReceivedUdpPacket, this, std::placeholders::_1));
     }
 
     log (String (F ("Listening on port ")) + DDP_PORT);

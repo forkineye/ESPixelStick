@@ -98,7 +98,7 @@ private:
         uint32_t errors;
     } DDP_stats_t;
 
-    AsyncUDP        * udp = nullptr;         // UDP
+    AsyncUDP        udp;         // UDP
     uint8_t         lastReceivedSequenceNumber = 0;
     bool            suspend = false;
     DDP_stats_t     stats;    // Statistics tracker
@@ -143,7 +143,6 @@ public:
     void Process ();                                        ///< Call from loop(),  renders Input data
     void GetDriverName (String& sDriverName) { sDriverName = "DDP"; } ///< get the name for the instantiated driver
     void SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize);
-    bool isShutDownRebootNeeded () { return HasBeenInitialized; }
 
 };
 

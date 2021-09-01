@@ -46,11 +46,9 @@ c_InputFPPRemote::c_InputFPPRemote (
 //-----------------------------------------------------------------------------
 c_InputFPPRemote::~c_InputFPPRemote ()
 {
-    if (HasBeenInitialized)
-    {
-        StopPlaying ();
-        FPPDiscovery.Disable ();
-    }
+    StopPlaying ();
+    FPPDiscovery.Disable ();
+
 } // ~c_InputFPPRemote
 
 //-----------------------------------------------------------------------------

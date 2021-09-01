@@ -29,11 +29,11 @@ class c_InputE131 : public c_InputCommon
     static const uint8_t    MAX_NUM_UNIVERSES = 10;
 
     ESPAsyncE131  * e131 = nullptr; ///< ESPAsyncE131
-    // e131_packet_t packet;           ///< Packet buffer for parsing
+    e131_packet_t packet;           ///< Packet buffer for parsing
 
     /// JSON configuration parameters
     uint16_t    startUniverse              = 1;    ///< Universe to listen for
-    uint16_t    LastUniverse               = 1;    ///< Last Universe to listen for
+    uint16_t    LastUniverse               = 1;       ///< Last Universe to listen for
     uint16_t    ChannelsPerUniverse        = 512;  ///< Universe boundary limit
     uint16_t    FirstUniverseChannelOffset = 1;    ///< Channel to start listening at - 1 based
 
@@ -73,6 +73,6 @@ class c_InputE131 : public c_InputCommon
     void GetDriverName (String & sDriverName) { sDriverName = "E1.31"; } ///< get the name for the instantiated driver
     void SetBufferInfo (uint8_t * BufferStart, uint16_t BufferSize);
     void NetworkStateChanged (bool IsConnected); // used by poorly designed rx functions
-    bool isShutDownRebootNeeded () { return HasBeenInitialized; }
-    void ProcessIncomingE131Data (e131_packet_t *);
+    bool isShutDownRebootNeeded () { return true; }
+
 };

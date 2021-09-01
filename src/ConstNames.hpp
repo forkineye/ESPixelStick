@@ -49,7 +49,6 @@ extern const char CN_config[];
 extern const char CN_count[];
 extern const char CN_currenteffect[];
 extern const char CN_cs_pin[];
-extern const char CN_currentlimit[];
 extern const char CN_current_sequence[];
 extern const char CN_data_pin[];
 extern const char CN_device [];

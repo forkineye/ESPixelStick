@@ -16,48 +16,14 @@
 *  or use of these programs.
 *
 */
+#ifdef USE_WS2801
 
 #include "../ESPixelStick.h"
-#ifdef ARDUINO_ARCH_ESP32
 #include "OutputWS2801Spi.hpp"
-#include "driver/spi_master.h"
-#include <esp_heap_alloc_caps.h>
 
-//----------------------------------------------------------------------------
-/* shell function to set the 'this' pointer of the real ISR
-   This allows me to use non static variables in the ISR.
- */
-static bool ws2801_transfer_callback_enabled = false;
-static void IRAM_ATTR ws2801_transfer_callback (spi_transaction_t * param)
-{
-    if (ws2801_transfer_callback_enabled)
-    {
-        reinterpret_cast <c_OutputWS2801Spi*>(param->user)->DataCbCounter++;
-        TaskHandle_t Handle = reinterpret_cast <c_OutputWS2801Spi*>(param->user)->GetTaskHandle ();
-        if (Handle)
-        {
-            vTaskResume (Handle);
-        }
-    }
-} // ws2801_transfer_callback
 
-//----------------------------------------------------------------------------
-static void SendIntensityDataTask (void* pvParameters)
-{
-    // DEBUG_START; Needs extra stack space to run this
-    do
-    {
-        // we start suspended
-        vTaskSuspend (NULL); //Suspend Own Task
-
-        c_OutputWS2801Spi* OutputWS2801Spi = reinterpret_cast <c_OutputWS2801Spi*>(pvParameters);
-        OutputWS2801Spi->DataTaskcounter++;
-        OutputWS2801Spi->SendIntensityData ();
-
-    } while (true);
-    // DEBUG_END;
-
-} // SendIntensityDataTask
+// forward declaration for the isr handler
+static void IRAM_ATTR SPI_intr_handler (void* param);
 
 //----------------------------------------------------------------------------
 c_OutputWS2801Spi::c_OutputWS2801Spi (c_OutputMgr::e_OutputChannelIds OutputChannelId,
@@ -68,14 +34,6 @@ c_OutputWS2801Spi::c_OutputWS2801Spi (c_OutputMgr::e_OutputChannelIds OutputChan
 {
     // DEBUG_START;
 
-    // update frame calculation 
-    BlockSize = WS2801_NUM_INTENSITY_PER_TRANSACTION;
-    BlockDelay = 20.0; // measured between 16 and 21 us
-
-    for (auto & TransactionBuffer : TransactionBuffers)
-    {
-        TransactionBuffer = nullptr;
-    }
 
     // DEBUG_END;
 } // c_OutputWS2801Spi
@@ -84,16 +42,35 @@ c_OutputWS2801Spi::c_OutputWS2801Spi (c_OutputMgr::e_OutputChannelIds OutputChan
 c_OutputWS2801Spi::~c_OutputWS2801Spi ()
 {
     // DEBUG_START;
+    if (gpio_num_t (-1) == DataPin) { return; }
 
-    ws2801_transfer_callback_enabled = false;
-    if (HasBeenInitialized)
-    {
-        LOG_PORT.println (CN_stars + String (F (" SPI Interface Shutdown requires a reboot ")) + CN_stars);
-        reboot = true;
-    }
+    // Disable all interrupts for this SPI Channel.
+    // DEBUG_V ("");
+
+    // Clear all pending interrupts in the SPI Channel
+    // DEBUG_V ("");
+    
+    // spicommon_dma_chan_free (int dma_chan);
+    // spicommon_periph_free (spi_host_device_thost);
+    // spicommon_bus_free_io (spi_host_device_thost);
+    // esp_intr_free (SPI_intr_handle);
+
+    // make sure no existing low level driver is running
+    // DEBUG_V ("");
+
+    // DEBUG_V (String("SPIChannelId: ") + String(SPIChannelId));
+    // SPIEnd (SPIObject);
     // DEBUG_END;
-
 } // ~c_OutputWS2801Spi
+
+//----------------------------------------------------------------------------
+/* shell function to set the 'this' pointer of the real ISR
+   This allows me to use non static variables in the ISR.
+ */
+static void IRAM_ATTR SPI_intr_handler (void* param)
+{
+    reinterpret_cast <c_OutputWS2801Spi*>(param)->ISR_Handler ();
+} // SPI_intr_handler
 
 //----------------------------------------------------------------------------
 /* Use the current config to set up the output port
@@ -101,95 +78,60 @@ c_OutputWS2801Spi::~c_OutputWS2801Spi ()
 void c_OutputWS2801Spi::Begin ()
 {
     // DEBUG_START;
+    // SPIChannelId = 0;
+    // DEBUG_V (String ("DataPin: ") + String (DataPin));
+    // DEBUG_V (String (" SPIChannelId: ") + String (SPIChannelId));
 
-    NextTransactionToFill = 0;
-    for (auto & TransactionBufferToSet : TransactionBuffers)
-    {
-        TransactionBuffers[NextTransactionToFill] = (byte*)pvPortMallocCaps (WS2801_NUM_INTENSITY_PER_TRANSACTION, MALLOC_CAP_DMA); ///< Pointer to transmit buffer
-        // DEBUG_V (String ("tx_buffer: 0x") + String (uint32_t(TransactionBuffers[NextTransactionToFill]), HEX));
-        NextTransactionToFill++;
-    }
+    // int dmach = 1;
+    esp_err_t ret;
+    spi_device_handle_t spi = nullptr;
 
-    NextTransactionToFill = 0;
+    spi_bus_config_t buscfg;
+    memset ((void*)&buscfg, 0x00, sizeof (buscfg));
+    buscfg.miso_io_num = -1;
+    buscfg.mosi_io_num = DataPin;
+    buscfg.sclk_io_num = 15;
+    buscfg.quadwp_io_num = -1;
+    buscfg.quadhd_io_num = -1;
+    buscfg.max_transfer_sz = OM_MAX_NUM_CHANNELS;
+    buscfg.flags = SPICOMMON_BUSFLAG_MASTER;
 
-    xTaskCreate (SendIntensityDataTask, "WS2801Task", 2000, this, ESP_TASK_PRIO_MIN + 4, &SendIntensityDataTaskHandle);
+    spi_device_interface_config_t devcfg;
+    memset ((void*)&devcfg, 0x00, sizeof (devcfg));
+    // devcfg.command_bits = 0; // No command to send
+    // devcfg.address_bits = 0; // No bus address to send
+    // devcfg.dummy_bits = 0; // No dummy bits to send
+    // devcfg.duty_cycle_pos = 0; // 50% Duty cycle
+    devcfg.clock_speed_hz = SPI_MASTER_FREQ_1M;     //Initial clock out at 5 MHz
+    // devcfg.mode = 0;                                //SPI mode 0
+    devcfg.spics_io_num = -1;                       //we will NOT use CS pin
+    devcfg.queue_size = 2;                          //We want to be able to queue 7 transactions at a time
+    // devcfg.pre_cb = nullptr;                        //Specify pre-transfer callback to handle D/C line
+    // devcfg.post_cb = ws2801_transfer_callback;      //Specify post-transfer callback to handle D/C line
+    // devcfg.flags = 0;
 
-    spi_bus_config_t SpiBusConfiguration;
-    memset ((void*)&SpiBusConfiguration, 0x00, sizeof (SpiBusConfiguration));
-    SpiBusConfiguration.miso_io_num = -1;
-    SpiBusConfiguration.mosi_io_num = DataPin;
-    SpiBusConfiguration.sclk_io_num = ClockPin;
-    SpiBusConfiguration.quadwp_io_num = -1;
-    SpiBusConfiguration.quadhd_io_num = -1;
-    SpiBusConfiguration.max_transfer_sz = OM_MAX_NUM_CHANNELS;
-    SpiBusConfiguration.flags = SPICOMMON_BUSFLAG_MASTER;
+    // spi_bus_initialize (spi_host_device_thost, constspi_bus_config_t * bus_config, int dma_chan);
 
-    spi_device_interface_config_t SpiDeviceConfiguration;
-    memset ((void*)&SpiDeviceConfiguration, 0x00, sizeof (SpiDeviceConfiguration));
-    // SpiDeviceConfiguration.command_bits = 0; // No command to send
-    // SpiDeviceConfiguration.address_bits = 0; // No bus address to send
-    // SpiDeviceConfiguration.dummy_bits = 0; // No dummy bits to send
-    // SpiDeviceConfiguration.duty_cycle_pos = 0; // 50% Duty cycle
-    SpiDeviceConfiguration.clock_speed_hz = WS2801_SPI_MASTER_FREQ_1M;
-    SpiDeviceConfiguration.mode = 0;                                // SPI mode 0
-    SpiDeviceConfiguration.spics_io_num = -1;                       // we will NOT use CS pin
-    SpiDeviceConfiguration.queue_size = 10 * WS2801_NUM_TRANSACTIONS;    // We want to be able to queue 2 transactions at a time
-    // SpiDeviceConfiguration.pre_cb = nullptr;                     // Specify pre-transfer callback to handle D/C line
-    SpiDeviceConfiguration.post_cb = ws2801_transfer_callback;      // Specify post-transfer callback to handle D/C line
-    // SpiDeviceConfiguration.flags = 0;
+    // spicommon_dma_chan_claim (int dma_chan)
+    // spicommon_periph_claim (spi_host_device_thost);
+    // spicommon_bus_initialize_io (spi_host_device_thost, constspi_bus_config_t * bus_config, int dma_chan, int flags, bool* is_native);
+    // ESP_ERROR_CHECK (esp_intr_alloc (ETS_SPI_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3 | ESP_INTR_FLAG_SHARED, SPI_intr_handler, this, &SPI_intr_handle));
 
-    ESP_ERROR_CHECK (spi_bus_initialize (WS2801_SPI_HOST, &SpiBusConfiguration, WS2801_SPI_DMA_CHANNEL));
-    ESP_ERROR_CHECK (spi_bus_add_device (WS2801_SPI_HOST, &SpiDeviceConfiguration, &spi_device_handle));
-    ESP_ERROR_CHECK (spi_device_acquire_bus (spi_device_handle, portMAX_DELAY));
+    // spicommon_setup_dma_desc_links (lldesc_t * dmadesc, int len, const uint8_t * data, bool isrx);
 
-    ws2801_transfer_callback_enabled = true;
-
-    HasBeenInitialized = true;
-
+    // Start output
     // DEBUG_END;
 
 } // init
-
-//----------------------------------------------------------------------------
-void c_OutputWS2801Spi::GetConfig (ArduinoJson::JsonObject& jsonConfig)
-{
-    // DEBUG_START;
-
-    c_OutputWS2801::GetConfig (jsonConfig);
-
-    jsonConfig[CN_clock_pin] = ClockPin;
-
-    // DEBUG_END;
-} // GetConfig
-
-//----------------------------------------------------------------------------
-void c_OutputWS2801Spi::GetStatus (ArduinoJson::JsonObject& jsonStatus)
-{
-    c_OutputWS2801::GetStatus (jsonStatus);
-
-    // jsonStatus["FrameStartCounter"] = FrameStartCounter;
-    jsonStatus["SendIntensityDataCounter"] = SendIntensityDataCounter;
-    jsonStatus["DataTaskcounter"] = DataTaskcounter;
-    jsonStatus["DataCbCounter"] = DataCbCounter;
-    
-} // GetStatus
 
 //----------------------------------------------------------------------------
 bool c_OutputWS2801Spi::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
-    gpio_num_t OldDataPin = DataPin;
-    gpio_num_t OldClockPin = ClockPin;
-
     bool response = c_OutputWS2801::SetConfig (jsonConfig);
-    
-    setFromJSON (ClockPin, jsonConfig, CN_clock_pin);
-    
-    if ((OldDataPin != DataPin) || (OldClockPin != ClockPin))
-    {
-        // TODO
-    }
+
+    //     SPI_set_pin (SPIChannelId, SPI_mode_t::SPI_MODE_TX, DataPin);
 
     // DEBUG_END;
     return response;
@@ -197,69 +139,55 @@ bool c_OutputWS2801Spi::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputWS2801Spi::SendIntensityData ()
+void IRAM_ATTR c_OutputWS2801Spi::ISR_Handler ()
 {
-    // DEBUG_START;
-    SendIntensityDataCounter++;
 
-    if (MoreDataToSend)
+} // ISR_Handler
+
+//----------------------------------------------------------------------------
+void IRAM_ATTR c_OutputWS2801Spi::ISR_Handler_StartNewFrame ()
+{
+    FrameStartCounter++;
+
+
+
+    StartNewFrame ();
+    ISR_Handler_SendIntensityData ();
+
+} // ISR_Handler_StartNewFrame
+
+//----------------------------------------------------------------------------
+/*
+ * Fill the MEMBLK with a fixed number of intensity values.
+ */
+void IRAM_ATTR c_OutputWS2801Spi::ISR_Handler_SendIntensityData ()
+{
+    uint32_t NumEmptyIntensitySlots = NumIntensityValuesPerInterrupt;
+
+    while ((NumEmptyIntensitySlots--) && (MoreDataToSend))
     {
-        spi_transaction_t & TransactionToFill = Transactions[NextTransactionToFill];
-        memset ((void*)&Transactions[NextTransactionToFill], 0x00, sizeof (spi_transaction_t));
+        uint8_t IntensityValue = GetNextIntensityToSend ();
 
-        TransactionToFill.user = this;         ///< User-defined variable. Can be used to store eg transaction ID.
-        byte * pMem = &TransactionBuffers[NextTransactionToFill][0];
-        TransactionToFill.tx_buffer = pMem;
-        uint32_t NumEmptyIntensitySlots = WS2801_NUM_INTENSITY_PER_TRANSACTION;
-
-        while ((NumEmptyIntensitySlots) && (MoreDataToSend))
+        // convert the intensity data into SPI data
+        for (uint8_t bitmask = 0x80; 0 != bitmask; bitmask >>= 1)
         {
-            *pMem++ = GetNextIntensityToSend ();
-            --NumEmptyIntensitySlots;
-        } // end while there is space in the buffer
-
-        TransactionToFill.length = WS2801_BITS_PER_INTENSITY * (WS2801_NUM_INTENSITY_PER_TRANSACTION - NumEmptyIntensitySlots);
-        if (!MoreDataToSend)
-        {
-            TransactionToFill.length++;
         }
+    } // end while there is space in the buffer
 
-        ESP_ERROR_CHECK (spi_device_queue_trans (spi_device_handle, &Transactions[NextTransactionToFill], portMAX_DELAY));
+    // terminate the current data in the buffer
 
-        if (++NextTransactionToFill >= WS2801_NUM_TRANSACTIONS)
-        {
-            NextTransactionToFill = 0;
-        }
-    }
-
-    // DEBUG_END;
-
-} // SendIntensityData
+} // ISR_Handler_SendIntensityData
 
 //----------------------------------------------------------------------------
 void c_OutputWS2801Spi::Render ()
 {
     // DEBUG_START;
 
-    if (canRefresh ())
-    {
-        StartNewFrame ();
-        ReportNewFrame ();
-
-        // fill all the available buffers
-        NextTransactionToFill = 0;
-        for (auto & TransactionToFill : Transactions)
-        {
-            if (SendIntensityDataTaskHandle)
-            {
-                vTaskResume (SendIntensityDataTaskHandle);
-            }
-        }
-        ws2801_transfer_callback_enabled = true;
-    }
+    ISR_Handler_StartNewFrame ();
+    ReportNewFrame ();
 
     // DEBUG_END;
 
 } // render
 
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def USE_WS2801

@@ -45,11 +45,11 @@ public:
     void IRAM_ATTR ISR_Handler (); ///< UART ISR
 
 private:
-#define TM1814_DATA_RATE                            (800000.0)
+#define TM1814_DATA_SPEED                           (800000.0)
 
 #define TM1814_NUM_DATA_BITS_PER_INTENSITY_BIT      11
 #define TM1814_NUM_DATA_BYTES_PER_INTENSITY_BYTE    8
-#define TM1814_BAUD_RATE                            int(TM1814_DATA_RATE * TM1814_NUM_DATA_BITS_PER_INTENSITY_BIT)
+#define TM1814_BAUD_RATE                            int(1.0 * TM1814_DATA_SPEED * TM1814_NUM_DATA_BITS_PER_INTENSITY_BIT)
 
     bool validate ();        ///< confirm that the current configuration is valid
 
