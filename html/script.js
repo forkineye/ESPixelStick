@@ -251,6 +251,9 @@ $(function ()
 
     // start updating stats
     RequestStatusUpdate();
+
+    // triggers menu update
+    RequestListOfFiles();
 });
 
 function ProcessLocalConfig(data)
@@ -305,7 +308,6 @@ function ProcessWindowChange(NextWindow) {
     else if (NextWindow === "#config") {
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
-        RequestListOfFiles();
     }
 
     else if (NextWindow === "#filemanagement") {
@@ -687,13 +689,6 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
         Device_Config = JsonConfigData.device;
         updateFromJSON(JsonConfigData);
 
-        if (false === JsonConfigData.SdCardPresent) {
-            $("#li-filemanagement").addClass("hidden");
-        }
-        else {
-            $("#li-filemanagement").removeClass("hidden");
-		}
-
         // is this a network config?
         if (JsonConfigData.hasOwnProperty("network")) {
             Network_Config = JsonConfigData.network;
@@ -1000,6 +995,17 @@ function convertUTCDateToLocalDate(date)
 
     return date;
 } // convertUTCDateToLocalDate
+
+function int2ip(num)
+{
+    var d = num % 256;
+    for (var i = 3; i > 0; i--)
+    {
+        num = Math.floor(num / 256);
+        d = d + '.' + num % 256;
+    }
+    return d;
+}
 
 ////////////////////////////////////////////////////
 //
@@ -1365,7 +1371,7 @@ function ProcessRecievedJsonStatusMessage(data)
         $('#pkts').text     (InputStatus.e131.num_packets);
         $('#chanlim').text  (InputStatus.e131.unichanlim);
         $('#perr').text     (InputStatus.e131.packet_errors);
-        $('#clientip').text (InputStatus.e131.last_clientIP);
+        $('#clientip').text (int2ip(parseInt(InputStatus.e131.last_clientIP)));
     }
     else
     {

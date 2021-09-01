@@ -21,11 +21,12 @@
 *   interface.
 *
 */
-#ifdef USE_WS2801
 
 #include "OutputWS2801.hpp"
+#ifdef ARDUINO_ARCH_ESP32
 
 #include <driver/spi_master.h>
+#include <esp_task.h>
 
 class c_OutputWS2801Spi : public c_OutputWS2801
 {
@@ -38,28 +39,45 @@ public:
     virtual ~c_OutputWS2801Spi ();
 
     // functions to be provided by the derived class
-    void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
+    void    Begin ();
+    void    GetConfig (ArduinoJson::JsonObject& jsonConfig);
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);  ///< Set a new config in the driver
+    void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
     void    Render ();                                        ///< Call from loop(),  renders output data
     void    PauseOutput () {};
+    TaskHandle_t GetTaskHandle () { return SendIntensityDataTaskHandle; }
 
-    /// Interrupt Handler
-    void IRAM_ATTR ISR_Handler (); ///< ISR
-    void IRAM_ATTR ISR_Handler_SendIntensityData (); ///< ISR
-    void IRAM_ATTR ISR_Handler_StartNewFrame (); ///< ISR
+    void DataOutputTask (void* pvParameters);
+    void SendIntensityData ();
+
+    uint32_t DataTaskcounter = 0;
+    uint32_t DataCbCounter = 0;
 
 private:
 
-#define SPI_MASTER_FREQ_1M      (APB_CLK_FREQ/80) // 1Mhz
+#define WS2801_SPI_MASTER_FREQ_1M               (APB_CLK_FREQ/80) // 1Mhz
+#define WS2801_NUM_TRANSACTIONS                 2
+#define WS2801_NUM_INTENSITY_PER_TRANSACTION    128
+#define WS2801_BITS_PER_INTENSITY               8
+#define WS2801_SPI_HOST                         VSPI_HOST
+#define WS2801_SPI_DMA_CHANNEL                  2
 
     uint8_t NumIntensityValuesPerInterrupt = 0;
     uint8_t NumIntensityBitsPerInterrupt = 0;
+    spi_device_handle_t spi_device_handle = 0;
+    gpio_num_t ClockPin = DEFAULT_WS2801_CLOCK_GPIO;
 
-    uint32_t FrameStartCounter = 0;
-    // uint32_t DataISRcounter = 0;
+    // uint32_t FrameStartCounter = 0;
+    uint32_t SendIntensityDataCounter = 0;
     // uint32_t FrameDoneCounter = 0;
     // uint32_t FrameEndISRcounter = 0;
 
+    byte * TransactionBuffers[WS2801_NUM_TRANSACTIONS];
+    spi_transaction_t Transactions[WS2801_NUM_TRANSACTIONS];
+    uint8_t NextTransactionToFill = 0;
+
+    TaskHandle_t SendIntensityDataTaskHandle = NULL;
+
 }; // c_OutputWS2801Spi
 
-#endif // def USE_WS2801
+#endif // def ARDUINO_ARCH_ESP32

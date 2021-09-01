@@ -1,14 +1,14 @@
 {
     "modes": [
         {
-            "name": "ESPixelStick Unify - Generic",
-            "description": "Unified build for ESPixelStick V3 hardware",
+            "name": "ESPixelStick 4.x (V3 Hardware)",
+            "description": "4.x build for ESPixelStick V3 hardware",
             "version": "4.0-dev (CI Build - Not Tested)",
             "file": "espixelstick-ci.bin"
         },
         {
-            "name": "ESPixelStick Unify - ESP32",
-            "description": "Unified build for ESP32 hardware",
+            "name": "ESPixelStick 4.x - ESP32",
+            "description": "4.x build for ESP32 hardware",
             "version": "4.0-dev (CI Build - Not Tested)",
             "file": "espixelstick-ci32.bin"
         }
@@ -31,7 +31,7 @@
             }
         },
         {
-            "name": "ESPixelStick Unify (LoLin_ESP32_PRO_16MB_2MB)",
+            "name": "LoLin_ESP32_PRO_16MB_2MB",
             "espplatformname": "esp32",
             "esptool": {
                 "reset": "nodemcu",
@@ -43,6 +43,21 @@
                 "page": "256",
                 "block": "4096",
                 "size": "2072576"
+            }
+        },
+        {
+            "name": "D1_Mini_ESP32",
+            "espplatformname": "esp32",
+            "esptool": {
+                "reset": "nodemcu",
+                "baudrate": "921600",
+                "fsloc": "0x3D0000",
+                "binloc": "0x00010000"
+            },
+            "filesystem": {
+                "page": "256",
+                "block": "4096",
+                "size": "0x30000"
             }
         }
     ]

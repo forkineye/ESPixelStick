@@ -20,8 +20,6 @@
 #include "../ESPixelStick.h"
 #include "OutputTM1814.hpp"
 
-#define TM1814_COMMAND_DATA_VALUE               63 // 0x3f ~3F = C1 = 193
-static uint8_t PreambleData[8] = { 63, 63, 63, 63, 193, 193, 193, 193 };
 
 //----------------------------------------------------------------------------
 c_OutputTM1814::c_OutputTM1814 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
@@ -52,8 +50,6 @@ void c_OutputTM1814::Begin ()
     
     // c_OutputPixel::Begin ();
 
-    SetPreambleInformation (PreambleData, sizeof (PreambleData));
-
     // DEBUG_END;
 } // GetConfig
 
@@ -63,6 +59,7 @@ void c_OutputTM1814::GetConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_START;
 
     c_OutputPixel::GetConfig (jsonConfig);
+    jsonConfig[CN_currentlimit] = CurrentLimit;
 
     // DEBUG_END;
 } // GetConfig
@@ -79,33 +76,35 @@ void c_OutputTM1814::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 {
     // DEBUG_START;
 
-        // Stop current output operation
+    // Stop current output operation
     c_OutputPixel::SetOutputBufferSize (NumChannelsAvailable);
 
     // Calculate our refresh time
-    FrameMinDurationInMicroSec = (TM1814_MICRO_SEC_PER_INTENSITY * OutputBufferSize) + InterFrameGapInMicroSec + TM1814_COMMAND_DATA_TIME_US;
+    SetFrameDurration (float (TM1814_PIXEL_NS_BIT_TOTAL) / 1000.0);
 
     // DEBUG_END;
 
 } // SetBufferSize
 
 //----------------------------------------------------------------------------
-/* Process the config
-*
-*   needs
-*       reference to string to process
-*   returns
-*       true - config has been accepted
-*       false - Config rejected. Using defaults for invalid settings
-*/
 bool c_OutputTM1814::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
+    // jsonConfig[CN_color_order] = "grbw";
+
     bool response = c_OutputPixel::SetConfig (jsonConfig);
 
     // Calculate our refresh time
-    FrameMinDurationInMicroSec = (TM1814_MICRO_SEC_PER_INTENSITY * numIntensityBytesPerPixel * OutputBufferSize) + InterFrameGapInMicroSec;
+    SetFrameDurration (float (TM1814_PIXEL_NS_BIT_TOTAL) / 1000.0);
+
+    setFromJSON (CurrentLimit, jsonConfig, CN_currentlimit);
+
+    uint8_t PreambleValue = map (CurrentLimit, 1, 100, 0, 63);
+    memset ((void*)(&PreambleData.positive[0]),  PreambleValue, sizeof (PreambleData.positive));
+    memset ((void*)(&PreambleData.negative[0]), ~PreambleValue, sizeof (PreambleData.negative));
+
+    SetPreambleInformation ((uint8_t*)&PreambleData, sizeof (PreambleData));
 
     // DEBUG_END;
     return response;

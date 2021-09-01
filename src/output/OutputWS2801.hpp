@@ -21,8 +21,8 @@
 *   interface.
 *
 */
-#ifdef USE_WS2801
 #include "OutputPixel.hpp"
+#ifdef ARDUINO_ARCH_ESP32
 
 class c_OutputWS2801 : public c_OutputPixel
 {
@@ -43,17 +43,13 @@ public:
     virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
 
 protected:
-
-#define WS2801_PIXEL_NS_BIT_0_HIGH          350.0 // 350ns +/- 150ns per datasheet
-#define WS2801_PIXEL_NS_BIT_0_LOW           900.0 // 900ns +/- 150ns per datasheet
-#define WS2801_PIXEL_NS_BIT_1_HIGH          900.0 // 900ns +/- 150ns per datasheet
-#define WS2801_PIXEL_NS_BIT_1_LOW           350.0 // 350ns +/- 150ns per datasheet
-#define WS2801_PIXEL_NS_IDLE             300000.0 // 300us per datasheet
-
-#define WS2801_MICRO_SEC_PER_INTENSITY          10L     // ((1/800000) * 8 bits) = 10us
-#define WS2801_MIN_IDLE_TIME_US                 (WS2801_PIXEL_NS_IDLE / 1000.0)
-// #define WS2801_DEFAULT_INTENSITY_PER_PIXEL      3
+#define WS2801_BIT_RATE                 (APB_CLK_FREQ/80)
+#define WS2801_BITS_PER_INTENSITY       8
+#define WS2801_MICRO_SEC_PER_INTENSITY  int(((1.0/float(WS2801_BIT_RATE)) * WS2801_BITS_PER_INTENSITY))
+#define WS2801_MIN_IDLE_TIME_US         500
+    uint16_t    BlockSize = 1;
+    float       BlockDelay = 0;
 
 }; // c_OutputWS2801
-#endif // def USE_WS2801
+#endif // def ARDUINO_ARCH_ESP32
 

@@ -494,7 +494,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             // DEBUG_V ("");
             if (error)
             {
-                log (String (F ("*** WebIO::onWsEvent(): Parse Error: ")) + error.c_str ());
+                log (CN_stars + String (F (" WebIO::onWsEvent(): Parse Error: ")) + error.c_str ());
                 log (WebSocketFrameCollectionBuffer);
                 break;
             }

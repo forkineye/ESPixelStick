@@ -60,11 +60,11 @@ void c_FileMgr::Begin ()
 
         if (!LittleFS.begin ())
         {
-            LOG_PORT.println ( String(CN_stars) + F (" Flash File system did not initialize correctly ") + CN_stars);
+            LOG_PORT.println ( String(CN_stars) + F (" Flash file system did not initialize correctly ") + CN_stars);
         }
         else
         {
-            LOG_PORT.println (F ("Flash File system initialized."));
+            LOG_PORT.println (F ("Flash file system initialized."));
             //listDir (LittleFS, String ("/"), 3);
         }
 
@@ -578,7 +578,7 @@ void c_FileMgr::DescribeSdCardToUser ()
 {
     // DEBUG_START;
 
-    String BaseMessage = F ("*** Found SD Card ***");
+    String BaseMessage = CN_stars + String (F (" Found SD Card ")) + CN_stars;
 
 #ifdef ARDUINO_ARCH_ESP32
     uint64_t cardSize = SD.cardSize () / (1024 * 1024);
