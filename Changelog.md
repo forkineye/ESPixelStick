@@ -4,7 +4,7 @@
 ### 4.0-dev (in progress)
 
 - Compiled against [Arduino Core 3.0.2](https://github.com/esp8266/Arduino/releases/tag/3.0.2) for ESP8266 platform.
-- Compiled against [Arduino Core 1.0.6](https://github.com/espressif/arduino-esp32/releases/tag/1.0.6) for ESP32 platform.
+- Compiled against [Arduino Core 2.0.0](https://github.com/espressif/arduino-esp32/releases/tag/2.0.0) for ESP32 platform.
 - ***ESP-01 modules are no longer supported***. Version 4.0 requires 4MB of flash and ESP-01 modules only have 1MB of flash. For the ESPixelStick V1 or V2, 3.2 is the latest version you can load.
 - Requires local upload to controller. OTA update from 3.x via EFU is not supported due to the new flash layout.  Upgrades to future 4.x version from 4.0 however will be supported.
 - Complete refactor of the code to allow easier implementation of extensions.

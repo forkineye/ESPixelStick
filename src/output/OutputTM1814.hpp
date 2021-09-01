@@ -25,6 +25,7 @@
 #include "OutputPixel.hpp"
 
 #ifdef ARDUINO_ARCH_ESP32
+#   include <soc/uart_reg.h>
 #   include <driver/uart.h>
 #endif
 

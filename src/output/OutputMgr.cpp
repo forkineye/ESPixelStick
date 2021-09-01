@@ -74,9 +74,11 @@ typedef struct
 //-----------------------------------------------------------------------------
 static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] =
 {
+#ifdef ARDUINO_ARCH_ESP8266
     {DEFAULT_UART_1_GPIO,  uart_port_t::UART_NUM_1},
-#ifdef ARDUINO_ARCH_ESP32
-    {DEFAULT_UART_2_GPIO, uart_port_t::UART_NUM_2},
+#elif ARDUINO_ARCH_ESP32
+    {DEFAULT_UART_1_GPIO, UART_NUM_1},
+    {DEFAULT_UART_2_GPIO, UART_NUM_2},
     // RMT ports
     {DEFAULT_RMT_0_GPIO,  uart_port_t (0)},
     {DEFAULT_RMT_1_GPIO,  uart_port_t (1)},
@@ -89,7 +91,8 @@ static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] 
     {DEFAULT_RMT_7_GPIO,  uart_port_t (7)},
 #endif // ndef ESP32_CAM
 
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def ARDUINO_ARCH_ESP82666
+
     {gpio_num_t::GPIO_NUM_10, uart_port_t (-1)},
 };
 

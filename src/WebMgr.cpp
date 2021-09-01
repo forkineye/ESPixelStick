@@ -29,18 +29,10 @@
 #include <Int64String.h>
 
 #include <FS.h>
+#include <LittleFS.h>
 
 #include <time.h>
 #include <sys/time.h>
-
-#ifdef ARDUINO_ARCH_ESP8266
-#	include <LittleFS.h>
-#   define LITTLEFS LittleFS
-#elif defined ARDUINO_ARCH_ESP32
-#	include <LITTLEFS.h>
-#else
-#	error "Unsupported CPU type."
-#endif
 
 // #define ESPALEXA_DEBUG
 #define ESPALEXA_MAXDEVICES 2
@@ -216,10 +208,10 @@ void c_WebMgr::init ()
 #endif // def USE_REST
 
     // Static Handler
-    webServer.serveStatic ("/", LITTLEFS, "/www/").setDefaultFile ("index.html");
+    webServer.serveStatic ("/", LittleFS, "/www/").setDefaultFile ("index.html");
 
     // FS Debugging Handler
-    webServer.serveStatic ("/fs", LITTLEFS, "/" );
+    webServer.serveStatic ("/fs", LittleFS, "/" );
 
     // if the client posts to the upload page
     webServer.on ("/upload", HTTP_POST | HTTP_PUT | HTTP_OPTIONS,
@@ -1113,7 +1105,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
             request->send (200, CN_textSLASHplain, (String ( F ("Update Finished: ")) + String (efupdate.getError ())).c_str());
             log (F ("Upload Finished."));
             efupdate.end ();
-            LITTLEFS.begin ();
+            LittleFS.begin ();
 
             extern bool reboot;
             reboot = true;

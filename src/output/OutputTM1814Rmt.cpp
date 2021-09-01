@@ -188,7 +188,7 @@ bool c_OutputTM1814Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     Rgb2Rmt[INTERFRAME_GAP_ID].duration1 = ifgTicks / 10;
     Rgb2Rmt[INTERFRAME_GAP_ID].level1 = 1;
 
-    rmt_set_pin (RmtChannelId, rmt_mode_t::RMT_MODE_TX, DataPin);
+    rmt_set_gpio (RmtChannelId, rmt_mode_t::RMT_MODE_TX, DataPin, false);
 
     // DEBUG_END;
     return response;

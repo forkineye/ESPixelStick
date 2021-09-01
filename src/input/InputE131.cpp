@@ -43,7 +43,7 @@ c_InputE131::~c_InputE131()
     // DEBUG_START;
 
     // The E1.31 layer and UDP layer do not handle a shut down well (at all). Ask for a reboot.
-    log ((F ("** Shutdown for input ")) + String (InputChannelId) +
+    log (String (F ("** Shutdown for input ")) + String (InputChannelId) +
             (F (" -  Reboot required **")));
 
     // DEBUG_END;
@@ -281,7 +281,7 @@ void c_InputE131::SubscribeToMulticastDomains()
                                     (((startUniverse + UniverseIndex) >> 0) & 0xff));
 
         igmp_joingroup ((ip4_addr_t*)&ifaddr[0], (ip4_addr_t*)&multicast_addr[0]);
-        log (F ("Multicast subscribed to ") + multicast_addr.toString());
+        log (String (F ("Multicast subscribed to ")) + multicast_addr.toString());
     }
     // DEBUG_END;
 } // multiSub

@@ -17,9 +17,9 @@ Being open source, you are free to use the ESPixelStick firmware on the device o
 The easiest way to get up and going is to download the [latest stable release](https://github.com/forkineye/ESPixelStick/releases/latest) and use ESPSFlashTool within the release archive to flash a pre-compiled binary.  If you're intent on compiling yourself or wish to modify the source code, you'll need the following software to build this project along with the Arduino IDE.
 
 - [Adruino for ESP8266](https://github.com/esp8266/Arduino) - Arduino core for ESP8266
-- [Arduino ESP8266 Filesystem Uploader](https://github.com/earlephilhower/arduino-esp8266littlefs-plugin/releases/latest) - Arduino plugin for uploading files to ESP8266 platforms
+- [Arduino ESP8266 Filesystem Uploader](https://github.com/earlephilhower/arduino-esp8266littlefs-plugin) - Arduino plugin for uploading files to ESP8266 platforms
 - [Adruino for ESP32](https://github.com/espressif/arduino-esp32) - Arduino core for ESP32
-- [Arduino ESP32 Filesystem Uploader](https://github.com/lorol/arduino-esp32fs-plugin/releases/latest) - Arduino plugin for uploading files to ESP32 platforms
+- [Arduino ESP32 Filesystem Uploader](https://github.com/lorol/arduino-esp32fs-plugin) - Arduino plugin for uploading files to ESP32 platforms
 - [gulp](http://gulpjs.com/) - Build system required to process web sources.  Refer to the html [README](html/README.md) for more information.
 
 The following libraries are required. Extract the folder in each of these zip files and place it in the "library" folder under your arduino environment.
@@ -44,7 +44,6 @@ Required for ESP8266:
 Required for ESP32:
 
 - [AsyncTCP](https://github.com/me-no-dev/AsyncTCP) - Asynchronous TCP Library
-- [LittleFS](https://github.com/lorol/LITTLEFS) - LittleFS for ESP32
 
 ## Important Notes on Compiling and Flashing
 

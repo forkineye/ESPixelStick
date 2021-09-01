@@ -317,5 +317,3 @@ void c_InputDDP::ProcessReceivedQuery ()
 #endif // def SUPPORT_QUERY
 
 } // ProcessReceivedDiscovery
-
-

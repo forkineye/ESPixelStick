@@ -19,7 +19,28 @@
             "cppStandard": "c++17",
             "intelliSenseMode": "gcc-x64",
             "forcedInclude": []
+        },
+        {
+            "name": "ESP32",
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "ARDUINO_ARCH_ESP32"
+            ],
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/../hardware/espressif/esp32/tools/sdk/**",
+                "${workspaceFolder}/../hardware/espressif/esp32/**",
+                "${workspaceFolder}/../libraries/**"
+            ],
+            "compilerPath": "${workspaceFolder}/../hardware/espressif/esp32/tools/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64",
+            "forcedInclude": []
         }
+
     ],
     "version": 4
 }

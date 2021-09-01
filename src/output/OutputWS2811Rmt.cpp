@@ -119,10 +119,10 @@ static void IRAM_ATTR rmt_intr_handler (void* param)
 */
 void c_OutputWS2811Rmt::Begin ()
 {
-    // DEBUG_START;
+    DEBUG_START;
     // RmtChannelId = 0;
-    // DEBUG_V (String ("DataPin: ") + String (DataPin));
-    // DEBUG_V (String (" RmtChannelId: ") + String (RmtChannelId));
+    DEBUG_V (String ("DataPin: ") + String (DataPin));
+    DEBUG_V (String (" RmtChannelId: ") + String (RmtChannelId));
 
     // Configure RMT channel
     rmt_config_t RmtConfig;
@@ -164,14 +164,14 @@ void c_OutputWS2811Rmt::Begin ()
     // DEBUG_V (String ("       Rgb2Rmt[STOPBIT_ID]: 0x") + String (uint32_t (Rgb2Rmt[STOPBIT_ID].val), HEX));
 
     // Start output
-    // DEBUG_END;
+    DEBUG_END;
 
 } // init
 
 //----------------------------------------------------------------------------
 bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
     bool response = c_OutputWS2811::SetConfig (jsonConfig);
 
@@ -184,9 +184,9 @@ bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     Rgb2Rmt[INTERFRAME_GAP_ID].duration1 = ifgTicks / 10;
     Rgb2Rmt[INTERFRAME_GAP_ID].level1 = 0;
 
-    rmt_set_pin (RmtChannelId, rmt_mode_t::RMT_MODE_TX, DataPin);
+    rmt_set_gpio (RmtChannelId, rmt_mode_t::RMT_MODE_TX, DataPin, false);
 
-    // DEBUG_END;
+    DEBUG_END;
     return response;
 
 } // GetStatus

@@ -136,7 +136,6 @@ void c_OutputTM1814Uart::Begin ()
     uart_config.parity = uart_parity_t::UART_PARITY_DISABLE;
     uart_config.rx_flow_ctrl_thresh = 1;
     uart_config.stop_bits = uart_stop_bits_t::UART_STOP_BITS_2;
-    uart_config.use_ref_tick = false;
     InitializeUart (uart_config, PIXEL_FIFO_TRIGGER_LEVEL);
 #endif
 
@@ -146,7 +145,7 @@ void c_OutputTM1814Uart::Begin ()
 #ifdef ARDUINO_ARCH_ESP8266
     ETS_UART_INTR_ATTACH (uart_intr_handler, this);
 #else
-    uart_isr_register (UartId, uart_intr_handler, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM, nullptr);
+    uart_isr_register (UartId, uart_intr_handler, this, ESP_INTR_FLAG_IRAM, nullptr);
 #endif
 
 } // init

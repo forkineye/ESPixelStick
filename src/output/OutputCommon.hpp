@@ -23,8 +23,9 @@
 #include "../ESPixelStick.h"
 
 #ifdef ARDUINO_ARCH_ESP32
+#   include <soc/uart_reg.h>
 #   include <driver/uart.h>
-#   include "driver/gpio.h"
+#   include <driver/gpio.h>
 #endif
 
 #include "OutputMgr.hpp"

@@ -241,7 +241,6 @@ void c_OutputGECE::Begin ()
     uart_config.parity = uart_parity_t::UART_PARITY_DISABLE;
     uart_config.rx_flow_ctrl_thresh = 1;
     uart_config.stop_bits = uart_stop_bits_t::UART_STOP_BITS_1;
-    uart_config.use_ref_tick = false;
     InitializeUart (uart_config, 0);
 
     SET_PERI_REG_BITS (UART_IDLE_CONF_REG (UartId), UART_TX_BRK_NUM_V, GECE_UART_BREAK_BITS, UART_TX_BRK_NUM_S);

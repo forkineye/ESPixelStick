@@ -67,7 +67,7 @@ public:
         OutputChannelId_RMT_7,
         OutputChannelId_RMT_8,
 #endif // ndef ESP32_CAM
-        OutputChannelId_SPI_1,
+//        OutputChannelId_SPI_1,
 #endif // def ARDUINO_ARCH_ESP32
         OutputChannelId_Relay,
         OutputChannelId_End, // must be last in the list

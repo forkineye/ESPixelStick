@@ -20,16 +20,14 @@
 
 #include "ESPixelStick.h"
 #include <FS.h>
+#include <LittleFS.h>
 #include <map>
 
 #ifdef ARDUINO_ARCH_ESP32
-#   include <LITTLEFS.h>
 #	include <SD.h>
 #	define SDFS SD
 #elif defined(ARDUINO_ARCH_ESP8266)
-#   include <LittleFS.h>
 #	include <SDFS.h>
-#   define LITTLEFS LittleFS
 #endif
 
 class c_FileMgr

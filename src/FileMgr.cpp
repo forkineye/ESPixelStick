@@ -58,14 +58,14 @@ void c_FileMgr::Begin ()
     {
         InitSdFileList ();
 
-        if (!LITTLEFS.begin ())
+        if (!LittleFS.begin ())
         {
             LOG_PORT.println ( String(CN_stars) + F (" Flash File system did not initialize correctly ") + CN_stars);
         }
         else
         {
             LOG_PORT.println (F ("Flash File system initialized."));
-            //listDir (LITTLEFS, String ("/"), 3);
+            //listDir (LittleFS, String ("/"), 3);
         }
 
         // SetSpiIoPins will be called via SetConfig when we boot and config.json is loaded.
@@ -168,7 +168,7 @@ void c_FileMgr::DeleteConfigFile (const String& FileName)
 {
     // DEBUG_START;
 
-    LITTLEFS.remove (FileName);
+    LittleFS.remove (FileName);
 
     // DEBUG_END;
 
@@ -235,7 +235,7 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
             break;
         }
 */
-        fs::File file = LITTLEFS.open (FileName.c_str (), "r");
+        fs::File file = LittleFS.open (FileName.c_str (), "r");
         if (!file)
         {
             LOG_PORT.println (String (CN_stars) + CfgFileMessagePrefix + String (F ("Could not open file for reading.")) + CN_stars);
@@ -298,7 +298,7 @@ bool c_FileMgr::SaveConfigFile (const String& FileName, const char * FileData)
     String CfgFileMessagePrefix = String (CN_Configuration_File_colon) + "'" + FileName + "' ";
     // DEBUG_V (FileData);
 
-    fs::File file = LITTLEFS.open (FileName.c_str (), "w");
+    fs::File file = LittleFS.open (FileName.c_str (), "w");
     if (!file)
     {
         LOG_PORT.println (String (CN_stars) + CfgFileMessagePrefix + String (F ("Could not open file for writing..")) + CN_stars);
@@ -313,7 +313,7 @@ bool c_FileMgr::SaveConfigFile (const String& FileName, const char * FileData)
 
         file.close ();
 
-        file = LITTLEFS.open (FileName.c_str (), "r");
+        file = LittleFS.open (FileName.c_str (), "r");
         LOG_PORT.print (CN_Configuration_File_colon);
         LOG_PORT.print (FileName);
         LOG_PORT.printf( " saved %ul bytes.\n", file.size ());
@@ -352,7 +352,7 @@ bool c_FileMgr::ReadConfigFile (const String& FileName, String& FileData)
     String CfgFileMessagePrefix = String (CN_Configuration_File_colon) + "'" + FileName + "' ";
 
     // DEBUG_V (String("File '") + FileName + "' is being opened.");
-    fs::File file = LITTLEFS.open (FileName.c_str (), CN_r);
+    fs::File file = LittleFS.open (FileName.c_str (), CN_r);
     if (file)
     {
         // Supress this for now, may add it back later
@@ -433,7 +433,7 @@ bool c_FileMgr::ReadConfigFile (const String & FileName, byte * FileData, size_t
     do // once
     {
         // DEBUG_V (String("File '") + FileName + "' is being opened.");
-        fs::File file = LITTLEFS.open (FileName.c_str (), CN_r);
+        fs::File file = LittleFS.open (FileName.c_str (), CN_r);
         if (!file)
         {
             LOG_PORT.println (String (CN_stars) + CN_Configuration_File_colon + "'" + FileName + F ("' not found.") + CN_stars);

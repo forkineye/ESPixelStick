@@ -19,16 +19,14 @@
 
 #include "ESPixelStick.h"
 #include <FS.h>
+#include <LittleFS.h>
+
 #include <lwip/def.h>
 #include "EFUpdate.h"
 
 #ifdef ARDUINO_ARCH_ESP32
-#   include <LITTLEFS.h>
 #   include <Update.h>
 #   include <esp_task_wdt.h>
-#else
-#   include <LittleFS.h>
-#   define LITTLEFS LittleFS
 #endif
 
 #ifndef U_SPIFFS
@@ -107,7 +105,7 @@ bool EFUpdate::process(uint8_t *data, size_t len) {
                         // DEBUG_V ();
                         // Begin file system update
 #ifdef ARDUINO_ARCH_ESP8266
-                        LITTLEFS.end();
+                        LittleFS.end();
 #endif
                         // DEBUG_V ();
                         if (!Update.begin(_record.size, U_SPIFFS)) {

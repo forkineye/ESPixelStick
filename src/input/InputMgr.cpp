@@ -244,7 +244,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
 */
 void c_InputMgr::CreateNewConfig ()
 {
-    // DEBUG_START;
+    DEBUG_START;
     LOG_PORT.println (F ("--- WARNING: Creating a new Input Manager configuration Data set - Start ---"));
 
     // create a place to save the config
@@ -253,34 +253,34 @@ void c_InputMgr::CreateNewConfig ()
 
     JsonConfig[CN_cfgver] = CurrentConfigVersion;
 
-    // DEBUG_V ("for each Input type");
+    DEBUG_V ("for each Input type");
     for (int InputTypeId = int (InputType_Start);
          InputTypeId < int (InputType_End);
          ++InputTypeId)
     {
-        // DEBUG_V ("for each input channel");
+        DEBUG_V ("for each input channel");
         int ChannelIndex = 0;
         for (c_InputCommon* CurrentInput : pInputChannelDrivers)
         {
-            // DEBUG_V (String("instantiate the Input type: ") + InputTypeId);
+            DEBUG_V (String("instantiate the Input type: ") + InputTypeId);
             InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex++), e_InputType (InputTypeId));
         }// end for each interface
 
-        // DEBUG_V ("collect the config data");
+        DEBUG_V ("collect the config data");
         CreateJsonConfig (JsonConfig);
 
-        // DEBUG_V ("");
+        DEBUG_V ("");
 
     } // end for each Input type
 
-    // DEBUG_V ("leave the Inputs disabled");
+    DEBUG_V ("leave the Inputs disabled");
     int ChannelIndex = 0;
     for (c_InputCommon* CurrentInput : pInputChannelDrivers)
     {
         InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex++), e_InputType::InputType_Disabled);
     }// end for each interface
 
-    // DEBUG_V ("");
+    DEBUG_V ("");
 
     // Record the default configuration
     CreateJsonConfig (JsonConfig);
@@ -290,7 +290,7 @@ void c_InputMgr::CreateNewConfig ()
     SetConfig (ConfigData.c_str());
 
     LOG_PORT.println (F ("--- WARNING: Creating a new Input Manager configuration Data set - Done ---"));
-    // DEBUG_END;
+    DEBUG_END;
 
 } // CreateNewConfig
 

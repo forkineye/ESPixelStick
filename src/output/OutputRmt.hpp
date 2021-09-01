@@ -37,7 +37,7 @@
 #define RMT_INT_THR_EVNT(channel)  ((RMT__INT_THR_EVNT)<< (uint32_t(channel)))
 
 #define RMT_ClockRate                               80000000.0
-#define RMT_Clock_Divisor                           2.0
+#define RMT_Clock_Divisor                           2
 #define RMT_TickLengthNS                            float((1/(RMT_ClockRate/RMT_Clock_Divisor))*1000000000.0)
 
 #endif // def ARDUINO_ARCH_ESP32
