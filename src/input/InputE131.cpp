@@ -247,7 +247,7 @@ void c_InputE131::SetBufferTranslation ()
 
     if (0 != BytesLeftToMap)
     {
-        log (F ("ERROR: Universe configuration is too small to fill output buffer. Outputs have been truncated."));
+        LOG_PORT.println (String (F ("ERROR: Universe configuration is too small to fill output buffer. Outputs have been truncated.")));
     }
 
     // DEBUG_END;
@@ -289,7 +289,7 @@ void c_InputE131::SubscribeToMulticastDomains()
                                     (((startUniverse + UniverseIndex) >> 0) & 0xff));
 
         igmp_joingroup ((ip4_addr_t*)&ifaddr[0], (ip4_addr_t*)&multicast_addr[0]);
-        log (F ("Multicast subscribed to ") + multicast_addr.toString());
+        LOG_PORT.println (String (F ("Multicast subscribed to ")) + multicast_addr.toString());
     }
     // DEBUG_END;
 } // multiSub
@@ -369,28 +369,28 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         // Get on with business
         if (e131->begin (E131_MULTICAST, startUniverse, LastUniverse - startUniverse + 1))
         {
-            log (F ("Multicast enabled"));
+            LOG_PORT.println (String (F ("Multicast enabled")));
         }
         else
         {
-            log (CN_stars + String (F (" E1.31 MULTICAST INIT FAILED ")) + CN_stars);
+            LOG_PORT.println (CN_stars + String (F (" E1.31 MULTICAST INIT FAILED ")) + CN_stars);
         }
 
         // DEBUG_V ("");
 
         if (e131->begin (E131_UNICAST))
         {
-            log (String (F ("Listening on port ")) + E131_DEFAULT_PORT);
+            LOG_PORT.println (String (F ("Listening on port ")) + E131_DEFAULT_PORT);
         }
         else
         {
-            log (CN_stars + String (F (" E1.31 UNICAST INIT FAILED ")) + CN_stars);
+            LOG_PORT.println (CN_stars + String (F (" E1.31 UNICAST INIT FAILED ")) + CN_stars);
         }
 
         // Setup IGMP subscriptions
         SubscribeToMulticastDomains ();
 
-        log (String (F ("Listening for ")) + InputDataBufferSize +
+        LOG_PORT.println (String (F ("Listening for ")) + InputDataBufferSize +
             F (" channels from Universe ") + startUniverse +
             F (" to ") + LastUniverse);
     }
@@ -400,7 +400,7 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         // E1.31 does not do this gracefully. A loss of connection needs a reboot
         extern bool reboot;
         reboot = true;
-        log (F ("Input requesting reboot on loss of WiFi connection."));
+        LOG_PORT.println (String (F ("Input requesting reboot on loss of WiFi connection.")));
     }
 
     // DEBUG_END;

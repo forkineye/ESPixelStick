@@ -109,18 +109,18 @@ bool c_OutputRelay::validate ()
 
     if ((Num_Channels > OM_RELAY_CHANNEL_LIMIT) || (Num_Channels < 1))
     {
-        log (CN_stars + String (F (" Requested channel count was Not Valid. Setting to ")) + OM_RELAY_CHANNEL_LIMIT + " " + CN_stars);
+        LOG_PORT.println (CN_stars + String (F (" Requested channel count was Not Valid. Setting to ")) + OM_RELAY_CHANNEL_LIMIT + " " + CN_stars);
         Num_Channels = OM_RELAY_CHANNEL_LIMIT;
         response = false;
     }
 
     if (Num_Channels < OM_RELAY_CHANNEL_LIMIT)
     {
-        log (CN_stars + String (F (" Requested channel count was Not Valid. Insuficient number of input channels avaialable ")) + CN_stars);
+        LOG_PORT.println (CN_stars + String (F (" Requested channel count was Not Valid. Insuficient number of input channels avaialable ")) + CN_stars);
 
         for (int ChannelIndex = OM_RELAY_CHANNEL_LIMIT - 1; ChannelIndex > Num_Channels; ChannelIndex--)
         {
-            log (String (CN_stars + String(F (" Disabling channel '")) + String(ChannelIndex + 1) + "' " + CN_stars));
+            LOG_PORT.println (String (CN_stars + String(F (" Disabling channel '")) + String(ChannelIndex + 1) + "' " + CN_stars));
             OutputList[ChannelIndex].Enabled = false;
         }
 
@@ -190,7 +190,7 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
         if (false == jsonConfig.containsKey (CN_channels))
         {
             // if not, flag an error and stop processing
-            log (F ("No Relay Output Channel Settings Found. Using Defaults"));
+            LOG_PORT.println (String (F ("No Relay Output Channel Settings Found. Using Defaults")));
             break;
         }
         JsonArray JsonChannelList = jsonConfig[CN_channels];
@@ -204,7 +204,7 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             if (ChannelId >= OM_RELAY_CHANNEL_LIMIT)
             {
                 // if not, flag an error and stop processing this channel
-                log (String(F ("No Relay Output Channel Settings Found for Channel '")) + String(ChannelId) + "'");
+                LOG_PORT.println (String(F ("No Relay Output Channel Settings Found for Channel '")) + String(ChannelId) + "'");
                 continue;
             }
 
