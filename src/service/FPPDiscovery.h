@@ -61,7 +61,7 @@ private:
     void StopPlaying       ();
     void StartPlaying      (String & filename, uint32_t frameId);
     bool AllowedToRemotePlayFiles ();
-    void log (String message);
+    void logcon (String message);
 
 public:
     c_FPPDiscovery ();

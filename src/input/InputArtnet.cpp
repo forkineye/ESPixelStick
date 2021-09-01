@@ -226,7 +226,7 @@ void c_InputArtnet::SetBufferTranslation ()
 
     if (0 != BytesLeftToMap)
     {
-        log (F ("ERROR: Universe configuration is too small to fill output buffer. Outputs have been truncated."));
+        logcon (F ("ERROR: Universe configuration is too small to fill output buffer. Outputs have been truncated."));
     }
 
     // DEBUG_END;
@@ -267,20 +267,20 @@ void c_InputArtnet::SetUpArtnet ()
 
         byte broadcast[] = { 10, 0, 1, 255 };
         pArtnet->setBroadcast (broadcast);
-        log (F ("Subscribed to broadcast"));
+        logcon (F ("Subscribed to broadcast"));
 
         // DEBUG_V ("");
 
         fMe = this; // hate this
         pArtnet->setArtDmxCallback ([](uint16_t UniverseId, uint16_t length, uint8_t sequence, uint8_t* data, IPAddress remoteIP)
             {
-                // log ("fMe");
+                // logcon ("fMe");
                 fMe->onDmxFrame (UniverseId, length, sequence, data, remoteIP);
             });
     }
     // DEBUG_V ("");
 
-    log (String (F ("Listening for ")) + InputDataBufferSize +
+    logcon (String (F ("Listening for ")) + InputDataBufferSize +
         F (" channels from Universe ") + startUniverse +
         F (" to ") + LastUniverse);
     // DEBUG_END;

@@ -374,7 +374,7 @@ void c_OutputCommon::GetConfig (JsonObject & jsonConfig)
     // DEBUG_END;
 } // GetConfig
 
-void c_OutputCommon::log(String message) {
+void c_OutputCommon::logcon(String message) {
     String DriverName = "";
     GetDriverName (DriverName);
     LOG_PORT.println("[" + DriverName + "] " + message);

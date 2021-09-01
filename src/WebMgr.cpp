@@ -289,7 +289,7 @@ void c_WebMgr::init ()
     espalexa.addDevice (pAlexaDevice);
     espalexa.setDiscoverable ((nullptr != pAlexaCallback) ? true : false);
 
-    log (String (F ("Web server listening on port ")) + HTTP_PORT);
+    logcon (String (F ("Web server listening on port ")) + HTTP_PORT);
 
     // DEBUG_END;
 }
@@ -373,7 +373,7 @@ void c_WebMgr::GetDeviceOptions ()
 
     if (0 == webJsonDoc.capacity ())
     {
-        log (F ("ERROR: Failed to allocate memory for the GetDeviceOptions web request response."));
+        logcon (F ("ERROR: Failed to allocate memory for the GetDeviceOptions web request response."));
     }
 
     // DEBUG_V ("");
@@ -420,7 +420,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             // only process text messages
             if (MessageInfo->opcode != WS_TEXT)
             {
-                log (F ("-- Ignore binary message --"));
+                logcon (F ("-- Ignore binary message --"));
                 break;
             }
             // DEBUG_V ("");
@@ -438,7 +438,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             if (WebSocketFrameCollectionBufferSize < (MessageInfo->index + len))
             {
                 // message wont fit. Dont save any of it
-                log (String (F ("*** onWsEvent() error: Incoming message is too long.")));
+                logcon (String (F ("*** onWsEvent() error: Incoming message is too long.")));
                 break;
             }
 
@@ -494,8 +494,8 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             // DEBUG_V ("");
             if (error)
             {
-                log (CN_stars + String (F (" WebIO::onWsEvent(): Parse Error: ")) + error.c_str ());
-                log (WebSocketFrameCollectionBuffer);
+                logcon (CN_stars + String (F (" WebIO::onWsEvent(): Parse Error: ")) + error.c_str ());
+                logcon (WebSocketFrameCollectionBuffer);
                 break;
             }
             // DEBUG_V ("");
@@ -508,26 +508,26 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
 
         case WS_EVT_CONNECT:
         {
-            log (String (F ("WS client connect - ")) + client->id ());
+            logcon (String (F ("WS client connect - ")) + client->id ());
             break;
         } // case WS_EVT_CONNECT:
 
         case WS_EVT_DISCONNECT:
         {
-            log (String (F ("WS client disconnect - ")) + client->id ());
+            logcon (String (F ("WS client disconnect - ")) + client->id ());
             break;
         } // case WS_EVT_DISCONNECT:
 
         case WS_EVT_PONG:
         {
-            log (F ("* WS PONG *"));
+            logcon (F ("* WS PONG *"));
             break;
         } // case WS_EVT_PONG:
 
         case WS_EVT_ERROR:
         default:
         {
-            log (F ("** WS ERROR **"));
+            logcon (F ("** WS ERROR **"));
             break;
         }
     } // end switch (type)
@@ -584,7 +584,7 @@ void c_WebMgr::ProcessXseriesRequests (AsyncWebSocketClient * client)
 
         default:
         {
-            log (String (F ("ERROR: Unhandled request: ")) + WebSocketFrameCollectionBuffer);
+            logcon (String (F ("ERROR: Unhandled request: ")) + WebSocketFrameCollectionBuffer);
             client->text ((String (F ("{\"Error\":Error"))).c_str());
             break;
         }
@@ -683,7 +683,7 @@ void c_WebMgr::ProcessVseriesRequests (AsyncWebSocketClient* client)
         default:
         {
             client->text (F ("V Error"));
-            log (String(CN_stars) + F ("ERROR: Unsupported Web command V") + WebSocketFrameCollectionBuffer[1] + CN_stars);
+            logcon (String(CN_stars) + F ("ERROR: Unsupported Web command V") + WebSocketFrameCollectionBuffer[1] + CN_stars);
             break;
         }
     } // end switch
@@ -712,7 +712,7 @@ void c_WebMgr::ProcessGseriesRequests (AsyncWebSocketClient* client)
         default:
         {
             client->text (F ("G Error"));
-            log (String(CN_stars) + F ("ERROR: Unsupported Web command V") + WebSocketFrameCollectionBuffer[1] + CN_stars);
+            logcon (String(CN_stars) + F ("ERROR: Unsupported Web command V") + WebSocketFrameCollectionBuffer[1] + CN_stars);
             break;
         }
     } // end switch
@@ -1078,7 +1078,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
 #else
             // this is not supported for ESP32
 #endif
-            log (String(F ("Upload Started: ")) + filename);
+            logcon (String(F ("Upload Started: ")) + filename);
             efupdate.begin ();
         }
 
@@ -1088,7 +1088,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
 
         if (!efupdate.process (data, len))
         {
-            log (String(CN_stars) + F (" UPDATE ERROR: ") + String (efupdate.getError ()));
+            logcon (String(CN_stars) + F (" UPDATE ERROR: ") + String (efupdate.getError ()));
         }
         // DEBUG_V ("Packet has been processed");
 
@@ -1103,7 +1103,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
         if (final)
         {
             request->send (200, CN_textSLASHplain, (String ( F ("Update Finished: ")) + String (efupdate.getError ())).c_str());
-            log (F ("Upload Finished."));
+            logcon (F ("Upload Finished."));
             efupdate.end ();
             LittleFS.begin ();
 
@@ -1132,7 +1132,7 @@ void c_WebMgr::Process ()
 } // Process
 
 // Serial console logging
-void c_WebMgr::log(String message) {
+void c_WebMgr::logcon(String message) {
     LOG_PORT.println("[WebMgr] " + message);
 } // log
 

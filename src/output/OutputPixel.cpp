@@ -243,7 +243,7 @@ bool c_OutputPixel::validate ()
 
     if (zig_size > pixel_count)
     {
-        log (CN_stars + String (F (" Requested ZigZag size count was too high. Setting to ")) + pixel_count + " " + CN_stars);
+        logcon (CN_stars + String (F (" Requested ZigZag size count was too high. Setting to ")) + pixel_count + " " + CN_stars);
         zig_size = pixel_count;
         response = false;
     }

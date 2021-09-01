@@ -189,7 +189,7 @@ bool c_OutputSerial::validate ()
 
     if ((Num_Channels > MAX_CHANNELS) || (Num_Channels < 1))
     {
-        log (CN_stars + String (F (" Requested channel count was not valid. Setting to ")) + MAX_CHANNELS + " " + CN_stars);
+        logcon (CN_stars + String (F (" Requested channel count was not valid. Setting to ")) + MAX_CHANNELS + " " + CN_stars);
         Num_Channels = DEFAULT_NUM_CHANNELS;
         response = false;
     }
@@ -197,20 +197,20 @@ bool c_OutputSerial::validate ()
 
     if ((CurrentBaudrate < uint32_t (BaudRate::BR_MIN)) || (CurrentBaudrate > uint32_t (BaudRate::BR_MAX)))
     {
-        log (CN_stars + String (F (" Requested baudrate is not valid. Setting to Default ")) + CN_stars);
+        logcon (CN_stars + String (F (" Requested baudrate is not valid. Setting to Default ")) + CN_stars);
         CurrentBaudrate = uint (BaudRate::BR_DEF);
         response = false;
     }
 
     if (GenericSerialHeader.length() > MAX_HDR_SIZE)
     {
-        log (CN_stars + String (F (" Requested header is too long. Setting to Default ")) + CN_stars);
+        logcon (CN_stars + String (F (" Requested header is too long. Setting to Default ")) + CN_stars);
         GenericSerialHeader = "";
     }
 
     if (GenericSerialFooter.length() > MAX_FOOTER_SIZE)
     {
-        log (CN_stars + String (F (" Requested footer is too long. Setting to Default ")) + CN_stars);
+        logcon (CN_stars + String (F (" Requested footer is too long. Setting to Default ")) + CN_stars);
         GenericSerialFooter = "";
     }
 
