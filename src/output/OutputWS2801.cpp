@@ -16,9 +16,9 @@
 *  or use of these programs.
 *
 */
-#ifdef USE_WS2801
 
 #include "../ESPixelStick.h"
+#ifdef ARDUINO_ARCH_ESP32
 #include "OutputWS2801.hpp"
 
 //----------------------------------------------------------------------------
@@ -69,7 +69,7 @@ void c_OutputWS2801::SetOutputBufferSize (uint16_t NumChannelsAvailable)
     c_OutputPixel::SetOutputBufferSize (NumChannelsAvailable);
 
     // Calculate our refresh time
-    FrameMinDurationInMicroSec = (WS2801_MICRO_SEC_PER_INTENSITY * OutputBufferSize) + InterFrameGapInMicroSec;
+    SetFrameDurration (((1.0 / float (WS2801_BIT_RATE)) * 1000000), BlockSize, BlockDelay);
 
     // DEBUG_END;
 
@@ -91,11 +91,11 @@ bool c_OutputWS2801::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     bool response = c_OutputPixel::SetConfig (jsonConfig);
 
     // Calculate our refresh time
-    FrameMinDurationInMicroSec = (WS2801_MICRO_SEC_PER_INTENSITY * numIntensityBytesPerPixel * OutputBufferSize) + InterFrameGapInMicroSec;
+    SetFrameDurration (((1.0 / float (WS2801_BIT_RATE)) * 1000000), BlockSize, BlockDelay);
 
     // DEBUG_END;
     return response;
 
 } // SetConfig
 
-#endif // def USE_WS2801
+#endif // def ARDUINO_ARCH_ESP32

@@ -39,10 +39,6 @@ c_InputArtnet::~c_InputArtnet()
 {
     // DEBUG_START;
 
-    // The Artnet layer and UDP layer do not handle a shut down well (at all). Ask for a reboot.
-    log (String (F ("** Shutdown for input ")) + String (InputChannelId) +
-            String (F (" - Reboot required **")));
-
     // DEBUG_END;
 
 } // ~c_InputArtnet
@@ -54,11 +50,7 @@ void c_InputArtnet::Begin ()
 
     do // once
     {
-        if (true == HasBeenInitialized)
-        {
-            // DEBUG_V ("");
-            // break;
-        }
+        if (HasBeenInitialized) { break; }
 
         // DEBUG_V ("InputDataBufferSize: " + String(InputDataBufferSize));
 
@@ -185,9 +177,12 @@ void c_InputArtnet::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
     InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
 
-    // buffer has moved. Start Over
-    HasBeenInitialized = false;
-    Begin ();
+    if (HasBeenInitialized)
+    {
+        // buffer has moved. Start Over
+        HasBeenInitialized = false;
+        Begin ();
+    }
 
     SetBufferTranslation ();
 

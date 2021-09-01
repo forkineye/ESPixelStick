@@ -578,7 +578,7 @@ void c_FileMgr::DescribeSdCardToUser ()
 {
     // DEBUG_START;
 
-    String BaseMessage = F ("*** Found SD Card ***");
+    String BaseMessage = CN_stars + String (F (" Found SD Card ")) + CN_stars;
 
 #ifdef ARDUINO_ARCH_ESP32
     uint64_t cardSize = SD.cardSize () / (1024 * 1024);

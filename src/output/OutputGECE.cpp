@@ -411,7 +411,7 @@ void IRAM_ATTR c_OutputGECE::ISR_Handler ()
     for (uint32_t currentShiftMask = bit (GECE_PACKET_SIZE - 1);
         0 != currentShiftMask; currentShiftMask >>= 1)
     {
-        enqueue (((packet & currentShiftMask) == 0) ? GECE_DATA_ZERO : GECE_DATA_ONE);
+        enqueueUart (((packet & currentShiftMask) == 0) ? GECE_DATA_ZERO : GECE_DATA_ONE);
     }
 
     // enable the stop bit after the last data is sent
