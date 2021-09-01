@@ -17,14 +17,6 @@
 *
 */
 
-/*****************************************/
-/*        BEGIN - Configuration          */
-/*****************************************/
-
-/*****************************************/
-/*         END - Configuration           */
-/*****************************************/
-
 // Core
 #include "src/ESPixelStick.h"
 #include "src/EFUpdate.h"
@@ -79,8 +71,6 @@ static void _u0_putc(char c){
 //  Globals
 //
 /////////////////////////////////////////////////////////
-
-// Configuration file
 
 const String VERSION = "4.0-dev (NOT STABLE)";
 const String BUILD_DATE = String(__DATE__) + " - " + String(__TIME__);
@@ -146,13 +136,14 @@ void setup()
     OutputMgr.Begin ();
     // DEBUG_V ("");
 
-    WiFiMgr.Begin (& config);
-    // DEBUG_V ("");
-
     // connect the input processing to the output processing.
     InputMgr.Begin (OutputMgr.GetBufferAddress (), OutputMgr.GetBufferUsedSize ());
 
+    // Wifi will be reset in the main loop since we just booted and de-serialized the config
+    WiFiMgr.Begin (& config);
     // DEBUG_V ("");
+
+        // DEBUG_V ("");
 
     // Configure and start the web server
     WebMgr.Begin(&config);
@@ -205,11 +196,11 @@ void validateConfig()
 } // validateConfig
 
 /// Deserialize device confiugration JSON to config structure - returns true if config change detected
-boolean dsDevice(JsonObject & json)
+bool dsDevice(JsonObject & json)
 {
     // DEBUG_START;
 
-    boolean ConfigChanged = false;
+    bool ConfigChanged = false;
     if (json.containsKey(CN_device))
     {
         JsonObject JsonDeviceConfig = json[CN_device];
@@ -242,11 +233,11 @@ boolean dsDevice(JsonObject & json)
 } // dsDevice
 
 /// Deserialize network confiugration JSON to config structure - returns true if config change detected
-boolean dsNetwork(JsonObject & json)
+bool dsNetwork(JsonObject & json)
 {
     // DEBUG_START;
 
-    boolean ConfigChanged = false;
+    bool ConfigChanged = false;
     if (json.containsKey(CN_network))
     {
 #ifdef ARDUINO_ARCH_ESP8266
@@ -334,10 +325,7 @@ bool deserializeCore (JsonObject & json)
         dsDevice  (json);
         FileMgr.SetConfig (json);
         ResetWiFi = dsNetwork (json);
-        ResetWiFi;
-
         DataHasBeenAccepted = true;
-
     } while (false);
 
     // DEBUG_END;
@@ -429,7 +417,7 @@ void GetConfig (JsonObject & json)
 } // GetConfig
 
 // Serialize the current config into a JSON string
-String serializeCore(boolean pretty)
+String serializeCore(bool pretty)
 {
     // DEBUG_START;
 

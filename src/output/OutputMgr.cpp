@@ -349,7 +349,7 @@ void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
     // DEBUG_START;
 
     JsonArray OutputStatus = jsonStatus.createNestedArray (CN_output);
-    uint channelIndex = 0;
+    uint8_t channelIndex = 0;
     for (auto CurrentOutput : pOutputChannelDrivers)
     {
         // DEBUG_V("");
@@ -534,6 +534,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     break;
                 }
 #endif // def ARDUINO_ARCH_ESP32
+
                 // DEBUG_V ("");
                 if (OM_IS_UART)
                 {
@@ -605,9 +606,10 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
         } // end switch (NewChannelType)
 
         // DEBUG_V ("");
+
         String sDriverName;
         pOutputChannelDrivers[ChannelIndex]->GetDriverName (sDriverName);
-        Serial.println (String (CN_stars) + " '" + sDriverName + F ("' Initialization for Output: ") + String (ChannelIndex) + " " + CN_stars);
+        log (String (CN_stars) + " '" + sDriverName + F ("' Initialization for Output: ") + String (ChannelIndex) + " " + CN_stars);
         if (StartDriver)
         {
             pOutputChannelDrivers[ChannelIndex]->Begin ();
@@ -670,7 +672,7 @@ void c_OutputMgr::LoadConfig ()
 bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
 {
     // DEBUG_START;
-    boolean Response = false;
+    bool Response = false;
 
     // DEBUG_V ("");
 

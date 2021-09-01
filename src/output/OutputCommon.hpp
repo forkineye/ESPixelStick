@@ -36,8 +36,8 @@
 class c_OutputCommon
 {
 public:
-    c_OutputCommon (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
-                    gpio_num_t outputGpio, 
+    c_OutputCommon (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+                    gpio_num_t outputGpio,
                     uart_port_t uart,
                     c_OutputMgr::e_OutputType outputType);
     virtual ~c_OutputCommon ();
@@ -75,8 +75,8 @@ protected:
     uint32_t    FrameCount                 = 0;
 
 #ifdef ARDUINO_ARCH_ESP8266
-    void InitializeUart (uint32_t BaudRate, 
-                         uint32_t UartFlags1, 
+    void InitializeUart (uint32_t BaudRate,
+                         uint32_t UartFlags1,
                          uint32_t UartFlags2,
                          uint32_t fifoTriggerLevel = 0);
 #else
@@ -89,6 +89,7 @@ protected:
     void StartBreak ();
     void EndBreak ();
     void GenerateBreak (uint32_t DurationInUs);
+    void log(String message);
 
     inline bool canRefresh ()
     {

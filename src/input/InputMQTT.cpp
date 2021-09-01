@@ -165,11 +165,11 @@ void c_InputMQTT::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
     }
 
     // DEBUG_END;
-    
+
 } // SetBufferInfo
 
 //-----------------------------------------------------------------------------
-boolean c_InputMQTT::SetConfig (ArduinoJson::JsonObject & jsonConfig)
+bool c_InputMQTT::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
@@ -280,8 +280,8 @@ void c_InputMQTT::connectToMqtt()
     }
     mqtt.setServer (ip.c_str (), port);
 
-    LOG_PORT.println(String(F ("MQTT Connecting to Broker ")) + ip + ":" + String(port));
-    mqtt.connect();
+    log (String(F ("Connecting to broker ")) + ip + ":" + String(port));
+    mqtt.connect ();
     mqtt.setWill (topic.c_str(), 1, true, lwt.c_str(), lwt.length());
 
     // DEBUG_END;
@@ -293,7 +293,7 @@ void c_InputMQTT::disconnectFromMqtt ()
 {
     // DEBUG_START;
 
-    LOG_PORT.println (F ("MQTT Disconnecting from Broker "));
+    log (F ("Disconnecting from broker"));
     mqtt.disconnect ();
 
     // DEBUG_END;
@@ -304,7 +304,7 @@ void c_InputMQTT::onMqttConnect(bool sessionPresent)
 {
     // DEBUG_START;
 
-    LOG_PORT.println(F ("MQTT Connected"));
+    log (F ("Connected"));
 
     // Get retained MQTT state
     mqtt.subscribe (topic.c_str (), 0);
@@ -348,8 +348,8 @@ void c_InputMQTT::onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
 {
     // DEBUG_START;
 
-    LOG_PORT.println(String(F ("MQTT Disconnected: DisconnectReason: ")) + String(DisconnectReasons[uint8_t(reason)]));
-    
+    log (String(F ("Disconnected: ")) + String(DisconnectReasons[uint8_t(reason)]));
+
     if (InputMgr.GetNetworkState ())
     {
         // DEBUG_V ("");
@@ -395,7 +395,7 @@ void c_InputMQTT::onMqttMessage(
         // DEBUG_V ("Set new values");
         if (error)
         {
-            LOG_PORT.println (String (F ("MQTT: Deserialzation Error. Error code = ")) + error.c_str ());
+            log (String (F ("Deserialzation error. Error code = ")) + error.c_str ());
             break;
         }
 
@@ -455,7 +455,7 @@ void c_InputMQTT::onMqttMessage(
         }
 
         publishState ();
-    
+
         // DEBUG_V ("");
     } while (false);
 
@@ -492,7 +492,7 @@ void c_InputMQTT::PlayFseq (JsonObject & JsonConfig)
         if (!FileIsPlayList && !FileIsStandalone)
         {
             // not a file we can process
-            LOG_PORT.println (String (F ("ERROR: MQTT: Unsupported file type for File Play operation. File:'")) + FileName + "'");
+            log (String (F ("ERROR: Unsupported file type for File Play operation. File:'")) + FileName + "'");
             break;
         }
 
@@ -708,7 +708,7 @@ void c_InputMQTT::publishHA()
 
         String HaJsonConfig;
         serializeJson(JsonConfig, HaJsonConfig);
-        
+
         // DEBUG_V (String ("HaJsonConfig: ") + HaJsonConfig);
         mqtt.publish(ha_config.c_str(), 0, true, HaJsonConfig.c_str());
 
@@ -769,7 +769,7 @@ void c_InputMQTT::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         // E1.31 does not do this gracefully. A loss of connection needs a reboot
         extern bool reboot;
         reboot = true;
-        LOG_PORT.println (F ("MQTT requesting reboot on loss of Network connection."));
+        log (F ("Requesting reboot on loss of network connection."));
     }
     else
     {

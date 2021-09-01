@@ -24,7 +24,7 @@ GNU General Public License for more details.
 
 //----------------------------------------------------------------------------
 c_OutputServoPCA9685::c_OutputServoPCA9685 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
-                                gpio_num_t outputGpio, 
+                                gpio_num_t outputGpio,
                                 uart_port_t uart,
                                 c_OutputMgr::e_OutputType outputType) :
     c_OutputCommon(OutputChannelId, outputGpio, uart, outputType)
@@ -85,18 +85,18 @@ bool c_OutputServoPCA9685::validate ()
 
     if ((Num_Channels > OM_SERVO_PCA9685_CHANNEL_LIMIT) || (Num_Channels < 1))
     {
-        LOG_PORT.println (CN_stars + String (F (" Requested channel count was Not Valid. Setting to ")) + OM_SERVO_PCA9685_CHANNEL_LIMIT + " " + CN_stars);
+        log (CN_stars + String (F (" Requested channel count was Not Valid. Setting to ")) + OM_SERVO_PCA9685_CHANNEL_LIMIT + " " + CN_stars);
         Num_Channels = OM_SERVO_PCA9685_CHANNEL_LIMIT;
         response = false;
     }
 
     if (Num_Channels < OM_SERVO_PCA9685_CHANNEL_LIMIT)
     {
-        LOG_PORT.println (CN_stars + String (F (" Requested channel count was Not Valid. Insuficient number of input channels avaialable ")) + CN_stars);
+        log (CN_stars + String (F (" Requested channel count was Not Valid. Insuficient number of input channels avaialable ")) + CN_stars);
 
         for (int ChannelIndex = OM_SERVO_PCA9685_CHANNEL_LIMIT - 1; ChannelIndex > Num_Channels; ChannelIndex--)
         {
-            LOG_PORT.println (String (CN_stars + String(F (" Disabling channel '")) + String(ChannelIndex + 1) + "' " + CN_stars));
+            log (String (CN_stars + String(F (" Disabling channel '")) + String(ChannelIndex + 1) + "' " + CN_stars));
             OutputList[ChannelIndex].Enabled = false;
         }
 
@@ -142,7 +142,7 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
         if (false == jsonConfig.containsKey (OM_SERVO_PCA9685_CHANNELS_NAME))
         {
             // if not, flag an error and stop processing
-            LOG_PORT.println (F ("No Servo PCA9685 Output Channel Settings Found. Using Defaults"));
+            log (F ("No channel settings found. Using defaults"));
             break;
         }
         JsonArray JsonChannelList = jsonConfig[OM_SERVO_PCA9685_CHANNELS_NAME];
@@ -156,7 +156,7 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             if (ChannelId >= OM_SERVO_PCA9685_CHANNEL_LIMIT)
             {
                 // if not, flag an error and stop processing this channel
-                LOG_PORT.println (String(F ("No Servo PCA9685 Output Channel Settings Found for Channel '")) + String(ChannelId) + "'");
+                log (String(F ("No settings found for channel '")) + String(ChannelId) + "'");
                 continue;
             }
 
@@ -173,7 +173,7 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             // DEBUG_V (String ("  Enabled: ") + String (CurrentOutputChannel->Enabled));
             // DEBUG_V (String (" MinLevel: ") + String (CurrentOutputChannel->MinLevel));
             // DEBUG_V (String (" MaxLevel: ") + String (CurrentOutputChannel->MaxLevel));
-        
+
             ++ChannelId;
         }
 
@@ -282,10 +282,10 @@ void c_OutputServoPCA9685::Render ()
                     // DEBUG_V (String ("MinScaledValue: ") + String (MinScaledValue));
                     // DEBUG_V (String ("MaxScaledValue: ") + String (MaxScaledValue));
 
-                    uint16_t pulse_width = map (newOutputValue, 
-                                                MinScaledValue, 
-                                                MaxScaledValue, 
-                                                currentServoPCA9685.MinLevel, 
+                    uint16_t pulse_width = map (newOutputValue,
+                                                MinScaledValue,
+                                                MaxScaledValue,
+                                                currentServoPCA9685.MinLevel,
                                                 currentServoPCA9685.MaxLevel);
                     Final_value = int ((float (pulse_width) / 1000000.0) * float (UpdateFrequency) * 4096.0);
                     // DEBUG_V (String ("pulse_width: ") + String (pulse_width));

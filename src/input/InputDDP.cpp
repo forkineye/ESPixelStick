@@ -126,7 +126,7 @@ void c_InputDDP::initUDP ()
         udp->onPacket (std::bind (&c_InputDDP::ProcessReceivedUdpPacket, this, std::placeholders::_1));
     }
 
-    LOG_PORT.println (String (F ("DDP subscribed to UDP: ")));
+    log (String (F ("Listening on port ")) + DDP_PORT);
 
     // DEBUG_END;
 } // initUDP

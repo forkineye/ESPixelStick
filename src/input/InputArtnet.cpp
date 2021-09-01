@@ -127,9 +127,9 @@ void c_InputArtnet::Process ()
 
 //-----------------------------------------------------------------------------
 void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
-                                uint16_t  length, 
+                                uint16_t  length,
                                 uint8_t   SequenceNumber,
-                                uint8_t * data, 
+                                uint8_t * data,
                                 IPAddress remoteIP)
 {
     // DEBUG_START;
@@ -144,14 +144,6 @@ void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
         // Do we need to update a sequnce error?
         if (SequenceNumber != CurrentUniverse.SequenceNumber)
         {
-            /*
-            LOG_PORT.print (F ("Artnet Sequence Error - expected: "));
-            LOG_PORT.print (CurrentUniverse.SequenceNumber);
-            LOG_PORT.print (F (" actual: "));
-            LOG_PORT.print (SequenceNumber);
-            LOG_PORT.print (" " + String (CN_universe) + " : ");
-            LOG_PORT.println (CurrentUniverseId);
-            */
             CurrentUniverse.SequenceErrorCounter++;
             CurrentUniverse.SequenceNumber = SequenceNumber;
             ++packet_errors;
@@ -234,7 +226,7 @@ void c_InputArtnet::SetBufferTranslation ()
 
     if (0 != BytesLeftToMap)
     {
-        LOG_PORT.println (F ("ERROR: Universe configuration is too small to fill output buffer. Outputs have been truncated."));
+        log (F ("ERROR: Universe configuration is too small to fill output buffer. Outputs have been truncated."));
     }
 
     // DEBUG_END;
@@ -242,7 +234,7 @@ void c_InputArtnet::SetBufferTranslation ()
 } // SetBufferTranslation
 
 //-----------------------------------------------------------------------------
-boolean c_InputArtnet::SetConfig (ArduinoJson::JsonObject& jsonConfig)
+bool c_InputArtnet::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
@@ -275,22 +267,22 @@ void c_InputArtnet::SetUpArtnet ()
 
         byte broadcast[] = { 10, 0, 1, 255 };
         pArtnet->setBroadcast (broadcast);
-        LOG_PORT.println (F ("Artnet Subscribed to Broadcast"));
+        log (F ("Subscribed to broadcast"));
 
         // DEBUG_V ("");
 
         fMe = this; // hate this
         pArtnet->setArtDmxCallback ([](uint16_t UniverseId, uint16_t length, uint8_t sequence, uint8_t* data, IPAddress remoteIP)
             {
-                // LOG_PORT.println ("fMe");
+                // log ("fMe");
                 fMe->onDmxFrame (UniverseId, length, sequence, data, remoteIP);
             });
     }
     // DEBUG_V ("");
 
-    LOG_PORT.printf_P (PSTR ("Artnet: Listening for %u channels from Universe %u to %u.\n"),
-        InputDataBufferSize, startUniverse, LastUniverse);
-
+    log (String (F ("Listening for ")) + InputDataBufferSize +
+        F (" channels from Universe ") + startUniverse +
+        F (" to ") + LastUniverse);
     // DEBUG_END;
 
 } // SubscribeToBroadcastDomain
@@ -305,11 +297,11 @@ void c_InputArtnet::validateConfiguration ()
     // DEBUG_V (String ("FirstUniverseChannelOffset: ") + String (FirstUniverseChannelOffset));
     // DEBUG_V (String ("              LastUniverse: ") + String (startUniverse));
 
-    if (startUniverse < 1) 
+    if (startUniverse < 1)
     {
         // DEBUG_V (String("ERROR: startUniverse: ") + String(startUniverse));
 
-        startUniverse = 1; 
+        startUniverse = 1;
     }
 
     // DEBUG_V ("");

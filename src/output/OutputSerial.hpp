@@ -23,7 +23,7 @@ GNU General Public License for more details.
 *send a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
 ******************************************************************
 *
-*   This is a derived class that converts data in the output buffer into 
+*   This is a derived class that converts data in the output buffer into
 *   pixel intensities and then transmits them through the configured serial
 *   interface.
 *
@@ -35,12 +35,12 @@ GNU General Public License for more details.
 #   include <driver/uart.h>
 #endif
 
-class c_OutputSerial : public c_OutputCommon  
+class c_OutputSerial : public c_OutputCommon
 {
 public:
     // These functions are inherited from c_OutputCommon
-    c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
-                      gpio_num_t outputGpio, 
+    c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+                      gpio_num_t outputGpio,
                       uart_port_t uart,
                       c_OutputMgr::e_OutputType outputType);
     virtual ~c_OutputSerial ();
@@ -90,7 +90,7 @@ private:
     String          GenericSerialFooter;
     char           *pGenericSerialFooter      = nullptr;
     size_t          LengthGenericSerialFooter = 0;
-    uint            CurrentBaudrate           = int(BaudRate::BR_DEF); // current transmit rate
+    uint32_t        CurrentBaudrate           = uint32_t(BaudRate::BR_DEF); // current transmit rate
     uint16_t        Num_Channels              = DEFAULT_NUM_CHANNELS;      // Number of data channels to transmit
 
     // non config data

@@ -77,12 +77,13 @@ typedef struct {
     bool        RebootOnWiFiFailureToConnect = true;
 } config_t;
 
-String  serializeCore          (boolean pretty = false);
+String  serializeCore          (bool pretty = false);
 void    deserializeCoreHandler (DynamicJsonDocument& jsonDoc);
 bool    deserializeCore        (JsonObject & json);
-boolean dsDevice               (JsonObject & json);
-boolean dsNetwork              (JsonObject & json);
+bool    dsDevice               (JsonObject & json);
+bool    dsNetwork              (JsonObject & json);
 extern  bool reboot;
+extern  bool ResetWiFi;
 static const String ConfigFileName = "/config.json";
 
 template <typename T, typename J, typename N>
