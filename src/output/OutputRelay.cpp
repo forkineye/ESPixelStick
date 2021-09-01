@@ -35,7 +35,7 @@ GNU General Public License for more details.
 #define Relay_OUTPUT_INVERTED        true
 #define Relay_OUTPUT_NOT_INVERTED    false
 #define Relay_DEFAULT_TRIGGER_LEVEL  128
-#define Relay_DEFAULT_GPIO_ID        ((gpio_num_t)0) 
+#define Relay_DEFAULT_GPIO_ID        ((gpio_num_t)0)
 
 static const c_OutputRelay::RelayChannel_t RelayChannelDefaultSettings[] =
 {
@@ -51,7 +51,7 @@ static const c_OutputRelay::RelayChannel_t RelayChannelDefaultSettings[] =
 
 //----------------------------------------------------------------------------
 c_OutputRelay::c_OutputRelay (c_OutputMgr::e_OutputChannelIds OutputChannelId,
-                                gpio_num_t outputGpio, 
+                                gpio_num_t outputGpio,
                                 uart_port_t uart,
                                 c_OutputMgr::e_OutputType outputType) :
     c_OutputCommon(OutputChannelId, outputGpio, uart, outputType)
@@ -219,7 +219,7 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             setFromJSON (temp, JsonChannelData, CN_gid);
             // DEBUGV (String ("temp: ") + String (temp));
 
-            if ((temp != CurrentOutputChannel->GpioId) && 
+            if ((temp != CurrentOutputChannel->GpioId) &&
                 (Relay_DEFAULT_GPIO_ID != CurrentOutputChannel->GpioId))
             {
                 // DEBUGV ("Revert Pin to input");
@@ -235,7 +235,7 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             // DEBUGV (String ("currentRelay.InvertOutput: ")      + String (CurrentOutputChannel->InvertOutput));
             // DEBUGV (String ("currentRelay.OnOffTriggerLevel: ") + String (CurrentOutputChannel->OnOffTriggerLevel));
             // DEBUGV (String ("currentRelay.GpioId: ")            + String (CurrentOutputChannel->GpioId));
-        
+
             ++ChannelId;
         }
 
@@ -276,7 +276,7 @@ void c_OutputRelay::GetConfig (ArduinoJson::JsonObject & jsonConfig)
         // DEBUGV (String ("currentRelay.OffValue: ") + String (currentRelay.OffValue));
         // DEBUGV (String ("currentRelay.Enabled: ")  + String (currentRelay.Enabled));
         // DEBUGV (String ("currentRelay.GpioId: ")   + String (currentRelay.GpioId));
-    
+
         ++ChannelId;
     }
 

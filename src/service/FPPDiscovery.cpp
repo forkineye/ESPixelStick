@@ -16,6 +16,7 @@
 *
 */
 
+#include <Arduino.h>
 #include "FPPDiscovery.h"
 #include "fseq.h"
 
@@ -77,21 +78,28 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         // DEBUG_V ();
 
         IPAddress address = IPAddress (239, 70, 80, 80);
+        bool fail = false;
 
         // Try to listen to the broadcast port
         if (!udp.listen (FPP_DISCOVERY_PORT))
         {
-            LOG_PORT.println (String (F ("FPPDiscovery FAILED to subscribed to broadcast messages")));
+            log (String (F ("FAILED to subscribed to broadcast messages")));
+            fail = true;
             break;
         }
-        LOG_PORT.println (String (F ("FPPDiscovery subscribed to broadcast")));
+        //LOG_PORT.println (String (F ("FPPDiscovery subscribed to broadcast")));
 
         if (!udp.listenMulticast (address, FPP_DISCOVERY_PORT))
         {
-            LOG_PORT.println (String (F ("FPPDiscovery FAILED to subscribed to multicast messages")));
+            log (String (F ("FAILED to subscribed to multicast messages")));
+            fail = true;
             break;
         }
-        LOG_PORT.println (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
+        //LOG_PORT.println (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
+
+        if (!fail)
+            log (String (F ("Listening on port ")) + String(FPP_DISCOVERY_PORT));
+
         udp.onPacket (std::bind (&c_FPPDiscovery::ProcessReceivedUdpPacket, this, std::placeholders::_1));
 
         sendPingPacket ();
@@ -109,7 +117,7 @@ void c_FPPDiscovery::Disable ()
 
     IsEnabled = false;
     StopPlaying ();
-    
+
     // DEBUG_END;
 
 } // Disable
@@ -120,7 +128,7 @@ void c_FPPDiscovery::Enable ()
     // DEBUG_START;
 
     IsEnabled = true;
-    
+
     // DEBUG_END;
 
 } // Enable
@@ -580,7 +588,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                         break;
                     }
                 }
-                LOG_PORT.println (String (F ("FPP Discovery: Could not open: ")) + seq);
+                log (String (F ("Could not open: ")) + seq);
             }
         }
         request->send (404);
@@ -615,7 +623,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
         c_FileMgr::FileId FileHandle;
         if (false == FileMgr.OpenSdFile (filename, c_FileMgr::FileMode::FileRead, FileHandle))
         {
-            LOG_PORT.println (String (F ("c_FPPDiscovery::ProcessPOST: File Does Not Exist - FileName: ")) + filename);
+            log (String (F ("c_FPPDiscovery::ProcessPOST: File Does Not Exist - FileName: ")) + filename);
             request->send (404);
             break;
         }
@@ -915,7 +923,7 @@ void c_FPPDiscovery::StopPlaying ()
     // DEBUG_V ("");
 
     ProcessBlankPacket ();
-    
+
     // DEBUG_END;
 
 } // StopPlaying
@@ -932,5 +940,11 @@ bool c_FPPDiscovery::AllowedToRemotePlayFiles()
 
     return (FileMgr.SdCardIsInstalled() && IsEnabled);
 } // AllowedToRemotePlayFiles
+
+// No service module parent class like i/o has for logging. Fake it til we make it.
+void c_FPPDiscovery::log(String message) {
+    LOG_PORT.println("[FPPDiscovery] " + message);
+} // log
+
 
 c_FPPDiscovery FPPDiscovery;

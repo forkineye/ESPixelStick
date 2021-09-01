@@ -15,7 +15,7 @@
 *  damages in connection with, or arising out of, the furnishing, performance
 *  or use of these programs.
 *
-*   This is an Interface base class used to manage the Input port. It provides 
+*   This is an Interface base class used to manage the Input port. It provides
 *   a common API for use by the factory class to manage the object.
 *
 */
@@ -51,4 +51,8 @@ c_InputCommon::~c_InputCommon ()
 
 } // ~c_InputMgr
 
-
+void c_InputCommon::log(String message) {
+    String DriverName = "";
+    GetDriverName (DriverName);
+    LOG_PORT.println("[" + DriverName + "] " + message);
+} // log

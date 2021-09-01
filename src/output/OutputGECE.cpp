@@ -181,7 +181,7 @@ c_OutputGECE::~c_OutputGECE ()
         // DEBUG_V ("Detach Interrupts");
 #ifdef ARDUINO_ARCH_ESP8266
         timer1_detachInterrupt ();
-#else if defined(ARDUINO_ARCH_ESP32)
+#elif defined(ARDUINO_ARCH_ESP32)
         if (pHwTimer)
         {
             timerAlarmDisable (pHwTimer);
@@ -274,7 +274,7 @@ void c_OutputGECE::Begin ()
     // Arm the Timer for our Interval
     timer1_write (GECE_CCOUNT_FRAME_TIME);
 
-#else if defined(ARDUINO_ARCH_ESP32)
+#elif defined(ARDUINO_ARCH_ESP32)
 
     // Configure Prescaler to 1, as our timer runs @ 80Mhz
     // Giving an output of 80,000,000 / 80 = 1,000,000 ticks / second
