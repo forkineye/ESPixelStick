@@ -39,12 +39,6 @@ extern "C" {
 #   define UART_TX_FIFO_SIZE    UART_FIFO_LEN
 #endif
 
-#ifndef UART_INV_MASK
-#   define UART_INV_MASK  (0x3f << 19)
-#endif // ndef UART_INV_MASK
-
-// TX FIFO trigger level.
-// We need to fill the FIFO at a rate faster than 0.3us per byte (1.2us/pixel)
 #define PIXEL_FIFO_TRIGGER_LEVEL (16)
 
 /*
@@ -54,8 +48,8 @@ extern "C" {
 */
 static char ConvertIntensityToUartDataStream[] =
 {
-    0b11000000,     // (0) 0000 0011 (11)
     0b11111100,     // (0) 0011 1111 (11)
+    0b11000000,     // (0) 0000 0011 (11)
 };
 
 // forward declaration for the isr handler
@@ -126,7 +120,7 @@ void c_OutputTM1814Uart::Begin ()
 #else
     /* Serial rate is 4x 800KHz for TM1814 */
     uart_config_t uart_config;
-    uart_config.baud_rate = TM1814_BAUD_RATE;
+    uart_config.baud_rate = (TM1814_BAUD_RATE - 100000);
     uart_config.data_bits = uart_word_length_t::UART_DATA_8_BITS;
     uart_config.flow_ctrl = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
     uart_config.parity = uart_parity_t::UART_PARITY_DISABLE;
@@ -194,7 +188,7 @@ void IRAM_ATTR c_OutputTM1814Uart::ISR_Handler ()
         uint32_t NumEmptyIntensitySlots = ((((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / TM1814_NUM_DATA_BYTES_PER_INTENSITY_BYTE);
         while ((NumEmptyIntensitySlots--) && (MoreDataToSend))
         {
-            uint8_t IntensityValue = GetNextIntensityToSend ();
+            uint8_t IntensityValue = ~GetNextIntensityToSend ();
 
             // convert the intensity data into RMT data
             for (uint8_t bitmask = 0x80; 0 != bitmask; bitmask >>= 1)
