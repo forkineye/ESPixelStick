@@ -22,10 +22,10 @@
 #include "OutputTM1814Rmt.hpp"
 #include "OutputRmt.hpp"
 
-#define TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH    uint16_t (TM1814_PIXEL_NS_BIT_0_HIGH / RMT_TickLengthNS)
-#define TM1814_PIXEL_RMT_TICKS_BIT_0_LOW     uint16_t (TM1814_PIXEL_NS_BIT_0_LOW  / RMT_TickLengthNS)
-#define TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH    uint16_t (TM1814_PIXEL_NS_BIT_1_HIGH / RMT_TickLengthNS)
-#define TM1814_PIXEL_RMT_TICKS_BIT_1_LOW     uint16_t (TM1814_PIXEL_NS_BIT_1_LOW  / RMT_TickLengthNS)
+#define TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH    uint16_t (TM1814_PIXEL_NS_BIT_0_HIGH / RMT_TickLengthNS) - 0
+#define TM1814_PIXEL_RMT_TICKS_BIT_0_LOW     uint16_t (TM1814_PIXEL_NS_BIT_0_LOW  / RMT_TickLengthNS) + 1
+#define TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH    uint16_t (TM1814_PIXEL_NS_BIT_1_HIGH / RMT_TickLengthNS) - 3
+#define TM1814_PIXEL_RMT_TICKS_BIT_1_LOW     uint16_t (TM1814_PIXEL_NS_BIT_1_LOW  / RMT_TickLengthNS) + 4
 #define TM1814_PIXEL_RMT_TICKS_IDLE          uint16_t (TM1814_PIXEL_NS_IDLE       / RMT_TickLengthNS)
 
 #define INTERFRAME_GAP_ID   2
@@ -290,7 +290,7 @@ void IRAM_ATTR c_OutputTM1814Rmt::ISR_Handler_SendIntensityData ()
 
     while ((NumEmptyIntensitySlots--) && (MoreDataToSend))
     {
-        uint8_t IntensityValue = GetNextIntensityToSend ();
+        uint8_t IntensityValue = ~GetNextIntensityToSend ();
 
         // convert the intensity data into RMT data
         for (uint8_t bitmask = 0x80; 0 != bitmask; bitmask >>= 1)
