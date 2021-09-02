@@ -56,7 +56,6 @@ private:
     intr_handle_t RMT_intr_handle = NULL;
     uint8_t NumIntensityValuesPerInterrupt = 0;
     uint8_t NumIntensityBitsPerInterrupt = 0;
-    rmt_item32_t Rgb2Rmt[5];
 
     // debug counters
     // uint32_t DataISRcounter = 0;

@@ -22,15 +22,19 @@
 #include "OutputTM1814Rmt.hpp"
 #include "OutputRmt.hpp"
 
-#define TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH    uint16_t (TM1814_PIXEL_NS_BIT_0_HIGH / RMT_TickLengthNS) - 0
+// The adjustments compensate for rounding errors in the calculations
+#define TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH    uint16_t (TM1814_PIXEL_NS_BIT_0_HIGH / RMT_TickLengthNS) + 0
 #define TM1814_PIXEL_RMT_TICKS_BIT_0_LOW     uint16_t (TM1814_PIXEL_NS_BIT_0_LOW  / RMT_TickLengthNS) + 1
-#define TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH    uint16_t (TM1814_PIXEL_NS_BIT_1_HIGH / RMT_TickLengthNS) - 3
-#define TM1814_PIXEL_RMT_TICKS_BIT_1_LOW     uint16_t (TM1814_PIXEL_NS_BIT_1_LOW  / RMT_TickLengthNS) + 4
+#define TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH    uint16_t (TM1814_PIXEL_NS_BIT_1_HIGH / RMT_TickLengthNS) + 0
+#define TM1814_PIXEL_RMT_TICKS_BIT_1_LOW     uint16_t (TM1814_PIXEL_NS_BIT_1_LOW  / RMT_TickLengthNS) + 1
 #define TM1814_PIXEL_RMT_TICKS_IDLE          uint16_t (TM1814_PIXEL_NS_IDLE       / RMT_TickLengthNS)
 
+#define DATA_BIT_ZERO_ID    0
+#define DATA_BIT_ONE_ID     1
 #define INTERFRAME_GAP_ID   2
 #define STARTBIT_ID         3
 #define STOPBIT_ID          4
+static rmt_item32_t Rgb2Rmt[5];
 
 // forward declaration for the isr handler
 static void IRAM_ATTR rmt_intr_handler (void* param);
@@ -44,15 +48,15 @@ c_OutputTM1814Rmt::c_OutputTM1814Rmt (c_OutputMgr::e_OutputChannelIds OutputChan
 {
     // DEBUG_START;
 
-    Rgb2Rmt[0].duration0 = TM1814_PIXEL_RMT_TICKS_BIT_0_LOW;
-    Rgb2Rmt[0].level0 = 0;
-    Rgb2Rmt[0].duration1 = TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH;
-    Rgb2Rmt[0].level1 = 1;
+    Rgb2Rmt[DATA_BIT_ZERO_ID].duration0 = TM1814_PIXEL_RMT_TICKS_BIT_0_LOW;
+    Rgb2Rmt[DATA_BIT_ZERO_ID].level0 = 0;
+    Rgb2Rmt[DATA_BIT_ZERO_ID].duration1 = TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH;
+    Rgb2Rmt[DATA_BIT_ZERO_ID].level1 = 1;
 
-    Rgb2Rmt[1].duration0 = TM1814_PIXEL_RMT_TICKS_BIT_1_LOW;
-    Rgb2Rmt[1].level0 = 0;
-    Rgb2Rmt[1].duration1 = TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH;
-    Rgb2Rmt[1].level1 = 1;
+    Rgb2Rmt[DATA_BIT_ONE_ID].duration0 = TM1814_PIXEL_RMT_TICKS_BIT_1_LOW;
+    Rgb2Rmt[DATA_BIT_ONE_ID].level0 = 0;
+    Rgb2Rmt[DATA_BIT_ONE_ID].duration1 = TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH;
+    Rgb2Rmt[DATA_BIT_ONE_ID].level1 = 1;
 
     // 300us Interframe gap
     Rgb2Rmt[INTERFRAME_GAP_ID].duration0 = TM1814_PIXEL_RMT_TICKS_IDLE / 2;
@@ -284,8 +288,8 @@ void IRAM_ATTR c_OutputTM1814Rmt::ISR_Handler_SendIntensityData ()
     // DataISRcounter++;
 
     uint32_t* pMem = (uint32_t*)RmtCurrentAddr;
-    register uint32_t OneValue  = Rgb2Rmt[1].val;
-    register uint32_t ZeroValue = Rgb2Rmt[0].val;
+    register uint32_t OneValue  = Rgb2Rmt[DATA_BIT_ONE_ID].val;
+    register uint32_t ZeroValue = Rgb2Rmt[DATA_BIT_ZERO_ID].val;
     uint32_t NumEmptyIntensitySlots = NumIntensityValuesPerInterrupt;
 
     while ((NumEmptyIntensitySlots--) && (MoreDataToSend))
