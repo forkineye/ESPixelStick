@@ -52,7 +52,7 @@ protected:
 #define TM1814_PIXEL_NS_BIT_0_LOW           360.0 // 360ns +/- 50ns per datasheet
 #define TM1814_PIXEL_NS_BIT_0_HIGH          (TM1814_PIXEL_NS_BIT_TOTAL - TM1814_PIXEL_NS_BIT_0_LOW)
 
-#define TM1814_PIXEL_NS_BIT_1_LOW           720.0 // 720ns -70ns / +280ns per datasheet
+#define TM1814_PIXEL_NS_BIT_1_LOW           800.0 // 720ns -70ns / +280ns per datasheet
 #define TM1814_PIXEL_NS_BIT_1_HIGH          (TM1814_PIXEL_NS_BIT_TOTAL - TM1814_PIXEL_NS_BIT_1_LOW)
 
 #define TM1814_PIXEL_NS_IDLE                300000.0 // 300us per datasheet
