@@ -245,7 +245,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
 void c_InputMgr::CreateNewConfig ()
 {
     // DEBUG_START;
-    LOG_PORT.println (F ("--- WARNING: Creating a new Input Manager configuration Data set - Start ---"));
+    LOG_PORT.println (String (F ("--- WARNING: Creating a new Input Manager configuration Data set - Start ---")));
 
     // create a place to save the config
     DynamicJsonDocument JsonConfigDoc (IM_JSON_SIZE);
@@ -289,7 +289,7 @@ void c_InputMgr::CreateNewConfig ()
     serializeJson (JsonConfigDoc, ConfigData);
     SetConfig (ConfigData.c_str());
 
-    LOG_PORT.println (F ("--- WARNING: Creating a new Input Manager configuration Data set - Done ---"));
+    LOG_PORT.println (String (F ("--- WARNING: Creating a new Input Manager configuration Data set - Done ---")));
     // DEBUG_END;
 
 } // CreateNewConfig
@@ -577,7 +577,7 @@ void c_InputMgr::LoadConfig ()
             // DEBUG_V ("");
         }))
     {
-        LOG_PORT.println (F ("EEEE Error loading Input Manager Config File. EEEE"));
+        LOG_PORT.println (String (F ("EEEE Error loading Input Manager Config File. EEEE")));
 
         // create a config file with default values
         // DEBUG_V ("");
@@ -702,7 +702,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
     {
         if (false == jsonConfig.containsKey (CN_input_config))
         {
-            LOG_PORT.println (F ("No Input Interface Settings Found. Using Defaults"));
+            LOG_PORT.println (String (F ("No Input Interface Settings Found. Using Defaults")));
             extern void PrettyPrint (JsonObject & jsonStuff, String Name);
             PrettyPrint (jsonConfig, String(F ("c_InputMgr::ProcessJsonConfig")));
             break;
@@ -720,7 +720,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
 
         if (TempVersion != CurrentConfigVersion)
         {
-            LOG_PORT.println (F ("InputMgr: Incorrect Version found. Using existing/default config."));
+            LOG_PORT.println (String (F ("InputMgr: Incorrect Version found. Using existing/default config.")));
             // break;
         }
 
@@ -733,14 +733,14 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
         }
         else
         {
-            LOG_PORT.println (F ("InputMgr: No Input Button Settings Found. Using Defaults"));
+            LOG_PORT.println (String (F ("InputMgr: No Input Button Settings Found. Using Defaults")));
         }
 
         // do we have a channel configuration array?
         if (false == InputChannelMgrData.containsKey (CN_channels))
         {
             // if not, flag an error and stop processing
-            LOG_PORT.println (F ("No Input Channel Settings Found. Using Defaults"));
+            LOG_PORT.println (String (F ("No Input Channel Settings Found. Using Defaults")));
             break;
         }
         JsonObject InputChannelArray = InputChannelMgrData[CN_channels];
@@ -838,7 +838,7 @@ void c_InputMgr::SetConfig (const char * NewConfigData)
     } // end we saved the config
     else
     {
-        LOG_PORT.println (F ("EEEE Error Saving Input Manager Config File. EEEE"));
+        LOG_PORT.println (String (F ("EEEE Error Saving Input Manager Config File. EEEE")));
     }
 
     // DEBUG_END;

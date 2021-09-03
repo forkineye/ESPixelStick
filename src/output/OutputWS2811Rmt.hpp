@@ -24,8 +24,7 @@
 #ifdef ARDUINO_ARCH_ESP32
 
 #include "OutputWS2811.hpp"
-
-#include <driver/rmt.h>
+#include "OutputRmt.hpp"
 
 class c_OutputWS2811Rmt : public c_OutputWS2811
 {
@@ -56,7 +55,6 @@ private:
     intr_handle_t RMT_intr_handle = NULL;
     uint8_t NumIntensityValuesPerInterrupt = 0;
     uint8_t NumIntensityBitsPerInterrupt = 0;
-    rmt_item32_t Rgb2Rmt[5];
 
     uint32_t FrameStartCounter = 0;
     // uint32_t DataISRcounter = 0;

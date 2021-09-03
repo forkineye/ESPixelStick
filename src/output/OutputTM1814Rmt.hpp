@@ -24,8 +24,7 @@
 #ifdef ARDUINO_ARCH_ESP32
 
 #include "OutputTM1814.hpp"
-
-#include <driver/rmt.h>
+#include "OutputRmt.hpp"
 
 class c_OutputTM1814Rmt : public c_OutputTM1814
 {
@@ -56,7 +55,6 @@ private:
     intr_handle_t RMT_intr_handle = NULL;
     uint8_t NumIntensityValuesPerInterrupt = 0;
     uint8_t NumIntensityBitsPerInterrupt = 0;
-    rmt_item32_t Rgb2Rmt[5];
 
     // debug counters
     // uint32_t DataISRcounter = 0;
