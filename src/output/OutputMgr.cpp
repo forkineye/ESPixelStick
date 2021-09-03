@@ -268,7 +268,7 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
 void c_OutputMgr::CreateNewConfig ()
 {
     // DEBUG_START;
-    LOG_PORT.println (F ("--- WARNING: Creating a new Output Manager configuration Data set - Start ---"));
+    LOG_PORT.println (String (F ("--- WARNING: Creating a new Output Manager configuration Data set - Start ---")));
 
     // create a place to save the config
     DynamicJsonDocument JsonConfigDoc (OM_MAX_CONFIG_SIZE);
@@ -319,7 +319,7 @@ void c_OutputMgr::CreateNewConfig ()
     SetConfig (ConfigData.c_str());
     // DEBUG_V (String ("ConfigData: ") + ConfigData);
 
-    LOG_PORT.println (F ("--- WARNING: Creating a new Output Manager configuration Data set - Done ---"));
+    LOG_PORT.println (String (F ("--- WARNING: Creating a new Output Manager configuration Data set - Done ---")));
     // DEBUG_END;
 
 } // CreateNewConfig
@@ -648,7 +648,7 @@ void c_OutputMgr::LoadConfig ()
             // DEBUG_V ("");
         }))
     {
-        LOG_PORT.println (F ("EEEE Error loading Output Manager Config File. EEEE"));
+        LOG_PORT.println (String (F ("EEEE Error loading Output Manager Config File. EEEE")));
 
         // create a config file with default values
         // DEBUG_V ("");
@@ -681,7 +681,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
     {
         if (false == jsonConfig.containsKey (CN_output_config))
         {
-            LOG_PORT.println (F ("No Output Interface Settings Found. Using Defaults"));
+            LOG_PORT.println (String (F ("No Output Interface Settings Found. Using Defaults")));
             break;
         }
         JsonObject OutputChannelMgrData = jsonConfig[CN_output_config];
@@ -696,7 +696,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
         // PrettyPrint (OutputChannelMgrData, "Output Config");
         if (TempVersion != CurrentConfigVersion)
         {
-            LOG_PORT.println (F ("OutputMgr: Incorrect Version found. Using existing/default config."));
+            LOG_PORT.println (String (F ("OutputMgr: Incorrect Version found. Using existing/default config.")));
             // break;
         }
 
@@ -704,7 +704,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
         if (false == OutputChannelMgrData.containsKey (CN_channels))
         {
             // if not, flag an error and stop processing
-            LOG_PORT.println (F ("No Output Channel Settings Found. Using Defaults"));
+            LOG_PORT.println (String (F ("No Output Channel Settings Found. Using Defaults")));
             break;
         }
         JsonObject OutputChannelArray = OutputChannelMgrData[CN_channels];
@@ -807,7 +807,7 @@ void c_OutputMgr::SetConfig (const char * ConfigData)
     } // end we got a config and it was good
     else
     {
-        LOG_PORT.println (F ("EEEE Error Saving Output Manager Config File. EEEE"));
+        LOG_PORT.println (String (F ("EEEE Error Saving Output Manager Config File. EEEE")));
     }
 
     // DEBUG_END;

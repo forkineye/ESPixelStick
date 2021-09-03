@@ -20,7 +20,6 @@
 #include "../ESPixelStick.h"
 #include "OutputTM1814.hpp"
 
-
 //----------------------------------------------------------------------------
 c_OutputTM1814::c_OutputTM1814 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     gpio_num_t outputGpio,
@@ -91,18 +90,18 @@ bool c_OutputTM1814::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
-    // jsonConfig[CN_color_order] = "grbw";
+    setFromJSON (CurrentLimit, jsonConfig, CN_currentlimit);
 
     bool response = c_OutputPixel::SetConfig (jsonConfig);
 
     // Calculate our refresh time
     SetFrameDurration (float (TM1814_PIXEL_NS_BIT_TOTAL) / 1000.0);
 
-    setFromJSON (CurrentLimit, jsonConfig, CN_currentlimit);
-
     uint8_t PreambleValue = map (CurrentLimit, 1, 100, 0, 63);
-    memset ((void*)(&PreambleData.positive[0]),  PreambleValue, sizeof (PreambleData.positive));
-    memset ((void*)(&PreambleData.negative[0]), ~PreambleValue, sizeof (PreambleData.negative));
+    // DEBUG_V (String (" CurrentLimit: ")   + String (CurrentLimit));
+    // DEBUG_V (String ("PreambleValue: 0x") + String (PreambleValue, HEX));
+    memset ((void*)(&PreambleData.normal[0]), ~PreambleValue, sizeof (PreambleData.normal));
+    memset ((void*)(&PreambleData.inverted[0]),  PreambleValue, sizeof (PreambleData.inverted));
 
     SetPreambleInformation ((uint8_t*)&PreambleData, sizeof (PreambleData));
 
