@@ -24,8 +24,7 @@
 #ifdef ARDUINO_ARCH_ESP32
 
 #include "OutputWS2811.hpp"
-
-#include <driver/rmt.h>
+#include "OutputRmt.hpp"
 
 class c_OutputWS2811Rmt : public c_OutputWS2811
 {
