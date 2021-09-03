@@ -8,7 +8,7 @@
             "chip": "esp8266",
             "appbin": "esp8266/app.bin",
             "esptool": {
-                "baudrate": "480600",
+                "baudrate": "460800",
                 "options": "--before default_reset --after hard_reset",
                 "flashcmd": "write_flash"
             },
@@ -32,7 +32,7 @@
             "chip": "esp32",
             "appbin": "esp32/app.bin",
             "esptool": {
-                "baudrate": "480600",
+                "baudrate": "460800",
                 "options": "--before default_reset --after hard_reset",
                 "flashcmd": "write_flash -z"
             },
