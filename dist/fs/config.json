@@ -7,7 +7,10 @@
     "netmask": "255.255.255.0",
     "gateway": "192.168.1.1",
     "dhcp": true,
-    "ap_fallback": false
+    "sta_timeout": 15,
+    "ap_fallback": false,
+    "ap_timeout": 120,
+    "ap_reboot": true
   },
   "device": {
     "id": "ESPixelStick"
