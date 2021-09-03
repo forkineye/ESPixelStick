@@ -127,7 +127,7 @@ jobs:
           mv ~/build/ESPixelStick.ino.bin dist/firmware/esp32/app.bin
           mv ~/build/ESPixelStick.ino.bootloader.bin dist/firmware/esp32/bootloader.bin
           mv ~/build/ESPixelStick.ino.partitions.bin dist/firmware/esp32/partitions.bin
-          cp ~/.arduino15/pacakges/esp32/tools/partitions/boot_app0.bin dist/firmware/esp32/boot_app0.bin
+          cp ~/.arduino15/packages/esp32/tools/partitions/boot_app0.bin dist/firmware/esp32/boot_app0.bin
 
       # Build and move the web pages
       - name: Compile Web Pages
