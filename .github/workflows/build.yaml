@@ -3,6 +3,7 @@ on: [push, pull_request]
 env:
   ESP8266_PLAT: 'esp8266:esp8266@3.0.2'
   ESP8266_FQBN: 'esp8266:esp8266:generic:xtal=160,vt=flash,exception=disabled,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=40,FlashMode=dio,eesz=4M2M,led=2,ip=hb2f,dbg=Disabled'
+  # When the ESP32 core updates, update the location of boot_app0.bin as well in the compile section.
   ESP32_PLAT: 'esp32:esp32@2.0.0'
 #  ESP32_FQBN: 'esp32:esp32:d32_pro:PSRAM=enabled,PartitionScheme=default,FlashFreq=80,DebugLevel=none'
   ESP32_FQBN: 'esp32:esp32:d1_mini32:PartitionScheme=min_spiffs,FlashFreq=80'
@@ -120,6 +121,7 @@ jobs:
           mkdir -p dist/firmware/esp8266
           mv ~/build/ESPixelStick.ino.bin dist/firmware/esp8266/app.bin
 
+      # Make sure to update boot_app0.bin location when the core updates
       - name: Compile for ESP32
         run: |
           arduino-cli compile --fqbn $ESP32_FQBN --build-path ~/build ESPixelStick
@@ -127,7 +129,7 @@ jobs:
           mv ~/build/ESPixelStick.ino.bin dist/firmware/esp32/app.bin
           mv ~/build/ESPixelStick.ino.bootloader.bin dist/firmware/esp32/bootloader.bin
           mv ~/build/ESPixelStick.ino.partitions.bin dist/firmware/esp32/partitions.bin
-          cp ~/.arduino15/packages/esp32/tools/partitions/boot_app0.bin dist/firmware/esp32/boot_app0.bin
+          cp ~/.arduino15/packages/esp32/hardware/esp32/2.0.0/tools/partitions/boot_app0.bin
 
       # Build and move the web pages
       - name: Compile Web Pages
