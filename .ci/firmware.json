@@ -1,63 +1,64 @@
 {
-    "modes": [
+    "release": "ESPixelStick 4.0-dev - UNTESTED CI BUILD",
+    "baudrate": "115200",
+    "boards": [
         {
-            "name": "ESPixelStick 4.x (V3 Hardware)",
-            "description": "4.x build for ESPixelStick V3 hardware",
-            "version": "4.0-dev (CI Build - Not Tested)",
-            "file": "espixelstick-ci.bin"
-        },
-        {
-            "name": "ESPixelStick 4.x - ESP32",
-            "description": "4.x build for ESP32 hardware",
-            "version": "4.0-dev (CI Build - Not Tested)",
-            "file": "espixelstick-ci32.bin"
-        }
-    ],
-
-    "devices": [
-        {
-            "name": "ESPixelStick V3 (LoLin_D1_Mini_4MB_2MB)",
-            "espplatformname": "esp8266",
+            "name": "ESPixelStick V3",
+            "description": "Official hardware from Forkineye",
+            "chip": "esp8266",
+            "appbin": "esp8266/app.bin",
             "esptool": {
-                "reset": "nodemcu",
-                "baudrate": "115200",
-                "fsloc": "0x200000",
-                "binloc": "0x0"
+                "baudrate": "480600",
+                "options": "--before default_reset --after hard_reset",
+                "flashcmd": "write_flash"
             },
+            "binfiles": [
+                {
+                    "name": "esp8266/app.bin",
+                    "offset": "0x0"
+                }
+            ],
             "filesystem": {
                 "page": "256",
                 "block": "8192",
-                "size": "2072576"
+                "size": "2072576",
+                "offset": "0x200000"
             }
         },
+
         {
-            "name": "LoLin_ESP32_PRO_16MB_2MB",
-            "espplatformname": "esp32",
+            "name": "Generic ESP32 4MB",
+            "description": "Generic ESP32 with 4MB flash layout for DIY builds",
+            "chip": "esp32",
+            "appbin": "esp32/app.bin",
             "esptool": {
-                "reset": "nodemcu",
-                "baudrate": "921600",
-                "fsloc": "0x290000",
-                "binloc": "0x00010000"
+                "baudrate": "480600",
+                "options": "--before default_reset --after hard_reset",
+                "flashcmd": "write_flash -z"
             },
+            "binfiles": [
+                {
+                    "name": "esp32/bootloader.bin",
+                    "offset": "0x1000"
+                },
+                {
+                    "name": "esp32/partitions.bin",
+                    "offset": "0x8000"
+                },
+                {
+                    "name": "esp32/boot_app0.bin",
+                    "offset": "0xe000"
+                },
+                {
+                    "name": "esp32/app.bin",
+                    "offset": "0x10000"
+                }
+            ],
             "filesystem": {
                 "page": "256",
                 "block": "4096",
-                "size": "2072576"
-            }
-        },
-        {
-            "name": "D1_Mini_ESP32",
-            "espplatformname": "esp32",
-            "esptool": {
-                "reset": "nodemcu",
-                "baudrate": "921600",
-                "fsloc": "0x3D0000",
-                "binloc": "0x00010000"
-            },
-            "filesystem": {
-                "page": "256",
-                "block": "4096",
-                "size": "0x30000"
+                "size": "0x30000",
+                "offset": "0x3D0000"
             }
         }
     ]

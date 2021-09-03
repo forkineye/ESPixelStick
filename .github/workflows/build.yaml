@@ -117,12 +117,17 @@ jobs:
       - name: Compile for ESP8266
         run: |
           arduino-cli compile --fqbn $ESP8266_FQBN --build-path ~/build ESPixelStick
-          mv ~/build/ESPixelStick.ino.bin dist/firmware/espixelstick-ci.bin
+          mkdir -p dist/firmware/esp8266
+          mv ~/build/ESPixelStick.ino.bin dist/firmware/esp8266/app.bin
 
       - name: Compile for ESP32
         run: |
           arduino-cli compile --fqbn $ESP32_FQBN --build-path ~/build ESPixelStick
-          mv ~/build/ESPixelStick.ino.bin dist/firmware/espixelstick-ci32.bin
+          mkdir -p dist/firmware/esp32
+          mv ~/build/ESPixelStick.ino.bin dist/firmware/esp32/app.bin
+          mv ~/build/ESPixelStick.ino.bootloader.bin dist/firmware/esp32/bootloader.bin
+          mv ~/build/ESPixelStick.ino.partitions.bin dist/firmware/esp32/partitions.bin
+          cp ~/.arduino15/pacakges/esp32/tools/partitions/boot_app0.bin dist/firmware/esp32/boot_app0.bin
 
       # Build and move the web pages
       - name: Compile Web Pages
