@@ -24,8 +24,7 @@
 #ifdef ARDUINO_ARCH_ESP32
 
 #include "OutputTM1814.hpp"
-
-#include <driver/rmt.h>
+#include "OutputRmt.hpp"
 
 class c_OutputTM1814Rmt : public c_OutputTM1814
 {

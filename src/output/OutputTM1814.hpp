@@ -49,7 +49,7 @@ protected:
 #define TM1814_PIXEL_DATA_RATE              800000.0
 #define TM1814_PIXEL_NS_BIT_TOTAL           ((1.0 / TM1814_PIXEL_DATA_RATE) * TM1814_PIXEL_NS_PER_SECOND) 
 
-#define TM1814_PIXEL_NS_BIT_0_LOW           360.0 // 360ns +/- 50ns per datasheet
+#define TM1814_PIXEL_NS_BIT_0_LOW           375.0 // 360ns +/- 50ns per datasheet
 #define TM1814_PIXEL_NS_BIT_0_HIGH          (TM1814_PIXEL_NS_BIT_TOTAL - TM1814_PIXEL_NS_BIT_0_LOW)
 
 #define TM1814_PIXEL_NS_BIT_1_LOW           800.0 // 720ns -70ns / +280ns per datasheet
@@ -65,8 +65,8 @@ private:
     uint8_t CurrentLimit = 50;
     typedef struct PreambleData_t
     {
-        uint8_t positive[4];
-        uint8_t negative[4];
+        uint8_t normal[4];
+        uint8_t inverted[4];
     };
     PreambleData_t PreambleData;
 

@@ -18,16 +18,14 @@
 */
 #ifdef ARDUINO_ARCH_ESP32
 
-#include "../ESPixelStick.h"
 #include "OutputTM1814Rmt.hpp"
-#include "OutputRmt.hpp"
 
 // The adjustments compensate for rounding errors in the calculations
-#define TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH    uint16_t (TM1814_PIXEL_NS_BIT_0_HIGH / RMT_TickLengthNS) + 0
-#define TM1814_PIXEL_RMT_TICKS_BIT_0_LOW     uint16_t (TM1814_PIXEL_NS_BIT_0_LOW  / RMT_TickLengthNS) + 1
-#define TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH    uint16_t (TM1814_PIXEL_NS_BIT_1_HIGH / RMT_TickLengthNS) + 0
-#define TM1814_PIXEL_RMT_TICKS_BIT_1_LOW     uint16_t (TM1814_PIXEL_NS_BIT_1_LOW  / RMT_TickLengthNS) + 1
-#define TM1814_PIXEL_RMT_TICKS_IDLE          uint16_t (TM1814_PIXEL_NS_IDLE       / RMT_TickLengthNS)
+#define TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH    uint16_t ((TM1814_PIXEL_NS_BIT_0_HIGH / RMT_TickLengthNS) + 0.0)
+#define TM1814_PIXEL_RMT_TICKS_BIT_0_LOW     uint16_t ((TM1814_PIXEL_NS_BIT_0_LOW  / RMT_TickLengthNS) + 1.0)
+#define TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH    uint16_t ((TM1814_PIXEL_NS_BIT_1_HIGH / RMT_TickLengthNS) + 0.0)
+#define TM1814_PIXEL_RMT_TICKS_BIT_1_LOW     uint16_t ((TM1814_PIXEL_NS_BIT_1_LOW  / RMT_TickLengthNS) + 1.0)
+#define TM1814_PIXEL_RMT_TICKS_IDLE          uint16_t ((TM1814_PIXEL_NS_IDLE       / RMT_TickLengthNS) + 1.0)
 
 #define DATA_BIT_ZERO_ID    0
 #define DATA_BIT_ONE_ID     1
@@ -150,7 +148,7 @@ void c_OutputTM1814Rmt::Begin ()
     RmtEndAddr   = &RMTMEM.chan[RmtChannelId].data32[63];
 
     // the math here results in a modulo 8 of the maximum number of slots to fill at frame start time.
-    NumIntensityValuesPerInterrupt = ((MAX_NUM_INTENSITY_BIT_SLOTS_PER_INTERRUPT - NUM_FRAME_START_SLOTS) / NumBitsPerByte);
+    NumIntensityValuesPerInterrupt = ((MAX_NUM_INTENSITY_BIT_SLOTS_PER_INTERRUPT / NumBitsPerByte) / 2);
     NumIntensityBitsPerInterrupt = NumIntensityValuesPerInterrupt * NumBitsPerByte;
 
     // DEBUG_V (String ("NumIntensityValuesPerInterrupt: ") + String (NumIntensityValuesPerInterrupt));
@@ -235,7 +233,6 @@ void IRAM_ATTR c_OutputTM1814Rmt::ISR_Handler ()
         if (MoreDataToSend)
         {
             ISR_Handler_SendIntensityData ();
-            RMT.conf_ch[RmtChannelId].conf1.tx_start = 1;
         }
         else
         {
@@ -269,7 +266,10 @@ void IRAM_ATTR c_OutputTM1814Rmt::ISR_Handler_StartNewFrame ()
     RMT.int_ena.val |= RMT_INT_THR_EVNT (RmtChannelId);
 
     StartNewFrame ();
+    uint8_t SavedNumIntensityValuesPerInterrupt = NumIntensityValuesPerInterrupt;
+    NumIntensityValuesPerInterrupt = ((MAX_NUM_INTENSITY_BIT_SLOTS_PER_INTERRUPT / NumBitsPerByte) - 1);
     ISR_Handler_SendIntensityData ();
+    NumIntensityValuesPerInterrupt = SavedNumIntensityValuesPerInterrupt;
 
     RMT.tx_lim_ch[RmtChannelId].limit = NumIntensityBitsPerInterrupt;
 

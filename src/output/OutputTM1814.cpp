@@ -100,8 +100,8 @@ bool c_OutputTM1814::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     uint8_t PreambleValue = map (CurrentLimit, 1, 100, 0, 63);
     // DEBUG_V (String (" CurrentLimit: ")   + String (CurrentLimit));
     // DEBUG_V (String ("PreambleValue: 0x") + String (PreambleValue, HEX));
-    memset ((void*)(&PreambleData.positive[0]), ~PreambleValue, sizeof (PreambleData.positive));
-    memset ((void*)(&PreambleData.negative[0]),  PreambleValue, sizeof (PreambleData.negative));
+    memset ((void*)(&PreambleData.normal[0]), ~PreambleValue, sizeof (PreambleData.normal));
+    memset ((void*)(&PreambleData.inverted[0]),  PreambleValue, sizeof (PreambleData.inverted));
 
     SetPreambleInformation ((uint8_t*)&PreambleData, sizeof (PreambleData));
 
