@@ -1,40 +1,53 @@
 name: ESPixelStick CI
 on: [push, pull_request]
 env:
+  # Platform versions - When the ESP32 core updates, update the compile sections for boot_app0.bin as well
   ESP8266_PLAT: 'esp8266:esp8266@3.0.2'
-  ESP8266_FQBN: 'esp8266:esp8266:generic:xtal=160,vt=flash,exception=disabled,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=40,FlashMode=dio,eesz=4M2M,led=2,ip=hb2f,dbg=Disabled'
-  # When the ESP32 core updates, update the location of boot_app0.bin as well in the compile section.
   ESP32_PLAT: 'esp32:esp32@2.0.0'
+
+#  ESP8266_FQBN: 'esp8266:esp8266:generic:xtal=160,vt=flash,exception=disabled,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=40,FlashMode=dio,eesz=4M2M,led=2,ip=hb2f,dbg=Disabled'
 #  ESP32_FQBN: 'esp32:esp32:d32_pro:PSRAM=enabled,PartitionScheme=default,FlashFreq=80,DebugLevel=none'
-  ESP32_FQBN: 'esp32:esp32:d1_mini32:PartitionScheme=min_spiffs,FlashFreq=80'
+#  ESP32_FQBN: 'esp32:esp32:d1_mini32:PartitionScheme=min_spiffs,FlashFreq=80'
 
 jobs:
-  build:
+  firmware:
+    strategy:
+      matrix:
+#        target: ["d1_mini", "d32_pro", "d1_mini32"]
+        include:
+          # ESPixelStick V3 - Wemos D1 Mini ESP8266
+          - target: "d1_mini"
+            platform: $ESP8266_PLAT
+            chip: "esp8266"
+            fqbn: "esp8266:esp8266:d1_mini:xtal=160,eesz=4M2M,ip=hb2f"
+          # Wemos D1 Mini ESP32
+          - target: "d1_mini32"
+            platform: $ESP32_PLAT
+            chip: "esp32"
+            fqbn: "esp32:esp32:d1_mini32:PartitionScheme=min_spiffs"
+          # Lolin D32 Pro
+          - target: "d32_pro"
+            platform: $ESP32_PLAT
+            chip: "esp32"
+            fqbn: "esp32:esp32:d32_pro:PSRAM=enabled,PartitionScheme=min_spiffs"
+
     runs-on: ubuntu-latest
     steps:
-      # Set Release Archive Filename
-      - run: echo "ARCHFILE=ESPixelStick_CI-$(date +'%Y%m%d%H%M%S').zip" >> $GITHUB_ENV
-
       # Checkout ESPixelStick
       - uses: actions/checkout@v2
 
       # Arduino stuff
       - uses: arduino/setup-arduino-cli@v1
+
       - name: Update board indexes and set paths
         run: |
           arduino-cli config init
           arduino-cli config add board_manager.additional_urls https://arduino.esp8266.com/stable/package_esp8266com_index.json https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
           arduino-cli config set directories.user ~/arduino
-      - name: Install platforms
-        run: |
-          arduino-cli core install $ESP8266_PLAT
-          arduino-cli core install $ESP32_PLAT
 
-      # Node Stuff
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-      - run: npm install
+      - name: Install platform
+        run: |
+          arduino-cli core install ${{ matrix.platform }}
 
       # Grab all the required libraries
       # Checkout won't allow paths outside of our workspace, so we put them in alib and move later.
@@ -44,58 +57,69 @@ jobs:
           repository: bblanchon/ArduinoJson
           path: alib/ArduinoJson
           ref: 6.x
+
       - name: Checkout ESPAsyncE131
         uses: actions/checkout@v2
         with:
           repository: forkineye/ESPAsyncE131
           path: alib/ESPAsyncE131
-      - name: Checkout ESPAsyncTCP
-        uses: actions/checkout@v2
-        with:
-          repository: me-no-dev/ESPAsyncTCP
-          path: alib/ESPAsyncTCP
-      - name: Checkout ESPAsyncUDP
-        uses: actions/checkout@v2
-        with:
-          repository: me-no-dev/ESPAsyncUDP
-          path: alib/ESPAsyncUDP
+
       - name: Checkout ESPAsyncWebServer
         uses: actions/checkout@v2
         with:
           repository: me-no-dev/ESPAsyncWebServer
           path: alib/ESPAsyncWebServer
+
       - name: Checkout async-mqtt-client
         uses: actions/checkout@v2
         with:
           repository: marvinroger/async-mqtt-client
           path: alib/async-mqtt-client
+
       - name: Checkout Int64String
         uses: actions/checkout@v2
         with:
           repository: djGrrr/Int64String
           path: alib/Int64String
+
       - name: Checkout Espalexa
         uses: actions/checkout@v2
         with:
           repository: MartinMueller2003/Espalexa
           path: alib/Espalexa
+
       - name: Checkout Adafruit PWM Servo Driver
         uses: actions/checkout@v2
         with:
           repository: adafruit/Adafruit-PWM-Servo-Driver-Library
           path: alib/Adafruit-PWM-Servo-Driver-Library
+
       - name: Checkout Artnet
         uses: actions/checkout@v2
         with:
           repository: natcl/Artnet
           path: alib/Artnet
+
       - name: Checkout ArduinoStreamUtils
         uses: actions/checkout@v2
         with:
           repository: bblanchon/ArduinoStreamUtils
           path: alib/ArduinoStreamUtils
 
-      # ESP32 Specific Stuff
+      # ESP8266 specific stuff
+      - name: Checkout ESPAsyncTCP
+        uses: actions/checkout@v2
+        with:
+          repository: me-no-dev/ESPAsyncTCP
+          path: alib/ESPAsyncTCP
+
+      - name: Checkout ESPAsyncUDP
+        uses: actions/checkout@v2
+        with:
+          repository: me-no-dev/ESPAsyncUDP
+          path: alib/ESPAsyncUDP
+
+      # ESP32 specific stuff
       - name: Checkout AsyncTCP
         uses: actions/checkout@v2
         with:
@@ -111,25 +135,52 @@ jobs:
 
       - name: Create secrets.h
         run: |
-          echo '#define SECRETS_SSID "SSID_NOT_SET"' > src/secrets.h
-          echo '#define SECRETS_PASS "PASSPHRASE_NOT_SET"' >> src/secrets.h
+          echo '#define SECRETS_SSID "SSID_NOT_SET"' > ESPixelStick/src/secrets.h
+          echo '#define SECRETS_PASS "PASSPHRASE_NOT_SET"' >> ESPixelStick/src/secrets.h
 
-      # Build and move the binaries
-      - name: Compile for ESP8266
+      # Build and move / rename firmware files
+      # Make sure to update boot_app0.bin location when the ESP32 core updates
+      - name: Compile for ${{ matrix.target }}
+        env:
+          chip: ${{ matrix.chip }}
         run: |
-          arduino-cli compile --fqbn $ESP8266_FQBN --build-path ~/build ESPixelStick
-          mkdir -p dist/firmware/esp8266
-          mv ~/build/ESPixelStick.ino.bin dist/firmware/esp8266/app.bin
+          arduino-cli compile --fqbn ${{ matrix.fqbn }} --build-path ~/build ESPixelStick
+          mkdir -p firmware/${{ matrix.chip }}
+          mv ~/build/ESPixelStick.ino.bin firmware/${{ matrix.chip }}/${{ matrix.target }}-app.bin
+          if [ "$chip" = "esp32" ]; then
+          mv ~/build/ESPixelStick.ino.bootloader.bin firmware/esp32/${{ matrix.target }}-bootloader.bin
+          mv ~/build/ESPixelStick.ino.partitions.bin firmware/esp32/${{ matrix.target }}-partitions.bin
+          cp ~/.arduino15/packages/esp32/hardware/esp32/2.0.0/tools/partitions/boot_app0.bin firmware/esp32/boot_app0.bin
+          fi
 
-      # Make sure to update boot_app0.bin location when the core updates
-      - name: Compile for ESP32
-        run: |
-          arduino-cli compile --fqbn $ESP32_FQBN --build-path ~/build ESPixelStick
-          mkdir -p dist/firmware/esp32
-          mv ~/build/ESPixelStick.ino.bin dist/firmware/esp32/app.bin
-          mv ~/build/ESPixelStick.ino.bootloader.bin dist/firmware/esp32/bootloader.bin
-          mv ~/build/ESPixelStick.ino.partitions.bin dist/firmware/esp32/partitions.bin
-          cp ~/.arduino15/packages/esp32/hardware/esp32/2.0.0/tools/partitions/boot_app0.bin dist/firmware/esp32/boot_app0.bin
+      - name: Upload Firmware Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Firmware Binaries
+          path: firmware
+
+
+  package:
+    needs: firmware
+    runs-on: ubuntu-latest
+    steps:
+      # Set Release Archive Filename
+      - run: echo "ARCHFILE=ESPixelStick_CI-$(date +'%Y%m%d%H%M%S').zip" >> $GITHUB_ENV
+
+      # Checkout ESPixelStick
+      - uses: actions/checkout@v2
+
+      # Download firmware binary artifact
+      - uses: actions/download-artifact@v2
+        with:
+          name: Firmware Binaries
+          path: dist/firmware
+
+      # Install Node
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: npm install
 
       # Build and move the web pages
       - name: Compile Web Pages
@@ -137,18 +188,18 @@ jobs:
           gulp
           gulp md
           gulp ci
-          mv data/* dist/fs
+          mv ESPixelStick/data/* dist/fs
 
       - name: Move CI specific release files into place
         run: |
           mv .ci/firmware.json dist/firmware/firmware.json
 
       - name: Create Release Archive
-        run: zip -r ../${{env.ARCHFILE}} *
+        run: zip -r ../${{ env.ARCHFILE }} *
         working-directory: dist
 
       - name: Upload Release Artifact
         uses: actions/upload-artifact@v2
         with:
           name: Release Archive
-          path: ${{env.ARCHFILE}}
+          path: ${{ env.ARCHFILE }}

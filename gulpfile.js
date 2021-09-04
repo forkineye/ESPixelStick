@@ -20,7 +20,7 @@ gulp.task('html', function() {
             minifyCSS: true,
             minifyJS: true}))
         .pipe(gzip())
-        .pipe(gulp.dest('data/www'));
+        .pipe(gulp.dest('ESPixelStick/data/www'));
 });
 
 /* CSS Task */
@@ -30,7 +30,7 @@ gulp.task('css', function() {
         .pipe(concat('esps.css'))
         .pipe(cleancss())
         .pipe(gzip())
-        .pipe(gulp.dest('data/www'));
+        .pipe(gulp.dest('ESPixelStick/data/www'));
 });
 
 /* JavaScript Task */
@@ -40,19 +40,19 @@ gulp.task('js', function() {
         .pipe(concat('esps.js'))
         .pipe(terser({ 'toplevel': true }))
         .pipe(gzip())
-        .pipe(gulp.dest('data/www'));
+        .pipe(gulp.dest('ESPixelStick/data/www'));
 });
 
 /* Image Task */
 gulp.task('image', function() {
     return gulp.src(['html/**/*.png'])
         .pipe(plumber())
-        .pipe(gulp.dest('data/www'));
+        .pipe(gulp.dest('ESPixelStick/data/www'));
 });
 
 /* Clean Task */
 gulp.task('clean', function() {
-    return del(['data/www/*']);
+    return del(['ESPixelStick/data/www/*']);
 });
 
 /* Markdown to HTML Task */

@@ -6,7 +6,7 @@
             "name": "ESPixelStick V3",
             "description": "Official hardware from Forkineye",
             "chip": "esp8266",
-            "appbin": "esp8266/app.bin",
+            "appbin": "esp8266/d1_mini-app.bin",
             "esptool": {
                 "baudrate": "460800",
                 "options": "--before default_reset --after hard_reset",
@@ -14,7 +14,7 @@
             },
             "binfiles": [
                 {
-                    "name": "esp8266/app.bin",
+                    "name": "esp8266/d1_mini-app.bin",
                     "offset": "0x0"
                 }
             ],
@@ -25,12 +25,11 @@
                 "offset": "0x200000"
             }
         },
-
         {
-            "name": "Generic ESP32 4MB",
-            "description": "Generic ESP32 with 4MB flash layout for DIY builds",
+            "name": "Lolin D32 Pro",
+            "description": "Lolin D32 Pro module with PSRAM support for DIY builds",
             "chip": "esp32",
-            "appbin": "esp32/app.bin",
+            "appbin": "esp32/d32_pro-app.bin",
             "esptool": {
                 "baudrate": "460800",
                 "options": "--before default_reset --after hard_reset",
@@ -38,11 +37,11 @@
             },
             "binfiles": [
                 {
-                    "name": "esp32/bootloader.bin",
+                    "name": "esp32/d32_pro-bootloader.bin",
                     "offset": "0x1000"
                 },
                 {
-                    "name": "esp32/partitions.bin",
+                    "name": "esp32/d32_pro-partitions.bin",
                     "offset": "0x8000"
                 },
                 {
@@ -50,7 +49,42 @@
                     "offset": "0xe000"
                 },
                 {
-                    "name": "esp32/app.bin",
+                    "name": "esp32/d32_pro-app.bin",
+                    "offset": "0x10000"
+                }
+            ],
+            "filesystem": {
+                "page": "256",
+                "block": "4096",
+                "size": "0x30000",
+                "offset": "0x3D0000"
+            }
+        },
+        {
+            "name": "Generic ESP32 4MB",
+            "description": "Generic ESP32 with 4MB flash layout for DIY builds",
+            "chip": "esp32",
+            "appbin": "esp32/d1_mini32-app.bin",
+            "esptool": {
+                "baudrate": "460800",
+                "options": "--before default_reset --after hard_reset",
+                "flashcmd": "write_flash -z"
+            },
+            "binfiles": [
+                {
+                    "name": "esp32/d1_mini32-bootloader.bin",
+                    "offset": "0x1000"
+                },
+                {
+                    "name": "esp32/d1_mini32-partitions.bin",
+                    "offset": "0x8000"
+                },
+                {
+                    "name": "esp32/boot_app0.bin",
+                    "offset": "0xe000"
+                },
+                {
+                    "name": "esp32/d1_mini32-app.bin",
                     "offset": "0x10000"
                 }
             ],
