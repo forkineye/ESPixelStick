@@ -11,7 +11,7 @@ jobs:
         uses: mattnotmitt/doxygen-action@v1
         with:
           working-directory: '.doxygen'
-          doxyfile-path: '.doxygen/Doxyfile'
+          doxyfile-path: 'Doxyfile'
 
       - name: Deploy to gh-pages
         uses: JamesIves/github-pages-deploy-action@4.1.5
