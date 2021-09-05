@@ -4,7 +4,7 @@
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/ShelbyMerrick)
 [![Build Status](https://github.com/forkineye/ESPixelStick/actions/workflows/build.yaml/badge.svg)](https://github.com/forkineye/ESPixelStick/actions/workflows/build.yaml)
 
-## ***The v3.x code has been moved to the v3.x branch. Unify (v4.x) is now in main. This code is in a Alpha state. All features have been developed and feedback is needed on usability. Automated / untested binaries are available as artifact attachments to the [actions workflows](https://github.com/forkineye/ESPixelStick/actions).***
+## ***The v3.x code has been moved to the v3.x branch. Unify (v4.x) is now in main. This code is in a Alpha state. All features have been developed and feedback is needed on usability. Automated / untested binaries are available as artifact attachments to the [ESPixelStick CI Workflow](https://github.com/forkineye/ESPixelStick/actions/workflows/build.yaml).***
 
 This is the Arduino based ESPixelStick firmware for ESP8266 and ESP32 platforms. The ESPixelStick firmware supports the control of clockless pixels, DMX512 devices and relays based upon your hardware platform. Pixel limitations are mostly based upon your desired refresh rate, around 800 pixels for a 25ms E1.31 source rate utilizing a single port controller like the ESPixelStick V3.  DDP is supported as well along with Alexa and MQTT support for integration into home automation systems.  On platforms with SD cards available, sequences from xLights may be uploaded for playback in either standalone or FPP Remote modes.
 

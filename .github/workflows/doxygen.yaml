@@ -1,5 +1,8 @@
 name: Doxygen
-on: [push]
+on:
+  push:
+    branches:
+      - main
 jobs:
   gendocs:
     runs-on: ubuntu-latest
@@ -18,3 +21,7 @@ jobs:
         with:
           branch: gh-pages
           folder: .doxygen/doc/html
+          target-folder: doxygen
+          single-commit: true
+          clean: true
+
