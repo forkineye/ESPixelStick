@@ -705,7 +705,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     jsonResponse[F ("HostDescription")] = config.id;
     jsonResponse[F ("Platform")]        = CN_ESPixelStick;
     jsonResponse[F ("Variant")]         = FPP_VARIANT_NAME;
-    jsonResponse[F ("Mode")]            = (true == AllowedToRemotePlayFiles()) ? 8 : 1;
+    jsonResponse[F ("Mode")]            = (true == AllowedToRemotePlayFiles()) ?  F("remote") : F("bridge");
     jsonResponse[F ("Version")]         = VERSION + String (":") + BUILD_DATE;
 
     const char* version = VERSION.c_str ();
