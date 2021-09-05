@@ -10,6 +10,7 @@ jobs:
       - name: Build doxygen pages
         uses: mattnotmitt/doxygen-action@v1
         with:
+          working-directory: '.doxygen'
           doxyfile-path: '.doxygen/Doxyfile'
 
       - name: Deploy to gh-pages
