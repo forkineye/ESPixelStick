@@ -1,0 +1,18 @@
+name: Doxygen
+on: [push]
+jobs:
+  gendocs:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout ESPixelStick
+      - uses: actions/checkout@v2
+
+      - name: Build doxygen pages
+        uses: mattnotmitt/doxygen-action@v1
+        with:
+          doxyfile-path: '.doxygen/Doxyfile'
+
+      - name: Deploy to gh-pages
+        uses: JamesIves/github-pages-deploy-action@4.1.5
+        branch: gh-pages
+        folder: .doxygen/doc/html
