@@ -21,13 +21,11 @@
 #include "ESPixelStick.h"
 #include <FS.h>
 #include <LittleFS.h>
+#include <SD.h>
 #include <map>
 
 #ifdef ARDUINO_ARCH_ESP32
-#	include <SD.h>
 #	define SDFS SD
-#elif defined(ARDUINO_ARCH_ESP8266)
-#	include <SDFS.h>
 #endif
 
 class c_FileMgr
@@ -41,7 +39,7 @@ public:
     void    Begin     ();
     void    Poll      ();
     void    GetConfig (JsonObject& json);
-    bool SetConfig (JsonObject& json);
+    bool    SetConfig (JsonObject& json);
 
     void    handleFileUpload (const String & filename, size_t index, uint8_t * data, size_t len, bool final);
 
@@ -78,6 +76,8 @@ public:
     void   GetListOfSdFiles (String & Response);
     size_t GetSdFileSize    (const FileId & FileHandle);
 
+    void   logcon           (String message);
+
     // Configuration file params
 #if defined ARDUINO_ARCH_ESP8266
 #   // define CONFIG_MAX_SIZE (3*1024)    ///< Sanity limit for config file
@@ -92,12 +92,7 @@ private:
     void listDir (fs::FS& fs, String dirname, uint8_t levels);
     void DescribeSdCardToUser ();
     void handleFileUploadNewFile (const String & filename);
-
-#ifdef ESP32
     void printDirectory (File dir, int numTabs);
-#else
-    void printDirectory (Dir dir, int numTabs);
-#endif // def ESP32
 
     bool     SdCardInstalled = false;
     uint8_t  miso_pin = SD_CARD_MISO_PIN;

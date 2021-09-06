@@ -76,9 +76,9 @@ const String VERSION = "4.0-dev (NOT STABLE)";
 const String BUILD_DATE = String(__DATE__) + " - " + String(__TIME__);
 const String CurrentConfigVersion = "1";
 
-config_t config;                 // Current configuration
-bool     reboot = false;         // Reboot flag
-uint32_t lastUpdate;             // Update timeout tracker
+config_t config;                // Current configuration
+bool     reboot = false;        // Reboot flag
+uint32_t lastUpdate;            // Update timeout tracker
 bool     ResetWiFi = false;
 
 /////////////////////////////////////////////////////////
@@ -227,6 +227,7 @@ bool dsDevice(JsonObject & json)
         LOG_PORT.println(F ("No device settings found."));
     }
 
+    // DEBUG_V (String("ConfigChanged: ") + String(ConfigChanged));
     // DEBUG_END;
 
     return ConfigChanged;
