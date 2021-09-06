@@ -21,7 +21,5 @@ jobs:
         with:
           branch: gh-pages
           folder: .doxygen/doc/html
-          target-folder: doxygen
+          target-folder: /doxygen
           single-commit: true
-          clean: true
-
