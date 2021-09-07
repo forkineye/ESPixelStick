@@ -40,11 +40,11 @@ static void IRAM_ATTR rmt_intr_handler (void* param);
 //----------------------------------------------------------------------------
 c_OutputRmt::c_OutputRmt ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     memset ( (void*)&Rgb2Rmt[0], 0x00, sizeof (Rgb2Rmt));
 
-    DEBUG_END;
+    // DEBUG_END;
 } // c_OutputRmt
 
 //----------------------------------------------------------------------------
