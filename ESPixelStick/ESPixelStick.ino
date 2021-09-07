@@ -89,6 +89,7 @@ bool     ResetWiFi = false;
 
 void loadConfig();
 void GetConfig (JsonObject & json);
+void GetDriverName (String & Name) { Name = "Main"; }
 
 /// Arduino Setup
 /** Arduino based setup code that is executed at startup. */
@@ -516,3 +517,8 @@ void loop()
     }
 
 } // loop
+
+void _logcon (String & DriverName, String & Message)
+{
+    LOG_PORT.println ("[" + DriverName + "] " + Message);
+} // logcon

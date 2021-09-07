@@ -293,7 +293,7 @@ void c_InputMQTT::disconnectFromMqtt ()
 {
     // DEBUG_START;
 
-    logcon (F ("Disconnecting from broker"));
+    logcon (String (F ("Disconnecting from broker")));
     mqtt.disconnect ();
 
     // DEBUG_END;
@@ -304,7 +304,7 @@ void c_InputMQTT::onMqttConnect(bool sessionPresent)
 {
     // DEBUG_START;
 
-    logcon (F ("Connected"));
+    logcon (String (F ("Connected")));
 
     // Get retained MQTT state
     mqtt.subscribe (topic.c_str (), 0);
@@ -769,7 +769,7 @@ void c_InputMQTT::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         // E1.31 does not do this gracefully. A loss of connection needs a reboot
         extern bool reboot;
         reboot = true;
-        logcon (F ("Requesting reboot on loss of network connection."));
+        logcon (String (F ("Requesting reboot on loss of network connection.")));
     }
     else
     {

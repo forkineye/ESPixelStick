@@ -39,6 +39,7 @@ public:
     virtual ~c_OutputWS2811 ();
 
     // functions to be provided by the derived class
+    virtual void         Begin ();
     virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
     virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
             void         GetDriverName (String & sDriverName) { sDriverName = String (F ("WS2811")); }
@@ -48,15 +49,18 @@ public:
 
 protected:
 
-#define WS2811_PIXEL_NS_BIT_0_HIGH          350.0 // 350ns +/- 150ns per datasheet
-#define WS2811_PIXEL_NS_BIT_0_LOW           900.0 // 900ns +/- 150ns per datasheet
-#define WS2811_PIXEL_NS_BIT_1_HIGH          900.0 // 900ns +/- 150ns per datasheet
-#define WS2811_PIXEL_NS_BIT_1_LOW           350.0 // 350ns +/- 150ns per datasheet
-#define WS2811_PIXEL_NS_IDLE             300000.0 // 300us per datasheet
+#define WS2811_PIXEL_NS_PER_SECOND          1000000000.0
+#define WS2811_PIXEL_DATA_RATE              800000.0
+#define WS2811_PIXEL_NS_BIT_TOTAL           ( (1.0 / WS2811_PIXEL_DATA_RATE) * WS2811_PIXEL_NS_PER_SECOND) 
 
-#define WS2811_MICRO_SEC_PER_INTENSITY          10L     // ((1/800000) * 8 bits) = 10us
+#define WS2811_PIXEL_NS_BIT_0_HIGH          250.0 // 250ns +/- 150ns per datasheet
+#define WS2811_PIXEL_NS_BIT_0_LOW           (WS2811_PIXEL_NS_BIT_TOTAL - WS2811_PIXEL_NS_BIT_0_HIGH)
+
+#define WS2811_PIXEL_NS_BIT_1_HIGH          600.0 // 600ns +/- 150ns per datasheet
+#define WS2811_PIXEL_NS_BIT_1_LOW           (WS2811_PIXEL_NS_BIT_TOTAL - WS2811_PIXEL_NS_BIT_1_HIGH)
+
+#define WS2811_PIXEL_NS_IDLE                300000.0 // 300us per datasheet
 #define WS2811_MIN_IDLE_TIME_US                 (WS2811_PIXEL_NS_IDLE / 1000.0)
-// #define WS2811_DEFAULT_INTENSITY_PER_PIXEL      3
 
 }; // c_OutputWS2811
 

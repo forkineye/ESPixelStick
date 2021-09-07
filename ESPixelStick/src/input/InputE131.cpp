@@ -247,7 +247,7 @@ void c_InputE131::SetBufferTranslation ()
 
     if (0 != BytesLeftToMap)
     {
-        logcon (F ("ERROR: Universe configuration is too small to fill output buffer. Outputs have been truncated."));
+        logcon (String (F ("ERROR: Universe configuration is too small to fill output buffer. Outputs have been truncated.")));
     }
 
     // DEBUG_END;
@@ -369,11 +369,11 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         // Get on with business
         if (e131->begin (E131_MULTICAST, startUniverse, LastUniverse - startUniverse + 1))
         {
-            logcon (F ("Multicast enabled"));
+            logcon (String (F ("Multicast enabled")));
         }
         else
         {
-            logcon (CN_stars + String (F (" E1.31 MULTICAST INIT FAILED ")) + CN_stars);
+            logcon (String (CN_stars) + F (" E1.31 MULTICAST INIT FAILED ") + CN_stars);
         }
 
         // DEBUG_V ("");
@@ -400,7 +400,7 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         // E1.31 does not do this gracefully. A loss of connection needs a reboot
         extern bool reboot;
         reboot = true;
-        logcon (F ("Input requesting reboot on loss of WiFi connection."));
+        logcon (String (F ("Input requesting reboot on loss of WiFi connection.")));
     }
 
     // DEBUG_END;

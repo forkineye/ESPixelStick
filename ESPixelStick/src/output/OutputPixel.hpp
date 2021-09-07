@@ -45,14 +45,18 @@ public:
     virtual void         GetDriverName (String& sDriverName) = 0;
     virtual c_OutputMgr::e_OutputType GetOutputType () = 0;
     virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
-    uint16_t             GetNumChannelsNeeded () { return (pixel_count * numIntensityBytesPerPixel); };
+    uint16_t             GetNumChannelsNeeded () { return (pixel_count * NumIntensityBytesPerPixel); };
     virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
+    bool                 GetMoreDataToSend () { return MoreDataToSend; }
+    IRAM_ATTR void       StartNewFrame ();
+    IRAM_ATTR uint8_t    GetNextIntensityToSend ();
+    void                 SetInvertData (bool _InvertData) { InvertData = _InvertData; }
 
 protected:
 
-    IRAM_ATTR void    StartNewFrame ();
-    IRAM_ATTR uint8_t GetNextIntensityToSend ();
-    void SetPreambleInformation (uint8_t* PreambleStart, uint8_t PreambleSize);
+    void SetFramePrependInformation (const uint8_t* data, size_t len);
+    void SetFrameAppendInformation  (const uint8_t* data, size_t len);
+    void SetPixelPrependInformation (const uint8_t* data, size_t len);
 
     bool      MoreDataToSend = false;
     uint16_t  InterFrameGapInMicroSec = 300;
@@ -62,28 +66,41 @@ protected:
 private:
 #define PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL 3
 
-    uint8_t*    pNextIntensityToSend = nullptr;     ///< start of output buffer being sent to the UART
-    uint16_t    RemainingPixelCount = 0;            ///< Used by ISR to determine how much more data to send
-    uint8_t     numIntensityBytesPerPixel = PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL;
+    uint8_t     NumIntensityBytesPerPixel = PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL;
 
-    uint8_t*    pPreamble = nullptr;
-    uint8_t     PreambleSize = 0;
-    uint8_t     PreambleCurrentCount = 0;
+    uint8_t*    NextPixelToSend = nullptr;
+    uint16_t    pixel_count = 100;
+    uint16_t    SentPixelsCount = 0;
+    uint8_t     PixelIntensityCurrentIndex = 0;
 
-    uint8_t     brightness = 100;                   ///< brightness to use
-    uint16_t    zig_size = 1;                       ///< Zigsize count - 0 = no zigzag
+    uint8_t   * pFramePrependData = nullptr;
+    size_t      FramePrependDataSize = 0;
+    size_t      FramePrependDataCurrentIndex = 0;
+
+    uint8_t   * pFrameAppendData = nullptr;
+    size_t      FrameAppendDataSize = 0;
+    size_t      FrameAppendDataCurrentIndex = 0;
+
+    uint8_t   * PixelPrependData = nullptr;
+    size_t      PixelPrependDataSize = 0;
+    size_t      PixelPrependDataCurrentIndex = 0;
+
+    uint16_t    PixelGroupSize = 1;
+    uint16_t    PixelGroupSizeCurrentCount = 0;
+
+    uint16_t    zig_size = 0;
     uint16_t    ZigPixelCount = 1;
-    uint16_t    CurrentZigPixelCount = 1;
-    uint16_t    CurrentZagPixelCount = 1;
-    uint16_t    group_size = 1;                     ///< Group size - 1 = no grouping
-    uint16_t    GroupPixelCount = 1;
-    uint16_t    CurrentGroupPixelCount = 1;
-    uint16_t    pixel_count = 100;                  ///< Number of pixels
-    uint16_t    PrependNullCount = 0;
-    uint16_t    CurrentPrependNullCount = 0;
-    uint16_t    AppendNullCount = 0;
-    uint16_t    CurrentAppendNullCount = 0;
-    uint8_t     CurrentIntensityIndex = 0;
+    uint16_t    ZigPixelCurrentCount = 1;
+    uint16_t    ZagPixelCount = 1;
+    uint16_t    ZagPixelCurrentCount = 1;
+
+    uint16_t    PrependNullPixelCount = 0;
+    uint16_t    PrependNullPixelCurrentCount = 0;
+
+    uint16_t    AppendNullPixelCount = 0;
+    uint16_t    AppendNullPixelCurrentCount = 0;
+
+    uint8_t     InvertData = false;
 
     typedef union ColorOffsets_s
     {
@@ -99,17 +116,36 @@ private:
     ColorOffsets_t  ColorOffsets;
 
     uint8_t     gamma_table[256] = { 0 };           ///< Gamma Adjustment table
-    float       gamma = 2.2;                        ///< gamma value to use
+    float       gamma = 1.0;                        ///< gamma value to use
+    uint8_t     brightness = 100;
     uint32_t    AdjustedBrightness = 256;           ///< brightness to use
 
     // JSON configuration parameters
-    String      color_order; ///< Pixel color order
+    String      color_order = "rgb"; ///< Pixel color order
 
     // Internal variables
 
     void updateGammaTable(); ///< Generate gamma correction table
     void updateColorOrderOffsets(); ///< Update color order
     bool validate ();        ///< confirm that the current configuration is valid
+
+    enum FrameState_t
+    {
+        FramePrependData,
+        FrameSendPixels,
+        FrameAppendData,
+        FrameDone
+    };
+    FrameState_t FrameState = FrameState_t::FrameDone;
+
+    enum PixelSendState_t
+    {
+        PixelPrependNulls,
+        PixelSendIntensity,
+        PixelAppendNulls,
+    };
+
+    PixelSendState_t PixelSendState = PixelSendState_t::PixelSendIntensity;
 
 }; // c_OutputPixel
 

@@ -1,3 +1,4 @@
+#ifdef SUPPORT_TM1814
 /*
 * OutputTM1814.cpp - TM1814 driver code for ESPixelStick UART
 *
@@ -47,10 +48,10 @@ void c_OutputTM1814::Begin ()
 {
     // DEBUG_START;
     
-    // c_OutputPixel::Begin ();
+    c_OutputPixel::Begin ();
 
     // DEBUG_END;
-} // GetConfig
+} // Begin
 
 //----------------------------------------------------------------------------
 void c_OutputTM1814::GetConfig (ArduinoJson::JsonObject& jsonConfig)
@@ -94,18 +95,20 @@ bool c_OutputTM1814::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     bool response = c_OutputPixel::SetConfig (jsonConfig);
 
-    // Calculate our refresh time
-    SetFrameDurration (float (TM1814_PIXEL_NS_BIT_TOTAL) / 1000.0);
-
     uint8_t PreambleValue = map (CurrentLimit, 1, 100, 0, 63);
     // DEBUG_V (String (" CurrentLimit: ")   + String (CurrentLimit));
     // DEBUG_V (String ("PreambleValue: 0x") + String (PreambleValue, HEX));
     memset ((void*)(&PreambleData.normal[0]), ~PreambleValue, sizeof (PreambleData.normal));
     memset ((void*)(&PreambleData.inverted[0]),  PreambleValue, sizeof (PreambleData.inverted));
+    SetFramePrependInformation ( (uint8_t*)&PreambleData, sizeof (PreambleData));
 
-    SetPreambleInformation ((uint8_t*)&PreambleData, sizeof (PreambleData));
+    SetInvertData (true);
+
+    // Calculate our refresh time
+    SetFrameDurration (float (TM1814_PIXEL_NS_BIT_TOTAL) / 1000.0);
 
     // DEBUG_END;
     return response;
 
 } // SetConfig
+#endif // def SUPPORT_TM1814

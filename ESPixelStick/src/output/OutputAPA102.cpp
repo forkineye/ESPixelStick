@@ -1,5 +1,6 @@
+#ifdef ARDUINO_ARCH_ESP32
 /*
-* OutputWS2811.cpp - WS2811 driver code for ESPixelStick UART
+* OutputAPA102.cpp - APA102 driver code for ESPixelStick UART
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -18,10 +19,10 @@
 */
 
 #include "../ESPixelStick.h"
-#include "OutputWS2811.hpp"
+#include "OutputAPA102.hpp"
 
 //----------------------------------------------------------------------------
-c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+c_OutputAPA102::c_OutputAPA102 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     gpio_num_t outputGpio,
     uart_port_t uart,
     c_OutputMgr::e_OutputType outputType) :
@@ -29,31 +30,21 @@ c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
 {
     // DEBUG_START;
 
-    InterFrameGapInMicroSec = WS2811_MIN_IDLE_TIME_US;
+    InterFrameGapInMicroSec = APA102_MIN_IDLE_TIME_US;
 
     // DEBUG_END;
-} // c_OutputWS2811
+} // c_OutputAPA102
 
 //----------------------------------------------------------------------------
-c_OutputWS2811::~c_OutputWS2811 ()
+c_OutputAPA102::~c_OutputAPA102 ()
 {
     // DEBUG_START;
 
     // DEBUG_END;
-} // ~c_OutputWS2811
+} // ~c_OutputAPA102
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811::Begin ()
-{
-    // DEBUG_START;
-
-    c_OutputPixel::Begin ();
-
-    // DEBUG_END;
-} // Begin
-
-//----------------------------------------------------------------------------
-void c_OutputWS2811::GetConfig (ArduinoJson::JsonObject& jsonConfig)
+void c_OutputAPA102::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
@@ -63,19 +54,14 @@ void c_OutputWS2811::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // GetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811::GetStatus (ArduinoJson::JsonObject& jsonStatus)
+void c_OutputAPA102::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     c_OutputPixel::GetStatus (jsonStatus);
-
-    // uint32_t UartIntSt = GET_PERI_REG_MASK (UART_INT_ST (UartId), UART_TXFIFO_EMPTY_INT_ENA);
-    // uint16_t SpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getWS2811FifoLength));
-    // jsonStatus["UartIntSt"] = UartIntSt;
-    // jsonStatus["SpaceInFifo"] = SpaceInFifo;
 
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputAPA102::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 {
     // DEBUG_START;
 
@@ -83,31 +69,25 @@ void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
     c_OutputPixel::SetOutputBufferSize (NumChannelsAvailable);
 
     // Calculate our refresh time
-    SetFrameDurration (float(WS2811_PIXEL_NS_BIT_0_HIGH + WS2811_PIXEL_NS_BIT_0_LOW) / 1000.0);
+    SetFrameDurration ( ( (1.0 / float (APA102_BIT_RATE)) * 1000000), BlockSize, BlockDelay);
 
     // DEBUG_END;
 
 } // SetBufferSize
 
 //----------------------------------------------------------------------------
-/* Process the config
-*
-*   needs
-*       reference to string to process
-*   returns
-*       true - config has been accepted
-*       false - Config rejected. Using defaults for invalid settings
-*/
-bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject& jsonConfig)
+bool c_OutputAPA102::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
     bool response = c_OutputPixel::SetConfig (jsonConfig);
 
     // Calculate our refresh time
-    SetFrameDurration (float (WS2811_PIXEL_NS_BIT_0_HIGH + WS2811_PIXEL_NS_BIT_0_LOW) / 1000.0);
+    SetFrameDurration ( ( (1.0 / float (APA102_BIT_RATE)) * 1000000), BlockSize, BlockDelay);
 
     // DEBUG_END;
     return response;
 
 } // SetConfig
+
+#endif // def ARDUINO_ARCH_ESP32

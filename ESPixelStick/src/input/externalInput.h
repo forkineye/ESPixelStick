@@ -12,20 +12,19 @@ public:
 	c_ExternalInput (void);
 	~c_ExternalInput(void) {}
 
-	typedef enum InputValue_e
+	enum InputValue_t
 	{
 		off = 0,		// input is off
 		shortOn,		// input was on for 0.5 sec
 		longOn,         // input was on for 2.0 sec
 		on,				// input is on
-	} InputValue_t;
+	};
 
-	typedef enum Polarity_e
+	enum Polarity_t
 	{
 		ActiveHigh = 0,
 		ActiveLow,
-
-	} Polarity_t;
+	};
 
 	void         Init              (uint32_t iInputId, uint32_t iPinId, Polarity_t Poliarity, String & sName);
 	InputValue_t Get               ();
@@ -36,6 +35,7 @@ public:
 	void         GetStatistics     (JsonObject JsonData);
 	void         ProcessConfig     (JsonObject JsonData);
 	bool		 IsEnabled ()      { return m_bIsEnabled; }
+	void         GetDriverName     (String & Name) { Name = "ExtInput"; }
 
 protected:
 

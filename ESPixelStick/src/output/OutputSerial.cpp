@@ -52,6 +52,7 @@ extern "C" {
 #define UART_TX_DONE_INT_CLR BIT(1)
 
 #elif defined(ARDUINO_ARCH_ESP32)
+#   include <soc/uart_reg.h>
 
 #   define UART_CONF0           UART_CONF0_REG
 #   define UART_CONF1           UART_CONF1_REG
@@ -65,7 +66,7 @@ extern "C" {
 
 #define FIFO_TRIGGER_LEVEL (UART_TX_FIFO_SIZE / 2)
 
-typedef enum
+enum RenardFrameDefinitions_t
 {
 	CMD_DATA_START   = 0x80,
     ESC_CHAR         = 0x7F,
@@ -75,7 +76,7 @@ typedef enum
 
     MIN_VAL_TO_ESC   = FRAME_PAD_CHAR,
     MAX_VAL_TO_ESC   = ESC_CHAR
-} RenardFrameDefinitions_t;
+};
 
 //----------------------------------------------------------------------------
 c_OutputSerial::c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId,
@@ -164,7 +165,7 @@ void c_OutputSerial::StartUart ()
 #ifdef ARDUINO_ARCH_ESP8266
     ETS_UART_INTR_ATTACH (uart_intr_handler, this);
 #else
-    uart_isr_register (UartId, uart_intr_handler, this, ESP_INTR_FLAG_IRAM, nullptr);
+    uart_isr_register (UartId, uart_intr_handler, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM, nullptr);
 #endif
 
     enqueue (0xff);

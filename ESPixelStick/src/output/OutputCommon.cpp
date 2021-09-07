@@ -106,7 +106,7 @@ void c_OutputCommon::InitializeUart (uint32_t baudrate,
         // are we using a valid config?
         if (gpio_num_t (-1) == DataPin)
         {
-            Serial.println (F ("ERROR: Data pin has not been defined"));
+            LOG_PORT.println (F ("ERROR: Data pin has not been defined"));
             break;
         }
 
@@ -172,7 +172,7 @@ void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
     // are we using a valid config?
     if (gpio_num_t (-1) == DataPin)
     {
-        Serial.println (F ("ERROR: Data pin has not been defined"));
+        LOG_PORT.println (F ("ERROR: Data pin has not been defined"));
         return;
     }
 

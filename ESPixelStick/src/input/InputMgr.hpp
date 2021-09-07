@@ -47,6 +47,7 @@ public:
     void NetworkStateChanged (bool IsConnected); // used by poorly designed rx functions
     void DeleteConfig () { FileMgr.DeleteConfigFile (ConfigFileName); }
     bool GetNetworkState () { return IsConnected; }
+    void GetDriverName (String & Name) { Name = "InputMgr"; }
 
     enum e_InputType
     {

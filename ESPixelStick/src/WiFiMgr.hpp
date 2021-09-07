@@ -62,6 +62,7 @@ public:
     config_t* GetConfigPtr    () { return config; }
     bool      IsWiFiConnected () { return ReportedIsWiFiConnected; }
     void      SetIsWiFiConnected (bool value) { ReportedIsWiFiConnected = value; }
+    void      GetDriverName (String Name) { Name = "WiFiMgr"; }
 
 private:
 

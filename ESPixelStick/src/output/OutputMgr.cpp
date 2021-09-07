@@ -30,13 +30,16 @@
 #include "OutputGECE.hpp"
 #include "OutputSerial.hpp"
 #include "OutputWS2811Uart.hpp"
+#ifdef SUPPORT_TM1814
 #include "OutputTM1814Uart.hpp"
 #include "OutputTM1814Rmt.hpp"
+#endif // def SUPPORT_TM1814
 #include "OutputRelay.hpp"
 #include "OutputServoPCA9685.hpp"
 #ifdef ARDUINO_ARCH_ESP32
 #   include "OutputWS2811Rmt.hpp"
 #   include "OutputWS2801Spi.hpp"
+#   include "OutputAPA102Spi.hpp"
 #endif // def ARDUINO_ARCH_ESP32
 // needs to be last
 #include "OutputMgr.hpp"
@@ -62,9 +65,12 @@ static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::
     {c_OutputMgr::e_OutputType::OutputType_Relay,         "Relay"         },
     {c_OutputMgr::e_OutputType::OutputType_Servo_PCA9685, "Servo_PCA9685" },
     {c_OutputMgr::e_OutputType::OutputType_Disabled,      "Disabled"      },
+#ifdef SUPPORT_TM1814
     {c_OutputMgr::e_OutputType::OutputType_TM1814,        "TM1814"        },
+#endif // def SUPPORT_TM1814
 #ifdef ARDUINO_ARCH_ESP32
-    {c_OutputMgr::e_OutputType::OutputType_WS2801,        "WS2801"        }
+    {c_OutputMgr::e_OutputType::OutputType_WS2801,        "WS2801"        },
+    {c_OutputMgr::e_OutputType::OutputType_APA102,        "APA102"        }
 #endif // def ARDUINO_ARCH_ESP32
 };
 
@@ -94,9 +100,9 @@ static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] 
     // {DEFAULT_RMT_6_GPIO,  uart_port_t (6)},
     // {DEFAULT_RMT_7_GPIO,  uart_port_t (7)},
 #endif // ndef ESP32_CAM
-    {DEFAULT_WS2801_DATA_GPIO, uart_port_t (-1)},
+    {DEFAULT_SPI_DATA_GPIO, uart_port_t (-1)},
 
-#endif // def ARDUINO_ARCH_ESP82666
+#endif // def ARDUINO_ARCH_ESP32
 
     {gpio_num_t::GPIO_NUM_10, uart_port_t (-1)},
 };
@@ -553,6 +559,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 break;
             }
 
+#ifdef SUPPORT_TM1814
             case e_OutputType::OutputType_TM1814:
             {
 #ifdef ARDUINO_ARCH_ESP32
@@ -578,6 +585,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 // DEBUG_V ("");
                 break;
             }
+#endif // def SUPPORT_TM1814
 
 #ifdef ARDUINO_ARCH_ESP32
             case e_OutputType::OutputType_WS2801:
@@ -596,6 +604,24 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
                 break;
             }
+
+            case e_OutputType::OutputType_APA102:
+            {
+                if (ChannelIndex == OutputChannelId_SPI_1)
+                {
+                    // LOG_PORT.println (CN_stars + String (F (" Starting WS2811 RMT for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputAPA102Spi (ChannelIndex, dataPin, UartId, OutputType_APA102);
+                    // DEBUG_V ("");
+                    break;
+                }
+
+                LOG_PORT.println (CN_stars + String (F (" Cannot Start WS2801 for channel '")) + ChannelIndex + "'. " + CN_stars);
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                // DEBUG_V ("");
+
+                break;
+            }
+
 #endif // def ARDUINO_ARCH_ESP32
 
             default:
@@ -610,7 +636,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
         // DEBUG_V ("");
         //String sDriverName;
         //pOutputChannelDrivers[ChannelIndex]->GetDriverName (sDriverName);
-        //Serial.println (String (CN_stars) + " '" + sDriverName + F ("' Initialization for Output: ") + String (ChannelIndex) + " " + CN_stars);
+        // logcon (String (CN_stars) + " '" + sDriverName + F ("' Initialization for Output: ") + String (ChannelIndex) + " " + CN_stars);
         if (StartDriver)
         {
             pOutputChannelDrivers[ChannelIndex]->Begin ();

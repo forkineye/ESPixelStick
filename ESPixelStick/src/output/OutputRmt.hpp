@@ -1,3 +1,4 @@
+#pragma once
 /*
 * OutputRmt.hpp - RMT driver code for ESPixelStick RMT Channel
 *
@@ -19,25 +20,57 @@
 #ifdef ARDUINO_ARCH_ESP32
 
 #include "../ESPixelStick.h"
+#include "OutputPixel.hpp"
 #include <driver/rmt.h>
 
-#define RmtChannelId                              rmt_channel_t(UartId)
-#define NumBitsPerByte                            8
-#define MAX_NUM_INTENSITY_BIT_SLOTS_PER_INTERRUPT (sizeof(RMTMEM.chan[0].data32) / sizeof (rmt_item32_t))
-#define NUM_FRAME_START_SLOTS                     6
+class c_OutputRmt
+{
+public:
+    c_OutputRmt ();
+    ~c_OutputRmt ();
 
-#define RMT__INT_TX_END     (1)
-#define RMT__INT_RX_END     (2)
-#define RMT__INT_ERROR      (4)
-#define RMT__INT_THR_EVNT   (1<<24)
+    void Begin (rmt_channel_t ChannelId, gpio_num_t DataPin, c_OutputPixel * OutputPixel, rmt_idle_level_t idle_level);
+    bool Render ();
+    void set_pin (gpio_num_t _DataPin) { DataPin = _DataPin; rmt_set_gpio (RmtChannelId, rmt_mode_t::RMT_MODE_TX, DataPin, false); }
 
-#define RMT_INT_TX_END(channel)     (RMT__INT_TX_END   << (uint32_t(channel)*3))
-#define RMT_INT_RX_END(channel)     (RMT__INT_RX_END   << (uint32_t(channel)*3))
-#define RMT_INT_ERROR(channel)      (RMT__INT_ERROR    << (uint32_t(channel)*3))
-#define RMT_INT_THR_EVNT(channel)  ((RMT__INT_THR_EVNT)<< (uint32_t(channel)))
+#define RMT_ClockRate       80000000.0
+#define RMT_Clock_Divisor   2.0
+#define RMT_TickLengthNS    float ( (1/ (RMT_ClockRate/RMT_Clock_Divisor)) * 1000000000.0)
 
-#define RMT_ClockRate                               80000000.0
-#define RMT_Clock_Divisor                           2
-#define RMT_TickLengthNS                            float((1/(RMT_ClockRate/RMT_Clock_Divisor))*1000000000.0)
+    enum RmtFrameType_t
+    {
+        RMT_DATA_BIT_ZERO_ID = 0,
+        RMT_DATA_BIT_ONE_ID,
+        RMT_INTERFRAME_GAP_ID,
+        RMT_STARTBIT_ID,
+        RMT_STOPBIT_ID,
+    };
+    void SetRgb2Rmt (rmt_item32_t NewValue, RmtFrameType_t ID) { Rgb2Rmt[ID] = NewValue; }
+
+    void IRAM_ATTR ISR_Handler ();
+    void IRAM_ATTR ISR_Handler_StartNewFrame ();
+    void IRAM_ATTR ISR_Handler_SendIntensityData ();
+
+private:
+    c_OutputPixel* OutputPixel = nullptr;
+    rmt_channel_t RmtChannelId = rmt_channel_t (-1);
+    gpio_num_t  DataPin = gpio_num_t (-1);
+    rmt_item32_t  Rgb2Rmt[5];
+
+    volatile rmt_item32_t* RmtStartAddr = nullptr;
+    volatile rmt_item32_t* RmtCurrentAddr = nullptr;
+    volatile rmt_item32_t* RmtEndAddr = nullptr;
+    intr_handle_t RMT_intr_handle = NULL;
+    uint8_t NumIntensityValuesPerInterrupt = 0;
+    uint8_t NumIntensityBitsPerInterrupt = 0;
+
+    // debug counters
+    // uint32_t DataISRcounter = 0;
+    // uint32_t FrameEndISRcounter = 0;
+    // uint32_t FrameStartCounter = 0;
+
+
+};
+
 
 #endif // def ARDUINO_ARCH_ESP32

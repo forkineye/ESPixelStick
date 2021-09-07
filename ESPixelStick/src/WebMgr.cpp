@@ -29,10 +29,13 @@
 #include <Int64String.h>
 
 #include <FS.h>
-#include <LittleFS.h>
 
 #include <time.h>
 #include <sys/time.h>
+
+#include <LittleFS.h>
+#define LITTLEFS LittleFS
+
 
 // #define ESPALEXA_DEBUG
 #define ESPALEXA_MAXDEVICES 2
@@ -208,10 +211,10 @@ void c_WebMgr::init ()
 #endif // def USE_REST
 
     // Static Handler
-    webServer.serveStatic ("/", LittleFS, "/www/").setDefaultFile ("index.html");
+    webServer.serveStatic ("/", LITTLEFS, "/www/").setDefaultFile ("index.html");
 
     // FS Debugging Handler
-    webServer.serveStatic ("/fs", LittleFS, "/" );
+    webServer.serveStatic ("/fs", LITTLEFS, "/" );
 
     // if the client posts to the upload page
     webServer.on ("/upload", HTTP_POST | HTTP_PUT | HTTP_OPTIONS,
