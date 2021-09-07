@@ -1,8 +1,7 @@
 # ESPixelStick Firmware
 
-[![Join the chat at https://gitter.im/forkineye/ESPixelStick](https://badges.gitter.im/forkineye/ESPixelStick.svg)](https://gitter.im/forkineye/ESPixelStick)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/ShelbyMerrick)
 [![Build Status](https://github.com/forkineye/ESPixelStick/actions/workflows/build.yaml/badge.svg)](https://github.com/forkineye/ESPixelStick/actions/workflows/build.yaml)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/ShelbyMerrick)
 
 ## ***The v3.x code has been moved to the v3.x branch. Unify (v4.x) is now in main. This code is in a Alpha state. All features have been developed and feedback is needed on usability. Automated / untested binaries are available as artifact attachments to the [ESPixelStick CI Workflow](https://github.com/forkineye/ESPixelStick/actions/workflows/build.yaml).***
 
@@ -10,7 +9,7 @@ This is the Arduino based ESPixelStick firmware for ESP8266 and ESP32 platforms.
 
 ## Hardware
 
-Being open source, you are free to use the ESPixelStick firmware on the device of your choice.  The code however is written specifically for the [ESPixelStick](http://forkineye.com/espixelstick). The ESPixelStick V3 utilizes a Wemos D1 Mini module and provides high current connectors, fusing, power filtering, reverse polarity protection, a differential output driver, SD card reader and proper logic level buffering.  The ESPixelStick V3 is available for purchase from [Forkineye](https://forkineye.com/product/espixelstick-v3/) and if you're in the US, it is available via [Amazon](http://amzn.to/2uqBFuX) as well.  The proceeds go towards things like keeping my wife happy so I can work on this project :)  The ESP32 version of the firmware is targeted for the Lolin D32 Pro. At this time, there is not a pre-made ESP32 controller so it is up to the user to roll their own buffer for the WS281x output and add appropiate power connectors. It does however have a SD card reader.
+Being open source, you are free to use the ESPixelStick firmware on the device of your choice.  The code however is written specifically for the [ESPixelStick](http://forkineye.com/espixelstick). The ESPixelStick V3 utilizes a Wemos D1 Mini module and provides high current connectors, fusing, power filtering, reverse polarity protection, a differential output driver, SD card reader and proper logic level buffering.  The ESPixelStick V3 is available for purchase from [Forkineye](https://forkineye.com/product/espixelstick-v3/) and if you're in the US, it is available via [Amazon](https://amzn.to/3kVb7tq) as well.  The proceeds go towards things like keeping my wife happy so I can work on this project :)  The ESP32 version of the firmware is targeted for the Lolin D32 Pro. At this time, there is not a pre-made ESP32 controller so it is up to the user to roll their own buffer for the WS281x output and add appropiate power connectors. It does however have a SD card reader.
 
 ## Build Requirements
 
