@@ -53,9 +53,9 @@ public:
 
 private:
     c_OutputPixel* OutputPixel = nullptr;
-    rmt_channel_t RmtChannelId = rmt_channel_t (-1);
-    gpio_num_t  DataPin = gpio_num_t (-1);
-    rmt_item32_t  Rgb2Rmt[5];
+    rmt_channel_t  RmtChannelId = rmt_channel_t (-1);
+    gpio_num_t     DataPin = gpio_num_t (-1);
+    rmt_item32_t   Rgb2Rmt[5];
 
     volatile rmt_item32_t* RmtStartAddr = nullptr;
     volatile rmt_item32_t* RmtCurrentAddr = nullptr;
@@ -68,9 +68,5 @@ private:
     // uint32_t DataISRcounter = 0;
     // uint32_t FrameEndISRcounter = 0;
     // uint32_t FrameStartCounter = 0;
-
-
 };
-
-
 #endif // def ARDUINO_ARCH_ESP32
