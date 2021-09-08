@@ -280,7 +280,7 @@ void c_InputMQTT::connectToMqtt()
     }
     mqtt.setServer (ip.c_str (), port);
 
-    NewLogToCon (String(F ("Connecting to broker ")) + ip + ":" + String(port));
+    logcon (String(F ("Connecting to broker ")) + ip + ":" + String(port));
     mqtt.connect ();
     mqtt.setWill (topic.c_str(), 1, true, lwt.c_str(), lwt.length());
 
@@ -293,7 +293,7 @@ void c_InputMQTT::disconnectFromMqtt ()
 {
     // DEBUG_START;
 
-    NewLogToCon (String (F ("Disconnecting from broker")));
+    logcon (String (F ("Disconnecting from broker")));
     mqtt.disconnect ();
 
     // DEBUG_END;
@@ -304,7 +304,7 @@ void c_InputMQTT::onMqttConnect(bool sessionPresent)
 {
     // DEBUG_START;
 
-    NewLogToCon (String (F ("Connected")));
+    logcon (String (F ("Connected")));
 
     // Get retained MQTT state
     mqtt.subscribe (topic.c_str (), 0);
@@ -348,7 +348,7 @@ void c_InputMQTT::onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
 {
     // DEBUG_START;
 
-    NewLogToCon (String(F ("Disconnected: ")) + String(DisconnectReasons[uint8_t(reason)]));
+    logcon (String(F ("Disconnected: ")) + String(DisconnectReasons[uint8_t(reason)]));
 
     if (InputMgr.GetNetworkState ())
     {
@@ -395,7 +395,7 @@ void c_InputMQTT::onMqttMessage(
         // DEBUG_V ("Set new values");
         if (error)
         {
-            NewLogToCon (String (F ("Deserialzation error. Error code = ")) + error.c_str ());
+            logcon (String (F ("Deserialzation error. Error code = ")) + error.c_str ());
             break;
         }
 
@@ -492,7 +492,7 @@ void c_InputMQTT::PlayFseq (JsonObject & JsonConfig)
         if (!FileIsPlayList && !FileIsStandalone)
         {
             // not a file we can process
-            NewLogToCon (String (F ("ERROR: Unsupported file type for File Play operation. File:'")) + FileName + "'");
+            logcon (String (F ("ERROR: Unsupported file type for File Play operation. File:'")) + FileName + "'");
             break;
         }
 
@@ -769,7 +769,7 @@ void c_InputMQTT::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         // E1.31 does not do this gracefully. A loss of connection needs a reboot
         extern bool reboot;
         reboot = true;
-        NewLogToCon (String (F ("Requesting reboot on loss of network connection.")));
+        logcon (String (F ("Requesting reboot on loss of network connection.")));
     }
     else
     {

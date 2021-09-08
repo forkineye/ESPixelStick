@@ -120,9 +120,9 @@ void setup()
     // Dump version and build information
     logcon (String(CN_ESPixelStick) + " v" + VERSION + "(" + BUILD_DATE + ")");
 #ifdef ARDUINO_ARCH_ESP8266
-    NewLogToCon (String (F ("ESP Version: ")) + ESP.getFullVersion ());
+    logcon (String (F ("ESP Version: ")) + ESP.getFullVersion ());
 #else
-    NewLogToCon (String(F ("ESP Version: ")) + ESP.getSdkVersion ());
+    logcon (String(F ("ESP Version: ")) + ESP.getSdkVersion ());
 #endif
 
     // DEBUG_V ("");
@@ -216,7 +216,7 @@ bool dsDevice(JsonObject & json)
         if (TempVersion != CurrentConfigVersion)
         {
             // need to do something in the future
-            NewLogToCon (String (F ("Incorrect Device Config Version ID found in config")));
+            logcon (String (F ("Incorrect Device Config Version ID found in config")));
             // break;
         }
 
@@ -224,7 +224,7 @@ bool dsDevice(JsonObject & json)
     }
     else
     {
-        NewLogToCon (String (F ("No device settings found.")));
+        logcon (String (F ("No device settings found.")));
     }
 
     // DEBUG_V (String("ConfigChanged: ") + String(ConfigChanged));
@@ -267,7 +267,7 @@ bool dsNetwork(JsonObject & json)
         if (TempVersion != CurrentConfigVersion)
         {
             // need to do something in the future
-            NewLogToCon (String (F ("Incorrect Version ID found in config")));
+            logcon (String (F ("Incorrect Version ID found in config")));
             // break;
         }
 
@@ -293,7 +293,7 @@ bool dsNetwork(JsonObject & json)
     }
     else
     {
-        NewLogToCon (String (F ("No network settings found.")));
+        logcon (String (F ("No network settings found.")));
     }
 
     // DEBUG_V (String("ConfigChanged: ") + String(ConfigChanged));
@@ -504,7 +504,7 @@ void loop()
     // Reboot handler
     if (reboot)
     {
-        NewLogToCon (String(CN_stars) + CN_minussigns + F ("Internal Reboot Requested. Rebooting Now"));
+        logcon (String(CN_stars) + CN_minussigns + F ("Internal Reboot Requested. Rebooting Now"));
         delay (REBOOT_DELAY);
         ESP.restart ();
     }

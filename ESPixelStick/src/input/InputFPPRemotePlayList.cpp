@@ -124,7 +124,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         String FileData;
         if (0 == FileMgr.ReadSdFile (PlayItemName, FileData))
         {
-            NewLogToCon (String (F ("Could not read Playlist file: '")) + PlayItemName + "'");
+            logcon (String (F ("Could not read Playlist file: '")) + PlayItemName + "'");
             fsm_PlayList_state_Paused_imp.Init (this);
             pCurrentFsmState->Start (PlayItemName, PauseEndTime, 1);
             break;
@@ -137,9 +137,9 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         if (error)
         {
             String CfgFileMessagePrefix = String (F ("SD file: '")) + PlayItemName + "' ";
-            NewLogToCon (CN_Heap_colon + String (ESP.getFreeHeap ()));
-            NewLogToCon (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
-            NewLogToCon (String (F ("++++")) + FileData + String (F ("----")));
+            logcon (CN_Heap_colon + String (ESP.getFreeHeap ()));
+            logcon (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
+            logcon (String (F ("++++")) + FileData + String (F ("----")));
             fsm_PlayList_state_Paused_imp.Init (this);
             pCurrentFsmState->Start (PlayItemName, PauseEndTime, PlayCount);
             break;
@@ -218,7 +218,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
 
         else
         {
-            NewLogToCon (String (F ("Unsupported Play List Entry type: '")) + PlayListEntryType + "'");
+            logcon (String (F ("Unsupported Play List Entry type: '")) + PlayListEntryType + "'");
             PauseEndTime = millis () + 10000;
             fsm_PlayList_state_Paused_imp.Init (this);
             pCurrentFsmState->Start (PlayListEntryName, FrameId, PlayCount);

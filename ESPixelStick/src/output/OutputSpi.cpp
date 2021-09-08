@@ -79,7 +79,7 @@ c_OutputSpi::~c_OutputSpi ()
     spi_transfer_callback_enabled = false;
     if (OutputPixel)
     {
-        NewLogToCon (CN_stars + String (F (" SPI Interface Shutdown requires a reboot ")) + CN_stars);
+        logcon (CN_stars + String (F (" SPI Interface Shutdown requires a reboot ")) + CN_stars);
         reboot = true;
     }
     // DEBUG_END;

@@ -60,16 +60,16 @@ void fsm_PlayEffect_state_Idle::Start (String & ConfigString, uint32_t )
     if (error)
     {
         String CfgFileMessagePrefix = String (F ("Effect Config: '")) + ConfigString + "' ";
-        NewLogToCon (CN_Heap_colon + String (ESP.getFreeHeap ()));
-        NewLogToCon (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
-        NewLogToCon (CN_plussigns + ConfigString + CN_minussigns);
+        logcon (CN_Heap_colon + String (ESP.getFreeHeap ()));
+        logcon (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
+        logcon (CN_plussigns + ConfigString + CN_minussigns);
     }
 
     JsonObject ConfigObject = EffectConfig.as<JsonObject> ();
 
     String EffectName;
     setFromJSON (EffectName, ConfigObject, CN_currenteffect);
-    NewLogToCon (String (F ("Playing Effect: '")) + EffectName + "'");
+    logcon (String (F ("Playing Effect: '")) + EffectName + "'");
 
     p_InputFPPRemotePlayEffect->EffectsEngine.SetConfig (ConfigObject);
     p_InputFPPRemotePlayEffect->fsm_PlayEffect_state_PlayingEffect_imp.Init (p_InputFPPRemotePlayEffect);

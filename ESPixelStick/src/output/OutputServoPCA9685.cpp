@@ -85,18 +85,18 @@ bool c_OutputServoPCA9685::validate ()
 
     if ((Num_Channels > OM_SERVO_PCA9685_CHANNEL_LIMIT) || (Num_Channels < 1))
     {
-        NewLogToCon (CN_stars + String (F (" Requested channel count was not valid. Setting to ")) + OM_SERVO_PCA9685_CHANNEL_LIMIT + " " + CN_stars);
+        logcon (CN_stars + String (F (" Requested channel count was not valid. Setting to ")) + OM_SERVO_PCA9685_CHANNEL_LIMIT + " " + CN_stars);
         Num_Channels = OM_SERVO_PCA9685_CHANNEL_LIMIT;
         response = false;
     }
 
     if (Num_Channels < OM_SERVO_PCA9685_CHANNEL_LIMIT)
     {
-        NewLogToCon (CN_stars + String (F (" Requested channel count was not valid. Insuficient number of input channels avaialable ")) + CN_stars);
+        logcon (CN_stars + String (F (" Requested channel count was not valid. Insuficient number of input channels avaialable ")) + CN_stars);
 
         for (int ChannelIndex = OM_SERVO_PCA9685_CHANNEL_LIMIT - 1; ChannelIndex > Num_Channels; ChannelIndex--)
         {
-            NewLogToCon (CN_stars + String (F (" Disabling channel '")) + String (ChannelIndex + 1) + "' " + CN_stars);
+            logcon (CN_stars + String (F (" Disabling channel '")) + String (ChannelIndex + 1) + "' " + CN_stars);
             OutputList[ChannelIndex].Enabled = false;
         }
 
@@ -142,7 +142,7 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
         if (false == jsonConfig.containsKey (OM_SERVO_PCA9685_CHANNELS_NAME))
         {
             // if not, flag an error and stop processing
-            NewLogToCon (F ("No channel settings found. Using defaults"));
+            logcon (F ("No channel settings found. Using defaults"));
             break;
         }
         JsonArray JsonChannelList = jsonConfig[OM_SERVO_PCA9685_CHANNELS_NAME];
@@ -156,7 +156,7 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             if (ChannelId >= OM_SERVO_PCA9685_CHANNEL_LIMIT)
             {
                 // if not, flag an error and stop processing this channel
-                NewLogToCon (String(F ("No settings found for channel '")) + String(ChannelId) + "'");
+                logcon (String(F ("No settings found for channel '")) + String(ChannelId) + "'");
                 continue;
             }
 

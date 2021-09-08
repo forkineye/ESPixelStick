@@ -83,22 +83,22 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         // Try to listen to the broadcast port
         if (!udp.listen (FPP_DISCOVERY_PORT))
         {
-            NewLogToCon (String (F ("FAILED to subscribed to broadcast messages")));
+            logcon (String (F ("FAILED to subscribed to broadcast messages")));
             fail = true;
             break;
         }
-        //NewLogToCon (String (F ("FPPDiscovery subscribed to broadcast")));
+        //logcon (String (F ("FPPDiscovery subscribed to broadcast")));
 
         if (!udp.listenMulticast (address, FPP_DISCOVERY_PORT))
         {
-            NewLogToCon (String (F ("FAILED to subscribed to multicast messages")));
+            logcon (String (F ("FAILED to subscribed to multicast messages")));
             fail = true;
             break;
         }
-        //NewLogToCon (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
+        //logcon (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
 
         if (!fail)
-            NewLogToCon (String (F ("Listening on port ")) + String(FPP_DISCOVERY_PORT));
+            logcon (String (F ("Listening on port ")) + String(FPP_DISCOVERY_PORT));
 
         udp.onPacket (std::bind (&c_FPPDiscovery::ProcessReceivedUdpPacket, this, std::placeholders::_1));
 
@@ -322,7 +322,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
                 // DEBUG_V (String ("    FrameId: ") + FrameId);
 
                 /*
-                NewLogToCon (String(float(millis()/1000.0)) + "," +
+                logcon (String(float(millis()/1000.0)) + "," +
                                   String(InputFPPRemotePlayFile.GetLastFrameId()) + "," +
                                   String (seconds_elapsed) + "," +
                                   String (FrameId) + "," +
@@ -588,7 +588,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                         break;
                     }
                 }
-                NewLogToCon (String (F ("Could not open: ")) + seq);
+                logcon (String (F ("Could not open: ")) + seq);
             }
         }
         request->send (404);
@@ -623,7 +623,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
         c_FileMgr::FileId FileHandle;
         if (false == FileMgr.OpenSdFile (filename, c_FileMgr::FileMode::FileRead, FileHandle))
         {
-            NewLogToCon (String (F ("c_FPPDiscovery::ProcessPOST: File Does Not Exist - FileName: ")) + filename);
+            logcon (String (F ("c_FPPDiscovery::ProcessPOST: File Does Not Exist - FileName: ")) + filename);
             request->send (404);
             break;
         }
@@ -917,7 +917,7 @@ void c_FPPDiscovery::StopPlaying ()
 {
     // DEBUG_START;
 
-    // NewLogToCon (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
+    // logcon (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
     InputFPPRemotePlayFile.Stop ();
 
     // DEBUG_V ("");
