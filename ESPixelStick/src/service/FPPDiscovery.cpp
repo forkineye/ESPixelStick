@@ -83,22 +83,22 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         // Try to listen to the broadcast port
         if (!udp.listen (FPP_DISCOVERY_PORT))
         {
-            logcon (String (F ("FAILED to subscribed to broadcast messages")));
+            NewLogToCon (String (F ("FAILED to subscribed to broadcast messages")));
             fail = true;
             break;
         }
-        //LOG_PORT.println (String (F ("FPPDiscovery subscribed to broadcast")));
+        //NewLogToCon (String (F ("FPPDiscovery subscribed to broadcast")));
 
         if (!udp.listenMulticast (address, FPP_DISCOVERY_PORT))
         {
-            logcon (String (F ("FAILED to subscribed to multicast messages")));
+            NewLogToCon (String (F ("FAILED to subscribed to multicast messages")));
             fail = true;
             break;
         }
-        //LOG_PORT.println (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
+        //NewLogToCon (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
 
         if (!fail)
-            logcon (String (F ("Listening on port ")) + String(FPP_DISCOVERY_PORT));
+            NewLogToCon (String (F ("Listening on port ")) + String(FPP_DISCOVERY_PORT));
 
         udp.onPacket (std::bind (&c_FPPDiscovery::ProcessReceivedUdpPacket, this, std::placeholders::_1));
 
@@ -322,7 +322,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
                 // DEBUG_V (String ("    FrameId: ") + FrameId);
 
                 /*
-                LOG_PORT.println (String(float(millis()/1000.0)) + "," +
+                NewLogToCon (String(float(millis()/1000.0)) + "," +
                                   String(InputFPPRemotePlayFile.GetLastFrameId()) + "," +
                                   String (seconds_elapsed) + "," +
                                   String (FrameId) + "," +
@@ -588,7 +588,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                         break;
                     }
                 }
-                logcon (String (F ("Could not open: ")) + seq);
+                NewLogToCon (String (F ("Could not open: ")) + seq);
             }
         }
         request->send (404);
@@ -623,7 +623,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
         c_FileMgr::FileId FileHandle;
         if (false == FileMgr.OpenSdFile (filename, c_FileMgr::FileMode::FileRead, FileHandle))
         {
-            logcon (String (F ("c_FPPDiscovery::ProcessPOST: File Does Not Exist - FileName: ")) + filename);
+            NewLogToCon (String (F ("c_FPPDiscovery::ProcessPOST: File Does Not Exist - FileName: ")) + filename);
             request->send (404);
             break;
         }
@@ -917,7 +917,7 @@ void c_FPPDiscovery::StopPlaying ()
 {
     // DEBUG_START;
 
-    // LOG_PORT.println (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
+    // NewLogToCon (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
     InputFPPRemotePlayFile.Stop ();
 
     // DEBUG_V ("");
@@ -940,11 +940,5 @@ bool c_FPPDiscovery::AllowedToRemotePlayFiles()
 
     return (FileMgr.SdCardIsInstalled() && IsEnabled);
 } // AllowedToRemotePlayFiles
-
-// No service module parent class like i/o has for logging. Fake it til we make it.
-void c_FPPDiscovery::logcon(String message) {
-    LOG_PORT.println("[FPPDiscovery] " + message);
-} // log
-
 
 c_FPPDiscovery FPPDiscovery;

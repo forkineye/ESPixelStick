@@ -89,7 +89,7 @@ bool     ResetWiFi = false;
 
 void loadConfig();
 void GetConfig (JsonObject & json);
-void GetDriverName (String & Name) { Name = "Main"; }
+void GetDriverName (String & Name) { Name = "ESP"; }
 
 /// Arduino Setup
 /** Arduino based setup code that is executed at startup. */
@@ -118,12 +118,11 @@ void setup()
 #endif
 
     // Dump version and build information
-    LOG_PORT.println("");
-    LOG_PORT.println( String(CN_ESPixelStick) + " v" + VERSION + "(" + BUILD_DATE + ")");
+    logcon (String(CN_ESPixelStick) + " v" + VERSION + "(" + BUILD_DATE + ")");
 #ifdef ARDUINO_ARCH_ESP8266
-    LOG_PORT.println (String (F ("ESP Version: ")) + ESP.getFullVersion ());
+    NewLogToCon (String (F ("ESP Version: ")) + ESP.getFullVersion ());
 #else
-    LOG_PORT.println (String(F ("ESP Version: ")) + ESP.getSdkVersion ());
+    NewLogToCon (String(F ("ESP Version: ")) + ESP.getSdkVersion ());
 #endif
 
     // DEBUG_V ("");
@@ -217,7 +216,7 @@ bool dsDevice(JsonObject & json)
         if (TempVersion != CurrentConfigVersion)
         {
             // need to do something in the future
-            LOG_PORT.println ("Incorrect Device Config Version ID found in config");
+            NewLogToCon (String (F ("Incorrect Device Config Version ID found in config")));
             // break;
         }
 
@@ -225,7 +224,7 @@ bool dsDevice(JsonObject & json)
     }
     else
     {
-        LOG_PORT.println(F ("No device settings found."));
+        NewLogToCon (String (F ("No device settings found.")));
     }
 
     // DEBUG_V (String("ConfigChanged: ") + String(ConfigChanged));
@@ -268,7 +267,7 @@ bool dsNetwork(JsonObject & json)
         if (TempVersion != CurrentConfigVersion)
         {
             // need to do something in the future
-            LOG_PORT.println ("Incorrect Version ID found in config");
+            NewLogToCon (String (F ("Incorrect Version ID found in config")));
             // break;
         }
 
@@ -294,7 +293,7 @@ bool dsNetwork(JsonObject & json)
     }
     else
     {
-        LOG_PORT.println(F ("No network settings found."));
+        NewLogToCon (String (F ("No network settings found.")));
     }
 
     // DEBUG_V (String("ConfigChanged: ") + String(ConfigChanged));
@@ -505,7 +504,7 @@ void loop()
     // Reboot handler
     if (reboot)
     {
-        LOG_PORT.println (String(CN_stars) + CN_minussigns + F ("Internal Reboot Requested. Rebooting Now"));
+        NewLogToCon (String(CN_stars) + CN_minussigns + F ("Internal Reboot Requested. Rebooting Now"));
         delay (REBOOT_DELAY);
         ESP.restart ();
     }
@@ -518,7 +517,7 @@ void loop()
 
 } // loop
 
-void _logcon (String & DriverName, String & Message)
+void _logcon (String & DriverName, String Message)
 {
     LOG_PORT.println ("[" + DriverName + "] " + Message);
 } // logcon

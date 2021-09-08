@@ -37,12 +37,12 @@ public:
     virtual ~c_OutputSpi ();
 
     // functions to be provided by the derived class
-    void    Begin (c_OutputPixel * _OutputPixel);
+    void    Begin (c_OutputPixel* _OutputPixel);
     bool    Render ();                                        ///< Call from loop (),  renders output data
     TaskHandle_t GetTaskHandle () { return SendIntensityDataTaskHandle; }
-
-    void DataOutputTask (void* pvParameters);
-    void SendIntensityData ();
+    void    GetDriverName (String& Name) { Name = "OutputSpi"; }
+    void    DataOutputTask (void* pvParameters);
+    void    SendIntensityData ();
 
     uint32_t DataTaskcounter = 0;
     uint32_t DataCbCounter = 0;

@@ -39,6 +39,7 @@ public:
     virtual void Start (String & FileName, uint32_t FrameId, uint32_t RemainingPlayCount) = 0;
     virtual void Stop (void) = 0;
     virtual bool Sync (String& FileName, uint32_t FrameId) = 0;
+    void GetDriverName (String& Name) { Name = "InputMgr"; }
 
 protected:
     c_InputFPPRemotePlayFile * p_InputFPPRemotePlayFile = nullptr;

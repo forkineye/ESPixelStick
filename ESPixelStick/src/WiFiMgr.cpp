@@ -179,7 +179,7 @@ void c_WiFiMgr::connectWifi (const String & ssid, const String & passphrase)
     WiFi.mode (WIFI_STA);
     // DEBUG_V ("");
 
-    LOG_PORT.println (String(F ("\nWiFi Connecting to '")) +
+    NewLogToCon (String(F ("\nWiFi Connecting to '")) +
                       ssid +
                       String (F ("' as ")) +
                       config->hostname);
@@ -195,7 +195,7 @@ void c_WiFiMgr::reset ()
     // DEBUG_START;
 
     // The WiFi states announce what they're doing, cleans up boot log a bit.
-    //LOG_PORT.println (F ("WiFi Reset has been requested"));
+    //NewLogToCon (F ("WiFi Reset has been requested"));
 
     fsm_WiFi_state_Boot_imp.Init ();
     if (IsWiFiConnected())
@@ -215,7 +215,7 @@ void c_WiFiMgr::SetUpIp ()
     {
         if (true == config->UseDhcp)
         {
-            LOG_PORT.println (F ("WiFi Connected with DHCP"));
+            NewLogToCon (F ("WiFi Connected with DHCP"));
             break;
         }
 
@@ -227,7 +227,7 @@ void c_WiFiMgr::SetUpIp ()
 
         if (temp == config->ip)
         {
-            LOG_PORT.println (F ("WiFI: ERROR: STATIC SELECTED WITHOUT IP. Using DHCP assigned address"));
+            NewLogToCon (F ("WiFI: ERROR: STATIC SELECTED WITHOUT IP. Using DHCP assigned address"));
             break;
         }
 
@@ -241,7 +241,7 @@ void c_WiFiMgr::SetUpIp ()
         // We didn't use DNS, so just set it to our configured gateway
         WiFi.config (config->ip, config->gateway, config->netmask, config->gateway);
 
-        LOG_PORT.println (F ("Connected with Static IP"));
+        NewLogToCon (F ("Connected with Static IP"));
 
     } while (false);
 
@@ -346,7 +346,7 @@ void c_WiFiMgr::AnnounceState ()
 
     String StateName;
     pCurrentFsmState->GetStateName (StateName);
-    LOG_PORT.println (String (F ("\nWiFi Entering State: ")) + StateName);
+    NewLogToCon (String (F ("\nWiFi Entering State: ")) + StateName);
 
     // DEBUG_END;
 
@@ -412,7 +412,7 @@ void fsm_WiFi_state_ConnectingUsingConfig::Poll ()
     {
         if (CurrentTimeMS - WiFiMgr.GetFsmStartTime() > (1000 * WiFiMgr.GetConfigPtr()->sta_timeout))
         {
-            LOG_PORT.println (F ("\nWiFi Failed to connect using Configured Credentials"));
+            NewLogToCon (F ("\nWiFi Failed to connect using Configured Credentials"));
             fsm_WiFi_state_ConnectingDefault_imp.Init ();
         }
     }
@@ -469,7 +469,7 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Poll ()
     {
         if (CurrentTimeMS - WiFiMgr.GetFsmStartTime () > (1000 * WiFiMgr.GetConfigPtr ()->sta_timeout))
         {
-            LOG_PORT.println (F ("\nWiFi Failed to connect using default Credentials"));
+            NewLogToCon (F ("\nWiFi Failed to connect using default Credentials"));
             fsm_WiFi_state_ConnectingAsAP_imp.Init ();
         }
     }
@@ -524,7 +524,7 @@ void fsm_WiFi_state_ConnectingAsAP::Poll ()
 
         if (millis () - WiFiMgr.GetFsmStartTime () > (1000 * WiFiMgr.GetConfigPtr ()->ap_timeout))
         {
-            LOG_PORT.println (F ("\nWiFi STA Failed to connect"));
+            NewLogToCon (F ("\nWiFi STA Failed to connect"));
             fsm_WiFi_state_ConnectionFailed_imp.Init ();
         }
     }
@@ -551,11 +551,11 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
         WiFiMgr.setIpAddress (WiFi.localIP ());
         WiFiMgr.setIpSubNetMask (WiFi.subnetMask ());
 
-        LOG_PORT.println (String (F ("WiFi SOFTAP: IP Address: '")) + WiFiMgr.getIpAddress().toString ());
+        NewLogToCon (String (F ("WiFi SOFTAP: IP Address: '")) + WiFiMgr.getIpAddress().toString ());
     }
     else
     {
-        LOG_PORT.println (String (F ("WiFi SOFTAP: Not enabled")));
+        NewLogToCon (String (F ("WiFi SOFTAP: Not enabled")));
         fsm_WiFi_state_ConnectionFailed_imp.Init ();
     }
 
@@ -606,7 +606,7 @@ void fsm_WiFi_state_ConnectedToAP::Init ()
     WiFiMgr.setIpAddress( WiFi.localIP () );
     WiFiMgr.setIpSubNetMask( WiFi.subnetMask () );
 
-    LOG_PORT.println (String (F ("WiFi Connected with IP: ")) + WiFiMgr.getIpAddress ().toString ());
+    NewLogToCon (String (F ("WiFi Connected with IP: ")) + WiFiMgr.getIpAddress ().toString ());
 
     WiFiMgr.SetIsWiFiConnected (true);
     InputMgr.NetworkStateChanged (true);
@@ -622,7 +622,7 @@ void fsm_WiFi_state_ConnectedToAP::OnDisconnect ()
 {
     // DEBUG_START;
 
-    LOG_PORT.println (F ("WiFi Lost the connection to the AP"));
+    NewLogToCon (F ("WiFi Lost the connection to the AP"));
     fsm_WiFi_state_ConnectionFailed_imp.Init ();
 
     // DEBUG_END;
@@ -639,7 +639,7 @@ void fsm_WiFi_state_ConnectedToSta::Poll ()
     // did we get silently disconnected?
     if (0 == WiFi.softAPgetStationNum ())
     {
-        LOG_PORT.println (F ("WiFi Lost the connection to the STA"));
+        NewLogToCon (F ("WiFi Lost the connection to the STA"));
         fsm_WiFi_state_ConnectionFailed_imp.Init ();
     }
 
@@ -660,7 +660,7 @@ void fsm_WiFi_state_ConnectedToSta::Init ()
     WiFiMgr.setIpAddress (WiFi.softAPIP ());
     WiFiMgr.setIpSubNetMask (IPAddress (255, 255, 255, 0));
 
-    LOG_PORT.println (String (F ("\nWiFi Connected to STA with IP: ")) + WiFiMgr.getIpAddress ().toString ());
+    NewLogToCon (String (F ("\nWiFi Connected to STA with IP: ")) + WiFiMgr.getIpAddress ().toString ());
 
     WiFiMgr.SetIsWiFiConnected (true);
     InputMgr.NetworkStateChanged (true);
@@ -675,7 +675,7 @@ void fsm_WiFi_state_ConnectedToSta::OnDisconnect ()
 {
     // DEBUG_START;
 
-    LOG_PORT.println (F ("WiFi STA Disconnected"));
+    NewLogToCon (F ("WiFi STA Disconnected"));
     fsm_WiFi_state_ConnectionFailed_imp.Init ();
 
     // DEBUG_END;
@@ -702,13 +702,13 @@ void fsm_WiFi_state_ConnectionFailed::Init ()
         if (true == WiFiMgr.GetConfigPtr ()->RebootOnWiFiFailureToConnect)
         {
             extern bool reboot;
-            LOG_PORT.println (F ("WiFi Requesting Reboot"));
+            NewLogToCon (F ("WiFi Requesting Reboot"));
 
             reboot = true;
         }
         else
         {
-            LOG_PORT.println (F ("WiFi Reboot Disabled."));
+            NewLogToCon (F ("WiFi Reboot Disabled."));
 
             // start over
             fsm_WiFi_state_Boot_imp.Init ();

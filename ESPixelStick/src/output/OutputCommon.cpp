@@ -66,9 +66,9 @@ c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds iOutputChannelId
     pOutputBuffer            = OutputMgr.GetBufferAddress ();
     FrameStartTimeInMicroSec = 0;
 
-	// LOG_PORT.println (String ("UartId:          '") + UartId + "'");
-    // LOG_PORT.println (String ("OutputChannelId: '") + OutputChannelId + "'");
-    // LOG_PORT.println (String ("OutputType:      '") + OutputType + "'");
+	// NewLogToCon (String ("UartId:          '") + UartId + "'");
+    // NewLogToCon (String ("OutputChannelId: '") + OutputChannelId + "'");
+    // NewLogToCon (String ("OutputType:      '") + OutputType + "'");
     if (gpio_num_t (-1) != DataPin)
     {
         pinMode (DataPin, INPUT_PULLUP);
@@ -106,7 +106,7 @@ void c_OutputCommon::InitializeUart (uint32_t baudrate,
         // are we using a valid config?
         if (gpio_num_t (-1) == DataPin)
         {
-            LOG_PORT.println (F ("ERROR: Data pin has not been defined"));
+            NewLogToCon (F ("ERROR: Data pin has not been defined"));
             break;
         }
 
@@ -131,7 +131,7 @@ void c_OutputCommon::InitializeUart (uint32_t baudrate,
 
             default:
             {
-                LOG_PORT.println (String (F (" Initializing UART on Chan: '")) + String (OutputChannelId) + "'. ERROR: Invalid UART Id");
+                NewLogToCon (String (F (" Initializing UART on Chan: '")) + String (OutputChannelId) + "'. ERROR: Invalid UART Id");
                 break;
             }
 
@@ -172,7 +172,7 @@ void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
     // are we using a valid config?
     if (gpio_num_t (-1) == DataPin)
     {
-        LOG_PORT.println (F ("ERROR: Data pin has not been defined"));
+        NewLogToCon (F ("ERROR: Data pin has not been defined"));
         return;
     }
 
@@ -375,9 +375,3 @@ void c_OutputCommon::GetConfig (JsonObject & jsonConfig)
 
     // DEBUG_END;
 } // GetConfig
-
-void c_OutputCommon::logcon(String message) {
-    String DriverName = "";
-    GetDriverName (DriverName);
-    LOG_PORT.println("[" + DriverName + "] " + message);
-} // log

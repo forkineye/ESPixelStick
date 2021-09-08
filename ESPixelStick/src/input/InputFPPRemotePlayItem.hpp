@@ -36,7 +36,7 @@ public:
             String   GetFileName    () { return PlayItemName; }
             uint32_t GetRepeatCount () { return RemainingPlayCount; }
             void     SetDuration    (time_t value) { PlayDurationSec = value; }
-
+            void     GetDriverName  (String& Name) { Name = "InputMgr"; }
 protected:
     String   PlayItemName;
     uint32_t RemainingPlayCount = 0;

@@ -36,6 +36,7 @@ public:
     virtual void GetStateName (String& sName) = 0;
     virtual void OnConnect (void) = 0;
     virtual void OnDisconnect (void) = 0;
+    void GetDriverName (String & Name) { Name = "WiFiMgr"; }
 }; // fsm_WiFi_state
 
 class c_WiFiMgr
@@ -62,7 +63,7 @@ public:
     config_t* GetConfigPtr    () { return config; }
     bool      IsWiFiConnected () { return ReportedIsWiFiConnected; }
     void      SetIsWiFiConnected (bool value) { ReportedIsWiFiConnected = value; }
-    void      GetDriverName (String Name) { Name = "WiFiMgr"; }
+    void      GetDriverName   (String & Name) { Name = "WiFiMgr"; }
 
 private:
 

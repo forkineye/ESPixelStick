@@ -56,8 +56,6 @@ protected:
     c_InputMgr::e_InputChannelIds InputChannelId = c_InputMgr::e_InputChannelIds::InputChannelId_ALL;
     c_InputMgr::e_InputType       ChannelType = c_InputMgr::e_InputType::InputType_Disabled;
 
-    void logcon(String message);
-
 private:
 
 }; // c_InputCommon

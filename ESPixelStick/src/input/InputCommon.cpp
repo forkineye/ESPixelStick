@@ -50,9 +50,3 @@ c_InputCommon::~c_InputCommon ()
     // DEBUG_END;
 
 } // ~c_InputMgr
-
-void c_InputCommon::logcon(String message) {
-    String DriverName = "";
-    GetDriverName (DriverName);
-    LOG_PORT.println("[" + DriverName + "] " + message);
-} // log

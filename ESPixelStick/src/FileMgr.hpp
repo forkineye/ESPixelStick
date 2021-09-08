@@ -75,8 +75,7 @@ public:
     void   CloseSdFile      (const FileId & FileHandle);
     void   GetListOfSdFiles (String & Response);
     size_t GetSdFileSize    (const FileId & FileHandle);
-
-    void   logcon           (String message);
+    void   GetDriverName (String& Name) { Name = "FileMgr"; }
 
     // Configuration file params
 #if defined ARDUINO_ARCH_ESP8266

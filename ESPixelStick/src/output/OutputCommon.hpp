@@ -90,7 +90,6 @@ protected:
     void StartBreak ();
     void EndBreak ();
     void GenerateBreak (uint32_t DurationInUs);
-    void logcon(String message);
 
     inline bool canRefresh ()
     {
