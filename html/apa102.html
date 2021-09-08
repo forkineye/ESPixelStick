@@ -1,0 +1,162 @@
+<div id="apa102">
+    <legend class="esps-legend" id="Title">APA102 Configuration</legend>
+    <div class="has-feedback" id="fg_apa102">
+        <fieldset id="fs_apa102">
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="pixel_count">Pixel Count</label>
+                <div class="col-sm-2">
+                    <input type="number" class="form-control is-valid" id="pixel_count" step="1" min="1" max="1200" value="0" required title="Number of pixels" onchange="apa102_OnChange ()">
+                </div>
+                <label class="control-label col-sm-2" for="group_size">Group Size</label>
+                <div class="col-sm-2">
+                    <input type="number" class="form-control is-valid" id="group_size" step="1" min="1" max="1360" value="1" required title="Group every X number of physical pixels together.  Default of 1 is no grouping." onchange="apa102_OnChange ()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="color_order">Color Order</label>
+                <div class="col-sm-2">
+                    <select class="form-control" id="color_order">
+                        <option value="rgb">RGB</option>
+                        <option value="grb">GRB</option>
+                        <option value="brg">BRG</option>
+                        <option value="rbg">RBG</option>
+                        <option value="gbr">GBR</option>
+                        <option value="bgr">BGR</option>
+                        <option value="rgbw">RGBW</option>
+                        <option value="grbw">GRBW</option>
+                        <option value="brgw">BRGW</option>
+                        <option value="rbgw">RBGW</option>
+                        <option value="gbrw">GBRW</option>
+                        <option value="bgrw">BGRW</option>
+                    </select>
+                </div>
+                <label class="control-label col-sm-2" for="zig_size">Zigzag Count</label>
+                <div class="col-sm-2">
+                    <input type="number" class="form-control is-valid" id="zig_size" step="1" min="0" max="680" value="0" required title="Zigzag every X number of physical pixels." onchange="apa102_OnChange ()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="gamma">Gamma Value</label>
+                <div class="col-sm-2">
+                    <input type="number" class="form-control is-valid" id="gamma" step="0.1" min="1.0" max="5.0" value="1.0" required title="Recommended value is 2.2. Set to 1.0 to disable." onchange="apa102_OnChange ()">
+                </div>
+
+                <label class="control-label col-sm-2" for="brightness">Brightness (%)</label>
+                <div class="col-sm-2">
+                    <input type="number" class="form-control is-valid" id="brightness" step="1" min="1" max="100" value="100" title="Set brightness as a percentage" onchange="apa102_OnChange ()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="prependnullcount">Start NULL Count</label>
+                <div class="col-sm-2">
+                    <input type="number" class="form-control is-valid" id="prependnullcount" step="1" min="0" max="100" value="0" title="Number of NULL Pixels to send before Pixel Data" onchange="apa102_OnChange ()">
+                </div>
+                <label class="control-label col-sm-2" for="appendnullcount">End NULL Count</label>
+                <div class="col-sm-2">
+                    <input type="number" class="form-control is-valid" id="appendnullcount" step="1" min="0" max="100" value="0" title="Number of NULL Pixels to send after Pixel Data" onchange="apa102_OnChange ()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-2">
+                    <div class="checkbox"><label><input type="checkbox" id="showgamma"> Show Gamma Curve</label></div>
+                </div>
+                <label class="control-label col-sm-2" for="interframetime">Inter Frame Time (us)</label>
+                <div class="col-sm-2">
+                    <input type="number" class="form-control is-valid" id="interframetime" step="1" min="300" max="10000" value="300" required title="Number of Micro Seconds between each frame." onchange="apa102_OnChange ()">
+                </div>
+            </div>
+
+        </fieldset>
+    </div>
+</div>
+
+<div class="col-sm-offset-2 col-sm-8 hidden gammagraph">
+    <svg viewBox="-25 -30 320 320" width="256" height="256" class="chart">
+        <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
+            </marker>
+        </defs>
+
+        <line x1="0" y1="256" x2="256" y2="256" stroke="#000" stroke-width="2" marker-end="url (#arrow)" />
+        <text x="125" y="275" class="label-title">Input</text>
+
+        <line x1="0" y1="256" x2="0" y2="0" stroke="#000" stroke-width="2" marker-end="url (#arrow)" />
+        <text x="-15" y="120" class="label-title" style="writing-mode: tb;">Output</text>
+
+        <polyline id="cracker"
+                  fill="none"
+                  stroke="#0074d9"
+                  stroke-width="2"
+                  points="" />
+    </svg>
+</div>
+
+<script>
+
+    // Gamma graph
+    $ ('#apa102 #showgamma').click (function () {
+        if ($ (this).is (':checked')) {
+            $ ('.gammagraph').removeClass ('hidden');
+        } else {
+            $ ('.gammagraph').addClass ('hidden');
+        }
+    });
+
+    // Gamma graph
+    $ ('#apa102 #gamma').change (function () {
+        sendGamma ();
+    });
+    $ ('#apa102 #brightness').change (function () {
+        sendGamma ();
+    });
+
+    function sendGamma () {
+        var json = {
+            'pixel': {
+                'gammaVal': parseFloat ($ ('#p_gammaVal').val ()),
+                'briteVal': parseFloat ($ ('#p_briteVal').val ())
+            }
+        }
+        //    wsEnqueue ('S4' + JSON.stringify (json));
+        //    wsEnqueue ('G4'); // Get Gamma Table
+    }
+
+    function refreshGamma (data) {
+        var gammaData = JSON.parse (data);
+        var polyline = document.getElementById ('cracker');
+        var points = polyline.getAttribute ('points');
+
+        points = "";
+        for (X = 0; X < 256; X++) {
+            var Y = 255 - gammaData.gamma[X];
+            points += X + ", " + Y + " ";
+        }
+
+        polyline.setAttribute ('points', points);
+    }
+
+    function apa102_OnChange ()
+    {
+        // var NumberOfPixels       = parseInt ($ ('#pixel_count').val ());
+        // var BytesPerPixel = $ ('#color_order option:selected').val ().length;
+        // console.info ("BytesPerPixel: " + BytesPerPixel);
+        // var NumberOfBytesInFrame = NumberOfPixels * BytesPerPixel;
+        // var PixelBaudRate        = 800000;
+        // var TimePerBit           = 1 / PixelBaudRate;
+        // var BitsPerByte          = 8;
+        // var TimePerByte          = TimePerBit * BitsPerByte; = 0.00001
+        // var InterFrameGap        = parseInt ($ ('#interframetime').val ()) / 1000000;
+        // var TimePerFrame         = (TimePerByte * NumberOfBytesInFrame) + InterFrameGap;
+        var TimePerFrame = (0.00001 * (parseInt ($ ('#pixel_count').val ()) * $ ('#color_order option:selected').val ().length)) + (parseInt ($ ('#interframetime').val ()) / 1000000);
+
+        var rateMs = TimePerFrame * 1000;
+        var hz = 1 / TimePerFrame;
+        $ ('#refresh').html (Math.ceil (rateMs) + ' ms / ' + Math.floor (hz) + ' fps');
+    } // refreshPixel
+
+</script>

@@ -104,4 +104,12 @@ bool setFromJSON (T& OutValue, J& Json, N Name)
     return HasBeenModified;
 };
 
+#define logcon(msg) \
+{ \
+    String DN; \
+    GetDriverName (DN); \
+    extern void _logcon (String & DriverName, String Message); \
+    _logcon (DN, msg); \
+}
+
 extern config_t config;

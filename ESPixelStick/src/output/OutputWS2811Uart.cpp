@@ -29,6 +29,7 @@ extern "C" {
 #   include <uart_register.h>
 }
 #elif defined(ARDUINO_ARCH_ESP32)
+#   include <soc/uart_reg.h>
 
 // Define ESP8266 style macro conversions to limit changes in the rest of the code.
 #   define UART_CONF0           UART_CONF0_REG
@@ -148,12 +149,22 @@ void c_OutputWS2811Uart::Begin ()
 #ifdef ARDUINO_ARCH_ESP8266
     ETS_UART_INTR_ATTACH (uart_intr_handler, this);
 #else
-    uart_isr_register (UartId, uart_intr_handler, this, ESP_INTR_FLAG_IRAM, nullptr);
+    uart_isr_register (UartId, uart_intr_handler, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM, nullptr);
 #endif
 
     // invert the output
     CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_INV_MASK);
     SET_PERI_REG_MASK (UART_CONF0 (UartId), (BIT (22)));
+
+#ifdef testPixelInsert
+    static const uint32_t FrameStartData = 0;
+    static const uint32_t FrameEndData = 0xFFFFFFFF;
+    static const uint8_t  PixelStartData = 0xC0;
+
+    SetFramePrependInformation ( (uint8_t*)&FrameStartData, sizeof (FrameStartData));
+    SetFrameAppendInformation ( (uint8_t*)&FrameEndData, sizeof (FrameEndData));
+    SetPixelPrependInformation (&PixelStartData, sizeof (PixelStartData));
+#endif // def testPixelInsert
 
 } // init
 

@@ -49,6 +49,7 @@ public:
     uint16_t  GetBufferSize     () { return sizeof(OutputBuffer); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
     void      DeleteConfig      () { FileMgr.DeleteConfigFile (ConfigFileName); }
     void      PauseOutputs      ();
+    void      GetDriverName     (String & Name) { Name = "OutputMgr"; }
 
     // handles to determine which output channel we are dealing with
     enum e_OutputChannelIds
@@ -99,9 +100,12 @@ public:
         OutputType_Serial,
         OutputType_Relay,
         OutputType_Servo_PCA9685,
+#ifdef SUPPORT_TM1814
         OutputType_TM1814,
+#endif // def SUPPORT_TM1814
 #ifdef ARDUINO_ARCH_ESP32
         OutputType_WS2801,
+        OutputType_APA102,
 #endif // def ARDUINO_ARCH_ESP32
         OutputType_End, // must be last
         OutputType_Start = OutputType_WS2811,

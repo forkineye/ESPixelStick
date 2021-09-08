@@ -39,27 +39,12 @@ public:
     // functions to be provided by the derived class
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);  ///< Set a new config in the driver
-    void    Render ();                                        ///< Call from loop(),  renders output data
+    void    Render ();                                        ///< Call from loop (),  renders output data
     void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
-
-    /// Interrupt Handler
-    void IRAM_ATTR ISR_Handler (); ///< ISR
-    void IRAM_ATTR ISR_Handler_SendIntensityData (); ///< ISR
-    void IRAM_ATTR ISR_Handler_StartNewFrame (); ///< ISR
 
 private:
 
-    volatile rmt_item32_t * RmtStartAddr   = nullptr;
-    volatile rmt_item32_t * RmtCurrentAddr = nullptr;
-    volatile rmt_item32_t * RmtEndAddr     = nullptr;
-    intr_handle_t RMT_intr_handle = NULL;
-    uint8_t NumIntensityValuesPerInterrupt = 0;
-    uint8_t NumIntensityBitsPerInterrupt = 0;
-
-    // debug counters
-    // uint32_t DataISRcounter = 0;
-    // uint32_t FrameEndISRcounter = 0;
-    // uint32_t FrameStartCounter = 0;
+    c_OutputRmt Rmt;
 
 }; // c_OutputTM1814Rmt
 

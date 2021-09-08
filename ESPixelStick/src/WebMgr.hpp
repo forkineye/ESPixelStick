@@ -45,6 +45,7 @@ public:
     void FirmwareUpload        (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
     void handleFileUpload      (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
     void NetworkStateChanged   (bool NewNetworkState);
+    void GetDriverName         (String & Name) { Name = "WebMgr"; }
 private:
 
     EFUpdate               efupdate;
@@ -88,8 +89,6 @@ private:
     void GetDeviceOptions           ();
     void GetInputOptions            ();
     void GetOutputOptions           ();
-
-    void logcon (String message);
 
 #ifdef USE_REST
     void RestProcessGET (AsyncWebServerRequest* request);

@@ -1,6 +1,6 @@
 #ifdef ARDUINO_ARCH_ESP32
 /*
-* OutputWS2801Spi.cpp - WS2801 driver code for ESPixelStick SPI Channel
+* OutputAPA102Spi.cpp - APA102 driver code for ESPixelStick SPI Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -19,40 +19,44 @@
 */
 
 #include "../ESPixelStick.h"
-#include "OutputWS2801Spi.hpp"
+#include "OutputAPA102Spi.hpp"
 
 //----------------------------------------------------------------------------
-c_OutputWS2801Spi::c_OutputWS2801Spi (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+c_OutputAPA102Spi::c_OutputAPA102Spi (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     gpio_num_t outputGpio,
     uart_port_t uart,
     c_OutputMgr::e_OutputType outputType) :
-    c_OutputWS2801 (OutputChannelId, outputGpio, uart, outputType)
+    c_OutputAPA102 (OutputChannelId, outputGpio, uart, outputType)
 {
     // DEBUG_START;
 
-    // update frame calculation
+    // update frame calculation 
     BlockSize = SPI_NUM_INTENSITY_PER_TRANSACTION;
     BlockDelay = 20.0; // measured between 16 and 21 us
 
     // DEBUG_END;
-} // c_OutputWS2801Spi
+} // c_OutputAPA102Spi
 
 //----------------------------------------------------------------------------
-c_OutputWS2801Spi::~c_OutputWS2801Spi ()
+c_OutputAPA102Spi::~c_OutputAPA102Spi ()
 {
     // DEBUG_START;
 
     // DEBUG_END;
 
-} // ~c_OutputWS2801Spi
+} // ~c_OutputAPA102Spi
 
 //----------------------------------------------------------------------------
 /* Use the current config to set up the output port
 */
-void c_OutputWS2801Spi::Begin ()
+void c_OutputAPA102Spi::Begin ()
 {
     // DEBUG_START;
     Spi.Begin (this);
+
+    SetFramePrependInformation ( (uint8_t*)&FrameStartData, sizeof (FrameStartData));
+    SetFrameAppendInformation  ( (uint8_t*)&FrameEndData,   sizeof (FrameEndData));
+    SetPixelPrependInformation ( (uint8_t*)&PixelStartData, sizeof (PixelStartData));
 
     HasBeenInitialized = true;
 
@@ -61,11 +65,11 @@ void c_OutputWS2801Spi::Begin ()
 } // init
 
 //----------------------------------------------------------------------------
-void c_OutputWS2801Spi::GetConfig (ArduinoJson::JsonObject& jsonConfig)
+void c_OutputAPA102Spi::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
-    c_OutputWS2801::GetConfig (jsonConfig);
+    c_OutputAPA102::GetConfig (jsonConfig);
 
     jsonConfig[CN_clock_pin] = DEFAULT_SPI_CLOCK_GPIO;
 
@@ -73,11 +77,11 @@ void c_OutputWS2801Spi::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // GetConfig
 
 //----------------------------------------------------------------------------
-bool c_OutputWS2801Spi::SetConfig (ArduinoJson::JsonObject& jsonConfig)
+bool c_OutputAPA102Spi::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
-    bool response = c_OutputWS2801::SetConfig (jsonConfig);
+    bool response = c_OutputAPA102::SetConfig (jsonConfig);
 
     // DEBUG_END;
     return response;
@@ -85,16 +89,16 @@ bool c_OutputWS2801Spi::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputWS2801Spi::Render ()
+void c_OutputAPA102Spi::Render ()
 {
     // DEBUG_START;
 
     if (canRefresh ())
     {
         if (Spi.Render ())
-            {
+        {
             ReportNewFrame ();
-            }
+        }
     }
 
     // DEBUG_END;

@@ -180,7 +180,7 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
             // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
             if (0 != p_InputFPPRemotePlayFile->RemainingPlayCount)
             {
-                LOG_PORT.println (String ("Replaying:: FileName:  '") + p_InputFPPRemotePlayFile->GetFileName () + "'");
+                logcon (String ("Replaying:: FileName:  '") + p_InputFPPRemotePlayFile->GetFileName () + "'");
                 --p_InputFPPRemotePlayFile->RemainingPlayCount;
                 // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
 
@@ -226,7 +226,7 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
 
             if (0 != p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed)
             {
-                LOG_PORT.println (F ("File Playback Failed to read enough data"));
+                logcon (F ("File Playback Failed to read enough data"));
                 Stop ();
             }
         }
@@ -265,7 +265,7 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
             c_FileMgr::FileMode::FileRead,
             p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed))
         {
-            LOG_PORT.println (String (F ("StartPlaying:: Could not open file: filename: '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
+            logcon (String (F ("StartPlaying:: Could not open file: filename: '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
             Stop ();
             break;
         }
@@ -281,7 +281,7 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
 
         if (BytesRead != sizeof (fsqHeader))
         {
-            LOG_PORT.println (String (F ("StartPlaying:: Could not read FSEQ header: filename: '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
+            logcon (String (F ("StartPlaying:: Could not read FSEQ header: filename: '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
             Stop ();
             break;
         }
@@ -289,7 +289,7 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
 
         if (fsqHeader.majorVersion != 2 || fsqHeader.compressionType != 0)
         {
-            LOG_PORT.println (String (F ("StartPlaying:: Could not start. ")) + p_InputFPPRemotePlayFile->PlayItemName + F (" is not a v2 uncompressed sequence"));
+            logcon (String (F ("StartPlaying:: Could not start. ")) + p_InputFPPRemotePlayFile->PlayItemName + F (" is not a v2 uncompressed sequence"));
             Stop ();
             break;
         }
@@ -309,7 +309,7 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
         // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence));
         // DEBUG_V (String ("            StartTimeInMillis: ") + String (p_InputFPPRemotePlayFile->StartTimeInMillis));
 
-        LOG_PORT.println (String (F ("Start Playing:: FileName:  '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
+        logcon (String (F ("Start Playing:: FileName:  '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
 
         Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_PlayingFile_imp);
 
@@ -347,7 +347,7 @@ void fsm_PlayFile_state_PlayingFile::Stop (void)
 {
     // DEBUG_START;
 
-    LOG_PORT.println (String (F ("Stop Playing:: FileName:  '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
+    logcon (String (F ("Stop Playing:: FileName:  '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
     // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed));
 
     p_InputFPPRemotePlayFile->fsm_PlayFile_state_Stopping_imp.Init (p_InputFPPRemotePlayFile);

@@ -31,35 +31,19 @@ class c_OutputWS2811Rmt : public c_OutputWS2811
 public:
     // These functions are inherited from c_OutputCommon
     c_OutputWS2811Rmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
-                      gpio_num_t outputGpio,
-                      uart_port_t uart,
-                      c_OutputMgr::e_OutputType outputType);
+        gpio_num_t outputGpio,
+        uart_port_t uart,
+        c_OutputMgr::e_OutputType outputType);
     virtual ~c_OutputWS2811Rmt ();
 
     // functions to be provided by the derived class
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);  ///< Set a new config in the driver
-    void    Render ();                                        ///< Call from loop(),  renders output data
-    void    PauseOutput () {};
-
-    /// Interrupt Handler
-    void IRAM_ATTR ISR_Handler (); ///< ISR
-    void IRAM_ATTR ISR_Handler_SendIntensityData (); ///< ISR
-    void IRAM_ATTR ISR_Handler_StartNewFrame (); ///< ISR
+    void    Render ();                                        ///< Call from loop (),  renders output data
 
 private:
 
-    volatile rmt_item32_t * RmtStartAddr   = nullptr;
-    volatile rmt_item32_t * RmtCurrentAddr = nullptr;
-    volatile rmt_item32_t * RmtEndAddr     = nullptr;
-    intr_handle_t RMT_intr_handle = NULL;
-    uint8_t NumIntensityValuesPerInterrupt = 0;
-    uint8_t NumIntensityBitsPerInterrupt = 0;
-
-    uint32_t FrameStartCounter = 0;
-    // uint32_t DataISRcounter = 0;
-    // uint32_t FrameDoneCounter = 0;
-    // uint32_t FrameEndISRcounter = 0;
+    c_OutputRmt Rmt;
 
 }; // c_OutputWS2811Rmt
 

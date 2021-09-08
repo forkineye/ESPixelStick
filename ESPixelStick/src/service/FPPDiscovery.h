@@ -61,7 +61,7 @@ private:
     void StopPlaying       ();
     void StartPlaying      (String & filename, uint32_t frameId);
     bool AllowedToRemotePlayFiles ();
-    void logcon (String message);
+    void GetDriverName     (String & Name) { Name = "FPPD"; }
 
 public:
     c_FPPDiscovery ();

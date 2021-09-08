@@ -226,7 +226,7 @@ void c_InputArtnet::SetBufferTranslation ()
 
     if (0 != BytesLeftToMap)
     {
-        logcon (F ("ERROR: Universe configuration is too small to fill output buffer. Outputs have been truncated."));
+        logcon (String (F ("ERROR: Universe configuration is too small to fill output buffer. Outputs have been truncated.")));
     }
 
     // DEBUG_END;
@@ -267,7 +267,7 @@ void c_InputArtnet::SetUpArtnet ()
 
         byte broadcast[] = { 10, 0, 1, 255 };
         pArtnet->setBroadcast (broadcast);
-        logcon (F ("Subscribed to broadcast"));
+        logcon (String (F ("Subscribed to broadcast")));
 
         // DEBUG_V ("");
 

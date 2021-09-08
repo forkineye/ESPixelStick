@@ -96,7 +96,7 @@ bool c_OutputServoPCA9685::validate ()
 
         for (int ChannelIndex = OM_SERVO_PCA9685_CHANNEL_LIMIT - 1; ChannelIndex > Num_Channels; ChannelIndex--)
         {
-            logcon (String (CN_stars + String(F (" Disabling channel '")) + String(ChannelIndex + 1) + "' " + CN_stars));
+            logcon (CN_stars + String (F (" Disabling channel '")) + String (ChannelIndex + 1) + "' " + CN_stars);
             OutputList[ChannelIndex].Enabled = false;
         }
 

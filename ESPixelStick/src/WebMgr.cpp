@@ -948,7 +948,7 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
             break;
         }
 
-        LOG_PORT.println ();
+        logcon (" ");
         PrettyPrint (jsonCmd, String(CN_stars) + F (" ERROR: Undhandled Set request type. ") + CN_stars );
         strcat (WebSocketFrameCollectionBuffer, "ERROR");
 
@@ -1130,11 +1130,6 @@ void c_WebMgr::Process ()
         espalexa.loop ();
     }
 } // Process
-
-// Serial console logging
-void c_WebMgr::logcon(String message) {
-    LOG_PORT.println("[WebMgr] " + message);
-} // log
 
 
 #ifdef USE_REST

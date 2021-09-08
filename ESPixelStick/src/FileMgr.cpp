@@ -307,10 +307,10 @@ bool c_FileMgr::SaveConfigFile (const String& FileName, const char * FileData)
 
         file.close ();
 
-        file = LittleFS.open (FileName.c_str (), "r");
-        LOG_PORT.print (CN_Configuration_File_colon);
-        LOG_PORT.print (FileName);
-        LOG_PORT.printf( " saved %ul bytes.\n", file.size ());
+        // file = LittleFS.open (FileName.c_str (), "r");
+        // LOG_PORT.print (CN_Configuration_File_colon);
+        // LOG_PORT.print (FileName);
+        // LOG_PORT.printf( " saved %ul bytes.\n", file.size ());
 
         // logcon (CfgFileMessagePrefix + String (F ("saved ")) + String (file.size ()) + F (" bytes."));
         file.close ();
@@ -442,12 +442,11 @@ bool c_FileMgr::ReadConfigFile (const String & FileName, byte * FileData, size_t
         }
 
         // Supress this for now, may add it back later
-        /*
-        LOG_PORT.print   (FileName);
-        LOG_PORT.print   (" reading ");
-        LOG_PORT.print   (file.size ());
-        LOG_PORT.println (" bytes.");
-        */
+        // Done at interrupt level. Cant use Strings
+        // LOG_PORT.print   (FileName);
+        // LOG_PORT.print   (" reading ");
+        // LOG_PORT.print   (file.size ());
+        // LOG_PORT.println (" bytes.");
 
         // DEBUG_V (String("File '") + FileName + "' is open.");
         file.seek (0, SeekSet);
@@ -1079,12 +1078,6 @@ void c_FileMgr::Poll ()
     // DEBUG_END;
 
 } // Poll
-
-// Serial console logging
-void c_FileMgr::logcon(String message) {
-    LOG_PORT.println("[FileMgr] " + message);
-} // log
-
 
 // create a global instance of the File Manager
 c_FileMgr FileMgr;

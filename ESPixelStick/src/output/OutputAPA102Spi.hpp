@@ -1,7 +1,7 @@
 #pragma once
 #ifdef ARDUINO_ARCH_ESP32
 /*
-* OutputWS2801Spi.h - WS2801 driver code for ESPixelStick Spi Channel
+* OutputAPA102Spi.h - APA102 driver code for ESPixelStick Spi Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -23,30 +23,30 @@
 *
 */
 
-#include "OutputWS2801.hpp"
+#include "OutputAPA102.hpp"
 #include "OutputSpi.hpp"
 
-class c_OutputWS2801Spi : public c_OutputWS2801
+class c_OutputAPA102Spi : public c_OutputAPA102
 {
 public:
     // These functions are inherited from c_OutputCommon
-    c_OutputWS2801Spi (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+    c_OutputAPA102Spi (c_OutputMgr::e_OutputChannelIds OutputChannelId,
                       gpio_num_t outputGpio,
                       uart_port_t uart,
                       c_OutputMgr::e_OutputType outputType);
-    virtual ~c_OutputWS2801Spi ();
+    virtual ~c_OutputAPA102Spi ();
 
     // functions to be provided by the derived class
     void    Begin ();
     void    GetConfig (ArduinoJson::JsonObject& jsonConfig);
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);  ///< Set a new config in the driver
-    void    Render ();                                        ///< Call from loop(),  renders output data
+    void    Render ();                                        ///< Call from loop (),  renders output data
     void    PauseOutput () {};
 
 private:
 
     c_OutputSpi Spi;
 
-}; // c_OutputWS2801Spi
+}; // c_OutputAPA102Spi
 
 #endif // def ARDUINO_ARCH_ESP32

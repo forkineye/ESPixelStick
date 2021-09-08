@@ -39,6 +39,7 @@ public:
     virtual void Stop (void) = 0;
     virtual bool Sync (uint32_t FrameId) = 0;
     virtual void GetStatus (JsonObject& jsonStatus) = 0;
+    void GetDriverName (String& Name) { Name = "InputMgr"; }
 
 protected:
     c_InputFPPRemotePlayEffect* p_InputFPPRemotePlayEffect = nullptr;

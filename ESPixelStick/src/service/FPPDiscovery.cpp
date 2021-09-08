@@ -87,7 +87,7 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
             fail = true;
             break;
         }
-        //LOG_PORT.println (String (F ("FPPDiscovery subscribed to broadcast")));
+        //logcon (String (F ("FPPDiscovery subscribed to broadcast")));
 
         if (!udp.listenMulticast (address, FPP_DISCOVERY_PORT))
         {
@@ -95,7 +95,7 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
             fail = true;
             break;
         }
-        //LOG_PORT.println (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
+        //logcon (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
 
         if (!fail)
             logcon (String (F ("Listening on port ")) + String(FPP_DISCOVERY_PORT));
@@ -322,7 +322,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
                 // DEBUG_V (String ("    FrameId: ") + FrameId);
 
                 /*
-                LOG_PORT.println (String(float(millis()/1000.0)) + "," +
+                logcon (String(float(millis()/1000.0)) + "," +
                                   String(InputFPPRemotePlayFile.GetLastFrameId()) + "," +
                                   String (seconds_elapsed) + "," +
                                   String (FrameId) + "," +
@@ -917,7 +917,7 @@ void c_FPPDiscovery::StopPlaying ()
 {
     // DEBUG_START;
 
-    // LOG_PORT.println (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
+    // logcon (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
     InputFPPRemotePlayFile.Stop ();
 
     // DEBUG_V ("");
@@ -940,11 +940,5 @@ bool c_FPPDiscovery::AllowedToRemotePlayFiles()
 
     return (FileMgr.SdCardIsInstalled() && IsEnabled);
 } // AllowedToRemotePlayFiles
-
-// No service module parent class like i/o has for logging. Fake it til we make it.
-void c_FPPDiscovery::logcon(String message) {
-    LOG_PORT.println("[FPPDiscovery] " + message);
-} // log
-
 
 c_FPPDiscovery FPPDiscovery;

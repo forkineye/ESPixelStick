@@ -1,3 +1,4 @@
+#ifdef ARDUINO_ARCH_ESP32
 /*
 * OutputWS2801.cpp - WS2801 driver code for ESPixelStick UART
 *
@@ -18,7 +19,6 @@
 */
 
 #include "../ESPixelStick.h"
-#ifdef ARDUINO_ARCH_ESP32
 #include "OutputWS2801.hpp"
 
 //----------------------------------------------------------------------------

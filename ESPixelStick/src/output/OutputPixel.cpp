@@ -25,22 +25,12 @@ c_OutputPixel::c_OutputPixel (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     gpio_num_t outputGpio,
     uart_port_t uart,
     c_OutputMgr::e_OutputType outputType) :
-    c_OutputCommon (OutputChannelId, outputGpio, uart, outputType),
-    color_order ("rgb"),
-    pixel_count (100),
-    zig_size (0),
-    group_size (1),
-    gamma (1.0),
-    brightness (100),
-    pNextIntensityToSend (nullptr),
-    RemainingPixelCount (0),
-    numIntensityBytesPerPixel (3)
+    c_OutputCommon (OutputChannelId, outputGpio, uart, outputType)
 {
     // DEBUG_START;
-    ColorOffsets.offset.r = 0;
-    ColorOffsets.offset.g = 1;
-    ColorOffsets.offset.b = 2;
-    ColorOffsets.offset.w = 3;
+    
+    updateGammaTable ();
+    updateColorOrderOffsets ();
 
     // DEBUG_END;
 } // c_OutputPixel
@@ -60,13 +50,13 @@ void c_OutputPixel::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     jsonConfig[CN_color_order] = color_order;
     jsonConfig[CN_pixel_count] = pixel_count;
-    jsonConfig[CN_group_size] = group_size;
+    jsonConfig[CN_group_size] = PixelGroupSize;
     jsonConfig[CN_zig_size] = zig_size;
     jsonConfig[CN_gamma] = gamma;
     jsonConfig[CN_brightness] = brightness; // save as a 0 - 100 percentage
     jsonConfig[CN_interframetime] = InterFrameGapInMicroSec;
-    jsonConfig[CN_prependnullcount] = PrependNullCount;
-    jsonConfig[CN_appendnullcount] = AppendNullCount;
+    jsonConfig[CN_prependnullcount] = PrependNullPixelCount;
+    jsonConfig[CN_appendnullcount] = AppendNullPixelCount;
 
     c_OutputCommon::GetConfig (jsonConfig);
 
@@ -78,7 +68,7 @@ void c_OutputPixel::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     c_OutputCommon::GetStatus (jsonStatus);
 
-    // jsonStatus["pNextIntensityToSend"] = uint32_t(pNextIntensityToSend);
+    // jsonStatus["NextPixelToSend"] = uint32_t (NextPixelToSend);
     // jsonStatus["RemainingIntensityCount"] = uint32_t(RemainingIntensityCount);
 
 } // GetStatus
@@ -112,16 +102,40 @@ void c_OutputPixel::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 } // SetBufferSize
 
 //----------------------------------------------------------------------------
-void c_OutputPixel::SetPreambleInformation (uint8_t* PreambleStart, uint8_t NewPreambleSize)
+void c_OutputPixel::SetFramePrependInformation (const uint8_t* data, size_t len)
 {
     // DEBUG_START;
 
-    pPreamble = PreambleStart;
-    PreambleSize = NewPreambleSize;
+    pFramePrependData = (uint8_t*)data;
+    FramePrependDataSize = len;
 
     // DEBUG_END;
 
-} // SetPreambleInformation
+} // SetFramePrependInformation
+
+//----------------------------------------------------------------------------
+void c_OutputPixel::SetFrameAppendInformation (const uint8_t* data, size_t len)
+{
+    // DEBUG_START;
+
+    pFrameAppendData = (uint8_t*)data;
+    FrameAppendDataSize = len;
+
+    // DEBUG_END;
+
+} // SetFrameAppendInformation
+
+//----------------------------------------------------------------------------
+void c_OutputPixel::SetPixelPrependInformation (const uint8_t* data, size_t len)
+{
+    // DEBUG_START;
+
+    PixelPrependData = (uint8_t*)data;
+    PixelPrependDataSize = len;
+
+    // DEBUG_END;
+
+} // SetPixelPrependInformation
 
 //----------------------------------------------------------------------------
 bool c_OutputPixel::SetConfig (ArduinoJson::JsonObject& jsonConfig)
@@ -131,16 +145,16 @@ bool c_OutputPixel::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     // enums need to be converted to uints for json
     setFromJSON (color_order, jsonConfig, CN_color_order);
     setFromJSON (pixel_count, jsonConfig, CN_pixel_count);
-    setFromJSON (group_size, jsonConfig, CN_group_size);
+    setFromJSON (PixelGroupSize, jsonConfig, CN_group_size);
     setFromJSON (zig_size, jsonConfig, CN_zig_size);
     setFromJSON (gamma, jsonConfig, CN_gamma);
     setFromJSON (brightness, jsonConfig, CN_brightness);
     setFromJSON (InterFrameGapInMicroSec, jsonConfig, CN_interframetime);
-    setFromJSON (PrependNullCount, jsonConfig, CN_prependnullcount);
-    setFromJSON (AppendNullCount, jsonConfig, CN_appendnullcount);
+    setFromJSON (PrependNullPixelCount, jsonConfig, CN_prependnullcount);
+    setFromJSON (AppendNullPixelCount, jsonConfig, CN_appendnullcount);
 
-    // DEBUG_V (String ("PrependNullCount: ") + String (PrependNullCount));
-    // DEBUG_V (String (" AppendNullCount: ") + String (AppendNullCount));
+    // DEBUG_V (String ("PrependNullPixelCount: ") + String (PrependNullPixelCount));
+    // DEBUG_V (String (" AppendNullPixelCount: ") + String (AppendNullPixelCount));
 
     c_OutputCommon::SetConfig (jsonConfig);
 
@@ -156,8 +170,13 @@ bool c_OutputPixel::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     // Update the config fields in case the validator changed them
     GetConfig (jsonConfig);
 
-    ZigPixelCount = (2 > zig_size) ? pixel_count : zig_size;
-    GroupPixelCount = (2 > group_size) ? 1 : group_size;
+    ZigPixelCount  = (2 > zig_size) ? pixel_count + 1: zig_size + 1;
+    ZagPixelCount  = (2 > zig_size) ? pixel_count + 1: zig_size + 0;
+    PixelGroupSize = (2 > PixelGroupSize) ? 1 : PixelGroupSize;
+
+    // DEBUG_V (String ("ZigPixelCount: ") + String (ZigPixelCount));
+    // DEBUG_V (String ("ZagPixelCount: ") + String (ZagPixelCount));
+    // DEBUG_V (String ("     zig_size: ") + String (zig_size));
 
     // DEBUG_END;
     return response;
@@ -191,18 +210,18 @@ void c_OutputPixel::updateColorOrderOffsets ()
 
     // DEBUG_V (String ("color_order: ") + color_order);
 
-         if (String (F ("wrgb")) == color_order) { ColorOffsets.offset.r = 3; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 2; numIntensityBytesPerPixel = 4; }
-    else if (String (F ("rgbw")) == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
-    else if (String (F ("grbw")) == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
-    else if (String (F ("brgw")) == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
-    else if (String (F ("rbgw")) == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
-    else if (String (F ("gbrw")) == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
-    else if (String (F ("bgrw")) == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 4; }
-    else if (String (F ("grb"))  == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
-    else if (String (F ("brg"))  == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
-    else if (String (F ("rbg"))  == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
-    else if (String (F ("gbr"))  == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
-    else if (String (F ("bgr"))  == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; numIntensityBytesPerPixel = 3; }
+         if (String (F ("wrgb")) == color_order) { ColorOffsets.offset.r = 3; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 2; NumIntensityBytesPerPixel = 4; }
+    else if (String (F ("rgbw")) == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
+    else if (String (F ("grbw")) == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
+    else if (String (F ("brgw")) == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
+    else if (String (F ("rbgw")) == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
+    else if (String (F ("gbrw")) == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
+    else if (String (F ("bgrw")) == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
+    else if (String (F ("grb"))  == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 3; }
+    else if (String (F ("brg"))  == color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 3; }
+    else if (String (F ("rbg"))  == color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 3; }
+    else if (String (F ("gbr"))  == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 3; }
+    else if (String (F ("bgr"))  == color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 3; }
     else
     {
         color_order = F ("rgb");
@@ -210,24 +229,15 @@ void c_OutputPixel::updateColorOrderOffsets ()
         ColorOffsets.offset.g = 1;
         ColorOffsets.offset.b = 2;
         ColorOffsets.offset.w = 3;
-        numIntensityBytesPerPixel = 3;
+        NumIntensityBytesPerPixel = 3;
     } // default
 
-    // DEBUG_V (String ("numIntensityBytesPerPixel: ") + String (numIntensityBytesPerPixel));
+    // DEBUG_V (String ("NumIntensityBytesPerPixel: ") + String (NumIntensityBytesPerPixel));
 
     // DEBUG_END;
 } // updateColorOrderOffsets
 
 //----------------------------------------------------------------------------
-/*
-*   Validate that the current values meet our needs
-*
-*   needs
-*       data set in the class elements
-*   returns
-*       true - no issues found
-*       false - had an issue and had to fix things
-*/
 bool c_OutputPixel::validate ()
 {
     // DEBUG_START;
@@ -238,6 +248,10 @@ bool c_OutputPixel::validate ()
         logcon (CN_stars + String (F (" Requested ZigZag size count was too high. Setting to ")) + pixel_count + " " + CN_stars);
         zig_size = pixel_count;
         response = false;
+    }
+    else if (2 > zig_size)
+    {
+        zig_size = 1;
     }
 
     // Default gamma value
@@ -266,9 +280,9 @@ void c_OutputPixel::SetFrameDurration (float IntensityBitTimeInUs, uint16_t Bloc
     // DEBUG_START;
     if (0 == BlockSize) { BlockSize = 1; }
 
-    float TotalIntensityBytes = OutputBufferSize * group_size;
-    float TotalNullBytes = (PrependNullCount + AppendNullCount) * numIntensityBytesPerPixel;
-    float TotalBytesOfIntensityData = (TotalIntensityBytes + TotalNullBytes + PreambleSize);
+    float TotalIntensityBytes = OutputBufferSize * PixelGroupSize;
+    float TotalNullBytes = (PrependNullPixelCount + AppendNullPixelCount) * NumIntensityBytesPerPixel;
+    float TotalBytesOfIntensityData = (TotalIntensityBytes + TotalNullBytes + FramePrependDataSize);
     float TotalBits = TotalBytesOfIntensityData * 8.0;
     uint16_t NumBlocks = uint16_t (TotalBytesOfIntensityData / float (BlockSize));
     int TotalBlockDelayUs = int (float (NumBlocks) * BlockDelayUs);
@@ -276,13 +290,13 @@ void c_OutputPixel::SetFrameDurration (float IntensityBitTimeInUs, uint16_t Bloc
     FrameMinDurationInMicroSec = (IntensityBitTimeInUs * TotalBits) + InterFrameGapInMicroSec + TotalBlockDelayUs;
 
     // DEBUG_V (String ("          OutputBufferSize: ") + String (OutputBufferSize));
-    // DEBUG_V (String ("                group_size: ") + String (group_size));
+    // DEBUG_V (String ("                PixelGroupSize: ") + String (PixelGroupSize));
     // DEBUG_V (String ("       TotalIntensityBytes: ") + String (TotalIntensityBytes));
-    // DEBUG_V (String ("          PrependNullCount: ") + String (PrependNullCount));
-    // DEBUG_V (String ("           AppendNullCount: ") + String (AppendNullCount));
-    // DEBUG_V (String (" numIntensityBytesPerPixel: ") + String (numIntensityBytesPerPixel));
+    // DEBUG_V (String ("          PrependNullPixelCount: ") + String (PrependNullPixelCount));
+    // DEBUG_V (String ("           AppendNullPixelCount: ") + String (AppendNullPixelCount));
+    // DEBUG_V (String (" NumIntensityBytesPerPixel: ") + String (NumIntensityBytesPerPixel));
     // DEBUG_V (String ("            TotalNullBytes: ") + String (TotalNullBytes));
-    // DEBUG_V (String ("              PreambleSize: ") + String (PreambleSize));
+    // DEBUG_V (String ("              FramePrependDataSize: ") + String (FramePrependDataSize));
     // DEBUG_V (String (" TotalBytesOfIntensityData: ") + String (TotalBytesOfIntensityData));
     // DEBUG_V (String ("                 TotalBits: ") + String (TotalBits));
     // DEBUG_V (String ("                 BlockSize: ") + String (BlockSize));
@@ -302,17 +316,24 @@ void IRAM_ATTR c_OutputPixel::StartNewFrame ()
 {
     // DEBUG_START;
 
-    CurrentZigPixelCount    = ZigPixelCount - 1;
-    CurrentZagPixelCount    = ZigPixelCount;
-    CurrentGroupPixelCount  = GroupPixelCount;
-    pNextIntensityToSend    = GetBufferAddress ();
-    RemainingPixelCount     = pixel_count;
-    CurrentIntensityIndex   = 0;
-    CurrentPrependNullCount = PrependNullCount * numIntensityBytesPerPixel;
-    CurrentAppendNullCount  = AppendNullCount  * numIntensityBytesPerPixel;
-    PreambleCurrentCount    = 0;
+    NextPixelToSend              = GetBufferAddress ();
+    FramePrependDataCurrentIndex = 0;
+    FrameAppendDataCurrentIndex  = 0;
+    ZigPixelCurrentCount         = 0;
+    ZagPixelCurrentCount         = 0;
+    SentPixelsCount              = 0;
+    PixelIntensityCurrentIndex   = 0;
+    PixelGroupSizeCurrentCount   = 0;
+    PrependNullPixelCurrentCount = 0;
+    AppendNullPixelCurrentCount  = 0;
+    PixelPrependDataCurrentIndex = 0;
+
+    FrameState     = (FramePrependDataSize)  ? FrameState_t::FramePrependData      : FrameState_t::FrameSendPixels;
+    PixelSendState = (PrependNullPixelCount) ? PixelSendState_t::PixelPrependNulls : PixelSendState_t::PixelSendIntensity;
 
     MoreDataToSend = (0 == pixel_count) ? false : true;
+
+    // NumIntensityBytesPerPixel = 1;
 
     // DEBUG_END;
 } // StartNewFrame
@@ -320,108 +341,224 @@ void IRAM_ATTR c_OutputPixel::StartNewFrame ()
 //----------------------------------------------------------------------------
 uint8_t IRAM_ATTR c_OutputPixel::GetNextIntensityToSend ()
 {
-    uint8_t response = (pNextIntensityToSend[ColorOffsets.Array[CurrentIntensityIndex]]);
-    response = gamma_table[response];
-    response = uint8_t( (uint32_t(response) * AdjustedBrightness) >> 8);
+    uint8_t response = 0x00;
 
-    do // once
+    switch (FrameState)
     {
-        if (PreambleSize != PreambleCurrentCount)
+        case FrameState_t::FramePrependData:
         {
-            response = pPreamble[PreambleCurrentCount++];
+            response = pFramePrependData[FramePrependDataCurrentIndex];
+            if (++FramePrependDataCurrentIndex < FramePrependDataSize)
+        {
             break;
         }
 
-        // Are we prepending NULL data?
-        if (CurrentPrependNullCount)
-        {
-            --CurrentPrependNullCount;
-            response = 0x00;
+            // FramePrependDataCurrentIndex = 0;
+            FrameState = FrameState_t::FrameSendPixels;
+            // PixelIntensityCurrentIndex = 0;
+            // PixelPrependDataCurrentIndex = 0;
             break;
-        }
+        } // case FrameState_t::FramePrependData
 
-        // have we sent all of the frame data?
-        if (0 == RemainingPixelCount)
+        case FrameState_t::FrameSendPixels:
         {
-            response = 0x00;
-
-            // Are we sending NULL data?
-            if (CurrentAppendNullCount)
-            {
-                --CurrentAppendNullCount;
-                if (0 == CurrentAppendNullCount)
+            switch (PixelSendState)
+        {
+                case PixelSendState_t::PixelPrependNulls:
                 {
-                    MoreDataToSend = false;
-                }
-            }
+                    if (PixelPrependDataCurrentIndex < PixelPrependDataSize)
+                    {
+                        response = PixelPrependData[PixelPrependDataCurrentIndex++];
             break;
         }
 
-        // has the current pixel completed?
-        ++CurrentIntensityIndex;
-        if (CurrentIntensityIndex < numIntensityBytesPerPixel)
-        {
-            // still working on the current pixel
+                    // response = 0x00;
+
+                    // has the pixel completed?
+                    if (++PixelIntensityCurrentIndex < NumIntensityBytesPerPixel)
+            {
+                        break;
+                }
+
+                    // pixel is complete. Move to the next one
+                    PixelIntensityCurrentIndex = 0;
+                    PixelPrependDataCurrentIndex = 0;
+
+                    if (++PrependNullPixelCurrentCount < PrependNullPixelCount)
+                    {
+                        break;
+            }
+
+                    // no more null pixels to send
+                    // PrependNullPixelCurrentCount = 0;
+                    PixelSendState = PixelSendState_t::PixelSendIntensity;
+                    break;
+                } // case PixelSendState_t::PixelPrependNulls:
+
+                case PixelSendState_t::PixelSendIntensity:
+                {
+                    // pixel prepend goes here
+                    if (PixelPrependDataCurrentIndex < PixelPrependDataSize)
+                    {
+                        response = PixelPrependData[PixelPrependDataCurrentIndex++];
             break;
         }
-        CurrentIntensityIndex = 0;
+
+                    response = (NextPixelToSend[ColorOffsets.Array[PixelIntensityCurrentIndex]]);
+                    response = gamma_table[response];
+                    response = uint8_t ( (uint32_t (response) * AdjustedBrightness) >> 8);
+
+                    // has the pixel completed?
+                    ++PixelIntensityCurrentIndex;
+                    if (PixelIntensityCurrentIndex < NumIntensityBytesPerPixel)
+        {
+                        // response = 0xF0;
+            break;
+        }
+                    // response = 0xFF;
+                    
+                    PixelIntensityCurrentIndex = 0;
+                    PixelPrependDataCurrentIndex = 0;
 
         // has the group completed?
-        --CurrentGroupPixelCount;
-        if (0 != CurrentGroupPixelCount)
+                    if (++PixelGroupSizeCurrentCount < PixelGroupSize)
         {
             // not finished with the group yet
-            continue;
+                        break;
         }
 
         // refresh the group count
-        CurrentGroupPixelCount = GroupPixelCount;
+                    PixelGroupSizeCurrentCount = 0;
 
-        --RemainingPixelCount;
-        if (0 == RemainingPixelCount)
+                    ++SentPixelsCount;
+                    if (SentPixelsCount >= pixel_count)
         {
-            // FrameDoneCounter++;
-            // Do we need to append NULL data?
-            if (0 == CurrentAppendNullCount)
+                        // response = 0xaa;
+                        if (AppendNullPixelCount)
             {
+                            PixelPrependDataCurrentIndex = 0;
+                            PixelIntensityCurrentIndex   = 0;
+                            AppendNullPixelCurrentCount  = 0;
+
+                            PixelSendState = PixelSendState_t::PixelAppendNulls;
+                        }
+                        else if (FrameAppendDataSize)
+                        {
+                            // FrameAppendDataCurrentIndex = 0;
+                            FrameState = FrameState_t::FrameAppendData;
+                        }
+                        else
+                        {
                 MoreDataToSend = false;
+                            FrameState = FrameState_t::FrameDone;
             }
 
             break;
         }
 
         // have we completed the forward traverse
-        if (CurrentZigPixelCount)
+                    if (++ZigPixelCurrentCount < ZigPixelCount)
         {
-            --CurrentZigPixelCount;
+                        // response = 0x0F;
             // not finished with the set yet.
-            pNextIntensityToSend += numIntensityBytesPerPixel;
-            continue;
+                        NextPixelToSend += NumIntensityBytesPerPixel;
+                        break;
         }
 
-        if (CurrentZagPixelCount == ZigPixelCount)
+                    if (0 == ZagPixelCurrentCount)
         {
             // first backward pixel
-            pNextIntensityToSend += numIntensityBytesPerPixel * (ZigPixelCount + 1);
+                        NextPixelToSend += NumIntensityBytesPerPixel * (ZigPixelCount + 1);
         }
 
         // have we completed the backward traverse
-        if (CurrentZagPixelCount)
+                    if (++ZagPixelCurrentCount < ZagPixelCount)
         {
-            --CurrentZagPixelCount;
+                        // response = 0xF0;
             // not finished with the set yet.
-            pNextIntensityToSend -= numIntensityBytesPerPixel;
-            continue;
+                        NextPixelToSend -= NumIntensityBytesPerPixel;
+                        break;
         }
 
+                    // response = 0xFF;
+
         // move to next forward pixel
-        pNextIntensityToSend += numIntensityBytesPerPixel * (ZigPixelCount);
+                    NextPixelToSend += NumIntensityBytesPerPixel * (ZigPixelCount);
 
         // refresh the zigZag
-        CurrentZigPixelCount = ZigPixelCount - 1;
-        CurrentZagPixelCount = ZigPixelCount;
+                    ZigPixelCurrentCount = 0;
+                    ZagPixelCurrentCount = 0;
 
-    } while (false);
+                    break;
+
+                } // case PixelSendState_t::PixelSendIntensity:
+
+                case PixelSendState_t::PixelAppendNulls:
+                {
+                    // pixel prepend goes here
+                    if (PixelPrependDataCurrentIndex < PixelPrependDataSize)
+                    {
+                        response = PixelPrependData[PixelPrependDataCurrentIndex++];
+                        break;
+                    }
+
+                    // response = 0x00;
+
+                    // has the pixel completed?
+                    if (++PixelIntensityCurrentIndex < NumIntensityBytesPerPixel)
+                    {
+                        break;
+                    }
+
+                    // pixel is complete. Move to the next one
+                    PixelIntensityCurrentIndex = 0;
+                    PixelPrependDataCurrentIndex = 0;
+
+                    if (++AppendNullPixelCurrentCount < AppendNullPixelCount)
+                    {
+                        break;
+                    }
+                    // AppendNullPixelCurrentCount = 0;
+
+                    if (FrameAppendDataSize)
+                    {
+                        // FrameAppendDataCurrentCount = 0;
+                        FrameState = FrameState_t::FrameAppendData;
+                        break;
+                    }
+
+                    MoreDataToSend = false;
+                    FrameState = FrameState_t::FrameDone;
+
+                    break;
+                } // case PixelSendState_t::PixelAppendNulls:
+
+            } // switch SendPixelsState
+            break;
+        } // case FrameState_t::FrameSendPixels
+
+        case FrameState_t::FrameAppendData:
+        {
+            response = pFrameAppendData[FrameAppendDataCurrentIndex];
+            if (++FrameAppendDataCurrentIndex < FrameAppendDataSize)
+            {
+                break;
+            }
+            // FrameAppendDataCurrentIndex = 0;
+            FrameState = FrameState_t::FrameDone;
+            MoreDataToSend = false;
+            break;
+        } // case FrameState_t::FrameAppendData
+
+        case FrameState_t::FrameDone:
+        {
+            MoreDataToSend = false;
+            break;
+        } // case FrameState_t::FrameDone
+
+    } // switch FrameState
+
+    if (InvertData) { response = ~response; }
 
     return response;
 } // NextIntensityToSend

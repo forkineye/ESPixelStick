@@ -47,7 +47,7 @@ public:
     typedef  c_OutputMgr::e_OutputType       OTYPE_t;
 
     // functions to be provided by the derived class
-    virtual void         Begin () = 0;                                         ///< set up the operating environment based on the current config (or defaults)
+    virtual void         Begin () {}                                           ///< set up the operating environment based on the current config (or defaults)
     virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig);     ///< Set a new config in the driver
     virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     virtual void         Render () = 0;                                        ///< Call from loop(),  renders output data
@@ -90,7 +90,6 @@ protected:
     void StartBreak ();
     void EndBreak ();
     void GenerateBreak (uint32_t DurationInUs);
-    void logcon(String message);
 
     inline bool canRefresh ()
     {

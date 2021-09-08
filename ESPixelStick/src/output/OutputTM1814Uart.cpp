@@ -1,3 +1,5 @@
+#ifdef SUPPORT_TM1814
+
 /*
 * TM1814Uart.cpp - TM1814 driver code for ESPixelStick UART
 *
@@ -29,6 +31,7 @@ extern "C" {
 #   include <uart_register.h>
 }
 #elif defined(ARDUINO_ARCH_ESP32)
+#   include <soc/uart_reg.h>
 
 // Define ESP8266 style macro conversions to limit changes in the rest of the code.
 #   define UART_CONF0           UART_CONF0_REG
@@ -42,9 +45,8 @@ extern "C" {
 #define PIXEL_FIFO_TRIGGER_LEVEL (16)
 
 /*
-* 8N2 UART lookup table for TM1814, first 2 bits ignored.
+* 8N2 UART lookup table for TM1814
 * Start and stop bits are part of the pixel stream.
-* Data intensity bits are inverted wrt the spec. 
 */
 static char ConvertIntensityToUartDataStream[] =
 {
@@ -135,7 +137,7 @@ void c_OutputTM1814Uart::Begin ()
 #ifdef ARDUINO_ARCH_ESP8266
     ETS_UART_INTR_ATTACH (uart_intr_handler, this);
 #else
-    uart_isr_register (UartId, uart_intr_handler, this, ESP_INTR_FLAG_IRAM, nullptr);
+    uart_isr_register (UartId, uart_intr_handler, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM, nullptr);
 #endif
 
 } // init
@@ -241,3 +243,5 @@ void c_OutputTM1814Uart::PauseOutput ()
 
     // DEBUG_END;
 } // PauseOutput
+
+#endif // def SUPPORT_TM1814
