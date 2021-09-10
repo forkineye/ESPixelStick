@@ -26,6 +26,11 @@
 class c_OutputRmt
 {
 private:
+#define RMT_INT_TX_END     (1)
+#define RMT_INT_RX_END     (2)
+#define RMT_INT_ERROR      (4)
+#define RMT_INT_THR_EVNT   (1<<24)
+
 #define RMT_INT_TX_END_BIT      (RMT_INT_TX_END   << (uint32_t (RmtChannelId)*3))
 #define RMT_INT_RX_END_BIT      (RMT_INT_RX_END   << (uint32_t (RmtChannelId)*3))
 #define RMT_INT_ERROR_BIT       (RMT_INT_ERROR    << (uint32_t (RmtChannelId)*3))

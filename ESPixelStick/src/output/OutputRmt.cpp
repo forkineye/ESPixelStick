@@ -24,11 +24,6 @@
 #define MAX_NUM_INTENSITY_BIT_SLOTS_PER_INTERRUPT (sizeof (RMTMEM.chan[0].data32) / sizeof (rmt_item32_t))
 #define NUM_FRAME_START_SLOTS                     6
 
-#define RMT_INT_TX_END     (1)
-#define RMT_INT_RX_END     (2)
-#define RMT_INT_ERROR      (4)
-#define RMT_INT_THR_EVNT   (1<<24)
-
 // forward declaration for the isr handler
 static void IRAM_ATTR rmt_intr_handler (void* param);
 
