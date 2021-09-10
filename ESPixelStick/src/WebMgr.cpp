@@ -207,7 +207,8 @@ void c_WebMgr::init ()
         });
 #endif // def USE_REST
 
-    // Static Handler
+    // Static Handlers
+    webServer.serveStatic ("/static", LittleFS, "/www/static").setCacheControl ("max-age=31536000");
     webServer.serveStatic ("/", LittleFS, "/www/").setDefaultFile ("index.html");
 
     // FS Debugging Handler
