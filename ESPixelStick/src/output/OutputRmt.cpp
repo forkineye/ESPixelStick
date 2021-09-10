@@ -29,11 +29,6 @@
 #define RMT_INT_ERROR      (4)
 #define RMT_INT_THR_EVNT   (1<<24)
 
-#define RMT_INT_TX_END_BIT      (RMT_INT_TX_END   << (uint32_t (RmtChannelId)*3))
-#define RMT_INT_RX_END_BIT      (RMT_INT_RX_END   << (uint32_t (RmtChannelId)*3))
-#define RMT_INT_ERROR_BIT       (RMT_INT_ERROR    << (uint32_t (RmtChannelId)*3))
-#define RMT_INT_THR_EVNT_BIT    (RMT_INT_THR_EVNT << (uint32_t (RmtChannelId)))
-
 // forward declaration for the isr handler
 static void IRAM_ATTR rmt_intr_handler (void* param);
 
@@ -181,12 +176,17 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_StartNewFrame ()
     // Need to build up a backlog of entries in the buffer
     // so that there is still plenty of data to send when the isr fires.
     // This is reflected in the constant: NUM_FRAME_START_SLOTS
-    *pMem++ = Rgb2Rmt[RmtFrameType_t::RMT_INTERFRAME_GAP_ID].val; // 60 us
-    *pMem++ = Rgb2Rmt[RmtFrameType_t::RMT_INTERFRAME_GAP_ID].val; // 60 us
-    *pMem++ = Rgb2Rmt[RmtFrameType_t::RMT_INTERFRAME_GAP_ID].val; // 60 us
-    *pMem++ = Rgb2Rmt[RmtFrameType_t::RMT_INTERFRAME_GAP_ID].val; // 60 us
-    *pMem++ = Rgb2Rmt[RmtFrameType_t::RMT_INTERFRAME_GAP_ID].val; // 60 us
-    *pMem++ = Rgb2Rmt[RmtFrameType_t::RMT_STARTBIT_ID].val;       // Start bit
+    NumIdleBitsCount = NumIdleBits;
+    while (NumIdleBitsCount)
+    {
+        *pMem++ = Rgb2Rmt[RmtFrameType_t::RMT_INTERFRAME_GAP_ID].val;
+    }
+
+    NumStartBitsCount = NumStartBits;
+    if (NumStartBits)
+    {
+        *pMem++ = Rgb2Rmt[RmtFrameType_t::RMT_STARTBIT_ID].val;       // Start bit
+    }
     RmtCurrentAddr = (volatile rmt_item32_t*)pMem;
 
     RMT.int_clr.val  = RMT_INT_THR_EVNT_BIT;
@@ -242,7 +242,7 @@ bool c_OutputRmt::Render ()
     bool Response = false;
     // DEBUG_START;
 
-    if ( 0 == (RMT.int_ena.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT)))
+    if (NoFrameInProgress())
     {
         ISR_Handler_StartNewFrame ();
         Response = true;

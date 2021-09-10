@@ -25,6 +25,38 @@
 
 class c_OutputRmt
 {
+private:
+#define RMT_INT_TX_END_BIT      (RMT_INT_TX_END   << (uint32_t (RmtChannelId)*3))
+#define RMT_INT_RX_END_BIT      (RMT_INT_RX_END   << (uint32_t (RmtChannelId)*3))
+#define RMT_INT_ERROR_BIT       (RMT_INT_ERROR    << (uint32_t (RmtChannelId)*3))
+#define RMT_INT_THR_EVNT_BIT    (RMT_INT_THR_EVNT << (uint32_t (RmtChannelId)))
+
+    c_OutputPixel* OutputPixel = nullptr;
+    rmt_channel_t  RmtChannelId = rmt_channel_t (-1);
+    gpio_num_t     DataPin = gpio_num_t (-1);
+    rmt_item32_t   Rgb2Rmt[5];
+
+    uint8_t        NumIdleBits = 6;
+    uint8_t        NumIdleBitsCount = 0;
+
+    uint8_t        NumStartBits = 1;
+    uint8_t        NumStartBitsCount = 0;
+
+    uint8_t        NumStopBits = 1;
+    uint8_t        NumStopBitsCount = 0;
+
+    volatile rmt_item32_t* RmtStartAddr = nullptr;
+    volatile rmt_item32_t* RmtCurrentAddr = nullptr;
+    volatile rmt_item32_t* RmtEndAddr = nullptr;
+    intr_handle_t RMT_intr_handle = NULL;
+    uint8_t NumIntensityValuesPerInterrupt = 0;
+    uint8_t NumIntensityBitsPerInterrupt = 0;
+
+    // debug counters
+    // uint32_t DataISRcounter = 0;
+    // uint32_t FrameEndISRcounter = 0;
+    // uint32_t FrameStartCounter = 0;
+
 public:
     c_OutputRmt ();
     ~c_OutputRmt ();
@@ -32,6 +64,10 @@ public:
     void Begin (rmt_channel_t ChannelId, gpio_num_t DataPin, c_OutputPixel * OutputPixel, rmt_idle_level_t idle_level);
     bool Render ();
     void set_pin (gpio_num_t _DataPin) { DataPin = _DataPin; rmt_set_gpio (RmtChannelId, rmt_mode_t::RMT_MODE_TX, DataPin, false); }
+
+    void SetNumIdleBits  (uint8_t Value)  { NumIdleBits  = Value; }
+    void SetNumStartBits (uint8_t Value)  { NumStartBits = Value; }
+    void SetNumStopBits  (uint8_t Value)  { NumStopBits  = Value; }
 
 #define RMT_ClockRate       80000000.0
 #define RMT_Clock_Divisor   2.0
@@ -47,26 +83,11 @@ public:
     };
     void SetRgb2Rmt (rmt_item32_t NewValue, RmtFrameType_t ID) { Rgb2Rmt[ID] = NewValue; }
 
+    bool NoFrameInProgress () { return (0 == (RMT.int_ena.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT))); }
+
     void IRAM_ATTR ISR_Handler ();
     void IRAM_ATTR ISR_Handler_StartNewFrame ();
     void IRAM_ATTR ISR_Handler_SendIntensityData ();
 
-private:
-    c_OutputPixel* OutputPixel = nullptr;
-    rmt_channel_t  RmtChannelId = rmt_channel_t (-1);
-    gpio_num_t     DataPin = gpio_num_t (-1);
-    rmt_item32_t   Rgb2Rmt[5];
-
-    volatile rmt_item32_t* RmtStartAddr = nullptr;
-    volatile rmt_item32_t* RmtCurrentAddr = nullptr;
-    volatile rmt_item32_t* RmtEndAddr = nullptr;
-    intr_handle_t RMT_intr_handle = NULL;
-    uint8_t NumIntensityValuesPerInterrupt = 0;
-    uint8_t NumIntensityBitsPerInterrupt = 0;
-
-    // debug counters
-    // uint32_t DataISRcounter = 0;
-    // uint32_t FrameEndISRcounter = 0;
-    // uint32_t FrameStartCounter = 0;
 };
 #endif // def ARDUINO_ARCH_ESP32
