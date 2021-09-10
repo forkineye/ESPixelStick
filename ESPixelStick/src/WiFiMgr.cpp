@@ -179,7 +179,7 @@ void c_WiFiMgr::connectWifi (const String & ssid, const String & passphrase)
     WiFi.mode (WIFI_STA);
     // DEBUG_V ("");
 
-    logcon (String(F ("\nWiFi Connecting to '")) +
+    logcon (String(F ("WiFi Connecting to '")) +
                       ssid +
                       String (F ("' as ")) +
                       config->hostname);
@@ -346,7 +346,8 @@ void c_WiFiMgr::AnnounceState ()
 
     String StateName;
     pCurrentFsmState->GetStateName (StateName);
-    logcon (String (F ("\nWiFi Entering State: ")) + StateName);
+    LOG_PORT.println ("");
+    logcon (String (F ("WiFi Entering State: ")) + StateName);
 
     // DEBUG_END;
 
@@ -412,7 +413,8 @@ void fsm_WiFi_state_ConnectingUsingConfig::Poll ()
     {
         if (CurrentTimeMS - WiFiMgr.GetFsmStartTime() > (1000 * WiFiMgr.GetConfigPtr()->sta_timeout))
         {
-            logcon (F ("\nWiFi Failed to connect using Configured Credentials"));
+            LOG_PORT.println ("");
+            logcon (F ("WiFi Failed to connect using Configured Credentials"));
             fsm_WiFi_state_ConnectingDefault_imp.Init ();
         }
     }
@@ -469,7 +471,8 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Poll ()
     {
         if (CurrentTimeMS - WiFiMgr.GetFsmStartTime () > (1000 * WiFiMgr.GetConfigPtr ()->sta_timeout))
         {
-            logcon (F ("\nWiFi Failed to connect using default Credentials"));
+            LOG_PORT.println ("");
+            logcon (F ("WiFi Failed to connect using default Credentials"));
             fsm_WiFi_state_ConnectingAsAP_imp.Init ();
         }
     }
@@ -524,7 +527,8 @@ void fsm_WiFi_state_ConnectingAsAP::Poll ()
 
         if (millis () - WiFiMgr.GetFsmStartTime () > (1000 * WiFiMgr.GetConfigPtr ()->ap_timeout))
         {
-            logcon (F ("\nWiFi STA Failed to connect"));
+            LOG_PORT.println ("");
+            logcon (F ("WiFi STA Failed to connect"));
             fsm_WiFi_state_ConnectionFailed_imp.Init ();
         }
     }
@@ -660,7 +664,8 @@ void fsm_WiFi_state_ConnectedToSta::Init ()
     WiFiMgr.setIpAddress (WiFi.softAPIP ());
     WiFiMgr.setIpSubNetMask (IPAddress (255, 255, 255, 0));
 
-    logcon (String (F ("\nWiFi Connected to STA with IP: ")) + WiFiMgr.getIpAddress ().toString ());
+    LOG_PORT.println ("");
+    logcon (String (F ("WiFi Connected to STA with IP: ")) + WiFiMgr.getIpAddress ().toString ());
 
     WiFiMgr.SetIsWiFiConnected (true);
     InputMgr.NetworkStateChanged (true);
