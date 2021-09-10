@@ -47,7 +47,7 @@ public:
     virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
     uint16_t             GetNumChannelsNeeded () { return (pixel_count * NumIntensityBytesPerPixel); };
     virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
-    bool                 GetMoreDataToSend () { return MoreDataToSend; }
+    bool                 MoreDataToSend () { return _MoreDataToSend; }
     IRAM_ATTR void       StartNewFrame ();
     IRAM_ATTR uint8_t    GetNextIntensityToSend ();
     void                 SetInvertData (bool _InvertData) { InvertData = _InvertData; }
@@ -58,7 +58,6 @@ protected:
     void SetFrameAppendInformation  (const uint8_t* data, size_t len);
     void SetPixelPrependInformation (const uint8_t* data, size_t len);
 
-    bool      MoreDataToSend = false;
     uint16_t  InterFrameGapInMicroSec = 300;
 
     void SetFrameDurration (float IntensityBitTimeInUs, uint16_t BlockSize = 1, float BlockDelayUs = 0.0);
@@ -67,6 +66,7 @@ private:
 #define PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL 3
 
     uint8_t     NumIntensityBytesPerPixel = PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL;
+    bool        _MoreDataToSend = false;
 
     uint8_t*    NextPixelToSend = nullptr;
     uint16_t    pixel_count = 100;

@@ -149,7 +149,7 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler ()
         // RMT.int_ena.val &= ~RMT_INT_THR_EVNT (RmtChannelId);
         RMT.int_clr.val = RMT_INT_THR_EVNT_BIT;
 
-        if (OutputPixel->GetMoreDataToSend ())
+        if (OutputPixel->MoreDataToSend ())
         {
             ISR_Handler_SendIntensityData ();
         }
@@ -209,7 +209,7 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_SendIntensityData ()
     register uint32_t ZeroValue = Rgb2Rmt[RmtFrameType_t::RMT_DATA_BIT_ZERO_ID].val;
     uint32_t NumEmptyIntensitySlots = NumIntensityValuesPerInterrupt;
 
-    while ( (NumEmptyIntensitySlots--) && (OutputPixel->GetMoreDataToSend ()))
+    while ( (NumEmptyIntensitySlots--) && (OutputPixel->MoreDataToSend ()))
     {
         uint8_t IntensityValue = OutputPixel->GetNextIntensityToSend ();
 
