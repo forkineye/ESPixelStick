@@ -17,7 +17,6 @@
 *
 */
 
-#include <Arduino.h>
 #include "InputE131.hpp"
 #include "../WiFiMgr.hpp"
 
@@ -273,28 +272,6 @@ bool c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // SetConfig
 
 //-----------------------------------------------------------------------------
-// Subscribe to "n" universes, starting at "universe"
-void c_InputE131::SubscribeToMulticastDomains()
-{
-    // DEBUG_START;
-
-    uint8_t count = LastUniverse - startUniverse + 1;
-    IPAddress ifaddr = WiFi.localIP ();
-    IPAddress multicast_addr;
-
-    for (uint8_t UniverseIndex = 0; UniverseIndex < count; ++UniverseIndex)
-    {
-        multicast_addr = IPAddress (239, 255,
-                                    (((startUniverse + UniverseIndex) >> 8) & 0xff),
-                                    (((startUniverse + UniverseIndex) >> 0) & 0xff));
-
-        igmp_joingroup ((ip4_addr_t*)&ifaddr[0], (ip4_addr_t*)&multicast_addr[0]);
-        logcon (String (F ("Multicast subscribed to ")) + multicast_addr.toString());
-    }
-    // DEBUG_END;
-} // multiSub
-
-//-----------------------------------------------------------------------------
 void c_InputE131::validateConfiguration ()
 {
     // DEBUG_START;
@@ -386,9 +363,6 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         {
             logcon (CN_stars + String (F (" E1.31 UNICAST INIT FAILED ")) + CN_stars);
         }
-
-        // Setup IGMP subscriptions
-        SubscribeToMulticastDomains ();
 
         logcon (String (F ("Listening for ")) + InputDataBufferSize +
             F (" channels from Universe ") + startUniverse +
