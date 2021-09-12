@@ -51,7 +51,6 @@ class c_InputE131 : public c_InputCommon
     } Universe_t;
     Universe_t UniverseArray[MAX_NUM_UNIVERSES];
 
-    void SubscribeToMulticastDomains();
     void validateConfiguration ();
     void NetworkStateChanged (bool IsConnected, bool RebootAllowed); // used by poorly designed rx functions
     void SetBufferTranslation ();
