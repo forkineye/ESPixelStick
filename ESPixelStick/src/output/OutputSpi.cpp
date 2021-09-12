@@ -29,13 +29,20 @@
 static bool spi_transfer_callback_enabled = false;
 static void IRAM_ATTR spi_transfer_callback (spi_transaction_t * param)
 {
-    if (spi_transfer_callback_enabled)
+    if ((spi_transfer_callback_enabled) && (param))
     {
-        reinterpret_cast <c_OutputSpi*> (param->user)->DataCbCounter++;
-        TaskHandle_t Handle = reinterpret_cast <c_OutputSpi*> (param->user)->GetTaskHandle ();
-        if (Handle)
+        if (param->user)
         {
-            vTaskResume (Handle);
+            reinterpret_cast <c_OutputSpi*> (param->user)->DataCbCounter++;
+            TaskHandle_t Handle = reinterpret_cast <c_OutputSpi*> (param->user)->GetTaskHandle ();
+            if (Handle)
+            {
+                vTaskResume (Handle);
+            }
+        }
+        else
+        {
+            LOG_PORT.println (F ("SPI User Parm is null."));
         }
     }
 } // spi_transfer_callback
@@ -145,7 +152,7 @@ void c_OutputSpi::SendIntensityData ()
     // DEBUG_START;
     SendIntensityDataCounter++;
 
-    if (OutputPixel->GetMoreDataToSend ())
+    if (OutputPixel->MoreDataToSend ())
     {
         spi_transaction_t & TransactionToFill = Transactions[NextTransactionToFill];
         memset ( (void*)&Transactions[NextTransactionToFill], 0x00, sizeof (spi_transaction_t));
@@ -155,14 +162,14 @@ void c_OutputSpi::SendIntensityData ()
         TransactionToFill.tx_buffer = pMem;
         uint32_t NumEmptyIntensitySlots = SPI_NUM_INTENSITY_PER_TRANSACTION;
 
-        while ( (NumEmptyIntensitySlots) && (OutputPixel->GetMoreDataToSend ()))
+        while ( (NumEmptyIntensitySlots) && (OutputPixel->MoreDataToSend ()))
         {
             *pMem++ = OutputPixel->GetNextIntensityToSend ();
             --NumEmptyIntensitySlots;
         } // end while there is space in the buffer
 
         TransactionToFill.length = SPI_BITS_PER_INTENSITY * (SPI_NUM_INTENSITY_PER_TRANSACTION - NumEmptyIntensitySlots);
-        if (!OutputPixel->GetMoreDataToSend ())
+        if (!OutputPixel->MoreDataToSend ())
         {
             TransactionToFill.length++;
         }
