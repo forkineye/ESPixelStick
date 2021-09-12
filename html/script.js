@@ -608,10 +608,13 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig )
     // console.info("modeControlName: " + modeControlName);
 
     // modify page title
-    var ModeDisplayName = GenerateInputOutputControlLabel(ChannelType, channelId) + " - " + $(modeControlName + ' #Title')[0].innerHTML;
-    // console.info("ModeDisplayName: " + ModeDisplayName);
-    $(modeControlName + ' #Title')[0].innerHTML = ModeDisplayName;
-
+    //TODO: Dirty hack to clean-up input names
+    if (ChannelType !== 'input') {
+        var ModeDisplayName = GenerateInputOutputControlLabel(ChannelType, channelId) + " - " + $(modeControlName + ' #Title')[0].innerHTML;
+        // console.info("ModeDisplayName: " + ModeDisplayName);
+        $(modeControlName + ' #Title')[0].innerHTML = ModeDisplayName;
+    } 
+  
     //document.getElementById("blahblah").innerHTML="NewText".
 
     elementids = $(modeControlName + ' *[id]').filter(":input").map(function ()
@@ -753,8 +756,14 @@ function updateFromJSON(obj)
 function GenerateInputOutputControlLabel(OptionListName, DisplayedChannelId)
 {
     var Id = parseInt(DisplayedChannelId) + 1;
-    var NewName = OptionListName.charAt(0).toUpperCase() + OptionListName.slice(1) + ": " + Id;
-
+    let NewName = '';
+//TODO: Dirty Hack to clean-up Input lables
+    if (OptionListName === `input`) {
+        NewName = (Id === 1) ? 'Primary Input' : 'Secondary Input'
+    } else {
+        NewName = OptionListName.charAt(0).toUpperCase() + OptionListName.slice(1) + " " + Id;
+    }
+    // console.log(`IO Label: ${NewName}`)
     return NewName;
 
 } // GenerateInputOutputControlLabel
@@ -816,7 +825,7 @@ function CreateOptionsFromConfig(OptionListName, Config)
         if (!$('#' + OptionListName + 'mode' + ChannelId).length)
         {
             // create the selection box
-            $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + ChannelId + '">' + GenerateInputOutputControlLabel(OptionListName, ChannelId) + ' Mode</label>');
+            $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + ChannelId + '">' + GenerateInputOutputControlLabel(OptionListName, ChannelId) + '</label>');
             $('#fg_' + OptionListName).append('<div class="col-sm-2"><select class="form-control wsopt" id="' + OptionListName + ChannelId + '"></select></div>');
             $('#fg_' + OptionListName + '_mode').append('<fieldset id="' + OptionListName + 'mode' + ChannelId + '"></fieldset>');
         }
@@ -1078,7 +1087,7 @@ function wsConnect()
                 }
                 else
                 {
-                    console.info("ws.onmessage: Received: " + event.data);
+                    // console.info("ws.onmessage: Received: " + event.data);
                     var msg = JSON.parse(event.data);
                     // "GET" message is a response to a get request. Populate the frontend.
                     if (msg.hasOwnProperty("get"))
@@ -1225,7 +1234,7 @@ function wsProcessOutputQueue()
         }, WaitForResponseTimeMS);
 
         //send it.
-        console.info('WS sending ' + OutputMessage);
+        // console.info('WS sending ' + OutputMessage);
         ws.send(OutputMessage);
 
     } // message available to send
