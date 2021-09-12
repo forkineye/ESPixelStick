@@ -705,7 +705,7 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     // is this an ACK response?
     else if (JsonConfigData.hasOwnProperty("OK"))
     {
-        // console.info("Received Acknowledgement to config set command.")
+        console.info("Received Acknowledgement to config set command.")
     }
 
     else
@@ -1086,11 +1086,22 @@ function wsConnect()
                         ProcessReceivedJsonConfigMessage(msg.get);
                     }
 
+//TODO: This never gets called now as we're sending 'cmd': 'OK' back isntead of 'set' with the updated config                    
                     // "SET" message is a reponse to a set request. Data has been validated and saved, Populate the frontend.
                     if (msg.hasOwnProperty("set"))
                     {
                         ProcessReceivedJsonConfigMessage(msg.set);
                         snackSave();
+                    }
+
+//TODO: Inform user configuration was saved, but this is broken as the UI could be in an invalid state
+//      if the validation routines changed their config. To be fixed in UI update.
+                    if (msg.hasOwnProperty('cmd'))
+                    { 
+                        if (msg.cmd === 'OK') {
+                            // console.log('---- OK ----');
+                            snackSave();
+                        }
                     }
                 }
             }

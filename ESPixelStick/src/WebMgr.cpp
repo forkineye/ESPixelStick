@@ -211,7 +211,7 @@ void c_WebMgr::init ()
     webServer.serveStatic ("/", LittleFS, "/www/").setDefaultFile ("index.html");
 
     // FS Debugging Handler
-    webServer.serveStatic ("/fs", LittleFS, "/" );
+    //webServer.serveStatic ("/fs", LittleFS, "/" );
 
     // if the client posts to the upload page
     webServer.on ("/upload", HTTP_POST | HTTP_PUT | HTTP_OPTIONS,
@@ -785,8 +785,15 @@ void c_WebMgr::processCmd (AsyncWebSocketClient * client, JsonObject & jsonCmd)
             // strcpy(WebSocketFrameCollectionBuffer, "{\"set\":");
             JsonObject jsonCmdSet = jsonCmd["set"];
             // DEBUG_V ("");
-            processCmdSet (jsonCmdSet);
-            strcpy (WebSocketFrameCollectionBuffer, "{\"cmd\":\"OK\"}");
+//TODO:  This will get called when time is set as well. We need something we can return
+//       to identify configration was saved and there were no errors. for now, we return
+//       that time was set.  In future, should return if configuration saved was valid.
+//       'OK' will trigger snackSave in UI.
+            if (processCmdSet (jsonCmdSet)) {
+                strcpy (WebSocketFrameCollectionBuffer, "{\"cmd\":\"OK\"}");
+            } else {
+                strcpy (WebSocketFrameCollectionBuffer, "{\"cmd\":\"TIME_SET\"}");
+            }
             // DEBUG_V ("");
             break;
         }
@@ -898,10 +905,15 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
 } // processCmdGet
 
 //-----------------------------------------------------------------------------
-void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
+bool c_WebMgr::processCmdSet (JsonObject & jsonCmd)
 {
     // DEBUG_START;
     // PrettyPrint (jsonCmd);
+
+//TODO: For now, we return if we need to send an ack / 'OK'.  Should be if config succeeded or failed
+//      to push proper state to UI.  For now, we just ignore time sets so user gets feedback that
+//      config was saved even though UI may be in invalid state.  To be fixed in UI rework.
+    bool retval = true;
 
     do // once
     {
@@ -939,6 +951,8 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
 
         if (jsonCmd.containsKey (F ("time")))
         {
+//TODO:  Send proper retval once upper logic is in place
+            retval = false;
             // PrettyPrint (jsonCmd, String ("processCmdSet"));
 
             // DEBUG_V ("time");
@@ -953,6 +967,8 @@ void c_WebMgr::processCmdSet (JsonObject & jsonCmd)
         strcat (WebSocketFrameCollectionBuffer, "ERROR");
 
     } while (false);
+
+    return retval;
 
     // DEBUG_END;
 
