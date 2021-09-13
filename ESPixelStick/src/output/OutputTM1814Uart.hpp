@@ -22,6 +22,9 @@
 *
 */
 
+#include "../ESPixelStick.h"
+#ifdef SUPPORT_TM1814
+
 #include "OutputTM1814.hpp"
 
 class c_OutputTM1814Uart : public c_OutputTM1814
@@ -51,7 +54,9 @@ private:
 #define TM1814_NUM_DATA_BYTES_PER_INTENSITY_BYTE    8
 #define TM1814_BAUD_RATE                            int(TM1814_DATA_RATE * TM1814_NUM_DATA_BITS_PER_INTENSITY_BIT)
 
-    bool validate ();        ///< confirm that the current configuration is valid
+    bool validate ();
 
 }; // c_OutputTM1814Uart
+
+#endif // def SUPPORT_TM1814
 

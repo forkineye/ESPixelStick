@@ -21,6 +21,8 @@
 *   interface.
 *
 */
+#include "../ESPixelStick.h"
+#ifdef SUPPORT_TM1814
 
 #include "OutputPixel.hpp"
 
@@ -71,3 +73,5 @@ private:
     PreambleData_t PreambleData;
 
 }; // c_OutputTM1814
+
+#endif // def SUPPORT_TM1814
