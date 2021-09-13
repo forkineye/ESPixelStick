@@ -75,7 +75,7 @@ private:
     void ProcessReceivedJsonMessage (DynamicJsonDocument   & webJsonDoc, AsyncWebSocketClient  * client);
     void processCmd                 (AsyncWebSocketClient  * client,  JsonObject & jsonCmd );
     void processCmdGet              (JsonObject & jsonCmd);
-    void processCmdSet              (JsonObject & jsonCmd);
+    bool processCmdSet              (JsonObject & jsonCmd);
     void processCmdOpt              (JsonObject & jsonCmd);
     void processCmdDelete           (JsonObject & jsonCmd);
     void processCmdSetTime          (JsonObject & jsonCmd);
