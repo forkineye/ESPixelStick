@@ -40,14 +40,9 @@ extern "C" {
 #   define UART_TX_FIFO_SIZE    UART_FIFO_LEN
 #endif
 
-#define WS2811_DATA_SPEED    (800000)
-
 #ifndef UART_INV_MASK
 #   define UART_INV_MASK  (0x3f << 19)
 #endif // ndef UART_INV_MASK
-
-#define WS2811_MICRO_SEC_PER_INTENSITY  10L     // ((1/800000) * 8 bits) = 10us
-//#define WS2811_MIN_IDLE_TIME_US            300L    ///< 300us idle time
 
 // TX FIFO trigger level. 40 bytes gives 100us before the FIFO goes empty
 // We need to fill the FIFO at a rate faster than 0.3us per byte (1.2us/pixel)
@@ -134,13 +129,11 @@ void c_OutputWS2811Uart::Begin ()
         SERIAL_TX_ONLY,
         PIXEL_FIFO_TRIGGER_LEVEL);
 #else
-        /* Serial rate is 4x 800KHz for WS2811 */
+    /* Serial rate is 4x 800KHz for WS2811 */
     uart_config_t uart_config;
-    uart_config.baud_rate = WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE * WS2811_DATA_SPEED;
+    memset ((void*)&uart_config, 0x00, sizeof (uart_config));
+    uart_config.baud_rate = int(WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE * WS2811_PIXEL_DATA_RATE);
     uart_config.data_bits = uart_word_length_t::UART_DATA_6_BITS;
-    uart_config.flow_ctrl = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
-    uart_config.parity = uart_parity_t::UART_PARITY_DISABLE;
-    uart_config.rx_flow_ctrl_thresh = 1;
     uart_config.stop_bits = uart_stop_bits_t::UART_STOP_BITS_1;
     InitializeUart (uart_config, PIXEL_FIFO_TRIGGER_LEVEL);
 #endif

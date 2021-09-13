@@ -208,9 +208,28 @@ void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
     // Do not set ESP_INTR_FLAG_IRAM here. the driver's ISR handler is not located in IRAM
     // DEBUG_V ("");
     // ESP_ERROR_CHECK (uart_driver_install (UartId, UART_FIFO_LEN+1, 0, 0, NULL, 0));
-    // DEBUG_V ("");
+    // DEBUG_V (String ("                  UartId: 0x") + String (UartId, HEX));
+    // DEBUG_V (String ("   uart_config.baud_rate: 0x") + String (uart_config.baud_rate, HEX));
+    // DEBUG_V (String ("UART_CLKDIV_REG (UartId): 0x") + String (UART_CLKDIV_REG (UartId), HEX));
+
+    uart_config.parity = uart_parity_t::UART_PARITY_DISABLE;
+    uart_config.flow_ctrl = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
+    uart_config.rx_flow_ctrl_thresh = 1;
+    uart_config.source_clk = uart_sclk_t::UART_SCLK_APB;
+
     ESP_ERROR_CHECK (uart_param_config (UartId, & uart_config));
-    // DEBUG_V ("");
+#define SupportSetUartBaudrateWorkAround
+#ifdef SupportSetUartBaudrateWorkAround
+    // DEBUG_V (String ("UART_CLKDIV_REG (UartId): 0x") + String (UART_CLKDIV_REG (UartId), HEX));
+    uint32_t ClockDivider = (APB_CLK_FREQ << 4) / uart_config.baud_rate;
+    // DEBUG_V (String ("            APB_CLK_FREQ: 0x") + String (APB_CLK_FREQ, HEX));
+    // DEBUG_V (String ("            ClockDivider: 0x") + String (ClockDivider, HEX));
+    uint32_t adjusted_ClockDivider = ((ClockDivider >> 4) & UART_CLKDIV_V) | ((ClockDivider & UART_CLKDIV_FRAG_V) << UART_CLKDIV_FRAG_S);
+    // DEBUG_V (String ("   adjusted_ClockDivider: 0x") + String (adjusted_ClockDivider, HEX));
+    *((uint32_t *) UART_CLKDIV_REG (UartId)) = adjusted_ClockDivider;
+    // DEBUG_V (String ("UART_CLKDIV_REG (UartId): 0x") + String (UART_CLKDIV_REG (UartId), HEX));
+#endif // def SupportSetUartBaudrateWorkAround
+
     ESP_ERROR_CHECK (uart_set_pin (UartId, DataPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
     // DEBUG_V ("");
 
