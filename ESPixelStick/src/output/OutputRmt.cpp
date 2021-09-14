@@ -171,14 +171,14 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_StartNewFrame ()
     // Need to build up a backlog of entries in the buffer
     // so that there is still plenty of data to send when the isr fires.
     // This is reflected in the constant: NUM_FRAME_START_SLOTS
-    NumIdleBitsCount = NumIdleBits;
-    while (NumIdleBitsCount)
+    NumIdleBitsCount = 0;
+    while (NumIdleBitsCount++ < NumIdleBits)
     {
         *pMem++ = Rgb2Rmt[RmtFrameType_t::RMT_INTERFRAME_GAP_ID].val;
     }
 
-    NumStartBitsCount = NumStartBits;
-    if (NumStartBits)
+    NumStartBitsCount = 0;
+    if (NumStartBits++ < NumStartBits)
     {
         *pMem++ = Rgb2Rmt[RmtFrameType_t::RMT_STARTBIT_ID].val;       // Start bit
     }

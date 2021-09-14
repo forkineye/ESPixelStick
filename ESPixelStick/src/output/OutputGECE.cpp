@@ -235,11 +235,9 @@ void c_OutputGECE::Begin ()
         0);
 #else
     uart_config_t uart_config;
+    memset ((void*)&uart_config, 0x00, sizeof (uart_config));
     uart_config.baud_rate = GECE_BAUDRATE;
     uart_config.data_bits = uart_word_length_t::UART_DATA_7_BITS;
-    uart_config.flow_ctrl = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
-    uart_config.parity = uart_parity_t::UART_PARITY_DISABLE;
-    uart_config.rx_flow_ctrl_thresh = 1;
     uart_config.stop_bits = uart_stop_bits_t::UART_STOP_BITS_1;
     InitializeUart (uart_config, 0);
 

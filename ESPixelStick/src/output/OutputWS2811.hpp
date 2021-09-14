@@ -59,8 +59,8 @@ protected:
 #define WS2811_PIXEL_NS_BIT_1_HIGH          600.0 // 600ns +/- 150ns per datasheet
 #define WS2811_PIXEL_NS_BIT_1_LOW           (WS2811_PIXEL_NS_BIT_TOTAL - WS2811_PIXEL_NS_BIT_1_HIGH)
 
-#define WS2811_PIXEL_NS_IDLE                300000.0 // 300us per datasheet
-#define WS2811_MIN_IDLE_TIME_US                 (WS2811_PIXEL_NS_IDLE / 1000.0)
+#define WS2811_PIXEL_IDLE_TIME_NS           300000.0 // 300us per datasheet
+#define WS2811_PIXEL_IDLE_TIME_US           (WS2811_PIXEL_IDLE_TIME_NS / 1000.0)
 
 }; // c_OutputWS2811
 

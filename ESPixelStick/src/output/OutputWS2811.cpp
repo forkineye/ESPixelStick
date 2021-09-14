@@ -29,7 +29,7 @@ c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
 {
     // DEBUG_START;
 
-    InterFrameGapInMicroSec = WS2811_MIN_IDLE_TIME_US;
+    InterFrameGapInMicroSec = WS2811_PIXEL_IDLE_TIME_US;
 
     // DEBUG_END;
 } // c_OutputWS2811

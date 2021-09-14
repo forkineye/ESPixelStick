@@ -1,4 +1,3 @@
-#ifdef SUPPORT_TM1814
 /*
 * OutputTM1814.cpp - TM1814 driver code for ESPixelStick UART
 *
@@ -19,6 +18,8 @@
 */
 
 #include "../ESPixelStick.h"
+#ifdef SUPPORT_TM1814
+
 #include "OutputTM1814.hpp"
 
 //----------------------------------------------------------------------------

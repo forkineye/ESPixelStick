@@ -1,4 +1,3 @@
-#ifdef SUPPORT_TM1814
 /*
 * OutputTM1814Rmt.cpp - TM1814 driver code for ESPixelStick RMT Channel
 *
@@ -18,6 +17,9 @@
 *
 */
 #ifdef ARDUINO_ARCH_ESP32
+
+#include "../ESPixelStick.h"
+#ifdef SUPPORT_TM1814
 
 #include "OutputTM1814Rmt.hpp"
 

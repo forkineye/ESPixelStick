@@ -1,5 +1,3 @@
-#ifdef SUPPORT_TM1814
-
 /*
 * TM1814Uart.cpp - TM1814 driver code for ESPixelStick UART
 *
@@ -20,6 +18,7 @@
 */
 
 #include "../ESPixelStick.h"
+#ifdef SUPPORT_TM1814
 
 #include "OutputTM1814Uart.hpp"
 
@@ -122,11 +121,9 @@ void c_OutputTM1814Uart::Begin ()
 #else
     /* Serial rate is 4x 800KHz for TM1814 */
     uart_config_t uart_config;
+    memset ((void*)&uart_config, 0x00, sizeof (uart_config));
     uart_config.baud_rate = (TM1814_BAUD_RATE - 100000);
     uart_config.data_bits = uart_word_length_t::UART_DATA_8_BITS;
-    uart_config.flow_ctrl = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
-    uart_config.parity = uart_parity_t::UART_PARITY_DISABLE;
-    uart_config.rx_flow_ctrl_thresh = 1;
     uart_config.stop_bits = uart_stop_bits_t::UART_STOP_BITS_2;
     InitializeUart (uart_config, PIXEL_FIFO_TRIGGER_LEVEL);
 #endif
@@ -187,7 +184,7 @@ void IRAM_ATTR c_OutputTM1814Uart::ISR_Handler ()
         register uint32_t OneValue  = ConvertIntensityToUartDataStream[1];
         register uint32_t ZeroValue = ConvertIntensityToUartDataStream[0];
         uint32_t NumEmptyIntensitySlots = ((((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / TM1814_NUM_DATA_BYTES_PER_INTENSITY_BYTE);
-        while ((NumEmptyIntensitySlots--) && (MoreDataToSend))
+        while ((NumEmptyIntensitySlots--) && (MoreDataToSend()))
         {
             uint8_t IntensityValue = ~GetNextIntensityToSend ();
 
@@ -199,7 +196,7 @@ void IRAM_ATTR c_OutputTM1814Uart::ISR_Handler ()
 
         } // end while there is data to be sent
 
-        if (!MoreDataToSend)
+        if (!MoreDataToSend())
         {
             CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
         }
@@ -218,17 +215,17 @@ void c_OutputTM1814Uart::Render ()
 
     // DEBUG_V (String ("RemainingIntensityCount: ") + RemainingIntensityCount)
 
-    if (gpio_num_t (-1) == DataPin) { return; }
-    if (!canRefresh ()) { return; }
+    if (canRefresh ())
+    {
+        // get the next frame started
+        StartNewFrame ();
 
-    // get the next frame started
-    StartNewFrame ();
+        // enable interrupts
+        WRITE_PERI_REG (UART_CONF1 (UartId), PIXEL_FIFO_TRIGGER_LEVEL << UART_TXFIFO_EMPTY_THRHD_S);
+        SET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
 
-    // enable interrupts
-    WRITE_PERI_REG (UART_CONF1 (UartId), PIXEL_FIFO_TRIGGER_LEVEL << UART_TXFIFO_EMPTY_THRHD_S);
-    SET_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
-
-    ReportNewFrame ();
+        ReportNewFrame ();
+    }
 
     // DEBUG_END;
 
