@@ -167,9 +167,11 @@ void setup()
 
 /// Configuration Validations
 /** Validates the config_t (core) configuration structure and forces defaults for invalid entries */
-void validateConfig()
+bool validateConfig()
 {
     // DEBUG_START;
+
+    bool configValid = true;
 
 #ifdef ARDUINO_ARCH_ESP8266
     String chipId = String (ESP.getChipId (), HEX);
@@ -180,17 +182,21 @@ void validateConfig()
     // Device defaults
     if (!config.id.length ())
     {
-        config.id = "No ID Found";
+        config.id = "ESPixelStick";
+        configValid = false;
         // DEBUG_V ();
     }
 
     if (0 == config.hostname.length ())
     {
         config.hostname = "esps-" + String (chipId);
+        configValid = false;
         // DEBUG_V ();
     }
 
     WiFiMgr.ValidateConfig (&config);
+
+    return configValid;
 
     // DEBUG_END;
 } // validateConfig
@@ -336,15 +342,9 @@ void loadConfig()
 
     String temp;
     // DEBUG_V ("");
-    if (FileMgr.LoadConfigFile (ConfigFileName, &deserializeCoreHandler))
-    {
-        // DEBUG_V ("Validate");
-        validateConfig();
-    }
-    else
-    {
-        // DEBUG_V ("Load failed, create a new config file and save it");
-        CreateNewConfig();
+    FileMgr.LoadConfigFile (ConfigFileName, &deserializeCoreHandler);
+    if (!validateConfig()) {
+        SaveConfig();
     }
 
     // DEBUG_START;
@@ -428,12 +428,9 @@ String serializeCore(bool pretty)
 } // serializeCore
 
 // Save configuration JSON file
-void CreateNewConfig()
+void SaveConfig()
 {
     // DEBUG_START;
-
-    // Validate Config
-    validateConfig();
 
     // Save Config
     String DataToSave = serializeCore (false);
@@ -442,7 +439,7 @@ void CreateNewConfig()
     FileMgr.SaveConfigFile(ConfigFileName, DataToSave);
 
     // DEBUG_END;
-} // CreateNewConfig
+} // SaveConfig
 
 /////////////////////////////////////////////////////////
 //
