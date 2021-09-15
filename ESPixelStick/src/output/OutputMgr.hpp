@@ -70,7 +70,10 @@ public:
 #endif // ndef ESP32_CAM
         OutputChannelId_SPI_1,
 #endif // def ARDUINO_ARCH_ESP32
+
+#ifndef BOARD_ESPS_V3
         OutputChannelId_Relay,
+#endif // def BOARD_ESPS_V3
         OutputChannelId_End, // must be last in the list
         OutputChannelId_Start = OutputChannelId_UART_1,
 
@@ -92,8 +95,7 @@ public:
 
     enum e_OutputType
     {
-        OutputType_Disabled = 0,
-        OutputType_WS2811,
+        OutputType_WS2811 = 0,
         OutputType_GECE,
         OutputType_DMX,
         OutputType_Renard,
@@ -107,6 +109,7 @@ public:
         OutputType_WS2801,
         OutputType_APA102,
 #endif // def ARDUINO_ARCH_ESP32
+        OutputType_Disabled,
         OutputType_End, // must be last
         OutputType_Start = OutputType_WS2811,
     };
