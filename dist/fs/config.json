@@ -1,4 +1,8 @@
 {
+  "cfgver": 1,
+  "device": {
+    "id": "ESPixelStick"
+  },
   "network": {
     "ssid": "",
     "passphrase": "",
@@ -11,8 +15,5 @@
     "ap_fallback": false,
     "ap_timeout": 120,
     "ap_reboot": true
-  },
-  "device": {
-    "id": "ESPixelStick"
   }
 }
