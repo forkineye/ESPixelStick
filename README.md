@@ -27,7 +27,7 @@ Required for all platforms:
 
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson) - Arduino JSON Library
 - [ESPAsyncE131](https://github.com/forkineye/ESPAsyncE131) - Asynchronous E1.31 (sACN) library
-- [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) - Asynchronous Web Server Library
+- [ESPAsyncWebServer](https://github.com/forkineye/ESPAsyncWebServer) - Asynchronous Web Server Library
 - [async-mqtt-client](https://github.com/marvinroger/async-mqtt-client) - Asynchronous MQTT Client
 - [Int64String](https://github.com/djGrrr/Int64String) - Converts 64 bit integers into a string
 - [EspAlexa](https://github.com/MartinMueller2003/Espalexa) - Alexa Direct control Library
@@ -37,12 +37,12 @@ Required for all platforms:
 
 Required for ESP8266:
 
-- [ESPAsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP) - Asynchronous TCP Library
+- [ESPAsyncTCP](https://github.com/forkineye/ESPAsyncTCP) - Asynchronous TCP Library
 - [ESPAsyncUDP](https://github.com/me-no-dev/ESPAsyncUDP) - Asynchronous UDP Library
 
 Required for ESP32:
 
-- [AsyncTCP](https://github.com/me-no-dev/AsyncTCP) - Asynchronous TCP Library
+- [AsyncTCP](https://github.com/forkineye/AsyncTCP) - Asynchronous TCP Library
 
 ## Important Notes on Compiling and Flashing
 

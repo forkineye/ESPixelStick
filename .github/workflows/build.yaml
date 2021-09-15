@@ -71,7 +71,7 @@ jobs:
       - name: Checkout ESPAsyncWebServer
         uses: actions/checkout@v2
         with:
-          repository: me-no-dev/ESPAsyncWebServer
+          repository: forkineye/ESPAsyncWebServer
           path: alib/ESPAsyncWebServer
 
       - name: Checkout async-mqtt-client
@@ -114,7 +114,7 @@ jobs:
       - name: Checkout ESPAsyncTCP
         uses: actions/checkout@v2
         with:
-          repository: me-no-dev/ESPAsyncTCP
+          repository: forkineye/ESPAsyncTCP
           path: alib/ESPAsyncTCP
 
       - name: Checkout ESPAsyncUDP
@@ -127,7 +127,7 @@ jobs:
       - name: Checkout AsyncTCP
         uses: actions/checkout@v2
         with:
-          repository: me-no-dev/AsyncTCP
+          repository: forkineye/AsyncTCP
           path: alib/AsyncTCP
 
       # Move Arduino libraries where they need to be.
