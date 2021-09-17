@@ -131,7 +131,9 @@ stop bit = low for at least 45us
 // forward declaration for the isr handler
 static void IRAM_ATTR uart_intr_handler (void* param);
 
-#ifdef ARDUINO_ARCH_ESP8266
+#ifdef BOARD_ESPS_V3
+static c_OutputGECE* GECE_OutputChanArray[c_OutputMgr::e_OutputChannelIds::OutputChannelId_End] = { nullptr };
+#elif defined (ARDUINO_ARCH_ESP8266)
 static c_OutputGECE* GECE_OutputChanArray[c_OutputMgr::e_OutputChannelIds::OutputChannelId_End] = { nullptr, nullptr };
 #else
 static c_OutputGECE* GECE_OutputChanArray[c_OutputMgr::e_OutputChannelIds::OutputChannelId_End] = { nullptr, nullptr, nullptr };

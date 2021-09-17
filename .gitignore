@@ -7,3 +7,4 @@ node_modules
 secrets.h
 __pycache__
 *.pyc
+ESPixelStick/data/www

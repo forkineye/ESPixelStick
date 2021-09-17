@@ -104,7 +104,9 @@ static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] 
 
 #endif // def ARDUINO_ARCH_ESP32
 
+#ifndef BOARD_ESPS_V3
     {gpio_num_t::GPIO_NUM_10, uart_port_t (-1)},
+#endif // def BOARD_ESPS_V3
 };
 
 //-----------------------------------------------------------------------------
@@ -481,23 +483,6 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 break;
             }
 
-            case e_OutputType::OutputType_Relay:
-            {
-                if (ChannelIndex == OutputChannelId_Relay)
-                {
-                    // logcon (CN_stars + String (F (" Starting RELAY for channel '")) + ChannelIndex + "'. " + CN_stars);
-                    pOutputChannelDrivers[ChannelIndex] = new c_OutputRelay (ChannelIndex, dataPin, UartId, OutputType_Relay);
-                    // DEBUG_V ("");
-                    break;
-                }
-                // DEBUG_V ("");
-
-                logcon (CN_stars + String (F (" Cannot Start RELAY for channel '")) + ChannelIndex + "'. " + CN_stars);
-                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
-                // DEBUG_V ("");
-                break;
-            }
-
             case e_OutputType::OutputType_Renard:
             {
                 if (OM_IS_UART)
@@ -510,6 +495,24 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 // DEBUG_V ("");
 
                 logcon (CN_stars + String (F (" Cannot Start Renard for channel '")) + ChannelIndex + "'. " + CN_stars);
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                // DEBUG_V ("");
+                break;
+            }
+
+#ifndef BOARD_ESPS_V3
+            case e_OutputType::OutputType_Relay:
+            {
+                if (ChannelIndex == OutputChannelId_Relay)
+                {
+                    // logcon (CN_stars + String (F (" Starting RELAY for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputRelay (ChannelIndex, dataPin, UartId, OutputType_Relay);
+                    // DEBUG_V ("");
+                    break;
+                }
+                // DEBUG_V ("");
+
+                logcon (CN_stars + String (F (" Cannot Start RELAY for channel '")) + ChannelIndex + "'. " + CN_stars);
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
                 break;
@@ -531,6 +534,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 // DEBUG_V ("");
                 break;
             }
+#endif // BOARD_ESPS_V3
 
             case e_OutputType::OutputType_WS2811:
             {
