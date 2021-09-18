@@ -5,31 +5,35 @@ env:
   ESP8266_PLAT: 'esp8266:esp8266@3.0.2'
   ESP32_PLAT: 'esp32:esp32@2.0.0'
 
-#  ESP8266_FQBN: 'esp8266:esp8266:generic:xtal=160,vt=flash,exception=disabled,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=40,FlashMode=dio,eesz=4M2M,led=2,ip=hb2f,dbg=Disabled'
-#  ESP32_FQBN: 'esp32:esp32:d32_pro:PSRAM=enabled,PartitionScheme=default,FlashFreq=80,DebugLevel=none'
-#  ESP32_FQBN: 'esp32:esp32:d1_mini32:PartitionScheme=min_spiffs,FlashFreq=80'
-
 jobs:
   firmware:
     strategy:
       matrix:
-#        target: ["d1_mini", "d32_pro", "d1_mini32"]
         include:
-          # ESPixelStick V3 - Wemos D1 Mini ESP8266
+          # ESPixelStick V3
+          - target: "espsv3"
+            platform: $ESP8266_PLAT
+            chip: "esp8266"
+            fqbn: "esp8266:esp8266:d1_mini:xtal=160,eesz=4M2M,ip=hb2f"
+            flags: "--build-property compiler.cpp.extra_flags=-DBOARD_ESPS_V3"
+          # Wemos D1 Mini ESP8266
           - target: "d1_mini"
             platform: $ESP8266_PLAT
             chip: "esp8266"
             fqbn: "esp8266:esp8266:d1_mini:xtal=160,eesz=4M2M,ip=hb2f"
+            flags: ""
           # Wemos D1 Mini ESP32
           - target: "d1_mini32"
             platform: $ESP32_PLAT
             chip: "esp32"
             fqbn: "esp32:esp32:d1_mini32:PartitionScheme=min_spiffs"
+            flags: ""
           # Lolin D32 Pro
           - target: "d32_pro"
             platform: $ESP32_PLAT
             chip: "esp32"
             fqbn: "esp32:esp32:d32_pro:PSRAM=enabled,PartitionScheme=min_spiffs"
+            flags: ""
 
     runs-on: ubuntu-latest
     steps:
@@ -144,7 +148,7 @@ jobs:
         env:
           chip: ${{ matrix.chip }}
         run: |
-          arduino-cli compile --fqbn ${{ matrix.fqbn }} --build-path ~/build ESPixelStick
+          arduino-cli compile --fqbn ${{ matrix.fqbn }} ${{ matrix.flags }} --build-path ~/build ESPixelStick
           mkdir -p firmware/${{ matrix.chip }}
           mv ~/build/ESPixelStick.ino.bin firmware/${{ matrix.chip }}/${{ matrix.target }}-app.bin
           if [ "$chip" = "esp32" ]; then

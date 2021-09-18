@@ -205,20 +205,7 @@ bool dsDevice(JsonObject & json)
     {
         JsonObject JsonDeviceConfig = json[CN_device];
 
-        String TempVersion;
-        setFromJSON (TempVersion, JsonDeviceConfig, CN_cfgver);
-
-        // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
-        // DEBUG_V (String ("CurrentConfigVersion: ") + String (CurrentConfigVersion));
-        // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
-        // PrettyPrint (JsonDeviceConfig, "Main Config");
-
-        if (TempVersion != CurrentConfigVersion)
-        {
-            // need to do something in the future
-            logcon (String (F ("Incorrect Device Config Version ID found in config")));
-            // break;
-        }
+//TODO: Add configuration upgrade handling - cfgver moved to root level
 
         ConfigChanged |= setFromJSON (config.id,        JsonDeviceConfig, CN_id);
     }
@@ -256,20 +243,7 @@ bool dsNetwork(JsonObject & json)
 
         JsonObject network = json[CN_network];
 
-        String TempVersion;
-        setFromJSON (TempVersion, network, CN_cfgver);
-
-        // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
-        // DEBUG_V (String ("CurrentConfigVersion: ") + String (CurrentConfigVersion));
-        // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
-        // PrettyPrint (network, "Main Config");
-
-        if (TempVersion != CurrentConfigVersion)
-        {
-            // need to do something in the future
-            logcon (String (F ("Incorrect Version ID found in config")));
-            // break;
-        }
+//TODO: Add configuration upgrade handling - cfgver moved to root level
 
         ConfigChanged |= setFromJSON (config.ssid,                         network, CN_ssid);
         ConfigChanged |= setFromJSON (config.passphrase,                   network, CN_passphrase);
@@ -323,6 +297,14 @@ bool deserializeCore (JsonObject & json)
 
     do // once
     {
+        String TempVersion;
+        setFromJSON (TempVersion, json, CN_cfgver);
+        if (TempVersion != CurrentConfigVersion)
+        {
+//TODO: Add configuration update handler
+            logcon (String (F ("Incorrect Config Version ID")));
+        }
+
         dsDevice  (json);
         FileMgr.SetConfig (json);
         ResetWiFi = dsNetwork (json);
@@ -381,16 +363,17 @@ void GetConfig (JsonObject & json)
 {
     // DEBUG_START;
 
+    // Config Version
+    json[CN_cfgver] = CurrentConfigVersion;
+
     // Device
     JsonObject device = json.createNestedObject(CN_device);
     device[CN_id]     = config.id;
-    device[CN_cfgver] = CurrentConfigVersion;
 
     FileMgr.GetConfig (device);
 
     // Network
     JsonObject network = json.createNestedObject(CN_network);
-    network[CN_cfgver]     = CurrentConfigVersion;
     network[CN_ssid]       = config.ssid;
     network[CN_passphrase] = config.passphrase;
     network[CN_hostname] = config.hostname;

@@ -6,6 +6,29 @@
             "name": "ESPixelStick V3",
             "description": "Official hardware from Forkineye",
             "chip": "esp8266",
+            "appbin": "esp8266/espsv3-app.bin",
+            "esptool": {
+                "baudrate": "460800",
+                "options": "--before default_reset --after hard_reset",
+                "flashcmd": "write_flash"
+            },
+            "binfiles": [
+                {
+                    "name": "esp8266/espsv3-app.bin",
+                    "offset": "0x0"
+                }
+            ],
+            "filesystem": {
+                "page": "256",
+                "block": "8192",
+                "size": "2072576",
+                "offset": "0x200000"
+            }
+        },
+        {
+            "name": "Wemos D1 Mini",
+            "description": "Generic Wemos D1 Mini for DIY builds",
+            "chip": "esp8266",
             "appbin": "esp8266/d1_mini-app.bin",
             "esptool": {
                 "baudrate": "460800",
