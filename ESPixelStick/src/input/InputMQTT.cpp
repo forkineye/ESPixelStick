@@ -41,6 +41,7 @@ c_InputMQTT::c_InputMQTT (
     // DEBUG_START;
 
     topic = String (F ("forkineye/")) + config.hostname;
+    lwtTopic = topic + CN_slashstatus;
 
     // Effect config defaults
     effectConfig.effect       = "Solid";
@@ -52,6 +53,9 @@ c_InputMQTT::c_InputMQTT (
     effectConfig.color.r      = 183;
     effectConfig.color.g      = 0;
     effectConfig.color.b      = 255;
+
+    // Set LWT - Must be set before mqtt connect()
+    mqtt.setWill (lwtTopic.c_str(), 1, true, LWT_OFFLINE);
 
     // DEBUG_END;
 } // c_InputE131
@@ -302,9 +306,8 @@ void c_InputMQTT::onMqttConnect(bool sessionPresent)
     // Subscribe to 'set'
     mqtt.subscribe(String(topic + CN_slashset).c_str(), 0);
 
-    // Set LWT
-    mqtt.setWill ((topic + String(LWT_TOPIC)).c_str(), 1, true, LWT_OFFLINE);
-    mqtt.publish ((topic + String(LWT_TOPIC)).c_str(), 1, true, LWT_ONLINE);
+    // Update 'status' / LWT topic
+    mqtt.publish (lwtTopic.c_str(), 1, true, LWT_ONLINE);
 
     // Publish state and Home Assistant discovery topic
     publishHA ();
@@ -693,7 +696,7 @@ void c_InputMQTT::publishHA()
         JsonConfig[F ("schema")]             = F ("json");
         JsonConfig[F ("state_topic")]        = topic;
         JsonConfig[F ("command_topic")]      = topic + CN_slashset;
-        JsonConfig[F ("availability_topic")] = topic + LWT_TOPIC;
+        JsonConfig[F ("availability_topic")] = lwtTopic;
         JsonConfig[F ("rgb")]                = CN_true;
 
         GetEffectList (JsonConfig);

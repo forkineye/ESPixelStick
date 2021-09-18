@@ -66,10 +66,10 @@ private:
     bool        CleanSessionRequired = false;
     String      haprefix = "homeassistant";
     bool        hadisco = true;
+    String      lwtTopic;
 
     const char* ON = "ON";
     const char* OFF = "OFF";
-    const char* LWT_TOPIC = "/status";
     const char* LWT_ONLINE = "online";
     const char* LWT_OFFLINE = "offline";
 

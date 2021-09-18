@@ -135,6 +135,7 @@ extern const char CN_seconds_played[];
 extern const char CN_seconds_remaining[];
 extern const char CN_sequence_filename[];
 extern const char CN_slashset[];
+extern const char CN_slashstatus[];
 extern const char CN_speed[];
 extern const char CN_ssid [];
 extern const char CN_sta_timeout [];
