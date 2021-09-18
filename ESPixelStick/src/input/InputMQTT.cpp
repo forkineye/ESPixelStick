@@ -40,7 +40,7 @@ c_InputMQTT::c_InputMQTT (
 {
     // DEBUG_START;
 
-    topic = F ("forkineye/") + config.hostname;
+    topic = String (F ("forkineye/")) + config.hostname;
 
     // Effect config defaults
     effectConfig.effect       = "Solid";
@@ -253,19 +253,6 @@ void c_InputMQTT::onNetworkDisconnect()
 } // onDisconnect
 
 //-----------------------------------------------------------------------------
-// void c_InputMQTT::update()
-// {
-//     // DEBUG_START;
-
-//     // Update Home Assistant Discovery if enabled
-//     publishHA ();
-//     publishState ();
-
-//     // DEBUG_END;
-
-// } // update
-
-//-----------------------------------------------------------------------------
 void c_InputMQTT::connectToMqtt()
 {
     // DEBUG_START;
@@ -319,9 +306,7 @@ void c_InputMQTT::onMqttConnect(bool sessionPresent)
     mqtt.setWill ((topic + String(LWT_TOPIC)).c_str(), 1, true, LWT_OFFLINE);
     mqtt.publish ((topic + String(LWT_TOPIC)).c_str(), 1, true, LWT_ONLINE);
 
-    // Publish state
-    //update ();
-    // Publish Home Assistant discovery topic
+    // Publish state and Home Assistant discovery topic
     publishHA ();
     publishState ();
 
@@ -718,14 +703,14 @@ void c_InputMQTT::publishHA()
 
         // Create a unique id using the chip id, and fill in the device properties
         // to enable integration support in HomeAssistant.
-        JsonConfig[F ("unique_id")] = F ("esps-") + chipId;
+        JsonConfig[F ("unique_id")] = CN_ESPixelStick + chipId;
 
         JsonObject device = JsonConfig.createNestedObject (CN_device);
         device[F ("identifiers")]  = WiFi.macAddress ();
         device[F ("manufacturer")] = F ("Forkineye");
         device[F ("model")]        = CN_ESPixelStick;
         device[CN_name]            = config.id;
-        device[F ("sw_version")]   = String(CN_ESPixelStick) + " v" + VERSION;
+        device[F ("sw_version")]   = String (CN_ESPixelStick) + " v" + VERSION;
 
         String HaJsonConfig;
         serializeJson(JsonConfig, HaJsonConfig);

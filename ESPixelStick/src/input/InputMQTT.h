@@ -79,7 +79,6 @@ private:
     void onNetworkConnect ();     ///< Call from onWifiConnect()
     void onNetworkDisconnect ();  ///< Call from onWiFiDisconnect()
     void validate ();      ///< Call from validateConfig()
-    //void update ();        ///< Call from updateConfig()
     void NetworkStateChanged (bool IsConnected, bool RebootAllowed); // used by poorly designed rx functions
     void PlayFseq (JsonObject & JsonConfig);
     void PlayEffect (JsonObject & JsonConfig);
