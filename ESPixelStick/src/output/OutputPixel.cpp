@@ -170,8 +170,8 @@ bool c_OutputPixel::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     // Update the config fields in case the validator changed them
     GetConfig (jsonConfig);
 
-    ZigPixelCount = (2 > zig_size) ? pixel_count + 1 : zig_size + 1;
-    ZagPixelCount = (2 > zig_size) ? pixel_count + 1 : zig_size + 0;
+    ZigPixelCount  = (2 > zig_size) ? pixel_count + 1 : zig_size + 1;
+    ZagPixelCount  = (2 > zig_size) ? pixel_count + 1 : zig_size + 1;
     PixelGroupSize = (2 > PixelGroupSize) ? 1 : PixelGroupSize;
 
     // DEBUG_V (String ("ZigPixelCount: ") + String (ZigPixelCount));
@@ -319,7 +319,7 @@ void IRAM_ATTR c_OutputPixel::StartNewFrame ()
     NextPixelToSend = GetBufferAddress ();
     FramePrependDataCurrentIndex = 0;
     FrameAppendDataCurrentIndex = 0;
-    ZigPixelCurrentCount = 0;
+    ZigPixelCurrentCount = 1;
     ZagPixelCurrentCount = 0;
     SentPixelsCount = 0;
     PixelIntensityCurrentIndex = 0;
@@ -468,7 +468,7 @@ uint8_t IRAM_ATTR c_OutputPixel::GetNextIntensityToSend ()
                     if (0 == ZagPixelCurrentCount)
                     {
                         // first backward pixel
-                        NextPixelToSend += NumIntensityBytesPerPixel * (ZigPixelCount + 1);
+                        NextPixelToSend += NumIntensityBytesPerPixel * (ZagPixelCount);
                     }
 
                     // have we completed the backward traverse
@@ -483,10 +483,10 @@ uint8_t IRAM_ATTR c_OutputPixel::GetNextIntensityToSend ()
                     // response = 0xFF;
 
                     // move to next forward pixel
-                    NextPixelToSend += NumIntensityBytesPerPixel * (ZigPixelCount);
+                    NextPixelToSend += NumIntensityBytesPerPixel * (ZagPixelCount - 1);
 
                     // refresh the zigZag
-                    ZigPixelCurrentCount = 0;
+                    ZigPixelCurrentCount = 1;
                     ZagPixelCurrentCount = 0;
 
                     break;
