@@ -21,6 +21,7 @@
 #include <Arduino.h>
 #include "InputCommon.hpp"
 #include <AsyncMqttClient.h>
+#include "InputEffectEngine.hpp"
 #include "InputFPPRemotePlayItem.hpp"
 
 class c_InputMQTT : public c_InputCommon
@@ -32,7 +33,7 @@ class c_InputMQTT : public c_InputCommon
           c_InputMgr::e_InputType       NewChannelType,
           uint8_t                     * BufferStart,
           uint16_t                      BufferSize);
-      
+
       ~c_InputMQTT ();
 
       // functions to be provided by the derived class
@@ -53,6 +54,9 @@ private:
     c_InputCommon * pEffectsEngine = nullptr;
     c_InputFPPRemotePlayItem* pPlayFileEngine = nullptr;
 
+    // Keep track of last known effect configuration state
+    c_InputEffectEngine::MQTTConfiguration_s effectConfig;
+
     // from original config struct
     String      ip;
     uint16_t    port = MQTT_PORT;
@@ -60,32 +64,33 @@ private:
     String      password;
     String      topic;
     bool        CleanSessionRequired = false;
-    bool        hadisco = false;
     String      haprefix = "homeassistant";
-    String      lwt = "";
+    bool        hadisco = true;
+
+    const char* ON = "ON";
+    const char* OFF = "OFF";
+    const char* LWT_TOPIC = "/status";
+    const char* LWT_ONLINE = "online";
+    const char* LWT_OFFLINE = "offline";
 
     void validateConfiguration ();
-    void RegisterWithMqtt ();
 
     void setup ();         ///< Call from setup()
     void onNetworkConnect ();     ///< Call from onWifiConnect()
     void onNetworkDisconnect ();  ///< Call from onWiFiDisconnect()
     void validate ();      ///< Call from validateConfig()
-    void update ();        ///< Call from updateConfig()
+    //void update ();        ///< Call from updateConfig()
     void NetworkStateChanged (bool IsConnected, bool RebootAllowed); // used by poorly designed rx functions
     void PlayFseq (JsonObject & JsonConfig);
     void PlayEffect (JsonObject & JsonConfig);
     void GetEngineConfig (JsonObject & JsonConfig);
     void GetEffectList (JsonObject & JsonConfig);
     void StopPlayFileEngine ();
+    void UpdateEffectConfiguration (JsonObject & JsonConfig);
 
     void load ();          ///< Load configuration from File System
     void save ();          ///< Save configuration to File System
 
-    // const char* CONFIG_FILE = "/mqtt.json";
-    const char* SET_COMMAND_TOPIC = "/set";
-    const char* ON = "ON";
-    const char* OFF = "OFF";
     bool stateOn = false;
 
     /////////////////////////////////////////////////////////

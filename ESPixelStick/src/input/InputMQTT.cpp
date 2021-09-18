@@ -18,10 +18,10 @@
 */
 
 #include "../ESPixelStick.h"
+#include "../WiFiMgr.hpp"
 #include <Ticker.h>
 #include <Int64String.h>
 #include "InputMQTT.h"
-#include "InputEffectEngine.hpp"
 #include "InputFPPRemotePlayFile.hpp"
 #include "InputFPPRemotePlayList.hpp"
 
@@ -40,7 +40,18 @@ c_InputMQTT::c_InputMQTT (
 {
     // DEBUG_START;
 
-    topic = config.hostname;
+    topic = F ("forkineye/") + config.hostname;
+
+    // Effect config defaults
+    effectConfig.effect       = "Solid";
+    effectConfig.mirror       = false;
+    effectConfig.allLeds      = false;
+    effectConfig.brightness   = 255;
+    effectConfig.blankTime    = 0;
+    effectConfig.whiteChannel = false;
+    effectConfig.color.r      = 183;
+    effectConfig.color.g      = 0;
+    effectConfig.color.b      = 255;
 
     // DEBUG_END;
 } // c_InputE131
@@ -48,9 +59,12 @@ c_InputMQTT::c_InputMQTT (
 //-----------------------------------------------------------------------------
 c_InputMQTT::~c_InputMQTT ()
 {
+    // DEBUG_START;
+
     if (HasBeenInitialized)
     {
-        mqtt.unsubscribe (topic.c_str ());
+        // DEBUG_V ("");
+        mqtt.unsubscribe (String(topic + CN_slashset).c_str());
         mqtt.disconnect (/*force = */ true);
         mqttTicker.detach ();
 
@@ -73,6 +87,7 @@ c_InputMQTT::~c_InputMQTT ()
         pPlayFileEngine = nullptr;
     }
 
+    // DEBUG_END;
 } // ~c_InputMQTT
 
 //-----------------------------------------------------------------------------
@@ -80,17 +95,17 @@ void c_InputMQTT::Begin()
 {
     // DEBUG_START;
 
-    if (true == HasBeenInitialized)
-    {
-        // DEBUG_END;
-        return;
-    }
+    // DEBUG_V ("InputDataBufferSize: " + String(InputDataBufferSize));
+
+    validateConfiguration ();
+    // DEBUG_V ("");
+
+    using namespace std::placeholders;
+    mqtt.onConnect    (std::bind (&c_InputMQTT::onMqttConnect,    this, _1));
+    mqtt.onDisconnect (std::bind (&c_InputMQTT::onMqttDisconnect, this, _1));
+    mqtt.onMessage    (std::bind (&c_InputMQTT::onMqttMessage,    this, _1, _2, _3, _4, _5, _6));
+
     HasBeenInitialized = true;
-
-    RegisterWithMqtt ();
-
-    // get things started
-    NetworkStateChanged (InputMgr.GetNetworkState ());
 
     // DEBUG_END;
 
@@ -108,7 +123,6 @@ void c_InputMQTT::GetConfig (JsonObject & jsonConfig)
     jsonConfig[CN_clean]    = CleanSessionRequired;
     jsonConfig[CN_hadisco]  = hadisco;
     jsonConfig[CN_haprefix] = haprefix;
-    jsonConfig[CN_lwt]      = lwt;
     jsonConfig[CN_effects]  = true;
     jsonConfig[CN_play]     = true;
 
@@ -173,7 +187,6 @@ bool c_InputMQTT::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
-    disconnectFromMqtt ();
     String OldTopic = topic;
     setFromJSON (ip,                   jsonConfig, CN_ip);
     setFromJSON (port,                 jsonConfig, CN_port);
@@ -183,7 +196,6 @@ bool c_InputMQTT::SetConfig (ArduinoJson::JsonObject & jsonConfig)
     setFromJSON (CleanSessionRequired, jsonConfig, CN_clean);
     setFromJSON (hadisco,              jsonConfig, CN_hadisco);
     setFromJSON (haprefix,             jsonConfig, CN_haprefix);
-    setFromJSON (lwt,                  jsonConfig, CN_lwt);
 
     validateConfiguration ();
 
@@ -196,7 +208,7 @@ bool c_InputMQTT::SetConfig (ArduinoJson::JsonObject & jsonConfig)
         mqtt.unsubscribe ((OldTopic + CN_slashset).c_str ());
     }
 
-    connectToMqtt ();
+    NetworkStateChanged (WiFiMgr.IsWiFiConnected (), false);
 
     // DEBUG_END;
     return true;
@@ -216,19 +228,6 @@ void c_InputMQTT::validateConfiguration ()
 //  MQTT Section
 //
 /////////////////////////////////////////////////////////
-
-void c_InputMQTT::RegisterWithMqtt ()
-{
-    // DEBUG_START;
-
-    using namespace std::placeholders;
-    mqtt.onConnect    (std::bind (&c_InputMQTT::onMqttConnect,    this, _1));
-    mqtt.onDisconnect (std::bind (&c_InputMQTT::onMqttDisconnect, this, _1));
-    mqtt.onMessage    (std::bind (&c_InputMQTT::onMqttMessage,    this, _1, _2, _3, _4, _5, _6));
-
-    // DEBUG_END;
-
-} // RegisterWithMqtt
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::onNetworkConnect()
@@ -254,17 +253,17 @@ void c_InputMQTT::onNetworkDisconnect()
 } // onDisconnect
 
 //-----------------------------------------------------------------------------
-void c_InputMQTT::update()
-{
-    // DEBUG_START;
+// void c_InputMQTT::update()
+// {
+//     // DEBUG_START;
 
-    // Update Home Assistant Discovery if enabled
-    publishHA ();
-    publishState ();
+//     // Update Home Assistant Discovery if enabled
+//     publishHA ();
+//     publishState ();
 
-    // DEBUG_END;
+//     // DEBUG_END;
 
-} // update
+// } // update
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::connectToMqtt()
@@ -276,13 +275,13 @@ void c_InputMQTT::connectToMqtt()
     if (user.length () > 0)
     {
         // DEBUG_V (String ("User: ") + user);
+        // DEBUG_V (String ("Password: ") + password);
         mqtt.setCredentials (user.c_str (), password.c_str ());
     }
     mqtt.setServer (ip.c_str (), port);
 
     logcon (String(F ("Connecting to broker ")) + ip + ":" + String(port));
     mqtt.connect ();
-    mqtt.setWill (topic.c_str(), 1, true, lwt.c_str(), lwt.length());
 
     // DEBUG_END;
 
@@ -293,7 +292,10 @@ void c_InputMQTT::disconnectFromMqtt ()
 {
     // DEBUG_START;
 
-    logcon (String (F ("Disconnecting from broker")));
+    // Only announce if we're actually connected
+    if (WiFiMgr.IsWiFiConnected()) {
+        logcon (String (F ("Disconnecting from broker")));
+    }
     mqtt.disconnect ();
 
     // DEBUG_END;
@@ -308,14 +310,20 @@ void c_InputMQTT::onMqttConnect(bool sessionPresent)
 
     // Get retained MQTT state
     mqtt.subscribe (topic.c_str (), 0);
+    mqtt.unsubscribe (topic.c_str());
 
-    // Setup subscriptions
-    mqtt.subscribe(String(topic + SET_COMMAND_TOPIC).c_str(), 0);
+    // Subscribe to 'set'
+    mqtt.subscribe(String(topic + CN_slashset).c_str(), 0);
 
-    mqtt.publish (topic.c_str(), 0, true, config.id.c_str());
+    // Set LWT
+    mqtt.setWill ((topic + String(LWT_TOPIC)).c_str(), 1, true, LWT_OFFLINE);
+    mqtt.publish ((topic + String(LWT_TOPIC)).c_str(), 1, true, LWT_ONLINE);
 
     // Publish state
-    update ();
+    //update ();
+    // Publish Home Assistant discovery topic
+    publishHA ();
+    publishState ();
 
     // DEBUG_END;
 
@@ -377,20 +385,27 @@ void c_InputMQTT::onMqttMessage(
 {
     // DEBUG_START;
 
+    // Payload isn't null terminated
+    char* payloadString = (char*)malloc (len + 1);
+    memcpy (payloadString, payload, len);
+    payloadString[len] = 0x00;
+
     do // once
     {
         // DEBUG_V (String ("   topic: ") + String (topic));
         // DEBUG_V (String ("RcvTopic: ") + String (RcvTopic));
-        // DEBUG_V (String (" payload: ") + String (payload));
+        // DEBUG_V (String (" payload: ") + String (payloadString));
+        // DEBUG_V (String ("   l/i/t: ") + String (len) + " / " + String(index) + " / " + String(total));
 
-        if (String (RcvTopic) != topic + CN_slashset)
+        if ((String (RcvTopic) != topic) &&
+            (String (RcvTopic) != topic + CN_slashset))
         {
-            // not a set for us
-            break;
+            // DEBUG_V ("Not our topic");
+            return;
         }
 
         DynamicJsonDocument rootDoc (1024);
-        DeserializationError error = deserializeJson (rootDoc, payload, len);
+        DeserializationError error = deserializeJson (rootDoc, payloadString, len);
 
         // DEBUG_V ("Set new values");
         if (error)
@@ -409,6 +424,8 @@ void c_InputMQTT::onMqttMessage(
             break;
         }
 
+        UpdateEffectConfiguration(root);
+
         // DEBUG_V ("");
         String NewState;
         setFromJSON (NewState, root, CN_state);
@@ -416,6 +433,7 @@ void c_InputMQTT::onMqttMessage(
 
         stateOn = NewState.equalsIgnoreCase(ON);
         InputMgr.SetOperationalState (!stateOn);
+        SetOperationalState (stateOn);
         // DEBUG_V (String("stateOn: ") + String(stateOn));
 
         if (stateOn)
@@ -439,7 +457,6 @@ void c_InputMQTT::onMqttMessage(
         else
         {
             // DEBUG_V ("State OFF");
-
             if (nullptr != pEffectsEngine)
             {
                 delete pEffectsEngine;
@@ -458,6 +475,8 @@ void c_InputMQTT::onMqttMessage(
 
         // DEBUG_V ("");
     } while (false);
+
+    free (payloadString);
 
     // DEBUG_END;
 
@@ -570,7 +589,7 @@ void c_InputMQTT::PlayEffect (JsonObject & JsonConfig)
     pEffectsEngine->SetOperationalState (true);
     // DEBUG_V ("");
 
-    ((c_InputEffectEngine*)(pEffectsEngine))->SetMqttConfig (JsonConfig);
+    ((c_InputEffectEngine*)(pEffectsEngine))->SetMqttConfig (effectConfig);
 
     // DEBUG_END;
 
@@ -594,26 +613,27 @@ void c_InputMQTT::StopPlayFileEngine ()
 //-----------------------------------------------------------------------------
 void c_InputMQTT::GetEngineConfig (JsonObject & JsonConfig)
 {
-    // DEBUG_START;
+     // DEBUG_START;
 
-    bool EffectEngineIsRunning = (nullptr != pEffectsEngine);
-    if (nullptr == pEffectsEngine)
+    if (nullptr != pEffectsEngine)
     {
-        // DEBUG_V ("");
-        pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputChannelId_1, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
-        pEffectsEngine->Begin ();
-        pEffectsEngine->SetOperationalState (false);
+        // DEBUG_V ("Effects engine running");
+        ((c_InputEffectEngine*)(pEffectsEngine))->GetMqttConfig (effectConfig);
+    } else {
+        // DEBUG_V ("Effects engine not running");
     }
-    // DEBUG_V ("");
 
+    JsonConfig[CN_effect]             = effectConfig.effect;
+    JsonConfig[CN_mirror]             = effectConfig.mirror;
+    JsonConfig[CN_allleds]            = effectConfig.allLeds;
+    JsonConfig[CN_brightness]         = effectConfig.brightness;
+    JsonConfig[CN_blanktime]          = effectConfig.blankTime;
+    JsonConfig[CN_EffectWhiteChannel] = effectConfig.whiteChannel;
 
-    ((c_InputEffectEngine*)(pEffectsEngine))->GetMqttConfig (JsonConfig);
-
-    if (!EffectEngineIsRunning)
-    {
-        delete pEffectsEngine;
-        pEffectsEngine = nullptr;
-    }
+    JsonObject color = JsonConfig.createNestedObject (CN_color);
+    color[CN_r] = effectConfig.color.r;
+    color[CN_g] = effectConfig.color.g;
+    color[CN_b] = effectConfig.color.b;
 
     if (nullptr != pPlayFileEngine)
     {
@@ -683,12 +703,13 @@ void c_InputMQTT::publishHA()
         DynamicJsonDocument root(1024);
         JsonObject JsonConfig = root.to<JsonObject> ();
 
-        JsonConfig[F ("platform")]      = F ("MQTT");
-        JsonConfig[CN_name]             = config.hostname;
-        JsonConfig[F ("schema")]        = F ("json");
-        JsonConfig[F ("state_topic")]   = topic;
-        JsonConfig[F ("command_topic")] = topic + CN_slashset;
-        JsonConfig[F ("rgb")]           = CN_true;
+        JsonConfig[F ("platform")]           = F ("MQTT");
+        JsonConfig[CN_name]                  = config.id;
+        JsonConfig[F ("schema")]             = F ("json");
+        JsonConfig[F ("state_topic")]        = topic;
+        JsonConfig[F ("command_topic")]      = topic + CN_slashset;
+        JsonConfig[F ("availability_topic")] = topic + LWT_TOPIC;
+        JsonConfig[F ("rgb")]                = CN_true;
 
         GetEffectList (JsonConfig);
 
@@ -697,13 +718,13 @@ void c_InputMQTT::publishHA()
 
         // Create a unique id using the chip id, and fill in the device properties
         // to enable integration support in HomeAssistant.
-        JsonConfig[F ("unique_id")] = CN_ESPixelStick + chipId;
+        JsonConfig[F ("unique_id")] = F ("esps-") + chipId;
 
         JsonObject device = JsonConfig.createNestedObject (CN_device);
         device[F ("identifiers")]  = WiFi.macAddress ();
-        device[F ("manufacturer")] = CN_ESPixelStick;
-        device[F ("model")]        = F ("Pixel Controller");
-        device[CN_name]            = config.hostname;
+        device[F ("manufacturer")] = F ("Forkineye");
+        device[F ("model")]        = CN_ESPixelStick;
+        device[CN_name]            = config.id;
         device[F ("sw_version")]   = String(CN_ESPixelStick) + " v" + VERSION;
 
         String HaJsonConfig;
@@ -766,16 +787,33 @@ void c_InputMQTT::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
     else if (ReBootAllowed)
     {
         // handle a disconnect
-        // E1.31 does not do this gracefully. A loss of connection needs a reboot
         extern bool reboot;
         reboot = true;
         logcon (String (F ("Requesting reboot on loss of network connection.")));
-    }
-    else
-    {
-        onNetworkDisconnect ();
     }
 
     // DEBUG_END;
 
 } // NetworkStateChanged
+
+//-----------------------------------------------------------------------------
+void c_InputMQTT::UpdateEffectConfiguration (JsonObject & JsonConfig)
+{
+    // DEBUG_START
+    setFromJSON (effectConfig.effect,       JsonConfig, CN_effect);
+    setFromJSON (effectConfig.mirror,       JsonConfig, CN_mirror);
+    setFromJSON (effectConfig.allLeds,      JsonConfig, CN_allleds);
+    setFromJSON (effectConfig.brightness,   JsonConfig, CN_brightness);
+    setFromJSON (effectConfig.blankTime,    JsonConfig, CN_blanktime);
+    setFromJSON (effectConfig.whiteChannel, JsonConfig, CN_EffectWhiteChannel);
+
+    if (JsonConfig.containsKey (CN_color))
+    {
+        JsonObject JsonColor = JsonConfig[CN_color];
+        setFromJSON (effectConfig.color.r, JsonColor, CN_r);
+        setFromJSON (effectConfig.color.g, JsonColor, CN_g);
+        setFromJSON (effectConfig.color.b, JsonColor, CN_b);
+    }
+
+    //DEBUG_END
+} // UpdateEffectConfiguration

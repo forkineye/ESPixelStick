@@ -32,21 +32,9 @@
                     <input type="text" class="form-control" id="topic" name="topic" maxlength="32" title="MQTT Status Topic. Control topic will be appended with /set." onchange="UpdateTopicSet(this)">
                 </div>
 
-                <label class="control-label col-sm-2" for="topicset">Set Topic</label>
-                <div class="col-sm-4 topicset">
-                    <input type="text" class="form-control topicset" id="topicset" name="topicset" maxlength="32" title="MQTT Set Topic." readonly="true">
-                </div>
-            </div>
-
-            <div class="form-group has-feedback">
                 <label class="control-label col-sm-2" for="haprefix">Home Assistant Prefix</label>
                 <div class="col-sm-4">
                     <input type="text" class="form-control" id="haprefix" name="haprefix" maxlength="32" title="Prefix used for Home Assistant Discovery">
-                </div>
-
-                <label class="control-label col-sm-2" for="lwt">LWT Payload</label>
-                <div class="col-sm-4">
-                    <input type="text" class="form-control" id="lwt" name="lwt" maxlength="32" title="Last Will \& Testiment">
                 </div>
             </div>
 
@@ -61,17 +49,3 @@
         </fieldset>
     </div>
 </div>
-
-<script>
-    function UpdateTopicSet(ThisObject)
-    {
-        $(ThisObject.parentNode.parentNode.children).each(function ()
-        {
-            if ($(this).hasClass("topicset"))
-            {
-                this.children[0].value = ThisObject.value + "/set";
-            }
-        });
-    } // UpdateTopicSet
-</script>
-
