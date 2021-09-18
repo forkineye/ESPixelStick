@@ -172,7 +172,8 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
     do // once
     {
         time_t now = millis ();
-        uint32_t CurrentFrame = p_InputFPPRemotePlayFile->CalculateFrameId (now);
+        int32_t SyncOffset = p_InputFPPRemotePlayFile->GetSyncOffsetMS ();
+        uint32_t CurrentFrame = p_InputFPPRemotePlayFile->CalculateFrameId (now, SyncOffset);
 
         // have we reached the end of the file?
         if (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence <= CurrentFrame)
@@ -394,11 +395,11 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, uint32_t TargetFram
 
             if (CurrentFrame > TargetFrameId)
             {
-                p_InputFPPRemotePlayFile->TimeOffset -= TimeOffsetStep;
+                p_InputFPPRemotePlayFile->TimeOffsetMS -= TimeOffsetStep;
             }
             else
             {
-                p_InputFPPRemotePlayFile->TimeOffset += TimeOffsetStep;
+                p_InputFPPRemotePlayFile->TimeOffsetMS += TimeOffsetStep;
             }
 
             p_InputFPPRemotePlayFile->StartTimeInMillis =

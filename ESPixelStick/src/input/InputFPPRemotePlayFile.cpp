@@ -70,7 +70,7 @@ void c_InputFPPRemotePlayFile::Stop ()
 void c_InputFPPRemotePlayFile::Sync (String & FileName, uint32_t FrameId)
 {
     // DEBUG_START;
-
+    int32_t f = GetSyncOffsetMS ();
     SyncCount++;
     if (pCurrentFsmState->Sync (FileName, FrameId))
     {
@@ -105,7 +105,7 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
 
     JsonStatus[F ("SyncCount")]           = SyncCount;
     JsonStatus[F ("SyncAdjustmentCount")] = SyncAdjustmentCount;
-    JsonStatus[F ("TimeOffset")]          = TimeOffset;
+    JsonStatus[F ("TimeOffset")]          = TimeOffsetMS;
 
     String temp = GetFileName ();
 

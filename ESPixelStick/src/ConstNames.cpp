@@ -139,6 +139,7 @@ const char CN_state                    [] = "state";
 const char CN_status                   [] = "status";
 const char CN_status_name              [] = "status_name";
 const char CN_subnet                   [] = "subnet";
+const char CN_SyncOffset               [] = "SyncOffset";
 const char CN_system                   [] = "system";
 const char CN_textSLASHplain           [] = "text/plain";
 const char CN_time_elapsed             [] = "time_elapsed";

@@ -48,6 +48,7 @@ protected:
     c_InputFPPRemotePlayItem * pInputFPPRemotePlayItem = nullptr;
     String StatusType;
 #   define No_LocalFileToPlay "..."
+    int32_t GetSyncOffsetMS () { return SyncOffsetMS; }
 
 private:
 
@@ -60,6 +61,7 @@ private:
     void save ();          ///< Save configuration to File System
 
     String FileBeingPlayed;
+    int32_t SyncOffsetMS = 0;
 
 #   define JSON_NAME_FILE_TO_PLAY CN_fseqfilename
 

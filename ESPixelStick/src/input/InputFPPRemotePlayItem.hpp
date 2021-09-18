@@ -37,9 +37,14 @@ public:
             uint32_t GetRepeatCount () { return RemainingPlayCount; }
             void     SetDuration    (time_t value) { PlayDurationSec = value; }
             void     GetDriverName  (String& Name) { Name = "InputMgr"; }
+            int32_t  GetSyncOffsetMS () { return SyncOffsetMS; }
+            void     SetSyncOffsetMS (int32_t value) { SyncOffsetMS = value; }
 protected:
     String   PlayItemName;
     uint32_t RemainingPlayCount = 0;
     time_t   PlayDurationSec = 0;
+
+private:
+    int32_t  SyncOffsetMS = 0;
 
 }; // c_InputFPPRemotePlayItem
