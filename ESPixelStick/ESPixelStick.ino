@@ -17,6 +17,8 @@
 *
 */
 
+#include <Arduino.h>
+
 // Core
 #include "src/ESPixelStick.h"
 #include "src/EFUpdate.h"
@@ -332,6 +334,20 @@ void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
     // DEBUG_END;
 }
 
+// Save configuration JSON file
+void SaveConfig()
+{
+    // DEBUG_START;
+
+    // Save Config
+    String DataToSave = serializeCore (false);
+    // DEBUG_V ("ConfigFileName: " + ConfigFileName);
+    // DEBUG_V ("DataToSave: " + DataToSave);
+    FileMgr.SaveConfigFile(ConfigFileName, DataToSave);
+
+    // DEBUG_END;
+} // SaveConfig
+
 /// Load configuration file
 /** Loads and validates the JSON configuration file from the file system.
  *  If no configuration file is found, a new one will be created.
@@ -426,20 +442,6 @@ String serializeCore(bool pretty)
 
     return jsonConfigString;
 } // serializeCore
-
-// Save configuration JSON file
-void SaveConfig()
-{
-    // DEBUG_START;
-
-    // Save Config
-    String DataToSave = serializeCore (false);
-    // DEBUG_V ("ConfigFileName: " + ConfigFileName);
-    // DEBUG_V ("DataToSave: " + DataToSave);
-    FileMgr.SaveConfigFile(ConfigFileName, DataToSave);
-
-    // DEBUG_END;
-} // SaveConfig
 
 /////////////////////////////////////////////////////////
 //
