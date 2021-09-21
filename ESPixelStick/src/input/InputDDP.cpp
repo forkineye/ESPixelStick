@@ -240,23 +240,28 @@ void c_InputDDP::ProcessReceivedData (DDP_packet_t & Packet)
         // is the offset and length valid?
 
         uint32_t InputBufferOffset = ntohl (header.channelOffset);
-        uint16_t packetDataLength  = ntohs (header.dataLen);
+        uint32_t packetDataLength  = ntohs (header.dataLen);
         uint32_t LastCharOffset    = packetDataLength + InputBufferOffset;
 
-        // DEBUG_V (String ("InputBufferOffset:    ") + String (InputBufferOffset));
-        // DEBUG_V (String ("packetDataLength:     ") + String (packetDataLength));
-        // DEBUG_V (String ("LastCharOffset:       ") + String (LastCharOffset));
+        // DEBUG_V (String ("   InputBufferOffset: ") + String (InputBufferOffset));
+        // DEBUG_V (String ("    packetDataLength: ") + String (packetDataLength));
+        // DEBUG_V (String ("      LastCharOffset: ") + String (LastCharOffset));
+        // DEBUG_V (String (" InputDataBufferSize: ") + String (InputDataBufferSize));
 
-        // will this data fit?
-        if (LastCharOffset > InputDataBufferSize)
+        if (InputBufferOffset >= InputDataBufferSize)
         {
-            // trim the data and record an error
-            packetDataLength -= LastCharOffset - InputDataBufferSize;
+            // DEBUG_V ("Cant write any of this data to the input buffer");
             stats.errors++;
-            // DEBUG_V (String ("New packetDataLength: ") + String (packetDataLength));
+            break;
         }
 
-        memcpy (&InputDataBuffer[InputBufferOffset], &Packet.data, packetDataLength);
+        uint32_t RemainingBufferSpace = InputDataBufferSize - InputBufferOffset;
+        // DEBUG_V (String ("RemainingBufferSpace: ") + String (RemainingBufferSpace));
+
+        uint32_t AdjPacketDataLength = min (RemainingBufferSpace, packetDataLength);
+        // DEBUG_V (String (" AdjPacketDataLength: ") + String (AdjPacketDataLength));
+
+        memcpy (&InputDataBuffer[InputBufferOffset], &Packet.data, AdjPacketDataLength);
 
         InputMgr.ResetBlankTimer ();
 

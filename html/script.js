@@ -708,7 +708,7 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     // is this an ACK response?
     else if (JsonConfigData.hasOwnProperty("OK"))
     {
-        console.info("Received Acknowledgement to config set command.")
+        // console.info("Received Acknowledgement to config set command.")
     }
 
     else
@@ -1087,7 +1087,7 @@ function wsConnect()
                 }
                 else
                 {
-                    // console.info("ws.onmessage: Received: " + event.data);
+                    console.info("ws.onmessage: Received: " + event.data);
                     var msg = JSON.parse(event.data);
                     // "GET" message is a response to a get request. Populate the frontend.
                     if (msg.hasOwnProperty("get"))
