@@ -40,7 +40,7 @@ private:
 #define DDP_Header_t_LEN (sizeof(struct ddp_hdr_struct))
 #define DDP_MAX_DATALEN (480*3)   // fits nicely in an ethernet packet
 
-#define DDP_FLAGS1_VER      0xc0   // version mask
+#define DDP_FLAGS1_VERMASK  0xc0   // version mask
 #define DDP_FLAGS1_VER1     0x40   // version=1
 #define DDP_FLAGS1_PUSH     0x01
 #define DDP_FLAGS1_QUERY    0x02
@@ -50,9 +50,12 @@ private:
 #define DDP_FLAGS1_DATAMASK (DDP_FLAGS1_QUERY | DDP_FLAGS1_REPLY | DDP_FLAGS1_STORAGE | DDP_FLAGS1_TIME)
 #define DDP_FLAGS1_DATA     0x00
 
-#define DDP_ID_DISPLAY       1
+#define DDP_ID_DEFAULT_ID    1
+#define DDP_ID_CONTROL     246
 #define DDP_ID_CONFIG      250
 #define DDP_ID_STATUS      251
+#define DDP_ID_DMXTRANSIT  254
+#define DDP_ID_ALL         255
 
 #define IsData(f)          (DDP_FLAGS1_DATA    == ((f) & DDP_FLAGS1_DATAMASK))
 #define IsPush(f)          (DDP_FLAGS1_PUSH    == ((f) & DDP_FLAGS1_PUSH))
@@ -63,32 +66,18 @@ private:
 
     typedef struct __attribute__ ((packed))
     {
-        uint8_t  flags;
-        uint8_t  sequenceNum;
-        uint8_t  type;
-        uint8_t  destination;
+        byte  flags1;
+        byte  flags2;
+        byte  type;
+        byte  id;
         uint32_t channelOffset;
         uint16_t dataLen;
-        uint8_t  data[1];
     } DDP_Header_t;
-
-    typedef struct __attribute__ ((packed))
-    {
-        uint8_t  flags;
-        uint8_t  sequenceNum;
-        uint8_t  type;
-        uint8_t  destination;
-        uint32_t channelOffset;
-        uint16_t dataLen;
-        uint32_t timeCode;
-        uint8_t  data[1];
-    } DDP_TimeCode_Header_t;
 
     typedef union __attribute__ ((packed))
     {
-        DDP_Header_t          header;  // header may or may not be time code
-        DDP_TimeCode_Header_t timeCodeHeader;
-        uint8_t               raw[1458];
+        DDP_Header_t header;  // header may or may not be time code
+        byte         data[DDP_MAX_DATALEN];
     } DDP_packet_t;
 
     typedef struct __attribute__ ((packed))
@@ -107,7 +96,7 @@ private:
 
     // Packet parser callback
     void ProcessReceivedUdpPacket (AsyncUDPPacket _packet);
-    void ProcessReceivedData (DDP_packet_t & Packet);
+    void ProcessReceivedData  (DDP_packet_t & Packet);
     void ProcessReceivedQuery ();
 
     enum PacketBufferStatus_t
@@ -116,15 +105,16 @@ private:
         BufferIsFilled,
         BufferIsBeingProcessed,
     };
-#ifdef SUPPORT_DDP_QUERY
+
     typedef struct
     {
         PacketBufferStatus_t PacketBufferStatus = PacketBufferStatus_t::BufferIsAvailable;
         DDP_packet_t Packet;
+        IPAddress ResponseAddress;
+        uint16_t  ResponsePort;
     } PacketBuffer_t;
 
     PacketBuffer_t PacketBuffer;
-#endif // def SUPPORT_DDP_QUERY
 
 public:
 

@@ -20,6 +20,15 @@
 #include <string.h>
 #include "../WiFiMgr.hpp"
 
+#ifdef ARDUINO_ARCH_ESP32
+#   define FPP_TYPE_ID          0xC3
+#   define FPP_VARIANT_NAME     (String(CN_ESPixelStick) + "-ESP32")
+
+#else
+#   define FPP_TYPE_ID          0xC2
+#   define FPP_VARIANT_NAME     (String(CN_ESPixelStick) + "-ESP8266")
+#endif
+
 //-----------------------------------------------------------------------------
 c_InputDDP::c_InputDDP (c_InputMgr::e_InputChannelIds NewInputChannelId,
                         c_InputMgr::e_InputType       NewChannelType,
@@ -30,9 +39,7 @@ c_InputDDP::c_InputDDP (c_InputMgr::e_InputChannelIds NewInputChannelId,
 {
     // DEBUG_START;
 
-#ifdef SUPPORT_DDP_QUERY
     PacketBuffer.PacketBufferStatus = PacketBufferStatus_t::BufferIsAvailable;
-#endif // def SUPPORT_DDP_QUERY
 
     // DEBUG_END;
 } // c_InputDDP
@@ -148,48 +155,20 @@ void c_InputDDP::ProcessReceivedUdpPacket(AsyncUDPPacket ReceivedPacket)
         stats.packetsReceived++;
         stats.bytesReceived += ReceivedPacket.length ();
 
-        int CurrentReceivedSequenceNumber = packet.header.sequenceNum & 0xF;
-        // DEBUG_V (String("CurrentReceivedSequenceNumber: ") + String(CurrentReceivedSequenceNumber));
-
-        // is the sender using sequence number?
-        if (0 != CurrentReceivedSequenceNumber)
+        if ((packet.header.flags1 & DDP_FLAGS1_VERMASK) != DDP_FLAGS1_VER1)
         {
-            // DEBUG_V (String ("lastReceivedSequenceNumber: ") + String (lastReceivedSequenceNumber));
-
-            // ignore duplicate packets. They are allowed
-            if (CurrentReceivedSequenceNumber == lastReceivedSequenceNumber)
-            {
-                // DEBUG_V ("Duplicate PDU received");
-                break;
-            }
-
-            // move to the next expected value
-            uint8_t NextExpectedSequenceNumber = 0xf & ++lastReceivedSequenceNumber;
-
-            // fix the wrap condition
-            if (0 == NextExpectedSequenceNumber) { NextExpectedSequenceNumber = 1; }
-            // DEBUG_V (String ("NextExpectedSequenceNumber") + String (NextExpectedSequenceNumber));
-
-            // remember what came in
-            lastReceivedSequenceNumber = CurrentReceivedSequenceNumber;
-
-            if (CurrentReceivedSequenceNumber != NextExpectedSequenceNumber)
-            {
-                stats.errors++;
-                // DEBUG_V (String ("Sequence error: stats.errors: ") + String (stats.errors));
-            }
-
-        } // using sequence numbers
-        // DEBUG_V ("");
+            stats.errors++;
+            // DEBUG_V ("Invalid version");
+            break;
+        }
 
         // need to fast track data
-        if (true == IsData(packet.header.flags))
+        if (true == IsData(packet.header.flags1))
         {
             ProcessReceivedData (packet);
             break;
         }
 
-#ifdef SUPPORT_DDP_QUERY
         // do we have a place to put the received data?
         if (PacketBuffer.PacketBufferStatus == PacketBufferStatus_t::BufferIsBeingProcessed)
         {
@@ -198,9 +177,10 @@ void c_InputDDP::ProcessReceivedUdpPacket(AsyncUDPPacket ReceivedPacket)
         }
         // DEBUG_V ("");
 
-        memcpy (PacketBuffer.Packet.raw, ReceivedPacket.data (), sizeof (packet.raw));
+        PacketBuffer.ResponseAddress = ReceivedPacket.remoteIP ();
+        PacketBuffer.ResponsePort = ReceivedPacket.remotePort ();
+        memcpy ((void*)&PacketBuffer.Packet, ReceivedPacket.data (), sizeof (PacketBuffer.Packet));
         PacketBuffer.PacketBufferStatus = PacketBufferStatus_t::BufferIsFilled;
-#endif // def SUPPORT_DDP_QUERY
 
     } while (false);
 
@@ -211,7 +191,6 @@ void c_InputDDP::ProcessReceivedUdpPacket(AsyncUDPPacket ReceivedPacket)
 //-----------------------------------------------------------------------------
 void c_InputDDP::Process ()
 {
-#ifdef SUPPORT_DDP_QUERY
     // DEBUG_START;
 
     do // once
@@ -225,28 +204,27 @@ void c_InputDDP::Process ()
         // DEBUG_V ("There is something in the buffer for us to process");
         PacketBuffer.PacketBufferStatus = PacketBufferStatus_t::BufferIsBeingProcessed;
 
-        if (true == IsData(PacketBuffer.Packet.header.flags))
+        if (true == IsData(PacketBuffer.Packet.header.flags1))
         {
             ProcessReceivedData (PacketBuffer.Packet);
             PacketBuffer.PacketBufferStatus = PacketBufferStatus_t::BufferIsAvailable;
             break;
         }
 
-        if (true == IsQuery (PacketBuffer.Packet.header.flags))
+        if (true == IsQuery (PacketBuffer.Packet.header.flags1))
         {
             ProcessReceivedQuery ();
             PacketBuffer.PacketBufferStatus = PacketBufferStatus_t::BufferIsAvailable;
             break;
         }
 
-        // not sure what this thing is but we are going to ignore it
+        // DEBUG_V ("not sure what this thing is but we are going to ignore it");
         PacketBuffer.PacketBufferStatus = PacketBufferStatus_t::BufferIsAvailable;
         // DEBUG_V("UnSupported PDU type");
 
     } while (false);
 
     // DEBUG_END;
-#endif // def SUPPORT_DDP_QUERY
 
 } // Process
 
@@ -278,7 +256,7 @@ void c_InputDDP::ProcessReceivedData (DDP_packet_t & Packet)
             // DEBUG_V (String ("New packetDataLength: ") + String (packetDataLength));
         }
 
-        memcpy (&InputDataBuffer[InputBufferOffset], header.data, packetDataLength);
+        memcpy (&InputDataBuffer[InputBufferOffset], &Packet.data, packetDataLength);
 
         InputMgr.ResetBlankTimer ();
 
@@ -291,27 +269,72 @@ void c_InputDDP::ProcessReceivedData (DDP_packet_t & Packet)
 //-----------------------------------------------------------------------------
 void c_InputDDP::ProcessReceivedQuery ()
 {
-#ifdef SUPPORT_DDP_QUERY
-
     // DEBUG_START;
 
-    uint16_t pixelPorts = 0;
-    uint16_t serialPorts = 0;
-    OutputMgr.GetPortCounts (pixelPorts, serialPorts);
+    DDP_packet_t & Packet = PacketBuffer.Packet;
 
-    sendDiscoveryResponse (
-        VERSION,
-        WiFi.macAddress (),
-        config.id,
-        pixelPorts,
-        serialPorts,
-        InputDataBufferSize,
-        InputDataBufferSize,
-        InputDataBufferSize,
-        WiFiMgr.getIpAddress (),
-        WiFiMgr.getIpSubNetMask ());
+    DDP_packet_t DDPresponse;
+    memset ((void*)&DDPresponse, 0x00, sizeof (DDPresponse));
+    DDPresponse.header.flags1 = DDP_FLAGS1_VER1 | DDP_FLAGS1_REPLY | DDP_FLAGS1_PUSH;
+
+    AsyncUDPMessage UDPresponse;
+
+    // DEBUG_V (String ("Packet.header.flags1: ") + String (Packet.header.flags1));
+    // DEBUG_V (String ("  Packet.header.type: ") + String (Packet.header.type));
+    // DEBUG_V (String ("    Packet.header.id: ") + String (Packet.header.id));
+
+    switch (Packet.header.id)
+    {
+        case DDP_ID_STATUS:
+        {
+            // DEBUG_V ("DDP_ID_STATUS query");
+            String JsonResponse = "{\"status\":{\"man\":\"ESPixelStick\",\"mod\":\"V4\",\"ver\":\"1.0\"}}";
+            DDPresponse.header.id = DDP_ID_STATUS;
+            DDPresponse.header.dataLen = htons (JsonResponse.length());
+            memcpy (&DDPresponse.data, JsonResponse.c_str (), JsonResponse.length());
+            UDPresponse.write ((const uint8_t*)&DDPresponse, size_t(sizeof(DDPresponse.header) + JsonResponse.length ()));
+            udp->sendTo (UDPresponse, PacketBuffer.ResponseAddress, PacketBuffer.ResponsePort);
+            break;
+        }
+
+        case DDP_ID_CONFIG:
+        {
+            // DEBUG_V ("DDP_ID_CONFIG query");
+
+            DynamicJsonDocument JsonConfigDoc (2048);
+            JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_config);
+            JsonConfig[CN_hostname] = config.hostname;
+            JsonConfig[CN_ip] = WiFi.localIP ().toString ();
+            JsonConfig["version"] = (VERSION + String (":") + BUILD_DATE);
+            JsonConfig["hardwareType"] = FPP_VARIANT_NAME;
+            JsonConfig[CN_type] = FPP_TYPE_ID;
+            JsonConfig[CN_num_chan] = InputDataBufferSize;
+            uint16_t PixelPortCount;
+            uint16_t SerialPortCount;
+            OutputMgr.GetPortCounts (PixelPortCount, SerialPortCount);
+            JsonConfig["NumPixelPort"] = PixelPortCount;
+            JsonConfig["NumSerialPort"] = SerialPortCount;
+
+            String JsonResponse;
+            serializeJson (JsonConfigDoc, JsonResponse);
+            // DEBUG_V (String ("JsonResponse: ") + String (JsonResponse));
+
+            DDPresponse.header.id = DDP_ID_CONFIG;
+            DDPresponse.header.dataLen = htons (JsonResponse.length ());
+            memcpy (&DDPresponse.data, JsonResponse.c_str (), JsonResponse.length ());
+            UDPresponse.write ((const uint8_t*)&DDPresponse, size_t (sizeof (DDPresponse.header) + JsonResponse.length ()));
+            udp->sendTo (UDPresponse, PacketBuffer.ResponseAddress, PacketBuffer.ResponsePort);
+            break;
+        }
+
+        default:
+        {
+            stats.errors++;
+            // DEBUG_V (String ("Unsupported query: ") + String (DDPresponse.header.id));
+            break;
+        }
+    }
 
     // DEBUG_END;
-#endif // def SUPPORT_DDP_QUERY
 
 } // ProcessReceivedDiscovery
