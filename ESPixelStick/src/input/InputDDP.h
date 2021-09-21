@@ -103,12 +103,11 @@ private:
     bool            suspend = false;
     DDP_stats_t     stats;    // Statistics tracker
 
-    // Internal Initializers
-    void initUDP ();
+    void NetworkStateChanged (bool NetwokState);
 
     // Packet parser callback
     void ProcessReceivedUdpPacket (AsyncUDPPacket _packet);
-    void ProcessReceivedData ();
+    void ProcessReceivedData (DDP_packet_t & Packet);
     void ProcessReceivedQuery ();
 
     enum PacketBufferStatus_t
@@ -117,14 +116,15 @@ private:
         BufferIsFilled,
         BufferIsBeingProcessed,
     };
-
-    typedef struct 
+#ifdef SUPPORT_DDP_QUERY
+    typedef struct
     {
         PacketBufferStatus_t PacketBufferStatus = PacketBufferStatus_t::BufferIsAvailable;
         DDP_packet_t Packet;
     } PacketBuffer_t;
 
     PacketBuffer_t PacketBuffer;
+#endif // def SUPPORT_DDP_QUERY
 
 public:
 

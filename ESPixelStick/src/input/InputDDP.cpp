@@ -30,7 +30,9 @@ c_InputDDP::c_InputDDP (c_InputMgr::e_InputChannelIds NewInputChannelId,
 {
     // DEBUG_START;
 
+#ifdef SUPPORT_DDP_QUERY
     PacketBuffer.PacketBufferStatus = PacketBufferStatus_t::BufferIsAvailable;
+#endif // def SUPPORT_DDP_QUERY
 
     // DEBUG_END;
 } // c_InputDDP
@@ -57,9 +59,11 @@ void c_InputDDP::Begin ()
 
     // DEBUG_V("");
     udp = new AsyncUDP ();
-    initUDP ();
 
-    HasBeenInitialized = true;
+    NetworkStateChanged (WiFiMgr.IsWiFiConnected ());
+
+    // HasBeenInitialized = true;
+
     // DEBUG_END;
 
 } // Begin
@@ -115,21 +119,22 @@ void c_InputDDP::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
 } // SetBufferInfo
 
 //-----------------------------------------------------------------------------
-void c_InputDDP::initUDP ()
+void c_InputDDP::NetworkStateChanged (bool IsConnected)
 {
-    // DEBUG_START;
-
-    delay (100);
-
-    if (udp->listen (DDP_PORT))
+    if (IsConnected && !HasBeenInitialized)
     {
-        udp->onPacket (std::bind (&c_InputDDP::ProcessReceivedUdpPacket, this, std::placeholders::_1));
+        // DEBUG_V ();
+
+        if (udp->listen (DDP_PORT))
+        {
+            udp->onPacket (std::bind (&c_InputDDP::ProcessReceivedUdpPacket, this, std::placeholders::_1));
+        }
+
+        HasBeenInitialized = true;
+
+        logcon (String (F ("Listening on port ")) + DDP_PORT);
     }
-
-    logcon (String (F ("Listening on port ")) + DDP_PORT);
-
-    // DEBUG_END;
-} // initUDP
+} // NetworkStateChanged
 
 //-----------------------------------------------------------------------------
 void c_InputDDP::ProcessReceivedUdpPacket(AsyncUDPPacket ReceivedPacket)
@@ -138,17 +143,7 @@ void c_InputDDP::ProcessReceivedUdpPacket(AsyncUDPPacket ReceivedPacket)
 
     do // once
     {
-        // do we have a place to put the received data?
-        if (PacketBuffer.PacketBufferStatus == PacketBufferStatus_t::BufferIsBeingProcessed)
-        {
-            // DEBUG_V ("Throw away the received packet. We dont have a place to put it.");
-            break;
-        }
-        // DEBUG_V ("");
-
-        // overwrrite the existing data for the case of PacketBufferStatus_t::BufferIsFilled
-        DDP_packet_t & packet = PacketBuffer.Packet;
-        memcpy (packet.raw, ReceivedPacket.data (), sizeof (packet.raw));
+        DDP_packet_t & packet = *((DDP_packet_t * )(ReceivedPacket.data ()));
 
         stats.packetsReceived++;
         stats.bytesReceived += ReceivedPacket.length ();
@@ -187,23 +182,25 @@ void c_InputDDP::ProcessReceivedUdpPacket(AsyncUDPPacket ReceivedPacket)
         } // using sequence numbers
         // DEBUG_V ("");
 
-        // we have a valid PDU. Time to parse it
-        PacketBuffer.PacketBufferStatus = PacketBufferStatus_t::BufferIsFilled;
-        // DEBUG_V (String ("packet.header.flags: 0x") + String (packet.header.flags, HEX));
-
         // need to fast track data
         if (true == IsData(packet.header.flags))
         {
-            ProcessReceivedData ();
-            PacketBuffer.PacketBufferStatus = PacketBufferStatus_t::BufferIsAvailable;
+            ProcessReceivedData (packet);
             break;
         }
 
-#ifdef SUPPORT_QUERY
-#else
-        PacketBuffer.PacketBufferStatus = PacketBufferStatus_t::BufferIsAvailable;
-#endif // def SUPPORT_QUERY
+#ifdef SUPPORT_DDP_QUERY
+        // do we have a place to put the received data?
+        if (PacketBuffer.PacketBufferStatus == PacketBufferStatus_t::BufferIsBeingProcessed)
+        {
+            // DEBUG_V ("Throw away the received packet. We dont have a place to put it.");
+            break;
+        }
+        // DEBUG_V ("");
 
+        memcpy (PacketBuffer.Packet.raw, ReceivedPacket.data (), sizeof (packet.raw));
+        PacketBuffer.PacketBufferStatus = PacketBufferStatus_t::BufferIsFilled;
+#endif // def SUPPORT_DDP_QUERY
 
     } while (false);
 
@@ -214,7 +211,7 @@ void c_InputDDP::ProcessReceivedUdpPacket(AsyncUDPPacket ReceivedPacket)
 //-----------------------------------------------------------------------------
 void c_InputDDP::Process ()
 {
-#ifdef SUPPORT_QUERY
+#ifdef SUPPORT_DDP_QUERY
     // DEBUG_START;
 
     do // once
@@ -230,7 +227,7 @@ void c_InputDDP::Process ()
 
         if (true == IsData(PacketBuffer.Packet.header.flags))
         {
-            ProcessReceivedData ();
+            ProcessReceivedData (PacketBuffer.Packet);
             PacketBuffer.PacketBufferStatus = PacketBufferStatus_t::BufferIsAvailable;
             break;
         }
@@ -249,18 +246,18 @@ void c_InputDDP::Process ()
     } while (false);
 
     // DEBUG_END;
-#endif // def SUPPORT_QUERY
+#endif // def SUPPORT_DDP_QUERY
 
 } // Process
 
 //-----------------------------------------------------------------------------
-void c_InputDDP::ProcessReceivedData ()
+void c_InputDDP::ProcessReceivedData (DDP_packet_t & Packet)
 {
     // DEBUG_START;
 
     do // once
     {
-        DDP_Header_t & header = PacketBuffer.Packet.header;
+        DDP_Header_t & header = Packet.header;
 
         // is the offset and length valid?
 
@@ -294,7 +291,7 @@ void c_InputDDP::ProcessReceivedData ()
 //-----------------------------------------------------------------------------
 void c_InputDDP::ProcessReceivedQuery ()
 {
-#ifdef SUPPORT_QUERY
+#ifdef SUPPORT_DDP_QUERY
 
     // DEBUG_START;
 
@@ -315,6 +312,6 @@ void c_InputDDP::ProcessReceivedQuery ()
         WiFiMgr.getIpSubNetMask ());
 
     // DEBUG_END;
-#endif // def SUPPORT_QUERY
+#endif // def SUPPORT_DDP_QUERY
 
 } // ProcessReceivedDiscovery
