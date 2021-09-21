@@ -141,24 +141,20 @@ void c_InputEffectEngine::GetMqttEffectList (JsonObject& jsonConfig)
 } // GetMqttEffectList
 
 //-----------------------------------------------------------------------------
-void c_InputEffectEngine::GetMqttConfig (JsonObject & jsonConfig)
+void c_InputEffectEngine::GetMqttConfig (MQTTConfiguration_s & mqttConfig)
 {
     // DEBUG_START;
 
-    jsonConfig[CN_effect]             = ActiveEffect->name;
-    // jsonConfig[CN_speed]      = EffectSpeed;
-    // jsonConfig[CN_reverse]    = EffectReverse;
-    jsonConfig[CN_mirror]             = EffectMirror;
-    jsonConfig[CN_allleds]            = EffectAllLeds;
-    jsonConfig[CN_brightness]         = uint16_t(EffectBrightness * 255.0);
-    jsonConfig[CN_blanktime]          = EffectBlankTime;
-    jsonConfig[CN_EffectWhiteChannel] = EffectWhiteChannel;
+    mqttConfig.effect       = ActiveEffect->name;
+    mqttConfig.mirror       = EffectMirror;
+    mqttConfig.allLeds      = EffectAllLeds;
+    mqttConfig.brightness   = uint8_t(EffectBrightness * 255.0);
+    mqttConfig.blankTime    = EffectBlankTime;
+    mqttConfig.whiteChannel = EffectWhiteChannel;
 
-    // color needs a bit of reprocessing
-    JsonObject color = jsonConfig.createNestedObject (CN_color);
-    color[CN_r] = EffectColor.r;
-    color[CN_g] = EffectColor.g;
-    color[CN_b] = EffectColor.b;
+    mqttConfig.color.r = EffectColor.r;
+    mqttConfig.color.g = EffectColor.g;
+    mqttConfig.color.b = EffectColor.b;
 
     // DEBUG_END;
 
@@ -318,41 +314,32 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // SetConfig
 
 //-----------------------------------------------------------------------------
-bool c_InputEffectEngine::SetMqttConfig (ArduinoJson::JsonObject& jsonConfig)
+void c_InputEffectEngine::SetMqttConfig (MQTTConfiguration_s& mqttConfig)
 {
     // DEBUG_START;
-    bool response = false;
     String effectName;
 
-    response |= setFromJSON (EffectSpeed,        jsonConfig, CN_speed);
-    response |= setFromJSON (EffectReverse,      jsonConfig, CN_reverse);
-    response |= setFromJSON (EffectMirror,       jsonConfig, CN_mirror);
-    response |= setFromJSON (EffectAllLeds,      jsonConfig, CN_allleds);
-    response |= setFromJSON (EffectBlankTime,    jsonConfig, CN_blanktime);
+    effectName = mqttConfig.effect;
+    EffectMirror = mqttConfig.mirror;
+    EffectAllLeds = mqttConfig.allLeds;
+    EffectBlankTime = mqttConfig.blankTime;
+    EffectWhiteChannel = mqttConfig.whiteChannel;
 
     uint16_t tempBrightness = uint8_t(EffectBrightness * 255.0);
-    response |= setFromJSON (tempBrightness,   jsonConfig, CN_brightness);
+    tempBrightness = mqttConfig.brightness;
     EffectBrightness = float(tempBrightness) / 255.0;
 
-    response |= setFromJSON (EffectWhiteChannel, jsonConfig, CN_EffectWhiteChannel);
-    response |= setFromJSON (effectName,         jsonConfig, CN_effect);
+    EffectColor.r = mqttConfig.color.r;
+    EffectColor.g = mqttConfig.color.g;
+    EffectColor.b = mqttConfig.color.b;
 
     SetBufferInfo (InputDataBuffer, InputDataBufferSize);
-
-    if (jsonConfig.containsKey (CN_color))
-    {
-        JsonObject JsonColor = jsonConfig[CN_color];
-        response |= setFromJSON (EffectColor.r, JsonColor, CN_r);
-        response |= setFromJSON (EffectColor.g, JsonColor, CN_g);
-        response |= setFromJSON (EffectColor.b, JsonColor, CN_b);
-    }
 
     validateConfiguration ();
 
     setEffect (effectName);
 
     // DEBUG_END;
-    return response;
 } // SetConfig
 
 //-----------------------------------------------------------------------------
