@@ -1,10 +1,5 @@
 name: ESPixelStick CI
 on: [push, pull_request]
-env:
-  # Platform versions - When the ESP32 core updates, update the compile sections for boot_app0.bin as well
-  ESP8266_PLAT: 'esp8266:esp8266@3.0.2'
-  ESP32_PLAT: 'esp32:esp32@2.0.0'
-
 jobs:
   firmware:
     strategy:
@@ -12,149 +7,62 @@ jobs:
         include:
           # ESPixelStick V3
           - target: "espsv3"
-            platform: $ESP8266_PLAT
             chip: "esp8266"
-            fqbn: "esp8266:esp8266:d1_mini:xtal=160,eesz=4M2M,ip=hb2f"
-            flags: "--build-property compiler.cpp.extra_flags=-DBOARD_ESPS_V3"
           # Wemos D1 Mini ESP8266
           - target: "d1_mini"
-            platform: $ESP8266_PLAT
             chip: "esp8266"
-            fqbn: "esp8266:esp8266:d1_mini:xtal=160,eesz=4M2M,ip=hb2f"
-            flags: ""
           # Wemos D1 Mini ESP32
           - target: "d1_mini32"
-            platform: $ESP32_PLAT
             chip: "esp32"
-            fqbn: "esp32:esp32:d1_mini32:PartitionScheme=min_spiffs"
-            flags: ""
           # Lolin D32 Pro
           - target: "d32_pro"
-            platform: $ESP32_PLAT
             chip: "esp32"
-            fqbn: "esp32:esp32:d32_pro:PSRAM=enabled,PartitionScheme=min_spiffs"
-            flags: ""
 
     runs-on: ubuntu-latest
     steps:
       # Checkout ESPixelStick
       - uses: actions/checkout@v2
 
-      # Arduino stuff
-      - uses: arduino/setup-arduino-cli@v1
-
-      - name: Update board indexes and set paths
-        run: |
-          arduino-cli config init
-          arduino-cli config add board_manager.additional_urls https://arduino.esp8266.com/stable/package_esp8266com_index.json https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
-          arduino-cli config set directories.user ~/arduino
-
-      - name: Install platform
-        run: |
-          arduino-cli core install ${{ matrix.platform }}
-
-      # Grab all the required libraries
-      # Checkout won't allow paths outside of our workspace, so we put them in alib and move later.
-      - name: Checkout ArduinoJson
-        uses: actions/checkout@v2
-        with:
-          repository: bblanchon/ArduinoJson
-          path: alib/ArduinoJson
-          ref: 6.x
-
-      - name: Checkout ESPAsyncE131
-        uses: actions/checkout@v2
-        with:
-          repository: forkineye/ESPAsyncE131
-          path: alib/ESPAsyncE131
-
-      - name: Checkout ESPAsyncWebServer
-        uses: actions/checkout@v2
-        with:
-          repository: forkineye/ESPAsyncWebServer
-          path: alib/ESPAsyncWebServer
-
-      - name: Checkout async-mqtt-client
-        uses: actions/checkout@v2
-        with:
-          repository: marvinroger/async-mqtt-client
-          path: alib/async-mqtt-client
-
-      - name: Checkout Int64String
-        uses: actions/checkout@v2
-        with:
-          repository: djGrrr/Int64String
-          path: alib/Int64String
-
-      - name: Checkout Espalexa
-        uses: actions/checkout@v2
-        with:
-          repository: MartinMueller2003/Espalexa
-          path: alib/Espalexa
-
-      - name: Checkout Adafruit PWM Servo Driver
-        uses: actions/checkout@v2
-        with:
-          repository: adafruit/Adafruit-PWM-Servo-Driver-Library
-          path: alib/Adafruit-PWM-Servo-Driver-Library
-
-      - name: Checkout Artnet
-        uses: actions/checkout@v2
-        with:
-          repository: natcl/Artnet
-          path: alib/Artnet
-
-      - name: Checkout ArduinoStreamUtils
-        uses: actions/checkout@v2
-        with:
-          repository: bblanchon/ArduinoStreamUtils
-          path: alib/ArduinoStreamUtils
-
-      # ESP8266 specific stuff
-      - name: Checkout ESPAsyncTCP
-        uses: actions/checkout@v2
-        with:
-          repository: forkineye/ESPAsyncTCP
-          path: alib/ESPAsyncTCP
-
-      - name: Checkout ESPAsyncUDP
-        uses: actions/checkout@v2
-        with:
-          repository: me-no-dev/ESPAsyncUDP
-          path: alib/ESPAsyncUDP
-
-      # ESP32 specific stuff
-      - name: Checkout AsyncTCP
-        uses: actions/checkout@v2
-        with:
-          repository: forkineye/AsyncTCP
-          path: alib/AsyncTCP
-
-      # Move Arduino libraries where they need to be.
-      - name: Move Arduino Libraries
-        run: |
-          mkdir -p ~/arduino/libraries
-          mv alib/* ~/arduino/libraries
-          rmdir alib
-
       - name: Create secrets.h
         run: |
           echo '#define SECRETS_SSID "SSID_NOT_SET"' > ESPixelStick/src/secrets.h
           echo '#define SECRETS_PASS "PASSPHRASE_NOT_SET"' >> ESPixelStick/src/secrets.h
 
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v2
+        with:
+          path: ~/.platformio
+          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+
+      - name: Install PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade platformio
+
       # Build and move / rename firmware files
-      # Make sure to update boot_app0.bin location when the ESP32 core updates
+      # Make sure to update bootloader and boot_app0.bin location when the ESP32 core updates
       - name: Compile for ${{ matrix.target }}
         env:
           chip: ${{ matrix.chip }}
         run: |
-          arduino-cli compile --fqbn ${{ matrix.fqbn }} ${{ matrix.flags }} --build-path ~/build ESPixelStick
+          pio run -e ${{ matrix.target }}
           mkdir -p firmware/${{ matrix.chip }}
-          mv ~/build/ESPixelStick.ino.bin firmware/${{ matrix.chip }}/${{ matrix.target }}-app.bin
+          mv .pio/build/${{ matrix.target }}/firmware.bin firmware/${{ matrix.chip }}/${{ matrix.target }}-app.bin
           if [ "$chip" = "esp32" ]; then
-          mv ~/build/ESPixelStick.ino.bootloader.bin firmware/esp32/${{ matrix.target }}-bootloader.bin
-          mv ~/build/ESPixelStick.ino.partitions.bin firmware/esp32/${{ matrix.target }}-partitions.bin
-          cp ~/.arduino15/packages/esp32/hardware/esp32/2.0.0/tools/partitions/boot_app0.bin firmware/esp32/boot_app0.bin
+          mv .pio/build/${{ matrix.target }}/partitions.bin firmware/esp32/${{ matrix.target }}-partitions.bin
+          cp ~/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/bin/bootloader_dio_40m.bin firmware/esp32/${{ matrix.target }}-bootloader.bin
+          cp ~/.platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin firmware/esp32/boot_app0.bin
           fi
 
       - name: Upload Firmware Artifacts
