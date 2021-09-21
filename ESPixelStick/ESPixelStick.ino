@@ -17,6 +17,8 @@
 *
 */
 
+#include <Arduino.h>
+
 // Core
 #include "src/ESPixelStick.h"
 #include "src/EFUpdate.h"
@@ -167,9 +169,11 @@ void setup()
 
 /// Configuration Validations
 /** Validates the config_t (core) configuration structure and forces defaults for invalid entries */
-void validateConfig()
+bool validateConfig()
 {
     // DEBUG_START;
+
+    bool configValid = true;
 
 #ifdef ARDUINO_ARCH_ESP8266
     String chipId = String (ESP.getChipId (), HEX);
@@ -180,17 +184,21 @@ void validateConfig()
     // Device defaults
     if (!config.id.length ())
     {
-        config.id = "No ID Found";
+        config.id = "ESPixelStick";
+        configValid = false;
         // DEBUG_V ();
     }
 
     if (0 == config.hostname.length ())
     {
         config.hostname = "esps-" + String (chipId);
+        configValid = false;
         // DEBUG_V ();
     }
 
     WiFiMgr.ValidateConfig (&config);
+
+    return configValid;
 
     // DEBUG_END;
 } // validateConfig
@@ -326,6 +334,20 @@ void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
     // DEBUG_END;
 }
 
+// Save configuration JSON file
+void SaveConfig()
+{
+    // DEBUG_START;
+
+    // Save Config
+    String DataToSave = serializeCore (false);
+    // DEBUG_V ("ConfigFileName: " + ConfigFileName);
+    // DEBUG_V ("DataToSave: " + DataToSave);
+    FileMgr.SaveConfigFile(ConfigFileName, DataToSave);
+
+    // DEBUG_END;
+} // SaveConfig
+
 /// Load configuration file
 /** Loads and validates the JSON configuration file from the file system.
  *  If no configuration file is found, a new one will be created.
@@ -336,15 +358,9 @@ void loadConfig()
 
     String temp;
     // DEBUG_V ("");
-    if (FileMgr.LoadConfigFile (ConfigFileName, &deserializeCoreHandler))
-    {
-        // DEBUG_V ("Validate");
-        validateConfig();
-    }
-    else
-    {
-        // DEBUG_V ("Load failed, create a new config file and save it");
-        CreateNewConfig();
+    FileMgr.LoadConfigFile (ConfigFileName, &deserializeCoreHandler);
+    if (!validateConfig()) {
+        SaveConfig();
     }
 
     // DEBUG_START;
@@ -426,23 +442,6 @@ String serializeCore(bool pretty)
 
     return jsonConfigString;
 } // serializeCore
-
-// Save configuration JSON file
-void CreateNewConfig()
-{
-    // DEBUG_START;
-
-    // Validate Config
-    validateConfig();
-
-    // Save Config
-    String DataToSave = serializeCore (false);
-    // DEBUG_V ("ConfigFileName: " + ConfigFileName);
-    // DEBUG_V ("DataToSave: " + DataToSave);
-    FileMgr.SaveConfigFile(ConfigFileName, DataToSave);
-
-    // DEBUG_END;
-} // CreateNewConfig
 
 /////////////////////////////////////////////////////////
 //

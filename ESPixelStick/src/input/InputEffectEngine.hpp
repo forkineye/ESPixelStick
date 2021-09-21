@@ -31,51 +31,6 @@ public:
 
     c_InputEffectEngine ();
 
-    // functions to be provided by the derived class
-    void Begin ();                             ///< set up the operating environment based on the current config (or defaults)
-    bool SetConfig (JsonObject& jsonConfig);   ///< Set a new config in the driver
-    bool SetMqttConfig (JsonObject& jsonConfig);   ///< Set a new config in the driver
-    void GetConfig (JsonObject& jsonConfig);   ///< Get the current config used by the driver
-    void GetMqttConfig (JsonObject& jsonConfig);   ///< Get the current config used by the driver
-    void GetMqttEffectList (JsonObject& jsonConfig);   ///< Get the current config used by the driver
-    void GetStatus (JsonObject& jsonStatus);
-    void Process ();                           ///< Call from loop(),  renders Input data
-    void GetDriverName (String  & sDriverName) { sDriverName = "Effects"; } ///< get the name for the instantiated driver
-    void SetBufferInfo (uint8_t * BufferStart, uint16_t BufferSize);
-    void ResetBlankTimer ();
-    void NextEffect ();
-
-    // Effect functions
-    uint16_t effectSolidColor ();
-    uint16_t effectRainbow ();
-    uint16_t effectChase ();
-    uint16_t effectBlink ();
-    uint16_t effectFlash ();
-    uint16_t effectFireFlicker ();
-    uint16_t effectLightning ();
-    uint16_t effectBreathe ();
-    uint16_t effectNull ();
-
-    typedef uint16_t (c_InputEffectEngine::* EffectFunc)(void);
-    typedef struct EffectDescriptor_s
-    {
-        String      name;
-        EffectFunc  func;
-        const char* htmlid;
-        bool        hasColor;
-        bool        hasMirror;
-        bool        hasReverse;
-        bool        hasAllLeds;
-        bool        hasWhiteChannel;
-        String      wsTCode;
-    } EffectDescriptor_t;
-
-private:
-
-    void validateConfiguration ();
-
-    bool HasBeenInitialized = false;
-
     // CRGB red, green, blue 0->255
     struct CRGB
     {
@@ -97,6 +52,63 @@ private:
         double s;
         double v;
     };
+
+    typedef uint16_t (c_InputEffectEngine::* EffectFunc)(void);
+
+    typedef struct EffectDescriptor_s
+    {
+        String      name;
+        EffectFunc  func;
+        const char* htmlid;
+        bool        hasColor;
+        bool        hasMirror;
+        bool        hasReverse;
+        bool        hasAllLeds;
+        bool        hasWhiteChannel;
+        String      wsTCode;
+    } EffectDescriptor_t;
+
+    typedef struct MQTTConfiguration_s
+    {
+        String  effect;
+        bool    mirror;
+        bool    allLeds;
+        uint8_t brightness;
+        uint8_t blankTime;
+        bool    whiteChannel;
+        CRGB    color;
+    } MQTTConfiguration_s;
+
+    // functions to be provided by the derived class
+    void Begin ();                             ///< set up the operating environment based on the current config (or defaults)
+    bool SetConfig (JsonObject& jsonConfig);   ///< Set a new config in the driver
+    void SetMqttConfig (MQTTConfiguration_s& mqttConfig);   ///< Set a new config in the driver
+    void GetConfig (JsonObject& jsonConfig);   ///< Get the current config used by the driver
+    void GetMqttConfig (MQTTConfiguration_s& mqttConfig);   ///< Get the current config used by the driver
+    void GetMqttEffectList (JsonObject& jsonConfig);   ///< Get the current config used by the driver
+    void GetStatus (JsonObject& jsonStatus);
+    void Process ();                           ///< Call from loop(),  renders Input data
+    void GetDriverName (String  & sDriverName) { sDriverName = "Effects"; } ///< get the name for the instantiated driver
+    void SetBufferInfo (uint8_t * BufferStart, uint16_t BufferSize);
+    void ResetBlankTimer ();
+    void NextEffect ();
+
+    // Effect functions
+    uint16_t effectSolidColor ();
+    uint16_t effectRainbow ();
+    uint16_t effectChase ();
+    uint16_t effectBlink ();
+    uint16_t effectFlash ();
+    uint16_t effectFireFlicker ();
+    uint16_t effectLightning ();
+    uint16_t effectBreathe ();
+    uint16_t effectNull ();
+
+private:
+
+    void validateConfiguration ();
+
+    bool HasBeenInitialized = false;
 
 
 #define MIN_EFFECT_DELAY 10

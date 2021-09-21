@@ -617,6 +617,7 @@ void c_InputMgr::Process ()
         }
 
         // DEBUG_V("");
+//TODO: Refactor this for for input priority (2 inputs only).  Only process secondary input if we aren't in "show mode"
         for (c_InputCommon* pInputChannel : pInputChannelDrivers)
         {
             pInputChannel->Process ();

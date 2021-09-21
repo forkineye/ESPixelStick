@@ -1,0 +1,24 @@
+; PlatformIO local user configuration
+;   ** Copy this file to platformio_user.ini and edit for your local config **
+;   Configurations defined here will override values defined in platformio.ini
+;
+;   [esp8266] and [esp32] sections are inherited into [env:]:
+;   https://docs.platformio.org/en/latest/projectconf/section_env.html
+
+;[platformio]
+;default_envs = espsv3
+
+;[env]
+;build_type = debug
+
+;[esp8266]
+;monitor_port = COM5
+;upload_port = COM5
+
+;[esp32]
+;monitor_port = COM6
+;upload_port = COM6
+
+;[env:espsv3]
+;monitor_port = COM3
+;upload_port = COM3

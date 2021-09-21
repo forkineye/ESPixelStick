@@ -131,6 +131,7 @@ const char CN_seconds_played           [] = "seconds_played";
 const char CN_seconds_remaining        [] = "seconds_remaining";
 const char CN_sequence_filename        [] = "sequence_filename";
 const char CN_slashset                 [] = "/set";
+const char CN_slashstatus              [] = "/status";
 const char CN_speed                    [] = "speed";
 const char CN_ssid                     [] = "ssid";
 const char CN_sta_timeout              [] = "sta_timeout";
