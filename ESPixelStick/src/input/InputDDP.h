@@ -90,7 +90,7 @@ private:
     typedef struct __attribute__ ((packed))
     {
         uint32_t packetsReceived;
-        uint32_t bytesReceived;
+        uint64_t bytesReceived;
         uint32_t errors;
     } DDP_stats_t;
 
