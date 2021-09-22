@@ -42,7 +42,6 @@ There are currently some issues with PlatformIO and uploading filesystem data.  
 
 For ESP32 platforms, you will need to utilize the Arduino IDE for uploading filesystem data until the ESP32 Arduino Core is updated in PlatformIO.
 
-
 ### Arduino IDE Instructions (not recommended)
 
 Due to dependencies and software versioning, building with the Arduino IDE is not recommended.  If you wish to build with the Arduino IDE, below is what you will need to install.
