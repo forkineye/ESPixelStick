@@ -171,7 +171,7 @@ void fsm_PlayList_state_PlayingFile::Init (c_InputFPPRemotePlayList* Parent)
 {
     // DEBUG_START;
 
-    Parent->pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile ();
+    Parent->pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (Parent->GetInputChannelId ());
 
     pInputFPPRemotePlayList = Parent;
     pInputFPPRemotePlayList->pCurrentFsmState = &(Parent->fsm_PlayList_state_PlayingFile_imp);
@@ -248,7 +248,7 @@ void fsm_PlayList_state_PlayingEffect::Init (c_InputFPPRemotePlayList* Parent)
     // DEBUG_START;
 
     pInputFPPRemotePlayList = Parent;
-    Parent->pInputFPPRemotePlayItem = new c_InputFPPRemotePlayEffect ();
+    Parent->pInputFPPRemotePlayItem = new c_InputFPPRemotePlayEffect (Parent->GetInputChannelId ());
 
     Parent->pCurrentFsmState = &(Parent->fsm_PlayList_state_PlayingEffect_imp);
 

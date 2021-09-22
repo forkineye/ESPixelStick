@@ -50,13 +50,13 @@ typedef struct
 
 static const InputTypeXlateMap_t InputTypeXlateMap[c_InputMgr::e_InputType::InputType_End] =
 {
-    {c_InputMgr::e_InputType::InputType_E1_31,    "E1.31",      c_InputMgr::e_InputChannelIds::InputChannelId_1},
-    {c_InputMgr::e_InputType::InputType_DDP,      "DDP",        c_InputMgr::e_InputChannelIds::InputChannelId_1},
-    {c_InputMgr::e_InputType::InputType_FPP,      "FPP Remote", c_InputMgr::e_InputChannelIds::InputChannelId_1},
-    {c_InputMgr::e_InputType::InputType_Artnet,   "Artnet",     c_InputMgr::e_InputChannelIds::InputChannelId_1},
-    {c_InputMgr::e_InputType::InputType_Effects,  "Effects",    c_InputMgr::e_InputChannelIds::InputChannelId_2},
-    {c_InputMgr::e_InputType::InputType_MQTT,     "MQTT",       c_InputMgr::e_InputChannelIds::InputChannelId_2},
-    {c_InputMgr::e_InputType::InputType_Alexa,    "Alexa",      c_InputMgr::e_InputChannelIds::InputChannelId_2},
+    {c_InputMgr::e_InputType::InputType_E1_31,    "E1.31",      c_InputMgr::e_InputChannelIds::InputPrimaryChannelId},
+    {c_InputMgr::e_InputType::InputType_DDP,      "DDP",        c_InputMgr::e_InputChannelIds::InputPrimaryChannelId},
+    {c_InputMgr::e_InputType::InputType_FPP,      "FPP Remote", c_InputMgr::e_InputChannelIds::InputPrimaryChannelId},
+    {c_InputMgr::e_InputType::InputType_Artnet,   "Artnet",     c_InputMgr::e_InputChannelIds::InputPrimaryChannelId},
+    {c_InputMgr::e_InputType::InputType_Effects,  "Effects",    c_InputMgr::e_InputChannelIds::InputSecondaryChannelId},
+    {c_InputMgr::e_InputType::InputType_MQTT,     "MQTT",       c_InputMgr::e_InputChannelIds::InputSecondaryChannelId},
+    {c_InputMgr::e_InputType::InputType_Alexa,    "Alexa",      c_InputMgr::e_InputChannelIds::InputSecondaryChannelId},
     {c_InputMgr::e_InputType::InputType_Disabled, "Disabled",   c_InputMgr::e_InputChannelIds::InputChannelId_ALL}
 };
 
@@ -616,13 +616,25 @@ void c_InputMgr::Process ()
             configInProgress = false;
         }
 
-        // DEBUG_V("");
-//TODO: Refactor this for for input priority (2 inputs only).  Only process secondary input if we aren't in "show mode"
-        for (c_InputCommon* pInputChannel : pInputChannelDrivers)
+        bool aBlankTimerIsRunning = false;
+        for (c_InputCommon * CurrentInput : pInputChannelDrivers)
         {
-            pInputChannel->Process ();
             // DEBUG_V("");
+            CurrentInput->Process ();
+
+            if (!BlankTimerHasExpired (CurrentInput->GetInputChannelId()))
+            {
+                aBlankTimerIsRunning = true;
+                break;
+            }
         }
+
+        if (false == aBlankTimerIsRunning && config.BlankDelay != 0)
+        {
+            // DEBUG_V("Clear Input Buffer");
+            memset (InputDataBuffer, 0x00, InputDataBufferSize);
+            RestartBlankTimer (InputSecondaryChannelId);
+        } // ALL blank timers have expired
 
         if (rebootNeeded)
         {
@@ -893,22 +905,6 @@ void c_InputMgr::SetOperationalState (bool ActiveFlag)
 } // SetOutputState
 
 //-----------------------------------------------------------------------------
-void c_InputMgr::ResetBlankTimer ()
-{
-    // DEBUG_START;
-
-    // pass through each active interface and set the blank state
-    for (c_InputCommon* pInputChannel : pInputChannelDrivers)
-    {
-        pInputChannel->ResetBlankTimer ();
-        // DEBUG_V("");
-    }
-
-    // DEBUG_END;
-
-} // SetOutputState
-
-//-----------------------------------------------------------------------------
 void c_InputMgr::NetworkStateChanged (bool _IsConnected)
 {
     // DEBUG_START;
@@ -923,7 +919,7 @@ void c_InputMgr::NetworkStateChanged (bool _IsConnected)
     }
 
     // DEBUG_END;
-} // WiFiStateChanged
+} // NetworkStateChanged
 
 // create a global instance of the Input channel factory
 c_InputMgr InputMgr;

@@ -274,7 +274,7 @@ void c_InputDDP::ProcessReceivedData (DDP_packet_t & Packet)
         // DEBUG_V (String ("   InputBufferOffset: ") + String (InputBufferOffset));
         memcpy (&InputDataBuffer[InputBufferOffset], &Data[0], AdjPacketDataLength);
 
-        InputMgr.ResetBlankTimer ();
+        InputMgr.RestartBlankTimer (GetInputChannelId ());
 
     } while (false);
 

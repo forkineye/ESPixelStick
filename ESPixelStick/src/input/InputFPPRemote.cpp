@@ -220,13 +220,13 @@ void c_InputFPPRemote::StartPlaying (String & FileName)
         if (-1 != FileName.indexOf (".pl"))
         {
             // DEBUG_V ("Start Playlist");
-            pInputFPPRemotePlayItem = new c_InputFPPRemotePlayList ();
+            pInputFPPRemotePlayItem = new c_InputFPPRemotePlayList (GetInputChannelId ());
             StatusType = F ("PlayList");
         }
         else
         {
             // DEBUG_V ("Start Local FSEQ file player");
-            pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile ();
+            pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (GetInputChannelId ());
             pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
             StatusType = CN_File;
         }

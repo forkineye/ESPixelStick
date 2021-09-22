@@ -20,11 +20,12 @@
 */
 
 #include "../ESPixelStick.h"
+#include "InputMgr.hpp"
 
 class c_InputFPPRemotePlayItem
 {
 public:
-    c_InputFPPRemotePlayItem ();
+    c_InputFPPRemotePlayItem (c_InputMgr::e_InputChannelIds InputChannelId);
     virtual ~c_InputFPPRemotePlayItem ();
 
     virtual void     Poll           (uint8_t * Buffer, size_t BufferSize) = 0;
@@ -39,6 +40,7 @@ public:
             void     GetDriverName  (String& Name) { Name = "InputMgr"; }
             int32_t  GetSyncOffsetMS () { return SyncOffsetMS; }
             void     SetSyncOffsetMS (int32_t value) { SyncOffsetMS = value; }
+            c_InputMgr::e_InputChannelIds GetInputChannelId () { return InputChannelId; }
 protected:
     String   PlayItemName;
     uint32_t RemainingPlayCount = 0;
@@ -46,5 +48,6 @@ protected:
 
 private:
     int32_t  SyncOffsetMS = 0;
+    c_InputMgr::e_InputChannelIds InputChannelId = c_InputMgr::e_InputChannelIds::InputChannelId_ALL;
 
 }; // c_InputFPPRemotePlayItem

@@ -58,7 +58,6 @@ extern const char CN_duration[];
 extern const char CN_effect[];
 extern const char CN_effect_list[];
 extern const char CN_EffectAllLeds[];
-extern const char CN_EffectBlankTime[];
 extern const char CN_EffectBrightness[];
 extern const char CN_EffectColor[];
 extern const char CN_EffectMirror[];

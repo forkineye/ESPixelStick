@@ -32,22 +32,35 @@ class c_InputCommon; ///< forward declaration to the pure virtual Input class th
 class c_InputMgr
 {
 public:
+    // handles to determine which input channel we are dealing with
+    // Channel 1 = primary / show input; Channel 2 = service input
+    enum e_InputChannelIds
+    {
+        InputPrimaryChannelId = 0,
+        InputSecondaryChannelId = 1,
+        InputChannelId_End,
+        InputChannelId_Start = InputPrimaryChannelId,
+        InputChannelId_ALL = InputChannelId_End,
+        EffectsChannel = InputSecondaryChannelId
+    };
+
     c_InputMgr ();
     virtual ~c_InputMgr ();
 
-    void Begin      (uint8_t * BufferStart, uint16_t BufferSize); ///< set up the operating environment based on the current config (or defaults)
-    void LoadConfig ();                                           ///< Read the current configuration data from nvram
-    void GetConfig  (byte * Response, size_t maxlen);             ///< Get the current config used by the driver
-    void GetStatus  (JsonObject & jsonStatus);
-    void SetConfig  (const char * NewConfig);                     ///< Set a new config in the driver
-    void Process    ();                                           ///< Call from loop(),  renders Input data
-    void SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize);
-    void SetOperationalState (bool Active);
-    void ResetBlankTimer ();
-    void NetworkStateChanged (bool IsConnected); // used by poorly designed rx functions
-    void DeleteConfig () { FileMgr.DeleteConfigFile (ConfigFileName); }
-    bool GetNetworkState () { return IsConnected; }
-    void GetDriverName (String & Name) { Name = "InputMgr"; }
+    void Begin                (uint8_t * BufferStart, uint16_t BufferSize);
+    void LoadConfig           ();
+    void GetConfig            (byte * Response, size_t maxlen);
+    void GetStatus            (JsonObject & jsonStatus);
+    void SetConfig            (const char * NewConfig);
+    void Process              ();
+    void SetBufferInfo        (uint8_t* BufferStart, uint16_t BufferSize);
+    void SetOperationalState  (bool Active);
+    void NetworkStateChanged  (bool IsConnected);
+    void DeleteConfig         () { FileMgr.DeleteConfigFile (ConfigFileName); }
+    bool GetNetworkState      () { return IsConnected; }
+    void GetDriverName        (String & Name) { Name = "InputMgr"; }
+    void RestartBlankTimer    (c_InputMgr::e_InputChannelIds Selector) { BlankEndTime[int(Selector)] = (millis () / 1000) + config.BlankDelay; }
+    bool BlankTimerHasExpired (c_InputMgr::e_InputChannelIds Selector) { return !(BlankEndTime[int(Selector)] > (millis () / 1000)); }
 
     enum e_InputType
     {
@@ -62,18 +75,6 @@ public:
         InputType_End,
         InputType_Start   = InputType_E1_31,
         InputType_Default = InputType_Disabled,
-    };
-
-    // handles to determine which input channel we are dealing with
-    // Channel 1 = primary / show input; Channel 2 = service input
-    enum e_InputChannelIds
-    {
-        InputChannelId_1 = 0,
-        InputChannelId_2 = 1,
-        InputChannelId_End,
-        InputChannelId_Start = InputChannelId_1,
-        InputChannelId_ALL = InputChannelId_End,
-        EffectsChannel = InputChannelId_2
     };
 
 private:
@@ -102,6 +103,8 @@ private:
 
     String ConfigFileName;
     bool   rebootNeeded = false;
+
+    time_t BlankEndTime[InputChannelId_End];
 
 #define IM_JSON_SIZE (5 * 1024)
 

@@ -19,7 +19,7 @@
 */
 
 #include "../ESPixelStick.h"
-// #include "../FileMgr.hpp"
+#include "../input/InputMgr.hpp"
 #include "../input/InputFPPRemotePlayFile.hpp"
 
 #ifdef ESP32
@@ -48,13 +48,9 @@ private:
     bool inFileUpload = false;
     bool hasBeenInitialized = false;
     bool IsEnabled = false;
-//    uint8_t* buffer = nullptr;
-//    int bufCurPos = 0;
     String UploadFileName;
-//    uint32_t SyncCount = 0;
-//    uint32_t SyncAdjustmentCount = 0;
     IPAddress FppRemoteIp = IPAddress (uint32_t(0));
-    c_InputFPPRemotePlayFile InputFPPRemotePlayFile;
+    c_InputFPPRemotePlayFile InputFPPRemotePlayFile = c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelIds::InputPrimaryChannelId);
 
     void GetSysInfoJSON    (JsonObject& jsonResponse);
     void BuildFseqResponse (String fname, c_FileMgr::FileId fseq, String & resp);

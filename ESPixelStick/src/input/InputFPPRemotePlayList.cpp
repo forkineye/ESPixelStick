@@ -22,8 +22,8 @@
 #include "../service/FPPDiscovery.h"
 
 //-----------------------------------------------------------------------------
-c_InputFPPRemotePlayList::c_InputFPPRemotePlayList () :
-    c_InputFPPRemotePlayItem()
+c_InputFPPRemotePlayList::c_InputFPPRemotePlayList (c_InputMgr::e_InputChannelIds InputChannelId) :
+    c_InputFPPRemotePlayItem(InputChannelId)
 {
     // DEBUG_START;
 

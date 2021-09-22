@@ -27,7 +27,7 @@
 class c_InputFPPRemotePlayEffect : public c_InputFPPRemotePlayItem
 {
 public:
-    c_InputFPPRemotePlayEffect ();
+    c_InputFPPRemotePlayEffect (c_InputMgr::e_InputChannelIds InputChannelId);
     ~c_InputFPPRemotePlayEffect ();
 
     virtual void Start (String & FileName, uint32_t duration, uint32_t PlayCount);

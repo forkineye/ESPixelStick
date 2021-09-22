@@ -103,6 +103,7 @@ void setup()
     config.netmask    = IPAddress ((uint32_t)0);
     config.gateway    = IPAddress ((uint32_t)0);
     config.UseDhcp    = true;
+    config.BlankDelay = 5;
     config.ap_fallbackIsEnabled = true;
     config.RebootOnWiFiFailureToConnect = true;
     config.ap_timeout  = AP_TIMEOUT;
@@ -213,9 +214,18 @@ bool dsDevice(JsonObject & json)
     {
         JsonObject JsonDeviceConfig = json[CN_device];
 
-//TODO: Add configuration upgrade handling - cfgver moved to root level
+        String TempVersion;
+        setFromJSON (TempVersion, JsonDeviceConfig, CN_cfgver);
+        if (TempVersion != CurrentConfigVersion)
+        {
+            //TODO: Add configuration update handler
+            logcon (String (F ("Incorrect Config Version ID")));
+        }
 
-        ConfigChanged |= setFromJSON (config.id,        JsonDeviceConfig, CN_id);
+//TODO: Add configuration upgrade handling - move cfgver to root level
+
+        ConfigChanged |= setFromJSON (config.id,         JsonDeviceConfig, CN_id);
+        ConfigChanged |= setFromJSON (config.BlankDelay, JsonDeviceConfig, CN_blanktime);
     }
     else
     {
@@ -305,14 +315,6 @@ bool deserializeCore (JsonObject & json)
 
     do // once
     {
-        String TempVersion;
-        setFromJSON (TempVersion, json, CN_cfgver);
-        if (TempVersion != CurrentConfigVersion)
-        {
-//TODO: Add configuration update handler
-            logcon (String (F ("Incorrect Config Version ID")));
-        }
-
         dsDevice  (json);
         FileMgr.SetConfig (json);
         ResetWiFi = dsNetwork (json);
@@ -380,11 +382,12 @@ void GetConfig (JsonObject & json)
     // DEBUG_START;
 
     // Config Version
-    json[CN_cfgver] = CurrentConfigVersion;
 
     // Device
-    JsonObject device = json.createNestedObject(CN_device);
-    device[CN_id]     = config.id;
+    JsonObject device    = json.createNestedObject(CN_device);
+    device[CN_cfgver]    = CurrentConfigVersion;
+    device[CN_id]        = config.id;
+    device[CN_blanktime] = config.BlankDelay;
 
     FileMgr.GetConfig (device);
 
@@ -392,7 +395,7 @@ void GetConfig (JsonObject & json)
     JsonObject network = json.createNestedObject(CN_network);
     network[CN_ssid]       = config.ssid;
     network[CN_passphrase] = config.passphrase;
-    network[CN_hostname] = config.hostname;
+    network[CN_hostname]   = config.hostname;
 #ifdef ARDUINO_ARCH_ESP8266
     IPAddress Temp = config.ip;
     network[CN_ip]      = Temp.toString ();

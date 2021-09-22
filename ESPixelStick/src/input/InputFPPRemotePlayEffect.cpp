@@ -22,8 +22,8 @@
 #include "InputEffectEngine.hpp"
 
 //-----------------------------------------------------------------------------
-c_InputFPPRemotePlayEffect::c_InputFPPRemotePlayEffect () :
-    c_InputFPPRemotePlayItem ()
+c_InputFPPRemotePlayEffect::c_InputFPPRemotePlayEffect (c_InputMgr::e_InputChannelIds InputChannelId) :
+    c_InputFPPRemotePlayItem (InputChannelId)
 {
     // DEBUG_START;
 

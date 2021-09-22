@@ -28,7 +28,7 @@
 class c_InputFPPRemotePlayList : public c_InputFPPRemotePlayItem
 {
 public:
-    c_InputFPPRemotePlayList ();
+    c_InputFPPRemotePlayList (c_InputMgr::e_InputChannelIds InputChannelId);
     ~c_InputFPPRemotePlayList ();
 
     virtual void Start (String & FileName, uint32_t FrameId, uint32_t PlayCount);

@@ -54,7 +54,6 @@ const char CN_duration                 [] = "duration";
 const char CN_effect                   [] = "effect";
 const char CN_effect_list              [] = "effect_list";
 const char CN_EffectAllLeds            [] = "EffectAllLeds";
-const char CN_EffectBlankTime          [] = "EffectBlankTime";
 const char CN_EffectBrightness         [] = "EffectBrightness";
 const char CN_EffectColor              [] = "EffectColor";
 const char CN_EffectMirror             [] = "EffectMirror";
