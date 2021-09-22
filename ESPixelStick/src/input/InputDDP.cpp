@@ -272,7 +272,7 @@ void c_InputDDP::ProcessReceivedData (DDP_packet_t & Packet)
         byte* Data = (IsTime(header.flags1)) ? &((DDP_TimeCode_packet_t&)Packet).data[0] : &Packet.data[0];
         // DEBUG_V (String ("                Data: 0x") + String (uint32_t (Data), HEX));
         // DEBUG_V (String ("   InputBufferOffset: ") + String (InputBufferOffset));
-        memcpy (&InputDataBuffer[InputBufferOffset], &Data[10], AdjPacketDataLength);
+        memcpy (&InputDataBuffer[InputBufferOffset], &Data[0], AdjPacketDataLength);
 
         InputMgr.ResetBlankTimer ();
 
