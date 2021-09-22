@@ -36,8 +36,8 @@ public:
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
     
-    uint32_t GetLastFrameId () { return LastFrameId; }
-    float GetTimeOffset () { return TimeOffset; }
+    uint32_t GetLastFrameId ()  { return LastFrameId; }
+    float    GetTimeOffsetMS () { return TimeOffsetMS; }
 
 private:
     friend class fsm_PlayFile_state_Idle;
@@ -59,12 +59,11 @@ private:
     uint8_t           FrameStepTime = 1;
     uint32_t          TotalNumberOfFramesInSequence = 0;
     uint32_t          StartTimeInMillis = 0;
-    float             TimeOffset = 1.0;
-
+    float             TimeOffsetMS = 1.0;
     uint32_t          SyncCount = 0;
     uint32_t          SyncAdjustmentCount = 0;
 
-    uint32_t          CalculateFrameId(time_t now) {return (uint32_t(float(now - StartTimeInMillis) * TimeOffset) / FrameStepTime); }
+    uint32_t          CalculateFrameId(time_t now, int32_t SyncOffsetMS = 0) {return (uint32_t(int32_t(float(now - StartTimeInMillis) * TimeOffsetMS) + SyncOffsetMS) / FrameStepTime); }
 
 #define TimeOffsetStep 0.00001
 

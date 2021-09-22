@@ -708,7 +708,7 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     // is this an ACK response?
     else if (JsonConfigData.hasOwnProperty("OK"))
     {
-        console.info("Received Acknowledgement to config set command.")
+        // console.info("Received Acknowledgement to config set command.")
     }
 
     else

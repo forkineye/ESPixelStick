@@ -905,6 +905,8 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
 
     // DEBUG_V (String ("   TotalBufferSize: ") + String (OutputBufferOffset));
     UsedBufferSize = OutputBufferOffset;
+    // DEBUG_V (String ("       OutputBuffer: 0x") + String (uint32_t (OutputBuffer), HEX));
+    // DEBUG_V (String ("     UsedBufferSize: ") + String (uint32_t (UsedBufferSize)));
     InputMgr.SetBufferInfo (OutputBuffer, OutputBufferOffset);
 
     // DEBUG_END;

@@ -93,13 +93,13 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
     // DEBUG_START;
 
     JsonObject e131Status = jsonStatus.createNestedObject (F ("e131"));
-    e131Status[CN_id]               = InputChannelId;
-    e131Status[F ("unifirst")]      = startUniverse;
-    e131Status[F ("unilast")]       = LastUniverse;
-    e131Status[F ("unichanlim")]    = ChannelsPerUniverse;
+    e131Status[CN_id]            = InputChannelId;
+    e131Status[CN_unifirst]      = startUniverse;
+    e131Status[CN_unilast ]      = LastUniverse;
+    e131Status[CN_unichanlim] = ChannelsPerUniverse;
 
-    e131Status[F ("num_packets")]   = e131->stats.num_packets;
-    e131Status[F ("last_clientIP")] = uint32_t(e131->stats.last_clientIP);
+    e131Status[CN_num_packets]   = e131->stats.num_packets;
+    e131Status[CN_last_clientIP] = uint32_t(e131->stats.last_clientIP);
     // DEBUG_V ("");
 
     JsonArray e131UniverseStatus = e131Status.createNestedArray (CN_channels);
@@ -108,11 +108,11 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
     {
         JsonObject e131CurrentUniverseStatus = e131UniverseStatus.createNestedObject ();
 
-        e131CurrentUniverseStatus[F ("errors")] = CurrentUniverse.SequenceErrorCounter;
+        e131CurrentUniverseStatus[CN_errors] = CurrentUniverse.SequenceErrorCounter;
         TotalErrors += CurrentUniverse.SequenceErrorCounter;
     }
 
-    e131Status[F ("packet_errors")] = TotalErrors;
+    e131Status[CN_packet_errors] = TotalErrors;
 
     // DEBUG_END;
 

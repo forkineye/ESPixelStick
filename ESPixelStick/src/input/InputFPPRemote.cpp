@@ -58,12 +58,6 @@ void c_InputFPPRemote::Begin()
 {
     // DEBUG_START;
 
-    if (true == HasBeenInitialized)
-    {
-        // DEBUG_END;
-        return;
-    }
-
     HasBeenInitialized = true;
 
     // DEBUG_END;
@@ -83,6 +77,7 @@ void c_InputFPPRemote::GetConfig (JsonObject & jsonConfig)
     {
         jsonConfig[JSON_NAME_FILE_TO_PLAY] = No_LocalFileToPlay;
     }
+    jsonConfig[CN_SyncOffset] = SyncOffsetMS;
 
     // DEBUG_END;
 
@@ -146,6 +141,11 @@ bool c_InputFPPRemote::SetConfig (JsonObject & jsonConfig)
 
     String FileToPlay;
     setFromJSON (FileToPlay, jsonConfig, JSON_NAME_FILE_TO_PLAY);
+    setFromJSON (SyncOffsetMS, jsonConfig, CN_SyncOffset);
+    if (pInputFPPRemotePlayItem)
+    {
+        pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
+    }
 
     // DEBUG_V ("Config Processing");
     StartPlaying (FileToPlay);
@@ -227,6 +227,7 @@ void c_InputFPPRemote::StartPlaying (String & FileName)
         {
             // DEBUG_V ("Start Local FSEQ file player");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile ();
+            pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
             StatusType = CN_File;
         }
 
