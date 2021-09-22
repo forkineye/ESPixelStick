@@ -121,6 +121,9 @@ void c_InputDDP::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
     InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
 
+    // DEBUG_V (String ("        InputBuffer: 0x") + String (uint32_t (InputDataBuffer), HEX));
+    // DEBUG_V (String ("InputDataBufferSize: ") + String (uint32_t (InputDataBufferSize)));
+
     // DEBUG_END;
 
 } // SetBufferInfo
@@ -236,6 +239,7 @@ void c_InputDDP::ProcessReceivedData (DDP_packet_t & Packet)
     do // once
     {
         DDP_Header_t & header = Packet.header;
+        // DEBUG_V (String ("              header: 0x") + String (uint32_t (&Packet.header), HEX));
 
         // is the offset and length valid?
 
@@ -243,7 +247,6 @@ void c_InputDDP::ProcessReceivedData (DDP_packet_t & Packet)
         uint32_t packetDataLength  = ntohs (header.dataLen);
         uint32_t LastCharOffset    = packetDataLength + InputBufferOffset;
 
-        // DEBUG_V (String ("   InputBufferOffset: ") + String (InputBufferOffset));
         // DEBUG_V (String ("    packetDataLength: ") + String (packetDataLength));
         // DEBUG_V (String ("      LastCharOffset: ") + String (LastCharOffset));
         // DEBUG_V (String (" InputDataBufferSize: ") + String (InputDataBufferSize));
@@ -258,10 +261,18 @@ void c_InputDDP::ProcessReceivedData (DDP_packet_t & Packet)
         uint32_t RemainingBufferSpace = InputDataBufferSize - InputBufferOffset;
         // DEBUG_V (String ("RemainingBufferSpace: ") + String (RemainingBufferSpace));
 
-        uint32_t AdjPacketDataLength = min (RemainingBufferSpace, packetDataLength);
+        uint32_t AdjPacketDataLength = packetDataLength;
+        if (RemainingBufferSpace < packetDataLength)
+        {
+            AdjPacketDataLength = RemainingBufferSpace;
+            stats.errors++;
+        }
         // DEBUG_V (String (" AdjPacketDataLength: ") + String (AdjPacketDataLength));
 
-        memcpy (&InputDataBuffer[InputBufferOffset], &Packet.data, AdjPacketDataLength);
+        byte* Data = (IsTime(header.flags1)) ? &((DDP_TimeCode_packet_t&)Packet).data[0] : &Packet.data[0];
+        // DEBUG_V (String ("                Data: 0x") + String (uint32_t (Data), HEX));
+        // DEBUG_V (String ("   InputBufferOffset: ") + String (InputBufferOffset));
+        memcpy (&InputDataBuffer[InputBufferOffset], &Data[10], AdjPacketDataLength);
 
         InputMgr.ResetBlankTimer ();
 
