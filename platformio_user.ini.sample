@@ -1,24 +1,44 @@
-; PlatformIO local user configuration
-;   ** Copy this file to platformio_user.ini and edit for your local config **
-;   Configurations defined here will override values defined in platformio.ini
+;~~PlatformIO local user configuration
+;  Copy this file to platformio_user.ini and edit for your local config
 ;
-;   [esp8266] and [esp32] sections are inherited into [env:]:
+;~~ Serial Port Configuration
+;  'monitor_port' and 'upload_port' need to be defined.
+;   For ESPixelStick, these ports will be the same.
+;
+;   The [env] section is top level and will be used for all devices
+;   and environments. If you have only one device, you can define
+;   the port here, or do nothing at all and PlatformIO will attempt
+;   to auto-detect it.
+;
+;   If you have multiple devices, you can define global [esp8266]
+;   or [esp32] specific ports.  If you want to target a specific
+;   build environment, you can do that as well. A list of all
+;   [env:] targets is defined in platformio.ini.
+;
+;~~ Optional configuration
+;   Configurations defined here will override platformio.ini
+;   https://docs.platformio.org/page/projectconf.html
+;
+;   [esp8266] and [esp32] sections are inherited into [env:] targets:
 ;   https://docs.platformio.org/en/latest/projectconf/section_env.html
+;
 
 ;[platformio]
 ;default_envs = espsv3
 
 ;[env]
 ;build_type = debug
+;monitor_port = COM3
+;upload_port = COM3
 
 ;[esp8266]
+;monitor_port = COM4
+;upload_port = COM4
+
+;[esp32]
 ;monitor_port = COM5
 ;upload_port = COM5
 
-;[esp32]
+;[env:espsv3]
 ;monitor_port = COM6
 ;upload_port = COM6
-
-;[env:espsv3]
-;monitor_port = COM3
-;upload_port = COM3
