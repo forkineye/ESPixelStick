@@ -58,7 +58,7 @@ c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInput
 
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::c_InputEffectEngine () :
-    c_InputCommon (c_InputMgr::e_InputChannelIds::InputChannelId_1,
+    c_InputCommon (c_InputMgr::e_InputChannelIds::InputPrimaryChannelId,
         c_InputMgr::e_InputType::InputType_Effects,
         nullptr, 0)
 {
@@ -109,7 +109,6 @@ void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
     jsonConfig[CN_EffectMirror]       = EffectMirror;
     jsonConfig[CN_EffectAllLeds]      = EffectAllLeds;
     jsonConfig[CN_EffectBrightness]   = uint32_t(EffectBrightness * 100.0);
-    jsonConfig[CN_EffectBlankTime]    = EffectBlankTime;
     jsonConfig[CN_EffectWhiteChannel] = EffectWhiteChannel;
     jsonConfig[CN_EffectColor]        = HexColor;
     // DEBUG_V ("");
@@ -149,7 +148,6 @@ void c_InputEffectEngine::GetMqttConfig (MQTTConfiguration_s & mqttConfig)
     mqttConfig.mirror       = EffectMirror;
     mqttConfig.allLeds      = EffectAllLeds;
     mqttConfig.brightness   = uint8_t(EffectBrightness * 255.0);
-    mqttConfig.blankTime    = EffectBlankTime;
     mqttConfig.whiteChannel = EffectWhiteChannel;
 
     mqttConfig.color.r = EffectColor.r;
@@ -230,12 +228,6 @@ void c_InputEffectEngine::Process ()
         }
         // DEBUG_V ("Pixel Count OK");
 
-        if (millis () < EffectBlankEnd)
-        {
-            break;
-        }
-        // DEBUG_V ("");
-
         if (millis () < (EffectLastRun + EffectWait))
         {
             break;
@@ -246,6 +238,7 @@ void c_InputEffectEngine::Process ()
         uint16_t wait = (this->*ActiveEffect->func)();
         EffectWait = max ((int)wait, MIN_EFFECT_DELAY);
         EffectCounter++;
+        InputMgr.RestartBlankTimer (GetInputChannelId ());
 
     } while (false);
 
@@ -289,7 +282,6 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     setFromJSON (EffectMirror,       jsonConfig, CN_EffectMirror);
     setFromJSON (EffectAllLeds,      jsonConfig, CN_EffectAllLeds);
     setFromJSON (EffectBrightness,   jsonConfig, CN_EffectBrightness);
-    setFromJSON (EffectBlankTime,    jsonConfig, CN_EffectBlankTime);
     setFromJSON (EffectWhiteChannel, jsonConfig, CN_EffectWhiteChannel);
     setFromJSON (effectName,         jsonConfig, CN_currenteffect);
     setFromJSON (effectColor,        jsonConfig, CN_EffectColor);
@@ -322,7 +314,6 @@ void c_InputEffectEngine::SetMqttConfig (MQTTConfiguration_s& mqttConfig)
     effectName = mqttConfig.effect;
     EffectMirror = mqttConfig.mirror;
     EffectAllLeds = mqttConfig.allLeds;
-    EffectBlankTime = mqttConfig.blankTime;
     EffectWhiteChannel = mqttConfig.whiteChannel;
 
     uint16_t tempBrightness = uint8_t(EffectBrightness * 255.0);
@@ -387,15 +378,6 @@ void c_InputEffectEngine::setDelay (uint16_t delay)
     }
     // DEBUG_END;
 } // setDelay
-
-//-----------------------------------------------------------------------------
-void c_InputEffectEngine::ResetBlankTimer ()
-{
-    // DEBUG_START;
-    EffectBlankEnd = millis () + (EffectBlankTime * 1000);
-    // DEBUG_END;
-
-} // ResetBlankTimer
 
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::setEffect (const String & effectName)
@@ -759,7 +741,8 @@ uint16_t c_InputEffectEngine::effectLightning ()
 }
 
 //-----------------------------------------------------------------------------
-uint16_t c_InputEffectEngine::effectBreathe () {
+uint16_t c_InputEffectEngine::effectBreathe ()
+{
     /*
      * Subtle "breathing" effect, works best with gamma correction on.
      *
@@ -900,4 +883,3 @@ c_InputEffectEngine::CRGB c_InputEffectEngine::hsv2rgb (dCHSV in)
     out_int = { uint8_t (255 * out.r), uint8_t (255 * out.g), uint8_t (255 * out.b) };
     return out_int;
 }
-

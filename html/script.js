@@ -984,6 +984,7 @@ function submitDeviceConfig()
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
     Device_Config.id        = $('#config #device #id').val();
+    Device_Config.blanktime = $('#config #device #blanktime').val();
     Device_Config.miso_pin  = $('#config #device #miso_pin').val();
     Device_Config.mosi_pin  = $('#config #device #mosi_pin').val();
     Device_Config.clock_pin = $('#config #device #clock_pin').val();

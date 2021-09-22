@@ -48,7 +48,6 @@ c_InputMQTT::c_InputMQTT (
     effectConfig.mirror       = false;
     effectConfig.allLeds      = false;
     effectConfig.brightness   = 255;
-    effectConfig.blankTime    = 0;
     effectConfig.whiteChannel = false;
     effectConfig.color.r      = 183;
     effectConfig.color.g      = 0;
@@ -536,12 +535,12 @@ void c_InputMQTT::PlayFseq (JsonObject & JsonConfig)
         if (FileIsPlayList)
         {
             // DEBUG_V ("Instantiate Play List Engine");
-            pPlayFileEngine = new c_InputFPPRemotePlayList ();
+            pPlayFileEngine = new c_InputFPPRemotePlayList (GetInputChannelId ());
         }
         else
         {
             // DEBUG_V ("Instantiate Play File Engine");
-            pPlayFileEngine = new c_InputFPPRemotePlayFile ();
+            pPlayFileEngine = new c_InputFPPRemotePlayFile (GetInputChannelId ());
         }
 
         // DEBUG_V ("Start Playing");
@@ -565,7 +564,7 @@ void c_InputMQTT::PlayEffect (JsonObject & JsonConfig)
     if (nullptr == pEffectsEngine)
     {
         // DEBUG_V ("Create Effect Engine");
-        pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputChannelId_1, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
+        pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputPrimaryChannelId, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
         pEffectsEngine->Begin ();
         pEffectsEngine->SetBufferInfo (InputDataBuffer, InputDataBufferSize);
 
@@ -615,7 +614,6 @@ void c_InputMQTT::GetEngineConfig (JsonObject & JsonConfig)
     JsonConfig[CN_mirror]             = effectConfig.mirror;
     JsonConfig[CN_allleds]            = effectConfig.allLeds;
     JsonConfig[CN_brightness]         = effectConfig.brightness;
-    JsonConfig[CN_blanktime]          = effectConfig.blankTime;
     JsonConfig[CN_EffectWhiteChannel] = effectConfig.whiteChannel;
 
     JsonObject color = JsonConfig.createNestedObject (CN_color);
@@ -646,7 +644,7 @@ void c_InputMQTT::GetEffectList (JsonObject & JsonConfig)
     if (nullptr == pEffectsEngine)
     {
         // DEBUG_V ("");
-        pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputChannelId_1, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
+        pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputPrimaryChannelId, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
         pEffectsEngine->Begin ();
         pEffectsEngine->SetOperationalState (false);
     }
@@ -792,7 +790,6 @@ void c_InputMQTT::UpdateEffectConfiguration (JsonObject & JsonConfig)
     setFromJSON (effectConfig.mirror,       JsonConfig, CN_mirror);
     setFromJSON (effectConfig.allLeds,      JsonConfig, CN_allleds);
     setFromJSON (effectConfig.brightness,   JsonConfig, CN_brightness);
-    setFromJSON (effectConfig.blankTime,    JsonConfig, CN_blanktime);
     setFromJSON (effectConfig.whiteChannel, JsonConfig, CN_EffectWhiteChannel);
 
     if (JsonConfig.containsKey (CN_color))

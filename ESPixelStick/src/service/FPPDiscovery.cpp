@@ -202,8 +202,6 @@ uint16_t read16 (uint8_t* pData)
 } // read16
 
 //-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
 {
     // DEBUG_START;

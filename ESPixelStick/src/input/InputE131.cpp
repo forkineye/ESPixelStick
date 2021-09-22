@@ -93,9 +93,9 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
     // DEBUG_START;
 
     JsonObject e131Status = jsonStatus.createNestedObject (F ("e131"));
-    e131Status[CN_id]            = InputChannelId;
-    e131Status[CN_unifirst]      = startUniverse;
-    e131Status[CN_unilast ]      = LastUniverse;
+    e131Status[CN_id]         = InputChannelId;
+    e131Status[CN_unifirst]   = startUniverse;
+    e131Status[CN_unilast ]   = LastUniverse;
     e131Status[CN_unichanlim] = ChannelsPerUniverse;
 
     e131Status[CN_num_packets]   = e131->stats.num_packets;
@@ -176,7 +176,7 @@ void c_InputE131::ProcessIncomingE131Data (e131_packet_t * packet)
                 &E131Data[CurrentUniverse.SourceDataOffset],
                 min (CurrentUniverse.BytesToCopy, NumBytesOfE131Data));
 
-            InputMgr.ResetBlankTimer ();
+            InputMgr.RestartBlankTimer (GetInputChannelId ());
         }
         else
         {

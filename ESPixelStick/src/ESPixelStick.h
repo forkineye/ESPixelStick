@@ -70,6 +70,7 @@ typedef struct {
     IPAddress   ip                   = (uint32_t)0;
     IPAddress   netmask              = (uint32_t)0;
     IPAddress   gateway              = (uint32_t)0;
+    time_t      BlankDelay           = time_t(5);
     bool        UseDhcp              = true;           ///< Use DHCP?
     bool        ap_fallbackIsEnabled = true;           ///< Fallback to AP if fail to associate?
     uint32_t    ap_timeout           = AP_TIMEOUT;     ///< How long to wait in AP mode with no connection before rebooting

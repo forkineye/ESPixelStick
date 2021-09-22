@@ -22,10 +22,12 @@
 #include "InputFPPRemotePlayItem.hpp"
 
 //-----------------------------------------------------------------------------
-c_InputFPPRemotePlayItem::c_InputFPPRemotePlayItem ()
+c_InputFPPRemotePlayItem::c_InputFPPRemotePlayItem (c_InputMgr::e_InputChannelIds _InputChannelId)
+
 {
     // DEBUG_START;
 
+    InputChannelId = _InputChannelId;
 
     // DEBUG_END;
 } // c_InputFPPRemotePlayItem

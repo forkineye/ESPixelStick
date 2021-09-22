@@ -232,7 +232,7 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
             }
         }
 
-        InputMgr.ResetBlankTimer ();
+        InputMgr.RestartBlankTimer (p_InputFPPRemotePlayFile->GetInputChannelId ());
 
     } while (false);
 
