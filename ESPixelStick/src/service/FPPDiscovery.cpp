@@ -451,7 +451,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
     FileMgr.ReadSdFile (fseq, (byte*)&fsqHeader, sizeof (fsqHeader), 0);
 
     JsonData[F ("Name")]            = fname;
-    JsonData[F ("Version")]         = String (fsqHeader.majorVersion) + "." + String (fsqHeader.minorVersion);
+    JsonData[CN_Version]            = String (fsqHeader.majorVersion) + "." + String (fsqHeader.minorVersion);
     JsonData[F ("ID")]              = int64String (fsqHeader.id);
     JsonData[F ("StepTime")]        = String (fsqHeader.stepTime);
     JsonData[F ("NumFrames")]       = String (fsqHeader.TotalNumberOfFramesInSequence);
@@ -701,12 +701,12 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
 {
     // DEBUG_START;
 
-    jsonResponse[CN_HostName]        = config.hostname;
+    jsonResponse[CN_HostName]           = config.hostname;
     jsonResponse[F ("HostDescription")] = config.id;
     jsonResponse[F ("Platform")]        = CN_ESPixelStick;
     jsonResponse[F ("Variant")]         = FPP_VARIANT_NAME;
     jsonResponse[F ("Mode")]            = (true == AllowedToRemotePlayFiles()) ?  F("remote") : F("bridge");
-    jsonResponse[F ("Version")]         = VERSION + String (":") + BUILD_DATE;
+    jsonResponse[CN_Version]            = VERSION + String (":") + BUILD_DATE;
 
     const char* version = VERSION.c_str ();
 

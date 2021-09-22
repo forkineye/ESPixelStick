@@ -87,15 +87,15 @@ void c_InputArtnet::GetStatus (JsonObject & jsonStatus)
     // DEBUG_START;
 
     JsonObject ArtnetStatus = jsonStatus.createNestedObject (F ("Artnet"));
-    ArtnetStatus[F ("unifirst")]      = startUniverse;
-    ArtnetStatus[F ("unilast")]       = LastUniverse;
-    ArtnetStatus[F ("unichanlim")]    = ChannelsPerUniverse;
+    ArtnetStatus[CN_unifirst]      = startUniverse;
+    ArtnetStatus[CN_unilast]       = LastUniverse;
+    ArtnetStatus[CN_unichanlim] = ChannelsPerUniverse;
     // DEBUG_V ("");
 
     ArtnetStatus[F ("lastData")]      = lastData;
-    ArtnetStatus[F ("num_packets")]   = num_packets;
-    ArtnetStatus[F ("packet_errors")] = packet_errors;
-    ArtnetStatus[F ("last_clientIP")] = LastRemoteIP.toString ();
+    ArtnetStatus[CN_num_packets]      = num_packets;
+    ArtnetStatus[CN_packet_errors] = packet_errors;
+    ArtnetStatus[CN_last_clientIP] = LastRemoteIP.toString ();
 
     JsonArray ArtnetUniverseStatus = ArtnetStatus.createNestedArray (CN_channels);
 
@@ -104,7 +104,7 @@ void c_InputArtnet::GetStatus (JsonObject & jsonStatus)
         JsonObject ArtnetCurrentUniverseStatus = ArtnetUniverseStatus.createNestedObject ();
 
         ArtnetCurrentUniverseStatus[CN_errors] = CurrentUniverse.SequenceErrorCounter;
-        ArtnetCurrentUniverseStatus[F ("num_packets")] = CurrentUniverse.num_packets;
+        ArtnetCurrentUniverseStatus[CN_num_packets] = CurrentUniverse.num_packets;
     }
 
     // DEBUG_END;

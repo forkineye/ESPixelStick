@@ -321,7 +321,7 @@ void c_InputDDP::ProcessReceivedQuery ()
             JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_config);
             JsonConfig[CN_hostname] = config.hostname;
             JsonConfig[CN_ip] = WiFi.localIP ().toString ();
-            JsonConfig["version"] = (VERSION + String (":") + BUILD_DATE);
+            JsonConfig[CN_version] = (VERSION + String (":") + BUILD_DATE);
             JsonConfig["hardwareType"] = FPP_VARIANT_NAME;
             JsonConfig[CN_type] = FPP_TYPE_ID;
             JsonConfig[CN_num_chan] = InputDataBufferSize;

@@ -604,7 +604,7 @@ void c_WebMgr::ProcessXARequest (AsyncWebSocketClient* client)
     DynamicJsonDocument webJsonDoc (1024);
     JsonObject jsonAdmin = webJsonDoc.createNestedObject (F ("admin"));
 
-    jsonAdmin["version"] = VERSION;
+    jsonAdmin[CN_version] = VERSION;
     jsonAdmin["built"] = BUILD_DATE;
     jsonAdmin["realflashsize"] = String (ESP.getFlashChipSize ());
 #ifdef ARDUINO_ARCH_ESP8266
