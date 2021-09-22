@@ -103,7 +103,7 @@ void c_InputArtnet::GetStatus (JsonObject & jsonStatus)
     {
         JsonObject ArtnetCurrentUniverseStatus = ArtnetUniverseStatus.createNestedObject ();
 
-        ArtnetCurrentUniverseStatus[F ("errors")] = CurrentUniverse.SequenceErrorCounter;
+        ArtnetCurrentUniverseStatus[CN_errors] = CurrentUniverse.SequenceErrorCounter;
         ArtnetCurrentUniverseStatus[F ("num_packets")] = CurrentUniverse.num_packets;
     }
 

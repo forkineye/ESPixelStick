@@ -69,6 +69,7 @@ extern const char CN_Effect[];
 extern const char CN_effects[];
 extern const char CN_en[];
 extern const char CN_enabled[];
+extern const char CN_enrrors[];
 extern const char CN_ESPixelStick [];
 extern const char CN_false [];
 extern const char CN_File[];

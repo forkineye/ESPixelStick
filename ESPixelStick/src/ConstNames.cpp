@@ -65,6 +65,7 @@ const char CN_Effect                   [] = "Effect";
 const char CN_effects                  [] = "effects";
 const char CN_en                       [] = "en";
 const char CN_enabled                  [] = "enabled";
+const char CN_enrrors                  [] = "errors";
 const char CN_ESPixelStick             [] = "ESPixelStick";
 const char CN_false                    [] = "false";
 const char CN_File                     [] = "File";

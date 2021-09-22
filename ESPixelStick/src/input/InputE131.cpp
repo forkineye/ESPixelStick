@@ -108,7 +108,7 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
     {
         JsonObject e131CurrentUniverseStatus = e131UniverseStatus.createNestedObject ();
 
-        e131CurrentUniverseStatus[F ("errors")] = CurrentUniverse.SequenceErrorCounter;
+        e131CurrentUniverseStatus[CN_errors] = CurrentUniverse.SequenceErrorCounter;
         TotalErrors += CurrentUniverse.SequenceErrorCounter;
     }
 

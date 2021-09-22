@@ -94,8 +94,8 @@ void c_InputDDP::GetStatus (JsonObject& jsonStatus)
     // DEBUG_V ("");
 
     ddpStatus["packetsreceived"] = stats.packetsReceived;
-    ddpStatus["bytesreceived"]   = stats.bytesReceived;
-    ddpStatus["errors"]          = stats.errors;
+    ddpStatus["bytesreceived"]   = float(stats.bytesReceived) / 1024.0;
+    ddpStatus[CN_errors]         = stats.errors;
     ddpStatus[CN_id]             = InputChannelId;
 
     // DEBUG_END;
