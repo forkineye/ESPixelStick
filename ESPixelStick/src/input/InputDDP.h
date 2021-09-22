@@ -74,13 +74,13 @@ private:
         uint16_t dataLen;
     } DDP_Header_t;
 
-    typedef union __attribute__ ((packed))
+    typedef struct __attribute__ ((packed))
     {
         DDP_Header_t header;  // header may or may not be time code
         byte         data[DDP_MAX_DATALEN];
     } DDP_packet_t;
 
-    typedef union __attribute__ ((packed))
+    typedef struct __attribute__ ((packed))
     {
         DDP_Header_t header;  // header may or may not be time code
         uint32_t     TimeCode;
