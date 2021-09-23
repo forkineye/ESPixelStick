@@ -473,12 +473,6 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
 
     let ChannelConfigs = RelayConfig.channels;
 
-    while (1 < $('#relaychannelconfigurationtable tr').length) {
-        console.log("Deleting $('#relaychannelconfigurationtable tr').length " + $('#relaychannelconfigurationtable tr').length);
-        RelayTableRef.last().remove();
-        console.log("After Delete: $('#relaychannelconfigurationtable tr').length " + $('#relaychannelconfigurationtable tr').length);
-    }
-
     // add as many rows as we need
     for (let CurrentRowId = 1; CurrentRowId <= ChannelConfigs.length; CurrentRowId++)
     {
@@ -517,12 +511,6 @@ function ProcessModeConfigurationDataServoPCA9685(ServoConfig)
     // console.log("Servochannelconfigurationtable.rows.length = " + $('#servo_pca9685channelconfigurationtable tr').length);
 
     let ChannelConfigs = ServoConfig.channels;
-
-    while (1 < $('#servo_pca9685channelconfigurationtable tr').length) {
-        console.log("Deleting $('#servo_pca9685channelconfigurationtable tr').length " + $('#servo_pca9685channelconfigurationtable tr').length);
-        ServoTableRef.last().remove();
-        console.log("After Delete: $('#servo_pca9685channelconfigurationtable tr').length " + $('#servo_pca9685channelconfigurationtable tr').length);
-    }
 
     // add as many rows as we need
     for (let CurrentRowId = 1; CurrentRowId <= ChannelConfigs.length; CurrentRowId++) {
@@ -1028,9 +1016,6 @@ function wsConnect()
             target = document.location.host;
         }
 
-        // target = "192.168.10.215";
-        // target = "192.168.10.155";
-
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');
         ws.binaryType = 'arraybuffer';
@@ -1135,6 +1120,11 @@ function wsConnect()
             wsFlushAndHaltTheOutputQueue();
             $('#wserror').modal();
             wsConnect();
+        };
+
+        ws.onerror = function(event)
+        {
+            console.error("WebSocket error: ", event);
         };
     }
     else
