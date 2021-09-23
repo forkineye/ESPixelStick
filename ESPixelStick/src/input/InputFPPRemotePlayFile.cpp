@@ -97,7 +97,7 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
 {
     // DEBUG_START;
 
-    uint32_t mseconds = LastFrameId * FrameStepTimeMS;
+    uint32_t mseconds = LastPlayedFrameId * FrameStepTimeMS;
     uint32_t msecondsTotal = FrameStepTimeMS * TotalNumberOfFramesInSequence;
 
     uint32_t secs = mseconds / 1000;
@@ -146,6 +146,17 @@ uint32_t c_InputFPPRemotePlayFile::CalculateFrameId (time_t now, int32_t SyncOff
 
     // DEBUG_END;
 
-    return max (CurrentFrameId, LastFrameId);
+    return max (CurrentFrameId, LastPlayedFrameId);
 
 } // CalculateFrameId
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemotePlayFile::CalculatePlayStartTime ()
+{
+    // DEBUG_START;
+
+    StartTimeMS = millis () - uint32_t ((float (FrameStepTimeMS) * TimeCorrectionFactor) * float (LastPlayedFrameId));
+
+    // DEBUG_END;
+
+} // CalculatePlayStartTime

@@ -36,7 +36,7 @@ public:
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
     
-    uint32_t GetLastFrameId ()  { return LastFrameId; }
+    uint32_t GetLastFrameId ()  { return LastPlayedFrameId; }
     float    GetTimeOffsetMS () { return TimeCorrectionFactor; }
 
 private:
@@ -52,8 +52,10 @@ private:
     fsm_PlayFile_state_Stopping    fsm_PlayFile_state_Stopping_imp;
 
     fsm_PlayFile_state * pCurrentFsmState = &fsm_PlayFile_state_Idle_imp;
+    
     c_FileMgr::FileId FileHandleForFileBeingPlayed = 0;
-    uint32_t          LastFrameId = 0;
+    uint32_t          LastPlayedFrameId = 0;
+    uint32_t          LastRcvdSyncFrameId = 0;
     size_t            DataOffset = 0;
     uint32_t          ChannelsPerFrame = 0;
     time_t            FrameStepTimeMS = 1;
@@ -64,6 +66,7 @@ private:
     uint32_t          SyncAdjustmentCount = 0;
 
     uint32_t          CalculateFrameId (time_t now, int32_t SyncOffsetMS = 0);
+    void              CalculatePlayStartTime ();
 
 #define TimeOffsetStep 0.00001
 
