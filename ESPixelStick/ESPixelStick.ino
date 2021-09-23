@@ -204,7 +204,7 @@ bool validateConfig()
     // DEBUG_END;
 } // validateConfig
 
-/// Deserialize device confiugration JSON to config structure - returns true if config change detected
+/// Deserialize device configuration JSON to config structure - returns true if config change detected
 bool dsDevice(JsonObject & json)
 {
     // DEBUG_START;
@@ -238,7 +238,7 @@ bool dsDevice(JsonObject & json)
     return ConfigChanged;
 } // dsDevice
 
-/// Deserialize network confiugration JSON to config structure - returns true if config change detected
+/// Deserialize network configuration JSON to config structure - returns true if config change detected
 bool dsNetwork(JsonObject & json)
 {
     // DEBUG_START;
