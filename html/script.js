@@ -1007,6 +1007,8 @@ function int2ip(num)
 //
 ////////////////////////////////////////////////////
 // On websocket connect
+var pingTimer;
+var pongTimer;
 function wsConnect()
 {
     if ('WebSocket' in window)
@@ -1026,6 +1028,9 @@ function wsConnect()
         {
             // console.info("ws.onopen");
 
+            // Start ping-pong heartbeat
+            wsPingPong();
+
             $('#wserror').modal('hide');                               // Remove error modal
             $('.wsopt').empty();                                       // Clear out option data built from websockets
 
@@ -1039,11 +1044,12 @@ function wsConnect()
 
             // console.info("ws.onopen: Start Sending");
             wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'time': { 'time_t': convertUTCDateToLocalDate(Date())/1000 } } } }));
-            wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get network config
+//TODO: Do we need to get this on connect? It loads again in the wifi tab
+            //wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get network config
 
             ProcessWindowChange($(location).attr("hash"));
 
-            RequestStatusUpdate();                                                       // start self filling status loop
+            RequestStatusUpdate();  // start self filling status loop
         };
 
         ws.onmessage = function (event)
@@ -1053,18 +1059,32 @@ function wsConnect()
             {
                 // console.info("ws.onmessage: Received: " + event.data);
 
-                // Process "simple" message format
+                // Process "simple" X message format
+                // Valid "Simple" message types
+                //   GET_STATUS      = 'J',
+                //   GET_ADMIN       = 'A',
+                //   DO_RESET        = '6',
+                //   DO_FACTORYRESET = '7',
+                //   PING            = 'P',
+
+
                 if (event.data.startsWith("X"))
                 {
-                    if (event.data[1] === 'J')
-                    {
-                        let data = event.data.substr(2);
-                        ProcessReceivedJsonStatusMessage(data);
-                    }
-                    else if (event.data[1] === 'A')
-                    {
-                        let data = event.data.substr(2);
-                        ProcessReceivedJsonAdminMessage(data);
+                    switch (event.data[1]) {
+                        case 'J': {
+                            let data = event.data.substr(2);
+                            ProcessReceivedJsonStatusMessage(data);
+                            break;
+                        }
+                        case 'P': {
+                            wsPingPong();
+                            break;
+                        }
+                        case 'A': {
+                            let data = event.data.substr(2);
+                            ProcessReceivedJsonAdminMessage(data);
+                            break;
+                        }
                     }
                 }
                 else
@@ -1115,13 +1135,6 @@ function wsConnect()
             // console.info("ws.onmessage: Done");
         }; // onmessage
 
-        ws.onclose = function ()
-        {
-            wsFlushAndHaltTheOutputQueue();
-            $('#wserror').modal();
-            wsConnect();
-        };
-
         ws.onerror = function(event)
         {
             console.error("WebSocket error: ", event);
@@ -1131,6 +1144,33 @@ function wsConnect()
     {
         alert('WebSockets is NOT supported by your Browser! You will need to upgrade your browser or downgrade to v2.0 of the ESPixelStick firmware.');
     }
+}
+
+// Ping every 2sec, Reconnect after 4sec
+function wsPingPong()
+{
+    // Ping Pong connection detection
+    clearTimeout(pingTimer);
+    clearTimeout(pongTimer);
+
+    pingTimer = setTimeout(function () {
+        ws.send('XP');
+    }, 2000);
+    pongTimer = setTimeout(function () {
+        wsReconnect();
+    }, 4000);
+
+}
+
+// Attempt to reconnect
+function wsReconnect()
+{
+    $('#wserror').modal();
+    clearTimeout(pingTimer);
+    clearTimeout(pongTimer);
+    wsFlushAndHaltTheOutputQueue();
+    ws = null;
+    wsConnect();
 }
 
 // Websocket message queuer

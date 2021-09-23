@@ -165,4 +165,5 @@ const char CN_updateinterval           [] = "updateinterval";
 const char CN_user                     [] = "user";
 const char CN_version                  [] = "version";
 const char CN_Version                  [] = "Version";
+const char CN_XP                       [] = "XP";
 const char CN_zig_size                 [] = "zig_size";

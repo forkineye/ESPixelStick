@@ -169,4 +169,5 @@ extern const char CN_updateinterval[];
 extern const char CN_user[];
 extern const char CN_version[];
 extern const char CN_Version[];
+extern const char CN_XP[];
 extern const char CN_zig_size[];

@@ -66,6 +66,7 @@ private:
         GET_ADMIN       = 'A',
         DO_RESET        = '6',
         DO_FACTORYRESET = '7',
+        PING            = 'P',
     };
 
     void init ();
