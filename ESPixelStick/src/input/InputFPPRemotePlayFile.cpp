@@ -70,7 +70,7 @@ void c_InputFPPRemotePlayFile::Stop ()
 void c_InputFPPRemotePlayFile::Sync (String & FileName, uint32_t FrameId)
 {
     // DEBUG_START;
-    int32_t f = GetSyncOffsetMS ();
+
     SyncCount++;
     if (pCurrentFsmState->Sync (FileName, FrameId))
     {
@@ -97,15 +97,15 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
 {
     // DEBUG_START;
 
-    uint32_t mseconds = LastFrameId * FrameStepTime;
-    uint32_t msecondsTotal = FrameStepTime * TotalNumberOfFramesInSequence;
+    uint32_t mseconds = LastPlayedFrameId * FrameStepTimeMS;
+    uint32_t msecondsTotal = FrameStepTimeMS * TotalNumberOfFramesInSequence;
 
     uint32_t secs = mseconds / 1000;
     uint32_t secsTot = msecondsTotal / 1000;
 
     JsonStatus[F ("SyncCount")]           = SyncCount;
     JsonStatus[F ("SyncAdjustmentCount")] = SyncAdjustmentCount;
-    JsonStatus[F ("TimeOffset")]          = TimeOffsetMS;
+    JsonStatus[F ("TimeOffset")]          = TimeCorrectionFactor;
 
     String temp = GetFileName ();
 
@@ -133,3 +133,30 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
     // DEBUG_END;
 
 } // GetStatus
+
+//-----------------------------------------------------------------------------
+uint32_t c_InputFPPRemotePlayFile::CalculateFrameId (time_t now, int32_t SyncOffsetMS)
+{
+    // DEBUG_START;
+
+    time_t   CurrentPlayTime         = now - StartTimeMS;
+    time_t   AdjustedPlayTime        = CurrentPlayTime + SyncOffsetMS;
+    time_t   AdjustedFrameStepTimeMS = time_t (float (FrameStepTimeMS) * TimeCorrectionFactor);
+    uint32_t CurrentFrameId          = AdjustedPlayTime / AdjustedFrameStepTimeMS;
+
+    // DEBUG_END;
+
+    return max (CurrentFrameId, LastPlayedFrameId);
+
+} // CalculateFrameId
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemotePlayFile::CalculatePlayStartTime ()
+{
+    // DEBUG_START;
+
+    StartTimeMS = millis () - uint32_t ((float (FrameStepTimeMS) * TimeCorrectionFactor) * float (LastPlayedFrameId));
+
+    // DEBUG_END;
+
+} // CalculatePlayStartTime

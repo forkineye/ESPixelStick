@@ -43,7 +43,7 @@ void fsm_PlayFile_state_Idle::Init (c_InputFPPRemotePlayFile* Parent)
     Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_Idle_imp);
 
     p_InputFPPRemotePlayFile->PlayItemName       = String ("");
-    p_InputFPPRemotePlayFile->LastFrameId        = 0;
+    p_InputFPPRemotePlayFile->LastPlayedFrameId        = 0;
     p_InputFPPRemotePlayFile->RemainingPlayCount = 0;
 
     // DEBUG_END;
@@ -58,11 +58,11 @@ void fsm_PlayFile_state_Idle::Start (String & FileName, uint32_t FrameId, uint32
     // DEBUG_V (String ("FileName: ") + FileName);
 
     p_InputFPPRemotePlayFile->PlayItemName       = FileName;
-    p_InputFPPRemotePlayFile->LastFrameId        = FrameId;
+    p_InputFPPRemotePlayFile->LastPlayedFrameId        = FrameId;
     p_InputFPPRemotePlayFile->RemainingPlayCount = RemainingPlayCount;
 
     // DEBUG_V (String ("           FileName: ") + p_InputFPPRemotePlayFile->PlayItemName);
-    // DEBUG_V (String ("            FrameId: ") + p_InputFPPRemotePlayFile->LastFrameId);
+    // DEBUG_V (String ("            FrameId: ") + p_InputFPPRemotePlayFile->LastPlayedFrameId);
     // DEBUG_V (String (" RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
 
     p_InputFPPRemotePlayFile->fsm_PlayFile_state_Starting_imp.Init (p_InputFPPRemotePlayFile);
@@ -127,7 +127,7 @@ void fsm_PlayFile_state_Starting::Start (String & FileName, uint32_t FrameId, ui
 
     // DEBUG_V (String ("FileName: ") + FileName);
     p_InputFPPRemotePlayFile->PlayItemName       = FileName;
-    p_InputFPPRemotePlayFile->LastFrameId        = FrameId;
+    p_InputFPPRemotePlayFile->LastPlayedFrameId        = FrameId;
     p_InputFPPRemotePlayFile->RemainingPlayCount = RemainingPlayCount;
 
     // DEBUG_END;
@@ -140,7 +140,7 @@ void fsm_PlayFile_state_Starting::Stop (void)
     // DEBUG_START;
 
     p_InputFPPRemotePlayFile->PlayItemName       = String("");
-    p_InputFPPRemotePlayFile->LastFrameId        = 0;
+    p_InputFPPRemotePlayFile->LastPlayedFrameId        = 0;
     p_InputFPPRemotePlayFile->RemainingPlayCount = 0;
 
     p_InputFPPRemotePlayFile->fsm_PlayFile_state_Idle_imp.Init (p_InputFPPRemotePlayFile);
@@ -185,8 +185,8 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
                 --p_InputFPPRemotePlayFile->RemainingPlayCount;
                 // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
 
-                p_InputFPPRemotePlayFile->StartTimeInMillis = now;
-                p_InputFPPRemotePlayFile->LastFrameId = -1;
+                p_InputFPPRemotePlayFile->StartTimeMS = now;
+                p_InputFPPRemotePlayFile->LastPlayedFrameId = -1;
                 CurrentFrame = 0;
             }
             else
@@ -198,7 +198,7 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
             }
         }
 
-        if (CurrentFrame == p_InputFPPRemotePlayFile->LastFrameId)
+        if (CurrentFrame == p_InputFPPRemotePlayFile->LastPlayedFrameId)
         {
             // DEBUG_V (String ("keep waiting"));
             break;
@@ -208,7 +208,7 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
         int      toRead = (p_InputFPPRemotePlayFile->ChannelsPerFrame > BufferSize) ? BufferSize : p_InputFPPRemotePlayFile->ChannelsPerFrame;
 
         //LOG_PORT.printf_P( PSTR("New Frame!   Old: %d     New:  %d      Offset: %d\n)", fseqCurrentFrameId, frame, FileOffsetToCurrentHeaderRecord);
-        p_InputFPPRemotePlayFile->LastFrameId = CurrentFrame;
+        p_InputFPPRemotePlayFile->LastPlayedFrameId = CurrentFrame;
 
         //LOG_PORT.printf_P ( PSTR("%d / %d / %d / %d / %d\n"), dataOffset, channelsPerFrame, outputBufferSize, toRead, pos);
         size_t bytesRead = FileMgr.ReadSdFile (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed, Buffer, toRead, pos);
@@ -250,7 +250,7 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
     do // once
     {
         // DEBUG_V (String ("FileName: '") + p_InputFPPRemotePlayFile->PlayItemName + "'");
-        // DEBUG_V (String (" FrameId: '") + p_InputFPPRemotePlayFile->LastFrameId + "'");
+        // DEBUG_V (String (" FrameId: '") + p_InputFPPRemotePlayFile->LastPlayedFrameId + "'");
         if (0 == p_InputFPPRemotePlayFile->RemainingPlayCount)
         {
             Stop ();
@@ -296,19 +296,19 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
         }
         // DEBUG_V ("");
 
-        // p_InputFPPRemotePlayFile->LastFrameId = 0;
+        p_InputFPPRemotePlayFile->LastPlayedFrameId = 0;
         p_InputFPPRemotePlayFile->DataOffset = fsqHeader.dataOffset;
         p_InputFPPRemotePlayFile->ChannelsPerFrame = fsqHeader.channelCount;
-        p_InputFPPRemotePlayFile->FrameStepTime = max ((uint8_t)1, fsqHeader.stepTime);
+        p_InputFPPRemotePlayFile->FrameStepTimeMS = max ((uint8_t)1, fsqHeader.stepTime);
         p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence = fsqHeader.TotalNumberOfFramesInSequence;
-        p_InputFPPRemotePlayFile->StartTimeInMillis = millis () - (p_InputFPPRemotePlayFile->FrameStepTime * p_InputFPPRemotePlayFile->LastFrameId);
+        p_InputFPPRemotePlayFile->CalculatePlayStartTime ();
 
-        // DEBUG_V (String ("                  LastFrameId: ") + String (p_InputFPPRemotePlayFile->LastFrameId));
+        // DEBUG_V (String ("            LastPlayedFrameId: ") + String (p_InputFPPRemotePlayFile->LastPlayedFrameId));
         // DEBUG_V (String ("                   DataOffset: ") + String (p_InputFPPRemotePlayFile->DataOffset));
         // DEBUG_V (String ("             ChannelsPerFrame: ") + String (p_InputFPPRemotePlayFile->ChannelsPerFrame));
-        // DEBUG_V (String ("                FrameStepTime: ") + String (p_InputFPPRemotePlayFile->FrameStepTime));
+        // DEBUG_V (String ("              FrameStepTimeMS: ") + String (p_InputFPPRemotePlayFile->FrameStepTimeMS));
         // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence));
-        // DEBUG_V (String ("            StartTimeInMillis: ") + String (p_InputFPPRemotePlayFile->StartTimeInMillis));
+        // DEBUG_V (String ("                  StartTimeMS: ") + String (p_InputFPPRemotePlayFile->StartTimeMS));
 
         logcon (String (F ("Start Playing:: FileName:  '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
 
@@ -330,9 +330,10 @@ void fsm_PlayFile_state_PlayingFile::Start (String& FileName, uint32_t FrameId, 
     if (FileName == p_InputFPPRemotePlayFile->GetFileName ())
     {
         // Keep playing the same file
-        p_InputFPPRemotePlayFile->LastFrameId = FrameId;
+        p_InputFPPRemotePlayFile->LastPlayedFrameId = FrameId;
+        p_InputFPPRemotePlayFile->LastRcvdSyncFrameId = FrameId;
         p_InputFPPRemotePlayFile->RemainingPlayCount = PlayCount;
-        p_InputFPPRemotePlayFile->StartTimeInMillis = millis () - (p_InputFPPRemotePlayFile->FrameStepTime * p_InputFPPRemotePlayFile->LastFrameId);
+        p_InputFPPRemotePlayFile->CalculatePlayStartTime ();
     }
     else
     {
@@ -374,6 +375,12 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, uint32_t TargetFram
             break;
         }
 
+        if (p_InputFPPRemotePlayFile->LastRcvdSyncFrameId >= p_InputFPPRemotePlayFile->LastPlayedFrameId)
+        {
+            // DEBUG_V ("Duplicate or older sync msg");
+            break;
+        }
+
         time_t now = millis ();
 
         uint32_t CurrentFrame = p_InputFPPRemotePlayFile->CalculateFrameId (now);
@@ -388,26 +395,28 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, uint32_t TargetFram
         // DEBUG_V (String ("    TargetFrameId: ") + String (TargetFrameId));
         // DEBUG_V (String ("        FrameDiff: ") + String (FrameDiff));
 
-        if (1 < FrameDiff)
+        if (1 > FrameDiff)
         {
-            // DEBUG_V ("Need to adjust the start time");
-            // DEBUG_V (String ("StartTimeInMillis: ") + String (p_InputFPPRemotePlayFile->StartTimeInMillis));
-
-            if (CurrentFrame > TargetFrameId)
-            {
-                p_InputFPPRemotePlayFile->TimeOffsetMS -= TimeOffsetStep;
-            }
-            else
-            {
-                p_InputFPPRemotePlayFile->TimeOffsetMS += TimeOffsetStep;
-            }
-
-            p_InputFPPRemotePlayFile->StartTimeInMillis =
-                now - (TargetFrameId * p_InputFPPRemotePlayFile->FrameStepTime);
-
-            response = true;
-            // DEBUG_V (String ("StartTimeInMillis: ") + String (p_InputFPPRemotePlayFile->StartTimeInMillis));
+            // DEBUG_V ("No Need to adjust the start time");
+            break;
         }
+        
+        // DEBUG_V ("Need to adjust the start time");
+        // DEBUG_V (String ("StartTimeMS: ") + String (p_InputFPPRemotePlayFile->StartTimeMS));
+
+        if (CurrentFrame > TargetFrameId)
+        {
+            p_InputFPPRemotePlayFile->TimeCorrectionFactor += TimeOffsetStep;
+        }
+        else
+        {
+            p_InputFPPRemotePlayFile->TimeCorrectionFactor -= TimeOffsetStep;
+        }
+
+        // p_InputFPPRemotePlayFile->CalculatePlayStartTime ();
+
+        response = true;
+        // DEBUG_V (String ("StartTimeMS: ") + String (p_InputFPPRemotePlayFile->StartTimeMS));
 
     } while (false);
 
