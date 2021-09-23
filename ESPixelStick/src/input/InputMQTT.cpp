@@ -564,7 +564,7 @@ void c_InputMQTT::PlayEffect (JsonObject & JsonConfig)
     if (nullptr == pEffectsEngine)
     {
         // DEBUG_V ("Create Effect Engine");
-        pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputPrimaryChannelId, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
+        pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputSecondaryChannelId, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
         pEffectsEngine->Begin ();
         pEffectsEngine->SetBufferInfo (InputDataBuffer, InputDataBufferSize);
 

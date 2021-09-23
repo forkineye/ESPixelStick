@@ -1,4 +1,3 @@
-var mode = 'null';
 var wsOutputQueue = [];
 var wsBusy = false;
 var wsOutputQueueTimer = null;
@@ -7,8 +6,6 @@ var FseqFileListRequestTimer = null;
 var ws = null; // Web Socket
 
 // global data
-var ParsedJsonStatus = null;
-var ParsedJsonConfig = null;
 var AdminInfo = null;
 var Output_Config = null; // Output Manager configuration record
 var Input_Config = null; // Input Manager configuration record
@@ -16,9 +13,7 @@ var Device_Config = null;
 var Network_Config = null;
 var Fseq_File_List = null;
 var selector = [];
-var StatusUpdateRequestTimer = null;
 var target = null;
-var myDropzone = null;
 var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
 
@@ -58,10 +53,10 @@ $(function ()
         // Firmware selection and upload
         $('#efu').change(function ()
         {
-            var file = _('efu').files[0];
-            var formdata = new FormData();
+            let file = _('efu').files[0];
+            let formdata = new FormData();
             formdata.append("file", file);
-            var FileXfer = new XMLHttpRequest();
+            let FileXfer = new XMLHttpRequest();
 
             FileXfer.upload.addEventListener("progress", progressHandler, false);
             FileXfer.addEventListener("load", completeHandler, false);
@@ -75,7 +70,7 @@ $(function ()
                 return document.getElementById(el);
             }
             function progressHandler(event) {
-                var percent = (event.loaded / event.total) * 100;
+                let percent = (event.loaded / event.total) * 100;
                 _("EfuProgressBar").value = Math.round(percent);
             }
 
@@ -141,11 +136,11 @@ $(function ()
         ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
         Device_Config.id = $('#config #device #id').val();
 
-        var TotalConfig = JSON.stringify({ 'device': Device_Config, 'network': Network_Config, 'input': Input_Config, 'output': Output_Config });
+        let TotalConfig = JSON.stringify({ 'device': Device_Config, 'network': Network_Config, 'input': Input_Config, 'output': Output_Config });
 
-        var blob = new Blob([TotalConfig], { type: "text/json;charset=utf-8" });
-        var FileName = Device_Config.id.replace(".", "-").replace(" ", "-").replace(",", "-") + "-" + AdminInfo.flashchipid;
-        saveAs(blob, FileName + ".json");
+        let blob = new Blob([TotalConfig], { type: "text/json;charset=utf-8" });
+        let FileName = Device_Config.id.replace(".", "-").replace(" ", "-").replace(",", "-") + "-" + AdminInfo.flashchipid;
+        saveAs(blob, FileName + ".json"); // Filesaver.js
     });
 
     $('#restoreconfig').change(function ()
@@ -174,7 +169,7 @@ $(function ()
         UpdateAdvancedOptionsMode();
     });
 
-    var finalUrl = "http://" + target + "/upload";
+    let finalUrl = "http://" + target + "/upload";
     // console.log(finalUrl);
     const uploader = new Dropzone('#filemanagementupload',
     {
@@ -205,9 +200,9 @@ $(function ()
                 // console.log(resp);
                 $('#fseqprogress_fg').addClass("hidden");
 
-                var DeltaTime = (new Date().getTime() - FseqFileTransferStartTime.getTime()) / 1000;
-                var rate = Math.floor((file.size / DeltaTime) / 1000);
-                console.info("Final Transfer Rate: " + rate + "KBps");
+                let DeltaTime = (new Date().getTime() - FseqFileTransferStartTime.getTime()) / 1000;
+                let rate = Math.floor((file.size / DeltaTime) / 1000);
+                console.debug("Final Transfer Rate: " + rate + "KBps");
             });
 
             this.on('addedfile', function (file, resp)
@@ -224,9 +219,9 @@ $(function ()
                 $('#fseqprogress_fg').removeClass("hidden");
                 $('#fseqprogressbytes').html(bytesSent);
 
-                var now = new Date().getTime();
-                var DeltaTime = (now - FseqFileTransferStartTime.getTime()) / 1000;
-                var rate = Math.floor((bytesSent / DeltaTime)/1000);
+                let now = new Date().getTime();
+                let DeltaTime = (now - FseqFileTransferStartTime.getTime()) / 1000;
+                let rate = Math.floor((bytesSent / DeltaTime)/1000);
                 $('#fseqprogressrate').html(rate + "KBps");
             });
         },
@@ -238,6 +233,7 @@ $(function ()
             return done(); // triggers a send
         }
     });
+
     $("#filemanagementupload").addClass("dropzone");
 
     $('#FileDeleteButton').click(function ()
@@ -246,7 +242,7 @@ $(function ()
     });
 
     // Autoload tab based on URL hash
-    var hash = window.location.hash;
+    let hash = window.location.hash;
     hash && $('ul.navbar-nav li a[href="' + hash + '"]').click();
 
     // start updating stats
@@ -259,7 +255,7 @@ $(function ()
 function ProcessLocalConfig(data)
 {
     // console.info(data);
-    var ParsedLocalConfig = JSON.parse(data);
+    let ParsedLocalConfig = JSON.parse(data);
 
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'device' : ParsedLocalConfig.device, 'network': ParsedLocalConfig.network } } }));
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input'  : { 'input_config' : ParsedLocalConfig.input  } } } }));
@@ -271,8 +267,8 @@ function UpdateAdvancedOptionsMode()
 {
     // console.info("UpdateAdvancedOptionsMode");
 
-    var am = $('#AdvancedOptions');
-    var AdvancedModeState = am.prop("checked");
+    let am = $('#AdvancedOptions');
+    let AdvancedModeState = am.prop("checked");
 
     $(".AdvancedMode").each(function ()
     {
@@ -389,15 +385,15 @@ function ProcessGetFileListResponse(JsonConfigData)
         // console.log("After Delete: $('#FileManagementTable tr').length " + $('#FileManagementTable tr').length);
     }
 
-    var CurrentRowId = 0;
+    let CurrentRowId = 0;
     JsonConfigData.files.forEach(function (file)
     {
-        var SelectedPattern = '<td><input  type="checkbox" id="FileSelected_' + (CurrentRowId) + '"></td>';
-        var NamePattern     = '<td><output type="text"     id="FileName_'     + (CurrentRowId) + '"></td>';
-        var DatePattern     = '<td><output type="text"     id="FileDate_'     + (CurrentRowId) + '"></td>';
-        var SizePattern     = '<td><output type="text"     id="FileSize_'     + (CurrentRowId) + '"></td>';
+        let SelectedPattern = '<td><input  type="checkbox" id="FileSelected_' + (CurrentRowId) + '"></td>';
+        let NamePattern     = '<td><output type="text"     id="FileName_'     + (CurrentRowId) + '"></td>';
+        let DatePattern     = '<td><output type="text"     id="FileDate_'     + (CurrentRowId) + '"></td>';
+        let SizePattern     = '<td><output type="text"     id="FileSize_'     + (CurrentRowId) + '"></td>';
 
-        var rowPattern = '<tr>' + SelectedPattern + NamePattern + DatePattern + SizePattern + '</tr>';
+        let rowPattern = '<tr>' + SelectedPattern + NamePattern + DatePattern + SizePattern + '</tr>';
         $('#FileManagementTable tr:last').after(rowPattern);
 
         $('#FileName_' + (CurrentRowId)).val(file.name);
@@ -410,13 +406,13 @@ function ProcessGetFileListResponse(JsonConfigData)
 
 function RequestFileDeletion()
 {
-    var files = [];
+    let files = [];
 
     $('#FileManagementTable > tr').each(function (CurRowId)
     {
         if (true === $('#FileSelected_' + CurRowId).prop("checked"))
         {
-            var FileEntry = {};
+            let FileEntry = {};
             FileEntry["name"] = $('#FileName_' + CurRowId).val().toString();
             files.push(FileEntry);
         }
@@ -434,7 +430,7 @@ function ParseParameter(name)
 
 function ProcessModeConfigurationDatafppremote(channelConfig)
 {
-    var jqSelector = "#fseqfilename";
+    let jqSelector = "#fseqfilename";
 
     // remove the existing options
     $(jqSelector).empty();
@@ -455,7 +451,7 @@ function ProcessModeConfigurationDatafppremote(channelConfig)
 
 function ProcessModeConfigurationDataEffects(channelConfig)
 {
-    var jqSelector = "#currenteffect";
+    let jqSelector = "#currenteffect";
 
     // remove the existing options
     $(jqSelector).empty();
@@ -475,25 +471,25 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
 {
     // console.log("relaychannelconfigurationtable.rows.length = " + $('#relaychannelconfigurationtable tr').length);
 
-    var ChannelConfigs = RelayConfig.channels;
+    let ChannelConfigs = RelayConfig.channels;
 
     while (1 < $('#relaychannelconfigurationtable tr').length) {
-        // console.log("Deleting $('#relaychannelconfigurationtable tr').length " + $('#relaychannelconfigurationtable tr').length);
+        console.log("Deleting $('#relaychannelconfigurationtable tr').length " + $('#relaychannelconfigurationtable tr').length);
         RelayTableRef.last().remove();
-        // console.log("After Delete: $('#relaychannelconfigurationtable tr').length " + $('#relaychannelconfigurationtable tr').length);
+        console.log("After Delete: $('#relaychannelconfigurationtable tr').length " + $('#relaychannelconfigurationtable tr').length);
     }
 
     // add as many rows as we need
-    for (var CurrentRowId = 1; CurrentRowId <= ChannelConfigs.length; CurrentRowId++)
+    for (let CurrentRowId = 1; CurrentRowId <= ChannelConfigs.length; CurrentRowId++)
     {
         // console.log("CurrentRowId = " + CurrentRowId);
-        var ChanIdPattern     = '<td id="chanId_'                            + (CurrentRowId) + '">a</td>';
-        var EnabledPattern    = '<td><input type="checkbox" id="Enabled_'    + (CurrentRowId) + '"></td>';
-        var InvertedPattern   = '<td><input type="checkbox" id="Inverted_'   + (CurrentRowId) + '"></td>';
-        var gpioPattern       = '<td><input type="number"   id="gpioId_'     + (CurrentRowId) + '"step="1" min="0" max="24"  value="30"  class="form-control is-valid"></td>';
-        var threshholdPattern = '<td><input type="number"   id="threshhold_' + (CurrentRowId) + '"step="1" min="0" max="255" value="300" class="form-control is-valid"></td>';
+        let ChanIdPattern     = '<td id="chanId_'                            + (CurrentRowId) + '">a</td>';
+        let EnabledPattern    = '<td><input type="checkbox" id="Enabled_'    + (CurrentRowId) + '"></td>';
+        let InvertedPattern   = '<td><input type="checkbox" id="Inverted_'   + (CurrentRowId) + '"></td>';
+        let gpioPattern       = '<td><input type="number"   id="gpioId_'     + (CurrentRowId) + '"step="1" min="0" max="24"  value="30"  class="form-control is-valid"></td>';
+        let threshholdPattern = '<td><input type="number"   id="threshhold_' + (CurrentRowId) + '"step="1" min="0" max="255" value="300" class="form-control is-valid"></td>';
 
-        var rowPattern = '<tr>' + ChanIdPattern + EnabledPattern + InvertedPattern + gpioPattern + threshholdPattern + '</tr>';
+        let rowPattern = '<tr>' + ChanIdPattern + EnabledPattern + InvertedPattern + gpioPattern + threshholdPattern + '</tr>';
         $('#relaychannelconfigurationtable tr:last').after(rowPattern);
 
         $('#chanId_'     + CurrentRowId).attr('style', $('#chanId_hr').attr('style'));
@@ -506,7 +502,7 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
     $.each(ChannelConfigs, function (i, CurrentChannelConfig)
     {
         // console.log("Current Channel Id = " + CurrentChannelConfig.id);
-        var currentChannelRowId = CurrentChannelConfig.id + 1;
+        let currentChannelRowId = CurrentChannelConfig.id + 1;
         $('#chanId_'     + (currentChannelRowId)).html(currentChannelRowId);
         $('#Enabled_'    + (currentChannelRowId)).prop("checked", CurrentChannelConfig.en);
         $('#Inverted_'   + (currentChannelRowId)).prop("checked", CurrentChannelConfig.inv);
@@ -520,24 +516,24 @@ function ProcessModeConfigurationDataServoPCA9685(ServoConfig)
 {
     // console.log("Servochannelconfigurationtable.rows.length = " + $('#servo_pca9685channelconfigurationtable tr').length);
 
-    var ChannelConfigs = ServoConfig.channels;
+    let ChannelConfigs = ServoConfig.channels;
 
     while (1 < $('#servo_pca9685channelconfigurationtable tr').length) {
-        // console.log("Deleting $('#servo_pca9685channelconfigurationtable tr').length " + $('#servo_pca9685channelconfigurationtable tr').length);
+        console.log("Deleting $('#servo_pca9685channelconfigurationtable tr').length " + $('#servo_pca9685channelconfigurationtable tr').length);
         ServoTableRef.last().remove();
-        // console.log("After Delete: $('#servo_pca9685channelconfigurationtable tr').length " + $('#servo_pca9685channelconfigurationtable tr').length);
+        console.log("After Delete: $('#servo_pca9685channelconfigurationtable tr').length " + $('#servo_pca9685channelconfigurationtable tr').length);
     }
 
     // add as many rows as we need
-    for (var CurrentRowId = 1; CurrentRowId <= ChannelConfigs.length; CurrentRowId++) {
+    for (let CurrentRowId = 1; CurrentRowId <= ChannelConfigs.length; CurrentRowId++) {
         // console.log("CurrentRowId = " + CurrentRowId);
-        var ChanIdPattern   = '<td                        id="ServoChanId_'                  + (CurrentRowId) + '">a</td>';
-        var EnabledPattern  = '<td><input type="checkbox" id="ServoEnabled_'                 + (CurrentRowId) + '"></td>';
-        var MinLevelPattern = '<td><input type="number"   id="ServoMinLevel_'                + (CurrentRowId) + '"step="1" min="10" max="4095"  value="0"  class="form-control is-valid"></td>';
-        var MaxLevelPattern = '<td><input type="number"   id="ServoMaxLevel_'                + (CurrentRowId) + '"step="1" min="10" max="4095"  value="0"  class="form-control is-valid"></td>';
-        var DataType        = '<td><select class="form-control is-valid" id="ServoDataType_' + (CurrentRowId) + '" title="Effect to generate"></select></td>';
+        let ChanIdPattern   = '<td                        id="ServoChanId_'                  + (CurrentRowId) + '">a</td>';
+        let EnabledPattern  = '<td><input type="checkbox" id="ServoEnabled_'                 + (CurrentRowId) + '"></td>';
+        let MinLevelPattern = '<td><input type="number"   id="ServoMinLevel_'                + (CurrentRowId) + '"step="1" min="10" max="4095"  value="0"  class="form-control is-valid"></td>';
+        let MaxLevelPattern = '<td><input type="number"   id="ServoMaxLevel_'                + (CurrentRowId) + '"step="1" min="10" max="4095"  value="0"  class="form-control is-valid"></td>';
+        let DataType        = '<td><select class="form-control is-valid" id="ServoDataType_' + (CurrentRowId) + '" title="Effect to generate"></select></td>';
 
-        var rowPattern = '<tr>' + ChanIdPattern + EnabledPattern + MinLevelPattern + MaxLevelPattern + DataType + '</tr>';
+        let rowPattern = '<tr>' + ChanIdPattern + EnabledPattern + MinLevelPattern + MaxLevelPattern + DataType + '</tr>';
         $('#servo_pca9685channelconfigurationtable tr:last').after(rowPattern);
 
         $('#ServoChanId_'   + CurrentRowId).attr('style', $('#ServoChanId_hr').attr('style'));
@@ -549,13 +545,13 @@ function ProcessModeConfigurationDataServoPCA9685(ServoConfig)
 
     $.each(ChannelConfigs, function (i, CurrentChannelConfig) {
         // console.log("Current Channel Id = " + CurrentChannelConfig.id);
-        var currentChannelRowId = CurrentChannelConfig.id + 1;
+        let currentChannelRowId = CurrentChannelConfig.id + 1;
         $('#ServoChanId_'   + (currentChannelRowId)).html(currentChannelRowId);
         $('#ServoEnabled_'  + (currentChannelRowId)).prop("checked", CurrentChannelConfig.en);
         $('#ServoMinLevel_' + (currentChannelRowId)).val(CurrentChannelConfig.Min);
         $('#ServoMaxLevel_' + (currentChannelRowId)).val(CurrentChannelConfig.Max);
 
-        var jqSelector = "#ServoDataType_" + (currentChannelRowId);
+        let jqSelector = "#ServoDataType_" + (currentChannelRowId);
 
         // remove the existing options
         $(jqSelector).empty();
@@ -589,32 +585,32 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig )
     // console.info("ProcessModeConfigurationData: Start");
 
     // determine the type of in/output that has been selected and populate the form
-    var TypeOfChannelId = parseInt($('#' + ChannelType +  channelId + " option:selected").val(), 10);
-    var channelConfigSet = JsonConfig.channels[channelId];
+    let TypeOfChannelId = parseInt($('#' + ChannelType +  channelId + " option:selected").val(), 10);
+    let channelConfigSet = JsonConfig.channels[channelId];
 
     if (isNaN(TypeOfChannelId))
     {
         // use the value we got from the controller
         TypeOfChannelId = channelConfigSet.type;
     }
-    var channelConfig = channelConfigSet[TypeOfChannelId];
-    var ChannelTypeName = channelConfig.type.toLowerCase();
+    let channelConfig = channelConfigSet[TypeOfChannelId];
+    let ChannelTypeName = channelConfig.type.toLowerCase();
     ChannelTypeName = ChannelTypeName.replace(".", "_");
     ChannelTypeName = ChannelTypeName.replace(" ", "_");
     // console.info("ChannelTypeName: " + ChannelTypeName);
 
-    var elementids = [];
-    var modeControlName = '#' + ChannelType + 'mode' + channelId;
+    let elementids = [];
+    let modeControlName = '#' + ChannelType + 'mode' + channelId;
     // console.info("modeControlName: " + modeControlName);
 
     // modify page title
     //TODO: Dirty hack to clean-up input names
     if (ChannelType !== 'input') {
-        var ModeDisplayName = GenerateInputOutputControlLabel(ChannelType, channelId) + " - " + $(modeControlName + ' #Title')[0].innerHTML;
+        let ModeDisplayName = GenerateInputOutputControlLabel(ChannelType, channelId) + " - " + $(modeControlName + ' #Title')[0].innerHTML;
         // console.info("ModeDisplayName: " + ModeDisplayName);
         $(modeControlName + ' #Title')[0].innerHTML = ModeDisplayName;
-    } 
-  
+    }
+
     //document.getElementById("blahblah").innerHTML="NewText".
 
     elementids = $(modeControlName + ' *[id]').filter(":input").map(function ()
@@ -624,7 +620,7 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig )
 
     elementids.forEach(function (elementid)
     {
-        var SelectedElement = modeControlName + ' #' + elementid;
+        let SelectedElement = modeControlName + ' #' + elementid;
         if ($(SelectedElement).is(':checkbox'))
         {
             $(SelectedElement).prop('checked', channelConfig[elementid]);
@@ -671,7 +667,7 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     // console.info("ProcessReceivedJsonConfigMessage: Start");
 
     // is this an output config?
-    if (JsonConfigData.hasOwnProperty("output_config"))
+    if ({}.hasOwnProperty.call(JsonConfigData, "output_config"))
     {
         // save the config for later use.
         Output_Config = JsonConfigData.output_config;
@@ -679,7 +675,7 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     }
 
     // is this an input config?
-    else if (JsonConfigData.hasOwnProperty("input_config"))
+    else if ({}.hasOwnProperty.call(JsonConfigData, "input_config"))
     {
         // save the config for later use.
         Input_Config = JsonConfigData.input_config;
@@ -687,26 +683,26 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     }
 
     // is this a device config?
-    else if (JsonConfigData.hasOwnProperty("device"))
+    else if ({}.hasOwnProperty.call(JsonConfigData, "device"))
     {
         Device_Config = JsonConfigData.device;
         updateFromJSON(JsonConfigData);
 
         // is this a network config?
-        if (JsonConfigData.hasOwnProperty("network")) {
+        if ({}.hasOwnProperty.call(JsonConfigData, "network")) {
             Network_Config = JsonConfigData.network;
             updateFromJSON(JsonConfigData);
         }
     }
 
     // is this a file list?
-    else if (JsonConfigData.hasOwnProperty("files"))
+    else if ({}.hasOwnProperty.call(JsonConfigData, "files"))
     {
         ProcessGetFileListResponse(JsonConfigData);
     }
 
     // is this an ACK response?
-    else if (JsonConfigData.hasOwnProperty("OK"))
+    else if ({}.hasOwnProperty.call(JsonConfigData, "OK"))
     {
         // console.info("Received Acknowledgement to config set command.")
     }
@@ -723,7 +719,7 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
 // Builds jQuery selectors from JSON data and updates the web interface
 function updateFromJSON(obj)
 {
-    for (var k in obj)
+    for (let k in obj)
     {
         selector.push('#' + k);
         if (typeof obj[k] === 'object' && obj[k] !== null)
@@ -732,7 +728,7 @@ function updateFromJSON(obj)
         }
         else
         {
-            var jqSelector = selector.join(' ');
+            let jqSelector = selector.join(' ');
             if (typeof obj[k] === 'boolean')
             {
                 $(jqSelector).prop('checked', obj[k]);
@@ -755,7 +751,7 @@ function updateFromJSON(obj)
 
 function GenerateInputOutputControlLabel(OptionListName, DisplayedChannelId)
 {
-    var Id = parseInt(DisplayedChannelId) + 1;
+    let Id = parseInt(DisplayedChannelId) + 1;
     let NewName = '';
 //TODO: Dirty Hack to clean-up Input lables
     if (OptionListName === `input`) {
@@ -773,7 +769,7 @@ function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId )
     // console.info("OptionListName: " + OptionListName);
     // console.info("DisplayedChannelId: " + DisplayedChannelId);
 
-    var HtmlLoadFileName = $('#' + OptionListName + DisplayedChannelId + ' option:selected').text().toLowerCase();
+    let HtmlLoadFileName = $('#' + OptionListName + DisplayedChannelId + ' option:selected').text().toLowerCase();
     // console.info("Base HtmlLoadFileName: " + HtmlLoadFileName);
     HtmlLoadFileName = HtmlLoadFileName.replace(".", "_");
     HtmlLoadFileName = HtmlLoadFileName.replace(" ", "_");
@@ -807,7 +803,7 @@ function CreateOptionsFromConfig(OptionListName, Config)
 {
     // console.info("CreateOptionsFromConfig");
 
-    var Channels = Config.channels;
+    let Channels = Config.channels;
 
     if ("input" === OptionListName)
     {
@@ -819,7 +815,7 @@ function CreateOptionsFromConfig(OptionListName, Config)
     {
         // OptionListName is 'input' or 'output'
         // console.info("ChannelId: " + ChannelId);
-        var CurrentChannel = Channels[ChannelId];
+        let CurrentChannel = Channels[ChannelId];
 
         // does the selection box we need already exist?
         if (!$('#' + OptionListName + 'mode' + ChannelId).length)
@@ -830,7 +826,7 @@ function CreateOptionsFromConfig(OptionListName, Config)
             $('#fg_' + OptionListName + '_mode').append('<fieldset id="' + OptionListName + 'mode' + ChannelId + '"></fieldset>');
         }
 
-        var jqSelector = "#" + OptionListName + ChannelId;
+        let jqSelector = "#" + OptionListName + ChannelId;
 
         // remove the existing options
         $(jqSelector).empty();
@@ -852,7 +848,7 @@ function CreateOptionsFromConfig(OptionListName, Config)
             }
             else
             {
-                var CurrentSection = CurrentChannel[SelectionTypeId];
+                let CurrentSection = CurrentChannel[SelectionTypeId];
                 // console.info("Add '" + CurrentSection.type + "' to selector");
                 $(jqSelector).append('<option value="' + SelectionTypeId + '">' + CurrentSection.type + '</option>');
             }
@@ -888,15 +884,15 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
     // for each option channel:
     jQuery.each(JsonConfig, function (DisplayedChannelId, CurrentChannelConfigurationData)
     {
-        var elementids = [];
-        var modeControlName = '#' + SectionName + 'mode' + DisplayedChannelId;
+        let elementids = [];
+        let modeControlName = '#' + SectionName + 'mode' + DisplayedChannelId;
         elementids = $(modeControlName + ' *[id]').filter(":input").map(function ()
         {
             return $(this).attr('id');
         }).get();
 
-        var ChannelType = parseInt($("#" + SectionName + DisplayedChannelId + " option:selected").val(), 10);
-        var ChannelConfig = CurrentChannelConfigurationData[ChannelType];
+        let ChannelType = parseInt($("#" + SectionName + DisplayedChannelId + " option:selected").val(), 10);
+        let ChannelConfig = CurrentChannelConfigurationData[ChannelType];
 
         // tell the ESP what type of channel it should be using
         CurrentChannelConfigurationData.type = ChannelType;
@@ -906,7 +902,7 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
             ChannelConfig.updateinterval = parseInt($('#updateinterval').val(), 10);
             $.each(ChannelConfig.channels, function (i, CurrentChannelConfig) {
                 // console.info("Current Channel Id = " + CurrentChannelConfig.id);
-                var currentChannelRowId = CurrentChannelConfig.id + 1;
+                let currentChannelRowId = CurrentChannelConfig.id + 1;
                 CurrentChannelConfig.en   = $('#Enabled_' + (currentChannelRowId)).prop("checked");
                 CurrentChannelConfig.inv  = $('#Inverted_' + (currentChannelRowId)).prop("checked");
                 CurrentChannelConfig.gid  = parseInt($('#gpioId_' + (currentChannelRowId)).val(), 10);
@@ -918,11 +914,11 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
             ChannelConfig.updateinterval = parseInt($('#updateinterval').val(), 10);
             $.each(ChannelConfig.channels, function (i, CurrentChannelConfig) {
                 // console.info("Current Channel Id = " + CurrentChannelConfig.id);
-                var currentChannelRowId = CurrentChannelConfig.id + 1;
+                let currentChannelRowId = CurrentChannelConfig.id + 1;
                 CurrentChannelConfig.en  = $('#ServoEnabled_' + (currentChannelRowId)).prop("checked");
                 CurrentChannelConfig.Min = parseInt($('#ServoMinLevel_' + (currentChannelRowId)).val(), 10);
                 CurrentChannelConfig.Max = parseInt($('#ServoMaxLevel_' + (currentChannelRowId)).val(), 10);
-                var ServoDataType        = parseInt($('#ServoDataType_' + (currentChannelRowId)).val(), 10);
+                let ServoDataType        = parseInt($('#ServoDataType_' + (currentChannelRowId)).val(), 10);
 
                 CurrentChannelConfig.rev = (ServoDataType & 0x01) ? true : false;
                 CurrentChannelConfig.sca = (ServoDataType & 0x02) ? true : false;
@@ -932,7 +928,7 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
         else
         {
             elementids.forEach(function (elementid) {
-                var SelectedElement = modeControlName + ' #' + elementid;
+                let SelectedElement = modeControlName + ' #' + elementid;
                 if ($(SelectedElement).is(':checkbox')) {
                     ChannelConfig[elementid] = $(SelectedElement).prop('checked');
                 }
@@ -948,14 +944,14 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
 function ValidateConfigFields(ElementList)
 {
     // return true if errors were found
-    var response = false;
+    let response = false;
 
-    for (var ChildElementId = 0;
+    for (let ChildElementId = 0;
          ChildElementId < ElementList.length;
          ChildElementId++)
     {
-        var ChildElement = ElementList[ChildElementId];
-        // var ChildType = ChildElement.type;
+        let ChildElement = ElementList[ChildElementId];
+        // let ChildType = ChildElement.type;
 
         if ((ChildElement.validity.valid !== undefined) && (!$(ChildElement).hasClass('hidden')))
         {
@@ -999,8 +995,8 @@ function submitDeviceConfig()
 function convertUTCDateToLocalDate(date)
 {
     date = new Date(date);
-    var localOffset = date.getTimezoneOffset() * 60000;
-    var localTime = date.getTime();
+    let localOffset = date.getTimezoneOffset() * 60000;
+    let localTime = date.getTime();
     date = localTime - localOffset;
 
     return date;
@@ -1008,8 +1004,8 @@ function convertUTCDateToLocalDate(date)
 
 function int2ip(num)
 {
-    var d = num % 256;
-    for (var i = 3; i > 0; i--)
+    let d = num % 256;
+    for (let i = 3; i > 0; i--)
     {
         num = Math.floor(num / 256);
         d = d + '.' + num % 256;
@@ -1077,28 +1073,28 @@ function wsConnect()
                 {
                     if (event.data[1] === 'J')
                     {
-                        var data = event.data.substr(2);
-                        ProcessRecievedJsonStatusMessage(data);
+                        let data = event.data.substr(2);
+                        ProcessReceivedJsonStatusMessage(data);
                     }
                     else if (event.data[1] === 'A')
                     {
-                        var data = event.data.substr(2);
-                        ProcessRecievedJsonAdminMessage(data);
+                        let data = event.data.substr(2);
+                        ProcessReceivedJsonAdminMessage(data);
                     }
                 }
                 else
                 {
                     // console.info("ws.onmessage: Received: " + event.data);
-                    var msg = JSON.parse(event.data);
+                    let msg = JSON.parse(event.data);
                     // "GET" message is a response to a get request. Populate the frontend.
-                    if (msg.hasOwnProperty("get"))
+                    if ({}.hasOwnProperty.call(msg, "get"))
                     {
                         ProcessReceivedJsonConfigMessage(msg.get);
                     }
 
-//TODO: This never gets called now as we're sending 'cmd': 'OK' back isntead of 'set' with the updated config                    
-                    // "SET" message is a reponse to a set request. Data has been validated and saved, Populate the frontend.
-                    if (msg.hasOwnProperty("set"))
+//TODO: This never gets called now as we're sending 'cmd': 'OK' back instead of 'set' with the updated config
+                    // "SET" message is a response to a set request. Data has been validated and saved, Populate the frontend.
+                    if ({}.hasOwnProperty.call(msg, "set"))
                     {
                         ProcessReceivedJsonConfigMessage(msg.set);
                         snackSave();
@@ -1106,8 +1102,8 @@ function wsConnect()
 
 //TODO: Inform user configuration was saved, but this is broken as the UI could be in an invalid state
 //      if the validation routines changed their config. To be fixed in UI update.
-                    if (msg.hasOwnProperty('cmd'))
-                    { 
+                    if ({}.hasOwnProperty.call(msg, 'cmd'))
+                    {
                         if (msg.cmd === 'OK') {
                             // console.log('---- OK ----');
                             snackSave();
@@ -1119,7 +1115,7 @@ function wsConnect()
             {
                 // console.info("Stream Data");
 
-                streamData = new Uint8Array(event.data);
+                let streamData = new Uint8Array(event.data);
                 drawStream(streamData);
                 if ($('#diag').is(':visible'))
                 {
@@ -1127,7 +1123,7 @@ function wsConnect()
                 }
             }
 
-            // show we are ready to send stupp
+            // show we are ready to send
             // console.info("ws.onmessage: Ask To Send Next Msg");
             wsReadyToSend();
 
@@ -1180,8 +1176,8 @@ function wsFlushAndHaltTheOutputQueue()
     while (wsOutputQueue.length > 0)
     {
         //get the next message from the queue.
-        var message = wsOutputQueue.shift();
-        // console.info("Discarding msg: " + message);
+        let message = wsOutputQueue.shift();
+        console.debug("Discarding msg: " + message);
     }
 } // wsFlushAndHaltTheOutputQueue
 
@@ -1210,14 +1206,14 @@ function wsProcessOutputQueue()
         wsBusy = true;
 
         //get the next message from the queue.
-        var OutputMessage = wsOutputQueue.shift();
+        let OutputMessage = wsOutputQueue.shift();
 
         // set WaitForResponseTimeMS to clear flag and try next message if response
-        // isn't recieved.
-        var WaitForResponseTimeMS = 20000; // 20 seconds
+        // isn't received.
+        let WaitForResponseTimeMS = 20000; // 20 seconds
 
         // Short WaitForResponseTimeMS for message types that don't generate a response.
-        var UseShortDelay = ['T0', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'X6'].indexOf(OutputMessage.substr(0, 2));
+        let UseShortDelay = ['T0', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'X6'].indexOf(OutputMessage.substr(0, 2));
         if (UseShortDelay !== -1)
         {
             // warning, setting this value too low can cause a rentrance issue
@@ -1264,41 +1260,41 @@ function wsReadyToSend()
 // Move to diagnostics
 function drawStream(streamData)
 {
-    var cols = parseInt($('#v_columns').val());
-    var size = Math.floor((canvas.width - 20) / cols);
-    var maxDisplay = 0;
+    let cols = parseInt($('#v_columns').val());
+    let size = Math.floor((canvas.width - 20) / cols);
+    let maxDisplay = 0;
 
     if ($("#diag #viewStyle option:selected").val() === "rgb")
     {
         maxDisplay = Math.min(streamData.length, (cols * Math.floor((canvas.height - 30) / size)) * 3);
-        for (var i = 0; i < maxDisplay; i += 3)
+        for (let i = 0; i < maxDisplay; i += 3)
         {
             ctx.fillStyle = 'rgb(' + streamData[i + 0] + ',' + streamData[i + 1] + ',' + streamData[i + 2] + ')';
-            var col = (i / 3) % cols;
-            var row = Math.floor((i / 3) / cols);
+            let col = (i / 3) % cols;
+            let row = Math.floor((i / 3) / cols);
             ctx.fillRect(10 + (col * size), 10 + (row * size), size - 1, size - 1);
         }
     }
     else     if ($("#diag #viewStyle option:selected").val() === "rgbw")
     {
         maxDisplay = Math.min(streamData.length, (cols * Math.floor((canvas.height - 30) / size)) * 4);
-        for (i = 0; i < maxDisplay; i += 4)
+        for (let i = 0; i < maxDisplay; i += 4)
         {
-            var WhiteLevel = streamData[i + 3];
+            let WhiteLevel = streamData[i + 3];
             ctx.fillStyle = 'rgb(' + Math.max(streamData[i + 0], WhiteLevel) + ',' + Math.max(streamData[i + 1], WhiteLevel) + ',' + Math.max(streamData[i + 2], WhiteLevel) + ')';
-            var col = (i / 4) % cols;
-            var row = Math.floor((i / 4) / cols);
+            let col = (i / 4) % cols;
+            let row = Math.floor((i / 4) / cols);
             ctx.fillRect(10 + (col * size), 10 + (row * size), size - 1, size - 1);
         }
     }
     else
     {
         maxDisplay = Math.min(streamData.length, (cols * Math.floor((canvas.height - 30) / size)));
-        for (i = 0; i < maxDisplay; i++)
+        for (let i = 0; i < maxDisplay; i++)
         {
             ctx.fillStyle = 'rgb(' + streamData[i] + ',' + streamData[i] + ',' + streamData[i] + ')';
-            var col = (i) % cols;
-            var row = Math.floor(i / cols);
+            let col = (i) % cols;
+            let row = Math.floor(i / cols);
             ctx.fillRect(10 + (col * size), 10 + (row * size), size - 2, size - 2);
         }
     }
@@ -1320,9 +1316,9 @@ function clearStream()
     }
 }
 
-function ProcessRecievedJsonAdminMessage(data)
+function ProcessReceivedJsonAdminMessage(data)
 {
-    var ParsedJsonAdmin = JSON.parse(data);
+    let ParsedJsonAdmin = JSON.parse(data);
     AdminInfo = ParsedJsonAdmin.admin;
 
     $('#version').text(AdminInfo.version);
@@ -1331,18 +1327,18 @@ function ProcessRecievedJsonAdminMessage(data)
     $('#realflashsize').text(AdminInfo.realflashsize);
     $('#flashchipid').text(AdminInfo.flashchipid);
 
-} // ProcessRecievedJsonAdminMessage
+} // ProcessReceivedJsonAdminMessage
 
-// ProcessRecievedJsonStatusMessage
-function ProcessRecievedJsonStatusMessage(data)
+// ProcessReceivedJsonStatusMessage
+function ProcessReceivedJsonStatusMessage(data)
 {
-    console.info("Status: " + data);
+    console.debug("Status: " + data);
 
-    var JsonStat = JSON.parse(data);
-    var Status  = JsonStat.status;
-    var System  = Status.system;
-    var rssi    = System.rssi;
-    var quality = 2 * (rssi + 100);
+    let JsonStat = JSON.parse(data);
+    let Status  = JsonStat.status;
+    let System  = Status.system;
+    let rssi    = System.rssi;
+    let quality = 2 * (rssi + 100);
 
     if (rssi <= -100)
     {
@@ -1366,14 +1362,14 @@ function ProcessRecievedJsonStatusMessage(data)
 
     // getUptime
     // uptime is reported in milliseconds
-    var date = new Date(System.uptime);
-    var str = '';
+    let date = new Date(System.uptime);
+    let str = '';
 
-    //    var hoursPerDay = 24;
-    //    var MinutesPerHour = 60;
-    //    var secondsPerMinute = 60;
-    //    var millisecondsPerSecond = 1000;
-    //    var MillisecondsPerDay = millisecondsPerSecond * secondsPerMinute * MinutesPerHour * hoursPerDay; = 86400000
+    //    let hoursPerDay = 24;
+    //    let MinutesPerHour = 60;
+    //    let secondsPerMinute = 60;
+    //    let millisecondsPerSecond = 1000;
+    //    let MillisecondsPerDay = millisecondsPerSecond * secondsPerMinute * MinutesPerHour * hoursPerDay; = 86400000
 
     str += Math.floor(date.getTime() / 86400000) + " days, ";
     str += ("0" + date.getUTCHours()).slice(-2) + ":";
@@ -1382,8 +1378,8 @@ function ProcessRecievedJsonStatusMessage(data)
     $('#x_uptime').text(str);
 
     // getE131Status(data)
-    var InputStatus = Status.input[0];
-    if (Status.input[0].hasOwnProperty('e131'))
+    let InputStatus = Status.input[0];
+    if ({}.hasOwnProperty.call(InputStatus, 'e131'))
     {
         $('#E131Status').removeClass("hidden")
 
@@ -1399,7 +1395,7 @@ function ProcessRecievedJsonStatusMessage(data)
         $('#E131Status').addClass("hidden")
     }
 
-    if (Status.input[0].hasOwnProperty('Artnet')) {
+    if ({}.hasOwnProperty.call(InputStatus, 'Artnet')) {
         $('#ArtnetStatus').removeClass("hidden")
 
         $('#an_uni_first').text(InputStatus.Artnet.unifirst);
@@ -1413,7 +1409,7 @@ function ProcessRecievedJsonStatusMessage(data)
         $('#ArtnetStatus').addClass("hidden")
     }
 
-    if (Status.input[0].hasOwnProperty('ddp'))
+    if ({}.hasOwnProperty.call(InputStatus, 'ddp'))
     {
         $('#ddpStatus').removeClass("hidden")
 
@@ -1426,11 +1422,11 @@ function ProcessRecievedJsonStatusMessage(data)
         $('#ddpStatus').addClass("hidden")
     }
 
-    if (Status.system.hasOwnProperty('FPPDiscovery'))
+    if ({}.hasOwnProperty.call(Status.system, 'FPPDiscovery'))
     {
         $('#FPPRemoteStatus').removeClass("hidden")
 
-        var FPPDstatus = Status.system.FPPDiscovery
+        let FPPDstatus = Status.system.FPPDiscovery
 
         $('#fppsyncreceived').text(FPPDstatus.SyncCount);
         $('#fppsyncadjustments').text(FPPDstatus.SyncAdjustmentCount);
@@ -1446,21 +1442,21 @@ function ProcessRecievedJsonStatusMessage(data)
         $('#FPPRemoteStatus').addClass("hidden")
     }
 
-    if (Status.input[0].hasOwnProperty('LocalPlayer'))
+    if ({}.hasOwnProperty.call(InputStatus, 'LocalPlayer'))
     {
-        var LocalPlayerStatus = Status.input[0].LocalPlayer;
+        let LocalPlayerStatus = Status.input[0].LocalPlayer;
 
-        if (LocalPlayerStatus.hasOwnProperty('PlayList'))
+        if ({}.hasOwnProperty.call(LocalPlayerStatus, 'PlayList'))
         {
             $('#LocalPlayListPlayerStatus').removeClass("hidden");
 
             LocalPlayerStatus = LocalPlayerStatus.PlayList;
-            
+
             $('#localPlayListName').text(LocalPlayerStatus.name);
             $('#localPlayListEntry').text(LocalPlayerStatus.entry);
             $('#localPlayListCount').text(LocalPlayerStatus.count);
 
-            if (LocalPlayerStatus.hasOwnProperty('File'))
+            if ({}.hasOwnProperty.call(LocalPlayerStatus, 'File'))
             {
                 $('#localPlayListRepeat').text(LocalPlayerStatus.repeat);
             }
@@ -1474,7 +1470,7 @@ function ProcessRecievedJsonStatusMessage(data)
             $('#LocalPlayListPlayerStatus').addClass("hidden")
         }
 
-        if (LocalPlayerStatus.hasOwnProperty('File')) {
+        if ({}.hasOwnProperty.call(LocalPlayerStatus, 'File')) {
             $('#LocalFilePlayerStatus').removeClass("hidden");
 
             $('#localFilePlayerFilename').text(LocalPlayerStatus.File.current_sequence);
@@ -1486,7 +1482,7 @@ function ProcessRecievedJsonStatusMessage(data)
             $('#LocalFilePlayerStatus').addClass("hidden")
         }
 
-        if (LocalPlayerStatus.hasOwnProperty('Effect'))
+        if ({}.hasOwnProperty.call(LocalPlayerStatus, 'Effect'))
         {
             $('#LocalEffectPlayerStatus').removeClass("hidden");
 
@@ -1498,7 +1494,7 @@ function ProcessRecievedJsonStatusMessage(data)
             $('#LocalEffectPlayerStatus').addClass("hidden")
         }
 
-        if (LocalPlayerStatus.hasOwnProperty('Paused')) {
+        if ({}.hasOwnProperty.call(LocalPlayerStatus, 'Paused')) {
             $('#PausedPlayerStatus').removeClass("hidden");
 
             $('#PausedTimeRemaining').text(LocalPlayerStatus.Paused.TimeRemaining);
@@ -1517,25 +1513,17 @@ function ProcessRecievedJsonStatusMessage(data)
 
     // Device Refresh is dynamic
     $('#refresh').text(Status.output[0].framerefreshrate + " fps");
-} // ProcessRecievedJsonStatusMessage
+} // ProcessReceivedJsonStatusMessage
 
 // Show "save" snackbar for 3sec
 function snackSave()
 {
-    var x = document.getElementById('snackbar');
+    let x = document.getElementById('snackbar');
     x.className = 'show';
     setTimeout(function ()
     {
         x.className = x.className.replace('show', '');
     }, 3000);
-}
-
-// Needs updated
-function setConfig()
-{
-    // Get config to refresh UI and show result
-    wsEnqueue("G1");
-    snackSave();
 }
 
 // Show reboot modal
