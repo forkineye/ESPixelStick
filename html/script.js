@@ -473,12 +473,6 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
 
     let ChannelConfigs = RelayConfig.channels;
 
-    while (1 < $('#relaychannelconfigurationtable tr').length) {
-        console.log("Deleting $('#relaychannelconfigurationtable tr').length " + $('#relaychannelconfigurationtable tr').length);
-        RelayTableRef.last().remove();
-        console.log("After Delete: $('#relaychannelconfigurationtable tr').length " + $('#relaychannelconfigurationtable tr').length);
-    }
-
     // add as many rows as we need
     for (let CurrentRowId = 1; CurrentRowId <= ChannelConfigs.length; CurrentRowId++)
     {
@@ -517,12 +511,6 @@ function ProcessModeConfigurationDataServoPCA9685(ServoConfig)
     // console.log("Servochannelconfigurationtable.rows.length = " + $('#servo_pca9685channelconfigurationtable tr').length);
 
     let ChannelConfigs = ServoConfig.channels;
-
-    while (1 < $('#servo_pca9685channelconfigurationtable tr').length) {
-        console.log("Deleting $('#servo_pca9685channelconfigurationtable tr').length " + $('#servo_pca9685channelconfigurationtable tr').length);
-        ServoTableRef.last().remove();
-        console.log("After Delete: $('#servo_pca9685channelconfigurationtable tr').length " + $('#servo_pca9685channelconfigurationtable tr').length);
-    }
 
     // add as many rows as we need
     for (let CurrentRowId = 1; CurrentRowId <= ChannelConfigs.length; CurrentRowId++) {
@@ -1019,6 +1007,8 @@ function int2ip(num)
 //
 ////////////////////////////////////////////////////
 // On websocket connect
+var pingTimer;
+var pongTimer;
 function wsConnect()
 {
     if ('WebSocket' in window)
@@ -1027,9 +1017,6 @@ function wsConnect()
         {
             target = document.location.host;
         }
-
-        // target = "192.168.10.215";
-        // target = "192.168.10.155";
 
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');
@@ -1040,6 +1027,9 @@ function wsConnect()
         ws.onopen = function ()
         {
             // console.info("ws.onopen");
+
+            // Start ping-pong heartbeat
+            wsPingPong();
 
             $('#wserror').modal('hide');                               // Remove error modal
             $('.wsopt').empty();                                       // Clear out option data built from websockets
@@ -1054,11 +1044,12 @@ function wsConnect()
 
             // console.info("ws.onopen: Start Sending");
             wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'time': { 'time_t': convertUTCDateToLocalDate(Date())/1000 } } } }));
-            wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get network config
+//TODO: Do we need to get this on connect? It loads again in the wifi tab
+            //wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get network config
 
             ProcessWindowChange($(location).attr("hash"));
 
-            RequestStatusUpdate();                                                       // start self filling status loop
+            RequestStatusUpdate();  // start self filling status loop
         };
 
         ws.onmessage = function (event)
@@ -1068,18 +1059,32 @@ function wsConnect()
             {
                 // console.info("ws.onmessage: Received: " + event.data);
 
-                // Process "simple" message format
+                // Process "simple" X message format
+                // Valid "Simple" message types
+                //   GET_STATUS      = 'J',
+                //   GET_ADMIN       = 'A',
+                //   DO_RESET        = '6',
+                //   DO_FACTORYRESET = '7',
+                //   PING            = 'P',
+
+
                 if (event.data.startsWith("X"))
                 {
-                    if (event.data[1] === 'J')
-                    {
-                        let data = event.data.substr(2);
-                        ProcessReceivedJsonStatusMessage(data);
-                    }
-                    else if (event.data[1] === 'A')
-                    {
-                        let data = event.data.substr(2);
-                        ProcessReceivedJsonAdminMessage(data);
+                    switch (event.data[1]) {
+                        case 'J': {
+                            let data = event.data.substr(2);
+                            ProcessReceivedJsonStatusMessage(data);
+                            break;
+                        }
+                        case 'P': {
+                            wsPingPong();
+                            break;
+                        }
+                        case 'A': {
+                            let data = event.data.substr(2);
+                            ProcessReceivedJsonAdminMessage(data);
+                            break;
+                        }
                     }
                 }
                 else
@@ -1130,17 +1135,42 @@ function wsConnect()
             // console.info("ws.onmessage: Done");
         }; // onmessage
 
-        ws.onclose = function ()
+        ws.onerror = function(event)
         {
-            wsFlushAndHaltTheOutputQueue();
-            $('#wserror').modal();
-            wsConnect();
+            console.error("WebSocket error: ", event);
         };
     }
     else
     {
         alert('WebSockets is NOT supported by your Browser! You will need to upgrade your browser or downgrade to v2.0 of the ESPixelStick firmware.');
     }
+}
+
+// Ping every 2sec, Reconnect after 4sec
+function wsPingPong()
+{
+    // Ping Pong connection detection
+    clearTimeout(pingTimer);
+    clearTimeout(pongTimer);
+
+    pingTimer = setTimeout(function () {
+        ws.send('XP');
+    }, 2000);
+    pongTimer = setTimeout(function () {
+        wsReconnect();
+    }, 4000);
+
+}
+
+// Attempt to reconnect
+function wsReconnect()
+{
+    $('#wserror').modal();
+    clearTimeout(pingTimer);
+    clearTimeout(pongTimer);
+    wsFlushAndHaltTheOutputQueue();
+    ws = null;
+    wsConnect();
 }
 
 // Websocket message queuer

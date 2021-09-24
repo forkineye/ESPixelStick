@@ -554,6 +554,12 @@ void c_WebMgr::ProcessXseriesRequests (AsyncWebSocketClient * client)
             break;
         } // end case SimpleMessage::GET_STATUS:
 
+        case SimpleMessage::PING:
+        {
+            client->text (CN_XP);
+            break;
+        }
+
         case SimpleMessage::GET_ADMIN:
         {
             // DEBUG_V ("");
