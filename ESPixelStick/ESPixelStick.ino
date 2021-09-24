@@ -505,4 +505,5 @@ void loop()
 void _logcon (String & DriverName, String Message)
 {
     LOG_PORT.println ("[" + DriverName + "] " + Message);
+    LOG_PORT.flush ();
 } // logcon
