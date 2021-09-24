@@ -37,7 +37,7 @@ public:
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
     
     uint32_t GetLastFrameId ()  { return LastPlayedFrameId; }
-    float    GetTimeOffsetMS () { return TimeCorrectionFactor; }
+    float    GetTimeCorrectionFactor () { return TimeCorrectionFactor; }
 
 private:
     friend class fsm_PlayFile_state_Idle;
