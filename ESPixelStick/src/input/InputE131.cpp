@@ -58,13 +58,13 @@ void c_InputE131::Begin ()
         validateConfiguration ();
         // DEBUG_V ("");
 
-        NetworkStateChanged (WiFiMgr.IsWiFiConnected (), false);
-
         // DEBUG_V ("");
         e131->registerCallback ( (void*)this, [] (e131_packet_t* Packet, void * pThis)
             {
                 ((c_InputE131*)pThis)->ProcessIncomingE131Data (Packet);
             });
+
+        NetworkStateChanged (WiFiMgr.IsWiFiConnected (), false);
 
         HasBeenInitialized = true;
 
