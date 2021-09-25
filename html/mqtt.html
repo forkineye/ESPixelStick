@@ -1,10 +1,10 @@
 <div id="mqtt">
     <legend class="esps-legend" id="Title">MQTT Configuration</legend>
-    <div class="has-feedback" id="fg_mqtt">
+    <div id="fg_mqtt">
         <fieldset id="fs_mqtt">
             <div class="form-group">
                 <label class="control-label col-sm-2" for="ip">Broker IP</label>
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                     <input type="text" class="form-control" id="ip" name="ip" minlength="7" maxlength="15" pattern='\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b' value="0.0.0.0" title="MQTT Broker IP.">
                 </div>
 
@@ -16,24 +16,25 @@
 
             <div class="form-group">
                 <label class="control-label col-sm-2" for="user">User</label>
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                     <input type="text" class="form-control" id="user" name="user" minlength="1" maxlength="20" title="MQTT Username (optional).">
                 </div>
 
                 <label class="control-label col-sm-2" for="password">Password</label>
-                <div class="col-sm-4">
-                    <input type="password" class="form-control" id="password" name="password" minlength="1" maxlength="20" title="MQTT Password (optional).">
+                <div class="col-sm-2">
+                    <input type="password" class="form-control" id="password" name="password" minlength="1" maxlength="32" title="MQTT Password (optional).">
                 </div>
             </div>
 
             <div class="form-group">
                 <label class="control-label col-sm-2" for="topic">Status Topic</label>
-                <div class="col-sm-4">
+                <div class="col-sm-6">
                     <input type="text" class="form-control" id="topic" name="topic" maxlength="32" title="MQTT Status Topic. Control topic will be appended with /set." onchange="UpdateTopicSet(this)">
                 </div>
-
+            </div>
+            <div class="form-group">
                 <label class="control-label col-sm-2" for="haprefix">Home Assistant Prefix</label>
-                <div class="col-sm-4">
+                <div class="col-sm-6">
                     <input type="text" class="form-control" id="haprefix" name="haprefix" maxlength="32" title="Prefix used for Home Assistant Discovery">
                 </div>
             </div>

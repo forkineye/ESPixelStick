@@ -1,31 +1,31 @@
 <div id="serial">
     <legend class="esps-legend" id="Title">Serial Configuration</legend>
-    <div class="has-feedback" id="fg_serial">
+    <div id="fg_serial">
         <fieldset id="fs_serial">
             <div class="form-group">
                 <label class="control-label col-sm-2" for="channel_count">Channel Count</label>
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                     <input type="number" class="form-control is-valid" id="num_chan" step="1" min="1" max="4096" value="0" required title="Number of Channels" onchange="RefreshSerialRate()">
                 </div>
 
                 <label class="control-label col-sm-2" for="baudrate">Baudrate</label>
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                     <input type="number" class="form-control is-valid" id="baudrate" step="1" min="38400" max="460800" value="57600" required title="Number of Channels" onchange="RefreshSerialRate()">
                 </div>
             </div>
-            <div class="form-group has-feedback">
+            <div class="form-group">
                 <label class="control-label col-sm-2" for="gen_ser_hdr">Frame Header</label>
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                     <input type="text" class="form-control is-valid" id="gen_ser_hdr" min="0" max="10" value="" required title="String to send at start of frame." onchange="RefreshSerialRate()">
                 </div>
 
                 <label class="control-label col-sm-2" for="gen_ser_ftr">Frame Footer</label>
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                     <input type="text" class="form-control is-valid" id="gen_ser_ftr" min="0" max="10" value="" required title="String to send at end of frame." onchange="RefreshSerialRate()">
                 </div>
             </div>
             <label class="control-label col-sm-2 hidden AdvancedMode" for="data_pin">GPIO Output</label>
-            <div class="col-sm-4">
+            <div class="col-sm-2">
                 <input type="number" class="form-control is-valid hidden AdvancedMode" id="data_pin" step="1" min="0" max="64" value="65" required title="GPIO pn which to output data">
             </div>
         </fieldset>
