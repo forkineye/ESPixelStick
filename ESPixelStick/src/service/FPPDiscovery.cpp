@@ -61,7 +61,6 @@ void c_FPPDiscovery::begin ()
     // DEBUG_END;
 } // begin
 
-
 //-----------------------------------------------------------------------------
 // Configure and start the web server
 void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
@@ -877,7 +876,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 void c_FPPDiscovery::StartPlaying (String & FileName, uint32_t FrameId)
 {
     // DEBUG_START;
-    // DEBUG_V (String("Open:: FileName: ") + filename);
+    // DEBUG_V (String("Open:: FileName: ") + FileName);
 
     do // once
     {

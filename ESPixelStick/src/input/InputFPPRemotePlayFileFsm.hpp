@@ -96,4 +96,9 @@ public:
     virtual void Stop (void);
     virtual bool Sync (String& FileName, uint32_t FrameId);
 
+private:
+    String   FileName = "";
+    uint32_t FrameId = 0;
+    uint32_t PlayCount = 0;
+
 }; // fsm_PlayFile_state_Stopping
