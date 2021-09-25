@@ -803,6 +803,7 @@ function CreateOptionsFromConfig(OptionListName, Config)
         // does the selection box we need already exist?
         if (!$('#' + OptionListName + 'mode' + ChannelId).length)
         {
+            // console.log(`OptionListName: ${OptionListName}`)
             // create the selection box
             $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + ChannelId + '">' + GenerateInputOutputControlLabel(OptionListName, ChannelId) + '</label>');
             $('#fg_' + OptionListName).append('<div class="col-sm-2"><select class="form-control wsopt" id="' + OptionListName + ChannelId + '"></select></div>');
