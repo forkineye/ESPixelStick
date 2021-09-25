@@ -69,6 +69,8 @@ extern const char CN_effects[];
 extern const char CN_en[];
 extern const char CN_enabled[];
 extern const char CN_errors[];
+extern const char CN_ESP32[];
+extern const char CN_ESP8266[];
 extern const char CN_ESPixelStick [];
 extern const char CN_false [];
 extern const char CN_File[];

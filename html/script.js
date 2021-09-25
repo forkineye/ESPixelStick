@@ -245,9 +245,6 @@ $(function ()
     let hash = window.location.hash;
     hash && $('ul.navbar-nav li a[href="' + hash + '"]').click();
 
-    // start updating stats
-    RequestStatusUpdate();
-
     // triggers menu update
     RequestListOfFiles();
 });
@@ -282,6 +279,12 @@ function UpdateAdvancedOptionsMode()
         }
     });
 
+    // Hide elements that are not applicable to our architecture
+    if (AdminInfo.arch === "ESP8266") {
+        $('.esp32').addClass('hidden');
+    } else if (AdminInfo.arch === "ESP32") {
+        $('.esp8266').addClass('hidden');
+    }
 } // UpdateAdvancedOptionsMode
 
 function ProcessWindowChange(NextWindow) {
@@ -292,9 +295,6 @@ function ProcessWindowChange(NextWindow) {
 
     else if (NextWindow === "#admin") {
         wsEnqueue('XA');
-        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
-        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
-        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
     }
 
     else if ((NextWindow === "#wifi") || (NextWindow === "#home")) {
@@ -302,6 +302,7 @@ function ProcessWindowChange(NextWindow) {
     }
 
     else if (NextWindow === "#config") {
+        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
     }
@@ -764,6 +765,7 @@ function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId )
     HtmlLoadFileName = HtmlLoadFileName + ".html";
     // console.info("Adjusted HtmlLoadFileName: " + HtmlLoadFileName);
 
+//TODO: Detect modules that don't require configuration - DDP, Alexa, ?
     if ("disabled.html" === HtmlLoadFileName)
     {
         $('#' + OptionListName + 'mode' + DisplayedChannelId).empty();
@@ -1043,9 +1045,11 @@ function wsConnect()
             wsReadyToSend();
 
             // console.info("ws.onopen: Start Sending");
+            // Push time
             wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'time': { 'time_t': convertUTCDateToLocalDate(Date())/1000 } } } }));
-//TODO: Do we need to get this on connect? It loads again in the wifi tab
-            //wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get network config
+
+            // Process an admin message to populate AdminInfo
+            wsEnqueue('XA');
 
             ProcessWindowChange($(location).attr("hash"));
 
@@ -1138,6 +1142,7 @@ function wsConnect()
         ws.onerror = function(event)
         {
             console.error("WebSocket error: ", event);
+            wsReconnect();
         };
     }
     else
@@ -1169,6 +1174,7 @@ function wsReconnect()
     clearTimeout(pingTimer);
     clearTimeout(pongTimer);
     wsFlushAndHaltTheOutputQueue();
+    ws.close();
     ws = null;
     wsConnect();
 }
@@ -1353,9 +1359,17 @@ function ProcessReceivedJsonAdminMessage(data)
 
     $('#version').text(AdminInfo.version);
     $('#built').text(AdminInfo.built);
+    $('#arch').text(AdminInfo.arch);
     $('#usedflashsize').text(AdminInfo.usedflashsize);
     $('#realflashsize').text(AdminInfo.realflashsize);
     $('#flashchipid').text(AdminInfo.flashchipid);
+
+    // Hide elements that are not applicable to our architecture
+    // if (AdminInfo.arch === "ESP8266") {
+    //     $('.esp32').addClass('hidden');
+    // } else if (AdminInfo.arch === "ESP32") {
+    //     $('.esp8266').addClass('hidden');
+    // }
 
 } // ProcessReceivedJsonAdminMessage
 
