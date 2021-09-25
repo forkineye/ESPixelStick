@@ -278,13 +278,6 @@ function UpdateAdvancedOptionsMode()
             $(this).addClass("hidden");
         }
     });
-
-    // Hide elements that are not applicable to our architecture
-    if (AdminInfo.arch === "ESP8266") {
-        $('.esp32').addClass('hidden');
-    } else if (AdminInfo.arch === "ESP32") {
-        $('.esp8266').addClass('hidden');
-    }
 } // UpdateAdvancedOptionsMode
 
 function ProcessWindowChange(NextWindow) {
@@ -1365,11 +1358,11 @@ function ProcessReceivedJsonAdminMessage(data)
     $('#flashchipid').text(AdminInfo.flashchipid);
 
     // Hide elements that are not applicable to our architecture
-    // if (AdminInfo.arch === "ESP8266") {
-    //     $('.esp32').addClass('hidden');
-    // } else if (AdminInfo.arch === "ESP32") {
-    //     $('.esp8266').addClass('hidden');
-    // }
+    if (AdminInfo.arch === "ESP8266") {
+        $('.esp32').addClass('hidden');
+    } else if (AdminInfo.arch === "ESP32") {
+        $('.esp8266').addClass('hidden');
+    }
 
 } // ProcessReceivedJsonAdminMessage
 
