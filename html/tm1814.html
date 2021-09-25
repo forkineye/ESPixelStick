@@ -2,18 +2,18 @@
     <legend class="esps-legend" id="Title">TM1814 Configuration</legend>
     <div class="form-group">
         <label class="control-label col-sm-2" for="pixel_count">Pixel Count</label>
-        <div class="col-sm-2">
+        <div class="col-sm-4">
             <input type="number" class="form-control is-valid" id="pixel_count" step="1" min="1" max="1200" value="0" required title="Number of pixels" onchange="tm1814_OnChange()">
         </div>
         <label class="control-label col-sm-2" for="group_size">Group Size</label>
-        <div class="col-sm-2">
+        <div class="col-sm-4">
             <input type="number" class="form-control is-valid" id="group_size" step="1" min="1" max="1360" value="1" required title="Group every X number of physical pixels together.  Default of 1 is no grouping." onchange="tm1814_OnChange()">
         </div>
     </div>
 
     <div class="form-group">
         <label class="control-label col-sm-2" for="color_order">Color Order</label>
-        <div class="col-sm-2">
+        <div class="col-sm-4">
             <select class="form-control" id="color_order">
                 <option value="rgb">RGB</option>
                 <option value="grb">GRB</option>
@@ -30,54 +30,54 @@
             </select>
         </div>
         <label class="control-label col-sm-2" for="zig_size">Zigzag Count</label>
-        <div class="col-sm-2">
+        <div class="col-sm-4">
             <input type="number" class="form-control is-valid" id="zig_size" step="1" min="0" max="680" value="0" required title="Zigzag every X number of physical pixels." onchange="tm1814_OnChange()">
         </div>
     </div>
 
     <div class="form-group">
         <label class="control-label col-sm-2" for="gamma">Gamma Value</label>
-        <div class="col-sm-2">
+        <div class="col-sm-4">
             <input type="number" class="form-control is-valid" id="gamma" step="0.1" min="1.0" max="5.0" value="1.0" required title="Recommended value is 2.2. Set to 1.0 to disable." onchange="tm1814_OnChange()">
         </div>
 
         <label class="control-label col-sm-2" for="brightness">Brightness (%)</label>
-        <div class="col-sm-2">
+        <div class="col-sm-4">
             <input type="number" class="form-control is-valid" id="brightness" step="1" min="1" max="100" value="100" title="Set brightness as a percentage" onchange="tm1814_OnChange()">
         </div>
     </div>
 
     <div class="form-group">
         <label class="control-label col-sm-2" for="prependnullcount">Start NULL Count</label>
-        <div class="col-sm-2">
+        <div class="col-sm-4">
             <input type="number" class="form-control is-valid" id="prependnullcount" step="1" min="0" max="100" value="0" title="Number of NULL Pixels to send before Pixel Data" onchange="tm1814_OnChange()">
         </div>
         <label class="control-label col-sm-2" for="appendnullcount">End NULL Count</label>
-        <div class="col-sm-2">
+        <div class="col-sm-4">
             <input type="number" class="form-control is-valid" id="appendnullcount" step="1" min="0" max="100" value="0" title="Number of NULL Pixels to send after Pixel Data" onchange="tm1814_OnChange()">
         </div>
     </div>
 
     <div class="form-group">
         <label class="control-label col-sm-2" for="currentlimit">Current Limit</label>
-        <div class="col-sm-2">
+        <div class="col-sm-4">
             <input type="number" class="form-control is-valid" id="currentlimit" step="1" min="1" max="100" value="0" required title="Current Limiting Factor applied by driver." onchange="tm1814_OnChange()">
         </div>
 
         <label class="control-label col-sm-2" for="interframetime">Inter Frame Time (us)</label>
-        <div class="col-sm-2">
+        <div class="col-sm-4">
             <input type="number" class="form-control is-valid" id="interframetime" step="1" min="300" max="10000" value="300" required title="Number of Micro Seconds between each frame." onchange="tm1814_OnChange()">
         </div>
     </div>
 
     <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-2">
+        <div class="col-sm-offset-2 col-sm-4">
             <div class="checkbox"><label><input type="checkbox" id="showgamma"> Show Gamma Curve</label></div>
         </div>
     </div>
 
     <label class="control-label col-sm-2 hidden AdvancedMode" for="data_pin">GPIO Output</label>
-    <div class="col-sm-2">
+    <div class="col-sm-4">
         <input type="number" class="form-control is-valid hidden AdvancedMode" id="data_pin" step="1" min="0" max="64" value="65" required title="GPIO pn which to output data">
     </div>
 </fieldset>

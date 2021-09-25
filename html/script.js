@@ -786,6 +786,8 @@ function CreateOptionsFromConfig(OptionListName, Config)
 {
     // console.info("CreateOptionsFromConfig");
 
+    // Set selection column width based on arch which equates to number of outputs for now
+    let col = (AdminInfo.arch === 'ESP8266') ? '4' : '2';
     let Channels = Config.channels;
 
     if ("input" === OptionListName)
@@ -805,9 +807,10 @@ function CreateOptionsFromConfig(OptionListName, Config)
         {
             // console.log(`OptionListName: ${OptionListName}`)
             // create the selection box
-            $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + ChannelId + '">' + GenerateInputOutputControlLabel(OptionListName, ChannelId) + '</label>');
-            $('#fg_' + OptionListName).append('<div class="col-sm-2"><select class="form-control wsopt" id="' + OptionListName + ChannelId + '"></select></div>');
-            $('#fg_' + OptionListName + '_mode').append('<fieldset id="' + OptionListName + 'mode' + ChannelId + '"></fieldset>');
+            $(`#fg_${OptionListName}`).append(`<label class="control-label col-sm-2" for="${OptionListName}${ChannelId}">${GenerateInputOutputControlLabel(OptionListName, ChannelId)}</label>`);
+            $(`#fg_${OptionListName}`).append(`<div class="col-sm-${col}"><select class="form-control wsopt" id="${OptionListName}${ChannelId}"></select></div>`);
+            $(`#fg_${OptionListName}_mode`).append(`<fieldset id="${OptionListName}mode${ChannelId}"></fieldset>`);
+
         }
 
         let jqSelector = "#" + OptionListName + ChannelId;

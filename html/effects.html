@@ -1,41 +1,43 @@
 <fieldset id="effects">
     <legend class="esps-legend" id="Title">Effect Configuration</legend>
-    <div class="col-sm-16">
-        <label class="control-label col-sm-2" for="currenteffect">Effect:</label>
-        <div class="col-sm-2">
+    <div class="form-group">
+        <label class="control-label col-sm-2" for="currenteffect">Effect</label>
+        <div class="col-sm-4">
             <select class="form-control is-valid" id="currenteffect" title="Effect to generate"></select>
         </div>
-
-        <label for="EffectColor" class="control-label col-sm-2">Color:</label>
-        <div class="col-sm-2">
+        <label for="EffectColor" class="control-label col-sm-2">Color</label>
+        <div class="col-sm-4">
             <input type="color" class="form-control is-valid" id="EffectColor" value="#000000" />
         </div>
     </div>
 
-    <div class="col-sm-16">
-        <label class="control-label col-sm-2" for="EffectSpeed">Speed:</label>
-        <div class="col-sm-2">
+    <div class="form-group">
+        <label class="control-label col-sm-2" for="EffectSpeed">Speed</label>
+        <div class="col-sm-4">
             <input type="number" class="form-control is-valid" id="EffectSpeed" step="1" min="1" max="10" value="0" required title="Rate at which effect runs">
         </div>
-
-        <label class="control-label col-sm-2" for="EffectBrightness">Brightness (%):</label>
-        <div class="col-sm-2">
+        <label class="control-label col-sm-2" for="EffectBrightness">Brightness (%)</label>
+        <div class="col-sm-4">
             <input type="number" class="form-control is-valid" id="EffectBrightness" step="1" min="1" max="100" value="0" required title="Effect Intensity">
         </div>
     </div>
 
     <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10" id="d_EffectReverse">
-            <div class="checkbox"><label><input type="checkbox" id="EffectReverse" class="reverse" name="t_reverse">Reverse pattern</label></div>
+        <div class="row">
+            <div class="col-sm-offset-2 col-sm-2" id="d_EffectReverse">
+                <div class="checkbox"><label><input type="checkbox" id="EffectReverse" class="reverse" name="t_reverse">Reverse pattern</label></div>
+            </div>
+            <div class="col-sm-8" id="d_EffectMirror">
+                <div class="checkbox"><label><input type="checkbox" id="EffectMirror" class="mirror" name="t_mirror">Mirror pattern</label></div>
+            </div>
         </div>
-        <div class="col-sm-offset-2 col-sm-10" id="d_EffectMirror">
-            <div class="checkbox"><label><input type="checkbox" id="EffectMirror" class="mirror" name="t_mirror">Mirror pattern</label></div>
-        </div>
-        <div class="col-sm-offset-2 col-sm-10" id="d_EffectAllLeds">
-            <div class="checkbox"><label><input type="checkbox" id="EffectAllLeds" class="allleds" name="t_allleds">All leds same </label></div>
-        </div>
-        <div class="col-sm-offset-2 col-sm-10" id="d_EffectWhiteChannel">
-            <div class="checkbox"><label><input type="checkbox" id="EffectWhiteChannel" class="whitechannel" name="t_whitechannel">Add White Channel Data</label></div>
+        <div class="row">
+            <div class="col-sm-offset-2 col-sm-2" id="d_EffectAllLeds">
+                <div class="checkbox"><label><input type="checkbox" id="EffectAllLeds" class="allleds" name="t_allleds">All leds same </label></div>
+            </div>
+            <div class="col-sm-8" id="d_EffectWhiteChannel">
+                <div class="checkbox"><label><input type="checkbox" id="EffectWhiteChannel" class="whitechannel" name="t_whitechannel">Add White Channel Data</label></div>
+            </div>
         </div>
     </div>
 </fieldset>
