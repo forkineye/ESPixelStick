@@ -74,7 +74,12 @@ static void _u0_putc(char c){
 //
 /////////////////////////////////////////////////////////
 
-const String VERSION = "4.0-dev (NOT STABLE)";
+#ifdef ESPS_VERSION
+const String VERSION = STRING(ESPS_VERSION);
+#else
+const String VERSION = "4.x-dev";
+#endif
+
 const String BUILD_DATE = String(__DATE__) + " - " + String(__TIME__);
 const String CurrentConfigVersion = "1";
 

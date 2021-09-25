@@ -48,15 +48,9 @@
 #define CLIENT_TIMEOUT  15      ///< In station/client mode try to connection for 15 seconds
 #define AP_TIMEOUT      120     ///< In AP mode, wait 60 seconds for a connection or reboot
 
-//TODO: Remove this?
-// E1.33 / RDMnet stuff - to be moved to library
-#define RDMNET_DNSSD_SRV_TYPE   "draft-e133.tcp"
-#define RDMNET_DEFAULT_SCOPE    "default"
-#define RDMNET_DEFAULT_DOMAIN   "local"
-#define RDMNET_DNSSD_TXTVERS    1
-#define RDMNET_DNSSD_E133VERS   1
-
-// Configuration file params
+// Macro strings
+#define STRINGIFY(X) #X
+#define STRING(X) STRINGIFY(X)
 
 /// Core configuration structure
 typedef struct {
