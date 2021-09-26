@@ -7,17 +7,26 @@ assignees: ''
 
 ---
 
---------- Instructions - Delete this ---------
+--------- Instructions --------
 Please provide answers directly below each section.
---------- Instructions - Delete to here ---------
+--------- Instructions ---------
+
 **ESPixelStick Firmware Version**
+
 
 **Hardware Version**
 
+
 **Binary release or compiled yourself?**
 
-**Operating System**
+
+**Operating System (and version)**
+
+
+**Web Browser (and version)**
+
 
 **Access Point**
+
 
 **Describe the bug**
