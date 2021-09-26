@@ -84,7 +84,6 @@ jobs:
 
 
   package:
-    name: Create Package
     needs: firmware
     runs-on: ubuntu-latest
     steps:
