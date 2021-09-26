@@ -1,0 +1,25 @@
+{
+	"semantics": [
+		{ "Rename": { "Full Path from": "Full Path to" } },
+		{ "Delete": "Full Path and Name Of Field to delete" },
+		{ "SetNumber": { "Full path to element to set": 0 } },
+		{ "SetString": { "Full path to element to set": "string" } },
+		{ "AppendString": { "Full path to element to set": "string to append" } },
+		{ "PrependString": { "Full path to element to set": "string to prepend" } },
+		{ "Add": { "Full path to element to add to": 0.0 } },
+		{ "Subtract": { "Full path to element to Subtract From": 0.0 } },
+		{ "Multiply": { "Full path to element to Multiply": 0.0 } },
+		{ "Divide": { "Full path to element to Divide": 0.0 } }
+	],
+
+	"Target Versions": {
+
+		"0": {
+			"List of": "actions"
+		},
+
+		"1": {
+			"List of": "actions"
+		}
+	}
+}
