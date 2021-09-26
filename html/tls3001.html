@@ -1,78 +1,73 @@
-<div id="tls3001">
+<fieldset id="tls3001">
     <legend class="esps-legend" id="Title">TLS3001 Configuration</legend>
-    <div class="has-feedback" id="fg_tls3001">
-        <fieldset id="fs_tls3001">
-            <div class="form-group">
-                <label class="control-label col-sm-2" for="pixel_count">Pixel Count</label>
-                <div class="col-sm-2">
-                    <input type="number" class="form-control is-valid" id="pixel_count" step="1" min="1" max="1200" value="0" required title="Number of pixels" onchange="tls3001_OnChange ()">
-                </div>
-                <label class="control-label col-sm-2" for="group_size">Group Size</label>
-                <div class="col-sm-2">
-                    <input type="number" class="form-control is-valid" id="group_size" step="1" min="1" max="1360" value="1" required title="Group every X number of physical pixels together.  Default of 1 is no grouping." onchange="tls3001_OnChange ()">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-sm-2" for="color_order">Color Order</label>
-                <div class="col-sm-2">
-                    <select class="form-control" id="color_order">
-                        <option value="rgb">RGB</option>
-                        <option value="grb">GRB</option>
-                        <option value="brg">BRG</option>
-                        <option value="rbg">RBG</option>
-                        <option value="gbr">GBR</option>
-                        <option value="bgr">BGR</option>
-                        <option value="rgbw">RGBW</option>
-                        <option value="grbw">GRBW</option>
-                        <option value="brgw">BRGW</option>
-                        <option value="rbgw">RBGW</option>
-                        <option value="gbrw">GBRW</option>
-                        <option value="bgrw">BGRW</option>
-                    </select>
-                </div>
-                <label class="control-label col-sm-2" for="zig_size">Zigzag Count</label>
-                <div class="col-sm-2">
-                    <input type="number" class="form-control is-valid" id="zig_size" step="1" min="0" max="680" value="0" required title="Zigzag every X number of physical pixels." onchange="tls3001_OnChange ()">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-sm-2" for="gamma">Gamma Value</label>
-                <div class="col-sm-2">
-                    <input type="number" class="form-control is-valid" id="gamma" step="0.1" min="1.0" max="5.0" value="1.0" required title="Recommended value is 2.2. Set to 1.0 to disable." onchange="tls3001_OnChange ()">
-                </div>
-
-                <label class="control-label col-sm-2" for="brightness">Brightness (%)</label>
-                <div class="col-sm-2">
-                    <input type="number" class="form-control is-valid" id="brightness" step="1" min="1" max="100" value="100" title="Set brightness as a percentage" onchange="tls3001_OnChange ()">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-sm-2" for="prependnullcount">Start NULL Count</label>
-                <div class="col-sm-2">
-                    <input type="number" class="form-control is-valid" id="prependnullcount" step="1" min="0" max="100" value="0" title="Number of NULL Pixels to send before Pixel Data" onchange="tls3001_OnChange ()">
-                </div>
-                <label class="control-label col-sm-2" for="appendnullcount">End NULL Count</label>
-                <div class="col-sm-2">
-                    <input type="number" class="form-control is-valid" id="appendnullcount" step="1" min="0" max="100" value="0" title="Number of NULL Pixels to send after Pixel Data" onchange="tls3001_OnChange ()">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-2">
-                    <div class="checkbox"><label><input type="checkbox" id="showgamma"> Show Gamma Curve</label></div>
-                </div>
-                <label class="control-label col-sm-2" for="interframetime">Inter Frame Time (us)</label>
-                <div class="col-sm-2">
-                    <input type="number" class="form-control is-valid" id="interframetime" step="1" min="50" max="10000" value="300" required title="Number of Micro Seconds between each frame." onchange="tls3001_OnChange ()">
-                </div>
-            </div>
-
-        </fieldset>
+    <div class="form-group">
+        <label class="control-label col-sm-2" for="pixel_count">Pixel Count</label>
+        <div class="col-sm-4">
+            <input type="number" class="form-control is-valid" id="pixel_count" step="1" min="1" max="1200" value="0" required title="Number of pixels" onchange="tls3001_OnChange ()">
+        </div>
+        <label class="control-label col-sm-2" for="group_size">Group Size</label>
+        <div class="col-sm-4">
+            <input type="number" class="form-control is-valid" id="group_size" step="1" min="1" max="1360" value="1" required title="Group every X number of physical pixels together.  Default of 1 is no grouping." onchange="tls3001_OnChange ()">
+        </div>
     </div>
-</div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-2" for="color_order">Color Order</label>
+        <div class="col-sm-4">
+            <select class="form-control" id="color_order">
+                <option value="rgb">RGB</option>
+                <option value="grb">GRB</option>
+                <option value="brg">BRG</option>
+                <option value="rbg">RBG</option>
+                <option value="gbr">GBR</option>
+                <option value="bgr">BGR</option>
+                <option value="rgbw">RGBW</option>
+                <option value="grbw">GRBW</option>
+                <option value="brgw">BRGW</option>
+                <option value="rbgw">RBGW</option>
+                <option value="gbrw">GBRW</option>
+                <option value="bgrw">BGRW</option>
+            </select>
+        </div>
+        <label class="control-label col-sm-2" for="zig_size">Zigzag Count</label>
+        <div class="col-sm-4">
+            <input type="number" class="form-control is-valid" id="zig_size" step="1" min="0" max="680" value="0" required title="Zigzag every X number of physical pixels." onchange="tls3001_OnChange ()">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-2" for="gamma">Gamma Value</label>
+        <div class="col-sm-4">
+            <input type="number" class="form-control is-valid" id="gamma" step="0.1" min="1.0" max="5.0" value="1.0" required title="Recommended value is 2.2. Set to 1.0 to disable." onchange="tls3001_OnChange ()">
+        </div>
+
+        <label class="control-label col-sm-2" for="brightness">Brightness (%)</label>
+        <div class="col-sm-4">
+            <input type="number" class="form-control is-valid" id="brightness" step="1" min="1" max="100" value="100" title="Set brightness as a percentage" onchange="tls3001_OnChange ()">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-2" for="prependnullcount">Start NULL Count</label>
+        <div class="col-sm-4">
+            <input type="number" class="form-control is-valid" id="prependnullcount" step="1" min="0" max="100" value="0" title="Number of NULL Pixels to send before Pixel Data" onchange="tls3001_OnChange ()">
+        </div>
+        <label class="control-label col-sm-2" for="appendnullcount">End NULL Count</label>
+        <div class="col-sm-4">
+            <input type="number" class="form-control is-valid" id="appendnullcount" step="1" min="0" max="100" value="0" title="Number of NULL Pixels to send after Pixel Data" onchange="tls3001_OnChange ()">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-4">
+            <div class="checkbox"><label><input type="checkbox" id="showgamma"> Show Gamma Curve</label></div>
+        </div>
+        <label class="control-label col-sm-2" for="interframetime">Inter Frame Time (us)</label>
+        <div class="col-sm-4">
+            <input type="number" class="form-control is-valid" id="interframetime" step="1" min="50" max="10000" value="300" required title="Number of Micro Seconds between each frame." onchange="tls3001_OnChange ()">
+        </div>
+    </div>
+</fieldset>
 
 <div class="col-sm-offset-2 col-sm-8 hidden gammagraph">
     <svg viewBox="-25 -30 320 320" width="256" height="256" class="chart">

@@ -23,6 +23,17 @@ jobs:
       # Checkout ESPixelStick
       - uses: actions/checkout@v2
 
+      - name: Create version file
+        run: |
+          mkdir firmware
+          echo "CI-$GITHUB_RUN_ID" > firmware/VERSION
+
+      - name: Tagged release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          echo "${{ github.ref }}" > firmware/VERSION
+          echo "ESPS_RELEASE" >> $GITHUB_ENV
+
       - name: Create secrets.h
         run: |
           echo '#define SECRETS_SSID "SSID_NOT_SET"' > ESPixelStick/src/secrets.h
@@ -78,10 +89,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Set Release Archive Filename
-      - run: echo "ARCHFILE=ESPixelStick_CI-$(date +'%Y%m%d%H%M%S').zip" >> $GITHUB_ENV
+      # - run: |
+      #   if [ -z "$ESPS_RELEASE" ]; then
+      #   echo "ARCHFILE=ESPixelStick_CI-$GITHUB_RUN_ID.zip" >> $GITHUB_ENV
+      #   else
+      #   echo "ARCHFILE=ESPixelStick_Firmware-$ESPS_RELEASE.zip" >> $GITHUB_ENV
+      #   fi
 
       # Checkout ESPixelStick
       - uses: actions/checkout@v2
+
+      - name: Tagged release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: echo "ESPS_RELEASE" >> $GITHUB_ENV
 
       # Download firmware binary artifact
       - uses: actions/download-artifact@v2
@@ -103,9 +123,17 @@ jobs:
           gulp ci
           mv ESPixelStick/data/* dist/fs
 
+      - name: Set release archive filename
+        run: echo "ARCHFILE=ESPixelStick_Firmware-`cat dist/firmware/VERSION`.zip" >> $GITHUB_ENV
+
+      - name: Update firmware.json
+        run: python .scripts/ci-firmware.py
+
       - name: Move CI specific release files into place
         run: |
+          if [ -z "$ESPS_RELEASE" ]; then
           mv .ci/firmware.json dist/firmware/firmware.json
+          fi
 
       - name: Create Release Archive
         run: zip -r ../${{ env.ARCHFILE }} *
@@ -116,3 +144,9 @@ jobs:
         with:
           name: Release Archive
           path: ${{ env.ARCHFILE }}
+
+      # - name: Release
+      #   uses: softprops/action-gh-release@v1
+      #   if: startsWith(github.ref, 'refs/tags/')
+      #   with:
+      #     files: ${{ env.ARCHFILE }}

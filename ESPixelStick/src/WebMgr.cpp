@@ -33,6 +33,7 @@
 
 #include <time.h>
 #include <sys/time.h>
+#include <functional>
 
 // #define ESPALEXA_DEBUG
 #define ESPALEXA_MAXDEVICES 2
@@ -125,10 +126,12 @@ void c_WebMgr::init ()
     DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Methods"), "GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH");
 
     // Setup WebSockets
-    webSocket.onEvent ([this](AsyncWebSocket* server, AsyncWebSocketClient * client, AwsEventType type, void* arg, uint8_t * data, size_t len)
-        {
-            this->onWsEvent (server, client, type, arg, data, len);
-        });
+    // webSocket.onEvent ([this](AsyncWebSocket* server, AsyncWebSocketClient * client, AwsEventType type, void* arg, uint8_t * data, size_t len)
+    //     {
+    //         this->onWsEvent (server, client, type, arg, data, len);
+    //     });
+    using namespace std::placeholders;
+    webSocket.onEvent (std::bind (&c_WebMgr::onWsEvent, this, _1, _2, _3, _4, _5, _6));
     webServer.addHandler (&webSocket);
 
     // Heap status handler
@@ -138,13 +141,13 @@ void c_WebMgr::init ()
         });
 
     // JSON Config Handler
-    webServer.on ("/conf", HTTP_GET, [this](AsyncWebServerRequest* request)
-        {
-            // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));
-            this->GetConfiguration ();
-            request->send (200, "text/json", WebSocketFrameCollectionBuffer);
-            // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));
-        });
+    // webServer.on ("/conf", HTTP_GET, [this](AsyncWebServerRequest* request)
+    //     {
+    //         // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));
+    //         this->GetConfiguration ();
+    //         request->send (200, "text/json", WebSocketFrameCollectionBuffer);
+    //         // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));
+    //     });
 
     // Firmware upload handler
     webServer.on ("/updatefw", HTTP_POST, [](AsyncWebServerRequest* request)
@@ -176,7 +179,7 @@ void c_WebMgr::init ()
         });
 
     // URL that FPP's status pages use to grab JSON about the current status, what's playing, etc...
-    // This can be used to mimic the behavior of atual FPP remotes
+    // This can be used to mimic the behavior of actual FPP remotes
     webServer.on ("/fppjson.php", HTTP_GET, [](AsyncWebServerRequest* request)
         {
             FPPDiscovery.ProcessFPPJson(request);
@@ -213,7 +216,7 @@ void c_WebMgr::init ()
     webServer.serveStatic ("/", LittleFS, "/www/").setDefaultFile ("index.html");
 
     // FS Debugging Handler
-    //webServer.serveStatic ("/fs", LittleFS, "/" );
+    webServer.serveStatic ("/fs", LittleFS, "/" );
 
     // if the client posts to the upload page
     webServer.on ("/upload", HTTP_POST | HTTP_PUT | HTTP_OPTIONS,
@@ -615,8 +618,10 @@ void c_WebMgr::ProcessXARequest (AsyncWebSocketClient* client)
     jsonAdmin["built"] = BUILD_DATE;
     jsonAdmin["realflashsize"] = String (ESP.getFlashChipSize ());
 #ifdef ARDUINO_ARCH_ESP8266
+    jsonAdmin["arch"] = CN_ESP8266;
     jsonAdmin["flashchipid"] = String (ESP.getChipId (), HEX);
-#else
+#elif defined (ARDUINO_ARCH_ESP32)
+    jsonAdmin["arch"] = CN_ESP32;
     jsonAdmin["flashchipid"] = int64String (ESP.getEfuseMac (), HEX);
 #endif
 
@@ -734,7 +739,7 @@ void c_WebMgr::ProcessGseriesRequests (AsyncWebSocketClient* client)
 void c_WebMgr::ProcessReceivedJsonMessage (DynamicJsonDocument & webJsonDoc, AsyncWebSocketClient * client)
 {
     // DEBUG_START;
-    //LOG_PORT.printf_P( PSTR("ProcessReceivedJsonMessage heap / stack ZcppStats: %u:%u:%u:%u\n"), ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
+    //LOG_PORT.printf_P( PSTR("ProcessReceivedJsonMessage heap / stack Stats: %u:%u:%u:%u\n"), ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
 
     do // once
     {
@@ -1143,7 +1148,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
 
 //-----------------------------------------------------------------------------
 /*
- * This function is called as part of the Arudino "loop" and does things that need
+ * This function is called as part of the Arduino "loop" and does things that need
  * periodic poking.
  *
  */

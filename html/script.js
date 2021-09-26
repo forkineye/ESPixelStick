@@ -248,9 +248,6 @@ $(function ()
     let hash = window.location.hash;
     hash && $('ul.navbar-nav li a[href="' + hash + '"]').click();
 
-    // start updating stats
-    RequestStatusUpdate();
-
     // triggers menu update
     RequestListOfFiles();
 });
@@ -284,7 +281,6 @@ function UpdateAdvancedOptionsMode()
             $(this).addClass("hidden");
         }
     });
-
 } // UpdateAdvancedOptionsMode
 
 function ProcessWindowChange(NextWindow) {
@@ -295,9 +291,6 @@ function ProcessWindowChange(NextWindow) {
 
     else if (NextWindow === "#admin") {
         wsEnqueue('XA');
-        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
-        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
-        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
     }
 
     else if ((NextWindow === "#wifi") || (NextWindow === "#home")) {
@@ -769,6 +762,7 @@ function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId )
     HtmlLoadFileName = HtmlLoadFileName + ".html";
     // console.info("Adjusted HtmlLoadFileName: " + HtmlLoadFileName);
 
+//TODO: Detect modules that don't require configuration - DDP, Alexa, ?
     if ("disabled.html" === HtmlLoadFileName)
     {
         $('#' + OptionListName + 'mode' + DisplayedChannelId).empty();
@@ -796,6 +790,8 @@ function CreateOptionsFromConfig(OptionListName, Config)
 {
     // console.info("CreateOptionsFromConfig");
 
+    // Set selection column width based on arch which equates to number of outputs for now
+    let col = (AdminInfo.arch === 'ESP8266') ? '4' : '2';
     let Channels = Config.channels;
 
     if ("input" === OptionListName)
@@ -813,10 +809,12 @@ function CreateOptionsFromConfig(OptionListName, Config)
         // does the selection box we need already exist?
         if (!$('#' + OptionListName + 'mode' + ChannelId).length)
         {
+            // console.log(`OptionListName: ${OptionListName}`)
             // create the selection box
-            $('#fg_' + OptionListName).append('<label class="control-label col-sm-2" for="' + OptionListName + ChannelId + '">' + GenerateInputOutputControlLabel(OptionListName, ChannelId) + '</label>');
-            $('#fg_' + OptionListName).append('<div class="col-sm-2"><select class="form-control wsopt" id="' + OptionListName + ChannelId + '"></select></div>');
-            $('#fg_' + OptionListName + '_mode').append('<fieldset id="' + OptionListName + 'mode' + ChannelId + '"></fieldset>');
+            $(`#fg_${OptionListName}`).append(`<label class="control-label col-sm-2" for="${OptionListName}${ChannelId}">${GenerateInputOutputControlLabel(OptionListName, ChannelId)}</label>`);
+            $(`#fg_${OptionListName}`).append(`<div class="col-sm-${col}"><select class="form-control wsopt" id="${OptionListName}${ChannelId}"></select></div>`);
+            $(`#fg_${OptionListName}_mode`).append(`<fieldset id="${OptionListName}mode${ChannelId}"></fieldset>`);
+
         }
 
         let jqSelector = "#" + OptionListName + ChannelId;
@@ -1051,9 +1049,11 @@ function wsConnect()
             wsReadyToSend();
 
             // console.info("ws.onopen: Start Sending");
+            // Push time
             wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'time': { 'time_t': convertUTCDateToLocalDate(Date())/1000 } } } }));
-//TODO: Do we need to get this on connect? It loads again in the wifi tab
-            //wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get network config
+
+            // Process an admin message to populate AdminInfo
+            wsEnqueue('XA');
 
             ProcessWindowChange($(location).attr("hash"));
 
@@ -1146,6 +1146,7 @@ function wsConnect()
         ws.onerror = function(event)
         {
             console.error("WebSocket error: ", event);
+            wsReconnect();
         };
     }
     else
@@ -1177,6 +1178,7 @@ function wsReconnect()
     clearTimeout(pingTimer);
     clearTimeout(pongTimer);
     wsFlushAndHaltTheOutputQueue();
+    ws.close();
     ws = null;
     wsConnect();
 }
@@ -1361,9 +1363,17 @@ function ProcessReceivedJsonAdminMessage(data)
 
     $('#version').text(AdminInfo.version);
     $('#built').text(AdminInfo.built);
+    $('#arch').text(AdminInfo.arch);
     $('#usedflashsize').text(AdminInfo.usedflashsize);
     $('#realflashsize').text(AdminInfo.realflashsize);
     $('#flashchipid').text(AdminInfo.flashchipid);
+
+    // Hide elements that are not applicable to our architecture
+    if (AdminInfo.arch === "ESP8266") {
+        $('.esp32').addClass('hidden');
+    } else if (AdminInfo.arch === "ESP32") {
+        $('.esp8266').addClass('hidden');
+    }
 
 } // ProcessReceivedJsonAdminMessage
 

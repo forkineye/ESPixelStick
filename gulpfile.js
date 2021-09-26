@@ -51,8 +51,8 @@ gulp.task('json', function() {
 });
 
 /* Image Task */
-gulp.task('image', function () {
-    return gulp.src(['html/**/*.png'])
+gulp.task('image', function() {
+    return gulp.src(['html/**/*.png', 'html/**/*.ico'])
         .pipe(plumber())
         .pipe(gulp.dest('ESPixelStick/data/www'));
 });
