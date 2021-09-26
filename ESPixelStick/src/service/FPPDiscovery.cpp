@@ -919,7 +919,7 @@ void c_FPPDiscovery::StopPlaying ()
 
     // DEBUG_V ("");
 
-    ProcessBlankPacket ();
+    // ProcessBlankPacket ();
 
     // DEBUG_END;
 
