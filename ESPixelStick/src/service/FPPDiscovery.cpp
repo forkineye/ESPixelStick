@@ -334,7 +334,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
                 // DEBUG_V ("Sync::Open");
                 // DEBUG_V (String ("   FileName: ") + FileName);
                 // DEBUG_V (String ("    FrameId: ") + FrameId);
-                StartPlaying (FileName, FrameId);
+                // StartPlaying (FileName, FrameId);
                 break;
             }
 
