@@ -135,6 +135,7 @@ $(function ()
         ExtractChannelConfigFromHtmlPage(Input_Config.channels, "input");
         ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
         Device_Config.id = $('#config #device #id').val();
+        Device_Config.blanktime = $('#config #device #blanktime').val();
 
         let TotalConfig = JSON.stringify({ 'device': Device_Config, 'network': Network_Config, 'input': Input_Config, 'output': Output_Config });
 
@@ -302,6 +303,7 @@ function ProcessWindowChange(NextWindow) {
     }
 
     else if (NextWindow === "#config") {
+        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
     }
@@ -673,6 +675,7 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     // is this a device config?
     else if ({}.hasOwnProperty.call(JsonConfigData, "device"))
     {
+    	// console.info("Got Device Config");
         Device_Config = JsonConfigData.device;
         updateFromJSON(JsonConfigData);
 
@@ -1017,6 +1020,9 @@ function wsConnect()
         {
             target = document.location.host;
         }
+
+        // target = "192.168.10.215";
+        // target = "192.168.10.155";
 
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');
