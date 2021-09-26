@@ -30,6 +30,8 @@ $.fn.modal.Constructor.DEFAULTS.keyboard = false;
 // lets get started
 wsConnect();
 
+wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
+
 // jQuery doc ready
 $(function ()
 {
