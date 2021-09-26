@@ -43,6 +43,13 @@ gulp.task('js', function() {
         .pipe(gulp.dest('ESPixelStick/data/www'));
 });
 
+/* json Task */
+gulp.task('json', function() {
+    return gulp.src('html/*.json')
+        .pipe(plumber())
+        .pipe(gulp.dest('ESPixelStick/data'));
+});
+
 /* Image Task */
 gulp.task('image', function() {
     return gulp.src(['html/**/*.png', 'html/**/*.ico'])
@@ -93,4 +100,4 @@ gulp.task('watch', function() {
 });
 
 /* Default Task */
-gulp.task('default', gulp.series(['clean', 'html', 'css', 'js', 'image']));
+gulp.task('default', gulp.series(['clean', 'html', 'css', 'js', 'image', 'json']));
