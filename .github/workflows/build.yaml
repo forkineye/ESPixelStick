@@ -68,8 +68,9 @@ jobs:
         run: |
           pio run -e ${{ matrix.target }}
           mkdir -p firmware/${{ matrix.chip }}
+          mkdir -p debug/${{ matrix.chip }}
           mv .pio/build/${{ matrix.target }}/firmware.bin firmware/${{ matrix.chip }}/${{ matrix.target }}-app.bin
-          mv .pio/build/${{ matrix.target }}/firmware.elf firmware/${{ matrix.chip }}/${{ matrix.target }}.elf
+          mv .pio/build/${{ matrix.target }}/firmware.elf debug/${{ matrix.chip }}/${{ matrix.target }}.elf
           if [ "$chip" = "esp32" ]; then
           mv .pio/build/${{ matrix.target }}/partitions.bin firmware/esp32/${{ matrix.target }}-partitions.bin
           cp ~/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/bin/bootloader_dio_40m.bin firmware/esp32/${{ matrix.target }}-bootloader.bin
@@ -82,6 +83,11 @@ jobs:
           name: Firmware Binaries
           path: firmware
 
+      - name: Upload Debugging Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Debug Files
+          path: debug
 
   package:
     needs: firmware
@@ -134,7 +140,7 @@ jobs:
         with:
           name: Release Archive
           path: ${{ env.ARCHFILE }}
-  
+
   release:
     needs: package
     runs-on: ubuntu-latest
