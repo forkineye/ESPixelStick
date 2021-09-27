@@ -30,7 +30,9 @@ $.fn.modal.Constructor.DEFAULTS.keyboard = false;
 // lets get started
 wsConnect();
 
-wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
+// console.log ('************before enqueue');
+// wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
+// console.log ('************after enqueue');
 
 // jQuery doc ready
 $(function ()
@@ -131,6 +133,7 @@ $(function ()
         clearStream();
     });
 
+//TODO: This should pull a configuration from the stick and not the web interface as web data could be invalid
     $('#backupconfig').click(function ()
     {
         ExtractNetworkConfigFromHtmlPage();
@@ -291,6 +294,9 @@ function ProcessWindowChange(NextWindow) {
 
     else if (NextWindow === "#admin") {
         wsEnqueue('XA');
+        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
+        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
+        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
     }
 
     else if ((NextWindow === "#wifi") || (NextWindow === "#home")) {

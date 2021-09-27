@@ -212,11 +212,11 @@ void c_WebMgr::init ()
 
     // Static Handlers
     webServer.serveStatic ("/UpdRecipe", LittleFS, "/UpdRecipe.json");
-    webServer.serveStatic ("/static", LittleFS, "/www/static").setCacheControl ("max-age=31536000");
+    // webServer.serveStatic ("/static", LittleFS, "/www/static").setCacheControl ("max-age=31536000");
     webServer.serveStatic ("/", LittleFS, "/www/").setDefaultFile ("index.html");
 
     // FS Debugging Handler
-    webServer.serveStatic ("/fs", LittleFS, "/" );
+    // webServer.serveStatic ("/fs", LittleFS, "/" );
 
     // if the client posts to the upload page
     webServer.on ("/upload", HTTP_POST | HTTP_PUT | HTTP_OPTIONS,
