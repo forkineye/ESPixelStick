@@ -689,7 +689,13 @@ void c_WebMgr::ProcessVseriesRequests (AsyncWebSocketClient* client)
         case '1':
         {
             // Diag screen is asking for real time output data
-            client->binary (OutputMgr.GetBufferAddress (), OutputMgr.GetBufferUsedSize ());
+            if (OutputMgr.GetBufferUsedSize ())
+            {
+                client->binary (OutputMgr.GetBufferAddress (), OutputMgr.GetBufferUsedSize ());
+            } else {
+                // Diagnostics tab needs something or it'll clog up the websocket queue with timeouts
+                client->binary ("0");
+            }
             break;
         }
 

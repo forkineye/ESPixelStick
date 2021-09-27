@@ -1251,7 +1251,7 @@ function wsProcessOutputQueue()
 
         // set WaitForResponseTimeMS to clear flag and try next message if response
         // isn't received.
-        let WaitForResponseTimeMS = 20000; // 20 seconds
+        let WaitForResponseTimeMS = 5000; // 5 seconds
 
         // Short WaitForResponseTimeMS for message types that don't generate a response.
         let UseShortDelay = ['T0', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'X6'].indexOf(OutputMessage.substr(0, 2));
