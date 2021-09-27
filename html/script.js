@@ -1035,7 +1035,7 @@ function wsConnect()
             // console.info("ws.onopen");
 
             // Start ping-pong heartbeat
-            wsPingPong();
+            //wsPingPong();
 
             $('#wserror').modal('hide');                               // Remove error modal
             $('.wsopt').empty();                                       // Clear out option data built from websockets
@@ -1065,7 +1065,7 @@ function wsConnect()
             // console.info("ws.onmessage: Start");
             if (typeof event.data === "string")
             {
-                // console.info("ws.onmessage: Received: " + event.data);
+                console.debug("WS RECV: " + event.data);
 
                 // Process "simple" X message format
                 // Valid "Simple" message types
@@ -1163,7 +1163,8 @@ function wsPingPong()
     clearTimeout(pongTimer);
 
     pingTimer = setTimeout(function () {
-        ws.send('XP');
+        //ws.send('XP');
+        wsEnqueue('XP');
     }, 2000);
     pongTimer = setTimeout(function () {
         wsReconnect();
@@ -1271,7 +1272,7 @@ function wsProcessOutputQueue()
         }, WaitForResponseTimeMS);
 
         //send it.
-        // console.info('WS sending ' + OutputMessage);
+        console.debug('WS SEND: ' + OutputMessage);
         ws.send(OutputMessage);
 
     } // message available to send
