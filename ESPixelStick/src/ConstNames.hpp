@@ -18,8 +18,6 @@
 *
 */
 
-extern const String CurrentConfigVersion;
-
 extern const String VERSION;
 extern const String BUILD_DATE;
 
