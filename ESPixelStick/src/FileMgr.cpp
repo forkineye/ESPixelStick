@@ -312,7 +312,7 @@ bool c_FileMgr::SaveConfigFile (const String& FileName, const char * FileData)
         // LOG_PORT.print (FileName);
         // LOG_PORT.printf( " saved %ul bytes.\n", file.size ());
 
-        // logcon (CfgFileMessagePrefix + String (F ("saved ")) + String (file.size ()) + F (" bytes."));
+        logcon (CfgFileMessagePrefix + String (F ("saved ")) + String (file.size ()) + F (" bytes."));
         file.close ();
 
         Response = true;

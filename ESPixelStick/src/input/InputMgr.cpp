@@ -402,7 +402,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             pInputChannelDrivers[ChannelIndex]->GetDriverName (DriverName);
             rebootNeeded |= pInputChannelDrivers[ChannelIndex]->isShutDownRebootNeeded();
             // DEBUG_V (String ("rebootNeeded: ") + String (rebootNeeded));
-            logcon (CN_stars + String(F(" Shutting Down '")) + DriverName + String(F("' on Input: ")) + String(ChannelIndex) + " " + CN_stars);
+            logcon (String(F("Shutting Down '")) + DriverName + String(F("' on Input: ")) + String(ChannelIndex));
 
             delete pInputChannelDrivers[ChannelIndex];
             // DEBUG_V ();
@@ -577,7 +577,7 @@ void c_InputMgr::LoadConfig ()
             // DEBUG_V ("");
         }))
     {
-        logcon (String (F ("EEEE Error loading Input Manager Config File. EEEE")));
+        logcon (CN_stars + String (F (" Error loading Input Manager Config File ")) + CN_stars);
 
         // create a config file with default values
         // DEBUG_V ("");
@@ -844,14 +844,15 @@ void c_InputMgr::SetConfig (const char * NewConfigData)
     if (true == FileMgr.SaveConfigFile (ConfigFileName, NewConfigData))
     {
         // DEBUG_V (String("NewConfigData: ") + NewConfigData);
-        logcon (CN_stars + String (F (" Saved Input Manager Config File. ")) + CN_stars);
+        // FileMgr logs for us
+        // logcon (CN_stars + String (F (" Saved Input Manager Config File. ")) + CN_stars);
 
         configLoadNeeded = true;
 
     } // end we saved the config
     else
     {
-        logcon (String (F ("EEEE Error Saving Input Manager Config File. EEEE")));
+        logcon (CN_stars + String (F (" Error Saving Input Manager Config File ")) + CN_stars);
     }
 
     // DEBUG_END;
