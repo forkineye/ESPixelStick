@@ -211,7 +211,7 @@ void c_WebMgr::init ()
 #endif // def USE_REST
 
     // Static Handlers
-    webServer.serveStatic ("/UpdRecipe", LittleFS, "/UpdRecipe.json").setCacheControl ("max-age=31536000");
+    webServer.serveStatic ("/UpdRecipe", LittleFS, "/UpdRecipe.json");
     webServer.serveStatic ("/static", LittleFS, "/www/static").setCacheControl ("max-age=31536000");
     webServer.serveStatic ("/", LittleFS, "/www/").setDefaultFile ("index.html");
 
