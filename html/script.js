@@ -1041,7 +1041,7 @@ function wsConnect()
             // console.info("ws.onopen");
 
             // Start ping-pong heartbeat
-            //wsPingPong();
+            wsPingPong();
 
             $('#wserror').modal('hide');                               // Remove error modal
             $('.wsopt').empty();                                       // Clear out option data built from websockets
@@ -1169,7 +1169,6 @@ function wsPingPong()
     clearTimeout(pongTimer);
 
     pingTimer = setTimeout(function () {
-        //ws.send('XP');
         wsEnqueue('XP');
     }, 2000);
     pongTimer = setTimeout(function () {
