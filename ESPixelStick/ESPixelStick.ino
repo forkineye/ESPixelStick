@@ -322,7 +322,7 @@ bool deserializeCore (JsonObject & json)
 
     do // once
     {
-        uint8_t TempVersion;
+        uint8_t TempVersion = 0;
         setFromJSON (TempVersion, json, CN_cfgver);
         if (TempVersion != CurrentConfigVersion)
         {

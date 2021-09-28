@@ -81,9 +81,10 @@ struct FSEQRangeEntry
 
 } __attribute__ ((packed));
 
+// https://github.com/FalconChristmas/fpp/blob/master/docs/FSEQ_Sequence_File_Format.txt
 struct FSEQHeader
 {
-    uint8_t  header[4];    // FSEQ
+    uint8_t  header[4];    // PSEQ
     uint16_t dataOffset;
     uint8_t  minorVersion;
     uint8_t  majorVersion;

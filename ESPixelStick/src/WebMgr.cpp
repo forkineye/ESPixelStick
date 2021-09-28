@@ -141,6 +141,8 @@ void c_WebMgr::init ()
         });
 
     // JSON Config Handler
+//TODO: This is only being used by FPP to get the hostname.  Will submit PR to change FPP and remove this
+//      https://github.com/FalconChristmas/fpp/blob/ae10a0b6fb1e32d1982c2296afac9af92e4da908/src/NetworkController.cpp#L248
     webServer.on ("/conf", HTTP_GET, [this](AsyncWebServerRequest* request)
         {
             // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));

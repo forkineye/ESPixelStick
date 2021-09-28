@@ -23,12 +23,10 @@
 #if defined(ARDUINO_ARCH_ESP8266)
 #	include <ESP8266WiFi.h>
 #	include <ESPAsyncTCP.h>
-#	include <ESP8266mDNS.h>
 #	include <ESPAsyncUDP.h>
 #elif defined(ARDUINO_ARCH_ESP32)
 #   include <AsyncTCP.h>
 #   include <AsyncUDP.h>
-#   include <ESPmDNS.h>
 #   include <WiFi.h>
 #else
 #	error "Unsupported CPU type"

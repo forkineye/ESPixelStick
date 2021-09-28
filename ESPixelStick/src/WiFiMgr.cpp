@@ -158,15 +158,24 @@ void c_WiFiMgr::connectWifi (const String & ssid, const String & passphrase)
     if (ResetWiFi)
         return;
 
-    // disconnect just in case
+    // Hostname must be set after the mode on ESP8266 and before on ESP32
 #ifdef ARDUINO_ARCH_ESP8266
     WiFi.disconnect ();
+
+    // Switch to station mode
+    WiFi.mode (WIFI_STA);
+    // DEBUG_V ("");
+
+    // DEBUG_V (String ("config->hostname: ") + config->hostname);
+    if (0 != config->hostname.length ())
+    {
+        // DEBUG_V (String ("Setting WiFi hostname: ") + config->hostname);
+        WiFi.hostname (config->hostname);
+    }
 #else
     WiFi.persistent (false);
     // DEBUG_V ("");
     WiFi.disconnect (true);
-#endif
-    // DEBUG_V ("");
 
     // DEBUG_V (String ("config->hostname: ") + config->hostname);
     if (0 != config->hostname.length ())
@@ -178,6 +187,7 @@ void c_WiFiMgr::connectWifi (const String & ssid, const String & passphrase)
     // Switch to station mode
     WiFi.mode (WIFI_STA);
     // DEBUG_V ("");
+#endif
 
     logcon (String(F ("WiFi Connecting to '")) +
                       ssid +
