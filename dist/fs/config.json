@@ -1,5 +1,6 @@
 {
   "cfgver": 1,
+  "init": true,
   "device": {
     "id": "ESPixelStick"
   },

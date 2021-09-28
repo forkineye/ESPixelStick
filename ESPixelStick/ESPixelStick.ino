@@ -83,10 +83,11 @@ const String VERSION = "4.x-dev";
 const String BUILD_DATE = String(__DATE__) + " - " + String(__TIME__);
 const uint8_t CurrentConfigVersion = 1;
 
-config_t config;                // Current configuration
-bool     reboot = false;        // Reboot flag
-uint32_t lastUpdate;            // Update timeout tracker
+config_t config;                    // Current configuration
+bool     reboot = false;            // Reboot flag
+uint32_t lastUpdate;                // Update timeout tracker
 bool     ResetWiFi = false;
+bool     InitializeConfig = false;  // Configuration initialization flag
 
 /////////////////////////////////////////////////////////
 //
@@ -187,6 +188,12 @@ bool validateConfig()
 #else
     String chipId = int64String (ESP.getEfuseMac (), HEX);
 #endif
+
+    // Initialization - Force save
+    if (InitializeConfig) {
+        logcon (CN_stars + String (F (" Configuration Initialization ")) + CN_stars);
+        configValid = false;
+    }
 
     // Device defaults
     if (!config.id.length ())
@@ -322,6 +329,8 @@ bool deserializeCore (JsonObject & json)
             //TODO: Add configuration update handler
             logcon (String (F ("Incorrect Config Version ID")));
         }
+
+        setFromJSON (InitializeConfig, json, CN_init);
 
         dsDevice  (json);
         FileMgr.SetConfig (json);

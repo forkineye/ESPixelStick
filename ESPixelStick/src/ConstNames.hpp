@@ -91,6 +91,7 @@ extern const char CN_HostName [];
 extern const char CN_hostname [];
 extern const char CN_id[];
 extern const char CN_Idle[];
+extern const char CN_init[];
 extern const char CN_interframetime[];
 extern const char CN_inv[];
 extern const char CN_ip[];
