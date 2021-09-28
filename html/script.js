@@ -1,5 +1,6 @@
 var wsOutputQueue = [];
 var wsBusy = false;
+var wsPaused = false;
 var wsOutputQueueTimer = null;
 var StatusRequestTimer = null;
 var FseqFileListRequestTimer = null;
@@ -16,6 +17,8 @@ var selector = [];
 var target = null;
 var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
+var pingTimer;
+var pongTimer;
 
 // Drawing canvas - move to diagnostics
 var canvas = document.getElementById("canvas");
@@ -250,6 +253,17 @@ $(function ()
     // Autoload tab based on URL hash
     let hash = window.location.hash;
     hash && $('ul.navbar-nav li a[href="' + hash + '"]').click();
+
+    // Halt pingpong if document is not visible
+    document.addEventListener("visibilitychange", function() {
+        if (document.hidden) {
+            clearTimeout(pingTimer);
+            clearTimeout(pongTimer);
+        } else {
+            wsReadyToSend();
+            wsPingPong();
+        }
+    });
 
     // triggers menu update
     RequestListOfFiles();
@@ -1016,8 +1030,6 @@ function int2ip(num)
 //
 ////////////////////////////////////////////////////
 // On websocket connect
-var pingTimer;
-var pongTimer;
 function wsConnect()
 {
     if ('WebSocket' in window)
@@ -1192,11 +1204,17 @@ function wsReconnect()
 // Websocket message queuer
 function wsEnqueue(message)
 {
-    // only send messages if the WS interface is up
+    // only send messages if the WS interface is up and document is visible
     if (ws.readyState !== 1)
     {
-        // console.info("WS is down. Discarding msg: " + message);
+        console.debug ("WS is down - Discarding msg: " + message);
     }
+
+    else if (wsPaused)
+    {
+        console.debug ("WS Paused - Discarding msg: " + message)
+    }
+
     else
     {
         wsOutputQueue.push(message);
@@ -1238,6 +1256,20 @@ function wsProcessOutputQueue()
         // The interface is NOT up. Flush the queue
         // console.log('wsProcessOutputQueue: WS Down. Flush');
         wsFlushAndHaltTheOutputQueue();
+    }
+
+    // Pause processing
+    else if (document.hidden)
+    {
+        console.debug (`WS Paused - Holding msg: ${wsOutputQueue}`);
+        wsPaused = true;
+        if (null !== wsOutputQueueTimer)
+        {
+            // stop the timer
+            clearTimeout(wsOutputQueueTimer);
+            wsOutputQueueTimer = null;
+            wsBusy = true;
+        }
     }
 
     //check if we are currently waiting for a response
@@ -1297,6 +1329,7 @@ function wsReadyToSend()
 
     // show we are ready to send the next message
     wsBusy = false;
+    wsPaused = false;
 
     //send next message
     wsProcessOutputQueue();
@@ -1386,8 +1419,6 @@ function ProcessReceivedJsonAdminMessage(data)
 // ProcessReceivedJsonStatusMessage
 function ProcessReceivedJsonStatusMessage(data)
 {
-    console.debug("Status: " + data);
-
     let JsonStat = JSON.parse(data);
     let Status  = JsonStat.status;
     let System  = Status.system;
