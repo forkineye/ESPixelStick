@@ -224,13 +224,16 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
                 continue;
             }
 
+            uint32_t AdjustedFilePosition = FilePosition + CurrentSparseRange.DataOffset;
+
+            // DEBUG_V (String ("                 FilePosition: ") + String (FilePosition));
+            // DEBUG_V (String ("         AdjustedFilePosition: ") + String (uint32_t(AdjustedFilePosition), HEX));
             // DEBUG_V (String ("           CurrentDestination: ") + String (uint32_t(CurrentDestination), HEX));
             // DEBUG_V (String ("            ActualBytesToRead: ") + String (ActualBytesToRead));
-            // DEBUG_V (String ("                 FilePosition: ") + String (FilePosition));
             size_t ActualBytesRead = FileMgr.ReadSdFile (FileHandleForFileBeingPlayed,
                                                          CurrentDestination, 
                                                          ActualBytesToRead, 
-                                                         FilePosition);
+                                                         AdjustedFilePosition);
             MaxBytesToRead -= ActualBytesRead;
             CurrentDestination += ActualBytesRead;
 
@@ -323,6 +326,7 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
         p_InputFPPRemotePlayFile->LastPlayedFrameId = 0;
         p_InputFPPRemotePlayFile->DataOffset = fsqHeader.dataOffset;
         p_InputFPPRemotePlayFile->ChannelsPerFrame = fsqHeader.channelCount;
+//        p_InputFPPRemotePlayFile->FrameStepTimeMS = max ((uint8_t)1, fsqHeader.stepTime) * 30;
         p_InputFPPRemotePlayFile->FrameStepTimeMS = max ((uint8_t)1, fsqHeader.stepTime);
         p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence = fsqHeader.TotalNumberOfFramesInSequence;
         p_InputFPPRemotePlayFile->CalculatePlayStartTime ();
