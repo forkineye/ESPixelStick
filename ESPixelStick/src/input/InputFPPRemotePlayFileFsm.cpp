@@ -207,33 +207,53 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
             break;
         }
 
-        uint32_t pos = p_InputFPPRemotePlayFile->DataOffset + (p_InputFPPRemotePlayFile->ChannelsPerFrame * CurrentFrame);
-        int      toRead = (p_InputFPPRemotePlayFile->ChannelsPerFrame > BufferSize) ? BufferSize : p_InputFPPRemotePlayFile->ChannelsPerFrame;
+        uint32_t FilePosition    = p_InputFPPRemotePlayFile->DataOffset + (p_InputFPPRemotePlayFile->ChannelsPerFrame * CurrentFrame);
+        size_t   MaxBytesToRead  = (p_InputFPPRemotePlayFile->ChannelsPerFrame > BufferSize) ? BufferSize : p_InputFPPRemotePlayFile->ChannelsPerFrame;
+        byte* CurrentDestination = Buffer;
+        // DEBUG_V (String ("               MaxBytesToRead: ") + String (MaxBytesToRead));
 
-        //LOG_PORT.printf_P( PSTR("New Frame!   Old: %d     New:  %d      Offset: %d\n)", fseqCurrentFrameId, frame, FileOffsetToCurrentHeaderRecord);
         p_InputFPPRemotePlayFile->LastPlayedFrameId = CurrentFrame;
 
-        //LOG_PORT.printf_P ( PSTR("%d / %d / %d / %d / %d\n"), dataOffset, channelsPerFrame, outputBufferSize, toRead, pos);
-        size_t bytesRead = FileMgr.ReadSdFile (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed, Buffer, toRead, pos);
-
-        // DEBUG_V (String ("      pos: ") + String (pos));
-        // DEBUG_V (String ("   toRead: ") + String (toRead));
-        // DEBUG_V (String ("bytesRead: ") + String (bytesRead));
-
-        if (bytesRead != toRead)
+        size_t TotalBytesRead = 0;
+        for (auto & CurrentSparseRange : SparseRanges)
         {
-            // DEBUG_V (String ("                          pos: ") + String (pos));
-            // DEBUG_V (String ("                       toRead: ") + String (toRead));
-            // DEBUG_V (String ("                    bytesRead: ") + String (bytesRead));
-            // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence));
-            // DEBUG_V (String ("                 CurrentFrame: ") + String (CurrentFrame));
-
-            if (0 != p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed)
+            size_t ActualBytesToRead = min (MaxBytesToRead, CurrentSparseRange.ChannelCount);
+            if (0 == ActualBytesToRead)
             {
-                logcon (F ("File Playback Failed to read enough data"));
-                Stop ();
+                // no data to read for this range
+                continue;
+            }
+
+            // DEBUG_V (String ("           CurrentDestination: ") + String (uint32_t(CurrentDestination), HEX));
+            // DEBUG_V (String ("            ActualBytesToRead: ") + String (ActualBytesToRead));
+            // DEBUG_V (String ("                 FilePosition: ") + String (FilePosition));
+            size_t ActualBytesRead = FileMgr.ReadSdFile (FileHandleForFileBeingPlayed,
+                                                         CurrentDestination, 
+                                                         ActualBytesToRead, 
+                                                         FilePosition);
+            MaxBytesToRead -= ActualBytesRead;
+            CurrentDestination += ActualBytesRead;
+
+            if (ActualBytesRead != ActualBytesToRead)
+            {
+                // DEBUG_V (String ("               TotalBytesRead: ") + String (TotalBytesRead));
+                // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence));
+                // DEBUG_V (String ("                 CurrentFrame: ") + String (CurrentFrame));
+
+                if (0 != FileHandleForFileBeingPlayed)
+                {
+                    logcon (F ("File Playback Failed to read enough data"));
+                    Stop ();
+                }
             }
         }
+
+        // DEBUG_V (String ("      DataOffset: ") + String (p_InputFPPRemotePlayFile->DataOffset));
+        // DEBUG_V (String ("      BufferSize: ") + String (BufferSize));
+        // DEBUG_V (String ("ChannelsPerFrame: ") + String (p_InputFPPRemotePlayFile->ChannelsPerFrame));
+        // DEBUG_V (String ("    FilePosition: ") + String (FilePosition));
+        // DEBUG_V (String ("  MaxBytesToRead: ") + String (MaxBytesToRead));
+        // DEBUG_V (String ("  TotalBytesRead: ") + String (TotalBytesRead));
 
         InputMgr.RestartBlankTimer (p_InputFPPRemotePlayFile->GetInputChannelId ());
 
@@ -266,22 +286,21 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
         // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
 
         FSEQHeader fsqHeader;
-        p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed = 0;
+        FileHandleForFileBeingPlayed = 0;
         if (false == FileMgr.OpenSdFile (p_InputFPPRemotePlayFile->PlayItemName,
-            c_FileMgr::FileMode::FileRead,
-            p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed))
+                                         c_FileMgr::FileMode::FileRead,
+                                         FileHandleForFileBeingPlayed))
         {
             logcon (String (F ("StartPlaying:: Could not open file: filename: '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
             Stop ();
             break;
         }
 
-        // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed));
-
-        size_t BytesRead = FileMgr.ReadSdFile (
-            p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed,
-            (uint8_t*)&fsqHeader,
-            sizeof (FSEQHeader), 0);
+        // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (FileHandleForFileBeingPlayed));
+        p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed = FileHandleForFileBeingPlayed;
+        size_t BytesRead = FileMgr.ReadSdFile (FileHandleForFileBeingPlayed,
+                                               (uint8_t*)&fsqHeader,
+                                               sizeof (FSEQHeader), 0);
         // DEBUG_V (String ("BytesRead: ") + String (BytesRead));
         // DEBUG_V (String ("sizeof (fsqHeader): ") + String (sizeof (fsqHeader)));
 
@@ -308,13 +327,60 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
         p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence = fsqHeader.TotalNumberOfFramesInSequence;
         p_InputFPPRemotePlayFile->CalculatePlayStartTime ();
 
+        memset ((void*)&SparseRanges, 0x00, sizeof (SparseRanges));
+        if (fsqHeader.numSparseRanges)
+        {
+            if (MAX_NUM_SPARSE_RANGES < fsqHeader.numSparseRanges)
+            {
+                logcon (String (F ("StartPlaying:: Could not start. ")) + p_InputFPPRemotePlayFile->PlayItemName + F (" Too many sparse ranges defined."));
+                Stop ();
+                break;
+            }
+
+            FSEQRangeEntry FseqRanges[MAX_NUM_SPARSE_RANGES];
+
+            // DEBUG_V (String ("          numCompressedBlocks: ") + String (fsqHeader.numCompressedBlocks));
+
+            FileMgr.ReadSdFile (FileHandleForFileBeingPlayed, 
+                               (uint8_t*)&FseqRanges[0],
+                               sizeof (FseqRanges),
+                               fsqHeader.numCompressedBlocks * 8 + sizeof(fsqHeader));
+
+            // DEBUG_V (String ("              numSparseRanges: ") + String (fsqHeader.numSparseRanges));
+            uint32_t SparseRangeIndex = 0;
+            for (auto& CurrentSparseRange : SparseRanges)
+            {
+                // DEBUG_V (String ("           Sparse Range Index: ") + String (SparseRangeIndex));
+                if (SparseRangeIndex >= fsqHeader.numSparseRanges)
+                {
+                    // DEBUG_V (String ("No Sparse Range Data for this entry "));
+                    ++SparseRangeIndex;
+                    continue;
+                }
+
+                CurrentSparseRange.DataOffset   = read24 (FseqRanges[SparseRangeIndex].Start);
+                CurrentSparseRange.ChannelCount = read24 (FseqRanges[SparseRangeIndex].Length);
+
+                // DEBUG_V (String ("                 ChannelCount: ") + String (CurrentSparseRange.ChannelCount));
+                // DEBUG_V (String ("                   DataOffset: 0x") + String (CurrentSparseRange.DataOffset, HEX));
+
+                ++SparseRangeIndex;
+            }
+        }
+        else
+        {
+            SparseRanges[0].DataOffset = 0;
+            SparseRanges[0].ChannelCount = fsqHeader.channelCount;
+        }
+
         // DEBUG_V (String ("            LastPlayedFrameId: ") + String (p_InputFPPRemotePlayFile->LastPlayedFrameId));
+        // DEBUG_V (String ("          numCompressedBlocks: ") + String (fsqHeader.numCompressedBlocks));
         // DEBUG_V (String ("                   DataOffset: ") + String (p_InputFPPRemotePlayFile->DataOffset));
-        // DEBUG_V (String ("             ChannelsPerFrame: ") + String (p_InputFPPRemotePlayFile->ChannelsPerFrame));
+        // DEBUG_V (String ("       Total ChannelsPerFrame: ") + String (p_InputFPPRemotePlayFile->ChannelsPerFrame));
         // DEBUG_V (String ("              FrameStepTimeMS: ") + String (p_InputFPPRemotePlayFile->FrameStepTimeMS));
         // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence));
         // DEBUG_V (String ("                  StartTimeMS: ") + String (p_InputFPPRemotePlayFile->StartTimeMS));
-        // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
+        // DEBUG_V (String ("           RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
 
         logcon (String (F ("Start Playing:: FileName: '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
 
@@ -359,7 +425,7 @@ void fsm_PlayFile_state_PlayingFile::Stop (void)
     // DEBUG_START;
 
     logcon (String (F ("Stop Playing::  FileName: '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
-    // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed));
+    // DEBUG_V (String (" FileHandleForFileBeingPlayed: ") + String (FileHandleForFileBeingPlayed));
     // DEBUG_V (String ("            LastPlayedFrameId: ") + String (p_InputFPPRemotePlayFile->LastPlayedFrameId));
     // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence));
     // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);

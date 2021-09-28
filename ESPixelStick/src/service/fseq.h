@@ -98,3 +98,41 @@ struct FSEQHeader
     uint8_t  flags2;
     uint64_t id;
 } __attribute__ ((packed));
+
+
+inline uint64_t read64 (uint8_t* buf, int idx) {
+    uint32_t r1 = (int)(buf[idx + 3]) << 24;
+    r1 |= (int)(buf[idx + 2]) << 16;
+    r1 |= (int)(buf[idx + 1]) << 8;
+    r1 |= (int)(buf[idx]);
+
+    uint32_t r2 = (int)(buf[idx + 7]) << 24;
+    r2 |= (int)(buf[idx + 6]) << 16;
+    r2 |= (int)(buf[idx + 5]) << 8;
+    r2 |= (int)(buf[idx + 4]);
+    uint64_t r = r2;
+    r <<= 32;
+    r |= r1;
+    return r;
+}
+//-----------------------------------------------------------------------------
+inline uint32_t read32 (uint8_t* buf, int idx) {
+    uint32_t r = (int)(buf[idx + 3]) << 24;
+    r |= (int)(buf[idx + 2]) << 16;
+    r |= (int)(buf[idx + 1]) << 8;
+    r |= (int)(buf[idx]);
+    return r;
+}
+//-----------------------------------------------------------------------------
+inline uint32_t read24 (uint8_t* pData)
+{
+    return ((uint32_t)(pData[0]) |
+        (uint32_t)(pData[1]) << 8 |
+        (uint32_t)(pData[2]) << 16);
+} // read24
+//-----------------------------------------------------------------------------
+inline uint16_t read16 (uint8_t* pData)
+{
+    return ((uint16_t)(pData[0]) |
+        (uint16_t)(pData[1]) << 8);
+} // read16
