@@ -248,7 +248,6 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
             }
         }
 
-
         // DEBUG_V (String ("      DataOffset: ") + String (p_InputFPPRemotePlayFile->DataOffset));
         // DEBUG_V (String ("      BufferSize: ") + String (BufferSize));
         // DEBUG_V (String ("ChannelsPerFrame: ") + String (p_InputFPPRemotePlayFile->ChannelsPerFrame));
