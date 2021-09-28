@@ -662,9 +662,9 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
 
     jsonResponse[CN_HostName]           = config.hostname;
     jsonResponse[F ("HostDescription")] = config.id;
-    jsonResponse[F ("Platform")]        = CN_ESPixelStick;
+    jsonResponse[CN_Platform]           = CN_ESPixelStick;
     jsonResponse[F ("Variant")]         = FPP_VARIANT_NAME;
-    jsonResponse[F ("Mode")]            = (true == AllowedToRemotePlayFiles()) ?  F("remote") : F("bridge");
+    jsonResponse[F ("Mode")]            = (true == AllowedToRemotePlayFiles()) ? CN_remote : CN_bridge;
     jsonResponse[CN_Version]            = VERSION + String (":") + BUILD_DATE;
 
     const char* version = VERSION.c_str ();
@@ -677,7 +677,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     jsonResponseUtilization[F ("MemoryFree")] = ESP.getFreeHeap ();
     jsonResponseUtilization[F ("Uptime")]     = millis ();
 
-    jsonResponse[F ("rssi")] = WiFi.RSSI ();
+    jsonResponse[CN_rssi] = WiFi.RSSI ();
     JsonArray jsonResponseIpAddresses = jsonResponse.createNestedArray (F ("IPS"));
     jsonResponseIpAddresses.add(WiFi.localIP ().toString ());
 
@@ -755,7 +755,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
                 else
                 {
                     JsonData[CN_mode] = 1;
-                    JsonData[CN_mode_name] = F ("bridge");
+                    JsonData[CN_mode_name] = CN_bridge;
                 }
             }
             else
