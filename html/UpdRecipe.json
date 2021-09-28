@@ -12,7 +12,7 @@
 		{ "Divide": { "Full path to element to Divide": 0.0 } }
 	],
 
-	"Target Versions": {
+	"TargetVersions": {
 
 		"0": {
 			"List of": "actions"

@@ -163,44 +163,6 @@ void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t Curr
 } // ReadNextFrame
 
 //-----------------------------------------------------------------------------
-uint64_t read64 (uint8_t* buf, int idx) {
-    uint32_t r1 = (int)(buf[idx + 3]) << 24;
-    r1 |= (int)(buf[idx + 2]) << 16;
-    r1 |= (int)(buf[idx + 1]) << 8;
-    r1 |= (int)(buf[idx]);
-
-    uint32_t r2 = (int)(buf[idx + 7]) << 24;
-    r2 |= (int)(buf[idx + 6]) << 16;
-    r2 |= (int)(buf[idx + 5]) << 8;
-    r2 |= (int)(buf[idx + 4]);
-    uint64_t r = r2;
-    r <<= 32;
-    r |= r1;
-    return r;
-}
-//-----------------------------------------------------------------------------
-uint32_t read32 (uint8_t* buf, int idx) {
-    uint32_t r = (int)(buf[idx + 3]) << 24;
-    r |= (int)(buf[idx + 2]) << 16;
-    r |= (int)(buf[idx + 1]) << 8;
-    r |= (int)(buf[idx]);
-    return r;
-}
-//-----------------------------------------------------------------------------
-uint32_t read24 (uint8_t* pData)
-{
-    return ((uint32_t)(pData[0]) |
-            (uint32_t)(pData[1]) << 8 |
-            (uint32_t)(pData[2]) << 16);
-} // read24
-//-----------------------------------------------------------------------------
-uint16_t read16 (uint8_t* pData)
-{
-    return ((uint16_t)(pData[0]) |
-            (uint16_t)(pData[1]) << 8);
-} // read16
-
-//-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
 {
     // DEBUG_START;
@@ -334,7 +296,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
                 // DEBUG_V ("Sync::Open");
                 // DEBUG_V (String ("   FileName: ") + FileName);
                 // DEBUG_V (String ("    FrameId: ") + FrameId);
-                StartPlaying (FileName, FrameId);
+                // StartPlaying (FileName, FrameId);
                 break;
             }
 
@@ -700,9 +662,9 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
 
     jsonResponse[CN_HostName]           = config.hostname;
     jsonResponse[F ("HostDescription")] = config.id;
-    jsonResponse[F ("Platform")]        = CN_ESPixelStick;
+    jsonResponse[CN_Platform]           = CN_ESPixelStick;
     jsonResponse[F ("Variant")]         = FPP_VARIANT_NAME;
-    jsonResponse[F ("Mode")]            = (true == AllowedToRemotePlayFiles()) ?  F("remote") : F("bridge");
+    jsonResponse[F ("Mode")]            = (true == AllowedToRemotePlayFiles()) ? CN_remote : CN_bridge;
     jsonResponse[CN_Version]            = VERSION + String (":") + BUILD_DATE;
 
     const char* version = VERSION.c_str ();
@@ -715,7 +677,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     jsonResponseUtilization[F ("MemoryFree")] = ESP.getFreeHeap ();
     jsonResponseUtilization[F ("Uptime")]     = millis ();
 
-    jsonResponse[F ("rssi")] = WiFi.RSSI ();
+    jsonResponse[CN_rssi] = WiFi.RSSI ();
     JsonArray jsonResponseIpAddresses = jsonResponse.createNestedArray (F ("IPS"));
     jsonResponseIpAddresses.add(WiFi.localIP ().toString ());
 
@@ -793,7 +755,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
                 else
                 {
                     JsonData[CN_mode] = 1;
-                    JsonData[CN_mode_name] = F ("bridge");
+                    JsonData[CN_mode_name] = CN_bridge;
                 }
             }
             else
