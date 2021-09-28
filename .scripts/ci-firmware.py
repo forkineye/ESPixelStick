@@ -13,7 +13,7 @@ with open("dist/firmware/firmware.json", "r+") as file:
     if RELEASE in os.environ:
         data["release"] = f"ESPixelStick {version}"
     else:
-        data["release"] = f"ESPixelStick Build #{version} (untested)"
+        data["release"] = f"ESPixelStick {version} (untested)"
     file.seek(0)
     json.dump(data, file)
-    file.truncate()     
+    file.truncate()
