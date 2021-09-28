@@ -141,13 +141,13 @@ void c_WebMgr::init ()
         });
 
     // JSON Config Handler
-    // webServer.on ("/conf", HTTP_GET, [this](AsyncWebServerRequest* request)
-    //     {
-    //         // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));
-    //         this->GetConfiguration ();
-    //         request->send (200, "text/json", WebSocketFrameCollectionBuffer);
-    //         // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));
-    //     });
+    webServer.on ("/conf", HTTP_GET, [this](AsyncWebServerRequest* request)
+        {
+            // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));
+            this->GetConfiguration ();
+            request->send (200, "text/json", WebSocketFrameCollectionBuffer);
+            // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));
+        });
 
     // Firmware upload handler
     webServer.on ("/updatefw", HTTP_POST, [](AsyncWebServerRequest* request)
@@ -545,6 +545,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
 
 //-----------------------------------------------------------------------------
 /// Process simple format 'X' messages
+/// XA and XJ messages are used by FPP
 void c_WebMgr::ProcessXseriesRequests (AsyncWebSocketClient * client)
 {
     // DEBUG_START;
@@ -713,6 +714,7 @@ void c_WebMgr::ProcessVseriesRequests (AsyncWebSocketClient* client)
 
 //-----------------------------------------------------------------------------
 /// Process simple format 'G' messages
+/// G2 messages are used by xLights and FPP
 void c_WebMgr::ProcessGseriesRequests (AsyncWebSocketClient* client)
 {
     // DEBUG_START;
@@ -777,6 +779,8 @@ void c_WebMgr::ProcessReceivedJsonMessage (DynamicJsonDocument & webJsonDoc, Asy
 } // ProcessReceivedJsonMessage
 
 //-----------------------------------------------------------------------------
+/// Process JSON command messages
+/// These messages are used by xLights and FPP
 void c_WebMgr::processCmd (AsyncWebSocketClient * client, JsonObject & jsonCmd)
 {
     // DEBUG_START;
