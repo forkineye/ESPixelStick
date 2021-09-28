@@ -408,7 +408,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
             String DriverName;
             pOutputChannelDrivers[ChannelIndex]->GetDriverName (DriverName);
-            logcon (CN_stars + String (F (" Shutting Down '")) + DriverName + String (F ("' on Output: ")) + String (ChannelIndex) + " " + CN_stars);
+            logcon (String (F (" Shutting Down '")) + DriverName + String (F ("' on Output: ")) + String (ChannelIndex));
             delete pOutputChannelDrivers[ChannelIndex];
             pOutputChannelDrivers[ChannelIndex] = nullptr;
             // DEBUG_V ("");
@@ -640,7 +640,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
         // DEBUG_V ("");
         String sDriverName;
         pOutputChannelDrivers[ChannelIndex]->GetDriverName (sDriverName);
-        logcon (String (CN_stars) + " '" + sDriverName + F ("' Initialization for Output: ") + String (ChannelIndex) + " " + CN_stars);
+        logcon ("'" + sDriverName + F ("' Initialization for Output: ") + String (ChannelIndex));
         if (StartDriver)
         {
             pOutputChannelDrivers[ChannelIndex]->Begin ();
@@ -678,7 +678,7 @@ void c_OutputMgr::LoadConfig ()
             // DEBUG_V ("");
         }))
     {
-        logcon (String (F ("EEEE Error loading Output Manager Config File. EEEE")));
+        logcon (CN_stars + String (F (" Error loading Output Manager Config File ")) + CN_stars);
 
         // create a config file with default values
         // DEBUG_V ("");
@@ -717,7 +717,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
         JsonObject OutputChannelMgrData = jsonConfig[CN_output_config];
         // DEBUG_V ("");
 
-        String TempVersion;
+        uint8_t TempVersion;
         setFromJSON (TempVersion, OutputChannelMgrData, CN_cfgver);
 
         // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
@@ -833,11 +833,12 @@ void c_OutputMgr::SetConfig (const char * ConfigData)
     if (true == FileMgr.SaveConfigFile (ConfigFileName, ConfigData))
     {
         ConfigLoadNeeded = true;
-        logcon (CN_stars + String (F (" Saved Output Manager Config File. ")) + CN_stars);
+        // FileMgr logs for us
+        // logcon (CN_stars + String (F (" Saved Output Manager Config File. ")) + CN_stars);
     } // end we got a config and it was good
     else
     {
-        logcon (String (F ("EEEE Error Saving Output Manager Config File. EEEE")));
+        logcon (CN_stars + String (F (" Error Saving Output Manager Config File ")) + CN_stars);
     }
 
     // DEBUG_END;

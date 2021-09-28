@@ -78,6 +78,7 @@ bool    deserializeCore        (JsonObject & json);
 bool    dsDevice               (JsonObject & json);
 bool    dsNetwork              (JsonObject & json);
 extern  bool reboot;
+extern  bool InitializeConfig;
 extern  bool ResetWiFi;
 static const String ConfigFileName = "/config.json";
 
@@ -108,3 +109,4 @@ bool setFromJSON (T& OutValue, J& Json, N Name)
 }
 
 extern config_t config;
+extern const uint8_t CurrentConfigVersion;

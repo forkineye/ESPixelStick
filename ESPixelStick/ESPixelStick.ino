@@ -81,12 +81,13 @@ const String VERSION = "4.x-dev";
 #endif
 
 const String BUILD_DATE = String(__DATE__) + " - " + String(__TIME__);
-const String CurrentConfigVersion = "1";
+const uint8_t CurrentConfigVersion = 1;
 
-config_t config;                // Current configuration
-bool     reboot = false;        // Reboot flag
-uint32_t lastUpdate;            // Update timeout tracker
+config_t config;                    // Current configuration
+bool     reboot = false;            // Reboot flag
+uint32_t lastUpdate;                // Update timeout tracker
 bool     ResetWiFi = false;
+bool     InitializeConfig = false;  // Configuration initialization flag
 
 /////////////////////////////////////////////////////////
 //
@@ -126,11 +127,12 @@ void setup()
 #endif
 
     // Dump version and build information
-    logcon (String(CN_ESPixelStick) + " v" + VERSION + "(" + BUILD_DATE + ")");
+    LOG_PORT.println ();
+    logcon (String(CN_ESPixelStick) + " v" + VERSION + " (" + BUILD_DATE + ")");
 #ifdef ARDUINO_ARCH_ESP8266
-    logcon (String (F ("ESP Version: ")) + ESP.getFullVersion ());
+    logcon (ESP.getFullVersion ());
 #else
-    logcon (String(F ("ESP Version: ")) + ESP.getSdkVersion ());
+    logcon (ESP.getSdkVersion ());
 #endif
 
     // DEBUG_V ("");
@@ -187,6 +189,12 @@ bool validateConfig()
     String chipId = int64String (ESP.getEfuseMac (), HEX);
 #endif
 
+    // Initialization - Force save
+    if (InitializeConfig) {
+        logcon (CN_stars + String (F (" Configuration Initialization ")) + CN_stars);
+        configValid = false;
+    }
+
     // Device defaults
     if (!config.id.length ())
     {
@@ -213,21 +221,15 @@ bool validateConfig()
 bool dsDevice(JsonObject & json)
 {
     // DEBUG_START;
+    // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
+    // PrettyPrint (json, "dsDevice");
 
     bool ConfigChanged = false;
     if (json.containsKey(CN_device))
     {
         JsonObject JsonDeviceConfig = json[CN_device];
 
-        String TempVersion;
-        setFromJSON (TempVersion, JsonDeviceConfig, CN_cfgver);
-        if (TempVersion != CurrentConfigVersion)
-        {
-            //TODO: Add configuration update handler
-            logcon (String (F ("Incorrect Config Version ID")));
-        }
-
-//TODO: Add configuration upgrade handling - move cfgver to root level
+//TODO: Add configuration upgrade handling - cfgver moved to root level
 
         ConfigChanged |= setFromJSON (config.id,         JsonDeviceConfig, CN_id);
         ConfigChanged |= setFromJSON (config.BlankDelay, JsonDeviceConfig, CN_blanktime);
@@ -320,6 +322,16 @@ bool deserializeCore (JsonObject & json)
 
     do // once
     {
+        uint8_t TempVersion;
+        setFromJSON (TempVersion, json, CN_cfgver);
+        if (TempVersion != CurrentConfigVersion)
+        {
+            //TODO: Add configuration update handler
+            logcon (String (F ("Incorrect Config Version ID")));
+        }
+
+        setFromJSON (InitializeConfig, json, CN_init);
+
         dsDevice  (json);
         FileMgr.SetConfig (json);
         ResetWiFi = dsNetwork (json);
@@ -387,10 +399,10 @@ void GetConfig (JsonObject & json)
     // DEBUG_START;
 
     // Config Version
+    json[CN_cfgver] = CurrentConfigVersion;
 
     // Device
     JsonObject device    = json.createNestedObject(CN_device);
-    device[CN_cfgver]    = CurrentConfigVersion;
     device[CN_id]        = config.id;
     device[CN_blanktime] = config.BlankDelay;
 

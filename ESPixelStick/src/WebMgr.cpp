@@ -211,12 +211,12 @@ void c_WebMgr::init ()
 #endif // def USE_REST
 
     // Static Handlers
-    webServer.serveStatic ("/UpdRecipe", LittleFS, "/UpdRecipe.json").setCacheControl ("max-age=31536000");
-    webServer.serveStatic ("/static", LittleFS, "/www/static").setCacheControl ("max-age=31536000");
+    webServer.serveStatic ("/UpdRecipe", LittleFS, "/UpdRecipe.json");
+    // webServer.serveStatic ("/static", LittleFS, "/www/static").setCacheControl ("max-age=31536000");
     webServer.serveStatic ("/", LittleFS, "/www/").setDefaultFile ("index.html");
 
     // FS Debugging Handler
-    webServer.serveStatic ("/fs", LittleFS, "/" );
+    // webServer.serveStatic ("/fs", LittleFS, "/" );
 
     // if the client posts to the upload page
     webServer.on ("/upload", HTTP_POST | HTTP_PUT | HTTP_OPTIONS,
@@ -689,7 +689,13 @@ void c_WebMgr::ProcessVseriesRequests (AsyncWebSocketClient* client)
         case '1':
         {
             // Diag screen is asking for real time output data
-            client->binary (OutputMgr.GetBufferAddress (), OutputMgr.GetBufferUsedSize ());
+            if (OutputMgr.GetBufferUsedSize ())
+            {
+                client->binary (OutputMgr.GetBufferAddress (), OutputMgr.GetBufferUsedSize ());
+            } else {
+                // Diagnostics tab needs something or it'll clog up the websocket queue with timeouts
+                client->binary ("0");
+            }
             break;
         }
 

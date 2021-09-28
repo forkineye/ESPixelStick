@@ -90,6 +90,7 @@ const char CN_HostName                 [] = "HostName";
 const char CN_hostname                 [] = "hostname";
 const char CN_id                       [] = "id";
 const char CN_Idle                     [] = "Idle";
+const char CN_init                     [] = "init";
 const char CN_interframetime           [] = "interframetime";
 const char CN_inv                      [] = "inv";
 const char CN_ip                       [] = "ip";

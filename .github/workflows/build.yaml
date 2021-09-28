@@ -28,11 +28,10 @@ jobs:
           mkdir firmware
           echo "CI-$GITHUB_RUN_ID" > firmware/VERSION
 
-      - name: Tagged release
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Tagged version release
+        if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          echo "${{ github.ref }}" > firmware/VERSION
-          echo "ESPS_RELEASE" >> $GITHUB_ENV
+          echo "${GITHUB_REF#refs/*/v}" > firmware/VERSION
 
       - name: Create secrets.h
         run: |
@@ -69,8 +68,9 @@ jobs:
         run: |
           pio run -e ${{ matrix.target }}
           mkdir -p firmware/${{ matrix.chip }}
+          mkdir -p debug/${{ matrix.chip }}
           mv .pio/build/${{ matrix.target }}/firmware.bin firmware/${{ matrix.chip }}/${{ matrix.target }}-app.bin
-          mv .pio/build/${{ matrix.target }}/firmware.elf firmware/${{ matrix.chip }}/${{ matrix.target }}.elf
+          mv .pio/build/${{ matrix.target }}/firmware.elf debug/${{ matrix.chip }}/${{ matrix.target }}.elf
           if [ "$chip" = "esp32" ]; then
           mv .pio/build/${{ matrix.target }}/partitions.bin firmware/esp32/${{ matrix.target }}-partitions.bin
           cp ~/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/bin/bootloader_dio_40m.bin firmware/esp32/${{ matrix.target }}-bootloader.bin
@@ -83,25 +83,23 @@ jobs:
           name: Firmware Binaries
           path: firmware
 
+      - name: Upload Debugging Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Debug Files
+          path: debug
 
   package:
     needs: firmware
     runs-on: ubuntu-latest
     steps:
-      # Set Release Archive Filename
-      # - run: |
-      #   if [ -z "$ESPS_RELEASE" ]; then
-      #   echo "ARCHFILE=ESPixelStick_CI-$GITHUB_RUN_ID.zip" >> $GITHUB_ENV
-      #   else
-      #   echo "ARCHFILE=ESPixelStick_Firmware-$ESPS_RELEASE.zip" >> $GITHUB_ENV
-      #   fi
-
       # Checkout ESPixelStick
       - uses: actions/checkout@v2
 
-      - name: Tagged release
-        if: startsWith(github.ref, 'refs/tags/')
-        run: echo "ESPS_RELEASE" >> $GITHUB_ENV
+      - name: Set release flag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo "ESPS_RELEASE=''" >> $GITHUB_ENV
 
       # Download firmware binary artifact
       - uses: actions/download-artifact@v2
@@ -120,20 +118,18 @@ jobs:
         run: |
           gulp
           gulp md
+          if [ -z "$ESPS_RELEASE" ]; then
           gulp ci
+          fi
           mv ESPixelStick/data/* dist/fs
 
       - name: Set release archive filename
-        run: echo "ARCHFILE=ESPixelStick_Firmware-`cat dist/firmware/VERSION`.zip" >> $GITHUB_ENV
+        run: |
+          _VERSION=$(< dist/firmware/VERSION)
+          echo "ARCHFILE=ESPixelStick_Firmware-${_VERSION}.zip" >> $GITHUB_ENV
 
       - name: Update firmware.json
         run: python .scripts/ci-firmware.py
-
-      - name: Move CI specific release files into place
-        run: |
-          if [ -z "$ESPS_RELEASE" ]; then
-          mv .ci/firmware.json dist/firmware/firmware.json
-          fi
 
       - name: Create Release Archive
         run: zip -r ../${{ env.ARCHFILE }} *
@@ -145,8 +141,18 @@ jobs:
           name: Release Archive
           path: ${{ env.ARCHFILE }}
 
-      # - name: Release
-      #   uses: softprops/action-gh-release@v1
-      #   if: startsWith(github.ref, 'refs/tags/')
-      #   with:
-      #     files: ${{ env.ARCHFILE }}
+  release:
+    needs: package
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Download Package
+        uses: actions/download-artifact@v2
+        with:
+          name: Release Archive
+      - name: Create Draft Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: true
+          files: ESPixelStick_Firmware*.zip

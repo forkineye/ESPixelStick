@@ -232,7 +232,7 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
         fs::File file = LittleFS.open (FileName.c_str (), "r");
         if (!file)
         {
-            logcon (String (CN_stars) + CfgFileMessagePrefix + String (F ("Could not open file for reading.")) + CN_stars);
+            logcon (String (CN_stars) + CfgFileMessagePrefix + String (F (" Could not open file for reading ")) + CN_stars);
             break;
         }
 
@@ -307,12 +307,8 @@ bool c_FileMgr::SaveConfigFile (const String& FileName, const char * FileData)
 
         file.close ();
 
-        // file = LittleFS.open (FileName.c_str (), "r");
-        // LOG_PORT.print (CN_Configuration_File_colon);
-        // LOG_PORT.print (FileName);
-        // LOG_PORT.printf( " saved %ul bytes.\n", file.size ());
-
-        // logcon (CfgFileMessagePrefix + String (F ("saved ")) + String (file.size ()) + F (" bytes."));
+        file = LittleFS.open (FileName.c_str (), "r");
+        logcon (CfgFileMessagePrefix + String (F ("saved ")) + String (file.size ()) + F (" bytes."));
         file.close ();
 
         Response = true;
@@ -349,7 +345,7 @@ bool c_FileMgr::ReadConfigFile (const String& FileName, String& FileData)
     fs::File file = LittleFS.open (FileName.c_str (), CN_r);
     if (file)
     {
-        // Supress this for now, may add it back later
+        // Suppress this for now, may add it back later
         //logcon (CfgFileMessagePrefix + String (F ("reading ")) + String (file.size()) + F (" bytes."));
 
         // DEBUG_V (String("File '") + FileName + "' is open.");
@@ -441,7 +437,7 @@ bool c_FileMgr::ReadConfigFile (const String & FileName, byte * FileData, size_t
             break;
         }
 
-        // Supress this for now, may add it back later
+        // Suppress this for now, may add it back later
         // Done at interrupt level. Cant use Strings
         // LOG_PORT.print   (FileName);
         // LOG_PORT.print   (" reading ");

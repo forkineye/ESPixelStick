@@ -30,7 +30,9 @@ $.fn.modal.Constructor.DEFAULTS.keyboard = false;
 // lets get started
 wsConnect();
 
-wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
+// console.log ('************before enqueue');
+// wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
+// console.log ('************after enqueue');
 
 // jQuery doc ready
 $(function ()
@@ -131,6 +133,7 @@ $(function ()
         clearStream();
     });
 
+//TODO: This should pull a configuration from the stick and not the web interface as web data could be invalid
     $('#backupconfig').click(function ()
     {
         ExtractNetworkConfigFromHtmlPage();
@@ -291,6 +294,9 @@ function ProcessWindowChange(NextWindow) {
 
     else if (NextWindow === "#admin") {
         wsEnqueue('XA');
+        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
+        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
+        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
     }
 
     else if ((NextWindow === "#wifi") || (NextWindow === "#home")) {
@@ -1065,7 +1071,7 @@ function wsConnect()
             // console.info("ws.onmessage: Start");
             if (typeof event.data === "string")
             {
-                // console.info("ws.onmessage: Received: " + event.data);
+                console.debug("WS RECV: " + event.data);
 
                 // Process "simple" X message format
                 // Valid "Simple" message types
@@ -1163,7 +1169,7 @@ function wsPingPong()
     clearTimeout(pongTimer);
 
     pingTimer = setTimeout(function () {
-        ws.send('XP');
+        wsEnqueue('XP');
     }, 2000);
     pongTimer = setTimeout(function () {
         wsReconnect();
@@ -1250,7 +1256,7 @@ function wsProcessOutputQueue()
 
         // set WaitForResponseTimeMS to clear flag and try next message if response
         // isn't received.
-        let WaitForResponseTimeMS = 20000; // 20 seconds
+        let WaitForResponseTimeMS = 5000; // 5 seconds
 
         // Short WaitForResponseTimeMS for message types that don't generate a response.
         let UseShortDelay = ['T0', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'X6'].indexOf(OutputMessage.substr(0, 2));
@@ -1271,7 +1277,7 @@ function wsProcessOutputQueue()
         }, WaitForResponseTimeMS);
 
         //send it.
-        // console.info('WS sending ' + OutputMessage);
+        console.debug('WS SEND: ' + OutputMessage);
         ws.send(OutputMessage);
 
     } // message available to send

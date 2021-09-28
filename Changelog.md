@@ -1,12 +1,12 @@
 
 # Changelog
 
-### 4.0-dev (in progress)
+### 4.0.0-beta1
 
 - Compiled against [Arduino Core 3.0.2](https://github.com/esp8266/Arduino/releases/tag/3.0.2) for ESP8266 platform.
 - Compiled against [Arduino Core 2.0.0](https://github.com/espressif/arduino-esp32/releases/tag/2.0.0) for ESP32 platform.
 - ***ESP-01 modules are no longer supported***. Version 4.0 requires 4MB of flash and ESP-01 modules only have 1MB of flash. For the ESPixelStick V1 or V2, 3.2 is the latest version you can load.
-- Requires local upload to controller. OTA update from 3.x via EFU is not supported due to the new flash layout.  Upgrades to future 4.x version from 4.0 however will be supported.
+- Requires local upload to controller. OTA update from 3.x via EFU is not supported due to the new flash layout.  Upgrades to future 4.x versions from 4.0.0 final however will be supported.
 - Complete refactor of the code to allow easier implementation of extensions.
 - Pixel and Serial code has been unified and all output modes are now selectable at runtime.
 - Added support for the ESP32 platform.
@@ -16,6 +16,8 @@
 - Added FPP remote support (requires board with SD card support).
 - Added Relay output support (8 channels, DIY hardware solution with GPIO mapping).
 - Added PCA9685 Servo output support (16 channels, requires PCA9685 module).
+- Added WS2801 support (ESP32 only)
+- Added APA-102 support (ESP32 only)
 
 ### 3.2
 
