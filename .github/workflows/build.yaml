@@ -1,5 +1,7 @@
 name: ESPixelStick CI
 on: [push, pull_request]
+env:
+  VERSION_BASE: '4.0'
 jobs:
   firmware:
     strategy:
@@ -26,7 +28,7 @@ jobs:
       - name: Create version file
         run: |
           mkdir firmware
-          echo "CI-$GITHUB_RUN_ID" > firmware/VERSION
+          echo "${VERSION_BASE}-ci (${GITHUB_RUN_ID})" > firmware/VERSION
 
       - name: Tagged version release
         if: startsWith(github.ref, 'refs/tags/v')
