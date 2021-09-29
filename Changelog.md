@@ -1,6 +1,16 @@
 
 # Changelog
 
+### 4.0-beta2
+- Fixed issue saving when hostname defind in ESPSFlashTool [Issue #360](https://github.com/forkineye/ESPixelStick/issues/360)
+- Websocket stability fixes
+- FPP / fseq processing fixes
+- Fixed hostname issue for ESP8266
+- Fixed cvgver not valid issue
+- Added project links to Admin page
+- More serial logging cleanup
+- Switch back to X.Y versioning
+
 ### 4.0.0-beta1
 
 - Compiled against [Arduino Core 3.0.2](https://github.com/esp8266/Arduino/releases/tag/3.0.2) for ESP8266 platform.
