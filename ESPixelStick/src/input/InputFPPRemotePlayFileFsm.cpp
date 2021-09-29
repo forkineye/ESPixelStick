@@ -215,7 +215,7 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
         p_InputFPPRemotePlayFile->LastPlayedFrameId = CurrentFrame;
 
         size_t TotalBytesRead = 0;
-        for (auto & CurrentSparseRange : SparseRanges)
+        for (auto & CurrentSparseRange : p_InputFPPRemotePlayFile->SparseRanges)
         {
             size_t ActualBytesToRead = min (MaxBytesToRead, CurrentSparseRange.ChannelCount);
             if (0 == ActualBytesToRead)
@@ -230,7 +230,7 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
             // DEBUG_V (String ("         AdjustedFilePosition: ") + String (uint32_t(AdjustedFilePosition), HEX));
             // DEBUG_V (String ("           CurrentDestination: ") + String (uint32_t(CurrentDestination), HEX));
             // DEBUG_V (String ("            ActualBytesToRead: ") + String (ActualBytesToRead));
-            size_t ActualBytesRead = FileMgr.ReadSdFile (FileHandleForFileBeingPlayed,
+            size_t ActualBytesRead = FileMgr.ReadSdFile (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed,
                                                          CurrentDestination, 
                                                          ActualBytesToRead, 
                                                          AdjustedFilePosition);
@@ -243,7 +243,7 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
                 // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence));
                 // DEBUG_V (String ("                 CurrentFrame: ") + String (CurrentFrame));
 
-                if (0 != FileHandleForFileBeingPlayed)
+                if (0 != p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed)
                 {
                     logcon (F ("File Playback Failed to read enough data"));
                     Stop ();
@@ -288,101 +288,16 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
         --p_InputFPPRemotePlayFile->RemainingPlayCount;
         // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
 
-        FSEQHeader fsqHeader;
-        FileHandleForFileBeingPlayed = 0;
-        if (false == FileMgr.OpenSdFile (p_InputFPPRemotePlayFile->PlayItemName,
-                                         c_FileMgr::FileMode::FileRead,
-                                         FileHandleForFileBeingPlayed))
+        if (!p_InputFPPRemotePlayFile->ParseFseqFile ())
         {
-            logcon (String (F ("StartPlaying:: Could not open file: filename: '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
             Stop ();
             break;
         }
-
-        // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (FileHandleForFileBeingPlayed));
-        p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed = FileHandleForFileBeingPlayed;
-        size_t BytesRead = FileMgr.ReadSdFile (FileHandleForFileBeingPlayed,
-                                               (uint8_t*)&fsqHeader,
-                                               sizeof (FSEQHeader), 0);
-        // DEBUG_V (String ("BytesRead: ") + String (BytesRead));
-        // DEBUG_V (String ("sizeof (fsqHeader): ") + String (sizeof (fsqHeader)));
-
-        if (BytesRead != sizeof (fsqHeader))
-        {
-            logcon (String (F ("StartPlaying:: Could not read FSEQ header: filename: '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
-            Stop ();
-            break;
-        }
-        // DEBUG_V ("");
-
-        if (fsqHeader.majorVersion != 2 || fsqHeader.compressionType != 0)
-        {
-            logcon (String (F ("StartPlaying:: Could not start. ")) + p_InputFPPRemotePlayFile->PlayItemName + F (" is not a v2 uncompressed sequence"));
-            Stop ();
-            break;
-        }
-        // DEBUG_V ("");
 
         p_InputFPPRemotePlayFile->LastPlayedFrameId = 0;
-        p_InputFPPRemotePlayFile->DataOffset = fsqHeader.dataOffset;
-        p_InputFPPRemotePlayFile->ChannelsPerFrame = fsqHeader.channelCount;
-//        p_InputFPPRemotePlayFile->FrameStepTimeMS = max ((uint8_t)1, fsqHeader.stepTime) * 30;
-        p_InputFPPRemotePlayFile->FrameStepTimeMS = max ((uint8_t)1, fsqHeader.stepTime);
-        p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence = fsqHeader.TotalNumberOfFramesInSequence;
         p_InputFPPRemotePlayFile->CalculatePlayStartTime ();
 
-        memset ((void*)&SparseRanges, 0x00, sizeof (SparseRanges));
-        if (fsqHeader.numSparseRanges)
-        {
-            if (MAX_NUM_SPARSE_RANGES < fsqHeader.numSparseRanges)
-            {
-                logcon (String (F ("StartPlaying:: Could not start. ")) + p_InputFPPRemotePlayFile->PlayItemName + F (" Too many sparse ranges defined."));
-                Stop ();
-                break;
-            }
-
-            FSEQRangeEntry FseqRanges[MAX_NUM_SPARSE_RANGES];
-
-            // DEBUG_V (String ("          numCompressedBlocks: ") + String (fsqHeader.numCompressedBlocks));
-
-            FileMgr.ReadSdFile (FileHandleForFileBeingPlayed, 
-                               (uint8_t*)&FseqRanges[0],
-                               sizeof (FseqRanges),
-                               fsqHeader.numCompressedBlocks * 8 + sizeof(fsqHeader));
-
-            // DEBUG_V (String ("              numSparseRanges: ") + String (fsqHeader.numSparseRanges));
-            uint32_t SparseRangeIndex = 0;
-            for (auto& CurrentSparseRange : SparseRanges)
-            {
-                // DEBUG_V (String ("           Sparse Range Index: ") + String (SparseRangeIndex));
-                if (SparseRangeIndex >= fsqHeader.numSparseRanges)
-                {
-                    // DEBUG_V (String ("No Sparse Range Data for this entry "));
-                    ++SparseRangeIndex;
-                    continue;
-                }
-
-                CurrentSparseRange.DataOffset   = read24 (FseqRanges[SparseRangeIndex].Start);
-                CurrentSparseRange.ChannelCount = read24 (FseqRanges[SparseRangeIndex].Length);
-
-                // DEBUG_V (String ("                 ChannelCount: ") + String (CurrentSparseRange.ChannelCount));
-                // DEBUG_V (String ("                   DataOffset: 0x") + String (CurrentSparseRange.DataOffset, HEX));
-
-                ++SparseRangeIndex;
-            }
-        }
-        else
-        {
-            SparseRanges[0].DataOffset = 0;
-            SparseRanges[0].ChannelCount = fsqHeader.channelCount;
-        }
-
         // DEBUG_V (String ("            LastPlayedFrameId: ") + String (p_InputFPPRemotePlayFile->LastPlayedFrameId));
-        // DEBUG_V (String ("          numCompressedBlocks: ") + String (fsqHeader.numCompressedBlocks));
-        // DEBUG_V (String ("                   DataOffset: ") + String (p_InputFPPRemotePlayFile->DataOffset));
-        // DEBUG_V (String ("       Total ChannelsPerFrame: ") + String (p_InputFPPRemotePlayFile->ChannelsPerFrame));
-        // DEBUG_V (String ("              FrameStepTimeMS: ") + String (p_InputFPPRemotePlayFile->FrameStepTimeMS));
-        // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence));
         // DEBUG_V (String ("                  StartTimeMS: ") + String (p_InputFPPRemotePlayFile->StartTimeMS));
         // DEBUG_V (String ("           RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
 

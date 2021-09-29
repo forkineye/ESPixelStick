@@ -406,17 +406,17 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
     DynamicJsonDocument JsonDoc (4*1024);
     JsonObject JsonData = JsonDoc.to<JsonObject> ();
 
-    FSEQHeader fsqHeader;
+    FSEQRawHeader fsqHeader;
     FileMgr.ReadSdFile (fseq, (byte*)&fsqHeader, sizeof (fsqHeader), 0);
 
     JsonData[F ("Name")]            = fname;
     JsonData[CN_Version]            = String (fsqHeader.majorVersion) + "." + String (fsqHeader.minorVersion);
-    JsonData[F ("ID")]              = int64String (fsqHeader.id);
+    JsonData[F ("ID")]              = int64String (read64 (fsqHeader.id, 0));
     JsonData[F ("StepTime")]        = String (fsqHeader.stepTime);
-    JsonData[F ("NumFrames")]       = String (fsqHeader.TotalNumberOfFramesInSequence);
+    JsonData[F ("NumFrames")]       = String (read32 (fsqHeader.TotalNumberOfFramesInSequence, 0));
     JsonData[F ("CompressionType")] = fsqHeader.compressionType;
 
-    uint32_t maxChannel = fsqHeader.channelCount;
+    uint32_t maxChannel = read32 (fsqHeader.channelCount, 0);
 
     if (0 != fsqHeader.numSparseRanges)
     {
@@ -424,10 +424,10 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
 
         maxChannel = 0;
 
-        uint8_t* RangeDataBuffer = (uint8_t*)malloc (6 * fsqHeader.numSparseRanges);
-        FSEQRangeEntry* CurrentFSEQRangeEntry = (FSEQRangeEntry*)RangeDataBuffer;
+        uint8_t* RangeDataBuffer = (uint8_t*)malloc (sizeof(FSEQRawRangeEntry) * fsqHeader.numSparseRanges);
+        FSEQRawRangeEntry* CurrentFSEQRangeEntry = (FSEQRawRangeEntry*)RangeDataBuffer;
 
-        FileMgr.ReadSdFile (fseq, RangeDataBuffer, sizeof (FSEQRangeEntry), fsqHeader.numCompressedBlocks * 8 + 32);
+        FileMgr.ReadSdFile (fseq, RangeDataBuffer, sizeof (FSEQRawRangeEntry), fsqHeader.numCompressedBlocks * 8 + 32);
 
         for (int CurrentRangeIndex = 0;
              CurrentRangeIndex < fsqHeader.numSparseRanges;
@@ -450,10 +450,10 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
     }
 
     JsonData[F ("MaxChannel")]   = String (maxChannel);
-    JsonData[F ("ChannelCount")] = String (fsqHeader.channelCount);
+    JsonData[F ("ChannelCount")] = String (read32 (fsqHeader.channelCount,0));
 
-    uint32_t FileOffsetToCurrentHeaderRecord = read16 ((uint8_t*)&fsqHeader.headerLen);
-    uint32_t FileOffsetToStartOfSequenceData = read16 ((uint8_t*)&fsqHeader.dataOffset); // DataOffset
+    uint32_t FileOffsetToCurrentHeaderRecord = read16 (fsqHeader.VariableHdrOffset);
+    uint32_t FileOffsetToStartOfSequenceData = read16 (fsqHeader.dataOffset); // DataOffset
 
     // DEBUG_V (String ("FileOffsetToCurrentHeaderRecord: ") + String (FileOffsetToCurrentHeaderRecord));
     // DEBUG_V (String ("FileOffsetToStartOfSequenceData: ") + String (FileOffsetToStartOfSequenceData));
@@ -462,16 +462,16 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
     {
         JsonArray  JsonDataHeaders = JsonData.createNestedArray (F ("variableHeaders"));
 
-        char FSEQVariableDataHeaderBuffer[sizeof (FSEQVariableDataHeader) + 1];
+        char FSEQVariableDataHeaderBuffer[sizeof (FSEQRawVariableDataHeader) + 1];
         memset ((uint8_t*)FSEQVariableDataHeaderBuffer, 0x00, sizeof (FSEQVariableDataHeaderBuffer));
-        FSEQVariableDataHeader* pCurrentVariableHeader = (FSEQVariableDataHeader*)FSEQVariableDataHeaderBuffer;
+        FSEQRawVariableDataHeader* pCurrentVariableHeader = (FSEQRawVariableDataHeader*)FSEQVariableDataHeaderBuffer;
 
         while (FileOffsetToCurrentHeaderRecord < FileOffsetToStartOfSequenceData)
         {
-            FileMgr.ReadSdFile (fseq, (byte*)FSEQVariableDataHeaderBuffer, sizeof (FSEQVariableDataHeader), FileOffsetToCurrentHeaderRecord);
+            FileMgr.ReadSdFile (fseq, (byte*)FSEQVariableDataHeaderBuffer, sizeof (FSEQRawVariableDataHeader), FileOffsetToCurrentHeaderRecord);
 
             int VariableDataHeaderTotalLength = read16 ((uint8_t*)&(pCurrentVariableHeader->length));
-            int VariableDataHeaderDataLength  = VariableDataHeaderTotalLength - sizeof (FSEQVariableDataHeader);
+            int VariableDataHeaderDataLength  = VariableDataHeaderTotalLength - sizeof (FSEQRawVariableDataHeader);
 
             String HeaderTypeCode (pCurrentVariableHeader->type);
 
@@ -488,7 +488,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
                 free (VariableDataHeaderDataBuffer);
             }
 
-            FileOffsetToCurrentHeaderRecord += VariableDataHeaderTotalLength + sizeof (FSEQVariableDataHeader);
+            FileOffsetToCurrentHeaderRecord += VariableDataHeaderTotalLength + sizeof (FSEQRawVariableDataHeader);
         } // while there are headers to process
     } // there are headers to process
 

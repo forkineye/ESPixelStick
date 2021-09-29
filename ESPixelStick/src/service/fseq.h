@@ -66,28 +66,58 @@ typedef union
     uint8_t raw[301];
 } FPPMultiSyncPacket;
 
-struct FSEQVariableDataHeader
+struct FSEQRawVariableDataHeader
+{
+    uint8_t    length[2];
+    char       type[2];
+    uint8_t    data;
+};
+
+struct FSEQParsedVariableDataHeader
 {
     uint16_t    length;
     char        type[2];
-//  uint8_t     data[???];
+    String      Data;
+};
 
-} __attribute__ ((packed));
-
-struct FSEQRangeEntry
+struct FSEQRawRangeEntry
 {
     uint8_t Start[3];
     uint8_t Length[3];
 
 } __attribute__ ((packed));
 
-struct FSEQHeader
+struct FSEQParsedRangeEntry
 {
-    uint8_t  header[4];    // FSEQ
+    uint32_t DataOffset;
+    uint32_t ChannelCount;
+};
+
+struct FSEQRawHeader
+{
+    uint8_t  header[4];    // PSEQ
+    uint8_t  dataOffset[2];
+    uint8_t  minorVersion;
+    uint8_t  majorVersion;
+    uint8_t  VariableHdrOffset[2];
+    uint8_t  channelCount[4];
+    uint8_t  TotalNumberOfFramesInSequence[4];
+    uint8_t  stepTime;
+    uint8_t  flags;
+    uint8_t  compressionType;
+    uint8_t  numCompressedBlocks;
+    uint8_t  numSparseRanges;
+    uint8_t  flags2;
+    uint8_t  id[8];
+} __attribute__ ((packed));
+
+struct FSEQParsedHeader
+{
+    uint8_t  header[4];    // PSEQ
     uint16_t dataOffset;
     uint8_t  minorVersion;
     uint8_t  majorVersion;
-    uint16_t headerLen;
+    uint16_t VariableHdrOffset;
     uint32_t channelCount;
     uint32_t TotalNumberOfFramesInSequence;
     uint8_t  stepTime;
@@ -97,8 +127,7 @@ struct FSEQHeader
     uint8_t  numSparseRanges;
     uint8_t  flags2;
     uint64_t id;
-} __attribute__ ((packed));
-
+};
 
 inline uint64_t read64 (uint8_t* buf, int idx) {
     uint32_t r1 = (int)(buf[idx + 3]) << 24;

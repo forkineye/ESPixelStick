@@ -22,6 +22,7 @@
 #include "../ESPixelStick.h"
 #include "InputFPPRemotePlayItem.hpp"
 #include "InputFPPRemotePlayFileFsm.hpp"
+#include "../service/fseq.h"
 
 class c_InputFPPRemotePlayFile : public c_InputFPPRemotePlayItem
 {
@@ -65,8 +66,12 @@ private:
     uint32_t          SyncCount = 0;
     uint32_t          SyncAdjustmentCount = 0;
 
+#define MAX_NUM_SPARSE_RANGES 5
+    FSEQParsedRangeEntry SparseRanges[MAX_NUM_SPARSE_RANGES];
+
     uint32_t          CalculateFrameId (time_t now, int32_t SyncOffsetMS = 0);
     void              CalculatePlayStartTime ();
+    bool              ParseFseqFile ();
 
 #define TimeOffsetStep 0.00001
 
