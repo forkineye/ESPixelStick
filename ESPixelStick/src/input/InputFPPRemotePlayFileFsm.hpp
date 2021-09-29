@@ -89,11 +89,6 @@ private:
         uint32_t ChannelCount;
     };
 
-#define MAX_NUM_SPARSE_RANGES 5
-    SparseRange SparseRanges[MAX_NUM_SPARSE_RANGES];
-    c_FileMgr::FileId FileHandleForFileBeingPlayed = 0;
-
-
 }; // fsm_PlayFile_state_PlayingFile
 
 /*****************************************************************************/

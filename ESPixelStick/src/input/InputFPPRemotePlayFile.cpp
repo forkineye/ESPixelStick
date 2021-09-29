@@ -160,3 +160,132 @@ void c_InputFPPRemotePlayFile::CalculatePlayStartTime ()
     // DEBUG_END;
 
 } // CalculatePlayStartTime
+
+//-----------------------------------------------------------------------------
+bool c_InputFPPRemotePlayFile::ParseFseqFile ()
+{
+    // DEBUG_START;
+    bool Response = false;
+
+    do // once
+    {
+        FSEQRawHeader    fsqRawHeader;
+        FSEQParsedHeader fsqParsedHeader;
+
+        FileHandleForFileBeingPlayed = 0;
+        if (false == FileMgr.OpenSdFile (PlayItemName,
+                                         c_FileMgr::FileMode::FileRead,
+                                         FileHandleForFileBeingPlayed))
+        {
+            logcon (String (F ("ParseFseqFile:: Could not open file: filename: '")) + PlayItemName + "'");
+            break;
+        }
+
+        // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (FileHandleForFileBeingPlayed));
+        size_t BytesRead = FileMgr.ReadSdFile (FileHandleForFileBeingPlayed,
+                                               (uint8_t*)&fsqRawHeader,
+                                               sizeof (fsqRawHeader), 0);
+        // DEBUG_V (String ("                    BytesRead: ") + String (BytesRead));
+        // DEBUG_V (String ("        sizeof (fsqRawHeader): ") + String (sizeof (fsqRawHeader)));
+
+        if (BytesRead != sizeof (fsqRawHeader))
+        {
+            logcon (String (F ("ParseFseqFile:: Could not read FSEQ header: filename: '")) + PlayItemName + "'");
+            break;
+        }
+
+        // DEBUG_V ("Convert Raw Header into a processed header");
+        memcpy (fsqParsedHeader.header, fsqRawHeader.header, sizeof (fsqParsedHeader.header));
+        fsqParsedHeader.dataOffset                    = read16 (fsqRawHeader.dataOffset);
+        fsqParsedHeader.minorVersion                  = fsqRawHeader.minorVersion;
+        fsqParsedHeader.majorVersion                  = fsqRawHeader.majorVersion;
+        fsqParsedHeader.VariableHdrOffset             = read16 (fsqRawHeader.VariableHdrOffset);
+        fsqParsedHeader.channelCount                  = read32 (fsqRawHeader.channelCount, 0);
+        fsqParsedHeader.TotalNumberOfFramesInSequence = read32 (fsqRawHeader.TotalNumberOfFramesInSequence, 0);
+        fsqParsedHeader.stepTime                      = fsqRawHeader.stepTime;
+        fsqParsedHeader.flags                         = fsqRawHeader.flags;
+        fsqParsedHeader.compressionType               = fsqRawHeader.compressionType;
+        fsqParsedHeader.numCompressedBlocks           = fsqRawHeader.numCompressedBlocks;
+        fsqParsedHeader.numSparseRanges               = fsqRawHeader.numSparseRanges;
+        fsqParsedHeader.flags2                        = fsqRawHeader.flags2;
+        fsqParsedHeader.id                            = read64 (fsqRawHeader.id, 0);
+
+        // DEBUG_V (String ("                   dataOffset: ") + String (fsqParsedHeader.dataOffset));
+        // DEBUG_V (String ("                 minorVersion: ") + String (fsqParsedHeader.minorVersion));
+        // DEBUG_V (String ("                 majorVersion: ") + String (fsqParsedHeader.majorVersion));
+        // DEBUG_V (String ("            VariableHdrOffset: ") + String (fsqParsedHeader.VariableHdrOffset));
+        // DEBUG_V (String ("                 channelCount: ") + String (fsqParsedHeader.channelCount));
+        // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (fsqParsedHeader.TotalNumberOfFramesInSequence));
+        // DEBUG_V (String ("                     stepTime: ") + String (fsqParsedHeader.stepTime));
+        // DEBUG_V (String ("                        flags: ") + String (fsqParsedHeader.flags));
+        // DEBUG_V (String ("              compressionType: 0x") + String (fsqParsedHeader.compressionType, HEX));
+        // DEBUG_V (String ("          numCompressedBlocks: ") + String (fsqParsedHeader.numCompressedBlocks));
+        // DEBUG_V (String ("              numSparseRanges: ") + String (fsqParsedHeader.numSparseRanges));
+        // DEBUG_V (String ("                       flags2: ") + String (fsqParsedHeader.flags2));
+        // DEBUG_V (String ("                           id: 0x") + String ((unsigned long)fsqParsedHeader.id, HEX));
+
+        if (fsqParsedHeader.majorVersion != 2 || fsqParsedHeader.compressionType != 0)
+        {
+            logcon (String (F ("ParseFseqFile:: Could not start. ")) + PlayItemName + F (" is not a v2 uncompressed sequence"));
+            break;
+        }
+        // DEBUG_V ("");
+
+        // FrameStepTimeMS = max ((uint8_t)1, fsqParsedHeader.stepTime) * 30;
+        FrameStepTimeMS = max ((uint8_t)1, fsqParsedHeader.stepTime);
+        TotalNumberOfFramesInSequence = fsqParsedHeader.TotalNumberOfFramesInSequence;
+
+        DataOffset = fsqParsedHeader.dataOffset;
+        ChannelsPerFrame = fsqParsedHeader.channelCount;
+
+        memset ((void*)&SparseRanges, 0x00, sizeof (SparseRanges));
+        if (fsqParsedHeader.numSparseRanges)
+        {
+            if (MAX_NUM_SPARSE_RANGES < fsqParsedHeader.numSparseRanges)
+            {
+                logcon (String (F ("ParseFseqFile:: Could not start. ")) + PlayItemName + F (" Too many sparse ranges defined in file header."));
+                break;
+            }
+
+            FSEQRawRangeEntry FseqRawRanges[MAX_NUM_SPARSE_RANGES];
+
+            FileMgr.ReadSdFile (FileHandleForFileBeingPlayed,
+                                (uint8_t*)&FseqRawRanges[0],
+                                sizeof (FseqRawRanges),
+                                fsqParsedHeader.numCompressedBlocks * 8 + sizeof (FseqRawRanges));
+
+            uint32_t SparseRangeIndex = 0;
+            for (auto & CurrentSparseRange : SparseRanges)
+            {
+                // DEBUG_V (String ("           Sparse Range Index: ") + String (SparseRangeIndex));
+                if (SparseRangeIndex >= fsqParsedHeader.numSparseRanges)
+                {
+                    // DEBUG_V (String ("No Sparse Range Data for this entry "));
+                    ++SparseRangeIndex;
+                    continue;
+                }
+
+                CurrentSparseRange.DataOffset   = read24 (FseqRawRanges[SparseRangeIndex].Start);
+                CurrentSparseRange.ChannelCount = read24 (FseqRawRanges[SparseRangeIndex].Length);
+
+                // DEBUG_V (String ("            RangeChannelCount: ")   + String (CurrentSparseRange.ChannelCount));
+                // DEBUG_V (String ("              RangeDataOffset: 0x") + String (CurrentSparseRange.DataOffset, HEX));
+
+                ++SparseRangeIndex;
+            }
+        }
+        else
+        {
+            SparseRanges[0].DataOffset = 0;
+            SparseRanges[0].ChannelCount = fsqParsedHeader.channelCount;
+        }
+
+        Response = true;
+
+    } while (false);
+
+    // DEBUG_END;
+
+    return Response;
+
+} // ParseFseqFile
