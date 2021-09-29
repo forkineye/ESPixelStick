@@ -89,8 +89,8 @@ def print_simple(h):
 
   sp = f" from {h['sp']}" if "sp" in h else ""
 
-  print(f"{h['file']}: V{h['ver_maj']}.{h['ver_min']}{sparse}{compressed} "
-        f"{h['channels']} channels with {h['frames']} frames @ {h['step']}ms{sp}")
+  print(f"{h['file']}:\n  V{h['ver_maj']}.{h['ver_min']}{sparse}{compressed} "
+        f"{h['channels']} channels with {h['frames']} frames @ {h['step']}ms{sp}\n")
 
 # Verbose Print
 def print_verbose(h):
@@ -114,7 +114,12 @@ def print_verbose(h):
     print(f"Reserved:       {h['reserved']}")
 
   elif h['ver_maj'] == 2:
-    print(f"Compression:    {h['compression']}")
+    ctype = 'unknown'
+    if h['compression'] == 1:
+      ctype = 'zstd'
+    elif h['compression'] == 2:
+      ctype = 'zlib'
+    print(f"Compression:    {h['compression']} ({ctype})")
     print(f"Comp Blocks:    {h['num_comp']}")
     print(f"Sparse Ranges:  {h['num_sparse']}")
     print(f"FLags 2:        {h['flags2']}")
