@@ -130,6 +130,8 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
     sprintf (buf, "%02d:%02d", minRem, secsTot);
     JsonStatus[CN_time_remaining] = buf;
 
+    JsonStatus[CN_errors] = LastFailedPlayStatusMsg;
+
     // DEBUG_END;
 
 } // GetStatus
@@ -172,12 +174,13 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
         FSEQRawHeader    fsqRawHeader;
         FSEQParsedHeader fsqParsedHeader;
 
-        FileHandleForFileBeingPlayed = 0;
+        FileHandleForFileBeingPlayed = -1;
         if (false == FileMgr.OpenSdFile (PlayItemName,
                                          c_FileMgr::FileMode::FileRead,
                                          FileHandleForFileBeingPlayed))
         {
-            logcon (String (F ("ParseFseqFile:: Could not open file: filename: '")) + PlayItemName + "'");
+            LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not open file: filename: '")) + PlayItemName + "'");
+            logcon (LastFailedPlayStatusMsg);
             break;
         }
 
@@ -190,7 +193,8 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 
         if (BytesRead != sizeof (fsqRawHeader))
         {
-            logcon (String (F ("ParseFseqFile:: Could not read FSEQ header: filename: '")) + PlayItemName + "'");
+            LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not read FSEQ header: filename: '")) + PlayItemName + "'");
+            logcon (LastFailedPlayStatusMsg);
             break;
         }
 
@@ -226,10 +230,18 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 
         if (fsqParsedHeader.majorVersion != 2 || fsqParsedHeader.compressionType != 0)
         {
-            logcon (String (F ("ParseFseqFile:: Could not start. ")) + PlayItemName + F (" is not a v2 uncompressed sequence"));
+            LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not start. ")) + PlayItemName + F (" is not a v2 uncompressed sequence"));
+            logcon (LastFailedPlayStatusMsg);
             break;
         }
         // DEBUG_V ("");
+
+        if ((fsqParsedHeader.TotalNumberOfFramesInSequence * fsqParsedHeader.channelCount) > FileMgr.GetSdFileSize (FileHandleForFileBeingPlayed))
+        {
+            LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not start. ")) + PlayItemName + F (" File does not contain enough data to meet the Stated Channel Count * Number of Frames value."));
+            logcon (LastFailedPlayStatusMsg);
+            break;
+        }
 
         // FrameStepTimeMS = max ((uint8_t)1, fsqParsedHeader.stepTime) * 30;
         FrameStepTimeMS = max ((uint8_t)1, fsqParsedHeader.stepTime);
@@ -243,7 +255,8 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
         {
             if (MAX_NUM_SPARSE_RANGES < fsqParsedHeader.numSparseRanges)
             {
-                logcon (String (F ("ParseFseqFile:: Could not start. ")) + PlayItemName + F (" Too many sparse ranges defined in file header."));
+                LastFailedPlayStatusMsg =  (String (F ("ParseFseqFile:: Could not start. ")) + PlayItemName + F (" Too many sparse ranges defined in file header."));
+                logcon (LastFailedPlayStatusMsg);
                 break;
             }
 
@@ -283,6 +296,8 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
         Response = true;
 
     } while (false);
+
+    // Caller must close the file since it is used to play the channel data.
 
     // DEBUG_END;
 

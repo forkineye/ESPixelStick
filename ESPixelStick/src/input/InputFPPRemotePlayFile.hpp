@@ -73,6 +73,8 @@ private:
     void              CalculatePlayStartTime ();
     bool              ParseFseqFile ();
 
+    String            LastFailedPlayStatusMsg;
+
 #define TimeOffsetStep 0.00001
 
 }; // c_InputFPPRemotePlayFile
