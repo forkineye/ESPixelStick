@@ -264,9 +264,6 @@ $(function ()
             wsPingPong();
         }
     });
-
-    // triggers menu update
-    RequestListOfFiles();
 });
 
 function ProcessLocalConfig(data)
@@ -321,6 +318,7 @@ function ProcessWindowChange(NextWindow) {
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
+        RequestListOfFiles();
     }
 
     else if (NextWindow === "#filemanagement") {
