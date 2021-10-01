@@ -21,7 +21,7 @@ These are the web source files which must be placed in ```data/www``` and upload
 
 ## Development
 
-When developing, check the comments at the top and bottom of ```index.html``` to use local sources. You'll need to use a local web server due to the ajax page loading. Python includes a simple one, just run ```python -m http.server``` (python 3) in this directory and connect to ```http://localhost:8000/?target=x.x.x.x```  where ```x.x.x.x``` is a device with the ESPixelStick firmware to use for the websocket connection.
+When developing, check the comments at the top and bottom of ```index.html``` to use local sources. You'll need to use a local web server due to the ajax page loading. Python includes a simple one, just run ```python -m http.server 8888``` (python 3) in this directory and connect to ```http://localhost:8888/?target=x.x.x.x```  where ```x.x.x.x``` is a device with the ESPixelStick firmware to use for the websocket connection.
 
 ## 3rd Party Software
 
