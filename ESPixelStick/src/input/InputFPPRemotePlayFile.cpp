@@ -214,19 +214,22 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
         fsqParsedHeader.flags2                        = fsqRawHeader.flags2;
         fsqParsedHeader.id                            = read64 (fsqRawHeader.id, 0);
 
-        // DEBUG_V (String ("                   dataOffset: ") + String (fsqParsedHeader.dataOffset));
-        // DEBUG_V (String ("                 minorVersion: ") + String (fsqParsedHeader.minorVersion));
-        // DEBUG_V (String ("                 majorVersion: ") + String (fsqParsedHeader.majorVersion));
-        // DEBUG_V (String ("            VariableHdrOffset: ") + String (fsqParsedHeader.VariableHdrOffset));
-        // DEBUG_V (String ("                 channelCount: ") + String (fsqParsedHeader.channelCount));
-        // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (fsqParsedHeader.TotalNumberOfFramesInSequence));
-        // DEBUG_V (String ("                     stepTime: ") + String (fsqParsedHeader.stepTime));
-        // DEBUG_V (String ("                        flags: ") + String (fsqParsedHeader.flags));
-        // DEBUG_V (String ("              compressionType: 0x") + String (fsqParsedHeader.compressionType, HEX));
-        // DEBUG_V (String ("          numCompressedBlocks: ") + String (fsqParsedHeader.numCompressedBlocks));
-        // DEBUG_V (String ("              numSparseRanges: ") + String (fsqParsedHeader.numSparseRanges));
-        // DEBUG_V (String ("                       flags2: ") + String (fsqParsedHeader.flags2));
-        // DEBUG_V (String ("                           id: 0x") + String ((unsigned long)fsqParsedHeader.id, HEX));
+#define DUMP_FSEQ_HEADER
+#ifdef DUMP_FSEQ_HEADER
+        DEBUG_V (String ("                   dataOffset: ") + String (fsqParsedHeader.dataOffset));
+        DEBUG_V (String ("                 minorVersion: ") + String (fsqParsedHeader.minorVersion));
+        DEBUG_V (String ("                 majorVersion: ") + String (fsqParsedHeader.majorVersion));
+        DEBUG_V (String ("            VariableHdrOffset: ") + String (fsqParsedHeader.VariableHdrOffset));
+        DEBUG_V (String ("                 channelCount: ") + String (fsqParsedHeader.channelCount));
+        DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (fsqParsedHeader.TotalNumberOfFramesInSequence));
+        DEBUG_V (String ("                     stepTime: ") + String (fsqParsedHeader.stepTime));
+        DEBUG_V (String ("                        flags: ") + String (fsqParsedHeader.flags));
+        DEBUG_V (String ("              compressionType: 0x") + String (fsqParsedHeader.compressionType, HEX));
+        DEBUG_V (String ("          numCompressedBlocks: ") + String (fsqParsedHeader.numCompressedBlocks));
+        DEBUG_V (String ("              numSparseRanges: ") + String (fsqParsedHeader.numSparseRanges));
+        DEBUG_V (String ("                       flags2: ") + String (fsqParsedHeader.flags2));
+        DEBUG_V (String ("                           id: 0x") + String ((unsigned long)fsqParsedHeader.id, HEX));
+#endif // def DUMP_FSEQ_HEADER
 
         if (fsqParsedHeader.majorVersion != 2 || fsqParsedHeader.compressionType != 0)
         {
@@ -287,16 +290,28 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
                 LargestOffset = max (LargestOffset, CurrentSparseRange.DataOffset);
                 LargestBlock  = max (LargestBlock, CurrentSparseRange.DataOffset + CurrentSparseRange.ChannelCount);
 
-                // DEBUG_V (String ("            RangeChannelCount: ") + String (CurrentSparseRange.ChannelCount));
-                // DEBUG_V (String ("              RangeDataOffset: 0x") + String (CurrentSparseRange.DataOffset, HEX));
+#ifdef DUMP_FSEQ_HEADER
+                DEBUG_V (String ("            RangeChannelCount: ") + String (CurrentSparseRange.ChannelCount));
+                DEBUG_V (String ("              RangeDataOffset: 0x") + String (CurrentSparseRange.DataOffset, HEX));
+#endif // def DUMP_FSEQ_HEADER
 
                 ++SparseRangeIndex;
             }
 
-            // DEBUG_V (String ("                TotalChannels: ") + String (TotalChannels));
-            // DEBUG_V (String ("                LargestOffset: ") + String (LargestOffset));
-            // DEBUG_V (String ("                 LargestBlock: ") + String (LargestBlock));
-            if (TotalChannels > fsqParsedHeader.channelCount)
+#ifdef DUMP_FSEQ_HEADER
+            DEBUG_V (String ("                TotalChannels: ") + String (TotalChannels));
+            DEBUG_V (String ("                LargestOffset: ") + String (LargestOffset));
+            DEBUG_V (String ("                 LargestBlock: ") + String (LargestBlock));
+#endif // def DUMP_FSEQ_HEADER
+            if (0 == TotalChannels)
+            {
+                LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Ignoring Range Info. ")) + PlayItemName + F (" No channels defined in Sparse Ranges."));
+                logcon (LastFailedPlayStatusMsg);
+                memset ((void*)&SparseRanges, 0x00, sizeof (SparseRanges));
+                SparseRanges[0].ChannelCount = fsqParsedHeader.channelCount;
+            }
+
+            else if (TotalChannels > fsqParsedHeader.channelCount)
             {
                 LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Ignoring Range Info. ")) + PlayItemName + F (" Too many channels defined in Sparse Ranges."));
                 logcon (LastFailedPlayStatusMsg);
