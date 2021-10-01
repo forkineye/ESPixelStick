@@ -315,10 +315,10 @@ function ProcessWindowChange(NextWindow) {
     }
 
     else if (NextWindow === "#config") {
+        RequestListOfFiles();
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
-        RequestListOfFiles();
     }
 
     else if (NextWindow === "#filemanagement") {
@@ -614,8 +614,6 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig )
         $(modeControlName + ' #Title')[0].innerHTML = ModeDisplayName;
     }
 
-    //document.getElementById("blahblah").innerHTML="NewText".
-
     elementids = $(modeControlName + ' *[id]').filter(":input").map(function ()
     {
         return $(this).attr('id');
@@ -688,7 +686,7 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     // is this a device config?
     else if ({}.hasOwnProperty.call(JsonConfigData, "device"))
     {
-    	// console.info("Got Device Config");
+        // console.info("Got Device Config");
         Device_Config = JsonConfigData.device;
         updateFromJSON(JsonConfigData);
 
@@ -784,6 +782,7 @@ function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId )
     if ("disabled.html" === HtmlLoadFileName)
     {
         $('#' + OptionListName + 'mode' + DisplayedChannelId).empty();
+        $('#refresh').html('-');
     }
     else
     {
@@ -798,6 +797,9 @@ function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId )
             else if ("output" === OptionListName)
             {
                 ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Output_Config);
+
+                // Trigger refresh update for outputs
+                $('#fg_output_mode input').trigger('change');
             }
         });
     }
@@ -1595,7 +1597,8 @@ function ProcessReceivedJsonStatusMessage(data)
     }
 
     // Device Refresh is dynamic
-    $('#refresh').text(Status.output[0].framerefreshrate + " fps");
+    // #refresh is used in device config tab to reflect what refresh rate should be, not what it currently is
+    // $('#refresh').text(Status.output[0].framerefreshrate + " fps");
 } // ProcessReceivedJsonStatusMessage
 
 // Show "save" snackbar for 3sec

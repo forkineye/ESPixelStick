@@ -28,7 +28,7 @@
         // var TimePerBit           = 1 / parseInt($('#renard #fg_renard #baudrate').val());
         // var TimePerByte          = TimePerBit * BitsPerByte;
         // var TimePerFrame         = TimePerByte * (NumberOfBytesInFrame);
-        var TimePerFrame            = ((1 / parseInt($('#renard #fg_renard #baudrate').val())) * 11) * (parseInt($('#renard #fg_renard #num_chan').val()) + 2);
+        var TimePerFrame            = ((1 / parseInt($('#renard #baudrate').val())) * 11) * (parseInt($('#renard #num_chan').val()) + 2);
 
         var rateMs = TimePerFrame * 1000;
         var hz     = 1 / TimePerFrame;

@@ -30,14 +30,14 @@
 <script>
     function RefreshSerialRate()
     {
-        var NumberOfBytesInFrame = parseInt($('#serial #fg_serial #num_chan').val());
-        NumberOfBytesInFrame    += parseInt($('#serial #fg_serial #gen_ser_hdr').val().length);
-        NumberOfBytesInFrame    += parseInt($('#serial #fg_serial #gen_ser_ftr').val().length);
+        var NumberOfBytesInFrame = parseInt($('#serial #num_chan').val());
+        NumberOfBytesInFrame    += parseInt($('#serial #gen_ser_hdr').val().length);
+        NumberOfBytesInFrame    += parseInt($('#serial #gen_ser_ftr').val().length);
         // var BitsPerByte          = 1 + 8 + 2;
         // var TimePerBit           = 1 / $('#serial #fg_serial #baudrate').val();
         // var TimePerByte          = TimePerBit * BitsPerByte;
         // var TimePerFrame         = TimePerByte * (NumberOfBytesInFrame);
-        var TimePerFrame            = ((1 / $('#serial #fg_serial #baudrate').val()) * 11) * (NumberOfBytesInFrame);
+        var TimePerFrame            = ((1 / $('#serial #baudrate').val()) * 11) * (NumberOfBytesInFrame);
 
         var rateMs = TimePerFrame * 1000;
         var hz     = 1 / TimePerFrame;
