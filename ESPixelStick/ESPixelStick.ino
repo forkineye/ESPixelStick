@@ -153,8 +153,6 @@ void setup()
     WiFiMgr.Begin (& config);
     // DEBUG_V ("");
 
-        // DEBUG_V ("");
-
     // Configure and start the web server
     WebMgr.Begin(&config);
 
@@ -167,6 +165,8 @@ void setup()
 #endif
     // DEBUG_END;
 
+    // Done with initialization
+    InitializeConfig = false;
 } // setup
 
 /////////////////////////////////////////////////////////

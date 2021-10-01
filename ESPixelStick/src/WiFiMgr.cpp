@@ -122,8 +122,8 @@ void c_WiFiMgr::Begin (config_t* NewConfig)
     // set up the poll interval
     NextPollTime = millis () + PollInterval;
 
-    // get the FSM moving
-    pCurrentFsmState->Poll ();
+    // Main loop should start polling for us
+    // pCurrentFsmState->Poll ();
 
     // DEBUG_END;
 
@@ -188,7 +188,7 @@ void c_WiFiMgr::connectWifi (const String & ssid, const String & passphrase)
     WiFi.mode (WIFI_STA);
     // DEBUG_V ("");
 #endif
-
+    LOG_PORT.println();
     logcon (String(F ("WiFi Connecting to '")) +
                       ssid +
                       String (F ("' as ")) +
@@ -356,8 +356,7 @@ void c_WiFiMgr::AnnounceState ()
 
     String StateName;
     pCurrentFsmState->GetStateName (StateName);
-    LOG_PORT.println ("");
-    logcon (String (F ("WiFi Entering State: ")) + StateName);
+    // logcon (String (F ("WiFi Entering State: ")) + StateName);
 
     // DEBUG_END;
 

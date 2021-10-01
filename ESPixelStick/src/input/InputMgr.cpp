@@ -245,7 +245,10 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
 void c_InputMgr::CreateNewConfig ()
 {
     // DEBUG_START;
-    logcon (String (F ("--- WARNING: Creating a new Input Manager configuration Data set - Start ---")));
+    if (!InitializeConfig)
+    {
+        logcon (String (F ("--- WARNING: Creating a new Input Manager configuration Data set ---")));
+    }
 
     // create a place to save the config
     DynamicJsonDocument JsonConfigDoc (IM_JSON_SIZE);
@@ -289,7 +292,7 @@ void c_InputMgr::CreateNewConfig ()
     serializeJson (JsonConfigDoc, ConfigData);
     SetConfig (ConfigData.c_str());
 
-    logcon (String (F ("--- WARNING: Creating a new Input Manager configuration Data set - Done ---")));
+    // logcon (String (F ("--- WARNING: Creating a new Input Manager configuration Data set - Done ---")));
     // DEBUG_END;
 
 } // CreateNewConfig
@@ -402,7 +405,9 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             pInputChannelDrivers[ChannelIndex]->GetDriverName (DriverName);
             rebootNeeded |= pInputChannelDrivers[ChannelIndex]->isShutDownRebootNeeded();
             // DEBUG_V (String ("rebootNeeded: ") + String (rebootNeeded));
-            logcon (String(F("Shutting Down '")) + DriverName + String(F("' on Input: ")) + String(ChannelIndex));
+            if (!InitializeConfig) {
+                logcon (String(F("Shutting Down '")) + DriverName + String(F("' on Input: ")) + String(ChannelIndex));
+            }
 
             delete pInputChannelDrivers[ChannelIndex];
             // DEBUG_V ();
@@ -529,7 +534,10 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
 
             default:
             {
-                logcon (CN_stars + String (F (" Unknown Input type for channel '")) + ChannelIndex + String(F ("'. Using disabled. ")) + CN_stars);
+                if (!InitializeConfig)
+                {
+                    logcon (CN_stars + String (F (" Unknown Input type for channel '")) + ChannelIndex + String(F ("'. Using disabled. ")) + CN_stars);
+                }
                 pInputChannelDrivers[ChannelIndex] = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
                 // DEBUG_V ("");
                 break;
@@ -577,7 +585,9 @@ void c_InputMgr::LoadConfig ()
             // DEBUG_V ("");
         }))
     {
-        logcon (CN_stars + String (F (" Error loading Input Manager Config File ")) + CN_stars);
+        if (!InitializeConfig) {
+            logcon (CN_stars + String (F (" Error loading Input Manager Config File ")) + CN_stars);
+        }
 
         // create a config file with default values
         // DEBUG_V ("");
