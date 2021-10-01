@@ -157,4 +157,5 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           draft: true
+          prerelease: true
           files: ESPixelStick_Firmware*.zip
