@@ -1,6 +1,16 @@
 
 # Changelog
 
+### 4.0-beta3
+
+- Fixed FSEQ playback for sparse files [Issues #367](https://github.com/forkineye/ESPixelStick/issues/367)
+- Fixed refresh rate display [Issue #371](https://github.com/forkineye/ESPixelStick/issues/371)
+- Added FSEQ validation for channel and sparse range counts
+- Stop output on FPP Connect file upload
+- Blank output when FPP Remote configuration is changed
+- Fixed files not showing for FPP Remote when tab is refreshed
+- More serial logging cleanup
+
 ### 4.0-beta2
 
 - Fixed issue saving when hostname defined in ESPSFlashTool [Issue #360](https://github.com/forkineye/ESPixelStick/issues/360)
