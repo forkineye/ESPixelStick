@@ -228,8 +228,8 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
         case 0x03: //Blank packet
         {
             // DEBUG_V (String (F ("FPP Blank packet")));
-            StopPlaying ();
-            // ProcessBlankPacket ();
+            // StopPlaying ();
+            ProcessBlankPacket ();
             break;
         }
 
@@ -888,7 +888,7 @@ void c_FPPDiscovery::StopPlaying ()
 
     // DEBUG_V ("");
 
-    ProcessBlankPacket ();
+    // ProcessBlankPacket ();
 
     // DEBUG_END;
 
