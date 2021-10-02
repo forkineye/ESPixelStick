@@ -37,6 +37,7 @@ public:
     {
         bool        Enabled;
         bool        InvertOutput;
+        bool        Pwm;
         uint8_t     OnOffTriggerLevel;
         gpio_num_t  GpioId;
         uint8_t     OnValue;
@@ -66,6 +67,7 @@ private:
 #   define OM_RELAY_UPDATE_INTERVAL_NAME    CN_updateinterval
 #   define OM_RELAY_CHANNEL_ENABLED_NAME    CN_en
 #   define OM_RELAY_CHANNEL_INVERT_NAME     CN_inv
+#   define OM_RELAY_CHANNEL_PWM_NAME        CN_pwm
 
     bool    validate ();
 

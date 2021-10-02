@@ -495,15 +495,17 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
         let ChanIdPattern     = '<td id="chanId_'                            + (CurrentRowId) + '">a</td>';
         let EnabledPattern    = '<td><input type="checkbox" id="Enabled_'    + (CurrentRowId) + '"></td>';
         let InvertedPattern   = '<td><input type="checkbox" id="Inverted_'   + (CurrentRowId) + '"></td>';
+        let PwmPattern        = '<td><input type="checkbox" id="Pwm_'        + (CurrentRowId) + '"></td>';
         let gpioPattern       = '<td><input type="number"   id="gpioId_'     + (CurrentRowId) + '"step="1" min="0" max="24"  value="30"  class="form-control is-valid"></td>';
         let threshholdPattern = '<td><input type="number"   id="threshhold_' + (CurrentRowId) + '"step="1" min="0" max="255" value="300" class="form-control is-valid"></td>';
 
-        let rowPattern = '<tr>' + ChanIdPattern + EnabledPattern + InvertedPattern + gpioPattern + threshholdPattern + '</tr>';
+        let rowPattern = '<tr>' + ChanIdPattern + EnabledPattern + InvertedPattern + PwmPattern + gpioPattern + threshholdPattern + '</tr>';
         $('#relaychannelconfigurationtable tr:last').after(rowPattern);
 
         $('#chanId_'     + CurrentRowId).attr('style', $('#chanId_hr').attr('style'));
         $('#Enabled_'    + CurrentRowId).attr('style', $('#Enabled_hr').attr('style'));
         $('#Inverted_'   + CurrentRowId).attr('style', $('#Inverted_hr').attr('style'));
+        $('#Pwm_'        + CurrentRowId).attr('style', $('#Pwm_hr').attr('style'));
         $('#gpioId_'     + CurrentRowId).attr('style', $('#gpioId_hr').attr('style'));
         $('#threshhold_' + CurrentRowId).attr('style', $('#threshhold_hr').attr('style'));
     }
@@ -515,6 +517,7 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
         $('#chanId_'     + (currentChannelRowId)).html(currentChannelRowId);
         $('#Enabled_'    + (currentChannelRowId)).prop("checked", CurrentChannelConfig.en);
         $('#Inverted_'   + (currentChannelRowId)).prop("checked", CurrentChannelConfig.inv);
+        $('#Pwm_'        + (currentChannelRowId)).prop("checked", CurrentChannelConfig.pwm);
         $('#gpioId_'     + (currentChannelRowId)).val(CurrentChannelConfig.gid);
         $('#threshhold_' + (currentChannelRowId)).val(CurrentChannelConfig.trig);
     });
@@ -916,6 +919,7 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
                 let currentChannelRowId = CurrentChannelConfig.id + 1;
                 CurrentChannelConfig.en   = $('#Enabled_' + (currentChannelRowId)).prop("checked");
                 CurrentChannelConfig.inv  = $('#Inverted_' + (currentChannelRowId)).prop("checked");
+                CurrentChannelConfig.pwm  = $('#Pwm_' + (currentChannelRowId)).prop("checked");
                 CurrentChannelConfig.gid  = parseInt($('#gpioId_' + (currentChannelRowId)).val(), 10);
                 CurrentChannelConfig.trig = parseInt($('#threshhold_' + (currentChannelRowId)).val(), 10);
             });
