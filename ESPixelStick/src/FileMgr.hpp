@@ -101,6 +101,7 @@ private:
     FileId   fsUploadFile;
     String   fsUploadFileName;
     bool     fsUploadFileSavedIsEnabled = false;
+    uint32_t fsUploadStartTime;
     char     XlateFileMode[3] = { 'r', 'w', 'w' };
 
 #define MaxOpenFiles 5
