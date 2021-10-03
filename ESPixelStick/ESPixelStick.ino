@@ -253,18 +253,9 @@ bool dsNetwork(JsonObject & json)
     bool ConfigChanged = false;
     if (json.containsKey(CN_network))
     {
-#ifdef ARDUINO_ARCH_ESP8266
-        IPAddress Temp = config.ip;
-        String ip = Temp.toString ();
-        Temp = config.gateway;
-        String gateway = Temp.toString ();
-        Temp = config.netmask;
-        String netmask = Temp.toString ();
-#else
         String ip      = config.ip.toString ();
         String gateway = config.gateway.toString ();
         String netmask = config.netmask.toString ();
-#endif // def ARDUINO_ARCH_ESP8266
 
         JsonObject network = json[CN_network];
 
