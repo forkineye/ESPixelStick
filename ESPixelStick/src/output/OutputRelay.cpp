@@ -130,6 +130,7 @@ bool c_OutputRelay::validate ()
     }
 
     SetOutputBufferSize (Num_Channels);
+    uint8_t Channel = 0;
     for (RelayChannel_t & currentRelay : OutputList)
     {
         if (currentRelay.GpioId == Relay_DEFAULT_GPIO_ID)
@@ -140,7 +141,13 @@ bool c_OutputRelay::validate ()
 
         else if (currentRelay.Enabled)
         {
-            pinMode (currentRelay.GpioId, OUTPUT);
+            #if defined(ARDUINO_ARCH_ESP32)
+               // assign GPIO to a channel and set the pwm 12 Khz frequency, 8 bit
+               ledcAttachPin(currentRelay.GpioId, Channel);
+               ledcSetup(Channel, 12000, 8);
+            #else
+               pinMode (currentRelay.GpioId, OUTPUT);
+            #endif
         }
 
         if (currentRelay.InvertOutput)
@@ -159,7 +166,7 @@ bool c_OutputRelay::validate ()
         // DEBUGV (String ("currentRelay.OffValue: ") + String (currentRelay.OffValue));
         // DEBUGV (String ("currentRelay.Enabled: ")  + String (currentRelay.Enabled));
         // DEBUGV (String ("currentRelay.GpioId: ")   + String (currentRelay.GpioId));
-
+        ++Channel;
     } // for each output channel
 
     // DEBUG_END;
@@ -311,7 +318,11 @@ void c_OutputRelay::Render ()
             uint8_t newOutputValue = pOutputBuffer[OutputDataIndex];
             if (currentRelay.Pwm)
             {
-                analogWrite(currentRelay.GpioId, newOutputValue);
+                #if defined(ARDUINO_ARCH_ESP32)
+                   ledcWrite(OutputDataIndex, newOutputValue);
+                #else
+                   analogWrite(currentRelay.GpioId, newOutputValue);
+                #endif
             }
             else
             {
