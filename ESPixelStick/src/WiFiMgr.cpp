@@ -158,6 +158,9 @@ void c_WiFiMgr::connectWifi (const String & ssid, const String & passphrase)
     if (ResetWiFi)
         return;
 
+    LOG_PORT.println();
+    SetUpIp ();
+
     // Hostname must be set after the mode on ESP8266 and before on ESP32
 #ifdef ARDUINO_ARCH_ESP8266
     WiFi.disconnect ();
@@ -188,8 +191,7 @@ void c_WiFiMgr::connectWifi (const String & ssid, const String & passphrase)
     WiFi.mode (WIFI_STA);
     // DEBUG_V ("");
 #endif
-    LOG_PORT.println();
-    logcon (String(F ("WiFi Connecting to '")) +
+    logcon (String(F ("Connecting to '")) +
                       ssid +
                       String (F ("' as ")) +
                       config->hostname);
@@ -206,6 +208,9 @@ void c_WiFiMgr::reset ()
 
     // The WiFi states announce what they're doing, cleans up boot log a bit.
     //logcon (F ("WiFi Reset has been requested"));
+
+    // Reset address in case we're switching from static to dhcp
+    WiFi.config (0u, 0u, 0u);
 
     fsm_WiFi_state_Boot_imp.Init ();
     if (IsWiFiConnected())
@@ -225,7 +230,7 @@ void c_WiFiMgr::SetUpIp ()
     {
         if (true == config->UseDhcp)
         {
-            logcon (F ("WiFi Connected with DHCP"));
+            logcon (F ("Using DHCP"));
             break;
         }
 
@@ -237,7 +242,7 @@ void c_WiFiMgr::SetUpIp ()
 
         if (temp == config->ip)
         {
-            logcon (F ("WiFI: ERROR: STATIC SELECTED WITHOUT IP. Using DHCP assigned address"));
+            logcon (F ("ERROR: STATIC SELECTED WITHOUT IP. Using DHCP assigned address"));
             break;
         }
 
@@ -251,7 +256,7 @@ void c_WiFiMgr::SetUpIp ()
         // We didn't use DNS, so just set it to our configured gateway
         WiFi.config (config->ip, config->gateway, config->netmask, config->gateway);
 
-        logcon (F ("Connected with Static IP"));
+        logcon (F ("Using Static IP"));
 
     } while (false);
 
@@ -614,12 +619,12 @@ void fsm_WiFi_state_ConnectedToAP::Init ()
     WiFiMgr.SetFsmState (this);
     WiFiMgr.AnnounceState ();
 
-    WiFiMgr.SetUpIp ();
+    // WiFiMgr.SetUpIp ();
 
     WiFiMgr.setIpAddress( WiFi.localIP () );
     WiFiMgr.setIpSubNetMask( WiFi.subnetMask () );
 
-    logcon (String (F ("WiFi Connected with IP: ")) + WiFiMgr.getIpAddress ().toString ());
+    logcon (String (F ("Connected with IP: ")) + WiFiMgr.getIpAddress ().toString ());
 
     WiFiMgr.SetIsWiFiConnected (true);
     InputMgr.NetworkStateChanged (true);
@@ -668,13 +673,13 @@ void fsm_WiFi_state_ConnectedToSta::Init ()
     WiFiMgr.SetFsmState (this);
     WiFiMgr.AnnounceState ();
 
-    WiFiMgr.SetUpIp ();
+    // WiFiMgr.SetUpIp ();
 
     WiFiMgr.setIpAddress (WiFi.softAPIP ());
     WiFiMgr.setIpSubNetMask (IPAddress (255, 255, 255, 0));
 
     LOG_PORT.println ("");
-    logcon (String (F ("WiFi Connected to STA with IP: ")) + WiFiMgr.getIpAddress ().toString ());
+    logcon (String (F ("Connected to STA with IP: ")) + WiFiMgr.getIpAddress ().toString ());
 
     WiFiMgr.SetIsWiFiConnected (true);
     InputMgr.NetworkStateChanged (true);
