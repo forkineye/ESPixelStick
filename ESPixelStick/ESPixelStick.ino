@@ -295,6 +295,12 @@ void SetConfig (JsonObject & json, const char * DataString)
 {
     // DEBUG_START;
 
+//TODO: This is being called from c_WebMgr::processCmdSet() with no validation
+//      of the data. Chance for 3rd party software to muck up the configuraton
+//      if they send bad json data.
+    // Set config version
+    json[CN_cfgver] = CurrentConfigVersion;
+
     FileMgr.SaveConfigFile (ConfigFileName, DataString);
     deserializeCore (json);
 
