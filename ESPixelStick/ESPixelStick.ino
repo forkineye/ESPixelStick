@@ -88,6 +88,7 @@ bool     reboot = false;            // Reboot flag
 uint32_t lastUpdate;                // Update timeout tracker
 bool     ResetWiFi = false;
 bool     InitializeConfig = false;  // Configuration initialization flag
+bool     ConfigLoadNeeded = false;
 
 /////////////////////////////////////////////////////////
 //
@@ -300,12 +301,13 @@ bool dsNetwork(JsonObject & json)
     return ConfigChanged;
 } // dsNetwork
 
+// Save the config and schedule a load operation
 void SetConfig (JsonObject & json, const char * DataString)
 {
     // DEBUG_START;
 
     FileMgr.SaveConfigFile (ConfigFileName, DataString);
-    deserializeCore (json);
+    ConfigLoadNeeded = true;
 
     // DEBUG_END;
 
@@ -375,10 +377,13 @@ void loadConfig()
 {
     // DEBUG_START;
 
+    ConfigLoadNeeded = false;
+
     String temp;
     // DEBUG_V ("");
     FileMgr.LoadConfigFile (ConfigFileName, &deserializeCoreHandler);
-    if (!validateConfig()) {
+    if (!validateConfig()) 
+    {
         SaveConfig();
     }
 
@@ -509,6 +514,11 @@ void loop()
         logcon (String(CN_stars) + CN_minussigns + F ("Internal Reboot Requested. Rebooting Now"));
         delay (REBOOT_DELAY);
         ESP.restart ();
+    }
+
+    if (ConfigLoadNeeded)
+    {
+        loadConfig ();
     }
 
     if (true == ResetWiFi)
