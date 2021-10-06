@@ -287,7 +287,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
                 }
 
                 // CurrentSparseRange.DataOffset = read24 (FseqRawRanges[SparseRangeIndex].Start);
-                CurrentSparseRange.DataOffset = 0;
+                CurrentSparseRange.DataOffset = TotalChannels;
                 CurrentSparseRange.ChannelCount = read24 (FseqRawRanges[SparseRangeIndex].Length);
                 TotalChannels += CurrentSparseRange.ChannelCount;
                 LargestOffset = max (LargestOffset, CurrentSparseRange.DataOffset);
