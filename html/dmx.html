@@ -19,7 +19,7 @@
         // var TimePerBit           = 1 / 250000; // fixed data rate
         // var TimePerByte          = TimePerBit * BitsPerByte;
         // var TimePerFrame         = (TimePerByte * NumberOfBytesInFrame) + InterFrameDelay;
-        var TimePerFrame         = (0.000044 * parseInt($('#dmx #fg_dmx #num_chan').val())) + 0.00005;
+        var TimePerFrame         = (0.000044 * parseInt($('#dmx #num_chan').val())) + 0.00005;
 
         var rateMs = TimePerFrame * 1000;
         var hz     = 1 / TimePerFrame;

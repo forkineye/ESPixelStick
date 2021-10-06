@@ -232,7 +232,9 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
         fs::File file = LittleFS.open (FileName.c_str (), "r");
         if (!file)
         {
-            logcon (String (CN_stars) + CfgFileMessagePrefix + String (F (" Could not open file for reading ")) + CN_stars);
+            if (!InitializeConfig) {
+                logcon (String (CN_stars) + CfgFileMessagePrefix + String (F (" Could not open file for reading ")) + CN_stars);
+            }
             break;
         }
 
@@ -889,6 +891,7 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
 {
     size_t response = 0;
     int FileListIndex;
+    // DEBUG_V (String("Bytes to write: ") + String(NumBytesToWrite));
     if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
     {
         WriteBufferingStream bufferedFileWrite{ FileList[FileListIndex].info, 128 };
@@ -1001,8 +1004,9 @@ void c_FileMgr::handleFileUpload (const String & filename,
             FileUploadBufferOffset = 0;
         }
 
-        // DEBUG_V ("UploadEnd: " + String(index + len) + String(" bytes"));
-        logcon (String (F ("Upload File: '")) + fsUploadFileName + String (F ("' Done")));
+        uint32_t uploadTime = (uint32_t)(millis() - fsUploadStartTime) / 1000;
+        logcon (String (F ("Upload File: '")) + fsUploadFileName +
+                String (F ("' Done (")) + String (uploadTime) + String (F ("s)")));
 
         CloseSdFile (fsUploadFile);
         fsUploadFileName = "";
@@ -1027,6 +1031,8 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
 
     // save the filename
     // DEBUG_V ("UploadStart: " + filename);
+
+    fsUploadStartTime = millis();
 
     // are we terminating the previous download?
     if (0 != fsUploadFileName.length ())

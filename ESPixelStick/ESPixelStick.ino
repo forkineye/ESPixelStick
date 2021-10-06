@@ -154,8 +154,6 @@ void setup()
     WiFiMgr.Begin (& config);
     // DEBUG_V ("");
 
-        // DEBUG_V ("");
-
     // Configure and start the web server
     WebMgr.Begin(&config);
 
@@ -168,6 +166,8 @@ void setup()
 #endif
     // DEBUG_END;
 
+    // Done with initialization
+    InitializeConfig = false;
 } // setup
 
 /////////////////////////////////////////////////////////
@@ -254,18 +254,9 @@ bool dsNetwork(JsonObject & json)
     bool ConfigChanged = false;
     if (json.containsKey(CN_network))
     {
-#ifdef ARDUINO_ARCH_ESP8266
-        IPAddress Temp = config.ip;
-        String ip = Temp.toString ();
-        Temp = config.gateway;
-        String gateway = Temp.toString ();
-        Temp = config.netmask;
-        String netmask = Temp.toString ();
-#else
         String ip      = config.ip.toString ();
         String gateway = config.gateway.toString ();
         String netmask = config.netmask.toString ();
-#endif // def ARDUINO_ARCH_ESP8266
 
         JsonObject network = json[CN_network];
 
@@ -305,6 +296,12 @@ bool dsNetwork(JsonObject & json)
 void SetConfig (JsonObject & json, const char * DataString)
 {
     // DEBUG_START;
+
+//TODO: This is being called from c_WebMgr::processCmdSet() with no validation
+//      of the data. Chance for 3rd party software to muck up the configuraton
+//      if they send bad json data.
+    // Set config version
+    json[CN_cfgver] = CurrentConfigVersion;
 
     FileMgr.SaveConfigFile (ConfigFileName, DataString);
     ConfigLoadNeeded = true;

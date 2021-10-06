@@ -276,7 +276,10 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
 void c_OutputMgr::CreateNewConfig ()
 {
     // DEBUG_START;
-    logcon (String (F ("--- WARNING: Creating a new Output Manager configuration Data set - Start ---")));
+    if (!InitializeConfig)
+    {
+        logcon (String (F ("--- WARNING: Creating a new Output Manager configuration Data set ---")));
+    }
 
     // create a place to save the config
     DynamicJsonDocument JsonConfigDoc (OM_MAX_CONFIG_SIZE);
@@ -327,7 +330,7 @@ void c_OutputMgr::CreateNewConfig ()
     SetConfig (ConfigData.c_str());
     // DEBUG_V (String ("ConfigData: ") + ConfigData);
 
-    logcon (String (F ("--- WARNING: Creating a new Output Manager configuration Data set - Done ---")));
+    // logcon (String (F ("--- WARNING: Creating a new Output Manager configuration Data set - Done ---")));
     // DEBUG_END;
 
 } // CreateNewConfig
@@ -408,7 +411,10 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
             String DriverName;
             pOutputChannelDrivers[ChannelIndex]->GetDriverName (DriverName);
-            logcon (String (F (" Shutting Down '")) + DriverName + String (F ("' on Output: ")) + String (ChannelIndex));
+            if (!InitializeConfig)
+            {
+                 logcon (String (F (" Shutting Down '")) + DriverName + String (F ("' on Output: ")) + String (ChannelIndex));
+            }
             delete pOutputChannelDrivers[ChannelIndex];
             pOutputChannelDrivers[ChannelIndex] = nullptr;
             // DEBUG_V ("");
@@ -630,7 +636,10 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
             default:
             {
-                logcon (CN_stars + String (F (" Unknown output type: '")) + String (NewOutputChannelType) + String(F(" for channel '")) + ChannelIndex + String(F("'. Using disabled. ")) + CN_stars );
+                if (!InitializeConfig)
+                {
+                    logcon (CN_stars + String (F (" Unknown output type: '")) + String (NewOutputChannelType) + String(F(" for channel '")) + ChannelIndex + String(F("'. Using disabled. ")) + CN_stars );
+                }
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
                 break;
@@ -640,7 +649,10 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
         // DEBUG_V ("");
         String sDriverName;
         pOutputChannelDrivers[ChannelIndex]->GetDriverName (sDriverName);
-        logcon ("'" + sDriverName + F ("' Initialization for Output: ") + String (ChannelIndex));
+        if (!InitializeConfig)
+        {
+            logcon ("'" + sDriverName + F ("' Initialization for Output: ") + String (ChannelIndex));
+        }
         if (StartDriver)
         {
             pOutputChannelDrivers[ChannelIndex]->Begin ();
@@ -678,7 +690,9 @@ void c_OutputMgr::LoadConfig ()
             // DEBUG_V ("");
         }))
     {
-        logcon (CN_stars + String (F (" Error loading Output Manager Config File ")) + CN_stars);
+        if (!InitializeConfig) {
+            logcon (CN_stars + String (F (" Error loading Output Manager Config File ")) + CN_stars);
+        }
 
         // create a config file with default values
         // DEBUG_V ("");

@@ -148,6 +148,8 @@ bool c_InputFPPRemote::SetConfig (JsonObject & jsonConfig)
     }
 
     // DEBUG_V ("Config Processing");
+    // Clear outbuffer on config change
+    memset (OutputMgr.GetBufferAddress(), 0x0, OutputMgr.GetBufferUsedSize ());
     StartPlaying (FileToPlay);
 
     // DEBUG_END;

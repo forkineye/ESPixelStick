@@ -224,16 +224,14 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
                 continue;
             }
 
-            uint32_t AdjustedFilePosition = FilePosition + CurrentSparseRange.DataOffset;
-
             // DEBUG_V (String ("                 FilePosition: ") + String (FilePosition));
             // DEBUG_V (String ("         AdjustedFilePosition: ") + String (uint32_t(AdjustedFilePosition), HEX));
             // DEBUG_V (String ("           CurrentDestination: ") + String (uint32_t(CurrentDestination), HEX));
             // DEBUG_V (String ("            ActualBytesToRead: ") + String (ActualBytesToRead));
             size_t ActualBytesRead = FileMgr.ReadSdFile (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed,
-                                                         CurrentDestination, 
-                                                         ActualBytesToRead, 
-                                                         AdjustedFilePosition);
+                                                         CurrentDestination,
+                                                         ActualBytesToRead,
+                                                         FilePosition);
             MaxBytesToRead -= ActualBytesRead;
             CurrentDestination += ActualBytesRead;
 
@@ -398,7 +396,7 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, uint32_t TargetFram
             // DEBUG_V ("No Need to adjust the time");
             break;
         }
-        
+
         // DEBUG_V ("Need to adjust the start time");
         // DEBUG_V (String ("StartTimeMS: ") + String (p_InputFPPRemotePlayFile->StartTimeMS));
 
@@ -467,7 +465,7 @@ void fsm_PlayFile_state_Stopping::Init (c_InputFPPRemotePlayFile* Parent)
 void fsm_PlayFile_state_Stopping::Start (String& _FileName, uint32_t _FrameId, uint32_t _PlayCount)
 {
     // DEBUG_START;
-    
+
     FileName  = _FileName;
     FrameId   = _FrameId;
     PlayCount = _PlayCount;

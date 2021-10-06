@@ -1,3 +1,11 @@
+############################################################################
+#                                                                          #
+# fseqinfo.py - A tool for dumping FSEQ header information                 #
+# Usage: fseqinfo.py -h                                                    #
+# From the ESPixelStick project: https://github.com/forkineye/ESPixelStick #
+#                                                                          #
+############################################################################
+
 import sys, os, argparse, json
 from struct import unpack, calcsize
 from glob import glob
@@ -57,6 +65,18 @@ def parse_header(filename):
       header['num_comp'] = (header['compression'] & 0xF0) | header['num_comp']
       header['compression'] = header['compression'] & 0xF
 
+      # Sparse ranges
+      if header['num_sparse']:
+        header['sparse'] = [{}]
+        # Skip over compression blocks and iterate sparse ranges
+        file.seek(header['num_comp'] * 8, 1)
+        for sr in range(header['num_sparse']):
+          sparse_start, *_ = unpack('<L', file.read(4))
+          header['sparse'][sr]['start'] = (sparse_start & 0xFFF)
+          file.seek(-1, 1)
+          sparse_channels, *_ = unpack('<L', file.read(4))
+          header['sparse'][sr]['channels'] = sparse_channels & 0xFFF
+          file.seek(-1, 1)
 
     # Variable Header(s)
     file.seek(header['length'])
@@ -96,40 +116,45 @@ def print_simple(h):
 def print_verbose(h):
   print(f"\n{h['file']}")
   print(''.join(['-' * len(h['file'])]))
-  print(f"File ID:        {h['magic']}")
-  print(f"Data Offset:    {h['offset']}")
-  print(f"Minor Version:  {h['ver_min']}")
-  print(f"Major Version:  {h['ver_maj']}")
-  print(f"Header Length:  {h['length']}")
-  print(f"Channel Count:  {h['channels']}")
-  print(f"Frame Count:    {h['frames']}")
-  print(f"Step Time(ms):  {h['step']}")
-  print(f"Flags:          {h['flags']}")
+  print(f"File ID:         {h['magic']}")
+  print(f"Data Offset:     {h['offset']}")
+  print(f"Minor Version:   {h['ver_min']}")
+  print(f"Major Version:   {h['ver_maj']}")
+  print(f"Header Length:   {h['length']}")
+  print(f"Channel Count:   {h['channels']}")
+  print(f"Frame Count:     {h['frames']}")
+  print(f"Step Time(ms):   {h['step']}")
+  print(f"Flags:           {h['flags']}")
 
   if h['ver_maj'] == 1:
-    print(f"Universe Count: {h['uni_count']}")
-    print(f"Universr Size:  {h['uni_size']}")
-    print(f"Gamma:          {h['gamma']}")
-    print(f"Color:          {h['color']}")
-    print(f"Reserved:       {h['reserved']}")
+    print(f"Universe Count:  {h['uni_count']}")
+    print(f"Universr Size:   {h['uni_size']}")
+    print(f"Gamma:           {h['gamma']}")
+    print(f"Color:           {h['color']}")
+    print(f"Reserved:        {h['reserved']}")
 
   elif h['ver_maj'] == 2:
     ctype = 'unknown'
-    if h['compression'] == 1:
+    if h['compression'] == 0:
+      ctype = 'uncompressed'
+    elif h['compression'] == 1:
       ctype = 'zstd'
     elif h['compression'] == 2:
       ctype = 'zlib'
-    print(f"Compression:    {h['compression']} ({ctype})")
-    print(f"Comp Blocks:    {h['num_comp']}")
-    print(f"Sparse Ranges:  {h['num_sparse']}")
-    print(f"FLags 2:        {h['flags2']}")
-    print(f"Unique ID:      {h['uid']}")
+    print(f"Compression:     {h['compression']} ({ctype})")
+    print(f"Comp Blocks:     {h['num_comp']}")
+    print(f"FLags 2:         {h['flags2']}")
+    print(f"Unique ID:       {h['uid']}")
+    print(f"Sparse Ranges:   {h['num_sparse']}")
+    for sr in range(h['num_sparse']):
+      print(f"  [{sr}] Start:     {h['sparse'][sr]['start']}")
+      print(f"  [{sr}] Channels:  {h['sparse'][sr]['channels']}")
 
   if 'mf' in h:
-    print(f"Media File:     {h['mf']}")
+    print(f"Media File:      {h['mf']}")
 
   if 'sp' in h:
-    print(f"Created By:     {h['sp']}")
+    print(f"Created By:      {h['sp']}")
 
 # main
 parser = argparse.ArgumentParser(

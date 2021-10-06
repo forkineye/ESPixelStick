@@ -167,6 +167,13 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
 {
     // DEBUG_START;
 
+    // We're in an upload, can't be bothered
+    if (inFileUpload)
+    {
+        // DEBUG_V ("")
+        return;
+    }
+
     FPPPacket* fppPacket = reinterpret_cast<FPPPacket*>(UDPpacket.data ());
     // DEBUG_V (String ("Received UDP packet from: ") + UDPpacket.remoteIP ().toString ());
     // DEBUG_V (String ("                 Sent to: ") + UDPpacket.localIP ().toString ());
@@ -221,7 +228,7 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
         case 0x03: //Blank packet
         {
             // DEBUG_V (String (F ("FPP Blank packet")));
-            StopPlaying ();
+            // StopPlaying ();
             ProcessBlankPacket ();
             break;
         }
@@ -621,7 +628,7 @@ void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data,
 
     if (!index)
     {
-        // LOG_PORT.printf_P( PSTR("In process Body:    idx: %d    RangeLength: %d    total: %d\n)", index, RangeLength, total);
+        // LOG_PORT.printf("len: %u / index: %u / total: %u\n", len, index, total);
         printReq (request, false);
 
         String path = request->getParam (ulrPath)->value ();
