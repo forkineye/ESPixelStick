@@ -151,6 +151,7 @@ const char CN_subnet                   [] = "subnet";
 const char CN_SyncOffset               [] = "SyncOffset";
 const char CN_system                   [] = "system";
 const char CN_textSLASHplain           [] = "text/plain";
+const char CN_time                     [] = "time";
 const char CN_time_elapsed             [] = "time_elapsed";
 const char CN_TimeRemaining            [] = "TimeRemaining";
 const char CN_time_remaining           [] = "time_remaining";
