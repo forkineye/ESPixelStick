@@ -24,6 +24,7 @@
 #include "../FileMgr.hpp"
 #include "../WiFiMgr.hpp"
 #include "../output/OutputMgr.hpp"
+#include <time.h>
 
 #ifdef ARDUINO_ARCH_ESP32
 #   define FPP_TYPE_ID          0xC3
@@ -42,7 +43,7 @@ static const String ulrPath     = "path";
 c_FPPDiscovery::c_FPPDiscovery ()
 {
     // DEBUG_START;
-
+    memset ((void*)&MultiSyncStats, 0x00, sizeof (MultiSyncStats));
     // DEBUG_END;
 } // c_FPPDiscovery
 
@@ -166,79 +167,137 @@ void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t Curr
 void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
 {
     // DEBUG_START;
-
-    // We're in an upload, can't be bothered
-    if (inFileUpload)
+    do // once
     {
-        // DEBUG_V ("")
-        return;
-    }
-
-    FPPPacket* fppPacket = reinterpret_cast<FPPPacket*>(UDPpacket.data ());
-    // DEBUG_V (String ("Received UDP packet from: ") + UDPpacket.remoteIP ().toString ());
-    // DEBUG_V (String ("                 Sent to: ") + UDPpacket.localIP ().toString ());
-    // DEBUG_V (String ("         FPP packet_type: ") + String(fppPacket->packet_type));
-
-    switch (fppPacket->packet_type)
-    {
-        case 0x04: //Ping Packet
+        // We're in an upload, can't be bothered
+        if (inFileUpload)
         {
-            // DEBUG_V (String (F ("Ping Packet")));
+            // DEBUG_V ("")
+            break;
+        }
 
-            FPPPingPacket* pingPacket = reinterpret_cast<FPPPingPacket*>(UDPpacket.data ());
-            // DEBUG_V (String (F ("Ping Packet subtype: ")) + String (pingPacket->ping_subtype));
-            // DEBUG_V (String (F ("Ping Packet packet.versionMajor: ")) + String (pingPacket->versionMajor));
-            // DEBUG_V (String (F ("Ping Packet packet.versionMinor: ")) + String (pingPacket->versionMinor));
-            // DEBUG_V (String (F ("Ping Packet packet.hostName:     ")) + String (pingPacket->hostName));
-            // DEBUG_V (String (F ("Ping Packet packet.hardwareType: ")) + String (pingPacket->hardwareType));
+        FPPPacket* fppPacket = reinterpret_cast<FPPPacket*>(UDPpacket.data ());
+        // DEBUG_V (String ("Received UDP packet from: ") + UDPpacket.remoteIP ().toString ());
+        // DEBUG_V (String ("                 Sent to: ") + UDPpacket.localIP ().toString ());
+        // DEBUG_V (String ("         FPP packet_type: ") + String(fppPacket->packet_type));
 
-            if (pingPacket->ping_subtype == 0x01)
+        if ((fppPacket->header[0] != 'F') ||
+            (fppPacket->header[1] != 'P') ||
+            (fppPacket->header[2] != 'P') ||
+            (fppPacket->header[3] != 'D'))
+        {
+            MultiSyncStats.pktError++;
+            break;
+        }
+
+        struct timeval tv;
+        gettimeofday (&tv, NULL);
+        MultiSyncStats.lastReceiveTime = tv.tv_sec;
+
+        switch (fppPacket->packet_type)
+        {
+            case CTRL_PKT_CMD: // deprecated in favor of FPP Commands
             {
-                // DEBUG_V (String (F ("FPP Ping discovery packet")));
-                // received a discover ping packet, need to send a ping out
-                if (UDPpacket.isBroadcast () || UDPpacket.isMulticast ())
+                MultiSyncStats.pktCommand++;
+                DEBUG_V ("Unsupported PDU: CTRL_PKT_CMD");
+                break;
+            }
+
+            case CTRL_PKT_SYNC:
+            {
+                FPPMultiSyncPacket* msPacket = reinterpret_cast<FPPMultiSyncPacket*>(UDPpacket.data ());
+                // DEBUG_V (String (F ("msPacket->sync_type: ")) + String(msPacket->sync_type));
+
+                if (msPacket->sync_type == SYNC_FILE_SEQ)
                 {
-                    // DEBUG_V ("Broadcast Ping Response");
-                    sendPingPacket ();
+                    //FSEQ type, not media
+                    // DEBUG_V (String (F ("Received FPP FSEQ sync packet")));
+                    FppRemoteIp = UDPpacket.remoteIP ();
+                    ProcessSyncPacket (msPacket->sync_action, msPacket->filename, msPacket->frame_number, msPacket->seconds_elapsed);
+                }
+                else if (msPacket->sync_type == SYNC_FILE_MEDIA)
+                {
+                    // DEBUG_V (String (F ("Unsupported SYNC_FILE_MEDIA message.")));
                 }
                 else
                 {
-                    // DEBUG_V ("Unicast Ping Response");
-                    sendPingPacket (UDPpacket.remoteIP ());
+                    DEBUG_V (String (F ("Unexpected Multisync msPacket->sync_type: ")) + String (msPacket->sync_type));
                 }
+
+                break;
             }
-            break;
-        }
 
-        case 0x01: //Multisync packet
-        {
-            FPPMultiSyncPacket* msPacket = reinterpret_cast<FPPMultiSyncPacket*>(UDPpacket.data ());
-            // DEBUG_V (String (F ("msPacket->sync_type: ")) + String(msPacket->sync_type));
-
-            if (msPacket->sync_type == 0x00)
+            case CTRL_PKT_EVENT: // deprecated in favor of FPP Commands
             {
-                //FSEQ type, not media
-                // DEBUG_V (String (F ("Received FPP FSEQ sync packet")));
-                FppRemoteIp = UDPpacket.remoteIP ();
-                ProcessSyncPacket (msPacket->sync_action, msPacket->filename, msPacket->frame_number, msPacket->seconds_elapsed);
+                DEBUG_V ("Unsupported PDU: CTRL_PKT_EVENT");
+                break;
             }
-            break;
-        }
 
-        case 0x03: //Blank packet
-        {
-            // DEBUG_V (String (F ("FPP Blank packet")));
-            // StopPlaying ();
-            ProcessBlankPacket ();
-            break;
-        }
+            case CTRL_PKT_BLANK:
+            {
+                // DEBUG_V (String (F ("FPP Blank packet")));
+                // StopPlaying ();
+                MultiSyncStats.pktBlank++;
+                ProcessBlankPacket ();
+                break;
+            }
 
-        default:
-        {
-            // DEBUG_V (String ("UnHandled PDU: packet_type:  ") + String (packet->packet_type));
-            break;
-        }
-    }
+            case CTRL_PKT_PING:
+            {
+                // DEBUG_V (String (F ("Ping Packet")));
+
+                MultiSyncStats.pktPing++;
+                FPPPingPacket* pingPacket = reinterpret_cast<FPPPingPacket*>(UDPpacket.data ());
+
+                // DEBUG_V (String (F ("Ping Packet subtype: ")) + String (pingPacket->ping_subtype));
+                // DEBUG_V (String (F ("Ping Packet packet.versionMajor: ")) + String (pingPacket->versionMajor));
+                // DEBUG_V (String (F ("Ping Packet packet.versionMinor: ")) + String (pingPacket->versionMinor));
+                // DEBUG_V (String (F ("Ping Packet packet.hostName:     ")) + String (pingPacket->hostName));
+                // DEBUG_V (String (F ("Ping Packet packet.hardwareType: ")) + String (pingPacket->hardwareType));
+
+                if (pingPacket->ping_subtype == 0x01)
+                {
+                    // DEBUG_V (String (F ("FPP Ping discovery packet")));
+                    // received a discover ping packet, need to send a ping out
+                    if (UDPpacket.isBroadcast () || UDPpacket.isMulticast ())
+                    {
+                        // DEBUG_V ("Broadcast Ping Response");
+                        sendPingPacket ();
+                    }
+                    else
+                    {
+                        // DEBUG_V ("Unicast Ping Response");
+                        sendPingPacket (UDPpacket.remoteIP ());
+                    }
+                }
+                else
+                {
+                    DEBUG_V (String (F ("Unexpected Ping sub type: ")) + String (pingPacket->ping_subtype));
+                }
+                break;
+            }
+
+            case CTRL_PKT_PLUGIN:
+            {
+                DEBUG_V ("Unsupported PDU: CTRL_PKT_PLUGIN");
+                MultiSyncStats.pktPlugin++;
+                break;
+            }
+
+            case CTRL_PKT_FPPCOMMAND:
+            {
+                DEBUG_V ("Unsupported PDU: CTRL_PKT_FPPCOMMAND");
+                MultiSyncStats.pktFPPCommand++;
+                break;
+            }
+
+            default:
+            {
+                DEBUG_V (String ("UnHandled PDU: packet_type:  ") + String (fppPacket->packet_type));
+                break;
+            }
+        } // switch (fppPacket->packet_type)
+    } while (false);
 
     // DEBUG_END;
 } // ProcessReceivedUdpPacket
@@ -258,27 +317,29 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
 
         switch (action)
         {
-            case 0x00: // Start
+            case SYNC_PKT_START:
             {
                 // DEBUG_V ("Sync::Start");
                 // DEBUG_V (String ("   FileName: ") + FileName);
                 // DEBUG_V (String ("    FrameId: ") + FrameId);
 
+                MultiSyncStats.pktSyncSeqStart++;
                 StartPlaying (FileName, FrameId);
                 break;
             }
 
-            case 0x01: // Stop
+            case SYNC_PKT_STOP:
             {
                 // DEBUG_V ("Sync::Stop");
                 // DEBUG_V (String ("   FileName: ") + FileName);
                 // DEBUG_V (String ("    FrameId: ") + FrameId);
 
+                MultiSyncStats.pktSyncSeqStop++;
                 StopPlaying ();
                 break;
             }
 
-            case 0x02: // Sync
+            case SYNC_PKT_SYNC:
             {
                 // DEBUG_V ("Sync");
                 // DEBUG_V (String ("PlayingFile: ") + PlayingFile ());
@@ -294,22 +355,24 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
                                   String (FrameId) + "," +
                                   String(InputFPPRemotePlayFile.GetTimeOffset(),5));
                 */
+                MultiSyncStats.pktSyncSeqSync++;
                 InputFPPRemotePlayFile.Sync (FileName, FrameId);
                 break;
             }
 
-            case 0x03: // Open
+            case SYNC_PKT_OPEN:
             {
                 // DEBUG_V ("Sync::Open");
                 // DEBUG_V (String ("   FileName: ") + FileName);
                 // DEBUG_V (String ("    FrameId: ") + FrameId);
                 // StartPlaying (FileName, FrameId);
+                MultiSyncStats.pktSyncSeqOpen++;
                 break;
             }
 
             default:
             {
-                // DEBUG_V (String (F ("Sync: ERROR: Unknown Action: ")) + String (action));
+                DEBUG_V (String (F ("Sync: ERROR: Unknown Action: ")) + String (action));
                 break;
             }
 
@@ -422,6 +485,29 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
     JsonData[F ("StepTime")]        = String (fsqHeader.stepTime);
     JsonData[F ("NumFrames")]       = String (read32 (fsqHeader.TotalNumberOfFramesInSequence, 0));
     JsonData[F ("CompressionType")] = fsqHeader.compressionType;
+
+    char timeStr[32];
+    memset (timeStr, 0, sizeof (timeStr));
+    struct tm tm = *gmtime (&MultiSyncStats.lastReceiveTime);
+    sprintf (timeStr, "%4d-%.2d-%.2d %.2d:%.2d:%.2d",
+        1900 + tm.tm_year, tm.tm_mon + 1, tm.tm_mday,
+        tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+    JsonData[F ("lastReceiveTime")] = timeStr;
+    JsonData[F ("pktCommand")]      = MultiSyncStats.pktCommand;
+    JsonData[F ("pktSyncSeqOpen")]  = MultiSyncStats.pktSyncSeqOpen;
+    JsonData[F ("pktSyncSeqStart")] = MultiSyncStats.pktSyncSeqStart;
+    JsonData[F ("pktSyncSeqStop")]  = MultiSyncStats.pktSyncSeqStop;
+    JsonData[F ("pktSyncSeqSync")]  = MultiSyncStats.pktSyncSeqSync;
+    JsonData[F ("pktSyncMedOpen")]  = MultiSyncStats.pktSyncMedOpen;
+    JsonData[F ("pktSyncMedStart")] = MultiSyncStats.pktSyncMedStart;
+    JsonData[F ("pktSyncMedStop")]  = MultiSyncStats.pktSyncMedStop;
+    JsonData[F ("pktSyncMedSync")]  = MultiSyncStats.pktSyncMedSync;
+    JsonData[F ("pktBlank")]        = MultiSyncStats.pktBlank;
+    JsonData[F ("pktPing")]         = MultiSyncStats.pktPing;
+    JsonData[F ("pktPlugin")]       = MultiSyncStats.pktPlugin;
+    JsonData[F ("pktFPPCommand")]   = MultiSyncStats.pktFPPCommand;
+    JsonData[F ("pktError")]        = MultiSyncStats.pktError;
 
     uint32_t maxChannel = read32 (fsqHeader.channelCount, 0);
 
