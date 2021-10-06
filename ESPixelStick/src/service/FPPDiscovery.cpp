@@ -199,7 +199,7 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
             case CTRL_PKT_CMD: // deprecated in favor of FPP Commands
             {
                 MultiSyncStats.pktCommand++;
-                DEBUG_V ("Unsupported PDU: CTRL_PKT_CMD");
+                // DEBUG_V ("Unsupported PDU: CTRL_PKT_CMD");
                 break;
             }
 
@@ -221,7 +221,7 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
                 }
                 else
                 {
-                    DEBUG_V (String (F ("Unexpected Multisync msPacket->sync_type: ")) + String (msPacket->sync_type));
+                    // DEBUG_V (String (F ("Unexpected Multisync msPacket->sync_type: ")) + String (msPacket->sync_type));
                 }
 
                 break;
@@ -229,7 +229,7 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
 
             case CTRL_PKT_EVENT: // deprecated in favor of FPP Commands
             {
-                DEBUG_V ("Unsupported PDU: CTRL_PKT_EVENT");
+                // DEBUG_V ("Unsupported PDU: CTRL_PKT_EVENT");
                 break;
             }
 
@@ -272,28 +272,28 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
                 }
                 else
                 {
-                    DEBUG_V (String (F ("Unexpected Ping sub type: ")) + String (pingPacket->ping_subtype));
+                    // DEBUG_V (String (F ("Unexpected Ping sub type: ")) + String (pingPacket->ping_subtype));
                 }
                 break;
             }
 
             case CTRL_PKT_PLUGIN:
             {
-                DEBUG_V ("Unsupported PDU: CTRL_PKT_PLUGIN");
+                // DEBUG_V ("Unsupported PDU: CTRL_PKT_PLUGIN");
                 MultiSyncStats.pktPlugin++;
                 break;
             }
 
             case CTRL_PKT_FPPCOMMAND:
             {
-                DEBUG_V ("Unsupported PDU: CTRL_PKT_FPPCOMMAND");
+                // DEBUG_V ("Unsupported PDU: CTRL_PKT_FPPCOMMAND");
                 MultiSyncStats.pktFPPCommand++;
                 break;
             }
 
             default:
             {
-                DEBUG_V (String ("UnHandled PDU: packet_type:  ") + String (fppPacket->packet_type));
+                // DEBUG_V (String ("UnHandled PDU: packet_type:  ") + String (fppPacket->packet_type));
                 break;
             }
         } // switch (fppPacket->packet_type)
@@ -372,7 +372,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
 
             default:
             {
-                DEBUG_V (String (F ("Sync: ERROR: Unknown Action: ")) + String (action));
+                // DEBUG_V (String (F ("Sync: ERROR: Unknown Action: ")) + String (action));
                 break;
             }
 
