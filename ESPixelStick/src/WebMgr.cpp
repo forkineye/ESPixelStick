@@ -974,14 +974,14 @@ bool c_WebMgr::processCmdSet (JsonObject & jsonCmd)
             break;
         }
 
-        if (jsonCmd.containsKey (F ("time")))
+        if (jsonCmd.containsKey (CN_time))
         {
 //TODO:  Send proper retval once upper logic is in place
             retval = false;
             // PrettyPrint (jsonCmd, String ("processCmdSet"));
 
             // DEBUG_V ("time");
-            JsonObject otConfig = jsonCmd[F ("time")];
+            JsonObject otConfig = jsonCmd[CN_time];
             processCmdSetTime (otConfig);
             // DEBUG_V ("output: Done");
             break;

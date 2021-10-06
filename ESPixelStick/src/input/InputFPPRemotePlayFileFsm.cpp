@@ -224,6 +224,8 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
                 continue;
             }
 
+            uint32_t AdjustedFilePosition = FilePosition + CurrentSparseRange.DataOffset;
+
             // DEBUG_V (String ("                 FilePosition: ") + String (FilePosition));
             // DEBUG_V (String ("         AdjustedFilePosition: ") + String (uint32_t(AdjustedFilePosition), HEX));
             // DEBUG_V (String ("           CurrentDestination: ") + String (uint32_t(CurrentDestination), HEX));
@@ -231,7 +233,7 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
             size_t ActualBytesRead = FileMgr.ReadSdFile (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed,
                                                          CurrentDestination,
                                                          ActualBytesToRead,
-                                                         FilePosition);
+                                                         AdjustedFilePosition);
             MaxBytesToRead -= ActualBytesRead;
             CurrentDestination += ActualBytesRead;
 

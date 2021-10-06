@@ -153,6 +153,7 @@ extern const char CN_subnet[];
 extern const char CN_SyncOffset[];
 extern const char CN_system[];
 extern const char CN_textSLASHplain[];
+extern const char CN_time[];
 extern const char CN_time_elapsed[];
 extern const char CN_TimeRemaining[];
 extern const char CN_time_remaining[];

@@ -59,6 +59,42 @@ private:
     bool AllowedToRemotePlayFiles ();
     void GetDriverName     (String & Name) { Name = "FPPD"; }
 
+    typedef struct MultiSyncStats_t
+    {
+        time_t   lastReceiveTime;
+        uint32_t pktCommand;
+        uint32_t pktSyncSeqOpen;
+        uint32_t pktSyncSeqStart;
+        uint32_t pktSyncSeqStop;
+        uint32_t pktSyncSeqSync;
+        uint32_t pktSyncMedOpen;
+        uint32_t pktSyncMedStart;
+        uint32_t pktSyncMedStop;
+        uint32_t pktSyncMedSync;
+        uint32_t pktBlank;
+        uint32_t pktPing;
+        uint32_t pktPlugin;
+        uint32_t pktFPPCommand;
+        uint32_t pktError;
+    };
+    MultiSyncStats_t MultiSyncStats;
+
+#   define SYNC_PKT_START       0
+#   define SYNC_PKT_STOP        1
+#   define SYNC_PKT_SYNC        2
+#   define SYNC_PKT_OPEN        3
+
+#   define SYNC_FILE_SEQ        0
+#   define SYNC_FILE_MEDIA      1
+
+#   define CTRL_PKT_CMD         0 // deprecated in favor of FPP Commands
+#   define CTRL_PKT_SYNC        1
+#   define CTRL_PKT_EVENT       2 // deprecated in favor of FPP Commands
+#   define CTRL_PKT_BLANK       3
+#   define CTRL_PKT_PING        4
+#   define CTRL_PKT_PLUGIN      5
+#   define CTRL_PKT_FPPCOMMAND  6
+
 public:
     c_FPPDiscovery ();
 
@@ -76,7 +112,6 @@ public:
     void Disable          (void);
     void GetStatus        (JsonObject& jsonStatus);
     void NetworkStateChanged (bool NewNetworkState);
-
 };
 
 extern c_FPPDiscovery FPPDiscovery;

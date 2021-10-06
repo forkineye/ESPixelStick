@@ -191,6 +191,7 @@ void c_WiFiMgr::connectWifi (const String & ssid, const String & passphrase)
     WiFi.mode (WIFI_STA);
     // DEBUG_V ("");
 #endif
+
     logcon (String(F ("Connecting to '")) +
                       ssid +
                       String (F ("' as ")) +
@@ -361,7 +362,8 @@ void c_WiFiMgr::AnnounceState ()
 
     String StateName;
     pCurrentFsmState->GetStateName (StateName);
-    // logcon (String (F ("WiFi Entering State: ")) + StateName);
+    LOG_PORT.println ("");
+    logcon (String (F ("WiFi Entering State: ")) + StateName);
 
     // DEBUG_END;
 
