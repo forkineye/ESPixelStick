@@ -274,7 +274,6 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 
             uint32_t SparseRangeIndex = 0;
             uint32_t TotalChannels = 0;
-            uint32_t LargestOffset = 0;
             uint32_t LargestBlock = 0;
             for (auto & CurrentSparseRange : SparseRanges)
             {
@@ -290,7 +289,6 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
                 CurrentSparseRange.DataOffset = TotalChannels;
                 CurrentSparseRange.ChannelCount = read24 (FseqRawRanges[SparseRangeIndex].Length);
                 TotalChannels += CurrentSparseRange.ChannelCount;
-                LargestOffset = max (LargestOffset, CurrentSparseRange.DataOffset);
                 LargestBlock  = max (LargestBlock, CurrentSparseRange.DataOffset + CurrentSparseRange.ChannelCount);
 
 #ifdef DUMP_FSEQ_HEADER
@@ -317,14 +315,6 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
             else if (TotalChannels > fsqParsedHeader.channelCount)
             {
                 LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Ignoring Range Info. ")) + PlayItemName + F (" Too many channels defined in Sparse Ranges."));
-                logcon (LastFailedPlayStatusMsg);
-                memset ((void*)&SparseRanges, 0x00, sizeof (SparseRanges));
-                SparseRanges[0].ChannelCount = fsqParsedHeader.channelCount;
-            }
-
-            else if (LargestOffset > fsqParsedHeader.channelCount)
-            {
-                LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Ignoring Range Info. ")) + PlayItemName + F (" Sparse Range Frame offset is larger than frame size."));
                 logcon (LastFailedPlayStatusMsg);
                 memset ((void*)&SparseRanges, 0x00, sizeof (SparseRanges));
                 SparseRanges[0].ChannelCount = fsqParsedHeader.channelCount;
