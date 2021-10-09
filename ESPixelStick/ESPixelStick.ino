@@ -89,6 +89,7 @@ uint32_t lastUpdate;                // Update timeout tracker
 bool     ResetWiFi = false;
 bool     InitializeConfig = false;  // Configuration initialization flag
 bool     ConfigLoadNeeded = false;
+bool     NeedAutoConfig = true;
 
 /////////////////////////////////////////////////////////
 //
@@ -231,6 +232,7 @@ bool dsDevice(JsonObject & json)
         JsonObject JsonDeviceConfig = json[CN_device];
 
 //TODO: Add configuration upgrade handling - cfgver moved to root level
+        setFromJSON (NeedAutoConfig, json, CN_NeedAutoConfig);
 
         ConfigChanged |= setFromJSON (config.id,         JsonDeviceConfig, CN_id);
         ConfigChanged |= setFromJSON (config.BlankDelay, JsonDeviceConfig, CN_blanktime);
@@ -327,6 +329,7 @@ bool deserializeCore (JsonObject & json)
         {
             //TODO: Add configuration update handler
             logcon (String (F ("Incorrect Config Version ID")));
+            NeedAutoConfig = true;
         }
 
         setFromJSON (InitializeConfig, json, CN_init);
@@ -379,8 +382,9 @@ void loadConfig()
     String temp;
     // DEBUG_V ("");
     FileMgr.LoadConfigFile (ConfigFileName, &deserializeCoreHandler);
-    if (!validateConfig()) 
+    if ((!validateConfig()) || (NeedAutoConfig))
     {
+        // DEBUG_V (String ("NeedAutoConfig: ") + String (NeedAutoConfig));
         SaveConfig();
     }
 
@@ -403,10 +407,12 @@ void GetConfig (JsonObject & json)
     // Config Version
     json[CN_cfgver] = CurrentConfigVersion;
 
+
     // Device
-    JsonObject device    = json.createNestedObject(CN_device);
-    device[CN_id]        = config.id;
-    device[CN_blanktime] = config.BlankDelay;
+    JsonObject device       = json.createNestedObject(CN_device);
+    device[CN_id]           = config.id;
+    device[CN_blanktime]    = config.BlankDelay;
+    json[CN_NeedAutoConfig] = false;
 
     FileMgr.GetConfig (device);
 

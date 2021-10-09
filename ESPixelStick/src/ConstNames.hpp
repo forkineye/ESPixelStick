@@ -111,6 +111,7 @@ extern const char CN_mode_name [];
 extern const char CN_mosi_pin[];
 extern const char CN_multicast [];
 extern const char CN_name [];
+extern const char CN_NeedAutoConfig [];
 extern const char CN_netmask [];
 extern const char CN_network [];
 extern const char CN_num_chan[];
