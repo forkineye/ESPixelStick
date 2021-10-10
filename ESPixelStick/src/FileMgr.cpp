@@ -232,7 +232,7 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
         fs::File file = LittleFS.open (FileName.c_str (), "r");
         if (!file)
         {
-            if (!InitializeConfig) {
+            if (!IsBooting) {
                 logcon (String (CN_stars) + CfgFileMessagePrefix + String (F (" Could not open file for reading ")) + CN_stars);
             }
             break;

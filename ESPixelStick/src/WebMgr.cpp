@@ -945,9 +945,9 @@ bool c_WebMgr::processCmdSet (JsonObject & jsonCmd)
         if ((jsonCmd.containsKey (CN_device)) || (jsonCmd.containsKey (CN_network)))
         {
             // DEBUG_V ("device/network");
-            extern void SetConfig (JsonObject &, const char* DataString);
+            extern void SetConfig (const char* DataString);
             serializeJson (jsonCmd, WebSocketFrameCollectionBuffer, sizeof (WebSocketFrameCollectionBuffer) - 1);
-            SetConfig (jsonCmd, WebSocketFrameCollectionBuffer);
+            SetConfig (WebSocketFrameCollectionBuffer);
             pAlexaDevice->setName (config.id);
 
             // DEBUG_V ("device/network: Done");
@@ -987,7 +987,7 @@ bool c_WebMgr::processCmdSet (JsonObject & jsonCmd)
             break;
         }
 
-        logcon (" ");
+        // logcon (" ");
         PrettyPrint (jsonCmd, String(CN_stars) + F (" ERROR: Undhandled Set request type. ") + CN_stars );
         strcat (WebSocketFrameCollectionBuffer, "ERROR");
 

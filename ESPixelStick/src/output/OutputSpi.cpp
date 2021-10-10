@@ -42,7 +42,7 @@ static void IRAM_ATTR spi_transfer_callback (spi_transaction_t * param)
         }
         else
         {
-            LOG_PORT.println (F ("SPI User Parm is null."));
+            logcon (F ("SPI User Parm is null."));
         }
     }
 } // spi_transfer_callback

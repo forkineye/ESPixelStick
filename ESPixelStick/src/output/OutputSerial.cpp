@@ -441,7 +441,7 @@ void c_OutputSerial::Render ()
     }
 
 //    delayMicroseconds (1000000);
-//    LOG_PORT.println ("4");
+//    DEBUG_V ("4");
 
     // start the next frame
     switch (OutputType)

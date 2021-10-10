@@ -138,6 +138,7 @@ private:
     bool HasBeenInitialized = false;
     bool ConfigLoadNeeded   = false;
     bool IsOutputPaused     = false;
+    bool BuildingNewConfig  = false;
 
     bool ProcessJsonConfig (JsonObject & jsonConfig);
     void CreateJsonConfig  (JsonObject & jsonConfig);

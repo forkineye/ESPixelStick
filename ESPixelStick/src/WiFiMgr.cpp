@@ -158,7 +158,6 @@ void c_WiFiMgr::connectWifi (const String & ssid, const String & passphrase)
     if (ResetWiFi)
         return;
 
-    LOG_PORT.println();
     SetUpIp ();
 
     // Hostname must be set after the mode on ESP8266 and before on ESP32
@@ -362,7 +361,6 @@ void c_WiFiMgr::AnnounceState ()
 
     String StateName;
     pCurrentFsmState->GetStateName (StateName);
-    LOG_PORT.println ("");
     logcon (String (F ("WiFi Entering State: ")) + StateName);
 
     // DEBUG_END;
@@ -429,7 +427,6 @@ void fsm_WiFi_state_ConnectingUsingConfig::Poll ()
     {
         if (CurrentTimeMS - WiFiMgr.GetFsmStartTime() > (1000 * WiFiMgr.GetConfigPtr()->sta_timeout))
         {
-            LOG_PORT.println ("");
             logcon (F ("WiFi Failed to connect using Configured Credentials"));
             fsm_WiFi_state_ConnectingDefault_imp.Init ();
         }
@@ -487,7 +484,6 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Poll ()
     {
         if (CurrentTimeMS - WiFiMgr.GetFsmStartTime () > (1000 * WiFiMgr.GetConfigPtr ()->sta_timeout))
         {
-            LOG_PORT.println ("");
             logcon (F ("WiFi Failed to connect using default Credentials"));
             fsm_WiFi_state_ConnectingAsAP_imp.Init ();
         }
@@ -539,11 +535,8 @@ void fsm_WiFi_state_ConnectingAsAP::Poll ()
     }
     else
     {
-        LOG_PORT.print (".");
-
         if (millis () - WiFiMgr.GetFsmStartTime () > (1000 * WiFiMgr.GetConfigPtr ()->ap_timeout))
         {
-            LOG_PORT.println ("");
             logcon (F ("WiFi STA Failed to connect"));
             fsm_WiFi_state_ConnectionFailed_imp.Init ();
         }
@@ -680,7 +673,6 @@ void fsm_WiFi_state_ConnectedToSta::Init ()
     WiFiMgr.setIpAddress (WiFi.softAPIP ());
     WiFiMgr.setIpSubNetMask (IPAddress (255, 255, 255, 0));
 
-    LOG_PORT.println ("");
     logcon (String (F ("Connected to STA with IP: ")) + WiFiMgr.getIpAddress ().toString ());
 
     WiFiMgr.SetIsWiFiConnected (true);
