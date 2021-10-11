@@ -10,8 +10,7 @@ var ws = null; // Web Socket
 var AdminInfo = null;
 var Output_Config = null; // Output Manager configuration record
 var Input_Config = null; // Input Manager configuration record
-var Device_Config = null;
-var Network_Config = null;
+var System_Config = null;
 var Fseq_File_List = null;
 var selector = [];
 var target = null;
@@ -34,7 +33,7 @@ $.fn.modal.Constructor.DEFAULTS.keyboard = false;
 wsConnect();
 
 // console.log ('************before enqueue');
-// wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
+// wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'system' } })); // Get general config
 // console.log ('************after enqueue');
 
 // jQuery doc ready
@@ -142,13 +141,13 @@ $(function ()
         ExtractNetworkConfigFromHtmlPage();
         ExtractChannelConfigFromHtmlPage(Input_Config.channels, "input");
         ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
-        Device_Config.id = $('#config #device #id').val();
-        Device_Config.blanktime = $('#config #device #blanktime').val();
+        System_Config.device.id = $('#config #device #id').val();
+        System_Config.device.blanktime = $('#config #device #blanktime').val();
 
-        let TotalConfig = JSON.stringify({ 'device': Device_Config, 'network': Network_Config, 'input': Input_Config, 'output': Output_Config });
+        let TotalConfig = JSON.stringify({ 'system': System_Config, 'input': Input_Config, 'output': Output_Config });
 
         let blob = new Blob([TotalConfig], { type: "text/json;charset=utf-8" });
-        let FileName = Device_Config.id.replace(".", "-").replace(" ", "-").replace(",", "-") + "-" + AdminInfo.flashchipid;
+        let FileName = System_Config.device.id.replace(".", "-").replace(" ", "-").replace(",", "-") + "-" + AdminInfo.flashchipid;
         saveAs(blob, FileName + ".json"); // Filesaver.js
     });
 
@@ -271,7 +270,7 @@ function ProcessLocalConfig(data)
     // console.info(data);
     let ParsedLocalConfig = JSON.parse(data);
 
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'device' : ParsedLocalConfig.device, 'network': ParsedLocalConfig.network } } }));
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'system' : ParsedLocalConfig } } }));
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input'  : { 'input_config' : ParsedLocalConfig.input  } } } }));
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'output' : { 'output_config': ParsedLocalConfig.output } } } }));
 
@@ -305,18 +304,18 @@ function ProcessWindowChange(NextWindow) {
 
     else if (NextWindow === "#admin") {
         wsEnqueue('XA');
-        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
+        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'system' } })); // Get general config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
     }
 
     else if ((NextWindow === "#wifi") || (NextWindow === "#home")) {
-        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
+        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'system' } })); // Get general config
     }
 
     else if (NextWindow === "#config") {
         RequestListOfFiles();
-        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'device' } })); // Get general config
+        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'system' } })); // Get general config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
     }
@@ -687,14 +686,8 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     else if ({}.hasOwnProperty.call(JsonConfigData, "device"))
     {
         // console.info("Got Device Config");
-        Device_Config = JsonConfigData.device;
+        System_Config = JsonConfigData;
         updateFromJSON(JsonConfigData);
-
-        // is this a network config?
-        if ({}.hasOwnProperty.call(JsonConfigData, "network")) {
-            Network_Config = JsonConfigData.network;
-            updateFromJSON(JsonConfigData);
-        }
     }
 
     // is this a file list?
@@ -870,23 +863,24 @@ function CreateOptionsFromConfig(OptionListName, Config)
 // Builds JSON config submission for "WiFi" tab
 function ExtractNetworkConfigFromHtmlPage()
 {
-    Network_Config.ssid        = $('#ssid').val();
-    Network_Config.passphrase  = $('#passphrase').val();
-    Network_Config.hostname    = $('#hostname').val();
-    Network_Config.sta_timeout = $('#sta_timeout').val();
-    Network_Config.ip          = $('#ip').val();
-    Network_Config.netmask     = $('#netmask').val();
-    Network_Config.gateway     = $('#gateway').val();
-    Network_Config.dhcp        = $('#dhcp').prop('checked');
-    Network_Config.ap_fallback = $('#ap_fallback').prop('checked');
-    Network_Config.ap_reboot   = $('#ap_reboot').prop('checked');
-    Network_Config.ap_timeout  = $('#apt').prop('checked');
+    System_Config.network.ssid        = $('#ssid').val();
+    System_Config.network.passphrase  = $('#passphrase').val();
+    System_Config.network.hostname    = $('#hostname').val();
+    System_Config.network.sta_timeout = $('#sta_timeout').val();
+    System_Config.network.ip          = $('#ip').val();
+    System_Config.network.netmask     = $('#netmask').val();
+    System_Config.network.gateway     = $('#gateway').val();
+    System_Config.network.dhcp        = $('#dhcp').prop('checked');
+    System_Config.network.ap_fallback = $('#ap_fallback').prop('checked');
+    System_Config.network.ap_reboot   = $('#ap_reboot').prop('checked');
+    System_Config.network.ap_timeout  = $('#apt').prop('checked');
+
 } // ExtractNetworkConfigFromHtmlPage
 
 // Builds JSON config submission for "WiFi" tab
 function submitWiFiConfig() {
     ExtractNetworkConfigFromHtmlPage();
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'device': Device_Config, 'network': Network_Config } } }));
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': System_Config } }));
 
 } // submitWiFiConfig
 
@@ -990,14 +984,14 @@ function submitDeviceConfig()
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
-    Device_Config.id        = $('#config #device #id').val();
-    Device_Config.blanktime = $('#config #device #blanktime').val();
-    Device_Config.miso_pin  = $('#config #device #miso_pin').val();
-    Device_Config.mosi_pin  = $('#config #device #mosi_pin').val();
-    Device_Config.clock_pin = $('#config #device #clock_pin').val();
-    Device_Config.cs_pin    = $('#config #device #cs_pin').val();
+    System_Config.device.id        = $('#config #device #id').val();
+    System_Config.device.blanktime = $('#config #device #blanktime').val();
+    System_Config.device.miso_pin  = $('#config #device #miso_pin').val();
+    System_Config.device.mosi_pin  = $('#config #device #mosi_pin').val();
+    System_Config.device.clock_pin = $('#config #device #clock_pin').val();
+    System_Config.device.cs_pin    = $('#config #device #cs_pin').val();
 
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'device': Device_Config, 'network': Network_Config } } }));
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': System_Config } }));
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input':  { 'input_config': Input_Config } } } }));
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'output': { 'output_config': Output_Config } } } }));
 
@@ -1039,7 +1033,7 @@ function wsConnect()
             target = document.location.host;
         }
 
-        // target = "192.168.10.215";
+        // target = "192.168.10.237";
         // target = "192.168.10.155";
 
         // Open a new web socket and set the binary type
