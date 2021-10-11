@@ -82,6 +82,7 @@ void c_InputE131::GetConfig (JsonObject & jsonConfig)
     jsonConfig[CN_universe]       = startUniverse;
     jsonConfig[CN_universe_limit] = ChannelsPerUniverse;
     jsonConfig[CN_universe_start] = FirstUniverseChannelOffset;
+    jsonConfig[CN_port]           = PortId;
 
     // DEBUG_END;
 
@@ -258,9 +259,19 @@ bool c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
+    ESPAsyncE131PortId OldPortId = PortId;
+
     setFromJSON (startUniverse,              jsonConfig, CN_universe);
     setFromJSON (ChannelsPerUniverse,        jsonConfig, CN_universe_limit);
     setFromJSON (FirstUniverseChannelOffset, jsonConfig, CN_universe_start);
+    setFromJSON (PortId,                     jsonConfig, CN_port);
+
+    if ((OldPortId != PortId) && (ESPAsyncE131Initialized))
+    {
+        // ask for a reboot. 
+        reboot = true;
+        logcon (String (F ("Requesting reboot on change of UDP port.")));
+    }
 
     validateConfiguration ();
 
@@ -344,9 +355,9 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
     if (IsConnected)
     {
         // Get on with business
-        if (e131->begin (E131_MULTICAST, startUniverse, LastUniverse - startUniverse + 1))
+        if (e131->begin (e131_listen_t::E131_MULTICAST, PortId, startUniverse, LastUniverse - startUniverse + 1))
         {
-            logcon (String (F ("Multicast enabled")));
+            // logcon (String (F ("Multicast enabled")));
         }
         else
         {
@@ -355,9 +366,9 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
 
         // DEBUG_V ("");
 
-        if (e131->begin (E131_UNICAST))
+        if (e131->begin (e131_listen_t::E131_UNICAST, PortId, startUniverse, LastUniverse - startUniverse + 1))
         {
-            logcon (String (F ("Listening on port ")) + E131_DEFAULT_PORT);
+            // logcon (String (F ("Listening on port ")) + PortId);
         }
         else
         {
@@ -365,14 +376,17 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         }
 
         logcon (String (F ("Listening for ")) + InputDataBufferSize +
-            F (" channels from Universe ") + startUniverse +
-            F (" to ") + LastUniverse);
+                        F (" channels from Universe ") + startUniverse +
+                        F (" to ") + LastUniverse + 
+                        F (" on port ") + PortId);
+
+        ESPAsyncE131Initialized = true;
     }
     else if (ReBootAllowed)
     {
         // handle a disconnect
         // E1.31 does not do this gracefully. A loss of connection needs a reboot
-        extern bool reboot;
+        // extern bool reboot;
         reboot = true;
         logcon (String (F ("Input requesting reboot on loss of WiFi connection.")));
     }

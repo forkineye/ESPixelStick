@@ -109,6 +109,7 @@ const char CN_mode_name                [] = "mode_name";
 const char CN_mosi_pin                 [] = "mosi_pin";
 const char CN_multicast                [] = "multicast";
 const char CN_name                     [] = "name";
+const char CN_NeedAutoConfig           [] = "NeedAutoConfig";
 const char CN_netmask                  [] = "netmask";
 const char CN_network                  [] = "network";
 const char CN_num_chan                 [] = "num_chan";

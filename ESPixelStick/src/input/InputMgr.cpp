@@ -245,7 +245,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
 void c_InputMgr::CreateNewConfig ()
 {
     // DEBUG_START;
-    if (!InitializeConfig)
+    if (!IsBooting)
     {
         logcon (String (F ("--- WARNING: Creating a new Input Manager configuration Data set ---")));
     }
@@ -405,7 +405,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             pInputChannelDrivers[ChannelIndex]->GetDriverName (DriverName);
             rebootNeeded |= pInputChannelDrivers[ChannelIndex]->isShutDownRebootNeeded();
             // DEBUG_V (String ("rebootNeeded: ") + String (rebootNeeded));
-            if (!InitializeConfig) {
+            if (!IsBooting) {
                 logcon (String(F("Shutting Down '")) + DriverName + String(F("' on Input: ")) + String(ChannelIndex));
             }
 
@@ -534,7 +534,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
 
             default:
             {
-                if (!InitializeConfig)
+                if (!IsBooting)
                 {
                     logcon (CN_stars + String (F (" Unknown Input type for channel '")) + ChannelIndex + String(F ("'. Using disabled. ")) + CN_stars);
                 }
@@ -585,7 +585,7 @@ void c_InputMgr::LoadConfig ()
             // DEBUG_V ("");
         }))
     {
-        if (!InitializeConfig) {
+        if (!IsBooting) {
             logcon (CN_stars + String (F (" Error loading Input Manager Config File ")) + CN_stars);
         }
 
@@ -733,7 +733,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
         JsonObject InputChannelMgrData = jsonConfig[CN_input_config];
         // DEBUG_V ("");
 
-        uint8_t TempVersion;
+        uint8_t TempVersion = !InputChannelMgrData;
         setFromJSON (TempVersion, InputChannelMgrData, CN_cfgver);
 
         // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
