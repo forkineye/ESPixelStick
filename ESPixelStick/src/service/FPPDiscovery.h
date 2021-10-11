@@ -59,7 +59,7 @@ private:
     bool AllowedToRemotePlayFiles ();
     void GetDriverName     (String & Name) { Name = "FPPD"; }
 
-    typedef struct MultiSyncStats_t
+    struct MultiSyncStats_t
     {
         time_t   lastReceiveTime;
         uint32_t pktCommand;

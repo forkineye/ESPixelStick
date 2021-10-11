@@ -474,7 +474,7 @@ void c_OutputSerial::Render ()
         {
             // LOG_PORT.println ("5 '" + GenericSerialHeader + "'");
 
-            if (GenericSerialHeader.length() > (UART_TX_FIFO_SIZE - getFifoLength))
+            if (uint32_t(GenericSerialHeader.length()) > uint32_t(UART_TX_FIFO_SIZE - getFifoLength))
             {
                 // wait longer
                 return;

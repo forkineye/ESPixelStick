@@ -738,7 +738,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
         JsonObject OutputChannelMgrData = jsonConfig[CN_output_config];
         // DEBUG_V ("");
 
-        uint8_t TempVersion;
+        uint8_t TempVersion = !CurrentConfigVersion;
         setFromJSON (TempVersion, OutputChannelMgrData, CN_cfgver);
 
         // DEBUG_V (String ("TempVersion: ") + String (TempVersion));

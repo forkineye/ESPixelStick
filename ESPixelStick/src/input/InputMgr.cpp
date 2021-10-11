@@ -733,7 +733,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
         JsonObject InputChannelMgrData = jsonConfig[CN_input_config];
         // DEBUG_V ("");
 
-        uint8_t TempVersion;
+        uint8_t TempVersion = !InputChannelMgrData;
         setFromJSON (TempVersion, InputChannelMgrData, CN_cfgver);
 
         // DEBUG_V (String ("TempVersion: ") + String (TempVersion));

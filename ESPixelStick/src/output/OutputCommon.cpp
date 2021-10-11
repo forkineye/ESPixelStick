@@ -48,7 +48,6 @@ extern "C" {
 
 #endif
 }
-static void IRAM_ATTR uart_intr_handler (void* param);
 
 //-------------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode

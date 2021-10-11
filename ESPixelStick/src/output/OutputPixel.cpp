@@ -190,7 +190,7 @@ void c_OutputPixel::updateGammaTable ()
     double tempBrightness = double (brightness) / 100.0;
     // DEBUG_V (String ("tempBrightness: ") + String (tempBrightness));
 
-    for (int i = 0; i < sizeof (gamma_table); ++i)
+    for (unsigned int i = 0; i < sizeof (gamma_table); ++i)
     {
         // ESP.wdtFeed ();
         gamma_table[i] = (uint8_t)min ((255.0 * pow (i * tempBrightness / 255, gamma) + 0.5), 255.0);
