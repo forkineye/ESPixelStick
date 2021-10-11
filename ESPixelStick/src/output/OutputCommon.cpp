@@ -140,7 +140,7 @@ void c_OutputCommon::InitializeUart (uint32_t baudrate,
         SET_PERI_REG_MASK   (UART_CONF0 (UartId), UART_RXFIFO_RST | UART_TXFIFO_RST);
         CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_RXFIFO_RST | UART_TXFIFO_RST);
 
-        if (OM_CMN_NO_CUSTOM_ISR != fifoTriggerLevel)
+        if (uint32_t(OM_CMN_NO_CUSTOM_ISR) != fifoTriggerLevel)
         {
             // Disable all interrupts
             ETS_UART_INTR_DISABLE ();
@@ -233,7 +233,7 @@ void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
     ESP_ERROR_CHECK (uart_set_pin (UartId, DataPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
     // DEBUG_V ("");
 
-    if (OM_CMN_NO_CUSTOM_ISR != fifoTriggerLevel)
+    if (uint32_t(OM_CMN_NO_CUSTOM_ISR) != fifoTriggerLevel)
     {
         ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
         // DEBUG_V ("");
