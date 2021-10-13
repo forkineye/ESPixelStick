@@ -169,11 +169,11 @@ void c_InputFPPRemote::StopPlaying ()
     {
         if (!PlayingFile ())
         {
-            DEBUG_V ("Not currently playing a file");
+            // DEBUG_ ("Not currently playing a file");
             break;
         }
 
-        DEBUG_V ();
+        // DEBUG_ ();
 
         pInputFPPRemotePlayItem->Stop ();
 
