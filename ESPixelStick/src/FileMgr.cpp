@@ -589,7 +589,7 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
 {
     // DEBUG_START;
 
-    DynamicJsonDocument ResponseJsonDoc (2048);
+    DynamicJsonDocument ResponseJsonDoc (3 * 1024);
 
     do // once
     {

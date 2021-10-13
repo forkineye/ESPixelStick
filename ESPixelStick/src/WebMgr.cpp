@@ -262,6 +262,18 @@ void c_WebMgr::init ()
         }
     );
 
+    webServer.on ("/download", HTTP_GET, [](AsyncWebServerRequest* request)
+    {
+        // DEBUG_V (String ("url: ") + String (request->url ()));
+        String filename = request->url ().substring (String ("/download").length ());
+        // DEBUG_V (String ("filename: ") + String (filename));
+
+        AsyncWebServerResponse* response = new AsyncFileResponse (SDFS, filename, "application/octet-stream", true);
+        request->send (response);
+
+        // DEBUG_V ("Send File Done");
+    });
+
     webServer.onNotFound ([this](AsyncWebServerRequest* request)
     {
         // DEBUG_V ("onNotFound");
