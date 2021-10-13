@@ -106,8 +106,11 @@ void c_InputFPPRemote::GetStatus (JsonObject & jsonStatus)
 void c_InputFPPRemote::Process ()
 {
     // DEBUG_START;
-
-    if (PlayingFile ())
+    if (!IsInputChannelActive)
+    {
+        // dont do anything if the channel is not active
+    }
+    else if (PlayingFile ())
     {
         pInputFPPRemotePlayItem->Poll (InputDataBuffer, InputDataBufferSize);
 
