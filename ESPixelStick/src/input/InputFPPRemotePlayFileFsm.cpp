@@ -214,7 +214,6 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
 
         p_InputFPPRemotePlayFile->LastPlayedFrameId = CurrentFrame;
 
-        size_t TotalBytesRead = 0;
         for (auto & CurrentSparseRange : p_InputFPPRemotePlayFile->SparseRanges)
         {
             size_t ActualBytesToRead = min (MaxBytesToRead, CurrentSparseRange.ChannelCount);
@@ -239,7 +238,6 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
 
             if (ActualBytesRead != ActualBytesToRead)
             {
-                // DEBUG_V (String ("               TotalBytesRead: ") + String (TotalBytesRead));
                 // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence));
                 // DEBUG_V (String ("                 CurrentFrame: ") + String (CurrentFrame));
 
@@ -256,7 +254,6 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
         // DEBUG_V (String ("ChannelsPerFrame: ") + String (p_InputFPPRemotePlayFile->ChannelsPerFrame));
         // DEBUG_V (String ("    FilePosition: ") + String (FilePosition));
         // DEBUG_V (String ("  MaxBytesToRead: ") + String (MaxBytesToRead));
-        // DEBUG_V (String ("  TotalBytesRead: ") + String (TotalBytesRead));
 
         InputMgr.RestartBlankTimer (p_InputFPPRemotePlayFile->GetInputChannelId ());
 

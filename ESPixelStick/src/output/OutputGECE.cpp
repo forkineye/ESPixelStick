@@ -58,12 +58,6 @@ extern "C" {
 #define GECE_DATA_ZERO 0b01111110
 #define GECE_DATA_ONE  0b01000000
 
-static char LOOKUP_GECE[] =
-{
-    GECE_DATA_ZERO,    // 0 - (0)01 111 11(1)
-    GECE_DATA_ONE      // 1 - (0)00 000 01(1)
-};
-
 /*
 output looks like this
 
@@ -127,9 +121,6 @@ stop bit = low for at least 45us
 #define GECE_SET_BLUE(value)        ((uint32_t(value) << GECE_BLUE_SHIFT)      & GECE_BLUE_MASK)
 #define GECE_SET_GREEN(value)       ((uint32_t(value)                   )      & GECE_GREEN_MASK)
 #define GECE_SET_RED(value)         ((uint32_t(value) >> GECE_RED_SHIFT )      & GECE_RED_MASK)
-
-// forward declaration for the isr handler
-static void IRAM_ATTR uart_intr_handler (void* param);
 
 #ifdef BOARD_ESPS_V3
 static c_OutputGECE* GECE_OutputChanArray[c_OutputMgr::e_OutputChannelIds::OutputChannelId_End] = { nullptr };

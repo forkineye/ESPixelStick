@@ -262,6 +262,18 @@ void c_WebMgr::init ()
         }
     );
 
+    webServer.on ("/download", HTTP_GET, [](AsyncWebServerRequest* request)
+    {
+        // DEBUG_V (String ("url: ") + String (request->url ()));
+        String filename = request->url ().substring (String ("/download").length ());
+        // DEBUG_V (String ("filename: ") + String (filename));
+
+        AsyncWebServerResponse* response = new AsyncFileResponse (SDFS, filename, "application/octet-stream", true);
+        request->send (response);
+
+        // DEBUG_V ("Send File Done");
+    });
+
     webServer.onNotFound ([this](AsyncWebServerRequest* request)
     {
         // DEBUG_V ("onNotFound");
@@ -749,7 +761,7 @@ void c_WebMgr::ProcessGseriesRequests (AsyncWebSocketClient* client)
 void c_WebMgr::ProcessReceivedJsonMessage (DynamicJsonDocument & webJsonDoc, AsyncWebSocketClient * client)
 {
     // DEBUG_START;
-    //LOG_PORT.printf_P( PSTR("ProcessReceivedJsonMessage heap / stack Stats: %u:%u:%u:%u\n"), ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
+    // LOG_PORT.printf_P( PSTR("ProcessReceivedJsonMessage heap / stack Stats: %u:%u:%u:%u\n"), ESP.getFreeHeap(), ESP.getHeapFragmentation(), ESP.getMaxFreeBlockSize(), ESP.getFreeContStack());
 
     do // once
     {
@@ -871,10 +883,9 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
         size_t bufferoffset = strlen(WebSocketFrameCollectionBuffer);
         size_t BufferFreeSize = sizeof (WebSocketFrameCollectionBuffer) - bufferoffset;
 
-        if ((jsonCmd[CN_get] == CN_device) ||
-            (jsonCmd[CN_get] == CN_network)  )
+        if (jsonCmd[CN_get] == CN_system)
         {
-            // DEBUG_V ("device/network");
+            // DEBUG_V ("system");
             FileMgr.ReadConfigFile (ConfigFileName,
                                     (byte*)&WebSocketFrameCollectionBuffer[bufferoffset],
                                     BufferFreeSize);
@@ -942,12 +953,12 @@ bool c_WebMgr::processCmdSet (JsonObject & jsonCmd)
 
     do // once
     {
-        if ((jsonCmd.containsKey (CN_device)) || (jsonCmd.containsKey (CN_network)))
+        if (jsonCmd.containsKey (CN_device))
         {
             // DEBUG_V ("device/network");
-            extern void SetConfig (JsonObject &, const char* DataString);
+            extern void SetConfig (const char* DataString);
             serializeJson (jsonCmd, WebSocketFrameCollectionBuffer, sizeof (WebSocketFrameCollectionBuffer) - 1);
-            SetConfig (jsonCmd, WebSocketFrameCollectionBuffer);
+            SetConfig (WebSocketFrameCollectionBuffer);
             pAlexaDevice->setName (config.id);
 
             // DEBUG_V ("device/network: Done");
@@ -987,7 +998,7 @@ bool c_WebMgr::processCmdSet (JsonObject & jsonCmd)
             break;
         }
 
-        logcon (" ");
+        // logcon (" ");
         PrettyPrint (jsonCmd, String(CN_stars) + F (" ERROR: Undhandled Set request type. ") + CN_stars );
         strcat (WebSocketFrameCollectionBuffer, "ERROR");
 

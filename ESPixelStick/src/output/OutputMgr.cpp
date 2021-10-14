@@ -276,10 +276,12 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
 void c_OutputMgr::CreateNewConfig ()
 {
     // DEBUG_START;
-    if (!InitializeConfig)
+    if (!IsBooting) 
     {
-        logcon (String (F ("--- WARNING: Creating a new Output Manager configuration Data set ---")));
+        logcon (String (F ("--- WARNING: Creating a new Output Manager configuration Data set ---"))); 
     }
+
+    BuildingNewConfig = true;
 
     // create a place to save the config
     DynamicJsonDocument JsonConfigDoc (OM_MAX_CONFIG_SIZE);
@@ -331,6 +333,9 @@ void c_OutputMgr::CreateNewConfig ()
     // DEBUG_V (String ("ConfigData: ") + ConfigData);
 
     // logcon (String (F ("--- WARNING: Creating a new Output Manager configuration Data set - Done ---")));
+
+    BuildingNewConfig = true;
+
     // DEBUG_END;
 
 } // CreateNewConfig
@@ -411,7 +416,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
             String DriverName;
             pOutputChannelDrivers[ChannelIndex]->GetDriverName (DriverName);
-            if (!InitializeConfig)
+            if (!IsBooting)
             {
                  logcon (String (F (" Shutting Down '")) + DriverName + String (F ("' on Output: ")) + String (ChannelIndex));
             }
@@ -447,7 +452,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 }
 
                 // DEBUG_V ("");
-                logcon (CN_stars + String (F (" Cannot Start DMX for channel '")) + ChannelIndex + "'. " + CN_stars);
+                if (!BuildingNewConfig) { logcon (CN_stars + String (F (" Cannot Start DMX for channel '")) + ChannelIndex + "'. " + CN_stars); }
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
                 break;
@@ -464,7 +469,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 }
                 // DEBUG_V ("");
 
-                logcon (CN_stars + String (F (" Cannot Start GECE for channel '")) + ChannelIndex + "'. " + CN_stars);
+                if (!BuildingNewConfig) { logcon (CN_stars + String (F (" Cannot Start GECE for channel '")) + ChannelIndex + "'. " + CN_stars); }
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
 
@@ -482,7 +487,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 }
                 // DEBUG_V ("");
 
-                logcon (CN_stars + String (F (" Cannot Start Generic Serial for channel '")) + ChannelIndex + "'. " + CN_stars);
+                if (!BuildingNewConfig) { logcon (CN_stars + String (F (" Cannot Start Generic Serial for channel '")) + ChannelIndex + "'. " + CN_stars); }
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
 
@@ -500,9 +505,10 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 }
                 // DEBUG_V ("");
 
-                logcon (CN_stars + String (F (" Cannot Start Renard for channel '")) + ChannelIndex + "'. " + CN_stars);
+                if (!BuildingNewConfig) { logcon (CN_stars + String (F (" Cannot Start Renard for channel '")) + ChannelIndex + "'. " + CN_stars); }
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
+
                 break;
             }
 
@@ -518,9 +524,10 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 }
                 // DEBUG_V ("");
 
-                logcon (CN_stars + String (F (" Cannot Start RELAY for channel '")) + ChannelIndex + "'. " + CN_stars);
+                if (!BuildingNewConfig) { logcon (CN_stars + String (F (" Cannot Start RELAY for channel '")) + ChannelIndex + "'. " + CN_stars); }
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
+
                 break;
             }
 
@@ -535,7 +542,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 }
                 // DEBUG_V ("");
 
-                logcon (CN_stars + String (F (" Cannot Start Servo PCA9685 for channel '")) + ChannelIndex + "'. " + CN_stars);
+                if (!BuildingNewConfig) { logcon (CN_stars + String (F (" Cannot Start Servo PCA9685 for channel '")) + ChannelIndex + "'. " + CN_stars); }
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
                 break;
@@ -562,7 +569,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     break;
                 }
 
-                logcon (CN_stars + String (F (" Cannot Start WS2811 for channel '")) + ChannelIndex + "'. " + CN_stars);
+                if (!BuildingNewConfig) { logcon (CN_stars + String (F (" Cannot Start WS2811 for channel '")) + ChannelIndex + "'. " + CN_stars); }
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
 
@@ -590,7 +597,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     break;
                 }
 
-                logcon (CN_stars + String (F (" Cannot Start WS2811 for channel '")) + ChannelIndex + "'. " + CN_stars);
+                if (!BuildingNewConfig) { logcon (CN_stars + String (F (" Cannot Start WS2811 for channel '")) + ChannelIndex + "'. " + CN_stars); }
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
                 break;
@@ -608,7 +615,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     break;
                 }
 
-                logcon (CN_stars + String (F (" Cannot Start WS2801 for channel '")) + ChannelIndex + "'. " + CN_stars);
+                if (!BuildingNewConfig) { logcon (CN_stars + String (F (" Cannot Start WS2801 for channel '")) + ChannelIndex + "'. " + CN_stars); }
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
 
@@ -625,7 +632,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     break;
                 }
 
-                logcon (CN_stars + String (F (" Cannot Start WS2801 for channel '")) + ChannelIndex + "'. " + CN_stars);
+                if (!BuildingNewConfig) { logcon (CN_stars + String (F (" Cannot Start WS2801 for channel '")) + ChannelIndex + "'. " + CN_stars); }
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
 
@@ -636,7 +643,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
             default:
             {
-                if (!InitializeConfig)
+                if (!IsBooting)
                 {
                     logcon (CN_stars + String (F (" Unknown output type: '")) + String (NewOutputChannelType) + String(F(" for channel '")) + ChannelIndex + String(F("'. Using disabled. ")) + CN_stars );
                 }
@@ -649,7 +656,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
         // DEBUG_V ("");
         String sDriverName;
         pOutputChannelDrivers[ChannelIndex]->GetDriverName (sDriverName);
-        if (!InitializeConfig)
+        if (!IsBooting)
         {
             logcon ("'" + sDriverName + F ("' Initialization for Output: ") + String (ChannelIndex));
         }
@@ -690,7 +697,7 @@ void c_OutputMgr::LoadConfig ()
             // DEBUG_V ("");
         }))
     {
-        if (!InitializeConfig) {
+        if (!IsBooting) {
             logcon (CN_stars + String (F (" Error loading Output Manager Config File ")) + CN_stars);
         }
 
@@ -731,7 +738,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
         JsonObject OutputChannelMgrData = jsonConfig[CN_output_config];
         // DEBUG_V ("");
 
-        uint8_t TempVersion;
+        uint8_t TempVersion = !CurrentConfigVersion;
         setFromJSON (TempVersion, OutputChannelMgrData, CN_cfgver);
 
         // DEBUG_V (String ("TempVersion: ") + String (TempVersion));

@@ -106,8 +106,12 @@ void c_InputFPPRemote::GetStatus (JsonObject & jsonStatus)
 void c_InputFPPRemote::Process ()
 {
     // DEBUG_START;
-
-    if (PlayingFile ())
+    if (!IsInputChannelActive)
+    {
+        // dont do anything if the channel is not active
+        StopPlaying ();
+    }
+    else if (PlayingFile ())
     {
         pInputFPPRemotePlayItem->Poll (InputDataBuffer, InputDataBufferSize);
 
@@ -161,13 +165,28 @@ bool c_InputFPPRemote::SetConfig (JsonObject & jsonConfig)
 void c_InputFPPRemote::StopPlaying ()
 {
     // DEBUG_START;
-
-    if (PlayingFile ())
+    do // once
     {
+        if (!PlayingFile ())
+        {
+            // DEBUG_ ("Not currently playing a file");
+            break;
+        }
+
+        // DEBUG_ ();
+
         pInputFPPRemotePlayItem->Stop ();
+
+        while (!pInputFPPRemotePlayItem->IsIdle ())
+        {
+            pInputFPPRemotePlayItem->Poll (InputDataBuffer, InputDataBufferSize);
+            pInputFPPRemotePlayItem->Stop ();
+        }
+
         delete pInputFPPRemotePlayItem;
         pInputFPPRemotePlayItem = nullptr;
-    }
+
+    } while (false);
 
     // DEBUG_END;
 

@@ -130,13 +130,7 @@ bool c_OutputRelay::validate ()
     SetOutputBufferSize (Num_Channels);
     for (RelayChannel_t & currentRelay : OutputList)
     {
-        if (currentRelay.GpioId == Relay_DEFAULT_GPIO_ID)
-        {
-            // pinMode (currentRelay.GpioId, INPUT);
-            currentRelay.Enabled = Relay_OUTPUT_DISABLED;
-        }
-
-        else if (currentRelay.Enabled)
+        if (currentRelay.Enabled)
         {
             pinMode (currentRelay.GpioId, OUTPUT);
         }
@@ -219,11 +213,10 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             setFromJSON (temp, JsonChannelData, CN_gid);
             // DEBUGV (String ("temp: ") + String (temp));
 
-            if ((temp != CurrentOutputChannel->GpioId) &&
-                (Relay_DEFAULT_GPIO_ID != CurrentOutputChannel->GpioId))
+            if (temp != CurrentOutputChannel->GpioId)
             {
                 // DEBUGV ("Revert Pin to input");
-                // The pin has changed and the original pin was not the default pin
+                // The pin has changed. Let go of the old pin
                 pinMode (CurrentOutputChannel->GpioId, INPUT);
             }
             CurrentOutputChannel->GpioId = (gpio_num_t)temp;

@@ -125,7 +125,7 @@ private:
     void InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, e_OutputType NewChannelType, bool StartDriver = true);
     void CreateNewConfig ();
 
-    c_OutputCommon * pOutputChannelDrivers[e_OutputChannelIds::OutputChannelId_End]; ///< pointer(s) to the current active output driver
+    c_OutputCommon * pOutputChannelDrivers[uint32_t(e_OutputChannelIds::OutputChannelId_End)]; ///< pointer(s) to the current active output drivers
 
     // configuration parameter names for the channel manager within the config file
 
@@ -138,6 +138,7 @@ private:
     bool HasBeenInitialized = false;
     bool ConfigLoadNeeded   = false;
     bool IsOutputPaused     = false;
+    bool BuildingNewConfig  = false;
 
     bool ProcessJsonConfig (JsonObject & jsonConfig);
     void CreateJsonConfig  (JsonObject & jsonConfig);

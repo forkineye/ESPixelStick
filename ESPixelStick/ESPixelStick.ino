@@ -87,8 +87,9 @@ config_t config;                    // Current configuration
 bool     reboot = false;            // Reboot flag
 uint32_t lastUpdate;                // Update timeout tracker
 bool     ResetWiFi = false;
-bool     InitializeConfig = false;  // Configuration initialization flag
+bool     IsBooting = true;  // Configuration initialization flag
 bool     ConfigLoadNeeded = false;
+bool     ConfigSaveNeeded = false;
 
 /////////////////////////////////////////////////////////
 //
@@ -167,7 +168,8 @@ void setup()
     // DEBUG_END;
 
     // Done with initialization
-    InitializeConfig = false;
+    IsBooting = false;
+
 } // setup
 
 /////////////////////////////////////////////////////////
@@ -189,12 +191,6 @@ bool validateConfig()
 #else
     String chipId = int64String (ESP.getEfuseMac (), HEX);
 #endif
-
-    // Initialization - Force save
-    if (InitializeConfig) {
-        logcon (CN_stars + String (F (" Configuration Initialization ")) + CN_stars);
-        configValid = false;
-    }
 
     // Device defaults
     if (!config.id.length ())
@@ -231,7 +227,6 @@ bool dsDevice(JsonObject & json)
         JsonObject JsonDeviceConfig = json[CN_device];
 
 //TODO: Add configuration upgrade handling - cfgver moved to root level
-
         ConfigChanged |= setFromJSON (config.id,         JsonDeviceConfig, CN_id);
         ConfigChanged |= setFromJSON (config.BlankDelay, JsonDeviceConfig, CN_blanktime);
     }
@@ -293,15 +288,13 @@ bool dsNetwork(JsonObject & json)
 } // dsNetwork
 
 // Save the config and schedule a load operation
-void SetConfig (JsonObject & json, const char * DataString)
+void SetConfig (const char * DataString)
 {
     // DEBUG_START;
 
 //TODO: This is being called from c_WebMgr::processCmdSet() with no validation
 //      of the data. Chance for 3rd party software to muck up the configuraton
 //      if they send bad json data.
-    // Set config version
-    json[CN_cfgver] = CurrentConfigVersion;
 
     FileMgr.SaveConfigFile (ConfigFileName, DataString);
     ConfigLoadNeeded = true;
@@ -321,20 +314,33 @@ bool deserializeCore (JsonObject & json)
 
     do // once
     {
-        uint8_t TempVersion = 0;
-        setFromJSON (TempVersion, json, CN_cfgver);
-        if (TempVersion != CurrentConfigVersion)
+        if (json.containsKey(CN_cfgver))
         {
-            //TODO: Add configuration update handler
-            logcon (String (F ("Incorrect Config Version ID")));
+            uint8_t TempVersion = uint8_t(-1);
+            setFromJSON (TempVersion, json, CN_cfgver);
+            if (TempVersion != CurrentConfigVersion)
+            {
+                //TODO: Add configuration update handler
+                logcon (String (F ("Incorrect Config Version ID")));
+            }
+        }
+        else
+        {
+            logcon (String (F ("Missing Config Version ID")));
         }
 
-        setFromJSON (InitializeConfig, json, CN_init);
+        // is this an initial config from the flash tool?
+        if (json.containsKey (CN_init))
+        {
+            // trigger a save operation
+            ConfigSaveNeeded = true;
+        }
 
         dsDevice  (json);
         FileMgr.SetConfig (json);
         ResetWiFi = dsNetwork (json);
         DataHasBeenAccepted = true;
+
     } while (false);
 
     // DEBUG_END;
@@ -356,6 +362,8 @@ void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
 void SaveConfig()
 {
     // DEBUG_START;
+
+    ConfigSaveNeeded = false;
 
     // Save Config
     String DataToSave = serializeCore (false);
@@ -379,10 +387,8 @@ void loadConfig()
     String temp;
     // DEBUG_V ("");
     FileMgr.LoadConfigFile (ConfigFileName, &deserializeCoreHandler);
-    if (!validateConfig()) 
-    {
-        SaveConfig();
-    }
+    
+    ConfigSaveNeeded |= !validateConfig ();
 
     // DEBUG_START;
 } // loadConfig
@@ -404,9 +410,9 @@ void GetConfig (JsonObject & json)
     json[CN_cfgver] = CurrentConfigVersion;
 
     // Device
-    JsonObject device    = json.createNestedObject(CN_device);
-    device[CN_id]        = config.id;
-    device[CN_blanktime] = config.BlankDelay;
+    JsonObject device       = json.createNestedObject(CN_device);
+    device[CN_id]           = config.id;
+    device[CN_blanktime]    = config.BlankDelay;
 
     FileMgr.GetConfig (device);
 
@@ -459,6 +465,8 @@ String serializeCore(bool pretty)
     {
         serializeJson (JsonConfig, jsonConfigString);
     }
+
+    // DEBUG_V (String ("jsonConfigString: ") + jsonConfigString);
 
     // DEBUG_END;
 
@@ -518,6 +526,11 @@ void loop()
         loadConfig ();
     }
 
+    if (ConfigSaveNeeded)
+    {
+        SaveConfig ();
+    }
+
     if (true == ResetWiFi)
     {
         ResetWiFi = false;
@@ -528,6 +541,16 @@ void loop()
 
 void _logcon (String & DriverName, String Message)
 {
-    LOG_PORT.println ("[" + DriverName + "] " + Message);
+    char Spaces[] = { "       " };
+    if (DriverName.length() < (sizeof(Spaces)-1))
+    {
+        Spaces[(sizeof (Spaces) - 1) - DriverName.length ()] = '\0';
+    }
+    else
+    {
+        Spaces[0] = '\0';
+    }
+
+    LOG_PORT.println ("[" + String (Spaces) + DriverName + "] " + Message);
     LOG_PORT.flush ();
 } // logcon

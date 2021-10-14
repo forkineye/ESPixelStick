@@ -245,10 +245,8 @@ void c_InputDDP::ProcessReceivedData (DDP_packet_t & Packet)
 
         uint32_t InputBufferOffset = ntohl (header.channelOffset);
         uint32_t packetDataLength  = ntohs (header.dataLen);
-        uint32_t LastCharOffset    = packetDataLength + InputBufferOffset;
 
         // DEBUG_V (String ("    packetDataLength: ") + String (packetDataLength));
-        // DEBUG_V (String ("      LastCharOffset: ") + String (LastCharOffset));
         // DEBUG_V (String (" InputDataBufferSize: ") + String (InputDataBufferSize));
 
         if (InputBufferOffset >= InputDataBufferSize)

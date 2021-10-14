@@ -133,7 +133,7 @@ public:
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Connecting Using Config Credentials"); }
     virtual void OnConnect (void);
-    virtual void OnDisconnect (void)          { LOG_PORT.print ("."); }
+    virtual void OnDisconnect (void) {}
 
 }; // fsm_WiFi_state_ConnectingUsingConfig
 
@@ -145,7 +145,7 @@ public:
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Connecting Using Default Credentials"); }
     virtual void OnConnect (void);
-    virtual void OnDisconnect (void)          { LOG_PORT.print ("."); }
+    virtual void OnDisconnect (void) {}
 
 }; // fsm_WiFi_state_ConnectingUsingConfig
 
@@ -169,7 +169,7 @@ public:
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Connecting As AP"); }
     virtual void OnConnect (void);
-    virtual void OnDisconnect (void)          { LOG_PORT.print ("."); }
+    virtual void OnDisconnect (void) {}
 
 }; // fsm_WiFi_state_ConnectingAsAP
 

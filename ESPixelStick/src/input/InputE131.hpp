@@ -36,6 +36,8 @@ class c_InputE131 : public c_InputCommon
     uint16_t    LastUniverse               = 1;    ///< Last Universe to listen for
     uint16_t    ChannelsPerUniverse        = 512;  ///< Universe boundary limit
     uint16_t    FirstUniverseChannelOffset = 1;    ///< Channel to start listening at - 1 based
+    ESPAsyncE131PortId PortId              = E131_DEFAULT_PORT;
+    bool        ESPAsyncE131Initialized    = false;
 
     /// from sketch globals
     uint16_t    channel_count = 0;       ///< Number of channels. Derived from output module configuration.
