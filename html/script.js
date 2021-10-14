@@ -248,7 +248,11 @@ $(function ()
     {
         RequestFileDeletion();
     });
-
+/*
+    $('#FileUploadButton').click(function () {
+        RequestFileUpload();
+    });
+*/
     // Autoload tab based on URL hash
     let hash = window.location.hash;
     hash && $('ul.navbar-nav li a[href="' + hash + '"]').click();
@@ -410,9 +414,18 @@ function ProcessGetFileListResponse(JsonConfigData)
         let rowPattern = '<tr>' + SelectedPattern + NamePattern + DatePattern + SizePattern + '</tr>';
         $('#FileManagementTable tr:last').after(rowPattern);
 
-        $('#FileName_' + (CurrentRowId)).val(file.name);
-        $('#FileDate_' + (CurrentRowId)).val(new Date(file.date * 1000).toISOString());
-        $('#FileSize_' + (CurrentRowId)).val(file.length);
+        try
+        {
+            $('#FileName_' + (CurrentRowId)).val(file.name);
+            $('#FileDate_' + (CurrentRowId)).val(new Date(file.date * 1000).toISOString());
+            $('#FileSize_' + (CurrentRowId)).val(file.length);
+        }
+        catch
+        {
+            $('#FileName_' + (CurrentRowId)).val("InvalidFile");
+            $('#FileDate_' + (CurrentRowId)).val(new Date(0).toISOString());
+            $('#FileSize_' + (CurrentRowId)).val(0);
+		}
 
         CurrentRowId++;
     });
@@ -436,6 +449,73 @@ function RequestFileDeletion()
     RequestListOfFiles();
 
 } // RequestFileDeletion
+
+/*
+function RequestFileUpload()
+{
+    $('#FileManagementTable > tr').each(function (CurRowId)
+    {
+        if (true === $('#FileSelected_' + CurRowId).prop("checked"))
+        {
+            let FileName   = $('#FileName_' + CurRowId).val().toString().replace(" - ", "/");
+            let FileLength = parseInt($('#Length_'   + CurRowId).val());
+            let uri = "data:application/octet-stream";
+            console.info("       uri: " + uri);
+            console.info("  FileName: " + FileName);
+            console.info("FileLength: " + FileName);
+            downloadURI(uri, FileName, FileLength);
+            $('#FileSelected_' + CurRowId).prop("checked", false);
+        }
+    });
+
+} // RequestFileUpload
+*/
+/*
+async function downloadURI(uri, name, totalLength)
+{
+
+    const response = await fetch('http://' + target + '/download/' + name);
+            .then(resp => resp.blob())
+
+    let length = response.headers.get('Content-Length');
+    console.info("length: " + length);
+
+    if (!length)
+    {
+        length = totalLength; // handle the error
+        console.info("Adjusted length: " + length);
+    }
+
+    console.info("response.status: " + response.status);
+    if (response.status >= 200 && response.status < 300)
+    {
+        let results = await response.json();
+    }
+    else
+    {
+        alert("Download '" + name + "' request was rejected by server");
+	}
+
+/*
+    window.status = "Download '" + name + "' Started";
+    fetch('http://' + target + '/download/' + name)
+        .then(resp => resp.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            // the filename you want
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            window.status = "Download '" + name + "' Complete";
+        })
+        .catch(() => alert("Download '" + name + "' Failed"));
+* /
+} // downloadURI
+*/
 
 function ParseParameter(name)
 {
