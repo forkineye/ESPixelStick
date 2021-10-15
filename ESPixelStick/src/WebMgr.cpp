@@ -883,7 +883,7 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
         size_t bufferoffset = strlen(WebSocketFrameCollectionBuffer);
         size_t BufferFreeSize = sizeof (WebSocketFrameCollectionBuffer) - bufferoffset;
 
-        if (jsonCmd[CN_get] == CN_system)
+        if ((jsonCmd[CN_get] == CN_system) || (jsonCmd[CN_get] == CN_device))
         {
             // DEBUG_V ("system");
             FileMgr.ReadConfigFile (ConfigFileName,
