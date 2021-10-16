@@ -50,7 +50,7 @@ private:
     bool IsEnabled = false;
     String UploadFileName;
     IPAddress FppRemoteIp = IPAddress (uint32_t(0));
-    c_InputFPPRemotePlayFile InputFPPRemotePlayFile = c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelIds::InputPrimaryChannelId);
+    c_InputFPPRemotePlayFile InputFPPRemotePlayFile = c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelIds::InputSecondaryChannelId);
 
     void GetSysInfoJSON    (JsonObject& jsonResponse);
     void BuildFseqResponse (String fname, c_FileMgr::FileId fseq, String & resp);
