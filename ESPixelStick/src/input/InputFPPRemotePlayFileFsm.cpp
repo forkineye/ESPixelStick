@@ -254,6 +254,7 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
         // DEBUG_V (String ("ChannelsPerFrame: ") + String (p_InputFPPRemotePlayFile->ChannelsPerFrame));
         // DEBUG_V (String ("    FilePosition: ") + String (FilePosition));
         // DEBUG_V (String ("  MaxBytesToRead: ") + String (MaxBytesToRead));
+        // DEBUG_V (String ("GetInputChannelId: ") + String (p_InputFPPRemotePlayFile->GetInputChannelId ()));
 
         InputMgr.RestartBlankTimer (p_InputFPPRemotePlayFile->GetInputChannelId ());
 
