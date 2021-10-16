@@ -108,11 +108,12 @@ void c_InputFPPRemote::Process ()
     // DEBUG_START;
     if (!IsInputChannelActive)
     {
-        // dont do anything if the channel is not active
+        // DEBUG_V ("dont do anything if the channel is not active");
         StopPlaying ();
     }
     else if (PlayingFile ())
     {
+        // DEBUG_V ("Local File Play");
         pInputFPPRemotePlayItem->Poll (InputDataBuffer, InputDataBufferSize);
 
         if (pInputFPPRemotePlayItem->IsIdle ())
@@ -123,6 +124,7 @@ void c_InputFPPRemote::Process ()
     }
     else
     {
+        // DEBUG_V ();
         FPPDiscovery.ReadNextFrame (InputDataBuffer, InputDataBufferSize);
     }
 

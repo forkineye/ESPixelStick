@@ -634,6 +634,7 @@ void c_InputMgr::Process ()
 
             if (!BlankTimerHasExpired (CurrentInput->GetInputChannelId()))
             {
+                // DEBUG_V (String ("Blank Timer is running: ") + String (CurrentInput->GetInputChannelId ()));
                 aBlankTimerIsRunning = true;
                 break;
             }
