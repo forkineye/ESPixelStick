@@ -46,6 +46,7 @@ static Espalexa         espalexa;
 static EFUpdate         efupdate; /// EFU Update Handler
 static AsyncWebServer   webServer (HTTP_PORT);  // Web Server
 static AsyncWebSocket   webSocket ("/ws");      // Web Socket Plugin
+static DynamicJsonDocument webJsonDoc (3 * WebSocketFrameCollectionBufferSize);
 
 //-----------------------------------------------------------------------------
 void PrettyPrint (JsonArray& jsonStuff, String Name)
@@ -186,31 +187,6 @@ void c_WebMgr::init ()
         {
             FPPDiscovery.ProcessFPPJson(request);
         });
-
-#ifdef USE_REST
-    // URL's needed for FPP Connect fseq uploading and querying
-    webServer.on ("/rest", HTTP_GET,
-        [this](AsyncWebServerRequest* request)
-        {
-            RestProcessGET (request);
-        });
-
-    webServer.on ("/rest", HTTP_POST | HTTP_PUT,
-        [this](AsyncWebServerRequest* request)
-        {
-            RestProcessPOST (request);
-        },
-
-        [this] (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final)
-        {
-            RestProcessFile (request, filename, index, data, len, final);
-        },
-
-        [this] (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total)
-        {
-            RestProcessBody (request, data, len, index, total);
-        });
-#endif // def USE_REST
 
     // Static Handlers
     webServer.serveStatic ("/UpdRecipe", LittleFS, "/UpdRecipe.json");
@@ -362,8 +338,7 @@ void c_WebMgr::GetConfiguration ()
     extern void GetConfig (JsonObject & json);
     // DEBUG_START;
 
-    DynamicJsonDocument webJsonDoc (4096);
-
+    webJsonDoc.clear ();
     JsonObject JsonSystemConfig = webJsonDoc.createNestedObject (CN_system);
     GetConfig (JsonSystemConfig);
     // DEBUG_V ("");
@@ -388,7 +363,7 @@ void c_WebMgr::GetDeviceOptions ()
     // DEBUG_START;
 #ifdef SUPPORT_DEVICE_OPTION_LIST
     // set up a framework to get the option data
-    DynamicJsonDocument webJsonDoc (2048);
+    webJsonDoc.clear ();
 
     if (0 == webJsonDoc.capacity ())
     {
@@ -482,6 +457,8 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             // DEBUG_V (WebSocketFrameCollectionBuffer);
             // message is all here. Process it
 
+            FeedWDT ();
+
             if (WebSocketFrameCollectionBuffer[0] == 'X')
             {
                 // DEBUG_V ("");
@@ -507,7 +484,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
 
             // convert the input data into a json structure (use json read only mode)
             size_t docSize = strlen ((const char*)(&WebSocketFrameCollectionBuffer[0])) * 3;
-            DynamicJsonDocument webJsonDoc (docSize);
+            webJsonDoc.clear ();
             DeserializationError error = deserializeJson (webJsonDoc, (const char *)(&WebSocketFrameCollectionBuffer[0]));
 
             // DEBUG_V ("");
@@ -550,6 +527,8 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             break;
         }
     } // end switch (type)
+
+    FeedWDT ();
 
     // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));
 
@@ -626,7 +605,7 @@ void c_WebMgr::ProcessXARequest (AsyncWebSocketClient* client)
 {
     // DEBUG_START;
 
-    DynamicJsonDocument webJsonDoc (1024);
+    webJsonDoc.clear ();
     JsonObject jsonAdmin = webJsonDoc.createNestedObject (F ("admin"));
 
     jsonAdmin[CN_version] = VERSION;
@@ -656,7 +635,7 @@ void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
 {
     // DEBUG_START;
 
-    DynamicJsonDocument webJsonDoc (2048);
+    webJsonDoc.clear ();
     JsonObject status = webJsonDoc.createNestedObject (CN_status);
     JsonObject system = status.createNestedObject (CN_system);
 
@@ -1182,80 +1161,6 @@ void c_WebMgr::Process ()
         espalexa.loop ();
     }
 } // Process
-
-
-#ifdef USE_REST
-void printRequest (AsyncWebServerRequest* request)
-{
-    // DEBUG_V (String ("      version: '") + String (request->version ()) + "'");
-    // DEBUG_V (String ("       method: '") + String (request->method ()) + "'");
-    // DEBUG_V (String ("          url: '") + String (request->url ()) + "'");
-    // DEBUG_V (String ("         host: '") + String (request->host ()) + "'");
-    // DEBUG_V (String ("  contentType: '") + String (request->contentType ()) + "'");
-    // DEBUG_V (String ("contentLength: '") + String (request->contentLength ()) + "'");
-    // DEBUG_V (String ("    multipart: '") + String (request->multipart ()) + "'");
-
-    //List all collected headers
-    int headers = request->headers ();
-    int i;
-    for (i = 0; i < headers; i++)
-    {
-        AsyncWebHeader* h = request->getHeader (i);
-        // DEBUG_V (String ("       HEADER: '") + h->name () + "', '" + h->value () + "'");
-    }
-
-} // printRequest
-//-----------------------------------------------------------------------------
-void c_WebMgr::RestProcessGET (AsyncWebServerRequest* request)
-{
-    // DEBUG_START;
-    printRequest (request);
-
-    // request->send (200, "text/json", WebSocketFrameCollectionBuffer);
-
-
-    request->send (200, CN_textSLASHplain, "Hello");
-
-    // DEBUG_END;
-
-} // RestProcessPOST
-
-//-----------------------------------------------------------------------------
-void c_WebMgr::RestProcessPOST (AsyncWebServerRequest* request)
-{
-    // DEBUG_START;
-    printRequest (request);
-
-    request->send (404, CN_textSLASHplain, "Page Not found");
-
-    // DEBUG_END;
-
-} // RestProcessGET
-
-//-----------------------------------------------------------------------------
-void c_WebMgr::RestProcessFile (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final)
-{
-    // DEBUG_START;
-    printRequest (request);
-
-    request->send (404, CN_textSLASHplain, "Page Not found");
-
-    // DEBUG_END;
-
-} // RestProcessFile
-
-//-----------------------------------------------------------------------------
-void c_WebMgr::RestProcessBody (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total)
-{
-    // DEBUG_START;
-    printRequest (request);
-
-    request->send (404, CN_textSLASHplain, "Page Not found");
-
-    // DEBUG_END;
-
-} // RestProcessBody
-#endif // def USE_REST
 
 //-----------------------------------------------------------------------------
 // create a global instance of the WEB UI manager

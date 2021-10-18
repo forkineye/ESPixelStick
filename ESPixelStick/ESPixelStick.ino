@@ -161,7 +161,8 @@ void setup()
     FPPDiscovery.begin ();
 
 #ifdef ARDUINO_ARCH_ESP8266
-    ESP.wdtEnable (2000);
+    // * ((volatile uint32_t*)0x60000900) &= ~(1); // Hardware WDT OFF
+    ESP.wdtEnable (2000); // 2 seconds
 #else
     esp_task_wdt_init (5, true);
 #endif
@@ -482,11 +483,9 @@ String serializeCore(bool pretty)
 /** Arduino based main loop */
 void loop()
 {
-#ifdef ARDUINO_ARCH_ESP32
-    esp_task_wdt_reset ();
-#else
-    ESP.wdtFeed ();
-#endif // def ARDUINO_ARCH_ESP32
+    // DEBUG_START;
+
+    FeedWDT ();
 
     // Keep the WiFi Open
     WiFiMgr.Poll ();
@@ -500,17 +499,14 @@ void loop()
     WebMgr.Process ();
 
     // need to keep the rx pipeline empty
-    size_t BytesToDiscard = min (1000, LOG_PORT.available ());
+    size_t BytesToDiscard = min (100, LOG_PORT.available ());
     while (0 < BytesToDiscard)
     {
+        FeedWDT ();
+
         // DEBUG_V (String("BytesToDiscard: ") + String(BytesToDiscard));
         BytesToDiscard--;
         LOG_PORT.read();
-#ifdef ARDUINO_ARCH_ESP32
-        esp_task_wdt_reset ();
-#else
-        ESP.wdtFeed ();
-#endif // def ARDUINO_ARCH_ESP32
     } // end discard loop
 
     // Reboot handler
@@ -523,11 +519,13 @@ void loop()
 
     if (ConfigLoadNeeded)
     {
+        FeedWDT ();
         loadConfig ();
     }
 
     if (ConfigSaveNeeded)
     {
+        FeedWDT ();
         SaveConfig ();
     }
 
@@ -554,3 +552,12 @@ void _logcon (String & DriverName, String Message)
     LOG_PORT.println ("[" + String (Spaces) + DriverName + "] " + Message);
     LOG_PORT.flush ();
 } // logcon
+
+void FeedWDT ()
+{
+#ifdef ARDUINO_ARCH_ESP32
+    esp_task_wdt_reset ();
+#else
+    ESP.wdtFeed ();
+#endif // def ARDUINO_ARCH_ESP32
+}

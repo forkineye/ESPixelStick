@@ -20,13 +20,13 @@
 
 #include "InputFPPRemotePlayFile.hpp"
 #include "../service/FPPDiscovery.h"
+#include "../service/fseq.h"
 
 //-----------------------------------------------------------------------------
 c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelIds InputChannelId) :
     c_InputFPPRemotePlayItem (InputChannelId)
 {
     // DEBUG_START;
-
     fsm_PlayFile_state_Idle_imp.Init (this);
 
     // DEBUG_END;
@@ -86,6 +86,7 @@ void c_InputFPPRemotePlayFile::Poll (uint8_t * Buffer, size_t BufferSize)
 {
     // DEBUG_START;
 
+    InitTimeCorrectionFactor ();
     pCurrentFsmState->Poll (Buffer, BufferSize);
 
     // DEBUG_END;
@@ -143,7 +144,14 @@ uint32_t c_InputFPPRemotePlayFile::CalculateFrameId (time_t now, int32_t SyncOff
 {
     // DEBUG_START;
 
-    time_t   CurrentPlayTime         = now - StartTimeMS;
+    time_t   CurrentPlayTime = now - StartTimeMS;
+
+    // has the counter wrapped?
+    if (now < StartTimeMS)
+    {
+        CurrentPlayTime = now + (0 - StartTimeMS);
+    }
+
     time_t   AdjustedPlayTime        = CurrentPlayTime + SyncOffsetMS;
     time_t   AdjustedFrameStepTimeMS = time_t (float (FrameStepTimeMS) * TimeCorrectionFactor);
     uint32_t CurrentFrameId          = AdjustedPlayTime / AdjustedFrameStepTimeMS;
@@ -159,7 +167,15 @@ void c_InputFPPRemotePlayFile::CalculatePlayStartTime ()
 {
     // DEBUG_START;
 
-    StartTimeMS = millis () - uint32_t ((float (FrameStepTimeMS) * TimeCorrectionFactor) * float (LastPlayedFrameId));
+    time_t now = millis ();
+    time_t StartOffset = time_t ((float (FrameStepTimeMS) * TimeCorrectionFactor) * float (LastPlayedFrameId));
+    StartTimeMS = now - StartOffset;
+    // DEBUG_V (String ("                 now: ") + String (now));
+    // DEBUG_V (String ("         StartOffset: ") + String (StartOffset));
+    // DEBUG_V (String ("     FrameStepTimeMS: ") + String (FrameStepTimeMS));
+    // DEBUG_V (String ("TimeCorrectionFactor: ") + String (TimeCorrectionFactor));
+    // DEBUG_V (String ("   LastPlayedFrameId: ") + String (LastPlayedFrameId));
+    // DEBUG_V (String ("         StartTimeMS: ") + String (StartTimeMS));
 
     // DEBUG_END;
 
@@ -218,19 +234,19 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 
 // #define DUMP_FSEQ_HEADER
 #ifdef DUMP_FSEQ_HEADER
-        DEBUG_V (String ("                   dataOffset: ") + String (fsqParsedHeader.dataOffset));
-        DEBUG_V (String ("                 minorVersion: ") + String (fsqParsedHeader.minorVersion));
-        DEBUG_V (String ("                 majorVersion: ") + String (fsqParsedHeader.majorVersion));
-        DEBUG_V (String ("            VariableHdrOffset: ") + String (fsqParsedHeader.VariableHdrOffset));
-        DEBUG_V (String ("                 channelCount: ") + String (fsqParsedHeader.channelCount));
-        DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (fsqParsedHeader.TotalNumberOfFramesInSequence));
-        DEBUG_V (String ("                     stepTime: ") + String (fsqParsedHeader.stepTime));
-        DEBUG_V (String ("                        flags: ") + String (fsqParsedHeader.flags));
-        DEBUG_V (String ("              compressionType: 0x") + String (fsqParsedHeader.compressionType, HEX));
-        DEBUG_V (String ("          numCompressedBlocks: ") + String (fsqParsedHeader.numCompressedBlocks));
-        DEBUG_V (String ("              numSparseRanges: ") + String (fsqParsedHeader.numSparseRanges));
-        DEBUG_V (String ("                       flags2: ") + String (fsqParsedHeader.flags2));
-        DEBUG_V (String ("                           id: 0x") + String ((unsigned long)fsqParsedHeader.id, HEX));
+        // DEBUG_V (String ("                   dataOffset: ") + String (fsqParsedHeader.dataOffset));
+        // DEBUG_V (String ("                 minorVersion: ") + String (fsqParsedHeader.minorVersion));
+        // DEBUG_V (String ("                 majorVersion: ") + String (fsqParsedHeader.majorVersion));
+        // DEBUG_V (String ("            VariableHdrOffset: ") + String (fsqParsedHeader.VariableHdrOffset));
+        // DEBUG_V (String ("                 channelCount: ") + String (fsqParsedHeader.channelCount));
+        // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (fsqParsedHeader.TotalNumberOfFramesInSequence));
+        // DEBUG_V (String ("                     stepTime: ") + String (fsqParsedHeader.stepTime));
+        // DEBUG_V (String ("                        flags: ") + String (fsqParsedHeader.flags));
+        // DEBUG_V (String ("              compressionType: 0x") + String (fsqParsedHeader.compressionType, HEX));
+        // DEBUG_V (String ("          numCompressedBlocks: ") + String (fsqParsedHeader.numCompressedBlocks));
+        // DEBUG_V (String ("              numSparseRanges: ") + String (fsqParsedHeader.numSparseRanges));
+        // DEBUG_V (String ("                       flags2: ") + String (fsqParsedHeader.flags2));
+        // DEBUG_V (String ("                           id: 0x") + String ((unsigned long)fsqParsedHeader.id, HEX));
 #endif // def DUMP_FSEQ_HEADER
 
         if (fsqParsedHeader.majorVersion != 2 || fsqParsedHeader.compressionType != 0)
@@ -292,17 +308,17 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
                 LargestBlock  = max (LargestBlock, CurrentSparseRange.DataOffset + CurrentSparseRange.ChannelCount);
 
 #ifdef DUMP_FSEQ_HEADER
-                DEBUG_V (String ("            RangeChannelCount: ") + String (CurrentSparseRange.ChannelCount));
-                DEBUG_V (String ("              RangeDataOffset: 0x") + String (CurrentSparseRange.DataOffset, HEX));
+                // DEBUG_V (String ("            RangeChannelCount: ") + String (CurrentSparseRange.ChannelCount));
+                // DEBUG_V (String ("              RangeDataOffset: 0x") + String (CurrentSparseRange.DataOffset, HEX));
 #endif // def DUMP_FSEQ_HEADER
 
                 ++SparseRangeIndex;
             }
 
 #ifdef DUMP_FSEQ_HEADER
-            DEBUG_V (String ("                TotalChannels: ") + String (TotalChannels));
-            DEBUG_V (String ("                LargestOffset: ") + String (LargestOffset));
-            DEBUG_V (String ("                 LargestBlock: ") + String (LargestBlock));
+            // DEBUG_V (String ("                TotalChannels: ") + String (TotalChannels));
+            // DEBUG_V (String ("                LargestOffset: ") + String (LargestOffset));
+            // DEBUG_V (String ("                 LargestBlock: ") + String (LargestBlock));
 #endif // def DUMP_FSEQ_HEADER
             if (0 == TotalChannels)
             {
@@ -345,3 +361,87 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
     return Response;
 
 } // ParseFseqFile
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemotePlayFile::InitTimeCorrectionFactor ()
+{
+    // DEBUG_START;
+
+    do // once
+    {
+        if (INVALID_TIME_CORRECTION_FACTOR != SavedTimeCorrectionFactor)
+        {
+            break;
+        }
+
+        // only do this once after boot.
+        TimeCorrectionFactor = SavedTimeCorrectionFactor = INITIAL_TIME_CORRECTION_FACTOR;
+
+        String FileData;
+        FileMgr.ReadSdFile (String (CN_time), FileData);
+
+        if (0 == FileData.length ())
+        {
+            // DEBUG_V ("No data in file");
+            break;
+        }
+
+        // DEBUG_V (String ("FileData: ") + FileData);
+
+        DynamicJsonDocument jsonDoc (64);
+        DeserializationError error = deserializeJson (jsonDoc, FileData);
+        if (error)
+        {
+            logcon (CN_Heap_colon + String (ESP.getFreeHeap ()));
+            logcon (String (F ("Time Factor Deserialzation Error. Error code = ")) + error.c_str ());
+        }
+        // DEBUG_V ("");
+
+        JsonObject JsonData = jsonDoc.as<JsonObject> ();
+
+        // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
+        // PrettyPrint (JsonData, String ("InitTimeCorrectionFactor"));
+
+        setFromJSON (TimeCorrectionFactor, JsonData, CN_time);
+        SavedTimeCorrectionFactor = TimeCorrectionFactor;
+        // DEBUG_V (String ("TimeCorrectionFactor: ") + String (TimeCorrectionFactor, 10));
+    
+    } while (false);
+
+    // DEBUG_END;
+
+} // InitTimeCorrectionFactor
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemotePlayFile::SaveTimeCorrectionFactor ()
+{
+    // DEBUG_START;
+
+    do // once
+    {
+        if (fabs (SavedTimeCorrectionFactor - TimeCorrectionFactor) < 0.000005F )
+        {
+            // DEBUG_V ("Nothing to save");
+            break;
+        }
+
+        DynamicJsonDocument jsonDoc (64);
+        JsonObject JsonData = jsonDoc.createNestedObject ("x");
+        // JsonObject JsonData = jsonDoc.as<JsonObject> ();
+
+        JsonData[CN_time] = TimeCorrectionFactor;
+        SavedTimeCorrectionFactor = TimeCorrectionFactor;
+
+        // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
+        // PrettyPrint (JsonData, String ("SaveTimeCorrectionFactor"));
+
+        String JsonFileData;
+        serializeJson (JsonData, JsonFileData);
+        // DEBUG_V (String ("JsonFileData: ") + JsonFileData);
+        FileMgr.SaveSdFile (String(CN_time), JsonFileData);
+
+    } while (false);
+    
+    // DEBUG_END;
+
+} // SaveTimeCorrectionFactor

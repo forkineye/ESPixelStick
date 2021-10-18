@@ -154,11 +154,7 @@ void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t Curr
 {
     // DEBUG_START;
 
-    if (PlayingFile())
-    {
-        // DEBUG_V ("");
-        InputFPPRemotePlayFile.Poll (CurrentOutputBuffer, CurrentOutputBufferSize);
-    }
+    InputFPPRemotePlayFile.Poll (CurrentOutputBuffer, CurrentOutputBufferSize);
 
     // DEBUG_END;
 } // ReadNextFrame
