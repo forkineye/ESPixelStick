@@ -80,6 +80,24 @@ extern  bool IsBooting;
 extern  bool ResetWiFi;
 static const String ConfigFileName = "/config.json";
 
+template <typename J, typename N>
+bool setFromJSON (float & OutValue, J& Json, N Name)
+{
+    bool HasBeenModified = false;
+
+    if (true == Json.containsKey (Name))
+    {
+        float temp = Json[Name];
+        if (fabs (temp - OutValue) > 0.000005F)
+        {
+            OutValue = temp;
+            HasBeenModified = true;
+        }
+    }
+
+    return HasBeenModified;
+};
+
 template <typename T, typename J, typename N>
 bool setFromJSON (T& OutValue, J& Json, N Name)
 {
