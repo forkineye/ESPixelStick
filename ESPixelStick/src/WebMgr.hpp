@@ -46,6 +46,7 @@ public:
     void handleFileUpload      (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
     void NetworkStateChanged   (bool NewNetworkState);
     void GetDriverName         (String & Name) { Name = "WebMgr"; }
+
 private:
 
     EFUpdate               efupdate;
@@ -70,7 +71,7 @@ private:
     };
 
     void init ();
-    void onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, size_t len);
+    void onWsEvent                  (AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, size_t len);
     void ProcessVseriesRequests     (AsyncWebSocketClient  * client);
     void ProcessGseriesRequests     (AsyncWebSocketClient  * client);
     void ProcessReceivedJsonMessage (DynamicJsonDocument   & webJsonDoc, AsyncWebSocketClient  * client);
@@ -90,13 +91,6 @@ private:
     void GetDeviceOptions           ();
     void GetInputOptions            ();
     void GetOutputOptions           ();
-
-#ifdef USE_REST
-    void RestProcessGET (AsyncWebServerRequest* request);
-    void RestProcessPOST (AsyncWebServerRequest* request);
-    void RestProcessFile (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
-    void RestProcessBody (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total);
-#endif // def USE_REST
 
 protected:
 
