@@ -42,9 +42,15 @@ void fsm_PlayFile_state_Idle::Init (c_InputFPPRemotePlayFile* Parent)
     p_InputFPPRemotePlayFile = Parent;
     Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_Idle_imp);
 
-    p_InputFPPRemotePlayFile->PlayItemName       = String ("");
-    p_InputFPPRemotePlayFile->LastPlayedFrameId  = 0;
-    p_InputFPPRemotePlayFile->RemainingPlayCount = 0;
+    p_InputFPPRemotePlayFile->PlayItemName        = String ("");
+    p_InputFPPRemotePlayFile->LastPlayedFrameId   = 0;
+    p_InputFPPRemotePlayFile->RemainingPlayCount  = 0;
+    p_InputFPPRemotePlayFile->LastRcvdSyncFrameId = 0;
+    p_InputFPPRemotePlayFile->DataOffset          = 0;
+    p_InputFPPRemotePlayFile->ChannelsPerFrame    = 0;
+    p_InputFPPRemotePlayFile->FrameStepTimeMS     = 1;
+    p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence = 0;
+    p_InputFPPRemotePlayFile->StartTimeMS         = 0;
 
     // DEBUG_END;
 
@@ -433,7 +439,7 @@ void fsm_PlayFile_state_Stopping::Poll (uint8_t* Buffer, size_t BufferSize)
     FileMgr.CloseSdFile (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed);
     p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed = 0;
     p_InputFPPRemotePlayFile->PlayItemName = String ("");
-
+    p_InputFPPRemotePlayFile->SaveTimeCorrectionFactor ();
     p_InputFPPRemotePlayFile->fsm_PlayFile_state_Idle_imp.Init (p_InputFPPRemotePlayFile);
 
     if (FileName != "")
@@ -443,7 +449,7 @@ void fsm_PlayFile_state_Stopping::Poll (uint8_t* Buffer, size_t BufferSize)
 
     // DEBUG_END;
 
-} // fsm_PlayFile_state_PlayingFile::Poll
+} // fsm_PlayFile_state_Stopping::Poll
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Stopping::Init (c_InputFPPRemotePlayFile* Parent)

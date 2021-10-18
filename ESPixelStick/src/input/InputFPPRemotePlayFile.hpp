@@ -36,11 +36,17 @@ public:
     virtual void Poll (uint8_t* Buffer, size_t BufferSize);
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
-    
+
     uint32_t GetLastFrameId ()  { return LastPlayedFrameId; }
     float    GetTimeCorrectionFactor () { return TimeCorrectionFactor; }
 
 private:
+#define INVALID_TIME_CORRECTION_FACTOR -1.0
+#define INITIAL_TIME_CORRECTION_FACTOR  1.0
+
+    void InitTimeCorrectionFactor ();
+    void SaveTimeCorrectionFactor ();
+
     friend class fsm_PlayFile_state_Idle;
     friend class fsm_PlayFile_state_Starting;
     friend class fsm_PlayFile_state_PlayingFile;
@@ -62,7 +68,8 @@ private:
     time_t            FrameStepTimeMS = 1;
     uint32_t          TotalNumberOfFramesInSequence = 0;
     uint32_t          StartTimeMS = 0;
-    float             TimeCorrectionFactor = 1.0;
+    double            TimeCorrectionFactor = INITIAL_TIME_CORRECTION_FACTOR;
+    double            SavedTimeCorrectionFactor = INVALID_TIME_CORRECTION_FACTOR;
     uint32_t          SyncCount = 0;
     uint32_t          SyncAdjustmentCount = 0;
 
