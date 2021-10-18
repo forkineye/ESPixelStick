@@ -20,6 +20,7 @@
 
 #include "InputFPPRemotePlayFile.hpp"
 #include "../service/FPPDiscovery.h"
+#include "../service/fseq.h"
 
 //-----------------------------------------------------------------------------
 c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelIds InputChannelId) :
@@ -143,7 +144,14 @@ uint32_t c_InputFPPRemotePlayFile::CalculateFrameId (time_t now, int32_t SyncOff
 {
     // DEBUG_START;
 
-    time_t   CurrentPlayTime         = now - StartTimeMS;
+    time_t   CurrentPlayTime = now - StartTimeMS;
+
+    // has the counter wrapped?
+    if (now < StartTimeMS)
+    {
+        CurrentPlayTime = now + (0 - StartTimeMS);
+    }
+
     time_t   AdjustedPlayTime        = CurrentPlayTime + SyncOffsetMS;
     time_t   AdjustedFrameStepTimeMS = time_t (float (FrameStepTimeMS) * TimeCorrectionFactor);
     uint32_t CurrentFrameId          = AdjustedPlayTime / AdjustedFrameStepTimeMS;
@@ -159,7 +167,15 @@ void c_InputFPPRemotePlayFile::CalculatePlayStartTime ()
 {
     // DEBUG_START;
 
-    StartTimeMS = millis () - uint32_t ((float (FrameStepTimeMS) * TimeCorrectionFactor) * float (LastPlayedFrameId));
+    time_t now = millis ();
+    time_t StartOffset = time_t ((float (FrameStepTimeMS) * TimeCorrectionFactor) * float (LastPlayedFrameId));
+    StartTimeMS = now - StartOffset;
+    // DEBUG_V (String ("                 now: ") + String (now));
+    // DEBUG_V (String ("         StartOffset: ") + String (StartOffset));
+    // DEBUG_V (String ("     FrameStepTimeMS: ") + String (FrameStepTimeMS));
+    // DEBUG_V (String ("TimeCorrectionFactor: ") + String (TimeCorrectionFactor));
+    // DEBUG_V (String ("   LastPlayedFrameId: ") + String (LastPlayedFrameId));
+    // DEBUG_V (String ("         StartTimeMS: ") + String (StartTimeMS));
 
     // DEBUG_END;
 

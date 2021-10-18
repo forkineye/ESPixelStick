@@ -20,7 +20,6 @@
 
 #include "InputFPPRemotePlayFile.hpp"
 #include "InputMgr.hpp"
-#include "../service/fseq.h"
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Idle::Poll (uint8_t * Buffer, size_t BufferSize)
@@ -200,8 +199,9 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
             }
             else
             {
-                // DEBUG_V (String ("CurrentFrame: ") + String(CurrentFrame));
-                // DEBUG_V (String ("Done Playing:: FileName:  '") + p_InputFPPRemotePlayFile->GetFileName () + "'");
+                // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence));
+                // DEBUG_V (String ("                 CurrentFrame: ") + String (CurrentFrame));
+                // DEBUG_V (String ("      Done Playing:: FileName: '") + p_InputFPPRemotePlayFile->GetFileName () + "'");
                 Stop ();
                 break;
             }
@@ -294,11 +294,10 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
 
         if (!p_InputFPPRemotePlayFile->ParseFseqFile ())
         {
-            Stop ();
+            p_InputFPPRemotePlayFile->fsm_PlayFile_state_Stopping_imp.Init (p_InputFPPRemotePlayFile);
             break;
         }
 
-        p_InputFPPRemotePlayFile->LastPlayedFrameId = 0;
         p_InputFPPRemotePlayFile->CalculatePlayStartTime ();
 
         // DEBUG_V (String ("            LastPlayedFrameId: ") + String (p_InputFPPRemotePlayFile->LastPlayedFrameId));
@@ -325,19 +324,9 @@ void fsm_PlayFile_state_PlayingFile::Start (String& FileName, uint32_t FrameId, 
     // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence));
     // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
 
-    if (FileName == p_InputFPPRemotePlayFile->GetFileName ())
-    {
-        // Keep playing the same file
-        // p_InputFPPRemotePlayFile->LastPlayedFrameId   = FrameId;
-        // p_InputFPPRemotePlayFile->LastRcvdSyncFrameId = FrameId;
-        // p_InputFPPRemotePlayFile->RemainingPlayCount  = PlayCount - 1;
-        // p_InputFPPRemotePlayFile->CalculatePlayStartTime ();
-    }
-    else
-    {
-        Stop ();
-        p_InputFPPRemotePlayFile->Start (FileName, FrameId, PlayCount);
-    }
+    Stop ();
+    p_InputFPPRemotePlayFile->Start (FileName, FrameId, PlayCount);
+
     // DEBUG_END;
 
 } // fsm_PlayFile_state_PlayingFile::Start
@@ -415,6 +404,7 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, uint32_t TargetFram
             p_InputFPPRemotePlayFile->TimeCorrectionFactor -= TimeOffsetStep;
         }
 
+        p_InputFPPRemotePlayFile->LastPlayedFrameId = TargetFrameId-1;
         // p_InputFPPRemotePlayFile->CalculatePlayStartTime ();
 
         response = true;
