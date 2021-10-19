@@ -33,16 +33,17 @@ class c_InputFPPRemotePlayFile;
 class fsm_PlayFile_state
 {
 public:
-    virtual void Poll (uint8_t * Buffer, size_t BufferSize) = 0;
+    virtual void Poll () = 0;
     virtual void Init (c_InputFPPRemotePlayFile * Parent) = 0;
     virtual void GetStateName (String & sName) = 0;
     virtual void Start (String & FileName, uint32_t FrameId, uint32_t RemainingPlayCount) = 0;
     virtual void Stop (void) = 0;
     virtual bool Sync (String& FileName, uint32_t FrameId) = 0;
     void GetDriverName (String& Name) { Name = "InputMgr"; }
+    virtual IRAM_ATTR void IsrPoll ();
 
 protected:
-    c_InputFPPRemotePlayFile * p_InputFPPRemotePlayFile = nullptr;
+    c_InputFPPRemotePlayFile * p_Parent = nullptr;
 
 }; // fsm_PlayFile_state
 
@@ -50,12 +51,13 @@ protected:
 class fsm_PlayFile_state_Idle : public fsm_PlayFile_state
 {
 public:
-    virtual void Poll (uint8_t * Buffer, size_t BufferSize);
+    virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Idle; }
     virtual void Start (String & FileName, uint32_t FrameId, uint32_t RemainingPlayCount);
     virtual void Stop (void);
     virtual bool Sync (String& FileName, uint32_t FrameId);
+    virtual IRAM_ATTR void IsrPoll ();
 
 }; // fsm_PlayFile_state_Idle
 
@@ -63,12 +65,13 @@ public:
 class fsm_PlayFile_state_Starting : public fsm_PlayFile_state
 {
 public:
-    virtual void Poll (uint8_t* Buffer, size_t BufferSize);
+    virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String& sName) { sName = F ("Starting"); }
     virtual void Start (String& FileName, uint32_t FrameId, uint32_t RemainingPlayCount);
     virtual void Stop (void);
     virtual bool Sync (String& FileName, uint32_t FrameId);
+    virtual IRAM_ATTR void IsrPoll ();
 
 }; // fsm_PlayFile_state_Starting
 
@@ -76,12 +79,14 @@ public:
 class fsm_PlayFile_state_PlayingFile : public fsm_PlayFile_state
 {
 public:
-    virtual void Poll (uint8_t * Buffer, size_t BufferSize);
+    virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String & sName) { sName = CN_File; }
     virtual void Start (String & FileName, uint32_t FrameId, uint32_t RemainingPlayCount);
     virtual void Stop (void);
     virtual bool Sync (String & FileName, uint32_t FrameId);
+    virtual IRAM_ATTR void IsrPoll ();
+
 private:
     struct SparseRange
     {
@@ -95,16 +100,17 @@ private:
 class fsm_PlayFile_state_Stopping : public fsm_PlayFile_state
 {
 public:
-    virtual void Poll (uint8_t* Buffer, size_t BufferSize);
+    virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String& sName) { sName = F("Stopping"); }
     virtual void Start (String& FileName, uint32_t FrameId, uint32_t RemainingPlayCount);
     virtual void Stop (void);
     virtual bool Sync (String& FileName, uint32_t FrameId);
+    virtual IRAM_ATTR void IsrPoll ();
 
 private:
-    String   FileName = "";
-    uint32_t FrameId = 0;
-    uint32_t PlayCount = 0;
+    String   FileName        = "";
+    uint32_t StartingFrameId = 0;
+    uint32_t PlayCount       = 0;
 
 }; // fsm_PlayFile_state_Stopping
