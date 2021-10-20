@@ -92,8 +92,8 @@ private:
 
     uint8_t * Buffer = nullptr;
     size_t    BufferSize = 0;
-    Ticker    TenMsTicker;
-    uint32_t  LastIsrMS = 0;
+    Ticker    MsTicker;
+    uint32_t  LastIsrTimeStampMS = 0;
 
 #define MAX_NUM_SPARSE_RANGES 5
     FSEQParsedRangeEntry SparseRanges[MAX_NUM_SPARSE_RANGES];

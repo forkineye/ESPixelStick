@@ -22,16 +22,22 @@
 #include "../service/FPPDiscovery.h"
 #include "../service/fseq.h"
 
+static void TimerHandler (void * p)
+{
+    reinterpret_cast<c_InputFPPRemotePlayFile*>(p)->IsrPoll ();
+
+}// TimerHandler
+
 //-----------------------------------------------------------------------------
 c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelIds InputChannelId) :
     c_InputFPPRemotePlayItem (InputChannelId)
 {
     // DEBUG_START;
 
-    LastIsrMS = millis ();
-    TenMsTicker.attach_ms (1, [this]() {this->IsrPoll (); }); // Add ISR Function
-
     fsm_PlayFile_state_Idle_imp.Init (this);
+
+    LastIsrTimeStampMS = millis ();
+    MsTicker.attach_ms (uint32_t (25), &TimerHandler, (void*)this); // Add ISR Function
 
     // DEBUG_END;
 } // c_InputFPPRemotePlayFile
@@ -40,7 +46,7 @@ c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelId
 c_InputFPPRemotePlayFile::~c_InputFPPRemotePlayFile ()
 {
     // DEBUG_START;
-    TenMsTicker.detach ();
+    MsTicker.detach ();
     for (uint32_t LoopCount = 10000; (LoopCount != 0) && (!IsIdle ()); LoopCount--)
     {
         Stop ();
@@ -106,8 +112,8 @@ void c_InputFPPRemotePlayFile::IsrPoll ()
     // xDEBUG_START;
 
     uint32_t now = millis ();
-    uint32_t elapsedMS = now - LastIsrMS;
-    LastIsrMS = now;
+    uint32_t elapsedMS = now - LastIsrTimeStampMS;
+    LastIsrTimeStampMS = now;
     FrameControl.ElapsedPlayTimeMS += elapsedMS;
     pCurrentFsmState->IsrPoll ();
     
