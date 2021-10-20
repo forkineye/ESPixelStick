@@ -22,7 +22,7 @@
 #include "InputMgr.hpp"
 
 //-----------------------------------------------------------------------------
-void fsm_PlayFile_state_Idle::Poll (uint8_t * Buffer, size_t BufferSize)
+void fsm_PlayFile_state_Idle::Poll ()
 {
     // DEBUG_START;
 
@@ -33,44 +33,42 @@ void fsm_PlayFile_state_Idle::Poll (uint8_t * Buffer, size_t BufferSize)
 } // fsm_PlayFile_state_Idle::Poll
 
 //-----------------------------------------------------------------------------
+IRAM_ATTR void fsm_PlayFile_state_Idle::IsrPoll ()
+{
+    // nothing to do
+
+} // fsm_PlayFile_state_Idle::IsrPoll
+
+//-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Idle::Init (c_InputFPPRemotePlayFile* Parent)
 {
     // DEBUG_START;
 
-    // DEBUG_V (String (" Parent: '") + String ((uint32_t)Parent) + "'");
-    p_InputFPPRemotePlayFile = Parent;
-    Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_Idle_imp);
-
-    p_InputFPPRemotePlayFile->PlayItemName        = String ("");
-    p_InputFPPRemotePlayFile->LastPlayedFrameId   = 0;
-    p_InputFPPRemotePlayFile->RemainingPlayCount  = 0;
-    p_InputFPPRemotePlayFile->LastRcvdSyncFrameId = 0;
-    p_InputFPPRemotePlayFile->DataOffset          = 0;
-    p_InputFPPRemotePlayFile->ChannelsPerFrame    = 0;
-    p_InputFPPRemotePlayFile->FrameStepTimeMS     = 1;
-    p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence = 0;
-    p_InputFPPRemotePlayFile->StartTimeMS         = 0;
+    // DEBUG_V (String (" Parent: 0x") + String ((uint32_t)Parent, HEX));
+    p_Parent = Parent;
+    p_Parent->pCurrentFsmState = &(p_Parent->fsm_PlayFile_state_Idle_imp);
+    p_Parent->ClearFileInfo ();
 
     // DEBUG_END;
 
 } // fsm_PlayFile_state_Idle::Init
 
 //-----------------------------------------------------------------------------
-void fsm_PlayFile_state_Idle::Start (String & FileName, uint32_t FrameId, uint32_t RemainingPlayCount)
+void fsm_PlayFile_state_Idle::Start (String & FileName, uint32_t StartingFrameId, uint32_t RemainingPlayCount)
 {
     // DEBUG_START;
 
     // DEBUG_V (String ("FileName: ") + FileName);
 
-    p_InputFPPRemotePlayFile->PlayItemName       = FileName;
-    p_InputFPPRemotePlayFile->LastPlayedFrameId  = FrameId;
-    p_InputFPPRemotePlayFile->RemainingPlayCount = RemainingPlayCount;
+    p_Parent->PlayItemName                 = FileName;
+    p_Parent->FrameControl.StartingFrameId = StartingFrameId;
+    p_Parent->RemainingPlayCount           = RemainingPlayCount;
 
-    // DEBUG_V (String ("           FileName: ") + p_InputFPPRemotePlayFile->PlayItemName);
-    // DEBUG_V (String ("            FrameId: ") + p_InputFPPRemotePlayFile->LastPlayedFrameId);
-    // DEBUG_V (String (" RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
+    // DEBUG_V (String ("           FileName: ") + p_Parent->PlayItemName);
+    // DEBUG_V (String ("    StartingFrameId: ") + p_Parent->FrameControl.StartingFrameId);
+    // DEBUG_V (String (" RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
 
-    p_InputFPPRemotePlayFile->fsm_PlayFile_state_Starting_imp.Init (p_InputFPPRemotePlayFile);
+    p_Parent->fsm_PlayFile_state_Starting_imp.Init (p_Parent);
 
     // DEBUG_END;
 
@@ -103,23 +101,30 @@ bool fsm_PlayFile_state_Idle::Sync (String & FileName, uint32_t FrameId)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void fsm_PlayFile_state_Starting::Poll (uint8_t * Buffer, size_t BufferSize)
+void fsm_PlayFile_state_Starting::Poll ()
 {
     // DEBUG_START;
 
-    p_InputFPPRemotePlayFile->fsm_PlayFile_state_PlayingFile_imp.Init (p_InputFPPRemotePlayFile);
-    // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
+    p_Parent->fsm_PlayFile_state_PlayingFile_imp.Init (p_Parent);
+    // DEBUG_V (String ("RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
 
     // DEBUG_END;
 
 } // fsm_PlayFile_state_Starting::Poll
 
 //-----------------------------------------------------------------------------
+IRAM_ATTR void fsm_PlayFile_state_Starting::IsrPoll ()
+{
+    // nothing to do
+
+} // fsm_PlayFile_state_Starting::IsrPoll
+
+//-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Starting::Init (c_InputFPPRemotePlayFile* Parent)
 {
     // DEBUG_START;
 
-    p_InputFPPRemotePlayFile = Parent;
+    p_Parent = Parent;
     Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_Starting_imp);
 
     // DEBUG_END;
@@ -132,10 +137,10 @@ void fsm_PlayFile_state_Starting::Start (String & FileName, uint32_t FrameId, ui
     // DEBUG_START;
 
     // DEBUG_V (String ("FileName: ") + FileName);
-    p_InputFPPRemotePlayFile->PlayItemName       = FileName;
-    p_InputFPPRemotePlayFile->LastPlayedFrameId  = FrameId;
-    p_InputFPPRemotePlayFile->RemainingPlayCount = RemainingPlayCount;
-    // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
+    p_Parent->PlayItemName                 = FileName;
+    p_Parent->FrameControl.StartingFrameId = FrameId;
+    p_Parent->RemainingPlayCount           = RemainingPlayCount;
+    // DEBUG_V (String ("RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
 
     // DEBUG_END;
 
@@ -146,11 +151,8 @@ void fsm_PlayFile_state_Starting::Stop (void)
 {
     // DEBUG_START;
 
-    p_InputFPPRemotePlayFile->PlayItemName       = String("");
-    p_InputFPPRemotePlayFile->LastPlayedFrameId  = 0;
-    p_InputFPPRemotePlayFile->RemainingPlayCount = 0;
-
-    p_InputFPPRemotePlayFile->fsm_PlayFile_state_Idle_imp.Init (p_InputFPPRemotePlayFile);
+    p_Parent->RemainingPlayCount = 0;
+    p_Parent->fsm_PlayFile_state_Idle_imp.Init (p_Parent);
 
     // DEBUG_END;
 
@@ -172,55 +174,78 @@ bool fsm_PlayFile_state_Starting::Sync (String& FileName, uint32_t FrameId)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
+void fsm_PlayFile_state_PlayingFile::Poll ()
 {
-    // DEBUG_START;
+    // xDEBUG_START;
 
     do // once
     {
-        time_t now = millis ();
-        int32_t SyncOffset = p_InputFPPRemotePlayFile->GetSyncOffsetMS ();
-        uint32_t CurrentFrame = p_InputFPPRemotePlayFile->CalculateFrameId (now, SyncOffset);
-
         // have we reached the end of the file?
-        if (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence <= CurrentFrame)
+        if (p_Parent->FrameControl.TotalNumberOfFramesInSequence <= p_Parent->FrameControl.LastPlayedFrameId)
         {
-            // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
-            if (0 != p_InputFPPRemotePlayFile->RemainingPlayCount)
+            // DEBUG_V (String ("RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
+            if (0 != p_Parent->RemainingPlayCount)
             {
-                // DEBUG_V (String ("RemainingPlayCount: ") + String (p_InputFPPRemotePlayFile->RemainingPlayCount));
-                logcon (String ("Replaying:: FileName:      '") + p_InputFPPRemotePlayFile->GetFileName () + "'");
-                --p_InputFPPRemotePlayFile->RemainingPlayCount;
-                // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
+                // DEBUG_V (String ("RemainingPlayCount: ") + String (p_Parent->RemainingPlayCount));
+                logcon (String ("Replaying:: FileName:      '") + p_Parent->GetFileName () + "'");
+                --p_Parent->RemainingPlayCount;
+                // DEBUG_V (String ("RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
 
-                p_InputFPPRemotePlayFile->StartTimeMS = now;
-                p_InputFPPRemotePlayFile->LastPlayedFrameId = -1;
-                CurrentFrame = 0;
+                p_Parent->FrameControl.LastPlayedFrameId = 0;
+                p_Parent->CalculatePlayStartTime (0);
             }
             else
             {
-                // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence));
-                // DEBUG_V (String ("                 CurrentFrame: ") + String (CurrentFrame));
-                // DEBUG_V (String ("      Done Playing:: FileName: '") + p_InputFPPRemotePlayFile->GetFileName () + "'");
+                // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->TotalNumberOfFramesInSequence));
+                // DEBUG_V (String ("      Done Playing:: FileName: '") + p_Parent->GetFileName () + "'");
                 Stop ();
                 break;
             }
         }
 
-        if (CurrentFrame == p_InputFPPRemotePlayFile->LastPlayedFrameId)
+        InputMgr.RestartBlankTimer (p_Parent->GetInputChannelId ());
+
+    } while (false);
+
+    // xDEBUG_END;
+
+} // fsm_PlayFile_state_PlayingFile::Poll
+
+//-----------------------------------------------------------------------------
+IRAM_ATTR void fsm_PlayFile_state_PlayingFile::IsrPoll ()
+{
+    // xDEBUG_START;
+
+    do // once
+    {
+        int32_t  SyncOffsetMS = p_Parent->GetSyncOffsetMS ();
+        uint32_t CurrentFrame = p_Parent->CalculateFrameId (SyncOffsetMS);
+        
+        // xDEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->TotalNumberOfFramesInSequence));
+        // xDEBUG_V (String ("                 CurrentFrame: ") + String (CurrentFrame));
+
+        // have we reached the end of the file?
+        if (p_Parent->FrameControl.TotalNumberOfFramesInSequence <= CurrentFrame)
         {
-            // DEBUG_V (String ("keep waiting"));
+            // trigger the background task to stop playing this file
+            p_Parent->FrameControl.LastPlayedFrameId = CurrentFrame;
             break;
         }
 
-        uint32_t FilePosition    = p_InputFPPRemotePlayFile->DataOffset + (p_InputFPPRemotePlayFile->ChannelsPerFrame * CurrentFrame);
-        size_t   MaxBytesToRead  = (p_InputFPPRemotePlayFile->ChannelsPerFrame > BufferSize) ? BufferSize : p_InputFPPRemotePlayFile->ChannelsPerFrame;
-        byte* CurrentDestination = Buffer;
-        // DEBUG_V (String ("               MaxBytesToRead: ") + String (MaxBytesToRead));
+        if (CurrentFrame == p_Parent->FrameControl.LastPlayedFrameId)
+        {
+            // xDEBUG_V (String ("keep waiting"));
+            break;
+        }
 
-        p_InputFPPRemotePlayFile->LastPlayedFrameId = CurrentFrame;
+        uint32_t FilePosition       = p_Parent->FrameControl.DataOffset + (p_Parent->FrameControl.ChannelsPerFrame * CurrentFrame);
+        size_t   MaxBytesToRead     = (p_Parent->FrameControl.ChannelsPerFrame > p_Parent->BufferSize) ? p_Parent->BufferSize : p_Parent->FrameControl.ChannelsPerFrame;
+        byte   * CurrentDestination = p_Parent->Buffer;
+        // xDEBUG_V (String ("               MaxBytesToRead: ") + String (MaxBytesToRead));
 
-        for (auto & CurrentSparseRange : p_InputFPPRemotePlayFile->SparseRanges)
+        p_Parent->FrameControl.LastPlayedFrameId = CurrentFrame;
+
+        for (auto& CurrentSparseRange : p_Parent->SparseRanges)
         {
             size_t ActualBytesToRead = min (MaxBytesToRead, CurrentSparseRange.ChannelCount);
             if (0 == ActualBytesToRead)
@@ -231,82 +256,78 @@ void fsm_PlayFile_state_PlayingFile::Poll (uint8_t* Buffer, size_t BufferSize)
 
             uint32_t AdjustedFilePosition = FilePosition + CurrentSparseRange.DataOffset;
 
-            // DEBUG_V (String ("                 FilePosition: ") + String (FilePosition));
-            // DEBUG_V (String ("         AdjustedFilePosition: ") + String (uint32_t(AdjustedFilePosition), HEX));
-            // DEBUG_V (String ("           CurrentDestination: ") + String (uint32_t(CurrentDestination), HEX));
-            // DEBUG_V (String ("            ActualBytesToRead: ") + String (ActualBytesToRead));
-            size_t ActualBytesRead = FileMgr.ReadSdFile (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed,
-                                                         CurrentDestination,
-                                                         ActualBytesToRead,
-                                                         AdjustedFilePosition);
+            // xDEBUG_V (String ("                 FilePosition: ") + String (FilePosition));
+            // xDEBUG_V (String ("         AdjustedFilePosition: ") + String (uint32_t(AdjustedFilePosition), HEX));
+            // xDEBUG_V (String ("           CurrentDestination: ") + String (uint32_t(CurrentDestination), HEX));
+            // xDEBUG_V (String ("            ActualBytesToRead: ") + String (ActualBytesToRead));
+            size_t ActualBytesRead = FileMgr.ReadSdFile (p_Parent->FileHandleForFileBeingPlayed,
+                CurrentDestination,
+                ActualBytesToRead,
+                AdjustedFilePosition);
             MaxBytesToRead -= ActualBytesRead;
             CurrentDestination += ActualBytesRead;
 
             if (ActualBytesRead != ActualBytesToRead)
             {
-                // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence));
-                // DEBUG_V (String ("                 CurrentFrame: ") + String (CurrentFrame));
+                // xDEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->TotalNumberOfFramesInSequence));
+                // xDEBUG_V (String ("                 CurrentFrame: ") + String (CurrentFrame));
 
-                if (0 != p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed)
+                if (0 != p_Parent->FileHandleForFileBeingPlayed)
                 {
-                    logcon (F ("File Playback Failed to read enough data"));
+                    // logcon (F ("File Playback Failed to read enough data"));
                     Stop ();
                 }
             }
         }
 
-        // DEBUG_V (String ("      DataOffset: ") + String (p_InputFPPRemotePlayFile->DataOffset));
-        // DEBUG_V (String ("      BufferSize: ") + String (BufferSize));
-        // DEBUG_V (String ("ChannelsPerFrame: ") + String (p_InputFPPRemotePlayFile->ChannelsPerFrame));
-        // DEBUG_V (String ("    FilePosition: ") + String (FilePosition));
-        // DEBUG_V (String ("  MaxBytesToRead: ") + String (MaxBytesToRead));
-        // DEBUG_V (String ("GetInputChannelId: ") + String (p_InputFPPRemotePlayFile->GetInputChannelId ()));
-
-        InputMgr.RestartBlankTimer (p_InputFPPRemotePlayFile->GetInputChannelId ());
+        // xDEBUG_V (String ("       DataOffset: ") + String (p_Parent->DataOffset));
+        // xDEBUG_V (String ("       BufferSize: ") + String (p_Parent->BufferSize));
+        // xDEBUG_V (String (" ChannelsPerFrame: ") + String (p_Parent->ChannelsPerFrame));
+        // xDEBUG_V (String ("     FilePosition: ") + String (FilePosition));
+        // xDEBUG_V (String ("   MaxBytesToRead: ") + String (MaxBytesToRead));
+        // xDEBUG_V (String ("GetInputChannelId: ") + String (p_Parent->GetInputChannelId ()));
 
     } while (false);
 
-    // DEBUG_END;
-
-} // fsm_PlayFile_state_PlayingFile::Poll
+} // fsm_PlayFile_state_PlayingFile::IsrPoll
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
 {
     // DEBUG_START;
 
-    p_InputFPPRemotePlayFile = Parent;
-    Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_PlayingFile_imp);
+    p_Parent = Parent;
 
     do // once
     {
-        // DEBUG_V (String ("FileName: '") + p_InputFPPRemotePlayFile->PlayItemName + "'");
-        // DEBUG_V (String (" FrameId: '") + p_InputFPPRemotePlayFile->LastPlayedFrameId + "'");
-        // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
-        if (0 == p_InputFPPRemotePlayFile->RemainingPlayCount)
+        // DEBUG_V (String ("FileName: '") + p_Parent->PlayItemName + "'");
+        // DEBUG_V (String (" FrameId: '") + p_Parent->LastPlayedFrameId + "'");
+        // DEBUG_V (String ("RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
+        if (0 == p_Parent->RemainingPlayCount)
         {
             Stop ();
             break;
         }
 
-        --p_InputFPPRemotePlayFile->RemainingPlayCount;
-        // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
+        --p_Parent->RemainingPlayCount;
+        // DEBUG_V (String ("RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
 
-        if (!p_InputFPPRemotePlayFile->ParseFseqFile ())
+        if (!p_Parent->ParseFseqFile ())
         {
-            p_InputFPPRemotePlayFile->fsm_PlayFile_state_Stopping_imp.Init (p_InputFPPRemotePlayFile);
+            p_Parent->fsm_PlayFile_state_Stopping_imp.Init (p_Parent);
             break;
         }
 
-        p_InputFPPRemotePlayFile->CalculatePlayStartTime ();
+        p_Parent->CalculatePlayStartTime (p_Parent->FrameControl.StartingFrameId);
 
-        // DEBUG_V (String ("            LastPlayedFrameId: ") + String (p_InputFPPRemotePlayFile->LastPlayedFrameId));
-        // DEBUG_V (String ("                  StartTimeMS: ") + String (p_InputFPPRemotePlayFile->StartTimeMS));
-        // DEBUG_V (String ("           RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
+        // DEBUG_V (String ("            LastPlayedFrameId: ") + String (p_Parent->LastPlayedFrameId));
+        // DEBUG_V (String ("                  StartTimeMS: ") + String (p_Parent->StartTimeMS));
+        // DEBUG_V (String ("           RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
 
-        logcon (String (F ("Start Playing:: FileName: '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
+        logcon (String (F ("Start Playing:: FileName: '")) + p_Parent->PlayItemName + "'");
 
         Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_PlayingFile_imp);
+        Parent->FrameControl.ElapsedPlayTimeMS = 0;
 
     } while (false);
 
@@ -320,12 +341,12 @@ void fsm_PlayFile_state_PlayingFile::Start (String& FileName, uint32_t FrameId, 
     // DEBUG_START;
 
     // DEBUG_V (String ("                     FileName: ") + FileName);
-    // DEBUG_V (String ("            LastPlayedFrameId: ") + String (p_InputFPPRemotePlayFile->LastPlayedFrameId));
-    // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence));
-    // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
+    // DEBUG_V (String ("            LastPlayedFrameId: ") + String (p_Parent->LastPlayedFrameId));
+    // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->TotalNumberOfFramesInSequence));
+    // DEBUG_V (String ("RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
 
     Stop ();
-    p_InputFPPRemotePlayFile->Start (FileName, FrameId, PlayCount);
+    p_Parent->Start (FileName, FrameId, PlayCount);
 
     // DEBUG_END;
 
@@ -336,13 +357,12 @@ void fsm_PlayFile_state_PlayingFile::Stop (void)
 {
     // DEBUG_START;
 
-    logcon (String (F ("Stop Playing::  FileName: '")) + p_InputFPPRemotePlayFile->PlayItemName + "'");
-    // DEBUG_V (String (" FileHandleForFileBeingPlayed: ") + String (FileHandleForFileBeingPlayed));
-    // DEBUG_V (String ("            LastPlayedFrameId: ") + String (p_InputFPPRemotePlayFile->LastPlayedFrameId));
-    // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_InputFPPRemotePlayFile->TotalNumberOfFramesInSequence));
-    // DEBUG_V (String ("RemainingPlayCount: ") + p_InputFPPRemotePlayFile->RemainingPlayCount);
+    logcon (String (F ("Stop Playing::  FileName: '")) + p_Parent->PlayItemName + "'");
+    // DEBUG_V (String ("            LastPlayedFrameId: ") + String (p_Parent->LastPlayedFrameId));
+    // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->TotalNumberOfFramesInSequence));
+    // DEBUG_V (String ("           RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
 
-    p_InputFPPRemotePlayFile->fsm_PlayFile_state_Stopping_imp.Init (p_InputFPPRemotePlayFile);
+    p_Parent->fsm_PlayFile_state_Stopping_imp.Init (p_Parent);
 
     // DEBUG_END;
 
@@ -357,24 +377,22 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, uint32_t TargetFram
     do // once
     {
         // are we on the correct file?
-        if (FileName != p_InputFPPRemotePlayFile->GetFileName ())
+        if (FileName != p_Parent->GetFileName ())
         {
             // DEBUG_V ("Sync: Filename change");
             Stop ();
-            p_InputFPPRemotePlayFile->Start (FileName, TargetFrameId, 1);
+            p_Parent->Start (FileName, TargetFrameId, 1);
             break;
         }
 
-        if (p_InputFPPRemotePlayFile->LastRcvdSyncFrameId >= TargetFrameId)
+        if (p_Parent->SyncControl.LastRcvdSyncFrameId >= TargetFrameId)
         {
             // DEBUG_V ("Duplicate or older sync msg");
             break;
         }
-        p_InputFPPRemotePlayFile->LastRcvdSyncFrameId = TargetFrameId;
+        p_Parent->SyncControl.LastRcvdSyncFrameId = TargetFrameId;
 
-        time_t now = millis ();
-
-        uint32_t CurrentFrame = p_InputFPPRemotePlayFile->CalculateFrameId (now);
+        uint32_t CurrentFrame = p_Parent->CalculateFrameId ();
         uint32_t FrameDiff = CurrentFrame - TargetFrameId;
 
         if (CurrentFrame < TargetFrameId)
@@ -393,22 +411,23 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, uint32_t TargetFram
         }
 
         // DEBUG_V ("Need to adjust the start time");
-        // DEBUG_V (String ("StartTimeMS: ") + String (p_InputFPPRemotePlayFile->StartTimeMS));
+        // DEBUG_V (String ("StartTimeMS: ") + String (p_Parent->StartTimeMS));
 
         if (CurrentFrame > TargetFrameId)
         {
-            p_InputFPPRemotePlayFile->TimeCorrectionFactor += TimeOffsetStep;
+            // p_Parent->SyncControl.TimeCorrectionFactor += TimeOffsetStep;
         }
         else
         {
-            p_InputFPPRemotePlayFile->TimeCorrectionFactor -= TimeOffsetStep;
+            // p_Parent->SyncControl.TimeCorrectionFactor -= TimeOffsetStep;
         }
+        // p_Parent->SyncControl.AdjustedFrameStepTimeMS = uint32_t (float (p_Parent->FrameControl.FrameStepTimeMS) * p_Parent->SyncControl.TimeCorrectionFactor);
 
-        p_InputFPPRemotePlayFile->LastPlayedFrameId = TargetFrameId-1;
-        // p_InputFPPRemotePlayFile->CalculatePlayStartTime ();
+        // p_Parent->LastPlayedFrameId = TargetFrameId-1;
+        p_Parent->CalculatePlayStartTime (TargetFrameId);
 
         response = true;
-        // DEBUG_V (String ("StartTimeMS: ") + String (p_InputFPPRemotePlayFile->StartTimeMS));
+        // DEBUG_V (String ("StartTimeMS: ") + String (p_Parent->StartTimeMS));
 
     } while (false);
 
@@ -420,21 +439,21 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, uint32_t TargetFram
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void fsm_PlayFile_state_Stopping::Poll (uint8_t* Buffer, size_t BufferSize)
+void fsm_PlayFile_state_Stopping::Poll ()
 {
     // DEBUG_START;
 
-    // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed));
+    // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (p_Parent->FileHandleForFileBeingPlayed));
 
-    FileMgr.CloseSdFile (p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed);
-    p_InputFPPRemotePlayFile->FileHandleForFileBeingPlayed = 0;
-    p_InputFPPRemotePlayFile->PlayItemName = String ("");
-    p_InputFPPRemotePlayFile->SaveTimeCorrectionFactor ();
-    p_InputFPPRemotePlayFile->fsm_PlayFile_state_Idle_imp.Init (p_InputFPPRemotePlayFile);
+    FileMgr.CloseSdFile (p_Parent->FileHandleForFileBeingPlayed);
+    p_Parent->FileHandleForFileBeingPlayed = 0;
+    p_Parent->SaveTimeCorrectionFactor ();
+    p_Parent->fsm_PlayFile_state_Idle_imp.Init (p_Parent);
 
     if (FileName != "")
     {
-        p_InputFPPRemotePlayFile->Start (FileName, FrameId, PlayCount);
+        // DEBUG_V ("Restarting File");
+        p_Parent->Start (FileName, StartingFrameId, PlayCount);
     }
 
     // DEBUG_END;
@@ -442,15 +461,22 @@ void fsm_PlayFile_state_Stopping::Poll (uint8_t* Buffer, size_t BufferSize)
 } // fsm_PlayFile_state_Stopping::Poll
 
 //-----------------------------------------------------------------------------
+IRAM_ATTR void fsm_PlayFile_state_Stopping::IsrPoll ()
+{
+    // nothing to do
+
+} // fsm_PlayFile_state_Stopping::IsrPoll
+
+//-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Stopping::Init (c_InputFPPRemotePlayFile* Parent)
 {
     // DEBUG_START;
 
-    FileName  = "";
-    FrameId   = 0;
-    PlayCount = 0;
+    FileName        = "";
+    StartingFrameId = 0;
+    PlayCount       = 0;
 
-    p_InputFPPRemotePlayFile = Parent;
+    p_Parent = Parent;
     Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_Stopping_imp);
 
     // DEBUG_END;
@@ -462,9 +488,9 @@ void fsm_PlayFile_state_Stopping::Start (String& _FileName, uint32_t _FrameId, u
 {
     // DEBUG_START;
 
-    FileName  = _FileName;
-    FrameId   = _FrameId;
-    PlayCount = _PlayCount;
+    FileName        = _FileName;
+    StartingFrameId = _FrameId;
+    PlayCount       = _PlayCount;
 
     // DEBUG_END
 
@@ -483,10 +509,8 @@ void fsm_PlayFile_state_Stopping::Stop (void)
 bool fsm_PlayFile_state_Stopping::Sync (String& FileName, uint32_t TargetFrameId)
 {
     // DEBUG_START;
-    bool response = false;
-
 
     // DEBUG_END;
-    return response;
+    return false;
 
 } // fsm_PlayFile_state_Stopping::Sync

@@ -23,6 +23,7 @@
 #include "InputFPPRemotePlayItem.hpp"
 #include "InputFPPRemotePlayFileFsm.hpp"
 #include "../service/fseq.h"
+#include <Ticker.h>
 
 class c_InputFPPRemotePlayFile : public c_InputFPPRemotePlayItem
 {
@@ -36,16 +37,20 @@ public:
     virtual void Poll (uint8_t* Buffer, size_t BufferSize);
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
+    
+    void IsrPoll ();
 
-    uint32_t GetLastFrameId ()  { return LastPlayedFrameId; }
-    float    GetTimeCorrectionFactor () { return TimeCorrectionFactor; }
+    uint32_t GetLastFrameId ()  { return FrameControl.LastPlayedFrameId; }
+    float    GetTimeCorrectionFactor () { return SyncControl.TimeCorrectionFactor; }
 
 private:
 #define INVALID_TIME_CORRECTION_FACTOR -1.0
 #define INITIAL_TIME_CORRECTION_FACTOR  1.0
+#define ELAPSED_PLAY_TIMER_INTERVAL_MS  10
 
     void InitTimeCorrectionFactor ();
     void SaveTimeCorrectionFactor ();
+    void ClearFileInfo            ();
 
     friend class fsm_PlayFile_state_Idle;
     friend class fsm_PlayFile_state_Starting;
@@ -61,23 +66,40 @@ private:
     fsm_PlayFile_state * pCurrentFsmState = &fsm_PlayFile_state_Idle_imp;
     
     c_FileMgr::FileId FileHandleForFileBeingPlayed = 0;
-    uint32_t          LastPlayedFrameId = 0;
-    uint32_t          LastRcvdSyncFrameId = 0;
-    size_t            DataOffset = 0;
-    uint32_t          ChannelsPerFrame = 0;
-    time_t            FrameStepTimeMS = 1;
-    uint32_t          TotalNumberOfFramesInSequence = 0;
-    uint32_t          StartTimeMS = 0;
-    double            TimeCorrectionFactor = INITIAL_TIME_CORRECTION_FACTOR;
-    double            SavedTimeCorrectionFactor = INVALID_TIME_CORRECTION_FACTOR;
-    uint32_t          SyncCount = 0;
-    uint32_t          SyncAdjustmentCount = 0;
+
+    struct FrameControl_t
+    {
+        size_t            DataOffset = 0;
+        uint32_t          ChannelsPerFrame = 0;
+        time_t            FrameStepTimeMS = 1;
+        uint32_t          TotalNumberOfFramesInSequence = 0;
+        uint32_t          ElapsedPlayTimeMS = 0;
+
+        uint32_t          StartingFrameId = 0;
+        uint32_t          LastPlayedFrameId = 0;
+    } FrameControl;
+
+    struct SyncControl_t
+    {
+        uint32_t          SyncCount = 0;
+        uint32_t          SyncAdjustmentCount = 0;
+        uint32_t          LastRcvdSyncFrameId = 0;
+
+        double            TimeCorrectionFactor = INITIAL_TIME_CORRECTION_FACTOR;
+        double            SavedTimeCorrectionFactor = INVALID_TIME_CORRECTION_FACTOR;
+        uint32_t          AdjustedFrameStepTimeMS = 0;
+    } SyncControl;
+
+    uint8_t * Buffer = nullptr;
+    size_t    BufferSize = 0;
+    Ticker    MsTicker;
+    uint32_t  LastIsrTimeStampMS = 0;
 
 #define MAX_NUM_SPARSE_RANGES 5
     FSEQParsedRangeEntry SparseRanges[MAX_NUM_SPARSE_RANGES];
 
-    uint32_t          CalculateFrameId (time_t now, int32_t SyncOffsetMS = 0);
-    void              CalculatePlayStartTime ();
+    uint32_t          CalculateFrameId (int32_t SyncOffsetMS = 0);
+    void              CalculatePlayStartTime (uint32_t FrameId);
     bool              ParseFseqFile ();
 
     String            LastFailedPlayStatusMsg;

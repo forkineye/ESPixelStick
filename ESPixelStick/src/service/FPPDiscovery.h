@@ -112,6 +112,8 @@ public:
     void Disable          (void);
     void GetStatus        (JsonObject& jsonStatus);
     void NetworkStateChanged (bool NewNetworkState);
+    void SetSyncOffsetMS  (int32_t value) { InputFPPRemotePlayFile.SetSyncOffsetMS (value); }
+
 };
 
 extern c_FPPDiscovery FPPDiscovery;

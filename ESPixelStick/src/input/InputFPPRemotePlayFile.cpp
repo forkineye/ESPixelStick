@@ -22,12 +22,22 @@
 #include "../service/FPPDiscovery.h"
 #include "../service/fseq.h"
 
+static void TimerHandler (void * p)
+{
+    reinterpret_cast<c_InputFPPRemotePlayFile*>(p)->IsrPoll ();
+
+}// TimerHandler
+
 //-----------------------------------------------------------------------------
 c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelIds InputChannelId) :
     c_InputFPPRemotePlayItem (InputChannelId)
 {
     // DEBUG_START;
+
     fsm_PlayFile_state_Idle_imp.Init (this);
+
+    LastIsrTimeStampMS = millis ();
+    MsTicker.attach_ms (uint32_t (25), &TimerHandler, (void*)this); // Add ISR Function
 
     // DEBUG_END;
 } // c_InputFPPRemotePlayFile
@@ -36,7 +46,7 @@ c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelId
 c_InputFPPRemotePlayFile::~c_InputFPPRemotePlayFile ()
 {
     // DEBUG_START;
-
+    MsTicker.detach ();
     for (uint32_t LoopCount = 10000; (LoopCount != 0) && (!IsIdle ()); LoopCount--)
     {
         Stop ();
@@ -71,10 +81,10 @@ void c_InputFPPRemotePlayFile::Sync (String & FileName, uint32_t FrameId)
 {
     // DEBUG_START;
 
-    SyncCount++;
+    SyncControl.SyncCount++;
     if (pCurrentFsmState->Sync (FileName, FrameId))
     {
-        SyncAdjustmentCount++;
+        SyncControl.SyncAdjustmentCount++;
     }
 
     // DEBUG_END;
@@ -82,33 +92,51 @@ void c_InputFPPRemotePlayFile::Sync (String & FileName, uint32_t FrameId)
 } // Sync
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::Poll (uint8_t * Buffer, size_t BufferSize)
+void c_InputFPPRemotePlayFile::Poll (uint8_t * _Buffer, size_t _BufferSize)
 {
-    // DEBUG_START;
+    // xDEBUG_START;
+
+    Buffer = _Buffer;
+    BufferSize = _BufferSize;
 
     InitTimeCorrectionFactor ();
-    pCurrentFsmState->Poll (Buffer, BufferSize);
+    pCurrentFsmState->Poll ();
 
-    // DEBUG_END;
+    // xDEBUG_END;
 
 } // Poll
 
 //-----------------------------------------------------------------------------
+void c_InputFPPRemotePlayFile::IsrPoll ()
+{
+    // xDEBUG_START;
+
+    uint32_t now = millis ();
+    uint32_t elapsedMS = now - LastIsrTimeStampMS;
+    LastIsrTimeStampMS = now;
+    FrameControl.ElapsedPlayTimeMS += elapsedMS;
+    pCurrentFsmState->IsrPoll ();
+    
+    // xDEBUG_END;
+
+} // IsrPoll
+
+//-----------------------------------------------------------------------------
 void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
 {
-    // DEBUG_START;
+    // xDEBUG_START;
 
     // uint32_t mseconds = millis () - StartTimeMS;
-    time_t   AdjustedFrameStepTimeMS = time_t (float (FrameStepTimeMS) * TimeCorrectionFactor);
-    uint32_t mseconds = AdjustedFrameStepTimeMS * LastPlayedFrameId;
-    uint32_t msecondsTotal = FrameStepTimeMS * TotalNumberOfFramesInSequence;
+    time_t   AdjustedFrameStepTimeMS = time_t (float (FrameControl.FrameStepTimeMS) * SyncControl.TimeCorrectionFactor);
+    uint32_t mseconds = AdjustedFrameStepTimeMS * FrameControl.LastPlayedFrameId;
+    uint32_t msecondsTotal = FrameControl.FrameStepTimeMS * FrameControl.TotalNumberOfFramesInSequence;
 
     uint32_t secs = mseconds / 1000;
     uint32_t secsTot = msecondsTotal / 1000;
 
-    JsonStatus[F ("SyncCount")]           = SyncCount;
-    JsonStatus[F ("SyncAdjustmentCount")] = SyncAdjustmentCount;
-    JsonStatus[F ("TimeOffset")]          = TimeCorrectionFactor;
+    JsonStatus[F ("SyncCount")]           = SyncControl.SyncCount;
+    JsonStatus[F ("SyncAdjustmentCount")] = SyncControl.SyncAdjustmentCount;
+    JsonStatus[F ("TimeOffset")]          = SyncControl.TimeCorrectionFactor;
 
     String temp = GetFileName ();
 
@@ -135,47 +163,53 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
 
     JsonStatus[CN_errors] = LastFailedPlayStatusMsg;
 
-    // DEBUG_END;
+    // xDEBUG_END;
 
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-uint32_t c_InputFPPRemotePlayFile::CalculateFrameId (time_t now, int32_t SyncOffsetMS)
+uint32_t c_InputFPPRemotePlayFile::CalculateFrameId (int32_t SyncOffsetMS)
 {
     // DEBUG_START;
 
-    time_t   CurrentPlayTime = now - StartTimeMS;
+    uint32_t CurrentFrameId = 0;
 
-    // has the counter wrapped?
-    if (now < StartTimeMS)
+    do // once
     {
-        CurrentPlayTime = now + (0 - StartTimeMS);
-    }
+        if (FrameControl.ElapsedPlayTimeMS < FrameControl.FrameStepTimeMS)
+        {
+            break;
+        }
 
-    time_t   AdjustedPlayTime        = CurrentPlayTime + SyncOffsetMS;
-    time_t   AdjustedFrameStepTimeMS = time_t (float (FrameStepTimeMS) * TimeCorrectionFactor);
-    uint32_t CurrentFrameId          = AdjustedPlayTime / AdjustedFrameStepTimeMS;
+        uint32_t AdjustedPlayTime = FrameControl.ElapsedPlayTimeMS + SyncOffsetMS;
+        // DEBUG_V (String ("AdjustedPlayTime: ") + String (AdjustedPlayTime));
+        if ((0 > SyncOffsetMS) && (FrameControl.ElapsedPlayTimeMS < abs(SyncOffsetMS)))
+        {
+            break;
+        }
+
+        CurrentFrameId = (AdjustedPlayTime / SyncControl.AdjustedFrameStepTimeMS);
+        // DEBUG_V (String ("  CurrentFrameId: ") + String (CurrentFrameId));
+
+    } while (false);
 
     // DEBUG_END;
 
-    return max (CurrentFrameId, LastPlayedFrameId);
+    return CurrentFrameId;
 
 } // CalculateFrameId
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::CalculatePlayStartTime ()
+void c_InputFPPRemotePlayFile::CalculatePlayStartTime (uint32_t StartingFrameId)
 {
     // DEBUG_START;
 
-    time_t now = millis ();
-    time_t StartOffset = time_t ((float (FrameStepTimeMS) * TimeCorrectionFactor) * float (LastPlayedFrameId));
-    StartTimeMS = now - StartOffset;
-    // DEBUG_V (String ("                 now: ") + String (now));
-    // DEBUG_V (String ("         StartOffset: ") + String (StartOffset));
-    // DEBUG_V (String ("     FrameStepTimeMS: ") + String (FrameStepTimeMS));
-    // DEBUG_V (String ("TimeCorrectionFactor: ") + String (TimeCorrectionFactor));
-    // DEBUG_V (String ("   LastPlayedFrameId: ") + String (LastPlayedFrameId));
-    // DEBUG_V (String ("         StartTimeMS: ") + String (StartTimeMS));
+    FrameControl.ElapsedPlayTimeMS = uint32_t ((float (FrameControl.FrameStepTimeMS) * SyncControl.TimeCorrectionFactor) * float (StartingFrameId));
+    
+    // DEBUG_V (String ("     FrameStepTimeMS: ") + String (FrameControl.FrameStepTimeMS));
+    // DEBUG_V (String ("TimeCorrectionFactor: ") + String (SyncControl.TimeCorrectionFactor));
+    // DEBUG_V (String ("     StartingFrameId: ") + String (StartingFrameId));
+    // DEBUG_V (String ("     ElapsedPlayTIme: ") + String (FrameControl.ElapsedPlayTimeMS));
 
     // DEBUG_END;
 
@@ -264,12 +298,12 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
             break;
         }
 
-        // FrameStepTimeMS = max ((uint8_t)1, fsqParsedHeader.stepTime) * 30;
-        FrameStepTimeMS = max ((uint8_t)1, fsqParsedHeader.stepTime);
-        TotalNumberOfFramesInSequence = fsqParsedHeader.TotalNumberOfFramesInSequence;
+        FrameControl.FrameStepTimeMS = max ((uint8_t)25, fsqParsedHeader.stepTime);
+        FrameControl.TotalNumberOfFramesInSequence = fsqParsedHeader.TotalNumberOfFramesInSequence;
+        SyncControl.AdjustedFrameStepTimeMS = uint32_t (float (FrameControl.FrameStepTimeMS) * SyncControl.TimeCorrectionFactor);
 
-        DataOffset = fsqParsedHeader.dataOffset;
-        ChannelsPerFrame = fsqParsedHeader.channelCount;
+        FrameControl.DataOffset = fsqParsedHeader.dataOffset;
+        FrameControl.ChannelsPerFrame = fsqParsedHeader.channelCount;
 
         memset ((void*)&SparseRanges, 0x00, sizeof (SparseRanges));
         if (fsqParsedHeader.numSparseRanges)
@@ -369,13 +403,13 @@ void c_InputFPPRemotePlayFile::InitTimeCorrectionFactor ()
 
     do // once
     {
-        if (INVALID_TIME_CORRECTION_FACTOR != SavedTimeCorrectionFactor)
+        if (INVALID_TIME_CORRECTION_FACTOR != SyncControl.SavedTimeCorrectionFactor)
         {
             break;
         }
 
         // only do this once after boot.
-        TimeCorrectionFactor = SavedTimeCorrectionFactor = INITIAL_TIME_CORRECTION_FACTOR;
+        SyncControl.TimeCorrectionFactor = SyncControl.SavedTimeCorrectionFactor = INITIAL_TIME_CORRECTION_FACTOR;
 
         String FileData;
         FileMgr.ReadSdFile (String (CN_time), FileData);
@@ -402,8 +436,8 @@ void c_InputFPPRemotePlayFile::InitTimeCorrectionFactor ()
         // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
         // PrettyPrint (JsonData, String ("InitTimeCorrectionFactor"));
 
-        setFromJSON (TimeCorrectionFactor, JsonData, CN_time);
-        SavedTimeCorrectionFactor = TimeCorrectionFactor;
+        setFromJSON (SyncControl.TimeCorrectionFactor, JsonData, CN_time);
+        SyncControl.SavedTimeCorrectionFactor = SyncControl.TimeCorrectionFactor;
         // DEBUG_V (String ("TimeCorrectionFactor: ") + String (TimeCorrectionFactor, 10));
     
     } while (false);
@@ -419,7 +453,7 @@ void c_InputFPPRemotePlayFile::SaveTimeCorrectionFactor ()
 
     do // once
     {
-        if (fabs (SavedTimeCorrectionFactor - TimeCorrectionFactor) < 0.000005F )
+        if (fabs (SyncControl.SavedTimeCorrectionFactor - SyncControl.TimeCorrectionFactor) < 0.000005F )
         {
             // DEBUG_V ("Nothing to save");
             break;
@@ -429,8 +463,8 @@ void c_InputFPPRemotePlayFile::SaveTimeCorrectionFactor ()
         JsonObject JsonData = jsonDoc.createNestedObject ("x");
         // JsonObject JsonData = jsonDoc.as<JsonObject> ();
 
-        JsonData[CN_time] = TimeCorrectionFactor;
-        SavedTimeCorrectionFactor = TimeCorrectionFactor;
+        JsonData[CN_time] = SyncControl.TimeCorrectionFactor;
+        SyncControl.SavedTimeCorrectionFactor = SyncControl.TimeCorrectionFactor;
 
         // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
         // PrettyPrint (JsonData, String ("SaveTimeCorrectionFactor"));
@@ -445,3 +479,18 @@ void c_InputFPPRemotePlayFile::SaveTimeCorrectionFactor ()
     // DEBUG_END;
 
 } // SaveTimeCorrectionFactor
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemotePlayFile::ClearFileInfo()
+{
+    PlayItemName                               = String ("");
+    FrameControl.StartingFrameId               = 0;
+    FrameControl.LastPlayedFrameId             = 0;
+    RemainingPlayCount                         = 0;
+    SyncControl.LastRcvdSyncFrameId            = 0;
+    FrameControl.DataOffset                    = 0;
+    FrameControl.ChannelsPerFrame              = 0;
+    FrameControl.FrameStepTimeMS               = 25;
+    FrameControl.TotalNumberOfFramesInSequence = 0;
+    FrameControl.ElapsedPlayTimeMS             = 0;
+} // ClearFileInfo
