@@ -415,13 +415,13 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, uint32_t TargetFram
 
         if (CurrentFrame > TargetFrameId)
         {
-            p_Parent->SyncControl.TimeCorrectionFactor += TimeOffsetStep;
+            // p_Parent->SyncControl.TimeCorrectionFactor += TimeOffsetStep;
         }
         else
         {
-            p_Parent->SyncControl.TimeCorrectionFactor -= TimeOffsetStep;
+            // p_Parent->SyncControl.TimeCorrectionFactor -= TimeOffsetStep;
         }
-        p_Parent->SyncControl.AdjustedFrameStepTimeMS = uint32_t (float (p_Parent->FrameControl.FrameStepTimeMS) * p_Parent->SyncControl.TimeCorrectionFactor);
+        // p_Parent->SyncControl.AdjustedFrameStepTimeMS = uint32_t (float (p_Parent->FrameControl.FrameStepTimeMS) * p_Parent->SyncControl.TimeCorrectionFactor);
 
         // p_Parent->LastPlayedFrameId = TargetFrameId-1;
         p_Parent->CalculatePlayStartTime (TargetFrameId);
