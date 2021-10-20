@@ -327,6 +327,7 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
         logcon (String (F ("Start Playing:: FileName: '")) + p_Parent->PlayItemName + "'");
 
         Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_PlayingFile_imp);
+        Parent->FrameControl.ElapsedPlayTimeMS = 0;
 
     } while (false);
 
