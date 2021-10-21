@@ -113,6 +113,12 @@ void c_InputFPPRemotePlayFile::IsrPoll ()
 
     uint32_t now = millis ();
     uint32_t elapsedMS = now - LastIsrTimeStampMS;
+    if (now < LastIsrTimeStampMS)
+    {
+        // handle wrap
+        elapsedMS = (0 - LastIsrTimeStampMS) + now;
+    }
+
     LastIsrTimeStampMS = now;
     FrameControl.ElapsedPlayTimeMS += elapsedMS;
     pCurrentFsmState->IsrPoll ();
