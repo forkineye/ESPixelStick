@@ -1,5 +1,5 @@
 #pragma once
-#ifdef ARDUINO_ARCH_ESP32
+#ifdef SPI_OUTPUT
 /*
 * OutputAPA102Spi.h - APA102 driver code for ESPixelStick Spi Channel
 *
@@ -49,4 +49,4 @@ private:
 
 }; // c_OutputAPA102Spi
 
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def SPI_OUTPUT

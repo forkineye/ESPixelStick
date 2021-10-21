@@ -1,4 +1,4 @@
-#ifdef ARDUINO_ARCH_ESP32
+#ifdef SPI_OUTPUT
 /*
 * OutputAPA102.cpp - APA102 driver code for ESPixelStick UART
 *
@@ -90,4 +90,4 @@ bool c_OutputAPA102::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
 } // SetConfig
 
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def SPI_OUTPUT

@@ -1,5 +1,5 @@
 #pragma once
-#ifdef ARDUINO_ARCH_ESP32
+#ifdef SPI_OUTPUT
 /*
 * OutputWS2801Spi.h - WS2801 driver code for ESPixelStick Spi Channel
 *
@@ -49,4 +49,4 @@ private:
 
 }; // c_OutputWS2801Spi
 
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def SPI_OUTPUT
