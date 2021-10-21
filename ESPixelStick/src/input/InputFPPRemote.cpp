@@ -153,6 +153,8 @@ bool c_InputFPPRemote::SetConfig (JsonObject & jsonConfig)
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
     }
 
+    FPPDiscovery.SetSyncOffsetMS (SyncOffsetMS);
+
     // DEBUG_V ("Config Processing");
     // Clear outbuffer on config change
     memset (OutputMgr.GetBufferAddress(), 0x0, OutputMgr.GetBufferUsedSize ());
