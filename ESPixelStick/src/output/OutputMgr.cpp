@@ -68,10 +68,10 @@ static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::
 #ifdef SUPPORT_TM1814
     {c_OutputMgr::e_OutputType::OutputType_TM1814,        "TM1814"        },
 #endif // def SUPPORT_TM1814
-#ifdef ARDUINO_ARCH_ESP32
+#ifdef SPI_OUTPUT
     {c_OutputMgr::e_OutputType::OutputType_WS2801,        "WS2801"        },
     {c_OutputMgr::e_OutputType::OutputType_APA102,        "APA102"        }
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def SPI_OUTPUT
 };
 
 //-----------------------------------------------------------------------------
@@ -92,17 +92,19 @@ static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] 
     // RMT ports
     {DEFAULT_RMT_0_GPIO,  uart_port_t (0)},
     {DEFAULT_RMT_1_GPIO,  uart_port_t (1)},
-#ifndef ESP32_CAM
-    {DEFAULT_RMT_2_GPIO,  uart_port_t (2)},
-    {DEFAULT_RMT_3_GPIO,  uart_port_t (3)},
-    // {DEFAULT_RMT_4_GPIO,  uart_port_t (4)},
-    // {DEFAULT_RMT_5_GPIO,  uart_port_t (5)},
-    // {DEFAULT_RMT_6_GPIO,  uart_port_t (6)},
-    // {DEFAULT_RMT_7_GPIO,  uart_port_t (7)},
-#endif // ndef ESP32_CAM
-    {DEFAULT_SPI_DATA_GPIO, uart_port_t (-1)},
-
+#   ifndef ESP32_CAM
+        {DEFAULT_RMT_2_GPIO,  uart_port_t (2)},
+        {DEFAULT_RMT_3_GPIO,  uart_port_t (3)},
+        // {DEFAULT_RMT_4_GPIO,  uart_port_t (4)},
+        // {DEFAULT_RMT_5_GPIO,  uart_port_t (5)},
+        // {DEFAULT_RMT_6_GPIO,  uart_port_t (6)},
+        // {DEFAULT_RMT_7_GPIO,  uart_port_t (7)},
+#   endif // ndef ESP32_CAM
 #endif // def ARDUINO_ARCH_ESP32
+
+#ifdef SPI_OUTPUT
+    {DEFAULT_SPI_DATA_GPIO, uart_port_t (-1)},
+#endif
 
 #ifndef BOARD_ESPS_V3
     {gpio_num_t::GPIO_NUM_10, uart_port_t (-1)},
@@ -276,9 +278,9 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
 void c_OutputMgr::CreateNewConfig ()
 {
     // DEBUG_START;
-    if (!IsBooting) 
+    if (!IsBooting)
     {
-        logcon (String (F ("--- WARNING: Creating a new Output Manager configuration Data set ---"))); 
+        logcon (String (F ("--- WARNING: Creating a new Output Manager configuration Data set ---")));
     }
 
     BuildingNewConfig = true;
@@ -604,7 +606,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
             }
 #endif // def SUPPORT_TM1814
 
-#ifdef ARDUINO_ARCH_ESP32
+#ifdef SPI_OUTPUT
             case e_OutputType::OutputType_WS2801:
             {
                 if (ChannelIndex == OutputChannelId_SPI_1)
@@ -639,7 +641,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 break;
             }
 
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def SPI_OUTPUT
 
             default:
             {

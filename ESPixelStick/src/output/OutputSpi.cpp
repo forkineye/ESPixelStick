@@ -1,4 +1,4 @@
-#ifdef ARDUINO_ARCH_ESP32
+#ifdef SPI_OUTPUT
 /*
 * OutputSpi.cpp - SPI driver code for ESPixelStick SPI Channel
 *
@@ -212,4 +212,4 @@ bool c_OutputSpi::Render ()
     return Response;
 } // render
 
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def SPI_OUTPUT

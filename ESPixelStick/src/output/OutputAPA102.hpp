@@ -1,5 +1,5 @@
 #pragma once
-#ifdef ARDUINO_ARCH_ESP32
+#ifdef SPI_OUTPUT
 /*
 * OutputAPA102.h - APA102 driver code for ESPixelStick
 *
@@ -56,4 +56,4 @@ protected:
 
 }; // c_OutputAPA102
 
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def SPI_OUTPUT

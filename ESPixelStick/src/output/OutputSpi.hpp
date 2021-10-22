@@ -22,7 +22,7 @@
 *
 */
 
-#ifdef ARDUINO_ARCH_ESP32
+#ifdef SPI_OUTPUT
 
 #include "../ESPixelStick.h"
 #include "OutputPixel.hpp"
@@ -77,4 +77,4 @@ private:
 
 }; // c_OutputSpi
 
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def SPI_OUTPUT

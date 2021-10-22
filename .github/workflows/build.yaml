@@ -19,6 +19,9 @@ jobs:
           # Lolin D32 Pro
           - target: "d32_pro"
             chip: "esp32"
+          # ESP32 CAM
+          - target: "esp32_cam"
+            chip: "esp32"
 
     runs-on: ubuntu-latest
     steps:

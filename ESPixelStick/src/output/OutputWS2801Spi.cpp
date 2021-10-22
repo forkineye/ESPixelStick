@@ -1,4 +1,4 @@
-#ifdef ARDUINO_ARCH_ESP32
+#ifdef SPI_OUTPUT
 /*
 * OutputWS2801Spi.cpp - WS2801 driver code for ESPixelStick SPI Channel
 *
@@ -101,4 +101,4 @@ void c_OutputWS2801Spi::Render ()
 
 } // render
 
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def SPI_OUTPUT

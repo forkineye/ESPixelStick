@@ -1,4 +1,4 @@
-#ifdef ARDUINO_ARCH_ESP32
+#ifdef SPI_OUTPUT
 /*
 * OutputAPA102Spi.cpp - APA102 driver code for ESPixelStick SPI Channel
 *
@@ -30,7 +30,7 @@ c_OutputAPA102Spi::c_OutputAPA102Spi (c_OutputMgr::e_OutputChannelIds OutputChan
 {
     // DEBUG_START;
 
-    // update frame calculation 
+    // update frame calculation
     BlockSize = SPI_NUM_INTENSITY_PER_TRANSACTION;
     BlockDelay = 20.0; // measured between 16 and 21 us
 
@@ -105,4 +105,4 @@ void c_OutputAPA102Spi::Render ()
 
 } // render
 
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def SPI_OUTPUT

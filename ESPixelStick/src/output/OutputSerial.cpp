@@ -197,7 +197,7 @@ bool c_OutputSerial::validate ()
     if ((CurrentBaudrate < uint32_t (BaudRate::BR_MIN)) || (CurrentBaudrate > uint32_t (BaudRate::BR_MAX)))
     {
         logcon (CN_stars + String (F (" Requested baudrate is not valid. Setting to Default ")) + CN_stars);
-        CurrentBaudrate = uint (BaudRate::BR_DEF);
+        CurrentBaudrate = uint32_t (BaudRate::BR_DEF);
         response = false;
     }
 
