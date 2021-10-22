@@ -40,7 +40,7 @@ public:
     virtual void Stop (void) = 0;
     virtual bool Sync (String& FileName, uint32_t FrameId) = 0;
     void GetDriverName (String& Name) { Name = "InputMgr"; }
-    virtual IRAM_ATTR void IsrPoll ();
+    virtual IRAM_ATTR void TimerPoll ();
 
 protected:
     c_InputFPPRemotePlayFile * p_Parent = nullptr;
@@ -57,7 +57,7 @@ public:
     virtual void Start (String & FileName, uint32_t FrameId, uint32_t RemainingPlayCount);
     virtual void Stop (void);
     virtual bool Sync (String& FileName, uint32_t FrameId);
-    virtual IRAM_ATTR void IsrPoll ();
+    virtual IRAM_ATTR void TimerPoll ();
 
 }; // fsm_PlayFile_state_Idle
 
@@ -71,7 +71,7 @@ public:
     virtual void Start (String& FileName, uint32_t FrameId, uint32_t RemainingPlayCount);
     virtual void Stop (void);
     virtual bool Sync (String& FileName, uint32_t FrameId);
-    virtual IRAM_ATTR void IsrPoll ();
+    virtual IRAM_ATTR void TimerPoll ();
 
 }; // fsm_PlayFile_state_Starting
 
@@ -85,7 +85,7 @@ public:
     virtual void Start (String & FileName, uint32_t FrameId, uint32_t RemainingPlayCount);
     virtual void Stop (void);
     virtual bool Sync (String & FileName, uint32_t FrameId);
-    virtual IRAM_ATTR void IsrPoll ();
+    virtual IRAM_ATTR void TimerPoll ();
 
 private:
     struct SparseRange
@@ -106,7 +106,7 @@ public:
     virtual void Start (String& FileName, uint32_t FrameId, uint32_t RemainingPlayCount);
     virtual void Stop (void);
     virtual bool Sync (String& FileName, uint32_t FrameId);
-    virtual IRAM_ATTR void IsrPoll ();
+    virtual IRAM_ATTR void TimerPoll ();
 
 private:
     String   FileName        = "";
