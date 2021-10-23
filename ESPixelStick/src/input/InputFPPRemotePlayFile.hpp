@@ -38,7 +38,7 @@ public:
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
     
-    void IsrPoll ();
+    void TimerPoll ();
 
     uint32_t GetLastFrameId ()  { return FrameControl.LastPlayedFrameId; }
     float    GetTimeCorrectionFactor () { return SyncControl.TimeCorrectionFactor; }
@@ -94,6 +94,11 @@ private:
     size_t    BufferSize = 0;
     Ticker    MsTicker;
     uint32_t  LastIsrTimeStampMS = 0;
+
+    // Logic to detect if polls have stopped coming in. 
+    // This is part of the blanking logic.
+    int       PollDetectionCounter = 0;
+    static const int PollDetectionCounterLimit = 5;
 
 #define MAX_NUM_SPARSE_RANGES 5
     FSEQParsedRangeEntry SparseRanges[MAX_NUM_SPARSE_RANGES];

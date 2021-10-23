@@ -33,11 +33,11 @@ void fsm_PlayFile_state_Idle::Poll ()
 } // fsm_PlayFile_state_Idle::Poll
 
 //-----------------------------------------------------------------------------
-IRAM_ATTR void fsm_PlayFile_state_Idle::IsrPoll ()
+IRAM_ATTR void fsm_PlayFile_state_Idle::TimerPoll ()
 {
     // nothing to do
 
-} // fsm_PlayFile_state_Idle::IsrPoll
+} // fsm_PlayFile_state_Idle::TimerPoll
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Idle::Init (c_InputFPPRemotePlayFile* Parent)
@@ -113,11 +113,11 @@ void fsm_PlayFile_state_Starting::Poll ()
 } // fsm_PlayFile_state_Starting::Poll
 
 //-----------------------------------------------------------------------------
-IRAM_ATTR void fsm_PlayFile_state_Starting::IsrPoll ()
+IRAM_ATTR void fsm_PlayFile_state_Starting::TimerPoll ()
 {
     // nothing to do
 
-} // fsm_PlayFile_state_Starting::IsrPoll
+} // fsm_PlayFile_state_Starting::TimerPoll
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Starting::Init (c_InputFPPRemotePlayFile* Parent)
@@ -212,7 +212,7 @@ void fsm_PlayFile_state_PlayingFile::Poll ()
 } // fsm_PlayFile_state_PlayingFile::Poll
 
 //-----------------------------------------------------------------------------
-IRAM_ATTR void fsm_PlayFile_state_PlayingFile::IsrPoll ()
+IRAM_ATTR void fsm_PlayFile_state_PlayingFile::TimerPoll ()
 {
     // xDEBUG_START;
 
@@ -289,7 +289,7 @@ IRAM_ATTR void fsm_PlayFile_state_PlayingFile::IsrPoll ()
 
     } while (false);
 
-} // fsm_PlayFile_state_PlayingFile::IsrPoll
+} // fsm_PlayFile_state_PlayingFile::TimerPoll
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
@@ -461,11 +461,11 @@ void fsm_PlayFile_state_Stopping::Poll ()
 } // fsm_PlayFile_state_Stopping::Poll
 
 //-----------------------------------------------------------------------------
-IRAM_ATTR void fsm_PlayFile_state_Stopping::IsrPoll ()
+IRAM_ATTR void fsm_PlayFile_state_Stopping::TimerPoll ()
 {
     // nothing to do
 
-} // fsm_PlayFile_state_Stopping::IsrPoll
+} // fsm_PlayFile_state_Stopping::TimerPoll
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Stopping::Init (c_InputFPPRemotePlayFile* Parent)

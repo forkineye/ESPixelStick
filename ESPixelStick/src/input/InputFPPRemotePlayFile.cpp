@@ -22,11 +22,11 @@
 #include "../service/FPPDiscovery.h"
 #include "../service/fseq.h"
 
-static void TimerHandler (void * p)
+static void TimerPollHandler (void * p)
 {
-    reinterpret_cast<c_InputFPPRemotePlayFile*>(p)->IsrPoll ();
+    reinterpret_cast<c_InputFPPRemotePlayFile*>(p)->TimerPoll ();
 
-}// TimerHandler
+}// TimerPollHandler
 
 //-----------------------------------------------------------------------------
 c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelIds InputChannelId) :
@@ -37,7 +37,7 @@ c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelId
     fsm_PlayFile_state_Idle_imp.Init (this);
 
     LastIsrTimeStampMS = millis ();
-    MsTicker.attach_ms (uint32_t (25), &TimerHandler, (void*)this); // Add ISR Function
+    MsTicker.attach_ms (uint32_t (25), &TimerPollHandler, (void*)this); // Add ISR Function
 
     // DEBUG_END;
 } // c_InputFPPRemotePlayFile
@@ -102,24 +102,38 @@ void c_InputFPPRemotePlayFile::Poll (uint8_t * _Buffer, size_t _BufferSize)
     InitTimeCorrectionFactor ();
     pCurrentFsmState->Poll ();
 
+    // Show that we have received a poll
+    PollDetectionCounter = 0;
+
     // xDEBUG_END;
 
 } // Poll
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::IsrPoll ()
+void c_InputFPPRemotePlayFile::TimerPoll ()
 {
     // xDEBUG_START;
 
-    uint32_t now = millis ();
-    uint32_t elapsedMS = now - LastIsrTimeStampMS;
-    LastIsrTimeStampMS = now;
-    FrameControl.ElapsedPlayTimeMS += elapsedMS;
-    pCurrentFsmState->IsrPoll ();
-    
+    // Are polls still coming in?
+    if (PollDetectionCounter < PollDetectionCounterLimit)
+    {
+        PollDetectionCounter++;
+
+        uint32_t now = millis ();
+        uint32_t elapsedMS = now - LastIsrTimeStampMS;
+        if (now < LastIsrTimeStampMS)
+        {
+            // handle wrap
+            elapsedMS = (0 - LastIsrTimeStampMS) + now;
+        }
+
+        LastIsrTimeStampMS = now;
+        FrameControl.ElapsedPlayTimeMS += elapsedMS;
+        pCurrentFsmState->TimerPoll ();
+    }
     // xDEBUG_END;
 
-} // IsrPoll
+} // TimerPoll
 
 //-----------------------------------------------------------------------------
 void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
