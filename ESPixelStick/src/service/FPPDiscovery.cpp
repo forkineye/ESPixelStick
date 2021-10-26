@@ -418,7 +418,7 @@ void c_FPPDiscovery::sendPingPacket (IPAddress destination)
     uint32_t ip = static_cast<uint32_t>(WiFi.localIP ());
     memcpy (packet.ipAddress, &ip, 4);
     strcpy (packet.hostName, config.hostname.c_str ());
-    strcpy (packet.version, (VERSION + String (":") + BUILD_DATE).c_str ());
+    strcpy (packet.version, VERSION.c_str());
     strcpy (packet.hardwareType, FPP_VARIANT_NAME.c_str());
     packet.ranges[0] = 0;
 
@@ -754,7 +754,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     jsonResponse[CN_Platform]           = CN_ESPixelStick;
     jsonResponse[F ("Variant")]         = FPP_VARIANT_NAME;
     jsonResponse[F ("Mode")]            = (true == AllowedToRemotePlayFiles()) ? CN_remote : CN_bridge;
-    jsonResponse[CN_Version]            = VERSION + String (":") + BUILD_DATE;
+    jsonResponse[CN_Version]            = VERSION;
 
     const char* version = VERSION.c_str ();
 
