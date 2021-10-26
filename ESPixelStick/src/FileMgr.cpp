@@ -607,16 +607,12 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
         }
 
 #ifdef ARDUINO_ARCH_ESP32
-        ResponseJsonDoc[F ("totalBytes")]     = SDFS.totalBytes ();
-        ResponseJsonDoc[F ("usedBytes")]      = SDFS.usedBytes ();
-
+        ResponseJsonDoc[F ("totalBytes")] = SD.cardSize ();
 #else
-        FSInfo fs_info;
-        SDFS.info (fs_info);
-        ResponseJsonDoc[F ("totalBytes")]     = fs_info.totalBytes;
-        ResponseJsonDoc[F ("usedBytes")]      = fs_info.usedBytes;
-
+        ResponseJsonDoc[F ("totalBytes")] = SD.size64 ();
 #endif
+        uint64_t usedBytes = 0;
+
         File dir = SDFS.open ("/", CN_r);
 
         while (true)
@@ -628,6 +624,8 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
                 // no more files
                 break;
             }
+
+            usedBytes += entry.size ();
 
             String EntryName = String (entry.name ());
             EntryName = EntryName.substring ((('/' == EntryName[0]) ? 1 : 0));
@@ -650,10 +648,12 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
             entry.close ();
         }
 
+        ResponseJsonDoc[F ("usedBytes")] = usedBytes;
+
     } while (false);
 
     serializeJson (ResponseJsonDoc, Response);
-    // DEBUG_V (Response);
+    // DEBUG_V (String ("Response: ") + Response);
 
     // DEBUG_END;
 
