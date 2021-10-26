@@ -606,6 +606,15 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
             break;
         }
 
+        FSInfo fs_info;
+        SDFS.info (fs_info);
+        ResponseJsonDoc[F ("totalBytes")]    = fs_info.totalBytes;
+        ResponseJsonDoc[F ("usedBytes")]     = fs_info.usedBytes;
+        ResponseJsonDoc[F ("blockSize")]     = fs_info.blockSize;
+        ResponseJsonDoc[F ("pageSize")]      = fs_info.pageSize;
+        ResponseJsonDoc[F ("maxOpenFiles")]  = fs_info.maxOpenFiles;
+        ResponseJsonDoc[F ("maxPathLength")] = fs_info.maxPathLength;
+
         File dir = SDFS.open ("/", CN_r);
 
         while (true)
