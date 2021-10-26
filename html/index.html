@@ -345,23 +345,18 @@
             <div id="filemanagement" class="mdiv hidden anchor">
                 <fieldset>
                     <legend class="esps-legend">File Management</legend>
+                    <form>
+                        <label class="control-label col-sm-2" for="totalBytes">SD Size (MB):</label>
+                        <output id="totalBytes"></output>
+                        <label class="control-label col-sm-2" for="usedBytes">SD Used (MB):</label>
+                        <output id="usedBytes"></output>
+                        <label class="control-label col-sm-2" for="remainingBytes">SD Remaining (MB):</label>
+                        <output id="remainingBytes"></output>
+                    </form>
+                    <br />
                     <div>
                         <a id="FileDeleteButton" class="button">Remove Selected File(s)</a>
                         <!-- <a id="FileUploadButton" class="button">Upload Selected File(s)</a> -->
-                    </div>
-                    <div>
-                        <div>
-                            <label class="control-label col-sm-2" for="totalBytes">SD Size (MB):</label>
-                            <output class="form-control" id="totalBytes" type="number"></output>
-                        </div>
-                        <div>
-                            <label class="control-label col-sm-2" for="usedBytes">Used SD Size (MB):</label>
-                            <output class="form-control" id="usedBytes" type="number"></output>
-                        </div>
-                        <div>
-                            <label class="control-label col-sm-2" for="remainingBytes">Remaining SD Size (MB):</label>
-                            <output class="form-control" id="remainingBytes" type="number"></output>
-                        </div>
                     </div>
                     <div>
                         <fieldset>
