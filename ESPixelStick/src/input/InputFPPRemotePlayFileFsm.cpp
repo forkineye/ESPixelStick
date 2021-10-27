@@ -447,7 +447,6 @@ void fsm_PlayFile_state_Stopping::Poll ()
 
     FileMgr.CloseSdFile (p_Parent->FileHandleForFileBeingPlayed);
     p_Parent->FileHandleForFileBeingPlayed = 0;
-    p_Parent->SaveTimeCorrectionFactor ();
     p_Parent->fsm_PlayFile_state_Idle_imp.Init (p_Parent);
 
     if (FileName != "")

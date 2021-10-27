@@ -377,6 +377,12 @@ function RequestListOfFiles()
 
 } // RequestListOfFiles
 
+function BytesToMB(Value)
+{
+    return (Value / (1024 * 1024)).toFixed();
+
+} // BytesToMB
+
 function ProcessGetFileListResponse(JsonConfigData)
 {
     // console.info("ProcessGetFileListResponse");
@@ -388,6 +394,10 @@ function ProcessGetFileListResponse(JsonConfigData)
     {
         $("#li-filemanagement").addClass("hidden");
     }
+
+    $("#totalBytes").val(BytesToMB (JsonConfigData.totalBytes));
+    $("#usedBytes").val(BytesToMB (JsonConfigData.usedBytes));
+    $("#remainingBytes").val(BytesToMB (JsonConfigData.totalBytes - JsonConfigData.usedBytes) );
 
     Fseq_File_List = JsonConfigData;
 
@@ -1594,7 +1604,6 @@ function ProcessReceivedJsonStatusMessage(data)
         $('#fppremoteFilePlayerFilename').text(FPPDstatus.current_sequence);
         $('#fppremoteFilePlayerTimeElapsed').text(FPPDstatus.time_elapsed);
         $('#fppremoteFilePlayerTimeRemaining').text(FPPDstatus.time_remaining);
-        $('#fppremoteFilePlayerTimeOffset').text(FPPDstatus.TimeOffset);
     }
     else
     {

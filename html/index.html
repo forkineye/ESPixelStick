@@ -108,7 +108,6 @@
                                 <tr><td width="50%">Filename: </td><td><span id="fppremoteFilePlayerFilename"></span></td></tr>
                                 <tr><td width="50%">Time Elapsed: </td><td><span id="fppremoteFilePlayerTimeElapsed"></span></td></tr>
                                 <tr><td width="50%">Time Remaining: </td><td><span id="fppremoteFilePlayerTimeRemaining"></span></td></tr>
-                                <tr><td width="50%">Frame Time Adjustment: </td><td><span id="fppremoteFilePlayerTimeOffset"></span></td></tr>
                             </table>
                         </fieldset>
                     </div>
@@ -345,6 +344,15 @@
             <div id="filemanagement" class="mdiv hidden anchor">
                 <fieldset>
                     <legend class="esps-legend">File Management</legend>
+                    <form>
+                        <label class="control-label col-sm-2" for="totalBytes">SD Size (MB):</label>
+                        <output id="totalBytes"></output>
+                        <label class="control-label col-sm-2" for="usedBytes">SD Used (MB):</label>
+                        <output id="usedBytes"></output>
+                        <label class="control-label col-sm-2" for="remainingBytes">SD Remaining (MB):</label>
+                        <output id="remainingBytes"></output>
+                    </form>
+                    <br />
                     <div>
                         <a id="FileDeleteButton" class="button">Remove Selected File(s)</a>
                         <!-- <a id="FileUploadButton" class="button">Upload Selected File(s)</a> -->

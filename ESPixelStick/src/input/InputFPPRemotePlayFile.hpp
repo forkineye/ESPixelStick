@@ -41,15 +41,10 @@ public:
     void TimerPoll ();
 
     uint32_t GetLastFrameId ()  { return FrameControl.LastPlayedFrameId; }
-    float    GetTimeCorrectionFactor () { return SyncControl.TimeCorrectionFactor; }
 
 private:
-#define INVALID_TIME_CORRECTION_FACTOR -1.0
-#define INITIAL_TIME_CORRECTION_FACTOR  1.0
 #define ELAPSED_PLAY_TIMER_INTERVAL_MS  10
 
-    void InitTimeCorrectionFactor ();
-    void SaveTimeCorrectionFactor ();
     void ClearFileInfo            ();
 
     friend class fsm_PlayFile_state_Idle;
@@ -71,7 +66,7 @@ private:
     {
         size_t            DataOffset = 0;
         uint32_t          ChannelsPerFrame = 0;
-        time_t            FrameStepTimeMS = 1;
+        uint32_t          FrameStepTimeMS = 1;
         uint32_t          TotalNumberOfFramesInSequence = 0;
         uint32_t          ElapsedPlayTimeMS = 0;
 
@@ -84,10 +79,6 @@ private:
         uint32_t          SyncCount = 0;
         uint32_t          SyncAdjustmentCount = 0;
         uint32_t          LastRcvdSyncFrameId = 0;
-
-        double            TimeCorrectionFactor = INITIAL_TIME_CORRECTION_FACTOR;
-        double            SavedTimeCorrectionFactor = INVALID_TIME_CORRECTION_FACTOR;
-        uint32_t          AdjustedFrameStepTimeMS = 0;
     } SyncControl;
 
     uint8_t * Buffer = nullptr;
