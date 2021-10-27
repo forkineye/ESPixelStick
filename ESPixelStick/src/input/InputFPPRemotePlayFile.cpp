@@ -99,7 +99,6 @@ void c_InputFPPRemotePlayFile::Poll (uint8_t * _Buffer, size_t _BufferSize)
     Buffer = _Buffer;
     BufferSize = _BufferSize;
 
-    InitTimeCorrectionFactor ();
     pCurrentFsmState->Poll ();
 
     // Show that we have received a poll
@@ -140,9 +139,7 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
 {
     // xDEBUG_START;
 
-    // uint32_t mseconds = millis () - StartTimeMS;
-    time_t   AdjustedFrameStepTimeMS = time_t (float (FrameControl.FrameStepTimeMS) * SyncControl.TimeCorrectionFactor);
-    uint32_t mseconds = AdjustedFrameStepTimeMS * FrameControl.LastPlayedFrameId;
+    uint32_t mseconds = FrameControl.FrameStepTimeMS * FrameControl.LastPlayedFrameId;
     uint32_t msecondsTotal = FrameControl.FrameStepTimeMS * FrameControl.TotalNumberOfFramesInSequence;
 
     uint32_t secs = mseconds / 1000;
@@ -150,7 +147,6 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
 
     JsonStatus[F ("SyncCount")]           = SyncControl.SyncCount;
     JsonStatus[F ("SyncAdjustmentCount")] = SyncControl.SyncAdjustmentCount;
-    JsonStatus[F ("TimeOffset")]          = SyncControl.TimeCorrectionFactor;
 
     String temp = GetFileName ();
 
@@ -202,7 +198,7 @@ uint32_t c_InputFPPRemotePlayFile::CalculateFrameId (int32_t SyncOffsetMS)
             break;
         }
 
-        CurrentFrameId = (AdjustedPlayTime / SyncControl.AdjustedFrameStepTimeMS);
+        CurrentFrameId = (AdjustedPlayTime / FrameControl.FrameStepTimeMS);
         // DEBUG_V (String ("  CurrentFrameId: ") + String (CurrentFrameId));
 
     } while (false);
@@ -218,10 +214,9 @@ void c_InputFPPRemotePlayFile::CalculatePlayStartTime (uint32_t StartingFrameId)
 {
     // DEBUG_START;
 
-    FrameControl.ElapsedPlayTimeMS = uint32_t ((float (FrameControl.FrameStepTimeMS) * SyncControl.TimeCorrectionFactor) * float (StartingFrameId));
+    FrameControl.ElapsedPlayTimeMS = FrameControl.FrameStepTimeMS * StartingFrameId;
     
     // DEBUG_V (String ("     FrameStepTimeMS: ") + String (FrameControl.FrameStepTimeMS));
-    // DEBUG_V (String ("TimeCorrectionFactor: ") + String (SyncControl.TimeCorrectionFactor));
     // DEBUG_V (String ("     StartingFrameId: ") + String (StartingFrameId));
     // DEBUG_V (String ("     ElapsedPlayTIme: ") + String (FrameControl.ElapsedPlayTimeMS));
 
@@ -314,7 +309,6 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 
         FrameControl.FrameStepTimeMS = max ((uint8_t)25, fsqParsedHeader.stepTime);
         FrameControl.TotalNumberOfFramesInSequence = fsqParsedHeader.TotalNumberOfFramesInSequence;
-        SyncControl.AdjustedFrameStepTimeMS = uint32_t (float (FrameControl.FrameStepTimeMS) * SyncControl.TimeCorrectionFactor);
 
         FrameControl.DataOffset = fsqParsedHeader.dataOffset;
         FrameControl.ChannelsPerFrame = fsqParsedHeader.channelCount;
@@ -409,90 +403,6 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
     return Response;
 
 } // ParseFseqFile
-
-//-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::InitTimeCorrectionFactor ()
-{
-    // DEBUG_START;
-
-    do // once
-    {
-        if (INVALID_TIME_CORRECTION_FACTOR != SyncControl.SavedTimeCorrectionFactor)
-        {
-            break;
-        }
-
-        // only do this once after boot.
-        SyncControl.TimeCorrectionFactor = SyncControl.SavedTimeCorrectionFactor = INITIAL_TIME_CORRECTION_FACTOR;
-
-        String FileData;
-        FileMgr.ReadSdFile (String (CN_time), FileData);
-
-        if (0 == FileData.length ())
-        {
-            // DEBUG_V ("No data in file");
-            break;
-        }
-
-        // DEBUG_V (String ("FileData: ") + FileData);
-
-        DynamicJsonDocument jsonDoc (64);
-        DeserializationError error = deserializeJson (jsonDoc, FileData);
-        if (error)
-        {
-            logcon (CN_Heap_colon + String (ESP.getFreeHeap ()));
-            logcon (String (F ("Time Factor Deserialzation Error. Error code = ")) + error.c_str ());
-        }
-        // DEBUG_V ("");
-
-        JsonObject JsonData = jsonDoc.as<JsonObject> ();
-
-        // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
-        // PrettyPrint (JsonData, String ("InitTimeCorrectionFactor"));
-
-        setFromJSON (SyncControl.TimeCorrectionFactor, JsonData, CN_time);
-        SyncControl.SavedTimeCorrectionFactor = SyncControl.TimeCorrectionFactor;
-        // DEBUG_V (String ("TimeCorrectionFactor: ") + String (TimeCorrectionFactor, 10));
-    
-    } while (false);
-
-    // DEBUG_END;
-
-} // InitTimeCorrectionFactor
-
-//-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::SaveTimeCorrectionFactor ()
-{
-    // DEBUG_START;
-
-    do // once
-    {
-        if (fabs (SyncControl.SavedTimeCorrectionFactor - SyncControl.TimeCorrectionFactor) < 0.000005F )
-        {
-            // DEBUG_V ("Nothing to save");
-            break;
-        }
-
-        DynamicJsonDocument jsonDoc (64);
-        JsonObject JsonData = jsonDoc.createNestedObject ("x");
-        // JsonObject JsonData = jsonDoc.as<JsonObject> ();
-
-        JsonData[CN_time] = SyncControl.TimeCorrectionFactor;
-        SyncControl.SavedTimeCorrectionFactor = SyncControl.TimeCorrectionFactor;
-
-        // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
-        // PrettyPrint (JsonData, String ("SaveTimeCorrectionFactor"));
-
-        String JsonFileData;
-        serializeJson (JsonData, JsonFileData);
-        // DEBUG_V (String ("JsonFileData: ") + JsonFileData);
-        FileMgr.SaveSdFile (String(CN_time), JsonFileData);
-
-    } while (false);
-    
-    // DEBUG_END;
-
-} // SaveTimeCorrectionFactor
 
 //-----------------------------------------------------------------------------
 void c_InputFPPRemotePlayFile::ClearFileInfo()
