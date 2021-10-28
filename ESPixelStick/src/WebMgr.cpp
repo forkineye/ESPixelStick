@@ -639,7 +639,7 @@ void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
     JsonObject status = webJsonDoc.createNestedObject (CN_status);
     JsonObject system = status.createNestedObject (CN_system);
 
-    system[F ("freeheap")] = (String)ESP.getFreeHeap ();
+    system[F ("freeheap")] = ESP.getFreeHeap ();
     system[F ("uptime")] = millis ();
     system[F ("SDinstalled")] = FileMgr.SdCardIsInstalled ();
 
@@ -660,11 +660,15 @@ void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
     OutputMgr.GetStatus (status);
     // DEBUG_V ("");
 
-    String response;
-    serializeJson (webJsonDoc, response);
+    memset (&WebSocketFrameCollectionBuffer[0], 0x00, sizeof (WebSocketFrameCollectionBuffer));
+    WebSocketFrameCollectionBuffer[0] = 'X';
+    WebSocketFrameCollectionBuffer[1] = 'J';
+    serializeJson (webJsonDoc, &WebSocketFrameCollectionBuffer[2], sizeof(WebSocketFrameCollectionBuffer)-3);
+    
     // DEBUG_V (response);
 
-    client->text ((String (F ("XJ")) + response).c_str());
+    client->text (&WebSocketFrameCollectionBuffer[0]);
+    // client->text ((F ("XJ{\"status\":{\"system\":{\"freeheap\":\"18504\",\"uptime\":14089,\"SDinstalled\":true,\"rssi\":-69,\"ip\":\"192.168.10.237\",\"subnet\":\"255.255.255.0\",\"mac\":\"24:A1:60 : 2E : 09 : 5D\",\"hostname\":\"esps - 2e095d\",\"ssid\":\"MaRtInG\",\"FPPDiscovery\":{\"FppRemoteIp\":\"(IP unset)\",\"SyncCount\":0,\"SyncAdjustmentCount\":0,\"current_sequence\":\"\",\"playlist\":\"\",\"seconds_elapsed\":\"0\",\"seconds_played\":\"0\",\"seconds_remaining\":\"0\",\"sequence_filename\":\"\",\"time_elapsed\":\"00 : 00\",\"time_remaining\":\"00 : 00\",\"errors\":\"\"}},\"inputbutton\":{\"id\":0,\"state\":\"off\"},\"input\":[{\"e131\":{\"id\":0,\"unifirst\":1,\"unilast\":5,\"unichanlim\":512,\"num_packets\":0,\"last_clientIP\":0,\"channels\":[{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0}],\"packet_errors\":0}},{\"LocalPlayer\":{\"id\":1,\"active\":false}}],\"output\":[{\"id\":0,\"framerefreshrate\":41,\"FrameCount\":528},{\"id\":1,\"framerefreshrate\":0,\"FrameCount\":0}]}}")));
 
     // DEBUG_END;
 
