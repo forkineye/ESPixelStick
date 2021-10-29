@@ -90,6 +90,7 @@ typedef enum
 #define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_1
 #define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_3
 #define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_16
+#define LED_GPIO                gpio_num_t::GPIO_NUM_33
 
 // File Manager
 #define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_2

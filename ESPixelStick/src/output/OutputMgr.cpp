@@ -157,6 +157,10 @@ void c_OutputMgr::Begin ()
     if (true == HasBeenInitialized) { return; }
     HasBeenInitialized = true;
 
+#ifdef LED_GPIO
+    pinMode (LED_GPIO, INPUT_PULLUP);
+#endif // def LED_GPIO
+
     // make sure the pointers are set up properly
     int ChannelIndex = 0;
     for (auto CurrentOutput : pOutputChannelDrivers)
