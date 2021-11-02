@@ -124,7 +124,7 @@ public:
     };
 
 #ifdef ARDUINO_ARCH_ESP8266
-#   define OM_MAX_NUM_CHANNELS  (800 * 3)
+#   define OM_MAX_NUM_CHANNELS  (1000 * 3)
 #else
 #   define OM_MAX_NUM_CHANNELS  (3000 * 3)
 #endif // !def ARDUINO_ARCH_ESP8266
