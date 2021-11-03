@@ -1160,6 +1160,7 @@ void c_WebMgr::Process ()
     {
         espalexa.loop ();
     }
+    webSocket.cleanupClients();
 } // Process
 
 //-----------------------------------------------------------------------------
