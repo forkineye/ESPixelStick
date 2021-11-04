@@ -413,7 +413,7 @@ void c_FPPDiscovery::sendPingPacket (IPAddress destination)
     v = (uint16_t)atoi (&version[2]);
     packet.versionMinor = (v >> 8) + ((v & 0xFF) << 8);
 
-    packet.operatingMode = (AllowedToRemotePlayFiles ()) ? 0x08 : 0x01; // Support remote mode : Bridge Mode
+    packet.operatingMode = (FileMgr.SdCardIsInstalled ()) ? 0x08 : 0x01; // Support remote mode : Bridge Mode
 
     uint32_t ip = static_cast<uint32_t>(WiFi.localIP ());
     memcpy (packet.ipAddress, &ip, 4);

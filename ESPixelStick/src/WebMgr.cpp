@@ -1163,14 +1163,15 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
  */
 void c_WebMgr::Process ()
 {
-    if (true == IsAlexaCallbackValid())
+   if (true == IsAlexaCallbackValid())
     {
         espalexa.loop ();
     }
 
-    webSocket.cleanupClients ();
+    webSocket.cleanupClients();
 
 } // Process
+
 
 //-----------------------------------------------------------------------------
 // create a global instance of the WEB UI manager
