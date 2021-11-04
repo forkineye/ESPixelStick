@@ -1546,6 +1546,15 @@ function ProcessReceivedJsonStatusMessage(data)
     str += ("0" + date.getUTCSeconds()).slice(-2);
     $('#x_uptime').text(str);
 
+    if (true === System.SDinstalled)
+    {
+        $("#li-filemanagement").removeClass("hidden");
+    }
+    else
+    {
+        $("#li-filemanagement").addClass("hidden");
+	}
+
     // getE131Status(data)
     let InputStatus = Status.input[0];
     if ({}.hasOwnProperty.call(InputStatus, 'e131'))
