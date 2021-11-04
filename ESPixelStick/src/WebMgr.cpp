@@ -504,6 +504,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
 
         case WS_EVT_CONNECT:
         {
+            webSocket.cleanupClients ();
             logcon (String (F ("WS client connect - ")) + client->id ());
             break;
         } // case WS_EVT_CONNECT:
@@ -523,6 +524,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
         case WS_EVT_ERROR:
         default:
         {
+            webSocket.cleanupClients ();
             logcon (F ("** WS ERROR **"));
             break;
         }
@@ -619,6 +621,7 @@ void c_WebMgr::ProcessXARequest (AsyncWebSocketClient* client)
     jsonAdmin["flashchipid"] = int64String (ESP.getEfuseMac (), HEX);
 #endif
 
+    memset (&WebSocketFrameCollectionBuffer[0], 0x00, sizeof (WebSocketFrameCollectionBuffer));
     strcpy (WebSocketFrameCollectionBuffer, "XA");
     size_t msgOffset = strlen (WebSocketFrameCollectionBuffer);
     serializeJson (webJsonDoc, &WebSocketFrameCollectionBuffer[msgOffset], (sizeof (WebSocketFrameCollectionBuffer) - msgOffset));
@@ -661,13 +664,13 @@ void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
     // DEBUG_V ("");
 
     memset (&WebSocketFrameCollectionBuffer[0], 0x00, sizeof (WebSocketFrameCollectionBuffer));
-    WebSocketFrameCollectionBuffer[0] = 'X';
-    WebSocketFrameCollectionBuffer[1] = 'J';
-    serializeJson (webJsonDoc, &WebSocketFrameCollectionBuffer[2], sizeof(WebSocketFrameCollectionBuffer)-3);
+    strcpy (WebSocketFrameCollectionBuffer, "XJ");
+    size_t msgOffset = strlen (WebSocketFrameCollectionBuffer);
+    serializeJson (webJsonDoc, &WebSocketFrameCollectionBuffer[msgOffset], (sizeof (WebSocketFrameCollectionBuffer) - msgOffset));
     
     // DEBUG_V (response);
 
-    client->text (&WebSocketFrameCollectionBuffer[0]);
+    client->text (WebSocketFrameCollectionBuffer);
     // client->text ((F ("XJ{\"status\":{\"system\":{\"freeheap\":\"18504\",\"uptime\":14089,\"SDinstalled\":true,\"rssi\":-69,\"ip\":\"192.168.10.237\",\"subnet\":\"255.255.255.0\",\"mac\":\"24:A1:60 : 2E : 09 : 5D\",\"hostname\":\"esps - 2e095d\",\"ssid\":\"MaRtInG\",\"FPPDiscovery\":{\"FppRemoteIp\":\"(IP unset)\",\"SyncCount\":0,\"SyncAdjustmentCount\":0,\"current_sequence\":\"\",\"playlist\":\"\",\"seconds_elapsed\":\"0\",\"seconds_played\":\"0\",\"seconds_remaining\":\"0\",\"sequence_filename\":\"\",\"time_elapsed\":\"00 : 00\",\"time_remaining\":\"00 : 00\",\"errors\":\"\"}},\"inputbutton\":{\"id\":0,\"state\":\"off\"},\"input\":[{\"e131\":{\"id\":0,\"unifirst\":1,\"unilast\":5,\"unichanlim\":512,\"num_packets\":0,\"last_clientIP\":0,\"channels\":[{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0}],\"packet_errors\":0}},{\"LocalPlayer\":{\"id\":1,\"active\":false}}],\"output\":[{\"id\":0,\"framerefreshrate\":41,\"FrameCount\":528},{\"id\":1,\"framerefreshrate\":0,\"FrameCount\":0}]}}")));
 
     // DEBUG_END;
@@ -1164,6 +1167,9 @@ void c_WebMgr::Process ()
     {
         espalexa.loop ();
     }
+
+    webSocket.cleanupClients ();
+
 } // Process
 
 //-----------------------------------------------------------------------------
