@@ -40,7 +40,7 @@ public:
     virtual void Stop (void) = 0;
     virtual bool Sync (String& FileName, uint32_t FrameId) = 0;
     void GetDriverName (String& Name) { Name = "InputMgr"; }
-    virtual IRAM_ATTR void TimerPoll ();
+    virtual IRAM_ATTR void TimerPoll () = 0;
 
 protected:
     c_InputFPPRemotePlayFile * p_Parent = nullptr;
