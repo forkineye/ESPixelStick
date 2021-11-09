@@ -57,11 +57,11 @@ c_InputFPPRemotePlayFile::~c_InputFPPRemotePlayFile ()
 } // ~c_InputFPPRemotePlayFile
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::Start (String & FileName, uint32_t FrameId, uint32_t PlayCount)
+void c_InputFPPRemotePlayFile::Start (String & FileName, float SecondsElapsed, uint32_t PlayCount)
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Start (FileName, FrameId, PlayCount);
+    pCurrentFsmState->Start (FileName, SecondsElapsed, PlayCount);
 
     // DEBUG_END;
 } // Start
@@ -77,12 +77,12 @@ void c_InputFPPRemotePlayFile::Stop ()
 } // Stop
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::Sync (String & FileName, uint32_t FrameId)
+void c_InputFPPRemotePlayFile::Sync (String & FileName, float SecondsElapsed)
 {
     // DEBUG_START;
 
     SyncControl.SyncCount++;
-    if (pCurrentFsmState->Sync (FileName, FrameId))
+    if (pCurrentFsmState->Sync (FileName, SecondsElapsed))
     {
         SyncControl.SyncAdjustmentCount++;
     }
@@ -139,7 +139,7 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
 {
     // xDEBUG_START;
 
-    uint32_t mseconds = FrameControl.FrameStepTimeMS * FrameControl.LastPlayedFrameId;
+    uint32_t mseconds = FrameControl.ElapsedPlayTimeMS;
     uint32_t msecondsTotal = FrameControl.FrameStepTimeMS * FrameControl.TotalNumberOfFramesInSequence;
 
     uint32_t secs = mseconds / 1000;
@@ -178,7 +178,7 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-uint32_t c_InputFPPRemotePlayFile::CalculateFrameId (int32_t SyncOffsetMS)
+uint32_t c_InputFPPRemotePlayFile::CalculateFrameId (uint32_t ElapsedMS, int32_t SyncOffsetMS)
 {
     // DEBUG_START;
 
@@ -186,14 +186,9 @@ uint32_t c_InputFPPRemotePlayFile::CalculateFrameId (int32_t SyncOffsetMS)
 
     do // once
     {
-        if (FrameControl.ElapsedPlayTimeMS < FrameControl.FrameStepTimeMS)
-        {
-            break;
-        }
-
-        uint32_t AdjustedPlayTime = FrameControl.ElapsedPlayTimeMS + SyncOffsetMS;
+        uint32_t AdjustedPlayTime = ElapsedMS + SyncOffsetMS;
         // DEBUG_V (String ("AdjustedPlayTime: ") + String (AdjustedPlayTime));
-        if ((0 > SyncOffsetMS) && (FrameControl.ElapsedPlayTimeMS < abs(SyncOffsetMS)))
+        if ((0 > SyncOffsetMS) && (ElapsedMS < abs(SyncOffsetMS)))
         {
             break;
         }
@@ -208,21 +203,6 @@ uint32_t c_InputFPPRemotePlayFile::CalculateFrameId (int32_t SyncOffsetMS)
     return CurrentFrameId;
 
 } // CalculateFrameId
-
-//-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::CalculatePlayStartTime (uint32_t StartingFrameId)
-{
-    // DEBUG_START;
-
-    FrameControl.ElapsedPlayTimeMS = FrameControl.FrameStepTimeMS * StartingFrameId;
-    
-    // DEBUG_V (String ("     FrameStepTimeMS: ") + String (FrameControl.FrameStepTimeMS));
-    // DEBUG_V (String ("     StartingFrameId: ") + String (StartingFrameId));
-    // DEBUG_V (String ("     ElapsedPlayTIme: ") + String (FrameControl.ElapsedPlayTimeMS));
-
-    // DEBUG_END;
-
-} // CalculatePlayStartTime
 
 //-----------------------------------------------------------------------------
 bool c_InputFPPRemotePlayFile::ParseFseqFile ()
@@ -408,13 +388,12 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 void c_InputFPPRemotePlayFile::ClearFileInfo()
 {
     PlayItemName                               = String ("");
-    FrameControl.StartingFrameId               = 0;
-    FrameControl.LastPlayedFrameId             = 0;
     RemainingPlayCount                         = 0;
-    SyncControl.LastRcvdSyncFrameId            = 0;
+    SyncControl.LastRcvdElapsedSeconds         = 0.0;
+    FrameControl.ElapsedPlayTimeMS             = 0;
     FrameControl.DataOffset                    = 0;
     FrameControl.ChannelsPerFrame              = 0;
     FrameControl.FrameStepTimeMS               = 25;
     FrameControl.TotalNumberOfFramesInSequence = 0;
-    FrameControl.ElapsedPlayTimeMS             = 0;
+
 } // ClearFileInfo

@@ -41,7 +41,7 @@ private:
 
     AsyncUDP udp;
     void ProcessReceivedUdpPacket (AsyncUDPPacket _packet);
-    void ProcessSyncPacket (uint8_t action, String filename, uint32_t frame, float seconds_elapsed);
+    void ProcessSyncPacket (uint8_t action, String filename, float seconds_elapsed);
     void ProcessBlankPacket ();
     bool PlayingFile () { return !InputFPPRemotePlayFile.IsIdle (); }
 
@@ -55,7 +55,7 @@ private:
     void GetSysInfoJSON    (JsonObject& jsonResponse);
     void BuildFseqResponse (String fname, c_FileMgr::FileId fseq, String & resp);
     void StopPlaying       ();
-    void StartPlaying      (String & filename, uint32_t frameId);
+    void StartPlaying      (String & FileName, float SecondsElapsed);
     bool AllowedToRemotePlayFiles ();
     void GetDriverName     (String & Name) { Name = "FPPD"; }
 

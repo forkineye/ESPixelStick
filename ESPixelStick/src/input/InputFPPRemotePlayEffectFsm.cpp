@@ -45,7 +45,7 @@ void fsm_PlayEffect_state_Idle::Init (c_InputFPPRemotePlayEffect* Parent)
 } // fsm_PlayEffect_state_Idle::Init
 
 //-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_Idle::Start (String & ConfigString, uint32_t )
+void fsm_PlayEffect_state_Idle::Start (String & ConfigString, float )
 {
     // DEBUG_START;
 
@@ -90,7 +90,7 @@ void fsm_PlayEffect_state_Idle::Stop (void)
 } // fsm_PlayEffect_state_Idle::Stop
 
 //-----------------------------------------------------------------------------
-bool fsm_PlayEffect_state_Idle::Sync (uint32_t FrameId)
+bool fsm_PlayEffect_state_Idle::Sync (float)
 {
     // DEBUG_START;
 
@@ -148,7 +148,7 @@ void fsm_PlayEffect_state_PlayingEffect::Init (c_InputFPPRemotePlayEffect* Paren
 } // fsm_PlayEffect_state_PlayingEffect::Init
 
 //-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_PlayingEffect::Start (String & FileName, uint32_t FrameId)
+void fsm_PlayEffect_state_PlayingEffect::Start (String &, float)
 {
     // DEBUG_START;
 
@@ -174,7 +174,7 @@ void fsm_PlayEffect_state_PlayingEffect::Stop (void)
 } // fsm_PlayEffect_state_PlayingEffect::Stop
 
 //-----------------------------------------------------------------------------
-bool fsm_PlayEffect_state_PlayingEffect::Sync (uint32_t FrameId)
+bool fsm_PlayEffect_state_PlayingEffect::Sync (float)
 {
     // DEBUG_START;
 
@@ -210,4 +210,3 @@ void fsm_PlayEffect_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
     // DEBUG_END;
 
 } // fsm_PlayEffect_state_PlayingEffect::GetStatus
-

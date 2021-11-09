@@ -47,7 +47,7 @@ void fsm_PlayList_state_WaitForStart::Init (c_InputFPPRemotePlayList* Parent)
 } // fsm_PlayList_state_WaitForStart::Init
 
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_WaitForStart::Start (String& FileName, uint32_t, uint32_t)
+void fsm_PlayList_state_WaitForStart::Start (String & FileName, float, uint32_t)
 {
     // DEBUG_START;
 
@@ -115,7 +115,7 @@ void fsm_PlayList_state_Idle::Init (c_InputFPPRemotePlayList* Parent)
 } // fsm_PlayList_state_Idle::Init
 
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_Idle::Start (String &, uint32_t, uint32_t )
+void fsm_PlayList_state_Idle::Start (String &, float, uint32_t )
 {
     // DEBUG_START;
 
@@ -181,11 +181,11 @@ void fsm_PlayList_state_PlayingFile::Init (c_InputFPPRemotePlayList* Parent)
 } // fsm_PlayList_state_PlayingFile::Init
 
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_PlayingFile::Start (String & FileName, uint32_t FrameId, uint32_t PlayCount)
+void fsm_PlayList_state_PlayingFile::Start (String & FileName, float SecondsElapsed, uint32_t PlayCount)
 {
     // DEBUG_START;
 
-    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Start (FileName, FrameId, PlayCount);
+    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Start (FileName, SecondsElapsed, PlayCount);
 
     // DEBUG_END;
 
@@ -257,15 +257,15 @@ void fsm_PlayList_state_PlayingEffect::Init (c_InputFPPRemotePlayList* Parent)
 } // fsm_PlayList_state_PlayingEffect::Init
 
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_PlayingEffect::Start (String & FileName, uint32_t FrameId, uint32_t PlayCount)
+void fsm_PlayList_state_PlayingEffect::Start (String & FileName, float SecondsElapsed, uint32_t PlayCount)
 {
     // DEBUG_START;
 
     // DEBUG_V (String ("FileName: '") + String (FileName) + "'");
     // DEBUG_V (String ("FrameId: '") + String (FrameId) + "'");
 
-    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->SetDuration (FrameId);
-    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Start (FileName, 0, PlayCount);
+    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->SetDuration (SecondsElapsed);
+    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Start (FileName, 0.0, PlayCount);
     
     // DEBUG_END;
 
@@ -330,7 +330,7 @@ void fsm_PlayList_state_Paused::Init (c_InputFPPRemotePlayList* Parent)
 } // fsm_PlayList_state_Paused::Init
 
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_Paused::Start (String& , uint32_t , uint32_t )
+void fsm_PlayList_state_Paused::Start (String& , float , uint32_t )
 {
     // DEBUG_START;
 

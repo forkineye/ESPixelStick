@@ -44,11 +44,11 @@ c_InputFPPRemotePlayList::~c_InputFPPRemotePlayList ()
 } // ~c_InputFPPRemotePlayList
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayList::Start (String & FileName, uint32_t FrameId, uint32_t PlayCount)
+void c_InputFPPRemotePlayList::Start (String & FileName, float ElapsedSeconds, uint32_t PlayCount)
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Start (FileName, FrameId, PlayCount);
+    pCurrentFsmState->Start (FileName, ElapsedSeconds, PlayCount);
 
     // DEBUG_END;
 
@@ -66,11 +66,11 @@ void c_InputFPPRemotePlayList::Stop ()
 } // Stop
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayList::Sync (String & FileName, uint32_t FrameId)
+void c_InputFPPRemotePlayList::Sync (String & FileName, float ElapsedSeconds)
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Sync (FileName, FrameId);
+    pCurrentFsmState->Sync (FileName, ElapsedSeconds);
 
     // DEBUG_END;
 
