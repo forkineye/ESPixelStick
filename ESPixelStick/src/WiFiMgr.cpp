@@ -104,7 +104,7 @@ void c_WiFiMgr::Begin (config_t* NewConfig)
     // https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/generic-class.html#setoutputpower
     // https://github.com/esp8266/Arduino/issues/6366
     // AI Thinker FCC certification performed at 17dBm
-    WiFi.setOutputPower (17);
+    WiFi.setOutputPower (16);
 
 #elif defined(ARDUINO_ARCH_ESP32)
     esp_wifi_set_ps (WIFI_PS_NONE);
