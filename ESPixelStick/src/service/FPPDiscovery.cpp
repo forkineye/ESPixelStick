@@ -206,10 +206,10 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
 
                 if (msPacket->sync_type == SYNC_FILE_SEQ)
                 {
-                    //FSEQ type, not media
+                    // FSEQ type, not media
                     // DEBUG_V (String (F ("Received FPP FSEQ sync packet")));
                     FppRemoteIp = UDPpacket.remoteIP ();
-                    ProcessSyncPacket (msPacket->sync_action, msPacket->filename, msPacket->frame_number, msPacket->seconds_elapsed);
+                    ProcessSyncPacket (msPacket->sync_action, String (msPacket->filename), msPacket->seconds_elapsed);
                 }
                 else if (msPacket->sync_type == SYNC_FILE_MEDIA)
                 {
@@ -299,7 +299,7 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
 } // ProcessReceivedUdpPacket
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_t FrameId, float seconds_elapsed)
+void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, float SecondsElapsed)
 {
     // DEBUG_START;
     do // once
@@ -320,7 +320,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
                 // DEBUG_V (String ("    FrameId: ") + FrameId);
 
                 MultiSyncStats.pktSyncSeqStart++;
-                StartPlaying (FileName, FrameId);
+                StartPlaying (FileName, SecondsElapsed);
                 break;
             }
 
@@ -352,7 +352,8 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, uint32_
                                   String(InputFPPRemotePlayFile.GetTimeOffset(),5));
                 */
                 MultiSyncStats.pktSyncSeqSync++;
-                InputFPPRemotePlayFile.Sync (FileName, FrameId);
+                // DEBUG_V (String ("SecondsElapsed: ") + String (SecondsElapsed));
+                InputFPPRemotePlayFile.Sync (FileName, SecondsElapsed);
                 break;
             }
 
@@ -924,7 +925,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 } // ProcessFPPJson
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::StartPlaying (String & FileName, uint32_t FrameId)
+void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
 {
     // DEBUG_START;
     // DEBUG_V (String("Open:: FileName: ") + FileName);
@@ -952,7 +953,7 @@ void c_FPPDiscovery::StartPlaying (String & FileName, uint32_t FrameId)
         }
         // DEBUG_V ("Asking for file to play");
 
-        InputFPPRemotePlayFile.Start (FileName, FrameId, 1);
+        InputFPPRemotePlayFile.Start (FileName, SecondsElapsed, 1);
 
     } while (false);
 

@@ -31,9 +31,9 @@ public:
     c_InputFPPRemotePlayList (c_InputMgr::e_InputChannelIds InputChannelId);
     ~c_InputFPPRemotePlayList ();
 
-    virtual void Start (String & FileName, uint32_t FrameId, uint32_t PlayCount);
+    virtual void Start (String & FileName, float SecondsElapsed, uint32_t PlayCount);
     virtual void Stop  ();
-    virtual void Sync  (String & FileName, uint32_t FrameId);
+    virtual void Sync  (String & FileName, float SecondsElapsed);
     virtual void Poll  (uint8_t * Buffer, size_t BufferSize);
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayList_state_Idle_imp); }

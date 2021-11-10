@@ -31,16 +31,14 @@ public:
     c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelIds InputChannelId);
     ~c_InputFPPRemotePlayFile ();
 
-    virtual void Start (String & FileName, uint32_t FrameId, uint32_t RemainingPlayCount);
+    virtual void Start (String & FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
     virtual void Stop ();
-    virtual void Sync (String& FileName, uint32_t FrameId);
+    virtual void Sync (String& FileName, float SecondsElapsed);
     virtual void Poll (uint8_t* Buffer, size_t BufferSize);
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
     
     void TimerPoll ();
-
-    uint32_t GetLastFrameId ()  { return FrameControl.LastPlayedFrameId; }
 
 private:
 #define ELAPSED_PLAY_TIMER_INTERVAL_MS  10
@@ -70,15 +68,13 @@ private:
         uint32_t          TotalNumberOfFramesInSequence = 0;
         uint32_t          ElapsedPlayTimeMS = 0;
 
-        uint32_t          StartingFrameId = 0;
-        uint32_t          LastPlayedFrameId = 0;
     } FrameControl;
 
     struct SyncControl_t
     {
         uint32_t          SyncCount = 0;
         uint32_t          SyncAdjustmentCount = 0;
-        uint32_t          LastRcvdSyncFrameId = 0;
+        float             LastRcvdElapsedSeconds = 0.0;
     } SyncControl;
 
     uint8_t * Buffer = nullptr;
@@ -94,8 +90,7 @@ private:
 #define MAX_NUM_SPARSE_RANGES 5
     FSEQParsedRangeEntry SparseRanges[MAX_NUM_SPARSE_RANGES];
 
-    uint32_t          CalculateFrameId (int32_t SyncOffsetMS = 0);
-    void              CalculatePlayStartTime (uint32_t FrameId);
+    uint32_t          CalculateFrameId (uint32_t ElapsedMS, int32_t SyncOffsetMS);
     bool              ParseFseqFile ();
 
     String            LastFailedPlayStatusMsg;
