@@ -131,6 +131,7 @@ extern const char CN_playFseq[];
 extern const char CN_playlist [];
 extern const char CN_plussigns [];
 extern const char CN_prependnullcount [];
+extern const char CN_pwm [];
 extern const char CN_remote [];
 extern const char CN_r[];
 extern const char CN_rev[];
