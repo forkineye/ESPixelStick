@@ -106,7 +106,8 @@ void fsm_PlayFile_state_Starting::Poll ()
     // DEBUG_START;
 
     p_Parent->fsm_PlayFile_state_PlayingFile_imp.Init (p_Parent);
-    // DEBUG_V (String ("RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
+    // DEBUG_V (String ("           RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
+    // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->FrameControl.TotalNumberOfFramesInSequence));
 
     // DEBUG_END;
 
@@ -180,6 +181,7 @@ void fsm_PlayFile_state_PlayingFile::Poll ()
 
     do // once
     {
+        // DEBUG_V (String ("LastPlayedFrameId: ") + String (LastPlayedFrameId));
         // have we reached the end of the file?
         if (p_Parent->FrameControl.TotalNumberOfFramesInSequence <= LastPlayedFrameId)
         {
@@ -226,6 +228,7 @@ IRAM_ATTR void fsm_PlayFile_state_PlayingFile::TimerPoll ()
         // have we reached the end of the file?
         if (p_Parent->FrameControl.TotalNumberOfFramesInSequence <= CurrentFrame)
         {
+            LastPlayedFrameId = CurrentFrame;
             break;
         }
 
