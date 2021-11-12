@@ -101,6 +101,14 @@ void loadConfig();
 void GetConfig (JsonObject & json);
 void GetDriverName (String & Name) { Name = "ESP"; }
 
+/// Radio configuration
+/** ESP8266 radio configuration routines that are executed at startup. */
+#ifdef ARDUINO_ARCH_ESP8266
+RF_PRE_INIT() {
+    system_phy_set_powerup_option(3);   // Do full RF calibration on power-up
+}
+#endif
+
 /// Arduino Setup
 /** Arduino based setup code that is executed at startup. */
 void setup()
@@ -388,7 +396,7 @@ void loadConfig()
     String temp;
     // DEBUG_V ("");
     FileMgr.LoadConfigFile (ConfigFileName, &deserializeCoreHandler);
-    
+
     ConfigSaveNeeded |= !validateConfig ();
 
     // DEBUG_START;
