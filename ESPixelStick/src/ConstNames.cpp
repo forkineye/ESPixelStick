@@ -129,6 +129,7 @@ const char CN_plussigns                [] = "+++++";
 const char CN_polarity                 [] = "polarity";
 const char CN_port                     [] = "port";
 const char CN_prependnullcount         [] = "prependnullcount";
+const char CN_pwm                      [] = "pwm";
 const char CN_r                        [] = "r";
 const char CN_remote                   [] = "remote";
 const char CN_rev                      [] = "rev";
