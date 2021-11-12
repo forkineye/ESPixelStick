@@ -169,10 +169,6 @@ $(function ()
         reboot();
     });
 
-    $('#adminFactoryReset').click(function () {
-        factoryReset();
-    });
-
     $('#AdvancedOptions').change(function () {
         UpdateAdvancedOptionsMode();
     });
@@ -1734,10 +1730,9 @@ function reboot()
     wsEnqueue('X6');
 }
 
-// reset config
-function factoryReset()
+// Reset config
+$('#confirm-reset .btn-ok').click(function ()
 {
     showReboot();
     wsEnqueue('X7');
-} // factoryReset
-
+});

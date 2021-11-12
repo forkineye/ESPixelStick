@@ -667,7 +667,7 @@ void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
     strcpy (WebSocketFrameCollectionBuffer, "XJ");
     size_t msgOffset = strlen (WebSocketFrameCollectionBuffer);
     serializeJson (webJsonDoc, &WebSocketFrameCollectionBuffer[msgOffset], (sizeof (WebSocketFrameCollectionBuffer) - msgOffset));
-    
+
     // DEBUG_V (response);
 
     client->text (WebSocketFrameCollectionBuffer);

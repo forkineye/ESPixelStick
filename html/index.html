@@ -395,55 +395,56 @@
                     <legend class="esps-legend">Administration</legend>
                     <form class="form-horizontal" id="updatefw" action="/updatefw" method="post" enctype="multipart/form-data">
                         <div class="form-group">
-                            <label class="control-label col-xs-3">FW Version</label>
-                            <p class="col-xs-9 form-control-static" id="version"></p>
-                            <label class="control-label col-xs-3">Build Date</label>
-                            <p class="col-xs-9 form-control-static" id="built"></p>
-                            <label class="control-label col-xs-3">Architecture</label>
-                            <p class="col-xs-9 form-control-static" id="arch"></p>
-                            <label class="control-label col-xs-3">Flash Size</label>
-                            <p class="col-xs-9 form-control-static" id="realflashsize"></p>
-                            <label class="control-label col-xs-3">Flash Chip ID</label>
-                            <p class="col-xs-9 form-control-static" id="flashchipid"></p>
-                            <label class="control-label col-xs-3">Project Links</label>
-                            <p class="col-xs-9 form-control-static">
+                            <label class="control-label col-sm-3 col-xs-4">FW Version</label>
+                            <p class="col-sm-9 col-xs-8 form-control-static" id="version"></p>
+                            <label class="control-label col-sm-3 col-xs-4">Build Date</label>
+                            <p class="col-sm-9 col-xs-8 form-control-static" id="built"></p>
+                            <label class="control-label col-sm-3 col-xs-4">Architecture</label>
+                            <p class="col-sm-9 col-xs-8 form-control-static" id="arch"></p>
+                            <label class="control-label col-sm-3 col-xs-4">Flash Size</label>
+                            <p class="col-sm-9 col-xs-8 form-control-static" id="realflashsize"></p>
+                            <label class="control-label col-sm-3 col-xs-4">Flash ID</label>
+                            <p class="col-sm-9 col-xs-8 form-control-static" id="flashchipid"></p>
+                            <label class="control-label col-sm-3 col-xs-4">Project Links</label>
+                            <p class="col-sm-9 col-xs-8 form-control-static">
                                 <a href="https://github.com/forkineye/ESPixelStick" target="_blank">ESPixelStick</a> |
                                 <a href="https://github.com/forkineye/ESPixelStick/issues" target="_blank">Report an Issue</a>
                             </p>
-                            <label class="control-label col-xs-3">Firmware Links</label>
-                            <p class="col-xs-9 form-control-static">
+                            <label class="control-label col-sm-3 col-xs-4">Firmware Links</label>
+                            <p class="col-sm-9 col-xs-8 form-control-static">
                                 <a href="https://github.com/forkineye/ESPixelStick/releases/latest" target="_blank">Latest Release</a> |
                                 <a href="https://github.com/forkineye/ESPixelStick/releases" target="_blank">Beta Releases</a> |
                                 <a href="https://github.com/forkineye/ESPixelStick/actions/workflows/build.yaml" target="_blank">CI Builds (untested)</a>
                             </p>
                         </div>
+
                         <div class="form-group">
-                            <div class="col-sm-offset-3 col-sm-3 col-xs-4">
-                                <button type="button" class="btn btn-primary" id="backupconfig">Backup Settings</button>
-                            </div>
-                            <div class="col-sm-3 col-xs-4">
+                            <div class="col-sm-offset-3 col-sm-3 col-xs-12">
                                 <label class="btn btn-primary btn-file">
                                     Update Firmware <input type="file" id="efu" name="file" accept=".efu" style="display: none;"><br /><progress class="hidden" id="EfuProgressBar" value="0" max="100"></progress>
                                 </label>
                             </div>
-                            <div class="col-sm-3 col-xs-4">
+                            <div class="col-sm-3 col-xs-12">
+                                <button type="button" class="btn btn-primary" id="backupconfig">Backup Settings</button>
+                            </div>
+                            <div class="col-sm-3 col-xs-12">
                                 <label class="btn btn-primary btn-file">
                                     Restore Settings <input type="file" id="restoreconfig" accept=".json" style="display: none;">
                                 </label>
                             </div>
                         </div>
                         <div class="form-group">
-                            <div class="col-sm-offset-3 col-sm-10">
+                            <div class="col-sm-offset-3 col-sm-9">
                                 <button type="button" class="btn btn-danger" id="adminReboot">Reboot</button>
                             </div>
                         </div>
                         <div class="form-group">
-                            <div class="col-sm-offset-3 col-sm-10">
-                                <button type="button" class="btn btn-danger" id="adminFactoryReset">Factory Reset</button>
+                            <div class="col-sm-offset-3 col-sm-9">
+                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#confirm-reset">Factory Reset</button>
                             </div>
                         </div>
                         <div class="form-group">
-                            <div class="col-sm-offset-3 col-sm-10" id="d_AdvancedOptions">
+                            <div class="col-sm-offset-3 col-sm-9" id="d_AdvancedOptions">
                                 <div class="checkbox"><label><input type="checkbox" id="AdvancedOptions" class="" name="t_AdvancedMode">Advanced Mode</label></div>
                             </div>
                         </div>
@@ -480,6 +481,26 @@
                 </div>
             </div>
         </div>
+
+        <!-- Factory Reset Modal -->
+        <div id="confirm-reset" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Factory Reset</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>This will perform a factory reset of your ESPixelStick, erasing all configuration data.</p>
+                        <p>Are you sure you want to do this?</p>
+                    </div>
+                    <div class="modal-body">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <a class="btn btn-danger btn-ok">Confirm Reset</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <!-- WebSockets Error Modal -->
         <div id="wserror" class="modal fade" tabindex="-1" role="dialog">
