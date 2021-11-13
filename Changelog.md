@@ -1,9 +1,25 @@
 
 # Changelog
 
+### 4.0-beta4
+
+- Moved FPP Remote to secondary input [Issue #388](https://github.com/forkineye/ESPixelStick/issues/388)
+- Added option to change E1.31 port number [Issue #320](https://github.com/forkineye/ESPixelStick/issues/320)
+- Display SD card stats on file mangement page [Issue #399](https://github.com/forkineye/ESPixelStick/issues/399)
+- Fixed issue not being able to use GPIO0 as a relay pin [Issue #375](https://github.com/forkineye/ESPixelStick/issues/375)
+- FPP multisync improvements
+- Increased ESP8266 pixel limit to 1200 pixels
+- Fixed issue with installing from 32bit Windows systems
+- Added ESP32-CAM build enviornment and binaries
+- Added RF calibration at boot and maximum TX limits to ESP8266 to help with stability
+- Switched LWIP2 build configuration to "High Bandwidth, No Features"
+- Switched to "yubox" fork of ESPAsnycWebserver
+- Added PWM support for relays
+- Added factory reset confirmation dialog
+
 ### 4.0-beta3
 
-- Fixed FSEQ playback for sparse files [Issues #367](https://github.com/forkineye/ESPixelStick/issues/367)
+- Fixed FSEQ playback for sparse files [Issue #367](https://github.com/forkineye/ESPixelStick/issues/367)
 - Fixed refresh rate display [Issue #371](https://github.com/forkineye/ESPixelStick/issues/371)
 - Added FSEQ validation for channel and sparse range counts
 - Stop output on FPP Connect file upload
