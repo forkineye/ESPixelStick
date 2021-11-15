@@ -137,6 +137,10 @@ void c_FileMgr::SetSpiIoPins ()
         SD.end ();
     }
 
+#ifdef USE_MISO_PULLUP
+    pinMode (miso_pin, INPUT_PULLUP); // on some hardware MISO is missing required pull-up resistor, use internal pull-up.
+#endif // def USE_MISO_PULLUP
+
 #ifdef ARDUINO_ARCH_ESP32
     SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
     if (!SD.begin (cs_pin))
