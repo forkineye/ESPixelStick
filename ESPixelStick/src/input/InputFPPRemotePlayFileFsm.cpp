@@ -35,7 +35,8 @@ void fsm_PlayFile_state_Idle::Poll ()
 //-----------------------------------------------------------------------------
 IRAM_ATTR void fsm_PlayFile_state_Idle::TimerPoll ()
 {
-    // nothing to do
+    p_Parent->FrameControl.ElapsedPlayTimeMS = 0;
+    p_Parent->FrameControl.TotalNumberOfFramesInSequence = 0;
 
 } // fsm_PlayFile_state_Idle::TimerPoll
 
