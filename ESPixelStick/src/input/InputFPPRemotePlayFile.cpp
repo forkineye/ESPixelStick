@@ -66,7 +66,7 @@ void c_InputFPPRemotePlayFile::Start (String & FileName, float SecondsElapsed, u
     }
     else
     {
-        DEBUG_V ("No SD Card installed. Ignore Start request");
+        // DEBUG_V ("No SD Card installed. Ignore Start request");
         fsm_PlayFile_state_Idle_imp.Init (this);
     }
 
@@ -106,6 +106,7 @@ void c_InputFPPRemotePlayFile::Poll (uint8_t * _Buffer, size_t _BufferSize)
     Buffer = _Buffer;
     BufferSize = _BufferSize;
 
+    pCurrentFsmState->TimerPoll ();
     pCurrentFsmState->Poll ();
 
     // Show that we have received a poll
@@ -135,7 +136,7 @@ void c_InputFPPRemotePlayFile::TimerPoll ()
 
         LastIsrTimeStampMS = now;
         FrameControl.ElapsedPlayTimeMS += elapsedMS;
-        pCurrentFsmState->TimerPoll ();
+        // pCurrentFsmState->TimerPoll ();
     }
     // xDEBUG_END;
 
