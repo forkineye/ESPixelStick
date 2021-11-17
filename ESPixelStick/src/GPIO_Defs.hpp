@@ -74,51 +74,15 @@ typedef enum
 
 
 // Platform specific GPIO definitions
-#if defined(ARDUINO_ARCH_ESP8266)
-//Output Manager
-#define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_2
 
-// File Manager
-#define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_12
-#define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_13
-#define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14
-#define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_15
-
-#elif defined(ESP32_CAM)
-//Output Manager
-#define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_0
-#define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_1
-#define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_3
-#define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_16
-#define LED_GPIO                gpio_num_t::GPIO_NUM_4
-
-// File Manager
-#define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_2
-#define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_15
-#define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14
-#define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_13
-
+#if defined(ESP32_CAM)
+#   include "GPIO_Defs_ESP32_CAM.hpp"
+#elif defined (ESP32_TTGO_T8)
+#   include "GPIO_Defs_ESP32_TTG_T8.hpp"
+#elif defined(ARDUINO_ARCH_ESP8266)
+#   include "GPIO_Defs_ESP8266_Generic.hpp"
 #elif defined(ARDUINO_ARCH_ESP32)
-//Output Manager
-#define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_2
-#define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_13
-#define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_12
-#define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_14
-#define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_32
-#define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_33
-// #define DEFAULT_RMT_4_GPIO      gpio_num_t::GPIO_NUM_
-// #define DEFAULT_RMT_5_GPIO      gpio_num_t::GPIO_NUM_
-// #define DEFAULT_RMT_6_GPIO      gpio_num_t::GPIO_NUM_
-// #define DEFAULT_RMT_7_GPIO      gpio_num_t::GPIO_NUM_
-
-// SPI Output
-#define DEFAULT_SPI_DATA_GPIO  gpio_num_t::GPIO_NUM_15
-#define DEFAULT_SPI_CLOCK_GPIO gpio_num_t::GPIO_NUM_25
-
-// File Manager
-#define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_19
-#define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_23
-#define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_18
-#define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_4
-
+#   include "GPIO_Defs_ESP32_generic.hpp"
+#else
+#   error "No valid platform definition"
 #endif // ndef platform specific GPIO definitions
