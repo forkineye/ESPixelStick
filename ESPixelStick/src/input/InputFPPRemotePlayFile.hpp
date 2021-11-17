@@ -49,12 +49,14 @@ private:
     friend class fsm_PlayFile_state_Starting;
     friend class fsm_PlayFile_state_PlayingFile;
     friend class fsm_PlayFile_state_Stopping;
+    friend class fsm_PlayFile_state_Error;
     friend class fsm_PlayFile_state;
 
     fsm_PlayFile_state_Idle        fsm_PlayFile_state_Idle_imp;
     fsm_PlayFile_state_Starting    fsm_PlayFile_state_Starting_imp;
     fsm_PlayFile_state_PlayingFile fsm_PlayFile_state_PlayingFile_imp;
     fsm_PlayFile_state_Stopping    fsm_PlayFile_state_Stopping_imp;
+    fsm_PlayFile_state_Error       fsm_PlayFile_state_Error_imp;
 
     fsm_PlayFile_state * pCurrentFsmState = &fsm_PlayFile_state_Idle_imp;
     

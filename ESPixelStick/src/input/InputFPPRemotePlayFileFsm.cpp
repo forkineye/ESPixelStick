@@ -66,7 +66,7 @@ void fsm_PlayFile_state_Idle::Start (String& FileName, float ElapsedSeconds, uin
     p_Parent->RemainingPlayCount = RemainingPlayCount;
 
     // DEBUG_V (String ("           FileName: ") + p_Parent->PlayItemName);
-    // DEBUG_V (String ("    StartingFrameId: ") + p_Parent->FrameControl.StartingFrameId);
+    // DEBUG_V (String ("  ElapsedPlayTimeMS: ") + p_Parent->FrameControl.ElapsedPlayTimeMS);
     // DEBUG_V (String (" RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
 
     p_Parent->fsm_PlayFile_state_Starting_imp.Init (p_Parent);
@@ -315,9 +315,10 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
         --p_Parent->RemainingPlayCount;
         // DEBUG_V (String ("RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
 
+
         if (!p_Parent->ParseFseqFile ())
         {
-            p_Parent->fsm_PlayFile_state_Stopping_imp.Init (p_Parent);
+            p_Parent->fsm_PlayFile_state_Error_imp.Init (p_Parent);
             break;
         }
 
@@ -515,3 +516,76 @@ bool fsm_PlayFile_state_Stopping::Sync (String&, float)
     return false;
 
 } // fsm_PlayFile_state_Stopping::Sync
+
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void fsm_PlayFile_state_Error::Poll ()
+{
+    // xDEBUG_START;
+
+    // xDEBUG_END;
+
+} // fsm_PlayFile_state_Error::Poll
+
+//-----------------------------------------------------------------------------
+IRAM_ATTR void fsm_PlayFile_state_Error::TimerPoll ()
+{
+    // xDEBUG_START;
+    // nothing to do
+    // xDEBUG_END;
+
+} // fsm_PlayFile_state_Error::TimerPoll
+
+//-----------------------------------------------------------------------------
+void fsm_PlayFile_state_Error::Init (c_InputFPPRemotePlayFile* Parent)
+{
+    // DEBUG_START;
+
+    p_Parent = Parent;
+    Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_Error_imp);
+
+    // DEBUG_END;
+
+} // fsm_PlayFile_state_Error::Init
+
+//-----------------------------------------------------------------------------
+void fsm_PlayFile_state_Error::Start (String& FileName, float ElapsedSeconds, uint32_t PlayCount)
+{
+    // DEBUG_START;
+
+    if (FileName != p_Parent->GetFileName ())
+    {
+        p_Parent->fsm_PlayFile_state_Idle_imp.Start (FileName, ElapsedSeconds, PlayCount);
+    }
+
+    // DEBUG_END
+
+} // fsm_PlayFile_state_Error::Start
+
+//-----------------------------------------------------------------------------
+void fsm_PlayFile_state_Error::Stop (void)
+{
+    // DEBUG_START;
+
+    p_Parent->fsm_PlayFile_state_Idle_imp.Init (p_Parent);
+
+    // DEBUG_END;
+
+} // fsm_PlayFile_state_Error::Stop
+
+//-----------------------------------------------------------------------------
+bool fsm_PlayFile_state_Error::Sync (String& FileName, float ElapsedSeconds)
+{
+    // DEBUG_START;
+
+    if (FileName != p_Parent->GetFileName ())
+    {
+        p_Parent->fsm_PlayFile_state_Idle_imp.Start (FileName, ElapsedSeconds, 1);
+    }
+
+    // DEBUG_END;
+    return false;
+
+} // fsm_PlayFile_state_Error::Sync

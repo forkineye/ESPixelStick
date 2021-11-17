@@ -115,3 +115,19 @@ private:
     uint32_t PlayCount           = 0;
 
 }; // fsm_PlayFile_state_Stopping
+
+/*****************************************************************************/
+class fsm_PlayFile_state_Error : public fsm_PlayFile_state
+{
+public:
+    virtual void Poll ();
+    virtual void Init (c_InputFPPRemotePlayFile* Parent);
+    virtual void GetStateName (String& sName) { sName = F ("Error"); }
+    virtual void Start (String& FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
+    virtual void Stop (void);
+    virtual bool Sync (String& FileName, float SecondsElapsed);
+    virtual IRAM_ATTR void TimerPoll ();
+
+private:
+
+}; // fsm_PlayFile_state_Error
