@@ -22,11 +22,39 @@
 #include "../service/FPPDiscovery.h"
 #include "../service/fseq.h"
 
+//-----------------------------------------------------------------------------
 static void TimerPollHandler (void * p)
 {
+#ifdef ARDUINO_ARCH_ESP32
+    TaskHandle_t Handle = reinterpret_cast <c_InputFPPRemotePlayFile*> (p)->GetTaskHandle ();
+    if (Handle)
+    {
+        vTaskResume (Handle);
+    }
+#else
     reinterpret_cast<c_InputFPPRemotePlayFile*>(p)->TimerPoll ();
+#endif // def ARDUINO_ARCH_ESP32
 
-}// TimerPollHandler
+} // TimerPollHandler
+
+#ifdef ARDUINO_ARCH_ESP32
+//----------------------------------------------------------------------------
+static void TimerPollHandlerTask (void* pvParameters)
+{
+    // xDEBUG_START; Need extra stack space to run this
+    c_InputFPPRemotePlayFile* InputFpp = reinterpret_cast <c_InputFPPRemotePlayFile*> (pvParameters);
+
+    do
+    {
+        // we start suspended
+        vTaskSuspend (NULL); //Suspend Own Task
+        InputFpp->TimerPoll ();
+
+    } while (true);
+    // xDEBUG_END;
+
+} // TimerPollHandlerTask
+#endif // def ARDUINO_ARCH_ESP32
 
 //-----------------------------------------------------------------------------
 c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelIds InputChannelId) :
@@ -39,6 +67,8 @@ c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelId
     LastIsrTimeStampMS = millis ();
     MsTicker.attach_ms (uint32_t (25), &TimerPollHandler, (void*)this); // Add ISR Function
 
+    xTaskCreate (TimerPollHandlerTask, "FPPTask", 2000, this, ESP_TASK_PRIO_MIN + 4, &TimerPollTaskHandle);
+
     // DEBUG_END;
 } // c_InputFPPRemotePlayFile
 
@@ -47,6 +77,12 @@ c_InputFPPRemotePlayFile::~c_InputFPPRemotePlayFile ()
 {
     // DEBUG_START;
     MsTicker.detach ();
+    if (NULL != TimerPollTaskHandle)
+    {
+        vTaskDelete (TimerPollTaskHandle);
+        TimerPollTaskHandle = NULL;
+    }
+
     for (uint32_t LoopCount = 10000; (LoopCount != 0) && (!IsIdle ()); LoopCount--)
     {
         Stop ();
@@ -106,7 +142,7 @@ void c_InputFPPRemotePlayFile::Poll (uint8_t * _Buffer, size_t _BufferSize)
     Buffer = _Buffer;
     BufferSize = _BufferSize;
 
-    pCurrentFsmState->TimerPoll ();
+    // pCurrentFsmState->TimerPoll ();
     pCurrentFsmState->Poll ();
 
     // Show that we have received a poll
@@ -136,7 +172,7 @@ void c_InputFPPRemotePlayFile::TimerPoll ()
 
         LastIsrTimeStampMS = now;
         FrameControl.ElapsedPlayTimeMS += elapsedMS;
-        // pCurrentFsmState->TimerPoll ();
+        pCurrentFsmState->TimerPoll ();
     }
     // xDEBUG_END;
 
