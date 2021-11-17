@@ -60,8 +60,15 @@ c_InputFPPRemotePlayFile::~c_InputFPPRemotePlayFile ()
 void c_InputFPPRemotePlayFile::Start (String & FileName, float SecondsElapsed, uint32_t PlayCount)
 {
     // DEBUG_START;
-
-    pCurrentFsmState->Start (FileName, SecondsElapsed, PlayCount);
+    if (FileMgr.SdCardIsInstalled ())
+    {
+        pCurrentFsmState->Start (FileName, SecondsElapsed, PlayCount);
+    }
+    else
+    {
+        DEBUG_V ("No SD Card installed. Ignore Start request");
+        fsm_PlayFile_state_Idle_imp.Init (this);
+    }
 
     // DEBUG_END;
 } // Start
