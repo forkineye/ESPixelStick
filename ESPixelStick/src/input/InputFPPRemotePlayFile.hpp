@@ -25,6 +25,11 @@
 #include "../service/fseq.h"
 #include <Ticker.h>
 
+#ifdef ARDUINO_ARCH_ESP32
+#include <esp_task.h>
+#endif // def ARDUINO_ARCH_ESP32
+
+
 class c_InputFPPRemotePlayFile : public c_InputFPPRemotePlayItem
 {
 public:
@@ -39,6 +44,9 @@ public:
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
     
     void TimerPoll ();
+#ifdef ARDUINO_ARCH_ESP32
+    TaskHandle_t GetTaskHandle () { return TimerPollTaskHandle; }
+#endif // def ARDUINO_ARCH_ESP32
 
 private:
 #define ELAPSED_PLAY_TIMER_INTERVAL_MS  10
@@ -81,6 +89,8 @@ private:
 
     uint8_t * Buffer = nullptr;
     size_t    BufferSize = 0;
+#   define    FPP_TICKER_PERIOD_MS 25
+// #   define    FPP_TICKER_PERIOD_MS 1000
     Ticker    MsTicker;
     uint32_t  LastIsrTimeStampMS = 0;
 
@@ -97,6 +107,10 @@ private:
 
     String            LastFailedPlayStatusMsg;
 
-#define TimeOffsetStep 0.00001
+#ifdef ARDUINO_ARCH_ESP32
+    TaskHandle_t TimerPollTaskHandle = NULL;
+#   define TimerPollHandlerTaskStack 2000
+// #   define TimerPollHandlerTaskStack 4000
+#endif // def ARDUINO_ARCH_ESP32
 
 }; // c_InputFPPRemotePlayFile

@@ -1124,7 +1124,7 @@ function wsConnect()
         }
 
         // target = "192.168.10.237";
-        // target = "192.168.10.155";
+        // target = "192.168.10.101";
 
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');
@@ -1266,10 +1266,10 @@ function wsPingPong()
 
     pingTimer = setTimeout(function () {
         wsEnqueue('XP');
-    }, 2000);
+    }, 4000);
     pongTimer = setTimeout(function () {
         wsReconnect();
-    }, 4000);
+    }, 6000);
 
 }
 
@@ -1600,92 +1600,73 @@ function ProcessReceivedJsonStatusMessage(data)
         $('#ddpStatus').addClass("hidden")
     }
 
-    if ({}.hasOwnProperty.call(Status.system, 'FPPDiscovery'))
+    InputStatus = Status.input[1];
+
+    if ({}.hasOwnProperty.call(InputStatus, 'Player'))
     {
-        $('#FPPRemoteStatus').removeClass("hidden")
-
-        let FPPDstatus = Status.system.FPPDiscovery
-
-        $('#fppsyncreceived').text(FPPDstatus.SyncCount);
-        $('#fppsyncadjustments').text(FPPDstatus.SyncAdjustmentCount);
-        $('#fppremoteip').text(FPPDstatus.FppRemoteIp);
-
-        $('#fppremoteFilePlayerFilename').text(FPPDstatus.current_sequence);
-        $('#fppremoteFilePlayerTimeElapsed').text(FPPDstatus.time_elapsed);
-        $('#fppremoteFilePlayerTimeRemaining').text(FPPDstatus.time_remaining);
-    }
-    else
-    {
-        $('#FPPRemoteStatus').addClass("hidden")
-    }
-
-    if ({}.hasOwnProperty.call(InputStatus, 'LocalPlayer'))
-    {
-        let LocalPlayerStatus = Status.input[0].LocalPlayer;
-
-        if ({}.hasOwnProperty.call(LocalPlayerStatus, 'PlayList'))
+        let PlayerStatus = InputStatus.Player;
+        if ({}.hasOwnProperty.call(PlayerStatus, 'FPPDiscovery'))
         {
-            $('#LocalPlayListPlayerStatus').removeClass("hidden");
+            $('#FPPRemoteStatus').removeClass("hidden")
 
-            LocalPlayerStatus = LocalPlayerStatus.PlayList;
+            let FPPDstatus = PlayerStatus.FPPDiscovery
 
-            $('#localPlayListName').text(LocalPlayerStatus.name);
-            $('#localPlayListEntry').text(LocalPlayerStatus.entry);
-            $('#localPlayListCount').text(LocalPlayerStatus.count);
+            $('#fppsyncreceived').text(FPPDstatus.SyncCount);
+            $('#fppsyncadjustments').text(FPPDstatus.SyncAdjustmentCount);
+            $('#fppremoteip').text(FPPDstatus.FppRemoteIp);
 
-            if ({}.hasOwnProperty.call(LocalPlayerStatus, 'File'))
-            {
-                $('#localPlayListRepeat').text(LocalPlayerStatus.repeat);
-            }
-            else
-            {
-                $('#localPlayListRepeat').text("0");
-            }
+            $('#fppremoteFilePlayerFilename').text(FPPDstatus.current_sequence);
+            $('#fppremoteFilePlayerTimeElapsed').text(FPPDstatus.time_elapsed);
+            $('#fppremoteFilePlayerTimeRemaining').text(FPPDstatus.time_remaining);
         }
         else
         {
-            $('#LocalPlayListPlayerStatus').addClass("hidden")
+            $('#FPPRemoteStatus').addClass("hidden")
         }
 
-        if ({}.hasOwnProperty.call(LocalPlayerStatus, 'File')) {
+        if ({}.hasOwnProperty.call(PlayerStatus, 'File'))
+        {
             $('#LocalFilePlayerStatus').removeClass("hidden");
 
-            $('#localFilePlayerFilename').text(LocalPlayerStatus.File.current_sequence);
-            $('#localFilePlayerTimeElapsed').text(LocalPlayerStatus.File.time_elapsed);
-            $('#localFilePlayerTimeRemaining').text(LocalPlayerStatus.File.time_remaining);
+            let FilePlayerStatus = PlayerStatus.File;
+            $('#localFilePlayerFilename').text(FilePlayerStatus.current_sequence);
+            $('#localFilePlayerTimeElapsed').text(FilePlayerStatus.time_elapsed);
+            $('#localFilePlayerTimeRemaining').text(FilePlayerStatus.time_remaining);
         }
         else
         {
-            $('#LocalFilePlayerStatus').addClass("hidden")
+            $('#LocalFilePlayerStatus').addClass("hidden");
         }
 
-        if ({}.hasOwnProperty.call(LocalPlayerStatus, 'Effect'))
+        if ({}.hasOwnProperty.call(PlayerStatus, 'Effect'))
         {
             $('#LocalEffectPlayerStatus').removeClass("hidden");
 
-            $('#localFilePlayerEffectName').text(LocalPlayerStatus.Effect.currenteffect);
-            $('#localFilePlayerEffectTimeRemaining').text(LocalPlayerStatus.Effect.TimeRemaining);
+            $('#localFilePlayerEffectName').text(PlayerStatus.Effect.currenteffect);
+            $('#localFilePlayerEffectTimeRemaining').text(PlayerStatus.Effect.TimeRemaining);
         }
         else
         {
             $('#LocalEffectPlayerStatus').addClass("hidden")
         }
 
-        if ({}.hasOwnProperty.call(LocalPlayerStatus, 'Paused')) {
+        if ({}.hasOwnProperty.call(PlayerStatus, 'Paused'))
+        {
             $('#PausedPlayerStatus').removeClass("hidden");
 
-            $('#PausedTimeRemaining').text(LocalPlayerStatus.Paused.TimeRemaining);
+            $('#PausedTimeRemaining').text(PlayerStatus.Paused.TimeRemaining);
         }
-        else {
+        else
+        {
             $('#PausedPlayerStatus').addClass("hidden")
         }
     }
-    else
-    {
-        $('#LocalPlayListPlayerStatus').addClass("hidden")
-        $('#LocalFilePlayerStatus').addClass("hidden")
-        $('#LocalEffectPlayerStatus').addClass("hidden")
-        $('#PausedPlayerStatus').addClass("hidden")
+    else {
+        $('#LocalPlayListPlayerStatus').addClass("hidden");
+        $('#LocalFilePlayerStatus').addClass("hidden");
+        $('#LocalEffectPlayerStatus').addClass("hidden");
+        $('#PausedPlayerStatus').addClass("hidden");
+        $('#FPPRemoteStatus').addClass("hidden");
     }
 
     // Device Refresh is dynamic

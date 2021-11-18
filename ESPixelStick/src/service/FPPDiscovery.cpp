@@ -140,10 +140,17 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
 
     if (IsEnabled)
     {
-        // DEBUG_V ("");
+        // DEBUG_V ("Is Enabled");
         JsonObject MyJsonStatus = jsonStatus.createNestedObject (F ("FPPDiscovery"));
         MyJsonStatus[F ("FppRemoteIp")] = FppRemoteIp.toString ();
-        InputFPPRemotePlayFile.GetStatus (MyJsonStatus);
+        if (InputFPPRemotePlayFile)
+        {
+            InputFPPRemotePlayFile->GetStatus (MyJsonStatus);
+        }
+    }
+    else
+    {
+        // DEBUG_V ("Not Enabled");
     }
 
     // DEBUG_END;
@@ -154,7 +161,10 @@ void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t Curr
 {
     // DEBUG_START;
 
-    InputFPPRemotePlayFile.Poll (CurrentOutputBuffer, CurrentOutputBufferSize);
+    if (InputFPPRemotePlayFile)
+    {
+        InputFPPRemotePlayFile->Poll (CurrentOutputBuffer, CurrentOutputBufferSize);
+    }
 
     // DEBUG_END;
 } // ReadNextFrame
@@ -353,7 +363,10 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, float S
                 */
                 MultiSyncStats.pktSyncSeqSync++;
                 // DEBUG_V (String ("SecondsElapsed: ") + String (SecondsElapsed));
-                InputFPPRemotePlayFile.Sync (FileName, SecondsElapsed);
+                if (InputFPPRemotePlayFile)
+                {
+                    InputFPPRemotePlayFile->Sync (FileName, SecondsElapsed);
+                }
                 break;
             }
 
@@ -850,7 +863,10 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             }
             else
             {
-                InputFPPRemotePlayFile.GetStatus (JsonData);
+                if (InputFPPRemotePlayFile)
+                {
+                    InputFPPRemotePlayFile->GetStatus (JsonData);
+                }
                 JsonData[CN_status] = 1;
                 JsonData[CN_status_name] = F ("playing");
 
@@ -953,7 +969,10 @@ void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
         }
         // DEBUG_V ("Asking for file to play");
 
-        InputFPPRemotePlayFile.Start (FileName, SecondsElapsed, 1);
+        if (InputFPPRemotePlayFile)
+        {
+            InputFPPRemotePlayFile->Start (FileName, SecondsElapsed, 1);
+        }
 
     } while (false);
 
@@ -967,7 +986,10 @@ void c_FPPDiscovery::StopPlaying ()
     // DEBUG_START;
 
     // logcon (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
-    InputFPPRemotePlayFile.Stop ();
+    if (InputFPPRemotePlayFile)
+    {
+        InputFPPRemotePlayFile->Stop ();
+    }
 
     // DEBUG_V ("");
 
