@@ -80,11 +80,14 @@ c_InputFPPRemotePlayFile::~c_InputFPPRemotePlayFile ()
 {
     // DEBUG_START;
     MsTicker.detach ();
+
+#ifdef ARDUINO_ARCH_ESP32
     if (NULL != TimerPollTaskHandle)
     {
         vTaskDelete (TimerPollTaskHandle);
         TimerPollTaskHandle = NULL;
     }
+#endif // def ARDUINO_ARCH_ESP32
 
     for (uint32_t LoopCount = 10000; (LoopCount != 0) && (!IsIdle ()); LoopCount--)
     {
