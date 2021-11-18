@@ -89,6 +89,8 @@ private:
 
     uint8_t * Buffer = nullptr;
     size_t    BufferSize = 0;
+#   define    FPP_TICKER_PERIOD_MS 25
+// #   define    FPP_TICKER_PERIOD_MS 1000
     Ticker    MsTicker;
     uint32_t  LastIsrTimeStampMS = 0;
 
@@ -105,11 +107,10 @@ private:
 
     String            LastFailedPlayStatusMsg;
 
-#define TimeOffsetStep 0.00001
 #ifdef ARDUINO_ARCH_ESP32
     TaskHandle_t TimerPollTaskHandle = NULL;
+#   define TimerPollHandlerTaskStack 2000
+// #   define TimerPollHandlerTaskStack 4000
 #endif // def ARDUINO_ARCH_ESP32
-
-
 
 }; // c_InputFPPRemotePlayFile

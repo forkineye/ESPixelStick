@@ -41,17 +41,18 @@ static void TimerPollHandler (void * p)
 //----------------------------------------------------------------------------
 static void TimerPollHandlerTask (void* pvParameters)
 {
-    // xDEBUG_START; Need extra stack space to run this
+    // DEBUG_START; // Need extra stack space to run this
     c_InputFPPRemotePlayFile* InputFpp = reinterpret_cast <c_InputFPPRemotePlayFile*> (pvParameters);
 
     do
     {
         // we start suspended
         vTaskSuspend (NULL); //Suspend Own Task
+        // DEBUG_V ("");
         InputFpp->TimerPoll ();
 
     } while (true);
-    // xDEBUG_END;
+    // DEBUG_END;
 
 } // TimerPollHandlerTask
 #endif // def ARDUINO_ARCH_ESP32
@@ -65,9 +66,11 @@ c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelId
     fsm_PlayFile_state_Idle_imp.Init (this);
 
     LastIsrTimeStampMS = millis ();
-    MsTicker.attach_ms (uint32_t (25), &TimerPollHandler, (void*)this); // Add ISR Function
+    MsTicker.attach_ms (uint32_t (FPP_TICKER_PERIOD_MS), &TimerPollHandler, (void*)this); // Add ISR Function
 
-    xTaskCreate (TimerPollHandlerTask, "FPPTask", 2000, this, ESP_TASK_PRIO_MIN + 4, &TimerPollTaskHandle);
+#ifdef ARDUINO_ARCH_ESP32
+    xTaskCreate (TimerPollHandlerTask, "FPPTask", TimerPollHandlerTaskStack, this, ESP_TASK_PRIO_MIN + 4, &TimerPollTaskHandle);
+#endif // def ARDUINO_ARCH_ESP32
 
     // DEBUG_END;
 } // c_InputFPPRemotePlayFile
