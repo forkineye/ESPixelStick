@@ -155,8 +155,6 @@ bool c_InputFPPRemote::SetConfig (JsonObject& jsonConfig)
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
     }
 
-    FPPDiscovery.SetSyncOffsetMS (SyncOffsetMS);
-
     // DEBUG_V ("Config Processing");
     // Clear outbuffer on config change
     memset (OutputMgr.GetBufferAddress (), 0x0, OutputMgr.GetBufferUsedSize ());
@@ -275,12 +273,12 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
         {
             // DEBUG_V ("Start Local FSEQ file player");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (GetInputChannelId ());
-            pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
             StatusType = CN_File;
         }
 
         // DEBUG_V (String ("FileName: '") + FileName + "'");
         // DEBUG_V ("Start Playing");
+        pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
         pInputFPPRemotePlayItem->Start (FileName, 0, 1);
         FileBeingPlayed = FileName;
 
