@@ -87,14 +87,24 @@ void c_InputFPPRemote::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject LocalPlayerStatus = jsonStatus.createNestedObject (F ("LocalPlayer"));
+    JsonObject LocalPlayerStatus = jsonStatus.createNestedObject (F ("Player"));
     LocalPlayerStatus[CN_id] = InputChannelId;
     LocalPlayerStatus[CN_active] = PlayingFile ();
 
-    if (PlayingFile ())
+    if (PlayingRemoteFile ())
+    {
+        FPPDiscovery.GetStatus (LocalPlayerStatus);
+    }
+
+    else if (PlayingFile ())
     {
         JsonObject PlayerObjectStatus = LocalPlayerStatus.createNestedObject (StatusType);
         pInputFPPRemotePlayItem->GetStatus (PlayerObjectStatus);
+    }
+
+    else
+    {
+        // DEBUG_V ("Not Playing");
     }
 
     // DEBUG_END;
@@ -112,7 +122,7 @@ void c_InputFPPRemote::Process ()
     }
     else if (PlayingRemoteFile ())
     {
-        // DEBUG_V ();
+        // DEBUG_V ("PlayingRemoteFile");
         FPPDiscovery.ReadNextFrame (InputDataBuffer, InputDataBufferSize);
     }
     else if (PlayingFile ())
@@ -211,8 +221,8 @@ void c_InputFPPRemote::StartPlaying (String& FileName)
         if ((0 == FileName.length ()) ||
             (FileName == String ("null")))
         {
-            StopPlaying ();
             // DEBUG_V ("No file to play");
+            StopPlaying ();
             break;
         }
 
@@ -303,10 +313,11 @@ void c_InputFPPRemote::StartPlayingRemoteFile (String& FileName)
 
         StopPlaying ();
 
-        // DEBUG_V ("Start an FSEQ file player");
+        // DEBUG_V ("Instantiate an FSEQ file player");
         pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (GetInputChannelId ());
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
         StatusType = CN_File;
+        FileBeingPlayed = FileName;
 
         FPPDiscovery.SetInputFPPRemotePlayFile ((c_InputFPPRemotePlayFile *) pInputFPPRemotePlayItem);
         FPPDiscovery.Enable ();
@@ -328,7 +339,7 @@ void c_InputFPPRemote::validateConfiguration ()
 //-----------------------------------------------------------------------------
 bool c_InputFPPRemote::PlayingFile ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     bool response = false;
 
@@ -342,7 +353,7 @@ bool c_InputFPPRemote::PlayingFile ()
         response = true;
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
     return response;
 
 } // PlayingFile
@@ -350,7 +361,7 @@ bool c_InputFPPRemote::PlayingFile ()
 //-----------------------------------------------------------------------------
 bool c_InputFPPRemote::PlayingRemoteFile ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     bool response = false;
 
@@ -370,7 +381,7 @@ bool c_InputFPPRemote::PlayingRemoteFile ()
 
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
     return response;
 
 } // PlayingRemoteFile
