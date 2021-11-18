@@ -140,13 +140,17 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
 
     if (IsEnabled)
     {
-        // DEBUG_V ("");
+        // DEBUG_V ("Is Enabled");
         JsonObject MyJsonStatus = jsonStatus.createNestedObject (F ("FPPDiscovery"));
         MyJsonStatus[F ("FppRemoteIp")] = FppRemoteIp.toString ();
         if (InputFPPRemotePlayFile)
         {
             InputFPPRemotePlayFile->GetStatus (MyJsonStatus);
         }
+    }
+    else
+    {
+        // DEBUG_V ("Not Enabled");
     }
 
     // DEBUG_END;
