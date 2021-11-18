@@ -32,7 +32,7 @@
 c_InputFPPRemote::c_InputFPPRemote (
     c_InputMgr::e_InputChannelIds NewInputChannelId,
     c_InputMgr::e_InputType       NewChannelType,
-    uint8_t                     * BufferStart,
+    uint8_t* BufferStart,
     uint16_t                      BufferSize) :
     c_InputCommon (NewInputChannelId, NewChannelType, BufferStart, BufferSize)
 {
@@ -49,12 +49,11 @@ c_InputFPPRemote::~c_InputFPPRemote ()
     if (HasBeenInitialized)
     {
         StopPlaying ();
-        FPPDiscovery.Disable ();
     }
 } // ~c_InputFPPRemote
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemote::Begin()
+void c_InputFPPRemote::Begin ()
 {
     // DEBUG_START;
 
@@ -65,13 +64,13 @@ void c_InputFPPRemote::Begin()
 } // begin
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemote::GetConfig (JsonObject & jsonConfig)
+void c_InputFPPRemote::GetConfig (JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
     if (PlayingFile ())
     {
-        jsonConfig[JSON_NAME_FILE_TO_PLAY] = pInputFPPRemotePlayItem->GetFileName();
+        jsonConfig[JSON_NAME_FILE_TO_PLAY] = pInputFPPRemotePlayItem->GetFileName ();
     }
     else
     {
@@ -84,12 +83,12 @@ void c_InputFPPRemote::GetConfig (JsonObject & jsonConfig)
 } // GetConfig
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemote::GetStatus (JsonObject & jsonStatus)
+void c_InputFPPRemote::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
     JsonObject LocalPlayerStatus = jsonStatus.createNestedObject (F ("LocalPlayer"));
-    LocalPlayerStatus[CN_id]     = InputChannelId;
+    LocalPlayerStatus[CN_id] = InputChannelId;
     LocalPlayerStatus[CN_active] = PlayingFile ();
 
     if (PlayingFile ())
@@ -111,6 +110,11 @@ void c_InputFPPRemote::Process ()
         // DEBUG_V ("dont do anything if the channel is not active");
         StopPlaying ();
     }
+    else if (PlayingRemoteFile ())
+    {
+        // DEBUG_V ();
+        FPPDiscovery.ReadNextFrame (InputDataBuffer, InputDataBufferSize);
+    }
     else if (PlayingFile ())
     {
         // DEBUG_V ("Local File Play");
@@ -124,8 +128,6 @@ void c_InputFPPRemote::Process ()
     }
     else
     {
-        // DEBUG_V ();
-        FPPDiscovery.ReadNextFrame (InputDataBuffer, InputDataBufferSize);
     }
 
     // DEBUG_END;
@@ -141,7 +143,7 @@ void c_InputFPPRemote::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
 } // SetBufferInfo
 
 //-----------------------------------------------------------------------------
-bool c_InputFPPRemote::SetConfig (JsonObject & jsonConfig)
+bool c_InputFPPRemote::SetConfig (JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
@@ -157,7 +159,7 @@ bool c_InputFPPRemote::SetConfig (JsonObject & jsonConfig)
 
     // DEBUG_V ("Config Processing");
     // Clear outbuffer on config change
-    memset (OutputMgr.GetBufferAddress(), 0x0, OutputMgr.GetBufferUsedSize ());
+    memset (OutputMgr.GetBufferAddress (), 0x0, OutputMgr.GetBufferUsedSize ());
     StartPlaying (FileToPlay);
 
     // DEBUG_END;
@@ -177,7 +179,9 @@ void c_InputFPPRemote::StopPlaying ()
             break;
         }
 
-        // DEBUG_ ();
+        // DEBUG_V ();
+        FPPDiscovery.Disable ();
+        FPPDiscovery.ForgetInputFPPRemotePlayFile ();
 
         pInputFPPRemotePlayItem->Stop ();
 
@@ -190,6 +194,8 @@ void c_InputFPPRemote::StopPlaying ()
         delete pInputFPPRemotePlayItem;
         pInputFPPRemotePlayItem = nullptr;
 
+        FileBeingPlayed = "";
+
     } while (false);
 
     // DEBUG_END;
@@ -197,7 +203,7 @@ void c_InputFPPRemote::StopPlaying ()
 } // StopPlaying
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemote::StartPlaying (String & FileName)
+void c_InputFPPRemote::StartPlaying (String& FileName)
 {
     // DEBUG_START;
 
@@ -205,24 +211,41 @@ void c_InputFPPRemote::StartPlaying (String & FileName)
     {
         // DEBUG_V (String ("FileName: '") + FileName + "'");
         if ((0 == FileName.length ()) ||
-            (FileName == No_LocalFileToPlay) ||
-            (FileName == String("null")) )
+            (FileName == String ("null")))
         {
             StopPlaying ();
-            // DEBUG_V ("Enable FPP Remote");
-
-            if (FileName == No_LocalFileToPlay)
-            {
-                FPPDiscovery.Enable ();
-            }
-
+            // DEBUG_V ("No file to play");
             break;
         }
-        // DEBUG_V ("Disable FPP Remote");
-        FPPDiscovery.Disable ();
-        // DEBUG_V ("Disable FPP Remote Done");
 
-        // are we already playing a file?
+        if (FileName == No_LocalFileToPlay)
+        {
+            StartPlayingRemoteFile (FileName);
+        }
+        else
+        {
+            StartPlayingLocalFile (FileName);
+        }
+
+    } while (false);
+
+    // DEBUG_END;
+
+} // StartPlaying
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
+{
+    // DEBUG_START;
+
+    do // once
+    {
+        if (PlayingRemoteFile ())
+        {
+            StopPlaying ();
+        }
+
+        // are we already playing a local file?
         if (PlayingFile ())
         {
             // DEBUG_V ("PlayingFile");
@@ -265,13 +288,91 @@ void c_InputFPPRemote::StartPlaying (String & FileName)
 
     // DEBUG_END;
 
+} // StartPlayingLocalFile
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemote::StartPlayingRemoteFile (String& FileName)
+{
+    // DEBUG_START;
+
+    do // once
+    {
+        if (PlayingRemoteFile ())
+        {
+            // DEBUG_V ("Already Playing in remote mode");
+            break;
+        }
+
+        StopPlaying ();
+
+        // DEBUG_V ("Start an FSEQ file player");
+        pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (GetInputChannelId ());
+        pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
+        StatusType = CN_File;
+
+        FPPDiscovery.SetInputFPPRemotePlayFile ((c_InputFPPRemotePlayFile *) pInputFPPRemotePlayItem);
+        FPPDiscovery.Enable ();
+
+    } while (false);
+
+    // DEBUG_END;
+
 } // StartPlaying
 
 //-----------------------------------------------------------------------------
-//TODO: Add MQTT configuration validation
 void c_InputFPPRemote::validateConfiguration ()
 {
     // DEBUG_START;
     // DEBUG_END;
 
 } // validate
+
+//-----------------------------------------------------------------------------
+bool c_InputFPPRemote::PlayingFile ()
+{
+    DEBUG_START;
+
+    bool response = false;
+
+    do // once
+    {
+        if (nullptr == pInputFPPRemotePlayItem)
+        {
+            break;
+        }
+
+        response = true;
+    } while (false);
+
+    DEBUG_END;
+    return response;
+
+} // PlayingFile
+
+//-----------------------------------------------------------------------------
+bool c_InputFPPRemote::PlayingRemoteFile ()
+{
+    DEBUG_START;
+
+    bool response = false;
+
+    do // once
+    {
+        if (!PlayingFile ())
+        {
+            break;
+        }
+
+        if (FileBeingPlayed != No_LocalFileToPlay)
+        {
+            break;
+        }
+
+        response = true;
+
+    } while (false);
+
+    DEBUG_END;
+    return response;
+
+} // PlayingRemoteFile

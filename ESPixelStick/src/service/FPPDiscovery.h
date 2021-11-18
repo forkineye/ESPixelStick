@@ -43,14 +43,21 @@ private:
     void ProcessReceivedUdpPacket (AsyncUDPPacket _packet);
     void ProcessSyncPacket (uint8_t action, String filename, float seconds_elapsed);
     void ProcessBlankPacket ();
-    bool PlayingFile () { return !InputFPPRemotePlayFile.IsIdle (); }
+    bool PlayingFile () 
+    {
+        if (InputFPPRemotePlayFile)
+        {
+            return !InputFPPRemotePlayFile->IsIdle ();
+        }
+        return false;
+    }
 
     bool inFileUpload = false;
     bool hasBeenInitialized = false;
     bool IsEnabled = false;
     String UploadFileName;
     IPAddress FppRemoteIp = IPAddress (uint32_t(0));
-    c_InputFPPRemotePlayFile InputFPPRemotePlayFile = c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelIds::InputSecondaryChannelId);
+    c_InputFPPRemotePlayFile * InputFPPRemotePlayFile = nullptr;
 
     void GetSysInfoJSON    (JsonObject& jsonResponse);
     void BuildFseqResponse (String fname, c_FileMgr::FileId fseq, String & resp);
@@ -112,7 +119,9 @@ public:
     void Disable          (void);
     void GetStatus        (JsonObject& jsonStatus);
     void NetworkStateChanged (bool NewNetworkState);
-    void SetSyncOffsetMS  (int32_t value) { InputFPPRemotePlayFile.SetSyncOffsetMS (value); }
+
+    void SetInputFPPRemotePlayFile (c_InputFPPRemotePlayFile * value) { InputFPPRemotePlayFile = value; }
+    void ForgetInputFPPRemotePlayFile () { InputFPPRemotePlayFile = nullptr; }
 
 };
 

@@ -54,8 +54,11 @@ private:
 
     void validateConfiguration ();
     void StartPlaying (String & FileName);
+    void StartPlayingLocalFile (String & FileName);
+    void StartPlayingRemoteFile (String & FileName);
     void StopPlaying ();
-    bool PlayingFile () { return nullptr != pInputFPPRemotePlayItem; }
+    bool PlayingFile ();
+    bool PlayingRemoteFile ();
 
     void load ();          ///< Load configuration from File System
     void save ();          ///< Save configuration to File System
