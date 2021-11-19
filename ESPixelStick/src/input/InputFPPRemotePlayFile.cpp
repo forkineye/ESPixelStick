@@ -131,6 +131,7 @@ void c_InputFPPRemotePlayFile::Sync (String & FileName, float SecondsElapsed)
     // DEBUG_START;
 
     SyncControl.SyncCount++;
+    UpdateElapsedPlayTimeMS ();
     if (pCurrentFsmState->Sync (FileName, SecondsElapsed))
     {
         SyncControl.SyncAdjustmentCount++;
@@ -167,17 +168,7 @@ void c_InputFPPRemotePlayFile::TimerPoll ()
     if (PollDetectionCounter < PollDetectionCounterLimit)
     {
         PollDetectionCounter++;
-
-        uint32_t now = millis ();
-        uint32_t elapsedMS = now - LastIsrTimeStampMS;
-        if (now < LastIsrTimeStampMS)
-        {
-            // handle wrap
-            elapsedMS = (0 - LastIsrTimeStampMS) + now;
-        }
-
-        LastIsrTimeStampMS = now;
-        FrameControl.ElapsedPlayTimeMS += elapsedMS;
+        UpdateElapsedPlayTimeMS ();
         pCurrentFsmState->TimerPoll ();
     }
     // xDEBUG_END;
@@ -226,6 +217,25 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
     // xDEBUG_END;
 
 } // GetStatus
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemotePlayFile::UpdateElapsedPlayTimeMS ()
+{
+    noInterrupts ();
+
+    uint32_t now = millis ();
+    uint32_t elapsedMS = now - LastIsrTimeStampMS;
+    if (now < LastIsrTimeStampMS)
+    {
+        // handle wrap
+        elapsedMS = (0 - LastIsrTimeStampMS) + now;
+    }
+
+    LastIsrTimeStampMS = now;
+    FrameControl.ElapsedPlayTimeMS += elapsedMS;
+
+    interrupts ();
+} // UpdateElapsedPlayTimeMS
 
 //-----------------------------------------------------------------------------
 uint32_t c_InputFPPRemotePlayFile::CalculateFrameId (uint32_t ElapsedMS, int32_t SyncOffsetMS)
