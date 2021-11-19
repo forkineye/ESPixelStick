@@ -102,10 +102,11 @@ private:
 #define MAX_NUM_SPARSE_RANGES 5
     FSEQParsedRangeEntry SparseRanges[MAX_NUM_SPARSE_RANGES];
 
-    uint32_t          CalculateFrameId (uint32_t ElapsedMS, int32_t SyncOffsetMS);
-    bool              ParseFseqFile ();
+    void        UpdateElapsedPlayTimeMS ();
+    uint32_t    CalculateFrameId (uint32_t ElapsedMS, int32_t SyncOffsetMS);
+    bool        ParseFseqFile ();
 
-    String            LastFailedPlayStatusMsg;
+    String      LastFailedPlayStatusMsg;
 
 #ifdef ARDUINO_ARCH_ESP32
     TaskHandle_t TimerPollTaskHandle = NULL;
