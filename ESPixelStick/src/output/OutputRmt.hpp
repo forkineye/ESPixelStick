@@ -58,9 +58,12 @@ private:
     uint8_t NumIntensityBitsPerInterrupt = 0;
 
     // debug counters
-    // uint32_t DataISRcounter = 0;
-    // uint32_t FrameEndISRcounter = 0;
-    // uint32_t FrameStartCounter = 0;
+    uint32_t DataISRcounter = 0;
+    uint32_t FrameEndISRcounter = 0;
+    uint32_t FrameStartCounter = 0;
+    uint32_t RxIsr = 0;
+    uint32_t ErrorIsr = 0;
+    uint32_t IsrIsNotForUs = 0;
 
 public:
     c_OutputRmt ();
@@ -68,6 +71,7 @@ public:
 
     void Begin (rmt_channel_t ChannelId, gpio_num_t DataPin, c_OutputPixel * OutputPixel, rmt_idle_level_t idle_level);
     bool Render ();
+    void GetStatus (ArduinoJson::JsonObject& jsonStatus);
     void set_pin (gpio_num_t _DataPin) { DataPin = _DataPin; rmt_set_gpio (RmtChannelId, rmt_mode_t::RMT_MODE_TX, DataPin, false); }
 
     void SetNumIdleBits  (uint8_t Value)  { NumIdleBits  = Value; }

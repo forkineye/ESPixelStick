@@ -134,35 +134,68 @@ void c_OutputRmt::Begin (rmt_channel_t ChannelId,
 //----------------------------------------------------------------------------
 void IRAM_ATTR c_OutputRmt::ISR_Handler ()
 {
-    if (RMT.int_st.val & RMT_INT_TX_END_BIT)
+    register uint32_t int_st = RMT.int_st.val;
+
+    do // once
     {
-        RMT.int_clr.val = RMT_INT_TX_END_BIT;
-        RMT.int_clr.val = RMT_INT_THR_EVNT_BIT;
-
-        RMT.int_ena.val &= ~RMT_INT_TX_END_BIT;
-        RMT.int_ena.val &= ~RMT_INT_THR_EVNT_BIT;
-
-        // ISR_Handler_StartNewFrame ();
-    }
-    else if (RMT.int_st.val & RMT_INT_THR_EVNT_BIT)
-    {
-        // RMT.int_ena.val &= ~RMT_INT_THR_EVNT (RmtChannelId);
-        RMT.int_clr.val = RMT_INT_THR_EVNT_BIT;
-
-        if (OutputPixel->MoreDataToSend ())
+        if (!(int_st & (RMT_INT_TX_END_BIT | RMT_INT_RX_END | RMT_INT_ERROR | RMT_INT_THR_EVNT)))
         {
-            ISR_Handler_SendIntensityData ();
+            IsrIsNotForUs++;
+            break;
         }
-        else
+
+        if (RMT.int_st.val & RMT_INT_THR_EVNT_BIT)
         {
+            DataISRcounter++;
+
+            // RMT.int_ena.val &= ~RMT_INT_THR_EVNT (RmtChannelId);
+            RMT.int_clr.val = RMT_INT_THR_EVNT_BIT;
+
+            if (OutputPixel->MoreDataToSend ())
+            {
+                ISR_Handler_SendIntensityData ();
+            }
+            else
+            {
+                RMT.int_ena.val &= ~RMT_INT_THR_EVNT_BIT;
+            }
+            break;
+        }
+
+        if (int_st & RMT_INT_TX_END_BIT)
+        {
+            FrameEndISRcounter++;
+
+            RMT.int_clr.val = RMT_INT_TX_END_BIT;
+            RMT.int_clr.val = RMT_INT_THR_EVNT_BIT;
+
+            RMT.int_ena.val &= ~RMT_INT_TX_END_BIT;
             RMT.int_ena.val &= ~RMT_INT_THR_EVNT_BIT;
+
+            // ISR_Handler_StartNewFrame ();
+            break;
         }
-    }
+
+        if (int_st & RMT_INT_ERROR_BIT)
+        {
+            ErrorIsr++;
+        }
+
+        if (int_st & RMT_INT_RX_END_BIT)
+        {
+            RxIsr++;
+        }
+
+    } while (false);
+
+
 } // ISR_Handler
 
 //----------------------------------------------------------------------------
 void IRAM_ATTR c_OutputRmt::ISR_Handler_StartNewFrame ()
 {
+    FrameStartCounter++;
+
     RMT.conf_ch[RmtChannelId].conf1.mem_rd_rst = 1; // set the internal pointer to the start of the mem block
     RMT.conf_ch[RmtChannelId].conf1.mem_rd_rst = 0;
 
@@ -248,5 +281,22 @@ bool c_OutputRmt::Render ()
     return Response;
 
 } // render
+
+//----------------------------------------------------------------------------
+void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
+{
+    jsonStatus["    DataISRcounter: "] = DataISRcounter;
+    jsonStatus["FrameEndISRcounter: "] = FrameEndISRcounter;
+    jsonStatus[" FrameStartCounter: "] = FrameStartCounter;
+    jsonStatus["          ErrorIsr: "] = ErrorIsr;
+    jsonStatus["             RxIsr: "] = RxIsr;
+    jsonStatus["     IsrIsNotForUs: "] = IsrIsNotForUs;
+
+    jsonStatus["       Raw int_ena: 0x"] = String (RMT.int_ena.val, HEX);
+    jsonStatus["           int_ena: 0x"] = String (RMT.int_ena.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
+    jsonStatus["            int_st: 0x"] = String (RMT.int_st.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
+    jsonStatus["        Raw int_st: 0x"] = String (RMT.int_st.val, HEX);
+
+} // GetStatus
 
 #endif // def ARDUINO_ARCH_ESP32
