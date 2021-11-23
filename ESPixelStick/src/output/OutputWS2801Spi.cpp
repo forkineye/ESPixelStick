@@ -1,4 +1,3 @@
-#ifdef SPI_OUTPUT
 /*
 * OutputWS2801Spi.cpp - WS2801 driver code for ESPixelStick SPI Channel
 *
@@ -19,6 +18,8 @@
 */
 
 #include "../ESPixelStick.h"
+#if defined (SUPPORT_OutputType_WS2801) && defined (SUPPORT_SPI_OUTPUT)
+
 #include "OutputWS2801Spi.hpp"
 
 //----------------------------------------------------------------------------
@@ -101,4 +102,4 @@ void c_OutputWS2801Spi::Render ()
 
 } // render
 
-#endif // def SPI_OUTPUT
+#endif // defined (SUPPORT_OutputType_WS2801) && defined (SUPPORT_SPI_OUTPUT)

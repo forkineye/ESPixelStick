@@ -1,4 +1,3 @@
-#ifdef SPI_OUTPUT
 /*
 * OutputSpi.cpp - SPI driver code for ESPixelStick SPI Channel
 *
@@ -17,6 +16,8 @@
 *  or use of these programs.
 *
 */
+#include "../ESPixelStick.h"
+#ifdef SUPPORT_SPI_OUTPUT
 
 #include "OutputSpi.hpp"
 #include "driver/spi_master.h"
@@ -212,4 +213,4 @@ bool c_OutputSpi::Render ()
     return Response;
 } // render
 
-#endif // def SPI_OUTPUT
+#endif // def SUPPORT_SPI_OUTPUT

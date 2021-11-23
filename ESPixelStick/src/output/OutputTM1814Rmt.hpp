@@ -21,9 +21,8 @@
 *   interface.
 *
 */
-#ifdef ARDUINO_ARCH_ESP32
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_TM1814
+#if defined (SUPPORT_OutputType_TM1814) && defined (SUPPORT_RMT_OUTPUT)
 
 #include "OutputTM1814.hpp"
 #include "OutputRmt.hpp"
@@ -49,6 +48,5 @@ private:
     c_OutputRmt Rmt;
 
 }; // c_OutputTM1814Rmt
-#endif // def SUPPORT_TM1814
 
-#endif // def ARDUINO_ARCH_ESP32
+#endif // defined (SUPPORT_OutputType_TM1814) && defined (SUPPORT_RMT_OUTPUT)

@@ -16,7 +16,8 @@
 *  or use of these programs.
 *
 */
-#ifdef ARDUINO_ARCH_ESP32
+#include "../ESPixelStick.h"
+#ifdef SUPPORT_RMT_OUTPUT
 
 #include "OutputWS2811Rmt.hpp"
 
@@ -148,4 +149,4 @@ void c_OutputWS2811Rmt::Render ()
 
 } // Render
 
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def SUPPORT_RMT_OUTPUT

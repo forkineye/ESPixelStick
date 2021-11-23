@@ -21,18 +21,30 @@
 //Output Manager
 #define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_2
 #define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_13
+#define UART_LAST               OutputChannelId_UART_2
+
+#define SUPPORT_RMT_OUTPUT
 #define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_12
 #define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_14
 #define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_32
 #define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_33
-// #define DEFAULT_RMT_4_GPIO      gpio_num_t::GPIO_NUM_
-// #define DEFAULT_RMT_5_GPIO      gpio_num_t::GPIO_NUM_
-// #define DEFAULT_RMT_6_GPIO      gpio_num_t::GPIO_NUM_
-// #define DEFAULT_RMT_7_GPIO      gpio_num_t::GPIO_NUM_
+#define RMT_LAST                OutputChannelId_RMT_4
+
+// #define SUPPORT_OutputType_WS2801
+// #define SUPPORT_OutputType_APA102
+// #define SUPPORT_OutputType_TM1814
+// #define SUPPORT_OutputType_TLS3001
+
+#define SUPPORT_RELAY_OUTPUT
+
+#if defined(SUPPORT_OutputType_WS2801) || defined(SUPPORT_OutputType_APA102)
+#   define SUPPORT_SPI_OUTPUT
 
 // SPI Output
 #define DEFAULT_SPI_DATA_GPIO  gpio_num_t::GPIO_NUM_15
 #define DEFAULT_SPI_CLOCK_GPIO gpio_num_t::GPIO_NUM_25
+
+#endif // defined(SUPPORT_OutputType_WS2801) || defined(SUPPORT_OutputType_TM1814)
 
 // File Manager
 #define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_19

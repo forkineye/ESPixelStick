@@ -1,4 +1,3 @@
-#ifdef SPI_OUTPUT
 /*
 * OutputWS2801.cpp - WS2801 driver code for ESPixelStick UART
 *
@@ -19,6 +18,8 @@
 */
 
 #include "../ESPixelStick.h"
+#ifdef SUPPORT_OutputType_WS2801
+
 #include "OutputWS2801.hpp"
 
 //----------------------------------------------------------------------------
@@ -98,4 +99,4 @@ bool c_OutputWS2801::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
 } // SetConfig
 
-#endif // def SPI_OUTPUT
+#endif // def SUPPORT_OutputType_WS2801

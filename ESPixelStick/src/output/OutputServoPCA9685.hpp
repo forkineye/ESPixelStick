@@ -17,6 +17,8 @@ GNU General Public License for more details.
 *   Servo States and then outputs on I2C
 *
 */
+#include "../ESPixelStick.h"
+#ifdef SUPPORT_RELAY_OUTPUT
 
 #include "OutputCommon.hpp"
 #include <Adafruit_PWMServoDriver.h>
@@ -79,3 +81,4 @@ private:
 
 }; // c_OutputServoPCA9685
 
+#endif // def SUPPORT_RELAY_OUTPUT

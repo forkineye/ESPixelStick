@@ -1,5 +1,3 @@
-#ifdef ARDUINO_ARCH_ESP32
-#ifdef SUPPORT_TLS3001
 /*
 * OutputTLS3001Rmt.cpp - TLS3001 driver code for ESPixelStick RMT Channel
 *
@@ -18,6 +16,8 @@
 *  or use of these programs.
 *
 */
+#include "../ESPixelStick.h"
+#if defined(SUPPORT_OutputType_TLS3001) && defined (SUPPORT_RMT_OUTPUT)
 
 #include "OutputTLS3001Rmt.hpp"
 
@@ -193,5 +193,4 @@ void fsm_RMT_state_SendData::Poll (c_OutputTLS3001Rmt* Parent)
 
 } // fsm_RMT_state_SendData
 
-#endif // def SUPPORT_TLS3001
-#endif // def ARDUINO_ARCH_ESP32
+#endif // defined(SUPPORT_OutputType_TLS3001) && defined (SUPPORT_RMT_OUTPUT)

@@ -269,7 +269,7 @@ void c_OutputCommon::TerminateUartOperation ()
 {
     // DEBUG_START;
 
-    if (OutputChannelId <= c_OutputMgr::OutputChannelId_UART_LAST)
+    if (OutputChannelId <= c_OutputMgr::e_OutputChannelIds::OutputChannelId_UART_LAST)
     {
         switch (UartId)
         {

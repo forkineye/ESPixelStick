@@ -21,11 +21,19 @@
 //Output Manager
 #define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_0
 #define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_4
+#define UART_LAST               OutputChannelId_UART_2
+
+#define SUPPORT_RMT_OUTPUT
 #define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_25
 #define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_26
 #define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_27
 #define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_14
+#define RMT_LAST                OutputChannelId_RMT_3
+
 #define LED_SDA                 gpio_num_t::GPIO_NUM_21  // Green LED and SDA. Will light-up if PCA9865 is used.
+
+
+#define SUPPORT_RELAY_OUTPUT
 
 // File Manager
 #define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_2

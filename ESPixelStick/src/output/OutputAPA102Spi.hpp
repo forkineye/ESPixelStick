@@ -1,5 +1,4 @@
 #pragma once
-#ifdef SPI_OUTPUT
 /*
 * OutputAPA102Spi.h - APA102 driver code for ESPixelStick Spi Channel
 *
@@ -22,6 +21,9 @@
 *   interface.
 *
 */
+
+#include "../ESPixelStick.h"
+#ifdef SUPPORT_OutputType_APA102
 
 #include "OutputAPA102.hpp"
 #include "OutputSpi.hpp"
@@ -49,4 +51,4 @@ private:
 
 }; // c_OutputAPA102Spi
 
-#endif // def SPI_OUTPUT
+#endif // def SUPPORT_OutputType_APA102
