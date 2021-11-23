@@ -122,13 +122,8 @@ stop bit = low for at least 45us
 #define GECE_SET_GREEN(value)       ((uint32_t(value)                   )      & GECE_GREEN_MASK)
 #define GECE_SET_RED(value)         ((uint32_t(value) >> GECE_RED_SHIFT )      & GECE_RED_MASK)
 
-#ifdef BOARD_ESPS_V3
-static c_OutputGECE* GECE_OutputChanArray[c_OutputMgr::e_OutputChannelIds::OutputChannelId_End] = { nullptr };
-#elif defined (ARDUINO_ARCH_ESP8266)
-static c_OutputGECE* GECE_OutputChanArray[c_OutputMgr::e_OutputChannelIds::OutputChannelId_End] = { nullptr, nullptr };
-#else
-static c_OutputGECE* GECE_OutputChanArray[c_OutputMgr::e_OutputChannelIds::OutputChannelId_End] = { nullptr, nullptr, nullptr };
-#endif
+// Static arrays are initialized to zero at boot time
+static c_OutputGECE* GECE_OutputChanArray[c_OutputMgr::e_OutputChannelIds::OutputChannelId_End];
 
 #ifdef ARDUINO_ARCH_ESP32
 static hw_timer_t * pHwTimer = nullptr;
@@ -143,6 +138,9 @@ c_OutputGECE::c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     c_OutputCommon(OutputChannelId, outputGpio, uart, outputType)
 {
     // DEBUG_START;
+
+    GECE_OutputChanArray[OutputChannelId] = nullptr;
+
     // DEBUG_END;
 
 } // c_OutputGECE
