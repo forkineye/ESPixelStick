@@ -1257,7 +1257,7 @@ function wsConnect()
     }
 }
 
-// Ping every 2sec, Reconnect after 4sec
+// Ping every 4sec, Reconnect after 12sec
 function wsPingPong()
 {
     // Ping Pong connection detection
@@ -1266,11 +1266,11 @@ function wsPingPong()
 
     pingTimer = setTimeout(function () {
         wsEnqueue('XP');
-    }, 4000);
+    }, 2000);
+
     pongTimer = setTimeout(function () {
         wsReconnect();
-    }, 6000);
-
+    }, 10000);
 }
 
 // Attempt to reconnect
@@ -1614,6 +1614,7 @@ function ProcessReceivedJsonStatusMessage(data)
             $('#fppsyncreceived').text(FPPDstatus.SyncCount);
             $('#fppsyncadjustments').text(FPPDstatus.SyncAdjustmentCount);
             $('#fppremoteip').text(FPPDstatus.FppRemoteIp);
+            $('#fppplayedfilecount').text(FPPDstatus.PlayedFileCount);
 
             $('#fppremoteFilePlayerFilename').text(FPPDstatus.current_sequence);
             $('#fppremoteFilePlayerTimeElapsed').text(FPPDstatus.time_elapsed);
