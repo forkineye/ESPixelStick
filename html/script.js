@@ -18,6 +18,7 @@ var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
 var pingTimer;
 var pongTimer;
+var IsDocumentHidden = false;
 
 // Drawing canvas - move to diagnostics
 var canvas = document.getElementById("canvas");
@@ -258,7 +259,9 @@ $(function ()
         if (document.hidden) {
             clearTimeout(pingTimer);
             clearTimeout(pongTimer);
+            IsDocumentHidden = true;
         } else {
+            IsDocumentHidden = false;
             wsReadyToSend();
             wsPingPong();
         }
@@ -1164,6 +1167,9 @@ function wsConnect()
 
         ws.onmessage = function (event)
         {
+            // reset the heartbeat timers
+            wsPingPong();
+
             // console.info("ws.onmessage: Start");
             if (typeof event.data === "string")
             {
@@ -1177,7 +1183,6 @@ function wsConnect()
                 //   DO_FACTORYRESET = '7',
                 //   PING            = 'P',
 
-
                 if (event.data.startsWith("X"))
                 {
                     switch (event.data[1]) {
@@ -1187,7 +1192,8 @@ function wsConnect()
                             break;
                         }
                         case 'P': {
-                            wsPingPong();
+                            // processed above for every received msg
+                            // wsPingPong();
                             break;
                         }
                         case 'A': {
@@ -1264,13 +1270,15 @@ function wsPingPong()
     clearTimeout(pingTimer);
     clearTimeout(pongTimer);
 
-    pingTimer = setTimeout(function () {
-        wsEnqueue('XP');
-    }, 2000);
+    if (false === IsDocumentHidden) {
+        pingTimer = setTimeout(function () {
+            wsEnqueue('XP');
+        }, 2000);
 
-    pongTimer = setTimeout(function () {
-        wsReconnect();
-    }, 10000);
+        pongTimer = setTimeout(function () {
+            wsReconnect();
+        }, 10000);
+	}
 }
 
 // Attempt to reconnect
