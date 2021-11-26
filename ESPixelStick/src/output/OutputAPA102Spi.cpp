@@ -1,4 +1,3 @@
-#ifdef SPI_OUTPUT
 /*
 * OutputAPA102Spi.cpp - APA102 driver code for ESPixelStick SPI Channel
 *
@@ -19,6 +18,8 @@
 */
 
 #include "../ESPixelStick.h"
+#if defined (SUPPORT_OutputType_APA102) && defined (SUPPORT_SPI_OUTPUT)
+
 #include "OutputAPA102Spi.hpp"
 
 //----------------------------------------------------------------------------
@@ -105,4 +106,4 @@ void c_OutputAPA102Spi::Render ()
 
 } // render
 
-#endif // def SPI_OUTPUT
+#endif // defined (SUPPORT_OutputType_APA102) && defined (SUPPORT_SPI_OUTPUT)

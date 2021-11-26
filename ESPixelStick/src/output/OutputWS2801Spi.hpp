@@ -1,5 +1,4 @@
 #pragma once
-#ifdef SPI_OUTPUT
 /*
 * OutputWS2801Spi.h - WS2801 driver code for ESPixelStick Spi Channel
 *
@@ -22,6 +21,8 @@
 *   interface.
 *
 */
+#include "../ESPixelStick.h"
+#if defined (SUPPORT_OutputType_WS2801) && defined (SUPPORT_SPI_OUTPUT)
 
 #include "OutputWS2801.hpp"
 #include "OutputSpi.hpp"
@@ -49,4 +50,4 @@ private:
 
 }; // c_OutputWS2801Spi
 
-#endif // def SPI_OUTPUT
+#endif // defined (SUPPORT_OutputType_WS2801) && defined (SUPPORT_SPI_OUTPUT)

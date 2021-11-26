@@ -1,5 +1,3 @@
-#ifdef ARDUINO_ARCH_ESP32
-#ifdef SUPPORT_TLS3001
 /*
 * OutputTLS3001.cpp - TLS3001 driver code for ESPixelStick UART
 *
@@ -20,6 +18,8 @@
 */
 
 #include "../ESPixelStick.h"
+#ifdef SUPPORT_OutputType_TLS3001
+
 #include "OutputTLS3001.hpp"
 
 //----------------------------------------------------------------------------
@@ -91,5 +91,4 @@ bool c_OutputTLS3001::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
 } // SetConfig
 
-#endif // def SUPPORT_TLS3001
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def SUPPORT_OutputType_TLS3001

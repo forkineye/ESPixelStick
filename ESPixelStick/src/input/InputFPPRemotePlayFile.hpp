@@ -93,6 +93,7 @@ private:
 // #   define    FPP_TICKER_PERIOD_MS 1000
     Ticker    MsTicker;
     uint32_t  LastIsrTimeStampMS = 0;
+    uint32_t  PlayedFileCount = 0;
 
     // Logic to detect if polls have stopped coming in. 
     // This is part of the blanking logic.

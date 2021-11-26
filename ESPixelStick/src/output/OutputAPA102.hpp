@@ -1,5 +1,4 @@
 #pragma once
-#ifdef SPI_OUTPUT
 /*
 * OutputAPA102.h - APA102 driver code for ESPixelStick
 *
@@ -22,6 +21,9 @@
 *   interface.
 *
 */
+#include "../ESPixelStick.h"
+#ifdef SUPPORT_OutputType_APA102
+
 #include "OutputPixel.hpp"
 
 class c_OutputAPA102 : public c_OutputPixel
@@ -29,9 +31,9 @@ class c_OutputAPA102 : public c_OutputPixel
 public:
     // These functions are inherited from c_OutputCommon
     c_OutputAPA102 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
-                      gpio_num_t outputGpio,
-                      uart_port_t uart,
-                      c_OutputMgr::e_OutputType outputType);
+                    gpio_num_t outputGpio,
+                    uart_port_t uart,
+                    c_OutputMgr::e_OutputType outputType);
     virtual ~c_OutputAPA102 ();
 
     // functions to be provided by the derived class
@@ -56,4 +58,4 @@ protected:
 
 }; // c_OutputAPA102
 
-#endif // def SPI_OUTPUT
+#endif // def SUPPORT_OutputType_APA102

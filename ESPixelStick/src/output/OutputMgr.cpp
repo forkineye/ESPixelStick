@@ -30,17 +30,13 @@
 #include "OutputGECE.hpp"
 #include "OutputSerial.hpp"
 #include "OutputWS2811Uart.hpp"
-#ifdef SUPPORT_TM1814
 #include "OutputTM1814Uart.hpp"
 #include "OutputTM1814Rmt.hpp"
-#endif // def SUPPORT_TM1814
 #include "OutputRelay.hpp"
 #include "OutputServoPCA9685.hpp"
-#ifdef ARDUINO_ARCH_ESP32
-#   include "OutputWS2811Rmt.hpp"
-#   include "OutputWS2801Spi.hpp"
-#   include "OutputAPA102Spi.hpp"
-#endif // def ARDUINO_ARCH_ESP32
+#include "OutputWS2811Rmt.hpp"
+#include "OutputWS2801Spi.hpp"
+#include "OutputAPA102Spi.hpp"
 // needs to be last
 #include "OutputMgr.hpp"
 
@@ -62,16 +58,23 @@ static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::
     {c_OutputMgr::e_OutputType::OutputType_DMX,           "DMX"           },
     {c_OutputMgr::e_OutputType::OutputType_Renard,        "Renard"        },
     {c_OutputMgr::e_OutputType::OutputType_Serial,        "Serial"        },
+#ifdef SUPPORT_RELAY_OUTPUT
     {c_OutputMgr::e_OutputType::OutputType_Relay,         "Relay"         },
     {c_OutputMgr::e_OutputType::OutputType_Servo_PCA9685, "Servo_PCA9685" },
+#endif // def SUPPORT_RELAY_OUTPUT
     {c_OutputMgr::e_OutputType::OutputType_Disabled,      "Disabled"      },
-#ifdef SUPPORT_TM1814
+
+#ifdef SUPPORT_OutputType_TM1814
     {c_OutputMgr::e_OutputType::OutputType_TM1814,        "TM1814"        },
-#endif // def SUPPORT_TM1814
-#ifdef SPI_OUTPUT
+#endif // def SUPPORT_OutputType_TM1814
+
+#ifdef SUPPORT_OutputType_WS2801
     {c_OutputMgr::e_OutputType::OutputType_WS2801,        "WS2801"        },
+#endif // def SUPPORT_OutputType_WS2801
+
+#ifdef SUPPORT_OutputType_APA102
     {c_OutputMgr::e_OutputType::OutputType_APA102,        "APA102"        }
-#endif // def SPI_OUTPUT
+#endif // def SUPPORT_OutputType_APA102
 };
 
 //-----------------------------------------------------------------------------
@@ -79,36 +82,44 @@ typedef struct
 {
     gpio_num_t dataPin;
     uart_port_t UartId;
-}OutputChannelIdToGpioAndPortEntry_t;
+} OutputChannelIdToGpioAndPortEntry_t;
 
 //-----------------------------------------------------------------------------
 static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] =
 {
-#ifdef ARDUINO_ARCH_ESP8266
-    {DEFAULT_UART_1_GPIO,  uart_port_t::UART_NUM_1},
-#elif ARDUINO_ARCH_ESP32
+#ifdef DEFAULT_UART_1_GPIO
     {DEFAULT_UART_1_GPIO, UART_NUM_1},
-    {DEFAULT_UART_2_GPIO, UART_NUM_2},
-    // RMT ports
-    {DEFAULT_RMT_0_GPIO,  uart_port_t (0)},
-    {DEFAULT_RMT_1_GPIO,  uart_port_t (1)},
-#   ifndef ESP32_CAM
-        {DEFAULT_RMT_2_GPIO,  uart_port_t (2)},
-        {DEFAULT_RMT_3_GPIO,  uart_port_t (3)},
-        // {DEFAULT_RMT_4_GPIO,  uart_port_t (4)},
-        // {DEFAULT_RMT_5_GPIO,  uart_port_t (5)},
-        // {DEFAULT_RMT_6_GPIO,  uart_port_t (6)},
-        // {DEFAULT_RMT_7_GPIO,  uart_port_t (7)},
-#   endif // ndef ESP32_CAM
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def DEFAULT_UART_1_GPIO
 
-#ifdef SPI_OUTPUT
+#ifdef DEFAULT_UART_2_GPIO
+    {DEFAULT_UART_2_GPIO, UART_NUM_2},
+#endif // def DEFAULT_UART_2_GPIO
+
+    // RMT ports
+#ifdef DEFAULT_RMT_0_GPIO
+    {DEFAULT_RMT_0_GPIO,  uart_port_t (0)},
+#endif // def DEFAULT_RMT_0_GPIO
+
+#ifdef DEFAULT_RMT_1_GPIO
+    {DEFAULT_RMT_1_GPIO,  uart_port_t (1)},
+#endif // def DEFAULT_RMT_1_GPIO
+
+#ifdef DEFAULT_RMT_2_GPIO
+    {DEFAULT_RMT_2_GPIO,  uart_port_t (2)},
+#endif // def DEFAULT_RMT_2_GPIO
+
+#ifdef DEFAULT_RMT_3_GPIO
+    {DEFAULT_RMT_3_GPIO,  uart_port_t (3)},
+#endif // def DEFAULT_RMT_3_GPIO
+
+#ifdef SUPPORT_SPI_OUTPUT
     {DEFAULT_SPI_DATA_GPIO, uart_port_t (-1)},
 #endif
 
-#ifndef BOARD_ESPS_V3
+#ifdef SUPPORT_RELAY_OUTPUT
     {gpio_num_t::GPIO_NUM_10, uart_port_t (-1)},
-#endif // def BOARD_ESPS_V3
+#endif // def SUPPORT_RELAY_OUTPUT
+
 };
 
 //-----------------------------------------------------------------------------
@@ -518,7 +529,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 break;
             }
 
-#ifndef BOARD_ESPS_V3
+#ifdef SUPPORT_RELAY_OUTPUT
             case e_OutputType::OutputType_Relay:
             {
                 if (ChannelIndex == OutputChannelId_Relay)
@@ -553,11 +564,11 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 // DEBUG_V ("");
                 break;
             }
-#endif // BOARD_ESPS_V3
+#endif // SUPPORT_RELAY_OUTPUT
 
             case e_OutputType::OutputType_WS2811:
             {
-#ifdef ARDUINO_ARCH_ESP32
+#ifdef SUPPORT_RMT_OUTPUT
                 if (OM_IS_RMT)
                 {
                     // logcon (CN_stars + String (F (" Starting WS2811 RMT for channel '")) + ChannelIndex + "'. " + CN_stars);
@@ -565,7 +576,8 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     // DEBUG_V ("");
                     break;
                 }
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def SUPPORT_RMT_OUTPUT
+
                 // DEBUG_V ("");
                 if (OM_IS_UART)
                 {
@@ -582,10 +594,10 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 break;
             }
 
-#ifdef SUPPORT_TM1814
+#ifdef SUPPORT_OutputType_TM1814
             case e_OutputType::OutputType_TM1814:
             {
-#ifdef ARDUINO_ARCH_ESP32
+#ifdef SUPPORT_RMT
                 if (OM_IS_RMT)
                 {
                     // logcon (CN_stars + String (F (" Starting TM1814 RMT for channel '")) + ChannelIndex + "'. " + CN_stars);
@@ -593,7 +605,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     // DEBUG_V ("");
                     break;
                 }
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def SUPPORT_RMT
                 // DEBUG_V ("");
                 if (OM_IS_UART)
                 {
@@ -608,9 +620,9 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 // DEBUG_V ("");
                 break;
             }
-#endif // def SUPPORT_TM1814
+#endif // def SUPPORT_OutputType_TM1814
 
-#ifdef SPI_OUTPUT
+#ifdef SUPPORT_OutputType_WS2801
             case e_OutputType::OutputType_WS2801:
             {
                 if (ChannelIndex == OutputChannelId_SPI_1)
@@ -627,7 +639,9 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
                 break;
             }
+#endif // def SUPPORT_OutputType_WS2801
 
+#ifdef SUPPORT_OutputType_APA102
             case e_OutputType::OutputType_APA102:
             {
                 if (ChannelIndex == OutputChannelId_SPI_1)
@@ -644,8 +658,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 
                 break;
             }
-
-#endif // def SPI_OUTPUT
+#endif // def SUPPORT_OutputType_APA102
 
             default:
             {

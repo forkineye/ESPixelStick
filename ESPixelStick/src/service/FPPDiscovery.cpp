@@ -192,9 +192,11 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
             (fppPacket->header[2] != 'P') ||
             (fppPacket->header[3] != 'D'))
         {
+            // DEBUG_V ("Invalid FPP header");
             MultiSyncStats.pktError++;
             break;
         }
+        // DEBUG_V ();
 
         struct timeval tv;
         gettimeofday (&tv, NULL);
@@ -316,6 +318,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, float S
     {
         if (!AllowedToRemotePlayFiles ())
         {
+            // DEBUG_V ("Not allowed to play remote files");
             break;
         }
 
@@ -326,8 +329,8 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, float S
             case SYNC_PKT_START:
             {
                 // DEBUG_V ("Sync::Start");
-                // DEBUG_V (String ("   FileName: ") + FileName);
-                // DEBUG_V (String ("    FrameId: ") + FrameId);
+                // DEBUG_V (String ("      FileName: ") + FileName);
+                // DEBUG_V (String ("SecondsElapsed: ") + SecondsElapsed);
 
                 MultiSyncStats.pktSyncSeqStart++;
                 StartPlaying (FileName, SecondsElapsed);
@@ -337,8 +340,8 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, float S
             case SYNC_PKT_STOP:
             {
                 // DEBUG_V ("Sync::Stop");
-                // DEBUG_V (String ("   FileName: ") + FileName);
-                // DEBUG_V (String ("    FrameId: ") + FrameId);
+                // DEBUG_V (String ("      FileName: ") + FileName);
+                // DEBUG_V (String ("SecondsElapsed: ") + SecondsElapsed);
 
                 MultiSyncStats.pktSyncSeqStop++;
                 StopPlaying ();
@@ -348,11 +351,11 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, float S
             case SYNC_PKT_SYNC:
             {
                 // DEBUG_V ("Sync");
-                // DEBUG_V (String ("PlayingFile: ") + PlayingFile ());
-                // DEBUG_V (String ("   FileName: ") + FileName);
-                // DEBUG_V (String ("  IsEnabled: ") + IsEnabled);
-                // DEBUG_V (String ("GetFileName: ") + InputFPPRemotePlayFile.GetFileName ());
-                // DEBUG_V (String ("    FrameId: ") + FrameId);
+                // DEBUG_V (String ("   PlayingFile: ") + PlayingFile ());
+                // DEBUG_V (String ("      FileName: ") + FileName);
+                // DEBUG_V (String ("     IsEnabled: ") + IsEnabled);
+                // DEBUG_V (String ("   GetFileName: ") + InputFPPRemotePlayFile.GetFileName ());
+                // DEBUG_V (String ("SecondsElapsed: ") + SecondsElapsed);
 
                 /*
                 logcon (String(float(millis()/1000.0)) + "," +
@@ -373,8 +376,8 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, float S
             case SYNC_PKT_OPEN:
             {
                 // DEBUG_V ("Sync::Open");
-                // DEBUG_V (String ("   FileName: ") + FileName);
-                // DEBUG_V (String ("    FrameId: ") + FrameId);
+                // DEBUG_V (String ("      FileName: ") + FileName);
+                // DEBUG_V (String ("SecondsElapsed: ") + SecondsElapsed);
                 // StartPlaying (FileName, FrameId);
                 MultiSyncStats.pktSyncSeqOpen++;
                 break;

@@ -17,9 +17,9 @@
 *  or use of these programs.
 *
 */
-#ifdef ARDUINO_ARCH_ESP32
 
 #include "../ESPixelStick.h"
+#ifdef SUPPORT_RMT_OUTPUT
 #include "OutputPixel.hpp"
 #include <driver/rmt.h>
 
@@ -99,4 +99,4 @@ public:
     void IRAM_ATTR ISR_Handler_SendIntensityData ();
 
 };
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def #ifdef SUPPORT_RMT_OUTPUT

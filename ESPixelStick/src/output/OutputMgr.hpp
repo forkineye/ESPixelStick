@@ -54,52 +54,39 @@ public:
     // handles to determine which output channel we are dealing with
     enum e_OutputChannelIds
     {
-#   if defined(ARDUINO_ARCH_ESP8266)
+#ifdef DEFAULT_UART_1_GPIO
         OutputChannelId_UART_1 = 0,
-#      ifndef BOARD_ESPS_V3
-            OutputChannelId_Relay,
-#      endif // ndef BOARD_ESPS_V3
-        OutputChannelId_End, // must be last in the list
-        OutputChannelId_Start      = OutputChannelId_UART_1,
-        OutputChannelId_UART_FIRST = OutputChannelId_UART_1,
-        OutputChannelId_UART_LAST  = OutputChannelId_UART_1,
-
-#   elif defined(ESP32_CAM)
-        OutputChannelId_UART_1 = 0,
+#endif // def DEFAULT_UART_1_GPIO
+#ifdef DEFAULT_UART_2_GPIO
         OutputChannelId_UART_2,
+#endif // def DEFAULT_UART_2_GPIO
+#ifdef DEFAULT_RMT_0_GPIO
         OutputChannelId_RMT_1,
+#endif // def DEFAULT_RMT_0_GPIO
+#ifdef DEFAULT_RMT_1_GPIO
         OutputChannelId_RMT_2,
-        OutputChannelId_Relay,
-        OutputChannelId_End, // must be last in the list
-        OutputChannelId_Start      = OutputChannelId_UART_1,
-        OutputChannelId_UART_FIRST = OutputChannelId_UART_1,
-        OutputChannelId_UART_LAST  = OutputChannelId_UART_2,
-        OutputChannelId_RMT_FIRST  = OutputChannelId_RMT_1,
-        OutputChannelId_RMT_LAST   = OutputChannelId_RMT_2,
-
-#   elif defined(ARDUINO_ARCH_ESP32)
-        OutputChannelId_UART_1 = 0,
-        OutputChannelId_UART_2,
-        OutputChannelId_RMT_1,
-        OutputChannelId_RMT_2,
+#endif // def DEFAULT_RMT_1_GPIO
+#ifdef DEFAULT_RMT_2_GPIO
         OutputChannelId_RMT_3,
+#endif // def DEFAULT_RMT_2_GPIO
+#ifdef DEFAULT_RMT_3_GPIO
         OutputChannelId_RMT_4,
-        // OutputChannelId_RMT_5,
-        // OutputChannelId_RMT_6,
-        // OutputChannelId_RMT_7,
-        // OutputChannelId_RMT_8,
-#      ifdef SPI_OUTPUT
-            OutputChannelId_SPI_1,
-#      endif // def SPI_OUTPUT
+#endif // def DEFAULT_RMT_3_GPIO
+#ifdef SUPPORT_SPI_OUTPUT
+        OutputChannelId_SPI_1,
+#endif // def SUPPORT_SPI_OUTPUT
+#ifdef SUPPORT_RELAY_OUTPUT
         OutputChannelId_Relay,
+#endif // def SUPPORT_RELAY_OUTPUT
         OutputChannelId_End, // must be last in the list
-        OutputChannelId_Start      = OutputChannelId_UART_1,
-        OutputChannelId_UART_FIRST = OutputChannelId_UART_1,
-        OutputChannelId_UART_LAST  = OutputChannelId_UART_2,
-        OutputChannelId_RMT_FIRST  = OutputChannelId_RMT_1,
-        OutputChannelId_RMT_LAST   = OutputChannelId_RMT_4,
 
-#   endif // platform defs
+        OutputChannelId_Start = OutputChannelId_UART_1,
+        OutputChannelId_UART_FIRST = OutputChannelId_UART_1,
+        OutputChannelId_UART_LAST = UART_LAST,
+#ifdef SUPPORT_RMT_OUTPUT
+        OutputChannelId_RMT_FIRST = OutputChannelId_RMT_1,
+        OutputChannelId_RMT_LAST = RMT_LAST,
+#endif // def SUPPORT_RMT_OUTPUT
     };
 
     enum e_OutputType
@@ -109,15 +96,19 @@ public:
         OutputType_DMX,
         OutputType_Renard,
         OutputType_Serial,
+#ifdef SUPPORT_RELAY_OUTPUT
         OutputType_Relay,
         OutputType_Servo_PCA9685,
-#ifdef SUPPORT_TM1814
+#endif // def SUPPORT_RELAY_OUTPUT
+#ifdef SUPPORT_OutputType_TM1814
         OutputType_TM1814,
-#endif // def SUPPORT_TM1814
-#ifdef SPI_OUTPUT
+#endif // def SUPPORT_OutputType_TM1814
+#ifdef SUPPORT_OutputType_WS2801
         OutputType_WS2801,
+#endif // def SUPPORT_OutputType_WS2801
+#ifdef SUPPORT_OutputType_APA102
         OutputType_APA102,
-#endif // def SPI_OUTPUT
+#endif // def SUPPORT_OutputType_APA102
         OutputType_Disabled,
         OutputType_End, // must be last
         OutputType_Start = OutputType_WS2811,

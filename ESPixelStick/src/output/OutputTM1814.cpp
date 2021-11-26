@@ -18,7 +18,7 @@
 */
 
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_TM1814
+#ifdef SUPPORT_OutputType_TM1814
 
 #include "OutputTM1814.hpp"
 
@@ -112,4 +112,4 @@ bool c_OutputTM1814::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     return response;
 
 } // SetConfig
-#endif // def SUPPORT_TM1814
+#endif // def SUPPORT_OutputType_TM1814

@@ -16,10 +16,9 @@
 *  or use of these programs.
 *
 */
-#ifdef ARDUINO_ARCH_ESP32
 
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_TM1814
+#if defined (SUPPORT_OutputType_TM1814) && defined (SUPPORT_RMT_OUTPUT)
 
 #include "OutputTM1814Rmt.hpp"
 
@@ -155,5 +154,4 @@ void c_OutputTM1814Rmt::Render ()
 
 } // Render
 
-#endif // def ARDUINO_ARCH_ESP32
-#endif // def SUPPORT_TM1814
+#endif // defined (SUPPORT_OutputType_TM1814) && defined (SUPPORT_RMT_OUTPUT)

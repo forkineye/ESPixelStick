@@ -1,6 +1,6 @@
 #pragma once
 /*
-* GPIO_Defs_ESP32_CAM.hpp - Output Management class
+* GPIO_Defs_ESP8266_ESPS_V3.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2021 Shelby Merrick
@@ -19,19 +19,11 @@
 */
 
 //Output Manager
-#define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_0
-#define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_1
-#define UART_LAST               OutputChannelId_UART_2
-
-#define SUPPORT_RMT_OUTPUT
-#define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_3
-#define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_16
-#define RMT_LAST                OutputChannelId_RMT_1
-
-#define LED_GPIO                gpio_num_t::GPIO_NUM_4
+#define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_2
+#define UART_LAST               OutputChannelId_UART_1
 
 // File Manager
-#define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_2
-#define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_15
+#define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_12
+#define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_13
 #define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14
-#define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_13
+#define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_15

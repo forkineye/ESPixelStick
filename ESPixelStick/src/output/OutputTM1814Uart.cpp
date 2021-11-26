@@ -18,7 +18,7 @@
 */
 
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_TM1814
+#ifdef SUPPORT_OutputType_TM1814
 
 #include "OutputTM1814Uart.hpp"
 
@@ -241,4 +241,4 @@ void c_OutputTM1814Uart::PauseOutput ()
     // DEBUG_END;
 } // PauseOutput
 
-#endif // def SUPPORT_TM1814
+#endif // def SUPPORT_OutputType_TM1814

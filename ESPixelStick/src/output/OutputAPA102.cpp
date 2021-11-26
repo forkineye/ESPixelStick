@@ -1,4 +1,3 @@
-#ifdef SPI_OUTPUT
 /*
 * OutputAPA102.cpp - APA102 driver code for ESPixelStick UART
 *
@@ -19,6 +18,8 @@
 */
 
 #include "../ESPixelStick.h"
+#ifdef SUPPORT_OutputType_APA102
+
 #include "OutputAPA102.hpp"
 
 //----------------------------------------------------------------------------
@@ -90,4 +91,4 @@ bool c_OutputAPA102::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
 } // SetConfig
 
-#endif // def SPI_OUTPUT
+#endif // def SUPPORT_OutputType_APA102

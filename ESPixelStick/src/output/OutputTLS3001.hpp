@@ -1,5 +1,3 @@
-#ifdef ARDUINO_ARCH_ESP32
-#ifdef SUPPORT_TLS3001
 #pragma once
 /*
 * OutputTLS3001.h - TLS3001 driver code for ESPixelStick
@@ -23,6 +21,8 @@
 *   interface.
 *
 */
+#include "../ESPixelStick.h"
+#ifdef SUPPORT_OutputType_TLS3001
 
 #include "OutputPixel.hpp"
 
@@ -85,5 +85,4 @@ private:
 
 }; // c_OutputTLS3001
 
-#endif // def SUPPORT_TLS3001
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def SUPPORT_OutputType_TLS3001

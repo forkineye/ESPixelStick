@@ -72,16 +72,21 @@ typedef enum
 } uart_port_t;
 #endif // def ARDUINO_ARCH_ESP8266
 
+// #define BOARD_ESPS_V3
+// #define ESP32_CAM
+// #define ESP32_TTGO_T8
 
 // Platform specific GPIO definitions
 
-#if defined(ESP32_CAM)
+#if defined (ESP32_CAM)
 #   include "GPIO_Defs_ESP32_CAM.hpp"
 #elif defined (ESP32_TTGO_T8)
-#   include "GPIO_Defs_ESP32_TTG_T8.hpp"
-#elif defined(ARDUINO_ARCH_ESP8266)
+#   include "GPIO_Defs_ESP32_TTGO_T8.hpp"
+#elif defined (BOARD_ESPS_V3)
+#   include "GPIO_Defs_ESP8266_ESPS_V3.hpp"
+#elif defined (ARDUINO_ARCH_ESP8266)
 #   include "GPIO_Defs_ESP8266_Generic.hpp"
-#elif defined(ARDUINO_ARCH_ESP32)
+#elif defined (ARDUINO_ARCH_ESP32)
 #   include "GPIO_Defs_ESP32_generic.hpp"
 #else
 #   error "No valid platform definition"

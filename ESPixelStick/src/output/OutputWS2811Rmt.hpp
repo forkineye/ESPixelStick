@@ -21,7 +21,8 @@
 *   interface.
 *
 */
-#ifdef ARDUINO_ARCH_ESP32
+#include "../ESPixelStick.h"
+#ifdef SUPPORT_RMT_OUTPUT
 
 #include "OutputWS2811.hpp"
 #include "OutputRmt.hpp"
@@ -48,4 +49,4 @@ private:
 
 }; // c_OutputWS2811Rmt
 
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def SUPPORT_RMT_OUTPUT

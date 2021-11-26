@@ -22,7 +22,7 @@
 *
 */
 #include "OutputPixel.hpp"
-#ifdef SPI_OUTPUT
+#ifdef SUPPORT_OutputType_WS2801
 
 class c_OutputWS2801 : public c_OutputPixel
 {
@@ -51,5 +51,4 @@ protected:
     float       BlockDelay = 0;
 
 }; // c_OutputWS2801
-#endif // def SPI_OUTPUT
-
+#endif // def SUPPORT_OutputType_WS2801

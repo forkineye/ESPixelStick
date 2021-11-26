@@ -22,7 +22,7 @@
 *
 */
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_TM1814
+#ifdef SUPPORT_OutputType_TM1814
 
 #include "OutputPixel.hpp"
 
@@ -74,4 +74,4 @@ private:
 
 }; // c_OutputTM1814
 
-#endif // def SUPPORT_TM1814
+#endif // def SUPPORT_OutputType_TM1814

@@ -27,7 +27,8 @@ GNU General Public License for more details.
 *   Relay States and then outputs on a GPIO
 *
 */
-
+#include "../ESPixelStick.h"
+#ifdef SUPPORT_RELAY_OUTPUT
 #include "OutputCommon.hpp"
 
 class c_OutputRelay : public c_OutputCommon  
@@ -81,3 +82,4 @@ private:
 
 }; // c_OutputRelay
 
+#endif // def SUPPORT_RELAY_OUTPUT

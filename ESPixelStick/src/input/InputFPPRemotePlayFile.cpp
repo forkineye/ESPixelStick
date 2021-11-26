@@ -197,6 +197,7 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
     JsonStatus[CN_seconds_played]    = String (secs);
     JsonStatus[CN_seconds_remaining] = String (secsTot - secs);
     JsonStatus[CN_sequence_filename] = temp;
+    JsonStatus[F("PlayedFileCount")] = PlayedFileCount;
 
     int mins = secs / 60;
     secs = secs % 60;
@@ -432,6 +433,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
             SparseRanges[0].ChannelCount = fsqParsedHeader.channelCount;
         }
 
+        PlayedFileCount++;
         Response = true;
 
     } while (false);

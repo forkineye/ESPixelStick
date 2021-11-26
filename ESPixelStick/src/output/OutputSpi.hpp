@@ -22,9 +22,8 @@
 *
 */
 
-#ifdef SPI_OUTPUT
-
 #include "../ESPixelStick.h"
+#ifdef SUPPORT_SPI_OUTPUT
 #include "OutputPixel.hpp"
 #include <driver/spi_master.h>
 #include <esp_task.h>
@@ -77,4 +76,4 @@ private:
 
 }; // c_OutputSpi
 
-#endif // def SPI_OUTPUT
+#endif // def SUPPORT_SPI_OUTPUT
