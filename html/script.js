@@ -172,7 +172,7 @@ $(function ()
 
     $('#AdvancedOptions').change(function () {
         UpdateAdvancedOptionsMode();
-        UpdatePixelCount();
+        UpdateChannelCounts();
     });
 
     let finalUrl = "http://" + target + "/upload";
@@ -300,14 +300,20 @@ function UpdateAdvancedOptionsMode()
     });
 } // UpdateAdvancedOptionsMode
 
-function UpdatePixelCount() {
-    // console.info("UpdatePixelCount");
-
-    $(".PixelCount").each(function ()
+function UpdateChannelCounts() {
+    // console.info("UpdateChannelCounts");
+    if (null !== Output_Config)
     {
-        $(this).attr('max', 3000);
-    });
-} // UpdatePixelCount
+        $(".SerialCount").each(function ()
+        {
+            $(this).attr('max', Output_Config.TotalChannels);
+        });
+
+        $(".PixelCount").each(function () {
+            $(this).attr('max', Output_Config.TotalChannels / 3);
+        });
+    }
+} // UpdateChannelCounts
 
 function ProcessWindowChange(NextWindow) {
 
@@ -338,7 +344,7 @@ function ProcessWindowChange(NextWindow) {
     }
 
     UpdateAdvancedOptionsMode();
-    UpdatePixelCount();
+    UpdateChannelCounts();
 
 } // ProcessWindowChange
 
@@ -760,7 +766,7 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig )
     }
 
     UpdateAdvancedOptionsMode();
-    UpdatePixelCount();
+    UpdateChannelCounts();
 
     // console.info("ProcessModeConfigurationData: End");
 
