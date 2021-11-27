@@ -146,7 +146,7 @@ private:
 
     String ConfigFileName;
 
-    uint8_t OutputBuffer[OM_MAX_NUM_CHANNELS + 1];
+    uint8_t OutputBuffer[OM_MAX_NUM_CHANNELS];
     uint16_t UsedBufferSize = 0;
 
 #define OM_IS_UART ((ChannelIndex >= OutputChannelId_UART_FIRST) && (ChannelIndex <= OutputChannelId_UART_LAST))

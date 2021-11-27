@@ -172,6 +172,7 @@ $(function ()
 
     $('#AdvancedOptions').change(function () {
         UpdateAdvancedOptionsMode();
+        UpdatePixelCount();
     });
 
     let finalUrl = "http://" + target + "/upload";
@@ -299,6 +300,15 @@ function UpdateAdvancedOptionsMode()
     });
 } // UpdateAdvancedOptionsMode
 
+function UpdatePixelCount() {
+    // console.info("UpdatePixelCount");
+
+    $(".PixelCount").each(function ()
+    {
+        $(this).attr('max', 3000);
+    });
+} // UpdatePixelCount
+
 function ProcessWindowChange(NextWindow) {
 
     if (NextWindow === "#diag") {
@@ -328,6 +338,7 @@ function ProcessWindowChange(NextWindow) {
     }
 
     UpdateAdvancedOptionsMode();
+    UpdatePixelCount();
 
 } // ProcessWindowChange
 
@@ -749,6 +760,7 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig )
     }
 
     UpdateAdvancedOptionsMode();
+    UpdatePixelCount();
 
     // console.info("ProcessModeConfigurationData: End");
 

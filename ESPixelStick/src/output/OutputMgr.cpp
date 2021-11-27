@@ -200,7 +200,6 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
 
     // add OM config parameters
     // DEBUG_V ("");
-    jsonConfig[F ("TotalChannels")] = sizeof (OutputBuffer) - 1;
     
     // add the channels header
     JsonObject OutputMgrChannelsData;
