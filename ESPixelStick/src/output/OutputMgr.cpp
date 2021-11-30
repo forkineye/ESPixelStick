@@ -200,7 +200,7 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
 
     // add OM config parameters
     // DEBUG_V ("");
-
+    
     // add the channels header
     JsonObject OutputMgrChannelsData;
     if (true == jsonConfig.containsKey (CN_channels))

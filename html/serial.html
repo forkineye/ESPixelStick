@@ -1,9 +1,9 @@
 <fieldset id="serial">
     <legend class="esps-legend" id="Title">Serial Configuration</legend>
     <div class="form-group">
-        <label class="control-label col-sm-2" for="channel_count">Channel Count</label>
+        <label class="control-label col-sm-2" for="num_chan">Channel Count</label>
         <div class="col-sm-4">
-            <input type="number" class="form-control is-valid" id="num_chan" step="1" min="1" max="4096" value="0" required title="Number of Channels" onchange="RefreshSerialRate()">
+            <input type="number" class="form-control is-valid SerialCount" id="num_chan" step="1" min="1" max="4096" value="0" required title="Number of Channels" onchange="RefreshSerialRate()">
         </div>
         <label class="control-label col-sm-2" for="baudrate">Baudrate</label>
         <div class="col-sm-4">
