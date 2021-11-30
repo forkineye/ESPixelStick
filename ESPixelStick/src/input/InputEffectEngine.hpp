@@ -101,6 +101,7 @@ public:
     uint16_t effectLightning ();
     uint16_t effectBreathe ();
     uint16_t effectNull ();
+    uint16_t effectRandom ();
 
 private:
 
@@ -108,13 +109,11 @@ private:
 
     bool HasBeenInitialized = false;
 
-
 #define MIN_EFFECT_DELAY 10
 #define MAX_EFFECT_DELAY 65535
 #define DEFAULT_EFFECT_DELAY 1000
 
     using timeType = decltype(millis());
-
 
     uint32_t EffectWait            = 32;              /* How long to wait for the effect to run again */
     timeType EffectLastRun         = 0;               /* When did the effect last run ? in millis() */
@@ -135,6 +134,7 @@ private:
     uint16_t PixelOffset           = 0;
 
     void setPixel(uint16_t idx,  CRGB color);
+    void GetPixel (uint16_t pixelId, CRGB & out);
     void setRange(uint16_t first, uint16_t len, CRGB color);
     void clearRange(uint16_t first, uint16_t len);
     void setAll(CRGB color);

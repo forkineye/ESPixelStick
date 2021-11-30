@@ -25,8 +25,8 @@
 
 // List of all the supported effects and their names
 static const c_InputEffectEngine::EffectDescriptor_t ListOfEffects[] =
-{//                                                                   Mirror     AllLeds
-    //    name;                             func;              htmlid;      Color;     Reverse     wsTCode
+{//                                                                              Mirror      AllLeds      wsTCode
+    //    name                              func                   htmlid               Color      Reverse
 
         // { "Disabled",     nullptr,                             "t_disabled",     1,    1,    1,    1,  "T0"     },
         { "Solid",        &c_InputEffectEngine::effectSolidColor, "t_static",       1,    0,    0,    0,  "T1"     },
@@ -36,7 +36,8 @@ static const c_InputEffectEngine::EffectDescriptor_t ListOfEffects[] =
         { "Chase",        &c_InputEffectEngine::effectChase,      "t_chase",        1,    1,    1,    0,  "T4"     },
         { "Fire flicker", &c_InputEffectEngine::effectFireFlicker,"t_fireflicker",  1,    0,    0,    0,  "T6"     },
         { "Lightning",    &c_InputEffectEngine::effectLightning,  "t_lightning",    1,    0,    0,    0,  "T7"     },
-        { "Breathe",      &c_InputEffectEngine::effectBreathe,    "t_breathe",      1,    0,    0,    0,  "T8"     }
+        { "Breathe",      &c_InputEffectEngine::effectBreathe,    "t_breathe",      1,    0,    0,    0,  "T8"     },
+        { "Random",       &c_InputEffectEngine::effectRandom,     "t_random",       0,    0,    0,    0,  "T9"     }
 };
 
 //-----------------------------------------------------------------------------
@@ -464,6 +465,28 @@ void c_InputEffectEngine::setPixel (uint16_t pixelId, CRGB color)
 } // setPixel
 
 //-----------------------------------------------------------------------------
+void c_InputEffectEngine::GetPixel (uint16_t pixelId, CRGB & out)
+{
+    // DEBUG_START;
+
+    // DEBUG_V (String ("IsInputChannelActive: ") + String(IsInputChannelActive));
+    // DEBUG_V (String ("pixelId: ") + pixelId);
+    // DEBUG_V (String ("PixelCount: ") + PixelCount);
+
+    if (pixelId < PixelCount)
+    {
+        uint8_t* pInputDataBuffer = &InputDataBuffer[ChannelsPerPixel * pixelId];
+
+        out.r = pInputDataBuffer[0];
+        out.g = pInputDataBuffer[1];
+        out.b = pInputDataBuffer[2];
+    }
+
+    // DEBUG_END;
+
+} // getPixel
+
+//-----------------------------------------------------------------------------
 void c_InputEffectEngine::setRange (uint16_t FirstPixelId, uint16_t NumberOfPixels, CRGB color)
 {
     for (uint16_t i = FirstPixelId; i < min (uint16_t (FirstPixelId + NumberOfPixels), PixelCount); i++)
@@ -580,10 +603,11 @@ uint16_t c_InputEffectEngine::effectChase ()
 } // effectChase
 
 //-----------------------------------------------------------------------------
-// Effect Step will be in the range zero through the number of pixels and is used
-// to set the starting point for the colors
 uint16_t c_InputEffectEngine::effectRainbow ()
 {
+    // Effect Step will be in the range zero through the number of pixels and is used
+    // to set the starting point for the colors
+       
     // DEBUG_START;
     // calculate only half the pixels if mirroring
     uint16_t NumberOfPixelsToOutput = MirroredPixelCount;
@@ -613,6 +637,63 @@ uint16_t c_InputEffectEngine::effectRainbow ()
     return (EffectDelay / 256);
 
 } // effectRainbow
+
+//-----------------------------------------------------------------------------
+uint16_t c_InputEffectEngine::effectRandom ()
+{
+    // Effect Step will be in the range zero through the number of pixels and is used
+    // to set the starting point for the colors
+
+    // DEBUG_START;
+    // calculate only half the pixels if mirroring
+    uint16_t NumberOfPixelsToOutput = MirroredPixelCount;
+
+    // DEBUG_V (String ("MirroredPixelCount: ") + String (MirroredPixelCount));
+
+    for (uint16_t CurrentPixelId = 0; CurrentPixelId < NumberOfPixelsToOutput; CurrentPixelId++)
+    {
+        CRGB RgbColor;
+        GetPixel (CurrentPixelId, RgbColor);
+        // DEBUG_V (String ("    RgbColor.r: ") + String (RgbColor.r));
+        // DEBUG_V (String ("    RgbColor.g: ") + String (RgbColor.g));
+        // DEBUG_V (String ("    RgbColor.b: ") + String (RgbColor.b));
+
+        dCHSV HsvColor = rgb2hsv(RgbColor);
+        // DEBUG_V (String ("CurrentPixelId: ") + String (CurrentPixelId));
+        // DEBUG_V (String ("         value: ") + String (HsvColor.v));
+        // DEBUG_V (String ("    saturation: ") + String (HsvColor.s));
+
+        // is a new color needed
+        if (HsvColor.v > 0.01)
+        {
+            // DEBUG_V ("adjust existing color value");
+            HsvColor.v -= 0.01;
+            // DEBUG_V (String ("         value: ") + String (HsvColor.v));
+        }
+        else
+        {
+            // DEBUG_V ("set up a new color");
+            HsvColor.h = double (random (359));
+            HsvColor.s = double (random (50, 100)) / 100;
+            HsvColor.v = double (random (50, 100)) / 100;
+
+            // RgbColor = hsv2rgb (HsvColor);
+            // DEBUG_V (String ("           hue: ") + String (HsvColor.h));
+            // DEBUG_V (String ("    saturation: ") + String (HsvColor.s));
+            // DEBUG_V (String ("         value: ") + String (HsvColor.v));
+            // DEBUG_V (String ("    RgbColor.r: ") + String (RgbColor.r));
+            // DEBUG_V (String ("    RgbColor.g: ") + String (RgbColor.g));
+            // DEBUG_V (String ("    RgbColor.b: ") + String (RgbColor.b));
+        }
+
+        RgbColor = hsv2rgb (HsvColor);
+        outputEffectColor (CurrentPixelId, RgbColor);
+    }
+
+    // DEBUG_END;
+    return (EffectDelay / 500);
+
+} // effectRandom
 
 //-----------------------------------------------------------------------------
 uint16_t c_InputEffectEngine::effectBlink ()
