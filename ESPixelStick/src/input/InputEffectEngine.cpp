@@ -25,8 +25,8 @@
 
 // List of all the supported effects and their names
 static const c_InputEffectEngine::EffectDescriptor_t ListOfEffects[] =
-{//                                                                   Mirror     AllLeds
-    //    name;                             func;              htmlid;      Color;     Reverse     wsTCode
+{//                                                                              Mirror      AllLeds      wsTCode
+    //    name                              func                   htmlid               Color      Reverse
 
         // { "Disabled",     nullptr,                             "t_disabled",     1,    1,    1,    1,  "T0"     },
         { "Solid",        &c_InputEffectEngine::effectSolidColor, "t_static",       1,    0,    0,    0,  "T1"     },
@@ -36,14 +36,15 @@ static const c_InputEffectEngine::EffectDescriptor_t ListOfEffects[] =
         { "Chase",        &c_InputEffectEngine::effectChase,      "t_chase",        1,    1,    1,    0,  "T4"     },
         { "Fire flicker", &c_InputEffectEngine::effectFireFlicker,"t_fireflicker",  1,    0,    0,    0,  "T6"     },
         { "Lightning",    &c_InputEffectEngine::effectLightning,  "t_lightning",    1,    0,    0,    0,  "T7"     },
-        { "Breathe",      &c_InputEffectEngine::effectBreathe,    "t_breathe",      1,    0,    0,    0,  "T8"     }
+        { "Breathe",      &c_InputEffectEngine::effectBreathe,    "t_breathe",      1,    0,    0,    0,  "T8"     },
+        { "Random",       &c_InputEffectEngine::effectRandom,     "t_random",       0,    0,    0,    0,  "T9"     }
 };
 
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInputChannelId,
-                                          c_InputMgr::e_InputType       NewChannelType,
-                                          uint8_t                     * BufferStart,
-                                          uint16_t                      BufferSize) :
+    c_InputMgr::e_InputType       NewChannelType,
+    uint8_t                     * BufferStart,
+    uint16_t                      BufferSize) :
     c_InputCommon (NewInputChannelId, NewChannelType, BufferStart, BufferSize)
 {
     // DEBUG_START;
@@ -134,7 +135,7 @@ void c_InputEffectEngine::GetMqttEffectList (JsonObject& jsonConfig)
 
     for (EffectDescriptor_t currentEffect : ListOfEffects)
     {
-        EffectsArray.add(currentEffect.name);
+        EffectsArray.add (currentEffect.name);
     }
     // DEBUG_END;
 } // GetMqttEffectList
@@ -165,7 +166,7 @@ void c_InputEffectEngine::GetStatus (JsonObject& jsonStatus)
 
     JsonObject Status = jsonStatus.createNestedObject (F ("effects"));
     Status[CN_currenteffect] = ActiveEffect->name;
-    Status[CN_id]            = InputChannelId;
+    Status[CN_id] = InputChannelId;
 
     // DEBUG_END;
 
@@ -251,7 +252,7 @@ void c_InputEffectEngine::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSi
 {
     // DEBUG_START;
 
-    InputDataBuffer     = BufferStart;
+    InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
 
     // DEBUG_V (String ("BufferSize: ") + String (BufferSize));
@@ -277,14 +278,14 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     String effectName;
     String effectColor;
 
-    setFromJSON (EffectSpeed,        jsonConfig, CN_EffectSpeed);
-    setFromJSON (EffectReverse,      jsonConfig, CN_EffectReverse);
-    setFromJSON (EffectMirror,       jsonConfig, CN_EffectMirror);
-    setFromJSON (EffectAllLeds,      jsonConfig, CN_EffectAllLeds);
-    setFromJSON (EffectBrightness,   jsonConfig, CN_EffectBrightness);
+    setFromJSON (EffectSpeed, jsonConfig, CN_EffectSpeed);
+    setFromJSON (EffectReverse, jsonConfig, CN_EffectReverse);
+    setFromJSON (EffectMirror, jsonConfig, CN_EffectMirror);
+    setFromJSON (EffectAllLeds, jsonConfig, CN_EffectAllLeds);
+    setFromJSON (EffectBrightness, jsonConfig, CN_EffectBrightness);
     setFromJSON (EffectWhiteChannel, jsonConfig, CN_EffectWhiteChannel);
-    setFromJSON (effectName,         jsonConfig, CN_currenteffect);
-    setFromJSON (effectColor,        jsonConfig, CN_EffectColor);
+    setFromJSON (effectName, jsonConfig, CN_currenteffect);
+    setFromJSON (effectColor, jsonConfig, CN_EffectColor);
     // DEBUG_V (String ("effectColor: ") + effectColor);
 
     EffectBrightness /= 100.0;
@@ -316,9 +317,9 @@ void c_InputEffectEngine::SetMqttConfig (MQTTConfiguration_s& mqttConfig)
     EffectAllLeds = mqttConfig.allLeds;
     EffectWhiteChannel = mqttConfig.whiteChannel;
 
-    uint16_t tempBrightness = uint8_t(EffectBrightness * 255.0);
+    uint16_t tempBrightness = uint8_t (EffectBrightness * 255.0);
     tempBrightness = mqttConfig.brightness;
-    EffectBrightness = float(tempBrightness) / 255.0;
+    EffectBrightness = float (tempBrightness) / 255.0;
 
     EffectColor.r = mqttConfig.color.r;
     EffectColor.g = mqttConfig.color.g;
@@ -390,14 +391,14 @@ void c_InputEffectEngine::setEffect (const String & effectName)
         if (effectName.equalsIgnoreCase (currentEffect.name))
         {
             // DEBUG_V ("Found desired effect");
-            if (!ActiveEffect->name.equalsIgnoreCase(currentEffect.name))
+            if (!ActiveEffect->name.equalsIgnoreCase (currentEffect.name))
             {
                 // DEBUG_V ("Starting Effect");
-                ActiveEffect  = &ListOfEffects[EffectIndex];
+                ActiveEffect = &ListOfEffects[EffectIndex];
                 EffectLastRun = millis ();
-                EffectWait    = MIN_EFFECT_DELAY;
+                EffectWait = MIN_EFFECT_DELAY;
                 EffectCounter = 0;
-                EffectStep    = 0;
+                EffectStep = 0;
             }
             break;
         }
@@ -417,12 +418,12 @@ void c_InputEffectEngine::setColor (String & NewColor)
 
     // Parse the color string into rgb values
 
-    uint32_t intValue = strtoul(NewColor.substring (1).c_str(), nullptr, 16);
+    uint32_t intValue = strtoul (NewColor.substring (1).c_str (), nullptr, 16);
     // DEBUG_V (String ("intValue: ") + String (intValue, 16));
 
     EffectColor.r = uint8_t ((intValue >> 16) & 0xFF);
-    EffectColor.g = uint8_t ((intValue >>  8) & 0xFF);
-    EffectColor.b = uint8_t ((intValue >>  0) & 0xFF);
+    EffectColor.g = uint8_t ((intValue >> 8) & 0xFF);
+    EffectColor.b = uint8_t ((intValue >> 0) & 0xFF);
 
     // DEBUG_END;
 
@@ -449,7 +450,10 @@ void c_InputEffectEngine::setPixel (uint16_t pixelId, CRGB color)
         pInputDataBuffer[0] = color.r * EffectBrightness;
         pInputDataBuffer[1] = color.g * EffectBrightness;
         pInputDataBuffer[2] = color.b * EffectBrightness;
-        pInputDataBuffer[3] = 0; // no white data
+        if (4 == ChannelsPerPixel)
+        {
+            pInputDataBuffer[3] = 0; // no white data
+        }
 
         // DEBUG_V (String ("pInputDataBuffer[0]: ") + String (pInputDataBuffer[0]));
         // DEBUG_V (String ("pInputDataBuffer[1]: ") + String (pInputDataBuffer[1]));
@@ -459,6 +463,28 @@ void c_InputEffectEngine::setPixel (uint16_t pixelId, CRGB color)
     // DEBUG_END;
 
 } // setPixel
+
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::GetPixel (uint16_t pixelId, CRGB & out)
+{
+    // DEBUG_START;
+
+    // DEBUG_V (String ("IsInputChannelActive: ") + String(IsInputChannelActive));
+    // DEBUG_V (String ("pixelId: ") + pixelId);
+    // DEBUG_V (String ("PixelCount: ") + PixelCount);
+
+    if (pixelId < PixelCount)
+    {
+        uint8_t* pInputDataBuffer = &InputDataBuffer[ChannelsPerPixel * pixelId];
+
+        out.r = pInputDataBuffer[0];
+        out.g = pInputDataBuffer[1];
+        out.b = pInputDataBuffer[2];
+    }
+
+    // DEBUG_END;
+
+} // getPixel
 
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::setRange (uint16_t FirstPixelId, uint16_t NumberOfPixels, CRGB color)
@@ -498,7 +524,7 @@ c_InputEffectEngine::CRGB c_InputEffectEngine::colorWheel (uint8_t pos)
     pos = 255 - pos;
     if (pos < 85)
     {
-        Response = { uint8_t(255 - pos * 3), 0, uint8_t(pos * 3) };
+        Response = { uint8_t (255 - pos * 3), 0, uint8_t (pos * 3) };
     }
     else if (pos < 170)
     {
@@ -530,19 +556,19 @@ uint16_t c_InputEffectEngine::effectSolidColor ()
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::outputEffectColor (uint16_t pixelId, CRGB outputColor)
 {
-   //  DEBUG_START;
+    //  DEBUG_START;
 
     uint16_t NumPixels = MirroredPixelCount;
 
     if (EffectReverse)
     {
-        pixelId = NumPixels - 1 - pixelId;
+        pixelId = (NumPixels - 1) - pixelId;
     }
 
     if (EffectMirror)
     {
-        setPixel ((NumPixels - 1)  - pixelId,                outputColor);
-        setPixel (((NumPixels    ) + pixelId) - PixelOffset, outputColor);
+        setPixel ((NumPixels - 1) - pixelId, outputColor);
+        setPixel (((NumPixels)+pixelId) - PixelOffset, outputColor);
     }
     else
     {
@@ -579,38 +605,95 @@ uint16_t c_InputEffectEngine::effectChase ()
 //-----------------------------------------------------------------------------
 uint16_t c_InputEffectEngine::effectRainbow ()
 {
+    // Effect Step will be in the range zero through the number of pixels and is used
+    // to set the starting point for the colors
+       
     // DEBUG_START;
     // calculate only half the pixels if mirroring
-    uint16_t lc = MirroredPixelCount;
+    uint16_t NumberOfPixelsToOutput = MirroredPixelCount;
+
+    // Next step or wrap
+    if (++EffectStep >= NumberOfPixelsToOutput) { EffectStep = 0; }
 
     // DEBUG_V (String ("MirroredPixelCount: ") + String (MirroredPixelCount));
     // DEBUG_V (String ("        EffectStep: ") + String (EffectStep));
 
-    for (uint16_t i = 0; i < lc; i++)
+    for (uint16_t CurrentPixelId = 0; CurrentPixelId < NumberOfPixelsToOutput; CurrentPixelId++)
     {
-        // CRGB color = colorWheel(((i * 256 / lc) + EffectStep) & 0xFF);
-
-        double hue = 0;
-        if (EffectAllLeds)
+        uint32_t hue = EffectStep;
+        if (!EffectAllLeds)
         {
-            hue = EffectStep * 360.0d / 256.0;	// all same colour
+            hue = CurrentPixelId + EffectStep;
+            if (hue > NumberOfPixelsToOutput) { hue -= NumberOfPixelsToOutput; }
+        }
+        hue = map (hue, 0, NumberOfPixelsToOutput, 0, 359);
+        CRGB color = hsv2rgb ({ double (hue), 1.0, 1.0 });
+
+        outputEffectColor ((NumberOfPixelsToOutput - CurrentPixelId) - 1, color);
+        // outputEffectColor (CurrentPixelId, color);
+    }
+
+    // DEBUG_END;
+    return (EffectDelay / 256);
+
+} // effectRainbow
+
+//-----------------------------------------------------------------------------
+uint16_t c_InputEffectEngine::effectRandom ()
+{
+    // Effect Step will be in the range zero through the number of pixels and is used
+    // to set the starting point for the colors
+
+    // DEBUG_START;
+    // calculate only half the pixels if mirroring
+    uint16_t NumberOfPixelsToOutput = MirroredPixelCount;
+
+    // DEBUG_V (String ("MirroredPixelCount: ") + String (MirroredPixelCount));
+
+    for (uint16_t CurrentPixelId = 0; CurrentPixelId < NumberOfPixelsToOutput; CurrentPixelId++)
+    {
+        CRGB RgbColor;
+        GetPixel (CurrentPixelId, RgbColor);
+        // DEBUG_V (String ("    RgbColor.r: ") + String (RgbColor.r));
+        // DEBUG_V (String ("    RgbColor.g: ") + String (RgbColor.g));
+        // DEBUG_V (String ("    RgbColor.b: ") + String (RgbColor.b));
+
+        dCHSV HsvColor = rgb2hsv(RgbColor);
+        // DEBUG_V (String ("CurrentPixelId: ") + String (CurrentPixelId));
+        // DEBUG_V (String ("         value: ") + String (HsvColor.v));
+        // DEBUG_V (String ("    saturation: ") + String (HsvColor.s));
+
+        // is a new color needed
+        if (HsvColor.v > 0.01)
+        {
+            // DEBUG_V ("adjust existing color value");
+            HsvColor.v -= 0.01;
+            // DEBUG_V (String ("         value: ") + String (HsvColor.v));
         }
         else
         {
-            hue = 360.0 * (((i * 256 / lc) + EffectStep) & 0xFF) / 255;
-        }
-        double sat = 1.0;
-        double val = 1.0;
-        CRGB color = hsv2rgb ({ hue, sat, val });
+            // DEBUG_V ("set up a new color");
+            HsvColor.h = double (random (359));
+            HsvColor.s = double (random (50, 100)) / 100;
+            HsvColor.v = double (random (50, 100)) / 100;
 
-        outputEffectColor (i, color);
+            // RgbColor = hsv2rgb (HsvColor);
+            // DEBUG_V (String ("           hue: ") + String (HsvColor.h));
+            // DEBUG_V (String ("    saturation: ") + String (HsvColor.s));
+            // DEBUG_V (String ("         value: ") + String (HsvColor.v));
+            // DEBUG_V (String ("    RgbColor.r: ") + String (RgbColor.r));
+            // DEBUG_V (String ("    RgbColor.g: ") + String (RgbColor.g));
+            // DEBUG_V (String ("    RgbColor.b: ") + String (RgbColor.b));
+        }
+
+        RgbColor = hsv2rgb (HsvColor);
+        outputEffectColor (CurrentPixelId, RgbColor);
     }
 
-    EffectStep = (1 + EffectStep) & 0xFF;
-
     // DEBUG_END;
-    return EffectDelay / 256;
-} // effectRainbow
+    return (EffectDelay / 500);
+
+} // effectRandom
 
 //-----------------------------------------------------------------------------
 uint16_t c_InputEffectEngine::effectBlink ()
@@ -644,18 +727,18 @@ uint16_t c_InputEffectEngine::effectFlash ()
 
     switch (EffectStep)
     {
-        case 0:
-        case 2:
-        {
-            setAll (EffectColor);
-            break;
-        }
+    case 0:
+    case 2:
+    {
+        setAll (EffectColor);
+        break;
+    }
 
-        default:
-        {
-            clearAll ();
-            break;
-        }
+    default:
+    {
+        clearAll ();
+        break;
+    }
     }
 
     EffectStep = (1 + EffectStep) % 6;
@@ -673,9 +756,9 @@ uint16_t c_InputEffectEngine::effectFireFlicker ()
     for (uint16_t i = 0; i < PixelCount; i++)
     {
         uint8_t flicker = random (lum);
-        setPixel (i, CRGB{ uint8_t(max (EffectColor.r - flicker, 0)),
-                           uint8_t(max (EffectColor.g - flicker, 0)),
-                           uint8_t(max (EffectColor.b - flicker, 0)) });
+        setPixel (i, CRGB{ uint8_t (max (EffectColor.r - flicker, 0)),
+                           uint8_t (max (EffectColor.g - flicker, 0)),
+                           uint8_t (max (EffectColor.b - flicker, 0)) });
     }
     EffectStep = (1 + EffectStep) % PixelCount;
     // DEBUG_END;
@@ -830,56 +913,67 @@ c_InputEffectEngine::CRGB c_InputEffectEngine::hsv2rgb (dCHSV in)
     dCRGB       out;
     CRGB out_int = { 0,0,0 };
 
-    if (in.s <= 0.0) {       // < is bogus, just shuts up warnings
+    if (in.s <= 0.0)       // < is bogus, just shuts up warnings
+    {
         out.r = in.v;
         out.g = in.v;
         out.b = in.v;
-        out_int = { uint8_t(255 * out.r), uint8_t(255 * out.g), uint8_t(255 * out.b) };
-        return out_int;
     }
-    hh = in.h;
-    if (hh >= 360.0) hh = 0.0;
-    hh /= 60.0;
-    i = (long)hh;
-    ff = hh - i;
-    p = in.v * (1.0 - in.s);
-    q = in.v * (1.0 - (in.s * ff));
-    t = in.v * (1.0 - (in.s * (1.0 - ff)));
+    else
+    {
+        hh = in.h;
+        if (hh >= 360.0) hh = 0.0;
+        hh /= 60.0;
+        i = (long)hh;
+        ff = hh - i;
+        p = in.v * (1.0 - in.s);
+        q = in.v * (1.0 - (in.s * ff));
+        t = in.v * (1.0 - (in.s * (1.0 - ff)));
 
-    switch (i) {
-    case 0:
-        out.r = in.v;
-        out.g = uint8_t (t);
-        out.b = uint8_t (p);
-        break;
-    case 1:
-        out.r = uint8_t (q);
-        out.g = in.v;
-        out.b = uint8_t (p);
-        break;
-    case 2:
-        out.r = uint8_t (p);
-        out.g = in.v;
-        out.b = uint8_t (t);
-        break;
+        switch (i) 
+        {
+            case 0:
+                out.r = in.v;
+                out.g = t;
+                out.b = p;
+                break;
 
-    case 3:
-        out.r = uint8_t (p);
-        out.g = uint8_t (q);
-        out.b = in.v;
-        break;
-    case 4:
-        out.r = uint8_t (t);
-        out.g = uint8_t (p);
-        out.b = in.v;
-        break;
-    case 5:
-    default:
-        out.r = in.v;
-        out.g = uint8_t (p);
-        out.b = uint8_t (q);
-        break;
+            case 1:
+                out.r = q;
+                out.g = in.v;
+                out.b = p;
+                break;
+
+            case 2:
+                out.r = p;
+                out.g = in.v;
+                out.b = t;
+                break;
+
+            case 3:
+                out.r = p;
+                out.g = q;
+                out.b = in.v;
+                break;
+
+            case 4:
+                out.r = t;
+                out.g = p;
+                out.b = in.v;
+                break;
+
+            case 5:
+            default:
+                out.r = in.v;
+                out.g = p;
+                out.b = q;
+                break;
+        }
     }
-    out_int = { uint8_t (255 * out.r), uint8_t (255 * out.g), uint8_t (255 * out.b) };
+
+    out_int.r = min (uint16_t (255), uint16_t (255 * out.r));
+    out_int.g = min (uint16_t (255), uint16_t (255 * out.g));
+    out_int.b = min (uint16_t (255), uint16_t (255 * out.b));
+
     return out_int;
 }

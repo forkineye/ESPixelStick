@@ -400,7 +400,6 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 
 #ifdef DUMP_FSEQ_HEADER
             // DEBUG_V (String ("                TotalChannels: ") + String (TotalChannels));
-            // DEBUG_V (String ("                LargestOffset: ") + String (LargestOffset));
             // DEBUG_V (String ("                 LargestBlock: ") + String (LargestBlock));
 #endif // def DUMP_FSEQ_HEADER
             if (0 == TotalChannels)
