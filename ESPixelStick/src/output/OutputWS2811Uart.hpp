@@ -45,7 +45,7 @@ public:
     /// Interrupt Handler
     void IRAM_ATTR ISR_Handler (); ///< UART ISR
 
-#define WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE    4
+#define WS2811_NUM_DATA_BYTES_PER_INTENSITY_BYTE    4
 
 private:
     bool validate ();        ///< confirm that the current configuration is valid

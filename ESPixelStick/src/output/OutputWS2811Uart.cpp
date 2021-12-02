@@ -132,7 +132,7 @@ void c_OutputWS2811Uart::Begin ()
     /* Serial rate is 4x 800KHz for WS2811 */
     uart_config_t uart_config;
     memset ((void*)&uart_config, 0x00, sizeof (uart_config));
-    uart_config.baud_rate = int(WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE * WS2811_PIXEL_DATA_RATE);
+    uart_config.baud_rate = int(WS2811_NUM_DATA_BYTES_PER_INTENSITY_BYTE * WS2811_PIXEL_DATA_RATE);
     uart_config.data_bits = uart_word_length_t::UART_DATA_6_BITS;
     uart_config.stop_bits = uart_stop_bits_t::UART_STOP_BITS_1;
     InitializeUart (uart_config, PIXEL_FIFO_TRIGGER_LEVEL);
@@ -229,7 +229,7 @@ void IRAM_ATTR c_OutputWS2811Uart::ISR_Handler ()
         // Fill the FIFO with new data
         // free space in the FIFO divided by the number of data bytes per intensity
         // gives the max number of intensities we can add to the FIFO
-        uint32_t NumEmptyIntensitySlots = ((((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / WS2812_NUM_DATA_BYTES_PER_INTENSITY_BYTE);
+        uint32_t NumEmptyIntensitySlots = ((((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / WS2811_NUM_DATA_BYTES_PER_INTENSITY_BYTE);
         while ((NumEmptyIntensitySlots--) && (MoreDataToSend()))
         {
             uint8_t IntensityValue = GetNextIntensityToSend ();
