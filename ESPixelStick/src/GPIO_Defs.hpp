@@ -76,8 +76,9 @@ typedef enum
 // #define ESP32_CAM
 // #define ESP32_TTGO_T8
 
-// Platform specific GPIO definitions
+#define SUPPORT_OutputType_UCS1903
 
+// Platform specific GPIO definitions
 #if defined (ESP32_CAM)
 #   include "GPIO_Defs_ESP32_CAM.hpp"
 #elif defined (ESP32_TTGO_T8)

@@ -27,16 +27,18 @@
 //-----------------------------------------------------------------------------
 // bring in driver definitions
 #include "OutputDisabled.hpp"
-#include "OutputGECE.hpp"
-#include "OutputSerial.hpp"
-#include "OutputWS2811Uart.hpp"
-#include "OutputTM1814Uart.hpp"
-#include "OutputTM1814Rmt.hpp"
-#include "OutputRelay.hpp"
-#include "OutputServoPCA9685.hpp"
-#include "OutputWS2811Rmt.hpp"
-#include "OutputWS2801Spi.hpp"
 #include "OutputAPA102Spi.hpp"
+#include "OutputGECE.hpp"
+#include "OutputRelay.hpp"
+#include "OutputSerial.hpp"
+#include "OutputServoPCA9685.hpp"
+#include "OutputTM1814Rmt.hpp"
+#include "OutputTM1814Uart.hpp"
+#include "OutputUCS1903Rmt.hpp"
+#include "OutputUCS1903Uart.hpp"
+#include "OutputWS2801Spi.hpp"
+#include "OutputWS2811Rmt.hpp"
+#include "OutputWS2811Uart.hpp"
 // needs to be last
 #include "OutputMgr.hpp"
 
@@ -63,6 +65,10 @@ static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::
     {c_OutputMgr::e_OutputType::OutputType_Servo_PCA9685, "Servo_PCA9685" },
 #endif // def SUPPORT_RELAY_OUTPUT
     {c_OutputMgr::e_OutputType::OutputType_Disabled,      "Disabled"      },
+
+#ifdef SUPPORT_OutputType_UCS1903
+    {c_OutputMgr::e_OutputType::OutputType_UCS1903,       "UCS1903"       },
+#endif // def SUPPORT_OutputType_TM1814
 
 #ifdef SUPPORT_OutputType_TM1814
     {c_OutputMgr::e_OutputType::OutputType_TM1814,        "TM1814"        },
@@ -594,6 +600,34 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 break;
             }
 
+#ifdef SUPPORT_OutputType_UCS1903
+            case e_OutputType::OutputType_UCS1903:
+            {
+#ifdef SUPPORT_RMT
+                if (OM_IS_RMT)
+                {
+                    // logcon (CN_stars + String (F (" Starting TM1814 RMT for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputUCS1903Rmt (ChannelIndex, dataPin, UartId, OutputType_UCS1903);
+                    // DEBUG_V ("");
+                    break;
+                }
+#endif // def SUPPORT_RMT
+                // DEBUG_V ("");
+                if (OM_IS_UART)
+                {
+                    // logcon (CN_stars + String (F (" Starting TM1814 UART for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputUCS1903Uart (ChannelIndex, dataPin, UartId, OutputType_UCS1903);
+                    // DEBUG_V ("");
+                    break;
+                }
+
+                if (!BuildingNewConfig) { logcon (CN_stars + String (F (" Cannot Start UCS1903 for channel '")) + ChannelIndex + "'. " + CN_stars); }
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                // DEBUG_V ("");
+                break;
+            }
+#endif // def SUPPORT_OutputType_UCS1903
+
 #ifdef SUPPORT_OutputType_TM1814
             case e_OutputType::OutputType_TM1814:
             {
@@ -615,7 +649,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     break;
                 }
 
-                if (!BuildingNewConfig) { logcon (CN_stars + String (F (" Cannot Start WS2811 for channel '")) + ChannelIndex + "'. " + CN_stars); }
+                if (!BuildingNewConfig) { logcon (CN_stars + String (F (" Cannot Start TM1814 for channel '")) + ChannelIndex + "'. " + CN_stars); }
                 pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
                 break;
