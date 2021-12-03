@@ -44,6 +44,7 @@ public:
         uint8_t     OnValue;
         uint8_t     OffValue;
         uint8_t     previousValue;
+        uint16_t    PwmFrequency;
 
     } RelayChannel_t;
 

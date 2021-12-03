@@ -76,6 +76,7 @@ extern const char CN_File[];
 extern const char CN_file[];
 extern const char CN_filename[];
 extern const char CN_files[];
+extern const char CN_Frequency[];
 extern const char CN_fseqfilename[];
 extern const char CN_gateway[];
 extern const char CN_g[];
