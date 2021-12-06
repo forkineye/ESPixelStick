@@ -483,7 +483,6 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             OutputMgr.PauseOutputs ();
 
             // convert the input data into a json structure (use json read only mode)
-            size_t docSize = strlen ((const char*)(&WebSocketFrameCollectionBuffer[0])) * 3;
             webJsonDoc.clear ();
             DeserializationError error = deserializeJson (webJsonDoc, (const char *)(&WebSocketFrameCollectionBuffer[0]));
 
