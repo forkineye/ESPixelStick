@@ -30,10 +30,10 @@
 #define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_33
 #define RMT_LAST                OutputChannelId_RMT_4
 
-// #define SUPPORT_OutputType_WS2801
-// #define SUPPORT_OutputType_APA102
-// #define SUPPORT_OutputType_TM1814
-// #define SUPPORT_OutputType_TLS3001
+// #define SUPPORT_OutputType_WS2801    // requires a change in the html directory
+// #define SUPPORT_OutputType_APA102    // requires a change in the html directory
+// #define SUPPORT_OutputType_TM1814    // requires a change in the html directory
+// #define SUPPORT_OutputType_TLS3001   // requires a change in the html directory
 
 #define SUPPORT_RELAY_OUTPUT
 
