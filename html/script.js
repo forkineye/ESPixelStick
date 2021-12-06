@@ -594,7 +594,7 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
     let ChannelConfigs = RelayConfig.channels;
 
     let HasPwmFrequency = false;
-    if (ChannelConfigs[0].hasOwnProperty('Frequency')) {
+    if ({}.hasOwnProperty.call(ChannelConfigs[0], "Frequency")) {
         HasPwmFrequency = true;
         $("#Frequency_hr").removeClass("hidden");
     }
@@ -1044,7 +1044,7 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
                 CurrentChannelConfig.gid  = parseInt($('#gpioId_' + (currentChannelRowId)).val(), 10);
                 CurrentChannelConfig.trig = parseInt($('#threshhold_' + (currentChannelRowId)).val(), 10);
 
-                if (CurrentChannelConfig.hasOwnProperty('Frequency')) {
+                if ({}.hasOwnProperty.call(ChannelConfigs[0], "Frequency")) {
                     CurrentChannelConfig.Frequency = parseInt($('#Frequency_' + (currentChannelRowId)).val(), 10);
 				}
             });
