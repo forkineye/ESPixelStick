@@ -1044,7 +1044,7 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
                 CurrentChannelConfig.gid  = parseInt($('#gpioId_' + (currentChannelRowId)).val(), 10);
                 CurrentChannelConfig.trig = parseInt($('#threshhold_' + (currentChannelRowId)).val(), 10);
 
-                if ({}.hasOwnProperty.call(ChannelConfigs[0], "Frequency")) {
+                if ({}.hasOwnProperty.call(ChannelConfig, "Frequency")) {
                     CurrentChannelConfig.Frequency = parseInt($('#Frequency_' + (currentChannelRowId)).val(), 10);
 				}
             });

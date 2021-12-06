@@ -238,7 +238,9 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             setFromJSON (CurrentOutputChannel->InvertOutput,      JsonChannelData, OM_RELAY_CHANNEL_INVERT_NAME);
             setFromJSON (CurrentOutputChannel->Pwm,               JsonChannelData, OM_RELAY_CHANNEL_PWM_NAME);
             setFromJSON (CurrentOutputChannel->OnOffTriggerLevel, JsonChannelData, CN_trig);
+#if defined(ARDUINO_ARCH_ESP32)
             setFromJSON (CurrentOutputChannel->PwmFrequency,      JsonChannelData, CN_Frequency);
+#endif // defined(ARDUINO_ARCH_ESP32)
 
             // DEBUGV (String ("currentRelay.GpioId: ") + String (CurrentOutputChannel->GpioId));
             temp = CurrentOutputChannel->GpioId;
@@ -261,7 +263,9 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             // DEBUGV (String ("currentRelay.OnOffTriggerLevel: ") + String (CurrentOutputChannel->OnOffTriggerLevel));
             // DEBUGV (String ("           currentRelay.GpioId: ") + String (CurrentOutputChannel->GpioId));
             // DEBUGV (String ("              currentRelay.Pwm: ") + String (CurrentOutputChannel->Pwm));
+#if defined(ARDUINO_ARCH_ESP32)
             // DEBUGV (String ("     currentRelay.PwmFrequency: ") + String (CurrentOutputChannel->Pwm));
+#endif // defined(ARDUINO_ARCH_ESP32)
 
             ++ChannelId;
         }
