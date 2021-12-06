@@ -85,6 +85,8 @@ typedef enum
 #   include "GPIO_Defs_ESP32_TTGO_T8.hpp"
 #elif defined (ESP32_LOLIN_D32_PRO)
 #   include "GPIO_Defs_ESP32_generic.hpp"
+#elif defined (ESP32_D1_MINI)
+#   include "GPIO_Defs_ESP32_D1_MINI.hpp"
 #elif defined (BOARD_ESPS_V3)
 #   include "GPIO_Defs_ESP8266_ESPS_V3.hpp"
 #elif defined (ARDUINO_ARCH_ESP8266)
