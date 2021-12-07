@@ -614,7 +614,7 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
         let threshholdPattern = '<td><input type="number"   id="threshhold_' + (CurrentRowId) + '"step="1" min="0" max="255" value="300" class="form-control is-valid"></td>';
         let PwmFreqPattern    = '';
         if (true === HasPwmFrequency) {
-            PwmFreqPattern    = '<td><input type="number"   id="Frequency_' + (CurrentRowId) + '"step="1" min="1000" max="19000" value="19000" class="form-control is-valid"></td>';
+            PwmFreqPattern    = '<td><input type="number"   id="Frequency_' + (CurrentRowId) + '"step="1" min="100" max="19000" value="19000" class="form-control is-valid"></td>';
         }
 
         let rowPattern = '<tr>' + ChanIdPattern + EnabledPattern + InvertedPattern + PwmPattern + gpioPattern + threshholdPattern + PwmFreqPattern + '</tr>';
