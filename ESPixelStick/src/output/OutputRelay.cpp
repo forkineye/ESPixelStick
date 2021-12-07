@@ -40,17 +40,24 @@ GNU General Public License for more details.
 #define Relay_OUTPUT_NOT_PWM         false
 #define Relay_DEFAULT_TRIGGER_LEVEL  128
 #define Relay_DEFAULT_GPIO_ID        ((gpio_num_t)0)
+#define RelayPwmHigh                 255
+#define RelayPwmLow                  0
+#if defined(ARDUINO_ARCH_ESP32)
+#define RelayPwmFrequency            , 12000
+#else
+#define RelayPwmFrequency
+#endif // defined(ARDUINO_ARCH_ESP32)
 
 static const c_OutputRelay::RelayChannel_t RelayChannelDefaultSettings[] =
 {
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency},
 };
 
 //----------------------------------------------------------------------------
@@ -140,21 +147,37 @@ bool c_OutputRelay::validate ()
             #if defined(ARDUINO_ARCH_ESP32)
                // assign GPIO to a channel and set the pwm 12 Khz frequency, 8 bit
                ledcAttachPin(currentRelay.GpioId, Channel);
-               ledcSetup(Channel, 12000, 8);
+               ledcSetup(Channel, currentRelay.PwmFrequency, 8);
             #else
                pinMode (currentRelay.GpioId, OUTPUT);
             #endif
         }
 
-        if (currentRelay.InvertOutput)
+        if (currentRelay.Pwm)
         {
-            currentRelay.OffValue = HIGH;
-            currentRelay.OnValue  = LOW;
+            if (currentRelay.InvertOutput)
+            {
+                currentRelay.OffValue = RelayPwmHigh;
+                currentRelay.OnValue = RelayPwmLow;
+            }
+            else
+            {
+                currentRelay.OffValue = RelayPwmLow;
+                currentRelay.OnValue = RelayPwmHigh;
+            }
         }
         else
         {
-            currentRelay.OffValue = LOW;
-            currentRelay.OnValue  = HIGH;
+            if (currentRelay.InvertOutput)
+            {
+                currentRelay.OffValue = HIGH;
+                currentRelay.OnValue = LOW;
+            }
+            else
+            {
+                currentRelay.OffValue = LOW;
+                currentRelay.OnValue = HIGH;
+            }
         }
 
         // DEBUGV (String ("CurrentRelayChanIndex: ") + String (CurrentRelayChanIndex++));
@@ -219,6 +242,9 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             setFromJSON (CurrentOutputChannel->InvertOutput,      JsonChannelData, OM_RELAY_CHANNEL_INVERT_NAME);
             setFromJSON (CurrentOutputChannel->Pwm,               JsonChannelData, OM_RELAY_CHANNEL_PWM_NAME);
             setFromJSON (CurrentOutputChannel->OnOffTriggerLevel, JsonChannelData, CN_trig);
+#if defined(ARDUINO_ARCH_ESP32)
+            setFromJSON (CurrentOutputChannel->PwmFrequency,      JsonChannelData, CN_Frequency);
+#endif // defined(ARDUINO_ARCH_ESP32)
 
             // DEBUGV (String ("currentRelay.GpioId: ") + String (CurrentOutputChannel->GpioId));
             temp = CurrentOutputChannel->GpioId;
@@ -233,14 +259,17 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             }
             CurrentOutputChannel->GpioId = (gpio_num_t)temp;
 
-            // DEBUGV (String ("CurrentRelayChanIndex: ")          + String (ChannelId));
-            // DEBUGV (String ("currentRelay.OnValue: ")           + String (CurrentOutputChannel->OnValue));
-            // DEBUGV (String ("currentRelay.OffValue: ")          + String (CurrentOutputChannel->OffValue));
-            // DEBUGV (String ("currentRelay.Enabled: ")           + String (CurrentOutputChannel->Enabled));
-            // DEBUGV (String ("currentRelay.InvertOutput: ")      + String (CurrentOutputChannel->InvertOutput));
+            // DEBUGV (String ("         CurrentRelayChanIndex: ") + String (ChannelId));
+            // DEBUGV (String ("          currentRelay.OnValue: ") + String (CurrentOutputChannel->OnValue));
+            // DEBUGV (String ("         currentRelay.OffValue: ") + String (CurrentOutputChannel->OffValue));
+            // DEBUGV (String ("          currentRelay.Enabled: ") + String (CurrentOutputChannel->Enabled));
+            // DEBUGV (String ("     currentRelay.InvertOutput: ") + String (CurrentOutputChannel->InvertOutput));
             // DEBUGV (String ("currentRelay.OnOffTriggerLevel: ") + String (CurrentOutputChannel->OnOffTriggerLevel));
-            // DEBUGV (String ("currentRelay.GpioId: ")            + String (CurrentOutputChannel->GpioId));
-            // DEBUGV (String ("currentRelay.Pwm: ")               + String (CurrentOutputChannel->Pwm));
+            // DEBUGV (String ("           currentRelay.GpioId: ") + String (CurrentOutputChannel->GpioId));
+            // DEBUGV (String ("              currentRelay.Pwm: ") + String (CurrentOutputChannel->Pwm));
+#if defined(ARDUINO_ARCH_ESP32)
+            // DEBUGV (String ("     currentRelay.PwmFrequency: ") + String (CurrentOutputChannel->Pwm));
+#endif // defined(ARDUINO_ARCH_ESP32)
 
             ++ChannelId;
         }
@@ -271,12 +300,16 @@ void c_OutputRelay::GetConfig (ArduinoJson::JsonObject & jsonConfig)
     {
         JsonObject JsonChannelData = JsonChannelList.createNestedObject ();
 
-        JsonChannelData[CN_id]      = ChannelId;
+        JsonChannelData[CN_id]                         = ChannelId;
         JsonChannelData[OM_RELAY_CHANNEL_ENABLED_NAME] = currentRelay.Enabled;
         JsonChannelData[OM_RELAY_CHANNEL_INVERT_NAME]  = currentRelay.InvertOutput;
         JsonChannelData[OM_RELAY_CHANNEL_PWM_NAME]     = currentRelay.Pwm;
-        JsonChannelData[CN_trig] = currentRelay.OnOffTriggerLevel;
-        JsonChannelData[CN_gid]    = currentRelay.GpioId;
+        JsonChannelData[CN_trig]                       = currentRelay.OnOffTriggerLevel;
+        JsonChannelData[CN_gid]                        = currentRelay.GpioId;
+
+#if defined(ARDUINO_ARCH_ESP32)
+        JsonChannelData[CN_Frequency]                  = currentRelay.PwmFrequency;
+#endif // defined(ARDUINO_ARCH_ESP32)
 
         // DEBUGV (String ("CurrentRelayChanIndex: ") + String (ChannelId));
         // DEBUGV (String ("currentRelay.OnValue: ")  + String (currentRelay.OnValue));
@@ -310,7 +343,7 @@ void c_OutputRelay::Render ()
         // DEBUG_V (String("OutputDataIndex: ") + String(OutputDataIndex));
         if (currentRelay.Enabled)
         {
-            uint8_t newOutputValue = pOutputBuffer[OutputDataIndex];
+            uint8_t newOutputValue = map (pOutputBuffer[OutputDataIndex], 0, 255, currentRelay.OffValue, currentRelay.OnValue);
             if (currentRelay.Pwm)
             {
                 #if defined(ARDUINO_ARCH_ESP32)

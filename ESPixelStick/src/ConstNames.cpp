@@ -74,6 +74,7 @@ const char CN_File                     [] = "File";
 const char CN_file                     [] = "file";
 const char CN_filename                 [] = "filename";
 const char CN_files                    [] = "files";
+const char CN_Frequency                [] = "Frequency";
 const char CN_fseqfilename             [] = "fseqfilename";
 const char CN_g                        [] = "g";
 const char CN_gamma                    [] = "gamma";

@@ -593,18 +593,31 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
 
     let ChannelConfigs = RelayConfig.channels;
 
+    let HasPwmFrequency = false;
+    if ({}.hasOwnProperty.call(ChannelConfigs[0], "Frequency")) {
+        HasPwmFrequency = true;
+        $("#Frequency_hr").removeClass("hidden");
+    }
+    else {
+        $("#Frequency_hr").addClass("hidden");
+	}
+
     // add as many rows as we need
-    for (let CurrentRowId = 1; CurrentRowId <= ChannelConfigs.length; CurrentRowId++)
-    {
+    for (let CurrentRowId = 1; CurrentRowId <= ChannelConfigs.length; CurrentRowId++) {
         // console.log("CurrentRowId = " + CurrentRowId);
+
         let ChanIdPattern     = '<td id="chanId_'                            + (CurrentRowId) + '">a</td>';
         let EnabledPattern    = '<td><input type="checkbox" id="Enabled_'    + (CurrentRowId) + '"></td>';
         let InvertedPattern   = '<td><input type="checkbox" id="Inverted_'   + (CurrentRowId) + '"></td>';
         let PwmPattern        = '<td><input type="checkbox" id="Pwm_'        + (CurrentRowId) + '"></td>';
         let gpioPattern       = '<td><input type="number"   id="gpioId_'     + (CurrentRowId) + '"step="1" min="0" max="24"  value="30"  class="form-control is-valid"></td>';
         let threshholdPattern = '<td><input type="number"   id="threshhold_' + (CurrentRowId) + '"step="1" min="0" max="255" value="300" class="form-control is-valid"></td>';
+        let PwmFreqPattern    = '';
+        if (true === HasPwmFrequency) {
+            PwmFreqPattern    = '<td><input type="number"   id="Frequency_' + (CurrentRowId) + '"step="1" min="1000" max="19000" value="19000" class="form-control is-valid"></td>';
+        }
 
-        let rowPattern = '<tr>' + ChanIdPattern + EnabledPattern + InvertedPattern + PwmPattern + gpioPattern + threshholdPattern + '</tr>';
+        let rowPattern = '<tr>' + ChanIdPattern + EnabledPattern + InvertedPattern + PwmPattern + gpioPattern + threshholdPattern + PwmFreqPattern + '</tr>';
         $('#relaychannelconfigurationtable tr:last').after(rowPattern);
 
         $('#chanId_'     + CurrentRowId).attr('style', $('#chanId_hr').attr('style'));
@@ -613,8 +626,12 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
         $('#Pwm_'        + CurrentRowId).attr('style', $('#Pwm_hr').attr('style'));
         $('#gpioId_'     + CurrentRowId).attr('style', $('#gpioId_hr').attr('style'));
         $('#threshhold_' + CurrentRowId).attr('style', $('#threshhold_hr').attr('style'));
+        if (true === HasPwmFrequency) {
+            $('#Frequency_' + CurrentRowId).attr('style', $('#Frequency_hr').attr('style'));
+        }
     }
 
+    // populate config
     $.each(ChannelConfigs, function (i, CurrentChannelConfig)
     {
         // console.log("Current Channel Id = " + CurrentChannelConfig.id);
@@ -625,6 +642,9 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
         $('#Pwm_'        + (currentChannelRowId)).prop("checked", CurrentChannelConfig.pwm);
         $('#gpioId_'     + (currentChannelRowId)).val(CurrentChannelConfig.gid);
         $('#threshhold_' + (currentChannelRowId)).val(CurrentChannelConfig.trig);
+        if (true === HasPwmFrequency) {
+            $('#Frequency_' + (currentChannelRowId)).val(CurrentChannelConfig.Frequency);
+        }
     });
 
 } // ProcessModeConfigurationDataRelay
@@ -1023,6 +1043,10 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
                 CurrentChannelConfig.pwm  = $('#Pwm_' + (currentChannelRowId)).prop("checked");
                 CurrentChannelConfig.gid  = parseInt($('#gpioId_' + (currentChannelRowId)).val(), 10);
                 CurrentChannelConfig.trig = parseInt($('#threshhold_' + (currentChannelRowId)).val(), 10);
+
+                if ({}.hasOwnProperty.call(ChannelConfig, "Frequency")) {
+                    CurrentChannelConfig.Frequency = parseInt($('#Frequency_' + (currentChannelRowId)).val(), 10);
+				}
             });
         }
         else if ((ChannelConfig.type === "Servo PCA9685") && ($("#servo_pca9685channelconfigurationtable").length))

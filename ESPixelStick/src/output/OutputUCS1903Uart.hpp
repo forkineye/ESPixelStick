@@ -1,6 +1,6 @@
 #pragma once
 /*
-* OutputWS2811Uart.h - WS2811 driver code for ESPixelStick UART
+* OutputUCS1903Uart.h - UCS1903 driver code for ESPixelStick UART
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -23,17 +23,19 @@
 */
 
 #include "OutputCommon.hpp"
-#include "OutputWS2811.hpp"
+#ifdef SUPPORT_OutputType_UCS1903
 
-class c_OutputWS2811Uart : public c_OutputWS2811
+#include "OutputUCS1903.hpp"
+
+class c_OutputUCS1903Uart : public c_OutputUCS1903
 {
 public:
     // These functions are inherited from c_OutputCommon
-    c_OutputWS2811Uart (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+    c_OutputUCS1903Uart (c_OutputMgr::e_OutputChannelIds OutputChannelId,
                       gpio_num_t outputGpio,
                       uart_port_t uart,
                       c_OutputMgr::e_OutputType outputType);
-    virtual ~c_OutputWS2811Uart ();
+    virtual ~c_OutputUCS1903Uart ();
 
     // functions to be provided by the derived class
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
@@ -45,10 +47,11 @@ public:
     /// Interrupt Handler
     void IRAM_ATTR ISR_Handler (); ///< UART ISR
 
-#define WS2811_NUM_DATA_BYTES_PER_INTENSITY_BYTE    4
+#define UCS1903_NUM_DATA_BYTES_PER_INTENSITY_BYTE    4
 
 private:
     bool validate ();        ///< confirm that the current configuration is valid
 
-}; // c_OutputWS2811Uart
+}; // c_OutputUCS1903Uart
 
+#endif // def SUPPORT_OutputType_UCS1903

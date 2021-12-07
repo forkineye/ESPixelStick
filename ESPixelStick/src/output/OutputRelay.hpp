@@ -44,6 +44,9 @@ public:
         uint8_t     OnValue;
         uint8_t     OffValue;
         uint8_t     previousValue;
+#if defined(ARDUINO_ARCH_ESP32)
+        uint16_t    PwmFrequency;
+#endif // defined(ARDUINO_ARCH_ESP32)
 
     } RelayChannel_t;
 

@@ -1,5 +1,5 @@
 /*
-* WS2811Uart.cpp - WS2811 driver code for ESPixelStick UART
+* UCS1903Uart.cpp - UCS1903 driver code for ESPixelStick UART
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -18,8 +18,9 @@
 */
 
 #include "../ESPixelStick.h"
+#ifdef SUPPORT_OutputType_UCS1903
 
-#include "OutputWS2811Uart.hpp"
+#include "OutputUCS1903Uart.hpp"
 
 #if defined(ARDUINO_ARCH_ESP8266)
 extern "C" {
@@ -49,10 +50,10 @@ extern "C" {
 #define PIXEL_FIFO_TRIGGER_LEVEL (16)
 
 /*
- * Inverted 6N1 UART lookup table for ws2811, first 2 bits ignored.
+ * Inverted 6N1 UART lookup table for UCS1903, first 2 bits ignored.
  * Start and stop bits are part of the pixel stream.
  */
-char Convert2BitIntensityToUartDataStream[] =
+char UCS1903Convert2BitIntensityToUartDataStream[] =
 {
     0b00110111,     // 00 - (1)000 100(0)
     0b00000111,     // 01 - (1)000 111(0)
@@ -64,19 +65,19 @@ char Convert2BitIntensityToUartDataStream[] =
 static void IRAM_ATTR uart_intr_handler (void* param);
 
 //----------------------------------------------------------------------------
-c_OutputWS2811Uart::c_OutputWS2811Uart (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+c_OutputUCS1903Uart::c_OutputUCS1903Uart (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     gpio_num_t outputGpio,
     uart_port_t uart,
     c_OutputMgr::e_OutputType outputType) :
-    c_OutputWS2811 (OutputChannelId, outputGpio, uart, outputType)
+    c_OutputUCS1903 (OutputChannelId, outputGpio, uart, outputType)
 {
     // DEBUG_START;
 
     // DEBUG_END;
-} // c_OutputWS2811Uart
+} // c_OutputUCS1903Uart
 
 //----------------------------------------------------------------------------
-c_OutputWS2811Uart::~c_OutputWS2811Uart ()
+c_OutputUCS1903Uart::~c_OutputUCS1903Uart ()
 {
     // DEBUG_START;
     if (gpio_num_t (-1) == DataPin) { return; }
@@ -105,7 +106,7 @@ c_OutputWS2811Uart::~c_OutputWS2811Uart ()
 #endif // def ARDUINO_ARCH_ESP32
 
     // DEBUG_END;
-} // ~c_OutputWS2811Uart
+} // ~c_OutputUCS1903Uart
 
 //----------------------------------------------------------------------------
 /* shell function to set the 'this' pointer of the real ISR
@@ -113,26 +114,26 @@ c_OutputWS2811Uart::~c_OutputWS2811Uart ()
  */
 static void IRAM_ATTR uart_intr_handler (void* param)
 {
-    reinterpret_cast <c_OutputWS2811Uart*>(param)->ISR_Handler ();
+    reinterpret_cast <c_OutputUCS1903Uart*>(param)->ISR_Handler ();
 } // uart_intr_handler
 
 //----------------------------------------------------------------------------
 /* Use the current config to set up the output port
 */
-void c_OutputWS2811Uart::Begin ()
+void c_OutputUCS1903Uart::Begin ()
 {
     // DEBUG_START;
 
 #ifdef ARDUINO_ARCH_ESP8266
-    InitializeUart (WS2811_NUM_DATA_BYTES_PER_INTENSITY_BYTE * WS2811_PIXEL_DATA_RATE,
+    InitializeUart (UCS1903_NUM_DATA_BYTES_PER_INTENSITY_BYTE * UCS1903_PIXEL_DATA_RATE,
         SERIAL_6N1,
         SERIAL_TX_ONLY,
         PIXEL_FIFO_TRIGGER_LEVEL);
 #else
-    /* Serial rate is 4x 800KHz for WS2811 */
+    /* Serial rate is 4x 800KHz for UCS1903 */
     uart_config_t uart_config;
     memset ((void*)&uart_config, 0x00, sizeof (uart_config));
-    uart_config.baud_rate = int(WS2811_NUM_DATA_BYTES_PER_INTENSITY_BYTE * WS2811_PIXEL_DATA_RATE);
+    uart_config.baud_rate = int(UCS1903_NUM_DATA_BYTES_PER_INTENSITY_BYTE * UCS1903_PIXEL_DATA_RATE);
     uart_config.data_bits = uart_word_length_t::UART_DATA_6_BITS;
     uart_config.stop_bits = uart_stop_bits_t::UART_STOP_BITS_1;
     InitializeUart (uart_config, PIXEL_FIFO_TRIGGER_LEVEL);
@@ -170,11 +171,11 @@ void c_OutputWS2811Uart::Begin ()
 *       true - config has been accepted
 *       false - Config rejected. Using defaults for invalid settings
 */
-bool c_OutputWS2811Uart::SetConfig (ArduinoJson::JsonObject& jsonConfig)
+bool c_OutputUCS1903Uart::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
-    bool response = c_OutputWS2811::SetConfig (jsonConfig);
+    bool response = c_OutputUCS1903::SetConfig (jsonConfig);
 
 #ifdef ARDUINO_ARCH_ESP32
     ESP_ERROR_CHECK (uart_set_pin (UartId, DataPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
@@ -186,7 +187,7 @@ bool c_OutputWS2811Uart::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // SetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811Uart::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputUCS1903Uart::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 {
     // DEBUG_START;
     // DEBUG_V (String ("NumChannelsAvailable: ") + String (NumChannelsAvailable));
@@ -209,7 +210,7 @@ void c_OutputWS2811Uart::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 #else
         ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
 #endif
-        c_OutputWS2811::SetOutputBufferSize (NumChannelsAvailable);
+        c_OutputUCS1903::SetOutputBufferSize (NumChannelsAvailable);
 
     } while (false);
 
@@ -221,7 +222,7 @@ void c_OutputWS2811Uart::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 /*
      * Fill the FIFO with as many intensity values as it can hold.
      */
-void IRAM_ATTR c_OutputWS2811Uart::ISR_Handler ()
+void IRAM_ATTR c_OutputUCS1903Uart::ISR_Handler ()
 {
     // Process if the desired UART has raised an interrupt
     if (READ_PERI_REG (UART_INT_ST (UartId)))
@@ -229,16 +230,16 @@ void IRAM_ATTR c_OutputWS2811Uart::ISR_Handler ()
         // Fill the FIFO with new data
         // free space in the FIFO divided by the number of data bytes per intensity
         // gives the max number of intensities we can add to the FIFO
-        uint32_t NumEmptyIntensitySlots = ((((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / WS2811_NUM_DATA_BYTES_PER_INTENSITY_BYTE);
+        uint32_t NumEmptyIntensitySlots = ((((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / UCS1903_NUM_DATA_BYTES_PER_INTENSITY_BYTE);
         while ((NumEmptyIntensitySlots--) && (MoreDataToSend()))
         {
             uint8_t IntensityValue = GetNextIntensityToSend ();
 
             // convert the intensity data into UART data
-            enqueueUart ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 6) & 0x3]));
-            enqueueUart ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 4) & 0x3]));
-            enqueueUart ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 2) & 0x3]));
-            enqueueUart ((Convert2BitIntensityToUartDataStream[(IntensityValue >> 0) & 0x3]));
+            enqueueUart ((UCS1903Convert2BitIntensityToUartDataStream[(IntensityValue >> 6) & 0x3]));
+            enqueueUart ((UCS1903Convert2BitIntensityToUartDataStream[(IntensityValue >> 4) & 0x3]));
+            enqueueUart ((UCS1903Convert2BitIntensityToUartDataStream[(IntensityValue >> 2) & 0x3]));
+            enqueueUart ((UCS1903Convert2BitIntensityToUartDataStream[(IntensityValue >> 0) & 0x3]));
         } // end while there is data to be sent
 
         if (!MoreDataToSend())
@@ -251,10 +252,10 @@ void IRAM_ATTR c_OutputWS2811Uart::ISR_Handler ()
 
     } // end Our uart generated an interrupt
 
-} // HandleWS2811Interrupt
+} // HandleUCS1903Interrupt
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811Uart::Render ()
+void c_OutputUCS1903Uart::Render ()
 {
     // DEBUG_START;
 
@@ -277,7 +278,7 @@ void c_OutputWS2811Uart::Render ()
 } // render
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811Uart::PauseOutput ()
+void c_OutputUCS1903Uart::PauseOutput ()
 {
     // DEBUG_START;
 
@@ -285,3 +286,5 @@ void c_OutputWS2811Uart::PauseOutput ()
 
     // DEBUG_END;
 } // PauseOutput
+
+#endif // def SUPPORT_OutputType_UCS1903

@@ -100,6 +100,9 @@ public:
         OutputType_Relay,
         OutputType_Servo_PCA9685,
 #endif // def SUPPORT_RELAY_OUTPUT
+#ifdef SUPPORT_OutputType_UCS1903
+        OutputType_UCS1903,
+#endif // def SUPPORT_OutputType_TM1814
 #ifdef SUPPORT_OutputType_TM1814
         OutputType_TM1814,
 #endif // def SUPPORT_OutputType_TM1814

@@ -1,6 +1,6 @@
 #pragma once
 /*
-* OutputWS2811Uart.h - WS2811 driver code for ESPixelStick UART
+* OutputUCS1903Rmt.h - UCS1903 driver code for ESPixelStick RMT Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -21,34 +21,32 @@
 *   interface.
 *
 */
+#include "../ESPixelStick.h"
+#ifdef SUPPORT_RMT_OUTPUT
 
-#include "OutputCommon.hpp"
-#include "OutputWS2811.hpp"
+#include "OutputUCS1903.hpp"
+#include "OutputRmt.hpp"
 
-class c_OutputWS2811Uart : public c_OutputWS2811
+class c_OutputUCS1903Rmt : public c_OutputUCS1903
 {
 public:
     // These functions are inherited from c_OutputCommon
-    c_OutputWS2811Uart (c_OutputMgr::e_OutputChannelIds OutputChannelId,
-                      gpio_num_t outputGpio,
-                      uart_port_t uart,
-                      c_OutputMgr::e_OutputType outputType);
-    virtual ~c_OutputWS2811Uart ();
+    c_OutputUCS1903Rmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+        gpio_num_t outputGpio,
+        uart_port_t uart,
+        c_OutputMgr::e_OutputType outputType);
+    virtual ~c_OutputUCS1903Rmt ();
 
     // functions to be provided by the derived class
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
-    void    Render ();                                        ///< Call from loop(),  renders output data
-    void    SetOutputBufferSize (uint16_t NumChannelsAvailable);
-    void    PauseOutput ();
-    bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);
-
-    /// Interrupt Handler
-    void IRAM_ATTR ISR_Handler (); ///< UART ISR
-
-#define WS2811_NUM_DATA_BYTES_PER_INTENSITY_BYTE    4
+    bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);  ///< Set a new config in the driver
+    void    Render ();                                        ///< Call from loop (),  renders output data
+    void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
 
 private:
-    bool validate ();        ///< confirm that the current configuration is valid
 
-}; // c_OutputWS2811Uart
+    c_OutputRmt Rmt;
 
+}; // c_OutputUCS1903Rmt
+
+#endif // def SUPPORT_RMT_OUTPUT
