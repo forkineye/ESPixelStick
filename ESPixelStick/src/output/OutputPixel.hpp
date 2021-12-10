@@ -88,6 +88,10 @@ private:
     uint16_t    PixelGroupSize = 1;
     uint16_t    PixelGroupSizeCurrentCount = 0;
 
+    float       IntensityBitTimeInUs = 0.0;
+    uint16_t    BlockSize = 1;
+    float       BlockDelayUs = 0.0;
+
     uint16_t    zig_size = 0;
     uint16_t    ZigPixelCount = 1;
     uint16_t    ZigPixelCurrentCount = 1;
