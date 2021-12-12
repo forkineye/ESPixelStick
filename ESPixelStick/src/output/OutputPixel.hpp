@@ -106,6 +106,15 @@ private:
 
     uint8_t     InvertData = false;
 
+// #define USE_PIXEL_DEBUG_COUNTERS
+#ifdef USE_PIXEL_DEBUG_COUNTERS
+    uint16_t   PixelsToSend = 0;
+    uint16_t   IntensityBytesSent = 0;
+    uint16_t   IntensityBytesSentLastFrame = 0;
+    uint16_t   SentPixels = 0;
+    uint32_t   AbortFrameCounter = 0;
+#endif // def USE_PIXEL_DEBUG_COUNTERS
+
     typedef union ColorOffsets_s
     {
         struct offsets
