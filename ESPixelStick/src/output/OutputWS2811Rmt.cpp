@@ -132,7 +132,8 @@ bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 void c_OutputWS2811Rmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     c_OutputWS2811::GetStatus (jsonStatus);
-    // Rmt.GetStatus (jsonStatus);
+    Rmt.GetStatus (jsonStatus);
+
 } // GetStatus
 
 //----------------------------------------------------------------------------
