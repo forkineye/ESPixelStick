@@ -57,13 +57,19 @@ private:
     uint8_t NumIntensityValuesPerInterrupt = 0;
     uint8_t NumIntensityBitsPerInterrupt = 0;
 
+#define USE_RMT_DEBUG_COUNTERS
+#ifdef USE_RMT_DEBUG_COUNTERS
     // debug counters
     uint32_t DataISRcounter = 0;
+    uint32_t FrameThresholdCounter = 0;
     uint32_t FrameEndISRcounter = 0;
     uint32_t FrameStartCounter = 0;
     uint32_t RxIsr = 0;
     uint32_t ErrorIsr = 0;
     uint32_t IsrIsNotForUs = 0;
+    uint16_t IntensityBytesSent = 0;
+    uint16_t IntensityBytesSentLastFrame = 0;
+#endif // def USE_RMT_DEBUG_COUNTERS
 
 public:
     c_OutputRmt ();
