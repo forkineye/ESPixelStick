@@ -123,11 +123,24 @@ bool c_OutputTM1814Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_INTERFRAME_GAP_ID);
 
     Rmt.set_pin (DataPin);
+    Rmt.SetMinFrameDurationInUs (FrameMinDurationInMicroSec);
 
     // DEBUG_END;
     return response;
 
 } // SetConfig
+
+//----------------------------------------------------------------------------
+void c_OutputTM1814Rmt::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+{
+    // DEBUG_START;
+
+    c_OutputTM1814::SetOutputBufferSize (NumChannelsAvailable);
+    Rmt.SetMinFrameDurationInUs (FrameMinDurationInMicroSec);
+
+    // DEBUG_END;
+
+} // SetBufferSize
 
 //----------------------------------------------------------------------------
 void c_OutputTM1814Rmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
