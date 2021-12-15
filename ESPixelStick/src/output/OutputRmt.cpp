@@ -228,7 +228,7 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_StartNewFrame ()
     }
 
     NumStartBitsCount = 0;
-    if (NumStartBits < NumStartBits)
+    if (NumStartBitsCount < NumStartBits)
     {
         *pMem++ = Rgb2Rmt[RmtFrameType_t::RMT_STARTBIT_ID].val;
         NumStartBits++;
