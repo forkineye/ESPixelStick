@@ -59,7 +59,7 @@ private:
     uint32_t LastFrameStartTime = 0;
     uint32_t FrameMinDurationInMicroSec = 1000;
 
-#define USE_RMT_DEBUG_COUNTERS
+// #define USE_RMT_DEBUG_COUNTERS
 #ifdef USE_RMT_DEBUG_COUNTERS
     // debug counters
     uint32_t DataISRcounter = 0;
