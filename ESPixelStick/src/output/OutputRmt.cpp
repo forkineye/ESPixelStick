@@ -261,9 +261,9 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_StartNewFrame ()
 
     LastFrameStartTime = micros ();
 
-    RMT.int_clr.val  = RMT_INT_TX_END_BIT;
-    // RMT.int_ena.val |= RMT_INT_TX_END_BIT;
     RMT.conf_ch[RmtChannelId].conf1.tx_start = 1;
+    RMT.int_clr.val  = RMT_INT_TX_END_BIT;
+    RMT.int_ena.val |= RMT_INT_TX_END_BIT;
 
 } // ISR_Handler_StartNewFrame
 
@@ -310,10 +310,10 @@ bool c_OutputRmt::Render ()
     {
         if (!NoFrameInProgress ())
         {
-            // break;
+            break;
         }
 
-        if ((micros () - LastFrameStartTime) < FrameMinDurationInMicroSec)
+        if ((micros () - LastFrameStartTime) < (FrameMinDurationInMicroSec + 10))
         {
             break;
         }
@@ -342,24 +342,22 @@ bool c_OutputRmt::Render ()
 void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
 #ifdef USE_RMT_DEBUG_COUNTERS
-    jsonStatus["RmtChannelId"] = RmtChannelId;
-    jsonStatus["DataISRcounter"] = DataISRcounter;
-    jsonStatus["FrameEndISRcounter"] = FrameEndISRcounter;
-    jsonStatus["FrameStartCounter"] = FrameStartCounter;
-    jsonStatus["ErrorIsr"] = ErrorIsr;
-    jsonStatus["RxIsr"] = RxIsr;
-    jsonStatus["FrameThresholdCounter"] = FrameThresholdCounter;
-    jsonStatus["IsrIsNotForUs"] = IsrIsNotForUs;
-    jsonStatus["IncompleteFrame"] = IncompleteFrame;
-    
-    jsonStatus["Raw int_ena"] = String (RMT.int_ena.val, HEX);
-    jsonStatus["int_ena"] = String (RMT.int_ena.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
-    jsonStatus["RMT_INT_TX_END_BIT"] = String (RMT_INT_TX_END_BIT, HEX);
-    jsonStatus["RMT_INT_THR_EVNT_BIT"] = String (RMT_INT_THR_EVNT_BIT, HEX);
-    jsonStatus["Raw int_st"] = String (RMT.int_st.val, HEX);
-    jsonStatus["int_st"] = String (RMT.int_st.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
-
-    jsonStatus["IntensityBytesSent"] = IntensityBytesSent;
+    jsonStatus["RmtChannelId"]                = RmtChannelId;
+    jsonStatus["DataISRcounter"]              = DataISRcounter;
+    jsonStatus["FrameEndISRcounter"]          = FrameEndISRcounter;
+    jsonStatus["FrameStartCounter"]           = FrameStartCounter;
+    jsonStatus["ErrorIsr"]                    = ErrorIsr;
+    jsonStatus["RxIsr"]                       = RxIsr;
+    jsonStatus["FrameThresholdCounter"]       = FrameThresholdCounter;
+    jsonStatus["IsrIsNotForUs"]               = IsrIsNotForUs;
+    jsonStatus["IncompleteFrame"]             = IncompleteFrame;
+    jsonStatus["Raw int_ena"]                 = String (RMT.int_ena.val, HEX);
+    jsonStatus["int_ena"]                     = String (RMT.int_ena.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
+    jsonStatus["RMT_INT_TX_END_BIT"]          = String (RMT_INT_TX_END_BIT, HEX);
+    jsonStatus["RMT_INT_THR_EVNT_BIT"]        = String (RMT_INT_THR_EVNT_BIT, HEX);
+    jsonStatus["Raw int_st"]                  = String (RMT.int_st.val, HEX);
+    jsonStatus["int_st"]                      = String (RMT.int_st.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
+    jsonStatus["IntensityBytesSent"]          = IntensityBytesSent;
     jsonStatus["IntensityBytesSentLastFrame"] = IntensityBytesSentLastFrame;
 #endif // def USE_RMT_DEBUG_COUNTERS
 
