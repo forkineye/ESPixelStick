@@ -831,6 +831,55 @@ bool c_FileMgr::ReadSdFile (const String & FileName, String & FileData)
 } // ReadSdFile
 
 //-----------------------------------------------------------------------------
+bool c_FileMgr::ReadSdFile (const String & FileName, JsonDocument & FileData)
+{
+    // DEBUG_START;
+
+    bool GotFileData = false;
+    FileId FileHandle = 0;
+
+    // DEBUG_V (String("File '") + FileName + "' is being opened.");
+    if (true == OpenSdFile (FileName, FileMode::FileRead, FileHandle))
+    {
+        // DEBUG_V (String("File '") + FileName + "' is open.");
+        int FileListIndex;
+        if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
+        {
+
+            FileList[FileListIndex].info.seek (0, SeekSet);
+            ReadBufferingStream bufferedFileRead{ FileList[FileListIndex].info, 128 };
+            String RawFileData = bufferedFileRead.readString ();
+
+            // DEBUG_V ("Convert File to JSON document");
+            DeserializationError error = deserializeJson (FileData, RawFileData);
+
+            // DEBUG_V ("Error Check");
+            if (error)
+            {
+                String CfgFileMessagePrefix = String (CN_Configuration_File_colon) + "'" + FileName + "' ";
+                logcon (CN_Heap_colon + String (ESP.getFreeHeap ()));
+                logcon (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
+                logcon (CN_plussigns + RawFileData + CN_minussigns);
+            }
+            else
+            {
+                GotFileData = true;
+            }
+        }
+    }
+    else
+    {
+        logcon (String (F ("SD file: '")) + FileName + String (F ("' not found.")));
+    }
+
+    CloseSdFile (FileHandle);
+
+    // DEBUG_END;
+    return GotFileData;
+
+} // ReadSdFile
+
+//-----------------------------------------------------------------------------
 size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t NumBytesToRead, size_t StartingPosition)
 {
     // DEBUG_START;

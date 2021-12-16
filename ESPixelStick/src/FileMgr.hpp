@@ -70,6 +70,7 @@ public:
     size_t ReadSdFile       (const FileId & FileHandle, byte * FileData, size_t NumBytesToRead);
     size_t ReadSdFile       (const FileId & FileHandle, byte * FileData, size_t NumBytesToRead,  size_t StartingPosition);
     bool   ReadSdFile       (const String & FileName,   String & FileData);
+    bool   ReadSdFile       (const String & FileName,   JsonDocument & FileData);
     size_t WriteSdFile      (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite);
     size_t WriteSdFile      (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite, size_t StartingPosition);
     void   CloseSdFile      (const FileId & FileHandle);
