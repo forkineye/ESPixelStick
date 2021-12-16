@@ -1,5 +1,5 @@
 /*
-* OutputRmt.cpp - TM1814 driver code for ESPixelStick RMT Channel
+* OutputRMT.cpp - TM1814 driver code for ESPixelStick RMT Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -23,7 +23,6 @@
 
 #define NumBitsPerByte                            8
 #define MAX_NUM_INTENSITY_BIT_SLOTS_PER_INTERRUPT (sizeof (RMTMEM.chan[0].data32) / sizeof (rmt_item32_t))
-#define NUM_FRAME_START_SLOTS                     6
 
 // forward declaration for the isr handler
 static void IRAM_ATTR rmt_intr_handler (void* param);
@@ -135,19 +134,23 @@ void c_OutputRmt::Begin (rmt_channel_t ChannelId,
 //----------------------------------------------------------------------------
 void IRAM_ATTR c_OutputRmt::ISR_Handler ()
 {
-    register uint32_t int_st = RMT.int_st.val;
+    uint32_t int_st = RMT.int_st.val;
 
     do // once
     {
+#ifdef USE_RMT_DEBUG_COUNTERS
         if (!(int_st & (RMT_INT_TX_END_BIT | RMT_INT_RX_END | RMT_INT_ERROR | RMT_INT_THR_EVNT)))
         {
             IsrIsNotForUs++;
-            break;
+//            break;
         }
+#endif // def USE_RMT_DEBUG_COUNTERS
 
-        if (RMT.int_st.val & RMT_INT_THR_EVNT_BIT)
+        if (int_st & RMT_INT_THR_EVNT_BIT)
         {
+#ifdef USE_RMT_DEBUG_COUNTERS
             DataISRcounter++;
+#endif // def USE_RMT_DEBUG_COUNTERS
 
             // RMT.int_ena.val &= ~RMT_INT_THR_EVNT (RmtChannelId);
             RMT.int_clr.val = RMT_INT_THR_EVNT_BIT;
@@ -158,6 +161,9 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler ()
             }
             else
             {
+#ifdef USE_RMT_DEBUG_COUNTERS
+                FrameThresholdCounter++;
+#endif // def USE_RMT_DEBUG_COUNTERS
                 RMT.int_ena.val &= ~RMT_INT_THR_EVNT_BIT;
             }
             break;
@@ -165,18 +171,23 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler ()
 
         if (int_st & RMT_INT_TX_END_BIT)
         {
+#ifdef USE_RMT_DEBUG_COUNTERS
             FrameEndISRcounter++;
+#endif // def USE_RMT_DEBUG_COUNTERS
 
-            RMT.int_clr.val = RMT_INT_TX_END_BIT;
-            RMT.int_clr.val = RMT_INT_THR_EVNT_BIT;
+            RMT.conf_ch[RmtChannelId].conf1.tx_start = 0;
 
             RMT.int_ena.val &= ~RMT_INT_TX_END_BIT;
             RMT.int_ena.val &= ~RMT_INT_THR_EVNT_BIT;
+
+            RMT.int_clr.val = RMT_INT_TX_END_BIT;
+            RMT.int_clr.val = RMT_INT_THR_EVNT_BIT;
 
             // ISR_Handler_StartNewFrame ();
             break;
         }
 
+#ifdef USE_RMT_DEBUG_COUNTERS
         if (int_st & RMT_INT_ERROR_BIT)
         {
             ErrorIsr++;
@@ -186,52 +197,73 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler ()
         {
             RxIsr++;
         }
+#endif // def USE_RMT_DEBUG_COUNTERS
 
     } while (false);
-
 
 } // ISR_Handler
 
 //----------------------------------------------------------------------------
 void IRAM_ATTR c_OutputRmt::ISR_Handler_StartNewFrame ()
 {
+#ifdef USE_RMT_DEBUG_COUNTERS
     FrameStartCounter++;
+#endif // def USE_RMT_DEBUG_COUNTERS
 
-    RMT.conf_ch[RmtChannelId].conf1.mem_rd_rst = 1; // set the internal pointer to the start of the mem block
+    // Stop the transmitter
+    RMT.conf_ch[RmtChannelId].conf1.tx_start = 0;
+
+    // reset the internal ans external pointers to the start of the mem block
+    RMT.conf_ch[RmtChannelId].conf1.mem_rd_rst = 1;
     RMT.conf_ch[RmtChannelId].conf1.mem_rd_rst = 0;
-
     uint32_t* pMem = (uint32_t*)RmtStartAddr;
 
     // Need to build up a backlog of entries in the buffer
     // so that there is still plenty of data to send when the isr fires.
-    // This is reflected in the constant: NUM_FRAME_START_SLOTS
     NumIdleBitsCount = 0;
-    while (NumIdleBitsCount++ < NumIdleBits)
+    while (NumIdleBitsCount < NumIdleBits)
     {
         *pMem++ = Rgb2Rmt[RmtFrameType_t::RMT_INTERFRAME_GAP_ID].val;
+        NumIdleBitsCount++;
     }
 
     NumStartBitsCount = 0;
-    if (NumStartBits++ < NumStartBits)
+    if (NumStartBitsCount < NumStartBits)
     {
-        *pMem++ = Rgb2Rmt[RmtFrameType_t::RMT_STARTBIT_ID].val;       // Start bit
+        *pMem++ = Rgb2Rmt[RmtFrameType_t::RMT_STARTBIT_ID].val;
+        NumStartBitsCount++;
     }
     RmtCurrentAddr = (volatile rmt_item32_t*)pMem;
 
     RMT.int_clr.val  = RMT_INT_THR_EVNT_BIT;
     RMT.int_ena.val |= RMT_INT_THR_EVNT_BIT;
 
+#ifdef USE_RMT_DEBUG_COUNTERS
+    IntensityBytesSentLastFrame = IntensityBytesSent;
+    IntensityBytesSent = 0;
+#endif // def USE_RMT_DEBUG_COUNTERS
+
+    // set up to send a new frame
     OutputPixel->StartNewFrame ();
+
+    // override the buffer limits so that we fill as many slots as we can in the first pass
     uint8_t SavedNumIntensityValuesPerInterrupt = NumIntensityValuesPerInterrupt;
-    NumIntensityValuesPerInterrupt = ( (MAX_NUM_INTENSITY_BIT_SLOTS_PER_INTERRUPT / NumBitsPerByte) - 1);
+    uint8_t NumBitsAlreadyInBuffer = NumIdleBitsCount + NumStartBits;
+    NumIntensityValuesPerInterrupt = (((MAX_NUM_INTENSITY_BIT_SLOTS_PER_INTERRUPT - NumBitsAlreadyInBuffer) - 1) / NumBitsPerByte);
+    
     ISR_Handler_SendIntensityData ();
+
+    // restore the buffer size to what the ISR can process
     NumIntensityValuesPerInterrupt = SavedNumIntensityValuesPerInterrupt;
 
+    // RMT.tx_lim_ch[0].limit = NumIntensityBitsPerInterrupt;
     RMT.tx_lim_ch[RmtChannelId].limit = NumIntensityBitsPerInterrupt;
 
+    LastFrameStartTime = micros ();
+
+    RMT.conf_ch[RmtChannelId].conf1.tx_start = 1;
     RMT.int_clr.val  = RMT_INT_TX_END_BIT;
     RMT.int_ena.val |= RMT_INT_TX_END_BIT;
-    RMT.conf_ch[RmtChannelId].conf1.tx_start = 1;
 
 } // ISR_Handler_StartNewFrame
 
@@ -239,18 +271,21 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_StartNewFrame ()
 void IRAM_ATTR c_OutputRmt::ISR_Handler_SendIntensityData ()
 {
     uint32_t* pMem = (uint32_t*)RmtCurrentAddr;
-    register uint32_t OneValue  = Rgb2Rmt[RmtFrameType_t::RMT_DATA_BIT_ONE_ID].val;
-    register uint32_t ZeroValue = Rgb2Rmt[RmtFrameType_t::RMT_DATA_BIT_ZERO_ID].val;
+    register uint32_t OneBitValue   = Rgb2Rmt[RmtFrameType_t::RMT_DATA_BIT_ONE_ID].val;
+    register uint32_t ZeroBitValue  = Rgb2Rmt[RmtFrameType_t::RMT_DATA_BIT_ZERO_ID].val;
     uint32_t NumEmptyIntensitySlots = NumIntensityValuesPerInterrupt;
 
     while ( (NumEmptyIntensitySlots--) && (OutputPixel->MoreDataToSend ()))
     {
         uint8_t IntensityValue = OutputPixel->GetNextIntensityToSend ();
+#ifdef USE_RMT_DEBUG_COUNTERS
+        IntensityBytesSent++;
+#endif // def USE_RMT_DEBUG_COUNTERS
 
         // convert the intensity data into RMT data
         for (uint8_t bitmask = 0x80; 0 != bitmask; bitmask >>= 1)
         {
-            *pMem++ = (IntensityValue & bitmask) ? OneValue : ZeroValue;
+            *pMem++ = (IntensityValue & bitmask) ? OneBitValue : ZeroBitValue;
             if (pMem > (uint32_t*)RmtEndAddr)
             {
                 pMem = (uint32_t*)RmtStartAddr;
@@ -271,11 +306,31 @@ bool c_OutputRmt::Render ()
     bool Response = false;
     // DEBUG_START;
 
-    if (NoFrameInProgress())
+    do // once
     {
+        if (!NoFrameInProgress ())
+        {
+            break;
+        }
+
+        if ((micros () - LastFrameStartTime) < (FrameMinDurationInMicroSec + 10))
+        {
+            break;
+        }
+
+#ifdef USE_RMT_DEBUG_COUNTERS
+        if (OutputPixel->MoreDataToSend ())
+        {
+            // DEBUG_V ("ERROR: Starting a new frame before the previous frame was completly sent");
+            IncompleteFrame++;
+        }
+#endif // def USE_RMT_DEBUG_COUNTERS
+
         ISR_Handler_StartNewFrame ();
+
         Response = true;
-    }
+
+    } while (false);
 
     // DEBUG_END;
 
@@ -286,17 +341,25 @@ bool c_OutputRmt::Render ()
 //----------------------------------------------------------------------------
 void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
-    jsonStatus["    DataISRcounter: "] = DataISRcounter;
-    jsonStatus["FrameEndISRcounter: "] = FrameEndISRcounter;
-    jsonStatus[" FrameStartCounter: "] = FrameStartCounter;
-    jsonStatus["          ErrorIsr: "] = ErrorIsr;
-    jsonStatus["             RxIsr: "] = RxIsr;
-    jsonStatus["     IsrIsNotForUs: "] = IsrIsNotForUs;
-
-    jsonStatus["       Raw int_ena: 0x"] = String (RMT.int_ena.val, HEX);
-    jsonStatus["           int_ena: 0x"] = String (RMT.int_ena.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
-    jsonStatus["            int_st: 0x"] = String (RMT.int_st.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
-    jsonStatus["        Raw int_st: 0x"] = String (RMT.int_st.val, HEX);
+#ifdef USE_RMT_DEBUG_COUNTERS
+    jsonStatus["RmtChannelId"]                = RmtChannelId;
+    jsonStatus["DataISRcounter"]              = DataISRcounter;
+    jsonStatus["FrameEndISRcounter"]          = FrameEndISRcounter;
+    jsonStatus["FrameStartCounter"]           = FrameStartCounter;
+    jsonStatus["ErrorIsr"]                    = ErrorIsr;
+    jsonStatus["RxIsr"]                       = RxIsr;
+    jsonStatus["FrameThresholdCounter"]       = FrameThresholdCounter;
+    jsonStatus["IsrIsNotForUs"]               = IsrIsNotForUs;
+    jsonStatus["IncompleteFrame"]             = IncompleteFrame;
+    jsonStatus["Raw int_ena"]                 = String (RMT.int_ena.val, HEX);
+    jsonStatus["int_ena"]                     = String (RMT.int_ena.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
+    jsonStatus["RMT_INT_TX_END_BIT"]          = String (RMT_INT_TX_END_BIT, HEX);
+    jsonStatus["RMT_INT_THR_EVNT_BIT"]        = String (RMT_INT_THR_EVNT_BIT, HEX);
+    jsonStatus["Raw int_st"]                  = String (RMT.int_st.val, HEX);
+    jsonStatus["int_st"]                      = String (RMT.int_st.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
+    jsonStatus["IntensityBytesSent"]          = IntensityBytesSent;
+    jsonStatus["IntensityBytesSentLastFrame"] = IntensityBytesSentLastFrame;
+#endif // def USE_RMT_DEBUG_COUNTERS
 
 } // GetStatus
 

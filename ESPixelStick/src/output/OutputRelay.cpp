@@ -42,10 +42,11 @@ GNU General Public License for more details.
 #define Relay_DEFAULT_GPIO_ID        ((gpio_num_t)0)
 #define RelayPwmHigh                 255
 #define RelayPwmLow                  0
+
 #if defined(ARDUINO_ARCH_ESP32)
-#define RelayPwmFrequency            , 12000
+#   define RelayPwmFrequency         , 12000
 #else
-#define RelayPwmFrequency
+#   define RelayPwmFrequency
 #endif // defined(ARDUINO_ARCH_ESP32)
 
 static const c_OutputRelay::RelayChannel_t RelayChannelDefaultSettings[] =

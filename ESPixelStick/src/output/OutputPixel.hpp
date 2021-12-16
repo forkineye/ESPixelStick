@@ -88,6 +88,10 @@ private:
     uint16_t    PixelGroupSize = 1;
     uint16_t    PixelGroupSizeCurrentCount = 0;
 
+    float       IntensityBitTimeInUs = 0.0;
+    uint16_t    BlockSize = 1;
+    float       BlockDelayUs = 0.0;
+
     uint16_t    zig_size = 0;
     uint16_t    ZigPixelCount = 1;
     uint16_t    ZigPixelCurrentCount = 1;
@@ -101,6 +105,15 @@ private:
     uint16_t    AppendNullPixelCurrentCount = 0;
 
     uint8_t     InvertData = false;
+
+// #define USE_PIXEL_DEBUG_COUNTERS
+#ifdef USE_PIXEL_DEBUG_COUNTERS
+    uint16_t   PixelsToSend = 0;
+    uint16_t   IntensityBytesSent = 0;
+    uint16_t   IntensityBytesSentLastFrame = 0;
+    uint16_t   SentPixels = 0;
+    uint32_t   AbortFrameCounter = 0;
+#endif // def USE_PIXEL_DEBUG_COUNTERS
 
     typedef union ColorOffsets_s
     {

@@ -56,14 +56,23 @@ private:
     intr_handle_t RMT_intr_handle = NULL;
     uint8_t NumIntensityValuesPerInterrupt = 0;
     uint8_t NumIntensityBitsPerInterrupt = 0;
+    uint32_t LastFrameStartTime = 0;
+    uint32_t FrameMinDurationInMicroSec = 1000;
 
+// #define USE_RMT_DEBUG_COUNTERS
+#ifdef USE_RMT_DEBUG_COUNTERS
     // debug counters
     uint32_t DataISRcounter = 0;
+    uint32_t FrameThresholdCounter = 0;
     uint32_t FrameEndISRcounter = 0;
     uint32_t FrameStartCounter = 0;
     uint32_t RxIsr = 0;
     uint32_t ErrorIsr = 0;
     uint32_t IsrIsNotForUs = 0;
+    uint16_t IntensityBytesSent = 0;
+    uint16_t IntensityBytesSentLastFrame = 0;
+    uint32_t IncompleteFrame = 0;
+#endif // def USE_RMT_DEBUG_COUNTERS
 
 public:
     c_OutputRmt ();
@@ -77,6 +86,7 @@ public:
     void SetNumIdleBits  (uint8_t Value)  { NumIdleBits  = Value; }
     void SetNumStartBits (uint8_t Value)  { NumStartBits = Value; }
     void SetNumStopBits  (uint8_t Value)  { NumStopBits  = Value; }
+    void SetMinFrameDurationInUs (uint32_t value) { FrameMinDurationInMicroSec = value; }
 
 #define RMT_ClockRate       80000000.0
 #define RMT_Clock_Divisor   2.0

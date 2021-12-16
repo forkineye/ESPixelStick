@@ -478,7 +478,7 @@ void fsm_PlayFile_state_Stopping::Init (c_InputFPPRemotePlayFile* Parent)
     p_Parent = Parent;
     Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_Stopping_imp);
 
-    p_Parent->SyncControl.LastRcvdElapsedSeconds;
+    p_Parent->SyncControl.LastRcvdElapsedSeconds = 0;
     p_Parent->FrameControl.ElapsedPlayTimeMS = 0;
 
     // DEBUG_END;

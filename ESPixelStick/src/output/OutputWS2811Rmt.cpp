@@ -26,7 +26,7 @@
 #define WS2811_PIXEL_RMT_TICKS_BIT_0_LOW     uint16_t ( (WS2811_PIXEL_NS_BIT_0_LOW  / RMT_TickLengthNS) + 0.0)
 #define WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH    uint16_t ( (WS2811_PIXEL_NS_BIT_1_HIGH / RMT_TickLengthNS) - 1.0)
 #define WS2811_PIXEL_RMT_TICKS_BIT_1_LOW     uint16_t ( (WS2811_PIXEL_NS_BIT_1_LOW  / RMT_TickLengthNS) + 1.0)
-#define WS2811_PIXEL_RMT_TICKS_IDLE          uint16_t ( (WS2811_PIXEL_IDLE_TIME_NS       / RMT_TickLengthNS) + 1.0)
+#define WS2811_PIXEL_RMT_TICKS_IDLE          uint16_t ( (WS2811_PIXEL_IDLE_TIME_NS  / RMT_TickLengthNS) + 1.0)
 
 //----------------------------------------------------------------------------
 c_OutputWS2811Rmt::c_OutputWS2811Rmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
@@ -115,13 +115,16 @@ bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     // Default is 100us * 3
     rmt_item32_t BitValue;
-    BitValue.duration0 = ifgTicks / 10;
+    // by default there are 6 rmt_item32_t instances replicated for the start of a frame.
+    // 6 instances times 2 time periods per instance = 12
+    BitValue.duration0 = ifgTicks / 12;
     BitValue.level0 = 0;
-    BitValue.duration1 = ifgTicks / 10;
+    BitValue.duration1 = ifgTicks / 12;
     BitValue.level1 = 0;
     Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_INTERFRAME_GAP_ID);
 
     Rmt.set_pin (DataPin);
+    Rmt.SetMinFrameDurationInUs (FrameMinDurationInMicroSec);
 
     // DEBUG_END;
     return response;
@@ -129,10 +132,23 @@ bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // SetConfig
 
 //----------------------------------------------------------------------------
+void c_OutputWS2811Rmt::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+{
+    // DEBUG_START;
+
+    c_OutputWS2811::SetOutputBufferSize (NumChannelsAvailable);
+    Rmt.SetMinFrameDurationInUs (FrameMinDurationInMicroSec);
+
+    // DEBUG_END;
+
+} // SetBufferSize
+
+//----------------------------------------------------------------------------
 void c_OutputWS2811Rmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     c_OutputWS2811::GetStatus (jsonStatus);
-    // Rmt.GetStatus (jsonStatus);
+    Rmt.GetStatus (jsonStatus);
+
 } // GetStatus
 
 //----------------------------------------------------------------------------
