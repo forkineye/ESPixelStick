@@ -95,6 +95,7 @@ private:
 protected:
     friend class fsm_WiFi_state_Boot;
     friend class fsm_WiFi_state_ConnectingUsingConfig;
+    friend class fsm_WiFi_state_ConnectingUsingSdConfig;
     friend class fsm_WiFi_state_ConnectingUsingDefaults;
     friend class fsm_WiFi_state_ConnectedToAP;
     friend class fsm_WiFi_state_ConnectingAsAP;
@@ -136,6 +137,18 @@ public:
     virtual void OnDisconnect (void) {}
 
 }; // fsm_WiFi_state_ConnectingUsingConfig
+
+/*****************************************************************************/
+class fsm_WiFi_state_ConnectingUsingSdConfig : public fsm_WiFi_state
+{
+public:
+    virtual void Poll (void);
+    virtual void Init (void);
+    virtual void GetStateName (String& sName) { sName = F ("Connecting Using SD Config Credentials"); }
+    virtual void OnConnect (void);
+    virtual void OnDisconnect (void) {}
+
+}; // fsm_WiFi_state_ConnectingUsingSdConfig
 
 /*****************************************************************************/
 class fsm_WiFi_state_ConnectingUsingDefaults : public fsm_WiFi_state

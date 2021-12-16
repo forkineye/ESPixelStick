@@ -44,6 +44,9 @@
 const String ssid       = SECRETS_SSID;
 const String passphrase = SECRETS_PASS;
 
+// WiFi configuration from SD card
+config_t sdConfig;
+
 /// Radio configuration
 /** ESP8266 radio configuration routines that are executed at startup. */
 /* Disabled for now, possible flash wear issue. Need to research further
@@ -63,6 +66,7 @@ RF_PRE_INIT() {
 /*****************************************************************************/
 fsm_WiFi_state_Boot                    fsm_WiFi_state_Boot_imp;
 fsm_WiFi_state_ConnectingUsingConfig   fsm_WiFi_state_ConnectingUsingConfig_imp;
+fsm_WiFi_state_ConnectingUsingSdConfig fsm_WiFi_state_ConnectingUsingSdConfig_imp;
 fsm_WiFi_state_ConnectingUsingDefaults fsm_WiFi_state_ConnectingDefault_imp;
 fsm_WiFi_state_ConnectedToAP           fsm_WiFi_state_ConnectedToAP_imp;
 fsm_WiFi_state_ConnectingAsAP          fsm_WiFi_state_ConnectingAsAP_imp;
@@ -95,6 +99,25 @@ void c_WiFiMgr::Begin (config_t* NewConfig)
 
     // save the pointer to the config
     config = NewConfig;
+
+    if (FileMgr.SdCardIsInstalled())
+    {
+        DynamicJsonDocument jsonConfigDoc(1024);
+        // DEBUG_V ("read the sdcard config");
+        if (FileMgr.ReadSdFile ("wificonfig.json", jsonConfigDoc))
+        {
+            // DEBUG_V ("Process the sdcard config");
+            JsonObject jsonConfig = jsonConfigDoc.as<JsonObject> ();
+
+            // copy the fields of interest into the local structure
+            setFromJSON (sdConfig.ssid,       jsonConfig, CN_ssid);
+            setFromJSON (sdConfig.passphrase, jsonConfig, CN_passphrase);
+        }
+        else
+        {
+            // DEBUG_V ("ERROR: Could not read SD card config");
+        }
+    }
 
     // Disable persistant credential storage and configure SDK params
     WiFi.persistent (false);
@@ -433,7 +456,7 @@ void fsm_WiFi_state_ConnectingUsingConfig::Poll ()
         if (CurrentTimeMS - WiFiMgr.GetFsmStartTime() > (1000 * WiFiMgr.GetConfigPtr()->sta_timeout))
         {
             logcon (F ("WiFi Failed to connect using Configured Credentials"));
-            fsm_WiFi_state_ConnectingDefault_imp.Init ();
+            fsm_WiFi_state_ConnectingUsingSdConfig_imp.Init ();
         }
     }
 
@@ -448,7 +471,7 @@ void fsm_WiFi_state_ConnectingUsingConfig::Init ()
 
     if ((0 == config.ssid.length ()) || (String("null") == config.ssid))
     {
-        fsm_WiFi_state_ConnectingDefault_imp.Init ();
+        fsm_WiFi_state_ConnectingUsingSdConfig_imp.Init ();
     }
     else
     {
@@ -474,6 +497,63 @@ void fsm_WiFi_state_ConnectingUsingConfig::OnConnect ()
     // DEBUG_END;
 
 } // fsm_WiFi_state_ConnectingUsingConfig::OnConnect
+
+/*****************************************************************************/
+/*****************************************************************************/
+// Wait for events
+void fsm_WiFi_state_ConnectingUsingSdConfig::Poll ()
+{
+    // DEBUG_START;
+
+    // wait for the connection to complete via the callback function
+    uint32_t CurrentTimeMS = millis ();
+
+    if (WiFi.status () != WL_CONNECTED)
+    {
+        if (CurrentTimeMS - WiFiMgr.GetFsmStartTime () > (1000 * WiFiMgr.GetConfigPtr ()->sta_timeout))
+        {
+            logcon (F ("WiFi Failed to connect using SD Configured Credentials"));
+            fsm_WiFi_state_ConnectingDefault_imp.Init ();
+        }
+    }
+
+    // DEBUG_END;
+} // fsm_WiFi_state_ConnectingUsingSdConfig::Poll
+
+/*****************************************************************************/
+// Wait for events
+void fsm_WiFi_state_ConnectingUsingSdConfig::Init ()
+{
+    // DEBUG_START;
+
+    if ((0 == sdConfig.ssid.length ()) || (String ("null") == sdConfig.ssid))
+    {
+        fsm_WiFi_state_ConnectingDefault_imp.Init ();
+    }
+    else
+    {
+        WiFiMgr.SetFsmState (this);
+        WiFiMgr.AnnounceState ();
+        WiFiMgr.SetFsmStartTime (millis ());
+
+        WiFiMgr.connectWifi (sdConfig.ssid, sdConfig.passphrase);
+    }
+
+    // DEBUG_END;
+
+} // fsm_WiFi_state_ConnectingUsingSdConfig::Init
+
+/*****************************************************************************/
+// Wait for events
+void fsm_WiFi_state_ConnectingUsingSdConfig::OnConnect ()
+{
+    // DEBUG_START;
+
+    fsm_WiFi_state_ConnectedToAP_imp.Init ();
+
+    // DEBUG_END;
+
+} // fsm_WiFi_state_ConnectingUsingSdConfig::OnConnect
 
 /*****************************************************************************/
 /*****************************************************************************/
