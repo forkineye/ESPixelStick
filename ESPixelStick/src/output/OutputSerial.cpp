@@ -317,13 +317,13 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
             // is there anything to send?
             if (0 == RemainingDataCount)
             {
-                // at this point the FIFO has at least 40 free bytes. 10 byte header should fit
+                // at this point the FIFO has at least 40 free bytes. 10 byte Footer should fit
                 // are we in generic serial mode?
                 if (OutputType == c_OutputMgr::e_OutputType::OutputType_Serial)
                 {
-                    for (size_t HeaderIndex = 0; HeaderIndex < LengthGenericSerialFooter; HeaderIndex++)
+                    for (size_t FooterIndex = 0; FooterIndex < LengthGenericSerialFooter; FooterIndex++)
                     {
-                        enqueue (pGenericSerialFooter[HeaderIndex]);
+                        enqueue (pGenericSerialFooter[FooterIndex]);
                     }
                 } // need to send the footer
 
@@ -379,6 +379,7 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
 void c_OutputSerial::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     c_OutputCommon::GetStatus (jsonStatus);
+#ifdef USE_DMX_STATS
     uint32_t conf0       = READ_PERI_REG (UART_CONF0 (UartId));
     uint32_t conf1       = READ_PERI_REG (UART_CONF1 (UartId));
     uint32_t intena      = READ_PERI_REG (UART_INT_ENA (UartId));
@@ -396,6 +397,9 @@ void c_OutputSerial::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     jsonStatus["intena"]             = String(uint32_t (intena), HEX);
     jsonStatus["UartIntRaw"]         = String (intRaw, HEX);
     jsonStatus["UartStatus"]         = String (UartStatus, HEX);
+    jsonStatus["TruncateFrameError"] = String (TruncateFrameError);
+    
+#endif // def USE_DMX_STATS
 
 } // GetStatus
 
@@ -440,8 +444,15 @@ void c_OutputSerial::Render ()
         return;
     }
 
-//    delayMicroseconds (1000000);
-//    DEBUG_V ("4");
+#ifdef USE_DMX_STATS
+    if (RemainingDataCount)
+    {
+        TruncateFrameError++;
+    }
+#endif // def USE_DMX_STATS
+
+    // delayMicroseconds (1000000);
+    // DEBUG_V ("4");
 
     // start the next frame
     switch (OutputType)
