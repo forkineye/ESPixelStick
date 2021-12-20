@@ -45,8 +45,8 @@ public:
     c_WiFiMgr ();
     virtual ~c_WiFiMgr ();
 
-    void      Begin           (config_t* NewConfig); ///< set up the operating environment based on the current config (or defaults)
-    int       ValidateConfig  (config_t * NewConfig);
+    void      Begin           (); ///< set up the operating environment based on the current config (or defaults)
+    int       ValidateConfig  ();
     IPAddress getIpAddress    () { return CurrentIpAddress; }
     void      setIpAddress    (IPAddress NewAddress ) { CurrentIpAddress = NewAddress; }
     IPAddress getIpSubNetMask () { return CurrentSubnetMask; }
@@ -60,7 +60,7 @@ public:
     void      AnnounceState   ();
     void      SetFsmStartTime (uint32_t NewStartTime)    { FsmTimerWiFiStartTime = NewStartTime; }
     uint32_t  GetFsmStartTime (void)                     { return FsmTimerWiFiStartTime; }
-    config_t* GetConfigPtr    () { return config; }
+    // config_t* GetConfigPtr    () { return config; }
     bool      IsWiFiConnected () { return ReportedIsWiFiConnected; }
     void      SetIsWiFiConnected (bool value) { ReportedIsWiFiConnected = value; }
     void      GetDriverName   (String & Name) { Name = "WiFiMgr"; }
@@ -73,7 +73,7 @@ private:
     WiFiEventHandler    wifiConnectHandler;     // WiFi connect handler
     WiFiEventHandler    wifiDisconnectHandler;  // WiFi disconnect handler
 #endif
-    config_t           *config = nullptr;                           // Current configuration
+    // config_t           *config = nullptr;                           // Current configuration
     IPAddress           CurrentIpAddress  = IPAddress (0, 0, 0, 0);
     IPAddress           CurrentSubnetMask = IPAddress (0, 0, 0, 0);
     time_t              NextPollTime = 0;

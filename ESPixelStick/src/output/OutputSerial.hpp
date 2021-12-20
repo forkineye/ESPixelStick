@@ -96,7 +96,12 @@ private:
     // non config data
     volatile uint16_t        RemainingDataCount;
     volatile uint8_t       * pNextChannelToSend;
-    String          OutputName;
+    String                   OutputName;
+
+#define USE_DMX_STATS
+#ifdef USE_DMX_STATS
+    uint32_t TruncateFrameError = 0;
+#endif // def USE_DMX_STATS
 
 #ifdef ARDUINO_ARCH_ESP8266
     /* Returns number of bytes waiting in the TX FIFO of UART1 */

@@ -160,7 +160,7 @@ void setup()
     InputMgr.Begin (OutputMgr.GetBufferAddress (), OutputMgr.GetBufferUsedSize ());
 
     // Wifi will be reset in the main loop since we just booted and de-serialized the config
-    WiFiMgr.Begin (& config);
+    WiFiMgr.Begin ();
     // DEBUG_V ("");
 
     // Configure and start the web server
@@ -216,7 +216,7 @@ bool validateConfig()
         // DEBUG_V ();
     }
 
-    WiFiMgr.ValidateConfig (&config);
+    WiFiMgr.ValidateConfig ();
 
     return configValid;
 

@@ -40,7 +40,7 @@
 #   define SECRETS_PASS "DEFAULT_PASSPHRASE_NOT_SET"
 #endif // ndef SECRETS_SSID
 
-/* Fallback configuration if config->json is empty or fails */
+/* Fallback configuration if config.json is empty or fails */
 const String ssid       = SECRETS_SSID;
 const String passphrase = SECRETS_PASS;
 
@@ -63,7 +63,7 @@ RF_PRE_INIT() {
 /*****************************************************************************/
 fsm_WiFi_state_Boot                    fsm_WiFi_state_Boot_imp;
 fsm_WiFi_state_ConnectingUsingConfig   fsm_WiFi_state_ConnectingUsingConfig_imp;
-fsm_WiFi_state_ConnectingUsingDefaults fsm_WiFi_state_ConnectingDefault_imp;
+fsm_WiFi_state_ConnectingUsingDefaults fsm_WiFi_state_ConnectingUsingDefaults_imp;
 fsm_WiFi_state_ConnectedToAP           fsm_WiFi_state_ConnectedToAP_imp;
 fsm_WiFi_state_ConnectingAsAP          fsm_WiFi_state_ConnectingAsAP_imp;
 fsm_WiFi_state_ConnectedToSta          fsm_WiFi_state_ConnectedToSta_imp;
@@ -89,12 +89,35 @@ c_WiFiMgr::~c_WiFiMgr()
 
 //-----------------------------------------------------------------------------
 ///< Start the module
-void c_WiFiMgr::Begin (config_t* NewConfig)
+void c_WiFiMgr::Begin ()
 {
     // DEBUG_START;
 
     // save the pointer to the config
-    config = NewConfig;
+    // config = NewConfig;
+
+    if (FileMgr.SdCardIsInstalled())
+    {
+        DynamicJsonDocument jsonConfigDoc(1024);
+        // DEBUG_V ("read the sdcard config");
+        if (FileMgr.ReadSdFile (F("wificonfig.json"), jsonConfigDoc))
+        {
+            // DEBUG_V ("Process the sdcard config");
+            JsonObject jsonConfig = jsonConfigDoc.as<JsonObject> ();
+
+            // copy the fields of interest into the local structure
+            setFromJSON (config.ssid,       jsonConfig, CN_ssid);
+            setFromJSON (config.passphrase, jsonConfig, CN_passphrase);
+
+            ConfigSaveNeeded = true;
+
+            FileMgr.DeleteSdFile (F ("wificonfig.json"));
+        }
+        else
+        {
+            // DEBUG_V ("ERROR: Could not read SD card config");
+        }
+    }
 
     // Disable persistant credential storage and configure SDK params
     WiFi.persistent (false);
@@ -173,22 +196,22 @@ void c_WiFiMgr::connectWifi (const String & ssid, const String & passphrase)
     WiFi.mode (WIFI_STA);
     // DEBUG_V ("");
 
-    // DEBUG_V (String ("config->hostname: ") + config->hostname);
-    if (0 != config->hostname.length ())
+    // DEBUG_V (String ("config.hostname: ") + config.hostname);
+    if (0 != config.hostname.length ())
     {
-        // DEBUG_V (String ("Setting WiFi hostname: ") + config->hostname);
-        WiFi.hostname (config->hostname);
+        // DEBUG_V (String ("Setting WiFi hostname: ") + config.hostname);
+        WiFi.hostname (config.hostname);
     }
 #else
     WiFi.persistent (false);
     // DEBUG_V ("");
     WiFi.disconnect (true);
 
-    // DEBUG_V (String ("config->hostname: ") + config->hostname);
-    if (0 != config->hostname.length ())
+    // DEBUG_V (String ("config.hostname: ") + config.hostname);
+    if (0 != config.hostname.length ())
     {
-        // DEBUG_V (String ("Setting WiFi hostname: ") + config->hostname);
-        WiFi.hostname (config->hostname);
+        // DEBUG_V (String ("Setting WiFi hostname: ") + config.hostname);
+        WiFi.hostname (config.hostname);
     }
 
     // Switch to station mode
@@ -199,7 +222,7 @@ void c_WiFiMgr::connectWifi (const String & ssid, const String & passphrase)
     logcon (String(F ("Connecting to '")) +
                       ssid +
                       String (F ("' as ")) +
-                      config->hostname);
+                      config.hostname);
 
     WiFi.begin (ssid.c_str (), passphrase.c_str ());
 
@@ -233,7 +256,7 @@ void c_WiFiMgr::SetUpIp ()
 
     do // once
     {
-        if (true == config->UseDhcp)
+        if (true == config.UseDhcp)
         {
             logcon (F ("Using DHCP"));
             break;
@@ -241,25 +264,25 @@ void c_WiFiMgr::SetUpIp ()
 
         IPAddress temp = (uint32_t)0;
         // DEBUG_V ("   temp: " + temp.toString ());
-        // DEBUG_V ("     ip: " + config->ip.toString());
-        // DEBUG_V ("netmask: " + config->netmask.toString ());
-        // DEBUG_V ("gateway: " + config->gateway.toString ());
+        // DEBUG_V ("     ip: " + config.ip.toString());
+        // DEBUG_V ("netmask: " + config.netmask.toString ());
+        // DEBUG_V ("gateway: " + config.gateway.toString ());
 
-        if (temp == config->ip)
+        if (temp == config.ip)
         {
             logcon (F ("ERROR: STATIC SELECTED WITHOUT IP. Using DHCP assigned address"));
             break;
         }
 
-        if ((config->ip      == WiFi.localIP ())    &&
-            (config->netmask == WiFi.subnetMask ()) &&
-            (config->gateway == WiFi.gatewayIP ()))
+        if ((config.ip      == WiFi.localIP ())    &&
+            (config.netmask == WiFi.subnetMask ()) &&
+            (config.gateway == WiFi.gatewayIP ()))
         {
             // correct IP is already set
             break;
         }
         // We didn't use DNS, so just set it to our configured gateway
-        WiFi.config (config->ip, config->gateway, config->netmask, config->gateway);
+        WiFi.config (config.ip, config.gateway, config.netmask, config.gateway);
 
         logcon (F ("Using Static IP"));
 
@@ -319,36 +342,36 @@ void c_WiFiMgr::onWiFiDisconnect (const WiFiEvent_t event, const WiFiEventInfo_t
 } // onWiFiDisconnect
 
 //-----------------------------------------------------------------------------
-int c_WiFiMgr::ValidateConfig (config_t* NewConfig)
+int c_WiFiMgr::ValidateConfig ()
 {
     // DEBUG_START;
 
     int response = 0;
 
-    if (0 == NewConfig->ssid.length ())
+    if (0 == config.ssid.length ())
     {
-        NewConfig->ssid = ssid;
+        config.ssid = ssid;
         // DEBUG_V ();
         response++;
     }
 
-    if (0 == NewConfig->passphrase.length ())
+    if (0 == config.passphrase.length ())
     {
-        NewConfig->passphrase = passphrase;
+        config.passphrase = passphrase;
         // DEBUG_V ();
         response++;
     }
 
-    if (NewConfig->sta_timeout < 5)
+    if (config.sta_timeout < 5)
     {
-        NewConfig->sta_timeout = CLIENT_TIMEOUT;
+        config.sta_timeout = CLIENT_TIMEOUT;
         // DEBUG_V ();
         response++;
     }
 
-    if (NewConfig->ap_timeout < 15)
+    if (config.ap_timeout < 15)
     {
-        NewConfig->ap_timeout = AP_TIMEOUT;
+        config.ap_timeout = AP_TIMEOUT;
         // DEBUG_V ();
         response++;
     }
@@ -430,10 +453,10 @@ void fsm_WiFi_state_ConnectingUsingConfig::Poll ()
 
     if (WiFi.status () != WL_CONNECTED)
     {
-        if (CurrentTimeMS - WiFiMgr.GetFsmStartTime() > (1000 * WiFiMgr.GetConfigPtr()->sta_timeout))
+        if (CurrentTimeMS - WiFiMgr.GetFsmStartTime() > (1000 * config.sta_timeout))
         {
             logcon (F ("WiFi Failed to connect using Configured Credentials"));
-            fsm_WiFi_state_ConnectingDefault_imp.Init ();
+            fsm_WiFi_state_ConnectingUsingDefaults_imp.Init ();
         }
     }
 
@@ -448,7 +471,7 @@ void fsm_WiFi_state_ConnectingUsingConfig::Init ()
 
     if ((0 == config.ssid.length ()) || (String("null") == config.ssid))
     {
-        fsm_WiFi_state_ConnectingDefault_imp.Init ();
+        fsm_WiFi_state_ConnectingUsingDefaults_imp.Init ();
     }
     else
     {
@@ -487,7 +510,7 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Poll ()
 
     if (WiFi.status () != WL_CONNECTED)
     {
-        if (CurrentTimeMS - WiFiMgr.GetFsmStartTime () > (1000 * WiFiMgr.GetConfigPtr ()->sta_timeout))
+        if (CurrentTimeMS - WiFiMgr.GetFsmStartTime () > (1000 * config.sta_timeout))
         {
             logcon (F ("WiFi Failed to connect using default Credentials"));
             fsm_WiFi_state_ConnectingAsAP_imp.Init ();
@@ -540,7 +563,7 @@ void fsm_WiFi_state_ConnectingAsAP::Poll ()
     }
     else
     {
-        if (millis () - WiFiMgr.GetFsmStartTime () > (1000 * WiFiMgr.GetConfigPtr ()->ap_timeout))
+        if (millis () - WiFiMgr.GetFsmStartTime () > (1000 * config.ap_timeout))
         {
             logcon (F ("WiFi STA Failed to connect"));
             fsm_WiFi_state_ConnectionFailed_imp.Init ();
@@ -559,11 +582,11 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
     WiFiMgr.SetFsmState (this);
     WiFiMgr.AnnounceState ();
 
-    if (true == WiFiMgr.GetConfigPtr ()->ap_fallbackIsEnabled)
+    if (true == config.ap_fallbackIsEnabled)
     {
         WiFi.mode (WIFI_AP);
 
-        String ssid = "ESPixelStick " + String (WiFiMgr.GetConfigPtr ()->hostname);
+        String ssid = "ESPixelStick " + String (config.hostname);
         WiFi.softAP (ssid.c_str ());
 
         WiFiMgr.setIpAddress (WiFi.localIP ());
@@ -717,7 +740,7 @@ void fsm_WiFi_state_ConnectionFailed::Init ()
     }
     else
     {
-        if (true == WiFiMgr.GetConfigPtr ()->RebootOnWiFiFailureToConnect)
+        if (true == config.RebootOnWiFiFailureToConnect)
         {
             extern bool reboot;
             logcon (F ("WiFi Requesting Reboot"));

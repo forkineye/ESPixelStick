@@ -525,6 +525,10 @@ void fsm_PlayFile_state_Error::Poll ()
 {
     // xDEBUG_START;
 
+    p_Parent->FrameControl.ElapsedPlayTimeMS = 0;
+    p_Parent->FrameControl.FrameStepTimeMS = 0;
+    p_Parent->FrameControl.TotalNumberOfFramesInSequence = 0;
+
     // xDEBUG_END;
 
 } // fsm_PlayFile_state_Error::Poll
@@ -533,7 +537,11 @@ void fsm_PlayFile_state_Error::Poll ()
 IRAM_ATTR void fsm_PlayFile_state_Error::TimerPoll ()
 {
     // xDEBUG_START;
-    // nothing to do
+
+    p_Parent->FrameControl.ElapsedPlayTimeMS = 0;
+    p_Parent->FrameControl.FrameStepTimeMS = 0;
+    p_Parent->FrameControl.TotalNumberOfFramesInSequence = 0;
+
     // xDEBUG_END;
 
 } // fsm_PlayFile_state_Error::TimerPoll
@@ -545,6 +553,10 @@ void fsm_PlayFile_state_Error::Init (c_InputFPPRemotePlayFile* Parent)
 
     p_Parent = Parent;
     Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_Error_imp);
+
+    p_Parent->FrameControl.ElapsedPlayTimeMS = 0;
+    p_Parent->FrameControl.FrameStepTimeMS = 0;
+    p_Parent->FrameControl.TotalNumberOfFramesInSequence = 0;
 
     // DEBUG_END;
 

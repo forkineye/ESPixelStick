@@ -126,4 +126,5 @@ bool setFromJSON (T& OutValue, J& Json, N Name)
 }
 
 extern config_t config;
+extern bool ConfigSaveNeeded;
 extern const uint8_t CurrentConfigVersion;
