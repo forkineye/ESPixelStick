@@ -1669,6 +1669,7 @@ function ProcessReceivedJsonStatusMessage(data)
             $('#fppremoteFilePlayerFilename').text(FPPDstatus.current_sequence);
             $('#fppremoteFilePlayerTimeElapsed').text(FPPDstatus.time_elapsed);
             $('#fppremoteFilePlayerTimeRemaining').text(FPPDstatus.time_remaining);
+            $('#fppremotelasterror').text(FPPDstatus.errors);
         }
         else
         {
