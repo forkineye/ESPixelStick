@@ -1,6 +1,6 @@
 #pragma once
 /*
-* WiFiMgr.hpp - Output Management class
+* WebMgr.hpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2021 Shelby Merrick

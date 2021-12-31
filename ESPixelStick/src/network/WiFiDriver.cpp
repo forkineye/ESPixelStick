@@ -1,5 +1,5 @@
 /*
-* WiFiMgr.cpp - Output Management class
+* WiFiDriver.cpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2021 Shelby Merrick
@@ -17,7 +17,7 @@
 *
 */
 
-#include "ESPixelStick.h"
+#include "../ESPixelStick.h"
 
 #ifdef ARDUINO_ARCH_ESP8266
 #   include <eagle_soc.h>
@@ -26,10 +26,9 @@
 #   include <esp_wifi.h>
 #endif // def ARDUINO_ARCH_ESP8266
 
-#include "WiFiMgr.hpp"
-#include "input/InputMgr.hpp"
-#include "WebMgr.hpp"
-#include "service/FPPDiscovery.h"
+#include "WiFiDriver.hpp"
+#include "NetworkMgr.hpp"
+#include "../FileMgr.hpp"
 
 //-----------------------------------------------------------------------------
 // Create secrets.h with a #define for SECRETS_SSID and SECRETS_PASS
@@ -41,8 +40,8 @@
 #endif // ndef SECRETS_SSID
 
 /* Fallback configuration if config.json is empty or fails */
-const String ssid       = SECRETS_SSID;
-const String passphrase = SECRETS_PASS;
+const String default_ssid       = SECRETS_SSID;
+const String default_passphrase = SECRETS_PASS;
 
 /// Radio configuration
 /** ESP8266 radio configuration routines that are executed at startup. */
@@ -71,25 +70,57 @@ fsm_WiFi_state_ConnectionFailed        fsm_WiFi_state_ConnectionFailed_imp;
 
 //-----------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
-c_WiFiMgr::c_WiFiMgr ()
+c_WiFiDriver::c_WiFiDriver ()
 {
+    ssid.clear ();
+    passphrase.clear ();
+    ip = IPAddress ((uint32_t)0);
+    netmask = IPAddress ((uint32_t)0);
+    gateway = IPAddress ((uint32_t)0);
+    UseDhcp = true;
+    ap_fallbackIsEnabled = true;
+    RebootOnWiFiFailureToConnect = true;
+    ap_timeout = AP_TIMEOUT;
+    sta_timeout = CLIENT_TIMEOUT;
+
+    fsm_WiFi_state_Boot_imp.SetParent (this);
+    fsm_WiFi_state_ConnectingUsingConfig_imp.SetParent (this);
+    fsm_WiFi_state_ConnectingUsingDefaults_imp.SetParent (this);
+    fsm_WiFi_state_ConnectedToAP_imp.SetParent (this);
+    fsm_WiFi_state_ConnectingAsAP_imp.SetParent (this);
+    fsm_WiFi_state_ConnectedToSta_imp.SetParent (this);
+    fsm_WiFi_state_ConnectionFailed_imp.SetParent (this);
+
     // this gets called pre-setup so there is nothing we can do here.
     fsm_WiFi_state_Boot_imp.Init ();
-} // c_WiFiMgr
+} // c_WiFiDriver
 
 //-----------------------------------------------------------------------------
 ///< deallocate any resources and put the output channels into a safe state
-c_WiFiMgr::~c_WiFiMgr()
+c_WiFiDriver::~c_WiFiDriver()
 {
  // DEBUG_START;
 
  // DEBUG_END;
 
-} // ~c_WiFiMgr
+} // ~c_WiFiDriver
+
+//-----------------------------------------------------------------------------
+void c_WiFiDriver::AnnounceState ()
+{
+    // DEBUG_START;
+
+    String StateName;
+    pCurrentFsmState->GetStateName (StateName);
+    logcon (String (F ("WiFi Entering State: ")) + StateName);
+
+    // DEBUG_END;
+
+} // AnnounceState
 
 //-----------------------------------------------------------------------------
 ///< Start the module
-void c_WiFiMgr::Begin ()
+void c_WiFiDriver::Begin ()
 {
     // DEBUG_START;
 
@@ -106,8 +137,8 @@ void c_WiFiMgr::Begin ()
             JsonObject jsonConfig = jsonConfigDoc.as<JsonObject> ();
 
             // copy the fields of interest into the local structure
-            setFromJSON (config.ssid,       jsonConfig, CN_ssid);
-            setFromJSON (config.passphrase, jsonConfig, CN_passphrase);
+            setFromJSON (ssid,       jsonConfig, CN_ssid);
+            setFromJSON (passphrase, jsonConfig, CN_passphrase);
 
             ConfigSaveNeeded = true;
 
@@ -158,33 +189,17 @@ void c_WiFiMgr::Begin ()
 } // begin
 
 //-----------------------------------------------------------------------------
-void c_WiFiMgr::GetStatus (JsonObject & jsonStatus)
-{
- // DEBUG_START;
-
-    jsonStatus[CN_rssi]   = WiFi.RSSI ();
-    jsonStatus[CN_ip]     = getIpAddress ().toString ();
-    jsonStatus[CN_subnet] = getIpSubNetMask ().toString ();
-    jsonStatus[CN_mac]    = WiFi.macAddress ();
-#ifdef ARDUINO_ARCH_ESP8266
-    jsonStatus[CN_hostname] = WiFi.hostname ();
-#else
-    jsonStatus[CN_hostname] = WiFi.getHostname ();
-#endif // def ARDUINO_ARCH_ESP8266
-    jsonStatus[CN_ssid]       = WiFi.SSID ();
-
- // DEBUG_END;
-} // GetStatus
-
-//-----------------------------------------------------------------------------
-void c_WiFiMgr::connectWifi (const String & ssid, const String & passphrase)
+void c_WiFiDriver::connectWifi (const String & current_ssid, const String & current_passphrase)
 {
     // DEBUG_START;
 
     // WiFi reset flag is set which will be handled in the next iteration of the main loop.
     // Ignore connect request to lessen boot spam.
     if (ResetWiFi)
+    {
+        // DEBUG_V ("WiFi Reset Requested");
         return;
+    }
 
     SetUpIp ();
 
@@ -218,91 +233,87 @@ void c_WiFiMgr::connectWifi (const String & ssid, const String & passphrase)
     WiFi.mode (WIFI_STA);
     // DEBUG_V ("");
 #endif
+    // DEBUG_V (String ("      ssid: ") + current_ssid);
+    // DEBUG_V (String ("passphrase: ") + current_passphrase);
+    // DEBUG_V (String ("  hostname: ") + config.hostname);
 
     logcon (String(F ("Connecting to '")) +
-                      ssid +
+                      current_ssid +
                       String (F ("' as ")) +
                       config.hostname);
 
-    WiFi.begin (ssid.c_str (), passphrase.c_str ());
+    WiFi.begin (current_ssid.c_str (), current_passphrase.c_str ());
 
     // DEBUG_END;
 } // connectWifi
 
 //-----------------------------------------------------------------------------
-void c_WiFiMgr::reset ()
+void c_WiFiDriver::GetConfig (JsonObject& json)
 {
     // DEBUG_START;
 
-    // The WiFi states announce what they're doing, cleans up boot log a bit.
-    //logcon (F ("WiFi Reset has been requested"));
+    json[CN_ssid] = ssid;
+    json[CN_passphrase] = passphrase;
 
-    // Reset address in case we're switching from static to dhcp
-    WiFi.config (0u, 0u, 0u);
+#ifdef ARDUINO_ARCH_ESP8266
+    IPAddress Temp = ip;
+    json[CN_ip] = Temp.toString ();
+    Temp = netmask;
+    json[CN_netmask] = Temp.toString ();
+    Temp = gateway;
+    json[CN_gateway] = Temp.toString ();
+#else
+    json[CN_ip] = ip.toString ();
+    json[CN_netmask] = netmask.toString ();
+    json[CN_gateway] = gateway.toString ();
+#endif // !def ARDUINO_ARCH_ESP8266
 
-    fsm_WiFi_state_Boot_imp.Init ();
-    if (IsWiFiConnected())
-    {
-        InputMgr.NetworkStateChanged (false);
-    }
+    json[CN_dhcp] = UseDhcp;
+    json[CN_sta_timeout] = sta_timeout;
+    json[CN_ap_fallback] = ap_fallbackIsEnabled;
+    json[CN_ap_timeout] = ap_timeout;
+    json[CN_ap_reboot] = RebootOnWiFiFailureToConnect;
 
     // DEBUG_END;
-} // reset
+
+} // GetConfig
 
 //-----------------------------------------------------------------------------
-void c_WiFiMgr::SetUpIp ()
+void c_WiFiDriver::GetWiFiHostname (String & name)
+{
+#ifdef ARDUINO_ARCH_ESP8266
+    name = WiFi.hostname ();
+#else
+    name = WiFi.getHostname ();
+#endif // def ARDUINO_ARCH_ESP8266
+
+} // GetWiFiHostName
+
+//-----------------------------------------------------------------------------
+void c_WiFiDriver::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    do // once
-    {
-        if (true == config.UseDhcp)
-        {
-            logcon (F ("Using DHCP"));
-            break;
-        }
-
-        IPAddress temp = (uint32_t)0;
-        // DEBUG_V ("   temp: " + temp.toString ());
-        // DEBUG_V ("     ip: " + config.ip.toString());
-        // DEBUG_V ("netmask: " + config.netmask.toString ());
-        // DEBUG_V ("gateway: " + config.gateway.toString ());
-
-        if (temp == config.ip)
-        {
-            logcon (F ("ERROR: STATIC SELECTED WITHOUT IP. Using DHCP assigned address"));
-            break;
-        }
-
-        if ((config.ip      == WiFi.localIP ())    &&
-            (config.netmask == WiFi.subnetMask ()) &&
-            (config.gateway == WiFi.gatewayIP ()))
-        {
-            // correct IP is already set
-            break;
-        }
-        // We didn't use DNS, so just set it to our configured gateway
-        WiFi.config (config.ip, config.gateway, config.netmask, config.gateway);
-
-        logcon (F ("Using Static IP"));
-
-    } while (false);
+    jsonStatus[CN_rssi] = WiFi.RSSI ();
+    jsonStatus[CN_ip] = getIpAddress ().toString ();
+    jsonStatus[CN_subnet] = getIpSubNetMask ().toString ();
+    jsonStatus[CN_mac] = WiFi.macAddress ();
+    jsonStatus[CN_ssid] = WiFi.SSID ();
 
     // DEBUG_END;
-
-} // SetUpIp
+} // GetStatus
 
 //-----------------------------------------------------------------------------
 #ifdef ARDUINO_ARCH_ESP32
 
 //-----------------------------------------------------------------------------
-void c_WiFiMgr::onWiFiStaConn (const WiFiEvent_t event, const WiFiEventInfo_t info)
+void c_WiFiDriver::onWiFiStaConn (const WiFiEvent_t event, const WiFiEventInfo_t info)
 {
     // DEBUG_V ("ESP has associated with the AP");
 } // onWiFiStaConn
 
 //-----------------------------------------------------------------------------
-void c_WiFiMgr::onWiFiStaDisc (const WiFiEvent_t event, const WiFiEventInfo_t info)
+void c_WiFiDriver::onWiFiStaDisc (const WiFiEvent_t event, const WiFiEventInfo_t info)
 {
     // DEBUG_V ("ESP has disconnected from the AP");
 } // onWiFiStaDisc
@@ -311,10 +322,10 @@ void c_WiFiMgr::onWiFiStaDisc (const WiFiEvent_t event, const WiFiEventInfo_t in
 
 //-----------------------------------------------------------------------------
 #ifdef ARDUINO_ARCH_ESP8266
-void c_WiFiMgr::onWiFiConnect (const WiFiEventStationModeGotIP& event)
+void c_WiFiDriver::onWiFiConnect (const WiFiEventStationModeGotIP& event)
 {
 #else
-void c_WiFiMgr::onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t info)
+void c_WiFiDriver::onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t info)
 {
 #endif
     // DEBUG_START;
@@ -327,10 +338,10 @@ void c_WiFiMgr::onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t in
 /// WiFi Disconnect Handler
 #ifdef ARDUINO_ARCH_ESP8266
 /** Attempt to re-connect every 2 seconds */
-void c_WiFiMgr::onWiFiDisconnect (const WiFiEventStationModeDisconnected & event)
+void c_WiFiDriver::onWiFiDisconnect (const WiFiEventStationModeDisconnected & event)
 {
 #else
-void c_WiFiMgr::onWiFiDisconnect (const WiFiEvent_t event, const WiFiEventInfo_t info)
+void c_WiFiDriver::onWiFiDisconnect (const WiFiEvent_t event, const WiFiEventInfo_t info)
 {
 #endif
     // DEBUG_START;
@@ -342,61 +353,7 @@ void c_WiFiMgr::onWiFiDisconnect (const WiFiEvent_t event, const WiFiEventInfo_t
 } // onWiFiDisconnect
 
 //-----------------------------------------------------------------------------
-int c_WiFiMgr::ValidateConfig ()
-{
-    // DEBUG_START;
-
-    int response = 0;
-
-    if (0 == config.ssid.length ())
-    {
-        config.ssid = ssid;
-        // DEBUG_V ();
-        response++;
-    }
-
-    if (0 == config.passphrase.length ())
-    {
-        config.passphrase = passphrase;
-        // DEBUG_V ();
-        response++;
-    }
-
-    if (config.sta_timeout < 5)
-    {
-        config.sta_timeout = CLIENT_TIMEOUT;
-        // DEBUG_V ();
-        response++;
-    }
-
-    if (config.ap_timeout < 15)
-    {
-        config.ap_timeout = AP_TIMEOUT;
-        // DEBUG_V ();
-        response++;
-    }
-
-    // DEBUG_END;
-
-    return response;
-
-} // ValidateConfig
-
-//-----------------------------------------------------------------------------
-void c_WiFiMgr::AnnounceState ()
-{
-    // DEBUG_START;
-
-    String StateName;
-    pCurrentFsmState->GetStateName (StateName);
-    logcon (String (F ("WiFi Entering State: ")) + StateName);
-
-    // DEBUG_END;
-
-} // AnnounceState
-
-//-----------------------------------------------------------------------------
-void c_WiFiMgr::Poll ()
+void c_WiFiDriver::Poll ()
 {
     // DEBUG_START;
 
@@ -407,9 +364,153 @@ void c_WiFiMgr::Poll ()
         pCurrentFsmState->Poll ();
     }
 
+    if (ResetWiFi)
+    {
+        ResetWiFi = false;
+        reset ();
+    }
+
     // DEBUG_END;
 
 } // Poll
+
+//-----------------------------------------------------------------------------
+void c_WiFiDriver::reset ()
+{
+    // DEBUG_START;
+
+    // Reset address in case we're switching from static to dhcp
+    WiFi.config (0u, 0u, 0u);
+
+    if (IsWiFiConnected ())
+    {
+        NetworkMgr.SetWiFiIsConnected (false);
+    }
+
+    fsm_WiFi_state_Boot_imp.Init ();
+
+    // DEBUG_END;
+} // reset
+
+//-----------------------------------------------------------------------------
+bool c_WiFiDriver::SetConfig (JsonObject & json)
+{
+    // DEBUG_START;
+
+    bool ConfigChanged = false;
+
+    String sIp = ip.toString ();
+    String sGateway = gateway.toString ();
+    String sNetmask = netmask.toString ();
+
+    ConfigChanged |= setFromJSON (ssid, json, CN_ssid);
+    ConfigChanged |= setFromJSON (passphrase, json, CN_passphrase);
+    ConfigChanged |= setFromJSON (sIp, json, CN_ip);
+    ConfigChanged |= setFromJSON (sNetmask, json, CN_netmask);
+    ConfigChanged |= setFromJSON (sGateway, json, CN_gateway);
+    ConfigChanged |= setFromJSON (UseDhcp, json, CN_dhcp);
+    ConfigChanged |= setFromJSON (sta_timeout, json, CN_sta_timeout);
+    ConfigChanged |= setFromJSON (ap_fallbackIsEnabled, json, CN_ap_fallback);
+    ConfigChanged |= setFromJSON (ap_timeout, json, CN_ap_timeout);
+    ConfigChanged |= setFromJSON (RebootOnWiFiFailureToConnect, json, CN_ap_reboot);
+
+    // DEBUG_V ("     ip: " + ip);
+    // DEBUG_V ("gateway: " + gateway);
+    // DEBUG_V ("netmask: " + netmask);
+
+    ip.fromString (sIp);
+    gateway.fromString (sGateway);
+    netmask.fromString (sNetmask);
+
+    // DEBUG_V (String("ConfigChanged: ") + String(ConfigChanged));
+    // DEBUG_END;
+    return ConfigChanged;
+
+} // SetConfig
+
+//-----------------------------------------------------------------------------
+void c_WiFiDriver::SetUpIp ()
+{
+    // DEBUG_START;
+
+    do // once
+    {
+        if (true == UseDhcp)
+        {
+            logcon (F ("Using DHCP"));
+            break;
+        }
+
+        IPAddress temp = (uint32_t)0;
+        // DEBUG_V ("   temp: " + temp.toString ());
+        // DEBUG_V ("     ip: " + ip.toString());
+        // DEBUG_V ("netmask: " + netmask.toString ());
+        // DEBUG_V ("gateway: " + gateway.toString ());
+
+        if (temp == ip)
+        {
+            logcon (F ("ERROR: STATIC SELECTED WITHOUT IP. Using DHCP assigned address"));
+            break;
+        }
+
+        if ((ip == WiFi.localIP ()) &&
+            (netmask == WiFi.subnetMask ()) &&
+            (gateway == WiFi.gatewayIP ()))
+        {
+            // correct IP is already set
+            break;
+        }
+        // We didn't use DNS, so just set it to our configured gateway
+        WiFi.config (ip, gateway, netmask, gateway);
+
+        logcon (F ("Using Static IP"));
+
+    } while (false);
+
+    // DEBUG_END;
+
+} // SetUpIp
+
+//-----------------------------------------------------------------------------
+int c_WiFiDriver::ValidateConfig ()
+{
+    // DEBUG_START;
+
+    int response = 0;
+
+    if (0 == ssid.length ())
+    {
+        ssid = ssid;
+        // DEBUG_V ();
+        response++;
+    }
+
+    if (0 == passphrase.length ())
+    {
+        passphrase = passphrase;
+        // DEBUG_V ();
+        response++;
+    }
+
+    if (sta_timeout < 5)
+    {
+        sta_timeout = CLIENT_TIMEOUT;
+        // DEBUG_V ();
+        response++;
+    }
+
+    if (ap_timeout < 15)
+    {
+        ap_timeout = AP_TIMEOUT;
+        // DEBUG_V ();
+        response++;
+    }
+
+    // DEBUG_END;
+
+    return response;
+
+} // ValidateConfig
 
 /*****************************************************************************/
 //  FSM Code
@@ -432,11 +533,11 @@ void fsm_WiFi_state_Boot::Init ()
 {
     // DEBUG_START;
 
-    WiFiMgr.SetFsmState( this );
+    pWiFiDriver->SetFsmState (this);
 
     // This can get called before the system is up and running.
     // No log port available yet
-    // WiFiMgr.AnnounceState ();
+    // pWiFiDriver->AnnounceState ();
 
     // DEBUG_END;
 } // fsm_WiFi_state_Boot::Init
@@ -453,7 +554,7 @@ void fsm_WiFi_state_ConnectingUsingConfig::Poll ()
 
     if (WiFi.status () != WL_CONNECTED)
     {
-        if (CurrentTimeMS - WiFiMgr.GetFsmStartTime() > (1000 * config.sta_timeout))
+        if (CurrentTimeMS - pWiFiDriver->GetFsmStartTime() > (1000 * pWiFiDriver->Get_sta_timeout()))
         {
             logcon (F ("WiFi Failed to connect using Configured Credentials"));
             fsm_WiFi_state_ConnectingUsingDefaults_imp.Init ();
@@ -468,18 +569,20 @@ void fsm_WiFi_state_ConnectingUsingConfig::Poll ()
 void fsm_WiFi_state_ConnectingUsingConfig::Init ()
 {
     // DEBUG_START;
+    String CurrentSsid = pWiFiDriver->GetConfig_ssid ();
+    String CurrentPassphrase = pWiFiDriver->GetConfig_passphrase ();
 
-    if ((0 == config.ssid.length ()) || (String("null") == config.ssid))
+    if ((0 == CurrentSsid.length ()) || (String("null") == CurrentSsid))
     {
         fsm_WiFi_state_ConnectingUsingDefaults_imp.Init ();
     }
     else
     {
-        WiFiMgr.SetFsmState (this);
-        WiFiMgr.AnnounceState ();
-        WiFiMgr.SetFsmStartTime (millis ());
+        pWiFiDriver->SetFsmState (this);
+        pWiFiDriver->AnnounceState ();
+        pWiFiDriver->SetFsmStartTime (millis ());
 
-        WiFiMgr.connectWifi (config.ssid, config.passphrase);
+        pWiFiDriver->connectWifi (CurrentSsid, CurrentPassphrase);
     }
 
     // DEBUG_END;
@@ -510,7 +613,7 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Poll ()
 
     if (WiFi.status () != WL_CONNECTED)
     {
-        if (CurrentTimeMS - WiFiMgr.GetFsmStartTime () > (1000 * config.sta_timeout))
+        if (CurrentTimeMS - pWiFiDriver->GetFsmStartTime () > (1000 * pWiFiDriver->Get_sta_timeout ()))
         {
             logcon (F ("WiFi Failed to connect using default Credentials"));
             fsm_WiFi_state_ConnectingAsAP_imp.Init ();
@@ -526,14 +629,11 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Init ()
 {
     // DEBUG_START;
 
-    WiFiMgr.SetFsmState (this);
-    WiFiMgr.AnnounceState ();
-    WiFiMgr.SetFsmStartTime (millis ());
+    pWiFiDriver->SetFsmState (this);
+    pWiFiDriver->AnnounceState ();
+    pWiFiDriver->SetFsmStartTime (millis ());
 
-    // Switch to station mode and disconnect just in case
-    // DEBUG_V ("");
-
-    WiFiMgr.connectWifi (ssid, passphrase);
+    pWiFiDriver->connectWifi (default_ssid, default_passphrase);
 
     // DEBUG_END;
 } // fsm_WiFi_state_ConnectingUsingDefaults::Init
@@ -563,7 +663,7 @@ void fsm_WiFi_state_ConnectingAsAP::Poll ()
     }
     else
     {
-        if (millis () - WiFiMgr.GetFsmStartTime () > (1000 * config.ap_timeout))
+        if (millis () - pWiFiDriver->GetFsmStartTime () > (1000 * pWiFiDriver->Get_ap_timeout ()))
         {
             logcon (F ("WiFi STA Failed to connect"));
             fsm_WiFi_state_ConnectionFailed_imp.Init ();
@@ -579,20 +679,21 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
 {
     // DEBUG_START;
 
-    WiFiMgr.SetFsmState (this);
-    WiFiMgr.AnnounceState ();
+    pWiFiDriver->SetFsmState (this);
+    pWiFiDriver->AnnounceState ();
 
-    if (true == config.ap_fallbackIsEnabled)
+    if (true == pWiFiDriver->Get_ap_fallbackIsEnabled())
     {
         WiFi.mode (WIFI_AP);
 
         String ssid = "ESPixelStick " + String (config.hostname);
         WiFi.softAP (ssid.c_str ());
 
-        WiFiMgr.setIpAddress (WiFi.localIP ());
-        WiFiMgr.setIpSubNetMask (WiFi.subnetMask ());
+        pWiFiDriver->setIpAddress (WiFi.localIP ());
+        pWiFiDriver->setIpSubNetMask (WiFi.subnetMask ());
 
-        logcon (String (F ("WiFi SOFTAP: IP Address: '")) + WiFiMgr.getIpAddress().toString ());
+        logcon (String (F ("WiFi SOFTAP:       ssid: '")) + ssid);
+        logcon (String (F ("WiFi SOFTAP: IP Address: '")) + pWiFiDriver->getIpAddress ().toString ());
     }
     else
     {
@@ -639,20 +740,18 @@ void fsm_WiFi_state_ConnectedToAP::Init ()
 {
     // DEBUG_START;
 
-    WiFiMgr.SetFsmState (this);
-    WiFiMgr.AnnounceState ();
+    pWiFiDriver->SetFsmState (this);
+    pWiFiDriver->AnnounceState ();
 
-    // WiFiMgr.SetUpIp ();
+    // WiFiDriver.SetUpIp ();
 
-    WiFiMgr.setIpAddress( WiFi.localIP () );
-    WiFiMgr.setIpSubNetMask( WiFi.subnetMask () );
+    pWiFiDriver->setIpAddress( WiFi.localIP () );
+    pWiFiDriver->setIpSubNetMask( WiFi.subnetMask () );
 
-    logcon (String (F ("Connected with IP: ")) + WiFiMgr.getIpAddress ().toString ());
+    logcon (String (F ("Connected with IP: ")) + pWiFiDriver->getIpAddress ().toString ());
 
-    WiFiMgr.SetIsWiFiConnected (true);
-    InputMgr.NetworkStateChanged (true);
-    WebMgr.NetworkStateChanged (true);
-    FPPDiscovery.NetworkStateChanged (true);
+    pWiFiDriver->SetIsWiFiConnected (true);
+    NetworkMgr.SetWiFiIsConnected (true);
 
     // DEBUG_END;
 } // fsm_WiFi_state_ConnectingAsAP::Init
@@ -693,19 +792,18 @@ void fsm_WiFi_state_ConnectedToSta::Init ()
 {
     // DEBUG_START;
 
-    WiFiMgr.SetFsmState (this);
-    WiFiMgr.AnnounceState ();
+    pWiFiDriver->SetFsmState (this);
+    pWiFiDriver->AnnounceState ();
 
-    // WiFiMgr.SetUpIp ();
+    // WiFiDriver.SetUpIp ();
 
-    WiFiMgr.setIpAddress (WiFi.softAPIP ());
-    WiFiMgr.setIpSubNetMask (IPAddress (255, 255, 255, 0));
+    pWiFiDriver->setIpAddress (WiFi.softAPIP ());
+    pWiFiDriver->setIpSubNetMask (IPAddress (255, 255, 255, 0));
 
-    logcon (String (F ("Connected to STA with IP: ")) + WiFiMgr.getIpAddress ().toString ());
+    logcon (String (F ("Connected to STA with IP: ")) + pWiFiDriver->getIpAddress ().toString ());
 
-    WiFiMgr.SetIsWiFiConnected (true);
-    InputMgr.NetworkStateChanged (true);
-    WebMgr.NetworkStateChanged (true);
+    pWiFiDriver->SetIsWiFiConnected (true);
+    NetworkMgr.SetWiFiIsConnected (true);
 
     // DEBUG_END;
 } // fsm_WiFi_state_ConnectedToSta::Init
@@ -730,17 +828,17 @@ void fsm_WiFi_state_ConnectionFailed::Init ()
 {
  // DEBUG_START;
 
-    WiFiMgr.SetFsmState (this);
-    WiFiMgr.AnnounceState ();
+    pWiFiDriver->SetFsmState (this);
+    pWiFiDriver->AnnounceState ();
 
-    if (WiFiMgr.IsWiFiConnected())
+    if (pWiFiDriver->IsWiFiConnected())
     {
-        WiFiMgr.SetIsWiFiConnected (false);
-        InputMgr.NetworkStateChanged (false);
+        pWiFiDriver->SetIsWiFiConnected (false);
+        NetworkMgr.SetWiFiIsConnected (false);
     }
     else
     {
-        if (true == config.RebootOnWiFiFailureToConnect)
+        if (true == pWiFiDriver->Get_RebootOnWiFiFailureToConnect())
         {
             extern bool reboot;
             logcon (F ("WiFi Requesting Reboot"));
@@ -760,6 +858,3 @@ void fsm_WiFi_state_ConnectionFailed::Init ()
 
 } // fsm_WiFi_state_ConnectionFailed::Init
 //-----------------------------------------------------------------------------
-
-// create a global instance of the WiFi Manager
-c_WiFiMgr WiFiMgr;

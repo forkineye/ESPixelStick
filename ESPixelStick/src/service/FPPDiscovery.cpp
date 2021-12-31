@@ -22,8 +22,8 @@
 
 #include <Int64String.h>
 #include "../FileMgr.hpp"
-#include "../WiFiMgr.hpp"
 #include "../output/OutputMgr.hpp"
+#include "../network/NetworkMgr.hpp"
 #include <time.h>
 
 #ifdef ARDUINO_ARCH_ESP32
@@ -57,7 +57,7 @@ void c_FPPDiscovery::begin ()
     inFileUpload = false;
     hasBeenInitialized = true;
 
-    NetworkStateChanged (WiFiMgr.IsWiFiConnected ());
+    NetworkStateChanged (NetworkMgr.IsConnected ());
 
     // DEBUG_END;
 } // begin

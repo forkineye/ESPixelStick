@@ -18,7 +18,7 @@
 
 #include "InputDDP.h"
 #include <string.h>
-#include "../WiFiMgr.hpp"
+#include "../network/NetworkMgr.hpp"
 
 #ifdef ARDUINO_ARCH_ESP32
 #   define FPP_TYPE_ID          0xC3
@@ -67,7 +67,7 @@ void c_InputDDP::Begin ()
     // DEBUG_V("");
     udp = new AsyncUDP ();
 
-    NetworkStateChanged (WiFiMgr.IsWiFiConnected ());
+    NetworkStateChanged (NetworkMgr.IsConnected ());
 
     // HasBeenInitialized = true;
 

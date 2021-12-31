@@ -18,7 +18,7 @@
 */
 
 #include "InputE131.hpp"
-#include "../WiFiMgr.hpp"
+#include "../network/NetworkMgr.hpp"
 
 //-----------------------------------------------------------------------------
 c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
@@ -64,7 +64,7 @@ void c_InputE131::Begin ()
                 ((c_InputE131*)pThis)->ProcessIncomingE131Data (Packet);
             });
 
-        NetworkStateChanged (WiFiMgr.IsWiFiConnected (), false);
+        NetworkStateChanged (NetworkMgr.IsConnected (), false);
 
         HasBeenInitialized = true;
 

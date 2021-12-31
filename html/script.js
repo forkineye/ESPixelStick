@@ -100,7 +100,7 @@ $(function ()
     });
 
     // DHCP field toggles
-    $('#network #dhcp').change(function () {
+    $('#wifi #dhcp').change(function () {
         if ($(this).is(':checked')) {
             $('.dhcp').removeClass('hidden');
             $('.dhcp').addClass('hidden');
@@ -108,11 +108,11 @@ $(function ()
         else {
             $('.dhcp').removeClass('hidden');
         }
-        $('#btn_wifi').prop("disabled", ValidateConfigFields($("#network input")));
+        $('#btn_network').prop("disabled", ValidateConfigFields($("#network #wifi input")));
     });
 
     $('#network').on("input", (function () {
-        $('#btn_wifi').prop("disabled", ValidateConfigFields($("#network input")));
+        $('#btn_network').prop("disabled", ValidateConfigFields($("#network #wifi input")));
     }));
 
     $('#config').on("input", (function () {
@@ -124,8 +124,8 @@ $(function ()
         submitDeviceConfig();
     });
 
-    $('#btn_wifi').click(function () {
-        submitWiFiConfig();
+    $('#btn_network').click(function () {
+        submitNetworkConfig();
     });
 
     $('#viewStyle').change(function () {
@@ -328,7 +328,7 @@ function ProcessWindowChange(NextWindow) {
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
     }
 
-    else if ((NextWindow === "#wifi") || (NextWindow === "#home")) {
+    else if ((NextWindow === "#pg_network") || (NextWindow === "#home")) {
         wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'system' } })); // Get general config
     }
 
@@ -991,28 +991,47 @@ function CreateOptionsFromConfig(OptionListName, Config)
 } // CreateOptionsFromConfig
 
 // Builds JSON config submission for "WiFi" tab
+function ExtractNetworkWiFiConfigFromHtmlPage()
+{
+    let wifi = System_Config.network.wifi;
+    wifi.ssid        = $('#network #wifi #ssid').val();
+    wifi.passphrase  = $('#network #wifi #passphrase').val();
+    wifi.sta_timeout = $('#network #wifi #sta_timeout').val();
+    wifi.ip          = $('#network #wifi #ip').val();
+    wifi.netmask     = $('#network #wifi #netmask').val();
+    wifi.gateway     = $('#network #wifi #gateway').val();
+    wifi.dhcp        = $('#network #wifi #dhcp').prop('checked');
+    wifi.ap_fallback = $('#network #wifi #ap_fallback').prop('checked');
+    wifi.ap_reboot   = $('#network #wifi #ap_reboot').prop('checked');
+    wifi.ap_timeout  = $('#network #wifi #ap_timeout').val();
+
+} // ExtractNetworkWiFiConfigFromHtmlPage
+
+function ExtractNetworkEthernetConfigFromHtmlPage()
+{
+    System_Config.network.Eth.ip      = $('#network #eth #ip').val();
+    System_Config.network.Eth.netmask = $('#network #eth #netmask').val();
+    System_Config.network.Eth.gateway = $('#network #eth #gateway').val();
+    System_Config.network.Eth.dhcp    = $('#network #eth #dhcp').prop('checked');
+
+} // ExtractNetworkEthernetConfigFromHtmlPage
+
+// Builds JSON config submission for "Network" tab
 function ExtractNetworkConfigFromHtmlPage()
 {
-    System_Config.network.ssid        = $('#ssid').val();
-    System_Config.network.passphrase  = $('#passphrase').val();
-    System_Config.network.hostname    = $('#hostname').val();
-    System_Config.network.sta_timeout = $('#sta_timeout').val();
-    System_Config.network.ip          = $('#ip').val();
-    System_Config.network.netmask     = $('#netmask').val();
-    System_Config.network.gateway     = $('#gateway').val();
-    System_Config.network.dhcp        = $('#dhcp').prop('checked');
-    System_Config.network.ap_fallback = $('#ap_fallback').prop('checked');
-    System_Config.network.ap_reboot   = $('#ap_reboot').prop('checked');
-    System_Config.network.ap_timeout  = $('#apt').prop('checked');
+    System_Config.network.hostname = $('#hostname').val();
+
+    ExtractNetworkWiFiConfigFromHtmlPage();
+    // ExtractNetworkEthernetConfigFromHtmlPage();
 
 } // ExtractNetworkConfigFromHtmlPage
 
 // Builds JSON config submission for "WiFi" tab
-function submitWiFiConfig() {
+function submitNetworkConfig() {
     ExtractNetworkConfigFromHtmlPage();
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': System_Config } }));
 
-} // submitWiFiConfig
+} // submitNetworkConfig
 
 function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
 {
@@ -1554,9 +1573,12 @@ function ProcessReceivedJsonAdminMessage(data)
 function ProcessReceivedJsonStatusMessage(data)
 {
     let JsonStat = JSON.parse(data);
-    let Status  = JsonStat.status;
-    let System  = Status.system;
-    let rssi    = System.rssi;
+    let Status   = JsonStat.status;
+    let System   = Status.system;
+    let Network  = System.network;
+    let Wifi     = Network.wifi;
+
+    let rssi = Wifi.rssi;
     let quality = 2 * (rssi + 100);
 
     if (rssi <= -100)
@@ -1567,14 +1589,13 @@ function ProcessReceivedJsonStatusMessage(data)
     {
         quality = 100;
     }
-
-    $('#x_rssi').text     (rssi);
-    $('#x_quality').text  (quality);
-    $('#x_ssid').text     (System.ssid);
-    $('#x_ip').text       (System.ip);
-    $('#x_hostname').text (System.hostname);
-    $('#x_subnet').text   (System.subnet);
-    $('#x_mac').text      (System.mac);
+    $('#n_hostname').text (Network.hostname);
+    $('#w_rssi').text     (rssi);
+    $('#w_quality').text  (quality);
+    $('#w_ssid').text     (Wifi.ssid);
+    $('#w_ip').text       (Wifi.ip);
+    $('#w_subnet').text   (Wifi.subnet);
+    $('#w_mac').text      (Wifi.mac);
 
     // getHeap(data)
     $('#x_freeheap').text(System.freeheap);
@@ -1745,7 +1766,7 @@ function showReboot()
     $('#reboot').modal();
     setTimeout(function ()
     {
-        if ($('#dhcp').prop('checked'))
+        if ($('#wifi #dhcp').prop('checked'))
         {
             window.location.assign("/");
         }
