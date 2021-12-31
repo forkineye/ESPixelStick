@@ -26,6 +26,7 @@
 #include "../input/InputMgr.hpp"
 #include "../service/FPPDiscovery.h"
 #include "../WebMgr.hpp"
+#include <Int64String.h>
 
 //-----------------------------------------------------------------------------
 
@@ -80,19 +81,25 @@ void c_NetworkMgr::GetConfig (JsonObject & json)
 
     JsonObject NetworkConfig = json.createNestedObject (CN_network);
 
-    NetworkConfig[CN_hostname] = config.hostname;
+    NetworkConfig[CN_hostname] = hostname;
 
     JsonObject NetworkWiFiConfig = NetworkConfig.createNestedObject (CN_wifi);
     WiFiDriver.GetConfig (NetworkWiFiConfig);
 
 #ifdef SUPPORT_ETHERNET
     JsonObject NetworkEthConfig = NetworkConfig.createNestedObject (CN_eth);
-    WiFiDriver.GetConfig (NetworkEthConfig);
+    EthernetDriver.GetConfig (NetworkEthConfig);
 
 #endif // def SUPPORT_ETHERNET
 
     // DEBUG_END;
 } // GetConfig
+
+//-----------------------------------------------------------------------------
+IPAddress c_NetworkMgr::GetlocalIP ()
+{
+    return WiFi.localIP ();
+} // GetlocalIP
 
 //-----------------------------------------------------------------------------
 void c_NetworkMgr::GetStatus (JsonObject & json)
@@ -140,6 +147,17 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
     // DEBUG_START;
     bool ConfigChanged = false;
 
+    if (0 == hostname.length ())
+    {
+#ifdef ARDUINO_ARCH_ESP8266
+        String chipId = String (ESP.getChipId (), HEX);
+#else
+        String chipId = int64String (ESP.getEfuseMac (), HEX);
+#endif
+        hostname = "esps-" + String (chipId);
+        // DEBUG_V ();
+    }
+
     do // once
     {
         if (!json.containsKey (CN_network))
@@ -152,7 +170,7 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
 
         JsonObject network = json[CN_network];
 
-        ConfigChanged |= setFromJSON (config.hostname, network, CN_hostname);
+        ConfigChanged |= setFromJSON (hostname, network, CN_hostname);
 
         if (network.containsKey (CN_wifi))
         {

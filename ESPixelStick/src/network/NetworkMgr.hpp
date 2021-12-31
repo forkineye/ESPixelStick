@@ -45,6 +45,8 @@ public:
     void SetEthernetIsConnected (bool newState);
 
     bool IsConnected () { return (IsWiFiConnected || IsEthernetConnected); }
+    void GetHostname (String& name) { name = hostname; }
+    IPAddress GetlocalIP ();
 
 private:
 
@@ -56,6 +58,7 @@ private:
     bool    HasBeenInitialized  = false;
     bool    IsWiFiConnected     = false;
     bool    IsEthernetConnected = false;
+    String  hostname;
 
 }; // c_NetworkMgr
 

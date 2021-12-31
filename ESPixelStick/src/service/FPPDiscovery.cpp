@@ -434,7 +434,9 @@ void c_FPPDiscovery::sendPingPacket (IPAddress destination)
 
     uint32_t ip = static_cast<uint32_t>(WiFi.localIP ());
     memcpy (packet.ipAddress, &ip, 4);
-    strcpy (packet.hostName, config.hostname.c_str ());
+    String Hostname;
+    NetworkMgr.GetHostname (Hostname);
+    strcpy (packet.hostName, Hostname.c_str ());
     strcpy (packet.version, VERSION.c_str());
     strcpy (packet.hardwareType, FPP_VARIANT_NAME.c_str());
     packet.ranges[0] = 0;
@@ -765,8 +767,10 @@ void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data,
 void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
 {
     // DEBUG_START;
+    String Hostname;
+    NetworkMgr.GetHostname (Hostname);
 
-    jsonResponse[CN_HostName]           = config.hostname;
+    jsonResponse[CN_HostName]           = Hostname;
     jsonResponse[F ("HostDescription")] = config.id;
     jsonResponse[CN_Platform]           = CN_ESPixelStick;
     jsonResponse[F ("Variant")]         = FPP_VARIANT_NAME;
@@ -905,7 +909,10 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 
         if (command == F ("getHostNameInfo"))
         {
-            JsonData[CN_HostName] = config.hostname;
+            String Hostname;
+            NetworkMgr.GetHostname (Hostname);
+
+            JsonData[CN_HostName] = Hostname;
             JsonData[F ("HostDescription")] = config.id;
 
             String resp;

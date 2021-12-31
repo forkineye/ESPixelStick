@@ -317,9 +317,11 @@ void c_InputDDP::ProcessReceivedQuery ()
 
             DynamicJsonDocument JsonConfigDoc (2048);
             JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_config);
-            JsonConfig[CN_hostname] = config.hostname;
+            String hostname;
+            NetworkMgr.GetHostname (hostname);
+            JsonConfig[CN_hostname] = hostname;
             JsonConfig[CN_id] = config.id;
-            JsonConfig[CN_ip] = WiFi.localIP ().toString ();
+            JsonConfig[CN_ip] = NetworkMgr.GetlocalIP ().toString ();
             JsonConfig[CN_version] = VERSION;
             JsonConfig["hardwareType"] = FPP_VARIANT_NAME;
             JsonConfig[CN_type] = FPP_TYPE_ID;

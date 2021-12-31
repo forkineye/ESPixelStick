@@ -40,7 +40,9 @@ c_InputMQTT::c_InputMQTT (
 {
     // DEBUG_START;
 
-    topic = String (F ("forkineye/")) + config.hostname;
+    String Hostname;
+    NetworkMgr.GetHostname (Hostname);
+    topic = String (F ("forkineye/")) + Hostname;
     lwtTopic = topic + CN_slashstatus;
 
     // Effect config defaults

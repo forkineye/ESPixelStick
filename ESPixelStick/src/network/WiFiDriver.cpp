@@ -203,6 +203,10 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
 
     SetUpIp ();
 
+    String Hostname;
+    NetworkMgr.GetHostname (Hostname);
+    // DEBUG_V (String ("Hostname: ") + Hostname);
+
     // Hostname must be set after the mode on ESP8266 and before on ESP32
 #ifdef ARDUINO_ARCH_ESP8266
     WiFi.disconnect ();
@@ -211,22 +215,20 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
     WiFi.mode (WIFI_STA);
     // DEBUG_V ("");
 
-    // DEBUG_V (String ("config.hostname: ") + config.hostname);
-    if (0 != config.hostname.length ())
+    if (0 != Hostname.length ())
     {
-        // DEBUG_V (String ("Setting WiFi hostname: ") + config.hostname);
-        WiFi.hostname (config.hostname);
+        // DEBUG_V (String ("Setting WiFi hostname: ") + Hostname);
+        WiFi.hostname (Hostname);
     }
 #else
     WiFi.persistent (false);
     // DEBUG_V ("");
     WiFi.disconnect (true);
 
-    // DEBUG_V (String ("config.hostname: ") + config.hostname);
-    if (0 != config.hostname.length ())
+    if (0 != Hostname.length ())
     {
-        // DEBUG_V (String ("Setting WiFi hostname: ") + config.hostname);
-        WiFi.hostname (config.hostname);
+        // DEBUG_V (String ("Setting WiFi hostname: ") + Hostname);
+        WiFi.hostname (Hostname);
     }
 
     // Switch to station mode
@@ -235,12 +237,12 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
 #endif
     // DEBUG_V (String ("      ssid: ") + current_ssid);
     // DEBUG_V (String ("passphrase: ") + current_passphrase);
-    // DEBUG_V (String ("  hostname: ") + config.hostname);
+    // DEBUG_V (String ("  hostname: ") + Hostname);
 
     logcon (String(F ("Connecting to '")) +
                       current_ssid +
                       String (F ("' as ")) +
-                      config.hostname);
+                      Hostname);
 
     WiFi.begin (current_ssid.c_str (), current_passphrase.c_str ());
 
@@ -685,8 +687,9 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
     if (true == pWiFiDriver->Get_ap_fallbackIsEnabled())
     {
         WiFi.mode (WIFI_AP);
-
-        String ssid = "ESPixelStick " + String (config.hostname);
+        String Hostname;
+        NetworkMgr.GetHostname (Hostname);
+        String ssid = "ESPixelStick-" + String (Hostname);
         WiFi.softAP (ssid.c_str ());
 
         pWiFiDriver->setIpAddress (WiFi.localIP ());

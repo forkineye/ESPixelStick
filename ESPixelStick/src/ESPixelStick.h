@@ -54,7 +54,6 @@
 typedef struct {
     // Device
     String      id;
-    String      hostname;
     time_t      BlankDelay = time_t(5);
 } config_t;
 

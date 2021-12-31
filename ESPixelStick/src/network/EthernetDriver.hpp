@@ -1,6 +1,6 @@
 #pragma once
 /*
-* EthernetMgr.hpp - Output Management class
+* EthernetDriver.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2021 Shelby Merrick
@@ -24,22 +24,27 @@
 #include <Eth.h>
 
 // forward declaration
+class c_EthernetDriver;
+
 /*****************************************************************************/
 class fsm_Eth_state
 {
+protected:
+    c_EthernetDriver * pEthernetDriver = nullptr;
 public:
     virtual void Poll (void) = 0;
     virtual void Init (void) = 0;
     virtual void GetStateName (String& sName) = 0;
     virtual void OnConnect (void) = 0;
     virtual void OnDisconnect (void) = 0;
+    void SetParent (c_EthernetDriver* parent) { pEthernetDriver = parent; }
 }; // fsm_Eth_state
 
-class c_EthernetMgr
+class c_EthernetDriver
 {
 public:
-    c_EthernetMgr ();
-    virtual ~c_EthernetMgr ();
+    c_EthernetDriver ();
+    virtual ~c_EthernetDriver ();
 
     void      Begin           (); ///< set up the operating environment based on the current config (or defaults)
     int       ValidateConfig  ();
@@ -92,7 +97,7 @@ protected:
     fsm_Eth_state * pCurrentFsmState = nullptr;
     uint32_t        FsmTimerEthStartTime = 0;
 
-}; // c_EthernetMgr
+}; // c_EthernetDriver
 
 /*****************************************************************************/
 /*
@@ -136,6 +141,6 @@ public:
 
 }; // fsm_Eth_state_ConnectedToEth
 
-extern c_EthernetMgr EthernetMgr;
+extern c_EthernetDriver EthernetDriver;
 
 #endif // def SUPPORT_ETHERNET

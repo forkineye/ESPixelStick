@@ -102,6 +102,10 @@ c_EthernetMgr::c_EthernetMgr ()
     gateway = IPAddress ((uint32_t)0);
     UseDhcp = true;
 
+    fsm_Eth_state_Boot_imp.SetParent (this);
+    fsm_Eth_state_ConnectingToEth_imp.SetParent (this);
+    fsm_Eth_state_ConnectedToEth_imp.SetParent (this);
+
     // this gets called pre-setup so there is nothing we can do here.
     fsm_Eth_state_Boot_imp.Init ();
 } // c_EthernetMgr
@@ -180,18 +184,20 @@ void c_EthernetMgr::connectEth ()
     // if (!eth_connected)
     // esp_eth_disable();
     ETH.begin ();
+    String Hostname;
+    NetworkMgr.GetHostname (Hostname);
 
-    DEBUG_V (String ("config.hostname: ") + config.hostname);
+    DEBUG_V (String ("Hostname: ") + Hostname);
     if (0 != config.hostname.length ())
     {
-        DEBUG_V (String ("Setting ETH hostname: ") + config.hostname);
+        DEBUG_V (String ("Setting ETH hostname: ") + Hostname);
 
         // ETH.config (INADDR_NONE, INADDR_NONE, INADDR_NONE);
-        ETH.setHostname (config.hostname.c_str ());
+        ETH.setHostname (Hostname.c_str ());
     }
     EthernetMgr.setHostname (ETH.getHostname ());
 
-    logcon.println (String (F ("\nEthernet Connecting as ")) + config.hostname);
+    logcon.println (String (F ("\nEthernet Connecting as ")) + Hostname);
 
     // DEBUG_END;
 } // connectEth

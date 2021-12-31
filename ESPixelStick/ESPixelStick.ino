@@ -185,23 +185,10 @@ bool validateConfig()
 
     bool configValid = true;
 
-#ifdef ARDUINO_ARCH_ESP8266
-    String chipId = String (ESP.getChipId (), HEX);
-#else
-    String chipId = int64String (ESP.getEfuseMac (), HEX);
-#endif
-
     // Device defaults
     if (!config.id.length ())
     {
         config.id = "ESPixelStick";
-        configValid = false;
-        // DEBUG_V ();
-    }
-
-    if (0 == config.hostname.length ())
-    {
-        config.hostname = "esps-" + String (chipId);
         configValid = false;
         // DEBUG_V ();
     }
