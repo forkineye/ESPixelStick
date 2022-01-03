@@ -247,6 +247,7 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
     WiFi.begin (current_ssid.c_str (), current_passphrase.c_str ());
 
     // DEBUG_END;
+
 } // connectWifi
 
 //-----------------------------------------------------------------------------
@@ -361,9 +362,12 @@ void c_WiFiDriver::Poll ()
 
     if (millis () > NextPollTime)
     {
-        // DEBUG_V ("");
+        // DEBUG_V ("Start Poll");
         NextPollTime += PollInterval;
+        // displayFsmState ();
         pCurrentFsmState->Poll ();
+        // displayFsmState ();
+        // DEBUG_V ("End Poll");
     }
 
     if (ResetWiFi)
@@ -429,6 +433,29 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
     return ConfigChanged;
 
 } // SetConfig
+
+//-----------------------------------------------------------------------------
+void c_WiFiDriver::displayFsmState ()
+{
+    // String Name;
+    // GetDriverName (Name);
+
+    // DEBUG_V (String ("            Name: ") + Name);
+    // DEBUG_V (String ("            this: ") + String (uint32_t (this), HEX));
+    // DEBUG_V (String ("pCurrentFsmState: ") + String (uint32_t (pCurrentFsmState), HEX));
+}
+
+//-----------------------------------------------------------------------------
+void c_WiFiDriver::SetFsmState (fsm_WiFi_state* NewState)
+{
+    // DEBUG_START;
+    // DEBUG_V (String ("pCurrentFsmState: ") + String (uint32_t (pCurrentFsmState), HEX));
+    // DEBUG_V (String ("        NewState: ") + String (uint32_t (NewState), HEX));
+    pCurrentFsmState = NewState;
+    // displayFsmState ();
+    // DEBUG_END;
+
+} // SetFsmState
 
 //-----------------------------------------------------------------------------
 void c_WiFiDriver::SetUpIp ()
@@ -524,7 +551,9 @@ void fsm_WiFi_state_Boot::Poll ()
     // DEBUG_START;
 
     // Start trying to connect to the AP
+    // DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
     fsm_WiFi_state_ConnectingUsingConfig_imp.Init ();
+    // pWiFiDriver->displayFsmState ();
 
     // DEBUG_END;
 } // fsm_WiFi_state_boot
@@ -535,6 +564,7 @@ void fsm_WiFi_state_Boot::Init ()
 {
     // DEBUG_START;
 
+    // DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
     pWiFiDriver->SetFsmState (this);
 
     // This can get called before the system is up and running.
@@ -558,6 +588,7 @@ void fsm_WiFi_state_ConnectingUsingConfig::Poll ()
     {
         if (CurrentTimeMS - pWiFiDriver->GetFsmStartTime() > (1000 * pWiFiDriver->Get_sta_timeout()))
         {
+            // DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
             logcon (F ("WiFi Failed to connect using Configured Credentials"));
             fsm_WiFi_state_ConnectingUsingDefaults_imp.Init ();
         }
@@ -573,9 +604,11 @@ void fsm_WiFi_state_ConnectingUsingConfig::Init ()
     // DEBUG_START;
     String CurrentSsid = pWiFiDriver->GetConfig_ssid ();
     String CurrentPassphrase = pWiFiDriver->GetConfig_passphrase ();
+    // DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
 
     if ((0 == CurrentSsid.length ()) || (String("null") == CurrentSsid))
     {
+        // DEBUG_V ();
         fsm_WiFi_state_ConnectingUsingDefaults_imp.Init ();
     }
     else
@@ -586,6 +619,7 @@ void fsm_WiFi_state_ConnectingUsingConfig::Init ()
 
         pWiFiDriver->connectWifi (CurrentSsid, CurrentPassphrase);
     }
+    // pWiFiDriver->displayFsmState ();
 
     // DEBUG_END;
 
@@ -617,6 +651,7 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Poll ()
     {
         if (CurrentTimeMS - pWiFiDriver->GetFsmStartTime () > (1000 * pWiFiDriver->Get_sta_timeout ()))
         {
+            // DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
             logcon (F ("WiFi Failed to connect using default Credentials"));
             fsm_WiFi_state_ConnectingAsAP_imp.Init ();
         }
@@ -631,11 +666,13 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Init ()
 {
     // DEBUG_START;
 
+    // DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
     pWiFiDriver->SetFsmState (this);
     pWiFiDriver->AnnounceState ();
     pWiFiDriver->SetFsmStartTime (millis ());
 
     pWiFiDriver->connectWifi (default_ssid, default_passphrase);
+    // pWiFiDriver->displayFsmState ();
 
     // DEBUG_END;
 } // fsm_WiFi_state_ConnectingUsingDefaults::Init
@@ -646,6 +683,7 @@ void fsm_WiFi_state_ConnectingUsingDefaults::OnConnect ()
 {
     // DEBUG_START;
 
+    // DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
     fsm_WiFi_state_ConnectedToAP_imp.Init ();
 
     // DEBUG_END;
@@ -743,6 +781,7 @@ void fsm_WiFi_state_ConnectedToAP::Init ()
 {
     // DEBUG_START;
 
+    // DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
     pWiFiDriver->SetFsmState (this);
     pWiFiDriver->AnnounceState ();
 
@@ -829,7 +868,7 @@ void fsm_WiFi_state_ConnectedToSta::OnDisconnect ()
 // Wait for events
 void fsm_WiFi_state_ConnectionFailed::Init ()
 {
- // DEBUG_START;
+    // DEBUG_START;
 
     pWiFiDriver->SetFsmState (this);
     pWiFiDriver->AnnounceState ();
@@ -857,7 +896,7 @@ void fsm_WiFi_state_ConnectionFailed::Init ()
         }
     }
 
- // DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_WiFi_state_ConnectionFailed::Init
 //-----------------------------------------------------------------------------

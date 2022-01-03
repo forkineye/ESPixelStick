@@ -64,7 +64,7 @@ public:
     void      reset           ();
     void      Poll ();
 
-    void      SetFsmState     (fsm_WiFi_state * NewState) { pCurrentFsmState = NewState; }
+    void      SetFsmState (fsm_WiFi_state* NewState);
     void      AnnounceState   ();
     void      SetFsmStartTime (uint32_t NewStartTime)    { FsmTimerWiFiStartTime = NewStartTime; }
     uint32_t  GetFsmStartTime (void)                     { return FsmTimerWiFiStartTime; }
@@ -118,6 +118,7 @@ private:
     void onWiFiStaConn    (const WiFiEvent_t event, const WiFiEventInfo_t info);
     void onWiFiStaDisc    (const WiFiEvent_t event, const WiFiEventInfo_t info);
 #endif
+    void displayFsmState ();
 
 protected:
     friend class fsm_WiFi_state_Boot;
