@@ -50,9 +50,9 @@ public:
 
 private:
 
-    c_WiFiDriver    WiFiDriver;
+    c_WiFiDriver     WiFiDriver;
 #ifdef SUPPORT_ETHERNET
-    c_WiFiDriver    EthernetDriver;
+    c_EthernetDriver EthernetDriver;
 #endif // def SUPPORT_ETHERNET
 
     bool    HasBeenInitialized  = false;
