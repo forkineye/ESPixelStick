@@ -72,6 +72,7 @@ extern const char CN_ESP32[];
 extern const char CN_ESP8266[];
 extern const char CN_ESPixelStick [];
 extern const char CN_eth[];
+extern const char CN_EthDrv[];
 extern const char CN_false [];
 extern const char CN_File[];
 extern const char CN_file[];

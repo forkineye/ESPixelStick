@@ -70,6 +70,7 @@ const char CN_ESP32                    [] = "ESP32";
 const char CN_ESP8266                  [] = "ESP8266";
 const char CN_ESPixelStick             [] = "ESPixelStick";
 const char CN_eth                      [] = "eth";
+const char CN_EthDrv                   [] = "EthDrv";
 const char CN_false                    [] = "false";
 const char CN_File                     [] = "File";
 const char CN_file                     [] = "file";
