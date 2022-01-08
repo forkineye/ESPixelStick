@@ -113,7 +113,6 @@ void c_InputMgr::Begin (uint8_t* BufferStart, uint16_t BufferSize)
 
     // prevent recalls
     if (true == HasBeenInitialized) { return; }
-    HasBeenInitialized = true;
 
     String temp = String (F("Effects Control"));
     ExternalInput.Init (0,0, c_ExternalInput::Polarity_t::ActiveLow, temp);
@@ -125,6 +124,7 @@ void c_InputMgr::Begin (uint8_t* BufferStart, uint16_t BufferSize)
         InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex++), e_InputType::InputType_Disabled);
         // DEBUG_V ("");
     }
+    HasBeenInitialized = true;
 
     // load up the configuration from the saved file. This also starts the drivers
     LoadConfig ();
@@ -720,7 +720,6 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
     bool Response = false;
 
     // DEBUG_V ("InputDataBufferSize: " + String (InputDataBufferSize));
-    // DEBUG_V ("ConfigData: " + ConfigData);
 
     do // once
     {
@@ -923,11 +922,14 @@ void c_InputMgr::NetworkStateChanged (bool _IsConnected)
 
     IsConnected = _IsConnected;
 
-    // pass through each active interface and notify WiFi changed state
-    for (c_InputCommon* pInputChannel : pInputChannelDrivers)
+    if (HasBeenInitialized)
     {
-        // DEBUG_V("");
-        pInputChannel->NetworkStateChanged (IsConnected);
+        // pass through each active interface and notify WiFi changed state
+        for (c_InputCommon* pInputChannel : pInputChannelDrivers)
+        {
+            // DEBUG_V (String ("pInputChannel: 0x") + String (uint32_t (), HEX));
+            pInputChannel->NetworkStateChanged (IsConnected);
+        }
     }
 
     // DEBUG_END;
