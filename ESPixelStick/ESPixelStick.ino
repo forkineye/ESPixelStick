@@ -276,7 +276,7 @@ bool deserializeCore (JsonObject & json)
 
         dsDevice  (json);
         FileMgr.SetConfig (json);
-        ResetWiFi = NetworkMgr.SetConfig (json);
+        ConfigSaveNeeded |= NetworkMgr.SetConfig (json);
         DataHasBeenAccepted = true;
 
     } while (false);
