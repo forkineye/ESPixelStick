@@ -104,14 +104,14 @@ private:
     IPAddress   netmask = IPAddress ((uint32_t)0);
     IPAddress   gateway = IPAddress ((uint32_t)0);
     bool        UseDhcp = true;
-#ifdef SUPPORT_ETHERNET
-    bool        ap_fallbackIsEnabled = false;
-#else
     bool        ap_fallbackIsEnabled = true;
-#endif // def SUPPORT_ETHERNET
     uint32_t    ap_timeout = AP_TIMEOUT;      ///< How long to wait in AP mode with no connection before rebooting
     uint32_t    sta_timeout = CLIENT_TIMEOUT; ///< Timeout when connection as client (station)
+#ifdef SUPPORT_ETHERNET
+    bool        RebootOnWiFiFailureToConnect = false;
+#else
     bool        RebootOnWiFiFailureToConnect = true;
+#endif // def SUPPORT_ETHERNET
 
     void SetUpIp ();
 
