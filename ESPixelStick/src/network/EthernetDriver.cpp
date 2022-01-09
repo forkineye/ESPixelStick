@@ -1,5 +1,5 @@
 /*
-* EthernetMgr.cpp - Output Management class
+* pEthernetDriver->cpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2021 Shelby Merrick
@@ -21,202 +21,247 @@
 
 #ifdef SUPPORT_ETHERNET
 
-#include "EthernetMgr.hpp"
-#include <ETH.h>
-#include "esp_eth.h"
-
-#include "input/InputMgr.hpp"
-#include "WebMgr.hpp"
-#include "service/FPPDiscovery.h"
-
-// Ethernet connection status as ETH doesn't currently have a status function
-static bool eth_connected = false;
-
-void EthTrackingEvent (WiFiEvent_t event)
-{
-    switch (event)
-    {
-        case SYSTEM_EVENT_ETH_START:
-        {
-            eth_connected = false;
-            Serial.println ("ETH Started");
-            //set eth hostname here
-            // ETH.setHostname("esp32-ethernet");
-            break;
-        }
-        case SYSTEM_EVENT_ETH_CONNECTED:
-        {
-            Serial.println ("ETH Connected");
-            break;
-        }
-        case SYSTEM_EVENT_ETH_GOT_IP:
-        {
-            Serial.print ("ETH MAC: ");
-            Serial.print (ETH.macAddress ());
-            Serial.print (", IPv4: ");
-            Serial.print (ETH.localIP ());
-            if (ETH.fullDuplex ())
-            {
-                Serial.print (", FULL_DUPLEX");
-            }
-            Serial.print (", ");
-            Serial.print (ETH.linkSpeed ());
-            Serial.println ("Mbps");
-            eth_connected = true;
-            break;
-        }
-
-        case SYSTEM_EVENT_ETH_DISCONNECTED:
-        {
-            Serial.println ("ETH Disconnected");
-            eth_connected = false;
-            break;
-        }
-
-        case SYSTEM_EVENT_ETH_STOP:
-        {
-            Serial.println ("ETH Stopped");
-            eth_connected = false;
-            break;
-        }
-
-        default:
-            break;
-    } // switch (event)
-
-} // EthTrackingEvent
+#include "ETH_m.h"
+#include "NetworkMgr.hpp"
+#include "EthernetDriver.hpp"
 
 /*****************************************************************************/
 /* FSM                                                                       */
 /*****************************************************************************/
-fsm_Eth_state_Boot                    fsm_Eth_state_Boot_imp;
-fsm_Eth_state_ConnectingToEth         fsm_Eth_state_ConnectingToEth_imp;
-fsm_Eth_state_ConnectedToEth          fsm_Eth_state_ConnectedToEth_imp;
+static fsm_Eth_state_Boot              fsm_Eth_state_Boot_imp;
+static fsm_Eth_state_PoweringUp        fsm_Eth_state_PoweringUp_imp;
+static fsm_Eth_state_ConnectingToEth   fsm_Eth_state_ConnectingToEth_imp;
+static fsm_Eth_state_ConnectedToEth    fsm_Eth_state_ConnectedToEth_imp;
+static fsm_Eth_state_ConnectionFailed  fsm_Eth_state_ConnectionFailed_imp;
+static fsm_Eth_state_DeviceInitFailed  fsm_Eth_state_DeviceInitFailed_imp;
 
 //-----------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
-c_EthernetMgr::c_EthernetMgr ()
+c_EthernetDriver::c_EthernetDriver ()
 {
-    ip = IPAddress ((uint32_t)0);
-    netmask = IPAddress ((uint32_t)0);
-    gateway = IPAddress ((uint32_t)0);
-    UseDhcp = true;
+    // DEBUG_START;
 
     fsm_Eth_state_Boot_imp.SetParent (this);
+    fsm_Eth_state_PoweringUp_imp.SetParent (this);
     fsm_Eth_state_ConnectingToEth_imp.SetParent (this);
     fsm_Eth_state_ConnectedToEth_imp.SetParent (this);
+    fsm_Eth_state_ConnectionFailed_imp.SetParent (this);
+    fsm_Eth_state_DeviceInitFailed_imp.SetParent (this);
 
     // this gets called pre-setup so there is nothing we can do here.
     fsm_Eth_state_Boot_imp.Init ();
-} // c_EthernetMgr
+
+    // DEBUG_END;
+} // c_EthernetDriver
 
 //-----------------------------------------------------------------------------
 ///< deallocate any resources and put the output channels into a safe state
-c_EthernetMgr::~c_EthernetMgr ()
+c_EthernetDriver::~c_EthernetDriver ()
 {
     // DEBUG_START;
 
     // DEBUG_END;
 
-} // ~c_EthernetMgr
+} // ~c_EthernetDriver
 
 //-----------------------------------------------------------------------------
-///< Start the module
-void c_EthernetMgr::Begin ()
+void c_EthernetDriver::AnnounceState ()
 {
     // DEBUG_START;
 
-    // Setup WiFi Handlers
-    WiFi.onEvent (EthTrackingEvent);
+    String StateName;
+    pCurrentFsmState->GetStateName (StateName);
+    logcon (String (F ("Entering State: ")) + StateName);
+
+    // DEBUG_END;
+
+} // AnnounceState
+
+//-----------------------------------------------------------------------------
+///< Start the module
+void c_EthernetDriver::Begin ()
+{
+    // DEBUG_START;
+
+    // Setup Ethernet Handlers
+    WiFi.onEvent ([this](WiFiEvent_t event, arduino_event_info_t info) {this->onEthStartHandler      (event, info); }, WiFiEvent_t::ARDUINO_EVENT_ETH_START);
+    WiFi.onEvent ([this](WiFiEvent_t event, arduino_event_info_t info) {this->onEthConnectHandler    (event, info); }, WiFiEvent_t::ARDUINO_EVENT_ETH_GOT_IP);
+    WiFi.onEvent ([this](WiFiEvent_t event, arduino_event_info_t info) {this->onEthDisconnectHandler (event, info); }, WiFiEvent_t::ARDUINO_EVENT_ETH_DISCONNECTED);
 
     // set up the poll interval
     NextPollTime = millis () + PollInterval;
-
-    // get the FSM moving
-    pCurrentFsmState->Poll ();
 
     // DEBUG_END;
 
 } // begin
 
 //-----------------------------------------------------------------------------
-void c_EthernetMgr::GetStatus (JsonObject& jsonStatus)
+void c_EthernetDriver::connectEth ()
 {
     // DEBUG_START;
 
-    jsonStatus[CN_ip] = getIpAddress ().toString ();
-    jsonStatus[CN_subnet] = getIpSubNetMask ().toString ();
-    jsonStatus[CN_mac] = getMacAddress ();
-    jsonStatus[CN_hostname] = getHostname ();
+    String Hostname;
+    NetworkMgr.GetHostname (Hostname);
+
+    // DEBUG_V (String ("Hostname: ") + Hostname);
+    if (0 != Hostname.length ())
+    {
+        // DEBUG_V (String ("Setting ETH hostname: ") + Hostname);
+
+        // ETH_m.config (INADDR_NONE, INADDR_NONE, INADDR_NONE);
+        ETH_m.setHostname (Hostname.c_str ());
+    }
+
+    logcon (String (F ("Ethernet Connecting as ")) + Hostname);
+
+    // DEBUG_END;
+} // connectEth
+
+//-----------------------------------------------------------------------------
+void c_EthernetDriver::GetConfig (JsonObject& json)
+{
+    // DEBUG_START;
+
+    json[CN_ip]      = ip.toString ();
+    json[CN_netmask] = netmask.toString ();
+    json[CN_gateway] = gateway.toString ();
+    json[CN_dhcp]    = UseDhcp;
+
+    json[F ("phy_adr")]  = phy_addr;
+    json[F ("power")]    = power_pin;
+    json[F ("mdc")]      = mdc_pin;
+    json[F ("mdio")]     = mdio_pin;
+    json[F ("phy_type")] = phy_type;
+    json[F ("clk_mode")] = clk_mode;
+
+    // DEBUG_END;
+
+} // GetConfig
+
+//-----------------------------------------------------------------------------
+void c_EthernetDriver::GetHostname (String & Name)
+{
+    Name = ETH_m.getHostname ();
+} // GetHostname
+
+//-----------------------------------------------------------------------------
+IPAddress c_EthernetDriver::GetIpAddress ()
+{
+    return ETH_m.localIP ();
+} // GetIpAddress
+
+//-----------------------------------------------------------------------------
+IPAddress c_EthernetDriver::GetIpSubNetMask ()
+{
+    return ETH_m.subnetMask ();
+} // GetIpSubNetMask
+
+//-----------------------------------------------------------------------------
+String c_EthernetDriver::GetMacAddress ()
+{
+    return ETH_m.macAddress ();
+} // GetMacAddress
+
+//-----------------------------------------------------------------------------
+void c_EthernetDriver::GetStatus (JsonObject& jsonStatus)
+{
+    // DEBUG_START;
+
+    String Hostname;
+    GetHostname (Hostname);
+    jsonStatus[CN_hostname] = Hostname;
+
+    jsonStatus[CN_ip] = GetIpAddress ().toString ();
+    jsonStatus[CN_subnet] = GetIpSubNetMask ().toString ();
+    jsonStatus[CN_mac] = GetMacAddress ();
+    jsonStatus[CN_connected] = IsConnected ();
 
     // DEBUG_END;
 } // GetStatus
 
+//-----------------------------------------------------------------------------
+bool c_EthernetDriver::IsConnected ()
+{
+    // DEBUG_V("");
+
+    return (pCurrentFsmState == &fsm_Eth_state_ConnectedToEth_imp);
+
+} // IsConnected
+
 //------------------------------------------------------------------------------
-// Broadcast network state change to relevant managers
-void c_EthernetMgr::NetworkStateChanged (bool NetworkState)
+void c_EthernetDriver::NetworkStateChanged (bool NetworkState)
 {
     // DEBUG_START;
 
-    InputMgr.NetworkStateChanged (NetworkState);
-    WebMgr.NetworkStateChanged (NetworkState);
-    FPPDiscovery.NetworkStateChanged (NetworkState);
+    NetworkMgr.SetEthernetIsConnected (NetworkState);
 
     // DEBUG_END;
 
 } // NetworkStateChanged
 
 //-----------------------------------------------------------------------------
-void c_EthernetMgr::connectEth ()
+void c_EthernetDriver::onEthConnectHandler (const WiFiEvent_t event, const WiFiEventInfo_t info)
 {
     // DEBUG_START;
 
-    // @TODO The ethernet setup currently runs against default hardware setup.
-    // Rather than carry the configuration here, these defaults can be
-    // overridden as -D statement upon compilation. This should be documented at
-    // some point.
-    // begin(uint8_t phy_addr=ETH_PHY_ADDR, 
-    //       int power=ETH_PHY_POWER,
-    //       int mdc=ETH_PHY_MDC, 
-    //       int mdio=ETH_PHY_MDIO, 
-    //       eth_phy_type_t type=ETH_PHY_TYPE,
-    //       eth_clock_mode_t clk_mode=ETH_CLK_MODE);
-    // if (!eth_connected)
-    // esp_eth_disable();
-    ETH.begin ();
-    String Hostname;
-    NetworkMgr.GetHostname (Hostname);
-
-    DEBUG_V (String ("Hostname: ") + Hostname);
-    if (0 != config.hostname.length ())
-    {
-        DEBUG_V (String ("Setting ETH hostname: ") + Hostname);
-
-        // ETH.config (INADDR_NONE, INADDR_NONE, INADDR_NONE);
-        ETH.setHostname (Hostname.c_str ());
-    }
-    EthernetMgr.setHostname (ETH.getHostname ());
-
-    logcon.println (String (F ("\nEthernet Connecting as ")) + Hostname);
+    pCurrentFsmState->OnConnect ();
 
     // DEBUG_END;
-} // connectEth
+
+} // onEthConnectHandler
 
 //-----------------------------------------------------------------------------
-void c_EthernetMgr::reset ()
+void c_EthernetDriver::onEthDisconnectHandler (const WiFiEvent_t event, const WiFiEventInfo_t info)
 {
     // DEBUG_START;
 
-    logcon.println (F ("Ethernet Reset has been requested"));
+    pCurrentFsmState->OnDisconnect ();
 
-    // Reset connection statuses
-    SetIsEthConnected (false);
+    // DEBUG_END;
+
+} // onEthDisconnectHandler
+
+//-----------------------------------------------------------------------------
+void c_EthernetDriver::onEthStartHandler (const WiFiEvent_t event, const WiFiEventInfo_t info)
+{
+    // DEBUG_START;
+
+    String Hostname;
+    NetworkMgr.GetHostname (Hostname);
+    ETH_m.setHostname (Hostname.c_str ());
+
+    // DEBUG_END;
+
+} // onEthStartHandler
+
+//-----------------------------------------------------------------------------
+void c_EthernetDriver::Poll ()
+{
+    // DEBUG_START;
+
+    if (millis () > NextPollTime)
+    {
+        // DEBUG_V ("Polling");
+        NextPollTime += PollInterval;
+        pCurrentFsmState->Poll ();
+    }
+
+    // DEBUG_END;
+
+} // Poll
+
+//-----------------------------------------------------------------------------
+void c_EthernetDriver::reset ()
+{
+    // DEBUG_START;
+
+    logcon (F ("Ethernet Reset has been requested"));
 
     // Disconnect Ethernet if connected
     fsm_Eth_state_Boot_imp.Init ();
-    if (esp_eth_disable () != ESP_OK)
+    // if (esp_eth_disable () != ESP_OK)
     {
-        logcon.println (F ("Could not disconnect Ethernet"));
+        logcon (F ("Could not disconnect Ethernet"));
     }
 
     NetworkStateChanged (false);
@@ -225,50 +270,72 @@ void c_EthernetMgr::reset ()
 } // reset
 
 //-----------------------------------------------------------------------------
-bool c_EthernetMgr::IsConnected ()
+bool c_EthernetDriver::SetConfig (JsonObject & json)
 {
-    DEBUG_V("");
+    // DEBUG_START;
 
-    return (pCurrentFsmState == &fsm_Eth_state_ConnectedToEth_imp);
+    bool ConfigChanged = false;
+    JsonObject networkEth = json[CN_eth];
 
-} // IsConnected
+    String sIP = ip.toString ();
+    String sGateway = gateway.toString ();
+    String sNetmask = netmask.toString ();
+
+    ConfigChanged |= setFromJSON (sIP,      networkEth, CN_ip);
+    ConfigChanged |= setFromJSON (sNetmask, networkEth, CN_netmask);
+    ConfigChanged |= setFromJSON (sGateway, networkEth, CN_gateway);
+    ConfigChanged |= setFromJSON (UseDhcp,  networkEth, CN_dhcp);
+
+    ip.fromString (sIP);
+    gateway.fromString (sGateway);
+    netmask.fromString (sNetmask);
+
+    // DEBUG_V ("     ip: " + ip);
+    // DEBUG_V ("gateway: " + gateway);
+    // DEBUG_V ("netmask: " + netmask);
+
+    // DEBUG_END;
+    return ConfigChanged;
+
+} // SetConfig
 
 //-----------------------------------------------------------------------------
-void c_EthernetMgr::SetUpIp ()
+void c_EthernetDriver::SetUpIp ()
 {
     // DEBUG_START;
     do // once
     {
-        if (true == config.UseDhcp)
+        if (true == UseDhcp)
         {
-            logcon.println (F ("Connecting to Ethernet using DHCP"));
+            logcon (F ("Connecting to Ethernet using DHCP"));
             break;
         }
 
         IPAddress temp = (uint32_t)0;
         // DEBUG_V ("   temp: " + temp.toString ());
-        // DEBUG_V ("     ip: " + config.ip.toString());
-        // DEBUG_V ("netmask: " + config.netmask.toString ());
-        // DEBUG_V ("gateway: " + config.gateway.toString ());
 
-        if (temp == config.ip)
+        if (temp == ip)
         {
-            logcon.println (F ("NETWORK: ERROR: STATIC SELECTED WITHOUT IP. Using DHCP assigned address"));
+            logcon (F ("NETWORK: ERROR: STATIC SELECTED WITHOUT IP. Using DHCP assigned address"));
             break;
         }
 
-        if ((config.ip == ETH.localIP ()) &&
-            (config.netmask == ETH.subnetMask ()) &&
-            (config.gateway == ETH.gatewayIP ()))
+        if ((ip      == ETH_m.localIP ())    &&
+            (netmask == ETH_m.subnetMask ()) &&
+            (gateway == ETH_m.gatewayIP ()))
         {
-            // correct IP is already set
+            // DEBUG_V ("correct IP is already set");
             break;
         }
+
+        // DEBUG_V ("     ip: " + ip.toString ());
+        // DEBUG_V ("netmask: " + netmask.toString ());
+        // DEBUG_V ("gateway: " + gateway.toString ());
 
         // We didn't use DNS, so just set it to our configured gateway
-        ETH.config (config.ip, config.gateway, config.netmask, config.gateway);
+        ETH_m.config (ip, gateway, netmask, gateway);
 
-        logcon.println (F ("Connecting to Ethernet with Static IP"));
+        logcon (F ("Connecting to Ethernet with Static IP"));
 
     } while (false);
 
@@ -277,7 +344,28 @@ void c_EthernetMgr::SetUpIp ()
 } // SetUpIp
 
 //-----------------------------------------------------------------------------
-int c_EthernetMgr::ValidateConfig ()
+void c_EthernetDriver::StartEth ()
+{
+    // @TODO The ethernet setup currently runs against default hardware setup.
+// Rather than carry the configuration here, these defaults can be
+// overridden as -D statement upon compilation. This should be documented at
+// some point.
+// begin(uint8_t phy_addr=ETH_PHY_ADDR, 
+//       int power=ETH_PHY_POWER,
+//       int mdc=ETH_PHY_MDC, 
+//       int mdio=ETH_PHY_MDIO, 
+//       eth_phy_type_t type=ETH_PHY_TYPE,
+//       eth_clock_mode_t clk_mode=ETH_CLK_MODE);
+// if (!eth_connected)
+// esp_eth_disable();
+    if (false == ETH_m.begin (phy_addr, power_pin, mdc_pin, mdio_pin, phy_type, clk_mode))
+    {
+        fsm_Eth_state_DeviceInitFailed_imp.Init ();
+    }
+} // StartEth
+
+//-----------------------------------------------------------------------------
+int c_EthernetDriver::ValidateConfig ()
 {
     // DEBUG_START;
 
@@ -289,38 +377,23 @@ int c_EthernetMgr::ValidateConfig ()
 
 } // ValidateConfig
 
-//-----------------------------------------------------------------------------
-void c_EthernetMgr::AnnounceState ()
-{
-    // DEBUG_START;
-
-    String StateName;
-    pCurrentFsmState->GetStateName (StateName);
-    logcon.println (String (F ("\nEthernet Network Entering State: ")) + StateName);
-
-    // DEBUG_END;
-
-} // AnnounceState
-
-//-----------------------------------------------------------------------------
-void c_EthernetMgr::Poll ()
-{
-    // DEBUG_START;
-
-    if (millis () > NextPollTime)
-    {
-        // DEBUG_V ("");
-        NextPollTime += PollInterval;
-        pCurrentFsmState->Poll ();
-    }
-
-    // DEBUG_END;
-
-} // Poll
-
 /*****************************************************************************/
 //  FSM Code
 /*****************************************************************************/
+/*****************************************************************************/
+// Waiting for polling to start
+void fsm_Eth_state_Boot::Init ()
+{
+    // DEBUG_START;
+
+    pEthernetDriver->SetFsmState (this);
+    // pEthernetDriver->AnnounceState ();
+    pEthernetDriver->SetFsmStartTime (millis ());
+
+    // DEBUG_END;
+
+} // fsm_Eth_state_Boot::Init
+
 /*****************************************************************************/
 // Waiting for polling to start
 void fsm_Eth_state_Boot::Poll ()
@@ -328,126 +401,164 @@ void fsm_Eth_state_Boot::Poll ()
     // DEBUG_START;
 
     // Start trying to connect to based on input config
-    fsm_Eth_state_ConnectingToEth_imp.Init ();
+    fsm_Eth_state_PoweringUp_imp.Init ();
+
     // DEBUG_END;
 } // fsm_Eth_state_boot
 
 /*****************************************************************************/
-// Waiting for polling to start
-void fsm_Eth_state_Boot::Init ()
+/*****************************************************************************/
+void fsm_Eth_state_PoweringUp::Init ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    EthernetMgr.SetFsmState (this);
+    pEthernetDriver->SetFsmState (this);
+    pEthernetDriver->AnnounceState ();
+    pEthernetDriver->SetFsmStartTime (millis ());
 
-    // This can get called before the system is up and running.
-    // No log port available yet
-    // EthernetMgr.AnnounceState ();
+    pinMode (gpio_num_t::GPIO_NUM_15, OUTPUT);
+    digitalWrite (gpio_num_t::GPIO_NUM_15, LOW);
 
-    DEBUG_END;
-} // fsm_Eth_state_Boot::Init
+    // DEBUG_END;
+
+} // fsm_Eth_state_PoweringUp::Init
+
+/*****************************************************************************/
+void fsm_Eth_state_PoweringUp::Poll ()
+{
+    // DEBUG_START;
+
+    // Start trying to connect to based on input config
+    fsm_Eth_state_ConnectingToEth_imp.Init ();
+
+    // this may throw the connected handler
+    pEthernetDriver->StartEth ();
+    pEthernetDriver->connectEth ();
+
+    // DEBUG_END;
+} // fsm_Eth_state_PoweringUp
 
 /*****************************************************************************/
 /*****************************************************************************/
-// Wait for events
+void fsm_Eth_state_ConnectingToEth::Init ()
+{
+    // DEBUG_START;
+
+    pEthernetDriver->SetFsmState (this);
+    pEthernetDriver->AnnounceState ();
+    pEthernetDriver->SetFsmStartTime (millis ());
+
+    // DEBUG_END;
+
+} // fsm_Eth_state_ConnectingToEthUsingConfig::Init
+
+/*****************************************************************************/
 void fsm_Eth_state_ConnectingToEth::Poll ()
 {
     // DEBUG_START;
-    // DEBUG_V ("Eth config poll");
+
     // wait for the connection to complete via the callback function
     uint32_t CurrentTimeMS = millis ();
 
-    // Check ethernet status first
-    if (!eth_connected)
+    // @TODO Ethernet connection timeout is currently hardcoded. Add
+    // to network config.
+    if (CurrentTimeMS - pEthernetDriver->GetFsmStartTime () > (60000))
     {
-        // @TODO Ethernet connection timeout is currently hardcoded to 10. Add
-        // to network config.
-        if (CurrentTimeMS - EthernetMgr.GetFsmStartTime () > (5000))
-        {
-            logcon.println (F ("\nEthernet Failed to connect"));
-            fsm_Eth_state_Boot_imp.Init ();
-        }
+        // logcon (F ("Ethernet Failed to connect"));
+        fsm_Eth_state_ConnectionFailed_imp.Init ();
     }
 
     // DEBUG_END;
 } // fsm_Eth_state_ConnectingToEth::Poll
 
 /*****************************************************************************/
-// Wait for events
-void fsm_Eth_state_ConnectingToEth::Init ()
-{
-    DEBUG_START;
-
-    EthernetMgr.SetFsmState (this);
-    EthernetMgr.AnnounceState ();
-    EthernetMgr.SetFsmStartTime (millis ());
-
-    // do something useful
-
-    DEBUG_END;
-
-} // fsm_Eth_state_ConnectingToEthUsingConfig::Init
-
-/*****************************************************************************/
-// Wait for events
 void fsm_Eth_state_ConnectingToEth::OnConnect ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     fsm_Eth_state_ConnectedToEth_imp.Init ();
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_Eth_state_ConnectingToEth::OnConnect
 
 /*****************************************************************************/
 /*****************************************************************************/
-// Wait for events
-void fsm_Eth_state_ConnectedToEth::Poll ()
+void fsm_Eth_state_ConnectedToEth::Init ()
 {
     // DEBUG_START;
 
+    pEthernetDriver->SetFsmState (this);
+    pEthernetDriver->AnnounceState ();
+    pEthernetDriver->SetFsmStartTime (millis ());
+
+    pEthernetDriver->SetUpIp ();
+
+    // pEthernetDriver->setIpAddress (ETH_m.localIP ());
+    // pEthernetDriver->setIpSubNetMask (ETH_m.subnetMask ());
+    // pEthernetDriver->setMacAddress (ETH_m.macAddress ());
+
+    logcon (String (F ("Ethernet Connected with IP: ")) + pEthernetDriver->GetIpAddress ().toString ());
+
+    pEthernetDriver->NetworkStateChanged (true);
+
     // DEBUG_END;
-} // fsm_Eth_state_ConnectedToEth::Poll
-
-/*****************************************************************************/
-// Wait for events
-void fsm_Eth_state_ConnectedToEth::Init ()
-{
-    DEBUG_START;
-
-    EthernetMgr.SetFsmState (this);
-    EthernetMgr.AnnounceState ();
-
-    EthernetMgr.SetUpIp ();
-
-    EthernetMgr.setIpAddress (ETH.localIP ());
-    EthernetMgr.setIpSubNetMask (ETH.subnetMask ());
-    EthernetMgr.setMacAddress (ETH.macAddress ());
-
-    logcon.println (String (F ("Ethernet Connected with IP: ")) + EthernetMgr.getIpAddress ().toString ());
-
-    EthernetMgr.NetworkStateChanged (EthernetMgr.IsConnected ());
-
-    DEBUG_END;
 
 } // fsm_Eth_state_ConnectedToEth::Init
 
 /*****************************************************************************/
-// Wait for events
 void fsm_Eth_state_ConnectedToEth::OnDisconnect ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    logcon.println (F ("Ethernet lost the connection"));
-    fsm_Eth_state_Boot_imp.Init ();
+    fsm_Eth_state_ConnectionFailed_imp.Init ();
+    pEthernetDriver->NetworkStateChanged (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_Eth_state_ConnectedToEth::OnDisconnect
 
-//-----------------------------------------------------------------------------
-// create a global instance of the Ethernet Manager
-c_EthernetMgr EthernetMgr;
+/*****************************************************************************/
+/*****************************************************************************/
+void fsm_Eth_state_ConnectionFailed::Init ()
+{
+    // DEBUG_START;
+
+    pEthernetDriver->SetFsmState (this);
+    pEthernetDriver->AnnounceState ();
+    pEthernetDriver->NetworkStateChanged (false);
+
+    ETH_m.stop ();
+
+    // DEBUG_END;
+
+} // fsm_Eth_state_ConnectionFailed::Init
+
+/*****************************************************************************/
+void fsm_Eth_state_ConnectionFailed::Poll ()
+{
+    // DEBUG_START;
+
+    // take some recovery action
+    fsm_Eth_state_ConnectingToEth_imp.Init ();
+
+    ETH_m.start ();
+
+    // DEBUG_END;
+} // fsm_Eth_state_ConnectionFailed::Poll
+
+/*****************************************************************************/
+/*****************************************************************************/
+void fsm_Eth_state_DeviceInitFailed::Init ()
+{
+    // DEBUG_START;
+
+    pEthernetDriver->SetFsmState (this);
+    pEthernetDriver->AnnounceState ();
+    pEthernetDriver->NetworkStateChanged (false);
+
+    // DEBUG_END;
+
+} // fsm_Eth_state_ConnectionFailed::Init
 
 #endif // def SUPPORT_ETHERNET

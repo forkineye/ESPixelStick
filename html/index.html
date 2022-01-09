@@ -56,21 +56,26 @@
                                 <tr><td width="33%">Up Time</td><td><span id="x_uptime"></span></td></tr>
                             </table>
                         </fieldset>
-
-                        <fieldset>
-                            <legend class="esps-legend">Network Status</legend>
-                            <table class="esps-table">
-                                <tr><td width="33%">Hostname</td><td><span id="n_hostname"></span></td></tr>
-                            </table>
-                        </fieldset>
                         <fieldset>
                             <legend class="esps-legend">WiFi Status</legend>
                             <table class="esps-table">
+                                <tr><td width="33%">Connected</td><td><span id="w_connected"></span></td></tr>
+                                <tr><td width="33%">Hostname</td><td><span id="w_hostname"></span></td></tr>
                                 <tr><td width="33%">SSID</td><td><span id="w_ssid"></span></td></tr>
                                 <tr><td width="33%">IP</td><td><span id="w_ip"></span></td></tr>
                                 <tr><td width="33%">SubNet</td><td><span id="w_subnet"></span></td></tr>
                                 <tr><td width="33%">MAC</td><td><span id="w_mac"></span></td></tr>
                                 <tr><td width="33%">RSSI</td><td><span id="w_rssi"></span>dBm / <span id="w_quality"></span>%</td></tr>
+                            </table>
+                        </fieldset>
+                        <fieldset id="ethernet_status" class="hidden">
+                            <legend class="esps-legend">Ethernet Status</legend>
+                            <table class="esps-table">
+                                <tr><td width="33%">Connected</td><td><span id="e_connected"></span></td></tr>
+                                <tr><td width="33%">Hostname</td><td><span id="e_hostname"></span></td></tr>
+                                <tr><td width="33%">IP</td><td><span id="e_ip"></span></td></tr>
+                                <tr><td width="33%">SubNet</td><td><span id="e_subnet"></span></td></tr>
+                                <tr><td width="33%">MAC</td><td><span id="e_mac"></span></td></tr>
                             </table>
                         </fieldset>
                     </div>
@@ -236,29 +241,32 @@
                                 </div>
                             </div>
                         </fieldset>
-                        <fieldset id="eth" class="hidden">
+                        <fieldset id="eth" class="">
                             <legend class="esps-legend">Ethernet Configuration</legend>
                             <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-8">
+                                    <div class="checkbox"><label><input type="checkbox" id="weus" title="Allow WiFI and Ethernet to be Up at the same time."> Allow WiFi</label></div>
+                                </div>
                                 <div class="col-sm-offset-2 col-sm-8">
                                     <div class="checkbox"><label><input type="checkbox" id="dhcp" title="Usage of DHCP with static leases is recommended."> Use DHCP</label></div>
                                 </div>
                             </div>
-                            <div class="form-group dhcp" id="fg_ip">
-                                <label class="control-label col-sm-2 dhcp" for="ip">IP</label>
+                            <div class="form-group ethdhcp" id="fg_ip">
+                                <label class="control-label col-sm-2 ethdhcp" for="ip">IP</label>
                                 <div class="col-sm-8">
-                                    <input type="text" class="form-control is-valid dhcp" id="ip" name="ip" minlength="7" maxlength="15" required pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$' value="0.0.0.0" title="Static IP Address">
+                                    <input type="text" class="form-control is-valid ethdhcp" id="ip" name="ip" minlength="7" maxlength="15" required pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$' value="0.0.0.0" title="Static IP Address">
                                 </div>
                             </div>
-                            <div class="form-group dhcp" id="fg_netmask">
-                                <label class="control-label col-sm-2 dhcp" for="netmask">Netmask</label>
+                            <div class="form-group ethdhcp" id="fg_netmask">
+                                <label class="control-label col-sm-2 ethdhcp" for="netmask">Netmask</label>
                                 <div class="col-sm-8">
-                                    <input type="text" class="form-control is-valid dhcp" id="netmask" name="netmask" minlength="7" maxlength="15" required pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$' value="0.0.0.0" title="Static Netmask">
+                                    <input type="text" class="form-control is-valid ethdhcp" id="netmask" name="netmask" minlength="7" maxlength="15" required pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$' value="0.0.0.0" title="Static Netmask">
                                 </div>
                             </div>
-                            <div class="form-group dhcp" id="fg_gateway">
+                            <div class="form-group ethdhcp" id="fg_gateway">
                                 <label class="control-label col-sm-2" for="gateway">Gateway</label>
                                 <div class="col-sm-8">
-                                    <input type="text" class="form-control is-valid dhcp" id="gateway" name="gateway" minlength="7" maxlength="15" required pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$' value="0.0.0.0" title="Static Gateway">
+                                    <input type="text" class="form-control is-valid ethdhcp" id="gateway" name="gateway" minlength="7" maxlength="15" required pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$' value="0.0.0.0" title="Static Gateway">
                                 </div>
                             </div>
                         </fieldset>

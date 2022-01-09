@@ -111,6 +111,16 @@ $(function ()
         $('#btn_network').prop("disabled", ValidateConfigFields($("#network #wifi input")));
     });
 
+    $('#eth #dhcp').change(function () {
+        if ($(this).is(':checked')) {
+            $('.ethdhcp').addClass('hidden');
+        }
+        else {
+            $('.ethdhcp').removeClass('hidden');
+        }
+        $('#btn_network').prop("disabled", ValidateConfigFields($("#network #wifi input")));
+    });
+
     $('#network').on("input", (function () {
         $('#btn_network').prop("disabled", ValidateConfigFields($("#network #wifi input")));
     }));
@@ -818,6 +828,14 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
         // console.info("Got Device Config");
         System_Config = JsonConfigData;
         updateFromJSON(JsonConfigData);
+
+        if ({}.hasOwnProperty.call(System_Config.network, 'eth')) {
+            $('#pg_network #network #eth').removeClass("hidden")
+        }
+        else {
+            $('#pg_network #network #eth').addClass("hidden")
+        }
+
     }
 
     // is this a file list?
@@ -1009,10 +1027,14 @@ function ExtractNetworkWiFiConfigFromHtmlPage()
 
 function ExtractNetworkEthernetConfigFromHtmlPage()
 {
-    System_Config.network.Eth.ip      = $('#network #eth #ip').val();
-    System_Config.network.Eth.netmask = $('#network #eth #netmask').val();
-    System_Config.network.Eth.gateway = $('#network #eth #gateway').val();
-    System_Config.network.Eth.dhcp    = $('#network #eth #dhcp').prop('checked');
+    if ({}.hasOwnProperty.call(System_Config.network, "eth"))
+    {
+        System_Config.network.eth.ip      = $('#network #eth #ip').val();
+        System_Config.network.eth.netmask = $('#network #eth #netmask').val();
+        System_Config.network.eth.gateway = $('#network #eth #gateway').val();
+        System_Config.network.eth.dhcp    = $('#network #eth #dhcp').prop('checked');
+        System_Config.network.weus        = $('#network #eth #weus').prop('checked');
+    }
 
 } // ExtractNetworkEthernetConfigFromHtmlPage
 
@@ -1022,7 +1044,7 @@ function ExtractNetworkConfigFromHtmlPage()
     System_Config.network.hostname = $('#hostname').val();
 
     ExtractNetworkWiFiConfigFromHtmlPage();
-    // ExtractNetworkEthernetConfigFromHtmlPage();
+    ExtractNetworkEthernetConfigFromHtmlPage();
 
 } // ExtractNetworkConfigFromHtmlPage
 
@@ -1188,7 +1210,7 @@ function wsConnect()
         }
 
         // target = "192.168.10.237";
-        // target = "192.168.10.101";
+        // target = "192.168.10.214";
 
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');
@@ -1577,6 +1599,7 @@ function ProcessReceivedJsonStatusMessage(data)
     let System   = Status.system;
     let Network  = System.network;
     let Wifi     = Network.wifi;
+    let Ethernet = Network.wifi;
 
     let rssi = Wifi.rssi;
     let quality = 2 * (rssi + 100);
@@ -1589,13 +1612,30 @@ function ProcessReceivedJsonStatusMessage(data)
     {
         quality = 100;
     }
-    $('#n_hostname').text (Network.hostname);
+
+    $('#w_connected').text((true === Wifi.connected) ? "Yes" : "No");
+    $('#w_hostname').text (Wifi.hostname);
     $('#w_rssi').text     (rssi);
     $('#w_quality').text  (quality);
     $('#w_ssid').text     (Wifi.ssid);
     $('#w_ip').text       (Wifi.ip);
     $('#w_subnet').text   (Wifi.subnet);
     $('#w_mac').text      (Wifi.mac);
+
+    if ({}.hasOwnProperty.call(Network, 'eth'))
+    {
+        $('#ethernet_status').removeClass("hidden")
+        Ethernet = Network.eth;
+        $('#e_connected').text((true === Ethernet.connected) ? "Yes" : "No");
+        $('#e_hostname').text(Ethernet.hostname);
+        $('#e_ip').text(Ethernet.ip);
+        $('#e_subnet').text(Ethernet.subnet);
+        $('#e_mac').text(Ethernet.mac);
+    }
+    else
+    {
+        $('#ethernet_status').addClass("hidden")
+    }
 
     // getHeap(data)
     $('#x_freeheap').text(System.freeheap);

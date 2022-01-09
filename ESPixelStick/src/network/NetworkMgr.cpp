@@ -29,19 +29,11 @@
 #include <Int64String.h>
 
 //-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-// Local Data definitions
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 // Methods
 //-----------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
 c_NetworkMgr::c_NetworkMgr ()
 {
-
-
 } // c_NetworkMgr
 
 //-----------------------------------------------------------------------------
@@ -55,6 +47,23 @@ c_NetworkMgr::~c_NetworkMgr ()
 } // ~c_NetworkMgr
 
 //-----------------------------------------------------------------------------
+void c_NetworkMgr::AdvertiseNewState ()
+{
+    // DEBUG_START;
+
+    if (PreviousState != IsConnected ())
+    {
+        // DEBUG_V ("Sending Advertisments");
+        PreviousState = IsConnected ();
+        InputMgr.NetworkStateChanged (IsConnected ());
+        WebMgr.NetworkStateChanged (IsConnected ());
+        FPPDiscovery.NetworkStateChanged (IsConnected ());
+    }
+
+    // DEBUG_END;
+} // AdvertiseNewState
+
+//-----------------------------------------------------------------------------
 ///< Start the module
 void c_NetworkMgr::Begin ()
 {
@@ -63,6 +72,9 @@ void c_NetworkMgr::Begin ()
     // prevent recalls
     if (true == HasBeenInitialized) { return; }
     HasBeenInitialized = true;
+
+    // Make sure the local config is valid
+    Validate ();
 
     WiFiDriver.Begin ();
 
@@ -87,6 +99,8 @@ void c_NetworkMgr::GetConfig (JsonObject & json)
     WiFiDriver.GetConfig (NetworkWiFiConfig);
 
 #ifdef SUPPORT_ETHERNET
+    NetworkConfig[CN_weus] = AllowWiFiAndEthUpSimultaneously;
+
     JsonObject NetworkEthConfig = NetworkConfig.createNestedObject (CN_eth);
     EthernetDriver.GetConfig (NetworkEthConfig);
 
@@ -108,7 +122,7 @@ void c_NetworkMgr::GetStatus (JsonObject & json)
 
     JsonObject NetworkStatus = json.createNestedObject (CN_network);
     String name;
-    WiFiDriver.GetWiFiHostname (name);
+    GetHostname (name);
     NetworkStatus[CN_hostname] = name;
 
     JsonObject NetworkWiFiStatus = NetworkStatus.createNestedObject (CN_wifi);
@@ -146,17 +160,7 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
 {
     // DEBUG_START;
     bool ConfigChanged = false;
-
-    if (0 == hostname.length ())
-    {
-#ifdef ARDUINO_ARCH_ESP8266
-        String chipId = String (ESP.getChipId (), HEX);
-#else
-        String chipId = int64String (ESP.getEfuseMac (), HEX);
-#endif
-        hostname = "esps-" + String (chipId);
-        // DEBUG_V ();
-    }
+    bool HostnameChanged = false;
 
     do // once
     {
@@ -170,7 +174,7 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
 
         JsonObject network = json[CN_network];
 
-        ConfigChanged |= setFromJSON (hostname, network, CN_hostname);
+        HostnameChanged = setFromJSON (hostname, network, CN_hostname);
 
         if (network.containsKey (CN_wifi))
         {
@@ -194,45 +198,68 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
         }
 
 #ifdef SUPPORT_ETHERNET
-        if (network.containsKey (CN_Eth))
+        ConfigChanged = setFromJSON (AllowWiFiAndEthUpSimultaneously, network, CN_weus);
+
+        if (network.containsKey (CN_eth))
         {
             JsonObject networkEth = network[CN_eth];
             ConfigChanged |= EthernetDriver.SetConfig (networkEth);
-
-
-
-            JsonObject networkEth = network[CN_Eth];
-
-            String ip = config.Network.Eth.ip.toString ();
-            String gateway = config.Network.Eth.gateway.toString ();
-            String netmask = config.Network.Eth.netmask.toString ();
-
-            ConfigChanged |= setFromJSON (ip, networkEth, CN_ip);
-            ConfigChanged |= setFromJSON (netmask, networkEth, CN_netmask);
-            ConfigChanged |= setFromJSON (gateway, networkEth, CN_gateway);
-            ConfigChanged |= setFromJSON (config.Network.WiFi.UseDhcp, networkEth, CN_dhcp);
-
-            // DEBUG_V ("     ip: " + ip);
-            // DEBUG_V ("gateway: " + gateway);
-            // DEBUG_V ("netmask: " + netmask);
-
-            config.Network.Eth.ip.fromString (ip);
-            config.Network.Eth.gateway.fromString (gateway);
-            config.Network.Eth.netmask.fromString (netmask);
         }
         else
         {
             logcon (String (F ("No network Ethernet settings found. Using default Ethernet Settings")));
         }
-#endif // def SUPPORT_ETHERNET
 
+        // DEBUG_V (String ("            IsEthernetConnected: ") + String (IsEthernetConnected));
+        // DEBUG_V (String ("AllowWiFiAndEthUpSimultaneously: ") + String (AllowWiFiAndEthUpSimultaneously));
+        SetEthernetIsConnected (IsEthernetConnected);
+
+#endif // def SUPPORT_ETHERNET
 
     } while (false);
 
+    HostnameChanged |= Validate ();
+
+    if(HostnameChanged)
+    {
+        WiFiDriver.SetHostname (hostname);
+#ifdef SUPPORT_ETHERNET
+        EthernetDriver.SetHostname (hostname);
+#endif // def SUPPORT_ETHERNET
+    }
+
+    ConfigChanged |= HostnameChanged;
+
+    // DEBUG_V (String ("ConfigChanged: ") + String (ConfigChanged));
     // DEBUG_END;
     return ConfigChanged;
 
 } // SetConfig
+
+//-----------------------------------------------------------------------------
+bool c_NetworkMgr:: Validate ()
+{
+    // DEBUG_START;
+    bool Changed = false;
+
+    // DEBUG_V (String ("hostname: \"") + hostname + "\"");
+    if (0 == hostname.length ())
+    {
+#ifdef ARDUINO_ARCH_ESP8266
+        String chipId = String (ESP.getChipId (), HEX);
+#else
+        String chipId = int64String (ESP.getEfuseMac (), HEX);
+#endif
+        // DEBUG_V ("Setting Hostname default");
+        hostname = "esps-" + String (chipId);
+        Changed = true;
+    }
+    // DEBUG_V (String ("hostname: \"") + hostname + "\"");
+    // DEBUG_V (String (" Changed: ") + String (Changed));
+
+    // DEBUG_END;
+    return Changed;
+} // Validate
 
 //-----------------------------------------------------------------------------
 void c_NetworkMgr::SetWiFiIsConnected (bool newState)
@@ -242,9 +269,7 @@ void c_NetworkMgr::SetWiFiIsConnected (bool newState)
     if (IsWiFiConnected != newState)
     {
         IsWiFiConnected = newState;
-        InputMgr.NetworkStateChanged (newState);
-        WebMgr.NetworkStateChanged (newState);
-        FPPDiscovery.NetworkStateChanged (newState);
+        AdvertiseNewState ();
     }
 
     // DEBUG_END;
@@ -253,9 +278,37 @@ void c_NetworkMgr::SetWiFiIsConnected (bool newState)
 //-----------------------------------------------------------------------------
 void c_NetworkMgr::SetEthernetIsConnected (bool newState)
 {
-    InputMgr.NetworkStateChanged (newState);
-    WebMgr.NetworkStateChanged (newState);
-    FPPDiscovery.NetworkStateChanged (newState);
+    // DEBUG_START;
+    // DEBUG_V (String ("newState: ") + String (newState));
+
+    if (IsEthernetConnected != newState)
+    {
+        IsEthernetConnected = newState;
+
+        if (!AllowWiFiAndEthUpSimultaneously)
+        {
+            // DEBUG_V ("!AllowWiFiAndEthUpSimultaneously");
+            if (true == newState)
+            {
+                // DEBUG_V ("Disable");
+                WiFiDriver.Disable ();
+            }
+            else
+            {
+                // DEBUG_V ("Enable");
+                WiFiDriver.Enable ();
+            }
+        }
+        else
+        {
+            // DEBUG_V ();
+            WiFiDriver.Enable ();
+        }
+
+        AdvertiseNewState ();
+    }
+
+    // DEBUG_END;
 } // SetEthernetIsConnected
 
 // create a global instance of the network manager

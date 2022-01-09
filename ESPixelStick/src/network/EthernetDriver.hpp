@@ -21,7 +21,8 @@
 #include "../ESPixelStick.h"
 #ifdef SUPPORT_ETHERNET
 
-#include <Eth.h>
+// #include <ETH.h>
+#include "ETH_m.h"
 
 // forward declaration
 class c_EthernetDriver;
@@ -38,6 +39,8 @@ public:
     virtual void OnConnect (void) = 0;
     virtual void OnDisconnect (void) = 0;
     void SetParent (c_EthernetDriver* parent) { pEthernetDriver = parent; }
+    void GetDriverName (String& value) { value = CN_EthDrv; }
+
 }; // fsm_Eth_state
 
 class c_EthernetDriver
@@ -47,52 +50,57 @@ public:
     virtual ~c_EthernetDriver ();
 
     void      Begin           (); ///< set up the operating environment based on the current config (or defaults)
+    void      GetConfig       (JsonObject & json);
+    bool      SetConfig       (JsonObject & json);
+    void      GetDriverName   (String & value) { value = CN_EthDrv; }
+
     int       ValidateConfig  ();
-    IPAddress getIpAddress    () { return CurrentIpAddress; }
-    void      setIpAddress    (IPAddress NewAddress ) { CurrentIpAddress = NewAddress; }
-    IPAddress getIpSubNetMask () { return CurrentSubnetMask; }
-    void      setIpSubNetMask (IPAddress NewAddress) { CurrentSubnetMask = NewAddress; }
-    String    getMacAddress   () { return CurrentMacAddress; }
-    void      setMacAddress   (String NewAddress ) { CurrentMacAddress = NewAddress; }
-    String    getHostname     () { return CurrentHostname; }
-    void      setHostname     (String NewHostname ) { CurrentHostname = NewHostname; }
+    IPAddress GetIpAddress    ();
+    IPAddress GetIpSubNetMask ();
+    String    GetMacAddress   ();
+    void      GetHostname     (String & Name);
+    void      SetHostname     (String & Name) {}
     void      GetStatus       (JsonObject & jsonStatus);
     void      connectEth      ();
     void      connectEth      (const String & ssid, const String & passphrase);
     void      reset           ();
-    void      Poll ();
-
+    void      Poll            ();
+    bool      IsConnected     ();
     void      SetFsmState         (fsm_Eth_state * NewState) { pCurrentFsmState = NewState; }
     void      AnnounceState       ();
     void      SetFsmStartTime     (uint32_t NewStartTime)    { FsmTimerEthStartTime = NewStartTime; }
     uint32_t  GetFsmStartTime     (void)                     { return FsmTimerEthStartTime; }
-    bool      IsConnected         () {return IsEthConnected() || IsEthConnected();}
     void      NetworkStateChanged (bool NetworkState);
+    void      StartEth ();
 
 private:
 
-#define PollInterval 1000
-
-    IPAddress           CurrentIpAddress  = IPAddress (0, 0, 0, 0);
-    IPAddress           CurrentSubnetMask = IPAddress (0, 0, 0, 0);
-    String              CurrentMacAddress = "";
-    time_t              NextPollTime = 0;
-    bool                ReportedIsEthConnected = false;
-
-    IPAddress   ip = (uint32_t)0;
-    IPAddress   netmask = (uint32_t)0;
-    IPAddress   gateway = (uint32_t)0;
-    bool        UseDhcp = true;           ///< Use DHCP?
-
     void SetUpIp ();
 
-    void onEthConnect    (const WiFiEvent_t event, const WiFiEventInfo_t info);
-    void onEthDisconnect (const WiFiEvent_t event, const WiFiEventInfo_t info);
+    void onEthStartHandler      (const WiFiEvent_t event, const WiFiEventInfo_t info);
+    void onEthConnectHandler    (const WiFiEvent_t event, const WiFiEventInfo_t info);
+    void onEthDisconnectHandler (const WiFiEvent_t event, const WiFiEventInfo_t info);
+
+    uint32_t         NextPollTime = 0;
+    uint32_t         PollInterval = 10000;
+
+    IPAddress        ip        = (uint32_t)0;
+    IPAddress        netmask   = (uint32_t)0;
+    IPAddress        gateway   = (uint32_t)0;
+    bool             UseDhcp   = true;
+    uint32_t         phy_addr  = DEFAULT_ETH_ADDR;
+    gpio_num_t       power_pin = DEFAULT_ETH_POWER_PIN;
+    gpio_num_t       mdc_pin   = DEFAULT_ETH_MDC_PIN;
+    gpio_num_t       mdio_pin  = DEFAULT_ETH_MDIO_PIN;
+    eth_phy_type_t   phy_type  = DEFAULT_ETH_TYPE;
+    eth_clock_mode_t clk_mode  = DEFAULT_ETH_CLK_MODE;
 
 protected:
     friend class fsm_Eth_state_Boot;
     friend class fsm_Eth_state_ConnectingToEth;
     friend class fsm_Eth_state_ConnectedToEth;
+    friend class fsm_Eth_state_ConnectionFailed;
+    friend class fsm_Eth_state_DeviceInitFailed;
     friend class fsm_Eth_state;
     fsm_Eth_state * pCurrentFsmState = nullptr;
     uint32_t        FsmTimerEthStartTime = 0;
@@ -118,12 +126,24 @@ public:
 }; // fsm_Eth_state_Boot
 
 /*****************************************************************************/
+class fsm_Eth_state_PoweringUp : public fsm_Eth_state
+{
+public:
+    virtual void Poll (void);
+    virtual void Init (void);
+    virtual void GetStateName (String& sName) { sName = F ("Powering Up"); }
+    virtual void OnConnect (void) {}
+    virtual void OnDisconnect (void) {}
+
+}; // fsm_Eth_state_PoweringUp
+
+/*****************************************************************************/
 class fsm_Eth_state_ConnectingToEth : public fsm_Eth_state
 {
 public:
     virtual void Poll (void);
     virtual void Init (void);
-    virtual void GetStateName (String& sName) { sName = F ("Connecting to Ethernet"); }
+    virtual void GetStateName (String& sName) { sName = F ("Connecting"); }
     virtual void OnConnect (void);
     virtual void OnDisconnect (void)          { LOG_PORT.print ("."); }
 
@@ -133,13 +153,37 @@ public:
 class fsm_Eth_state_ConnectedToEth : public fsm_Eth_state
 {
 public:
-    virtual void Poll (void);
+    virtual void Poll (void) {}
     virtual void Init (void);
-    virtual void GetStateName (String& sName) { sName = F ("Connected To Ethernet"); }
+    virtual void GetStateName (String& sName) { sName = F ("Connected"); }
     virtual void OnConnect (void) {}
     virtual void OnDisconnect (void);
 
 }; // fsm_Eth_state_ConnectedToEth
+
+/*****************************************************************************/
+class fsm_Eth_state_ConnectionFailed : public fsm_Eth_state
+{
+public:
+    virtual void Poll (void);
+    virtual void Init (void);
+    virtual void GetStateName (String& sName) { sName = F ("Connection Failed"); }
+    virtual void OnConnect (void) {}
+    virtual void OnDisconnect (void) {}
+
+}; // fsm_Eth_state_ConnectionFailed
+
+/*****************************************************************************/
+class fsm_Eth_state_DeviceInitFailed : public fsm_Eth_state
+{
+public:
+    virtual void Poll (void) {}
+    virtual void Init (void);
+    virtual void GetStateName (String& sName) { sName = F ("Device Init Failed"); }
+    virtual void OnConnect (void) {}
+    virtual void OnDisconnect (void) {}
+
+}; // fsm_Eth_state_DeviceInitFailed
 
 extern c_EthernetDriver EthernetDriver;
 

@@ -45,20 +45,24 @@ public:
     void SetEthernetIsConnected (bool newState);
 
     bool IsConnected () { return (IsWiFiConnected || IsEthernetConnected); }
-    void GetHostname (String& name) { name = hostname; }
+    void GetHostname (String & name) { name = hostname; }
     IPAddress GetlocalIP ();
 
 private:
+    bool Validate ();
+    void AdvertiseNewState ();
 
     c_WiFiDriver     WiFiDriver;
 #ifdef SUPPORT_ETHERNET
     c_EthernetDriver EthernetDriver;
 #endif // def SUPPORT_ETHERNET
 
+    String  hostname;
     bool    HasBeenInitialized  = false;
     bool    IsWiFiConnected     = false;
     bool    IsEthernetConnected = false;
-    String  hostname;
+    bool    PreviousState       = false;
+    bool    AllowWiFiAndEthUpSimultaneously = true;
 
 }; // c_NetworkMgr
 
