@@ -212,7 +212,7 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
 
         // DEBUG_V (String ("            IsEthernetConnected: ") + String (IsEthernetConnected));
         // DEBUG_V (String ("AllowWiFiAndEthUpSimultaneously: ") + String (AllowWiFiAndEthUpSimultaneously));
-        SetEthernetIsConnected (IsEthernetConnected);
+        SetWiFiEnable ();
 
 #endif // def SUPPORT_ETHERNET
 
@@ -276,6 +276,31 @@ void c_NetworkMgr::SetWiFiIsConnected (bool newState)
 } // SetWiFiIsConnected
 
 //-----------------------------------------------------------------------------
+void c_NetworkMgr::SetWiFiEnable ()
+{
+    if (!AllowWiFiAndEthUpSimultaneously)
+    {
+        // DEBUG_V ("!AllowWiFiAndEthUpSimultaneously");
+        if (true == IsEthernetConnected)
+        {
+            // DEBUG_V ("Disable");
+            WiFiDriver.Disable ();
+        }
+        else
+        {
+            // DEBUG_V ("Enable");
+            WiFiDriver.Enable ();
+        }
+    }
+    else
+    {
+        // DEBUG_V ();
+        WiFiDriver.Enable ();
+    }
+
+} // SetWiFiEnabled
+
+//-----------------------------------------------------------------------------
 void c_NetworkMgr::SetEthernetIsConnected (bool newState)
 {
     // DEBUG_START;
@@ -284,27 +309,7 @@ void c_NetworkMgr::SetEthernetIsConnected (bool newState)
     if (IsEthernetConnected != newState)
     {
         IsEthernetConnected = newState;
-
-        if (!AllowWiFiAndEthUpSimultaneously)
-        {
-            // DEBUG_V ("!AllowWiFiAndEthUpSimultaneously");
-            if (true == newState)
-            {
-                // DEBUG_V ("Disable");
-                WiFiDriver.Disable ();
-            }
-            else
-            {
-                // DEBUG_V ("Enable");
-                WiFiDriver.Enable ();
-            }
-        }
-        else
-        {
-            // DEBUG_V ();
-            WiFiDriver.Enable ();
-        }
-
+        SetWiFiEnable ();
         AdvertiseNewState ();
     }
 

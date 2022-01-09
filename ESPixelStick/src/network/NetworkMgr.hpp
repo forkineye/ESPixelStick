@@ -51,6 +51,7 @@ public:
 private:
     bool Validate ();
     void AdvertiseNewState ();
+    void SetWiFiEnable ();
 
     c_WiFiDriver     WiFiDriver;
 #ifdef SUPPORT_ETHERNET
