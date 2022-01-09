@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
 // Create secrets.h with a #define for SECRETS_SSID and SECRETS_PASS
 // or delete the #include and enter the strings directly below.
-#include "secrets.h"
+// #include "secrets.h"
 #ifndef SECRETS_SSID
 #   define SECRETS_SSID "DEFAULT_SSID_NOT_SET"
 #   define SECRETS_PASS "DEFAULT_PASSPHRASE_NOT_SET"
@@ -67,22 +67,12 @@ fsm_WiFi_state_ConnectedToAP           fsm_WiFi_state_ConnectedToAP_imp;
 fsm_WiFi_state_ConnectingAsAP          fsm_WiFi_state_ConnectingAsAP_imp;
 fsm_WiFi_state_ConnectedToSta          fsm_WiFi_state_ConnectedToSta_imp;
 fsm_WiFi_state_ConnectionFailed        fsm_WiFi_state_ConnectionFailed_imp;
+fsm_WiFi_state_Disabled                fsm_WiFi_state_Disabled_imp;
 
 //-----------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
 c_WiFiDriver::c_WiFiDriver ()
 {
-    ssid.clear ();
-    passphrase.clear ();
-    ip = IPAddress ((uint32_t)0);
-    netmask = IPAddress ((uint32_t)0);
-    gateway = IPAddress ((uint32_t)0);
-    UseDhcp = true;
-    ap_fallbackIsEnabled = true;
-    RebootOnWiFiFailureToConnect = true;
-    ap_timeout = AP_TIMEOUT;
-    sta_timeout = CLIENT_TIMEOUT;
-
     fsm_WiFi_state_Boot_imp.SetParent (this);
     fsm_WiFi_state_ConnectingUsingConfig_imp.SetParent (this);
     fsm_WiFi_state_ConnectingUsingDefaults_imp.SetParent (this);
@@ -90,6 +80,7 @@ c_WiFiDriver::c_WiFiDriver ()
     fsm_WiFi_state_ConnectingAsAP_imp.SetParent (this);
     fsm_WiFi_state_ConnectedToSta_imp.SetParent (this);
     fsm_WiFi_state_ConnectionFailed_imp.SetParent (this);
+    fsm_WiFi_state_Disabled_imp.SetParent (this);
 
     // this gets called pre-setup so there is nothing we can do here.
     fsm_WiFi_state_Boot_imp.Init ();
@@ -251,6 +242,37 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
 } // connectWifi
 
 //-----------------------------------------------------------------------------
+void c_WiFiDriver::Disable ()
+{
+    // DEBUG_START;
+
+    if (pCurrentFsmState != &fsm_WiFi_state_Disabled_imp)
+    {
+        // DEBUG_V ();
+        WiFi.enableSTA (false);
+        WiFi.enableAP (false);
+        fsm_WiFi_state_Disabled_imp.Init ();
+    }
+
+    // DEBUG_END;
+} // Disable
+
+//-----------------------------------------------------------------------------
+void c_WiFiDriver::Enable ()
+{
+    // DEBUG_START;
+
+    if (pCurrentFsmState == &fsm_WiFi_state_Disabled_imp)
+    {
+        // DEBUG_V ();
+        WiFi.enableSTA (true);
+        WiFi.enableAP (false);
+        fsm_WiFi_state_ConnectionFailed_imp.Init ();
+    }
+    // DEBUG_END;
+} // Enable
+
+//-----------------------------------------------------------------------------
 void c_WiFiDriver::GetConfig (JsonObject& json)
 {
     // DEBUG_START;
@@ -282,7 +304,7 @@ void c_WiFiDriver::GetConfig (JsonObject& json)
 } // GetConfig
 
 //-----------------------------------------------------------------------------
-void c_WiFiDriver::GetWiFiHostname (String & name)
+void c_WiFiDriver::GetHostname (String & name)
 {
 #ifdef ARDUINO_ARCH_ESP8266
     name = WiFi.hostname ();
@@ -296,12 +318,16 @@ void c_WiFiDriver::GetWiFiHostname (String & name)
 void c_WiFiDriver::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
+    String Hostname;
+    GetHostname (Hostname);
+    jsonStatus[CN_hostname] = Hostname;
 
     jsonStatus[CN_rssi] = WiFi.RSSI ();
     jsonStatus[CN_ip] = getIpAddress ().toString ();
     jsonStatus[CN_subnet] = getIpSubNetMask ().toString ();
     jsonStatus[CN_mac] = WiFi.macAddress ();
     jsonStatus[CN_ssid] = WiFi.SSID ();
+    jsonStatus[CN_connected] = IsWiFiConnected ();
 
     // DEBUG_END;
 } // GetStatus
@@ -435,17 +461,6 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
 } // SetConfig
 
 //-----------------------------------------------------------------------------
-void c_WiFiDriver::displayFsmState ()
-{
-    // String Name;
-    // GetDriverName (Name);
-
-    // DEBUG_V (String ("            Name: ") + Name);
-    // DEBUG_V (String ("            this: ") + String (uint32_t (this), HEX));
-    // DEBUG_V (String ("pCurrentFsmState: ") + String (uint32_t (pCurrentFsmState), HEX));
-}
-
-//-----------------------------------------------------------------------------
 void c_WiFiDriver::SetFsmState (fsm_WiFi_state* NewState)
 {
     // DEBUG_START;
@@ -456,6 +471,17 @@ void c_WiFiDriver::SetFsmState (fsm_WiFi_state* NewState)
     // DEBUG_END;
 
 } // SetFsmState
+
+//-----------------------------------------------------------------------------
+void c_WiFiDriver::SetHostname (String & )
+{
+    // DEBUG_START;
+
+    // Need to reset the WiFi sub system if the host name changes
+    reset ();
+
+    // DEBUG_END;
+} // SetHostname
 
 //-----------------------------------------------------------------------------
 void c_WiFiDriver::SetUpIp ()
@@ -889,7 +915,7 @@ void fsm_WiFi_state_ConnectionFailed::Init ()
         }
         else
         {
-            logcon (F ("WiFi Reboot Disabled."));
+            // DEBUG_V ("WiFi Reboot Disabled.");
 
             // start over
             fsm_WiFi_state_Boot_imp.Init ();
@@ -899,4 +925,25 @@ void fsm_WiFi_state_ConnectionFailed::Init ()
     // DEBUG_END;
 
 } // fsm_WiFi_state_ConnectionFailed::Init
+
+/*****************************************************************************/
+/*****************************************************************************/
+// Wait for events
+void fsm_WiFi_state_Disabled::Init ()
+{
+    // DEBUG_START;
+
+    pWiFiDriver->SetFsmState (this);
+    pWiFiDriver->AnnounceState ();
+
+    if (pWiFiDriver->IsWiFiConnected ())
+    {
+        pWiFiDriver->SetIsWiFiConnected (false);
+        NetworkMgr.SetWiFiIsConnected (false);
+    }
+
+    // DEBUG_END;
+
+} // fsm_WiFi_state_ConnectionFailed::Init
+
 //-----------------------------------------------------------------------------

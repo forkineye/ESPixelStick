@@ -77,13 +77,15 @@ public:
     bool      Get_RebootOnWiFiFailureToConnect () { return RebootOnWiFiFailureToConnect; }
     String    GetConfig_ssid () { return ssid; }
     String    GetConfig_passphrase () { return passphrase; }
-    void      GetWiFiHostname (String& name);
+    void      GetHostname (String& name);
+    void      SetHostname (String & name);
+    void      Disable ();
+    void      Enable ();
 
 private:
 
     int       ValidateConfig ();
 
-#define PollInterval 1000
 
 #ifdef ARDUINO_ARCH_ESP8266
     WiFiEventHandler    wifiConnectHandler;     // WiFi connect handler
@@ -92,17 +94,22 @@ private:
     // config_t           *config = nullptr;                           // Current configuration
     IPAddress   CurrentIpAddress  = IPAddress (0, 0, 0, 0);
     IPAddress   CurrentSubnetMask = IPAddress (0, 0, 0, 0);
-    time_t      NextPollTime = 0;
+    uint32_t    NextPollTime = 0;
+    uint32_t    PollInterval = 1000;
     bool        ReportedIsWiFiConnected = false;
 
     String      ssid;
     String      passphrase;
-    IPAddress   ip      = (uint32_t)0;
-    IPAddress   netmask = (uint32_t)0;
-    IPAddress   gateway = (uint32_t)0;
-    bool        UseDhcp = true;           ///< Use DHCP?
-    bool        ap_fallbackIsEnabled = true;           ///< Fallback to AP if fail to associate?
-    uint32_t    ap_timeout = AP_TIMEOUT;     ///< How long to wait in AP mode with no connection before rebooting
+    IPAddress   ip      = IPAddress ((uint32_t)0);
+    IPAddress   netmask = IPAddress ((uint32_t)0);
+    IPAddress   gateway = IPAddress ((uint32_t)0);
+    bool        UseDhcp = true;
+#ifdef SUPPORT_ETHERNET
+    bool        ap_fallbackIsEnabled = false;
+#else
+    bool        ap_fallbackIsEnabled = true;
+#endif // def SUPPORT_ETHERNET
+    uint32_t    ap_timeout = AP_TIMEOUT;      ///< How long to wait in AP mode with no connection before rebooting
     uint32_t    sta_timeout = CLIENT_TIMEOUT; ///< Timeout when connection as client (station)
     bool        RebootOnWiFiFailureToConnect = true;
 
@@ -118,7 +125,6 @@ private:
     void onWiFiStaConn    (const WiFiEvent_t event, const WiFiEventInfo_t info);
     void onWiFiStaDisc    (const WiFiEvent_t event, const WiFiEventInfo_t info);
 #endif
-    void displayFsmState ();
 
 protected:
     friend class fsm_WiFi_state_Boot;
@@ -128,6 +134,7 @@ protected:
     friend class fsm_WiFi_state_ConnectingAsAP;
     friend class fsm_WiFi_state_ConnectedToSta;
     friend class fsm_WiFi_state_ConnectionFailed;
+    friend class fsm_WiFi_state_Disabled;
     friend class fsm_WiFi_state;
     fsm_WiFi_state * pCurrentFsmState = nullptr;
     uint32_t         FsmTimerWiFiStartTime = 0;
@@ -224,3 +231,15 @@ public:
     virtual void OnDisconnect (void) {}
 
 }; // fsm_WiFi_state_Rebooting
+
+/*****************************************************************************/
+class fsm_WiFi_state_Disabled : public fsm_WiFi_state
+{
+public:
+    virtual void Poll (void) {}
+    virtual void Init (void);
+    virtual void GetStateName (String& sName) { sName = F ("Disabled"); }
+    virtual void OnConnect (void) {}
+    virtual void OnDisconnect (void) {}
+
+}; // fsm_WiFi_state_Disabled
