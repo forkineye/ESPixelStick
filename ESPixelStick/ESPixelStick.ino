@@ -30,7 +30,7 @@
 // Output modules
 #include "src/output/OutputMgr.hpp"
 
-// WiFi interface
+// Network interface
 #include "src/network/NetworkMgr.hpp"
 
 // WEB interface
