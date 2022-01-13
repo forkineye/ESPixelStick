@@ -37,6 +37,7 @@ public:
     virtual void Init (void) = 0;
     virtual void GetStateName (String& sName) = 0;
     virtual void OnConnect (void) = 0;
+    virtual void OnGotIp (void) = 0;
     virtual void OnDisconnect (void) = 0;
     void SetParent (c_EthernetDriver* parent) { pEthernetDriver = parent; }
     void GetDriverName (String& value) { value = CN_EthDrv; }
@@ -77,16 +78,14 @@ private:
 
     void SetUpIp ();
 
-    void onEthStartHandler      (const WiFiEvent_t event, const WiFiEventInfo_t info);
-    void onEthConnectHandler    (const WiFiEvent_t event, const WiFiEventInfo_t info);
-    void onEthDisconnectHandler (const WiFiEvent_t event, const WiFiEventInfo_t info);
+    void onEventHandler         (const WiFiEvent_t event, const WiFiEventInfo_t info);
 
     uint32_t         NextPollTime = 0;
-    uint32_t         PollInterval = 10000;
+    uint32_t         PollInterval = 1000;
 
-    IPAddress        ip        = (uint32_t)0;
-    IPAddress        netmask   = (uint32_t)0;
-    IPAddress        gateway   = (uint32_t)0;
+    IPAddress        ip        = INADDR_NONE;
+    IPAddress        netmask   = INADDR_NONE;
+    IPAddress        gateway   = INADDR_NONE;
     bool             UseDhcp   = true;
     uint32_t         phy_addr  = DEFAULT_ETH_ADDR;
     gpio_num_t       power_pin = DEFAULT_ETH_POWER_PIN;
@@ -121,6 +120,7 @@ public:
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Boot"); }
     virtual void OnConnect (void)             { /* ignore */ }
+    virtual void OnGotIp (void)               { /* ignore */ }
     virtual void OnDisconnect (void)          { /* ignore */ }
 
 }; // fsm_Eth_state_Boot
@@ -133,6 +133,7 @@ public:
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Powering Up"); }
     virtual void OnConnect (void) {}
+    virtual void OnGotIp (void) {}
     virtual void OnDisconnect (void) {}
 
 }; // fsm_Eth_state_PoweringUp
@@ -145,6 +146,7 @@ public:
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Connecting"); }
     virtual void OnConnect (void);
+    virtual void OnGotIp (void) {}
     virtual void OnDisconnect (void)          { LOG_PORT.print ("."); }
 
 }; // fsm_Eth_state_ConnectingToEth
@@ -157,6 +159,7 @@ public:
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Connected"); }
     virtual void OnConnect (void) {}
+    virtual void OnGotIp (void) {}
     virtual void OnDisconnect (void);
 
 }; // fsm_Eth_state_ConnectedToEth
@@ -169,6 +172,7 @@ public:
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Connection Failed"); }
     virtual void OnConnect (void) {}
+    virtual void OnGotIp (void) {}
     virtual void OnDisconnect (void) {}
 
 }; // fsm_Eth_state_ConnectionFailed
@@ -181,6 +185,7 @@ public:
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Device Init Failed"); }
     virtual void OnConnect (void) {}
+    virtual void OnGotIp (void) {}
     virtual void OnDisconnect (void) {}
 
 }; // fsm_Eth_state_DeviceInitFailed

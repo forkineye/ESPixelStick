@@ -84,9 +84,7 @@ void c_EthernetDriver::Begin ()
     // DEBUG_START;
 
     // Setup Ethernet Handlers
-    WiFi.onEvent ([this](WiFiEvent_t event, arduino_event_info_t info) {this->onEthStartHandler      (event, info); }, WiFiEvent_t::ARDUINO_EVENT_ETH_START);
-    WiFi.onEvent ([this](WiFiEvent_t event, arduino_event_info_t info) {this->onEthConnectHandler    (event, info); }, WiFiEvent_t::ARDUINO_EVENT_ETH_GOT_IP);
-    WiFi.onEvent ([this](WiFiEvent_t event, arduino_event_info_t info) {this->onEthDisconnectHandler (event, info); }, WiFiEvent_t::ARDUINO_EVENT_ETH_DISCONNECTED);
+    WiFi.onEvent ([this](WiFiEvent_t event, arduino_event_info_t info) {this->onEventHandler (event, info); });
 
     // set up the poll interval
     NextPollTime = millis () + PollInterval;
@@ -200,39 +198,55 @@ void c_EthernetDriver::NetworkStateChanged (bool NetworkState)
 } // NetworkStateChanged
 
 //-----------------------------------------------------------------------------
-void c_EthernetDriver::onEthConnectHandler (const WiFiEvent_t event, const WiFiEventInfo_t info)
+void c_EthernetDriver::onEventHandler (const WiFiEvent_t event, const WiFiEventInfo_t info)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
-    pCurrentFsmState->OnConnect ();
+    switch (event)
+    {
+        case ARDUINO_EVENT_ETH_START:
+        {
+            DEBUG_V ("ARDUINO_EVENT_ETH_START");
 
-    // DEBUG_END;
+            String Hostname;
+            NetworkMgr.GetHostname (Hostname);
+            ETH_m.setHostname (Hostname.c_str ());
 
-} // onEthConnectHandler
+            break;
+        }
+        case ARDUINO_EVENT_ETH_CONNECTED:
+        {
+            DEBUG_V ("ARDUINO_EVENT_ETH_CONNECTED");
+            pCurrentFsmState->OnConnect ();
+            break;
+        }
+        case ARDUINO_EVENT_ETH_GOT_IP:
+        {
+            DEBUG_V ("ARDUINO_EVENT_ETH_GOT_IP");
+            pCurrentFsmState->OnGotIp ();
+            break;
+        }
+        case ARDUINO_EVENT_ETH_DISCONNECTED:
+        {
+            DEBUG_V ("ARDUINO_EVENT_ETH_DISCONNECTED");
+            pCurrentFsmState->OnDisconnect ();
+            break;
+        }
+        case ARDUINO_EVENT_ETH_STOP:
+        {
+            DEBUG_V ("ARDUINO_EVENT_ETH_STOP");
+            pCurrentFsmState->OnDisconnect ();
+            break;
+        }
+        default:
+        {
+            // some event we are not processing
+            break;
+        }
+    }
+    DEBUG_END;
 
-//-----------------------------------------------------------------------------
-void c_EthernetDriver::onEthDisconnectHandler (const WiFiEvent_t event, const WiFiEventInfo_t info)
-{
-    // DEBUG_START;
-
-    pCurrentFsmState->OnDisconnect ();
-
-    // DEBUG_END;
-
-} // onEthDisconnectHandler
-
-//-----------------------------------------------------------------------------
-void c_EthernetDriver::onEthStartHandler (const WiFiEvent_t event, const WiFiEventInfo_t info)
-{
-    // DEBUG_START;
-
-    String Hostname;
-    NetworkMgr.GetHostname (Hostname);
-    ETH_m.setHostname (Hostname.c_str ());
-
-    // DEBUG_END;
-
-} // onEthStartHandler
+} // onEventHandler
 
 //-----------------------------------------------------------------------------
 void c_EthernetDriver::Poll ()
@@ -305,13 +319,16 @@ void c_EthernetDriver::SetUpIp ()
     // DEBUG_START;
     do // once
     {
+        IPAddress temp = INADDR_NONE;
+
         if (true == UseDhcp)
         {
             logcon (F ("Connecting to Ethernet using DHCP"));
+            ETH_m.config (temp, temp, temp, temp);
+
             break;
         }
 
-        IPAddress temp = (uint32_t)0;
         // DEBUG_V ("   temp: " + temp.toString ());
 
         if (temp == ip)
@@ -400,8 +417,13 @@ void fsm_Eth_state_Boot::Poll ()
 {
     // DEBUG_START;
 
-    // Start trying to connect to based on input config
-    fsm_Eth_state_PoweringUp_imp.Init ();
+    uint32_t CurrentTimeMS = millis ();
+
+    if (CurrentTimeMS - pEthernetDriver->GetFsmStartTime () > (10000))
+    {
+        // Start trying to connect
+        fsm_Eth_state_PoweringUp_imp.Init ();
+    }
 
     // DEBUG_END;
 } // fsm_Eth_state_boot
@@ -416,6 +438,7 @@ void fsm_Eth_state_PoweringUp::Init ()
     pEthernetDriver->AnnounceState ();
     pEthernetDriver->SetFsmStartTime (millis ());
 
+    // Set up the power control output
     pinMode (gpio_num_t::GPIO_NUM_15, OUTPUT);
     digitalWrite (gpio_num_t::GPIO_NUM_15, LOW);
 
@@ -474,11 +497,11 @@ void fsm_Eth_state_ConnectingToEth::Poll ()
 /*****************************************************************************/
 void fsm_Eth_state_ConnectingToEth::OnConnect ()
 {
-    // DEBUG_START;
+    DEBUG_START;
 
     fsm_Eth_state_ConnectedToEth_imp.Init ();
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // fsm_Eth_state_ConnectingToEth::OnConnect
 
@@ -493,10 +516,6 @@ void fsm_Eth_state_ConnectedToEth::Init ()
     pEthernetDriver->SetFsmStartTime (millis ());
 
     pEthernetDriver->SetUpIp ();
-
-    // pEthernetDriver->setIpAddress (ETH_m.localIP ());
-    // pEthernetDriver->setIpSubNetMask (ETH_m.subnetMask ());
-    // pEthernetDriver->setMacAddress (ETH_m.macAddress ());
 
     logcon (String (F ("Ethernet Connected with IP: ")) + pEthernetDriver->GetIpAddress ().toString ());
 
@@ -522,7 +541,7 @@ void fsm_Eth_state_ConnectedToEth::OnDisconnect ()
 /*****************************************************************************/
 void fsm_Eth_state_ConnectionFailed::Init ()
 {
-    // DEBUG_START;
+    DEBUG_START;
 
     pEthernetDriver->SetFsmState (this);
     pEthernetDriver->AnnounceState ();
@@ -530,21 +549,21 @@ void fsm_Eth_state_ConnectionFailed::Init ()
 
     ETH_m.stop ();
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // fsm_Eth_state_ConnectionFailed::Init
 
 /*****************************************************************************/
 void fsm_Eth_state_ConnectionFailed::Poll ()
 {
-    // DEBUG_START;
+    DEBUG_START;
 
     // take some recovery action
     fsm_Eth_state_ConnectingToEth_imp.Init ();
 
     ETH_m.start ();
 
-    // DEBUG_END;
+    DEBUG_END;
 } // fsm_Eth_state_ConnectionFailed::Poll
 
 /*****************************************************************************/
