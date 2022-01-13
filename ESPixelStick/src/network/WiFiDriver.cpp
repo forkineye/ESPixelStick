@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
 // Create secrets.h with a #define for SECRETS_SSID and SECRETS_PASS
 // or delete the #include and enter the strings directly below.
-// #include "secrets.h"
+#include "secrets.h"
 #ifndef SECRETS_SSID
 #   define SECRETS_SSID "DEFAULT_SSID_NOT_SET"
 #   define SECRETS_PASS "DEFAULT_PASSPHRASE_NOT_SET"
@@ -82,7 +82,6 @@ c_WiFiDriver::c_WiFiDriver ()
     fsm_WiFi_state_ConnectionFailed_imp.SetParent (this);
     fsm_WiFi_state_Disabled_imp.SetParent (this);
 
-    // this gets called pre-setup so there is nothing we can do here.
     fsm_WiFi_state_Boot_imp.Init ();
 } // c_WiFiDriver
 
@@ -235,6 +234,7 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
                       String (F ("' as ")) +
                       Hostname);
 
+    WiFi.setSleep (false);
     WiFi.begin (current_ssid.c_str (), current_passphrase.c_str ());
 
     // DEBUG_END;
