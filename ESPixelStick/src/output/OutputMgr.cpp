@@ -175,8 +175,8 @@ void c_OutputMgr::Begin ()
     HasBeenInitialized = true;
 
 #ifdef LED_FLASH_GPIO
-    pinMode (LED_GPIO, OUTPUT);
-    digitalWrite (LED_GPIO, LED_FLASH_OFF);
+    pinMode (LED_FLASH_GPIO, OUTPUT);
+    digitalWrite (LED_FLASH_GPIO, LED_FLASH_OFF);
 #endif // def LED_FLASH_GPIO
 
     // make sure the pointers are set up properly
