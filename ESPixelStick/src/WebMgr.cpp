@@ -22,7 +22,7 @@
 #include "output/OutputMgr.hpp"
 #include "input/InputMgr.hpp"
 #include "service/FPPDiscovery.h"
-#include "WiFiMgr.hpp"
+#include "network/NetworkMgr.hpp"
 
 #include "WebMgr.hpp"
 #include "FileMgr.hpp"
@@ -93,7 +93,7 @@ void c_WebMgr::Begin (config_t* /* NewConfig */)
 {
     // DEBUG_START;
 
-    if (WiFiMgr.IsWiFiConnected ())
+    if (NetworkMgr.IsConnected ())
     {
         init ();
     }
@@ -648,7 +648,7 @@ void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
     // DEBUG_V ("");
 
     // Ask WiFi Stats
-    WiFiMgr.GetStatus (system);
+    NetworkMgr.GetStatus (system);
     // DEBUG_V ("");
 
     FPPDiscovery.GetStatus (system);

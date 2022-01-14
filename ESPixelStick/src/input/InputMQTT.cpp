@@ -18,12 +18,12 @@
 */
 
 #include "../ESPixelStick.h"
-#include "../WiFiMgr.hpp"
 #include <Ticker.h>
 #include <Int64String.h>
 #include "InputMQTT.h"
 #include "InputFPPRemotePlayFile.hpp"
 #include "InputFPPRemotePlayList.hpp"
+#include "../network/NetworkMgr.hpp"
 
 #if defined ARDUINO_ARCH_ESP32
 #   include <functional>
@@ -40,7 +40,9 @@ c_InputMQTT::c_InputMQTT (
 {
     // DEBUG_START;
 
-    topic = String (F ("forkineye/")) + config.hostname;
+    String Hostname;
+    NetworkMgr.GetHostname (Hostname);
+    topic = String (F ("forkineye/")) + Hostname;
     lwtTopic = topic + CN_slashstatus;
 
     // Effect config defaults
@@ -211,7 +213,7 @@ bool c_InputMQTT::SetConfig (ArduinoJson::JsonObject & jsonConfig)
         mqtt.unsubscribe ((OldTopic + CN_slashset).c_str ());
     }
 
-    NetworkStateChanged (WiFiMgr.IsWiFiConnected (), false);
+    NetworkStateChanged (NetworkMgr.IsConnected (), false);
 
     // DEBUG_END;
     return true;
@@ -283,7 +285,7 @@ void c_InputMQTT::disconnectFromMqtt ()
     // DEBUG_START;
 
     // Only announce if we're actually connected
-    if (WiFiMgr.IsWiFiConnected()) {
+    if (NetworkMgr.IsConnected()) {
         logcon (String (F ("Disconnecting from broker")));
     }
     mqtt.disconnect ();

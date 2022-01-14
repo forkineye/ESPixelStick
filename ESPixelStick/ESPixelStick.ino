@@ -30,8 +30,8 @@
 // Output modules
 #include "src/output/OutputMgr.hpp"
 
-// WiFi interface
-#include "src/WiFiMgr.hpp"
+// Network interface
+#include "src/network/NetworkMgr.hpp"
 
 // WEB interface
 #include "src/WebMgr.hpp"
@@ -113,17 +113,7 @@ RF_PRE_INIT() {
 /** Arduino based setup code that is executed at startup. */
 void setup()
 {
-    config.ssid.clear ();
-    config.passphrase.clear ();
-    config.ip         = IPAddress ((uint32_t)0);
-    config.netmask    = IPAddress ((uint32_t)0);
-    config.gateway    = IPAddress ((uint32_t)0);
-    config.UseDhcp    = true;
     config.BlankDelay = 5;
-    config.ap_fallbackIsEnabled = true;
-    config.RebootOnWiFiFailureToConnect = true;
-    config.ap_timeout  = AP_TIMEOUT;
-    config.sta_timeout = CLIENT_TIMEOUT;
 
     // Setup serial log port
     LOG_PORT.begin(115200);
@@ -158,9 +148,9 @@ void setup()
 
     // connect the input processing to the output processing.
     InputMgr.Begin (OutputMgr.GetBufferAddress (), OutputMgr.GetBufferUsedSize ());
+    // DEBUG_V ("");
 
-    // Wifi will be reset in the main loop since we just booted and de-serialized the config
-    WiFiMgr.Begin ();
+    NetworkMgr.Begin ();
     // DEBUG_V ("");
 
     // Configure and start the web server
@@ -195,12 +185,6 @@ bool validateConfig()
 
     bool configValid = true;
 
-#ifdef ARDUINO_ARCH_ESP8266
-    String chipId = String (ESP.getChipId (), HEX);
-#else
-    String chipId = int64String (ESP.getEfuseMac (), HEX);
-#endif
-
     // Device defaults
     if (!config.id.length ())
     {
@@ -208,15 +192,6 @@ bool validateConfig()
         configValid = false;
         // DEBUG_V ();
     }
-
-    if (0 == config.hostname.length ())
-    {
-        config.hostname = "esps-" + String (chipId);
-        configValid = false;
-        // DEBUG_V ();
-    }
-
-    WiFiMgr.ValidateConfig ();
 
     return configValid;
 
@@ -249,52 +224,6 @@ bool dsDevice(JsonObject & json)
 
     return ConfigChanged;
 } // dsDevice
-
-/// Deserialize network configuration JSON to config structure - returns true if config change detected
-bool dsNetwork(JsonObject & json)
-{
-    // DEBUG_START;
-
-    bool ConfigChanged = false;
-    if (json.containsKey(CN_network))
-    {
-        String ip      = config.ip.toString ();
-        String gateway = config.gateway.toString ();
-        String netmask = config.netmask.toString ();
-
-        JsonObject network = json[CN_network];
-
-//TODO: Add configuration upgrade handling - cfgver moved to root level
-
-        ConfigChanged |= setFromJSON (config.ssid,                         network, CN_ssid);
-        ConfigChanged |= setFromJSON (config.passphrase,                   network, CN_passphrase);
-        ConfigChanged |= setFromJSON (ip,                                  network, CN_ip);
-        ConfigChanged |= setFromJSON (netmask,                             network, CN_netmask);
-        ConfigChanged |= setFromJSON (gateway,                             network, CN_gateway);
-        ConfigChanged |= setFromJSON (config.hostname,                     network, CN_hostname);
-        ConfigChanged |= setFromJSON (config.UseDhcp,                      network, CN_dhcp);
-        ConfigChanged |= setFromJSON (config.sta_timeout,                  network, CN_sta_timeout);
-        ConfigChanged |= setFromJSON (config.ap_fallbackIsEnabled,         network, CN_ap_fallback);
-        ConfigChanged |= setFromJSON (config.ap_timeout,                   network, CN_ap_timeout);
-        ConfigChanged |= setFromJSON (config.RebootOnWiFiFailureToConnect, network, CN_ap_reboot);
-
-        // DEBUG_V ("     ip: " + ip);
-        // DEBUG_V ("gateway: " + gateway);
-        // DEBUG_V ("netmask: " + netmask);
-
-        config.ip.fromString (ip);
-        config.gateway.fromString (gateway);
-        config.netmask.fromString (netmask);
-    }
-    else
-    {
-        logcon (String (F ("No network settings found.")));
-    }
-
-    // DEBUG_V (String("ConfigChanged: ") + String(ConfigChanged));
-    // DEBUG_END;
-    return ConfigChanged;
-} // dsNetwork
 
 // Save the config and schedule a load operation
 void SetConfig (const char * DataString)
@@ -347,7 +276,7 @@ bool deserializeCore (JsonObject & json)
 
         dsDevice  (json);
         FileMgr.SetConfig (json);
-        ResetWiFi = dsNetwork (json);
+        ConfigSaveNeeded |= NetworkMgr.SetConfig (json);
         DataHasBeenAccepted = true;
 
     } while (false);
@@ -425,30 +354,7 @@ void GetConfig (JsonObject & json)
 
     FileMgr.GetConfig (device);
 
-    // Network
-    JsonObject network = json.createNestedObject(CN_network);
-    network[CN_ssid]       = config.ssid;
-    network[CN_passphrase] = config.passphrase;
-    network[CN_hostname]   = config.hostname;
-#ifdef ARDUINO_ARCH_ESP8266
-    IPAddress Temp = config.ip;
-    network[CN_ip]      = Temp.toString ();
-    Temp = config.netmask;
-    network[CN_netmask] = Temp.toString ();
-    Temp = config.gateway;
-    network[CN_gateway] = Temp.toString ();
-#else
-    network[CN_ip]      = config.ip.toString ();
-    network[CN_netmask] = config.netmask.toString ();
-    network[CN_gateway] = config.gateway.toString ();
-#endif // !def ARDUINO_ARCH_ESP8266
-
-    network[CN_dhcp]        = config.UseDhcp;
-    network[CN_sta_timeout] = config.sta_timeout;
-
-    network[CN_ap_fallback] = config.ap_fallbackIsEnabled;
-    network[CN_ap_timeout]  = config.ap_timeout;
-    network[CN_ap_reboot]   = config.RebootOnWiFiFailureToConnect;
+    NetworkMgr.GetConfig (json);
 
     // DEBUG_END;
 } // GetConfig
@@ -495,8 +401,8 @@ void loop()
 
     FeedWDT ();
 
-    // Keep the WiFi Open
-    WiFiMgr.Poll ();
+    // Keep the Network Open
+    NetworkMgr.Poll ();
 
     // Process input data
     InputMgr.Process ();
@@ -535,12 +441,6 @@ void loop()
     {
         FeedWDT ();
         SaveConfig ();
-    }
-
-    if (true == ResetWiFi)
-    {
-        ResetWiFi = false;
-        WiFiMgr.reset ();
     }
 
 } // loop

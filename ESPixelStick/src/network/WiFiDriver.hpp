@@ -1,6 +1,6 @@
 #pragma once
 /*
-* WiFiMgr.hpp - Output Management class
+* WiFiDriver.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2021 Shelby Merrick
@@ -18,7 +18,7 @@
 *
 */
 
-#include "ESPixelStick.h"
+#include "../ESPixelStick.h"
 
 #ifdef ARDUINO_ARCH_ESP8266
 #   include <ESP8266WiFi.h>
@@ -26,58 +26,92 @@
 #   include <WiFi.h>
 #endif // def ARDUINO_ARCH_ESP8266
 
+// forward declaration for the compiler
+class c_WiFiDriver;
+
 // forward declaration
 /*****************************************************************************/
 class fsm_WiFi_state
 {
+protected:
+    c_WiFiDriver* pWiFiDriver = nullptr;
 public:
     virtual void Poll (void) = 0;
     virtual void Init (void) = 0;
     virtual void GetStateName (String& sName) = 0;
     virtual void OnConnect (void) = 0;
     virtual void OnDisconnect (void) = 0;
-    void GetDriverName (String & Name) { Name = "WiFiMgr"; }
+    void GetDriverName (String & Name) { Name = CN_WiFiDrv; }
+    void SetParent (c_WiFiDriver * parent) { pWiFiDriver = parent; }
 }; // fsm_WiFi_state
 
-class c_WiFiMgr
+class c_WiFiDriver
 {
 public:
-    c_WiFiMgr ();
-    virtual ~c_WiFiMgr ();
+    c_WiFiDriver ();
+    virtual ~c_WiFiDriver ();
 
-    void      Begin           (); ///< set up the operating environment based on the current config (or defaults)
-    int       ValidateConfig  ();
+    void Begin ();
+    void GetConfig (JsonObject & json);
+    void GetStatus (JsonObject & json);
+    bool SetConfig (JsonObject & json);
+
     IPAddress getIpAddress    () { return CurrentIpAddress; }
     void      setIpAddress    (IPAddress NewAddress ) { CurrentIpAddress = NewAddress; }
     IPAddress getIpSubNetMask () { return CurrentSubnetMask; }
     void      setIpSubNetMask (IPAddress NewAddress) { CurrentSubnetMask = NewAddress; }
-    void      GetStatus       (JsonObject & jsonStatus);
     void      connectWifi     (const String & ssid, const String & passphrase);
     void      reset           ();
     void      Poll ();
 
-    void      SetFsmState     (fsm_WiFi_state * NewState) { pCurrentFsmState = NewState; }
+    void      SetFsmState (fsm_WiFi_state* NewState);
     void      AnnounceState   ();
     void      SetFsmStartTime (uint32_t NewStartTime)    { FsmTimerWiFiStartTime = NewStartTime; }
     uint32_t  GetFsmStartTime (void)                     { return FsmTimerWiFiStartTime; }
-    // config_t* GetConfigPtr    () { return config; }
     bool      IsWiFiConnected () { return ReportedIsWiFiConnected; }
     void      SetIsWiFiConnected (bool value) { ReportedIsWiFiConnected = value; }
-    void      GetDriverName   (String & Name) { Name = "WiFiMgr"; }
+    void      GetDriverName   (String & Name) { Name = CN_WiFiDrv; }
+    uint32_t  Get_sta_timeout  () { return sta_timeout; }
+    uint32_t  Get_ap_timeout   () { return ap_timeout; }
+    bool      Get_ap_fallbackIsEnabled () { return ap_fallbackIsEnabled; }
+    bool      Get_RebootOnWiFiFailureToConnect () { return RebootOnWiFiFailureToConnect; }
+    String    GetConfig_ssid () { return ssid; }
+    String    GetConfig_passphrase () { return passphrase; }
+    void      GetHostname (String& name);
+    void      SetHostname (String & name);
+    void      Disable ();
+    void      Enable ();
 
 private:
 
-#define PollInterval 1000
+    int       ValidateConfig ();
+
 
 #ifdef ARDUINO_ARCH_ESP8266
     WiFiEventHandler    wifiConnectHandler;     // WiFi connect handler
     WiFiEventHandler    wifiDisconnectHandler;  // WiFi disconnect handler
 #endif
     // config_t           *config = nullptr;                           // Current configuration
-    IPAddress           CurrentIpAddress  = IPAddress (0, 0, 0, 0);
-    IPAddress           CurrentSubnetMask = IPAddress (0, 0, 0, 0);
-    time_t              NextPollTime = 0;
-    bool                ReportedIsWiFiConnected = false;
+    IPAddress   CurrentIpAddress  = IPAddress (0, 0, 0, 0);
+    IPAddress   CurrentSubnetMask = IPAddress (0, 0, 0, 0);
+    uint32_t    NextPollTime = 0;
+    uint32_t    PollInterval = 1000;
+    bool        ReportedIsWiFiConnected = false;
+
+    String      ssid;
+    String      passphrase;
+    IPAddress   ip      = IPAddress ((uint32_t)0);
+    IPAddress   netmask = IPAddress ((uint32_t)0);
+    IPAddress   gateway = IPAddress ((uint32_t)0);
+    bool        UseDhcp = true;
+    bool        ap_fallbackIsEnabled = true;
+    uint32_t    ap_timeout = AP_TIMEOUT;      ///< How long to wait in AP mode with no connection before rebooting
+    uint32_t    sta_timeout = CLIENT_TIMEOUT; ///< Timeout when connection as client (station)
+#ifdef SUPPORT_ETHERNET
+    bool        RebootOnWiFiFailureToConnect = false;
+#else
+    bool        RebootOnWiFiFailureToConnect = true;
+#endif // def SUPPORT_ETHERNET
 
     void SetUpIp ();
 
@@ -100,11 +134,12 @@ protected:
     friend class fsm_WiFi_state_ConnectingAsAP;
     friend class fsm_WiFi_state_ConnectedToSta;
     friend class fsm_WiFi_state_ConnectionFailed;
+    friend class fsm_WiFi_state_Disabled;
     friend class fsm_WiFi_state;
     fsm_WiFi_state * pCurrentFsmState = nullptr;
     uint32_t         FsmTimerWiFiStartTime = 0;
 
-}; // c_WiFiMgr
+}; // c_WiFiDriver
 
 
 /*****************************************************************************/
@@ -197,4 +232,14 @@ public:
 
 }; // fsm_WiFi_state_Rebooting
 
-extern c_WiFiMgr WiFiMgr;
+/*****************************************************************************/
+class fsm_WiFi_state_Disabled : public fsm_WiFi_state
+{
+public:
+    virtual void Poll (void) {}
+    virtual void Init (void);
+    virtual void GetStateName (String& sName) { sName = F ("Disabled"); }
+    virtual void OnConnect (void) {}
+    virtual void OnDisconnect (void) {}
+
+}; // fsm_WiFi_state_Disabled

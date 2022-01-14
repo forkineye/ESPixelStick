@@ -18,7 +18,7 @@
 */
 
 #include "InputArtnet.hpp"
-#include "../WiFiMgr.hpp"
+#include "../network/NetworkMgr.hpp"
 
 //-----------------------------------------------------------------------------
 c_InputArtnet::c_InputArtnet (c_InputMgr::e_InputChannelIds NewInputChannelId,
@@ -57,7 +57,7 @@ void c_InputArtnet::Begin ()
         validateConfiguration ();
         // DEBUG_V ("");
 
-        NetworkStateChanged (WiFiMgr.IsWiFiConnected (), false);
+        NetworkStateChanged (NetworkMgr.IsConnected (), false);
 
         // DEBUG_V ("");
         HasBeenInitialized = true;
@@ -115,7 +115,7 @@ void c_InputArtnet::GetStatus (JsonObject & jsonStatus)
 void c_InputArtnet::Process ()
 {
     // DEBUG_START;
-    if ((nullptr != pArtnet) && (WiFiMgr.IsWiFiConnected ()))
+    if ((nullptr != pArtnet) && (NetworkMgr.IsConnected ()))
     {
         // DEBUG_V ("");
         pArtnet->read ();

@@ -53,21 +53,8 @@
 /// Core configuration structure
 typedef struct {
     // Device
-    String      id;         ///< Device ID
-
-    // Network
-    String      ssid;
-    String      passphrase;
-    String      hostname;
-    IPAddress   ip                   = (uint32_t)0;
-    IPAddress   netmask              = (uint32_t)0;
-    IPAddress   gateway              = (uint32_t)0;
-    time_t      BlankDelay           = time_t(5);
-    bool        UseDhcp              = true;           ///< Use DHCP?
-    bool        ap_fallbackIsEnabled = true;           ///< Fallback to AP if fail to associate?
-    uint32_t    ap_timeout           = AP_TIMEOUT;     ///< How long to wait in AP mode with no connection before rebooting
-    uint32_t    sta_timeout          = CLIENT_TIMEOUT; ///< Timeout when connection as client (station)
-    bool        RebootOnWiFiFailureToConnect = true;
+    String      id;
+    time_t      BlankDelay = time_t(5);
 } config_t;
 
 String  serializeCore          (bool pretty = false);
@@ -78,8 +65,8 @@ bool    dsNetwork              (JsonObject & json);
 extern  bool reboot;
 extern  bool IsBooting;
 extern  bool ResetWiFi;
-static const String ConfigFileName = "/config.json";
-extern void FeedWDT ();
+static  const String ConfigFileName = "/config.json";
+extern  void FeedWDT ();
 
 template <typename J, typename N>
 bool setFromJSON (float & OutValue, J& Json, N Name)
