@@ -58,12 +58,12 @@ public:
     int       ValidateConfig  ();
     IPAddress GetIpAddress    ();
     IPAddress GetIpSubNetMask ();
+    IPAddress GetIpGateway    ();
     String    GetMacAddress   ();
     void      GetHostname     (String & Name);
     void      SetHostname     (String & Name) {}
     void      GetStatus       (JsonObject & jsonStatus);
-    void      connectEth      ();
-    void      connectEth      (const String & ssid, const String & passphrase);
+    void      SetEthHostname  ();
     void      reset           ();
     void      Poll            ();
     bool      IsConnected     ();
@@ -82,6 +82,7 @@ private:
 
     uint32_t         NextPollTime = 0;
     uint32_t         PollInterval = 1000;
+    bool             HasBeenPreviouslyConfigured = false;
 
     IPAddress        ip        = INADDR_NONE;
     IPAddress        netmask   = INADDR_NONE;
@@ -146,7 +147,7 @@ public:
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Connecting"); }
     virtual void OnConnect (void);
-    virtual void OnGotIp (void) {}
+    virtual void OnGotIp (void);
     virtual void OnDisconnect (void)          { LOG_PORT.print ("."); }
 
 }; // fsm_Eth_state_ConnectingToEth
