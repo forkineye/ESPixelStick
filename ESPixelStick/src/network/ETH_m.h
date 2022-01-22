@@ -18,6 +18,9 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "../ESPixelStick.h"
+#ifdef SUPPORT_ETHERNET
+
 #ifndef _ETH_m_H_
 #define _ETH_m_H_
 
@@ -111,3 +114,4 @@ class ETHClass_m {
 extern ETHClass_m ETH_m;
 
 #endif /* _ETH_m_H_ */
+#endif // def SUPPORT_ETHERNET

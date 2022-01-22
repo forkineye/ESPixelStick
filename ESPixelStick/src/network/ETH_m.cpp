@@ -17,7 +17,7 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "../ESPixelStick.h"
+#ifdef SUPPORT_ETHERNET
 
 #include "ETH_m.h"
 #include "esp_system.h"
@@ -617,3 +617,4 @@ String ETHClass_m::macAddress(void)
 }
 
 ETHClass_m ETH_m;
+#endif // def SUPPORT_ETHERNET
