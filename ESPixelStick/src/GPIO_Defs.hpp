@@ -77,7 +77,7 @@ typedef enum
 // #define ESP32_CAM
 // #define ESP32_TTGO_T8
 // #define BOARD_ESP32_D1_MINI_ETH
-#define BOARD_ESP32_LOLIN_D32_PRO_ETH
+// #define BOARD_ESP32_LOLIN_D32_PRO_ETH
 
 #define SUPPORT_OutputType_UCS1903
 
