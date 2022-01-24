@@ -79,7 +79,8 @@ typedef enum
 // #define BOARD_ESP32_D1_MINI_ETH
 // #define BOARD_ESP32_LOLIN_D32_PRO_ETH
 
-#define SUPPORT_OutputType_UCS1903
+// #define SUPPORT_OutputType_UCS1903
+// #define SUPPORT_OutputType_GS8208
 
 // Platform specific GPIO definitions
 #if defined (BOARD_ESP32_CAM)
