@@ -278,6 +278,8 @@ void c_NetworkMgr::SetWiFiIsConnected (bool newState)
 //-----------------------------------------------------------------------------
 void c_NetworkMgr::SetWiFiEnable ()
 {
+    // DEBUG_START;
+
     if (!AllowWiFiAndEthUpSimultaneously)
     {
         // DEBUG_V ("!AllowWiFiAndEthUpSimultaneously");
@@ -294,7 +296,7 @@ void c_NetworkMgr::SetWiFiEnable ()
     }
     else
     {
-        // DEBUG_V ();
+        // DEBUG_V ("AllowWiFiAndEthUpSimultaneously");
         WiFiDriver.Enable ();
     }
 

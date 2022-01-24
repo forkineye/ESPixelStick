@@ -74,21 +74,23 @@ typedef enum
 
 // #define BOARD_ESP01S
 // #define BOARD_ESPS_V3
-// #define ESP32_CAM
-// #define ESP32_TTGO_T8
+// #define BOARD_ESP32_CAM
+// #define BOARD_ESP32_TTGO_T8
 // #define BOARD_ESP32_D1_MINI_ETH
 // #define BOARD_ESP32_LOLIN_D32_PRO_ETH
 
 #define SUPPORT_OutputType_UCS1903
 
 // Platform specific GPIO definitions
-#if defined (ESP32_CAM)
+#if defined (BOARD_ESP32_CAM)
 #   include "GPIO_Defs_ESP32_CAM.hpp"
-#elif defined (ESP32_TTGO_T8)
+#elif defined (BOARD_ESP32_TTGO_T8)
 #   include "GPIO_Defs_ESP32_TTGO_T8.hpp"
-#elif defined (ESP32_LOLIN_D32_PRO)
+#elif defined (BOARD_ESP32_LOLIN_D32_PRO)
 #   include "GPIO_Defs_ESP32_generic.hpp"
-#elif defined (ESP32_D1_MINI)
+#elif defined (BOARD_ESP32_LOLIN_D32_PRO_ETH)
+#   include "GPIO_Defs_ESP32_LoLin_D32_PRO_ETH.hpp"
+#elif defined (BOARD_ESP32_D1_MINI)
 #   include "GPIO_Defs_ESP32_D1_MINI.hpp"
 #elif defined (BOARD_ESP32_D1_MINI_ETH)
 #   include "GPIO_Defs_ESP32_D1_MINI_ETH.hpp"
@@ -96,8 +98,6 @@ typedef enum
 #   include "GPIO_Defs_ESP8266_ESP01S.hpp"
 #elif defined (BOARD_ESPS_V3)
 #   include "GPIO_Defs_ESP8266_ESPS_V3.hpp"
-// #elif defined (BOARD_ESP32_LOLIN_D32_PRO_ETH)
-// #   include "GPIO_Defs_ESP32_LoLin_D32_PRO_ETH.hpp"
 #elif defined (ARDUINO_ARCH_ESP8266)
 #   include "GPIO_Defs_ESP8266_Generic.hpp"
 #elif defined (ARDUINO_ARCH_ESP32)

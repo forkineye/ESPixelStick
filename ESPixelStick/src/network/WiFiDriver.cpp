@@ -245,6 +245,7 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
 void c_WiFiDriver::Disable ()
 {
     // DEBUG_START;
+    // AnnounceState ();
 
     if (pCurrentFsmState != &fsm_WiFi_state_Disabled_imp)
     {
@@ -255,12 +256,14 @@ void c_WiFiDriver::Disable ()
     }
 
     // DEBUG_END;
+
 } // Disable
 
 //-----------------------------------------------------------------------------
 void c_WiFiDriver::Enable ()
 {
     // DEBUG_START;
+    // AnnounceState ();
 
     if (pCurrentFsmState == &fsm_WiFi_state_Disabled_imp)
     {
@@ -269,6 +272,11 @@ void c_WiFiDriver::Enable ()
         WiFi.enableAP (false);
         fsm_WiFi_state_ConnectionFailed_imp.Init ();
     }
+    else
+    {
+        // DEBUG_V (String ("WiFi is not disabled"));
+    }
+
     // DEBUG_END;
 } // Enable
 
