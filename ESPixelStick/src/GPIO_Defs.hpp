@@ -78,7 +78,7 @@ typedef enum
 // #define BOARD_ESP32_TTGO_T8
 // #define BOARD_ESP32_D1_MINI_ETH
 // #define BOARD_ESP32_LOLIN_D32_PRO_ETH
-#define BOARD_ESP32_MH_ET_LIVE_MiniKit
+// #define BOARD_ESP32_MH_ET_LIVE_MiniKit
 
 // #define SUPPORT_OutputType_UCS1903
 // #define SUPPORT_OutputType_GS8208
