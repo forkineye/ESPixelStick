@@ -22,6 +22,15 @@ jobs:
           # ESP32 CAM
           - target: "esp32_cam"
             chip: "esp32"
+          # Lolin D32 Pro eth
+          - target: "d32_pro_eth"
+            chip: "esp32"
+          # TTGO T8
+          - target: "esp32_ttgo_t8"
+            chip: "esp32"
+          # mh et esp32 mini kit
+          - target: "d1_mini_mhetesp32minikit"
+            chip: "esp32"
 
     runs-on: ubuntu-latest
     steps:
@@ -40,8 +49,8 @@ jobs:
 
       - name: Create secrets.h
         run: |
-          echo '#define SECRETS_SSID "SSID_NOT_SET"' > ESPixelStick/src/secrets.h
-          echo '#define SECRETS_PASS "PASSPHRASE_NOT_SET"' >> ESPixelStick/src/secrets.h
+          echo '#define SECRETS_SSID "SSID_NOT_SET"' > ESPixelStick/src/network/secrets.h
+          echo '#define SECRETS_PASS "PASSPHRASE_NOT_SET"' >> ESPixelStick/src/network/secrets.h
 
       - name: Cache pip
         uses: actions/cache@v2

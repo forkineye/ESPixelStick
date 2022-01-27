@@ -1,6 +1,6 @@
 #pragma once
 /*
-* OutputUCS1903Rmt.h - UCS1903 driver code for ESPixelStick RMT Channel
+* OutputGS8208Uart.h - GS8208 driver code for ESPixelStick UART
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -21,36 +21,37 @@
 *   interface.
 *
 */
-#include "../ESPixelStick.h"
 
-#ifdef SUPPORT_OutputType_UCS1903
-#ifdef SUPPORT_RMT_OUTPUT
+#include "OutputCommon.hpp"
+#ifdef SUPPORT_OutputType_GS8208
 
-#include "OutputUCS1903.hpp"
-#include "OutputRmt.hpp"
+#include "OutputGS8208.hpp"
 
-class c_OutputUCS1903Rmt : public c_OutputUCS1903
+class c_OutputGS8208Uart : public c_OutputGS8208
 {
 public:
     // These functions are inherited from c_OutputCommon
-    c_OutputUCS1903Rmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
-        gpio_num_t outputGpio,
-        uart_port_t uart,
-        c_OutputMgr::e_OutputType outputType);
-    virtual ~c_OutputUCS1903Rmt ();
+    c_OutputGS8208Uart (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+                      gpio_num_t outputGpio,
+                      uart_port_t uart,
+                      c_OutputMgr::e_OutputType outputType);
+    virtual ~c_OutputGS8208Uart ();
 
     // functions to be provided by the derived class
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
-    bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);  ///< Set a new config in the driver
-    void    Render ();                                        ///< Call from loop (),  renders output data
-    void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
+    void    Render ();                                        ///< Call from loop(),  renders output data
     void    SetOutputBufferSize (uint16_t NumChannelsAvailable);
+    void    PauseOutput ();
+    bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);
+
+    /// Interrupt Handler
+    void IRAM_ATTR ISR_Handler (); ///< UART ISR
+
+#define GS8208_NUM_DATA_BYTES_PER_INTENSITY_BYTE    4
 
 private:
+    bool validate ();        ///< confirm that the current configuration is valid
 
-    c_OutputRmt Rmt;
+}; // c_OutputGS8208Uart
 
-}; // c_OutputUCS1903Rmt
-
-#endif // def SUPPORT_RMT_OUTPUT
-#endif // def SUPPORT_OutputType_UCS1903
+#endif // def SUPPORT_OutputType_GS8208

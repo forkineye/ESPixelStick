@@ -112,6 +112,9 @@ public:
 #ifdef SUPPORT_OutputType_APA102
         OutputType_APA102,
 #endif // def SUPPORT_OutputType_APA102
+#ifdef SUPPORT_OutputType_GS8208
+        OutputType_GS8208,
+#endif // def SUPPORT_OutputType_GS8208
         OutputType_Disabled,
         OutputType_End, // must be last
         OutputType_Start = OutputType_WS2811,

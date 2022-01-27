@@ -1,6 +1,6 @@
 #pragma once
 /*
-* OutputUCS1903Rmt.h - UCS1903 driver code for ESPixelStick RMT Channel
+* OutputGS8208Rmt.h - GS8208 driver code for ESPixelStick RMT Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015 Shelby Merrick
@@ -23,21 +23,21 @@
 */
 #include "../ESPixelStick.h"
 
-#ifdef SUPPORT_OutputType_UCS1903
+#ifdef SUPPORT_OutputType_GS8208
 #ifdef SUPPORT_RMT_OUTPUT
 
-#include "OutputUCS1903.hpp"
+#include "OutputGS8208.hpp"
 #include "OutputRmt.hpp"
 
-class c_OutputUCS1903Rmt : public c_OutputUCS1903
+class c_OutputGS8208Rmt : public c_OutputGS8208
 {
 public:
     // These functions are inherited from c_OutputCommon
-    c_OutputUCS1903Rmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+    c_OutputGS8208Rmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
         gpio_num_t outputGpio,
         uart_port_t uart,
         c_OutputMgr::e_OutputType outputType);
-    virtual ~c_OutputUCS1903Rmt ();
+    virtual ~c_OutputGS8208Rmt ();
 
     // functions to be provided by the derived class
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
@@ -50,7 +50,7 @@ private:
 
     c_OutputRmt Rmt;
 
-}; // c_OutputUCS1903Rmt
+}; // c_OutputGS8208Rmt
 
 #endif // def SUPPORT_RMT_OUTPUT
-#endif // def SUPPORT_OutputType_UCS1903
+#endif // def SUPPORT_OutputType_GS8208

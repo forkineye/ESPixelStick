@@ -17,9 +17,10 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#include "ETH_m.h"
+
 #ifdef SUPPORT_ETHERNET
 
-#include "ETH_m.h"
 #include "esp_system.h"
 #if ESP_IDF_VERSION_MAJOR > 3
     #include "esp_event.h"

@@ -39,6 +39,8 @@
 #include "OutputWS2801Spi.hpp"
 #include "OutputWS2811Rmt.hpp"
 #include "OutputWS2811Uart.hpp"
+#include "OutputGS8208Uart.hpp"
+#include "OutputGS8208Rmt.hpp"
 // needs to be last
 #include "OutputMgr.hpp"
 
@@ -79,8 +81,12 @@ static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::
 #endif // def SUPPORT_OutputType_WS2801
 
 #ifdef SUPPORT_OutputType_APA102
-    {c_OutputMgr::e_OutputType::OutputType_APA102,        "APA102"        }
+    {c_OutputMgr::e_OutputType::OutputType_APA102,        "APA102"        },
 #endif // def SUPPORT_OutputType_APA102
+
+#ifdef SUPPORT_OutputType_GS8208
+    {c_OutputMgr::e_OutputType::OutputType_GS8208,        "GS8208"        },
+#endif // def SUPPORT_OutputType_GS8208
 };
 
 //-----------------------------------------------------------------------------
@@ -694,6 +700,34 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                 break;
             }
 #endif // def SUPPORT_OutputType_APA102
+
+#ifdef SUPPORT_OutputType_GS8208
+            case e_OutputType::OutputType_GS8208:
+            {
+#ifdef SUPPORT_RMT
+                if (OM_IS_RMT)
+                {
+                    // logcon (CN_stars + String (F (" Starting GS8208 RMT for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputGS8208Rmt (ChannelIndex, dataPin, UartId, OutputType_GS8208);
+                    // DEBUG_V ("");
+                    break;
+                }
+#endif // def SUPPORT_RMT
+                // DEBUG_V ("");
+                if (OM_IS_UART)
+                {
+                    // logcon (CN_stars + String (F (" Starting GS8208 UART for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    pOutputChannelDrivers[ChannelIndex] = new c_OutputGS8208Uart (ChannelIndex, dataPin, UartId, OutputType_GS8208);
+                    // DEBUG_V ("");
+                    break;
+                }
+
+                if (!BuildingNewConfig) { logcon (CN_stars + String (F (" Cannot Start GS8208 for channel '")) + ChannelIndex + "'. " + CN_stars); }
+                pOutputChannelDrivers[ChannelIndex] = new c_OutputDisabled (ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                // DEBUG_V ("");
+                break;
+            }
+#endif // def SUPPORT_OutputType_GS8208
 
             default:
             {

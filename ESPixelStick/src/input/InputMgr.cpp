@@ -421,7 +421,10 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
         {
             case e_InputType::InputType_Disabled:
             {
-                // logcon (CN_stars + String (F ("*********** Disabled Input type for channel '")) + ChannelIndex + "'. **************");
+                if (!IsBooting) 
+                {
+                    logcon (String (F ("Disabled Input type for channel '")) + ChannelIndex + "'.");
+                }
                 pInputChannelDrivers[ChannelIndex] = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
                 // DEBUG_V ("");
                 break;
@@ -431,7 +434,10 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             {
                 if (InputTypeIsAllowedOnChannel (InputType_E1_31, ChannelIndex))
                 {
-                    // DEBUG_V (CN_stars + String (F (" Starting E1.31 for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    if (!IsBooting)
+                    {
+                        logcon (String (F ("Starting E1.31 for channel '")) + ChannelIndex + "'.");
+                    }
                     pInputChannelDrivers[ChannelIndex] = new c_InputE131 (ChannelIndex, InputType_E1_31, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
@@ -446,7 +452,10 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             {
                 if (InputTypeIsAllowedOnChannel (InputType_Effects, ChannelIndex))
                 {
-                    // logcon (CN_stars + String (F ("*********** Starting Effects Engine for channel '")) + ChannelIndex + "'. **************");
+                    if (!IsBooting)
+                    {
+                        logcon (String (F ("Starting Effects Engine for channel '")) + ChannelIndex + "'.");
+                    }
                     pInputChannelDrivers[ChannelIndex] = new c_InputEffectEngine (ChannelIndex, InputType_Effects, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
@@ -461,7 +470,10 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             {
                 if (InputTypeIsAllowedOnChannel (InputType_MQTT, ChannelIndex))
                 {
-                    // logcon (CN_stars + String (F ("*********** Starting MQTT for channel '")) + ChannelIndex + "'. **************");
+                    if (!IsBooting)
+                    {
+                        logcon (String (F ("Starting MQTT for channel '")) + ChannelIndex + "'.");
+                    }
                     pInputChannelDrivers[ChannelIndex] = new c_InputMQTT (ChannelIndex, InputType_MQTT, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
@@ -476,7 +488,10 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             {
                 if (InputTypeIsAllowedOnChannel (InputType_Alexa, ChannelIndex))
                 {
-                    // logcon (CN_stars + String (F ("*********** Starting Alexa for channel '")) + ChannelIndex + "'. **************");
+                    if (!IsBooting)
+                    {
+                        logcon (String (F ("Starting Alexa for channel '")) + ChannelIndex + "'.");
+                    }
                     pInputChannelDrivers[ChannelIndex] = new c_InputAlexa (ChannelIndex, InputType_Alexa, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
@@ -491,7 +506,10 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             {
                 if (InputTypeIsAllowedOnChannel (InputType_DDP, ChannelIndex))
                 {
-                    // logcon (CN_stars + String (F ("*********** Starting DDP for channel '")) + ChannelIndex + "'. **************");
+                    if (!IsBooting)
+                    {
+                        logcon (String (F ("Starting DDP for channel '")) + ChannelIndex + "'.");
+                    }
                     pInputChannelDrivers[ChannelIndex] = new c_InputDDP (ChannelIndex, InputType_DDP, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
@@ -506,7 +524,10 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             {
                 if (InputTypeIsAllowedOnChannel (InputType_FPP, ChannelIndex))
                 {
-                    // logcon (CN_stars + String (F ("*********** Starting FPP for channel '")) + ChannelIndex + "'. **************");
+                    if (!IsBooting)
+                    {
+                        logcon (String (F ("Starting FPP Remote for channel '")) + ChannelIndex + "'.");
+                    }
                     pInputChannelDrivers[ChannelIndex] = new c_InputFPPRemote (ChannelIndex, InputType_FPP, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
@@ -521,7 +542,10 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             {
                 if (InputTypeIsAllowedOnChannel (InputType_Artnet, ChannelIndex))
                 {
-                    // logcon (CN_stars + String (F ("*********** Starting Artnet for channel '")) + ChannelIndex + "'. **************");
+                    if (!IsBooting)
+                    {
+                        logcon (String (F ("Starting Artnet for channel '")) + ChannelIndex + "'.");
+                    }
                     pInputChannelDrivers[ChannelIndex] = new c_InputArtnet (ChannelIndex, InputType_Artnet, InputDataBuffer, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
