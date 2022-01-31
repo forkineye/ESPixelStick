@@ -26,7 +26,7 @@ class c_InputE131 : public c_InputCommon
   private:
     static const uint16_t   UNIVERSE_MAX = 512;
     static const char       ConfigFileName[];
-    static const uint8_t    MAX_NUM_UNIVERSES = 10;
+    static const uint8_t    MAX_NUM_UNIVERSES = (OM_MAX_NUM_CHANNELS / UNIVERSE_MAX) + 1;
 
     ESPAsyncE131  * e131 = nullptr; ///< ESPAsyncE131
     // e131_packet_t packet;           ///< Packet buffer for parsing
