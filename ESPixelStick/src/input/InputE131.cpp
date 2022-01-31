@@ -224,25 +224,28 @@ void c_InputE131::SetBufferTranslation ()
 
     // set up the bytes for the First Universe
     uint16_t BytesInUniverse = ChannelsPerUniverse - InputOffset;
-    // DEBUG_V (String ("ChannelsPerUniverse: ") + String (uint32_t (ChannelsPerUniverse), HEX));
+    // DEBUG_V (String ("    ChannelsPerUniverse:   ") + String (uint32_t (ChannelsPerUniverse)));
+    // DEBUG_V (String ("    InputDataBufferSize:   ") + String (uint32_t (InputDataBufferSize)));
 
     for (auto& CurrentUniverse : UniverseArray)
     {
         uint16_t BytesInThisUniverse = min (BytesInUniverse, BytesLeftToMap);
+        // DEBUG_V (String ("BytesInThisUniverse: 0x") + String (BytesInThisUniverse, HEX));
         CurrentUniverse.Destination = &InputDataBuffer[DestinationOffset];
         CurrentUniverse.BytesToCopy = BytesInThisUniverse;
         CurrentUniverse.SourceDataOffset = InputOffset;
         CurrentUniverse.SequenceErrorCounter = 0;
         CurrentUniverse.SequenceNumber = 0;
 
-        // DEBUG_V (String ("        Destination: ") + String (uint32_t (CurrentUniverse.Destination), HEX));
-        // DEBUG_V (String ("        BytesToCopy: ") + String (CurrentUniverse.BytesToCopy, HEX));
-        // DEBUG_V (String ("   SourceDataOffset: ") + String (CurrentUniverse.SourceDataOffset, HEX));
+        // DEBUG_V (String ("        Destination: 0x") + String (uint32_t (CurrentUniverse.Destination), HEX));
+        // DEBUG_V (String ("        BytesToCopy:   ") + String (CurrentUniverse.BytesToCopy));
+        // DEBUG_V (String ("   SourceDataOffset: 0x") + String (CurrentUniverse.SourceDataOffset, HEX));
 
         DestinationOffset += BytesInThisUniverse;
         BytesLeftToMap -= BytesInThisUniverse;
         BytesInUniverse = ChannelsPerUniverse;
         InputOffset = 0;
+        // DEBUG_V (String ("     BytesLeftToMap:   ") + String (BytesLeftToMap));
     }
 
     if (0 != BytesLeftToMap)
