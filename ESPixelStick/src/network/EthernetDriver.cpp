@@ -125,12 +125,14 @@ void c_EthernetDriver::GetConfig (JsonObject& json)
     json[CN_gateway] = gateway.toString ();
     json[CN_dhcp]    = UseDhcp;
 
-    json[F ("phy_adr")]  = phy_addr;
-    json[F ("power")]    = power_pin;
-    json[F ("mdc")]      = mdc_pin;
-    json[F ("mdio")]     = mdio_pin;
-    json[F ("phy_type")] = phy_type;
-    json[F ("clk_mode")] = clk_mode;
+    json[CN_type]        = phy_type;
+    json[CN_addr]        = phy_addr;
+    json[CN_power_pin]   = power_pin;
+    json[CN_mode]        = clk_mode;
+    json[CN_mdc_pin]     = mdc_pin;
+    json[CN_mdio_pin]    = mdio_pin;
+    json[CN_activevalue] = powerPinActiveValue;
+    json[CN_activedelay] = powerPinActiveDelayMs;
 
     // DEBUG_END;
 
@@ -184,6 +186,18 @@ void c_EthernetDriver::GetStatus (JsonObject& jsonStatus)
 
     // DEBUG_END;
 } // GetStatus
+
+//-----------------------------------------------------------------------------
+void c_EthernetDriver::InitPowerPin ()
+{
+    // DEBUG_START;
+
+    // Set up the power control output
+    pinMode (power_pin, OUTPUT);
+    digitalWrite (power_pin, powerPinActiveValue);
+
+    // DEBUG_END;
+} // InitPowerPin
 
 //-----------------------------------------------------------------------------
 bool c_EthernetDriver::IsConnected ()
@@ -304,6 +318,15 @@ bool c_EthernetDriver::SetConfig (JsonObject & json)
     ConfigChanged |= setFromJSON (sGateway, json, CN_gateway);
     ConfigChanged |= setFromJSON (UseDhcp,  json, CN_dhcp);
 
+    ConfigChanged |= setFromJSON (phy_addr,  json, CN_addr);
+    ConfigChanged |= setFromJSON (power_pin, json, CN_power_pin);
+    ConfigChanged |= setFromJSON (mdc_pin,   json, CN_mdc_pin);
+    ConfigChanged |= setFromJSON (mdio_pin,  json, CN_mdio_pin);
+    ConfigChanged |= setFromJSON (phy_type,  json, CN_type);
+    ConfigChanged |= setFromJSON (clk_mode,  json, CN_mode);
+    ConfigChanged |= setFromJSON (powerPinActiveValue,   json, CN_activevalue);
+    ConfigChanged |= setFromJSON (powerPinActiveDelayMs, json, CN_activedelay);
+
     ip.fromString (sIP);
     gateway.fromString (sGateway);
     netmask.fromString (sNetmask);
@@ -385,7 +408,7 @@ void c_EthernetDriver::StartEth ()
 
 // if (!eth_connected)
 // esp_eth_disable();
-    if (false == ETH_m.begin (phy_addr, power_pin, mdc_pin, mdio_pin, phy_type, clk_mode))
+    if (false == ETH_m.begin (phy_addr, gpio_num_t(-1), mdc_pin, mdio_pin, phy_type, clk_mode))
     {
         fsm_Eth_state_DeviceInitFailed_imp.Init ();
     }
@@ -450,9 +473,7 @@ void fsm_Eth_state_PoweringUp::Init ()
     pEthernetDriver->AnnounceState ();
     pEthernetDriver->SetFsmStartTime (millis ());
 
-    // Set up the power control output
-    pinMode (gpio_num_t::GPIO_NUM_15, OUTPUT);
-    digitalWrite (gpio_num_t::GPIO_NUM_15, LOW);
+    pEthernetDriver->InitPowerPin ();
 
     // DEBUG_END;
 
@@ -463,12 +484,15 @@ void fsm_Eth_state_PoweringUp::Poll ()
 {
     // DEBUG_START;
 
-    // Start trying to connect to based on input config
-    fsm_Eth_state_ConnectingToEth_imp.Init ();
+    uint32_t CurrentTimeMS = millis ();
+    if (CurrentTimeMS - pEthernetDriver->GetFsmStartTime () > (pEthernetDriver->GetPowerPinActiveDelayMs()))
+    {
+        // Start trying to connect to based on input config
+        fsm_Eth_state_ConnectingToEth_imp.Init ();
 
-    // this may throw the connected handler
-    pEthernetDriver->StartEth ();
-    // pEthernetDriver->StartEth ();
+        // this may throw the connected handler
+        pEthernetDriver->StartEth ();
+    }
 
     // DEBUG_END;
 } // fsm_Eth_state_PoweringUp

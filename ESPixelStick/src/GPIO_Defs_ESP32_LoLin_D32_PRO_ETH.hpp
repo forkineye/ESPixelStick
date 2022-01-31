@@ -66,12 +66,13 @@
 #define DEFAULT_ETH_CLK_MODE    eth_clock_mode_t::ETH_CLOCK_GPIO0_IN
 
 // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
-#define DEFAULT_ETH_POWER_PIN   gpio_num_t(gpio_num_t::GPIO_NUM_15)
+#define DEFAULT_ETH_POWER_PIN          gpio_num_t(gpio_num_t::GPIO_NUM_15)
+#define DEFAULT_ETH_POWER_PIN_ACTIVE   HIGH
 
 // Type of the Ethernet PHY (LAN8720 or TLK110)
 #define DEFAULT_ETH_TYPE        eth_phy_type_t::ETH_PHY_LAN8720
 
-// I²C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
+// Iï¿½C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
 // #define ETH_ADDR_PHY_LAN8720    0
 #define ETH_ADDR_PHY_LAN8720    1
 #define ETH_ADDR_PHY_TLK110     31
