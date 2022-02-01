@@ -31,8 +31,8 @@
 static fsm_Eth_state_Boot              fsm_Eth_state_Boot_imp;
 static fsm_Eth_state_PoweringUp        fsm_Eth_state_PoweringUp_imp;
 static fsm_Eth_state_ConnectingToEth   fsm_Eth_state_ConnectingToEth_imp;
-static fsm_Eth_state_ConnectedToEth    fsm_Eth_state_ConnectedToEth_imp;
-static fsm_Eth_state_ConnectionFailed  fsm_Eth_state_ConnectionFailed_imp;
+static fsm_Eth_state_WaitForIP         fsm_Eth_state_WaitForIP_imp;
+static fsm_Eth_state_GotIp             fsm_Eth_state_GotIp_imp;
 static fsm_Eth_state_DeviceInitFailed  fsm_Eth_state_DeviceInitFailed_imp;
 
 //-----------------------------------------------------------------------------
@@ -44,8 +44,8 @@ c_EthernetDriver::c_EthernetDriver ()
     fsm_Eth_state_Boot_imp.SetParent (this);
     fsm_Eth_state_PoweringUp_imp.SetParent (this);
     fsm_Eth_state_ConnectingToEth_imp.SetParent (this);
-    fsm_Eth_state_ConnectedToEth_imp.SetParent (this);
-    fsm_Eth_state_ConnectionFailed_imp.SetParent (this);
+    fsm_Eth_state_WaitForIP_imp.SetParent (this);
+    fsm_Eth_state_GotIp_imp.SetParent (this);
     fsm_Eth_state_DeviceInitFailed_imp.SetParent (this);
 
     // this gets called pre-setup so there is nothing we can do here.
@@ -204,7 +204,7 @@ bool c_EthernetDriver::IsConnected ()
 {
     // DEBUG_V("");
 
-    return (pCurrentFsmState == &fsm_Eth_state_ConnectedToEth_imp);
+    return (pCurrentFsmState == &fsm_Eth_state_WaitForIP_imp);
 
 } // IsConnected
 
@@ -512,30 +512,12 @@ void fsm_Eth_state_ConnectingToEth::Init ()
 } // fsm_Eth_state_ConnectingToEthUsingConfig::Init
 
 /*****************************************************************************/
-void fsm_Eth_state_ConnectingToEth::Poll ()
-{
-    // DEBUG_START;
-
-    // wait for the connection to complete via the callback function
-    // uint32_t CurrentTimeMS = millis ();
-
-    // @TODO Ethernet connection timeout is currently hardcoded. Add
-    // to network config.
-    // if (CurrentTimeMS - pEthernetDriver->GetFsmStartTime () > (60000))
-    // {
-        // logcon (F ("Ethernet Failed to connect"));
-        // fsm_Eth_state_ConnectionFailed_imp.Init ();
-    // }
-
-    // DEBUG_END;
-} // fsm_Eth_state_ConnectingToEth::Poll
-
-/*****************************************************************************/
 void fsm_Eth_state_ConnectingToEth::OnConnect ()
 {
     // DEBUG_START;
 
     pEthernetDriver->SetUpIp ();
+    fsm_Eth_state_WaitForIP_imp.Init ();
 
     // DEBUG_END;
 
@@ -546,7 +528,8 @@ void fsm_Eth_state_ConnectingToEth::OnGotIp ()
 {
     // DEBUG_START;
 
-    fsm_Eth_state_ConnectedToEth_imp.Init ();
+    fsm_Eth_state_GotIp_imp.Init ();
+    pEthernetDriver->SetUpIp ();
 
     // DEBUG_END;
 
@@ -554,7 +537,7 @@ void fsm_Eth_state_ConnectingToEth::OnGotIp ()
 
 /*****************************************************************************/
 /*****************************************************************************/
-void fsm_Eth_state_ConnectedToEth::Init ()
+void fsm_Eth_state_WaitForIP::Init ()
 {
     // DEBUG_START;
 
@@ -562,56 +545,62 @@ void fsm_Eth_state_ConnectedToEth::Init ()
     pEthernetDriver->AnnounceState ();
     pEthernetDriver->SetFsmStartTime (millis ());
 
-    logcon (String (F ("Ethernet Connected with IP: ")) + pEthernetDriver->GetIpAddress ().toString ());
-    // DEBUG_V (String (" gateway: ") + pEthernetDriver->GetIpGateway ().toString ());
-    // DEBUG_V (String (" netmask: ") + pEthernetDriver->GetIpSubNetMask ().toString ());
-
-    pEthernetDriver->NetworkStateChanged (true);
-
     // DEBUG_END;
 
-} // fsm_Eth_state_ConnectedToEth::Init
+} // fsm_Eth_state_WaitForIP::Init
 
 /*****************************************************************************/
-void fsm_Eth_state_ConnectedToEth::OnDisconnect ()
+void fsm_Eth_state_WaitForIP::OnGotIp ()
 {
     // DEBUG_START;
 
-    fsm_Eth_state_ConnectionFailed_imp.Init ();
-    pEthernetDriver->NetworkStateChanged (false);
+    fsm_Eth_state_GotIp_imp.Init ();
 
     // DEBUG_END;
 
-} // fsm_Eth_state_ConnectedToEth::OnDisconnect
+} // fsm_Eth_state_WaitForIP::OnGotIp
+
+/*****************************************************************************/
+void fsm_Eth_state_WaitForIP::OnDisconnect ()
+{
+    // DEBUG_START;
+
+    fsm_Eth_state_ConnectingToEth_imp.Init ();
+
+    // DEBUG_END;
+
+} // fsm_Eth_state_WaitForIP::OnDisconnect
 
 /*****************************************************************************/
 /*****************************************************************************/
-void fsm_Eth_state_ConnectionFailed::Init ()
+void fsm_Eth_state_GotIp::Init ()
 {
     // DEBUG_START;
 
     pEthernetDriver->SetFsmState (this);
     pEthernetDriver->AnnounceState ();
-    pEthernetDriver->NetworkStateChanged (false);
+    pEthernetDriver->NetworkStateChanged (true);
 
-    ETH_m.stop ();
+    logcon (String (F ("Ethernet Connected with IP: ")) + pEthernetDriver->GetIpAddress ().toString ());
+    // DEBUG_V (String (" gateway: ") + pEthernetDriver->GetIpGateway ().toString ());
+    // DEBUG_V (String (" netmask: ") + pEthernetDriver->GetIpSubNetMask ().toString ());
 
     // DEBUG_END;
 
-} // fsm_Eth_state_ConnectionFailed::Init
+} // fsm_Eth_state_GotIp::Init
 
 /*****************************************************************************/
-void fsm_Eth_state_ConnectionFailed::Poll ()
+void fsm_Eth_state_GotIp::OnDisconnect ()
 {
     // DEBUG_START;
+
+    pEthernetDriver->NetworkStateChanged (false);
 
     // take some recovery action
     fsm_Eth_state_ConnectingToEth_imp.Init ();
 
-    ETH_m.start ();
-
     // DEBUG_END;
-} // fsm_Eth_state_ConnectionFailed::Poll
+} // fsm_Eth_state_GotIp::OnDisconnect
 
 /*****************************************************************************/
 /*****************************************************************************/
@@ -625,6 +614,6 @@ void fsm_Eth_state_DeviceInitFailed::Init ()
 
     // DEBUG_END;
 
-} // fsm_Eth_state_ConnectionFailed::Init
+} // fsm_Eth_state_DeviceInitFailed::Init
 
 #endif // def SUPPORT_ETHERNET
