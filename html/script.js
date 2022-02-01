@@ -1029,11 +1029,21 @@ function ExtractNetworkEthernetConfigFromHtmlPage()
 {
     if ({}.hasOwnProperty.call(System_Config.network, "eth"))
     {
-        System_Config.network.eth.ip      = $('#network #eth #ip').val();
-        System_Config.network.eth.netmask = $('#network #eth #netmask').val();
-        System_Config.network.eth.gateway = $('#network #eth #gateway').val();
-        System_Config.network.eth.dhcp    = $('#network #eth #dhcp').prop('checked');
-        System_Config.network.weus        = $('#network #eth #weus').prop('checked');
+        System_Config.network.weus            = $('#network #eth #weus').prop('checked');
+
+        System_Config.network.eth.ip          = $('#network #eth #ip').val();
+        System_Config.network.eth.netmask     = $('#network #eth #netmask').val();
+        System_Config.network.eth.gateway     = $('#network #eth #gateway').val();
+        System_Config.network.eth.dhcp        = $('#network #eth #dhcp').prop('checked');
+        System_Config.network.eth.type        = $('#network #eth #type').val();
+        System_Config.network.eth.type        = parseInt($('#network #eth #type option:selected').val(), 10);
+        System_Config.network.eth.addr        = $('#network #eth #addr').val();
+        System_Config.network.eth.power_pin   = $('#network #eth #power_pin').val();
+        System_Config.network.eth.mode        = parseInt($('#network #eth #mode option:selected').val(), 10);
+        System_Config.network.eth.mdc_pin     = $('#network #eth #mdc_pin').val();
+        System_Config.network.eth.mdio_pin    = $('#network #eth #mdio_pin').val();
+        System_Config.network.eth.activevalue = (parseInt($('#network #eth #activevalue option:selected').val(), 10) === 1);
+        System_Config.network.eth.activedelay = $('#network #eth #activedelay').val();
     }
 
 } // ExtractNetworkEthernetConfigFromHtmlPage
@@ -1210,7 +1220,7 @@ function wsConnect()
         }
 
         // target = "192.168.10.237";
-        // target = "192.168.10.214";
+        // target = "192.168.10.101";
 
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');

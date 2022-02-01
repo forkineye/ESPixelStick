@@ -21,9 +21,6 @@
 #include "../ESPixelStick.h"
 #ifdef SUPPORT_ETHERNET
 
-// #include <ETH.h>
-#include "ETH_m.h"
-
 // forward declaration
 class c_EthernetDriver;
 
@@ -73,6 +70,8 @@ public:
     uint32_t  GetFsmStartTime     (void)                     { return FsmTimerEthStartTime; }
     void      NetworkStateChanged (bool NetworkState);
     void      StartEth ();
+    void      InitPowerPin ();
+    uint32_t  GetPowerPinActiveDelayMs () { return powerPinActiveDelayMs; }
 
 private:
 
@@ -94,6 +93,8 @@ private:
     gpio_num_t       mdio_pin  = DEFAULT_ETH_MDIO_PIN;
     eth_phy_type_t   phy_type  = DEFAULT_ETH_TYPE;
     eth_clock_mode_t clk_mode  = DEFAULT_ETH_CLK_MODE;
+    bool             powerPinActiveValue = (HIGH == DEFAULT_ETH_POWER_PIN_ACTIVE);
+    uint32_t         powerPinActiveDelayMs = 1000;
 
 protected:
     friend class fsm_Eth_state_Boot;

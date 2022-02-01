@@ -13,8 +13,14 @@ jobs:
           # Wemos D1 Mini ESP8266
           - target: "d1_mini"
             chip: "esp8266"
+          # ESP01S
+          - target: "esp01s"
+            chip: "esp8266"
           # Wemos D1 Mini ESP32
           - target: "d1_mini32"
+            chip: "esp32"
+          # Wemos D1 Mini ESP32
+          - target: "d1_mini32_eth"
             chip: "esp32"
           # Lolin D32 Pro
           - target: "d32_pro"

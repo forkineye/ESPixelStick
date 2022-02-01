@@ -269,6 +269,66 @@
                                     <input type="text" class="form-control is-valid ethdhcp" id="gateway" name="gateway" minlength="7" maxlength="15" required pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$' value="0.0.0.0" title="Static Gateway">
                                 </div>
                             </div>
+                            <!-- Advanced Mode -->
+                            <div class="hidden AdvancedMode">
+                                <div class="form-group">
+                                    <label class="control-label col-sm-2" for="type">LAN Type</label>
+                                    <div class="col-sm-3 esp32">
+                                        <select id="type">
+                                            <option value="0">ETH_PHY_LAN8720</option>
+                                            <!--
+                                            <option value="1">ETH_PHY_TLK110</option>
+                                            <option value="2">ETH_PHY_RTL8201</option>
+                                            <option value="3">ETH_PHY_DP83848</option>
+                                            <option value="4">ETH_PHY_DM9051</option>
+                                            <option value="5">ETH_PHY_KSZ8081</option>
+                                            -->
+                                        </select>
+                                    </div>
+                                    <label class="control-label col-sm-2 esp32" for="addr">PHY MDIO Address</label>
+                                    <div class="col-sm-2 esp32">
+                                        <input type="number" class="form-control is-valid esp32" id="addr" step="1" min="1" max="32" value="0" required title="MDC Address for LAN interface">
+                                    </div>
+                                </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-2 esp32" for="mode">Clock Mode</label>
+                                        <div class="col-sm-3 esp32">
+                                            <select id="mode">
+                                                <option value="0">ETH_CLOCK_GPIO0_IN</option>
+                                                <option value="1">ETH_CLOCK_GPIO0_OUT</option>
+                                                <option value="2">ETH_CLOCK_GPIO16_OUT</option>
+                                                <option value="3">ETH_CLOCK_GPIO17_OUT</option>
+                                            </select>
+                                        </div>
+                                        <label class="control-label col-sm-2" for="power_pin">Power Control Pin</label>
+                                        <div class="col-sm-2">
+                                            <input type="number" class="form-control is-valid" id="power_pin" step="1" min="1" max="32" value="0" required title="GPIO on which external power will be controlled">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-2 esp32" for="activevalue">Power Active Level</label>
+                                        <div class="col-sm-3 esp32">
+                                            <select id="activevalue">
+                                                <option value="0">LOW</option>
+                                                <option value="1">HIGH</option>
+                                            </select>
+                                        </div>
+                                        <label class="control-label col-sm-2 esp32" for="activedelay">Power Active Delay (MS)</label>
+                                        <div class="col-sm-2 esp32">
+                                            <input type="number" class="form-control is-valid esp32" id="activedelay" step="1" min="0" max="10000" value="0" required title="Delay between applying power and starting interface.">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-2 esp32" for="mdc_pin">MDC Pin</label>
+                                        <div class="col-sm-3 esp32">
+                                            <input type="number" class="form-control is-valid esp32" id="mdc_pin" step="1" min="1" max="32" value="0" required title="GPIO on which MDC will be sent">
+                                        </div>
+                                        <label class="control-label col-sm-2 esp32" for="mdio_pin">MDIO Pin</label>
+                                        <div class="col-sm-2 esp32">
+                                            <input type="number" class="form-control is-valid esp32" id="mdio_pin" step="1" min="1" max="32" value="0" required title="GPIO on which MDIO will be transfered">
+                                        </div>
+                                    </div>
+                                </div>
                         </fieldset>
                     </fieldset>
                     <div class="form-group">
@@ -300,22 +360,22 @@
                             <div class="form-group hidden AdvancedMode">
                                 <label class="control-label col-sm-2 esp32" for="miso_pin">SD MISO Pin</label>
                                 <div class="col-sm-4 esp32">
-                                    <input type="number" class="form-control is-valid esp32" id="miso_pin" step="1" min="1" max="24" value="0" required title="GPIO on which MISO will be received">
+                                    <input type="number" class="form-control is-valid esp32" id="miso_pin" step="1" min="1" max="40" value="0" required title="GPIO on which MISO will be received">
                                 </div>
                                 <label class="control-label col-sm-2 esp32" for="mosi_pin">SD MOSI Pin</label>
                                 <div class="col-sm-4 esp32">
-                                    <input type="number" class="form-control is-valid esp32" id="mosi_pin" step="1" min="1" max="24" value="0" required title="GPIO on which MOSI will be sent">
+                                    <input type="number" class="form-control is-valid esp32" id="mosi_pin" step="1" min="1" max="40" value="0" required title="GPIO on which MOSI will be sent">
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label class="control-label col-sm-2 esp32" for="clock_pin">SD Clock Pin</label>
                                 <div class="col-sm-4 esp32">
-                                    <input type="number" class="form-control is-valid esp32" id="clock_pin" step="1" min="1" max="24" value="0" required title="GPIO on which CLOCK will be sent">
+                                    <input type="number" class="form-control is-valid esp32" id="clock_pin" step="1" min="1" max="40" value="0" required title="GPIO on which CLOCK will be sent">
                                 </div>
                                 <label class="control-label col-sm-2" for="cs_pin">SD Chip Select Pin</label>
                                 <div class="col-sm-4">
-                                    <input type="number" class="form-control is-valid" id="cs_pin" step="1" min="1" max="24" value="0" required title="GPIO on which Chip Select will be sent">
+                                    <input type="number" class="form-control is-valid" id="cs_pin" step="1" min="1" max="40" value="0" required title="GPIO on which Chip Select will be sent">
                                 </div>
                             </div>
                         </div>
@@ -340,7 +400,7 @@
 
                                     <label class="control-label col-sm-2" for="ecb_gpioid">GPIO</label>
                                     <div class="col-sm-2">
-                                        <input type="number" class="form-control is-valid" id="ecb_gpioid" name="ecb_gpioid" step="1" min="0" max="24" value="0" title="GPIO to monitor for effects trigger">
+                                        <input type="number" class="form-control is-valid" id="ecb_gpioid" name="ecb_gpioid" step="1" min="0" max="40" value="0" title="GPIO to monitor for effects trigger">
                                     </div>
 
                                     <label class="control-label col-sm-2" for="ecb_polarity">Polarity</label>
