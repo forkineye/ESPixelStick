@@ -32,8 +32,8 @@
 #define RMT_LAST                OutputChannelId_RMT_4
 
 #define SUPPORT_OutputType_WS2801    // requires a change in the html directory
-// #define SUPPORT_OutputType_APA102    // requires a change in the html directory
-// #define SUPPORT_OutputType_TM1814    // requires a change in the html directory
+#define SUPPORT_OutputType_APA102    // requires a change in the html directory
+#define SUPPORT_OutputType_TM1814    // requires a change in the html directory
 // #define SUPPORT_OutputType_TLS3001   // requires a change in the html directory
 
 #define SUPPORT_RELAY_OUTPUT
