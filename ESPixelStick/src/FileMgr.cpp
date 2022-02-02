@@ -64,7 +64,7 @@ void c_FileMgr::Begin ()
         }
         else
         {
-            logcon (F ("Flash file system initialized."));
+            logcon (String (F ("Flash file system initialized. Used = ")) + String (LittleFS.usedBytes ()) + String (F (" out of ")) + String (LittleFS.totalBytes()) );
             //listDir (LittleFS, String ("/"), 3);
         }
 
