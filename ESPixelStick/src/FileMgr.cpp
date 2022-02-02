@@ -64,7 +64,12 @@ void c_FileMgr::Begin ()
         }
         else
         {
+#ifdef ARDUINO_ARCH_ESP32
             logcon (String (F ("Flash file system initialized. Used = ")) + String (LittleFS.usedBytes ()) + String (F (" out of ")) + String (LittleFS.totalBytes()) );
+#else
+            logcon (String (F ("Flash file system initialized.")));
+#endif // def ARDUINO_ARCH_ESP32
+
             //listDir (LittleFS, String ("/"), 3);
         }
 
