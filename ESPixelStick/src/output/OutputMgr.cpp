@@ -70,7 +70,7 @@ static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::
 
 #ifdef SUPPORT_OutputType_UCS1903
     {c_OutputMgr::e_OutputType::OutputType_UCS1903,       "UCS1903"       },
-#endif // def SUPPORT_OutputType_TM1814
+#endif // def SUPPORT_OutputType_UCS1903
 
 #ifdef SUPPORT_OutputType_TM1814
     {c_OutputMgr::e_OutputType::OutputType_TM1814,        "TM1814"        },
@@ -610,7 +610,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 #ifdef SUPPORT_OutputType_UCS1903
             case e_OutputType::OutputType_UCS1903:
             {
-#ifdef SUPPORT_RMT
+#ifdef SUPPORT_RMT_OUTPUT
                 if (OM_IS_RMT)
                 {
                     // logcon (CN_stars + String (F (" Starting TM1814 RMT for channel '")) + ChannelIndex + "'. " + CN_stars);
@@ -618,7 +618,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     // DEBUG_V ("");
                     break;
                 }
-#endif // def SUPPORT_RMT
+#endif // def SUPPORT_RMT_OUTPUT
                 // DEBUG_V ("");
                 if (OM_IS_UART)
                 {
@@ -638,7 +638,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 #ifdef SUPPORT_OutputType_TM1814
             case e_OutputType::OutputType_TM1814:
             {
-#ifdef SUPPORT_RMT
+#ifdef SUPPORT_RMT_OUTPUT
                 if (OM_IS_RMT)
                 {
                     // logcon (CN_stars + String (F (" Starting TM1814 RMT for channel '")) + ChannelIndex + "'. " + CN_stars);
@@ -646,7 +646,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     // DEBUG_V ("");
                     break;
                 }
-#endif // def SUPPORT_RMT
+#endif // def SUPPORT_RMT_OUTPUT
                 // DEBUG_V ("");
                 if (OM_IS_UART)
                 {
@@ -704,7 +704,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
 #ifdef SUPPORT_OutputType_GS8208
             case e_OutputType::OutputType_GS8208:
             {
-#ifdef SUPPORT_RMT
+#ifdef SUPPORT_RMT_OUTPUT
                 if (OM_IS_RMT)
                 {
                     // logcon (CN_stars + String (F (" Starting GS8208 RMT for channel '")) + ChannelIndex + "'. " + CN_stars);
@@ -712,7 +712,7 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
                     // DEBUG_V ("");
                     break;
                 }
-#endif // def SUPPORT_RMT
+#endif // def SUPPORT_RMT_OUTPUT
                 // DEBUG_V ("");
                 if (OM_IS_UART)
                 {
