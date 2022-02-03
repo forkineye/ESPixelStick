@@ -1,19 +1,19 @@
-Import("env")
 import platform
+Import ("env")
 
-os_name = platform.system().lower()
+OS_NAME = platform.system().lower()
+FS_PATH = "./dist/bin/"
 
-mkfsPath = "./dist/bin/"
-if "windows" == os_name:
-    mkfsPath += "win32/mklittlefs.exe"
-elif "linux" == os_name:
-    mkfsPath += "linux64/mklittlefs"
-elif "linux64" == os_name:
-    mkfsPath += "linux64/mklittlefs"
-elif "macos" == os_name:
-    mkfsPath += "macos/mklittlefs"
+if OS_NAME == "windows" :
+    FS_PATH += "win32/mklittlefs.exe"
+elif OS_NAME == "linux" :
+    FS_PATH += "linux64/mklittlefs"
+elif OS_NAME == "linux64" :
+    FS_PATH += "linux64/mklittlefs"
+elif OS_NAME == "macos" :
+    FS_PATH += "macos/mklittlefs"
 else:
-    print("ERROR: Could not determine OS type. Got: " + str(os_name))
+    print("ERROR: Could not determine OS type. Got: " + str (OS_NAME))
 
-print("Replace MKSPIFFSTOOL with " + mkfsPath)
-env.Replace (MKSPIFFSTOOL = mkfsPath)
+print("Replace MKSPIFFSTOOL with " + FS_PATH)
+env.Replace (MKSPIFFSTOOL = FS_PATH)
