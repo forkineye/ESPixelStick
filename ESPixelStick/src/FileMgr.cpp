@@ -128,6 +128,20 @@ void c_FileMgr::GetConfig (JsonObject& json)
 } // GetConfig
 
 //-----------------------------------------------------------------------------
+void c_FileMgr::GetStatus (JsonObject& json)
+{
+    // DEBUG_START;
+
+#ifdef ARDUINO_ARCH_ESP32
+    json[F ("size")] = LittleFS.totalBytes ();
+    json[F ("used")] = LittleFS.usedBytes ();
+#endif // def ARDUINO_ARCH_ESP32
+
+    // DEBUG_END;
+
+} // GetConfig
+
+//-----------------------------------------------------------------------------
 void c_FileMgr::SetSpiIoPins ()
 {
     // DEBUG_START;

@@ -662,6 +662,10 @@ void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
     OutputMgr.GetStatus (status);
     // DEBUG_V ("");
 
+    // Get File Manager Stats
+    FileMgr.GetStatus (system);
+    // DEBUG_V ("");
+
     memset (&WebSocketFrameCollectionBuffer[0], 0x00, sizeof (WebSocketFrameCollectionBuffer));
     strcpy (WebSocketFrameCollectionBuffer, "XJ");
     size_t msgOffset = strlen (WebSocketFrameCollectionBuffer);
