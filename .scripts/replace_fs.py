@@ -10,7 +10,7 @@ elif OS_NAME == "linux" :
     FS_PATH += "linux64/mklittlefs"
 elif OS_NAME == "linux64" :
     FS_PATH += "linux64/mklittlefs"
-elif OS_NAME == "macos" :
+elif OS_NAME == "darwin" :
     FS_PATH += "macos/mklittlefs"
 else:
     print("ERROR: Could not determine OS type. Got: " + str (OS_NAME))
