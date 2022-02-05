@@ -853,6 +853,7 @@ void c_WebMgr::processCmd (AsyncWebSocketClient * client, JsonObject & jsonCmd)
 
     } while (false);
 
+    // DEBUG_V (String ("WebSocketFrameCollectionBuffer") + WebSocketFrameCollectionBuffer);
     client->text (WebSocketFrameCollectionBuffer);
 
     // DEBUG_END;
@@ -870,7 +871,9 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
     do // once
     {
         size_t bufferoffset = strlen(WebSocketFrameCollectionBuffer);
-        size_t BufferFreeSize = sizeof (WebSocketFrameCollectionBuffer) - bufferoffset;
+        size_t BufferFreeSize = sizeof (WebSocketFrameCollectionBuffer) - (bufferoffset + 3);
+        // DEBUG_V (String ("bufferoffset: ") + bufferoffset);
+        // DEBUG_V (String ("BufferFreeSize: ") + BufferFreeSize);
 
         if ((jsonCmd[CN_get] == CN_system) || (jsonCmd[CN_get] == CN_device))
         {
@@ -902,15 +905,19 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
 
         if (jsonCmd[CN_get] == CN_files)
         {
-            // DEBUG_V ("input");
+            // DEBUG_V ("CN_files");
             String Temp;
             FileMgr.GetListOfSdFiles (Temp);
+            // DEBUG_V (String ("Temp.length (): ") + Temp.length ());
+
             if (Temp.length () >= BufferFreeSize )
             {
+                // DEBUG_V ("File List Too Long");
                 strcat (WebSocketFrameCollectionBuffer, "\"ERROR\": \"File List Too Long\"");
             }
             else
             {
+                // DEBUG_V ("strcat");
                 strcat (WebSocketFrameCollectionBuffer, Temp.c_str ());
             }
             // DEBUG_V ("");
