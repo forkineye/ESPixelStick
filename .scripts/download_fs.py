@@ -46,12 +46,15 @@ class FSInfo:
 
 class LittleFSInfo(FSInfo):
     def __init__(self, start, length, page_size, block_size):
+
+        print("PIOPLATFORM: " + env["PIOPLATFORM"])
+
         if env["PIOPLATFORM"] == "espressif32":
             #for ESP32: retrieve and evaluate, e.g. to mkspiffs_espressif32_arduino
             self.tool = env.subst(env["MKSPIFFSTOOL"])
         else:
             self.tool = env["MKFSTOOL"] # from mkspiffs package
-        self.tool = join(platform.get_package_dir("tool-mklittlefs"), self.tool)
+            self.tool = join(platform.get_package_dir("tool-mklittlefs"), self.tool)
         super().__init__(FSType.LITTLEFS, start, length, page_size, block_size)
     def __repr__(self): 
         return f"FS type {self.fs_type} Start {hex(self.start)} Len {self.length} Page size {self.page_size} Block size {self.block_size} Tool: {self.tool}"
@@ -71,7 +74,7 @@ class SPIFFSInfo(FSInfo):
     def __repr__(self): 
         return f"FS type {self.fs_type} Start {hex(self.start)} Len {self.length} Page size {self.page_size} Block size {self.block_size} Tool: {self.tool}"
     def get_extract_cmd(self, input_file, output_dir):
-        return f'"{self.tool}" -b {self.block_size} -p {self.page_size} --unpack "{output_dir}" "{input_file}"'
+        return f'"{self.tool}" -b {self.block_size} -p {self.page_size} -s {self.length} --unpack "{output_dir}" "{input_file}"'
 
 # SPIFFS helpers copied from ESP32, https://github.com/platformio/platform-espressif32/blob/develop/builder/main.py
 # Copyright 2014-present PlatformIO <contact@platformio.org>
@@ -309,8 +312,9 @@ def display_fs(extracted_dir):
 
 def command_download_fs(*args, **kwargs):
     print("Entrypoint")
-    #print(env.Dump())
+    # print(env.Dump())
     info = get_fs_type_start_and_length()
+    info.tool = "./dist/bin/win32/mklittlefs.exe"
     print("Parsed FS info: " + str(info))
     download_ok, downloaded_file = download_fs(info)
     print("Download was okay: " + str(download_ok) + ". File at: "+ str(downloaded_file))
