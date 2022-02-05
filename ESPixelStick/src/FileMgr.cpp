@@ -601,7 +601,7 @@ void c_FileMgr::DescribeSdCardToUser ()
     logcon (String (F ("SD Card Size: ")) + int64String (cardSize) + "MB");
     File root = SD.open ("/");
 
-    printDirectory (root, 0);
+    // printDirectory (root, 0);
 
     // DEBUG_END;
 
@@ -1154,15 +1154,6 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
 
 } // handleFileUploadNewFile
 
-//-----------------------------------------------------------------------------
-void c_FileMgr::Poll ()
-{
-    // DEBUG_START;
-
-
-    // DEBUG_END;
-
-} // Poll
 
 // create a global instance of the File Manager
 c_FileMgr FileMgr;

@@ -37,7 +37,7 @@ public:
     typedef uint32_t FileId;
 
     void    Begin     ();
-    void    Poll      ();
+    void    Poll      () {}
     void    GetConfig (JsonObject& json);
     bool    SetConfig (JsonObject& json);
     void    GetStatus (JsonObject& json);
