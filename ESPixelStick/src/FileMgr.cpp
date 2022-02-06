@@ -64,7 +64,12 @@ void c_FileMgr::Begin ()
         }
         else
         {
-            logcon (F ("Flash file system initialized."));
+#ifdef ARDUINO_ARCH_ESP32
+            logcon (String (F ("Flash file system initialized. Used = ")) + String (LittleFS.usedBytes ()) + String (F (" out of ")) + String (LittleFS.totalBytes()) );
+#else
+            logcon (String (F ("Flash file system initialized.")));
+#endif // def ARDUINO_ARCH_ESP32
+
             //listDir (LittleFS, String ("/"), 3);
         }
 
@@ -117,6 +122,20 @@ void c_FileMgr::GetConfig (JsonObject& json)
     json[CN_mosi_pin]  = mosi_pin;
     json[CN_clock_pin] = clk_pin;
     json[CN_cs_pin]    = cs_pin;
+
+    // DEBUG_END;
+
+} // GetConfig
+
+//-----------------------------------------------------------------------------
+void c_FileMgr::GetStatus (JsonObject& json)
+{
+    // DEBUG_START;
+
+#ifdef ARDUINO_ARCH_ESP32
+    json[F ("size")] = LittleFS.totalBytes ();
+    json[F ("used")] = LittleFS.usedBytes ();
+#endif // def ARDUINO_ARCH_ESP32
 
     // DEBUG_END;
 

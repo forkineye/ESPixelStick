@@ -99,8 +99,8 @@ private:
 protected:
     friend class fsm_Eth_state_Boot;
     friend class fsm_Eth_state_ConnectingToEth;
-    friend class fsm_Eth_state_ConnectedToEth;
-    friend class fsm_Eth_state_ConnectionFailed;
+    friend class fsm_Eth_state_WaitForIP;
+    friend class fsm_Eth_state_GotIp;
     friend class fsm_Eth_state_DeviceInitFailed;
     friend class fsm_Eth_state;
     fsm_Eth_state * pCurrentFsmState = nullptr;
@@ -144,40 +144,40 @@ public:
 class fsm_Eth_state_ConnectingToEth : public fsm_Eth_state
 {
 public:
-    virtual void Poll (void);
+    virtual void Poll (void) {}
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Connecting"); }
     virtual void OnConnect (void);
     virtual void OnGotIp (void);
-    virtual void OnDisconnect (void)          { LOG_PORT.print ("."); }
+    virtual void OnDisconnect (void) {}
 
 }; // fsm_Eth_state_ConnectingToEth
 
 /*****************************************************************************/
-class fsm_Eth_state_ConnectedToEth : public fsm_Eth_state
+class fsm_Eth_state_WaitForIP : public fsm_Eth_state
 {
 public:
     virtual void Poll (void) {}
     virtual void Init (void);
-    virtual void GetStateName (String& sName) { sName = F ("Connected"); }
+    virtual void GetStateName (String& sName) { sName = F ("Wait for IP Address"); }
+    virtual void OnConnect (void) {}
+    virtual void OnGotIp (void);
+    virtual void OnDisconnect (void);
+
+}; // fsm_Eth_state_WaitForIP
+
+/*****************************************************************************/
+class fsm_Eth_state_GotIp : public fsm_Eth_state
+{
+public:
+    virtual void Poll (void) {}
+    virtual void Init (void);
+    virtual void GetStateName (String& sName) { sName = F ("Got IP"); }
     virtual void OnConnect (void) {}
     virtual void OnGotIp (void) {}
     virtual void OnDisconnect (void);
 
-}; // fsm_Eth_state_ConnectedToEth
-
-/*****************************************************************************/
-class fsm_Eth_state_ConnectionFailed : public fsm_Eth_state
-{
-public:
-    virtual void Poll (void);
-    virtual void Init (void);
-    virtual void GetStateName (String& sName) { sName = F ("Connection Failed"); }
-    virtual void OnConnect (void) {}
-    virtual void OnGotIp (void) {}
-    virtual void OnDisconnect (void) {}
-
-}; // fsm_Eth_state_ConnectionFailed
+}; // fsm_Eth_state_GotIp
 
 /*****************************************************************************/
 class fsm_Eth_state_DeviceInitFailed : public fsm_Eth_state

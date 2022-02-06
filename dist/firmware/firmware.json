@@ -49,8 +49,148 @@
             }
         },
         {
-            "name": "Lolin D32 Pro",
-            "description": "Lolin D32 Pro module with PSRAM support for DIY builds",
+            "name": "D1 Mini Mhetesp32minikit",
+            "description": "D1 Mini Mhetesp32minikit module with PSRAM support for DIY builds",
+            "chip": "esp32",
+            "appbin": "esp32/d1_mini_mhetesp32minikit-app.bin",
+            "esptool": {
+                "baudrate": "460800",
+                "options": "--before default_reset --after hard_reset",
+                "flashcmd": "write_flash -z"
+            },
+            "binfiles": [
+                {
+                    "name": "esp32/d1_mini_mhetesp32minikit-bootloader.bin",
+                    "offset": "0x1000"
+                },
+                {
+                    "name": "esp32/d1_mini_mhetesp32minikit-partitions.bin",
+                    "offset": "0x8000"
+                },
+                {
+                    "name": "esp32/boot_app0.bin",
+                    "offset": "0xe000"
+                },
+                {
+                    "name": "esp32/d1_mini_mhetesp32minikit-app.bin",
+                    "offset": "0x10000"
+                }
+            ],
+            "filesystem": {
+                "page": "256",
+                "block": "4096",
+                "size": "0x50000",
+                "offset": "0x3B0000"
+            }
+        },
+        {
+            "name": "D1 Mini32 ETH",
+            "description": "D1 ESP32 module with PSRAM support for DIY builds",
+            "chip": "esp32",
+            "appbin": "esp32/d1_mini32_eth-app.bin",
+            "esptool": {
+                "baudrate": "460800",
+                "options": "--before default_reset --after hard_reset",
+                "flashcmd": "write_flash -z"
+            },
+            "binfiles": [
+                {
+                    "name": "esp32/d1_mini32_eth-bootloader.bin",
+                    "offset": "0x1000"
+                },
+                {
+                    "name": "esp32/d1_mini32_eth-partitions.bin",
+                    "offset": "0x8000"
+                },
+                {
+                    "name": "esp32/boot_app0.bin",
+                    "offset": "0xe000"
+                },
+                {
+                    "name": "esp32/d1_mini32_eth-app.bin",
+                    "offset": "0x10000"
+                }
+            ],
+            "filesystem": {
+                "page": "256",
+                "block": "4096",
+                "size": "0x50000",
+                "offset": "0x3B0000"
+            }
+        },
+        {
+            "name": "D1 Mini32",
+            "description": "D1 ESP32 module with PSRAM support for DIY builds",
+            "chip": "esp32",
+            "appbin": "esp32/d1_mini32-app.bin",
+            "esptool": {
+                "baudrate": "460800",
+                "options": "--before default_reset --after hard_reset",
+                "flashcmd": "write_flash -z"
+            },
+            "binfiles": [
+                {
+                    "name": "esp32/d1_mini32-bootloader.bin",
+                    "offset": "0x1000"
+                },
+                {
+                    "name": "esp32/d1_mini32-partitions.bin",
+                    "offset": "0x8000"
+                },
+                {
+                    "name": "esp32/boot_app0.bin",
+                    "offset": "0xe000"
+                },
+                {
+                    "name": "esp32/d1_mini32-app.bin",
+                    "offset": "0x10000"
+                }
+            ],
+            "filesystem": {
+                "page": "256",
+                "block": "4096",
+                "size": "0x50000",
+                "offset": "0x3B0000"
+            }
+        },
+        {
+            "name": "D32 PRO ETH",
+            "description": "D32 PRO ESP32 module with PSRAM support for DIY builds",
+            "chip": "esp32",
+            "appbin": "esp32/d32_pro_eth-app.bin",
+            "esptool": {
+                "baudrate": "460800",
+                "options": "--before default_reset --after hard_reset",
+                "flashcmd": "write_flash -z"
+            },
+            "binfiles": [
+                {
+                    "name": "esp32/d32_pro_eth-bootloader.bin",
+                    "offset": "0x1000"
+                },
+                {
+                    "name": "esp32/d32_pro_eth-partitions.bin",
+                    "offset": "0x8000"
+                },
+                {
+                    "name": "esp32/boot_app0.bin",
+                    "offset": "0xe000"
+                },
+                {
+                    "name": "esp32/d32_pro_eth-app.bin",
+                    "offset": "0x10000"
+                }
+            ],
+            "filesystem": {
+                "page": "256",
+                "block": "4096",
+                "size": "0x50000",
+                "offset": "0x3B0000"
+            }
+        },
+        {
+            "name": "D32 PRO",
+            "description": "D32 PRO ESP32 module with PSRAM support for DIY builds",
             "chip": "esp32",
             "appbin": "esp32/d32_pro-app.bin",
             "esptool": {
@@ -79,8 +219,8 @@
             "filesystem": {
                 "page": "256",
                 "block": "4096",
-                "size": "0x30000",
-                "offset": "0x3D0000"
+                "size": "0x50000",
+                "offset": "0x3B0000"
             }
         },
         {
@@ -114,8 +254,43 @@
             "filesystem": {
                 "page": "256",
                 "block": "4096",
-                "size": "0x30000",
-                "offset": "0x3D0000"
+                "size": "0x50000",
+                "offset": "0x3B0000"
+            }
+        },
+        {
+            "name": "ESP32 TTGO T8",
+            "description": "ESP32 for DIY builds",
+            "chip": "esp32",
+            "appbin": "esp32/esp32_ttgo_t8-app.bin",
+            "esptool": {
+                "baudrate": "460800",
+                "options": "--before default_reset --after hard_reset",
+                "flashcmd": "write_flash -z"
+            },
+            "binfiles": [
+                {
+                    "name": "esp32/esp32_ttgo_t8-bootloader.bin",
+                    "offset": "0x1000"
+                },
+                {
+                    "name": "esp32/esp32_ttgo_t8-partitions.bin",
+                    "offset": "0x8000"
+                },
+                {
+                    "name": "esp32/boot_app0.bin",
+                    "offset": "0xe000"
+                },
+                {
+                    "name": "esp32/esp32_ttgo_t8-app.bin",
+                    "offset": "0x10000"
+                }
+            ],
+            "filesystem": {
+                "page": "256",
+                "block": "4096",
+                "size": "0x50000",
+                "offset": "0x3B0000"
             }
         },
         {
@@ -149,8 +324,8 @@
             "filesystem": {
                 "page": "256",
                 "block": "4096",
-                "size": "0x30000",
-                "offset": "0x3D0000"
+                "size": "0x50000",
+                "offset": "0x3B0000"
             }
         }
     ]

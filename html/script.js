@@ -1667,6 +1667,23 @@ function ProcessReceivedJsonStatusMessage(data)
     str += ("0" + date.getUTCSeconds()).slice(-2);
     $('#x_uptime').text(str);
 
+    if ({}.hasOwnProperty.call(System, 'used')) {
+        $('#i_size').removeClass("hidden");
+        $('#x_size').removeClass("hidden");
+        $('#x_size').text(System.size);
+
+        $('#i_used').removeClass("hidden");
+        $('#x_used').removeClass("hidden");
+        $('#x_used').text(System.used);
+    }
+    else
+    {
+        $('#i_size').addClass("hidden");
+        $('#x_size').addClass("hidden");
+        $('#i_used').addClass("hidden");
+        $('#x_used').addClass("hidden");
+    }
+
     if (true === System.SDinstalled)
     {
         $("#li-filemanagement").removeClass("hidden");
