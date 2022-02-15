@@ -1153,7 +1153,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
             request->send (200, CN_textSLASHplain, (String ( F ("Update Finished: ")) + String (efupdate.getError ())).c_str());
             logcon (F ("Upload Finished."));
             efupdate.end ();
-            LittleFS.begin ();
+            // LittleFS.begin ();
 
             extern bool reboot;
             reboot = true;
