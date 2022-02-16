@@ -28,7 +28,7 @@
 #define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_16
 #define RMT_LAST                OutputChannelId_RMT_1
 
-#define LED_FLASH_GPIO          gpio_num_t::GPIO_NUM_4
+#define LED_FLASH_GPIO          gpio_num_t::GPIO_NUM_33
 #define LED_FLASH_OFF           HIGH
 
 // File Manager
