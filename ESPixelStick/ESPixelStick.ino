@@ -116,9 +116,10 @@ RF_PRE_INIT() {
 void setup()
 {
     config.BlankDelay = 5;
-
+#ifdef ARDUINO_ARCH_ESP32
     // disable brownout detector
     WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
+#endif // def ARDUINO_ARCH_ESP32
 
     // Setup serial log port
     LOG_PORT.begin(115200);
