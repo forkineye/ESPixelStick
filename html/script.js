@@ -453,7 +453,7 @@ function ProcessGetFileListResponse(JsonConfigData)
         try
         {
             $('#FileName_' + (CurrentRowId)).val(file.name);
-            $('#FileDate_' + (CurrentRowId)).val(new Date(file.date * 1000).toISOString());
+            $('#FileDate_' + (CurrentRowId)).val(new Date(file.date * 1000).toLocaleString());
             $('#FileSize_' + (CurrentRowId)).val(file.length);
         }
         catch

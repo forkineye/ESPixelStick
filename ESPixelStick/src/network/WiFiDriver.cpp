@@ -807,7 +807,7 @@ void fsm_WiFi_state_ConnectedToAP::Poll ()
     }
 
     // DEBUG_END;
-} // fsm_WiFi_state_ConnectingAsAP::Poll
+} // fsm_WiFi_state_ConnectedToAP::Poll
 
 /*****************************************************************************/
 // Wait for events
@@ -830,7 +830,7 @@ void fsm_WiFi_state_ConnectedToAP::Init ()
     NetworkMgr.SetWiFiIsConnected (true);
 
     // DEBUG_END;
-} // fsm_WiFi_state_ConnectingAsAP::Init
+} // fsm_WiFi_state_ConnectedToAP::Init
 
 /*****************************************************************************/
 // Wait for events
@@ -952,6 +952,6 @@ void fsm_WiFi_state_Disabled::Init ()
 
     // DEBUG_END;
 
-} // fsm_WiFi_state_ConnectionFailed::Init
+} // fsm_WiFi_state_Disabled::Init
 
 //-----------------------------------------------------------------------------

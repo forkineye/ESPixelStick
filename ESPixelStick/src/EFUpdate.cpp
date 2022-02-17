@@ -60,7 +60,7 @@ bool EFUpdate::process(uint8_t *data, size_t len) {
 
         switch (_state) {
             case State::HEADER:
-                // DEBUG_V ("HEADER");
+                // DEBUG_V ("Process HEADER record");
                 _header.raw[_loc++] = data[index++];
                 // DEBUG_V ();
                 if (_loc == sizeof(efuheader_t)) {
@@ -79,18 +79,20 @@ bool EFUpdate::process(uint8_t *data, size_t len) {
                 // DEBUG_V ();
                 break;
             case State::RECORD:
-                // DEBUG_V ("RECORD");
+                // DEBUG_V ("Process Data RECORD Type");
                 _record.raw[_loc++] = data[index++];
                 if (_loc == sizeof(efurecord_t)) {
                     // DEBUG_V ();
                     _record.type = RecordType(ntohs((uint16_t)_record.type));
                     _record.size = ntohl(_record.size);
                     _loc = 0;
+                    // DEBUG_V (String("_record.type: ") + uint32_t(_record.type));
+                    // DEBUG_V (String("_record.size: ") + _record.size);
                     if (_record.type == RecordType::SKETCH_IMAGE) {
-                        // DEBUG_V ("Call Update.begin");
+                        logcon ("Starting Sketch Image");
                         // Begin sketch update
                         if (!Update.begin(_record.size, U_FLASH)) {
-                            // DEBUG_V ("FAIL");
+                            // DEBUG_V ("Update.begin FAIL");
                             _state = State::FAIL;
                             _error = Update.getError();
                         } else {
@@ -102,26 +104,26 @@ bool EFUpdate::process(uint8_t *data, size_t len) {
 #endif
                         // DEBUG_V ();
                     } else if (_record.type == RecordType::FS_IMAGE) {
-                        // DEBUG_V ();
+                        logcon ("Starting FS IMAGE");
                         // Begin file system update
 #ifdef ARDUINO_ARCH_ESP8266
                         LittleFS.end();
 #endif
                         // DEBUG_V ();
                         if (!Update.begin(_record.size, U_SPIFFS)) {
-                            // DEBUG_V ();
+                            // DEBUG_V ("begin U_SPIFFS failed");
                             _state = State::FAIL;
                             _error = Update.getError();
                             // DEBUG_V ();
                         } else {
-                            // DEBUG_V ();
+                            // DEBUG_V ("begin U_SPIFFS");
                             _state = State::DATA;
                         }
 #ifdef ARDUINO_ARCH_ESP8266
                         Update.runAsync (true);
 #endif
                     } else {
-                        // DEBUG_V ();
+                        logcon ("Unknown Record Type");
                         _state = State::FAIL;
                         _error = EFUPDATE_ERROR_REC;
                     }
@@ -136,12 +138,9 @@ bool EFUpdate::process(uint8_t *data, size_t len) {
                 // DEBUG_V ("Call Update.write");
                 // DEBUG_V (String ("toWrite: 0x") + String (toWrite, HEX));
                 // DEBUG_V (String ("   data: 0x") + String (size_t(data) + index, HEX));
+                FeedWDT();
 
-#ifdef ARDUINO_ARCH_ESP32
-        		esp_task_wdt_reset ();
-#else
-       			 ESP.wdtFeed ();
-#endif // def ARDUINO_ARCH_ESP32                Update.write(data + index, toWrite);
+                Update.write(&data[index], toWrite);
                 // DEBUG_V ("write done");
                 index = index + toWrite;
                 _loc = _loc + toWrite;
@@ -149,7 +148,7 @@ bool EFUpdate::process(uint8_t *data, size_t len) {
                 if (_record.size == _loc) {
                     // DEBUG_V ("Call Update.end");
                     Update.end(true);
-                    // DEBUG_V ("Call Update.end");
+                    logcon ("Data Transfer Complete");
                     memset(&_record, 0, sizeof(efurecord_t));
                     _loc = 0;
                     _state = State::RECORD;

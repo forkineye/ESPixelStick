@@ -53,6 +53,8 @@ extern "C"
     // ESP32 user_interface is now built in
 #   include <Update.h>
 #   include <esp_task_wdt.h>
+#   include "soc/soc.h"
+#   include "soc/rtc_cntl_reg.h"
 #else
 #	error "Unsupported CPU type."
 #endif
@@ -114,6 +116,10 @@ RF_PRE_INIT() {
 void setup()
 {
     config.BlankDelay = 5;
+#ifdef ARDUINO_ARCH_ESP32
+    // disable brownout detector
+    WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
+#endif // def ARDUINO_ARCH_ESP32
 
     // Setup serial log port
     LOG_PORT.begin(115200);
