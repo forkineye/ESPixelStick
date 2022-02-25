@@ -244,7 +244,7 @@ void c_WebMgr::init ()
         String filename = request->url ().substring (String ("/download").length ());
         // DEBUG_V (String ("filename: ") + String (filename));
 
-        AsyncWebServerResponse* response = new AsyncFileResponse (SDFS, filename, "application/octet-stream", true);
+        AsyncWebServerResponse* response = new AsyncFileResponse (ESP_SDFS, filename, "application/octet-stream", true);
         request->send (response);
 
         // DEBUG_V ("Send File Done");
