@@ -234,8 +234,9 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
                       String (F ("' as ")) +
                       Hostname);
 
-    WiFi.setSleep (false);
-    WiFi.begin (current_ssid.c_str (), current_passphrase.c_str ());
+ // crashes SD   WiFi.setSleep(false);
+    // DEBUG_V("");
+    WiFi.begin(current_ssid.c_str(), current_passphrase.c_str());
 
     // DEBUG_END;
 
@@ -366,6 +367,7 @@ void c_WiFiDriver::onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t
 {
 #endif
     // DEBUG_START;
+
     pCurrentFsmState->OnConnect ();
 
     // DEBUG_END;
@@ -383,9 +385,9 @@ void c_WiFiDriver::onWiFiDisconnect (const WiFiEvent_t event, const WiFiEventInf
 #endif
     // DEBUG_START;
 
-    pCurrentFsmState->OnDisconnect ();
+   pCurrentFsmState->OnDisconnect ();
 
-    // DEBUG_END;
+   // DEBUG_END;
 
 } // onWiFiDisconnect
 
