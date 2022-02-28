@@ -155,8 +155,9 @@ void c_FileMgr::SetSpiIoPins ()
     {
         ESP_SD.end ();
     }
-
+#ifdef ARDUINO_ARCH_ESP32
     try
+#endif // def ARDUINO_ARCH_ESP32
     {
 #ifdef SUPPORT_SD_MMC
         pinMode(SD_CARD_DATA_0, PULLUP);
@@ -190,12 +191,14 @@ void c_FileMgr::SetSpiIoPins ()
             DescribeSdCardToUser ();
         }
     }
-    catch(const std::exception& e)
+#ifdef ARDUINO_ARCH_ESP32
+    catch (const std::exception &e)
     {
         logcon (String (F ("ERROR: Could not init the SD Card: "))+ e.what());
         SdCardInstalled = false;
     }
-    
+#endif // def ARDUINO_ARCH_ESP32
+
     // DEBUG_END;
 
 } // SetSpiIoPins
