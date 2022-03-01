@@ -41,6 +41,7 @@ public:
     void      GetConfig         (byte * Response, size_t maxlen);
     void      GetConfig         (String & Response);
     void      SetConfig         (const char * NewConfig);  ///< Save the current configuration data to nvram
+    void      SetConfig         (ArduinoJson::JsonDocument & NewConfig);  ///< Save the current configuration data to nvram
     void      GetStatus         (JsonObject & jsonStatus);
     void      PauseOutput       (bool PauseTheOutput) { IsOutputPaused = PauseTheOutput; }
     void      GetPortCounts     (uint16_t& PixelCount, uint16_t& SerialCount) {PixelCount = uint16_t(OutputChannelId_End); SerialCount = min(uint16_t(OutputChannelId_End), uint16_t(2)); }
@@ -139,7 +140,7 @@ private:
 #ifdef ARDUINO_ARCH_ESP8266
 #   define OM_MAX_CONFIG_SIZE      ((size_t)(5*1024))
 #else
-#   define OM_MAX_CONFIG_SIZE      ((size_t)(10*1024))
+#   define OM_MAX_CONFIG_SIZE      ((size_t)(11*1024))
 #endif // !def ARDUINO_ARCH_ESP8266
 
     bool HasBeenInitialized = false;
