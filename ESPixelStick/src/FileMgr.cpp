@@ -367,14 +367,30 @@ bool c_FileMgr::SaveConfigFile (const String& FileName, const char * FileData)
 } // SaveConfigFile
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::SaveConfigFile (const String& FileName, JsonVariant& FileData)
+bool c_FileMgr::SaveConfigFile(const String &FileName, JsonDocument &FileData)
 {
     // DEBUG_START;
     bool Response = false;
-    String ConvertedFileData;
 
-    serializeJson (FileData, ConvertedFileData);
-    Response = SaveConfigFile (FileName, ConvertedFileData);
+    String CfgFileMessagePrefix = String(CN_Configuration_File_colon) + "'" + FileName + "' ";
+
+    fs::File file = LittleFS.open(FileName.c_str(), "w");
+    if (!file)
+    {
+        logcon(String(CN_stars) + CfgFileMessagePrefix + String(F("Could not open file for writing..")) + CN_stars);
+    }
+    else
+    {
+        file.seek(0, SeekSet);
+
+        size_t NumBytesSaved = serializeJson(FileData, file);
+
+        file.close();
+
+        logcon(CfgFileMessagePrefix + String(F("saved ")) + String(NumBytesSaved) + F(" bytes."));
+
+        Response = true;
+    }
 
     // DEBUG_END;
 

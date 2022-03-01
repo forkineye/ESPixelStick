@@ -69,7 +69,7 @@ public:
     void   DeleteConfigFile (const String & FileName);
     bool   SaveConfigFile   (const String & FileName, String & FileData);
     bool   SaveConfigFile   (const String & FileName, const char * FileData);
-    bool   SaveConfigFile   (const String & FileName, JsonVariant & FileData);
+    bool   SaveConfigFile   (const String & FileName, JsonDocument & FileData);
     bool   ReadConfigFile   (const String & FileName, String & FileData);
     bool   ReadConfigFile   (const String & FileName, JsonDocument & FileData);
     bool   ReadConfigFile   (const String & FileName, byte * FileData, size_t maxlen);
