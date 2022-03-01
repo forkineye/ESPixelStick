@@ -823,11 +823,12 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     }
 
     // is this a device config?
-    else if ({}.hasOwnProperty.call(JsonConfigData, "device"))
+    else if ({}.hasOwnProperty.call(JsonConfigData, "system"))
     {
-        // console.info("Got Device Config");
-        System_Config = JsonConfigData;
-        updateFromJSON(JsonConfigData);
+        System_Config = JsonConfigData.system;
+        console.info("Got System Config: " + System_Config);
+
+        updateFromJSON(JsonConfigData.system);
 
         if ({}.hasOwnProperty.call(System_Config.network, 'eth')) {
             $('#pg_network #network #eth').removeClass("hidden")
