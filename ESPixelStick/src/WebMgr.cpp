@@ -341,14 +341,6 @@ void c_WebMgr::GetConfiguration ()
     webJsonDoc.clear ();
     JsonObject JsonSystemConfig = webJsonDoc.createNestedObject (CN_system);
     GetConfig (JsonSystemConfig);
-    // DEBUG_V ("");
-
-    // JsonObject JsonOutputConfig = webJsonDoc.createNestedObject (F ("outputs"));
-    // OutputMgr.GetConfig (JsonOutputConfig);
-    // DEBUG_V ("");
-
-    // JsonObject JsonInputConfig = webJsonDoc.createNestedObject (F ("inputs"));
-    // InputMgr.GetConfig (JsonInputConfig);
 
     // now make it something we can transmit
     serializeJson (webJsonDoc, WebSocketFrameCollectionBuffer);
@@ -949,7 +941,7 @@ bool c_WebMgr::processCmdSet (JsonObject & jsonCmd)
 
     do // once
     {
-        if (jsonCmd.containsKey (CN_device))
+        if (jsonCmd.containsKey(CN_device) | jsonCmd.containsKey(CN_system))
         {
             // DEBUG_V ("device/network");
             extern void SetConfig (const char* DataString);
