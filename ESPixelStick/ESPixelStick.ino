@@ -255,34 +255,49 @@ bool deserializeCore (JsonObject & json)
 
     // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
     // PrettyPrint (json, "Main Config");
+    JsonObject DeviceConfig;
 
     do // once
     {
-        if (json.containsKey(CN_cfgver))
+        // was this saved by the ESP itself
+        if (json.containsKey(CN_system))
+        {
+            DeviceConfig = json[CN_system];
+        }
+        // is this an initial config from the flash tool?
+        else if (json.containsKey(CN_init))
+        {
+            // trigger a save operation
+            ConfigSaveNeeded = true;
+            logcon(String(F("Processing Flash Tool config")));
+            DeviceConfig = json;
+        }
+        else
+        {
+            logcon(String(F("Could not find system config")));
+            ConfigSaveNeeded = true;
+            break;
+        }
+
+        if (DeviceConfig.containsKey(CN_cfgver))
         {
             uint8_t TempVersion = uint8_t(-1);
-            setFromJSON (TempVersion, json, CN_cfgver);
+            setFromJSON(TempVersion, DeviceConfig, CN_cfgver);
             if (TempVersion != CurrentConfigVersion)
             {
-                //TODO: Add configuration update handler
-                logcon (String (F ("Incorrect Config Version ID")));
+                // TODO: Add configuration update handler
+                logcon(String(F("Incorrect Config Version ID")));
             }
         }
         else
         {
-            logcon (String (F ("Missing Config Version ID")));
+            logcon(String(F("Missing Config Version ID")));
+            // break; // ignoring this error for now.
         }
 
-        // is this an initial config from the flash tool?
-        if (json.containsKey (CN_init))
-        {
-            // trigger a save operation
-            ConfigSaveNeeded = true;
-        }
-
-        dsDevice  (json);
-        FileMgr.SetConfig (json);
-        ConfigSaveNeeded |= NetworkMgr.SetConfig (json);
+        dsDevice(DeviceConfig);
+        FileMgr.SetConfig(DeviceConfig);
+        ConfigSaveNeeded |= NetworkMgr.SetConfig(DeviceConfig);
         DataHasBeenAccepted = true;
 
     } while (false);
@@ -309,11 +324,13 @@ void SaveConfig()
 
     ConfigSaveNeeded = false;
 
-    // Save Config
-    String DataToSave = serializeCore (false);
-    // DEBUG_V ("ConfigFileName: " + ConfigFileName);
-    // DEBUG_V ("DataToSave: " + DataToSave);
-    FileMgr.SaveConfigFile(ConfigFileName, DataToSave);
+    // Create buffer and root object
+    DynamicJsonDocument jsonConfigDoc(2048);
+    JsonObject JsonConfig = jsonConfigDoc.createNestedObject(CN_system);
+
+    GetConfig(JsonConfig);
+
+    FileMgr.SaveConfigFile(ConfigFileName, jsonConfigDoc);
 
     // DEBUG_END;
 } // SaveConfig
