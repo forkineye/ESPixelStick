@@ -253,14 +253,14 @@ void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
 #endif
 
 //-----------------------------------------------------------------------------
-esp_err_t c_OutputCommon::RegisterUartIsrHandler(void (*fn)(void *), void *arg, int intr_alloc_flags)
+bool c_OutputCommon::RegisterUartIsrHandler(void (*fn)(void *), void *arg, int intr_alloc_flags)
 {
-    int ret = ESP_OK;
+    bool ret = true;
 #ifdef ARDUINO_ARCH_ESP8266
     ETS_UART_INTR_ATTACH(fn, arg);
 #else
     // UART_ENTER_CRITICAL(&(uart_context[uart_num].spinlock));
-    ret = esp_intr_alloc(uart_periph_signal[UartId].irq, intr_alloc_flags, fn, arg, nullptr);
+    ret = (ESP_OK == esp_intr_alloc(uart_periph_signal[UartId].irq, intr_alloc_flags, fn, arg, nullptr));
     // UART_EXIT_CRITICAL(&(uart_context[uart_num].spinlock));
 #endif
     return ret;
