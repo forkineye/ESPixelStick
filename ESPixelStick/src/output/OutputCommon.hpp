@@ -90,6 +90,7 @@ protected:
     void StartBreak ();
     void EndBreak ();
     void GenerateBreak (uint32_t DurationInUs);
+    esp_err_t RegisterUartIsrHandler(void (*fn)(void *), void *arg, int intr_alloc_flags);
 
     inline bool canRefresh ()
     {

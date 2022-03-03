@@ -140,11 +140,7 @@ void c_OutputUCS1903Uart::Begin ()
 #endif
 
     // Atttach interrupt handler
-#ifdef ARDUINO_ARCH_ESP8266
-    ETS_UART_INTR_ATTACH (uart_intr_handler, this);
-#else
-    uart_isr_register (UartId, uart_intr_handler, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM, nullptr);
-#endif
+    RegisterUartIsrHandler(uart_intr_handler, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM);
 
     // invert the output
     CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_INV_MASK);
