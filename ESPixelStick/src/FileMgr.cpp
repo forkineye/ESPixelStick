@@ -298,7 +298,7 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
             logcon (String(CN_stars) + CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str () + CN_stars);
             // logcon (CN_plussigns + RawFileData + CN_minussigns);
 	        // DEBUG_V (String ("                heap: ") + String (ESP.getFreeHeap ()));
-    	    // DEBUG_V (String (" getMaxFreeBlockSize: ") + String (ESP.getMaxFreeBlockSize ()));
+    	    /// DEBUG_V (String (" getMaxFreeBlockSize: ") + String (ESP.getMaxFreeBlockSize ()));
         	DEBUG_V (String ("           file.size: ") + String (file.size ()));
 	        // DEBUG_V (String ("Expected JsonDocSize: ") + String (JsonDocSize));
     	    // DEBUG_V (String ("    jsonDoc.capacity: ") + String (jsonDoc.capacity ()));
@@ -517,7 +517,7 @@ bool c_FileMgr::ReadConfigFile (const String & FileName, byte * FileData, size_t
 
         GotFileData = true;
 
-        // DEBUG_V (FileData);
+        /// DEBUG_V (FileData);
 
     } while (false);
 
