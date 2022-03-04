@@ -35,7 +35,7 @@ jobs:
           - target: "esp32_ttgo_t8"
             chip: "esp32"
           # mh et esp32 mini kit
-          - target: "d1_mini_mhetesp32minikit"
+          - target: "esp32_wt32eth01"
             chip: "esp32"
 
     runs-on: ubuntu-latest
