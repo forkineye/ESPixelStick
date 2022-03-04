@@ -171,18 +171,22 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
             ConfigSaveNeeded = true;
             break;
         }
+        // DEBUG_V("");
 
         JsonObject network = json[CN_network];
 
         HostnameChanged = setFromJSON (hostname, network, CN_hostname);
+        // DEBUG_V("");
 
         if (network.containsKey (CN_wifi))
         {
+            // DEBUG_V("");
             JsonObject networkWiFi = network[CN_wifi];
             ConfigChanged |= WiFiDriver.SetConfig (networkWiFi);
         }
         else
         {
+            // DEBUG_V("");
             // this may be an old style config
             if (network.containsKey (CN_ssid))
             {
@@ -218,15 +222,19 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
 
     } while (false);
 
-    HostnameChanged |= Validate ();
+    // DEBUG_V("");
+    HostnameChanged |= Validate();
+    // DEBUG_V("");
 
     if(HostnameChanged)
     {
-        WiFiDriver.SetHostname (hostname);
+        // DEBUG_V("");
+        WiFiDriver.SetHostname(hostname);
 #ifdef SUPPORT_ETHERNET
         EthernetDriver.SetHostname (hostname);
 #endif // def SUPPORT_ETHERNET
     }
+    // DEBUG_V("");
 
     ConfigChanged |= HostnameChanged;
 
@@ -299,6 +307,7 @@ void c_NetworkMgr::SetWiFiEnable ()
         // DEBUG_V ("AllowWiFiAndEthUpSimultaneously");
         WiFiDriver.Enable ();
     }
+    // DEBUG_END;
 
 } // SetWiFiEnabled
 
