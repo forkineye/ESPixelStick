@@ -238,7 +238,7 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
                       String (F ("' as ")) +
                       Hostname);
 
- // TODO crashes SD   WiFi.setSleep(false);
+    WiFi.setSleep(false);
     // DEBUG_V("");
     WiFi.begin(current_ssid.c_str(), current_passphrase.c_str());
 
