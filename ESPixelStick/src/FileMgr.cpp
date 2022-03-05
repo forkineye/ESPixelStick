@@ -299,7 +299,7 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
             // logcon (CN_plussigns + RawFileData + CN_minussigns);
 	        // DEBUG_V (String ("                heap: ") + String (ESP.getFreeHeap ()));
     	    /// DEBUG_V (String (" getMaxFreeBlockSize: ") + String (ESP.getMaxFreeBlockSize ()));
-        	DEBUG_V (String ("           file.size: ") + String (file.size ()));
+        	// DEBUG_V (String ("           file.size: ") + String (file.size ()));
 	        // DEBUG_V (String ("Expected JsonDocSize: ") + String (JsonDocSize));
     	    // DEBUG_V (String ("    jsonDoc.capacity: ") + String (jsonDoc.capacity ()));
             break;
