@@ -105,7 +105,9 @@ typedef enum
 #   include "GPIO_Defs_ESP8266_ESP01S.hpp"
 #elif defined (BOARD_ESPS_V3)
 #   include "GPIO_Defs_ESP8266_ESPS_V3.hpp"
-#elif defined (ARDUINO_ARCH_ESP8266)
+#elif defined(BOARD_ESP32_QUINLED_ETH)
+#   include "GPIO_Defs_ESP32_QUINLED_ETH.hpp"
+#elif defined(ARDUINO_ARCH_ESP8266)
 #   include "GPIO_Defs_ESP8266_Generic.hpp"
 #elif defined (ARDUINO_ARCH_ESP32)
 #   include "GPIO_Defs_ESP32_generic.hpp"
