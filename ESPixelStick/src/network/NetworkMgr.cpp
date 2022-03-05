@@ -223,13 +223,13 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
     } while (false);
 
     // DEBUG_V("");
-    HostnameChanged |= Validate();
+    HostnameChanged |= Validate ();
     // DEBUG_V("");
 
     if(HostnameChanged)
     {
         // DEBUG_V("");
-        WiFiDriver.SetHostname(hostname);
+        WiFiDriver.SetHostname (hostname);
 #ifdef SUPPORT_ETHERNET
         EthernetDriver.SetHostname (hostname);
 #endif // def SUPPORT_ETHERNET
