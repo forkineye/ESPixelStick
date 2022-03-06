@@ -1,6 +1,6 @@
 #pragma once
 /*
- * GPIO_Defs_ESP32_QUINLED_ETH.hpp - Output Management class
+ * GPIO_Defs_ESP32_QUINLED_UNO_ETH.hpp - Output Management class
  *
  * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
  * Copyright (c) 2021 Shelby Merrick
@@ -22,30 +22,7 @@
 
 //Output Manager
 #define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_2
-#define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_4
 #define UART_LAST               OutputChannelId_UART_1
-
-#define SUPPORT_RMT_OUTPUT
-#define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_0
-#define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_5
-#define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_16
-#define RMT_LAST                OutputChannelId_RMT_3
-
-// #define SUPPORT_OutputType_WS2801
-// #define SUPPORT_OutputType_APA102
-// #define SUPPORT_OutputType_TM1814
-// #define SUPPORT_OutputType_TLS3001
-
-// #define SUPPORT_RELAY_OUTPUT
-
-#if defined(SUPPORT_OutputType_WS2801) || defined(SUPPORT_OutputType_APA102)
-#   define SUPPORT_SPI_OUTPUT
-
-// SPI Output
-#  define DEFAULT_SPI_DATA_GPIO  gpio_num_t::GPIO_NUM_15
-#  define DEFAULT_SPI_CLOCK_GPIO gpio_num_t::GPIO_NUM_25
-
-#endif // defined(SUPPORT_OutputType_WS2801) || defined(SUPPORT_OutputType_TM1814)
 
 // File Manager
 #define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_12
