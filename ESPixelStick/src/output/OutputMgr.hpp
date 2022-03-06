@@ -122,12 +122,19 @@ public:
     };
 
 #ifdef ARDUINO_ARCH_ESP8266
-#   define OM_MAX_NUM_CHANNELS  (1200 * 3)
-#else
-#   define OM_MAX_NUM_CHANNELS  (3000 * 3)
-#endif // !def ARDUINO_ARCH_ESP8266
+#   define OM_MAX_NUM_CHANNELS      (1200 * 3)
+#   define OM_MAX_CONFIG_SIZE       ((size_t)(5 * 1024))
+#else // ARDUINO_ARCH_ESP32
+#   ifdef BOARD_HAS_PSRAM
+#       define OM_MAX_NUM_CHANNELS  (7000 * 3)
+#       define OM_MAX_CONFIG_SIZE   ((size_t)(20 * 1024))
+#   else
+#       define OM_MAX_NUM_CHANNELS  (3000 * 3)
+#       define OM_MAX_CONFIG_SIZE   ((size_t)(11 * 1024))
+#   endif // !def BOARD_HAS_PSRAM
+#endif // !def ARDUINO_ARCH_ESP32
 
-private:
+    private:
 
     void InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, e_OutputType NewChannelType, bool StartDriver = true);
     void CreateNewConfig ();
@@ -136,12 +143,6 @@ private:
     c_OutputCommon * pOutputChannelDrivers[uint32_t(e_OutputChannelIds::OutputChannelId_End)];
 
     // configuration parameter names for the channel manager within the config file
-
-#ifdef ARDUINO_ARCH_ESP8266
-#   define OM_MAX_CONFIG_SIZE      ((size_t)(5*1024))
-#else
-#   define OM_MAX_CONFIG_SIZE      ((size_t)(11*1024))
-#endif // !def ARDUINO_ARCH_ESP8266
 
     bool HasBeenInitialized = false;
     bool ConfigLoadNeeded   = false;
