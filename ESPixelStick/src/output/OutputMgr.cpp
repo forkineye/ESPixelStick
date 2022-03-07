@@ -336,14 +336,15 @@ void c_OutputMgr::CreateNewConfig ()
             // DEBUG_V (String ("instantiate output type: ") + String (outputTypeId));
             InstantiateNewOutputChannel (e_OutputChannelIds (ChannelIndex++), e_OutputType (outputTypeId), false);
             // DEBUG_V ("");
-
-        }// end for each interface
+        } // end for each interface
 
         // DEBUG_V ("collect the config data for this output type");
         CreateJsonConfig (JsonConfig);
+        // DEBUG_V(String("       Heap: ") + String(ESP.getFreeHeap()));
+        // DEBUG_V(String(" overflowed: ") + String(JsonConfigDoc.overflowed()));
+        // DEBUG_V(String("memoryUsage: ") + String(JsonConfigDoc.memoryUsage()));
 
         // DEBUG_V ("");
-
     } // end for each output type
 
     // DEBUG_V ("leave the outputs disabled");
@@ -355,12 +356,11 @@ void c_OutputMgr::CreateNewConfig ()
     // DEBUG_V ("Outputs Are disabled");
     CreateJsonConfig (JsonConfig);
 
-    // DEBUG_V ("");
-    String ConfigData;
-    serializeJson (JsonConfigDoc, ConfigData);
-    // DEBUG_V (String("ConfigData: ") + ConfigData);
-    SetConfig (ConfigData.c_str());
-    // DEBUG_V (String ("ConfigData: ") + ConfigData);
+    // DEBUG_V (String ("       Heap: ") + String (ESP.getFreeHeap ()));
+    // DEBUG_V (String (" overflowed: ") + String (JsonConfigDoc.overflowed()));
+    // DEBUG_V (String ("memoryUsage: ") + String (JsonConfigDoc.memoryUsage()));
+
+    SetConfig(JsonConfigDoc);
 
     // logcon (String (F ("--- WARNING: Creating a new Output Manager configuration Data set - Done ---")));
 
@@ -433,9 +433,8 @@ void c_OutputMgr::InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, 
         // is there an existing driver?
         if (nullptr != pOutputChannelDrivers[ChannelIndex])
         {
-            // int temp = pOutputChannelDrivers[ChannelIndex]->GetOutputType ();
-            // DEBUG_V (String("pOutputChannelDrivers[ChannelIndex]->GetOutputType () '") + temp + String("'"));
-            // DEBUG_V (String("NewOutputChannelType '") + int(NewOutputChannelType) + "'");
+            // DEBUG_V (String ("pOutputChannelDrivers[ChannelIndex]->GetOutputType () '") + String (pOutputChannelDrivers[ChannelIndex]->GetOutputType()) + String ("'"));
+            // DEBUG_V (String ("NewOutputChannelType '") + int(NewOutputChannelType) + "'");
 
             // DEBUG_V ("does the driver need to change?");
             if (pOutputChannelDrivers[ChannelIndex]->GetOutputType () == NewOutputChannelType)
@@ -922,14 +921,10 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
 
 //-----------------------------------------------------------------------------
 /*
-    This is a bit tricky. The running config is only a portion of the total
-    configuration. We need to get the existing saved configuration and add the
-    current configuration to it.
-
-*   Save the current configuration to NVRAM
+*   Save the current configuration to the FS
 *
 *   needs
-*       Nothing
+*       pointer to the config data array
 *   returns
 *       Nothing
 */
@@ -942,12 +937,36 @@ void c_OutputMgr::SetConfig (const char * ConfigData)
     if (true == FileMgr.SaveConfigFile (ConfigFileName, ConfigData))
     {
         ConfigLoadNeeded = true;
-        // FileMgr logs for us
-        // logcon (CN_stars + String (F (" Saved Output Manager Config File. ")) + CN_stars);
     } // end we got a config and it was good
     else
     {
         logcon (CN_stars + String (F (" Error Saving Output Manager Config File ")) + CN_stars);
+    }
+
+    // DEBUG_END;
+
+} // SaveConfig
+
+//-----------------------------------------------------------------------------
+/*
+ *   Save the current configuration to the FS
+ *
+ *   needs
+ *       Reference to the JSON Document
+ *   returns
+ *       Nothing
+ */
+void c_OutputMgr::SetConfig(ArduinoJson::JsonDocument & ConfigData)
+{
+    // DEBUG_START;
+
+    if (true == FileMgr.SaveConfigFile(ConfigFileName, ConfigData))
+    {
+        ConfigLoadNeeded = true;
+    } // end we got a config and it was good
+    else
+    {
+        logcon(CN_stars + String(F(" Error Saving Output Manager Config File ")) + CN_stars);
     }
 
     // DEBUG_END;

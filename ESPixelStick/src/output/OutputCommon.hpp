@@ -91,6 +91,12 @@ protected:
     void EndBreak ();
     void GenerateBreak (uint32_t DurationInUs);
 
+#ifndef ESP_INTR_FLAG_IRAM
+#   define ESP_INTR_FLAG_IRAM 0
+#endif // ndef ESP_INTR_FLAG_IRAM
+
+    bool RegisterUartIsrHandler(void (*fn)(void *), void *arg, int intr_alloc_flags);
+
     inline bool canRefresh ()
     {
         return (micros () - FrameStartTimeInMicroSec) >= FrameMinDurationInMicroSec;

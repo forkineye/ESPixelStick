@@ -190,7 +190,7 @@ void fsm_PlayFile_state_PlayingFile::Poll ()
             if (0 != p_Parent->RemainingPlayCount)
             {
                 // DEBUG_V (String ("RemainingPlayCount: ") + String (p_Parent->RemainingPlayCount));
-                logcon (String ("Replaying:: FileName:      '") + p_Parent->GetFileName () + "'");
+                // DEBUG_V (String ("Replaying:: FileName:      '") + p_Parent->GetFileName () + "'");
                 --p_Parent->RemainingPlayCount;
                 // DEBUG_V (String ("RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
 
@@ -326,7 +326,7 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
         // DEBUG_V (String ("                  StartTimeMS: ") + String (p_Parent->StartTimeMS));
         // DEBUG_V (String ("           RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
 
-        logcon (String (F ("Start Playing:: FileName: '")) + p_Parent->PlayItemName + "'");
+        // DEBUG_V (String (F ("Start Playing:: FileName: '")) + p_Parent->PlayItemName + "'");
 
         Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_PlayingFile_imp);
         Parent->FrameControl.ElapsedPlayTimeMS = 0;
@@ -359,7 +359,7 @@ void fsm_PlayFile_state_PlayingFile::Stop (void)
 {
     // DEBUG_START;
 
-    logcon (String (F ("Stop Playing::  FileName: '")) + p_Parent->PlayItemName + "'");
+    // DEBUG_V (String (F ("Stop Playing::  FileName: '")) + p_Parent->PlayItemName + "'");
     // DEBUG_V (String ("            LastPlayedFrameId: ") + String (p_Parent->LastPlayedFrameId));
     // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->TotalNumberOfFramesInSequence));
     // DEBUG_V (String ("           RemainingPlayCount: ") + p_Parent->RemainingPlayCount);

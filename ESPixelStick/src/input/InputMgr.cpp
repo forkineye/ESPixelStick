@@ -288,9 +288,7 @@ void c_InputMgr::CreateNewConfig ()
     // Record the default configuration
     CreateJsonConfig (JsonConfig);
 
-    String ConfigData;
-    serializeJson (JsonConfigDoc, ConfigData);
-    SetConfig (ConfigData.c_str());
+    SetConfig(JsonConfigDoc);
 
     // logcon (String (F ("--- WARNING: Creating a new Input Manager configuration Data set - Done ---")));
     // DEBUG_END;
@@ -887,6 +885,33 @@ void c_InputMgr::SetConfig (const char * NewConfigData)
     else
     {
         logcon (CN_stars + String (F (" Error Saving Input Manager Config File ")) + CN_stars);
+    }
+
+    // DEBUG_END;
+
+} // SetConfig
+
+//-----------------------------------------------------------------------------
+/* Sets the configuration for the current active ports:
+ *
+ *   WARNING: This runs in the Web server context and cannot access the File system
+ */
+void c_InputMgr::SetConfig(JsonDocument & NewConfigData)
+{
+    // DEBUG_START;
+
+    if (true == FileMgr.SaveConfigFile(ConfigFileName, NewConfigData))
+    {
+        // DEBUG_V (String("NewConfigData: ") + NewConfigData);
+        // FileMgr logs for us
+        // logcon (CN_stars + String (F (" Saved Input Manager Config File. ")) + CN_stars);
+
+        configLoadNeeded = true;
+
+    } // end we saved the config
+    else
+    {
+        logcon(CN_stars + String(F(" Error Saving Input Manager Config File ")) + CN_stars);
     }
 
     // DEBUG_END;

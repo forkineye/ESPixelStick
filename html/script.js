@@ -823,11 +823,12 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     }
 
     // is this a device config?
-    else if ({}.hasOwnProperty.call(JsonConfigData, "device"))
+    else if ({}.hasOwnProperty.call(JsonConfigData, "system"))
     {
-        // console.info("Got Device Config");
-        System_Config = JsonConfigData;
-        updateFromJSON(JsonConfigData);
+        System_Config = JsonConfigData.system;
+        // console.info("Got System Config: " + System_Config);
+
+        updateFromJSON(System_Config);
 
         if ({}.hasOwnProperty.call(System_Config.network, 'eth')) {
             $('#pg_network #network #eth').removeClass("hidden")
@@ -1035,7 +1036,6 @@ function ExtractNetworkEthernetConfigFromHtmlPage()
         System_Config.network.eth.netmask     = $('#network #eth #netmask').val();
         System_Config.network.eth.gateway     = $('#network #eth #gateway').val();
         System_Config.network.eth.dhcp        = $('#network #eth #dhcp').prop('checked');
-        System_Config.network.eth.type        = $('#network #eth #type').val();
         System_Config.network.eth.type        = parseInt($('#network #eth #type option:selected').val(), 10);
         System_Config.network.eth.addr        = $('#network #eth #addr').val();
         System_Config.network.eth.power_pin   = $('#network #eth #power_pin').val();
@@ -1059,9 +1059,19 @@ function ExtractNetworkConfigFromHtmlPage()
 } // ExtractNetworkConfigFromHtmlPage
 
 // Builds JSON config submission for "WiFi" tab
-function submitNetworkConfig() {
+function submitNetworkConfig()
+{
+    System_Config.device.id        = $('#config #device #id').val();
+    System_Config.device.blanktime = $('#config #device #blanktime').val();
+    System_Config.device.miso_pin  = $('#config #device #miso_pin').val();
+    System_Config.device.mosi_pin  = $('#config #device #mosi_pin').val();
+    System_Config.device.clock_pin = $('#config #device #clock_pin').val();
+    System_Config.device.cs_pin    = $('#config #device #cs_pin').val();
+
     ExtractNetworkConfigFromHtmlPage();
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': System_Config } }));
+
+    // console.info("Send: " + JSON.stringify({ 'cmd': { 'set': { 'system': System_Config } } }));
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'system': System_Config }}}));
 
 } // submitNetworkConfig
 
@@ -1170,15 +1180,8 @@ function submitDeviceConfig()
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
-    System_Config.device.id        = $('#config #device #id').val();
-    System_Config.device.blanktime = $('#config #device #blanktime').val();
-    System_Config.device.miso_pin  = $('#config #device #miso_pin').val();
-    System_Config.device.mosi_pin  = $('#config #device #mosi_pin').val();
-    System_Config.device.clock_pin = $('#config #device #clock_pin').val();
-    System_Config.device.cs_pin    = $('#config #device #cs_pin').val();
-
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': System_Config } }));
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input':  { 'input_config': Input_Config } } } }));
+    submitNetworkConfig();
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input':  { 'input_config':  Input_Config  } } } }));
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'output': { 'output_config': Output_Config } } } }));
 
 } // submitDeviceConfig

@@ -35,6 +35,7 @@ extern "C" {
 #   include <soc/uart_reg.h>
 #   include <rom/ets_sys.h>
 #   include <driver/uart.h>
+#   include <soc/uart_periph.h>
 
 #   define UART_CONF0           UART_CONF0_REG
 #   define UART_CONF1           UART_CONF1_REG
@@ -250,6 +251,20 @@ void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
 
 } // InitializeUart
 #endif
+
+//-----------------------------------------------------------------------------
+bool c_OutputCommon::RegisterUartIsrHandler(void (*fn)(void *), void *arg, int intr_alloc_flags)
+{
+    bool ret = true;
+#ifdef ARDUINO_ARCH_ESP8266
+    ETS_UART_INTR_ATTACH(fn, arg);
+#else
+    // UART_ENTER_CRITICAL(&(uart_context[uart_num].spinlock));
+    ret = (ESP_OK == esp_intr_alloc(uart_periph_signal[UartId].irq, intr_alloc_flags, fn, arg, nullptr));
+    // UART_EXIT_CRITICAL(&(uart_context[uart_num].spinlock));
+#endif
+    return ret;
+} // RegisterUartIsrHandler
 
 //-----------------------------------------------------------------------------
 void c_OutputCommon::GetStatus (JsonObject & jsonStatus)

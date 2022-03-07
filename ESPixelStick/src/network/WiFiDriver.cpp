@@ -89,9 +89,9 @@ c_WiFiDriver::c_WiFiDriver ()
 ///< deallocate any resources and put the output channels into a safe state
 c_WiFiDriver::~c_WiFiDriver()
 {
- // DEBUG_START;
+    // DEBUG_START;
 
- // DEBUG_END;
+    // DEBUG_END;
 
 } // ~c_WiFiDriver
 
@@ -200,6 +200,7 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
     // Hostname must be set after the mode on ESP8266 and before on ESP32
 #ifdef ARDUINO_ARCH_ESP8266
     WiFi.disconnect ();
+    // DEBUG_V("");
 
     // Switch to station mode
     WiFi.mode (WIFI_STA);
@@ -210,16 +211,19 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
         // DEBUG_V (String ("Setting WiFi hostname: ") + Hostname);
         WiFi.hostname (Hostname);
     }
+    // DEBUG_V("");
 #else
     WiFi.persistent (false);
     // DEBUG_V ("");
     WiFi.disconnect (true);
+    // DEBUG_V("");
 
     if (0 != Hostname.length ())
     {
         // DEBUG_V (String ("Setting WiFi hostname: ") + Hostname);
         WiFi.hostname (Hostname);
     }
+    // DEBUG_V("Setting WiFi Mode to STA");
 
     // Switch to station mode
     WiFi.mode (WIFI_STA);
@@ -235,6 +239,7 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
                       Hostname);
 
     WiFi.setSleep (false);
+    // DEBUG_V("");
     WiFi.begin (current_ssid.c_str (), current_passphrase.c_str ());
 
     // DEBUG_END;
@@ -245,7 +250,6 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
 void c_WiFiDriver::Disable ()
 {
     // DEBUG_START;
-    // AnnounceState ();
 
     if (pCurrentFsmState != &fsm_WiFi_state_Disabled_imp)
     {
@@ -263,7 +267,6 @@ void c_WiFiDriver::Disable ()
 void c_WiFiDriver::Enable ()
 {
     // DEBUG_START;
-    // AnnounceState ();
 
     if (pCurrentFsmState == &fsm_WiFi_state_Disabled_imp)
     {
@@ -366,6 +369,7 @@ void c_WiFiDriver::onWiFiConnect (const WiFiEvent_t event, const WiFiEventInfo_t
 {
 #endif
     // DEBUG_START;
+
     pCurrentFsmState->OnConnect ();
 
     // DEBUG_END;
@@ -421,11 +425,14 @@ void c_WiFiDriver::reset ()
 
     // Reset address in case we're switching from static to dhcp
     WiFi.config (0u, 0u, 0u);
+    // DEBUG_V("");
 
     if (IsWiFiConnected ())
     {
+        // DEBUG_V("");
         NetworkMgr.SetWiFiIsConnected (false);
     }
+    // DEBUG_V("");
 
     fsm_WiFi_state_Boot_imp.Init ();
 
@@ -582,14 +589,14 @@ int c_WiFiDriver::ValidateConfig ()
 // Waiting for polling to start
 void fsm_WiFi_state_Boot::Poll ()
 {
-    // DEBUG_START;
+    /// DEBUG_START;
 
     // Start trying to connect to the AP
-    // DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
+    /// DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
     fsm_WiFi_state_ConnectingUsingConfig_imp.Init ();
     // pWiFiDriver->displayFsmState ();
 
-    // DEBUG_END;
+    /// DEBUG_END;
 } // fsm_WiFi_state_boot
 
 /*****************************************************************************/
@@ -613,7 +620,7 @@ void fsm_WiFi_state_Boot::Init ()
 // Wait for events
 void fsm_WiFi_state_ConnectingUsingConfig::Poll ()
 {
-    // DEBUG_START;
+    /// DEBUG_START;
 
     // wait for the connection to complete via the callback function
     uint32_t CurrentTimeMS = millis ();
@@ -622,13 +629,13 @@ void fsm_WiFi_state_ConnectingUsingConfig::Poll ()
     {
         if (CurrentTimeMS - pWiFiDriver->GetFsmStartTime() > (1000 * pWiFiDriver->Get_sta_timeout()))
         {
-            // DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
+            /// DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
             logcon (F ("WiFi Failed to connect using Configured Credentials"));
             fsm_WiFi_state_ConnectingUsingDefaults_imp.Init ();
         }
     }
 
-    // DEBUG_END;
+    /// DEBUG_END;
 } // fsm_WiFi_state_ConnectingUsingConfig::Poll
 
 /*****************************************************************************/
@@ -676,7 +683,7 @@ void fsm_WiFi_state_ConnectingUsingConfig::OnConnect ()
 // Wait for events
 void fsm_WiFi_state_ConnectingUsingDefaults::Poll ()
 {
-    // DEBUG_START;
+    /// DEBUG_START;
 
     // wait for the connection to complete via the callback function
     uint32_t CurrentTimeMS = millis ();
@@ -685,13 +692,13 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Poll ()
     {
         if (CurrentTimeMS - pWiFiDriver->GetFsmStartTime () > (1000 * pWiFiDriver->Get_sta_timeout ()))
         {
-            // DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
+            /// DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
             logcon (F ("WiFi Failed to connect using default Credentials"));
             fsm_WiFi_state_ConnectingAsAP_imp.Init ();
         }
     }
 
-    // DEBUG_END;
+    /// DEBUG_END;
 } // fsm_WiFi_state_ConnectingUsingDefaults::Poll
 
 /*****************************************************************************/
@@ -729,7 +736,7 @@ void fsm_WiFi_state_ConnectingUsingDefaults::OnConnect ()
 // Wait for events
 void fsm_WiFi_state_ConnectingAsAP::Poll ()
 {
-    // DEBUG_START;
+    /// DEBUG_START;
 
     if (0 != WiFi.softAPgetStationNum ())
     {
@@ -744,7 +751,7 @@ void fsm_WiFi_state_ConnectingAsAP::Poll ()
         }
     }
 
-    // DEBUG_END;
+    /// DEBUG_END;
 } // fsm_WiFi_state_ConnectingAsAP::Poll
 
 /*****************************************************************************/
@@ -784,11 +791,11 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
 // Wait for events
 void fsm_WiFi_state_ConnectingAsAP::OnConnect ()
 {
- // DEBUG_START;
+    // DEBUG_START;
 
     fsm_WiFi_state_ConnectedToSta_imp.Init ();
 
- // DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_WiFi_state_ConnectingAsAP::OnConnect
 
@@ -797,16 +804,16 @@ void fsm_WiFi_state_ConnectingAsAP::OnConnect ()
 // Wait for events
 void fsm_WiFi_state_ConnectedToAP::Poll ()
 {
-    // DEBUG_START;
+    /// DEBUG_START;
 
     // did we get silently disconnected?
     if (WiFi.status () != WL_CONNECTED)
     {
-     // DEBUG_V ("WiFi Handle Silent Disconnect");
+        // DEBUG_V ("WiFi Handle Silent Disconnect");
         WiFi.reconnect ();
     }
 
-    // DEBUG_END;
+    /// DEBUG_END;
 } // fsm_WiFi_state_ConnectedToAP::Poll
 
 /*****************************************************************************/
@@ -850,7 +857,7 @@ void fsm_WiFi_state_ConnectedToAP::OnDisconnect ()
 // Wait for events
 void fsm_WiFi_state_ConnectedToSta::Poll ()
 {
-   // DEBUG_START;
+    /// DEBUG_START;
 
     // did we get silently disconnected?
     if (0 == WiFi.softAPgetStationNum ())
@@ -859,7 +866,7 @@ void fsm_WiFi_state_ConnectedToSta::Poll ()
         fsm_WiFi_state_ConnectionFailed_imp.Init ();
     }
 
-    // DEBUG_END;
+    /// DEBUG_END;
 } // fsm_WiFi_state_ConnectedToSta::Poll
 
 /*****************************************************************************/

@@ -149,7 +149,7 @@ void c_InputFPPRemotePlayFile::Poll (uint8_t * _Buffer, size_t _BufferSize)
     Buffer = _Buffer;
     BufferSize = _BufferSize;
 
-    // pCurrentFsmState->TimerPoll ();
+    // TimerPoll ();
     pCurrentFsmState->Poll ();
 
     // Show that we have received a poll

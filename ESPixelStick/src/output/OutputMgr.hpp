@@ -41,6 +41,7 @@ public:
     void      GetConfig         (byte * Response, size_t maxlen);
     void      GetConfig         (String & Response);
     void      SetConfig         (const char * NewConfig);  ///< Save the current configuration data to nvram
+    void      SetConfig         (ArduinoJson::JsonDocument & NewConfig);  ///< Save the current configuration data to nvram
     void      GetStatus         (JsonObject & jsonStatus);
     void      PauseOutput       (bool PauseTheOutput) { IsOutputPaused = PauseTheOutput; }
     void      GetPortCounts     (uint16_t& PixelCount, uint16_t& SerialCount) {PixelCount = uint16_t(OutputChannelId_End); SerialCount = min(uint16_t(OutputChannelId_End), uint16_t(2)); }
@@ -121,12 +122,19 @@ public:
     };
 
 #ifdef ARDUINO_ARCH_ESP8266
-#   define OM_MAX_NUM_CHANNELS  (1200 * 3)
-#else
-#   define OM_MAX_NUM_CHANNELS  (3000 * 3)
-#endif // !def ARDUINO_ARCH_ESP8266
+#   define OM_MAX_NUM_CHANNELS      (1200 * 3)
+#   define OM_MAX_CONFIG_SIZE       ((size_t)(5 * 1024))
+#else // ARDUINO_ARCH_ESP32
+#   ifdef BOARD_HAS_PSRAM
+#       define OM_MAX_NUM_CHANNELS  (7000 * 3)
+#       define OM_MAX_CONFIG_SIZE   ((size_t)(20 * 1024))
+#   else
+#       define OM_MAX_NUM_CHANNELS  (3000 * 3)
+#       define OM_MAX_CONFIG_SIZE   ((size_t)(11 * 1024))
+#   endif // !def BOARD_HAS_PSRAM
+#endif // !def ARDUINO_ARCH_ESP32
 
-private:
+    private:
 
     void InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, e_OutputType NewChannelType, bool StartDriver = true);
     void CreateNewConfig ();
@@ -135,12 +143,6 @@ private:
     c_OutputCommon * pOutputChannelDrivers[uint32_t(e_OutputChannelIds::OutputChannelId_End)];
 
     // configuration parameter names for the channel manager within the config file
-
-#ifdef ARDUINO_ARCH_ESP8266
-#   define OM_MAX_CONFIG_SIZE      ((size_t)(5*1024))
-#else
-#   define OM_MAX_CONFIG_SIZE      ((size_t)(10*1024))
-#endif // !def ARDUINO_ARCH_ESP8266
 
     bool HasBeenInitialized = false;
     bool ConfigLoadNeeded   = false;
