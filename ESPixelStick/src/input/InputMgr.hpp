@@ -63,6 +63,10 @@ public:
     void RestartBlankTimer    (c_InputMgr::e_InputChannelIds Selector) { BlankEndTime[int(Selector)] = (millis () / 1000) + config.BlankDelay; }
     bool BlankTimerHasExpired (c_InputMgr::e_InputChannelIds Selector) { return !(BlankEndTime[int(Selector)] > (millis () / 1000)); }
 
+#if defined(SUPPORT_SD) || defined(SUPPORT_SD_MMC)
+#   define SUPPORT_FPP
+#endif // defined(SUPPORT_SD) || defined(SUPPORT_SD_MMC)
+
     enum e_InputType
     {
         InputType_E1_31 = 0,
@@ -70,11 +74,13 @@ public:
         InputType_MQTT,
         InputType_Alexa,
         InputType_DDP,
+#ifdef SUPPORT_FPP
         InputType_FPP,
+#endif // def SUPPORT_FPP
         InputType_Artnet,
         InputType_Disabled,
         InputType_End,
-        InputType_Start   = InputType_E1_31,
+        InputType_Start = InputType_E1_31,
         InputType_Default = InputType_Disabled,
     };
 

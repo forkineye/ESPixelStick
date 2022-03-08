@@ -52,7 +52,9 @@ static const InputTypeXlateMap_t InputTypeXlateMap[c_InputMgr::e_InputType::Inpu
 {
     {c_InputMgr::e_InputType::InputType_E1_31,    "E1.31",      c_InputMgr::e_InputChannelIds::InputPrimaryChannelId},
     {c_InputMgr::e_InputType::InputType_DDP,      "DDP",        c_InputMgr::e_InputChannelIds::InputPrimaryChannelId},
+#ifdef SUPPORT_FPP
     {c_InputMgr::e_InputType::InputType_FPP,      "FPP Remote", c_InputMgr::e_InputChannelIds::InputSecondaryChannelId},
+#endif // def SUPPORT_FPP
     {c_InputMgr::e_InputType::InputType_Artnet,   "Artnet",     c_InputMgr::e_InputChannelIds::InputPrimaryChannelId},
     {c_InputMgr::e_InputType::InputType_Effects,  "Effects",    c_InputMgr::e_InputChannelIds::InputSecondaryChannelId},
     {c_InputMgr::e_InputType::InputType_MQTT,     "MQTT",       c_InputMgr::e_InputChannelIds::InputSecondaryChannelId},
@@ -518,6 +520,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                 break;
             }
 
+#ifdef SUPPORT_FPP
             case e_InputType::InputType_FPP:
             {
                 if (InputTypeIsAllowedOnChannel (InputType_FPP, ChannelIndex))
@@ -535,6 +538,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                 }
                 break;
             }
+#endif // def SUPPORT_FPP
 
             case e_InputType::InputType_Artnet:
             {
