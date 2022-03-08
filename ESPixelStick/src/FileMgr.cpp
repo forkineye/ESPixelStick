@@ -90,10 +90,12 @@ bool c_FileMgr::SetConfig (JsonObject & json)
     {
         JsonObject JsonDeviceConfig = json[CN_device];
 
+#if defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
         ConfigChanged |= setFromJSON (miso_pin, JsonDeviceConfig, CN_miso_pin);
         ConfigChanged |= setFromJSON (mosi_pin, JsonDeviceConfig, CN_mosi_pin);
         ConfigChanged |= setFromJSON (clk_pin,  JsonDeviceConfig, CN_clock_pin);
         ConfigChanged |= setFromJSON (cs_pin,   JsonDeviceConfig, CN_cs_pin);
+#endif //  defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
     }
     else
     {
@@ -118,10 +120,12 @@ void c_FileMgr::GetConfig (JsonObject& json)
 {
     // DEBUG_START;
 
+#if defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
     json[CN_miso_pin]  = miso_pin;
     json[CN_mosi_pin]  = mosi_pin;
     json[CN_clock_pin] = clk_pin;
     json[CN_cs_pin]    = cs_pin;
+#endif // defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
 
     // DEBUG_END;
 
@@ -145,7 +149,7 @@ void c_FileMgr::GetStatus (JsonObject& json)
 void c_FileMgr::SetSpiIoPins ()
 {
     // DEBUG_START;
-
+#if defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
     // DEBUG_V (String ("miso_pin: ") + String (miso_pin));
     // DEBUG_V (String ("mosi_pin: ") + String (mosi_pin));
     // DEBUG_V (String (" clk_pin: ") + String (clk_pin));
@@ -198,6 +202,10 @@ void c_FileMgr::SetSpiIoPins ()
         SdCardInstalled = false;
     }
 #endif // def ARDUINO_ARCH_ESP32
+
+#else // no sd defined
+    SdCardInstalled = false;
+#endif // defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
 
     // DEBUG_END;
 

@@ -46,6 +46,7 @@
 #endif // defined(SUPPORT_OutputType_WS2801) || defined(SUPPORT_OutputType_TM1814)
 
 // File Manager
+#define SUPPORT_SD
 #define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_12
 #define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_13
 #define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14
