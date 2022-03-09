@@ -200,8 +200,8 @@ void c_OutputMgr::Begin ()
     uint8_t index = 0;
     for (DriverInfo_t & CurrentOutput : OutputChannelDrivers)
     {
-        CurrentOutput.DriverIndex = c_OutputMgr::e_OutputChannelIds(index++);
-        InstantiateNewOutputChannel(CurrentOutput.DriverIndex,
+        CurrentOutput.DriverId = index++;
+        InstantiateNewOutputChannel(e_OutputChannelIds(CurrentOutput.DriverId),
                                     e_OutputType::OutputType_Disabled);
         // DEBUG_V ("");
     }
@@ -345,7 +345,7 @@ void c_OutputMgr::CreateNewConfig ()
         {
             // DEBUG_V (String ("ChannelIndex: ") + String (ChannelIndex));
             // DEBUG_V (String ("instantiate output type: ") + String (outputTypeId));
-            InstantiateNewOutputChannel(CurrentOutput.DriverIndex, e_OutputType(outputTypeId), false);
+            InstantiateNewOutputChannel(e_OutputChannelIds(CurrentOutput.DriverId), e_OutputType(outputTypeId), false);
             // DEBUG_V ("");
         } // end for each interface
 
@@ -361,7 +361,7 @@ void c_OutputMgr::CreateNewConfig ()
     // DEBUG_V ("leave the outputs disabled");
     for (auto CurrentOutput : OutputChannelDrivers)
     {
-        InstantiateNewOutputChannel(CurrentOutput.DriverIndex, e_OutputType::OutputType_Disabled);
+        InstantiateNewOutputChannel(e_OutputChannelIds(CurrentOutput.DriverId), e_OutputType::OutputType_Disabled);
     }// end for each interface
     // DEBUG_V ("Outputs Are disabled");
     CreateJsonConfig (JsonConfig);
@@ -1045,6 +1045,7 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
 
         OutputChannel.pOutputChannelDriver->SetOutputBufferSize (ChannelsToAllocate);
         OutputChannel.ChannelCount = ChannelsToAllocate;
+        OutputChannel.EndChannelId = OutputBufferOffset + ChannelsToAllocate;
 
         if (AvailableChannels < ChannelsNeeded)
         {
@@ -1081,6 +1082,60 @@ void c_OutputMgr::PauseOutputs (void)
 
     // DEBUG_END;
 } // PauseOutputs
+//-----------------------------------------------------------------------------
+void c_OutputMgr::WriteToBuffer(size_t StartChannelId, size_t ChannelCount, byte *pSourceData)
+{
+    // DEBUG_START;
+
+    do // once
+    {
+        if ((StartChannelId + ChannelCount) > UsedBufferSize)
+        {
+            DEBUG_V(String("ERROR: Invalid parameters"));
+            DEBUG_V(String("StartChannelId: ") + String(StartChannelId, HEX));
+            DEBUG_V(String("  ChannelCount: ") + String(ChannelCount));
+            DEBUG_V(String("UsedBufferSize: ") + String(UsedBufferSize));
+            break;
+        }
+        // DEBUG_V(String("&OutputBuffer[StartChannelId]: 0x") + String(uint(&OutputBuffer[StartChannelId]), HEX));
+        size_t EndChannelId = StartChannelId + ChannelCount;
+        // Serial.print('1');
+        for (auto &currentOutputChannelDriver : OutputChannelDrivers)
+        {
+            // Serial.print('2');
+            // does this output handle this block of data?
+            if (StartChannelId < currentOutputChannelDriver.StartingChannelId)
+            {
+                // we have gone beyond where we can put this data.
+                // Serial.print('3');
+                break;
+            }
+
+            if (StartChannelId > currentOutputChannelDriver.EndChannelId)
+            {
+                // move to the next driver
+                // Serial.print('4');
+                continue;
+            }
+            // Serial.print('5');
+
+            size_t lastChannelToSet = min(EndChannelId, currentOutputChannelDriver.EndChannelId);
+            size_t ChannelsToSet = lastChannelToSet - StartChannelId;
+            size_t RelativeStartChannelId = StartChannelId - currentOutputChannelDriver.StartingChannelId;
+            // DEBUG_V(String("               StartChannelId: 0x") + String(StartChannelId, HEX));
+            // DEBUG_V(String("                 EndChannelId: 0x") + String(EndChannelId, HEX));
+            // DEBUG_V(String("             lastChannelToSet: 0x") + String(lastChannelToSet, HEX));
+            // DEBUG_V(String("                ChannelsToSet: 0x") + String(ChannelsToSet, HEX));
+            currentOutputChannelDriver.pOutputChannelDriver->WriteToBuffer(RelativeStartChannelId, ChannelsToSet, pSourceData);
+            StartChannelId += ChannelsToSet;
+            pSourceData += ChannelsToSet;
+            // memcpy(&OutputBuffer[StartChannelId], pSourceData, ChannelCount);
+        }
+
+    } while (false);
+    // DEBUG_END;
+
+} // WriteToBuffer
 
 // create a global instance of the output channel factory
 c_OutputMgr OutputMgr;

@@ -414,22 +414,12 @@ void c_OutputCommon::GetConfig (JsonObject & jsonConfig)
 //----------------------------------------------------------------------------
 void c_OutputCommon::WriteToBuffer (size_t StartChannelId, size_t ChannelCount, byte * pSourceData)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    do // once
-    {
-        if ((StartChannelId + ChannelCount) >= OutputBufferSize)
-        {
-            DEBUG_V(String("ERROR: Invalid parameters"));
-            DEBUG_V(String("  StartChannelId: ") + String(StartChannelId));
-            DEBUG_V(String("    ChannelCount: ") + String(ChannelCount));
-            DEBUG_V(String("OutputBufferSize: ") + String(OutputBufferSize));
-            break;
-        }
+    // DEBUG_V(String("               StartChannelId: 0x") + String(StartChannelId, HEX));
+    // DEBUG_V(String("&OutputBuffer[StartChannelId]: 0x") + String(uint(&OutputBuffer[StartChannelId]), HEX));
+    memcpy(&pOutputBuffer[StartChannelId], pSourceData, ChannelCount);
 
-        memcpy(&pOutputBuffer[StartChannelId], pSourceData, ChannelCount);
-
-    } while (false);
-    DEBUG_END;
+    // DEBUG_END;
 
 } // WriteToBuffer

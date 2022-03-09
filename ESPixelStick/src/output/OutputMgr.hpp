@@ -160,13 +160,14 @@ private:
     // pointer(s) to the current active output drivers
     struct DriverInfo_t
     {
-        c_OutputMgr::e_OutputChannelIds DriverIndex = OutputChannelId_Start;
+        size_t DriverId = 0;
         c_OutputCommon * pOutputChannelDriver = nullptr;
         size_t StartingChannelId = 0;
         size_t ChannelCount = 0;
+        size_t EndChannelId = 0;
     };
 
-    DriverInfo_t OutputChannelDrivers[uint(e_OutputChannelIds::OutputChannelId_End)];
+    DriverInfo_t OutputChannelDrivers[OutputChannelId_End];
 
     // configuration parameter names for the channel manager within the config file
 
