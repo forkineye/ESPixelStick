@@ -61,6 +61,7 @@ public:
     virtual void         SetOutputBufferSize (uint16_t NewOutputBufferSize)  { OutputBufferSize = NewOutputBufferSize; };
     virtual uint16_t     GetNumChannelsNeeded () = 0;
     virtual void         PauseOutput () {}
+    virtual void         WriteToBuffer (size_t StartChannelId, size_t ChannelCount, byte *pData);
 
 protected:
 #define OM_CMN_NO_CUSTOM_ISR                    (-1)

@@ -30,6 +30,7 @@ GNU General Public License for more details.
 */
 
 #include "OutputCommon.hpp"
+#ifdef SUPPORT_UART_OUTPUT
 
 #ifdef ARDUINO_ARCH_ESP32
 #   include <driver/uart.h>
@@ -122,4 +123,4 @@ private:
 #endif
 
 }; // c_OutputGenericSerial
-
+#endif // def SUPPORT_UART_OUTPUT

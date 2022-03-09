@@ -29,7 +29,7 @@ GNU General Public License for more details.
 
 #include "OutputSerial.hpp"
 #include "OutputCommon.hpp"
-
+#ifdef SUPPORT_UART_OUTPUT
 #ifdef ARDUINO_ARCH_ESP8266
 extern "C" {
 #   include <eagle_soc.h>
@@ -512,3 +512,4 @@ void c_OutputSerial::Render ()
 
     // DEBUG_END;
 } // render
+#endif // def SUPPORT_UART_OUTPUT

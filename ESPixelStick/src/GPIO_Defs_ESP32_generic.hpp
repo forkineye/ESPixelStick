@@ -19,7 +19,8 @@
 */
 
 //Output Manager
-#define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_2
+#define SUPPORT_UART_OUTPUT
+#define DEFAULT_UART_1_GPIO gpio_num_t::GPIO_NUM_2
 #define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_13
 // #define UART_LAST               OutputChannelId_UART_1
 #define UART_LAST               OutputChannelId_UART_2

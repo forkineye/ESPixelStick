@@ -19,9 +19,10 @@
  */
 
 // Output Manager
-#define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_16
-#define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_3
-#define UART_LAST               OutputChannelId_UART_2
+#define SUPPORT_RMT_OUTPUT
+#define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_16
+#define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_3
+#define RMT_LAST                OutputChannelId_RMT_2
 
 // File Manager
 #define SUPPORT_SD

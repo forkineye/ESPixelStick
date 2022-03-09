@@ -51,6 +51,7 @@ public:
     void      DeleteConfig      () { FileMgr.DeleteConfigFile (ConfigFileName); }
     void      PauseOutputs      ();
     void      GetDriverName     (String & Name) { Name = "OutputMgr"; }
+    void      WriteToBuffer     (size_t StartChannelId, size_t ChannelCount, byte * pData);
 
     // handles to determine which output channel we are dealing with
     enum e_OutputChannelIds
@@ -73,17 +74,33 @@ public:
 #ifdef DEFAULT_RMT_3_GPIO
         OutputChannelId_RMT_4,
 #endif // def DEFAULT_RMT_3_GPIO
+#ifdef DEFAULT_RMT_4_GPIO
+        OutputChannelId_RMT_5,
+#endif // def DEFAULT_RMT_3_GPIO
+#ifdef DEFAULT_RMT_5_GPIO
+        OutputChannelId_RMT_6,
+#endif // def DEFAULT_RMT_3_GPIO
+#ifdef DEFAULT_RMT_6_GPIO
+        OutputChannelId_RMT_7,
+#endif // def DEFAULT_RMT_3_GPIO
+#ifdef DEFAULT_RMT_7_GPIO
+        OutputChannelId_RMT_8,
+#endif // def DEFAULT_RMT_3_GPIO
 #ifdef SUPPORT_SPI_OUTPUT
         OutputChannelId_SPI_1,
 #endif // def SUPPORT_SPI_OUTPUT
 #ifdef SUPPORT_RELAY_OUTPUT
         OutputChannelId_Relay,
 #endif // def SUPPORT_RELAY_OUTPUT
-        OutputChannelId_End, // must be last in the list
 
-        OutputChannelId_Start = OutputChannelId_UART_1,
+        OutputChannelId_End, // must be last in the list
+        OutputChannelId_Start = 0,
+
+#ifdef SUPPORT_UART_OUTPUT
         OutputChannelId_UART_FIRST = OutputChannelId_UART_1,
         OutputChannelId_UART_LAST = UART_LAST,
+#endif // def SUPPORT_UART_OUTPUT
+
 #ifdef SUPPORT_RMT_OUTPUT
         OutputChannelId_RMT_FIRST = OutputChannelId_RMT_1,
         OutputChannelId_RMT_LAST = RMT_LAST,
@@ -94,9 +111,11 @@ public:
     {
         OutputType_WS2811 = 0,
         OutputType_GECE,
+#ifdef SUPPORT_UART_OUTPUT
         OutputType_DMX,
         OutputType_Renard,
         OutputType_Serial,
+#endif // def SUPPORT_UART_OUTPUT
 #ifdef SUPPORT_RELAY_OUTPUT
         OutputType_Relay,
         OutputType_Servo_PCA9685,
@@ -134,13 +153,20 @@ public:
 #   endif // !def BOARD_HAS_PSRAM
 #endif // !def ARDUINO_ARCH_ESP32
 
-    private:
-
-    void InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, e_OutputType NewChannelType, bool StartDriver = true);
-    void CreateNewConfig ();
+private:
+    void InstantiateNewOutputChannel (c_OutputMgr::e_OutputChannelIds ChannelIndex, e_OutputType NewChannelType, bool StartDriver = true);
+    void CreateNewConfig();
 
     // pointer(s) to the current active output drivers
-    c_OutputCommon * pOutputChannelDrivers[uint32_t(e_OutputChannelIds::OutputChannelId_End)];
+    struct DriverInfo_t
+    {
+        c_OutputMgr::e_OutputChannelIds DriverIndex = OutputChannelId_Start;
+        c_OutputCommon * pOutputChannelDriver = nullptr;
+        size_t StartingChannelId = 0;
+        size_t ChannelCount = 0;
+    };
+
+    DriverInfo_t OutputChannelDrivers[uint(e_OutputChannelIds::OutputChannelId_End)];
 
     // configuration parameter names for the channel manager within the config file
 
@@ -158,8 +184,17 @@ public:
     uint8_t OutputBuffer[OM_MAX_NUM_CHANNELS];
     uint16_t UsedBufferSize = 0;
 
-#define OM_IS_UART ((ChannelIndex >= OutputChannelId_UART_FIRST) && (ChannelIndex <= OutputChannelId_UART_LAST))
-#define OM_IS_RMT ((ChannelIndex >= OutputChannelId_RMT_FIRST) && (ChannelIndex <= OutputChannelId_RMT_LAST))
+#ifdef SUPPORT_UART_OUTPUT
+#   define OM_IS_UART ((ChannelIndex >= OutputChannelId_UART_FIRST) && (ChannelIndex <= OutputChannelId_UART_LAST))
+#else
+#   define OM_IS_UART false
+#endif // def SUPPORT_UART_OUTPUT
+#ifdef SUPPORT_RMT
+#   define OM_IS_RMT ((ChannelIndex >= OutputChannelId_RMT_FIRST) && (ChannelIndex <= OutputChannelId_RMT_LAST))
+#else
+#   define OM_IS_RMT false
+#endif // def SUPPORT_RMT
+
 
 }; // c_OutputMgr
 

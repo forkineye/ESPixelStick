@@ -283,7 +283,7 @@ void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
 void c_OutputCommon::TerminateUartOperation ()
 {
     // DEBUG_START;
-
+#ifdef SUPPORT_UART_OUTPUT
     if (OutputChannelId <= c_OutputMgr::e_OutputChannelIds::OutputChannelId_UART_LAST)
     {
         switch (UartId)
@@ -317,6 +317,7 @@ void c_OutputCommon::TerminateUartOperation ()
             }
         } // end switch (UartId)
     }
+#endif // def SUPPORT_UART_OUTPUT
 
     // DEBUG_END;
 
@@ -409,3 +410,26 @@ void c_OutputCommon::GetConfig (JsonObject & jsonConfig)
 
     // DEBUG_END;
 } // GetConfig
+
+//----------------------------------------------------------------------------
+void c_OutputCommon::WriteToBuffer (size_t StartChannelId, size_t ChannelCount, byte * pSourceData)
+{
+    DEBUG_START;
+
+    do // once
+    {
+        if ((StartChannelId + ChannelCount) >= OutputBufferSize)
+        {
+            DEBUG_V(String("ERROR: Invalid parameters"));
+            DEBUG_V(String("  StartChannelId: ") + String(StartChannelId));
+            DEBUG_V(String("    ChannelCount: ") + String(ChannelCount));
+            DEBUG_V(String("OutputBufferSize: ") + String(OutputBufferSize));
+            break;
+        }
+
+        memcpy(&pOutputBuffer[StartChannelId], pSourceData, ChannelCount);
+
+    } while (false);
+    DEBUG_END;
+
+} // WriteToBuffer
