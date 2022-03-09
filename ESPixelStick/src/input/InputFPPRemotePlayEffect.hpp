@@ -30,12 +30,12 @@ public:
     c_InputFPPRemotePlayEffect (c_InputMgr::e_InputChannelIds InputChannelId);
     ~c_InputFPPRemotePlayEffect ();
 
-    virtual void Start (String & FileName, float duration, uint32_t PlayCount);
-    virtual void Stop  ();
-    virtual void Sync  (String & FileName, float SecondsElapsed);
-    virtual void Poll  (uint8_t * Buffer, size_t BufferSize);
+    virtual void Start     (String & FileName, float duration, uint32_t PlayCount);
+    virtual void Stop      ();
+    virtual void Sync      (String & FileName, float SecondsElapsed);
+    virtual void Poll      ();
     virtual void GetStatus (JsonObject & jsonStatus);
-    virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayEffect_state_Idle_imp); }
+    virtual bool IsIdle    () { return (pCurrentFsmState == &fsm_PlayEffect_state_Idle_imp); }
 
 protected:
 

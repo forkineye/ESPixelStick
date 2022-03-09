@@ -24,7 +24,7 @@
 #include "InputFPPRemotePlayEffect.hpp"
 
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_WaitForStart::Poll (uint8_t* Buffer, size_t BufferSize)
+void fsm_PlayList_state_WaitForStart::Poll ()
 {
     // DEBUG_START;
 
@@ -92,7 +92,7 @@ void fsm_PlayList_state_WaitForStart::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_Idle::Poll (uint8_t * Buffer, size_t BufferSize)
+void fsm_PlayList_state_Idle::Poll ()
 {
     // DEBUG_START;
 
@@ -150,11 +150,11 @@ void fsm_PlayList_state_Idle::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_PlayingFile::Poll (uint8_t * Buffer, size_t BufferSize)
+void fsm_PlayList_state_PlayingFile::Poll ()
 {
     // DEBUG_START;
 
-    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll (Buffer, BufferSize);
+    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll ();
     
     if (pInputFPPRemotePlayList->pInputFPPRemotePlayItem->IsIdle ())
     {
@@ -226,11 +226,11 @@ void fsm_PlayList_state_PlayingFile::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_PlayingEffect::Poll (uint8_t * Buffer, size_t BufferSize)
+void fsm_PlayList_state_PlayingEffect::Poll ()
 {
     // DEBUG_START;
 
-    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll (Buffer, BufferSize);
+    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll ();
 
     if (pInputFPPRemotePlayList->pInputFPPRemotePlayItem->IsIdle ())
     {
@@ -304,7 +304,7 @@ void fsm_PlayList_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_Paused::Poll (uint8_t* Buffer, size_t BufferSize)
+void fsm_PlayList_state_Paused::Poll ()
 {
     // DEBUG_START;
 

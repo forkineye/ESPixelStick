@@ -157,13 +157,13 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t CurrentOutputBufferSize)
+void c_FPPDiscovery::ReadNextFrame ()
 {
     // DEBUG_START;
 
     if (InputFPPRemotePlayFile)
     {
-        InputFPPRemotePlayFile->Poll (CurrentOutputBuffer, CurrentOutputBufferSize);
+        InputFPPRemotePlayFile->Poll ();
     }
 
     // DEBUG_END;

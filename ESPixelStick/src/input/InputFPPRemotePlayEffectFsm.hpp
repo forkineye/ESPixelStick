@@ -32,7 +32,7 @@ class c_InputFPPRemotePlayEffect;
 class fsm_PlayEffect_state
 {
 public:
-    virtual void Poll (uint8_t * Buffer, size_t BufferSize) = 0;
+    virtual void Poll () = 0;
     virtual void Init (c_InputFPPRemotePlayEffect * Parent) = 0;
     virtual void GetStateName (String & sName) = 0;
     virtual void Start (String & FileName, float SecondsElapsed) = 0;
@@ -50,7 +50,7 @@ protected:
 class fsm_PlayEffect_state_Idle : public fsm_PlayEffect_state
 {
 public:
-    virtual void Poll (uint8_t * Buffer, size_t BufferSize);
+    virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayEffect* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Idle; }
     virtual void Start (String & FileName, float SecondsElapsed);
@@ -64,7 +64,7 @@ public:
 class fsm_PlayEffect_state_PlayingEffect : public fsm_PlayEffect_state
 {
 public:
-    virtual void Poll (uint8_t * Buffer, size_t BufferSize);
+    virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayEffect* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Effect; }
     virtual void Start (String & FileName, float SecondsElapsed);

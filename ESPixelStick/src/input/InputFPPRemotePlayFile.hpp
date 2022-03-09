@@ -39,7 +39,7 @@ public:
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
     virtual void Stop ();
     virtual void Sync (String& FileName, float SecondsElapsed);
-    virtual void Poll (uint8_t* Buffer, size_t BufferSize);
+    virtual void Poll ();
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
     
@@ -73,7 +73,7 @@ private:
     struct FrameControl_t
     {
         size_t            DataOffset = 0;
-        uint32_t          ChannelsPerFrame = 0;
+        size_t            ChannelsPerFrame = 0;
         uint32_t          FrameStepTimeMS = 1;
         uint32_t          TotalNumberOfFramesInSequence = 0;
         uint32_t          ElapsedPlayTimeMS = 0;
@@ -87,8 +87,6 @@ private:
         float             LastRcvdElapsedSeconds = 0.0;
     } SyncControl;
 
-    uint8_t * Buffer = nullptr;
-    size_t    BufferSize = 0;
 #   define    FPP_TICKER_PERIOD_MS 25
 // #   define    FPP_TICKER_PERIOD_MS 1000
     Ticker    MsTicker;

@@ -92,7 +92,7 @@ c_InputFPPRemotePlayFile::~c_InputFPPRemotePlayFile ()
     for (uint32_t LoopCount = 10000; (LoopCount != 0) && (!IsIdle ()); LoopCount--)
     {
         Stop ();
-        Poll (nullptr, 0);
+        Poll ();
     }
     // DEBUG_END;
 
@@ -142,12 +142,9 @@ void c_InputFPPRemotePlayFile::Sync (String & FileName, float SecondsElapsed)
 } // Sync
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::Poll (uint8_t * _Buffer, size_t _BufferSize)
+void c_InputFPPRemotePlayFile::Poll ()
 {
     // xDEBUG_START;
-
-    Buffer = _Buffer;
-    BufferSize = _BufferSize;
 
     // TimerPoll ();
     pCurrentFsmState->Poll ();

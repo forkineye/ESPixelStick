@@ -107,11 +107,10 @@ c_InputMgr::~c_InputMgr ()
 
 //-----------------------------------------------------------------------------
 ///< Start the module
-void c_InputMgr::Begin (uint8_t* BufferStart, uint16_t BufferSize)
+void c_InputMgr::Begin (size_t BufferSize)
 {
     // DEBUG_START;
 
-    InputDataBuffer     = BufferStart;
     InputDataBufferSize = BufferSize;
     // DEBUG_V (String("InputDataBufferSize: ") + String (InputDataBufferSize));
 
@@ -424,7 +423,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                 {
                     logcon (String (F ("Disabled Input type for channel '")) + ChannelIndex + "'.");
                 }
-                InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
+                InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBufferSize);
                 // DEBUG_V ("");
                 break;
             }
@@ -437,12 +436,12 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                     {
                         logcon (String (F ("Starting E1.31 for channel '")) + ChannelIndex + "'.");
                     }
-                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputE131 (ChannelIndex, InputType_E1_31, InputDataBuffer, InputDataBufferSize);
+                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputE131 (ChannelIndex, InputType_E1_31, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
                 else
                 {
-                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
+                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBufferSize);
                 }
                 break;
             }
@@ -455,12 +454,12 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                     {
                         logcon (String (F ("Starting Effects Engine for channel '")) + ChannelIndex + "'.");
                     }
-                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputEffectEngine (ChannelIndex, InputType_Effects, InputDataBuffer, InputDataBufferSize);
+                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputEffectEngine (ChannelIndex, InputType_Effects, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
                 else
                 {
-                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
+                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBufferSize);
                 }
                 break;
             }
@@ -473,12 +472,12 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                     {
                         logcon (String (F ("Starting MQTT for channel '")) + ChannelIndex + "'.");
                     }
-                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputMQTT (ChannelIndex, InputType_MQTT, InputDataBuffer, InputDataBufferSize);
+                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputMQTT (ChannelIndex, InputType_MQTT, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
                 else
                 {
-                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
+                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBufferSize);
                 }
                 break;
             }
@@ -491,12 +490,12 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                     {
                         logcon (String (F ("Starting Alexa for channel '")) + ChannelIndex + "'.");
                     }
-                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputAlexa (ChannelIndex, InputType_Alexa, InputDataBuffer, InputDataBufferSize);
+                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputAlexa (ChannelIndex, InputType_Alexa, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
                 else
                 {
-                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
+                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBufferSize);
                 }
                 break;
             }
@@ -509,12 +508,12 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                     {
                         logcon (String (F ("Starting DDP for channel '")) + ChannelIndex + "'.");
                     }
-                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDDP (ChannelIndex, InputType_DDP, InputDataBuffer, InputDataBufferSize);
+                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDDP (ChannelIndex, InputType_DDP, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
                 else
                 {
-                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
+                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBufferSize);
                 }
                 break;
             }
@@ -528,12 +527,12 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                     {
                         logcon (String (F ("Starting FPP Remote for channel '")) + ChannelIndex + "'.");
                     }
-                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputFPPRemote (ChannelIndex, InputType_FPP, InputDataBuffer, InputDataBufferSize);
+                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputFPPRemote (ChannelIndex, InputType_FPP, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
                 else
                 {
-                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
+                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBufferSize);
                 }
                 break;
             }
@@ -547,12 +546,12 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                     {
                         logcon (String (F ("Starting Artnet for channel '")) + ChannelIndex + "'.");
                     }
-                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputArtnet (ChannelIndex, InputType_Artnet, InputDataBuffer, InputDataBufferSize);
+                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputArtnet (ChannelIndex, InputType_Artnet, InputDataBufferSize);
                     // DEBUG_V ("");
                 }
                 else
                 {
-                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
+                    InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBufferSize);
                 }
                 break;
             }
@@ -563,7 +562,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                 {
                     logcon (CN_stars + String (F (" Unknown Input type for channel '")) + ChannelIndex + String(F ("'. Using disabled. ")) + CN_stars);
                 }
-                InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBuffer, InputDataBufferSize);
+                InputChannelDrivers[ChannelIndex].pInputChannelDriver = new c_InputDisabled (ChannelIndex, InputType_Disabled, InputDataBufferSize);
                 // DEBUG_V ("");
                 break;
             }
@@ -578,7 +577,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             // DEBUG_V (String ("StartDriver: ") + String (StartDriver));
             InputChannelDrivers[ChannelIndex].pInputChannelDriver->Begin ();
             // DEBUG_V ("");
-            InputChannelDrivers[ChannelIndex].pInputChannelDriver->SetBufferInfo (InputDataBuffer, InputDataBufferSize);
+            InputChannelDrivers[ChannelIndex].pInputChannelDriver->SetBufferInfo (InputDataBufferSize);
         }
         // DEBUG_V ("");
 
@@ -668,7 +667,7 @@ void c_InputMgr::Process ()
         if (false == aBlankTimerIsRunning && config.BlankDelay != 0)
         {
             // DEBUG_V("Clear Input Buffer");
-            memset (InputDataBuffer, 0x00, InputDataBufferSize);
+            OutputMgr.ClearBuffer ();
             RestartBlankTimer (InputSecondaryChannelId);
         } // ALL blank timers have expired
 
@@ -922,11 +921,10 @@ void c_InputMgr::SetConfig(JsonDocument & NewConfigData)
 } // SetConfig
 
 //-----------------------------------------------------------------------------
-void c_InputMgr::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
+void c_InputMgr::SetBufferInfo (size_t BufferSize)
 {
     // DEBUG_START;
 
-    InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
 
     // DEBUG_V ("InputDataBufferSize: " + String (InputDataBufferSize));
@@ -939,7 +937,7 @@ void c_InputMgr::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
     {
         if (nullptr != InputChannelDrivers[ChannelIndex].pInputChannelDriver)
         {
-            InputChannelDrivers[ChannelIndex].pInputChannelDriver->SetBufferInfo (InputDataBuffer, InputDataBufferSize);
+            InputChannelDrivers[ChannelIndex].pInputChannelDriver->SetBufferInfo (InputDataBufferSize);
         }
     } // end for each channel
 

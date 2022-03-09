@@ -240,8 +240,9 @@ IRAM_ATTR void fsm_PlayFile_state_PlayingFile::TimerPoll ()
         }
 
         uint32_t FilePosition = p_Parent->FrameControl.DataOffset + (p_Parent->FrameControl.ChannelsPerFrame * CurrentFrame);
-        size_t   MaxBytesToRead = (p_Parent->FrameControl.ChannelsPerFrame > p_Parent->BufferSize) ? p_Parent->BufferSize : p_Parent->FrameControl.ChannelsPerFrame;
-        byte* CurrentDestination = p_Parent->Buffer;
+        size_t BufferSize = OutputMgr.GetBufferUsedSize();
+        size_t MaxBytesToRead = (p_Parent->FrameControl.ChannelsPerFrame > BufferSize) ? BufferSize : p_Parent->FrameControl.ChannelsPerFrame;
+        byte* CurrentDestination = (byte*)OutputMgr.GetBufferAddress();
         // xDEBUG_V (String ("               MaxBytesToRead: ") + String (MaxBytesToRead));
 
         LastPlayedFrameId = CurrentFrame;

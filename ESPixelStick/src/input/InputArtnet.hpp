@@ -46,12 +46,12 @@ class c_InputArtnet : public c_InputCommon
 
     typedef struct 
     {
-        uint8_t  * Destination;
-        uint16_t   BytesToCopy;
-        uint16_t   SourceDataOffset;
-        uint32_t   SequenceErrorCounter;
-        uint8_t    SequenceNumber;
-        uint32_t   num_packets;
+        size_t   DestinationOffset;
+        size_t   BytesToCopy;
+        size_t   SourceDataOffset;
+        uint32_t SequenceErrorCounter;
+        uint8_t  SequenceNumber;
+        uint32_t num_packets;
 
     } Universe_t;
     Universe_t UniverseArray[MAX_NUM_UNIVERSES];
@@ -60,14 +60,13 @@ class c_InputArtnet : public c_InputCommon
     void validateConfiguration ();
     void NetworkStateChanged (bool IsConnected, bool RebootAllowed); // used by poorly designed rx functions
     void SetBufferTranslation ();
-    void onDmxFrame (uint16_t CurrentUniverseId, uint16_t length, uint8_t sequence, uint8_t* data, IPAddress remoteIP);
+    void onDmxFrame (uint16_t CurrentUniverseId, size_t length, uint8_t sequence, uint8_t* data, IPAddress remoteIP);
 
   public:
 
     c_InputArtnet (c_InputMgr::e_InputChannelIds NewInputChannelId,
                    c_InputMgr::e_InputType       NewChannelType,
-                   uint8_t                     * BufferStart,
-                   uint16_t                      BufferSize);
+                   size_t                        BufferSize);
     ~c_InputArtnet();
 
     // functions to be provided by the derived class
@@ -77,7 +76,7 @@ class c_InputArtnet : public c_InputCommon
     void GetStatus (JsonObject & jsonStatus);
     void Process ();                                        ///< Call from loop(),  renders Input data
     void GetDriverName (String & sDriverName) { sDriverName = "Artnet"; } ///< get the name for the instantiated driver
-    void SetBufferInfo (uint8_t * BufferStart, uint16_t BufferSize);
+    void SetBufferInfo (size_t BufferSize);
     void NetworkStateChanged (bool IsConnected); // used by poorly designed rx functions
     bool isShutDownRebootNeeded () { return HasBeenInitialized; }
 

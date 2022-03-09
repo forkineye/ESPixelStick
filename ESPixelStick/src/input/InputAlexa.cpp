@@ -30,9 +30,8 @@
 c_InputAlexa::c_InputAlexa (
     c_InputMgr::e_InputChannelIds NewInputChannelId,
     c_InputMgr::e_InputType       NewChannelType,
-    uint8_t                     * BufferStart,
-    uint16_t                      BufferSize) :
-    c_InputCommon (NewInputChannelId, NewChannelType, BufferStart, BufferSize)
+    size_t                        BufferSize) :
+    c_InputCommon (NewInputChannelId, NewChannelType, BufferSize)
 
 {
     // DEBUG_START;
@@ -70,7 +69,7 @@ void c_InputAlexa::Begin()
     }
     HasBeenInitialized = true;
 
-    pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputSecondaryChannelId, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
+    pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputSecondaryChannelId, c_InputMgr::e_InputType::InputType_Effects, InputDataBufferSize);
     pEffectsEngine->SetOperationalState (false);
 
     WebMgr.RegisterAlexaCallback ([this](EspalexaDevice* pDevice) {this->onMessage (pDevice); });
@@ -117,16 +116,15 @@ void c_InputAlexa::Process ()
 } // process
 
 //-----------------------------------------------------------------------------
-void c_InputAlexa::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
+void c_InputAlexa::SetBufferInfo (size_t BufferSize)
 {
     // DEBUG_START;
 
-    InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
 
     // DEBUG_V (String ("InputDataBufferSize: ") + String (InputDataBufferSize));
 
-    pEffectsEngine->SetBufferInfo (BufferStart, BufferSize);
+    pEffectsEngine->SetBufferInfo (BufferSize);
 
     // DEBUG_END;
 
@@ -162,7 +160,7 @@ void c_InputAlexa::onMessage(EspalexaDevice * pDevice)
     // DEBUG_START;
     do // once
     {
-        memset (InputDataBuffer, 0x0, InputDataBufferSize);
+        OutputMgr.ClearBuffer ();
 
         char HexColor[] = "#000000 ";
         sprintf (HexColor, "#%02x%02x%02x", pDevice->getR (), pDevice->getG (), pDevice->getB ());
