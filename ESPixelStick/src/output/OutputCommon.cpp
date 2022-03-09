@@ -423,3 +423,16 @@ void c_OutputCommon::WriteToBuffer (size_t StartChannelId, size_t ChannelCount, 
     // DEBUG_END;
 
 } // WriteToBuffer
+
+//----------------------------------------------------------------------------
+void c_OutputCommon::ReadChannelData(size_t StartChannelId, size_t ChannelCount, byte * pTargetData)
+{
+    // DEBUG_START;
+
+    // DEBUG_V(String("               StartChannelId: 0x") + String(StartChannelId, HEX));
+    // DEBUG_V(String("&OutputBuffer[StartChannelId]: 0x") + String(uint(&OutputBuffer[StartChannelId]), HEX));
+    memcpy(pTargetData, &pOutputBuffer[StartChannelId], ChannelCount);
+
+    // DEBUG_END;
+
+} // WriteToBuffer

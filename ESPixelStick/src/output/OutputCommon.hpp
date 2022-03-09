@@ -61,19 +61,20 @@ public:
     virtual void         SetOutputBufferSize (uint16_t NewOutputBufferSize)  { OutputBufferSize = NewOutputBufferSize; };
     virtual uint16_t     GetNumChannelsNeeded () = 0;
     virtual void         PauseOutput () {}
-    virtual void         WriteToBuffer (size_t StartChannelId, size_t ChannelCount, byte *pData);
+    virtual void         WriteToBuffer (size_t StartChannelId, size_t ChannelCount, byte *pSourceData);
+    virtual void         ReadChannelData (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
 
-protected:
+protected :
 #define OM_CMN_NO_CUSTOM_ISR                    (-1)
 
-    gpio_num_t  DataPin                    = gpio_num_t (-1); ///< Output pin to use for this driver
+    gpio_num_t  DataPin = gpio_num_t(-1); ///< Output pin to use for this driver
     uart_port_t UartId;      ///< Id of the UART used by this instance of the driver
     OTYPE_t     OutputType;  ///< Type to report for this driver
     OID_t       OutputChannelId;
     bool        HasBeenInitialized         = false;
     uint32_t    FrameMinDurationInMicroSec = 20000;
     uint8_t   * pOutputBuffer              = nullptr;
-    uint16_t    OutputBufferSize           = 0;
+    size_t      OutputBufferSize           = 0;
     uint32_t    FrameCount                 = 0;
 
 #ifdef ARDUINO_ARCH_ESP8266

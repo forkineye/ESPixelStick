@@ -52,6 +52,7 @@ public:
     void      PauseOutputs      ();
     void      GetDriverName     (String & Name) { Name = "OutputMgr"; }
     void      WriteToBuffer     (size_t StartChannelId, size_t ChannelCount, byte * pData);
+    void      ReadChannelData   (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
 
     // handles to determine which output channel we are dealing with
     enum e_OutputChannelIds
