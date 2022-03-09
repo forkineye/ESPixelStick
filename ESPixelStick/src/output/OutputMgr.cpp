@@ -1193,5 +1193,16 @@ void c_OutputMgr::ReadChannelData(size_t StartChannelId, size_t ChannelCount, by
 
 } // ReadChannelData
 
+//-----------------------------------------------------------------------------
+void c_OutputMgr::ClearBuffer()
+{
+    // DEBUG_START;
+
+    memset(OutputBuffer, 0x00, sizeof(OutputBuffer));
+
+    // DEBUG_END;
+
+} // ClearBuffer
+
 // create a global instance of the output channel factory
 c_OutputMgr OutputMgr;
