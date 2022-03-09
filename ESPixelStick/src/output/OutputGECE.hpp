@@ -36,7 +36,7 @@ public:
     void      Render ();                                        ///< Call from loop(),  renders output data
     void      GetDriverName (String & sDriverName) { sDriverName = String (F ("GECE")); }
     void      GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
-    uint16_t  GetNumChannelsNeeded ();
+    size_t    GetNumChannelsNeeded ();
 
     void IRAM_ATTR ISR_Handler (); ///< UART ISR
 

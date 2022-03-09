@@ -1025,7 +1025,7 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
 {
     // DEBUG_START;
 
-    uint16_t OutputBufferOffset = 0;
+    size_t OutputBufferOffset = 0;
 
     // DEBUG_V (String ("        BufferSize: ") + String (sizeof(OutputBuffer)));
     // DEBUG_V (String ("OutputBufferOffset: ") + String (OutputBufferOffset));
@@ -1035,9 +1035,9 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
         OutputChannel.StartingChannelId = OutputBufferOffset;
         OutputChannel.pOutputChannelDriver->SetOutputBufferAddress(&OutputBuffer[OutputBufferOffset]);
 
-        uint16_t ChannelsNeeded     = OutputChannel.pOutputChannelDriver->GetNumChannelsNeeded ();
-        uint16_t AvailableChannels  = sizeof(OutputBuffer) - OutputBufferOffset;
-        uint16_t ChannelsToAllocate = min (ChannelsNeeded, AvailableChannels);
+        size_t ChannelsNeeded     = OutputChannel.pOutputChannelDriver->GetNumChannelsNeeded ();
+        size_t AvailableChannels  = sizeof(OutputBuffer) - OutputBufferOffset;
+        size_t ChannelsToAllocate = min (ChannelsNeeded, AvailableChannels);
 
         // DEBUG_V (String ("    ChannelsNeeded: ") + String (ChannelsNeeded));
         // DEBUG_V (String (" AvailableChannels: ") + String (AvailableChannels));

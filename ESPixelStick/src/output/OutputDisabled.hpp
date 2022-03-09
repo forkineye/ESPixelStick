@@ -40,7 +40,7 @@ public:
     void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     void         Render ();                                        ///< Call from loop(),  renders output data
     void         GetDriverName (String & sDriverName) { sDriverName = String (F ("Disabled")); }
-    uint16_t     GetNumChannelsNeeded () { return 0; }
+    size_t       GetNumChannelsNeeded () { return 0; }
 
     void IRAM_ATTR ISR_Handler () {} ///< UART ISR
 

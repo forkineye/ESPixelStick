@@ -82,7 +82,7 @@ void c_OutputPixel::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputPixel::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputPixel::SetOutputBufferSize(size_t NumChannelsAvailable)
 {
     // DEBUG_START;
        // DEBUG_V (String ("NumChannelsAvailable: ") + String (NumChannelsAvailable));
@@ -594,3 +594,29 @@ uint8_t IRAM_ATTR c_OutputPixel::GetNextIntensityToSend ()
 
     return response;
 } // NextIntensityToSend
+
+//----------------------------------------------------------------------------
+void c_OutputPixel::WriteChannelData(size_t StartChannelId, size_t ChannelCount, byte *pSourceData)
+{
+    // DEBUG_START;
+
+    // DEBUG_V(String("               StartChannelId: 0x") + String(StartChannelId, HEX));
+    // DEBUG_V(String("&OutputBuffer[StartChannelId]: 0x") + String(uint(&OutputBuffer[StartChannelId]), HEX));
+    memcpy(&pOutputBuffer[StartChannelId], pSourceData, ChannelCount);
+
+    // DEBUG_END;
+
+} // WriteChannelData
+
+//----------------------------------------------------------------------------
+void c_OutputPixel::ReadChannelData(size_t StartChannelId, size_t ChannelCount, byte *pTargetData)
+{
+    // DEBUG_START;
+
+    // DEBUG_V(String("               StartChannelId: 0x") + String(StartChannelId, HEX));
+    // DEBUG_V(String("&OutputBuffer[StartChannelId]: 0x") + String(uint(&OutputBuffer[StartChannelId]), HEX));
+    memcpy(pTargetData, &pOutputBuffer[StartChannelId], ChannelCount);
+
+    // DEBUG_END;
+
+} // WriteChannelData

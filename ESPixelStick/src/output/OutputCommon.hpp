@@ -49,17 +49,17 @@ public:
     // functions to be provided by the derived class
     virtual void         Begin () {}                                           ///< set up the operating environment based on the current config (or defaults)
     virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig);     ///< Set a new config in the driver
-    virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
+    virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig);     ///< Get the current config used by the driver
     virtual void         Render () = 0;                                        ///< Call from loop(),  renders output data
     virtual void         GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
             OID_t        GetOutputChannelId () { return OutputChannelId; }     ///< return the output channel number
             uint8_t    * GetBufferAddress ()   { return pOutputBuffer;}        ///< Get the address of the buffer into which the E1.31 handler will stuff data
-            uint16_t     GetBufferUsedSize ()  { return OutputBufferSize;}     ///< Get the address of the buffer into which the E1.31 handler will stuff data
+            size_t       GetBufferUsedSize ()  { return OutputBufferSize;}     ///< Get the address of the buffer into which the E1.31 handler will stuff data
             OTYPE_t      GetOutputType ()      { return OutputType; }          ///< Have the instance report its type.
     virtual void         GetStatus (ArduinoJson::JsonObject & jsonStatus);
             void         SetOutputBufferAddress (uint8_t* pNewOutputBuffer) { pOutputBuffer = pNewOutputBuffer; }
     virtual void         SetOutputBufferSize (uint16_t NewOutputBufferSize)  { OutputBufferSize = NewOutputBufferSize; };
-    virtual uint16_t     GetNumChannelsNeeded () = 0;
+    virtual size_t       GetNumChannelsNeeded () = 0;
     virtual void         PauseOutput () {}
     virtual void         WriteChannelData (size_t StartChannelId, size_t ChannelCount, byte *pSourceData);
     virtual void         ReadChannelData (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
