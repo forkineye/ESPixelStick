@@ -51,7 +51,7 @@ public:
     void      DeleteConfig      () { FileMgr.DeleteConfigFile (ConfigFileName); }
     void      PauseOutputs      ();
     void      GetDriverName     (String & Name) { Name = "OutputMgr"; }
-    void      WriteToBuffer     (size_t StartChannelId, size_t ChannelCount, byte * pData);
+    void      WriteChannelData     (size_t StartChannelId, size_t ChannelCount, byte * pData);
     void      ReadChannelData   (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
     void      ClearBuffer       ();
 

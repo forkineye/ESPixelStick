@@ -171,7 +171,7 @@ void c_InputE131::ProcessIncomingE131Data (e131_packet_t * packet)
             ++CurrentUniverse.SequenceNumber;
 
             size_t NumBytesOfE131Data = size_t(ntohs (packet->property_value_count) - 1);
-            OutputMgr.WriteToBuffer(CurrentUniverse.DestinationOffset, 
+            OutputMgr.WriteChannelData(CurrentUniverse.DestinationOffset, 
                                     min(CurrentUniverse.BytesToCopy, NumBytesOfE131Data), 
                                     &E131Data[CurrentUniverse.SourceDataOffset]);
 /*

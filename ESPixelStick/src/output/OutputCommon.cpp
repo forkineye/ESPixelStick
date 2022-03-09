@@ -412,7 +412,7 @@ void c_OutputCommon::GetConfig (JsonObject & jsonConfig)
 } // GetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputCommon::WriteToBuffer (size_t StartChannelId, size_t ChannelCount, byte * pSourceData)
+void c_OutputCommon::WriteChannelData (size_t StartChannelId, size_t ChannelCount, byte * pSourceData)
 {
     // DEBUG_START;
 
@@ -422,7 +422,7 @@ void c_OutputCommon::WriteToBuffer (size_t StartChannelId, size_t ChannelCount, 
 
     // DEBUG_END;
 
-} // WriteToBuffer
+} // WriteChannelData
 
 //----------------------------------------------------------------------------
 void c_OutputCommon::ReadChannelData(size_t StartChannelId, size_t ChannelCount, byte * pTargetData)
@@ -435,4 +435,4 @@ void c_OutputCommon::ReadChannelData(size_t StartChannelId, size_t ChannelCount,
 
     // DEBUG_END;
 
-} // WriteToBuffer
+} // WriteChannelData

@@ -1084,7 +1084,7 @@ void c_OutputMgr::PauseOutputs (void)
 } // PauseOutputs
 
 //-----------------------------------------------------------------------------
-void c_OutputMgr::WriteToBuffer(size_t StartChannelId, size_t ChannelCount, byte *pSourceData)
+void c_OutputMgr::WriteChannelData(size_t StartChannelId, size_t ChannelCount, byte *pSourceData)
 {
     // DEBUG_START;
 
@@ -1127,7 +1127,7 @@ void c_OutputMgr::WriteToBuffer(size_t StartChannelId, size_t ChannelCount, byte
             // DEBUG_V(String("                 EndChannelId: 0x") + String(EndChannelId, HEX));
             // DEBUG_V(String("             lastChannelToSet: 0x") + String(lastChannelToSet, HEX));
             // DEBUG_V(String("                ChannelsToSet: 0x") + String(ChannelsToSet, HEX));
-            currentOutputChannelDriver.pOutputChannelDriver->WriteToBuffer(RelativeStartChannelId, ChannelsToSet, pSourceData);
+            currentOutputChannelDriver.pOutputChannelDriver->WriteChannelData(RelativeStartChannelId, ChannelsToSet, pSourceData);
             StartChannelId += ChannelsToSet;
             pSourceData += ChannelsToSet;
             // memcpy(&OutputBuffer[StartChannelId], pSourceData, ChannelCount);
@@ -1136,7 +1136,7 @@ void c_OutputMgr::WriteToBuffer(size_t StartChannelId, size_t ChannelCount, byte
     } while (false);
     // DEBUG_END;
 
-} // WriteToBuffer
+} // WriteChannelData
 
 //-----------------------------------------------------------------------------
 void c_OutputMgr::ReadChannelData(size_t StartChannelId, size_t ChannelCount, byte *pTargetData)

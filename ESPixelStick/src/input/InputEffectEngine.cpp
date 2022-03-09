@@ -452,7 +452,7 @@ void c_InputEffectEngine::setPixel (uint16_t pixelId, CRGB color)
         {
             PixelBuffer[3] = 0; // no white data
         }
-        OutputMgr.WriteToBuffer(pixelId * ChannelsPerPixel, ChannelsPerPixel, PixelBuffer);
+        OutputMgr.WriteChannelData(pixelId * ChannelsPerPixel, ChannelsPerPixel, PixelBuffer);
     }
 
     // DEBUG_END;

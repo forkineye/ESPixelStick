@@ -155,7 +155,7 @@ void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
         // DEBUG_V (String ("data[0]: ") + String (data[0], HEX));
 
         lastData = data[0];
-        OutputMgr.WriteToBuffer( CurrentUniverse.DestinationOffset, 
+        OutputMgr.WriteChannelData( CurrentUniverse.DestinationOffset, 
                                  min(CurrentUniverse.BytesToCopy, length), 
                                  &data[CurrentUniverse.SourceDataOffset]);
 /*
