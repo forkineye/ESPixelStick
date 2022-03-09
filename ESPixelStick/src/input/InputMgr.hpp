@@ -88,8 +88,13 @@ private:
 
     void InstantiateNewInputChannel (e_InputChannelIds InputChannelId, e_InputType NewChannelType, bool StartDriver = true);
     void CreateNewConfig ();
+    struct DriverInfo_t
+    {
+        size_t DriverId = 0;
+        c_InputCommon * pInputChannelDriver = nullptr; ///< pointer(s) to the current active Input driver
+    };
 
-    c_InputCommon * pInputChannelDrivers[InputChannelId_End]; ///< pointer(s) to the current active Input driver
+    DriverInfo_t    InputChannelDrivers[InputChannelId_End]; ///< pointer(s) to the current active Input driver
     uint8_t       * InputDataBuffer     = nullptr;
     uint16_t        InputDataBufferSize = 0;
     bool            HasBeenInitialized  = false;
