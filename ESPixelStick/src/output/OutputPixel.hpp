@@ -66,13 +66,13 @@ protected:
 private:
 #define PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL 3
 
-    uint8_t     NumIntensityBytesPerPixel = PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL;
+    size_t      NumIntensityBytesPerPixel = PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL;
     bool        _MoreDataToSend = false;
 
     uint8_t*    NextPixelToSend = nullptr;
     size_t      pixel_count = 100;
     size_t      SentPixelsCount = 0;
-    uint8_t     PixelIntensityCurrentIndex = 0;
+    size_t      PixelIntensityCurrentIndex = 0;
 
     uint8_t   * pFramePrependData = nullptr;
     size_t      FramePrependDataSize = 0;
@@ -142,6 +142,7 @@ private:
     void updateGammaTable(); ///< Generate gamma correction table
     void updateColorOrderOffsets(); ///< Update color order
     bool validate ();        ///< confirm that the current configuration is valid
+    inline size_t CalculateIntensityOffset(size_t ChannelId);
 
     enum FrameState_t
     {
