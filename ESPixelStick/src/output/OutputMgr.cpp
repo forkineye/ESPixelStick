@@ -1090,7 +1090,7 @@ void c_OutputMgr::WriteChannelData(size_t StartChannelId, size_t ChannelCount, b
 
     do // once
     {
-        if ((StartChannelId + ChannelCount) > UsedBufferSize)
+        if (((StartChannelId + ChannelCount) > UsedBufferSize) || (0 == ChannelCount))
         {
             DEBUG_V(String("ERROR: Invalid parameters"));
             DEBUG_V(String("StartChannelId: ") + String(StartChannelId, HEX));
@@ -1098,6 +1098,7 @@ void c_OutputMgr::WriteChannelData(size_t StartChannelId, size_t ChannelCount, b
             DEBUG_V(String("UsedBufferSize: ") + String(UsedBufferSize));
             break;
         }
+
         // DEBUG_V(String("&OutputBuffer[StartChannelId]: 0x") + String(uint(&OutputBuffer[StartChannelId]), HEX));
         size_t EndChannelId = StartChannelId + ChannelCount;
         // Serial.print('1');
@@ -1127,7 +1128,10 @@ void c_OutputMgr::WriteChannelData(size_t StartChannelId, size_t ChannelCount, b
             // DEBUG_V(String("                 EndChannelId: 0x") + String(EndChannelId, HEX));
             // DEBUG_V(String("             lastChannelToSet: 0x") + String(lastChannelToSet, HEX));
             // DEBUG_V(String("                ChannelsToSet: 0x") + String(ChannelsToSet, HEX));
-            currentOutputChannelDriver.pOutputChannelDriver->WriteChannelData(RelativeStartChannelId, ChannelsToSet, pSourceData);
+            if (ChannelsToSet)
+            {
+                currentOutputChannelDriver.pOutputChannelDriver->WriteChannelData(RelativeStartChannelId, ChannelsToSet, pSourceData);
+            }
             StartChannelId += ChannelsToSet;
             pSourceData += ChannelsToSet;
             // memcpy(&OutputBuffer[StartChannelId], pSourceData, ChannelCount);
