@@ -104,6 +104,7 @@ private:
     void        UpdateElapsedPlayTimeMS ();
     uint32_t    CalculateFrameId (uint32_t ElapsedMS, int32_t SyncOffsetMS);
     bool        ParseFseqFile ();
+    size_t      ReadFile(size_t DestinationIntensityId, size_t NumBytesToRead, size_t FileOffset);
 
     String      LastFailedPlayStatusMsg;
 

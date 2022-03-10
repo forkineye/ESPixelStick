@@ -455,3 +455,28 @@ void c_InputFPPRemotePlayFile::ClearFileInfo()
     FrameControl.TotalNumberOfFramesInSequence = 0;
 
 } // ClearFileInfo
+
+size_t c_InputFPPRemotePlayFile::ReadFile(size_t DestinationIntensityId, size_t NumBytesToRead, size_t FileOffset)
+{
+    // DEBUG_START;
+    uint8_t LocalIntensityBuffer[210];
+
+    size_t NumBytesRead = 0;
+
+    while (NumBytesRead < NumBytesToRead)
+    {
+        size_t NumBytesReadThisPass = FileMgr.ReadSdFile(FileHandleForFileBeingPlayed,
+                                                         LocalIntensityBuffer,
+                                                         min((NumBytesToRead - NumBytesRead), sizeof(LocalIntensityBuffer)),
+                                                         FileOffset);
+
+        OutputMgr.WriteChannelData(DestinationIntensityId, NumBytesReadThisPass, LocalIntensityBuffer);
+
+        FileOffset += NumBytesReadThisPass;
+        NumBytesRead += NumBytesReadThisPass;
+        DestinationIntensityId += NumBytesReadThisPass;
+    }
+
+    // DEBUG_END;
+    return NumBytesRead;
+} // ReadFile
