@@ -46,12 +46,12 @@ public:
     void      PauseOutput       (bool PauseTheOutput) { IsOutputPaused = PauseTheOutput; }
     void      GetPortCounts     (uint16_t& PixelCount, uint16_t& SerialCount) {PixelCount = uint16_t(OutputChannelId_End); SerialCount = min(uint16_t(OutputChannelId_End), uint16_t(2)); }
     uint8_t*  GetBufferAddress  () { return OutputBuffer; } ///< Get the address of the buffer into which the E1.31 handler will stuff data
-    uint16_t  GetBufferUsedSize () { return UsedBufferSize; } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
-    uint16_t  GetBufferSize     () { return sizeof(OutputBuffer); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
+    size_t    GetBufferUsedSize () { return UsedBufferSize; } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
+    size_t    GetBufferSize     () { return sizeof(OutputBuffer); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
     void      DeleteConfig      () { FileMgr.DeleteConfigFile (ConfigFileName); }
     void      PauseOutputs      ();
     void      GetDriverName     (String & Name) { Name = "OutputMgr"; }
-    void      WriteChannelData     (size_t StartChannelId, size_t ChannelCount, byte * pData);
+    void      WriteChannelData  (size_t StartChannelId, size_t ChannelCount, byte * pData);
     void      ReadChannelData   (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
     void      ClearBuffer       ();
 
@@ -185,7 +185,7 @@ private:
     String ConfigFileName;
 
     uint8_t OutputBuffer[OM_MAX_NUM_CHANNELS];
-    uint16_t UsedBufferSize = 0;
+    size_t  UsedBufferSize = 0;
 
 #ifdef SUPPORT_UART_OUTPUT
 #   define OM_IS_UART ((ChannelIndex >= OutputChannelId_UART_FIRST) && (ChannelIndex <= OutputChannelId_UART_LAST))
