@@ -459,7 +459,14 @@ void c_InputFPPRemotePlayFile::ClearFileInfo()
 size_t c_InputFPPRemotePlayFile::ReadFile(size_t DestinationIntensityId, size_t NumBytesToRead, size_t FileOffset)
 {
     // DEBUG_START;
-    uint8_t LocalIntensityBuffer[210];
+#define WRITE_DIRECT_TO_OUTPUT_BUFFER
+#ifdef WRITE_DIRECT_TO_OUTPUT_BUFFER
+    size_t NumBytesRead = FileMgr.ReadSdFile(FileHandleForFileBeingPlayed,
+                                             OutputMgr.GetBufferAddress(),
+                                             min((NumBytesToRead), OutputMgr.GetBufferUsedSize()),
+                                             FileOffset);
+#else
+    uint8_t LocalIntensityBuffer[200];
 
     size_t NumBytesRead = 0;
 
@@ -476,6 +483,7 @@ size_t c_InputFPPRemotePlayFile::ReadFile(size_t DestinationIntensityId, size_t 
         NumBytesRead += NumBytesReadThisPass;
         DestinationIntensityId += NumBytesReadThisPass;
     }
+#endif // !def WRITE_DIRECT_TO_OUTPUT_BUFFER
 
     // DEBUG_END;
     return NumBytesRead;
