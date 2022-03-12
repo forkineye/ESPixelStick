@@ -597,6 +597,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
             case e_OutputType::OutputType_WS2811:
             {
 #ifdef SUPPORT_RMT_OUTPUT
+                // DEBUG_V("RMT");
                 if (OM_IS_RMT)
                 {
                     // logcon (CN_stars + String (F (" Starting WS2811 RMT for channel '")) + ChannelIndex + "'. " + CN_stars);
@@ -607,7 +608,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
 #endif // def SUPPORT_RMT_OUTPUT
 
 #ifdef SUPPORT_UART_OUTPUT
-                // DEBUG_V ("");
+                // DEBUG_V ("UART");
                 if (OM_IS_UART)
                 {
                     // logcon (CN_stars + String (F (" Starting WS2811 UART for channel '")) + ChannelIndex + "'. " + CN_stars);
