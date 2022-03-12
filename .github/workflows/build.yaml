@@ -37,6 +37,18 @@ jobs:
           # mh et esp32 mini kit
           - target: "esp32_wt32eth01"
             chip: "esp32"
+          # mh et esp32 QuinLed QUAD
+          - target: "esp32_quinled_quad"
+            chip: "esp32"
+          # mh et esp32 QuinLed QUAD Eth
+          - target: "esp32_quinled_quad_eth"
+            chip: "esp32"
+          # mh et esp32 QuinLed UNO
+          - target: "esp32_quinled_uno"
+            chip: "esp32"
+          # mh et esp32 QuinLed UNO Eth
+          - target: "esp32_quinled_uno_eth"
+            chip: "esp32"
 
     runs-on: ubuntu-latest
     steps:
