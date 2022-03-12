@@ -192,12 +192,11 @@ private:
 #else
 #   define OM_IS_UART false
 #endif // def SUPPORT_UART_OUTPUT
-#ifdef SUPPORT_RMT
+#ifdef SUPPORT_RMT_OUTPUT
 #   define OM_IS_RMT ((ChannelIndex >= OutputChannelId_RMT_FIRST) && (ChannelIndex <= OutputChannelId_RMT_LAST))
 #else
 #   define OM_IS_RMT false
-#endif // def SUPPORT_RMT
-
+#endif // def SUPPORT_RMT_OUTPUT
 
 }; // c_OutputMgr
 
