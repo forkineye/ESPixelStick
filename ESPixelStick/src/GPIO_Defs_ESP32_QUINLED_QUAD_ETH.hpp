@@ -21,20 +21,19 @@
 #define SUPPORT_ETHERNET
 
 //Output Manager
-#define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_2
-#define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_4
-#define UART_LAST               OutputChannelId_UART_2
-
 #define SUPPORT_RMT_OUTPUT
-#define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_0
-#define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_5
-#define RMT_LAST                OutputChannelId_RMT_2
+#define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_16
+#define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_3
+#define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_1
+#define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_4
+#define RMT_LAST                OutputChannelId_RMT_4
 
 // File Manager
-#define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_12
-#define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_13
-#define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14
-#define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_15
+// #define SUPPORT_SD
+// #define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_12
+// #define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_13
+// #define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14
+// #define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_15
 
 // #include <ETH.h>
 #include "network/ETH_m.h"
@@ -48,15 +47,15 @@
 #define DEFAULT_ETH_CLK_MODE ETH_CLOCK_GPIO0_IN
 
 // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
-#define DEFAULT_ETH_POWER_PIN          gpio_num_t::GPIO_NUM_15
+#define DEFAULT_ETH_POWER_PIN          gpio_num_t::GPIO_NUM_5
 #define DEFAULT_ETH_POWER_PIN_ACTIVE   HIGH
 
 // Type of the Ethernet PHY (LAN8720 or TLK110)
 #define DEFAULT_ETH_TYPE    ETH_PHY_LAN8720
 
 // I2C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
-// #define ETH_ADDR_PHY_LAN8720    0
-#define ETH_ADDR_PHY_LAN8720    1
+#define ETH_ADDR_PHY_LAN8720    0
+// #define ETH_ADDR_PHY_LAN8720    1
 #define ETH_ADDR_PHY_TLK110     31
 #define DEFAULT_ETH_ADDR        ETH_ADDR_PHY_LAN8720
 #define DEFAULT_ETH_TXEN        gpio_num_t::GPIO_NUM_21

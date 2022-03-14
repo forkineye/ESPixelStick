@@ -283,7 +283,7 @@ void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
 void c_OutputCommon::TerminateUartOperation ()
 {
     // DEBUG_START;
-
+#ifdef SUPPORT_UART_OUTPUT
     if (OutputChannelId <= c_OutputMgr::e_OutputChannelIds::OutputChannelId_UART_LAST)
     {
         switch (UartId)
@@ -317,6 +317,7 @@ void c_OutputCommon::TerminateUartOperation ()
             }
         } // end switch (UartId)
     }
+#endif // def SUPPORT_UART_OUTPUT
 
     // DEBUG_END;
 
@@ -409,3 +410,29 @@ void c_OutputCommon::GetConfig (JsonObject & jsonConfig)
 
     // DEBUG_END;
 } // GetConfig
+
+//----------------------------------------------------------------------------
+void c_OutputCommon::WriteChannelData (size_t StartChannelId, size_t ChannelCount, byte * pSourceData)
+{
+    // DEBUG_START;
+
+    // DEBUG_V(String("               StartChannelId: 0x") + String(StartChannelId, HEX));
+    // DEBUG_V(String("&OutputBuffer[StartChannelId]: 0x") + String(uint(&OutputBuffer[StartChannelId]), HEX));
+    memcpy(&pOutputBuffer[StartChannelId], pSourceData, ChannelCount);
+
+    // DEBUG_END;
+
+} // WriteChannelData
+
+//----------------------------------------------------------------------------
+void c_OutputCommon::ReadChannelData(size_t StartChannelId, size_t ChannelCount, byte * pTargetData)
+{
+    // DEBUG_START;
+
+    // DEBUG_V(String("               StartChannelId: 0x") + String(StartChannelId, HEX));
+    // DEBUG_V(String("&OutputBuffer[StartChannelId]: 0x") + String(uint(&OutputBuffer[StartChannelId]), HEX));
+    memcpy(pTargetData, &pOutputBuffer[StartChannelId], ChannelCount);
+
+    // DEBUG_END;
+
+} // WriteChannelData

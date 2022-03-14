@@ -47,14 +47,14 @@ public:
     c_InputMgr ();
     virtual ~c_InputMgr ();
 
-    void Begin                (uint8_t * BufferStart, uint16_t BufferSize);
+    void Begin                (size_t BufferSize);
     void LoadConfig           ();
     void GetConfig            (byte * Response, size_t maxlen);
     void GetStatus            (JsonObject & jsonStatus);
     void SetConfig            (const char * NewConfig);
     void SetConfig            (ArduinoJson::JsonDocument & NewConfig);
     void Process              ();
-    void SetBufferInfo        (uint8_t* BufferStart, uint16_t BufferSize);
+    void SetBufferInfo        (size_t BufferSize);
     void SetOperationalState  (bool Active);
     void NetworkStateChanged  (bool IsConnected);
     void DeleteConfig         () { FileMgr.DeleteConfigFile (ConfigFileName); }
@@ -63,6 +63,10 @@ public:
     void RestartBlankTimer    (c_InputMgr::e_InputChannelIds Selector) { BlankEndTime[int(Selector)] = (millis () / 1000) + config.BlankDelay; }
     bool BlankTimerHasExpired (c_InputMgr::e_InputChannelIds Selector) { return !(BlankEndTime[int(Selector)] > (millis () / 1000)); }
 
+#if defined(SUPPORT_SD) || defined(SUPPORT_SD_MMC)
+#   define SUPPORT_FPP
+#endif // defined(SUPPORT_SD) || defined(SUPPORT_SD_MMC)
+
     enum e_InputType
     {
         InputType_E1_31 = 0,
@@ -70,11 +74,13 @@ public:
         InputType_MQTT,
         InputType_Alexa,
         InputType_DDP,
+#ifdef SUPPORT_FPP
         InputType_FPP,
+#endif // def SUPPORT_FPP
         InputType_Artnet,
         InputType_Disabled,
         InputType_End,
-        InputType_Start   = InputType_E1_31,
+        InputType_Start = InputType_E1_31,
         InputType_Default = InputType_Disabled,
     };
 
@@ -82,10 +88,14 @@ private:
 
     void InstantiateNewInputChannel (e_InputChannelIds InputChannelId, e_InputType NewChannelType, bool StartDriver = true);
     void CreateNewConfig ();
+    struct DriverInfo_t
+    {
+        size_t DriverId = 0;
+        c_InputCommon * pInputChannelDriver = nullptr; ///< pointer(s) to the current active Input driver
+    };
 
-    c_InputCommon * pInputChannelDrivers[InputChannelId_End]; ///< pointer(s) to the current active Input driver
-    uint8_t       * InputDataBuffer     = nullptr;
-    uint16_t        InputDataBufferSize = 0;
+    DriverInfo_t    InputChannelDrivers[InputChannelId_End]; ///< pointer(s) to the current active Input driver
+    size_t          InputDataBufferSize = 0;
     bool            HasBeenInitialized  = false;
     c_ExternalInput ExternalInput;
     bool            EffectEngineIsConfiguredToRun[InputChannelId_End];

@@ -92,7 +92,7 @@ c_InputFPPRemotePlayFile::~c_InputFPPRemotePlayFile ()
     for (uint32_t LoopCount = 10000; (LoopCount != 0) && (!IsIdle ()); LoopCount--)
     {
         Stop ();
-        Poll (nullptr, 0);
+        Poll ();
     }
     // DEBUG_END;
 
@@ -142,12 +142,9 @@ void c_InputFPPRemotePlayFile::Sync (String & FileName, float SecondsElapsed)
 } // Sync
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::Poll (uint8_t * _Buffer, size_t _BufferSize)
+void c_InputFPPRemotePlayFile::Poll ()
 {
     // xDEBUG_START;
-
-    Buffer = _Buffer;
-    BufferSize = _BufferSize;
 
     // TimerPoll ();
     pCurrentFsmState->Poll ();
@@ -458,3 +455,36 @@ void c_InputFPPRemotePlayFile::ClearFileInfo()
     FrameControl.TotalNumberOfFramesInSequence = 0;
 
 } // ClearFileInfo
+
+size_t c_InputFPPRemotePlayFile::ReadFile(size_t DestinationIntensityId, size_t NumBytesToRead, size_t FileOffset)
+{
+    // DEBUG_START;
+#define WRITE_DIRECT_TO_OUTPUT_BUFFER
+#ifdef WRITE_DIRECT_TO_OUTPUT_BUFFER
+    size_t NumBytesRead = FileMgr.ReadSdFile(FileHandleForFileBeingPlayed,
+                                             OutputMgr.GetBufferAddress(),
+                                             min((NumBytesToRead), OutputMgr.GetBufferUsedSize()),
+                                             FileOffset);
+#else
+    uint8_t LocalIntensityBuffer[200];
+
+    size_t NumBytesRead = 0;
+
+    while (NumBytesRead < NumBytesToRead)
+    {
+        size_t NumBytesReadThisPass = FileMgr.ReadSdFile(FileHandleForFileBeingPlayed,
+                                                         LocalIntensityBuffer,
+                                                         min((NumBytesToRead - NumBytesRead), sizeof(LocalIntensityBuffer)),
+                                                         FileOffset);
+
+        OutputMgr.WriteChannelData(DestinationIntensityId, NumBytesReadThisPass, LocalIntensityBuffer);
+
+        FileOffset += NumBytesReadThisPass;
+        NumBytesRead += NumBytesReadThisPass;
+        DestinationIntensityId += NumBytesReadThisPass;
+    }
+#endif // !def WRITE_DIRECT_TO_OUTPUT_BUFFER
+
+    // DEBUG_END;
+    return NumBytesRead;
+} // ReadFile

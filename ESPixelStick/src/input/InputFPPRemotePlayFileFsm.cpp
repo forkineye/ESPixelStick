@@ -240,8 +240,10 @@ IRAM_ATTR void fsm_PlayFile_state_PlayingFile::TimerPoll ()
         }
 
         uint32_t FilePosition = p_Parent->FrameControl.DataOffset + (p_Parent->FrameControl.ChannelsPerFrame * CurrentFrame);
-        size_t   MaxBytesToRead = (p_Parent->FrameControl.ChannelsPerFrame > p_Parent->BufferSize) ? p_Parent->BufferSize : p_Parent->FrameControl.ChannelsPerFrame;
-        byte* CurrentDestination = p_Parent->Buffer;
+        size_t BufferSize = OutputMgr.GetBufferUsedSize();
+        size_t MaxBytesToRead = (p_Parent->FrameControl.ChannelsPerFrame > BufferSize) ? BufferSize : p_Parent->FrameControl.ChannelsPerFrame;
+
+        size_t CurrentDestination = 0;
         // xDEBUG_V (String ("               MaxBytesToRead: ") + String (MaxBytesToRead));
 
         LastPlayedFrameId = CurrentFrame;
@@ -257,14 +259,12 @@ IRAM_ATTR void fsm_PlayFile_state_PlayingFile::TimerPoll ()
 
             uint32_t AdjustedFilePosition = FilePosition + CurrentSparseRange.DataOffset;
 
-            // xDEBUG_V (String ("                 FilePosition: ") + String (FilePosition));
-            // xDEBUG_V (String ("         AdjustedFilePosition: ") + String (uint32_t(AdjustedFilePosition), HEX));
-            // xDEBUG_V (String ("           CurrentDestination: ") + String (uint32_t(CurrentDestination), HEX));
-            // xDEBUG_V (String ("            ActualBytesToRead: ") + String (ActualBytesToRead));
-            size_t ActualBytesRead = FileMgr.ReadSdFile (p_Parent->FileHandleForFileBeingPlayed,
-                CurrentDestination,
-                ActualBytesToRead,
-                AdjustedFilePosition);
+            /// DEBUG_V (String ("                 FilePosition: ") + String (FilePosition));
+            /// DEBUG_V (String ("         AdjustedFilePosition: ") + String (uint32_t(AdjustedFilePosition), HEX));
+            /// DEBUG_V (String ("           CurrentDestination: ") + String (uint32_t(CurrentDestination), HEX));
+            /// DEBUG_V (String ("            ActualBytesToRead: ") + String (ActualBytesToRead));
+            size_t ActualBytesRead = p_Parent->ReadFile(CurrentDestination, ActualBytesToRead, AdjustedFilePosition);
+
             MaxBytesToRead -= ActualBytesRead;
             CurrentDestination += ActualBytesRead;
 

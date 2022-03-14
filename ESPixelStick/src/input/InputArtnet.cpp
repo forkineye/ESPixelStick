@@ -23,9 +23,8 @@
 //-----------------------------------------------------------------------------
 c_InputArtnet::c_InputArtnet (c_InputMgr::e_InputChannelIds NewInputChannelId,
                               c_InputMgr::e_InputType       NewChannelType,
-                              uint8_t                     * BufferStart,
-                              uint16_t                      BufferSize) :
-    c_InputCommon(NewInputChannelId, NewChannelType, BufferStart, BufferSize)
+                              size_t                        BufferSize) :
+    c_InputCommon(NewInputChannelId, NewChannelType, BufferSize)
 
 {
     // DEBUG_START;
@@ -127,7 +126,7 @@ void c_InputArtnet::Process ()
 
 //-----------------------------------------------------------------------------
 void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
-                                uint16_t  length,
+                                size_t    length,
                                 uint8_t   SequenceNumber,
                                 uint8_t * data,
                                 IPAddress remoteIP)
@@ -139,7 +138,7 @@ void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
         LastRemoteIP = remoteIP;
 
         // Universe offset and sequence tracking
-        Universe_t& CurrentUniverse = UniverseArray[CurrentUniverseId - startUniverse];
+        Universe_t & CurrentUniverse = UniverseArray[CurrentUniverseId - startUniverse];
 
         // Do we need to update a sequnce error?
         if (SequenceNumber != CurrentUniverse.SequenceNumber)
@@ -156,11 +155,14 @@ void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
         // DEBUG_V (String ("data[0]: ") + String (data[0], HEX));
 
         lastData = data[0];
-
-        memcpy (CurrentUniverse.Destination,
-                &data[CurrentUniverse.SourceDataOffset],
-                min (CurrentUniverse.BytesToCopy, length));
-
+        OutputMgr.WriteChannelData( CurrentUniverse.DestinationOffset, 
+                                 min(CurrentUniverse.BytesToCopy, length), 
+                                 &data[CurrentUniverse.SourceDataOffset]);
+/*
+        memcpy(CurrentUniverse.Destination,
+               &data[CurrentUniverse.SourceDataOffset],
+               min(CurrentUniverse.BytesToCopy, length));
+*/
         InputMgr.RestartBlankTimer (GetInputChannelId ());
     }
     else
@@ -170,11 +172,10 @@ void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
     // DEBUG_END;
 }
 //-----------------------------------------------------------------------------
-void c_InputArtnet::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
+void c_InputArtnet::SetBufferInfo (size_t BufferSize)
 {
     // DEBUG_START;
 
-    InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
 
     if (HasBeenInitialized)
@@ -197,20 +198,20 @@ void c_InputArtnet::SetBufferTranslation ()
 
     // for each possible universe, set the start and size
 
-    uint16_t InputOffset = FirstUniverseChannelOffset - 1;
-    uint16_t DestinationOffset = 0;
-    uint16_t BytesLeftToMap = InputDataBufferSize;
+    size_t InputOffset = FirstUniverseChannelOffset - 1;
+    size_t DestinationOffset = 0;
+    size_t BytesLeftToMap = InputDataBufferSize;
 
     // set up the bytes for the First Universe
-    uint16_t BytesInUniverse = ChannelsPerUniverse - InputOffset;
+    size_t BytesInUniverse = ChannelsPerUniverse - InputOffset;
     // DEBUG_V (String ("ChannelsPerUniverse: ") + String (uint32_t (ChannelsPerUniverse), HEX));
 
     for (auto& CurrentUniverse : UniverseArray)
     {
-        uint16_t BytesInThisUniverse = min (BytesInUniverse, BytesLeftToMap);
-        CurrentUniverse.Destination = &InputDataBuffer[DestinationOffset];
-        CurrentUniverse.BytesToCopy = BytesInThisUniverse;
-        CurrentUniverse.SourceDataOffset = InputOffset;
+        size_t BytesInThisUniverse        = min (BytesInUniverse, BytesLeftToMap);
+        CurrentUniverse.DestinationOffset = DestinationOffset;
+        CurrentUniverse.BytesToCopy       = BytesInThisUniverse;
+        CurrentUniverse.SourceDataOffset  = InputOffset;
         // CurrentUniverse.SequenceErrorCounter = 0;
         // CurrentUniverse.SequenceNumber = 0;
 
@@ -219,9 +220,9 @@ void c_InputArtnet::SetBufferTranslation ()
         // DEBUG_V (String ("   SourceDataOffset: ") + String (CurrentUniverse.SourceDataOffset, HEX));
 
         DestinationOffset += BytesInThisUniverse;
-        BytesLeftToMap -= BytesInThisUniverse;
-        BytesInUniverse = ChannelsPerUniverse;
-        InputOffset = 0;
+        BytesLeftToMap    -= BytesInThisUniverse;
+        BytesInUniverse    = ChannelsPerUniverse;
+        InputOffset        = 0;
     }
 
     if (0 != BytesLeftToMap)
@@ -328,7 +329,7 @@ void c_InputArtnet::validateConfiguration ()
 
     // Find the last universe we should listen for
      // DEBUG_V ("");
-    uint16_t span = FirstUniverseChannelOffset + InputDataBufferSize - 1;
+    size_t span = FirstUniverseChannelOffset + InputDataBufferSize - 1;
     if (span % ChannelsPerUniverse)
     {
         LastUniverse = startUniverse + span / ChannelsPerUniverse;

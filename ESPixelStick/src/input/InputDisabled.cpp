@@ -27,9 +27,8 @@
 //----------------------------------------------------------------------------
 c_InputDisabled::c_InputDisabled (c_InputMgr::e_InputChannelIds NewInputChannelId,
                                   c_InputMgr::e_InputType       NewChannelType,
-                                  uint8_t* BufferStart,
-                                  uint16_t                      BufferSize) :
-    c_InputCommon (NewInputChannelId, NewChannelType, BufferStart, BufferSize)
+                                  size_t                        BufferSize) :
+    c_InputCommon (NewInputChannelId, NewChannelType, BufferSize)
 {
     // DEBUG_START;
 

@@ -30,6 +30,7 @@ GNU General Public License for more details.
 */
 
 #include "OutputCommon.hpp"
+#ifdef SUPPORT_UART_OUTPUT
 
 #ifdef ARDUINO_ARCH_ESP32
 #   include <driver/uart.h>
@@ -46,14 +47,14 @@ public:
     virtual ~c_OutputSerial ();
 
     // functions to be provided by the derived class
-    void Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
-    bool SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
-    void GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-    void Render ();                                        ///< Call from loop(),  renders output data
-    void GetDriverName (String & sDriverName);
-    void GetStatus (ArduinoJson::JsonObject& jsonStatus);
-    uint16_t GetNumChannelsNeeded () { return Num_Channels; }
-    void SetOutputBufferSize (uint16_t NumChannelsAvailable);
+    void   Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
+    bool   SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
+    void   GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
+    void   Render ();                                        ///< Call from loop(),  renders output data
+    void   GetDriverName (String & sDriverName);
+    void   GetStatus (ArduinoJson::JsonObject& jsonStatus);
+    size_t GetNumChannelsNeeded () { return Num_Channels; }
+    void   SetOutputBufferSize (uint16_t NumChannelsAvailable);
 
 #define GS_CHANNEL_LIMIT 2048
 
@@ -122,4 +123,4 @@ private:
 #endif
 
 }; // c_OutputGenericSerial
-
+#endif // def SUPPORT_UART_OUTPUT

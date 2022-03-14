@@ -19,10 +19,12 @@
 */
 
 //Output Manager
+#define SUPPORT_UART_OUTPUT
 #define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_2
 #define UART_LAST               OutputChannelId_UART_1
 
 // File Manager
+#define SUPPORT_SD
 #define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_12
 #define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_13
 #define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14

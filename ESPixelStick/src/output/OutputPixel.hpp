@@ -33,9 +33,9 @@ class c_OutputPixel : public c_OutputCommon
 public:
     // These functions are inherited from c_OutputCommon
     c_OutputPixel (c_OutputMgr::e_OutputChannelIds OutputChannelId,
-                      gpio_num_t outputGpio,
-                      uart_port_t uart,
-                      c_OutputMgr::e_OutputType outputType);
+                   gpio_num_t outputGpio,
+                   uart_port_t uart,
+                   c_OutputMgr::e_OutputType outputType);
     virtual ~c_OutputPixel ();
 
     // functions to be provided by the derived class
@@ -45,13 +45,14 @@ public:
     virtual void         GetDriverName (String& sDriverName) = 0;
     virtual c_OutputMgr::e_OutputType GetOutputType () = 0;
     virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
-    uint16_t             GetNumChannelsNeeded () { return (pixel_count * NumIntensityBytesPerPixel); };
-    virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
-    bool                 MoreDataToSend () { return _MoreDataToSend; }
+            size_t       GetNumChannelsNeeded () { return (pixel_count * NumIntensityBytesPerPixel); };
+    virtual void         SetOutputBufferSize (size_t NumChannelsAvailable);
+            bool         MoreDataToSend () { return _MoreDataToSend; }
     IRAM_ATTR void       StartNewFrame ();
     IRAM_ATTR uint8_t    GetNextIntensityToSend ();
-    void                 SetInvertData (bool _InvertData) { InvertData = _InvertData; }
-
+            void         SetInvertData (bool _InvertData) { InvertData = _InvertData; }
+    virtual void         WriteChannelData (size_t StartChannelId, size_t ChannelCount, byte *pSourceData);
+    virtual void         ReadChannelData (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
 protected:
 
     void SetFramePrependInformation (const uint8_t* data, size_t len);
@@ -65,13 +66,13 @@ protected:
 private:
 #define PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL 3
 
-    uint8_t     NumIntensityBytesPerPixel = PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL;
+    size_t      NumIntensityBytesPerPixel = PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL;
     bool        _MoreDataToSend = false;
 
     uint8_t*    NextPixelToSend = nullptr;
-    uint16_t    pixel_count = 100;
-    uint16_t    SentPixelsCount = 0;
-    uint8_t     PixelIntensityCurrentIndex = 0;
+    size_t      pixel_count = 100;
+    size_t      SentPixelsCount = 0;
+    size_t      PixelIntensityCurrentIndex = 0;
 
     uint8_t   * pFramePrependData = nullptr;
     size_t      FramePrependDataSize = 0;
@@ -85,33 +86,33 @@ private:
     size_t      PixelPrependDataSize = 0;
     size_t      PixelPrependDataCurrentIndex = 0;
 
-    uint16_t    PixelGroupSize = 1;
-    uint16_t    PixelGroupSizeCurrentCount = 0;
+    size_t      PixelGroupSize = 1;
+    size_t      PixelGroupSizeCurrentCount = 0;
 
     float       IntensityBitTimeInUs = 0.0;
-    uint16_t    BlockSize = 1;
+    size_t      BlockSize = 1;
     float       BlockDelayUs = 0.0;
 
-    uint16_t    zig_size = 0;
-    uint16_t    ZigPixelCount = 1;
-    uint16_t    ZigPixelCurrentCount = 1;
-    uint16_t    ZagPixelCount = 1;
-    uint16_t    ZagPixelCurrentCount = 1;
+    size_t      zig_size = 0;
+    size_t      ZigPixelCount = 1;
+    size_t      ZigPixelCurrentCount = 1;
+    size_t      ZagPixelCount = 1;
+    size_t      ZagPixelCurrentCount = 1;
 
-    uint16_t    PrependNullPixelCount = 0;
-    uint16_t    PrependNullPixelCurrentCount = 0;
+    size_t      PrependNullPixelCount = 0;
+    size_t      PrependNullPixelCurrentCount = 0;
 
-    uint16_t    AppendNullPixelCount = 0;
-    uint16_t    AppendNullPixelCurrentCount = 0;
+    size_t      AppendNullPixelCount = 0;
+    size_t      AppendNullPixelCurrentCount = 0;
 
-    uint8_t     InvertData = false;
+    bool        InvertData = false;
 
 // #define USE_PIXEL_DEBUG_COUNTERS
 #ifdef USE_PIXEL_DEBUG_COUNTERS
-    uint16_t   PixelsToSend = 0;
-    uint16_t   IntensityBytesSent = 0;
-    uint16_t   IntensityBytesSentLastFrame = 0;
-    uint16_t   SentPixels = 0;
+    size_t     PixelsToSend = 0;
+    size_t     IntensityBytesSent = 0;
+    size_t     IntensityBytesSentLastFrame = 0;
+    size_t     SentPixels = 0;
     uint32_t   AbortFrameCounter = 0;
 #endif // def USE_PIXEL_DEBUG_COUNTERS
 
@@ -141,6 +142,7 @@ private:
     void updateGammaTable(); ///< Generate gamma correction table
     void updateColorOrderOffsets(); ///< Update color order
     bool validate ();        ///< confirm that the current configuration is valid
+    inline size_t CalculateIntensityOffset(size_t ChannelId);
 
     enum FrameState_t
     {

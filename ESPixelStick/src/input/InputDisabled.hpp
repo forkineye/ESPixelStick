@@ -30,8 +30,7 @@ public:
     // These functions are inherited from c_InputCommon
     c_InputDisabled (c_InputMgr::e_InputChannelIds NewInputChannelId,
                      c_InputMgr::e_InputType       NewChannelType,
-                     uint8_t *                     BufferStart,
-                     uint16_t                      BufferSize);
+                     size_t                        BufferSize);
     virtual ~c_InputDisabled ();
 
     // functions to be provided by the derived class
@@ -41,7 +40,7 @@ public:
     void GetStatus (JsonObject & jsonStatus);
     void Process ();                            ///< Call from loop(),  Process Input data
     void GetDriverName (String& sDriverName) { sDriverName = "Disabled"; } ///< get the name for the instantiated driver
-    void SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize) {}
+    void SetBufferInfo (size_t BufferSize) {}
 
 private:
 

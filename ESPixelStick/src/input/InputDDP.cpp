@@ -32,9 +32,8 @@
 //-----------------------------------------------------------------------------
 c_InputDDP::c_InputDDP (c_InputMgr::e_InputChannelIds NewInputChannelId,
                         c_InputMgr::e_InputType       NewChannelType,
-                        uint8_t                     * BufferStart,
-                        uint16_t                      BufferSize) :
-    c_InputCommon (NewInputChannelId, NewChannelType, BufferStart, BufferSize)
+                        size_t                        BufferSize) :
+    c_InputCommon (NewInputChannelId, NewChannelType, BufferSize)
 
 {
     // DEBUG_START;
@@ -114,11 +113,10 @@ bool c_InputDDP::SetConfig (JsonObject& jsonConfig)
 } // SetConfig
 
 //-----------------------------------------------------------------------------
-void c_InputDDP::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
+void c_InputDDP::SetBufferInfo (size_t BufferSize)
 {
     // DEBUG_START;
 
-    InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
 
     // DEBUG_V (String ("        InputBuffer: 0x") + String (uint32_t (InputDataBuffer), HEX));
@@ -270,7 +268,7 @@ void c_InputDDP::ProcessReceivedData (DDP_packet_t & Packet)
         byte* Data = (IsTime(header.flags1)) ? &((DDP_TimeCode_packet_t&)Packet).data[0] : &Packet.data[0];
         // DEBUG_V (String ("                Data: 0x") + String (uint32_t (Data), HEX));
         // DEBUG_V (String ("   InputBufferOffset: ") + String (InputBufferOffset));
-        memcpy (&InputDataBuffer[InputBufferOffset], &Data[0], AdjPacketDataLength);
+        OutputMgr.WriteChannelData(InputBufferOffset, AdjPacketDataLength, &Data[0]);
 
         InputMgr.RestartBlankTimer (GetInputChannelId ());
 

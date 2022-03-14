@@ -28,8 +28,7 @@ class c_InputCommon
 public:
     c_InputCommon (c_InputMgr::e_InputChannelIds NewInputChannelId,
                    c_InputMgr::e_InputType       NewChannelType,
-                   uint8_t                     * BufferStart,
-                   uint16_t                      BufferSize);
+                   size_t                        BufferSize);
     virtual ~c_InputCommon ();
 
     // functions to be provided by the derived class
@@ -39,7 +38,7 @@ public:
     virtual void GetStatus (JsonObject & jsonStatus) = 0;
     virtual void Process () = 0;                                       ///< Call from loop(),  renders Input data
     virtual void GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
-    virtual void SetBufferInfo (uint8_t * BufferStart, uint16_t BufferSize) = 0;
+    virtual void SetBufferInfo (size_t BufferSize) = 0;
     virtual void SetOperationalState (bool ActiveFlag) { IsInputChannelActive = ActiveFlag; }
     virtual void NetworkStateChanged (bool IsConnected) {}; // used by poorly designed rx functions
     virtual bool isShutDownRebootNeeded () { return false; }
@@ -49,8 +48,7 @@ public:
 
 protected:
     bool        HasBeenInitialized  = false;
-    uint8_t    *InputDataBuffer     = nullptr;
-    uint16_t    InputDataBufferSize = 0;
+    size_t      InputDataBufferSize = 0;
     bool        IsInputChannelActive = true;
     c_InputMgr::e_InputChannelIds InputChannelId = c_InputMgr::e_InputChannelIds::InputChannelId_ALL;
     c_InputMgr::e_InputType       ChannelType = c_InputMgr::e_InputType::InputType_Disabled;

@@ -77,11 +77,11 @@ void c_InputFPPRemotePlayList::Sync (String & FileName, float ElapsedSeconds)
 } // Sync
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayList::Poll (uint8_t * Buffer, size_t BufferSize)
+void c_InputFPPRemotePlayList::Poll ()
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Poll (Buffer, BufferSize);
+    pCurrentFsmState->Poll ();
 
     // DEBUG_END;
 

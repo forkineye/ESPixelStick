@@ -42,16 +42,15 @@ static const c_InputEffectEngine::EffectDescriptor_t ListOfEffects[] =
 
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInputChannelId,
-    c_InputMgr::e_InputType       NewChannelType,
-    uint8_t                     * BufferStart,
-    uint16_t                      BufferSize) :
-    c_InputCommon (NewInputChannelId, NewChannelType, BufferStart, BufferSize)
+                                          c_InputMgr::e_InputType       NewChannelType,
+                                          size_t                        BufferSize) :
+    c_InputCommon (NewInputChannelId, NewChannelType, BufferSize)
 {
     // DEBUG_START;
     // set a default effect
     ActiveEffect = &ListOfEffects[0];
 
-    SetBufferInfo (BufferStart, BufferSize);
+    SetBufferInfo (BufferSize);
 
     // DEBUG_END;
 } // c_InputEffectEngine
@@ -60,14 +59,13 @@ c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInput
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::c_InputEffectEngine () :
     c_InputCommon (c_InputMgr::e_InputChannelIds::InputPrimaryChannelId,
-        c_InputMgr::e_InputType::InputType_Effects,
-        nullptr, 0)
+                   c_InputMgr::e_InputType::InputType_Effects, 0)
 {
     // DEBUG_START;
     // set a default effect
     ActiveEffect = &ListOfEffects[0];
 
-    SetBufferInfo (nullptr, 0);
+    SetBufferInfo (0);
 
     // DEBUG_END;
 
@@ -248,11 +246,10 @@ void c_InputEffectEngine::Process ()
 } // process
 
 //-----------------------------------------------------------------------------
-void c_InputEffectEngine::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
+void c_InputEffectEngine::SetBufferInfo (size_t BufferSize)
 {
     // DEBUG_START;
 
-    InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
 
     // DEBUG_V (String ("BufferSize: ") + String (BufferSize));
@@ -290,7 +287,7 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     EffectBrightness /= 100.0;
 
-    SetBufferInfo (InputDataBuffer, InputDataBufferSize);
+    SetBufferInfo (InputDataBufferSize);
 
     setColor (effectColor);
     validateConfiguration ();
@@ -325,7 +322,7 @@ void c_InputEffectEngine::SetMqttConfig (MQTTConfiguration_s& mqttConfig)
     EffectColor.g = mqttConfig.color.g;
     EffectColor.b = mqttConfig.color.b;
 
-    SetBufferInfo (InputDataBuffer, InputDataBufferSize);
+    SetBufferInfo (InputDataBufferSize);
 
     validateConfiguration ();
 
@@ -440,24 +437,22 @@ void c_InputEffectEngine::setPixel (uint16_t pixelId, CRGB color)
 
     if ((true == IsInputChannelActive) && (pixelId < PixelCount))
     {
-        uint8_t* pInputDataBuffer = &InputDataBuffer[ChannelsPerPixel * pixelId];
+        uint8_t PixelBuffer[sizeof(CRGB)];
 
+        // DEBUG_V(String("ChannelsPerPixel * pixelId: 0x") + String(uint(ChannelsPerPixel * pixelId), HEX));
         // DEBUG_V (String ("EffectBrightness: ") + String (EffectBrightness));
         // DEBUG_V (String ("color.r: ") + String (color.r));
         // DEBUG_V (String ("color.g: ") + String (color.g));
         // DEBUG_V (String ("color.b: ") + String (color.b));
 
-        pInputDataBuffer[0] = color.r * EffectBrightness;
-        pInputDataBuffer[1] = color.g * EffectBrightness;
-        pInputDataBuffer[2] = color.b * EffectBrightness;
+        PixelBuffer[0] = color.r * EffectBrightness;
+        PixelBuffer[1] = color.g * EffectBrightness;
+        PixelBuffer[2] = color.b * EffectBrightness;
         if (4 == ChannelsPerPixel)
         {
-            pInputDataBuffer[3] = 0; // no white data
+            PixelBuffer[3] = 0; // no white data
         }
-
-        // DEBUG_V (String ("pInputDataBuffer[0]: ") + String (pInputDataBuffer[0]));
-        // DEBUG_V (String ("pInputDataBuffer[1]: ") + String (pInputDataBuffer[1]));
-        // DEBUG_V (String ("pInputDataBuffer[2]: ") + String (pInputDataBuffer[2]));
+        OutputMgr.WriteChannelData(pixelId * ChannelsPerPixel, ChannelsPerPixel, PixelBuffer);
     }
 
     // DEBUG_END;
@@ -475,11 +470,12 @@ void c_InputEffectEngine::GetPixel (uint16_t pixelId, CRGB & out)
 
     if (pixelId < PixelCount)
     {
-        uint8_t* pInputDataBuffer = &InputDataBuffer[ChannelsPerPixel * pixelId];
+        byte PixelData[sizeof(CRGB)];
+        OutputMgr.ReadChannelData(size_t(ChannelsPerPixel * pixelId), sizeof(PixelData), PixelData);
 
-        out.r = pInputDataBuffer[0];
-        out.g = pInputDataBuffer[1];
-        out.b = pInputDataBuffer[2];
+        out.r = PixelData[0];
+        out.g = PixelData[1];
+        out.b = PixelData[2];
     }
 
     // DEBUG_END;
@@ -489,7 +485,7 @@ void c_InputEffectEngine::GetPixel (uint16_t pixelId, CRGB & out)
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::setRange (uint16_t FirstPixelId, uint16_t NumberOfPixels, CRGB color)
 {
-    for (uint16_t i = FirstPixelId; i < min (uint16_t (FirstPixelId + NumberOfPixels), PixelCount); i++)
+    for (uint16_t i = FirstPixelId; i < min(size_t (FirstPixelId + NumberOfPixels), PixelCount); i++)
     {
         setPixel (i, color);
     }
@@ -498,7 +494,7 @@ void c_InputEffectEngine::setRange (uint16_t FirstPixelId, uint16_t NumberOfPixe
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::clearRange (uint16_t FirstPixelId, uint16_t NumberOfPixels)
 {
-    for (uint16_t i = FirstPixelId; i < min (uint16_t (FirstPixelId + NumberOfPixels), PixelCount); i++)
+    for (uint16_t i = FirstPixelId; i < min (size_t (FirstPixelId + NumberOfPixels), PixelCount); i++)
     {
         setPixel (i, { 0, 0, 0 });
     }

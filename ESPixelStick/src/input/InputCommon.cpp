@@ -27,9 +27,7 @@
 ///< Start up the driver and put it into a safe mode
 c_InputCommon::c_InputCommon (c_InputMgr::e_InputChannelIds NewInputChannelId,
                               c_InputMgr::e_InputType       NewChannelType,
-                              uint8_t                     * BufferStart,
-                              uint16_t                      BufferSize) :
-    InputDataBuffer(BufferStart),
+                              size_t                        BufferSize) :
     InputDataBufferSize(BufferSize),
     InputChannelId(NewInputChannelId),
     ChannelType(NewChannelType)
@@ -42,10 +40,7 @@ c_InputCommon::~c_InputCommon ()
 {
     // DEBUG_START;
 
-    if (nullptr != InputDataBuffer)
-    {
-        memset (InputDataBuffer, 0x00, InputDataBufferSize);
-    }
+    OutputMgr.ClearBuffer ();
 
     // DEBUG_END;
 

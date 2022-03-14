@@ -23,9 +23,8 @@
 //-----------------------------------------------------------------------------
 c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
                           c_InputMgr::e_InputType       NewChannelType,
-                          uint8_t                     * BufferStart,
-                          uint16_t                      BufferSize) :
-    c_InputCommon(NewInputChannelId, NewChannelType, BufferStart, BufferSize)
+                          size_t                        BufferSize) :
+    c_InputCommon(NewInputChannelId, NewChannelType, BufferSize)
 
 {
     // DEBUG_START;
@@ -171,12 +170,15 @@ void c_InputE131::ProcessIncomingE131Data (e131_packet_t * packet)
 
             ++CurrentUniverse.SequenceNumber;
 
-            uint16_t NumBytesOfE131Data = ntohs (packet->property_value_count) - 1;
-
-            memcpy (CurrentUniverse.Destination,
-                &E131Data[CurrentUniverse.SourceDataOffset],
-                min (CurrentUniverse.BytesToCopy, NumBytesOfE131Data));
-
+            size_t NumBytesOfE131Data = size_t(ntohs (packet->property_value_count) - 1);
+            OutputMgr.WriteChannelData(CurrentUniverse.DestinationOffset, 
+                                    min(CurrentUniverse.BytesToCopy, NumBytesOfE131Data), 
+                                    &E131Data[CurrentUniverse.SourceDataOffset]);
+/*
+            memcpy(CurrentUniverse.Destination, 
+                   &E131Data[CurrentUniverse.SourceDataOffset],
+                   min(CurrentUniverse.BytesToCopy, NumBytesOfE131Data));
+*/
             InputMgr.RestartBlankTimer (GetInputChannelId ());
         }
         else
@@ -191,11 +193,10 @@ void c_InputE131::ProcessIncomingE131Data (e131_packet_t * packet)
 } // process
 
 //-----------------------------------------------------------------------------
-void c_InputE131::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
+void c_InputE131::SetBufferInfo (size_t BufferSize)
 {
     // DEBUG_START;
 
-    InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
 
     if (HasBeenInitialized)
@@ -218,12 +219,12 @@ void c_InputE131::SetBufferTranslation ()
 
     // for each possible universe, set the start and size
 
-    uint16_t InputOffset = FirstUniverseChannelOffset - 1;
-    uint16_t DestinationOffset = 0;
-    uint16_t BytesLeftToMap = InputDataBufferSize;
+    size_t InputOffset = FirstUniverseChannelOffset - 1;
+    size_t DestinationOffset = 0;
+    size_t  BytesLeftToMap = InputDataBufferSize;
 
     // set up the bytes for the First Universe
-    uint16_t BytesInUniverse = ChannelsPerUniverse - InputOffset;
+    size_t BytesInUniverse = ChannelsPerUniverse - InputOffset;
     // DEBUG_V (String ("    ChannelsPerUniverse:   ") + String (uint32_t (ChannelsPerUniverse)));
     // DEBUG_V (String ("    InputDataBufferSize:   ") + String (uint32_t (InputDataBufferSize)));
 
@@ -231,7 +232,7 @@ void c_InputE131::SetBufferTranslation ()
     {
         uint16_t BytesInThisUniverse = min (BytesInUniverse, BytesLeftToMap);
         // DEBUG_V (String ("BytesInThisUniverse: 0x") + String (BytesInThisUniverse, HEX));
-        CurrentUniverse.Destination = &InputDataBuffer[DestinationOffset];
+        CurrentUniverse.DestinationOffset = DestinationOffset;
         CurrentUniverse.BytesToCopy = BytesInThisUniverse;
         CurrentUniverse.SourceDataOffset = InputOffset;
         CurrentUniverse.SequenceErrorCounter = 0;
@@ -326,7 +327,7 @@ void c_InputE131::validateConfiguration ()
 
     // Find the last universe we should listen for
      // DEBUG_V ("");
-    uint16_t span = FirstUniverseChannelOffset + InputDataBufferSize - 1;
+    size_t span = FirstUniverseChannelOffset + InputDataBufferSize - 1;
     if (span % ChannelsPerUniverse)
     {
         LastUniverse = startUniverse + span / ChannelsPerUniverse;

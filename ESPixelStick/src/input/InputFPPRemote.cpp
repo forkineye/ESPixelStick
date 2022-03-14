@@ -29,12 +29,10 @@
 #endif
 
 //-----------------------------------------------------------------------------
-c_InputFPPRemote::c_InputFPPRemote (
-    c_InputMgr::e_InputChannelIds NewInputChannelId,
-    c_InputMgr::e_InputType       NewChannelType,
-    uint8_t* BufferStart,
-    uint16_t                      BufferSize) :
-    c_InputCommon (NewInputChannelId, NewChannelType, BufferStart, BufferSize)
+c_InputFPPRemote::c_InputFPPRemote (c_InputMgr::e_InputChannelIds NewInputChannelId,
+                                    c_InputMgr::e_InputType       NewChannelType,
+                                    size_t                        BufferSize) :
+    c_InputCommon (NewInputChannelId, NewChannelType, BufferSize)
 {
     // DEBUG_START;
 
@@ -123,12 +121,12 @@ void c_InputFPPRemote::Process ()
     else if (PlayingRemoteFile ())
     {
         // DEBUG_V ("PlayingRemoteFile");
-        FPPDiscovery.ReadNextFrame (InputDataBuffer, InputDataBufferSize);
+        FPPDiscovery.ReadNextFrame ();
     }
     else if (PlayingFile ())
     {
         // DEBUG_V ("Local File Play");
-        pInputFPPRemotePlayItem->Poll (InputDataBuffer, InputDataBufferSize);
+        pInputFPPRemotePlayItem->Poll ();
 
         if (pInputFPPRemotePlayItem->IsIdle ())
         {
@@ -145,9 +143,8 @@ void c_InputFPPRemote::Process ()
 } // process
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemote::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
+void c_InputFPPRemote::SetBufferInfo (size_t BufferSize)
 {
-    InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
 
 } // SetBufferInfo
@@ -195,7 +192,7 @@ void c_InputFPPRemote::StopPlaying ()
 
         while (!pInputFPPRemotePlayItem->IsIdle ())
         {
-            pInputFPPRemotePlayItem->Poll (InputDataBuffer, InputDataBufferSize);
+            pInputFPPRemotePlayItem->Poll ();
             pInputFPPRemotePlayItem->Stop ();
         }
 

@@ -127,8 +127,7 @@ public:
 
     c_InputDDP (c_InputMgr::e_InputChannelIds NewInputChannelId,
                 c_InputMgr::e_InputType       NewChannelType,
-                uint8_t                     * BufferStart,
-                uint16_t                      BufferSize);
+                size_t                        BufferSize);
 
     ~c_InputDDP ();
 
@@ -139,7 +138,7 @@ public:
     void GetStatus (JsonObject& jsonStatus);
     void Process ();                                        ///< Call from loop(),  renders Input data
     void GetDriverName (String& sDriverName) { sDriverName = "DDP"; } ///< get the name for the instantiated driver
-    void SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize);
+    void SetBufferInfo (size_t BufferSize);
     bool isShutDownRebootNeeded () { return HasBeenInitialized; }
 
 };

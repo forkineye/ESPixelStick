@@ -333,7 +333,7 @@ void c_OutputGECE::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 } // GetConfig
 
 //----------------------------------------------------------------------------
-uint16_t c_OutputGECE::GetNumChannelsNeeded ()
+size_t c_OutputGECE::GetNumChannelsNeeded ()
 {
     return pixel_count * GECE_NUM_INTENSITY_BYTES_PER_PIXEL;
 

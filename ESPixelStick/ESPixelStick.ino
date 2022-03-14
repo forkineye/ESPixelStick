@@ -153,7 +153,7 @@ void setup()
     // DEBUG_V ("");
 
     // connect the input processing to the output processing.
-    InputMgr.Begin (OutputMgr.GetBufferAddress (), OutputMgr.GetBufferUsedSize ());
+    InputMgr.Begin (OutputMgr.GetBufferUsedSize ());
     // DEBUG_V ("");
 
     NetworkMgr.Begin ();

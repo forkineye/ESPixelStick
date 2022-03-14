@@ -30,12 +30,10 @@
 #endif
 
 //-----------------------------------------------------------------------------
-c_InputMQTT::c_InputMQTT (
-    c_InputMgr::e_InputChannelIds NewInputChannelId,
-    c_InputMgr::e_InputType       NewChannelType,
-    uint8_t                     * BufferStart,
-    uint16_t                      BufferSize) :
-    c_InputCommon (NewInputChannelId, NewChannelType, BufferStart, BufferSize)
+c_InputMQTT::c_InputMQTT (c_InputMgr::e_InputChannelIds NewInputChannelId,
+                          c_InputMgr::e_InputType       NewChannelType,
+                          size_t                        BufferSize) :
+    c_InputCommon (NewInputChannelId, NewChannelType, BufferSize)
 
 {
     // DEBUG_START;
@@ -163,7 +161,7 @@ void c_InputMQTT::Process ()
 
     if (nullptr != pPlayFileEngine)
     {
-        pPlayFileEngine->Poll (InputDataBuffer, InputDataBufferSize);
+        pPlayFileEngine->Poll ();
     }
 
     // DEBUG_END;
@@ -171,16 +169,15 @@ void c_InputMQTT::Process ()
 } // process
 
 //-----------------------------------------------------------------------------
-void c_InputMQTT::SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize)
+void c_InputMQTT::SetBufferInfo (size_t BufferSize)
 {
     // DEBUG_START;
 
-    InputDataBuffer = BufferStart;
     InputDataBufferSize = BufferSize;
 
     if (nullptr != pEffectsEngine)
     {
-        pEffectsEngine->SetBufferInfo (BufferStart, BufferSize);
+        pEffectsEngine->SetBufferInfo (BufferSize);
     }
 
     // DEBUG_END;
@@ -566,9 +563,9 @@ void c_InputMQTT::PlayEffect (JsonObject & JsonConfig)
     if (nullptr == pEffectsEngine)
     {
         // DEBUG_V ("Create Effect Engine");
-        pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputSecondaryChannelId, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
+        pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputSecondaryChannelId, c_InputMgr::e_InputType::InputType_Effects, InputDataBufferSize);
         pEffectsEngine->Begin ();
-        pEffectsEngine->SetBufferInfo (InputDataBuffer, InputDataBufferSize);
+        pEffectsEngine->SetBufferInfo (InputDataBufferSize);
 
         // DEBUG_V (String ("    InputDataBuffer: ") + String (uint32_t(InputDataBuffer)));
         // DEBUG_V (String ("InputDataBufferSize: ") + String (InputDataBufferSize));
@@ -646,7 +643,7 @@ void c_InputMQTT::GetEffectList (JsonObject & JsonConfig)
     if (nullptr == pEffectsEngine)
     {
         // DEBUG_V ("");
-        pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputPrimaryChannelId, c_InputMgr::e_InputType::InputType_Effects, InputDataBuffer, InputDataBufferSize);
+        pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputPrimaryChannelId, c_InputMgr::e_InputType::InputType_Effects, InputDataBufferSize);
         pEffectsEngine->Begin ();
         pEffectsEngine->SetOperationalState (false);
     }
