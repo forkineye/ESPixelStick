@@ -112,6 +112,8 @@ private:
     size_t     PixelsToSend = 0;
     size_t     IntensityBytesSent = 0;
     size_t     IntensityBytesSentLastFrame = 0;
+    uint32_t   FrameStartCounter = 0;
+    uint32_t   FrameEndCounter = 0;
     size_t     SentPixels = 0;
     uint32_t   AbortFrameCounter = 0;
 #endif // def USE_PIXEL_DEBUG_COUNTERS
