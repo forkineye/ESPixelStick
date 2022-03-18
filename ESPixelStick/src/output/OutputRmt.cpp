@@ -342,23 +342,24 @@ bool c_OutputRmt::Render ()
 void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
 #ifdef USE_RMT_DEBUG_COUNTERS
-    jsonStatus["RmtChannelId"]                = RmtChannelId;
-    jsonStatus["DataISRcounter"]              = DataISRcounter;
-    jsonStatus["FrameEndISRcounter"]          = FrameEndISRcounter;
-    jsonStatus["FrameStartCounter"]           = FrameStartCounter;
-    jsonStatus["ErrorIsr"]                    = ErrorIsr;
-    jsonStatus["RxIsr"]                       = RxIsr;
-    jsonStatus["FrameThresholdCounter"]       = FrameThresholdCounter;
-    jsonStatus["IsrIsNotForUs"]               = IsrIsNotForUs;
-    jsonStatus["IncompleteFrame"]             = IncompleteFrame;
-    jsonStatus["Raw int_ena"]                 = String (RMT.int_ena.val, HEX);
-    jsonStatus["int_ena"]                     = String (RMT.int_ena.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
-    jsonStatus["RMT_INT_TX_END_BIT"]          = String (RMT_INT_TX_END_BIT, HEX);
-    jsonStatus["RMT_INT_THR_EVNT_BIT"]        = String (RMT_INT_THR_EVNT_BIT, HEX);
-    jsonStatus["Raw int_st"]                  = String (RMT.int_st.val, HEX);
-    jsonStatus["int_st"]                      = String (RMT.int_st.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
-    jsonStatus["IntensityBytesSent"]          = IntensityBytesSent;
-    jsonStatus["IntensityBytesSentLastFrame"] = IntensityBytesSentLastFrame;
+    JsonObject debugStatus = jsonStatus.createNestedObject("RMT Debug");
+    debugStatus["RmtChannelId"]                = RmtChannelId;
+    debugStatus["DataISRcounter"]              = DataISRcounter;
+    debugStatus["FrameEndISRcounter"]          = FrameEndISRcounter;
+    debugStatus["FrameStartCounter"]           = FrameStartCounter;
+    debugStatus["ErrorIsr"]                    = ErrorIsr;
+    debugStatus["RxIsr"]                       = RxIsr;
+    debugStatus["FrameThresholdCounter"]       = FrameThresholdCounter;
+    debugStatus["IsrIsNotForUs"]               = IsrIsNotForUs;
+    debugStatus["IncompleteFrame"]             = IncompleteFrame;
+    debugStatus["Raw int_ena"]                 = String (RMT.int_ena.val, HEX);
+    debugStatus["int_ena"]                     = String (RMT.int_ena.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
+    debugStatus["RMT_INT_TX_END_BIT"]          = String (RMT_INT_TX_END_BIT, HEX);
+    debugStatus["RMT_INT_THR_EVNT_BIT"]        = String (RMT_INT_THR_EVNT_BIT, HEX);
+    debugStatus["Raw int_st"]                  = String (RMT.int_st.val, HEX);
+    debugStatus["int_st"]                      = String (RMT.int_st.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
+    debugStatus["IntensityBytesSent"]          = IntensityBytesSent;
+    debugStatus["IntensityBytesSentLastFrame"] = IntensityBytesSentLastFrame;
 #endif // def USE_RMT_DEBUG_COUNTERS
 
 } // GetStatus
