@@ -19,7 +19,7 @@
 
 #include "../ESPixelStick.h"
 #include "OutputPixel.hpp"
-// #define ADJUST_INTENSITY_AT_ISR
+#define ADJUST_INTENSITY_AT_ISR
 
 //----------------------------------------------------------------------------
 c_OutputPixel::c_OutputPixel (c_OutputMgr::e_OutputChannelIds OutputChannelId,
@@ -72,11 +72,14 @@ void c_OutputPixel::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     c_OutputCommon::GetStatus (jsonStatus);
 
 #ifdef USE_PIXEL_DEBUG_COUNTERS
-    jsonStatus["NumIntensityBytesPerPixel"] = NumIntensityBytesPerPixel;
-    jsonStatus["PixelsToSend"] = PixelsToSend;
-    jsonStatus["IntensityBytesSent"] = IntensityBytesSent;
-    jsonStatus["IntensityBytesSentLastFrame"] = IntensityBytesSentLastFrame;
-    jsonStatus["AbortFrameCounter"] = AbortFrameCounter;
+    JsonObject debugStatus = jsonStatus.createNestedObject("Pixel Debug");
+    debugStatus["NumIntensityBytesPerPixel"] = NumIntensityBytesPerPixel;
+    debugStatus["PixelsToSend"] = PixelsToSend;
+    debugStatus["IntensityBytesSent"] = IntensityBytesSent;
+    debugStatus["FrameStartCounter"] = FrameStartCounter;
+    debugStatus["FrameEndCounter"] = FrameEndCounter;
+    debugStatus["IntensityBytesSentLastFrame"] = IntensityBytesSentLastFrame;
+    debugStatus["AbortFrameCounter"] = AbortFrameCounter;
 #endif // def USE_PIXEL_DEBUG_COUNTERS
 
     // DEBUG_END;
@@ -318,7 +321,7 @@ void c_OutputPixel::SetFrameDurration (float IntensityBitTimeInUs, uint16_t Bloc
     // DEBUG_V (String ("   InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
     // DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
 
-       // DEBUG_END;
+    // DEBUG_END;
 
 } // SetInterframeGap
 
@@ -330,11 +333,12 @@ void IRAM_ATTR c_OutputPixel::StartNewFrame ()
 #ifdef USE_PIXEL_DEBUG_COUNTERS
     if (MoreDataToSend ())
     {
-        AbortFrameCounter++:
+        AbortFrameCounter++;
     }
+    FrameStartCounter++;
 #endif // def USE_PIXEL_DEBUG_COUNTERS
 
-    NextPixelToSend = GetBufferAddress ();
+    NextPixelToSend = GetBufferAddress();
     FramePrependDataCurrentIndex = 0;
     FrameAppendDataCurrentIndex = 0;
     ZigPixelCurrentCount = 1;
@@ -370,68 +374,68 @@ uint8_t IRAM_ATTR c_OutputPixel::GetNextIntensityToSend ()
 
     switch (FrameState)
     {
-    case FrameState_t::FramePrependData:
-    {
-        response = pFramePrependData[FramePrependDataCurrentIndex];
-        if (++FramePrependDataCurrentIndex < FramePrependDataSize)
+        case FrameState_t::FramePrependData:
         {
+            response = pFramePrependData[FramePrependDataCurrentIndex];
+            if (++FramePrependDataCurrentIndex < FramePrependDataSize)
+            {
+                break;
+            }
+
+            // FramePrependDataCurrentIndex = 0;
+            FrameState = FrameState_t::FrameSendPixels;
+            // PixelIntensityCurrentIndex = 0;
+            // PixelPrependDataCurrentIndex = 0;
             break;
-        }
+        } // case FrameState_t::FramePrependData
 
-        // FramePrependDataCurrentIndex = 0;
-        FrameState = FrameState_t::FrameSendPixels;
-        // PixelIntensityCurrentIndex = 0;
-        // PixelPrependDataCurrentIndex = 0;
-        break;
-    } // case FrameState_t::FramePrependData
-
-    case FrameState_t::FrameSendPixels:
-    {
-        switch (PixelSendState)
+        case FrameState_t::FrameSendPixels:
         {
-        case PixelSendState_t::PixelPrependNulls:
-        {
-            if (PixelPrependDataCurrentIndex < PixelPrependDataSize)
+            switch (PixelSendState)
             {
-                response = PixelPrependData[PixelPrependDataCurrentIndex++];
-                break;
-            }
-
-            // response = 0x00;
-
-            // has the pixel completed?
-            if (++PixelIntensityCurrentIndex < NumIntensityBytesPerPixel)
+            case PixelSendState_t::PixelPrependNulls:
             {
+                if (PixelPrependDataCurrentIndex < PixelPrependDataSize)
+                {
+                    response = PixelPrependData[PixelPrependDataCurrentIndex++];
+                    break;
+                }
+
+                // response = 0x00;
+
+                // has the pixel completed?
+                if (++PixelIntensityCurrentIndex < NumIntensityBytesPerPixel)
+                {
+                    break;
+                }
+
+                // pixel is complete. Move to the next one
+                PixelIntensityCurrentIndex = 0;
+                PixelPrependDataCurrentIndex = 0;
+
+                if (++PrependNullPixelCurrentCount < PrependNullPixelCount)
+                {
+                    break;
+                }
+
+                // no more null pixels to send
+                // PrependNullPixelCurrentCount = 0;
+                PixelSendState = PixelSendState_t::PixelSendIntensity;
                 break;
-            }
+            } // case PixelSendState_t::PixelPrependNulls:
 
-            // pixel is complete. Move to the next one
-            PixelIntensityCurrentIndex = 0;
-            PixelPrependDataCurrentIndex = 0;
-
-            if (++PrependNullPixelCurrentCount < PrependNullPixelCount)
+            case PixelSendState_t::PixelSendIntensity:
             {
-                break;
-            }
-
-            // no more null pixels to send
-            // PrependNullPixelCurrentCount = 0;
-            PixelSendState = PixelSendState_t::PixelSendIntensity;
-            break;
-        } // case PixelSendState_t::PixelPrependNulls:
-
-        case PixelSendState_t::PixelSendIntensity:
-        {
 #ifdef USE_PIXEL_DEBUG_COUNTERS
-            IntensityBytesSent++;
+                IntensityBytesSent++;
 #endif // def USE_PIXEL_DEBUG_COUNTERS
 
-            // pixel prepend goes here
-            if (PixelPrependDataCurrentIndex < PixelPrependDataSize)
-            {
-                response = PixelPrependData[PixelPrependDataCurrentIndex++];
-                break;
-            }
+                // pixel prepend goes here
+                if (PixelPrependDataCurrentIndex < PixelPrependDataSize)
+                {
+                    response = PixelPrependData[PixelPrependDataCurrentIndex++];
+                    break;
+                }
 
 #ifdef ADJUST_INTENSITY_AT_ISR
             response = (NextPixelToSend[ColorOffsets.Array[PixelIntensityCurrentIndex]]);
@@ -463,6 +467,10 @@ uint8_t IRAM_ATTR c_OutputPixel::GetNextIntensityToSend ()
             ++SentPixelsCount;
             if (SentPixelsCount >= pixel_count)
             {
+#ifdef USE_PIXEL_DEBUG_COUNTERS
+                FrameEndCounter++;
+#endif // def USE_PIXEL_DEBUG_COUNTERS
+
                 // response = 0xaa;
                 if (AppendNullPixelCount)
                 {
