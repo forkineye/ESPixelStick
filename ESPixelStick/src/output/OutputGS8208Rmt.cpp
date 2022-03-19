@@ -59,9 +59,9 @@ c_OutputGS8208Rmt::c_OutputGS8208Rmt (c_OutputMgr::e_OutputChannelIds OutputChan
     BitValue.level1 = 1;
     Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_INTERFRAME_GAP_ID);
 
-    BitValue.duration0 = 1;
+    BitValue.duration0 = 2;
     BitValue.level0 = 0;
-    BitValue.duration1 = 1;
+    BitValue.duration1 = 2;
     BitValue.level1 = 0;
     Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_STARTBIT_ID);
 
