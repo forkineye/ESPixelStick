@@ -21,7 +21,6 @@
 
 #include "OutputRmt.hpp"
 
-#define NumBitsPerByte                            8
 #define MAX_NUM_INTENSITY_BIT_SLOTS_PER_INTERRUPT (sizeof(RMTMEM.chan[0].data32) / sizeof(RMTMEM.chan[0].data32[0]))
 
 // forward declaration for the isr handler
@@ -107,8 +106,8 @@ void c_OutputRmt::Begin (rmt_channel_t ChannelId,
     RmtEndAddr   = &RMTMEM.chan[RmtChannelId].data32[63];
 
     // the math here results in a modulo 8 of the maximum number of slots to fill at frame start time.
-    NumIntensityValuesPerInterrupt = ( (MAX_NUM_INTENSITY_BIT_SLOTS_PER_INTERRUPT / NumBitsPerByte) / 2);
-    NumIntensityBitsPerInterrupt = NumIntensityValuesPerInterrupt * NumBitsPerByte;
+    NumIntensityValuesPerInterrupt = ( (MAX_NUM_INTENSITY_BIT_SLOTS_PER_INTERRUPT / NumBitsPerIntensityValue) / 2);
+    NumIntensityBitsPerInterrupt = NumIntensityValuesPerInterrupt * NumBitsPerIntensityValue;
 
     // DEBUG_V (String ("NumIntensityValuesPerInterrupt: ") + String (NumIntensityValuesPerInterrupt));
     // DEBUG_V (String ("  NumIntensityBitsPerInterrupt: ") + String (NumIntensityBitsPerInterrupt));
@@ -241,6 +240,8 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_StartNewFrame ()
 #ifdef USE_RMT_DEBUG_COUNTERS
     IntensityBytesSentLastFrame = IntensityBytesSent;
     IntensityBytesSent = 0;
+    IntensityBitsSentLastFrame = IntensityBitsSent;
+    IntensityBitsSent = 0;
 #endif // def USE_RMT_DEBUG_COUNTERS
 
     // set up to send a new frame
@@ -249,7 +250,7 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_StartNewFrame ()
     // override the buffer limits so that we fill as many slots as we can in the first pass
     uint8_t SavedNumIntensityValuesPerInterrupt = NumIntensityValuesPerInterrupt;
     uint8_t NumBitsAlreadyInBuffer = NumIdleBitsCount + NumStartBits;
-    NumIntensityValuesPerInterrupt = (((MAX_NUM_INTENSITY_BIT_SLOTS_PER_INTERRUPT - NumBitsAlreadyInBuffer) - 1) / NumBitsPerByte);
+    NumIntensityValuesPerInterrupt = (((MAX_NUM_INTENSITY_BIT_SLOTS_PER_INTERRUPT - NumBitsAlreadyInBuffer) - 1) / NumBitsPerIntensityValue);
     // DEBUG_V(String("NumIntensityValuesPerInterrupt: ") + String(NumIntensityValuesPerInterrupt));
 
     ISR_Handler_SendIntensityData ();
@@ -284,14 +285,18 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_SendIntensityData ()
 
     while ( (NumEmptyIntensitySlots--) && (OutputPixel->MoreDataToSend ()))
     {
-        uint8_t IntensityValue = OutputPixel->GetNextIntensityToSend ();
+        uint32_t IntensityValue = map(OutputPixel->GetNextIntensityToSend(), 0, 255, 0, IntensityMapDstMax);
 #ifdef USE_RMT_DEBUG_COUNTERS
         IntensityBytesSent++;
 #endif // def USE_RMT_DEBUG_COUNTERS
 
         // convert the intensity data into RMT data
-        for (uint8_t bitmask = 0x80; 0 != bitmask; bitmask >>= 1)
+        for (uint32_t bitmask = TxIntensityDataStartingMask; 0 != bitmask; bitmask >>= 1)
         {
+#ifdef USE_RMT_DEBUG_COUNTERS
+            IntensityBitsSent++;
+#endif // def USE_RMT_DEBUG_COUNTERS
+
             *pMem++ = (IntensityValue & bitmask) ? OneBitValue : ZeroBitValue;
             if (pMem > (uint32_t*)RmtEndAddr)
             {
@@ -367,8 +372,46 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     debugStatus["int_st"]                      = String (RMT.int_st.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
     debugStatus["IntensityBytesSent"]          = IntensityBytesSent;
     debugStatus["IntensityBytesSentLastFrame"] = IntensityBytesSentLastFrame;
+    debugStatus["IntensityBitsSent"]           = IntensityBitsSent;
+    debugStatus["IntensityBitsSentLastFrame"]  = IntensityBitsSentLastFrame;
 #endif // def USE_RMT_DEBUG_COUNTERS
 
 } // GetStatus
+
+//----------------------------------------------------------------------------
+void c_OutputRmt::SetIntensityDataWidth(uint32_t DataWidth)
+{
+    // DEBUG_START;
+
+    do // once
+    {
+        DEBUG_V(String("                     DataWidth: ") + String(DataWidth));
+
+        if ((0 == DataWidth) || (DataWidth >= (sizeof(TxIntensityDataStartingMask)-1) * 8))
+        {
+            DEBUG_V(String(F("Invalid DataWidth: ")) + String(DataWidth));
+            break;
+        }
+       
+        noInterrupts();
+        NumBitsPerIntensityValue = DataWidth;
+        NumIntensityValuesPerInterrupt = ((MAX_NUM_INTENSITY_BIT_SLOTS_PER_INTERRUPT / NumBitsPerIntensityValue) / 2);
+        NumIntensityBitsPerInterrupt = NumIntensityValuesPerInterrupt * NumBitsPerIntensityValue;
+
+        IntensityMapDstMax = (1 << DataWidth) - 1;
+        TxIntensityDataStartingMask = 1 << (DataWidth-1);
+        interrupts();
+
+        DEBUG_V(String("      NumBitsPerIntensityValue: ") + String(NumBitsPerIntensityValue));
+        DEBUG_V(String("NumIntensityValuesPerInterrupt: ") + String(NumIntensityValuesPerInterrupt));
+        DEBUG_V(String("  NumIntensityBitsPerInterrupt: ") + String(NumIntensityBitsPerInterrupt));
+        DEBUG_V(String("            IntensityMapDstMax: ") + String(IntensityMapDstMax));
+        DEBUG_V(String("   TxIntensityDataStartingMask: 0x") + String(TxIntensityDataStartingMask, HEX));
+
+    } while (false);
+
+    // DEBUG_END;
+
+} // SetIntensityDataWidth
 
 #endif // def SUPPORT_RMT_OUTPUT

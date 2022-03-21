@@ -69,9 +69,12 @@ private:
     uint32_t RxIsr = 0;
     uint32_t ErrorIsr = 0;
     uint32_t IsrIsNotForUs = 0;
-    uint16_t IntensityBytesSent = 0;
-    uint16_t IntensityBytesSentLastFrame = 0;
+    uint32_t IntensityBytesSent = 0;
+    uint32_t IntensityBitsSent = 0;
+    uint32_t IntensityBytesSentLastFrame = 0;
+    uint32_t IntensityBitsSentLastFrame = 0;
     uint32_t IncompleteFrame = 0;
+    uint32_t IncompleteFrameLastFrame = 0;
 #endif // def USE_RMT_DEBUG_COUNTERS
 
 public:
@@ -108,5 +111,10 @@ public:
     void IRAM_ATTR ISR_Handler_StartNewFrame ();
     void IRAM_ATTR ISR_Handler_SendIntensityData ();
 
+    long     IntensityMapDstMax          = 255;
+    uint32_t TxIntensityDataStartingMask = 0x80;
+    uint32_t NumBitsPerIntensityValue    = 8;
+
+    void SetIntensityDataWidth(uint32_t DataWidth);
 };
 #endif // def #ifdef SUPPORT_RMT_OUTPUT
