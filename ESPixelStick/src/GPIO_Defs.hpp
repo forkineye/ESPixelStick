@@ -74,6 +74,7 @@ typedef enum
 
 #define SUPPORT_OutputType_UCS1903
 #define SUPPORT_OutputType_GS8208
+#define SUPPORT_OutputType_UCS8903
 
 // Platform specific GPIO definitions
 #if defined (BOARD_ESP32_CAM)

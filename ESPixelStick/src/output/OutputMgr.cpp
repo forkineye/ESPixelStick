@@ -41,6 +41,8 @@
 #include "OutputWS2811Uart.hpp"
 #include "OutputGS8208Uart.hpp"
 #include "OutputGS8208Rmt.hpp"
+#include "OutputUCS8903Uart.hpp"
+#include "OutputUCS8903Rmt.hpp"
 // needs to be last
 #include "OutputMgr.hpp"
 
@@ -89,6 +91,10 @@ static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::
 #ifdef SUPPORT_OutputType_GS8208
         {c_OutputMgr::e_OutputType::OutputType_GS8208, "GS8208"},
 #endif // def SUPPORT_OutputType_GS8208
+
+#ifdef SUPPORT_OutputType_UCS8903
+        {c_OutputMgr::e_OutputType::OutputType_UCS8903, "UCS8903"},
+#endif // def SUPPORT_OutputType_UCS8903
 };
 
 //-----------------------------------------------------------------------------
@@ -753,6 +759,39 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
             }
 #endif // def SUPPORT_OutputType_GS8208
 
+#ifdef SUPPORT_OutputType_UCS8903
+            case e_OutputType::OutputType_UCS8903:
+            {
+#ifdef SUPPORT_RMT_OUTPUT
+                if (OM_IS_RMT)
+                {
+                    // DEBUG_V(CN_stars + String(F(" Starting UCS8903 RMT for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    OutputChannelDrivers[uint(ChannelIndex)].pOutputChannelDriver = new c_OutputUCS8903Rmt(ChannelIndex, dataPin, UartId, OutputType_UCS8903);
+                    // DEBUG_V ("");
+                    break;
+                }
+#endif // def SUPPORT_RMT_OUTPUT
+#ifdef SUPPORT_UART_OUTPUT
+                // DEBUG_V ("");
+                if (OM_IS_UART)
+                {
+                    // DEBUG_V(CN_stars + String(F(" Starting UCS8903 UART for channel '")) + ChannelIndex + "'. " + CN_stars);
+                    OutputChannelDrivers[uint(ChannelIndex)].pOutputChannelDriver = new c_OutputUCS8903Uart(ChannelIndex, dataPin, UartId, OutputType_UCS8903);
+                    // DEBUG_V ("");
+                    break;
+                }
+#endif // def SUPPORT_UART_OUTPUT
+
+                if (!BuildingNewConfig)
+                {
+                    logcon(CN_stars + String(F(" Cannot Start UCS8903 for channel '")) + ChannelIndex + "'. " + CN_stars);
+                }
+                OutputChannelDrivers[uint(ChannelIndex)].pOutputChannelDriver = new c_OutputDisabled(ChannelIndex, dataPin, UartId, OutputType_Disabled);
+                // DEBUG_V ("");
+                break;
+            }
+#endif // def SUPPORT_OutputType_UCS8903
+
             default:
             {
                 if (!IsBooting)
@@ -1093,10 +1132,10 @@ void c_OutputMgr::WriteChannelData(size_t StartChannelId, size_t ChannelCount, b
     {
         if (((StartChannelId + ChannelCount) > UsedBufferSize) || (0 == ChannelCount))
         {
-            DEBUG_V(String("ERROR: Invalid parameters"));
-            DEBUG_V(String("StartChannelId: ") + String(StartChannelId, HEX));
-            DEBUG_V(String("  ChannelCount: ") + String(ChannelCount));
-            DEBUG_V(String("UsedBufferSize: ") + String(UsedBufferSize));
+            // DEBUG_V(String("ERROR: Invalid parameters"));
+            // DEBUG_V(String("StartChannelId: ") + String(StartChannelId, HEX));
+            // DEBUG_V(String("  ChannelCount: ") + String(ChannelCount));
+            // DEBUG_V(String("UsedBufferSize: ") + String(UsedBufferSize));
             break;
         }
 
@@ -1152,10 +1191,10 @@ void c_OutputMgr::ReadChannelData(size_t StartChannelId, size_t ChannelCount, by
     {
         if ((StartChannelId + ChannelCount) > UsedBufferSize)
         {
-            DEBUG_V(String("ERROR: Invalid parameters"));
-            DEBUG_V(String("StartChannelId: ") + String(StartChannelId, HEX));
-            DEBUG_V(String("  ChannelCount: ") + String(ChannelCount));
-            DEBUG_V(String("UsedBufferSize: ") + String(UsedBufferSize));
+            // DEBUG_V(String("ERROR: Invalid parameters"));
+            // DEBUG_V(String("StartChannelId: ") + String(StartChannelId, HEX));
+            // DEBUG_V(String("  ChannelCount: ") + String(ChannelCount));
+            // DEBUG_V(String("UsedBufferSize: ") + String(UsedBufferSize));
             break;
         }
         // DEBUG_V(String("&OutputBuffer[StartChannelId]: 0x") + String(uint(&OutputBuffer[StartChannelId]), HEX));

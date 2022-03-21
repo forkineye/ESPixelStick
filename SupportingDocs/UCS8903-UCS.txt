@@ -1,0 +1,18 @@
+Function Description
+The chip adopts the single-wire communication method and uses the return-to-zero code to send signals. After the chip is powered on and reset, it accepts the call from the DIN terminal.
+After receiving enough 48bit data, the DO port starts to forward data for the next chip to provide input data. Before forwarding, DO mouth one
+Pull straight down. At this time, the chip will not accept new data, and the three PWM output ports of the chip OUTR, OUTG and OUTB will
+48bit data, send out corresponding signals with different duty ratios, the signal period is about 1ms. If the input signal at the DIN terminal is a RESET signal,
+The chip will send the received data to the display, and the chip will re-accept new data after the signal ends, and after receiving the first 48bit data,
+The data is forwarded through the DO port. Before the chip receives the RESET code, the original outputs of the OUTR, OUTG and OUTB pins remain unchanged.
+After receiving the low-level RESET code for more than 1.5ms, the chip outputs the 48bit PWM data pulse width just received to OUTR,
+OUTG, OUTB pins
+
+Data is 16 bits per color MSb first.
+
+T0H	400ns +/- 40ns
+T0L	800ns -0
+T1H	800ns +/- 80ns
+T1L	400ns -0
+IFG 24us
+Initital reset >1ms
