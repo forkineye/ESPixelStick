@@ -253,8 +253,13 @@ void c_InputMgr::CreateNewConfig ()
     }
 
     // create a place to save the config
-    DynamicJsonDocument JsonConfigDoc (IM_JSON_SIZE);
-    JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_input_config);
+    // DEBUG_V(String("Heap: ") + String(ESP.getFreeHeap()));
+
+    DynamicJsonDocument JsonConfigDoc(IM_JSON_SIZE);
+    // DEBUG_V("");
+
+    JsonObject JsonConfig = JsonConfigDoc.createNestedObject(CN_input_config);
+    // DEBUG_V("");
 
     JsonConfig[CN_cfgver] = CurrentConfigVersion;
 
@@ -263,10 +268,11 @@ void c_InputMgr::CreateNewConfig ()
          InputTypeId < int (InputType_End);
          ++InputTypeId)
     {
-        // DEBUG_V ("for each input channel");
+        // DEBUG_V(String("instantiate the Input type: ") + InputTypeId);
+        // DEBUG_V("for each input channel");
         for (auto & CurrentInput : InputChannelDrivers)
         {
-            // DEBUG_V (String("instantiate the Input type: ") + InputTypeId);
+            // DEBUG_V(String("DriverId: ") + CurrentInput.DriverId);
             InstantiateNewInputChannel (e_InputChannelIds(CurrentInput.DriverId), e_InputType(InputTypeId), false);
         }// end for each interface
 
