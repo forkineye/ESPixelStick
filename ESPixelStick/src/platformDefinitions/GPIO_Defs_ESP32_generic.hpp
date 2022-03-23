@@ -45,15 +45,15 @@
 
 // Output Types
 // Not Finished - #define SUPPORT_OutputType_TLS3001
-#define SUPPORT_OutputType_APA102
-#define SUPPORT_OutputType_DMX
-#define SUPPORT_OutputType_GECE
-#define SUPPORT_OutputType_GS8208
-#define SUPPORT_OutputType_Renard
-#define SUPPORT_OutputType_Serial
-#define SUPPORT_OutputType_TM1814
-#define SUPPORT_OutputType_UCS1903
-#define SUPPORT_OutputType_UCS8903
-#define SUPPORT_OutputType_WS2801
+// #define SUPPORT_OutputType_APA102
+// #define SUPPORT_OutputType_DMX
+// #define SUPPORT_OutputType_GECE
+// #define SUPPORT_OutputType_GS8208
+// #define SUPPORT_OutputType_Renard
+// #define SUPPORT_OutputType_Serial
+// #define SUPPORT_OutputType_TM1814
+// #define SUPPORT_OutputType_UCS1903
+// #define SUPPORT_OutputType_UCS8903
+// #define SUPPORT_OutputType_WS2801
 #define SUPPORT_OutputType_WS2811
-#define SUPPORT_RELAY_OUTPUT
+// #define SUPPORT_RELAY_OUTPUT

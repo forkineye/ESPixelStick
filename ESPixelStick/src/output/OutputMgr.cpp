@@ -342,15 +342,15 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
 */
 void c_OutputMgr::CreateNewConfig ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
-    DEBUG_V (String (F ("--- WARNING: Creating a new Output Manager configuration Data set ---")));
+    // DEBUG_V (String (F ("--- WARNING: Creating a new Output Manager configuration Data set ---")));
 
     BuildingNewConfig = true;
 
     // create a place to save the config
     DynamicJsonDocument JsonConfigDoc (OM_MAX_CONFIG_SIZE);
-    DEBUG_V ("");
+    // DEBUG_V ("");
 
     JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_output_config);
     // DEBUG_V ("");
@@ -399,7 +399,7 @@ void c_OutputMgr::CreateNewConfig ()
 
     BuildingNewConfig = true;
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // CreateNewConfig
 
@@ -457,7 +457,7 @@ void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
 */
 void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds ChannelIndex, e_OutputType NewOutputChannelType, bool StartDriver)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     do // once
     {
@@ -832,7 +832,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
         }
         if (StartDriver)
         {
-            DEBUG_V("Starting Driver");
+            // DEBUG_V("Starting Driver");
             OutputChannelDrivers[uint(ChannelIndex)].pOutputChannelDriver->Begin();
         }
 
@@ -842,7 +842,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
     // OutputChannelDrivers[uint(ChannelIndex)]->GetDriverName (temp);
     // DEBUG_V (String ("Driver Name: ") + temp);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // InstantiateNewOutputChannel
 
@@ -856,16 +856,17 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
 */
 void c_OutputMgr::LoadConfig ()
 {
-    DEBUG_START;
+    // DEBUG_START;
     
     // try to load and process the config file
     if (!FileMgr.LoadConfigFile(ConfigFileName, [this](DynamicJsonDocument &JsonConfigDoc)
-                                {
-            DEBUG_V ("");
+        {
+            // DEBUG_V ("");
             JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
-            DEBUG_V ("");
+            // DEBUG_V ("");
             this->ProcessJsonConfig (JsonConfig);
-            DEBUG_V (""); }))
+            // DEBUG_V (""); }))
+        }))
     {
         if (!IsBooting)
         {
@@ -873,11 +874,11 @@ void c_OutputMgr::LoadConfig ()
         }
 
         // create a config file with default values
-        DEBUG_V ("");
+        // DEBUG_V ("");
         CreateNewConfig ();
     }
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // LoadConfig
 
