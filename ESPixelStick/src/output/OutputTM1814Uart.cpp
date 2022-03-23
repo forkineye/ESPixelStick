@@ -18,7 +18,7 @@
 */
 
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_OutputType_TM1814
+#if defined(SUPPORT_OutputType_TM1814) && defined(SUPPORT_UART_OUTPUT)
 
 #include "OutputTM1814Uart.hpp"
 
@@ -72,30 +72,31 @@ c_OutputTM1814Uart::c_OutputTM1814Uart (c_OutputMgr::e_OutputChannelIds OutputCh
 c_OutputTM1814Uart::~c_OutputTM1814Uart ()
 {
     // DEBUG_START;
-    if (gpio_num_t (-1) == DataPin) { return; }
+    if (HasBeenInitialized)
+    {
+        // Disable all interrupts for this uart.
+        CLEAR_PERI_REG_MASK(UART_INT_ENA(UartId), UART_INTR_MASK);
+        // DEBUG_V ("");
 
-    // Disable all interrupts for this uart.
-    CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
-    // DEBUG_V ("");
-
-    // Clear all pending interrupts in the UART
-    WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
-    // DEBUG_V ("");
+        // Clear all pending interrupts in the UART
+        WRITE_PERI_REG(UART_INT_CLR(UartId), UART_INTR_MASK);
+        // DEBUG_V ("");
 
 #ifdef ARDUINO_ARCH_ESP8266
-    Serial1.end ();
+        Serial1.end();
 #else
 
-    // make sure no existing low level driver is running
-    ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
-    // DEBUG_V ("");
+        // make sure no existing low level driver is running
+        ESP_ERROR_CHECK(uart_disable_tx_intr(UartId));
+        // DEBUG_V ("");
 
-    ESP_ERROR_CHECK (uart_disable_rx_intr (UartId));
-    // DEBUG_V (String("UartId: ") + String(UartId));
+        ESP_ERROR_CHECK(uart_disable_rx_intr(UartId));
+        // DEBUG_V (String("UartId: ") + String(UartId));
 
-    // todo: put back uart_isr_free (UartId);
+        // todo: put back uart_isr_free (UartId);
 
 #endif // def ARDUINO_ARCH_ESP32
+    }
 
     // DEBUG_END;
 } // ~c_OutputTM1814Uart
@@ -132,7 +133,7 @@ void c_OutputTM1814Uart::Begin ()
 
     // Atttach interrupt handler
     RegisterUartIsrHandler(uart_intr_handler, this, UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM);
-
+    HasBeenInitialized = true;
 } // init
 
 //----------------------------------------------------------------------------
@@ -237,4 +238,4 @@ void c_OutputTM1814Uart::PauseOutput ()
     // DEBUG_END;
 } // PauseOutput
 
-#endif // def SUPPORT_OutputType_TM1814
+#endif // defined(SUPPORT_OutputType_TM1814) && defined(SUPPORT_UART_OUTPUT)

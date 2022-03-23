@@ -13,6 +13,7 @@ GNU General Public License for more details.
 ******************************************************************/
 
 #include "../ESPixelStick.h"
+
 #ifdef SUPPORT_RELAY_OUTPUT
 
 #include <utility>
@@ -31,18 +32,8 @@ c_OutputServoPCA9685::c_OutputServoPCA9685 (c_OutputMgr::e_OutputChannelIds Outp
                                 c_OutputMgr::e_OutputType outputType) :
     c_OutputCommon(OutputChannelId, outputGpio, uart, outputType)
 {
-    for (ServoPCA9685Channel_t& currentServoPCA9685 : OutputList)
-    {
-        currentServoPCA9685.Enabled       = false;
-        currentServoPCA9685.MinLevel      = SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH;
-        currentServoPCA9685.MaxLevel      = SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH;
-        currentServoPCA9685.PreviousValue = 0;
-        currentServoPCA9685.IsReversed    = false;
-        currentServoPCA9685.Is16Bit       = false;
-        currentServoPCA9685.IsScaled      = true;
-    }
-
-    // DEBUG_END;
+    DEBUG_START;
+    DEBUG_END;
 } // c_OutputServoPCA9685
 
 //----------------------------------------------------------------------------
@@ -50,7 +41,10 @@ c_OutputServoPCA9685::~c_OutputServoPCA9685 ()
 {
     // DEBUG_START;
 
-    // Terminate the I2C bus
+    if(pwm)
+    {
+        delete pwm;
+    }
 
     // DEBUG_END;
 } // ~c_OutputServoPCA9685
@@ -60,12 +54,30 @@ void c_OutputServoPCA9685::Begin ()
 {
     // DEBUG_START;
 
-    SetOutputBufferSize (Num_Channels);
+    if(!HasBeenInitialized)
+    {
+        for (ServoPCA9685Channel_t & currentServoPCA9685Channel : OutputList)
+        {
+            currentServoPCA9685Channel.Enabled = false;
+            currentServoPCA9685Channel.MinLevel = SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH;
+            currentServoPCA9685Channel.MaxLevel = SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH;
+            currentServoPCA9685Channel.PreviousValue = 0;
+            currentServoPCA9685Channel.IsReversed = false;
+            currentServoPCA9685Channel.Is16Bit = false;
+            currentServoPCA9685Channel.IsScaled = true;
+        }
 
-    pwm.begin ();
-    pwm.setPWMFreq (UpdateFrequency);
+        pwm = new Adafruit_PWMServoDriver();
 
-    validate ();
+        SetOutputBufferSize(Num_Channels);
+
+        pwm->begin();
+        pwm->setPWMFreq(UpdateFrequency);
+
+        validate();
+
+        HasBeenInitialized = true;
+    }
 
     // DEBUG_END;
 } // Begin
@@ -138,7 +150,7 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 
         // PrettyPrint (jsonConfig, String("c_OutputServoPCA9685::SetConfig"));
         setFromJSON (UpdateFrequency, jsonConfig, OM_SERVO_PCA9685_UPDATE_INTERVAL_NAME);
-        pwm.setPWMFreq (UpdateFrequency);
+        pwm->setPWMFreq (UpdateFrequency);
 
         // do we have a channel configuration array?
         if (false == jsonConfig.containsKey (OM_SERVO_PCA9685_CHANNELS_NAME))
@@ -293,7 +305,7 @@ void c_OutputServoPCA9685::Render ()
                     // DEBUG_V (String ("pulse_width: ") + String (pulse_width));
                     // DEBUG_V (String ("Final_value: ") + String (Final_value));
                 }
-                pwm.setPWM (OutputDataIndex, 0, Final_value);
+                pwm->setPWM (OutputDataIndex, 0, Final_value);
             }
         }
         ++OutputDataIndex;

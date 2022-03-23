@@ -74,6 +74,10 @@ private:
 
     c_OutputPixel* OutputPixel = nullptr;
 
+#ifndef HasBeenInitialized
+    bool HasBeenInitialized = false;
+#endif // ndef HasBeenInitialized
+
 }; // c_OutputSpi
 
 #endif // def SUPPORT_SPI_OUTPUT

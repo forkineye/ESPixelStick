@@ -18,7 +18,7 @@
 */
 
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_OutputType_APA102
+#if defined(SUPPORT_OutputType_APA102)
 
 #include "OutputAPA102.hpp"
 
@@ -91,4 +91,4 @@ bool c_OutputAPA102::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
 } // SetConfig
 
-#endif // def SUPPORT_OutputType_APA102
+#endif // defined(SUPPORT_OutputType_APA102)

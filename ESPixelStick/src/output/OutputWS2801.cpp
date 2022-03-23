@@ -50,6 +50,7 @@ void c_OutputWS2801::GetConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_START;
 
     c_OutputPixel::GetConfig (jsonConfig);
+    HasBeenInitialized = true;
 
     // DEBUG_END;
 } // GetConfig

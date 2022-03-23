@@ -90,7 +90,7 @@ c_WebMgr::~c_WebMgr ()
 ///< Start the module
 void c_WebMgr::Begin (config_t* /* NewConfig */)
 {
-    // DEBUG_START;
+    DEBUG_START;
     do // once
     {
 #ifdef BOARD_HAS_PSRAM
@@ -112,6 +112,7 @@ void c_WebMgr::Begin (config_t* /* NewConfig */)
         // DEBUG_V(String("WebJsonDoc->capacity: 0x") + String(WebJsonDoc->capacity(), HEX));
 
         memset(pWebSocketFrameCollectionBuffer, 0x00, WebSocketFrameCollectionBufferSize + 1);
+        // DEBUG_V();
 
         if (NetworkMgr.IsConnected())
         {
@@ -120,7 +121,7 @@ void c_WebMgr::Begin (config_t* /* NewConfig */)
 
     } while (false);
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // begin
 
@@ -128,21 +129,21 @@ void c_WebMgr::Begin (config_t* /* NewConfig */)
 // Configure and start the web server
 void c_WebMgr::NetworkStateChanged (bool NewNetworkState)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
     if (true == NewNetworkState)
     {
         init ();
     }
 
-    // DEBUG_END;
+    DEBUG_END;
 } // NetworkStateChanged
 
 //-----------------------------------------------------------------------------
 // Configure and start the web server
 void c_WebMgr::init ()
 {
-    // DEBUG_START;
+    DEBUG_START;
     // Add header for SVG plot support?
     DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Origin"),  "*");
     DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Headers"), "append, delete, entries, foreach, get, has, keys, set, values, Authorization, Content-Type, Content-Range, Content-Disposition, Content-Description, cache-control, x-requested-with");
@@ -308,7 +309,7 @@ void c_WebMgr::init ()
 
     logcon (String (F ("Web server listening on port ")) + HTTP_PORT);
 
-    // DEBUG_END;
+    DEBUG_END;
 }
 
 //-----------------------------------------------------------------------------

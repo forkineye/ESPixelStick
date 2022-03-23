@@ -46,17 +46,21 @@ c_OutputRmt::~c_OutputRmt ()
 
     // Clear all pending interrupts in the RMT Channel
     // DEBUG_V ("");
-    RMT.int_ena.val &= ~RMT_INT_TX_END_BIT;
-    RMT.int_ena.val &= ~RMT_INT_THR_EVNT_BIT;
-    rmt_tx_stop (RmtChannelId);
+    if (HasBeenInitialized)
+    {
+        RMT.int_ena.val &= ~RMT_INT_TX_END_BIT;
+        RMT.int_ena.val &= ~RMT_INT_THR_EVNT_BIT;
+        rmt_tx_stop(RmtChannelId);
 
-    esp_intr_free (RMT_intr_handle);
+        esp_intr_free(RMT_intr_handle);
 
-    // make sure no existing low level driver is running
-    // DEBUG_V ("");
+        // make sure no existing low level driver is running
+        // DEBUG_V ("");
 
-    // DEBUG_V (String ("RmtChannelId: ") + String (RmtChannelId));
-    // rmtEnd (RmtObject);
+        // DEBUG_V (String ("RmtChannelId: ") + String (RmtChannelId));
+        // rmtEnd (RmtObject);
+    }
+
     // DEBUG_END;
 } // ~c_OutputRmt
 
@@ -127,6 +131,8 @@ void c_OutputRmt::Begin (rmt_channel_t ChannelId,
 
     // Start output
     // DEBUG_END;
+
+    HasBeenInitialized = true;
 
 } // init
 

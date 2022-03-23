@@ -19,6 +19,7 @@
 
 #include "../ESPixelStick.h"
 #include "OutputUCS8903.hpp"
+#ifdef SUPPORT_OutputType_UCS8903
 
 //----------------------------------------------------------------------------
 c_OutputUCS8903::c_OutputUCS8903 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
@@ -48,6 +49,7 @@ void c_OutputUCS8903::Begin ()
     // DEBUG_START;
 
     c_OutputPixel::Begin ();
+    HasBeenInitialized = true;
 
     // DEBUG_END;
 } // Begin
@@ -111,3 +113,4 @@ bool c_OutputUCS8903::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     return response;
 
 } // SetConfig
+#endif // def SUPPORT_OutputType_UCS8903

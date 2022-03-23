@@ -72,10 +72,6 @@ typedef enum
 } uart_port_t;
 #endif // def ARDUINO_ARCH_ESP8266
 
-#define SUPPORT_OutputType_UCS1903
-#define SUPPORT_OutputType_GS8208
-#define SUPPORT_OutputType_UCS8903
-
 // Platform specific GPIO definitions
 #if defined (BOARD_ESP32_CAM)
 #   include "GPIO_Defs_ESP32_CAM.hpp"

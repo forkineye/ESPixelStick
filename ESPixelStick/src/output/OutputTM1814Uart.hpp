@@ -23,7 +23,7 @@
 */
 
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_OutputType_TM1814
+#if defined(SUPPORT_OutputType_TM1814) && defined(SUPPORT_UART_OUTPUT)
 
 #include "OutputTM1814.hpp"
 
@@ -58,5 +58,4 @@ private:
 
 }; // c_OutputTM1814Uart
 
-#endif // def SUPPORT_OutputType_TM1814
-
+#endif // defined(SUPPORT_OutputType_TM1814) && defined(SUPPORT_UART_OUTPUT)

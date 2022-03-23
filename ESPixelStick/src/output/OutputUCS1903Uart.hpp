@@ -23,7 +23,7 @@
 */
 
 #include "OutputCommon.hpp"
-#ifdef SUPPORT_OutputType_UCS1903
+#if defined(SUPPORT_OutputType_UCS1903) && defined(SUPPORT_UART_OUTPUT)
 
 #include "OutputUCS1903.hpp"
 
@@ -54,4 +54,4 @@ private:
 
 }; // c_OutputUCS1903Uart
 
-#endif // def SUPPORT_OutputType_UCS1903
+#endif // defined(SUPPORT_OutputType_UCS1903) && defined(SUPPORT_UART_OUTPUT)

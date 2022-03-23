@@ -18,7 +18,8 @@
 */
 
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_OutputType_GS8208
+
+#if defined(SUPPORT_OutputType_GS8208)
 
 #include "OutputGS8208.hpp"
 
@@ -114,4 +115,4 @@ bool c_OutputGS8208::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
 } // SetConfig
 
-#endif // def SUPPORT_OutputType_GS8208
+#endif // defined(SUPPORT_OutputType_GS8208)

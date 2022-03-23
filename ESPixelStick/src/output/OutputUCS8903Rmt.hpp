@@ -22,6 +22,7 @@
 *
 */
 #include "../ESPixelStick.h"
+#ifdef SUPPORT_OutputType_UCS8903
 #ifdef SUPPORT_RMT_OUTPUT
 
 #include "OutputUCS8903.hpp"
@@ -51,3 +52,4 @@ private:
 }; // c_OutputUCS8903Rmt
 
 #endif // def SUPPORT_RMT_OUTPUT
+#endif // def SUPPORT_OutputType_UCS8903

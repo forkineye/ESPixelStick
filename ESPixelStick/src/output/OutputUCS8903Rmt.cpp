@@ -17,7 +17,8 @@
 *
 */
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_RMT_OUTPUT
+
+#if defined(SUPPORT_OutputType_UCS8903) && defined(SUPPORT_RMT_OUTPUT)
 
 #include "OutputUCS8903Rmt.hpp"
 
@@ -99,6 +100,8 @@ void c_OutputUCS8903Rmt::Begin ()
     Rmt.Begin (rmt_channel_t (OutputChannelId), gpio_num_t (DataPin), this, rmt_idle_level_t::RMT_IDLE_LEVEL_LOW);
     Rmt.SetIntensityDataWidth(UCS8903_INTENSITY_DATA_WIDTH);
 
+    HasBeenInitialized = true;
+    
     // Start output
     // DEBUG_END;
 
@@ -166,4 +169,4 @@ void c_OutputUCS8903Rmt::Render ()
 
 } // Render
 
-#endif // def SUPPORT_RMT_OUTPUT
+#endif // defined(SUPPORT_OutputType_UCS8903) && defined(SUPPORT_RMT_OUTPUT)

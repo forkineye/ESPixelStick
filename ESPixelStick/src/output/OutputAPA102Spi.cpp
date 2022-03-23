@@ -106,4 +106,4 @@ void c_OutputAPA102Spi::Render ()
 
 } // render
 
-#endif // defined (SUPPORT_OutputType_APA102) && defined (SUPPORT_SPI_OUTPUT)
+#endif // defined(SUPPORT_OutputType_APA102) && defined(SUPPORT_SPI_OUTPUT)

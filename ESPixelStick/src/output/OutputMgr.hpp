@@ -111,20 +111,28 @@ public:
 
     enum e_OutputType
     {
-            OutputType_WS2811 = 0,
+#ifdef SUPPORT_OutputType_WS2811
+            OutputType_WS2811,
+#endif // def SUPPORT_OutputType_WS2811
+#ifdef SUPPORT_OutputType_GECE
             OutputType_GECE,
-#ifdef SUPPORT_UART_OUTPUT
+#endif // def SUPPORT_OutputType_GECE
+#ifdef SUPPORT_OutputType_DMX
             OutputType_DMX,
+#endif // def SUPPORT_OutputType_DMX
+#ifdef SUPPORT_OutputType_Renard
             OutputType_Renard,
+#endif // def SUPPORT_OutputType_Renard
+#ifdef SUPPORT_OutputType_Serial
             OutputType_Serial,
-#endif // def SUPPORT_UART_OUTPUT
+#endif // def SUPPORT_OutputType_Serial
 #ifdef SUPPORT_RELAY_OUTPUT
             OutputType_Relay,
             OutputType_Servo_PCA9685,
 #endif // def SUPPORT_RELAY_OUTPUT
 #ifdef SUPPORT_OutputType_UCS1903
             OutputType_UCS1903,
-#endif // def SUPPORT_OutputType_TM1814
+#endif // def SUPPORT_OutputType_UCS1903
 #ifdef SUPPORT_OutputType_TM1814
             OutputType_TM1814,
 #endif // def SUPPORT_OutputType_TM1814
@@ -140,9 +148,12 @@ public:
 #ifdef SUPPORT_OutputType_UCS8903
             OutputType_UCS8903,
 #endif // def SUPPORT_OutputType_UCS8903
+#ifdef SUPPORT_OutputType_TLS3001
+            OutputType_TLS3001,
+#endif // def SUPPORT_OutputType_TLS3001
             OutputType_Disabled,
             OutputType_End, // must be last
-            OutputType_Start = OutputType_WS2811,
+            OutputType_Start = 0,
     };
 
 #ifdef ARDUINO_ARCH_ESP8266

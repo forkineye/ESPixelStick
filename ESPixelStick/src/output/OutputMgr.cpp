@@ -59,42 +59,56 @@ typedef struct
 
 static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::OutputType_End] =
     {
-        {c_OutputMgr::e_OutputType::OutputType_WS2811, "WS2811"},
-#ifdef SUPPORT_UART_OUTPUT
-        {c_OutputMgr::e_OutputType::OutputType_GECE, "GECE"},
-        {c_OutputMgr::e_OutputType::OutputType_DMX, "DMX"},
-        {c_OutputMgr::e_OutputType::OutputType_Renard, "Renard"},
-        {c_OutputMgr::e_OutputType::OutputType_Serial, "Serial"},
-#endif // def SUPPORT_UART_OUTPUT
-#ifdef SUPPORT_RELAY_OUTPUT
-        {c_OutputMgr::e_OutputType::OutputType_Relay, "Relay"},
-        {c_OutputMgr::e_OutputType::OutputType_Servo_PCA9685, "Servo_PCA9685"},
-#endif // def SUPPORT_RELAY_OUTPUT
-        {c_OutputMgr::e_OutputType::OutputType_Disabled, "Disabled"},
-
-#ifdef SUPPORT_OutputType_UCS1903
-        {c_OutputMgr::e_OutputType::OutputType_UCS1903, "UCS1903"},
-#endif // def SUPPORT_OutputType_UCS1903
-
-#ifdef SUPPORT_OutputType_TM1814
-        {c_OutputMgr::e_OutputType::OutputType_TM1814, "TM1814"},
-#endif // def SUPPORT_OutputType_TM1814
-
-#ifdef SUPPORT_OutputType_WS2801
-        {c_OutputMgr::e_OutputType::OutputType_WS2801, "WS2801"},
-#endif // def SUPPORT_OutputType_WS2801
-
 #ifdef SUPPORT_OutputType_APA102
         {c_OutputMgr::e_OutputType::OutputType_APA102, "APA102"},
 #endif // def SUPPORT_OutputType_APA102
+
+#ifdef SUPPORT_OutputType_DMX
+        {c_OutputMgr::e_OutputType::OutputType_DMX, "DMX"},
+#endif // def SUPPORT_OutputType_DMX
+
+#ifdef SUPPORT_OutputType_GECE
+        {c_OutputMgr::e_OutputType::OutputType_GECE, "GECE"},
+#endif // def SUPPORT_OutputType_GECE
 
 #ifdef SUPPORT_OutputType_GS8208
         {c_OutputMgr::e_OutputType::OutputType_GS8208, "GS8208"},
 #endif // def SUPPORT_OutputType_GS8208
 
+#ifdef SUPPORT_OutputType_RENARD
+        {c_OutputMgr::e_OutputType::OutputType_Renard, "Renard"},
+#endif // def SUPPORT_OutputType_RENARD
+
+#ifdef SUPPORT_OutputType_SERIAL
+        {c_OutputMgr::e_OutputType::OutputType_Serial, "Serial"},
+#endif // def SUPPORT_OutputType_SERIAL
+
+#ifdef SUPPORT_OutputType_TM1814
+        {c_OutputMgr::e_OutputType::OutputType_TM1814, "TM1814"},
+#endif // def SUPPORT_OutputType_TM1814
+
+#ifdef SUPPORT_OutputType_UCS1903
+        {c_OutputMgr::e_OutputType::OutputType_UCS1903, "UCS1903"},
+#endif // def SUPPORT_OutputType_UCS1903
+
 #ifdef SUPPORT_OutputType_UCS8903
         {c_OutputMgr::e_OutputType::OutputType_UCS8903, "UCS8903"},
 #endif // def SUPPORT_OutputType_UCS8903
+
+#ifdef SUPPORT_OutputType_WS2801
+        {c_OutputMgr::e_OutputType::OutputType_WS2801, "WS2801"},
+#endif // def SUPPORT_OutputType_WS2801
+
+#ifdef SUPPORT_OutputType_WS2811
+        {c_OutputMgr::e_OutputType::OutputType_WS2811, "WS2811"},
+#endif // def SUPPORT_OutputType_WS2811
+
+#ifdef SUPPORT_RELAY_OUTPUT
+        {c_OutputMgr::e_OutputType::OutputType_Relay, "Relay"},
+        {c_OutputMgr::e_OutputType::OutputType_Servo_PCA9685, "Servo_PCA9685"},
+#endif // def SUPPORT_RELAY_OUTPUT
+
+        {c_OutputMgr::e_OutputType::OutputType_Disabled, "Disabled"},
 };
 
 //-----------------------------------------------------------------------------
@@ -192,9 +206,14 @@ c_OutputMgr::~c_OutputMgr()
 void c_OutputMgr::Begin ()
 {
     // DEBUG_START;
+    IsBooting = false;
+    FileMgr.DeleteConfigFile(ConfigFileName);
 
     // prevent recalls
-    if (true == HasBeenInitialized) { return; }
+    if (true == HasBeenInitialized)
+    {
+        return;
+    }
     HasBeenInitialized = true;
 
 #ifdef LED_FLASH_GPIO
@@ -323,17 +342,15 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
 */
 void c_OutputMgr::CreateNewConfig ()
 {
-    // DEBUG_START;
-    if (!IsBooting)
-    {
-        logcon (String (F ("--- WARNING: Creating a new Output Manager configuration Data set ---")));
-    }
+    DEBUG_START;
+
+    DEBUG_V (String (F ("--- WARNING: Creating a new Output Manager configuration Data set ---")));
 
     BuildingNewConfig = true;
 
     // create a place to save the config
     DynamicJsonDocument JsonConfigDoc (OM_MAX_CONFIG_SIZE);
-    // DEBUG_V ("");
+    DEBUG_V ("");
 
     JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_output_config);
     // DEBUG_V ("");
@@ -349,7 +366,7 @@ void c_OutputMgr::CreateNewConfig ()
         // DEBUG_V ("for each interface");
         for (DriverInfo_t CurrentOutput : OutputChannelDrivers)
         {
-            // DEBUG_V (String ("ChannelIndex: ") + String (ChannelIndex));
+            // DEBUG_V(String("DriverId: ") + String(CurrentOutput.DriverId));
             // DEBUG_V (String ("instantiate output type: ") + String (outputTypeId));
             InstantiateNewOutputChannel(e_OutputChannelIds(CurrentOutput.DriverId), e_OutputType(outputTypeId), false);
             // DEBUG_V ("");
@@ -378,11 +395,11 @@ void c_OutputMgr::CreateNewConfig ()
 
     SetConfig(JsonConfigDoc);
 
-    // logcon (String (F ("--- WARNING: Creating a new Output Manager configuration Data set - Done ---")));
+    // DEBUG_V (String (F ("--- WARNING: Creating a new Output Manager configuration Data set - Done ---")));
 
     BuildingNewConfig = true;
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // CreateNewConfig
 
@@ -440,7 +457,7 @@ void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
 */
 void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds ChannelIndex, e_OutputType NewOutputChannelType, bool StartDriver)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
     do // once
     {
@@ -484,7 +501,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
                 break;
             }
 
-#if defined(SUPPORT_UART_OUTPUT)
+#if defined(SUPPORT_OutputType_DMX)
             case e_OutputType::OutputType_DMX:
             {
                 if ((ChannelIndex >= OutputChannelId_UART_FIRST) && (ChannelIndex <= OutputChannelId_UART_LAST))
@@ -501,9 +518,9 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
                 // DEBUG_V ("");
                 break;
             }
-#endif // defined(e_OutputType::OutputType_DMX)
+#endif // defined(SUPPORT_OutputType_DMX)
 
-#if defined(SUPPORT_UART_OUTPUT)
+#if defined(SUPPORT_OutputType_GECE)
             case e_OutputType::OutputType_GECE:
             {
                 if ((ChannelIndex >= OutputChannelId_UART_FIRST) && (ChannelIndex <= OutputChannelId_UART_LAST))
@@ -521,9 +538,9 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
 
                 break;
             }
-#endif // defined(SUPPORT_UART_OUTPUT)
+#endif // defined(SUPPORT_OutputType_GECE)
 
-#ifdef SUPPORT_UART_OUTPUT
+#ifdef SUPPORT_OutputType_SERIAL
             case e_OutputType::OutputType_Serial:
             {
                 if (OM_IS_UART)
@@ -541,9 +558,9 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
 
                 break;
             }
-#endif // def SUPPORT_UART_OUTPUT
+#endif // def SUPPORT_OutputType_SERIAL
 
-#ifdef SUPPORT_UART_OUTPUT
+#ifdef SUPPORT_OutputType_RENARD
             case e_OutputType::OutputType_Renard:
             {
                 if (OM_IS_UART)
@@ -561,7 +578,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
 
                 break;
             }
-#endif // def SUPPORT_UART_OUTPUT
+#endif // def SUPPORT_OutputType_RENARD
 
 #ifdef SUPPORT_RELAY_OUTPUT
             case e_OutputType::OutputType_Relay:
@@ -600,6 +617,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
             }
 #endif // SUPPORT_RELAY_OUTPUT
 
+#ifdef SUPPORT_OutputType_WS2811
             case e_OutputType::OutputType_WS2811:
             {
 #ifdef SUPPORT_RMT_OUTPUT
@@ -630,6 +648,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
 
                 break;
             }
+#endif // def SUPPORT_OutputType_WS2811
 
 #ifdef SUPPORT_OutputType_UCS1903
             case e_OutputType::OutputType_UCS1903:
@@ -813,6 +832,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
         }
         if (StartDriver)
         {
+            DEBUG_V("Starting Driver");
             OutputChannelDrivers[uint(ChannelIndex)].pOutputChannelDriver->Begin();
         }
 
@@ -822,7 +842,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
     // OutputChannelDrivers[uint(ChannelIndex)]->GetDriverName (temp);
     // DEBUG_V (String ("Driver Name: ") + temp);
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // InstantiateNewOutputChannel
 
@@ -836,28 +856,28 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
 */
 void c_OutputMgr::LoadConfig ()
 {
-    // DEBUG_START;
-
+    DEBUG_START;
+    
     // try to load and process the config file
-    if (!FileMgr.LoadConfigFile (ConfigFileName, [this](DynamicJsonDocument & JsonConfigDoc)
-        {
-            // DEBUG_V ("");
+    if (!FileMgr.LoadConfigFile(ConfigFileName, [this](DynamicJsonDocument &JsonConfigDoc)
+                                {
+            DEBUG_V ("");
             JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
-            // DEBUG_V ("");
+            DEBUG_V ("");
             this->ProcessJsonConfig (JsonConfig);
-            // DEBUG_V ("");
-        }))
+            DEBUG_V (""); }))
     {
-        if (!IsBooting) {
-            logcon (CN_stars + String (F (" Error loading Output Manager Config File ")) + CN_stars);
+        if (!IsBooting)
+        {
+            logcon(CN_stars + String(F(" Error loading Output Manager Config File ")) + CN_stars);
         }
 
         // create a config file with default values
-        // DEBUG_V ("");
+        DEBUG_V ("");
         CreateNewConfig ();
     }
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // LoadConfig
 

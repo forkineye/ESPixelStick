@@ -23,7 +23,8 @@
 */
 
 #include "OutputCommon.hpp"
-#ifdef SUPPORT_OutputType_GS8208
+
+#if defined(SUPPORT_OutputType_GS8208) && defined(SUPPORT_UART_OUTPUT)
 
 #include "OutputGS8208.hpp"
 
@@ -54,4 +55,4 @@ private:
 
 }; // c_OutputGS8208Uart
 
-#endif // def SUPPORT_OutputType_GS8208
+#endif // defined(SUPPORT_OutputType_GS8208) && defined(SUPPORT_UART_OUTPUT)

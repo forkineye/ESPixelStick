@@ -71,9 +71,9 @@ private:
     bool    validate ();
 
     // config data
-    ServoPCA9685Channel_t   OutputList[OM_SERVO_PCA9685_CHANNEL_LIMIT];
-    Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver ();
-    float                   UpdateFrequency = SERVO_PCA9685_UPDATE_FREQUENCY;
+    ServoPCA9685Channel_t     OutputList[OM_SERVO_PCA9685_CHANNEL_LIMIT];
+    Adafruit_PWMServoDriver * pwm = nullptr;
+    float                     UpdateFrequency = SERVO_PCA9685_UPDATE_FREQUENCY;
 
     // non config data
     String      OutputName;

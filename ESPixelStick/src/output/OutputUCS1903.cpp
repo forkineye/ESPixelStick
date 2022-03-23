@@ -51,6 +51,8 @@ void c_OutputUCS1903::Begin ()
 
     c_OutputPixel::Begin ();
 
+    HasBeenInitialized = true;
+
     // DEBUG_END;
 } // Begin
 

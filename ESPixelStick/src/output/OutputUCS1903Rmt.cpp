@@ -17,9 +17,8 @@
 *
 */
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_OutputType_UCS1903
 
-#ifdef SUPPORT_RMT_OUTPUT
+#if defined(SUPPORT_OutputType_UCS1903) && defined(SUPPORT_RMT_OUTPUT)
 
 #include "OutputUCS1903Rmt.hpp"
 
@@ -100,7 +99,8 @@ void c_OutputUCS1903Rmt::Begin ()
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
     Rmt.Begin (rmt_channel_t (OutputChannelId), gpio_num_t (DataPin), this, rmt_idle_level_t::RMT_IDLE_LEVEL_LOW);
 
-    // Start output
+    HasBeenInitialized = true;
+
     // DEBUG_END;
 
 } // Begin
@@ -164,5 +164,4 @@ void c_OutputUCS1903Rmt::Render ()
 
 } // Render
 
-#endif // def SUPPORT_RMT_OUTPUT
-#endif // def SUPPORT_OutputType_UCS1903
+#endif // defined(SUPPORT_OutputType_UCS1903) && defined(SUPPORT_RMT_OUTPUT)

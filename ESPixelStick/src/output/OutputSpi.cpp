@@ -143,6 +143,8 @@ void c_OutputSpi::Begin (c_OutputPixel* _OutputPixel)
 
     spi_transfer_callback_enabled = true;
 
+    HasBeenInitialized = true;
+
     // DEBUG_END;
 
 } // Begin

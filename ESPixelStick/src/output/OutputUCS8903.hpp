@@ -24,6 +24,7 @@
 
 #include "OutputPixel.hpp"
 
+#ifdef SUPPORT_OutputType_UCS8903
 #ifdef ARDUINO_ARCH_ESP32
 #   include <driver/uart.h>
 #endif
@@ -66,4 +67,4 @@ protected:
 #define UCS8903_INTENSITY_DATA_WIDTH         16
 
 }; // c_OutputUCS8903
-
+#endif // def SUPPORT_OutputType_UCS8903

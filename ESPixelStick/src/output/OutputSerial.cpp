@@ -29,7 +29,9 @@ GNU General Public License for more details.
 
 #include "OutputSerial.hpp"
 #include "OutputCommon.hpp"
-#ifdef SUPPORT_UART_OUTPUT
+
+#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_SERIAL) || defined(SUPPORT_OutputType_RENARD)
+
 #ifdef ARDUINO_ARCH_ESP8266
 extern "C" {
 #   include <eagle_soc.h>
@@ -93,16 +95,17 @@ c_OutputSerial::c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId,
 c_OutputSerial::~c_OutputSerial ()
 {
     // DEBUG_START;
-    if (gpio_num_t (-1) == DataPin) { return; }
-
+    if (HasBeenInitialized)
+    {
 #ifdef ARDUINO_ARCH_ESP32
-    // make sure no existing low level driver is running
-    ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
-    // DEBUG_V ("");
+        // make sure no existing low level driver is running
+        ESP_ERROR_CHECK(uart_disable_tx_intr(UartId));
+        // DEBUG_V ("");
 
-    ESP_ERROR_CHECK (uart_disable_rx_intr (UartId));
-    // DEBUG_V ("");
+        ESP_ERROR_CHECK(uart_disable_rx_intr(UartId));
+        // DEBUG_V ("");
 #endif
+    }
 
     // DEBUG_END;
 } // ~c_OutputSerial
@@ -122,6 +125,7 @@ void c_OutputSerial::Begin ()
     // DEBUG_START;
 
     SetOutputBufferSize (Num_Channels);
+    HasBeenInitialized = true;
 
     // DEBUG_END;
 } // Begin
@@ -512,4 +516,4 @@ void c_OutputSerial::Render ()
 
     // DEBUG_END;
 } // render
-#endif // def SUPPORT_UART_OUTPUT
+#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_SERIAL) || defined(SUPPORT_OutputType_RENARD)

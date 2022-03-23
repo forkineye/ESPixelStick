@@ -23,6 +23,7 @@
 */
 
 #include "OutputPixel.hpp"
+#if defined(SUPPORT_OutputType_WS2811)
 
 #ifdef ARDUINO_ARCH_ESP32
 #   include <driver/uart.h>
@@ -64,3 +65,4 @@ protected:
 
 }; // c_OutputWS2811
 
+#endif // defined(SUPPORT_OutputType_WS2811)

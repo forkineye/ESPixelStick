@@ -22,7 +22,7 @@
 *
 */
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_OutputType_APA102
+#if defined(SUPPORT_OutputType_APA102)
 
 #include "OutputPixel.hpp"
 
@@ -58,4 +58,4 @@ protected:
 
 }; // c_OutputAPA102
 
-#endif // def SUPPORT_OutputType_APA102
+#endif // defined(SUPPORT_OutputType_APA102) && defined(SUPPORT_SPI_OUTPUT)

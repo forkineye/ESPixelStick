@@ -77,6 +77,10 @@ private:
     uint32_t IncompleteFrameLastFrame = 0;
 #endif // def USE_RMT_DEBUG_COUNTERS
 
+#ifndef HasBeenInitialized
+    bool     HasBeenInitialized = false;
+#endif // ndef HasBeenInitialized
+
 public:
     c_OutputRmt ();
     ~c_OutputRmt ();

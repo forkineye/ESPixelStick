@@ -30,21 +30,10 @@
 #define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_16
 #define RMT_LAST                OutputChannelId_RMT_3
 
-// #define SUPPORT_OutputType_WS2801
-// #define SUPPORT_OutputType_APA102
-// #define SUPPORT_OutputType_TM1814
-// #define SUPPORT_OutputType_TLS3001
-
-// #define SUPPORT_RELAY_OUTPUT
-
-#if defined(SUPPORT_OutputType_WS2801) || defined(SUPPORT_OutputType_APA102)
-#   define SUPPORT_SPI_OUTPUT
-
 // SPI Output
+#define SUPPORT_SPI_OUTPUT
 #define DEFAULT_SPI_DATA_GPIO  gpio_num_t::GPIO_NUM_15
 #define DEFAULT_SPI_CLOCK_GPIO gpio_num_t::GPIO_NUM_25
-
-#endif // defined(SUPPORT_OutputType_WS2801) || defined(SUPPORT_OutputType_TM1814)
 
 // File Manager
 #define SUPPORT_SD
@@ -52,3 +41,18 @@
 #define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_13
 #define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14
 #define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_15
+
+// Output Types
+// #define SUPPORT_OutputType_TLS3001
+// #define SUPPORT_OutputType_APA102
+#define SUPPORT_OutputType_DMX
+#define SUPPORT_OutputType_GECE
+// #define SUPPORT_OutputType_GS8208
+#define SUPPORT_OutputType_Renard
+#define SUPPORT_OutputType_Serial
+// #define SUPPORT_OutputType_TM1814
+// #define SUPPORT_OutputType_UCS1903
+// #define SUPPORT_OutputType_UCS8903
+// #define SUPPORT_OutputType_WS2801
+#define SUPPORT_OutputType_WS2811
+// #define SUPPORT_RELAY_OUTPUT

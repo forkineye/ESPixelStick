@@ -19,6 +19,8 @@
 
 #include "../ESPixelStick.h"
 
+#if defined(SUPPORT_OutputType_UCS8903) && defined(SUPPORT_UART_OUTPUT)
+
 #include "OutputUCS8903Uart.hpp"
 
 #if defined(ARDUINO_ARCH_ESP8266)
@@ -78,30 +80,32 @@ c_OutputUCS8903Uart::c_OutputUCS8903Uart (c_OutputMgr::e_OutputChannelIds Output
 c_OutputUCS8903Uart::~c_OutputUCS8903Uart ()
 {
     // DEBUG_START;
-    if (gpio_num_t (-1) == DataPin) { return; }
 
-    // Disable all interrupts for this uart.
-    CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
-    // DEBUG_V ("");
+    if (HasBeenInitialized)
+    {
+        // Disable all interrupts for this uart.
+        CLEAR_PERI_REG_MASK(UART_INT_ENA(UartId), UART_INTR_MASK);
+        // DEBUG_V ("");
 
-    // Clear all pending interrupts in the UART
-    WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
-    // DEBUG_V ("");
+        // Clear all pending interrupts in the UART
+        WRITE_PERI_REG(UART_INT_CLR(UartId), UART_INTR_MASK);
+        // DEBUG_V ("");
 
 #ifdef ARDUINO_ARCH_ESP8266
-    Serial1.end ();
+        Serial1.end();
 #else
 
-    // make sure no existing low level driver is running
-    ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
-    // DEBUG_V ("");
+        // make sure no existing low level driver is running
+        ESP_ERROR_CHECK(uart_disable_tx_intr(UartId));
+        // DEBUG_V ("");
 
-    ESP_ERROR_CHECK (uart_disable_rx_intr (UartId));
-    // DEBUG_V (String("UartId: ") + String(UartId));
+        ESP_ERROR_CHECK(uart_disable_rx_intr(UartId));
+        // DEBUG_V (String("UartId: ") + String(UartId));
 
-    // todo: put back uart_isr_free (UartId);
+        // todo: put back uart_isr_free (UartId);
 
 #endif // def ARDUINO_ARCH_ESP32
+    }
 
     // DEBUG_END;
 } // ~c_OutputUCS8903Uart
@@ -156,6 +160,8 @@ void c_OutputUCS8903Uart::Begin ()
     SetFrameAppendInformation ( (uint8_t*)&FrameEndData, sizeof (FrameEndData));
     SetPixelPrependInformation (&PixelStartData, sizeof (PixelStartData));
 #endif // def testPixelInsert
+
+    HasBeenInitialized = true;
 
 } // init
 
@@ -233,7 +239,8 @@ void IRAM_ATTR c_OutputUCS8903Uart::ISR_Handler ()
 
         while ((NumEmptyIntensitySlots--) && (MoreDataToSend()))
         {
-            register uint16_t IntensityValue = uint16_t(map(long(GetNextIntensityToSend()), 0, 255, 0, 65535));
+            // cant use map function in an ISR. It crashes.
+            register uint32_t IntensityValue = uint32_t(GetNextIntensityToSend()) * IntensityMultiplier;
             for (uint16_t mask = 1 << (UCS8903_INTENSITY_DATA_WIDTH - 1); 0 != mask; mask >>= 1)
             {
                 // convert the intensity data into UART data
@@ -285,3 +292,5 @@ void c_OutputUCS8903Uart::PauseOutput ()
 
     // DEBUG_END;
 } // PauseOutput
+
+#endif // defined(SUPPORT_OutputType_UCS8903) && defined(SUPPORT_UART_OUTPUT)

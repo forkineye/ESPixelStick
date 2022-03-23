@@ -17,7 +17,7 @@
 *
 */
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_RMT_OUTPUT
+#if defined(SUPPORT_OutputType_WS2811) && defined(SUPPORT_RMT_OUTPUT)
 
 #include "OutputWS2811Rmt.hpp"
 
@@ -97,6 +97,7 @@ void c_OutputWS2811Rmt::Begin ()
 
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
     Rmt.Begin (rmt_channel_t (OutputChannelId), gpio_num_t (DataPin), this, rmt_idle_level_t::RMT_IDLE_LEVEL_LOW);
+    HasBeenInitialized = true;
 
     // Start output
     // DEBUG_END;
@@ -165,4 +166,4 @@ void c_OutputWS2811Rmt::Render ()
 
 } // Render
 
-#endif // def SUPPORT_RMT_OUTPUT
+#endif // defined(SUPPORT_OutputType_WS2811) && defined(SUPPORT_RMT_OUTPUT)

@@ -32,22 +32,6 @@
 #define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_16
 #define RMT_LAST                OutputChannelId_RMT_3
 
-// #define SUPPORT_OutputType_WS2801
-// #define SUPPORT_OutputType_APA102
-// #define SUPPORT_OutputType_TM1814
-// #define SUPPORT_OutputType_TLS3001
-
-// #define SUPPORT_RELAY_OUTPUT
-
-#if defined(SUPPORT_OutputType_WS2801) || defined(SUPPORT_OutputType_APA102)
-#   define SUPPORT_SPI_OUTPUT
-
-// SPI Output
-#define DEFAULT_SPI_DATA_GPIO  gpio_num_t::GPIO_NUM_15
-#define DEFAULT_SPI_CLOCK_GPIO gpio_num_t::GPIO_NUM_25
-
-#endif // defined(SUPPORT_OutputType_WS2801) || defined(SUPPORT_OutputType_TM1814)
-
 // File Manager
 #define SUPPORT_SD
 #define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_12
@@ -55,9 +39,13 @@
 #define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14
 #define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_15
 
+// SPI Output
+#define SUPPORT_SPI_OUTPUT
+#define DEFAULT_SPI_DATA_GPIO  gpio_num_t::GPIO_NUM_15
+#define DEFAULT_SPI_CLOCK_GPIO gpio_num_t::GPIO_NUM_25
+
 // #include <ETH.h>
 #include "network/ETH_m.h"
-
 /*
    * ETH_CLOCK_GPIO0_IN   - default: external clock from crystal oscillator
    * ETH_CLOCK_GPIO0_OUT  - 50MHz clock from internal APLL output on GPIO0 - possibly an inverter is needed for LAN8720
@@ -87,3 +75,17 @@
 #define DEFAULT_ETH_MDC_PIN     gpio_num_t::GPIO_NUM_23
 #define DEFAULT_ETH_MDIO_PIN    gpio_num_t::GPIO_NUM_18
 
+// Output Types
+// #define SUPPORT_OutputType_TLS3001
+// #define SUPPORT_OutputType_APA102
+#define SUPPORT_OutputType_DMX
+#define SUPPORT_OutputType_GECE
+// #define SUPPORT_OutputType_GS8208
+#define SUPPORT_OutputType_Renard
+#define SUPPORT_OutputType_Serial
+// #define SUPPORT_OutputType_TM1814
+// #define SUPPORT_OutputType_UCS1903
+// #define SUPPORT_OutputType_UCS8903
+// #define SUPPORT_OutputType_WS2801
+#define SUPPORT_OutputType_WS2811
+// #define SUPPORT_RELAY_OUTPUT

@@ -23,6 +23,9 @@
 */
 
 #include "OutputCommon.hpp"
+
+#if defined(SUPPORT_OutputType_UCS8903) && defined(SUPPORT_UART_OUTPUT)
+
 #include "OutputUCS8903.hpp"
 
 class c_OutputUCS8903Uart : public c_OutputUCS8903
@@ -44,11 +47,13 @@ public:
 
     /// Interrupt Handler
     void IRAM_ATTR ISR_Handler (); ///< UART ISR
+    uint32_t IntensityMultiplier = 65535 / 255;
 
-#define UCS8903_NUM_UART_DATA_BYTES_PER_INTENSITY_VALUE    16
+#define UCS8903_NUM_UART_DATA_BYTES_PER_INTENSITY_VALUE 16
 
 private:
     bool validate ();        ///< confirm that the current configuration is valid
 
 }; // c_OutputUCS8903Uart
 
+#endif // defined(SUPPORT_OutputType_UCS8903) && defined(SUPPORT_UART_OUTPUT)
