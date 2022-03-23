@@ -262,11 +262,13 @@ void c_OutputSerial::GetConfig (ArduinoJson::JsonObject & jsonConfig)
     // DEBUG_START;
     jsonConfig[CN_num_chan]    = Num_Channels;
     jsonConfig[CN_baudrate]    = CurrentBaudrate;
+#ifdef SUPPORT_OutputType_Serial
     if (OutputType == c_OutputMgr::e_OutputType::OutputType_Serial)
     {
         jsonConfig[CN_gen_ser_hdr] = GenericSerialHeader;
         jsonConfig[CN_gen_ser_ftr] = GenericSerialFooter;
     }
+#endif // def SUPPORT_OutputType_Serial
 
     c_OutputCommon::GetConfig (jsonConfig);
 
@@ -278,23 +280,29 @@ void  c_OutputSerial::GetDriverName (String & sDriverName)
 {
     switch (OutputType)
     {
+#ifdef SUPPORT_OutputType_Serial
         case c_OutputMgr::e_OutputType::OutputType_Serial:
         {
             sDriverName = F ("Serial");
             break;
         }
+#endif // def SUPPORT_OutputType_Serial
 
+#ifdef SUPPORT_OutputType_DMX
         case c_OutputMgr::e_OutputType::OutputType_DMX:
         {
             sDriverName = F ("DMX");
             break;
         }
+#endif // def SUPPORT_OutputType_DMX
 
+#ifdef SUPPORT_OutputType_Renard
         case c_OutputMgr::e_OutputType::OutputType_Renard:
         {
             sDriverName = F ("Renard");
             break;
         }
+#endif // def SUPPORT_OutputType_Renard
 
         default:
         {
@@ -319,6 +327,7 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
             {
                 // at this point the FIFO has at least 40 free bytes. 10 byte Footer should fit
                 // are we in generic serial mode?
+#ifdef SUPPORT_OutputType_Serial
                 if (OutputType == c_OutputMgr::e_OutputType::OutputType_Serial)
                 {
                     for (size_t FooterIndex = 0; FooterIndex < LengthGenericSerialFooter; FooterIndex++)
@@ -326,6 +335,7 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
                         enqueue (pGenericSerialFooter[FooterIndex]);
                     }
                 } // need to send the footer
+#endif // def SUPPORT_OutputType_Serial
 
                 // Disable ALL interrupts when done
                 CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
@@ -351,6 +361,7 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
                 // read the current data value from the buffer and point at the next byte
                 data = *pNextChannelToSend++;
 
+#ifdef SUPPORT_OutputType_Renard
                 // do we have to adjust the renard data stream?
                 if ((OutputType == c_OutputMgr::e_OutputType::OutputType_Renard) &&
                     (data >= RenardFrameDefinitions_t::MIN_VAL_TO_ESC) &&
@@ -364,6 +375,7 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
                     --SpaceInFifo;
 
                 } // end modified data
+#endif // def SUPPORT_OutputType_Renard
 
                 // send the intensity data
                 enqueue (data);
@@ -457,6 +469,7 @@ void c_OutputSerial::Render ()
     // start the next frame
     switch (OutputType)
     {
+#ifdef SUPPORT_OutputType_DMX
         case c_OutputMgr::e_OutputType::OutputType_DMX:
         {
             if (!canRefresh())
@@ -472,7 +485,9 @@ void c_OutputSerial::Render ()
             // send the rest of the frame
             break;
         } // DMX512
+#endif // def SUPPORT_OutputType_DMX
 
+#ifdef SUPPORT_OutputType_Renard
         case c_OutputMgr::e_OutputType::OutputType_Renard:
         {
             enqueue (RenardFrameDefinitions_t::FRAME_START_CHAR);
@@ -480,7 +495,9 @@ void c_OutputSerial::Render ()
 
             break;
         } // RENARD
+#endif // def SUPPORT_OutputType_Renard
 
+#ifdef SUPPORT_OutputType_Serial
         case c_OutputMgr::e_OutputType::OutputType_Serial:
         {
             // LOG_PORT.println ("5 '" + GenericSerialHeader + "'");
@@ -499,6 +516,7 @@ void c_OutputSerial::Render ()
             // ISR will send the footer
             break;
         } // GENERIC
+#endif // def SUPPORT_OutputType_Serial
 
         default:
         { break; } // this is not possible but the language needs it here
