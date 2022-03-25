@@ -84,11 +84,14 @@ c_OutputSpi::~c_OutputSpi ()
 {
     // DEBUG_START;
 
-    spi_transfer_callback_enabled = false;
-    if (OutputPixel)
+    if(HasBeenInitialized)
     {
-        logcon (CN_stars + String (F (" SPI Interface Shutdown requires a reboot ")) + CN_stars);
-        reboot = true;
+        spi_transfer_callback_enabled = false;
+        if (OutputPixel)
+        {
+            logcon(CN_stars + String(F(" SPI Interface Shutdown requires a reboot ")) + CN_stars);
+            reboot = true;
+        }
     }
     // DEBUG_END;
 
