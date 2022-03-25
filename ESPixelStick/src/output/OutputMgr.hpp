@@ -29,6 +29,12 @@
 
 class c_OutputCommon; ///< forward declaration to the pure virtual output class that will be defined later.
 
+#ifdef UART_LAST
+#       define NUM_UARTS UART_LAST
+#else
+#       define NUM_UARTS 0
+#endif
+
 class c_OutputMgr
 {
 public:
@@ -44,7 +50,7 @@ public:
     void      SetConfig         (ArduinoJson::JsonDocument & NewConfig);  ///< Save the current configuration data to nvram
     void      GetStatus         (JsonObject & jsonStatus);
     void      PauseOutput       (bool PauseTheOutput) { IsOutputPaused = PauseTheOutput; }
-    void      GetPortCounts     (uint16_t& PixelCount, uint16_t& SerialCount) {PixelCount = uint16_t(OutputChannelId_End); SerialCount = min(uint16_t(OutputChannelId_End), uint16_t(2)); }
+    void      GetPortCounts     (uint16_t& PixelCount, uint16_t& SerialCount) {PixelCount = uint16_t(OutputChannelId_End); SerialCount = uint16_t(NUM_UARTS); }
     uint8_t*  GetBufferAddress  () { return OutputBuffer; } ///< Get the address of the buffer into which the E1.31 handler will stuff data
     size_t    GetBufferUsedSize () { return UsedBufferSize; } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
     size_t    GetBufferSize     () { return sizeof(OutputBuffer); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
@@ -59,7 +65,7 @@ public:
     enum e_OutputChannelIds
     {
 #ifdef DEFAULT_UART_1_GPIO
-        OutputChannelId_UART_1 = 0,
+        OutputChannelId_UART_1,
 #endif // def DEFAULT_UART_1_GPIO
 #ifdef DEFAULT_UART_2_GPIO
         OutputChannelId_UART_2,
@@ -174,17 +180,14 @@ public:
 #endif // !def ARDUINO_ARCH_ESP32
 
 private:
-    void InstantiateNewOutputChannel (c_OutputMgr::e_OutputChannelIds ChannelIndex, e_OutputType NewChannelType, bool StartDriver = true);
-    void CreateNewConfig();
-
-    // pointer(s) to the current active output drivers
-    struct DriverInfo_t
-    {
-        size_t DriverId = 0;
-        c_OutputCommon * pOutputChannelDriver = nullptr;
-        size_t StartingChannelId = 0;
-        size_t ChannelCount = 0;
-        size_t EndChannelId = 0;
+        // pointer(s) to the current active output drivers
+        struct DriverInfo_t
+        {
+                size_t DriverId = 0;
+                c_OutputCommon *pOutputChannelDriver = nullptr;
+                size_t StartingChannelId = 0;
+                size_t ChannelCount = 0;
+                size_t EndChannelId = 0;
     };
 
     DriverInfo_t OutputChannelDrivers[OutputChannelId_End];
@@ -199,6 +202,8 @@ private:
     bool ProcessJsonConfig (JsonObject & jsonConfig);
     void CreateJsonConfig  (JsonObject & jsonConfig);
     void UpdateDisplayBufferReferences (void);
+    void InstantiateNewOutputChannel(DriverInfo_t &ChannelIndex, e_OutputType NewChannelType, bool StartDriver = true);
+    void CreateNewConfig();
 
     String ConfigFileName;
 
@@ -206,12 +211,12 @@ private:
     size_t  UsedBufferSize = 0;
 
 #ifdef SUPPORT_UART_OUTPUT
-#   define OM_IS_UART ((ChannelIndex >= OutputChannelId_UART_FIRST) && (ChannelIndex <= OutputChannelId_UART_LAST))
+#       define OM_IS_UART ((CurrentOutputChannel.DriverId >= OutputChannelId_UART_FIRST) && (CurrentOutputChannel.DriverId <= OutputChannelId_UART_LAST))
 #else
 #   define OM_IS_UART false
 #endif // def SUPPORT_UART_OUTPUT
 #ifdef SUPPORT_RMT_OUTPUT
-#   define OM_IS_RMT ((ChannelIndex >= OutputChannelId_RMT_FIRST) && (ChannelIndex <= OutputChannelId_RMT_LAST))
+#       define OM_IS_RMT ((CurrentOutputChannel.DriverId >= OutputChannelId_RMT_FIRST) && (CurrentOutputChannel.DriverId <= OutputChannelId_RMT_LAST))
 #else
 #   define OM_IS_RMT false
 #endif // def SUPPORT_RMT_OUTPUT
