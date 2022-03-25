@@ -23,7 +23,7 @@ GNU General Public License for more details.
 ******************************************************************/
 
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_RELAY_OUTPUT
+#ifdef SUPPORT_OutputType_Relay
 
 #include <utility>
 #include <algorithm>
@@ -385,4 +385,4 @@ void c_OutputRelay::Render ()
     // DEBUG_END;
 } // render
 
-#endif // def SUPPORT_RELAY_OUTPUT
+#endif // def SUPPORT_OutputType_Relay

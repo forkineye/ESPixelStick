@@ -28,7 +28,9 @@ GNU General Public License for more details.
 *
 */
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_RELAY_OUTPUT
+
+#ifdef SUPPORT_OutputType_Relay
+
 #include "OutputCommon.hpp"
 
 class c_OutputRelay : public c_OutputCommon  
@@ -85,4 +87,4 @@ private:
 
 }; // c_OutputRelay
 
-#endif // def SUPPORT_RELAY_OUTPUT
+#endif // def SUPPORT_OutputType_Relay
