@@ -75,13 +75,13 @@ static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::
         {c_OutputMgr::e_OutputType::OutputType_GS8208, "GS8208"},
 #endif // def SUPPORT_OutputType_GS8208
 
-#ifdef SUPPORT_OutputType_RENARD
+#ifdef SUPPORT_OutputType_Renard
         {c_OutputMgr::e_OutputType::OutputType_Renard, "Renard"},
-#endif // def SUPPORT_OutputType_RENARD
+#endif // def SUPPORT_OutputType_Renard
 
-#ifdef SUPPORT_OutputType_SERIAL
+#ifdef SUPPORT_OutputType_Serial
         {c_OutputMgr::e_OutputType::OutputType_Serial, "Serial"},
-#endif // def SUPPORT_OutputType_SERIAL
+#endif // def SUPPORT_OutputType_Serial
 
 #ifdef SUPPORT_OutputType_TM1814
         {c_OutputMgr::e_OutputType::OutputType_TM1814, "TM1814"},
@@ -103,10 +103,12 @@ static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::
         {c_OutputMgr::e_OutputType::OutputType_WS2811, "WS2811"},
 #endif // def SUPPORT_OutputType_WS2811
 
-#ifdef SUPPORT_RELAY_OUTPUT
+#ifdef SUPPORT_OutputType_Relay
         {c_OutputMgr::e_OutputType::OutputType_Relay, "Relay"},
+#endif // def SUPPORT_OutputType_Servo_PCA9685
+#ifdef SUPPORT_OutputType_Servo_PCA9685
         {c_OutputMgr::e_OutputType::OutputType_Servo_PCA9685, "Servo_PCA9685"},
-#endif // def SUPPORT_RELAY_OUTPUT
+#endif // def SUPPORT_OutputType_Servo_PCA9685
 
         {c_OutputMgr::e_OutputType::OutputType_Disabled, "Disabled"},
 };
@@ -120,55 +122,55 @@ typedef struct
 
 //-----------------------------------------------------------------------------
 static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] =
-{
+    {
 #ifdef DEFAULT_UART_1_GPIO
-    {DEFAULT_UART_1_GPIO, UART_NUM_1},
+        {DEFAULT_UART_1_GPIO, UART_NUM_1},
 #endif // def DEFAULT_UART_1_GPIO
 
 #ifdef DEFAULT_UART_2_GPIO
-    {DEFAULT_UART_2_GPIO, UART_NUM_2},
+        {DEFAULT_UART_2_GPIO, UART_NUM_2},
 #endif // def DEFAULT_UART_2_GPIO
 
     // RMT ports
 #ifdef DEFAULT_RMT_0_GPIO
-    {DEFAULT_RMT_0_GPIO,  uart_port_t (0)},
+        {DEFAULT_RMT_0_GPIO, uart_port_t(0)},
 #endif // def DEFAULT_RMT_0_GPIO
 
 #ifdef DEFAULT_RMT_1_GPIO
-    {DEFAULT_RMT_1_GPIO,  uart_port_t (1)},
+        {DEFAULT_RMT_1_GPIO, uart_port_t(1)},
 #endif // def DEFAULT_RMT_1_GPIO
 
 #ifdef DEFAULT_RMT_2_GPIO
-    {DEFAULT_RMT_2_GPIO,  uart_port_t (2)},
+        {DEFAULT_RMT_2_GPIO, uart_port_t(2)},
 #endif // def DEFAULT_RMT_2_GPIO
 
 #ifdef DEFAULT_RMT_3_GPIO
-    {DEFAULT_RMT_3_GPIO,  uart_port_t (3)},
+        {DEFAULT_RMT_3_GPIO, uart_port_t(3)},
 #endif // def DEFAULT_RMT_3_GPIO
 
 #ifdef DEFAULT_RMT_4_GPIO
-    {DEFAULT_RMT_4_GPIO,  uart_port_t (4)},
+        {DEFAULT_RMT_4_GPIO, uart_port_t(4)},
 #endif // def DEFAULT_RMT_4_GPIO
 
 #ifdef DEFAULT_RMT_5_GPIO
-    {DEFAULT_RMT_5_GPIO,  uart_port_t (5)},
+        {DEFAULT_RMT_5_GPIO, uart_port_t(5)},
 #endif // def DEFAULT_RMT_5_GPIO
 
 #ifdef DEFAULT_RMT_6_GPIO
-    {DEFAULT_RMT_6_GPIO,  uart_port_t (6)},
+        {DEFAULT_RMT_6_GPIO, uart_port_t(6)},
 #endif // def DEFAULT_RMT_6_GPIO
 
 #ifdef DEFAULT_RMT_7_GPIO
-    {DEFAULT_RMT_7_GPIO,  uart_port_t (7)},
+        {DEFAULT_RMT_7_GPIO, uart_port_t(7)},
 #endif // def DEFAULT_RMT_7_GPIO
 
 #ifdef SUPPORT_SPI_OUTPUT
-    {DEFAULT_SPI_DATA_GPIO, uart_port_t (-1)},
+        {DEFAULT_SPI_DATA_GPIO, uart_port_t(-1)},
 #endif
 
-#ifdef SUPPORT_RELAY_OUTPUT
-    {gpio_num_t::GPIO_NUM_10, uart_port_t (-1)},
-#endif // def SUPPORT_RELAY_OUTPUT
+#ifdef DEFAULT_RELAY_GPIO
+        {DEFAULT_RELAY_GPIO, uart_port_t(-1)},
+#endif // def DEFAULT_RELAY_GPIO
 
 };
 
@@ -206,8 +208,9 @@ c_OutputMgr::~c_OutputMgr()
 void c_OutputMgr::Begin ()
 {
     // DEBUG_START;
-    IsBooting = false;
-    FileMgr.DeleteConfigFile(ConfigFileName);
+
+    // IsBooting = false;
+    // FileMgr.DeleteConfigFile(ConfigFileName);
 
     // prevent recalls
     if (true == HasBeenInitialized)
@@ -343,6 +346,7 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
 void c_OutputMgr::CreateNewConfig ()
 {
     // DEBUG_START;
+    // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
 
     // DEBUG_V (String (F ("--- WARNING: Creating a new Output Manager configuration Data set ---")));
 
@@ -359,24 +363,25 @@ void c_OutputMgr::CreateNewConfig ()
     JsonConfig[F ("MaxChannels")] = sizeof(OutputBuffer);
 
     // DEBUG_V ("for each output type");
-    for (int outputTypeId = int (OutputType_Start);
-         outputTypeId < int (OutputType_End);
-         ++outputTypeId)
+    for (auto CurrentOutputType : OutputTypeXlateMap)
     {
         // DEBUG_V ("for each interface");
         for (DriverInfo_t CurrentOutput : OutputChannelDrivers)
         {
             // DEBUG_V(String("DriverId: ") + String(CurrentOutput.DriverId));
             // DEBUG_V (String ("instantiate output type: ") + String (outputTypeId));
-            InstantiateNewOutputChannel(e_OutputChannelIds(CurrentOutput.DriverId), e_OutputType(outputTypeId), false);
+            InstantiateNewOutputChannel(e_OutputChannelIds(CurrentOutput.DriverId), CurrentOutputType.id, false);
             // DEBUG_V ("");
         } // end for each interface
+
+        // PrettyPrint(JsonConfig, "Intermediate in OutputMgr");
 
         // DEBUG_V ("collect the config data for this output type");
         CreateJsonConfig (JsonConfig);
         // DEBUG_V(String("       Heap: ") + String(ESP.getFreeHeap()));
         // DEBUG_V(String(" overflowed: ") + String(JsonConfigDoc.overflowed()));
         // DEBUG_V(String("memoryUsage: ") + String(JsonConfigDoc.memoryUsage()));
+        // PrettyPrint(JsonConfig, "Final Port in OutputMgr");
 
         // DEBUG_V ("");
     } // end for each output type
@@ -386,12 +391,16 @@ void c_OutputMgr::CreateNewConfig ()
     {
         InstantiateNewOutputChannel(e_OutputChannelIds(CurrentOutput.DriverId), e_OutputType::OutputType_Disabled);
     }// end for each interface
+
+    // PrettyPrint(JsonConfig, "Complete OutputMgr");
+
     // DEBUG_V ("Outputs Are disabled");
+
     CreateJsonConfig (JsonConfig);
 
-    // DEBUG_V (String ("       Heap: ") + String (ESP.getFreeHeap ()));
-    // DEBUG_V (String (" overflowed: ") + String (JsonConfigDoc.overflowed()));
-    // DEBUG_V (String ("memoryUsage: ") + String (JsonConfigDoc.memoryUsage()));
+    DEBUG_V (String ("       Heap: ") + String (ESP.getFreeHeap ()));
+    DEBUG_V (String (" overflowed: ") + String (JsonConfigDoc.overflowed()));
+    DEBUG_V (String ("memoryUsage: ") + String (JsonConfigDoc.memoryUsage()));
 
     SetConfig(JsonConfigDoc);
 
@@ -540,7 +549,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
             }
 #endif // defined(SUPPORT_OutputType_GECE)
 
-#ifdef SUPPORT_OutputType_SERIAL
+#ifdef SUPPORT_OutputType_Serial
             case e_OutputType::OutputType_Serial:
             {
                 if (OM_IS_UART)
@@ -558,9 +567,9 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
 
                 break;
             }
-#endif // def SUPPORT_OutputType_SERIAL
+#endif // def SUPPORT_OutputType_Serial
 
-#ifdef SUPPORT_OutputType_RENARD
+#ifdef SUPPORT_OutputType_Renard
             case e_OutputType::OutputType_Renard:
             {
                 if (OM_IS_UART)
@@ -578,9 +587,9 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
 
                 break;
             }
-#endif // def SUPPORT_OutputType_RENARD
+#endif // def SUPPORT_OutputType_Renard
 
-#ifdef SUPPORT_RELAY_OUTPUT
+#ifdef SUPPORT_OutputType_Relay
             case e_OutputType::OutputType_Relay:
             {
                 if (ChannelIndex == OutputChannelId_Relay)
@@ -598,7 +607,9 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
 
                 break;
             }
+#endif // def SUPPORT_OutputType_Relay
 
+#ifdef SUPPORT_OutputType_Servo_PCA9685
             case e_OutputType::OutputType_Servo_PCA9685:
             {
                 if (ChannelIndex == OutputChannelId_Relay)
@@ -615,7 +626,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(c_OutputMgr::e_OutputChannelIds Ch
                 // DEBUG_V ("");
                 break;
             }
-#endif // SUPPORT_RELAY_OUTPUT
+#endif // SUPPORT_OutputType_Servo_PCA9685
 
 #ifdef SUPPORT_OutputType_WS2811
             case e_OutputType::OutputType_WS2811:
@@ -1043,7 +1054,10 @@ void c_OutputMgr::SetConfig (const char * ConfigData)
  */
 void c_OutputMgr::SetConfig(ArduinoJson::JsonDocument & ConfigData)
 {
-    // DEBUG_START;
+    DEBUG_START;
+
+    // serializeJson(ConfigData, LOG_PORT);
+    // DEBUG_V("");
 
     if (true == FileMgr.SaveConfigFile(ConfigFileName, ConfigData))
     {

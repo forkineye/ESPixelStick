@@ -91,7 +91,7 @@ public:
 #ifdef SUPPORT_SPI_OUTPUT
         OutputChannelId_SPI_1,
 #endif // def SUPPORT_SPI_OUTPUT
-#ifdef SUPPORT_RELAY_OUTPUT
+#if defined(SUPPORT_OutputType_Relay) || defined(SUPPORT_OutputType_Servo_PCA9685)
         OutputChannelId_Relay,
 #endif // def SUPPORT_RELAY_OUTPUT
 
@@ -109,51 +109,55 @@ public:
 #endif // def SUPPORT_RMT_OUTPUT
     };
 
+    // do NOT insert into the middle of this list. Always add new types to the end of the list
     enum e_OutputType
     {
+            OutputType_Disabled = 0,
 #ifdef SUPPORT_OutputType_WS2811
-            OutputType_WS2811,
+            OutputType_WS2811 = 1,
 #endif // def SUPPORT_OutputType_WS2811
 #ifdef SUPPORT_OutputType_GECE
-            OutputType_GECE,
+            OutputType_GECE = 2,
 #endif // def SUPPORT_OutputType_GECE
 #ifdef SUPPORT_OutputType_DMX
-            OutputType_DMX,
+            OutputType_DMX = 3,
 #endif // def SUPPORT_OutputType_DMX
 #ifdef SUPPORT_OutputType_Renard
-            OutputType_Renard,
+            OutputType_Renard = 4,
 #endif // def SUPPORT_OutputType_Renard
 #ifdef SUPPORT_OutputType_Serial
-            OutputType_Serial,
+            OutputType_Serial = 5,
 #endif // def SUPPORT_OutputType_Serial
-#ifdef SUPPORT_RELAY_OUTPUT
-            OutputType_Relay,
-            OutputType_Servo_PCA9685,
-#endif // def SUPPORT_RELAY_OUTPUT
+#ifdef SUPPORT_OutputType_Relay
+            OutputType_Relay = 6,
+#endif // def SUPPORT_OutputType_Relay
+#ifdef SUPPORT_OutputType_Servo_PCA9685
+            OutputType_Servo_PCA9685 = 7,
+#endif // def SUPPORT_OutputType_Servo_PCA9685
 #ifdef SUPPORT_OutputType_UCS1903
-            OutputType_UCS1903,
+            OutputType_UCS1903 = 8,
 #endif // def SUPPORT_OutputType_UCS1903
 #ifdef SUPPORT_OutputType_TM1814
-            OutputType_TM1814,
+            OutputType_TM1814 = 9,
 #endif // def SUPPORT_OutputType_TM1814
 #ifdef SUPPORT_OutputType_WS2801
-            OutputType_WS2801,
+            OutputType_WS2801 = 10,
 #endif // def SUPPORT_OutputType_WS2801
 #ifdef SUPPORT_OutputType_APA102
-            OutputType_APA102,
+            OutputType_APA102 = 11,
 #endif // def SUPPORT_OutputType_APA102
 #ifdef SUPPORT_OutputType_GS8208
-            OutputType_GS8208,
+            OutputType_GS8208 = 12,
 #endif // def SUPPORT_OutputType_GS8208
 #ifdef SUPPORT_OutputType_UCS8903
-            OutputType_UCS8903,
+            OutputType_UCS8903 = 13,
 #endif // def SUPPORT_OutputType_UCS8903
 #ifdef SUPPORT_OutputType_TLS3001
-            OutputType_TLS3001,
+            OutputType_TLS3001 = 14,
 #endif // def SUPPORT_OutputType_TLS3001
-            OutputType_Disabled,
+            // Add new types here
             OutputType_End, // must be last
-            OutputType_Start = 0,
+            OutputType_Start = OutputType_Disabled,
     };
 
 #ifdef ARDUINO_ARCH_ESP8266
