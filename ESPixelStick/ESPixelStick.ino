@@ -147,25 +147,25 @@ void setup()
     // Load configuration from the File System and set Hostname
     loadConfig();
 
-    DEBUG_V(String("InputMgr Heap: ") + String(ESP.getFreeHeap()));
+    // DEBUG_V(String("InputMgr Heap: ") + String(ESP.getFreeHeap()));
     // connect the input processing to the output processing.
     InputMgr.Begin (0);
 
-    DEBUG_V(String("OutputMgr Heap: ") + String(ESP.getFreeHeap()));
+    // DEBUG_V(String("OutputMgr Heap: ") + String(ESP.getFreeHeap()));
     // Set up the output manager to start sending data to the serial ports
     OutputMgr.Begin();
 
-    DEBUG_V(String("NetworkMgr Heap: ") + String(ESP.getFreeHeap()));
+    // DEBUG_V(String("NetworkMgr Heap: ") + String(ESP.getFreeHeap()));
     NetworkMgr.Begin();
 
-    DEBUG_V(String("WebMgr Heap: ") + String(ESP.getFreeHeap()));
+    // DEBUG_V(String("WebMgr Heap: ") + String(ESP.getFreeHeap()));
     // Configure and start the web server
     WebMgr.Begin(&config);
 
-    DEBUG_V(String("FPPDiscovery Heap: ") + String(ESP.getFreeHeap()));
+    // DEBUG_V(String("FPPDiscovery Heap: ") + String(ESP.getFreeHeap()));
     FPPDiscovery.begin ();
 
-    DEBUG_V(String("Final Heap: ") + String(ESP.getFreeHeap()));
+    // DEBUG_V(String("Final Heap: ") + String(ESP.getFreeHeap()));
 
 #ifdef ARDUINO_ARCH_ESP8266
     // * ((volatile uint32_t*)0x60000900) &= ~(1); // Hardware WDT OFF
