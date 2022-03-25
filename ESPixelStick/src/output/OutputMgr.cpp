@@ -614,10 +614,10 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 #ifdef SUPPORT_OutputType_Relay
             case e_OutputType::OutputType_Relay:
             {
-                if (CurrentOutputChannel.DriverId == OutputChannelId_Relay)
+                if (CurrentOutputChannelDriver.DriverId == OutputChannelId_Relay)
                 {
-                    // logcon (CN_stars + String (F (" Starting RELAY for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
-                    CurrentOutputChannel.pOutputChannelDriver = new c_OutputRelay(CurrentOutputChannel.DriverId, dataPin, UartId, OutputType_Relay);
+                    // logcon (CN_stars + String (F (" Starting RELAY for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputRelay(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_Relay);
                     // DEBUG_V ("");
                     break;
                 }
@@ -625,9 +625,9 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 
                 if (!BuildingNewConfig)
                 {
-                    logcon(CN_stars + String(F(" Cannot Start RELAY for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
+                    logcon(CN_stars + String(F(" Cannot Start RELAY for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                 }
-                CurrentOutputChannel.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannel.DriverId, dataPin, UartId, OutputType_Disabled);
+                CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
 
                 break;
@@ -637,10 +637,10 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 #ifdef SUPPORT_OutputType_Servo_PCA9685
             case e_OutputType::OutputType_Servo_PCA9685:
             {
-                if (CurrentOutputChannel.DriverId == OutputChannelId_Relay)
+                if (CurrentOutputChannelDriver.DriverId == OutputChannelId_Relay)
                 {
-                    // logcon (CN_stars + String (F (" Starting Servo PCA9685 for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
-                    CurrentOutputChannel.pOutputChannelDriver = new c_OutputServoPCA9685(CurrentOutputChannel.DriverId, dataPin, UartId, OutputType_Servo_PCA9685);
+                    // logcon (CN_stars + String (F (" Starting Servo PCA9685 for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputServoPCA9685(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_Servo_PCA9685);
                     // DEBUG_V ("");
                     break;
                 }
@@ -761,19 +761,19 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 #ifdef SUPPORT_OutputType_WS2801
             case e_OutputType::OutputType_WS2801:
             {
-                if (CurrentOutputChannel.DriverId == OutputChannelId_SPI_1)
+                if (CurrentOutputChannelDriver.DriverId == OutputChannelId_SPI_1)
                 {
-                    // logcon (CN_stars + String (F (" Starting WS2811 RMT for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
-                    CurrentOutputChannel.pOutputChannelDriver = new c_OutputWS2801Spi(CurrentOutputChannel.DriverId, dataPin, UartId, OutputType_WS2801);
+                    // logcon (CN_stars + String (F (" Starting WS2811 RMT for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputWS2801Spi(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_WS2801);
                     // DEBUG_V ("");
                     break;
                 }
 
                 if (!BuildingNewConfig)
                 {
-                    logcon(CN_stars + String(F(" Cannot Start WS2801 for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
+                    logcon(CN_stars + String(F(" Cannot Start WS2801 for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                 }
-                CurrentOutputChannel.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannel.DriverId, dataPin, UartId, OutputType_Disabled);
+                CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
 
                 break;
@@ -783,19 +783,19 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 #ifdef SUPPORT_OutputType_APA102
             case e_OutputType::OutputType_APA102:
             {
-                if (CurrentOutputChannel.DriverId == OutputChannelId_SPI_1)
+                if (CurrentOutputChannelDriver.DriverId == OutputChannelId_SPI_1)
                 {
-                    // logcon (CN_stars + String (F (" Starting WS2811 RMT for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
-                    CurrentOutputChannel.pOutputChannelDriver = new c_OutputAPA102Spi(CurrentOutputChannel.DriverId, dataPin, UartId, OutputType_APA102);
+                    // logcon (CN_stars + String (F (" Starting WS2811 RMT for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputAPA102Spi(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_APA102);
                     // DEBUG_V ("");
                     break;
                 }
 
                 if (!BuildingNewConfig) 
                 {
-                    logcon(CN_stars + String(F(" Cannot Start WS2801 for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
+                    logcon(CN_stars + String(F(" Cannot Start WS2801 for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                 }
-                CurrentOutputChannel.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannel.DriverId, dataPin, UartId, OutputType_Disabled);
+                CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
 
                 break;
