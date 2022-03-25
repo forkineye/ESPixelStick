@@ -234,13 +234,13 @@ void IRAM_ATTR c_OutputUCS8903Uart::ISR_Handler ()
         // free space in the FIFO divided by the number of data bytes per intensity
         // gives the max number of intensities we can add to the FIFO
         uint32_t NumEmptyIntensitySlots = ((((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / UCS8903_NUM_UART_DATA_BYTES_PER_INTENSITY_VALUE);
-        register uint8_t OneValue  = Convert2BitIntensityToUCS8903UartDataStream[1];
-        register uint8_t ZeroValue = Convert2BitIntensityToUCS8903UartDataStream[0];
+        uint8_t OneValue  = Convert2BitIntensityToUCS8903UartDataStream[1];
+        uint8_t ZeroValue = Convert2BitIntensityToUCS8903UartDataStream[0];
 
         while ((NumEmptyIntensitySlots--) && (MoreDataToSend()))
         {
             // cant use map function in an ISR. It crashes.
-            register uint32_t IntensityValue = uint32_t(GetNextIntensityToSend()) * IntensityMultiplier;
+            uint32_t IntensityValue = uint32_t(GetNextIntensityToSend()) * IntensityMultiplier;
             for (uint16_t mask = 1 << (UCS8903_INTENSITY_DATA_WIDTH - 1); 0 != mask; mask >>= 1)
             {
                 // convert the intensity data into UART data
