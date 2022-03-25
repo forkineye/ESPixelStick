@@ -284,10 +284,10 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_StartNewFrame ()
 //----------------------------------------------------------------------------
 void IRAM_ATTR c_OutputRmt::ISR_Handler_SendIntensityData ()
 {
-    register uint32_t* pMem         = (uint32_t*)RmtCurrentAddr;
-    register uint32_t OneBitValue   = Rgb2Rmt[RmtFrameType_t::RMT_DATA_BIT_ONE_ID].val;
-    register uint32_t ZeroBitValue  = Rgb2Rmt[RmtFrameType_t::RMT_DATA_BIT_ZERO_ID].val;
-    register uint32_t NumEmptyIntensitySlots = NumIntensityValuesPerInterrupt;
+    uint32_t* pMem         = (uint32_t*)RmtCurrentAddr;
+    uint32_t OneBitValue   = Rgb2Rmt[RmtFrameType_t::RMT_DATA_BIT_ONE_ID].val;
+    uint32_t ZeroBitValue  = Rgb2Rmt[RmtFrameType_t::RMT_DATA_BIT_ZERO_ID].val;
+    uint32_t NumEmptyIntensitySlots = NumIntensityValuesPerInterrupt;
 
     while ( (NumEmptyIntensitySlots--) && (OutputPixel->MoreDataToSend ()))
     {

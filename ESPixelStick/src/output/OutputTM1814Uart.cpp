@@ -178,8 +178,8 @@ void IRAM_ATTR c_OutputTM1814Uart::ISR_Handler ()
         // Fill the FIFO with new data
         // free space in the FIFO divided by the number of data bytes per intensity
         // gives the max number of intensities we can add to the FIFO
-        register uint32_t OneValue  = ConvertIntensityToUartDataStream[1];
-        register uint32_t ZeroValue = ConvertIntensityToUartDataStream[0];
+        uint32_t OneValue  = ConvertIntensityToUartDataStream[1];
+        uint32_t ZeroValue = ConvertIntensityToUartDataStream[0];
         uint32_t NumEmptyIntensitySlots = ((((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / TM1814_NUM_DATA_BYTES_PER_INTENSITY_BYTE);
         while ((NumEmptyIntensitySlots--) && (MoreDataToSend()))
         {
