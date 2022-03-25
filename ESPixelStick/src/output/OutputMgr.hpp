@@ -183,7 +183,7 @@ private:
         // pointer(s) to the current active output drivers
         struct DriverInfo_t
         {
-                size_t DriverId = 0;
+                e_OutputChannelIds DriverId = OutputChannelId_Start;
                 c_OutputCommon *pOutputChannelDriver = nullptr;
                 size_t StartingChannelId = 0;
                 size_t ChannelCount = 0;
@@ -211,12 +211,12 @@ private:
     size_t  UsedBufferSize = 0;
 
 #ifdef SUPPORT_UART_OUTPUT
-#       define OM_IS_UART ((CurrentOutputChannel.DriverId >= OutputChannelId_UART_FIRST) && (CurrentOutputChannel.DriverId <= OutputChannelId_UART_LAST))
+#       define OM_IS_UART ((CurrentOutputChannelDriver.DriverId >= OutputChannelId_UART_FIRST) && (CurrentOutputChannelDriver.DriverId <= OutputChannelId_UART_LAST))
 #else
 #   define OM_IS_UART false
 #endif // def SUPPORT_UART_OUTPUT
 #ifdef SUPPORT_RMT_OUTPUT
-#       define OM_IS_RMT ((CurrentOutputChannel.DriverId >= OutputChannelId_RMT_FIRST) && (CurrentOutputChannel.DriverId <= OutputChannelId_RMT_LAST))
+#       define OM_IS_RMT ((CurrentOutputChannelDriver.DriverId >= OutputChannelId_RMT_FIRST) && (CurrentOutputChannelDriver.DriverId <= OutputChannelId_RMT_LAST))
 #else
 #   define OM_IS_RMT false
 #endif // def SUPPORT_RMT_OUTPUT
