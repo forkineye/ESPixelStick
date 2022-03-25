@@ -43,3 +43,19 @@
 #define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14
 #define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_13
 #define USE_MISO_PULLUP
+
+// Output Types
+// Not Finished - #define SUPPORT_OutputType_TLS3001
+// #define SUPPORT_OutputType_APA102  // SPI
+#define SUPPORT_OutputType_DMX     // UART
+#define SUPPORT_OutputType_GECE    // UART
+#define SUPPORT_OutputType_GS8208  // UART / RMT
+#define SUPPORT_OutputType_Renard  // UART
+#define SUPPORT_OutputType_Serial  // UART
+#define SUPPORT_OutputType_TM1814  // UART / RMT
+#define SUPPORT_OutputType_UCS1903 // UART / RMT
+#define SUPPORT_OutputType_UCS8903 // UART / RMT
+// #define SUPPORT_OutputType_WS2801  // SPI
+#define SUPPORT_OutputType_WS2811  // UART / RMT
+// #define SUPPORT_OutputType_Relay            // GPIO
+// #define SUPPORT_OutputType_Servo_PCA9685    // I2C (default pins)
