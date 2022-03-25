@@ -398,9 +398,9 @@ void c_OutputMgr::CreateNewConfig ()
 
     CreateJsonConfig (JsonConfig);
 
-    DEBUG_V (String ("       Heap: ") + String (ESP.getFreeHeap ()));
-    DEBUG_V (String (" overflowed: ") + String (JsonConfigDoc.overflowed()));
-    DEBUG_V (String ("memoryUsage: ") + String (JsonConfigDoc.memoryUsage()));
+    // DEBUG_V (String ("       Heap: ") + String (ESP.getFreeHeap ()));
+    // DEBUG_V (String (" overflowed: ") + String (JsonConfigDoc.overflowed()));
+    // DEBUG_V (String ("memoryUsage: ") + String (JsonConfigDoc.memoryUsage()));
 
     SetConfig(JsonConfigDoc);
 
@@ -1054,7 +1054,7 @@ void c_OutputMgr::SetConfig (const char * ConfigData)
  */
 void c_OutputMgr::SetConfig(ArduinoJson::JsonDocument & ConfigData)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     // serializeJson(ConfigData, LOG_PORT);
     // DEBUG_V("");
