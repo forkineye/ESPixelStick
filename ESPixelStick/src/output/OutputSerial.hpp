@@ -30,7 +30,7 @@ GNU General Public License for more details.
 */
 
 #include "OutputCommon.hpp"
-#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_SERIAL) || defined(SUPPORT_OutputType_RENARD)
+#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
 
 #ifdef ARDUINO_ARCH_ESP32
 #   include <driver/uart.h>
@@ -124,4 +124,4 @@ private:
 
 }; // c_OutputGenericSerial
 
-#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_SERIAL) || defined(SUPPORT_OutputType_RENARD)
+#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)

@@ -30,7 +30,7 @@ GNU General Public License for more details.
 #include "OutputSerial.hpp"
 #include "OutputCommon.hpp"
 
-#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_SERIAL) || defined(SUPPORT_OutputType_RENARD)
+#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
 
 #ifdef ARDUINO_ARCH_ESP8266
 extern "C" {
@@ -135,7 +135,7 @@ void c_OutputSerial::StartUart ()
 {
     // DEBUG_START;
     int speed = 0;
-
+#if defined(SUPPORT_OutputType_DMX)
     if (OutputType == c_OutputMgr::e_OutputType::OutputType_DMX)
     {
         speed = uint32_t (BaudRate::BR_DMX);
@@ -144,6 +144,9 @@ void c_OutputSerial::StartUart ()
     {
         speed = uint32_t (CurrentBaudrate);
     }
+#else
+    speed = uint32_t(CurrentBaudrate);
+#endif // defined(SUPPORT_OutputType_DMX)
 
 #ifdef ARDUINO_ARCH_ESP8266
     /* Initialize uart */
@@ -534,4 +537,4 @@ void c_OutputSerial::Render ()
 
     // DEBUG_END;
 } // render
-#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_SERIAL) || defined(SUPPORT_OutputType_RENARD)
+#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
