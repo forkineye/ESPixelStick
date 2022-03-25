@@ -90,7 +90,7 @@ c_WebMgr::~c_WebMgr ()
 ///< Start the module
 void c_WebMgr::Begin (config_t* /* NewConfig */)
 {
-    DEBUG_START;
+    // DEBUG_START;
     do // once
     {
 #ifdef BOARD_HAS_PSRAM
