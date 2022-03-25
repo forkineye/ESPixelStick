@@ -18,7 +18,7 @@ GNU General Public License for more details.
 *
 */
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_RELAY_OUTPUT
+#ifdef SUPPORT_OutputType_Servo_PCA9685
 
 #include "OutputCommon.hpp"
 #include <Adafruit_PWMServoDriver.h>
@@ -81,4 +81,4 @@ private:
 
 }; // c_OutputServoPCA9685
 
-#endif // def SUPPORT_RELAY_OUTPUT
+#endif // def SUPPORT_OutputType_Servo_PCA9685

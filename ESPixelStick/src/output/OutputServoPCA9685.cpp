@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 #include "../ESPixelStick.h"
 
-#ifdef SUPPORT_RELAY_OUTPUT
+#ifdef SUPPORT_OutputType_Servo_PCA9685
 
 #include <utility>
 #include <algorithm>
@@ -32,8 +32,8 @@ c_OutputServoPCA9685::c_OutputServoPCA9685 (c_OutputMgr::e_OutputChannelIds Outp
                                 c_OutputMgr::e_OutputType outputType) :
     c_OutputCommon(OutputChannelId, outputGpio, uart, outputType)
 {
-    DEBUG_START;
-    DEBUG_END;
+    // DEBUG_START;
+    // DEBUG_END;
 } // c_OutputServoPCA9685
 
 //----------------------------------------------------------------------------
@@ -41,8 +41,9 @@ c_OutputServoPCA9685::~c_OutputServoPCA9685 ()
 {
     // DEBUG_START;
 
-    if(pwm)
+    if(nullptr != pwm)
     {
+        // DEBUG_V();
         delete pwm;
     }
 
@@ -66,7 +67,7 @@ void c_OutputServoPCA9685::Begin ()
             currentServoPCA9685Channel.Is16Bit = false;
             currentServoPCA9685Channel.IsScaled = true;
         }
-
+        // DEBUG_V("Allocate PWM");
         pwm = new Adafruit_PWMServoDriver();
 
         SetOutputBufferSize(Num_Channels);
@@ -218,6 +219,7 @@ void c_OutputServoPCA9685::GetConfig (ArduinoJson::JsonObject & jsonConfig)
         JsonObject JsonChannelData = JsonChannelList.createNestedObject ();
 
         JsonChannelData[OM_SERVO_PCA9685_CHANNEL_ID_NAME]       = ChannelId;
+        // continue;
         JsonChannelData[OM_SERVO_PCA9685_CHANNEL_ENABLED_NAME]  = currentServoPCA9685.Enabled;
         JsonChannelData[OM_SERVO_PCA9685_CHANNEL_MINLEVEL_NAME] = currentServoPCA9685.MinLevel;
         JsonChannelData[OM_SERVO_PCA9685_CHANNEL_MAXLEVEL_NAME] = currentServoPCA9685.MaxLevel;
@@ -232,6 +234,9 @@ void c_OutputServoPCA9685::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 
         ++ChannelId;
     }
+
+    // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
+    // PrettyPrint(jsonConfig, "Servo");
 
     // DEBUG_END;
 } // GetConfig
@@ -314,4 +319,4 @@ void c_OutputServoPCA9685::Render ()
     // DEBUG_END;
 } // render
 
-#endif // def SUPPORT_RELAY_OUTPUT
+#endif // def SUPPORT_OutputType_Servo_PCA9685
