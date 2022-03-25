@@ -45,7 +45,7 @@
 #define DEFAULT_SPI_CLOCK_GPIO gpio_num_t::GPIO_NUM_25
 
 // #include <ETH.h>
-#include "network/ETH_m.h"
+#include "../network/ETH_m.h"
 /*
    * ETH_CLOCK_GPIO0_IN   - default: external clock from crystal oscillator
    * ETH_CLOCK_GPIO0_OUT  - 50MHz clock from internal APLL output on GPIO0 - possibly an inverter is needed for LAN8720

@@ -36,7 +36,7 @@
 // #define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_15
 
 // #include <ETH.h>
-#include "network/ETH_m.h"
+#include "../network/ETH_m.h"
 
 /*
    * ETH_CLOCK_GPIO0_IN   - default: external clock from crystal oscillator
@@ -70,11 +70,11 @@
 // Output Types
 // Not Finished - #define SUPPORT_OutputType_TLS3001
 // #define SUPPORT_OutputType_APA102  // SPI
-#define SUPPORT_OutputType_DMX     // UART
-#define SUPPORT_OutputType_GECE    // UART
+// #define SUPPORT_OutputType_DMX     // UART
+// #define SUPPORT_OutputType_GECE    // UART
 #define SUPPORT_OutputType_GS8208  // UART / RMT
-#define SUPPORT_OutputType_Renard  // UART
-#define SUPPORT_OutputType_Serial  // UART
+// #define SUPPORT_OutputType_Renard  // UART
+// #define SUPPORT_OutputType_Serial  // UART
 #define SUPPORT_OutputType_TM1814  // UART / RMT
 #define SUPPORT_OutputType_UCS1903 // UART / RMT
 #define SUPPORT_OutputType_UCS8903 // UART / RMT

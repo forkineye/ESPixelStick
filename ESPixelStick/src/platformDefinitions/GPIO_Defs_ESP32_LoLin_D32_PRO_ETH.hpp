@@ -48,7 +48,7 @@
 #define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_4
 
 // #include <ETH.h>
-#include "network/ETH_m.h"
+#include "../network/ETH_m.h"
 
 /*
    * ETH_CLOCK_GPIO0_IN   - default: external clock from crystal oscillator
