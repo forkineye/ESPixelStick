@@ -87,10 +87,10 @@ c_OutputCommon::~c_OutputCommon ()
         {
             return;
         }
-
+        // DEBUG_V("Set Pin Mode");
         pinMode(DataPin, INPUT_PULLUP);
 
-        // DEBUG_V ("");
+        // DEBUG_V ("Terminate UART");
         TerminateUartOperation();
     }
     // DEBUG_END;
