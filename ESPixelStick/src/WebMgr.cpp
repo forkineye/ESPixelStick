@@ -48,6 +48,17 @@ static AsyncWebServer   webServer (HTTP_PORT);  // Web Server
 static AsyncWebSocket   webSocket ("/ws");      // Web Socket Plugin
 
 //-----------------------------------------------------------------------------
+void PrettyPrint(DynamicJsonDocument &jsonStuff, String Name)
+{
+    // DEBUG_V ("---------------------------------------------");
+    LOG_PORT.println (String (F ("---- Pretty Print: '")) + Name + "'");
+    serializeJson (jsonStuff, LOG_PORT);
+    LOG_PORT.println ("");
+        // DEBUG_V ("---------------------------------------------");
+
+} // PrettyPrint
+
+//-----------------------------------------------------------------------------
 void PrettyPrint (JsonArray& jsonStuff, String Name)
 {
     // DEBUG_V ("---------------------------------------------");
