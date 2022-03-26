@@ -26,6 +26,9 @@
 #define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_3
 #define RMT_LAST                OutputChannelId_RMT_2
 
+#define DEFAULT_I2C_SDA         gpio_num_t::GPIO_NUM_21
+#define DEFAULT_I2C_SCL         gpio_num_t::GPIO_NUM_22
+
 // File Manager
 // #define SUPPORT_SD
 // #define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_12
@@ -67,16 +70,16 @@
 
 // Output Types
 // Not Finished - #define SUPPORT_OutputType_TLS3001
-// #define SUPPORT_OutputType_APA102  // SPI
-// #define SUPPORT_OutputType_DMX     // UART
-// #define SUPPORT_OutputType_GECE    // UART
-#define SUPPORT_OutputType_GS8208  // UART / RMT
-// #define SUPPORT_OutputType_Renard  // UART
-// #define SUPPORT_OutputType_Serial  // UART
-#define SUPPORT_OutputType_TM1814  // UART / RMT
-#define SUPPORT_OutputType_UCS1903 // UART / RMT
-#define SUPPORT_OutputType_UCS8903 // UART / RMT
-// #define SUPPORT_OutputType_WS2801  // SPI
-#define SUPPORT_OutputType_WS2811  // UART / RMT
-// #define SUPPORT_OutputType_Relay            // GPIO
-// #define SUPPORT_OutputType_Servo_PCA9685    // I2C (default pins)
+// #define SUPPORT_OutputType_APA102         // SPI
+// #define SUPPORT_OutputType_DMX            // UART
+// #define SUPPORT_OutputType_GECE           // UART
+#define SUPPORT_OutputType_GS8208         // UART / RMT
+// #define SUPPORT_OutputType_Renard         // UART
+// #define SUPPORT_OutputType_Serial         // UART
+#define SUPPORT_OutputType_TM1814         // UART / RMT
+#define SUPPORT_OutputType_UCS1903        // UART / RMT
+#define SUPPORT_OutputType_UCS8903        // UART / RMT
+// #define SUPPORT_OutputType_WS2801         // SPI
+#define SUPPORT_OutputType_WS2811         // UART / RMT
+// #define SUPPORT_OutputType_Relay          // GPIO
+// #define SUPPORT_OutputType_Servo_PCA9685  // I2C (default pins)
