@@ -316,7 +316,10 @@ void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
 {
     // DEBUG_START;
 
-    JsonObject json = jsonDoc.as<JsonObject> ();
+    // extern void PrettyPrint(DynamicJsonDocument & jsonStuff, String Name);
+    // PrettyPrint(jsonDoc, "deserializeCoreHandler");
+    
+    JsonObject json = jsonDoc.as<JsonObject>();
     deserializeCore (json);
 
     // DEBUG_END;
