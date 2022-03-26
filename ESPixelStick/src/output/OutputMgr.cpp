@@ -648,9 +648,9 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 
                 if (!BuildingNewConfig) 
                 {
-                    logcon(CN_stars + String(F(" Cannot Start Servo PCA9685 for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
+                    logcon(CN_stars + String(F(" Cannot Start Servo PCA9685 for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                 }
-                CurrentOutputChannel.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannel.DriverId, dataPin, UartId, OutputType_Disabled);
+                CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_Disabled);
                 // DEBUG_V ("");
                 break;
             }
