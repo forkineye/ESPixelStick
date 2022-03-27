@@ -92,4 +92,4 @@
 // #define SUPPORT_OutputType_WS2801         // SPI
 #define SUPPORT_OutputType_WS2811         // UART / RMT
 #define SUPPORT_OutputType_Relay          // GPIO
-// #define SUPPORT_OutputType_Servo_PCA9685  // I2C (default pins)
+#define SUPPORT_OutputType_Servo_PCA9685  // I2C (default pins)
