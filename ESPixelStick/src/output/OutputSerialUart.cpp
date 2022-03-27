@@ -27,7 +27,7 @@ GNU General Public License for more details.
 #include <algorithm>
 #include <math.h>
 
-#include "OutputSerial.hpp"
+#include "OutputSerialUart.hpp"
 #include "OutputCommon.hpp"
 
 #if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
@@ -81,7 +81,7 @@ enum RenardFrameDefinitions_t
 };
 
 //----------------------------------------------------------------------------
-c_OutputSerial::c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+c_OutputSerialUart::c_OutputSerialUart (c_OutputMgr::e_OutputChannelIds OutputChannelId,
                                 gpio_num_t outputGpio,
                                 uart_port_t uart,
                                 c_OutputMgr::e_OutputType outputType) :
@@ -89,10 +89,10 @@ c_OutputSerial::c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId,
 {
     // DEBUG_START;
     // DEBUG_END;
-} // c_OutputSerial
+} // c_OutputSerialUart
 
 //----------------------------------------------------------------------------
-c_OutputSerial::~c_OutputSerial ()
+c_OutputSerialUart::~c_OutputSerialUart ()
 {
     // DEBUG_START;
     if (HasBeenInitialized)
@@ -108,7 +108,7 @@ c_OutputSerial::~c_OutputSerial ()
     }
 
     // DEBUG_END;
-} // ~c_OutputSerial
+} // ~c_OutputSerialUart
 
 //----------------------------------------------------------------------------
 /* shell function to set the 'this' pointer of the real ISR
@@ -116,11 +116,11 @@ c_OutputSerial::~c_OutputSerial ()
  */
 static void IRAM_ATTR uart_intr_handler (void* param)
 {
-    reinterpret_cast <c_OutputSerial*>(param)->ISR_Handler ();
+    reinterpret_cast <c_OutputSerialUart*>(param)->ISR_Handler ();
 } // uart_intr_handler
 
 //----------------------------------------------------------------------------
-void c_OutputSerial::Begin ()
+void c_OutputSerialUart::Begin ()
 {
     // DEBUG_START;
 
@@ -131,7 +131,7 @@ void c_OutputSerial::Begin ()
 } // Begin
 
 //----------------------------------------------------------------------------
-void c_OutputSerial::StartUart ()
+void c_OutputSerialUart::StartUart ()
 {
     // DEBUG_START;
     int speed = 0;
@@ -184,7 +184,7 @@ void c_OutputSerial::StartUart ()
 *       true - no issues found
 *       false - had an issue and had to fix things
 */
-bool c_OutputSerial::validate ()
+bool c_OutputSerialUart::validate ()
 {
     // DEBUG_START;
     bool response = true;
@@ -233,7 +233,7 @@ bool c_OutputSerial::validate ()
 *       true - config has been accepted
 *       false - Config rejected. Using defaults for invalid settings
 */
-bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject & jsonConfig)
+bool c_OutputSerialUart::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
     setFromJSON (GenericSerialHeader, jsonConfig, CN_gen_ser_hdr);
@@ -260,7 +260,7 @@ bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 } // SetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputSerial::GetConfig (ArduinoJson::JsonObject & jsonConfig)
+void c_OutputSerialUart::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
     jsonConfig[CN_num_chan]    = Num_Channels;
@@ -279,7 +279,7 @@ void c_OutputSerial::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 } // GetConfig
 
 //----------------------------------------------------------------------------
-void  c_OutputSerial::GetDriverName (String & sDriverName)
+void  c_OutputSerialUart::GetDriverName (String & sDriverName)
 {
     switch (OutputType)
     {
@@ -318,7 +318,7 @@ void  c_OutputSerial::GetDriverName (String & sDriverName)
 
 //----------------------------------------------------------------------------
 // Fill the FIFO with as many intensity values as it can hold.
-void IRAM_ATTR c_OutputSerial::ISR_Handler ()
+void IRAM_ATTR c_OutputSerialUart::ISR_Handler ()
 {
     // Process if the desired UART has raised an interrupt
     if (READ_PERI_REG (UART_INT_ST (UartId)))
@@ -391,7 +391,7 @@ void IRAM_ATTR c_OutputSerial::ISR_Handler ()
 } // ISR_Handler
 
 //----------------------------------------------------------------------------
-void c_OutputSerial::GetStatus (ArduinoJson::JsonObject& jsonStatus)
+void c_OutputSerialUart::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     c_OutputCommon::GetStatus (jsonStatus);
 #ifdef USE_DMX_STATS
@@ -419,7 +419,7 @@ void c_OutputSerial::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputSerial::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputSerialUart::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 {
     // DEBUG_START;
     // DEBUG_V (String ("NumChannelsAvailable: ") + String (NumChannelsAvailable));
@@ -448,7 +448,7 @@ void c_OutputSerial::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 } // SetBufferSize
 
 //----------------------------------------------------------------------------
-void c_OutputSerial::Render ()
+void c_OutputSerialUart::Render ()
 {
     // DEBUG_START;
 

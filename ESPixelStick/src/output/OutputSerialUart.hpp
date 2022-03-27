@@ -36,15 +36,15 @@ GNU General Public License for more details.
 #   include <driver/uart.h>
 #endif
 
-class c_OutputSerial : public c_OutputCommon
+class c_OutputSerialUart : public c_OutputCommon
 {
 public:
     // These functions are inherited from c_OutputCommon
-    c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+    c_OutputSerialUart (c_OutputMgr::e_OutputChannelIds OutputChannelId,
                       gpio_num_t outputGpio,
                       uart_port_t uart,
                       c_OutputMgr::e_OutputType outputType);
-    virtual ~c_OutputSerial ();
+    virtual ~c_OutputSerialUart ();
 
     // functions to be provided by the derived class
     void   Begin ();                                         ///< set up the operating environment based on the current config (or defaults)

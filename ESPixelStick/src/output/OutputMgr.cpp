@@ -30,7 +30,7 @@
 #include "OutputAPA102Spi.hpp"
 #include "OutputGECE.hpp"
 #include "OutputRelay.hpp"
-#include "OutputSerial.hpp"
+#include "OutputSerialUart.hpp"
 #include "OutputServoPCA9685.hpp"
 #include "OutputTM1814Rmt.hpp"
 #include "OutputTM1814Uart.hpp"
@@ -526,7 +526,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                 if ((CurrentOutputChannelDriver.DriverId >= OutputChannelId_UART_FIRST) && (CurrentOutputChannelDriver.DriverId <= OutputChannelId_UART_LAST))
                 {
                     // logcon (CN_stars + String (F (" Starting DMX for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
-                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputSerial(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_DMX);
+                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputSerialUart(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_DMX);
                     // DEBUG_V ("");
                     break;
                 }
@@ -571,7 +571,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                 if (OM_IS_UART)
                 {
                     // logcon (CN_stars + String (F (" Starting Generic Serial for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
-                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputSerial(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_Serial);
+                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputSerialUart(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_Serial);
                     // DEBUG_V ("");
                     break;
                 }
@@ -594,7 +594,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                 if (OM_IS_UART)
                 {
                     // logcon (CN_stars + String (F (" Starting Renard for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
-                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputSerial(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_Renard);
+                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputSerialUart(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_Renard);
                     // DEBUG_V ("");
                     break;
                 }
