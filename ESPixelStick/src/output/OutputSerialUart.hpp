@@ -32,11 +32,13 @@ GNU General Public License for more details.
 #include "OutputCommon.hpp"
 #if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
 
+#include "OutputSerial.hpp"
+
 #ifdef ARDUINO_ARCH_ESP32
 #   include <driver/uart.h>
 #endif
 
-class c_OutputSerialUart : public c_OutputCommon
+class c_OutputSerialUart : public c_OutputSerial
 {
 public:
     // These functions are inherited from c_OutputCommon
@@ -47,62 +49,15 @@ public:
     virtual ~c_OutputSerialUart ();
 
     // functions to be provided by the derived class
-    void   Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
-    bool   SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
-    void   GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-    void   Render ();                                        ///< Call from loop(),  renders output data
-    void   GetDriverName (String & sDriverName);
-    void   GetStatus (ArduinoJson::JsonObject& jsonStatus);
-    size_t GetNumChannelsNeeded () { return Num_Channels; }
-    void   SetOutputBufferSize (uint16_t NumChannelsAvailable);
-
-#define GS_CHANNEL_LIMIT 2048
-
-    enum class BaudRate
-    {
-        BR_MIN = 38400,
-        BR_DMX = 250000,
-        BR_MAX = 460800,
-        BR_DEF = 57600,
-    };
-
+    void            Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
+    virtual bool    SetConfig(ArduinoJson::JsonObject &jsonConfig); ///< Set a new config in the driver
+    void            Render();
     /// Interrupt Handler
     void IRAM_ATTR ISR_Handler (); ///< UART ISR
 
 private:
-    const size_t    MAX_HDR_SIZE           = 10;      // Max generic serial header size
-    const size_t    MAX_FOOTER_SIZE        = 10;      // max generic serial footer size
-    const size_t    MAX_CHANNELS           = 1024;
-    const uint16_t  DEFAULT_NUM_CHANNELS   = 64;
-    const size_t    BUF_SIZE               = (MAX_CHANNELS + MAX_HDR_SIZE + MAX_FOOTER_SIZE);
-    const uint32_t  DMX_BITS_PER_BYTE      = (1.0 + 8.0 + 2.0);
 
-#define  DMX_US_PER_BIT uint32_t((1.0 / 250000.0) * 1000000.0)
-
-    /* DMX minimum timings per E1.11 */
-    const uint8_t   DMX_BREAK              = 92; // 23 bits
-    const uint8_t   DMX_MAB                = 12; //  3 bits
-
-    bool validate ();
     void StartUart ();
-
-    // config data
-    String          GenericSerialHeader;
-    String          GenericSerialFooter;
-    char           *pGenericSerialFooter      = nullptr;
-    size_t          LengthGenericSerialFooter = 0;
-    uint32_t        CurrentBaudrate           = uint32_t(BaudRate::BR_DEF); // current transmit rate
-    uint16_t        Num_Channels              = DEFAULT_NUM_CHANNELS;      // Number of data channels to transmit
-
-    // non config data
-    volatile uint16_t        RemainingDataCount;
-    volatile uint8_t       * pNextChannelToSend;
-    String                   OutputName;
-
-#define USE_DMX_STATS
-#ifdef USE_DMX_STATS
-    uint32_t TruncateFrameError = 0;
-#endif // def USE_DMX_STATS
 
 #ifdef ARDUINO_ARCH_ESP8266
     /* Returns number of bytes waiting in the TX FIFO of UART1 */
