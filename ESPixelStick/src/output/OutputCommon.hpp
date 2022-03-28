@@ -64,6 +64,10 @@ public:
     virtual void         WriteChannelData (size_t StartChannelId, size_t ChannelCount, byte *pSourceData);
     virtual void         ReadChannelData (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
 
+    IRAM_ATTR virtual void       StartNewFrame () = 0;
+    IRAM_ATTR virtual uint8_t    GetNextIntensityToSend () = 0;
+    IRAM_ATTR virtual bool       MoreDataToSend() = 0;
+
 protected :
 #define OM_CMN_NO_CUSTOM_ISR                    (-1)
 

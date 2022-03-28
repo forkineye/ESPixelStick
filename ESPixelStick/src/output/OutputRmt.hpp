@@ -20,7 +20,7 @@
 
 #include "../ESPixelStick.h"
 #ifdef SUPPORT_RMT_OUTPUT
-#include "OutputPixel.hpp"
+#include "OutputCommon.hpp"
 #include <driver/rmt.h>
 
 class c_OutputRmt
@@ -36,28 +36,28 @@ private:
 #define RMT_INT_ERROR_BIT       (RMT_INT_ERROR    << (uint32_t (RmtChannelId)*3))
 #define RMT_INT_THR_EVNT_BIT    (RMT_INT_THR_EVNT << (uint32_t (RmtChannelId)))
 
-    c_OutputPixel* OutputPixel = nullptr;
-    rmt_channel_t  RmtChannelId = rmt_channel_t (-1);
-    gpio_num_t     DataPin = gpio_num_t (-1);
-    rmt_item32_t   Intensity2Rmt[5];
+    c_OutputCommon *    OutputDataSource = nullptr;
+    rmt_channel_t       RmtChannelId = rmt_channel_t (-1);
+    gpio_num_t          DataPin = gpio_num_t (-1);
+    rmt_item32_t        Intensity2Rmt[5];
 
-    uint8_t        NumIdleBits = 6;
-    uint8_t        NumIdleBitsCount = 0;
+    uint8_t             NumIdleBits = 6;
+    uint8_t             NumIdleBitsCount = 0;
 
-    uint8_t        NumStartBits = 1;
-    uint8_t        NumStartBitsCount = 0;
+    uint8_t             NumStartBits = 1;
+    uint8_t             NumStartBitsCount = 0;
 
-    uint8_t        NumStopBits = 1;
-    uint8_t        NumStopBitsCount = 0;
+    uint8_t             NumStopBits = 1;
+    uint8_t             NumStopBitsCount = 0;
 
     volatile rmt_item32_t* RmtStartAddr = nullptr;
     volatile rmt_item32_t* RmtCurrentAddr = nullptr;
     volatile rmt_item32_t* RmtEndAddr = nullptr;
-    intr_handle_t RMT_intr_handle = NULL;
-    uint8_t NumIntensityValuesPerInterrupt = 0;
-    uint8_t NumIntensityBitsPerInterrupt = 0;
-    uint32_t LastFrameStartTime = 0;
-    uint32_t FrameMinDurationInMicroSec = 1000;
+    intr_handle_t       RMT_intr_handle = NULL;
+    uint8_t             NumIntensityValuesPerInterrupt = 0;
+    uint8_t             NumIntensityBitsPerInterrupt = 0;
+    uint32_t            LastFrameStartTime = 0;
+    uint32_t            FrameMinDurationInMicroSec = 1000;
 
 // #define USE_RMT_DEBUG_COUNTERS
 #ifdef USE_RMT_DEBUG_COUNTERS
@@ -85,7 +85,7 @@ public:
     c_OutputRmt ();
     ~c_OutputRmt ();
 
-    void Begin (rmt_channel_t ChannelId, gpio_num_t DataPin, c_OutputPixel * OutputPixel, rmt_idle_level_t idle_level);
+    void Begin (rmt_channel_t ChannelId, gpio_num_t DataPin, c_OutputCommon * OutputDataSource, rmt_idle_level_t idle_level);
     bool Render ();
     void GetStatus (ArduinoJson::JsonObject& jsonStatus);
     void set_pin (gpio_num_t _DataPin) { DataPin = _DataPin; rmt_set_gpio (RmtChannelId, rmt_mode_t::RMT_MODE_TX, DataPin, false); }

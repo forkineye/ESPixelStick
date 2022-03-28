@@ -42,7 +42,10 @@ public:
     void         GetDriverName (String & sDriverName) { sDriverName = String (F ("Disabled")); }
     size_t       GetNumChannelsNeeded () { return 0; }
 
-    void IRAM_ATTR ISR_Handler () {} ///< UART ISR
+    void IRAM_ATTR      ISR_Handler () {} ///< UART ISR
+    IRAM_ATTR void      StartNewFrame () {}
+    IRAM_ATTR uint8_t   GetNextIntensityToSend () {return 0;}
+    IRAM_ATTR bool      MoreDataToSend() { return false; }
 
 private:
 

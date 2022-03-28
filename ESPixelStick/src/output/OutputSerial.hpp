@@ -44,16 +44,17 @@ public:
     virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
             size_t       GetNumChannelsNeeded () { return Num_Channels; };
             void         SetOutputBufferSize (size_t NumChannelsAvailable);
-            bool         MoreDataToSend () { return (SerialFrameState_t::SerialIdle != SerialFrameState); }
             void         SetOutputBufferSize(uint16_t NumChannelsAvailable);
             void         Render() = 0;
+            
     IRAM_ATTR void       StartNewFrame();
     IRAM_ATTR uint8_t    GetNextIntensityToSend();
+    IRAM_ATTR bool       MoreDataToSend() { return (SerialFrameState_t::SerialIdle != SerialFrameState); }
 
-        protected:
-            uint16_t InterFrameGapInMicroSec = 250;
+protected:
+    uint16_t InterFrameGapInMicroSec = 250;
 
-            void SetFrameDurration(float IntensityBitTimeInUs);
+    void SetFrameDurration(float IntensityBitTimeInUs);
 
 #define GS_CHANNEL_LIMIT 2048
 

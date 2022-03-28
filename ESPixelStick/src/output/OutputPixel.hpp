@@ -47,12 +47,14 @@ public:
     virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
             size_t       GetNumChannelsNeeded () { return (pixel_count * NumIntensityBytesPerPixel); };
     virtual void         SetOutputBufferSize (size_t NumChannelsAvailable);
-            bool         MoreDataToSend () { return _MoreDataToSend; }
-    IRAM_ATTR void       StartNewFrame ();
-    IRAM_ATTR uint8_t    GetNextIntensityToSend ();
             void         SetInvertData (bool _InvertData) { InvertData = _InvertData; }
     virtual void         WriteChannelData (size_t StartChannelId, size_t ChannelCount, byte *pSourceData);
     virtual void         ReadChannelData (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
+
+    IRAM_ATTR bool       MoreDataToSend () { return _MoreDataToSend; }
+    IRAM_ATTR void       StartNewFrame ();
+    IRAM_ATTR uint8_t    GetNextIntensityToSend ();
+    
 protected:
 
     void SetFramePrependInformation (const uint8_t* data, size_t len);

@@ -78,14 +78,14 @@ static void IRAM_ATTR rmt_intr_handler (void* param)
 */
 void c_OutputRmt::Begin (rmt_channel_t ChannelId, 
                          gpio_num_t _DataPin, 
-                         c_OutputPixel * _OutputPixel,
+                         c_OutputCommon * _OutputDataSource,
                          rmt_idle_level_t idle_level )
 {
     // DEBUG_START;
 
     DataPin = _DataPin;
     RmtChannelId = ChannelId;
-    OutputPixel = _OutputPixel;
+    OutputDataSource = _OutputDataSource;
 
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
     // DEBUG_V (String (" RmtChannelId: ") + String (RmtChannelId));
@@ -160,7 +160,7 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler ()
             // RMT.int_ena.val &= ~RMT_INT_THR_EVNT (RmtChannelId);
             RMT.int_clr.val = RMT_INT_THR_EVNT_BIT;
 
-            if (OutputPixel->MoreDataToSend ())
+            if (OutputDataSource->MoreDataToSend ())
             {
                 ISR_Handler_SendIntensityData ();
             }
@@ -251,7 +251,7 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_StartNewFrame ()
 #endif // def USE_RMT_DEBUG_COUNTERS
 
     // set up to send a new frame
-    OutputPixel->StartNewFrame ();
+    OutputDataSource->StartNewFrame ();
 
     // override the buffer limits so that we fill as many slots as we can in the first pass
     uint8_t SavedNumIntensityValuesPerInterrupt = NumIntensityValuesPerInterrupt;
@@ -289,9 +289,9 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_SendIntensityData ()
     uint32_t ZeroBitValue  = Intensity2Rmt[RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID].val;
     uint32_t NumEmptyIntensitySlots = NumIntensityValuesPerInterrupt;
 
-    while ( (NumEmptyIntensitySlots--) && (OutputPixel->MoreDataToSend ()))
+    while ( (NumEmptyIntensitySlots--) && (OutputDataSource->MoreDataToSend ()))
     {
-        uint32_t IntensityValue = map(OutputPixel->GetNextIntensityToSend(), 0, 255, 0, IntensityMapDstMax);
+        uint32_t IntensityValue = map(OutputDataSource->GetNextIntensityToSend(), 0, 255, 0, IntensityMapDstMax);
 #ifdef USE_RMT_DEBUG_COUNTERS
         IntensityBytesSent++;
 #endif // def USE_RMT_DEBUG_COUNTERS
@@ -337,7 +337,7 @@ bool c_OutputRmt::Render ()
         }
 
 #ifdef USE_RMT_DEBUG_COUNTERS
-        if (OutputPixel->MoreDataToSend ())
+        if (OutputDataSource->MoreDataToSend ())
         {
             // DEBUG_V ("ERROR: Starting a new frame before the previous frame was completly sent");
             IncompleteFrame++;
