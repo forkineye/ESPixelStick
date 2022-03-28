@@ -31,7 +31,7 @@ c_OutputRmt::c_OutputRmt ()
 {
     // DEBUG_START;
 
-    memset ( (void*)&Rgb2Rmt[0], 0x00, sizeof (Rgb2Rmt));
+    memset ( (void*)&Intensity2Rmt[0], 0x00, sizeof (Intensity2Rmt));
 
     // DEBUG_END;
 } // c_OutputRmt
@@ -228,14 +228,14 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_StartNewFrame ()
     NumIdleBitsCount = 0;
     while (NumIdleBitsCount < NumIdleBits)
     {
-        *pMem++ = Rgb2Rmt[RmtFrameType_t::RMT_INTERFRAME_GAP_ID].val;
+        *pMem++ = Intensity2Rmt[RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID].val;
         NumIdleBitsCount++;
     }
 
     NumStartBitsCount = 0;
     if (NumStartBitsCount < NumStartBits)
     {
-        *pMem++ = Rgb2Rmt[RmtFrameType_t::RMT_STARTBIT_ID].val;
+        *pMem++ = Intensity2Rmt[RmtDataBitIdType_t::RMT_STARTBIT_ID].val;
         NumStartBitsCount++;
     }
     RmtCurrentAddr = (volatile rmt_item32_t*)pMem;
@@ -285,8 +285,8 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_StartNewFrame ()
 void IRAM_ATTR c_OutputRmt::ISR_Handler_SendIntensityData ()
 {
     uint32_t* pMem         = (uint32_t*)RmtCurrentAddr;
-    uint32_t OneBitValue   = Rgb2Rmt[RmtFrameType_t::RMT_DATA_BIT_ONE_ID].val;
-    uint32_t ZeroBitValue  = Rgb2Rmt[RmtFrameType_t::RMT_DATA_BIT_ZERO_ID].val;
+    uint32_t OneBitValue   = Intensity2Rmt[RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID].val;
+    uint32_t ZeroBitValue  = Intensity2Rmt[RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID].val;
     uint32_t NumEmptyIntensitySlots = NumIntensityValuesPerInterrupt;
 
     while ( (NumEmptyIntensitySlots--) && (OutputPixel->MoreDataToSend ()))
@@ -312,7 +312,7 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_SendIntensityData ()
     } // end while there is space in the buffer
 
     // terminate the current data in the buffer
-    *pMem = Rgb2Rmt[RmtFrameType_t::RMT_STOPBIT_ID].val;
+    *pMem = Intensity2Rmt[RmtDataBitIdType_t::RMT_STOPBIT_ID].val;
 
     RmtCurrentAddr = (volatile rmt_item32_t*)pMem;
 

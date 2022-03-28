@@ -39,7 +39,7 @@ private:
     c_OutputPixel* OutputPixel = nullptr;
     rmt_channel_t  RmtChannelId = rmt_channel_t (-1);
     gpio_num_t     DataPin = gpio_num_t (-1);
-    rmt_item32_t   Rgb2Rmt[5];
+    rmt_item32_t   Intensity2Rmt[5];
 
     uint8_t        NumIdleBits = 6;
     uint8_t        NumIdleBitsCount = 0;
@@ -99,15 +99,18 @@ public:
 #define RMT_Clock_Divisor   2.0
 #define RMT_TickLengthNS    float ( (1/ (RMT_ClockRate/RMT_Clock_Divisor)) * 1000000000.0)
 
-    enum RmtFrameType_t
+    enum RmtDataBitIdType_t
     {
-        RMT_DATA_BIT_ZERO_ID = 0,
-        RMT_DATA_BIT_ONE_ID,
-        RMT_INTERFRAME_GAP_ID,
+        RMT_DATA_BIT_ZERO_ID = 0,   // UART 00
+        RMT_DATA_BIT_ONE_ID,        // UART 01
+        RMT_DATA_BIT_TWO_ID,        // UART 10
+        RMT_DATA_BIT_THREE_ID,      // UART 11
+        RMT_INTERFRAME_GAP_ID,      // UART Break / MAB
         RMT_STARTBIT_ID,
-        RMT_STOPBIT_ID,
+        RMT_STOPBIT_ID,             // UART Stop/start bit
+        RMT_INVALID_VALUE,
     };
-    void SetRgb2Rmt (rmt_item32_t NewValue, RmtFrameType_t ID) { Rgb2Rmt[ID] = NewValue; }
+    void SetIntensity2Rmt (rmt_item32_t NewValue, RmtDataBitIdType_t ID) { Intensity2Rmt[ID] = NewValue; }
 
     bool NoFrameInProgress () { return (0 == (RMT.int_ena.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT))); }
 
@@ -115,10 +118,11 @@ public:
     void IRAM_ATTR ISR_Handler_StartNewFrame ();
     void IRAM_ATTR ISR_Handler_SendIntensityData ();
 
-    long     IntensityMapDstMax          = 255;
-    uint32_t TxIntensityDataStartingMask = 0x80;
-    uint32_t NumBitsPerIntensityValue    = 8;
-
-    void SetIntensityDataWidth(uint32_t DataWidth);
+    long                IntensityMapDstMax          = 255;
+    uint32_t            TxIntensityDataStartingMask = 0x80;
+    uint32_t            NumBitsPerIntensityValue    = 8;
+    RmtDataBitIdType_t  InterIntensityValueId       = RMT_INVALID_VALUE;
+   
+   void SetIntensityDataWidth(uint32_t DataWidth);
 };
 #endif // def #ifdef SUPPORT_RMT_OUTPUT

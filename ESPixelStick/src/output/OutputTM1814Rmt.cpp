@@ -44,31 +44,31 @@ c_OutputTM1814Rmt::c_OutputTM1814Rmt (c_OutputMgr::e_OutputChannelIds OutputChan
     BitValue.level0 = 0;
     BitValue.duration1 = TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH;
     BitValue.level1 = 1;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_DATA_BIT_ZERO_ID);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID);
 
     BitValue.duration0 = TM1814_PIXEL_RMT_TICKS_BIT_1_LOW;
     BitValue.level0 = 0;
     BitValue.duration1 = TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH;
     BitValue.level1 = 1;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_DATA_BIT_ONE_ID);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID);
 
     BitValue.duration0 = TM1814_PIXEL_RMT_TICKS_IDLE / 12;
     BitValue.level0 = 1;
     BitValue.duration1 = TM1814_PIXEL_RMT_TICKS_IDLE / 12;
     BitValue.level1 = 1;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_INTERFRAME_GAP_ID);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
     BitValue.duration0 = TM1814_PIXEL_RMT_TICKS_IDLE / 12;
     BitValue.level0 = 1;
     BitValue.duration1 = TM1814_PIXEL_RMT_TICKS_IDLE / 12;
     BitValue.level1 = 1;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_STARTBIT_ID);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STARTBIT_ID);
 
     BitValue.duration0 = 0;
     BitValue.level0 = 0;
     BitValue.duration1 = 0;
     BitValue.level1 = 0;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_STOPBIT_ID);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STOPBIT_ID);
 
     // DEBUG_V (String ("TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH: 0x") + String (TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH, HEX));
     // DEBUG_V (String (" TM1814_PIXEL_RMT_TICKS_BIT_0_LOW: 0x") + String (TM1814_PIXEL_RMT_TICKS_BIT_0_LOW,  HEX));
@@ -121,7 +121,7 @@ bool c_OutputTM1814Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     BitValue.level0 = 1;
     BitValue.duration1 = ifgTicks / 10;
     BitValue.level1 = 1;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_INTERFRAME_GAP_ID);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
     Rmt.set_pin (DataPin);
     Rmt.SetMinFrameDurationInUs (FrameMinDurationInMicroSec);
