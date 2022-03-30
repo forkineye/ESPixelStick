@@ -49,7 +49,7 @@ static void IRAM_ATTR spi_transfer_callback (spi_transaction_t * param)
 } // spi_transfer_callback
 
 //----------------------------------------------------------------------------
-static void SendIntensityDataTask (void* pvParameters)
+static void SendSpiIntensityDataTask (void* pvParameters)
 {
     // DEBUG_START; Needs extra stack space to run this
     do
@@ -64,7 +64,7 @@ static void SendIntensityDataTask (void* pvParameters)
     } while (true);
     // DEBUG_END;
 
-} // SendIntensityDataTask
+} // SendSpiIntensityDataTask
 
 //----------------------------------------------------------------------------
 c_OutputSpi::c_OutputSpi ()
@@ -114,7 +114,7 @@ void c_OutputSpi::Begin (c_OutputPixel* _OutputPixel)
 
     NextTransactionToFill = 0;
 
-    xTaskCreate (SendIntensityDataTask, "SPITask", 2000, this, ESP_TASK_PRIO_MIN + 4, &SendIntensityDataTaskHandle);
+    xTaskCreate (SendSpiIntensityDataTask, "SPITask", 2000, this, ESP_TASK_PRIO_MIN + 4, &SendIntensityDataTaskHandle);
 
     spi_bus_config_t SpiBusConfiguration;
     memset ( (void*)&SpiBusConfiguration, 0x00, sizeof (SpiBusConfiguration));
