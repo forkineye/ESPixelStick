@@ -30,6 +30,9 @@ class fsm_Eth_state
 protected:
     c_EthernetDriver * pEthernetDriver = nullptr;
 public:
+    fsm_Eth_state() {}
+    virtual ~fsm_Eth_state() {}
+
     virtual void Poll (void) = 0;
     virtual void Init (void) = 0;
     virtual void GetStateName (String& sName) = 0;
@@ -118,6 +121,9 @@ protected:
 class fsm_Eth_state_Boot : public fsm_Eth_state
 {
 public:
+    fsm_Eth_state_Boot() {}
+    virtual ~fsm_Eth_state_Boot() {}
+
     virtual void Poll (void);
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Boot"); }
@@ -131,6 +137,9 @@ public:
 class fsm_Eth_state_PoweringUp : public fsm_Eth_state
 {
 public:
+    fsm_Eth_state_PoweringUp() {}
+    virtual ~fsm_Eth_state_PoweringUp() {}
+
     virtual void Poll (void);
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Powering Up"); }
@@ -144,6 +153,9 @@ public:
 class fsm_Eth_state_ConnectingToEth : public fsm_Eth_state
 {
 public:
+    fsm_Eth_state_ConnectingToEth() {}
+    virtual ~fsm_Eth_state_ConnectingToEth() {}
+
     virtual void Poll (void) {}
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Connecting"); }
@@ -157,6 +169,9 @@ public:
 class fsm_Eth_state_WaitForIP : public fsm_Eth_state
 {
 public:
+    fsm_Eth_state_WaitForIP() {}
+    virtual ~fsm_Eth_state_WaitForIP() {}
+
     virtual void Poll (void) {}
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Wait for IP Address"); }
@@ -170,6 +185,9 @@ public:
 class fsm_Eth_state_GotIp : public fsm_Eth_state
 {
 public:
+    fsm_Eth_state_GotIp() {}
+    virtual ~fsm_Eth_state_GotIp() {}
+
     virtual void Poll (void) {}
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Got IP"); }
@@ -183,6 +201,9 @@ public:
 class fsm_Eth_state_DeviceInitFailed : public fsm_Eth_state
 {
 public:
+    fsm_Eth_state_DeviceInitFailed() {}
+    virtual ~fsm_Eth_state_DeviceInitFailed() {}
+
     virtual void Poll (void) {}
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Device Init Failed"); }

@@ -26,7 +26,7 @@ public:
     c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInputChannelId,
                          c_InputMgr::e_InputType       NewChannelType,
                          size_t                        BufferSize);
-    ~c_InputEffectEngine ();
+    virtual ~c_InputEffectEngine ();
 
     c_InputEffectEngine ();
 

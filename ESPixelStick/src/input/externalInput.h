@@ -10,7 +10,7 @@ class c_ExternalInput
 {
 public:
 	c_ExternalInput (void);
-	~c_ExternalInput(void) {}
+	virtual ~c_ExternalInput(void) {}
 
 	enum InputValue_t
 	{

@@ -31,7 +31,7 @@ class c_InputFPPRemote : public c_InputCommon
                         c_InputMgr::e_InputType       NewChannelType,
                         size_t                        BufferSize);
       
-      ~c_InputFPPRemote ();
+      virtual ~c_InputFPPRemote ();
 
       // functions to be provided by the derived class
       void Begin ();                           ///< set up the operating environment based on the current config (or defaults)

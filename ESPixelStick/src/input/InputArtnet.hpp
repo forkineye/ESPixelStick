@@ -67,7 +67,7 @@ class c_InputArtnet : public c_InputCommon
     c_InputArtnet (c_InputMgr::e_InputChannelIds NewInputChannelId,
                    c_InputMgr::e_InputType       NewChannelType,
                    size_t                        BufferSize);
-    ~c_InputArtnet();
+    virtual ~c_InputArtnet();
 
     // functions to be provided by the derived class
     void Begin ();                                          ///< set up the operating environment based on the current config (or defaults)
