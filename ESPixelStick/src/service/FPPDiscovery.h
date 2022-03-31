@@ -104,6 +104,7 @@ private:
 
 public:
     c_FPPDiscovery ();
+    virtual ~c_FPPDiscovery() {}
 
     void begin ();
 
