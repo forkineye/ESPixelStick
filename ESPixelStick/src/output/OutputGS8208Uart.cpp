@@ -19,7 +19,8 @@
 
 #include "../ESPixelStick.h"
 
-#ifdef SUPPORT_OutputType_GS8208
+#if defined(SUPPORT_OutputType_GS8208) && defined(SUPPORT_UART_OUTPUT)
+
 #include "OutputGS8208Uart.hpp"
 
 #if defined(ARDUINO_ARCH_ESP8266)
@@ -86,30 +87,36 @@ c_OutputGS8208Uart::c_OutputGS8208Uart (c_OutputMgr::e_OutputChannelIds OutputCh
 c_OutputGS8208Uart::~c_OutputGS8208Uart ()
 {
     // DEBUG_START;
-    if (gpio_num_t (-1) == DataPin) { return; }
+    if(HasBeenInitialized)
+    {
+        if (gpio_num_t(-1) == DataPin)
+        {
+            return;
+        }
 
-    // Disable all interrupts for this uart.
-    CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
-    // DEBUG_V ("");
+        // Disable all interrupts for this uart.
+        CLEAR_PERI_REG_MASK(UART_INT_ENA(UartId), UART_INTR_MASK);
+        // DEBUG_V ("");
 
-    // Clear all pending interrupts in the UART
-    WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
-    // DEBUG_V ("");
+        // Clear all pending interrupts in the UART
+        WRITE_PERI_REG(UART_INT_CLR(UartId), UART_INTR_MASK);
+        // DEBUG_V ("");
 
 #ifdef ARDUINO_ARCH_ESP8266
-    Serial1.end ();
+        Serial1.end();
 #else
 
-    // make sure no existing low level driver is running
-    ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
-    // DEBUG_V ("");
+        // make sure no existing low level driver is running
+        ESP_ERROR_CHECK(uart_disable_tx_intr(UartId));
+        // DEBUG_V ("");
 
-    ESP_ERROR_CHECK (uart_disable_rx_intr (UartId));
-    // DEBUG_V (String("UartId: ") + String(UartId));
+        ESP_ERROR_CHECK(uart_disable_rx_intr(UartId));
+        // DEBUG_V (String("UartId: ") + String(UartId));
 
-    // todo: put back uart_isr_free (UartId);
+        // todo: put back uart_isr_free (UartId);
 
 #endif // def ARDUINO_ARCH_ESP32
+    }
 
     // DEBUG_END;
 } // ~c_OutputGS8208Uart
@@ -131,10 +138,10 @@ void c_OutputGS8208Uart::Begin ()
     // DEBUG_START;
 
 #ifdef ARDUINO_ARCH_ESP8266
-    InitializeUart (GS8208_NUM_DATA_BYTES_PER_INTENSITY_BYTE * GS8208_PIXEL_DATA_RATE,
-        SERIAL_6N1,
-        SERIAL_TX_ONLY,
-        PIXEL_FIFO_TRIGGER_LEVEL);
+    InitializeUart(GS8208_NUM_DATA_BYTES_PER_INTENSITY_BYTE * GS8208_PIXEL_DATA_RATE,
+                   SERIAL_6N1,
+                   SERIAL_TX_ONLY,
+                   PIXEL_FIFO_TRIGGER_LEVEL);
 #else
     /* Serial rate is 4x 1MHz for GS8208 */
     uart_config_t uart_config;
@@ -161,6 +168,8 @@ void c_OutputGS8208Uart::Begin ()
     SetFrameAppendInformation ( (uint8_t*)&FrameEndData, sizeof (FrameEndData));
     SetPixelPrependInformation (&PixelStartData, sizeof (PixelStartData));
 #endif // def testPixelInsert
+
+    HasBeenInitialized = true;
 
 } // init
 
@@ -289,4 +298,4 @@ void c_OutputGS8208Uart::PauseOutput ()
     // DEBUG_END;
 } // PauseOutput
 
-#endif // def SUPPORT_OutputType_GS8208
+#endif // defined(SUPPORT_OutputType_GS8208) && defined(SUPPORT_UART_OUTPUT)

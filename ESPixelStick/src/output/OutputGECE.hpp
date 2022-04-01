@@ -19,6 +19,7 @@
 */
 
 #include "OutputCommon.hpp"
+#if defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_UART_OUTPUT)
 
 class c_OutputGECE: public c_OutputCommon
 {
@@ -66,3 +67,5 @@ static inline uint32_t _getCycleCount (void) {
     __asm__ __volatile__ ("rsr %0,ccount":"=a" (ccount));
     return ccount;
 }
+
+#endif // defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_UART_OUTPUT)

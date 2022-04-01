@@ -24,6 +24,7 @@
 
 #include "OutputCommon.hpp"
 #include "OutputWS2811.hpp"
+#if defined(SUPPORT_OutputType_WS2811) && defined(SUPPORT_UART_OUTPUT)
 
 class c_OutputWS2811Uart : public c_OutputWS2811
 {
@@ -52,3 +53,4 @@ private:
 
 }; // c_OutputWS2811Uart
 
+#endif // defined(SUPPORT_OutputType_WS2811) && defined(SUPPORT_UART_OUTPUT)

@@ -19,6 +19,7 @@
 
 #include "../ESPixelStick.h"
 #include "OutputWS2811.hpp"
+#if defined(SUPPORT_OutputType_WS2811) 
 
 //----------------------------------------------------------------------------
 c_OutputWS2811::c_OutputWS2811 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
@@ -48,6 +49,7 @@ void c_OutputWS2811::Begin ()
     // DEBUG_START;
 
     c_OutputPixel::Begin ();
+    HasBeenInitialized = true;
 
     // DEBUG_END;
 } // Begin
@@ -111,3 +113,4 @@ bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     return response;
 
 } // SetConfig
+#endif // defined(SUPPORT_OutputType_WS2811)

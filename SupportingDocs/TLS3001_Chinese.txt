@@ -1,0 +1,437 @@
+TLS3001 
+
+3通道 
+LED恒流驱动芯片
+
+三通道 
+LED恒流驱动芯片
+
+（V2.0）
+
+天利半导体有限公司 
+
+
+TERALANE SEMICONDUCTOR INC. 
+
+地址：深圳市南山区科技园南区高新南一道中国科技开发院 
+3号塔楼 
+7楼
+电话：86-755-8630 9506 
+传真：86-755-8630 9523 
+
+
+TLS3001 
+
+3通道 
+LED恒流驱动芯片
+
+芯片描述：
+
+TLS3001是单线传输、三通道 
+LED恒流驱动芯片，内置 
+12位灰阶控制的 
+PWM
+调制功能。3个恒流输出通道所输出的电流值不受输出端负载电压影响，并提
+供恒定一致的输出电流，用户可以选择不同的外接电阻来调整输出电流，调整
+范围从 
+0到30mA。内置电压调节器，使芯片正常工作在5～17V的较宽电压范
+围内，输出端口最大耐压达到17V。 
+
+主要性能： 
+
+
+􀁺3路恒流输出通道，恒流输出不受输出端负载电压影响 
+􀁺输出电流范围：0～30mA 
+
+􀁺典型电流为20mA，外接电阻为620 Ω 
+􀁺曼彻斯特通信接口 
+􀁺可支持双通道数据传送，提高系统的可靠性 
+􀁺超强级联驱动能力，单线最大级联数达1024 
+􀁺12位PWM灰阶控制 
+􀁺输出通道交错时间迟滞80ns，使系统瞬态电流及由此产生的噪声降低到最小 
+􀁺精确的输出电流精度：通道之间 ±1.5%，芯片之间 ±3％ 
+􀁺较宽的数据传送速率范围：100KHz～2MHz 
+􀁺较宽的工作电压范围：5～17V 
+􀁺低耗电量：<100mW 
+􀁺较高的刷新速率，PWM输出频率可达 
+1000Hz以上 
+􀁺极强的抗干扰能力，ESD > 7KV 
+典型应用：封装信息： 
+
+
+􀁺单像素点光源 
+◆ SOP14 
+􀁺柔性灯带 
+◆ SSOP10 
+􀁺护栏管 
+◆ SOP8 
+
+􀁺招牌字 
+◆ 客户定制 
+􀁺条形屏
+
+TLS3001 
+
+3通道 
+LED恒流驱动芯片
+
+功能框图
+
+
+电气特性 
+􀁺最大限定范围
+
+特性代表符号最大工作范围单位
+电源电压 
+VDD 17 V 
+输入端电压（SDI） 
+VIN－0.4～Vcap＋0.4 V 
+输出端电流 
+IOUT 30 mA 
+输出端耐受电压 
+VDS 17 V 
+接地端电流 
+IGND 95 mA 
+数据时钟频率 
+FDCLK 0.1～2 MHz 
+SOP14 0.87 
+W承受功耗 
+PDmax SSOP10 0.625 
+SOP8 0.625 
+工作温度 
+Topr -45 ~ +85 ℃
+存贮温度 
+Tstg －55 ~ +125 ℃ 
+
+
+
+TLS3001 
+
+3通道 
+LED恒流驱动芯片
+
+􀁺直流特性
+
+特性代表符号测量条件最小值一般值最大值单位
+电源电压 
+VDD 5 17 V 
+CAP之输
+出电压 
+Vcap 3.1 3.15 3.32 V 
+输出电流 
+IOUT 0 20 30 mA 
+电流偏移
+量（通道
+间） 
+dIOUT1 
+Iout＝20mA VR＝ 
+461 mV 
+R=620Ω 
+±1.5 ±3 ％
+电流偏移
+量（芯片
+间） 
+dIOUT2 
+Iout＝20mA VR＝ 
+461 mV 
+R=620Ω 
+±3 ±6 ％
+电流偏移
+量 vs 电
+源电压 
+%/dVDD 电源电压＝5～17V ±0.2 ±0.5 ％/V 
+
+􀁺动态特性
+
+特性代表符号最小值一般值最大值单位
+内建时钟频率 
+OSC 13 27 MHz
+时钟高电平宽度 19 38 ns 
+时钟低电平宽度 19 38 ns 
+输出通道间的交错迟滞时间 
+80 ns 
+电流输出电位上升时间 
+300n ns 
+电流输出电位下降时间 
+600n ns 
+
+
+TLS3001 
+
+3通道 
+LED恒流驱动芯片
+
+恒流特性 
+
+
+1） 通道间的电流差异小于±1.5％，芯片间的电流差异小于±3％。 
+
+2） 具有不受负载端电压影响的电流输出特性，如下图所示，输出电流稳定性将
+不受LED顺向电压(VF)变化影响
+Iout vs VDD at Various Rext05101520253005101520VDD(v)
+Iout(mA)
+调整输出电流
+
+ 通道的输出电流由外接电阻确定，对应关系如下图所示： 
+
+Rext vs. Iout05101520253035400500600700800900Rext(Ohm)
+Iout(mA)
+
+TLS3001 
+3 channels
+LED constant current driver chip
+
+The following formula can be used to calculate the output current value:
+
+Iout = (Vref/R)*2*13.8
+Vref ≈ 0.46V
+When the resistance is
+At 620 Ω, the output current is about
+20mA
+
+Data communication protocol
+
+Give to
+The input signal of the SDI pin must follow the following definitions:
+
+a. Valid input data must be Manchester coded, and the signal changes from high to low to indicate " 1", from low to high Jump representation "0"
+b. After the chip is powered on, a synchronization frame must be sent first so that the chip can detect the baud rate of the communication. Sync frame The format is: 15’b111111111111111+4’b0001+11’b00000000000, in the sending synchronization
+c. After the frame, you must delay for a period of time before sending the data frame. This is for each chip to accurately detect To the baud rate of the communication, the delay time (us) is greater than: the number of connected chips ÷ the communication wave rate (MHz) × 30 After sending several frames of data, resend the reset frame and wait After 1ms, send the same Step frame, so that the chip eliminates accumulated errors, the reset frame format is: 15’b111111111111111+4’b0100 
+d. The data frame format is: 15’b111111111111111+4’b0010 (data header) + first chip 39bit data + second chip 39bit data + …… + the first n chips 39bit data
+e. The first chip is the chip that receives data first, and the data format of the chip is: 1’ b0 (identification bit) + 12’ bxxxxxxxxxxxx (output port 1 data) + 1’ b0 (identification bit) + 12’ bxxxxxxxxxxxx (input Out port 2 data)+ 1’ b0 (identification bit) + 12’ bxxxxxxxxxxxx (output port 3 data), x is 1 or 0  
+f. Data is sent first MSB (most significant bit)
+g. When the SDI input pin is in the idle state, it must be kept low
+h. In the process of sending the same frame of data, it must be sent continuously without interruption and the sending frequency. Change.
+
+
+TLS3001 
+
+Basic timing
+
+
+Dual channel communication function
+
+
+TLS3001 has dual data channel communication function. When two channels receive valid data information at the same time,
+The chip will select the channel by default
+1 Data is valid data; TLS3001 will periodically check when the data path is idle
+Measure the status of the data path. Once it detects a disconnection in the data path, it will automatically switch the data path to another
+A data path greatly improves the reliability of the system. Specific applications are as follows:
+
+
+The dual-channel data format is as follows:
+
+
+
+TLS3001
+
+3 channels
+LED constant current driver chip
+
+Staggered delay time at the output
+
+
+Z This chip has a built-in delay circuit mechanism, OUT1, OUT2, and OUT3 are output in sequence according to a delay time of 80ns
+Current, the transient current of the system and the resulting noise are reduced to a minimum.
+
+Program design reference flow chart
+
+
+It is recommended to send the data according to the baud rate after sending
+M frame data needs approximately
+Send a reply every 3 seconds
+Bit frame, then delay
+1ms, then send the synchronization frame, delay
+Nms.
+
+
+TLS3001 
+
+3 channels
+LED constant current driver chip
+
+Package description
+•
+SOP14 package information and pin diagram
+
+
+•
+SOP14 pin assignment definition
+
+Serial Number Pin Name Type Function
+1 VREF / NC output test terminal / not connected
+2 VANA / NC output test port / not connected
+3 SDI1 input Serial data input terminal 1
+4 SDO2 output serial data output terminal 2
+5 OSC / NC output test terminal / not connected
+6 VR input
+External resistance input terminal, adjustable
+Section output current size, default
+Resistance is 620Ω
+7 GND Power chip ground
+8 CAP output external 1uF stabilized capacitor
+9 SDI2 Input serial data input terminal 2
+10 SDO1 output serial data output terminal 1
+11 VDD Power chip power supply
+12 OUT1 Output constant current output terminal, external LED
+13 OUT2 Output constant current output terminal, external LED
+14 OUT3 Output constant current output terminal, external LED
+
+
+TLS3001 
+
+3通道 
+LED恒流驱动芯片
+
+• 
+SOP14封装信息
+
+
+
+TLS3001 
+
+3通道 
+LED恒流驱动芯片
+
+• 
+SSOP10封装信息和管脚图
+
+
+• 
+SSOP10引脚分配定义
+
+序号 Pin名称 类型 功能 
+1 OUT3 输出LED驱动输出3 
+2 OUT2 输出 LED驱动输出2 
+3 OUT1 输出 LED驱动输出1 
+4 VREF 测试端/未连接 
+5 SDI 输入串行数据输入端 
+6 VR 输入 
+外接电阻输入端，可调
+节输出电流大小，默认
+20mA电阻为620Ω 
+7 GND 电源地芯片地 
+8 CAP 输出外接1uF的稳压电容 
+9 SDO 输出串行数据输出端 
+10 VDD 电源芯片电源 
+
+
+TLS3001 
+
+3通道 
+LED恒流驱动芯片
+
+• 
+SSOP10封装信息
+
+
+
+TLS3001 
+
+3通道 
+LED恒流驱动芯片
+
+• 
+SOP8封装信息和管脚图
+
+
+􀂾引脚分配定义
+
+序号 Pin名称 类型 功能 
+1 SDI 输入串行数据输入端 
+2 
+VR 输出 
+外接电阻输入端，可调
+节输出电流大小，默认
+20mA电阻为620Ω 
+3 GND 电源地 芯片地 
+4 SDO 输出串行数据输出端 
+5 VDD 电源芯片电源 
+6 OUT3 输出 LED驱动输出3 
+7 OUT2 输出LED驱动输出2 
+8 OUT1 输出LED驱动输出1
+
+
+TLS3001 
+
+3通道 
+LED恒流驱动芯片
+
+• 
+SOP8封装信息
+
+
+14 
+
+
+TLS3001 
+
+3通道 
+LED恒流驱动芯片
+
+典型应用电路 
+• 
+SOP14典型应用电路
+
+
+单通道模式
+
+
+双通道模式 
+
+
+• 
+SSOP10典型应用电路
+
+
+
+TLS3001 
+
+3通道 
+LED恒流驱动芯片
+
+• 
+SOP8应用电路
+
+
+应用注意事项 
+
+
+• 
+VDD供电电压范围： 
+SOP14和SSOP10供电电压范围：5-17V， 
+SOP8供电电压范围：4.5-7.5V 
+V DD和GND之间须有一个0.1uF的滤波电容 
+
+
+􀁺输入数据的时钟频率须在100KHz～2MHz之间，为了信号能够传输更多的节
+
+点，建议数据的发送频率在1M以内 
+• 
+SDI信号输入引脚的电压最大不能超过3.5V 
+• 
+SDO输出信号高电平为3.3V 
+
+• 
+SDI、SDO的输入输出线路分布电容尽可能小，以便传输更多的节点 
+􀁺输出端VOUT1，2，3的电压应控制在1.5～10V之内，保证芯片良好的恒流输出特
+性，同时使芯片自身功耗尽可能低，应使 
+OUTX恒流输出时的电压尽量接近 
+1.5V 
+
+􀁺在发送若干帧数据后，重新发送一次复位帧延时 
+1ms再发送同步帧，再延时 
+Nms，提高系统的抗干扰能力 
+
+
+􀁺假如串联的 
+LED数量比较多，Vled需要用到超过 
+17V，则芯片输出端需加
+三极管保护线路 
+􀁺双通道模式下当双通道信号都为有效时，芯片会自动默认通道 
+1信号为显
+示信息。第二通道发送的数据顺序应该按像素信息与第一通道的首尾倒置 
+• 
+SOP14封装单通道使用模式下，不使用的通道输入端应该接上拉或悬空
+
+

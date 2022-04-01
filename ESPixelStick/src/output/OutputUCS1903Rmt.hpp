@@ -23,8 +23,7 @@
 */
 #include "../ESPixelStick.h"
 
-#ifdef SUPPORT_OutputType_UCS1903
-#ifdef SUPPORT_RMT_OUTPUT
+#if defined(SUPPORT_OutputType_UCS1903) && defined(SUPPORT_RMT_OUTPUT)
 
 #include "OutputUCS1903.hpp"
 #include "OutputRmt.hpp"
@@ -52,5 +51,4 @@ private:
 
 }; // c_OutputUCS1903Rmt
 
-#endif // def SUPPORT_RMT_OUTPUT
-#endif // def SUPPORT_OutputType_UCS1903
+#endif // defined(SUPPORT_OutputType_UCS1903) && defined(SUPPORT_RMT_OUTPUT)

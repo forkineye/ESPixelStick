@@ -84,11 +84,14 @@ c_OutputSpi::~c_OutputSpi ()
 {
     // DEBUG_START;
 
-    spi_transfer_callback_enabled = false;
-    if (OutputPixel)
+    if(HasBeenInitialized)
     {
-        logcon (CN_stars + String (F (" SPI Interface Shutdown requires a reboot ")) + CN_stars);
-        reboot = true;
+        spi_transfer_callback_enabled = false;
+        if (OutputPixel)
+        {
+            logcon(CN_stars + String(F(" SPI Interface Shutdown requires a reboot ")) + CN_stars);
+            reboot = true;
+        }
     }
     // DEBUG_END;
 
@@ -142,6 +145,8 @@ void c_OutputSpi::Begin (c_OutputPixel* _OutputPixel)
     ESP_ERROR_CHECK (spi_device_acquire_bus (spi_device_handle, portMAX_DELAY));
 
     spi_transfer_callback_enabled = true;
+
+    HasBeenInitialized = true;
 
     // DEBUG_END;
 

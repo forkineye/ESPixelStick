@@ -437,7 +437,7 @@ void c_InputEffectEngine::setPixel (uint16_t pixelId, CRGB color)
 
     if ((true == IsInputChannelActive) && (pixelId < PixelCount))
     {
-        uint8_t PixelBuffer[sizeof(CRGB)];
+        uint8_t PixelBuffer[sizeof(CRGB)+1];
 
         // DEBUG_V(String("ChannelsPerPixel * pixelId: 0x") + String(uint(ChannelsPerPixel * pixelId), HEX));
         // DEBUG_V (String ("EffectBrightness: ") + String (EffectBrightness));

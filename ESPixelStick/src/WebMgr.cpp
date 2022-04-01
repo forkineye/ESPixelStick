@@ -112,6 +112,7 @@ void c_WebMgr::Begin (config_t* /* NewConfig */)
         // DEBUG_V(String("WebJsonDoc->capacity: 0x") + String(WebJsonDoc->capacity(), HEX));
 
         memset(pWebSocketFrameCollectionBuffer, 0x00, WebSocketFrameCollectionBufferSize + 1);
+        // DEBUG_V();
 
         if (NetworkMgr.IsConnected())
         {

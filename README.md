@@ -40,9 +40,9 @@ The recommended way to build ESPixelStick is with PlatformIO.  However, due to c
 
 There are currently some issues with PlatformIO and uploading filesystem data.  For ESP8266, there is a caching issue which will prevent filesystem data from being rebuilt when changes are made. You can follow the references in this [issue](https://github.com/platformio/platform-espressif8266/issues/257) and apply the fix locally.  Alternatively, you can use the Arduino IDE for uploading the filesystem.
 
-For ESP32 platforms, you will need to utilize the Arduino IDE for uploading filesystem data until the ESP32 Arduino Core is updated in PlatformIO.
+For ESP32 platforms, you will need to utilize the VSCODE/Platformio for uploading filesystem data.
 
-### Arduino IDE Instructions (not recommended)
+### Arduino IDE Instructions (not recommended, No longer supported for ESP32)
 
 Due to dependencies and software versioning, building with the Arduino IDE is not recommended.  If you wish to build with the Arduino IDE, below is what you will need to install.
 
@@ -75,7 +75,7 @@ Required for ESP32:
 
 - [AsyncTCP](https://github.com/forkineye/AsyncTCP) - Asynchronous TCP Library
 
-#### Arduino Compiling and Flashing
+#### Arduino Compiling and Flashing - ESP8266 ONLY
 
 - Web pages **must** be processed, placed into ```data/www```, and uploaded with the upload plugin. Gulp will process the pages and put them in ```data/www``` for you. Refer to the html [README](html/README.md) for more information.
 - In order to use the upload plugin, the ESP **must** be placed into programming mode and the Arduino serial monitor **must** be closed.

@@ -81,12 +81,18 @@ c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds iOutputChannelId
 c_OutputCommon::~c_OutputCommon ()
 {
     // DEBUG_START;
-    if (gpio_num_t (-1) == DataPin) { return; }
+    if(HasBeenInitialized)
+    {
+        if (gpio_num_t(-1) == DataPin)
+        {
+            return;
+        }
+        // DEBUG_V("Set Pin Mode");
+        pinMode(DataPin, INPUT_PULLUP);
 
-    pinMode (DataPin, INPUT_PULLUP);
-
-    // DEBUG_V ("");
-    TerminateUartOperation ();
+        // DEBUG_V ("Terminate UART");
+        TerminateUartOperation();
+    }
     // DEBUG_END;
 } // ~c_OutputMgr
 

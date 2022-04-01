@@ -50,6 +50,7 @@ void c_OutputTM1814::Begin ()
     // DEBUG_START;
     
     c_OutputPixel::Begin ();
+    HasBeenInitialized = true;
 
     // DEBUG_END;
 } // Begin

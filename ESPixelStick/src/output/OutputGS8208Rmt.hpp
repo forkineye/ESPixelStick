@@ -23,8 +23,7 @@
 */
 #include "../ESPixelStick.h"
 
-#ifdef SUPPORT_OutputType_GS8208
-#ifdef SUPPORT_RMT_OUTPUT
+#if defined(SUPPORT_OutputType_GS8208) && defined(SUPPORT_RMT_OUTPUT)
 
 #include "OutputGS8208.hpp"
 #include "OutputRmt.hpp"
@@ -52,5 +51,4 @@ private:
 
 }; // c_OutputGS8208Rmt
 
-#endif // def SUPPORT_RMT_OUTPUT
-#endif // def SUPPORT_OutputType_GS8208
+#endif // defined(SUPPORT_OutputType_GS8208) && defined(SUPPORT_RMT_OUTPUT)

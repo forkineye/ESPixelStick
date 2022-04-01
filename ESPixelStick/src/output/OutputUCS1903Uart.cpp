@@ -18,7 +18,7 @@
 */
 
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_OutputType_UCS1903
+#if defined(SUPPORT_OutputType_UCS1903) && defined(SUPPORT_UART_OUTPUT)
 
 #include "OutputUCS1903Uart.hpp"
 
@@ -80,30 +80,30 @@ c_OutputUCS1903Uart::c_OutputUCS1903Uart (c_OutputMgr::e_OutputChannelIds Output
 c_OutputUCS1903Uart::~c_OutputUCS1903Uart ()
 {
     // DEBUG_START;
-    if (gpio_num_t (-1) == DataPin) { return; }
+    if (HasBeenInitialized)
+    {
+        // Disable all interrupts for this uart.
+        CLEAR_PERI_REG_MASK(UART_INT_ENA(UartId), UART_INTR_MASK);
+        // DEBUG_V ("");
 
-    // Disable all interrupts for this uart.
-    CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
-    // DEBUG_V ("");
-
-    // Clear all pending interrupts in the UART
-    WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
-    // DEBUG_V ("");
+        // Clear all pending interrupts in the UART
+        WRITE_PERI_REG(UART_INT_CLR(UartId), UART_INTR_MASK);
+        // DEBUG_V ("");
 
 #ifdef ARDUINO_ARCH_ESP8266
-    Serial1.end ();
+        Serial1.end();
 #else
 
-    // make sure no existing low level driver is running
-    ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
-    // DEBUG_V ("");
+        // make sure no existing low level driver is running
+        ESP_ERROR_CHECK(uart_disable_tx_intr(UartId));
+        // DEBUG_V ("");
 
-    ESP_ERROR_CHECK (uart_disable_rx_intr (UartId));
-    // DEBUG_V (String("UartId: ") + String(UartId));
+        ESP_ERROR_CHECK(uart_disable_rx_intr(UartId));
+        // DEBUG_V (String("UartId: ") + String(UartId));
 
-    // todo: put back uart_isr_free (UartId);
-
+        // todo: put back uart_isr_free (UartId);
 #endif // def ARDUINO_ARCH_ESP32
+    }
 
     // DEBUG_END;
 } // ~c_OutputUCS1903Uart
@@ -155,6 +155,8 @@ void c_OutputUCS1903Uart::Begin ()
     SetFrameAppendInformation ( (uint8_t*)&FrameEndData, sizeof (FrameEndData));
     SetPixelPrependInformation (&PixelStartData, sizeof (PixelStartData));
 #endif // def testPixelInsert
+
+    HasBeenInitialized = true;
 
 } // init
 
@@ -283,4 +285,4 @@ void c_OutputUCS1903Uart::PauseOutput ()
     // DEBUG_END;
 } // PauseOutput
 
-#endif // def SUPPORT_OutputType_UCS1903
+#endif // defined(SUPPORT_OutputType_UCS1903) && defined(SUPPORT_UART_OUTPUT)
