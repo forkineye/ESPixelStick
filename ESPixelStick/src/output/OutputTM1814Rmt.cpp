@@ -97,7 +97,14 @@ void c_OutputTM1814Rmt::Begin ()
     c_OutputTM1814::Begin ();
 
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
-    Rmt.Begin (rmt_channel_t (OutputChannelId), gpio_num_t (DataPin), this, rmt_idle_level_t::RMT_IDLE_LEVEL_HIGH);
+    c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
+    OutputRmtConfig.RmtChannelId     = rmt_channel_t(OutputChannelId);
+    OutputRmtConfig.DataPin          = gpio_num_t(DataPin);
+    OutputRmtConfig.idle_level       = rmt_idle_level_t::RMT_IDLE_LEVEL_HIGH;
+    OutputRmtConfig.pPixelDataSource = this;
+
+    Rmt.Begin(OutputRmtConfig);
+
     HasBeenInitialized = true;
 
     // Start output

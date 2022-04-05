@@ -51,16 +51,16 @@ c_OutputWS2811Rmt::c_OutputWS2811Rmt (c_OutputMgr::e_OutputChannelIds OutputChan
     BitValue.level1 = 0;
     Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID);
 
-    BitValue.duration0 = WS2811_PIXEL_RMT_TICKS_IDLE / 10;
+    BitValue.duration0 = WS2811_PIXEL_RMT_TICKS_IDLE / 12;
     BitValue.level0 = 0;
-    BitValue.duration1 = WS2811_PIXEL_RMT_TICKS_IDLE / 10;
-    BitValue.level1 = 1;
+    BitValue.duration1 = WS2811_PIXEL_RMT_TICKS_IDLE / 12;
+    BitValue.level1 = 0;
     Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
     BitValue.duration0 = 2;
-    BitValue.level0 = 0;
+    BitValue.level0 = 1;
     BitValue.duration1 = 2;
-    BitValue.level1 = 0;
+    BitValue.level1 = 1;
     Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STARTBIT_ID);
 
     BitValue.duration0 = 0;
@@ -96,7 +96,14 @@ void c_OutputWS2811Rmt::Begin ()
     c_OutputWS2811::Begin ();
 
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
-    Rmt.Begin (rmt_channel_t (OutputChannelId), gpio_num_t (DataPin), this, rmt_idle_level_t::RMT_IDLE_LEVEL_LOW);
+    c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
+    OutputRmtConfig.RmtChannelId     = rmt_channel_t(OutputChannelId);
+    OutputRmtConfig.DataPin          = gpio_num_t(DataPin);
+    OutputRmtConfig.idle_level       = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
+    OutputRmtConfig.pPixelDataSource = this;
+
+    Rmt.Begin(OutputRmtConfig);
+
     HasBeenInitialized = true;
 
     // Start output
@@ -119,9 +126,9 @@ bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     // by default there are 6 rmt_item32_t instances replicated for the start of a frame.
     // 6 instances times 2 time periods per instance = 12
     BitValue.duration0 = ifgTicks / 12;
-    BitValue.level0 = 0;
+    BitValue.level0    = 0;
     BitValue.duration1 = ifgTicks / 12;
-    BitValue.level1 = 0;
+    BitValue.level1    = 0;
     Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
     Rmt.set_pin (DataPin);
