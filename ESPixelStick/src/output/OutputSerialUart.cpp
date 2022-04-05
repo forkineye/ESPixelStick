@@ -173,7 +173,7 @@ void IRAM_ATTR c_OutputSerialUart::ISR_Handler ()
         do // once
         {
             // is there anything to send?
-            if (!MoreDataToSend())
+            if (!ISR_MoreDataToSend())
             {
                 // Disable ALL interrupts when done
                 CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
@@ -191,12 +191,12 @@ void IRAM_ATTR c_OutputSerialUart::ISR_Handler ()
 
             // cant precalc this since data sent count is data value dependent (for Renard)
             // is there an intensity value to send and do we have the space to send it?
-            while (SpaceInFifo && MoreDataToSend())
+            while (SpaceInFifo && ISR_MoreDataToSend())
             {
                 SpaceInFifo--;
 
                 // read the current data value from the buffer and point at the next byte
-                data = GetNextIntensityToSend();
+                data = ISR_GetNextIntensityToSend();
 
                 // send the intensity data
                 enqueue (data);
@@ -235,8 +235,8 @@ void c_OutputSerialUart::Render ()
 
             c_OutputSerial::StartNewFrame();
 
-            GenerateBreak (DMX_BREAK);
-            delayMicroseconds (DMX_MAB);
+            GenerateBreak (DMX_BREAK_US);
+            delayMicroseconds (DMX_MAB_US);
 
             break;
         } // DMX512

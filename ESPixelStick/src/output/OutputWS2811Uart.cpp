@@ -229,9 +229,9 @@ void IRAM_ATTR c_OutputWS2811Uart::ISR_Handler ()
         // free space in the FIFO divided by the number of data bytes per intensity
         // gives the max number of intensities we can add to the FIFO
         uint32_t NumEmptyIntensitySlots = ((((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / WS2811_NUM_DATA_BYTES_PER_INTENSITY_BYTE);
-        while ((NumEmptyIntensitySlots--) && (MoreDataToSend()))
+        while ((NumEmptyIntensitySlots--) && (ISR_MoreDataToSend()))
         {
-            uint8_t IntensityValue = GetNextIntensityToSend ();
+            uint8_t IntensityValue = ISR_GetNextIntensityToSend ();
 
             // convert the intensity data into UART data
             enqueueUart ((Convert2BitIntensityToWS2811UartDataStream[(IntensityValue >> 6) & 0x3]));
@@ -240,7 +240,7 @@ void IRAM_ATTR c_OutputWS2811Uart::ISR_Handler ()
             enqueueUart ((Convert2BitIntensityToWS2811UartDataStream[(IntensityValue >> 0) & 0x3]));
         } // end while there is data to be sent
 
-        if (!MoreDataToSend())
+        if (!ISR_MoreDataToSend())
         {
             CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
         }
