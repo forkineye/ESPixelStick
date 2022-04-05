@@ -39,6 +39,7 @@ public:
     void      GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
     size_t    GetNumChannelsNeeded ();
 
+    void    IRAM_ATTR ISR_Handler (); ///< UART ISR
 
 private:
 
