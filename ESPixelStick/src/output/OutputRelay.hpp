@@ -68,9 +68,6 @@ public:
     void   GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
     size_t GetNumChannelsNeeded () { return Num_Channels; }
 
-    IRAM_ATTR void      StartNewFrame () {}
-    IRAM_ATTR uint8_t   GetNextIntensityToSend () {return 0;}
-    IRAM_ATTR bool      MoreDataToSend () { return false; }
 
 private:
 #   define OM_RELAY_CHANNEL_LIMIT           8
