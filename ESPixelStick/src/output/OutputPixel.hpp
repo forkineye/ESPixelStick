@@ -30,6 +30,15 @@
 
 class c_OutputPixel : public c_OutputCommon
 {
+private:
+        enum FrameState_t
+    {
+        FramePrependData,
+        FrameSendPixels,
+        FrameAppendData,
+        FrameDone
+    };
+
 public:
     // These functions are inherited from c_OutputCommon
     c_OutputPixel (c_OutputMgr::e_OutputChannelIds OutputChannelId,
@@ -51,9 +60,9 @@ public:
     virtual void         WriteChannelData (size_t StartChannelId, size_t ChannelCount, byte *pSourceData);
     virtual void         ReadChannelData (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
 
-    IRAM_ATTR bool       MoreDataToSend () { return _MoreDataToSend; }
-    IRAM_ATTR void       StartNewFrame ();
-    IRAM_ATTR uint8_t    GetNextIntensityToSend ();
+            void         StartNewFrame();
+    bool    IRAM_ATTR    ISR_MoreDataToSend() { return FrameState_t::FrameDone != FrameState; }
+    uint8_t IRAM_ATTR    ISR_GetNextIntensityToSend ();
     
 protected:
 
@@ -69,7 +78,6 @@ private:
 #define PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL 3
 
     size_t      NumIntensityBytesPerPixel = PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL;
-    bool        _MoreDataToSend = false;
 
     uint8_t*    NextPixelToSend = nullptr;
     size_t      pixel_count = 100;
@@ -148,15 +156,6 @@ private:
     bool validate ();        ///< confirm that the current configuration is valid
     inline size_t CalculateIntensityOffset(size_t ChannelId);
 
-    enum FrameState_t
-    {
-        FramePrependData,
-        FrameSendPixels,
-        FrameAppendData,
-        FrameDone
-    };
-    FrameState_t FrameState = FrameState_t::FrameDone;
-
     enum PixelSendState_t
     {
         PixelPrependNulls,
@@ -164,6 +163,7 @@ private:
         PixelAppendNulls,
     };
 
+    FrameState_t FrameState = FrameState_t::FrameDone;
     PixelSendState_t PixelSendState = PixelSendState_t::PixelSendIntensity;
 
 }; // c_OutputPixel
