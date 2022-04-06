@@ -31,6 +31,7 @@
 #include "OutputGECE.hpp"
 #include "OutputRelay.hpp"
 #include "OutputSerialUart.hpp"
+#include "OutputSerialRmt.hpp"
 #include "OutputServoPCA9685.hpp"
 #include "OutputTM1814Rmt.hpp"
 #include "OutputTM1814Uart.hpp"
@@ -523,6 +524,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 #if defined(SUPPORT_OutputType_DMX)
             case e_OutputType::OutputType_DMX:
             {
+#ifdef SUPPORT_UART_OUTPUT
                 if ((CurrentOutputChannelDriver.DriverId >= OutputChannelId_UART_FIRST) && (CurrentOutputChannelDriver.DriverId <= OutputChannelId_UART_LAST))
                 {
                     // logcon (CN_stars + String (F (" Starting DMX for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
@@ -530,6 +532,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                     // DEBUG_V ("");
                     break;
                 }
+#endif // def SUPPORT_UART_OUTPUT
 
                 // DEBUG_V ("");
                 if (!BuildingNewConfig)
@@ -568,6 +571,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 #ifdef SUPPORT_OutputType_Serial
             case e_OutputType::OutputType_Serial:
             {
+#ifdef SUPPORT_UART_OUTPUT
                 if (OM_IS_UART)
                 {
                     // logcon (CN_stars + String (F (" Starting Generic Serial for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
@@ -576,6 +580,18 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                     break;
                 }
                 // DEBUG_V ("");
+#endif // def SUPPORT_UART_OUTPUT
+
+#ifdef SUPPORT_RMT_OUTPUT
+                if (OM_IS_RMT)
+                {
+                    // logcon (CN_stars + String (F (" Starting Generic Serial for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
+                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputSerialRmt(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_Serial);
+                    // DEBUG_V ("");
+                    break;
+                }
+                // DEBUG_V ("");
+#endif // def SUPPORT_RMT_OUTPUT
 
                 if (!BuildingNewConfig)
                 {
@@ -591,6 +607,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 #ifdef SUPPORT_OutputType_Renard
             case e_OutputType::OutputType_Renard:
             {
+#ifdef SUPPORT_UART_OUTPUT
                 if (OM_IS_UART)
                 {
                     // logcon (CN_stars + String (F (" Starting Renard for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
@@ -599,8 +616,20 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                     break;
                 }
                 // DEBUG_V ("");
+#endif // def SUPPORT_UART_OUTPUT
 
-                if (!BuildingNewConfig) 
+#ifdef xSUPPORT_RMT_OUTPUT
+                if (OM_IS_RMT)
+                {
+                    // logcon (CN_stars + String (F (" Starting Renard for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
+                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputSerialRmt(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_Renard);
+                    // DEBUG_V ("");
+                    break;
+                }
+                // DEBUG_V ("");
+#endif // def SUPPORT_RMT_OUTPUT
+
+                if (!BuildingNewConfig)
                 {
                     logcon(CN_stars + String(F(" Cannot Start Renard for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                 }
