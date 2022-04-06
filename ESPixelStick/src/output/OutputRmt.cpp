@@ -78,7 +78,7 @@ static void IRAM_ATTR rmt_intr_handler (void* param)
 */
 void c_OutputRmt::Begin (OutputRmtConfig_t config )
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     do // once
     {
@@ -147,7 +147,7 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
         HasBeenInitialized = true;
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // init
 
@@ -455,6 +455,8 @@ bool c_OutputRmt::Render ()
 //----------------------------------------------------------------------------
 void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
+    // DEBUG_START;
+
     jsonStatus[F("NumRmtSlotOverruns")] = NumRmtSlotOverruns;
 #ifdef USE_RMT_DEBUG_COUNTERS
     JsonObject debugStatus = jsonStatus.createNestedObject("RMT Debug");
@@ -491,7 +493,7 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     }
 
 #endif // def USE_RMT_DEBUG_COUNTERS
-
+    // DEBUG_END;
 } // GetStatus
 
 //----------------------------------------------------------------------------

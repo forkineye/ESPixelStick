@@ -78,7 +78,8 @@ bool c_OutputSerialRmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     SetUpRmtBitTimes();
 
     Rmt.set_pin (DataPin);
-    Rmt.SetMinFrameDurationInUs (FrameMinDurationInMicroSec);
+    c_OutputSerial::SetFrameDurration((1.0 / float(CurrentBaudrate)));
+    Rmt.SetMinFrameDurationInUs(FrameMinDurationInMicroSec);
 
     // DEBUG_END;
     return response;
@@ -185,9 +186,12 @@ void c_OutputSerialRmt::SetOutputBufferSize(uint16_t NumChannelsAvailable)
 //----------------------------------------------------------------------------
 void c_OutputSerialRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
-    c_OutputSerial::GetStatus (jsonStatus);
-    Rmt.GetStatus (jsonStatus);
+    // DEBUG_START;
 
+    c_OutputSerial::GetStatus(jsonStatus);
+    Rmt.GetStatus(jsonStatus);
+
+    // DEBUG_END;
 } // GetStatus
 
 //----------------------------------------------------------------------------

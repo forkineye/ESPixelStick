@@ -151,6 +151,10 @@ bool c_OutputSerialUart::SetConfig (ArduinoJson::JsonObject & jsonConfig)
     // DEBUG_START;
 
     bool response = c_OutputSerial::SetConfig(jsonConfig);
+    // DEBUG_V(String("   CurrentBaudrate: ") + String(CurrentBaudrate));
+    float BitTime = (1.0 / float(CurrentBaudrate));
+    // DEBUG_V(String("         BitTimeUS: ") + String(BitTime * 1000000.0));
+    c_OutputSerial::SetFrameDurration(BitTime);
 
 #ifdef ARDUINO_ARCH_ESP32
     ESP_ERROR_CHECK (uart_set_pin (UartId, DataPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));

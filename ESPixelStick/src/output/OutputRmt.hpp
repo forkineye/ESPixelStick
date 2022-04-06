@@ -162,7 +162,7 @@ public:
    
     void SetIntensityDataWidth(uint32_t DataWidth);
 
-#define USE_RMT_DEBUG_COUNTERS
+// #define USE_RMT_DEBUG_COUNTERS
 #ifdef USE_RMT_DEBUG_COUNTERS
    // debug counters
    uint32_t DataCallbackCounter = 0;

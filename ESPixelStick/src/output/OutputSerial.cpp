@@ -67,12 +67,13 @@ void c_OutputSerial::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 
 #ifdef USE_SERIAL_DEBUG_COUNTERS
     JsonObject debugStatus = jsonStatus.createNestedObject("Serial Debug");
-    debugStatus["NextIntensityToSend"] = NextIntensityToSend;
-    debugStatus["IntensityBytesSent"] = IntensityBytesSent;
+    debugStatus["Num_Channels"]                = Num_Channels;
+    debugStatus["NextIntensityToSend"]         = String(int(NextIntensityToSend), HEX);
+    debugStatus["IntensityBytesSent"]          = IntensityBytesSent;
     debugStatus["IntensityBytesSentLastFrame"] = IntensityBytesSentLastFrame;
-    debugStatus["FrameStartCounter"] = FrameStartCounter;
-    debugStatus["FrameEndCounter"] = FrameEndCounter;
-    debugStatus["AbortFrameCounter"] = AbortFrameCounter;
+    debugStatus["FrameStartCounter"]           = FrameStartCounter;
+    debugStatus["FrameEndCounter"]             = FrameEndCounter;
+    debugStatus["AbortFrameCounter"]           = AbortFrameCounter;
 #endif // def USE_SERIAL_DEBUG_COUNTERS
 
     // DEBUG_END;
@@ -117,7 +118,7 @@ void c_OutputSerial::GetDriverName(String &sDriverName)
 } // GetDriverName
 
 //----------------------------------------------------------------------------
-void c_OutputSerial::SetOutputBufferSize(uint16_t NumChannelsAvailable)
+void c_OutputSerial::SetOutputBufferSize(size_t NumChannelsAvailable)
 {
     // DEBUG_START;
     // DEBUG_V (String ("NumChannelsAvailable: ") + String (NumChannelsAvailable));
@@ -219,14 +220,18 @@ bool c_OutputSerial::validate ()
 void c_OutputSerial::SetFrameDurration (float IntensityBitTimeInUs)
 {
     // DEBUG_START;
+    // add a 10 bit buffer to the frame.
+    uint32_t TotalBits = 10 + uint32_t(NumBitsPerIntensity * float(Num_Channels));
+    uint32_t TotalFrameTime = uint32_t(IntensityBitTimeInUs * float(TotalBits)) + InterFrameGapInMicroSec;
+    FrameMinDurationInMicroSec = max(uint32_t(25000), TotalFrameTime);
 
-    size_t TotalBits = NumBitsPerIntensity * Num_Channels;
-
-    FrameMinDurationInMicroSec = (IntensityBitTimeInUs * TotalBits) + InterFrameGapInMicroSec;
-
-    // DEBUG_V (String ("          OutputBufferSize: ") + String (OutputBufferSize));
-    // DEBUG_V (String ("      IntensityBitTimeInUs: ") + String (IntensityBitTimeInUs));
+    // DEBUG_V (String ("       NumBitsPerIntensity: ") + String (NumBitsPerIntensity));
+    // DEBUG_V (String ("              Num_Channels: ") + String (Num_Channels));
+    // DEBUG_V (String ("                 TotalBits: ") + String (TotalBits));
+    // DEBUG_V (String ("      IntensityBitTimeInUs: ") + String (IntensityBitTimeInUs * 1000000.0));
     // DEBUG_V (String ("   InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
+    // DEBUG_V (String ("            TotalFrameTime: ") + String (TotalFrameTime));
+    // DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
 
     // DEBUG_END;
 
@@ -337,6 +342,9 @@ uint8_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
                 if (0 == --intensity_count)
                 {
                     SerialFrameState = SerialFrameState_t::SerialIdle;
+#ifdef USE_SERIAL_DEBUG_COUNTERS
+                    ++FrameEndCounter;
+#endif // def USE_SERIAL_DEBUG_COUNTERS
                 }
             }
 
@@ -350,6 +358,9 @@ uint8_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
             if (0 == --intensity_count)
             {
                 SerialFrameState = SerialFrameState_t::SerialIdle;
+#ifdef USE_SERIAL_DEBUG_COUNTERS
+                ++FrameEndCounter;
+#endif // def USE_SERIAL_DEBUG_COUNTERS
             }
             else
             {
@@ -371,6 +382,9 @@ uint8_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
             if (0 == --intensity_count)
             {
                 SerialFrameState = SerialFrameState_t::SerialIdle;
+#ifdef USE_SERIAL_DEBUG_COUNTERS
+                ++FrameEndCounter;
+#endif // def USE_SERIAL_DEBUG_COUNTERS
             }
             break;
         }
@@ -397,6 +411,9 @@ uint8_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
                 else
                 {
                     SerialFrameState = SerialFrameState_t::SerialIdle;
+#ifdef USE_SERIAL_DEBUG_COUNTERS
+                    ++FrameEndCounter;
+#endif // def USE_SERIAL_DEBUG_COUNTERS
                 }
             }
             break;
@@ -408,6 +425,9 @@ uint8_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
             if (SerialFooterSize <= SerialFooterIndex)
             {
                 SerialFrameState = SerialFrameState_t::SerialIdle;
+#ifdef USE_SERIAL_DEBUG_COUNTERS
+                ++FrameEndCounter;
+#endif // def USE_SERIAL_DEBUG_COUNTERS
             }
             break;
         }

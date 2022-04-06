@@ -44,7 +44,6 @@ public:
     virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
             size_t       GetNumChannelsNeeded () { return Num_Channels; };
             void         SetOutputBufferSize (size_t NumChannelsAvailable);
-            void         SetOutputBufferSize(uint16_t NumChannelsAvailable);
             void         Render() = 0;
             void         StartNewFrame();
             
@@ -52,9 +51,7 @@ public:
     bool    IRAM_ATTR    ISR_MoreDataToSend() { return (SerialFrameState_t::SerialIdle != SerialFrameState); }
 
 protected:
-            uint16_t InterFrameGapInMicroSec = 250;
-
-            void SetFrameDurration(float IntensityBitTimeInUs);
+    void SetFrameDurration(float IntensityBitTimeInUs);
 
 #define GS_CHANNEL_LIMIT 2048
 
@@ -69,8 +66,9 @@ protected:
     uint32_t CurrentBaudrate = uint32_t(BaudRate::BR_DEF); // current transmit rate
 
     /* DMX minimum timings per E1.11 */
-    const uint32_t  DMX_BREAK_US         = uint32_t(((1.0 / float(BaudRate::BR_DMX)) * 23.0) * 1000000.0);  // 23 bits = 92us
-    const uint32_t  DMX_MAB_US           = uint32_t(((1.0 / float(BaudRate::BR_DMX)) *  3.0) * 1000000.0);  //  3 bits = 12us
+    const uint32_t  DMX_BREAK_US     = uint32_t(((1.0 / float(BaudRate::BR_DMX)) * 23.0) * 1000000.0);  // 23 bits = 92us
+    const uint32_t  DMX_MAB_US       = uint32_t(((1.0 / float(BaudRate::BR_DMX)) *  3.0) * 1000000.0);  //  3 bits = 12us
+    uint32_t InterFrameGapInMicroSec = DMX_BREAK_US + DMX_MAB_US;
 
 private:
 
@@ -82,7 +80,6 @@ private:
     const uint32_t  DMX_BITS_PER_BYTE    = (1.0 + 8.0 + 2.0);
     const size_t    DMX_MaxFrameSize     = 512;
     
-// #define  DMX_US_PER_BIT uint32_t((1.0 / 250000.0) * 1000000.0)
 
     uint16_t    Num_Channels = DEFAULT_NUM_CHANNELS;       // Number of data channels to transmit
 
@@ -101,7 +98,7 @@ private:
     size_t      SerialFooterSize  = 0;
     size_t      SerialFooterIndex = 0;
 
-#define USE_SERIAL_DEBUG_COUNTERS
+// #define USE_SERIAL_DEBUG_COUNTERS
 #ifdef USE_SERIAL_DEBUG_COUNTERS
     size_t     IntensityBytesSent = 0;
     size_t     IntensityBytesSentLastFrame = 0;
