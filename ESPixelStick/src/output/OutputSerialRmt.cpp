@@ -21,12 +21,6 @@
 
 #include "OutputSerialRmt.hpp"
 
-// The adjustments compensate for rounding errors in the calculations
-#define WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH    0 // uint16_t ( (WS2811_PIXEL_NS_BIT_0_HIGH / RMT_TickLengthNS) + 0.0)
-#define WS2811_PIXEL_RMT_TICKS_BIT_0_LOW     0 // uint16_t ( (WS2811_PIXEL_NS_BIT_0_LOW  / RMT_TickLengthNS) + 0.0)
-#define WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH    0 // uint16_t ( (WS2811_PIXEL_NS_BIT_1_HIGH / RMT_TickLengthNS) - 1.0)
-#define WS2811_PIXEL_RMT_TICKS_BIT_1_LOW     0 // uint16_t ( (WS2811_PIXEL_NS_BIT_1_LOW  / RMT_TickLengthNS) + 1.0)
-#define WS2811_PIXEL_RMT_TICKS_IDLE          0 // uint16_t ( (WS2811_PIXEL_IDLE_TIME_NS  / RMT_TickLengthNS) + 1.0)
 
 //----------------------------------------------------------------------------
 c_OutputSerialRmt::c_OutputSerialRmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
@@ -36,43 +30,6 @@ c_OutputSerialRmt::c_OutputSerialRmt (c_OutputMgr::e_OutputChannelIds OutputChan
     c_OutputSerial (OutputChannelId, outputGpio, uart, outputType)
 {
     // DEBUG_START;
-
-    rmt_item32_t BitValue;
-
-    BitValue.duration0 = WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH;
-    BitValue.level0 = 1;
-    BitValue.duration1 = WS2811_PIXEL_RMT_TICKS_BIT_0_LOW;
-    BitValue.level1 = 0;
-    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID);
-
-    BitValue.duration0 = WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH;
-    BitValue.level0 = 1;
-    BitValue.duration1 = WS2811_PIXEL_RMT_TICKS_BIT_1_LOW;
-    BitValue.level1 = 0;
-    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID);
-
-    BitValue.duration0 = WS2811_PIXEL_RMT_TICKS_IDLE / 10;
-    BitValue.level0 = 0;
-    BitValue.duration1 = WS2811_PIXEL_RMT_TICKS_IDLE / 10;
-    BitValue.level1 = 1;
-    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
-
-    BitValue.duration0 = 2;
-    BitValue.level0 = 0;
-    BitValue.duration1 = 2;
-    BitValue.level1 = 0;
-    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STARTBIT_ID);
-
-    BitValue.duration0 = 0;
-    BitValue.level0 = 0;
-    BitValue.duration1 = 0;
-    BitValue.level1 = 0;
-    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STOPBIT_ID);
-
-    // DEBUG_V (String ("WS2811_PIXEL_RMT_TICKS_BIT_0_H: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH, HEX));
-    // DEBUG_V (String ("WS2811_PIXEL_RMT_TICKS_BIT_0_L: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_0_LOW,  HEX));
-    // DEBUG_V (String ("WS2811_PIXEL_RMT_TICKS_BIT_1_H: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH, HEX));
-    // DEBUG_V (String ("WS2811_PIXEL_RMT_TICKS_BIT_1_L: 0x") + String (WS2811_PIXEL_RMT_TICKS_BIT_1_LOW,  HEX));
 
     // DEBUG_END;
 
@@ -96,7 +53,14 @@ void c_OutputSerialRmt::Begin ()
     c_OutputSerial::Begin ();
 
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
-    Rmt.Begin (rmt_channel_t (OutputChannelId), gpio_num_t (DataPin), this, rmt_idle_level_t::RMT_IDLE_LEVEL_LOW);
+    c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
+    OutputRmtConfig.RmtChannelId      = rmt_channel_t(OutputChannelId);
+    OutputRmtConfig.DataPin           = gpio_num_t(DataPin);
+    OutputRmtConfig.idle_level        = rmt_idle_level_t::RMT_IDLE_LEVEL_HIGH;
+    OutputRmtConfig.pSerialDataSource = this;
+    Rmt.Begin(OutputRmtConfig);
+
+    SetUpRmtBitTimes();
     HasBeenInitialized = true;
 
     // Start output
@@ -111,18 +75,7 @@ bool c_OutputSerialRmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     bool response = c_OutputSerial::SetConfig (jsonConfig);
 
-    uint32_t ifgNS = (InterFrameGapInMicroSec * 1000);
-    uint32_t ifgTicks = ifgNS / RMT_TickLengthNS;
-
-    // Default is 100us * 3
-    rmt_item32_t BitValue;
-    // by default there are 6 rmt_item32_t instances replicated for the start of a frame.
-    // 6 instances times 2 time periods per instance = 12
-    BitValue.duration0 = ifgTicks / 12;
-    BitValue.level0 = 0;
-    BitValue.duration1 = ifgTicks / 12;
-    BitValue.level1 = 0;
-    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
+    SetUpRmtBitTimes();
 
     Rmt.set_pin (DataPin);
     Rmt.SetMinFrameDurationInUs (FrameMinDurationInMicroSec);
@@ -133,7 +86,92 @@ bool c_OutputSerialRmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // SetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputSerialRmt::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputSerialRmt::SetUpRmtBitTimes()
+{
+    rmt_item32_t BitValue;
+
+    float BitTimeNS = (1.0 / float(CurrentBaudrate)) * 1000000000;
+    uint32_t BitTimeRmtTicks = uint32_t(BitTimeNS / RMT_TickLengthNS) + 1;
+    // DEBUG_V(String(" CurrentBaudrate: ") + String(CurrentBaudrate));
+    // DEBUG_V(String("       BitTimeNS: ") + String(BitTimeNS));
+    // DEBUG_V(String("RMT_TickLengthNS: ") + String(RMT_TickLengthNS));
+    // DEBUG_V(String(" BitTimeRmtTicks: ") + String(BitTimeRmtTicks));
+
+    BitValue.duration0 = BitTimeRmtTicks;
+    BitValue.level0 = 1;
+    BitValue.duration1 = BitTimeRmtTicks;
+    BitValue.level1 = 1;
+    Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
+    Rmt.SetNumIdleBits(1);
+
+    BitValue.duration0 = BitTimeRmtTicks / 2;
+    BitValue.level0 = 0;
+    BitValue.duration1 = BitTimeRmtTicks / 2;
+    BitValue.level1 = 0;
+    Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STARTBIT_ID);
+    Rmt.SetNumStartBits(1);
+
+    // ISR will process two bits at a time. This updates the bit durration based on baudrate
+    BitValue.duration0 = BitTimeRmtTicks / 2;
+    BitValue.level0 = 0;
+    BitValue.duration1 = BitTimeRmtTicks / 2;
+    BitValue.level1 = 0;
+    Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID);
+
+    BitValue.duration0 = BitTimeRmtTicks / 2;
+    BitValue.level0 = 1;
+    BitValue.duration1 = BitTimeRmtTicks / 2;
+    BitValue.level1 = 1;
+    Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID);
+
+    BitValue.duration0 = BitTimeRmtTicks;
+    BitValue.level0 = 1;
+    BitValue.duration1 = BitTimeRmtTicks;
+    BitValue.level1 = 0;
+    Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_TWO_ID);
+
+    BitValue.duration0 = BitTimeRmtTicks;
+    BitValue.level0 = 1;
+    BitValue.duration1 = BitTimeRmtTicks;
+    BitValue.level1 = 1;
+    Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_THREE_ID);
+
+    BitValue.duration0 = BitTimeRmtTicks * 2; // Two stop bits
+    BitValue.level0 = 1;
+    BitValue.duration1 = BitTimeRmtTicks;     // one start bit
+    BitValue.level1 = 0;
+    Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STOP_START_BIT_ID);
+    Rmt.SetSendInterIntensityBits (true);
+
+    BitValue.duration0 = BitTimeRmtTicks;
+    BitValue.level0 = 1;
+    BitValue.duration1 = BitTimeRmtTicks;
+    BitValue.level1 = 1;
+    Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_END_OF_FRAME);
+    Rmt.SetSendEndOfFrameBits(true);
+
+#if defined(SUPPORT_OutputType_DMX)
+    if (c_OutputMgr::e_OutputType::OutputType_DMX == OutputType)
+    {
+        // turn it into a break signal
+        BitValue.duration0 = (DMX_BREAK_US * 1000) / RMT_TickLengthNS;
+        BitValue.level0 = 0;
+        BitValue.duration1 = (DMX_MAB_US   * 1000) / RMT_TickLengthNS;
+        BitValue.level1 = 1;
+        Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
+    }
+#endif // defined(SUPPORT_OutputType_DMX)
+
+#if defined(SUPPORT_OutputType_Serial)
+#endif // defined(SUPPORT_OutputType_Serial)
+
+#if defined(SUPPORT_OutputType_Renard)
+#endif // defined(SUPPORT_OutputType_Renard)
+
+} // SetUpRmtBitTimes
+
+//----------------------------------------------------------------------------
+void c_OutputSerialRmt::SetOutputBufferSize(uint16_t NumChannelsAvailable)
 {
     // DEBUG_START;
 
@@ -159,7 +197,8 @@ void c_OutputSerialRmt::Render ()
 
     if (Rmt.Render ())
     {
-        ReportNewFrame ();
+        // DEBUG_V("Report New Frame");
+        ReportNewFrame();
     }
 
     // DEBUG_END;

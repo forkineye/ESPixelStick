@@ -137,7 +137,7 @@ void c_OutputSerial::SetOutputBufferSize(uint16_t NumChannelsAvailable)
         c_OutputCommon::SetOutputBufferSize(NumChannelsAvailable);
 
         // Calculate our refresh time
-        FrameMinDurationInMicroSec = DMX_US_PER_BIT * DMX_BITS_PER_BYTE * (NumChannelsAvailable + 2);
+        FrameMinDurationInMicroSec = 25; // DMX_US_PER_BIT * DMX_BITS_PER_BYTE * (NumChannelsAvailable + 2);
         // DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
         // DEBUG_V (String ("      NumChannelsAvailable: ") + String (NumChannelsAvailable));
     } while (false);
@@ -233,12 +233,12 @@ void c_OutputSerial::SetFrameDurration (float IntensityBitTimeInUs)
 } // SetFrameDurration
 
 //----------------------------------------------------------------------------
-void IRAM_ATTR c_OutputSerial::StartNewFrame ()
+void c_OutputSerial::StartNewFrame ()
 {
     // DEBUG_START;
 
 #ifdef USE_SERIAL_DEBUG_COUNTERS
-    if (MoreDataToSend ())
+    if (ISR_MoreDataToSend ())
     {
         AbortFrameCounter++;
     }
@@ -295,7 +295,7 @@ void IRAM_ATTR c_OutputSerial::StartNewFrame ()
 } // StartNewFrame
 
 //----------------------------------------------------------------------------
-uint8_t IRAM_ATTR c_OutputSerial::GetNextIntensityToSend ()
+uint8_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
 {
     uint8_t data = 0x00;
 

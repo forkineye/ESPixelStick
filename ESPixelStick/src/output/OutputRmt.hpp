@@ -29,16 +29,17 @@ class c_OutputRmt
 public:
     enum RmtDataBitIdType_t
     {
-        RMT_DATA_BIT_ZERO_ID = 0,   // UART 00
-        RMT_DATA_BIT_ONE_ID,        // UART 01
-        RMT_DATA_BIT_TWO_ID,        // UART 10
-        RMT_DATA_BIT_THREE_ID,      // UART 11
-        RMT_INTERFRAME_GAP_ID,      // UART Break / MAB
-        RMT_STARTBIT_ID,
-        RMT_STOPBIT_ID,             // UART Stop/start bit
-        RMT_END_OF_FRAME,
-        RMT_LIST_END,
+        RMT_DATA_BIT_ZERO_ID = 0,   // 0 UART 00
+        RMT_DATA_BIT_ONE_ID,        // 1 UART 01
+        RMT_DATA_BIT_TWO_ID,        // 2 UART 10
+        RMT_DATA_BIT_THREE_ID,      // 3 UART 11
+        RMT_INTERFRAME_GAP_ID,      // 4 UART Break / MAB
+        RMT_STARTBIT_ID,            // 5
+        RMT_STOPBIT_ID,             // 6 UART Stop/start bit
+        RMT_END_OF_FRAME,           // 7
+        RMT_LIST_END,               // 8 This must be last
         RMT_INVALID_VALUE,
+        RMT_NUM_BIT_TYPES = RMT_LIST_END,
         RMT_STOP_START_BIT_ID = RMT_STOPBIT_ID,
     };
 
@@ -179,6 +180,7 @@ public:
    uint32_t IntensityBitsSentLastFrame = 0;
    uint32_t IncompleteFrame = 0;
    uint32_t IncompleteFrameLastFrame = 0;
+   uint32_t BitTypeCounters[RmtDataBitIdType_t::RMT_NUM_BIT_TYPES];
 #endif // def USE_RMT_DEBUG_COUNTERS
 };
 #endif // def #ifdef SUPPORT_RMT_OUTPUT

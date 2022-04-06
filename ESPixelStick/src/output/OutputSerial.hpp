@@ -46,15 +46,15 @@ public:
             void         SetOutputBufferSize (size_t NumChannelsAvailable);
             void         SetOutputBufferSize(uint16_t NumChannelsAvailable);
             void         Render() = 0;
+            void         StartNewFrame();
             
-    IRAM_ATTR void       StartNewFrame();
-    IRAM_ATTR uint8_t    GetNextIntensityToSend();
-    IRAM_ATTR bool       MoreDataToSend() { return (SerialFrameState_t::SerialIdle != SerialFrameState); }
+    uint8_t IRAM_ATTR    ISR_GetNextIntensityToSend();
+    bool    IRAM_ATTR    ISR_MoreDataToSend() { return (SerialFrameState_t::SerialIdle != SerialFrameState); }
 
 protected:
-    uint16_t InterFrameGapInMicroSec = 250;
+            uint16_t InterFrameGapInMicroSec = 250;
 
-    void SetFrameDurration(float IntensityBitTimeInUs);
+            void SetFrameDurration(float IntensityBitTimeInUs);
 
 #define GS_CHANNEL_LIMIT 2048
 
@@ -69,19 +69,20 @@ protected:
     uint32_t CurrentBaudrate = uint32_t(BaudRate::BR_DEF); // current transmit rate
 
     /* DMX minimum timings per E1.11 */
-    const uint8_t   DMX_BREAK            = 92; // 23 bits
-    const uint8_t   DMX_MAB              = 12; //  3 bits
+    const uint32_t  DMX_BREAK_US         = uint32_t(((1.0 / float(BaudRate::BR_DMX)) * 23.0) * 1000000.0);  // 23 bits = 92us
+    const uint32_t  DMX_MAB_US           = uint32_t(((1.0 / float(BaudRate::BR_DMX)) *  3.0) * 1000000.0);  //  3 bits = 12us
 
 private:
 
-    const size_t    MAX_HDR_SIZE         = 10;    // Max generic serial header size
-    const size_t    MAX_FOOTER_SIZE      = 10; // max generic serial footer size
+    const size_t    MAX_HDR_SIZE         = 10;      // Max generic serial header size
+    const size_t    MAX_FOOTER_SIZE      = 10;      // max generic serial footer size
     const size_t    MAX_CHANNELS         = 1024;
     const uint16_t  DEFAULT_NUM_CHANNELS = 64;
     const size_t    BUF_SIZE             = (MAX_CHANNELS + MAX_HDR_SIZE + MAX_FOOTER_SIZE);
     const uint32_t  DMX_BITS_PER_BYTE    = (1.0 + 8.0 + 2.0);
-
-#define  DMX_US_PER_BIT uint32_t((1.0 / 250000.0) * 1000000.0)
+    const size_t    DMX_MaxFrameSize     = 512;
+    
+// #define  DMX_US_PER_BIT uint32_t((1.0 / 250000.0) * 1000000.0)
 
     uint16_t    Num_Channels = DEFAULT_NUM_CHANNELS;       // Number of data channels to transmit
 

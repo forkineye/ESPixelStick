@@ -29,7 +29,10 @@ c_OutputRmt::c_OutputRmt ()
 {
     // DEBUG_START;
 
-    memset ( (void*)&Intensity2Rmt[0], 0x00, sizeof (Intensity2Rmt));
+    memset((void *)&Intensity2Rmt[0],   0x00, sizeof(Intensity2Rmt));
+#ifdef USE_RMT_DEBUG_COUNTERS
+    memset((void *)&BitTypeCounters[0], 0x00, sizeof(BitTypeCounters));
+#endif // def USE_RMT_DEBUG_COUNTERS
 
     // DEBUG_END;
 } // c_OutputRmt
@@ -274,6 +277,8 @@ inline void IRAM_ATTR c_OutputRmt::ISR_EnqueueData(uint32_t value)
 //----------------------------------------------------------------------------
 void c_OutputRmt::StartNewFrame ()
 {
+    // DEBUG_START;
+
 #ifdef USE_RMT_DEBUG_COUNTERS
     FrameStartCounter++;
 #endif // def USE_RMT_DEBUG_COUNTERS
@@ -286,6 +291,9 @@ void c_OutputRmt::StartNewFrame ()
     {
         ISR_EnqueueData (Intensity2Rmt[RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID].val);
         ++NumInterFrameRmtSlotsCount;
+#ifdef USE_RMT_DEBUG_COUNTERS
+        BitTypeCounters[int(RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID)]++;
+#endif // def USE_RMT_DEBUG_COUNTERS
     }
 
     // DEBUG_V(String("NumFrameStartRmtSlots: ") + String(NumFrameStartRmtSlots));
@@ -293,6 +301,9 @@ void c_OutputRmt::StartNewFrame ()
     while (NumFrameStartRmtSlotsCount++ < NumFrameStartRmtSlots)
     {
         ISR_EnqueueData (Intensity2Rmt[RmtDataBitIdType_t::RMT_STARTBIT_ID].val);
+#ifdef USE_RMT_DEBUG_COUNTERS
+        BitTypeCounters[int(RmtDataBitIdType_t::RMT_STARTBIT_ID)]++;
+#endif // def USE_RMT_DEBUG_COUNTERS
     }
 
 #ifdef USE_RMT_DEBUG_COUNTERS
@@ -315,6 +326,8 @@ void c_OutputRmt::StartNewFrame ()
         // DEBUG_V(String("Data at '" + String(bitIndex) + "': 0x") + String(((uint32_t *)RmtStartAddr)[bitIndex], HEX));
     }
 */
+    // DEBUG_END;
+
 } // ISR_Handler_StartNewFrame
 
 //----------------------------------------------------------------------------
@@ -340,17 +353,33 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_SendIntensityData ()
             IntensityBitsSent++;
 #endif // def USE_RMT_DEBUG_COUNTERS
             ISR_EnqueueData((IntensityValue & bitmask) ? OneBitValue : ZeroBitValue);
+#ifdef USE_RMT_DEBUG_COUNTERS
+            if (IntensityValue & bitmask)
+            {
+                BitTypeCounters[int(RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID)]++;
+            }
+            else
+            {
+                BitTypeCounters[int(RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID)]++;
+            }
+#endif // def USE_RMT_DEBUG_COUNTERS
+        } // end send one intensity value
+
+        if (SendEndOfFrameBits && !MoreDataToSend())
+        {
+            ISR_EnqueueData(Intensity2Rmt[RmtDataBitIdType_t::RMT_END_OF_FRAME].val);
+#ifdef USE_RMT_DEBUG_COUNTERS
+            BitTypeCounters[int(RmtDataBitIdType_t::RMT_END_OF_FRAME)]++;
+#endif // def USE_RMT_DEBUG_COUNTERS
+        }
+        else if (SendInterIntensityBits)
+        {
+            ISR_EnqueueData(Intensity2Rmt[RmtDataBitIdType_t::RMT_STOP_START_BIT_ID].val);
+#ifdef USE_RMT_DEBUG_COUNTERS
+            BitTypeCounters[int(RmtDataBitIdType_t::RMT_STOP_START_BIT_ID)]++;
+#endif // def USE_RMT_DEBUG_COUNTERS
         }
     } // end while there is space in the buffer
-
-    if (SendEndOfFrameBits && !MoreDataToSend())
-    {
-        ISR_EnqueueData(Intensity2Rmt[RmtDataBitIdType_t::RMT_END_OF_FRAME].val);
-    }
-    else if (SendInterIntensityBits)
-    {
-        ISR_EnqueueData(Intensity2Rmt[RmtDataBitIdType_t::RMT_STOP_START_BIT_ID].val);
-    }
 
     // terminate the current data in the buffer
     // gets overwritten on next refill
@@ -406,10 +435,8 @@ bool c_OutputRmt::Render ()
 
         // DEBUG_V("Set up a new Frame");
         StartNewFrame();
-        // DEBUG_V();
-        // FeedWDT();
-        // DEBUG_V("Start Transmit");
 
+        // DEBUG_V("Start Transmit");
         // enable the threshold event interrupt
         EnableInterrupts;
         RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 1;
@@ -431,25 +458,38 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     jsonStatus[F("NumRmtSlotOverruns")] = NumRmtSlotOverruns;
 #ifdef USE_RMT_DEBUG_COUNTERS
     JsonObject debugStatus = jsonStatus.createNestedObject("RMT Debug");
-    debugStatus["RmtChannelId"]                = OutputRmtConfig.RmtChannelId;
-    debugStatus["DataISRcounter"]              = DataISRcounter;
-    debugStatus["FrameEndISRcounter"]          = FrameEndISRcounter;
-    debugStatus["FrameStartCounter"]           = FrameStartCounter;
-    debugStatus["ErrorIsr"]                    = ErrorIsr;
-    debugStatus["RxIsr"]                       = RxIsr;
-    debugStatus["FrameThresholdCounter"]       = FrameThresholdCounter;
-    debugStatus["IsrIsNotForUs"]               = IsrIsNotForUs;
-    debugStatus["IncompleteFrame"]             = IncompleteFrame;
-    debugStatus["Raw int_ena"]                 = String (RMT.int_ena.val, HEX);
-    debugStatus["int_ena"]                     = String (RMT.int_ena.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
-    debugStatus["RMT_INT_TX_END_BIT"]          = String (RMT_INT_TX_END_BIT, HEX);
-    debugStatus["RMT_INT_THR_EVNT_BIT"]        = String (RMT_INT_THR_EVNT_BIT, HEX);
-    debugStatus["Raw int_st"]                  = String (RMT.int_st.val, HEX);
-    debugStatus["int_st"]                      = String (RMT.int_st.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
-    debugStatus["IntensityBytesSent"]          = IntensityBytesSent;
-    debugStatus["IntensityBytesSentLastFrame"] = IntensityBytesSentLastFrame;
-    debugStatus["IntensityBitsSent"]           = IntensityBitsSent;
-    debugStatus["IntensityBitsSentLastFrame"]  = IntensityBitsSentLastFrame;
+    debugStatus["RmtChannelId"]                 = OutputRmtConfig.RmtChannelId;
+    debugStatus["DataISRcounter"]               = DataISRcounter;
+    debugStatus["FrameEndISRcounter"]           = FrameEndISRcounter;
+    debugStatus["FrameStartCounter"]            = FrameStartCounter;
+    debugStatus["ErrorIsr"]                     = ErrorIsr;
+    debugStatus["RxIsr"]                        = RxIsr;
+    debugStatus["FrameThresholdCounter"]        = FrameThresholdCounter;
+    debugStatus["IsrIsNotForUs"]                = IsrIsNotForUs;
+    debugStatus["IncompleteFrame"]              = IncompleteFrame;
+    debugStatus["Raw int_ena"]                  = String (RMT.int_ena.val, HEX);
+    debugStatus["int_ena"]                      = String (RMT.int_ena.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
+    debugStatus["RMT_INT_TX_END_BIT"]           = String (RMT_INT_TX_END_BIT, HEX);
+    debugStatus["RMT_INT_THR_EVNT_BIT"]         = String (RMT_INT_THR_EVNT_BIT, HEX);
+    debugStatus["Raw int_st"]                   = String (RMT.int_st.val, HEX);
+    debugStatus["int_st"]                       = String (RMT.int_st.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
+    debugStatus["IntensityBytesSent"]           = IntensityBytesSent;
+    debugStatus["IntensityBytesSentLastFrame"]  = IntensityBytesSentLastFrame;
+    debugStatus["IntensityBitsSent"]            = IntensityBitsSent;
+    debugStatus["IntensityBitsSentLastFrame"]   = IntensityBitsSentLastFrame;
+    debugStatus["NumInterFrameRmtSlots"]        = NumInterFrameRmtSlots;
+    debugStatus["NumFrameStartRmtSlots"]        = NumFrameStartRmtSlots;
+    debugStatus["NumFrameStopRmtSlots"]         = NumFrameStopRmtSlots;
+    debugStatus["SendInterIntensityBits"]       = SendInterIntensityBits;
+    debugStatus["SendEndOfFrameBits"]           = SendEndOfFrameBits;
+    debugStatus["NumRmtSlotsPerIntensityValue"] = NumRmtSlotsPerIntensityValue;
+
+    uint32_t index = 0;
+    for (auto CurrentCounter : BitTypeCounters)
+    {
+        debugStatus[String("RMT TYPE Counter ") + String(index++)] = CurrentCounter;
+    }
+
 #endif // def USE_RMT_DEBUG_COUNTERS
 
 } // GetStatus

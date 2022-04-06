@@ -43,9 +43,11 @@ public:
     void    Render ();                                        ///< Call from loop (),  renders output data
     void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
     void    SetOutputBufferSize (uint16_t NumChannelsAvailable);
+    void    PauseOutput(bool State) {Rmt.PauseOutput(State);}
 
 private:
-
+    void SetUpRmtBitTimes();
+    
     c_OutputRmt Rmt;
 
 }; // c_OutputSerialRmt
