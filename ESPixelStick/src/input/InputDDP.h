@@ -129,7 +129,7 @@ public:
                 c_InputMgr::e_InputType       NewChannelType,
                 size_t                        BufferSize);
 
-    ~c_InputDDP ();
+    virtual ~c_InputDDP ();
 
     // Generic UDP listener, no physical or IP configuration
     void Begin ();

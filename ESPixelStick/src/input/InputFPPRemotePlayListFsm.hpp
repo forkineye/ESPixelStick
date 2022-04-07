@@ -32,6 +32,9 @@ class c_InputFPPRemotePlayList;
 class fsm_PlayList_state
 {
 public:
+    fsm_PlayList_state() {}
+    virtual ~fsm_PlayList_state() {}
+
     virtual void Poll () = 0;
     virtual void Init (c_InputFPPRemotePlayList * Parent) = 0;
     virtual void GetStateName (String & sName) = 0;
@@ -50,6 +53,9 @@ protected:
 class fsm_PlayList_state_WaitForStart : public fsm_PlayList_state
 {
 public:
+    fsm_PlayList_state_WaitForStart() {}
+    virtual ~fsm_PlayList_state_WaitForStart() {}
+
     virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayList* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Idle; }
@@ -63,6 +69,9 @@ public:
 class fsm_PlayList_state_Idle : public fsm_PlayList_state
 {
 public:
+    fsm_PlayList_state_Idle() {}
+    virtual ~fsm_PlayList_state_Idle() {}
+
     virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayList* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Idle; }
@@ -76,6 +85,9 @@ public:
 class fsm_PlayList_state_PlayingFile : public fsm_PlayList_state
 {
 public:
+    fsm_PlayList_state_PlayingFile() {}
+    virtual ~fsm_PlayList_state_PlayingFile() {}
+
     virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayList* Parent);
     virtual void GetStateName (String & sName) { sName = CN_File; }
@@ -89,6 +101,9 @@ public:
 class fsm_PlayList_state_PlayingEffect : public fsm_PlayList_state
 {
 public:
+    fsm_PlayList_state_PlayingEffect() {}
+    virtual ~fsm_PlayList_state_PlayingEffect() {}
+
     virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayList* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Effect; }
@@ -102,6 +117,9 @@ public:
 class fsm_PlayList_state_Paused : public fsm_PlayList_state
 {
 public:
+    fsm_PlayList_state_Paused() {}
+    virtual ~fsm_PlayList_state_Paused() {}
+
     virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayList* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Paused; }

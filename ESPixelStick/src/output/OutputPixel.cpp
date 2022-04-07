@@ -89,10 +89,10 @@ void c_OutputPixel::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 void c_OutputPixel::SetOutputBufferSize(size_t NumChannelsAvailable)
 {
     // DEBUG_START;
-       // DEBUG_V (String ("NumChannelsAvailable: ") + String (NumChannelsAvailable));
-       // DEBUG_V (String ("   GetBufferUsedSize: ") + String (c_OutputCommon::GetBufferUsedSize ()));
-       // DEBUG_V (String ("         pixel_count: ") + String (pixel_count));
-       // DEBUG_V (String ("       BufferAddress: ") + String ((uint32_t)(c_OutputCommon::GetBufferAddress ())));
+    // DEBUG_V (String ("NumChannelsAvailable: ") + String (NumChannelsAvailable));
+    // DEBUG_V (String ("   GetBufferUsedSize: ") + String (c_OutputCommon::GetBufferUsedSize ()));
+    // DEBUG_V (String ("         pixel_count: ") + String (pixel_count));
+    // DEBUG_V (String ("       BufferAddress: ") + String ((uint32_t)(c_OutputCommon::GetBufferAddress ())));
 
     do // once
     {
@@ -184,8 +184,8 @@ bool c_OutputPixel::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     // Update the config fields in case the validator changed them
     GetConfig (jsonConfig);
 
-    ZigPixelCount = (2 > zig_size) ? pixel_count + 1 : zig_size + 1;
-    ZagPixelCount = (2 > zig_size) ? pixel_count + 1 : zig_size + 1;
+    ZigPixelCount  = (2 > zig_size) ? pixel_count + 1 : zig_size + 1;
+    ZagPixelCount  = (2 > zig_size) ? pixel_count + 1 : zig_size + 1;
     PixelGroupSize = (2 > PixelGroupSize) ? 1 : PixelGroupSize;
 
     // DEBUG_V (String ("ZigPixelCount: ") + String (ZigPixelCount));
@@ -331,7 +331,7 @@ void IRAM_ATTR c_OutputPixel::StartNewFrame ()
     // DEBUG_START;
 
 #ifdef USE_PIXEL_DEBUG_COUNTERS
-    if (MoreDataToSend ())
+    if (ISR_MoreDataToSend ())
     {
         AbortFrameCounter++;
     }
@@ -353,8 +353,6 @@ void IRAM_ATTR c_OutputPixel::StartNewFrame ()
     FrameState = (FramePrependDataSize) ? FrameState_t::FramePrependData : FrameState_t::FrameSendPixels;
     PixelSendState = (PrependNullPixelCount) ? PixelSendState_t::PixelPrependNulls : PixelSendState_t::PixelSendIntensity;
 
-    _MoreDataToSend = (0 == pixel_count) ? false : true;
-
 #ifdef USE_PIXEL_DEBUG_COUNTERS
     SentPixels = SentPixelsCount;
     PixelsToSend = pixel_count;
@@ -368,7 +366,7 @@ void IRAM_ATTR c_OutputPixel::StartNewFrame ()
 } // StartNewFrame
 
 //----------------------------------------------------------------------------
-uint8_t IRAM_ATTR c_OutputPixel::GetNextIntensityToSend ()
+uint8_t IRAM_ATTR c_OutputPixel::ISR_GetNextIntensityToSend ()
 {
     uint8_t response = 0x00;
 
@@ -491,7 +489,6 @@ uint8_t IRAM_ATTR c_OutputPixel::GetNextIntensityToSend ()
                     IntensityBytesSentLastFrame = IntensityBytesSent;
 #endif // def USE_PIXEL_DEBUG_COUNTERS
 
-                    _MoreDataToSend = false;
                     FrameState = FrameState_t::FrameDone;
                 }
 
@@ -559,7 +556,6 @@ uint8_t IRAM_ATTR c_OutputPixel::GetNextIntensityToSend ()
                     IntensityBytesSentLastFrame = IntensityBytesSent;
 #endif // def USE_PIXEL_DEBUG_COUNTERS
 
-                    _MoreDataToSend = false;
                     FrameState = FrameState_t::FrameDone;
                 }
 
@@ -603,7 +599,6 @@ uint8_t IRAM_ATTR c_OutputPixel::GetNextIntensityToSend ()
                 break;
             }
 
-            _MoreDataToSend = false;
             FrameState = FrameState_t::FrameDone;
 
             break;
@@ -622,13 +617,11 @@ uint8_t IRAM_ATTR c_OutputPixel::GetNextIntensityToSend ()
         }
         // FrameAppendDataCurrentIndex = 0;
         FrameState = FrameState_t::FrameDone;
-        _MoreDataToSend = false;
         break;
     } // case FrameState_t::FrameAppendData
 
     case FrameState_t::FrameDone:
     {
-        _MoreDataToSend = false;
         break;
     } // case FrameState_t::FrameDone
 

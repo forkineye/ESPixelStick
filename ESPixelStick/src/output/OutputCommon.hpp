@@ -58,16 +58,16 @@ public:
             OTYPE_t      GetOutputType ()      { return OutputType; }          ///< Have the instance report its type.
     virtual void         GetStatus (ArduinoJson::JsonObject & jsonStatus);
             void         SetOutputBufferAddress (uint8_t* pNewOutputBuffer) { pOutputBuffer = pNewOutputBuffer; }
-    virtual void         SetOutputBufferSize (uint16_t NewOutputBufferSize)  { OutputBufferSize = NewOutputBufferSize; };
+    virtual void         SetOutputBufferSize (size_t NewOutputBufferSize)  { OutputBufferSize = NewOutputBufferSize; };
     virtual size_t       GetNumChannelsNeeded () = 0;
     virtual void         PauseOutput () {}
     virtual void         WriteChannelData (size_t StartChannelId, size_t ChannelCount, byte *pSourceData);
     virtual void         ReadChannelData (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
 
-protected :
+protected:
 #define OM_CMN_NO_CUSTOM_ISR                    (-1)
 
-    gpio_num_t  DataPin = gpio_num_t(-1); ///< Output pin to use for this driver
+    gpio_num_t  DataPin                    = gpio_num_t (-1); ///< Output pin to use for this driver
     uart_port_t UartId;      ///< Id of the UART used by this instance of the driver
     OTYPE_t     OutputType;  ///< Type to report for this driver
     OID_t       OutputChannelId;

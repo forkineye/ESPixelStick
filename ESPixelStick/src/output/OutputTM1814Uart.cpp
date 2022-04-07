@@ -181,9 +181,9 @@ void IRAM_ATTR c_OutputTM1814Uart::ISR_Handler ()
         uint32_t OneValue  = ConvertIntensityToUartDataStream[1];
         uint32_t ZeroValue = ConvertIntensityToUartDataStream[0];
         uint32_t NumEmptyIntensitySlots = ((((uint16_t)UART_TX_FIFO_SIZE) - (getFifoLength)) / TM1814_NUM_DATA_BYTES_PER_INTENSITY_BYTE);
-        while ((NumEmptyIntensitySlots--) && (MoreDataToSend()))
+        while ((NumEmptyIntensitySlots--) && (ISR_MoreDataToSend()))
         {
-            uint8_t IntensityValue = ~GetNextIntensityToSend ();
+            uint8_t IntensityValue = ~ISR_GetNextIntensityToSend ();
 
             // convert the intensity data into RMT data
             for (uint8_t bitmask = 0x80; 0 != bitmask; bitmask >>= 1)
@@ -193,7 +193,7 @@ void IRAM_ATTR c_OutputTM1814Uart::ISR_Handler ()
 
         } // end while there is data to be sent
 
-        if (!MoreDataToSend())
+        if (!ISR_MoreDataToSend())
         {
             CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
         }

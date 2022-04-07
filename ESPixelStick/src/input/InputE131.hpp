@@ -62,7 +62,7 @@ class c_InputE131 : public c_InputCommon
     c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
                  c_InputMgr::e_InputType       NewChannelType,
                  size_t                        BufferSize);
-    ~c_InputE131();
+    virtual ~c_InputE131();
 
     // functions to be provided by the derived class
     void Begin ();                                          ///< set up the operating environment based on the current config (or defaults)

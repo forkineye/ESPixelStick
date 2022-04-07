@@ -30,7 +30,7 @@ class c_InputAlexa : public c_InputCommon
           c_InputMgr::e_InputType       NewChannelType,
           size_t                        BufferSize);
       
-      ~c_InputAlexa ();
+      virtual ~c_InputAlexa ();
 
       // functions to be provided by the derived class
       void Begin ();                           ///< set up the operating environment based on the current config (or defaults)

@@ -49,7 +49,7 @@ static void IRAM_ATTR spi_transfer_callback (spi_transaction_t * param)
 } // spi_transfer_callback
 
 //----------------------------------------------------------------------------
-static void SendIntensityDataTask (void* pvParameters)
+static void SendSpiIntensityDataTask (void* pvParameters)
 {
     // DEBUG_START; Needs extra stack space to run this
     do
@@ -64,7 +64,7 @@ static void SendIntensityDataTask (void* pvParameters)
     } while (true);
     // DEBUG_END;
 
-} // SendIntensityDataTask
+} // SendSpiIntensityDataTask
 
 //----------------------------------------------------------------------------
 c_OutputSpi::c_OutputSpi ()
@@ -114,7 +114,7 @@ void c_OutputSpi::Begin (c_OutputPixel* _OutputPixel)
 
     NextTransactionToFill = 0;
 
-    xTaskCreate (SendIntensityDataTask, "SPITask", 2000, this, ESP_TASK_PRIO_MIN + 4, &SendIntensityDataTaskHandle);
+    xTaskCreate (SendSpiIntensityDataTask, "SPITask", 2000, this, ESP_TASK_PRIO_MIN + 4, &SendIntensityDataTaskHandle);
 
     spi_bus_config_t SpiBusConfiguration;
     memset ( (void*)&SpiBusConfiguration, 0x00, sizeof (SpiBusConfiguration));
@@ -158,7 +158,7 @@ void c_OutputSpi::SendIntensityData ()
     // DEBUG_START;
     SendIntensityDataCounter++;
 
-    if (OutputPixel->MoreDataToSend ())
+    if (OutputPixel->ISR_MoreDataToSend ())
     {
         spi_transaction_t & TransactionToFill = Transactions[NextTransactionToFill];
         memset ( (void*)&Transactions[NextTransactionToFill], 0x00, sizeof (spi_transaction_t));
@@ -168,14 +168,14 @@ void c_OutputSpi::SendIntensityData ()
         TransactionToFill.tx_buffer = pMem;
         uint32_t NumEmptyIntensitySlots = SPI_NUM_INTENSITY_PER_TRANSACTION;
 
-        while ( (NumEmptyIntensitySlots) && (OutputPixel->MoreDataToSend ()))
+        while ( (NumEmptyIntensitySlots) && (OutputPixel->ISR_MoreDataToSend ()))
         {
-            *pMem++ = OutputPixel->GetNextIntensityToSend ();
+            *pMem++ = OutputPixel->ISR_GetNextIntensityToSend ();
             --NumEmptyIntensitySlots;
         } // end while there is space in the buffer
 
         TransactionToFill.length = SPI_BITS_PER_INTENSITY * (SPI_NUM_INTENSITY_PER_TRANSACTION - NumEmptyIntensitySlots);
-        if (!OutputPixel->MoreDataToSend ())
+        if (!OutputPixel->ISR_MoreDataToSend ())
         {
             TransactionToFill.length++;
         }

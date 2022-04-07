@@ -41,8 +41,8 @@ public:
     void         Render ();                                        ///< Call from loop(),  renders output data
     void         GetDriverName (String & sDriverName) { sDriverName = String (F ("Disabled")); }
     size_t       GetNumChannelsNeeded () { return 0; }
+   
 
-    void IRAM_ATTR ISR_Handler () {} ///< UART ISR
 
 private:
 

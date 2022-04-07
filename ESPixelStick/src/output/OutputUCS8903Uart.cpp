@@ -237,10 +237,10 @@ void IRAM_ATTR c_OutputUCS8903Uart::ISR_Handler ()
         uint8_t OneValue  = Convert2BitIntensityToUCS8903UartDataStream[1];
         uint8_t ZeroValue = Convert2BitIntensityToUCS8903UartDataStream[0];
 
-        while ((NumEmptyIntensitySlots--) && (MoreDataToSend()))
+        while ((NumEmptyIntensitySlots--) && (ISR_MoreDataToSend()))
         {
             // cant use map function in an ISR. It crashes.
-            uint32_t IntensityValue = uint32_t(GetNextIntensityToSend()) * IntensityMultiplier;
+            uint32_t IntensityValue = uint32_t(ISR_GetNextIntensityToSend()) * IntensityMultiplier;
             for (uint16_t mask = 1 << (UCS8903_INTENSITY_DATA_WIDTH - 1); 0 != mask; mask >>= 1)
             {
                 // convert the intensity data into UART data
@@ -248,7 +248,7 @@ void IRAM_ATTR c_OutputUCS8903Uart::ISR_Handler ()
             }
         } // end while there is data to be sent
 
-        if (!MoreDataToSend())
+        if (!ISR_MoreDataToSend())
         {
             CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_TXFIFO_EMPTY_INT_ENA);
         }

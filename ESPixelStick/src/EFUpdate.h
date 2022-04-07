@@ -26,13 +26,16 @@
 
 class EFUpdate {
  public:
-    const uint32_t EFU_ID = 0x00554645;     // 'E', 'F', 'U', 0x00
+     EFUpdate(){}
+     virtual ~EFUpdate() {}
+     
+     const uint32_t EFU_ID = 0x00554645; // 'E', 'F', 'U', 0x00
 
-    void begin();
-    bool process(uint8_t *data, size_t len);
-    bool hasError();
-    uint8_t getError();
-    bool end();
+     void begin();
+     bool process(uint8_t *data, size_t len);
+     bool hasError();
+     uint8_t getError();
+     bool end();
     void GetDriverName(String & name) {name = String(F("EFUPD"));}
 
  private:

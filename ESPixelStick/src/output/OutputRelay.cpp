@@ -68,10 +68,10 @@ c_OutputRelay::c_OutputRelay (c_OutputMgr::e_OutputChannelIds OutputChannelId,
                                 c_OutputMgr::e_OutputType outputType) :
     c_OutputCommon(OutputChannelId, outputGpio, uart, outputType)
 {
-    DEBUG_START;
+    // DEBUG_START;
     memcpy((char*)OutputList, (char*)RelayChannelDefaultSettings, sizeof(OutputList));
 
-    DEBUG_END;
+    // DEBUG_END;
 } // c_OutputRelay
 
 //----------------------------------------------------------------------------
@@ -98,7 +98,7 @@ c_OutputRelay::~c_OutputRelay ()
 //----------------------------------------------------------------------------
 void c_OutputRelay::Begin ()
 {
-    DEBUG_START;
+    // DEBUG_START;
     if(!HasBeenInitialized)
     {
         SetOutputBufferSize(Num_Channels);
@@ -108,7 +108,7 @@ void c_OutputRelay::Begin ()
         HasBeenInitialized = true;
     }
 
-    DEBUG_END;
+    // DEBUG_END;
 }
 
 //----------------------------------------------------------------------------

@@ -34,7 +34,7 @@ class c_InputFPPRemotePlayFile : public c_InputFPPRemotePlayItem
 {
 public:
     c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelIds InputChannelId);
-    ~c_InputFPPRemotePlayFile ();
+    virtual ~c_InputFPPRemotePlayFile ();
 
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
     virtual void Stop ();

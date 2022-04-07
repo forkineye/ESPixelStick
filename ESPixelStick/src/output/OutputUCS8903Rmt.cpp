@@ -44,31 +44,31 @@ c_OutputUCS8903Rmt::c_OutputUCS8903Rmt (c_OutputMgr::e_OutputChannelIds OutputCh
     BitValue.level0 = 1;
     BitValue.duration1 = UCS8903_PIXEL_RMT_TICKS_BIT_0_LOW;
     BitValue.level1 = 0;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_DATA_BIT_ZERO_ID);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID);
 
     BitValue.duration0 = UCS8903_PIXEL_RMT_TICKS_BIT_1_HIGH;
     BitValue.level0 = 1;
     BitValue.duration1 = UCS8903_PIXEL_RMT_TICKS_BIT_1_LOW;
     BitValue.level1 = 0;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_DATA_BIT_ONE_ID);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID);
 
     BitValue.duration0 = UCS8903_PIXEL_RMT_TICKS_IDLE / 10;
     BitValue.level0 = 0;
     BitValue.duration1 = UCS8903_PIXEL_RMT_TICKS_IDLE / 10;
     BitValue.level1 = 1;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_INTERFRAME_GAP_ID);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
     BitValue.duration0 = 2;
     BitValue.level0 = 0;
     BitValue.duration1 = 2;
     BitValue.level1 = 0;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_STARTBIT_ID);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STARTBIT_ID);
 
     BitValue.duration0 = 0;
     BitValue.level0 = 0;
     BitValue.duration1 = 0;
     BitValue.level1 = 0;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_STOPBIT_ID);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STOPBIT_ID);
 
     // DEBUG_V (String ("UCS8903_PIXEL_RMT_TICKS_BIT_0_H: 0x") + String (UCS8903_PIXEL_RMT_TICKS_BIT_0_HIGH, HEX));
     // DEBUG_V (String ("UCS8903_PIXEL_RMT_TICKS_BIT_0_L: 0x") + String (UCS8903_PIXEL_RMT_TICKS_BIT_0_LOW,  HEX));
@@ -97,7 +97,14 @@ void c_OutputUCS8903Rmt::Begin ()
     c_OutputUCS8903::Begin ();
 
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
-    Rmt.Begin (rmt_channel_t (OutputChannelId), gpio_num_t (DataPin), this, rmt_idle_level_t::RMT_IDLE_LEVEL_LOW);
+    c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
+    OutputRmtConfig.RmtChannelId     = rmt_channel_t(OutputChannelId);
+    OutputRmtConfig.DataPin          = gpio_num_t(DataPin);
+    OutputRmtConfig.idle_level       = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
+    OutputRmtConfig.pPixelDataSource = this;
+
+    Rmt.Begin(OutputRmtConfig);
+
     Rmt.SetIntensityDataWidth(UCS8903_INTENSITY_DATA_WIDTH);
 
     HasBeenInitialized = true;
@@ -125,7 +132,7 @@ bool c_OutputUCS8903Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     BitValue.level0 = 0;
     BitValue.duration1 = ifgTicks / 12;
     BitValue.level1 = 0;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_INTERFRAME_GAP_ID);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
     Rmt.set_pin (DataPin);
     Rmt.SetMinFrameDurationInUs (FrameMinDurationInMicroSec);

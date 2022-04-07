@@ -33,6 +33,9 @@ class c_InputFPPRemotePlayFile;
 class fsm_PlayFile_state
 {
 public:
+    fsm_PlayFile_state() {}
+    virtual ~fsm_PlayFile_state() {}
+
     virtual void Poll () = 0;
     virtual void Init (c_InputFPPRemotePlayFile * Parent) = 0;
     virtual void GetStateName (String & sName) = 0;
@@ -51,6 +54,9 @@ protected:
 class fsm_PlayFile_state_Idle : public fsm_PlayFile_state
 {
 public:
+    fsm_PlayFile_state_Idle() {}
+    virtual ~fsm_PlayFile_state_Idle() {}
+
     virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Idle; }
@@ -65,6 +71,9 @@ public:
 class fsm_PlayFile_state_Starting : public fsm_PlayFile_state
 {
 public:
+    fsm_PlayFile_state_Starting() {}
+    virtual ~fsm_PlayFile_state_Starting() {}
+
     virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String& sName) { sName = F ("Starting"); }
@@ -79,6 +88,9 @@ public:
 class fsm_PlayFile_state_PlayingFile : public fsm_PlayFile_state
 {
 public:
+    fsm_PlayFile_state_PlayingFile() {}
+    virtual ~fsm_PlayFile_state_PlayingFile() {}
+
     virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String & sName) { sName = CN_File; }
@@ -101,6 +113,9 @@ private:
 class fsm_PlayFile_state_Stopping : public fsm_PlayFile_state
 {
 public:
+    fsm_PlayFile_state_Stopping() {}
+    virtual ~fsm_PlayFile_state_Stopping() {}
+
     virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String& sName) { sName = F("Stopping"); }
@@ -120,6 +135,9 @@ private:
 class fsm_PlayFile_state_Error : public fsm_PlayFile_state
 {
 public:
+    fsm_PlayFile_state_Error() {}
+    virtual ~fsm_PlayFile_state_Error() {}
+
     virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String& sName) { sName = F ("Error"); }
