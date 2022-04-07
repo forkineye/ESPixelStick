@@ -83,8 +83,12 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
     do // once
     {
         OutputRmtConfig = config;
-
+#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
         if ((nullptr == OutputRmtConfig.pPixelDataSource) && (nullptr == OutputRmtConfig.pSerialDataSource))
+#else
+        if (nullptr == OutputRmtConfig.pPixelDataSource)
+#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+
         {
             LOG_PORT.println (F("Invalid RMT configuration parameters. Rebooting"));
             reboot = true;

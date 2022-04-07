@@ -49,7 +49,9 @@ public:
         gpio_num_t       DataPin            = gpio_num_t(-1);
         rmt_idle_level_t idle_level         = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
         c_OutputPixel    *pPixelDataSource  = nullptr;
-        c_OutputSerial   *pSerialDataSource = nullptr;
+#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+        c_OutputSerial *pSerialDataSource = nullptr;
+#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
     };
 
 private:
@@ -103,7 +105,11 @@ private:
         {
             return OutputRmtConfig.pPixelDataSource->ISR_MoreDataToSend();
         }
+#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
         return OutputRmtConfig.pSerialDataSource->ISR_MoreDataToSend();
+#else
+        return false;
+#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
     }
 
     uint8_t GetNextIntensityToSend()
@@ -112,16 +118,22 @@ private:
         {
             return OutputRmtConfig.pPixelDataSource->ISR_GetNextIntensityToSend();
         }
+#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
         return OutputRmtConfig.pSerialDataSource->ISR_GetNextIntensityToSend();
+#else 
+        return false;
+#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
     }
 
     void StartNewDataFrame()
     {
         if (nullptr != OutputRmtConfig.pPixelDataSource)
         {
-            return OutputRmtConfig.pPixelDataSource->StartNewFrame();
+            OutputRmtConfig.pPixelDataSource->StartNewFrame();
         }
-        return OutputRmtConfig.pSerialDataSource->StartNewFrame();
+#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+        OutputRmtConfig.pSerialDataSource->StartNewFrame();
+#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
     }
 
 #ifndef HasBeenInitialized
