@@ -99,7 +99,7 @@ private:
     uint32_t            TxIntensityDataStartingMask = 0x80;
     RmtDataBitIdType_t  InterIntensityValueId       = RMT_INVALID_VALUE;
 
-    bool MoreDataToSend()
+    inline bool IRAM_ATTR MoreDataToSend()
     {
         if (nullptr != OutputRmtConfig.pPixelDataSource)
         {
@@ -112,7 +112,7 @@ private:
 #endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
     }
 
-    uint8_t GetNextIntensityToSend()
+    inline uint8_t IRAM_ATTR GetNextIntensityToSend()
     {
         if (nullptr != OutputRmtConfig.pPixelDataSource)
         {
@@ -125,7 +125,7 @@ private:
 #endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
     }
 
-    void StartNewDataFrame()
+    inline void IRAM_ATTR StartNewDataFrame()
     {
         if (nullptr != OutputRmtConfig.pPixelDataSource)
         {
