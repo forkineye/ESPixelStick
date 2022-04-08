@@ -24,7 +24,8 @@
 #define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_3
 #define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_1
 #define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_4
-#define RMT_LAST                OutputChannelId_RMT_4
+#define DEFAULT_RMT_4_GPIO      gpio_num_t::GPIO_NUM_15 // Q1R output can be used for pixels
+#define RMT_LAST                OutputChannelId_RMT_5
 
 #define DEFAULT_I2C_SDA gpio_num_t::GPIO_NUM_21
 #define DEFAULT_I2C_SCL gpio_num_t::GPIO_NUM_22
