@@ -95,7 +95,7 @@ private:
     void        IRAM_ATTR ISR_Handler_SendIntensityData ();
     inline void IRAM_ATTR ISR_EnqueueData(uint32_t value);
 
-    long                IntensityMapDstMax          = 255;
+    uint32_t            IntensityMapMultiplier      = 1;
     uint32_t            TxIntensityDataStartingMask = 0x80;
     RmtDataBitIdType_t  InterIntensityValueId       = RMT_INVALID_VALUE;
 
