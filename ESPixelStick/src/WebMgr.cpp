@@ -170,6 +170,13 @@ void c_WebMgr::init ()
     webServer.addHandler (&webSocket);
 
     // Heap status handler
+    webServer.on ("/reboot", HTTP_GET, [](AsyncWebServerRequest* request)
+        {
+            reboot = true;
+            request->send (200, CN_textSLASHplain, "Rebooting");
+        });
+
+    // Heap status handler
     webServer.on ("/heap", HTTP_GET, [](AsyncWebServerRequest* request)
         {
             request->send (200, CN_textSLASHplain, String (ESP.getFreeHeap ()).c_str());
