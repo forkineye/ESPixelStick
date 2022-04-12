@@ -78,7 +78,6 @@ bool c_OutputSerialRmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     SetUpRmtBitTimes();
 
     Rmt.set_pin (DataPin);
-    c_OutputSerial::SetFrameDurration((1.0 / float(CurrentBaudrate)));
     Rmt.SetMinFrameDurationInUs(FrameMinDurationInMicroSec);
 
     // DEBUG_END;

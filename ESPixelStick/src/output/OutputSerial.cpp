@@ -31,7 +31,12 @@ c_OutputSerial::c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     c_OutputCommon (OutputChannelId, outputGpio, uart, outputType)
 {
     // DEBUG_START;
-
+#if defined(SUPPORT_OutputType_DMX)
+    if (outputType == c_OutputMgr::e_OutputType::OutputType_DMX)
+    {
+        CurrentBaudrate = uint32_t(BaudRate::BR_DMX);
+    }
+#endif // defined(SUPPORT_OutputType_DMX)
     // DEBUG_END;
 } // c_OutputSerial
 
@@ -44,7 +49,20 @@ c_OutputSerial::~c_OutputSerial ()
 } // ~c_OutputSerial
 
 //----------------------------------------------------------------------------
-void c_OutputSerial::GetConfig (ArduinoJson::JsonObject& jsonConfig)
+void c_OutputSerial::Begin()
+{
+    // DEBUG_START;
+#if defined(SUPPORT_OutputType_DMX)
+    if (OutputType == c_OutputMgr::e_OutputType::OutputType_DMX)
+    {
+        CurrentBaudrate = uint32_t(BaudRate::BR_DMX);
+    }
+#endif // defined(SUPPORT_OutputType_DMX)
+    // DEBUG_END;
+} // Begin
+
+//----------------------------------------------------------------------------
+void c_OutputSerial::GetConfig(ArduinoJson::JsonObject &jsonConfig)
 {
     // DEBUG_START;
 
@@ -138,9 +156,8 @@ void c_OutputSerial::SetOutputBufferSize(size_t NumChannelsAvailable)
         c_OutputCommon::SetOutputBufferSize(NumChannelsAvailable);
 
         // Calculate our refresh time
-        FrameMinDurationInMicroSec = 25; // DMX_US_PER_BIT * DMX_BITS_PER_BYTE * (NumChannelsAvailable + 2);
-        // DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
-        // DEBUG_V (String ("      NumChannelsAvailable: ") + String (NumChannelsAvailable));
+        SetFrameDurration();
+
     } while (false);
 
     // DEBUG_END;
@@ -151,17 +168,24 @@ bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
+#if defined(SUPPORT_OutputType_DMX)
+    if (OutputType == c_OutputMgr::e_OutputType::OutputType_DMX)
+    {
+        jsonConfig[CN_baudrate] = uint32_t(BaudRate::BR_DMX);
+    }
+#endif // defined(SUPPORT_OutputType_DMX)
+
     setFromJSON(GenericSerialHeader, jsonConfig, CN_gen_ser_hdr);
     setFromJSON(GenericSerialFooter, jsonConfig, CN_gen_ser_ftr);
     setFromJSON(Num_Channels,        jsonConfig, CN_num_chan);
     setFromJSON(CurrentBaudrate,     jsonConfig, CN_baudrate);
 
     c_OutputCommon::SetConfig(jsonConfig);
-
     bool response = validate();
 
     SerialHeaderSize = GenericSerialHeader.length();
     SerialFooterSize = GenericSerialFooter.length();
+    SetFrameDurration();
 
     // Update the config fields in case the validator changed them
     GetConfig(jsonConfig);
@@ -217,20 +241,24 @@ bool c_OutputSerial::validate ()
 } // validate
 
 //----------------------------------------------------------------------------
-void c_OutputSerial::SetFrameDurration (float IntensityBitTimeInUs)
+void c_OutputSerial::SetFrameDurration ()
 {
     // DEBUG_START;
-    // add a 10 bit buffer to the frame.
-    uint32_t TotalBits = 10 + uint32_t(NumBitsPerIntensity * float(Num_Channels));
-    uint32_t TotalFrameTime = uint32_t(IntensityBitTimeInUs * float(TotalBits)) + InterFrameGapInMicroSec;
-    FrameMinDurationInMicroSec = max(uint32_t(25000), TotalFrameTime);
+    float IntensityBitTimeInUs     = (1.0 / float(CurrentBaudrate)) * 1000000.0;
+    float TotalIntensitiesPerFrame = float(Num_Channels + 1) + SerialHeaderSize + SerialFooterSize;
+    float TotalBitsPerFrame        = float(NumBitsPerIntensity) * TotalIntensitiesPerFrame;
+    uint32_t TotalFrameTimeInUs    = uint32_t(IntensityBitTimeInUs * TotalBitsPerFrame) + InterFrameGapInMicroSec;
+    FrameMinDurationInMicroSec     = max(uint32_t(25000), TotalFrameTimeInUs);
 
-    // DEBUG_V (String ("       NumBitsPerIntensity: ") + String (NumBitsPerIntensity));
-    // DEBUG_V (String ("              Num_Channels: ") + String (Num_Channels));
-    // DEBUG_V (String ("                 TotalBits: ") + String (TotalBits));
-    // DEBUG_V (String ("      IntensityBitTimeInUs: ") + String (IntensityBitTimeInUs * 1000000.0));
+    // DEBUG_V (String ("           CurrentBaudrate: ") + String (CurrentBaudrate));
+    // DEBUG_V (String ("      IntensityBitTimeInUs: ") + String (IntensityBitTimeInUs));
+    // DEBUG_V (String ("          SerialHeaderSize: ") + String (SerialHeaderSize));
+    // DEBUG_V (String ("          SerialFooterSize: ") + String (SerialFooterSize));
+    // DEBUG_V (String ("  TotalIntensitiesPerFrame: ") + String (TotalIntensitiesPerFrame));
+    // DEBUG_V (String ("         TotalBitsPerFrame: ") + String (TotalBitsPerFrame));
     // DEBUG_V (String ("   InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
-    // DEBUG_V (String ("            TotalFrameTime: ") + String (TotalFrameTime));
+    // DEBUG_V (String ("        TotalFrameTimeInUs: ") + String (TotalFrameTimeInUs));
+    // DEBUG_V (String ("   InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
     // DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
 
     // DEBUG_END;
@@ -251,10 +279,10 @@ void c_OutputSerial::StartNewFrame ()
 #endif // def USE_SERIAL_DEBUG_COUNTERS
 
     NextIntensityToSend = GetBufferAddress();
-    intensity_count = Num_Channels;
-    SentIntensityCount = 0;
-    SerialHeaderIndex = 0;
-    SerialFooterIndex = 0;
+    intensity_count     = Num_Channels;
+    SentIntensityCount  = 0;
+    SerialHeaderIndex   = 0;
+    SerialFooterIndex   = 0;
 
 #ifdef USE_SERIAL_DEBUG_COUNTERS
     IntensityBytesSentLastFrame = IntensityBytesSent;
