@@ -3,7 +3,7 @@
 * ArtnetInput.h - Code to wrap ESPAsyncArtnet for input
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and Artnet based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,

@@ -2,7 +2,7 @@
 * c_InputDDP.cpp
 *
 * Project: c_InputDDP - Asynchronous DDP library for Arduino ESP8266 and ESP32
-* Copyright (c) 2019 Daniel Kulp
+* Copyright (c) 2019, 2022 Daniel Kulp, Shelby Merrick
 *
 *  This program is provided free for you to use in any way that you wish,
 *  subject to the laws and regulations where you are using it.  Due diligence

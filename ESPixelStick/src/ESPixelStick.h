@@ -3,7 +3,7 @@
 * ESPixelStick.h
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2016 Shelby Merrick
+* Copyright (c) 2016, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
