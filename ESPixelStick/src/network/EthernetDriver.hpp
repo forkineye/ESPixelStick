@@ -50,31 +50,31 @@ public:
     c_EthernetDriver ();
     virtual ~c_EthernetDriver ();
 
-    void      Begin           (); ///< set up the operating environment based on the current config (or defaults)
-    void      GetConfig       (JsonObject & json);
-    bool      SetConfig       (JsonObject & json);
-    void      GetDriverName   (String & value) { value = CN_EthDrv; }
+    void            Begin               (); ///< set up the operating environment based on the current config (or defaults)
+    void            GetConfig           (JsonObject & json);
+    bool            SetConfig           (JsonObject & json);
+    void            GetDriverName       (String & value) { value = CN_EthDrv; }
 
-    int       ValidateConfig  ();
-    IPAddress GetIpAddress    ();
-    IPAddress GetIpSubNetMask ();
-    IPAddress GetIpGateway    ();
-    String    GetMacAddress   ();
-    void      GetHostname     (String & Name);
-    void      SetHostname     (String & Name) {}
-    void      GetStatus       (JsonObject & jsonStatus);
-    void      SetEthHostname  ();
-    void      reset           ();
-    void      Poll            ();
-    bool      IsConnected     ();
-    void      SetFsmState         (fsm_Eth_state * NewState) { pCurrentFsmState = NewState; }
-    void      AnnounceState       ();
-    void      SetFsmStartTime     (uint32_t NewStartTime)    { FsmTimerEthStartTime = NewStartTime; }
-    uint32_t  GetFsmStartTime     (void)                     { return FsmTimerEthStartTime; }
-    void      NetworkStateChanged (bool NetworkState);
-    void      StartEth ();
-    void      InitPowerPin ();
-    uint32_t  GetPowerPinActiveDelayMs () { return powerPinActiveDelayMs; }
+    int             ValidateConfig      ();
+    IPAddress       GetIpAddress        ();
+    IPAddress       GetIpSubNetMask     ();
+    IPAddress       GetIpGateway        ();
+    String          GetMacAddress       ();
+    void            GetHostname         (String & Name);
+    void            SetHostname         (String & Name) {}
+    void            GetStatus           (JsonObject & jsonStatus);
+    void            SetEthHostname      ();
+    void            reset               ();
+    void            Poll                ();
+    bool            IsConnected         ();
+    inline void     SetFsmState         (fsm_Eth_state * NewState) { pCurrentFsmState = NewState; }
+    void            AnnounceState       ();
+    inline void     SetFsmStartTime     (uint32_t NewStartTime)    { FsmTimerEthStartTime = NewStartTime; }
+    inline uint32_t GetFsmStartTime     (void)                     { return FsmTimerEthStartTime; }
+    void            NetworkStateChanged (bool NetworkState);
+    void            StartEth            ();
+    void            InitPowerPin        ();
+    inline uint32_t GetPowerPinActiveDelayMs () { return powerPinActiveDelayMs; }
 
 private:
 
