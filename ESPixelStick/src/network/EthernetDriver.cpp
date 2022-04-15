@@ -40,17 +40,6 @@ static fsm_Eth_state_DeviceInitFailed  fsm_Eth_state_DeviceInitFailed_imp;
 c_EthernetDriver::c_EthernetDriver ()
 {
     // DEBUG_START;
-
-    fsm_Eth_state_Boot_imp.SetParent (this);
-    fsm_Eth_state_PoweringUp_imp.SetParent (this);
-    fsm_Eth_state_ConnectingToEth_imp.SetParent (this);
-    fsm_Eth_state_WaitForIP_imp.SetParent (this);
-    fsm_Eth_state_GotIp_imp.SetParent (this);
-    fsm_Eth_state_DeviceInitFailed_imp.SetParent (this);
-
-    // this gets called pre-setup so there is nothing we can do here.
-    fsm_Eth_state_Boot_imp.Init ();
-
     // DEBUG_END;
 } // c_EthernetDriver
 
@@ -59,7 +48,6 @@ c_EthernetDriver::c_EthernetDriver ()
 c_EthernetDriver::~c_EthernetDriver ()
 {
     // DEBUG_START;
-
     // DEBUG_END;
 
 } // ~c_EthernetDriver
@@ -82,6 +70,16 @@ void c_EthernetDriver::AnnounceState ()
 void c_EthernetDriver::Begin ()
 {
     // DEBUG_START;
+
+    fsm_Eth_state_Boot_imp.SetParent(this);
+    fsm_Eth_state_PoweringUp_imp.SetParent(this);
+    fsm_Eth_state_ConnectingToEth_imp.SetParent(this);
+    fsm_Eth_state_WaitForIP_imp.SetParent(this);
+    fsm_Eth_state_GotIp_imp.SetParent(this);
+    fsm_Eth_state_DeviceInitFailed_imp.SetParent(this);
+
+    // this gets called pre-setup so there is nothing we can do here.
+    fsm_Eth_state_Boot_imp.Init();
 
     // Setup Ethernet Handlers
     WiFi.onEvent ([this](WiFiEvent_t event, arduino_event_info_t info) {this->onEventHandler (event, info); });
@@ -120,10 +118,10 @@ void c_EthernetDriver::GetConfig (JsonObject& json)
 {
     // DEBUG_START;
 
-    json[CN_ip]      = ip.toString ();
-    json[CN_netmask] = netmask.toString ();
-    json[CN_gateway] = gateway.toString ();
-    json[CN_dhcp]    = UseDhcp;
+    json[CN_ip]          = ip.toString ();
+    json[CN_netmask]     = netmask.toString ();
+    json[CN_gateway]     = gateway.toString ();
+    json[CN_dhcp]        = UseDhcp;
 
     json[CN_type]        = phy_type;
     json[CN_addr]        = phy_addr;
@@ -442,6 +440,8 @@ void fsm_Eth_state_Boot::Init ()
     // pEthernetDriver->AnnounceState ();
     pEthernetDriver->SetFsmStartTime (millis ());
 
+    // DEBUG_V(String("pEthernetDriver: 0x") + String(uint32_t(pEthernetDriver), HEX));
+
     // DEBUG_END;
 
 } // fsm_Eth_state_Boot::Init
@@ -454,10 +454,12 @@ void fsm_Eth_state_Boot::Poll ()
 
     uint32_t CurrentTimeMS = millis ();
 
-    if (CurrentTimeMS - pEthernetDriver->GetFsmStartTime () > (10000))
+    // DEBUG_V(String("pEthernetDriver: 0x") + String(uint32_t(pEthernetDriver), HEX));
+
+    if (CurrentTimeMS - pEthernetDriver->GetFsmStartTime() > (10000))
     {
-        // Start trying to connect
-        fsm_Eth_state_PoweringUp_imp.Init ();
+        // DEBUG_V("Start trying to connect");
+        fsm_Eth_state_PoweringUp_imp.Init();
     }
 
     // DEBUG_END;
