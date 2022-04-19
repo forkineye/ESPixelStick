@@ -1229,13 +1229,14 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
 } // UpdateDisplayBufferReferences
 
 //-----------------------------------------------------------------------------
-void c_OutputMgr::PauseOutputs (void)
+void c_OutputMgr::PauseOutputs(bool PauseTheOutput)
 {
     // DEBUG_START;
+    IsOutputPaused = PauseTheOutput;
 
     for (auto & CurrentOutput : OutputChannelDrivers)
     {
-        CurrentOutput.pOutputChannelDriver->PauseOutput ();
+        CurrentOutput.pOutputChannelDriver->PauseOutput(PauseTheOutput);
     }
 
     // DEBUG_END;
