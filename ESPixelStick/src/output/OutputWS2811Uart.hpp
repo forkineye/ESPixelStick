@@ -22,34 +22,39 @@
 *
 */
 
-#include "OutputCommon.hpp"
-#include "OutputWS2811.hpp"
+#include "../ESPixelStick.h"
 #if defined(SUPPORT_OutputType_WS2811) && defined(SUPPORT_UART_OUTPUT)
+
+#include "OutputWS2811.hpp"
+#include "OutputUart.hpp"
 
 class c_OutputWS2811Uart : public c_OutputWS2811
 {
 public:
     // These functions are inherited from c_OutputCommon
     c_OutputWS2811Uart (c_OutputMgr::e_OutputChannelIds OutputChannelId,
-                      gpio_num_t outputGpio,
-                      uart_port_t uart,
-                      c_OutputMgr::e_OutputType outputType);
+                        gpio_num_t outputGpio,
+                        uart_port_t uart,
+                        c_OutputMgr::e_OutputType outputType);
     virtual ~c_OutputWS2811Uart ();
 
     // functions to be provided by the derived class
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
     void    Render ();                                        ///< Call from loop(),  renders output data
-    void    SetOutputBufferSize (uint16_t NumChannelsAvailable);
-    void    PauseOutput ();
+    void    PauseOutput (bool State);
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);
-
-    /// Interrupt Handler
-    void IRAM_ATTR ISR_Handler (); ///< UART ISR
+    void    GetConfig (ArduinoJson::JsonObject& jsonConfig);
+    void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
 
 #define WS2811_NUM_DATA_BYTES_PER_INTENSITY_BYTE    4
 
 private:
-    bool validate ();        ///< confirm that the current configuration is valid
+    c_OutputUart Uart;
+#ifdef WS2811_UART_DEBUG_COUNTERS
+    uint32_t NewFrameCounter = 0;
+    uint32_t TimeSinceLastFrameMS = 0;
+    uint32_t TimeLastFrameStartedMS = 0;
+#endif // def WS2811_UART_DEBUG_COUNTERS
 
 }; // c_OutputWS2811Uart
 

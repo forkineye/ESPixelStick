@@ -164,10 +164,7 @@ void c_OutputWS2811Rmt::Render ()
 {
     // DEBUG_START;
 
-    if (Rmt.Render ())
-    {
-        ReportNewFrame ();
-    }
+    Rmt.Render();
 
     // DEBUG_END;
 

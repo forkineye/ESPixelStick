@@ -49,7 +49,7 @@ void c_OutputSerialUart::Begin ()
     OutputUartConfig.UartId                 = UartId;
     OutputUartConfig.DataPin                = DataPin;
     OutputUartConfig.IntensityDataWidth     = 8;
-    OutputUartConfig.UartDataSize           = c_OutputUart::UartDataSize_t::UART_8N2;
+    OutputUartConfig.UartDataSize           = c_OutputUart::UartDataSize_t::OUTPUT_UART_8N2;
     OutputUartConfig.TranslateIntensityData = false;
     OutputUartConfig.pSerialDataSource      = this;
     OutputUartConfig.Baudrate               = CurrentBaudrate;
