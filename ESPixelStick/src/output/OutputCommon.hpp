@@ -60,7 +60,7 @@ public:
             void         SetOutputBufferAddress (uint8_t* pNewOutputBuffer) { pOutputBuffer = pNewOutputBuffer; }
     virtual void         SetOutputBufferSize (size_t NewOutputBufferSize)  { OutputBufferSize = NewOutputBufferSize; };
     virtual size_t       GetNumChannelsNeeded () = 0;
-    virtual void         PauseOutput () {}
+    virtual void         PauseOutput (bool State) {}
     virtual void         WriteChannelData (size_t StartChannelId, size_t ChannelCount, byte *pSourceData);
     virtual void         ReadChannelData (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
 
