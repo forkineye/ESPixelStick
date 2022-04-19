@@ -29,7 +29,7 @@
 #define DEFAULT_RMT_4_GPIO      gpio_num_t::GPIO_NUM_21
 #define DEFAULT_RMT_5_GPIO      gpio_num_t::GPIO_NUM_17
 #define DEFAULT_RMT_6_GPIO      gpio_num_t::GPIO_NUM_22
-#define RMT_LAST                OutputChannelId_RMT_6
+#define RMT_LAST                OutputChannelId_RMT_7
 
 //Power relay output over Q1 or Q1R
 #define DEFAULT_RELAY_GPIO      gpio_num_t::GPIO_NUM_15
