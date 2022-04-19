@@ -513,7 +513,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
                 break;
             }
 
-            OutputMgr.PauseOutputs ();
+            OutputMgr.PauseOutputs (true);
 
             // convert the input data into a json structure (use json read only mode)
             WebJsonDoc->clear ();
@@ -563,6 +563,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
     } // end switch (type)
 
     FeedWDT ();
+    OutputMgr.PauseOutputs(false);
 
     // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));
 
