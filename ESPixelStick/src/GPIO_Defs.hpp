@@ -3,7 +3,7 @@
 * GPIO_Defs.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -87,11 +87,15 @@ typedef enum
 #   include "platformDefinitions/GPIO_Defs_ESP32_MH_ET_LIVE_MiniKit.hpp"
 #elif defined(BOARD_ESP32_QUINLED_QUAD_ETH)
 #   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_QUAD_ETH.hpp"
+#elif defined(BOARD_ESP32_QUINLED_QUAD_AE_PLUS)
+#   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_QUAD_AE_Plus.hpp"
 #elif defined(BOARD_ESP32_QUINLED_QUAD)
 #   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_QUAD.hpp"
 #elif defined(BOARD_ESP32_QUINLED_UNO_ETH)
 #   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_UNO_ETH.hpp"
 #elif defined(BOARD_ESP32_QUINLED_UNO)
+#   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_UNO_AE_Plus.hpp"
+#elif defined(BOARD_ESP32_QUINLED_UNO_AE_PLUS)
 #   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_UNO.hpp"
 #elif defined (BOARD_ESP32_TTGO_T8)
 #   include "platformDefinitions/GPIO_Defs_ESP32_TTGO_T8.hpp"

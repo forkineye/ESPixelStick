@@ -2,7 +2,7 @@
 * WebMgr.cpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -168,6 +168,13 @@ void c_WebMgr::init ()
     using namespace std::placeholders;
     webSocket.onEvent (std::bind (&c_WebMgr::onWsEvent, this, _1, _2, _3, _4, _5, _6));
     webServer.addHandler (&webSocket);
+
+    // Heap status handler
+    webServer.on ("/reboot", HTTP_GET, [](AsyncWebServerRequest* request)
+        {
+            reboot = true;
+            request->send (200, CN_textSLASHplain, "Rebooting");
+        });
 
     // Heap status handler
     webServer.on ("/heap", HTTP_GET, [](AsyncWebServerRequest* request)
@@ -506,7 +513,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
                 break;
             }
 
-            OutputMgr.PauseOutputs ();
+            OutputMgr.PauseOutputs (true);
 
             // convert the input data into a json structure (use json read only mode)
             WebJsonDoc->clear ();
@@ -556,6 +563,7 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
     } // end switch (type)
 
     FeedWDT ();
+    OutputMgr.PauseOutputs(false);
 
     // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));
 

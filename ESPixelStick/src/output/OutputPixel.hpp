@@ -3,7 +3,7 @@
 * OutputPixel.h - Pixel driver code for ESPixelStick
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015 Shelby Merrick
+* Copyright (c) 2015, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -31,7 +31,7 @@
 class c_OutputPixel : public c_OutputCommon
 {
 private:
-        enum FrameState_t
+    enum FrameState_t
     {
         FramePrependData,
         FrameSendPixels,
@@ -59,11 +59,12 @@ public:
             void         SetInvertData (bool _InvertData) { InvertData = _InvertData; }
     virtual void         WriteChannelData (size_t StartChannelId, size_t ChannelCount, byte *pSourceData);
     virtual void         ReadChannelData (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
+    inline  void         SetIntensityBitTimeInUS (float value) { IntensityBitTimeInUs = value; }
 
             void         StartNewFrame();
-    bool    IRAM_ATTR    ISR_MoreDataToSend() { return FrameState_t::FrameDone != FrameState; }
+    bool    IRAM_ATTR    ISR_MoreDataToSend () { return FrameState_t::FrameDone != FrameState; }
     uint8_t IRAM_ATTR    ISR_GetNextIntensityToSend ();
-    
+
 protected:
 
     void SetFramePrependInformation (const uint8_t* data, size_t len);
@@ -117,15 +118,25 @@ private:
 
     bool        InvertData = false;
 
-// #define USE_PIXEL_DEBUG_COUNTERS
+#define USE_PIXEL_DEBUG_COUNTERS
 #ifdef USE_PIXEL_DEBUG_COUNTERS
-    size_t     PixelsToSend = 0;
-    size_t     IntensityBytesSent = 0;
-    size_t     IntensityBytesSentLastFrame = 0;
-    uint32_t   FrameStartCounter = 0;
-    uint32_t   FrameEndCounter = 0;
-    size_t     SentPixels = 0;
-    uint32_t   AbortFrameCounter = 0;
+    size_t     PixelsToSend                     = 0;
+    size_t     IntensityBytesSent               = 0;
+    size_t     IntensityBytesSentLastFrame      = 0;
+    uint32_t   FrameStartCounter                = 0;
+    uint32_t   FrameEndCounter                  = 0;
+    size_t     SentPixels                       = 0;
+    uint32_t   AbortFrameCounter                = 0;
+    uint32_t   FramePrependDataCounter          = 0;
+    uint32_t   FrameSendPixelsCounter           = 0;
+    uint32_t   FrameAppendDataCounter           = 0;
+    uint32_t   FrameDoneCounter                 = 0;
+    uint32_t   FrameStateUnknownCounter         = 0;
+    uint32_t   PixelPrependNullsCounter         = 0;
+    uint32_t   PixelSendIntensityCounter        = 0;
+    uint32_t   PixelAppendNullsCounter          = 0;
+    uint32_t   PixelUnkownState                 = 0;
+    uint32_t   GetNextIntensityToSendCounter    = 0;
 #endif // def USE_PIXEL_DEBUG_COUNTERS
 
     typedef union ColorOffsets_s

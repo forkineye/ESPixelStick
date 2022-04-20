@@ -3,7 +3,7 @@
 * OutputSerial.h - Pixel driver code for ESPixelStick
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015 Shelby Merrick
+* Copyright (c) 2015, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -36,7 +36,7 @@ public:
     virtual ~c_OutputSerial ();
 
     // functions to be provided by the derived class
-    // virtual void         Begin () {};
+    virtual void         Begin ();
     virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
     virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
             void         GetDriverName (String& sDriverName);
@@ -51,7 +51,7 @@ public:
     bool    IRAM_ATTR    ISR_MoreDataToSend() { return (SerialFrameState_t::SerialIdle != SerialFrameState); }
 
 protected:
-    void SetFrameDurration(float IntensityBitTimeInUs);
+    void SetFrameDurration();
 
 #define GS_CHANNEL_LIMIT 2048
 
@@ -81,7 +81,7 @@ private:
     const size_t    DMX_MaxFrameSize     = 512;
     
 
-    uint16_t    Num_Channels = DEFAULT_NUM_CHANNELS;       // Number of data channels to transmit
+    size_t      Num_Channels = DEFAULT_NUM_CHANNELS;       // Number of data channels to transmit
 
     uint8_t*    NextIntensityToSend = nullptr;
     size_t      intensity_count = 0;

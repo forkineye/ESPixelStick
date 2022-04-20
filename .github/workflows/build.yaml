@@ -40,11 +40,17 @@ jobs:
           # QuinLed QUAD
           - target: "esp32_quinled_quad"
             chip: "esp32"
+          # QuinLed QUAD AE+
+          - target: "esp32_quinled_quad_ae_plus"
+            chip: "esp32"
           # QuinLed QUAD Eth
           - target: "esp32_quinled_quad_eth"
             chip: "esp32"
           # QuinLed UNO
           - target: "esp32_quinled_uno"
+            chip: "esp32"
+          # QuinLed UNO AE +
+          - target: "esp32_quinled_uno_ae_plus"
             chip: "esp32"
           # QuinLed UNO Eth
           - target: "esp32_quinled_uno_eth"

@@ -3,7 +3,7 @@
 * OutputCommon.hpp - Output base class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -60,7 +60,7 @@ public:
             void         SetOutputBufferAddress (uint8_t* pNewOutputBuffer) { pOutputBuffer = pNewOutputBuffer; }
     virtual void         SetOutputBufferSize (size_t NewOutputBufferSize)  { OutputBufferSize = NewOutputBufferSize; };
     virtual size_t       GetNumChannelsNeeded () = 0;
-    virtual void         PauseOutput () {}
+    virtual void         PauseOutput (bool State) {}
     virtual void         WriteChannelData (size_t StartChannelId, size_t ChannelCount, byte *pSourceData);
     virtual void         ReadChannelData (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
 

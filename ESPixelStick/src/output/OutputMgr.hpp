@@ -3,7 +3,7 @@
 * OutputMgr.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -49,13 +49,12 @@ public:
     void      SetConfig         (const char * NewConfig);  ///< Save the current configuration data to nvram
     void      SetConfig         (ArduinoJson::JsonDocument & NewConfig);  ///< Save the current configuration data to nvram
     void      GetStatus         (JsonObject & jsonStatus);
-    void      PauseOutput       (bool PauseTheOutput) { IsOutputPaused = PauseTheOutput; }
     void      GetPortCounts     (uint16_t& PixelCount, uint16_t& SerialCount) {PixelCount = uint16_t(OutputChannelId_End); SerialCount = uint16_t(NUM_UARTS); }
     uint8_t*  GetBufferAddress  () { return OutputBuffer; } ///< Get the address of the buffer into which the E1.31 handler will stuff data
     size_t    GetBufferUsedSize () { return UsedBufferSize; } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
     size_t    GetBufferSize     () { return sizeof(OutputBuffer); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
     void      DeleteConfig      () { FileMgr.DeleteConfigFile (ConfigFileName); }
-    void      PauseOutputs      ();
+    void      PauseOutputs      (bool NewState);
     void      GetDriverName     (String & Name) { Name = "OutputMgr"; }
     void      WriteChannelData  (size_t StartChannelId, size_t ChannelCount, byte * pData);
     void      ReadChannelData   (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);

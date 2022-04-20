@@ -2,7 +2,7 @@
 * OutputRmt.cpp - TM1814 driver code for ESPixelStick RMT Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015 Shelby Merrick
+* Copyright (c) 2015, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -344,7 +344,7 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_SendIntensityData ()
 
     while ((NumAvailableRmtSlotsToFill > NumRmtSlotsPerIntensityValue) && MoreDataToSend())
     {
-        uint32_t IntensityValue = GetNextIntensityToSend();
+        uint32_t IntensityValue = GetNextIntensityToSend() * IntensityMapMultiplier;
 //        uint32_t IntensityValue = map(GetNextIntensityToSend(), 0, 255, 0, IntensityMapDstMax);
 #ifdef USE_RMT_DEBUG_COUNTERS
         IntensityBytesSent++;
@@ -517,12 +517,14 @@ void c_OutputRmt::SetIntensityDataWidth(uint32_t DataWidth)
        
         noInterrupts();
         NumRmtSlotsPerIntensityValue = DataWidth + ((SendInterIntensityBits) ? 1 : 0 );
-        IntensityMapDstMax = (1 << DataWidth) - 1;
-        TxIntensityDataStartingMask = 1 << (DataWidth-1);
+        uint32_t IntensityMapDstMax = (1 << DataWidth) - 1;
+        IntensityMapMultiplier = IntensityMapDstMax / 255;
+        TxIntensityDataStartingMask = 1 << (DataWidth - 1);
         interrupts();
 
         // DEBUG_V(String("NumRmtSlotsPerIntensityValue: ")   + String(NumRmtSlotsPerIntensityValue));
         // DEBUG_V(String("          IntensityMapDstMax: ")   + String(IntensityMapDstMax));
+        // DEBUG_V(String("      IntensityMapMultiplier: ")   + String(IntensityMapMultiplier));
         // DEBUG_V(String("     NumRmtSlotsPerInterrupt: 0x") + String(NumRmtSlotsPerInterrupt, HEX));
 
     } while (false);

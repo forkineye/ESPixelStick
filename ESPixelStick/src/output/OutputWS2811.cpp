@@ -2,7 +2,7 @@
 * OutputWS2811.cpp - WS2811 driver code for ESPixelStick UART
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015 Shelby Merrick
+* Copyright (c) 2015, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -69,27 +69,7 @@ void c_OutputWS2811::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     c_OutputPixel::GetStatus (jsonStatus);
 
-    // uint32_t UartIntSt = GET_PERI_REG_MASK (UART_INT_ST (UartId), UART_TXFIFO_EMPTY_INT_ENA);
-    // uint16_t SpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getWS2811FifoLength));
-    // jsonStatus["UartIntSt"] = UartIntSt;
-    // jsonStatus["SpaceInFifo"] = SpaceInFifo;
-
 } // GetStatus
-
-//----------------------------------------------------------------------------
-void c_OutputWS2811::SetOutputBufferSize (uint16_t NumChannelsAvailable)
-{
-    // DEBUG_START;
-
-        // Stop current output operation
-    c_OutputPixel::SetOutputBufferSize (NumChannelsAvailable);
-
-    // Calculate our refresh time
-    SetFrameDurration (float(WS2811_PIXEL_NS_BIT_0_HIGH + WS2811_PIXEL_NS_BIT_0_LOW) / 1000.0);
-
-    // DEBUG_END;
-
-} // SetBufferSize
 
 //----------------------------------------------------------------------------
 /* Process the config
@@ -107,7 +87,7 @@ bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     bool response = c_OutputPixel::SetConfig (jsonConfig);
 
     // Calculate our refresh time
-    SetFrameDurration (float (WS2811_PIXEL_NS_BIT_0_HIGH + WS2811_PIXEL_NS_BIT_0_LOW) / 1000.0);
+    SetFrameDurration(float(WS2811_PIXEL_NS_BIT_TOTAL) / 1000.0);
 
     // DEBUG_END;
     return response;
