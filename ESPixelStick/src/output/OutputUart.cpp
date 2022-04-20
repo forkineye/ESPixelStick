@@ -281,8 +281,8 @@ void c_OutputUart::InitializeUart()
         if (OutputUartConfig.InvertOutputPolarity)
         {
             // invert the output
-            CLEAR_PERI_REG_MASK (UART_CONF0(UartId), UART_INV_MASK);
-            SET_PERI_REG_MASK (UART_CONF0(UartId), (BIT(22)));
+            CLEAR_PERI_REG_MASK (UART_CONF0(OutputUartConfig.UartId), UART_INV_MASK);
+            SET_PERI_REG_MASK   (UART_CONF0(OutputUartConfig.UartId), (BIT(22)));
         }
 
         // Clear FIFOs
