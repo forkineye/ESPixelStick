@@ -399,6 +399,7 @@ bool c_OutputCommon::SetConfig (JsonObject & jsonConfig)
     bool response = setFromJSON (tempDataPin, jsonConfig, CN_data_pin);
 
     DataPin = gpio_num_t (tempDataPin);
+    // DEBUG_V(String(" DataPin: ") + String(DataPin));
 
     // DEBUG_END;
 
@@ -413,6 +414,8 @@ void c_OutputCommon::GetConfig (JsonObject & jsonConfig)
 
     // enums need to be converted to uints for json
     jsonConfig[CN_data_pin] = uint8_t (DataPin);
+
+    // DEBUG_V(String(" DataPin: ") + String(DataPin));
 
     // DEBUG_END;
 } // GetConfig

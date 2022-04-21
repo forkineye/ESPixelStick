@@ -212,8 +212,10 @@ void c_OutputUart::GetConfig(JsonObject &jsonConfig)
     // DEBUG_START;
 
     // enums need to be converted to uints for json
-    jsonConfig[CN_data_pin] = uint8_t(OutputUartConfig.DataPin);
+    // jsonConfig[CN_data_pin] = uint8_t(OutputUartConfig.DataPin);
     jsonConfig[CN_baudrate] = OutputUartConfig.Baudrate;
+    // DEBUG_V(String(" DataPin: ") + String(OutputUartConfig.DataPin));
+    // DEBUG_V(String("Baudrate: ") + String(OutputUartConfig.Baudrate));
 
     // DEBUG_END;
 } // GetConfig
@@ -537,6 +539,9 @@ bool c_OutputUart::SetConfig(JsonObject &jsonConfig)
     response |= setFromJSON(OutputUartConfig.Baudrate, jsonConfig, CN_baudrate);
 
     OutputUartConfig.DataPin = gpio_num_t(tempDataPin);
+
+    // DEBUG_V(String(" DataPin: ") + String(OutputUartConfig.DataPin));
+    // DEBUG_V(String("Baudrate: ") + String(OutputUartConfig.Baudrate));
 
     StartUart();
 

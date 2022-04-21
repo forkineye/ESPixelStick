@@ -90,12 +90,10 @@ bool c_FileMgr::SetConfig (JsonObject & json)
     {
         JsonObject JsonDeviceConfig = json[CN_device];
 
-#if defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
         ConfigChanged |= setFromJSON (miso_pin, JsonDeviceConfig, CN_miso_pin);
         ConfigChanged |= setFromJSON (mosi_pin, JsonDeviceConfig, CN_mosi_pin);
         ConfigChanged |= setFromJSON (clk_pin,  JsonDeviceConfig, CN_clock_pin);
         ConfigChanged |= setFromJSON (cs_pin,   JsonDeviceConfig, CN_cs_pin);
-#endif //  defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
     }
     else
     {
@@ -120,12 +118,10 @@ void c_FileMgr::GetConfig (JsonObject& json)
 {
     // DEBUG_START;
 
-#if defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
     json[CN_miso_pin]  = miso_pin;
     json[CN_mosi_pin]  = mosi_pin;
     json[CN_clock_pin] = clk_pin;
     json[CN_cs_pin]    = cs_pin;
-#endif // defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
 
     // DEBUG_END;
 
