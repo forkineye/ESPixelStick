@@ -46,9 +46,7 @@
 #   define SD_CARD_DATA_1          gpio_num_t::GPIO_NUM_4
 #   define SD_CARD_DATA_2          gpio_num_t::GPIO_NUM_12
 #   define SD_CARD_DATA_3          gpio_num_t::GPIO_NUM_13
-#endif // def SUPPORT_SD_MMC
-
-#ifdef SUPPORT_SD
+#else // SUPPORT_SD
 #   define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_2
 #   define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_15
 #   define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14

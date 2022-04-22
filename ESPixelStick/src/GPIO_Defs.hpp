@@ -73,7 +73,7 @@ typedef enum
 #endif // def ARDUINO_ARCH_ESP8266
 
 // Platform specific GPIO definitions
-#if defined (BOARD_ESP32_CAM)
+#if   defined (BOARD_ESP32_CAM)
 #   include "platformDefinitions/GPIO_Defs_ESP32_CAM.hpp"
 #elif defined (BOARD_ESP32_D1_MINI_ETH)
 #   include "platformDefinitions/GPIO_Defs_ESP32_D1_MINI_ETH.hpp"
@@ -101,6 +101,10 @@ typedef enum
 #   include "platformDefinitions/GPIO_Defs_ESP32_TTGO_T8.hpp"
 #elif defined (BOARD_ESP32_WT32ETH01)
 #   include "platformDefinitions/GPIO_Defs_ESP32_WT32ETH01.hpp"
+#elif defined(BOARD_ESP32_TWILIGHTLORD)
+#   include "platformDefinitions/GPIO_Defs_ESP32_TWILIGHTLORD.hpp"
+#elif defined(BOARD_ESP32_TWILIGHTLORD_ETH)
+#   include "platformDefinitions/GPIO_Defs_ESP32_TWILIGHTLORD_ETH.hpp"
 #elif defined (BOARD_ESP01S)
 #   include "platformDefinitions/GPIO_Defs_ESP8266_ESP01S.hpp"
 #elif defined (BOARD_ESPS_V3)

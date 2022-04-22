@@ -1,6 +1,6 @@
 #pragma once
 /*
- * GPIO_Defs_ESP32_QUINLED_QUAD.hpp - Output Management class
+ * GPIO_Defs_ESP32_TWILIGHTLORD_ETH.hpp - Output Management class
  *
  * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
  * Copyright (c) 2021 Shelby Merrick
@@ -21,10 +21,18 @@
 #define SUPPORT_ETHERNET
 
 //Output Manager
+#define SUPPORT_UART_OUTPUT
+#define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_2
+#define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_4
+#define UART_LAST               OutputChannelId_UART_1
+
 #define SUPPORT_RMT_OUTPUT
-#define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_16
-#define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_3
-#define RMT_LAST                OutputChannelId_RMT_2
+#define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_14
+#define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_31
+#define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_32
+#define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_33
+#define DEFAULT_RMT_4_GPIO      gpio_num_t::GPIO_NUM_34
+#define RMT_LAST                OutputChannelId_RMT_5
 
 //Power relay output over Q1 or Q1R
 #define DEFAULT_RELAY_GPIO      gpio_num_t::GPIO_NUM_15
@@ -35,10 +43,10 @@
 
 // File Manager - Defnitions must be present even if SD is not supported
 // #define SUPPORT_SD
-#define SD_CARD_MISO_PIN gpio_num_t::GPIO_NUM_12
-#define SD_CARD_MOSI_PIN gpio_num_t::GPIO_NUM_13
-#define SD_CARD_CLK_PIN gpio_num_t::GPIO_NUM_14
-#define SD_CARD_CS_PIN gpio_num_t::GPIO_NUM_15
+#define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_12
+#define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_13
+#define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14
+#define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_15
 
 // #include <ETH.h>
 #include "../network/ETH_m.h"
@@ -72,19 +80,18 @@
 #define DEFAULT_ETH_MDC_PIN     gpio_num_t::GPIO_NUM_23
 #define DEFAULT_ETH_MDIO_PIN    gpio_num_t::GPIO_NUM_18
 
-
 // Output Types
 // Not Finished - #define SUPPORT_OutputType_TLS3001
 // #define SUPPORT_OutputType_APA102           // SPI
-// #define SUPPORT_OutputType_DMX              // UART
-// #define SUPPORT_OutputType_GECE             // UART
+#define SUPPORT_OutputType_DMX              // UART / RMT
+#define SUPPORT_OutputType_GECE             // UART
 #define SUPPORT_OutputType_GS8208           // UART / RMT
-// #define SUPPORT_OutputType_Renard           // UART
-// #define SUPPORT_OutputType_Serial           // UART
+#define SUPPORT_OutputType_Renard           // UART / RMT
+#define SUPPORT_OutputType_Serial           // UART / RMT
 #define SUPPORT_OutputType_TM1814           // UART / RMT
 #define SUPPORT_OutputType_UCS1903          // UART / RMT
 #define SUPPORT_OutputType_UCS8903          // UART / RMT
 // #define SUPPORT_OutputType_WS2801           // SPI
 #define SUPPORT_OutputType_WS2811           // UART / RMT
 #define SUPPORT_OutputType_Relay            // GPIO
-// #define SUPPORT_OutputType_Servo_PCA9685    // I2C (default pins)
+#define SUPPORT_OutputType_Servo_PCA9685    // I2C (default pins)

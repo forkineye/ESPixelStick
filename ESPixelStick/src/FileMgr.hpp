@@ -109,12 +109,10 @@ private:
     void printDirectory (File dir, int numTabs);
 
     bool     SdCardInstalled = false;
-#if defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
     uint8_t  miso_pin = SD_CARD_MISO_PIN;
     uint8_t  mosi_pin = SD_CARD_MOSI_PIN;
     uint8_t  clk_pin  = SD_CARD_CLK_PIN;
     uint8_t  cs_pin   = SD_CARD_CS_PIN;
-#endif // def SUPPORT_SD
     FileId fsUploadFile;
     String   fsUploadFileName;
     bool     fsUploadFileSavedIsEnabled = false;
