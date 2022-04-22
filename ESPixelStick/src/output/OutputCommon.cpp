@@ -345,52 +345,6 @@ void c_OutputCommon::ReportNewFrame ()
 } // ReportNewFrame
 
 //----------------------------------------------------------------------------
-void c_OutputCommon::StartBreak ()
-{
-    // DEBUG_START;
-
-#ifdef ARDUINO_ARCH_ESP8266
-    SET_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
-#else
-    pinMatrixOutDetach (DataPin, false, false);
-    pinMode (DataPin, OUTPUT);
-    digitalWrite (DataPin, LOW);
-#endif // def ARDUINO_ARCH_ESP8266
-
-    // DEBUG_END;
-
-} // StartBreak
-
-//----------------------------------------------------------------------------
-void c_OutputCommon::EndBreak ()
-{
-    // DEBUG_START;
-
-#ifdef ARDUINO_ARCH_ESP8266
-    CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_TXD_BRK);
-#else
-    digitalWrite (DataPin, HIGH);
-    pinMatrixOutAttach (DataPin, UART_TXD_IDX (UartId), false, false);
-#endif // def ARDUINO_ARCH_ESP8266
-
-    // DEBUG_END;
-
-} // EndBreak
-
-//----------------------------------------------------------------------------
-void c_OutputCommon::GenerateBreak (uint32_t DurationInUs)
-{
-    // DEBUG_START;
-
-    StartBreak ();
-    delayMicroseconds (DurationInUs);
-    EndBreak ();
-
-    // DEBUG_END;
-
-} // GenerateBreak
-
-//----------------------------------------------------------------------------
 bool c_OutputCommon::SetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;

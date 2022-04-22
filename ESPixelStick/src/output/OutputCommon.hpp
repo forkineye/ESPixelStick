@@ -89,9 +89,6 @@ protected:
 
     void TerminateUartOperation ();
     void ReportNewFrame ();
-    void StartBreak ();
-    void EndBreak ();
-    void GenerateBreak (uint32_t DurationInUs);
 
 #ifndef ESP_INTR_FLAG_IRAM
 #   define ESP_INTR_FLAG_IRAM 0
