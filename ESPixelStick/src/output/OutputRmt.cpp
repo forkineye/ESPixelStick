@@ -311,10 +311,10 @@ void c_OutputRmt::StartNewFrame ()
     }
 
 #ifdef USE_RMT_DEBUG_COUNTERS
-    IntensityBytesSentLastFrame = IntensityBytesSent;
-    IntensityBytesSent = 0;
-    IntensityBitsSentLastFrame = IntensityBitsSent;
-    IntensityBitsSent = 0;
+    IntensityValuesSentLastFrame = IntensityValuesSent;
+    IntensityValuesSent          = 0;
+    IntensityBitsSentLastFrame   = IntensityBitsSent;
+    IntensityBitsSent            = 0;
 #endif // def USE_RMT_DEBUG_COUNTERS
 
     // set up to send a new frame
@@ -347,7 +347,7 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_SendIntensityData ()
         uint32_t IntensityValue = GetNextIntensityToSend() * IntensityMapMultiplier;
 //        uint32_t IntensityValue = map(GetNextIntensityToSend(), 0, 255, 0, IntensityMapDstMax);
 #ifdef USE_RMT_DEBUG_COUNTERS
-        IntensityBytesSent++;
+        IntensityValuesSent++;
 #endif // def USE_RMT_DEBUG_COUNTERS
 
         // convert the intensity data into RMT slot data
@@ -479,8 +479,8 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     debugStatus["RMT_INT_THR_EVNT_BIT"]         = String (RMT_INT_THR_EVNT_BIT, HEX);
     debugStatus["Raw int_st"]                   = String (RMT.int_st.val, HEX);
     debugStatus["int_st"]                       = String (RMT.int_st.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
-    debugStatus["IntensityBytesSent"]           = IntensityBytesSent;
-    debugStatus["IntensityBytesSentLastFrame"]  = IntensityBytesSentLastFrame;
+    debugStatus["IntensityValuesSent"]           = IntensityValuesSent;
+    debugStatus["IntensityValuesSentLastFrame"]  = IntensityValuesSentLastFrame;
     debugStatus["IntensityBitsSent"]            = IntensityBitsSent;
     debugStatus["IntensityBitsSentLastFrame"]   = IntensityBitsSentLastFrame;
     debugStatus["NumInterFrameRmtSlots"]        = NumInterFrameRmtSlots;

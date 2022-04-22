@@ -106,7 +106,10 @@ private:
             return OutputRmtConfig.pPixelDataSource->ISR_MoreDataToSend();
         }
 #if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
-        return OutputRmtConfig.pSerialDataSource->ISR_MoreDataToSend();
+        else
+        {
+            return OutputRmtConfig.pSerialDataSource->ISR_MoreDataToSend();
+        }
 #else
         return false;
 #endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
@@ -119,7 +122,10 @@ private:
             return OutputRmtConfig.pPixelDataSource->ISR_GetNextIntensityToSend();
         }
 #if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
-        return OutputRmtConfig.pSerialDataSource->ISR_GetNextIntensityToSend();
+        else
+        {
+            return OutputRmtConfig.pSerialDataSource->ISR_GetNextIntensityToSend();
+        }
 #else 
         return false;
 #endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
@@ -132,7 +138,10 @@ private:
             OutputRmtConfig.pPixelDataSource->StartNewFrame();
         }
 #if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
-        OutputRmtConfig.pSerialDataSource->StartNewFrame();
+        else
+        {
+            OutputRmtConfig.pSerialDataSource->StartNewFrame();
+        }
 #endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
     }
 
@@ -186,9 +195,9 @@ public:
    uint32_t RxIsr = 0;
    uint32_t ErrorIsr = 0;
    uint32_t IsrIsNotForUs = 0;
-   uint32_t IntensityBytesSent = 0;
+   uint32_t IntensityValuesSent = 0;
    uint32_t IntensityBitsSent = 0;
-   uint32_t IntensityBytesSentLastFrame = 0;
+   uint32_t IntensityValuesSentLastFrame = 0;
    uint32_t IntensityBitsSentLastFrame = 0;
    uint32_t IncompleteFrame = 0;
    uint32_t IncompleteFrameLastFrame = 0;
