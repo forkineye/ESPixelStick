@@ -31,13 +31,15 @@
 #include "../FileMgr.hpp"
 
 //-----------------------------------------------------------------------------
-// Create secrets.h with a #define for SECRETS_SSID and SECRETS_PASS
+// Use platformio_user.ini to define these values.
+// Platformio_user.ini defines these in the [env] section.
 // or delete the #include and enter the strings directly below.
-#include "secrets.h"
-#ifndef SECRETS_SSID
+#if !defined(SECRETS_SSID)
 #   define SECRETS_SSID "DEFAULT_SSID_NOT_SET"
+#endif // SECRETS_SSID
+#if !defined(SECRETS_PASS)
 #   define SECRETS_PASS "DEFAULT_PASSPHRASE_NOT_SET"
-#endif // ndef SECRETS_SSID
+#endif // SECRETS_SSID
 
 /* Fallback configuration if config.json is empty or fails */
 const String default_ssid       = SECRETS_SSID;
