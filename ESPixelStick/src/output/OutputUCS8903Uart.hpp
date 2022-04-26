@@ -27,6 +27,7 @@
 #if defined(SUPPORT_OutputType_UCS8903) && defined(SUPPORT_UART_OUTPUT)
 
 #include "OutputUCS8903.hpp"
+#include "OutputUart.hpp"
 
 class c_OutputUCS8903Uart : public c_OutputUCS8903
 {
@@ -39,20 +40,20 @@ public:
     virtual ~c_OutputUCS8903Uart ();
 
     // functions to be provided by the derived class
-    void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
-    void    Render ();                                        ///< Call from loop(),  renders output data
-    void    SetOutputBufferSize (uint16_t NumChannelsAvailable);
-    void    PauseOutput ();
+    void    Begin ();
+    void    Render ();
+    void    PauseOutput (bool State);
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);
-
-    /// Interrupt Handler
-    void IRAM_ATTR ISR_Handler (); ///< UART ISR
-    uint32_t IntensityMultiplier = 65535 / 255;
-
-#define UCS8903_NUM_UART_DATA_BYTES_PER_INTENSITY_VALUE 16
+    void    GetConfig (ArduinoJson::JsonObject& jsonConfig);
+    void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
 
 private:
-    bool validate ();        ///< confirm that the current configuration is valid
+    c_OutputUart Uart;
+#ifdef UCS8903_UART_DEBUG_COUNTERS
+    uint32_t NewFrameCounter        = 0;
+    uint32_t TimeSinceLastFrameMS   = 0;
+    uint32_t TimeLastFrameStartedMS = 0;
+#endif // def UCS8903_UART_DEBUG_COUNTERS
 
 }; // c_OutputUCS8903Uart
 

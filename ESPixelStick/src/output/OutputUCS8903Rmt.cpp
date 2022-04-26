@@ -98,14 +98,12 @@ void c_OutputUCS8903Rmt::Begin ()
 
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
     c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
-    OutputRmtConfig.RmtChannelId     = rmt_channel_t(OutputChannelId);
-    OutputRmtConfig.DataPin          = gpio_num_t(DataPin);
-    OutputRmtConfig.idle_level       = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
-    OutputRmtConfig.pPixelDataSource = this;
-
+    OutputRmtConfig.RmtChannelId       = rmt_channel_t(OutputChannelId);
+    OutputRmtConfig.DataPin            = gpio_num_t(DataPin);
+    OutputRmtConfig.idle_level         = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
+    OutputRmtConfig.IntensityDataWidth = UCS8903_INTENSITY_DATA_WIDTH;
+    OutputRmtConfig.pPixelDataSource   = this;
     Rmt.Begin(OutputRmtConfig);
-
-    Rmt.SetIntensityDataWidth(UCS8903_INTENSITY_DATA_WIDTH);
 
     HasBeenInitialized = true;
     
