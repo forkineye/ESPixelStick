@@ -33,9 +33,9 @@ class c_OutputUCS1903Rmt : public c_OutputUCS1903
 public:
     // These functions are inherited from c_OutputCommon
     c_OutputUCS1903Rmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
-        gpio_num_t outputGpio,
-        uart_port_t uart,
-        c_OutputMgr::e_OutputType outputType);
+                        gpio_num_t outputGpio,
+                        uart_port_t uart,
+                        c_OutputMgr::e_OutputType outputType);
     virtual ~c_OutputUCS1903Rmt ();
 
     // functions to be provided by the derived class

@@ -22,12 +22,10 @@
 *
 */
 
-#include "OutputPixel.hpp"
+#include "../EspixelStick.h"
 #ifdef SUPPORT_OutputType_UCS1903
 
-#ifdef ARDUINO_ARCH_ESP32
-#   include <driver/uart.h>
-#endif
+#include "OutputPixel.hpp"
 
 class c_OutputUCS1903 : public c_OutputPixel
 {

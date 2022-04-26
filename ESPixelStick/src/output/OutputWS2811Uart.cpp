@@ -171,8 +171,6 @@ void c_OutputWS2811Uart::Render ()
         }
 
         // DEBUG_V("get the next frame started");
-        // StartNewFrame();
-        // DEBUG_V();
 #ifdef WS2811_UART_DEBUG_COUNTERS
         NewFrameCounter++;
         TimeSinceLastFrameMS = millis() - TimeLastFrameStartedMS;
