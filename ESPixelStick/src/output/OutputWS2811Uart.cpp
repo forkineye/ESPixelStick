@@ -34,7 +34,7 @@ struct Convert2BitIntensityToWS2811UartDataStreamEntry_t
     uint8_t Translation;
     c_OutputUart::UartDataBitTranslationId_t Id;
 };
-Convert2BitIntensityToWS2811UartDataStreamEntry_t Convert2BitIntensityToWS2811UartDataStream[] =
+const Convert2BitIntensityToWS2811UartDataStreamEntry_t PROGMEM Convert2BitIntensityToWS2811UartDataStream[] =
 {
     {0b00110111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID}, // 00 - (1)000 100(0)
     {0b00000111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID}, // 01 - (1)000 111(0)
@@ -85,9 +85,8 @@ void c_OutputWS2811Uart::Begin ()
     OutputUartConfig.UartId                        = UartId;
     OutputUartConfig.DataPin                       = DataPin;
     OutputUartConfig.IntensityDataWidth            = WS2811_PIXEL_BITS_PER_INTENSITY;
-    OutputUartConfig.NumUartSlotsPerIntensityValue = WS2811_PIXEL_UART_BITS_PER_PIXEL_BIT;
     OutputUartConfig.UartDataSize                  = c_OutputUart::UartDataSize_t::OUTPUT_UART_6N1;
-    OutputUartConfig.TranslateIntensityData        = true;
+    OutputUartConfig.TranslateIntensityData        = c_OutputUart::TranslateIntensityData_t::TwoToOne;
     OutputUartConfig.pPixelDataSource              = this;
     OutputUartConfig.Baudrate                      = WS2811_PIXEL_UART_BAUDRATE;
     OutputUartConfig.InvertOutputPolarity          = true;
