@@ -380,9 +380,17 @@ void IRAM_ATTR c_OutputPixel::StartNewFrame ()
 } // StartNewFrame
 
 //----------------------------------------------------------------------------
-uint8_t IRAM_ATTR c_OutputPixel::ISR_GetNextIntensityToSend ()
+void c_OutputPixel::SetIntensityDataWidth(uint32_t DataWidth)
 {
-    uint8_t response = 0x00;
+    uint32_t IntensityMaxValue = (1 << DataWidth);
+    IntensityMultiplier = IntensityMaxValue / 256;
+
+} // SetIntensityDataWidth
+
+//----------------------------------------------------------------------------
+uint32_t IRAM_ATTR c_OutputPixel::ISR_GetNextIntensityToSend ()
+{
+    uint32_t response = 0x00;
 
 #ifdef USE_PIXEL_DEBUG_COUNTERS
     GetNextIntensityToSendCounter++;
@@ -432,7 +440,7 @@ uint8_t IRAM_ATTR c_OutputPixel::ISR_GetNextIntensityToSend ()
 #endif // def USE_PIXEL_DEBUG_COUNTERS
                     if (PixelPrependDataCurrentIndex < PixelPrependDataSize)
                     {
-                        response = PixelPrependData[PixelPrependDataCurrentIndex++];
+                        response = PixelPrependData[PixelPrependDataCurrentIndex++] * IntensityMultiplier;
                         break;
                     }
 
