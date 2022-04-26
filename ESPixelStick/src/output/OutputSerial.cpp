@@ -330,9 +330,9 @@ void c_OutputSerial::StartNewFrame ()
 } // StartNewFrame
 
 //----------------------------------------------------------------------------
-uint8_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
+uint32_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
 {
-    uint8_t data = 0x00;
+    uint32_t data = 0x00;
 
 #ifdef USE_SERIAL_DEBUG_COUNTERS
     IntensityBytesSent++;

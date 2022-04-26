@@ -47,8 +47,8 @@ public:
             void         Render() = 0;
             void         StartNewFrame();
             
-    uint8_t IRAM_ATTR    ISR_GetNextIntensityToSend();
-    bool    IRAM_ATTR    ISR_MoreDataToSend() { return (SerialFrameState_t::SerialIdle != SerialFrameState); }
+    uint32_t IRAM_ATTR   ISR_GetNextIntensityToSend();
+    bool     IRAM_ATTR   ISR_MoreDataToSend() { return (SerialFrameState_t::SerialIdle != SerialFrameState); }
 
 protected:
     void SetFrameDurration();
