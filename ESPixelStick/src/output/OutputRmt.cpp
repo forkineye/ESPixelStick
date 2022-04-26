@@ -1,5 +1,5 @@
 /*
-* OutputRmt.cpp - TM1814 driver code for ESPixelStick RMT Channel
+* OutputRmt.cpp - driver code for ESPixelStick RMT Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015, 2022 Shelby Merrick
@@ -95,10 +95,13 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
             break;
         }
 
-        SetIntensityDataWidth(8);
-
-        // DEBUG_V (String ("DataPin: ") + String (DataPin));
-        // DEBUG_V (String (" RmtChannelId: ") + String (OutputRmtConfig.RmtChannelId));
+        NumRmtSlotsPerIntensityValue = OutputRmtConfig.IntensityDataWidth + ((SendInterIntensityBits) ? 1 : 0);
+        TxIntensityDataStartingMask  = 1 << (OutputRmtConfig.IntensityDataWidth - 1);
+        // DEBUG_V (String("          IntensityDataWidth: ") + String(OutputRmtConfig.IntensityDataWidth));
+        // DEBUG_V (String("NumRmtSlotsPerIntensityValue: ") + String (NumRmtSlotsPerIntensityValue));
+        // DEBUG_V(String("  TxIntensityDataStartingMask: 0x") + String(TxIntensityDataStartingMask, HEX));
+        // DEBUG_V (String ("                    DataPin: ") + String (OutputRmtConfig.DataPin));
+        // DEBUG_V (String ("               RmtChannelId: ") + String (OutputRmtConfig.RmtChannelId));
 
         // Configure RMT channel
         rmt_config_t RmtConfig;
@@ -279,6 +282,55 @@ inline void IRAM_ATTR c_OutputRmt::ISR_EnqueueData(uint32_t value)
 }
 
 //----------------------------------------------------------------------------
+inline bool IRAM_ATTR c_OutputRmt::MoreDataToSend()
+{
+    if (nullptr != OutputRmtConfig.pPixelDataSource)
+    {
+        return OutputRmtConfig.pPixelDataSource->ISR_MoreDataToSend();
+    }
+#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+    else
+    {
+        return OutputRmtConfig.pSerialDataSource->ISR_MoreDataToSend();
+    }
+#else
+    return false;
+#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+}
+
+//----------------------------------------------------------------------------
+inline uint32_t IRAM_ATTR c_OutputRmt::GetNextIntensityToSend()
+{
+    if (nullptr != OutputRmtConfig.pPixelDataSource)
+    {
+        return OutputRmtConfig.pPixelDataSource->ISR_GetNextIntensityToSend();
+    }
+#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+    else
+    {
+        return OutputRmtConfig.pSerialDataSource->ISR_GetNextIntensityToSend();
+    }
+#else
+    return false;
+#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+} // GetNextIntensityToSend
+
+//----------------------------------------------------------------------------
+inline void IRAM_ATTR c_OutputRmt::StartNewDataFrame()
+{
+    if (nullptr != OutputRmtConfig.pPixelDataSource)
+    {
+        OutputRmtConfig.pPixelDataSource->StartNewFrame();
+    }
+#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+    else
+    {
+        OutputRmtConfig.pSerialDataSource->StartNewFrame();
+    }
+#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+} // StartNewDataFrame
+
+//----------------------------------------------------------------------------
 void c_OutputRmt::StartNewFrame ()
 {
     // DEBUG_START;
@@ -344,8 +396,7 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_SendIntensityData ()
 
     while ((NumAvailableRmtSlotsToFill > NumRmtSlotsPerIntensityValue) && MoreDataToSend())
     {
-        uint32_t IntensityValue = GetNextIntensityToSend() * IntensityMapMultiplier;
-//        uint32_t IntensityValue = map(GetNextIntensityToSend(), 0, 255, 0, IntensityMapDstMax);
+        uint32_t IntensityValue = GetNextIntensityToSend();
 #ifdef USE_RMT_DEBUG_COUNTERS
         IntensityValuesSent++;
 #endif // def USE_RMT_DEBUG_COUNTERS
@@ -499,38 +550,5 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 #endif // def USE_RMT_DEBUG_COUNTERS
     // DEBUG_END;
 } // GetStatus
-
-//----------------------------------------------------------------------------
-void c_OutputRmt::SetIntensityDataWidth(uint32_t DataWidth)
-{
-    // DEBUG_START;
-
-    do // once
-    {
-        // DEBUG_V(String("                     DataWidth: ") + String(DataWidth));
-
-        if ((0 == DataWidth) || (DataWidth >= (sizeof(TxIntensityDataStartingMask)-1) * 8))
-        {
-            // DEBUG_V(String(F("Invalid DataWidth: ")) + String(DataWidth));
-            break;
-        }
-       
-        noInterrupts();
-        NumRmtSlotsPerIntensityValue = DataWidth + ((SendInterIntensityBits) ? 1 : 0 );
-        uint32_t IntensityMapDstMax = (1 << DataWidth) - 1;
-        IntensityMapMultiplier = IntensityMapDstMax / 255;
-        TxIntensityDataStartingMask = 1 << (DataWidth - 1);
-        interrupts();
-
-        // DEBUG_V(String("NumRmtSlotsPerIntensityValue: ")   + String(NumRmtSlotsPerIntensityValue));
-        // DEBUG_V(String("          IntensityMapDstMax: ")   + String(IntensityMapDstMax));
-        // DEBUG_V(String("      IntensityMapMultiplier: ")   + String(IntensityMapMultiplier));
-        // DEBUG_V(String("     NumRmtSlotsPerInterrupt: 0x") + String(NumRmtSlotsPerInterrupt, HEX));
-
-    } while (false);
-
-    // DEBUG_END;
-
-} // SetIntensityDataWidth
 
 #endif // def SUPPORT_RMT_OUTPUT
