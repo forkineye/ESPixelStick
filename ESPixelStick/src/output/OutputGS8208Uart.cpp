@@ -81,7 +81,7 @@ void c_OutputGS8208Uart::Begin ()
     OutputUartConfig.ChannelId                     = OutputChannelId;
     OutputUartConfig.UartId                        = UartId;
     OutputUartConfig.DataPin                       = DataPin;
-    OutputUartConfig.IntensityDataWidth            = GS8208_PIXEL_BITS_PER_INTENSITY;
+    OutputUartConfig.IntensityDataWidth            = GS8208_NUM_DATA_BYTES_PER_INTENSITY_BYTE;
     OutputUartConfig.UartDataSize                  = c_OutputUart::UartDataSize_t::OUTPUT_UART_6N1;
     OutputUartConfig.TranslateIntensityData        = c_OutputUart::TranslateIntensityData_t::TwoToOne;
     OutputUartConfig.pPixelDataSource              = this;
