@@ -198,15 +198,12 @@ void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
     ESP_ERROR_CHECK (uart_set_hw_flow_ctrl (UartId, uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE, 0));
     ESP_ERROR_CHECK (uart_set_sw_flow_ctrl (UartId, false, 0, 0));
 
-    if (OM_CMN_NO_CUSTOM_ISR != fifoTriggerLevel)
-    {
-        // make sure no existing low level ISR is running
-        ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
-        // DEBUG_V ("");
+    // make sure no existing low level ISR is running
+    ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
+    // DEBUG_V ("");
 
-        ESP_ERROR_CHECK (uart_disable_rx_intr (UartId));
-        // DEBUG_V ("");
-    }
+    ESP_ERROR_CHECK (uart_disable_rx_intr (UartId));
+    // DEBUG_V ("");
 
     // start the generic UART driver.
     // NOTE: Zero for RX buffer size causes errors in the uart API.
@@ -240,18 +237,15 @@ void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
     ESP_ERROR_CHECK (uart_set_pin (UartId, DataPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
     // DEBUG_V ("");
 
-    if (uint32_t(OM_CMN_NO_CUSTOM_ISR) != fifoTriggerLevel)
-    {
-        ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
-        // DEBUG_V ("");
+    ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
+    // DEBUG_V ("");
 
-        // Disable ALL interrupts. They are enabled by uart.c in the SDK
-        CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
-        // DEBUG_V ("");
+    // Disable ALL interrupts. They are enabled by uart.c in the SDK
+    CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
+    // DEBUG_V ("");
 
-        // Clear all pending interrupts in the UART
-        // WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
-    }
+    // Clear all pending interrupts in the UART
+    // WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
 
     // DEBUG_END;
 
