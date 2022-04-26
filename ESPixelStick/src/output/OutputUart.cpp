@@ -122,8 +122,6 @@ static void IRAM_ATTR uart_intr_handler (void* param)
 } // uart_intr_handler
 
 //----------------------------------------------------------------------------
-/* Use the current config to set up the output port
-*/
 void c_OutputUart::Begin (OutputUartConfig_t & config )
 {
     // DEBUG_START;
@@ -145,7 +143,7 @@ void c_OutputUart::Begin (OutputUartConfig_t & config )
         }
 
         // initial data width
-        SetIntensityDataWidth(OutputUartConfig.IntensityDataWidth);
+        SetIntensityDataWidth();
 
         // DEBUG_V (String ("      OutputUartConfig.DataPin: ") + String (OutputUartConfig.DataPin));
         // DEBUG_V (String ("OutputUartConfig.UartChannelId: ") + String (OutputUartConfig.ChannelId));
@@ -236,12 +234,14 @@ void c_OutputUart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
     debugStatus["FrameEndISRcounter"]            = FrameEndISRcounter;
     debugStatus["FrameThresholdCounter"]         = FrameThresholdCounter;
     debugStatus["IncompleteFrame"]               = IncompleteFrame;
-    debugStatus["IntensityBytesSent"]            = IntensityBytesSent;
-    debugStatus["IntensityBytesSentLastFrame"]   = IntensityBytesSentLastFrame;
+    debugStatus["IntensityValuesSent"]           = IntensityValuesSent;
+    debugStatus["IntensityValuesSentLastFrame"]  = IntensityValuesSentLastFrame;
     debugStatus["IntensityBitsSent"]             = IntensityBitsSent;
     debugStatus["IntensityBitsSentLastFrame"]    = IntensityBitsSentLastFrame;
-    debugStatus["NumUartSlotsPerIntensityValue"] = OutputUartConfig.NumUartSlotsPerIntensityValue;
     debugStatus["EnqueueCounter"]                = EnqueueCounter;
+
+    debugStatus["UART_CONF0"] = String(READ_PERI_REG(UART_CONF0(OutputUartConfig.UartId)), HEX);
+    debugStatus["UART_CONF1"] = String(READ_PERI_REG(UART_CONF1(OutputUartConfig.UartId)), HEX);
 
 #endif // def USE_UART_DEBUG_COUNTERS
     // DEBUG_END;
@@ -291,23 +291,20 @@ void c_OutputUart::InitializeUart()
         SET_PERI_REG_MASK   (UART_CONF0(OutputUartConfig.UartId), UART_RXFIFO_RST | UART_TXFIFO_RST);
         CLEAR_PERI_REG_MASK (UART_CONF0(OutputUartConfig.UartId), UART_RXFIFO_RST | UART_TXFIFO_RST);
 
-        if (uint32_t(OM_CMN_NO_CUSTOM_ISR) != OutputUartConfig.FiFoTriggerLevel)
-        {
-            // Disable all interrupts
-            ETS_UART_INTR_DISABLE();
+        // Disable all interrupts
+        ETS_UART_INTR_DISABLE();
 
-            // Set TX FIFO trigger. 40 bytes gives 100 us to start to refill the FIFO
-            WRITE_PERI_REG(UART_CONF1(OutputUartConfig.UartId), OutputUartConfig.FiFoTriggerLevel << UART_TXFIFO_EMPTY_THRHD_S);
+        // Set TX FIFO trigger. 
+        WRITE_PERI_REG(UART_CONF1(OutputUartConfig.UartId), OutputUartConfig.FiFoTriggerLevel << UART_TXFIFO_EMPTY_THRHD_S);
 
-            // Disable RX & TX interrupts. It is enabled by uart.c in the SDK
-            CLEAR_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
+        // Disable RX & TX interrupts. It is enabled by uart.c in the SDK
+        CLEAR_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
 
-            // Clear all pending interrupts in the UART
-            WRITE_PERI_REG(UART_INT_CLR(OutputUartConfig.UartId), UART_INTR_MASK);
+        // Clear all pending interrupts in the UART
+        WRITE_PERI_REG(UART_INT_CLR(OutputUartConfig.UartId), UART_INTR_MASK);
 
-            // Reenable interrupts
-            ETS_UART_INTR_ENABLE();
-        }
+        // Reenable interrupts
+        ETS_UART_INTR_ENABLE();
 
         set_pin();
 
@@ -331,15 +328,13 @@ void c_OutputUart::InitializeUart()
     ESP_ERROR_CHECK(uart_set_hw_flow_ctrl(OutputUartConfig.UartId, uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE, 0));
     ESP_ERROR_CHECK(uart_set_sw_flow_ctrl(OutputUartConfig.UartId, false, 0, 0));
 
-    if (OM_CMN_NO_CUSTOM_ISR != OutputUartConfig.FiFoTriggerLevel)
-    {
-        // make sure no existing low level ISR is running
-        ESP_ERROR_CHECK(uart_disable_tx_intr(OutputUartConfig.UartId));
-        // DEBUG_V ("");
+    // DEBUG_V("Turn off ISR handler")
+    // make sure no existing low level ISR is running
+    ESP_ERROR_CHECK(uart_disable_tx_intr(OutputUartConfig.UartId));
+    // DEBUG_V ("");
 
-        ESP_ERROR_CHECK(uart_disable_rx_intr(OutputUartConfig.UartId));
-        // DEBUG_V ("");
-    }
+    ESP_ERROR_CHECK(uart_disable_rx_intr(OutputUartConfig.UartId));
+    // DEBUG_V ("");
 
     // start the generic UART driver.
     // NOTE: Zero for RX buffer size causes errors in the uart API.
@@ -366,10 +361,13 @@ void c_OutputUart::InitializeUart()
     ESP_ERROR_CHECK(uart_param_config(OutputUartConfig.UartId, &uart_config));
     // DEBUG_V (String ("UART_CLKDIV_REG (OutputUartConfig.UartId): 0x") + String (*((uint32_t*)UART_CLKDIV_REG (OutputUartConfig.UartId)), HEX));
 
+    // Set TX FIFO trigger.
+    WRITE_PERI_REG(UART_CONF1(OutputUartConfig.UartId), OutputUartConfig.FiFoTriggerLevel << UART_TXFIFO_EMPTY_THRHD_S);
+
     if (OutputUartConfig.InvertOutputPolarity)
     {
-        // invert the output
-        CLEAR_PERI_REG_MASK (UART_CONF0(OutputUartConfig.UartId), UART_INV_MASK);
+        // DEBUG_V("Invert the output");
+        CLEAR_PERI_REG_MASK(UART_CONF0(OutputUartConfig.UartId), UART_INV_MASK);
         SET_PERI_REG_MASK   (UART_CONF0(OutputUartConfig.UartId), (BIT(22)));
     }
 
@@ -387,18 +385,8 @@ void c_OutputUart::InitializeUart()
     set_pin();
     // DEBUG_V ("");
 
-    if (uint32_t(OM_CMN_NO_CUSTOM_ISR) != OutputUartConfig.FiFoTriggerLevel)
-    {
-        ESP_ERROR_CHECK(uart_disable_tx_intr(OutputUartConfig.UartId));
-        // DEBUG_V ("");
-
-        // Disable ALL interrupts. They are enabled by uart.c in the SDK
-        // CLEAR_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), UART_INTR_MASK);
-        // DEBUG_V ("");
-
-        // Clear all pending interrupts in the UART
-        // WRITE_PERI_REG (UART_INT_CLR (OutputUartConfig.UartId), UART_INTR_MASK);
-    }
+    ESP_ERROR_CHECK(uart_disable_tx_intr(OutputUartConfig.UartId));
+    // DEBUG_V ("");
 
     // DEBUG_END;
 
@@ -406,7 +394,79 @@ void c_OutputUart::InitializeUart()
 #endif
 
 //----------------------------------------------------------------------------
-void IRAM_ATTR c_OutputUart::ISR_Handler ()
+bool IRAM_ATTR c_OutputUart::MoreDataToSend()
+{
+    if (nullptr != OutputUartConfig.pPixelDataSource)
+    {
+        return OutputUartConfig.pPixelDataSource->ISR_MoreDataToSend();
+    }
+    else
+    {
+#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+        return OutputUartConfig.pSerialDataSource->ISR_MoreDataToSend();
+#else
+        return false;
+#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+    }
+} // MoreDataToSend
+
+//----------------------------------------------------------------------------
+uint32_t IRAM_ATTR c_OutputUart::GetNextIntensityToSend()
+{
+    if (nullptr != OutputUartConfig.pPixelDataSource)
+    {
+        return OutputUartConfig.pPixelDataSource->ISR_GetNextIntensityToSend();
+    }
+    else
+    {
+#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+        return OutputUartConfig.pSerialDataSource->ISR_GetNextIntensityToSend();
+#else
+        return 0;
+#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+    }
+} // GetNextIntensityToSend
+
+//----------------------------------------------------------------------------
+void IRAM_ATTR c_OutputUart::StartNewDataFrame()
+{
+    if (nullptr != OutputUartConfig.pPixelDataSource)
+    {
+        OutputUartConfig.pPixelDataSource->StartNewFrame();
+    }
+#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+    else
+    {
+        OutputUartConfig.pSerialDataSource->StartNewFrame();
+    }
+#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+} // StartNewDataFrame
+
+//----------------------------------------------------------------------------
+uint32_t IRAM_ATTR c_OutputUart::getUartFifoLength()
+{
+#ifdef ARDUINO_ARCH_ESP8266
+    return uint32_t((U1S >> USTXC) & 0xff);
+#elif defined(ARDUINO_ARCH_ESP32)
+    return uint32_t((READ_PERI_REG(UART_STATUS_REG(OutputUartConfig.UartId)) & UART_TXFIFO_CNT_M) >> UART_TXFIFO_CNT_S);
+#endif // defined(ARDUINO_ARCH_ESP32)
+} // getUartFifoLength
+
+//----------------------------------------------------------------------------
+void IRAM_ATTR c_OutputUart::enqueueUartData(uint8_t value)
+{
+#ifdef USE_UART_DEBUG_COUNTERS
+    EnqueueCounter++;
+#endif // def USE_UART_DEBUG_COUNTERS
+#ifdef ARDUINO_ARCH_ESP8266
+    (U1F = (char)(value));
+#elif defined(ARDUINO_ARCH_ESP32)
+    (*((volatile uint32_t *)(UART_FIFO_AHB_REG(OutputUartConfig.UartId)))) = (uint32_t)(value);
+#endif // defined(ARDUINO_ARCH_ESP32)
+} // enqueueUartData
+
+//----------------------------------------------------------------------------
+void IRAM_ATTR c_OutputUart::ISR_Handler()
 {
     do // once
     {
@@ -448,33 +508,51 @@ void IRAM_ATTR c_OutputUart::ISR_Handler ()
 //----------------------------------------------------------------------------
 void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
 {
-    size_t NumAvailableUartSlotsToFill = ((((size_t)UART_TX_FIFO_SIZE) - (getUartFifoLength)) / OutputUartConfig.IntensityDataWidth);
-    while (MoreDataToSend() && (NumAvailableUartSlotsToFill > OutputUartConfig.NumUartSlotsPerIntensityValue))
-    {
-        uint32_t IntensityValue = GetNextIntensityToSend();
-#ifdef USE_UART_DEBUG_COUNTERS
-        IntensityBytesSent++;
-#endif // def USE_UART_DEBUG_COUNTERS
-        if (OutputUartConfig.TranslateIntensityData)
-        {
-#ifdef USE_UART_DEBUG_COUNTERS
-            IntensityBitsSent += 4;
-#endif // def USE_UART_DEBUG_COUNTERS
-            enqueueUartData(Intensity2Uart[(IntensityValue >> 6) & 0x0003]); --NumAvailableUartSlotsToFill;
-            enqueueUartData(Intensity2Uart[(IntensityValue >> 4) & 0x0003]); --NumAvailableUartSlotsToFill;
-            enqueueUartData(Intensity2Uart[(IntensityValue >> 2) & 0x0003]); --NumAvailableUartSlotsToFill;
-            enqueueUartData(Intensity2Uart[(IntensityValue >> 0) & 0x0003]); --NumAvailableUartSlotsToFill;
-        }
-        else
-        {
-#ifdef USE_UART_DEBUG_COUNTERS
-            IntensityBitsSent += 1;
-#endif // def USE_UART_DEBUG_COUNTERS
-            --NumAvailableUartSlotsToFill;
-            enqueueUartData(IntensityValue); 
-        }
-    } // end while there is space in the buffer
+    size_t NumAvailableIntensitySlotsToFill = ((((size_t)UART_TX_FIFO_SIZE) - (getUartFifoLength())) / NumUartSlotsPerIntensityValue);
 
+    while (MoreDataToSend() && NumAvailableIntensitySlotsToFill)
+    {
+#ifdef USE_UART_DEBUG_COUNTERS
+        IntensityValuesSent++;
+        IntensityBitsSent += NumUartSlotsPerIntensityValue;
+#endif // def USE_UART_DEBUG_COUNTERS
+
+        NumAvailableIntensitySlotsToFill--;
+
+        uint32_t IntensityValue = GetNextIntensityToSend();
+        if (OutputUartConfig.TranslateIntensityData == TranslateIntensityData_t::NoTranslation)
+        {
+            for (uint32_t count = 0; count < NumUartSlotsPerIntensityValue; count++)
+            {
+                enqueueUartData(IntensityValue & 0xFF);
+                IntensityValue >>= 8;
+            }
+        } // end no translation
+
+        else if (OutputUartConfig.TranslateIntensityData == TranslateIntensityData_t::OneToOne)
+        { // 1:1
+            for (uint32_t mask = TxIntensityDataStartingMask; 0 != mask; mask >>= 1)
+            {
+                // convert the intensity data into UART data
+                enqueueUartData(Intensity2Uart[(IntensityValue & mask) ? UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID : UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID]);
+            }
+        } // end 1:1
+
+        else // 2:1
+        {
+            // Mask is used as a shift counter that is decremented by 2.
+            for (uint32_t NumBitsToShift = TxIntensityDataStartingMask - 2; 
+                 0 < NumBitsToShift; 
+                 NumBitsToShift -= 2)
+            {
+                // convert the intensity data into UART data
+                enqueueUartData(Intensity2Uart[(IntensityValue >> NumBitsToShift) & 0x3]);
+            }
+            // handle the last two bits
+            enqueueUartData(Intensity2Uart[IntensityValue & 0x3]);
+        } // end 2:1
+    } // end while there is space in the buffer
+    // DEBUG_END;
 } // ISR_Handler_SendIntensityData
 
 //----------------------------------------------------------------------------
@@ -558,30 +636,35 @@ void c_OutputUart::SetIntensity2Uart(uint8_t value, UartDataBitTranslationId_t I
 } // SetIntensity2Uart
 
 //----------------------------------------------------------------------------
-void c_OutputUart::SetIntensityDataWidth(uint32_t DataWidth, size_t NumUartSlotsPerIntensityValue)
+void c_OutputUart::SetIntensityDataWidth()
 {
     // DEBUG_START;
 
-    do // once
+    // DEBUG_V(String("           IntensityDataWidth: ") + String(OutputUartConfig.IntensityDataWidth));
+    // DEBUG_V(String("       TranslateIntensityData: ") + String(OutputUartConfig.TranslateIntensityData));
+
+    // No Translation
+    if (OutputUartConfig.TranslateIntensityData == TranslateIntensityData_t::NoTranslation)
     {
-        // DEBUG_V(String("                     DataWidth: ") + String(DataWidth));
+        NumUartSlotsPerIntensityValue = 1;
+        TxIntensityDataStartingMask = OutputUartConfig.IntensityDataWidth;
+    }
+    // 1:1
+    else if (OutputUartConfig.TranslateIntensityData == TranslateIntensityData_t::OneToOne)
+    {
+        NumUartSlotsPerIntensityValue = OutputUartConfig.IntensityDataWidth;
+        TxIntensityDataStartingMask = 1 << (OutputUartConfig.IntensityDataWidth - 1);
+    }
+    else // 2:1
+    {
+        // this is not a true mask. This is the number of bits to 
+        // shift the value before using a fixed mask
+        NumUartSlotsPerIntensityValue = OutputUartConfig.IntensityDataWidth >> 1;
+        TxIntensityDataStartingMask   = OutputUartConfig.IntensityDataWidth;
+    }
 
-        if ((0 == DataWidth) || (DataWidth >= (sizeof(TxIntensityDataStartingMask)-1) * 8))
-        {
-            // DEBUG_V(String(F("Invalid DataWidth: ")) + String(DataWidth));
-            break;
-        }
-       
-        noInterrupts();
-        IntensityMapDstMax = (1 << DataWidth) - 1;
-        TxIntensityDataStartingMask = 1 << (DataWidth-1);
-        OutputUartConfig.NumUartSlotsPerIntensityValue = NumUartSlotsPerIntensityValue;
-        interrupts();
-
-        // DEBUG_V(String("NumUartSlotsPerIntensityValue: ")   + String(NumUartSlotsPerIntensityValue));
-        // DEBUG_V(String("  TxIntensityDataStartingMask: 0x") + String(TxIntensityDataStartingMask, HEX));
-
-    } while (false);
+    // DEBUG_V(String("  TxIntensityDataStartingMask: 0x") + String(TxIntensityDataStartingMask, HEX));
+    // DEBUG_V(String("NumUartSlotsPerIntensityValue: ")   + String(NumUartSlotsPerIntensityValue));
 
     // DEBUG_END;
 
@@ -590,20 +673,27 @@ void c_OutputUart::SetIntensityDataWidth(uint32_t DataWidth, size_t NumUartSlots
 //----------------------------------------------------------------------------
 void c_OutputUart::set_pin()
 {
-    pinMode(OutputUartConfig.DataPin, OUTPUT);
-    digitalWrite(OutputUartConfig.DataPin, LOW);
+    // DEBUG_START;
+
+    // DEBUG_V(String("DataPin: ") + String(OutputUartConfig.DataPin));
+
+    if (gpio_num_t(-1) != OutputUartConfig.DataPin)
+    {
+        pinMode(OutputUartConfig.DataPin, OUTPUT);
+        digitalWrite(OutputUartConfig.DataPin, LOW);
 
 #ifdef ARDUINO_ARCH_ESP8266
-    // UART Pins cannot be modified on the ESP8266
+        // UART Pins cannot be modified on the ESP8266
 #else
-    ESP_ERROR_CHECK(uart_set_pin(OutputUartConfig.UartId,
-                                 OutputUartConfig.DataPin,
-                                 UART_PIN_NO_CHANGE,
-                                 UART_PIN_NO_CHANGE,
-                                 UART_PIN_NO_CHANGE));
-    pinMatrixOutAttach(OutputUartConfig.DataPin, UART_TXD_IDX(OutputUartConfig.UartId), false, false);
-
+        ESP_ERROR_CHECK(uart_set_pin(OutputUartConfig.UartId,
+                                     OutputUartConfig.DataPin,
+                                     UART_PIN_NO_CHANGE,
+                                     UART_PIN_NO_CHANGE,
+                                     UART_PIN_NO_CHANGE));
+        pinMatrixOutAttach(OutputUartConfig.DataPin, UART_TXD_IDX(OutputUartConfig.UartId), false, false);
 #endif // def ARDUINO_ARCH_ESP32
+    }
+    // DEBUG_END;
 } // set_pin
 
 //----------------------------------------------------------------------------
@@ -632,8 +722,8 @@ void c_OutputUart::StartNewFrame()
         IncompleteFrame++;
     }
 
-    IntensityBytesSentLastFrame = IntensityBytesSent;
-    IntensityBytesSent = 0;
+    IntensityValuesSentLastFrame = IntensityValuesSent;
+    IntensityValuesSent = 0;
     IntensityBitsSentLastFrame = IntensityBitsSent;
     IntensityBitsSent = 0;
 #endif // def USE_UART_DEBUG_COUNTERS
@@ -643,7 +733,9 @@ void c_OutputUart::StartNewFrame()
     {
         GenerateBreak(92, 23);
     }
+
     // DEBUG_V();
+
     StartNewDataFrame();
     // DEBUG_V();
 
