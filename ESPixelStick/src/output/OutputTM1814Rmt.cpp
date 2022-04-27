@@ -29,6 +29,24 @@
 #define TM1814_PIXEL_RMT_TICKS_BIT_1_LOW     uint16_t ( (TM1814_PIXEL_NS_BIT_1_LOW  / RMT_TickLengthNS) + 1.0)
 #define TM1814_PIXEL_RMT_TICKS_IDLE          uint16_t ( (TM1814_PIXEL_NS_IDLE       / RMT_TickLengthNS) + 1.0)
 
+typedef c_OutputRmt::RmtDataBitIdType_t Rdbit_t;
+struct RmtBitDefinitionEntry_t
+{
+    rmt_item32_t Data;
+    Rdbit_t Id;
+} // RmtBitDefinitionEntry_t
+static const PROGMEM RmtBitDefinitions[] =
+{
+    // {{}.duration0,.level0,.duration1,.level1},Type},
+
+    {{TM1814_PIXEL_RMT_TICKS_BIT_0_LOW, 0, TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH, 1}, Rdbit_t::RMT_DATA_BIT_ZERO_ID},
+    {{TM1814_PIXEL_RMT_TICKS_BIT_1_LOW, 0, TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH, 1}, Rdbit_t::RMT_DATA_BIT_ONE_ID},
+    {{TM1814_PIXEL_RMT_TICKS_IDLE / 12, 1, TM1814_PIXEL_RMT_TICKS_IDLE / 12,  1}, Rdbit_t::RMT_INTERFRAME_GAP_ID},
+    {{TM1814_PIXEL_RMT_TICKS_IDLE / 12, 1, TM1814_PIXEL_RMT_TICKS_IDLE / 12,  1}, Rdbit_t::RMT_STARTBIT_ID},
+    {{0,                                0, 0,                                 0}, Rdbit_t::RMT_STOPBIT_ID},
+
+}; // RmtBitDefinitions
+
 //----------------------------------------------------------------------------
 c_OutputTM1814Rmt::c_OutputTM1814Rmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     gpio_num_t outputGpio,
@@ -37,38 +55,10 @@ c_OutputTM1814Rmt::c_OutputTM1814Rmt (c_OutputMgr::e_OutputChannelIds OutputChan
     c_OutputTM1814 (OutputChannelId, outputGpio, uart, outputType)
 {
     // DEBUG_START;
-
-    rmt_item32_t BitValue;
-
-    BitValue.duration0 = TM1814_PIXEL_RMT_TICKS_BIT_0_LOW;
-    BitValue.level0 = 0;
-    BitValue.duration1 = TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH;
-    BitValue.level1 = 1;
-    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID);
-
-    BitValue.duration0 = TM1814_PIXEL_RMT_TICKS_BIT_1_LOW;
-    BitValue.level0 = 0;
-    BitValue.duration1 = TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH;
-    BitValue.level1 = 1;
-    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID);
-
-    BitValue.duration0 = TM1814_PIXEL_RMT_TICKS_IDLE / 12;
-    BitValue.level0 = 1;
-    BitValue.duration1 = TM1814_PIXEL_RMT_TICKS_IDLE / 12;
-    BitValue.level1 = 1;
-    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
-
-    BitValue.duration0 = TM1814_PIXEL_RMT_TICKS_IDLE / 12;
-    BitValue.level0 = 1;
-    BitValue.duration1 = TM1814_PIXEL_RMT_TICKS_IDLE / 12;
-    BitValue.level1 = 1;
-    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STARTBIT_ID);
-
-    BitValue.duration0 = 0;
-    BitValue.level0 = 0;
-    BitValue.duration1 = 0;
-    BitValue.level1 = 0;
-    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STOPBIT_ID);
+    for (auto currentRmtBitDefinition : RmtBitDefinitions)
+    {
+        Rmt.SetIntensity2Rmt(currentRmtBitDefinition.Data, currentRmtBitDefinition.Id);
+    }
 
     // DEBUG_V (String ("TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH: 0x") + String (TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH, HEX));
     // DEBUG_V (String (" TM1814_PIXEL_RMT_TICKS_BIT_0_LOW: 0x") + String (TM1814_PIXEL_RMT_TICKS_BIT_0_LOW,  HEX));

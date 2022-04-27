@@ -27,6 +27,24 @@ static fsm_RMT_state_SendStart fsm_RMT_state_SendStart_imp;
 static fsm_RMT_state_SendReset fsm_RMT_state_SendReset_imp;
 static fsm_RMT_state_SendData  fsm_RMT_state_SendData_imp;
 
+typedef c_OutputRmt::RmtDataBitIdType_t Rdbit_t;
+struct RmtBitDefinitionEntry_t
+{
+    rmt_item32_t Data;
+    Rdbit_t Id;
+} // RmtBitDefinitionEntry_t
+static const PROGMEM RmtBitDefinitions[] =
+{
+    // {{}.duration0,.level0,.duration1,.level1},Type},
+
+    {{TLS3001_PIXEL_RMT_TICKS_BIT,      1, TLS3001_PIXEL_RMT_TICKS_BIT,      0}, Rdbit_t::RMT_STARTBIT_ID},
+    {{TLS3001_PIXEL_RMT_TICKS_BIT,      0, TLS3001_PIXEL_RMT_TICKS_BIT,      1}, Rdbit_t::RMT_DATA_BIT_ZERO_ID},
+    {{TLS3001_PIXEL_RMT_TICKS_BIT,      1, TLS3001_PIXEL_RMT_TICKS_BIT,      0}, Rdbit_t::RMT_DATA_BIT_ONE_ID},
+    {{TLS3001_PIXEL_RMT_TICKS_BIT / 10, 0, TLS3001_PIXEL_RMT_TICKS_BIT / 10, 0}, Rdbit_t::RMT_INTERFRAME_GAP_ID},
+    {{0,                                0, 0,                                0}, Rdbit_t::RMT_STOPBIT_ID},
+
+}; // RmtBitDefinitions
+
 //----------------------------------------------------------------------------
 c_OutputTLS3001Rmt::c_OutputTLS3001Rmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     gpio_num_t outputGpio,
@@ -36,36 +54,10 @@ c_OutputTLS3001Rmt::c_OutputTLS3001Rmt (c_OutputMgr::e_OutputChannelIds OutputCh
 {
     // DEBUG_START;
 
-    rmt_item32_t BitValue;
-    BitValue.duration0 = TLS3001_PIXEL_RMT_TICKS_BIT;
-    BitValue.level0 = 1;
-    BitValue.duration1 = TLS3001_PIXEL_RMT_TICKS_BIT;
-    BitValue.level1 = 0;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_STARTBIT_ID);
-
-    BitValue.duration0 = TLS3001_PIXEL_RMT_TICKS_BIT;
-    BitValue.level0 = 0;
-    BitValue.duration1 = TLS3001_PIXEL_RMT_TICKS_BIT;
-    BitValue.level1 = 1;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_DATA_BIT_ZERO_ID);
-
-    BitValue.duration0 = TLS3001_PIXEL_RMT_TICKS_BIT;
-    BitValue.level0 = 1;
-    BitValue.duration1 = TLS3001_PIXEL_RMT_TICKS_BIT;
-    BitValue.level1 = 0;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_DATA_BIT_ONE_ID);
-
-    BitValue.duration0 = TLS3001_PIXEL_RMT_TICKS_BIT / 10;
-    BitValue.level0 = 0;
-    BitValue.duration1 = TLS3001_PIXEL_RMT_TICKS_BIT / 10;
-    BitValue.level1 = 0;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_INTERFRAME_GAP_ID);
-
-    BitValue.duration0 = 0;
-    BitValue.level0 = 0;
-    BitValue.duration1 = 0;
-    BitValue.level1 = 0;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_STOPBIT_ID);
+    for (auto currentRmtBitDefinition : RmtBitDefinitions)
+    {
+        Rmt.SetIntensity2Rmt(currentRmtBitDefinition.Data, currentRmtBitDefinition.Id);
+    }
 
     // DEBUG_V (String ("TLS3001_PIXEL_RMT_TICKS_BIT: 0x") + String (TLS3001_PIXEL_RMT_TICKS_BIT, HEX));
 
