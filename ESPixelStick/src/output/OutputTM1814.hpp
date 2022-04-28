@@ -37,13 +37,12 @@ public:
     virtual ~c_OutputTM1814 ();
 
     // functions to be provided by the derived class
-    virtual void         Begin ();
-    virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
-    virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-            void         GetDriverName (String & sDriverName) { sDriverName = String (F ("TM1814")); }
-    c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_TM1814;} ///< Have the instance report its type.
-    virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
-    virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
+    virtual void Begin ();
+    virtual bool SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
+    virtual void GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
+            void GetDriverName (String & sDriverName) { sDriverName = String (F ("TM1814")); }
+    virtual void GetStatus (ArduinoJson::JsonObject & jsonStatus);
+    virtual void SetOutputBufferSize (uint16_t NumChannelsAvailable);
 
 protected:
 

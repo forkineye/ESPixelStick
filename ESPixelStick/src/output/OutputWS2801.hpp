@@ -35,12 +35,11 @@ public:
     virtual ~c_OutputWS2801 ();
 
     // functions to be provided by the derived class
-    virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
-    virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-            void         GetDriverName (String & sDriverName) { sDriverName = String (F ("WS2801")); }
-    c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_WS2801;} ///< Have the instance report its type.
-    virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
-    virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
+    virtual bool SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
+    virtual void GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
+            void GetDriverName (String & sDriverName) { sDriverName = String (F ("WS2801")); }
+    virtual void GetStatus (ArduinoJson::JsonObject & jsonStatus);
+    virtual void SetOutputBufferSize (uint16_t NumChannelsAvailable);
 
 protected:
 #define WS2801_BIT_RATE                 (APB_CLK_FREQ/80)
