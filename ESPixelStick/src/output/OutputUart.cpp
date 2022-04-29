@@ -239,6 +239,8 @@ void c_OutputUart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
     debugStatus["IntensityBitsSent"]             = IntensityBitsSent;
     debugStatus["IntensityBitsSentLastFrame"]    = IntensityBitsSentLastFrame;
     debugStatus["EnqueueCounter"]                = EnqueueCounter;
+    debugStatus["BreakIsrCounter"]               = BreakIsrCounter;
+    debugStatus["IdleIsrCounter"]                = IdleIsrCounter;    
 
     debugStatus["UART_CONF0"] = String(READ_PERI_REG(UART_CONF0(OutputUartConfig.UartId)), HEX);
     debugStatus["UART_CONF1"] = String(READ_PERI_REG(UART_CONF1(OutputUartConfig.UartId)), HEX);
@@ -474,13 +476,27 @@ void IRAM_ATTR c_OutputUart::ISR_Handler()
         RxIsr++;
 #endif // def USE_UART_DEBUG_COUNTERS
 
-       // Process if the desired UART has raised an interrupt
-        if (READ_PERI_REG(UART_INT_ST(OutputUartConfig.UartId)))
+        // Process if the desired UART has raised an interrupt
+        uint32_t isrStatus = 0;
+        if (isrStatus = READ_PERI_REG(UART_INT_ST(OutputUartConfig.UartId)))
         {
 #ifdef USE_UART_DEBUG_COUNTERS
-            DataISRcounter++;
+            if (isrStatus & UART_TX_BRK_IDLE_DONE_INT_ENA)
+            {
+                IdleIsrCounter++;
+            }
+
+            if (isrStatus & UART_TX_BRK_DONE_INT_ENA)
+            {
+                BreakIsrCounter++;
+            }
+
+            if (isrStatus & UART_TXFIFO_EMPTY_INT_ENA)
+            {
+                DataISRcounter++;
+            }
 #endif // def USE_UART_DEBUG_COUNTERS
-            // Fill the FIFO with new data
+       // Fill the FIFO with new data
             ISR_Handler_SendIntensityData();
 
             if (!MoreDataToSend())
@@ -501,13 +517,19 @@ void IRAM_ATTR c_OutputUart::ISR_Handler()
         }
 #endif // def USE_UART_DEBUG_COUNTERS
 
-    } while(false);
+    } while (false);
 
 } // ISR_Handler
 
 //----------------------------------------------------------------------------
 void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
 {
+    if (OutputUartConfig.SendExtendedStartBit)
+    {
+        // Set up the built in break after intensity data sent time in bits.
+        SET_PERI_REG_BITS(UART_IDLE_CONF_REG(OutputUartConfig.UartId), UART_TX_IDLE_NUM_V, OutputUartConfig.SendExtendedStartBit, UART_TX_IDLE_NUM_S);
+    }
+
     size_t NumAvailableIntensitySlotsToFill = ((((size_t)UART_TX_FIFO_SIZE) - (getUartFifoLength())) / NumUartSlotsPerIntensityValue);
 
     while (MoreDataToSend() && NumAvailableIntensitySlotsToFill)
@@ -551,6 +573,14 @@ void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
             // handle the last two bits
             enqueueUartData(Intensity2Uart[IntensityValue & 0x3]);
         } // end 2:1
+        
+        if (OutputUartConfig.SendBreakAfterIntensityData)
+        {
+            SET_PERI_REG_BITS(UART_IDLE_CONF_REG(OutputUartConfig.UartId), UART_TX_BRK_NUM_V, OutputUartConfig.SendBreakAfterIntensityData, UART_TX_BRK_NUM_S);
+            SET_PERI_REG_MASK(UART_CONF0(OutputUartConfig.UartId), UART_TXD_BRK);
+            EnableUartInterrupts();
+            return;
+        }
     } // end while there is space in the buffer
     // DEBUG_END;
 } // ISR_Handler_SendIntensityData
@@ -709,6 +739,21 @@ void c_OutputUart::SetSendBreak(bool value)
 } // SetSendBreak
 
 //----------------------------------------------------------------------------
+inline void IRAM_ATTR c_OutputUart::EnableUartInterrupts()
+{
+    DisableUartInterrupts;
+
+    if (OutputUartConfig.SendBreakAfterIntensityData)
+    {
+        SET_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), UART_TX_BRK_IDLE_DONE_INT_ENA);
+    }
+    else
+    {
+        SET_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), UART_TXFIFO_EMPTY_INT_ENA);
+    }
+} // EnableUartInterrupts
+
+//----------------------------------------------------------------------------
 void c_OutputUart::StartNewFrame()
 {
     // DEBUG_START;
@@ -741,7 +786,7 @@ void c_OutputUart::StartNewFrame()
 
     ISR_Handler_SendIntensityData();
 
-    EnableUartInterrupts;
+    EnableUartInterrupts();
 
     // DEBUG_END;
 

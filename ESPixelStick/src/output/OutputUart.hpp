@@ -21,6 +21,8 @@
 #include "../ESPixelStick.h"
 #ifdef SUPPORT_UART_OUTPUT
 
+#include <soc/uart_reg.h>
+
 #include "OutputPixel.hpp"
 #include "OutputSerial.hpp"
 
@@ -39,7 +41,7 @@ public:
         OUTPUT_UART_8N2,
     };
 
-// TX FIFO trigger level. 40 bytes gives 100us before the FIFO goes empty
+// TX FIFO trigger level. WS2811 40 bytes gives 100us before the FIFO goes empty
 // We need to fill the FIFO at a rate faster than 0.3us per byte (1.2us/pixel)
 #define DEFAULT_UART_FIFO_TRIGGER_LEVEL (17)
 
@@ -62,6 +64,9 @@ public:
         uint32_t                    Baudrate                        = 57600; // current transmit rate
         c_OutputPixel               *pPixelDataSource               = nullptr;
         uint32_t                    FiFoTriggerLevel                = DEFAULT_UART_FIFO_TRIGGER_LEVEL;
+        uint16_t                    SendBreakAfterIntensityData     = 0;
+        uint16_t                    SendExtendedStartBit            = 0;
+        bool                        TriggerIsrExternally            = false;
 
 #if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
         c_OutputSerial              *pSerialDataSource              = nullptr;
@@ -81,6 +86,7 @@ public:
     void SetSendBreak            (bool value);
 
     void IRAM_ATTR ISR_Handler();
+    void IRAM_ATTR ISR_Handler_SendIntensityData();
 
     enum UartDataBitTranslationId_t
     {
@@ -120,12 +126,12 @@ private:
     intr_handle_t  IsrHandle                        = nullptr;
 #endif // defined(ARDUINO_ARCH_ESP32)
 
-    void     IRAM_ATTR ISR_Handler_SendIntensityData();
     bool     IRAM_ATTR MoreDataToSend();
     uint32_t IRAM_ATTR GetNextIntensityToSend();
     void     IRAM_ATTR StartNewDataFrame();
     uint32_t IRAM_ATTR getUartFifoLength();
     void     IRAM_ATTR enqueueUartData(uint8_t value);
+    inline void IRAM_ATTR EnableUartInterrupts();
 
 #define USE_UART_DEBUG_COUNTERS
 #ifdef USE_UART_DEBUG_COUNTERS
@@ -146,10 +152,19 @@ private:
     uint32_t IncompleteFrame = 0;
     uint32_t IncompleteFrameLastFrame = 0;
     uint32_t EnqueueCounter = 0;
+    uint32_t BreakIsrCounter = 0;
+    uint32_t IdleIsrCounter = 0;
 #endif // def USE_UART_DEBUG_COUNTERS
 
-#define DisableUartInterrupts CLEAR_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), UART_TXFIFO_EMPTY_INT_ENA);
-#define EnableUartInterrupts  SET_PERI_REG_MASK  (UART_INT_ENA(OutputUartConfig.UartId), UART_TXFIFO_EMPTY_INT_ENA);
+#ifndef UART_TX_BRK_DONE_INT_ENA
+#   define UART_TX_BRK_DONE_INT_ENA 0
+#endif // ndef | UART_TX_BRK_DONE_INT_ENA
+
+#ifndef UART_INTR_MASK
+#   define UART_INTR_MASK uint32_t((1 << 18)-1)
+#endif
+
+#define DisableUartInterrupts CLEAR_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), UART_INTR_MASK);
 
 #ifndef ESP_INTR_FLAG_IRAM
 #   define ESP_INTR_FLAG_IRAM 0
