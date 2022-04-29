@@ -23,9 +23,9 @@
 #include "OutputGECEUart.hpp"
 
 /*
- * 7N1 UART lookup table for GECE, first bit is ignored.
+ * 8N1 UART lookup table for GECE,
  * Start bit and stop bits are part of the packet.
- * Bits are backwards since we need MSB out.
+ * Bits are backwards since we need MSB out first.
  */
 struct Convert2BitIntensityToGECEUartDataStreamEntry_t
 {
@@ -34,9 +34,6 @@ struct Convert2BitIntensityToGECEUartDataStreamEntry_t
 };
 const Convert2BitIntensityToGECEUartDataStreamEntry_t PROGMEM Convert2BitIntensityToGECEUartDataStream[] =
 {
-//     {0b11111110, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID},
-//     {0b10000000, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID},
-
     {0b11101111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID},
     {0b11101000, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID},
     {0b00001111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_10_ID},
