@@ -15,8 +15,6 @@ public:
 	enum InputValue_t
 	{
 		off = 0,		// input is off
-		shortOn,		// input was on for 0.5 sec
-		longOn,         // input was on for 2.0 sec
 		on,				// input is on
 	};
 
