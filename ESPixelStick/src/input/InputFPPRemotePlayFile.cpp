@@ -203,7 +203,7 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
     int minRem = secsTot / 60;
     secsTot = secsTot % 60;
 
-    char buf[8];
+    char buf[12]; // avoid -Wformat-overflow= warning by increasing size from 6 to 12
     sprintf (buf, "%02d:%02d", mins, secs);
     JsonStatus[CN_time_elapsed] = buf;
 

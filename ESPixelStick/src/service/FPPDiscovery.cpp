@@ -501,7 +501,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
     JsonData[F ("NumFrames")]       = String (read32 (fsqHeader.TotalNumberOfFramesInSequence, 0));
     JsonData[F ("CompressionType")] = fsqHeader.compressionType;
 
-    char timeStr[32];
+    char timeStr[72]; // Avoid -Wformat-overflow warning by increasing buffer size from 32 to 72
     memset (timeStr, 0, sizeof (timeStr));
     struct tm tm = *gmtime (&MultiSyncStats.lastReceiveTime);
     sprintf (timeStr, "%4d-%.2d-%.2d %.2d:%.2d:%.2d",
