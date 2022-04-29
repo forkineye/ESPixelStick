@@ -34,8 +34,13 @@ struct Convert2BitIntensityToGECEUartDataStreamEntry_t
 };
 const Convert2BitIntensityToGECEUartDataStreamEntry_t PROGMEM Convert2BitIntensityToGECEUartDataStream[] =
 {
-    {0b01111110, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID},
-    {0b01000000, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID},
+//     {0b11111110, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID},
+//     {0b10000000, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID},
+
+    {0b11101111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID},
+    {0b11101000, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID},
+    {0b00001111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_10_ID},
+    {0b00001000, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_11_ID},
 };
 
 // Static arrays are initialized to zero at boot time
@@ -147,21 +152,15 @@ void c_OutputGECEUart::Begin ()
     OutputUartConfig.UartId                         = UartId;
     OutputUartConfig.DataPin                        = DataPin;
     OutputUartConfig.IntensityDataWidth             = GECE_PACKET_SIZE;
-    OutputUartConfig.UartDataSize                   = c_OutputUart::UartDataSize_t::OUTPUT_UART_7N1;
-    OutputUartConfig.TranslateIntensityData         = c_OutputUart::TranslateIntensityData_t::OneToOne;
+    OutputUartConfig.UartDataSize                   = c_OutputUart::UartDataSize_t::OUTPUT_UART_8N1;
+    OutputUartConfig.TranslateIntensityData         = c_OutputUart::TranslateIntensityData_t::TwoToOne;
     OutputUartConfig.pPixelDataSource               = this;
     OutputUartConfig.Baudrate                       = GECE_BAUDRATE;
     OutputUartConfig.InvertOutputPolarity           = false;
     OutputUartConfig.SendBreakAfterIntensityData    = GECE_UART_BREAK_BITS; // number of bit times to delay
     OutputUartConfig.TriggerIsrExternally           = false;
-    OutputUartConfig.SendExtendedStartBit           = 10;
+    OutputUartConfig.SendExtendedStartBit           = uint32_t((float(GECE_PIXEL_START_TIME_NS / 1000.0) / float(GECE_UART_USEC_PER_BIT))+0.5);
     Uart.Begin(OutputUartConfig);
-
-#ifdef foo
-
-    SET_PERI_REG_BITS(UART_IDLE_CONF_REG(UartId), UART_TX_BRK_NUM_V, GECE_UART_BREAK_BITS, UART_TX_BRK_NUM_S);
-
-#endif // def foo
 
     // DEBUG_V (String ("       TIMER_FREQUENCY: ") + String (TIMER_FREQUENCY));
     // DEBUG_V (String ("     TIMER_ClockTimeNS: ") + String (TIMER_ClockTimeNS));
@@ -170,44 +169,6 @@ void c_OutputGECEUart::Begin ()
     // DEBUG_V (String ("  GECE_FRAME_TIME_USEC: ") + String (GECE_FRAME_TIME_USEC));
     // DEBUG_V (String ("  GECE_FRAME_TIME_NSEC: ") + String (GECE_FRAME_TIME_NSEC));
     // DEBUG_V (String ("GECE_CCOUNT_FRAME_TIME: ") + String (GECE_CCOUNT_FRAME_TIME));
-
-#ifdef ARDUINO_ARCH_ESP8266
-
-    // DEBUG_V ();
-
-    timer1_attachInterrupt(timer_intr_handler); // Add ISR Function
-    timer1_enable(TIM_DIV1, TIM_EDGE, TIM_LOOP);
-    /* Dividers:
-        TIM_DIV1 = 0,   // 80MHz (80 ticks/us - 104857.588 us max)
-        TIM_DIV16 = 1,  // 5MHz (5 ticks/us - 1677721.4 us max)
-        TIM_DIV256 = 3  // 312.5Khz (1 tick = 3.2us - 26843542.4 us max)
-    Reloads:
-        TIM_SINGLE	0 //on interrupt routine you need to write a new value to start the timer again
-        TIM_LOOP	1 //on interrupt the counter will start with the same value again
-    */
-
-    // Arm the Timer for our Interval
-    timer1_write(GECE_CCOUNT_FRAME_TIME);
-
-#elif defined(xARDUINO_ARCH_ESP32)
-
-    // Configure Prescaler to 1, as our timer runs @ 80Mhz
-    // Giving an output of 80,000,000 / 80 = 1,000,000 ticks / second
-    if (nullptr == pHwTimer)
-    {
-        // Prescaler to 1 (min value) reuslts in a divide by 2 on the clock.
-        pHwTimer = timerBegin(0, 1, true);
-        timerAttachInterrupt(pHwTimer, &timer_intr_handler, true);
-        // ESP32 is a multi core / multi processing chip. It is mandatory to disable task switches during ISR
-        timerMux = portMUX_INITIALIZER_UNLOCKED;
-    }
-
-    // compensate for prescale divide by two.
-    // timerAlarmWrite(pHwTimer, GECE_CCOUNT_FRAME_TIME / 2, true);
-    timerAlarmWrite(pHwTimer, (GECE_CCOUNT_FRAME_TIME / 2) + 10000, true);
-    timerAlarmEnable(pHwTimer);
-
-#endif
 
     HasBeenInitialized = true;
 
@@ -313,27 +274,5 @@ void c_OutputGECEUart::PauseOutput (bool State)
 
     // DEBUG_END;
 } // PauseOutput
-
-//----------------------------------------------------------------------------
-void IRAM_ATTR c_OutputGECEUart::ISR_Handler()
-{
-#ifdef ARDUINO_ARCH_ESP8266
-    // begin start bit
-    CLEAR_PERI_REG_MASK(UART_CONF0(UartId), UART_TXD_BRK);
-    uint32_t StartingCycleCount = _getCycleCount();
-    // finish  start bit
-    while ((_getCycleCount() - StartingCycleCount) < (GECE_CCOUNT_STARTBIT - 10))
-    {
-    }
-#endif
-
-#ifdef GECE_UART_DEBUG_COUNTERS
-    IsrHandlerCount++;
-#endif // def GECE_UART_DEBUG_COUNTERS
-
-    // now convert the bits into a byte stream
-    Uart.ISR_Handler_SendIntensityData();
-
-} // ISR_Handler
 
 #endif // defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_UART_OUTPUT)
