@@ -40,40 +40,6 @@ const Convert2BitIntensityToGECEUartDataStreamEntry_t PROGMEM Convert2BitIntensi
     {0b00001000, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_11_ID},
 };
 
-// Static arrays are initialized to zero at boot time
-static c_OutputGECEUart *GECE_OutputChanArray[c_OutputMgr::e_OutputChannelIds::OutputChannelId_End];
-
-#ifdef GECE_UART_DEBUG_COUNTERS
-    static uint32_t TimerIsrCounter = 0;
-#endif // def GECE_UART_DEBUG_COUNTERS
-
-//----------------------------------------------------------------------------
-/* shell function to set the 'this' pointer of the real ISR
-   This allows me to use non static variables in the ISR.
- */
-static void IRAM_ATTR timer_intr_handler()
-{
-#ifdef GECE_UART_DEBUG_COUNTERS
-    TimerIsrCounter++;
-#endif // def GECE_UART_DEBUG_COUNTERS
-
-#ifdef ARDUINO_ARCH_ESP32
-    portENTER_CRITICAL_ISR(&timerMux);
-#endif
-    // (*((volatile uint32_t*)(UART_FIFO_AHB_REG (0)))) = (uint32_t)('.');
-    for (auto currentChannel : GECE_OutputChanArray)
-    {
-        if (nullptr != currentChannel)
-        {
-            currentChannel->ISR_Handler();
-        }
-    }
-#ifdef ARDUINO_ARCH_ESP32
-    portEXIT_CRITICAL_ISR(&timerMux);
-#endif
-
-} // timer_intr_handler
-
 //----------------------------------------------------------------------------
 c_OutputGECEUart::c_OutputGECEUart (c_OutputMgr::e_OutputChannelIds OutputChannelId,
                                     gpio_num_t outputGpio,
@@ -83,8 +49,6 @@ c_OutputGECEUart::c_OutputGECEUart (c_OutputMgr::e_OutputChannelIds OutputChanne
 {
     // DEBUG_START;
 
-    GECE_OutputChanArray[OutputChannelId] = nullptr;
-
     // DEBUG_END;
 } // c_OutputGECEUart
 
@@ -92,38 +56,6 @@ c_OutputGECEUart::c_OutputGECEUart (c_OutputMgr::e_OutputChannelIds OutputChanne
 c_OutputGECEUart::~c_OutputGECEUart ()
 {
     // DEBUG_START;
-    if (HasBeenInitialized)
-    {
-        GECE_OutputChanArray[OutputChannelId] = nullptr;
-
-        // clean up the timer ISR
-        bool foundActiveChannel = false;
-        for (auto currentChannel : GECE_OutputChanArray)
-        {
-            // DEBUG_V (String ("currentChannel: ") + String (uint(currentChannel), HEX));
-            if (nullptr != currentChannel)
-            {
-                // DEBUG_V ("foundActiveChannel");
-                foundActiveChannel = true;
-            }
-        }
-
-        // DEBUG_V ();
-
-        // have all of the GECE channels been killed?
-        if (!foundActiveChannel)
-        {
-            // DEBUG_V ("Detach Interrupts");
-#ifdef ARDUINO_ARCH_ESP8266
-            timer1_detachInterrupt();
-#elif defined(ARDUINO_ARCH_ESP32)
-            if (pHwTimer)
-            {
-                timerAlarmDisable(pHwTimer);
-            }
-#endif
-        }
-    }
 
     // DEBUG_END;
 } // ~c_OutputGECEUart
@@ -210,8 +142,6 @@ void c_OutputGECEUart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
     debugStatus["NewFrameCounter"]          = NewFrameCounter;
     debugStatus["TimeSinceLastFrameMS"]     = TimeSinceLastFrameMS;
     debugStatus["TimeLastFrameStartedMS"]   = TimeLastFrameStartedMS;
-    debugStatus["IsrHandlerCount"]          = IsrHandlerCount;
-    debugStatus["TimerIsrCounter"]          = TimerIsrCounter;
 #endif // def GECE_UART_DEBUG_COUNTERS
 
     // DEBUG_END;
@@ -224,12 +154,6 @@ void c_OutputGECEUart::Render ()
     // DEBUG_START;
 
     // DEBUG_V (String ("RemainingIntensityCount: ") + RemainingIntensityCount)
-
-    // start processing the timer interrupts
-    if (nullptr != pOutputBuffer)
-    {
-        GECE_OutputChanArray[OutputChannelId] = this;
-    }
 
     do // Once
     {
