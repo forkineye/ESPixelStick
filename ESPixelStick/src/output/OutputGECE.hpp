@@ -44,13 +44,23 @@ public:
             bool validate ();
 
 private:
+/*
+    output looks like this
+
+    Start bit = High for 8us
+    26 data bits.
+        Each bit is 31us
+        0 = 6 us low, 25 us high
+        1 = 25 us low, 6 us high
+    stop bit = low for at least 45us
+*/
 #define GECE_PIXEL_LIMIT        63  ///< Total pixel limit
 #define GECE_DEFAULT_BRIGHTNESS 0xCC
 
 #define GECE_PIXEL_NS_BIT_0_HIGH    (25 * 1000)
 #define GECE_PIXEL_NS_BIT_0_LOW     (6  * 1000)
 #define GECE_PIXEL_NS_BIT_1_HIGH    (6  * 1000)
-#define GECE_PIXEL_NS_BIT_1_LOW     (23 * 1000)
+#define GECE_PIXEL_NS_BIT_1_LOW     (25 * 1000)
 #define GECE_PIXEL_START_TIME_NS    (8  * 1000)
 #define GECE_PIXEL_STOP_TIME_NS     (45 * 1000)
 #define GECE_USEC_PER_GECE_BIT      ((GECE_PIXEL_NS_BIT_0_HIGH + GECE_PIXEL_NS_BIT_0_LOW)/1000)
