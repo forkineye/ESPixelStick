@@ -34,7 +34,8 @@ struct Convert2BitIntensityToWS2811UartDataStreamEntry_t
     uint8_t Translation;
     c_OutputUart::UartDataBitTranslationId_t Id;
 };
-const Convert2BitIntensityToWS2811UartDataStreamEntry_t PROGMEM Convert2BitIntensityToWS2811UartDataStream[] =
+
+static const Convert2BitIntensityToWS2811UartDataStreamEntry_t Convert2BitIntensityToWS2811UartDataStream[] =
 {
     {0b00110111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID}, // 00 - (1)000 100(0)
     {0b00000111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID}, // 01 - (1)000 111(0)
@@ -63,16 +64,16 @@ c_OutputWS2811Uart::~c_OutputWS2811Uart ()
 } // ~c_OutputWS2811Uart
 
 //----------------------------------------------------------------------------
-/* Use the current config to set up the output port
-*/
 void c_OutputWS2811Uart::Begin ()
 {
     // DEBUG_START;
 
     c_OutputWS2811::Begin();
+    // DEBUG_V();
 
     for (auto CurrentTranslation : Convert2BitIntensityToWS2811UartDataStream)
     {
+        // DEBUG_V();
         Uart.SetIntensity2Uart(CurrentTranslation.Translation, CurrentTranslation.Id);
     }
     
@@ -91,16 +92,6 @@ void c_OutputWS2811Uart::Begin ()
     OutputUartConfig.Baudrate                      = WS2811_PIXEL_UART_BAUDRATE;
     OutputUartConfig.InvertOutputPolarity          = true;
     Uart.Begin(OutputUartConfig);
-
-#ifdef testPixelInsert
-    static const uint32_t FrameStartData = 0;
-    static const uint32_t FrameEndData = 0xFFFFFFFF;
-    static const uint8_t  PixelStartData = 0xC0;
-
-    SetFramePrependInformation ( (uint8_t*)&FrameStartData, sizeof (FrameStartData));
-    SetFrameAppendInformation  ( (uint8_t*)&FrameEndData, sizeof (FrameEndData));
-    SetPixelPrependInformation (&PixelStartData, sizeof (PixelStartData));
-#endif // def testPixelInsert
 
     HasBeenInitialized = true;
 
