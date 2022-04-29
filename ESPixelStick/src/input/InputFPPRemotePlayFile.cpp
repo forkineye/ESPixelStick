@@ -178,6 +178,7 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
     // xDEBUG_START;
 
     uint32_t mseconds = FrameControl.ElapsedPlayTimeMS;
+    // BUGBUG -- can overflow, resulting in incorrect time calculation (uint32 * uint32 ==> requires uint64 result)
     uint32_t msecondsTotal = FrameControl.FrameStepTimeMS * FrameControl.TotalNumberOfFramesInSequence;
 
     uint32_t secs = mseconds / 1000;
@@ -203,12 +204,33 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
     int minRem = secsTot / 60;
     secsTot = secsTot % 60;
 
-    char buf[12]; // avoid -Wformat-overflow= warning by increasing size from 6 to 12
-    sprintf (buf, "%02d:%02d", mins, secs);
-    JsonStatus[CN_time_elapsed] = buf;
 
-    sprintf (buf, "%02d:%02d", minRem, secsTot);
-    JsonStatus[CN_time_remaining] = buf;
+    // Manual calculation of maximum size string buffer required:
+    // mseconds is uint32         , range [0..4294967295]
+    // mins is 1/(60*1000) of that, range [0..71582]
+    // msecondsTotal is uint32    , range [0..4294967295]
+    // minRem is 1/(60*1000)...   , range [0..4294967295] due to potential for overflow (else 71582)
+    // secs                       , range [0..59]
+    // secsTot                    , range [0..59]
+    //
+    // Therefore, maximum string is for time remaining: "4000111222:33", which requires 14 bytes
+    // If overflow is fixed, the maximum string is:     "71582:99", which requires 9 bytes
+
+    // Avoid use of unsafe `sprintf` ... especially with stack-based buffers
+    static const int TMP_BUFFER_CHAR_COUNT = 14;
+    char buf[TMP_BUFFER_CHAR_COUNT];
+
+    int writtenChars = snprintf (buf, TMP_BUFFER_CHAR_COUNT, "%02d:%02d", mins, secs);
+    // TODO: assert ((writtenChars > 0) && (writtenChars < TMP_BUFFER_CHAR_COUNT))
+    if ((writtenChars > 0) && (writtenChars < TMP_BUFFER_CHAR_COUNT)) {
+        JsonStatus[CN_time_elapsed] = buf;
+    }
+
+    writtenChars = snprintf (buf, TMP_BUFFER_CHAR_COUNT, "%02d:%02d", minRem, secsTot);
+    // TODO: assert ((writtenChars > 0) && (writtenChars < TMP_BUFFER_CHAR_COUNT))
+    if ((writtenChars > 0) && (writtenChars < TMP_BUFFER_CHAR_COUNT)) {
+        JsonStatus[CN_time_remaining] = buf;
+    }
 
     JsonStatus[CN_errors] = LastFailedPlayStatusMsg;
 
