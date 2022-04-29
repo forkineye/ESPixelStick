@@ -28,7 +28,8 @@
 // bring in driver definitions
 #include "OutputDisabled.hpp"
 #include "OutputAPA102Spi.hpp"
-#include "OutputGECE.hpp"
+#include "OutputGECEUart.hpp"
+#include "OutputGECERmt.hpp"
 #include "OutputRelay.hpp"
 #include "OutputSerialUart.hpp"
 #include "OutputSerialRmt.hpp"
@@ -558,14 +559,26 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 #if defined(SUPPORT_OutputType_GECE)
             case e_OutputType::OutputType_GECE:
             {
-                if ((CurrentOutputChannelDriver.DriverId >= OutputChannelId_UART_FIRST) && (CurrentOutputChannelDriver.DriverId <= OutputChannelId_UART_LAST))
+#ifdef SUPPORT_UART_OUTPUT
+                if (OM_IS_UART)
                 {
                     // logcon (CN_stars + String (F (" Starting GECE for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
-                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputGECE(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_GECE);
+                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputGECEUart(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_GECE);
                     // DEBUG_V ("");
                     break;
                 }
                 // DEBUG_V ("");
+#endif // def SUPPORT_UART_OUTPUT
+
+#ifdef SUPPORT_RMT_OUTPUT
+                if (OM_IS_RMT)
+                {
+                    // logcon (CN_stars + String (F (" Starting GECE for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
+                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputGECERmt(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_GECE);
+                    // DEBUG_V ("");
+                    break;
+                }
+#endif // def SUPPORT_RMT_OUTPUT
 
                 if (!BuildingNewConfig)
                 {
