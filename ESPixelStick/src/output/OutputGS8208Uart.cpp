@@ -32,7 +32,7 @@ struct Convert2BitIntensityToGS8208UartDataStreamEntry_t
     uint8_t Translation;
     c_OutputUart::UartDataBitTranslationId_t Id;
 };
-const Convert2BitIntensityToGS8208UartDataStreamEntry_t PROGMEM Convert2BitIntensityToGS8208UartDataStream[] =
+const Convert2BitIntensityToGS8208UartDataStreamEntry_t Convert2BitIntensityToGS8208UartDataStream[] =
 {
     {0b00110111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID}, // 00 - (1)000 100(0)
     {0b00000111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID}, // 01 - (1)000 111(0)
@@ -61,8 +61,6 @@ c_OutputGS8208Uart::~c_OutputGS8208Uart ()
 } // ~c_OutputGS8208Uart
 
 //----------------------------------------------------------------------------
-/* Use the current config to set up the output port
-*/
 void c_OutputGS8208Uart::Begin ()
 {
     // DEBUG_START;
@@ -174,7 +172,8 @@ void c_OutputGS8208Uart::Render()
 #endif // def GS8208_UART_DEBUG_COUNTERS
 
         Uart.StartNewFrame();
-
+        ReportNewFrame();
+        
         // DEBUG_V();
 
     } while (false);

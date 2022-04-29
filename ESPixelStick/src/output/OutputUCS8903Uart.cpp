@@ -33,7 +33,7 @@ struct ConvertBitIntensityToUCS8903UartDataStreamEntry_t
     c_OutputUart::UartDataBitTranslationId_t Id;
 };
 
-const ConvertBitIntensityToUCS8903UartDataStreamEntry_t PROGMEM ConvertBitIntensityToUCS8903UartDataStream[] =
+const ConvertBitIntensityToUCS8903UartDataStreamEntry_t ConvertBitIntensityToUCS8903UartDataStream[] =
 {
     { 0b11111100, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID}, // 0,
     { 0b11000000, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID}, // 1
@@ -63,8 +63,6 @@ c_OutputUCS8903Uart::~c_OutputUCS8903Uart ()
 } // ~c_OutputUCS8903Uart
 
 //----------------------------------------------------------------------------
-/* Use the current config to set up the output port
-*/
 void c_OutputUCS8903Uart::Begin ()
 {
     // DEBUG_START;

@@ -32,7 +32,7 @@ struct Convert2BitIntensityToTM1814UartDataStreamEntry_t
     uint8_t Translation;
     c_OutputUart::UartDataBitTranslationId_t Id;
 };
-static const Convert2BitIntensityToTM1814UartDataStreamEntry_t PROGMEM Convert2BitIntensityToTM1814UartDataStream[] =
+static const Convert2BitIntensityToTM1814UartDataStreamEntry_t Convert2BitIntensityToTM1814UartDataStream[] =
 {
     {0b11111100, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID},
     {0b11000000, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID},
