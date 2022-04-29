@@ -47,15 +47,15 @@ protected:
 #   define M_ID         CN_id
 
 	String                    m_name;
-	uint32_t                  m_iPinId              = 0;
-	Polarity_t                m_polarity            = Polarity_t::ActiveLow;
-	time_t                    m_ExpirationTime      = 0;
-	bool                      m_bIsEnabled          = false;
-	uint32_t                  m_iInputDebounceCount = 0;
-	uint32_t                  m_iInputHoldTimeMS    = 0;
-	bool                      m_bHadLongPush        = false;
-	bool                      m_bHadShortPush       = false;
-	fsm_ExternalInput_state * m_pCurrentFsmState    = nullptr;
+	uint32_t                  m_iPinId;
+	Polarity_t                m_polarity;
+	time_t                    m_ExpirationTime;
+	bool                      m_bIsEnabled;
+	uint32_t                  m_iInputDebounceCount;
+	uint32_t                  m_iInputHoldTimeMS;
+	bool                      m_bHadLongPush;
+	bool                      m_bHadShortPush;
+	fsm_ExternalInput_state * m_pCurrentFsmState;
 
 	friend class fsm_ExternalInput_boot;
 	friend class fsm_ExternalInput_off_state;
