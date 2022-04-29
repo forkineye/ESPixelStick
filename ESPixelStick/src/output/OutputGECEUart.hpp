@@ -55,7 +55,7 @@ private:
 
         c_OutputUart Uart;
 
-#define GECE_UART_DEBUG_COUNTERS
+// #define GECE_UART_DEBUG_COUNTERS
 #ifdef GECE_UART_DEBUG_COUNTERS
     uint32_t NewFrameCounter = 0;
     uint32_t TimeSinceLastFrameMS = 0;

@@ -139,7 +139,7 @@ private:
     void     IRAM_ATTR enqueueUartData(uint8_t value);
     inline void IRAM_ATTR EnableUartInterrupts();
 
-#define USE_UART_DEBUG_COUNTERS
+// #define USE_UART_DEBUG_COUNTERS
 #ifdef USE_UART_DEBUG_COUNTERS
     // debug counters
     uint32_t DataCallbackCounter = 0;

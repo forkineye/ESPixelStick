@@ -114,7 +114,7 @@ private:
     bool        InvertData                  = false;
     uint32_t    IntensityMultiplier         = 1;
     
-#define USE_PIXEL_DEBUG_COUNTERS
+// #define USE_PIXEL_DEBUG_COUNTERS
 #ifdef USE_PIXEL_DEBUG_COUNTERS
     size_t     PixelsToSend                     = 0;
     size_t     IntensityBytesSent               = 0;

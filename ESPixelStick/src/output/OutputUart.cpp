@@ -389,14 +389,14 @@ void c_OutputUart::InitializeUart()
                 float InterIntensityBreakInTicks = float(OutputUartConfig.NumBreakBitsAfterIntensityData + 1) * TicksPerBit;
                 float IntensityTimeInTicks       = float(OutputUartConfig.IntensityDataWidth + 1) * TicksPerBit;
                 float TimerTimeInTicks           = float(ExtendedStartBitCCOUNT) + InterIntensityBreakInTicks + IntensityTimeInTicks;
-                DEBUG_V(String("                      Baudrate: ") + String(OutputUartConfig.Baudrate));
-                DEBUG_V(String("                      NsPerBit: ") + String(NsPerBit));
-                DEBUG_V(String("NumBreakBitsAfterIntensityData: ") + String(OutputUartConfig.NumBreakBitsAfterIntensityData));
-                DEBUG_V(String("    InterIntensityBreakInTicks: ") + String(InterIntensityBreakInTicks));
-                DEBUG_V(String("            IntensityDataWidth: ") + String(OutputUartConfig.IntensityDataWidth));
-                DEBUG_V(String("          IntensityTimeInTicks: ") + String(IntensityTimeInTicks));
-                DEBUG_V(String("        ExtendedStartBitCCOUNT: ") + String(ExtendedStartBitCCOUNT));
-                DEBUG_V(String("              TimerTimeInTicks: ") + String(TimerTimeInTicks));
+                // DEBUG_V(String("                      Baudrate: ") + String(OutputUartConfig.Baudrate));
+                // DEBUG_V(String("                      NsPerBit: ") + String(NsPerBit));
+                // DEBUG_V(String("NumBreakBitsAfterIntensityData: ") + String(OutputUartConfig.NumBreakBitsAfterIntensityData));
+                // DEBUG_V(String("    InterIntensityBreakInTicks: ") + String(InterIntensityBreakInTicks));
+                // DEBUG_V(String("            IntensityDataWidth: ") + String(OutputUartConfig.IntensityDataWidth));
+                // DEBUG_V(String("          IntensityTimeInTicks: ") + String(IntensityTimeInTicks));
+                // DEBUG_V(String("        ExtendedStartBitCCOUNT: ") + String(ExtendedStartBitCCOUNT));
+                // DEBUG_V(String("              TimerTimeInTicks: ") + String(TimerTimeInTicks));
 
                 // Arm the Timer for our Interval + overhead
                 timer1_write(uint32_t(TimerTimeInTicks) + 33000);
@@ -623,21 +623,21 @@ void IRAM_ATTR c_OutputUart::ISR_UART_Handler()
 //----------------------------------------------------------------------------
 void c_OutputUart::CalculateStartBitTime()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     float BitTimeInUs       = ((1.0 / float(OutputUartConfig.Baudrate)) * 1000000.0);
     float BitTimeInNs       = BitTimeInUs * 1000;
     float StartBitTimeInNs  = BitTimeInNs * float(OutputUartConfig.NumExtendedStartBits);
     ExtendedStartBitCCOUNT  = uint32_t((StartBitTimeInNs + 0.5) / CPU_ClockTimeNS);
 
-    DEBUG_V(String("          NumExtendedStartBits: ") + String(OutputUartConfig.NumExtendedStartBits));
-    DEBUG_V(String("                      Baudrate: ") + String(OutputUartConfig.Baudrate));
-    DEBUG_V(String("                   BitTimeInUs: ") + String(BitTimeInUs));
-    DEBUG_V(String("                   BitTimeInNs: ") + String(BitTimeInNs));
-    DEBUG_V(String("              StartBitTimeInNs: ") + String(StartBitTimeInNs));
-    DEBUG_V(String("        ExtendedStartBitCCOUNT: ") + String(ExtendedStartBitCCOUNT));
+    // DEBUG_V(String("          NumExtendedStartBits: ") + String(OutputUartConfig.NumExtendedStartBits));
+    // DEBUG_V(String("                      Baudrate: ") + String(OutputUartConfig.Baudrate));
+    // DEBUG_V(String("                   BitTimeInUs: ") + String(BitTimeInUs));
+    // DEBUG_V(String("                   BitTimeInNs: ") + String(BitTimeInNs));
+    // DEBUG_V(String("              StartBitTimeInNs: ") + String(StartBitTimeInNs));
+    // DEBUG_V(String("        ExtendedStartBitCCOUNT: ") + String(ExtendedStartBitCCOUNT));
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // CalculateStartBitTime
 
