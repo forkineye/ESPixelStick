@@ -73,9 +73,9 @@ protected:
 class fsm_ExternalInput_state
 {
 public:
-	virtual void Poll(c_ExternalInput * pExternalInput) = 0;
-	virtual void Init(c_ExternalInput * pExternalInput) = 0;
-	virtual c_ExternalInput::InputValue_t Get(void)     = 0;
+	virtual void Poll(c_ExternalInput& pExternalInput) = 0;
+	virtual void Init(c_ExternalInput& pExternalInput) = 0;
+	virtual c_ExternalInput::InputValue_t Get(void)    = 0;
 	virtual ~fsm_ExternalInput_state() {};
 private:
 #define MIN_INPUT_STABLE_VALUE	5
@@ -90,8 +90,8 @@ private:
 class fsm_ExternalInput_boot final : public fsm_ExternalInput_state
 {
 public:
-	void Poll (c_ExternalInput * pExternalInput) override;
-	void Init (c_ExternalInput * pExternalInput) override;
+	void Poll (c_ExternalInput& pExternalInput) override;
+	void Init (c_ExternalInput& pExternalInput) override;
 	c_ExternalInput::InputValue_t Get(void) override { return c_ExternalInput::InputValue_t::off; }
 	~fsm_ExternalInput_boot() override {};
 }; // fsm_ExternalInput_boot
@@ -102,8 +102,8 @@ public:
 class fsm_ExternalInput_off_state final : public fsm_ExternalInput_state
 {
 public:
-	void Poll(c_ExternalInput * pExternalInput) override;
-	void Init(c_ExternalInput * pExternalInput) override;
+	void Poll(c_ExternalInput& pExternalInput) override;
+	void Init(c_ExternalInput& pExternalInput) override;
 	c_ExternalInput::InputValue_t Get(void) override { return c_ExternalInput::InputValue_t::off; }
 	~fsm_ExternalInput_off_state() override {};
 
@@ -115,8 +115,8 @@ public:
 class fsm_ExternalInput_on_wait_short_state final : public fsm_ExternalInput_state
 {
 public:
-	void Poll(c_ExternalInput * pExternalInput) override;
-	void Init(c_ExternalInput * pExternalInput) override;
+	void Poll(c_ExternalInput& pExternalInput) override;
+	void Init(c_ExternalInput& pExternalInput) override;
 	c_ExternalInput::InputValue_t Get(void) override { return c_ExternalInput::InputValue_t::on; }
 	~fsm_ExternalInput_on_wait_short_state() override {};
 
@@ -128,8 +128,8 @@ public:
 class fsm_ExternalInput_on_wait_long_state final : public fsm_ExternalInput_state
 {
 public:
-	void Poll (c_ExternalInput * pExternalInput) override;
-	void Init (c_ExternalInput * pExternalInput) override;
+	void Poll (c_ExternalInput& pExternalInput) override;
+	void Init (c_ExternalInput& pExternalInput) override;
 	c_ExternalInput::InputValue_t Get (void) override { return c_ExternalInput::InputValue_t::on; }
 	~fsm_ExternalInput_on_wait_long_state() override {};
 
@@ -141,8 +141,8 @@ public:
 class fsm_ExternalInput_wait_for_off_state final : public fsm_ExternalInput_state
 {
 public:
-	void Poll (c_ExternalInput* pExternalInput) override;
-	void Init (c_ExternalInput* pExternalInput) override;
+	void Poll (c_ExternalInput& pExternalInput) override;
+	void Init (c_ExternalInput& pExternalInput) override;
 	c_ExternalInput::InputValue_t Get (void) override { return c_ExternalInput::InputValue_t::on; }
 	~fsm_ExternalInput_wait_for_off_state() override {};
 
