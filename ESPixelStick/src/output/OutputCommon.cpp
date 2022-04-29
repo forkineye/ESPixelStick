@@ -23,43 +23,16 @@
 #include "../ESPixelStick.h"
 #include "OutputCommon.hpp"
 
-extern "C" {
-#ifdef ARDUINO_ARCH_ESP8266
-#   include <eagle_soc.h>
-#   include <ets_sys.h>
-#   include <uart.h>
-#   include <uart_register.h>
-#elif defined(ARDUINO_ARCH_ESP32)
-#   include <esp32-hal-uart.h>
-#   include <soc/soc.h>
-#   include <soc/uart_reg.h>
-#   include <rom/ets_sys.h>
-#   include <driver/uart.h>
-#   include <soc/uart_periph.h>
-
-#   define UART_CONF0           UART_CONF0_REG
-#   define UART_CONF1           UART_CONF1_REG
-#   define UART_INT_ENA         UART_INT_ENA_REG
-#   define UART_INT_CLR         UART_INT_CLR_REG
-#   define SERIAL_TX_ONLY       UART_INT_CLR_REG
-#   define UART_INT_ST          UART_INT_ST_REG
-#   define UART_TX_FIFO_SIZE    UART_FIFO_LEN
-
-#define UART_TXD_IDX(u)     ((u==0)?U0TXD_OUT_IDX:((u==1)?U1TXD_OUT_IDX:((u==2)?U2TXD_OUT_IDX:0)))
-
-#endif
-}
-
 //-------------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
-c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds iOutputChannelId,
+c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds _OutputChannelId,
 	                            gpio_num_t outputGpio,
 	                            uart_port_t uart,
                                 c_OutputMgr::e_OutputType outputType)
 {
 	// remember what channel we are
 	HasBeenInitialized       = false;
-	OutputChannelId          = iOutputChannelId;
+	OutputChannelId          = _OutputChannelId;
 	DataPin                  = outputGpio;
 	UartId                   = uart;
     OutputType               = outputType;
@@ -74,7 +47,7 @@ c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds iOutputChannelId
         pinMode (DataPin, INPUT_PULLUP);
     }
 
-} // c_OutputMgr
+} // c_OutputCommon
 
 //-------------------------------------------------------------------------------
 // deallocate any resources and put the output channels into a safe state
@@ -89,182 +62,9 @@ c_OutputCommon::~c_OutputCommon ()
         }
         // DEBUG_V("Set Pin Mode");
         pinMode(DataPin, INPUT_PULLUP);
-
-        // DEBUG_V ("Terminate UART");
-        TerminateUartOperation();
     }
     // DEBUG_END;
-} // ~c_OutputMgr
-
-#ifdef ARDUINO_ARCH_ESP8266
-//----------------------------------------------------------------------------
-/* Use the current config to set up the output port
-*/
-void c_OutputCommon::InitializeUart (uint32_t baudrate,
-                                     uint32_t uartFlags,
-                                     uint32_t uartFlags2,
-                                     uint32_t fifoTriggerLevel)
-{
-    // DEBUG_START;
-
-    do // once
-    {
-        // are we using a valid config?
-        if (gpio_num_t (-1) == DataPin)
-        {
-            logcon (F ("ERROR: Data pin has not been defined"));
-            break;
-        }
-
-        TerminateUartOperation ();
-
-        // Set output pins
-        pinMode (DataPin, OUTPUT);
-        digitalWrite (DataPin, LOW);
-
-        switch (UartId)
-        {
-            case UART_NUM_0:
-            {
-                Serial.begin (baudrate, SerialConfig(uartFlags), SerialMode(uartFlags2));
-                break;
-            }
-            case UART_NUM_1:
-            {
-                Serial1.begin (baudrate, SerialConfig (uartFlags), SerialMode (uartFlags2));
-                break;
-            }
-
-            default:
-            {
-                logcon (String (F (" Initializing UART on Chan: '")) + String (OutputChannelId) + "'. ERROR: Invalid UART Id");
-                break;
-            }
-
-        } // end switch (UartId)
-
-        // Clear FIFOs
-        SET_PERI_REG_MASK   (UART_CONF0 (UartId), UART_RXFIFO_RST | UART_TXFIFO_RST);
-        CLEAR_PERI_REG_MASK (UART_CONF0 (UartId), UART_RXFIFO_RST | UART_TXFIFO_RST);
-
-        if (uint32_t(OM_CMN_NO_CUSTOM_ISR) != fifoTriggerLevel)
-        {
-            // Disable all interrupts
-            ETS_UART_INTR_DISABLE ();
-
-            // Set TX FIFO trigger. 40 bytes gives 100 us to start to refill the FIFO
-            WRITE_PERI_REG (UART_CONF1 (UartId), fifoTriggerLevel << UART_TXFIFO_EMPTY_THRHD_S);
-
-            // Disable RX & TX interrupts. It is enabled by uart.c in the SDK
-            CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
-
-            // Clear all pending interrupts in the UART
-            WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
-
-            // Reenable interrupts
-            ETS_UART_INTR_ENABLE ();
-        }
-
-    } while (false);
-
-} // init
-
-#elif defined (ARDUINO_ARCH_ESP32)
-void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
-                                     uint32_t fifoTriggerLevel)
-{
-    // DEBUG_START;
-
-    // are we using a valid config?
-    if (gpio_num_t (-1) == DataPin)
-    {
-        logcon (F ("ERROR: Data pin has not been defined"));
-        return;
-    }
-
-    TerminateUartOperation ();
-
-    // In the ESP32 you need to be careful which CPU is being configured
-    // to handle interrupts. These API functions are supposed to handle this
-    // selection.
-
-    // DEBUG_V (String ("UartId  = '") + UartId + "'");
-    // DEBUG_V (String ("DataPin = '") + DataPin + "'");
-
-    // Set output pins
-    pinMode (DataPin, OUTPUT);
-    digitalWrite (DataPin, LOW);
-
-    ESP_ERROR_CHECK (uart_set_hw_flow_ctrl (UartId, uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE, 0));
-    ESP_ERROR_CHECK (uart_set_sw_flow_ctrl (UartId, false, 0, 0));
-
-    // make sure no existing low level ISR is running
-    ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
-    // DEBUG_V ("");
-
-    ESP_ERROR_CHECK (uart_disable_rx_intr (UartId));
-    // DEBUG_V ("");
-
-    // start the generic UART driver.
-    // NOTE: Zero for RX buffer size causes errors in the uart API.
-    // Must be at least one byte larger than the fifo size
-    // Do not set ESP_INTR_FLAG_IRAM here. the driver's ISR handler is not located in IRAM
-    // DEBUG_V ("");
-    // ESP_ERROR_CHECK (uart_driver_install (UartId, UART_FIFO_LEN+1, 0, 0, NULL, 0));
-    // DEBUG_V (String ("                  UartId: 0x") + String (UartId, HEX));
-    // DEBUG_V (String ("   uart_config.baud_rate: 0x") + String (uart_config.baud_rate, HEX));
-
-    uart_config.parity = uart_parity_t::UART_PARITY_DISABLE;
-    uart_config.flow_ctrl = uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE;
-    uart_config.rx_flow_ctrl_thresh = 1;
-    uart_config.source_clk = uart_sclk_t::UART_SCLK_APB;
-
-    // DEBUG_V (String ("UART_CLKDIV_REG (UartId): 0x") + String (*((uint32_t*)UART_CLKDIV_REG (UartId)), HEX));
-    ESP_ERROR_CHECK (uart_param_config (UartId, & uart_config));
-    // DEBUG_V (String ("UART_CLKDIV_REG (UartId): 0x") + String (*((uint32_t*)UART_CLKDIV_REG (UartId)), HEX));
-
-#define xSupportSetUartBaudrateWorkAround
-#ifdef SupportSetUartBaudrateWorkAround
-    uint32_t ClockDivider = (APB_CLK_FREQ << 4) / uart_config.baud_rate;
-    // DEBUG_V (String ("            APB_CLK_FREQ: 0x") + String (APB_CLK_FREQ, HEX));
-    // DEBUG_V (String ("            ClockDivider: 0x") + String (ClockDivider, HEX));
-    uint32_t adjusted_ClockDivider = ((ClockDivider >> 4) & UART_CLKDIV_V) | ((ClockDivider & UART_CLKDIV_FRAG_V) << UART_CLKDIV_FRAG_S);
-    // DEBUG_V (String ("   adjusted_ClockDivider: 0x") + String (adjusted_ClockDivider, HEX));
-    *((uint32_t *) UART_CLKDIV_REG (UartId)) = adjusted_ClockDivider;
-    // DEBUG_V (String ("UART_CLKDIV_REG (UartId): 0x") + String (*((uint32_t*)UART_CLKDIV_REG (UartId)), HEX));
-#endif // def SupportSetUartBaudrateWorkAround
-
-    ESP_ERROR_CHECK (uart_set_pin (UartId, DataPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
-    // DEBUG_V ("");
-
-    ESP_ERROR_CHECK (uart_disable_tx_intr (UartId));
-    // DEBUG_V ("");
-
-    // Disable ALL interrupts. They are enabled by uart.c in the SDK
-    CLEAR_PERI_REG_MASK (UART_INT_ENA (UartId), UART_INTR_MASK);
-    // DEBUG_V ("");
-
-    // Clear all pending interrupts in the UART
-    // WRITE_PERI_REG (UART_INT_CLR (UartId), UART_INTR_MASK);
-
-    // DEBUG_END;
-
-} // InitializeUart
-#endif
-
-//-----------------------------------------------------------------------------
-bool c_OutputCommon::RegisterUartIsrHandler(void (*fn)(void *), void *arg, int intr_alloc_flags)
-{
-    bool ret = true;
-#ifdef ARDUINO_ARCH_ESP8266
-    ETS_UART_INTR_ATTACH(fn, arg);
-#else
-    // UART_ENTER_CRITICAL(&(uart_context[uart_num].spinlock));
-    ret = (ESP_OK == esp_intr_alloc(uart_periph_signal[UartId].irq, intr_alloc_flags, fn, arg, nullptr));
-    // UART_EXIT_CRITICAL(&(uart_context[uart_num].spinlock));
-#endif
-    return ret;
-} // RegisterUartIsrHandler
+} // ~c_OutputCommon
 
 //-----------------------------------------------------------------------------
 void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
@@ -278,50 +78,6 @@ void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
 
     // DEBUG_END;
 } // GetStatus
-
-//----------------------------------------------------------------------------
-void c_OutputCommon::TerminateUartOperation ()
-{
-    // DEBUG_START;
-#ifdef SUPPORT_UART_OUTPUT
-    if (OutputChannelId <= c_OutputMgr::e_OutputChannelIds::OutputChannelId_UART_LAST)
-    {
-        switch (UartId)
-        {
-            case UART_NUM_0:
-            {
-                // DEBUG_V ("UART_NUM_0");
-                Serial.end ();
-                break;
-            }
-            case UART_NUM_1:
-            {
-                // DEBUG_V ("UART_NUM_1");
-                Serial1.end ();
-                break;
-            }
-
-    #ifdef ARDUINO_ARCH_ESP32
-            case UART_NUM_2:
-            {
-                // DEBUG_V ("UART_NUM_2");
-                Serial2.end ();
-                break;
-            }
-    #endif // def ARDUINO_ARCH_ESP32
-
-            default:
-            {
-                // DEBUG_V ("default");
-                break;
-            }
-        } // end switch (UartId)
-    }
-#endif // def SUPPORT_UART_OUTPUT
-
-    // DEBUG_END;
-
-} // TerminateUartOperation
 
 //----------------------------------------------------------------------------
 void c_OutputCommon::ReportNewFrame ()
