@@ -21,7 +21,11 @@
 #include "../ESPixelStick.h"
 #ifdef SUPPORT_UART_OUTPUT
 
-#include <soc/uart_reg.h>
+#ifdef ARDUINO_ARCH_ESP32
+#   include <soc/uart_reg.h>
+#   include <driver/uart.h>
+#   include <driver/gpio.h>
+#endif
 
 #include "OutputPixel.hpp"
 #include "OutputSerial.hpp"
@@ -161,9 +165,15 @@ private:
 #endif // ndef | UART_TX_BRK_DONE_INT_ENA
 
 #ifndef UART_INTR_MASK
-#   define UART_INTR_MASK uint32_t((1 << 18)-1)
+#if defined(ARDUINO_ARCH_ESP32)
+#   define UART_INTR_MASK uint32_t((1 << 18) - 1)
+#elif defined(ARDUINO_ARCH_ESP8266)
+#   define UART_INTR_MASK uint32_t((1 << 8) - 1)
+#endif //  defined(ARDUINO_ARCH_ESP8266)
+
 #endif
 
+#define ClearUartInterrupts   WRITE_PERI_REG(UART_INT_CLR(OutputUartConfig.UartId), UART_INTR_MASK);
 #define DisableUartInterrupts CLEAR_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), UART_INTR_MASK);
 
 #ifndef ESP_INTR_FLAG_IRAM
