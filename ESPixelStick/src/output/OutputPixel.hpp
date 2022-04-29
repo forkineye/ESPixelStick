@@ -23,11 +23,7 @@
 */
 
 #include "OutputCommon.hpp"
-/*
-#ifdef ARDUINO_ARCH_ESP32
-#   include <driver/uart.h>
-#endif
-*/
+
 class c_OutputPixel : public c_OutputCommon
 {
 private:
@@ -48,11 +44,8 @@ public:
     virtual ~c_OutputPixel ();
 
     // functions to be provided by the derived class
-    // virtual void         Begin () {};
     virtual  bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
     virtual  void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-    virtual  void         GetDriverName (String& sDriverName) = 0;
-    virtual  c_OutputMgr::e_OutputType GetOutputType () = 0;
     virtual  void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
              size_t       GetNumChannelsNeeded () { return (pixel_count * NumIntensityBytesPerPixel); };
     virtual  void         SetOutputBufferSize (size_t NumChannelsAvailable);
@@ -64,6 +57,8 @@ public:
              void         StartNewFrame();
     bool     IRAM_ATTR    ISR_MoreDataToSend () { return FrameState_t::FrameDone != FrameState; }
     uint32_t IRAM_ATTR    ISR_GetNextIntensityToSend ();
+    void                  SetPixelCount(size_t value) {pixel_count = value;}
+    size_t                GetPixelCount() {return pixel_count;}
 
 protected:
 
@@ -138,6 +133,8 @@ private:
     uint32_t   PixelAppendNullsCounter          = 0;
     uint32_t   PixelUnkownState                 = 0;
     uint32_t   GetNextIntensityToSendCounter    = 0;
+    uint32_t   LastGECEdataSent                 = uint32_t(-1);
+    uint32_t   NumGECEdataSent                  = 0;
 #endif // def USE_PIXEL_DEBUG_COUNTERS
 
     typedef union ColorOffsets_s
@@ -153,10 +150,12 @@ private:
     } ColorOffsets_t;
     ColorOffsets_t  ColorOffsets;
 
-    uint8_t     gamma_table[256] = { 0 };           ///< Gamma Adjustment table
-    float       gamma = 1.0;                        ///< gamma value to use
-    uint8_t     brightness = 100;
-    uint32_t    AdjustedBrightness = 256;           ///< brightness to use
+    uint8_t     gamma_table[256]    = { 0 };    ///< Gamma Adjustment table
+    float       gamma               = 1.0;      ///< gamma value to use
+    uint8_t     brightness          = 100;
+    uint32_t    AdjustedBrightness  = 256;
+    uint32_t    GECEPixelId         = 0;
+    uint32_t    GECEBrightness      = 255;
 
     // JSON configuration parameters
     String      color_order = "rgb"; ///< Pixel color order
@@ -167,6 +166,7 @@ private:
     void updateColorOrderOffsets(); ///< Update color order
     bool validate ();        ///< confirm that the current configuration is valid
     inline size_t CalculateIntensityOffset(size_t ChannelId);
+    uint32_t IRAM_ATTR GetIntensityData();
 
     enum PixelSendState_t
     {
