@@ -36,16 +36,15 @@ public:
     virtual ~c_OutputSerial ();
 
     // functions to be provided by the derived class
-    virtual void         Begin ();
-    virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
-    virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-            void         GetDriverName (String& sDriverName);
-            c_OutputMgr::e_OutputType GetOutputType ();
-    virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
-            size_t       GetNumChannelsNeeded () { return Num_Channels; };
-            void         SetOutputBufferSize (size_t NumChannelsAvailable);
-            void         Render() = 0;
-            void         StartNewFrame();
+    virtual void   Begin ();
+    virtual bool   SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
+    virtual void   GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
+            void   GetDriverName (String& sDriverName);
+    virtual void   GetStatus (ArduinoJson::JsonObject & jsonStatus);
+            size_t GetNumChannelsNeeded () { return Num_Channels; };
+            void   SetOutputBufferSize (size_t NumChannelsAvailable);
+            void   Render() = 0;
+            void   StartNewFrame();
             
     uint32_t IRAM_ATTR   ISR_GetNextIntensityToSend();
     bool     IRAM_ATTR   ISR_MoreDataToSend() { return (SerialFrameState_t::SerialIdle != SerialFrameState); }
