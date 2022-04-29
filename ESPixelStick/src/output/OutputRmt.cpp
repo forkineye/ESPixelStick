@@ -74,8 +74,6 @@ static void IRAM_ATTR rmt_intr_handler (void* param)
 } // rmt_intr_handler
 
 //----------------------------------------------------------------------------
-/* Use the current config to set up the output port
-*/
 void c_OutputRmt::Begin (OutputRmtConfig_t config )
 {
     // DEBUG_START;
@@ -95,7 +93,7 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
             break;
         }
 
-        NumRmtSlotsPerIntensityValue = OutputRmtConfig.IntensityDataWidth + ((SendInterIntensityBits) ? 1 : 0);
+        NumRmtSlotsPerIntensityValue = OutputRmtConfig.IntensityDataWidth + ((OutputRmtConfig.SendInterIntensityBits) ? 1 : 0);
         TxIntensityDataStartingMask  = 1 << (OutputRmtConfig.IntensityDataWidth - 1);
         // DEBUG_V (String("          IntensityDataWidth: ") + String(OutputRmtConfig.IntensityDataWidth));
         // DEBUG_V (String("NumRmtSlotsPerIntensityValue: ") + String (NumRmtSlotsPerIntensityValue));
@@ -343,7 +341,7 @@ void c_OutputRmt::StartNewFrame ()
     // so that there is still plenty of data to send when the isr fires.
     // DEBUG_V(String("NumInterFrameRmtSlots: ") + String(NumInterFrameRmtSlots));
     size_t NumInterFrameRmtSlotsCount = 0;
-    while (NumInterFrameRmtSlotsCount < NumInterFrameRmtSlots)
+    while (NumInterFrameRmtSlotsCount < OutputRmtConfig.NumIdleBits)
     {
         ISR_EnqueueData (Intensity2Rmt[RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID].val);
         ++NumInterFrameRmtSlotsCount;
@@ -354,7 +352,7 @@ void c_OutputRmt::StartNewFrame ()
 
     // DEBUG_V(String("NumFrameStartRmtSlots: ") + String(NumFrameStartRmtSlots));
     size_t NumFrameStartRmtSlotsCount = 0;
-    while (NumFrameStartRmtSlotsCount++ < NumFrameStartRmtSlots)
+    while (NumFrameStartRmtSlotsCount++ < OutputRmtConfig.NumFrameStartBits)
     {
         ISR_EnqueueData (Intensity2Rmt[RmtDataBitIdType_t::RMT_STARTBIT_ID].val);
 #ifdef USE_RMT_DEBUG_COUNTERS
@@ -420,14 +418,14 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_SendIntensityData ()
 #endif // def USE_RMT_DEBUG_COUNTERS
         } // end send one intensity value
 
-        if (SendEndOfFrameBits && !MoreDataToSend())
+        if (OutputRmtConfig.SendEndOfFrameBits && !MoreDataToSend())
         {
             ISR_EnqueueData(Intensity2Rmt[RmtDataBitIdType_t::RMT_END_OF_FRAME].val);
 #ifdef USE_RMT_DEBUG_COUNTERS
             BitTypeCounters[int(RmtDataBitIdType_t::RMT_END_OF_FRAME)]++;
 #endif // def USE_RMT_DEBUG_COUNTERS
         }
-        else if (SendInterIntensityBits)
+        else if (OutputRmtConfig.SendInterIntensityBits)
         {
             ISR_EnqueueData(Intensity2Rmt[RmtDataBitIdType_t::RMT_STOP_START_BIT_ID].val);
 #ifdef USE_RMT_DEBUG_COUNTERS
@@ -530,15 +528,15 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     debugStatus["RMT_INT_THR_EVNT_BIT"]         = String (RMT_INT_THR_EVNT_BIT, HEX);
     debugStatus["Raw int_st"]                   = String (RMT.int_st.val, HEX);
     debugStatus["int_st"]                       = String (RMT.int_st.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT), HEX);
-    debugStatus["IntensityValuesSent"]           = IntensityValuesSent;
-    debugStatus["IntensityValuesSentLastFrame"]  = IntensityValuesSentLastFrame;
+    debugStatus["IntensityValuesSent"]          = IntensityValuesSent;
+    debugStatus["IntensityValuesSentLastFrame"] = IntensityValuesSentLastFrame;
     debugStatus["IntensityBitsSent"]            = IntensityBitsSent;
     debugStatus["IntensityBitsSentLastFrame"]   = IntensityBitsSentLastFrame;
-    debugStatus["NumInterFrameRmtSlots"]        = NumInterFrameRmtSlots;
-    debugStatus["NumFrameStartRmtSlots"]        = NumFrameStartRmtSlots;
-    debugStatus["NumFrameStopRmtSlots"]         = NumFrameStopRmtSlots;
-    debugStatus["SendInterIntensityBits"]       = SendInterIntensityBits;
-    debugStatus["SendEndOfFrameBits"]           = SendEndOfFrameBits;
+    debugStatus["NumIdleBits"]                  = OutputRmtConfig.NumIdleBits;
+    debugStatus["NumFrameStartBits"]            = OutputRmtConfig.NumFrameStartBits;
+    debugStatus["NumFrameStopBits"]             = OutputRmtConfig.NumFrameStopBits;
+    debugStatus["SendInterIntensityBits"]       = OutputRmtConfig.SendInterIntensityBits;
+    debugStatus["SendEndOfFrameBits"]           = OutputRmtConfig.SendEndOfFrameBits;
     debugStatus["NumRmtSlotsPerIntensityValue"] = NumRmtSlotsPerIntensityValue;
 
     uint32_t index = 0;
