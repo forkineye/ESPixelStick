@@ -76,6 +76,7 @@ public:
 	virtual void Poll(c_ExternalInput * pExternalInput) = 0;
 	virtual void Init(c_ExternalInput * pExternalInput) = 0;
 	virtual c_ExternalInput::InputValue_t Get(void)     = 0;
+	virtual ~fsm_ExternalInput_state() {};
 private:
 #define MIN_INPUT_STABLE_VALUE	5
 #define INPUT_SHORT_VALUE_MS    500
