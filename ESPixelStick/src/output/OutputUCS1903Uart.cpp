@@ -31,7 +31,7 @@ struct Convert2BitIntensityToUCS1903UartDataStreamEntry_t
     uint8_t Translation;
     c_OutputUart::UartDataBitTranslationId_t Id;
 };
-const Convert2BitIntensityToUCS1903UartDataStreamEntry_t PROGMEM Convert2BitIntensityToUCS1903UartDataStream[] =
+const Convert2BitIntensityToUCS1903UartDataStreamEntry_t Convert2BitIntensityToUCS1903UartDataStream[] =
 {
     {0b00110111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID}, // 00 - (1)000 100(0)
     {0b00000111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID}, // 01 - (1)000 111(0)
@@ -60,8 +60,6 @@ c_OutputUCS1903Uart::~c_OutputUCS1903Uart ()
 } // ~c_OutputUCS1903Uart
 
 //----------------------------------------------------------------------------
-/* Use the current config to set up the output port
-*/
 void c_OutputUCS1903Uart::Begin ()
 {
     // DEBUG_START;
@@ -86,16 +84,6 @@ void c_OutputUCS1903Uart::Begin ()
     OutputUartConfig.Baudrate                      = int(UCS1903_NUM_DATA_BYTES_PER_INTENSITY_BYTE * UCS1903_PIXEL_DATA_RATE);;
     OutputUartConfig.InvertOutputPolarity          = true;
     Uart.Begin(OutputUartConfig);
-
-#ifdef testPixelInsert
-    static const uint32_t FrameStartData = 0;
-    static const uint32_t FrameEndData = 0xFFFFFFFF;
-    static const uint8_t  PixelStartData = 0xC0;
-
-    SetFramePrependInformation ( (uint8_t*)&FrameStartData, sizeof (FrameStartData));
-    SetFrameAppendInformation ( (uint8_t*)&FrameEndData, sizeof (FrameEndData));
-    SetPixelPrependInformation (&PixelStartData, sizeof (PixelStartData));
-#endif // def testPixelInsert
 
     HasBeenInitialized = true;
 
@@ -156,7 +144,7 @@ void c_OutputUCS1903Uart::Render ()
     if (!canRefresh ()) { return; }
 
     // get the next frame started
-    StartNewFrame ();
+    Uart.StartNewFrame ();
     ReportNewFrame ();
 
     // DEBUG_END;
