@@ -32,7 +32,7 @@ c_ExternalInput::c_ExternalInput(void) :
 	m_iInputHoldTimeMS(0),
 	m_bHadLongPush(false),
 	m_bHadShortPush(false),
-	m_pCurrentFsmState(&fsm_ExternalInput_boot_imp)
+	m_CurrentFsmState(fsm_ExternalInput_boot_imp)
 {
 	// DEBUG_START;
 	fsm_ExternalInput_boot_imp.Init(*this); // currently redundant, but might Init() might do more ... so important to leave this
@@ -69,7 +69,7 @@ c_ExternalInput::InputValue_t c_ExternalInput::Get()
 {
 	// DEBUG_START;
 
-	return m_pCurrentFsmState->Get();
+	return m_CurrentFsmState.Get();
 
 	// DEBUG_END;
 
@@ -168,7 +168,7 @@ void c_ExternalInput::ProcessConfig (JsonObject JsonData)
 void c_ExternalInput::Poll (void)
 {
 	// DEBUG_START;
-	m_pCurrentFsmState->Poll (*this);
+	m_CurrentFsmState.Poll (*this);
 
 	// DEBUG_END;
 
@@ -209,7 +209,7 @@ bool c_ExternalInput::ReadInput (void)
 // waiting for the system to come up
 void fsm_ExternalInput_boot::Init (c_ExternalInput& pExternalInput)
 {
-	pExternalInput.m_pCurrentFsmState = &fsm_ExternalInput_boot_imp;
+	pExternalInput.m_CurrentFsmState = fsm_ExternalInput_boot_imp;
 
 	// dont do anything
 
@@ -236,7 +236,7 @@ void fsm_ExternalInput_off_state::Init(c_ExternalInput& pExternalInput)
 	// DEBUG_START;
 
 	pExternalInput.m_iInputDebounceCount = MIN_INPUT_STABLE_VALUE;
-	pExternalInput.m_pCurrentFsmState    = &fsm_ExternalInput_off_state_imp;
+	pExternalInput.m_CurrentFsmState    = fsm_ExternalInput_off_state_imp;
 	// DEBUG_V ("Entring OFF State");
 
 } // fsm_ExternalInput_off_state::Init
@@ -280,7 +280,7 @@ void fsm_ExternalInput_on_wait_short_state::Init(c_ExternalInput& pExternalInput
 	// DEBUG_START;
 
 	pExternalInput.m_iInputHoldTimeMS = millis() + INPUT_SHORT_VALUE_MS;
-	pExternalInput.m_pCurrentFsmState = &fsm_ExternalInput_on_wait_short_state_imp;
+	pExternalInput.m_CurrentFsmState = fsm_ExternalInput_on_wait_short_state_imp;
 	// DEBUG_V ("Entring Wait Short State");
 
 } // fsm_ExternalInput_on_wait_short_state::Init
@@ -319,7 +319,7 @@ void fsm_ExternalInput_on_wait_short_state::Poll(c_ExternalInput& pExternalInput
 void fsm_ExternalInput_on_wait_long_state::Init (c_ExternalInput& pExternalInput)
 {
 	pExternalInput.m_iInputHoldTimeMS = millis () + INPUT_LONG_VALUE_MS;
-	pExternalInput.m_pCurrentFsmState = &fsm_ExternalInput_on_wait_long_state_imp;
+	pExternalInput.m_CurrentFsmState = fsm_ExternalInput_on_wait_long_state_imp;
 	// DEBUG_V ("Entring Wait Long State");
 
 } // fsm_ExternalInput_on_wait_long_state::Init
@@ -361,7 +361,7 @@ void fsm_ExternalInput_on_wait_long_state::Poll (c_ExternalInput& pExternalInput
 // Input is always on
 void fsm_ExternalInput_wait_for_off_state::Init (c_ExternalInput& pExternalInput)
 {
-	pExternalInput.m_pCurrentFsmState = &fsm_ExternalInput_wait_for_off_state_imp;
+	pExternalInput.m_CurrentFsmState = fsm_ExternalInput_wait_for_off_state_imp;
 	// DEBUG_V ("Entring Wait OFF State");
 
 } // fsm_ExternalInput_wait_for_off_state::Init

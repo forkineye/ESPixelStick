@@ -55,7 +55,7 @@ protected:
 	uint32_t                  m_iInputHoldTimeMS;
 	bool                      m_bHadLongPush;
 	bool                      m_bHadShortPush;
-	fsm_ExternalInput_state * m_pCurrentFsmState;
+	fsm_ExternalInput_state&  m_CurrentFsmState;
 
 	friend class fsm_ExternalInput_boot;
 	friend class fsm_ExternalInput_off_state;
