@@ -56,7 +56,7 @@ extern "C"
 static void IRAM_ATTR uart_intr_handler (void* param);
 
 #ifdef ARDUINO_ARCH_ESP8266
-const PROGMEM uint32_t UartDataSizeXlat[8] =
+const PROGMEM uint32_t UartDataSizeXlat[] =
 {
     SERIAL_5N1,
     SERIAL_5N2,
@@ -73,7 +73,7 @@ struct UartDataSizeXlatEntry_t
     uart_word_length_t DataWidth;
     uart_stop_bits_t   NumStopBits;
 };
-const PROGMEM UartDataSizeXlatEntry_t UartDataSizeXlat[8] =
+const PROGMEM UartDataSizeXlatEntry_t UartDataSizeXlat[] =
 {
     {uart_word_length_t::UART_DATA_5_BITS, uart_stop_bits_t::UART_STOP_BITS_1},
     {uart_word_length_t::UART_DATA_5_BITS, uart_stop_bits_t::UART_STOP_BITS_2},
@@ -261,13 +261,15 @@ void c_OutputUart::InitializeUart()
         {
             case UART_NUM_0:
             {
-                Serial.begin( OutputUartConfig.Baudrate, 
-                              SerialConfig(UartDataSizeXlat[OutputUartConfig.UartDataSize]), 
-                              SerialMode(SERIAL_TX_ONLY));
+                // DEBUG_V("UART_NUM_0");
+                Serial.begin(OutputUartConfig.Baudrate,
+                             SerialConfig(UartDataSizeXlat[OutputUartConfig.UartDataSize]),
+                             SerialMode(SERIAL_TX_ONLY));
                 break;
             }
             case UART_NUM_1:
             {
+                // DEBUG_V("UART_NUM_1");
                 Serial1.begin( OutputUartConfig.Baudrate, 
                                SerialConfig (UartDataSizeXlat[OutputUartConfig.UartDataSize]), 
                                SerialMode (SERIAL_TX_ONLY));
@@ -284,33 +286,35 @@ void c_OutputUart::InitializeUart()
 
         if (OutputUartConfig.InvertOutputPolarity)
         {
-            // invert the output
+            // DEBUG_V("invert the output");
             CLEAR_PERI_REG_MASK (UART_CONF0(OutputUartConfig.UartId), UART_INV_MASK);
             SET_PERI_REG_MASK   (UART_CONF0(OutputUartConfig.UartId), (BIT(22)));
         }
 
-        // Clear FIFOs
+        // DEBUG_V("Clear FIFOs");
         SET_PERI_REG_MASK   (UART_CONF0(OutputUartConfig.UartId), UART_RXFIFO_RST | UART_TXFIFO_RST);
         CLEAR_PERI_REG_MASK (UART_CONF0(OutputUartConfig.UartId), UART_RXFIFO_RST | UART_TXFIFO_RST);
 
-        // Disable all interrupts
+        // DEBUG_V("Disable all interrupts");
         ETS_UART_INTR_DISABLE();
 
-        // Set TX FIFO trigger. 
+        // DEBUG_V("Set TX FIFO trigger.");
         WRITE_PERI_REG(UART_CONF1(OutputUartConfig.UartId), OutputUartConfig.FiFoTriggerLevel << UART_TXFIFO_EMPTY_THRHD_S);
 
-        // Disable RX & TX interrupts. It is enabled by uart.c in the SDK
-        CLEAR_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
+        // DEBUG_V("Disable RX & TX interrupts. It is enabled by uart.c in the SDK");
+        DisableUartInterrupts;
 
-        // Clear all pending interrupts in the UART
-        WRITE_PERI_REG(UART_INT_CLR(OutputUartConfig.UartId), UART_INTR_MASK);
+        // DEBUG_V("Clear all pending interrupts in the UART");
+        ClearUartInterrupts;
 
-        // Reenable interrupts
+        // DEBUG_V("Reenable interrupts");
         ETS_UART_INTR_ENABLE();
 
         set_pin();
 
     } while (false);
+
+    // DEBUG_END;
 
 } // init
 
@@ -478,13 +482,15 @@ void IRAM_ATTR c_OutputUart::ISR_Handler()
 
         // Process if the desired UART has raised an interrupt
         uint32_t isrStatus = 0;
-        if (isrStatus = READ_PERI_REG(UART_INT_ST(OutputUartConfig.UartId)))
+        if (0 != (isrStatus = READ_PERI_REG(UART_INT_ST(OutputUartConfig.UartId))))
         {
 #ifdef USE_UART_DEBUG_COUNTERS
+#ifdef ARDUINO_ARCH_ESP32
             if (isrStatus & UART_TX_BRK_IDLE_DONE_INT_ENA)
             {
                 IdleIsrCounter++;
             }
+#endif // def ARDUINO_ARCH_ESP32
 
             if (isrStatus & UART_TX_BRK_DONE_INT_ENA)
             {
@@ -508,7 +514,8 @@ void IRAM_ATTR c_OutputUart::ISR_Handler()
             }
 
             // Clear all interrupt flags for this uart
-            WRITE_PERI_REG(UART_INT_CLR(OutputUartConfig.UartId), UART_INTR_MASK);
+            ClearUartInterrupts;
+
         } // end Our uart generated an interrupt
 #ifdef USE_UART_DEBUG_COUNTERS
         else
@@ -526,8 +533,10 @@ void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
 {
     if (OutputUartConfig.SendExtendedStartBit)
     {
+#ifdef ARDUINO_ARCH_ESP32
         // Set up the built in break after intensity data sent time in bits.
         SET_PERI_REG_BITS(UART_IDLE_CONF_REG(OutputUartConfig.UartId), UART_TX_IDLE_NUM_V, OutputUartConfig.SendExtendedStartBit, UART_TX_IDLE_NUM_S);
+#endif // def ARDUINO_ARCH_ESP32
     }
 
     size_t NumAvailableIntensitySlotsToFill = ((((size_t)UART_TX_FIFO_SIZE) - (getUartFifoLength())) / NumUartSlotsPerIntensityValue);
@@ -576,7 +585,9 @@ void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
         
         if (OutputUartConfig.SendBreakAfterIntensityData)
         {
+#ifdef ARDUINO_ARCH_ESP32
             SET_PERI_REG_BITS(UART_IDLE_CONF_REG(OutputUartConfig.UartId), UART_TX_BRK_NUM_V, OutputUartConfig.SendBreakAfterIntensityData, UART_TX_BRK_NUM_S);
+#endif // def ARDUINO_ARCH_ESP32
             SET_PERI_REG_MASK(UART_CONF0(OutputUartConfig.UartId), UART_TXD_BRK);
             EnableUartInterrupts();
             return;
@@ -707,22 +718,23 @@ void c_OutputUart::set_pin()
 
     // DEBUG_V(String("DataPin: ") + String(OutputUartConfig.DataPin));
 
+#ifdef ARDUINO_ARCH_ESP8266
+    // UART Pins cannot be modified on the ESP8266
+#else
     if (gpio_num_t(-1) != OutputUartConfig.DataPin)
     {
+        // DEBUG_V();
+
         pinMode(OutputUartConfig.DataPin, OUTPUT);
         digitalWrite(OutputUartConfig.DataPin, LOW);
-
-#ifdef ARDUINO_ARCH_ESP8266
-        // UART Pins cannot be modified on the ESP8266
-#else
         ESP_ERROR_CHECK(uart_set_pin(OutputUartConfig.UartId,
                                      OutputUartConfig.DataPin,
                                      UART_PIN_NO_CHANGE,
                                      UART_PIN_NO_CHANGE,
                                      UART_PIN_NO_CHANGE));
         pinMatrixOutAttach(OutputUartConfig.DataPin, UART_TXD_IDX(OutputUartConfig.UartId), false, false);
-#endif // def ARDUINO_ARCH_ESP32
     }
+#endif // def ARDUINO_ARCH_ESP32
     // DEBUG_END;
 } // set_pin
 
@@ -745,7 +757,9 @@ inline void IRAM_ATTR c_OutputUart::EnableUartInterrupts()
 
     if (OutputUartConfig.SendBreakAfterIntensityData)
     {
+#ifdef ARDUINO_ARCH_ESP32
         SET_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), UART_TX_BRK_IDLE_DONE_INT_ENA);
+#endif // def ARDUINO_ARCH_ESP32
     }
     else
     {
@@ -809,7 +823,7 @@ void c_OutputUart::StartUart()
         TerminateUartOperation();
 
         // Set output pins
-        set_pin();
+        // set_pin();
 
         /* Initialize uart */
         InitializeUart();
