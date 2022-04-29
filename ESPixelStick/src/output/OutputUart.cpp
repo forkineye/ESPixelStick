@@ -54,6 +54,9 @@ extern "C"
 
 // forward declaration for the isr handler
 static void IRAM_ATTR uart_intr_handler (void* param);
+#ifdef ARDUINO_ARCH_ESP8266
+static c_OutputUart *OutputTimerArray[c_OutputMgr::e_OutputChannelIds::OutputChannelId_End];
+#endif // def ARDUINO_ARCH_ESP8266
 
 #ifdef ARDUINO_ARCH_ESP8266
 const PROGMEM uint32_t UartDataSizeXlat[] =
@@ -88,13 +91,47 @@ const PROGMEM UartDataSizeXlatEntry_t UartDataSizeXlat[] =
 
 #define UART_TXD_IDX(u) ((u == 0) ? U0TXD_OUT_IDX : ((u == 1) ? U1TXD_OUT_IDX : ((u == 2) ? U2TXD_OUT_IDX : 0)))
 
+#ifdef ARDUINO_ARCH_ESP8266
+//----------------------------------------------------------------------------
+static bool AreTimersRunning()
+{
+    // clean up the timer ISR
+    bool foundActiveChannel = false;
+    for (auto currentChannel : OutputTimerArray)
+    {
+        // DEBUG_V (String ("currentChannel: ") + String (uint(currentChannel), HEX));
+        if (nullptr != currentChannel)
+        {
+            // DEBUG_V ("foundActiveChannel");
+            foundActiveChannel = true;
+        }
+    }
+    return foundActiveChannel;
+} // AreTimersRunning
+
+//----------------------------------------------------------------------------
+/* shell function to set the 'this' pointer of the real ISR
+   This allows me to use non static variables in the ISR.
+ */
+static void IRAM_ATTR timer_intr_handler()
+{
+    for (auto currentChannel : OutputTimerArray)
+    {
+        if (nullptr != currentChannel)
+        {
+            // U0F = '.';
+            currentChannel->ISR_Timer_Handler();
+        }
+    }
+} // timer_intr_handler
+#endif // def ARDUINO_ARCH_ESP8266
+
 //----------------------------------------------------------------------------
 c_OutputUart::c_OutputUart()
 {
     // DEBUG_START;
 
     memset((void *)&Intensity2Uart[0],   0x00, sizeof(Intensity2Uart));
-
     // DEBUG_END;
 } // c_OutputUart
 
@@ -104,6 +141,18 @@ c_OutputUart::~c_OutputUart ()
     // DEBUG_START;
 
     TerminateUartOperation();
+
+#ifdef ARDUINO_ARCH_ESP8266
+
+    OutputTimerArray[OutputUartConfig.ChannelId] = nullptr;
+
+    // have all of the timer channels been killed?
+    if (!AreTimersRunning())
+    {
+        // DEBUG_V ("Detach Interrupts");
+        timer1_detachInterrupt();
+    }
+#endif
 
     // DEBUG_END;
 } // ~c_OutputUart
@@ -116,7 +165,7 @@ static void IRAM_ATTR uart_intr_handler (void* param)
 {
     if (param)
     {
-        reinterpret_cast<c_OutputUart *>(param)->ISR_Handler();
+        reinterpret_cast<c_OutputUart *>(param)->ISR_UART_Handler();
     }
 
 } // uart_intr_handler
@@ -241,6 +290,12 @@ void c_OutputUart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
     debugStatus["EnqueueCounter"]                = EnqueueCounter;
     debugStatus["BreakIsrCounter"]               = BreakIsrCounter;
     debugStatus["IdleIsrCounter"]                = IdleIsrCounter;    
+    debugStatus["TimerIsrCounter"]               = TimerIsrCounter;    
+    debugStatus["TimerIsrNoDataToSend"]          = TimerIsrNoDataToSend;    
+    debugStatus["TimerIsrSendData"]              = TimerIsrSendData;
+    debugStatus["FiFoNotEmpty"]                  = FiFoNotEmpty;
+    debugStatus["FiFoEmpty"]                     = FiFoEmpty;
+    debugStatus["UartFifoLength"]                = getUartFifoLength();
 
     debugStatus["UART_CONF0"] = String(READ_PERI_REG(UART_CONF0(OutputUartConfig.UartId)), HEX);
     debugStatus["UART_CONF1"] = String(READ_PERI_REG(UART_CONF1(OutputUartConfig.UartId)), HEX);
@@ -311,6 +366,42 @@ void c_OutputUart::InitializeUart()
         ETS_UART_INTR_ENABLE();
 
         set_pin();
+
+        CalculateStartBitTime();
+
+        if (WeNeedAtimer)
+        {
+            // DEBUG_V ();
+            if (!AreTimersRunning())
+            {
+                timer1_attachInterrupt(timer_intr_handler); // Add ISR Function
+                timer1_enable(TIM_DIV1, TIM_EDGE, TIM_LOOP);
+                /* Dividers:
+                    TIM_DIV1 = 0,   // 80MHz (80 ticks/us - 104857.588 us max)
+                    TIM_DIV16 = 1,  // 5MHz (5 ticks/us - 1677721.4 us max)
+                    TIM_DIV256 = 3  // 312.5Khz (1 tick = 3.2us - 26843542.4 us max)
+                Reloads:
+                    TIM_SINGLE	0 //on interrupt routine you need to write a new value to start the timer again
+                    TIM_LOOP	1 //on interrupt the counter will start with the same value again
+                */
+                float NsPerBit                   = (1.0 / float(OutputUartConfig.Baudrate)) * 1000000000.0;
+                float TicksPerBit                = (NsPerBit / CPU_ClockTimeNS) + 0.5;
+                float InterIntensityBreakInTicks = float(OutputUartConfig.NumBreakBitsAfterIntensityData + 1) * TicksPerBit;
+                float IntensityTimeInTicks       = float(OutputUartConfig.IntensityDataWidth + 1) * TicksPerBit;
+                float TimerTimeInTicks           = float(ExtendedStartBitCCOUNT) + InterIntensityBreakInTicks + IntensityTimeInTicks;
+                DEBUG_V(String("                      Baudrate: ") + String(OutputUartConfig.Baudrate));
+                DEBUG_V(String("                      NsPerBit: ") + String(NsPerBit));
+                DEBUG_V(String("NumBreakBitsAfterIntensityData: ") + String(OutputUartConfig.NumBreakBitsAfterIntensityData));
+                DEBUG_V(String("    InterIntensityBreakInTicks: ") + String(InterIntensityBreakInTicks));
+                DEBUG_V(String("            IntensityDataWidth: ") + String(OutputUartConfig.IntensityDataWidth));
+                DEBUG_V(String("          IntensityTimeInTicks: ") + String(IntensityTimeInTicks));
+                DEBUG_V(String("        ExtendedStartBitCCOUNT: ") + String(ExtendedStartBitCCOUNT));
+                DEBUG_V(String("              TimerTimeInTicks: ") + String(TimerTimeInTicks));
+
+                // Arm the Timer for our Interval + overhead
+                timer1_write(uint32_t(TimerTimeInTicks) + 33000);
+            }
+        }
 
     } while (false);
 
@@ -472,7 +563,7 @@ void IRAM_ATTR c_OutputUart::enqueueUartData(uint8_t value)
 } // enqueueUartData
 
 //----------------------------------------------------------------------------
-void IRAM_ATTR c_OutputUart::ISR_Handler()
+void IRAM_ATTR c_OutputUart::ISR_UART_Handler()
 {
     do // once
     {
@@ -526,20 +617,94 @@ void IRAM_ATTR c_OutputUart::ISR_Handler()
 
     } while (false);
 
-} // ISR_Handler
+} // ISR_UART_Handler
+
+#ifdef ARDUINO_ARCH_ESP8266
+//----------------------------------------------------------------------------
+void c_OutputUart::CalculateStartBitTime()
+{
+    DEBUG_START;
+
+    float BitTimeInUs       = ((1.0 / float(OutputUartConfig.Baudrate)) * 1000000.0);
+    float BitTimeInNs       = BitTimeInUs * 1000;
+    float StartBitTimeInNs  = BitTimeInNs * float(OutputUartConfig.NumExtendedStartBits);
+    ExtendedStartBitCCOUNT  = uint32_t((StartBitTimeInNs + 0.5) / CPU_ClockTimeNS);
+
+    DEBUG_V(String("          NumExtendedStartBits: ") + String(OutputUartConfig.NumExtendedStartBits));
+    DEBUG_V(String("                      Baudrate: ") + String(OutputUartConfig.Baudrate));
+    DEBUG_V(String("                   BitTimeInUs: ") + String(BitTimeInUs));
+    DEBUG_V(String("                   BitTimeInNs: ") + String(BitTimeInNs));
+    DEBUG_V(String("              StartBitTimeInNs: ") + String(StartBitTimeInNs));
+    DEBUG_V(String("        ExtendedStartBitCCOUNT: ") + String(ExtendedStartBitCCOUNT));
+
+    DEBUG_END;
+
+} // CalculateStartBitTime
+
+//----------------------------------------------------------------------------
+void IRAM_ATTR c_OutputUart::ISR_Timer_Handler()
+{
+#ifdef USE_UART_DEBUG_COUNTERS
+    TimerIsrCounter++;
+#endif // def USE_UART_DEBUG_COUNTERS
+
+    if (MoreDataToSend())
+    {
+#ifdef USE_UART_DEBUG_COUNTERS
+        TimerIsrSendData++;
+#endif // def USE_UART_DEBUG_COUNTERS
+        CLEAR_PERI_REG_MASK(UART_CONF0(OutputUartConfig.UartId), UART_TXD_BRK);
+
+        if (ExtendedStartBitCCOUNT)
+        {
+            uint32_t StartingCycleCount = _getCycleCount();
+            // finish  start bit
+            while ((_getCycleCount() - StartingCycleCount) < ExtendedStartBitCCOUNT)
+            {
+            }
+        }
+
+        ISR_Handler_SendIntensityData();
+        DisableUartInterrupts;
+#ifdef USE_UART_DEBUG_COUNTERS
+        if (!MoreDataToSend())
+        {
+            FrameEndISRcounter++;
+        }
+#endif // def USE_UART_DEBUG_COUNTERS
+    }
+#ifdef USE_UART_DEBUG_COUNTERS
+    else
+    {
+        TimerIsrNoDataToSend++;
+    }
+#endif // def USE_UART_DEBUG_COUNTERS
+
+} // ISR_Timer_Handler
+#endif // def ARDUINO_ARCH_ESP8266
 
 //----------------------------------------------------------------------------
 void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
 {
-    if (OutputUartConfig.SendExtendedStartBit)
+    if (OutputUartConfig.NumExtendedStartBits)
     {
 #ifdef ARDUINO_ARCH_ESP32
         // Set up the built in break after intensity data sent time in bits.
-        SET_PERI_REG_BITS(UART_IDLE_CONF_REG(OutputUartConfig.UartId), UART_TX_IDLE_NUM_V, OutputUartConfig.SendExtendedStartBit, UART_TX_IDLE_NUM_S);
+        SET_PERI_REG_BITS(UART_IDLE_CONF_REG(OutputUartConfig.UartId), UART_TX_IDLE_NUM_V, OutputUartConfig.NumExtendedStartBits, UART_TX_IDLE_NUM_S);
 #endif // def ARDUINO_ARCH_ESP32
     }
 
     size_t NumAvailableIntensitySlotsToFill = ((((size_t)UART_TX_FIFO_SIZE) - (getUartFifoLength())) / NumUartSlotsPerIntensityValue);
+#ifdef USE_UART_DEBUG_COUNTERS
+    if (NumAvailableIntensitySlotsToFill)
+    {
+        FiFoNotEmpty++;
+    }
+    else
+    {
+        FiFoEmpty++;
+    }
+#endif // def USE_UART_DEBUG_COUNTERS
 
     while (MoreDataToSend() && NumAvailableIntensitySlotsToFill)
     {
@@ -583,13 +748,15 @@ void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
             enqueueUartData(Intensity2Uart[IntensityValue & 0x3]);
         } // end 2:1
         
-        if (OutputUartConfig.SendBreakAfterIntensityData)
+        if (OutputUartConfig.NumBreakBitsAfterIntensityData)
         {
 #ifdef ARDUINO_ARCH_ESP32
-            SET_PERI_REG_BITS(UART_IDLE_CONF_REG(OutputUartConfig.UartId), UART_TX_BRK_NUM_V, OutputUartConfig.SendBreakAfterIntensityData, UART_TX_BRK_NUM_S);
-#endif // def ARDUINO_ARCH_ESP32
+            SET_PERI_REG_BITS(UART_IDLE_CONF_REG(OutputUartConfig.UartId), UART_TX_BRK_NUM_V, OutputUartConfig.NumBreakBitsAfterIntensityData, UART_TX_BRK_NUM_S);
             SET_PERI_REG_MASK(UART_CONF0(OutputUartConfig.UartId), UART_TXD_BRK);
             EnableUartInterrupts();
+#else
+            SET_PERI_REG_MASK(UART_CONF0(OutputUartConfig.UartId), UART_TXD_BRK);
+#endif // def ARDUINO_ARCH_ESP32
             return;
         }
     } // end while there is space in the buffer
@@ -755,11 +922,13 @@ inline void IRAM_ATTR c_OutputUart::EnableUartInterrupts()
 {
     DisableUartInterrupts;
 
-    if (OutputUartConfig.SendBreakAfterIntensityData)
+    if (OutputUartConfig.NumBreakBitsAfterIntensityData)
     {
 #ifdef ARDUINO_ARCH_ESP32
         SET_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), UART_TX_BRK_IDLE_DONE_INT_ENA);
-#endif // def ARDUINO_ARCH_ESP32
+#else // ESP8266
+        // no uart interrupts when using timers
+#endif // def ARDUINO_ARCH_ESP8266
     }
     else
     {
@@ -798,9 +967,11 @@ void c_OutputUart::StartNewFrame()
     StartNewDataFrame();
     // DEBUG_V();
 
-    ISR_Handler_SendIntensityData();
-
-    EnableUartInterrupts();
+    if(!WeNeedAtimer)
+    {
+        ISR_Handler_SendIntensityData();
+        EnableUartInterrupts();
+    }
 
     // DEBUG_END;
 
@@ -822,16 +993,21 @@ void c_OutputUart::StartUart()
 
         TerminateUartOperation();
 
-        // Set output pins
-        // set_pin();
-
-        /* Initialize uart */
+        // Initialize uart also sets pin
         InitializeUart();
 
         // Atttach interrupt handler
         RegisterUartIsrHandler();
 
         enqueueUartData(0xff);
+
+#ifdef ARDUINO_ARCH_ESP8266
+        // start processing the timer interrupts
+        if (WeNeedAtimer)
+        {
+            OutputTimerArray[OutputUartConfig.ChannelId] = this;
+        }
+#endif // def ARDUINO_ARCH_ESP8266
 
     } while (false);
 

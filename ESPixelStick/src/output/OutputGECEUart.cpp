@@ -32,7 +32,7 @@ struct Convert2BitIntensityToGECEUartDataStreamEntry_t
     uint8_t Translation;
     c_OutputUart::UartDataBitTranslationId_t Id;
 };
-const Convert2BitIntensityToGECEUartDataStreamEntry_t PROGMEM Convert2BitIntensityToGECEUartDataStream[] =
+const Convert2BitIntensityToGECEUartDataStreamEntry_t Convert2BitIntensityToGECEUartDataStream[] =
 {
     {0b11101111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID},
     {0b11101000, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID},
@@ -86,9 +86,9 @@ void c_OutputGECEUart::Begin ()
     OutputUartConfig.pPixelDataSource               = this;
     OutputUartConfig.Baudrate                       = GECE_BAUDRATE;
     OutputUartConfig.InvertOutputPolarity           = false;
-    OutputUartConfig.SendBreakAfterIntensityData    = GECE_UART_BREAK_BITS; // number of bit times to delay
+    OutputUartConfig.NumBreakBitsAfterIntensityData = GECE_UART_BREAK_BITS; // number of bit times to delay
     OutputUartConfig.TriggerIsrExternally           = false;
-    OutputUartConfig.SendExtendedStartBit           = uint32_t((float(GECE_PIXEL_START_TIME_NS / 1000.0) / float(GECE_UART_USEC_PER_BIT))+0.5);
+    OutputUartConfig.NumExtendedStartBits           = uint32_t((float(GECE_PIXEL_START_TIME_NS / 1000.0) / float(GECE_UART_USEC_PER_BIT))+0.5);
     Uart.Begin(OutputUartConfig);
 
     // DEBUG_V (String ("       TIMER_FREQUENCY: ") + String (TIMER_FREQUENCY));
