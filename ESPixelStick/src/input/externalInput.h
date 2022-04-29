@@ -6,11 +6,11 @@
 
 /*****************************************************************************/
 class fsm_ExternalInput_state;
-class c_ExternalInput
+class c_ExternalInput final
 {
 public:
 	c_ExternalInput (void);
-	virtual ~c_ExternalInput(void) {}
+	~c_ExternalInput(void) {}
 
 	enum InputValue_t
 	{
