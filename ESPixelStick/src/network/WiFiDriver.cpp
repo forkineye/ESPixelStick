@@ -39,7 +39,7 @@
 #endif // SECRETS_SSID
 #if !defined(SECRETS_PASS)
 #   define SECRETS_PASS "DEFAULT_PASSPHRASE_NOT_SET"
-#endif // SECRETS_SSID
+#endif // SECRETS_PASS
 
 /* Fallback configuration if config.json is empty or fails */
 const String default_ssid       = SECRETS_SSID;
