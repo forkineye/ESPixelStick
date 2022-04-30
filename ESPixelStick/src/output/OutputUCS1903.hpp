@@ -22,7 +22,7 @@
 *
 */
 
-#include "../EspixelStick.h"
+#include "../ESPixelStick.h"
 #ifdef SUPPORT_OutputType_UCS1903
 
 #include "OutputPixel.hpp"
