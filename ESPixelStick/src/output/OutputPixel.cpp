@@ -581,13 +581,18 @@ uint32_t IRAM_ATTR c_OutputPixel::ISR_GetNextIntensityToSend ()
 
         default:
         {
+#ifdef USE_PIXEL_DEBUG_COUNTERS
             FrameStateUnknownCounter++;
+#endif // def USE_PIXEL_DEBUG_COUNTERS
         }
-    } // switch FrameState
+        } // switch FrameState
 
-    if (InvertData) { response = ~response; }
+        if (InvertData)
+        {
+            response = ~response;
+        }
 
-    return response;
+        return response;
 
 } // NextIntensityToSend
 
