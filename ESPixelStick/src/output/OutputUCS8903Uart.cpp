@@ -27,16 +27,11 @@
  * Inverted 8N1 UART lookup table for UCS8903.
  * Start and stop bits are part of the pixel stream.
  */
-struct ConvertBitIntensityToUCS8903UartDataStreamEntry_t
-{
-    uint8_t Translation;
-    c_OutputUart::UartDataBitTranslationId_t Id;
-};
-
-const ConvertBitIntensityToUCS8903UartDataStreamEntry_t ConvertBitIntensityToUCS8903UartDataStream[] =
+static const c_OutputUart::ConvertIntensityToUartDataStreamEntry_t ConvertIntensityToUartDataStream[] =
 {
     { 0b11111100, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID}, // 0,
     { 0b11000000, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID}, // 1
+    { 0,          c_OutputUart::UartDataBitTranslationId_t::Uart_LIST_END}
 };
 
 #define UCS8903_NUM_UART_BITS_PER_INTENSITY_BIT 10
@@ -72,24 +67,20 @@ void c_OutputUCS8903Uart::Begin ()
 
     c_OutputUCS8903::Begin();
 
-    for (auto CurrentTranslation : ConvertBitIntensityToUCS8903UartDataStream)
-    {
-        Uart.SetIntensity2Uart(CurrentTranslation.Translation, CurrentTranslation.Id);
-    }
-
     SetIntensityBitTimeInUS(float(UCS8903_PIXEL_NS_BIT_TOTAL) / 1000.0);
 
     c_OutputUart::OutputUartConfig_t OutputUartConfig;
-    OutputUartConfig.ChannelId                     = OutputChannelId;
-    OutputUartConfig.UartId                        = UartId;
-    OutputUartConfig.DataPin                       = DataPin;
-    OutputUartConfig.IntensityDataWidth            = UCS8903_INTENSITY_DATA_WIDTH;
-    OutputUartConfig.UartDataSize                  = c_OutputUart::UartDataSize_t::OUTPUT_UART_8N1;
-    OutputUartConfig.TranslateIntensityData        = c_OutputUart::TranslateIntensityData_t::OneToOne;
-    OutputUartConfig.pPixelDataSource              = this;
-    OutputUartConfig.Baudrate                      = UCS8903_PIXEL_UART_BAUDRATE;
-    OutputUartConfig.InvertOutputPolarity          = true;
-    Uart.Begin(OutputUartConfig);
+    OutputUartConfig.ChannelId              = OutputChannelId;
+    OutputUartConfig.UartId                 = UartId;
+    OutputUartConfig.DataPin                = DataPin;
+    OutputUartConfig.IntensityDataWidth     = UCS8903_INTENSITY_DATA_WIDTH;
+    OutputUartConfig.UartDataSize           = c_OutputUart::UartDataSize_t::OUTPUT_UART_8N1;
+    OutputUartConfig.TranslateIntensityData = c_OutputUart::TranslateIntensityData_t::OneToOne;
+    OutputUartConfig.pPixelDataSource       = this;
+    OutputUartConfig.Baudrate               = UCS8903_PIXEL_UART_BAUDRATE;
+    OutputUartConfig.InvertOutputPolarity   = true;
+    OutputUartConfig.CitudsArray            = ConvertIntensityToUartDataStream;
+    Uart.Begin(OutputUartConfig);    
 
 #ifdef testPixelInsert
     static const uint32_t FrameStartData = 0;

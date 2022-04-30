@@ -23,20 +23,16 @@
 #include "OutputUCS1903Uart.hpp"
 
 /*
- * Inverted 6N1 UART lookup table for UCS1903, first 2 bits ignored.
+ * Inverted 6N1 UART lookup table for UCS1903, MSB 2 bits ignored.
  * Start and stop bits are part of the pixel stream.
  */
-struct Convert2BitIntensityToUCS1903UartDataStreamEntry_t
-{
-    uint8_t Translation;
-    c_OutputUart::UartDataBitTranslationId_t Id;
-};
-const Convert2BitIntensityToUCS1903UartDataStreamEntry_t Convert2BitIntensityToUCS1903UartDataStream[] =
+static const c_OutputUart::ConvertIntensityToUartDataStreamEntry_t ConvertIntensityToUartDataStream[] =
 {
     {0b00110111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID}, // 00 - (1)000 100(0)
     {0b00000111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID}, // 01 - (1)000 111(0)
     {0b00110100, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_10_ID}, // 10 - (1)110 100(0)
     {0b00000100, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_11_ID}, // 11 - (1)110 111(0)
+    {0,          c_OutputUart::UartDataBitTranslationId_t::Uart_LIST_END}
 };
 
 //----------------------------------------------------------------------------
@@ -66,23 +62,19 @@ void c_OutputUCS1903Uart::Begin ()
 
     c_OutputUCS1903::Begin();
 
-    for (auto CurrentTranslation : Convert2BitIntensityToUCS1903UartDataStream)
-    {
-        Uart.SetIntensity2Uart(CurrentTranslation.Translation, CurrentTranslation.Id);
-    }
-
     SetIntensityBitTimeInUS(float(UCS1903_PIXEL_NS_BIT_TOTAL) / 1000.0);
 
     c_OutputUart::OutputUartConfig_t OutputUartConfig;
-    OutputUartConfig.ChannelId                     = OutputChannelId;
-    OutputUartConfig.UartId                        = UartId;
-    OutputUartConfig.DataPin                       = DataPin;
-    OutputUartConfig.IntensityDataWidth            = UCS1903_NUM_DATA_BYTES_PER_INTENSITY_BYTE;
-    OutputUartConfig.UartDataSize                  = c_OutputUart::UartDataSize_t::OUTPUT_UART_6N1;
-    OutputUartConfig.TranslateIntensityData        = c_OutputUart::TranslateIntensityData_t::TwoToOne;
-    OutputUartConfig.pPixelDataSource              = this;
-    OutputUartConfig.Baudrate                      = int(UCS1903_NUM_DATA_BYTES_PER_INTENSITY_BYTE * UCS1903_PIXEL_DATA_RATE);;
-    OutputUartConfig.InvertOutputPolarity          = true;
+    OutputUartConfig.ChannelId              = OutputChannelId;
+    OutputUartConfig.UartId                 = UartId;
+    OutputUartConfig.DataPin                = DataPin;
+    OutputUartConfig.IntensityDataWidth     = UCS1903_NUM_DATA_BYTES_PER_INTENSITY_BYTE;
+    OutputUartConfig.UartDataSize           = c_OutputUart::UartDataSize_t::OUTPUT_UART_6N1;
+    OutputUartConfig.TranslateIntensityData = c_OutputUart::TranslateIntensityData_t::TwoToOne;
+    OutputUartConfig.pPixelDataSource       = this;
+    OutputUartConfig.Baudrate               = int(UCS1903_NUM_DATA_BYTES_PER_INTENSITY_BYTE * UCS1903_PIXEL_DATA_RATE);;
+    OutputUartConfig.InvertOutputPolarity   = true;
+    OutputUartConfig.CitudsArray            = ConvertIntensityToUartDataStream;
     Uart.Begin(OutputUartConfig);
 
     HasBeenInitialized = true;

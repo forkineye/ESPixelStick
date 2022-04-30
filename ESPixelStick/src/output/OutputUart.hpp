@@ -56,6 +56,24 @@ public:
         TwoToOne,
     };
 
+    enum UartDataBitTranslationId_t
+    {
+        Uart_DATA_BIT_00_ID = 0,
+        Uart_DATA_BIT_01_ID,
+        Uart_DATA_BIT_10_ID,
+        Uart_DATA_BIT_11_ID,
+        Uart_LIST_END,
+        Uart_INVALID_VALUE,
+        Uart_NUM_BIT_TYPES = Uart_LIST_END,
+    };
+
+    struct ConvertIntensityToUartDataStreamEntry_t
+    {
+        uint8_t Translation;
+        c_OutputUart::UartDataBitTranslationId_t Id;
+    };
+    typedef ConvertIntensityToUartDataStreamEntry_t CitudsArray_t;
+
     struct OutputUartConfig_t
     {
         c_OutputCommon::OID_t       ChannelId                       = c_OutputCommon::OID_t(-1);
@@ -71,9 +89,10 @@ public:
         uint16_t                    NumBreakBitsAfterIntensityData  = 0;
         uint16_t                    NumExtendedStartBits            = 0;
         bool                        TriggerIsrExternally            = false;
+        const CitudsArray_t        *CitudsArray                     = nullptr;
 
 #if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
-        c_OutputSerial              *pSerialDataSource              = nullptr;
+            c_OutputSerial *pSerialDataSource = nullptr;
 #endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
     };
 
@@ -92,18 +111,6 @@ public:
     void IRAM_ATTR ISR_UART_Handler();
     void IRAM_ATTR ISR_Handler_SendIntensityData();
 
-    enum UartDataBitTranslationId_t
-    {
-        Uart_DATA_BIT_00_ID = 0,
-        Uart_DATA_BIT_01_ID,
-        Uart_DATA_BIT_10_ID,
-        Uart_DATA_BIT_11_ID,
-        Uart_LIST_END,
-        Uart_INVALID_VALUE,
-        Uart_NUM_BIT_TYPES = Uart_LIST_END,
-    };
-    void SetIntensity2Uart(uint8_t value, UartDataBitTranslationId_t ID);
-
 private:
     void StartUart              ();
     bool RegisterUartIsrHandler ();
@@ -116,6 +123,7 @@ private:
     void GenerateBreak          (uint32_t DurationInUs, uint32_t MarkDurationInUs);
     void SetIntensityDataWidth  ();
     void CalculateStartBitTime  ();
+    void SetIntensity2Uart      (uint8_t value, UartDataBitTranslationId_t ID);
 
     OutputUartConfig_t OutputUartConfig;
 

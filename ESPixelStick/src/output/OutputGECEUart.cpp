@@ -27,17 +27,13 @@
  * Start bit and stop bits are part of the packet.
  * Bits are backwards since we need MSB out first.
  */
-struct Convert2BitIntensityToGECEUartDataStreamEntry_t
-{
-    uint8_t Translation;
-    c_OutputUart::UartDataBitTranslationId_t Id;
-};
-const Convert2BitIntensityToGECEUartDataStreamEntry_t Convert2BitIntensityToGECEUartDataStream[] =
+static const c_OutputUart::ConvertIntensityToUartDataStreamEntry_t ConvertIntensityToUartDataStream[] =
 {
     {0b11101111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID},
     {0b11101000, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID},
     {0b00001111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_10_ID},
     {0b00001000, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_11_ID},
+    {0,          c_OutputUart::UartDataBitTranslationId_t::Uart_LIST_END}
 };
 
 //----------------------------------------------------------------------------
@@ -67,11 +63,6 @@ void c_OutputGECEUart::Begin ()
 
     c_OutputGECE::Begin();
 
-    for (auto CurrentTranslation : Convert2BitIntensityToGECEUartDataStream)
-    {
-        Uart.SetIntensity2Uart(CurrentTranslation.Translation, CurrentTranslation.Id);
-    }
-    
     // DEBUG_V(String("GECE_PIXEL_UART_BAUDRATE: ") + String(GECE_PIXEL_UART_BAUDRATE));
 
     SetIntensityBitTimeInUS(float(GECE_USEC_PER_GECE_BIT));
@@ -89,12 +80,9 @@ void c_OutputGECEUart::Begin ()
     OutputUartConfig.NumBreakBitsAfterIntensityData = GECE_UART_BREAK_BITS; // number of bit times to delay
     OutputUartConfig.TriggerIsrExternally           = false;
     OutputUartConfig.NumExtendedStartBits           = uint32_t((float(GECE_PIXEL_START_TIME_NS / 1000.0) / float(GECE_UART_USEC_PER_BIT))+0.5);
+    OutputUartConfig.CitudsArray                    = ConvertIntensityToUartDataStream;
     Uart.Begin(OutputUartConfig);
 
-    // DEBUG_V (String ("       TIMER_FREQUENCY: ") + String (TIMER_FREQUENCY));
-    // DEBUG_V (String ("     TIMER_ClockTimeNS: ") + String (TIMER_ClockTimeNS));
-    // DEBUG_V (String ("                 F_CPU: ") + String (F_CPU));
-    // DEBUG_V (String ("       CPU_ClockTimeNS: ") + String (CPU_ClockTimeNS));
     // DEBUG_V (String ("  GECE_FRAME_TIME_USEC: ") + String (GECE_FRAME_TIME_USEC));
     // DEBUG_V (String ("  GECE_FRAME_TIME_NSEC: ") + String (GECE_FRAME_TIME_NSEC));
     // DEBUG_V (String ("GECE_CCOUNT_FRAME_TIME: ") + String (GECE_CCOUNT_FRAME_TIME));

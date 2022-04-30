@@ -27,15 +27,11 @@
 * 8N2 UART lookup table for TM1814
 * Start and stop bits are part of the pixel stream.
 */
-struct Convert2BitIntensityToTM1814UartDataStreamEntry_t
-{
-    uint8_t Translation;
-    c_OutputUart::UartDataBitTranslationId_t Id;
-};
-static const Convert2BitIntensityToTM1814UartDataStreamEntry_t Convert2BitIntensityToTM1814UartDataStream[] =
+static const c_OutputUart::ConvertIntensityToUartDataStreamEntry_t ConvertIntensityToUartDataStream[] =
 {
     {0b11111100, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID},
     {0b11000000, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID},
+    {0,          c_OutputUart::UartDataBitTranslationId_t::Uart_LIST_END}
 };
 
 //----------------------------------------------------------------------------
@@ -65,25 +61,21 @@ void c_OutputTM1814Uart::Begin ()
 
     c_OutputTM1814::Begin();
 
-    for (auto CurrentTranslation : Convert2BitIntensityToTM1814UartDataStream)
-    {
-        Uart.SetIntensity2Uart(CurrentTranslation.Translation, CurrentTranslation.Id);
-    }
-    
     // DEBUG_V(String("TM1814_PIXEL_UART_BAUDRATE: ") + String(TM1814_PIXEL_UART_BAUDRATE));
 
     SetIntensityBitTimeInUS(float(TM1814_PIXEL_NS_BIT_TOTAL) / 1000.0);
 
     c_OutputUart::OutputUartConfig_t OutputUartConfig;
-    OutputUartConfig.ChannelId                     = OutputChannelId;
-    OutputUartConfig.UartId                        = UartId;
-    OutputUartConfig.DataPin                       = DataPin;
-    OutputUartConfig.IntensityDataWidth            = TM1814_NUM_DATA_BYTES_PER_INTENSITY_BYTE;
-    OutputUartConfig.UartDataSize                  = c_OutputUart::UartDataSize_t::OUTPUT_UART_8N2;
-    OutputUartConfig.TranslateIntensityData        = c_OutputUart::TranslateIntensityData_t::OneToOne;
-    OutputUartConfig.pPixelDataSource              = this;
-    OutputUartConfig.Baudrate                      = TM1814_BAUD_RATE;
-    OutputUartConfig.InvertOutputPolarity          = true;
+    OutputUartConfig.ChannelId              = OutputChannelId;
+    OutputUartConfig.UartId                 = UartId;
+    OutputUartConfig.DataPin                = DataPin;
+    OutputUartConfig.IntensityDataWidth     = TM1814_NUM_DATA_BYTES_PER_INTENSITY_BYTE;
+    OutputUartConfig.UartDataSize           = c_OutputUart::UartDataSize_t::OUTPUT_UART_8N2;
+    OutputUartConfig.TranslateIntensityData = c_OutputUart::TranslateIntensityData_t::OneToOne;
+    OutputUartConfig.pPixelDataSource       = this;
+    OutputUartConfig.Baudrate               = TM1814_BAUD_RATE;
+    OutputUartConfig.InvertOutputPolarity   = true;
+    OutputUartConfig.CitudsArray            = ConvertIntensityToUartDataStream;
     Uart.Begin(OutputUartConfig);
     
     HasBeenInitialized = true;

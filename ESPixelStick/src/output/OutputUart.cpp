@@ -197,6 +197,17 @@ void c_OutputUart::Begin (OutputUartConfig_t & config )
         // DEBUG_V (String ("      OutputUartConfig.DataPin: ") + String (OutputUartConfig.DataPin));
         // DEBUG_V (String ("OutputUartConfig.UartChannelId: ") + String (OutputUartConfig.ChannelId));
 
+        // this should be a vector but Arduino does not support them.
+        if (nullptr != OutputUartConfig.CitudsArray)
+        {
+            const ConvertIntensityToUartDataStreamEntry_t * CurrentTranslation = OutputUartConfig.CitudsArray;
+            while (CurrentTranslation->Id != UartDataBitTranslationId_t::Uart_LIST_END)
+            {
+                SetIntensity2Uart(CurrentTranslation->Translation, CurrentTranslation->Id);
+                CurrentTranslation++;
+            }
+        }
+
         LastFrameStartTime = millis();
 
         HasBeenInitialized = true;
