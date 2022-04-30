@@ -18,7 +18,7 @@
 *
 */
 
-#include "../EspixelStick.h"
+#include "../ESPixelStick.h"
 #if defined(SUPPORT_OutputType_GECE)
 
 #include "OutputGECEFrame.hpp"
