@@ -1,6 +1,6 @@
 #pragma once
 /*
-* GPIO_Defs_ESP32_D1_MINI_ETH.hpp - Output Management class
+* GPIO_Defs_ESP32_Olimex_Gateway.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2021 Shelby Merrick
@@ -25,17 +25,17 @@
 #define UART_LAST               OutputChannelId_UART_1
 
 #define SUPPORT_RMT_OUTPUT
-#define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_36
+#define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_12
 #define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_16    // TODO: check that this works!
 #define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_32
 #define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_35    // TODO: check that this works
 // TODO: 36 & 39 are also available on the header if 16 and/or 35 don't work
-#define RMT_LAST                OutputChannelId_RMT_3
+#define RMT_LAST                OutputChannelId_RMT_4
 
-// #define SUPPORT_OutputType_WS2801
-// #define SUPPORT_OutputType_APA102
-// #define SUPPORT_OutputType_TM1814
-// #define SUPPORT_OutputType_TLS3001
+// #define SUPPORT_OutputType_WS2801    // requires a change in the html directory
+// #define SUPPORT_OutputType_APA102    // requires a change in the html directory
+// #define SUPPORT_OutputType_TM1814    // requires a change in the html directory
+// #define SUPPORT_OutputType_TLS3001   // requires a change in the html directory
 
 // #define SUPPORT_RELAY_OUTPUT
 
@@ -53,10 +53,6 @@
 #define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_15
 #define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14
 #define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_13
-// #define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_12
-// #define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_13
-// #define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14
-// #define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_15
 
 // #include <ETH.h>
 #include "network/ETH_m.h"
@@ -67,19 +63,18 @@
    * ETH_CLOCK_GPIO16_OUT - 50MHz clock from internal APLL output on GPIO16 - possibly an inverter is needed for LAN8720
    * ETH_CLOCK_GPIO17_OUT - 50MHz clock from internal APLL inverted output on GPIO17 - tested with LAN8720
 */
-#define DEFAULT_ETH_CLK_MODE ETH_CLOCK_GPIO17_OUT
+#define DEFAULT_ETH_CLK_MODE    eth_clock_mode_t::ETH_CLOCK_GPIO17_OUT
 
 // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
-// #define DEFAULT_ETH_POWER_PIN          gpio_num_t(gpio_num_t::GPIO_NUM_5)
-#define DEFAULT_ETH_POWER_PIN          gpio_num_t(gpio_num_t::GPIO_NUM_NC)
+#define DEFAULT_ETH_POWER_PIN          gpio_num_t(gpio_num_t::GPIO_NUM_5)
 #define DEFAULT_ETH_POWER_PIN_ACTIVE   HIGH
 
 // Type of the Ethernet PHY (LAN8720 or TLK110)
-#define DEFAULT_ETH_TYPE    ETH_PHY_LAN8720
+#define DEFAULT_ETH_TYPE        eth_phy_type_t::ETH_PHY_LAN8720
 
 // I2C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
- #define ETH_ADDR_PHY_LAN8720    0
-// #define ETH_ADDR_PHY_LAN8720    1
+#define ETH_ADDR_PHY_LAN8720    0
+//#define ETH_ADDR_PHY_LAN8720    1
 #define ETH_ADDR_PHY_TLK110     31
 #define DEFAULT_ETH_ADDR        ETH_ADDR_PHY_LAN8720
 #define DEFAULT_ETH_TXEN        gpio_num_t::GPIO_NUM_21

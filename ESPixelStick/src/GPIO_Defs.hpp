@@ -79,6 +79,7 @@ typedef enum
 // #define BOARD_ESP32_D1_MINI_ETH
 // #define BOARD_ESP32_LOLIN_D32_PRO_ETH
 // #define BOARD_ESP32_MH_ET_LIVE_MiniKit
+// #define BOARD_ESP32_OLIMEX_GATEWAY
 
 #define SUPPORT_OutputType_UCS1903
 #define SUPPORT_OutputType_GS8208
@@ -98,6 +99,8 @@ typedef enum
 #   include "GPIO_Defs_ESP32_D1_MINI_ETH.hpp"
 #elif defined (BOARD_ESP32_MH_ET_LIVE_MiniKit)
 #   include "GPIO_Defs_ESP32_MH_ET_LIVE_MiniKit.hpp"
+#elif defined (BOARD_ESP32_OLIMEX_GATEWAY)
+#   include "GPIO_Defs_ESP32_Olimex_Gateway.hpp"
 #elif defined (BOARD_ESP01S)
 #   include "GPIO_Defs_ESP8266_ESP01S.hpp"
 #elif defined (BOARD_ESPS_V3)
