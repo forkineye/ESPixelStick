@@ -29,10 +29,10 @@
  */
 static const c_OutputUart::ConvertIntensityToUartDataStreamEntry_t ConvertIntensityToUartDataStream[] =
 {
-    {0b11101111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID},
-    {0b11101000, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID},
-    {0b00001111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_10_ID},
-    {0b00001000, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_11_ID},
+    {0b11101111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID}, // (0)1111 0111(1)
+    {0b11101000, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID}, // (0)0001 0111(1)
+    {0b00001111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_10_ID}, // (0)1111 1111(1)
+    {0b00001000, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_11_ID}, // (0)0001 0000(1)
     {0,          c_OutputUart::UartDataBitTranslationId_t::Uart_LIST_END}
 };
 
