@@ -3,7 +3,7 @@
 * OutputTLS3001Rmt.h - TLS3001 driver code for ESPixelStick RMT Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015 Shelby Merrick
+* Copyright (c) 2015, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -30,7 +30,9 @@
 class fsm_RMT_state
 {
 public:
-    virtual void Init (c_OutputTLS3001Rmt * Parent) = 0;
+    fsm_RMT_state() {}
+    virtual ~fsm_RMT_state() {}
+    virtual void Init(c_OutputTLS3001Rmt *Parent) = 0;
     virtual void Poll (c_OutputTLS3001Rmt * Parent) = 0;
     uint32_t     FsmTimerStartTime = 0;
     void GetDriverName (String& Name) { Name = "TLS3001"; }
@@ -77,7 +79,9 @@ protected:
 class fsm_RMT_state_SendReset : public fsm_RMT_state
 {
 public:
-    virtual void Init (c_OutputTLS3001Rmt * Parent);
+    fsm_RMT_state_SendReset() {}
+    virtual ~fsm_RMT_state_SendReset() {}
+    virtual void Init(c_OutputTLS3001Rmt *Parent);
     virtual void Poll (c_OutputTLS3001Rmt * Parent);
 
 }; // fsm_RMT_state_SendReset
@@ -86,7 +90,9 @@ public:
 class fsm_RMT_state_SendStart : public fsm_RMT_state
 {
 public:
-    virtual void Init (c_OutputTLS3001Rmt * Parent);
+    fsm_RMT_state_SendStart() {}
+    virtual ~fsm_RMT_state_SendStart() {}
+    virtual void Init(c_OutputTLS3001Rmt *Parent);
     virtual void Poll (c_OutputTLS3001Rmt * Parent);
 
 }; // fsm_RMT_state_SendStart
@@ -95,7 +101,9 @@ public:
 class fsm_RMT_state_SendData : public fsm_RMT_state
 {
 public:
-    virtual void Init (c_OutputTLS3001Rmt * Parent);
+    fsm_RMT_state_SendData() {}
+    virtual ~fsm_RMT_state_SendData() {}
+    virtual void Init(c_OutputTLS3001Rmt *Parent);
     virtual void Poll (c_OutputTLS3001Rmt * Parent);
 private:
     uint32_t FrameCount = 0;

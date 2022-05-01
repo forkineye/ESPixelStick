@@ -3,7 +3,7 @@
 * OutputAPA102.h - APA102 driver code for ESPixelStick
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015 Shelby Merrick
+* Copyright (c) 2015, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -22,7 +22,7 @@
 *
 */
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_OutputType_APA102
+#if defined(SUPPORT_OutputType_APA102)
 
 #include "OutputPixel.hpp"
 
@@ -58,4 +58,4 @@ protected:
 
 }; // c_OutputAPA102
 
-#endif // def SUPPORT_OutputType_APA102
+#endif // defined(SUPPORT_OutputType_APA102) && defined(SUPPORT_SPI_OUTPUT)

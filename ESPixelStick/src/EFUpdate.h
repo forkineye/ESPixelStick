@@ -2,7 +2,7 @@
 * EFUpdate.h
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2016 Shelby Merrick
+* Copyright (c) 2016, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -26,13 +26,16 @@
 
 class EFUpdate {
  public:
-    const uint32_t EFU_ID = 0x00554645;     // 'E', 'F', 'U', 0x00
+     EFUpdate(){}
+     virtual ~EFUpdate() {}
+     
+     const uint32_t EFU_ID = 0x00554645; // 'E', 'F', 'U', 0x00
 
-    void begin();
-    bool process(uint8_t *data, size_t len);
-    bool hasError();
-    uint8_t getError();
-    bool end();
+     void begin();
+     bool process(uint8_t *data, size_t len);
+     bool hasError();
+     uint8_t getError();
+     bool end();
     void GetDriverName(String & name) {name = String(F("EFUPD"));}
 
  private:

@@ -3,7 +3,7 @@
 * EthernetDriver.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -30,6 +30,9 @@ class fsm_Eth_state
 protected:
     c_EthernetDriver * pEthernetDriver = nullptr;
 public:
+    fsm_Eth_state() {}
+    virtual ~fsm_Eth_state() {}
+
     virtual void Poll (void) = 0;
     virtual void Init (void) = 0;
     virtual void GetStateName (String& sName) = 0;
@@ -47,31 +50,31 @@ public:
     c_EthernetDriver ();
     virtual ~c_EthernetDriver ();
 
-    void      Begin           (); ///< set up the operating environment based on the current config (or defaults)
-    void      GetConfig       (JsonObject & json);
-    bool      SetConfig       (JsonObject & json);
-    void      GetDriverName   (String & value) { value = CN_EthDrv; }
+    void            Begin               (); ///< set up the operating environment based on the current config (or defaults)
+    void            GetConfig           (JsonObject & json);
+    bool            SetConfig           (JsonObject & json);
+    void            GetDriverName       (String & value) { value = CN_EthDrv; }
 
-    int       ValidateConfig  ();
-    IPAddress GetIpAddress    ();
-    IPAddress GetIpSubNetMask ();
-    IPAddress GetIpGateway    ();
-    String    GetMacAddress   ();
-    void      GetHostname     (String & Name);
-    void      SetHostname     (String & Name) {}
-    void      GetStatus       (JsonObject & jsonStatus);
-    void      SetEthHostname  ();
-    void      reset           ();
-    void      Poll            ();
-    bool      IsConnected     ();
-    void      SetFsmState         (fsm_Eth_state * NewState) { pCurrentFsmState = NewState; }
-    void      AnnounceState       ();
-    void      SetFsmStartTime     (uint32_t NewStartTime)    { FsmTimerEthStartTime = NewStartTime; }
-    uint32_t  GetFsmStartTime     (void)                     { return FsmTimerEthStartTime; }
-    void      NetworkStateChanged (bool NetworkState);
-    void      StartEth ();
-    void      InitPowerPin ();
-    uint32_t  GetPowerPinActiveDelayMs () { return powerPinActiveDelayMs; }
+    int             ValidateConfig      ();
+    IPAddress       GetIpAddress        ();
+    IPAddress       GetIpSubNetMask     ();
+    IPAddress       GetIpGateway        ();
+    String          GetMacAddress       ();
+    void            GetHostname         (String & Name);
+    void            SetHostname         (String & Name) {}
+    void            GetStatus           (JsonObject & jsonStatus);
+    void            SetEthHostname      ();
+    void            reset               ();
+    void            Poll                ();
+    bool            IsConnected         ();
+    inline void     SetFsmState         (fsm_Eth_state * NewState) { pCurrentFsmState = NewState; }
+    void            AnnounceState       ();
+    inline void     SetFsmStartTime     (uint32_t NewStartTime)    { FsmTimerEthStartTime = NewStartTime; }
+    inline uint32_t GetFsmStartTime     (void)                     { return FsmTimerEthStartTime; }
+    void            NetworkStateChanged (bool NetworkState);
+    void            StartEth            ();
+    void            InitPowerPin        ();
+    inline uint32_t GetPowerPinActiveDelayMs () { return powerPinActiveDelayMs; }
 
 private:
 
@@ -118,6 +121,9 @@ protected:
 class fsm_Eth_state_Boot : public fsm_Eth_state
 {
 public:
+    fsm_Eth_state_Boot() {}
+    virtual ~fsm_Eth_state_Boot() {}
+
     virtual void Poll (void);
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Boot"); }
@@ -131,6 +137,9 @@ public:
 class fsm_Eth_state_PoweringUp : public fsm_Eth_state
 {
 public:
+    fsm_Eth_state_PoweringUp() {}
+    virtual ~fsm_Eth_state_PoweringUp() {}
+
     virtual void Poll (void);
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Powering Up"); }
@@ -144,6 +153,9 @@ public:
 class fsm_Eth_state_ConnectingToEth : public fsm_Eth_state
 {
 public:
+    fsm_Eth_state_ConnectingToEth() {}
+    virtual ~fsm_Eth_state_ConnectingToEth() {}
+
     virtual void Poll (void) {}
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Connecting"); }
@@ -157,6 +169,9 @@ public:
 class fsm_Eth_state_WaitForIP : public fsm_Eth_state
 {
 public:
+    fsm_Eth_state_WaitForIP() {}
+    virtual ~fsm_Eth_state_WaitForIP() {}
+
     virtual void Poll (void) {}
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Wait for IP Address"); }
@@ -170,6 +185,9 @@ public:
 class fsm_Eth_state_GotIp : public fsm_Eth_state
 {
 public:
+    fsm_Eth_state_GotIp() {}
+    virtual ~fsm_Eth_state_GotIp() {}
+
     virtual void Poll (void) {}
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Got IP"); }
@@ -183,6 +201,9 @@ public:
 class fsm_Eth_state_DeviceInitFailed : public fsm_Eth_state
 {
 public:
+    fsm_Eth_state_DeviceInitFailed() {}
+    virtual ~fsm_Eth_state_DeviceInitFailed() {}
+
     virtual void Poll (void) {}
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Device Init Failed"); }

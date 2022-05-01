@@ -3,7 +3,7 @@
 * InputFPPRemotePlayEffectFsm.hpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -32,7 +32,10 @@ class c_InputFPPRemotePlayEffect;
 class fsm_PlayEffect_state
 {
 public:
-    virtual void Poll (uint8_t * Buffer, size_t BufferSize) = 0;
+    fsm_PlayEffect_state() {}
+    virtual ~fsm_PlayEffect_state() {}
+
+    virtual void Poll () = 0;
     virtual void Init (c_InputFPPRemotePlayEffect * Parent) = 0;
     virtual void GetStateName (String & sName) = 0;
     virtual void Start (String & FileName, float SecondsElapsed) = 0;
@@ -50,7 +53,10 @@ protected:
 class fsm_PlayEffect_state_Idle : public fsm_PlayEffect_state
 {
 public:
-    virtual void Poll (uint8_t * Buffer, size_t BufferSize);
+    fsm_PlayEffect_state_Idle() {}
+    virtual ~fsm_PlayEffect_state_Idle() {}
+
+    virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayEffect* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Idle; }
     virtual void Start (String & FileName, float SecondsElapsed);
@@ -64,7 +70,10 @@ public:
 class fsm_PlayEffect_state_PlayingEffect : public fsm_PlayEffect_state
 {
 public:
-    virtual void Poll (uint8_t * Buffer, size_t BufferSize);
+    fsm_PlayEffect_state_PlayingEffect() {}
+    virtual ~fsm_PlayEffect_state_PlayingEffect() {}
+
+    virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayEffect* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Effect; }
     virtual void Start (String & FileName, float SecondsElapsed);

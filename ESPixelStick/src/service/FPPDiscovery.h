@@ -3,7 +3,7 @@
 * c_FPPDiscovery.h
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2018 Shelby Merrick
+* Copyright (c) 2018, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -104,6 +104,7 @@ private:
 
 public:
     c_FPPDiscovery ();
+    virtual ~c_FPPDiscovery() {}
 
     void begin ();
 
@@ -112,7 +113,7 @@ public:
     void ProcessPOST      (AsyncWebServerRequest* request);
     void ProcessFile      (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
     void ProcessBody      (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total);
-    void ReadNextFrame    (uint8_t* outputBuffer, uint16_t outputBufferSize);
+    void ReadNextFrame    ();
     void sendPingPacket   (IPAddress destination = IPAddress(255, 255, 255, 255));
     void PlayFile         (String & FileToPlay);
     void Enable           (void);

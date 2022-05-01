@@ -2,7 +2,7 @@
 * ESPixelStick.ino
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2016 Shelby Merrick
+* Copyright (c) 2016, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -146,23 +146,26 @@ void setup()
 
     // Load configuration from the File System and set Hostname
     loadConfig();
-    // DEBUG_V ("");
 
-    // Set up the output manager to start sending data to the serial ports
-    OutputMgr.Begin ();
-    // DEBUG_V ("");
-
+    // DEBUG_V(String("InputMgr Heap: ") + String(ESP.getFreeHeap()));
     // connect the input processing to the output processing.
-    InputMgr.Begin (OutputMgr.GetBufferAddress (), OutputMgr.GetBufferUsedSize ());
-    // DEBUG_V ("");
+    InputMgr.Begin (0);
 
-    NetworkMgr.Begin ();
-    // DEBUG_V ("");
+    // DEBUG_V(String("OutputMgr Heap: ") + String(ESP.getFreeHeap()));
+    // Set up the output manager to start sending data to the serial ports
+    OutputMgr.Begin();
 
+    // DEBUG_V(String("NetworkMgr Heap: ") + String(ESP.getFreeHeap()));
+    NetworkMgr.Begin();
+
+    // DEBUG_V(String("WebMgr Heap: ") + String(ESP.getFreeHeap()));
     // Configure and start the web server
     WebMgr.Begin(&config);
 
+    // DEBUG_V(String("FPPDiscovery Heap: ") + String(ESP.getFreeHeap()));
     FPPDiscovery.begin ();
+
+    // DEBUG_V(String("Final Heap: ") + String(ESP.getFreeHeap()));
 
 #ifdef ARDUINO_ARCH_ESP8266
     // * ((volatile uint32_t*)0x60000900) &= ~(1); // Hardware WDT OFF
@@ -255,34 +258,51 @@ bool deserializeCore (JsonObject & json)
 
     // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
     // PrettyPrint (json, "Main Config");
+    JsonObject DeviceConfig;
 
     do // once
     {
-        if (json.containsKey(CN_cfgver))
+        // was this saved by the ESP itself
+        if (json.containsKey(CN_system))
+        {
+            DeviceConfig = json[CN_system];
+        }
+        // is this an initial config from the flash tool?
+        else if (json.containsKey(CN_init))
+        {
+            // trigger a save operation
+            ConfigSaveNeeded = true;
+            logcon(String(F("Processing Flash Tool config")));
+            DeviceConfig = json;
+        }
+        else
+        {
+            logcon(String(F("Could not find system config")));
+            ConfigSaveNeeded = true;
+            break;
+        }
+
+        if (DeviceConfig.containsKey(CN_cfgver))
         {
             uint8_t TempVersion = uint8_t(-1);
-            setFromJSON (TempVersion, json, CN_cfgver);
+            setFromJSON(TempVersion, DeviceConfig, CN_cfgver);
             if (TempVersion != CurrentConfigVersion)
             {
-                //TODO: Add configuration update handler
-                logcon (String (F ("Incorrect Config Version ID")));
+                // TODO: Add configuration update handler
+                logcon(String(F("Incorrect Config Version ID")));
             }
         }
         else
         {
-            logcon (String (F ("Missing Config Version ID")));
+            logcon(String(F("Missing Config Version ID")));
+            // break; // ignoring this error for now.
         }
 
-        // is this an initial config from the flash tool?
-        if (json.containsKey (CN_init))
-        {
-            // trigger a save operation
-            ConfigSaveNeeded = true;
-        }
-
-        dsDevice  (json);
-        FileMgr.SetConfig (json);
-        ConfigSaveNeeded |= NetworkMgr.SetConfig (json);
+        dsDevice(DeviceConfig);
+        FileMgr.SetConfig(DeviceConfig);
+        // DEBUG_V("");
+        ConfigSaveNeeded |= NetworkMgr.SetConfig(DeviceConfig);
+        // DEBUG_V("");
         DataHasBeenAccepted = true;
 
     } while (false);
@@ -296,7 +316,10 @@ void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
 {
     // DEBUG_START;
 
-    JsonObject json = jsonDoc.as<JsonObject> ();
+    // extern void PrettyPrint(DynamicJsonDocument & jsonStuff, String Name);
+    // PrettyPrint(jsonDoc, "deserializeCoreHandler");
+    
+    JsonObject json = jsonDoc.as<JsonObject>();
     deserializeCore (json);
 
     // DEBUG_END;
@@ -309,11 +332,13 @@ void SaveConfig()
 
     ConfigSaveNeeded = false;
 
-    // Save Config
-    String DataToSave = serializeCore (false);
-    // DEBUG_V ("ConfigFileName: " + ConfigFileName);
-    // DEBUG_V ("DataToSave: " + DataToSave);
-    FileMgr.SaveConfigFile(ConfigFileName, DataToSave);
+    // Create buffer and root object
+    DynamicJsonDocument jsonConfigDoc(2048);
+    JsonObject JsonConfig = jsonConfigDoc.createNestedObject(CN_system);
+
+    GetConfig(JsonConfig);
+
+    FileMgr.SaveConfigFile(ConfigFileName, jsonConfigDoc);
 
     // DEBUG_END;
 } // SaveConfig

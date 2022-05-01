@@ -2,7 +2,7 @@
 * OutputSpi.cpp - SPI driver code for ESPixelStick SPI Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015 Shelby Merrick
+* Copyright (c) 2015, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -49,7 +49,7 @@ static void IRAM_ATTR spi_transfer_callback (spi_transaction_t * param)
 } // spi_transfer_callback
 
 //----------------------------------------------------------------------------
-static void SendIntensityDataTask (void* pvParameters)
+static void SendSpiIntensityDataTask (void* pvParameters)
 {
     // DEBUG_START; Needs extra stack space to run this
     do
@@ -64,7 +64,7 @@ static void SendIntensityDataTask (void* pvParameters)
     } while (true);
     // DEBUG_END;
 
-} // SendIntensityDataTask
+} // SendSpiIntensityDataTask
 
 //----------------------------------------------------------------------------
 c_OutputSpi::c_OutputSpi ()
@@ -84,11 +84,14 @@ c_OutputSpi::~c_OutputSpi ()
 {
     // DEBUG_START;
 
-    spi_transfer_callback_enabled = false;
-    if (OutputPixel)
+    if(HasBeenInitialized)
     {
-        logcon (CN_stars + String (F (" SPI Interface Shutdown requires a reboot ")) + CN_stars);
-        reboot = true;
+        spi_transfer_callback_enabled = false;
+        if (OutputPixel)
+        {
+            logcon(CN_stars + String(F(" SPI Interface Shutdown requires a reboot ")) + CN_stars);
+            reboot = true;
+        }
     }
     // DEBUG_END;
 
@@ -111,7 +114,7 @@ void c_OutputSpi::Begin (c_OutputPixel* _OutputPixel)
 
     NextTransactionToFill = 0;
 
-    xTaskCreate (SendIntensityDataTask, "SPITask", 2000, this, ESP_TASK_PRIO_MIN + 4, &SendIntensityDataTaskHandle);
+    xTaskCreate (SendSpiIntensityDataTask, "SPITask", 2000, this, ESP_TASK_PRIO_MIN + 4, &SendIntensityDataTaskHandle);
 
     spi_bus_config_t SpiBusConfiguration;
     memset ( (void*)&SpiBusConfiguration, 0x00, sizeof (SpiBusConfiguration));
@@ -143,6 +146,8 @@ void c_OutputSpi::Begin (c_OutputPixel* _OutputPixel)
 
     spi_transfer_callback_enabled = true;
 
+    HasBeenInitialized = true;
+
     // DEBUG_END;
 
 } // Begin
@@ -153,7 +158,7 @@ void c_OutputSpi::SendIntensityData ()
     // DEBUG_START;
     SendIntensityDataCounter++;
 
-    if (OutputPixel->MoreDataToSend ())
+    if (OutputPixel->ISR_MoreDataToSend ())
     {
         spi_transaction_t & TransactionToFill = Transactions[NextTransactionToFill];
         memset ( (void*)&Transactions[NextTransactionToFill], 0x00, sizeof (spi_transaction_t));
@@ -163,14 +168,14 @@ void c_OutputSpi::SendIntensityData ()
         TransactionToFill.tx_buffer = pMem;
         uint32_t NumEmptyIntensitySlots = SPI_NUM_INTENSITY_PER_TRANSACTION;
 
-        while ( (NumEmptyIntensitySlots) && (OutputPixel->MoreDataToSend ()))
+        while ( (NumEmptyIntensitySlots) && (OutputPixel->ISR_MoreDataToSend ()))
         {
-            *pMem++ = OutputPixel->GetNextIntensityToSend ();
+            *pMem++ = OutputPixel->ISR_GetNextIntensityToSend ();
             --NumEmptyIntensitySlots;
         } // end while there is space in the buffer
 
         TransactionToFill.length = SPI_BITS_PER_INTENSITY * (SPI_NUM_INTENSITY_PER_TRANSACTION - NumEmptyIntensitySlots);
-        if (!OutputPixel->MoreDataToSend ())
+        if (!OutputPixel->ISR_MoreDataToSend ())
         {
             TransactionToFill.length++;
         }

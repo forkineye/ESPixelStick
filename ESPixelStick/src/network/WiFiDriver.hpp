@@ -3,7 +3,7 @@
 * WiFiDriver.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -36,6 +36,9 @@ class fsm_WiFi_state
 protected:
     c_WiFiDriver* pWiFiDriver = nullptr;
 public:
+    fsm_WiFi_state() {}
+    virtual ~fsm_WiFi_state() {}
+
     virtual void Poll (void) = 0;
     virtual void Init (void) = 0;
     virtual void GetStateName (String& sName) = 0;
@@ -152,6 +155,9 @@ protected:
 class fsm_WiFi_state_Boot : public fsm_WiFi_state
 {
 public:
+    fsm_WiFi_state_Boot() {}
+    virtual ~fsm_WiFi_state_Boot() {}
+
     virtual void Poll (void);
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Boot"); }
@@ -164,6 +170,9 @@ public:
 class fsm_WiFi_state_ConnectingUsingConfig : public fsm_WiFi_state
 {
 public:
+    fsm_WiFi_state_ConnectingUsingConfig() {}
+    virtual ~fsm_WiFi_state_ConnectingUsingConfig() {}
+
     virtual void Poll (void);
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Connecting Using Config Credentials"); }
@@ -176,6 +185,9 @@ public:
 class fsm_WiFi_state_ConnectingUsingDefaults : public fsm_WiFi_state
 {
 public:
+    fsm_WiFi_state_ConnectingUsingDefaults() {}
+    virtual ~fsm_WiFi_state_ConnectingUsingDefaults() {}
+
     virtual void Poll (void);
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Connecting Using Default Credentials"); }
@@ -188,6 +200,9 @@ public:
 class fsm_WiFi_state_ConnectedToAP : public fsm_WiFi_state
 {
 public:
+    fsm_WiFi_state_ConnectedToAP() {}
+    virtual ~fsm_WiFi_state_ConnectedToAP() {}
+
     virtual void Poll (void);
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Connected To AP"); }
@@ -200,6 +215,9 @@ public:
 class fsm_WiFi_state_ConnectingAsAP : public fsm_WiFi_state
 {
 public:
+    fsm_WiFi_state_ConnectingAsAP() {}
+    virtual ~fsm_WiFi_state_ConnectingAsAP() {}
+
     virtual void Poll (void);
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Connecting As AP"); }
@@ -212,6 +230,9 @@ public:
 class fsm_WiFi_state_ConnectedToSta : public fsm_WiFi_state
 {
 public:
+    fsm_WiFi_state_ConnectedToSta() {}
+    virtual ~fsm_WiFi_state_ConnectedToSta() {}
+
     virtual void Poll (void);
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Connected To STA"); }
@@ -224,7 +245,10 @@ public:
 class fsm_WiFi_state_ConnectionFailed : public fsm_WiFi_state
 {
 public:
-    virtual void Poll (void) {}
+    fsm_WiFi_state_ConnectionFailed() {}
+    virtual ~fsm_WiFi_state_ConnectionFailed() {}
+
+    virtual void Poll(void) {}
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Connection Failed"); }
     virtual void OnConnect (void) {}
@@ -236,6 +260,9 @@ public:
 class fsm_WiFi_state_Disabled : public fsm_WiFi_state
 {
 public:
+    fsm_WiFi_state_Disabled() {}
+    virtual ~fsm_WiFi_state_Disabled() {}
+
     virtual void Poll (void) {}
     virtual void Init (void);
     virtual void GetStateName (String& sName) { sName = F ("Disabled"); }

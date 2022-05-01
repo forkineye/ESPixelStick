@@ -3,7 +3,7 @@
 * InputDDP.h
 *
 * Project: InputDDP - Asynchronous DDP library for Arduino ESP8266 and ESP32
-* Copyright (c) 2019 Daniel Kulp
+* Copyright (c) 2019, 2022 Daniel Kulp, Shelby Merrick
 *
 *  This program is provided free for you to use in any way that you wish,
 *  subject to the laws and regulations where you are using it.  Due diligence
@@ -127,10 +127,9 @@ public:
 
     c_InputDDP (c_InputMgr::e_InputChannelIds NewInputChannelId,
                 c_InputMgr::e_InputType       NewChannelType,
-                uint8_t                     * BufferStart,
-                uint16_t                      BufferSize);
+                size_t                        BufferSize);
 
-    ~c_InputDDP ();
+    virtual ~c_InputDDP ();
 
     // Generic UDP listener, no physical or IP configuration
     void Begin ();
@@ -139,7 +138,7 @@ public:
     void GetStatus (JsonObject& jsonStatus);
     void Process ();                                        ///< Call from loop(),  renders Input data
     void GetDriverName (String& sDriverName) { sDriverName = "DDP"; } ///< get the name for the instantiated driver
-    void SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize);
+    void SetBufferInfo (size_t BufferSize);
     bool isShutDownRebootNeeded () { return HasBeenInitialized; }
 
 };

@@ -1,7 +1,7 @@
 /*
 * c_FPPDiscovery.cpp
 
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -157,13 +157,13 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::ReadNextFrame (uint8_t * CurrentOutputBuffer, uint16_t CurrentOutputBufferSize)
+void c_FPPDiscovery::ReadNextFrame ()
 {
     // DEBUG_START;
 
     if (InputFPPRemotePlayFile)
     {
-        InputFPPRemotePlayFile->Poll (CurrentOutputBuffer, CurrentOutputBufferSize);
+        InputFPPRemotePlayFile->Poll ();
     }
 
     // DEBUG_END;

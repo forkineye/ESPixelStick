@@ -3,7 +3,7 @@
 * InputFPPRemotePlayListFsm.hpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -32,7 +32,10 @@ class c_InputFPPRemotePlayList;
 class fsm_PlayList_state
 {
 public:
-    virtual void Poll (uint8_t * Buffer, size_t BufferSize) = 0;
+    fsm_PlayList_state() {}
+    virtual ~fsm_PlayList_state() {}
+
+    virtual void Poll () = 0;
     virtual void Init (c_InputFPPRemotePlayList * Parent) = 0;
     virtual void GetStateName (String & sName) = 0;
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t PlayCount) = 0;
@@ -50,7 +53,10 @@ protected:
 class fsm_PlayList_state_WaitForStart : public fsm_PlayList_state
 {
 public:
-    virtual void Poll (uint8_t * Buffer, size_t BufferSize);
+    fsm_PlayList_state_WaitForStart() {}
+    virtual ~fsm_PlayList_state_WaitForStart() {}
+
+    virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayList* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Idle; }
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t PlayCount);
@@ -63,7 +69,10 @@ public:
 class fsm_PlayList_state_Idle : public fsm_PlayList_state
 {
 public:
-    virtual void Poll (uint8_t* Buffer, size_t BufferSize);
+    fsm_PlayList_state_Idle() {}
+    virtual ~fsm_PlayList_state_Idle() {}
+
+    virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayList* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Idle; }
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t PlayCount);
@@ -76,7 +85,10 @@ public:
 class fsm_PlayList_state_PlayingFile : public fsm_PlayList_state
 {
 public:
-    virtual void Poll (uint8_t * Buffer, size_t BufferSize);
+    fsm_PlayList_state_PlayingFile() {}
+    virtual ~fsm_PlayList_state_PlayingFile() {}
+
+    virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayList* Parent);
     virtual void GetStateName (String & sName) { sName = CN_File; }
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t PlayCount);
@@ -89,7 +101,10 @@ public:
 class fsm_PlayList_state_PlayingEffect : public fsm_PlayList_state
 {
 public:
-    virtual void Poll (uint8_t * Buffer, size_t BufferSize);
+    fsm_PlayList_state_PlayingEffect() {}
+    virtual ~fsm_PlayList_state_PlayingEffect() {}
+
+    virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayList* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Effect; }
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t PlayCount);
@@ -102,7 +117,10 @@ public:
 class fsm_PlayList_state_Paused : public fsm_PlayList_state
 {
 public:
-    virtual void Poll (uint8_t * Buffer, size_t BufferSize);
+    fsm_PlayList_state_Paused() {}
+    virtual ~fsm_PlayList_state_Paused() {}
+
+    virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayList* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Paused; }
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t PlayCount);

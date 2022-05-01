@@ -3,7 +3,7 @@
 * OutputSpi.h - SPI driver code for ESPixelStick Spi Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015 Shelby Merrick
+* Copyright (c) 2015, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -73,6 +73,10 @@ private:
     gpio_num_t ClockPin = DEFAULT_SPI_CLOCK_GPIO;
 
     c_OutputPixel* OutputPixel = nullptr;
+
+#ifndef HasBeenInitialized
+    bool HasBeenInitialized = false;
+#endif // ndef HasBeenInitialized
 
 }; // c_OutputSpi
 

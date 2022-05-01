@@ -3,7 +3,7 @@
 * WebMgr.hpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -52,13 +52,17 @@ private:
     EFUpdate               efupdate;
     DeviceCallbackFunction pAlexaCallback = nullptr;
     EspalexaDevice *       pAlexaDevice = nullptr;
+    char *pWebSocketFrameCollectionBuffer = nullptr;
 
 #ifdef ARDUINO_ARCH_ESP32
-#   define WebSocketFrameCollectionBufferSize (8*1024)
-#else
+#   ifdef BOARD_HAS_PSRAM
+#      define WebSocketFrameCollectionBufferSize (20 * 1024)
+#   else // no PSRAM use heap
+#      define WebSocketFrameCollectionBufferSize (10 * 1024)
+#   endif // ! def BOARD_HAS_PSRAM
+#else // esp8266
 #   define WebSocketFrameCollectionBufferSize (3*1024)
 #endif // def ARDUINO_ARCH_ESP8266
-    char WebSocketFrameCollectionBuffer[WebSocketFrameCollectionBufferSize + 1];
 
     /// Valid "Simple" message types
     enum SimpleMessage
@@ -74,7 +78,7 @@ private:
     void onWsEvent                  (AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, size_t len);
     void ProcessVseriesRequests     (AsyncWebSocketClient  * client);
     void ProcessGseriesRequests     (AsyncWebSocketClient  * client);
-    void ProcessReceivedJsonMessage (DynamicJsonDocument   & webJsonDoc, AsyncWebSocketClient  * client);
+    void ProcessReceivedJsonMessage (AsyncWebSocketClient  * client);
     void processCmd                 (AsyncWebSocketClient  * client,  JsonObject & jsonCmd );
     void processCmdGet              (JsonObject & jsonCmd);
     bool processCmdSet              (JsonObject & jsonCmd);
@@ -92,7 +96,32 @@ private:
     void GetInputOptions            ();
     void GetOutputOptions           ();
 
-protected:
+#ifdef BOARD_HAS_PSRAM
+
+    struct SpiRamAllocator
+    {
+        void *allocate(size_t size)
+        {
+            return ps_malloc(size);
+        }
+
+        void deallocate(void *pointer)
+        {
+            free(pointer);
+        }
+
+        void *reallocate(void *ptr, size_t new_size)
+        {
+            return ps_realloc(ptr, new_size);
+        }
+    };
+
+    using WebJsonDocument = BasicJsonDocument<SpiRamAllocator>;
+#else
+    using WebJsonDocument = DynamicJsonDocument;
+#endif // def BOARD_HAS_PSRAM
+
+    WebJsonDocument *WebJsonDoc = nullptr;
 
 }; // c_WebMgr
 

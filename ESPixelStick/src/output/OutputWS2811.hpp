@@ -3,7 +3,7 @@
 * OutputWS2811.h - WS2811 driver code for ESPixelStick
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015 Shelby Merrick
+* Copyright (c) 2015, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -23,6 +23,7 @@
 */
 
 #include "OutputPixel.hpp"
+#if defined(SUPPORT_OutputType_WS2811)
 
 #ifdef ARDUINO_ARCH_ESP32
 #   include <driver/uart.h>
@@ -45,13 +46,12 @@ public:
             void         GetDriverName (String & sDriverName) { sDriverName = String (F ("WS2811")); }
     c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_WS2811;} ///< Have the instance report its type.
     virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
-    virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
 
 protected:
 
 #define WS2811_PIXEL_NS_PER_SECOND          1000000000.0
 #define WS2811_PIXEL_DATA_RATE              800000.0
-#define WS2811_PIXEL_NS_BIT_TOTAL           ( (1.0 / WS2811_PIXEL_DATA_RATE) * WS2811_PIXEL_NS_PER_SECOND) 
+#define WS2811_PIXEL_NS_BIT_TOTAL           ( (1.0 / WS2811_PIXEL_DATA_RATE) * WS2811_PIXEL_NS_PER_SECOND)
 
 #define WS2811_PIXEL_NS_BIT_0_HIGH          250.0 // 250ns +/- 150ns per datasheet
 #define WS2811_PIXEL_NS_BIT_0_LOW           (WS2811_PIXEL_NS_BIT_TOTAL - WS2811_PIXEL_NS_BIT_0_HIGH)
@@ -62,5 +62,8 @@ protected:
 #define WS2811_PIXEL_IDLE_TIME_NS           300000.0 // 300us per datasheet
 #define WS2811_PIXEL_IDLE_TIME_US           (WS2811_PIXEL_IDLE_TIME_NS / 1000.0)
 
+#define WS2811_PIXEL_BITS_PER_INTENSITY     8
+
 }; // c_OutputWS2811
 
+#endif // defined(SUPPORT_OutputType_WS2811)

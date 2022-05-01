@@ -3,7 +3,7 @@
 * E131Input.h - Code to wrap ESPAsyncE131 for input
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -44,11 +44,11 @@ class c_InputE131 : public c_InputCommon
 
     typedef struct 
     {
-        uint8_t  * Destination;
-        uint16_t   BytesToCopy;
-        uint16_t   SourceDataOffset;
-        uint32_t   SequenceErrorCounter;
-        uint8_t    SequenceNumber;
+      size_t   DestinationOffset;
+      size_t   BytesToCopy;
+      size_t   SourceDataOffset;
+      uint8_t  SequenceNumber;
+      uint32_t SequenceErrorCounter;
 
     } Universe_t;
     Universe_t UniverseArray[MAX_NUM_UNIVERSES];
@@ -61,9 +61,8 @@ class c_InputE131 : public c_InputCommon
 
     c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
                  c_InputMgr::e_InputType       NewChannelType,
-                 uint8_t                     * BufferStart,
-                 uint16_t                      BufferSize);
-    ~c_InputE131();
+                 size_t                        BufferSize);
+    virtual ~c_InputE131();
 
     // functions to be provided by the derived class
     void Begin ();                                          ///< set up the operating environment based on the current config (or defaults)
@@ -72,7 +71,7 @@ class c_InputE131 : public c_InputCommon
     void GetStatus (JsonObject & jsonStatus);
     void Process ();                                        ///< Call from loop(),  renders Input data
     void GetDriverName (String & sDriverName) { sDriverName = "E1.31"; } ///< get the name for the instantiated driver
-    void SetBufferInfo (uint8_t * BufferStart, uint16_t BufferSize);
+    void SetBufferInfo (size_t BufferSize);
     void NetworkStateChanged (bool IsConnected); // used by poorly designed rx functions
     bool isShutDownRebootNeeded () { return HasBeenInitialized; }
     void ProcessIncomingE131Data (e131_packet_t *);

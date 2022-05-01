@@ -3,7 +3,7 @@
 * OutputGECE.h - GECE driver code for ESPixelStick
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015 Shelby Merrick
+* Copyright (c) 2015, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -19,6 +19,7 @@
 */
 
 #include "OutputCommon.hpp"
+#if defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_UART_OUTPUT)
 
 class c_OutputGECE: public c_OutputCommon
 {
@@ -36,9 +37,9 @@ public:
     void      Render ();                                        ///< Call from loop(),  renders output data
     void      GetDriverName (String & sDriverName) { sDriverName = String (F ("GECE")); }
     void      GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
-    uint16_t  GetNumChannelsNeeded ();
+    size_t    GetNumChannelsNeeded ();
 
-    void IRAM_ATTR ISR_Handler (); ///< UART ISR
+    void    IRAM_ATTR ISR_Handler (); ///< UART ISR
 
 private:
 
@@ -66,3 +67,5 @@ static inline uint32_t _getCycleCount (void) {
     __asm__ __volatile__ ("rsr %0,ccount":"=a" (ccount));
     return ccount;
 }
+
+#endif // defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_UART_OUTPUT)

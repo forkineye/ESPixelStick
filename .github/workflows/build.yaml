@@ -34,11 +34,38 @@ jobs:
           # TTGO T8
           - target: "esp32_ttgo_t8"
             chip: "esp32"
+          # WT 32 Ethernet Board
+          - target: "esp32_wt32eth01"
+            chip: "esp32"
+          # QuinLed QUAD
+          - target: "esp32_quinled_quad"
+            chip: "esp32"
+          # QuinLed QUAD AE+
+          - target: "esp32_quinled_quad_ae_plus"
+            chip: "esp32"
+          # QuinLed QUAD Eth
+          - target: "esp32_quinled_quad_eth"
+            chip: "esp32"
+          # QuinLed UNO
+          - target: "esp32_quinled_uno"
+            chip: "esp32"
+          # QuinLed UNO AE +
+          - target: "esp32_quinled_uno_ae_plus"
+            chip: "esp32"
+          # QuinLed UNO Eth
+          - target: "esp32_quinled_uno_eth"
+            chip: "esp32"
           # mh et esp32 mini kit
           - target: "d1_mini_mhetesp32minikit"
             chip: "esp32"
           # Olimex ESP32 Gateway
             target: "olimex_esp32_gw"
+            chip: "esp32"
+          # Twilight Lord
+          - target: "d1_mini_twilightlord"
+            chip: "esp32"
+          # Twilight Lord ETH
+          - target: "d1_mini_twilightlord_eth"
             chip: "esp32"
 
     runs-on: ubuntu-latest

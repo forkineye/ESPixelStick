@@ -2,7 +2,7 @@
 * OutputCommon.cpp - Output Interface base class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -35,6 +35,7 @@ extern "C" {
 #   include <soc/uart_reg.h>
 #   include <rom/ets_sys.h>
 #   include <driver/uart.h>
+#   include <soc/uart_periph.h>
 
 #   define UART_CONF0           UART_CONF0_REG
 #   define UART_CONF1           UART_CONF1_REG
@@ -80,12 +81,18 @@ c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds iOutputChannelId
 c_OutputCommon::~c_OutputCommon ()
 {
     // DEBUG_START;
-    if (gpio_num_t (-1) == DataPin) { return; }
+    if(HasBeenInitialized)
+    {
+        if (gpio_num_t(-1) == DataPin)
+        {
+            return;
+        }
+        // DEBUG_V("Set Pin Mode");
+        pinMode(DataPin, INPUT_PULLUP);
 
-    pinMode (DataPin, INPUT_PULLUP);
-
-    // DEBUG_V ("");
-    TerminateUartOperation ();
+        // DEBUG_V ("Terminate UART");
+        TerminateUartOperation();
+    }
     // DEBUG_END;
 } // ~c_OutputMgr
 
@@ -252,6 +259,20 @@ void c_OutputCommon::InitializeUart (uart_config_t & uart_config,
 #endif
 
 //-----------------------------------------------------------------------------
+bool c_OutputCommon::RegisterUartIsrHandler(void (*fn)(void *), void *arg, int intr_alloc_flags)
+{
+    bool ret = true;
+#ifdef ARDUINO_ARCH_ESP8266
+    ETS_UART_INTR_ATTACH(fn, arg);
+#else
+    // UART_ENTER_CRITICAL(&(uart_context[uart_num].spinlock));
+    ret = (ESP_OK == esp_intr_alloc(uart_periph_signal[UartId].irq, intr_alloc_flags, fn, arg, nullptr));
+    // UART_EXIT_CRITICAL(&(uart_context[uart_num].spinlock));
+#endif
+    return ret;
+} // RegisterUartIsrHandler
+
+//-----------------------------------------------------------------------------
 void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
@@ -268,7 +289,7 @@ void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
 void c_OutputCommon::TerminateUartOperation ()
 {
     // DEBUG_START;
-
+#ifdef SUPPORT_UART_OUTPUT
     if (OutputChannelId <= c_OutputMgr::e_OutputChannelIds::OutputChannelId_UART_LAST)
     {
         switch (UartId)
@@ -302,6 +323,7 @@ void c_OutputCommon::TerminateUartOperation ()
             }
         } // end switch (UartId)
     }
+#endif // def SUPPORT_UART_OUTPUT
 
     // DEBUG_END;
 
@@ -377,6 +399,7 @@ bool c_OutputCommon::SetConfig (JsonObject & jsonConfig)
     bool response = setFromJSON (tempDataPin, jsonConfig, CN_data_pin);
 
     DataPin = gpio_num_t (tempDataPin);
+    // DEBUG_V(String(" DataPin: ") + String(DataPin));
 
     // DEBUG_END;
 
@@ -392,5 +415,33 @@ void c_OutputCommon::GetConfig (JsonObject & jsonConfig)
     // enums need to be converted to uints for json
     jsonConfig[CN_data_pin] = uint8_t (DataPin);
 
+    // DEBUG_V(String(" DataPin: ") + String(DataPin));
+
     // DEBUG_END;
 } // GetConfig
+
+//----------------------------------------------------------------------------
+void c_OutputCommon::WriteChannelData (size_t StartChannelId, size_t ChannelCount, byte * pSourceData)
+{
+    // DEBUG_START;
+
+    // DEBUG_V(String("               StartChannelId: 0x") + String(StartChannelId, HEX));
+    // DEBUG_V(String("&OutputBuffer[StartChannelId]: 0x") + String(uint(&OutputBuffer[StartChannelId]), HEX));
+    memcpy(&pOutputBuffer[StartChannelId], pSourceData, ChannelCount);
+
+    // DEBUG_END;
+
+} // WriteChannelData
+
+//----------------------------------------------------------------------------
+void c_OutputCommon::ReadChannelData(size_t StartChannelId, size_t ChannelCount, byte * pTargetData)
+{
+    // DEBUG_START;
+
+    // DEBUG_V(String("               StartChannelId: 0x") + String(StartChannelId, HEX));
+    // DEBUG_V(String("&OutputBuffer[StartChannelId]: 0x") + String(uint(&OutputBuffer[StartChannelId]), HEX));
+    memcpy(pTargetData, &pOutputBuffer[StartChannelId], ChannelCount);
+
+    // DEBUG_END;
+
+} // WriteChannelData

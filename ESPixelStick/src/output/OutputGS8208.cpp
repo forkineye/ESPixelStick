@@ -2,7 +2,7 @@
 * OutputGS8208.cpp - GS8208 driver code for ESPixelStick UART
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015 Shelby Merrick
+* Copyright (c) 2015, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -18,7 +18,8 @@
 */
 
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_OutputType_GS8208
+
+#if defined(SUPPORT_OutputType_GS8208)
 
 #include "OutputGS8208.hpp"
 
@@ -114,4 +115,4 @@ bool c_OutputGS8208::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
 } // SetConfig
 
-#endif // def SUPPORT_OutputType_GS8208
+#endif // defined(SUPPORT_OutputType_GS8208)

@@ -3,7 +3,7 @@
 * FileMgr.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -19,14 +19,27 @@
 */
 
 #include "ESPixelStick.h"
-#include <FS.h>
 #include <LittleFS.h>
-#include <SD.h>
+#ifdef SUPPORT_SD_MMC
+#   include <SD_MMC.h>
+#else
+#   include <FS.h>
+#   include <SD.h>
+#endif // def SUPPORT_SD_MMC
 #include <map>
 
 #ifdef ARDUINO_ARCH_ESP32
-#	define SDFS SD
-#endif
+#   ifdef SUPPORT_SD_MMC
+#       define ESP_SD   SD_MMC
+#	    define ESP_SDFS SD_MMC
+#   else // !def SUPPORT_SD_MMC
+#       define ESP_SD   SD
+#	    define ESP_SDFS SD
+#   endif // !def SUPPORT_SD_MMC
+#else // !ARDUINO_ARCH_ESP32
+#   define ESP_SD   SD
+#   define ESP_SDFS SDFS
+#endif // !ARDUINO_ARCH_ESP32
 
 class c_FileMgr
 {
@@ -56,7 +69,7 @@ public:
     void   DeleteConfigFile (const String & FileName);
     bool   SaveConfigFile   (const String & FileName, String & FileData);
     bool   SaveConfigFile   (const String & FileName, const char * FileData);
-    bool   SaveConfigFile   (const String & FileName, JsonVariant & FileData);
+    bool   SaveConfigFile   (const String & FileName, JsonDocument & FileData);
     bool   ReadConfigFile   (const String & FileName, String & FileData);
     bool   ReadConfigFile   (const String & FileName, JsonDocument & FileData);
     bool   ReadConfigFile   (const String & FileName, byte * FileData, size_t maxlen);
@@ -100,7 +113,7 @@ private:
     uint8_t  mosi_pin = SD_CARD_MOSI_PIN;
     uint8_t  clk_pin  = SD_CARD_CLK_PIN;
     uint8_t  cs_pin   = SD_CARD_CS_PIN;
-    FileId   fsUploadFile;
+    FileId fsUploadFile;
     String   fsUploadFileName;
     bool     fsUploadFileSavedIsEnabled = false;
     uint32_t fsUploadStartTime;
@@ -109,9 +122,10 @@ private:
 #define MaxOpenFiles 5
     struct FileListEntry_t
     {
-        FileId handle;
-        File   info;
-        int    entryId;
+        FileId  handle;
+        File    info;
+        size_t  size;
+        int     entryId;
     };
     FileListEntry_t FileList[MaxOpenFiles];
     int FileListFindSdFileHandle (FileId HandleToFind);

@@ -3,7 +3,7 @@
 * OutputUCS1903Uart.h - UCS1903 driver code for ESPixelStick UART
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015 Shelby Merrick
+* Copyright (c) 2015, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -23,7 +23,7 @@
 */
 
 #include "OutputCommon.hpp"
-#ifdef SUPPORT_OutputType_UCS1903
+#if defined(SUPPORT_OutputType_UCS1903) && defined(SUPPORT_UART_OUTPUT)
 
 #include "OutputUCS1903.hpp"
 
@@ -54,4 +54,4 @@ private:
 
 }; // c_OutputUCS1903Uart
 
-#endif // def SUPPORT_OutputType_UCS1903
+#endif // defined(SUPPORT_OutputType_UCS1903) && defined(SUPPORT_UART_OUTPUT)

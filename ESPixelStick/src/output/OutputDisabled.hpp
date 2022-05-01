@@ -3,7 +3,7 @@
 * OutputDisabled.h - WS2811 driver code for ESPixelStick
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015 Shelby Merrick
+* Copyright (c) 2015, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -40,9 +40,9 @@ public:
     void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     void         Render ();                                        ///< Call from loop(),  renders output data
     void         GetDriverName (String & sDriverName) { sDriverName = String (F ("Disabled")); }
-    uint16_t     GetNumChannelsNeeded () { return 0; }
+    size_t       GetNumChannelsNeeded () { return 0; }
+   
 
-    void IRAM_ATTR ISR_Handler () {} ///< UART ISR
 
 private:
 

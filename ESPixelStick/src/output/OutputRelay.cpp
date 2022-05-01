@@ -23,7 +23,7 @@ GNU General Public License for more details.
 ******************************************************************/
 
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_RELAY_OUTPUT
+#ifdef SUPPORT_OutputType_Relay
 
 #include <utility>
 #include <algorithm>
@@ -79,14 +79,17 @@ c_OutputRelay::~c_OutputRelay ()
 {
     // DEBUG_START;
 
-    for (RelayChannel_t & currentRelay : OutputList)
+    if(HasBeenInitialized)
     {
-        if (currentRelay.Enabled)
+        for (RelayChannel_t &currentRelay : OutputList)
         {
-            pinMode (currentRelay.GpioId, INPUT);
+            if (currentRelay.Enabled)
+            {
+                pinMode(currentRelay.GpioId, INPUT);
+            }
+            currentRelay.Enabled = Relay_OUTPUT_DISABLED;
+            currentRelay.GpioId = Relay_DEFAULT_GPIO_ID;
         }
-        currentRelay.Enabled = Relay_OUTPUT_DISABLED;
-        currentRelay.GpioId  = Relay_DEFAULT_GPIO_ID;
     }
 
     // DEBUG_END;
@@ -96,10 +99,14 @@ c_OutputRelay::~c_OutputRelay ()
 void c_OutputRelay::Begin ()
 {
     // DEBUG_START;
+    if(!HasBeenInitialized)
+    {
+        SetOutputBufferSize(Num_Channels);
 
-    SetOutputBufferSize (Num_Channels);
+        validate();
 
-    validate ();
+        HasBeenInitialized = true;
+    }
 
     // DEBUG_END;
 }
@@ -378,4 +385,4 @@ void c_OutputRelay::Render ()
     // DEBUG_END;
 } // render
 
-#endif // def SUPPORT_RELAY_OUTPUT
+#endif // def SUPPORT_OutputType_Relay

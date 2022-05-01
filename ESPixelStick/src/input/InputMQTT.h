@@ -3,7 +3,7 @@
 * InputMQTT.h
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -31,10 +31,9 @@ class c_InputMQTT : public c_InputCommon
       c_InputMQTT (
           c_InputMgr::e_InputChannelIds NewInputChannelId,
           c_InputMgr::e_InputType       NewChannelType,
-          uint8_t                     * BufferStart,
-          uint16_t                      BufferSize);
+          size_t                        BufferSize);
 
-      ~c_InputMQTT ();
+      virtual ~c_InputMQTT ();
 
       // functions to be provided by the derived class
       void Begin ();                           ///< set up the operating environment based on the current config (or defaults)
@@ -43,7 +42,7 @@ class c_InputMQTT : public c_InputCommon
       void GetStatus (JsonObject& jsonStatus);
       void Process ();                         ///< Call from loop(),  renders Input data
       void GetDriverName (String& sDriverName) { sDriverName = "MQTT"; } ///< get the name for the instantiated driver
-      void SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize);
+      void SetBufferInfo (size_t BufferSize);
       void NetworkStateChanged (bool IsConnected); // used by poorly designed rx functions
 
 private:

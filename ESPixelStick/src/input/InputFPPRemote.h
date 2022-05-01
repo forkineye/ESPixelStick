@@ -3,7 +3,7 @@
 * InputFPPRemote.h
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -27,13 +27,11 @@ class c_InputFPPRemote : public c_InputCommon
 {
   public:
 
-      c_InputFPPRemote (
-          c_InputMgr::e_InputChannelIds NewInputChannelId,
-          c_InputMgr::e_InputType       NewChannelType,
-          uint8_t                     * BufferStart,
-          uint16_t                      BufferSize);
+      c_InputFPPRemote (c_InputMgr::e_InputChannelIds NewInputChannelId,
+                        c_InputMgr::e_InputType       NewChannelType,
+                        size_t                        BufferSize);
       
-      ~c_InputFPPRemote ();
+      virtual ~c_InputFPPRemote ();
 
       // functions to be provided by the derived class
       void Begin ();                           ///< set up the operating environment based on the current config (or defaults)
@@ -42,7 +40,7 @@ class c_InputFPPRemote : public c_InputCommon
       void GetStatus (JsonObject& jsonStatus);
       void Process ();                         ///< Call from loop(),  renders Input data
       void GetDriverName (String& sDriverName) { sDriverName = "FPP Remote"; } ///< get the name for the instantiated driver
-      void SetBufferInfo (uint8_t* BufferStart, uint16_t BufferSize);
+      void SetBufferInfo (size_t BufferSize);
 
 protected:
     c_InputFPPRemotePlayItem * pInputFPPRemotePlayItem = nullptr;

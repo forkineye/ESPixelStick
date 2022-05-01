@@ -3,7 +3,7 @@
 * InputFPPRemotePlayFile.hpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -34,12 +34,12 @@ class c_InputFPPRemotePlayFile : public c_InputFPPRemotePlayItem
 {
 public:
     c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelIds InputChannelId);
-    ~c_InputFPPRemotePlayFile ();
+    virtual ~c_InputFPPRemotePlayFile ();
 
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
     virtual void Stop ();
     virtual void Sync (String& FileName, float SecondsElapsed);
-    virtual void Poll (uint8_t* Buffer, size_t BufferSize);
+    virtual void Poll ();
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
     
@@ -73,7 +73,7 @@ private:
     struct FrameControl_t
     {
         size_t            DataOffset = 0;
-        uint32_t          ChannelsPerFrame = 0;
+        size_t            ChannelsPerFrame = 0;
         uint32_t          FrameStepTimeMS = 1;
         uint32_t          TotalNumberOfFramesInSequence = 0;
         uint32_t          ElapsedPlayTimeMS = 0;
@@ -87,8 +87,6 @@ private:
         float             LastRcvdElapsedSeconds = 0.0;
     } SyncControl;
 
-    uint8_t * Buffer = nullptr;
-    size_t    BufferSize = 0;
 #   define    FPP_TICKER_PERIOD_MS 25
 // #   define    FPP_TICKER_PERIOD_MS 1000
     Ticker    MsTicker;
@@ -106,13 +104,14 @@ private:
     void        UpdateElapsedPlayTimeMS ();
     uint32_t    CalculateFrameId (uint32_t ElapsedMS, int32_t SyncOffsetMS);
     bool        ParseFseqFile ();
+    size_t      ReadFile(size_t DestinationIntensityId, size_t NumBytesToRead, size_t FileOffset);
 
     String      LastFailedPlayStatusMsg;
 
 #ifdef ARDUINO_ARCH_ESP32
     TaskHandle_t TimerPollTaskHandle = NULL;
 #   define TimerPollHandlerTaskStack 2000
-// #   define TimerPollHandlerTaskStack 4000
+// #   define TimerPollHandlerTaskStack 6000
 #endif // def ARDUINO_ARCH_ESP32
 
 }; // c_InputFPPRemotePlayFile

@@ -18,7 +18,7 @@ GNU General Public License for more details.
 *
 */
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_RELAY_OUTPUT
+#ifdef SUPPORT_OutputType_Servo_PCA9685
 
 #include "OutputCommon.hpp"
 #include <Adafruit_PWMServoDriver.h>
@@ -46,13 +46,14 @@ public:
     virtual ~c_OutputServoPCA9685 ();
 
     // functions to be provided by the derived class
-    void Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
-    bool SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
-    void GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-    void Render ();                                        ///< Call from loop(),  renders output data
-    void GetDriverName (String& sDriverName);
-    void GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
-    uint16_t GetNumChannelsNeeded () { return Num_Channels; }
+    void   Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
+    bool   SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
+    void   GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
+    void   Render ();                                        ///< Call from loop(),  renders output data
+    void   GetDriverName (String& sDriverName);
+    void   GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
+    size_t GetNumChannelsNeeded () { return Num_Channels; }
+
 
 private:
 #   define OM_SERVO_PCA9685_CHANNEL_LIMIT           16
@@ -71,9 +72,9 @@ private:
     bool    validate ();
 
     // config data
-    ServoPCA9685Channel_t   OutputList[OM_SERVO_PCA9685_CHANNEL_LIMIT];
-    Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver ();
-    float                   UpdateFrequency = SERVO_PCA9685_UPDATE_FREQUENCY;
+    ServoPCA9685Channel_t     OutputList[OM_SERVO_PCA9685_CHANNEL_LIMIT];
+    Adafruit_PWMServoDriver * pwm = nullptr;
+    float                     UpdateFrequency = SERVO_PCA9685_UPDATE_FREQUENCY;
 
     // non config data
     String      OutputName;
@@ -81,4 +82,4 @@ private:
 
 }; // c_OutputServoPCA9685
 
-#endif // def SUPPORT_RELAY_OUTPUT
+#endif // def SUPPORT_OutputType_Servo_PCA9685

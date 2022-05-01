@@ -3,7 +3,7 @@
 * OutputMgr.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -29,6 +29,12 @@
 
 class c_OutputCommon; ///< forward declaration to the pure virtual output class that will be defined later.
 
+#ifdef UART_LAST
+#       define NUM_UARTS UART_LAST
+#else
+#       define NUM_UARTS 0
+#endif
+
 class c_OutputMgr
 {
 public:
@@ -41,21 +47,24 @@ public:
     void      GetConfig         (byte * Response, size_t maxlen);
     void      GetConfig         (String & Response);
     void      SetConfig         (const char * NewConfig);  ///< Save the current configuration data to nvram
+    void      SetConfig         (ArduinoJson::JsonDocument & NewConfig);  ///< Save the current configuration data to nvram
     void      GetStatus         (JsonObject & jsonStatus);
-    void      PauseOutput       (bool PauseTheOutput) { IsOutputPaused = PauseTheOutput; }
-    void      GetPortCounts     (uint16_t& PixelCount, uint16_t& SerialCount) {PixelCount = uint16_t(OutputChannelId_End); SerialCount = min(uint16_t(OutputChannelId_End), uint16_t(2)); }
+    void      GetPortCounts     (uint16_t& PixelCount, uint16_t& SerialCount) {PixelCount = uint16_t(OutputChannelId_End); SerialCount = uint16_t(NUM_UARTS); }
     uint8_t*  GetBufferAddress  () { return OutputBuffer; } ///< Get the address of the buffer into which the E1.31 handler will stuff data
-    uint16_t  GetBufferUsedSize () { return UsedBufferSize; } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
-    uint16_t  GetBufferSize     () { return sizeof(OutputBuffer); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
+    size_t    GetBufferUsedSize () { return UsedBufferSize; } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
+    size_t    GetBufferSize     () { return sizeof(OutputBuffer); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
     void      DeleteConfig      () { FileMgr.DeleteConfigFile (ConfigFileName); }
-    void      PauseOutputs      ();
+    void      PauseOutputs      (bool NewState);
     void      GetDriverName     (String & Name) { Name = "OutputMgr"; }
+    void      WriteChannelData  (size_t StartChannelId, size_t ChannelCount, byte * pData);
+    void      ReadChannelData   (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
+    void      ClearBuffer       ();
 
     // handles to determine which output channel we are dealing with
     enum e_OutputChannelIds
     {
 #ifdef DEFAULT_UART_1_GPIO
-        OutputChannelId_UART_1 = 0,
+        OutputChannelId_UART_1,
 #endif // def DEFAULT_UART_1_GPIO
 #ifdef DEFAULT_UART_2_GPIO
         OutputChannelId_UART_2,
@@ -72,75 +81,117 @@ public:
 #ifdef DEFAULT_RMT_3_GPIO
         OutputChannelId_RMT_4,
 #endif // def DEFAULT_RMT_3_GPIO
+#ifdef DEFAULT_RMT_4_GPIO
+        OutputChannelId_RMT_5,
+#endif // def DEFAULT_RMT_3_GPIO
+#ifdef DEFAULT_RMT_5_GPIO
+        OutputChannelId_RMT_6,
+#endif // def DEFAULT_RMT_3_GPIO
+#ifdef DEFAULT_RMT_6_GPIO
+        OutputChannelId_RMT_7,
+#endif // def DEFAULT_RMT_3_GPIO
+#ifdef DEFAULT_RMT_7_GPIO
+        OutputChannelId_RMT_8,
+#endif // def DEFAULT_RMT_3_GPIO
 #ifdef SUPPORT_SPI_OUTPUT
         OutputChannelId_SPI_1,
 #endif // def SUPPORT_SPI_OUTPUT
-#ifdef SUPPORT_RELAY_OUTPUT
+#if defined(SUPPORT_OutputType_Relay) || defined(SUPPORT_OutputType_Servo_PCA9685)
         OutputChannelId_Relay,
 #endif // def SUPPORT_RELAY_OUTPUT
-        OutputChannelId_End, // must be last in the list
 
-        OutputChannelId_Start = OutputChannelId_UART_1,
+        OutputChannelId_End, // must be last in the list
+        OutputChannelId_Start = 0,
+
+#ifdef SUPPORT_UART_OUTPUT
         OutputChannelId_UART_FIRST = OutputChannelId_UART_1,
         OutputChannelId_UART_LAST = UART_LAST,
+#endif // def SUPPORT_UART_OUTPUT
+
 #ifdef SUPPORT_RMT_OUTPUT
         OutputChannelId_RMT_FIRST = OutputChannelId_RMT_1,
         OutputChannelId_RMT_LAST = RMT_LAST,
 #endif // def SUPPORT_RMT_OUTPUT
     };
 
+    // do NOT insert into the middle of this list. Always add new types to the end of the list
     enum e_OutputType
     {
-        OutputType_WS2811 = 0,
-        OutputType_GECE,
-        OutputType_DMX,
-        OutputType_Renard,
-        OutputType_Serial,
-#ifdef SUPPORT_RELAY_OUTPUT
-        OutputType_Relay,
-        OutputType_Servo_PCA9685,
-#endif // def SUPPORT_RELAY_OUTPUT
+            OutputType_Disabled = 0,
+#ifdef SUPPORT_OutputType_WS2811
+            OutputType_WS2811 = 1,
+#endif // def SUPPORT_OutputType_WS2811
+#ifdef SUPPORT_OutputType_GECE
+            OutputType_GECE = 2,
+#endif // def SUPPORT_OutputType_GECE
+#ifdef SUPPORT_OutputType_DMX
+            OutputType_DMX = 3,
+#endif // def SUPPORT_OutputType_DMX
+#ifdef SUPPORT_OutputType_Renard
+            OutputType_Renard = 4,
+#endif // def SUPPORT_OutputType_Renard
+#ifdef SUPPORT_OutputType_Serial
+            OutputType_Serial = 5,
+#endif // def SUPPORT_OutputType_Serial
+#ifdef SUPPORT_OutputType_Relay
+            OutputType_Relay = 6,
+#endif // def SUPPORT_OutputType_Relay
+#ifdef SUPPORT_OutputType_Servo_PCA9685
+            OutputType_Servo_PCA9685 = 7,
+#endif // def SUPPORT_OutputType_Servo_PCA9685
 #ifdef SUPPORT_OutputType_UCS1903
-        OutputType_UCS1903,
-#endif // def SUPPORT_OutputType_TM1814
+            OutputType_UCS1903 = 8,
+#endif // def SUPPORT_OutputType_UCS1903
 #ifdef SUPPORT_OutputType_TM1814
-        OutputType_TM1814,
+            OutputType_TM1814 = 9,
 #endif // def SUPPORT_OutputType_TM1814
 #ifdef SUPPORT_OutputType_WS2801
-        OutputType_WS2801,
+            OutputType_WS2801 = 10,
 #endif // def SUPPORT_OutputType_WS2801
 #ifdef SUPPORT_OutputType_APA102
-        OutputType_APA102,
+            OutputType_APA102 = 11,
 #endif // def SUPPORT_OutputType_APA102
 #ifdef SUPPORT_OutputType_GS8208
-        OutputType_GS8208,
+            OutputType_GS8208 = 12,
 #endif // def SUPPORT_OutputType_GS8208
-        OutputType_Disabled,
-        OutputType_End, // must be last
-        OutputType_Start = OutputType_WS2811,
+#ifdef SUPPORT_OutputType_UCS8903
+            OutputType_UCS8903 = 13,
+#endif // def SUPPORT_OutputType_UCS8903
+#ifdef SUPPORT_OutputType_TLS3001
+            OutputType_TLS3001 = 14,
+#endif // def SUPPORT_OutputType_TLS3001
+            // Add new types here
+            OutputType_End, // must be last
+            OutputType_Start = OutputType_Disabled,
     };
 
 #ifdef ARDUINO_ARCH_ESP8266
-#   define OM_MAX_NUM_CHANNELS  (1200 * 3)
-#else
-#   define OM_MAX_NUM_CHANNELS  (3000 * 3)
-#endif // !def ARDUINO_ARCH_ESP8266
+#   define OM_MAX_NUM_CHANNELS      (1200 * 3)
+#   define OM_MAX_CONFIG_SIZE       ((size_t)(5 * 1024))
+#else // ARDUINO_ARCH_ESP32
+#   ifdef BOARD_HAS_PSRAM
+#       define OM_MAX_NUM_CHANNELS  (7000 * 3)
+#       define OM_MAX_CONFIG_SIZE   ((size_t)(20 * 1024))
+#   else
+#       define OM_MAX_NUM_CHANNELS  (3000 * 3)
+#       define OM_MAX_CONFIG_SIZE   ((size_t)(11 * 1024))
+#   endif // !def BOARD_HAS_PSRAM
+#endif // !def ARDUINO_ARCH_ESP32
 
 private:
+        // pointer(s) to the current active output drivers
+        struct DriverInfo_t
+        {
+                e_OutputChannelIds DriverId = OutputChannelId_Start;
+                c_OutputCommon *pOutputChannelDriver = nullptr;
+                size_t StartingChannelId = 0;
+                size_t ChannelCount = 0;
+                size_t EndChannelId = 0;
+    };
 
-    void InstantiateNewOutputChannel (e_OutputChannelIds ChannelIndex, e_OutputType NewChannelType, bool StartDriver = true);
-    void CreateNewConfig ();
-
-    // pointer(s) to the current active output drivers
-    c_OutputCommon * pOutputChannelDrivers[uint32_t(e_OutputChannelIds::OutputChannelId_End)];
+    DriverInfo_t OutputChannelDrivers[OutputChannelId_End];
 
     // configuration parameter names for the channel manager within the config file
-
-#ifdef ARDUINO_ARCH_ESP8266
-#   define OM_MAX_CONFIG_SIZE      ((size_t)(5*1024))
-#else
-#   define OM_MAX_CONFIG_SIZE      ((size_t)(10*1024))
-#endif // !def ARDUINO_ARCH_ESP8266
 
     bool HasBeenInitialized = false;
     bool ConfigLoadNeeded   = false;
@@ -150,14 +201,24 @@ private:
     bool ProcessJsonConfig (JsonObject & jsonConfig);
     void CreateJsonConfig  (JsonObject & jsonConfig);
     void UpdateDisplayBufferReferences (void);
+    void InstantiateNewOutputChannel(DriverInfo_t &ChannelIndex, e_OutputType NewChannelType, bool StartDriver = true);
+    void CreateNewConfig();
 
     String ConfigFileName;
 
     uint8_t OutputBuffer[OM_MAX_NUM_CHANNELS];
-    uint16_t UsedBufferSize = 0;
+    size_t  UsedBufferSize = 0;
 
-#define OM_IS_UART ((ChannelIndex >= OutputChannelId_UART_FIRST) && (ChannelIndex <= OutputChannelId_UART_LAST))
-#define OM_IS_RMT ((ChannelIndex >= OutputChannelId_RMT_FIRST) && (ChannelIndex <= OutputChannelId_RMT_LAST))
+#ifdef SUPPORT_UART_OUTPUT
+#       define OM_IS_UART ((CurrentOutputChannelDriver.DriverId >= OutputChannelId_UART_FIRST) && (CurrentOutputChannelDriver.DriverId <= OutputChannelId_UART_LAST))
+#else
+#   define OM_IS_UART false
+#endif // def SUPPORT_UART_OUTPUT
+#ifdef SUPPORT_RMT_OUTPUT
+#       define OM_IS_RMT ((CurrentOutputChannelDriver.DriverId >= OutputChannelId_RMT_FIRST) && (CurrentOutputChannelDriver.DriverId <= OutputChannelId_RMT_LAST))
+#else
+#   define OM_IS_RMT false
+#endif // def SUPPORT_RMT_OUTPUT
 
 }; // c_OutputMgr
 

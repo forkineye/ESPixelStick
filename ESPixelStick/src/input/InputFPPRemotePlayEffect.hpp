@@ -3,7 +3,7 @@
 * InputFPPRemotePlayEffect.hpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -28,14 +28,14 @@ class c_InputFPPRemotePlayEffect : public c_InputFPPRemotePlayItem
 {
 public:
     c_InputFPPRemotePlayEffect (c_InputMgr::e_InputChannelIds InputChannelId);
-    ~c_InputFPPRemotePlayEffect ();
+    virtual ~c_InputFPPRemotePlayEffect ();
 
-    virtual void Start (String & FileName, float duration, uint32_t PlayCount);
-    virtual void Stop  ();
-    virtual void Sync  (String & FileName, float SecondsElapsed);
-    virtual void Poll  (uint8_t * Buffer, size_t BufferSize);
+    virtual void Start     (String & FileName, float duration, uint32_t PlayCount);
+    virtual void Stop      ();
+    virtual void Sync      (String & FileName, float SecondsElapsed);
+    virtual void Poll      ();
     virtual void GetStatus (JsonObject & jsonStatus);
-    virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayEffect_state_Idle_imp); }
+    virtual bool IsIdle    () { return (pCurrentFsmState == &fsm_PlayEffect_state_Idle_imp); }
 
 protected:
 

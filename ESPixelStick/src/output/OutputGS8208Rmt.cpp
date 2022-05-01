@@ -2,7 +2,7 @@
 * OutputGS8208Rmt.cpp - GS8208 driver code for ESPixelStick RMT Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015 Shelby Merrick
+* Copyright (c) 2015, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -18,8 +18,7 @@
 */
 #include "../ESPixelStick.h"
 
-#ifdef SUPPORT_OutputType_GS8208
-#ifdef SUPPORT_RMT_OUTPUT
+#if defined(SUPPORT_OutputType_GS8208) && defined(SUPPORT_RMT_OUTPUT)
 
 #include "OutputGS8208Rmt.hpp"
 
@@ -45,31 +44,31 @@ c_OutputGS8208Rmt::c_OutputGS8208Rmt (c_OutputMgr::e_OutputChannelIds OutputChan
     BitValue.level0 = 1;
     BitValue.duration1 = GS8208_PIXEL_RMT_TICKS_BIT_0_LOW;
     BitValue.level1 = 0;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_DATA_BIT_ZERO_ID);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID);
 
     BitValue.duration0 = GS8208_PIXEL_RMT_TICKS_BIT_1_HIGH;
     BitValue.level0 = 1;
     BitValue.duration1 = GS8208_PIXEL_RMT_TICKS_BIT_1_LOW;
     BitValue.level1 = 0;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_DATA_BIT_ONE_ID);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID);
 
     BitValue.duration0 = GS8208_PIXEL_RMT_TICKS_IDLE / 10;
     BitValue.level0 = 0;
     BitValue.duration1 = GS8208_PIXEL_RMT_TICKS_IDLE / 10;
     BitValue.level1 = 1;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_INTERFRAME_GAP_ID);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
-    BitValue.duration0 = 1;
+    BitValue.duration0 = 2;
     BitValue.level0 = 0;
-    BitValue.duration1 = 1;
+    BitValue.duration1 = 2;
     BitValue.level1 = 0;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_STARTBIT_ID);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STARTBIT_ID);
 
     BitValue.duration0 = 0;
     BitValue.level0 = 0;
     BitValue.duration1 = 0;
     BitValue.level1 = 0;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_STOPBIT_ID);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STOPBIT_ID);
 
     // DEBUG_V (String ("GS8208_PIXEL_RMT_TICKS_BIT_0_H: 0x") + String (GS8208_PIXEL_RMT_TICKS_BIT_0_HIGH, HEX));
     // DEBUG_V (String ("GS8208_PIXEL_RMT_TICKS_BIT_0_L: 0x") + String (GS8208_PIXEL_RMT_TICKS_BIT_0_LOW,  HEX));
@@ -98,7 +97,13 @@ void c_OutputGS8208Rmt::Begin ()
     c_OutputGS8208::Begin ();
 
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
-    Rmt.Begin (rmt_channel_t (OutputChannelId), gpio_num_t (DataPin), this, rmt_idle_level_t::RMT_IDLE_LEVEL_LOW);
+    c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
+    OutputRmtConfig.RmtChannelId     = rmt_channel_t(OutputChannelId);
+    OutputRmtConfig.DataPin          = gpio_num_t(DataPin);
+    OutputRmtConfig.idle_level       = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
+    OutputRmtConfig.pPixelDataSource = this;
+
+    Rmt.Begin(OutputRmtConfig);
 
     // Start output
     // DEBUG_END;
@@ -123,7 +128,7 @@ bool c_OutputGS8208Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     BitValue.level0 = 0;
     BitValue.duration1 = ifgTicks / 12;
     BitValue.level1 = 0;
-    Rmt.SetRgb2Rmt (BitValue, c_OutputRmt::RmtFrameType_t::RMT_INTERFRAME_GAP_ID);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
     Rmt.set_pin (DataPin);
     Rmt.SetMinFrameDurationInUs (FrameMinDurationInMicroSec);
@@ -167,5 +172,4 @@ void c_OutputGS8208Rmt::Render ()
 
 } // Render
 
-#endif // def SUPPORT_RMT_OUTPUT
-#endif // def SUPPORT_OutputType_GS8208
+#endif // defined(SUPPORT_OutputType_GS8208) && defined(SUPPORT_RMT_OUTPUT)

@@ -2,7 +2,7 @@
 * InputFPPRemoteFsm.cpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -22,7 +22,7 @@
 #include "../service/FPPDiscovery.h"
 
 //-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_Idle::Poll (uint8_t * Buffer, size_t BufferSize)
+void fsm_PlayEffect_state_Idle::Poll ()
 {
     // DEBUG_START;
 
@@ -116,11 +116,11 @@ void fsm_PlayEffect_state_Idle::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_PlayingEffect::Poll (uint8_t * Buffer, size_t BufferSize)
+void fsm_PlayEffect_state_PlayingEffect::Poll ()
 {
     // DEBUG_START;
 
-    p_InputFPPRemotePlayEffect->EffectsEngine.SetBufferInfo (Buffer, BufferSize);
+    p_InputFPPRemotePlayEffect->EffectsEngine.SetBufferInfo (OutputMgr.GetBufferUsedSize());
     p_InputFPPRemotePlayEffect->EffectsEngine.Process ();
 
     if (p_InputFPPRemotePlayEffect->PLayEffectEndTime <= millis ())

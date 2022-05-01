@@ -1,5 +1,5 @@
 <fieldset id="serial">
-    <legend class="esps-legend" id="Title">Serial Configuration</legend>
+    <legend class="esps-legend" id="Title">Generic Serial Configuration</legend>
     <div class="form-group">
         <label class="control-label col-sm-2" for="num_chan">Channel Count</label>
         <div class="col-sm-4">
@@ -14,11 +14,11 @@
     <div class="form-group">
         <label class="control-label col-sm-2" for="gen_ser_hdr">Frame Header</label>
         <div class="col-sm-4">
-            <input type="text" class="form-control is-valid" id="gen_ser_hdr" min="0" max="10" value="" required title="String to send at start of frame." onchange="RefreshSerialRate()">
+            <input type="text" class="form-control is-valid" id="gen_ser_hdr" minlength="0" maxlength="10" value="" required title="String to send at start of frame." onchange="RefreshSerialRate()">
         </div>
         <label class="control-label col-sm-2" for="gen_ser_ftr">Frame Footer</label>
         <div class="col-sm-4">
-            <input type="text" class="form-control is-valid" id="gen_ser_ftr" min="0" max="10" value="" required title="String to send at end of frame." onchange="RefreshSerialRate()">
+            <input type="text" class="form-control is-valid" id="gen_ser_ftr" minlength="0" maxlength="10" value="" required title="String to send at end of frame." onchange="RefreshSerialRate()">
         </div>
     </div>
     <label class="control-label col-sm-2 hidden AdvancedMode" for="data_pin">GPIO Output</label>

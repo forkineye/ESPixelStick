@@ -3,7 +3,7 @@
 * OutputCommon.hpp - Output base class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -49,18 +49,20 @@ public:
     // functions to be provided by the derived class
     virtual void         Begin () {}                                           ///< set up the operating environment based on the current config (or defaults)
     virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig);     ///< Set a new config in the driver
-    virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
+    virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig);     ///< Get the current config used by the driver
     virtual void         Render () = 0;                                        ///< Call from loop(),  renders output data
     virtual void         GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
             OID_t        GetOutputChannelId () { return OutputChannelId; }     ///< return the output channel number
             uint8_t    * GetBufferAddress ()   { return pOutputBuffer;}        ///< Get the address of the buffer into which the E1.31 handler will stuff data
-            uint16_t     GetBufferUsedSize ()  { return OutputBufferSize;}     ///< Get the address of the buffer into which the E1.31 handler will stuff data
+            size_t       GetBufferUsedSize ()  { return OutputBufferSize;}     ///< Get the address of the buffer into which the E1.31 handler will stuff data
             OTYPE_t      GetOutputType ()      { return OutputType; }          ///< Have the instance report its type.
     virtual void         GetStatus (ArduinoJson::JsonObject & jsonStatus);
             void         SetOutputBufferAddress (uint8_t* pNewOutputBuffer) { pOutputBuffer = pNewOutputBuffer; }
-    virtual void         SetOutputBufferSize (uint16_t NewOutputBufferSize)  { OutputBufferSize = NewOutputBufferSize; };
-    virtual uint16_t     GetNumChannelsNeeded () = 0;
-    virtual void         PauseOutput () {}
+    virtual void         SetOutputBufferSize (size_t NewOutputBufferSize)  { OutputBufferSize = NewOutputBufferSize; };
+    virtual size_t       GetNumChannelsNeeded () = 0;
+    virtual void         PauseOutput (bool State) {}
+    virtual void         WriteChannelData (size_t StartChannelId, size_t ChannelCount, byte *pSourceData);
+    virtual void         ReadChannelData (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
 
 protected:
 #define OM_CMN_NO_CUSTOM_ISR                    (-1)
@@ -72,7 +74,7 @@ protected:
     bool        HasBeenInitialized         = false;
     uint32_t    FrameMinDurationInMicroSec = 20000;
     uint8_t   * pOutputBuffer              = nullptr;
-    uint16_t    OutputBufferSize           = 0;
+    size_t      OutputBufferSize           = 0;
     uint32_t    FrameCount                 = 0;
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -90,6 +92,12 @@ protected:
     void StartBreak ();
     void EndBreak ();
     void GenerateBreak (uint32_t DurationInUs);
+
+#ifndef ESP_INTR_FLAG_IRAM
+#   define ESP_INTR_FLAG_IRAM 0
+#endif // ndef ESP_INTR_FLAG_IRAM
+
+    bool RegisterUartIsrHandler(void (*fn)(void *), void *arg, int intr_alloc_flags);
 
     inline bool canRefresh ()
     {

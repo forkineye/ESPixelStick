@@ -2,7 +2,7 @@
 * GECE.cpp - GECE driver code for ESPixelStick
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015 Shelby Merrick
+* Copyright (c) 2015, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -18,6 +18,9 @@
 */
 
 #include "../ESPixelStick.h"
+
+#if defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_UART_OUTPUT)
+
 #include "OutputGECE.hpp"
 #include <HardwareSerial.h>
 #ifdef ARDUINO_ARCH_ESP32
@@ -150,34 +153,37 @@ c_OutputGECE::~c_OutputGECE ()
 {
     // DEBUG_START;
 
-    GECE_OutputChanArray[OutputChannelId] = nullptr;
-
-    // clean up the timer ISR
-    bool foundActiveChannel = false;
-    for (auto currentChannel : GECE_OutputChanArray)
+    if(HasBeenInitialized)
     {
-        // DEBUG_V (String ("currentChannel: ") + String (uint(currentChannel), HEX));
-        if (nullptr != currentChannel)
+        GECE_OutputChanArray[OutputChannelId] = nullptr;
+
+        // clean up the timer ISR
+        bool foundActiveChannel = false;
+        for (auto currentChannel : GECE_OutputChanArray)
         {
-            // DEBUG_V ("foundActiveChannel");
-            foundActiveChannel = true;
+            // DEBUG_V (String ("currentChannel: ") + String (uint(currentChannel), HEX));
+            if (nullptr != currentChannel)
+            {
+                // DEBUG_V ("foundActiveChannel");
+                foundActiveChannel = true;
+            }
         }
-    }
 
-    // DEBUG_V ();
+        // DEBUG_V ();
 
-    // have all of the GECE channels been killed?
-    if (!foundActiveChannel)
-    {
-        // DEBUG_V ("Detach Interrupts");
+        // have all of the GECE channels been killed?
+        if (!foundActiveChannel)
+        {
+            // DEBUG_V ("Detach Interrupts");
 #ifdef ARDUINO_ARCH_ESP8266
-        timer1_detachInterrupt ();
+            timer1_detachInterrupt();
 #elif defined(ARDUINO_ARCH_ESP32)
-        if (pHwTimer)
-        {
-            timerAlarmDisable (pHwTimer);
-        }
+            if (pHwTimer)
+            {
+                timerAlarmDisable(pHwTimer);
+            }
 #endif
+        }
     }
 
     // DEBUG_END;
@@ -214,7 +220,7 @@ void c_OutputGECE::Begin ()
 
     if (gpio_num_t (-1) == DataPin) { return; }
 
-    SetOutputBufferSize (pixel_count * GECE_NUM_INTENSITY_BYTES_PER_PIXEL);
+    SetOutputBufferSize(pixel_count * GECE_NUM_INTENSITY_BYTES_PER_PIXEL);
 
     // DEBUG_V (String ("GECE_BAUDRATE: ") + String (GECE_BAUDRATE));
 
@@ -281,6 +287,9 @@ void c_OutputGECE::Begin ()
     timerAlarmEnable (pHwTimer);
 
 #endif
+
+    HasBeenInitialized = true;
+
     // DEBUG_END;
 } // begin
 
@@ -333,7 +342,7 @@ void c_OutputGECE::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 } // GetConfig
 
 //----------------------------------------------------------------------------
-uint16_t c_OutputGECE::GetNumChannelsNeeded ()
+size_t c_OutputGECE::GetNumChannelsNeeded ()
 {
     return pixel_count * GECE_NUM_INTENSITY_BYTES_PER_PIXEL;
 
@@ -428,3 +437,5 @@ void c_OutputGECE::Render()
     // DEBUG_END;
 
 } // render
+
+#endif // defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_UART_OUTPUT)
