@@ -21,11 +21,12 @@
 #define SUPPORT_ETHERNET
 
 //Output Manager
+#define SUPPORT_UART_OUTPUT
 #define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_4
 #define UART_LAST               OutputChannelId_UART_1
 
 #define SUPPORT_RMT_OUTPUT
-#define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_12
+#define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_36
 #define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_16    // TODO: check that this works!
 #define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_32
 #define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_35    // TODO: check that this works
@@ -43,12 +44,14 @@
 #   define SUPPORT_SPI_OUTPUT
 
 // SPI Output
+#define SUPPORT_SPI_OUTPUT
 #define DEFAULT_SPI_DATA_GPIO  gpio_num_t::GPIO_NUM_15
 #define DEFAULT_SPI_CLOCK_GPIO gpio_num_t::GPIO_NUM_25
 
 #endif // defined(SUPPORT_OutputType_WS2801) || defined(SUPPORT_OutputType_TM1814)
 
 // File Manager
+#define SUPPORT_SD
 #define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_2
 #define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_15
 #define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14
@@ -66,7 +69,7 @@
 #define DEFAULT_ETH_CLK_MODE    eth_clock_mode_t::ETH_CLOCK_GPIO17_OUT
 
 // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
-#define DEFAULT_ETH_POWER_PIN          gpio_num_t(gpio_num_t::GPIO_NUM_5)
+#define DEFAULT_ETH_POWER_PIN          gpio_num_t(gpio_num_t::GPIO_NUM_NC)
 #define DEFAULT_ETH_POWER_PIN_ACTIVE   HIGH
 
 // Type of the Ethernet PHY (LAN8720 or TLK110)
