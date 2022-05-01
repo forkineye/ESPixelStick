@@ -380,7 +380,7 @@ void c_OutputUart::InitializeUart()
 
         CalculateStartBitTime();
 
-        if (WeNeedAtimer)
+        if (WeNeedAtimer())
         {
             // DEBUG_V ();
             if (!AreTimersRunning())
@@ -609,14 +609,14 @@ void IRAM_ATTR c_OutputUart::ISR_UART_Handler()
 
             if (!MoreDataToSend())
             {
-                DisableUartInterrupts;
+                DisableUartInterrupts();
 #ifdef USE_UART_DEBUG_COUNTERS
                 FrameEndISRcounter++;
 #endif // def USE_UART_DEBUG_COUNTERS
             }
 
             // Clear all interrupt flags for this uart
-            ClearUartInterrupts;
+            ClearUartInterrupts();
 
         } // end Our uart generated an interrupt
 #ifdef USE_UART_DEBUG_COUNTERS
@@ -786,7 +786,7 @@ void c_OutputUart::PauseOutput(bool PauseOutput)
     else if (PauseOutput)
     {
         // DEBUG_V("stop the output");
-        DisableUartInterrupts;
+        DisableUartInterrupts();
     }
 
     OutputIsPaused = PauseOutput;
@@ -800,7 +800,7 @@ bool c_OutputUart::RegisterUartIsrHandler()
     // DEBUG_START;
 
     bool ret = true;
-    DisableUartInterrupts;
+    DisableUartInterrupts();
 
 #ifdef ARDUINO_ARCH_ESP8266
     // ETS_UART_INTR_DETACH(uart_intr_handler);
@@ -929,9 +929,31 @@ void c_OutputUart::SetSendBreak(bool value)
 } // SetSendBreak
 
 //----------------------------------------------------------------------------
+inline void IRAM_ATTR c_OutputUart::ClearUartInterrupts()
+{
+    WRITE_PERI_REG(UART_INT_CLR(OutputUartConfig.UartId), UART_INTR_MASK);
+} // ClearUartInterrupts
+
+//----------------------------------------------------------------------------
+inline bool c_OutputUart::WeNeedAtimer()
+{
+#if defined(ARDUINO_ARCH_ESP8266)
+    return (OutputUartConfig.NumBreakBitsAfterIntensityData || OutputUartConfig.NumExtendedStartBits)
+#else
+    return false;
+#endif // defined(ARDUINO_ARCH_ESP8266)
+} // WeNeedAtimer
+
+//----------------------------------------------------------------------------
+inline void IRAM_ATTR c_OutputUart::DisableUartInterrupts()
+{
+    CLEAR_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), UART_INTR_MASK);
+} // DisableUartInterrupts
+
+//----------------------------------------------------------------------------
 inline void IRAM_ATTR c_OutputUart::EnableUartInterrupts()
 {
-    DisableUartInterrupts;
+    DisableUartInterrupts();
 
     if (OutputUartConfig.NumBreakBitsAfterIntensityData)
     {
@@ -950,7 +972,7 @@ inline void IRAM_ATTR c_OutputUart::EnableUartInterrupts()
 //----------------------------------------------------------------------------
 void c_OutputUart::StartNewFrame()
 {
-    // DEBUG_START;
+// DEBUG_START;
 #ifdef USE_UART_DEBUG_COUNTERS
     FrameStartCounter++;
 #endif // def USE_UART_DEBUG_COUNTERS
@@ -978,7 +1000,7 @@ void c_OutputUart::StartNewFrame()
     StartNewDataFrame();
     // DEBUG_V();
 
-    if(!WeNeedAtimer)
+    if(!WeNeedAtimer())
     {
         ISR_Handler_SendIntensityData();
         EnableUartInterrupts();
@@ -1014,7 +1036,7 @@ void c_OutputUart::StartUart()
 
 #ifdef ARDUINO_ARCH_ESP8266
         // start processing the timer interrupts
-        if (WeNeedAtimer)
+        if (WeNeedAtimer())
         {
             OutputTimerArray[OutputUartConfig.ChannelId] = this;
         }
@@ -1030,7 +1052,7 @@ void c_OutputUart::TerminateUartOperation()
 {
     // DEBUG_START;
     
-    DisableUartInterrupts;
+    DisableUartInterrupts();
 
 #ifdef SUPPORT_UART_OUTPUT
     if (OutputUartConfig.ChannelId <= c_OutputMgr::e_OutputChannelIds::OutputChannelId_UART_LAST)

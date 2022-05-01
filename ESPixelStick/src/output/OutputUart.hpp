@@ -124,11 +124,12 @@ private:
     void SetIntensityDataWidth  ();
     void CalculateStartBitTime  ();
     void SetIntensity2Uart      (uint8_t value, UartDataBitTranslationId_t ID);
+    inline bool WeNeedAtimer    ();
 
     OutputUartConfig_t OutputUartConfig;
 
     uint8_t Intensity2Uart[UartDataBitTranslationId_t::Uart_LIST_END];
-    bool             OutputIsPaused                 = false;
+    bool            OutputIsPaused                  = false;
     bool            SendBreak                       = false;
     uint32_t        LastFrameStartTime              = 0;
     uint32_t        FrameMinDurationInMicroSec      = 25000;
@@ -146,6 +147,8 @@ private:
     uint32_t IRAM_ATTR getUartFifoLength();
     void     IRAM_ATTR enqueueUartData(uint8_t value);
     inline void IRAM_ATTR EnableUartInterrupts();
+    inline void IRAM_ATTR ClearUartInterrupts();
+    inline void IRAM_ATTR DisableUartInterrupts();
 
 // #define USE_UART_DEBUG_COUNTERS
 #ifdef USE_UART_DEBUG_COUNTERS
@@ -188,15 +191,6 @@ private:
 #   endif //  defined(ARDUINO_ARCH_ESP8266)
 #endif // UART_INTR_MASK
 
-#if defined(ARDUINO_ARCH_ESP32)
-#   define WeNeedAtimer false
-#else
-#define WeNeedAtimer (OutputUartConfig.NumBreakBitsAfterIntensityData || OutputUartConfig.NumExtendedStartBits)
-#endif // defined(ARDUINO_ARCH_ESP32)
-
-#define ClearUartInterrupts   WRITE_PERI_REG(UART_INT_CLR(OutputUartConfig.UartId), UART_INTR_MASK);
-#define DisableUartInterrupts CLEAR_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), UART_INTR_MASK);
-
 #ifndef ESP_INTR_FLAG_IRAM
 #   define ESP_INTR_FLAG_IRAM 0
 #endif // ndef ESP_INTR_FLAG_IRAM
@@ -207,8 +201,7 @@ private:
 #define CPU_ClockTimeNS         ((1.0 / float(F_CPU)) * 1000000000)
 
 public:
-    void IRAM_ATTR
-    ISR_Timer_Handler();
+    void IRAM_ATTR ISR_Timer_Handler();
 private:
     // Cycle counter
     // static uint32_t _getCycleCount(void) __attribute__((always_inline));
