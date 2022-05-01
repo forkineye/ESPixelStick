@@ -368,10 +368,10 @@ void c_OutputUart::InitializeUart()
         WRITE_PERI_REG(UART_CONF1(OutputUartConfig.UartId), OutputUartConfig.FiFoTriggerLevel << UART_TXFIFO_EMPTY_THRHD_S);
 
         // DEBUG_V("Disable RX & TX interrupts. It is enabled by uart.c in the SDK");
-        DisableUartInterrupts;
+        DisableUartInterrupts();
 
         // DEBUG_V("Clear all pending interrupts in the UART");
-        ClearUartInterrupts;
+        ClearUartInterrupts();
 
         // DEBUG_V("Reenable interrupts");
         ETS_UART_INTR_ENABLE();
@@ -676,7 +676,7 @@ void IRAM_ATTR c_OutputUart::ISR_Timer_Handler()
         }
 
         ISR_Handler_SendIntensityData();
-        DisableUartInterrupts;
+        DisableUartInterrupts();
 #ifdef USE_UART_DEBUG_COUNTERS
         if (!MoreDataToSend())
         {
@@ -938,7 +938,7 @@ inline void IRAM_ATTR c_OutputUart::ClearUartInterrupts()
 inline bool c_OutputUart::WeNeedAtimer()
 {
 #if defined(ARDUINO_ARCH_ESP8266)
-    return (OutputUartConfig.NumBreakBitsAfterIntensityData || OutputUartConfig.NumExtendedStartBits)
+    return (OutputUartConfig.NumBreakBitsAfterIntensityData || OutputUartConfig.NumExtendedStartBits);
 #else
     return false;
 #endif // defined(ARDUINO_ARCH_ESP8266)
