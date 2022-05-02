@@ -2,7 +2,7 @@
 * OutputUart.cpp - TM1814 driver code for ESPixelStick UART Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015 Shelby Merrick
+* Copyright (c) 2015-2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -380,6 +380,7 @@ void c_OutputUart::InitializeUart()
 
         CalculateStartBitTime();
 
+#if defined(ARDUINO_ARCH_ESP8266)
         if (WeNeedAtimer())
         {
             // DEBUG_V ();
@@ -413,6 +414,7 @@ void c_OutputUart::InitializeUart()
                 timer1_write(uint32_t(TimerTimeInTicks) + 33000);
             }
         }
+#endif // defined(ARDUINO_ARCH_ESP8266)
 
     } while (false);
 
@@ -435,14 +437,6 @@ void c_OutputUart::InitializeUart()
 
     ESP_ERROR_CHECK(uart_set_hw_flow_ctrl(OutputUartConfig.UartId, uart_hw_flowcontrol_t::UART_HW_FLOWCTRL_DISABLE, 0));
     ESP_ERROR_CHECK(uart_set_sw_flow_ctrl(OutputUartConfig.UartId, false, 0, 0));
-
-    // DEBUG_V("Turn off ISR handler")
-    // make sure no existing low level ISR is running
-    ESP_ERROR_CHECK(uart_disable_tx_intr(OutputUartConfig.UartId));
-    // DEBUG_V ("");
-
-    ESP_ERROR_CHECK(uart_disable_rx_intr(OutputUartConfig.UartId));
-    // DEBUG_V ("");
 
     // start the generic UART driver.
     // NOTE: Zero for RX buffer size causes errors in the uart API.
@@ -491,10 +485,6 @@ void c_OutputUart::InitializeUart()
 #endif // def SupportSetUartBaudrateWorkAround
 
     set_pin();
-    // DEBUG_V ("");
-
-    ESP_ERROR_CHECK(uart_disable_tx_intr(OutputUartConfig.UartId));
-    // DEBUG_V ("");
 
     // DEBUG_END;
 
@@ -962,7 +952,7 @@ inline void IRAM_ATTR c_OutputUart::EnableUartInterrupts()
 //----------------------------------------------------------------------------
 void c_OutputUart::StartNewFrame()
 {
-// DEBUG_START;
+    // DEBUG_START;
 #ifdef USE_UART_DEBUG_COUNTERS
     FrameStartCounter++;
 #endif // def USE_UART_DEBUG_COUNTERS
@@ -990,11 +980,13 @@ void c_OutputUart::StartNewFrame()
     StartNewDataFrame();
     // DEBUG_V();
 
-    if(!WeNeedAtimer())
+#if defined(ARDUINO_ARCH_ESP8266)
+    if (!WeNeedAtimer())
     {
         ISR_Handler_SendIntensityData();
         EnableUartInterrupts();
     }
+#endif // defined(ARDUINO_ARCH_ESP8266)
 
     // DEBUG_END;
 
