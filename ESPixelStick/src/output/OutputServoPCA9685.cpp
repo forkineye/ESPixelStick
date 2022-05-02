@@ -22,9 +22,6 @@ GNU General Public License for more details.
 
 #include "OutputServoPCA9685.hpp"
 
-#define SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH 650
-#define SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH 2350
-
 //----------------------------------------------------------------------------
 c_OutputServoPCA9685::c_OutputServoPCA9685 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
                                 gpio_num_t outputGpio,
@@ -33,6 +30,18 @@ c_OutputServoPCA9685::c_OutputServoPCA9685 (c_OutputMgr::e_OutputChannelIds Outp
     c_OutputCommon(OutputChannelId, outputGpio, uart, outputType)
 {
     // DEBUG_START;
+
+    for (ServoPCA9685Channel_t & currentServoPCA9685Channel : OutputList)
+    {
+        currentServoPCA9685Channel.Enabled          = false;
+        currentServoPCA9685Channel.MinLevel         = SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH;
+        currentServoPCA9685Channel.MaxLevel         = SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH;
+        currentServoPCA9685Channel.PreviousValue    = 0;
+        currentServoPCA9685Channel.IsReversed       = false;
+        currentServoPCA9685Channel.Is16Bit          = false;
+        currentServoPCA9685Channel.IsScaled         = true;
+    }
+
     // DEBUG_END;
 } // c_OutputServoPCA9685
 
@@ -57,16 +66,6 @@ void c_OutputServoPCA9685::Begin ()
 
     if(!HasBeenInitialized)
     {
-        for (ServoPCA9685Channel_t & currentServoPCA9685Channel : OutputList)
-        {
-            currentServoPCA9685Channel.Enabled = false;
-            currentServoPCA9685Channel.MinLevel = SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH;
-            currentServoPCA9685Channel.MaxLevel = SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH;
-            currentServoPCA9685Channel.PreviousValue = 0;
-            currentServoPCA9685Channel.IsReversed = false;
-            currentServoPCA9685Channel.Is16Bit = false;
-            currentServoPCA9685Channel.IsScaled = true;
-        }
         // DEBUG_V("Allocate PWM");
         pwm = new Adafruit_PWMServoDriver();
 
@@ -84,15 +83,6 @@ void c_OutputServoPCA9685::Begin ()
 } // Begin
 
 //----------------------------------------------------------------------------
-/*
-*   Validate that the current values meet our needs
-*
-*   needs
-*       data set in the class elements
-*   returns
-*       true - no issues found
-*       false - had an issue and had to fix things
-*/
 bool c_OutputServoPCA9685::validate ()
 {
     // DEBUG_START;
