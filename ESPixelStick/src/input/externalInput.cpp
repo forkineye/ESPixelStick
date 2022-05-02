@@ -23,15 +23,6 @@ fsm_ExternalInput_wait_for_off_state  fsm_ExternalInput_wait_for_off_state_imp;
 /*****************************************************************************/
 
 c_ExternalInput::c_ExternalInput(void) :
-	m_name(),
-	m_iPinId(0),
-	m_polarity(Polarity_t::ActiveLow),
-	m_ExpirationTime(0),
-	m_bIsEnabled(false),
-	m_iInputDebounceCount(0),
-	m_iInputHoldTimeMS(0),
-	m_bHadLongPush(false),
-	m_bHadShortPush(false),
 	m_CurrentFsmState(fsm_ExternalInput_boot_imp)
 {
 	// DEBUG_START;
