@@ -16,6 +16,8 @@ public:
 	{
 		off = 0,		// input is off
 		on,				// input is on
+		shortOn,		// input was on for 0.5 sec -- NOT CURRENTLY USED/IMPLEMENTED ... must call InputHadShortPush()
+		longOn,         // input was on for 2.0 sec -- NOT CURRENTLY USED/IMPLEMENTED ... must call InputHadLongPush()
 	};
 
 	enum Polarity_t
