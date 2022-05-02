@@ -969,7 +969,7 @@ void c_OutputMgr::LoadConfig ()
     
     // try to load and process the config file
     if (!FileMgr.LoadConfigFile(ConfigFileName, [this](DynamicJsonDocument &JsonConfigDoc)
-                                {
+        {
             // extern void PrettyPrint(JsonConfigDoc & jsonStuff, String Name);
             // PrettyPrint(JsonConfigDoc, "OM Load Config");
 
@@ -980,7 +980,8 @@ void c_OutputMgr::LoadConfig ()
             // PrettyPrint(JsonConfig, "OM Load Config");
             // DEBUG_V ("Start");
             this->ProcessJsonConfig(JsonConfig);
-            // DEBUG_V ("End"); }))
+            // DEBUG_V ("End");
+        }))
     {
         if (!IsBooting)
         {
