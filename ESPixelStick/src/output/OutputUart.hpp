@@ -204,11 +204,7 @@ public:
 private:
     inline bool WeNeedAtimer() __attribute__((gnu_inline, const))
     {
-#if defined(ARDUINO_ARCH_ESP8266)
         return (OutputUartConfig.NumBreakBitsAfterIntensityData || OutputUartConfig.NumExtendedStartBits);
-#else
-        return false;
-#endif // defined(ARDUINO_ARCH_ESP8266)
     }  // WeNeedAtimer
 
     // Cycle counter
