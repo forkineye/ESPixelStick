@@ -969,13 +969,18 @@ void c_OutputMgr::LoadConfig ()
     
     // try to load and process the config file
     if (!FileMgr.LoadConfigFile(ConfigFileName, [this](DynamicJsonDocument &JsonConfigDoc)
-        {
+                                {
+            // extern void PrettyPrint(JsonConfigDoc & jsonStuff, String Name);
+            // PrettyPrint(JsonConfigDoc, "OM Load Config");
+
             // DEBUG_V ("");
             JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
-            // DEBUG_V ("");
-            this->ProcessJsonConfig (JsonConfig);
-            // DEBUG_V (""); }))
-        }))
+
+            // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
+            // PrettyPrint(JsonConfig, "OM Load Config");
+            // DEBUG_V ("Start");
+            this->ProcessJsonConfig(JsonConfig);
+            // DEBUG_V ("End"); }))
     {
         if (!IsBooting)
         {
@@ -1008,6 +1013,9 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
     bool Response = false;
 
     // DEBUG_V ("");
+
+    // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
+    // PrettyPrint(jsonConfig, "ProcessJsonConfig");
 
     do // once
     {
@@ -1055,6 +1063,8 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
             JsonObject OutputChannelConfig = OutputChannelArray[String(CurrentOutputChannelDriver.DriverId).c_str()];
             // DEBUG_V ("");
 
+            // PrettyPrint(OutputChannelConfig, "ProcessJson Channel Config");
+
             // set a default value for channel type
             uint32_t ChannelType = uint32_t (OutputType_End);
             setFromJSON (ChannelType, OutputChannelConfig, CN_type);
@@ -1085,6 +1095,8 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
             // make sure the proper output type is running
             InstantiateNewOutputChannel(CurrentOutputChannelDriver, e_OutputType(ChannelType));
             // DEBUG_V ("");
+
+            // PrettyPrint(OutputChannelDriverConfig, "ProcessJson Channel Driver Config");
 
             // send the config to the driver. At this level we have no idea what is in it
             CurrentOutputChannelDriver.pOutputChannelDriver->SetConfig(OutputChannelDriverConfig);
