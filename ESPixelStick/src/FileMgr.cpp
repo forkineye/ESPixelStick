@@ -278,6 +278,7 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
             logcon (String(CN_stars) + CfgFileMessagePrefix + F ("Could not read file.") + CN_stars);
             break;
         }
+        logcon(RawFileData);
 */
         fs::File file = LittleFS.open (FileName.c_str (), "r");
         if (!file)
@@ -308,6 +309,9 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
     	    // DEBUG_V (String ("    jsonDoc.capacity: ") + String (jsonDoc.capacity ()));
             break;
         }
+
+        // extern void PrettyPrint(DynamicJsonDocument & jsonStuff, String Name);
+        // PrettyPrint(jsonDoc, CfgFileMessagePrefix);
 
         // DEBUG_V ("");
         jsonDoc.garbageCollect ();
