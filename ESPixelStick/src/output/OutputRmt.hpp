@@ -45,10 +45,17 @@ public:
 
     struct OutputRmtConfig_t
     {
-        rmt_channel_t    RmtChannelId       = rmt_channel_t(-1);
-        gpio_num_t       DataPin            = gpio_num_t(-1);
-        rmt_idle_level_t idle_level         = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
-        c_OutputPixel    *pPixelDataSource  = nullptr;
+        rmt_channel_t    RmtChannelId           = rmt_channel_t(-1);
+        gpio_num_t       DataPin                = gpio_num_t(-1);
+        rmt_idle_level_t idle_level             = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
+        size_t           IntensityDataWidth     = 8;
+        bool             SendInterIntensityBits = false;
+        bool             SendEndOfFrameBits     = false;
+        uint8_t          NumFrameStartBits      = 1;
+        uint8_t          NumFrameStopBits       = 1;
+        uint8_t          NumIdleBits            = 6;
+
+        c_OutputPixel  *pPixelDataSource      = nullptr;
 #if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
         c_OutputSerial *pSerialDataSource = nullptr;
 #endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
@@ -70,11 +77,6 @@ private:
     rmt_item32_t        Intensity2Rmt[RmtDataBitIdType_t::RMT_LIST_END];
     bool                OutputIsPaused   = false;
 
-    uint8_t             NumInterFrameRmtSlots             = 6;
-    uint8_t             NumFrameStartRmtSlots             = 1;
-    uint8_t             NumFrameStopRmtSlots              = 1;
-    bool                SendInterIntensityBits            = false;
-    bool                SendEndOfFrameBits                = false;
     uint32_t            NumRmtSlotsPerIntensityValue      = 8;
     uint32_t            NumRmtSlotOverruns                = 0;
 
@@ -86,55 +88,19 @@ private:
 #define NUM_RMT_SLOTS (sizeof(RMTMEM.chan[0].data32) / sizeof(RMTMEM.chan[0].data32[0]))
 #define MIN_FRAME_TIME_MS 25
 
-    volatile size_t     NumAvailableRmtSlotsToFill = NUM_RMT_SLOTS;
-    const size_t        NumRmtSlotsPerInterrupt    = NUM_RMT_SLOTS * 0.75;
-    uint32_t            LastFrameStartTime         = 0;
-    uint32_t            FrameMinDurationInMicroSec = 1000;
-
-    void                  StartNewFrame ();
-    void        IRAM_ATTR ISR_Handler_SendIntensityData ();
-    inline void IRAM_ATTR ISR_EnqueueData(uint32_t value);
-
-    uint32_t            IntensityMapMultiplier      = 1;
+    volatile size_t     NumAvailableRmtSlotsToFill  = NUM_RMT_SLOTS;
+    const size_t        NumRmtSlotsPerInterrupt     = NUM_RMT_SLOTS * 0.75;
+    uint32_t            LastFrameStartTime          = 0;
+    uint32_t            FrameMinDurationInMicroSec  = 1000;
     uint32_t            TxIntensityDataStartingMask = 0x80;
     RmtDataBitIdType_t  InterIntensityValueId       = RMT_INVALID_VALUE;
 
-    inline bool IRAM_ATTR MoreDataToSend()
-    {
-        if (nullptr != OutputRmtConfig.pPixelDataSource)
-        {
-            return OutputRmtConfig.pPixelDataSource->ISR_MoreDataToSend();
-        }
-#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
-        return OutputRmtConfig.pSerialDataSource->ISR_MoreDataToSend();
-#else
-        return false;
-#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
-    }
-
-    inline uint8_t IRAM_ATTR GetNextIntensityToSend()
-    {
-        if (nullptr != OutputRmtConfig.pPixelDataSource)
-        {
-            return OutputRmtConfig.pPixelDataSource->ISR_GetNextIntensityToSend();
-        }
-#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
-        return OutputRmtConfig.pSerialDataSource->ISR_GetNextIntensityToSend();
-#else 
-        return false;
-#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
-    }
-
-    inline void IRAM_ATTR StartNewDataFrame()
-    {
-        if (nullptr != OutputRmtConfig.pPixelDataSource)
-        {
-            OutputRmtConfig.pPixelDataSource->StartNewFrame();
-        }
-#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
-        OutputRmtConfig.pSerialDataSource->StartNewFrame();
-#endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
-    }
+    void                  StartNewFrame ();
+    void            IRAM_ATTR ISR_Handler_SendIntensityData ();
+    inline void     IRAM_ATTR ISR_EnqueueData(uint32_t value);
+    inline bool     IRAM_ATTR MoreDataToSend();
+    inline uint32_t IRAM_ATTR GetNextIntensityToSend();
+    inline void     IRAM_ATTR StartNewDataFrame();
 
 #ifndef HasBeenInitialized
         bool HasBeenInitialized = false;
@@ -151,11 +117,6 @@ public:
     void GetStatus                              (ArduinoJson::JsonObject& jsonStatus);
     void set_pin                                (gpio_num_t _DataPin) { OutputRmtConfig.DataPin = _DataPin; rmt_set_gpio (OutputRmtConfig.RmtChannelId, rmt_mode_t::RMT_MODE_TX, OutputRmtConfig.DataPin, false); }
     void PauseOutput                            (bool State);
-    void SetNumIdleBits                         (uint8_t Value)  { NumInterFrameRmtSlots      = Value; }
-    void SetNumStartBits                        (uint8_t Value)  { NumFrameStartRmtSlots      = Value; }
-    void SetNumStopBits                         (uint8_t Value)  { NumFrameStopRmtSlots       = Value; }
-    void SetSendInterIntensityBits              (bool Value)     { SendInterIntensityBits     = Value; }
-    void SetSendEndOfFrameBits                  (bool Value)     { SendEndOfFrameBits         = Value; }
     void SetMinFrameDurationInUs                (uint32_t value) { FrameMinDurationInMicroSec = value; }
     inline uint32_t IRAM_ATTR GetRmtIntMask     ()               { return ((RMT_INT_TX_END_BIT | RMT_INT_ERROR_BIT | RMT_INT_ERROR_BIT | RMT_INT_THR_EVNT_BIT)); }
 
@@ -172,9 +133,7 @@ public:
 
     void IRAM_ATTR ISR_Handler ();
    
-    void SetIntensityDataWidth(uint32_t DataWidth);
-
-// #define USE_RMT_DEBUG_COUNTERS
+#define USE_RMT_DEBUG_COUNTERS
 #ifdef USE_RMT_DEBUG_COUNTERS
    // debug counters
    uint32_t DataCallbackCounter = 0;
@@ -186,9 +145,9 @@ public:
    uint32_t RxIsr = 0;
    uint32_t ErrorIsr = 0;
    uint32_t IsrIsNotForUs = 0;
-   uint32_t IntensityBytesSent = 0;
+   uint32_t IntensityValuesSent = 0;
    uint32_t IntensityBitsSent = 0;
-   uint32_t IntensityBytesSentLastFrame = 0;
+   uint32_t IntensityValuesSentLastFrame = 0;
    uint32_t IntensityBitsSentLastFrame = 0;
    uint32_t IncompleteFrame = 0;
    uint32_t IncompleteFrameLastFrame = 0;

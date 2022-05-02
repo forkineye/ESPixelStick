@@ -26,6 +26,7 @@
 #if defined(SUPPORT_OutputType_TM1814) && defined(SUPPORT_UART_OUTPUT)
 
 #include "OutputTM1814.hpp"
+#include "OutputUart.hpp"
 
 class c_OutputTM1814Uart : public c_OutputTM1814
 {
@@ -38,23 +39,22 @@ public:
     virtual ~c_OutputTM1814Uart ();
 
     // functions to be provided by the derived class
+    // functions to be provided by the derived class
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
     void    Render ();                                        ///< Call from loop(),  renders output data
-    void    SetOutputBufferSize (uint16_t NumChannelsAvailable);
-    void    PauseOutput ();
+    void    PauseOutput (bool State);
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);
-
-    /// Interrupt Handler
-    void IRAM_ATTR ISR_Handler (); ///< UART ISR
-
+    void    GetConfig (ArduinoJson::JsonObject& jsonConfig);
+    void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
+ 
 private:
+    c_OutputUart Uart;
+
 #define TM1814_DATA_RATE                            (800000.0)
 
 #define TM1814_NUM_DATA_BITS_PER_INTENSITY_BIT      11
 #define TM1814_NUM_DATA_BYTES_PER_INTENSITY_BYTE    8
 #define TM1814_BAUD_RATE                            int(TM1814_DATA_RATE * TM1814_NUM_DATA_BITS_PER_INTENSITY_BIT)
-
-    bool validate ();
 
 }; // c_OutputTM1814Uart
 

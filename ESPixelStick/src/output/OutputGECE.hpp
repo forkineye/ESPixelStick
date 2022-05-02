@@ -18,10 +18,13 @@
 *
 */
 
-#include "OutputCommon.hpp"
-#if defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_UART_OUTPUT)
+#include "../ESPixelStick.h"
+#if defined(SUPPORT_OutputType_GECE)
 
-class c_OutputGECE: public c_OutputCommon
+#include "OutputGECEFrame.hpp"
+#include "OutputPixel.hpp"
+
+class c_OutputGECE: public c_OutputPixel
 {
 public:
     c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
@@ -31,41 +34,48 @@ public:
     virtual ~c_OutputGECE ();
 
     // functions to be provided by the derived class
-    void      Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
-    bool      SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
-    void      GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-    void      Render ();                                        ///< Call from loop(),  renders output data
-    void      GetDriverName (String & sDriverName) { sDriverName = String (F ("GECE")); }
-    void      GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
-    size_t    GetNumChannelsNeeded ();
-
-    void    IRAM_ATTR ISR_Handler (); ///< UART ISR
+    virtual void Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
+    virtual bool SetConfig(ArduinoJson::JsonObject &jsonConfig);        ///< Set a new config in the driver
+    virtual void GetConfig(ArduinoJson::JsonObject &jsonConfig);        ///< Get the current config used by the driver
+    virtual void GetStatus(ArduinoJson::JsonObject &jsonStatus);        ///< Get the current config used by the driver
+    virtual void Render();                                              ///< Call from loop(),  renders output data
+    virtual void GetDriverName(String &sDriverName) { sDriverName = String(F("GECE")); }
+            void SetOutputBufferSize(uint16_t NumChannelsAvailable);
+            bool validate ();
 
 private:
+/*
+    output looks like this
 
+    Start bit = High for 8us
+    26 data bits.
+        Each bit is 31us
+        0 = 6 us low, 25 us high
+        1 = 25 us low, 6 us high
+    stop bit = low for at least 45us
+*/
 #define GECE_PIXEL_LIMIT        63  ///< Total pixel limit
 #define GECE_DEFAULT_BRIGHTNESS 0xCC
 
-    // JSON configuration parameters
-    uint8_t         pixel_count = GECE_PIXEL_LIMIT;
-    uint8_t         brightness  = GECE_DEFAULT_BRIGHTNESS;
+#define GECE_PIXEL_NS_BIT_0_HIGH    (25 * 1000)
+#define GECE_PIXEL_NS_BIT_0_LOW     (6  * 1000)
+#define GECE_PIXEL_NS_BIT_1_HIGH    (6  * 1000)
+#define GECE_PIXEL_NS_BIT_1_LOW     (25 * 1000)
+#define GECE_PIXEL_START_TIME_NS    (8  * 1000)
+#define GECE_PIXEL_STOP_TIME_NS     (45 * 1000)
+#define GECE_USEC_PER_GECE_BIT      ((GECE_PIXEL_NS_BIT_0_HIGH + GECE_PIXEL_NS_BIT_0_LOW)/1000)
 
-    bool validate();
+#define GECE_NUM_INTENSITY_BYTES_PER_PIXEL  3
+#define GECE_BITS_PER_INTENSITY             4
+#define GECE_BITS_BRIGHTNESS                8
+#define GECE_BITS_ADDRESS                   6
+#define GECE_OVERHEAD_BITS                  (GECE_BITS_BRIGHTNESS + GECE_BITS_ADDRESS)
+#define GECE_PACKET_SIZE                    ((GECE_NUM_INTENSITY_BYTES_PER_PIXEL * GECE_BITS_PER_INTENSITY) + GECE_OVERHEAD_BITS) //   26
 
-    struct OutputFrame_t
-    {
-        uint32_t CurrentPixelID;
-        uint8_t* pCurrentInputData;
-    };
-    OutputFrame_t OutputFrame;
+#define GECE_FRAME_TIME_USEC                ((GECE_PACKET_SIZE * GECE_USEC_PER_GECE_BIT) + 90)
+#define GECE_FRAME_TIME_NSEC                (GECE_FRAME_TIME_USEC * 1000)
+
 };
 
-// Cycle counter
-static uint32_t _getCycleCount (void) __attribute__ ((always_inline));
-static inline uint32_t _getCycleCount (void) {
-    uint32_t ccount;
-    __asm__ __volatile__ ("rsr %0,ccount":"=a" (ccount));
-    return ccount;
-}
 
-#endif // defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_UART_OUTPUT)
+#endif // defined(SUPPORT_OutputType_GECE)

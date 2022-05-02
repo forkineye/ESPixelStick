@@ -21,17 +21,10 @@
 */
 
 #include "../ESPixelStick.h"
-
-#ifdef ARDUINO_ARCH_ESP32
-#   include <soc/uart_reg.h>
-#   include <driver/uart.h>
-#   include <driver/gpio.h>
-#endif
-
 #include "OutputMgr.hpp"
 
-#ifndef UART_INTR_MASK
-#   define UART_INTR_MASK 0x1ff
+#ifdef ARDUINO_ARCH_ESP32
+#   include <driver/uart.h>
 #endif
 
 class c_OutputCommon
@@ -65,63 +58,23 @@ public:
     virtual void         ReadChannelData (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
 
 protected:
-#define OM_CMN_NO_CUSTOM_ISR                    (-1)
 
-    gpio_num_t  DataPin                    = gpio_num_t (-1); ///< Output pin to use for this driver
-    uart_port_t UartId;      ///< Id of the UART used by this instance of the driver
-    OTYPE_t     OutputType;  ///< Type to report for this driver
-    OID_t       OutputChannelId;
+    gpio_num_t  DataPin                    = gpio_num_t (-1);
+    uart_port_t UartId                     = uart_port_t (-1);
+    OTYPE_t     OutputType                 = OTYPE_t::OutputType_Disabled;
+    OID_t       OutputChannelId            = OID_t::OutputChannelId_End;
     bool        HasBeenInitialized         = false;
-    uint32_t    FrameMinDurationInMicroSec = 20000;
+    uint32_t    FrameMinDurationInMicroSec = 25000;
     uint8_t   * pOutputBuffer              = nullptr;
     size_t      OutputBufferSize           = 0;
     uint32_t    FrameCount                 = 0;
 
-#ifdef ARDUINO_ARCH_ESP8266
-    void InitializeUart (uint32_t BaudRate,
-                         uint32_t UartFlags1,
-                         uint32_t UartFlags2,
-                         uint32_t fifoTriggerLevel = 0);
-#else
-    void InitializeUart (uart_config_t & config,
-                         uint32_t fifoTriggerLevel = 0);
-#endif // ! def ARDUINO_ARCH_ESP8266
-
-    void TerminateUartOperation ();
     void ReportNewFrame ();
-    void StartBreak ();
-    void EndBreak ();
-    void GenerateBreak (uint32_t DurationInUs);
-
-#ifndef ESP_INTR_FLAG_IRAM
-#   define ESP_INTR_FLAG_IRAM 0
-#endif // ndef ESP_INTR_FLAG_IRAM
-
-    bool RegisterUartIsrHandler(void (*fn)(void *), void *arg, int intr_alloc_flags);
 
     inline bool canRefresh ()
     {
         return (micros () - FrameStartTimeInMicroSec) >= FrameMinDurationInMicroSec;
     }
-
-#ifdef ARDUINO_ARCH_ESP8266
-    /* Returns number of bytes waiting in the TX FIFO of UART1 */
-#  define getFifoLength ((uint16_t)((U1S >> USTXC) & 0xff))
-
-   /* Append a byte to the TX FIFO of UART1 */
-#  define enqueueUart(data)  (U1F = (char)(data))
-
-#elif defined(ARDUINO_ARCH_ESP32)
-
-    /* Returns number of bytes waiting in the TX FIFO of UART1 */
-#   define getFifoLength ((uint16_t)((READ_PERI_REG (UART_STATUS_REG (UartId)) & UART_TXFIFO_CNT_M) >> UART_TXFIFO_CNT_S))
-// #   define getFifoLength 80
-
-    /* Append a byte to the TX FIFO of UART1 */
-// #   define enqueue(value) WRITE_PERI_REG(UART_FIFO_AHB_REG (UART), (char)(value))
-#	define enqueueUart(value) (*((volatile uint32_t*)(UART_FIFO_AHB_REG (UartId)))) = (uint32_t)(value)
-
-#endif
 
 private:
     uint32_t    FrameRefreshTimeInMicroSec = 0;
