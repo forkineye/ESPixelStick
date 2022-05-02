@@ -124,7 +124,6 @@ private:
     void SetIntensityDataWidth  ();
     void CalculateStartBitTime  ();
     void SetIntensity2Uart      (uint8_t value, UartDataBitTranslationId_t ID);
-    inline bool WeNeedAtimer    ();
 
     OutputUartConfig_t OutputUartConfig;
 
@@ -203,6 +202,15 @@ private:
 public:
     void IRAM_ATTR ISR_Timer_Handler();
 private:
+    inline bool WeNeedAtimer() __attribute__((gnu_inline, const))
+    {
+#if defined(ARDUINO_ARCH_ESP8266)
+        return (OutputUartConfig.NumBreakBitsAfterIntensityData || OutputUartConfig.NumExtendedStartBits);
+#else
+        return false;
+#endif // defined(ARDUINO_ARCH_ESP8266)
+    }  // WeNeedAtimer
+
     // Cycle counter
     // static uint32_t _getCycleCount(void) __attribute__((always_inline));
     static inline uint32_t _getCycleCount(void)

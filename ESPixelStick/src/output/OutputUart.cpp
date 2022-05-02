@@ -935,16 +935,6 @@ inline void IRAM_ATTR c_OutputUart::ClearUartInterrupts()
 } // ClearUartInterrupts
 
 //----------------------------------------------------------------------------
-inline bool c_OutputUart::WeNeedAtimer()
-{
-#if defined(ARDUINO_ARCH_ESP8266)
-    return (OutputUartConfig.NumBreakBitsAfterIntensityData || OutputUartConfig.NumExtendedStartBits);
-#else
-    return false;
-#endif // defined(ARDUINO_ARCH_ESP8266)
-} // WeNeedAtimer
-
-//----------------------------------------------------------------------------
 inline void IRAM_ATTR c_OutputUart::DisableUartInterrupts()
 {
     CLEAR_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), UART_INTR_MASK);
