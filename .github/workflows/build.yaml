@@ -80,11 +80,6 @@ jobs:
         run: |
           echo "${GITHUB_REF#refs/*/v}" > firmware/VERSION
 
-      - name: Create secrets.h
-        run: |
-          echo '#define SECRETS_SSID "SSID_NOT_SET"' > ESPixelStick/src/network/secrets.h
-          echo '#define SECRETS_PASS "PASSPHRASE_NOT_SET"' >> ESPixelStick/src/network/secrets.h
-
       - name: Cache pip
         uses: actions/cache@v2
         with:
