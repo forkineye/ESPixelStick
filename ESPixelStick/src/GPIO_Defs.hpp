@@ -82,7 +82,7 @@ typedef enum
 #elif defined (BOARD_ESP32_LOLIN_D32_PRO_ETH)
 #   include "platformDefinitions/GPIO_Defs_ESP32_LoLin_D32_PRO_ETH.hpp"
 #elif defined (BOARD_ESP32_LOLIN_D32_PRO)
-#   include "platformDefinitions/GPIO_Defs_ESP32_generic.hpp"
+#   include "platformDefinitions/GPIO_Defs_ESP32_LoLin_D32_PRO.hpp"
 #elif defined (BOARD_ESP32_MH_ET_LIVE_MiniKit)
 #   include "platformDefinitions/GPIO_Defs_ESP32_MH_ET_LIVE_MiniKit.hpp"
 #elif defined(BOARD_ESP32_QUINLED_QUAD_ETH)
