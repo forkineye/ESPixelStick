@@ -137,8 +137,6 @@ void c_OutputWS2811Uart::Render ()
 {
     // DEBUG_START;
 
-    // DEBUG_V (String ("RemainingIntensityCount: ") + RemainingIntensityCount)
-
     do // Once
     {
         if (gpio_num_t(-1) == DataPin)
