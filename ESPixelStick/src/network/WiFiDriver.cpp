@@ -34,7 +34,7 @@
 // Use platformio_user.ini to define these values.
 // Platformio_user.ini defines these in the [env] section.
 // or delete the #include and enter the strings directly below.
-#inlcude "secrets.h"
+#include "secrets.h"
 
 #if !defined(SECRETS_SSID)
 #   define SECRETS_SSID "DEFAULT_SSID_NOT_SET"
