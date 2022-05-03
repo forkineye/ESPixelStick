@@ -470,11 +470,11 @@ void c_OutputUart::InitializeUart()
     // DEBUG_V(String("FiFoTriggerLevel: ") + String(OutputUartConfig.FiFoTriggerLevel));
     WRITE_PERI_REG(UART_CONF1(OutputUartConfig.UartId), OutputUartConfig.FiFoTriggerLevel << UART_TXFIFO_EMPTY_THRHD_S);
 
+    CLEAR_PERI_REG_MASK(UART_CONF0(OutputUartConfig.UartId), UART_INV_MASK);
     if (OutputUartConfig.InvertOutputPolarity)
     {
         // DEBUG_V("Invert the output");
-        CLEAR_PERI_REG_MASK(UART_CONF0(OutputUartConfig.UartId), UART_INV_MASK);
-        SET_PERI_REG_MASK   (UART_CONF0(OutputUartConfig.UartId), (BIT(22)));
+        SET_PERI_REG_MASK(UART_CONF0(OutputUartConfig.UartId), (BIT(22)));
     }
 
 // #define SupportSetUartBaudrateWorkAround
