@@ -120,6 +120,7 @@ static void IRAM_ATTR timer_intr_handler()
         if (nullptr != currentChannel)
         {
             // U0F = '.';
+            // (*((volatile uint32_t *)(UART_FIFO_AHB_REG(0)))) = (uint32_t)('.');
             currentChannel->ISR_Timer_Handler();
         }
     }
@@ -163,8 +164,10 @@ c_OutputUart::~c_OutputUart ()
  */
 static void IRAM_ATTR uart_intr_handler (void* param)
 {
+    // (*((volatile uint32_t *)(UART_FIFO_AHB_REG(0)))) = (uint32_t)('.');
     if (param)
     {
+        // (*((volatile uint32_t *)(UART_FIFO_AHB_REG(0)))) = (uint32_t)('|');
         reinterpret_cast<c_OutputUart *>(param)->ISR_UART_Handler();
     }
 
@@ -464,6 +467,7 @@ void c_OutputUart::InitializeUart()
     // DEBUG_V (String ("UART_CLKDIV_REG (OutputUartConfig.UartId): 0x") + String (*((uint32_t*)UART_CLKDIV_REG (OutputUartConfig.UartId)), HEX));
 
     // Set TX FIFO trigger.
+    // DEBUG_V(String("FiFoTriggerLevel: ") + String(OutputUartConfig.FiFoTriggerLevel));
     WRITE_PERI_REG(UART_CONF1(OutputUartConfig.UartId), OutputUartConfig.FiFoTriggerLevel << UART_TXFIFO_EMPTY_THRHD_S);
 
     if (OutputUartConfig.InvertOutputPolarity)
@@ -986,7 +990,10 @@ void c_OutputUart::StartNewFrame()
         ISR_Handler_SendIntensityData();
         EnableUartInterrupts();
     }
-#endif // defined(ARDUINO_ARCH_ESP8266)
+#else
+    ISR_Handler_SendIntensityData();
+    EnableUartInterrupts();
+#endif // defined(ARDUINO_ARCH_ESP32)
 
     // DEBUG_END;
 
