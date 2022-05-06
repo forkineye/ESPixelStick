@@ -58,6 +58,11 @@ public:
     virtual void         ReadChannelData (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
 
 protected:
+#define MilliSecondsInASecond       1000
+#define MicroSecondsInAmilliSecond  1000
+#define MicroSecondsInASecond       (MicroSecondsInAmilliSecond * MilliSecondsInASecond)
+#define NanoSecondsInAMicroSecond   1000
+#define NanoSecondsInASecond        (MicroSecondsInASecond * NanoSecondsInAMicroSecond)
 
     gpio_num_t  DataPin                    = gpio_num_t (-1);
     uart_port_t UartId                     = uart_port_t (-1);
