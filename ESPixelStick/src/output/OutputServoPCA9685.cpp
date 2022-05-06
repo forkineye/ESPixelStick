@@ -178,8 +178,6 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             // DEBUG_V (String ("  Enabled: ") + String (CurrentOutputChannel->Enabled));
             // DEBUG_V (String (" MinLevel: ") + String (CurrentOutputChannel->MinLevel));
             // DEBUG_V (String (" MaxLevel: ") + String (CurrentOutputChannel->MaxLevel));
-
-            ++ChannelId;
         }
 
     } while (false);
