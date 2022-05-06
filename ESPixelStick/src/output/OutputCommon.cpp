@@ -42,10 +42,6 @@ c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds _OutputChannelId
 	// logcon (String ("UartId:          '") + UartId + "'");
     // logcon (String ("OutputChannelId: '") + OutputChannelId + "'");
     // logcon (String ("OutputType:      '") + OutputType + "'");
-    if (gpio_num_t (-1) != DataPin)
-    {
-        pinMode (DataPin, INPUT_PULLUP);
-    }
 
 } // c_OutputCommon
 
@@ -54,15 +50,7 @@ c_OutputCommon::c_OutputCommon (c_OutputMgr::e_OutputChannelIds _OutputChannelId
 c_OutputCommon::~c_OutputCommon ()
 {
     // DEBUG_START;
-    if(HasBeenInitialized)
-    {
-        if (gpio_num_t(-1) == DataPin)
-        {
-            return;
-        }
-        // DEBUG_V("Set Pin Mode");
-        pinMode(DataPin, INPUT_PULLUP);
-    }
+
     // DEBUG_END;
 } // ~c_OutputCommon
 
@@ -71,9 +59,8 @@ void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-#define MicroSecondsInAsecond 1000000
     jsonStatus[CN_id] = OutputChannelId;
-    jsonStatus["framerefreshrate"] = (0 == FrameRefreshTimeInMicroSec) ? 0 : int (MicroSecondsInAsecond / FrameRefreshTimeInMicroSec);
+    jsonStatus["framerefreshrate"] = (0 == FrameRefreshTimeInMicroSec) ? 0 : int(MicroSecondsInASecond / FrameRefreshTimeInMicroSec);
     jsonStatus["FrameCount"] = FrameCount;
 
     // DEBUG_END;
