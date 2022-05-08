@@ -320,26 +320,27 @@ void c_OutputPixel::SetFrameDurration (float IntensityBitTimeInUs, uint16_t Bloc
     uint16_t NumBlocks              = uint16_t (TotalBytesOfIntensityData / float (BlockSize));
     int TotalBlockDelayUs           = int (float (NumBlocks) * BlockDelayUs);
 
-    FrameMinDurationInMicroSec = (IntensityBitTimeInUs * TotalBits) + InterFrameGapInMicroSec + TotalBlockDelayUs;
-    FrameMinDurationInMicroSec = max(uint32_t(25000), FrameMinDurationInMicroSec);
+    uint32_t _FrameMinDurationInMicroSec = (IntensityBitTimeInUs * TotalBits) + InterFrameGapInMicroSec + TotalBlockDelayUs;
+    FrameMinDurationInMicroSec = max(uint32_t(25000), _FrameMinDurationInMicroSec);
 
-    // DEBUG_V (String ("          OutputBufferSize: ") + String (OutputBufferSize));
-    // DEBUG_V (String ("            PixelGroupSize: ") + String (PixelGroupSize));
-    // DEBUG_V (String ("       TotalIntensityBytes: ") + String (TotalIntensityBytes));
-    // DEBUG_V (String ("     PrependNullPixelCount: ") + String (PrependNullPixelCount));
-    // DEBUG_V (String ("      AppendNullPixelCount: ") + String (AppendNullPixelCount));
-    // DEBUG_V (String (" NumIntensityBytesPerPixel: ") + String (NumIntensityBytesPerPixel));
-    // DEBUG_V (String ("            TotalNullBytes: ") + String (TotalNullBytes));
-    // DEBUG_V (String ("      FramePrependDataSize: ") + String (FramePrependDataSize));
-    // DEBUG_V (String (" TotalBytesOfIntensityData: ") + String (TotalBytesOfIntensityData));
-    // DEBUG_V (String ("                 TotalBits: ") + String (TotalBits));
-    // DEBUG_V (String ("                 BlockSize: ") + String (BlockSize));
-    // DEBUG_V (String ("                 NumBlocks: ") + String (NumBlocks));
-    // DEBUG_V (String ("              BlockDelayUs: ") + String (BlockDelayUs));
-    // DEBUG_V (String ("         TotalBlockDelayUs: ") + String (TotalBlockDelayUs));
-    // DEBUG_V (String ("      IntensityBitTimeInUs: ") + String (IntensityBitTimeInUs));
-    // DEBUG_V (String ("   InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
-    // DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
+    // DEBUG_V (String ("           OutputBufferSize: ") + String (OutputBufferSize));
+    // DEBUG_V (String ("             PixelGroupSize: ") + String (PixelGroupSize));
+    // DEBUG_V (String ("        TotalIntensityBytes: ") + String (TotalIntensityBytes));
+    // DEBUG_V (String ("      PrependNullPixelCount: ") + String (PrependNullPixelCount));
+    // DEBUG_V (String ("       AppendNullPixelCount: ") + String (AppendNullPixelCount));
+    // DEBUG_V (String ("  NumIntensityBytesPerPixel: ") + String (NumIntensityBytesPerPixel));
+    // DEBUG_V (String ("             TotalNullBytes: ") + String (TotalNullBytes));
+    // DEBUG_V (String ("       FramePrependDataSize: ") + String (FramePrependDataSize));
+    // DEBUG_V (String ("  TotalBytesOfIntensityData: ") + String (TotalBytesOfIntensityData));
+    // DEBUG_V (String ("                  TotalBits: ") + String (TotalBits));
+    // DEBUG_V (String ("                  BlockSize: ") + String (BlockSize));
+    // DEBUG_V (String ("                  NumBlocks: ") + String (NumBlocks));
+    // DEBUG_V (String ("               BlockDelayUs: ") + String (BlockDelayUs));
+    // DEBUG_V (String ("          TotalBlockDelayUs: ") + String (TotalBlockDelayUs));
+    // DEBUG_V (String ("       IntensityBitTimeInUs: ") + String (IntensityBitTimeInUs));
+    // DEBUG_V (String ("    InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
+    // DEBUG_V (String ("_FrameMinDurationInMicroSec: ") + String (_FrameMinDurationInMicroSec));
+    // DEBUG_V (String (" FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
 
     // DEBUG_END;
 
