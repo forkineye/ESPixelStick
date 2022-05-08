@@ -150,7 +150,7 @@ private:
     inline void IRAM_ATTR   ClearUartInterrupts();
     inline void IRAM_ATTR   DisableUartInterrupts();
 
-#define USE_UART_DEBUG_COUNTERS
+// #define USE_UART_DEBUG_COUNTERS
 #ifdef USE_UART_DEBUG_COUNTERS
     // debug counters
     uint32_t DataCallbackCounter = 0;
