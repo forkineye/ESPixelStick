@@ -21,8 +21,8 @@
 #include "../ESPixelStick.h"
 #ifdef SUPPORT_ETHERNET
 
-#ifndef _ETH_m_H_
-#define _ETH_m_H_
+#ifndef _ETH_H_
+#define _ETH_H_
 
 #include "WiFi.h"
 #include "esp_system.h"
@@ -56,10 +56,10 @@
 typedef enum { ETH_CLOCK_GPIO0_IN, ETH_CLOCK_GPIO0_OUT, ETH_CLOCK_GPIO16_OUT, ETH_CLOCK_GPIO17_OUT } eth_clock_mode_t;
 #endif
 
-typedef enum { ETH_PHY_LAN8720, ETH_PHY_TLK110, ETH_PHY_RTL8201, ETH_PHY_DP83848, ETH_PHY_DM9051, ETH_PHY_KSZ8081, ETH_PHY_MAX } eth_phy_type_t;
+typedef enum { ETH_PHY_LAN8720, ETH_PHY_TLK110, ETH_PHY_RTL8201, ETH_PHY_DP83848, ETH_PHY_DM9051, ETH_PHY_KSZ8041, ETH_PHY_KSZ8081, ETH_PHY_MAX } eth_phy_type_t;
 #define ETH_PHY_IP101 ETH_PHY_TLK110
 
-class ETHClass_m {
+class ETHClass {
     private:
         bool initialized;
         bool staticIP;
@@ -75,10 +75,10 @@ class ETHClass_m {
         eth_config_t eth_config;
 #endif
     public:
-        ETHClass_m();
-        ~ETHClass_m();
+        ETHClass();
+        ~ETHClass();
 
-        bool begin(uint8_t phy_addr=ETH_PHY_ADDR, int power=ETH_PHY_POWER, int mdc=ETH_PHY_MDC, int mdio=ETH_PHY_MDIO, eth_phy_type_t type=ETH_PHY_TYPE, eth_clock_mode_t clk_mode=ETH_CLK_MODE);
+        bool begin(uint8_t phy_addr=ETH_PHY_ADDR, int power=ETH_PHY_POWER, int mdc=ETH_PHY_MDC, int mdio=ETH_PHY_MDIO, eth_phy_type_t type=ETH_PHY_TYPE, eth_clock_mode_t clk_mode=ETH_CLK_MODE, bool use_mac_from_efuse=false);
 
         bool config(IPAddress local_ip, IPAddress gateway, IPAddress subnet, IPAddress dns1 = (uint32_t)0x00000000, IPAddress dns2 = (uint32_t)0x00000000);
 
@@ -111,7 +111,7 @@ class ETHClass_m {
         friend class WiFiServer;
 };
 
-extern ETHClass_m ETH_m;
+extern ETHClass ETH;
 
-#endif /* _ETH_m_H_ */
+#endif /* _ETH_H_ */
 #endif // def SUPPORT_ETHERNET

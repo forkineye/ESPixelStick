@@ -127,7 +127,7 @@ static esp_err_t on_lowlevel_init_done(esp_eth_handle_t eth_handle){
         //gpio_hal_iomux_func_sel(PERIPHS_IO_MUX_GPIO0_U, FUNC_GPIO0_EMAC_TX_CLK);
         //PIN_INPUT_ENABLE(GPIO_PIN_MUX_REG[0]);
         pinMode(0, INPUT);
-        pinMode(0, FUNCTION_6);
+        PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[0], 5);
         EMAC_EXT.ex_clk_ctrl.ext_en = 1;
         EMAC_EXT.ex_clk_ctrl.int_en = 0;
         EMAC_EXT.ex_oscclk_conf.clk_sel = 1;
@@ -139,7 +139,7 @@ static esp_err_t on_lowlevel_init_done(esp_eth_handle_t eth_handle){
             //gpio_hal_iomux_func_sel(PERIPHS_IO_MUX_GPIO0_U, FUNC_GPIO0_CLK_OUT1);
             //PIN_INPUT_DISABLE(GPIO_PIN_MUX_REG[0]);
             pinMode(0, OUTPUT);
-            pinMode(0, FUNCTION_2);
+            PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[0], 1);
             // Choose the APLL clock to output on GPIO
             REG_WRITE(PIN_CTRL, 6);
 #endif
@@ -149,7 +149,7 @@ static esp_err_t on_lowlevel_init_done(esp_eth_handle_t eth_handle){
             //gpio_hal_iomux_func_sel(PERIPHS_IO_MUX_GPIO16_U, FUNC_GPIO16_EMAC_CLK_OUT);
             //PIN_INPUT_DISABLE(GPIO_PIN_MUX_REG[16]);
             pinMode(16, OUTPUT);
-            pinMode(16, FUNCTION_6);
+            PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[16], 5);
 #endif
         } else if(eth_clock_mode == ETH_CLOCK_GPIO17_OUT){
 #if CONFIG_ETH_RMII_CLK_OUT_GPIO != 17
@@ -157,7 +157,7 @@ static esp_err_t on_lowlevel_init_done(esp_eth_handle_t eth_handle){
             //gpio_hal_iomux_func_sel(PERIPHS_IO_MUX_GPIO17_U, FUNC_GPIO17_EMAC_CLK_OUT_180);
             //PIN_INPUT_DISABLE(GPIO_PIN_MUX_REG[17]);
             pinMode(17, OUTPUT);
-            pinMode(17, FUNCTION_6);
+            PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[17], 5);
 #endif
         }
 #if CONFIG_ETH_RMII_CLK_INPUT
@@ -214,7 +214,7 @@ static void _eth_phy_power_enable(bool enable)
 }
 #endif
 
-ETHClass_m::ETHClass_m()
+ETHClass::ETHClass()
     :initialized(false)
     ,staticIP(false)
 #if ESP_IDF_VERSION_MAJOR > 3
@@ -227,16 +227,22 @@ ETHClass_m::ETHClass_m()
 {
 }
 
-ETHClass_m::~ETHClass_m()
+ETHClass::~ETHClass()
 {
 	stop();
 }
-
-bool ETHClass_m::begin(uint8_t phy_addr, int power, int mdc, int mdio, eth_phy_type_t type, eth_clock_mode_t clock_mode)
+bool ETHClass::begin(uint8_t phy_addr, int power, int mdc, int mdio, eth_phy_type_t type, eth_clock_mode_t clock_mode, bool use_mac_from_efuse)
 {
 #if ESP_IDF_VERSION_MAJOR > 3
     eth_clock_mode = clock_mode;
     tcpipInit();
+
+    if (use_mac_from_efuse)
+    {
+        uint8_t p[6] = { 0x00,0x00,0x00,0x00,0x00,0x00 };
+        esp_efuse_mac_get_custom(p);
+        esp_base_mac_addr_set(p);
+    }
 
     tcpip_adapter_set_default_eth_handlers();
     
@@ -251,6 +257,8 @@ bool ETHClass_m::begin(uint8_t phy_addr, int power, int mdc, int mdio, eth_phy_t
 #endif
 #if CONFIG_ETH_USE_ESP32_EMAC
         eth_mac_config_t mac_config = ETH_MAC_DEFAULT_CONFIG();
+        mac_config.clock_config.rmii.clock_mode = (eth_clock_mode) ? EMAC_CLK_OUT : EMAC_CLK_EXT_IN;
+        mac_config.clock_config.rmii.clock_gpio = (1 == eth_clock_mode) ? EMAC_APPL_CLK_OUT_GPIO : (2 == eth_clock_mode) ? EMAC_CLK_OUT_GPIO : (3 == eth_clock_mode) ? EMAC_CLK_OUT_180_GPIO : EMAC_CLK_IN_GPIO;
         mac_config.smi_mdc_gpio_num = mdc;
         mac_config.smi_mdio_gpio_num = mdio;
         mac_config.sw_reset_timeout_ms = 1000;
@@ -287,6 +295,13 @@ bool ETHClass_m::begin(uint8_t phy_addr, int power, int mdc, int mdio, eth_phy_t
             eth_phy = esp_eth_phy_new_dm9051(&phy_config);
             break;
 #endif
+        case ETH_PHY_KSZ8041:
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4,4,0)
+            eth_phy = esp_eth_phy_new_ksz8041(&phy_config);
+#else
+            log_e("unsupported ethernet type 'ETH_PHY_KSZ8041'");
+#endif
+            break;
         case ETH_PHY_KSZ8081:
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4,4,0)
             eth_phy = esp_eth_phy_new_ksz8081(&phy_config);
@@ -304,7 +319,7 @@ bool ETHClass_m::begin(uint8_t phy_addr, int power, int mdc, int mdio, eth_phy_t
 
     eth_handle = NULL;
     esp_eth_config_t eth_config = ETH_DEFAULT_CONFIG(eth_mac, eth_phy);
-    eth_config.on_lowlevel_init_done = on_lowlevel_init_done;
+    //eth_config.on_lowlevel_init_done = on_lowlevel_init_done;
     //eth_config.on_lowlevel_deinit_done = on_lowlevel_deinit_done;
     if(esp_eth_driver_install(&eth_config, &eth_handle) != ESP_OK || eth_handle == NULL){
         log_e("esp_eth_driver_install failed");
@@ -324,7 +339,7 @@ bool ETHClass_m::begin(uint8_t phy_addr, int power, int mdc, int mdio, eth_phy_t
     esp_err_t err;
     if(initialized){
         return start()
-    }
+        }
     _eth_phy_mdc_pin = mdc;
     _eth_phy_mdio_pin = mdio;
     _eth_phy_power_pin = power;
@@ -353,25 +368,33 @@ bool ETHClass_m::begin(uint8_t phy_addr, int power, int mdc, int mdio, eth_phy_t
     }
 
     tcpipInit();
+
+    if (use_mac_from_efuse)
+    {
+        uint8_t p[6] = { 0x00,0x00,0x00,0x00,0x00,0x00 };
+        esp_efuse_mac_get_custom(p);
+        esp_base_mac_addr_set(p);
+    }
+
     err = esp_eth_init(&eth_config);
-    if (!err) {
+    if(!err){
         initialized = true;
         
         if (start ()) {
             return true;
         }
     } else {
-        log_e ("esp_eth_init error: %d", err);
+        log_e("esp_eth_init error: %d", err);
     }
 #endif
     // holds a few microseconds to let DHCP start and enter into a good state
     // FIX ME -- adresses issue https://github.com/espressif/arduino-esp32/issues/5733
-    delay (50);
+    delay(50);
 
-    return true; 
+    return true;
 }
 
-bool ETHClass_m::start ()
+bool ETHClass::start ()
 {
     if (!started)
     {
@@ -395,7 +418,7 @@ bool ETHClass_m::start ()
     return started;
 } // start
 
-bool ETHClass_m::stop ()
+bool ETHClass::stop ()
 {
     if (started)
     {
@@ -419,7 +442,7 @@ bool ETHClass_m::stop ()
     return !started;
 } // stop
 
-bool ETHClass_m::config(IPAddress local_ip, IPAddress gateway, IPAddress subnet, IPAddress dns1, IPAddress dns2)
+bool ETHClass::config(IPAddress local_ip, IPAddress gateway, IPAddress subnet, IPAddress dns1, IPAddress dns2)
 {
     // DEBUG_START;
     esp_err_t err = ESP_OK;
@@ -478,7 +501,7 @@ bool ETHClass_m::config(IPAddress local_ip, IPAddress gateway, IPAddress subnet,
     return true;
 }
 
-IPAddress ETHClass_m::localIP()
+IPAddress ETHClass::localIP()
 {
     tcpip_adapter_ip_info_t ip;
     if(tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_ETH, &ip)){
@@ -487,7 +510,7 @@ IPAddress ETHClass_m::localIP()
     return IPAddress(ip.ip.addr);
 }
 
-IPAddress ETHClass_m::subnetMask()
+IPAddress ETHClass::subnetMask()
 {
     tcpip_adapter_ip_info_t ip;
     if(tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_ETH, &ip)){
@@ -496,7 +519,7 @@ IPAddress ETHClass_m::subnetMask()
     return IPAddress(ip.netmask.addr);
 }
 
-IPAddress ETHClass_m::gatewayIP()
+IPAddress ETHClass::gatewayIP()
 {
     tcpip_adapter_ip_info_t ip;
     if(tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_ETH, &ip)){
@@ -505,13 +528,13 @@ IPAddress ETHClass_m::gatewayIP()
     return IPAddress(ip.gw.addr);
 }
 
-IPAddress ETHClass_m::dnsIP(uint8_t dns_no)
+IPAddress ETHClass::dnsIP(uint8_t dns_no)
 {
     const ip_addr_t * dns_ip = dns_getserver(dns_no);
     return IPAddress(dns_ip->u_addr.ip4.addr);
 }
 
-IPAddress ETHClass_m::broadcastIP()
+IPAddress ETHClass::broadcastIP()
 {
     tcpip_adapter_ip_info_t ip;
     if(tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_ETH, &ip)){
@@ -520,7 +543,7 @@ IPAddress ETHClass_m::broadcastIP()
     return WiFiGenericClass::calculateBroadcast(IPAddress(ip.gw.addr), IPAddress(ip.netmask.addr));
 }
 
-IPAddress ETHClass_m::networkID()
+IPAddress ETHClass::networkID()
 {
     tcpip_adapter_ip_info_t ip;
     if(tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_ETH, &ip)){
@@ -529,7 +552,7 @@ IPAddress ETHClass_m::networkID()
     return WiFiGenericClass::calculateNetworkID(IPAddress(ip.gw.addr), IPAddress(ip.netmask.addr));
 }
 
-uint8_t ETHClass_m::subnetCIDR()
+uint8_t ETHClass::subnetCIDR()
 {
     tcpip_adapter_ip_info_t ip;
     if(tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_ETH, &ip)){
@@ -538,7 +561,7 @@ uint8_t ETHClass_m::subnetCIDR()
     return WiFiGenericClass::calculateSubnetCIDR(IPAddress(ip.netmask.addr));
 }
 
-const char * ETHClass_m::getHostname()
+const char * ETHClass::getHostname()
 {
     const char * hostname;
     if(tcpip_adapter_get_hostname(TCPIP_ADAPTER_IF_ETH, &hostname)){
@@ -547,12 +570,12 @@ const char * ETHClass_m::getHostname()
     return hostname;
 }
 
-bool ETHClass_m::setHostname(const char * hostname)
+bool ETHClass::setHostname(const char * hostname)
 {
     return tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_ETH, hostname) == 0;
 }
 
-bool ETHClass_m::fullDuplex()
+bool ETHClass::fullDuplex()
 {
 #ifdef ESP_IDF_VERSION_MAJOR
     return true;//todo: do not see an API for this
@@ -561,7 +584,7 @@ bool ETHClass_m::fullDuplex()
 #endif
 }
 
-bool ETHClass_m::linkUp()
+bool ETHClass::linkUp()
 {
 #ifdef ESP_IDF_VERSION_MAJOR
     return eth_link == ETH_LINK_UP;
@@ -570,7 +593,7 @@ bool ETHClass_m::linkUp()
 #endif
 }
 
-uint8_t ETHClass_m::linkSpeed()
+uint8_t ETHClass::linkSpeed()
 {
 #ifdef ESP_IDF_VERSION_MAJOR
     eth_speed_t link_speed;
@@ -581,12 +604,12 @@ uint8_t ETHClass_m::linkSpeed()
 #endif
 }
 
-bool ETHClass_m::enableIpV6()
+bool ETHClass::enableIpV6()
 {
     return tcpip_adapter_create_ip6_linklocal(TCPIP_ADAPTER_IF_ETH) == 0;
 }
 
-IPv6Address ETHClass_m::localIPv6()
+IPv6Address ETHClass::localIPv6()
 {
     static ip6_addr_t addr;
     if(tcpip_adapter_get_ip6_linklocal(TCPIP_ADAPTER_IF_ETH, &addr)){
@@ -595,7 +618,7 @@ IPv6Address ETHClass_m::localIPv6()
     return IPv6Address(addr.addr);
 }
 
-uint8_t * ETHClass_m::macAddress(uint8_t* mac)
+uint8_t * ETHClass::macAddress(uint8_t* mac)
 {
     if(!mac){
         return NULL;
@@ -608,7 +631,7 @@ uint8_t * ETHClass_m::macAddress(uint8_t* mac)
     return mac;
 }
 
-String ETHClass_m::macAddress(void)
+String ETHClass::macAddress(void)
 {
     uint8_t mac[6] = {0,0,0,0,0,0};
     char macStr[18] = { 0 };
@@ -617,5 +640,5 @@ String ETHClass_m::macAddress(void)
     return String(macStr);
 }
 
-ETHClass_m ETH_m;
+ETHClass ETH;
 #endif // def SUPPORT_ETHERNET
