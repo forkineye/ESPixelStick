@@ -957,9 +957,8 @@ inline void IRAM_ATTR c_OutputUart::ClearUartInterrupts()
 //----------------------------------------------------------------------------
 inline void IRAM_ATTR c_OutputUart::DisableUartInterrupts()
 {
-    ClearUartInterrupts();
     CLEAR_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), UART_INTR_MASK);
-    ActiveIsrMask = 0;
+    ClearUartInterrupts();
 } // DisableUartInterrupts
 
 //----------------------------------------------------------------------------
