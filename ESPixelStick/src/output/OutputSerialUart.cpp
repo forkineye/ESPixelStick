@@ -45,7 +45,15 @@ void c_OutputSerialUart::Begin ()
     c_OutputSerial::Begin();
 
     c_OutputUart::OutputUartConfig_t OutputUartConfig;
-    OutputUartConfig.ChannelId              = OutputChannelId;
+#if defined(SUPPORT_OutputType_DMX)
+    if (c_OutputMgr::e_OutputType::OutputType_DMX == OutputType)
+    {
+        OutputUartConfig.FrameStartBreakUS          = 92;
+        OutputUartConfig.FrameStartMarkAfterBreakUS = 23;
+        ;
+    }
+#endif // defined(SUPPORT_OutputType_DMX)
+    OutputUartConfig.ChannelId = OutputChannelId;
     OutputUartConfig.UartId                 = UartId;
     OutputUartConfig.DataPin                = DataPin;
     OutputUartConfig.IntensityDataWidth     = 8;
@@ -54,14 +62,8 @@ void c_OutputSerialUart::Begin ()
     OutputUartConfig.pSerialDataSource      = this;
     OutputUartConfig.Baudrate               = CurrentBaudrate;
     Uart.Begin(OutputUartConfig);
-
-#if defined(SUPPORT_OutputType_DMX)
-    if (c_OutputMgr::e_OutputType::OutputType_DMX == OutputType)
-    {
-        Uart.SetSendBreak(true);
-    }
-#endif // defined(SUPPORT_OutputType_DMX)
- HasBeenInitialized = true;
+    
+    HasBeenInitialized = true;
 
     // DEBUG_END;
 } // Begin

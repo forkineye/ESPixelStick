@@ -258,10 +258,17 @@ void c_OutputUart::GenerateBreak(uint32_t DurationInUs, uint32_t MarkDurationInU
 {
     // DEBUG_START;
 
-    StartBreak();
-    delayMicroseconds(DurationInUs);
+    if (DurationInUs)
+    {
+        StartBreak();
+        delayMicroseconds(DurationInUs);
+    }
+
     EndBreak();
-    delayMicroseconds(MarkDurationInUs);
+    if (MarkDurationInUs)
+    {
+        delayMicroseconds(MarkDurationInUs);
+    }
 
     // DEBUG_END;
 
@@ -375,6 +382,9 @@ void c_OutputUart::InitializeUart()
 
         // DEBUG_V("Clear all pending interrupts in the UART");
         ClearUartInterrupts();
+
+        // DEBUG_V("Setup UART ISR flags");
+        CalculateEnableUartInterruptFlags();
 
         // DEBUG_V("Reenable interrupts");
         ETS_UART_INTR_ENABLE();
@@ -496,10 +506,12 @@ void c_OutputUart::InitializeUart()
                               UART_TX_IDLE_NUM_S);
         }
     }
+    
+    CalculateEnableUartInterruptFlags();
 
 // #define SupportSetUartBaudrateWorkAround
 #ifdef SupportSetUartBaudrateWorkAround
-    uint32_t ClockDivider = (APB_CLK_FREQ << 4) / uart_config.baud_rate;
+        uint32_t ClockDivider = (APB_CLK_FREQ << 4) / uart_config.baud_rate;
     // DEBUG_V (String ("            APB_CLK_FREQ: 0x") + String (APB_CLK_FREQ, HEX));
     // DEBUG_V (String ("            ClockDivider: 0x") + String (ClockDivider, HEX));
     uint32_t adjusted_ClockDivider = ((ClockDivider >> 4) & UART_CLKDIV_V) | ((ClockDivider & UART_CLKDIV_FRAG_V) << UART_CLKDIV_FRAG_S);
@@ -937,12 +949,6 @@ void c_OutputUart::SetMinFrameDurationInUs(uint32_t value)
 } // SetMinFrameDurationInUs
 
 //----------------------------------------------------------------------------
-void c_OutputUart::SetSendBreak(bool value)
-{
-    SendBreak = value;
-} // SetSendBreak
-
-//----------------------------------------------------------------------------
 inline void IRAM_ATTR c_OutputUart::ClearUartInterrupts()
 {
     WRITE_PERI_REG(UART_INT_CLR(OutputUartConfig.UartId), UART_INTR_MASK);
@@ -957,13 +963,45 @@ inline void IRAM_ATTR c_OutputUart::DisableUartInterrupts()
 } // DisableUartInterrupts
 
 //----------------------------------------------------------------------------
+void c_OutputUart::CalculateEnableUartInterruptFlags()
+{
+    /// DEBUG_START;
+
+    uint32_t isr_flag = 0;
+
+    // do we need to send an inter intensity break?
+    if (OutputUartConfig.NumInterIntensityBreakBits)
+    {
+        // DEBUG_V();
+        isr_flag = UART_TX_BRK_DONE_INT_ENA;
+
+        // DEBUG_V();
+        if (OutputUartConfig.NumInterIntensityMABbits)
+        {
+            /// DEBUG_V();
+            isr_flag = UART_TX_BRK_IDLE_DONE_INT_ENA;
+        }
+    }
+    else
+    {
+        // DEBUG_V();
+        isr_flag = UART_TXFIFO_EMPTY_INT_ENA;
+    }
+    // DEBUG_V();
+
+    ActiveIsrMask = isr_flag;
+
+    /// DEBUG_END;
+
+} // EnableUartInterrupts
+
+//----------------------------------------------------------------------------
 inline void IRAM_ATTR c_OutputUart::EnableUartInterrupts()
 {
     /// DEBUG_START;
 
     do // once
     {
-        uint32_t isr_flag = 0;
         DisableUartInterrupts();
 
         // if more data to send
@@ -974,29 +1012,8 @@ inline void IRAM_ATTR c_OutputUart::EnableUartInterrupts()
         }
         // there is data that needs to be sent
 
-        // do we need to send an inter intensity break?
-        if (OutputUartConfig.NumInterIntensityBreakBits)
-        {
-            /// DEBUG_V();
-            isr_flag = UART_TX_BRK_DONE_INT_ENA;
-#ifdef ARDUINO_ARCH_ESP32
-            /// DEBUG_V();
-            if (OutputUartConfig.NumInterIntensityMABbits)
-            {
-                /// DEBUG_V();
-                isr_flag = UART_TX_BRK_IDLE_DONE_INT_ENA;
-            }
-#endif // def ARDUINO_ARCH_ESP32
-        }
-        else
-        {
-            /// DEBUG_V();
-            isr_flag = UART_TXFIFO_EMPTY_INT_ENA;
-        }
-        /// DEBUG_V();
-
-        ActiveIsrMask = isr_flag;
         SET_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), ActiveIsrMask);
+
     } while (false);
 
     /// DEBUG_END;
@@ -1025,10 +1042,7 @@ void c_OutputUart::StartNewFrame()
 #endif // def USE_UART_DEBUG_COUNTERS
 
     // set up to send a new frame
-    if(SendBreak)
-    {
-        GenerateBreak(92, 23);
-    }
+    GenerateBreak(OutputUartConfig.FrameStartBreakUS, OutputUartConfig.FrameStartMarkAfterBreakUS);
 
     // DEBUG_V();
 

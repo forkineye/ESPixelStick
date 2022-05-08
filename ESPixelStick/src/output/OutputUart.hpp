@@ -81,12 +81,14 @@ public:
         uart_port_t                 UartId                          = uart_port_t(-1);
         size_t                      IntensityDataWidth              = 8; // 8 bits in a byte
         UartDataSize_t              UartDataSize                    = UartDataSize_t::OUTPUT_UART_8N2;
+        uint32_t                    FrameStartBreakUS               = 0;
+        uint32_t                    FrameStartMarkAfterBreakUS      = 0;
         TranslateIntensityData_t    TranslateIntensityData          = TranslateIntensityData_t::NoTranslation;
         bool                        InvertOutputPolarity            = false;
         uint32_t                    Baudrate                        = 57600; // current transmit rate
         c_OutputPixel               *pPixelDataSource               = nullptr;
         uint32_t                    FiFoTriggerLevel                = DEFAULT_UART_FIFO_TRIGGER_LEVEL;
-        uint16_t                    NumInterIntensityBreakBits  = 0;
+        uint16_t                    NumInterIntensityBreakBits      = 0;
         uint16_t                    NumInterIntensityMABbits        = 0;
         bool                        TriggerIsrExternally            = false;
         const CitudsArray_t        *CitudsArray                     = nullptr;
@@ -106,7 +108,6 @@ public:
     void PauseOutput             (bool State);
     void SetMinFrameDurationInUs (uint32_t value);
     void StartNewFrame           ();
-    void SetSendBreak            (bool value);
 
     void IRAM_ATTR ISR_UART_Handler();
     void IRAM_ATTR ISR_Handler_SendIntensityData();
@@ -128,7 +129,6 @@ private:
 
     uint8_t Intensity2Uart[UartDataBitTranslationId_t::Uart_LIST_END];
     bool            OutputIsPaused                  = false;
-    bool            SendBreak                       = false;
     uint32_t        LastFrameStartTime              = 0;
     uint32_t        FrameMinDurationInMicroSec      = 25000;
     uint32_t        TxIntensityDataStartingMask     = 0x80;
@@ -140,14 +140,15 @@ private:
     intr_handle_t   IsrHandle                       = nullptr;
 #endif // defined(ARDUINO_ARCH_ESP32)
 
-    bool     IRAM_ATTR MoreDataToSend();
-    uint32_t IRAM_ATTR GetNextIntensityToSend();
-    void     IRAM_ATTR StartNewDataFrame();
-    uint32_t IRAM_ATTR getUartFifoLength();
-    void     IRAM_ATTR enqueueUartData(uint8_t value);
-    inline void IRAM_ATTR EnableUartInterrupts();
-    inline void IRAM_ATTR ClearUartInterrupts();
-    inline void IRAM_ATTR DisableUartInterrupts();
+    bool     IRAM_ATTR      MoreDataToSend();
+    uint32_t IRAM_ATTR      GetNextIntensityToSend();
+    void     IRAM_ATTR      StartNewDataFrame();
+    uint32_t IRAM_ATTR      getUartFifoLength();
+    void     IRAM_ATTR      enqueueUartData(uint8_t value);
+    void                    CalculateEnableUartInterruptFlags();
+    inline void IRAM_ATTR   EnableUartInterrupts();
+    inline void IRAM_ATTR   ClearUartInterrupts();
+    inline void IRAM_ATTR   DisableUartInterrupts();
 
 #define USE_UART_DEBUG_COUNTERS
 #ifdef USE_UART_DEBUG_COUNTERS
@@ -182,6 +183,10 @@ private:
 #ifndef UART_TX_BRK_DONE_INT_ENA
 #   define UART_TX_BRK_DONE_INT_ENA 0
 #endif // ndef | UART_TX_BRK_DONE_INT_ENA
+
+#ifndef UART_TX_BRK_IDLE_DONE_INT_ENA
+#   define UART_TX_BRK_IDLE_DONE_INT_ENA 0
+#endif // ndef | UART_TX_BRK_IDLE_DONE_INT_ENA
 
 #ifndef UART_INTR_MASK
 #   if defined(ARDUINO_ARCH_ESP32)
