@@ -50,7 +50,6 @@ void c_OutputSerialUart::Begin ()
     {
         OutputUartConfig.FrameStartBreakUS          = 92;
         OutputUartConfig.FrameStartMarkAfterBreakUS = 23;
-        ;
     }
 #endif // defined(SUPPORT_OutputType_DMX)
     OutputUartConfig.ChannelId = OutputChannelId;
