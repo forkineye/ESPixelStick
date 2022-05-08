@@ -3,7 +3,7 @@
  * GPIO_Defs_ESP32_LoLin_D32_PRO.hpp - Output Management class
  *
  * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
- * Copyright (c) 2021 Shelby Merrick
+ * Copyright (c) 2021 - 2022 Shelby Merrick
  * http://www.forkineye.com
  *
  *  This program is provided free for you to use in any way that you wish,
@@ -33,11 +33,11 @@
 
 // SPI Output
 #define SUPPORT_SPI_OUTPUT
-#define DEFAULT_SPI_DATA_GPIO  gpio_num_t::GPIO_NUM_15
-#define DEFAULT_SPI_CLOCK_GPIO gpio_num_t::GPIO_NUM_25
+#define DEFAULT_SPI_DATA_GPIO   gpio_num_t::GPIO_NUM_16
+#define DEFAULT_SPI_CLOCK_GPIO  gpio_num_t::GPIO_NUM_17
 
-#define DEFAULT_I2C_SDA         gpio_num_t::GPIO_NUM_21
-#define DEFAULT_I2C_SCL         gpio_num_t::GPIO_NUM_22
+#define DEFAULT_I2C_SDA         gpio_num_t::GPIO_NUM_3
+#define DEFAULT_I2C_SCL         gpio_num_t::GPIO_NUM_5
 
 // File Manager
 #define SUPPORT_SD
@@ -46,7 +46,7 @@
 #define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_18
 #define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_4
 
-#define DEFAULT_RELAY_GPIO      gpio_num_t::GPIO_NUM_10
+#define DEFAULT_RELAY_GPIO      gpio_num_t::GPIO_NUM_1
 
 // Output Types
 // Not Finished - #define SUPPORT_OutputType_TLS3001
