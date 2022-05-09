@@ -5,13 +5,14 @@ Import("env")
 
 
 def PrepareDestinationDirectory(DirRoot, DirPath):
-    print("mkdirs: Remove path - '" + DirPath + "'")
-    shutil.rmtree(DirPath, True)
+    os.system("ls -al ./")
+    print("mkdirs: Remove path - '" + DirRoot + "'")
+    shutil.rmtree(DirRoot, True)
     os.system("ls -al ./")
     print("mkdirs: path - '" + DirPath + "'")
     os.makedirs(DirPath, 0x777, True)
     os.system("ls -al ./")
-    print("chmod")
+    print("chmod: " + DirRoot)
     os.system("chmod -R a+rwx " + DirRoot)
     os.system("ls -al " + DirPath)
 
@@ -51,7 +52,7 @@ DST_DBG   = DBG_DIR + PIOENV + ".elf"
 def after_build(source, target, env):
 
     pathfrm = os.path.join("", DST_DIR)
-    PrepareDestinationDirectory("./firmawre", pathfrm)
+    PrepareDestinationDirectory("./firmware", pathfrm)
     print("Copy from: '" + SRC_BIN + "' to '" + DST_BIN + "'")
     shutil.copyfile(SRC_BIN, DST_BIN)
     print("Listing dir: " + pathfrm)
