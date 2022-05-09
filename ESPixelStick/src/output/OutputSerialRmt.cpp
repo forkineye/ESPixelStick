@@ -95,7 +95,7 @@ void c_OutputSerialRmt::SetUpRmtBitTimes()
 {
     rmt_item32_t BitValue;
 
-    float BitTimeNS = (1.0 / float(CurrentBaudrate)) * 1000000000;
+    float BitTimeNS = (1.0 / float(CurrentBaudrate)) * NanoSecondsInASecond;
     uint32_t BitTimeRmtTicks = uint32_t(BitTimeNS / RMT_TickLengthNS) + 1;
     // DEBUG_V(String(" CurrentBaudrate: ") + String(CurrentBaudrate));
     // DEBUG_V(String("       BitTimeNS: ") + String(BitTimeNS));
@@ -155,9 +155,9 @@ void c_OutputSerialRmt::SetUpRmtBitTimes()
     if (c_OutputMgr::e_OutputType::OutputType_DMX == OutputType)
     {
         // turn it into a break signal
-        BitValue.duration0 = (DMX_BREAK_US * 1000) / RMT_TickLengthNS;
+        BitValue.duration0 = (DMX_BREAK_US * NanoSecondsInAMicroSecond) / RMT_TickLengthNS;
         BitValue.level0 = 0;
-        BitValue.duration1 = (DMX_MAB_US   * 1000) / RMT_TickLengthNS;
+        BitValue.duration1 = (DMX_MAB_US   * NanoSecondsInAMicroSecond) / RMT_TickLengthNS;
         BitValue.level1 = 1;
         Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
     }

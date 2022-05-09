@@ -244,7 +244,7 @@ bool c_OutputSerial::validate ()
 void c_OutputSerial::SetFrameDurration ()
 {
     // DEBUG_START;
-    float IntensityBitTimeInUs     = (1.0 / float(CurrentBaudrate)) * 1000000.0;
+    float IntensityBitTimeInUs     = (1.0 / float(CurrentBaudrate)) * float(MicroSecondsInASecond);
     float TotalIntensitiesPerFrame = float(Num_Channels + 1) + SerialHeaderSize + SerialFooterSize;
     float TotalBitsPerFrame        = float(NumBitsPerIntensity) * TotalIntensitiesPerFrame;
     uint32_t TotalFrameTimeInUs    = uint32_t(IntensityBitTimeInUs * TotalBitsPerFrame) + InterFrameGapInMicroSec;

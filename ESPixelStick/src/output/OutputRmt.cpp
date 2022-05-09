@@ -25,7 +25,7 @@
 static void IRAM_ATTR rmt_intr_handler (void* param);
 
 //----------------------------------------------------------------------------
-c_OutputRmt::c_OutputRmt ()
+c_OutputRmt::c_OutputRmt()
 {
     // DEBUG_START;
 
@@ -42,15 +42,21 @@ c_OutputRmt::~c_OutputRmt ()
 {
     // DEBUG_START;
 
-    // Disable all interrupts for this RMT Channel.
-    // DEBUG_V ("");
-
-    // Clear all pending interrupts in the RMT Channel
-    // DEBUG_V ("");
     if (HasBeenInitialized)
     {
+        logcon(F("Shutting down an RMT channel requires a reboot"));
+        reboot = true;
+
         DisableInterrupts;
-        rmt_tx_stop (OutputRmtConfig.RmtChannelId);
+        RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 0;
+        RMT.int_ena.val = 0;
+        RMT.int_ena.val = 0;
+        RMT.int_clr.val = RMT_INT_THR_EVNT_BIT;
+        RMT.int_clr.val = RMT_INT_TX_END_BIT;
+
+        // reset the internal and external pointers to the start of the mem block
+        RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.mem_rd_rst = 1;
+        RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.mem_rd_rst = 0;
 
         rmt_isr_deregister (RMT_intr_handle);
 
@@ -141,11 +147,9 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
 
         // DEBUG_V (String ("                Intensity2Rmt[0]: 0x") + String (uint32_t (Intensity2Rmt[0].val), HEX));
         // DEBUG_V (String ("                Intensity2Rmt[1]: 0x") + String (uint32_t (Intensity2Rmt[1].val), HEX));
-        // DEBUG_V (String ("Intensity2Rmt[INTERFRAME_GAP_ID]: 0x") + String (uint32_t (Intensity2Rmt[INTERFRAME_GAP_ID].val), HEX));
-        // DEBUG_V (String ("      Intensity2Rmt[STARTBIT_ID]: 0x") + String (uint32_t (Intensity2Rmt[STARTBIT_ID].val), HEX));
-        // DEBUG_V (String ("       Intensity2Rmt[STOPBIT_ID]: 0x") + String (uint32_t (Intensity2Rmt[STOPBIT_ID].val), HEX));
 
 #ifdef RMT_USR_ISR_TASK
+        // This is for debugging only
         xTaskCreate(SendRmtIntensityDataTask, "RMTTask", 4000, this, ESP_TASK_PRIO_MIN + 4, &SendIntensityDataTaskHandle);
 #endif // def RMT_USR_ISR_TASK
 
@@ -159,12 +163,12 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
 //----------------------------------------------------------------------------
 void IRAM_ATTR c_OutputRmt::ISR_Handler ()
 {
-    // DEBUG_START;
+    /// DEBUG_START;
 
     uint32_t int_st = RMT.int_raw.val;
-    // DEBUG_V(String("              int_st: 0x") + String(int_st, HEX));
-    // DEBUG_V(String("  RMT_INT_TX_END_BIT: 0x") + String(RMT_INT_TX_END_BIT, HEX));
-    // DEBUG_V(String("RMT_INT_THR_EVNT_BIT: 0x") + String(RMT_INT_THR_EVNT_BIT, HEX));
+    /// DEBUG_V(String("              int_st: 0x") + String(int_st, HEX));
+    /// DEBUG_V(String("  RMT_INT_TX_END_BIT: 0x") + String(RMT_INT_TX_END_BIT, HEX));
+    /// DEBUG_V(String("RMT_INT_THR_EVNT_BIT: 0x") + String(RMT_INT_THR_EVNT_BIT, HEX));
 
     do // once
     {
@@ -187,7 +191,7 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler ()
 
         if (int_st & RMT_INT_THR_EVNT_BIT)
         {
-            // DEBUG_V("RMT_INT_THR_EVNT_BIT");
+            /// DEBUG_V("RMT_INT_THR_EVNT_BIT");
 
 #ifdef USE_RMT_DEBUG_COUNTERS
             DataISRcounter++;
@@ -220,34 +224,34 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler ()
 #ifdef USE_RMT_DEBUG_COUNTERS
         if (int_st & RMT_INT_ERROR_BIT)
         {
-            // DEBUG_V("RMT_INT_ERROR_BIT");
+            /// DEBUG_V("RMT_INT_ERROR_BIT");
             ErrorIsr++;
         }
 
         if (int_st & RMT_INT_RX_END_BIT)
         {
-            // DEBUG_V("RMT_INT_RX_END_BIT");
+            /// DEBUG_V("RMT_INT_RX_END_BIT");
             RxIsr++;
         }
 #endif // def USE_RMT_DEBUG_COUNTERS
     } while (false);
 
-    // DEBUG_END;
+    /// DEBUG_END;
 
 } // ISR_Handler
 
 //----------------------------------------------------------------------------
 void c_OutputRmt::PauseOutput(bool PauseOutput)
 {
-    // DEBUG_START;
+    /// DEBUG_START;
 
     if (OutputIsPaused == PauseOutput)
     {
-        // DEBUG_V("no change. Ignore the call");
+        /// DEBUG_V("no change. Ignore the call");
     }
     else if (PauseOutput)
     {
-        // DEBUG_V("stop the output");
+        /// DEBUG_V("stop the output");
         DisableInterrupts;
         RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 0;
 
@@ -257,13 +261,13 @@ void c_OutputRmt::PauseOutput(bool PauseOutput)
 
     OutputIsPaused = PauseOutput;
 
-    // DEBUG_END;
+    /// DEBUG_END;
 }
 
 //----------------------------------------------------------------------------
 inline void IRAM_ATTR c_OutputRmt::ISR_EnqueueData(uint32_t value)
 {
-    // DEBUG_START;
+    /// DEBUG_START;
 
     // write the data
     RmtCurrentAddr->val = value;
@@ -276,7 +280,7 @@ inline void IRAM_ATTR c_OutputRmt::ISR_EnqueueData(uint32_t value)
         RmtCurrentAddr = RmtStartAddr;
     }
 
-    // DEBUG_END;
+    /// DEBUG_END;
 }
 
 //----------------------------------------------------------------------------
@@ -339,7 +343,7 @@ void c_OutputRmt::StartNewFrame ()
 
     // Need to build up a backlog of entries in the buffer
     // so that there is still plenty of data to send when the isr fires.
-    // DEBUG_V(String("NumInterFrameRmtSlots: ") + String(NumInterFrameRmtSlots));
+    /// DEBUG_V(String("NumIdleBits: ") + String(OutputRmtConfig.NumIdleBits));
     size_t NumInterFrameRmtSlotsCount = 0;
     while (NumInterFrameRmtSlotsCount < OutputRmtConfig.NumIdleBits)
     {
@@ -350,7 +354,7 @@ void c_OutputRmt::StartNewFrame ()
 #endif // def USE_RMT_DEBUG_COUNTERS
     }
 
-    // DEBUG_V(String("NumFrameStartRmtSlots: ") + String(NumFrameStartRmtSlots));
+    /// DEBUG_V(String("NumFrameStartBits: ") + String(OutputRmtConfig.NumFrameStartBits));
     size_t NumFrameStartRmtSlotsCount = 0;
     while (NumFrameStartRmtSlotsCount++ < OutputRmtConfig.NumFrameStartBits)
     {
@@ -387,7 +391,7 @@ void c_OutputRmt::StartNewFrame ()
 //----------------------------------------------------------------------------
 void IRAM_ATTR c_OutputRmt::ISR_Handler_SendIntensityData ()
 {
-    // DEBUG_START;
+    /// DEBUG_START;
 
     uint32_t OneBitValue  = Intensity2Rmt[RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID].val;
     uint32_t ZeroBitValue = Intensity2Rmt[RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID].val;
@@ -438,14 +442,14 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_SendIntensityData ()
     // gets overwritten on next refill
     RmtCurrentAddr->val = 0;
 
-    // DEBUG_END;
+    /// DEBUG_END;
 
 } // ISR_Handler_SendIntensityData
 
 //----------------------------------------------------------------------------
 bool c_OutputRmt::Render ()
 {
-    // DEBUG_START;
+    /// DEBUG_START;
     bool Response = false;
 
     do // once
@@ -473,7 +477,7 @@ bool c_OutputRmt::Render ()
         }
 #endif // def USE_RMT_DEBUG_COUNTERS
 
-        // DEBUG_V("Stop old Frame");
+        /// DEBUG_V("Stop old Frame");
         RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 0;
         DisableInterrupts;
         RMT.int_clr.val = RMT_INT_THR_EVNT_BIT;
@@ -486,20 +490,20 @@ bool c_OutputRmt::Render ()
         NumAvailableRmtSlotsToFill = NUM_RMT_SLOTS;
         RMT.tx_lim_ch[OutputRmtConfig.RmtChannelId].limit = NumRmtSlotsPerInterrupt;
 
-        // DEBUG_V("Set up a new Frame");
+        /// DEBUG_V("Set up a new Frame");
         StartNewFrame();
 
-        // DEBUG_V("Start Transmit");
+        /// DEBUG_V("Start Transmit");
         // enable the threshold event interrupt
         EnableInterrupts;
         RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 1;
         LastFrameStartTime = millis ();
-        // DEBUG_V("Transmit Started");
+        /// DEBUG_V("Transmit Started");
         Response = true;
 
     } while (false);
 
-    // DEBUG_END;
+    /// DEBUG_END;
 
     return Response;
 
@@ -508,7 +512,7 @@ bool c_OutputRmt::Render ()
 //----------------------------------------------------------------------------
 void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
-    // DEBUG_START;
+    /// DEBUG_START;
 
     jsonStatus[F("NumRmtSlotOverruns")] = NumRmtSlotOverruns;
 #ifdef USE_RMT_DEBUG_COUNTERS
@@ -546,7 +550,7 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     }
 
 #endif // def USE_RMT_DEBUG_COUNTERS
-    // DEBUG_END;
+    /// DEBUG_END;
 } // GetStatus
 
 #endif // def SUPPORT_RMT_OUTPUT

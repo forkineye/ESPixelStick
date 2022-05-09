@@ -49,10 +49,9 @@ public:
 
 protected:
 
-#define UCS8903_PIXEL_NS_PER_SECOND          1000000000.0
 // #define UCS8903_PIXEL_DATA_RATE              800000.0
-#define UCS8903_PIXEL_DATA_RATE             (1 / ((UCS8903_PIXEL_NS_BIT_TOTAL) / UCS8903_PIXEL_NS_PER_SECOND ))
-// #define UCS8903_PIXEL_NS_BIT_TOTAL           ((1.0 / UCS8903_PIXEL_DATA_RATE) * UCS8903_PIXEL_NS_PER_SECOND)
+#define UCS8903_PIXEL_DATA_RATE             (1 / ((UCS8903_PIXEL_NS_BIT_TOTAL) / NanoSecondsInASecond ))
+// #define UCS8903_PIXEL_NS_BIT_TOTAL           ((1.0 / UCS8903_PIXEL_DATA_RATE) * NanoSecondsInASecond)
 #define UCS8903_PIXEL_NS_BIT_TOTAL           (UCS8903_PIXEL_NS_BIT_0_HIGH + UCS8903_PIXEL_NS_BIT_0_LOW)
 
 #define UCS8903_PIXEL_NS_BIT_0_HIGH          400.0 // 400ns +/- 40ns per datasheet
@@ -62,7 +61,7 @@ protected:
 #define UCS8903_PIXEL_NS_BIT_1_LOW           400.0 // 400ns -0 per data sheet
 
 #define UCS8903_PIXEL_IDLE_TIME_NS           30000.0 // >24us per datasheet
-#define UCS8903_PIXEL_IDLE_TIME_US           (UCS8903_PIXEL_IDLE_TIME_NS / 1000.0)
+#define UCS8903_PIXEL_IDLE_TIME_US           (UCS8903_PIXEL_IDLE_TIME_NS / float(NanoSecondsInAMicroSecond))
 #define UCS8903_INTENSITY_DATA_WIDTH         16
 
 }; // c_OutputUCS8903

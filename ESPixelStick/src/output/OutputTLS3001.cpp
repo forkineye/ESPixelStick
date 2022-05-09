@@ -70,7 +70,7 @@ void c_OutputTLS3001::SetOutputBufferSize (uint16_t NumChannelsAvailable)
     c_OutputPixel::SetOutputBufferSize (NumChannelsAvailable);
 
     // Calculate our refresh time
-    SetFrameDurration (((1.0 / float (TLS3001_PIXEL_NS_BIT)) * 1000000), 0, 0);
+    SetFrameDurration (((1.0 / float (TLS3001_PIXEL_NS_BIT)) * MicroSecondsInASecond), 0, 0);
 
     // DEBUG_END;
 
@@ -84,7 +84,7 @@ bool c_OutputTLS3001::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     bool response = c_OutputPixel::SetConfig (jsonConfig);
 
     // Calculate our refresh time
-    SetFrameDurration (((1.0 / float (TLS3001_PIXEL_NS_BIT)) * 1000000), 0, 0);
+    SetFrameDurration (((1.0 / float (TLS3001_PIXEL_NS_BIT)) * MicroSecondsInASecond), 0, 0);
 
     // DEBUG_END;
     return response;

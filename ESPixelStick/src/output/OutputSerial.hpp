@@ -65,8 +65,8 @@ protected:
     uint32_t CurrentBaudrate = uint32_t(BaudRate::BR_DEF); // current transmit rate
 
     /* DMX minimum timings per E1.11 */
-    const uint32_t  DMX_BREAK_US     = uint32_t(((1.0 / float(BaudRate::BR_DMX)) * 23.0) * 1000000.0);  // 23 bits = 92us
-    const uint32_t  DMX_MAB_US       = uint32_t(((1.0 / float(BaudRate::BR_DMX)) *  3.0) * 1000000.0);  //  3 bits = 12us
+    const uint32_t  DMX_BREAK_US     = uint32_t(((1.0 / float(BaudRate::BR_DMX)) * 23.0) * float(MicroSecondsInASecond));  // 23 bits = 92us
+    const uint32_t  DMX_MAB_US       = uint32_t(((1.0 / float(BaudRate::BR_DMX)) *  3.0) * float(MicroSecondsInASecond));  //  3 bits = 12us
     uint32_t InterFrameGapInMicroSec = DMX_BREAK_US + DMX_MAB_US;
 
 private:

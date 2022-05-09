@@ -81,13 +81,15 @@ public:
         uart_port_t                 UartId                          = uart_port_t(-1);
         size_t                      IntensityDataWidth              = 8; // 8 bits in a byte
         UartDataSize_t              UartDataSize                    = UartDataSize_t::OUTPUT_UART_8N2;
+        uint32_t                    FrameStartBreakUS               = 0;
+        uint32_t                    FrameStartMarkAfterBreakUS      = 0;
         TranslateIntensityData_t    TranslateIntensityData          = TranslateIntensityData_t::NoTranslation;
         bool                        InvertOutputPolarity            = false;
         uint32_t                    Baudrate                        = 57600; // current transmit rate
         c_OutputPixel               *pPixelDataSource               = nullptr;
         uint32_t                    FiFoTriggerLevel                = DEFAULT_UART_FIFO_TRIGGER_LEVEL;
-        uint16_t                    NumBreakBitsAfterIntensityData  = 0;
-        uint16_t                    NumExtendedStartBits            = 0;
+        uint16_t                    NumInterIntensityBreakBits      = 0;
+        uint16_t                    NumInterIntensityMABbits        = 0;
         bool                        TriggerIsrExternally            = false;
         const CitudsArray_t        *CitudsArray                     = nullptr;
 
@@ -106,7 +108,6 @@ public:
     void PauseOutput             (bool State);
     void SetMinFrameDurationInUs (uint32_t value);
     void StartNewFrame           ();
-    void SetSendBreak            (bool value);
 
     void IRAM_ATTR ISR_UART_Handler();
     void IRAM_ATTR ISR_Handler_SendIntensityData();
@@ -122,45 +123,51 @@ private:
     void EndBreak               ();
     void GenerateBreak          (uint32_t DurationInUs, uint32_t MarkDurationInUs);
     void SetIntensityDataWidth  ();
-    void CalculateStartBitTime  ();
     void SetIntensity2Uart      (uint8_t value, UartDataBitTranslationId_t ID);
 
     OutputUartConfig_t OutputUartConfig;
 
     uint8_t Intensity2Uart[UartDataBitTranslationId_t::Uart_LIST_END];
     bool            OutputIsPaused                  = false;
-    bool            SendBreak                       = false;
     uint32_t        LastFrameStartTime              = 0;
     uint32_t        FrameMinDurationInMicroSec      = 25000;
     uint32_t        TxIntensityDataStartingMask     = 0x80;
     bool            HasBeenInitialized              = false;
     size_t          NumUartSlotsPerIntensityValue   = 1;
-    uint32_t        ExtendedStartBitCCOUNT          = 0;
+    uint32_t        MarkAfterInterintensityBreakBitCCOUNT          = 0;
+    uint32_t        ActiveIsrMask                   = 0;
 #if defined(ARDUINO_ARCH_ESP32)
     intr_handle_t   IsrHandle                       = nullptr;
 #endif // defined(ARDUINO_ARCH_ESP32)
 
-    bool     IRAM_ATTR MoreDataToSend();
-    uint32_t IRAM_ATTR GetNextIntensityToSend();
-    void     IRAM_ATTR StartNewDataFrame();
-    uint32_t IRAM_ATTR getUartFifoLength();
-    void     IRAM_ATTR enqueueUartData(uint8_t value);
-    inline void IRAM_ATTR EnableUartInterrupts();
-    inline void IRAM_ATTR ClearUartInterrupts();
-    inline void IRAM_ATTR DisableUartInterrupts();
+    bool     IRAM_ATTR      MoreDataToSend();
+    uint32_t IRAM_ATTR      GetNextIntensityToSend();
+    void     IRAM_ATTR      StartNewDataFrame();
+    uint32_t IRAM_ATTR      getUartFifoLength();
+    void     IRAM_ATTR      enqueueUartData(uint8_t value);
+    void                    CalculateEnableUartInterruptFlags();
+    inline void IRAM_ATTR   EnableUartInterrupts();
+    inline void IRAM_ATTR   ClearUartInterrupts();
+    inline void IRAM_ATTR   DisableUartInterrupts();
 
 // #define USE_UART_DEBUG_COUNTERS
 #ifdef USE_UART_DEBUG_COUNTERS
     // debug counters
     uint32_t DataCallbackCounter = 0;
     uint32_t DataTaskcounter = 0;
-    uint32_t DataISRcounter = 0;
+    uint32_t RxIsr = 0;
+    uint32_t ErrorIsr = 0;
+    uint32_t FiFoISRcounter = 0;
+    uint32_t BreakIsrCounter = 0;
+    uint32_t IdleIsrCounter = 0;
+    uint32_t IsrIsNotForUs = 0;
+    uint32_t UnknownIsr = 0;
+    uint32_t TimerIsrCounter = 0;
+    uint32_t TimerIsrNoDataToSend = 0;
+    uint32_t TimerIsrSendData = 0;
     uint32_t FrameThresholdCounter = 0;
     uint32_t FrameEndISRcounter = 0;
     uint32_t FrameStartCounter = 0;
-    uint32_t RxIsr = 0;
-    uint32_t ErrorIsr = 0;
-    uint32_t IsrIsNotForUs = 0;
     uint32_t IntensityValuesSent = 0;
     uint32_t IntensityBitsSent = 0;
     uint32_t IntensityValuesSentLastFrame = 0;
@@ -168,11 +175,6 @@ private:
     uint32_t IncompleteFrame = 0;
     uint32_t IncompleteFrameLastFrame = 0;
     uint32_t EnqueueCounter = 0;
-    uint32_t BreakIsrCounter = 0;
-    uint32_t IdleIsrCounter = 0;
-    uint32_t TimerIsrCounter = 0;
-    uint32_t TimerIsrNoDataToSend = 0;
-    uint32_t TimerIsrSendData = 0;
     uint32_t FiFoNotEmpty = 0;
     uint32_t FiFoEmpty = 0;
 
@@ -181,6 +183,10 @@ private:
 #ifndef UART_TX_BRK_DONE_INT_ENA
 #   define UART_TX_BRK_DONE_INT_ENA 0
 #endif // ndef | UART_TX_BRK_DONE_INT_ENA
+
+#ifndef UART_TX_BRK_IDLE_DONE_INT_ENA
+#   define UART_TX_BRK_IDLE_DONE_INT_ENA 0
+#endif // ndef | UART_TX_BRK_IDLE_DONE_INT_ENA
 
 #ifndef UART_INTR_MASK
 #   if defined(ARDUINO_ARCH_ESP32)
@@ -194,18 +200,19 @@ private:
 #   define ESP_INTR_FLAG_IRAM 0
 #endif // ndef ESP_INTR_FLAG_IRAM
 
+// timer interrupt support for GECE on ESP8266
 #if defined(ARDUINO_ARCH_ESP8266)
 
-// timer interrupt support for GECE on ESP8266
-#define CPU_ClockTimeNS         ((1.0 / float(F_CPU)) * 1000000000)
-
 public:
-    void IRAM_ATTR ISR_Timer_Handler();
+
+	void IRAM_ATTR ISR_Timer_Handler();
+
 private:
-    inline bool WeNeedAtimer() __attribute__((gnu_inline, const))
+    void CalculateInterIntensityMabTime();
+    inline bool IsUartTimerInUse() __attribute__((gnu_inline, const))
     {
-        return (OutputUartConfig.NumBreakBitsAfterIntensityData || OutputUartConfig.NumExtendedStartBits);
-    }  // WeNeedAtimer
+        return (OutputUartConfig.NumInterIntensityBreakBits || OutputUartConfig.NumInterIntensityMABbits);
+    }  // IsUartTimerInUse
 
     // Cycle counter
     // static uint32_t _getCycleCount(void) __attribute__((always_inline));
@@ -215,7 +222,7 @@ private:
         __asm__ __volatile__("rsr %0,ccount" : "=a"(ccount));
         return ccount;
     }
-
+    
 #endif // defined(ARDUINO_ARCH_ESP8266)
 };
 #endif // def #ifdef SUPPORT_UART_OUTPUT

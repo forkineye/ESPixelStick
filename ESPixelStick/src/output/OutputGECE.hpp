@@ -57,13 +57,13 @@ private:
 #define GECE_PIXEL_LIMIT        63  ///< Total pixel limit
 #define GECE_DEFAULT_BRIGHTNESS 0xCC
 
-#define GECE_PIXEL_NS_BIT_0_HIGH    (25 * 1000)
-#define GECE_PIXEL_NS_BIT_0_LOW     (6  * 1000)
-#define GECE_PIXEL_NS_BIT_1_HIGH    (6  * 1000)
-#define GECE_PIXEL_NS_BIT_1_LOW     (25 * 1000)
-#define GECE_PIXEL_START_TIME_NS    (8  * 1000)
-#define GECE_PIXEL_STOP_TIME_NS     (45 * 1000)
-#define GECE_USEC_PER_GECE_BIT      ((GECE_PIXEL_NS_BIT_0_HIGH + GECE_PIXEL_NS_BIT_0_LOW)/1000)
+#define GECE_PIXEL_NS_BIT_0_HIGH            (25 * NanoSecondsInAMicroSecond)
+#define GECE_PIXEL_NS_BIT_0_LOW             (6  * NanoSecondsInAMicroSecond)
+#define GECE_PIXEL_NS_BIT_1_HIGH            (6  * NanoSecondsInAMicroSecond)
+#define GECE_PIXEL_NS_BIT_1_LOW             (25 * NanoSecondsInAMicroSecond)
+#define GECE_PIXEL_START_TIME_NS            (8  * NanoSecondsInAMicroSecond)
+#define GECE_PIXEL_STOP_TIME_NS             (45 * NanoSecondsInAMicroSecond)
+#define GECE_USEC_PER_GECE_BIT              ((GECE_PIXEL_NS_BIT_0_HIGH + GECE_PIXEL_NS_BIT_0_LOW)/NanoSecondsInAMicroSecond)
 
 #define GECE_NUM_INTENSITY_BYTES_PER_PIXEL  3
 #define GECE_BITS_PER_INTENSITY             4
@@ -73,7 +73,7 @@ private:
 #define GECE_PACKET_SIZE                    ((GECE_NUM_INTENSITY_BYTES_PER_PIXEL * GECE_BITS_PER_INTENSITY) + GECE_OVERHEAD_BITS) //   26
 
 #define GECE_FRAME_TIME_USEC                ((GECE_PACKET_SIZE * GECE_USEC_PER_GECE_BIT) + 90)
-#define GECE_FRAME_TIME_NSEC                (GECE_FRAME_TIME_USEC * 1000)
+#define GECE_FRAME_TIME_NSEC                (GECE_FRAME_TIME_USEC * NanoSecondsInAMicroSecond)
 
 };
 

@@ -62,13 +62,13 @@ void c_OutputUCS1903Uart::Begin ()
 
     c_OutputUCS1903::Begin();
 
-    SetIntensityBitTimeInUS(float(UCS1903_PIXEL_NS_BIT_TOTAL) / 1000.0);
+    SetIntensityBitTimeInUS(float(UCS1903_PIXEL_NS_BIT_TOTAL) / float(NanoSecondsInAMicroSecond));
 
     c_OutputUart::OutputUartConfig_t OutputUartConfig;
     OutputUartConfig.ChannelId              = OutputChannelId;
     OutputUartConfig.UartId                 = UartId;
     OutputUartConfig.DataPin                = DataPin;
-    OutputUartConfig.IntensityDataWidth     = UCS1903_NUM_DATA_BYTES_PER_INTENSITY_BYTE;
+    OutputUartConfig.IntensityDataWidth     = UCS1903_PIXEL_BITS_PER_INTENSITY;
     OutputUartConfig.UartDataSize           = c_OutputUart::UartDataSize_t::OUTPUT_UART_6N1;
     OutputUartConfig.TranslateIntensityData = c_OutputUart::TranslateIntensityData_t::TwoToOne;
     OutputUartConfig.pPixelDataSource       = this;

@@ -50,8 +50,8 @@ private:
 
 #define GECE_UART_BITS_PER_GECE_BIT 5.0
 #define GECE_UART_USEC_PER_BIT      (float(GECE_USEC_PER_GECE_BIT) / float(GECE_UART_BITS_PER_GECE_BIT))
-#define GECE_BAUDRATE               uint32_t((1.0 / (GECE_UART_USEC_PER_BIT / 1000000.0)))
-#define GECE_UART_BREAK_BITS        uint32_t(((GECE_PIXEL_STOP_TIME_NS / 1000) / GECE_UART_USEC_PER_BIT) + 1)
+#define GECE_BAUDRATE               uint32_t((1.0 / (GECE_UART_USEC_PER_BIT / float(MicroSecondsInASecond))))
+#define GECE_UART_BREAK_BITS        uint32_t(((GECE_PIXEL_STOP_TIME_NS / NanoSecondsInAMicroSecond) / GECE_UART_USEC_PER_BIT) + 1)
 
         c_OutputUart Uart;
 

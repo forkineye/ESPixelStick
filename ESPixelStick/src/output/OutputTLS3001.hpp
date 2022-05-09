@@ -46,12 +46,11 @@ public:
 
 protected:
 
-#define TLS3001_PIXEL_NS_PER_SECOND          1000000000.0
 #define TLS3001_PIXEL_DATA_RATE              500000.0
-#define TLS3001_PIXEL_NS_BIT                ((1.0 / TLS3001_PIXEL_DATA_RATE) * TLS3001_PIXEL_NS_PER_SECOND) 
+#define TLS3001_PIXEL_NS_BIT                ((1.0 / TLS3001_PIXEL_DATA_RATE) * NanoSecondsInASecond) 
 
 #define TLS3001_PIXEL_NS_IDLE                50000.0 // 50us
-#define TLS3001_MIN_IDLE_TIME_US             (TLS3001_PIXEL_NS_IDLE / 1000.0)
+#define TLS3001_MIN_IDLE_TIME_US             (TLS3001_PIXEL_NS_IDLE / float(NanoSecondsInAMicroSecond))
 
 #define TLS3001_DEFAULT_INTENSITY_PER_PIXEL  3
 /*

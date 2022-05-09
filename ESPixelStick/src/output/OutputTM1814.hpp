@@ -46,9 +46,8 @@ public:
 
 protected:
 
-#define TM1814_PIXEL_NS_PER_SECOND          1000000000.0
 #define TM1814_PIXEL_DATA_RATE              800000.0
-#define TM1814_PIXEL_NS_BIT_TOTAL           ((1.0 / TM1814_PIXEL_DATA_RATE) * TM1814_PIXEL_NS_PER_SECOND) 
+#define TM1814_PIXEL_NS_BIT_TOTAL           ((1.0 / TM1814_PIXEL_DATA_RATE) * NanoSecondsInASecond) 
 
 #define TM1814_PIXEL_NS_BIT_0_LOW           375.0 // 360ns +/- 50ns per datasheet
 #define TM1814_PIXEL_NS_BIT_0_HIGH          (TM1814_PIXEL_NS_BIT_TOTAL - TM1814_PIXEL_NS_BIT_0_LOW)
@@ -57,7 +56,7 @@ protected:
 #define TM1814_PIXEL_NS_BIT_1_HIGH          (TM1814_PIXEL_NS_BIT_TOTAL - TM1814_PIXEL_NS_BIT_1_LOW)
 
 #define TM1814_PIXEL_NS_IDLE                500000.0 // 500us per datasheet
-#define TM1814_MIN_IDLE_TIME_US             (TM1814_PIXEL_NS_IDLE / 1000.0)
+#define TM1814_MIN_IDLE_TIME_US             (TM1814_PIXEL_NS_IDLE / float(NanoSecondsInAMicroSecond))
 
 #define TM1814_DEFAULT_INTENSITY_PER_PIXEL  3
 

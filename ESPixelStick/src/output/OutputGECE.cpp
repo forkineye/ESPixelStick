@@ -110,7 +110,7 @@ void c_OutputGECE::SetOutputBufferSize(uint16_t NumChannelsAvailable)
     c_OutputPixel::SetOutputBufferSize(NumChannelsAvailable);
 
     // Calculate our refresh time
-    SetFrameDurration(float(GECE_FRAME_TIME_USEC));
+    SetFrameDurration(float(GECE_FRAME_TIME_USEC) / (GECE_PACKET_SIZE-1));
 
     // DEBUG_END;
 

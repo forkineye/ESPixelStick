@@ -293,7 +293,7 @@ void c_OutputServoPCA9685::Render ()
                                                 MaxScaledValue,
                                                 currentServoPCA9685.MinLevel,
                                                 currentServoPCA9685.MaxLevel);
-                    Final_value = int ((float (pulse_width) / 1000000.0) * float (UpdateFrequency) * 4096.0);
+                    Final_value = int((float(pulse_width) / float(MicroSecondsInASecond)) * float(UpdateFrequency) * 4096.0);
                     // DEBUG_V (String ("pulse_width: ") + String (pulse_width));
                     // DEBUG_V (String ("Final_value: ") + String (Final_value));
                 }

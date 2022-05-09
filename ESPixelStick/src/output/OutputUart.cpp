@@ -258,10 +258,17 @@ void c_OutputUart::GenerateBreak(uint32_t DurationInUs, uint32_t MarkDurationInU
 {
     // DEBUG_START;
 
-    StartBreak();
-    delayMicroseconds(DurationInUs);
+    if (DurationInUs)
+    {
+        StartBreak();
+        delayMicroseconds(DurationInUs);
+    }
+
     EndBreak();
-    delayMicroseconds(MarkDurationInUs);
+    if (MarkDurationInUs)
+    {
+        delayMicroseconds(MarkDurationInUs);
+    }
 
     // DEBUG_END;
 
@@ -290,7 +297,10 @@ void c_OutputUart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
     JsonObject debugStatus = jsonStatus.createNestedObject("UART Debug");
     debugStatus["ChannelId"]                     = OutputUartConfig.ChannelId;
     debugStatus["RxIsr"]                         = RxIsr;
-    debugStatus["DataISRcounter"]                = DataISRcounter;
+    debugStatus["FiFoISRcounter"]                = FiFoISRcounter;
+    debugStatus["BreakIsrCounter"]               = BreakIsrCounter;
+    debugStatus["IdleIsrCounter"]                = IdleIsrCounter;    
+    debugStatus["UnknownIsr"]                    = UnknownIsr;
     debugStatus["IsrIsNotForUs"]                 = IsrIsNotForUs;
     debugStatus["ErrorIsr"]                      = ErrorIsr;
     debugStatus["FrameStartCounter"]             = FrameStartCounter;
@@ -302,8 +312,6 @@ void c_OutputUart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
     debugStatus["IntensityBitsSent"]             = IntensityBitsSent;
     debugStatus["IntensityBitsSentLastFrame"]    = IntensityBitsSentLastFrame;
     debugStatus["EnqueueCounter"]                = EnqueueCounter;
-    debugStatus["BreakIsrCounter"]               = BreakIsrCounter;
-    debugStatus["IdleIsrCounter"]                = IdleIsrCounter;    
     debugStatus["TimerIsrCounter"]               = TimerIsrCounter;    
     debugStatus["TimerIsrNoDataToSend"]          = TimerIsrNoDataToSend;    
     debugStatus["TimerIsrSendData"]              = TimerIsrSendData;
@@ -313,7 +321,6 @@ void c_OutputUart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
 
     debugStatus["UART_CONF0"] = String(READ_PERI_REG(UART_CONF0(OutputUartConfig.UartId)), HEX);
     debugStatus["UART_CONF1"] = String(READ_PERI_REG(UART_CONF1(OutputUartConfig.UartId)), HEX);
-
 #endif // def USE_UART_DEBUG_COUNTERS
     // DEBUG_END;
 } // GetStatus
@@ -353,10 +360,10 @@ void c_OutputUart::InitializeUart()
 
         } // end switch (OutputUartConfig.UartId)
 
+        CLEAR_PERI_REG_MASK(UART_CONF0(OutputUartConfig.UartId), UART_INV_MASK);
         if (OutputUartConfig.InvertOutputPolarity)
         {
             // DEBUG_V("invert the output");
-            CLEAR_PERI_REG_MASK (UART_CONF0(OutputUartConfig.UartId), UART_INV_MASK);
             SET_PERI_REG_MASK   (UART_CONF0(OutputUartConfig.UartId), (BIT(22)));
         }
 
@@ -376,15 +383,17 @@ void c_OutputUart::InitializeUart()
         // DEBUG_V("Clear all pending interrupts in the UART");
         ClearUartInterrupts();
 
+        // DEBUG_V("Setup UART ISR flags");
+        CalculateEnableUartInterruptFlags();
+
         // DEBUG_V("Reenable interrupts");
         ETS_UART_INTR_ENABLE();
 
         set_pin();
 
-        CalculateStartBitTime();
+        CalculateInterIntensityMabTime();
 
-#if defined(ARDUINO_ARCH_ESP8266)
-        if (WeNeedAtimer())
+        if (IsUartTimerInUse())
         {
             // DEBUG_V ();
             if (!AreTimersRunning())
@@ -399,25 +408,29 @@ void c_OutputUart::InitializeUart()
                     TIM_SINGLE	0 //on interrupt routine you need to write a new value to start the timer again
                     TIM_LOOP	1 //on interrupt the counter will start with the same value again
                 */
-                float NsPerBit                   = (1.0 / float(OutputUartConfig.Baudrate)) * 1000000000.0;
+                float NsPerBit                   = (1.0 / float(OutputUartConfig.Baudrate)) * float(NanoSecondsInASecond);
                 float TicksPerBit                = (NsPerBit / CPU_ClockTimeNS) + 0.5;
-                float InterIntensityBreakInTicks = float(OutputUartConfig.NumBreakBitsAfterIntensityData + 1) * TicksPerBit;
+                float InterIntensityBreakInTicks = float(OutputUartConfig.NumInterIntensityBreakBits + 1) * TicksPerBit;
                 float IntensityTimeInTicks       = float(OutputUartConfig.IntensityDataWidth + 1) * TicksPerBit;
-                float TimerTimeInTicks           = float(ExtendedStartBitCCOUNT) + InterIntensityBreakInTicks + IntensityTimeInTicks;
-                // DEBUG_V(String("                      Baudrate: ") + String(OutputUartConfig.Baudrate));
-                // DEBUG_V(String("                      NsPerBit: ") + String(NsPerBit));
-                // DEBUG_V(String("NumBreakBitsAfterIntensityData: ") + String(OutputUartConfig.NumBreakBitsAfterIntensityData));
-                // DEBUG_V(String("    InterIntensityBreakInTicks: ") + String(InterIntensityBreakInTicks));
-                // DEBUG_V(String("            IntensityDataWidth: ") + String(OutputUartConfig.IntensityDataWidth));
-                // DEBUG_V(String("          IntensityTimeInTicks: ") + String(IntensityTimeInTicks));
-                // DEBUG_V(String("        ExtendedStartBitCCOUNT: ") + String(ExtendedStartBitCCOUNT));
-                // DEBUG_V(String("              TimerTimeInTicks: ") + String(TimerTimeInTicks));
+                float TimerTimeInTicks           = float(MarkAfterInterintensityBreakBitCCOUNT) + InterIntensityBreakInTicks + IntensityTimeInTicks;
+                // DEBUG_V(String("                             Baudrate: ") + String(OutputUartConfig.Baudrate));
+                // DEBUG_V(String("                             NsPerBit: ") + String(NsPerBit));
+                // DEBUG_V(String("       NumInterIntensityBreakBits: ") + String(OutputUartConfig.NumInterIntensityBreakBits));
+                // DEBUG_V(String("           InterIntensityBreakInTicks: ") + String(InterIntensityBreakInTicks));
+                // DEBUG_V(String("                   IntensityDataWidth: ") + String(OutputUartConfig.IntensityDataWidth));
+                // DEBUG_V(String("                 IntensityTimeInTicks: ") + String(IntensityTimeInTicks));
+                // DEBUG_V(String("MarkAfterInterintensityBreakBitCCOUNT: ") + String(MarkAfterInterintensityBreakBitCCOUNT));
+                // DEBUG_V(String("                     TimerTimeInTicks: ") + String(TimerTimeInTicks));
 
                 // Arm the Timer for our Interval + overhead
                 timer1_write(uint32_t(TimerTimeInTicks) + 33000);
             }
         }
-#endif // defined(ARDUINO_ARCH_ESP8266)
+
+        if (OutputUartConfig.NumInterIntensityBreakBits)
+        {
+            SET_PERI_REG_MASK(UART_CONF0(OutputUartConfig.UartId), UART_TXD_BRK);
+        }
 
     } while (false);
 
@@ -477,9 +490,28 @@ void c_OutputUart::InitializeUart()
         SET_PERI_REG_MASK(UART_CONF0(OutputUartConfig.UartId), (BIT(22)));
     }
 
+    if (OutputUartConfig.NumInterIntensityBreakBits)
+    {
+        SET_PERI_REG_BITS(UART_IDLE_CONF_REG(OutputUartConfig.UartId),
+                          UART_TX_BRK_NUM_V,
+                          OutputUartConfig.NumInterIntensityBreakBits,
+                          UART_TX_BRK_NUM_S);
+
+        if (OutputUartConfig.NumInterIntensityMABbits)
+        {
+            // Set up the built in break after intensity data sent time in bits.
+            SET_PERI_REG_BITS(UART_IDLE_CONF_REG(OutputUartConfig.UartId),
+                              UART_TX_IDLE_NUM_V,
+                              OutputUartConfig.NumInterIntensityMABbits,
+                              UART_TX_IDLE_NUM_S);
+        }
+    }
+    
+    CalculateEnableUartInterruptFlags();
+
 // #define SupportSetUartBaudrateWorkAround
 #ifdef SupportSetUartBaudrateWorkAround
-    uint32_t ClockDivider = (APB_CLK_FREQ << 4) / uart_config.baud_rate;
+        uint32_t ClockDivider = (APB_CLK_FREQ << 4) / uart_config.baud_rate;
     // DEBUG_V (String ("            APB_CLK_FREQ: 0x") + String (APB_CLK_FREQ, HEX));
     // DEBUG_V (String ("            ClockDivider: 0x") + String (ClockDivider, HEX));
     uint32_t adjusted_ClockDivider = ((ClockDivider >> 4) & UART_CLKDIV_V) | ((ClockDivider & UART_CLKDIV_FRAG_V) << UART_CLKDIV_FRAG_S);
@@ -577,8 +609,8 @@ void IRAM_ATTR c_OutputUart::ISR_UART_Handler()
 #endif // def USE_UART_DEBUG_COUNTERS
 
         // Process if the desired UART has raised an interrupt
-        uint32_t isrStatus = 0;
-        if (0 != (isrStatus = READ_PERI_REG(UART_INT_ST(OutputUartConfig.UartId))))
+        uint32_t isrStatus = READ_PERI_REG(UART_INT_ST(OutputUartConfig.UartId));
+        if (0 != (isrStatus & ActiveIsrMask))
         {
 #ifdef USE_UART_DEBUG_COUNTERS
 #ifdef ARDUINO_ARCH_ESP32
@@ -588,17 +620,21 @@ void IRAM_ATTR c_OutputUart::ISR_UART_Handler()
             }
 #endif // def ARDUINO_ARCH_ESP32
 
+            if (isrStatus & UART_TXFIFO_EMPTY_INT_ENA)
+            {
+                FiFoISRcounter++;
+            }
+
             if (isrStatus & UART_TX_BRK_DONE_INT_ENA)
             {
                 BreakIsrCounter++;
             }
-
-            if (isrStatus & UART_TXFIFO_EMPTY_INT_ENA)
-            {
-                DataISRcounter++;
-            }
 #endif // def USE_UART_DEBUG_COUNTERS
-       // Fill the FIFO with new data
+
+            // Clear all interrupt flags for this uart
+            ClearUartInterrupts();
+
+            // Fill the FIFO with new data
             ISR_Handler_SendIntensityData();
 
             if (!MoreDataToSend())
@@ -608,9 +644,6 @@ void IRAM_ATTR c_OutputUart::ISR_UART_Handler()
                 FrameEndISRcounter++;
 #endif // def USE_UART_DEBUG_COUNTERS
             }
-
-            // Clear all interrupt flags for this uart
-            ClearUartInterrupts();
 
         } // end Our uart generated an interrupt
 #ifdef USE_UART_DEBUG_COUNTERS
@@ -626,25 +659,25 @@ void IRAM_ATTR c_OutputUart::ISR_UART_Handler()
 
 #ifdef ARDUINO_ARCH_ESP8266
 //----------------------------------------------------------------------------
-void c_OutputUart::CalculateStartBitTime()
+void c_OutputUart::CalculateInterIntensityMabTime()
 {
     // DEBUG_START;
 
-    float BitTimeInUs       = ((1.0 / float(OutputUartConfig.Baudrate)) * 1000000.0);
-    float BitTimeInNs       = BitTimeInUs * 1000;
-    float StartBitTimeInNs  = BitTimeInNs * float(OutputUartConfig.NumExtendedStartBits);
-    ExtendedStartBitCCOUNT  = uint32_t((StartBitTimeInNs + 0.5) / CPU_ClockTimeNS);
+    float BitTimeInUs                       = ((1.0 / float(OutputUartConfig.Baudrate)) * float(MicroSecondsInASecond));
+    float BitTimeInNs                       = BitTimeInUs * NanoSecondsInAMicroSecond;
+    float StartBitTimeInNs                  = BitTimeInNs * float(OutputUartConfig.NumInterIntensityMABbits);
+    MarkAfterInterintensityBreakBitCCOUNT   = uint32_t((StartBitTimeInNs + 0.5) / CPU_ClockTimeNS);
 
-    // DEBUG_V(String("          NumExtendedStartBits: ") + String(OutputUartConfig.NumExtendedStartBits));
-    // DEBUG_V(String("                      Baudrate: ") + String(OutputUartConfig.Baudrate));
-    // DEBUG_V(String("                   BitTimeInUs: ") + String(BitTimeInUs));
-    // DEBUG_V(String("                   BitTimeInNs: ") + String(BitTimeInNs));
-    // DEBUG_V(String("              StartBitTimeInNs: ") + String(StartBitTimeInNs));
-    // DEBUG_V(String("        ExtendedStartBitCCOUNT: ") + String(ExtendedStartBitCCOUNT));
+    // DEBUG_V(String("             NumInterIntensityMABbits: ") + String(OutputUartConfig.NumInterIntensityMABbits));
+    // DEBUG_V(String("                             Baudrate: ") + String(OutputUartConfig.Baudrate));
+    // DEBUG_V(String("                          BitTimeInUs: ") + String(BitTimeInUs));
+    // DEBUG_V(String("                          BitTimeInNs: ") + String(BitTimeInNs));
+    // DEBUG_V(String("                     StartBitTimeInNs: ") + String(StartBitTimeInNs));
+    // DEBUG_V(String("MarkAfterInterintensityBreakBitCCOUNT: ") + String(MarkAfterInterintensityBreakBitCCOUNT));
 
     // DEBUG_END;
 
-} // CalculateStartBitTime
+} // CalculateInterIntensityMabTime
 
 //----------------------------------------------------------------------------
 void IRAM_ATTR c_OutputUart::ISR_Timer_Handler()
@@ -660,11 +693,11 @@ void IRAM_ATTR c_OutputUart::ISR_Timer_Handler()
 #endif // def USE_UART_DEBUG_COUNTERS
         CLEAR_PERI_REG_MASK(UART_CONF0(OutputUartConfig.UartId), UART_TXD_BRK);
 
-        if (ExtendedStartBitCCOUNT)
+        if (MarkAfterInterintensityBreakBitCCOUNT)
         {
             uint32_t StartingCycleCount = _getCycleCount();
             // finish  start bit
-            while ((_getCycleCount() - StartingCycleCount) < ExtendedStartBitCCOUNT)
+            while ((_getCycleCount() - StartingCycleCount) < MarkAfterInterintensityBreakBitCCOUNT)
             {
             }
         }
@@ -691,14 +724,6 @@ void IRAM_ATTR c_OutputUart::ISR_Timer_Handler()
 //----------------------------------------------------------------------------
 void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
 {
-    if (OutputUartConfig.NumExtendedStartBits)
-    {
-#ifdef ARDUINO_ARCH_ESP32
-        // Set up the built in break after intensity data sent time in bits.
-        SET_PERI_REG_BITS(UART_IDLE_CONF_REG(OutputUartConfig.UartId), UART_TX_IDLE_NUM_V, OutputUartConfig.NumExtendedStartBits, UART_TX_IDLE_NUM_S);
-#endif // def ARDUINO_ARCH_ESP32
-    }
-
     size_t NumAvailableIntensitySlotsToFill = ((((size_t)UART_TX_FIFO_SIZE) - (getUartFifoLength())) / NumUartSlotsPerIntensityValue);
 #ifdef USE_UART_DEBUG_COUNTERS
     if (NumAvailableIntensitySlotsToFill)
@@ -715,7 +740,6 @@ void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
     {
 #ifdef USE_UART_DEBUG_COUNTERS
         IntensityValuesSent++;
-        IntensityBitsSent += NumUartSlotsPerIntensityValue;
 #endif // def USE_UART_DEBUG_COUNTERS
 
         NumAvailableIntensitySlotsToFill--;
@@ -727,6 +751,9 @@ void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
             {
                 enqueueUartData(IntensityValue & 0xFF);
                 IntensityValue >>= 8;
+#ifdef USE_UART_DEBUG_COUNTERS
+                IntensityBitsSent += 8;
+#endif // def USE_UART_DEBUG_COUNTERS
             }
         } // end no translation
 
@@ -736,6 +763,9 @@ void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
             {
                 // convert the intensity data into UART data
                 enqueueUartData(Intensity2Uart[(IntensityValue & mask) ? UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID : UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID]);
+#ifdef USE_UART_DEBUG_COUNTERS
+                IntensityBitsSent += 1;
+#endif // def USE_UART_DEBUG_COUNTERS
             }
         } // end 1:1
 
@@ -748,24 +778,26 @@ void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
             {
                 // convert the intensity data into UART data
                 enqueueUartData(Intensity2Uart[(IntensityValue >> NumBitsToShift) & 0x3]);
+#ifdef USE_UART_DEBUG_COUNTERS
+                IntensityBitsSent += 2;
+#endif // def USE_UART_DEBUG_COUNTERS
             }
             // handle the last two bits
             enqueueUartData(Intensity2Uart[IntensityValue & 0x3]);
+#ifdef USE_UART_DEBUG_COUNTERS
+            IntensityBitsSent += 2;
+#endif    // def USE_UART_DEBUG_COUNTERS
         } // end 2:1
-        
-        if (OutputUartConfig.NumBreakBitsAfterIntensityData)
+
+        if (OutputUartConfig.NumInterIntensityBreakBits)
         {
-#ifdef ARDUINO_ARCH_ESP32
-            SET_PERI_REG_BITS(UART_IDLE_CONF_REG(OutputUartConfig.UartId), UART_TX_BRK_NUM_V, OutputUartConfig.NumBreakBitsAfterIntensityData, UART_TX_BRK_NUM_S);
             SET_PERI_REG_MASK(UART_CONF0(OutputUartConfig.UartId), UART_TXD_BRK);
-            EnableUartInterrupts();
-#else
-            SET_PERI_REG_MASK(UART_CONF0(OutputUartConfig.UartId), UART_TXD_BRK);
-#endif // def ARDUINO_ARCH_ESP32
-            return;
+            break;
         }
     } // end while there is space in the buffer
+    
     // DEBUG_END;
+
 } // ISR_Handler_SendIntensityData
 
 //----------------------------------------------------------------------------
@@ -917,12 +949,6 @@ void c_OutputUart::SetMinFrameDurationInUs(uint32_t value)
 } // SetMinFrameDurationInUs
 
 //----------------------------------------------------------------------------
-void c_OutputUart::SetSendBreak(bool value)
-{
-    SendBreak = value;
-} // SetSendBreak
-
-//----------------------------------------------------------------------------
 inline void IRAM_ATTR c_OutputUart::ClearUartInterrupts()
 {
     WRITE_PERI_REG(UART_INT_CLR(OutputUartConfig.UartId), UART_INTR_MASK);
@@ -932,52 +958,90 @@ inline void IRAM_ATTR c_OutputUart::ClearUartInterrupts()
 inline void IRAM_ATTR c_OutputUart::DisableUartInterrupts()
 {
     CLEAR_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), UART_INTR_MASK);
+    ClearUartInterrupts();
 } // DisableUartInterrupts
+
+//----------------------------------------------------------------------------
+void c_OutputUart::CalculateEnableUartInterruptFlags()
+{
+    /// DEBUG_START;
+
+    uint32_t isr_flag = 0;
+
+    // do we need to send an inter intensity break?
+    if (OutputUartConfig.NumInterIntensityBreakBits)
+    {
+        // DEBUG_V();
+        isr_flag = UART_TX_BRK_DONE_INT_ENA;
+
+        // DEBUG_V();
+        if (OutputUartConfig.NumInterIntensityMABbits)
+        {
+            /// DEBUG_V();
+            isr_flag = UART_TX_BRK_IDLE_DONE_INT_ENA;
+        }
+    }
+    else
+    {
+        // DEBUG_V();
+        isr_flag = UART_TXFIFO_EMPTY_INT_ENA;
+    }
+    // DEBUG_V();
+
+    ActiveIsrMask = isr_flag;
+
+    /// DEBUG_END;
+
+} // EnableUartInterrupts
 
 //----------------------------------------------------------------------------
 inline void IRAM_ATTR c_OutputUart::EnableUartInterrupts()
 {
-    DisableUartInterrupts();
+    /// DEBUG_START;
 
-    if (OutputUartConfig.NumBreakBitsAfterIntensityData)
+    do // once
     {
-#ifdef ARDUINO_ARCH_ESP32
-        SET_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), UART_TX_BRK_IDLE_DONE_INT_ENA);
-#else // ESP8266
-        // no uart interrupts when using timers
-#endif // def ARDUINO_ARCH_ESP8266
-    }
-    else
-    {
-        SET_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), UART_TXFIFO_EMPTY_INT_ENA);
-    }
+        DisableUartInterrupts();
+
+        // if more data to send
+        if (!MoreDataToSend())
+        {
+            /// DEBUG_V("dont turn on interrupts if there is no more data to send");
+            break;
+        }
+        // there is data that needs to be sent
+
+        SET_PERI_REG_MASK(UART_INT_ENA(OutputUartConfig.UartId), ActiveIsrMask);
+
+    } while (false);
+
+    /// DEBUG_END;
+
 } // EnableUartInterrupts
 
 //----------------------------------------------------------------------------
 void c_OutputUart::StartNewFrame()
 {
     // DEBUG_START;
-#ifdef USE_UART_DEBUG_COUNTERS
-    FrameStartCounter++;
-#endif // def USE_UART_DEBUG_COUNTERS
+
+    DisableUartInterrupts();
 
 #ifdef USE_UART_DEBUG_COUNTERS
+    FrameStartCounter++;
+
     if(MoreDataToSend())
     {
         IncompleteFrame++;
     }
 
-    IntensityValuesSentLastFrame = IntensityValuesSent;
-    IntensityValuesSent = 0;
-    IntensityBitsSentLastFrame = IntensityBitsSent;
-    IntensityBitsSent = 0;
+    IntensityValuesSentLastFrame    = IntensityValuesSent;
+    IntensityValuesSent             = 0;
+    IntensityBitsSentLastFrame      = IntensityBitsSent;
+    IntensityBitsSent               = 0;
 #endif // def USE_UART_DEBUG_COUNTERS
 
     // set up to send a new frame
-    if(SendBreak)
-    {
-        GenerateBreak(92, 23);
-    }
+    GenerateBreak(OutputUartConfig.FrameStartBreakUS, OutputUartConfig.FrameStartMarkAfterBreakUS);
 
     // DEBUG_V();
 
@@ -985,7 +1049,7 @@ void c_OutputUart::StartNewFrame()
     // DEBUG_V();
 
 #if defined(ARDUINO_ARCH_ESP8266)
-    if (!WeNeedAtimer())
+    if (!IsUartTimerInUse())
     {
         ISR_Handler_SendIntensityData();
         EnableUartInterrupts();
@@ -1025,7 +1089,7 @@ void c_OutputUart::StartUart()
 
 #ifdef ARDUINO_ARCH_ESP8266
         // start processing the timer interrupts
-        if (WeNeedAtimer())
+        if (IsUartTimerInUse())
         {
             OutputTimerArray[OutputUartConfig.ChannelId] = this;
         }

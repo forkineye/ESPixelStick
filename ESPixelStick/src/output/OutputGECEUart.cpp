@@ -77,9 +77,9 @@ void c_OutputGECEUart::Begin ()
     OutputUartConfig.pPixelDataSource               = this;
     OutputUartConfig.Baudrate                       = GECE_BAUDRATE;
     OutputUartConfig.InvertOutputPolarity           = false;
-    OutputUartConfig.NumBreakBitsAfterIntensityData = GECE_UART_BREAK_BITS; // number of bit times to delay
+    OutputUartConfig.NumInterIntensityBreakBits     = GECE_UART_BREAK_BITS; // number of bit times to delay
     OutputUartConfig.TriggerIsrExternally           = false;
-    OutputUartConfig.NumExtendedStartBits           = uint32_t((float(GECE_PIXEL_START_TIME_NS / 1000.0) / float(GECE_UART_USEC_PER_BIT))+0.5);
+    OutputUartConfig.NumInterIntensityMABbits       = uint32_t((float(GECE_PIXEL_START_TIME_NS / NanoSecondsInAMicroSecond) / float(GECE_UART_USEC_PER_BIT)) + 0.5);
     OutputUartConfig.CitudsArray                    = ConvertIntensityToUartDataStream;
     Uart.Begin(OutputUartConfig);
 

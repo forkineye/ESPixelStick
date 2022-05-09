@@ -109,7 +109,7 @@ bool c_OutputUCS1903Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     bool response = c_OutputUCS1903::SetConfig (jsonConfig);
 
-    uint32_t ifgNS = (InterFrameGapInMicroSec * 1000);
+    uint32_t ifgNS = (InterFrameGapInMicroSec * NanoSecondsInAMicroSecond);
     uint32_t ifgTicks = ifgNS / RMT_TickLengthNS;
 
     // Default is 100us * 3

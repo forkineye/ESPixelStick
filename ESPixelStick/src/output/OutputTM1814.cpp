@@ -82,7 +82,7 @@ void c_OutputTM1814::SetOutputBufferSize (uint16_t NumChannelsAvailable)
     c_OutputPixel::SetOutputBufferSize (NumChannelsAvailable);
 
     // Calculate our refresh time
-    SetFrameDurration (float (TM1814_PIXEL_NS_BIT_TOTAL) / 1000.0);
+    SetFrameDurration (float (TM1814_PIXEL_NS_BIT_TOTAL) / float(NanoSecondsInAMicroSecond));
 
     // DEBUG_END;
 
@@ -107,7 +107,7 @@ bool c_OutputTM1814::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     SetInvertData (true);
 
     // Calculate our refresh time
-    SetFrameDurration (float (TM1814_PIXEL_NS_BIT_TOTAL) / 1000.0);
+    SetFrameDurration (float (TM1814_PIXEL_NS_BIT_TOTAL) / float(NanoSecondsInAMicroSecond));
 
     // DEBUG_END;
     return response;

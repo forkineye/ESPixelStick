@@ -87,7 +87,7 @@ void c_OutputUCS1903::SetOutputBufferSize (uint16_t NumChannelsAvailable)
     c_OutputPixel::SetOutputBufferSize (NumChannelsAvailable);
 
     // Calculate our refresh time
-    SetFrameDurration (float(UCS1903_PIXEL_NS_BIT_0_HIGH + UCS1903_PIXEL_NS_BIT_0_LOW) / 1000.0);
+    SetFrameDurration (float(UCS1903_PIXEL_NS_BIT_0_HIGH + UCS1903_PIXEL_NS_BIT_0_LOW) / float(NanoSecondsInAMicroSecond));
 
     // DEBUG_END;
 
@@ -109,7 +109,7 @@ bool c_OutputUCS1903::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     bool response = c_OutputPixel::SetConfig (jsonConfig);
 
     // Calculate our refresh time
-    SetFrameDurration (float (UCS1903_PIXEL_NS_BIT_0_HIGH + UCS1903_PIXEL_NS_BIT_0_LOW) / 1000.0);
+    SetFrameDurration (float (UCS1903_PIXEL_NS_BIT_0_HIGH + UCS1903_PIXEL_NS_BIT_0_LOW) / float(NanoSecondsInASecond));
 
     // DEBUG_END;
     return response;
