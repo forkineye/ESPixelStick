@@ -28,27 +28,50 @@ SRC_DBG  = SRC_DIR + PROGNAME + ".elf"
 
 # print("SRC_BIN " + SRC_BIN)
 
-DST_DIR   = "firmware/" + BOARD_MCU + "/"
+DST_DIR   = "./firmware/" + BOARD_MCU + "/"
 DST_BIN   = DST_DIR + PIOENV + "-app.bin"
 DST_PART  = DST_DIR + PIOENV + "-partitions.bin"
 DST_BOOT  = DST_DIR + PIOENV + "-bootloader.bin"
 
-DBG_DIR   = "debug/" + BOARD_MCU + "/"
+DBG_DIR   = "./debug/" + BOARD_MCU + "/"
 DST_DBG   = DBG_DIR + PIOENV + ".elf"
 
 def after_build(source, target, env):
 
-    path = os.path.join("./", DST_DIR)
-    print("Out Dirs: " + path)
-    os.makedirs(path, 0x777, True)
-    print("Copy: " + SRC_BIN)
-    shutil.copyfile(SRC_BIN, DST_BIN)
+    pathfrm = os.path.join("", DST_DIR)
+    print("mkdirs: path - '" + pathfrm + "'")
+    os.makedirs(pathfrm, 0x777, True)
+    dirs = os.listdir(pathfrm)
+    for file in dirs:
+        print(file)
 
-    pathdbg = os.path.join("./", DBG_DIR)
-    print("Out DBG Dirs: " + pathdbg)
+    print("Copy from: '" + SRC_BIN + "' to '" + DST_BIN + "'")
+    shutil.copyfile(SRC_BIN, DST_BIN)
+    dirs = os.listdir(pathfrm)
+    for file in dirs:
+        print(file)
+
+    for dirpath, dirnames, filenames in os.walk(pathfrm):
+        for filename in filenames:
+            path = os.path.join(dirpath, filename)
+            os.chmod(path, 0o777)  # for example
+
+    pathdbg = os.path.join("", DBG_DIR)
+    print("mkdirs: pathdbg - '" + pathdbg + "'")
     os.makedirs(pathdbg, 0x777, True)
-    print("Copy: " + SRC_DBG)
+
+    dirs = os.listdir(pathdbg)
+    for file in dirs:
+        print(file)
+    print("Copy from: '" + SRC_DBG + "' to '" + DST_DBG + "'")
     shutil.copyfile(SRC_DBG, DST_DBG)
+    dirs = os.listdir(pathdbg)
+    for file in dirs:
+        print(file)
+    for dirpath, dirnames, filenames in os.walk(pathfrm):
+        for filename in filenames:
+            path = os.path.join(dirpath, filename)
+            os.chmod(path, 0o777)  # for example
 
     if("FLASH_EXTRA_IMAGES" in env):
         FLASH_EXTRA_IMAGES = env['FLASH_EXTRA_IMAGES']
