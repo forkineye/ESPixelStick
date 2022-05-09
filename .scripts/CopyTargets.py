@@ -5,12 +5,15 @@ Import("env")
 
 
 def PrepareDestinationDirectory(DirPath):
-    print("mkdirs: path - '" + DirPath + "'")
+    print("mkdirs: Remove path - '" + DirPath + "'")
     shutil.rmtree(DirPath, True)
-    os.makedirs(DirPath, 0x7777, True)
-    os.system("chmod -R 0x777 " + DirPath)
-    print("Listing dir: " + DirPath)
-    os.system("ls -alR " + DirPath)
+    os.system("ls -al ./")
+    print("mkdirs: path - '" + DirPath + "'")
+    os.makedirs(DirPath, 0x777, True)
+    os.system("ls -al ./")
+    print("chmod")
+    os.chmod(DirPath, "a+rwx")
+    os.system("ls -al " + DirPath)
 
 BUILD_DIR = env['PROJECT_BUILD_DIR']
 PIOENV    = env['PIOENV']
