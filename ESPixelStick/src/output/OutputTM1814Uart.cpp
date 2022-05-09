@@ -63,7 +63,7 @@ void c_OutputTM1814Uart::Begin ()
 
     // DEBUG_V(String("TM1814_PIXEL_UART_BAUDRATE: ") + String(TM1814_PIXEL_UART_BAUDRATE));
 
-    SetIntensityBitTimeInUS(float(TM1814_PIXEL_NS_BIT_TOTAL) / 1000.0);
+    SetIntensityBitTimeInUS(float(TM1814_PIXEL_NS_BIT_TOTAL) / float(NanoSecondsInAMicroSecond));
 
     c_OutputUart::OutputUartConfig_t OutputUartConfig;
     OutputUartConfig.ChannelId              = OutputChannelId;

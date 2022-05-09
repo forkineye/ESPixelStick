@@ -63,7 +63,7 @@ private:
 #define GECE_PIXEL_NS_BIT_1_LOW             (25 * NanoSecondsInAMicroSecond)
 #define GECE_PIXEL_START_TIME_NS            (8  * NanoSecondsInAMicroSecond)
 #define GECE_PIXEL_STOP_TIME_NS             (45 * NanoSecondsInAMicroSecond)
-#define GECE_USEC_PER_GECE_BIT              ((GECE_PIXEL_NS_BIT_0_HIGH + GECE_PIXEL_NS_BIT_0_LOW)/1000)
+#define GECE_USEC_PER_GECE_BIT              ((GECE_PIXEL_NS_BIT_0_HIGH + GECE_PIXEL_NS_BIT_0_LOW)/NanoSecondsInAMicroSecond)
 
 #define GECE_NUM_INTENSITY_BYTES_PER_PIXEL  3
 #define GECE_BITS_PER_INTENSITY             4

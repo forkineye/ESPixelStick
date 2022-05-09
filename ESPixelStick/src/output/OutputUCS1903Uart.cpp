@@ -62,7 +62,7 @@ void c_OutputUCS1903Uart::Begin ()
 
     c_OutputUCS1903::Begin();
 
-    SetIntensityBitTimeInUS(float(UCS1903_PIXEL_NS_BIT_TOTAL) / 1000.0);
+    SetIntensityBitTimeInUS(float(UCS1903_PIXEL_NS_BIT_TOTAL) / float(NanoSecondsInAMicroSecond));
 
     c_OutputUart::OutputUartConfig_t OutputUartConfig;
     OutputUartConfig.ChannelId              = OutputChannelId;

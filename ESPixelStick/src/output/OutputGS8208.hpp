@@ -49,9 +49,8 @@ public:
 
 protected:
 
-#define GS8208_PIXEL_NS_PER_SECOND          1000000000.0
 #define GS8208_PIXEL_DATA_RATE              1000000.0
-#define GS8208_PIXEL_NS_BIT_TOTAL           ( (1.0 / GS8208_PIXEL_DATA_RATE) * GS8208_PIXEL_NS_PER_SECOND) 
+#define GS8208_PIXEL_NS_BIT_TOTAL           ( (1.0 / GS8208_PIXEL_DATA_RATE) * float(NanoSecondsInASecond)) 
 
 #define GS8208_PIXEL_NS_BIT_0_HIGH          (0.25 *  GS8208_PIXEL_NS_BIT_TOTAL) // 250ns +/- 150ns per datasheet
 #define GS8208_PIXEL_NS_BIT_0_LOW           (GS8208_PIXEL_NS_BIT_TOTAL - GS8208_PIXEL_NS_BIT_0_HIGH)
@@ -60,7 +59,7 @@ protected:
 #define GS8208_PIXEL_NS_BIT_1_LOW           (GS8208_PIXEL_NS_BIT_TOTAL - GS8208_PIXEL_NS_BIT_1_HIGH)
 
 #define GS8208_PIXEL_IDLE_TIME_NS           300000.0 // 300us per datasheet
-#define GS8208_PIXEL_IDLE_TIME_US           (GS8208_PIXEL_IDLE_TIME_NS / 1000.0)
+#define GS8208_PIXEL_IDLE_TIME_US           (GS8208_PIXEL_IDLE_TIME_NS / float(NanoSecondsInAMicroSecond))
 
 }; // c_OutputGS8208
 

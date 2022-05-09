@@ -68,7 +68,7 @@ void c_OutputWS2811Uart::Begin ()
 
     // DEBUG_V(String("WS2811_PIXEL_UART_BAUDRATE: ") + String(WS2811_PIXEL_UART_BAUDRATE));
 
-    SetIntensityBitTimeInUS(float(WS2811_PIXEL_NS_BIT_TOTAL) / 1000.0);
+    SetIntensityBitTimeInUS(float(WS2811_PIXEL_NS_BIT_TOTAL) / float(NanoSecondsInAMicroSecond));
 
     c_OutputUart::OutputUartConfig_t OutputUartConfig;
     OutputUartConfig.ChannelId              = OutputChannelId;

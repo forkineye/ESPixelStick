@@ -70,7 +70,7 @@ void c_OutputAPA102::SetOutputBufferSize (uint16_t NumChannelsAvailable)
     c_OutputPixel::SetOutputBufferSize (NumChannelsAvailable);
 
     // Calculate our refresh time
-    SetFrameDurration ( ( (1.0 / float (APA102_BIT_RATE)) * 1000000), BlockSize, BlockDelay);
+    SetFrameDurration ( ( (1.0 / float (APA102_BIT_RATE)) * MicroSecondsInASecond), BlockSize, BlockDelay);
 
     // DEBUG_END;
 
@@ -84,7 +84,7 @@ bool c_OutputAPA102::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     bool response = c_OutputPixel::SetConfig (jsonConfig);
 
     // Calculate our refresh time
-    SetFrameDurration ( ( (1.0 / float (APA102_BIT_RATE)) * 1000000), BlockSize, BlockDelay);
+    SetFrameDurration ( ( (1.0 / float (APA102_BIT_RATE)) * MicroSecondsInASecond), BlockSize, BlockDelay);
 
     // DEBUG_END;
     return response;

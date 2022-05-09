@@ -82,7 +82,7 @@ void c_OutputUCS8903::SetOutputBufferSize (uint16_t NumChannelsAvailable)
     c_OutputPixel::SetOutputBufferSize (NumChannelsAvailable);
 
     // Calculate our refresh time
-    SetFrameDurration (float(UCS8903_PIXEL_NS_BIT_0_HIGH + UCS8903_PIXEL_NS_BIT_0_LOW) / 1000.0);
+    SetFrameDurration(float(UCS8903_PIXEL_NS_BIT_0_HIGH + UCS8903_PIXEL_NS_BIT_0_LOW) / float(NanoSecondsInAMicroSecond));
 
     // DEBUG_END;
 
@@ -97,7 +97,7 @@ bool c_OutputUCS8903::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_V();
 
     // Calculate our refresh time
-    SetFrameDurration (float (UCS8903_PIXEL_NS_BIT_0_HIGH + UCS8903_PIXEL_NS_BIT_0_LOW) / 1000.0);
+    SetFrameDurration(float(UCS8903_PIXEL_NS_BIT_0_HIGH + UCS8903_PIXEL_NS_BIT_0_LOW) / float(NanoSecondsInAMicroSecond));
 
     // DEBUG_END;
     return response;

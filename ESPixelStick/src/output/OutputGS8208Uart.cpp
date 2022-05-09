@@ -64,7 +64,7 @@ void c_OutputGS8208Uart::Begin ()
 
     // DEBUG_V(String("GS8208_PIXEL_UART_BAUDRATE: ") + String(GS8208_PIXEL_UART_BAUDRATE));
 
-    SetIntensityBitTimeInUS(float(GS8208_PIXEL_NS_BIT_TOTAL) / 1000.0);
+    SetIntensityBitTimeInUS(float(GS8208_PIXEL_NS_BIT_TOTAL) / float(NanoSecondsInAMicroSecond));
 
     c_OutputUart::OutputUartConfig_t OutputUartConfig;
     OutputUartConfig.ChannelId                     = OutputChannelId;
