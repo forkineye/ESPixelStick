@@ -4,7 +4,7 @@ import os
 Import("env")
 
 
-def PrepareDestinationDirectory(DirPath):
+def PrepareDestinationDirectory(DirRoot, DirPath):
     print("mkdirs: Remove path - '" + DirPath + "'")
     shutil.rmtree(DirPath, True)
     os.system("ls -al ./")
@@ -12,7 +12,7 @@ def PrepareDestinationDirectory(DirPath):
     os.makedirs(DirPath, 0x777, True)
     os.system("ls -al ./")
     print("chmod")
-    os.chmod(DirPath, "a+rwx")
+    os.system("chmod -R a+rwx " + DirRoot)
     os.system("ls -al " + DirPath)
 
 BUILD_DIR = env['PROJECT_BUILD_DIR']
@@ -51,18 +51,18 @@ DST_DBG   = DBG_DIR + PIOENV + ".elf"
 def after_build(source, target, env):
 
     pathfrm = os.path.join("", DST_DIR)
-    PrepareDestinationDirectory(pathfrm)
+    PrepareDestinationDirectory("./firmawre", pathfrm)
     print("Copy from: '" + SRC_BIN + "' to '" + DST_BIN + "'")
     shutil.copyfile(SRC_BIN, DST_BIN)
     print("Listing dir: " + pathfrm)
-    os.system("ls -alR " + pathfrm)
+    os.system("ls -al " + pathfrm + "/")
 
     pathdbg = os.path.join("", DBG_DIR)
-    PrepareDestinationDirectory(pathdbg)
+    PrepareDestinationDirectory("./debug", pathdbg)
     print("Copy from: '" + SRC_DBG + "' to '" + DST_DBG + "'")
     shutil.copyfile(SRC_DBG, DST_DBG)
     print("Listing dir: " + pathdbg)
-    os.system("ls -alR ./debug")
+    os.system("ls -al " + pathdbg + "/")
 
     if("FLASH_EXTRA_IMAGES" in env):
         FLASH_EXTRA_IMAGES = env['FLASH_EXTRA_IMAGES']
