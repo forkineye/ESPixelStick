@@ -20,12 +20,12 @@ BOARD_F_FLASH = env['BOARD_F_FLASH'].removesuffix('000000L') + 'm'
 # print("BOARD_FLASH_MODE " + BOARD_FLASH_MODE)
 # print("BOARD_F_FLASH " + BOARD_F_FLASH)
 
-SRC_DIR  = BUILD_DIR + "\\" + PIOENV + "\\"
+SRC_DIR  = BUILD_DIR + "/" + PIOENV + "/"
 SRC_BIN  = SRC_DIR + PROGNAME + ".bin"
 SRC_PART = SRC_DIR + "partitions.bin"
 # print("SRC_BIN " + SRC_BIN)
 
-DST_DIR  = ".\\dist\\firmware\\" + BOARD_MCU + "\\"
+DST_DIR  = "./dist/firmware/" + BOARD_MCU + "/"
 DST_BIN  = DST_DIR + PIOENV + "-app.bin"
 DST_PART = DST_DIR + PIOENV + "-partitions.bin"
 DST_BOOT = DST_DIR + PIOENV + "-bootloader.bin"
