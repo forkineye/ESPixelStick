@@ -40,8 +40,9 @@ def after_build(source, target, env):
 
     pathfrm = os.path.join("", DST_DIR)
     print("mkdirs: path - '" + pathfrm + "'")
-    shutil.rmtree(pathfrm)
+    shutil.rmtree(pathfrm, True)
     os.makedirs(pathfrm, 0x7777, True)
+    os.system("chmod -R 0x777 ./firmware")
     print("Listing dir: " + pathfrm)
     os.system("ls -al ./firmware")
     print("Copy from: '" + SRC_BIN + "' to '" + DST_BIN + "'")
@@ -51,7 +52,9 @@ def after_build(source, target, env):
 
     pathdbg = os.path.join("", DBG_DIR)
     print("mkdirs: pathdbg - '" + pathdbg + "'")
+    shutil.rmtree(pathdbg, True)
     os.makedirs(pathdbg, 0x777, True)
+    os.system("chmod -R 0x777 ./firmware")
     print("Listing dir: " + pathdbg)
     os.system("ls -al ./debug")
     print("Copy from: '" + SRC_DBG + "' to '" + DST_DBG + "'")
