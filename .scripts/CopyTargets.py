@@ -1,5 +1,6 @@
 import platform
 import shutil
+import os
 Import("env")
 
 BUILD_DIR = env['PROJECT_BUILD_DIR']
@@ -23,17 +24,31 @@ BOARD_F_FLASH = env['BOARD_F_FLASH'].removesuffix('000000L') + 'm'
 SRC_DIR  = BUILD_DIR + "/" + PIOENV + "/"
 SRC_BIN  = SRC_DIR + PROGNAME + ".bin"
 SRC_PART = SRC_DIR + "partitions.bin"
+SRC_DBG  = SRC_DIR + PROGNAME + ".elf"
+
 # print("SRC_BIN " + SRC_BIN)
 
-DST_DIR  = "./dist/firmware/" + BOARD_MCU + "/"
-DST_BIN  = DST_DIR + PIOENV + "-app.bin"
-DST_PART = DST_DIR + PIOENV + "-partitions.bin"
-DST_BOOT = DST_DIR + PIOENV + "-bootloader.bin"
+DST_DIR   = "firmware/" + BOARD_MCU + "/"
+DST_BIN   = DST_DIR + PIOENV + "-app.bin"
+DST_PART  = DST_DIR + PIOENV + "-partitions.bin"
+DST_BOOT  = DST_DIR + PIOENV + "-bootloader.bin"
+
+DBG_DIR   = "debug/" + BOARD_MCU + "/"
+DST_DBG   = DBG_DIR + PIOENV + ".elf"
 
 def after_build(source, target, env):
 
+    path = os.path.join("./", DST_DIR)
+    print("Out Dirs: " + path)
+    os.makedirs(path, 0x777, True)
     print("Copy: " + SRC_BIN)
     shutil.copyfile(SRC_BIN, DST_BIN)
+
+    pathdbg = os.path.join("./", DBG_DIR)
+    print("Out DBG Dirs: " + pathdbg)
+    os.makedirs(pathdbg, 0x777, True)
+    print("Copy: " + SRC_DBG)
+    shutil.copyfile(SRC_DBG, DST_DBG)
 
     if("FLASH_EXTRA_IMAGES" in env):
         FLASH_EXTRA_IMAGES = env['FLASH_EXTRA_IMAGES']
