@@ -111,6 +111,8 @@ jobs:
         env:
           chip: ${{ matrix.chip }}
         run: |
+          mkdir -p ./dist/firmware/esp32
+          mkdir -p ./dist/firmware/esp8266
           pio run -e ${{ matrix.target }}
           mkdir -p firmware/${{ matrix.chip }}
           mkdir -p debug/${{ matrix.chip }}
@@ -119,11 +121,13 @@ jobs:
           if [ "$chip" = "esp32" ]; then
           mv .pio/build/${{ matrix.target }}/partitions.bin firmware/esp32/${{ matrix.target }}-partitions.bin
           # MEM cp ~/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/bin/bootloader_dio_40m.bin firmware/esp32/${{ matrix.target }}-bootloader.bin
+          mkdir -p ./dist/firmware/esp32
           ls -al ./dist
           ls -al ./dist/firmware
           ls -al ./dist/firmware/esp32
           cp ./dist/firmware/esp32/${{ matrix.target }}-bootloader.bin firmware/esp32/${{ matrix.target }}-bootloader.bin
           cp ~/.platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin firmware/esp32/boot_app0.bin
+          ls -al firmware/esp32/boot_app0.bin
           fi
 
       - name: Upload Firmware Artifacts
