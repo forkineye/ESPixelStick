@@ -64,6 +64,9 @@ jobs:
           # Twilight Lord ETH
           - target: "d1_mini_twilightlord_eth"
             chip: "esp32"
+          # DEVKITC
+          - target: "esp32_devkitc"
+            chip: "esp32"
 
     runs-on: ubuntu-latest
     steps:
