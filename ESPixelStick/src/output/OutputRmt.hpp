@@ -119,6 +119,7 @@ public:
     void PauseOutput                            (bool State);
     void SetMinFrameDurationInUs                (uint32_t value) { FrameMinDurationInMicroSec = value; }
     inline uint32_t IRAM_ATTR GetRmtIntMask     ()               { return ((RMT_INT_TX_END_BIT | RMT_INT_ERROR_BIT | RMT_INT_ERROR_BIT | RMT_INT_THR_EVNT_BIT)); }
+    void GetDriverName                          (String &value)  { value = CN_RMT; }
 
 #define DisableInterrupts RMT.int_ena.val &= ~(RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT)
 #define EnableInterrupts  RMT.int_ena.val |=  (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT)
