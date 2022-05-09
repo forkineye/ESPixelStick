@@ -59,6 +59,8 @@ protected:
 #define UCS1903_PIXEL_IDLE_TIME_NS           25000.0 // 24us per datasheet
 #define UCS1903_PIXEL_IDLE_TIME_US           (UCS1903_PIXEL_IDLE_TIME_NS / float(NanoSecondsInAMicroSecond))
 
+#define UCS1903_PIXEL_BITS_PER_INTENSITY     8
+
 }; // c_OutputUCS1903
 
 #endif // def SUPPORT_OutputType_UCS1903

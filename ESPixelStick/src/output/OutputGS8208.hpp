@@ -61,6 +61,8 @@ protected:
 #define GS8208_PIXEL_IDLE_TIME_NS           300000.0 // 300us per datasheet
 #define GS8208_PIXEL_IDLE_TIME_US           (GS8208_PIXEL_IDLE_TIME_NS / float(NanoSecondsInAMicroSecond))
 
+#define GS8208_PIXEL_BITS_PER_INTENSITY     8
+
 }; // c_OutputGS8208
 
 #endif // def SUPPORT_OutputType_GS8208
