@@ -40,38 +40,24 @@ def after_build(source, target, env):
 
     pathfrm = os.path.join("", DST_DIR)
     print("mkdirs: path - '" + pathfrm + "'")
-    os.makedirs(pathfrm, 0x777, True)
-    dirs = os.listdir(pathfrm)
-    for file in dirs:
-        print(file)
-
+    shutil.rmtree(pathfrm)
+    os.makedirs(pathfrm, 0x7777, True)
+    print("Listing dir: " + pathfrm)
+    os.system("ls -al ./firmware")
     print("Copy from: '" + SRC_BIN + "' to '" + DST_BIN + "'")
     shutil.copyfile(SRC_BIN, DST_BIN)
-    dirs = os.listdir(pathfrm)
-    for file in dirs:
-        print(file)
-
-    for dirpath, dirnames, filenames in os.walk(pathfrm):
-        for filename in filenames:
-            path = os.path.join(dirpath, filename)
-            os.chmod(path, 0o777)  # for example
+    print("Listing dir: " + pathfrm)
+    os.system("ls -al ./firmware")
 
     pathdbg = os.path.join("", DBG_DIR)
     print("mkdirs: pathdbg - '" + pathdbg + "'")
     os.makedirs(pathdbg, 0x777, True)
-
-    dirs = os.listdir(pathdbg)
-    for file in dirs:
-        print(file)
+    print("Listing dir: " + pathdbg)
+    os.system("ls -al ./debug")
     print("Copy from: '" + SRC_DBG + "' to '" + DST_DBG + "'")
     shutil.copyfile(SRC_DBG, DST_DBG)
-    dirs = os.listdir(pathdbg)
-    for file in dirs:
-        print(file)
-    for dirpath, dirnames, filenames in os.walk(pathfrm):
-        for filename in filenames:
-            path = os.path.join(dirpath, filename)
-            os.chmod(path, 0o777)  # for example
+    print("Listing dir: " + pathdbg)
+    os.system("ls -al ./debug")
 
     if("FLASH_EXTRA_IMAGES" in env):
         FLASH_EXTRA_IMAGES = env['FLASH_EXTRA_IMAGES']
