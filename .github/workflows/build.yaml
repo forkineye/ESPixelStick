@@ -118,7 +118,8 @@ jobs:
           mv .pio/build/${{ matrix.target }}/firmware.elf debug/${{ matrix.chip }}/${{ matrix.target }}.elf
           if [ "$chip" = "esp32" ]; then
           mv .pio/build/${{ matrix.target }}/partitions.bin firmware/esp32/${{ matrix.target }}-partitions.bin
-          cp ~/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/bin/bootloader_dio_40m.bin firmware/esp32/${{ matrix.target }}-bootloader.bin
+          # MEM cp ~/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/bin/bootloader_dio_40m.bin firmware/esp32/${{ matrix.target }}-bootloader.bin
+          cp ./dist/firmware/esp32/${{ matrix.target }}-bootloader.bin firmware/esp32/${{ matrix.target }}-bootloader.bin
           cp ~/.platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin firmware/esp32/boot_app0.bin
           fi
 
