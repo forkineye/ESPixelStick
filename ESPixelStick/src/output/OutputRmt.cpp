@@ -142,6 +142,17 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
         RMT.tx_lim_ch[OutputRmtConfig.RmtChannelId].limit = NumRmtSlotsPerInterrupt;
         NumAvailableRmtSlotsToFill = NUM_RMT_SLOTS;
 
+        // this should be a vector but Arduino does not support them.
+        if (nullptr != OutputRmtConfig.CitrdsArray)
+        {
+            const ConvertIntensityToRmtDataStreamEntry_t *CurrentTranslation = OutputRmtConfig.CitrdsArray;
+            while (CurrentTranslation->Id != RmtDataBitIdType_t::RMT_LIST_END)
+            {
+                SetIntensity2Rmt(CurrentTranslation->Translation, CurrentTranslation->Id);
+                CurrentTranslation++;
+            }
+        }
+
         // create a delay before starting to send data
         LastFrameStartTime = millis();
 
