@@ -85,27 +85,27 @@ typedef enum
 #   include "platformDefinitions/GPIO_Defs_ESP32_LoLin_D32_PRO.hpp"
 #elif defined (BOARD_ESP32_MH_ET_LIVE_MiniKit)
 #   include "platformDefinitions/GPIO_Defs_ESP32_MH_ET_LIVE_MiniKit.hpp"
-#elif defined(BOARD_ESP32_QUINLED_QUAD_ETH)
+#elif defined (BOARD_ESP32_QUINLED_QUAD_ETH)
 #   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_QUAD_ETH.hpp"
-#elif defined(BOARD_ESP32_QUINLED_QUAD_AE_PLUS)
+#elif defined (BOARD_ESP32_QUINLED_QUAD_AE_PLUS)
 #   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_QUAD_AE_Plus.hpp"
-#elif defined(BOARD_ESP32_QUINLED_QUAD)
+#elif defined (BOARD_ESP32_QUINLED_QUAD)
 #   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_QUAD.hpp"
-#elif defined(BOARD_ESP32_QUINLED_UNO_ETH)
+#elif defined (BOARD_ESP32_QUINLED_UNO_ETH)
 #   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_UNO_ETH.hpp"
-#elif defined(BOARD_ESP32_QUINLED_UNO)
+#elif defined (BOARD_ESP32_QUINLED_UNO)
 #   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_UNO_AE_Plus.hpp"
-#elif defined(BOARD_ESP32_QUINLED_UNO_AE_PLUS)
+#elif defined (BOARD_ESP32_QUINLED_UNO_AE_PLUS)
 #   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_UNO.hpp"
 #elif defined (BOARD_ESP32_TTGO_T8)
 #   include "platformDefinitions/GPIO_Defs_ESP32_TTGO_T8.hpp"
 #elif defined (BOARD_ESP32_WT32ETH01)
 #   include "platformDefinitions/GPIO_Defs_ESP32_WT32ETH01.hpp"
-#elif defined(BOARD_ESP32_TWILIGHTLORD)
+#elif defined (BOARD_ESP32_TWILIGHTLORD)
 #   include "platformDefinitions/GPIO_Defs_ESP32_TWILIGHTLORD.hpp"
-#elif defined(BOARD_ESP32_TWILIGHTLORD_ETH)
+#elif defined (BOARD_ESP32_TWILIGHTLORD_ETH)
 #   include "platformDefinitions/GPIO_Defs_ESP32_TWILIGHTLORD_ETH.hpp"
-#elif defined(BOARD_ESP32_TWILIGHTLORD_ETH)
+#elif defined (BOARD_ESP32_TWILIGHTLORD_ETH)
 #   include "platformDefinitions/GPIO_Defs_ESP32_DevkitC.hpp"
 #elif defined (BOARD_ESP01S)
 #   include "platformDefinitions/GPIO_Defs_ESP8266_ESP01S.hpp"
@@ -113,7 +113,7 @@ typedef enum
 #   include "platformDefinitions/GPIO_Defs_ESP8266_ESPS_V3.hpp"
 #elif defined (ARDUINO_ARCH_ESP32)
 #   include "platformDefinitions/GPIO_Defs_ESP32_generic.hpp"
-#elif defined(ARDUINO_ARCH_ESP8266)
+#elif defined (ARDUINO_ARCH_ESP8266)
 #   include "platformDefinitions/GPIO_Defs_ESP8266_Generic.hpp"
 #else
 #   error "No valid platform definition"
