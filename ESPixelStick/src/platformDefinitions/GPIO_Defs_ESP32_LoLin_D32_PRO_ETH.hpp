@@ -22,7 +22,7 @@
 
 #define SUPPORT_ETHERNET
 #include <ETH.h>
-#undefine SUPPORT_SD_CARD
+#undef SUPPORT_SD_CARD
 
 /*
    * ETH_CLOCK_GPIO0_IN   - default: external clock from crystal oscillator
@@ -43,7 +43,7 @@
 #define ETH_ADDR_PHY_LAN8720           0
 // #define ETH_ADDR_PHY_LAN8720          1
 #define ETH_ADDR_PHY_TLK110            31
-#define ETH_PHY_ADDR                   ETH_ADDR_PHY_LAN8720
+#define DEFAULT_ETH_ADDR               ETH_ADDR_PHY_LAN8720
 #define DEFAULT_ETH_TXEN               gpio_num_t::GPIO_NUM_21
 #define DEFAULT_ETH_TXD0               gpio_num_t::GPIO_NUM_19
 #define DEFAULT_ETH_TXD1               gpio_num_t::GPIO_NUM_22
