@@ -212,7 +212,7 @@ bool c_EthernetDriver::IsConnected ()
 {
     // DEBUG_V("");
 
-    return (pCurrentFsmState == &fsm_Eth_state_WaitForIP_imp);
+    return (pCurrentFsmState == &fsm_Eth_state_GotIp_imp);
 
 } // IsConnected
 
@@ -533,7 +533,7 @@ void fsm_Eth_state_ConnectingToEth::Poll()
 
     if(ETH.localIP())
     {
-        LOG_PORT.println(String("Got ETH IP: ") + ETH.localIP().toString());
+        // LOG_PORT.println(String("Got ETH IP: ") + ETH.localIP().toString());
         OnGotIp();
     }
     // DEBUG_END;
