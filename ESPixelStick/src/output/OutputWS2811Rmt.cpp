@@ -37,6 +37,7 @@ static const c_OutputRmt::ConvertIntensityToRmtDataStreamEntry_t ConvertIntensit
     {{WS2811_PIXEL_RMT_TICKS_IDLE / 12,  0, WS2811_PIXEL_RMT_TICKS_IDLE / 12, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID},
     {{                                2, 1,                                2, 1}, c_OutputRmt::RmtDataBitIdType_t::RMT_STARTBIT_ID},
     {{                                0, 0,                                0, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_STOPBIT_ID},
+    {{                                0, 0,                                0, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_LIST_END},
 
 }; // ConvertIntensityToRmtDataStream
 
@@ -82,7 +83,7 @@ void c_OutputWS2811Rmt::Begin ()
     OutputRmtConfig.idle_level       = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
     OutputRmtConfig.pPixelDataSource = this;
     OutputRmtConfig.CitrdsArray      = ConvertIntensityToRmtDataStream;
-
+    // DEBUG_V();
     Rmt.Begin(OutputRmtConfig);
 
     HasBeenInitialized = true;
