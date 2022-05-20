@@ -935,6 +935,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
         // DEBUG_V ("");
         String sDriverName;
         CurrentOutputChannelDriver.pOutputChannelDriver->GetDriverName(sDriverName);
+        // DEBUG_V(String("Driver Name: ") + sDriverName);
         if (!IsBooting)
         {
             logcon("'" + sDriverName + F("' Initialization for Output: ") + String(CurrentOutputChannelDriver.DriverId));
@@ -946,10 +947,6 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
         }
 
     } while (false);
-
-    // String temp;
-    // CurrentOutputChannel.pOutputChannelDriver->GetDriverName (temp);
-    // DEBUG_V (String ("Driver Name: ") + temp);
 
     // DEBUG_END;
 
@@ -1246,7 +1243,7 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
         }
 
         OutputBufferOffset += ChannelsToAllocate;
-        // DEBUG_V (String ("pOutputChannel->GetBufferUsedSize: ") + String (pOutputChannel->GetBufferUsedSize ()));
+        // DEBUG_V(String("OutputChannel.GetBufferUsedSize: ") + String(OutputChannel.pOutputChannelDriver->GetBufferUsedSize()));
         // DEBUG_V (String ("OutputBufferOffset: ") + String(OutputBufferOffset));
     }
 
