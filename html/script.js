@@ -1222,18 +1222,21 @@ function wsConnect()
             target = document.location.host;
         }
 
-        // target = "192.168.10.237";
+        // target = "192.168.10.184";
         // target = "192.168.10.101";
 
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');
         ws.binaryType = 'arraybuffer';
-
+        ws.onclose = function (event)
+        {
+            console.error('WebSocket Close: ', event);
+        };
         // When connection is opened, get core data.
         // Module data is loaded in module change / load callbacks
-        ws.onopen = function ()
+        ws.onopen = function (event)
         {
-            // console.info("ws.onopen");
+            console.info("ws.onopen " + event);
 
             // Start ping-pong heartbeat
             wsPingPong();
@@ -1350,7 +1353,7 @@ function wsConnect()
         ws.onerror = function(event)
         {
             console.error("WebSocket error: ", event);
-            wsReconnect();
+
         };
     }
     else
@@ -1368,12 +1371,22 @@ function wsPingPong()
 
     if (false === IsDocumentHidden) {
         pingTimer = setTimeout(function () {
-            wsEnqueue('XP');
-        }, 2000);
+            // is the socket still open?
+            if (ws.readyState === 3)
+            {
+                wsReconnect();
+            }
+            else
+            {
+                ws.send('XP');
+                // wsEnqueue('XP');
+            }
+
+        }, 1000);
 
         pongTimer = setTimeout(function () {
             wsReconnect();
-        }, 10000);
+        }, 6000);
 	}
 }
 
@@ -1395,6 +1408,7 @@ function wsEnqueue(message)
     // only send messages if the WS interface is up and document is visible
     if (ws.readyState !== 1)
     {
+        console.debug ("WS is down - readyState: " + ws.readyState);
         console.debug ("WS is down - Discarding msg: " + message);
     }
 
