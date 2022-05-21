@@ -31,6 +31,7 @@
 #else
 #	error "Unsupported CPU type"
 #endif
+#include "esp_err.h"
 
 #define ARDUINOJSON_USE_LONG_LONG 1
 
@@ -112,7 +113,6 @@ bool setFromJSON (T& OutValue, J& Json, N Name)
     return HasBeenModified;
 };
 
-#if defined(esp_err_t)
 // Template function takes array of characters as **reference**
 // to allow template to statically assert buffer is large enough
 // to always succeed.  Returns esp_err_t to allow use of
@@ -154,7 +154,6 @@ inline esp_err_t saferSecondsToFormattedMinutesAndSecondsString(char (&output)[N
     }
     return ESP_FAIL;
 }
-#endif // defined(esp_err_t)
 
 #define logcon(msg) \
 { \
