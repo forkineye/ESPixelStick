@@ -1,3 +1,6 @@
+/debug/
+/firmware/
+/ESPixelStick/ESPixelStick.ino.cpp
 /.doxygen/doc/
 /.pio/
 /.vscode/
