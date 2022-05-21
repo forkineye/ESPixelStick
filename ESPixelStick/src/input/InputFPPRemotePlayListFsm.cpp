@@ -356,22 +356,21 @@ void fsm_PlayList_state_Paused::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject PauseStatus = jsonStatus.createNestedObject (CN_Paused);
-    
+    JsonObject pauseStatus = jsonStatus.createNestedObject (CN_Paused);
+
     time_t now = millis ();
 
-    time_t SecondsRemaining = (pInputFPPRemotePlayList->PauseEndTime - now) / 1000;
+    time_t secondsRemaining = (pInputFPPRemotePlayList->PauseEndTime - now) / 1000u;
     if (now > pInputFPPRemotePlayList->PauseEndTime)
     {
-        SecondsRemaining = 0;
+        secondsRemaining = 0;
     }
 
-    time_t MinutesRemaining = min(time_t(99), time_t(SecondsRemaining / 60));
-    SecondsRemaining = SecondsRemaining % 60;
-
-    char buf[10];
-    sprintf (buf, "%02u:%02u", uint32_t(MinutesRemaining), uint32_t(SecondsRemaining));
-    PauseStatus[F ("TimeRemaining")] = buf;
+    char buf[12];
+    // BUGBUG -- casting time_t to integer types is not portable code (can be real ... e.g., float)
+    // BUGBUG -- no portable way to know maximum value of time_t, or if it's signed vs. unsigned (without type traits)
+    ESP_ERROR_CHECK(saferSecondsToFormattedMinutesAndSecondsString(buf, (uint32_t)secondsRemaining));
+    pauseStatus[F ("TimeRemaining")] = buf;
 
     // DEBUG_END;
 
