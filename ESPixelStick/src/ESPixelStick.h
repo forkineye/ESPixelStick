@@ -112,6 +112,50 @@ bool setFromJSON (T& OutValue, J& Json, N Name)
     return HasBeenModified;
 };
 
+#if defined(esp_err_t)
+// Template function takes array of characters as **reference**
+// to allow template to statically assert buffer is large enough
+// to always succeed.  Returns esp_err_t to allow use of
+// ESP_ERROR_CHECK() macro (as this is used extensively elsewhere).
+template <size_t N>
+inline esp_err_t saferRgbToHtmlColorString(char (&output)[N], uint8_t r, uint8_t g, uint8_t b) {
+    // Including the trailing null, this string requires eight (8) characters.
+    //
+    // The output is formatted as "#RRGGBB", where RR, GG, and BB are two hex digits
+    // for the red, green, and blue components, respectively.
+    static_assert(N >= 8);
+    int wouldHaveWrittenChars = snprintf(output, N, "#%02x%02x%02x", r, g, b);
+    // TODO: assert ((wouldHaveWrittenChars > 0) && (wouldHaveWrittenChars < N))
+    if ((wouldHaveWrittenChars > 0) && (wouldHaveWrittenChars < N)) {
+        return ESP_OK;
+    }
+    return ESP_FAIL;
+}
+// Template function takes array of characters as **reference**
+// to allow template to statically assert buffer is large enough
+// to always succeed.  Returns esp_err_t to allow use of
+// ESP_ERROR_CHECK() macro (as this is used extensively elsewhere).
+template <size_t N>
+inline esp_err_t saferSecondsToFormattedMinutesAndSecondsString(char (&output)[N], uint32_t seconds) {
+
+    // Including the trailing null, the string may require up to twelve (12) characters.
+    //
+    // The output is formatted as "{minutes}:{seconds}".
+    // uint32_t seconds is in range [0..4294967295].
+    // therefore, minutes is in range [0..71582788] (eight characters).
+    // seconds is always exactly two characters.
+    static_assert(N >= 12);
+    uint32_t m = seconds / 60u;
+    uint8_t  s = seconds % 60u;
+    int wouldHaveWrittenChars = snprintf(output, N, "%u:%02u", m, s);
+    // TODO: assert ((wouldHaveWrittenChars > 0) && (wouldHaveWrittenChars < N))
+    if ((wouldHaveWrittenChars > 0) && (wouldHaveWrittenChars < N)) {
+        return ESP_OK;
+    }
+    return ESP_FAIL;
+}
+#endif // defined(esp_err_t)
+
 #define logcon(msg) \
 { \
     String DN; \
