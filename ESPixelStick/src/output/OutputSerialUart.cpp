@@ -17,6 +17,8 @@ GNU General Public License for more details.
 
 #include "../ESPixelStick.h"
 #if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+#ifdef SUPPORT_UART_OUTPUT
+
 #include "OutputSerialUart.hpp"
 
 //----------------------------------------------------------------------------
@@ -119,4 +121,5 @@ void c_OutputSerialUart::Render ()
 
 } // render
 
+#endif // def SUPPORT_UART_OUTPUT
 #endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
