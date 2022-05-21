@@ -127,10 +127,10 @@ inline esp_err_t saferRgbToHtmlColorString(char (&output)[N], uint8_t r, uint8_t
     static_assert(N >= 8);
     static_assert(sizeof(int) <= sizeof(size_t)); // casting non-negative int to size_t is safe
     int wouldHaveWrittenChars = snprintf(output, N, "#%02x%02x%02x", r, g, b);
-    // TODO: assert ((wouldHaveWrittenChars > 0) && (wouldHaveWrittenChars < N))
-    if ((wouldHaveWrittenChars > 0) && (((size_t)wouldHaveWrittenChars) < N)) {
+    if (likely((wouldHaveWrittenChars > 0) && (((size_t)wouldHaveWrittenChars) < N))) {
         return ESP_OK;
     }
+    // TODO: assert ((wouldHaveWrittenChars > 0) && (wouldHaveWrittenChars < N))
     return ESP_FAIL;
 }
 // Template function takes array of characters as **reference**
@@ -151,10 +151,10 @@ inline esp_err_t saferSecondsToFormattedMinutesAndSecondsString(char (&output)[N
     uint32_t m = seconds / 60u;
     uint8_t  s = seconds % 60u;
     int wouldHaveWrittenChars = snprintf(output, N, "%u:%02u", m, s);
-    // TODO: assert ((wouldHaveWrittenChars > 0) && (wouldHaveWrittenChars < N))
-    if ((wouldHaveWrittenChars > 0) && (((size_t)wouldHaveWrittenChars) < N)) {
+    if (likely((wouldHaveWrittenChars > 0) && (((size_t)wouldHaveWrittenChars) < N))) {
         return ESP_OK;
     }
+    // TODO: assert ((wouldHaveWrittenChars > 0) && (wouldHaveWrittenChars < N))
     return ESP_FAIL;
 }
 
