@@ -23,14 +23,14 @@ typedef int esp_err_t; // currently only need two defined status: OK & FAIL
     #define LOG_ERROR_MSG(...)
 #endif
 
-/**
- * Macro which can be used to check the error code,
- * and terminate the program in case the code is not ESP_OK.
- * Prints the error code, error location, and the failed statement to serial output.
- *
- * Disabled if assertions are disabled.
- */
-#ifdef NDEBUG
+#ifndef likely
+    #define likely(x)      __builtin_expect(!!(x), 1)
+#endif
+#ifndef unlikely
+    #define unlikely(x)    __builtin_expect(!!(x), 0)
+#endif
+
+#if defined(NDEBUG)
     #define ESP_ERROR_CHECK(x)                                          \
         do {                                                            \
             esp_err_t err_rc_ = (x);                                    \
@@ -48,7 +48,7 @@ typedef int esp_err_t; // currently only need two defined status: OK & FAIL
     #define ESP_ERROR_CHECK(x)                                          \
         do {                                                            \
             esp_err_t err_rc_ = (x);                                    \
-            if (err_rc_ != ESP_OK) {                                    \
+            if (unlikely(err_rc_ != ESP_OK)) {                          \
                 LOG_ERROR_MSG("err: esp_err_t = %d", rc);               \
                 assert(0 && #x);                                        \
             }                                                           \
