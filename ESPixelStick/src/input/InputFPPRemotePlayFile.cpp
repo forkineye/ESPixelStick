@@ -186,12 +186,12 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
     uint32_t msecondsTotal;
     if (__builtin_mul_overflow(FrameControl.FrameStepTimeMS, FrameControl.TotalNumberOfFramesInSequence, &msecondsTotal)) {
         // returned non-zero: there has been an overflow
-        msecondsTotal = 1000u; // set to one second total when overflow occurs
+        msecondsTotal = MilliSecondsInASecond; // set to one second total when overflow occurs
     }
 
     // JsonStatus uses seconds to report elapsed, played, and remaining time
-    uint32_t secs = mseconds / 1000u;
-    uint32_t secsTot = msecondsTotal / 1000u;
+    uint32_t secs = mseconds / MilliSecondsInASecond;
+    uint32_t secsTot = msecondsTotal / MilliSecondsInASecond;
     uint32_t secsRem;
     if (__builtin_sub_overflow(secsTot, secs, &secsRem)) {
         // returned non-zero: there has been an overflow
