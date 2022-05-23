@@ -29,23 +29,18 @@
 #define TM1814_PIXEL_RMT_TICKS_BIT_1_LOW     uint16_t ( (TM1814_PIXEL_NS_BIT_1_LOW  / RMT_TickLengthNS) + 1.0)
 #define TM1814_PIXEL_RMT_TICKS_IDLE          uint16_t ( (TM1814_PIXEL_NS_IDLE       / RMT_TickLengthNS) + 1.0)
 
-typedef c_OutputRmt::RmtDataBitIdType_t Rdbit_t;
-struct RmtBitDefinitionEntry_t
+static const c_OutputRmt::ConvertIntensityToRmtDataStreamEntry_t ConvertIntensityToRmtDataStream[] =
 {
-    rmt_item32_t Data;
-    Rdbit_t Id;
-} // RmtBitDefinitionEntry_t
-static const PROGMEM RmtBitDefinitions[] =
-{
-    // {{}.duration0,.level0,.duration1,.level1},Type},
+    // {{.duration0,.level0,.duration1,.level1},Type},
 
-    {{TM1814_PIXEL_RMT_TICKS_BIT_0_LOW, 0, TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH, 1}, Rdbit_t::RMT_DATA_BIT_ZERO_ID},
-    {{TM1814_PIXEL_RMT_TICKS_BIT_1_LOW, 0, TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH, 1}, Rdbit_t::RMT_DATA_BIT_ONE_ID},
-    {{TM1814_PIXEL_RMT_TICKS_IDLE / 12, 1, TM1814_PIXEL_RMT_TICKS_IDLE / 12,  1}, Rdbit_t::RMT_INTERFRAME_GAP_ID},
-    {{TM1814_PIXEL_RMT_TICKS_IDLE / 12, 1, TM1814_PIXEL_RMT_TICKS_IDLE / 12,  1}, Rdbit_t::RMT_STARTBIT_ID},
-    {{0,                                0, 0,                                 0}, Rdbit_t::RMT_STOPBIT_ID},
+    {{TM1814_PIXEL_RMT_TICKS_BIT_0_LOW, 0, TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH, 1}, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID},
+    {{TM1814_PIXEL_RMT_TICKS_BIT_1_LOW, 0, TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH, 1}, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID},
+    {{TM1814_PIXEL_RMT_TICKS_IDLE / 12, 1, TM1814_PIXEL_RMT_TICKS_IDLE / 12,  1}, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID},
+    {{TM1814_PIXEL_RMT_TICKS_IDLE / 12, 1, TM1814_PIXEL_RMT_TICKS_IDLE / 12,  1}, c_OutputRmt::RmtDataBitIdType_t::RMT_STARTBIT_ID},
+    {{                               0, 0,                                0,  0}, c_OutputRmt::RmtDataBitIdType_t::RMT_STOPBIT_ID},
+    {{                               0, 0,                                0,  0}, c_OutputRmt::RmtDataBitIdType_t::RMT_LIST_END},
 
-}; // RmtBitDefinitions
+}; // ConvertIntensityToRmtDataStream
 
 //----------------------------------------------------------------------------
 c_OutputTM1814Rmt::c_OutputTM1814Rmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
@@ -55,10 +50,6 @@ c_OutputTM1814Rmt::c_OutputTM1814Rmt (c_OutputMgr::e_OutputChannelIds OutputChan
     c_OutputTM1814 (OutputChannelId, outputGpio, uart, outputType)
 {
     // DEBUG_START;
-    for (auto currentRmtBitDefinition : RmtBitDefinitions)
-    {
-        Rmt.SetIntensity2Rmt(currentRmtBitDefinition.Data, currentRmtBitDefinition.Id);
-    }
 
     // DEBUG_V (String ("TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH: 0x") + String (TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH, HEX));
     // DEBUG_V (String (" TM1814_PIXEL_RMT_TICKS_BIT_0_LOW: 0x") + String (TM1814_PIXEL_RMT_TICKS_BIT_0_LOW,  HEX));
@@ -92,6 +83,7 @@ void c_OutputTM1814Rmt::Begin ()
     OutputRmtConfig.DataPin          = gpio_num_t(DataPin);
     OutputRmtConfig.idle_level       = rmt_idle_level_t::RMT_IDLE_LEVEL_HIGH;
     OutputRmtConfig.pPixelDataSource = this;
+    OutputRmtConfig.CitrdsArray      = ConvertIntensityToRmtDataStream;
 
     Rmt.Begin(OutputRmtConfig);
 

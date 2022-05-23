@@ -43,17 +43,25 @@ public:
         RMT_STOP_START_BIT_ID = RMT_STOPBIT_ID,
     };
 
+    struct ConvertIntensityToRmtDataStreamEntry_t
+    {
+        rmt_item32_t        Translation;
+        RmtDataBitIdType_t  Id;
+    };
+    typedef ConvertIntensityToRmtDataStreamEntry_t CitrdsArray_t;
+
     struct OutputRmtConfig_t
     {
-        rmt_channel_t    RmtChannelId           = rmt_channel_t(-1);
-        gpio_num_t       DataPin                = gpio_num_t(-1);
-        rmt_idle_level_t idle_level             = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
-        size_t           IntensityDataWidth     = 8;
-        bool             SendInterIntensityBits = false;
-        bool             SendEndOfFrameBits     = false;
-        uint8_t          NumFrameStartBits      = 1;
-        uint8_t          NumFrameStopBits       = 1;
-        uint8_t          NumIdleBits            = 6;
+        rmt_channel_t       RmtChannelId           = rmt_channel_t(-1);
+        gpio_num_t          DataPin                = gpio_num_t(-1);
+        rmt_idle_level_t    idle_level             = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
+        size_t              IntensityDataWidth     = 8;
+        bool                SendInterIntensityBits = false;
+        bool                SendEndOfFrameBits     = false;
+        uint8_t             NumFrameStartBits      = 1;
+        uint8_t             NumFrameStopBits       = 1;
+        uint8_t             NumIdleBits            = 6;
+        const CitrdsArray_t *CitrdsArray           = nullptr;
 
         c_OutputPixel  *pPixelDataSource      = nullptr;
 #if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
@@ -134,7 +142,7 @@ public:
 
     void IRAM_ATTR ISR_Handler ();
    
-#define USE_RMT_DEBUG_COUNTERS
+// #define USE_RMT_DEBUG_COUNTERS
 #ifdef USE_RMT_DEBUG_COUNTERS
    // debug counters
    uint32_t DataCallbackCounter = 0;
