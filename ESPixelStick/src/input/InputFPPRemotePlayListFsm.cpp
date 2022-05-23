@@ -20,6 +20,7 @@
 
 #include "InputFPPRemotePlayList.hpp"
 #include "../service/FPPDiscovery.h"
+#include "../utility/SaferStringConversion.hpp"
 #include "../FileMgr.hpp"
 #include "InputFPPRemotePlayEffect.hpp"
 

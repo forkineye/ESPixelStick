@@ -17,6 +17,7 @@
 *
 */
 #include "../ESPixelStick.h"
+#include "../utility/SaferStringConversion.hpp"
 #include "InputEffectEngine.hpp"
 
 //-----------------------------------------------------------------------------

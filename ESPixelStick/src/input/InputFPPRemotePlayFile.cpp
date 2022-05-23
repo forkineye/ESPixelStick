@@ -21,6 +21,7 @@
 #include "InputFPPRemotePlayFile.hpp"
 #include "../service/FPPDiscovery.h"
 #include "../service/fseq.h"
+#include "../utility/SaferStringConversion.hpp"
 
 //-----------------------------------------------------------------------------
 static void TimerPollHandler (void * p)

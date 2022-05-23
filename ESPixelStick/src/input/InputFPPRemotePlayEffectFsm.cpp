@@ -20,6 +20,7 @@
 
 #include "InputFPPRemotePlayEffect.hpp"
 #include "../service/FPPDiscovery.h"
+#include "../utility/SaferStringConversion.hpp"
 
 //-----------------------------------------------------------------------------
 void fsm_PlayEffect_state_Idle::Poll ()

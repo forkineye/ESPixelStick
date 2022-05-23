@@ -32,9 +32,6 @@
 #	error "Unsupported CPU type"
 #endif
 
-#include "./utility/backported.h"
-#include "./utility/SaferStringConversion.hpp"
-
 #define ARDUINOJSON_USE_LONG_LONG 1
 
 #include <Ticker.h>

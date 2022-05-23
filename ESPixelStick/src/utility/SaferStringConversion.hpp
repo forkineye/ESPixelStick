@@ -19,12 +19,32 @@
 */
 
 #include "../ESPixelStick.h"
+#include "./backported.h"
+ 
+// The following template functions' first parameter is defined
+// as a **reference** to an array of characters.  The size of
+// the array is the template parameter.  This allows the function
+// to statically assert that the passed-in buffer is large enough
+// to always succeed.  Else, a compilation will occur.
+//
+// Allowing the compiler to deduce the template parameters has
+// multiple benefits:
+// * Users can ignore that the function is a template
+// * Code remains easy to read
+// * Compiler doesn't deduce wrong size
+// * Even if a user manually enters a larger template size,
+//   the compiler will report an error, such as:
+//   error: invalid initialization of reference of type 'char (&)[15]'
+//          from expression of type 'char [12]'
+
+
 
 // Safer RGB to HTML string (e.g., "#FF8833") conversion function
-// Template function takes array of characters as **reference**
-// to allow template to statically assert buffer is large enough
-// to always succeed.  Returns esp_err_t to allow use of
-// ESP_ERROR_CHECK() macro (as this is used extensively elsewhere).
+//
+// Example use:
+//     char foo[8];
+//     ESP_ERROR_CHECK(saferRgbToHtmlColorString(foo, led.r, led.g, led.b));
+//
 template <size_t N>
 inline esp_err_t saferRgbToHtmlColorString(char (&output)[N], uint8_t r, uint8_t g, uint8_t b) {
     // Including the trailing null, this string requires eight (8) characters.
@@ -41,10 +61,11 @@ inline esp_err_t saferRgbToHtmlColorString(char (&output)[N], uint8_t r, uint8_t
     return ESP_FAIL;
 }
 // Safer seconds to "Minutes:Seconds" string conversion function
-// Template function takes array of characters as **reference**
-// to allow template to statically assert buffer is large enough
-// to always succeed.  Returns esp_err_t to allow use of
-// ESP_ERROR_CHECK() macro (as this is used extensively elsewhere).
+//
+// Example use:
+//     char foo[12];
+//     ESP_ERROR_CHECK(saferSecondsToFormattedMinutesAndSecondsString(foo, seconds));
+//
 template <size_t N>
 inline esp_err_t saferSecondsToFormattedMinutesAndSecondsString(char (&output)[N], uint32_t seconds) {
 
@@ -66,10 +87,13 @@ inline esp_err_t saferSecondsToFormattedMinutesAndSecondsString(char (&output)[N
     return ESP_FAIL;
 }
 // Safer mac to string (e.g., "00:11:22:33:44:55") string conversion function
-// Template function takes array of characters as **reference**
-// to allow template to statically assert buffer is large enough
-// to always succeed.  Returns esp_err_t to allow use of
-// ESP_ERROR_CHECK() macro (as this is used extensively elsewhere).
+//
+// Example use:
+//     uint8_t mac[6];
+//     GetMacAddress(mac); // fill the values
+//     char foo[18];
+//     ESP_ERROR_CHECK(saferMacAddressToString(foo, mac));
+//
 template <size_t N, size_t M>
 inline esp_err_t saferMacAddressToString(char (&output)[N], uint8_t (&mac)[M]) {
     static_assert(N >= 18); // Including the trailing null, the string requires exactly 18 characters.

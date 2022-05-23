@@ -21,6 +21,7 @@
 #include <Int64String.h>
 #include "InputAlexa.h"
 #include "InputEffectEngine.hpp"
+#include "../utility/SaferStringConversion.hpp"
 
 #if defined ARDUINO_ARCH_ESP32
 #   include <functional>
