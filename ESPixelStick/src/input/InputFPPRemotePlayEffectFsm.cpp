@@ -51,7 +51,7 @@ void fsm_PlayEffect_state_Idle::Start (String & ConfigString, float )
     // DEBUG_START;
 
     // DEBUG_V (String ("ConfigString: '") + ConfigString + "'");
-    p_InputFPPRemotePlayEffect->PLayEffectEndTime = millis () + (1000 * p_InputFPPRemotePlayEffect->PlayDurationSec);
+    p_InputFPPRemotePlayEffect->PlayEffectEndTime = millis () + (1000 * p_InputFPPRemotePlayEffect->PlayDurationSec);
     
     // tell the effect engine what it is supposed to be doing
     DynamicJsonDocument EffectConfig (512);
@@ -124,7 +124,7 @@ void fsm_PlayEffect_state_PlayingEffect::Poll ()
     p_InputFPPRemotePlayEffect->EffectsEngine.SetBufferInfo (OutputMgr.GetBufferUsedSize());
     p_InputFPPRemotePlayEffect->EffectsEngine.Process ();
 
-    if (p_InputFPPRemotePlayEffect->PLayEffectEndTime <= millis ())
+    if (p_InputFPPRemotePlayEffect->PlayEffectEndTime <= millis ())
     {
         // DEBUG_V ("");
         Stop ();
@@ -193,8 +193,8 @@ void fsm_PlayEffect_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
     // DEBUG_START;
 
     time_t now = millis ();
-    time_t SecondsRemaining = (p_InputFPPRemotePlayEffect->PLayEffectEndTime - now) / 1000;
-    if (now > p_InputFPPRemotePlayEffect->PLayEffectEndTime)
+    time_t SecondsRemaining = (p_InputFPPRemotePlayEffect->PlayEffectEndTime - now) / 1000;
+    if (now > p_InputFPPRemotePlayEffect->PlayEffectEndTime)
     {
         SecondsRemaining = 0;
     }
