@@ -190,7 +190,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
             continue;
         }
 
-        // DEBUG_V (String("Create Section in Config file for the Input channel: '") + CurrentChannel->GetInputChannelId() + "'");
+        // DEBUG_V (String("Create Section in Config file for the Input channel: '") + CurrentChannel.pInputChannelDriver->GetInputChannelId() + "'");
         // create a record for this channel
         JsonObject ChannelConfigData;
         String sChannelId = String (CurrentChannel.pInputChannelDriver->GetInputChannelId ());
@@ -396,7 +396,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
         // is there an existing driver?
         if (nullptr != InputChannelDrivers[ChannelIndex].pInputChannelDriver)
         {
-            // DEBUG_V (String("pInputChannelDrivers[ChannelIndex]->GetInputType () '") + pInputChannelDrivers[ChannelIndex]->GetInputType () + String("'"));
+            // DEBUG_V(String("InputChannelDrivers[ChannelIndex].pInputChannelDriver->GetInputType () '") + InputChannelDrivers[ChannelIndex].pInputChannelDriver->GetInputType() + String("'"));
             // DEBUG_V (String("NewInputChannelType '") + int(NewInputChannelType) + "'");
 
             // DEBUG_V ("does the driver need to change?");
@@ -664,7 +664,7 @@ void c_InputMgr::Process ()
 
             if (!BlankTimerHasExpired (CurrentInput.pInputChannelDriver->GetInputChannelId()))
             {
-                // DEBUG_V (String ("Blank Timer is running: ") + String (CurrentInput->GetInputChannelId ()));
+                // DEBUG_V (String ("Blank Timer is running: ") + String (CurrentInput.pInputChannelDriver->GetInputChannelId ()));
                 aBlankTimerIsRunning = true;
                 break;
             }
@@ -910,7 +910,6 @@ void c_InputMgr::SetConfig(JsonDocument & NewConfigData)
 
     if (true == FileMgr.SaveConfigFile(ConfigFileName, NewConfigData))
     {
-        // DEBUG_V (String("NewConfigData: ") + NewConfigData);
         // FileMgr logs for us
         // logcon (CN_stars + String (F (" Saved Input Manager Config File. ")) + CN_stars);
 
