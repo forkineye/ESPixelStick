@@ -34,10 +34,10 @@
 #define DEFAULT_RMT_4_GPIO      gpio_num_t::GPIO_NUM_34
 #define RMT_LAST                OutputChannelId_RMT_5
 
-//Power relay output over Q1 or Q1R
+// Power relay output over Q1 or Q1R
 #define DEFAULT_RELAY_GPIO      gpio_num_t::GPIO_NUM_15
 
-//I2c over Q3 and Q4 (might require HW pullups to be installed)
+// I2c over Q3 and Q4 (might require HW pullups to be installed)
 #define DEFAULT_I2C_SDA gpio_num_t::GPIO_NUM_2
 #define DEFAULT_I2C_SCL gpio_num_t::GPIO_NUM_32
 
