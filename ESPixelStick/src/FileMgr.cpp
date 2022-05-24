@@ -175,7 +175,7 @@ void c_FileMgr::SetSpiIoPins ()
         // DEBUG_V (String ("  cs_pin: ") + String (cs_pin));
 
         SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
-
+        // DEBUG_V();
 #       ifdef USE_MISO_PULLUP
         // DEBUG_V("USE_MISO_PULLUP");
         // on some hardware MISO is missing a required pull-up resistor, use internal pull-up.
@@ -188,11 +188,13 @@ void c_FileMgr::SetSpiIoPins ()
 #   endif // ! ARDUINO_ARCH_ESP32
 #endif // !def SUPPORT_SD_MMC
         {
-            logcon (String (F ("No SD card installed")));
+            // DEBUG_V();
+            logcon(String(F("No SD card installed")));
             SdCardInstalled = false;
         }
         else
         {
+            // DEBUG_V();
             SdCardInstalled = true;
             DescribeSdCardToUser ();
         }
