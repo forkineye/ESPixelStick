@@ -38,10 +38,10 @@
 
 // File Manager - Defnitions must be present even if SD is not supported
 // #define SUPPORT_SD
-#define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_12
-#define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_13
-#define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14
-#define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_15
+#define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_19
+#define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_23
+#define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_18
+#define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_5
 
 #include <ETH.h>
 
