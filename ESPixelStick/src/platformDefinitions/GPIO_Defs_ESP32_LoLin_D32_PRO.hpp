@@ -52,7 +52,7 @@
 // Not Finished - #define SUPPORT_OutputType_TLS3001
 #define SUPPORT_OutputType_APA102           // SPI
 #define SUPPORT_OutputType_DMX              // UART / RMT
-#define SUPPORT_OutputType_GECE             // UART
+#define SUPPORT_OutputType_GECE             // UART / RMT
 #define SUPPORT_OutputType_GS8208           // UART / RMT
 #define SUPPORT_OutputType_Renard           // UART / RMT
 #define SUPPORT_OutputType_Serial           // UART / RMT
