@@ -19,7 +19,8 @@
 
 #include "../ESPixelStick.h"
 
-#if defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_UART_OUTPUT)
+#if defined(SUPPORT_OutputType_GECE)
+#if defined(SUPPORT_UART_OUTPUT) || defined(SUPPORT_RMT_OUTPUT)
 
 #include "OutputGECE.hpp"
 
@@ -159,4 +160,5 @@ void c_OutputGECE::Render()
 
 } // render
 
+#endif // defined(SUPPORT_UART_OUTPUT) || defined(SUPPORT_RMT_OUTPUT)
 #endif // defined(SUPPORT_OutputType_GECE)
