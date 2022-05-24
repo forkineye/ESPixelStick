@@ -58,7 +58,7 @@ private:
 #   ifdef BOARD_HAS_PSRAM
 #      define WebSocketFrameCollectionBufferSize (20 * 1024)
 #   else // no PSRAM use heap
-#      define WebSocketFrameCollectionBufferSize (10 * 1024)
+#      define WebSocketFrameCollectionBufferSize (11 * 1024)
 #   endif // ! def BOARD_HAS_PSRAM
 #else // esp8266
 #   define WebSocketFrameCollectionBufferSize (3*1024)
