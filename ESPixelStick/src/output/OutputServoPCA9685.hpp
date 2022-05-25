@@ -25,24 +25,27 @@ GNU General Public License for more details.
 
 class c_OutputServoPCA9685 : public c_OutputCommon  
 {
-public:
-    typedef struct ServoPCA9685Channel_s
+private:
+#define SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH 650
+#define SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH 2350
+
+public: typedef struct ServoPCA9685Channel_s
     {
-        bool        Enabled;
-        uint16_t    MinLevel;
-        uint16_t    MaxLevel;
-        uint16_t    PreviousValue;
-        bool        IsReversed;
-        bool        Is16Bit;
-        bool        IsScaled;
+        bool        Enabled         = false;
+        uint16_t    MinLevel        = SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH;
+        uint16_t    MaxLevel        = SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH;
+        uint16_t    PreviousValue   = 0;
+        bool        IsReversed      = false;
+        bool        Is16Bit         = false;
+        bool        IsScaled        = true;
 
     } ServoPCA9685Channel_t;
 
     // These functions are inherited from c_OutputCommon
     c_OutputServoPCA9685 (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
-                   gpio_num_t outputGpio, 
-                   uart_port_t uart,
-                   c_OutputMgr::e_OutputType outputType);
+                          gpio_num_t outputGpio, 
+                          uart_port_t uart,
+                          c_OutputMgr::e_OutputType outputType);
     virtual ~c_OutputServoPCA9685 ();
 
     // functions to be provided by the derived class
@@ -53,7 +56,6 @@ public:
     void   GetDriverName (String& sDriverName);
     void   GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
     size_t GetNumChannelsNeeded () { return Num_Channels; }
-
 
 private:
 #   define OM_SERVO_PCA9685_CHANNEL_LIMIT           16

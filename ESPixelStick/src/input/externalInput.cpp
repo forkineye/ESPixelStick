@@ -22,10 +22,11 @@ fsm_ExternalInput_wait_for_off_state  fsm_ExternalInput_wait_for_off_state_imp;
 /* Code                                                                      */
 /*****************************************************************************/
 
-c_ExternalInput::c_ExternalInput(void)
+c_ExternalInput::c_ExternalInput(void) :
+	m_CurrentFsmState(fsm_ExternalInput_boot_imp)
 {
 	// DEBUG_START;
-	fsm_ExternalInput_boot_imp.Init (this);
+	fsm_ExternalInput_boot_imp.Init(*this); // currently redundant, but might Init() might do more ... so important to leave this
 	// DEBUG_END;
 
 } // c_ExternalInput
@@ -59,7 +60,7 @@ c_ExternalInput::InputValue_t c_ExternalInput::Get()
 {
 	// DEBUG_START;
 
-	return m_pCurrentFsmState->Get();
+	return m_CurrentFsmState.Get();
 
 	// DEBUG_END;
 
@@ -137,7 +138,7 @@ void c_ExternalInput::ProcessConfig (JsonObject JsonData)
 		pinMode (m_iPinId, INPUT);
 		m_bHadLongPush  = false;
 		m_bHadShortPush = false;
-		fsm_ExternalInput_boot_imp.Init (this);
+		fsm_ExternalInput_boot_imp.Init (*this);
 	}
 
 	// DEBUG_V (String ("m_iPinId: ") + String (m_iPinId));
@@ -158,7 +159,7 @@ void c_ExternalInput::ProcessConfig (JsonObject JsonData)
 void c_ExternalInput::Poll (void)
 {
 	// DEBUG_START;
-	m_pCurrentFsmState->Poll (this);
+	m_CurrentFsmState.Poll (*this);
 
 	// DEBUG_END;
 
@@ -197,9 +198,9 @@ bool c_ExternalInput::ReadInput (void)
 
 /*****************************************************************************/
 // waiting for the system to come up
-void fsm_ExternalInput_boot::Init (c_ExternalInput* pExternalInput)
+void fsm_ExternalInput_boot::Init (c_ExternalInput& pExternalInput)
 {
-	pExternalInput->m_pCurrentFsmState = &fsm_ExternalInput_boot_imp;
+	pExternalInput.m_CurrentFsmState = fsm_ExternalInput_boot_imp;
 
 	// dont do anything
 
@@ -207,10 +208,10 @@ void fsm_ExternalInput_boot::Init (c_ExternalInput* pExternalInput)
 
 /*****************************************************************************/
 // waiting for the system to come up
-void fsm_ExternalInput_boot::Poll (c_ExternalInput* pExternalInput)
+void fsm_ExternalInput_boot::Poll (c_ExternalInput& pExternalInput)
 {
 	// start normal operation
-	if (pExternalInput->m_bIsEnabled)
+	if (pExternalInput.m_bIsEnabled)
 	{
 		fsm_ExternalInput_off_state_imp.Init (pExternalInput);
 	}
@@ -221,30 +222,30 @@ void fsm_ExternalInput_boot::Poll (c_ExternalInput* pExternalInput)
 /*****************************************************************************/
 /*****************************************************************************/
 // Input is off and is stable
-void fsm_ExternalInput_off_state::Init(c_ExternalInput* pExternalInput)
+void fsm_ExternalInput_off_state::Init(c_ExternalInput& pExternalInput)
 {
 	// DEBUG_START;
 
-	pExternalInput->m_iInputDebounceCount = MIN_INPUT_STABLE_VALUE;
-	pExternalInput->m_pCurrentFsmState    = &fsm_ExternalInput_off_state_imp;
+	pExternalInput.m_iInputDebounceCount = MIN_INPUT_STABLE_VALUE;
+	pExternalInput.m_CurrentFsmState    = fsm_ExternalInput_off_state_imp;
 	// DEBUG_V ("Entring OFF State");
 
 } // fsm_ExternalInput_off_state::Init
 
 /*****************************************************************************/
 // Input was off
-void fsm_ExternalInput_off_state::Poll(c_ExternalInput* pExternalInput)
+void fsm_ExternalInput_off_state::Poll(c_ExternalInput& pExternalInput)
 {
 	// DEBUG_START;
 
 	// read the input
-	bool bInputValue = pExternalInput->ReadInput();
+	bool bInputValue = pExternalInput.ReadInput();
 	
 	// If the input is "on"
 	if (true == bInputValue)
 	{
 		// decrement the counter
-		if (0 == --pExternalInput->m_iInputDebounceCount)
+		if (0 == --pExternalInput.m_iInputDebounceCount)
 		{
 			// we really are on
 			fsm_ExternalInput_on_wait_short_state_imp.Init(pExternalInput);
@@ -254,7 +255,7 @@ void fsm_ExternalInput_off_state::Poll(c_ExternalInput* pExternalInput)
 	{
 		// DEBUG_V ("");
 		// reset the debounce counter
-		pExternalInput->m_iInputDebounceCount = MIN_INPUT_STABLE_VALUE;
+		pExternalInput.m_iInputDebounceCount = MIN_INPUT_STABLE_VALUE;
 	}
 
 	// DEBUG_END;
@@ -265,30 +266,30 @@ void fsm_ExternalInput_off_state::Poll(c_ExternalInput* pExternalInput)
 /*****************************************************************************/
 /*****************************************************************************/
 // Input is on and is stable
-void fsm_ExternalInput_on_wait_short_state::Init(c_ExternalInput* pExternalInput)
+void fsm_ExternalInput_on_wait_short_state::Init(c_ExternalInput& pExternalInput)
 {
 	// DEBUG_START;
 
-	pExternalInput->m_iInputHoldTimeMS = millis() + INPUT_SHORT_VALUE_MS;
-	pExternalInput->m_pCurrentFsmState = &fsm_ExternalInput_on_wait_short_state_imp;
+	pExternalInput.m_iInputHoldTimeMS = millis() + INPUT_SHORT_VALUE_MS;
+	pExternalInput.m_CurrentFsmState = fsm_ExternalInput_on_wait_short_state_imp;
 	// DEBUG_V ("Entring Wait Short State");
 
 } // fsm_ExternalInput_on_wait_short_state::Init
 
 /*****************************************************************************/
 // Input is on and is stable
-void fsm_ExternalInput_on_wait_short_state::Poll(c_ExternalInput* pExternalInput)
+void fsm_ExternalInput_on_wait_short_state::Poll(c_ExternalInput& pExternalInput)
 {
 	// DEBUG_START;
 	// read the input
-	bool bInputValue = pExternalInput->ReadInput ();
+	bool bInputValue = pExternalInput.ReadInput ();
 
 	// If the input is "on"
 	if (true == bInputValue)
 	{
 		// DEBUG_V("");
 		// decrement the counter
-		if (millis() >= pExternalInput->m_iInputHoldTimeMS)
+		if (millis() >= pExternalInput.m_iInputHoldTimeMS)
 		{
 			// we really are on
 			fsm_ExternalInput_on_wait_long_state_imp.Init(pExternalInput);
@@ -306,38 +307,38 @@ void fsm_ExternalInput_on_wait_short_state::Poll(c_ExternalInput* pExternalInput
 /*****************************************************************************/
 /*****************************************************************************/
 // Input is always on
-void fsm_ExternalInput_on_wait_long_state::Init (c_ExternalInput* pExternalInput)
+void fsm_ExternalInput_on_wait_long_state::Init (c_ExternalInput& pExternalInput)
 {
-	pExternalInput->m_iInputHoldTimeMS = millis () + INPUT_LONG_VALUE_MS;
-	pExternalInput->m_pCurrentFsmState = &fsm_ExternalInput_on_wait_long_state_imp;
+	pExternalInput.m_iInputHoldTimeMS = millis () + INPUT_LONG_VALUE_MS;
+	pExternalInput.m_CurrentFsmState = fsm_ExternalInput_on_wait_long_state_imp;
 	// DEBUG_V ("Entring Wait Long State");
 
 } // fsm_ExternalInput_on_wait_long_state::Init
 
 /*****************************************************************************/
 // Input is on and is stable
-void fsm_ExternalInput_on_wait_long_state::Poll (c_ExternalInput* pExternalInput)
+void fsm_ExternalInput_on_wait_long_state::Poll (c_ExternalInput& pExternalInput)
 {
 	// DEBUG_START;
 
 	// read the input
-	bool bInputValue = pExternalInput->ReadInput ();
+	bool bInputValue = pExternalInput.ReadInput ();
 
 	// If the input is "on"
 	if (true == bInputValue)
 	{
 		// DEBUG_V("");
 		// decrement the counter
-		if (millis () >= pExternalInput->m_iInputHoldTimeMS)
+		if (millis () >= pExternalInput.m_iInputHoldTimeMS)
 		{
 			// we really are on
 			fsm_ExternalInput_wait_for_off_state_imp.Init (pExternalInput);
-			pExternalInput->m_bHadLongPush = true;
+			pExternalInput.m_bHadLongPush = true;
 		}
 	}
 	else // Turned off
 	{
-		pExternalInput->m_bHadShortPush = true;
+		pExternalInput.m_bHadShortPush = true;
 		fsm_ExternalInput_off_state_imp.Init (pExternalInput);
 	}
 
@@ -349,21 +350,21 @@ void fsm_ExternalInput_on_wait_long_state::Poll (c_ExternalInput* pExternalInput
 /*****************************************************************************/
 /*****************************************************************************/
 // Input is always on
-void fsm_ExternalInput_wait_for_off_state::Init (c_ExternalInput* pExternalInput)
+void fsm_ExternalInput_wait_for_off_state::Init (c_ExternalInput& pExternalInput)
 {
-	pExternalInput->m_pCurrentFsmState = &fsm_ExternalInput_wait_for_off_state_imp;
+	pExternalInput.m_CurrentFsmState = fsm_ExternalInput_wait_for_off_state_imp;
 	// DEBUG_V ("Entring Wait OFF State");
 
 } // fsm_ExternalInput_wait_for_off_state::Init
 
 /*****************************************************************************/
 // Input is on and is stable
-void fsm_ExternalInput_wait_for_off_state::Poll (c_ExternalInput* pExternalInput)
+void fsm_ExternalInput_wait_for_off_state::Poll (c_ExternalInput& pExternalInput)
 {
 	// DEBUG_START;
 
 	// read the input
-	bool bInputValue = pExternalInput->ReadInput ();
+	bool bInputValue = pExternalInput.ReadInput ();
 
 	// If the input is "on"
 	if (false == bInputValue)

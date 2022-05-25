@@ -1,6 +1,21 @@
 import platform
 import shutil
+import os
 Import("env")
+
+
+def PrepareDestinationDirectory(DirRoot, DirPath):
+    # os.system("ls -al ./")
+    # print("mkdirs: Remove path - '" + DirRoot + "'")
+    # shutil.rmtree(DirRoot, True)
+    # os.system("ls -al ./")
+    print("mkdirs: path - '" + DirPath + "'")
+    os.makedirs(DirPath, 0x777, True)
+    # os.system("ls -al ./")
+    # print("chmod: " + DirRoot)
+    if("Windows" != platform.system()):
+        os.system("chmod -R a+rwx " + DirRoot)
+        # os.system("ls -al " + DirPath)
 
 BUILD_DIR = env['PROJECT_BUILD_DIR']
 PIOENV    = env['PIOENV']
@@ -20,20 +35,38 @@ BOARD_F_FLASH = env['BOARD_F_FLASH'].removesuffix('000000L') + 'm'
 # print("BOARD_FLASH_MODE " + BOARD_FLASH_MODE)
 # print("BOARD_F_FLASH " + BOARD_F_FLASH)
 
-SRC_DIR  = BUILD_DIR + "\\" + PIOENV + "\\"
+SRC_DIR  = BUILD_DIR + "/" + PIOENV + "/"
 SRC_BIN  = SRC_DIR + PROGNAME + ".bin"
 SRC_PART = SRC_DIR + "partitions.bin"
+SRC_DBG  = SRC_DIR + PROGNAME + ".elf"
+
 # print("SRC_BIN " + SRC_BIN)
 
-DST_DIR  = ".\\dist\\firmware\\" + BOARD_MCU + "\\"
-DST_BIN  = DST_DIR + PIOENV + "-app.bin"
-DST_PART = DST_DIR + PIOENV + "-partitions.bin"
-DST_BOOT = DST_DIR + PIOENV + "-bootloader.bin"
+DST_ROOT  = "./firmware/"
+DST_DIR   = DST_ROOT + BOARD_MCU + "/"
+DST_BIN   = DST_DIR + PIOENV + "-app.bin"
+DST_PART  = DST_DIR + PIOENV + "-partitions.bin"
+DST_BOOT  = DST_DIR + PIOENV + "-bootloader.bin"
+
+DBG_ROOT  = "./debug/"
+DBG_DIR   = DBG_ROOT + BOARD_MCU + "/"
+DST_DBG   = DBG_DIR + PIOENV + ".elf"
 
 def after_build(source, target, env):
 
-    print("Copy: " + SRC_BIN)
+    DstPath = os.path.join("", DST_DIR)
+    PrepareDestinationDirectory(DST_ROOT, DstPath)
+    print("Copy from: '" + SRC_BIN + "' to '" + DST_BIN + "'")
     shutil.copyfile(SRC_BIN, DST_BIN)
+    # print("Listing dir: " + DstPath)
+    # os.system("ls -al " + DstPath + "/")
+
+    DbgPath = os.path.join("", DBG_DIR)
+    PrepareDestinationDirectory(DBG_ROOT, DbgPath)
+    print("Copy from: '" + SRC_DBG + "' to '" + DST_DBG + "'")
+    shutil.copyfile(SRC_DBG, DST_DBG)
+    # print("Listing dir: " + DbgPath)
+    # os.system("ls -al " + DbgPath + "/")
 
     if("FLASH_EXTRA_IMAGES" in env):
         FLASH_EXTRA_IMAGES = env['FLASH_EXTRA_IMAGES']

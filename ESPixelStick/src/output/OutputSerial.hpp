@@ -36,19 +36,18 @@ public:
     virtual ~c_OutputSerial ();
 
     // functions to be provided by the derived class
-    virtual void         Begin ();
-    virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
-    virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-            void         GetDriverName (String& sDriverName);
-            c_OutputMgr::e_OutputType GetOutputType ();
-    virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
-            size_t       GetNumChannelsNeeded () { return Num_Channels; };
-            void         SetOutputBufferSize (size_t NumChannelsAvailable);
-            void         Render() = 0;
-            void         StartNewFrame();
+    virtual void   Begin ();
+    virtual bool   SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
+    virtual void   GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
+            void   GetDriverName (String& sDriverName);
+    virtual void   GetStatus (ArduinoJson::JsonObject & jsonStatus);
+            size_t GetNumChannelsNeeded () { return Num_Channels; };
+            void   SetOutputBufferSize (size_t NumChannelsAvailable);
+            void   Render() = 0;
+            void   StartNewFrame();
             
-    uint8_t IRAM_ATTR    ISR_GetNextIntensityToSend();
-    bool    IRAM_ATTR    ISR_MoreDataToSend() { return (SerialFrameState_t::SerialIdle != SerialFrameState); }
+    uint32_t IRAM_ATTR   ISR_GetNextIntensityToSend();
+    bool     IRAM_ATTR   ISR_MoreDataToSend() { return (SerialFrameState_t::SerialIdle != SerialFrameState); }
 
 protected:
     void SetFrameDurration();
@@ -66,8 +65,8 @@ protected:
     uint32_t CurrentBaudrate = uint32_t(BaudRate::BR_DEF); // current transmit rate
 
     /* DMX minimum timings per E1.11 */
-    const uint32_t  DMX_BREAK_US     = uint32_t(((1.0 / float(BaudRate::BR_DMX)) * 23.0) * 1000000.0);  // 23 bits = 92us
-    const uint32_t  DMX_MAB_US       = uint32_t(((1.0 / float(BaudRate::BR_DMX)) *  3.0) * 1000000.0);  //  3 bits = 12us
+    const uint32_t  DMX_BREAK_US     = uint32_t(((1.0 / float(BaudRate::BR_DMX)) * 23.0) * float(MicroSecondsInASecond));  // 23 bits = 92us
+    const uint32_t  DMX_MAB_US       = uint32_t(((1.0 / float(BaudRate::BR_DMX)) *  3.0) * float(MicroSecondsInASecond));  //  3 bits = 12us
     uint32_t InterFrameGapInMicroSec = DMX_BREAK_US + DMX_MAB_US;
 
 private:

@@ -21,7 +21,7 @@
 
 #ifdef SUPPORT_ETHERNET
 
-#include "ETH_m.h"
+#include <ETH.h>
 #include "NetworkMgr.hpp"
 #include "EthernetDriver.hpp"
 
@@ -78,6 +78,16 @@ void c_EthernetDriver::Begin ()
     fsm_Eth_state_GotIp_imp.SetParent(this);
     fsm_Eth_state_DeviceInitFailed_imp.SetParent(this);
 
+#ifdef testEth
+    logcon(String("Start IP ") + GetIpAddress().toString());
+    if (false == ETH.begin(phy_addr, power_pin /*gpio_num_t(-1)*/, mdc_pin, mdio_pin, phy_type, clk_mode))
+    {
+        logcon(String("Failed IP ") + GetIpAddress().toString());
+    }
+    while(!GetIpAddress()) {}
+    logcon(String("After IP ") + GetIpAddress().toString());
+#endif // def testEth
+
     // this gets called pre-setup so there is nothing we can do here.
     fsm_Eth_state_Boot_imp.Init();
 
@@ -104,8 +114,8 @@ void c_EthernetDriver::SetEthHostname ()
     {
         // DEBUG_V (String ("Setting ETH hostname: ") + Hostname);
 
-        // ETH_m.config (INADDR_NONE, INADDR_NONE, INADDR_NONE);
-        ETH_m.setHostname (Hostname.c_str ());
+        // ETH.config (INADDR_NONE, INADDR_NONE, INADDR_NONE);
+        ETH.setHostname (Hostname.c_str ());
     }
 
     logcon (String (F ("Ethernet Connecting as ")) + Hostname);
@@ -139,31 +149,31 @@ void c_EthernetDriver::GetConfig (JsonObject& json)
 //-----------------------------------------------------------------------------
 void c_EthernetDriver::GetHostname (String & Name)
 {
-    Name = ETH_m.getHostname ();
+    Name = ETH.getHostname ();
 } // GetHostname
 
 //-----------------------------------------------------------------------------
 IPAddress c_EthernetDriver::GetIpAddress ()
 {
-    return ETH_m.localIP ();
+    return ETH.localIP ();
 } // GetIpAddress
 
 //-----------------------------------------------------------------------------
 IPAddress c_EthernetDriver::GetIpGateway ()
 {
-    return ETH_m.gatewayIP ();
+    return ETH.gatewayIP ();
 } // GetIpGateway
 
 //-----------------------------------------------------------------------------
 IPAddress c_EthernetDriver::GetIpSubNetMask ()
 {
-    return ETH_m.subnetMask ();
+    return ETH.subnetMask ();
 } // GetIpSubNetMask
 
 //-----------------------------------------------------------------------------
 String c_EthernetDriver::GetMacAddress ()
 {
-    return ETH_m.macAddress ();
+    return ETH.macAddress ();
 } // GetMacAddress
 
 //-----------------------------------------------------------------------------
@@ -202,7 +212,7 @@ bool c_EthernetDriver::IsConnected ()
 {
     // DEBUG_V("");
 
-    return (pCurrentFsmState == &fsm_Eth_state_WaitForIP_imp);
+    return (pCurrentFsmState == &fsm_Eth_state_GotIp_imp);
 
 } // IsConnected
 
@@ -288,12 +298,13 @@ void c_EthernetDriver::reset ()
     logcon (F ("Ethernet Reset has been requested"));
 
     NetworkStateChanged (false);
-
+#ifdef ETH_stop
     // Disconnect Ethernet if connected
-    if (ETH_m.stop () != ESP_OK)
+    if (ETH.stop () != ESP_OK)
     {
         logcon (F ("Could not disconnect Ethernet"));
     }
+#endif // def ETH.stop
 
     fsm_Eth_state_Boot_imp.Init ();
 
@@ -363,7 +374,7 @@ void c_EthernetDriver::SetUpIp ()
         if (true == UseDhcp)
         {
             logcon (F ("Connecting to Ethernet using DHCP"));
-            // ETH_m.config (temp, temp, temp, temp);
+            // ETH.config (temp, temp, temp, temp);
 
             break;
         }
@@ -376,9 +387,9 @@ void c_EthernetDriver::SetUpIp ()
             break;
         }
 
-        if ((ip      == ETH_m.localIP ())    &&
-            (netmask == ETH_m.subnetMask ()) &&
-            (gateway == ETH_m.gatewayIP ()))
+        if ((ip      == ETH.localIP ())    &&
+            (netmask == ETH.subnetMask ()) &&
+            (gateway == ETH.gatewayIP ()))
         {
             // DEBUG_V ("correct IP is already set");
             break;
@@ -389,7 +400,7 @@ void c_EthernetDriver::SetUpIp ()
         // DEBUG_V ("gateway: " + gateway.toString ());
 
         // We didn't use DNS, so just set it to our configured gateway
-        ETH_m.config (ip, gateway, netmask, gateway);
+        ETH.config (ip, gateway, netmask, gateway);
 
         logcon (F ("Connecting to Ethernet with Static IP"));
 
@@ -406,7 +417,9 @@ void c_EthernetDriver::StartEth ()
 
 // if (!eth_connected)
 // esp_eth_disable();
-    if (false == ETH_m.begin (phy_addr, gpio_num_t(-1), mdc_pin, mdio_pin, phy_type, clk_mode))
+    logcon(String("ETH IP Before Start: ") + ETH.localIP().toString());
+    if (false == ETH.begin (phy_addr, power_pin /*gpio_num_t(-1)*/, mdc_pin, mdio_pin, phy_type, clk_mode))
+    // if (false == ETH.begin(phy_addr, power_pin, mdc_pin, mdio_pin, phy_type, clk_mode))
     {
         fsm_Eth_state_DeviceInitFailed_imp.Init ();
     }
@@ -512,6 +525,19 @@ void fsm_Eth_state_ConnectingToEth::Init ()
     // DEBUG_END;
 
 } // fsm_Eth_state_ConnectingToEthUsingConfig::Init
+
+/*****************************************************************************/
+void fsm_Eth_state_ConnectingToEth::Poll()
+{
+    // DEBUG_START;
+
+    if(ETH.localIP())
+    {
+        // LOG_PORT.println(String("Got ETH IP: ") + ETH.localIP().toString());
+        OnGotIp();
+    }
+    // DEBUG_END;
+} // fsm_Eth_state_ConnectingToEth
 
 /*****************************************************************************/
 void fsm_Eth_state_ConnectingToEth::OnConnect ()

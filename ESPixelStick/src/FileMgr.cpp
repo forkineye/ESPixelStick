@@ -146,13 +146,9 @@ void c_FileMgr::SetSpiIoPins ()
 {
     // DEBUG_START;
 #if defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
-    // DEBUG_V (String ("miso_pin: ") + String (miso_pin));
-    // DEBUG_V (String ("mosi_pin: ") + String (mosi_pin));
-    // DEBUG_V (String (" clk_pin: ") + String (clk_pin));
-    // DEBUG_V (String ("  cs_pin: ") + String (cs_pin));
-
     if (SdCardInstalled)
     {
+        // DEBUG_V("Terminate current SD session");
         ESP_SD.end ();
     }
 #ifdef ARDUINO_ARCH_ESP32
@@ -160,6 +156,11 @@ void c_FileMgr::SetSpiIoPins ()
 #endif // def ARDUINO_ARCH_ESP32
     {
 #ifdef SUPPORT_SD_MMC
+        // DEBUG_V (String ("  Data 0: ") + String (SD_CARD_DATA_0));
+        // DEBUG_V (String ("  Data 1: ") + String (SD_CARD_DATA_1));
+        // DEBUG_V (String ("  Data 2: ") + String (SD_CARD_DATA_2));
+        // DEBUG_V (String ("  Data 3: ") + String (SD_CARD_DATA_3));
+
         pinMode(SD_CARD_DATA_0, PULLUP);
         pinMode(SD_CARD_DATA_1, PULLUP);
         pinMode(SD_CARD_DATA_2, PULLUP);
@@ -168,6 +169,11 @@ void c_FileMgr::SetSpiIoPins ()
         if(!ESP_SD.begin())
 #else // ! SUPPORT_SD_MMC
 #   ifdef ARDUINO_ARCH_ESP32
+        // DEBUG_V (String ("miso_pin: ") + String (miso_pin));
+        // DEBUG_V (String ("mosi_pin: ") + String (mosi_pin));
+        // DEBUG_V (String (" clk_pin: ") + String (clk_pin));
+        // DEBUG_V (String ("  cs_pin: ") + String (cs_pin));
+
         SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
 
 #       ifdef USE_MISO_PULLUP
@@ -278,6 +284,7 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
             logcon (String(CN_stars) + CfgFileMessagePrefix + F ("Could not read file.") + CN_stars);
             break;
         }
+        logcon(RawFileData);
 */
         fs::File file = LittleFS.open (FileName.c_str (), "r");
         if (!file)
@@ -308,6 +315,9 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
     	    // DEBUG_V (String ("    jsonDoc.capacity: ") + String (jsonDoc.capacity ()));
             break;
         }
+
+        // extern void PrettyPrint(DynamicJsonDocument & jsonStuff, String Name);
+        // PrettyPrint(jsonDoc, CfgFileMessagePrefix);
 
         // DEBUG_V ("");
         jsonDoc.garbageCollect ();

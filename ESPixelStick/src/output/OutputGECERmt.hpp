@@ -1,6 +1,6 @@
 #pragma once
 /*
-* OutputUCS1903Rmt.h - UCS1903 driver code for ESPixelStick RMT Channel
+* OutputGECERmt.h - GECE driver code for ESPixelStick RMT Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2015, 2022 Shelby Merrick
@@ -22,21 +22,20 @@
 *
 */
 #include "../ESPixelStick.h"
+#if defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_RMT_OUTPUT)
 
-#if defined(SUPPORT_OutputType_UCS1903) && defined(SUPPORT_RMT_OUTPUT)
-
-#include "OutputUCS1903.hpp"
+#include "OutputGECE.hpp"
 #include "OutputRmt.hpp"
 
-class c_OutputUCS1903Rmt : public c_OutputUCS1903
+class c_OutputGECERmt : public c_OutputGECE
 {
 public:
     // These functions are inherited from c_OutputCommon
-    c_OutputUCS1903Rmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
-                        gpio_num_t outputGpio,
-                        uart_port_t uart,
-                        c_OutputMgr::e_OutputType outputType);
-    virtual ~c_OutputUCS1903Rmt ();
+    c_OutputGECERmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+                     gpio_num_t outputGpio,
+                     uart_port_t uart,
+                     c_OutputMgr::e_OutputType outputType);
+    virtual ~c_OutputGECERmt ();
 
     // functions to be provided by the derived class
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
@@ -49,6 +48,6 @@ private:
 
     c_OutputRmt Rmt;
 
-}; // c_OutputUCS1903Rmt
+}; // c_OutputGECERmt
 
-#endif // defined(SUPPORT_OutputType_UCS1903) && defined(SUPPORT_RMT_OUTPUT)
+#endif // defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_RMT_OUTPUT)

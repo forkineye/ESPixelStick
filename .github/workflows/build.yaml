@@ -67,6 +67,9 @@ jobs:
           # Twilight Lord ETH
           - target: "d1_mini_twilightlord_eth"
             chip: "esp32"
+          # DEVKITC
+          - target: "esp32_devkitc"
+            chip: "esp32"
 
     runs-on: ubuntu-latest
     steps:
@@ -82,11 +85,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
           echo "${GITHUB_REF#refs/*/v}" > firmware/VERSION
-
-      - name: Create secrets.h
-        run: |
-          echo '#define SECRETS_SSID "SSID_NOT_SET"' > ESPixelStick/src/network/secrets.h
-          echo '#define SECRETS_PASS "PASSPHRASE_NOT_SET"' >> ESPixelStick/src/network/secrets.h
 
       - name: Cache pip
         uses: actions/cache@v2
@@ -117,15 +115,8 @@ jobs:
           chip: ${{ matrix.chip }}
         run: |
           pio run -e ${{ matrix.target }}
-          mkdir -p firmware/${{ matrix.chip }}
-          mkdir -p debug/${{ matrix.chip }}
-          mv .pio/build/${{ matrix.target }}/firmware.bin firmware/${{ matrix.chip }}/${{ matrix.target }}-app.bin
-          mv .pio/build/${{ matrix.target }}/firmware.elf debug/${{ matrix.chip }}/${{ matrix.target }}.elf
-          if [ "$chip" = "esp32" ]; then
-          mv .pio/build/${{ matrix.target }}/partitions.bin firmware/esp32/${{ matrix.target }}-partitions.bin
-          cp ~/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/bin/bootloader_dio_40m.bin firmware/esp32/${{ matrix.target }}-bootloader.bin
-          cp ~/.platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin firmware/esp32/boot_app0.bin
-          fi
+          ls -al ./firmware/${{ matrix.chip }}
+          ls -al ./debug/${{ matrix.chip }}
 
       - name: Upload Firmware Artifacts
         uses: actions/upload-artifact@v2

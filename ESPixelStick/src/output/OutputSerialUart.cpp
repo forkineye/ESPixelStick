@@ -17,6 +17,8 @@ GNU General Public License for more details.
 
 #include "../ESPixelStick.h"
 #if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+#ifdef SUPPORT_UART_OUTPUT
+
 #include "OutputSerialUart.hpp"
 
 //----------------------------------------------------------------------------
@@ -45,23 +47,24 @@ void c_OutputSerialUart::Begin ()
     c_OutputSerial::Begin();
 
     c_OutputUart::OutputUartConfig_t OutputUartConfig;
-    OutputUartConfig.ChannelId              = OutputChannelId;
+#if defined(SUPPORT_OutputType_DMX)
+    if (c_OutputMgr::e_OutputType::OutputType_DMX == OutputType)
+    {
+        OutputUartConfig.FrameStartBreakUS          = 92;
+        OutputUartConfig.FrameStartMarkAfterBreakUS = 23;
+    }
+#endif // defined(SUPPORT_OutputType_DMX)
+    OutputUartConfig.ChannelId = OutputChannelId;
     OutputUartConfig.UartId                 = UartId;
     OutputUartConfig.DataPin                = DataPin;
     OutputUartConfig.IntensityDataWidth     = 8;
     OutputUartConfig.UartDataSize           = c_OutputUart::UartDataSize_t::OUTPUT_UART_8N2;
-    OutputUartConfig.TranslateIntensityData = false;
+    OutputUartConfig.TranslateIntensityData = c_OutputUart::TranslateIntensityData_t::NoTranslation;
     OutputUartConfig.pSerialDataSource      = this;
     OutputUartConfig.Baudrate               = CurrentBaudrate;
     Uart.Begin(OutputUartConfig);
-
-#if defined(SUPPORT_OutputType_DMX)
-    if (c_OutputMgr::e_OutputType::OutputType_DMX == OutputType)
-    {
-        Uart.SetSendBreak(true);
-    }
-#endif // defined(SUPPORT_OutputType_DMX)
- HasBeenInitialized = true;
+    
+    HasBeenInitialized = true;
 
     // DEBUG_END;
 } // Begin
@@ -118,4 +121,5 @@ void c_OutputSerialUart::Render ()
 
 } // render
 
+#endif // def SUPPORT_UART_OUTPUT
 #endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)

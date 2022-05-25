@@ -19,13 +19,15 @@
 
 #include "../ESPixelStick.h"
 #include "OutputPixel.hpp"
+#include "OutputGECEFrame.hpp"
+
 #define ADJUST_INTENSITY_AT_ISR
 
 //----------------------------------------------------------------------------
 c_OutputPixel::c_OutputPixel (c_OutputMgr::e_OutputChannelIds OutputChannelId,
-    gpio_num_t outputGpio,
-    uart_port_t uart,
-    c_OutputMgr::e_OutputType outputType) :
+                              gpio_num_t outputGpio,
+                              uart_port_t uart,
+                              c_OutputMgr::e_OutputType outputType) :
     c_OutputCommon (OutputChannelId, outputGpio, uart, outputType)
 {
     // DEBUG_START;
@@ -90,7 +92,10 @@ void c_OutputPixel::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     debugStatus["FrameAppendDataCounter"]           = FrameAppendDataCounter;
     debugStatus["FrameDoneCounter"]                 = FrameDoneCounter;
     debugStatus["FrameStateUnknownCounter"]         = FrameStateUnknownCounter;
-
+    debugStatus["LastGECEdataSent 0x"]              = String(LastGECEdataSent, HEX);
+    debugStatus["NumGECEdataSent"]                  = NumGECEdataSent;
+    debugStatus["GECEBrightness"]                   = GECEBrightness;
+    debugStatus["AdjustedBrightness"]               = AdjustedBrightness;
 #endif // def USE_PIXEL_DEBUG_COUNTERS
 
     // DEBUG_END;
@@ -186,6 +191,7 @@ bool c_OutputPixel::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     bool response = validate ();
 
     AdjustedBrightness = map (brightness, 0, 100, 0, 256);
+    GECEBrightness = GECE_SET_BRIGHTNESS(map(brightness, 0, 100, 0, 255));
     // DEBUG_V (String ("brightness: ") + String (brightness));
     // DEBUG_V (String ("AdjustedBrightness: ") + String (AdjustedBrightness));
 
@@ -314,26 +320,27 @@ void c_OutputPixel::SetFrameDurration (float IntensityBitTimeInUs, uint16_t Bloc
     uint16_t NumBlocks              = uint16_t (TotalBytesOfIntensityData / float (BlockSize));
     int TotalBlockDelayUs           = int (float (NumBlocks) * BlockDelayUs);
 
-    FrameMinDurationInMicroSec = (IntensityBitTimeInUs * TotalBits) + InterFrameGapInMicroSec + TotalBlockDelayUs;
-    FrameMinDurationInMicroSec = max(uint32_t(25000), FrameMinDurationInMicroSec);
+    uint32_t _FrameMinDurationInMicroSec = (IntensityBitTimeInUs * TotalBits) + InterFrameGapInMicroSec + TotalBlockDelayUs;
+    FrameMinDurationInMicroSec = max(uint32_t(25000), _FrameMinDurationInMicroSec);
 
-    // DEBUG_V (String ("          OutputBufferSize: ") + String (OutputBufferSize));
-    // DEBUG_V (String ("            PixelGroupSize: ") + String (PixelGroupSize));
-    // DEBUG_V (String ("       TotalIntensityBytes: ") + String (TotalIntensityBytes));
-    // DEBUG_V (String ("     PrependNullPixelCount: ") + String (PrependNullPixelCount));
-    // DEBUG_V (String ("      AppendNullPixelCount: ") + String (AppendNullPixelCount));
-    // DEBUG_V (String (" NumIntensityBytesPerPixel: ") + String (NumIntensityBytesPerPixel));
-    // DEBUG_V (String ("            TotalNullBytes: ") + String (TotalNullBytes));
-    // DEBUG_V (String ("      FramePrependDataSize: ") + String (FramePrependDataSize));
-    // DEBUG_V (String (" TotalBytesOfIntensityData: ") + String (TotalBytesOfIntensityData));
-    // DEBUG_V (String ("                 TotalBits: ") + String (TotalBits));
-    // DEBUG_V (String ("                 BlockSize: ") + String (BlockSize));
-    // DEBUG_V (String ("                 NumBlocks: ") + String (NumBlocks));
-    // DEBUG_V (String ("              BlockDelayUs: ") + String (BlockDelayUs));
-    // DEBUG_V (String ("         TotalBlockDelayUs: ") + String (TotalBlockDelayUs));
-    // DEBUG_V (String ("      IntensityBitTimeInUs: ") + String (IntensityBitTimeInUs));
-    // DEBUG_V (String ("   InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
-    // DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
+    // DEBUG_V (String ("           OutputBufferSize: ") + String (OutputBufferSize));
+    // DEBUG_V (String ("             PixelGroupSize: ") + String (PixelGroupSize));
+    // DEBUG_V (String ("        TotalIntensityBytes: ") + String (TotalIntensityBytes));
+    // DEBUG_V (String ("      PrependNullPixelCount: ") + String (PrependNullPixelCount));
+    // DEBUG_V (String ("       AppendNullPixelCount: ") + String (AppendNullPixelCount));
+    // DEBUG_V (String ("  NumIntensityBytesPerPixel: ") + String (NumIntensityBytesPerPixel));
+    // DEBUG_V (String ("             TotalNullBytes: ") + String (TotalNullBytes));
+    // DEBUG_V (String ("       FramePrependDataSize: ") + String (FramePrependDataSize));
+    // DEBUG_V (String ("  TotalBytesOfIntensityData: ") + String (TotalBytesOfIntensityData));
+    // DEBUG_V (String ("                  TotalBits: ") + String (TotalBits));
+    // DEBUG_V (String ("                  BlockSize: ") + String (BlockSize));
+    // DEBUG_V (String ("                  NumBlocks: ") + String (NumBlocks));
+    // DEBUG_V (String ("               BlockDelayUs: ") + String (BlockDelayUs));
+    // DEBUG_V (String ("          TotalBlockDelayUs: ") + String (TotalBlockDelayUs));
+    // DEBUG_V (String ("       IntensityBitTimeInUs: ") + String (IntensityBitTimeInUs));
+    // DEBUG_V (String ("    InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
+    // DEBUG_V (String ("_FrameMinDurationInMicroSec: ") + String (_FrameMinDurationInMicroSec));
+    // DEBUG_V (String (" FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
 
     // DEBUG_END;
 
@@ -363,7 +370,8 @@ void IRAM_ATTR c_OutputPixel::StartNewFrame ()
     PrependNullPixelCurrentCount    = 0;
     AppendNullPixelCurrentCount     = 0;
     PixelPrependDataCurrentIndex    = 0;
-
+    GECEPixelId                     = 0;
+    
     FrameState     = (FramePrependDataSize)  ? FrameState_t::FramePrependData : FrameState_t::FrameSendPixels;
     PixelSendState = (PrependNullPixelCount) ? PixelSendState_t::PixelPrependNulls : PixelSendState_t::PixelSendIntensity;
 
@@ -380,9 +388,17 @@ void IRAM_ATTR c_OutputPixel::StartNewFrame ()
 } // StartNewFrame
 
 //----------------------------------------------------------------------------
-uint8_t IRAM_ATTR c_OutputPixel::ISR_GetNextIntensityToSend ()
+void c_OutputPixel::SetIntensityDataWidth(uint32_t DataWidth)
 {
-    uint8_t response = 0x00;
+    uint32_t IntensityMaxValue = (1 << DataWidth);
+    IntensityMultiplier = IntensityMaxValue / 256;
+
+} // SetIntensityDataWidth
+
+//----------------------------------------------------------------------------
+uint32_t IRAM_ATTR c_OutputPixel::ISR_GetNextIntensityToSend ()
+{
+    uint32_t response = 0x00;
 
 #ifdef USE_PIXEL_DEBUG_COUNTERS
     GetNextIntensityToSendCounter++;
@@ -432,7 +448,7 @@ uint8_t IRAM_ATTR c_OutputPixel::ISR_GetNextIntensityToSend ()
 #endif // def USE_PIXEL_DEBUG_COUNTERS
                     if (PixelPrependDataCurrentIndex < PixelPrependDataSize)
                     {
-                        response = PixelPrependData[PixelPrependDataCurrentIndex++];
+                        response = PixelPrependData[PixelPrependDataCurrentIndex++] * IntensityMultiplier;
                         break;
                     }
 
@@ -472,133 +488,26 @@ uint8_t IRAM_ATTR c_OutputPixel::ISR_GetNextIntensityToSend ()
                         response = PixelPrependData[PixelPrependDataCurrentIndex++];
                         break;
                     }
-
-#ifdef ADJUST_INTENSITY_AT_ISR
-                    response = (NextPixelToSend[ColorOffsets.Array[PixelIntensityCurrentIndex]]);
-                    response = gamma_table[response];
-                    response = uint8_t ((uint32_t (response) * AdjustedBrightness) >> 8);
-
-                    // has the pixel completed?
-                    ++PixelIntensityCurrentIndex;
-                    if (PixelIntensityCurrentIndex < NumIntensityBytesPerPixel)
+#ifdef SUPPORT_OutputType_GECE
+                    if (OutputType == OTYPE_t::OutputType_GECE)
                     {
-                        // response = 0xF0;
-                        break;
-                    }
-                    // response = 0xFF;
-
-                    PixelIntensityCurrentIndex = 0;
-                    PixelPrependDataCurrentIndex = 0;
-
-                    // has the group completed?
-                    if (++PixelGroupSizeCurrentCount < PixelGroupSize)
-                    {
-                        // not finished with the group yet
-                        break;
-                    }
-
-                    // refresh the group count
-                    PixelGroupSizeCurrentCount = 0;
-
-                    ++SentPixelsCount;
-                    if (SentPixelsCount >= pixel_count)
-                    {
+                        // build a GECE intensity frame
+                        response = GECEBrightness;
+                        response |= GECE_SET_ADDRESS(GECEPixelId++);
+                        response |= GECE_SET_RED(GetIntensityData());
+                        response |= GECE_SET_GREEN(GetIntensityData());
+                        response |= GECE_SET_BLUE(GetIntensityData());
 #ifdef USE_PIXEL_DEBUG_COUNTERS
-                        FrameEndCounter++;
+                        LastGECEdataSent = response;
+                        NumGECEdataSent++;
 #endif // def USE_PIXEL_DEBUG_COUNTERS
-
-                        // response = 0xaa;
-                        if (AppendNullPixelCount)
-                        {
-                            PixelPrependDataCurrentIndex = 0;
-                            PixelIntensityCurrentIndex = 0;
-                            AppendNullPixelCurrentCount = 0;
-
-                            PixelSendState = PixelSendState_t::PixelAppendNulls;
-                        }
-                        else if (FrameAppendDataSize)
-                        {
-                            // FrameAppendDataCurrentIndex = 0;
-                            FrameState = FrameState_t::FrameAppendData;
-                        }
-                        else
-                        {
-#ifdef USE_PIXEL_DEBUG_COUNTERS
-                            IntensityBytesSentLastFrame = IntensityBytesSent;
-#endif // def USE_PIXEL_DEBUG_COUNTERS
-                            FrameState = FrameState_t::FrameDone;
-                        }
-
+                    }
+                    else
+#endif // def SUPPORT_OutputType_GECE
+                    {
+                        response = GetIntensityData();
+                    }
                     break;
-                    }
-
-                    // have we completed the forward traverse
-                    if (++ZigPixelCurrentCount < ZigPixelCount)
-                    {
-                        // response = 0x0F;
-                        // not finished with the set yet.
-                        NextPixelToSend += NumIntensityBytesPerPixel;
-                        break;
-                    }
-
-                    if (0 == ZagPixelCurrentCount)
-                    {
-                        // first backward pixel
-                        NextPixelToSend += NumIntensityBytesPerPixel * (ZagPixelCount);
-                    }
-
-                    // have we completed the backward traverse
-                    if (++ZagPixelCurrentCount < ZagPixelCount)
-                    {
-                        // response = 0xF0;
-                        // not finished with the set yet.
-                        NextPixelToSend -= NumIntensityBytesPerPixel;
-                        break;
-                    }
-
-                    // response = 0xFF;
-
-                    // move to next forward pixel
-                    NextPixelToSend += NumIntensityBytesPerPixel * (ZagPixelCount - 1);
-
-                    // refresh the zigZag
-                    ZigPixelCurrentCount = 1;
-                    ZagPixelCurrentCount = 0;
-
-                    break;
-
-#else // !ADJUST_INTENSITY_AT_ISR Adjustments are made at write time
-                    response = pOutputBuffer[PixelIntensityCurrentIndex];
-
-                    ++PixelIntensityCurrentIndex;
-                    if (PixelIntensityCurrentIndex >= OutputBufferSize)
-                    {
-                        // response = 0xaa;
-                        if (AppendNullPixelCount)
-                        {
-                            PixelPrependDataCurrentIndex = 0;
-                            PixelIntensityCurrentIndex = 0;
-                            AppendNullPixelCurrentCount = 0;
-
-                            PixelSendState = PixelSendState_t::PixelAppendNulls;
-                        }
-                        else if (FrameAppendDataSize)
-                        {
-                            // FrameAppendDataCurrentIndex = 0;
-                            FrameState = FrameState_t::FrameAppendData;
-                        }
-                        else
-                        {
-        #ifdef USE_PIXEL_DEBUG_COUNTERS
-                            IntensityBytesSentLastFrame = IntensityBytesSent;
-        #endif // def USE_PIXEL_DEBUG_COUNTERS
-
-                            FrameState = FrameState_t::FrameDone;
-                        }
-
-                        break;
-                    }
-#endif // ! def ADJUST_INTENSITY_AT_WRITE
                 } // case PixelSendState_t::PixelSendIntensity:
 
                 case PixelSendState_t::PixelAppendNulls:
@@ -673,14 +582,158 @@ uint8_t IRAM_ATTR c_OutputPixel::ISR_GetNextIntensityToSend ()
 
         default:
         {
+#ifdef USE_PIXEL_DEBUG_COUNTERS
             FrameStateUnknownCounter++;
+#endif // def USE_PIXEL_DEBUG_COUNTERS
         }
-    } // switch FrameState
+        } // switch FrameState
 
-    if (InvertData) { response = ~response; }
+        if (InvertData)
+        {
+            response = ~response;
+        }
 
-    return response;
+        return response;
+
 } // NextIntensityToSend
+
+//----------------------------------------------------------------------------
+uint32_t IRAM_ATTR c_OutputPixel::GetIntensityData()
+{
+    uint32_t response = 0;
+
+    do // once
+    {
+#ifdef ADJUST_INTENSITY_AT_ISR
+        response = (NextPixelToSend[ColorOffsets.Array[PixelIntensityCurrentIndex]]);
+        response = gamma_table[response];
+        response = uint8_t((uint32_t(response) * AdjustedBrightness) >> 8);
+
+        // has the pixel completed?
+        ++PixelIntensityCurrentIndex;
+        if (PixelIntensityCurrentIndex < NumIntensityBytesPerPixel)
+        {
+            // response = 0xF0;
+            break;
+        }
+        // response = 0xFF;
+
+        PixelIntensityCurrentIndex = 0;
+        PixelPrependDataCurrentIndex = 0;
+
+        // has the group completed?
+        if (++PixelGroupSizeCurrentCount < PixelGroupSize)
+        {
+            // not finished with the group yet
+            break;
+        }
+
+        // refresh the group count
+        PixelGroupSizeCurrentCount = 0;
+
+        ++SentPixelsCount;
+        if (SentPixelsCount >= pixel_count)
+        {
+#ifdef USE_PIXEL_DEBUG_COUNTERS
+            FrameEndCounter++;
+#endif // def USE_PIXEL_DEBUG_COUNTERS
+
+            // response = 0xaa;
+            if (AppendNullPixelCount)
+            {
+                PixelPrependDataCurrentIndex = 0;
+                PixelIntensityCurrentIndex = 0;
+                AppendNullPixelCurrentCount = 0;
+
+                PixelSendState = PixelSendState_t::PixelAppendNulls;
+            }
+            else if (FrameAppendDataSize)
+            {
+                // FrameAppendDataCurrentIndex = 0;
+                FrameState = FrameState_t::FrameAppendData;
+            }
+            else
+            {
+#ifdef USE_PIXEL_DEBUG_COUNTERS
+                IntensityBytesSentLastFrame = IntensityBytesSent;
+#endif // def USE_PIXEL_DEBUG_COUNTERS
+                FrameState = FrameState_t::FrameDone;
+            }
+
+            break;
+        }
+
+        // have we completed the forward traverse
+        if (++ZigPixelCurrentCount < ZigPixelCount)
+        {
+            // response = 0x0F;
+            // not finished with the set yet.
+            NextPixelToSend += NumIntensityBytesPerPixel;
+            break;
+        }
+
+        if (0 == ZagPixelCurrentCount)
+        {
+            // first backward pixel
+            NextPixelToSend += NumIntensityBytesPerPixel * (ZagPixelCount);
+        }
+
+        // have we completed the backward traverse
+        if (++ZagPixelCurrentCount < ZagPixelCount)
+        {
+            // response = 0xF0;
+            // not finished with the set yet.
+            NextPixelToSend -= NumIntensityBytesPerPixel;
+            break;
+        }
+
+        // response = 0xFF;
+
+        // move to next forward pixel
+        NextPixelToSend += NumIntensityBytesPerPixel * (ZagPixelCount - 1);
+
+        // refresh the zigZag
+        ZigPixelCurrentCount = 1;
+        ZagPixelCurrentCount = 0;
+
+        break;
+
+#else // !ADJUST_INTENSITY_AT_ISR Adjustments are made at write time
+        response = pOutputBuffer[PixelIntensityCurrentIndex];
+
+        ++PixelIntensityCurrentIndex;
+        if (PixelIntensityCurrentIndex >= OutputBufferSize)
+        {
+            // response = 0xaa;
+            if (AppendNullPixelCount)
+            {
+                PixelPrependDataCurrentIndex = 0;
+                PixelIntensityCurrentIndex = 0;
+                AppendNullPixelCurrentCount = 0;
+
+                PixelSendState = PixelSendState_t::PixelAppendNulls;
+            }
+            else if (FrameAppendDataSize)
+            {
+                // FrameAppendDataCurrentIndex = 0;
+                FrameState = FrameState_t::FrameAppendData;
+            }
+            else
+            {
+#ifdef USE_PIXEL_DEBUG_COUNTERS
+                IntensityBytesSentLastFrame = IntensityBytesSent;
+#endif // def USE_PIXEL_DEBUG_COUNTERS
+
+                FrameState = FrameState_t::FrameDone;
+            }
+
+            break;
+        }
+#endif // ! def ADJUST_INTENSITY_AT_WRITE
+
+    } while (false);
+    return response;
+}
 
 //----------------------------------------------------------------------------
 inline size_t c_OutputPixel::CalculateIntensityOffset(size_t ChannelId)

@@ -49,6 +49,7 @@ void c_OutputUCS8903::Begin ()
     // DEBUG_START;
 
     c_OutputPixel::Begin ();
+    SetIntensityDataWidth(UCS8903_INTENSITY_DATA_WIDTH);
     HasBeenInitialized = true;
 
     // DEBUG_END;
@@ -67,13 +68,9 @@ void c_OutputUCS8903::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 //----------------------------------------------------------------------------
 void c_OutputUCS8903::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
-    c_OutputPixel::GetStatus (jsonStatus);
-
-    // uint32_t UartIntSt = GET_PERI_REG_MASK (UART_INT_ST (UartId), UART_TXFIFO_EMPTY_INT_ENA);
-    // uint16_t SpaceInFifo = (((uint16_t)UART_TX_FIFO_SIZE) - (getUCS8903FifoLength));
-    // jsonStatus["UartIntSt"] = UartIntSt;
-    // jsonStatus["SpaceInFifo"] = SpaceInFifo;
-
+    // DEBUG_START;
+    c_OutputPixel::GetStatus(jsonStatus);
+    // DEBUG_END;
 } // GetStatus
 
 //----------------------------------------------------------------------------
@@ -81,36 +78,30 @@ void c_OutputUCS8903::SetOutputBufferSize (uint16_t NumChannelsAvailable)
 {
     // DEBUG_START;
 
-        // Stop current output operation
+    // Stop current output operation
     c_OutputPixel::SetOutputBufferSize (NumChannelsAvailable);
 
     // Calculate our refresh time
-    SetFrameDurration (float(UCS8903_PIXEL_NS_BIT_0_HIGH + UCS8903_PIXEL_NS_BIT_0_LOW) / 1000.0);
+    SetFrameDurration(float(UCS8903_PIXEL_NS_BIT_0_HIGH + UCS8903_PIXEL_NS_BIT_0_LOW) / float(NanoSecondsInAMicroSecond));
 
     // DEBUG_END;
 
 } // SetBufferSize
 
 //----------------------------------------------------------------------------
-/* Process the config
-*
-*   needs
-*       reference to string to process
-*   returns
-*       true - config has been accepted
-*       false - Config rejected. Using defaults for invalid settings
-*/
 bool c_OutputUCS8903::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
     bool response = c_OutputPixel::SetConfig (jsonConfig);
+    // DEBUG_V();
 
     // Calculate our refresh time
-    SetFrameDurration (float (UCS8903_PIXEL_NS_BIT_0_HIGH + UCS8903_PIXEL_NS_BIT_0_LOW) / 1000.0);
+    SetFrameDurration(float(UCS8903_PIXEL_NS_BIT_0_HIGH + UCS8903_PIXEL_NS_BIT_0_LOW) / float(NanoSecondsInAMicroSecond));
 
     // DEBUG_END;
     return response;
 
 } // SetConfig
+
 #endif // def SUPPORT_OutputType_UCS8903

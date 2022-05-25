@@ -153,6 +153,7 @@ extern const CN_PROGMEM char CN_remote[];
 extern const CN_PROGMEM char CN_r[];
 extern const CN_PROGMEM char CN_rev[];
 extern const CN_PROGMEM char CN_reverse[];
+extern const CN_PROGMEM char CN_RMT[];
 extern const CN_PROGMEM char CN_rssi[];
 extern const CN_PROGMEM char CN_sca[];
 extern const CN_PROGMEM char CN_seconds_elapsed[];

@@ -28,7 +28,8 @@
 // bring in driver definitions
 #include "OutputDisabled.hpp"
 #include "OutputAPA102Spi.hpp"
-#include "OutputGECE.hpp"
+#include "OutputGECEUart.hpp"
+#include "OutputGECERmt.hpp"
 #include "OutputRelay.hpp"
 #include "OutputSerialUart.hpp"
 #include "OutputSerialRmt.hpp"
@@ -283,7 +284,7 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
     // DEBUG_V ("For Each Output Channel");
     for (auto & CurrentChannel : OutputChannelDrivers)
     {
-        // DEBUG_V (String("Create Section in Config file for the output channel: '") + CurrentChannel->GetOutputChannelId() + "'");
+        // DEBUG_V(String("Create Section in Config file for the output channel: '") + CurrentChannel.pOutputChannelDriver->GetOutputChannelId() + "'");
         // create a record for this channel
         JsonObject ChannelConfigData;
         String sChannelId = String(CurrentChannel.pOutputChannelDriver->GetOutputChannelId());
@@ -379,8 +380,8 @@ void c_OutputMgr::CreateNewConfig ()
         // DEBUG_V ("for each interface");
         for (DriverInfo_t & CurrentOutputChannelDriver : OutputChannelDrivers)
         {
-            // DEBUG_V(String("DriverId: ") + String(CurrentOutput.DriverId));
-            // DEBUG_V (String ("instantiate output type: ") + String (outputTypeId));
+            // DEBUG_V(String("DriverId: ") + String(CurrentOutputChannelDriver.DriverId));
+            // DEBUG_V (String ("instantiate output type: ") + String (CurrentOutputType.name));
             InstantiateNewOutputChannel(CurrentOutputChannelDriver, CurrentOutputType.id, false);
             // DEBUG_V ("");
         } // end for each interface
@@ -484,7 +485,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
         // is there an existing driver?
         if (nullptr != CurrentOutputChannelDriver.pOutputChannelDriver)
         {
-            // DEBUG_V (String ("OutputChannelDrivers[uint(CurrentOutputChannel.DriverId)]->GetOutputType () '") + String (OutputChannelDrivers[uint(CurrentOutputChannel.DriverId)]->GetOutputType()) + String ("'"));
+            // DEBUG_V(String("OutputChannelDrivers[uint(CurrentOutputChannel.DriverId)]->GetOutputType () '") + String(OutputChannelDrivers[uint(CurrentOutputChannelDriver.DriverId)].pOutputChannelDriver->GetOutputType()) + String("'"));
             // DEBUG_V (String ("NewOutputChannelType '") + int(NewOutputChannelType) + "'");
 
             // DEBUG_V ("does the driver need to change?");
@@ -558,14 +559,26 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 #if defined(SUPPORT_OutputType_GECE)
             case e_OutputType::OutputType_GECE:
             {
-                if ((CurrentOutputChannelDriver.DriverId >= OutputChannelId_UART_FIRST) && (CurrentOutputChannelDriver.DriverId <= OutputChannelId_UART_LAST))
+#ifdef SUPPORT_UART_OUTPUT
+                if (OM_IS_UART)
                 {
                     // logcon (CN_stars + String (F (" Starting GECE for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
-                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputGECE(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_GECE);
+                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputGECEUart(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_GECE);
                     // DEBUG_V ("");
                     break;
                 }
                 // DEBUG_V ("");
+#endif // def SUPPORT_UART_OUTPUT
+
+#ifdef SUPPORT_RMT_OUTPUT
+                if (OM_IS_RMT)
+                {
+                    // logcon (CN_stars + String (F (" Starting GECE for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
+                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputGECERmt(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_GECE);
+                    // DEBUG_V ("");
+                    break;
+                }
+#endif // def SUPPORT_RMT_OUTPUT
 
                 if (!BuildingNewConfig)
                 {
@@ -890,7 +903,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                 // DEBUG_V ("");
                 if (OM_IS_UART)
                 {
-                    // DEBUG_V(CN_stars + String(F(" Starting UCS8903 UART for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
+                    // DEBUG_V(CN_stars + String(F(" Starting UCS8903 UART for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                     CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputUCS8903Uart(CurrentOutputChannelDriver.DriverId, dataPin, UartId, OutputType_UCS8903);
                     // DEBUG_V ("");
                     break;
@@ -922,6 +935,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
         // DEBUG_V ("");
         String sDriverName;
         CurrentOutputChannelDriver.pOutputChannelDriver->GetDriverName(sDriverName);
+        // DEBUG_V(String("Driver Name: ") + sDriverName);
         if (!IsBooting)
         {
             logcon("'" + sDriverName + F("' Initialization for Output: ") + String(CurrentOutputChannelDriver.DriverId));
@@ -933,10 +947,6 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
         }
 
     } while (false);
-
-    // String temp;
-    // CurrentOutputChannel.pOutputChannelDriver->GetDriverName (temp);
-    // DEBUG_V (String ("Driver Name: ") + temp);
 
     // DEBUG_END;
 
@@ -957,11 +967,17 @@ void c_OutputMgr::LoadConfig ()
     // try to load and process the config file
     if (!FileMgr.LoadConfigFile(ConfigFileName, [this](DynamicJsonDocument &JsonConfigDoc)
         {
+            // extern void PrettyPrint(JsonConfigDoc & jsonStuff, String Name);
+            // PrettyPrint(JsonConfigDoc, "OM Load Config");
+
             // DEBUG_V ("");
             JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
-            // DEBUG_V ("");
-            this->ProcessJsonConfig (JsonConfig);
-            // DEBUG_V (""); }))
+
+            // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
+            // PrettyPrint(JsonConfig, "OM Load Config");
+            // DEBUG_V ("Start");
+            this->ProcessJsonConfig(JsonConfig);
+            // DEBUG_V ("End");
         }))
     {
         if (!IsBooting)
@@ -995,6 +1011,9 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
     bool Response = false;
 
     // DEBUG_V ("");
+
+    // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
+    // PrettyPrint(jsonConfig, "ProcessJsonConfig");
 
     do // once
     {
@@ -1042,6 +1061,8 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
             JsonObject OutputChannelConfig = OutputChannelArray[String(CurrentOutputChannelDriver.DriverId).c_str()];
             // DEBUG_V ("");
 
+            // PrettyPrint(OutputChannelConfig, "ProcessJson Channel Config");
+
             // set a default value for channel type
             uint32_t ChannelType = uint32_t (OutputType_End);
             setFromJSON (ChannelType, OutputChannelConfig, CN_type);
@@ -1066,15 +1087,23 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
                 continue;
             }
 
+            // PrettyPrint(OutputChannelConfig, "ProcessJson Channel Config");
+
             JsonObject OutputChannelDriverConfig = OutputChannelConfig[String (ChannelType)];
-            // DEBUG_V ("");
+            // DEBUG_V("");
+            // PrettyPrint(OutputChannelDriverConfig, "ProcessJson Channel Driver Config");
+            // DEBUG_V("");
 
             // make sure the proper output type is running
             InstantiateNewOutputChannel(CurrentOutputChannelDriver, e_OutputType(ChannelType));
-            // DEBUG_V ("");
+
+            // DEBUG_V();
+            // PrettyPrint(OutputChannelDriverConfig, "ProcessJson Channel Driver Config");
+            // DEBUG_V();
 
             // send the config to the driver. At this level we have no idea what is in it
             CurrentOutputChannelDriver.pOutputChannelDriver->SetConfig(OutputChannelDriverConfig);
+            // DEBUG_V();
 
         } // end for each channel
 
@@ -1214,7 +1243,7 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
         }
 
         OutputBufferOffset += ChannelsToAllocate;
-        // DEBUG_V (String ("pOutputChannel->GetBufferUsedSize: ") + String (pOutputChannel->GetBufferUsedSize ()));
+        // DEBUG_V(String("OutputChannel.GetBufferUsedSize: ") + String(OutputChannel.pOutputChannelDriver->GetBufferUsedSize()));
         // DEBUG_V (String ("OutputBufferOffset: ") + String(OutputBufferOffset));
     }
 

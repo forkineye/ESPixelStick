@@ -40,7 +40,7 @@ public:
     virtual void OnGotIp (void) = 0;
     virtual void OnDisconnect (void) = 0;
     void SetParent (c_EthernetDriver* parent) { pEthernetDriver = parent; }
-    void GetDriverName (String& value) { value = CN_EthDrv; }
+    void GetDriverName (String & value) { value = CN_EthDrv; }
 
 }; // fsm_Eth_state
 
@@ -156,8 +156,8 @@ public:
     fsm_Eth_state_ConnectingToEth() {}
     virtual ~fsm_Eth_state_ConnectingToEth() {}
 
-    virtual void Poll (void) {}
-    virtual void Init (void);
+    virtual void Poll(void);
+    virtual void Init(void);
     virtual void GetStateName (String& sName) { sName = F ("Connecting"); }
     virtual void OnConnect (void);
     virtual void OnGotIp (void);

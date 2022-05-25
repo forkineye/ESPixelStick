@@ -54,10 +54,15 @@ void c_OutputSerialRmt::Begin ()
 
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
     c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
-    OutputRmtConfig.RmtChannelId      = rmt_channel_t(OutputChannelId);
-    OutputRmtConfig.DataPin           = gpio_num_t(DataPin);
-    OutputRmtConfig.idle_level        = rmt_idle_level_t::RMT_IDLE_LEVEL_HIGH;
-    OutputRmtConfig.pSerialDataSource = this;
+    OutputRmtConfig.RmtChannelId            = rmt_channel_t(OutputChannelId);
+    OutputRmtConfig.DataPin                 = gpio_num_t(DataPin);
+    OutputRmtConfig.idle_level              = rmt_idle_level_t::RMT_IDLE_LEVEL_HIGH;
+    OutputRmtConfig.pSerialDataSource       = this;
+    OutputRmtConfig.SendInterIntensityBits  = true;
+    OutputRmtConfig.SendEndOfFrameBits      = true;
+    OutputRmtConfig.NumFrameStartBits       = 1;
+    OutputRmtConfig.NumIdleBits             = 1;
+
     Rmt.Begin(OutputRmtConfig);
 
     SetUpRmtBitTimes();
@@ -90,7 +95,7 @@ void c_OutputSerialRmt::SetUpRmtBitTimes()
 {
     rmt_item32_t BitValue;
 
-    float BitTimeNS = (1.0 / float(CurrentBaudrate)) * 1000000000;
+    float BitTimeNS = (1.0 / float(CurrentBaudrate)) * NanoSecondsInASecond;
     uint32_t BitTimeRmtTicks = uint32_t(BitTimeNS / RMT_TickLengthNS) + 1;
     // DEBUG_V(String(" CurrentBaudrate: ") + String(CurrentBaudrate));
     // DEBUG_V(String("       BitTimeNS: ") + String(BitTimeNS));
@@ -102,14 +107,12 @@ void c_OutputSerialRmt::SetUpRmtBitTimes()
     BitValue.duration1 = BitTimeRmtTicks;
     BitValue.level1 = 1;
     Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
-    Rmt.SetNumIdleBits(1);
 
     BitValue.duration0 = BitTimeRmtTicks / 2;
     BitValue.level0 = 0;
     BitValue.duration1 = BitTimeRmtTicks / 2;
     BitValue.level1 = 0;
     Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STARTBIT_ID);
-    Rmt.SetNumStartBits(1);
 
     // ISR will process two bits at a time. This updates the bit durration based on baudrate
     BitValue.duration0 = BitTimeRmtTicks / 2;
@@ -141,22 +144,20 @@ void c_OutputSerialRmt::SetUpRmtBitTimes()
     BitValue.duration1 = BitTimeRmtTicks;     // one start bit
     BitValue.level1 = 0;
     Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STOP_START_BIT_ID);
-    Rmt.SetSendInterIntensityBits (true);
 
     BitValue.duration0 = BitTimeRmtTicks;
     BitValue.level0 = 1;
     BitValue.duration1 = BitTimeRmtTicks;
     BitValue.level1 = 1;
     Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_END_OF_FRAME);
-    Rmt.SetSendEndOfFrameBits(true);
 
 #if defined(SUPPORT_OutputType_DMX)
     if (c_OutputMgr::e_OutputType::OutputType_DMX == OutputType)
     {
         // turn it into a break signal
-        BitValue.duration0 = (DMX_BREAK_US * 1000) / RMT_TickLengthNS;
+        BitValue.duration0 = (DMX_BREAK_US * NanoSecondsInAMicroSecond) / RMT_TickLengthNS;
         BitValue.level0 = 0;
-        BitValue.duration1 = (DMX_MAB_US   * 1000) / RMT_TickLengthNS;
+        BitValue.duration1 = (DMX_MAB_US   * NanoSecondsInAMicroSecond) / RMT_TickLengthNS;
         BitValue.level1 = 1;
         Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
     }

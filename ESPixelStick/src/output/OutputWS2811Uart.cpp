@@ -26,20 +26,16 @@
 #define WS2811_PIXEL_UART_BAUDRATE (WS2811_PIXEL_DATA_RATE * WS2811_PIXEL_UART_BITS_PER_PIXEL_BIT)
 
 /*
- * Inverted 6N1 UART lookup table for ws2811, first 2 bits ignored.
+ * Inverted 6N1 UART lookup table for ws2811, MSB 2 bits ignored.
  * Start and stop bits are part of the pixel stream.
  */
-struct Convert2BitIntensityToWS2811UartDataStreamEntry_t
-{
-    uint8_t Translation;
-    c_OutputUart::UartDataBitTranslationId_t Id;
-};
-Convert2BitIntensityToWS2811UartDataStreamEntry_t Convert2BitIntensityToWS2811UartDataStream[] =
+static const c_OutputUart::ConvertIntensityToUartDataStreamEntry_t ConvertIntensityToUartDataStream[] =
 {
     {0b00110111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_00_ID}, // 00 - (1)000 100(0)
     {0b00000111, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_01_ID}, // 01 - (1)000 111(0)
     {0b00110100, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_10_ID}, // 10 - (1)110 100(0)
     {0b00000100, c_OutputUart::UartDataBitTranslationId_t::Uart_DATA_BIT_11_ID}, // 11 - (1)110 111(0)
+    {0,          c_OutputUart::UartDataBitTranslationId_t::Uart_LIST_END}
 };
 
 //----------------------------------------------------------------------------
@@ -63,45 +59,29 @@ c_OutputWS2811Uart::~c_OutputWS2811Uart ()
 } // ~c_OutputWS2811Uart
 
 //----------------------------------------------------------------------------
-/* Use the current config to set up the output port
-*/
 void c_OutputWS2811Uart::Begin ()
 {
     // DEBUG_START;
 
     c_OutputWS2811::Begin();
+    // DEBUG_V();
 
-    for (auto CurrentTranslation : Convert2BitIntensityToWS2811UartDataStream)
-    {
-        Uart.SetIntensity2Uart(CurrentTranslation.Translation, CurrentTranslation.Id);
-    }
-    
     // DEBUG_V(String("WS2811_PIXEL_UART_BAUDRATE: ") + String(WS2811_PIXEL_UART_BAUDRATE));
 
-    SetIntensityBitTimeInUS(float(WS2811_PIXEL_NS_BIT_TOTAL) / 1000.0);
+    SetIntensityBitTimeInUS(float(WS2811_PIXEL_NS_BIT_TOTAL) / float(NanoSecondsInAMicroSecond));
 
     c_OutputUart::OutputUartConfig_t OutputUartConfig;
-    OutputUartConfig.ChannelId                     = OutputChannelId;
-    OutputUartConfig.UartId                        = UartId;
-    OutputUartConfig.DataPin                       = DataPin;
-    OutputUartConfig.IntensityDataWidth            = WS2811_PIXEL_BITS_PER_INTENSITY;
-    OutputUartConfig.NumUartSlotsPerIntensityValue = WS2811_PIXEL_UART_BITS_PER_PIXEL_BIT;
-    OutputUartConfig.UartDataSize                  = c_OutputUart::UartDataSize_t::OUTPUT_UART_6N1;
-    OutputUartConfig.TranslateIntensityData        = true;
-    OutputUartConfig.pPixelDataSource              = this;
-    OutputUartConfig.Baudrate                      = WS2811_PIXEL_UART_BAUDRATE;
-    OutputUartConfig.InvertOutputPolarity          = true;
+    OutputUartConfig.ChannelId              = OutputChannelId;
+    OutputUartConfig.UartId                 = UartId;
+    OutputUartConfig.DataPin                = DataPin;
+    OutputUartConfig.IntensityDataWidth     = WS2811_PIXEL_BITS_PER_INTENSITY;
+    OutputUartConfig.UartDataSize           = c_OutputUart::UartDataSize_t::OUTPUT_UART_6N1;
+    OutputUartConfig.TranslateIntensityData = c_OutputUart::TranslateIntensityData_t::TwoToOne;
+    OutputUartConfig.pPixelDataSource       = this;
+    OutputUartConfig.Baudrate               = WS2811_PIXEL_UART_BAUDRATE;
+    OutputUartConfig.InvertOutputPolarity   = true;
+    OutputUartConfig.CitudsArray            = ConvertIntensityToUartDataStream;
     Uart.Begin(OutputUartConfig);
-
-#ifdef testPixelInsert
-    static const uint32_t FrameStartData = 0;
-    static const uint32_t FrameEndData = 0xFFFFFFFF;
-    static const uint8_t  PixelStartData = 0xC0;
-
-    SetFramePrependInformation ( (uint8_t*)&FrameStartData, sizeof (FrameStartData));
-    SetFrameAppendInformation  ( (uint8_t*)&FrameEndData, sizeof (FrameEndData));
-    SetPixelPrependInformation (&PixelStartData, sizeof (PixelStartData));
-#endif // def testPixelInsert
 
     HasBeenInitialized = true;
 
@@ -157,8 +137,6 @@ void c_OutputWS2811Uart::Render ()
 {
     // DEBUG_START;
 
-    // DEBUG_V (String ("RemainingIntensityCount: ") + RemainingIntensityCount)
-
     do // Once
     {
         if (gpio_num_t(-1) == DataPin)
@@ -172,8 +150,6 @@ void c_OutputWS2811Uart::Render ()
         }
 
         // DEBUG_V("get the next frame started");
-        // StartNewFrame();
-        // DEBUG_V();
 #ifdef WS2811_UART_DEBUG_COUNTERS
         NewFrameCounter++;
         TimeSinceLastFrameMS = millis() - TimeLastFrameStartedMS;

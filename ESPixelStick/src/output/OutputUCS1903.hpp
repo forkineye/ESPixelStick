@@ -22,12 +22,10 @@
 *
 */
 
-#include "OutputPixel.hpp"
+#include "../ESPixelStick.h"
 #ifdef SUPPORT_OutputType_UCS1903
 
-#ifdef ARDUINO_ARCH_ESP32
-#   include <driver/uart.h>
-#endif
+#include "OutputPixel.hpp"
 
 class c_OutputUCS1903 : public c_OutputPixel
 {
@@ -40,19 +38,17 @@ public:
     virtual ~c_OutputUCS1903 ();
 
     // functions to be provided by the derived class
-    virtual void         Begin ();
-    virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
-    virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-            void         GetDriverName (String & sDriverName) { sDriverName = String (F ("UCS1903")); }
-    c_OutputMgr::e_OutputType GetOutputType () {return c_OutputMgr::e_OutputType::OutputType_UCS1903;} ///< Have the instance report its type.
-    virtual void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
-    virtual void         SetOutputBufferSize (uint16_t NumChannelsAvailable);
+    virtual void Begin ();
+    virtual bool SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
+    virtual void GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
+            void GetDriverName (String & sDriverName) { sDriverName = String (F ("UCS1903")); }
+    virtual void GetStatus (ArduinoJson::JsonObject & jsonStatus);
+    virtual void SetOutputBufferSize (uint16_t NumChannelsAvailable);
 
 protected:
 
-#define UCS1903_PIXEL_NS_PER_SECOND          1000000000.0
 #define UCS1903_PIXEL_DATA_RATE              800000.0
-#define UCS1903_PIXEL_NS_BIT_TOTAL           ( (1.0 / UCS1903_PIXEL_DATA_RATE) * UCS1903_PIXEL_NS_PER_SECOND) 
+#define UCS1903_PIXEL_NS_BIT_TOTAL           ( (1.0 / UCS1903_PIXEL_DATA_RATE) * NanoSecondsInASecond) 
 
 #define UCS1903_PIXEL_NS_BIT_0_HIGH          250.0 // 250ns +/- 150ns per datasheet
 #define UCS1903_PIXEL_NS_BIT_0_LOW           (UCS1903_PIXEL_NS_BIT_TOTAL - UCS1903_PIXEL_NS_BIT_0_HIGH)
@@ -61,7 +57,9 @@ protected:
 #define UCS1903_PIXEL_NS_BIT_1_LOW           (UCS1903_PIXEL_NS_BIT_TOTAL - UCS1903_PIXEL_NS_BIT_1_HIGH)
 
 #define UCS1903_PIXEL_IDLE_TIME_NS           25000.0 // 24us per datasheet
-#define UCS1903_PIXEL_IDLE_TIME_US           (UCS1903_PIXEL_IDLE_TIME_NS / 1000.0)
+#define UCS1903_PIXEL_IDLE_TIME_US           (UCS1903_PIXEL_IDLE_TIME_NS / float(NanoSecondsInAMicroSecond))
+
+#define UCS1903_PIXEL_BITS_PER_INTENSITY     8
 
 }; // c_OutputUCS1903
 

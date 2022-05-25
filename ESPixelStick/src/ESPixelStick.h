@@ -46,6 +46,14 @@
 #define CLIENT_TIMEOUT  15      ///< In station/client mode try to connection for 15 seconds
 #define AP_TIMEOUT      120     ///< In AP mode, wait 120 seconds for a connection or reboot
 
+#define MilliSecondsInASecond       1000
+#define MicroSecondsInAmilliSecond  1000
+#define MicroSecondsInASecond       (MicroSecondsInAmilliSecond * MilliSecondsInASecond)
+#define NanoSecondsInAMicroSecond   1000
+#define NanoSecondsInASecond        (MicroSecondsInASecond * NanoSecondsInAMicroSecond)
+
+#define CPU_ClockTimeNS             ((1.0 / float(F_CPU)) * float(NanoSecondsInASecond))
+
 // Macro strings
 #define STRINGIFY(X) #X
 #define STRING(X) STRINGIFY(X)

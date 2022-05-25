@@ -86,7 +86,7 @@ void c_OutputGS8208::SetOutputBufferSize (uint16_t NumChannelsAvailable)
     c_OutputPixel::SetOutputBufferSize (NumChannelsAvailable);
 
     // Calculate our refresh time
-    SetFrameDurration (float(GS8208_PIXEL_NS_BIT_0_HIGH + GS8208_PIXEL_NS_BIT_0_LOW) / 1000.0);
+    SetFrameDurration (float(GS8208_PIXEL_NS_BIT_0_HIGH + GS8208_PIXEL_NS_BIT_0_LOW) / float(NanoSecondsInAMicroSecond));
 
     // DEBUG_END;
 
@@ -108,7 +108,7 @@ bool c_OutputGS8208::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     bool response = c_OutputPixel::SetConfig (jsonConfig);
 
     // Calculate our refresh time
-    SetFrameDurration (float (GS8208_PIXEL_NS_BIT_0_HIGH + GS8208_PIXEL_NS_BIT_0_LOW) / 1000.0);
+    SetFrameDurration (float (GS8208_PIXEL_NS_BIT_0_HIGH + GS8208_PIXEL_NS_BIT_0_LOW) / float(NanoSecondsInAMicroSecond));
 
     // DEBUG_END;
     return response;

@@ -1,9 +1,8 @@
-#pragma once
 /*
-* GPIO_Defs_ESP32_generic.hpp - Output Management class
+* secrets.h - file created to avoid build break
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021, 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -17,4 +16,7 @@
 *  or use of these programs.
 *
 */
-#include "GPIO_Defs_ESP32_LoLin_D32_PRO.hpp"
+
+// #define SECRETS_SSID "DEFAULT_SSID_NOT_SET"
+// #define SECRETS_PASS "DEFAULT_PASSPHRASE_NOT_SET"
+
