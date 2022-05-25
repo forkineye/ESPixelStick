@@ -31,10 +31,17 @@
 #include "../FileMgr.hpp"
 
 //-----------------------------------------------------------------------------
-// Use platformio_user.ini to define these values.
-// Platformio_user.ini defines these in the [env] section.
-// or delete the #include and enter the strings directly below.
-// #include "secrets.h"
+/*
+    There are three ways to define the default Network Name and PassPhrase
+
+    1) Create a secrets.h file and place it in the network directory with the WiFiDriver.cpp file
+    2) Use platformio_user.ini to define the WiFi Credentials for your platform
+    3) Edit the strings below directly
+*/
+
+#if __has_include("secrets.h")
+#   include "secrets.h"
+#endif //  __has_include("secrets.h")
 
 #if !defined(SECRETS_SSID)
 #   define SECRETS_SSID "DEFAULT_SSID_NOT_SET"
