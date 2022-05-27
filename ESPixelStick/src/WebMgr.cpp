@@ -169,7 +169,7 @@ void c_WebMgr::init ()
     webSocket.onEvent (std::bind (&c_WebMgr::onWsEvent, this, _1, _2, _3, _4, _5, _6));
     webServer.addHandler (&webSocket);
 
-    // Heap status handler
+    // Reboot handler
     webServer.on ("/reboot", HTTP_GET, [](AsyncWebServerRequest* request)
         {
             reboot = true;
