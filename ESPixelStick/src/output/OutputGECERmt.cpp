@@ -29,23 +29,17 @@
 #define GECE_PIXEL_RMT_TICKS_STOP          uint16_t ( (GECE_PIXEL_STOP_TIME_NS  / RMT_TickLengthNS) + 1.0)
 #define GECE_PIXEL_RMT_TICKS_START         uint16_t ( (GECE_PIXEL_START_TIME_NS  / RMT_TickLengthNS) + 1.0)
 
-typedef c_OutputRmt::RmtDataBitIdType_t Rdbit_t;
-struct RmtBitDefinitionEntry_t
+static const c_OutputRmt::ConvertIntensityToRmtDataStreamEntry_t ConvertIntensityToRmtDataStream[] =
 {
-    rmt_item32_t Data;
-    Rdbit_t Id;
-} // RmtBitDefinitionEntry_t
-static const PROGMEM RmtBitDefinitions[] =
-{
-    // {{}.duration0,.level0,.duration1,.level1},Type},
+    // {{.duration0,.level0,.duration1,.level1},Type},
 
-    {{GECE_PIXEL_RMT_TICKS_BIT_0_LOW, 0, GECE_PIXEL_RMT_TICKS_BIT_0_HIGH, 1}, Rdbit_t::RMT_DATA_BIT_ZERO_ID},
-    {{GECE_PIXEL_RMT_TICKS_BIT_1_LOW, 0, GECE_PIXEL_RMT_TICKS_BIT_1_HIGH, 1}, Rdbit_t::RMT_DATA_BIT_ONE_ID},
-    {{GECE_PIXEL_RMT_TICKS_START / 2, 0, GECE_PIXEL_RMT_TICKS_START / 2,  0}, Rdbit_t::RMT_INTERFRAME_GAP_ID},
-    {{GECE_PIXEL_RMT_TICKS_START / 2, 1, GECE_PIXEL_RMT_TICKS_START / 2,  1}, Rdbit_t::RMT_STARTBIT_ID},
-    {{GECE_PIXEL_RMT_TICKS_STOP  / 2, 0, GECE_PIXEL_RMT_TICKS_STOP  / 2,  0}, Rdbit_t::RMT_STOPBIT_ID},
-    {{GECE_PIXEL_RMT_TICKS_STOP,      0, GECE_PIXEL_RMT_TICKS_START,      1}, Rdbit_t::RMT_STOP_START_BIT_ID},
-
+    {{GECE_PIXEL_RMT_TICKS_BIT_0_LOW, 0, GECE_PIXEL_RMT_TICKS_BIT_0_HIGH, 1}, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID},
+    {{GECE_PIXEL_RMT_TICKS_BIT_1_LOW, 0, GECE_PIXEL_RMT_TICKS_BIT_1_HIGH, 1}, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID},
+    {{GECE_PIXEL_RMT_TICKS_START / 2, 0, GECE_PIXEL_RMT_TICKS_START / 2,  0}, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID},
+    {{GECE_PIXEL_RMT_TICKS_START / 2, 1, GECE_PIXEL_RMT_TICKS_START / 2,  1}, c_OutputRmt::RmtDataBitIdType_t::RMT_STARTBIT_ID},
+    {{GECE_PIXEL_RMT_TICKS_STOP  / 2, 0, GECE_PIXEL_RMT_TICKS_STOP  / 2,  0}, c_OutputRmt::RmtDataBitIdType_t::RMT_STOPBIT_ID},
+    {{GECE_PIXEL_RMT_TICKS_STOP,      0, GECE_PIXEL_RMT_TICKS_START,      1}, c_OutputRmt::RmtDataBitIdType_t::RMT_STOP_START_BIT_ID},
+    {{                             0, 0,                               0, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_LIST_END},
 }; // RmtBitDefinitions
 
 //----------------------------------------------------------------------------
@@ -56,10 +50,6 @@ c_OutputGECERmt::c_OutputGECERmt(c_OutputMgr::e_OutputChannelIds OutputChannelId
 {
     // DEBUG_START;
 
-    for (auto currentRmtBitDefinition : RmtBitDefinitions)
-    {
-        Rmt.SetIntensity2Rmt(currentRmtBitDefinition.Data, currentRmtBitDefinition.Id);
-    }
     // DEBUG_V (String ("GECE_PIXEL_RMT_TICKS_BIT_0_LOW: 0x") + String (GECE_PIXEL_RMT_TICKS_BIT_0_LOW, HEX));
     // DEBUG_V (String ("GECE_PIXEL_RMT_TICKS_BIT_0_HIGH: 0x") + String (GECE_PIXEL_RMT_TICKS_BIT_0_HIGH,  HEX));
     // DEBUG_V (String ("GECE_PIXEL_RMT_TICKS_BIT_1_H: 0x") + String (GECE_PIXEL_RMT_TICKS_BIT_1_HIGH, HEX));
@@ -93,6 +83,7 @@ void c_OutputGECERmt::Begin ()
     OutputRmtConfig.pPixelDataSource        = this;
     OutputRmtConfig.IntensityDataWidth      = GECE_PACKET_SIZE;
     OutputRmtConfig.SendInterIntensityBits  = true;
+    OutputRmtConfig.CitrdsArray             = ConvertIntensityToRmtDataStream;
 
     Rmt.Begin(OutputRmtConfig);
 

@@ -27,23 +27,17 @@ static fsm_RMT_state_SendStart fsm_RMT_state_SendStart_imp;
 static fsm_RMT_state_SendReset fsm_RMT_state_SendReset_imp;
 static fsm_RMT_state_SendData  fsm_RMT_state_SendData_imp;
 
-typedef c_OutputRmt::RmtDataBitIdType_t Rdbit_t;
-struct RmtBitDefinitionEntry_t
+static const c_OutputRmt::ConvertIntensityToRmtDataStreamEntry_t ConvertIntensityToRmtDataStream[] =
 {
-    rmt_item32_t Data;
-    Rdbit_t Id;
-} // RmtBitDefinitionEntry_t
-static const PROGMEM RmtBitDefinitions[] =
-{
-    // {{}.duration0,.level0,.duration1,.level1},Type},
+    // {{.duration0,.level0,.duration1,.level1},Type},
 
-    {{TLS3001_PIXEL_RMT_TICKS_BIT,      1, TLS3001_PIXEL_RMT_TICKS_BIT,      0}, Rdbit_t::RMT_STARTBIT_ID},
-    {{TLS3001_PIXEL_RMT_TICKS_BIT,      0, TLS3001_PIXEL_RMT_TICKS_BIT,      1}, Rdbit_t::RMT_DATA_BIT_ZERO_ID},
-    {{TLS3001_PIXEL_RMT_TICKS_BIT,      1, TLS3001_PIXEL_RMT_TICKS_BIT,      0}, Rdbit_t::RMT_DATA_BIT_ONE_ID},
-    {{TLS3001_PIXEL_RMT_TICKS_BIT / 10, 0, TLS3001_PIXEL_RMT_TICKS_BIT / 10, 0}, Rdbit_t::RMT_INTERFRAME_GAP_ID},
-    {{0,                                0, 0,                                0}, Rdbit_t::RMT_STOPBIT_ID},
-
-}; // RmtBitDefinitions
+    {{TLS3001_PIXEL_RMT_TICKS_BIT,      1, TLS3001_PIXEL_RMT_TICKS_BIT,      0}, c_OutputRmt::RmtDataBitIdType_t::RMT_STARTBIT_ID},
+    {{TLS3001_PIXEL_RMT_TICKS_BIT,      0, TLS3001_PIXEL_RMT_TICKS_BIT,      1}, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID},
+    {{TLS3001_PIXEL_RMT_TICKS_BIT,      1, TLS3001_PIXEL_RMT_TICKS_BIT,      0}, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID},
+    {{TLS3001_PIXEL_RMT_TICKS_BIT / 10, 0, TLS3001_PIXEL_RMT_TICKS_BIT / 10, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID},
+    {{                               0, 0,                                0, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_STOPBIT_ID},
+    {{                               0, 0,                                0, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_LIST_END},
+}; // ConvertIntensityToRmtDataStream
 
 //----------------------------------------------------------------------------
 c_OutputTLS3001Rmt::c_OutputTLS3001Rmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
@@ -53,11 +47,6 @@ c_OutputTLS3001Rmt::c_OutputTLS3001Rmt (c_OutputMgr::e_OutputChannelIds OutputCh
     c_OutputTLS3001 (OutputChannelId, outputGpio, uart, outputType)
 {
     // DEBUG_START;
-
-    for (auto currentRmtBitDefinition : RmtBitDefinitions)
-    {
-        Rmt.SetIntensity2Rmt(currentRmtBitDefinition.Data, currentRmtBitDefinition.Id);
-    }
 
     // DEBUG_V (String ("TLS3001_PIXEL_RMT_TICKS_BIT: 0x") + String (TLS3001_PIXEL_RMT_TICKS_BIT, HEX));
 
@@ -89,6 +78,16 @@ void c_OutputTLS3001Rmt::Begin ()
     Rmt.SetNumStopBits  (0);
     Rmt.SetNumIdleBits  (0);
     Rmt.Begin (rmt_channel_t (OutputChannelId), gpio_num_t (DataPin), this, rmt_idle_level_t::RMT_IDLE_LEVEL_LOW);
+
+    c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
+    OutputRmtConfig.RmtChannelId     = rmt_channel_t(OutputChannelId);
+    OutputRmtConfig.DataPin          = gpio_num_t(DataPin);
+    OutputRmtConfig.idle_level       = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
+    OutputRmtConfig.pPixelDataSource = this;
+    OutputRmtConfig.CitrdsArray      = ConvertIntensityToRmtDataStream;
+
+    Rmt.Begin(OutputRmtConfig);
+
 
     // DEBUG_END;
 
