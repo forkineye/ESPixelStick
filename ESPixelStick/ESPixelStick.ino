@@ -111,6 +111,17 @@ RF_PRE_INIT() {
 }
 #endif
 
+void TestHeap(uint32_t Id)
+{
+    DEBUG_V(String("Test ID: ") + String(Id));
+    DEBUG_V(String("Allocate JSON document. Size = ") + String(20 * 1024));
+    DEBUG_V(String("Heap Before: ") + ESP.getFreeHeap());
+    {
+        DynamicJsonDocument jsonDoc(20 * 1024);
+    }
+    DEBUG_V(String(" Heap After: ") + ESP.getFreeHeap());
+}
+
 /// Arduino Setup
 /** Arduino based setup code that is executed at startup. */
 void setup()
@@ -141,23 +152,29 @@ void setup()
     logcon (ESP.getSdkVersion ());
 #endif
 
-    // DEBUG_V ("");
-    FileMgr.Begin ();
+    // TestHeap(uint32_t(10));
+    // DEBUG_V("");
+    FileMgr.Begin();
 
     // Load configuration from the File System and set Hostname
+    // TestHeap(uint32_t(15));
     loadConfig();
 
+    // TestHeap(uint32_t(20));
     // DEBUG_V(String("InputMgr Heap: ") + String(ESP.getFreeHeap()));
     // connect the input processing to the output processing.
     InputMgr.Begin (0);
 
+    // TestHeap(uint32_t(30));
     // DEBUG_V(String("OutputMgr Heap: ") + String(ESP.getFreeHeap()));
     // Set up the output manager to start sending data to the serial ports
     OutputMgr.Begin();
 
+    // TestHeap(uint32_t(40));
     // DEBUG_V(String("NetworkMgr Heap: ") + String(ESP.getFreeHeap()));
     NetworkMgr.Begin();
 
+    // TestHeap(uint32_t(50));
     // DEBUG_V(String("WebMgr Heap: ") + String(ESP.getFreeHeap()));
     // Configure and start the web server
     WebMgr.Begin(&config);
@@ -299,6 +316,7 @@ bool deserializeCore (JsonObject & json)
         }
 
         dsDevice(DeviceConfig);
+        // DEBUG_V("");
         FileMgr.SetConfig(DeviceConfig);
         // DEBUG_V("");
         ConfigSaveNeeded |= NetworkMgr.SetConfig(DeviceConfig);
@@ -359,7 +377,7 @@ void loadConfig()
 
     ConfigSaveNeeded |= !validateConfig ();
 
-    // DEBUG_START;
+    // DEBUG_END;
 } // loadConfig
 
 void DeleteConfig ()
