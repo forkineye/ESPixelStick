@@ -3,7 +3,7 @@
 * GPIO_Defs_ESP32_CAM.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021 - 2022 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -32,8 +32,8 @@
 #define LED_FLASH_GPIO          gpio_num_t::GPIO_NUM_33
 #define LED_FLASH_OFF           HIGH
 
-#define DEFAULT_I2C_SDA         gpio_num_t::GPIO_NUM_21
-#define DEFAULT_I2C_SCL         gpio_num_t::GPIO_NUM_22
+// #define DEFAULT_I2C_SDA         gpio_num_t::GPIO_NUM_21
+// #define DEFAULT_I2C_SCL         gpio_num_t::GPIO_NUM_22
 
 // File Manager
 // #define USE_MISO_PULLUP
@@ -67,4 +67,4 @@
 // #define SUPPORT_OutputType_WS2801           // SPI
 #define SUPPORT_OutputType_WS2811           // UART / RMT
 #define SUPPORT_OutputType_Relay            // GPIO
-#define SUPPORT_OutputType_Servo_PCA9685    // I2C (default pins)
+// #define SUPPORT_OutputType_Servo_PCA9685    // I2C (default pins)
