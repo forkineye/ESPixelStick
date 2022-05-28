@@ -84,7 +84,15 @@ void PrettyPrint (JsonObject& jsonStuff, String Name)
 ///< Start up the driver and put it into a safe mode
 c_WebMgr::c_WebMgr ()
 {
-    // this gets called pre-setup so there is nothing we can do here.
+    // this gets called pre-setup so there is little we can do here.
+#ifdef BOARD_HAS_PSRAM
+    // DEBUG_V(String(F("Total PSRAM: ")) + String(ESP.getPsramSize()));
+    // DEBUG_V(String(F(" Free PSRAM: ")) + String(ESP.getFreePsram()));
+    pWebSocketFrameCollectionBuffer = (char *)ps_malloc(WebSocketFrameCollectionBufferSize + 1);
+#else  // Use Heap
+    pWebSocketFrameCollectionBuffer = (char *)malloc(WebSocketFrameCollectionBufferSize + 1);
+#endif // def BOARD_HAS_PSRAM
+
 } // c_WebMgr
 
 //-----------------------------------------------------------------------------
@@ -104,14 +112,6 @@ void c_WebMgr::Begin (config_t* /* NewConfig */)
     // DEBUG_START;
     do // once
     {
-#ifdef BOARD_HAS_PSRAM
-        // DEBUG_V(String(F("Total PSRAM: ")) + String(ESP.getPsramSize()));
-        // DEBUG_V(String(F(" Free PSRAM: ")) + String(ESP.getFreePsram()));
-
-        pWebSocketFrameCollectionBuffer = (char *)ps_malloc(WebSocketFrameCollectionBufferSize + 1);
-#else // Use Heap
-        pWebSocketFrameCollectionBuffer = (char *)malloc(WebSocketFrameCollectionBufferSize + 1);
-#endif // def BOARD_HAS_PSRAM
         if (nullptr == pWebSocketFrameCollectionBuffer)
         {
             logcon("Could not allocate Web Buffer. Requesting reboot");
