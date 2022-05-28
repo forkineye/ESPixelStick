@@ -22,6 +22,8 @@
 #include "EFUpdate.h"
 #include <ESPAsyncWebServer.h>
 #include <EspalexaDevice.h>
+#include "output/OutputMgr.hpp"
+
 #ifdef ARDUINO_ARCH_ESP32
 #	include <SD.h>
 #else
@@ -54,15 +56,7 @@ private:
     EspalexaDevice *       pAlexaDevice = nullptr;
     char *pWebSocketFrameCollectionBuffer = nullptr;
 
-#ifdef ARDUINO_ARCH_ESP32
-#   ifdef BOARD_HAS_PSRAM
-#      define WebSocketFrameCollectionBufferSize (20 * 1024)
-#   else // no PSRAM use heap
-#      define WebSocketFrameCollectionBufferSize (11 * 1024)
-#   endif // ! def BOARD_HAS_PSRAM
-#else // esp8266
-#   define WebSocketFrameCollectionBufferSize (3*1024)
-#endif // def ARDUINO_ARCH_ESP8266
+#define WebSocketFrameCollectionBufferSize (OM_MAX_CONFIG_SIZE + 100)
 
     /// Valid "Simple" message types
     enum SimpleMessage
