@@ -272,6 +272,8 @@ void c_FileMgr::listDir (fs::FS& fs, String dirname, uint8_t levels)
 //-----------------------------------------------------------------------------
 bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler Handler)
 {
+    // DEBUG_START;
+
     bool retval = false;
 
     do // once
@@ -288,7 +290,9 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
         }
         logcon(RawFileData);
 */
+        // DEBUG_V();
         fs::File file = LittleFS.open (FileName.c_str (), "r");
+        // DEBUG_V();
         if (!file)
         {
             if (!IsBooting) {
@@ -297,10 +301,12 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
             break;
         }
 
-        // DEBUG_V ("Convert File to JSON document");
         size_t JsonDocSize = file.size () * 3;
-        DynamicJsonDocument jsonDoc (JsonDocSize);
+        // DEBUG_V(String("Allocate JSON document. Size = ") + String(JsonDocSize));
+        // DEBUG_V(String("Heap: ") + ESP.getFreeHeap());
+        DynamicJsonDocument jsonDoc(JsonDocSize);
 
+        // DEBUG_V ("Convert File to JSON document");
         DeserializationError error = deserializeJson (jsonDoc, file);
         file.close ();
 
@@ -321,12 +327,15 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
         // extern void PrettyPrint(DynamicJsonDocument & jsonStuff, String Name);
         // PrettyPrint(jsonDoc, CfgFileMessagePrefix);
 
-        // DEBUG_V ("");
+        // DEBUG_V ();
         jsonDoc.garbageCollect ();
 
         logcon (CfgFileMessagePrefix + String (F ("loaded.")));
 
+        // DEBUG_V ();
         Handler (jsonDoc);
+
+        // DEBUG_V();
         retval = true;
 
     } while (false);
