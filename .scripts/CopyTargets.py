@@ -3,6 +3,9 @@ import shutil
 import os
 Import("env")
 
+f = open("./MyEnv.txt", "a")
+f.write(env.Dump())
+f.close()
 
 def PrepareDestinationDirectory(DirRoot, DirPath):
     # os.system("ls -al ./")
@@ -38,7 +41,8 @@ BOARD_F_FLASH = env['BOARD_F_FLASH'].removesuffix('000000L') + 'm'
 SRC_DIR  = BUILD_DIR + "/" + PIOENV + "/"
 SRC_BIN  = SRC_DIR + PROGNAME + ".bin"
 SRC_PART = SRC_DIR + "partitions.bin"
-SRC_DBG  = SRC_DIR + PROGNAME + ".elf"
+SRC_ELF  = SRC_DIR + PROGNAME + ".elf"
+SRC_MAP  = SRC_DIR + PROGNAME + ".map"
 
 # print("SRC_BIN " + SRC_BIN)
 
@@ -50,7 +54,8 @@ DST_BOOT  = DST_DIR + PIOENV + "-bootloader.bin"
 
 DBG_ROOT  = "./debug/"
 DBG_DIR   = DBG_ROOT + BOARD_MCU + "/"
-DST_DBG   = DBG_DIR + PIOENV + ".elf"
+DST_ELF   = DBG_DIR + PIOENV + ".elf"
+DST_MAP   = DBG_DIR + PIOENV + ".map"
 
 def after_build(source, target, env):
 
@@ -61,10 +66,15 @@ def after_build(source, target, env):
     # print("Listing dir: " + DstPath)
     # os.system("ls -al " + DstPath + "/")
 
+    print("Copy from: '" + SRC_MAP + "' to '" + DST_MAP + "'")
+    shutil.copyfile(SRC_MAP, DST_MAP)
+    # print("Listing dir: " + DbgPath)
+    # os.system("ls -al " + DbgPath + "/")
+
     DbgPath = os.path.join("", DBG_DIR)
     PrepareDestinationDirectory(DBG_ROOT, DbgPath)
-    print("Copy from: '" + SRC_DBG + "' to '" + DST_DBG + "'")
-    shutil.copyfile(SRC_DBG, DST_DBG)
+    print("Copy from: '" + SRC_ELF + "' to '" + DST_ELF + "'")
+    shutil.copyfile(SRC_ELF, DST_ELF)
     # print("Listing dir: " + DbgPath)
     # os.system("ls -al " + DbgPath + "/")
 
