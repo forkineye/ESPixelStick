@@ -47,6 +47,8 @@
 //
 template <size_t N>
 inline esp_err_t saferRgbToHtmlColorString(char (&output)[N], uint8_t r, uint8_t g, uint8_t b) {
+    esp_err_t result = ESP_FAIL;
+
     // Including the trailing null, this string requires eight (8) characters.
     //
     // The output is formatted as "#RRGGBB", where RR, GG, and BB are two hex digits
@@ -55,10 +57,11 @@ inline esp_err_t saferRgbToHtmlColorString(char (&output)[N], uint8_t r, uint8_t
     static_assert(sizeof(int) <= sizeof(size_t)); // casting non-negative int to size_t is safe
     int wouldHaveWrittenChars = snprintf(output, N, "#%02x%02x%02x", r, g, b);
     if (likely((wouldHaveWrittenChars > 0) && (((size_t)wouldHaveWrittenChars) < N))) {
-        return ESP_OK;
+        result = ESP_OK;
+    } else {
+        // TODO: assert((wouldHaveWrittenChars > 0) && (wouldHaveWrittenChars < N));
     }
-    // TODO: assert ((wouldHaveWrittenChars > 0) && (wouldHaveWrittenChars < N))
-    return ESP_FAIL;
+    return result;
 }
 // Safer seconds to "Minutes:Seconds" string conversion function
 //
@@ -68,6 +71,7 @@ inline esp_err_t saferRgbToHtmlColorString(char (&output)[N], uint8_t r, uint8_t
 //
 template <size_t N>
 inline esp_err_t saferSecondsToFormattedMinutesAndSecondsString(char (&output)[N], uint32_t seconds) {
+    esp_err_t result = ESP_FAIL;
 
     // Including the trailing null, the string may require up to twelve (12) characters.
     //
@@ -81,32 +85,9 @@ inline esp_err_t saferSecondsToFormattedMinutesAndSecondsString(char (&output)[N
     uint8_t  s = seconds % 60u;
     int wouldHaveWrittenChars = snprintf(output, N, "%u:%02u", m, s);
     if (likely((wouldHaveWrittenChars > 0) && (((size_t)wouldHaveWrittenChars) < N))) {
-        return ESP_OK;
+        result = ESP_OK;
+    } else {
+        // TODO: assert((wouldHaveWrittenChars > 0) && (wouldHaveWrittenChars < N));
     }
-    // TODO: assert ((wouldHaveWrittenChars > 0) && (wouldHaveWrittenChars < N))
-    return ESP_FAIL;
-}
-// Safer mac to string (e.g., "00:11:22:33:44:55") string conversion function
-//
-// Example use:
-//     uint8_t mac[6];
-//     GetMacAddress(mac); // fill the values
-//     char foo[18];
-//     ESP_ERROR_CHECK(saferMacAddressToString(foo, mac));
-//
-template <size_t N, size_t M>
-inline esp_err_t saferMacAddressToString(char (&output)[N], uint8_t (&mac)[M]) {
-    static_assert(N >= 18); // Including the trailing null, the string requires exactly 18 characters.
-    static_assert(M >=  6); // MAC address input must be at least 6 bytes
-    int wouldHaveWrittenChars =
-        snprintf(
-            output, N,
-            "%02X:%02X:%02X:%02X:%02X:%02X",
-            mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]
-            );
-    if (likely((wouldHaveWrittenChars > 0) && (((size_t)wouldHaveWrittenChars) < N))) {
-        return ESP_OK;
-    }
-    // TODO: assert ((wouldHaveWrittenChars > 0) && (wouldHaveWrittenChars < N))
-    return ESP_FAIL;
+    return result;
 }
