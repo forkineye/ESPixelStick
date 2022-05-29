@@ -269,8 +269,9 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
         }
 
         // DEBUG_V ("Start A New File");
-
-        if (-1 != FileName.indexOf (".pl"))
+        int Last_dot_pl_Position = FileName.lastIndexOf(CN_Dotpl);
+        String Last_pl_Text = FileName.substring(Last_dot_pl_Position);
+        if (String(CN_Dotpl) == Last_pl_Text)
         {
             // DEBUG_V ("Start Playlist");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayList (GetInputChannelId ());
@@ -278,6 +279,16 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
         }
         else
         {
+            int Last_dot_fseq_Position = FileName.lastIndexOf(CN_Dotfseq);
+            String Last_fseq_Text = FileName.substring(Last_dot_fseq_Position);
+            if (String(CN_Dotfseq) != Last_fseq_Text)
+            {
+                logcon(String(F("File Name does not end with a valid .fseq or .pl extension: '")) + FileName + "'");
+                StatusType = F("Invalid File Name");
+                FileBeingPlayed.clear();
+                break;
+            }
+
             // DEBUG_V ("Start Local FSEQ file player");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (GetInputChannelId ());
             StatusType = CN_File;
