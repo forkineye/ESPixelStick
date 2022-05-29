@@ -43,6 +43,7 @@ SRC_BIN  = SRC_DIR + PROGNAME + ".bin"
 SRC_PART = SRC_DIR + "partitions.bin"
 SRC_ELF  = SRC_DIR + PROGNAME + ".elf"
 SRC_MAP  = SRC_DIR + PROGNAME + ".map"
+SRC_MAP2 = "./" + PROGNAME + ".map"
 
 # print("SRC_BIN " + SRC_BIN)
 
@@ -66,17 +67,24 @@ def after_build(source, target, env):
     # print("Listing dir: " + DstPath)
     # os.system("ls -al " + DstPath + "/")
 
-    print("Copy from: '" + SRC_MAP + "' to '" + DST_MAP + "'")
-    shutil.copyfile(SRC_MAP, DST_MAP)
-    # print("Listing dir: " + DbgPath)
-    # os.system("ls -al " + DbgPath + "/")
-
     DbgPath = os.path.join("", DBG_DIR)
     PrepareDestinationDirectory(DBG_ROOT, DbgPath)
     print("Copy from: '" + SRC_ELF + "' to '" + DST_ELF + "'")
     shutil.copyfile(SRC_ELF, DST_ELF)
     # print("Listing dir: " + DbgPath)
     # os.system("ls -al " + DbgPath + "/")
+
+    if(os.path.exists(SRC_MAP)):
+        print("Copy from: '" + SRC_MAP + "' to '" + DST_MAP + "'")
+        shutil.move(SRC_MAP, DST_MAP)
+        # print("Listing dir: " + DbgPath)
+        # os.system("ls -al " + DbgPath + "/")
+
+    if(os.path.exists(SRC_MAP2)):
+        print("Copy from: '" + SRC_MAP2 + "' to '" + DST_MAP + "'")
+        shutil.move(SRC_MAP2, DST_MAP)
+        # print("Listing dir: " + DbgPath)
+        # os.system("ls -al " + DbgPath + "/")
 
     if("FLASH_EXTRA_IMAGES" in env):
         FLASH_EXTRA_IMAGES = env['FLASH_EXTRA_IMAGES']
