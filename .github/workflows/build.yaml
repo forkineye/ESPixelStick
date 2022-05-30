@@ -37,6 +37,9 @@ jobs:
           # WT 32 Ethernet Board
           - target: "esp32_wt32eth01"
             chip: "esp32"
+          # QuinLed QUAD Dig OCTA
+          - target: "esp32_quinled_dig_octa"
+            chip: "esp32"
           # QuinLed QUAD
           - target: "esp32_quinled_quad"
             chip: "esp32"

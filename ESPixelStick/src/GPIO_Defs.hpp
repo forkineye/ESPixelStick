@@ -85,6 +85,8 @@ typedef enum
 #   include "platformDefinitions/GPIO_Defs_ESP32_LoLin_D32_PRO.hpp"
 #elif defined (BOARD_ESP32_MH_ET_LIVE_MiniKit)
 #   include "platformDefinitions/GPIO_Defs_ESP32_MH_ET_LIVE_MiniKit.hpp"
+#elif defined (BOARD_ESP32_QUINLED_DIG_OCTA)
+#   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_Dig-Octa.hpp"
 #elif defined (BOARD_ESP32_QUINLED_QUAD_ETH)
 #   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_QUAD_ETH.hpp"
 #elif defined (BOARD_ESP32_QUINLED_QUAD_AE_PLUS)
