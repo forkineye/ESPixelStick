@@ -53,6 +53,7 @@ void c_FPPDiscovery::begin ()
     // DEBUG_START;
 
     StopPlaying ();
+    // DEBUG_V();
 
     inFileUpload = false;
     hasBeenInitialized = true;
