@@ -228,7 +228,7 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
 
     if(HostnameChanged)
     {
-        // DEBUG_V("");
+        // DEBUG_V(String("hostname: ") + hostname);
         WiFiDriver.SetHostname (hostname);
 #ifdef SUPPORT_ETHERNET
         EthernetDriver.SetHostname (hostname);
