@@ -24,6 +24,7 @@
 #include "../FileMgr.hpp"
 #include "../output/OutputMgr.hpp"
 #include "../network/NetworkMgr.hpp"
+#include "../utility/SaferStringConversion.hpp"
 #include <time.h>
 
 #ifdef ARDUINO_ARCH_ESP32
@@ -501,20 +502,12 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
     JsonData[F ("NumFrames")]       = String (read32 (fsqHeader.TotalNumberOfFramesInSequence, 0));
     JsonData[F ("CompressionType")] = fsqHeader.compressionType;
 
-    static const int TIME_STR_CHAR_COUNT = 32;
-    char timeStr[TIME_STR_CHAR_COUNT];
-    struct tm tm = *gmtime (&MultiSyncStats.lastReceiveTime);
-    // BUGBUG -- trusting the provided `tm` structure values contain valid data ... use `snprintf` to mitigate.
-    int actuallyWritten = snprintf (timeStr, TIME_STR_CHAR_COUNT,
-        "%4d-%.2d-%.2d %.2d:%.2d:%.2d",
-        1900 + tm.tm_year, tm.tm_mon + 1, tm.tm_mday,
-        tm.tm_hour, tm.tm_min, tm.tm_sec);
+    struct tm tm;
+    gmtime_r(&MultiSyncStats.lastReceiveTime, &tm);
 
-    // TODO: assert ((actuallyWritten > 0) && (actuallyWritten < TIME_STR_CHAR_COUNT))
-    if ((actuallyWritten > 0) && (actuallyWritten < TIME_STR_CHAR_COUNT)) {
-        JsonData[F ("lastReceiveTime")] = timeStr;
-    }
-
+    char timeStr[20];
+    ESP_ERROR_CHECK(saferTmToSortableString(timeStr, tm));
+    JsonData[F ("lastReceiveTime")] = timeStr;
     JsonData[F ("pktCommand")]      = MultiSyncStats.pktCommand;
     JsonData[F ("pktSyncSeqOpen")]  = MultiSyncStats.pktSyncSeqOpen;
     JsonData[F ("pktSyncSeqStart")] = MultiSyncStats.pktSyncSeqStart;

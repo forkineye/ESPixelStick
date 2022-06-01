@@ -20,6 +20,7 @@
 
 #include "../ESPixelStick.h"
 #include "./backported.h"
+#include <time.h>
  
 // The following template functions' first parameter is defined
 // as a **reference** to an array of characters.  The size of
@@ -88,6 +89,59 @@ inline esp_err_t saferSecondsToFormattedMinutesAndSecondsString(char (&output)[N
         result = ESP_OK;
     } else {
         // TODO: assert((wouldHaveWrittenChars > 0) && (wouldHaveWrittenChars < N));
+    }
+    return result;
+}
+// Safer `tm` to `yyyy-MM-dd hh:mm:ss` format (RFC1123, using space instead of `T`)
+// Example use:
+//     char foo[8];
+//     ESP_ERROR_CHECK(saferRgbToHtmlColorString(foo, led.r, led.g, led.b));
+//
+template <size_t N>
+inline esp_err_t saferTmToSortableString(char (&output)[N], const struct tm &tm) {
+    esp_err_t result = ESP_FAIL;
+
+    // The output is formatted as "yyyy-MM-dd hh:mm:ss", where:
+    //     yyyy is four-digit year
+    //     MM   is two-digit month (e.g. 01 for January)
+    //     dd   is two-digit day in that month
+    //     hh   is two-digit hour (24-hour format)
+    //     mm   is two-digit minutes
+    //     ss   is two-digit seconds
+
+    // Including the trailing null, this string requires (20) characters,
+    // (at least through 9999-12-31 11:59:59 ... which should be sufficient)
+    //    "9999-12-31 24:59:59"
+    //     ....-....1....-....2
+    static_assert(N >= 20);
+    output[0] = (char)0;
+
+    // esp01 build emits warning if do not explicitly prevent overflow
+    // (e.g., negative values, large values), even though using snprintf()
+    // and returning error code on failures.
+    if (       (tm.tm_year < -1900) || (tm.tm_year > 8100)) {
+    } else if ((tm.tm_mon  <     0) || (tm.tm_mon  >   12)) {
+    } else if ((tm.tm_mday <     1) || (tm.tm_mday >   31)) { // this is NOT full validation!
+    } else if ((tm.tm_hour <     0) || (tm.tm_hour >   24)) { // not a mistake ... leap seconds!
+    } else if ((tm.tm_min  <     0) || (tm.tm_min  >   59)) {
+    } else if ((tm.tm_sec  <     0) || (tm.tm_sec  >   59)) {
+    } else {
+        int wouldHaveWrittenChars =
+            snprintf(
+                output, N,
+                "%4d-%.2d-%.2d %.2d:%.2d:%.2d",
+                1900 + tm.tm_year,
+                tm.tm_mon + 1,
+                tm.tm_mday,
+                tm.tm_hour,
+                tm.tm_min,
+                tm.tm_sec
+                );
+        if (likely((wouldHaveWrittenChars > 0) && (((size_t)wouldHaveWrittenChars) < N))) {
+            result = ESP_OK;
+        } else {
+            // TODO: assert((wouldHaveWrittenChars > 0) && (wouldHaveWrittenChars < N));
+        }
     }
     return result;
 }
