@@ -64,6 +64,8 @@ extern const CN_PROGMEM char CN_current_sequence[];
 extern const CN_PROGMEM char CN_data_pin[];
 extern const CN_PROGMEM char CN_device [];
 extern const CN_PROGMEM char CN_dhcp[];
+extern const CN_PROGMEM char CN_Dotfseq[];
+extern const CN_PROGMEM char CN_Dotpl[];
 extern const CN_PROGMEM char CN_duration[];
 extern const CN_PROGMEM char CN_effect[];
 extern const CN_PROGMEM char CN_effect_list[];

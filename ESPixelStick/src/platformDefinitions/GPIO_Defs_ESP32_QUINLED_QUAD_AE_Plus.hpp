@@ -40,19 +40,19 @@
 
 // File Manager
 #define SUPPORT_SD
-#define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_23
-#define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_19
+#define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_19
+#define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_23
 #define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_18
 #define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_5
 
 // Output Types
 // Not Finished - #define SUPPORT_OutputType_TLS3001
 // #define SUPPORT_OutputType_APA102           // SPI
-// #define SUPPORT_OutputType_DMX              // UART / RMT
-// #define SUPPORT_OutputType_GECE             // UART / RMT
+#define SUPPORT_OutputType_DMX              // UART / RMT
+#define SUPPORT_OutputType_GECE             // UART / RMT
 #define SUPPORT_OutputType_GS8208           // UART / RMT
-// #define SUPPORT_OutputType_Renard           // UART / RMT
-// #define SUPPORT_OutputType_Serial           // UART / RMT
+#define SUPPORT_OutputType_Renard           // UART / RMT
+#define SUPPORT_OutputType_Serial           // UART / RMT
 #define SUPPORT_OutputType_TM1814           // UART / RMT
 #define SUPPORT_OutputType_UCS1903          // UART / RMT
 #define SUPPORT_OutputType_UCS8903          // UART / RMT

@@ -84,7 +84,15 @@ void PrettyPrint (JsonObject& jsonStuff, String Name)
 ///< Start up the driver and put it into a safe mode
 c_WebMgr::c_WebMgr ()
 {
-    // this gets called pre-setup so there is nothing we can do here.
+    // this gets called pre-setup so there is little we can do here.
+#ifdef BOARD_HAS_PSRAM
+    // DEBUG_V(String(F("Total PSRAM: ")) + String(ESP.getPsramSize()));
+    // DEBUG_V(String(F(" Free PSRAM: ")) + String(ESP.getFreePsram()));
+    pWebSocketFrameCollectionBuffer = (char *)ps_malloc(WebSocketFrameCollectionBufferSize + 1);
+#else  // Use Heap
+    pWebSocketFrameCollectionBuffer = (char *)malloc(WebSocketFrameCollectionBufferSize + 1);
+#endif // def BOARD_HAS_PSRAM
+
 } // c_WebMgr
 
 //-----------------------------------------------------------------------------
@@ -104,14 +112,6 @@ void c_WebMgr::Begin (config_t* /* NewConfig */)
     // DEBUG_START;
     do // once
     {
-#ifdef BOARD_HAS_PSRAM
-        // DEBUG_V(String(F("Total PSRAM: ")) + String(ESP.getPsramSize()));
-        // DEBUG_V(String(F(" Free PSRAM: ")) + String(ESP.getFreePsram()));
-
-        pWebSocketFrameCollectionBuffer = (char *)ps_malloc(WebSocketFrameCollectionBufferSize + 1);
-#else // Use Heap
-        pWebSocketFrameCollectionBuffer = (char *)malloc(WebSocketFrameCollectionBufferSize + 1);
-#endif // def BOARD_HAS_PSRAM
         if (nullptr == pWebSocketFrameCollectionBuffer)
         {
             logcon("Could not allocate Web Buffer. Requesting reboot");
@@ -154,38 +154,40 @@ void c_WebMgr::NetworkStateChanged (bool NewNetworkState)
 // Configure and start the web server
 void c_WebMgr::init ()
 {
-    // DEBUG_START;
-    // Add header for SVG plot support?
-    DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Origin"),  "*");
-    DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Headers"), "append, delete, entries, foreach, get, has, keys, set, values, Authorization, Content-Type, Content-Range, Content-Disposition, Content-Description, cache-control, x-requested-with");
-    DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Methods"), "GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH");
+    if(!HasBeenInitialized)
+    {
+        // DEBUG_START;
+        // Add header for SVG plot support?
+    	DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Origin"),  "*");
+    	DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Headers"), "append, delete, entries, foreach, get, has, keys, set, values, Authorization, Content-Type, Content-Range, Content-Disposition, Content-Description, cache-control, x-requested-with");
+    	DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Methods"), "GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH");
 
-    // Setup WebSockets
-    // webSocket.onEvent ([this](AsyncWebSocket* server, AsyncWebSocketClient * client, AwsEventType type, void* arg, uint8_t * data, size_t len)
-    //     {
-    //         this->onWsEvent (server, client, type, arg, data, len);
-    //     });
-    using namespace std::placeholders;
-    webSocket.onEvent (std::bind (&c_WebMgr::onWsEvent, this, _1, _2, _3, _4, _5, _6));
-    webServer.addHandler (&webSocket);
+        // Setup WebSockets
+        // webSocket.onEvent ([this](AsyncWebSocket* server, AsyncWebSocketClient * client, AwsEventType type, void* arg, uint8_t * data, size_t len)
+        //     {
+        //         this->onWsEvent (server, client, type, arg, data, len);
+        //     });
+        using namespace std::placeholders;
+    	webSocket.onEvent (std::bind (&c_WebMgr::onWsEvent, this, _1, _2, _3, _4, _5, _6));
+    	webServer.addHandler (&webSocket);
 
-    // Heap status handler
-    webServer.on ("/reboot", HTTP_GET, [](AsyncWebServerRequest* request)
+        // Reboot handler
+    	webServer.on ("/reboot", HTTP_GET, [](AsyncWebServerRequest* request)
         {
             reboot = true;
             request->send (200, CN_textSLASHplain, "Rebooting");
         });
 
-    // Heap status handler
-    webServer.on ("/heap", HTTP_GET, [](AsyncWebServerRequest* request)
+        // Heap status handler
+    	webServer.on ("/heap", HTTP_GET, [](AsyncWebServerRequest* request)
         {
             request->send (200, CN_textSLASHplain, String (ESP.getFreeHeap ()).c_str());
         });
 
-    // JSON Config Handler
-//TODO: This is only being used by FPP to get the hostname.  Will submit PR to change FPP and remove this
-//      https://github.com/FalconChristmas/fpp/blob/ae10a0b6fb1e32d1982c2296afac9af92e4da908/src/NetworkController.cpp#L248
-    webServer.on ("/conf", HTTP_GET, [this](AsyncWebServerRequest* request)
+        // JSON Config Handler
+		//TODO: This is only being used by FPP to get the hostname.  Will submit PR to change FPP and remove this
+		//      https://github.com/FalconChristmas/fpp/blob/ae10a0b6fb1e32d1982c2296afac9af92e4da908/src/NetworkController.cpp#L248
+    	webServer.on ("/conf", HTTP_GET, [this](AsyncWebServerRequest* request)
         {
             // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));
             this->GetConfiguration ();
@@ -193,140 +195,142 @@ void c_WebMgr::init ()
             // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));
         });
 
-    // Firmware upload handler
-    webServer.on ("/updatefw", HTTP_POST, [](AsyncWebServerRequest* request)
+        // Firmware upload handler
+    	webServer.on ("/updatefw", HTTP_POST, [](AsyncWebServerRequest* request)
         {
             webSocket.textAll ("X6");
         }, [](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final) {WebMgr.FirmwareUpload (request, filename, index, data, len,  final); }).setFilter (ON_STA_FILTER);
 
-    // URL's needed for FPP Connect fseq uploading and querying
-    webServer.on ("/fpp", HTTP_GET,
-        [](AsyncWebServerRequest* request)
-        {
-        FPPDiscovery.ProcessGET(request);
-        });
+    	// URL's needed for FPP Connect fseq uploading and querying
+   	 	webServer.on ("/fpp", HTTP_GET,
+        	[](AsyncWebServerRequest* request)
+        	{
+        		FPPDiscovery.ProcessGET(request);
+        	});
 
-    webServer.on ("/fpp", HTTP_POST | HTTP_PUT,
-        [](AsyncWebServerRequest* request)
-        {
-            FPPDiscovery.ProcessPOST(request);
-        },
+    	webServer.on ("/fpp", HTTP_POST | HTTP_PUT,
+        	[](AsyncWebServerRequest* request)
+        	{
+            	FPPDiscovery.ProcessPOST(request);
+        	},
 
-        [](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
-        {
-            FPPDiscovery.ProcessFile(request, filename, index, data, len, final);
-        },
+        	[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
+        	{
+            	FPPDiscovery.ProcessFile(request, filename, index, data, len, final);
+        	},
 
-        [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
-        {
-            FPPDiscovery.ProcessBody(request, data, len, index, total);
-        });
-
-    // URL that FPP's status pages use to grab JSON about the current status, what's playing, etc...
-    // This can be used to mimic the behavior of actual FPP remotes
-    webServer.on ("/fppjson.php", HTTP_GET, [](AsyncWebServerRequest* request)
-        {
-            FPPDiscovery.ProcessFPPJson(request);
-        });
-
-    // Static Handlers
-    webServer.serveStatic ("/UpdRecipe", LittleFS, "/UpdRecipe.json");
-    // webServer.serveStatic ("/static", LittleFS, "/www/static").setCacheControl ("max-age=31536000");
-    webServer.serveStatic ("/", LittleFS, "/www/").setDefaultFile ("index.html");
-
-    // FS Debugging Handler
-    // webServer.serveStatic ("/fs", LittleFS, "/" );
-
-    // if the client posts to the upload page
-    webServer.on ("/upload", HTTP_POST | HTTP_PUT | HTTP_OPTIONS,
-        [](AsyncWebServerRequest * request)
-        {
-            // DEBUG_V ("Got upload post request");
-            if (true == FileMgr.SdCardIsInstalled())
+            [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
             {
-                // Send status 200 (OK) to tell the client we are ready to receive
-                request->send (200);
-            }
-            else
+                FPPDiscovery.ProcessBody(request, data, len, index, total);
+            });
+
+        // URL that FPP's status pages use to grab JSON about the current status, what's playing, etc...
+        // This can be used to mimic the behavior of actual FPP remotes
+    	webServer.on ("/fppjson.php", HTTP_GET, [](AsyncWebServerRequest* request)
             {
-                request->send (404, CN_textSLASHplain, "Page Not found");
-            }
-        },
+                FPPDiscovery.ProcessFPPJson(request);
+            });
 
-        [this](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final)
-        {
-            // DEBUG_V ("Got process FIle request");
-            // DEBUG_V (String ("Got process File request: name: ")  + filename);
-            // DEBUG_V (String ("Got process File request: index: ") + String (index));
-            // DEBUG_V (String ("Got process File request: len:   ") + String (len));
-            // DEBUG_V (String ("Got process File request: final: ") + String (final));
-            if (true == FileMgr.SdCardIsInstalled())
+        // Static Handlers
+   	 	webServer.serveStatic ("/UpdRecipe", LittleFS, "/UpdRecipe.json");
+        // webServer.serveStatic ("/static", LittleFS, "/www/static").setCacheControl ("max-age=31536000");
+    	webServer.serveStatic ("/", LittleFS, "/www/").setDefaultFile ("index.html");
+
+        // FS Debugging Handler
+        // webServer.serveStatic ("/fs", LittleFS, "/" );
+
+        // if the client posts to the upload page
+    	webServer.on ("/upload", HTTP_POST | HTTP_PUT | HTTP_OPTIONS,
+        	[](AsyncWebServerRequest * request)
             {
-                this->handleFileUpload (request, filename, index, data, len, final); // Receive and save the file
-            }
-            else
+                // DEBUG_V ("Got upload post request");
+                if (true == FileMgr.SdCardIsInstalled())
+                {
+                    // Send status 200 (OK) to tell the client we are ready to receive
+                	request->send (200);
+                }
+                else
+                {
+                	request->send (404, CN_textSLASHplain, "Page Not found");
+                }
+            },
+
+        	[this](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final)
             {
-                request->send (404, CN_textSLASHplain, "Page Not found");
-            }
-        },
+                // DEBUG_V ("Got process FIle request");
+                // DEBUG_V (String ("Got process File request: name: ")  + filename);
+                // DEBUG_V (String ("Got process File request: index: ") + String (index));
+                // DEBUG_V (String ("Got process File request: len:   ") + String (len));
+                // DEBUG_V (String ("Got process File request: final: ") + String (final));
+                if (true == FileMgr.SdCardIsInstalled())
+                {
+                	this->handleFileUpload (request, filename, index, data, len, final); // Receive and save the file
+                }
+                else
+                {
+                	request->send (404, CN_textSLASHplain, "Page Not found");
+                }
+            },
 
-        [this](AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total)
-        {
-            // DEBUG_V (String ("Got process Body request: index: ") + String (index));
-            // DEBUG_V (String ("Got process Body request: len:   ") + String (len));
-            // DEBUG_V (String ("Got process Body request: total: ") + String (total));
-            request->send (404, CN_textSLASHplain, "Page Not found");
-        }
-    );
-
-    webServer.on ("/download", HTTP_GET, [](AsyncWebServerRequest* request)
-    {
-        // DEBUG_V (String ("url: ") + String (request->url ()));
-        String filename = request->url ().substring (String ("/download").length ());
-        // DEBUG_V (String ("filename: ") + String (filename));
-
-        AsyncWebServerResponse* response = new AsyncFileResponse (ESP_SDFS, filename, "application/octet-stream", true);
-        request->send (response);
-
-        // DEBUG_V ("Send File Done");
-    });
-
-    webServer.onNotFound ([this](AsyncWebServerRequest* request)
-    {
-        // DEBUG_V ("onNotFound");
-        if (true == this->IsAlexaCallbackValid())
-        {
-            // DEBUG_V ("IsAlexaCallbackValid == true");
-            if (!espalexa.handleAlexaApiCall (request)) //if you don't know the URI, ask espalexa whether it is an Alexa control request
+        	[this](AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total)
             {
-                // DEBUG_V ("Alexa Callback could not resolve the request");
-                request->send (404, CN_textSLASHplain, "Page Not found");
-            }
-        }
-        else
-        {
-            // DEBUG_V ("IsAlexaCallbackValid == false");
-            request->send (404, CN_textSLASHplain, "Page Not found");
-        }
-    });
+                // DEBUG_V (String ("Got process Body request: index: ") + String (index));
+                // DEBUG_V (String ("Got process Body request: len:   ") + String (len));
+                // DEBUG_V (String ("Got process Body request: total: ") + String (total));
+            	request->send (404, CN_textSLASHplain, "Page Not found");
+        	}
+    	);
 
-    //give espalexa a pointer to the server object so it can use your server instead of creating its own
-    espalexa.begin (&webServer);
+    		webServer.on ("/download", HTTP_GET, [](AsyncWebServerRequest* request)
+            {
+                // DEBUG_V (String ("url: ") + String (request->url ()));
+                String filename = request->url ().substring (String ("/download").length ());
+                // DEBUG_V (String ("filename: ") + String (filename));
 
-    // webServer.begin ();
+                AsyncWebServerResponse* response = new AsyncFileResponse (ESP_SDFS, filename, "application/octet-stream", true);
+                request->send (response);
 
-    pAlexaDevice = new EspalexaDevice (String (F ("ESP")), [this](EspalexaDevice* pDevice)
+        		// DEBUG_V ("Send File Done");
+    		});
+
+    		webServer.onNotFound ([this](AsyncWebServerRequest* request)
+            {
+                // DEBUG_V ("onNotFound");
+                if (true == this->IsAlexaCallbackValid())
+                {
+                    // DEBUG_V ("IsAlexaCallbackValid == true");
+                    if (!espalexa.handleAlexaApiCall (request)) //if you don't know the URI, ask espalexa whether it is an Alexa control request
+                    {
+                        // DEBUG_V ("Alexa Callback could not resolve the request");
+                        request->send (404, CN_textSLASHplain, "Page Not found");
+                    }
+                }
+                else
+                {
+                    // DEBUG_V ("IsAlexaCallbackValid == false");
+                    request->send (404, CN_textSLASHplain, "Page Not found");
+        		}
+            });
+
+    	//give espalexa a pointer to the server object so it can use your server instead of creating its own
+    	espalexa.begin (&webServer);
+
+        // webServer.begin ();
+
+    	pAlexaDevice = new EspalexaDevice (String (F ("ESP")), [this](EspalexaDevice* pDevice)
         {
             this->onAlexaMessage (pDevice);
 
         }, EspalexaDeviceType::extendedcolor);
 
-    pAlexaDevice->setName (config.id);
-    espalexa.addDevice (pAlexaDevice);
-    espalexa.setDiscoverable ((nullptr != pAlexaCallback) ? true : false);
+    	pAlexaDevice->setName (config.id);
+    	espalexa.addDevice (pAlexaDevice);
+    	espalexa.setDiscoverable ((nullptr != pAlexaCallback) ? true : false);
 
-    logcon (String (F ("Web server listening on port ")) + HTTP_PORT);
+    	logcon (String (F ("Web server listening on port ")) + HTTP_PORT);
 
+        HasBeenInitialized = true;
+    }
     // DEBUG_END;
 }
 
@@ -1207,15 +1211,16 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
  */
 void c_WebMgr::Process ()
 {
-   if (true == IsAlexaCallbackValid())
+    if(HasBeenInitialized)
     {
-        espalexa.loop ();
+        if (true == IsAlexaCallbackValid())
+        {
+        	espalexa.loop ();
+        }
+
+        webSocket.cleanupClients();
     }
-
-    webSocket.cleanupClients();
-
 } // Process
-
 
 //-----------------------------------------------------------------------------
 // create a global instance of the WEB UI manager
