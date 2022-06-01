@@ -113,23 +113,33 @@ inline esp_err_t saferTmToSortableString(char (&output)[N], const struct tm &tm)
     // (at least through 9999-12-31 11:59:59 ... which should be sufficient)
     //    "9999-12-31 24:59:59"
     //     ....-....1....-....2
+    //     1234 1234 1234 1234
     static_assert(N >= 20);
     output[0] = (char)0;
 
     // esp01 build emits warning if do not explicitly prevent overflow
-    // (e.g., negative values, large values), even though using snprintf()
+    // (e.g., negative values, large values),  even though using snprintf()
     // and returning error code on failures.
-    if (       (tm.tm_year < -1900) || (tm.tm_year > 8100)) {
-    } else if ((tm.tm_mon  <     0) || (tm.tm_mon  >   12)) {
-    } else if ((tm.tm_mday <     1) || (tm.tm_mday >   31)) { // this is NOT full validation!
-    } else if ((tm.tm_hour <     0) || (tm.tm_hour >   24)) { // not a mistake ... leap seconds!
-    } else if ((tm.tm_min  <     0) || (tm.tm_min  >   59)) {
-    } else if ((tm.tm_sec  <     0) || (tm.tm_sec  >   59)) {
+    // THIS IS ***NOT*** FULLY VALIDATING THE VALUES!
+    // For example, this might result in invalid date: "2000-02-31 23:59:60"
+    if (       unlikely((tm.tm_year < -1900) || (tm.tm_year > 8100))) {
+    } else if (unlikely((tm.tm_mon  <     0) || (tm.tm_mon  >   12))) {
+    } else if (unlikely((tm.tm_mday <     1) || (tm.tm_mday >   31))) {
+    } else if (unlikely((tm.tm_hour <     0) || (tm.tm_hour >   24))) { // not a mistake ... leap seconds!
+    } else if (unlikely((tm.tm_min  <     0) || (tm.tm_min  >   59))) {
+    } else if (unlikely((tm.tm_sec  <     0) || (tm.tm_sec  >   69))) { // not a mistake ... leap seconds!
     } else {
+
+#if defined(ARDUINO_ARCH_ESP8266)
+// Older compiler used for ESP8266 has false warning below ...
+// Keep this diagnostic enabled for other platforms (e.g., ESP32)
+#   pragma GCC diagnostic push
+#   pragma GCC diagnostic ignored "-Wformat-truncation"
+#endif
         int wouldHaveWrittenChars =
             snprintf(
                 output, N,
-                "%4d-%.2d-%.2d %.2d:%.2d:%.2d",
+                "%.4d-%.2d-%.2d %.2d:%.2d:%.2d",
                 1900 + tm.tm_year,
                 tm.tm_mon + 1,
                 tm.tm_mday,
@@ -137,11 +147,16 @@ inline esp_err_t saferTmToSortableString(char (&output)[N], const struct tm &tm)
                 tm.tm_min,
                 tm.tm_sec
                 );
+#if defined(ARDUINO_ARCH_ESP8266)
+#   pragma GCC diagnostic pop
+#endif
+
         if (likely((wouldHaveWrittenChars > 0) && (((size_t)wouldHaveWrittenChars) < N))) {
             result = ESP_OK;
         } else {
             // TODO: assert((wouldHaveWrittenChars > 0) && (wouldHaveWrittenChars < N));
         }
     }
+
     return result;
 }
