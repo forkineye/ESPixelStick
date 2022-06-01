@@ -47,7 +47,7 @@ protected:
     fsm_PlayEffect_state_PlayingEffect fsm_PlayEffect_state_PlayingEffect_imp;
 
     fsm_PlayEffect_state* pCurrentFsmState = nullptr;
-    time_t PLayEffectEndTime = 0;
+    time_t PlayEffectEndTime = 0;
 
     c_InputEffectEngine EffectsEngine;
 
