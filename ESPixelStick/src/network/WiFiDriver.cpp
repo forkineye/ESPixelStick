@@ -435,7 +435,7 @@ void c_WiFiDriver::reset ()
     // DEBUG_START;
 
     // Reset address in case we're switching from static to dhcp
-    WiFi.config (0u, 0u, 0u);
+    // WiFi.config (0u, 0u, 0u);
     // DEBUG_V("");
 
     if (IsWiFiConnected ())
