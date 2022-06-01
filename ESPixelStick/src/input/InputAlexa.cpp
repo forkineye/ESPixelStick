@@ -21,6 +21,7 @@
 #include <Int64String.h>
 #include "InputAlexa.h"
 #include "InputEffectEngine.hpp"
+#include "../utility/SaferStringConversion.hpp"
 
 #if defined ARDUINO_ARCH_ESP32
 #   include <functional>
@@ -162,8 +163,9 @@ void c_InputAlexa::onMessage(EspalexaDevice * pDevice)
     {
         OutputMgr.ClearBuffer ();
 
-        char HexColor[] = "#000000 ";
-        sprintf (HexColor, "#%02x%02x%02x", pDevice->getR (), pDevice->getG (), pDevice->getB ());
+        char HexColor[8];
+        ESP_ERROR_CHECK(saferRgbToHtmlColorString(HexColor, pDevice->getR (), pDevice->getG (), pDevice->getB ()));
+
         // DEBUG_V (String ("pDevice->getR: ") + String (pDevice->getR ()));
         // DEBUG_V (String ("pDevice->getG: ") + String (pDevice->getG ()));
         // DEBUG_V (String ("pDevice->getB: ") + String (pDevice->getB ()));

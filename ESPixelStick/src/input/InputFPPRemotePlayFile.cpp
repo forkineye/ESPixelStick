@@ -21,6 +21,7 @@
 #include "InputFPPRemotePlayFile.hpp"
 #include "../service/FPPDiscovery.h"
 #include "../service/fseq.h"
+#include "../utility/SaferStringConversion.hpp"
 
 //-----------------------------------------------------------------------------
 static void TimerPollHandler (void * p)
@@ -177,12 +178,26 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
 {
     // xDEBUG_START;
 
-    uint32_t mseconds = FrameControl.ElapsedPlayTimeMS;
-    // BUGBUG -- can overflow, resulting in incorrect time calculation (uint32 * uint32 ==> requires uint64 result)
-    uint32_t msecondsTotal = FrameControl.FrameStepTimeMS * FrameControl.TotalNumberOfFramesInSequence;
+    // NOTE:
+    // variables ending in "Total" reflect total     play time
+    // variables ending in "Rem"   reflect remaining play time
 
-    uint32_t secs = mseconds / 1000;
-    uint32_t secsTot = msecondsTotal / 1000;
+    // File uses milliseconds to store elapsed and total play time
+    uint32_t mseconds = FrameControl.ElapsedPlayTimeMS;
+    uint32_t msecondsTotal;
+    if (__builtin_mul_overflow(FrameControl.FrameStepTimeMS, FrameControl.TotalNumberOfFramesInSequence, &msecondsTotal)) {
+        // returned non-zero: there has been an overflow
+        msecondsTotal = MilliSecondsInASecond; // set to one second total when overflow occurs
+    }
+
+    // JsonStatus uses seconds to report elapsed, played, and remaining time
+    uint32_t secs = mseconds / MilliSecondsInASecond;
+    uint32_t secsTot = msecondsTotal / MilliSecondsInASecond;
+    uint32_t secsRem;
+    if (__builtin_sub_overflow(secsTot, secs, &secsRem)) {
+        // returned non-zero: there has been an overflow
+        secsRem = 0; // set to zero remaining seconds when overflow occurs
+    }
 
     JsonStatus[F ("SyncCount")]           = SyncControl.SyncCount;
     JsonStatus[F ("SyncAdjustmentCount")] = SyncControl.SyncAdjustmentCount;
@@ -193,44 +208,18 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
     JsonStatus[CN_playlist]          = temp;
     JsonStatus[CN_seconds_elapsed]   = String (secs);
     JsonStatus[CN_seconds_played]    = String (secs);
-    JsonStatus[CN_seconds_remaining] = String (secsTot - secs);
+    JsonStatus[CN_seconds_remaining] = String (secsRem);
     JsonStatus[CN_sequence_filename] = temp;
     JsonStatus[F("PlayedFileCount")] = PlayedFileCount;
 
-    int mins = secs / 60;
-    secs = secs % 60;
-
-    secsTot = secsTot - secs;
-    int minRem = secsTot / 60;
-    secsTot = secsTot % 60;
-
-
-    // Manual calculation of maximum size string buffer required:
-    // mseconds is uint32         , range [0..4294967295]
-    // mins is 1/(60*1000) of that, range [0..71582]
-    // msecondsTotal is uint32    , range [0..4294967295]
-    // minRem is 1/(60*1000)...   , range [0..4294967295] due to potential for overflow (else 71582)
-    // secs                       , range [0..59]
-    // secsTot                    , range [0..59]
-    //
-    // Therefore, maximum string is for time remaining: "4000111222:33", which requires 14 bytes
-    // If overflow is fixed, the maximum string is:     "71582:99", which requires 9 bytes
-
-    // Avoid use of unsafe `sprintf` ... especially with stack-based buffers
-    static const int TMP_BUFFER_CHAR_COUNT = 14;
-    char buf[TMP_BUFFER_CHAR_COUNT];
-
-    int writtenChars = snprintf (buf, TMP_BUFFER_CHAR_COUNT, "%02d:%02d", mins, secs);
-    // TODO: assert ((writtenChars > 0) && (writtenChars < TMP_BUFFER_CHAR_COUNT))
-    if ((writtenChars > 0) && (writtenChars < TMP_BUFFER_CHAR_COUNT)) {
-        JsonStatus[CN_time_elapsed] = buf;
-    }
-
-    writtenChars = snprintf (buf, TMP_BUFFER_CHAR_COUNT, "%02d:%02d", minRem, secsTot);
-    // TODO: assert ((writtenChars > 0) && (writtenChars < TMP_BUFFER_CHAR_COUNT))
-    if ((writtenChars > 0) && (writtenChars < TMP_BUFFER_CHAR_COUNT)) {
-        JsonStatus[CN_time_remaining] = buf;
-    }
+    // After inserting the total seconds and total seconds remaining,
+    // JsonStatus also includes formatted "minutes + seconds" for both
+    // timeElapsed and timeRemaining
+    char buf[12];
+    ESP_ERROR_CHECK(saferSecondsToFormattedMinutesAndSecondsString(buf, secs));
+    JsonStatus[CN_time_elapsed] = buf;
+    ESP_ERROR_CHECK(saferSecondsToFormattedMinutesAndSecondsString(buf, secsRem));
+    JsonStatus[CN_time_remaining] = buf;
 
     JsonStatus[CN_errors] = LastFailedPlayStatusMsg;
 
