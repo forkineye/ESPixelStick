@@ -158,6 +158,7 @@ void setup()
 
     // Load configuration from the File System and set Hostname
     // TestHeap(uint32_t(15));
+    // DEBUG_V(String("LoadConfig Heap: ") + String(ESP.getFreeHeap()));
     loadConfig();
 
     // TestHeap(uint32_t(20));
@@ -282,6 +283,7 @@ bool deserializeCore (JsonObject & json)
         // was this saved by the ESP itself
         if (json.containsKey(CN_system))
         {
+            // DEBUG_V("");
             DeviceConfig = json[CN_system];
         }
         // is this an initial config from the flash tool?
@@ -298,9 +300,11 @@ bool deserializeCore (JsonObject & json)
             ConfigSaveNeeded = true;
             break;
         }
+        // DEBUG_V("");
 
         if (DeviceConfig.containsKey(CN_cfgver))
         {
+            // DEBUG_V("");
             uint8_t TempVersion = uint8_t(-1);
             setFromJSON(TempVersion, DeviceConfig, CN_cfgver);
             if (TempVersion != CurrentConfigVersion)
