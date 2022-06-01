@@ -14,3 +14,4 @@ secrets.h
 *.ino.generic.bin
 *.gz
 *.pyc
+/MyEnv.txt
