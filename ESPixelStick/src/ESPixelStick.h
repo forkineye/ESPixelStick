@@ -19,7 +19,6 @@
 */
 
 #include <Arduino.h>
-
 #if defined(ARDUINO_ARCH_ESP8266)
 #	include <ESP8266WiFi.h>
 #	include <ESPAsyncTCP.h>
@@ -37,9 +36,12 @@
 #include <Ticker.h>
 #include <ArduinoJson.h>
 
+#include "utility/SaferArraySize.hpp"
+
 #include "memdebug.h"
 #include "ConstNames.hpp"
 #include "GPIO_Defs.hpp"
+
 
 #define REBOOT_DELAY    100     ///< Delay for rebooting once reboot flag is set
 #define LOG_PORT        Serial  ///< Serial port for console logging

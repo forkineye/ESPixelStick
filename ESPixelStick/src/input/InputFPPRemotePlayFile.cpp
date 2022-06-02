@@ -309,7 +309,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
         }
 
         // DEBUG_V ("Convert Raw Header into a processed header");
-        memcpy (fsqParsedHeader.header, fsqRawHeader.header, sizeof (fsqParsedHeader.header));
+        memcpy (fsqParsedHeader.header, fsqRawHeader.header, SaferArrayByteSize(fsqParsedHeader.header));
         fsqParsedHeader.dataOffset                    = read16 (fsqRawHeader.dataOffset);
         fsqParsedHeader.minorVersion                  = fsqRawHeader.minorVersion;
         fsqParsedHeader.majorVersion                  = fsqRawHeader.majorVersion;
@@ -362,7 +362,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
         FrameControl.DataOffset = fsqParsedHeader.dataOffset;
         FrameControl.ChannelsPerFrame = fsqParsedHeader.channelCount;
 
-        memset ((void*)&SparseRanges, 0x00, sizeof (SparseRanges));
+        memset ((void*)&SparseRanges, 0x00, SaferArrayByteSize(SparseRanges));
         if (fsqParsedHeader.numSparseRanges)
         {
             if (MAX_NUM_SPARSE_RANGES < fsqParsedHeader.numSparseRanges)
@@ -376,7 +376,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 
             FileMgr.ReadSdFile (FileHandleForFileBeingPlayed,
                                 (uint8_t*)&FseqRawRanges[0],
-                                sizeof (FseqRawRanges),
+                                SaferArrayByteSize (FseqRawRanges),
                                 sizeof (FSEQRawHeader) + fsqParsedHeader.numCompressedBlocks * 8);
 
             uint32_t SparseRangeIndex = 0;
@@ -414,7 +414,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
             {
                 LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Ignoring Range Info. ")) + PlayItemName + F (" No channels defined in Sparse Ranges."));
                 logcon (LastFailedPlayStatusMsg);
-                memset ((void*)&SparseRanges, 0x00, sizeof (SparseRanges));
+                memset ((void*)&SparseRanges, 0x00, SaferArrayByteSize(SparseRanges));
                 SparseRanges[0].ChannelCount = fsqParsedHeader.channelCount;
             }
 
@@ -422,7 +422,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
             {
                 LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Ignoring Range Info. ")) + PlayItemName + F (" Too many channels defined in Sparse Ranges."));
                 logcon (LastFailedPlayStatusMsg);
-                memset ((void*)&SparseRanges, 0x00, sizeof (SparseRanges));
+                memset ((void*)&SparseRanges, 0x00, SaferArrayByteSize(SparseRanges));
                 SparseRanges[0].ChannelCount = fsqParsedHeader.channelCount;
             }
 
@@ -430,13 +430,13 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
             {
                 LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Ignoring Range Info. ")) + PlayItemName + F (" Sparse Range Frame offset + Num channels is larger than frame size."));
                 logcon (LastFailedPlayStatusMsg);
-                memset ((void*)&SparseRanges, 0x00, sizeof (SparseRanges));
+                memset ((void*)&SparseRanges, 0x00, SaferArrayByteSize(SparseRanges));
                 SparseRanges[0].ChannelCount = fsqParsedHeader.channelCount;
             }
         }
         else
         {
-            memset ((void*)&SparseRanges, 0x00, sizeof (SparseRanges));
+            memset ((void*)&SparseRanges, 0x00, SaferArrayByteSize(SparseRanges));
             SparseRanges[0].ChannelCount = fsqParsedHeader.channelCount;
         }
 
@@ -485,7 +485,7 @@ size_t c_InputFPPRemotePlayFile::ReadFile(size_t DestinationIntensityId, size_t 
     {
         size_t NumBytesReadThisPass = FileMgr.ReadSdFile(FileHandleForFileBeingPlayed,
                                                          LocalIntensityBuffer,
-                                                         min((NumBytesToRead - NumBytesRead), sizeof(LocalIntensityBuffer)),
+                                                         min((NumBytesToRead - NumBytesRead), SaferArrayByteSize(LocalIntensityBuffer)),
                                                          FileOffset);
 
         OutputMgr.WriteChannelData(DestinationIntensityId, NumBytesReadThisPass, LocalIntensityBuffer);

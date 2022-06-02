@@ -69,7 +69,7 @@ c_OutputRelay::c_OutputRelay (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     c_OutputCommon(OutputChannelId, outputGpio, uart, outputType)
 {
     // DEBUG_START;
-    memcpy((char*)OutputList, (char*)RelayChannelDefaultSettings, sizeof(OutputList));
+    memcpy((char*)OutputList, (char*)RelayChannelDefaultSettings, SaferArrayByteSize(OutputList));
 
     // DEBUG_END;
 } // c_OutputRelay

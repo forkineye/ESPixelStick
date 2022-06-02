@@ -437,9 +437,12 @@ void c_FPPDiscovery::sendPingPacket (IPAddress destination)
     memcpy (packet.ipAddress, &ip, 4);
     String Hostname;
     NetworkMgr.GetHostname (Hostname);
-    strcpy (packet.hostName, Hostname.c_str ());
-    strcpy (packet.version, VERSION.c_str());
-    strcpy (packet.hardwareType, FPP_VARIANT_NAME.c_str());
+    // TODO: Untracked dependency: NetworkMgr.GetHostname() result must never exceed 65 characters (FPPPingPacket.hostname)
+    strncpy(packet.hostName,     Hostname.c_str (),        SaferArrayElementCount(packet.hostName));
+    // TODO: Untracked dependency: VERSION                         must never exceed 65 characters (FPPPingPacket.version)
+    strncpy(packet.version,      VERSION.c_str(),          SaferArrayElementCount(packet.version));
+    // TODO: Untracked dependency: FPP_VARIANT_NAME                must never exceed 41 characters (FPPPingPacket.hardwareType)
+    strncpy(packet.hardwareType, FPP_VARIANT_NAME.c_str(), SaferArrayElementCount(packet.hardwareType));
     packet.ranges[0] = 0;
 
     // DEBUG_V ("Send Ping to " + destination.toString());
@@ -570,7 +573,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
         JsonArray  JsonDataHeaders = JsonData.createNestedArray (F ("variableHeaders"));
 
         char FSEQVariableDataHeaderBuffer[sizeof (FSEQRawVariableDataHeader) + 1];
-        memset ((uint8_t*)FSEQVariableDataHeaderBuffer, 0x00, sizeof (FSEQVariableDataHeaderBuffer));
+        memset ((uint8_t*)FSEQVariableDataHeaderBuffer, 0x00, SaferArrayByteSize(FSEQVariableDataHeaderBuffer));
         FSEQRawVariableDataHeader* pCurrentVariableHeader = (FSEQRawVariableDataHeader*)FSEQVariableDataHeaderBuffer;
 
         while (FileOffsetToCurrentHeaderRecord < FileOffsetToStartOfSequenceData)

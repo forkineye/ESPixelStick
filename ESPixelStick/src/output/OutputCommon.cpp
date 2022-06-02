@@ -131,6 +131,8 @@ void c_OutputCommon::ReadChannelData(size_t StartChannelId, size_t ChannelCount,
 
     // DEBUG_V(String("               StartChannelId: 0x") + String(StartChannelId, HEX));
     // DEBUG_V(String("&OutputBuffer[StartChannelId]: 0x") + String(uint(&OutputBuffer[StartChannelId]), HEX));
+
+    // NOTE: ChannelCount is used by callers as both size in bytes && element count.
     memcpy(pTargetData, &pOutputBuffer[StartChannelId], ChannelCount);
 
     // DEBUG_END;

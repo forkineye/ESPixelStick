@@ -497,9 +497,9 @@ void loop()
 void _logcon (String & DriverName, String Message)
 {
     char Spaces[] = { "       " };
-    if (DriverName.length() < (sizeof(Spaces)-1))
+    if (DriverName.length() < (SaferArrayElementCount(Spaces)-1))
     {
-        Spaces[(sizeof (Spaces) - 1) - DriverName.length ()] = '\0';
+        Spaces[(SaferArrayElementCount(Spaces) - 1) - DriverName.length ()] = '\0';
     }
     else
     {

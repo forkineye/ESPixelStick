@@ -185,7 +185,7 @@ c_OutputMgr::c_OutputMgr ()
     ConfigFileName = String (F ("/")) + String (CN_output_config) + F (".json");
 
     // clear the input data buffer
-    memset ((char*)&OutputBuffer[0], 0, sizeof (OutputBuffer));
+    memset ((char*)&OutputBuffer[0], 0, SaferArrayByteSize(OutputBuffer));
 
 } // c_OutputMgr
 
@@ -374,7 +374,8 @@ void c_OutputMgr::CreateNewConfig ()
     // DEBUG_V ();
 
     JsonConfig[CN_cfgver] = CurrentConfigVersion;
-    JsonConfig[F ("MaxChannels")] = sizeof(OutputBuffer);
+    // TODO: Unwritten presumption that a single channel === a single byte of data
+    JsonConfig[F ("MaxChannels")] = SaferArrayByteSize(OutputBuffer);
 
     // DEBUG_V ("for each output type");
     for (auto CurrentOutputType : OutputTypeXlateMap)
@@ -1216,7 +1217,7 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
 
     size_t OutputBufferOffset = 0;
 
-    // DEBUG_V (String ("        BufferSize: ") + String (sizeof(OutputBuffer)));
+    // DEBUG_V (String ("        BufferSize: ") + String (SaferArrayByteSize(OutputBuffer)));
     // DEBUG_V (String ("OutputBufferOffset: ") + String (OutputBufferOffset));
 
     for (auto & OutputChannel : OutputChannelDrivers)
@@ -1225,7 +1226,8 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
         OutputChannel.pOutputChannelDriver->SetOutputBufferAddress(&OutputBuffer[OutputBufferOffset]);
 
         size_t ChannelsNeeded     = OutputChannel.pOutputChannelDriver->GetNumChannelsNeeded ();
-        size_t AvailableChannels  = sizeof(OutputBuffer) - OutputBufferOffset;
+        // TODO: Unwritten presumption that a single channel === a single byte of data
+        size_t AvailableChannels  = SaferArrayByteSize(OutputBuffer) - OutputBufferOffset;
         size_t ChannelsToAllocate = min (ChannelsNeeded, AvailableChannels);
 
         // DEBUG_V (String ("    ChannelsNeeded: ") + String (ChannelsNeeded));
@@ -1339,6 +1341,7 @@ void c_OutputMgr::ReadChannelData(size_t StartChannelId, size_t ChannelCount, by
 
     do // once
     {
+        // TODO: Unwritten presumption that a single channel === a single byte of data
         if ((StartChannelId + ChannelCount) > UsedBufferSize)
         {
             // DEBUG_V (String("ERROR: Invalid parameters"));
@@ -1392,7 +1395,7 @@ void c_OutputMgr::ClearBuffer()
 {
     // DEBUG_START;
 
-    memset(OutputBuffer, 0x00, sizeof(OutputBuffer));
+    memset(OutputBuffer, 0x00, SaferArrayByteSize(OutputBuffer));
 
     // DEBUG_END;
 

@@ -29,9 +29,9 @@ c_OutputRmt::c_OutputRmt()
 {
     // DEBUG_START;
 
-    memset((void *)&Intensity2Rmt[0],   0x00, sizeof(Intensity2Rmt));
+    memset((void *)&Intensity2Rmt[0],   0x00, SaferArrayByteSize(Intensity2Rmt));
 #ifdef USE_RMT_DEBUG_COUNTERS
-    memset((void *)&BitTypeCounters[0], 0x00, sizeof(BitTypeCounters));
+    memset((void *)&BitTypeCounters[0], 0x00, SaferArrayByteSize(BitTypeCounters));
 #endif // def USE_RMT_DEBUG_COUNTERS
 
     // DEBUG_END;

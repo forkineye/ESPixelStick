@@ -94,7 +94,10 @@ private:
     volatile rmt_item32_t *RmtEndAddr      = nullptr;
 
 #define NUM_RMT_SLOTS (sizeof(RMTMEM.chan[0].data32) / sizeof(RMTMEM.chan[0].data32[0]))
+// #define NUM_RMT_SLOTS (SaferArrayElementCount(RMTMEM.chan[0].data32)) // BUGBUG - GCC erroneously indicates that this causes side effects
+
 #define MIN_FRAME_TIME_MS 25
+    static_assert(NUM_RMT_SLOTS >= 4); // else, the multiplication by 0.75 will result in zero....
 
     volatile size_t     NumAvailableRmtSlotsToFill  = NUM_RMT_SLOTS;
     const size_t        NumRmtSlotsPerInterrupt     = NUM_RMT_SLOTS * 0.75;

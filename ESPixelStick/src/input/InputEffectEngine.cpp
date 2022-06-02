@@ -472,7 +472,8 @@ void c_InputEffectEngine::GetPixel (uint16_t pixelId, CRGB & out)
     if (pixelId < PixelCount)
     {
         byte PixelData[sizeof(CRGB)];
-        OutputMgr.ReadChannelData(size_t(ChannelsPerPixel * pixelId), sizeof(PixelData), PixelData);
+        // TODO: Unwritten presumption that a single channel === a single byte of data
+        OutputMgr.ReadChannelData(size_t(ChannelsPerPixel * pixelId), SaferArrayByteSize(PixelData), PixelData);
 
         out.r = PixelData[0];
         out.g = PixelData[1];

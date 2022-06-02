@@ -29,7 +29,7 @@ c_InputArtnet::c_InputArtnet (c_InputMgr::e_InputChannelIds NewInputChannelId,
 {
     // DEBUG_START;
     // DEBUG_V ("BufferSize: " + String (BufferSize));
-    memset ((void*)UniverseArray, 0x00, sizeof (UniverseArray));
+    memset ((void*)UniverseArray, 0x00, SaferArrayByteSize(UniverseArray));
     // DEBUG_END;
 } // c_InputArtnet
 

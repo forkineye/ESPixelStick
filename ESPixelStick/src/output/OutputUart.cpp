@@ -132,7 +132,7 @@ c_OutputUart::c_OutputUart()
 {
     // DEBUG_START;
 
-    memset((void *)&Intensity2Uart[0],   0x00, sizeof(Intensity2Uart));
+    memset((void *)&Intensity2Uart[0],   0x00, SaferArrayByteSize(Intensity2Uart));
     // DEBUG_END;
 } // c_OutputUart
 
