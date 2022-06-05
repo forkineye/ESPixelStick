@@ -58,6 +58,9 @@ jobs:
           # QuinLed UNO Eth
           - target: "esp32_quinled_uno_eth"
             chip: "esp32"
+          # QuinLed UNO Eth
+          - target: "esp32_quinled_uno_eth_espsv3"
+            chip: "esp32"
           # mh et esp32 mini kit
           - target: "d1_mini_mhetesp32minikit"
             chip: "esp32"
