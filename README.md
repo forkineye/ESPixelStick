@@ -36,12 +36,6 @@ The recommended way to build ESPixelStick is with PlatformIO.  However, due to c
 - In the same status bar, click ☑️ to compile or ➡️ to compile and upload.
 - To build and upload the filesystem, click on the PlatformIO icon on the left bar, then click on *Project Tasks->[env]->Platform->Upload Filesystem Image*. Note that before the filesystem is built, the web pages **must** be processed. Instructions are processing the web pages are in the html [README](html/README.md).
 
-#### PlatformIO Issues
-
-There are currently some issues with PlatformIO and uploading filesystem data.  For ESP8266, there is a caching issue which will prevent filesystem data from being rebuilt when changes are made. You can follow the references in this [issue](https://github.com/platformio/platform-espressif8266/issues/257) and apply the fix locally.  Alternatively, you can use the Arduino IDE for uploading the filesystem.
-
-For ESP32 platforms, you will need to utilize the VSCODE/Platformio for uploading filesystem data.
-
 ### Arduino IDE Instructions (not recommended, No longer supported for ESP32)
 
 Due to dependencies and software versioning, building with the Arduino IDE is not recommended.  If you wish to build with the Arduino IDE, below is what you will need to install.
