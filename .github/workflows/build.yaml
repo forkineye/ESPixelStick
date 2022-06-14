@@ -67,6 +67,9 @@ jobs:
           # DEVKITC
           - target: "esp32_devkitc"
             chip: "esp32"
+          # M5Stack Atom
+          - target: "m5stack_atom"
+            chip: "esp32"
 
     runs-on: ubuntu-latest
     steps:
