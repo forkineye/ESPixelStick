@@ -87,6 +87,8 @@ typedef enum
 #   include "platformDefinitions/GPIO_Defs_ESP32_M5Stack_Atom.hpp"
 #elif defined (BOARD_ESP32_MH_ET_LIVE_MiniKit)
 #   include "platformDefinitions/GPIO_Defs_ESP32_MH_ET_LIVE_MiniKit.hpp"
+#elif defined (BOARD_ESP32_QUINLED_DIG_OCTA)
+#   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_Dig-Octa.hpp"
 #elif defined (BOARD_ESP32_QUINLED_QUAD_ETH)
 #   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_QUAD_ETH.hpp"
 #elif defined (BOARD_ESP32_QUINLED_QUAD_AE_PLUS)
@@ -99,6 +101,8 @@ typedef enum
 #   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_UNO_AE_Plus.hpp"
 #elif defined (BOARD_ESP32_QUINLED_UNO_AE_PLUS)
 #   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_UNO.hpp"
+#elif defined (BOARD_ESP32_QUINLED_UNO_ETH_ESPSV3)
+#   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_UNO_ETH_ESPSV3.hpp"
 #elif defined (BOARD_ESP32_TTGO_T8)
 #   include "platformDefinitions/GPIO_Defs_ESP32_TTGO_T8.hpp"
 #elif defined (BOARD_ESP32_WT32ETH01)
