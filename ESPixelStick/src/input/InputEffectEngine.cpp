@@ -17,6 +17,7 @@
 *
 */
 #include "../ESPixelStick.h"
+#include "../utility/SaferStringConversion.hpp"
 #include "InputEffectEngine.hpp"
 
 //-----------------------------------------------------------------------------
@@ -98,8 +99,8 @@ void c_InputEffectEngine::Begin ()
 void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
 {
     // DEBUG_START;
-    char HexColor[] = "#000000 ";
-    sprintf (HexColor, "#%02x%02x%02x", EffectColor.r, EffectColor.g, EffectColor.b);
+    char HexColor[8];
+    ESP_ERROR_CHECK(saferRgbToHtmlColorString(HexColor, EffectColor.r, EffectColor.g, EffectColor.b));
     // DEBUG_V ("");
 
     jsonConfig[CN_currenteffect]      = ActiveEffect->name;

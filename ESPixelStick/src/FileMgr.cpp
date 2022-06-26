@@ -175,7 +175,7 @@ void c_FileMgr::SetSpiIoPins ()
         // DEBUG_V (String ("  cs_pin: ") + String (cs_pin));
 
         SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
-
+        // DEBUG_V();
 #       ifdef USE_MISO_PULLUP
         // DEBUG_V("USE_MISO_PULLUP");
         // on some hardware MISO is missing a required pull-up resistor, use internal pull-up.
@@ -188,11 +188,13 @@ void c_FileMgr::SetSpiIoPins ()
 #   endif // ! ARDUINO_ARCH_ESP32
 #endif // !def SUPPORT_SD_MMC
         {
-            logcon (String (F ("No SD card installed")));
+            // DEBUG_V();
+            logcon(String(F("No SD card installed")));
             SdCardInstalled = false;
         }
         else
         {
+            // DEBUG_V();
             SdCardInstalled = true;
             DescribeSdCardToUser ();
         }
@@ -270,6 +272,8 @@ void c_FileMgr::listDir (fs::FS& fs, String dirname, uint8_t levels)
 //-----------------------------------------------------------------------------
 bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler Handler)
 {
+    // DEBUG_START;
+
     bool retval = false;
 
     do // once
@@ -286,7 +290,9 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
         }
         logcon(RawFileData);
 */
+        // DEBUG_V();
         fs::File file = LittleFS.open (FileName.c_str (), "r");
+        // DEBUG_V();
         if (!file)
         {
             if (!IsBooting) {
@@ -295,10 +301,12 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
             break;
         }
 
-        // DEBUG_V ("Convert File to JSON document");
         size_t JsonDocSize = file.size () * 3;
-        DynamicJsonDocument jsonDoc (JsonDocSize);
+        // DEBUG_V(String("Allocate JSON document. Size = ") + String(JsonDocSize));
+        // DEBUG_V(String("Heap: ") + ESP.getFreeHeap());
+        DynamicJsonDocument jsonDoc(JsonDocSize);
 
+        // DEBUG_V ("Convert File to JSON document");
         DeserializationError error = deserializeJson (jsonDoc, file);
         file.close ();
 
@@ -319,12 +327,15 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
         // extern void PrettyPrint(DynamicJsonDocument & jsonStuff, String Name);
         // PrettyPrint(jsonDoc, CfgFileMessagePrefix);
 
-        // DEBUG_V ("");
+        // DEBUG_V ();
         jsonDoc.garbageCollect ();
 
         logcon (CfgFileMessagePrefix + String (F ("loaded.")));
 
+        // DEBUG_V ();
         Handler (jsonDoc);
+
+        // DEBUG_V();
         retval = true;
 
     } while (false);

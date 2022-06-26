@@ -31,10 +31,17 @@
 #include "../FileMgr.hpp"
 
 //-----------------------------------------------------------------------------
-// Use platformio_user.ini to define these values.
-// Platformio_user.ini defines these in the [env] section.
-// or delete the #include and enter the strings directly below.
-// #include "secrets.h"
+/*
+    There are three ways to define the default Network Name and PassPhrase
+
+    1) Create a secrets.h file and place it in the network directory with the WiFiDriver.cpp file
+    2) Use platformio_user.ini to define the WiFi Credentials for your platform
+    3) Edit the strings below directly
+*/
+
+#if __has_include("secrets.h")
+#   include "secrets.h"
+#endif //  __has_include("secrets.h")
 
 #if !defined(SECRETS_SSID)
 #   define SECRETS_SSID "DEFAULT_SSID_NOT_SET"
@@ -187,64 +194,68 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
 {
     // DEBUG_START;
 
-    // WiFi reset flag is set which will be handled in the next iteration of the main loop.
-    // Ignore connect request to lessen boot spam.
-    if (ResetWiFi)
+    do // once
     {
-        // DEBUG_V ("WiFi Reset Requested");
-        return;
-    }
+        // WiFi reset flag is set which will be handled in the next iteration of the main loop.
+        // Ignore connect request to lessen boot spam.
+        if (ResetWiFi)
+        {
+            // DEBUG_V ("WiFi Reset Requested");
+            break;
+        }
 
-    SetUpIp ();
+        SetUpIp();
 
-    String Hostname;
-    NetworkMgr.GetHostname (Hostname);
-    // DEBUG_V (String ("Hostname: ") + Hostname);
+        String Hostname;
+        NetworkMgr.GetHostname(Hostname);
+        // DEBUG_V(String("Hostname: ") + Hostname);
 
-    // Hostname must be set after the mode on ESP8266 and before on ESP32
+        // Hostname must be set after the mode on ESP8266 and before on ESP32
 #ifdef ARDUINO_ARCH_ESP8266
-    WiFi.disconnect ();
-    // DEBUG_V("");
+        WiFi.disconnect();
+        // DEBUG_V("");
 
-    // Switch to station mode
-    WiFi.mode (WIFI_STA);
-    // DEBUG_V ("");
+        // Switch to station mode
+        WiFi.mode(WIFI_STA);
+        // DEBUG_V ("");
 
-    if (0 != Hostname.length ())
-    {
-        // DEBUG_V (String ("Setting WiFi hostname: ") + Hostname);
-        WiFi.hostname (Hostname);
-    }
-    // DEBUG_V("");
+        if (0 != Hostname.length())
+        {
+            // DEBUG_V (String ("Setting WiFi hostname: ") + Hostname);
+            WiFi.hostname(Hostname);
+        }
+        // DEBUG_V("");
 #else
-    WiFi.persistent (false);
-    // DEBUG_V ("");
-    WiFi.disconnect (true);
-    // DEBUG_V("");
+        WiFi.persistent(false);
+        // DEBUG_V("");
+        WiFi.disconnect(true);
+        // DEBUG_V("");
 
-    if (0 != Hostname.length ())
-    {
-        // DEBUG_V (String ("Setting WiFi hostname: ") + Hostname);
-        WiFi.hostname (Hostname);
-    }
-    // DEBUG_V("Setting WiFi Mode to STA");
+        if (0 != Hostname.length())
+        {
+            // DEBUG_V(String("Setting WiFi hostname: ") + Hostname);
+            WiFi.hostname(Hostname);
+        }
 
-    // Switch to station mode
-    WiFi.mode (WIFI_STA);
-    // DEBUG_V ("");
+        // DEBUG_V("Setting WiFi Mode to STA");
+        WiFi.enableAP(false);
+        // DEBUG_V();
+        WiFi.enableSTA(true);
+        
 #endif
-    // DEBUG_V (String ("      ssid: ") + current_ssid);
-    // DEBUG_V (String ("passphrase: ") + current_passphrase);
-    // DEBUG_V (String ("  hostname: ") + Hostname);
+        // DEBUG_V (String ("      ssid: ") + current_ssid);
+        // DEBUG_V (String ("passphrase: ") + current_passphrase);
+        // DEBUG_V (String ("  hostname: ") + Hostname);
 
-    logcon (String(F ("Connecting to '")) +
-                      current_ssid +
-                      String (F ("' as ")) +
-                      Hostname);
+    	logcon (String(F ("Connecting to '")) +
+               current_ssid +
+               String(F("' as ")) +
+               Hostname);
 
-    WiFi.setSleep (false);
-    // DEBUG_V("");
-    WiFi.begin (current_ssid.c_str (), current_passphrase.c_str ());
+        WiFi.setSleep(false);
+        // DEBUG_V("");
+        WiFi.begin(current_ssid.c_str(), current_passphrase.c_str());
+    } while (false);
 
     // DEBUG_END;
 
@@ -428,7 +439,7 @@ void c_WiFiDriver::reset ()
     // DEBUG_START;
 
     // Reset address in case we're switching from static to dhcp
-    WiFi.config (0u, 0u, 0u);
+    // WiFi.config (0u, 0u, 0u);
     // DEBUG_V("");
 
     if (IsWiFiConnected ())
@@ -531,6 +542,7 @@ void c_WiFiDriver::SetUpIp ()
             (netmask == WiFi.subnetMask ()) &&
             (gateway == WiFi.gatewayIP ()))
         {
+            // DEBUG_V();
             // correct IP is already set
             break;
         }
@@ -769,7 +781,8 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
 
     if (true == pWiFiDriver->Get_ap_fallbackIsEnabled())
     {
-        WiFi.mode (WIFI_AP);
+        WiFi.enableSTA(false);
+        WiFi.enableAP(true);
         String Hostname;
         NetworkMgr.GetHostname (Hostname);
         String ssid = "ESPixelStick-" + String (Hostname);

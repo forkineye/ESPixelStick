@@ -59,6 +59,24 @@ protected:
     c_InputFPPRemotePlayItem * pInputFPPRemotePlayItem = nullptr;
 
     uint32_t PlayListEntryId     = 0;
+
+    // BUGBUG -- time_t creates issues for portable code, and for overflow-safe code
+    // time_t is only required to be a "real" type, which means it can be either a float or an integer.
+    // even when time_t is an integer type, it can be signed or unsigned
+    //
+    // Current code appears to assume that time_t is not a float.
+    //
+    // C++11 does not expose any constant for minimum / maximum value for the time_t type.
+    // This makes it impossible (without type traits) to ensure math operations on time_t types do
+    // not result in undefined behavior (signed types only) and/or overflow (all types).
+    //
+    // Therefore, it is highly recommended to move AWAY from use of time_t wherever possible,
+    // and instead use types that expose their minimum and maximum values, respectively.
+    //
+    // For now, because the code presumes time_t is an integer type, the following assertion
+    // ensures this for all practical purposes.
+    static_assert( (((time_t)1) / 2) == 0 ); // Verify time_t is an integer type (alternative: float)
+
     time_t   PauseEndTime        = 0;
     uint32_t PlayListRepeatCount = 1;
 

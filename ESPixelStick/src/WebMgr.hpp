@@ -22,12 +22,17 @@
 #include "EFUpdate.h"
 #include <ESPAsyncWebServer.h>
 #include <EspalexaDevice.h>
-#ifdef ARDUINO_ARCH_ESP32
-#	include <SD.h>
-#else
-#	include <SDFS.h>
-#endif // def ARDUINO_ARCH_ESP32
+#include "output/OutputMgr.hpp"
 
+#ifdef ARDUINO_ARCH_ESP32
+#   if __has_include("SD.h")
+#       include <SD.h>
+#   endif //  __has_include("SD.h")
+#else
+#   if __has_include("SDFS.h")
+#       include <SDFS.h>
+#   endif //  __has_include("SDFS.h")
+#endif // def ARDUINO_ARCH_ESP32
 
 class c_WebMgr
 {
@@ -51,27 +56,20 @@ private:
 
     EFUpdate               efupdate;
     DeviceCallbackFunction pAlexaCallback = nullptr;
-    EspalexaDevice *       pAlexaDevice = nullptr;
+    EspalexaDevice *       pAlexaDevice   = nullptr;
     char *pWebSocketFrameCollectionBuffer = nullptr;
+    bool                   HasBeenInitialized = false;
 
-#ifdef ARDUINO_ARCH_ESP32
-#   ifdef BOARD_HAS_PSRAM
-#      define WebSocketFrameCollectionBufferSize (20 * 1024)
-#   else // no PSRAM use heap
-#      define WebSocketFrameCollectionBufferSize (10 * 1024)
-#   endif // ! def BOARD_HAS_PSRAM
-#else // esp8266
-#   define WebSocketFrameCollectionBufferSize (3*1024)
-#endif // def ARDUINO_ARCH_ESP8266
+#define WebSocketFrameCollectionBufferSize (OM_MAX_CONFIG_SIZE + 100)
 
     /// Valid "Simple" message types
     enum SimpleMessage
     {
-        GET_STATUS      = 'J',
-        GET_ADMIN       = 'A',
-        DO_RESET        = '6',
+        GET_STATUS = 'J',
+        GET_ADMIN = 'A',
+        DO_RESET = '6',
         DO_FACTORYRESET = '7',
-        PING            = 'P',
+        PING = 'P',
     };
 
     void init ();
