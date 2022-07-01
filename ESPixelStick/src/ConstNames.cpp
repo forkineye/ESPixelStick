@@ -97,6 +97,7 @@ const CN_PROGMEM char CN_hadisco                  [] = "hadisco";
 const CN_PROGMEM char CN_haprefix                 [] = "haprefix";
 const CN_PROGMEM char CN_HostName                 [] = "HostName";
 const CN_PROGMEM char CN_hostname                 [] = "hostname";
+const CN_PROGMEM char CN_hv                       [] = "hv";
 const CN_PROGMEM char CN_id                       [] = "id";
 const CN_PROGMEM char CN_Idle                     [] = "Idle";
 const CN_PROGMEM char CN_init                     [] = "init";

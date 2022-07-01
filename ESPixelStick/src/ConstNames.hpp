@@ -106,6 +106,7 @@ extern const CN_PROGMEM char CN_haprefix[];
 extern const CN_PROGMEM char CN_Heap_colon [];
 extern const CN_PROGMEM char CN_HostName [];
 extern const CN_PROGMEM char CN_hostname [];
+extern const CN_PROGMEM char CN_hv[];
 extern const CN_PROGMEM char CN_id[];
 extern const CN_PROGMEM char CN_Idle[];
 extern const CN_PROGMEM char CN_init[];
