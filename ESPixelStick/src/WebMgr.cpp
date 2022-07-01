@@ -163,10 +163,6 @@ void c_WebMgr::init ()
     	DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Methods"), "GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH");
 
         // Setup WebSockets
-        // webSocket.onEvent ([this](AsyncWebSocket* server, AsyncWebSocketClient * client, AwsEventType type, void* arg, uint8_t * data, size_t len)
-        //     {
-        //         this->onWsEvent (server, client, type, arg, data, len);
-        //     });
         using namespace std::placeholders;
     	webSocket.onEvent (std::bind (&c_WebMgr::onWsEvent, this, _1, _2, _3, _4, _5, _6));
     	webServer.addHandler (&webSocket);
