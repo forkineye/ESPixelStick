@@ -672,25 +672,29 @@ function ProcessModeConfigurationDataServoPCA9685(ServoConfig)
         let EnabledPattern  = '<td><input type="checkbox" id="ServoEnabled_'                 + (CurrentRowId) + '"></td>';
         let MinLevelPattern = '<td><input type="number"   id="ServoMinLevel_'                + (CurrentRowId) + '"step="1" min="10" max="4095"  value="0"  class="form-control is-valid"></td>';
         let MaxLevelPattern = '<td><input type="number"   id="ServoMaxLevel_'                + (CurrentRowId) + '"step="1" min="10" max="4095"  value="0"  class="form-control is-valid"></td>';
+        let RestingPattern  = '<td><input type="number"   id="ServoHomeValue_'               + (CurrentRowId) + '"step="1" min="0"  max="255"   value="0"  class="form-control is-valid"></td>';
         let DataType        = '<td><select class="form-control is-valid" id="ServoDataType_' + (CurrentRowId) + '" title="Effect to generate"></select></td>';
+        
+        let rowPattern = '<tr>' + ChanIdPattern + EnabledPattern + MinLevelPattern + MaxLevelPattern + DataType + RestingPattern + '</tr>';
 
-        let rowPattern = '<tr>' + ChanIdPattern + EnabledPattern + MinLevelPattern + MaxLevelPattern + DataType + '</tr>';
         $('#servo_pca9685channelconfigurationtable tr:last').after(rowPattern);
 
-        $('#ServoChanId_'   + CurrentRowId).attr('style', $('#ServoChanId_hr').attr('style'));
-        $('#ServoEnabled_'  + CurrentRowId).attr('style', $('#ServoEnabled_hr').attr('style'));
-        $('#ServoMinLevel_' + CurrentRowId).attr('style', $('#ServoMinLevel_hr').attr('style'));
-        $('#ServoMaxLevel_' + CurrentRowId).attr('style', $('#ServoMaxLevel_hr').attr('style'));
-        $('#ServoDataType_' + CurrentRowId).attr('style', $('#ServoDataType_hr').attr('style'));
+        $('#ServoChanId_'    + CurrentRowId).attr('style', $('#ServoChanId_hr').attr('style'));
+        $('#ServoEnabled_'   + CurrentRowId).attr('style', $('#ServoEnabled_hr').attr('style'));
+        $('#ServoMinLevel_'  + CurrentRowId).attr('style', $('#ServoMinLevel_hr').attr('style'));
+        $('#ServoMaxLevel_'  + CurrentRowId).attr('style', $('#ServoMaxLevel_hr').attr('style'));
+        $('#ServoHomeValue_' + CurrentRowId).attr('style', $('#ServoHomeValue_hr').attr('style'));
+        $('#ServoDataType_'  + CurrentRowId).attr('style', $('#ServoDataType_hr').attr('style'));
     }
 
     $.each(ChannelConfigs, function (i, CurrentChannelConfig) {
         // console.log("Current Channel Id = " + CurrentChannelConfig.id);
         let currentChannelRowId = CurrentChannelConfig.id + 1;
-        $('#ServoChanId_'   + (currentChannelRowId)).html(currentChannelRowId);
-        $('#ServoEnabled_'  + (currentChannelRowId)).prop("checked", CurrentChannelConfig.en);
-        $('#ServoMinLevel_' + (currentChannelRowId)).val(CurrentChannelConfig.Min);
-        $('#ServoMaxLevel_' + (currentChannelRowId)).val(CurrentChannelConfig.Max);
+        $('#ServoChanId_'    + (currentChannelRowId)).html(currentChannelRowId);
+        $('#ServoEnabled_'   + (currentChannelRowId)).prop("checked", CurrentChannelConfig.en);
+        $('#ServoMinLevel_'  + (currentChannelRowId)).val(CurrentChannelConfig.Min);
+        $('#ServoMaxLevel_'  + (currentChannelRowId)).val(CurrentChannelConfig.Max);
+        $('#ServoHomeValue_' + (currentChannelRowId)).val(CurrentChannelConfig.hv);
 
         let jqSelector = "#ServoDataType_" + (currentChannelRowId);
 
@@ -1115,11 +1119,12 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
             ChannelConfig.updateinterval = parseInt($('#updateinterval').val(), 10);
             $.each(ChannelConfig.channels, function (i, CurrentChannelConfig) {
                 // console.info("Current Channel Id = " + CurrentChannelConfig.id);
-                let currentChannelRowId = CurrentChannelConfig.id + 1;
+                let currentChannelRowId  = CurrentChannelConfig.id + 1;
                 CurrentChannelConfig.en  = $('#ServoEnabled_' + (currentChannelRowId)).prop("checked");
-                CurrentChannelConfig.Min = parseInt($('#ServoMinLevel_' + (currentChannelRowId)).val(), 10);
-                CurrentChannelConfig.Max = parseInt($('#ServoMaxLevel_' + (currentChannelRowId)).val(), 10);
-                let ServoDataType        = parseInt($('#ServoDataType_' + (currentChannelRowId)).val(), 10);
+                CurrentChannelConfig.Min = parseInt($('#ServoMinLevel_'  + (currentChannelRowId)).val(), 10);
+                CurrentChannelConfig.Max = parseInt($('#ServoMaxLevel_'  + (currentChannelRowId)).val(), 10);
+                CurrentChannelConfig.hv  = parseInt($('#ServoHomeValue_' + (currentChannelRowId)).val(), 10);
+                let ServoDataType        = parseInt($('#ServoDataType_'  + (currentChannelRowId)).val(), 10);
 
                 CurrentChannelConfig.rev = (ServoDataType & 0x01) ? true : false;
                 CurrentChannelConfig.sca = (ServoDataType & 0x02) ? true : false;
