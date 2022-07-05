@@ -167,7 +167,7 @@ public:
 
 #ifdef ARDUINO_ARCH_ESP8266
 #   define OM_MAX_NUM_CHANNELS      (1200 * 3)
-#   define OM_MAX_CONFIG_SIZE       ((size_t)(5 * 1024))
+#   define OM_MAX_CONFIG_SIZE       ((size_t)(3 * 1024))
 #else // ARDUINO_ARCH_ESP32
 #   ifdef BOARD_HAS_PSRAM
 #       define OM_MAX_NUM_CHANNELS  (7000 * 3)
