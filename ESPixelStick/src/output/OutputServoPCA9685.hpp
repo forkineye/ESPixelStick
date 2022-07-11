@@ -29,8 +29,9 @@ private:
 #define SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH 650
 #define SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH 2350
 
-public: typedef struct ServoPCA9685Channel_s
+    typedef struct ServoPCA9685Channel_s
     {
+        uint8_t     Id              = -1;
         bool        Enabled         = false;
         uint16_t    MinLevel        = SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH;
         uint16_t    MaxLevel        = SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH;
@@ -38,8 +39,11 @@ public: typedef struct ServoPCA9685Channel_s
         bool        IsReversed      = false;
         bool        Is16Bit         = false;
         bool        IsScaled        = true;
+        uint8_t     HomeValue       = 0;
 
     } ServoPCA9685Channel_t;
+
+public: 
 
     // These functions are inherited from c_OutputCommon
     c_OutputServoPCA9685 (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
@@ -56,6 +60,7 @@ public: typedef struct ServoPCA9685Channel_s
     void   GetDriverName (String& sDriverName);
     void   GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
     size_t GetNumChannelsNeeded () { return Num_Channels; }
+    void   ClearBuffer();
 
 private:
 #   define OM_SERVO_PCA9685_CHANNEL_LIMIT           16
@@ -69,6 +74,7 @@ private:
 #   define OM_SERVO_PCA9685_CHANNEL_REVERSED        CN_rev
 #   define OM_SERVO_PCA9685_CHANNEL_16BITS          CN_b16
 #   define OM_SERVO_PCA9685_CHANNEL_SCALED          CN_sca
+#   define OM_SERVO_PCA9685_CHANNEL_HOME            CN_hv
 #   define SERVO_PCA9685_UPDATE_FREQUENCY           50
 
     bool    validate ();

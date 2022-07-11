@@ -31,8 +31,10 @@ c_OutputServoPCA9685::c_OutputServoPCA9685 (c_OutputMgr::e_OutputChannelIds Outp
 {
     // DEBUG_START;
 
-    for (ServoPCA9685Channel_t & currentServoPCA9685Channel : OutputList)
+    uint32_t id = 0;
+    for (ServoPCA9685Channel_t &currentServoPCA9685Channel : OutputList)
     {
+        currentServoPCA9685Channel.Id               = id++;
         currentServoPCA9685Channel.Enabled          = false;
         currentServoPCA9685Channel.MinLevel         = SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH;
         currentServoPCA9685Channel.MaxLevel         = SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH;
@@ -40,6 +42,7 @@ c_OutputServoPCA9685::c_OutputServoPCA9685 (c_OutputMgr::e_OutputChannelIds Outp
         currentServoPCA9685Channel.IsReversed       = false;
         currentServoPCA9685Channel.Is16Bit          = false;
         currentServoPCA9685Channel.IsScaled         = true;
+        currentServoPCA9685Channel.HomeValue        = 0;
     }
 
     // DEBUG_END;
@@ -81,6 +84,21 @@ void c_OutputServoPCA9685::Begin ()
 
     // DEBUG_END;
 } // Begin
+
+//-----------------------------------------------------------------------------
+void c_OutputServoPCA9685::ClearBuffer ()
+{
+    // DEBUG_START;
+
+    // memset(GetBufferAddress(), 0x00, GetBufferUsedSize());
+    for (ServoPCA9685Channel_t & currentServoPCA9685Channel : OutputList)
+    {
+        GetBufferAddress()[currentServoPCA9685Channel.Id] = 
+            currentServoPCA9685Channel.HomeValue;
+    }
+
+    // DEBUG_END;
+} // ClearBuffer
 
 //----------------------------------------------------------------------------
 bool c_OutputServoPCA9685::validate ()
@@ -173,6 +191,7 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             setFromJSON (CurrentOutputChannel->IsReversed, JsonChannelData, OM_SERVO_PCA9685_CHANNEL_REVERSED);
             setFromJSON (CurrentOutputChannel->Is16Bit,    JsonChannelData, OM_SERVO_PCA9685_CHANNEL_16BITS);
             setFromJSON (CurrentOutputChannel->IsScaled,   JsonChannelData, OM_SERVO_PCA9685_CHANNEL_SCALED);
+            setFromJSON (CurrentOutputChannel->HomeValue,  JsonChannelData, OM_SERVO_PCA9685_CHANNEL_HOME);
 
             // DEBUG_V (String ("ChannelId: ") + String (ChannelId));
             // DEBUG_V (String ("  Enabled: ") + String (CurrentOutputChannel->Enabled));
@@ -213,6 +232,7 @@ void c_OutputServoPCA9685::GetConfig (ArduinoJson::JsonObject & jsonConfig)
         JsonChannelData[OM_SERVO_PCA9685_CHANNEL_REVERSED]      = currentServoPCA9685.IsReversed;
         JsonChannelData[OM_SERVO_PCA9685_CHANNEL_16BITS]        = currentServoPCA9685.Is16Bit;
         JsonChannelData[OM_SERVO_PCA9685_CHANNEL_SCALED]        = currentServoPCA9685.IsScaled;
+        JsonChannelData[OM_SERVO_PCA9685_CHANNEL_HOME]          = currentServoPCA9685.HomeValue;
 
         // DEBUG_V (String ("ChannelId: ") + String (ChannelId));
         // DEBUG_V (String ("  Enabled: ") + String (currentServoPCA9685.Enabled));

@@ -1392,7 +1392,13 @@ void c_OutputMgr::ClearBuffer()
 {
     // DEBUG_START;
 
-    memset(OutputBuffer, 0x00, sizeof(OutputBuffer));
+    for (auto & currentOutputChannelDriver : OutputChannelDrivers)
+    {
+        if(nullptr != currentOutputChannelDriver.pOutputChannelDriver)
+        {
+            currentOutputChannelDriver.pOutputChannelDriver->ClearBuffer();
+        }
+    }
 
     // DEBUG_END;
 
