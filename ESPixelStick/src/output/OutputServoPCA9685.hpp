@@ -60,7 +60,7 @@ public:
     void   GetDriverName (String& sDriverName);
     void   GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
     size_t GetNumChannelsNeeded () { return Num_Channels; }
-    void   ClearBuffer();
+    // void   ClearBuffer();
 
 private:
 #   define OM_SERVO_PCA9685_CHANNEL_LIMIT           16
