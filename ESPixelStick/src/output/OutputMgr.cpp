@@ -1191,6 +1191,12 @@ void c_OutputMgr::SetConfig(ArduinoJson::JsonDocument & ConfigData)
 void c_OutputMgr::Render()
 {
     // DEBUG_START;
+
+#ifdef LED_FLASH_GPIO
+    pinMode (LED_FLASH_GPIO, OUTPUT);
+    digitalWrite (LED_FLASH_GPIO, LED_FLASH_OFF);
+#endif // def LED_FLASH_GPIO
+
     // do we need to save the current config?
     if (true == ConfigLoadNeeded)
     {
