@@ -23,7 +23,7 @@
 #define SUPPORT_UART_OUTPUT
 #define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_16
 #define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_32
-#define UART_LAST               OutputChannelId_UART_1
+#define UART_LAST               OutputChannelId_UART_2
 
 #define SUPPORT_RMT_OUTPUT
 #define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_33
@@ -40,7 +40,7 @@
 #define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_5
 
 #include <ETH.h>
-
+#define SUPPORT_ETHERNET
 /*
    * ETH_CLOCK_GPIO0_IN   - default: external clock from crystal oscillator
    * ETH_CLOCK_GPIO0_OUT  - 50MHz clock from internal APLL output on GPIO0 - possibly an inverter is needed for LAN8720
@@ -50,15 +50,15 @@
 #define DEFAULT_ETH_CLK_MODE           eth_clock_mode_t::ETH_CLOCK_GPIO17_OUT
 
 // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
-#define DEFAULT_ETH_POWER_PIN          gpio_num_t::GPIO_NUM_5
+#define DEFAULT_ETH_POWER_PIN          gpio_num_t(-1)
 #define DEFAULT_ETH_POWER_PIN_ACTIVE   HIGH
 
 // Type of the Ethernet PHY (LAN8720 or TLK110)
 #define DEFAULT_ETH_TYPE               eth_phy_type_t::ETH_PHY_LAN8720
 
 // I2C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
-#define ETH_ADDR_PHY_LAN8720           0
-// #define ETH_ADDR_PHY_LAN8720         1
+// #define ETH_ADDR_PHY_LAN8720           0
+#define ETH_ADDR_PHY_LAN8720         1
 //#define ETH_ADDR_PHY_TLK110           31
 #define DEFAULT_ETH_ADDR               ETH_ADDR_PHY_LAN8720
 #define DEFAULT_ETH_TXEN               gpio_num_t::GPIO_NUM_21
@@ -84,5 +84,5 @@
 #define SUPPORT_OutputType_UCS8903          // UART / RMT
 // #define SUPPORT_OutputType_WS2801           // SPI
 #define SUPPORT_OutputType_WS2811           // UART / RMT
-#define SUPPORT_OutputType_Relay            // GPIO
+// #define SUPPORT_OutputType_Relay            // GPIO
 // #define SUPPORT_OutputType_Servo_PCA9685    // I2C (default pins)
