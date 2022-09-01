@@ -17,7 +17,7 @@
 *
 */
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_RMT_OUTPUT
+#ifdef ARDUINO_ARCH_ESP32
 
 #include "OutputRmt.hpp"
 
@@ -573,4 +573,4 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     // //DEBUG_END;
 } // GetStatus
 
-#endif // def SUPPORT_RMT_OUTPUT
+#endif // def ARDUINO_ARCH_ESP32

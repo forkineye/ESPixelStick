@@ -18,7 +18,7 @@
 */
 
 #include "../ESPixelStick.h"
-#if defined(SUPPORT_OutputType_UCS1903) && defined(SUPPORT_UART_OUTPUT)
+#if defined(SUPPORT_OutputType_UCS1903)
 
 #include "OutputUCS1903Uart.hpp"
 
@@ -154,4 +154,4 @@ void c_OutputUCS1903Uart::PauseOutput (bool State)
     // DEBUG_END;
 } // PauseOutput
 
-#endif // defined(SUPPORT_OutputType_UCS1903) && defined(SUPPORT_UART_OUTPUT)
+#endif // defined(SUPPORT_OutputType_UCS1903)

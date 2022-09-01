@@ -18,7 +18,7 @@
 */
 
 #include "../ESPixelStick.h"
-#if defined(SUPPORT_OutputType_TM1814) && defined(SUPPORT_UART_OUTPUT)
+#if defined(SUPPORT_OutputType_TM1814)
 
 #include "OutputTM1814Uart.hpp"
 
@@ -77,7 +77,7 @@ void c_OutputTM1814Uart::Begin ()
     OutputUartConfig.InvertOutputPolarity   = true;
     OutputUartConfig.CitudsArray            = ConvertIntensityToUartDataStream;
     Uart.Begin(OutputUartConfig);
-    
+
     HasBeenInitialized = true;
 
 } // init
@@ -165,4 +165,4 @@ void c_OutputTM1814Uart::PauseOutput(bool State)
     // DEBUG_END;
 } // PauseOutput
 
-#endif // defined(SUPPORT_OutputType_TM1814) && defined(SUPPORT_UART_OUTPUT)
+#endif // defined(SUPPORT_OutputType_TM1814)

@@ -19,7 +19,6 @@
  */
 
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_UART_OUTPUT
 
 #ifdef ARDUINO_ARCH_ESP32
 #   include <soc/uart_reg.h>
@@ -222,7 +221,6 @@ private:
         __asm__ __volatile__("rsr %0,ccount" : "=a"(ccount));
         return ccount;
     }
-    
+
 #endif // defined(ARDUINO_ARCH_ESP8266)
 };
-#endif // def #ifdef SUPPORT_UART_OUTPUT

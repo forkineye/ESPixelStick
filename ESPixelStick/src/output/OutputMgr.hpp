@@ -63,106 +63,122 @@ public:
     // handles to determine which output channel we are dealing with
     enum e_OutputChannelIds
     {
-#ifdef DEFAULT_UART_1_GPIO
+        #ifdef DEFAULT_UART_1_GPIO
         OutputChannelId_UART_1,
-#endif // def DEFAULT_UART_1_GPIO
-#ifdef DEFAULT_UART_2_GPIO
+        #endif // def DEFAULT_UART_1_GPIO
+
+        #ifdef DEFAULT_UART_2_GPIO
         OutputChannelId_UART_2,
-#endif // def DEFAULT_UART_2_GPIO
-#ifdef DEFAULT_RMT_0_GPIO
+        #endif // def DEFAULT_UART_2_GPIO
+
+        #ifdef DEFAULT_RMT_0_GPIO
+        OutputChannelId_RMT_0,
+        #endif // def DEFAULT_RMT_0_GPIO
+
+        #ifdef DEFAULT_RMT_1_GPIO
         OutputChannelId_RMT_1,
-#endif // def DEFAULT_RMT_0_GPIO
-#ifdef DEFAULT_RMT_1_GPIO
+        #endif // def DEFAULT_RMT_1_GPIO
+
+        #ifdef DEFAULT_RMT_2_GPIO
         OutputChannelId_RMT_2,
-#endif // def DEFAULT_RMT_1_GPIO
-#ifdef DEFAULT_RMT_2_GPIO
+        #endif // def DEFAULT_RMT_2_GPIO
+
+        #ifdef DEFAULT_RMT_3_GPIO
         OutputChannelId_RMT_3,
-#endif // def DEFAULT_RMT_2_GPIO
-#ifdef DEFAULT_RMT_3_GPIO
+        #endif // def DEFAULT_RMT_3_GPIO
+
+        #ifdef DEFAULT_RMT_4_GPIO
         OutputChannelId_RMT_4,
-#endif // def DEFAULT_RMT_3_GPIO
-#ifdef DEFAULT_RMT_4_GPIO
+        #endif // def DEFAULT_RMT_3_GPIO
+
+        #ifdef DEFAULT_RMT_5_GPIO
         OutputChannelId_RMT_5,
-#endif // def DEFAULT_RMT_3_GPIO
-#ifdef DEFAULT_RMT_5_GPIO
+        #endif // def DEFAULT_RMT_3_GPIO
+
+        #ifdef DEFAULT_RMT_6_GPIO
         OutputChannelId_RMT_6,
-#endif // def DEFAULT_RMT_3_GPIO
-#ifdef DEFAULT_RMT_6_GPIO
+        #endif // def DEFAULT_RMT_3_GPIO
+
+        #ifdef DEFAULT_RMT_7_GPIO
         OutputChannelId_RMT_7,
-#endif // def DEFAULT_RMT_3_GPIO
-#ifdef DEFAULT_RMT_7_GPIO
-        OutputChannelId_RMT_8,
-#endif // def DEFAULT_RMT_3_GPIO
-#ifdef SUPPORT_SPI_OUTPUT
+        #endif // def DEFAULT_RMT_3_GPIO
+
+        #ifdef SUPPORT_SPI_OUTPUT
         OutputChannelId_SPI_1,
-#endif // def SUPPORT_SPI_OUTPUT
-#if defined(SUPPORT_OutputType_Relay) || defined(SUPPORT_OutputType_Servo_PCA9685)
+        #endif // def SUPPORT_SPI_OUTPUT
+
+        #if defined(SUPPORT_OutputType_Relay) || defined(SUPPORT_OutputType_Servo_PCA9685)
         OutputChannelId_Relay,
-#endif // def SUPPORT_RELAY_OUTPUT
+        #endif // def SUPPORT_RELAY_OUTPUT
 
         OutputChannelId_End, // must be last in the list
-        OutputChannelId_Start = 0,
-
-#ifdef SUPPORT_UART_OUTPUT
-        OutputChannelId_UART_FIRST = OutputChannelId_UART_1,
-        OutputChannelId_UART_LAST = UART_LAST,
-#endif // def SUPPORT_UART_OUTPUT
-
-#ifdef SUPPORT_RMT_OUTPUT
-        OutputChannelId_RMT_FIRST = OutputChannelId_RMT_1,
-        OutputChannelId_RMT_LAST = RMT_LAST,
-#endif // def SUPPORT_RMT_OUTPUT
+        // OutputChannelId_Start = 0,
     };
 
     // do NOT insert into the middle of this list. Always add new types to the end of the list
     enum e_OutputType
     {
-            OutputType_Disabled = 0,
-#ifdef SUPPORT_OutputType_WS2811
-            OutputType_WS2811 = 1,
-#endif // def SUPPORT_OutputType_WS2811
-#ifdef SUPPORT_OutputType_GECE
-            OutputType_GECE = 2,
-#endif // def SUPPORT_OutputType_GECE
-#ifdef SUPPORT_OutputType_DMX
-            OutputType_DMX = 3,
-#endif // def SUPPORT_OutputType_DMX
-#ifdef SUPPORT_OutputType_Renard
-            OutputType_Renard = 4,
-#endif // def SUPPORT_OutputType_Renard
-#ifdef SUPPORT_OutputType_Serial
-            OutputType_Serial = 5,
-#endif // def SUPPORT_OutputType_Serial
-#ifdef SUPPORT_OutputType_Relay
-            OutputType_Relay = 6,
-#endif // def SUPPORT_OutputType_Relay
-#ifdef SUPPORT_OutputType_Servo_PCA9685
-            OutputType_Servo_PCA9685 = 7,
-#endif // def SUPPORT_OutputType_Servo_PCA9685
-#ifdef SUPPORT_OutputType_UCS1903
-            OutputType_UCS1903 = 8,
-#endif // def SUPPORT_OutputType_UCS1903
-#ifdef SUPPORT_OutputType_TM1814
-            OutputType_TM1814 = 9,
-#endif // def SUPPORT_OutputType_TM1814
-#ifdef SUPPORT_OutputType_WS2801
-            OutputType_WS2801 = 10,
-#endif // def SUPPORT_OutputType_WS2801
-#ifdef SUPPORT_OutputType_APA102
-            OutputType_APA102 = 11,
-#endif // def SUPPORT_OutputType_APA102
-#ifdef SUPPORT_OutputType_GS8208
-            OutputType_GS8208 = 12,
-#endif // def SUPPORT_OutputType_GS8208
-#ifdef SUPPORT_OutputType_UCS8903
-            OutputType_UCS8903 = 13,
-#endif // def SUPPORT_OutputType_UCS8903
-#ifdef SUPPORT_OutputType_TLS3001
-            OutputType_TLS3001 = 14,
-#endif // def SUPPORT_OutputType_TLS3001
-            // Add new types here
-            OutputType_End, // must be last
-            OutputType_Start = OutputType_Disabled,
+        OutputType_Disabled = 0,
+
+        #ifdef SUPPORT_OutputType_WS2811
+        OutputType_WS2811 = 1,
+        #endif // def SUPPORT_OutputType_WS2811
+
+        #ifdef SUPPORT_OutputType_GECE
+        OutputType_GECE = 2,
+        #endif // def SUPPORT_OutputType_GECE
+
+        #ifdef SUPPORT_OutputType_DMX
+        OutputType_DMX = 3,
+        #endif // def SUPPORT_OutputType_DMX
+
+        #ifdef SUPPORT_OutputType_Renard
+        OutputType_Renard = 4,
+        #endif // def SUPPORT_OutputType_Renard
+
+        #ifdef SUPPORT_OutputType_Serial
+        OutputType_Serial = 5,
+        #endif // def SUPPORT_OutputType_Serial
+
+        #ifdef SUPPORT_OutputType_Relay
+        OutputType_Relay = 6,
+        #endif // def SUPPORT_OutputType_Relay
+
+        #ifdef SUPPORT_OutputType_Servo_PCA9685
+        OutputType_Servo_PCA9685 = 7,
+        #endif // def SUPPORT_OutputType_Servo_PCA9685
+
+        #ifdef SUPPORT_OutputType_UCS1903
+        OutputType_UCS1903 = 8,
+        #endif // def SUPPORT_OutputType_UCS1903
+
+        #ifdef SUPPORT_OutputType_TM1814
+        OutputType_TM1814 = 9,
+        #endif // def SUPPORT_OutputType_TM1814
+
+        #ifdef SUPPORT_OutputType_WS2801
+        OutputType_WS2801 = 10,
+        #endif // def SUPPORT_OutputType_WS2801
+
+        #ifdef SUPPORT_OutputType_APA102
+        OutputType_APA102 = 11,
+        #endif // def SUPPORT_OutputType_APA102
+
+        #ifdef SUPPORT_OutputType_GS8208
+        OutputType_GS8208 = 12,
+        #endif // def SUPPORT_OutputType_GS8208
+
+        #ifdef SUPPORT_OutputType_UCS8903
+        OutputType_UCS8903 = 13,
+        #endif // def SUPPORT_OutputType_UCS8903
+
+        #ifdef SUPPORT_OutputType_TLS3001
+        OutputType_TLS3001 = 14,
+        #endif // def SUPPORT_OutputType_TLS3001
+
+        // Add new types here
+        OutputType_End, // must be last
+        OutputType_Start = OutputType_Disabled,
     };
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -178,17 +194,28 @@ public:
 #   endif // !def BOARD_HAS_PSRAM
 #endif // !def ARDUINO_ARCH_ESP32
 
-private:
-        // pointer(s) to the current active output drivers
-        struct DriverInfo_t
-        {
-                e_OutputChannelIds DriverId = OutputChannelId_Start;
-                c_OutputCommon *pOutputChannelDriver = nullptr;
-                size_t StartingChannelId = 0;
-                size_t ChannelCount = 0;
-                size_t EndChannelId = 0;
+    enum OM_PortType_t
+    {
+        Uart = 0,
+        Rmt,
+        Spi,
+        Relay,
     };
 
+private:
+    struct DriverInfo_t
+    {
+        e_OutputChannelIds  DriverId                = e_OutputChannelIds(0);
+        c_OutputCommon      *pOutputChannelDriver   = nullptr;
+        size_t              StartingChannelId       = 0;
+        size_t              ChannelCount            = 0;
+        size_t              EndChannelId            = 0;
+        gpio_num_t          GpioPin                 = gpio_num_t(0);
+        OM_PortType_t       PortType                = OM_PortType_t::Uart;
+        uart_port_t         PortId                  = uart_port_t(0);
+    };
+
+    // pointer(s) to the current active output drivers
     DriverInfo_t OutputChannelDrivers[OutputChannelId_End];
 
     // configuration parameter names for the channel manager within the config file
@@ -209,16 +236,8 @@ private:
     uint8_t OutputBuffer[OM_MAX_NUM_CHANNELS];
     size_t  UsedBufferSize = 0;
 
-#ifdef SUPPORT_UART_OUTPUT
-#       define OM_IS_UART ((CurrentOutputChannelDriver.DriverId >= OutputChannelId_UART_FIRST) && (CurrentOutputChannelDriver.DriverId <= OutputChannelId_UART_LAST))
-#else
-#   define OM_IS_UART false
-#endif // def SUPPORT_UART_OUTPUT
-#ifdef SUPPORT_RMT_OUTPUT
-#       define OM_IS_RMT ((CurrentOutputChannelDriver.DriverId >= OutputChannelId_RMT_FIRST) && (CurrentOutputChannelDriver.DriverId <= OutputChannelId_RMT_LAST))
-#else
-#   define OM_IS_RMT false
-#endif // def SUPPORT_RMT_OUTPUT
+#define OM_IS_UART (CurrentOutputChannelDriver.PortType == OM_PortType_t::Uart)
+#define OM_IS_RMT  (CurrentOutputChannelDriver.PortType == OM_PortType_t::Rmt)
 
 }; // c_OutputMgr
 

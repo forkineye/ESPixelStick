@@ -18,7 +18,7 @@
 */
 
 #include "../ESPixelStick.h"
-#if defined(SUPPORT_OutputType_WS2811) && defined(SUPPORT_UART_OUTPUT)
+#if defined(SUPPORT_OutputType_WS2811)
 
 #include "OutputWS2811Uart.hpp"
 
@@ -177,4 +177,4 @@ void c_OutputWS2811Uart::PauseOutput (bool State)
     // DEBUG_END;
 } // PauseOutput
 
-#endif // defined(SUPPORT_OutputType_WS2811) && defined(SUPPORT_UART_OUTPUT)
+#endif // defined(SUPPORT_OutputType_WS2811)

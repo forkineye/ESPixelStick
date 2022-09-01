@@ -24,7 +24,7 @@
 
 #include "OutputCommon.hpp"
 
-#if defined(SUPPORT_OutputType_UCS8903) && defined(SUPPORT_UART_OUTPUT)
+#if defined(SUPPORT_OutputType_UCS8903)
 
 #include "OutputUCS8903.hpp"
 #include "OutputUart.hpp"
@@ -57,4 +57,4 @@ private:
 
 }; // c_OutputUCS8903Uart
 
-#endif // defined(SUPPORT_OutputType_UCS8903) && defined(SUPPORT_UART_OUTPUT)
+#endif // defined(SUPPORT_OutputType_UCS8903)

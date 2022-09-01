@@ -17,7 +17,7 @@
 *
 */
 #include "../ESPixelStick.h"
-#if defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_RMT_OUTPUT)
+#if defined(SUPPORT_OutputType_GECE) && defined(ARDUINO_ARCH_ESP32)
 
 #include "OutputGECERmt.hpp"
 
@@ -140,4 +140,4 @@ void c_OutputGECERmt::Render ()
 
 } // Render
 
-#endif // defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_RMT_OUTPUT)
+#endif // defined(SUPPORT_OutputType_GECE) && defined(ARDUINO_ARCH_ESP32)

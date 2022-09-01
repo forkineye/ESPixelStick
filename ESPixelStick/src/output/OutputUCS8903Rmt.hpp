@@ -23,7 +23,7 @@
 */
 #include "../ESPixelStick.h"
 #ifdef SUPPORT_OutputType_UCS8903
-#ifdef SUPPORT_RMT_OUTPUT
+#ifdef ARDUINO_ARCH_ESP32
 
 #include "OutputUCS8903.hpp"
 #include "OutputRmt.hpp"
@@ -51,5 +51,5 @@ private:
 
 }; // c_OutputUCS8903Rmt
 
-#endif // def SUPPORT_RMT_OUTPUT
+#endif // def ARDUINO_ARCH_ESP32
 #endif // def SUPPORT_OutputType_UCS8903

@@ -17,7 +17,7 @@
 *
 */
 #include "../ESPixelStick.h"
-#if defined(SUPPORT_OutputType_TLS3001) && defined (SUPPORT_RMT_OUTPUT)
+#if defined(SUPPORT_OutputType_TLS3001) && defined (ARDUINO_ARCH_ESP32)
 
 #include "OutputTLS3001Rmt.hpp"
 
@@ -197,4 +197,4 @@ void fsm_RMT_state_SendData::Poll (c_OutputTLS3001Rmt* Parent)
 
 } // fsm_RMT_state_SendData
 
-#endif // defined(SUPPORT_OutputType_TLS3001) && defined (SUPPORT_RMT_OUTPUT)
+#endif // defined(SUPPORT_OutputType_TLS3001) && defined (ARDUINO_ARCH_ESP32)

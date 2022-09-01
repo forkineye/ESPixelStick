@@ -19,7 +19,7 @@
 */
 
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_RMT_OUTPUT
+#ifdef ARDUINO_ARCH_ESP32
 #include <driver/rmt.h>
 #include "OutputPixel.hpp"
 #include "OutputSerial.hpp"
@@ -141,7 +141,7 @@ public:
     bool NoFrameInProgress () { return (0 == (RMT.int_ena.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT))); }
 
     void IRAM_ATTR ISR_Handler ();
-   
+
 // #define USE_RMT_DEBUG_COUNTERS
 #ifdef USE_RMT_DEBUG_COUNTERS
    // debug counters
@@ -163,4 +163,4 @@ public:
    uint32_t BitTypeCounters[RmtDataBitIdType_t::RMT_NUM_BIT_TYPES];
 #endif // def USE_RMT_DEBUG_COUNTERS
 };
-#endif // def #ifdef SUPPORT_RMT_OUTPUT
+#endif // def #ifdef ARDUINO_ARCH_ESP32
