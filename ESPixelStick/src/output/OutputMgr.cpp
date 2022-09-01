@@ -168,7 +168,7 @@ static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] 
 #endif // def DEFAULT_RMT_7_GPIO
 
 #ifdef SUPPORT_SPI_OUTPUT
-    {DEFAULT_SPI_DATA_GPIO, uart_port_t(-1), OM_PortType_t::Spi},
+    {DEFAULT_SPI_DATA_GPIO, uart_port_t(-1), c_OutputMgr::OM_PortType_t::Spi},
 #endif
 
 #ifdef DEFAULT_RELAY_GPIO
