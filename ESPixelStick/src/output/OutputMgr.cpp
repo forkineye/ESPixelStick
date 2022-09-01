@@ -537,6 +537,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                     break;
                 }
 
+                #if defined(ARDUINO_ARCH_ESP32)
                 if (OM_IS_RMT)
                 {
                     // logcon (CN_stars + String (F (" Starting DMX for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
@@ -544,6 +545,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                     // DEBUG_V ();
                     break;
                 }
+                #endif // defined(ARDUINO_ARCH_ESP32)
 
                 // DEBUG_V ();
                 if (!BuildingNewConfig)
@@ -568,6 +570,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                 }
                 // DEBUG_V ();
 
+                #if defined(ARDUINO_ARCH_ESP32)
                 if (OM_IS_RMT)
                 {
                     // logcon (CN_stars + String (F (" Starting GECE for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
@@ -575,6 +578,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                     // DEBUG_V ();
                     break;
                 }
+                #endif // defined(ARDUINO_ARCH_ESP32)
 
                 if (!BuildingNewConfig)
                 {
@@ -599,6 +603,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                 }
                 // DEBUG_V ();
 
+                #if defined(ARDUINO_ARCH_ESP32)
                 if (OM_IS_RMT)
                 {
                     // logcon (CN_stars + String (F (" Starting Generic Serial for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
@@ -606,6 +611,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                     // DEBUG_V ();
                     break;
                 }
+                #endif // defined(ARDUINO_ARCH_ESP32)
                 // DEBUG_V ();
 
                 if (!BuildingNewConfig)
@@ -631,6 +637,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                 }
                 // DEBUG_V ();
 
+                #if defined(ARDUINO_ARCH_ESP32)
                 if (OM_IS_RMT)
                 {
                     // logcon (CN_stars + String (F (" Starting Renard for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
@@ -638,6 +645,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                     // DEBUG_V ();
                     break;
                 }
+                #endif // defined(ARDUINO_ARCH_ESP32)
                 // DEBUG_V ();
 
                 if (!BuildingNewConfig)
@@ -709,6 +717,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                     break;
                 }
 
+                #if defined(ARDUINO_ARCH_ESP32)
                 if (OM_IS_RMT)
                 {
                     // DEBUG_V ("RMT");
@@ -717,6 +726,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                     // DEBUG_V ();
                     break;
                 }
+                #endif // defined(ARDUINO_ARCH_ESP32)
 
                 if (!BuildingNewConfig)
                 {
