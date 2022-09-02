@@ -52,7 +52,7 @@
 #define SUPPORT_OutputType_GS8208           // UART / RMT
 #define SUPPORT_OutputType_Renard           // UART / RMT
 #define SUPPORT_OutputType_Serial           // UART / RMT
-#define SUPPORT_OutputType_TM1814           // UART / RMT
+// #define SUPPORT_OutputType_TM1814           // UART / RMT
 #define SUPPORT_OutputType_UCS1903          // UART / RMT
 #define SUPPORT_OutputType_UCS8903          // UART / RMT
 // #define SUPPORT_OutputType_WS2801           // SPI

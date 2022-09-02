@@ -377,6 +377,9 @@ void c_OutputMgr::CreateNewConfig ()
     JsonConfig[CN_cfgver] = CurrentConfigVersion;
     JsonConfig[F ("MaxChannels")] = sizeof(OutputBuffer);
 
+    // Collect the all ports disabled config first
+    CreateJsonConfig (JsonConfig);
+
     // DEBUG_V ("for each output type");
     for (auto CurrentOutputType : OutputTypeXlateMap)
     {
@@ -388,6 +391,12 @@ void c_OutputMgr::CreateNewConfig ()
             InstantiateNewOutputChannel(CurrentOutputChannelDriver, CurrentOutputType.id, false);
             // DEBUG_V ();
         } // end for each interface
+
+        if(JsonConfigDoc.overflowed())
+        {
+            logcon("Error: Config size is too small. Cannot create an output config with the current settings.")
+            break;
+        }
 
         // PrettyPrint(JsonConfig, "Intermediate in OutputMgr");
 
@@ -482,7 +491,8 @@ void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
 void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChannelDriver, e_OutputType NewOutputChannelType, bool StartDriver)
 {
     // DEBUG_START;
-
+    // BuildingNewConfig = false;
+    // IsBooting = false;
     do // once
     {
         // is there an existing driver?
@@ -516,11 +526,16 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
         CurrentOutputChannelDriver.PortType  = OutputChannelIdToGpioAndPort[CurrentOutputChannelDriver.DriverId].PortType;
         CurrentOutputChannelDriver.PortId    = OutputChannelIdToGpioAndPort[CurrentOutputChannelDriver.DriverId].PortId;
 
+        // DEBUG_V (String("DriverId: ") + String(CurrentOutputChannelDriver.DriverId));
+        // DEBUG_V (String(" GpioPin: ") + String(CurrentOutputChannelDriver.PortId));
+        // DEBUG_V (String("PortType: ") + String(CurrentOutputChannelDriver.PortType));
+        // DEBUG_V (String("  PortId: ") + String(CurrentOutputChannelDriver.PortId));
+
         switch (NewOutputChannelType)
         {
             case e_OutputType::OutputType_Disabled:
             {
-                // logcon (CN_stars + String (F (" Disabled output type for channel '")) + CurrentOutputChannel.DriverId + "'. **************");
+                // logcon (CN_stars + String (F (" Disabled output type for channel '")) + CurrentOutputChannelDriver.DriverId + "'. **************");
                 CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_Disabled);
                 // DEBUG_V ();
                 break;
@@ -745,7 +760,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                 // DEBUG_V ();
                 if (OM_IS_UART)
                 {
-                    // logcon (CN_stars + String (F (" Starting TM1814 UART for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
+                    // logcon (CN_stars + String (F (" Starting UCS1903 UART for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
                     CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputUCS1903Uart(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_UCS1903);
                     // DEBUG_V ();
                     break;
@@ -753,7 +768,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 
                 if (OM_IS_RMT)
                 {
-                    // logcon (CN_stars + String (F (" Starting TM1814 RMT for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    // logcon (CN_stars + String (F (" Starting UCS1903 RMT for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                     CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputUCS1903Rmt(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_UCS1903);
                     // DEBUG_V ();
                     break;
