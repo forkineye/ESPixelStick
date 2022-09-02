@@ -23,7 +23,7 @@
 */
 
 #include "../ESPixelStick.h"
-#if defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_UART_OUTPUT)
+#if defined(SUPPORT_OutputType_GECE)
 
 #include "OutputGECE.hpp"
 #include "OutputUart.hpp"
@@ -64,4 +64,4 @@ private:
 
 }; // c_OutputGECEUart
 
-#endif // defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_UART_OUTPUT)
+#endif // defined(SUPPORT_OutputType_GECE)

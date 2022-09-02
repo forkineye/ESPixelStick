@@ -23,7 +23,7 @@
 */
 
 #include "../ESPixelStick.h"
-#if defined(SUPPORT_OutputType_TM1814) && defined(SUPPORT_UART_OUTPUT)
+#if defined(SUPPORT_OutputType_TM1814)
 
 #include "OutputTM1814.hpp"
 #include "OutputUart.hpp"
@@ -46,7 +46,7 @@ public:
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);
     void    GetConfig (ArduinoJson::JsonObject& jsonConfig);
     void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
- 
+
 private:
     c_OutputUart Uart;
 
@@ -58,4 +58,4 @@ private:
 
 }; // c_OutputTM1814Uart
 
-#endif // defined(SUPPORT_OutputType_TM1814) && defined(SUPPORT_UART_OUTPUT)
+#endif // defined(SUPPORT_OutputType_TM1814)

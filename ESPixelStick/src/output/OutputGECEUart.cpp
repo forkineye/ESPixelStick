@@ -18,7 +18,7 @@
 */
 
 #include "../ESPixelStick.h"
-#if defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_UART_OUTPUT)
+#if defined(SUPPORT_OutputType_GECE)
 
 #include "OutputGECEUart.hpp"
 
@@ -184,4 +184,4 @@ void c_OutputGECEUart::PauseOutput (bool State)
     // DEBUG_END;
 } // PauseOutput
 
-#endif // defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_UART_OUTPUT)
+#endif // defined(SUPPORT_OutputType_GECE)

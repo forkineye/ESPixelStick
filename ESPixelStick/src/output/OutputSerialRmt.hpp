@@ -22,7 +22,7 @@
 *
 */
 #include "../ESPixelStick.h"
-#if (defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)) && defined(SUPPORT_RMT_OUTPUT)
+#if (defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)) && defined(ARDUINO_ARCH_ESP32)
 
 #include "OutputSerial.hpp"
 #include "OutputRmt.hpp"
@@ -47,9 +47,9 @@ public:
 
 private:
     void SetUpRmtBitTimes();
-    
+
     c_OutputRmt Rmt;
 
 }; // c_OutputSerialRmt
 
-#endif // (defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)) && defined(SUPPORT_RMT_OUTPUT)
+#endif // (defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)) && defined(ARDUINO_ARCH_ESP32)

@@ -19,15 +19,11 @@
 */
 
 //Output Manager
-#define SUPPORT_UART_OUTPUT
 #define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_0
 #define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_1
-#define UART_LAST               OutputChannelId_UART_2
 
-#define SUPPORT_RMT_OUTPUT
 #define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_3
 #define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_16
-#define RMT_LAST                OutputChannelId_RMT_1
 
 #define LED_FLASH_GPIO          gpio_num_t::GPIO_NUM_4
 #define LED_FLASH_OFF           LOW

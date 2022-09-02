@@ -21,7 +21,8 @@
 #include "ESPixelStick.h"
 
 #ifdef ARDUINO_ARCH_ESP32
-#   include "driver/gpio.h"
+#   include <driver/gpio.h>
+#   include <hal/uart_types.h>
 #endif
 
 #ifdef ARDUINO_ARCH_ESP8266

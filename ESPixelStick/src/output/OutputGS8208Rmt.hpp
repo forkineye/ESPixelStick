@@ -23,7 +23,7 @@
 */
 #include "../ESPixelStick.h"
 
-#if defined(SUPPORT_OutputType_GS8208) && defined(SUPPORT_RMT_OUTPUT)
+#if defined(SUPPORT_OutputType_GS8208) && defined(ARDUINO_ARCH_ESP32)
 
 #include "OutputGS8208.hpp"
 #include "OutputRmt.hpp"
@@ -51,4 +51,4 @@ private:
 
 }; // c_OutputGS8208Rmt
 
-#endif // defined(SUPPORT_OutputType_GS8208) && defined(SUPPORT_RMT_OUTPUT)
+#endif // defined(SUPPORT_OutputType_GS8208) && defined(ARDUINO_ARCH_ESP32)

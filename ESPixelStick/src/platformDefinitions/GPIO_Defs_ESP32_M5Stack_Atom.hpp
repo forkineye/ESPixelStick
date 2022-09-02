@@ -21,7 +21,7 @@
 /*
 * M5Stack Atom driver, boards are ESP32-PICO-D4 based, no PSRAM
 *
-* Note: These boards lack PSRAM. So if you need more outputs, you probably need to 
+* Note: These boards lack PSRAM. So if you need more outputs, you probably need to
 *       raise the WebSocketFrameCollectionBufferSize a bit e.g. 12*1024. Otherwise you'll
 *       face an issue that the webUI is not rendering the output configutation section.
 *
@@ -31,27 +31,22 @@
 */
 
 // Output Manager
-#define SUPPORT_UART_OUTPUT
 // Bottom extension interface
 #define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_19 // TxD for RS485 Base
-#define UART_LAST               OutputChannelId_UART_1
-
-#define SUPPORT_RMT_OUTPUT
 
 // Internal neopixel(s)
 #define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_27
 
 // Bottom extension interface
-#define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_22 
+#define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_22
 #define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_23
 #define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_33
 
 // GROVE extension interface
 #define DEFAULT_RMT_4_GPIO      gpio_num_t::GPIO_NUM_26 // TxD for RS485 Tail
 //#define DEFAULT_RMT_5_GPIO      gpio_num_t::GPIO_NUM_32  // disabled by default due to memory contraints.
-#define RMT_LAST                OutputChannelId_RMT_5
 
-// Bottom extension interface 
+// Bottom extension interface
 // Disabled by default, on Atom Matrix I2C is shared with a 6-Axis IMU (MPU-6886)
 // #define DEFAULT_I2C_SDA         gpio_num_t::GPIO_NUM_25
 // #define DEFAULT_I2C_SCL         gpio_num_t::GPIO_NUM_21
