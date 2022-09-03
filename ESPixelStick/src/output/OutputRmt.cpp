@@ -484,10 +484,13 @@ bool c_OutputRmt::Render ()
             break;
         }
 
-        if ((millis() - LastFrameStartTime) < MIN_FRAME_TIME_MS)
+        uint32_t Now = millis();
+        if ((Now - LastFrameStartTime) < MIN_FRAME_TIME_MS)
         {
+            // keep waiting
             break;
         }
+        LastFrameStartTime = Now;
 
 #ifdef USE_RMT_DEBUG_COUNTERS
         if (MoreDataToSend())
@@ -517,7 +520,6 @@ bool c_OutputRmt::Render ()
         // enable the threshold event interrupt
         EnableInterrupts;
         RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 1;
-        LastFrameStartTime = millis ();
         // //DEBUG_V("Transmit Started");
         Response = true;
 
