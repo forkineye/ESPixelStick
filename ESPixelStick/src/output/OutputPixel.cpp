@@ -21,7 +21,7 @@
 #include "OutputPixel.hpp"
 #include "OutputGECEFrame.hpp"
 
-#define ADJUST_INTENSITY_AT_ISR
+// #define ADJUST_INTENSITY_AT_ISR
 
 //----------------------------------------------------------------------------
 c_OutputPixel::c_OutputPixel (c_OutputMgr::e_OutputChannelIds OutputChannelId,
@@ -102,7 +102,7 @@ void c_OutputPixel::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputPixel::SetOutputBufferSize(size_t NumChannelsAvailable)
+void c_OutputPixel::SetOutputBufferSize(uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
     // DEBUG_V (String ("NumChannelsAvailable: ") + String (NumChannelsAvailable));
@@ -131,7 +131,7 @@ void c_OutputPixel::SetOutputBufferSize(size_t NumChannelsAvailable)
 } // SetBufferSize
 
 //----------------------------------------------------------------------------
-void c_OutputPixel::SetFramePrependInformation (const uint8_t* data, size_t len)
+void c_OutputPixel::SetFramePrependInformation (const uint8_t* data, uint32_t len)
 {
     // DEBUG_START;
 
@@ -143,7 +143,7 @@ void c_OutputPixel::SetFramePrependInformation (const uint8_t* data, size_t len)
 } // SetFramePrependInformation
 
 //----------------------------------------------------------------------------
-void c_OutputPixel::SetFrameAppendInformation (const uint8_t* data, size_t len)
+void c_OutputPixel::SetFrameAppendInformation (const uint8_t* data, uint32_t len)
 {
     // DEBUG_START;
 
@@ -155,7 +155,7 @@ void c_OutputPixel::SetFrameAppendInformation (const uint8_t* data, size_t len)
 } // SetFrameAppendInformation
 
 //----------------------------------------------------------------------------
-void c_OutputPixel::SetPixelPrependInformation (const uint8_t* data, size_t len)
+void c_OutputPixel::SetPixelPrependInformation (const uint8_t* data, uint32_t len)
 {
     // DEBUG_START;
 
@@ -736,42 +736,42 @@ uint32_t IRAM_ATTR c_OutputPixel::GetIntensityData()
 }
 
 //----------------------------------------------------------------------------
-inline size_t c_OutputPixel::CalculateIntensityOffset(size_t ChannelId)
+inline uint32_t c_OutputPixel::CalculateIntensityOffset(uint32_t ChannelId)
 {
     // DEBUG_START;
 
     // DEBUG_V(String("              ChannelId: 0x") + String(ChannelId, HEX));
-    size_t PixelId = ChannelId / size_t(NumIntensityBytesPerPixel);
+    uint32_t PixelId = ChannelId / uint32_t(NumIntensityBytesPerPixel);
     // DEBUG_V(String("                PixelId: 0x") + String(PixelId, HEX));
 
     // are we doing a zig zag operation?
     if ((zig_size > 1) && (PixelId >= zig_size))
     {
         // DEBUG_V(String("               zig_size: 0x") + String(zig_size, HEX));
-        size_t ZigZagGroupId = PixelId / zig_size;
+        uint32_t ZigZagGroupId = PixelId / zig_size;
         // DEBUG_V(String("          ZigZagGroupId: 0x") + String(ZigZagGroupId, HEX));
 
         // is this a backwards group
         if (0 != (ZigZagGroupId & 0x1))
         {
             // DEBUG_V("Backwards Group");
-            size_t zigoffset = PixelId % zig_size;
+            uint32_t zigoffset = PixelId % zig_size;
             // DEBUG_V(String("              zigoffset: 0x") + String(zigoffset, HEX));
-            size_t BaseGroupPixelId = ZigZagGroupId * zig_size;
+            uint32_t BaseGroupPixelId = ZigZagGroupId * zig_size;
             PixelId = BaseGroupPixelId + (zig_size - 1) - zigoffset;
             // DEBUG_V(String("       BaseGroupPixelId: 0x") + String(BaseGroupPixelId, HEX));
             // DEBUG_V(String("                PixelId: 0x") + String(PixelId, HEX));
         }
     }
 
-    size_t ColorOrderIndex = ChannelId % size_t(NumIntensityBytesPerPixel);
-    if (size_t(NumIntensityBytesPerPixel) > ChannelId)
+    uint32_t ColorOrderIndex = ChannelId % uint32_t(NumIntensityBytesPerPixel);
+    if (uint32_t(NumIntensityBytesPerPixel) > ChannelId)
     {
         ColorOrderIndex = ChannelId;
     }
-    size_t ColorOrderId = ColorOffsets.Array[ColorOrderIndex];
-    size_t PixelIntensityBaseId = PixelId * size_t(NumIntensityBytesPerPixel);
-    size_t TargetBufferIntensityId = PixelIntensityBaseId + ColorOrderId;
+    uint32_t ColorOrderId = ColorOffsets.Array[ColorOrderIndex];
+    uint32_t PixelIntensityBaseId = PixelId * uint32_t(NumIntensityBytesPerPixel);
+    uint32_t TargetBufferIntensityId = PixelIntensityBaseId + ColorOrderId;
 
     // DEBUG_V(String("              ChannelId: 0x") + String(ChannelId, HEX));
     // DEBUG_V(String("                PixelId: 0x") + String(PixelId, HEX));
@@ -786,7 +786,7 @@ inline size_t c_OutputPixel::CalculateIntensityOffset(size_t ChannelId)
 } // CalculateIntensityOffset
 
 //----------------------------------------------------------------------------
-void c_OutputPixel::WriteChannelData(size_t StartChannelId, size_t ChannelCount, byte *pSourceData)
+void c_OutputPixel::WriteChannelData(uint32_t StartChannelId, uint32_t ChannelCount, byte *pSourceData)
 {
     // DEBUG_START;
 
@@ -797,11 +797,11 @@ void c_OutputPixel::WriteChannelData(size_t StartChannelId, size_t ChannelCount,
     memcpy(&pOutputBuffer[StartChannelId], pSourceData, ChannelCount);
 #else
 
-    size_t EndChannelId = StartChannelId + ChannelCount;
-    size_t SourceDataIndex = 0;
-    for (size_t currentChannelId = StartChannelId; currentChannelId < EndChannelId; ++currentChannelId, ++SourceDataIndex)
+    uint32_t EndChannelId = StartChannelId + ChannelCount;
+    uint32_t SourceDataIndex = 0;
+    for (uint32_t currentChannelId = StartChannelId; currentChannelId < EndChannelId; ++currentChannelId, ++SourceDataIndex)
     {
-        size_t CurrentIntensityData = gamma_table[pSourceData[SourceDataIndex]];
+        uint32_t CurrentIntensityData = gamma_table[pSourceData[SourceDataIndex]];
         CurrentIntensityData = uint8_t((uint32_t(CurrentIntensityData) * AdjustedBrightness) >> 8);
 
         pOutputBuffer[CalculateIntensityOffset(currentChannelId)] = CurrentIntensityData;
@@ -814,7 +814,7 @@ void c_OutputPixel::WriteChannelData(size_t StartChannelId, size_t ChannelCount,
 } // WriteChannelData
 
 //----------------------------------------------------------------------------
-void c_OutputPixel::ReadChannelData(size_t StartChannelId, size_t ChannelCount, byte *pTargetData)
+void c_OutputPixel::ReadChannelData(uint32_t StartChannelId, uint32_t ChannelCount, byte *pTargetData)
 {
     // DEBUG_START;
 
@@ -824,9 +824,9 @@ void c_OutputPixel::ReadChannelData(size_t StartChannelId, size_t ChannelCount, 
     memcpy(pTargetData, &pOutputBuffer[StartChannelId], ChannelCount);
 #else  // !ADJUST_INTENSITY_AT_ISR
 
-    size_t EndChannelId = StartChannelId + ChannelCount;
-    size_t SourceDataIndex = 0;
-    for (size_t currentChannelId = StartChannelId; currentChannelId < EndChannelId; ++currentChannelId, ++SourceDataIndex)
+    uint32_t EndChannelId = StartChannelId + ChannelCount;
+    uint32_t SourceDataIndex = 0;
+    for (uint32_t currentChannelId = StartChannelId; currentChannelId < EndChannelId; ++currentChannelId, ++SourceDataIndex)
     {
         uint8_t CurrentIntensityData = pOutputBuffer[CalculateIntensityOffset(currentChannelId)];
         // CurrentIntensityData = gamma_table[CurrentIntensityData];
