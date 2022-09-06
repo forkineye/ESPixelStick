@@ -448,7 +448,7 @@ void c_OutputMgr::GetConfig (String & Response)
 } // GetConfig
 
 //-----------------------------------------------------------------------------
-void c_OutputMgr::GetConfig (byte * Response, size_t maxlen )
+void c_OutputMgr::GetConfig (byte * Response, uint32_t maxlen )
 {
     // DEBUG_START;
 
@@ -1216,37 +1216,53 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
 {
     // DEBUG_START;
 
-    size_t OutputBufferOffset = 0;
+    /* Buffer vs virtual buffer.
+        Pixels have a concept called groups. A group of pixels uses
+        a single tupple of input channel data and replicates that
+        data into N positions in the output buffer. For non pixel
+        channels or for pixels with a group size of 1, the virtual
+        buffer and the output buffers are the same.
+        The virtual buffer size is the one we give to the input
+        processing engine
+    */
+    uint32_t OutputBufferOffset     = 0;    // offset into the raw data in the output buffer
+    uint32_t OutputChannelOffset    = 0;    // Virtual channel offset to the output buffer.
 
     // DEBUG_V (String ("        BufferSize: ") + String (sizeof(OutputBuffer)));
     // DEBUG_V (String ("OutputBufferOffset: ") + String (OutputBufferOffset));
 
     for (auto & OutputChannel : OutputChannelDrivers)
     {
-        OutputChannel.StartingChannelId = OutputBufferOffset;
+        OutputChannel.OutputBufferStartingOffset = OutputBufferOffset;
+        OutputChannel.OutputChannelStartingOffset = OutputChannelOffset;
         OutputChannel.pOutputChannelDriver->SetOutputBufferAddress(&OutputBuffer[OutputBufferOffset]);
 
-        size_t ChannelsNeeded     = OutputChannel.pOutputChannelDriver->GetNumChannelsNeeded ();
-        size_t AvailableChannels  = sizeof(OutputBuffer) - OutputBufferOffset;
-        size_t ChannelsToAllocate = min (ChannelsNeeded, AvailableChannels);
+        uint32_t OutputBufferDataBytesNeeded        = OutputChannel.pOutputChannelDriver->GetNumOutputBufferBytesNeeded ();
+        uint32_t VirtualOutputBufferDataBytesNeeded = OutputChannel.pOutputChannelDriver->GetNumOutputBufferChannelsServiced ();
 
-        // DEBUG_V (String ("    ChannelsNeeded: ") + String (ChannelsNeeded));
-        // DEBUG_V (String (" AvailableChannels: ") + String (AvailableChannels));
-        // DEBUG_V (String ("ChannelsToAllocate: ") + String (ChannelsToAllocate));
+        uint32_t AvailableChannels = sizeof(OutputBuffer) - OutputBufferOffset;
 
-        OutputChannel.pOutputChannelDriver->SetOutputBufferSize (ChannelsToAllocate);
-        OutputChannel.ChannelCount = ChannelsToAllocate;
-        OutputChannel.EndChannelId = OutputBufferOffset + ChannelsToAllocate;
-
-        if (AvailableChannels < ChannelsNeeded)
+        if (AvailableChannels < OutputBufferDataBytesNeeded)
         {
-            logcon (String (F ("--- OutputMgr: ERROR: Too many output channels have been Requested: ")) + String (ChannelsNeeded));
+            logcon (String (F ("--- OutputMgr: ERROR: Too many output channels have been Requested: ")) + String (OutputBufferDataBytesNeeded));
             // DEBUG_V (String ("    ChannelsNeeded: ") + String (ChannelsNeeded));
             // DEBUG_V (String (" AvailableChannels: ") + String (AvailableChannels));
             // DEBUG_V (String ("ChannelsToAllocate: ") + String (ChannelsToAllocate));
+            break;
         }
 
-        OutputBufferOffset += ChannelsToAllocate;
+        // DEBUG_V (String ("    ChannelsNeeded: ") + String (ChannelsNeeded));
+        // DEBUG_V (String (" AvailableChannels: ") + String (AvailableChannels));
+
+        OutputBufferOffset += OutputBufferDataBytesNeeded;
+        OutputChannel.OutputBufferDataSize  = OutputBufferDataBytesNeeded;
+        OutputChannel.OutputBufferEndOffset = OutputBufferOffset - 1;
+        OutputChannel.pOutputChannelDriver->SetOutputBufferSize (OutputBufferDataBytesNeeded);
+
+        OutputChannelOffset += VirtualOutputBufferDataBytesNeeded;
+        OutputChannel.OutputChannelSize      = VirtualOutputBufferDataBytesNeeded;
+        OutputChannel.OutputChannelEndOffset = OutputChannelOffset;
+
         // DEBUG_V (String("OutputChannel.GetBufferUsedSize: ") + String(OutputChannel.pOutputChannelDriver->GetBufferUsedSize()));
         // DEBUG_V (String ("OutputBufferOffset: ") + String(OutputBufferOffset));
     }
@@ -1255,7 +1271,7 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
     UsedBufferSize = OutputBufferOffset;
     // DEBUG_V (String ("       OutputBuffer: 0x") + String (uint32_t (OutputBuffer), HEX));
     // DEBUG_V (String ("     UsedBufferSize: ") + String (uint32_t (UsedBufferSize)));
-    InputMgr.SetBufferInfo (OutputBufferOffset);
+    InputMgr.SetBufferInfo (OutputChannelOffset);
 
     // DEBUG_END;
 
@@ -1276,7 +1292,7 @@ void c_OutputMgr::PauseOutputs(bool PauseTheOutput)
 } // PauseOutputs
 
 //-----------------------------------------------------------------------------
-void c_OutputMgr::WriteChannelData(size_t StartChannelId, size_t ChannelCount, byte *pSourceData)
+void c_OutputMgr::WriteChannelData(uint32_t StartChannelId, uint32_t ChannelCount, byte *pSourceData)
 {
     // DEBUG_START;
 
@@ -1292,20 +1308,20 @@ void c_OutputMgr::WriteChannelData(size_t StartChannelId, size_t ChannelCount, b
         }
 
         // DEBUG_V (String("&OutputBuffer[StartChannelId]: 0x") + String(uint(&OutputBuffer[StartChannelId]), HEX));
-        size_t EndChannelId = StartChannelId + ChannelCount;
+        uint32_t EndChannelId = StartChannelId + ChannelCount;
         // Serial.print('1');
         for (auto & currentOutputChannelDriver : OutputChannelDrivers)
         {
             // Serial.print('2');
             // does this output handle this block of data?
-            if (StartChannelId < currentOutputChannelDriver.StartingChannelId)
+            if (StartChannelId < currentOutputChannelDriver.OutputChannelStartingOffset)
             {
                 // we have gone beyond where we can put this data.
                 // Serial.print('3');
                 break;
             }
 
-            if (StartChannelId > currentOutputChannelDriver.EndChannelId)
+            if (StartChannelId > currentOutputChannelDriver.OutputChannelEndOffset)
             {
                 // move to the next driver
                 // Serial.print('4');
@@ -1313,9 +1329,9 @@ void c_OutputMgr::WriteChannelData(size_t StartChannelId, size_t ChannelCount, b
             }
             // Serial.print('5');
 
-            size_t lastChannelToSet = min(EndChannelId, currentOutputChannelDriver.EndChannelId);
-            size_t ChannelsToSet = lastChannelToSet - StartChannelId;
-            size_t RelativeStartChannelId = StartChannelId - currentOutputChannelDriver.StartingChannelId;
+            uint32_t lastChannelToSet = min(EndChannelId, currentOutputChannelDriver.OutputChannelEndOffset);
+            uint32_t ChannelsToSet = lastChannelToSet - StartChannelId;
+            uint32_t RelativeStartChannelId = StartChannelId - currentOutputChannelDriver.OutputChannelStartingOffset;
             // DEBUG_V (String("               StartChannelId: 0x") + String(StartChannelId, HEX));
             // DEBUG_V (String("                 EndChannelId: 0x") + String(EndChannelId, HEX));
             // DEBUG_V (String("             lastChannelToSet: 0x") + String(lastChannelToSet, HEX));
@@ -1335,7 +1351,7 @@ void c_OutputMgr::WriteChannelData(size_t StartChannelId, size_t ChannelCount, b
 } // WriteChannelData
 
 //-----------------------------------------------------------------------------
-void c_OutputMgr::ReadChannelData(size_t StartChannelId, size_t ChannelCount, byte *pTargetData)
+void c_OutputMgr::ReadChannelData(uint32_t StartChannelId, uint32_t ChannelCount, byte *pTargetData)
 {
     // DEBUG_START;
 
@@ -1350,20 +1366,20 @@ void c_OutputMgr::ReadChannelData(size_t StartChannelId, size_t ChannelCount, by
             break;
         }
         // DEBUG_V (String("&OutputBuffer[StartChannelId]: 0x") + String(uint(&OutputBuffer[StartChannelId]), HEX));
-        size_t EndChannelId = StartChannelId + ChannelCount;
+        uint32_t EndChannelId = StartChannelId + ChannelCount;
         // Serial.print('1');
         for (auto & currentOutputChannelDriver : OutputChannelDrivers)
         {
             // Serial.print('2');
             // does this output handle this block of data?
-            if (StartChannelId < currentOutputChannelDriver.StartingChannelId)
+            if (StartChannelId < currentOutputChannelDriver.OutputChannelStartingOffset)
             {
                 // we have gone beyond where we can put this data.
                 // Serial.print('3');
                 break;
             }
 
-            if (StartChannelId > currentOutputChannelDriver.EndChannelId)
+            if (StartChannelId > currentOutputChannelDriver.OutputChannelEndOffset)
             {
                 // move to the next driver
                 // Serial.print('4');
@@ -1371,9 +1387,9 @@ void c_OutputMgr::ReadChannelData(size_t StartChannelId, size_t ChannelCount, by
             }
             // Serial.print('5');
 
-            size_t lastChannelToSet = min(EndChannelId, currentOutputChannelDriver.EndChannelId);
-            size_t ChannelsToSet = lastChannelToSet - StartChannelId;
-            size_t RelativeStartChannelId = StartChannelId - currentOutputChannelDriver.StartingChannelId;
+            uint32_t lastChannelToSet = min(EndChannelId, currentOutputChannelDriver.OutputChannelEndOffset);
+            uint32_t ChannelsToSet = lastChannelToSet - StartChannelId;
+            uint32_t RelativeStartChannelId = StartChannelId - currentOutputChannelDriver.OutputChannelStartingOffset;
             // DEBUG_V (String("               StartChannelId: 0x") + String(StartChannelId, HEX));
             // DEBUG_V (String("                 EndChannelId: 0x") + String(EndChannelId, HEX));
             // DEBUG_V (String("             lastChannelToSet: 0x") + String(lastChannelToSet, HEX));

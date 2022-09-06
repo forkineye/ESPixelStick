@@ -36,16 +36,17 @@ public:
     virtual ~c_OutputSerial ();
 
     // functions to be provided by the derived class
-    virtual void   Begin ();
-    virtual bool   SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
-    virtual void   GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-            void   GetDriverName (String& sDriverName);
-    virtual void   GetStatus (ArduinoJson::JsonObject & jsonStatus);
-            size_t GetNumChannelsNeeded () { return Num_Channels; };
-            void   SetOutputBufferSize (size_t NumChannelsAvailable);
-            void   Render() = 0;
-            void   StartNewFrame();
-            
+    virtual void        Begin ();
+    virtual bool        SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
+    virtual void        GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
+            void        GetDriverName (String& sDriverName);
+    virtual void        GetStatus (ArduinoJson::JsonObject & jsonStatus);
+            uint32_t    GetNumOutputBufferBytesNeeded () { return OutputBufferSize; };
+            uint32_t    GetNumOutputBufferChannelsServiced () { return OutputBufferSize; };
+            void        SetOutputBufferSize (size_t NumChannelsAvailable);
+            void        Render() = 0;
+            void        StartNewFrame();
+
     uint32_t IRAM_ATTR   ISR_GetNextIntensityToSend();
     bool     IRAM_ATTR   ISR_MoreDataToSend() { return (SerialFrameState_t::SerialIdle != SerialFrameState); }
 
@@ -78,7 +79,7 @@ private:
     const size_t    BUF_SIZE             = (MAX_CHANNELS + MAX_HDR_SIZE + MAX_FOOTER_SIZE);
     const uint32_t  DMX_BITS_PER_BYTE    = (1.0 + 8.0 + 2.0);
     const size_t    DMX_MaxFrameSize     = 512;
-    
+
 
     size_t      Num_Channels = DEFAULT_NUM_CHANNELS;       // Number of data channels to transmit
 

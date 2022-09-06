@@ -44,20 +44,20 @@ public:
     void      Begin             ();                        ///< set up the operating environment based on the current config (or defaults)
     void      Render            ();                        ///< Call from loop(),  renders output data
     void      LoadConfig        ();                        ///< Read the current configuration data from nvram
-    void      GetConfig         (byte * Response, size_t maxlen);
+    void      GetConfig         (byte * Response, uint32_t maxlen);
     void      GetConfig         (String & Response);
     void      SetConfig         (const char * NewConfig);  ///< Save the current configuration data to nvram
     void      SetConfig         (ArduinoJson::JsonDocument & NewConfig);  ///< Save the current configuration data to nvram
     void      GetStatus         (JsonObject & jsonStatus);
     void      GetPortCounts     (uint16_t& PixelCount, uint16_t& SerialCount) {PixelCount = uint16_t(OutputChannelId_End); SerialCount = uint16_t(NUM_UARTS); }
     uint8_t*  GetBufferAddress  () { return OutputBuffer; } ///< Get the address of the buffer into which the E1.31 handler will stuff data
-    size_t    GetBufferUsedSize () { return UsedBufferSize; } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
-    size_t    GetBufferSize     () { return sizeof(OutputBuffer); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
+    uint32_t    GetBufferUsedSize () { return UsedBufferSize; } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
+    uint32_t    GetBufferSize     () { return sizeof(OutputBuffer); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
     void      DeleteConfig      () { FileMgr.DeleteConfigFile (ConfigFileName); }
     void      PauseOutputs      (bool NewState);
     void      GetDriverName     (String & Name) { Name = "OutputMgr"; }
-    void      WriteChannelData  (size_t StartChannelId, size_t ChannelCount, byte * pData);
-    void      ReadChannelData   (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
+    void      WriteChannelData  (uint32_t StartChannelId, uint32_t ChannelCount, byte * pData);
+    void      ReadChannelData   (uint32_t StartChannelId, uint32_t ChannelCount, byte *pTargetData);
     void      ClearBuffer       ();
 
     // handles to determine which output channel we are dealing with
@@ -183,14 +183,14 @@ public:
 
 #ifdef ARDUINO_ARCH_ESP8266
 #   define OM_MAX_NUM_CHANNELS      (1200 * 3)
-#   define OM_MAX_CONFIG_SIZE       ((size_t)(3 * 1024))
+#   define OM_MAX_CONFIG_SIZE       ((uint32_t)(3 * 1024))
 #else // ARDUINO_ARCH_ESP32
 #   ifdef BOARD_HAS_PSRAM
 #       define OM_MAX_NUM_CHANNELS  (7000 * 3)
-#       define OM_MAX_CONFIG_SIZE   ((size_t)(20 * 1024))
+#       define OM_MAX_CONFIG_SIZE   ((uint32_t)(20 * 1024))
 #   else
 #       define OM_MAX_NUM_CHANNELS  (3000 * 3)
-#       define OM_MAX_CONFIG_SIZE   ((size_t)(11 * 1024))
+#       define OM_MAX_CONFIG_SIZE   ((uint32_t)(11 * 1024))
 #   endif // !def BOARD_HAS_PSRAM
 #endif // !def ARDUINO_ARCH_ESP32
 
@@ -205,14 +205,19 @@ public:
 private:
     struct DriverInfo_t
     {
-        e_OutputChannelIds  DriverId                = e_OutputChannelIds(0);
-        c_OutputCommon      *pOutputChannelDriver   = nullptr;
-        size_t              StartingChannelId       = 0;
-        size_t              ChannelCount            = 0;
-        size_t              EndChannelId            = 0;
-        gpio_num_t          GpioPin                 = gpio_num_t(0);
-        OM_PortType_t       PortType                = OM_PortType_t::Uart;
-        uart_port_t         PortId                  = uart_port_t(0);
+        uint32_t            OutputBufferStartingOffset  = 0;
+        uint32_t            OutputBufferDataSize        = 0;
+        uint32_t            OutputBufferEndOffset       = 0;
+
+        uint32_t            OutputChannelStartingOffset = 0;
+        uint32_t            OutputChannelSize           = 0;
+        uint32_t            OutputChannelEndOffset      = 0;
+
+        gpio_num_t          GpioPin                     = gpio_num_t(0);
+        OM_PortType_t       PortType                    = OM_PortType_t::Uart;
+        uart_port_t         PortId                      = uart_port_t(0);
+        e_OutputChannelIds  DriverId                    = e_OutputChannelIds(0);
+        c_OutputCommon      *pOutputChannelDriver       = nullptr;
     };
 
     // pointer(s) to the current active output drivers
@@ -234,7 +239,7 @@ private:
     String ConfigFileName;
 
     uint8_t OutputBuffer[OM_MAX_NUM_CHANNELS];
-    size_t  UsedBufferSize = 0;
+    uint32_t  UsedBufferSize = 0;
 
 #define OM_IS_UART (CurrentOutputChannelDriver.PortType == OM_PortType_t::Uart)
 #define OM_IS_RMT  (CurrentOutputChannelDriver.PortType == OM_PortType_t::Rmt)

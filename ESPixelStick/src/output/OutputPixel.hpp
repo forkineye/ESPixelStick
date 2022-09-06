@@ -47,24 +47,25 @@ public:
     virtual  bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
     virtual  void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     virtual  void         GetStatus (ArduinoJson::JsonObject& jsonStatus);
-             size_t       GetNumChannelsNeeded () { return (pixel_count * NumIntensityBytesPerPixel); };
-    virtual  void         SetOutputBufferSize (size_t NumChannelsAvailable);
+             uint32_t     GetNumOutputBufferBytesNeeded () { return (pixel_count * NumIntensityBytesPerPixel); };
+             uint32_t     GetNumOutputBufferChannelsServiced () { return (GetNumOutputBufferBytesNeeded() / PixelGroupSize); };
+    virtual  void         SetOutputBufferSize (uint32_t NumChannelsAvailable);
              void         SetInvertData (bool _InvertData) { InvertData = _InvertData; }
-    virtual  void         WriteChannelData (size_t StartChannelId, size_t ChannelCount, byte *pSourceData);
-    virtual  void         ReadChannelData (size_t StartChannelId, size_t ChannelCount, byte *pTargetData);
+    virtual  void         WriteChannelData (uint32_t StartChannelId, uint32_t ChannelCount, byte *pSourceData);
+    virtual  void         ReadChannelData (uint32_t StartChannelId, uint32_t ChannelCount, byte *pTargetData);
     inline   void         SetIntensityBitTimeInUS (float value) { IntensityBitTimeInUs = value; }
              void         SetIntensityDataWidth(uint32_t value);
              void         StartNewFrame();
     bool     IRAM_ATTR    ISR_MoreDataToSend () { return FrameState_t::FrameDone != FrameState; }
     uint32_t IRAM_ATTR    ISR_GetNextIntensityToSend ();
-    void                  SetPixelCount(size_t value) {pixel_count = value;}
-    size_t                GetPixelCount() {return pixel_count;}
+    void                  SetPixelCount(uint32_t value) {pixel_count = value;}
+    uint32_t              GetPixelCount() {return pixel_count;}
 
 protected:
 
-    void SetFramePrependInformation (const uint8_t* data, size_t len);
-    void SetFrameAppendInformation  (const uint8_t* data, size_t len);
-    void SetPixelPrependInformation (const uint8_t* data, size_t len);
+    void SetFramePrependInformation (const uint8_t* data, uint32_t len);
+    void SetFrameAppendInformation  (const uint8_t* data, uint32_t len);
+    void SetPixelPrependInformation (const uint8_t* data, uint32_t len);
 
     uint16_t  InterFrameGapInMicroSec = 300;
 
@@ -73,55 +74,56 @@ protected:
 private:
 #define PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL 3
 
-    size_t      NumIntensityBytesPerPixel = PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL;
+    uint32_t      NumIntensityBytesPerPixel = PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL;
 
-    uint8_t   * NextPixelToSend             = nullptr;
-    size_t      pixel_count                 = 100;
-    size_t      SentPixelsCount             = 0;
-    size_t      PixelIntensityCurrentIndex  = 0;
+    uint8_t     * NextPixelToSend             = nullptr;
+    uint32_t      pixel_count                 = 100;
+    uint32_t      SentPixelsCount             = 0;
+    uint32_t      PixelIntensityCurrentIndex  = 0;
 
-    uint8_t   * pFramePrependData           = nullptr;
-    size_t      FramePrependDataSize        = 0;
-    size_t      FramePrependDataCurrentIndex = 0;
+    uint8_t     * pFramePrependData           = nullptr;
+    uint32_t      FramePrependDataSize        = 0;
+    uint32_t      FramePrependDataCurrentIndex = 0;
 
-    uint8_t   * pFrameAppendData            = nullptr;
-    size_t      FrameAppendDataSize         = 0;
-    size_t      FrameAppendDataCurrentIndex = 0;
+    uint8_t     * pFrameAppendData            = nullptr;
+    uint32_t      FrameAppendDataSize         = 0;
+    uint32_t      FrameAppendDataCurrentIndex = 0;
 
-    uint8_t   * PixelPrependData            = nullptr;
-    size_t      PixelPrependDataSize        = 0;
-    size_t      PixelPrependDataCurrentIndex = 0;
+    uint8_t     * PixelPrependData            = nullptr;
+    uint32_t      PixelPrependDataSize        = 0;
+    uint32_t      PixelPrependDataCurrentIndex = 0;
 
-    size_t      PixelGroupSize              = 1;
-    size_t      PixelGroupSizeCurrentCount  = 0;
+    uint32_t      PixelGroupSize              = 1;
+    uint32_t      PixelGroups                 = 1;
+    // uint32_t      PixelGroupSizeCurrentCount  = 0;
 
     float       IntensityBitTimeInUs        = 0.0;
-    size_t      BlockSize                   = 1;
+    uint32_t      BlockSize                   = 1;
     float       BlockDelayUs                = 0.0;
 
-    size_t      zig_size                    = 0;
-    size_t      ZigPixelCount               = 1;
-    size_t      ZigPixelCurrentCount        = 1;
-    size_t      ZagPixelCount               = 1;
-    size_t      ZagPixelCurrentCount        = 1;
+    uint32_t      zig_size                    = 1;
+    // uint32_t      ZigPixelCount               = 1;
+    // uint32_t      ZigPixelCurrentCount        = 1;
+    // uint32_t      ZagPixelCount               = 1;
+    // uint32_t      ZagPixelCurrentCount        = 1;
 
-    size_t      PrependNullPixelCount       = 0;
-    size_t      PrependNullPixelCurrentCount = 0;
+    uint32_t      PrependNullPixelCount       = 0;
+    uint32_t      PrependNullPixelCurrentCount = 0;
 
-    size_t      AppendNullPixelCount        = 0;
-    size_t      AppendNullPixelCurrentCount = 0;
+    uint32_t      AppendNullPixelCount        = 0;
+    uint32_t      AppendNullPixelCurrentCount = 0;
 
     bool        InvertData                  = false;
     uint32_t    IntensityMultiplier         = 1;
-    
+
 // #define USE_PIXEL_DEBUG_COUNTERS
 #ifdef USE_PIXEL_DEBUG_COUNTERS
-    size_t     PixelsToSend                     = 0;
-    size_t     IntensityBytesSent               = 0;
-    size_t     IntensityBytesSentLastFrame      = 0;
+    uint32_t     PixelsToSend                     = 0;
+    uint32_t     IntensityBytesSent               = 0;
+    uint32_t     IntensityBytesSentLastFrame      = 0;
     uint32_t   FrameStartCounter                = 0;
     uint32_t   FrameEndCounter                  = 0;
-    size_t     SentPixels                       = 0;
+    uint32_t     SentPixels                       = 0;
     uint32_t   AbortFrameCounter                = 0;
     uint32_t   FramePrependDataCounter          = 0;
     uint32_t   FrameSendPixelsCounter           = 0;
@@ -165,7 +167,7 @@ private:
     void updateGammaTable(); ///< Generate gamma correction table
     void updateColorOrderOffsets(); ///< Update color order
     bool validate ();        ///< confirm that the current configuration is valid
-    inline size_t CalculateIntensityOffset(size_t ChannelId);
+    inline uint32_t CalculateIntensityOffset(uint32_t ChannelId);
     uint32_t IRAM_ATTR GetIntensityData();
 
     enum PixelSendState_t
@@ -179,4 +181,3 @@ private:
     PixelSendState_t PixelSendState = PixelSendState_t::PixelSendIntensity;
 
 }; // c_OutputPixel
-
