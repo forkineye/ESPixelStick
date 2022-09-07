@@ -357,11 +357,8 @@ void IRAM_ATTR c_OutputPixel::StartNewFrame ()
     NextPixelToSend = GetBufferAddress();
     FramePrependDataCurrentIndex    = 0;
     FrameAppendDataCurrentIndex     = 0;
-    // ZigPixelCurrentCount            = 1;
-    // ZagPixelCurrentCount            = 0;
     SentPixelsCount                 = 0;
     PixelIntensityCurrentIndex      = 0;
-    // PixelGroupSizeCurrentCount      = 0;
     PrependNullPixelCurrentCount    = 0;
     AppendNullPixelCurrentCount     = 0;
     PixelPrependDataCurrentIndex    = 0;
