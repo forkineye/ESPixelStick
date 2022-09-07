@@ -127,8 +127,8 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
         // DEBUG_V();
         ESP_ERROR_CHECK(rmt_set_source_clk(RmtConfig.channel, rmt_source_clk_t::RMT_BASECLK_APB));
         // DEBUG_V();
-        // ESP_ERROR_CHECK (esp_intr_alloc (ETS_RMT_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3 | ESP_INTR_FLAG_SHARED, rmt_intr_handler, this, &RMT_intr_handle));
-        ESP_ERROR_CHECK(rmt_isr_register(rmt_intr_handler, this, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL1 | ESP_INTR_FLAG_SHARED, &RMT_intr_handle));
+        ESP_ERROR_CHECK (esp_intr_alloc (ETS_RMT_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3 | ESP_INTR_FLAG_SHARED, rmt_intr_handler, this, &RMT_intr_handle));
+        // ESP_ERROR_CHECK(rmt_isr_register(rmt_intr_handler, this, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL1 | ESP_INTR_FLAG_SHARED, &RMT_intr_handle));
         // DEBUG_V();
 
         RMT.apb_conf.fifo_mask = 1;      // enable access to the mem blocks
@@ -204,6 +204,23 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler ()
 
             RMT.int_clr.val = RMT_INT_TX_END_BIT;
             RMT.int_clr.val = RMT_INT_THR_EVNT_BIT;
+
+            if (MoreDataToSend())
+            {
+                RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 0;
+
+                // reset the internal and external pointers to the start of the mem block
+                RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.mem_rd_rst = 1;
+                RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.mem_rd_rst = 0;
+                RmtCurrentAddr = RmtStartAddr;
+                NumAvailableRmtSlotsToFill = NUM_RMT_SLOTS;
+                RMT.tx_lim_ch[OutputRmtConfig.RmtChannelId].limit = NumRmtSlotsPerInterrupt;
+
+                ISR_Handler_SendIntensityData();
+
+                EnableInterrupts;
+                RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 1;
+            }
 
             // ISR_Handler_StartNewFrame ();
             break;
