@@ -723,7 +723,7 @@ void IRAM_ATTR c_OutputUart::ISR_Timer_Handler()
 //----------------------------------------------------------------------------
 void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
 {
-    size_t NumAvailableIntensitySlotsToFill = ((((size_t)UART_TX_FIFO_SIZE) - (getUartFifoLength())) / NumUartSlotsPerIntensityValue);
+    uint32_t NumAvailableIntensitySlotsToFill = ((((uint32_t)UART_TX_FIFO_SIZE) - (getUartFifoLength())) / NumUartSlotsPerIntensityValue);
 #ifdef USE_UART_DEBUG_COUNTERS
     if (NumAvailableIntensitySlotsToFill)
     {

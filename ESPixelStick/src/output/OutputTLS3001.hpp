@@ -42,12 +42,12 @@ public:
     virtual void GetConfig (ArduinoJson::JsonObject& jsonConfig); ///< Get the current config used by the driver
             void GetDriverName (String& sDriverName) { sDriverName = String (F ("TLS3001")); }
     virtual void GetStatus (ArduinoJson::JsonObject & jsonStatus);
-    virtual void SetOutputBufferSize (uint16_t NumChannelsAvailable);
+    virtual void SetOutputBufferSize (uint32_t NumChannelsAvailable);
 
 protected:
 
 #define TLS3001_PIXEL_DATA_RATE              500000.0
-#define TLS3001_PIXEL_NS_BIT                ((1.0 / TLS3001_PIXEL_DATA_RATE) * NanoSecondsInASecond) 
+#define TLS3001_PIXEL_NS_BIT                ((1.0 / TLS3001_PIXEL_DATA_RATE) * NanoSecondsInASecond)
 
 #define TLS3001_PIXEL_NS_IDLE                50000.0 // 50us
 #define TLS3001_MIN_IDLE_TIME_US             (TLS3001_PIXEL_NS_IDLE / float(NanoSecondsInAMicroSecond))
@@ -61,7 +61,7 @@ protected:
         Reset  0b0100 Followed by long idle time (calculation needed)
         Data   0b0010 Followed by 39 bit data times num pixels
 
-    39 bit data 
+    39 bit data
         1 zero
         12 R
         1 zero

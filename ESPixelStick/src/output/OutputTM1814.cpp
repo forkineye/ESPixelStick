@@ -48,7 +48,7 @@ c_OutputTM1814::~c_OutputTM1814 ()
 void c_OutputTM1814::Begin ()
 {
     // DEBUG_START;
-    
+
     c_OutputPixel::Begin ();
     HasBeenInitialized = true;
 
@@ -74,7 +74,7 @@ void c_OutputTM1814::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputTM1814::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputTM1814::SetOutputBufferSize (uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
 

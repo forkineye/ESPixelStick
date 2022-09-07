@@ -62,7 +62,7 @@ void c_OutputWS2801::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputWS2801::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputWS2801::SetOutputBufferSize (uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
 

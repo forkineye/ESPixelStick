@@ -74,7 +74,7 @@ void c_OutputUCS8903Uart::Begin ()
     OutputUartConfig.UartId                 = UartId;
     OutputUartConfig.DataPin                = DataPin;
     OutputUartConfig.IntensityDataWidth     = UCS8903_INTENSITY_DATA_WIDTH;
-    OutputUartConfig.UartDataSize           = c_OutputUart::UartDataSize_t::OUTPUT_UART_8N1;
+    OutputUartConfig.UartDataSize           = c_OutputUart::UartDatauint32_t::OUTPUT_UART_8N1;
     OutputUartConfig.TranslateIntensityData = c_OutputUart::TranslateIntensityData_t::OneToOne;
     OutputUartConfig.pPixelDataSource       = this;
     OutputUartConfig.Baudrate               = UCS8903_PIXEL_UART_BAUDRATE;

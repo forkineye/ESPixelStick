@@ -39,7 +39,7 @@ public:
     virtual void GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
             void GetDriverName (String & sDriverName) { sDriverName = String (F ("WS2801")); }
     virtual void GetStatus (ArduinoJson::JsonObject & jsonStatus);
-    virtual void SetOutputBufferSize (uint16_t NumChannelsAvailable);
+    virtual void SetOutputBufferSize (uint32_t NumChannelsAvailable);
 
 protected:
 #define WS2801_BIT_RATE                 (APB_CLK_FREQ/80)

@@ -123,7 +123,7 @@ bool c_OutputUCS8903Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // SetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputUCS8903Rmt::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputUCS8903Rmt::SetOutputBufferSize (uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
 

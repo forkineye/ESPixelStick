@@ -109,7 +109,7 @@ bool c_OutputTLS3001Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // SetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputTLS3001Rmt::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputTLS3001Rmt::SetOutputBufferSize (uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
 

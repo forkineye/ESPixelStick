@@ -69,7 +69,7 @@ void c_OutputUCS1903Uart::Begin ()
     OutputUartConfig.UartId                 = UartId;
     OutputUartConfig.DataPin                = DataPin;
     OutputUartConfig.IntensityDataWidth     = UCS1903_PIXEL_BITS_PER_INTENSITY;
-    OutputUartConfig.UartDataSize           = c_OutputUart::UartDataSize_t::OUTPUT_UART_6N1;
+    OutputUartConfig.UartDataSize           = c_OutputUart::UartDatauint32_t::OUTPUT_UART_6N1;
     OutputUartConfig.TranslateIntensityData = c_OutputUart::TranslateIntensityData_t::TwoToOne;
     OutputUartConfig.pPixelDataSource       = this;
     OutputUartConfig.Baudrate               = int(UCS1903_NUM_DATA_BYTES_PER_INTENSITY_BYTE * UCS1903_PIXEL_DATA_RATE);;
