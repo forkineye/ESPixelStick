@@ -16,7 +16,7 @@
 *  damages in connection with, or arising out of, the furnishing, performance
 *  or use of these programs.
 *
-*   This is a derived class that converts data in the Input buffer into 
+*   This is a derived class that converts data in the Input buffer into
 *   pixel intensities and then transmits them through the configured serial
 *   interface.
 *
@@ -24,13 +24,13 @@
 
 #include "InputCommon.hpp"
 
-class c_InputDisabled : public c_InputCommon  
+class c_InputDisabled : public c_InputCommon
 {
 public:
     // These functions are inherited from c_InputCommon
     c_InputDisabled (c_InputMgr::e_InputChannelIds NewInputChannelId,
                      c_InputMgr::e_InputType       NewChannelType,
-                     size_t                        BufferSize);
+                     uint32_t                        BufferSize);
     virtual ~c_InputDisabled ();
 
     // functions to be provided by the derived class
@@ -40,9 +40,8 @@ public:
     void GetStatus (JsonObject & jsonStatus);
     void Process ();                            ///< Call from loop(),  Process Input data
     void GetDriverName (String& sDriverName) { sDriverName = "Disabled"; } ///< get the name for the instantiated driver
-    void SetBufferInfo (size_t BufferSize) {}
+    void SetBufferInfo (uint32_t BufferSize) {}
 
 private:
 
 }; // c_InputDisabled
-

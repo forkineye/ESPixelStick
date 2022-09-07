@@ -21,7 +21,7 @@
 #include "InputCommon.hpp"
 #include <Artnet.h>
 
-class c_InputArtnet : public c_InputCommon 
+class c_InputArtnet : public c_InputCommon
 {
   private:
     static const uint16_t   UNIVERSE_MAX = 512;
@@ -44,11 +44,11 @@ class c_InputArtnet : public c_InputCommon
     /// from sketch globals
     uint16_t    channel_count = 0;       ///< Number of channels. Derived from output module configuration.
 
-    typedef struct 
+    typedef struct
     {
-        size_t   DestinationOffset;
-        size_t   BytesToCopy;
-        size_t   SourceDataOffset;
+        uint32_t   DestinationOffset;
+        uint32_t   BytesToCopy;
+        uint32_t   SourceDataOffset;
         uint32_t SequenceErrorCounter;
         uint8_t  SequenceNumber;
         uint32_t num_packets;
@@ -60,13 +60,13 @@ class c_InputArtnet : public c_InputCommon
     void validateConfiguration ();
     void NetworkStateChanged (bool IsConnected, bool RebootAllowed); // used by poorly designed rx functions
     void SetBufferTranslation ();
-    void onDmxFrame (uint16_t CurrentUniverseId, size_t length, uint8_t sequence, uint8_t* data, IPAddress remoteIP);
+    void onDmxFrame (uint16_t CurrentUniverseId, uint32_t length, uint8_t sequence, uint8_t* data, IPAddress remoteIP);
 
   public:
 
     c_InputArtnet (c_InputMgr::e_InputChannelIds NewInputChannelId,
                    c_InputMgr::e_InputType       NewChannelType,
-                   size_t                        BufferSize);
+                   uint32_t                        BufferSize);
     virtual ~c_InputArtnet();
 
     // functions to be provided by the derived class
@@ -76,7 +76,7 @@ class c_InputArtnet : public c_InputCommon
     void GetStatus (JsonObject & jsonStatus);
     void Process ();                                        ///< Call from loop(),  renders Input data
     void GetDriverName (String & sDriverName) { sDriverName = "Artnet"; } ///< get the name for the instantiated driver
-    void SetBufferInfo (size_t BufferSize);
+    void SetBufferInfo (uint32_t BufferSize);
     void NetworkStateChanged (bool IsConnected); // used by poorly designed rx functions
     bool isShutDownRebootNeeded () { return HasBeenInitialized; }
 

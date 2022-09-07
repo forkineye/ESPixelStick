@@ -27,7 +27,7 @@
 ///< Start up the driver and put it into a safe mode
 c_InputCommon::c_InputCommon (c_InputMgr::e_InputChannelIds NewInputChannelId,
                               c_InputMgr::e_InputType       NewChannelType,
-                              size_t                        BufferSize) :
+                              uint32_t                        BufferSize) :
     InputDataBufferSize(BufferSize),
     InputChannelId(NewInputChannelId),
     ChannelType(NewChannelType)

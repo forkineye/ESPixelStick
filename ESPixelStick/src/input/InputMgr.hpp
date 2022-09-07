@@ -47,14 +47,14 @@ public:
     c_InputMgr ();
     virtual ~c_InputMgr ();
 
-    void Begin                (size_t BufferSize);
+    void Begin                (uint32_t BufferSize);
     void LoadConfig           ();
-    void GetConfig            (byte * Response, size_t maxlen);
+    void GetConfig            (byte * Response, uint32_t maxlen);
     void GetStatus            (JsonObject & jsonStatus);
     void SetConfig            (const char * NewConfig);
     void SetConfig            (ArduinoJson::JsonDocument & NewConfig);
     void Process              ();
-    void SetBufferInfo        (size_t BufferSize);
+    void SetBufferInfo        (uint32_t BufferSize);
     void SetOperationalState  (bool Active);
     void NetworkStateChanged  (bool IsConnected);
     void DeleteConfig         () { FileMgr.DeleteConfigFile (ConfigFileName); }
@@ -90,12 +90,12 @@ private:
     void CreateNewConfig ();
     struct DriverInfo_t
     {
-        size_t DriverId = 0;
+        uint32_t DriverId = 0;
         c_InputCommon * pInputChannelDriver = nullptr; ///< pointer(s) to the current active Input driver
     };
 
     DriverInfo_t    InputChannelDrivers[InputChannelId_End]; ///< pointer(s) to the current active Input driver
-    size_t          InputDataBufferSize = 0;
+    uint32_t          InputDataBufferSize = 0;
     bool            HasBeenInitialized  = false;
     c_ExternalInput ExternalInput;
     bool            EffectEngineIsConfiguredToRun[InputChannelId_End];

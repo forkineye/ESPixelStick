@@ -29,8 +29,8 @@ class c_InputFPPRemote : public c_InputCommon
 
       c_InputFPPRemote (c_InputMgr::e_InputChannelIds NewInputChannelId,
                         c_InputMgr::e_InputType       NewChannelType,
-                        size_t                        BufferSize);
-      
+                        uint32_t                        BufferSize);
+
       virtual ~c_InputFPPRemote ();
 
       // functions to be provided by the derived class
@@ -40,7 +40,7 @@ class c_InputFPPRemote : public c_InputCommon
       void GetStatus (JsonObject& jsonStatus);
       void Process ();                         ///< Call from loop(),  renders Input data
       void GetDriverName (String& sDriverName) { sDriverName = "FPP Remote"; } ///< get the name for the instantiated driver
-      void SetBufferInfo (size_t BufferSize);
+      void SetBufferInfo (uint32_t BufferSize);
 
 protected:
     c_InputFPPRemotePlayItem * pInputFPPRemotePlayItem = nullptr;

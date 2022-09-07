@@ -31,7 +31,7 @@
 c_InputAlexa::c_InputAlexa (
     c_InputMgr::e_InputChannelIds NewInputChannelId,
     c_InputMgr::e_InputType       NewChannelType,
-    size_t                        BufferSize) :
+    uint32_t                        BufferSize) :
     c_InputCommon (NewInputChannelId, NewChannelType, BufferSize)
 
 {
@@ -117,7 +117,7 @@ void c_InputAlexa::Process ()
 } // process
 
 //-----------------------------------------------------------------------------
-void c_InputAlexa::SetBufferInfo (size_t BufferSize)
+void c_InputAlexa::SetBufferInfo (uint32_t BufferSize)
 {
     // DEBUG_START;
 
@@ -195,4 +195,3 @@ void c_InputAlexa::onMessage(EspalexaDevice * pDevice)
     // DEBUG_END;
 
 } // onMessage
-

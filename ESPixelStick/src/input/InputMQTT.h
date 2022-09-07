@@ -31,7 +31,7 @@ class c_InputMQTT : public c_InputCommon
       c_InputMQTT (
           c_InputMgr::e_InputChannelIds NewInputChannelId,
           c_InputMgr::e_InputType       NewChannelType,
-          size_t                        BufferSize);
+          uint32_t                        BufferSize);
 
       virtual ~c_InputMQTT ();
 
@@ -42,7 +42,7 @@ class c_InputMQTT : public c_InputCommon
       void GetStatus (JsonObject& jsonStatus);
       void Process ();                         ///< Call from loop(),  renders Input data
       void GetDriverName (String& sDriverName) { sDriverName = "MQTT"; } ///< get the name for the instantiated driver
-      void SetBufferInfo (size_t BufferSize);
+      void SetBufferInfo (uint32_t BufferSize);
       void NetworkStateChanged (bool IsConnected); // used by poorly designed rx functions
 
 private:
@@ -101,7 +101,7 @@ private:
     void connectToMqtt (); // onMqttDisconnect, onWifiConnect
     void onMqttConnect (bool sessionPresent); // setup
     void onMqttDisconnect (AsyncMqttClientDisconnectReason reason); // setup
-    void onMqttMessage (char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total); // setup
+    void onMqttMessage (char* topic, char* payload, AsyncMqttClientMessageProperties properties, uint32_t len, uint32_t index, uint32_t total); // setup
     void publishHA (); // updateConfig
     void publishState (); // onMqttConnect, onMqttMessage, procT, updateConfig
 };
