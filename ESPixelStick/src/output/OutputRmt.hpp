@@ -104,7 +104,7 @@ private:
     RmtDataBitIdType_t  InterIntensityValueId       = RMT_INVALID_VALUE;
 
     void                  StartNewFrame ();
-    void            IRAM_ATTR ISR_Handler_SendIntensityData ();
+    inline void     IRAM_ATTR ISR_Handler_SendIntensityData ();
     inline void     IRAM_ATTR ISR_EnqueueData(uint32_t value);
     inline bool     IRAM_ATTR MoreDataToSend();
     inline uint32_t IRAM_ATTR GetNextIntensityToSend();
