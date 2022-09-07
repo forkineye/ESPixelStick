@@ -1233,6 +1233,11 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
 
     for (auto & OutputChannel : OutputChannelDrivers)
     {
+        // String DriverName;
+        // OutputChannel.pOutputChannelDriver->GetDriverName(DriverName);
+        // DEBUG_V(String("Name: ") + DriverName);
+        // DEBUG_V(String("PortId: ") + String(OutputChannel.pOutputChannelDriver->GetOutputChannelId()) );
+
         OutputChannel.OutputBufferStartingOffset = OutputBufferOffset;
         OutputChannel.OutputChannelStartingOffset = OutputChannelOffset;
         OutputChannel.pOutputChannelDriver->SetOutputBufferAddress(&OutputBuffer[OutputBufferOffset]);
@@ -1251,7 +1256,7 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
             break;
         }
 
-        // DEBUG_V (String ("    ChannelsNeeded: ") + String (ChannelsNeeded));
+        // DEBUG_V (String ("    ChannelsNeeded: ") + String (OutputBufferDataBytesNeeded));
         // DEBUG_V (String (" AvailableChannels: ") + String (AvailableChannels));
 
         OutputBufferOffset += OutputBufferDataBytesNeeded;
