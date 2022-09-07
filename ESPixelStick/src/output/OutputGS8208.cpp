@@ -78,7 +78,7 @@ void c_OutputGS8208::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputGS8208::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputGS8208::SetOutputBufferSize (uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
 

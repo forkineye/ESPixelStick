@@ -41,7 +41,7 @@ public:
     virtual void GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
             void GetDriverName (String & sDriverName) { sDriverName = String (F ("APA102")); }
     virtual void GetStatus (ArduinoJson::JsonObject & jsonStatus);
-    virtual void SetOutputBufferSize (uint16_t NumChannelsAvailable);
+    virtual void SetOutputBufferSize (uint32_t NumChannelsAvailable);
 
 protected:
 
