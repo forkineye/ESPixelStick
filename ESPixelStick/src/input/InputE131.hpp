@@ -21,7 +21,7 @@
 #include "InputCommon.hpp"
 #include <ESPAsyncE131.h>
 
-class c_InputE131 : public c_InputCommon 
+class c_InputE131 : public c_InputCommon
 {
   private:
     static const uint16_t   UNIVERSE_MAX = 512;
@@ -42,11 +42,11 @@ class c_InputE131 : public c_InputCommon
     /// from sketch globals
     uint16_t    channel_count = 0;       ///< Number of channels. Derived from output module configuration.
 
-    typedef struct 
+    typedef struct
     {
-      size_t   DestinationOffset;
-      size_t   BytesToCopy;
-      size_t   SourceDataOffset;
+      uint32_t   DestinationOffset;
+      uint32_t   BytesToCopy;
+      uint32_t   SourceDataOffset;
       uint8_t  SequenceNumber;
       uint32_t SequenceErrorCounter;
 
@@ -61,7 +61,7 @@ class c_InputE131 : public c_InputCommon
 
     c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
                  c_InputMgr::e_InputType       NewChannelType,
-                 size_t                        BufferSize);
+                 uint32_t                        BufferSize);
     virtual ~c_InputE131();
 
     // functions to be provided by the derived class
@@ -71,7 +71,7 @@ class c_InputE131 : public c_InputCommon
     void GetStatus (JsonObject & jsonStatus);
     void Process ();                                        ///< Call from loop(),  renders Input data
     void GetDriverName (String & sDriverName) { sDriverName = "E1.31"; } ///< get the name for the instantiated driver
-    void SetBufferInfo (size_t BufferSize);
+    void SetBufferInfo (uint32_t BufferSize);
     void NetworkStateChanged (bool IsConnected); // used by poorly designed rx functions
     bool isShutDownRebootNeeded () { return HasBeenInitialized; }
     void ProcessIncomingE131Data (e131_packet_t *);

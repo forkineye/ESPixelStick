@@ -119,7 +119,7 @@ bool c_OutputGS8208Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // SetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputGS8208Rmt::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputGS8208Rmt::SetOutputBufferSize (uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
 

@@ -714,7 +714,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
 }
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::ProcessFile (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final)
+void c_FPPDiscovery::ProcessFile (AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final)
 {
     // DEBUG_START;
     //LOG_PORT.printf_P( PSTR("In ProcessFile: %s    idx: %d    RangeLength: %d    final: %d\n)",FileName.c_str(), index, RangeLength, final? 1 : 0);
@@ -729,7 +729,7 @@ void c_FPPDiscovery::ProcessFile (AsyncWebServerRequest* request, String filenam
 // the blocks come in very small (~500 bytes) we'll accumulate in a buffer
 // so the writes out to SD can be more in line with what the SD file system can handle
 // #define BUFFER_LEN 8192
-void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total)
+void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data, uint32_t len, uint32_t index, uint32_t total)
 {
     // DEBUG_START;
     printReq (request, false);

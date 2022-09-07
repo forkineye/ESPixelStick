@@ -16,7 +16,7 @@
 *  damages in connection with, or arising out of, the furnishing, performance
 *  or use of these programs.
 *
-*   This is a derived class that converts data in the output buffer into 
+*   This is a derived class that converts data in the output buffer into
 *   pixel intensities and then transmits them through the configured serial
 *   interface.
 *
@@ -24,12 +24,12 @@
 
 #include "OutputCommon.hpp"
 
-class c_OutputDisabled : public c_OutputCommon  
+class c_OutputDisabled : public c_OutputCommon
 {
 public:
     // These functions are inherited from c_OutputCommon
-    c_OutputDisabled (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
-                      gpio_num_t outputGpio, 
+    c_OutputDisabled (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+                      gpio_num_t outputGpio,
                       uart_port_t uart,
                       c_OutputMgr::e_OutputType outputType);
     virtual ~c_OutputDisabled ();
@@ -40,11 +40,9 @@ public:
     void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     void         Render ();                                        ///< Call from loop(),  renders output data
     void         GetDriverName (String & sDriverName) { sDriverName = String (F ("Disabled")); }
-    size_t       GetNumChannelsNeeded () { return 0; }
-   
-
+    uint32_t     GetNumOutputBufferBytesNeeded () { return 0; }
+    uint32_t     GetNumOutputBufferChannelsServiced () { return 0; }
 
 private:
 
 }; // c_OutputDisabled
-

@@ -13,7 +13,7 @@ GNU General Public License for more details.
 *
 ******************************************************************
 *
-*   This is a derived class that converts data in the output buffer into 
+*   This is a derived class that converts data in the output buffer into
 *   Servo States and then outputs on I2C
 *
 */
@@ -23,7 +23,7 @@ GNU General Public License for more details.
 #include "OutputCommon.hpp"
 #include <Adafruit_PWMServoDriver.h>
 
-class c_OutputServoPCA9685 : public c_OutputCommon  
+class c_OutputServoPCA9685 : public c_OutputCommon
 {
 private:
 #define SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH 650
@@ -43,24 +43,24 @@ private:
 
     } ServoPCA9685Channel_t;
 
-public: 
+public:
 
     // These functions are inherited from c_OutputCommon
-    c_OutputServoPCA9685 (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
-                          gpio_num_t outputGpio, 
+    c_OutputServoPCA9685 (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+                          gpio_num_t outputGpio,
                           uart_port_t uart,
                           c_OutputMgr::e_OutputType outputType);
     virtual ~c_OutputServoPCA9685 ();
 
     // functions to be provided by the derived class
-    void   Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
-    bool   SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
-    void   GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-    void   Render ();                                        ///< Call from loop(),  renders output data
-    void   GetDriverName (String& sDriverName);
-    void   GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
-    size_t GetNumChannelsNeeded () { return Num_Channels; }
-    // void   ClearBuffer();
+    void        Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
+    bool        SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
+    void        GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
+    void        Render ();                                        ///< Call from loop(),  renders output data
+    void        GetDriverName (String& sDriverName);
+    void        GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
+    uint32_t    GetNumOutputBufferBytesNeeded () { return OutputBufferSize; };
+    uint32_t    GetNumOutputBufferChannelsServiced () { return OutputBufferSize; };
 
 private:
 #   define OM_SERVO_PCA9685_CHANNEL_LIMIT           16

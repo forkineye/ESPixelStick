@@ -54,7 +54,7 @@ public:
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);  ///< Set a new config in the driver
     void    Render ();                                        ///< Call from loop (),  renders output data
     void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
-    void    SetOutputBufferSize (uint16_t NumChannelsAvailable);
+    void    SetOutputBufferSize (uint32_t NumChannelsAvailable);
 
 private:
 

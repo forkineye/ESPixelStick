@@ -55,7 +55,7 @@ public:
         rmt_channel_t       RmtChannelId           = rmt_channel_t(-1);
         gpio_num_t          DataPin                = gpio_num_t(-1);
         rmt_idle_level_t    idle_level             = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
-        size_t              IntensityDataWidth     = 8;
+        uint32_t              IntensityDataWidth     = 8;
         bool                SendInterIntensityBits = false;
         bool                SendEndOfFrameBits     = false;
         uint8_t             NumFrameStartBits      = 1;
@@ -93,18 +93,19 @@ private:
     volatile rmt_item32_t *RmtCurrentAddr  = nullptr;
     volatile rmt_item32_t *RmtEndAddr      = nullptr;
 
+
 #define NUM_RMT_SLOTS (sizeof(RMTMEM.chan[0].data32) / sizeof(RMTMEM.chan[0].data32[0]))
 #define MIN_FRAME_TIME_MS 25
 
-    volatile size_t     NumAvailableRmtSlotsToFill  = NUM_RMT_SLOTS;
-    const size_t        NumRmtSlotsPerInterrupt     = NUM_RMT_SLOTS * 0.75;
+    volatile uint32_t     NumAvailableRmtSlotsToFill  = NUM_RMT_SLOTS;
+    const uint32_t        NumRmtSlotsPerInterrupt     = NUM_RMT_SLOTS * 0.75;
     uint32_t            LastFrameStartTime          = 0;
     uint32_t            FrameMinDurationInMicroSec  = 1000;
     uint32_t            TxIntensityDataStartingMask = 0x80;
     RmtDataBitIdType_t  InterIntensityValueId       = RMT_INVALID_VALUE;
 
     void                  StartNewFrame ();
-    void            IRAM_ATTR ISR_Handler_SendIntensityData ();
+    inline void     IRAM_ATTR ISR_Handler_SendIntensityData ();
     inline void     IRAM_ATTR ISR_EnqueueData(uint32_t value);
     inline bool     IRAM_ATTR MoreDataToSend();
     inline uint32_t IRAM_ATTR GetNextIntensityToSend();

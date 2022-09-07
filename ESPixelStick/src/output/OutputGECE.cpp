@@ -102,7 +102,7 @@ void c_OutputGECE::GetStatus (ArduinoJson::JsonObject & jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputGECE::SetOutputBufferSize(uint16_t NumChannelsAvailable)
+void c_OutputGECE::SetOutputBufferSize(uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
 
@@ -122,7 +122,7 @@ bool c_OutputGECE::validate ()
     // DEBUG_START;
 
     bool response = true;
-    size_t PixelCount = GetPixelCount();
+    uint32_t PixelCount = GetPixelCount();
     if (PixelCount > GECE_PIXEL_LIMIT)
     {
         PixelCount = GECE_PIXEL_LIMIT;

@@ -121,7 +121,7 @@ bool c_OutputTM1814Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // SetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputTM1814Rmt::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputTM1814Rmt::SetOutputBufferSize (uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
 

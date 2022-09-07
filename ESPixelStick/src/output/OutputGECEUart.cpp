@@ -72,7 +72,7 @@ void c_OutputGECEUart::Begin ()
     OutputUartConfig.UartId                         = UartId;
     OutputUartConfig.DataPin                        = DataPin;
     OutputUartConfig.IntensityDataWidth             = GECE_PACKET_SIZE;
-    OutputUartConfig.UartDataSize                   = c_OutputUart::UartDataSize_t::OUTPUT_UART_8N1;
+    OutputUartConfig.UartDataSize                   = c_OutputUart::UartDatauint32_t::OUTPUT_UART_8N1;
     OutputUartConfig.TranslateIntensityData         = c_OutputUart::TranslateIntensityData_t::TwoToOne;
     OutputUartConfig.pPixelDataSource               = this;
     OutputUartConfig.Baudrate                       = GECE_BAUDRATE;

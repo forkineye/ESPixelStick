@@ -43,12 +43,12 @@ public:
     virtual void GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
             void GetDriverName (String & sDriverName) { sDriverName = String (F ("UCS1903")); }
     virtual void GetStatus (ArduinoJson::JsonObject & jsonStatus);
-    virtual void SetOutputBufferSize (uint16_t NumChannelsAvailable);
+    virtual void SetOutputBufferSize (uint32_t NumChannelsAvailable);
 
 protected:
 
 #define UCS1903_PIXEL_DATA_RATE              800000.0
-#define UCS1903_PIXEL_NS_BIT_TOTAL           ( (1.0 / UCS1903_PIXEL_DATA_RATE) * NanoSecondsInASecond) 
+#define UCS1903_PIXEL_NS_BIT_TOTAL           ( (1.0 / UCS1903_PIXEL_DATA_RATE) * NanoSecondsInASecond)
 
 #define UCS1903_PIXEL_NS_BIT_0_HIGH          250.0 // 250ns +/- 150ns per datasheet
 #define UCS1903_PIXEL_NS_BIT_0_LOW           (UCS1903_PIXEL_NS_BIT_TOTAL - UCS1903_PIXEL_NS_BIT_0_HIGH)

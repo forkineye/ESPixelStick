@@ -62,7 +62,7 @@ void c_OutputTLS3001::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputTLS3001::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputTLS3001::SetOutputBufferSize (uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
 

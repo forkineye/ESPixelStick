@@ -23,7 +23,7 @@ GNU General Public License for more details.
 *send a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
 ******************************************************************
 *
-*   This is a derived class that converts data in the output buffer into 
+*   This is a derived class that converts data in the output buffer into
 *   Relay States and then outputs on a GPIO
 *
 */
@@ -33,7 +33,7 @@ GNU General Public License for more details.
 
 #include "OutputCommon.hpp"
 
-class c_OutputRelay : public c_OutputCommon  
+class c_OutputRelay : public c_OutputCommon
 {
 public:
     typedef struct RelayChannel_s
@@ -53,21 +53,21 @@ public:
     } RelayChannel_t;
 
     // These functions are inherited from c_OutputCommon
-    c_OutputRelay (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
-                   gpio_num_t outputGpio, 
+    c_OutputRelay (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+                   gpio_num_t outputGpio,
                    uart_port_t uart,
                    c_OutputMgr::e_OutputType outputType);
     virtual ~c_OutputRelay ();
 
     // functions to be provided by the derived class
-    void   Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
-    bool   SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
-    void   GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-    void   Render ();                                        ///< Call from loop(),  renders output data
-    void   GetDriverName (String& sDriverName);
-    void   GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
-    size_t GetNumChannelsNeeded () { return Num_Channels; }
-
+    void        Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
+    bool        SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
+    void        GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
+    void        Render ();                                        ///< Call from loop(),  renders output data
+    void        GetDriverName (String& sDriverName);
+    void        GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
+    uint32_t    GetNumOutputBufferBytesNeeded () { return Num_Channels; }
+    uint32_t    GetNumOutputBufferChannelsServiced () { return Num_Channels; }
 
 private:
 #   define OM_RELAY_CHANNEL_LIMIT           8

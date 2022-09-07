@@ -62,7 +62,7 @@ void c_OutputAPA102::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputAPA102::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputAPA102::SetOutputBufferSize (uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
 

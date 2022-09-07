@@ -42,7 +42,7 @@ public:
     virtual void Poll ();
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
-    
+
     void TimerPoll ();
 #ifdef ARDUINO_ARCH_ESP32
     TaskHandle_t GetTaskHandle () { return TimerPollTaskHandle; }
@@ -67,13 +67,13 @@ private:
     fsm_PlayFile_state_Error       fsm_PlayFile_state_Error_imp;
 
     fsm_PlayFile_state * pCurrentFsmState = &fsm_PlayFile_state_Idle_imp;
-    
+
     c_FileMgr::FileId FileHandleForFileBeingPlayed = 0;
 
     struct FrameControl_t
     {
-        size_t            DataOffset = 0;
-        size_t            ChannelsPerFrame = 0;
+        uint32_t            DataOffset = 0;
+        uint32_t            ChannelsPerFrame = 0;
         uint32_t          FrameStepTimeMS = 1;
         uint32_t          TotalNumberOfFramesInSequence = 0;
         uint32_t          ElapsedPlayTimeMS = 0;
@@ -93,7 +93,7 @@ private:
     uint32_t  LastIsrTimeStampMS = 0;
     uint32_t  PlayedFileCount = 0;
 
-    // Logic to detect if polls have stopped coming in. 
+    // Logic to detect if polls have stopped coming in.
     // This is part of the blanking logic.
     int       PollDetectionCounter = 0;
     static const int PollDetectionCounterLimit = 5;
@@ -104,7 +104,7 @@ private:
     void        UpdateElapsedPlayTimeMS ();
     uint32_t    CalculateFrameId (uint32_t ElapsedMS, int32_t SyncOffsetMS);
     bool        ParseFseqFile ();
-    size_t      ReadFile(size_t DestinationIntensityId, size_t NumBytesToRead, size_t FileOffset);
+    uint32_t      ReadFile(uint32_t DestinationIntensityId, uint32_t NumBytesToRead, uint32_t FileOffset);
 
     String      LastFailedPlayStatusMsg;
 

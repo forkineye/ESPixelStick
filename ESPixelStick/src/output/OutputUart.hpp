@@ -32,7 +32,7 @@
 class c_OutputUart
 {
 public:
-    enum UartDataSize_t
+    enum UartDatauint32_t
     {
         OUTPUT_UART_5N1 = 0,
         OUTPUT_UART_5N2,
@@ -78,8 +78,8 @@ public:
         c_OutputCommon::OID_t       ChannelId                       = c_OutputCommon::OID_t(-1);
         gpio_num_t                  DataPin                         = gpio_num_t(-1);
         uart_port_t                 UartId                          = uart_port_t(-1);
-        size_t                      IntensityDataWidth              = 8; // 8 bits in a byte
-        UartDataSize_t              UartDataSize                    = UartDataSize_t::OUTPUT_UART_8N2;
+        uint32_t                      IntensityDataWidth              = 8; // 8 bits in a byte
+        UartDatauint32_t              UartDataSize                    = UartDatauint32_t::OUTPUT_UART_8N2;
         uint32_t                    FrameStartBreakUS               = 0;
         uint32_t                    FrameStartMarkAfterBreakUS      = 0;
         TranslateIntensityData_t    TranslateIntensityData          = TranslateIntensityData_t::NoTranslation;
@@ -132,7 +132,7 @@ private:
     uint32_t        FrameMinDurationInMicroSec      = 25000;
     uint32_t        TxIntensityDataStartingMask     = 0x80;
     bool            HasBeenInitialized              = false;
-    size_t          NumUartSlotsPerIntensityValue   = 1;
+    uint32_t          NumUartSlotsPerIntensityValue   = 1;
     uint32_t        MarkAfterInterintensityBreakBitCCOUNT          = 0;
     uint32_t        ActiveIsrMask                   = 0;
 #if defined(ARDUINO_ARCH_ESP32)

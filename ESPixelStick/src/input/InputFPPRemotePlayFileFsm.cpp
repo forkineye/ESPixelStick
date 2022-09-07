@@ -240,17 +240,17 @@ IRAM_ATTR void fsm_PlayFile_state_PlayingFile::TimerPoll ()
         }
 
         uint32_t FilePosition = p_Parent->FrameControl.DataOffset + (p_Parent->FrameControl.ChannelsPerFrame * CurrentFrame);
-        size_t BufferSize = OutputMgr.GetBufferUsedSize();
-        size_t MaxBytesToRead = (p_Parent->FrameControl.ChannelsPerFrame > BufferSize) ? BufferSize : p_Parent->FrameControl.ChannelsPerFrame;
+        uint32_t BufferSize = OutputMgr.GetBufferUsedSize();
+        uint32_t MaxBytesToRead = (p_Parent->FrameControl.ChannelsPerFrame > BufferSize) ? BufferSize : p_Parent->FrameControl.ChannelsPerFrame;
 
-        size_t CurrentDestination = 0;
+        uint32_t CurrentDestination = 0;
         // xDEBUG_V (String ("               MaxBytesToRead: ") + String (MaxBytesToRead));
 
         LastPlayedFrameId = CurrentFrame;
 
         for (auto& CurrentSparseRange : p_Parent->SparseRanges)
         {
-            size_t ActualBytesToRead = min (MaxBytesToRead, CurrentSparseRange.ChannelCount);
+            uint32_t ActualBytesToRead = min (MaxBytesToRead, CurrentSparseRange.ChannelCount);
             if (0 == ActualBytesToRead)
             {
                 // no data to read for this range
@@ -263,7 +263,7 @@ IRAM_ATTR void fsm_PlayFile_state_PlayingFile::TimerPoll ()
             /// DEBUG_V (String ("         AdjustedFilePosition: ") + String (uint32_t(AdjustedFilePosition), HEX));
             /// DEBUG_V (String ("           CurrentDestination: ") + String (uint32_t(CurrentDestination), HEX));
             /// DEBUG_V (String ("            ActualBytesToRead: ") + String (ActualBytesToRead));
-            size_t ActualBytesRead = p_Parent->ReadFile(CurrentDestination, ActualBytesToRead, AdjustedFilePosition);
+            uint32_t ActualBytesRead = p_Parent->ReadFile(CurrentDestination, ActualBytesToRead, AdjustedFilePosition);
 
             MaxBytesToRead -= ActualBytesRead;
             CurrentDestination += ActualBytesRead;

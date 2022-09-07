@@ -122,11 +122,14 @@ bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // SetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811Rmt::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputWS2811Rmt::SetOutputBufferSize (uint32_t NumChannelsAvailable)
 {
+
     // DEBUG_START;
 
     c_OutputWS2811::SetOutputBufferSize (NumChannelsAvailable);
+
+    // DEBUG_V(String("FrameMinDurationInMicroSec: ") + String(FrameMinDurationInMicroSec));
     Rmt.SetMinFrameDurationInUs (FrameMinDurationInMicroSec);
 
     // DEBUG_END;

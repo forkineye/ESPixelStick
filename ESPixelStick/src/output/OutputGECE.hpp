@@ -27,8 +27,8 @@
 class c_OutputGECE: public c_OutputPixel
 {
 public:
-    c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId, 
-                  gpio_num_t outputGpio, 
+    c_OutputGECE (c_OutputMgr::e_OutputChannelIds OutputChannelId,
+                  gpio_num_t outputGpio,
                   uart_port_t uart,
                   c_OutputMgr::e_OutputType outputType);
     virtual ~c_OutputGECE ();
@@ -40,7 +40,7 @@ public:
     virtual void GetStatus(ArduinoJson::JsonObject &jsonStatus);        ///< Get the current config used by the driver
     virtual void Render();                                              ///< Call from loop(),  renders output data
     virtual void GetDriverName(String &sDriverName) { sDriverName = String(F("GECE")); }
-            void SetOutputBufferSize(uint16_t NumChannelsAvailable);
+            void SetOutputBufferSize(uint32_t NumChannelsAvailable);
             bool validate ();
 
 private:

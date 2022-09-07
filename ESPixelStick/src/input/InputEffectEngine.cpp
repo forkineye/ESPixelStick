@@ -44,7 +44,7 @@ static const c_InputEffectEngine::EffectDescriptor_t ListOfEffects[] =
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInputChannelId,
                                           c_InputMgr::e_InputType       NewChannelType,
-                                          size_t                        BufferSize) :
+                                          uint32_t                        BufferSize) :
     c_InputCommon (NewInputChannelId, NewChannelType, BufferSize)
 {
     // DEBUG_START;
@@ -247,7 +247,7 @@ void c_InputEffectEngine::Process ()
 } // process
 
 //-----------------------------------------------------------------------------
-void c_InputEffectEngine::SetBufferInfo (size_t BufferSize)
+void c_InputEffectEngine::SetBufferInfo (uint32_t BufferSize)
 {
     // DEBUG_START;
 
@@ -472,7 +472,7 @@ void c_InputEffectEngine::GetPixel (uint16_t pixelId, CRGB & out)
     if (pixelId < PixelCount)
     {
         byte PixelData[sizeof(CRGB)];
-        OutputMgr.ReadChannelData(size_t(ChannelsPerPixel * pixelId), sizeof(PixelData), PixelData);
+        OutputMgr.ReadChannelData(uint32_t(ChannelsPerPixel * pixelId), sizeof(PixelData), PixelData);
 
         out.r = PixelData[0];
         out.g = PixelData[1];
@@ -486,7 +486,7 @@ void c_InputEffectEngine::GetPixel (uint16_t pixelId, CRGB & out)
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::setRange (uint16_t FirstPixelId, uint16_t NumberOfPixels, CRGB color)
 {
-    for (uint16_t i = FirstPixelId; i < min(size_t (FirstPixelId + NumberOfPixels), PixelCount); i++)
+    for (uint16_t i = FirstPixelId; i < min(uint32_t (FirstPixelId + NumberOfPixels), PixelCount); i++)
     {
         setPixel (i, color);
     }
@@ -495,7 +495,7 @@ void c_InputEffectEngine::setRange (uint16_t FirstPixelId, uint16_t NumberOfPixe
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::clearRange (uint16_t FirstPixelId, uint16_t NumberOfPixels)
 {
-    for (uint16_t i = FirstPixelId; i < min (size_t (FirstPixelId + NumberOfPixels), PixelCount); i++)
+    for (uint16_t i = FirstPixelId; i < min (uint32_t (FirstPixelId + NumberOfPixels), PixelCount); i++)
     {
         setPixel (i, { 0, 0, 0 });
     }
@@ -604,7 +604,7 @@ uint16_t c_InputEffectEngine::effectRainbow ()
 {
     // Effect Step will be in the range zero through the number of pixels and is used
     // to set the starting point for the colors
-       
+
     // DEBUG_START;
     // calculate only half the pixels if mirroring
     uint16_t NumberOfPixelsToOutput = MirroredPixelCount;
@@ -927,7 +927,7 @@ c_InputEffectEngine::CRGB c_InputEffectEngine::hsv2rgb (dCHSV in)
         q = in.v * (1.0 - (in.s * ff));
         t = in.v * (1.0 - (in.s * (1.0 - ff)));
 
-        switch (i) 
+        switch (i)
         {
             case 0:
                 out.r = in.v;

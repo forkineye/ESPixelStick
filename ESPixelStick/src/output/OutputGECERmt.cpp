@@ -110,7 +110,7 @@ bool c_OutputGECERmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // SetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputGECERmt::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputGECERmt::SetOutputBufferSize (uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
 

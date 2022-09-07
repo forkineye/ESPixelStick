@@ -75,7 +75,7 @@ void c_OutputWS2811Uart::Begin ()
     OutputUartConfig.UartId                 = UartId;
     OutputUartConfig.DataPin                = DataPin;
     OutputUartConfig.IntensityDataWidth     = WS2811_PIXEL_BITS_PER_INTENSITY;
-    OutputUartConfig.UartDataSize           = c_OutputUart::UartDataSize_t::OUTPUT_UART_6N1;
+    OutputUartConfig.UartDataSize           = c_OutputUart::UartDatauint32_t::OUTPUT_UART_6N1;
     OutputUartConfig.TranslateIntensityData = c_OutputUart::TranslateIntensityData_t::TwoToOne;
     OutputUartConfig.pPixelDataSource       = this;
     OutputUartConfig.Baudrate               = WS2811_PIXEL_UART_BAUDRATE;

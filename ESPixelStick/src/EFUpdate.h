@@ -28,11 +28,11 @@ class EFUpdate {
  public:
      EFUpdate(){}
      virtual ~EFUpdate() {}
-     
+
      const uint32_t EFU_ID = 0x00554645; // 'E', 'F', 'U', 0x00
 
      void begin();
-     bool process(uint8_t *data, size_t len);
+     bool process(uint8_t *data, uint32_t len);
      bool hasError();
      uint8_t getError();
      bool end();
@@ -76,7 +76,7 @@ class EFUpdate {
     } efurecord_t;
 
     State       _state = State::FAIL;
-    size_t      _loc = 0;
+    uint32_t      _loc = 0;
     efuheader_t _header;
     efurecord_t _record;
     uint32_t    _maxSketchSpace;

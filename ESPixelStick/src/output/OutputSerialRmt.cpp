@@ -172,7 +172,7 @@ void c_OutputSerialRmt::SetUpRmtBitTimes()
 } // SetUpRmtBitTimes
 
 //----------------------------------------------------------------------------
-void c_OutputSerialRmt::SetOutputBufferSize(uint16_t NumChannelsAvailable)
+void c_OutputSerialRmt::SetOutputBufferSize(uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
 

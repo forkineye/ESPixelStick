@@ -107,7 +107,7 @@ c_InputMgr::~c_InputMgr ()
 
 //-----------------------------------------------------------------------------
 ///< Start the module
-void c_InputMgr::Begin (size_t BufferSize)
+void c_InputMgr::Begin (uint32_t BufferSize)
 {
     // DEBUG_START;
 
@@ -302,7 +302,7 @@ void c_InputMgr::CreateNewConfig ()
 } // CreateNewConfig
 
 //-----------------------------------------------------------------------------
-void c_InputMgr::GetConfig (byte * Response, size_t maxlen)
+void c_InputMgr::GetConfig (byte * Response, uint32_t maxlen)
 {
     // DEBUGSTART;
 
@@ -425,7 +425,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
         {
             case e_InputType::InputType_Disabled:
             {
-                if (!IsBooting) 
+                if (!IsBooting)
                 {
                     logcon (String (F ("Disabled Input type for channel '")) + ChannelIndex + "'.");
                 }
@@ -926,7 +926,7 @@ void c_InputMgr::SetConfig(JsonDocument & NewConfigData)
 } // SetConfig
 
 //-----------------------------------------------------------------------------
-void c_InputMgr::SetBufferInfo (size_t BufferSize)
+void c_InputMgr::SetBufferInfo (uint32_t BufferSize)
 {
     // DEBUG_START;
 
