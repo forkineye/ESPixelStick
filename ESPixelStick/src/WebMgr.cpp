@@ -195,7 +195,7 @@ void c_WebMgr::init ()
     	webServer.on ("/updatefw", HTTP_POST, [](AsyncWebServerRequest* request)
         {
             webSocket.textAll ("X6");
-        }, [](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final) {WebMgr.FirmwareUpload (request, filename, index, data, len,  final); }).setFilter (ON_STA_FILTER);
+        }, [](AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final) {WebMgr.FirmwareUpload (request, filename, index, data, len,  final); }).setFilter (ON_STA_FILTER);
 
     	// URL's needed for FPP Connect fseq uploading and querying
    	 	webServer.on ("/fpp", HTTP_GET,
@@ -210,12 +210,12 @@ void c_WebMgr::init ()
             	FPPDiscovery.ProcessPOST(request);
         	},
 
-        	[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
+        	[](AsyncWebServerRequest *request, String filename, uint32_t index, uint8_t *data, uint32_t len, bool final)
         	{
             	FPPDiscovery.ProcessFile(request, filename, index, data, len, final);
         	},
 
-            [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+            [](AsyncWebServerRequest *request, uint8_t *data, uint32_t len, uint32_t index, uint32_t total)
             {
                 FPPDiscovery.ProcessBody(request, data, len, index, total);
             });
@@ -251,7 +251,7 @@ void c_WebMgr::init ()
                 }
             },
 
-        	[this](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final)
+        	[this](AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final)
             {
                 // DEBUG_V ("Got process FIle request");
                 // DEBUG_V (String ("Got process File request: name: ")  + filename);
@@ -268,7 +268,7 @@ void c_WebMgr::init ()
                 }
             },
 
-        	[this](AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total)
+        	[this](AsyncWebServerRequest* request, uint8_t* data, uint32_t len, uint32_t index, uint32_t total)
             {
                 // DEBUG_V (String ("Got process Body request: index: ") + String (index));
                 // DEBUG_V (String ("Got process Body request: len:   ") + String (len));
@@ -333,9 +333,9 @@ void c_WebMgr::init ()
 //-----------------------------------------------------------------------------
 void c_WebMgr::handleFileUpload (AsyncWebServerRequest* request,
                                  String filename,
-                                 size_t index,
+                                 uint32_t index,
                                  uint8_t * data,
-                                 size_t len,
+                                 uint32_t len,
                                  bool final)
 {
     // DEBUG_START;
@@ -413,7 +413,7 @@ void c_WebMgr::GetDeviceOptions ()
     // PrettyPrint (WebOptions);
 
     // now make it something we can transmit
-    size_t msgOffset = strlen (WebSocketFrameCollectionBuffer);
+    uint32_t msgOffset = strlen (WebSocketFrameCollectionBuffer);
     serializeJson(WebOptions, &pWebSocketFrameCollectionBuffer[msgOffset], (WebSocketFrameCollectionBufferSize - msgOffset));
 #endif // def SUPPORT_DEVICE_OPTION_LIST
 
@@ -427,7 +427,7 @@ void c_WebMgr::GetDeviceOptions ()
  * Text messages that start with 'X' are treated as "Simple" format messages, else they're parsed as JSON.
  */
 void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
-    AwsEventType type, void * arg, uint8_t * data, size_t len)
+    AwsEventType type, void * arg, uint8_t * data, uint32_t len)
 {
     // DEBUG_START;
     // DEBUG_V (CN_Heap_colon + String (ESP.getFreeHeap ()));
@@ -656,7 +656,7 @@ void c_WebMgr::ProcessXARequest (AsyncWebSocketClient* client)
 
     memset(pWebSocketFrameCollectionBuffer, 0x00, WebSocketFrameCollectionBufferSize);
     strcpy (pWebSocketFrameCollectionBuffer, "XA");
-    size_t msgOffset = strlen (pWebSocketFrameCollectionBuffer);
+    uint32_t msgOffset = strlen (pWebSocketFrameCollectionBuffer);
     serializeJson(*WebJsonDoc, &pWebSocketFrameCollectionBuffer[msgOffset], (WebSocketFrameCollectionBufferSize - msgOffset));
     // DEBUG_V (String(WebSocketFrameCollectionBuffer));
 
@@ -702,7 +702,7 @@ void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
 
     memset(pWebSocketFrameCollectionBuffer, 0x00, WebSocketFrameCollectionBufferSize);
     strcpy (pWebSocketFrameCollectionBuffer, "XJ");
-    size_t msgOffset = strlen (pWebSocketFrameCollectionBuffer);
+    uint32_t msgOffset = strlen (pWebSocketFrameCollectionBuffer);
     serializeJson(*WebJsonDoc, &pWebSocketFrameCollectionBuffer[msgOffset], (WebSocketFrameCollectionBufferSize - msgOffset));
 
     // DEBUG_V (response);
@@ -904,8 +904,8 @@ void c_WebMgr::processCmdGet (JsonObject & jsonCmd)
 
     do // once
     {
-        size_t bufferoffset = strlen(pWebSocketFrameCollectionBuffer);
-        size_t BufferFreeSize = WebSocketFrameCollectionBufferSize - (bufferoffset + 3);
+        uint32_t bufferoffset = strlen(pWebSocketFrameCollectionBuffer);
+        uint32_t BufferFreeSize = WebSocketFrameCollectionBufferSize - (bufferoffset + 3);
         // DEBUG_V (String ("bufferoffset: ") + bufferoffset);
         // DEBUG_V (String ("BufferFreeSize: ") + BufferFreeSize);
 
@@ -1133,9 +1133,9 @@ void c_WebMgr::processCmdDelete (JsonObject& jsonCmd)
 //-----------------------------------------------------------------------------
 void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
                                String filename,
-                               size_t index,
+                               uint32_t index,
                                uint8_t * data,
-                               size_t len,
+                               uint32_t len,
                                bool final)
 {
     // DEBUG_START;

@@ -47,8 +47,8 @@ public:
     void onAlexaMessage        (EspalexaDevice * pDevice);
     void RegisterAlexaCallback (DeviceCallbackFunction cb);
     bool IsAlexaCallbackValid  () { return (nullptr != pAlexaCallback); }
-    void FirmwareUpload        (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
-    void handleFileUpload      (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
+    void FirmwareUpload        (AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final);
+    void handleFileUpload      (AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final);
     void NetworkStateChanged   (bool NewNetworkState);
     void GetDriverName         (String & Name) { Name = "WebMgr"; }
 
@@ -73,7 +73,7 @@ private:
     };
 
     void init ();
-    void onWsEvent                  (AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, size_t len);
+    void onWsEvent                  (AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, uint32_t len);
     void ProcessVseriesRequests     (AsyncWebSocketClient  * client);
     void ProcessGseriesRequests     (AsyncWebSocketClient  * client);
     void ProcessReceivedJsonMessage (AsyncWebSocketClient  * client);
@@ -98,7 +98,7 @@ private:
 
     struct SpiRamAllocator
     {
-        void *allocate(size_t size)
+        void *allocate(uint32_t size)
         {
             return ps_malloc(size);
         }
@@ -108,7 +108,7 @@ private:
             free(pointer);
         }
 
-        void *reallocate(void *ptr, size_t new_size)
+        void *reallocate(void *ptr, uint32_t new_size)
         {
             return ps_realloc(ptr, new_size);
         }
