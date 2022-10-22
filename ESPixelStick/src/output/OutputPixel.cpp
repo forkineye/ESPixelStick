@@ -636,29 +636,33 @@ inline uint32_t c_OutputPixel::CalculateIntensityOffset(uint32_t ChannelId)
 {
     // DEBUG_START;
 
-    // DEBUG_V(String("              ChannelId: 0x") + String(ChannelId, HEX));
-    uint32_t PixelId = ChannelId / uint32_t(NumIntensityBytesPerPixel);
-    // DEBUG_V(String("                PixelId: 0x") + String(PixelId, HEX));
+    // DEBUG_V(String("              ChannelId: ") + String(ChannelId));
+    uint32_t PixelId = ChannelId / NumIntensityBytesPerPixel;
+    // DEBUG_V(String("               PixelId0: ") + String(PixelId));
 
     // are we doing a zig zag operation?
     if ((zig_size > 1) && (PixelId >= zig_size))
     {
-        // DEBUG_V(String("               zig_size: 0x") + String(zig_size, HEX));
+        // DEBUG_V(String("               PixelId1: ") + String(PixelId));
+        // DEBUG_V(String("               zig_size: ") + String(zig_size));
         uint32_t ZigZagGroupId = PixelId / zig_size;
-        // DEBUG_V(String("          ZigZagGroupId: 0x") + String(ZigZagGroupId, HEX));
+        // DEBUG_V(String("          ZigZagGroupId: ") + String(ZigZagGroupId));
 
         // is this a backwards group
         if (0 != (ZigZagGroupId & 0x1))
         {
             // DEBUG_V("Backwards Group");
             uint32_t zigoffset = PixelId % zig_size;
-            // DEBUG_V(String("              zigoffset: 0x") + String(zigoffset, HEX));
+            // DEBUG_V(String("              zigoffset: ") + String(zigoffset));
             uint32_t BaseGroupPixelId = ZigZagGroupId * zig_size;
+            // DEBUG_V(String("      BaseGroupPixelId1: ") + String(BaseGroupPixelId));
             PixelId = BaseGroupPixelId + (zig_size - 1) - zigoffset;
-            // DEBUG_V(String("       BaseGroupPixelId: 0x") + String(BaseGroupPixelId, HEX));
+            // DEBUG_V(String("      BaseGroupPixelId2: ") + String(BaseGroupPixelId));
             // DEBUG_V(String("                PixelId: 0x") + String(PixelId, HEX));
         }
+        // DEBUG_V(String("               PixelId2: ") + String(PixelId));
     }
+    // DEBUG_V(String("          Final PixelId: ") + String(PixelId));
 
     uint32_t ColorOrderIndex = ChannelId % NumIntensityBytesPerPixel;
     if (uint32_t(NumIntensityBytesPerPixel) > ChannelId)
@@ -666,7 +670,7 @@ inline uint32_t c_OutputPixel::CalculateIntensityOffset(uint32_t ChannelId)
         ColorOrderIndex = ChannelId;
     }
     uint32_t ColorOrderId = ColorOffsets.Array[ColorOrderIndex];
-    uint32_t PixelIntensityBaseId = PixelId * PixelGroupSize * NumIntensityBytesPerPixel;
+    uint32_t PixelIntensityBaseId = PixelId * NumIntensityBytesPerPixel;
     uint32_t TargetBufferIntensityId = PixelIntensityBaseId + ColorOrderId;
 
     // DEBUG_V(String("                ChannelId: 0x") + String(ChannelId, HEX));
