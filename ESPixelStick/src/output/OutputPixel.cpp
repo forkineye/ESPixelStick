@@ -637,7 +637,7 @@ inline uint32_t c_OutputPixel::CalculateIntensityOffset(uint32_t ChannelId)
     // DEBUG_START;
 
     // DEBUG_V(String("              ChannelId: ") + String(ChannelId));
-    uint32_t PixelId = ChannelId / NumIntensityBytesPerPixel;
+    uint32_t PixelId = ChannelId / uint32_t(NumIntensityBytesPerPixel);
     // DEBUG_V(String("               PixelId0: ") + String(PixelId));
 
     // are we doing a zig zag operation?
@@ -670,7 +670,7 @@ inline uint32_t c_OutputPixel::CalculateIntensityOffset(uint32_t ChannelId)
         ColorOrderIndex = ChannelId;
     }
     uint32_t ColorOrderId = ColorOffsets.Array[ColorOrderIndex];
-    uint32_t PixelIntensityBaseId = PixelId * NumIntensityBytesPerPixel;
+    uint32_t PixelIntensityBaseId = PixelId * PixelGroupSize * NumIntensityBytesPerPixel;
     uint32_t TargetBufferIntensityId = PixelIntensityBaseId + ColorOrderId;
 
     // DEBUG_V(String("                ChannelId: 0x") + String(ChannelId, HEX));

@@ -470,7 +470,7 @@ void c_InputFPPRemotePlayFile::ClearFileInfo()
 uint32_t c_InputFPPRemotePlayFile::ReadFile(uint32_t DestinationIntensityId, uint32_t NumBytesToRead, uint32_t FileOffset)
 {
     // DEBUG_START;
-#define WRITE_DIRECT_TO_OUTPUT_BUFFER
+// #define WRITE_DIRECT_TO_OUTPUT_BUFFER
 #ifdef WRITE_DIRECT_TO_OUTPUT_BUFFER
     uint32_t NumBytesRead = FileMgr.ReadSdFile(FileHandleForFileBeingPlayed,
                                              OutputMgr.GetBufferAddress(),
