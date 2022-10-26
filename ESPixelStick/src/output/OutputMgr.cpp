@@ -514,6 +514,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
             {
                 logcon(String(F(" Shutting Down '")) + DriverName + String(F("' on Output: ")) + String(CurrentOutputChannelDriver.DriverId));
             }
+
             delete CurrentOutputChannelDriver.pOutputChannelDriver;
             CurrentOutputChannelDriver.pOutputChannelDriver = nullptr;
             // DEBUG_V ();
@@ -1120,6 +1121,8 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
 
     UpdateDisplayBufferReferences ();
 
+    SetSerialUart();
+
     // DEBUG_END;
     return Response;
 
@@ -1182,6 +1185,46 @@ void c_OutputMgr::SetConfig(ArduinoJson::JsonDocument & ConfigData)
 
 } // SaveConfig
 
+//-----------------------------------------------------------------------------
+void c_OutputMgr::SetSerialUart()
+{
+    // DEBUG_START;
+
+    bool NeedToTurnOffSerial = false;
+
+    for (auto & CurrentOutputChannelDriver : OutputChannelDrivers)
+    {
+        // DEBUG_V();
+        if(e_OutputType::OutputType_Disabled != CurrentOutputChannelDriver.pOutputChannelDriver->GetOutputType() &&
+        (ConsoleTxGpio == CurrentOutputChannelDriver.pOutputChannelDriver->GetOutputGpio() ||
+        ConsoleRxGpio == CurrentOutputChannelDriver.pOutputChannelDriver->GetOutputGpio()))
+        {
+            // DEBUG_V("Found port that needs Serial turned off");
+            NeedToTurnOffSerial = true;
+        }
+    } // end for each channel
+
+    // DEBUG_V(String("NeedToTurnOffSerial: ") + String(NeedToTurnOffSerial));
+    // DEBUG_V(String(" SerialUartIsActive: ") + String(SerialUartIsActive));
+    if(NeedToTurnOffSerial && SerialUartIsActive)
+    {
+        // DEBUG_V("Turn OFF Serial");
+        Serial.end();
+        SerialUartIsActive = false;
+    }
+    else if(!NeedToTurnOffSerial && !SerialUartIsActive)
+    {
+        Serial.begin(115200);
+        SerialUartIsActive = true;
+        // DEBUG_V("Turn ON Serial");
+    }
+    else
+    {
+        // DEBUG_V("Leave Serial Alone");
+    }
+
+    // DEBUG_END;
+}
 //-----------------------------------------------------------------------------
 ///< Called from loop(), renders output data
 void c_OutputMgr::Render()

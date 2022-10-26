@@ -51,8 +51,8 @@ public:
     void      GetStatus         (JsonObject & jsonStatus);
     void      GetPortCounts     (uint16_t& PixelCount, uint16_t& SerialCount) {PixelCount = uint16_t(OutputChannelId_End); SerialCount = uint16_t(NUM_UARTS); }
     uint8_t*  GetBufferAddress  () { return OutputBuffer; } ///< Get the address of the buffer into which the E1.31 handler will stuff data
-    uint32_t    GetBufferUsedSize () { return UsedBufferSize; } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
-    uint32_t    GetBufferSize     () { return sizeof(OutputBuffer); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
+    uint32_t  GetBufferUsedSize () { return UsedBufferSize; } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
+    uint32_t  GetBufferSize     () { return sizeof(OutputBuffer); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
     void      DeleteConfig      () { FileMgr.DeleteConfigFile (ConfigFileName); }
     void      PauseOutputs      (bool NewState);
     void      GetDriverName     (String & Name) { Name = "OutputMgr"; }
@@ -235,11 +235,15 @@ private:
     void UpdateDisplayBufferReferences (void);
     void InstantiateNewOutputChannel(DriverInfo_t &ChannelIndex, e_OutputType NewChannelType, bool StartDriver = true);
     void CreateNewConfig();
+    void SetSerialUart();
 
     String ConfigFileName;
 
     uint8_t OutputBuffer[OM_MAX_NUM_CHANNELS];
     uint32_t  UsedBufferSize = 0;
+    gpio_num_t ConsoleTxGpio = gpio_num_t::GPIO_NUM_1;
+    gpio_num_t ConsoleRxGpio = gpio_num_t::GPIO_NUM_3;
+    bool       SerialUartIsActive = true;
 
 #define OM_IS_UART (CurrentOutputChannelDriver.PortType == OM_PortType_t::Uart)
 #define OM_IS_RMT  (CurrentOutputChannelDriver.PortType == OM_PortType_t::Rmt)
