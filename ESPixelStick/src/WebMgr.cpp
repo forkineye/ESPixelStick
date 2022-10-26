@@ -678,6 +678,7 @@ void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
     system[F ("freeheap")] = ESP.getFreeHeap ();
     system[F ("uptime")] = millis ();
     system[F ("SDinstalled")] = FileMgr.SdCardIsInstalled ();
+    system[F ("DiscardedRxData")] = DiscardedRxData;
 
     // DEBUG_V ("");
 
