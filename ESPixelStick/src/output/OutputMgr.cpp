@@ -126,6 +126,10 @@ typedef struct
 //-----------------------------------------------------------------------------
 static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] =
 {
+#ifdef DEFAULT_UART_0_GPIO
+    {DEFAULT_UART_0_GPIO, UART_NUM_0, c_OutputMgr::OM_PortType_t::Uart},
+#endif // def DEFAULT_UART_0_GPIO
+
 #ifdef DEFAULT_UART_1_GPIO
     {DEFAULT_UART_1_GPIO, UART_NUM_1, c_OutputMgr::OM_PortType_t::Uart},
 #endif // def DEFAULT_UART_1_GPIO

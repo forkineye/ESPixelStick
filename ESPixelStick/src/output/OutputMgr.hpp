@@ -63,6 +63,10 @@ public:
     // handles to determine which output channel we are dealing with
     enum e_OutputChannelIds
     {
+        #ifdef DEFAULT_UART_0_GPIO
+        OutputChannelId_UART_0,
+        #endif // def DEFAULT_UART_0_GPIO
+
         #ifdef DEFAULT_UART_1_GPIO
         OutputChannelId_UART_1,
         #endif // def DEFAULT_UART_1_GPIO
