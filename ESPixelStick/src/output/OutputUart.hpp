@@ -112,17 +112,18 @@ public:
     void IRAM_ATTR ISR_Handler_SendIntensityData();
 
 private:
-    void StartUart              ();
-    bool RegisterUartIsrHandler ();
-    void InitializeUart         ();
-    void set_pin                ();
-    void TerminateUartOperation ();
-    void ReportNewFrame         ();
-    void StartBreak             ();
-    void EndBreak               ();
-    void GenerateBreak          (uint32_t DurationInUs, uint32_t MarkDurationInUs);
-    void SetIntensityDataWidth  ();
-    void SetIntensity2Uart      (uint8_t value, UartDataBitTranslationId_t ID);
+    void StartUart                      ();
+    bool RegisterUartIsrHandler         ();
+    void InitializeUart                 ();
+    void set_pin                        ();
+    void TerminateSerialPortOperation   ();
+    void RestoreSerialPortOperation     ();
+    void ReportNewFrame                 ();
+    void StartBreak                     ();
+    void EndBreak                       ();
+    void GenerateBreak                  (uint32_t DurationInUs, uint32_t MarkDurationInUs);
+    void SetIntensityDataWidth          ();
+    void SetIntensity2Uart              (uint8_t value, UartDataBitTranslationId_t ID);
 
     OutputUartConfig_t OutputUartConfig;
 
