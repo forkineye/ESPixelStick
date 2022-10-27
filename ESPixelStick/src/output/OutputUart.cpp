@@ -140,7 +140,7 @@ c_OutputUart::~c_OutputUart ()
 {
     // DEBUG_START;
 
-    TerminateUartOperation();
+    RestoreSerialPortOperation();
 
 #ifdef ARDUINO_ARCH_ESP8266
 
@@ -1076,7 +1076,7 @@ void c_OutputUart::StartUart()
             return;
         }
 
-        TerminateUartOperation();
+        TerminateSerialPortOperation();
 
         // Initialize uart also sets pin
         InitializeUart();
@@ -1100,7 +1100,7 @@ void c_OutputUart::StartUart()
 } // StartUart
 
 //----------------------------------------------------------------------------
-void c_OutputUart::TerminateUartOperation()
+void c_OutputUart::TerminateSerialPortOperation()
 {
     // DEBUG_START;
 
@@ -1111,14 +1111,14 @@ void c_OutputUart::TerminateUartOperation()
         case UART_NUM_0:
         {
             // DEBUG_V ("UART_NUM_0");
-            Serial.end();
+            Serial.end(true);
             break;
         }
 
         case UART_NUM_1:
         {
             // DEBUG_V ("UART_NUM_1");
-            Serial1.end();
+            Serial1.end(true);
             break;
         }
 
@@ -1126,7 +1126,7 @@ void c_OutputUart::TerminateUartOperation()
         case UART_NUM_2:
         {
             // DEBUG_V ("UART_NUM_2");
-            Serial2.end();
+            Serial2.end(true);
             break;
         }
         #endif // def ARDUINO_ARCH_ESP32
@@ -1144,8 +1144,52 @@ void c_OutputUart::TerminateUartOperation()
         esp_intr_free(IsrHandle);
         IsrHandle = nullptr;
     }
+    // uart_driver_delete(OutputUartConfig.UartId);
 #endif // def ARDUINO_ARCH_ESP32
 
     // DEBUG_END;
 
-} // TerminateUartOperation
+} // TerminateSerialPortOperation
+
+//----------------------------------------------------------------------------
+void c_OutputUart::RestoreSerialPortOperation()
+{
+    // DEBUG_START;
+
+    DisableUartInterrupts();
+
+    switch (OutputUartConfig.UartId)
+    {
+        case UART_NUM_0:
+        {
+            // DEBUG_V ("UART_NUM_0");
+            Serial.begin(115200);
+            break;
+        }
+
+        case UART_NUM_1:
+        {
+            // DEBUG_V ("UART_NUM_1");
+            Serial1.begin(115200);
+            break;
+        }
+
+        #ifdef ARDUINO_ARCH_ESP32
+        case UART_NUM_2:
+        {
+            // DEBUG_V ("UART_NUM_2");
+            Serial2.begin(115200);
+            break;
+        }
+        #endif // def ARDUINO_ARCH_ESP32
+
+        default:
+        {
+            // DEBUG_V ("default");
+            break;
+        }
+    } // end switch (UartId)
+
+    // DEBUG_END;
+
+} // RestoreSerialPortOperation
