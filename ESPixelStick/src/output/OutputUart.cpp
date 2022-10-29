@@ -1111,14 +1111,14 @@ void c_OutputUart::TerminateSerialPortOperation()
         case UART_NUM_0:
         {
             // DEBUG_V ("UART_NUM_0");
-            Serial.end(true);
+            Serial.end();
             break;
         }
 
         case UART_NUM_1:
         {
             // DEBUG_V ("UART_NUM_1");
-            Serial1.end(true);
+            Serial1.end();
             break;
         }
 
