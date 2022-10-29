@@ -163,6 +163,7 @@ const CN_PROGMEM char CN_stars                    [] = "***";
 const CN_PROGMEM char CN_state                    [] = "state";
 const CN_PROGMEM char CN_status                   [] = "status";
 const CN_PROGMEM char CN_status_name              [] = "status_name";
+const CN_PROGMEM char CN_StayInApMode             [] = "StayInApMode";
 const CN_PROGMEM char CN_subnet                   [] = "subnet";
 const CN_PROGMEM char CN_SyncOffset               [] = "SyncOffset";
 const CN_PROGMEM char CN_system                   [] = "system";

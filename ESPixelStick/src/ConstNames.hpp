@@ -172,6 +172,7 @@ extern const CN_PROGMEM char CN_stars[];
 extern const CN_PROGMEM char CN_state[];
 extern const CN_PROGMEM char CN_status [];
 extern const CN_PROGMEM char CN_status_name[];
+extern const CN_PROGMEM char CN_StayInApMode [];
 extern const CN_PROGMEM char CN_subnet[];
 extern const CN_PROGMEM char CN_SyncOffset[];
 extern const CN_PROGMEM char CN_system[];

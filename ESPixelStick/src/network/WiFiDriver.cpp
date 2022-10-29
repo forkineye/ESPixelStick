@@ -241,7 +241,7 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
         WiFi.enableAP(false);
         // DEBUG_V();
         WiFi.enableSTA(true);
-        
+
 #endif
         // DEBUG_V (String ("      ssid: ") + current_ssid);
         // DEBUG_V (String ("passphrase: ") + current_passphrase);
@@ -319,11 +319,12 @@ void c_WiFiDriver::GetConfig (JsonObject& json)
     json[CN_gateway] = gateway.toString ();
 #endif // !def ARDUINO_ARCH_ESP8266
 
-    json[CN_dhcp] = UseDhcp;
-    json[CN_sta_timeout] = sta_timeout;
-    json[CN_ap_fallback] = ap_fallbackIsEnabled;
-    json[CN_ap_timeout] = ap_timeout;
-    json[CN_ap_reboot] = RebootOnWiFiFailureToConnect;
+    json[CN_StayInApMode] = StayInApMode;
+    json[CN_dhcp]         = UseDhcp;
+    json[CN_sta_timeout]  = sta_timeout;
+    json[CN_ap_fallback]  = ap_fallbackIsEnabled;
+    json[CN_ap_timeout]   = ap_timeout;
+    json[CN_ap_reboot]    = RebootOnWiFiFailureToConnect;
 
     // DEBUG_END;
 
@@ -475,6 +476,7 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
     ConfigChanged |= setFromJSON (ap_fallbackIsEnabled, json, CN_ap_fallback);
     ConfigChanged |= setFromJSON (ap_timeout, json, CN_ap_timeout);
     ConfigChanged |= setFromJSON (RebootOnWiFiFailureToConnect, json, CN_ap_reboot);
+    ConfigChanged |= setFromJSON (StayInApMode, json, CN_StayInApMode);
 
     // DEBUG_V ("     ip: " + ip);
     // DEBUG_V ("gateway: " + gateway);
@@ -762,8 +764,11 @@ void fsm_WiFi_state_ConnectingAsAP::Poll ()
     {
         if (millis () - pWiFiDriver->GetFsmStartTime () > (1000 * pWiFiDriver->Get_ap_timeout ()))
         {
-            logcon (F ("WiFi STA Failed to connect"));
-            fsm_WiFi_state_ConnectionFailed_imp.Init ();
+            if( false == pWiFiDriver->Get_ap_StayInApMode())
+            {
+                logcon (F ("WiFi STA Failed to connect"));
+                fsm_WiFi_state_ConnectionFailed_imp.Init ();
+            }
         }
     }
 
@@ -779,7 +784,7 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
     pWiFiDriver->SetFsmState (this);
     pWiFiDriver->AnnounceState ();
 
-    if (true == pWiFiDriver->Get_ap_fallbackIsEnabled())
+    if (true == pWiFiDriver->Get_ap_fallbackIsEnabled() || pWiFiDriver->Get_ap_StayInApMode())
     {
         WiFi.enableSTA(false);
         WiFi.enableAP(true);
@@ -880,7 +885,14 @@ void fsm_WiFi_state_ConnectedToSta::Poll ()
     if (0 == WiFi.softAPgetStationNum ())
     {
         logcon (F ("WiFi Lost the connection to the STA"));
-        fsm_WiFi_state_ConnectionFailed_imp.Init ();
+        if(pWiFiDriver->Get_ap_StayInApMode())
+        {
+            fsm_WiFi_state_ConnectingAsAP_imp.Init ();
+        }
+        else
+        {
+            fsm_WiFi_state_ConnectionFailed_imp.Init ();
+        }
     }
 
     /// DEBUG_END;
@@ -915,7 +927,14 @@ void fsm_WiFi_state_ConnectedToSta::OnDisconnect ()
     // DEBUG_START;
 
     logcon (F ("WiFi STA Disconnected"));
-    fsm_WiFi_state_ConnectionFailed_imp.Init ();
+    if(pWiFiDriver->Get_ap_StayInApMode())
+    {
+        fsm_WiFi_state_ConnectingAsAP_imp.Init ();
+    }
+    else
+    {
+        fsm_WiFi_state_ConnectionFailed_imp.Init ();
+    }
 
     // DEBUG_END;
 
