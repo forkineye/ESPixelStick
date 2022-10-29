@@ -1213,8 +1213,7 @@ void c_OutputMgr::SetSerialUart()
     if(NeedToTurnOffSerial && SerialUartIsActive)
     {
         // DEBUG_V("Turn OFF Serial");
-        Serial.end(true);
-        uart_driver_delete(0);
+        Serial.end();
         SerialUartIsActive = false;
     }
     else if(!NeedToTurnOffSerial && !SerialUartIsActive)
