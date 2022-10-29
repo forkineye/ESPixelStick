@@ -38,11 +38,9 @@ wsConnect();
 // console.log ('************after enqueue');
 
 // jQuery doc ready
-$(function ()
-{
+$(function () {
     // Menu navigation for single page layout
-    $('ul.navbar-nav li a').click(function ()
-    {
+    $('ul.navbar-nav li a').click(function () {
         // Highlight proper navbar item
         $('.nav li').removeClass('active');
         $(this).parent().addClass('active');
@@ -58,8 +56,7 @@ $(function ()
         $('.navbar-toggle').attr('aria-expanded', 'false');
 
         // Firmware selection and upload
-        $('#efu').change(function ()
-        {
+        $('#efu').change(function () {
             let file = _('efu').files[0];
             let formdata = new FormData();
             formdata.append("file", file);
@@ -129,8 +126,7 @@ $(function ()
         $('#DeviceConfigSave').prop("disabled", ValidateConfigFields($('#config input')));
     }));
 
-    $('#DeviceConfigSave').click(function ()
-    {
+    $('#DeviceConfigSave').click(function () {
         submitDeviceConfig();
     });
 
@@ -146,9 +142,8 @@ $(function ()
         clearStream();
     });
 
-//TODO: This should pull a configuration from the stick and not the web interface as web data could be invalid
-    $('#backupconfig').click(function ()
-    {
+    //TODO: This should pull a configuration from the stick and not the web interface as web data could be invalid
+    $('#backupconfig').click(function () {
         ExtractNetworkConfigFromHtmlPage();
         ExtractChannelConfigFromHtmlPage(Input_Config.channels, "input");
         ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
@@ -162,13 +157,10 @@ $(function ()
         saveAs(blob, FileName + ".json"); // Filesaver.js
     });
 
-    $('#restoreconfig').change(function ()
-    {
-        if (this.files.length !== 0)
-        {
+    $('#restoreconfig').change(function () {
+        if (this.files.length !== 0) {
             const reader = new FileReader();
-            reader.onload = function fileReadCompleted()
-            {
+            reader.onload = function fileReadCompleted() {
                 // when the reader is done, the content is in reader.result.
                 ProcessLocalConfig(reader.result);
             };
@@ -188,85 +180,81 @@ $(function ()
     let finalUrl = "http://" + target + "/upload";
     // console.log(finalUrl);
     const uploader = new Dropzone('#filemanagementupload',
-    {
-        url: finalUrl,
-        paramName: 'file',
-        maxFilesize: 1000, // MB
-        maxFiles: 1,
-        parallelUploads: 1,
-        clickable: true,
-        uploadMultiple: false,
-        createImageThumbnails: false,
-        dictDefaultMessage: 'Drag an image here to upload, or click to select one',
-        acceptedFiles: '.fseq,.pl',
-        timeout: 99999999, /*milliseconds*/
-        init: function ()
         {
-            this.on('success', function (file, resp) {
-                // console.log("Success");
+            url: finalUrl,
+            paramName: 'file',
+            maxFilesize: 1000, // MB
+            maxFiles: 1,
+            parallelUploads: 1,
+            clickable: true,
+            uploadMultiple: false,
+            createImageThumbnails: false,
+            dictDefaultMessage: 'Drag an image here to upload, or click to select one',
+            acceptedFiles: '.fseq,.pl',
+            timeout: 99999999, /*milliseconds*/
+            init: function () {
+                this.on('success', function (file, resp) {
+                    // console.log("Success");
+                    // console.log(file);
+                    // console.log(resp);
+                    Dropzone.forElement('#filemanagementupload').removeAllFiles(true)
+                    RequestListOfFiles();
+                });
+
+                this.on('complete', function (file, resp) {
+                    // console.log("complete");
+                    // console.log(file);
+                    // console.log(resp);
+                    $('#fseqprogress_fg').addClass("hidden");
+
+                    let DeltaTime = (new Date().getTime() - FseqFileTransferStartTime.getTime()) / 1000;
+                    let rate = Math.floor((file.size / DeltaTime) / 1000);
+                    console.debug("Final Transfer Rate: " + rate + "KBps");
+                });
+
+                this.on('addedfile', function (file, resp) {
+                    // console.log("addedfile");
+                    // console.log(file);
+                    // console.log(resp);
+                    FseqFileTransferStartTime = new Date();
+                });
+
+                this.on('uploadprogress', function (file, percentProgress, bytesSent) {
+                    // console.log("percentProgress: " + percentProgress);
+                    // console.log("bytesSent: " + bytesSent);
+                    $('#fseqprogress_fg').removeClass("hidden");
+                    $('#fseqprogressbytes').html(bytesSent);
+
+                    let now = new Date().getTime();
+                    let DeltaTime = (now - FseqFileTransferStartTime.getTime()) / 1000;
+                    let rate = Math.floor((bytesSent / DeltaTime) / 1000);
+                    $('#fseqprogressrate').html(rate + "KBps");
+                });
+            },
+
+            accept: function (file, done) {
+                // console.log("accept");
                 // console.log(file);
-                // console.log(resp);
-                Dropzone.forElement('#filemanagementupload').removeAllFiles(true)
-                RequestListOfFiles();
-            });
-
-            this.on('complete', function (file, resp) {
-                // console.log("complete");
-                // console.log(file);
-                // console.log(resp);
-                $('#fseqprogress_fg').addClass("hidden");
-
-                let DeltaTime = (new Date().getTime() - FseqFileTransferStartTime.getTime()) / 1000;
-                let rate = Math.floor((file.size / DeltaTime) / 1000);
-                console.debug("Final Transfer Rate: " + rate + "KBps");
-            });
-
-            this.on('addedfile', function (file, resp)
-            {
-                // console.log("addedfile");
-                // console.log(file);
-                // console.log(resp);
-                FseqFileTransferStartTime = new Date();
-            });
-
-            this.on('uploadprogress', function (file, percentProgress, bytesSent) {
-                // console.log("percentProgress: " + percentProgress);
-                // console.log("bytesSent: " + bytesSent);
-                $('#fseqprogress_fg').removeClass("hidden");
-                $('#fseqprogressbytes').html(bytesSent);
-
-                let now = new Date().getTime();
-                let DeltaTime = (now - FseqFileTransferStartTime.getTime()) / 1000;
-                let rate = Math.floor((bytesSent / DeltaTime)/1000);
-                $('#fseqprogressrate').html(rate + "KBps");
-            });
-        },
-
-        accept: function (file, done)
-        {
-            // console.log("accept");
-            // console.log(file);
-            return done(); // triggers a send
-        }
-    });
+                return done(); // triggers a send
+            }
+        });
 
     $("#filemanagementupload").addClass("dropzone");
 
-    $('#FileDeleteButton').click(function ()
-    {
+    $('#FileDeleteButton').click(function () {
         RequestFileDeletion();
     });
-/*
-    $('#FileUploadButton').click(function () {
-        RequestFileUpload();
-    });
-*/
+    /*
+        $('#FileUploadButton').click(function () {
+            RequestFileUpload();
+        });
+    */
     // Autoload tab based on URL hash
     let hash = window.location.hash;
     hash && $('ul.navbar-nav li a[href="' + hash + '"]').click();
 
     // Halt pingpong if document is not visible
-    document.addEventListener("visibilitychange", function() {
+    document.addEventListener("visibilitychange", function () {
         if (document.hidden) {
             clearTimeout(pingTimer);
             clearTimeout(pongTimer);
@@ -279,32 +267,27 @@ $(function ()
     });
 });
 
-function ProcessLocalConfig(data)
-{
+function ProcessLocalConfig(data) {
     // console.info(data);
     let ParsedLocalConfig = JSON.parse(data);
 
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'system' : ParsedLocalConfig } } }));
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input'  : { 'input_config' : ParsedLocalConfig.input  } } } }));
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'output' : { 'output_config': ParsedLocalConfig.output } } } }));
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'system': ParsedLocalConfig } } }));
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input': { 'input_config': ParsedLocalConfig.input } } } }));
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'output': { 'output_config': ParsedLocalConfig.output } } } }));
 
 } // ProcessLocalConfig
 
-function UpdateAdvancedOptionsMode()
-{
+function UpdateAdvancedOptionsMode() {
     // console.info("UpdateAdvancedOptionsMode");
 
     let am = $('#AdvancedOptions');
     let AdvancedModeState = am.prop("checked");
 
-    $(".AdvancedMode").each(function ()
-    {
-        if (true === AdvancedModeState)
-        {
+    $(".AdvancedMode").each(function () {
+        if (true === AdvancedModeState) {
             $(this).removeClass("hidden");
         }
-        else
-        {
+        else {
             $(this).addClass("hidden");
         }
     });
@@ -312,10 +295,8 @@ function UpdateAdvancedOptionsMode()
 
 function UpdateChannelCounts() {
     // console.info("UpdateChannelCounts");
-    if (null !== Output_Config)
-    {
-        $(".SerialCount").each(function ()
-        {
+    if (null !== Output_Config) {
+        $(".SerialCount").each(function () {
             $(this).attr('max', Output_Config.TotalChannels);
         });
 
@@ -358,14 +339,11 @@ function ProcessWindowChange(NextWindow) {
 
 } // ProcessWindowChange
 
-function RequestStatusUpdate()
-{
+function RequestStatusUpdate() {
     // is the timer running?
-    if (null === StatusRequestTimer)
-    {
+    if (null === StatusRequestTimer) {
         // timer runs forever
-        StatusRequestTimer = setTimeout(function ()
-        {
+        StatusRequestTimer = setTimeout(function () {
             clearTimeout(StatusRequestTimer);
             StatusRequestTimer = null;
 
@@ -374,22 +352,18 @@ function RequestStatusUpdate()
         }, 1000);
     } // end timer was not running
 
-    if ($('#home').is(':visible'))
-    {
+    if ($('#home').is(':visible')) {
         // ask for a status update from the server
         wsEnqueue('XJ');
     } // end home (aka status) is visible
 
 } // RequestStatusUpdate
 
-function RequestListOfFiles()
-{
+function RequestListOfFiles() {
     // is the timer running?
-    if (null === FseqFileListRequestTimer)
-    {
+    if (null === FseqFileListRequestTimer) {
         // timer runs until we get a response
-        FseqFileListRequestTimer = setTimeout(function ()
-        {
+        FseqFileListRequestTimer = setTimeout(function () {
             clearTimeout(FseqFileListRequestTimer);
             FseqFileListRequestTimer = null;
 
@@ -403,27 +377,24 @@ function RequestListOfFiles()
 
 } // RequestListOfFiles
 
-function BytesToMB(Value)
-{
+function BytesToMB(Value) {
     return (Value / (1024 * 1024)).toFixed();
 
 } // BytesToMB
 
-function ProcessGetFileListResponse(JsonConfigData)
-{
+function ProcessGetFileListResponse(JsonConfigData) {
     // console.info("ProcessGetFileListResponse");
 
     SdCardIsInstalled = JsonConfigData.SdCardPresent;
 
     $("#li-filemanagement").removeClass("hidden");
-    if (false === SdCardIsInstalled)
-    {
+    if (false === SdCardIsInstalled) {
         $("#li-filemanagement").addClass("hidden");
     }
 
-    $("#totalBytes").val(BytesToMB (JsonConfigData.totalBytes));
-    $("#usedBytes").val(BytesToMB (JsonConfigData.usedBytes));
-    $("#remainingBytes").val(BytesToMB (JsonConfigData.totalBytes - JsonConfigData.usedBytes) );
+    $("#totalBytes").val(BytesToMB(JsonConfigData.totalBytes));
+    $("#usedBytes").val(BytesToMB(JsonConfigData.usedBytes));
+    $("#remainingBytes").val(BytesToMB(JsonConfigData.totalBytes - JsonConfigData.usedBytes));
 
     Fseq_File_List = JsonConfigData;
 
@@ -432,26 +403,23 @@ function ProcessGetFileListResponse(JsonConfigData)
 
     // console.info("$('#FileManagementTable > tr').length " + $('#FileManagementTable > tr').length);
 
-    while (1 < $('#FileManagementTable > tr').length)
-    {
+    while (1 < $('#FileManagementTable > tr').length) {
         // console.info("Deleting $('#FileManagementTable tr').length " + $('#FileManagementTable tr').length);
         $('#FileManagementTable tr').last().remove();
         // console.log("After Delete: $('#FileManagementTable tr').length " + $('#FileManagementTable tr').length);
     }
 
     let CurrentRowId = 0;
-    JsonConfigData.files.forEach(function (file)
-    {
+    JsonConfigData.files.forEach(function (file) {
         let SelectedPattern = '<td><input  type="checkbox" id="FileSelected_' + (CurrentRowId) + '"></td>';
-        let NamePattern     = '<td><output type="text"     id="FileName_'     + (CurrentRowId) + '"></td>';
-        let DatePattern     = '<td><output type="text"     id="FileDate_'     + (CurrentRowId) + '"></td>';
-        let SizePattern     = '<td><output type="text"     id="FileSize_'     + (CurrentRowId) + '"></td>';
+        let NamePattern = '<td><output type="text"     id="FileName_' + (CurrentRowId) + '"></td>';
+        let DatePattern = '<td><output type="text"     id="FileDate_' + (CurrentRowId) + '"></td>';
+        let SizePattern = '<td><output type="text"     id="FileSize_' + (CurrentRowId) + '"></td>';
 
         let rowPattern = '<tr>' + SelectedPattern + NamePattern + DatePattern + SizePattern + '</tr>';
         $('#FileManagementTable tr:last').after(rowPattern);
 
-        try
-        {
+        try {
             $('#FileName_' + (CurrentRowId)).val(file.name);
             $('#FileDate_' + (CurrentRowId)).val(new Date(file.date * 1000).toLocaleString());
             $('#FileSize_' + (CurrentRowId)).val(file.length);
@@ -461,20 +429,17 @@ function ProcessGetFileListResponse(JsonConfigData)
             $('#FileName_' + (CurrentRowId)).val("InvalidFile");
             $('#FileDate_' + (CurrentRowId)).val(new Date(0).toISOString());
             $('#FileSize_' + (CurrentRowId)).val(0);
-		}
+        }
 
         CurrentRowId++;
     });
 } // ProcessGetFileListResponse
 
-function RequestFileDeletion()
-{
+function RequestFileDeletion() {
     let files = [];
 
-    $('#FileManagementTable > tr').each(function (CurRowId)
-    {
-        if (true === $('#FileSelected_' + CurRowId).prop("checked"))
-        {
+    $('#FileManagementTable > tr').each(function (CurRowId) {
+        if (true === $('#FileSelected_' + CurRowId).prop("checked")) {
             let FileEntry = {};
             FileEntry["name"] = $('#FileName_' + CurRowId).val().toString();
             files.push(FileEntry);
@@ -530,7 +495,7 @@ async function downloadURI(uri, name, totalLength)
     else
     {
         alert("Download '" + name + "' request was rejected by server");
-	}
+    }
 
 /*
     window.status = "Download '" + name + "' Started";
@@ -553,13 +518,11 @@ async function downloadURI(uri, name, totalLength)
 } // downloadURI
 */
 
-function ParseParameter(name)
-{
+function ParseParameter(name) {
     return (location.search.split(name + '=')[1] || '').split('&')[0];
 }
 
-function ProcessModeConfigurationDatafppremote(channelConfig)
-{
+function ProcessModeConfigurationDatafppremote(channelConfig) {
     let jqSelector = "#fseqfilename";
 
     // remove the existing options
@@ -579,8 +542,7 @@ function ProcessModeConfigurationDatafppremote(channelConfig)
 
 } // ProcessModeConfigurationDatafppremote
 
-function ProcessModeConfigurationDataEffects(channelConfig)
-{
+function ProcessModeConfigurationDataEffects(channelConfig) {
     let jqSelector = "#currenteffect";
 
     // remove the existing options
@@ -597,8 +559,7 @@ function ProcessModeConfigurationDataEffects(channelConfig)
 
 } // ProcessModeConfigurationDataEffects
 
-function ProcessModeConfigurationDataRelay(RelayConfig)
-{
+function ProcessModeConfigurationDataRelay(RelayConfig) {
     // console.log("relaychannelconfigurationtable.rows.length = " + $('#relaychannelconfigurationtable tr').length);
 
     let ChannelConfigs = RelayConfig.channels;
@@ -610,31 +571,31 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
     }
     else {
         $("#Frequency_hr").addClass("hidden");
-	}
+    }
 
     // add as many rows as we need
     for (let CurrentRowId = 1; CurrentRowId <= ChannelConfigs.length; CurrentRowId++) {
         // console.log("CurrentRowId = " + CurrentRowId);
 
-        let ChanIdPattern     = '<td id="chanId_'                            + (CurrentRowId) + '">a</td>';
-        let EnabledPattern    = '<td><input type="checkbox" id="Enabled_'    + (CurrentRowId) + '"></td>';
-        let InvertedPattern   = '<td><input type="checkbox" id="Inverted_'   + (CurrentRowId) + '"></td>';
-        let PwmPattern        = '<td><input type="checkbox" id="Pwm_'        + (CurrentRowId) + '"></td>';
-        let gpioPattern       = '<td><input type="number"   id="gpioId_'     + (CurrentRowId) + '"step="1" min="0" max="34"  value="34"  class="form-control is-valid"></td>';
+        let ChanIdPattern = '<td id="chanId_' + (CurrentRowId) + '">a</td>';
+        let EnabledPattern = '<td><input type="checkbox" id="Enabled_' + (CurrentRowId) + '"></td>';
+        let InvertedPattern = '<td><input type="checkbox" id="Inverted_' + (CurrentRowId) + '"></td>';
+        let PwmPattern = '<td><input type="checkbox" id="Pwm_' + (CurrentRowId) + '"></td>';
+        let gpioPattern = '<td><input type="number"   id="gpioId_' + (CurrentRowId) + '"step="1" min="0" max="34"  value="34"  class="form-control is-valid"></td>';
         let threshholdPattern = '<td><input type="number"   id="threshhold_' + (CurrentRowId) + '"step="1" min="0" max="255" value="300" class="form-control is-valid"></td>';
-        let PwmFreqPattern    = '';
+        let PwmFreqPattern = '';
         if (true === HasPwmFrequency) {
-            PwmFreqPattern    = '<td><input type="number"   id="Frequency_' + (CurrentRowId) + '"step="1" min="100" max="19000" value="19000" class="form-control is-valid"></td>';
+            PwmFreqPattern = '<td><input type="number"   id="Frequency_' + (CurrentRowId) + '"step="1" min="100" max="19000" value="19000" class="form-control is-valid"></td>';
         }
 
         let rowPattern = '<tr>' + ChanIdPattern + EnabledPattern + InvertedPattern + PwmPattern + gpioPattern + threshholdPattern + PwmFreqPattern + '</tr>';
         $('#relaychannelconfigurationtable tr:last').after(rowPattern);
 
-        $('#chanId_'     + CurrentRowId).attr('style', $('#chanId_hr').attr('style'));
-        $('#Enabled_'    + CurrentRowId).attr('style', $('#Enabled_hr').attr('style'));
-        $('#Inverted_'   + CurrentRowId).attr('style', $('#Inverted_hr').attr('style'));
-        $('#Pwm_'        + CurrentRowId).attr('style', $('#Pwm_hr').attr('style'));
-        $('#gpioId_'     + CurrentRowId).attr('style', $('#gpioId_hr').attr('style'));
+        $('#chanId_' + CurrentRowId).attr('style', $('#chanId_hr').attr('style'));
+        $('#Enabled_' + CurrentRowId).attr('style', $('#Enabled_hr').attr('style'));
+        $('#Inverted_' + CurrentRowId).attr('style', $('#Inverted_hr').attr('style'));
+        $('#Pwm_' + CurrentRowId).attr('style', $('#Pwm_hr').attr('style'));
+        $('#gpioId_' + CurrentRowId).attr('style', $('#gpioId_hr').attr('style'));
         $('#threshhold_' + CurrentRowId).attr('style', $('#threshhold_hr').attr('style'));
         if (true === HasPwmFrequency) {
             $('#Frequency_' + CurrentRowId).attr('style', $('#Frequency_hr').attr('style'));
@@ -642,15 +603,14 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
     }
 
     // populate config
-    $.each(ChannelConfigs, function (i, CurrentChannelConfig)
-    {
+    $.each(ChannelConfigs, function (i, CurrentChannelConfig) {
         // console.log("Current Channel Id = " + CurrentChannelConfig.id);
         let currentChannelRowId = CurrentChannelConfig.id + 1;
-        $('#chanId_'     + (currentChannelRowId)).html(currentChannelRowId);
-        $('#Enabled_'    + (currentChannelRowId)).prop("checked", CurrentChannelConfig.en);
-        $('#Inverted_'   + (currentChannelRowId)).prop("checked", CurrentChannelConfig.inv);
-        $('#Pwm_'        + (currentChannelRowId)).prop("checked", CurrentChannelConfig.pwm);
-        $('#gpioId_'     + (currentChannelRowId)).val(CurrentChannelConfig.gid);
+        $('#chanId_' + (currentChannelRowId)).html(currentChannelRowId);
+        $('#Enabled_' + (currentChannelRowId)).prop("checked", CurrentChannelConfig.en);
+        $('#Inverted_' + (currentChannelRowId)).prop("checked", CurrentChannelConfig.inv);
+        $('#Pwm_' + (currentChannelRowId)).prop("checked", CurrentChannelConfig.pwm);
+        $('#gpioId_' + (currentChannelRowId)).val(CurrentChannelConfig.gid);
         $('#threshhold_' + (currentChannelRowId)).val(CurrentChannelConfig.trig);
         if (true === HasPwmFrequency) {
             $('#Frequency_' + (currentChannelRowId)).val(CurrentChannelConfig.Frequency);
@@ -659,8 +619,7 @@ function ProcessModeConfigurationDataRelay(RelayConfig)
 
 } // ProcessModeConfigurationDataRelay
 
-function ProcessModeConfigurationDataServoPCA9685(ServoConfig)
-{
+function ProcessModeConfigurationDataServoPCA9685(ServoConfig) {
     // console.log("Servochannelconfigurationtable.rows.length = " + $('#servo_pca9685channelconfigurationtable tr').length);
 
     let ChannelConfigs = ServoConfig.channels;
@@ -668,32 +627,32 @@ function ProcessModeConfigurationDataServoPCA9685(ServoConfig)
     // add as many rows as we need
     for (let CurrentRowId = 1; CurrentRowId <= ChannelConfigs.length; CurrentRowId++) {
         // console.log("CurrentRowId = " + CurrentRowId);
-        let ChanIdPattern   = '<td                        id="ServoChanId_'                  + (CurrentRowId) + '">a</td>';
-        let EnabledPattern  = '<td><input type="checkbox" id="ServoEnabled_'                 + (CurrentRowId) + '"></td>';
-        let MinLevelPattern = '<td><input type="number"   id="ServoMinLevel_'                + (CurrentRowId) + '"step="1" min="10" max="4095"  value="0"  class="form-control is-valid"></td>';
-        let MaxLevelPattern = '<td><input type="number"   id="ServoMaxLevel_'                + (CurrentRowId) + '"step="1" min="10" max="4095"  value="0"  class="form-control is-valid"></td>';
-        let RestingPattern  = '<td><input type="number"   id="ServoHomeValue_'               + (CurrentRowId) + '"step="1" min="0"  max="255"   value="0"  class="form-control is-valid"></td>';
-        let DataType        = '<td><select class="form-control is-valid" id="ServoDataType_' + (CurrentRowId) + '" title="Effect to generate"></select></td>';
-        
+        let ChanIdPattern = '<td                        id="ServoChanId_' + (CurrentRowId) + '">a</td>';
+        let EnabledPattern = '<td><input type="checkbox" id="ServoEnabled_' + (CurrentRowId) + '"></td>';
+        let MinLevelPattern = '<td><input type="number"   id="ServoMinLevel_' + (CurrentRowId) + '"step="1" min="10" max="4095"  value="0"  class="form-control is-valid"></td>';
+        let MaxLevelPattern = '<td><input type="number"   id="ServoMaxLevel_' + (CurrentRowId) + '"step="1" min="10" max="4095"  value="0"  class="form-control is-valid"></td>';
+        let RestingPattern = '<td><input type="number"   id="ServoHomeValue_' + (CurrentRowId) + '"step="1" min="0"  max="255"   value="0"  class="form-control is-valid"></td>';
+        let DataType = '<td><select class="form-control is-valid" id="ServoDataType_' + (CurrentRowId) + '" title="Effect to generate"></select></td>';
+
         let rowPattern = '<tr>' + ChanIdPattern + EnabledPattern + MinLevelPattern + MaxLevelPattern + DataType + RestingPattern + '</tr>';
 
         $('#servo_pca9685channelconfigurationtable tr:last').after(rowPattern);
 
-        $('#ServoChanId_'    + CurrentRowId).attr('style', $('#ServoChanId_hr').attr('style'));
-        $('#ServoEnabled_'   + CurrentRowId).attr('style', $('#ServoEnabled_hr').attr('style'));
-        $('#ServoMinLevel_'  + CurrentRowId).attr('style', $('#ServoMinLevel_hr').attr('style'));
-        $('#ServoMaxLevel_'  + CurrentRowId).attr('style', $('#ServoMaxLevel_hr').attr('style'));
+        $('#ServoChanId_' + CurrentRowId).attr('style', $('#ServoChanId_hr').attr('style'));
+        $('#ServoEnabled_' + CurrentRowId).attr('style', $('#ServoEnabled_hr').attr('style'));
+        $('#ServoMinLevel_' + CurrentRowId).attr('style', $('#ServoMinLevel_hr').attr('style'));
+        $('#ServoMaxLevel_' + CurrentRowId).attr('style', $('#ServoMaxLevel_hr').attr('style'));
         $('#ServoHomeValue_' + CurrentRowId).attr('style', $('#ServoHomeValue_hr').attr('style'));
-        $('#ServoDataType_'  + CurrentRowId).attr('style', $('#ServoDataType_hr').attr('style'));
+        $('#ServoDataType_' + CurrentRowId).attr('style', $('#ServoDataType_hr').attr('style'));
     }
 
     $.each(ChannelConfigs, function (i, CurrentChannelConfig) {
         // console.log("Current Channel Id = " + CurrentChannelConfig.id);
         let currentChannelRowId = CurrentChannelConfig.id + 1;
-        $('#ServoChanId_'    + (currentChannelRowId)).html(currentChannelRowId);
-        $('#ServoEnabled_'   + (currentChannelRowId)).prop("checked", CurrentChannelConfig.en);
-        $('#ServoMinLevel_'  + (currentChannelRowId)).val(CurrentChannelConfig.Min);
-        $('#ServoMaxLevel_'  + (currentChannelRowId)).val(CurrentChannelConfig.Max);
+        $('#ServoChanId_' + (currentChannelRowId)).html(currentChannelRowId);
+        $('#ServoEnabled_' + (currentChannelRowId)).prop("checked", CurrentChannelConfig.en);
+        $('#ServoMinLevel_' + (currentChannelRowId)).val(CurrentChannelConfig.Min);
+        $('#ServoMaxLevel_' + (currentChannelRowId)).val(CurrentChannelConfig.Max);
         $('#ServoHomeValue_' + (currentChannelRowId)).val(CurrentChannelConfig.hv);
 
         let jqSelector = "#ServoDataType_" + (currentChannelRowId);
@@ -711,30 +670,27 @@ function ProcessModeConfigurationDataServoPCA9685(ServoConfig)
 
         // set the current selector value
         $(jqSelector).val((CurrentChannelConfig.rev << 0) +
-                          (CurrentChannelConfig.sca << 1) +
-                          (CurrentChannelConfig.b16 << 2) );
+            (CurrentChannelConfig.sca << 1) +
+            (CurrentChannelConfig.b16 << 2));
     });
 
 } // ProcessModeConfigurationDataServoPCA9685
 
-function ProcessInputConfig()
-{
+function ProcessInputConfig() {
     $("#ecb_enable").prop("checked", Input_Config.ecb.enabled);
     $("#ecb_gpioid").val(Input_Config.ecb.id);
     $("#ecb_polarity").val(Input_Config.ecb.polarity);
 
 } // ProcessInputConfig
 
-function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig )
-{
+function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
     // console.info("ProcessModeConfigurationData: Start");
 
     // determine the type of in/output that has been selected and populate the form
-    let TypeOfChannelId = parseInt($('#' + ChannelType +  channelId + " option:selected").val(), 10);
+    let TypeOfChannelId = parseInt($('#' + ChannelType + channelId + " option:selected").val(), 10);
     let channelConfigSet = JsonConfig.channels[channelId];
 
-    if (isNaN(TypeOfChannelId))
-    {
+    if (isNaN(TypeOfChannelId)) {
         // use the value we got from the controller
         TypeOfChannelId = channelConfigSet.type;
     }
@@ -756,45 +712,36 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig )
         $(modeControlName + ' #Title')[0].innerHTML = ModeDisplayName;
     }
 
-    elementids = $(modeControlName + ' *[id]').filter(":input").map(function ()
-    {
+    elementids = $(modeControlName + ' *[id]').filter(":input").map(function () {
         return $(this).attr('id');
     }).get();
 
-    elementids.forEach(function (elementid)
-    {
+    elementids.forEach(function (elementid) {
         let SelectedElement = modeControlName + ' #' + elementid;
-        if ($(SelectedElement).is(':checkbox'))
-        {
+        if ($(SelectedElement).is(':checkbox')) {
             $(SelectedElement).prop('checked', channelConfig[elementid]);
         }
-        else
-        {
+        else {
             $(SelectedElement).val(channelConfig[elementid]);
         }
     });
 
-    if ("fpp_remote" === ChannelTypeName)
-    {
-        if (null !== Fseq_File_List)
-        {
+    if ("fpp_remote" === ChannelTypeName) {
+        if (null !== Fseq_File_List) {
             ProcessModeConfigurationDatafppremote(channelConfig);
         }
     }
 
-    else if ("effects" === ChannelTypeName)
-    {
+    else if ("effects" === ChannelTypeName) {
         ProcessModeConfigurationDataEffects(channelConfig);
     }
 
-    else if ("relay" === ChannelTypeName)
-    {
+    else if ("relay" === ChannelTypeName) {
         // console.info("ProcessModeConfigurationData: relay");
         ProcessModeConfigurationDataRelay(channelConfig);
     }
 
-    else if ("servo_pca9685" === ChannelTypeName)
-    {
+    else if ("servo_pca9685" === ChannelTypeName) {
         // console.info("ProcessModeConfigurationData: servo");
         ProcessModeConfigurationDataServoPCA9685(channelConfig);
     }
@@ -806,29 +753,25 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig )
 
 } // ProcessModeConfigurationData
 
-function ProcessReceivedJsonConfigMessage(JsonConfigData)
-{
+function ProcessReceivedJsonConfigMessage(JsonConfigData) {
     // console.info("ProcessReceivedJsonConfigMessage: Start");
 
     // is this an output config?
-    if ({}.hasOwnProperty.call(JsonConfigData, "output_config"))
-    {
+    if ({}.hasOwnProperty.call(JsonConfigData, "output_config")) {
         // save the config for later use.
         Output_Config = JsonConfigData.output_config;
         CreateOptionsFromConfig("output", Output_Config);
     }
 
     // is this an input config?
-    else if ({}.hasOwnProperty.call(JsonConfigData, "input_config"))
-    {
+    else if ({}.hasOwnProperty.call(JsonConfigData, "input_config")) {
         // save the config for later use.
         Input_Config = JsonConfigData.input_config;
         CreateOptionsFromConfig("input", Input_Config);
     }
 
     // is this a device config?
-    else if ({}.hasOwnProperty.call(JsonConfigData, "system"))
-    {
+    else if ({}.hasOwnProperty.call(JsonConfigData, "system")) {
         System_Config = JsonConfigData.system;
         // console.info("Got System Config: " + System_Config);
 
@@ -844,19 +787,16 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
     }
 
     // is this a file list?
-    else if ({}.hasOwnProperty.call(JsonConfigData, "files"))
-    {
+    else if ({}.hasOwnProperty.call(JsonConfigData, "files")) {
         ProcessGetFileListResponse(JsonConfigData);
     }
 
     // is this an ACK response?
-    else if ({}.hasOwnProperty.call(JsonConfigData, "OK"))
-    {
+    else if ({}.hasOwnProperty.call(JsonConfigData, "OK")) {
         // console.info("Received Acknowledgement to config set command.")
     }
 
-    else
-    {
+    else {
         console.error("unknown configuration record type has been ignored.")
     }
 
@@ -865,24 +805,18 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData)
 } // ProcessReceivedJsonConfigMessage
 
 // Builds jQuery selectors from JSON data and updates the web interface
-function updateFromJSON(obj)
-{
-    for (let k in obj)
-    {
+function updateFromJSON(obj) {
+    for (let k in obj) {
         selector.push('#' + k);
-        if (typeof obj[k] === 'object' && obj[k] !== null)
-        {
+        if (typeof obj[k] === 'object' && obj[k] !== null) {
             updateFromJSON(obj[k]);
         }
-        else
-        {
+        else {
             let jqSelector = selector.join(' ');
-            if (typeof obj[k] === 'boolean')
-            {
+            if (typeof obj[k] === 'boolean') {
                 $(jqSelector).prop('checked', obj[k]);
             }
-            else
-            {
+            else {
                 $(jqSelector).val(obj[k]);
             }
 
@@ -897,11 +831,10 @@ function updateFromJSON(obj)
     $('#device-id').text($('#config #id').val());
 }
 
-function GenerateInputOutputControlLabel(OptionListName, DisplayedChannelId)
-{
+function GenerateInputOutputControlLabel(OptionListName, DisplayedChannelId) {
     let Id = parseInt(DisplayedChannelId) + 1;
     let NewName = '';
-//TODO: Dirty Hack to clean-up Input lables
+    //TODO: Dirty Hack to clean-up Input lables
     if (OptionListName === `input`) {
         NewName = (Id === 1) ? 'Primary Input' : 'Secondary Input'
     } else {
@@ -912,8 +845,7 @@ function GenerateInputOutputControlLabel(OptionListName, DisplayedChannelId)
 
 } // GenerateInputOutputControlLabel
 
-function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId )
-{
+function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId) {
     // console.info("OptionListName: " + OptionListName);
     // console.info("DisplayedChannelId: " + DisplayedChannelId);
 
@@ -924,24 +856,19 @@ function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId )
     HtmlLoadFileName = HtmlLoadFileName + ".html";
     // console.info("Adjusted HtmlLoadFileName: " + HtmlLoadFileName);
 
-//TODO: Detect modules that don't require configuration - DDP, Alexa, ?
-    if ("disabled.html" === HtmlLoadFileName)
-    {
+    //TODO: Detect modules that don't require configuration - DDP, Alexa, ?
+    if ("disabled.html" === HtmlLoadFileName) {
         $('#' + OptionListName + 'mode' + DisplayedChannelId).empty();
         $('#refresh').html('-');
     }
-    else
-    {
+    else {
         // try to load the field definition file for this channel type
-        $('#' + OptionListName + 'mode' + DisplayedChannelId).load(HtmlLoadFileName, function ()
-        {
-            if ("input" === OptionListName)
-            {
+        $('#' + OptionListName + 'mode' + DisplayedChannelId).load(HtmlLoadFileName, function () {
+            if ("input" === OptionListName) {
                 ProcessInputConfig();
                 ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Input_Config);
             }
-            else if ("output" === OptionListName)
-            {
+            else if ("output" === OptionListName) {
                 ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Output_Config);
 
                 // Trigger refresh update for outputs
@@ -952,29 +879,25 @@ function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId )
 
 } // LoadDeviceSetupSelectedOption
 
-function CreateOptionsFromConfig(OptionListName, Config)
-{
+function CreateOptionsFromConfig(OptionListName, Config) {
     // console.info("CreateOptionsFromConfig");
 
     // Set selection column width based on arch which equates to number of outputs for now
     let col = (AdminInfo.arch === 'ESP8266') ? '4' : '2';
     let Channels = Config.channels;
 
-    if ("input" === OptionListName)
-    {
+    if ("input" === OptionListName) {
         $('#ecpin').val(Config.ecpin);
     }
 
     // for each field we need to populate (input vs output)
-    Object.keys(Channels).forEach(function (ChannelId)
-    {
+    Object.keys(Channels).forEach(function (ChannelId) {
         // OptionListName is 'input' or 'output'
         // console.info("ChannelId: " + ChannelId);
         let CurrentChannel = Channels[ChannelId];
 
         // does the selection box we need already exist?
-        if (!$('#' + OptionListName + 'mode' + ChannelId).length)
-        {
+        if (!$('#' + OptionListName + 'mode' + ChannelId).length) {
             // console.log(`OptionListName: ${OptionListName}`)
             // create the selection box
             $(`#fg_${OptionListName}`).append(`<label class="control-label col-sm-2" for="${OptionListName}${ChannelId}">${GenerateInputOutputControlLabel(OptionListName, ChannelId)}</label>`);
@@ -989,22 +912,18 @@ function CreateOptionsFromConfig(OptionListName, Config)
         $(jqSelector).empty();
 
         // for each Channel type in the list
-        Object.keys(CurrentChannel).forEach(function (SelectionTypeId)
-        {
+        Object.keys(CurrentChannel).forEach(function (SelectionTypeId) {
             // console.info("SelectionId: " + SelectionTypeId);
-            if ("type" === SelectionTypeId)
-            {
+            if ("type" === SelectionTypeId) {
                 // console.info("Set the selector type to: " + CurrentChannel.type);
                 $(jqSelector).val(CurrentChannel.type);
                 LoadDeviceSetupSelectedOption(OptionListName, ChannelId);
-                $(jqSelector).change(function ()
-                {
+                $(jqSelector).change(function () {
                     // console.info("Set the selector type to: " + CurrentChannel.type);
                     LoadDeviceSetupSelectedOption(OptionListName, ChannelId);
                 });
             }
-            else
-            {
+            else {
                 let CurrentSection = CurrentChannel[SelectionTypeId];
                 // console.info("Add '" + CurrentSection.type + "' to selector");
                 $(jqSelector).append('<option value="' + SelectionTypeId + '">' + CurrentSection.type + '</option>');
@@ -1014,38 +933,36 @@ function CreateOptionsFromConfig(OptionListName, Config)
 } // CreateOptionsFromConfig
 
 // Builds JSON config submission for "WiFi" tab
-function ExtractNetworkWiFiConfigFromHtmlPage()
-{
+function ExtractNetworkWiFiConfigFromHtmlPage() {
     let wifi = System_Config.network.wifi;
-    wifi.ssid        = $('#network #wifi #ssid').val();
-    wifi.passphrase  = $('#network #wifi #passphrase').val();
+    wifi.ssid = $('#network #wifi #ssid').val();
+    wifi.passphrase = $('#network #wifi #passphrase').val();
     wifi.sta_timeout = $('#network #wifi #sta_timeout').val();
-    wifi.ip          = $('#network #wifi #ip').val();
-    wifi.netmask     = $('#network #wifi #netmask').val();
-    wifi.gateway     = $('#network #wifi #gateway').val();
-    wifi.dhcp        = $('#network #wifi #dhcp').prop('checked');
+    wifi.ip = $('#network #wifi #ip').val();
+    wifi.netmask = $('#network #wifi #netmask').val();
+    wifi.gateway = $('#network #wifi #gateway').val();
+    wifi.dhcp = $('#network #wifi #dhcp').prop('checked');
     wifi.ap_fallback = $('#network #wifi #ap_fallback').prop('checked');
-    wifi.ap_reboot   = $('#network #wifi #ap_reboot').prop('checked');
-    wifi.ap_timeout  = $('#network #wifi #ap_timeout').val();
+    wifi.ap_reboot = $('#network #wifi #ap_reboot').prop('checked');
+    wifi.ap_timeout = $('#network #wifi #ap_timeout').val();
+    wifi.StayInApMode = $('#network #wifi #StayInApMode').val();
 
 } // ExtractNetworkWiFiConfigFromHtmlPage
 
-function ExtractNetworkEthernetConfigFromHtmlPage()
-{
-    if ({}.hasOwnProperty.call(System_Config.network, "eth"))
-    {
-        System_Config.network.weus            = $('#network #eth #weus').prop('checked');
+function ExtractNetworkEthernetConfigFromHtmlPage() {
+    if ({}.hasOwnProperty.call(System_Config.network, "eth")) {
+        System_Config.network.weus = $('#network #eth #weus').prop('checked');
 
-        System_Config.network.eth.ip          = $('#network #eth #ip').val();
-        System_Config.network.eth.netmask     = $('#network #eth #netmask').val();
-        System_Config.network.eth.gateway     = $('#network #eth #gateway').val();
-        System_Config.network.eth.dhcp        = $('#network #eth #dhcp').prop('checked');
-        System_Config.network.eth.type        = parseInt($('#network #eth #type option:selected').val(), 10);
-        System_Config.network.eth.addr        = $('#network #eth #addr').val();
-        System_Config.network.eth.power_pin   = $('#network #eth #power_pin').val();
-        System_Config.network.eth.mode        = parseInt($('#network #eth #mode option:selected').val(), 10);
-        System_Config.network.eth.mdc_pin     = $('#network #eth #mdc_pin').val();
-        System_Config.network.eth.mdio_pin    = $('#network #eth #mdio_pin').val();
+        System_Config.network.eth.ip = $('#network #eth #ip').val();
+        System_Config.network.eth.netmask = $('#network #eth #netmask').val();
+        System_Config.network.eth.gateway = $('#network #eth #gateway').val();
+        System_Config.network.eth.dhcp = $('#network #eth #dhcp').prop('checked');
+        System_Config.network.eth.type = parseInt($('#network #eth #type option:selected').val(), 10);
+        System_Config.network.eth.addr = $('#network #eth #addr').val();
+        System_Config.network.eth.power_pin = $('#network #eth #power_pin').val();
+        System_Config.network.eth.mode = parseInt($('#network #eth #mode option:selected').val(), 10);
+        System_Config.network.eth.mdc_pin = $('#network #eth #mdc_pin').val();
+        System_Config.network.eth.mdio_pin = $('#network #eth #mdio_pin').val();
         System_Config.network.eth.activevalue = (parseInt($('#network #eth #activevalue option:selected').val(), 10) === 1);
         System_Config.network.eth.activedelay = $('#network #eth #activedelay').val();
     }
@@ -1053,8 +970,7 @@ function ExtractNetworkEthernetConfigFromHtmlPage()
 } // ExtractNetworkEthernetConfigFromHtmlPage
 
 // Builds JSON config submission for "Network" tab
-function ExtractNetworkConfigFromHtmlPage()
-{
+function ExtractNetworkConfigFromHtmlPage() {
     System_Config.network.hostname = $('#hostname').val();
 
     ExtractNetworkWiFiConfigFromHtmlPage();
@@ -1063,31 +979,27 @@ function ExtractNetworkConfigFromHtmlPage()
 } // ExtractNetworkConfigFromHtmlPage
 
 // Builds JSON config submission for "WiFi" tab
-function submitNetworkConfig()
-{
-    System_Config.device.id        = $('#config #device #id').val();
+function submitNetworkConfig() {
+    System_Config.device.id = $('#config #device #id').val();
     System_Config.device.blanktime = $('#config #device #blanktime').val();
-    System_Config.device.miso_pin  = $('#config #device #miso_pin').val();
-    System_Config.device.mosi_pin  = $('#config #device #mosi_pin').val();
+    System_Config.device.miso_pin = $('#config #device #miso_pin').val();
+    System_Config.device.mosi_pin = $('#config #device #mosi_pin').val();
     System_Config.device.clock_pin = $('#config #device #clock_pin').val();
-    System_Config.device.cs_pin    = $('#config #device #cs_pin').val();
+    System_Config.device.cs_pin = $('#config #device #cs_pin').val();
 
     ExtractNetworkConfigFromHtmlPage();
 
     // console.info("Send: " + JSON.stringify({ 'cmd': { 'set': { 'system': System_Config } } }));
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'system': System_Config }}}));
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'system': System_Config } } }));
 
 } // submitNetworkConfig
 
-function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
-{
+function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName) {
     // for each option channel:
-    jQuery.each(JsonConfig, function (DisplayedChannelId, CurrentChannelConfigurationData)
-    {
+    jQuery.each(JsonConfig, function (DisplayedChannelId, CurrentChannelConfigurationData) {
         let elementids = [];
         let modeControlName = '#' + SectionName + 'mode' + DisplayedChannelId;
-        elementids = $(modeControlName + ' *[id]').filter(":input").map(function ()
-        {
+        elementids = $(modeControlName + ' *[id]').filter(":input").map(function () {
             return $(this).attr('id');
         }).get();
 
@@ -1097,42 +1009,39 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
         // tell the ESP what type of channel it should be using
         CurrentChannelConfigurationData.type = ChannelType;
 
-        if ((ChannelConfig.type === "Relay") && ($("#relaychannelconfigurationtable").length))
-        {
+        if ((ChannelConfig.type === "Relay") && ($("#relaychannelconfigurationtable").length)) {
             ChannelConfig.updateinterval = parseInt($('#updateinterval').val(), 10);
             $.each(ChannelConfig.channels, function (i, CurrentChannelConfig) {
                 // console.info("Current Channel Id = " + CurrentChannelConfig.id);
                 let currentChannelRowId = CurrentChannelConfig.id + 1;
-                CurrentChannelConfig.en   = $('#Enabled_' + (currentChannelRowId)).prop("checked");
-                CurrentChannelConfig.inv  = $('#Inverted_' + (currentChannelRowId)).prop("checked");
-                CurrentChannelConfig.pwm  = $('#Pwm_' + (currentChannelRowId)).prop("checked");
-                CurrentChannelConfig.gid  = parseInt($('#gpioId_' + (currentChannelRowId)).val(), 10);
+                CurrentChannelConfig.en = $('#Enabled_' + (currentChannelRowId)).prop("checked");
+                CurrentChannelConfig.inv = $('#Inverted_' + (currentChannelRowId)).prop("checked");
+                CurrentChannelConfig.pwm = $('#Pwm_' + (currentChannelRowId)).prop("checked");
+                CurrentChannelConfig.gid = parseInt($('#gpioId_' + (currentChannelRowId)).val(), 10);
                 CurrentChannelConfig.trig = parseInt($('#threshhold_' + (currentChannelRowId)).val(), 10);
 
                 if ({}.hasOwnProperty.call(ChannelConfig, "Frequency")) {
                     CurrentChannelConfig.Frequency = parseInt($('#Frequency_' + (currentChannelRowId)).val(), 10);
-				}
+                }
             });
         }
-        else if ((ChannelConfig.type === "Servo PCA9685") && ($("#servo_pca9685channelconfigurationtable").length))
-        {
+        else if ((ChannelConfig.type === "Servo PCA9685") && ($("#servo_pca9685channelconfigurationtable").length)) {
             ChannelConfig.updateinterval = parseInt($('#updateinterval').val(), 10);
             $.each(ChannelConfig.channels, function (i, CurrentChannelConfig) {
                 // console.info("Current Channel Id = " + CurrentChannelConfig.id);
-                let currentChannelRowId  = CurrentChannelConfig.id + 1;
-                CurrentChannelConfig.en  = $('#ServoEnabled_' + (currentChannelRowId)).prop("checked");
-                CurrentChannelConfig.Min = parseInt($('#ServoMinLevel_'  + (currentChannelRowId)).val(), 10);
-                CurrentChannelConfig.Max = parseInt($('#ServoMaxLevel_'  + (currentChannelRowId)).val(), 10);
-                CurrentChannelConfig.hv  = parseInt($('#ServoHomeValue_' + (currentChannelRowId)).val(), 10);
-                let ServoDataType        = parseInt($('#ServoDataType_'  + (currentChannelRowId)).val(), 10);
+                let currentChannelRowId = CurrentChannelConfig.id + 1;
+                CurrentChannelConfig.en = $('#ServoEnabled_' + (currentChannelRowId)).prop("checked");
+                CurrentChannelConfig.Min = parseInt($('#ServoMinLevel_' + (currentChannelRowId)).val(), 10);
+                CurrentChannelConfig.Max = parseInt($('#ServoMaxLevel_' + (currentChannelRowId)).val(), 10);
+                CurrentChannelConfig.hv = parseInt($('#ServoHomeValue_' + (currentChannelRowId)).val(), 10);
+                let ServoDataType = parseInt($('#ServoDataType_' + (currentChannelRowId)).val(), 10);
 
                 CurrentChannelConfig.rev = (ServoDataType & 0x01) ? true : false;
                 CurrentChannelConfig.sca = (ServoDataType & 0x02) ? true : false;
                 CurrentChannelConfig.b16 = (ServoDataType & 0x04) ? true : false;
             });
         }
-        else
-        {
+        else {
             elementids.forEach(function (elementid) {
                 let SelectedElement = modeControlName + ' #' + elementid;
                 if ($(SelectedElement).is(':checkbox')) {
@@ -1147,23 +1056,19 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName)
 
 } // ExtractChannelConfigFromHtmlPage
 
-function ValidateConfigFields(ElementList)
-{
+function ValidateConfigFields(ElementList) {
     // return true if errors were found
     let response = false;
 
     for (let ChildElementId = 0;
-         ChildElementId < ElementList.length;
-         ChildElementId++)
-    {
+        ChildElementId < ElementList.length;
+        ChildElementId++) {
         let ChildElement = ElementList[ChildElementId];
         // let ChildType = ChildElement.type;
 
-        if ((ChildElement.validity.valid !== undefined) && (!$(ChildElement).hasClass('hidden')))
-        {
+        if ((ChildElement.validity.valid !== undefined) && (!$(ChildElement).hasClass('hidden'))) {
             // console.info("ChildElement.validity.valid: " + ChildElement.validity.valid);
-            if (false === ChildElement.validity.valid)
-            {
+            if (false === ChildElement.validity.valid) {
                 // console.info("          Element: " + ChildElement.id);
                 // console.info("   ChildElementId: " + ChildElementId);
                 // console.info("ChildElement Type: " + ChildType);
@@ -1176,23 +1081,21 @@ function ValidateConfigFields(ElementList)
 } // ValidateConfigFields
 
 // Build dynamic JSON config submission for "Device" tab
-function submitDeviceConfig()
-{
+function submitDeviceConfig() {
     ExtractChannelConfigFromHtmlPage(Input_Config.channels, "input");
-    Input_Config.ecb.enabled  = $("#ecb_enable").is(':checked');
-    Input_Config.ecb.id       = $("#ecb_gpioid").val();
+    Input_Config.ecb.enabled = $("#ecb_enable").is(':checked');
+    Input_Config.ecb.id = $("#ecb_gpioid").val();
     Input_Config.ecb.polarity = $("#ecb_polarity").val();
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
     submitNetworkConfig();
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input':  { 'input_config':  Input_Config  } } } }));
+    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input': { 'input_config': Input_Config } } } }));
     wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'output': { 'output_config': Output_Config } } } }));
 
 } // submitDeviceConfig
 
-function convertUTCDateToLocalDate(date)
-{
+function convertUTCDateToLocalDate(date) {
     date = new Date(date);
     let localOffset = date.getTimezoneOffset() * 60000;
     let localTime = date.getTime();
@@ -1201,11 +1104,9 @@ function convertUTCDateToLocalDate(date)
     return date;
 } // convertUTCDateToLocalDate
 
-function int2ip(num)
-{
+function int2ip(num) {
     let d = num % 256;
-    for (let i = 3; i > 0; i--)
-    {
+    for (let i = 3; i > 0; i--) {
         num = Math.floor(num / 256);
         d = d + '.' + num % 256;
     }
@@ -1218,12 +1119,9 @@ function int2ip(num)
 //
 ////////////////////////////////////////////////////
 // On websocket connect
-function wsConnect()
-{
-    if ('WebSocket' in window)
-    {
-        if (!(target = ParseParameter('target')))
-        {
+function wsConnect() {
+    if ('WebSocket' in window) {
+        if (!(target = ParseParameter('target'))) {
             target = document.location.host;
         }
 
@@ -1233,14 +1131,12 @@ function wsConnect()
         // Open a new web socket and set the binary type
         ws = new WebSocket('ws://' + target + '/ws');
         ws.binaryType = 'arraybuffer';
-        ws.onclose = function (event)
-        {
+        ws.onclose = function (event) {
             console.error('WebSocket Close: ', event);
         };
         // When connection is opened, get core data.
         // Module data is loaded in module change / load callbacks
-        ws.onopen = function (event)
-        {
+        ws.onopen = function (event) {
             console.info("ws.onopen " + event);
 
             // Start ping-pong heartbeat
@@ -1259,7 +1155,7 @@ function wsConnect()
 
             // console.info("ws.onopen: Start Sending");
             // Push time
-            wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'time': { 'time_t': convertUTCDateToLocalDate(Date())/1000 } } } }));
+            wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'time': { 'time_t': convertUTCDateToLocalDate(Date()) / 1000 } } } }));
 
             // Process an admin message to populate AdminInfo
             wsEnqueue('XA');
@@ -1269,14 +1165,12 @@ function wsConnect()
             RequestStatusUpdate();  // start self filling status loop
         };
 
-        ws.onmessage = function (event)
-        {
+        ws.onmessage = function (event) {
             // reset the heartbeat timers
             wsPingPong();
 
             // console.info("ws.onmessage: Start");
-            if (typeof event.data === "string")
-            {
+            if (typeof event.data === "string") {
                 console.debug("WS RECV: " + event.data);
 
                 // Process "simple" X message format
@@ -1287,8 +1181,7 @@ function wsConnect()
                 //   DO_FACTORYRESET = '7',
                 //   PING            = 'P',
 
-                if (event.data.startsWith("X"))
-                {
+                if (event.data.startsWith("X")) {
                     switch (event.data[1]) {
                         case 'J': {
                             let data = event.data.substr(2);
@@ -1307,28 +1200,24 @@ function wsConnect()
                         }
                     }
                 }
-                else
-                {
+                else {
                     // console.info("ws.onmessage: Received: " + event.data);
                     let msg = JSON.parse(event.data);
                     // "GET" message is a response to a get request. Populate the frontend.
-                    if ({}.hasOwnProperty.call(msg, "get"))
-                    {
+                    if ({}.hasOwnProperty.call(msg, "get")) {
                         ProcessReceivedJsonConfigMessage(msg.get);
                     }
 
-//TODO: This never gets called now as we're sending 'cmd': 'OK' back instead of 'set' with the updated config
+                    //TODO: This never gets called now as we're sending 'cmd': 'OK' back instead of 'set' with the updated config
                     // "SET" message is a response to a set request. Data has been validated and saved, Populate the frontend.
-                    if ({}.hasOwnProperty.call(msg, "set"))
-                    {
+                    if ({}.hasOwnProperty.call(msg, "set")) {
                         ProcessReceivedJsonConfigMessage(msg.set);
                         snackSave();
                     }
 
-//TODO: Inform user configuration was saved, but this is broken as the UI could be in an invalid state
-//      if the validation routines changed their config. To be fixed in UI update.
-                    if ({}.hasOwnProperty.call(msg, 'cmd'))
-                    {
+                    //TODO: Inform user configuration was saved, but this is broken as the UI could be in an invalid state
+                    //      if the validation routines changed their config. To be fixed in UI update.
+                    if ({}.hasOwnProperty.call(msg, 'cmd')) {
                         if (msg.cmd === 'OK') {
                             // console.log('---- OK ----');
                             snackSave();
@@ -1336,14 +1225,12 @@ function wsConnect()
                     }
                 }
             }
-            else
-            {
+            else {
                 // console.info("Stream Data");
 
                 let streamData = new Uint8Array(event.data);
                 drawStream(streamData);
-                if ($('#diag').is(':visible'))
-                {
+                if ($('#diag').is(':visible')) {
                     wsEnqueue('V1');
                 }
             }
@@ -1355,21 +1242,18 @@ function wsConnect()
             // console.info("ws.onmessage: Done");
         }; // onmessage
 
-        ws.onerror = function(event)
-        {
+        ws.onerror = function (event) {
             console.error("WebSocket error: ", event);
 
         };
     }
-    else
-    {
+    else {
         alert('WebSockets is NOT supported by your Browser! You will need to upgrade your browser or downgrade to v2.0 of the ESPixelStick firmware.');
     }
 }
 
 // Ping every 4sec, Reconnect after 12sec
-function wsPingPong()
-{
+function wsPingPong() {
     // Ping Pong connection detection
     clearTimeout(pingTimer);
     clearTimeout(pongTimer);
@@ -1377,12 +1261,10 @@ function wsPingPong()
     if (false === IsDocumentHidden) {
         pingTimer = setTimeout(function () {
             // is the socket still open?
-            if (ws.readyState === 3)
-            {
+            if (ws.readyState === 3) {
                 wsReconnect();
             }
-            else
-            {
+            else {
                 ws.send('XP');
                 // wsEnqueue('XP');
             }
@@ -1392,12 +1274,11 @@ function wsPingPong()
         pongTimer = setTimeout(function () {
             wsReconnect();
         }, 6000);
-	}
+    }
 }
 
 // Attempt to reconnect
-function wsReconnect()
-{
+function wsReconnect() {
     $('#wserror').modal();
     clearTimeout(pingTimer);
     clearTimeout(pongTimer);
@@ -1408,33 +1289,27 @@ function wsReconnect()
 }
 
 // Websocket message queuer
-function wsEnqueue(message)
-{
+function wsEnqueue(message) {
     // only send messages if the WS interface is up and document is visible
-    if (ws.readyState !== 1)
-    {
-        console.debug ("WS is down - readyState: " + ws.readyState);
-        console.debug ("WS is down - Discarding msg: " + message);
+    if (ws.readyState !== 1) {
+        console.debug("WS is down - readyState: " + ws.readyState);
+        console.debug("WS is down - Discarding msg: " + message);
     }
 
-    else if (wsPaused)
-    {
-        console.debug ("WS Paused - Discarding msg: " + message)
+    else if (wsPaused) {
+        console.debug("WS Paused - Discarding msg: " + message)
     }
 
-    else
-    {
+    else {
         wsOutputQueue.push(message);
         wsProcessOutputQueue();
 
     } // WS is up
 } // wsEnqueue
 
-function wsFlushAndHaltTheOutputQueue()
-{
+function wsFlushAndHaltTheOutputQueue() {
     // do we have a send timer running?
-    if (null !== wsOutputQueueTimer)
-    {
+    if (null !== wsOutputQueueTimer) {
         // stop the timer
         clearTimeout(wsOutputQueueTimer);
         wsOutputQueueTimer = null;
@@ -1444,8 +1319,7 @@ function wsFlushAndHaltTheOutputQueue()
     wsBusy = true;
 
     // empty the output queue
-    while (wsOutputQueue.length > 0)
-    {
+    while (wsOutputQueue.length > 0) {
         //get the next message from the queue.
         let message = wsOutputQueue.shift();
         console.debug("Discarding msg: " + message);
@@ -1453,25 +1327,21 @@ function wsFlushAndHaltTheOutputQueue()
 } // wsFlushAndHaltTheOutputQueue
 
 // Websocket message queuer
-function wsProcessOutputQueue()
-{
+function wsProcessOutputQueue() {
     // console.log('wsProcessOutputQueue');
 
     // only send messages if the WS interface is up
-    if (ws.readyState !== 1)
-    {
+    if (ws.readyState !== 1) {
         // The interface is NOT up. Flush the queue
         // console.log('wsProcessOutputQueue: WS Down. Flush');
         wsFlushAndHaltTheOutputQueue();
     }
 
     // Pause processing
-    else if (document.hidden)
-    {
-        console.debug (`WS Paused - Holding msg: ${wsOutputQueue}`);
+    else if (document.hidden) {
+        console.debug(`WS Paused - Holding msg: ${wsOutputQueue}`);
         wsPaused = true;
-        if (null !== wsOutputQueueTimer)
-        {
+        if (null !== wsOutputQueueTimer) {
             // stop the timer
             clearTimeout(wsOutputQueueTimer);
             wsOutputQueueTimer = null;
@@ -1480,13 +1350,11 @@ function wsProcessOutputQueue()
     }
 
     //check if we are currently waiting for a response
-    else if (wsBusy === true)
-    {
+    else if (wsBusy === true) {
         // console.log('wsProcessOutputQueue: Busy');
     } // cant send yet
 
-    else if (wsOutputQueue.length > 0)
-    {
+    else if (wsOutputQueue.length > 0) {
         //set the wsBusy flag indicating that we are waiting for a response
         wsBusy = true;
 
@@ -1499,15 +1367,13 @@ function wsProcessOutputQueue()
 
         // Short WaitForResponseTimeMS for message types that don't generate a response.
         let UseShortDelay = ['T0', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'X6'].indexOf(OutputMessage.substr(0, 2));
-        if (UseShortDelay !== -1)
-        {
+        if (UseShortDelay !== -1) {
             // warning, setting this value too low can cause a rentrance issue
             WaitForResponseTimeMS = 50;
         }
 
         // set up a new timer
-        wsOutputQueueTimer = setTimeout(function ()
-        {
+        wsOutputQueueTimer = setTimeout(function () {
             // console.info('WS Send Timer expired');
 
             // Move on to the next message
@@ -1524,11 +1390,9 @@ function wsProcessOutputQueue()
 } // wsProcessOutputQueue
 
 // Websocket message queuer
-function wsReadyToSend()
-{
+function wsReadyToSend() {
     // is a timer running?
-    if (null !== wsOutputQueueTimer)
-    {
+    if (null !== wsOutputQueueTimer) {
         // stop the timer
         clearTimeout(wsOutputQueueTimer);
         wsOutputQueueTimer = null;
@@ -1544,28 +1408,23 @@ function wsReadyToSend()
 } // wsReadyToSend
 
 // Move to diagnostics
-function drawStream(streamData)
-{
+function drawStream(streamData) {
     let cols = parseInt($('#v_columns').val());
     let size = Math.floor((canvas.width - 20) / cols);
     let maxDisplay = 0;
 
-    if ($("#diag #viewStyle option:selected").val() === "rgb")
-    {
+    if ($("#diag #viewStyle option:selected").val() === "rgb") {
         maxDisplay = Math.min(streamData.length, (cols * Math.floor((canvas.height - 30) / size)) * 3);
-        for (let i = 0; i < maxDisplay; i += 3)
-        {
+        for (let i = 0; i < maxDisplay; i += 3) {
             ctx.fillStyle = 'rgb(' + streamData[i + 0] + ',' + streamData[i + 1] + ',' + streamData[i + 2] + ')';
             let col = (i / 3) % cols;
             let row = Math.floor((i / 3) / cols);
             ctx.fillRect(10 + (col * size), 10 + (row * size), size - 1, size - 1);
         }
     }
-    else     if ($("#diag #viewStyle option:selected").val() === "rgbw")
-    {
+    else if ($("#diag #viewStyle option:selected").val() === "rgbw") {
         maxDisplay = Math.min(streamData.length, (cols * Math.floor((canvas.height - 30) / size)) * 4);
-        for (let i = 0; i < maxDisplay; i += 4)
-        {
+        for (let i = 0; i < maxDisplay; i += 4) {
             let WhiteLevel = streamData[i + 3];
             ctx.fillStyle = 'rgb(' + Math.max(streamData[i + 0], WhiteLevel) + ',' + Math.max(streamData[i + 1], WhiteLevel) + ',' + Math.max(streamData[i + 2], WhiteLevel) + ')';
             let col = (i / 4) % cols;
@@ -1573,19 +1432,16 @@ function drawStream(streamData)
             ctx.fillRect(10 + (col * size), 10 + (row * size), size - 1, size - 1);
         }
     }
-    else
-    {
+    else {
         maxDisplay = Math.min(streamData.length, (cols * Math.floor((canvas.height - 30) / size)));
-        for (let i = 0; i < maxDisplay; i++)
-        {
+        for (let i = 0; i < maxDisplay; i++) {
             ctx.fillStyle = 'rgb(' + streamData[i] + ',' + streamData[i] + ',' + streamData[i] + ')';
             let col = (i) % cols;
             let row = Math.floor(i / cols);
             ctx.fillRect(10 + (col * size), 10 + (row * size), size - 2, size - 2);
         }
     }
-    if (streamData.length > maxDisplay)
-    {
+    if (streamData.length > maxDisplay) {
         ctx.fillStyle = 'rgb(204,0,0)';
         ctx.fillRect(0, canvas.height - 25, canvas.width, 25);
         ctx.fillStyle = 'rgb(255,255,255)';
@@ -1594,16 +1450,13 @@ function drawStream(streamData)
 }
 
 // Move to diagnostics
-function clearStream()
-{
-    if (typeof ctx !== 'undefined')
-    {
+function clearStream() {
+    if (typeof ctx !== 'undefined') {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 }
 
-function ProcessReceivedJsonAdminMessage(data)
-{
+function ProcessReceivedJsonAdminMessage(data) {
     let ParsedJsonAdmin = JSON.parse(data);
     AdminInfo = ParsedJsonAdmin.admin;
 
@@ -1624,38 +1477,34 @@ function ProcessReceivedJsonAdminMessage(data)
 } // ProcessReceivedJsonAdminMessage
 
 // ProcessReceivedJsonStatusMessage
-function ProcessReceivedJsonStatusMessage(data)
-{
+function ProcessReceivedJsonStatusMessage(data) {
     let JsonStat = JSON.parse(data);
-    let Status   = JsonStat.status;
-    let System   = Status.system;
-    let Network  = System.network;
-    let Wifi     = Network.wifi;
+    let Status = JsonStat.status;
+    let System = Status.system;
+    let Network = System.network;
+    let Wifi = Network.wifi;
     let Ethernet = Network.wifi;
 
     let rssi = Wifi.rssi;
     let quality = 2 * (rssi + 100);
 
-    if (rssi <= -100)
-    {
+    if (rssi <= -100) {
         quality = 0;
     }
-    else if (rssi >= -50)
-    {
+    else if (rssi >= -50) {
         quality = 100;
     }
 
     $('#w_connected').text((true === Wifi.connected) ? "Yes" : "No");
-    $('#w_hostname').text (Wifi.hostname);
-    $('#w_rssi').text     (rssi);
-    $('#w_quality').text  (quality);
-    $('#w_ssid').text     (Wifi.ssid);
-    $('#w_ip').text       (Wifi.ip);
-    $('#w_subnet').text   (Wifi.subnet);
-    $('#w_mac').text      (Wifi.mac);
+    $('#w_hostname').text(Wifi.hostname);
+    $('#w_rssi').text(rssi);
+    $('#w_quality').text(quality);
+    $('#w_ssid').text(Wifi.ssid);
+    $('#w_ip').text(Wifi.ip);
+    $('#w_subnet').text(Wifi.subnet);
+    $('#w_mac').text(Wifi.mac);
 
-    if ({}.hasOwnProperty.call(Network, 'eth'))
-    {
+    if ({}.hasOwnProperty.call(Network, 'eth')) {
         $('#ethernet_status').removeClass("hidden")
         Ethernet = Network.eth;
         $('#e_connected').text((true === Ethernet.connected) ? "Yes" : "No");
@@ -1664,8 +1513,7 @@ function ProcessReceivedJsonStatusMessage(data)
         $('#e_subnet').text(Ethernet.subnet);
         $('#e_mac').text(Ethernet.mac);
     }
-    else
-    {
+    else {
         $('#ethernet_status').addClass("hidden")
     }
 
@@ -1698,38 +1546,33 @@ function ProcessReceivedJsonStatusMessage(data)
         $('#x_used').removeClass("hidden");
         $('#x_used').text(System.used);
     }
-    else
-    {
+    else {
         $('#i_size').addClass("hidden");
         $('#x_size').addClass("hidden");
         $('#i_used').addClass("hidden");
         $('#x_used').addClass("hidden");
     }
 
-    if (true === System.SDinstalled)
-    {
+    if (true === System.SDinstalled) {
         $("#li-filemanagement").removeClass("hidden");
     }
-    else
-    {
+    else {
         $("#li-filemanagement").addClass("hidden");
-	}
+    }
 
     // getE131Status(data)
     let InputStatus = Status.input[0];
-    if ({}.hasOwnProperty.call(InputStatus, 'e131'))
-    {
+    if ({}.hasOwnProperty.call(InputStatus, 'e131')) {
         $('#E131Status').removeClass("hidden")
 
         $('#uni_first').text(InputStatus.e131.unifirst);
-        $('#uni_last').text (InputStatus.e131.unilast);
-        $('#pkts').text     (InputStatus.e131.num_packets);
-        $('#chanlim').text  (InputStatus.e131.unichanlim);
-        $('#perr').text     (InputStatus.e131.packet_errors);
-        $('#clientip').text (int2ip(parseInt(InputStatus.e131.last_clientIP)));
+        $('#uni_last').text(InputStatus.e131.unilast);
+        $('#pkts').text(InputStatus.e131.num_packets);
+        $('#chanlim').text(InputStatus.e131.unichanlim);
+        $('#perr').text(InputStatus.e131.packet_errors);
+        $('#clientip').text(int2ip(parseInt(InputStatus.e131.last_clientIP)));
     }
-    else
-    {
+    else {
         $('#E131Status').addClass("hidden")
     }
 
@@ -1747,26 +1590,22 @@ function ProcessReceivedJsonStatusMessage(data)
         $('#ArtnetStatus').addClass("hidden")
     }
 
-    if ({}.hasOwnProperty.call(InputStatus, 'ddp'))
-    {
+    if ({}.hasOwnProperty.call(InputStatus, 'ddp')) {
         $('#ddpStatus').removeClass("hidden")
 
         $('#ddppacketsreceived').text(InputStatus.ddp.packetsreceived);
         $('#ddpbytesreceived').text(InputStatus.ddp.bytesreceived);
         $('#ddperrors').text(InputStatus.ddp.errors);
     }
-    else
-    {
+    else {
         $('#ddpStatus').addClass("hidden")
     }
 
     InputStatus = Status.input[1];
 
-    if ({}.hasOwnProperty.call(InputStatus, 'Player'))
-    {
+    if ({}.hasOwnProperty.call(InputStatus, 'Player')) {
         let PlayerStatus = InputStatus.Player;
-        if ({}.hasOwnProperty.call(PlayerStatus, 'FPPDiscovery'))
-        {
+        if ({}.hasOwnProperty.call(PlayerStatus, 'FPPDiscovery')) {
             $('#FPPRemoteStatus').removeClass("hidden")
 
             let FPPDstatus = PlayerStatus.FPPDiscovery
@@ -1781,13 +1620,11 @@ function ProcessReceivedJsonStatusMessage(data)
             $('#fppremoteFilePlayerTimeRemaining').text(FPPDstatus.time_remaining);
             $('#fppremotelasterror').text(FPPDstatus.errors);
         }
-        else
-        {
+        else {
             $('#FPPRemoteStatus').addClass("hidden")
         }
 
-        if ({}.hasOwnProperty.call(PlayerStatus, 'File'))
-        {
+        if ({}.hasOwnProperty.call(PlayerStatus, 'File')) {
             $('#LocalFilePlayerStatus').removeClass("hidden");
 
             let FilePlayerStatus = PlayerStatus.File;
@@ -1795,31 +1632,26 @@ function ProcessReceivedJsonStatusMessage(data)
             $('#localFilePlayerTimeElapsed').text(FilePlayerStatus.time_elapsed);
             $('#localFilePlayerTimeRemaining').text(FilePlayerStatus.time_remaining);
         }
-        else
-        {
+        else {
             $('#LocalFilePlayerStatus').addClass("hidden");
         }
 
-        if ({}.hasOwnProperty.call(PlayerStatus, 'Effect'))
-        {
+        if ({}.hasOwnProperty.call(PlayerStatus, 'Effect')) {
             $('#LocalEffectPlayerStatus').removeClass("hidden");
 
             $('#localFilePlayerEffectName').text(PlayerStatus.Effect.currenteffect);
             $('#localFilePlayerEffectTimeRemaining').text(PlayerStatus.Effect.TimeRemaining);
         }
-        else
-        {
+        else {
             $('#LocalEffectPlayerStatus').addClass("hidden")
         }
 
-        if ({}.hasOwnProperty.call(PlayerStatus, 'Paused'))
-        {
+        if ({}.hasOwnProperty.call(PlayerStatus, 'Paused')) {
             $('#PausedPlayerStatus').removeClass("hidden");
 
             $('#PausedTimeRemaining').text(PlayerStatus.Paused.TimeRemaining);
         }
-        else
-        {
+        else {
             $('#PausedPlayerStatus').addClass("hidden")
         }
     }
@@ -1837,45 +1669,37 @@ function ProcessReceivedJsonStatusMessage(data)
 } // ProcessReceivedJsonStatusMessage
 
 // Show "save" snackbar for 3sec
-function snackSave()
-{
+function snackSave() {
     let x = document.getElementById('snackbar');
     x.className = 'show';
-    setTimeout(function ()
-    {
+    setTimeout(function () {
         x.className = x.className.replace('show', '');
     }, 3000);
 }
 
 // Show reboot modal
-function showReboot()
-{
+function showReboot() {
     $("#EfuProgressBar").addClass("hidden");
     $('#update').modal('hide');
     $('#reboot').modal();
-    setTimeout(function ()
-    {
-        if ($('#wifi #dhcp').prop('checked'))
-        {
+    setTimeout(function () {
+        if ($('#wifi #dhcp').prop('checked')) {
             window.location.assign("/");
         }
-        else
-        {
+        else {
             window.location.assign("http://" + $('#ip').val());
         }
     }, 5000);
 }
 
 // Queue reboot
-function reboot()
-{
+function reboot() {
     showReboot();
     wsEnqueue('X6');
 }
 
 // Reset config
-$('#confirm-reset .btn-ok').click(function ()
-{
+$('#confirm-reset .btn-ok').click(function () {
     showReboot();
     wsEnqueue('X7');
 });

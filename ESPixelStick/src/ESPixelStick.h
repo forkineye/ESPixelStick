@@ -75,6 +75,7 @@ extern  bool IsBooting;
 extern  bool ResetWiFi;
 static  const String ConfigFileName = "/config.json";
 extern  void FeedWDT ();
+extern  uint32_t DiscardedRxData;
 
 template <typename J, typename N>
 bool setFromJSON (float & OutValue, J& Json, N Name)

@@ -63,10 +63,6 @@ public:
     void RestartBlankTimer    (c_InputMgr::e_InputChannelIds Selector) { BlankEndTime[int(Selector)] = (millis () / 1000) + config.BlankDelay; }
     bool BlankTimerHasExpired (c_InputMgr::e_InputChannelIds Selector) { return !(BlankEndTime[int(Selector)] > (millis () / 1000)); }
 
-#if defined(SUPPORT_SD) || defined(SUPPORT_SD_MMC)
-#   define SUPPORT_FPP
-#endif // defined(SUPPORT_SD) || defined(SUPPORT_SD_MMC)
-
     enum e_InputType
     {
         InputType_E1_31 = 0,
