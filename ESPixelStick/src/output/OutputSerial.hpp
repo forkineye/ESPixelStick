@@ -105,6 +105,7 @@ private:
     uint32_t   FrameStartCounter = 0;
     uint32_t   FrameEndCounter = 0;
     uint32_t   AbortFrameCounter = 0;
+    uint32_t   LastDataSent = 0;
 #endif // def USE_SERIAL_DEBUG_COUNTERS
 
     bool validate ();        ///< confirm that the current configuration is valid

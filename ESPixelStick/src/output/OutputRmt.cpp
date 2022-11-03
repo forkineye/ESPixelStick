@@ -100,7 +100,14 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
         }
 
         NumRmtSlotsPerIntensityValue = OutputRmtConfig.IntensityDataWidth + ((OutputRmtConfig.SendInterIntensityBits) ? 1 : 0);
-        TxIntensityDataStartingMask  = 1 << (OutputRmtConfig.IntensityDataWidth - 1);
+        if(OutputRmtConfig_t::DataDirection_t::MSB2LSB == OutputRmtConfig.DataDirection)
+        {
+            TxIntensityDataStartingMask = 1 << (OutputRmtConfig.IntensityDataWidth - 1);
+        }
+        else
+        {
+            TxIntensityDataStartingMask = 1;
+        }
         // DEBUG_V (String("          IntensityDataWidth: ") + String(OutputRmtConfig.IntensityDataWidth));
         // DEBUG_V (String("NumRmtSlotsPerIntensityValue: ") + String (NumRmtSlotsPerIntensityValue));
         // DEBUG_V(String("  TxIntensityDataStartingMask: 0x") + String(TxIntensityDataStartingMask, HEX));
@@ -441,12 +448,21 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_SendIntensityData ()
 #endif // def USE_RMT_DEBUG_COUNTERS
 
         // convert the intensity data into RMT slot data
-        for (uint32_t bitmask = TxIntensityDataStartingMask; 0 != bitmask; bitmask >>= 1)
+        uint32_t bitmask = TxIntensityDataStartingMask;
+        for (uint32_t BitCount = OutputRmtConfig.IntensityDataWidth; 0 < BitCount; --BitCount)
         {
 #ifdef USE_RMT_DEBUG_COUNTERS
             IntensityBitsSent++;
 #endif // def USE_RMT_DEBUG_COUNTERS
             ISR_EnqueueData((IntensityValue & bitmask) ? OneBitValue : ZeroBitValue);
+            if(OutputRmtConfig_t::DataDirection_t::MSB2LSB == OutputRmtConfig.DataDirection)
+            {
+                bitmask >>= 1;
+            }
+            else
+            {
+                bitmask <<= 1;
+            }
 #ifdef USE_RMT_DEBUG_COUNTERS
             if (IntensityValue & bitmask)
             {
@@ -598,6 +614,14 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     for (auto CurrentCounter : BitTypeCounters)
     {
         debugStatus[String("RMT TYPE Counter ") + String(index++)] = CurrentCounter;
+    }
+
+    index = 0;
+    uint32_t * CurrentPointer = (uint32_t*)const_cast<rmt_item32_t*>(&RMTMEM.chan[OutputRmtConfig.RmtChannelId].data32[0]);
+    for(index = 0; index < NUM_RMT_SLOTS; index++)
+    {
+        uint32_t data = CurrentPointer[index];
+        debugStatus[String("RMT Data ") + String(index)] = String(data, HEX);
     }
 
 #endif // def USE_RMT_DEBUG_COUNTERS

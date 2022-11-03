@@ -62,6 +62,7 @@ void c_OutputSerialRmt::Begin ()
     OutputRmtConfig.SendEndOfFrameBits      = true;
     OutputRmtConfig.NumFrameStartBits       = 1;
     OutputRmtConfig.NumIdleBits             = 1;
+    OutputRmtConfig.DataDirection           = c_OutputRmt::OutputRmtConfig_t::DataDirection_t::LSB2MSB;
 
     Rmt.Begin(OutputRmtConfig);
 
@@ -157,7 +158,7 @@ void c_OutputSerialRmt::SetUpRmtBitTimes()
         // turn it into a break signal
         BitValue.duration0 = (DMX_BREAK_US * NanoSecondsInAMicroSecond) / RMT_TickLengthNS;
         BitValue.level0 = 0;
-        BitValue.duration1 = (DMX_MAB_US   * NanoSecondsInAMicroSecond) / RMT_TickLengthNS;
+        BitValue.duration1 = 2 * ((DMX_MAB_US   * NanoSecondsInAMicroSecond) / RMT_TickLengthNS);
         BitValue.level1 = 1;
         Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
     }

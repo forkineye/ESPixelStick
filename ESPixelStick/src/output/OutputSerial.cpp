@@ -92,6 +92,7 @@ void c_OutputSerial::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     debugStatus["FrameStartCounter"]           = FrameStartCounter;
     debugStatus["FrameEndCounter"]             = FrameEndCounter;
     debugStatus["AbortFrameCounter"]           = AbortFrameCounter;
+    debugStatus["LastDataSent"]                = LastDataSent;
 #endif // def USE_SERIAL_DEBUG_COUNTERS
 
     // DEBUG_END;
@@ -469,12 +470,10 @@ uint32_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
         }
     } // switch SerialFrameState
 
-/*
-    if (InvertData)
-    {
-        response = ~response;
-    }
-*/
+
+#ifdef USE_SERIAL_DEBUG_COUNTERS
+    LastDataSent = data;
+#endif // def USE_SERIAL_DEBUG_COUNTERS
     return data;
 } // NextIntensityToSend
 

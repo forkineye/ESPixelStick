@@ -55,12 +55,18 @@ public:
         rmt_channel_t       RmtChannelId           = rmt_channel_t(-1);
         gpio_num_t          DataPin                = gpio_num_t(-1);
         rmt_idle_level_t    idle_level             = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
-        uint32_t              IntensityDataWidth     = 8;
+        uint32_t            IntensityDataWidth     = 8;
         bool                SendInterIntensityBits = false;
         bool                SendEndOfFrameBits     = false;
         uint8_t             NumFrameStartBits      = 1;
         uint8_t             NumFrameStopBits       = 1;
         uint8_t             NumIdleBits            = 6;
+        enum DataDirection_t
+        {
+            MSB2LSB = 0,
+            LSB2MSB
+        };
+        DataDirection_t     DataDirection          = DataDirection_t::MSB2LSB;
         const CitrdsArray_t *CitrdsArray           = nullptr;
 
         c_OutputPixel  *pPixelDataSource      = nullptr;
@@ -92,7 +98,6 @@ private:
     volatile rmt_item32_t *RmtStartAddr    = nullptr;
     volatile rmt_item32_t *RmtCurrentAddr  = nullptr;
     volatile rmt_item32_t *RmtEndAddr      = nullptr;
-
 
 #define NUM_RMT_SLOTS (sizeof(RMTMEM.chan[0].data32) / sizeof(RMTMEM.chan[0].data32[0]))
 #define MIN_FRAME_TIME_MS 25
@@ -162,6 +167,7 @@ public:
    uint32_t IncompleteFrame = 0;
    uint32_t IncompleteFrameLastFrame = 0;
    uint32_t BitTypeCounters[RmtDataBitIdType_t::RMT_NUM_BIT_TYPES];
+
 #endif // def USE_RMT_DEBUG_COUNTERS
 };
 #endif // def #ifdef ARDUINO_ARCH_ESP32
