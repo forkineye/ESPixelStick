@@ -43,8 +43,8 @@
 #define DEFAULT_RMT_4_GPIO      gpio_num_t::GPIO_NUM_33
 
 // GROVE extension interface
-#define DEFAULT_RMT_4_GPIO      gpio_num_t::GPIO_NUM_26 // TxD for RS485 Tail
-//#define DEFAULT_RMT_5_GPIO      gpio_num_t::GPIO_NUM_32  // disabled by default due to memory contraints.
+#define DEFAULT_RMT_5_GPIO      gpio_num_t::GPIO_NUM_26 // TxD for RS485 Tail
+//#define DEFAULT_RMT_6_GPIO      gpio_num_t::GPIO_NUM_32  // disabled by default due to memory contraints.
 
 // Bottom extension interface
 // Disabled by default, on Atom Matrix I2C is shared with a 6-Axis IMU (MPU-6886)
