@@ -49,9 +49,9 @@ void EFUpdate::begin() {
     // DEBUG_END;
 }
 
-bool EFUpdate::process(uint8_t *data, size_t len) {
+bool EFUpdate::process(uint8_t *data, uint32_t len) {
     // DEBUG_START;
-    size_t index = 0;
+    uint32_t index = 0;
     bool ConfigChanged = true;
 
     while (index < len) {
@@ -132,12 +132,12 @@ bool EFUpdate::process(uint8_t *data, size_t len) {
                 break;
             case State::DATA:
                 // DEBUG_V ("DATA");
-                size_t toWrite;
+                uint32_t toWrite;
 
                 toWrite = (_record.size - _loc < len) ? _record.size - _loc : len - index;
                 // DEBUG_V ("Call Update.write");
                 // DEBUG_V (String ("toWrite: 0x") + String (toWrite, HEX));
-                // DEBUG_V (String ("   data: 0x") + String (size_t(data) + index, HEX));
+                // DEBUG_V (String ("   data: 0x") + String (uint32_t(data) + index, HEX));
                 FeedWDT();
 
                 Update.write(&data[index], toWrite);

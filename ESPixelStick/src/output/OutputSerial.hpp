@@ -36,16 +36,17 @@ public:
     virtual ~c_OutputSerial ();
 
     // functions to be provided by the derived class
-    virtual void   Begin ();
-    virtual bool   SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
-    virtual void   GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-            void   GetDriverName (String& sDriverName);
-    virtual void   GetStatus (ArduinoJson::JsonObject & jsonStatus);
-            size_t GetNumChannelsNeeded () { return Num_Channels; };
-            void   SetOutputBufferSize (size_t NumChannelsAvailable);
-            void   Render() = 0;
-            void   StartNewFrame();
-            
+    virtual void        Begin ();
+    virtual bool        SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
+    virtual void        GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
+            void        GetDriverName (String& sDriverName);
+    virtual void        GetStatus (ArduinoJson::JsonObject & jsonStatus);
+            uint32_t    GetNumOutputBufferBytesNeeded () { return OutputBufferSize; };
+            uint32_t    GetNumOutputBufferChannelsServiced () { return OutputBufferSize; };
+            void        SetOutputBufferSize (uint32_t NumChannelsAvailable);
+            void        Render() = 0;
+            void        StartNewFrame();
+
     uint32_t IRAM_ATTR   ISR_GetNextIntensityToSend();
     bool     IRAM_ATTR   ISR_MoreDataToSend() { return (SerialFrameState_t::SerialIdle != SerialFrameState); }
 
@@ -71,39 +72,40 @@ protected:
 
 private:
 
-    const size_t    MAX_HDR_SIZE         = 10;      // Max generic serial header size
-    const size_t    MAX_FOOTER_SIZE      = 10;      // max generic serial footer size
-    const size_t    MAX_CHANNELS         = 1024;
+    const uint32_t    MAX_HDR_SIZE         = 10;      // Max generic serial header size
+    const uint32_t    MAX_FOOTER_SIZE      = 10;      // max generic serial footer size
+    const uint32_t    MAX_CHANNELS         = 1024;
     const uint16_t  DEFAULT_NUM_CHANNELS = 64;
-    const size_t    BUF_SIZE             = (MAX_CHANNELS + MAX_HDR_SIZE + MAX_FOOTER_SIZE);
+    const uint32_t    BUF_SIZE             = (MAX_CHANNELS + MAX_HDR_SIZE + MAX_FOOTER_SIZE);
     const uint32_t  DMX_BITS_PER_BYTE    = (1.0 + 8.0 + 2.0);
-    const size_t    DMX_MaxFrameSize     = 512;
-    
+    const uint32_t    DMX_MaxFrameSize     = 512;
 
-    size_t      Num_Channels = DEFAULT_NUM_CHANNELS;       // Number of data channels to transmit
+
+    uint32_t      Num_Channels = DEFAULT_NUM_CHANNELS;       // Number of data channels to transmit
 
     uint8_t*    NextIntensityToSend = nullptr;
-    size_t      intensity_count = 0;
-    size_t      SentIntensityCount = 0;
+    uint32_t      intensity_count = 0;
+    uint32_t      SentIntensityCount = 0;
 
     float       IntensityBitTimeInUs = 0.0;
-    size_t      NumBitsPerIntensity = 1 + 8 + 2;   // Start. 8 Data, Stop
+    uint32_t      NumBitsPerIntensity = 1 + 8 + 2;   // Start. 8 Data, Stop
 
     String      GenericSerialHeader;
-    size_t      SerialHeaderSize  = 0;
-    size_t      SerialHeaderIndex = 0;
+    uint32_t      SerialHeaderSize  = 0;
+    uint32_t      SerialHeaderIndex = 0;
 
     String      GenericSerialFooter;
-    size_t      SerialFooterSize  = 0;
-    size_t      SerialFooterIndex = 0;
+    uint32_t      SerialFooterSize  = 0;
+    uint32_t      SerialFooterIndex = 0;
 
 // #define USE_SERIAL_DEBUG_COUNTERS
 #ifdef USE_SERIAL_DEBUG_COUNTERS
-    size_t     IntensityBytesSent = 0;
-    size_t     IntensityBytesSentLastFrame = 0;
+    uint32_t     IntensityBytesSent = 0;
+    uint32_t     IntensityBytesSentLastFrame = 0;
     uint32_t   FrameStartCounter = 0;
     uint32_t   FrameEndCounter = 0;
     uint32_t   AbortFrameCounter = 0;
+    uint32_t   LastDataSent = 0;
 #endif // def USE_SERIAL_DEBUG_COUNTERS
 
     bool validate ();        ///< confirm that the current configuration is valid

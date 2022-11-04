@@ -85,6 +85,7 @@ void c_OutputServoPCA9685::Begin ()
     // DEBUG_END;
 } // Begin
 
+#ifdef UseCustomClearBuffer
 //-----------------------------------------------------------------------------
 void c_OutputServoPCA9685::ClearBuffer ()
 {
@@ -99,6 +100,7 @@ void c_OutputServoPCA9685::ClearBuffer ()
 
     // DEBUG_END;
 } // ClearBuffer
+#endif // def UseCustomClearBuffer
 
 //----------------------------------------------------------------------------
 bool c_OutputServoPCA9685::validate ()
@@ -272,7 +274,12 @@ void c_OutputServoPCA9685::Render ()
             uint16_t MaxScaledValue = 255;
             uint16_t MinScaledValue = 0;
             uint16_t newOutputValue = pOutputBuffer[OutputDataIndex];
-
+            
+            if(0 == newOutputValue)
+            {
+                newOutputValue = currentServoPCA9685.HomeValue;
+            }
+            
             if (currentServoPCA9685.Is16Bit)
             {
                 // DEBUG_V ("16 Bit Mode");

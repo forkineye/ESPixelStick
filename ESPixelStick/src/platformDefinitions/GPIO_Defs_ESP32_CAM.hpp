@@ -19,39 +19,25 @@
 */
 
 //Output Manager
-#define SUPPORT_UART_OUTPUT
 #define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_0
 #define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_1
-#define UART_LAST               OutputChannelId_UART_2
 
-#define SUPPORT_RMT_OUTPUT
 #define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_3
 #define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_16
-#define RMT_LAST                OutputChannelId_RMT_1
 
-#define LED_FLASH_GPIO          gpio_num_t::GPIO_NUM_33
-#define LED_FLASH_OFF           HIGH
+#define LED_FLASH_GPIO          gpio_num_t::GPIO_NUM_4
+#define LED_FLASH_OFF           LOW
 
 // #define DEFAULT_I2C_SDA         gpio_num_t::GPIO_NUM_21
 // #define DEFAULT_I2C_SCL         gpio_num_t::GPIO_NUM_22
 
 // File Manager
 // #define USE_MISO_PULLUP
-// #define SUPPORT_SD_MMC
 #define SUPPORT_SD
-#ifdef SUPPORT_SD_MMC
-#   define SD_CARD_CMD             gpio_num_t::GPIO_NUM_15
-#   define SD_CARD_CLK             gpio_num_t::GPIO_NUM_14
-#   define SD_CARD_DATA_0          gpio_num_t::GPIO_NUM_2
-#   define SD_CARD_DATA_1          gpio_num_t::GPIO_NUM_4
-#   define SD_CARD_DATA_2          gpio_num_t::GPIO_NUM_12
-#   define SD_CARD_DATA_3          gpio_num_t::GPIO_NUM_13
-#else // SUPPORT_SD
-#   define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_2
-#   define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_15
-#   define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14
-#   define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_13
-#endif // SUPPORT SD
+#define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_2
+#define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_15
+#define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14
+#define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_13
 
 // Output Types
 // Not Finished - #define SUPPORT_OutputType_TLS3001

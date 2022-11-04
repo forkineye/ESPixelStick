@@ -22,7 +22,7 @@
 *
 */
 #include "../ESPixelStick.h"
-#if defined(SUPPORT_OutputType_WS2811) && defined(SUPPORT_RMT_OUTPUT)
+#if defined(SUPPORT_OutputType_WS2811) && defined(ARDUINO_ARCH_ESP32)
 
 #include "OutputWS2811.hpp"
 #include "OutputRmt.hpp"
@@ -42,7 +42,7 @@ public:
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);  ///< Set a new config in the driver
     void    Render ();                                        ///< Call from loop (),  renders output data
     void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
-    void    SetOutputBufferSize (uint16_t NumChannelsAvailable);
+    void    SetOutputBufferSize (uint32_t NumChannelsAvailable);
 
 private:
 
@@ -50,4 +50,4 @@ private:
 
 }; // c_OutputWS2811Rmt
 
-#endif // defined(SUPPORT_OutputType_WS2811) && defined(SUPPORT_RMT_OUTPUT)
+#endif // defined(SUPPORT_OutputType_WS2811) && defined(ARDUINO_ARCH_ESP32)

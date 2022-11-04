@@ -1,6 +1,6 @@
 #pragma once
 /*
- * GPIO_Defs_ESP32_QUINLED_QUAD.hpp - Output Management class
+ * GPIO_Defs_ESP32_ESP3DEUXQuattro_DMX.hpp - Output Management class
  *
  * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
  * Copyright (c) 2021 Shelby Merrick
@@ -16,23 +16,17 @@
  *  damages in connection with, or arising out of, the furnishing, performance
  *  or use of these programs.
  *
+ * BOARD_ESPS_ESP3DEUXQUATRO_DMX
  */
-
-#define SUPPORT_ETHERNET
 
 //Output Manager
 #define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_16
-#define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_3
+#define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_32
 
-#define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_1
+#define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_33
 #define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_4
-
-//Power relay output over Q1 or Q1R
-#define DEFAULT_RELAY_GPIO      gpio_num_t::GPIO_NUM_15
-
-//I2c over Q3 and Q4 (might require HW pullups to be installed)
-#define DEFAULT_I2C_SDA         gpio_num_t::GPIO_NUM_2
-#define DEFAULT_I2C_SCL         gpio_num_t::GPIO_NUM_32
+#define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_12
+#define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_2
 
 // File Manager - Defnitions must be present even if SD is not supported
 // #define SUPPORT_SD
@@ -42,7 +36,7 @@
 #define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_5
 
 #include <ETH.h>
-
+#define SUPPORT_ETHERNET
 /*
    * ETH_CLOCK_GPIO0_IN   - default: external clock from crystal oscillator
    * ETH_CLOCK_GPIO0_OUT  - 50MHz clock from internal APLL output on GPIO0 - possibly an inverter is needed for LAN8720
@@ -52,15 +46,15 @@
 #define DEFAULT_ETH_CLK_MODE           eth_clock_mode_t::ETH_CLOCK_GPIO17_OUT
 
 // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
-#define DEFAULT_ETH_POWER_PIN          gpio_num_t::GPIO_NUM_5
+#define DEFAULT_ETH_POWER_PIN          gpio_num_t(-1)
 #define DEFAULT_ETH_POWER_PIN_ACTIVE   HIGH
 
 // Type of the Ethernet PHY (LAN8720 or TLK110)
 #define DEFAULT_ETH_TYPE               eth_phy_type_t::ETH_PHY_LAN8720
 
 // I2C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
-#define ETH_ADDR_PHY_LAN8720           0
-// #define ETH_ADDR_PHY_LAN8720         1
+// #define ETH_ADDR_PHY_LAN8720           0
+#define ETH_ADDR_PHY_LAN8720         1
 //#define ETH_ADDR_PHY_TLK110           31
 #define DEFAULT_ETH_ADDR               ETH_ADDR_PHY_LAN8720
 #define DEFAULT_ETH_TXEN               gpio_num_t::GPIO_NUM_21
@@ -71,6 +65,7 @@
 #define DEFAULT_ETH_RXD1               gpio_num_t::GPIO_NUM_26
 #define DEFAULT_ETH_MDC_PIN            gpio_num_t::GPIO_NUM_23
 #define DEFAULT_ETH_MDIO_PIN           gpio_num_t::GPIO_NUM_18
+
 
 // Output Types
 // Not Finished - #define SUPPORT_OutputType_TLS3001
@@ -85,5 +80,5 @@
 #define SUPPORT_OutputType_UCS8903          // UART / RMT
 // #define SUPPORT_OutputType_WS2801           // SPI
 #define SUPPORT_OutputType_WS2811           // UART / RMT
-#define SUPPORT_OutputType_Relay            // GPIO
+// #define SUPPORT_OutputType_Relay            // GPIO
 // #define SUPPORT_OutputType_Servo_PCA9685    // I2C (default pins)

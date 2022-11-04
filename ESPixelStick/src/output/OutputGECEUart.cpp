@@ -18,7 +18,7 @@
 */
 
 #include "../ESPixelStick.h"
-#if defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_UART_OUTPUT)
+#if defined(SUPPORT_OutputType_GECE)
 
 #include "OutputGECEUart.hpp"
 
@@ -72,7 +72,7 @@ void c_OutputGECEUart::Begin ()
     OutputUartConfig.UartId                         = UartId;
     OutputUartConfig.DataPin                        = DataPin;
     OutputUartConfig.IntensityDataWidth             = GECE_PACKET_SIZE;
-    OutputUartConfig.UartDataSize                   = c_OutputUart::UartDataSize_t::OUTPUT_UART_8N1;
+    OutputUartConfig.UartDataSize                   = c_OutputUart::UartDatauint32_t::OUTPUT_UART_8N1;
     OutputUartConfig.TranslateIntensityData         = c_OutputUart::TranslateIntensityData_t::TwoToOne;
     OutputUartConfig.pPixelDataSource               = this;
     OutputUartConfig.Baudrate                       = GECE_BAUDRATE;
@@ -184,4 +184,4 @@ void c_OutputGECEUart::PauseOutput (bool State)
     // DEBUG_END;
 } // PauseOutput
 
-#endif // defined(SUPPORT_OutputType_GECE) && defined(SUPPORT_UART_OUTPUT)
+#endif // defined(SUPPORT_OutputType_GECE)

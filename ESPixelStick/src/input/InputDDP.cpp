@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 c_InputDDP::c_InputDDP (c_InputMgr::e_InputChannelIds NewInputChannelId,
                         c_InputMgr::e_InputType       NewChannelType,
-                        size_t                        BufferSize) :
+                        uint32_t                        BufferSize) :
     c_InputCommon (NewInputChannelId, NewChannelType, BufferSize)
 
 {
@@ -113,7 +113,7 @@ bool c_InputDDP::SetConfig (JsonObject& jsonConfig)
 } // SetConfig
 
 //-----------------------------------------------------------------------------
-void c_InputDDP::SetBufferInfo (size_t BufferSize)
+void c_InputDDP::SetBufferInfo (uint32_t BufferSize)
 {
     // DEBUG_START;
 
@@ -304,7 +304,7 @@ void c_InputDDP::ProcessReceivedQuery ()
             DDPresponse.header.id = DDP_ID_STATUS;
             DDPresponse.header.dataLen = htons (JsonResponse.length());
             memcpy (&DDPresponse.data, JsonResponse.c_str (), JsonResponse.length());
-            UDPresponse.write ((const uint8_t*)&DDPresponse, size_t(sizeof(DDPresponse.header) + JsonResponse.length ()));
+            UDPresponse.write ((const uint8_t*)&DDPresponse, uint32_t(sizeof(DDPresponse.header) + JsonResponse.length ()));
             udp->sendTo (UDPresponse, PacketBuffer.ResponseAddress, PacketBuffer.ResponsePort);
             break;
         }
@@ -337,7 +337,7 @@ void c_InputDDP::ProcessReceivedQuery ()
             DDPresponse.header.id = DDP_ID_CONFIG;
             DDPresponse.header.dataLen = htons (JsonResponse.length ());
             memcpy (&DDPresponse.data, JsonResponse.c_str (), JsonResponse.length ());
-            UDPresponse.write ((const uint8_t*)&DDPresponse, size_t (sizeof (DDPresponse.header) + JsonResponse.length ()));
+            UDPresponse.write ((const uint8_t*)&DDPresponse, uint32_t (sizeof (DDPresponse.header) + JsonResponse.length ()));
             udp->sendTo (UDPresponse, PacketBuffer.ResponseAddress, PacketBuffer.ResponsePort);
             break;
         }

@@ -79,6 +79,8 @@ jobs:
           # M5Stack Atom
           - target: "m5stack_atom"
             chip: "esp32"
+          - target: "esp3deuxquatro_dmx"
+            chip: "esp32"
 
     runs-on: ubuntu-latest
     steps:

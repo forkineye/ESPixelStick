@@ -17,7 +17,7 @@
 *
 */
 #include "../ESPixelStick.h"
-#if defined(SUPPORT_OutputType_WS2811) && defined(SUPPORT_RMT_OUTPUT)
+#if defined(SUPPORT_OutputType_WS2811) && defined(ARDUINO_ARCH_ESP32)
 
 #include "OutputWS2811Rmt.hpp"
 
@@ -122,11 +122,14 @@ bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // SetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811Rmt::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputWS2811Rmt::SetOutputBufferSize (uint32_t NumChannelsAvailable)
 {
+
     // DEBUG_START;
 
     c_OutputWS2811::SetOutputBufferSize (NumChannelsAvailable);
+
+    // DEBUG_V(String("FrameMinDurationInMicroSec: ") + String(FrameMinDurationInMicroSec));
     Rmt.SetMinFrameDurationInUs (FrameMinDurationInMicroSec);
 
     // DEBUG_END;
@@ -152,4 +155,4 @@ void c_OutputWS2811Rmt::Render ()
 
 } // Render
 
-#endif // defined(SUPPORT_OutputType_WS2811) && defined(SUPPORT_RMT_OUTPUT)
+#endif // defined(SUPPORT_OutputType_WS2811) && defined(ARDUINO_ARCH_ESP32)

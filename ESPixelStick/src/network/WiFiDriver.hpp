@@ -77,6 +77,7 @@ public:
     uint32_t  Get_sta_timeout  () { return sta_timeout; }
     uint32_t  Get_ap_timeout   () { return ap_timeout; }
     bool      Get_ap_fallbackIsEnabled () { return ap_fallbackIsEnabled; }
+    bool      Get_ap_StayInApMode () { return StayInApMode; }
     bool      Get_RebootOnWiFiFailureToConnect () { return RebootOnWiFiFailureToConnect; }
     String    GetConfig_ssid () { return ssid; }
     String    GetConfig_passphrase () { return passphrase; }
@@ -110,6 +111,8 @@ private:
     bool        ap_fallbackIsEnabled = true;
     uint32_t    ap_timeout = AP_TIMEOUT;      ///< How long to wait in AP mode with no connection before rebooting
     uint32_t    sta_timeout = CLIENT_TIMEOUT; ///< Timeout when connection as client (station)
+    bool        StayInApMode = false;
+
 #ifdef SUPPORT_ETHERNET
     bool        RebootOnWiFiFailureToConnect = false;
 #else

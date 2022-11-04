@@ -18,7 +18,7 @@
 */
 #include "../ESPixelStick.h"
 
-#if defined(SUPPORT_OutputType_UCS8903) && defined(SUPPORT_RMT_OUTPUT)
+#if defined(SUPPORT_OutputType_UCS8903) && defined(ARDUINO_ARCH_ESP32)
 
 #include "OutputUCS8903Rmt.hpp"
 
@@ -88,7 +88,7 @@ void c_OutputUCS8903Rmt::Begin ()
     Rmt.Begin(OutputRmtConfig);
 
     HasBeenInitialized = true;
-    
+
     // Start output
     // DEBUG_END;
 
@@ -123,7 +123,7 @@ bool c_OutputUCS8903Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // SetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputUCS8903Rmt::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputUCS8903Rmt::SetOutputBufferSize (uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
 
@@ -156,4 +156,4 @@ void c_OutputUCS8903Rmt::Render ()
 
 } // Render
 
-#endif // defined(SUPPORT_OutputType_UCS8903) && defined(SUPPORT_RMT_OUTPUT)
+#endif // defined(SUPPORT_OutputType_UCS8903) && defined(ARDUINO_ARCH_ESP32)

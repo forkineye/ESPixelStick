@@ -19,7 +19,7 @@
 */
 
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_RMT_OUTPUT
+#ifdef ARDUINO_ARCH_ESP32
 #include <driver/rmt.h>
 #include "OutputPixel.hpp"
 #include "OutputSerial.hpp"
@@ -55,12 +55,18 @@ public:
         rmt_channel_t       RmtChannelId           = rmt_channel_t(-1);
         gpio_num_t          DataPin                = gpio_num_t(-1);
         rmt_idle_level_t    idle_level             = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
-        size_t              IntensityDataWidth     = 8;
+        uint32_t            IntensityDataWidth     = 8;
         bool                SendInterIntensityBits = false;
         bool                SendEndOfFrameBits     = false;
         uint8_t             NumFrameStartBits      = 1;
         uint8_t             NumFrameStopBits       = 1;
         uint8_t             NumIdleBits            = 6;
+        enum DataDirection_t
+        {
+            MSB2LSB = 0,
+            LSB2MSB
+        };
+        DataDirection_t     DataDirection          = DataDirection_t::MSB2LSB;
         const CitrdsArray_t *CitrdsArray           = nullptr;
 
         c_OutputPixel  *pPixelDataSource      = nullptr;
@@ -96,15 +102,15 @@ private:
 #define NUM_RMT_SLOTS (sizeof(RMTMEM.chan[0].data32) / sizeof(RMTMEM.chan[0].data32[0]))
 #define MIN_FRAME_TIME_MS 25
 
-    volatile size_t     NumAvailableRmtSlotsToFill  = NUM_RMT_SLOTS;
-    const size_t        NumRmtSlotsPerInterrupt     = NUM_RMT_SLOTS * 0.75;
+    volatile uint32_t     NumAvailableRmtSlotsToFill  = NUM_RMT_SLOTS;
+    const uint32_t        NumRmtSlotsPerInterrupt     = NUM_RMT_SLOTS * 0.75;
     uint32_t            LastFrameStartTime          = 0;
     uint32_t            FrameMinDurationInMicroSec  = 1000;
     uint32_t            TxIntensityDataStartingMask = 0x80;
     RmtDataBitIdType_t  InterIntensityValueId       = RMT_INVALID_VALUE;
 
     void                  StartNewFrame ();
-    void            IRAM_ATTR ISR_Handler_SendIntensityData ();
+    inline void     IRAM_ATTR ISR_Handler_SendIntensityData ();
     inline void     IRAM_ATTR ISR_EnqueueData(uint32_t value);
     inline bool     IRAM_ATTR MoreDataToSend();
     inline uint32_t IRAM_ATTR GetNextIntensityToSend();
@@ -141,7 +147,7 @@ public:
     bool NoFrameInProgress () { return (0 == (RMT.int_ena.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT))); }
 
     void IRAM_ATTR ISR_Handler ();
-   
+
 // #define USE_RMT_DEBUG_COUNTERS
 #ifdef USE_RMT_DEBUG_COUNTERS
    // debug counters
@@ -161,6 +167,7 @@ public:
    uint32_t IncompleteFrame = 0;
    uint32_t IncompleteFrameLastFrame = 0;
    uint32_t BitTypeCounters[RmtDataBitIdType_t::RMT_NUM_BIT_TYPES];
+
 #endif // def USE_RMT_DEBUG_COUNTERS
 };
-#endif // def #ifdef SUPPORT_RMT_OUTPUT
+#endif // def #ifdef ARDUINO_ARCH_ESP32

@@ -45,12 +45,12 @@ public:
     virtual void GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
             void GetDriverName (String & sDriverName) { sDriverName = String (F ("GS8208")); }
     virtual void GetStatus (ArduinoJson::JsonObject& jsonStatus);
-    virtual void SetOutputBufferSize (uint16_t NumChannelsAvailable);
+    virtual void SetOutputBufferSize (uint32_t NumChannelsAvailable);
 
 protected:
 
 #define GS8208_PIXEL_DATA_RATE              1000000.0
-#define GS8208_PIXEL_NS_BIT_TOTAL           ( (1.0 / GS8208_PIXEL_DATA_RATE) * float(NanoSecondsInASecond)) 
+#define GS8208_PIXEL_NS_BIT_TOTAL           ( (1.0 / GS8208_PIXEL_DATA_RATE) * float(NanoSecondsInASecond))
 
 #define GS8208_PIXEL_NS_BIT_0_HIGH          (0.25 *  GS8208_PIXEL_NS_BIT_TOTAL) // 250ns +/- 150ns per datasheet
 #define GS8208_PIXEL_NS_BIT_0_LOW           (GS8208_PIXEL_NS_BIT_TOTAL - GS8208_PIXEL_NS_BIT_0_HIGH)

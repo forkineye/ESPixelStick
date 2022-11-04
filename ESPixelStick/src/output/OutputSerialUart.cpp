@@ -17,7 +17,6 @@ GNU General Public License for more details.
 
 #include "../ESPixelStick.h"
 #if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
-#ifdef SUPPORT_UART_OUTPUT
 
 #include "OutputSerialUart.hpp"
 
@@ -58,12 +57,12 @@ void c_OutputSerialUart::Begin ()
     OutputUartConfig.UartId                 = UartId;
     OutputUartConfig.DataPin                = DataPin;
     OutputUartConfig.IntensityDataWidth     = 8;
-    OutputUartConfig.UartDataSize           = c_OutputUart::UartDataSize_t::OUTPUT_UART_8N2;
+    OutputUartConfig.UartDataSize           = c_OutputUart::UartDatauint32_t::OUTPUT_UART_8N2;
     OutputUartConfig.TranslateIntensityData = c_OutputUart::TranslateIntensityData_t::NoTranslation;
     OutputUartConfig.pSerialDataSource      = this;
     OutputUartConfig.Baudrate               = CurrentBaudrate;
     Uart.Begin(OutputUartConfig);
-    
+
     HasBeenInitialized = true;
 
     // DEBUG_END;
@@ -121,5 +120,4 @@ void c_OutputSerialUart::Render ()
 
 } // render
 
-#endif // def SUPPORT_UART_OUTPUT
 #endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)

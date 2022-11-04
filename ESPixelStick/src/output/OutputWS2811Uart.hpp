@@ -23,7 +23,7 @@
 */
 
 #include "../ESPixelStick.h"
-#if defined(SUPPORT_OutputType_WS2811) && defined(SUPPORT_UART_OUTPUT)
+#if defined(SUPPORT_OutputType_WS2811)
 
 #include "OutputWS2811.hpp"
 #include "OutputUart.hpp"
@@ -58,4 +58,4 @@ private:
 
 }; // c_OutputWS2811Uart
 
-#endif // defined(SUPPORT_OutputType_WS2811) && defined(SUPPORT_UART_OUTPUT)
+#endif // defined(SUPPORT_OutputType_WS2811)

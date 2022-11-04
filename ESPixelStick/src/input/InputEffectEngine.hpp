@@ -25,7 +25,7 @@ class c_InputEffectEngine : public c_InputCommon
 public:
     c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInputChannelId,
                          c_InputMgr::e_InputType       NewChannelType,
-                         size_t                        BufferSize);
+                         uint32_t                        BufferSize);
     virtual ~c_InputEffectEngine ();
 
     c_InputEffectEngine ();
@@ -87,7 +87,7 @@ public:
     void GetStatus (JsonObject& jsonStatus);
     void Process ();                           ///< Call from loop(),  renders Input data
     void GetDriverName (String  & sDriverName) { sDriverName = "Effects"; } ///< get the name for the instantiated driver
-    void SetBufferInfo (size_t BufferSize);
+    void SetBufferInfo (uint32_t BufferSize);
     void NextEffect ();
 
     // Effect functions
@@ -127,10 +127,10 @@ private:
     CRGB EffectColor               = { 183, 0, 255 }; /* Externally controlled effect color */
 
     uint32_t EffectStep            = 0;            /* Shared mutable effect step counter */
-    size_t   PixelCount            = 0;            /* Number of RGB leds (not channels) */
-    size_t   MirroredPixelCount    = 0;            /* Number of RGB leds (not channels) */
+    uint32_t   PixelCount            = 0;            /* Number of RGB leds (not channels) */
+    uint32_t   MirroredPixelCount    = 0;            /* Number of RGB leds (not channels) */
     uint8_t  ChannelsPerPixel      = 3;
-    size_t   PixelOffset           = 0;
+    uint32_t   PixelOffset           = 0;
 
     void setPixel(uint16_t idx,  CRGB color);
     void GetPixel (uint16_t pixelId, CRGB & out);

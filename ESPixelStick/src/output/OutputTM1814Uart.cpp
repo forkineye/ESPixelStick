@@ -18,7 +18,7 @@
 */
 
 #include "../ESPixelStick.h"
-#if defined(SUPPORT_OutputType_TM1814) && defined(SUPPORT_UART_OUTPUT)
+#if defined(SUPPORT_OutputType_TM1814)
 
 #include "OutputTM1814Uart.hpp"
 
@@ -70,14 +70,14 @@ void c_OutputTM1814Uart::Begin ()
     OutputUartConfig.UartId                 = UartId;
     OutputUartConfig.DataPin                = DataPin;
     OutputUartConfig.IntensityDataWidth     = TM1814_NUM_DATA_BYTES_PER_INTENSITY_BYTE;
-    OutputUartConfig.UartDataSize           = c_OutputUart::UartDataSize_t::OUTPUT_UART_8N2;
+    OutputUartConfig.UartDataSize           = c_OutputUart::UartDatauint32_t::OUTPUT_UART_8N2;
     OutputUartConfig.TranslateIntensityData = c_OutputUart::TranslateIntensityData_t::OneToOne;
     OutputUartConfig.pPixelDataSource       = this;
     OutputUartConfig.Baudrate               = TM1814_BAUD_RATE;
     OutputUartConfig.InvertOutputPolarity   = true;
     OutputUartConfig.CitudsArray            = ConvertIntensityToUartDataStream;
     Uart.Begin(OutputUartConfig);
-    
+
     HasBeenInitialized = true;
 
 } // init
@@ -165,4 +165,4 @@ void c_OutputTM1814Uart::PauseOutput(bool State)
     // DEBUG_END;
 } // PauseOutput
 
-#endif // defined(SUPPORT_OutputType_TM1814) && defined(SUPPORT_UART_OUTPUT)
+#endif // defined(SUPPORT_OutputType_TM1814)

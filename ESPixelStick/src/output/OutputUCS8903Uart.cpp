@@ -19,7 +19,7 @@
 
 #include "../ESPixelStick.h"
 
-#if defined(SUPPORT_OutputType_UCS8903) && defined(SUPPORT_UART_OUTPUT)
+#if defined(SUPPORT_OutputType_UCS8903)
 
 #include "OutputUCS8903Uart.hpp"
 
@@ -74,13 +74,13 @@ void c_OutputUCS8903Uart::Begin ()
     OutputUartConfig.UartId                 = UartId;
     OutputUartConfig.DataPin                = DataPin;
     OutputUartConfig.IntensityDataWidth     = UCS8903_INTENSITY_DATA_WIDTH;
-    OutputUartConfig.UartDataSize           = c_OutputUart::UartDataSize_t::OUTPUT_UART_8N1;
+    OutputUartConfig.UartDataSize           = c_OutputUart::UartDatauint32_t::OUTPUT_UART_8N1;
     OutputUartConfig.TranslateIntensityData = c_OutputUart::TranslateIntensityData_t::OneToOne;
     OutputUartConfig.pPixelDataSource       = this;
     OutputUartConfig.Baudrate               = UCS8903_PIXEL_UART_BAUDRATE;
     OutputUartConfig.InvertOutputPolarity   = true;
     OutputUartConfig.CitudsArray            = ConvertIntensityToUartDataStream;
-    Uart.Begin(OutputUartConfig);    
+    Uart.Begin(OutputUartConfig);
 
 #ifdef testPixelInsert
     static const uint32_t FrameStartData = 0;
@@ -190,4 +190,4 @@ void c_OutputUCS8903Uart::PauseOutput (bool State)
     // DEBUG_END;
 } // PauseOutput
 
-#endif // defined(SUPPORT_OutputType_UCS8903) && defined(SUPPORT_UART_OUTPUT)
+#endif // defined(SUPPORT_OutputType_UCS8903)

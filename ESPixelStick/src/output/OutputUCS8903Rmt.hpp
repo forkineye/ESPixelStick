@@ -23,7 +23,7 @@
 */
 #include "../ESPixelStick.h"
 #ifdef SUPPORT_OutputType_UCS8903
-#ifdef SUPPORT_RMT_OUTPUT
+#ifdef ARDUINO_ARCH_ESP32
 
 #include "OutputUCS8903.hpp"
 #include "OutputRmt.hpp"
@@ -43,7 +43,7 @@ public:
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);  ///< Set a new config in the driver
     void    Render ();                                        ///< Call from loop (),  renders output data
     void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
-    void    SetOutputBufferSize (uint16_t NumChannelsAvailable);
+    void    SetOutputBufferSize (uint32_t NumChannelsAvailable);
 
 private:
 
@@ -51,5 +51,5 @@ private:
 
 }; // c_OutputUCS8903Rmt
 
-#endif // def SUPPORT_RMT_OUTPUT
+#endif // def ARDUINO_ARCH_ESP32
 #endif // def SUPPORT_OutputType_UCS8903

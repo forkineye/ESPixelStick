@@ -23,7 +23,7 @@
 //-----------------------------------------------------------------------------
 c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
                           c_InputMgr::e_InputType       NewChannelType,
-                          size_t                        BufferSize) :
+                          uint32_t                        BufferSize) :
     c_InputCommon(NewInputChannelId, NewChannelType, BufferSize)
 
 {
@@ -170,12 +170,12 @@ void c_InputE131::ProcessIncomingE131Data (e131_packet_t * packet)
 
             ++CurrentUniverse.SequenceNumber;
 
-            size_t NumBytesOfE131Data = size_t(ntohs (packet->property_value_count) - 1);
-            OutputMgr.WriteChannelData(CurrentUniverse.DestinationOffset, 
-                                    min(CurrentUniverse.BytesToCopy, NumBytesOfE131Data), 
+            uint32_t NumBytesOfE131Data = uint32_t(ntohs (packet->property_value_count) - 1);
+            OutputMgr.WriteChannelData(CurrentUniverse.DestinationOffset,
+                                    min(CurrentUniverse.BytesToCopy, NumBytesOfE131Data),
                                     &E131Data[CurrentUniverse.SourceDataOffset]);
 /*
-            memcpy(CurrentUniverse.Destination, 
+            memcpy(CurrentUniverse.Destination,
                    &E131Data[CurrentUniverse.SourceDataOffset],
                    min(CurrentUniverse.BytesToCopy, NumBytesOfE131Data));
 */
@@ -193,7 +193,7 @@ void c_InputE131::ProcessIncomingE131Data (e131_packet_t * packet)
 } // process
 
 //-----------------------------------------------------------------------------
-void c_InputE131::SetBufferInfo (size_t BufferSize)
+void c_InputE131::SetBufferInfo (uint32_t BufferSize)
 {
     // DEBUG_START;
 
@@ -219,12 +219,12 @@ void c_InputE131::SetBufferTranslation ()
 
     // for each possible universe, set the start and size
 
-    size_t InputOffset = FirstUniverseChannelOffset - 1;
-    size_t DestinationOffset = 0;
-    size_t  BytesLeftToMap = InputDataBufferSize;
+    uint32_t InputOffset = FirstUniverseChannelOffset - 1;
+    uint32_t DestinationOffset = 0;
+    uint32_t  BytesLeftToMap = InputDataBufferSize;
 
     // set up the bytes for the First Universe
-    size_t BytesInUniverse = ChannelsPerUniverse - InputOffset;
+    uint32_t BytesInUniverse = ChannelsPerUniverse - InputOffset;
     // DEBUG_V (String ("    ChannelsPerUniverse:   ") + String (uint32_t (ChannelsPerUniverse)));
     // DEBUG_V (String ("    InputDataBufferSize:   ") + String (uint32_t (InputDataBufferSize)));
 
@@ -272,7 +272,7 @@ bool c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     if ((OldPortId != PortId) && (ESPAsyncE131Initialized))
     {
-        // ask for a reboot. 
+        // ask for a reboot.
         reboot = true;
         logcon (String (F ("Requesting reboot on change of UDP port.")));
     }
@@ -327,7 +327,7 @@ void c_InputE131::validateConfiguration ()
 
     // Find the last universe we should listen for
      // DEBUG_V ("");
-    size_t span = FirstUniverseChannelOffset + InputDataBufferSize - 1;
+    uint32_t span = FirstUniverseChannelOffset + InputDataBufferSize - 1;
     if (span % ChannelsPerUniverse)
     {
         LastUniverse = startUniverse + span / ChannelsPerUniverse;
@@ -381,7 +381,7 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
 
         logcon (String (F ("Listening for ")) + InputDataBufferSize +
                         F (" channels from Universe ") + startUniverse +
-                        F (" to ") + LastUniverse + 
+                        F (" to ") + LastUniverse +
                         F (" on port ") + PortId);
 
         ESPAsyncE131Initialized = true;

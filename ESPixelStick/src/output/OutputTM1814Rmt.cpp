@@ -18,7 +18,7 @@
 */
 
 #include "../ESPixelStick.h"
-#if defined (SUPPORT_OutputType_TM1814) && defined (SUPPORT_RMT_OUTPUT)
+#if defined (SUPPORT_OutputType_TM1814) && defined (ARDUINO_ARCH_ESP32)
 
 #include "OutputTM1814Rmt.hpp"
 
@@ -121,7 +121,7 @@ bool c_OutputTM1814Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // SetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputTM1814Rmt::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputTM1814Rmt::SetOutputBufferSize (uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
 
@@ -157,4 +157,4 @@ void c_OutputTM1814Rmt::Render ()
 
 } // Render
 
-#endif // defined (SUPPORT_OutputType_TM1814) && defined (SUPPORT_RMT_OUTPUT)
+#endif // defined (SUPPORT_OutputType_TM1814) && defined (ARDUINO_ARCH_ESP32)

@@ -43,7 +43,7 @@ private:
     void ProcessReceivedUdpPacket (AsyncUDPPacket _packet);
     void ProcessSyncPacket (uint8_t action, String filename, float seconds_elapsed);
     void ProcessBlankPacket ();
-    bool PlayingFile () 
+    bool PlayingFile ()
     {
         if (InputFPPRemotePlayFile)
         {
@@ -111,8 +111,8 @@ public:
     void ProcessFPPJson   (AsyncWebServerRequest* request);
     void ProcessGET       (AsyncWebServerRequest* request);
     void ProcessPOST      (AsyncWebServerRequest* request);
-    void ProcessFile      (AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
-    void ProcessBody      (AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total);
+    void ProcessFile      (AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final);
+    void ProcessBody      (AsyncWebServerRequest* request, uint8_t* data, uint32_t len, uint32_t index, uint32_t total);
     void ReadNextFrame    ();
     void sendPingPacket   (IPAddress destination = IPAddress(255, 255, 255, 255));
     void PlayFile         (String & FileToPlay);

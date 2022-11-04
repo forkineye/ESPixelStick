@@ -1,9 +1,9 @@
 #pragma once
 /*
- * GPIO_Defs_ESP32_QUINLED_QUAD.hpp - Output Management class
+ * GPIO_Defs_ESP32_QUINLED_UNO_ESPSV3.hpp - Output Management class
  *
  * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
- * Copyright (c) 2021 Shelby Merrick
+ * Copyright (c) 2021 - 2022 Shelby Merrick
  * http://www.forkineye.com
  *
  *  This program is provided free for you to use in any way that you wish,
@@ -20,14 +20,6 @@
 
 //Output Manager
 #define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_16
-#define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_3
-
-//Power relay output over Q1 or Q1R
-#define DEFAULT_RELAY_GPIO      gpio_num_t::GPIO_NUM_15
-
-//I2c over Q3 and Q4 (might require HW pullups to be installed)
-#define DEFAULT_I2C_SDA gpio_num_t::GPIO_NUM_2
-#define DEFAULT_I2C_SCL gpio_num_t::GPIO_NUM_32
 
 // File Manager - Defnitions must be present even if SD is not supported
 #define SUPPORT_SD
@@ -49,5 +41,5 @@
 #define SUPPORT_OutputType_UCS8903          // UART / RMT
 // #define SUPPORT_OutputType_WS2801           // SPI
 #define SUPPORT_OutputType_WS2811           // UART / RMT
-#define SUPPORT_OutputType_Relay            // GPIO
+// #define SUPPORT_OutputType_Relay            // GPIO
 // #define SUPPORT_OutputType_Servo_PCA9685    // I2C (default pins)

@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 c_InputMQTT::c_InputMQTT (c_InputMgr::e_InputChannelIds NewInputChannelId,
                           c_InputMgr::e_InputType       NewChannelType,
-                          size_t                        BufferSize) :
+                          uint32_t                        BufferSize) :
     c_InputCommon (NewInputChannelId, NewChannelType, BufferSize)
 
 {
@@ -169,7 +169,7 @@ void c_InputMQTT::Process ()
 } // process
 
 //-----------------------------------------------------------------------------
-void c_InputMQTT::SetBufferInfo (size_t BufferSize)
+void c_InputMQTT::SetBufferInfo (uint32_t BufferSize)
 {
     // DEBUG_START;
 
@@ -365,9 +365,9 @@ void c_InputMQTT::onMqttMessage(
     char* RcvTopic,
     char* payload,
     AsyncMqttClientMessageProperties properties,
-    size_t len,
-    size_t index,
-    size_t total)
+    uint32_t len,
+    uint32_t index,
+    uint32_t total)
 {
     // DEBUG_START;
 

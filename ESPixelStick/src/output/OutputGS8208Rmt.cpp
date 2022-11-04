@@ -18,7 +18,7 @@
 */
 #include "../ESPixelStick.h"
 
-#if defined(SUPPORT_OutputType_GS8208) && defined(SUPPORT_RMT_OUTPUT)
+#if defined(SUPPORT_OutputType_GS8208) && defined(ARDUINO_ARCH_ESP32)
 
 #include "OutputGS8208Rmt.hpp"
 
@@ -119,7 +119,7 @@ bool c_OutputGS8208Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // SetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputGS8208Rmt::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputGS8208Rmt::SetOutputBufferSize (uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
 
@@ -152,4 +152,4 @@ void c_OutputGS8208Rmt::Render ()
 
 } // Render
 
-#endif // defined(SUPPORT_OutputType_GS8208) && defined(SUPPORT_RMT_OUTPUT)
+#endif // defined(SUPPORT_OutputType_GS8208) && defined(ARDUINO_ARCH_ESP32)

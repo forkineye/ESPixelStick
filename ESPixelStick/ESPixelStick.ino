@@ -92,6 +92,7 @@ bool     ResetWiFi = false;
 bool     IsBooting = true;  // Configuration initialization flag
 bool     ConfigLoadNeeded = false;
 bool     ConfigSaveNeeded = false;
+uint32_t DiscardedRxData = 0;
 
 /////////////////////////////////////////////////////////
 //
@@ -340,7 +341,7 @@ void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
 
     // extern void PrettyPrint(DynamicJsonDocument & jsonStuff, String Name);
     // PrettyPrint(jsonDoc, "deserializeCoreHandler");
-    
+
     JsonObject json = jsonDoc.as<JsonObject>();
     deserializeCore (json);
 
@@ -467,6 +468,7 @@ void loop()
 
     // need to keep the rx pipeline empty
     size_t BytesToDiscard = min (100, LOG_PORT.available ());
+    DiscardedRxData += BytesToDiscard;
     while (0 < BytesToDiscard)
     {
         FeedWDT ();

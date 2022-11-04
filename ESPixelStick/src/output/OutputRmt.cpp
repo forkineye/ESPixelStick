@@ -17,7 +17,7 @@
 *
 */
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_RMT_OUTPUT
+#ifdef ARDUINO_ARCH_ESP32
 
 #include "OutputRmt.hpp"
 
@@ -100,7 +100,14 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
         }
 
         NumRmtSlotsPerIntensityValue = OutputRmtConfig.IntensityDataWidth + ((OutputRmtConfig.SendInterIntensityBits) ? 1 : 0);
-        TxIntensityDataStartingMask  = 1 << (OutputRmtConfig.IntensityDataWidth - 1);
+        if(OutputRmtConfig_t::DataDirection_t::MSB2LSB == OutputRmtConfig.DataDirection)
+        {
+            TxIntensityDataStartingMask = 1 << (OutputRmtConfig.IntensityDataWidth - 1);
+        }
+        else
+        {
+            TxIntensityDataStartingMask = 1;
+        }
         // DEBUG_V (String("          IntensityDataWidth: ") + String(OutputRmtConfig.IntensityDataWidth));
         // DEBUG_V (String("NumRmtSlotsPerIntensityValue: ") + String (NumRmtSlotsPerIntensityValue));
         // DEBUG_V(String("  TxIntensityDataStartingMask: 0x") + String(TxIntensityDataStartingMask, HEX));
@@ -127,8 +134,8 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
         // DEBUG_V();
         ESP_ERROR_CHECK(rmt_set_source_clk(RmtConfig.channel, rmt_source_clk_t::RMT_BASECLK_APB));
         // DEBUG_V();
-        // ESP_ERROR_CHECK (esp_intr_alloc (ETS_RMT_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3 | ESP_INTR_FLAG_SHARED, rmt_intr_handler, this, &RMT_intr_handle));
-        ESP_ERROR_CHECK(rmt_isr_register(rmt_intr_handler, this, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL1 | ESP_INTR_FLAG_SHARED, &RMT_intr_handle));
+        ESP_ERROR_CHECK (esp_intr_alloc (ETS_RMT_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3 | ESP_INTR_FLAG_SHARED, rmt_intr_handler, this, &RMT_intr_handle));
+        // ESP_ERROR_CHECK(rmt_isr_register(rmt_intr_handler, this, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL1 | ESP_INTR_FLAG_SHARED, &RMT_intr_handle));
         // DEBUG_V();
 
         RMT.apb_conf.fifo_mask = 1;      // enable access to the mem blocks
@@ -204,6 +211,23 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler ()
 
             RMT.int_clr.val = RMT_INT_TX_END_BIT;
             RMT.int_clr.val = RMT_INT_THR_EVNT_BIT;
+
+            if (MoreDataToSend())
+            {
+                RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 0;
+
+                // reset the internal and external pointers to the start of the mem block
+                RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.mem_rd_rst = 1;
+                RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.mem_rd_rst = 0;
+                RmtCurrentAddr = RmtStartAddr;
+                NumAvailableRmtSlotsToFill = NUM_RMT_SLOTS;
+                RMT.tx_lim_ch[OutputRmtConfig.RmtChannelId].limit = NumRmtSlotsPerInterrupt;
+
+                ISR_Handler_SendIntensityData();
+
+                EnableInterrupts;
+                RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 1;
+            }
 
             // ISR_Handler_StartNewFrame ();
             break;
@@ -364,7 +388,7 @@ void c_OutputRmt::StartNewFrame ()
     // Need to build up a backlog of entries in the buffer
     // so that there is still plenty of data to send when the isr fires.
     // //DEBUG_V(String("NumIdleBits: ") + String(OutputRmtConfig.NumIdleBits));
-    size_t NumInterFrameRmtSlotsCount = 0;
+    uint32_t NumInterFrameRmtSlotsCount = 0;
     while (NumInterFrameRmtSlotsCount < OutputRmtConfig.NumIdleBits)
     {
         ISR_EnqueueData (Intensity2Rmt[RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID].val);
@@ -375,7 +399,7 @@ void c_OutputRmt::StartNewFrame ()
     }
 
     // //DEBUG_V(String("NumFrameStartBits: ") + String(OutputRmtConfig.NumFrameStartBits));
-    size_t NumFrameStartRmtSlotsCount = 0;
+    uint32_t NumFrameStartRmtSlotsCount = 0;
     while (NumFrameStartRmtSlotsCount++ < OutputRmtConfig.NumFrameStartBits)
     {
         ISR_EnqueueData (Intensity2Rmt[RmtDataBitIdType_t::RMT_STARTBIT_ID].val);
@@ -424,12 +448,21 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_SendIntensityData ()
 #endif // def USE_RMT_DEBUG_COUNTERS
 
         // convert the intensity data into RMT slot data
-        for (uint32_t bitmask = TxIntensityDataStartingMask; 0 != bitmask; bitmask >>= 1)
+        uint32_t bitmask = TxIntensityDataStartingMask;
+        for (uint32_t BitCount = OutputRmtConfig.IntensityDataWidth; 0 < BitCount; --BitCount)
         {
 #ifdef USE_RMT_DEBUG_COUNTERS
             IntensityBitsSent++;
 #endif // def USE_RMT_DEBUG_COUNTERS
             ISR_EnqueueData((IntensityValue & bitmask) ? OneBitValue : ZeroBitValue);
+            if(OutputRmtConfig_t::DataDirection_t::MSB2LSB == OutputRmtConfig.DataDirection)
+            {
+                bitmask >>= 1;
+            }
+            else
+            {
+                bitmask <<= 1;
+            }
 #ifdef USE_RMT_DEBUG_COUNTERS
             if (IntensityValue & bitmask)
             {
@@ -469,7 +502,7 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler_SendIntensityData ()
 //----------------------------------------------------------------------------
 bool c_OutputRmt::Render ()
 {
-    // //DEBUG_START;
+    // _ DEBUG_START;
     bool Response = false;
 
     do // once
@@ -479,15 +512,30 @@ bool c_OutputRmt::Render ()
             break;
         }
 
+        uint32_t Now = millis();
+        uint32_t FrameDeltaTimeMicroSeconds = (Now - LastFrameStartTime) * 1000;
+        // _ DEBUG_V(String("FrameDeltaTimeMicroSeconds: ") + String(FrameDeltaTimeMicroSeconds));
+        // _ DEBUG_V(String("FrameMinDurationInMicroSec: ") + String(FrameMinDurationInMicroSec));
+
         if (!NoFrameInProgress ())
         {
-            break;
+            // _ DEBUG_V("NoFrameInProgress");
+            if ((FrameDeltaTimeMicroSeconds) > (FrameMinDurationInMicroSec * 3))
+            {
+                // DEBUG_V("Frame is stuck");
+            }
+            else
+            {
+                break;
+            }
         }
 
-        if ((millis() - LastFrameStartTime) < MIN_FRAME_TIME_MS)
+        if (FrameDeltaTimeMicroSeconds < FrameMinDurationInMicroSec)
         {
+            // _ DEBUG_V("keep waiting");
             break;
         }
+        LastFrameStartTime = Now;
 
 #ifdef USE_RMT_DEBUG_COUNTERS
         if (MoreDataToSend())
@@ -497,7 +545,7 @@ bool c_OutputRmt::Render ()
         }
 #endif // def USE_RMT_DEBUG_COUNTERS
 
-        // //DEBUG_V("Stop old Frame");
+        // _ DEBUG_V("Stop old Frame");
         RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 0;
         DisableInterrupts;
         RMT.int_clr.val = RMT_INT_THR_EVNT_BIT;
@@ -510,20 +558,19 @@ bool c_OutputRmt::Render ()
         NumAvailableRmtSlotsToFill = NUM_RMT_SLOTS;
         RMT.tx_lim_ch[OutputRmtConfig.RmtChannelId].limit = NumRmtSlotsPerInterrupt;
 
-        // //DEBUG_V("Set up a new Frame");
+        // _ DEBUG_V("Set up a new Frame");
         StartNewFrame();
 
-        // //DEBUG_V("Start Transmit");
+        // _ DEBUG_V("Start Transmit");
         // enable the threshold event interrupt
         EnableInterrupts;
         RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 1;
-        LastFrameStartTime = millis ();
-        // //DEBUG_V("Transmit Started");
+        // _ DEBUG_V("Transmit Started");
         Response = true;
 
     } while (false);
 
-    // //DEBUG_END;
+    // _ DEBUG_END;
 
     return Response;
 
@@ -569,8 +616,16 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
         debugStatus[String("RMT TYPE Counter ") + String(index++)] = CurrentCounter;
     }
 
+    index = 0;
+    uint32_t * CurrentPointer = (uint32_t*)const_cast<rmt_item32_t*>(&RMTMEM.chan[OutputRmtConfig.RmtChannelId].data32[0]);
+    for(index = 0; index < NUM_RMT_SLOTS; index++)
+    {
+        uint32_t data = CurrentPointer[index];
+        debugStatus[String("RMT Data ") + String(index)] = String(data, HEX);
+    }
+
 #endif // def USE_RMT_DEBUG_COUNTERS
     // //DEBUG_END;
 } // GetStatus
 
-#endif // def SUPPORT_RMT_OUTPUT
+#endif // def ARDUINO_ARCH_ESP32

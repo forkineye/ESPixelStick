@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
 c_InputFPPRemote::c_InputFPPRemote (c_InputMgr::e_InputChannelIds NewInputChannelId,
                                     c_InputMgr::e_InputType       NewChannelType,
-                                    size_t                        BufferSize) :
+                                    uint32_t                        BufferSize) :
     c_InputCommon (NewInputChannelId, NewChannelType, BufferSize)
 {
     // DEBUG_START;
@@ -143,7 +143,7 @@ void c_InputFPPRemote::Process ()
 } // process
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemote::SetBufferInfo (size_t BufferSize)
+void c_InputFPPRemote::SetBufferInfo (uint32_t BufferSize)
 {
     InputDataBufferSize = BufferSize;
 

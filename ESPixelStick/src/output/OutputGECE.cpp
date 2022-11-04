@@ -20,7 +20,6 @@
 #include "../ESPixelStick.h"
 
 #if defined(SUPPORT_OutputType_GECE)
-#if defined(SUPPORT_UART_OUTPUT) || defined(SUPPORT_RMT_OUTPUT)
 
 #include "OutputGECE.hpp"
 
@@ -103,7 +102,7 @@ void c_OutputGECE::GetStatus (ArduinoJson::JsonObject & jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputGECE::SetOutputBufferSize(uint16_t NumChannelsAvailable)
+void c_OutputGECE::SetOutputBufferSize(uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
 
@@ -123,7 +122,7 @@ bool c_OutputGECE::validate ()
     // DEBUG_START;
 
     bool response = true;
-    size_t PixelCount = GetPixelCount();
+    uint32_t PixelCount = GetPixelCount();
     if (PixelCount > GECE_PIXEL_LIMIT)
     {
         PixelCount = GECE_PIXEL_LIMIT;
@@ -160,5 +159,4 @@ void c_OutputGECE::Render()
 
 } // render
 
-#endif // defined(SUPPORT_UART_OUTPUT) || defined(SUPPORT_RMT_OUTPUT)
 #endif // defined(SUPPORT_OutputType_GECE)

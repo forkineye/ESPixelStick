@@ -295,7 +295,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
         }
 
         // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (FileHandleForFileBeingPlayed));
-        size_t BytesRead = FileMgr.ReadSdFile (FileHandleForFileBeingPlayed,
+        uint32_t BytesRead = FileMgr.ReadSdFile (FileHandleForFileBeingPlayed,
                                                (uint8_t*)&fsqRawHeader,
                                                sizeof (fsqRawHeader), 0);
         // DEBUG_V (String ("                    BytesRead: ") + String (BytesRead));
@@ -467,23 +467,23 @@ void c_InputFPPRemotePlayFile::ClearFileInfo()
 
 } // ClearFileInfo
 
-size_t c_InputFPPRemotePlayFile::ReadFile(size_t DestinationIntensityId, size_t NumBytesToRead, size_t FileOffset)
+uint32_t c_InputFPPRemotePlayFile::ReadFile(uint32_t DestinationIntensityId, uint32_t NumBytesToRead, uint32_t FileOffset)
 {
     // DEBUG_START;
-#define WRITE_DIRECT_TO_OUTPUT_BUFFER
+// #define WRITE_DIRECT_TO_OUTPUT_BUFFER
 #ifdef WRITE_DIRECT_TO_OUTPUT_BUFFER
-    size_t NumBytesRead = FileMgr.ReadSdFile(FileHandleForFileBeingPlayed,
+    uint32_t NumBytesRead = FileMgr.ReadSdFile(FileHandleForFileBeingPlayed,
                                              OutputMgr.GetBufferAddress(),
                                              min((NumBytesToRead), OutputMgr.GetBufferUsedSize()),
                                              FileOffset);
 #else
     uint8_t LocalIntensityBuffer[200];
 
-    size_t NumBytesRead = 0;
+    uint32_t NumBytesRead = 0;
 
     while (NumBytesRead < NumBytesToRead)
     {
-        size_t NumBytesReadThisPass = FileMgr.ReadSdFile(FileHandleForFileBeingPlayed,
+        uint32_t NumBytesReadThisPass = FileMgr.ReadSdFile(FileHandleForFileBeingPlayed,
                                                          LocalIntensityBuffer,
                                                          min((NumBytesToRead - NumBytesRead), sizeof(LocalIntensityBuffer)),
                                                          FileOffset);

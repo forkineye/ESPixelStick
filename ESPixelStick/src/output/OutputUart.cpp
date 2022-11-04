@@ -17,7 +17,6 @@
 *
 */
 #include "../ESPixelStick.h"
-#ifdef SUPPORT_UART_OUTPUT
 
 #include "OutputUart.hpp"
 extern "C"
@@ -141,7 +140,7 @@ c_OutputUart::~c_OutputUart ()
 {
     // DEBUG_START;
 
-    TerminateUartOperation();
+    RestoreSerialPortOperation();
 
 #ifdef ARDUINO_ARCH_ESP8266
 
@@ -299,7 +298,7 @@ void c_OutputUart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
     debugStatus["RxIsr"]                         = RxIsr;
     debugStatus["FiFoISRcounter"]                = FiFoISRcounter;
     debugStatus["BreakIsrCounter"]               = BreakIsrCounter;
-    debugStatus["IdleIsrCounter"]                = IdleIsrCounter;    
+    debugStatus["IdleIsrCounter"]                = IdleIsrCounter;
     debugStatus["UnknownIsr"]                    = UnknownIsr;
     debugStatus["IsrIsNotForUs"]                 = IsrIsNotForUs;
     debugStatus["ErrorIsr"]                      = ErrorIsr;
@@ -312,8 +311,8 @@ void c_OutputUart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
     debugStatus["IntensityBitsSent"]             = IntensityBitsSent;
     debugStatus["IntensityBitsSentLastFrame"]    = IntensityBitsSentLastFrame;
     debugStatus["EnqueueCounter"]                = EnqueueCounter;
-    debugStatus["TimerIsrCounter"]               = TimerIsrCounter;    
-    debugStatus["TimerIsrNoDataToSend"]          = TimerIsrNoDataToSend;    
+    debugStatus["TimerIsrCounter"]               = TimerIsrCounter;
+    debugStatus["TimerIsrNoDataToSend"]          = TimerIsrNoDataToSend;
     debugStatus["TimerIsrSendData"]              = TimerIsrSendData;
     debugStatus["FiFoNotEmpty"]                  = FiFoNotEmpty;
     debugStatus["FiFoEmpty"]                     = FiFoEmpty;
@@ -346,8 +345,8 @@ void c_OutputUart::InitializeUart()
             case UART_NUM_1:
             {
                 // DEBUG_V("UART_NUM_1");
-                Serial1.begin( OutputUartConfig.Baudrate, 
-                               SerialConfig (UartDataSizeXlat[OutputUartConfig.UartDataSize]), 
+                Serial1.begin( OutputUartConfig.Baudrate,
+                               SerialConfig (UartDataSizeXlat[OutputUartConfig.UartDataSize]),
                                SerialMode (SERIAL_TX_ONLY));
                 break;
             }
@@ -506,7 +505,7 @@ void c_OutputUart::InitializeUart()
                               UART_TX_IDLE_NUM_S);
         }
     }
-    
+
     CalculateEnableUartInterruptFlags();
 
 // #define SupportSetUartBaudrateWorkAround
@@ -724,7 +723,7 @@ void IRAM_ATTR c_OutputUart::ISR_Timer_Handler()
 //----------------------------------------------------------------------------
 void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
 {
-    size_t NumAvailableIntensitySlotsToFill = ((((size_t)UART_TX_FIFO_SIZE) - (getUartFifoLength())) / NumUartSlotsPerIntensityValue);
+    uint32_t NumAvailableIntensitySlotsToFill = ((((uint32_t)UART_TX_FIFO_SIZE) - (getUartFifoLength())) / NumUartSlotsPerIntensityValue);
 #ifdef USE_UART_DEBUG_COUNTERS
     if (NumAvailableIntensitySlotsToFill)
     {
@@ -772,8 +771,8 @@ void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
         else // 2:1
         {
             // Mask is used as a shift counter that is decremented by 2.
-            for (uint32_t NumBitsToShift = TxIntensityDataStartingMask - 2; 
-                 0 < NumBitsToShift; 
+            for (uint32_t NumBitsToShift = TxIntensityDataStartingMask - 2;
+                 0 < NumBitsToShift;
                  NumBitsToShift -= 2)
             {
                 // convert the intensity data into UART data
@@ -795,7 +794,7 @@ void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
             break;
         }
     } // end while there is space in the buffer
-    
+
     // DEBUG_END;
 
 } // ISR_Handler_SendIntensityData
@@ -902,7 +901,7 @@ void c_OutputUart::SetIntensityDataWidth()
     }
     else // 2:1
     {
-        // this is not a true mask. This is the number of bits to 
+        // this is not a true mask. This is the number of bits to
         // shift the value before using a fixed mask
         NumUartSlotsPerIntensityValue = OutputUartConfig.IntensityDataWidth >> 1;
         TxIntensityDataStartingMask   = OutputUartConfig.IntensityDataWidth;
@@ -1077,7 +1076,7 @@ void c_OutputUart::StartUart()
             return;
         }
 
-        TerminateUartOperation();
+        TerminateSerialPortOperation();
 
         // Initialize uart also sets pin
         InitializeUart();
@@ -1101,48 +1100,43 @@ void c_OutputUart::StartUart()
 } // StartUart
 
 //----------------------------------------------------------------------------
-void c_OutputUart::TerminateUartOperation()
+void c_OutputUart::TerminateSerialPortOperation()
 {
     // DEBUG_START;
-    
+
     DisableUartInterrupts();
 
-#ifdef SUPPORT_UART_OUTPUT
-    if (OutputUartConfig.ChannelId <= c_OutputMgr::e_OutputChannelIds::OutputChannelId_UART_LAST)
+    switch (OutputUartConfig.UartId)
     {
-        switch (OutputUartConfig.UartId)
+        case UART_NUM_0:
         {
-            case UART_NUM_0:
-            {
-                // DEBUG_V ("UART_NUM_0");
-                Serial.end();
-                break;
-            }
+            // DEBUG_V ("UART_NUM_0");
+            Serial.end();
+            break;
+        }
 
-            case UART_NUM_1:
-            {
-                // DEBUG_V ("UART_NUM_1");
-                Serial1.end();
-                break;
-            }
+        case UART_NUM_1:
+        {
+            // DEBUG_V ("UART_NUM_1");
+            Serial1.end();
+            break;
+        }
 
-#ifdef ARDUINO_ARCH_ESP32
-            case UART_NUM_2:
-            {
-                // DEBUG_V ("UART_NUM_2");
-                Serial2.end();
-                break;
-            }
-#endif // def ARDUINO_ARCH_ESP32
+        #ifdef ARDUINO_ARCH_ESP32
+        case UART_NUM_2:
+        {
+            // DEBUG_V ("UART_NUM_2");
+            Serial2.end(true);
+            break;
+        }
+        #endif // def ARDUINO_ARCH_ESP32
 
-            default:
-            {
-                // DEBUG_V ("default");
-                break;
-            }
-        } // end switch (UartId)
-    }
-#endif // def SUPPORT_UART_OUTPUT
+        default:
+        {
+            // DEBUG_V ("default");
+            break;
+        }
+    } // end switch (UartId)
 
 #ifdef ARDUINO_ARCH_ESP32
     if (IsrHandle)
@@ -1150,10 +1144,52 @@ void c_OutputUart::TerminateUartOperation()
         esp_intr_free(IsrHandle);
         IsrHandle = nullptr;
     }
+    // uart_driver_delete(OutputUartConfig.UartId);
 #endif // def ARDUINO_ARCH_ESP32
 
     // DEBUG_END;
 
-} // TerminateUartOperation
+} // TerminateSerialPortOperation
 
-#endif // def SUPPORT_UART_OUTPUT
+//----------------------------------------------------------------------------
+void c_OutputUart::RestoreSerialPortOperation()
+{
+    // DEBUG_START;
+
+    DisableUartInterrupts();
+
+    switch (OutputUartConfig.UartId)
+    {
+        case UART_NUM_0:
+        {
+            // DEBUG_V ("UART_NUM_0");
+            Serial.begin(115200);
+            break;
+        }
+
+        case UART_NUM_1:
+        {
+            // DEBUG_V ("UART_NUM_1");
+            Serial1.begin(115200);
+            break;
+        }
+
+        #ifdef ARDUINO_ARCH_ESP32
+        case UART_NUM_2:
+        {
+            // DEBUG_V ("UART_NUM_2");
+            Serial2.begin(115200);
+            break;
+        }
+        #endif // def ARDUINO_ARCH_ESP32
+
+        default:
+        {
+            // DEBUG_V ("default");
+            break;
+        }
+    } // end switch (UartId)
+
+    // DEBUG_END;
+
+} // RestoreSerialPortOperation

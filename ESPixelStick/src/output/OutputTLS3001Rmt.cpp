@@ -17,7 +17,7 @@
 *
 */
 #include "../ESPixelStick.h"
-#if defined(SUPPORT_OutputType_TLS3001) && defined (SUPPORT_RMT_OUTPUT)
+#if defined(SUPPORT_OutputType_TLS3001) && defined (ARDUINO_ARCH_ESP32)
 
 #include "OutputTLS3001Rmt.hpp"
 
@@ -109,7 +109,7 @@ bool c_OutputTLS3001Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // SetConfig
 
 //----------------------------------------------------------------------------
-void c_OutputTLS3001Rmt::SetOutputBufferSize (uint16_t NumChannelsAvailable)
+void c_OutputTLS3001Rmt::SetOutputBufferSize (uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
 
@@ -197,4 +197,4 @@ void fsm_RMT_state_SendData::Poll (c_OutputTLS3001Rmt* Parent)
 
 } // fsm_RMT_state_SendData
 
-#endif // defined(SUPPORT_OutputType_TLS3001) && defined (SUPPORT_RMT_OUTPUT)
+#endif // defined(SUPPORT_OutputType_TLS3001) && defined (ARDUINO_ARCH_ESP32)

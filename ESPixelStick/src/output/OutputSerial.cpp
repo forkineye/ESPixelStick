@@ -92,6 +92,7 @@ void c_OutputSerial::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     debugStatus["FrameStartCounter"]           = FrameStartCounter;
     debugStatus["FrameEndCounter"]             = FrameEndCounter;
     debugStatus["AbortFrameCounter"]           = AbortFrameCounter;
+    debugStatus["LastDataSent"]                = LastDataSent;
 #endif // def USE_SERIAL_DEBUG_COUNTERS
 
     // DEBUG_END;
@@ -136,7 +137,7 @@ void c_OutputSerial::GetDriverName(String &sDriverName)
 } // GetDriverName
 
 //----------------------------------------------------------------------------
-void c_OutputSerial::SetOutputBufferSize(size_t NumChannelsAvailable)
+void c_OutputSerial::SetOutputBufferSize(uint32_t NumChannelsAvailable)
 {
     // DEBUG_START;
     // DEBUG_V (String ("NumChannelsAvailable: ") + String (NumChannelsAvailable));
@@ -384,7 +385,7 @@ uint32_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
         case SerialFrameState_t::RenardSendEscapedData:
         {
             data = *NextIntensityToSend - uint8_t(RenardFrameDefinitions_t::ESCAPED_OFFSET);
-            ++NextIntensityToSend;           
+            ++NextIntensityToSend;
             if (0 == --intensity_count)
             {
                 SerialFrameState = SerialFrameState_t::SerialIdle;
@@ -469,12 +470,10 @@ uint32_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
         }
     } // switch SerialFrameState
 
-/*
-    if (InvertData)
-    {
-        response = ~response;
-    }
-*/
+
+#ifdef USE_SERIAL_DEBUG_COUNTERS
+    LastDataSent = data;
+#endif // def USE_SERIAL_DEBUG_COUNTERS
     return data;
 } // NextIntensityToSend
 

@@ -21,7 +21,8 @@
 #include "ESPixelStick.h"
 
 #ifdef ARDUINO_ARCH_ESP32
-#   include "driver/gpio.h"
+#   include <driver/gpio.h>
+#   include <hal/uart_types.h>
 #endif
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -112,9 +113,11 @@ typedef enum
 #elif defined (BOARD_ESP32_QUINLED_UNO_ETH)
 #   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_UNO_ETH.hpp"
 #elif defined (BOARD_ESP32_QUINLED_UNO)
-#   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_UNO_AE_Plus.hpp"
-#elif defined (BOARD_ESP32_QUINLED_UNO_AE_PLUS)
 #   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_UNO.hpp"
+#elif defined (BOARD_ESP32_QUINLED_UNO_AE_PLUS)
+#   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_UNO_AE_Plus.hpp"
+#elif defined (BOARD_ESP32_QUINLED_UNO_ESPSV3)
+#   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_UNO_ESPSV3.hpp"
 #elif defined (BOARD_ESP32_QUINLED_UNO_ETH_ESPSV3)
 #   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_UNO_ETH_ESPSV3.hpp"
 #elif defined (BOARD_ESP32_TTGO_T8)
@@ -131,6 +134,8 @@ typedef enum
 #   include "platformDefinitions/GPIO_Defs_ESP8266_ESP01S.hpp"
 #elif defined (BOARD_ESPS_V3)
 #   include "platformDefinitions/GPIO_Defs_ESP8266_ESPS_V3.hpp"
+#elif defined (BOARD_ESPS_ESP3DEUXQUATRO_DMX)
+#   include "platformDefinitions/GPIO_Defs_ESP32_ESP3DEUXQuattro_DMX.hpp"
 #elif defined (ARDUINO_ARCH_ESP32)
 #   include "platformDefinitions/GPIO_Defs_ESP32_generic.hpp"
 #elif defined (ARDUINO_ARCH_ESP8266)
@@ -138,3 +143,7 @@ typedef enum
 #else
 #   error "No valid platform definition"
 #endif // ndef platform specific GPIO definitions
+
+#if defined(SUPPORT_SD) || defined(SUPPORT_SD_MMC)
+#   define SUPPORT_FPP
+#endif // defined(SUPPORT_SD) || defined(SUPPORT_SD_MMC)
