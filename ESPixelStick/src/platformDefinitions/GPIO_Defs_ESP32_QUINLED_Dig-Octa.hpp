@@ -24,12 +24,12 @@
 #define DEFAULT_UART_1_GPIO      gpio_num_t::GPIO_NUM_0
 #define DEFAULT_UART_2_GPIO      gpio_num_t::GPIO_NUM_1
 
-#define DEFAULT_RMT_0_GPIO       gpio_num_t::GPIO_NUM_2
-#define DEFAULT_RMT_1_GPIO       gpio_num_t::GPIO_NUM_3
-#define DEFAULT_RMT_2_GPIO       gpio_num_t::GPIO_NUM_4
-#define DEFAULT_RMT_3_GPIO       gpio_num_t::GPIO_NUM_5
-#define DEFAULT_RMT_4_GPIO       gpio_num_t::GPIO_NUM_12
-#define DEFAULT_RMT_5_GPIO       gpio_num_t::GPIO_NUM_13
+#define DEFAULT_RMT_1_GPIO       gpio_num_t::GPIO_NUM_2
+#define DEFAULT_RMT_2_GPIO       gpio_num_t::GPIO_NUM_3
+#define DEFAULT_RMT_3_GPIO       gpio_num_t::GPIO_NUM_4
+#define DEFAULT_RMT_4_GPIO       gpio_num_t::GPIO_NUM_5
+#define DEFAULT_RMT_5_GPIO       gpio_num_t::GPIO_NUM_12
+#define DEFAULT_RMT_6_GPIO       gpio_num_t::GPIO_NUM_13
 
 //Power relay output over Q1 or Q1R
 #define DEFAULT_RELAY_GPIO      gpio_num_t::GPIO_NUM_33
