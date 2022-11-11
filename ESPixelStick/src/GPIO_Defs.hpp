@@ -73,18 +73,6 @@ typedef enum
 } uart_port_t;
 #endif // def ARDUINO_ARCH_ESP8266
 
-// #define BOARD_ESP01S
-// #define BOARD_ESPS_V3
-// #define BOARD_ESP32_CAM
-// #define BOARD_ESP32_TTGO_T8
-// #define BOARD_ESP32_D1_MINI_ETH
-// #define BOARD_ESP32_LOLIN_D32_PRO_ETH
-// #define BOARD_ESP32_MH_ET_LIVE_MiniKit
-// #define BOARD_ESP32_OLIMEX_GATEWAY
-
-#define SUPPORT_OutputType_UCS1903
-#define SUPPORT_OutputType_GS8208
-
 // Platform specific GPIO definitions
 #if   defined (BOARD_ESP32_CAM)
 #   include "platformDefinitions/GPIO_Defs_ESP32_CAM.hpp"
