@@ -54,7 +54,6 @@
 #define DEFAULT_ETH_CLK_MODE           eth_clock_mode_t::ETH_CLOCK_GPIO0_IN
 
 // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
-// #define DEFAULT_ETH_POWER_PIN          gpio_num_t(gpio_num_t::GPIO_NUM_5)
 #define DEFAULT_ETH_POWER_PIN          gpio_num_t::GPIO_NUM_15
 #define DEFAULT_ETH_POWER_PIN_ACTIVE   HIGH
 
