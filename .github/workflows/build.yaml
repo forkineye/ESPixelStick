@@ -64,6 +64,9 @@ jobs:
           # mh et esp32 mini kit
           - target: "d1_mini_mhetesp32minikit"
             chip: "esp32"
+          # Olimex ESP32 Gateway
+            target: "olimex_esp32_gw"
+            chip: "esp32"
           # Twilight Lord
           - target: "d1_mini_twilightlord"
             chip: "esp32"
