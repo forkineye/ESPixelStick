@@ -22,58 +22,32 @@
  * Pinout for Olimex ESP32-GATEWAY
  * https://www.olimex.com/Products/IoT/ESP32/ESP32-GATEWAY/open-source-hardware
  */
-#define SUPPORT_ETHERNET
 
 //Output Manager
-#define SUPPORT_UART_OUTPUT
 #define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_4     // Supposed to be SD Card, but R10 not populated
-#define UART_LAST               OutputChannelId_UART_1
 
-
-#define SUPPORT_RMT_OUTPUT
 #define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_12    // Tested working
 #define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_13    // Tested working
 #define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_16    // Tested working
 #define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_32    // Tested working
 /*
   Notes:
-  - Got exceptions and board resets when using either of GPIO_NUM_36 or GPIO_NUM_35
-    as an RMT output
   - GPIOs 4, 12, 13 are for SD Card, but are not actually wired to the SD Card on
     board rev G (resistors R10, R11, R9 are not populated on the board)
+  - 39 is also available on the header
+  - Maybe also use 33 (LED output) if needed
 */ 
-// TODO: 39 is also available on the header, maybe also use 33 (LED output)
-#define RMT_LAST                OutputChannelId_RMT_4
-
-// #define SUPPORT_OutputType_WS2801    // requires a change in the html directory
-// #define SUPPORT_OutputType_APA102    // requires a change in the html directory
-// #define SUPPORT_OutputType_TM1814    // requires a change in the html directory
-// #define SUPPORT_OutputType_TLS3001   // requires a change in the html directory
-#define SUPPORT_OutputType_WS2811           // UART / RMT
-
-// #define SUPPORT_RELAY_OUTPUT
-
-#if defined(SUPPORT_OutputType_WS2801) || defined(SUPPORT_OutputType_APA102)
-#   define SUPPORT_SPI_OUTPUT
-
-// SPI Output
-#define SUPPORT_SPI_OUTPUT
-#define DEFAULT_SPI_DATA_GPIO  gpio_num_t::GPIO_NUM_15
-#define DEFAULT_SPI_CLOCK_GPIO gpio_num_t::GPIO_NUM_25
-
-#endif // defined(SUPPORT_OutputType_WS2801) || defined(SUPPORT_OutputType_TM1814)
 
 // File Manager
 // Have not been able to get the SD card working, yet.
 // CS pin would be GPIO13, but is not connected (resistor R9 not populated); instead CS is pulled up through R2
-#define SUPPORT_SD
 #define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_2
 #define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_15
 #define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_14
 #define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_NC
 
 #include <ETH.h>
-
+#define SUPPORT_ETHERNET
 /*
    * ETH_CLOCK_GPIO0_IN   - default: external clock from crystal oscillator
    * ETH_CLOCK_GPIO0_OUT  - 50MHz clock from internal APLL output on GPIO0 - possibly an inverter is needed for LAN8720
@@ -83,7 +57,6 @@
 #define DEFAULT_ETH_CLK_MODE    eth_clock_mode_t::ETH_CLOCK_GPIO17_OUT
 
 // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
-// #define DEFAULT_ETH_POWER_PIN          gpio_num_t(gpio_num_t::GPIO_NUM_NC)
 #define DEFAULT_ETH_POWER_PIN          gpio_num_t(gpio_num_t::GPIO_NUM_5)
 #define DEFAULT_ETH_POWER_PIN_ACTIVE   LOW
 
@@ -104,3 +77,18 @@
 #define DEFAULT_ETH_MDC_PIN     gpio_num_t::GPIO_NUM_23
 #define DEFAULT_ETH_MDIO_PIN    gpio_num_t::GPIO_NUM_18
 
+
+// Output Types
+// #define SUPPORT_OutputType_APA102           // SPI
+#define SUPPORT_OutputType_DMX              // UART / RMT
+#define SUPPORT_OutputType_GECE             // UART / RMT
+#define SUPPORT_OutputType_GS8208           // UART / RMT
+#define SUPPORT_OutputType_Renard           // UART / RMT
+#define SUPPORT_OutputType_Serial           // UART / RMT
+#define SUPPORT_OutputType_TM1814           // UART / RMT
+#define SUPPORT_OutputType_UCS1903          // UART / RMT
+#define SUPPORT_OutputType_UCS8903          // UART / RMT
+// #define SUPPORT_OutputType_WS2801           // SPI
+#define SUPPORT_OutputType_WS2811           // UART / RMT
+// #define SUPPORT_OutputType_Relay            // GPIO
+// #define SUPPORT_OutputType_Servo_PCA9685    // I2C (default pins)
