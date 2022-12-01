@@ -85,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout ESPixelStick
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Create version file
         run: |
@@ -98,7 +98,7 @@ jobs:
           echo "${GITHUB_REF#refs/*/v}" > firmware/VERSION
 
       - name: Cache pip
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -106,13 +106,13 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: Cache PlatformIO
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.platformio
           key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
 
       - name: Install PlatformIO
         run: |
@@ -130,13 +130,13 @@ jobs:
           ls -al ./debug/${{ matrix.chip }}
 
       - name: Upload Firmware Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Firmware Binaries
           path: firmware
 
       - name: Upload Debugging Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Debug Files
           path: debug
@@ -146,7 +146,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout ESPixelStick
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set release flag
         if: startsWith(github.ref, 'refs/tags/v')
@@ -160,9 +160,9 @@ jobs:
           path: dist/firmware
 
       # Install Node
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '16'
       - run: npm install
 
       # Build and move the web pages
@@ -188,7 +188,7 @@ jobs:
         working-directory: dist
 
       - name: Upload Release Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Release Archive
           path: ${{ env.ARCHFILE }}
