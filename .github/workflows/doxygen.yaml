@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout ESPixelStick
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Build doxygen pages
         uses: mattnotmitt/doxygen-action@v1
@@ -17,7 +17,7 @@ jobs:
           doxyfile-path: 'Doxyfile'
 
       - name: Deploy to gh-pages
-        uses: JamesIves/github-pages-deploy-action@4.1.5
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: .doxygen/doc/html
