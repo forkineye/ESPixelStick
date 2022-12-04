@@ -102,7 +102,7 @@ public:
     void Begin                   (c_OutputUart::OutputUartConfig_t & config);
     bool SetConfig               (ArduinoJson::JsonObject &jsonConfig);
     void GetConfig               (ArduinoJson::JsonObject &jsonConfig);
-    void GetDriverName           (String &sDriverName) { sDriverName = String(F("OutputUart")); }
+    void GetDriverName           (String &sDriverName) { sDriverName = CN_OutputUart; }
     void GetStatus               (ArduinoJson::JsonObject &jsonStatus);
     void PauseOutput             (bool State);
     void SetMinFrameDurationInUs (uint32_t value);

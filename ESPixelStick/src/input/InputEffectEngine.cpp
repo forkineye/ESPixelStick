@@ -19,6 +19,7 @@
 #include "../ESPixelStick.h"
 #include "../utility/SaferStringConversion.hpp"
 #include "InputEffectEngine.hpp"
+#include <vector>
 
 //-----------------------------------------------------------------------------
 // Local Structure and Data Definitions
@@ -38,7 +39,34 @@ static const c_InputEffectEngine::EffectDescriptor_t ListOfEffects[] =
         { "Fire flicker", &c_InputEffectEngine::effectFireFlicker,"t_fireflicker",  1,    0,    0,    0,  "T6"     },
         { "Lightning",    &c_InputEffectEngine::effectLightning,  "t_lightning",    1,    0,    0,    0,  "T7"     },
         { "Breathe",      &c_InputEffectEngine::effectBreathe,    "t_breathe",      1,    0,    0,    0,  "T8"     },
-        { "Random",       &c_InputEffectEngine::effectRandom,     "t_random",       0,    0,    0,    0,  "T9"     }
+        { "Random",       &c_InputEffectEngine::effectRandom,     "t_random",       0,    0,    0,    0,  "T9"     },
+        { "Transition",   &c_InputEffectEngine::effectTransition, "t_Transition",   0,    0,    0,    0,  "T10"    }
+};
+
+static std::vector<c_InputEffectEngine::dCRGB> TransitionColorTable =
+{
+	{ 85,  85,  85},
+	{128, 128,   0},
+	{128,   0, 128},
+	{  0, 128, 128},
+	{ 28, 128, 100},
+	{128, 100,  28},
+	{100,  28, 128},
+	{ 40, 175,  40},
+	{175,  40,  40},
+	{ 40,  40, 175},
+	{191,  64,   0},
+	{ 64,   0, 191},
+	{  0, 191,  64},
+	{128,  64,  64},
+	{ 64, 128,  64},
+	{ 64,  64, 128},
+	{ 80, 144,  32},
+	{144,  32,  80},
+	{ 32,  80, 144},
+	{100, 100,  55},
+	{ 55, 100, 100},
+	{100, 100,  55},
 };
 
 //-----------------------------------------------------------------------------
@@ -53,9 +81,10 @@ c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInput
 
     SetBufferInfo (BufferSize);
 
+    TransitionTargetColorIterator = TransitionColorTable.begin();
+
     // DEBUG_END;
 } // c_InputEffectEngine
-
 
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::c_InputEffectEngine () :
@@ -67,6 +96,8 @@ c_InputEffectEngine::c_InputEffectEngine () :
     ActiveEffect = &ListOfEffects[0];
 
     SetBufferInfo (0);
+
+    TransitionTargetColorIterator = TransitionColorTable.begin();
 
     // DEBUG_END;
 
@@ -122,6 +153,17 @@ void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
         JsonObject currentJsonEntry = EffectsArray.createNestedObject ();
         currentJsonEntry[CN_name] = currentEffect.name;
     }
+
+    JsonArray TransitionsArray = jsonConfig.createNestedArray (CN_transitions);
+    for (auto currentTransition : TransitionColorTable)
+    {
+        // DEBUG_V ("");
+        JsonObject currentJsonEntry = TransitionsArray.createNestedObject ();
+        currentJsonEntry["r"] = currentTransition.r;
+        currentJsonEntry["g"] = currentTransition.g;
+        currentJsonEntry["b"] = currentTransition.b;
+    }
+
     // DEBUG_END;
 
 } // GetConfig
@@ -235,7 +277,7 @@ void c_InputEffectEngine::Process ()
 
         // DEBUG_V ("Update output");
         EffectLastRun = millis ();
-        uint16_t wait = (this->*ActiveEffect->func)();
+        uint32_t wait = (this->*ActiveEffect->func)();
         EffectWait = max ((int)wait, MIN_EFFECT_DELAY);
         EffectCounter++;
         InputMgr.RestartBlankTimer (GetInputChannelId ());
@@ -285,6 +327,26 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     setFromJSON (effectName, jsonConfig, CN_currenteffect);
     setFromJSON (effectColor, jsonConfig, CN_EffectColor);
     // DEBUG_V (String ("effectColor: ") + effectColor);
+
+    if(jsonConfig.containsKey(CN_transitions))
+    {
+        TransitionColorTable.clear();
+
+        JsonArray TransitionsArray = jsonConfig[CN_transitions];
+        for (auto currentTransition : TransitionsArray)
+        {
+            // DEBUG_V ("");
+            dCRGB NewColorTarget;
+            setFromJSON (NewColorTarget.r, currentTransition, "r");
+            setFromJSON (NewColorTarget.g, currentTransition, "g");
+            setFromJSON (NewColorTarget.b, currentTransition, "b");
+            // DEBUG_V (String("NewColorTarget.r: ") + String(NewColorTarget.r));
+            // DEBUG_V (String("NewColorTarget.g: ") + String(NewColorTarget.g));
+            // DEBUG_V (String("NewColorTarget.b: ") + String(NewColorTarget.b));
+
+            TransitionColorTable.push_back(NewColorTarget);
+        }
+    }
 
     EffectBrightness /= 100.0;
 
@@ -691,6 +753,171 @@ uint16_t c_InputEffectEngine::effectRandom ()
     return (EffectDelay / 500);
 
 } // effectRandom
+
+//-----------------------------------------------------------------------------
+uint16_t c_InputEffectEngine::effectTransition ()
+{
+    /*
+        All pixels will be changed to the next color in a list of colors
+    */
+
+    // DEBUG_START;
+    // DEBUG_V(String("TransitionTargetColorId: ") + String(TransitionTargetColorId));
+
+    if(ColorHasReachedTarget())
+    {
+        // DEBUG_V("need to calculate a new target color");
+
+        // remove any calculation errors
+        dCRGB TransitionCurrentColor = *TransitionTargetColorIterator;
+
+        ++TransitionTargetColorIterator;
+
+        // wrap the index
+        if(TransitionTargetColorIterator == TransitionColorTable.end())
+        {
+            // DEBUG_V("Wrap Transition iterator");
+            TransitionTargetColorIterator = TransitionColorTable.begin();
+        }
+
+        CalculateTransitionStepValue (TransitionTargetColorIterator->r, TransitionCurrentColor.r, TransitionStepValue.r);
+        CalculateTransitionStepValue (TransitionTargetColorIterator->g, TransitionCurrentColor.g, TransitionStepValue.g);
+        CalculateTransitionStepValue (TransitionTargetColorIterator->b, TransitionCurrentColor.b, TransitionStepValue.b);
+
+        // DEBUG_V(String("   TransitionStepValue.r: ") + String(TransitionStepValue.r));
+        // DEBUG_V(String("   TransitionStepValue.g: ") + String(TransitionStepValue.g));
+        // DEBUG_V(String("   TransitionStepValue.b: ") + String(TransitionStepValue.b));
+        // DEBUG_V(String("           TargetColor.r: ") + String(TransitionTargetColorIterator->r));
+        // DEBUG_V(String("           TargetColor.g: ") + String(TransitionTargetColorIterator->g));
+        // DEBUG_V(String("           TargetColor.b: ") + String(TransitionTargetColorIterator->b));
+        // DEBUG_V(String("TransitionCurrentColor.r: ") + String(TransitionCurrentColor.r));
+        // DEBUG_V(String("TransitionCurrentColor.g: ") + String(TransitionCurrentColor.g));
+        // DEBUG_V(String("TransitionCurrentColor.b: ") + String(TransitionCurrentColor.b));
+    }
+    else
+    {
+        // DEBUG_V("need to calculate next transition color");
+
+        ConditionalIncrementColor(TransitionTargetColorIterator->r, TransitionCurrentColor.r, TransitionStepValue.r);
+        ConditionalIncrementColor(TransitionTargetColorIterator->g, TransitionCurrentColor.g, TransitionStepValue.g);
+        ConditionalIncrementColor(TransitionTargetColorIterator->b, TransitionCurrentColor.b, TransitionStepValue.b);
+    }
+
+    CRGB TempColor;
+    TempColor.r = uint8_t(TransitionCurrentColor.r);
+    TempColor.g = uint8_t(TransitionCurrentColor.g);
+    TempColor.b = uint8_t(TransitionCurrentColor.b);
+
+    // DEBUG_V(String("r: ") + String(TempColor.r));
+    // DEBUG_V(String("g: ") + String(TempColor.g));
+    // DEBUG_V(String("b: ") + String(TempColor.b));
+
+    setAll(TempColor);
+
+    // DEBUG_END;
+    return (EffectDelay / 10);
+//    return 1;
+} // effectTransition
+
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::CalculateTransitionStepValue(double tc, double cc, double & step)
+{
+    // DEBUG_START;
+    step = (tc - cc) / NumStepsToTarget;
+
+    #define MinStepValue (1.0 / NumStepsToTarget)
+    if(MinStepValue > fabs(step))
+    {
+        if(step < 0.0)
+        {
+            step = 0 - MinStepValue;
+        }
+        else
+        {
+            step = MinStepValue;
+        }
+    }
+
+    // DEBUG_V(String("  tc: ") + String(tc));
+    // DEBUG_V(String("  cc: ") + String(cc));
+    // DEBUG_V(String("step: ") + String(step));
+
+    // DEBUG_END;
+}
+
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::ConditionalIncrementColor(double tc, double & cc, double step)
+{
+    // DEBUG_START;
+
+    double originalDiff = fabs(tc-cc);
+
+    if(!ColorHasReachedTarget(tc, cc, step))
+    {
+        cc = min((cc + step), 255.0);
+        cc = max(0.0, cc);
+    }
+
+    double NewDiff = fabs(tc-cc);
+    if(NewDiff > originalDiff)
+    {
+        // DEBUG_V("Diff error. Diff is growing instead of shrinking");
+        cc = tc;
+    }
+
+    // DEBUG_V(String("  tc: ") + String(tc));
+    // DEBUG_V(String("  cc: ") + String(cc));
+    // DEBUG_V(String("step: ") + String(step));
+
+    // DEBUG_END;
+}
+
+//-----------------------------------------------------------------------------
+bool c_InputEffectEngine::ColorHasReachedTarget(double tc, double cc, double step)
+{
+    // DEBUG_START;
+
+    bool response = false;
+
+    double diff = fabs(tc - cc);
+
+    if(diff <= fabs(2 * step))
+    {
+        // DEBUG_V("Single Color has reached target")
+        response = true;
+    }
+/*
+    else
+    {
+        // DEBUG_V(String("  tc: ") + String(tc, 8));
+        // DEBUG_V(String("  cc: ") + String(cc, 8));
+        // DEBUG_V(String("step: ") + String(step, 8));
+        // DEBUG_V(String("diff: ") + String(diff, 8));
+    }
+*/
+    // DEBUG_END;
+    return response;
+
+} // ColorHasReachedTarget
+
+//-----------------------------------------------------------------------------
+bool c_InputEffectEngine::ColorHasReachedTarget()
+{
+    // DEBUG_START;
+
+    bool response = ( ColorHasReachedTarget(TransitionTargetColorIterator->r, TransitionCurrentColor.r, TransitionStepValue.r) &&
+                      ColorHasReachedTarget(TransitionTargetColorIterator->g, TransitionCurrentColor.g, TransitionStepValue.g) &&
+                      ColorHasReachedTarget(TransitionTargetColorIterator->b, TransitionCurrentColor.b, TransitionStepValue.b));
+
+    if(response)
+    {
+        // DEBUG_V("Color has reached target");
+    }
+
+    // DEBUG_END;
+    return response;
+
+} // ColorHasReachedTarget
 
 //-----------------------------------------------------------------------------
 uint16_t c_InputEffectEngine::effectBlink ()

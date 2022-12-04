@@ -19,6 +19,7 @@
 */
 
 #include "InputCommon.hpp"
+#include <vector>
 
 class c_InputEffectEngine : public c_InputCommon
 {
@@ -30,6 +31,20 @@ public:
 
     c_InputEffectEngine ();
 
+    // dCRGB red, green, blue 0->1.0
+    struct dCRGB {
+        double r;
+        double g;
+        double b;
+        dCRGB operator=(dCRGB a)
+        {
+            r = a.r;
+            g = a.g;
+            b = a.b;
+            return a;
+        }
+    };
+
     // CRGB red, green, blue 0->255
     struct CRGB
     {
@@ -38,15 +53,9 @@ public:
         uint8_t b;
     };
 
-    // dCRGB red, green, blue 0->1.0
-    struct dCRGB {
-        double r;
-        double g;
-        double b;
-    };
-
     // dCHSV hue 0->360 sat 0->1.0 val 0->1.0
-    struct dCHSV {
+    struct dCHSV
+    {
         double h;
         double s;
         double v;
@@ -101,6 +110,7 @@ public:
     uint16_t effectBreathe ();
     uint16_t effectNull ();
     uint16_t effectRandom ();
+    uint16_t effectTransition ();
 
 private:
 
@@ -126,10 +136,10 @@ private:
     float EffectBrightness         = 1.0;             /* Externally controlled effect brightness [0, 255] */
     CRGB EffectColor               = { 183, 0, 255 }; /* Externally controlled effect color */
 
-    uint32_t EffectStep            = 0;            /* Shared mutable effect step counter */
+    uint32_t   EffectStep            = 0;            /* Shared mutable effect step counter */
     uint32_t   PixelCount            = 0;            /* Number of RGB leds (not channels) */
     uint32_t   MirroredPixelCount    = 0;            /* Number of RGB leds (not channels) */
-    uint8_t  ChannelsPerPixel      = 3;
+    uint8_t    ChannelsPerPixel      = 3;
     uint32_t   PixelOffset           = 0;
 
     void setPixel(uint16_t idx,  CRGB color);
@@ -153,4 +163,12 @@ private:
 
     const EffectDescriptor_t * ActiveEffect = nullptr;
 
+    dCRGB   TransitionCurrentColor = {0.0, 0.0, 0.0};
+    std::vector<c_InputEffectEngine::dCRGB>::iterator TransitionTargetColorIterator;
+    dCRGB   TransitionStepValue    = {2.0, 2.0, 2.0};
+    #define NumStepsToTarget         300.0
+    bool ColorHasReachedTarget ();
+    bool ColorHasReachedTarget (double tc, double cc, double step);
+    void ConditionalIncrementColor(double tc, double & cc, double step);
+    void CalculateTransitionStepValue(double tc, double cc, double & step);
 };

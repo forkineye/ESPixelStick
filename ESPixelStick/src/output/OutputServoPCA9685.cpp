@@ -94,7 +94,7 @@ void c_OutputServoPCA9685::ClearBuffer ()
     // memset(GetBufferAddress(), 0x00, GetBufferUsedSize());
     for (ServoPCA9685Channel_t & currentServoPCA9685Channel : OutputList)
     {
-        GetBufferAddress()[currentServoPCA9685Channel.Id] = 
+        GetBufferAddress()[currentServoPCA9685Channel.Id] =
             currentServoPCA9685Channel.HomeValue;
     }
 
@@ -110,18 +110,18 @@ bool c_OutputServoPCA9685::validate ()
 
     if ((Num_Channels > OM_SERVO_PCA9685_CHANNEL_LIMIT) || (Num_Channels < 1))
     {
-        logcon (CN_stars + String (F (" Requested channel count was not valid. Setting to ")) + OM_SERVO_PCA9685_CHANNEL_LIMIT + " " + CN_stars);
+        logcon (CN_stars + String (MN_01) + OM_SERVO_PCA9685_CHANNEL_LIMIT + " " + CN_stars);
         Num_Channels = OM_SERVO_PCA9685_CHANNEL_LIMIT;
         response = false;
     }
 
     if (Num_Channels < OM_SERVO_PCA9685_CHANNEL_LIMIT)
     {
-        logcon (CN_stars + String (F (" Requested channel count was not valid. Insuficient number of input channels avaialable ")) + CN_stars);
+        logcon (CN_stars + String (MN_02) + CN_stars);
 
         for (int ChannelIndex = OM_SERVO_PCA9685_CHANNEL_LIMIT - 1; ChannelIndex > Num_Channels; ChannelIndex--)
         {
-            logcon (CN_stars + String (F (" Disabling channel '")) + String (ChannelIndex + 1) + "' " + CN_stars);
+            logcon (CN_stars + String (MN_03) + String (ChannelIndex + 1) + "' " + CN_stars);
             OutputList[ChannelIndex].Enabled = false;
         }
 
@@ -167,7 +167,7 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
         if (false == jsonConfig.containsKey (OM_SERVO_PCA9685_CHANNELS_NAME))
         {
             // if not, flag an error and stop processing
-            logcon (F ("No channel settings found. Using defaults"));
+            logcon (MN_04);
             break;
         }
         JsonArray JsonChannelList = jsonConfig[OM_SERVO_PCA9685_CHANNELS_NAME];
@@ -181,7 +181,7 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             if (ChannelId >= OM_SERVO_PCA9685_CHANNEL_LIMIT)
             {
                 // if not, flag an error and stop processing this channel
-                logcon (String(F ("No settings found for channel '")) + String(ChannelId) + "'");
+                logcon (String(MN_05) + String(ChannelId) + "'");
                 continue;
             }
 
@@ -253,7 +253,7 @@ void c_OutputServoPCA9685::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 //----------------------------------------------------------------------------
 void  c_OutputServoPCA9685::GetDriverName (String & sDriverName)
 {
-    sDriverName = F ("Servo PCA9685");
+    sDriverName = CN_Servo_PCA9685;
 
 } // GetDriverName
 
@@ -274,12 +274,12 @@ void c_OutputServoPCA9685::Render ()
             uint16_t MaxScaledValue = 255;
             uint16_t MinScaledValue = 0;
             uint16_t newOutputValue = pOutputBuffer[OutputDataIndex];
-            
+
             if(0 == newOutputValue)
             {
                 newOutputValue = currentServoPCA9685.HomeValue;
             }
-            
+
             if (currentServoPCA9685.Is16Bit)
             {
                 // DEBUG_V ("16 Bit Mode");

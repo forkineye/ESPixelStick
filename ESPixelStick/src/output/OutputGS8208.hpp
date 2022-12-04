@@ -43,7 +43,7 @@ public:
     virtual void Begin ();
     virtual bool SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
     virtual void GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-            void GetDriverName (String & sDriverName) { sDriverName = String (F ("GS8208")); }
+            void GetDriverName (String & sDriverName) { sDriverName = CN_GS8208; }
     virtual void GetStatus (ArduinoJson::JsonObject& jsonStatus);
     virtual void SetOutputBufferSize (uint32_t NumChannelsAvailable);
 

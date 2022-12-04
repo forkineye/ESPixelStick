@@ -50,6 +50,10 @@
 
 #include "../input/InputMgr.hpp"
 
+#ifndef DEFAULT_RELAY_GPIO
+    #define DEFAULT_RELAY_GPIO      gpio_num_t::GPIO_NUM_1
+#endif // ndef DEFAULT_RELAY_GPIO
+
 //-----------------------------------------------------------------------------
 // Local Data definitions
 //-----------------------------------------------------------------------------
@@ -175,9 +179,9 @@ static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] 
     {DEFAULT_SPI_DATA_GPIO, uart_port_t(-1), c_OutputMgr::OM_PortType_t::Spi},
 #endif
 
-#ifdef DEFAULT_RELAY_GPIO
+#if defined(SUPPORT_OutputType_Relay) || defined(SUPPORT_OutputType_Servo_PCA9685)
     {DEFAULT_RELAY_GPIO, uart_port_t(-1), c_OutputMgr::OM_PortType_t::Relay},
-#endif // def DEFAULT_RELAY_GPIO
+#endif // defined(SUPPORT_OutputType_Relay) || defined(SUPPORT_OutputType_Servo_PCA9685)
 
 };
 
@@ -187,7 +191,7 @@ static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] 
 ///< Start up the driver and put it into a safe mode
 c_OutputMgr::c_OutputMgr ()
 {
-    ConfigFileName = String (F ("/")) + String (CN_output_config) + F (".json");
+    ConfigFileName = String ("/") + String (CN_output_config) + CN_Dotjson;
 
     // clear the input data buffer
     memset ((char*)&OutputBuffer[0], 0, sizeof (OutputBuffer));
@@ -367,7 +371,7 @@ void c_OutputMgr::CreateNewConfig ()
     // DEBUG_START;
     // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
 
-    // DEBUG_V (String (F ("--- WARNING: Creating a new Output Manager configuration Data set ---")));
+    // DEBUG_V (String (("--- WARNING: Creating a new Output Manager configuration Data set ---")));
 
     BuildingNewConfig = true;
 
@@ -379,7 +383,7 @@ void c_OutputMgr::CreateNewConfig ()
     // DEBUG_V ();
 
     JsonConfig[CN_cfgver] = CurrentConfigVersion;
-    JsonConfig[F ("MaxChannels")] = sizeof(OutputBuffer);
+    JsonConfig[CN_MaxChannels] = sizeof(OutputBuffer);
 
     // Collect the all ports disabled config first
     CreateJsonConfig (JsonConfig);
@@ -387,11 +391,11 @@ void c_OutputMgr::CreateNewConfig ()
     // DEBUG_V ("for each output type");
     for (auto CurrentOutputType : OutputTypeXlateMap)
     {
+        // DEBUG_V (String ("instantiate output type: ") + String (CurrentOutputType.name));
         // DEBUG_V ("for each interface");
         for (DriverInfo_t & CurrentOutputChannelDriver : OutputChannelDrivers)
         {
             // DEBUG_V (String("DriverId: ") + String(CurrentOutputChannelDriver.DriverId));
-            // DEBUG_V (String ("instantiate output type: ") + String (CurrentOutputType.name));
             InstantiateNewOutputChannel(CurrentOutputChannelDriver, CurrentOutputType.id, false);
             // DEBUG_V ();
         } // end for each interface
@@ -432,7 +436,7 @@ void c_OutputMgr::CreateNewConfig ()
 
     SetConfig(JsonConfigDoc);
 
-    // DEBUG_V (String (F ("--- WARNING: Creating a new Output Manager configuration Data set - Done ---")));
+    // DEBUG_V (String (("--- WARNING: Creating a new Output Manager configuration Data set - Done ---")));
 
     BuildingNewConfig = true;
 
@@ -516,7 +520,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
             CurrentOutputChannelDriver.pOutputChannelDriver->GetDriverName(DriverName);
             if (!IsBooting)
             {
-                logcon(String(F(" Shutting Down '")) + DriverName + String(F("' on Output: ")) + String(CurrentOutputChannelDriver.DriverId));
+                logcon(String(MN_12) + DriverName + MN_13 + String(CurrentOutputChannelDriver.DriverId));
             }
 
             delete CurrentOutputChannelDriver.pOutputChannelDriver;
@@ -540,7 +544,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
         {
             case e_OutputType::OutputType_Disabled:
             {
-                // logcon (CN_stars + String (F (" Disabled output type for channel '")) + CurrentOutputChannelDriver.DriverId + "'. **************");
+                // logcon (CN_stars + String (CN_Disabled) + MN_06 + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                 CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_Disabled);
                 // DEBUG_V ();
                 break;
@@ -551,7 +555,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
             {
                 if (OM_IS_UART)
                 {
-                    // logcon (CN_stars + String (F (" Starting DMX for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
+                    // logcon (CN_stars + String (CN_DMX) + MN_06 + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                     CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputSerialUart(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_DMX);
                     // DEBUG_V ();
                     break;
@@ -560,7 +564,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                 #if defined(ARDUINO_ARCH_ESP32)
                 if (OM_IS_RMT)
                 {
-                    // logcon (CN_stars + String (F (" Starting DMX for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
+                    // logcon (CN_stars + String (CN_DMX) + MN_06 + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                     CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputSerialRmt(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_DMX);
                     // DEBUG_V ();
                     break;
@@ -570,7 +574,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                 // DEBUG_V ();
                 if (!BuildingNewConfig)
                 {
-                    logcon(CN_stars + String(F(" Cannot Start DMX for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    logcon(CN_stars + String(MN_07) + CN_DMX + MN_08 + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                 }
                 CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_Disabled);
                 // DEBUG_V ();
@@ -583,7 +587,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
             {
                 if (OM_IS_UART)
                 {
-                    // logcon (CN_stars + String (F (" Starting GECE for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
+                    // logcon (CN_stars + String (CN_GECE) + MN_06 + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                     CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputGECEUart(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_GECE);
                     // DEBUG_V ();
                     break;
@@ -593,7 +597,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                 #if defined(ARDUINO_ARCH_ESP32)
                 if (OM_IS_RMT)
                 {
-                    // logcon (CN_stars + String (F (" Starting GECE for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
+                    // logcon (CN_stars + String (CN_GECE) + MN_06 + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                     CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputGECERmt(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_GECE);
                     // DEBUG_V ();
                     break;
@@ -602,7 +606,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 
                 if (!BuildingNewConfig)
                 {
-                     logcon (CN_stars + String (F (" Cannot Start GECE for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    logcon(CN_stars + String(MN_07) + CN_GECE + MN_08 + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                 }
                 CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_Disabled);
                 // DEBUG_V ();
@@ -773,7 +777,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 
                 if (OM_IS_RMT)
                 {
-                    // logcon (CN_stars + String (F (" Starting UCS1903 RMT for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    // logcon (CN_stars + String ((" Starting UCS1903 RMT for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                     CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputUCS1903Rmt(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_UCS1903);
                     // DEBUG_V ();
                     break;
@@ -781,7 +785,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 
                 if (!BuildingNewConfig)
                 {
-                    logcon(CN_stars + String(F(" Cannot Start UCS1903 for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    logcon(CN_stars + String(MN_07) + CN_UCS1903 + MN_08 + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                 }
                 CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_Disabled);
                 // DEBUG_V ();
@@ -795,7 +799,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                 // DEBUG_V ();
                 if (OM_IS_UART)
                 {
-                    // logcon (CN_stars + String (F (" Starting TM1814 UART for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
+                    // logcon (CN_stars + String ((" Starting TM1814 UART for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
                     CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputTM1814Uart(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_TM1814);
                     // DEBUG_V ();
                     break;
@@ -803,7 +807,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 
                 if (OM_IS_RMT)
                 {
-                    // logcon (CN_stars + String (F (" Starting TM1814 RMT for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    // logcon (CN_stars + String ((" Starting TM1814 RMT for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                     CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputTM1814Rmt(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_TM1814);
                     // DEBUG_V ();
                     break;
@@ -811,7 +815,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 
                 if (!BuildingNewConfig)
                 {
-                    logcon(CN_stars + String(F(" Cannot Start TM1814 for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    logcon(CN_stars + String(MN_07) + CN_TM1814 + MN_08 + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                 }
                 CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_Disabled);
                 // DEBUG_V ();
@@ -824,7 +828,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
             {
                 if (CurrentOutputChannelDriver.PortType == OM_PortType_t::Spi)
                 {
-                    // logcon (CN_stars + String (F (" Starting WS2811 RMT for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    // logcon (CN_stars + String ((" Starting WS2811 RMT for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                     CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputWS2801Spi(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_WS2801);
                     // DEBUG_V ();
                     break;
@@ -832,7 +836,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 
                 if (!BuildingNewConfig)
                 {
-                    logcon(CN_stars + String(F(" Cannot Start WS2801 for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    logcon(CN_stars + String(MN_07) + CN_WS2801 + MN_08 + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                 }
                 CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_Disabled);
                 // DEBUG_V ();
@@ -846,7 +850,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
             {
                 if (CurrentOutputChannelDriver.PortType == OM_PortType_t::Spi)
                 {
-                    // logcon (CN_stars + String (F (" Starting WS2811 RMT for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    // logcon (CN_stars + String ((" Starting WS2811 RMT for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                     CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputAPA102Spi(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_APA102);
                     // DEBUG_V ();
                     break;
@@ -854,7 +858,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 
                 if (!BuildingNewConfig)
                 {
-                    logcon(CN_stars + String(F(" Cannot Start WS2801 for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    logcon(CN_stars + String(MN_07) + CN_WS2801 + MN_08 + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                 }
                 CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_Disabled);
                 // DEBUG_V ();
@@ -869,7 +873,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                 // DEBUG_V ();
                 if (OM_IS_UART)
                 {
-                    // logcon (CN_stars + String (F (" Starting GS8208 UART for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
+                    // logcon (CN_stars + String ((" Starting GS8208 UART for channel '")) + CurrentOutputChannel.DriverId + "'. " + CN_stars);
                     CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputGS8208Uart(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_GS8208);
                     // DEBUG_V ();
                     break;
@@ -877,7 +881,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 
                 if (OM_IS_RMT)
                 {
-                    // logcon (CN_stars + String (F (" Starting GS8208 RMT for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    // logcon (CN_stars + String ((" Starting GS8208 RMT for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                     CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputGS8208Rmt(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_GS8208);
                     // DEBUG_V ();
                     break;
@@ -885,7 +889,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 
                 if (!BuildingNewConfig)
                 {
-                    logcon(CN_stars + String(F(" Cannot Start GS8208 for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    logcon(CN_stars + String(MN_07) + CN_GS8208 + MN_08 + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                 }
                 CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_Disabled);
                 // DEBUG_V ();
@@ -899,7 +903,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                 // DEBUG_V ();
                 if (OM_IS_UART)
                 {
-                    // DEBUG_V (CN_stars + String(F(" Starting UCS8903 UART for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    // DEBUG_V (CN_stars + String((" Starting UCS8903 UART for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                     CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputUCS8903Uart(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_UCS8903);
                     // DEBUG_V ();
                     break;
@@ -907,7 +911,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 
                 if (OM_IS_RMT)
                 {
-                    // DEBUG_V (CN_stars + String(F(" Starting UCS8903 RMT for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    // DEBUG_V (CN_stars + String((" Starting UCS8903 RMT for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                     CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputUCS8903Rmt(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_UCS8903);
                     // DEBUG_V ();
                     break;
@@ -915,7 +919,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
 
                 if (!BuildingNewConfig)
                 {
-                    logcon(CN_stars + String(F(" Cannot Start UCS8903 for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    logcon(CN_stars + String(MN_07) + CN_UCS8903 + MN_08 + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
                 }
                 CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_Disabled);
                 // DEBUG_V ();
@@ -927,7 +931,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
             {
                 if (!IsBooting)
                 {
-                    logcon(CN_stars + String(F(" Unknown output type: '")) + String(NewOutputChannelType) + String(F(" for channel '")) + CurrentOutputChannelDriver.DriverId + String(F("'. Using disabled. ")) + CN_stars);
+                    logcon(CN_stars + String(MN_09) + String(NewOutputChannelType) + MN_10 + CurrentOutputChannelDriver.DriverId + MN_11 + CN_stars);
                 }
                 CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_Disabled);
                 // DEBUG_V ();
@@ -936,12 +940,15 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
         } // end switch (NewChannelType)
 
         // DEBUG_V ();
+        // DEBUG_V (String("pOutputChannelDriver: 0x") + String(uint32_t(CurrentOutputChannelDriver.pOutputChannelDriver),HEX));
+        // DEBUG_V (String("heap: 0x") + String(uint32_t(ESP.getMaxFreeBlockSize()),HEX));
+
         String sDriverName;
         CurrentOutputChannelDriver.pOutputChannelDriver->GetDriverName(sDriverName);
         // DEBUG_V (String("Driver Name: ") + sDriverName);
         if (!IsBooting)
         {
-            logcon("'" + sDriverName + F("' Initialization for Output: ") + String(CurrentOutputChannelDriver.DriverId));
+            logcon("'" + sDriverName + MN_14 + String(CurrentOutputChannelDriver.DriverId));
         }
         if (StartDriver)
         {
@@ -985,7 +992,7 @@ void c_OutputMgr::LoadConfig ()
     {
         if (!IsBooting)
         {
-            logcon(CN_stars + String(F(" Error loading Output Manager Config File ")) + CN_stars);
+            logcon(CN_stars + String(MN_15) + CN_stars);
         }
 
         // create a config file with default values
@@ -1022,7 +1029,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
     {
         if (false == jsonConfig.containsKey (CN_output_config))
         {
-            logcon (String (F ("No Output Interface Settings Found. Using Defaults")));
+                logcon(String(MN_16) + MN_18);
             break;
         }
         JsonObject OutputChannelMgrData = jsonConfig[CN_output_config];
@@ -1037,7 +1044,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
         // PrettyPrint (OutputChannelMgrData, "Output Config");
         if (TempVersion != CurrentConfigVersion)
         {
-            logcon (String (F ("OutputMgr: Incorrect Version found. Using existing/default config.")));
+            logcon (MN_17);
             // break;
         }
 
@@ -1045,7 +1052,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
         if (false == OutputChannelMgrData.containsKey (CN_channels))
         {
             // if not, flag an error and stop processing
-            logcon (String (F ("No Output Channel Settings Found. Using Defaults")));
+                logcon(String(MN_16) + MN_18);
             break;
         }
         JsonObject OutputChannelArray = OutputChannelMgrData[CN_channels];
@@ -1058,7 +1065,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
             if (false == OutputChannelArray.containsKey(String(CurrentOutputChannelDriver.DriverId).c_str()))
             {
                 // if not, flag an error and stop processing
-                logcon(String(F("No Output Settings Found for Channel '")) + CurrentOutputChannelDriver.DriverId + String(F("'. Using Defaults")));
+                logcon(String(MN_16) + CurrentOutputChannelDriver.DriverId + MN_18);
                 break;
             }
             JsonObject OutputChannelConfig = OutputChannelArray[String(CurrentOutputChannelDriver.DriverId).c_str()];
@@ -1075,7 +1082,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
             if (ChannelType >= uint32_t (OutputType_End))
             {
                 // if not, flag an error and move on to the next channel
-                logcon(String(F("Invalid Channel Type in config '")) + ChannelType + String(F("'. Specified for channel '")) + CurrentOutputChannelDriver.DriverId + "'. Disabling channel");
+                logcon(String(MN_19) + ChannelType + MN_20 + CurrentOutputChannelDriver.DriverId + MN_03);
                 InstantiateNewOutputChannel(CurrentOutputChannelDriver, e_OutputType::OutputType_Disabled);
                 continue;
             }
@@ -1085,7 +1092,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
             if (false == OutputChannelConfig.containsKey (String (ChannelType)))
             {
                 // if not, flag an error and stop processing
-                logcon(String(F("No Output Settings Found for Channel '")) + CurrentOutputChannelDriver.DriverId + String(F("'. Using Defaults")));
+                logcon(String(MN_16) + CurrentOutputChannelDriver.DriverId + MN_18);
                 InstantiateNewOutputChannel(CurrentOutputChannelDriver, e_OutputType::OutputType_Disabled);
                 continue;
             }
@@ -1153,7 +1160,7 @@ void c_OutputMgr::SetConfig (const char * ConfigData)
     } // end we got a config and it was good
     else
     {
-        logcon (CN_stars + String (F (" Error Saving Output Manager Config File ")) + CN_stars);
+        logcon (CN_stars + String (MN_21) + CN_stars);
     }
 
     // DEBUG_END;
@@ -1182,7 +1189,7 @@ void c_OutputMgr::SetConfig(ArduinoJson::JsonDocument & ConfigData)
     } // end we got a config and it was good
     else
     {
-        logcon(CN_stars + String(F(" Error Saving Output Manager Config File ")) + CN_stars);
+        logcon(CN_stars + String(MN_21) + CN_stars);
     }
 
     // DEBUG_END;
@@ -1296,7 +1303,7 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
 
         if (AvailableChannels < OutputBufferDataBytesNeeded)
         {
-            logcon (String (F ("--- OutputMgr: ERROR: Too many output channels have been Requested: ")) + String (OutputBufferDataBytesNeeded));
+            logcon (MN_22 + String (OutputBufferDataBytesNeeded));
             // DEBUG_V (String ("    ChannelsNeeded: ") + String (ChannelsNeeded));
             // DEBUG_V (String (" AvailableChannels: ") + String (AvailableChannels));
             // DEBUG_V (String ("ChannelsToAllocate: ") + String (ChannelsToAllocate));

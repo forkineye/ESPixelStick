@@ -106,7 +106,7 @@ void c_OutputSerial::GetDriverName(String &sDriverName)
 #ifdef SUPPORT_OutputType_Serial
     case c_OutputMgr::e_OutputType::OutputType_Serial:
     {
-        sDriverName = F("Serial");
+        sDriverName = CN_Serial;
         break;
     }
 #endif // def SUPPORT_OutputType_Serial
@@ -114,7 +114,7 @@ void c_OutputSerial::GetDriverName(String &sDriverName)
 #ifdef SUPPORT_OutputType_DMX
     case c_OutputMgr::e_OutputType::OutputType_DMX:
     {
-        sDriverName = F("DMX");
+        sDriverName = CN_DMX;
         break;
     }
 #endif // def SUPPORT_OutputType_DMX
@@ -122,14 +122,14 @@ void c_OutputSerial::GetDriverName(String &sDriverName)
 #ifdef SUPPORT_OutputType_Renard
     case c_OutputMgr::e_OutputType::OutputType_Renard:
     {
-        sDriverName = F("Renard");
+        sDriverName = CN_Renard;
         break;
     }
 #endif // def SUPPORT_OutputType_Renard
 
     default:
     {
-        sDriverName = F("Default");
+        sDriverName = CN_Default;
         break;
     }
     } // switch (OutputType)
