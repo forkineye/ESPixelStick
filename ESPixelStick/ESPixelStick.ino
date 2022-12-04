@@ -288,7 +288,7 @@ bool deserializeCore (JsonObject & json)
             DeviceConfig = json[CN_system];
         }
         // is this an initial config from the flash tool?
-        else if (json.containsKey(CN_init))
+        else if (json.containsKey(CN_init) || json.containsKey(CN_network))
         {
             // trigger a save operation
             ConfigSaveNeeded = true;
