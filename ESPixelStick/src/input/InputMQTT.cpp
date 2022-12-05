@@ -40,11 +40,11 @@ c_InputMQTT::c_InputMQTT (c_InputMgr::e_InputChannelIds NewInputChannelId,
 
     String Hostname;
     NetworkMgr.GetHostname (Hostname);
-    topic = String (F ("forkineye/")) + Hostname;
+    topic = CN_forkineye + Hostname;
     lwtTopic = topic + CN_slashstatus;
 
     // Effect config defaults
-    effectConfig.effect       = "Solid";
+    effectConfig.effect       = CN_Solid;
     effectConfig.mirror       = false;
     effectConfig.allLeds      = false;
     effectConfig.brightness   = 255;
@@ -138,7 +138,7 @@ void c_InputMQTT::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject Status = jsonStatus.createNestedObject (F ("mqtt"));
+    JsonObject Status = jsonStatus.createNestedObject (CN_mqtt);
     Status[CN_id] = InputChannelId;
 
     // DEBUG_END;
@@ -269,7 +269,7 @@ void c_InputMQTT::connectToMqtt()
     }
     mqtt.setServer (ip.c_str (), port);
 
-    logcon (String(F ("Connecting to broker ")) + ip + ":" + String(port));
+    logcon (String(MN_83) + ip + ":" + String(port));
     mqtt.connect ();
 
     // DEBUG_END;
@@ -282,8 +282,9 @@ void c_InputMQTT::disconnectFromMqtt ()
     // DEBUG_START;
 
     // Only announce if we're actually connected
-    if (NetworkMgr.IsConnected()) {
-        logcon (String (F ("Disconnecting from broker")));
+    if (NetworkMgr.IsConnected())
+    {
+        logcon (MN_84);
     }
     mqtt.disconnect ();
 
@@ -295,7 +296,7 @@ void c_InputMQTT::onMqttConnect(bool sessionPresent)
 {
     // DEBUG_START;
 
-    logcon (String (F ("Connected")));
+    logcon (CN_connected);
 
     // Get retained MQTT state
     mqtt.subscribe (topic.c_str (), 0);
@@ -342,7 +343,7 @@ void c_InputMQTT::onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
 {
     // DEBUG_START;
 
-    logcon (String(F ("Disconnected: ")) + String(DisconnectReasons[uint8_t(reason)]));
+    logcon (CN_Disconnected + String(DisconnectReasons[uint8_t(reason)]));
 
     if (InputMgr.GetNetworkState ())
     {
@@ -396,7 +397,7 @@ void c_InputMQTT::onMqttMessage(
         // DEBUG_V ("Set new values");
         if (error)
         {
-            logcon (String (F ("Deserialzation error. Error code = ")) + error.c_str ());
+            logcon (String (MN_44) + error.c_str ());
             break;
         }
 
@@ -491,13 +492,13 @@ void c_InputMQTT::PlayFseq (JsonObject & JsonConfig)
         // DEBUG_V (String (" FileName: ") + FileName);
         // DEBUG_V (String ("PlayCount: ") + String(PlayCount));
 
-        bool FileIsPlayList   = FileName.endsWith (String (F (".pl")));
-        bool FileIsStandalone = FileName.endsWith (String (F (".fseq")));
+        bool FileIsPlayList   = FileName.endsWith (String (CN_Dotpl));
+        bool FileIsStandalone = FileName.endsWith (String (CN_Dotfseq));
 
         if (!FileIsPlayList && !FileIsStandalone)
         {
             // not a file we can process
-            logcon (String (F ("ERROR: Unsupported file type for File Play operation. File:'")) + FileName + "'");
+            logcon (MN_85 + FileName + "'");
             break;
         }
 
@@ -510,8 +511,7 @@ void c_InputMQTT::PlayFseq (JsonObject & JsonConfig)
         {
             PlayingFile = pPlayFileEngine->GetFileName ();
 
-            EngineFileIsPlayList   = PlayingFile.endsWith (String (F (".pl")));
-            // EngineFileIsStandalone = PlayingFile.endsWith (String (F (".fseq")));
+            EngineFileIsPlayList   = PlayingFile.endsWith (CN_Dotpl);
 
             // is it the right engine?
             if (EngineFileIsPlayList != FileIsPlayList)
@@ -677,7 +677,7 @@ void c_InputMQTT::publishHA()
 #else
     String chipId = int64String (ESP.getEfuseMac (), HEX);
 #endif
-    String ha_config = haprefix + F ("/light/") + chipId + F ("/config");
+    String ha_config = haprefix + CN_light + chipId + CN_slashconfig;
 
     // DEBUG_V (String ("ha_config: ") + ha_config);
     // DEBUG_V (String ("hadisco: ") + hadisco);
@@ -688,29 +688,29 @@ void c_InputMQTT::publishHA()
         DynamicJsonDocument root(1024);
         JsonObject JsonConfig = root.to<JsonObject> ();
 
-        JsonConfig[F ("platform")]           = F ("MQTT");
-        JsonConfig[CN_name]                  = config.id;
-        JsonConfig[F ("schema")]             = F ("json");
-        JsonConfig[F ("state_topic")]        = topic;
-        JsonConfig[F ("command_topic")]      = topic + CN_slashset;
-        JsonConfig[F ("availability_topic")] = lwtTopic;
-        JsonConfig[F ("rgb")]                = CN_true;
+        JsonConfig[CN_platform]          = CN_MQTT;
+        JsonConfig[CN_name]              = config.id;
+        JsonConfig[CN_schema]            = CN_json;
+        JsonConfig[CN_statetopic]        = topic;
+        JsonConfig[CN_command_topic]     = topic + CN_slashset;
+        JsonConfig[CN_availabilitytopic] = lwtTopic;
+        JsonConfig[CN_rgb]               = CN_true;
 
         GetEffectList (JsonConfig);
 
         // Register the attributes topic
-        JsonConfig[F ("json_attributes_topic")] = topic + F ("/attributes");
+        JsonConfig[CN_json_attributes_topic] = topic + CN_slashattributes;
 
         // Create a unique id using the chip id, and fill in the device properties
         // to enable integration support in HomeAssistant.
-        JsonConfig[F ("unique_id")] = CN_ESPixelStick + chipId;
+        JsonConfig[CN_unique_id] = CN_ESPixelStick + chipId;
 
         JsonObject device = JsonConfig.createNestedObject (CN_device);
-        device[F ("identifiers")]  = WiFi.macAddress ();
-        device[F ("manufacturer")] = F ("Forkineye");
-        device[F ("model")]        = CN_ESPixelStick;
-        device[CN_name]            = config.id;
-        device[F ("sw_version")]   = String (CN_ESPixelStick) + " v" + VERSION;
+        device[CN_identifiers]  = WiFi.macAddress ();
+        device[CN_manufacturer] = CN_Forkineye;
+        device[CN_model]        = CN_ESPixelStick;
+        device[CN_name]         = config.id;
+        device[CN_sw_version]   = String (CN_ESPixelStick) + " v" + VERSION;
 
         String HaJsonConfig;
         serializeJson(JsonConfig, HaJsonConfig);
@@ -734,7 +734,7 @@ void c_InputMQTT::publishState()
     // DEBUG_START;
 
     DynamicJsonDocument root(1024);
-    JsonObject JsonConfig = root.createNestedObject(F ("MQTT"));
+    JsonObject JsonConfig = root.createNestedObject(CN_MQTT);
 
     JsonConfig[CN_state] = (true == stateOn) ? String(ON) : String(OFF);
 
@@ -774,7 +774,7 @@ void c_InputMQTT::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         // handle a disconnect
         extern bool reboot;
         reboot = true;
-        logcon (String (F ("Requesting reboot on loss of network connection.")));
+        logcon (MN_45);
     }
 
     // DEBUG_END;

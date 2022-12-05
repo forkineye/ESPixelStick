@@ -786,14 +786,14 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
         }
         else
         {
-            logcon (String (F ("InputMgr: No Input Button Settings Found. Using Defaults")));
+            logcon (String (MN_73) + MN_76 + MN_18);
         }
 
         // do we have a channel configuration array?
         if (false == InputChannelMgrData.containsKey (CN_channels))
         {
             // if not, flag an error and stop processing
-            logcon (String (F ("No Input Channel Settings Found. Using Defaults")));
+            logcon (String (MN_73) + MN_77 + MN_18);
             break;
         }
         JsonObject InputChannelArray = InputChannelMgrData[CN_channels];
@@ -808,7 +808,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
             if (false == InputChannelArray.containsKey (String (ChannelIndex)))
             {
                 // if not, flag an error and stop processing
-                logcon (String (F ("No Input Settings Found for Channel '")) + ChannelIndex + String (F ("'. Using Defaults")));
+                logcon (String (MN_73) + MN_78 + String(ChannelIndex) + MN_18);
                 continue;
             }
             JsonObject InputChannelConfig = InputChannelArray[String (ChannelIndex)];
@@ -823,7 +823,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
             if (/*(ChannelType < uint32_t (InputType_Start)) ||*/ (ChannelType >= uint32_t (InputType_End)))
             {
                 // if not, flag an error and move on to the next channel
-                logcon (String (F ("Invalid Channel Type in config '")) + ChannelType + String (F ("'. Specified for channel '")) + ChannelIndex + "'. Disabling channel");
+                logcon (String (MN_73) + MN_79 + String(ChannelType) + MN_80 + String(ChannelIndex) + MN_81);
                 InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex), e_InputType::InputType_Disabled);
                 continue;
             }
@@ -833,7 +833,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
             if (false == InputChannelConfig.containsKey (String (ChannelType)))
             {
                 // if not, flag an error and stop processing
-                logcon (String (F ("No Input Settings Found for Channel '")) + ChannelIndex + String (F ("'. Using Defaults")));
+                logcon (String (MN_73) + MN_78 + String(ChannelIndex) + MN_18);
                 InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex), e_InputType::InputType_Disabled);
                 continue;
             }
@@ -885,14 +885,14 @@ void c_InputMgr::SetConfig (const char * NewConfigData)
     {
         // DEBUG_V (String("NewConfigData: ") + NewConfigData);
         // FileMgr logs for us
-        // logcon (CN_stars + String (F (" Saved Input Manager Config File. ")) + CN_stars);
+        // logcon (CN_stars + String ((" Saved Input Manager Config File. ")) + CN_stars);
 
         configLoadNeeded = true;
 
     } // end we saved the config
     else
     {
-        logcon (CN_stars + String (F (" Error Saving Input Manager Config File ")) + CN_stars);
+        logcon (CN_stars + String (MN_82) + CN_stars);
     }
 
     // DEBUG_END;
@@ -911,14 +911,14 @@ void c_InputMgr::SetConfig(JsonDocument & NewConfigData)
     if (true == FileMgr.SaveConfigFile(ConfigFileName, NewConfigData))
     {
         // FileMgr logs for us
-        // logcon (CN_stars + String (F (" Saved Input Manager Config File. ")) + CN_stars);
+        // DEBUG_V (CN_stars + String ((" Saved Input Manager Config File. ")) + CN_stars);
 
         configLoadNeeded = true;
 
     } // end we saved the config
     else
     {
-        logcon(CN_stars + String(F (" Error Saving Input Manager Config File ")) + CN_stars);
+        logcon (CN_stars + String (MN_82) + CN_stars);
     }
 
     // DEBUG_END;
