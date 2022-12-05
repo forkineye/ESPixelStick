@@ -60,7 +60,7 @@ void fsm_PlayList_state_WaitForStart::Start (String & FileName, float, uint32_t)
         // DEBUG_V (String ("PlayItemName: '") + pInputFPPRemotePlayList->PlayItemName + "'");
 
         pInputFPPRemotePlayList->fsm_PlayList_state_Idle_imp.Init (pInputFPPRemotePlayList);
-    
+
     } while (false);
 
     // DEBUG_END;
@@ -156,7 +156,7 @@ void fsm_PlayList_state_PlayingFile::Poll ()
     // DEBUG_START;
 
     pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll ();
-    
+
     if (pInputFPPRemotePlayList->pInputFPPRemotePlayItem->IsIdle ())
     {
         // DEBUG_V ("Done with all entries");
@@ -202,10 +202,10 @@ void fsm_PlayList_state_PlayingFile::Stop (void)
     // This redirects async requests to a safe place.
     pInputFPPRemotePlayList->fsm_PlayList_state_Idle_imp.Init (pInputFPPRemotePlayList);
     // DEBUG_V ("");
-    
+
     pInputFPPRemotePlayItemTemp->Stop ();
     delete pInputFPPRemotePlayItemTemp;
-    
+
     // DEBUG_END;
 
 } // fsm_PlayList_state_PlayingFile::Stop
@@ -215,7 +215,7 @@ void fsm_PlayList_state_PlayingFile::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    jsonStatus[F ("repeat")] = pInputFPPRemotePlayList->pInputFPPRemotePlayItem->GetRepeatCount ();
+    jsonStatus[CN_repeat] = pInputFPPRemotePlayList->pInputFPPRemotePlayItem->GetRepeatCount ();
 
     JsonObject FileStatus = jsonStatus.createNestedObject (CN_File);
     pInputFPPRemotePlayList->pInputFPPRemotePlayItem->GetStatus (FileStatus);
@@ -267,7 +267,7 @@ void fsm_PlayList_state_PlayingEffect::Start (String & FileName, float SecondsEl
 
     pInputFPPRemotePlayList->pInputFPPRemotePlayItem->SetDuration (SecondsElapsed);
     pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Start (FileName, 0.0, PlayCount);
-    
+
     // DEBUG_END;
 
 } // fsm_PlayList_state_PlayingEffect::Start
@@ -371,7 +371,7 @@ void fsm_PlayList_state_Paused::GetStatus (JsonObject& jsonStatus)
     // BUGBUG -- casting time_t to integer types is not portable code (can be real ... e.g., float)
     // BUGBUG -- no portable way to know maximum value of time_t, or if it's signed vs. unsigned (without type traits)
     ESP_ERROR_CHECK(saferSecondsToFormattedMinutesAndSecondsString(buf, (uint32_t)SecondsRemaining));
-    PauseStatus[F ("TimeRemaining")] = buf;
+    PauseStatus[CN_TimeRemaining] = buf;
 
     // DEBUG_END;
 
