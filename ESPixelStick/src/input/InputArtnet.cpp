@@ -85,14 +85,14 @@ void c_InputArtnet::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject ArtnetStatus = jsonStatus.createNestedObject (F ("Artnet"));
-    ArtnetStatus[CN_unifirst]      = startUniverse;
-    ArtnetStatus[CN_unilast]       = LastUniverse;
+    JsonObject ArtnetStatus = jsonStatus.createNestedObject (CN_Artnet);
+    ArtnetStatus[CN_unifirst]   = startUniverse;
+    ArtnetStatus[CN_unilast]    = LastUniverse;
     ArtnetStatus[CN_unichanlim] = ChannelsPerUniverse;
     // DEBUG_V ("");
 
-    ArtnetStatus[F ("lastData")]      = lastData;
-    ArtnetStatus[CN_num_packets]      = num_packets;
+    ArtnetStatus[CN_lastData]      = lastData;
+    ArtnetStatus[CN_num_packets]   = num_packets;
     ArtnetStatus[CN_packet_errors] = packet_errors;
     ArtnetStatus[CN_last_clientIP] = LastRemoteIP.toString ();
 
@@ -227,7 +227,7 @@ void c_InputArtnet::SetBufferTranslation ()
 
     if (0 != BytesLeftToMap)
     {
-        logcon (String (F ("ERROR: Universe configuration is too small to fill output buffer. Outputs have been truncated.")));
+        logcon (String (MN_23));
     }
 
     // DEBUG_END;
@@ -268,7 +268,7 @@ void c_InputArtnet::SetUpArtnet ()
 
         byte broadcast[] = { 10, 0, 1, 255 };
         pArtnet->setBroadcast (broadcast);
-        logcon (String (F ("Subscribed to broadcast")));
+        logcon (MN_24);
 
         // DEBUG_V ("");
 
@@ -281,9 +281,7 @@ void c_InputArtnet::SetUpArtnet ()
     }
     // DEBUG_V ("");
 
-    logcon (String (F ("Listening for ")) + InputDataBufferSize +
-        F (" channels from Universe ") + startUniverse +
-        F (" to ") + LastUniverse);
+    logcon (String (MN_25) + InputDataBufferSize + MN_26 + startUniverse + MN_27 + LastUniverse);
     // DEBUG_END;
 
 } // SubscribeToBroadcastDomain

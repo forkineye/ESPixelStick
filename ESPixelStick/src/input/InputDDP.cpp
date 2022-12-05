@@ -89,13 +89,13 @@ void c_InputDDP::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject ddpStatus = jsonStatus.createNestedObject (F ("ddp"));
+    JsonObject ddpStatus = jsonStatus.createNestedObject (CN_ddp);
     // DEBUG_V ("");
 
-    ddpStatus["packetsreceived"] = stats.packetsReceived;
-    ddpStatus["bytesreceived"]   = float(stats.bytesReceived) / 1024.0;
-    ddpStatus[CN_errors]         = stats.errors;
-    ddpStatus[CN_id]             = InputChannelId;
+    ddpStatus[CN_packetsreceived] = stats.packetsReceived;
+    ddpStatus[CN_bytesreceived]   = float(stats.bytesReceived) / 1024.0;
+    ddpStatus[CN_errors]          = stats.errors;
+    ddpStatus[CN_id]              = InputChannelId;
 
     // DEBUG_END;
 
@@ -140,7 +140,7 @@ void c_InputDDP::NetworkStateChanged (bool IsConnected)
 
         HasBeenInitialized = true;
 
-        logcon (String (F ("Listening on port ")) + DDP_PORT);
+        logcon (String (MN_28) + DDP_PORT);
     }
 } // NetworkStateChanged
 

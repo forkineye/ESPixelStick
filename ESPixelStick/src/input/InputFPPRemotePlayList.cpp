@@ -93,7 +93,7 @@ void c_InputFPPRemotePlayList::GetStatus (JsonObject & jsonStatus)
     // DEBUG_START;
 
     jsonStatus[CN_name]  = GetFileName ();
-    jsonStatus[F ("entry")] = PlayListEntryId;
+    jsonStatus[CN_entry] = PlayListEntryId;
     jsonStatus[CN_count] = PlayListRepeatCount;
 
     pCurrentFsmState->GetStatus (jsonStatus);
@@ -124,7 +124,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         String FileData;
         if (0 == FileMgr.ReadSdFile (PlayItemName, FileData))
         {
-            logcon (String (F ("Could not read Playlist file: '")) + PlayItemName + "'");
+            logcon (String (MN_62) + PlayItemName + "'");
             fsm_PlayList_state_Paused_imp.Init (this);
             pCurrentFsmState->Start (PlayItemName, PauseEndTime, 1);
             break;

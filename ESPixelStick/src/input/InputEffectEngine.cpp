@@ -205,7 +205,7 @@ void c_InputEffectEngine::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject Status = jsonStatus.createNestedObject (F ("effects"));
+    JsonObject Status = jsonStatus.createNestedObject (CN_effects);
     Status[CN_currenteffect] = ActiveEffect->name;
     Status[CN_id] = InputChannelId;
 
@@ -242,7 +242,7 @@ void c_InputEffectEngine::NextEffect ()
 
     // DEBUG_V (String ("CurrentEffectIndex: ") + String(CurrentEffectIndex));
     setEffect (ListOfEffects[CurrentEffectIndex].name);
-    logcon (String (F ("Setting new effect: ")) + ActiveEffect->name);
+    logcon (MN_46 + ActiveEffect->name);
     // DEBUG_V (String ("ActiveEffect->name: ") + ActiveEffect->name);
 
     // DEBUG_END;

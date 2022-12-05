@@ -92,7 +92,7 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject e131Status = jsonStatus.createNestedObject (F ("e131"));
+    JsonObject e131Status = jsonStatus.createNestedObject (CN_e131);
     e131Status[CN_id]         = InputChannelId;
     e131Status[CN_unifirst]   = startUniverse;
     e131Status[CN_unilast ]   = LastUniverse;
@@ -157,9 +157,9 @@ void c_InputE131::ProcessIncomingE131Data (e131_packet_t * packet)
             // Do we need to update a sequnce error?
             if (packet->sequence_number != CurrentUniverse.SequenceNumber)
             {
-                // DEBUG_V (F ("E1.31 Sequence Error - expected: "));
+                // DEBUG_V (("E1.31 Sequence Error - expected: "));
                 // DEBUG_V (CurrentUniverse.SequenceNumber);
-                // DEBUG_V (F (" actual: "));
+                // DEBUG_V ((" actual: "));
                 // DEBUG_V (packet->sequence_number);
                 // DEBUG_V (" " + String (CN_universe) + " : ");
                 // DEBUG_V (CurrentUniverseId);
@@ -251,7 +251,7 @@ void c_InputE131::SetBufferTranslation ()
 
     if (0 != BytesLeftToMap)
     {
-        logcon (String (F ("ERROR: Universe configuration is too small to fill output buffer. Outputs have been truncated.")));
+        logcon (MN_29);
     }
 
     // DEBUG_END;
@@ -274,7 +274,7 @@ bool c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     {
         // ask for a reboot.
         reboot = true;
-        logcon (String (F ("Requesting reboot on change of UDP port.")));
+        logcon (MN_30);
     }
 
     validateConfiguration ();
@@ -361,28 +361,28 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         // Get on with business
         if (e131->begin (e131_listen_t::E131_MULTICAST, PortId, startUniverse, LastUniverse - startUniverse + 1))
         {
-            // logcon (String (F ("Multicast enabled")));
+            // logcon (String ("Multicast enabled")));
         }
         else
         {
-            logcon (String (CN_stars) + F (" E1.31 MULTICAST INIT FAILED ") + CN_stars);
+            logcon (String (CN_stars) + MN_31 + CN_stars);
         }
 
         // DEBUG_V ("");
 
         if (e131->begin (e131_listen_t::E131_UNICAST, PortId, startUniverse, LastUniverse - startUniverse + 1))
         {
-            // logcon (String (F ("Listening on port ")) + PortId);
+            // DEBUG_V (String ("Listening on port ")) + PortId);
         }
         else
         {
-            logcon (CN_stars + String (F (" E1.31 UNICAST INIT FAILED ")) + CN_stars);
+            logcon (CN_stars + String (MN_32) + CN_stars);
         }
 
-        logcon (String (F ("Listening for ")) + InputDataBufferSize +
-                        F (" channels from Universe ") + startUniverse +
-                        F (" to ") + LastUniverse +
-                        F (" on port ") + PortId);
+        logcon (String (MN_25) + InputDataBufferSize +
+                        MN_26 + startUniverse +
+                        MN_27 + LastUniverse +
+                        MN_28 + PortId);
 
         ESPAsyncE131Initialized = true;
     }
@@ -392,7 +392,7 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
         // E1.31 does not do this gracefully. A loss of connection needs a reboot
         // extern bool reboot;
         reboot = true;
-        logcon (String (F ("Input requesting reboot on loss of WiFi connection.")));
+        logcon (MN_45);
     }
 
     // DEBUG_END;

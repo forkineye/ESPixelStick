@@ -85,7 +85,7 @@ void c_InputFPPRemote::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject LocalPlayerStatus = jsonStatus.createNestedObject (F ("Player"));
+    JsonObject LocalPlayerStatus = jsonStatus.createNestedObject (CN_Player);
     LocalPlayerStatus[CN_id] = InputChannelId;
     LocalPlayerStatus[CN_active] = PlayingFile ();
 
@@ -275,7 +275,7 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
         {
             // DEBUG_V ("Start Playlist");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayList (GetInputChannelId ());
-            StatusType = F ("PlayList");
+            StatusType = CN_PlayList;
         }
         else
         {
@@ -283,8 +283,8 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
             String Last_fseq_Text = FileName.substring(Last_dot_fseq_Position);
             if (String(CN_Dotfseq) != Last_fseq_Text)
             {
-                logcon(String(F("File Name does not end with a valid .fseq or .pl extension: '")) + FileName + "'");
-                StatusType = F("Invalid File Name");
+                logcon(String(MN_47) + FileName + "'");
+                StatusType = MN_48;
                 FileBeingPlayed.clear();
                 break;
             }

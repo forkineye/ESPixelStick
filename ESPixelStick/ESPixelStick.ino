@@ -292,12 +292,12 @@ bool deserializeCore (JsonObject & json)
         {
             // trigger a save operation
             ConfigSaveNeeded = true;
-            logcon(String(F("Processing Flash Tool config")));
+            logcon(String(F ("Processing Flash Tool config")));
             DeviceConfig = json;
         }
         else
         {
-            logcon(String(F("Could not find system config")));
+            logcon(String(F ("Could not find system config")));
             ConfigSaveNeeded = true;
             break;
         }
@@ -311,12 +311,12 @@ bool deserializeCore (JsonObject & json)
             if (TempVersion != CurrentConfigVersion)
             {
                 // TODO: Add configuration update handler
-                logcon(String(F("Incorrect Config Version ID")));
+                logcon(String(F ("Incorrect Config Version ID")));
             }
         }
         else
         {
-            logcon(String(F("Missing Config Version ID")));
+            logcon(String(F ("Missing Config Version ID")));
             // break; // ignoring this error for now.
         }
 

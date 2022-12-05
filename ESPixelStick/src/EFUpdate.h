@@ -36,7 +36,7 @@ class EFUpdate {
      bool hasError();
      uint8_t getError();
      bool end();
-    void GetDriverName(String & name) {name = String(F("EFUPD"));}
+    void GetDriverName(String & name) {name = CN_EFUPD;}
 
  private:
     /* Record types */

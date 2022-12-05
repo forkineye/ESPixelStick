@@ -106,8 +106,8 @@ void c_WebMgr::Begin (config_t* /* NewConfig */)
     do // once
     {
 #ifdef BOARD_HAS_PSRAM
-        // DEBUG_V(String(F("Total PSRAM: ")) + String(ESP.getPsramSize()));
-        // DEBUG_V(String(F(" Free PSRAM: ")) + String(ESP.getFreePsram()));
+        // DEBUG_V(String(("Total PSRAM: ")) + String(ESP.getPsramSize()));
+        // DEBUG_V(String((" Free PSRAM: ")) + String(ESP.getFreePsram()));
         pWebSocketFrameCollectionBuffer = (char *)ps_malloc(WebSocketFrameCollectionBufferSize + 1);
 #else  // Use Heap
         pWebSocketFrameCollectionBuffer = (char *)malloc(WebSocketFrameCollectionBufferSize + 1);
@@ -439,10 +439,10 @@ void c_WebMgr::onWsEvent (AsyncWebSocket* server, AsyncWebSocketClient * client,
             // DEBUG_V ("");
 
             AwsFrameInfo* MessageInfo = static_cast<AwsFrameInfo*>(arg);
-            // DEBUG_V (String (F ("               len: ")) + len);
-            // DEBUG_V (String (F ("MessageInfo->index: ")) + int64String (MessageInfo->index));
-            // DEBUG_V (String (F ("  MessageInfo->len: ")) + int64String (MessageInfo->len));
-            // DEBUG_V (String (F ("MessageInfo->final: ")) + String (MessageInfo->final));
+            // DEBUG_V (String (("               len: ")) + len);
+            // DEBUG_V (String (("MessageInfo->index: ")) + int64String (MessageInfo->index));
+            // DEBUG_V (String (("  MessageInfo->len: ")) + int64String (MessageInfo->len));
+            // DEBUG_V (String (("MessageInfo->final: ")) + String (MessageInfo->final));
 
             // only process text messages
             if (MessageInfo->opcode != WS_TEXT)
@@ -709,7 +709,6 @@ void c_WebMgr::ProcessXJRequest (AsyncWebSocketClient* client)
     // DEBUG_V (response);
 
     client->text (pWebSocketFrameCollectionBuffer);
-    // client->text ((F ("XJ{\"status\":{\"system\":{\"freeheap\":\"18504\",\"uptime\":14089,\"SDinstalled\":true,\"rssi\":-69,\"ip\":\"192.168.10.237\",\"subnet\":\"255.255.255.0\",\"mac\":\"24:A1:60 : 2E : 09 : 5D\",\"hostname\":\"esps - 2e095d\",\"ssid\":\"MaRtInG\",\"FPPDiscovery\":{\"FppRemoteIp\":\"(IP unset)\",\"SyncCount\":0,\"SyncAdjustmentCount\":0,\"current_sequence\":\"\",\"playlist\":\"\",\"seconds_elapsed\":\"0\",\"seconds_played\":\"0\",\"seconds_remaining\":\"0\",\"sequence_filename\":\"\",\"time_elapsed\":\"00 : 00\",\"time_remaining\":\"00 : 00\",\"errors\":\"\"}},\"inputbutton\":{\"id\":0,\"state\":\"off\"},\"input\":[{\"e131\":{\"id\":0,\"unifirst\":1,\"unilast\":5,\"unichanlim\":512,\"num_packets\":0,\"last_clientIP\":0,\"channels\":[{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0},{\"errors\":0}],\"packet_errors\":0}},{\"LocalPlayer\":{\"id\":1,\"active\":false}}],\"output\":[{\"id\":0,\"framerefreshrate\":41,\"FrameCount\":528},{\"id\":1,\"framerefreshrate\":0,\"FrameCount\":0}]}}")));
 
     // DEBUG_END;
 

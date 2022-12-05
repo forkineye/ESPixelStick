@@ -132,7 +132,7 @@ void c_WiFiDriver::Begin ()
     {
         DynamicJsonDocument jsonConfigDoc(1024);
         // DEBUG_V ("read the sdcard config");
-        if (FileMgr.ReadSdFile (F("wificonfig.json"), jsonConfigDoc))
+        if (FileMgr.ReadSdFile (F ("wificonfig.json"), jsonConfigDoc))
         {
             // DEBUG_V ("Process the sdcard config");
             JsonObject jsonConfig = jsonConfigDoc.as<JsonObject> ();
@@ -249,7 +249,7 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
 
     	logcon (String(F ("Connecting to '")) +
                current_ssid +
-               String(F("' as ")) +
+               String(F ("' as ")) +
                Hostname);
 
         WiFi.setSleep(false);

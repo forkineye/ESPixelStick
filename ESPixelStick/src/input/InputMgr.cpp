@@ -117,7 +117,7 @@ void c_InputMgr::Begin (uint32_t BufferSize)
     // prevent recalls
     if (true == HasBeenInitialized) { return; }
 
-    String temp = String (F("Effects Control"));
+    String temp = String (F ("Effects Control"));
     ExternalInput.Init (0,0, c_ExternalInput::Polarity_t::ActiveLow, temp);
 
     // make sure the pointers are set up properly
@@ -410,7 +410,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             rebootNeeded |= InputChannelDrivers[ChannelIndex].pInputChannelDriver->isShutDownRebootNeeded();
             // DEBUG_V (String ("rebootNeeded: ") + String (rebootNeeded));
             if (!IsBooting) {
-                logcon (String(F("Shutting Down '")) + DriverName + String(F("' on Input: ")) + String(ChannelIndex));
+                logcon (String(F ("Shutting Down '")) + DriverName + String(F ("' on Input: ")) + String(ChannelIndex));
             }
 
             delete InputChannelDrivers[ChannelIndex].pInputChannelDriver;
@@ -577,7 +577,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
         // DEBUG_V ("");
         //String sDriverName;
         //pInputChannelDrivers[ChannelIndex]->GetDriverName (sDriverName);
-        //Serial.println (String (CN_stars) + " '" + sDriverName + F("' Initialization for input: '") + String(ChannelIndex) + "' " + CN_stars);
+        //Serial.println (String (CN_stars) + " '" + sDriverName + F ("' Initialization for input: '") + String(ChannelIndex) + "' " + CN_stars);
         if (StartDriver)
         {
             // DEBUG_V (String ("StartDriver: ") + String (StartDriver));
@@ -918,7 +918,7 @@ void c_InputMgr::SetConfig(JsonDocument & NewConfigData)
     } // end we saved the config
     else
     {
-        logcon(CN_stars + String(F(" Error Saving Input Manager Config File ")) + CN_stars);
+        logcon(CN_stars + String(F (" Error Saving Input Manager Config File ")) + CN_stars);
     }
 
     // DEBUG_END;

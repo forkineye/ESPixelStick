@@ -88,7 +88,7 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
             fail = true;
             break;
         }
-        //logcon (String (F ("FPPDiscovery subscribed to broadcast")));
+        // DEBUG_V (String (("FPPDiscovery subscribed to broadcast")));
 
         if (!udp.listenMulticast (address, FPP_DISCOVERY_PORT))
         {
@@ -96,7 +96,7 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
             fail = true;
             break;
         }
-        //logcon (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
+        // DEBUG_V (String (("FPPDiscovery subscribed to multicast: ")) + address.toString ());
 
         if (!fail)
             logcon (String (F ("Listening on port ")) + String(FPP_DISCOVERY_PORT));
@@ -215,22 +215,22 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
             case CTRL_PKT_SYNC:
             {
                 FPPMultiSyncPacket* msPacket = reinterpret_cast<FPPMultiSyncPacket*>(UDPpacket.data ());
-                // DEBUG_V (String (F ("msPacket->sync_type: ")) + String(msPacket->sync_type));
+                // DEBUG_V (String (("msPacket->sync_type: ")) + String(msPacket->sync_type));
 
                 if (msPacket->sync_type == SYNC_FILE_SEQ)
                 {
                     // FSEQ type, not media
-                    // DEBUG_V (String (F ("Received FPP FSEQ sync packet")));
+                    // DEBUG_V (String (("Received FPP FSEQ sync packet")));
                     FppRemoteIp = UDPpacket.remoteIP ();
                     ProcessSyncPacket (msPacket->sync_action, String (msPacket->filename), msPacket->seconds_elapsed);
                 }
                 else if (msPacket->sync_type == SYNC_FILE_MEDIA)
                 {
-                    // DEBUG_V (String (F ("Unsupported SYNC_FILE_MEDIA message.")));
+                    // DEBUG_V (String (("Unsupported SYNC_FILE_MEDIA message.")));
                 }
                 else
                 {
-                    // DEBUG_V (String (F ("Unexpected Multisync msPacket->sync_type: ")) + String (msPacket->sync_type));
+                    // DEBUG_V (String (("Unexpected Multisync msPacket->sync_type: ")) + String (msPacket->sync_type));
                 }
 
                 break;
@@ -244,7 +244,7 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
 
             case CTRL_PKT_BLANK:
             {
-                // DEBUG_V (String (F ("FPP Blank packet")));
+                // DEBUG_V (String (("FPP Blank packet")));
                 // StopPlaying ();
                 MultiSyncStats.pktBlank++;
                 ProcessBlankPacket ();
@@ -253,20 +253,20 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
 
             case CTRL_PKT_PING:
             {
-                // DEBUG_V (String (F ("Ping Packet")));
+                // DEBUG_V (String (("Ping Packet")));
 
                 MultiSyncStats.pktPing++;
                 FPPPingPacket* pingPacket = reinterpret_cast<FPPPingPacket*>(UDPpacket.data ());
 
-                // DEBUG_V (String (F ("Ping Packet subtype: ")) + String (pingPacket->ping_subtype));
-                // DEBUG_V (String (F ("Ping Packet packet.versionMajor: ")) + String (pingPacket->versionMajor));
-                // DEBUG_V (String (F ("Ping Packet packet.versionMinor: ")) + String (pingPacket->versionMinor));
-                // DEBUG_V (String (F ("Ping Packet packet.hostName:     ")) + String (pingPacket->hostName));
-                // DEBUG_V (String (F ("Ping Packet packet.hardwareType: ")) + String (pingPacket->hardwareType));
+                // DEBUG_V (String (("Ping Packet subtype: ")) + String (pingPacket->ping_subtype));
+                // DEBUG_V (String (("Ping Packet packet.versionMajor: ")) + String (pingPacket->versionMajor));
+                // DEBUG_V (String (("Ping Packet packet.versionMinor: ")) + String (pingPacket->versionMinor));
+                // DEBUG_V (String (("Ping Packet packet.hostName:     ")) + String (pingPacket->hostName));
+                // DEBUG_V (String (("Ping Packet packet.hardwareType: ")) + String (pingPacket->hardwareType));
 
                 if (pingPacket->ping_subtype == 0x01)
                 {
-                    // DEBUG_V (String (F ("FPP Ping discovery packet")));
+                    // DEBUG_V (String (("FPP Ping discovery packet")));
                     // received a discover ping packet, need to send a ping out
                     if (UDPpacket.isBroadcast () || UDPpacket.isMulticast ())
                     {
@@ -281,7 +281,7 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
                 }
                 else
                 {
-                    // DEBUG_V (String (F ("Unexpected Ping sub type: ")) + String (pingPacket->ping_subtype));
+                    // DEBUG_V (String (("Unexpected Ping sub type: ")) + String (pingPacket->ping_subtype));
                 }
                 break;
             }
@@ -386,7 +386,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, float S
 
             default:
             {
-                // DEBUG_V (String (F ("Sync: ERROR: Unknown Action: ")) + String (action));
+                // DEBUG_V (String (("Sync: ERROR: Unknown Action: ")) + String (action));
                 break;
             }
 
@@ -682,7 +682,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
     do // once
     {
         String path = request->getParam (ulrPath)->value ();
-        // DEBUG_V (String(F ("path: ")) + path);
+        // DEBUG_V (String(("path: ")) + path);
 
         if (path != F ("uploadFile"))
         {
@@ -692,7 +692,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
         }
 
         String filename = request->getParam (CN_filename)->value ();
-        // DEBUG_V (String(F ("FileName: ")) + filename);
+        // DEBUG_V (String(("FileName: ")) + filename);
 
         c_FileMgr::FileId FileHandle;
         if (false == FileMgr.OpenSdFile (filename, c_FileMgr::FileMode::FileRead, FileHandle))
@@ -736,7 +736,7 @@ void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data,
 
     if (!index)
     {
-        // LOG_PORT.printf("len: %u / index: %u / total: %u\n", len, index, total);
+        // LOG_PORT.printF ("len: %u / index: %u / total: %u\n", len, index, total);
         printReq (request, false);
 
         String path = request->getParam (ulrPath)->value ();
@@ -1002,7 +1002,7 @@ void c_FPPDiscovery::StopPlaying ()
 {
     // DEBUG_START;
 
-    // logcon (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
+    // DEBUG_V (String (("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
     if (InputFPPRemotePlayFile)
     {
         InputFPPRemotePlayFile->Stop ();
