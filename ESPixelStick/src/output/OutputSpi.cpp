@@ -43,7 +43,7 @@ static void IRAM_ATTR spi_transfer_callback (spi_transaction_t * param)
         }
         else
         {
-            logcon (MN_125);
+            LOG_PORT.println (MN_125);
         }
     }
 } // spi_transfer_callback

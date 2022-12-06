@@ -238,6 +238,7 @@ const CN_PROGMEM char CN_plussigns                [] = "+++++";
 const CN_PROGMEM char CN_polarity                 [] = "polarity";
 const CN_PROGMEM char CN_port                     [] = "port";
 const CN_PROGMEM char CN_power_pin                [] = "power_pin";
+const CN_PROGMEM char CN_Powering_Up              [] = "Powering_Up";
 const CN_PROGMEM char CN_prependnullcount         [] = "prependnullcount";
 const CN_PROGMEM char CN_pwm                      [] = "pwm";
 const CN_PROGMEM char CN_r                        [] = "r";

@@ -118,7 +118,7 @@ void c_EthernetDriver::SetEthHostname ()
         ETH.setHostname (Hostname.c_str ());
     }
 
-    logcon (CN_Ethernet + CN_Connecting + CN_as + Hostname);
+    logcon (String(CN_Ethernet) + CN_connecting + CN_as + Hostname);
 
     // DEBUG_END;
 } // StartEth
