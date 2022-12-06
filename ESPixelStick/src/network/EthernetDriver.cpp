@@ -295,7 +295,7 @@ void c_EthernetDriver::reset ()
 {
     // DEBUG_START;
 
-    logcon (F ("Ethernet Reset has been requested"));
+    logcon (MN_216);
 
     NetworkStateChanged (false);
 #ifdef ETH_stop
