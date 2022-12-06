@@ -59,7 +59,7 @@ void c_EthernetDriver::AnnounceState ()
 
     String StateName;
     pCurrentFsmState->GetStateName (StateName);
-    logcon (String (F ("Entering State: ")) + StateName);
+    logcon (MN_86 + StateName);
 
     // DEBUG_END;
 
@@ -118,7 +118,7 @@ void c_EthernetDriver::SetEthHostname ()
         ETH.setHostname (Hostname.c_str ());
     }
 
-    logcon (String (F ("Ethernet Connecting as ")) + Hostname);
+    logcon (CN_Ethernet + CN_Connecting + CN_as + Hostname);
 
     // DEBUG_END;
 } // StartEth
@@ -302,7 +302,7 @@ void c_EthernetDriver::reset ()
     // Disconnect Ethernet if connected
     if (ETH.stop () != ESP_OK)
     {
-        logcon (F ("Could not disconnect Ethernet"));
+        logcon (MN_87);
     }
 #endif // def ETH.stop
 
@@ -352,7 +352,7 @@ bool c_EthernetDriver::SetConfig (JsonObject & json)
     // Eth Driver does not support config updates while it is running.
     if (ConfigChanged && HasBeenPreviouslyConfigured)
     {
-        logcon (F ("Configuration change requires system reboot."));
+        logcon (MN_88);
         reboot = true;
     }
 
@@ -373,7 +373,7 @@ void c_EthernetDriver::SetUpIp ()
 
         if (true == UseDhcp)
         {
-            logcon (F ("Connecting to Ethernet using DHCP"));
+            logcon (MN_89);
             // ETH.config (temp, temp, temp, temp);
 
             break;
@@ -383,7 +383,7 @@ void c_EthernetDriver::SetUpIp ()
 
         if (temp == ip)
         {
-            logcon (F ("NETWORK: ERROR: STATIC SELECTED WITHOUT IP. Using DHCP assigned address"));
+            logcon (MN_90);
             break;
         }
 
@@ -402,7 +402,7 @@ void c_EthernetDriver::SetUpIp ()
         // We didn't use DNS, so just set it to our configured gateway
         ETH.config (ip, gateway, netmask, gateway);
 
-        logcon (F ("Connecting to Ethernet with Static IP"));
+        logcon (MN_91);
 
     } while (false);
 
@@ -609,7 +609,7 @@ void fsm_Eth_state_GotIp::Init ()
     pEthernetDriver->AnnounceState ();
     pEthernetDriver->NetworkStateChanged (true);
 
-    logcon (String (F ("Ethernet Connected with IP: ")) + pEthernetDriver->GetIpAddress ().toString ());
+    logcon (MN_92 + pEthernetDriver->GetIpAddress ().toString ());
     // DEBUG_V (String (" gateway: ") + pEthernetDriver->GetIpGateway ().toString ());
     // DEBUG_V (String (" netmask: ") + pEthernetDriver->GetIpSubNetMask ().toString ());
 

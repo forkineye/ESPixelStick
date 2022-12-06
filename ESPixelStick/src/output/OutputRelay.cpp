@@ -128,18 +128,18 @@ bool c_OutputRelay::validate ()
 
     if ((Num_Channels > OM_RELAY_CHANNEL_LIMIT) || (Num_Channels < 1))
     {
-        logcon (CN_stars + String (F (" Requested channel count was not valid. Setting to ")) + OM_RELAY_CHANNEL_LIMIT + " " + CN_stars);
+        logcon (CN_stars + String (MN_01) + OM_RELAY_CHANNEL_LIMIT + " " + CN_stars);
         Num_Channels = OM_RELAY_CHANNEL_LIMIT;
         response = false;
     }
 
     if (Num_Channels < OM_RELAY_CHANNEL_LIMIT)
     {
-        logcon (CN_stars + String (F (" Requested channel count was vot valid. Insuficient number of input channels avaialable ")) + CN_stars);
+        logcon (String (CN_stars) + MN_123 + CN_stars);
 
         for (int ChannelIndex = OM_RELAY_CHANNEL_LIMIT - 1; ChannelIndex > Num_Channels; ChannelIndex--)
         {
-            logcon (String (CN_stars + String(F (" Disabling channel '")) + String(ChannelIndex + 1) + "' " + CN_stars));
+            logcon (String (CN_stars) + MN_03 + String(ChannelIndex + 1) + "' " + CN_stars);
             OutputList[ChannelIndex].Enabled = false;
         }
 
@@ -226,7 +226,7 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
         if (false == jsonConfig.containsKey (CN_channels))
         {
             // if not, flag an error and stop processing
-            logcon (F ("No output channel settings found. Using defaults."));
+            logcon (String(MN_124) + MN_18);
             break;
         }
         JsonArray JsonChannelList = jsonConfig[CN_channels];
@@ -240,7 +240,7 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             if (ChannelId >= OM_RELAY_CHANNEL_LIMIT)
             {
                 // if not, flag an error and stop processing this channel
-                logcon (String(F ("No settings found for channel '")) + String(ChannelId) + "'");
+                logcon (String(MN_05) + String(ChannelId) + "'");
                 continue;
             }
 

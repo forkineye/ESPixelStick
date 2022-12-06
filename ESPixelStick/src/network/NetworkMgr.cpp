@@ -166,7 +166,7 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
     {
         if (!json.containsKey (CN_network))
         {
-            logcon (String (F ("No network config found. Use default settings")));
+            logcon (String (MN_96) + MN_18);
             // request config save
             ConfigSaveNeeded = true;
             break;
@@ -190,14 +190,14 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
             // this may be an old style config
             if (network.containsKey (CN_ssid))
             {
-                logcon (String (F ("Using old style WiFi Settings")));
+                logcon (MN_97);
                 // request config save
                 ConfigSaveNeeded = true;
                 ConfigChanged |= WiFiDriver.SetConfig (network);
             }
             else
             {
-                logcon (String (F ("No network WiFi settings found. Using default WiFi Settings")));
+                logcon (String (MN_96) + MN_18);
             }
         }
 
@@ -211,7 +211,7 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
         }
         else
         {
-            logcon (String (F ("No network Ethernet settings found. Using default Ethernet Settings")));
+            logcon (String (MN_98) + MN_18);
         }
 
         // DEBUG_V (String ("            IsEthernetConnected: ") + String (IsEthernetConnected));
