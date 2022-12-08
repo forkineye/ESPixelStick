@@ -93,7 +93,7 @@ void c_InputFPPRemotePlayList::GetStatus (JsonObject & jsonStatus)
     // DEBUG_START;
 
     jsonStatus[CN_name]  = GetFileName ();
-    jsonStatus[CN_entry] = PlayListEntryId;
+    jsonStatus[F ("entry")] = PlayListEntryId;
     jsonStatus[CN_count] = PlayListRepeatCount;
 
     pCurrentFsmState->GetStatus (jsonStatus);
@@ -124,7 +124,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         String FileData;
         if (0 == FileMgr.ReadSdFile (PlayItemName, FileData))
         {
-            logcon (String (MN_62) + PlayItemName + "'");
+            logcon (String (F ("Could not read Playlist file: '")) + PlayItemName + "'");
             fsm_PlayList_state_Paused_imp.Init (this);
             pCurrentFsmState->Start (PlayItemName, PauseEndTime, 1);
             break;
@@ -136,10 +136,10 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         // DEBUG_V ("Error Check");
         if (error)
         {
-            String CfgFileMessagePrefix = MN_63 + PlayItemName + "' ";
+            String CfgFileMessagePrefix = String (F ("SD file: '")) + PlayItemName + "' ";
             logcon (CN_Heap_colon + String (ESP.getFreeHeap ()));
-            logcon (CfgFileMessagePrefix + MN_44 + error.c_str ());
-            logcon (CN_plussigns + FileData + CN_minussigns);
+            logcon (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
+            logcon (String (F ("++++")) + FileData + String (F ("----")));
             fsm_PlayList_state_Paused_imp.Init (this);
             pCurrentFsmState->Start (PlayItemName, PauseEndTime, PlayCount);
             break;
@@ -187,7 +187,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         {
             FrameId = 1;
             PlayCount = 1;
-            setFromJSON (PlayCount, JsonPlayListArrayEntry, CN_playcount);
+            setFromJSON (PlayCount, JsonPlayListArrayEntry, F ("playcount"));
             // DEBUG_V (String ("PlayListEntryPlayCount: '") + String (FrameId) + "'");
 
             fsm_PlayList_state_PlayingFile_imp.Init (this);
@@ -204,7 +204,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
             fsm_PlayList_state_PlayingEffect_imp.Init (this);
         }
 
-        else if (String (CN_pause) == PlayListEntryType)
+        else if (String (F ("pause")) == PlayListEntryType)
         {
             uint32_t PlayListEntryDuration = 0;
             setFromJSON (PlayListEntryDuration, JsonPlayListArrayEntry, CN_duration);
@@ -218,7 +218,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
 
         else
         {
-            logcon (MN_64 + PlayListEntryType + "'");
+            logcon (String (F ("Unsupported Play List Entry type: '")) + PlayListEntryType + "'");
             PauseEndTime = millis () + 10000;
             fsm_PlayList_state_Paused_imp.Init (this);
             pCurrentFsmState->Start (PlayListEntryName, FrameId, PlayCount);

@@ -163,7 +163,7 @@ public:
 
     virtual void Poll (void);
     virtual void Init (void);
-    virtual void GetStateName (String& sName) { sName = CN_Boot; }
+    virtual void GetStateName (String& sName) { sName = F ("Boot"); }
     virtual void OnConnect (void)             { /* ignore */ }
     virtual void OnDisconnect (void)          { /* ignore */ }
 
@@ -178,7 +178,7 @@ public:
 
     virtual void Poll (void);
     virtual void Init (void);
-    virtual void GetStateName (String& sName) { sName = MN_116; }
+    virtual void GetStateName (String& sName) { sName = F ("Connecting Using Config Credentials"); }
     virtual void OnConnect (void);
     virtual void OnDisconnect (void) {}
 
@@ -193,7 +193,7 @@ public:
 
     virtual void Poll (void);
     virtual void Init (void);
-    virtual void GetStateName (String& sName) { sName = MN_117; }
+    virtual void GetStateName (String& sName) { sName = F ("Connecting Using Default Credentials"); }
     virtual void OnConnect (void);
     virtual void OnDisconnect (void) {}
 
@@ -208,7 +208,7 @@ public:
 
     virtual void Poll (void);
     virtual void Init (void);
-    virtual void GetStateName (String& sName) { sName = MN_118; }
+    virtual void GetStateName (String& sName) { sName = F ("Connected To AP"); }
     virtual void OnConnect (void) {}
     virtual void OnDisconnect (void);
 
@@ -223,7 +223,7 @@ public:
 
     virtual void Poll (void);
     virtual void Init (void);
-    virtual void GetStateName (String& sName) { sName = MN_119; }
+    virtual void GetStateName (String& sName) { sName = F ("Connecting As AP"); }
     virtual void OnConnect (void);
     virtual void OnDisconnect (void) {}
 
@@ -238,7 +238,7 @@ public:
 
     virtual void Poll (void);
     virtual void Init (void);
-    virtual void GetStateName (String& sName) { sName = MN_120; }
+    virtual void GetStateName (String& sName) { sName = F ("Connected To STA"); }
     virtual void OnConnect (void) {}
     virtual void OnDisconnect (void);
 
@@ -253,7 +253,7 @@ public:
 
     virtual void Poll(void) {}
     virtual void Init (void);
-    virtual void GetStateName (String& sName) { sName = MN_121; }
+    virtual void GetStateName (String& sName) { sName = F ("Connection Failed"); }
     virtual void OnConnect (void) {}
     virtual void OnDisconnect (void) {}
 
@@ -268,7 +268,7 @@ public:
 
     virtual void Poll (void) {}
     virtual void Init (void);
-    virtual void GetStateName (String& sName) { sName = CN_Disabled; }
+    virtual void GetStateName (String& sName) { sName = F ("Disabled"); }
     virtual void OnConnect (void) {}
     virtual void OnDisconnect (void) {}
 

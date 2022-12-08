@@ -76,7 +76,7 @@ public:
 
     virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
-    virtual void GetStateName (String& sName) { sName = CN_Starting; }
+    virtual void GetStateName (String& sName) { sName = F ("Starting"); }
     virtual void Start (String& FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
     virtual void Stop (void);
     virtual bool Sync (String& FileName, float SecondsElapsed);
@@ -118,7 +118,7 @@ public:
 
     virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
-    virtual void GetStateName (String& sName) { sName = CN_Stopping; }
+    virtual void GetStateName (String& sName) { sName = F("Stopping"); }
     virtual void Start (String& FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
     virtual void Stop (void);
     virtual bool Sync (String& FileName, float SecondsElapsed);
@@ -140,7 +140,7 @@ public:
 
     virtual void Poll ();
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
-    virtual void GetStateName (String& sName) { sName = CN_Error; }
+    virtual void GetStateName (String& sName) { sName = F ("Error"); }
     virtual void Start (String& FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
     virtual void Stop (void);
     virtual bool Sync (String& FileName, float SecondsElapsed);

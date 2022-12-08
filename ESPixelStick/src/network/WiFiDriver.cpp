@@ -113,7 +113,7 @@ void c_WiFiDriver::AnnounceState ()
 
     String StateName;
     pCurrentFsmState->GetStateName (StateName);
-    logcon (MN_99 + StateName);
+    logcon (String (F ("WiFi Entering State: ")) + StateName);
 
     // DEBUG_END;
 
@@ -132,7 +132,7 @@ void c_WiFiDriver::Begin ()
     {
         DynamicJsonDocument jsonConfigDoc(1024);
         // DEBUG_V ("read the sdcard config");
-        if (FileMgr.ReadSdFile (MN_100, jsonConfigDoc))
+        if (FileMgr.ReadSdFile (F("wificonfig.json"), jsonConfigDoc))
         {
             // DEBUG_V ("Process the sdcard config");
             JsonObject jsonConfig = jsonConfigDoc.as<JsonObject> ();
@@ -143,7 +143,7 @@ void c_WiFiDriver::Begin ()
 
             ConfigSaveNeeded = true;
 
-            FileMgr.DeleteSdFile (MN_100);
+            FileMgr.DeleteSdFile (F ("wificonfig.json"));
         }
         else
         {
@@ -247,7 +247,10 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
         // DEBUG_V (String ("passphrase: ") + current_passphrase);
         // DEBUG_V (String ("  hostname: ") + Hostname);
 
-    	logcon (MN_101 + current_ssid + MN_102 + Hostname);
+    	logcon (String(F ("Connecting to '")) +
+               current_ssid +
+               String(F("' as ")) +
+               Hostname);
 
         WiFi.setSleep(false);
         // DEBUG_V("");
@@ -521,7 +524,7 @@ void c_WiFiDriver::SetUpIp ()
     {
         if (true == UseDhcp)
         {
-            logcon (MN_103);
+            logcon (F ("Using DHCP"));
             break;
         }
 
@@ -533,7 +536,7 @@ void c_WiFiDriver::SetUpIp ()
 
         if (temp == ip)
         {
-            logcon (MN_90);
+            logcon (F ("ERROR: STATIC SELECTED WITHOUT IP. Using DHCP assigned address"));
             break;
         }
 
@@ -548,7 +551,7 @@ void c_WiFiDriver::SetUpIp ()
         // We didn't use DNS, so just set it to our configured gateway
         WiFi.config (ip, gateway, netmask, gateway);
 
-        logcon (MN_104);
+        logcon (F ("Using Static IP"));
 
     } while (false);
 
@@ -645,7 +648,7 @@ void fsm_WiFi_state_ConnectingUsingConfig::Poll ()
         if (CurrentTimeMS - pWiFiDriver->GetFsmStartTime() > (1000 * pWiFiDriver->Get_sta_timeout()))
         {
             /// DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
-            logcon (MN_105);
+            logcon (F ("WiFi Failed to connect using Configured Credentials"));
             fsm_WiFi_state_ConnectingUsingDefaults_imp.Init ();
         }
     }
@@ -708,7 +711,7 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Poll ()
         if (CurrentTimeMS - pWiFiDriver->GetFsmStartTime () > (1000 * pWiFiDriver->Get_sta_timeout ()))
         {
             /// DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
-            logcon (MN_106);
+            logcon (F ("WiFi Failed to connect using default Credentials"));
             fsm_WiFi_state_ConnectingAsAP_imp.Init ();
         }
     }
@@ -763,7 +766,7 @@ void fsm_WiFi_state_ConnectingAsAP::Poll ()
         {
             if( false == pWiFiDriver->Get_ap_StayInApMode())
             {
-                logcon (MN_107);
+                logcon (F ("WiFi STA Failed to connect"));
                 fsm_WiFi_state_ConnectionFailed_imp.Init ();
             }
         }
@@ -793,12 +796,12 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
         pWiFiDriver->setIpAddress (WiFi.localIP ());
         pWiFiDriver->setIpSubNetMask (WiFi.subnetMask ());
 
-        logcon (MN_108 + ssid);
-        logcon (MN_109 + pWiFiDriver->getIpAddress ().toString ());
+        logcon (String (F ("WiFi SOFTAP:       ssid: '")) + ssid);
+        logcon (String (F ("WiFi SOFTAP: IP Address: '")) + pWiFiDriver->getIpAddress ().toString ());
     }
     else
     {
-        logcon (MN_110);
+        logcon (String (F ("WiFi SOFTAP: Not enabled")));
         fsm_WiFi_state_ConnectionFailed_imp.Init ();
     }
 
@@ -850,7 +853,7 @@ void fsm_WiFi_state_ConnectedToAP::Init ()
     pWiFiDriver->setIpAddress( WiFi.localIP () );
     pWiFiDriver->setIpSubNetMask( WiFi.subnetMask () );
 
-    logcon (MN_92 + pWiFiDriver->getIpAddress ().toString ());
+    logcon (String (F ("Connected with IP: ")) + pWiFiDriver->getIpAddress ().toString ());
 
     pWiFiDriver->SetIsWiFiConnected (true);
     NetworkMgr.SetWiFiIsConnected (true);
@@ -864,7 +867,7 @@ void fsm_WiFi_state_ConnectedToAP::OnDisconnect ()
 {
     // DEBUG_START;
 
-    logcon (MN_111);
+    logcon (F ("WiFi Lost the connection to the AP"));
     fsm_WiFi_state_ConnectionFailed_imp.Init ();
 
     // DEBUG_END;
@@ -881,7 +884,7 @@ void fsm_WiFi_state_ConnectedToSta::Poll ()
     // did we get silently disconnected?
     if (0 == WiFi.softAPgetStationNum ())
     {
-        logcon (MN_112);
+        logcon (F ("WiFi Lost the connection to the STA"));
         if(pWiFiDriver->Get_ap_StayInApMode())
         {
             fsm_WiFi_state_ConnectingAsAP_imp.Init ();
@@ -909,7 +912,7 @@ void fsm_WiFi_state_ConnectedToSta::Init ()
     pWiFiDriver->setIpAddress (WiFi.softAPIP ());
     pWiFiDriver->setIpSubNetMask (IPAddress (255, 255, 255, 0));
 
-    logcon (MN_113 + pWiFiDriver->getIpAddress ().toString ());
+    logcon (String (F ("Connected to STA with IP: ")) + pWiFiDriver->getIpAddress ().toString ());
 
     pWiFiDriver->SetIsWiFiConnected (true);
     NetworkMgr.SetWiFiIsConnected (true);
@@ -923,7 +926,7 @@ void fsm_WiFi_state_ConnectedToSta::OnDisconnect ()
 {
     // DEBUG_START;
 
-    logcon (MN_114);
+    logcon (F ("WiFi STA Disconnected"));
     if(pWiFiDriver->Get_ap_StayInApMode())
     {
         fsm_WiFi_state_ConnectingAsAP_imp.Init ();
@@ -957,7 +960,7 @@ void fsm_WiFi_state_ConnectionFailed::Init ()
         if (true == pWiFiDriver->Get_RebootOnWiFiFailureToConnect())
         {
             extern bool reboot;
-            logcon (MN_115);
+            logcon (F ("WiFi Requesting Reboot"));
 
             reboot = true;
         }

@@ -126,7 +126,7 @@ public:
 
     virtual void Poll (void);
     virtual void Init (void);
-    virtual void GetStateName (String& sName) { sName = CN_Boot; }
+    virtual void GetStateName (String& sName) { sName = F ("Boot"); }
     virtual void OnConnect (void)             { /* ignore */ }
     virtual void OnGotIp (void)               { /* ignore */ }
     virtual void OnDisconnect (void)          { /* ignore */ }
@@ -142,7 +142,7 @@ public:
 
     virtual void Poll (void);
     virtual void Init (void);
-    virtual void GetStateName (String& sName) { sName = CN_Powering_Up; }
+    virtual void GetStateName (String& sName) { sName = F ("Powering Up"); }
     virtual void OnConnect (void) {}
     virtual void OnGotIp (void) {}
     virtual void OnDisconnect (void) {}
@@ -158,7 +158,7 @@ public:
 
     virtual void Poll(void);
     virtual void Init(void);
-    virtual void GetStateName (String& sName) { sName = CN_connecting; }
+    virtual void GetStateName (String& sName) { sName = F ("Connecting"); }
     virtual void OnConnect (void);
     virtual void OnGotIp (void);
     virtual void OnDisconnect (void) {}
@@ -174,7 +174,7 @@ public:
 
     virtual void Poll (void) {}
     virtual void Init (void);
-    virtual void GetStateName (String& sName) { sName = MN_93; }
+    virtual void GetStateName (String& sName) { sName = F ("Wait for IP Address"); }
     virtual void OnConnect (void) {}
     virtual void OnGotIp (void);
     virtual void OnDisconnect (void);
@@ -190,7 +190,7 @@ public:
 
     virtual void Poll (void) {}
     virtual void Init (void);
-    virtual void GetStateName (String& sName) { sName = MN_94; }
+    virtual void GetStateName (String& sName) { sName = F ("Got IP"); }
     virtual void OnConnect (void) {}
     virtual void OnGotIp (void) {}
     virtual void OnDisconnect (void);
@@ -206,7 +206,7 @@ public:
 
     virtual void Poll (void) {}
     virtual void Init (void);
-    virtual void GetStateName (String& sName) { sName = MN_95; }
+    virtual void GetStateName (String& sName) { sName = F ("Device Init Failed"); }
     virtual void OnConnect (void) {}
     virtual void OnGotIp (void) {}
     virtual void OnDisconnect (void) {}

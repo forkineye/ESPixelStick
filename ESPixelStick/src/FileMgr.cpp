@@ -60,14 +60,14 @@ void c_FileMgr::Begin ()
 
         if (!LittleFS.begin ())
         {
-            logcon ( String(CN_stars) + MN_33 + CN_stars);
+            logcon ( String(CN_stars) + F (" Flash file system did not initialize correctly ") + CN_stars);
         }
         else
         {
 #ifdef ARDUINO_ARCH_ESP32
-            logcon (String (MN_34) + MN_35 + String (LittleFS.usedBytes ()) + MN_36 + String (LittleFS.totalBytes()) );
+            logcon (String (F ("Flash file system initialized. Used = ")) + String (LittleFS.usedBytes ()) + String (F (" out of ")) + String (LittleFS.totalBytes()) );
 #else
-            logcon (MN_34);
+            logcon (String (F ("Flash file system initialized.")));
 #endif // def ARDUINO_ARCH_ESP32
 
             //listDir (LittleFS, String ("/"), 3);
@@ -97,7 +97,7 @@ bool c_FileMgr::SetConfig (JsonObject & json)
     }
     else
     {
-        logcon (MN_37);
+        logcon (F ("No File Manager settings found."));
     }
 
     // DEBUG_V (String ("ConfigChanged: ") + String (ConfigChanged));
@@ -133,8 +133,8 @@ void c_FileMgr::GetStatus (JsonObject& json)
     // DEBUG_START;
 
 #ifdef ARDUINO_ARCH_ESP32
-    json[CN_size] = LittleFS.totalBytes ();
-    json[CN_used] = LittleFS.usedBytes ();
+    json[F ("size")] = LittleFS.totalBytes ();
+    json[F ("used")] = LittleFS.usedBytes ();
 #endif // def ARDUINO_ARCH_ESP32
 
     // DEBUG_END;
@@ -189,7 +189,7 @@ void c_FileMgr::SetSpiIoPins ()
 #endif // !def SUPPORT_SD_MMC
         {
             // DEBUG_V();
-            logcon(MN_38);
+            logcon(String(F("No SD card installed")));
             SdCardInstalled = false;
         }
         else
@@ -202,7 +202,7 @@ void c_FileMgr::SetSpiIoPins ()
 #ifdef ARDUINO_ARCH_ESP32
     catch (const std::exception &e)
     {
-        logcon (String (MN_39)+ e.what());
+        logcon (String (F ("ERROR: Could not init the SD Card: "))+ e.what());
         SdCardInstalled = false;
     }
 #endif // def ARDUINO_ARCH_ESP32
@@ -232,18 +232,18 @@ void c_FileMgr::listDir (fs::FS& fs, String dirname, uint8_t levels)
     // DEBUG_START;
     do // once
     {
-        logcon (MN_40 + dirname);
+        logcon (String (F ("Listing directory: ")) + dirname);
 
         File root = fs.open (dirname, CN_r);
         if (!root)
         {
-            logcon (String (CN_stars) + MN_41 + dirname + CN_stars);
+            logcon (String (CN_stars) + F ("failed to open directory: ") + dirname + CN_stars);
             break;
         }
 
         if (!root.isDirectory ())
         {
-            logcon (MN_42 + dirname);
+            logcon (String (F ("Is not a directory: ")) + dirname);
             break;
         }
 
@@ -285,7 +285,7 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
         String RawFileData;
         if (false == ReadConfigFile (FileName, RawFileData))
         {
-            DEBUG_V (String(CN_stars) + CfgFileMessagePrefix + ("Could not read file.") + CN_stars);
+            logcon (String(CN_stars) + CfgFileMessagePrefix + F ("Could not read file.") + CN_stars);
             break;
         }
         logcon(RawFileData);
@@ -296,7 +296,7 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
         if (!file)
         {
             if (!IsBooting) {
-                logcon (String (CN_stars) + CfgFileMessagePrefix + MN_43 + CN_stars);
+                logcon (String (CN_stars) + CfgFileMessagePrefix + String (F (" Could not open file for reading ")) + CN_stars);
             }
             break;
         }
@@ -314,7 +314,7 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
         if (error)
         {
             // logcon (CN_Heap_colon + String (ESP.getMaxFreeBlockSize ()));
-            logcon (String(CN_stars) + CfgFileMessagePrefix + MN_44 + error.c_str () + CN_stars);
+            logcon (String(CN_stars) + CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str () + CN_stars);
             // logcon (CN_plussigns + RawFileData + CN_minussigns);
 	        // DEBUG_V (String ("                heap: ") + String (ESP.getFreeHeap ()));
     	    /// DEBUG_V (String (" getMaxFreeBlockSize: ") + String (ESP.getMaxFreeBlockSize ()));
@@ -330,7 +330,7 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
         // DEBUG_V ();
         jsonDoc.garbageCollect ();
 
-        logcon (CfgFileMessagePrefix + CN_loaded);
+        logcon (CfgFileMessagePrefix + String (F ("loaded.")));
 
         // DEBUG_V ();
         Handler (jsonDoc);
@@ -368,7 +368,7 @@ bool c_FileMgr::SaveConfigFile (const String& FileName, const char * FileData)
     fs::File file = LittleFS.open (FileName.c_str (), "w");
     if (!file)
     {
-        logcon (String (CN_stars) + CfgFileMessagePrefix + MN_142 + CN_stars);
+        logcon (String (CN_stars) + CfgFileMessagePrefix + String (F ("Could not open file for writing..")) + CN_stars);
     }
     else
     {
@@ -381,7 +381,7 @@ bool c_FileMgr::SaveConfigFile (const String& FileName, const char * FileData)
         file.close ();
 
         file = LittleFS.open (FileName.c_str (), "r");
-        logcon (CfgFileMessagePrefix + CN_saved + String (file.size ()) + MN_143);
+        logcon (CfgFileMessagePrefix + String (F ("saved ")) + String (file.size ()) + F (" bytes."));
         file.close ();
 
         Response = true;
@@ -411,7 +411,7 @@ bool c_FileMgr::SaveConfigFile(const String &FileName, JsonDocument &FileData)
 
     if (!file)
     {
-        logcon(String(CN_stars) + CfgFileMessagePrefix + MN_142 + CN_stars);
+        logcon(String(CN_stars) + CfgFileMessagePrefix + String(F("Could not open file for writing..")) + CN_stars);
     }
     else
     {
@@ -424,7 +424,7 @@ bool c_FileMgr::SaveConfigFile(const String &FileName, JsonDocument &FileData)
 
         file.close();
 
-        logcon(CfgFileMessagePrefix + CN_saved + String(NumBytesSaved) + MN_143);
+        logcon(CfgFileMessagePrefix + String(F("saved ")) + String(NumBytesSaved) + F(" bytes."));
 
         Response = true;
     }
@@ -447,7 +447,7 @@ bool c_FileMgr::ReadConfigFile (const String& FileName, String& FileData)
     if (file)
     {
         // Suppress this for now, may add it back later
-        // DEBUG_V (CfgFileMessagePrefix + String (("reading ")) + String (file.size()) + (" bytes."));
+        //logcon (CfgFileMessagePrefix + String (F ("reading ")) + String (file.size()) + F (" bytes."));
 
         // DEBUG_V (String("File '") + FileName + "' is open.");
         file.seek (0, SeekSet);
@@ -461,7 +461,7 @@ bool c_FileMgr::ReadConfigFile (const String& FileName, String& FileData)
     }
     else
     {
-        logcon (String (CN_stars) + CN_Configuration_File_colon + "'" + FileName + MN_144 + CN_stars);
+        logcon (String (CN_stars) + CN_Configuration_File_colon + "'" + FileName + F ("' not found.") + CN_stars);
     }
 
     // DEBUG_END;
@@ -500,7 +500,7 @@ bool c_FileMgr::ReadConfigFile (const String& FileName, JsonDocument & FileData)
         {
             String CfgFileMessagePrefix = String (CN_Configuration_File_colon) + "'" + FileName + "' ";
             logcon (CN_Heap_colon + String (ESP.getFreeHeap ()));
-            logcon (CfgFileMessagePrefix + MN_44 + error.c_str ());
+            logcon (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
             logcon (CN_plussigns + RawFileData + CN_minussigns);
             break;
         }
@@ -527,13 +527,13 @@ bool c_FileMgr::ReadConfigFile (const String & FileName, byte * FileData, size_t
         fs::File file = LittleFS.open (FileName.c_str (), CN_r);
         if (!file)
         {
-            logcon (String (CN_stars) + CN_Configuration_File_colon + "'" + FileName + MN_144 + CN_stars);
+            logcon (String (CN_stars) + CN_Configuration_File_colon + "'" + FileName + F ("' not found.") + CN_stars);
             break;
         }
 
         if (file.size() >= maxlen)
         {
-            logcon (String (CN_stars) + CN_Configuration_File_colon + "'" + FileName + MN_145 + CN_stars);
+            logcon (String (CN_stars) + CN_Configuration_File_colon + "'" + FileName + F ("' too large for buffer. ") + CN_stars);
             file.close ();
             break;
         }
@@ -633,7 +633,7 @@ c_FileMgr::FileId c_FileMgr::CreateSdFileHandle ()
 
     if (0 == response)
     {
-        logcon (String (CN_stars) + MN_146 + CN_stars);
+        logcon (String (CN_stars) + F (" Could not allocate another file handle ") + CN_stars);
     }
     // DEBUG_V (String ("FileHandle: ") + String (FileHandle));
 
@@ -674,7 +674,7 @@ void c_FileMgr::DescribeSdCardToUser ()
     uint64_t cardSize = ESP_SD.size64 () / (1024 * 1024);
 #endif // def ARDUINO_ARCH_ESP32
 
-    logcon (String (MN_147) + int64String (cardSize) + "MB");
+    logcon (String (F ("SD Card Size: ")) + int64String (cardSize) + "MB");
 
     // DEBUG_V("Open Root");
     File root = ESP_SD.open("/");
@@ -697,21 +697,21 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
     {
         if (0 == ResponseJsonDoc.capacity ())
         {
-            logcon (String(CN_stars) + MN_148 + CN_stars);
+            logcon (String(CN_stars) + F ("ERROR: Failed to allocate memory for the GetListOfSdFiles web request response.") + CN_stars);
             break;
         }
 
         JsonArray FileArray = ResponseJsonDoc.createNestedArray (CN_files);
-        ResponseJsonDoc[MN_149] = SdCardIsInstalled ();
+        ResponseJsonDoc[F ("SdCardPresent")] = SdCardIsInstalled ();
         if (false == SdCardIsInstalled ())
         {
             break;
         }
 
 #ifdef ARDUINO_ARCH_ESP32
-        ResponseJsonDoc[MN_150] = ESP_SD.cardSize ();
+        ResponseJsonDoc[F ("totalBytes")] = ESP_SD.cardSize ();
 #else
-        ResponseJsonDoc[MN_150] = ESP_SD.size64 ();
+        ResponseJsonDoc[F ("totalBytes")] = ESP_SD.size64 ();
 #endif
         uint64_t usedBytes = 0;
 
@@ -735,24 +735,24 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
             // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
 
             if ((0 != EntryName.length ()) &&
-                (!EntryName.equals(MN_151)) &&
+                (EntryName != String (F ("System Volume Information"))) &&
                 (0 != entry.size ())
                )
             {
                 // DEBUG_V ("Adding File: '" + EntryName + "'");
 
                 JsonObject CurrentFile = FileArray.createNestedObject ();
-                CurrentFile[CN_name]   = EntryName;
-                CurrentFile[CN_date]   = entry.getLastWrite ();
-                CurrentFile[CN_length] = entry.size ();
+                CurrentFile[CN_name]      = EntryName;
+                CurrentFile[F ("date")]   = entry.getLastWrite ();
+                CurrentFile[F ("length")] = entry.size ();
             }
 
             entry.close ();
         }
 
         dir.close();
-
-        ResponseJsonDoc[MN_152] = usedBytes;
+        
+        ResponseJsonDoc[F("usedBytes")] = usedBytes;
 
     } while (false);
 
@@ -786,13 +786,13 @@ void c_FileMgr::printDirectory (File dir, int numTabs)
 
         if (entry.isDirectory ())
         {
-            logcon (tabs + MN_153 + entry.name());
+            logcon (tabs + F ("> ") + entry.name());
             printDirectory (entry, numTabs + 1);
         }
         else
         {
             // files have sizes, directories do not
-            logcon (tabs + entry.name() + MN_154 + String(entry.size ()));
+            logcon (tabs + entry.name() + F (" - ") + String(entry.size ()));
         }
         entry.close ();
     }
@@ -810,12 +810,12 @@ void c_FileMgr::SaveSdFile (const String & FileName, String & FileData)
         FileId FileHandle = 0;
         if (false == OpenSdFile (FileName, FileMode::FileWrite, FileHandle))
         {
-            logcon (MN_155 + FileName + MN_156);
+            logcon (String (F ("Could not open '")) + FileName + F ("' for writting."));
             break;
         }
 
         int WriteCount = WriteSdFile (FileHandle, (byte*)FileData.c_str (), (size_t)FileData.length ());
-        logcon (MN_157 + FileName + MN_158 + String(WriteCount));
+        logcon (String (F ("Wrote '")) + FileName + F ("' ") + String(WriteCount));
 
         CloseSdFile (FileHandle);
 
@@ -866,7 +866,7 @@ bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & Fil
             // DEBUG_V (String("Read FIle"));
             if (false == ESP_SDFS.exists (FileNamePrefix + FileName))
             {
-                logcon (MN_159 + FileName + MN_160);
+                logcon (String (F ("ERROR: Cannot find '")) + FileName + F ("' for reading. File does not exist."));
                 break;
             }
         }
@@ -883,7 +883,7 @@ bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & Fil
             // DEBUG_V("Open return");
             if (!FileList[FileListIndex].info)
             {
-                logcon(MN_161 + FileName + MN_158);
+                logcon(String(F("ERROR: Cannot open '")) + FileName + F("'."));
 
                 // release the file list entry
                 FileList[FileListIndex].handle = 0;
@@ -940,7 +940,7 @@ bool c_FileMgr::ReadSdFile (const String & FileName, String & FileData)
     else
     {
         CloseSdFile (FileHandle);
-        logcon (MN_63 + FileName + MN_144);
+        logcon (String (F ("SD file: '")) + FileName + String (F ("' not found.")));
     }
 
     // DEBUG_END;
@@ -976,7 +976,7 @@ bool c_FileMgr::ReadSdFile (const String & FileName, JsonDocument & FileData)
             {
                 String CfgFileMessagePrefix = String (CN_Configuration_File_colon) + "'" + FileName + "' ";
                 logcon (CN_Heap_colon + String (ESP.getFreeHeap ()));
-                logcon (CfgFileMessagePrefix + MN_44 + error.c_str ());
+                logcon (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
                 logcon (CN_plussigns + RawFileData + CN_minussigns);
             }
             else
@@ -988,7 +988,7 @@ bool c_FileMgr::ReadSdFile (const String & FileName, JsonDocument & FileData)
     }
     else
     {
-        logcon (MN_63 + FileName + MN_144);
+        logcon (String (F ("SD file: '")) + FileName + String (F ("' not found.")));
     }
 
     // DEBUG_END;
@@ -1016,7 +1016,7 @@ size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t N
         // DEBUG_V(String("ActualBytesToRead: ") + String(ActualBytesToRead));
         if(!FileList[FileListIndex].info.seek(StartingPosition, SeekSet))
         {
-            logcon(MN_162);
+            logcon(F("ERROR: SD Card: Could not set file read start position"));
         }
         else
         {
@@ -1026,7 +1026,7 @@ size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t N
     }
     else
     {
-        logcon (MN_163 + String (FileHandle));
+        logcon (String (F ("ReadSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
 
     // DEBUG_END;
@@ -1053,7 +1053,7 @@ size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t N
     }
     else
     {
-        logcon (MN_163 + String (FileHandle));
+        logcon (String (F ("ReadSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
 
     // DEBUG_END;
@@ -1075,7 +1075,7 @@ void c_FileMgr::CloseSdFile (const FileId& FileHandle)
     }
     else
     {
-        logcon (MN_164 + String (FileHandle));
+        logcon (String (F ("CloseSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
 
     // DEBUG_END;
@@ -1095,7 +1095,7 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
     }
     else
     {
-        logcon (MN_165 + String (FileHandle));
+        logcon (String (F ("WriteSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
 
     return response;
@@ -1114,7 +1114,7 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
     }
     else
     {
-        logcon (MN_165 + String (FileHandle));
+        logcon (String (F ("WriteSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
 
     return response;
@@ -1132,7 +1132,7 @@ size_t c_FileMgr::GetSdFileSize (const FileId& FileHandle)
     }
     else
     {
-        logcon (MN_166 + String (FileHandle));
+        logcon (String (F ("GetSdFileSize::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
 
     return response;
@@ -1201,7 +1201,8 @@ void c_FileMgr::handleFileUpload (const String & filename,
         }
 
         uint32_t uploadTime = (uint32_t)(millis() - fsUploadStartTime) / 1000;
-        logcon (MN_167 + fsUploadFileName + MN_168 + String (uploadTime) + MN_169);
+        logcon (String (F ("Upload File: '")) + fsUploadFileName +
+                String (F ("' Done (")) + String (uploadTime) + String (F ("s)")));
 
         CloseSdFile (fsUploadFile);
         fsUploadFileName = "";
@@ -1232,7 +1233,7 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
     // are we terminating the previous download?
     if (0 != fsUploadFileName.length ())
     {
-        logcon (MN_170 + fsUploadFileName + "'");
+        logcon (String (F ("Aborting Previous File Upload For: '")) + fsUploadFileName + String (F ("'")));
         FileMgr.CloseSdFile (fsUploadFile);
         fsUploadFileName = "";
     }
@@ -1240,7 +1241,7 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
     // Set up to receive a file
     fsUploadFileName = filename;
 
-    logcon (MN_167 + fsUploadFileName + MN_171);
+    logcon (String (F ("Upload File: '")) + fsUploadFileName + String (F ("' Started")));
 
     FileMgr.DeleteSdFile (fsUploadFileName);
 

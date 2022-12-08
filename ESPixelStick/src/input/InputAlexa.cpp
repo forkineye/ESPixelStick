@@ -96,7 +96,7 @@ void c_InputAlexa::GetStatus (JsonObject& /* jsonStatus */)
 {
     // DEBUG_START;
 
-    // JsonObject mqttStatus = jsonStatus.createNestedObject (CN_mqtt);
+    // JsonObject mqttStatus = jsonStatus.createNestedObject (F ("mqtt"));
     // mqttStatus["unifirst"] = startUniverse;
 
     // DEBUG_END;
@@ -178,7 +178,7 @@ void c_InputAlexa::onMessage(EspalexaDevice * pDevice)
         JsonConfig[CN_EffectMirror]     = false;
         JsonConfig[CN_EffectAllLeds]    = true;
         JsonConfig[CN_EffectBrightness] = map (pDevice->getValue (), 0, 255, 0, 100);
-        JsonConfig[CN_currenteffect]    = CN_Solid;
+        JsonConfig[CN_currenteffect]    = F ("Solid");
         JsonConfig[CN_EffectColor]      = HexColor;
         // DEBUG_V (String ("CN_EffectBrightness: ") + String (pDevice->getValue ()));
         // DEBUG_V (String ("getState: ") + String (pDevice->getState ()));

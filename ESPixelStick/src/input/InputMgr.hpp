@@ -100,7 +100,7 @@ private:
     bool            configLoadNeeded    = false;
 
     // configuration parameter names for the channel manager within the config file
-#   define IM_EffectsControlButtonName CN_ecb
+#   define IM_EffectsControlButtonName F ("ecb")
 
     bool ProcessJsonConfig           (JsonObject & jsonConfig);
     void CreateJsonConfig            (JsonObject & jsonConfig);

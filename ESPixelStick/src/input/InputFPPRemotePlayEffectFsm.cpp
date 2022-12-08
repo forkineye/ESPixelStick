@@ -52,7 +52,7 @@ void fsm_PlayEffect_state_Idle::Start (String & ConfigString, float )
 
     // DEBUG_V (String ("ConfigString: '") + ConfigString + "'");
     p_InputFPPRemotePlayEffect->PlayEffectEndTime = millis () + (1000 * p_InputFPPRemotePlayEffect->PlayDurationSec);
-
+    
     // tell the effect engine what it is supposed to be doing
     DynamicJsonDocument EffectConfig (512);
     DeserializationError error = deserializeJson ((EffectConfig), (const String)ConfigString);
@@ -60,9 +60,9 @@ void fsm_PlayEffect_state_Idle::Start (String & ConfigString, float )
     // DEBUG_V ("Error Check");
     if (error)
     {
-        String CfgFileMessagePrefix = MN_49 + ConfigString + "' ";
+        String CfgFileMessagePrefix = String (F ("Effect Config: '")) + ConfigString + "' ";
         logcon (CN_Heap_colon + String (ESP.getFreeHeap ()));
-        logcon (CfgFileMessagePrefix + MN_44 + error.c_str ());
+        logcon (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
         logcon (CN_plussigns + ConfigString + CN_minussigns);
     }
 
@@ -70,7 +70,7 @@ void fsm_PlayEffect_state_Idle::Start (String & ConfigString, float )
 
     String EffectName;
     setFromJSON (EffectName, ConfigObject, CN_currenteffect);
-    logcon (MN_50 + EffectName + "'");
+    logcon (String (F ("Playing Effect: '")) + EffectName + "'");
 
     p_InputFPPRemotePlayEffect->EffectsEngine.SetConfig (ConfigObject);
     p_InputFPPRemotePlayEffect->fsm_PlayEffect_state_PlayingEffect_imp.Init (p_InputFPPRemotePlayEffect);
@@ -108,7 +108,7 @@ void fsm_PlayEffect_state_Idle::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    jsonStatus[CN_TimeRemaining] = MN_51;
+    jsonStatus[CN_TimeRemaining] = F ("00:00");
 
     // DEBUG_END;
 

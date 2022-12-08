@@ -84,22 +84,22 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         // Try to listen to the broadcast port
         if (!udp.listen (FPP_DISCOVERY_PORT))
         {
-            logcon (MN_126);
+            logcon (String (F ("FAILED to subscribed to broadcast messages")));
             fail = true;
             break;
         }
-        // DEBUG_V (String (("FPPDiscovery subscribed to broadcast")));
+        //logcon (String (F ("FPPDiscovery subscribed to broadcast")));
 
         if (!udp.listenMulticast (address, FPP_DISCOVERY_PORT))
         {
-            logcon (MN_127);
+            logcon (String (F ("FAILED to subscribed to multicast messages")));
             fail = true;
             break;
         }
-        // DEBUG_V (String (("FPPDiscovery subscribed to multicast: ")) + address.toString ());
+        //logcon (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
 
         if (!fail)
-            logcon (MN_28 + String(FPP_DISCOVERY_PORT));
+            logcon (String (F ("Listening on port ")) + String(FPP_DISCOVERY_PORT));
 
         udp.onPacket (std::bind (&c_FPPDiscovery::ProcessReceivedUdpPacket, this, std::placeholders::_1));
 
@@ -142,8 +142,8 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
     if (IsEnabled)
     {
         // DEBUG_V ("Is Enabled");
-        JsonObject MyJsonStatus = jsonStatus.createNestedObject (CN_FPPDiscovery);
-        MyJsonStatus[CN_FppRemoteIp] = FppRemoteIp.toString ();
+        JsonObject MyJsonStatus = jsonStatus.createNestedObject (F ("FPPDiscovery"));
+        MyJsonStatus[F ("FppRemoteIp")] = FppRemoteIp.toString ();
         if (InputFPPRemotePlayFile)
         {
             InputFPPRemotePlayFile->GetStatus (MyJsonStatus);
@@ -215,22 +215,22 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
             case CTRL_PKT_SYNC:
             {
                 FPPMultiSyncPacket* msPacket = reinterpret_cast<FPPMultiSyncPacket*>(UDPpacket.data ());
-                // DEBUG_V (String (("msPacket->sync_type: ")) + String(msPacket->sync_type));
+                // DEBUG_V (String (F ("msPacket->sync_type: ")) + String(msPacket->sync_type));
 
                 if (msPacket->sync_type == SYNC_FILE_SEQ)
                 {
                     // FSEQ type, not media
-                    // DEBUG_V (String (("Received FPP FSEQ sync packet")));
+                    // DEBUG_V (String (F ("Received FPP FSEQ sync packet")));
                     FppRemoteIp = UDPpacket.remoteIP ();
                     ProcessSyncPacket (msPacket->sync_action, String (msPacket->filename), msPacket->seconds_elapsed);
                 }
                 else if (msPacket->sync_type == SYNC_FILE_MEDIA)
                 {
-                    // DEBUG_V (String (("Unsupported SYNC_FILE_MEDIA message.")));
+                    // DEBUG_V (String (F ("Unsupported SYNC_FILE_MEDIA message.")));
                 }
                 else
                 {
-                    // DEBUG_V (String (("Unexpected Multisync msPacket->sync_type: ")) + String (msPacket->sync_type));
+                    // DEBUG_V (String (F ("Unexpected Multisync msPacket->sync_type: ")) + String (msPacket->sync_type));
                 }
 
                 break;
@@ -244,7 +244,7 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
 
             case CTRL_PKT_BLANK:
             {
-                // DEBUG_V (String (("FPP Blank packet")));
+                // DEBUG_V (String (F ("FPP Blank packet")));
                 // StopPlaying ();
                 MultiSyncStats.pktBlank++;
                 ProcessBlankPacket ();
@@ -253,20 +253,20 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
 
             case CTRL_PKT_PING:
             {
-                // DEBUG_V (String (("Ping Packet")));
+                // DEBUG_V (String (F ("Ping Packet")));
 
                 MultiSyncStats.pktPing++;
                 FPPPingPacket* pingPacket = reinterpret_cast<FPPPingPacket*>(UDPpacket.data ());
 
-                // DEBUG_V (String (("Ping Packet subtype: ")) + String (pingPacket->ping_subtype));
-                // DEBUG_V (String (("Ping Packet packet.versionMajor: ")) + String (pingPacket->versionMajor));
-                // DEBUG_V (String (("Ping Packet packet.versionMinor: ")) + String (pingPacket->versionMinor));
-                // DEBUG_V (String (("Ping Packet packet.hostName:     ")) + String (pingPacket->hostName));
-                // DEBUG_V (String (("Ping Packet packet.hardwareType: ")) + String (pingPacket->hardwareType));
+                // DEBUG_V (String (F ("Ping Packet subtype: ")) + String (pingPacket->ping_subtype));
+                // DEBUG_V (String (F ("Ping Packet packet.versionMajor: ")) + String (pingPacket->versionMajor));
+                // DEBUG_V (String (F ("Ping Packet packet.versionMinor: ")) + String (pingPacket->versionMinor));
+                // DEBUG_V (String (F ("Ping Packet packet.hostName:     ")) + String (pingPacket->hostName));
+                // DEBUG_V (String (F ("Ping Packet packet.hardwareType: ")) + String (pingPacket->hardwareType));
 
                 if (pingPacket->ping_subtype == 0x01)
                 {
-                    // DEBUG_V (String (("FPP Ping discovery packet")));
+                    // DEBUG_V (String (F ("FPP Ping discovery packet")));
                     // received a discover ping packet, need to send a ping out
                     if (UDPpacket.isBroadcast () || UDPpacket.isMulticast ())
                     {
@@ -281,7 +281,7 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
                 }
                 else
                 {
-                    // DEBUG_V (String (("Unexpected Ping sub type: ")) + String (pingPacket->ping_subtype));
+                    // DEBUG_V (String (F ("Unexpected Ping sub type: ")) + String (pingPacket->ping_subtype));
                 }
                 break;
             }
@@ -386,7 +386,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, float S
 
             default:
             {
-                // DEBUG_V (String (("Sync: ERROR: Unknown Action: ")) + String (action));
+                // DEBUG_V (String (F ("Sync: ERROR: Unknown Action: ")) + String (action));
                 break;
             }
 
@@ -495,12 +495,12 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
     FSEQRawHeader fsqHeader;
     FileMgr.ReadSdFile (fseq, (byte*)&fsqHeader, sizeof (fsqHeader), 0);
 
-    JsonData[CN_Name]            = fname;
-    JsonData[CN_Version]         = String (fsqHeader.majorVersion) + "." + String (fsqHeader.minorVersion);
-    JsonData[CN_ID]              = int64String (read64 (fsqHeader.id, 0));
-    JsonData[CN_StepTime]        = String (fsqHeader.stepTime);
-    JsonData[CN_NumFrames]       = String (read32 (fsqHeader.TotalNumberOfFramesInSequence, 0));
-    JsonData[CN_CompressionType] = fsqHeader.compressionType;
+    JsonData[F ("Name")]            = fname;
+    JsonData[CN_Version]            = String (fsqHeader.majorVersion) + "." + String (fsqHeader.minorVersion);
+    JsonData[F ("ID")]              = int64String (read64 (fsqHeader.id, 0));
+    JsonData[F ("StepTime")]        = String (fsqHeader.stepTime);
+    JsonData[F ("NumFrames")]       = String (read32 (fsqHeader.TotalNumberOfFramesInSequence, 0));
+    JsonData[F ("CompressionType")] = fsqHeader.compressionType;
 
     static const int TIME_STR_CHAR_COUNT = 32;
     char timeStr[TIME_STR_CHAR_COUNT];
@@ -513,29 +513,29 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
 
     // TODO: assert ((actuallyWritten > 0) && (actuallyWritten < TIME_STR_CHAR_COUNT))
     if ((actuallyWritten > 0) && (actuallyWritten < TIME_STR_CHAR_COUNT)) {
-        JsonData[CN_lastReceiveTime] = timeStr;
+        JsonData[F ("lastReceiveTime")] = timeStr;
     }
 
-    JsonData[CN_pktCommand]      = MultiSyncStats.pktCommand;
-    JsonData[CN_pktSyncSeqOpen]  = MultiSyncStats.pktSyncSeqOpen;
-    JsonData[CN_pktSyncSeqStart] = MultiSyncStats.pktSyncSeqStart;
-    JsonData[CN_pktSyncSeqStop]  = MultiSyncStats.pktSyncSeqStop;
-    JsonData[CN_pktSyncSeqSync]  = MultiSyncStats.pktSyncSeqSync;
-    JsonData[CN_pktSyncMedOpen]  = MultiSyncStats.pktSyncMedOpen;
-    JsonData[CN_pktSyncMedStart] = MultiSyncStats.pktSyncMedStart;
-    JsonData[CN_pktSyncMedStop]  = MultiSyncStats.pktSyncMedStop;
-    JsonData[CN_pktSyncMedSync]  = MultiSyncStats.pktSyncMedSync;
-    JsonData[CN_pktBlank]        = MultiSyncStats.pktBlank;
-    JsonData[CN_pktPing]         = MultiSyncStats.pktPing;
-    JsonData[CN_pktPlugin]       = MultiSyncStats.pktPlugin;
-    JsonData[CN_pktFPPCommand]   = MultiSyncStats.pktFPPCommand;
-    JsonData[CN_pktError]        = MultiSyncStats.pktError;
+    JsonData[F ("pktCommand")]      = MultiSyncStats.pktCommand;
+    JsonData[F ("pktSyncSeqOpen")]  = MultiSyncStats.pktSyncSeqOpen;
+    JsonData[F ("pktSyncSeqStart")] = MultiSyncStats.pktSyncSeqStart;
+    JsonData[F ("pktSyncSeqStop")]  = MultiSyncStats.pktSyncSeqStop;
+    JsonData[F ("pktSyncSeqSync")]  = MultiSyncStats.pktSyncSeqSync;
+    JsonData[F ("pktSyncMedOpen")]  = MultiSyncStats.pktSyncMedOpen;
+    JsonData[F ("pktSyncMedStart")] = MultiSyncStats.pktSyncMedStart;
+    JsonData[F ("pktSyncMedStop")]  = MultiSyncStats.pktSyncMedStop;
+    JsonData[F ("pktSyncMedSync")]  = MultiSyncStats.pktSyncMedSync;
+    JsonData[F ("pktBlank")]        = MultiSyncStats.pktBlank;
+    JsonData[F ("pktPing")]         = MultiSyncStats.pktPing;
+    JsonData[F ("pktPlugin")]       = MultiSyncStats.pktPlugin;
+    JsonData[F ("pktFPPCommand")]   = MultiSyncStats.pktFPPCommand;
+    JsonData[F ("pktError")]        = MultiSyncStats.pktError;
 
     uint32_t maxChannel = read32 (fsqHeader.channelCount, 0);
 
     if (0 != fsqHeader.numSparseRanges)
     {
-        JsonArray  JsonDataRanges = JsonData.createNestedArray (CN_Ranges);
+        JsonArray  JsonDataRanges = JsonData.createNestedArray (F ("Ranges"));
 
         maxChannel = 0;
 
@@ -552,8 +552,8 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
             uint32_t RangeLength = read24 (CurrentFSEQRangeEntry->Length);
 
             JsonObject JsonRange = JsonDataRanges.createNestedObject ();
-            JsonRange[CN_Start]  = String (RangeStart);
-            JsonRange[CN_Length] = String (RangeLength);
+            JsonRange[F ("Start")]  = String (RangeStart);
+            JsonRange[F ("Length")] = String (RangeLength);
 
             if ((RangeStart + RangeLength - 1) > maxChannel)
             {
@@ -564,8 +564,8 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
         free (RangeDataBuffer);
     }
 
-    JsonData[CN_MaxChannel]   = String (maxChannel);
-    JsonData[CN_ChannelCount] = String (read32 (fsqHeader.channelCount,0));
+    JsonData[F ("MaxChannel")]   = String (maxChannel);
+    JsonData[F ("ChannelCount")] = String (read32 (fsqHeader.channelCount,0));
 
     uint32_t FileOffsetToCurrentHeaderRecord = read16 (fsqHeader.VariableHdrOffset);
     uint32_t FileOffsetToStartOfSequenceData = read16 (fsqHeader.dataOffset); // DataOffset
@@ -575,7 +575,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
 
     if (FileOffsetToCurrentHeaderRecord < FileOffsetToStartOfSequenceData)
     {
-        JsonArray  JsonDataHeaders = JsonData.createNestedArray (CN_variableHeaders);
+        JsonArray  JsonDataHeaders = JsonData.createNestedArray (F ("variableHeaders"));
 
         char FSEQVariableDataHeaderBuffer[sizeof (FSEQRawVariableDataHeader) + 1];
         memset ((uint8_t*)FSEQVariableDataHeaderBuffer, 0x00, sizeof (FSEQVariableDataHeaderBuffer));
@@ -635,12 +635,12 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 
         // DEBUG_V (String ("Path: ") + path);
 
-        if (path.startsWith (MN_128) && AllowedToRemotePlayFiles())
+        if (path.startsWith (F ("/api/sequence/")) && AllowedToRemotePlayFiles())
         {
             // DEBUG_V ("");
 
             String seq = path.substring (14);
-            if (seq.endsWith (MN_129))
+            if (seq.endsWith (F ("/meta")))
             {
                 // DEBUG_V ("");
 
@@ -658,11 +658,11 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                         String resp = "";
                         BuildFseqResponse (seq, FileHandle, resp);
                         FileMgr.CloseSdFile (FileHandle);
-                        request->send (200, MN_130, resp);
+                        request->send (200, F ("application/json"), resp);
                         break;
                     }
                 }
-                logcon (MN_43 + seq);
+                logcon (String (F ("Could not open: ")) + seq);
             }
         }
         request->send (404);
@@ -682,9 +682,9 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
     do // once
     {
         String path = request->getParam (ulrPath)->value ();
-        // DEBUG_V (String(("path: ")) + path);
+        // DEBUG_V (String(F ("path: ")) + path);
 
-        if (path.equals(MN_131))
+        if (path != F ("uploadFile"))
         {
             // DEBUG_V ("");
             request->send (404);
@@ -692,12 +692,12 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
         }
 
         String filename = request->getParam (CN_filename)->value ();
-        // DEBUG_V (String(("FileName: ")) + filename);
+        // DEBUG_V (String(F ("FileName: ")) + filename);
 
         c_FileMgr::FileId FileHandle;
         if (false == FileMgr.OpenSdFile (filename, c_FileMgr::FileMode::FileRead, FileHandle))
         {
-            logcon (MN_132 + filename);
+            logcon (String (F ("c_FPPDiscovery::ProcessPOST: File Does Not Exist - FileName: ")) + filename);
             request->send (404);
             break;
         }
@@ -706,7 +706,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
         String resp = "";
         BuildFseqResponse (filename, FileHandle, resp);
         FileMgr.CloseSdFile (FileHandle);
-        request->send (200, MN_130, resp);
+        request->send (200, F ("application/json"), resp);
 
     } while (false);
 
@@ -736,10 +736,11 @@ void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data,
 
     if (!index)
     {
+        // LOG_PORT.printf("len: %u / index: %u / total: %u\n", len, index, total);
         printReq (request, false);
 
         String path = request->getParam (ulrPath)->value ();
-        if (path.equals(MN_131))
+        if (path == F ("uploadFile"))
         {
             if (!request->hasParam (CN_filename))
             {
@@ -776,25 +777,25 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     String Hostname;
     NetworkMgr.GetHostname (Hostname);
 
-    jsonResponse[CN_HostName]        = Hostname;
-    jsonResponse[CN_HostDescription] = config.id;
-    jsonResponse[CN_Platform]        = CN_ESPixelStick;
-    jsonResponse[CN_Variant]         = FPP_VARIANT_NAME;
-    jsonResponse[CN_Mode]            = (true == AllowedToRemotePlayFiles()) ? CN_remote : CN_bridge;
-    jsonResponse[CN_Version]         = VERSION;
+    jsonResponse[CN_HostName]           = Hostname;
+    jsonResponse[F ("HostDescription")] = config.id;
+    jsonResponse[CN_Platform]           = CN_ESPixelStick;
+    jsonResponse[F ("Variant")]         = FPP_VARIANT_NAME;
+    jsonResponse[F ("Mode")]            = (true == AllowedToRemotePlayFiles()) ? CN_remote : CN_bridge;
+    jsonResponse[CN_Version]            = VERSION;
 
     const char* version = VERSION.c_str ();
 
-    jsonResponse[CN_majorVersion] = (uint16_t)atoi (version);
-    jsonResponse[CN_minorVersion] = (uint16_t)atoi (&version[2]);
-    jsonResponse[CN_typeId]       = FPP_TYPE_ID;
+    jsonResponse[F ("majorVersion")] = (uint16_t)atoi (version);
+    jsonResponse[F ("minorVersion")] = (uint16_t)atoi (&version[2]);
+    jsonResponse[F ("typeId")]       = FPP_TYPE_ID;
 
-    JsonObject jsonResponseUtilization = jsonResponse.createNestedObject (CN_Utilization);
-    jsonResponseUtilization[CN_MemoryFree] = ESP.getFreeHeap ();
-    jsonResponseUtilization[CN_Uptime]     = millis ();
+    JsonObject jsonResponseUtilization = jsonResponse.createNestedObject (F ("Utilization"));
+    jsonResponseUtilization[F ("MemoryFree")] = ESP.getFreeHeap ();
+    jsonResponseUtilization[F ("Uptime")]     = millis ();
 
     jsonResponse[CN_rssi] = WiFi.RSSI ();
-    JsonArray jsonResponseIpAddresses = jsonResponse.createNestedArray (CN_IPS);
+    JsonArray jsonResponseIpAddresses = jsonResponse.createNestedArray (F ("IPS"));
     jsonResponseIpAddresses.add(WiFi.localIP ().toString ());
 
     // DEBUG_END;
@@ -823,7 +824,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
         String command = request->getParam (ulrCommand)->value ();
         // DEBUG_V (String ("command: ") + command);
 
-        if (command.equals(MN_133))
+        if (command == F ("getFPPstatus"))
         {
             String adv = CN_false;
             if (request->hasParam (CN_advancedView))
@@ -831,23 +832,23 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
                 adv = request->getParam (CN_advancedView)->value ();
             }
 
-            JsonObject JsonDataMqtt = JsonData.createNestedObject(CN_MQTT);
+            JsonObject JsonDataMqtt = JsonData.createNestedObject(F ("MQTT"));
 
-            JsonDataMqtt[CN_configured] = false;
-            JsonDataMqtt[CN_connected]  = false;
+            JsonDataMqtt[F ("configured")] = false;
+            JsonDataMqtt[F ("connected")]  = false;
 
-            JsonObject JsonDataCurrentPlaylist = JsonData.createNestedObject (MN_136);
+            JsonObject JsonDataCurrentPlaylist = JsonData.createNestedObject (F ("current_playlist"));
 
-            JsonDataCurrentPlaylist[CN_count]       = "0";
-            JsonDataCurrentPlaylist[CN_description] = "";
-            JsonDataCurrentPlaylist[CN_index]       = "0";
-            JsonDataCurrentPlaylist[CN_playlist]    = "";
-            JsonDataCurrentPlaylist[CN_type]        = "";
+            JsonDataCurrentPlaylist[CN_count]          = "0";
+            JsonDataCurrentPlaylist[F ("description")] = "";
+            JsonDataCurrentPlaylist[F ("index")]       = "0";
+            JsonDataCurrentPlaylist[CN_playlist]       = "";
+            JsonDataCurrentPlaylist[CN_type]           = "";
 
-            JsonData[CN_volume] = 70;
-            JsonData[MN_134]    = "";
-            JsonData[CN_fppd]   = CN_running;
-            JsonData[MN_135]    = "";
+            JsonData[F ("volume")]         = 70;
+            JsonData[F ("media_filename")] = "";
+            JsonData[F ("fppd")]           = F ("running");
+            JsonData[F ("current_song")]   = "";
 
             if (false == PlayingFile())
             {
@@ -861,7 +862,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
                 JsonData[CN_time_remaining]    = String ("00:00");
 
                 JsonData[CN_status] = 0;
-                JsonData[CN_status_name] = CN_idle;
+                JsonData[CN_status_name] = F ("idle");
 
                 if (IsEnabled)
                 {
@@ -881,7 +882,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
                     InputFPPRemotePlayFile->GetStatus (JsonData);
                 }
                 JsonData[CN_status] = 1;
-                JsonData[CN_status_name] = CN_playing;
+                JsonData[CN_status_name] = F ("playing");
 
                 JsonData[CN_mode] = 8;
                 JsonData[CN_mode_name] = CN_remote;
@@ -889,58 +890,58 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 
             if (adv == CN_true)
             {
-                JsonObject JsonDataAdvancedView = JsonData.createNestedObject (MN_137);
+                JsonObject JsonDataAdvancedView = JsonData.createNestedObject (F ("advancedView"));
                 GetSysInfoJSON (JsonDataAdvancedView);
             }
 
             String Response;
             serializeJson (JsonDoc, Response);
             // DEBUG_V (String ("JsonDoc: ") + Response);
-            request->send (200, MN_130, Response);
+            request->send (200, F ("application/json"), Response);
 
             break;
         }
 
-        if (command.equals(MN_138))
+        if (command == F ("getSysInfo"))
         {
             GetSysInfoJSON (JsonData);
 
             String resp = "";
             serializeJson (JsonData, resp);
             // DEBUG_V (String ("JsonDoc: ") + resp);
-            request->send (200, MN_130, resp);
+            request->send (200, F ("application/json"), resp);
 
             break;
         }
 
-        if (command.equals(MN_139))
+        if (command == F ("getHostNameInfo"))
         {
             String Hostname;
             NetworkMgr.GetHostname (Hostname);
 
             JsonData[CN_HostName] = Hostname;
-            JsonData[CN_HostDescription] = config.id;
+            JsonData[F ("HostDescription")] = config.id;
 
             String resp;
             serializeJson (JsonData, resp);
             // DEBUG_V (String ("resp: ") + resp);
-            request->send (200, MN_130, resp);
+            request->send (200, F ("application/json"), resp);
 
             break;
         }
 
-        if (command.equals(MN_140))
+        if (command == F ("getChannelOutputs"))
         {
             if (request->hasParam (CN_file))
             {
                 String filename = request->getParam (CN_file)->value ();
-                if (filename.equals(MN_141))
+                if (String(F ("co-other")) == filename)
                 {
                     String resp;
                     OutputMgr.GetConfig (resp);
 
                     // DEBUG_V (String ("resp: ") + resp);
-                    request->send (200, MN_130, resp);
+                    request->send (200, F ("application/json"), resp);
 
                     break;
                 }
@@ -1001,7 +1002,7 @@ void c_FPPDiscovery::StopPlaying ()
 {
     // DEBUG_START;
 
-    // DEBUG_V (String (("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
+    // logcon (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
     if (InputFPPRemotePlayFile)
     {
         InputFPPRemotePlayFile->Stop ();
