@@ -49,7 +49,7 @@ typedef int esp_err_t; // currently only need two defined status: OK & FAIL
         do {                                                            \
             esp_err_t err_rc_ = (x);                                    \
             if (unlikely(err_rc_ != ESP_OK)) {                          \
-                LOG_ERROR_MSG("err: esp_err_t = %d", err_rc_);               \
+                LOG_ERROR_MSG("err: esp_err_t = %d", rc);               \
                 assert(0 && #x);                                        \
             }                                                           \
         } while(0);
@@ -67,3 +67,5 @@ typedef int esp_err_t; // currently only need two defined status: OK & FAIL
 #else
 #	error "Unsupported CPU type"
 #endif
+
+
