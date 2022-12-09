@@ -1165,10 +1165,13 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName) {
                 if (undefined !== RowId) {
                     // console.info("RowId = " + RowId);
 
+                    let DeleteButtonName = 'transitionDelete_' + RowId;
                     let elementName = 'transitionColor_' + RowId;
+                    // console.info("DeleteButtonName = " + DeleteButtonName);
                     // console.info("elementName = " + elementName);
 
-                    // the auto export adds the raw color data to the structure. Remove it.
+                    // the auto export adds the delete and raw color data to the structure. Remove it.
+                    delete ChannelConfig[DeleteButtonName];
                     delete ChannelConfig[elementName];
 
                     let HexValue = $('#' + elementName).val();
@@ -1289,7 +1292,7 @@ function wsConnect() {
             target = document.location.host;
         }
 
-        // target = "192.168.10.184";
+        // target = "192.168.10.175";
         // target = "192.168.10.101";
 
         // Open a new web socket and set the binary type
