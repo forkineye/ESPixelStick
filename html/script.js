@@ -1633,6 +1633,7 @@ function ProcessReceivedJsonAdminMessage(data) {
     $('#usedflashsize').text(AdminInfo.usedflashsize);
     $('#realflashsize').text(AdminInfo.realflashsize);
     $('#flashchipid').text(AdminInfo.flashchipid);
+    $('#BoardName').text(AdminInfo.BoardName);
 
     // Hide elements that are not applicable to our architecture
     if (AdminInfo.arch === "ESP8266") {

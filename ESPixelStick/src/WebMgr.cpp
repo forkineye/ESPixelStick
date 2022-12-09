@@ -646,6 +646,7 @@ void c_WebMgr::ProcessXARequest (AsyncWebSocketClient* client)
     jsonAdmin[CN_version] = VERSION;
     jsonAdmin["built"] = BUILD_DATE;
     jsonAdmin["realflashsize"] = String (ESP.getFlashChipSize ());
+    jsonAdmin["BoardName"] = String(BOARD_NAME);
 #ifdef ARDUINO_ARCH_ESP8266
     jsonAdmin["arch"] = CN_ESP8266;
     jsonAdmin["flashchipid"] = String (ESP.getChipId (), HEX);
