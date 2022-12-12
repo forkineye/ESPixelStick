@@ -335,8 +335,11 @@ void c_OutputRelay::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 //----------------------------------------------------------------------------
 void  c_OutputRelay::GetDriverName (String & sDriverName)
 {
-    sDriverName = F ("Relay");
+    // DEBUG_START;
 
+    sDriverName = CN_Relay;
+
+    // DEBUG_END;
 } // GetDriverName
 
 //----------------------------------------------------------------------------

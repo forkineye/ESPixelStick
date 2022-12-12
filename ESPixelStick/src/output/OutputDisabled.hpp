@@ -39,7 +39,7 @@ public:
     bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
     void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     void         Render ();                                        ///< Call from loop(),  renders output data
-    void         GetDriverName (String & sDriverName) { sDriverName = String (F ("Disabled")); }
+    void         GetDriverName (String & sDriverName) { sDriverName = CN_Disabled; }
     uint32_t     GetNumOutputBufferBytesNeeded () { return 0; }
     uint32_t     GetNumOutputBufferChannelsServiced () { return 0; }
 

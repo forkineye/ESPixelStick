@@ -14,30 +14,54 @@
     <div class="form-group">
         <label class="control-label col-sm-2" for="EffectSpeed">Speed</label>
         <div class="col-sm-4">
-            <input type="number" class="form-control is-valid" id="EffectSpeed" step="1" min="1" max="10" value="0" required title="Rate at which effect runs">
+            <input type="number" class="form-control is-valid" id="EffectSpeed" step="1" min="1" max="10" value="0"
+                required title="Rate at which effect runs">
         </div>
         <label class="control-label col-sm-2" for="EffectBrightness">Brightness (%)</label>
         <div class="col-sm-4">
-            <input type="number" class="form-control is-valid" id="EffectBrightness" step="1" min="1" max="100" value="0" required title="Effect Intensity">
+            <input type="number" class="form-control is-valid" id="EffectBrightness" step="1" min="1" max="100"
+                value="0" required title="Effect Intensity">
         </div>
     </div>
 
     <div class="form-group">
         <div class="row">
             <div class="col-sm-offset-2 col-sm-2" id="d_EffectReverse">
-                <div class="checkbox"><label><input type="checkbox" id="EffectReverse" class="reverse" name="t_reverse">Reverse pattern</label></div>
+                <div class="checkbox"><label><input type="checkbox" id="EffectReverse" class="reverse"
+                            name="t_reverse">Reverse pattern</label></div>
             </div>
             <div class="col-sm-8" id="d_EffectMirror">
-                <div class="checkbox"><label><input type="checkbox" id="EffectMirror" class="mirror" name="t_mirror">Mirror pattern</label></div>
+                <div class="checkbox"><label><input type="checkbox" id="EffectMirror" class="mirror"
+                            name="t_mirror">Mirror pattern</label></div>
             </div>
         </div>
+
         <div class="row">
             <div class="col-sm-offset-2 col-sm-2" id="d_EffectAllLeds">
-                <div class="checkbox"><label><input type="checkbox" id="EffectAllLeds" class="allleds" name="t_allleds">All leds same </label></div>
+                <div class="checkbox"><label><input type="checkbox" id="EffectAllLeds" class="allleds"
+                            name="t_allleds">All leds same </label></div>
             </div>
             <div class="col-sm-8" id="d_EffectWhiteChannel">
-                <div class="checkbox"><label><input type="checkbox" id="EffectWhiteChannel" class="whitechannel" name="t_whitechannel">Add White Channel Data</label></div>
+                <div class="checkbox"><label><input type="checkbox" id="EffectWhiteChannel" class="whitechannel"
+                            name="t_whitechannel">Add White Channel Data</label></div>
             </div>
         </div>
-    </div>
+
+        <div class="form-group" style="height:200px; overflow:auto;">
+            <div class="col-sm-offset-2 col-sm-2" id="d_transition">
+                <table class="table" id="TransitionColorTable">
+                    <thead>
+                        <tr>
+                            <th id="transitionId_hr">Transition ID</th>
+                            <th id="TransitionColor_hr">Transition Color</th>
+                            <th id="TransitionDelete_hr">Transition Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr></tr>
+                    </tbody>
+                </table>
+                <button type="Button" class="btn btn-primary" id="AddTransitionBtn">Add Transition</button>;
+            </div>
+        </div>
 </fieldset>

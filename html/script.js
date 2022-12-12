@@ -520,7 +520,7 @@ async function downloadURI(uri, name, totalLength)
 
 function ParseParameter(name) {
     return (location.search.split(name + '=')[1] || '').split('&')[0];
-}
+} // ParseParameter
 
 function ProcessModeConfigurationDatafppremote(channelConfig) {
     let jqSelector = "#fseqfilename";
@@ -557,7 +557,112 @@ function ProcessModeConfigurationDataEffects(channelConfig) {
     // set the current selector value
     $(jqSelector).val(channelConfig.currenteffect);
 
+    $('#TransitionColorTable tbody').removeData();
+
+    channelConfig.transitions.forEach(element => {
+        // console.info("Element.r = " + element.r);
+        // console.info("Element.g = " + element.g);
+        // console.info("Element.b = " + element.b);
+
+        let CurrentColor = "#" + ((element.r * 256 * 256) + (element.g * 256) + element.b).toString(16);
+        transitionAddRow(CurrentColor);
+    });
+
+    RenumberTransitionTable();
+
+    $('#AddTransitionBtn').unbind();
+    $('#AddTransitionBtn').click(function () {
+        // console.info("Add a transition");
+        transitionAddRow('#000000');
+        RenumberTransitionTable();
+    });
+
 } // ProcessModeConfigurationDataEffects
+
+function UUID() {
+    var uuid = (function () {
+        var i,
+            c = "89ab",
+            u = [];
+        for (i = 0; i < 36; i += 1) {
+            u[i] = (Math.random() * 16 | 0).toString(16);
+        }
+        u[8] = u[13] = u[18] = u[23] = "-";
+        u[14] = "4";
+        u[19] = c.charAt(Math.random() * 4 | 0);
+        return u.join("");
+    })();
+    return {
+        toString: function () {
+            return uuid;
+        },
+        valueOf: function () {
+            return uuid;
+        }
+    };
+} // UUID
+
+function transitionAddRow(CurrentColor) {
+
+    // console.info("length " + $('#TransitionColorTable tbody tr').length);
+
+    if (26 > $('#TransitionColorTable tbody tr').length) {
+        let CurrentRowId = 'UUID_' + UUID().toString().toUpperCase();
+        // console.info("CurrentColor " + CurrentColor);
+
+        while (-1 !== CurrentRowId.indexOf("-")) {
+            CurrentRowId = CurrentRowId.replace("-", "_");
+        }
+
+        while (CurrentColor.length < 7) { CurrentColor = CurrentColor.replace("#", "#0"); }
+
+        let TransitionIdPattern = '<td>' + (CurrentRowId) + '</td>';
+        let TransitionColorPattern = '<td><input type="color" class="form-control is-valid" id="transitionColor_' + CurrentRowId + '" value="' + CurrentColor + '"></td>';
+        let TransitionDeletePattern = '<td><button type="Button" class="btn btn-primary" RowId="' + CurrentRowId + '" id="transitionDelete_' + CurrentRowId + '">Delete</button></td>';
+        let rowPattern = '<tr id="transitionRow_' + (CurrentRowId) + '" RowId="' + CurrentRowId + '"> ' + TransitionIdPattern + TransitionColorPattern + TransitionDeletePattern + '</tr> ';
+        $('#TransitionColorTable tbody tr:last').after(rowPattern);
+        $('#transitionDelete_' + CurrentRowId).click(function () { transitionDeleteRow($(this)); });
+    }
+} // transitionAddRow
+
+function transitionDeleteRow(button) {
+
+    let RowId = $(button).attr("RowId");
+    // console.info("Got Click for CurrentRowId: " + RowId);
+    // console.info("Length: " + $('#TransitionColorTable tbody tr').length);
+    // 3 = hdr+2 rows
+    if (3 < $('#TransitionColorTable tbody tr').length) {
+        $('#transitionRow_' + RowId).remove();
+        RenumberTransitionTable();
+    }
+
+} // transitionDeleteRow
+
+function RenumberTransitionTable() {
+    // renumber the table
+    // console.info("Length " + $('#TransitionColorTable tbody tr').length);
+
+    $('#TransitionColorTable tbody tr').each(elementId => {
+        if (0 !== elementId) {
+            // console.info(elementId);
+            $('#TransitionColorTable tbody tr:eq(' + elementId + ') td:eq(0)').html((elementId).toString());
+            if (4 > $('#TransitionColorTable tbody tr').length) {
+                $('#TransitionColorTable tbody tr:eq(' + elementId + ') td:eq(2)').hide();
+            }
+            else {
+                $('#TransitionColorTable tbody tr:eq(' + elementId + ') td:eq(2)').show();
+            }
+        }
+    });
+
+    if (26 > $('#TransitionColorTable tbody tr').length) {
+        $('#AddTransitionBtn').show();
+    }
+    else {
+        $('#AddTransitionBtn').hide();
+    }
+
+} // RenumberTransitionTable
 
 function ProcessModeConfigurationDataRelay(RelayConfig) {
     // console.log("relaychannelconfigurationtable.rows.length = " + $('#relaychannelconfigurationtable tr').length);
@@ -829,7 +934,7 @@ function updateFromJSON(obj) {
 
     // Update Device ID in footer
     $('#device-id').text($('#config #id').val());
-}
+} // updateFromJSON
 
 function GenerateInputOutputControlLabel(OptionListName, DisplayedChannelId) {
     let Id = parseInt(DisplayedChannelId) + 1;
@@ -1041,20 +1146,82 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName) {
                 CurrentChannelConfig.b16 = (ServoDataType & 0x04) ? true : false;
             });
         }
-        else {
-            elementids.forEach(function (elementid) {
-                let SelectedElement = modeControlName + ' #' + elementid;
-                if ($(SelectedElement).is(':checkbox')) {
-                    ChannelConfig[elementid] = $(SelectedElement).prop('checked');
-                }
-                else {
-                    ChannelConfig[elementid] = $(SelectedElement).val();
+        else if (ChannelConfig.type === "Effects") {
+            // transitions need extra processing
+            ExtractConfigFromHtmlPages(elementids, modeControlName, ChannelConfig);
+
+            // the auto export adds the add color button to the structure. Remove it.
+            delete ChannelConfig["AddTransitionBtn"];
+
+            // build a new transitions array
+            const transitions = [];
+            transitions.length = $('#TransitionColorTable tbody tr').length - 1;
+            let elementId = 0; // row counter into the json array
+
+            $('#TransitionColorTable tbody tr').each(function () {
+                let CurRow = $(this)[0];
+                let RowId = $(CurRow).attr("RowId");
+
+                if (undefined !== RowId) {
+                    // console.info("RowId = " + RowId);
+
+                    let DeleteButtonName = 'transitionDelete_' + RowId;
+                    let elementName = 'transitionColor_' + RowId;
+                    // console.info("DeleteButtonName = " + DeleteButtonName);
+                    // console.info("elementName = " + elementName);
+
+                    // the auto export adds the delete and raw color data to the structure. Remove it.
+                    delete ChannelConfig[DeleteButtonName];
+                    delete ChannelConfig[elementName];
+
+                    let HexValue = $('#' + elementName).val();
+
+                    // console.info("HexValue = " + HexValue);
+                    // console.info("r = " + hexToRgb(HexValue).r);
+                    // console.info("g = " + hexToRgb(HexValue).g);
+                    // console.info("b = " + hexToRgb(HexValue).b);
+                    transitions[elementId] = {};
+                    let transition = transitions[elementId];
+                    transition.r = hexToRgb(HexValue).r;
+                    transition.g = hexToRgb(HexValue).g;
+                    transition.b = hexToRgb(HexValue).b;
+                    elementId++;
                 }
             });
+
+            ChannelConfig.transitions = transitions;
+        }
+        else {
+            ExtractConfigFromHtmlPages(elementids, modeControlName, ChannelConfig);
+        }
+    });
+} // ExtractChannelConfigFromHtmlPage
+
+function hexToRgb(hex) {
+    // console.info("hex: " + hex);
+    while (hex.length < 7) { hex = hex.replace("#", "#0"); }
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+} // hexToRgb
+
+function ExtractConfigFromHtmlPages(elementids, modeControlName, ChannelConfig) {
+
+    elementids.forEach(function (elementid) {
+
+        let SelectedElement = modeControlName + ' #' + elementid;
+
+        if ($(SelectedElement).is(':checkbox')) {
+            ChannelConfig[elementid] = $(SelectedElement).prop('checked');
+        }
+        else {
+            ChannelConfig[elementid] = $(SelectedElement).val();
         }
     }); // end for each channel
-
-} // ExtractChannelConfigFromHtmlPage
+}
 
 function ValidateConfigFields(ElementList) {
     // return true if errors were found
@@ -1125,7 +1292,7 @@ function wsConnect() {
             target = document.location.host;
         }
 
-        // target = "192.168.10.184";
+        // target = "192.168.10.175";
         // target = "192.168.10.101";
 
         // Open a new web socket and set the binary type
@@ -1466,6 +1633,7 @@ function ProcessReceivedJsonAdminMessage(data) {
     $('#usedflashsize').text(AdminInfo.usedflashsize);
     $('#realflashsize').text(AdminInfo.realflashsize);
     $('#flashchipid').text(AdminInfo.flashchipid);
+    $('#BoardName').text(AdminInfo.BoardName);
 
     // Hide elements that are not applicable to our architecture
     if (AdminInfo.arch === "ESP8266") {

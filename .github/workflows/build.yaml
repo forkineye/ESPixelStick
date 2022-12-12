@@ -13,6 +13,9 @@ jobs:
           # Wemos D1 Mini ESP8266
           - target: "d1_mini"
             chip: "esp8266"
+          # Wemos D1 Mini PRO ESP8266
+          - target: "d1_mini_pro"
+            chip: "esp8266"
           # ESP01S
           - target: "esp01s"
             chip: "esp8266"

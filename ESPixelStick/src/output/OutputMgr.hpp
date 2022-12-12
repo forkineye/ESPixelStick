@@ -204,6 +204,7 @@ public:
         Rmt,
         Spi,
         Relay,
+        Undefined
     };
 
 private:
@@ -217,10 +218,10 @@ private:
         uint32_t            OutputChannelSize           = 0;
         uint32_t            OutputChannelEndOffset      = 0;
 
-        gpio_num_t          GpioPin                     = gpio_num_t(0);
-        OM_PortType_t       PortType                    = OM_PortType_t::Uart;
-        uart_port_t         PortId                      = uart_port_t(0);
-        e_OutputChannelIds  DriverId                    = e_OutputChannelIds(0);
+        gpio_num_t          GpioPin                     = gpio_num_t(-1);
+        OM_PortType_t       PortType                    = OM_PortType_t::Undefined;
+        uart_port_t         PortId                      = uart_port_t(-1);
+        e_OutputChannelIds  DriverId                    = e_OutputChannelIds(-1);
         c_OutputCommon      *pOutputChannelDriver       = nullptr;
     };
 

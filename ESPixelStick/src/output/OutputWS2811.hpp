@@ -44,7 +44,7 @@ public:
     virtual bool SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
     virtual void GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     virtual void GetStatus (ArduinoJson::JsonObject & jsonStatus);
-            void GetDriverName (String & sDriverName) { sDriverName = String (F ("WS2811")); }
+            void GetDriverName (String & sDriverName) { sDriverName = CN_WS2811; }
 
 protected:
 
