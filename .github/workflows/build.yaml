@@ -1,5 +1,5 @@
 name: ESPixelStick CI
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 env:
   VERSION_BASE: '4.0'
 jobs:
