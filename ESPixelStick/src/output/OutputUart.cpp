@@ -317,6 +317,7 @@ void c_OutputUart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
     debugStatus["FiFoNotEmpty"]                  = FiFoNotEmpty;
     debugStatus["FiFoEmpty"]                     = FiFoEmpty;
     debugStatus["UartFifoLength"]                = getUartFifoLength();
+    debugStatus["TxStopped"]                     = TxStopped;
 
     debugStatus["UART_CONF0"] = String(READ_PERI_REG(UART_CONF0(OutputUartConfig.UartId)), HEX);
     debugStatus["UART_CONF1"] = String(READ_PERI_REG(UART_CONF1(OutputUartConfig.UartId)), HEX);
@@ -527,7 +528,7 @@ void c_OutputUart::InitializeUart()
 #endif
 
 //----------------------------------------------------------------------------
-bool IRAM_ATTR c_OutputUart::MoreDataToSend()
+bool inline IRAM_ATTR c_OutputUart::MoreDataToSend()
 {
     if (nullptr != OutputUartConfig.pPixelDataSource)
     {
@@ -544,7 +545,7 @@ bool IRAM_ATTR c_OutputUart::MoreDataToSend()
 } // MoreDataToSend
 
 //----------------------------------------------------------------------------
-uint32_t IRAM_ATTR c_OutputUart::GetNextIntensityToSend()
+uint32_t inline IRAM_ATTR c_OutputUart::GetNextIntensityToSend()
 {
     if (nullptr != OutputUartConfig.pPixelDataSource)
     {
@@ -576,7 +577,7 @@ void IRAM_ATTR c_OutputUart::StartNewDataFrame()
 } // StartNewDataFrame
 
 //----------------------------------------------------------------------------
-uint32_t IRAM_ATTR c_OutputUart::getUartFifoLength()
+uint32_t inline IRAM_ATTR c_OutputUart::getUartFifoLength()
 {
 #ifdef ARDUINO_ARCH_ESP8266
     return uint32_t((U1S >> USTXC) & 0xff);
@@ -586,7 +587,7 @@ uint32_t IRAM_ATTR c_OutputUart::getUartFifoLength()
 } // getUartFifoLength
 
 //----------------------------------------------------------------------------
-void IRAM_ATTR c_OutputUart::enqueueUartData(uint8_t value)
+void inline IRAM_ATTR c_OutputUart::enqueueUartData(uint8_t value)
 {
 #ifdef USE_UART_DEBUG_COUNTERS
     EnqueueCounter++;
@@ -633,6 +634,15 @@ void IRAM_ATTR c_OutputUart::ISR_UART_Handler()
             // Clear all interrupt flags for this uart
             ClearUartInterrupts();
 
+            if(isrStatus & UART_TX_DONE_INT_ST)
+            {
+#ifdef USE_UART_DEBUG_COUNTERS
+                TxStopped++;
+#endif // def USE_UART_DEBUG_COUNTERS
+                // abort the frame
+                DisableUartInterrupts();
+                break;
+            }
             // Fill the FIFO with new data
             ISR_Handler_SendIntensityData();
 
@@ -983,7 +993,7 @@ void c_OutputUart::CalculateEnableUartInterruptFlags()
     else
     {
         // DEBUG_V();
-        isr_flag = UART_TXFIFO_EMPTY_INT_ENA;
+        isr_flag = UART_TXFIFO_EMPTY_INT_ENA | UART_TX_DONE_INT_ENA;
     }
     // DEBUG_V();
 
