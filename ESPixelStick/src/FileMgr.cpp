@@ -25,9 +25,9 @@
 
 #define HTML_TRANSFER_BLOCK_SIZE    563
 #ifdef ARDUINO_ARCH_ESP32
-#   define NumBlocksToBuffer        21
+#   define NumBlocksToBuffer        7
 #else
-#   define NumBlocksToBuffer         9
+#   define NumBlocksToBuffer        9
 #endif
 
 static const uint32_t FileUploadBufferSize = HTML_TRANSFER_BLOCK_SIZE * NumBlocksToBuffer;
@@ -751,7 +751,7 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
         }
 
         dir.close();
-        
+
         ResponseJsonDoc[F("usedBytes")] = usedBytes;
 
     } while (false);
@@ -1122,6 +1122,25 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
 } // WriteSdFile
 
 //-----------------------------------------------------------------------------
+size_t c_FileMgr::GetSdFileSize (const String& FileName)
+{
+    size_t response = 0;
+    FileId Handle;
+    if(OpenSdFile (FileName,   FileMode::FileRead, Handle))
+    {
+        response = GetSdFileSize(Handle);
+        CloseSdFile(Handle);
+    }
+    else
+    {
+        logcon(String("Could not open '") + FileName + "' to check size.");
+    }
+
+    return response;
+
+} // GetSdFileSize
+
+//-----------------------------------------------------------------------------
 size_t c_FileMgr::GetSdFileSize (const FileId& FileHandle)
 {
     size_t response = 0;
@@ -1140,21 +1159,26 @@ size_t c_FileMgr::GetSdFileSize (const FileId& FileHandle)
 } // GetSdFileSize
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::handleFileUpload (const String & filename,
+void c_FileMgr::handleFileUpload (
+    const String & filename,
     size_t index,
     uint8_t* data,
     size_t len,
-    bool final)
+    bool final,
+    uint32_t totalLen)
 {
     // DEBUG_START;
+
+    // DEBUG_V (String ("filename: ") + filename);
+    // DEBUG_V (String ("   index: ") + String (index));
+    // DEBUG_V (String ("     len: ") + String (len));
+    // DEBUG_V (String ("   final: ") + String (final));
+    // DEBUG_V (String ("   total: ") + String (totalLen));
+
     if (0 == index)
     {
         handleFileUploadNewFile (filename);
     }
-
-    // DEBUG_V (String ("index: ") + String (index));
-    // DEBUG_V (String ("  len: ") + String (len));
-    // DEBUG_V (String ("final: ") + String (final));
 
     if ((0 != len) && (0 != fsUploadFileName.length ()))
     {
@@ -1163,7 +1187,7 @@ void c_FileMgr::handleFileUpload (const String & filename,
             // Write data
             // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
             WriteSdFile (fsUploadFile, data, len);
-            // LOG_PORT.print (String ("Writting bytes: ") + String (index) + '\r');
+            // DEBUG_V (String ("Writting bytes: ") + String (index));
             // LOG_PORT.print (".");
         }
         else
@@ -1172,7 +1196,7 @@ void c_FileMgr::handleFileUpload (const String & filename,
             if (((len + FileUploadBufferOffset) >= FileUploadBufferSize) &&
                 (0 != FileUploadBufferOffset))
             {
-                // write out the buffer
+                // DEBUG_V ("write out the buffer");
                 WriteSdFile (fsUploadFile, FileUploadBuffer, FileUploadBufferOffset);
                 FileUploadBufferOffset = 0;
             }
@@ -1185,7 +1209,7 @@ void c_FileMgr::handleFileUpload (const String & filename,
             }
             else
             {
-                // chunk is bigger than our buffer
+                // DEBUG_V ("chunk is bigger than our buffer");
                 WriteSdFile (fsUploadFile, data, len);
             }
         }
@@ -1193,9 +1217,9 @@ void c_FileMgr::handleFileUpload (const String & filename,
 
     if ((true == final) && (0 != fsUploadFileName.length ()))
     {
-        // save the last bits
         if (FileUploadBufferOffset)
         {
+            // DEBUG_V ("save the last bits");
             WriteSdFile (fsUploadFile, FileUploadBuffer, FileUploadBufferOffset);
             FileUploadBufferOffset = 0;
         }
@@ -1205,6 +1229,10 @@ void c_FileMgr::handleFileUpload (const String & filename,
                 String (F ("' Done (")) + String (uploadTime) + String (F ("s)")));
 
         CloseSdFile (fsUploadFile);
+
+        // DEBUG_V(String("Expected: ") + String(totalLen));
+        // DEBUG_V(String("     Got: ") + String(GetSdFileSize(fsUploadFileName)));
+
         fsUploadFileName = "";
 
         if (nullptr != FileUploadBuffer)

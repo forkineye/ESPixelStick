@@ -55,7 +55,7 @@ public:
     bool    SetConfig (JsonObject& json);
     void    GetStatus (JsonObject& json);
 
-    void    handleFileUpload (const String & filename, size_t index, uint8_t * data, size_t len, bool final);
+    void    handleFileUpload (const String & filename, size_t index, uint8_t * data, size_t len, bool final, uint32_t totalLen);
 
     typedef std::function<void (DynamicJsonDocument& json)> DeserializationHandler;
 
@@ -89,8 +89,9 @@ public:
     size_t WriteSdFile      (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite, size_t StartingPosition);
     void   CloseSdFile      (const FileId & FileHandle);
     void   GetListOfSdFiles (String & Response);
+    size_t GetSdFileSize    (const String & FileName);
     size_t GetSdFileSize    (const FileId & FileHandle);
-    void   GetDriverName (String& Name) { Name = "FileMgr"; }
+    void   GetDriverName    (String& Name) { Name = "FileMgr"; }
 
     // Configuration file params
 #if defined ARDUINO_ARCH_ESP8266
