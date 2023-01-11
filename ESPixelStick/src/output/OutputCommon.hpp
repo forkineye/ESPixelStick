@@ -76,11 +76,33 @@ protected:
 
     inline bool canRefresh ()
     {
-        return (micros () - FrameStartTimeInMicroSec) >= FrameMinDurationInMicroSec;
+        bool response = false;
+        uint32_t Now = micros ();
+
+        // did we wrap around?
+        if(FrameEndTimeInMicroSec < FrameStartTimeInMicroSec)
+        {
+            // timer wrapped around
+            if((Now < FrameStartTimeInMicroSec) && (Now > FrameEndTimeInMicroSec))
+            {
+                response = true;
+            }
+        }
+        else
+        {
+            // timer did not wrap around
+            if(Now > FrameEndTimeInMicroSec)
+            {
+                response = true;
+            }
+        }
+
+        return response;
     }
 
 private:
     uint32_t    FrameRefreshTimeInMicroSec = 0;
     uint32_t    FrameStartTimeInMicroSec   = 0;
+    uint32_t    FrameEndTimeInMicroSec     = 0;
 
 }; // c_OutputCommon
