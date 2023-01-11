@@ -253,19 +253,7 @@ void c_WebMgr::init ()
 
         	[this](AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final)
             {
-                // DEBUG_V ("Got process FIle request");
-                // DEBUG_V (String ("Got process File request: name: ")  + filename);
-                // DEBUG_V (String ("Got process File request: index: ") + String (index));
-                // DEBUG_V (String ("Got process File request: len:   ") + String (len));
-                // DEBUG_V (String ("Got process File request: final: ") + String (final));
-                if (true == FileMgr.SdCardIsInstalled())
-                {
-                	this->handleFileUpload (request, filename, index, data, len, final); // Receive and save the file
-                }
-                else
-                {
-                	request->send (404, CN_textSLASHplain, "Page Not found");
-                }
+                FPPDiscovery.ProcessFile (request, filename, index, data, len, final);
             },
 
         	[this](AsyncWebServerRequest* request, uint8_t* data, uint32_t len, uint32_t index, uint32_t total)
@@ -329,21 +317,6 @@ void c_WebMgr::init ()
     }
     // DEBUG_END;
 }
-
-//-----------------------------------------------------------------------------
-void c_WebMgr::handleFileUpload (AsyncWebServerRequest* request,
-                                 String filename,
-                                 uint32_t index,
-                                 uint8_t * data,
-                                 uint32_t len,
-                                 bool final)
-{
-    // DEBUG_START;
-
-    FileMgr.handleFileUpload (filename, index, data, len, final);
-
-    // DEBUG_END;
-} // handleFileUpload
 
 //-----------------------------------------------------------------------------
 void c_WebMgr::RegisterAlexaCallback (DeviceCallbackFunction cb)

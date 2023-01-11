@@ -48,7 +48,6 @@ public:
     void RegisterAlexaCallback (DeviceCallbackFunction cb);
     bool IsAlexaCallbackValid  () { return (nullptr != pAlexaCallback); }
     void FirmwareUpload        (AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final);
-    void handleFileUpload      (AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final);
     void NetworkStateChanged   (bool NewNetworkState);
     void GetDriverName         (String & Name) { Name = "WebMgr"; }
 
