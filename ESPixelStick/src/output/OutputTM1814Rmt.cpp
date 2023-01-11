@@ -113,7 +113,6 @@ bool c_OutputTM1814Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
     Rmt.set_pin (DataPin);
-    Rmt.SetMinFrameDurationInUs (FrameMinDurationInMicroSec);
 
     // DEBUG_END;
     return response;
@@ -126,7 +125,6 @@ void c_OutputTM1814Rmt::SetOutputBufferSize (uint32_t NumChannelsAvailable)
     // DEBUG_START;
 
     c_OutputTM1814::SetOutputBufferSize (NumChannelsAvailable);
-    Rmt.SetMinFrameDurationInUs (FrameMinDurationInMicroSec);
 
     // DEBUG_END;
 
