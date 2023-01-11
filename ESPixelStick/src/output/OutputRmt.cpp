@@ -509,7 +509,9 @@ bool c_OutputRmt::Render ()
             break;
         }
 
-    digitalWrite(DEBUG_GPIO, LOW);
+#ifdef DEBUG_GPIO
+        digitalWrite(DEBUG_GPIO, LOW);
+#endif // def DEBUG_GPIO
 
 #ifdef USE_RMT_DEBUG_COUNTERS
         if (MoreDataToSend())
@@ -541,7 +543,9 @@ bool c_OutputRmt::Render ()
         RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 1;
         // _ DEBUG_V("Transmit Started");
         Response = true;
-    digitalWrite(DEBUG_GPIO, HIGH);
+#ifdef DEBUG_GPIO
+        digitalWrite(DEBUG_GPIO, HIGH);
+#endif // def DEBUG_GPIO
 
     } while (false);
 
