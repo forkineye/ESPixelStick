@@ -813,10 +813,10 @@ void c_FPPDiscovery::ProcessBody (
                 // DEBUG_V ("");
             }
 
-            DEBUG_V (String ("         name: ") + UploadFileName);
+            // DEBUG_V (String ("         name: ") + UploadFileName);
             // DEBUG_V (String ("        index: ") + String (index));
             // DEBUG_V (String ("          len: ") + String (len));
-            DEBUG_V (String ("        total: ") + String (total));
+            // DEBUG_V (String ("        total: ") + String (total));
 
         } // end 0 == index
 
