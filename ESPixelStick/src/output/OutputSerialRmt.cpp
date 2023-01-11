@@ -84,7 +84,6 @@ bool c_OutputSerialRmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     SetUpRmtBitTimes();
 
     Rmt.set_pin (DataPin);
-    Rmt.SetMinFrameDurationInUs(FrameMinDurationInMicroSec);
 
     // DEBUG_END;
     return response;
@@ -178,7 +177,6 @@ void c_OutputSerialRmt::SetOutputBufferSize(uint32_t NumChannelsAvailable)
     // DEBUG_START;
 
     c_OutputSerial::SetOutputBufferSize (NumChannelsAvailable);
-    Rmt.SetMinFrameDurationInUs (FrameMinDurationInMicroSec);
 
     // DEBUG_END;
 
@@ -200,11 +198,28 @@ void c_OutputSerialRmt::Render ()
 {
     // DEBUG_START;
 
-    if (Rmt.Render ())
+    do // Once
     {
-        // DEBUG_V("Report New Frame");
-        ReportNewFrame();
-    }
+        if (gpio_num_t(-1) == DataPin)
+        {
+            break;
+        }
+
+        if (!canRefresh())
+        {
+            break;
+        }
+
+        // DEBUG_V("get the next frame started");
+
+        if (Rmt.Render ())
+        {
+            ReportNewFrame ();
+        }
+
+        // DEBUG_V();
+
+    } while (false);
 
     // DEBUG_END;
 

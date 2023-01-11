@@ -148,13 +148,30 @@ void c_OutputTM1814Rmt::Render ()
 {
     // DEBUG_START;
 
-    if (Rmt.Render ())
+    do // Once
     {
-        ReportNewFrame ();
-    }
+        if (gpio_num_t(-1) == DataPin)
+        {
+            break;
+        }
+
+        if (!canRefresh())
+        {
+            break;
+        }
+
+        // DEBUG_V("get the next frame started");
+
+        if (Rmt.Render ())
+        {
+            ReportNewFrame ();
+        }
+
+        // DEBUG_V();
+
+    } while (false);
 
     // DEBUG_END;
-
 } // Render
 
 #endif // defined (SUPPORT_OutputType_TM1814) && defined (ARDUINO_ARCH_ESP32)

@@ -132,16 +132,36 @@ void c_OutputTLS3001Rmt::Render ()
 {
     // DEBUG_START;
 
-    if (Rmt.NoFrameInProgress ())
+    do // Once
     {
-        pCurrentFsmState->Poll (this);
+        if (gpio_num_t(-1) == DataPin)
+        {
+            break;
+        }
 
-        // output the frame
+        if (!canRefresh())
+        {
+            break;
+        }
+
+        if (Rmt.NoFrameInProgress ())
+        {
+            pCurrentFsmState->Poll (this);
+
+        }
+
+        // DEBUG_V("get the next frame started");
+
         if (Rmt.Render ())
         {
             ReportNewFrame ();
         }
-    }
+
+        // DEBUG_V();
+
+    } while (false);
+
+    // DEBUG_END;    }
 
     // DEBUG_END;
 

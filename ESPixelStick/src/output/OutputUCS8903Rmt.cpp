@@ -115,7 +115,6 @@ bool c_OutputUCS8903Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
     Rmt.set_pin (DataPin);
-    Rmt.SetMinFrameDurationInUs (FrameMinDurationInMicroSec);
 
     // DEBUG_END;
     return response;
@@ -128,7 +127,6 @@ void c_OutputUCS8903Rmt::SetOutputBufferSize (uint32_t NumChannelsAvailable)
     // DEBUG_START;
 
     c_OutputUCS8903::SetOutputBufferSize (NumChannelsAvailable);
-    Rmt.SetMinFrameDurationInUs (FrameMinDurationInMicroSec);
 
     // DEBUG_END;
 
@@ -147,13 +145,30 @@ void c_OutputUCS8903Rmt::Render ()
 {
     // DEBUG_START;
 
-    if (Rmt.Render ())
+    do // Once
     {
-        ReportNewFrame ();
-    }
+        if (gpio_num_t(-1) == DataPin)
+        {
+            break;
+        }
+
+        if (!canRefresh())
+        {
+            break;
+        }
+
+        // DEBUG_V("get the next frame started");
+
+        if (Rmt.Render ())
+        {
+            ReportNewFrame ();
+        }
+
+        // DEBUG_V();
+
+    } while (false);
 
     // DEBUG_END;
-
 } // Render
 
 #endif // defined(SUPPORT_OutputType_UCS8903) && defined(ARDUINO_ARCH_ESP32)
