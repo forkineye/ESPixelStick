@@ -126,12 +126,14 @@ static void IRAM_ATTR timer_intr_handler()
 } // timer_intr_handler
 #endif // def ARDUINO_ARCH_ESP8266
 
+// #define StartPin gpio_num_t::GPIO_NUM_4
 //----------------------------------------------------------------------------
 c_OutputUart::c_OutputUart()
 {
     // DEBUG_START;
 
     memset((void *)&Intensity2Uart[0],   0x00, sizeof(Intensity2Uart));
+
     // DEBUG_END;
 } // c_OutputUart
 
@@ -209,8 +211,6 @@ void c_OutputUart::Begin (OutputUartConfig_t & config )
                 CurrentTranslation++;
             }
         }
-
-        LastFrameStartTime = millis();
 
         HasBeenInitialized = true;
     } while (false);
@@ -643,8 +643,11 @@ void IRAM_ATTR c_OutputUart::ISR_UART_Handler()
                 DisableUartInterrupts();
                 break;
             }
+    // digitalWrite(DEBUG_GPIO, LOW);
+
             // Fill the FIFO with new data
             ISR_Handler_SendIntensityData();
+    // digitalWrite(DEBUG_GPIO, HIGH);
 
             if (!MoreDataToSend())
             {
@@ -753,7 +756,9 @@ void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
 
         NumAvailableIntensitySlotsToFill--;
 
+    // digitalWrite(DEBUG_GPIO, LOW);
         uint32_t IntensityValue = GetNextIntensityToSend();
+    // digitalWrite(DEBUG_GPIO, HIGH);
         if (OutputUartConfig.TranslateIntensityData == TranslateIntensityData_t::NoTranslation)
         {
             for (uint32_t count = 0; count < NumUartSlotsPerIntensityValue; count++)
@@ -950,12 +955,6 @@ void c_OutputUart::set_pin()
 #endif // def ARDUINO_ARCH_ESP32
     // DEBUG_END;
 } // set_pin
-
-//----------------------------------------------------------------------------
-void c_OutputUart::SetMinFrameDurationInUs(uint32_t value)
-{
-    FrameMinDurationInMicroSec = value;
-} // SetMinFrameDurationInUs
 
 //----------------------------------------------------------------------------
 inline void IRAM_ATTR c_OutputUart::ClearUartInterrupts()

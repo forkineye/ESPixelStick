@@ -105,7 +105,6 @@ public:
     void GetDriverName           (String &sDriverName) { sDriverName = CN_OutputUart; }
     void GetStatus               (ArduinoJson::JsonObject &jsonStatus);
     void PauseOutput             (bool State);
-    void SetMinFrameDurationInUs (uint32_t value);
     void StartNewFrame           ();
 
     void IRAM_ATTR ISR_UART_Handler();
@@ -129,8 +128,6 @@ private:
 
     uint8_t Intensity2Uart[UartDataBitTranslationId_t::Uart_LIST_END];
     bool            OutputIsPaused                  = false;
-    uint32_t        LastFrameStartTime              = 0;
-    uint32_t        FrameMinDurationInMicroSec      = 25000;
     uint32_t        TxIntensityDataStartingMask     = 0x80;
     bool            HasBeenInitialized              = false;
     uint32_t        NumUartSlotsPerIntensityValue   = 1;
