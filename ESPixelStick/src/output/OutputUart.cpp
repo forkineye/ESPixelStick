@@ -633,7 +633,7 @@ void IRAM_ATTR c_OutputUart::ISR_UART_Handler()
 
             // Clear all interrupt flags for this uart
             ClearUartInterrupts();
-
+#ifdef ARDUINO_ARCH_ESP32
             if(isrStatus & UART_TX_DONE_INT_ST)
             {
 #ifdef USE_UART_DEBUG_COUNTERS
@@ -643,6 +643,7 @@ void IRAM_ATTR c_OutputUart::ISR_UART_Handler()
                 DisableUartInterrupts();
                 break;
             }
+#endif // def ARDUINO_ARCH_ESP32
     // digitalWrite(DEBUG_GPIO, LOW);
 
             // Fill the FIFO with new data
@@ -992,7 +993,11 @@ void c_OutputUart::CalculateEnableUartInterruptFlags()
     else
     {
         // DEBUG_V();
+#ifdef ARDUINO_ARCH_ESP32
         isr_flag = UART_TXFIFO_EMPTY_INT_ENA | UART_TX_DONE_INT_ENA;
+#else
+        isr_flag = UART_TXFIFO_EMPTY_INT_ENA;
+#endif // def ARDUINO_ARCH_ESP32
     }
     // DEBUG_V();
 
