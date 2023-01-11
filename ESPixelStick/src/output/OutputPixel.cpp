@@ -360,7 +360,7 @@ void IRAM_ATTR c_OutputPixel::SetStartingSendPixelState()
             FrameStateFuncPtr = &c_OutputPixel::PixelSendIntensity;
         }
 #else
-        FrameStateFuncPtr = &c_OutputPixel::fPixelSendxIntensity;
+        FrameStateFuncPtr = &c_OutputPixel::PixelSendIntensity;
 #endif // def SUPPORT_OutputType_GECE
     }
 
@@ -514,7 +514,7 @@ uint32_t IRAM_ATTR c_OutputPixel::PixelSendPrependIntensity()
                 FrameStateFuncPtr = &c_OutputPixel::PixelSendIntensity;
             }
 #else
-            FrameStateFuncPtr = &c_OutputPixel::fPixelSendxIntensity;
+            FrameStateFuncPtr = &c_OutputPixel::PixelSendIntensity;
 #endif // def SUPPORT_OutputType_GECE
         }
 
