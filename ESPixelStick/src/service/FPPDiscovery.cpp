@@ -686,7 +686,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
 
         if (path != F ("uploadFile"))
         {
-            // DEBUG_V ("");
+            // DEBUG_V ("Not a valid path");
             request->send (404);
             break;
         }
@@ -714,58 +714,115 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
 }
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::ProcessFile (AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final)
+void c_FPPDiscovery::ProcessFile (
+    AsyncWebServerRequest* request,
+    String filename,
+    uint32_t index,
+    uint8_t* data,
+    uint32_t len,
+    bool final,
+    uint32_t ContentLength)
 {
     // DEBUG_START;
-    //LOG_PORT.printf_P( PSTR("In ProcessFile: %s    idx: %d    RangeLength: %d    final: %d\n)",FileName.c_str(), index, RangeLength, final? 1 : 0);
 
-    //printReq(request, false);
-    request->send (404);
+    printReq(request, false);
+
+    do // once
+    {
+        if (false == FileMgr.SdCardIsInstalled())
+        {
+            request->send (404);
+            break;
+        }
+
+        uint32_t ContentLength = 0;
+        if(request->hasHeader(F("Content-Length")))
+        {
+            ContentLength = atoi (request->getHeader(F("Content-Length"))->value().c_str());
+        }
+
+        // DEBUG_V (String ("         name: ") + filename);
+        // DEBUG_V (String ("        index: ") + String (index));
+        // DEBUG_V (String ("          len: ") + String (len));
+        // DEBUG_V (String ("        final: ") + String (final));
+        // DEBUG_V (String ("ContentLength: ") + String (ContentLength));
+
+        if(!inFileUpload)
+        {
+            // DEBUG_V();
+            StopPlaying();
+            inFileUpload = true;
+            UploadFileName = filename;
+        }
+
+        // DEBUG_V();
+        FileMgr.handleFileUpload (UploadFileName, index, data, len, final, ContentLength);
+
+        // DEBUG_V();
+        if (final)
+        {
+            inFileUpload = false;
+            UploadFileName = "";
+        }
+
+    } while (false);
+
     // DEBUG_END;
 
 } // ProcessFile
 
 //-----------------------------------------------------------------------------
-// the blocks come in very small (~500 bytes) we'll accumulate in a buffer
-// so the writes out to SD can be more in line with what the SD file system can handle
-// #define BUFFER_LEN 8192
-void c_FPPDiscovery::ProcessBody (AsyncWebServerRequest* request, uint8_t* data, uint32_t len, uint32_t index, uint32_t total)
+void c_FPPDiscovery::ProcessBody (
+    AsyncWebServerRequest* request,
+    uint8_t* data,
+    uint32_t len,
+    uint32_t index,
+    uint32_t total)
 {
     // DEBUG_START;
     printReq (request, false);
 
-    if (!index)
-    {
-        // LOG_PORT.printf("len: %u / index: %u / total: %u\n", len, index, total);
-        printReq (request, false);
+    // DEBUG_V(String("  len: ") + String(len));
+    // DEBUG_V(String("index: ") + String(index));
+    // DEBUG_V(String("total: ") + String(total));
 
-        String path = request->getParam (ulrPath)->value ();
-        if (path == F ("uploadFile"))
+    do // once
+    {
+        // is this the first packet?
+        if (0 == index)
         {
-            if (!request->hasParam (CN_filename))
+            // DEBUG_V();
+
+            if(!request->hasParam(ulrPath))
             {
-                // DEBUG_V ("Missing Filename Parameter");
+                // DEBUG_V("Missing URL Path param");
+                request->send (404);
+                break;
             }
-            else
+
+            String path = request->getParam (ulrPath)->value ();
+            if (path == F ("uploadFile"))
             {
-                StopPlaying ();
-                inFileUpload = true;
-                // DEBUG_V (String ("request: ") + String (uint32_t (request), HEX));
+                if (!request->hasParam (CN_filename))
+                {
+                    // DEBUG_V ("Missing Filename Parameter");
+                    request->send (404);
+                    break;
+                }
                 UploadFileName = String (request->getParam (CN_filename)->value ());
                 // DEBUG_V ("");
             }
-        }
-    }
 
-    if (inFileUpload)
-    {
-        FileMgr.handleFileUpload (UploadFileName, index, data, len, total <= (index + len));
+            DEBUG_V (String ("         name: ") + UploadFileName);
+            // DEBUG_V (String ("        index: ") + String (index));
+            // DEBUG_V (String ("          len: ") + String (len));
+            DEBUG_V (String ("        total: ") + String (total));
 
-        if (index + len == total)
-        {
-            inFileUpload = false;
-        }
-    }
+        } // end 0 == index
+
+        ProcessFile (request, UploadFileName, index, data, len, (total <= (index + len)), 0);
+
+    } while (false);
 
     // DEBUG_END;
 } // ProcessBody
