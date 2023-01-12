@@ -126,12 +126,14 @@ static void IRAM_ATTR timer_intr_handler()
 } // timer_intr_handler
 #endif // def ARDUINO_ARCH_ESP8266
 
+// #define StartPin gpio_num_t::GPIO_NUM_4
 //----------------------------------------------------------------------------
 c_OutputUart::c_OutputUart()
 {
     // DEBUG_START;
 
     memset((void *)&Intensity2Uart[0],   0x00, sizeof(Intensity2Uart));
+
     // DEBUG_END;
 } // c_OutputUart
 
@@ -209,8 +211,6 @@ void c_OutputUart::Begin (OutputUartConfig_t & config )
                 CurrentTranslation++;
             }
         }
-
-        LastFrameStartTime = millis();
 
         HasBeenInitialized = true;
     } while (false);
@@ -317,6 +317,7 @@ void c_OutputUart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
     debugStatus["FiFoNotEmpty"]                  = FiFoNotEmpty;
     debugStatus["FiFoEmpty"]                     = FiFoEmpty;
     debugStatus["UartFifoLength"]                = getUartFifoLength();
+    debugStatus["TxStopped"]                     = TxStopped;
 
     debugStatus["UART_CONF0"] = String(READ_PERI_REG(UART_CONF0(OutputUartConfig.UartId)), HEX);
     debugStatus["UART_CONF1"] = String(READ_PERI_REG(UART_CONF1(OutputUartConfig.UartId)), HEX);
@@ -527,7 +528,7 @@ void c_OutputUart::InitializeUart()
 #endif
 
 //----------------------------------------------------------------------------
-bool IRAM_ATTR c_OutputUart::MoreDataToSend()
+bool inline IRAM_ATTR c_OutputUart::MoreDataToSend()
 {
     if (nullptr != OutputUartConfig.pPixelDataSource)
     {
@@ -544,7 +545,7 @@ bool IRAM_ATTR c_OutputUart::MoreDataToSend()
 } // MoreDataToSend
 
 //----------------------------------------------------------------------------
-uint32_t IRAM_ATTR c_OutputUart::GetNextIntensityToSend()
+uint32_t inline IRAM_ATTR c_OutputUart::GetNextIntensityToSend()
 {
     if (nullptr != OutputUartConfig.pPixelDataSource)
     {
@@ -576,7 +577,7 @@ void IRAM_ATTR c_OutputUart::StartNewDataFrame()
 } // StartNewDataFrame
 
 //----------------------------------------------------------------------------
-uint32_t IRAM_ATTR c_OutputUart::getUartFifoLength()
+uint32_t inline IRAM_ATTR c_OutputUart::getUartFifoLength()
 {
 #ifdef ARDUINO_ARCH_ESP8266
     return uint32_t((U1S >> USTXC) & 0xff);
@@ -586,7 +587,7 @@ uint32_t IRAM_ATTR c_OutputUart::getUartFifoLength()
 } // getUartFifoLength
 
 //----------------------------------------------------------------------------
-void IRAM_ATTR c_OutputUart::enqueueUartData(uint8_t value)
+void inline IRAM_ATTR c_OutputUart::enqueueUartData(uint8_t value)
 {
 #ifdef USE_UART_DEBUG_COUNTERS
     EnqueueCounter++;
@@ -632,9 +633,22 @@ void IRAM_ATTR c_OutputUart::ISR_UART_Handler()
 
             // Clear all interrupt flags for this uart
             ClearUartInterrupts();
+#ifdef ARDUINO_ARCH_ESP32
+            if(isrStatus & UART_TX_DONE_INT_ST)
+            {
+#ifdef USE_UART_DEBUG_COUNTERS
+                TxStopped++;
+#endif // def USE_UART_DEBUG_COUNTERS
+                // abort the frame
+                DisableUartInterrupts();
+                break;
+            }
+#endif // def ARDUINO_ARCH_ESP32
+    // digitalWrite(DEBUG_GPIO, LOW);
 
             // Fill the FIFO with new data
             ISR_Handler_SendIntensityData();
+    // digitalWrite(DEBUG_GPIO, HIGH);
 
             if (!MoreDataToSend())
             {
@@ -743,7 +757,9 @@ void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
 
         NumAvailableIntensitySlotsToFill--;
 
+    // digitalWrite(DEBUG_GPIO, LOW);
         uint32_t IntensityValue = GetNextIntensityToSend();
+    // digitalWrite(DEBUG_GPIO, HIGH);
         if (OutputUartConfig.TranslateIntensityData == TranslateIntensityData_t::NoTranslation)
         {
             for (uint32_t count = 0; count < NumUartSlotsPerIntensityValue; count++)
@@ -942,12 +958,6 @@ void c_OutputUart::set_pin()
 } // set_pin
 
 //----------------------------------------------------------------------------
-void c_OutputUart::SetMinFrameDurationInUs(uint32_t value)
-{
-    FrameMinDurationInMicroSec = value;
-} // SetMinFrameDurationInUs
-
-//----------------------------------------------------------------------------
 inline void IRAM_ATTR c_OutputUart::ClearUartInterrupts()
 {
     WRITE_PERI_REG(UART_INT_CLR(OutputUartConfig.UartId), UART_INTR_MASK);
@@ -983,7 +993,11 @@ void c_OutputUart::CalculateEnableUartInterruptFlags()
     else
     {
         // DEBUG_V();
+#ifdef ARDUINO_ARCH_ESP32
+        isr_flag = UART_TXFIFO_EMPTY_INT_ENA | UART_TX_DONE_INT_ENA;
+#else
         isr_flag = UART_TXFIFO_EMPTY_INT_ENA;
+#endif // def ARDUINO_ARCH_ESP32
     }
     // DEBUG_V();
 

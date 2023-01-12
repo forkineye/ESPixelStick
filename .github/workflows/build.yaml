@@ -1,5 +1,5 @@
 name: ESPixelStick CI
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 env:
   VERSION_BASE: '4.0'
 jobs:
@@ -48,6 +48,9 @@ jobs:
             chip: "esp32"
           # QuinLed QUAD AE+
           - target: "esp32_quinled_quad_ae_plus"
+            chip: "esp32"
+          # QuinLed QUAD AE+ 8
+          - target: "esp32_quinled_quad_ae_plus_8"
             chip: "esp32"
           # QuinLed QUAD Eth
           - target: "esp32_quinled_quad_eth"

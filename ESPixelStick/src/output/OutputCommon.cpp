@@ -82,9 +82,10 @@ void c_OutputCommon::ReportNewFrame ()
     // DEBUG_START;
 
     uint32_t Now = micros ();
-    FrameRefreshTimeInMicroSec = Now - FrameStartTimeInMicroSec;
-    FrameStartTimeInMicroSec = Now;
 
+    FrameRefreshTimeInMicroSec  = Now - FrameStartTimeInMicroSec;
+    FrameStartTimeInMicroSec    = Now;
+    FrameEndTimeInMicroSec      = FrameStartTimeInMicroSec + FrameMinDurationInMicroSec;
     FrameCount++;
 
     // DEBUG_END;

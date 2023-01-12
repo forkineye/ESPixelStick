@@ -111,7 +111,7 @@ public:
     void ProcessFPPJson   (AsyncWebServerRequest* request);
     void ProcessGET       (AsyncWebServerRequest* request);
     void ProcessPOST      (AsyncWebServerRequest* request);
-    void ProcessFile      (AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final);
+    void ProcessFile      (AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final, uint32_t contentLength = 0);
     void ProcessBody      (AsyncWebServerRequest* request, uint8_t* data, uint32_t len, uint32_t index, uint32_t total);
     void ReadNextFrame    ();
     void sendPingPacket   (IPAddress destination = IPAddress(255, 255, 255, 255));

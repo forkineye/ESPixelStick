@@ -102,10 +102,10 @@ private:
 #define NUM_RMT_SLOTS (sizeof(RMTMEM.chan[0].data32) / sizeof(RMTMEM.chan[0].data32[0]))
 #define MIN_FRAME_TIME_MS 25
 
-    volatile uint32_t     NumAvailableRmtSlotsToFill  = NUM_RMT_SLOTS;
-    const uint32_t        NumRmtSlotsPerInterrupt     = NUM_RMT_SLOTS * 0.75;
-    uint32_t            LastFrameStartTime          = 0;
-    uint32_t            FrameMinDurationInMicroSec  = 1000;
+    volatile uint32_t   NumAvailableRmtSlotsToFill  = NUM_RMT_SLOTS;
+    const uint32_t      NumRmtSlotsPerInterrupt     = NUM_RMT_SLOTS * 0.75;
+//    uint32_t            LastFrameStartTime          = 0;
+//     uint32_t            FrameMinDurationInMicroSec  = 1000;
     uint32_t            TxIntensityDataStartingMask = 0x80;
     RmtDataBitIdType_t  InterIntensityValueId       = RMT_INVALID_VALUE;
 
@@ -131,7 +131,6 @@ public:
     void GetStatus                              (ArduinoJson::JsonObject& jsonStatus);
     void set_pin                                (gpio_num_t _DataPin) { OutputRmtConfig.DataPin = _DataPin; rmt_set_gpio (OutputRmtConfig.RmtChannelId, rmt_mode_t::RMT_MODE_TX, OutputRmtConfig.DataPin, false); }
     void PauseOutput                            (bool State);
-    void SetMinFrameDurationInUs                (uint32_t value) { FrameMinDurationInMicroSec = value; }
     inline uint32_t IRAM_ATTR GetRmtIntMask     ()               { return ((RMT_INT_TX_END_BIT | RMT_INT_ERROR_BIT | RMT_INT_ERROR_BIT | RMT_INT_THR_EVNT_BIT)); }
     void GetDriverName                          (String &value)  { value = CN_RMT; }
 

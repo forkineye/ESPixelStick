@@ -194,7 +194,7 @@ public:
 #       define OM_MAX_CONFIG_SIZE   ((uint32_t)(20 * 1024))
 #   else
 #       define OM_MAX_NUM_CHANNELS  (3000 * 3)
-#       define OM_MAX_CONFIG_SIZE   ((uint32_t)(11 * 1024))
+#       define OM_MAX_CONFIG_SIZE   ((uint32_t)(13 * 1024))
 #   endif // !def BOARD_HAS_PSRAM
 #endif // !def ARDUINO_ARCH_ESP32
 

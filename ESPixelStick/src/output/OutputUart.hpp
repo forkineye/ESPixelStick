@@ -105,7 +105,6 @@ public:
     void GetDriverName           (String &sDriverName) { sDriverName = CN_OutputUart; }
     void GetStatus               (ArduinoJson::JsonObject &jsonStatus);
     void PauseOutput             (bool State);
-    void SetMinFrameDurationInUs (uint32_t value);
     void StartNewFrame           ();
 
     void IRAM_ATTR ISR_UART_Handler();
@@ -129,8 +128,6 @@ private:
 
     uint8_t Intensity2Uart[UartDataBitTranslationId_t::Uart_LIST_END];
     bool            OutputIsPaused                  = false;
-    uint32_t        LastFrameStartTime              = 0;
-    uint32_t        FrameMinDurationInMicroSec      = 25000;
     uint32_t        TxIntensityDataStartingMask     = 0x80;
     bool            HasBeenInitialized              = false;
     uint32_t        NumUartSlotsPerIntensityValue   = 1;
@@ -140,15 +137,15 @@ private:
     intr_handle_t   IsrHandle                       = nullptr;
 #endif // defined(ARDUINO_ARCH_ESP32)
 
-    bool     IRAM_ATTR      MoreDataToSend();
-    uint32_t IRAM_ATTR      GetNextIntensityToSend();
     void     IRAM_ATTR      StartNewDataFrame();
-    uint32_t IRAM_ATTR      getUartFifoLength();
-    void     IRAM_ATTR      enqueueUartData(uint8_t value);
     void                    CalculateEnableUartInterruptFlags();
-    inline void IRAM_ATTR   EnableUartInterrupts();
-    inline void IRAM_ATTR   ClearUartInterrupts();
-    inline void IRAM_ATTR   DisableUartInterrupts();
+    inline uint32_t IRAM_ATTR   getUartFifoLength();
+    inline bool     IRAM_ATTR   MoreDataToSend();
+    inline uint32_t IRAM_ATTR   GetNextIntensityToSend();
+    inline void     IRAM_ATTR   enqueueUartData(uint8_t value);
+    inline void     IRAM_ATTR   EnableUartInterrupts();
+    inline void     IRAM_ATTR   ClearUartInterrupts();
+    inline void     IRAM_ATTR   DisableUartInterrupts();
 
 // #define USE_UART_DEBUG_COUNTERS
 #ifdef USE_UART_DEBUG_COUNTERS
@@ -177,6 +174,7 @@ private:
     uint32_t EnqueueCounter = 0;
     uint32_t FiFoNotEmpty = 0;
     uint32_t FiFoEmpty = 0;
+    uint32_t TxStopped = 0;
 
 #endif // def USE_UART_DEBUG_COUNTERS
 

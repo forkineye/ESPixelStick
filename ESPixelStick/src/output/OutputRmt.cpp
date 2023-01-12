@@ -169,9 +169,6 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
             }
         }
 
-        // create a delay before starting to send data
-        LastFrameStartTime = millis();
-
         // DEBUG_V (String ("                Intensity2Rmt[0]: 0x") + String (uint32_t (Intensity2Rmt[0].val), HEX));
         // DEBUG_V (String ("                Intensity2Rmt[1]: 0x") + String (uint32_t (Intensity2Rmt[1].val), HEX));
 
@@ -512,30 +509,9 @@ bool c_OutputRmt::Render ()
             break;
         }
 
-        uint32_t Now = millis();
-        uint32_t FrameDeltaTimeMicroSeconds = (Now - LastFrameStartTime) * 1000;
-        // _ DEBUG_V(String("FrameDeltaTimeMicroSeconds: ") + String(FrameDeltaTimeMicroSeconds));
-        // _ DEBUG_V(String("FrameMinDurationInMicroSec: ") + String(FrameMinDurationInMicroSec));
-
-        if (!NoFrameInProgress ())
-        {
-            // _ DEBUG_V("NoFrameInProgress");
-            if ((FrameDeltaTimeMicroSeconds) > (FrameMinDurationInMicroSec * 3))
-            {
-                // DEBUG_V("Frame is stuck");
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        if (FrameDeltaTimeMicroSeconds < FrameMinDurationInMicroSec)
-        {
-            // _ DEBUG_V("keep waiting");
-            break;
-        }
-        LastFrameStartTime = Now;
+#ifdef DEBUG_GPIO
+        digitalWrite(DEBUG_GPIO, LOW);
+#endif // def DEBUG_GPIO
 
 #ifdef USE_RMT_DEBUG_COUNTERS
         if (MoreDataToSend())
@@ -567,6 +543,9 @@ bool c_OutputRmt::Render ()
         RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 1;
         // _ DEBUG_V("Transmit Started");
         Response = true;
+#ifdef DEBUG_GPIO
+        digitalWrite(DEBUG_GPIO, HIGH);
+#endif // def DEBUG_GPIO
 
     } while (false);
 
