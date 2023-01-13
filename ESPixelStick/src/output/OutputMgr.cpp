@@ -1203,15 +1203,17 @@ void c_OutputMgr::SetSerialUart()
 
     bool NeedToTurnOffSerial = false;
 
+    // DEBUG_V(String("ConsoleTxGpio: ") + String(ConsoleTxGpio));
+    // DEBUG_V(String("ConsoleRxGpio: ") + String(ConsoleRxGpio));
+
     for (auto & CurrentOutputChannelDriver : OutputChannelDrivers)
     {
         // DEBUG_V();
-        if(e_OutputType::OutputType_Disabled != CurrentOutputChannelDriver.pOutputChannelDriver->GetOutputType() &&
-        (ConsoleTxGpio == CurrentOutputChannelDriver.pOutputChannelDriver->GetOutputGpio() ||
-        ConsoleRxGpio == CurrentOutputChannelDriver.pOutputChannelDriver->GetOutputGpio()))
+        if(e_OutputType::OutputType_Disabled != CurrentOutputChannelDriver.pOutputChannelDriver->GetOutputType())
         {
-            // DEBUG_V("Found port that needs Serial turned off");
-            NeedToTurnOffSerial = true;
+            // DEBUG_V (String("Output GPIO: ") + String(CurrentOutputChannelDriver.pOutputChannelDriver->GetOutputGpio()));
+
+            NeedToTurnOffSerial |= CurrentOutputChannelDriver.pOutputChannelDriver->ValidateGpio(ConsoleTxGpio, ConsoleRxGpio);
         }
     } // end for each channel
 
@@ -1219,7 +1221,7 @@ void c_OutputMgr::SetSerialUart()
     // DEBUG_V(String(" SerialUartIsActive: ") + String(SerialUartIsActive));
     if(NeedToTurnOffSerial && SerialUartIsActive)
     {
-        // DEBUG_V("Turn OFF Serial");
+        logcon ("Found an Output that uses a Serial console GPIO. Turning off Serial console output.");
         Serial.end();
         SerialUartIsActive = false;
     }

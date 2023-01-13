@@ -65,9 +65,10 @@ public:
     void        GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     void        Render ();                                        ///< Call from loop(),  renders output data
     void        GetDriverName (String& sDriverName);
-    void        GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
+    void        GetStatus (ArduinoJson::JsonObject & jsonStatus);
     uint32_t    GetNumOutputBufferBytesNeeded () { return Num_Channels; }
     uint32_t    GetNumOutputBufferChannelsServiced () { return Num_Channels; }
+    bool        ValidateGpio (gpio_num_t ConsoleTxGpio, gpio_num_t ConsoleRxGpio);
 
 private:
 #   define OM_RELAY_CHANNEL_LIMIT           8
