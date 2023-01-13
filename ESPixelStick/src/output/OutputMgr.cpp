@@ -1209,13 +1209,11 @@ void c_OutputMgr::SetSerialUart()
     for (auto & CurrentOutputChannelDriver : OutputChannelDrivers)
     {
         // DEBUG_V();
-        if(e_OutputType::OutputType_Disabled != CurrentOutputChannelDriver.pOutputChannelDriver->GetOutputType() &&
-        (ConsoleTxGpio == CurrentOutputChannelDriver.pOutputChannelDriver->GetOutputGpio() ||
-        ConsoleRxGpio == CurrentOutputChannelDriver.pOutputChannelDriver->GetOutputGpio()))
+        if(e_OutputType::OutputType_Disabled != CurrentOutputChannelDriver.pOutputChannelDriver->GetOutputType())
         {
             // DEBUG_V (String("Output GPIO: ") + String(CurrentOutputChannelDriver.pOutputChannelDriver->GetOutputGpio()));
 
-            NeedToTurnOffSerial = true;
+            NeedToTurnOffSerial |= CurrentOutputChannelDriver.pOutputChannelDriver->ValidateGpio(ConsoleTxGpio, ConsoleRxGpio);
         }
     } // end for each channel
 

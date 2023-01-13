@@ -59,6 +59,7 @@ public:
     virtual void         ClearBuffer ();
     virtual void         WriteChannelData (uint32_t StartChannelId, uint32_t ChannelCount, byte *pSourceData);
     virtual void         ReadChannelData (uint32_t StartChannelId, uint32_t ChannelCount, byte *pTargetData);
+    virtual bool         ValidateGpio (gpio_num_t ConsoleTxGpio, gpio_num_t ConsoleRxGpio);
 
 protected:
 

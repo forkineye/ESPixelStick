@@ -147,3 +147,14 @@ void c_OutputCommon::ReadChannelData(uint32_t StartChannelId, uint32_t ChannelCo
     // DEBUG_END;
 
 } // WriteChannelData
+
+//----------------------------------------------------------------------------
+bool c_OutputCommon::ValidateGpio (gpio_num_t ConsoleTxGpio, gpio_num_t ConsoleRxGpio)
+{
+    // DEBUG_START;
+
+    bool response = ((ConsoleTxGpio == DataPin) || (ConsoleRxGpio == DataPin));
+
+    // DEBUG_END;
+    return response;
+} // ValidateGpio
