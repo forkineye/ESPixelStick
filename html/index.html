@@ -316,38 +316,46 @@
                     <fieldset>
                         <legend class="esps-legend">Relay Status</legend>
                         <table class="esps-table">
-                            <tr>
-                                <td width="50%">Output 1 Value: </td>
-                                <td><span id="RelayValue_1"></span></td>
-                            </tr>
-                            <tr>
-                                <td width="50%">Output 2 Value: </td>
-                                <td><span id="RelayValue_2"></span></td>
-                            </tr>
-                            <tr>
-                                <td width="50%">Output 3 Value: </td>
-                                <td><span id="RelayValue_3"></span></td>
-                            </tr>
-                            <tr>
-                                <td width="50%">Output 4 Value: </td>
-                                <td><span id="RelayValue_4"></span></td>
-                            </tr>
-                            <tr>
-                                <td width="50%">Output 5 Value: </td>
-                                <td><span id="RelayValue_5"></span></td>
-                            </tr>
-                            <tr>
-                                <td width="50%">Output 6 Value: </td>
-                                <td><span id="RelayValue_6"></span></td>
-                            </tr>
-                            <tr>
-                                <td width="50%">Output 7 Value: </td>
-                                <td><span id="RelayValue_7"></span></td>
-                            </tr>
-                            <tr>
-                                <td width="50%">Output 8 Value: </td>
-                                <td><span id="RelayValue_8"></span></td>
-                            </tr>
+                            <thead>
+                                <tr>
+                                    <th width="30%">Output</th>
+                                    <th width="20%">value</th>
+                                </tr>
+                            </thead>
+                            <tbody id="RelayStatusTable">
+                                <tr>
+                                    <td>1</td>
+                                    <td><output type="text" id="RelayValue_0"></td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td><output type="text" id="RelayValue_1"></td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td><output type="text" id="RelayValue_2"></td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td><output type="text" id="RelayValue_3"></td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td><output type="text" id="RelayValue_4"></td>
+                                </tr>
+                                <tr>
+                                    <td>6</td>
+                                    <td><output type="text" id="RelayValue_5"></td>
+                                </tr>
+                                <tr>
+                                    <td>7</td>
+                                    <td><output type="text" id="RelayValue_6"></td>
+                                </tr>
+                                <tr>
+                                    <td>8</td>
+                                    <td><output type="text" id="RelayValue_7"></td>
+                                </tr>
+                            </tbody>
                         </table>
                     </fieldset>
                 </div>
@@ -897,16 +905,16 @@
         </div>
     </footer>
 
-    <!-- for local development
-        <script type="text/javascript" src="js/dropzone.js"></script>
-        <script type="text/javascript" src="js/jquery-3.5.1.js"></script>
-        <script type="text/javascript" src="js/bootstrap.js"></script>
-        <script type="text/javascript" src="js/jqColorPicker.js"></script>
-        <script type="text/javascript" src="script.js"></script>
-        <script type="text/javascript" src="js/FileSaver.js"></script>
-        -->
+    <script type="text/javascript" src="js/dropzone.js"></script>
+    <script type="text/javascript" src="js/jquery-3.5.1.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
+    <script type="text/javascript" src="js/jqColorPicker.js"></script>
+    <script type="text/javascript" src="script.js"></script>
+    <script type="text/javascript" src="js/FileSaver.js"></script>
 
+    <!-- for local development
     <script type="text/javascript" src="esps.js"></script>
+        -->
 
 </body>
 
