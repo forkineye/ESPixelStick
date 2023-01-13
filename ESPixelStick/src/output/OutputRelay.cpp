@@ -421,4 +421,24 @@ void c_OutputRelay::Render ()
     // DEBUG_END;
 } // render
 
+//----------------------------------------------------------------------------
+bool c_OutputRelay::ValidateGpio (gpio_num_t ConsoleTxGpio, gpio_num_t ConsoleRxGpio)
+{
+    // DEBUG_START;
+
+    bool response = false;
+
+    for (RelayChannel_t & currentRelay : OutputList)
+    {
+        if (currentRelay.Enabled)
+        {
+            response |= ((currentRelay.GpioId == ConsoleTxGpio) || (currentRelay.GpioId == ConsoleRxGpio));
+        }
+    }
+
+    // DEBUG_END;
+    return response;
+
+} // ValidateGpio
+
 #endif // def SUPPORT_OutputType_Relay
