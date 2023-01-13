@@ -679,10 +679,10 @@ function ProcessModeConfigurationDataRelay(RelayConfig) {
     }
 
     // add as many rows as we need
-    for (let CurrentRowId = 1; CurrentRowId <= ChannelConfigs.length; CurrentRowId++) {
+    for (let CurrentRowId = 0; CurrentRowId < ChannelConfigs.length; CurrentRowId++) {
         // console.log("CurrentRowId = " + CurrentRowId);
 
-        let ChanIdPattern = '<td id="chanId_' + (CurrentRowId) + '">a</td>';
+        let ChanIdPattern = '<td id="chanId_' + (CurrentRowId + 1) + '">a</td>';
         let EnabledPattern = '<td><input type="checkbox" id="Enabled_' + (CurrentRowId) + '"></td>';
         let InvertedPattern = '<td><input type="checkbox" id="Inverted_' + (CurrentRowId) + '"></td>';
         let PwmPattern = '<td><input type="checkbox" id="Pwm_' + (CurrentRowId) + '"></td>';
@@ -709,8 +709,9 @@ function ProcessModeConfigurationDataRelay(RelayConfig) {
 
     // populate config
     $.each(ChannelConfigs, function (i, CurrentChannelConfig) {
-        // console.log("Current Channel Id = " + CurrentChannelConfig.id);
-        let currentChannelRowId = CurrentChannelConfig.id + 1;
+        let currentChannelRowId = CurrentChannelConfig.id;
+        // console.log("Populate Config Current Channel Id = " + CurrentChannelConfig.id);
+        // console.log("Populate Config Current gid = " + CurrentChannelConfig.gid);
         $('#chanId_' + (currentChannelRowId)).html(currentChannelRowId);
         $('#Enabled_' + (currentChannelRowId)).prop("checked", CurrentChannelConfig.en);
         $('#Inverted_' + (currentChannelRowId)).prop("checked", CurrentChannelConfig.inv);
@@ -1118,7 +1119,7 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName) {
             ChannelConfig.updateinterval = parseInt($('#updateinterval').val(), 10);
             $.each(ChannelConfig.channels, function (i, CurrentChannelConfig) {
                 // console.info("Current Channel Id = " + CurrentChannelConfig.id);
-                let currentChannelRowId = CurrentChannelConfig.id + 1;
+                let currentChannelRowId = CurrentChannelConfig.id;
                 CurrentChannelConfig.en = $('#Enabled_' + (currentChannelRowId)).prop("checked");
                 CurrentChannelConfig.inv = $('#Inverted_' + (currentChannelRowId)).prop("checked");
                 CurrentChannelConfig.pwm = $('#Pwm_' + (currentChannelRowId)).prop("checked");
@@ -1830,6 +1831,20 @@ function ProcessReceivedJsonStatusMessage(data) {
         $('#PausedPlayerStatus').addClass("hidden");
         $('#FPPRemoteStatus').addClass("hidden");
     }
+
+    let OutputStatus = Status.output[1];
+
+    if ({}.hasOwnProperty.call(OutputStatus, 'Relay')) {
+        $('#RelayStatus').removeClass("hidden")
+
+        OutputStatus.Relay.forEach(function (currentRelay) {
+            $('#RelayValue_' + currentRelay.id).text(currentRelay.activevalue);
+        });
+    }
+    else {
+        $('#RelayStatus').addClass("hidden")
+    }
+
 
     // Device Refresh is dynamic
     // #refresh is used in device config tab to reflect what refresh rate should be, not what it currently is

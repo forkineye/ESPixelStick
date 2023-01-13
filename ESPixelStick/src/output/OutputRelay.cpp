@@ -333,6 +333,29 @@ void c_OutputRelay::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 } // GetConfig
 
 //----------------------------------------------------------------------------
+void c_OutputRelay::GetStatus(ArduinoJson::JsonObject &jsonStatus)
+{
+    // DEBUG_START;
+
+    c_OutputCommon::GetStatus(jsonStatus);
+    JsonArray JsonChannelList = jsonStatus.createNestedArray (CN_Relay);
+
+    uint8_t ChannelId = 0;
+    for (RelayChannel_t & currentRelay : OutputList)
+    {
+        JsonObject JsonChannelData = JsonChannelList.createNestedObject ();
+
+        JsonChannelData[CN_id]          = ChannelId;
+        JsonChannelData[CN_activevalue] = currentRelay.previousValue;
+
+        ++ChannelId;
+    }
+
+    // DEBUG_END;
+
+} // GetStatus
+
+//----------------------------------------------------------------------------
 void  c_OutputRelay::GetDriverName (String & sDriverName)
 {
     // DEBUG_START;
@@ -348,26 +371,36 @@ void c_OutputRelay::Render ()
     // DEBUG_START;
 
     uint8_t OutputDataIndex = 0;
+    uint8_t newOutputValue = 0;
 
     for (RelayChannel_t & currentRelay : OutputList)
     {
         // DEBUG_V (String("OutputDataIndex: ") + String(OutputDataIndex));
+        // DEBUG_V (String("        Enabled: ") + String(currentRelay.Enabled));
         if (currentRelay.Enabled)
         {
-            uint8_t newOutputValue = map (pOutputBuffer[OutputDataIndex], 0, 255, currentRelay.OffValue, currentRelay.OnValue);
+            // DEBUG_V (String(" rawOutputValue: ") + String(pOutputBuffer[OutputDataIndex]));
             if (currentRelay.Pwm)
             {
+                newOutputValue = map (pOutputBuffer[OutputDataIndex], 0, 255, currentRelay.OffValue, currentRelay.OnValue);
+                // DEBUG_V (String(" newOutputValue: ") + String(newOutputValue));
+                if (newOutputValue != currentRelay.previousValue)
+                {
                 #if defined(ARDUINO_ARCH_ESP32)
                    ledcWrite(OutputDataIndex, newOutputValue);
                 #else
                    analogWrite(currentRelay.GpioId, newOutputValue);
                 #endif
+                }
             }
             else
             {
-                newOutputValue = (newOutputValue > currentRelay.OnOffTriggerLevel) ? currentRelay.OnValue : currentRelay.OffValue;
+                newOutputValue = (pOutputBuffer[OutputDataIndex] > currentRelay.OnOffTriggerLevel) ? currentRelay.OnValue : currentRelay.OffValue;
+                // DEBUG_V (String(" newOutputValue: ") + String(newOutputValue));
                 if (newOutputValue != currentRelay.previousValue)
                 {
+                    // DEBUG_V (String("OutputDataIndex: ") + String(OutputDataIndex));
+                    // DEBUG_V("Write New Value");
                     digitalWrite (currentRelay.GpioId, newOutputValue);
                 }
             }
