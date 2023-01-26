@@ -141,7 +141,7 @@ private:
     void                    CalculateEnableUartInterruptFlags();
     inline uint32_t IRAM_ATTR   getUartFifoLength();
     inline bool     IRAM_ATTR   MoreDataToSend();
-    inline uint32_t IRAM_ATTR   GetNextIntensityToSend();
+    inline bool     IRAM_ATTR   GetNextIntensityToSend(uint32_t &DataToSend);
     inline void     IRAM_ATTR   enqueueUartData(uint8_t value);
     inline void     IRAM_ATTR   EnableUartInterrupts();
     inline void     IRAM_ATTR   ClearUartInterrupts();
