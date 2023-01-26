@@ -167,7 +167,7 @@ public:
              void         SetIntensityDataWidth(uint32_t value);
              void         StartNewFrame();
     inline   bool IRAM_ATTR ISR_MoreDataToSend () {return (&c_OutputPixel::FrameDone != FrameStateFuncPtr);}
-    uint32_t IRAM_ATTR    ISR_GetNextIntensityToSend ();
+             bool IRAM_ATTR ISR_GetNextIntensityToSend (uint32_t &DataToSend);
     void                  SetPixelCount(uint32_t value) {pixel_count = value;}
     uint32_t              GetPixelCount() {return pixel_count;}
 

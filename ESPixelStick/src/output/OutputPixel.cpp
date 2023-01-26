@@ -33,6 +33,8 @@ c_OutputPixel::c_OutputPixel (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     updateGammaTable ();
     updateColorOrderOffsets ();
 
+    FrameStateFuncPtr = &c_OutputPixel::FrameDone;
+
     // DEBUG_END;
 } // c_OutputPixel
 
@@ -317,6 +319,7 @@ void c_OutputPixel::SetFrameDurration (float IntensityBitTimeInUs, uint16_t Bloc
 
     uint32_t _FrameMinDurationInMicroSec = (IntensityBitTimeInUs * TotalBits) + InterFrameGapInMicroSec + TotalBlockDelayUs;
     FrameMinDurationInMicroSec = max(uint32_t(25000), _FrameMinDurationInMicroSec);
+
 
     // DEBUG_V (String ("           OutputBufferSize: ") + String (OutputBufferSize));
     // DEBUG_V (String ("             PixelGroupSize: ") + String (PixelGroupSize));
@@ -627,21 +630,21 @@ uint32_t IRAM_ATTR c_OutputPixel::FrameDone()
 }
 
 //----------------------------------------------------------------------------
-uint32_t IRAM_ATTR c_OutputPixel::ISR_GetNextIntensityToSend ()
+bool IRAM_ATTR c_OutputPixel::ISR_GetNextIntensityToSend (uint32_t &DataToSend)
 {
 
 #ifdef USE_PIXEL_DEBUG_COUNTERS
     GetNextIntensityToSendCounter++;
 #endif // def USE_PIXEL_DEBUG_COUNTERS
 
-    uint32_t response = (this->*FrameStateFuncPtr)();
+    DataToSend = (this->*FrameStateFuncPtr)();
 
     if (InvertData)
     {
-        response = ~response;
+        DataToSend = ~DataToSend;
     }
 
-    return response;
+    return ISR_MoreDataToSend();
 
 } // NextIntensityToSend
 
@@ -653,6 +656,13 @@ uint32_t IRAM_ATTR c_OutputPixel::GetIntensityData()
     do // once
     {
         response = pOutputBuffer[PixelIntensityCurrentIndex];
+        switch (PixelIntensityCurrentIndex & 0x03)
+        {
+            case 0: {response = 0; break;}
+            case 1: {response = 250; break;}
+            case 2: {response = 128; break;}
+            case 3: {response = 0; break;}
+        }
 
         ++PixelIntensityCurrentIndex;
         if (PixelIntensityCurrentIndex >= OutputBufferSize)
