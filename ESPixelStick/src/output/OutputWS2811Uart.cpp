@@ -133,19 +133,22 @@ void c_OutputWS2811Uart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811Uart::Render ()
+uint32_t c_OutputWS2811Uart::Poll ()
 {
     // DEBUG_START;
+    uint32_t FrameLen = ActualFrameDurationMicroSec;
 
     do // Once
     {
         if (gpio_num_t(-1) == DataPin)
         {
+            FrameLen = 0;
             break;
         }
 
         if (!canRefresh())
         {
+            FrameLen = 0;
             break;
         }
 
@@ -164,6 +167,7 @@ void c_OutputWS2811Uart::Render ()
 
     // DEBUG_END;
 
+    return FrameLen;
 } // render
 
 //----------------------------------------------------------------------------
