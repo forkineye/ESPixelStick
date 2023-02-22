@@ -366,7 +366,7 @@ void  c_OutputRelay::GetDriverName (String & sDriverName)
 } // GetDriverName
 
 //----------------------------------------------------------------------------
-void c_OutputRelay::Poll ()
+uint32_t c_OutputRelay::Poll ()
 {
     // DEBUG_START;
 
@@ -419,6 +419,7 @@ void c_OutputRelay::Poll ()
     ReportNewFrame ();
 
     // DEBUG_END;
+    return ActualFrameDurationMicroSec;
 } // render
 
 //----------------------------------------------------------------------------

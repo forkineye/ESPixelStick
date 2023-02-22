@@ -242,7 +242,6 @@ private:
     void InstantiateNewOutputChannel(DriverInfo_t &ChannelIndex, e_OutputType NewChannelType, bool StartDriver = true);
     void CreateNewConfig();
     void SetSerialUart();
-    uint32_t GetNumActiveChannels (void);
 
     String ConfigFileName;
 
@@ -251,7 +250,9 @@ private:
     gpio_num_t ConsoleTxGpio = gpio_num_t::GPIO_NUM_1;
     gpio_num_t ConsoleRxGpio = gpio_num_t::GPIO_NUM_3;
     bool       SerialUartIsActive = true;
+#if defined(ARDUINO_ARCH_ESP32)
     TaskHandle_t myTaskHandle = NULL;
+#endif // defined(ARDUINO_ARCH_ESP32)
 
 #define OM_IS_UART (CurrentOutputChannelDriver.PortType == OM_PortType_t::Uart)
 #define OM_IS_RMT  (CurrentOutputChannelDriver.PortType == OM_PortType_t::Rmt)

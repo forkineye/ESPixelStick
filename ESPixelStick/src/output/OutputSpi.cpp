@@ -167,10 +167,12 @@ void c_OutputSpi::SendIntensityData ()
         byte * pMem = &TransactionBuffers[NextTransactionToFill][0];
         TransactionToFill.tx_buffer = pMem;
         uint32_t NumEmptyIntensitySlots = SPI_NUM_INTENSITY_PER_TRANSACTION;
+        uint32_t IntensityData = 0;
 
         while ( (NumEmptyIntensitySlots) && (OutputPixel->ISR_MoreDataToSend ()))
         {
-            *pMem++ = OutputPixel->ISR_GetNextIntensityToSend ();
+            OutputPixel->ISR_GetNextIntensityToSend (IntensityData);
+            *pMem++ = byte(IntensityData);
             --NumEmptyIntensitySlots;
         } // end while there is space in the buffer
 

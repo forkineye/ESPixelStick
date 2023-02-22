@@ -55,6 +55,7 @@
     #define DEFAULT_RELAY_GPIO      gpio_num_t::GPIO_NUM_1
 #endif // ndef DEFAULT_RELAY_GPIO
 
+#if defined(ARDUINO_ARCH_ESP32)
 void OM_Task (void *arg)
 {
     while(1){
@@ -62,6 +63,8 @@ void OM_Task (void *arg)
         OutputMgr.TaskPoll();
     }
 }
+#endif // defined(ARDUINO_ARCH_ESP32)
+
 //-----------------------------------------------------------------------------
 // Local Data definitions
 //-----------------------------------------------------------------------------
@@ -269,12 +272,14 @@ void c_OutputMgr::Begin ()
 
         // CreateNewConfig ();
 
+        // Preset the output memory
+        memset((void*)&OutputBuffer[0], 0x00, sizeof(OutputBuffer));
+
+#if defined(ARDUINO_ARCH_ESP32)
         xTaskCreatePinnedToCore(OM_Task, "OM_Task", 4096, NULL, 10, &myTaskHandle, 0);
+#endif // defined(ARDUINO_ARCH_ESP32)
 
     } while (false);
-
-    // Preset the output memory
-    memset((void*)&OutputBuffer[0], 0x00, sizeof(OutputBuffer));
 
     // DEBUG_END;
 
@@ -493,8 +498,6 @@ void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
         CurrentOutput.pOutputChannelDriver->GetStatus(channelStatus);
         // DEBUG_V ();
     }
-
-    jsonStatus["NumActiveChannels"] = GetNumActiveChannels();
 
     // DEBUG_END;
 } // GetStatus
@@ -1260,18 +1263,40 @@ void c_OutputMgr::SetSerialUart()
 void c_OutputMgr::Poll()
 {
     // //DEBUG_START;
-    // //DEBUG_END;
-} // Render
-
-//-----------------------------------------------------------------------------
-void c_OutputMgr::TaskPoll()
-{
-    // //DEBUG_START;
 
 #ifdef LED_FLASH_GPIO
     pinMode (LED_FLASH_GPIO, OUTPUT);
     digitalWrite (LED_FLASH_GPIO, LED_FLASH_OFF);
 #endif // def LED_FLASH_GPIO
+
+#if defined(ARDUINO_ARCH_ESP8266)
+    // do we need to save the current config?
+    if (true == ConfigLoadNeeded)
+    {
+        ConfigLoadNeeded = false;
+        LoadConfig ();
+    } // done need to save the current config
+
+    if (false == IsOutputPaused)
+    {
+        // //DEBUG_V();
+        for (DriverInfo_t & OutputChannel : OutputChannelDrivers)
+        {
+            // //DEBUG_V("Start a new channel");
+            OutputChannel.pOutputChannelDriver->Poll ();
+        }
+    }
+
+#endif //  defined(ARDUINO_ARCH_ESP8266)
+
+    // //DEBUG_END;
+} // Poll
+
+#if defined(ARDUINO_ARCH_ESP32)
+//-----------------------------------------------------------------------------
+void c_OutputMgr::TaskPoll()
+{
+    // //DEBUG_START;
 
     // do we need to save the current config?
     if (true == ConfigLoadNeeded)
@@ -1302,28 +1327,8 @@ void c_OutputMgr::TaskPoll()
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
     // //DEBUG_END;
-} // render
-
-//-----------------------------------------------------------------------------
-uint32_t c_OutputMgr::GetNumActiveChannels (void)
-{
-    // //DEBUG_START;
-
-    uint32_t NumberOfActiveChannels = 0;
-    // //DEBUG_V("Count the number of channels sending data");
-    for (DriverInfo_t & OutputChannel : OutputChannelDrivers)
-    {
-        if(OutputChannel.pOutputChannelDriver->DriverIsSendingIntensityData ())
-        {
-            // //DEBUG_V();
-            NumberOfActiveChannels++;
-        }
-    }
-
-    // //DEBUG_END;
-    return NumberOfActiveChannels;
-
-} // GetNumActiveChannels
+} // TaskPoll
+#endif // defined(ARDUINO_ARCH_ESP32)
 
 //-----------------------------------------------------------------------------
 void c_OutputMgr::UpdateDisplayBufferReferences (void)

@@ -86,9 +86,11 @@ bool c_OutputWS2801Spi::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputWS2801Spi::Poll ()
+uint32_t c_OutputWS2801Spi::Poll ()
 {
     // DEBUG_START;
+
+    uint32_t FrameLen = ActualFrameDurationMicroSec;
 
     if (canRefresh ())
     {
@@ -97,8 +99,13 @@ void c_OutputWS2801Spi::Poll ()
             ReportNewFrame ();
             }
     }
+    else
+    {
+        FrameLen = 0;
+    }
 
     // DEBUG_END;
+    return FrameLen;
 
 } // render
 

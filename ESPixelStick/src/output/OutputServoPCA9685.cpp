@@ -258,7 +258,7 @@ void  c_OutputServoPCA9685::GetDriverName (String & sDriverName)
 } // GetDriverName
 
 //----------------------------------------------------------------------------
-void c_OutputServoPCA9685::Poll ()
+uint32_t c_OutputServoPCA9685::Poll ()
 {
     // DEBUG_START;
 
@@ -331,6 +331,8 @@ void c_OutputServoPCA9685::Poll ()
     }
 
     // DEBUG_END;
+    return ActualFrameDurationMicroSec;
+
 } // render
 
 #endif // def SUPPORT_OutputType_Servo_PCA9685

@@ -127,19 +127,22 @@ void c_OutputTM1814Uart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputTM1814Uart::Poll ()
+uint32_t c_OutputTM1814Uart::Poll ()
 {
     // DEBUG_START;
+    uint32_t FrameLen = ActualFrameDurationMicroSec;
 
     do // Once
     {
         if (gpio_num_t(-1) == DataPin)
         {
+            FrameLen = 0;
             break;
         }
 
         if (!canRefresh())
         {
+            FrameLen = 0;
             break;
         }
 
@@ -151,8 +154,9 @@ void c_OutputTM1814Uart::Poll ()
     } while (false);
 
     // DEBUG_END;
+    return FrameLen;
 
-} // render
+} // Poll
 
 //----------------------------------------------------------------------------
 void c_OutputTM1814Uart::PauseOutput(bool State)
