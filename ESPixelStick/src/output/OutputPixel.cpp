@@ -305,10 +305,12 @@ bool c_OutputPixel::validate ()
 } // validate
 
 //----------------------------------------------------------------------------
-void c_OutputPixel::SetFrameDurration (float IntensityBitTimeInUs, uint16_t BlockSize, float BlockDelayUs)
+void c_OutputPixel::SetFrameDurration (float _IntensityBitTimeInUs, uint16_t BlockSize, float BlockDelayUs)
 {
     // DEBUG_START;
     if (0 == BlockSize) { BlockSize = 1; }
+
+    IntensityBitTimeInUs = _IntensityBitTimeInUs;
 
     float TotalIntensityBytes       = OutputBufferSize;
     float TotalNullBytes            = (PrependNullPixelCount + AppendNullPixelCount) * NumIntensityBytesPerPixel;
@@ -317,10 +319,9 @@ void c_OutputPixel::SetFrameDurration (float IntensityBitTimeInUs, uint16_t Bloc
     uint16_t NumBlocks              = uint16_t (TotalBytesOfIntensityData / float (BlockSize));
     int TotalBlockDelayUs           = int (float (NumBlocks) * BlockDelayUs);
 
-    uint32_t _FrameMinDurationInMicroSec = (IntensityBitTimeInUs * TotalBits) + InterFrameGapInMicroSec + TotalBlockDelayUs;
-    FrameMinDurationInMicroSec = max(uint32_t(25000), _FrameMinDurationInMicroSec);
-
-
+    ActualFrameDurationMicroSec = (IntensityBitTimeInUs * TotalBits) + InterFrameGapInMicroSec + TotalBlockDelayUs;
+    FrameMinDurationInMicroSec = max(uint32_t(25000), ActualFrameDurationMicroSec);
+    
     // DEBUG_V (String ("           OutputBufferSize: ") + String (OutputBufferSize));
     // DEBUG_V (String ("             PixelGroupSize: ") + String (PixelGroupSize));
     // DEBUG_V (String ("        TotalIntensityBytes: ") + String (TotalIntensityBytes));
@@ -337,7 +338,7 @@ void c_OutputPixel::SetFrameDurration (float IntensityBitTimeInUs, uint16_t Bloc
     // DEBUG_V (String ("          TotalBlockDelayUs: ") + String (TotalBlockDelayUs));
     // DEBUG_V (String ("       IntensityBitTimeInUs: ") + String (IntensityBitTimeInUs));
     // DEBUG_V (String ("    InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
-    // DEBUG_V (String ("_FrameMinDurationInMicroSec: ") + String (_FrameMinDurationInMicroSec));
+    // DEBUG_V (String ("ActualFrameDurationMicroSec: ") + String (ActualFrameDurationMicroSec));
     // DEBUG_V (String (" FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
 
     // DEBUG_END;
@@ -653,46 +654,34 @@ uint32_t IRAM_ATTR c_OutputPixel::GetIntensityData()
 {
     uint32_t response = 0;
 
-    do // once
+    response = pOutputBuffer[PixelIntensityCurrentIndex];
+
+    ++PixelIntensityCurrentIndex;
+    if (PixelIntensityCurrentIndex >= OutputBufferSize)
     {
-        response = pOutputBuffer[PixelIntensityCurrentIndex];
-        switch (PixelIntensityCurrentIndex & 0x03)
+        // response = 0xaa;
+        if (AppendNullPixelCount)
         {
-            case 0: {response = 0; break;}
-            case 1: {response = 250; break;}
-            case 2: {response = 128; break;}
-            case 3: {response = 0; break;}
+            PixelPrependDataCurrentIndex = 0;
+            PixelIntensityCurrentIndex = 0;
+            AppendNullPixelCurrentCount = 0;
+
+            FrameStateFuncPtr = &c_OutputPixel::PixelAppendNulls;
         }
-
-        ++PixelIntensityCurrentIndex;
-        if (PixelIntensityCurrentIndex >= OutputBufferSize)
+        else if (FrameAppendDataSize)
         {
-            // response = 0xaa;
-            if (AppendNullPixelCount)
-            {
-                PixelPrependDataCurrentIndex = 0;
-                PixelIntensityCurrentIndex = 0;
-                AppendNullPixelCurrentCount = 0;
-
-                FrameStateFuncPtr = &c_OutputPixel::PixelAppendNulls;
-            }
-            else if (FrameAppendDataSize)
-            {
-                FrameStateFuncPtr = &c_OutputPixel::FrameAppendData;
-            }
-            else
-            {
+            FrameStateFuncPtr = &c_OutputPixel::FrameAppendData;
+        }
+        else
+        {
 #ifdef USE_PIXEL_DEBUG_COUNTERS
-                IntensityBytesSentLastFrame = IntensityBytesSent;
+            IntensityBytesSentLastFrame = IntensityBytesSent;
 #endif // def USE_PIXEL_DEBUG_COUNTERS
 
-                FrameStateFuncPtr = &c_OutputPixel::FrameDone;
-            }
-
-            break;
+            FrameStateFuncPtr = &c_OutputPixel::FrameDone;
         }
+    }
 
-    } while (false);
     return response;
 }
 
@@ -766,15 +755,15 @@ void c_OutputPixel::WriteChannelData(uint32_t StartChannelId, uint32_t ChannelCo
     {
         uint32_t CurrentIntensityData = gamma_table[pSourceData[SourceDataIndex]];
         CurrentIntensityData = uint8_t((uint32_t(CurrentIntensityData) * AdjustedBrightness) >> 8);
-
         uint32_t CalculatedChannelId = CalculateIntensityOffset(currentChannelId);
-
+        
+        uint8_t *pBuffer = &pOutputBuffer[CalculatedChannelId];
         for(uint32_t CurrentGroupIndex = 0; CurrentGroupIndex < PixelGroupSize; ++CurrentGroupIndex)
         {
             // DEBUG_V(String("      CurrentGroupIndex: 0x") + String(CurrentGroupIndex, HEX));
             // DEBUG_V(String("    CalculatedChannelId: 0x") + String(CalculatedChannelId, HEX));
-            pOutputBuffer[CalculatedChannelId] = CurrentIntensityData;
-            CalculatedChannelId += NumIntensityBytesPerPixel;
+            *pBuffer = CurrentIntensityData;
+            pBuffer += NumIntensityBytesPerPixel;
         }
     }
 
