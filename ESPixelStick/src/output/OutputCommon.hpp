@@ -43,7 +43,7 @@ public:
     virtual void         Begin () {}                                           ///< set up the operating environment based on the current config (or defaults)
     virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig);     ///< Set a new config in the driver
     virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig);     ///< Get the current config used by the driver
-    virtual void         Render () = 0;                                        ///< Call from loop(),  renders output data
+    virtual uint32_t     Poll () = 0;                                        ///< Call from loop(),  renders output data
     virtual void         GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
             OID_t        GetOutputChannelId () { return OutputChannelId; }     ///< return the output channel number
             uint8_t    * GetBufferAddress ()   { return pOutputBuffer;}        ///< Get the address of the buffer into which the E1.31 handler will stuff data
@@ -60,18 +60,20 @@ public:
     virtual void         WriteChannelData (uint32_t StartChannelId, uint32_t ChannelCount, byte *pSourceData);
     virtual void         ReadChannelData (uint32_t StartChannelId, uint32_t ChannelCount, byte *pTargetData);
     virtual bool         ValidateGpio (gpio_num_t ConsoleTxGpio, gpio_num_t ConsoleRxGpio);
-
+    virtual bool         DriverIsSendingIntensityData() {return false;}
+    virtual uint32_t     GetFrameTimeMs() {return 1 + (ActualFrameDurationMicroSec / 1000); }
 protected:
 
-    gpio_num_t  DataPin                    = gpio_num_t (-1);
-    uart_port_t UartId                     = uart_port_t (-1);
-    OTYPE_t     OutputType                 = OTYPE_t::OutputType_Disabled;
-    OID_t       OutputChannelId            = OID_t::OutputChannelId_End;
-    bool        HasBeenInitialized         = false;
-    uint32_t    FrameMinDurationInMicroSec = 25000;
-    uint8_t   * pOutputBuffer              = nullptr;
-    uint32_t    OutputBufferSize           = 0;
-    uint32_t    FrameCount                 = 0;
+    gpio_num_t  DataPin                     = gpio_num_t (-1);
+    uart_port_t UartId                      = uart_port_t (-1);
+    OTYPE_t     OutputType                  = OTYPE_t::OutputType_Disabled;
+    OID_t       OutputChannelId             = OID_t::OutputChannelId_End;
+    bool        HasBeenInitialized          = false;
+    uint32_t    FrameMinDurationInMicroSec  = 25000;
+    uint32_t    ActualFrameDurationMicroSec = 50000; // Default time for relays is every 50ms
+    uint8_t   * pOutputBuffer               = nullptr;
+    uint32_t    OutputBufferSize            = 0;
+    uint32_t    FrameCount                  = 0;
 
     void ReportNewFrame ();
 

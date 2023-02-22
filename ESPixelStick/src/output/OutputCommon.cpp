@@ -72,6 +72,7 @@ void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
     jsonStatus[CN_id] = OutputChannelId;
     jsonStatus["framerefreshrate"] = (0 == FrameRefreshTimeInMicroSec) ? 0 : int(MicroSecondsInASecond / FrameRefreshTimeInMicroSec);
     jsonStatus["FrameCount"] = FrameCount;
+    jsonStatus["ActualFrameDurationMicroSec"] = ActualFrameDurationMicroSec;
 
     // DEBUG_END;
 } // GetStatus
