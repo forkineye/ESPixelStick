@@ -81,10 +81,10 @@ void c_OutputDisabled::GetConfig(ArduinoJson::JsonObject & /* jsonConfig */ )
 
 } // GetConfig
 
-void c_OutputDisabled::Render()
+uint32_t c_OutputDisabled::Poll()
 {
     // DEBUG_START;
 
     // DEBUG_END;
-
-} // Render
+    return 0;
+} // Poll
