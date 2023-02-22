@@ -44,7 +44,7 @@ public:
             uint32_t    GetNumOutputBufferBytesNeeded () { return OutputBufferSize; };
             uint32_t    GetNumOutputBufferChannelsServiced () { return OutputBufferSize; };
             void        SetOutputBufferSize (uint32_t NumChannelsAvailable);
-            void        Render() = 0;
+            uint32_t    Poll = 0;
             void        StartNewFrame();
 
     bool IRAM_ATTR   ISR_GetNextIntensityToSend(uint32_t &DataToSend);

@@ -41,7 +41,7 @@ public:
 
     // functions to be provided by the derived class
     void    Begin ();
-    void    Render ();
+    uint32_t Poll ();
     void    PauseOutput (bool State);
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);
     void    GetConfig (ArduinoJson::JsonObject& jsonConfig);

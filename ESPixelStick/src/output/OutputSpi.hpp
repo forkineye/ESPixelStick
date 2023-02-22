@@ -37,7 +37,7 @@ public:
 
     // functions to be provided by the derived class
     void    Begin (c_OutputPixel* _OutputPixel);
-    bool    Render ();                                        ///< Call from loop (),  renders output data
+    bool    Poll ();                                        ///< Call from loop (),  renders output data
     TaskHandle_t GetTaskHandle () { return SendIntensityDataTaskHandle; }
     void    GetDriverName (String& Name) { Name = CN_OutputSpi; }
     void    DataOutputTask (void* pvParameters);

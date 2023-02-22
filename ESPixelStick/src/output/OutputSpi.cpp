@@ -193,7 +193,7 @@ void c_OutputSpi::SendIntensityData ()
 } // SendIntensityData
 
 //----------------------------------------------------------------------------
-bool c_OutputSpi::Render ()
+bool c_OutputSpi::Poll ()
 {
     bool Response = false;
 

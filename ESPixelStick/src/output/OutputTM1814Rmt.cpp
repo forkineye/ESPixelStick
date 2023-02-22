@@ -142,7 +142,7 @@ void c_OutputTM1814Rmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputTM1814Rmt::Render ()
+void c_OutputTM1814Rmt::Poll ()
 {
     // DEBUG_START;
 
@@ -160,7 +160,7 @@ void c_OutputTM1814Rmt::Render ()
 
         // DEBUG_V("get the next frame started");
 
-        if (Rmt.Render ())
+        if (Rmt.Poll ())
         {
             ReportNewFrame ();
         }
@@ -170,6 +170,6 @@ void c_OutputTM1814Rmt::Render ()
     } while (false);
 
     // DEBUG_END;
-} // Render
+} // Poll
 
 #endif // defined (SUPPORT_OutputType_TM1814) && defined (ARDUINO_ARCH_ESP32)

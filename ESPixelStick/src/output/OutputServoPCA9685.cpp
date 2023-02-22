@@ -258,7 +258,7 @@ void  c_OutputServoPCA9685::GetDriverName (String & sDriverName)
 } // GetDriverName
 
 //----------------------------------------------------------------------------
-void c_OutputServoPCA9685::Render ()
+void c_OutputServoPCA9685::Poll ()
 {
     // DEBUG_START;
 

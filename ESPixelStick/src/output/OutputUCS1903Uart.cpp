@@ -126,20 +126,22 @@ void c_OutputUCS1903Uart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputUCS1903Uart::Render ()
+uint32_t c_OutputUCS1903Uart::Poll ()
 {
     // DEBUG_START;
+    uint32_t FrameLen = ActualFrameDurationMicroSec;
 
     // DEBUG_V (String ("RemainingIntensityCount: ") + RemainingIntensityCount)
 
-    if (gpio_num_t (-1) == DataPin) { return; }
-    if (!canRefresh ()) { return; }
+    if (gpio_num_t (-1) == DataPin) { return 0; }
+    if (!canRefresh ()) { return 0; }
 
     // get the next frame started
     Uart.StartNewFrame ();
     ReportNewFrame ();
 
     // DEBUG_END;
+    return FrameLen;
 
 } // render
 

@@ -127,7 +127,7 @@ void c_OutputTM1814Uart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputTM1814Uart::Render ()
+void c_OutputTM1814Uart::Poll ()
 {
     // DEBUG_START;
 

@@ -137,25 +137,28 @@ void c_OutputUCS1903Rmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputUCS1903Rmt::Render ()
+uint32_t c_OutputUCS1903Rmt::Poll ()
 {
     // DEBUG_START;
+    uint32_t FrameLen = ActualFrameDurationMicroSec;
 
     do // Once
     {
         if (gpio_num_t(-1) == DataPin)
         {
+            FrameLen = 0;
             break;
         }
 
         if (!canRefresh())
         {
+            FrameLen = 0;
             break;
         }
 
         // DEBUG_V("get the next frame started");
 
-        if (Rmt.Render ())
+        if (Rmt.StartNewFrame ())
         {
             ReportNewFrame ();
         }
@@ -165,6 +168,7 @@ void c_OutputUCS1903Rmt::Render ()
     } while (false);
 
     // DEBUG_END;
-} // Render
+    return FrameLen;
+} // Poll
 
 #endif // defined(SUPPORT_OutputType_UCS1903) && defined(ARDUINO_ARCH_ESP32)

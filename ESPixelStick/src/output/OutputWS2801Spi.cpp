@@ -86,13 +86,13 @@ bool c_OutputWS2801Spi::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputWS2801Spi::Render ()
+void c_OutputWS2801Spi::Poll ()
 {
     // DEBUG_START;
 
     if (canRefresh ())
     {
-        if (Spi.Render ())
+        if (Spi.Poll ())
             {
             ReportNewFrame ();
             }

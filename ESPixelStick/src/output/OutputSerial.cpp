@@ -248,8 +248,8 @@ void c_OutputSerial::SetFrameDurration ()
     float IntensityBitTimeInUs     = (1.0 / float(CurrentBaudrate)) * float(MicroSecondsInASecond);
     float TotalIntensitiesPerFrame = float(Num_Channels + 1) + SerialHeaderSize + SerialFooterSize;
     float TotalBitsPerFrame        = float(NumBitsPerIntensity) * TotalIntensitiesPerFrame;
-    uint32_t TotalFrameTimeInUs    = uint32_t(IntensityBitTimeInUs * TotalBitsPerFrame) + InterFrameGapInMicroSec;
-    FrameMinDurationInMicroSec     = max(uint32_t(25000), TotalFrameTimeInUs);
+    ActualFrameDurationMicroSec    = uint32_t(IntensityBitTimeInUs * TotalBitsPerFrame) + InterFrameGapInMicroSec;
+    FrameMinDurationInMicroSec     = max(uint32_t(25000), ActualFrameDurationMicroSec);
 
     // DEBUG_V (String ("           CurrentBaudrate: ") + String (CurrentBaudrate));
     // DEBUG_V (String ("      IntensityBitTimeInUs: ") + String (IntensityBitTimeInUs));
@@ -257,9 +257,7 @@ void c_OutputSerial::SetFrameDurration ()
     // DEBUG_V (String ("          SerialFooterSize: ") + String (SerialFooterSize));
     // DEBUG_V (String ("  TotalIntensitiesPerFrame: ") + String (TotalIntensitiesPerFrame));
     // DEBUG_V (String ("         TotalBitsPerFrame: ") + String (TotalBitsPerFrame));
-    // DEBUG_V (String ("   InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
-    // DEBUG_V (String ("        TotalFrameTimeInUs: ") + String (TotalFrameTimeInUs));
-    // DEBUG_V (String ("   InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
+    // DEBUG_V (String ("ActualFrameDurationMicroSec: ") + String (ActualFrameDurationMicroSec));
     // DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
 
     // DEBUG_END;

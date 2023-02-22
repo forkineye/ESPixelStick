@@ -106,17 +106,23 @@ void c_OutputSerialUart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputSerialUart::Render ()
+uint32_t c_OutputSerialUart::Poll ()
 {
     // DEBUG_START;
+    uint32_t FrameLen = ActualFrameDurationMicroSec;
 
     if (canRefresh())
     {
         Uart.StartNewFrame();
         ReportNewFrame();
     }
+    else 
+    {
+        FrameLen = 0;
+    }
 
     // DEBUG_END;
+    return FrameLen;
 
 } // render
 
