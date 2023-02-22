@@ -19,17 +19,16 @@
   */
 
 // Output Manager
-#define DEFAULT_UART_1_GPIO gpio_num_t::GPIO_NUM_16 // Output 1
-#define DEFAULT_UART_2_GPIO gpio_num_t::GPIO_NUM_3  // Output 2
-
-#define DEFAULT_RMT_1_GPIO  gpio_num_t::GPIO_NUM_1  // Output 3
-#define DEFAULT_RMT_2_GPIO  gpio_num_t::GPIO_NUM_4  // Output 4
+#define DEFAULT_RMT_0_GPIO  gpio_num_t::GPIO_NUM_16 // Output 1
+#define DEFAULT_RMT_1_GPIO  gpio_num_t::GPIO_NUM_3  // Output 2
+#define DEFAULT_RMT_2_GPIO  gpio_num_t::GPIO_NUM_1  // Output 3
+#define DEFAULT_RMT_3_GPIO  gpio_num_t::GPIO_NUM_4  // Output 4
 
 // AE+ extra 3 outputs (Level-shifted and 33R resistor)
-#define DEFAULT_RMT_3_GPIO  gpio_num_t::GPIO_NUM_15 // Output 5
-#define DEFAULT_RMT_4_GPIO  gpio_num_t::GPIO_NUM_21 // Output 6
-#define DEFAULT_RMT_5_GPIO  gpio_num_t::GPIO_NUM_17 // Output 7
-#define DEFAULT_RMT_6_GPIO  gpio_num_t::GPIO_NUM_22 // Output 8
+#define DEFAULT_RMT_4_GPIO  gpio_num_t::GPIO_NUM_15 // Output 5
+#define DEFAULT_RMT_5_GPIO  gpio_num_t::GPIO_NUM_21 // Output 6
+#define DEFAULT_RMT_6_GPIO  gpio_num_t::GPIO_NUM_17 // Output 7
+#define DEFAULT_RMT_7_GPIO  gpio_num_t::GPIO_NUM_22 // Output 8
 
 // Power relay output over Q1 or Q1R
 // #define DEFAULT_RELAY_GPIO      gpio_num_t::GPIO_NUM_15
