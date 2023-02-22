@@ -76,15 +76,17 @@ public:
     };
 
 private:
-#define RMT_INT_TX_END     (1)
-#define RMT_INT_RX_END     (2)
-#define RMT_INT_ERROR      (4)
-#define RMT_INT_THR_EVNT   (1<<24)
+#define RMT_INT_TX_END          (1)
+#define RMT_INT_RX_END          (2)
+#define RMT_INT_ERROR           (4)
+#define RMT_BITS_PER_CHAN       (3)
 
-#define RMT_INT_TX_END_BIT      (RMT_INT_TX_END   << (uint32_t (OutputRmtConfig.RmtChannelId)*3))
-#define RMT_INT_RX_END_BIT      (RMT_INT_RX_END   << (uint32_t (OutputRmtConfig.RmtChannelId)*3))
-#define RMT_INT_ERROR_BIT       (RMT_INT_ERROR    << (uint32_t (OutputRmtConfig.RmtChannelId)*3))
-#define RMT_INT_THR_EVNT_BIT    (RMT_INT_THR_EVNT << (uint32_t (OutputRmtConfig.RmtChannelId)))
+#define RMT_INT_THR_EVNT_BIT    (1 << (24 + uint32_t (OutputRmtConfig.RmtChannelId)))
+
+#define RMT_INT_TX_END_BIT      (RMT_INT_TX_END   << (uint32_t (OutputRmtConfig.RmtChannelId)*RMT_BITS_PER_CHAN))
+#define RMT_INT_RX_END_BIT      (RMT_INT_RX_END   << (uint32_t (OutputRmtConfig.RmtChannelId)*RMT_BITS_PER_CHAN))
+#define RMT_INT_ERROR_BIT       (RMT_INT_ERROR    << (uint32_t (OutputRmtConfig.RmtChannelId)*RMT_BITS_PER_CHAN))
+#define NUM_RMT_SLOTS           (sizeof(RMTMEM.chan[0].data32) / sizeof(RMTMEM.chan[0].data32[0]))
 
     OutputRmtConfig_t   OutputRmtConfig;
 
@@ -93,31 +95,29 @@ private:
 
     uint32_t            NumRmtSlotsPerIntensityValue      = 8;
     uint32_t            NumRmtSlotOverruns                = 0;
+    uint32_t            MaxNumRmtSlotsPerInterrupt        = (NUM_RMT_SLOTS/2);
 
-    rmt_isr_handle_t       RMT_intr_handle = NULL;
-    volatile rmt_item32_t *RmtStartAddr    = nullptr;
-    volatile rmt_item32_t *RmtCurrentAddr  = nullptr;
-    volatile rmt_item32_t *RmtEndAddr      = nullptr;
+    rmt_item32_t    SendBuffer[NUM_RMT_SLOTS];
+    uint32_t        RmtBufferWriteIndex         = 0;
+    uint32_t        SendBufferWriteIndex        = 0;
+    uint32_t        SendBufferReadIndex         = 0;
+    uint32_t        NumUsedEntriesInSendBuffer  = 0;
 
-#define NUM_RMT_SLOTS (sizeof(RMTMEM.chan[0].data32) / sizeof(RMTMEM.chan[0].data32[0]))
 #define MIN_FRAME_TIME_MS 25
 
-    volatile uint32_t   NumAvailableRmtSlotsToFill  = NUM_RMT_SLOTS;
-    const uint32_t      NumRmtSlotsPerInterrupt     = NUM_RMT_SLOTS * 0.75;
-//    uint32_t            LastFrameStartTime          = 0;
-//     uint32_t            FrameMinDurationInMicroSec  = 1000;
     uint32_t            TxIntensityDataStartingMask = 0x80;
     RmtDataBitIdType_t  InterIntensityValueId       = RMT_INVALID_VALUE;
 
-    void                  StartNewFrame ();
-    inline void     IRAM_ATTR ISR_Handler_SendIntensityData ();
-    inline void     IRAM_ATTR ISR_EnqueueData(uint32_t value);
-    inline bool     IRAM_ATTR MoreDataToSend();
-    inline uint32_t IRAM_ATTR GetNextIntensityToSend();
-    inline void     IRAM_ATTR StartNewDataFrame();
+    inline void IRAM_ATTR ISR_TransferIntensityDataToRMT ();
+    inline void IRAM_ATTR ISR_CreateIntensityData ();
+    inline void IRAM_ATTR ISR_WriteToBuffer(uint32_t value);
+    inline bool IRAM_ATTR ISR_MoreDataToSend();
+    inline bool IRAM_ATTR ISR_GetNextIntensityToSend(uint32_t &DataToSend);
+    inline void IRAM_ATTR ISR_StartNewDataFrame();
+    inline void IRAM_ATTR ISR_ResetRmtBlockPointers();
 
 #ifndef HasBeenInitialized
-        bool HasBeenInitialized = false;
+    bool HasBeenInitialized = false;
 #endif // ndef HasBeenInitialized
 
     TaskHandle_t SendIntensityDataTaskHandle = NULL;
@@ -127,15 +127,20 @@ public:
     virtual ~c_OutputRmt ();
 
     void Begin                                  (OutputRmtConfig_t config);
-    bool Render                                 ();
+    bool StartNewFrame                          ();
     void GetStatus                              (ArduinoJson::JsonObject& jsonStatus);
     void set_pin                                (gpio_num_t _DataPin) { OutputRmtConfig.DataPin = _DataPin; rmt_set_gpio (OutputRmtConfig.RmtChannelId, rmt_mode_t::RMT_MODE_TX, OutputRmtConfig.DataPin, false); }
     void PauseOutput                            (bool State);
-    inline uint32_t IRAM_ATTR GetRmtIntMask     ()               { return ((RMT_INT_TX_END_BIT | RMT_INT_ERROR_BIT | RMT_INT_ERROR_BIT | RMT_INT_THR_EVNT_BIT)); }
+    inline uint32_t IRAM_ATTR GetRmtIntMask     ()               { return ((RMT_INT_TX_END_BIT | RMT_INT_ERROR_BIT | RMT_INT_ERROR_BIT)); }
     void GetDriverName                          (String &value)  { value = CN_RMT; }
 
-#define DisableInterrupts RMT.int_ena.val &= ~(RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT)
-#define EnableInterrupts  RMT.int_ena.val |=  (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT)
+#define RMT_ISR_BITS         (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT)
+#define DisableRmtInterrupts RMT.int_ena.val &= ~(RMT_ISR_BITS)
+#define EnableRmtInterrupts  RMT.int_ena.val |=  (RMT_ISR_BITS)
+#define ClearRmtInterrupts   RMT.int_clr.val  =  (RMT_ISR_BITS)
+#define InterrupsAreEnabled  (RMT.int_ena.val &  (RMT_ISR_BITS))
+
+    bool DriverIsSendingIntensityData() {return 0 != InterrupsAreEnabled;}
 
 #define RMT_ClockRate       80000000.0
 #define RMT_Clock_Divisor   2.0
@@ -143,22 +148,26 @@ public:
 
     void SetIntensity2Rmt (rmt_item32_t NewValue, RmtDataBitIdType_t ID) { Intensity2Rmt[ID] = NewValue; }
 
-    bool NoFrameInProgress () { return (0 == (RMT.int_ena.val & (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT))); }
+    bool ThereIsDataToSend = false;
+    bool NoFrameInProgress () { return (0 == (RMT.int_ena.val & (RMT_ISR_BITS))); }
 
-    void IRAM_ATTR ISR_Handler ();
+    void IRAM_ATTR ISR_Handler (uint32_t isrFlags);
 
 // #define USE_RMT_DEBUG_COUNTERS
 #ifdef USE_RMT_DEBUG_COUNTERS
    // debug counters
    uint32_t DataCallbackCounter = 0;
    uint32_t DataTaskcounter = 0;
-   uint32_t DataISRcounter = 0;
-   uint32_t FrameThresholdCounter = 0;
+   uint32_t ISRcounter = 0;
+   uint32_t FrameStartCounter = 0; 
    uint32_t FrameEndISRcounter = 0;
-   uint32_t FrameStartCounter = 0;
+   uint32_t SendBlockIsrCounter = 0;
+   uint32_t RanOutOfData = 0;
+   uint32_t UnknownISRcounter = 0;
+   uint32_t IntTxEndIsrCounter = 0;
+   uint32_t IntTxThrIsrCounter = 0;
    uint32_t RxIsr = 0;
    uint32_t ErrorIsr = 0;
-   uint32_t IsrIsNotForUs = 0;
    uint32_t IntensityValuesSent = 0;
    uint32_t IntensityBitsSent = 0;
    uint32_t IntensityValuesSentLastFrame = 0;
@@ -166,7 +175,10 @@ public:
    uint32_t IncompleteFrame = 0;
    uint32_t IncompleteFrameLastFrame = 0;
    uint32_t BitTypeCounters[RmtDataBitIdType_t::RMT_NUM_BIT_TYPES];
-
+   uint32_t RmtEntriesTransfered = 0;
+   uint32_t RmtXmtFills = 0;
+   
 #endif // def USE_RMT_DEBUG_COUNTERS
+
 };
 #endif // def #ifdef ARDUINO_ARCH_ESP32

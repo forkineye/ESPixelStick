@@ -78,11 +78,14 @@ void c_OutputWS2811Rmt::Begin ()
 
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
     c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
-    OutputRmtConfig.RmtChannelId     = rmt_channel_t(OutputChannelId);
-    OutputRmtConfig.DataPin          = gpio_num_t(DataPin);
-    OutputRmtConfig.idle_level       = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
-    OutputRmtConfig.pPixelDataSource = this;
-    OutputRmtConfig.CitrdsArray      = ConvertIntensityToRmtDataStream;
+    OutputRmtConfig.RmtChannelId      = rmt_channel_t(OutputChannelId);
+    OutputRmtConfig.DataPin           = gpio_num_t(DataPin);
+    OutputRmtConfig.idle_level        = rmt_idle_level_t::RMT_IDLE_LEVEL_HIGH;
+    OutputRmtConfig.pPixelDataSource  = this;
+    OutputRmtConfig.NumFrameStartBits = 0;
+    OutputRmtConfig.CitrdsArray       = ConvertIntensityToRmtDataStream;
+    OutputRmtConfig.NumIdleBits       = 1;
+
     // DEBUG_V();
     Rmt.Begin(OutputRmtConfig);
 
@@ -106,10 +109,10 @@ bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     // Default is 100us * 3
     rmt_item32_t BitValue;
     // by default there are 6 rmt_item32_t instances replicated for the start of a frame.
-    // 6 instances times 2 time periods per instance = 12
-    BitValue.duration0 = ifgTicks / 12;
+    // 1 instances times 2 time periods per instance = 2
+    BitValue.duration0 = ifgTicks / 2;
     BitValue.level0    = 0;
-    BitValue.duration1 = ifgTicks / 12;
+    BitValue.duration1 = ifgTicks / 2;
     BitValue.level1    = 0;
     Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
@@ -123,7 +126,6 @@ bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 //----------------------------------------------------------------------------
 void c_OutputWS2811Rmt::SetOutputBufferSize (uint32_t NumChannelsAvailable)
 {
-
     // DEBUG_START;
 
     c_OutputWS2811::SetOutputBufferSize (NumChannelsAvailable);
@@ -141,25 +143,28 @@ void c_OutputWS2811Rmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputWS2811Rmt::Render ()
+uint32_t c_OutputWS2811Rmt::Poll ()
 {
     // DEBUG_START;
+    uint32_t FrameLen = ActualFrameDurationMicroSec;
 
     do // Once
     {
         if (gpio_num_t(-1) == DataPin)
         {
+            FrameLen = 0;
             break;
         }
 
         if (!canRefresh())
         {
+            FrameLen = 0;
             break;
         }
 
         // DEBUG_V("get the next frame started");
 
-        if (Rmt.Render ())
+        if (Rmt.StartNewFrame ())
         {
             ReportNewFrame ();
         }
@@ -169,7 +174,8 @@ void c_OutputWS2811Rmt::Render ()
     } while (false);
 
     // DEBUG_END;
+    return FrameLen;
 
-} // Render
+} // Poll
 
 #endif // defined(SUPPORT_OutputType_WS2811) && defined(ARDUINO_ARCH_ESP32)

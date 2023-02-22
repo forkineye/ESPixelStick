@@ -24,6 +24,7 @@
 #include "../ESPixelStick.h"
 #include "../FileMgr.hpp"
 
+
 //-----------------------------------------------------------------------------
 // bring in driver definitions
 #include "OutputDisabled.hpp"
@@ -54,6 +55,13 @@
     #define DEFAULT_RELAY_GPIO      gpio_num_t::GPIO_NUM_1
 #endif // ndef DEFAULT_RELAY_GPIO
 
+void OM_Task (void *arg)
+{
+    while(1){
+        // DEBUG_V();
+        OutputMgr.TaskPoll();
+    }
+}
 //-----------------------------------------------------------------------------
 // Local Data definitions
 //-----------------------------------------------------------------------------
@@ -260,7 +268,13 @@ void c_OutputMgr::Begin ()
         LoadConfig();
 
         // CreateNewConfig ();
+
+        xTaskCreatePinnedToCore(OM_Task, "OM_Task", 4096, NULL, 10, &myTaskHandle, 0);
+
     } while (false);
+
+    // Preset the output memory
+    memset((void*)&OutputBuffer[0], 0x00, sizeof(OutputBuffer));
 
     // DEBUG_END;
 
@@ -479,6 +493,8 @@ void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
         CurrentOutput.pOutputChannelDriver->GetStatus(channelStatus);
         // DEBUG_V ();
     }
+
+    jsonStatus["NumActiveChannels"] = GetNumActiveChannels();
 
     // DEBUG_END;
 } // GetStatus
@@ -1238,11 +1254,19 @@ void c_OutputMgr::SetSerialUart()
 
     // DEBUG_END;
 }
+
 //-----------------------------------------------------------------------------
-///< Called from loop(), renders output data
-void c_OutputMgr::Render()
+///< Called from loop(), Does Nothing
+void c_OutputMgr::Poll()
 {
-    // DEBUG_START;
+    // //DEBUG_START;
+    // //DEBUG_END;
+} // Render
+
+//-----------------------------------------------------------------------------
+void c_OutputMgr::TaskPoll()
+{
+    // //DEBUG_START;
 
 #ifdef LED_FLASH_GPIO
     pinMode (LED_FLASH_GPIO, OUTPUT);
@@ -1258,14 +1282,48 @@ void c_OutputMgr::Render()
 
     if (false == IsOutputPaused)
     {
-        // DEBUG_START;
+        // //DEBUG_V();
         for (DriverInfo_t & OutputChannel : OutputChannelDrivers)
         {
-            OutputChannel.pOutputChannelDriver->Render ();
+            // //DEBUG_V("Start a new channel");
+            uint32_t DelayInUs = OutputChannel.pOutputChannelDriver->Poll ();
+            if(DelayInUs)
+            {
+                vTaskDelay((DelayInUs / 1000) / portTICK_PERIOD_MS);
+            }
+            else
+            {
+                vTaskDelay(1);
+            }
         }
     }
-    // DEBUG_END;
+    else
+    {
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+    // //DEBUG_END;
 } // render
+
+//-----------------------------------------------------------------------------
+uint32_t c_OutputMgr::GetNumActiveChannels (void)
+{
+    // //DEBUG_START;
+
+    uint32_t NumberOfActiveChannels = 0;
+    // //DEBUG_V("Count the number of channels sending data");
+    for (DriverInfo_t & OutputChannel : OutputChannelDrivers)
+    {
+        if(OutputChannel.pOutputChannelDriver->DriverIsSendingIntensityData ())
+        {
+            // //DEBUG_V();
+            NumberOfActiveChannels++;
+        }
+    }
+
+    // //DEBUG_END;
+    return NumberOfActiveChannels;
+
+} // GetNumActiveChannels
 
 //-----------------------------------------------------------------------------
 void c_OutputMgr::UpdateDisplayBufferReferences (void)
@@ -1353,7 +1411,7 @@ void c_OutputMgr::PauseOutputs(bool PauseTheOutput)
 } // PauseOutputs
 
 //-----------------------------------------------------------------------------
-void c_OutputMgr::WriteChannelData(uint32_t StartChannelId, uint32_t ChannelCount, byte *pSourceData)
+void c_OutputMgr::WriteChannelData(uint32_t StartChannelId, uint32_t ChannelCount, uint8_t *pSourceData)
 {
     // DEBUG_START;
 
