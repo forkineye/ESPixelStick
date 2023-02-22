@@ -90,13 +90,13 @@ bool c_OutputAPA102Spi::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputAPA102Spi::Render ()
+void c_OutputAPA102Spi::Poll ()
 {
     // DEBUG_START;
 
     if (canRefresh ())
     {
-        if (Spi.Render ())
+        if (Spi.Poll ())
         {
             ReportNewFrame ();
         }

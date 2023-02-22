@@ -466,8 +466,8 @@ void loop()
     // Process input data
     InputMgr.Process ();
 
-    // Render output
-    OutputMgr.Render();
+    // Poll output
+    OutputMgr.Poll();
 
     WebMgr.Process ();
 

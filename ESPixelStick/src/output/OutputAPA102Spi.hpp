@@ -42,7 +42,7 @@ public:
     void    Begin ();
     void    GetConfig (ArduinoJson::JsonObject& jsonConfig);
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);  ///< Set a new config in the driver
-    void    Render ();                                        ///< Call from loop (),  renders output data
+    void    Poll ();                                        ///< Call from loop (),  renders output data
     void    PauseOutput () {};
 
 private:
