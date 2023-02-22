@@ -366,7 +366,7 @@ void  c_OutputRelay::GetDriverName (String & sDriverName)
 } // GetDriverName
 
 //----------------------------------------------------------------------------
-void c_OutputRelay::Render ()
+void c_OutputRelay::Poll ()
 {
     // DEBUG_START;
 
