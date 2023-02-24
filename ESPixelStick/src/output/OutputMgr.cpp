@@ -277,6 +277,7 @@ void c_OutputMgr::Begin ()
 
 #if defined(ARDUINO_ARCH_ESP32)
         xTaskCreatePinnedToCore(OM_Task, "OM_Task", 4096, NULL, 10, &myTaskHandle, 0);
+        vTaskPrioritySet(myTaskHandle, 4);
 #endif // defined(ARDUINO_ARCH_ESP32)
 
     } while (false);
@@ -1314,17 +1315,19 @@ void c_OutputMgr::TaskPoll()
             uint32_t DelayInUs = OutputChannel.pOutputChannelDriver->Poll ();
             if(DelayInUs)
             {
-                vTaskDelay((DelayInUs / 1000) / portTICK_PERIOD_MS);
+                // convert MicroSecs + 1ms to MilliSecs and then convert to Delay in ticks
+                vTaskDelay(pdMS_TO_TICKS((DelayInUs + 1000) / 1000));
             }
             else
             {
-                vTaskDelay(1);
+                vTaskDelay(pdMS_TO_TICKS(1));
             }
         }
     }
     else
     {
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        // one second delay
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
     // //DEBUG_END;
 } // TaskPoll
