@@ -240,23 +240,28 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     debugStatus["conf1"]                        = String(RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.val, HEX);
     debugStatus["tx_lim_ch"]                    = String(RMT.tx_lim_ch[OutputRmtConfig.RmtChannelId].limit);
 
+    debugStatus["FrameStartCounter"]            = FrameStartCounter;
     debugStatus["RawIsrCounter"]                = RawIsrCounter;
     debugStatus["ISRcounter"]                   = ISRcounter;
     debugStatus["SendBlockIsrCounter"]          = SendBlockIsrCounter;
     debugStatus["FrameEndISRcounter"]           = FrameEndISRcounter;
     debugStatus["UnknownISRcounter"]            = UnknownISRcounter;
     debugStatus["RanOutOfData"]                 = RanOutOfData;
-    debugStatus["FrameStartCounter"]            = FrameStartCounter;
     debugStatus["IntTxEndIsrCounter"]           = IntTxEndIsrCounter;
     debugStatus["IntTxThrIsrCounter"]           = IntTxThrIsrCounter;
     debugStatus["ErrorIsr"]                     = ErrorIsr;
     debugStatus["RxIsr"]                        = RxIsr;
     debugStatus["IncompleteFrame"]              = IncompleteFrame;
-    debugStatus["Raw int_ena"]                  = String (RMT.int_ena.val, HEX);
-    debugStatus["TX END int_ena"]               = String (RMT.int_ena.val & (RMT_INT_TX_END_BIT), HEX);
-    debugStatus["RMT_INT_TX_END_BIT"]           = String (RMT_INT_TX_END_BIT, HEX);
-    debugStatus["Raw int_st"]                   = String (RMT.int_st.val, HEX);
-    debugStatus["TX END int_st"]                = String (RMT.int_st.val & (RMT_INT_TX_END_BIT), HEX);
+    debugStatus["RMT_INT_TX_END_BIT"]           = "0x" + String (RMT_INT_TX_END_BIT, HEX);
+    debugStatus["RMT_INT_THR_EVNT_BIT"]         = "0x" + String (RMT_INT_THR_EVNT_BIT, HEX);
+    uint32_t temp = RMT.int_ena.val;
+    debugStatus["Raw int_ena"]                  = "0x" + String (temp, HEX);
+    debugStatus["TX END int_ena"]               = "0x" + String (temp & (RMT_INT_TX_END_BIT), HEX);
+    debugStatus["TX THRSH int_ena"]             = "0x" + String (temp & (RMT_INT_THR_EVNT_BIT), HEX);
+    temp = RMT.int_st.val;
+    debugStatus["Raw int_st"]                   = "0x" + String (temp, HEX);
+    debugStatus["TX END int_st"]                = "0x" + String (temp & (RMT_INT_TX_END_BIT), HEX);
+    debugStatus["TX THRSH int_st"]              = "0x" + String (temp & (RMT_INT_THR_EVNT_BIT), HEX);
     debugStatus["IntensityValuesSent"]          = IntensityValuesSent;
     debugStatus["IntensityValuesSentLastFrame"] = IntensityValuesSentLastFrame;
     debugStatus["IntensityBitsSent"]            = IntensityBitsSent;
@@ -270,6 +275,8 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     debugStatus["RmtEntriesTransfered"]         = RmtEntriesTransfered;
     debugStatus["RmtXmtFills"]                  = RmtXmtFills;
 
+// #define IncludeBufferData
+#ifdef IncludeBufferData
     uint32_t index = 0;
     for (auto CurrentCounter : BitTypeCounters)
     {
@@ -291,7 +298,7 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
         uint32_t data = CurrentPointer[index];
         debugStatus[String("RMT Data ") + String(index)] = String(data, HEX);
     }
-
+#endif // def IncludeBufferData
 #endif // def USE_RMT_DEBUG_COUNTERS
     // //DEBUG_END;
 } // GetStatus
@@ -431,12 +438,14 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler (uint32_t isrFlags)
             // refill the buffer
             ISR_CreateIntensityData();
 
-#ifdef USE_RMT_DEBUG_COUNTERS
-            if (!ThereIsDataToSend)
+            if (!ThereIsDataToSend && 0 == NumUsedEntriesInSendBuffer)
             {
+#ifdef USE_RMT_DEBUG_COUNTERS
                 ++RanOutOfData;
-            }
 #endif // def USE_RMT_DEBUG_COUNTERS
+                DisableRmtInterrupts;
+                RMTMEM.chan[OutputRmtConfig.RmtChannelId].data32[RmtBufferWriteIndex].val = 0x0;
+            }
         }
         else
         {
@@ -586,9 +595,6 @@ bool c_OutputRmt::StartNewFrame ()
         DisableRmtInterrupts;
         RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 0;
 
-        RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.mem_rd_rst = 1;
-        RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.mem_rd_rst = 0;
-
         // rmt_tx_memory_reset(OutputRmtConfig.RmtChannelId);
         ISR_ResetRmtBlockPointers ();
 
@@ -644,8 +650,6 @@ bool c_OutputRmt::StartNewFrame ()
         ISR_CreateIntensityData ();
 
         // At this point we have 128 bits of data created and ready to send
-
-        // ISR_ResetRmtBlockPointers ();
         RMT.tx_lim_ch[OutputRmtConfig.RmtChannelId].limit = MaxNumRmtSlotsPerInterrupt;
 
         ClearRmtInterrupts;
