@@ -96,6 +96,7 @@ void c_InputDDP::GetStatus (JsonObject& jsonStatus)
     ddpStatus["bytesreceived"]   = float(stats.bytesReceived) / 1024.0;
     ddpStatus[CN_errors]         = stats.errors;
     ddpStatus[CN_id]             = InputChannelId;
+    ddpStatus["lastError"]       = lastError;
 
     // DEBUG_END;
 
@@ -159,6 +160,7 @@ void c_InputDDP::ProcessReceivedUdpPacket(AsyncUDPPacket ReceivedPacket)
         if ((packet.header.flags1 & DDP_FLAGS1_VERMASK) != DDP_FLAGS1_VER1)
         {
             stats.errors++;
+            lastError = String("Incorrect version. Flags1: 0x") + String(packet.header.flags1, HEX);
             // DEBUG_V ("Invalid version");
             break;
         }
@@ -250,6 +252,7 @@ void c_InputDDP::ProcessReceivedData (DDP_packet_t & Packet)
         if (InputBufferOffset >= InputDataBufferSize)
         {
             // DEBUG_V ("Cant write any of this data to the input buffer");
+            lastError = String("Too much data received. Entire PDU discarded");
             stats.errors++;
             break;
         }
@@ -261,6 +264,7 @@ void c_InputDDP::ProcessReceivedData (DDP_packet_t & Packet)
         if (RemainingBufferSpace < packetDataLength)
         {
             AdjPacketDataLength = RemainingBufferSpace;
+            lastError = String("Too much data received. Discarding ") + String(packetDataLength - RemainingBufferSpace) + (" bytes of data");
             stats.errors++;
         }
         // DEBUG_V (String (" AdjPacketDataLength: ") + String (AdjPacketDataLength));
@@ -345,7 +349,7 @@ void c_InputDDP::ProcessReceivedQuery ()
         default:
         {
             stats.errors++;
-            // DEBUG_V (String ("Unsupported query: ") + String (DDPresponse.header.id));
+            lastError = String ("Unsupported query: ") + String (DDPresponse.header.id);
             break;
         }
     }

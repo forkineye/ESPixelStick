@@ -93,6 +93,7 @@ private:
         uint64_t bytesReceived;
         uint32_t errors;
     } DDP_stats_t;
+        String   lastError;
 
     AsyncUDP        * udp = nullptr;         // UDP
     uint8_t         lastReceivedSequenceNumber = 0;
