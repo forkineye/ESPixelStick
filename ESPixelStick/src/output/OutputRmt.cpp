@@ -122,7 +122,7 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
 
     do // once
     {
-        gpio_set_direction(gpio_num_t::GPIO_NUM_4, gpio_mode_t::GPIO_MODE_OUTPUT);
+        // gpio_set_direction(gpio_num_t::GPIO_NUM_4, gpio_mode_t::GPIO_MODE_OUTPUT);
 
         OutputRmtConfig = config;
 #if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
@@ -386,7 +386,7 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler (uint32_t isrFlags)
 {
     // //DEBUG_START;
 
-    GPIO_OUTPUT_SET(gpio_num_t::GPIO_NUM_4, 0);
+    // GPIO_OUTPUT_SET(gpio_num_t::GPIO_NUM_4, 0);
     // gpio_set_level(gpio_num_t::GPIO_NUM_4, 0);
     // uint32_t int_st = RMT.int_raw.val;
     // //DEBUG_V(String("              int_st: 0x") + String(int_st, HEX));
@@ -456,7 +456,7 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler (uint32_t isrFlags)
 #endif // def USE_RMT_DEBUG_COUNTERS
 
     // //DEBUG_END;
-    GPIO_OUTPUT_SET(gpio_num_t::GPIO_NUM_4, 1);
+    // GPIO_OUTPUT_SET(gpio_num_t::GPIO_NUM_4, 1);
 } // ISR_Handler
 
 //----------------------------------------------------------------------------
