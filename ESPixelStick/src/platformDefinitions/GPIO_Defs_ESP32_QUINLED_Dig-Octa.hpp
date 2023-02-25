@@ -21,22 +21,21 @@
 #define SUPPORT_ETHERNET
 
 //Output Manager
-#define DEFAULT_UART_1_GPIO      gpio_num_t::GPIO_NUM_0
-#define DEFAULT_UART_2_GPIO      gpio_num_t::GPIO_NUM_1
-
-#define DEFAULT_RMT_1_GPIO       gpio_num_t::GPIO_NUM_2
-#define DEFAULT_RMT_2_GPIO       gpio_num_t::GPIO_NUM_3
-#define DEFAULT_RMT_3_GPIO       gpio_num_t::GPIO_NUM_4
-#define DEFAULT_RMT_4_GPIO       gpio_num_t::GPIO_NUM_5
-#define DEFAULT_RMT_5_GPIO       gpio_num_t::GPIO_NUM_12
-#define DEFAULT_RMT_6_GPIO       gpio_num_t::GPIO_NUM_13
+#define DEFAULT_RMT_0_GPIO gpio_num_t::GPIO_NUM_0
+#define DEFAULT_RMT_1_GPIO gpio_num_t::GPIO_NUM_1
+#define DEFAULT_RMT_2_GPIO gpio_num_t::GPIO_NUM_2
+#define DEFAULT_RMT_3_GPIO gpio_num_t::GPIO_NUM_3
+#define DEFAULT_RMT_4_GPIO gpio_num_t::GPIO_NUM_4
+#define DEFAULT_RMT_5_GPIO gpio_num_t::GPIO_NUM_5
+#define DEFAULT_RMT_6_GPIO gpio_num_t::GPIO_NUM_12
+#define DEFAULT_RMT_7_GPIO gpio_num_t::GPIO_NUM_13
 
 //Power relay output over Q1 or Q1R
-#define DEFAULT_RELAY_GPIO      gpio_num_t::GPIO_NUM_33
+#define DEFAULT_RELAY_GPIO gpio_num_t::GPIO_NUM_33
 
 //I2c over Q3 and Q4 (SCL is shared with LED8! Disable LED8 to enable I2C)
-//#define DEFAULT_I2C_SDA gpio_num_t::GPIO_NUM_32
-//#define DEFAULT_I2C_SCL gpio_num_t::GPIO_NUM_13
+#define DEFAULT_I2C_SDA gpio_num_t::GPIO_NUM_32
+#define DEFAULT_I2C_SCL gpio_num_t::GPIO_NUM_13
 
 // File Manager
 #define SUPPORT_SD
@@ -90,4 +89,4 @@
 // #define SUPPORT_OutputType_WS2801           // SPI
 #define SUPPORT_OutputType_WS2811           // UART / RMT
 #define SUPPORT_OutputType_Relay            // GPIO
-// #define SUPPORT_OutputType_Servo_PCA9685    // I2C (default pins)
+#define SUPPORT_OutputType_Servo_PCA9685    // I2C (default pins)
