@@ -419,7 +419,7 @@ uint32_t c_OutputRelay::Poll ()
     ReportNewFrame ();
 
     // DEBUG_END;
-    return ActualFrameDurationMicroSec;
+    return 0;
 } // render
 
 //----------------------------------------------------------------------------

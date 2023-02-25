@@ -331,7 +331,7 @@ uint32_t c_OutputServoPCA9685::Poll ()
     }
 
     // DEBUG_END;
-    return ActualFrameDurationMicroSec;
+    return 0;
 
 } // render
 
