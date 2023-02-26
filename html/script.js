@@ -689,7 +689,7 @@ function ProcessModeConfigurationDataRelay(RelayConfig) {
         let EnabledPattern = '<td><input type="checkbox" id="Enabled_' + (CurrentRowId) + '"></td>';
         let InvertedPattern = '<td><input type="checkbox" id="Inverted_' + (CurrentRowId) + '"></td>';
         let PwmPattern = '<td><input type="checkbox" id="Pwm_' + (CurrentRowId) + '"></td>';
-        let gpioPattern = '<td><input type="number"   id="gpioId_' + (CurrentRowId) + '"step="1" min="0" max="34"  value="34"  class="form-control is-valid"></td>';
+        let gpioPattern = '<td><input type="number"   id="gpioId_' + (CurrentRowId) + '"step="1" min="-1" max="34"  value="34"  class="form-control is-valid"></td>';
         let threshholdPattern = '<td><input type="number"   id="threshhold_' + (CurrentRowId) + '"step="1" min="0" max="255" value="300" class="form-control is-valid"></td>';
         let PwmFreqPattern = '';
         if (true === HasPwmFrequency) {
