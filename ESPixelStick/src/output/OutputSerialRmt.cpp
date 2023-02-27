@@ -194,25 +194,28 @@ void c_OutputSerialRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputSerialRmt::Render ()
+uint32_t c_OutputSerialRmt::Poll ()
 {
     // DEBUG_START;
+    uint32_t FrameLen = ActualFrameDurationMicroSec;
 
     do // Once
     {
         if (gpio_num_t(-1) == DataPin)
         {
+            FrameLen = 0;
             break;
         }
 
         if (!canRefresh())
         {
+            FrameLen = 0;
             break;
         }
 
         // DEBUG_V("get the next frame started");
 
-        if (Rmt.Render ())
+        if (Rmt.StartNewFrame ())
         {
             ReportNewFrame ();
         }
@@ -222,6 +225,7 @@ void c_OutputSerialRmt::Render ()
     } while (false);
 
     // DEBUG_END;
+    return FrameLen;
 
 } // Render
 

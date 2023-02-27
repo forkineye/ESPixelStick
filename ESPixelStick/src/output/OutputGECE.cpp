@@ -150,13 +150,13 @@ bool c_OutputGECE::validate ()
 } // validate
 
 //----------------------------------------------------------------------------
-void c_OutputGECE::Render()
+uint32_t c_OutputGECE::Poll()
 {
     // DEBUG_START;
 
 
     // DEBUG_END;
-
+    return 0;
 } // render
 
 #endif // defined(SUPPORT_OutputType_GECE)

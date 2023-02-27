@@ -39,7 +39,7 @@ GNU General Public License for more details.
 #define Relay_OUTPUT_PWM             true
 #define Relay_OUTPUT_NOT_PWM         false
 #define Relay_DEFAULT_TRIGGER_LEVEL  128
-#define Relay_DEFAULT_GPIO_ID        ((gpio_num_t)0)
+#define Relay_DEFAULT_GPIO_ID        gpio_num_t(-1)
 #define RelayPwmHigh                 255
 #define RelayPwmLow                  0
 
@@ -83,12 +83,15 @@ c_OutputRelay::~c_OutputRelay ()
     {
         for (RelayChannel_t &currentRelay : OutputList)
         {
-            if (currentRelay.Enabled)
+            if (gpio_num_t(-1) != currentRelay.GpioId)
             {
-                pinMode(currentRelay.GpioId, INPUT);
+                if (currentRelay.Enabled)
+                {
+                    pinMode(currentRelay.GpioId, INPUT);
+                }
+                currentRelay.Enabled = Relay_OUTPUT_DISABLED;
+                currentRelay.GpioId = Relay_DEFAULT_GPIO_ID;
             }
-            currentRelay.Enabled = Relay_OUTPUT_DISABLED;
-            currentRelay.GpioId = Relay_DEFAULT_GPIO_ID;
         }
     }
 
@@ -150,7 +153,7 @@ bool c_OutputRelay::validate ()
     uint8_t Channel = 0;
     for (RelayChannel_t & currentRelay : OutputList)
     {
-        if (currentRelay.Enabled)
+        if (currentRelay.Enabled && (gpio_num_t(-1) != currentRelay.GpioId))
         {
             #if defined(ARDUINO_ARCH_ESP32)
                // assign GPIO to a channel and set the pwm 12 Khz frequency, 8 bit
@@ -259,7 +262,7 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             setFromJSON (temp, JsonChannelData, CN_gid);
             // DEBUGV (String ("temp: ") + String (temp));
 
-            if (temp != CurrentOutputChannel->GpioId)
+            if ((gpio_num_t(-1) != CurrentOutputChannel->GpioId) && (temp != CurrentOutputChannel->GpioId))
             {
                 // DEBUGV ("Revert Pin to input");
                 // The pin has changed. Let go of the old pin
@@ -366,7 +369,7 @@ void  c_OutputRelay::GetDriverName (String & sDriverName)
 } // GetDriverName
 
 //----------------------------------------------------------------------------
-void c_OutputRelay::Render ()
+uint32_t c_OutputRelay::Poll ()
 {
     // DEBUG_START;
 
@@ -377,7 +380,7 @@ void c_OutputRelay::Render ()
     {
         // DEBUG_V (String("OutputDataIndex: ") + String(OutputDataIndex));
         // DEBUG_V (String("        Enabled: ") + String(currentRelay.Enabled));
-        if (currentRelay.Enabled)
+        if (currentRelay.Enabled && (gpio_num_t(-1) != currentRelay.GpioId))
         {
             // DEBUG_V (String(" rawOutputValue: ") + String(pOutputBuffer[OutputDataIndex]));
             if (currentRelay.Pwm)
@@ -419,6 +422,7 @@ void c_OutputRelay::Render ()
     ReportNewFrame ();
 
     // DEBUG_END;
+    return 0;
 } // render
 
 //----------------------------------------------------------------------------

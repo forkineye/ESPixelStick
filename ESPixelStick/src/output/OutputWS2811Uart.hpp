@@ -40,7 +40,7 @@ public:
 
     // functions to be provided by the derived class
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
-    void    Render ();                                        ///< Call from loop(),  renders output data
+    uint32_t Poll ();                                        ///< Call from loop(),  renders output data
     void    PauseOutput (bool State);
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);
     void    GetConfig (ArduinoJson::JsonObject& jsonConfig);

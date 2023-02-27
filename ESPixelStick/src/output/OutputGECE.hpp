@@ -38,7 +38,7 @@ public:
     virtual bool SetConfig(ArduinoJson::JsonObject &jsonConfig);        ///< Set a new config in the driver
     virtual void GetConfig(ArduinoJson::JsonObject &jsonConfig);        ///< Get the current config used by the driver
     virtual void GetStatus(ArduinoJson::JsonObject &jsonStatus);        ///< Get the current config used by the driver
-    virtual void Render();                                              ///< Call from loop(),  renders output data
+    virtual uint32_t Poll();                                              ///< Call from loop(),  renders output data
     virtual void GetDriverName(String &sDriverName) { sDriverName = CN_GECE; }
             void SetOutputBufferSize(uint32_t NumChannelsAvailable);
             bool validate ();

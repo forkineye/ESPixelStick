@@ -1,1 +1,2 @@
-http-server -p8000
+rem http-server -p8000
+node NodeJsServer

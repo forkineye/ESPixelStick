@@ -142,25 +142,28 @@ void c_OutputTM1814Rmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputTM1814Rmt::Render ()
+uint32_t c_OutputTM1814Rmt::Poll ()
 {
     // DEBUG_START;
+    uint32_t FrameLen = ActualFrameDurationMicroSec;
 
     do // Once
     {
         if (gpio_num_t(-1) == DataPin)
         {
+            FrameLen = 0;
             break;
         }
 
         if (!canRefresh())
         {
+            FrameLen = 0;
             break;
         }
 
         // DEBUG_V("get the next frame started");
 
-        if (Rmt.Render ())
+        if (Rmt.StartNewFrame ())
         {
             ReportNewFrame ();
         }
@@ -169,7 +172,9 @@ void c_OutputTM1814Rmt::Render ()
 
     } while (false);
 
+    return FrameLen;
+
     // DEBUG_END;
-} // Render
+} // Poll
 
 #endif // defined (SUPPORT_OutputType_TM1814) && defined (ARDUINO_ARCH_ESP32)

@@ -248,8 +248,8 @@ void c_OutputSerial::SetFrameDurration ()
     float IntensityBitTimeInUs     = (1.0 / float(CurrentBaudrate)) * float(MicroSecondsInASecond);
     float TotalIntensitiesPerFrame = float(Num_Channels + 1) + SerialHeaderSize + SerialFooterSize;
     float TotalBitsPerFrame        = float(NumBitsPerIntensity) * TotalIntensitiesPerFrame;
-    uint32_t TotalFrameTimeInUs    = uint32_t(IntensityBitTimeInUs * TotalBitsPerFrame) + InterFrameGapInMicroSec;
-    FrameMinDurationInMicroSec     = max(uint32_t(25000), TotalFrameTimeInUs);
+    ActualFrameDurationMicroSec    = uint32_t(IntensityBitTimeInUs * TotalBitsPerFrame) + InterFrameGapInMicroSec;
+    FrameMinDurationInMicroSec     = max(uint32_t(25000), ActualFrameDurationMicroSec);
 
     // DEBUG_V (String ("           CurrentBaudrate: ") + String (CurrentBaudrate));
     // DEBUG_V (String ("      IntensityBitTimeInUs: ") + String (IntensityBitTimeInUs));
@@ -257,9 +257,7 @@ void c_OutputSerial::SetFrameDurration ()
     // DEBUG_V (String ("          SerialFooterSize: ") + String (SerialFooterSize));
     // DEBUG_V (String ("  TotalIntensitiesPerFrame: ") + String (TotalIntensitiesPerFrame));
     // DEBUG_V (String ("         TotalBitsPerFrame: ") + String (TotalBitsPerFrame));
-    // DEBUG_V (String ("   InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
-    // DEBUG_V (String ("        TotalFrameTimeInUs: ") + String (TotalFrameTimeInUs));
-    // DEBUG_V (String ("   InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
+    // DEBUG_V (String ("ActualFrameDurationMicroSec: ") + String (ActualFrameDurationMicroSec));
     // DEBUG_V (String ("FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
 
     // DEBUG_END;
@@ -331,9 +329,9 @@ void c_OutputSerial::StartNewFrame ()
 } // StartNewFrame
 
 //----------------------------------------------------------------------------
-uint32_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
+bool IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend (uint32_t &DataToSend)
 {
-    uint32_t data = 0x00;
+    DataToSend = 0x00;
 
 #ifdef USE_SERIAL_DEBUG_COUNTERS
     IntensityBytesSent++;
@@ -343,27 +341,27 @@ uint32_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
     {
         case SerialFrameState_t::RenardFrameStart:
         {
-            data = RenardFrameDefinitions_t::FRAME_START_CHAR;
+            DataToSend = RenardFrameDefinitions_t::FRAME_START_CHAR;
             SerialFrameState = SerialFrameState_t::RenardDataStart;
             break;
         }
 
         case SerialFrameState_t::RenardDataStart:
         {
-            data = RenardFrameDefinitions_t::CMD_DATA_START;
+            DataToSend = RenardFrameDefinitions_t::CMD_DATA_START;
             SerialFrameState = SerialFrameState_t::RenardSendData;
             break;
         }
 
         case SerialFrameState_t::RenardSendData:
         {
-            data = *NextIntensityToSend;
+            DataToSend = *NextIntensityToSend;
             // do we have to adjust the renard data stream?
-            if ((data >= RenardFrameDefinitions_t::MIN_VAL_TO_ESC) &&
-                (data <= RenardFrameDefinitions_t::MAX_VAL_TO_ESC))
+            if ((DataToSend >= RenardFrameDefinitions_t::MIN_VAL_TO_ESC) &&
+                (DataToSend <= RenardFrameDefinitions_t::MAX_VAL_TO_ESC))
             {
                 // Send a two byte substitute for the value
-                data = RenardFrameDefinitions_t::ESC_CHAR;
+                DataToSend = RenardFrameDefinitions_t::ESC_CHAR;
                 SerialFrameState = SerialFrameState_t::RenardSendEscapedData;
 
             } // end modified data
@@ -384,7 +382,7 @@ uint32_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
 
         case SerialFrameState_t::RenardSendEscapedData:
         {
-            data = *NextIntensityToSend - uint8_t(RenardFrameDefinitions_t::ESCAPED_OFFSET);
+            DataToSend = *NextIntensityToSend - uint8_t(RenardFrameDefinitions_t::ESCAPED_OFFSET);
             ++NextIntensityToSend;
             if (0 == --intensity_count)
             {
@@ -402,14 +400,14 @@ uint32_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
 
         case SerialFrameState_t::DMXSendFrameStart:
         {
-            data = 0x00; // DMX Lighting frame start
+            DataToSend = 0x00; // DMX Lighting frame start
             SerialFrameState = SerialFrameState_t::DMXSendData;
             break;
         }
 
         case SerialFrameState_t::DMXSendData:
         {
-            data = *NextIntensityToSend++;
+            DataToSend = *NextIntensityToSend++;
             if (0 == --intensity_count)
             {
                 SerialFrameState = SerialFrameState_t::SerialIdle;
@@ -422,7 +420,7 @@ uint32_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
 
         case SerialFrameState_t::GenSerSendHeader:
         {
-            data = GenericSerialHeader[SerialHeaderIndex++];
+            DataToSend = GenericSerialHeader[SerialHeaderIndex++];
             if (SerialHeaderSize <= SerialHeaderIndex)
             {
                 SerialFrameState = SerialFrameState_t::GenSerSendData;
@@ -432,7 +430,7 @@ uint32_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
 
         case SerialFrameState_t::GenSerSendData:
         {
-            data = *NextIntensityToSend++;
+            DataToSend = *NextIntensityToSend++;
             if (0 == --intensity_count)
             {
                 if (SerialFooterSize)
@@ -452,7 +450,7 @@ uint32_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
 
         case SerialFrameState_t::GenSerSendFooter:
         {
-            data = GenericSerialFooter[SerialFooterIndex++];
+            DataToSend = GenericSerialFooter[SerialFooterIndex++];
             if (SerialFooterSize <= SerialFooterIndex)
             {
                 SerialFrameState = SerialFrameState_t::SerialIdle;
@@ -474,7 +472,7 @@ uint32_t IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend ()
 #ifdef USE_SERIAL_DEBUG_COUNTERS
     LastDataSent = data;
 #endif // def USE_SERIAL_DEBUG_COUNTERS
-    return data;
+    return ISR_MoreDataToSend();
 } // NextIntensityToSend
 
 #endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)

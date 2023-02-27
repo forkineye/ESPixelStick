@@ -545,18 +545,18 @@ bool inline IRAM_ATTR c_OutputUart::MoreDataToSend()
 } // MoreDataToSend
 
 //----------------------------------------------------------------------------
-uint32_t inline IRAM_ATTR c_OutputUart::GetNextIntensityToSend()
+bool inline IRAM_ATTR c_OutputUart::GetNextIntensityToSend(uint32_t &DataToSend)
 {
     if (nullptr != OutputUartConfig.pPixelDataSource)
     {
-        return OutputUartConfig.pPixelDataSource->ISR_GetNextIntensityToSend();
+        return OutputUartConfig.pPixelDataSource->ISR_GetNextIntensityToSend(DataToSend);
     }
     else
     {
 #if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
-        return OutputUartConfig.pSerialDataSource->ISR_GetNextIntensityToSend();
+        return OutputUartConfig.pSerialDataSource->ISR_GetNextIntensityToSend(DataToSend);
 #else
-        return 0;
+        return false;
 #endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
     }
 } // GetNextIntensityToSend
@@ -644,11 +644,15 @@ void IRAM_ATTR c_OutputUart::ISR_UART_Handler()
                 break;
             }
 #endif // def ARDUINO_ARCH_ESP32
-    // digitalWrite(DEBUG_GPIO, LOW);
+#ifdef DEBUG_GPIO
+        digitalWrite(DEBUG_GPIO, LOW);
+#endif // def DEBUG_GPIO
 
             // Fill the FIFO with new data
             ISR_Handler_SendIntensityData();
-    // digitalWrite(DEBUG_GPIO, HIGH);
+#ifdef DEBUG_GPIO
+        digitalWrite(DEBUG_GPIO, HIGH);
+#endif // def DEBUG_GPIO
 
             if (!MoreDataToSend())
             {
@@ -749,7 +753,10 @@ void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
     }
 #endif // def USE_UART_DEBUG_COUNTERS
 
-    while (MoreDataToSend() && NumAvailableIntensitySlotsToFill)
+    uint32_t IntensityValue;
+    bool MoreData = MoreDataToSend();
+
+    while (MoreData && NumAvailableIntensitySlotsToFill)
     {
 #ifdef USE_UART_DEBUG_COUNTERS
         IntensityValuesSent++;
@@ -757,9 +764,15 @@ void IRAM_ATTR c_OutputUart::ISR_Handler_SendIntensityData ()
 
         NumAvailableIntensitySlotsToFill--;
 
-    // digitalWrite(DEBUG_GPIO, LOW);
-        uint32_t IntensityValue = GetNextIntensityToSend();
-    // digitalWrite(DEBUG_GPIO, HIGH);
+#ifdef DEBUG_GPIO
+        digitalWrite(DEBUG_GPIO, LOW);
+#endif // def DEBUG_GPIO
+
+        MoreData = GetNextIntensityToSend(IntensityValue);
+
+#ifdef DEBUG_GPIO
+        digitalWrite(DEBUG_GPIO, HIGH);
+#endif // def DEBUG_GPIO
         if (OutputUartConfig.TranslateIntensityData == TranslateIntensityData_t::NoTranslation)
         {
             for (uint32_t count = 0; count < NumUartSlotsPerIntensityValue; count++)

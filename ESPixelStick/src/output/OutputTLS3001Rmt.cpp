@@ -128,7 +128,7 @@ void c_OutputTLS3001Rmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputTLS3001Rmt::Render ()
+void c_OutputTLS3001Rmt::Poll ()
 {
     // DEBUG_START;
 
@@ -152,7 +152,7 @@ void c_OutputTLS3001Rmt::Render ()
 
         // DEBUG_V("get the next frame started");
 
-        if (Rmt.Render ())
+        if (Rmt.Poll ())
         {
             ReportNewFrame ();
         }
@@ -165,7 +165,7 @@ void c_OutputTLS3001Rmt::Render ()
 
     // DEBUG_END;
 
-} // Render
+} // Poll
 
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------

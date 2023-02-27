@@ -24,6 +24,7 @@
 #include "../ESPixelStick.h"
 #include "../FileMgr.hpp"
 
+
 //-----------------------------------------------------------------------------
 // bring in driver definitions
 #include "OutputDisabled.hpp"
@@ -53,6 +54,16 @@
 #ifndef DEFAULT_RELAY_GPIO
     #define DEFAULT_RELAY_GPIO      gpio_num_t::GPIO_NUM_1
 #endif // ndef DEFAULT_RELAY_GPIO
+
+#if defined(ARDUINO_ARCH_ESP32)
+void OM_Task (void *arg)
+{
+    while(1){
+        // DEBUG_V();
+        OutputMgr.TaskPoll();
+    }
+}
+#endif // defined(ARDUINO_ARCH_ESP32)
 
 //-----------------------------------------------------------------------------
 // Local Data definitions
@@ -260,6 +271,15 @@ void c_OutputMgr::Begin ()
         LoadConfig();
 
         // CreateNewConfig ();
+
+        // Preset the output memory
+        memset((void*)&OutputBuffer[0], 0x00, sizeof(OutputBuffer));
+
+#if defined(ARDUINO_ARCH_ESP32)
+        xTaskCreatePinnedToCore(OM_Task, "OM_Task", 4096, NULL, 10, &myTaskHandle, 0);
+        vTaskPrioritySet(myTaskHandle, 4);
+#endif // defined(ARDUINO_ARCH_ESP32)
+
     } while (false);
 
     // DEBUG_END;
@@ -1238,16 +1258,46 @@ void c_OutputMgr::SetSerialUart()
 
     // DEBUG_END;
 }
+
 //-----------------------------------------------------------------------------
-///< Called from loop(), renders output data
-void c_OutputMgr::Render()
+///< Called from loop(), Does Nothing
+void c_OutputMgr::Poll()
 {
-    // DEBUG_START;
+    // //DEBUG_START;
 
 #ifdef LED_FLASH_GPIO
     pinMode (LED_FLASH_GPIO, OUTPUT);
     digitalWrite (LED_FLASH_GPIO, LED_FLASH_OFF);
 #endif // def LED_FLASH_GPIO
+
+#if defined(ARDUINO_ARCH_ESP8266)
+    // do we need to save the current config?
+    if (true == ConfigLoadNeeded)
+    {
+        ConfigLoadNeeded = false;
+        LoadConfig ();
+    } // done need to save the current config
+
+    if (false == IsOutputPaused)
+    {
+        // //DEBUG_V();
+        for (DriverInfo_t & OutputChannel : OutputChannelDrivers)
+        {
+            // //DEBUG_V("Start a new channel");
+            OutputChannel.pOutputChannelDriver->Poll ();
+        }
+    }
+
+#endif //  defined(ARDUINO_ARCH_ESP8266)
+
+    // //DEBUG_END;
+} // Poll
+
+#if defined(ARDUINO_ARCH_ESP32)
+//-----------------------------------------------------------------------------
+void c_OutputMgr::TaskPoll()
+{
+    // //DEBUG_START;
 
     // do we need to save the current config?
     if (true == ConfigLoadNeeded)
@@ -1258,14 +1308,30 @@ void c_OutputMgr::Render()
 
     if (false == IsOutputPaused)
     {
-        // DEBUG_START;
+        // //DEBUG_V();
         for (DriverInfo_t & OutputChannel : OutputChannelDrivers)
         {
-            OutputChannel.pOutputChannelDriver->Render ();
+            // //DEBUG_V("Start a new channel");
+            uint32_t DelayInUs = OutputChannel.pOutputChannelDriver->Poll ();
+            if(DelayInUs)
+            {
+                // convert MicroSecs + 1ms to MilliSecs and then convert to Delay in ticks
+                vTaskDelay(pdMS_TO_TICKS((DelayInUs + 1000) / 1000));
+            }
+            else
+            {
+                vTaskDelay(pdMS_TO_TICKS(1));
+            }
         }
     }
-    // DEBUG_END;
-} // render
+    else
+    {
+        // one second delay
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+    // //DEBUG_END;
+} // TaskPoll
+#endif // defined(ARDUINO_ARCH_ESP32)
 
 //-----------------------------------------------------------------------------
 void c_OutputMgr::UpdateDisplayBufferReferences (void)
@@ -1353,7 +1419,7 @@ void c_OutputMgr::PauseOutputs(bool PauseTheOutput)
 } // PauseOutputs
 
 //-----------------------------------------------------------------------------
-void c_OutputMgr::WriteChannelData(uint32_t StartChannelId, uint32_t ChannelCount, byte *pSourceData)
+void c_OutputMgr::WriteChannelData(uint32_t StartChannelId, uint32_t ChannelCount, uint8_t *pSourceData)
 {
     // DEBUG_START;
 

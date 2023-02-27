@@ -42,7 +42,7 @@ public:
     virtual ~c_OutputMgr ();
 
     void      Begin             ();                        ///< set up the operating environment based on the current config (or defaults)
-    void      Render            ();                        ///< Call from loop(),  renders output data
+    void      Poll            ();                        ///< Call from loop(),  renders output data
     void      LoadConfig        ();                        ///< Read the current configuration data from nvram
     void      GetConfig         (byte * Response, uint32_t maxlen);
     void      GetConfig         (String & Response);
@@ -56,9 +56,10 @@ public:
     void      DeleteConfig      () { FileMgr.DeleteConfigFile (ConfigFileName); }
     void      PauseOutputs      (bool NewState);
     void      GetDriverName     (String & Name) { Name = "OutputMgr"; }
-    void      WriteChannelData  (uint32_t StartChannelId, uint32_t ChannelCount, byte * pData);
-    void      ReadChannelData   (uint32_t StartChannelId, uint32_t ChannelCount, byte *pTargetData);
+    void      WriteChannelData  (uint32_t StartChannelId, uint32_t ChannelCount, uint8_t * pData);
+    void      ReadChannelData   (uint32_t StartChannelId, uint32_t ChannelCount, uint8_t *pTargetData);
     void      ClearBuffer       ();
+    void      TaskPoll          ();
 
     // handles to determine which output channel we are dealing with
     enum e_OutputChannelIds
@@ -116,7 +117,7 @@ public:
         #endif // def SUPPORT_RELAY_OUTPUT
 
         OutputChannelId_End, // must be last in the list
-        // OutputChannelId_Start = 0,
+        OutputChannelId_Start = 0,
     };
 
     // do NOT insert into the middle of this list. Always add new types to the end of the list
@@ -249,6 +250,9 @@ private:
     gpio_num_t ConsoleTxGpio = gpio_num_t::GPIO_NUM_1;
     gpio_num_t ConsoleRxGpio = gpio_num_t::GPIO_NUM_3;
     bool       SerialUartIsActive = true;
+#if defined(ARDUINO_ARCH_ESP32)
+    TaskHandle_t myTaskHandle = NULL;
+#endif // defined(ARDUINO_ARCH_ESP32)
 
 #define OM_IS_UART (CurrentOutputChannelDriver.PortType == OM_PortType_t::Uart)
 #define OM_IS_RMT  (CurrentOutputChannelDriver.PortType == OM_PortType_t::Rmt)

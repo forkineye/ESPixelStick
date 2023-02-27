@@ -90,19 +90,25 @@ bool c_OutputAPA102Spi::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputAPA102Spi::Render ()
+uint32_t c_OutputAPA102Spi::Poll ()
 {
     // DEBUG_START;
+    uint32_t FrameLen = ActualFrameDurationMicroSec;
 
     if (canRefresh ())
     {
-        if (Spi.Render ())
+        if (Spi.Poll ())
         {
             ReportNewFrame ();
         }
     }
+    else
+    {
+        FrameLen = 0;
+    }
 
     // DEBUG_END;
+    return FrameLen;
 
 } // render
 

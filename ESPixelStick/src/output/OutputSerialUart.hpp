@@ -43,7 +43,7 @@ public:
     virtual bool    SetConfig(ArduinoJson::JsonObject &jsonConfig); ///< Set a new config in the driver
     virtual void    GetConfig(ArduinoJson::JsonObject &jsonConfig); ///< Set a new config in the driver
     virtual void    GetStatus(ArduinoJson::JsonObject &jsonStatus);
-    void            Render();
+    uint32_t        Poll();
 
 private:
     c_OutputUart Uart;

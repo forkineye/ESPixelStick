@@ -87,6 +87,9 @@ bool c_OutputWS2811::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     bool response = c_OutputPixel::SetConfig (jsonConfig);
 
     // Calculate our refresh time
+    
+    // DEBUG_V(String("   WS2811_PIXEL_DATA_RATE: ") + String(WS2811_PIXEL_DATA_RATE));
+    // DEBUG_V(String("WS2811_PIXEL_NS_BIT_TOTAL: ") + String(WS2811_PIXEL_NS_BIT_TOTAL));
     SetFrameDurration(float(WS2811_PIXEL_NS_BIT_TOTAL) / float(NanoSecondsInAMicroSecond));
 
     // DEBUG_END;

@@ -137,9 +137,10 @@ void c_OutputGECEUart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputGECEUart::Render ()
+uint32_t c_OutputGECEUart::Poll ()
 {
     // DEBUG_START;
+    uint32_t FrameLen = ActualFrameDurationMicroSec;
 
     // DEBUG_V (String ("RemainingIntensityCount: ") + RemainingIntensityCount)
 
@@ -147,11 +148,13 @@ void c_OutputGECEUart::Render ()
     {
         if (gpio_num_t(-1) == DataPin)
         {
+            FrameLen = 0;
             break;
         }
 
         if (!canRefresh())
         {
+            FrameLen = 0;
             break;
         }
 
@@ -170,6 +173,7 @@ void c_OutputGECEUart::Render ()
     } while (false);
 
     // DEBUG_END;
+    return FrameLen;
 
 } // render
 
