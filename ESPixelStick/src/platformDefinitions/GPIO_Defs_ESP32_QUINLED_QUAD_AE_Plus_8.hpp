@@ -26,9 +26,9 @@
 
 // AE+ extra 3 outputs (Level-shifted and 33R resistor)
 #define DEFAULT_RMT_4_GPIO  gpio_num_t::GPIO_NUM_15 // Output 5
-#define DEFAULT_RMT_5_GPIO  gpio_num_t::GPIO_NUM_12 // Output 6
-#define DEFAULT_RMT_6_GPIO  gpio_num_t::GPIO_NUM_2  // Output 7
-#define DEFAULT_RMT_7_GPIO  gpio_num_t::GPIO_NUM_32 // Output 8
+#define DEFAULT_RMT_5_GPIO  gpio_num_t::GPIO_NUM_21 // Output 6
+#define DEFAULT_RMT_6_GPIO  gpio_num_t::GPIO_NUM_17 // Output 7
+#define DEFAULT_RMT_7_GPIO  gpio_num_t::GPIO_NUM_22 // Output 8
 
 // File Manager
 #define SUPPORT_SD
