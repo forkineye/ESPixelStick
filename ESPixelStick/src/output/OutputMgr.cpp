@@ -1315,8 +1315,8 @@ void c_OutputMgr::TaskPoll()
             uint32_t DelayInUs = OutputChannel.pOutputChannelDriver->Poll ();
             if(DelayInUs)
             {
-                // convert MicroSecs + 1ms to MilliSecs and then convert to Delay in ticks
-                vTaskDelay(pdMS_TO_TICKS((DelayInUs + 1000) / 1000));
+                // convert MicroSecs to MilliSecs add some buffer and then convert to Delay in ticks
+                vTaskDelay(pdMS_TO_TICKS((DelayInUs / 1000) + 2));
             }
             else
             {
