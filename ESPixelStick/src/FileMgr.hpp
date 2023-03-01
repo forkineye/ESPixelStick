@@ -101,6 +101,7 @@ public:
 #endif
 private:
     void   SetSpiIoPins ();
+    void   ResetSdCard ();
 
 #   define SD_CARD_CLK_MHZ     SD_SCK_MHZ(50)  // 50 MHz SPI clock
 
