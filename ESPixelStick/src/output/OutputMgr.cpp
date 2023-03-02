@@ -1308,20 +1308,22 @@ void c_OutputMgr::TaskPoll()
 
     if (false == IsOutputPaused)
     {
+        bool FoundAnActiveOutputChannel = false;
         // //DEBUG_V();
         for (DriverInfo_t & OutputChannel : OutputChannelDrivers)
         {
             // //DEBUG_V("Start a new channel");
             uint32_t DelayInUs = OutputChannel.pOutputChannelDriver->Poll ();
+
             if(DelayInUs)
             {
-                // convert MicroSecs to MilliSecs add some buffer and then convert to Delay in ticks
-                vTaskDelay(pdMS_TO_TICKS((DelayInUs / 1000) + 2));
+                FoundAnActiveOutputChannel = true;
             }
-            else
-            {
-                vTaskDelay(pdMS_TO_TICKS(1));
-            }
+        }
+
+        if(!FoundAnActiveOutputChannel)
+        {
+            vTaskDelay(pdMS_TO_TICKS(25));
         }
     }
     else
