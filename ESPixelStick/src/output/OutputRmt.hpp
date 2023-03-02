@@ -153,7 +153,9 @@ public:
 
     void IRAM_ATTR ISR_Handler (uint32_t isrFlags);
 
-// #define USE_RMT_DEBUG_COUNTERS
+    SemaphoreHandle_t  WaitFrameDone;
+
+#define USE_RMT_DEBUG_COUNTERS
 #ifdef USE_RMT_DEBUG_COUNTERS
    // debug counters
    uint32_t DataCallbackCounter = 0;
