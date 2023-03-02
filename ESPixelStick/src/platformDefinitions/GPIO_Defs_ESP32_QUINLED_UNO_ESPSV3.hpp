@@ -19,7 +19,7 @@
  */
 
 //Output Manager
-#define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_16
+#define DEFAULT_RMT_0_GPIO     gpio_num_t::GPIO_NUM_16
 
 // File Manager - Defnitions must be present even if SD is not supported
 #define SUPPORT_SD

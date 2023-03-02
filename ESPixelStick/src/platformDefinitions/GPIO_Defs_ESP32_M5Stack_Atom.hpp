@@ -32,7 +32,7 @@
 
 // Output Manager
 // Bottom extension interface
-#define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_19 // TxD for RS485 Base
+#define DEFAULT_RMT_0_GPIO     gpio_num_t::GPIO_NUM_19 // TxD for RS485 Base
 
 // Internal neopixel(s)
 #define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_27

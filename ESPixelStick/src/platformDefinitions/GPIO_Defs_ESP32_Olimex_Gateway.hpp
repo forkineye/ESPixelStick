@@ -24,12 +24,12 @@
  */
 
 //Output Manager
-#define DEFAULT_UART_1_GPIO     gpio_num_t::GPIO_NUM_4     // Supposed to be SD Card, but R10 not populated
-#define DEFAULT_UART_2_GPIO     gpio_num_t::GPIO_NUM_12    // Supposed to be SD Card, but R10 not populated
+#define DEFAULT_RMT_0_GPIO     gpio_num_t::GPIO_NUM_4     // Supposed to be SD Card, but R10 not populated
+#define DEFAULT_RMT_1_GPIO     gpio_num_t::GPIO_NUM_12    // Supposed to be SD Card, but R10 not populated
 
-#define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_13    // Tested working
-#define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_16    // Tested working
-#define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_32    // Tested working
+#define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_13    // Tested working
+#define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_16    // Tested working
+#define DEFAULT_RMT_4_GPIO      gpio_num_t::GPIO_NUM_32    // Tested working
 /*
   Notes:
   - GPIOs 4, 12, 13 are for SD Card, but are not actually wired to the SD Card on
