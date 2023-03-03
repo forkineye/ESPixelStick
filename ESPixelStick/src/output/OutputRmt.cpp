@@ -233,7 +233,7 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 
     jsonStatus[F("NumRmtSlotOverruns")] = NumRmtSlotOverruns;
 #ifdef USE_RMT_DEBUG_COUNTERS 
-    JsonObject debugStatus = jsonStatus.createNestedObject("RMT Debug");
+    jsonStatus[F("OutputIsPaused")] = OutputIsPaused;    JsonObject debugStatus = jsonStatus.createNestedObject("RMT Debug");
     debugStatus["RmtChannelId"]                 = OutputRmtConfig.RmtChannelId;
     debugStatus["GPIO"]                         = OutputRmtConfig.DataPin;
     debugStatus["conf0"]                        = String(RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf0.val, HEX);
@@ -582,6 +582,7 @@ bool c_OutputRmt::StartNewFrame ()
     {
         if(OutputIsPaused)
         {
+            // DEBUG_V("Paused");
             break;
         }
 
