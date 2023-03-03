@@ -81,25 +81,18 @@ protected:
     {
         bool response = false;
         uint32_t Now = micros ();
+        FrameTimeDeltaUs = Now - FrameStartTimeInMicroSec; // how many us since the frame started
 
-        // did we wrap around?
-        if(FrameEndTimeInMicroSec < FrameStartTimeInMicroSec)
+        // did the counter wrap?
+        if(Now < FrameStartTimeInMicroSec)
         {
-            // timer wrapped around
-            if((Now < FrameStartTimeInMicroSec) && (Now > FrameEndTimeInMicroSec))
-            {
-                response = true;
-            }
-        }
-        else
-        {
-            // timer did not wrap around
-            if(Now > FrameEndTimeInMicroSec)
-            {
-                response = true;
-            }
+            FrameTimeDeltaUs = Now + (0 - FrameStartTimeInMicroSec);
         }
 
+        if(FrameTimeDeltaUs > FrameRefreshTimeInMicroSec)
+        {
+            response = true;
+        }
         return response;
     }
 
@@ -107,5 +100,6 @@ private:
     uint32_t    FrameRefreshTimeInMicroSec = 0;
     uint32_t    FrameStartTimeInMicroSec   = 0;
     uint32_t    FrameEndTimeInMicroSec     = 0;
+    uint32_t    FrameTimeDeltaUs           = 0;
 
 }; // c_OutputCommon
