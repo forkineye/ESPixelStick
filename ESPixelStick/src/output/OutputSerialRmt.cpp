@@ -215,7 +215,7 @@ uint32_t c_OutputSerialRmt::Poll ()
 
         // DEBUG_V("get the next frame started");
 
-        if (Rmt.StartNewFrame ())
+        if (Rmt.StartNewFrame (ActualFrameDurationMicroSec))
         {
             ReportNewFrame ();
         }

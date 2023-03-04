@@ -164,7 +164,7 @@ uint32_t c_OutputWS2811Rmt::Poll ()
 
         // DEBUG_V("get the next frame started");
 
-        if (Rmt.StartNewFrame ())
+        if (Rmt.StartNewFrame (ActualFrameDurationMicroSec))
         {
             ReportNewFrame ();
         }
