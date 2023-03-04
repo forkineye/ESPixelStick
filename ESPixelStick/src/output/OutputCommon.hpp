@@ -69,7 +69,7 @@ protected:
     OTYPE_t     OutputType                  = OTYPE_t::OutputType_Disabled;
     OID_t       OutputChannelId             = OID_t::OutputChannelId_End;
     bool        HasBeenInitialized          = false;
-    uint32_t    FrameMinDurationInMicroSec  = 25000;
+    uint32_t    FrameDurationInMicroSec  = 25000;
     uint32_t    ActualFrameDurationMicroSec = 50000; // Default time for relays is every 50ms
     uint8_t   * pOutputBuffer               = nullptr;
     uint32_t    OutputBufferSize            = 0;
@@ -89,7 +89,7 @@ protected:
             FrameTimeDeltaInMicroSec = Now + (0 - FrameStartTimeInMicroSec);
         }
 
-        if(FrameTimeDeltaInMicroSec > FrameMinDurationInMicroSec)
+        if(FrameTimeDeltaInMicroSec > FrameDurationInMicroSec)
         {
             response = true;
         }
