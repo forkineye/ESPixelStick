@@ -491,6 +491,10 @@ void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
+#if defined(ARDUINO_ARCH_ESP32)
+    // jsonStatus["PollCount"] = PollCount;
+#endif // defined(ARDUINO_ARCH_ESP32)
+
     JsonArray OutputStatus = jsonStatus.createNestedArray (CN_output);
     for (auto & CurrentOutput : OutputChannelDrivers)
     {
@@ -1308,6 +1312,7 @@ void c_OutputMgr::TaskPoll()
 
     if (false == IsOutputPaused)
     {
+        // PollCount ++;
         bool FoundAnActiveOutputChannel = false;
         // //DEBUG_V();
         for (DriverInfo_t & OutputChannel : OutputChannelDrivers)

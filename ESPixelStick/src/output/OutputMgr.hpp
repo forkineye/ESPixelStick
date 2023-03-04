@@ -252,6 +252,7 @@ private:
     bool       SerialUartIsActive = true;
 #if defined(ARDUINO_ARCH_ESP32)
     TaskHandle_t myTaskHandle = NULL;
+    // uint32_t PollCount = 0;
 #endif // defined(ARDUINO_ARCH_ESP32)
 
 #define OM_IS_UART (CurrentOutputChannelDriver.PortType == OM_PortType_t::Uart)
