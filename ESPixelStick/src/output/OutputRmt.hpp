@@ -127,7 +127,7 @@ public:
     virtual ~c_OutputRmt ();
 
     void Begin                                  (OutputRmtConfig_t config);
-    bool StartNewFrame                          ();
+    bool StartNewFrame                          (uint32_t FrameDurationInMicroSec);
     void GetStatus                              (ArduinoJson::JsonObject& jsonStatus);
     void set_pin                                (gpio_num_t _DataPin) { OutputRmtConfig.DataPin = _DataPin; rmt_set_gpio (OutputRmtConfig.RmtChannelId, rmt_mode_t::RMT_MODE_TX, OutputRmtConfig.DataPin, false); }
     void PauseOutput                            (bool State);

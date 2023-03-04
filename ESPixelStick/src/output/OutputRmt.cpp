@@ -572,7 +572,7 @@ void c_OutputRmt::PauseOutput(bool PauseOutput)
 }
 
 //----------------------------------------------------------------------------
-bool c_OutputRmt::StartNewFrame ()
+bool c_OutputRmt::StartNewFrame (uint32_t FrameDurationInMicroSec)
 {
     // //DEBUG_START;
 
@@ -661,7 +661,7 @@ bool c_OutputRmt::StartNewFrame ()
         RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 1;
 
         // wait for the ISR to finish
-        xSemaphoreTake(WaitFrameDone, portMAX_DELAY);
+        xSemaphoreTake(WaitFrameDone, pdMS_TO_TICKS((FrameDurationInMicroSec+2000)/1000));
         Response = true;
     } while(false);
 
