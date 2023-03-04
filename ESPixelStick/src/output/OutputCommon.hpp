@@ -81,15 +81,15 @@ protected:
     {
         bool response = false;
         uint32_t Now = micros ();
-        FrameTimeDeltaUs = Now - FrameStartTimeInMicroSec; // how many us since the frame started
+        FrameTimeDeltaInMicroSec = Now - FrameStartTimeInMicroSec; // how many us since the frame started
 
         // did the counter wrap?
         if(Now < FrameStartTimeInMicroSec)
         {
-            FrameTimeDeltaUs = Now + (0 - FrameStartTimeInMicroSec);
+            FrameTimeDeltaInMicroSec = Now + (0 - FrameStartTimeInMicroSec);
         }
 
-        if(FrameTimeDeltaUs > FrameRefreshTimeInMicroSec)
+        if(FrameTimeDeltaInMicroSec > FrameMinDurationInMicroSec)
         {
             response = true;
         }
@@ -100,6 +100,6 @@ private:
     uint32_t    FrameRefreshTimeInMicroSec = 0;
     uint32_t    FrameStartTimeInMicroSec   = 0;
     uint32_t    FrameEndTimeInMicroSec     = 0;
-    uint32_t    FrameTimeDeltaUs           = 0;
+    uint32_t    FrameTimeDeltaInMicroSec           = 0;
 
 }; // c_OutputCommon

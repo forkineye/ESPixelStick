@@ -74,10 +74,12 @@ void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
     jsonStatus["FrameCount"] = FrameCount;
     
     jsonStatus["ActualFrameDurationMicroSec"] = ActualFrameDurationMicroSec;
-    jsonStatus["FrameStartTimeInMicroSec"] = FrameStartTimeInMicroSec;
-    jsonStatus["FrameEndTimeInMicroSec"] = FrameEndTimeInMicroSec;
-    jsonStatus["FrameTimeDeltaUs"] = FrameTimeDeltaUs;
-    jsonStatus["micros"] = micros();
+    jsonStatus["FrameMinDurationInMicroSec"]  = FrameMinDurationInMicroSec;
+    jsonStatus["FrameRefreshTimeInMicroSec"]  = FrameRefreshTimeInMicroSec;
+    jsonStatus["FrameStartTimeInMicroSec"]    = FrameStartTimeInMicroSec;
+    jsonStatus["FrameEndTimeInMicroSec"]      = FrameEndTimeInMicroSec;
+    jsonStatus["FrameTimeDeltaUs"]            = FrameTimeDeltaInMicroSec;
+    jsonStatus["micros"]                      = micros();
 
     // DEBUG_END;
 } // GetStatus
