@@ -127,7 +127,7 @@ public:
     virtual ~c_OutputRmt ();
 
     void Begin                                  (OutputRmtConfig_t config);
-    bool StartNewFrame                          ();
+    bool StartNewFrame                          (uint32_t FrameDurationInMicroSec);
     void GetStatus                              (ArduinoJson::JsonObject& jsonStatus);
     void set_pin                                (gpio_num_t _DataPin) { OutputRmtConfig.DataPin = _DataPin; rmt_set_gpio (OutputRmtConfig.RmtChannelId, rmt_mode_t::RMT_MODE_TX, OutputRmtConfig.DataPin, false); }
     void PauseOutput                            (bool State);
@@ -152,6 +152,8 @@ public:
     bool NoFrameInProgress () { return (0 == (RMT.int_ena.val & (RMT_ISR_BITS))); }
 
     void IRAM_ATTR ISR_Handler (uint32_t isrFlags);
+
+    SemaphoreHandle_t  WaitFrameDone;
 
 // #define USE_RMT_DEBUG_COUNTERS
 #ifdef USE_RMT_DEBUG_COUNTERS

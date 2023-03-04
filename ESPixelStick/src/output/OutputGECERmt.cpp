@@ -149,7 +149,7 @@ uint32_t c_OutputGECERmt::Poll ()
 
         // DEBUG_V("get the next frame started");
 
-        if (Rmt.StartNewFrame ())
+        if (Rmt.StartNewFrame (ActualFrameDurationMicroSec))
         {
             ReportNewFrame ();
         }

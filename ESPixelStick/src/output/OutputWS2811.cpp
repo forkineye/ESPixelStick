@@ -69,6 +69,8 @@ void c_OutputWS2811::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     c_OutputPixel::GetStatus (jsonStatus);
 
+    // jsonStatus["canRefresh"] = canRefresh();
+
 } // GetStatus
 
 //----------------------------------------------------------------------------

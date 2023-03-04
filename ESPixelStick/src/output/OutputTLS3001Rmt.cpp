@@ -101,7 +101,7 @@ bool c_OutputTLS3001Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     bool response = c_OutputTLS3001::SetConfig (jsonConfig);
 
     Rmt.set_pin (DataPin);
-    Rmt.SetMinFrameDurationInUs (FrameMinDurationInMicroSec);
+    Rmt.SetMinFrameDurationInUs (FrameDurationInMicroSec);
 
     // DEBUG_END;
     return response;
@@ -114,7 +114,7 @@ void c_OutputTLS3001Rmt::SetOutputBufferSize (uint32_t NumChannelsAvailable)
     // DEBUG_START;
 
     c_OutputTLS3001::SetOutputBufferSize (NumChannelsAvailable);
-    Rmt.SetMinFrameDurationInUs (FrameMinDurationInMicroSec);
+    Rmt.SetMinFrameDurationInUs (FrameDurationInMicroSec);
 
     // DEBUG_END;
 

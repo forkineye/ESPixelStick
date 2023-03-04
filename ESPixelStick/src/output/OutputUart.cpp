@@ -126,7 +126,6 @@ static void IRAM_ATTR timer_intr_handler()
 } // timer_intr_handler
 #endif // def ARDUINO_ARCH_ESP8266
 
-// #define StartPin gpio_num_t::GPIO_NUM_4
 //----------------------------------------------------------------------------
 c_OutputUart::c_OutputUart()
 {
@@ -211,6 +210,10 @@ void c_OutputUart::Begin (OutputUartConfig_t & config )
                 CurrentTranslation++;
             }
         }
+
+#if defined(ARDUINO_ARCH_ESP32)
+        WaitFrameDone = xSemaphoreCreateBinary();
+#endif // defined(ARDUINO_ARCH_ESP32)
 
         HasBeenInitialized = true;
     } while (false);
@@ -657,6 +660,11 @@ void IRAM_ATTR c_OutputUart::ISR_UART_Handler()
             if (!MoreDataToSend())
             {
                 DisableUartInterrupts();
+
+                #ifdef ARDUINO_ARCH_ESP32
+                xSemaphoreGive(WaitFrameDone);
+                #endif // def ARDUINO_ARCH_ESP32
+                
 #ifdef USE_UART_DEBUG_COUNTERS
                 FrameEndISRcounter++;
 #endif // def USE_UART_DEBUG_COUNTERS
@@ -1083,6 +1091,7 @@ void c_OutputUart::StartNewFrame()
 #else
     ISR_Handler_SendIntensityData();
     EnableUartInterrupts();
+    xSemaphoreTake(WaitFrameDone, portMAX_DELAY);
 #endif // defined(ARDUINO_ARCH_ESP32)
 
     // DEBUG_END;

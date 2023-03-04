@@ -122,8 +122,6 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
 
     do // once
     {
-        // gpio_set_direction(gpio_num_t::GPIO_NUM_4, gpio_mode_t::GPIO_MODE_OUTPUT);
-
         OutputRmtConfig = config;
 #if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
         if ((nullptr == OutputRmtConfig.pPixelDataSource) && (nullptr == OutputRmtConfig.pSerialDataSource))
@@ -214,6 +212,8 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
         // DEBUG_V (String ("                Intensity2Rmt[0]: 0x") + String (uint32_t (Intensity2Rmt[0].val), HEX));
         // DEBUG_V (String ("                Intensity2Rmt[1]: 0x") + String (uint32_t (Intensity2Rmt[1].val), HEX));
 
+        WaitFrameDone = xSemaphoreCreateBinary();
+
 #ifdef RMT_USE_ISR_TASK
         // This is for debugging only
         xTaskCreate(SendRmtIntensityDataTask, "RMTTask", 4000, this, ESP_TASK_PRIO_MIN + 4, &SendIntensityDataTaskHandle);
@@ -233,7 +233,7 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 
     jsonStatus[F("NumRmtSlotOverruns")] = NumRmtSlotOverruns;
 #ifdef USE_RMT_DEBUG_COUNTERS 
-    JsonObject debugStatus = jsonStatus.createNestedObject("RMT Debug");
+    jsonStatus[F("OutputIsPaused")] = OutputIsPaused;    JsonObject debugStatus = jsonStatus.createNestedObject("RMT Debug");
     debugStatus["RmtChannelId"]                 = OutputRmtConfig.RmtChannelId;
     debugStatus["GPIO"]                         = OutputRmtConfig.DataPin;
     debugStatus["conf0"]                        = String(RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf0.val, HEX);
@@ -393,8 +393,6 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler (uint32_t isrFlags)
 {
     // //DEBUG_START;
 
-    // GPIO_OUTPUT_SET(gpio_num_t::GPIO_NUM_4, 0);
-    // gpio_set_level(gpio_num_t::GPIO_NUM_4, 0);
     // uint32_t int_st = RMT.int_raw.val;
     // //DEBUG_V(String("              int_st: 0x") + String(int_st, HEX));
     // //DEBUG_V(String("  RMT_INT_TX_END_BIT: 0x") + String(RMT_INT_TX_END_BIT, HEX));
@@ -438,20 +436,23 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler (uint32_t isrFlags)
             // refill the buffer
             ISR_CreateIntensityData();
 
+            // is there any data left to enqueue?
             if (!ThereIsDataToSend && 0 == NumUsedEntriesInSendBuffer)
             {
 #ifdef USE_RMT_DEBUG_COUNTERS
                 ++RanOutOfData;
 #endif // def USE_RMT_DEBUG_COUNTERS
-                DisableRmtInterrupts;
+                // DisableRmtInterrupts;
+
+                // terminate the data stream
                 RMTMEM.chan[OutputRmtConfig.RmtChannelId].data32[RmtBufferWriteIndex].val = 0x0;
+                // xSemaphoreGive(WaitFrameDone);
             }
         }
         else
         {
             DisableRmtInterrupts;
-            // terminate the data stream
-            RMTMEM.chan[OutputRmtConfig.RmtChannelId].data32[RmtBufferWriteIndex].val = 0x0;
+            xSemaphoreGive(WaitFrameDone);
 #ifdef USE_RMT_DEBUG_COUNTERS
             FrameEndISRcounter++;
 #endif // def USE_RMT_DEBUG_COUNTERS
@@ -465,7 +466,6 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler (uint32_t isrFlags)
 #endif // def USE_RMT_DEBUG_COUNTERS
 
     // //DEBUG_END;
-    // GPIO_OUTPUT_SET(gpio_num_t::GPIO_NUM_4, 1);
 } // ISR_Handler
 
 //----------------------------------------------------------------------------
@@ -572,7 +572,7 @@ void c_OutputRmt::PauseOutput(bool PauseOutput)
 }
 
 //----------------------------------------------------------------------------
-bool c_OutputRmt::StartNewFrame ()
+bool c_OutputRmt::StartNewFrame (uint32_t FrameDurationInMicroSec)
 {
     // //DEBUG_START;
 
@@ -582,6 +582,7 @@ bool c_OutputRmt::StartNewFrame ()
     {
         if(OutputIsPaused)
         {
+            // DEBUG_V("Paused");
             break;
         }
 
@@ -656,8 +657,11 @@ bool c_OutputRmt::StartNewFrame ()
         EnableRmtInterrupts;
 
         // DEBUG_V("start the transmitter");
+        rmt_set_gpio(OutputRmtConfig.RmtChannelId, RMT_MODE_TX, OutputRmtConfig.DataPin, false);
         RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 1;
 
+        // wait for the ISR to finish
+        xSemaphoreTake(WaitFrameDone, pdMS_TO_TICKS((FrameDurationInMicroSec+2000)/1000));
         Response = true;
     } while(false);
 

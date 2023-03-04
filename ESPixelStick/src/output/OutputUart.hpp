@@ -135,6 +135,7 @@ private:
     uint32_t        ActiveIsrMask                   = 0;
 #if defined(ARDUINO_ARCH_ESP32)
     intr_handle_t   IsrHandle                       = nullptr;
+    SemaphoreHandle_t  WaitFrameDone;
 #endif // defined(ARDUINO_ARCH_ESP32)
 
     void     IRAM_ATTR      StartNewDataFrame();

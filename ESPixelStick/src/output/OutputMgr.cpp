@@ -491,6 +491,10 @@ void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
+#if defined(ARDUINO_ARCH_ESP32)
+    // jsonStatus["PollCount"] = PollCount;
+#endif // defined(ARDUINO_ARCH_ESP32)
+
     JsonArray OutputStatus = jsonStatus.createNestedArray (CN_output);
     for (auto & CurrentOutput : OutputChannelDrivers)
     {
@@ -1308,20 +1312,23 @@ void c_OutputMgr::TaskPoll()
 
     if (false == IsOutputPaused)
     {
+        // PollCount ++;
+        bool FoundAnActiveOutputChannel = false;
         // //DEBUG_V();
         for (DriverInfo_t & OutputChannel : OutputChannelDrivers)
         {
             // //DEBUG_V("Start a new channel");
             uint32_t DelayInUs = OutputChannel.pOutputChannelDriver->Poll ();
+
             if(DelayInUs)
             {
-                // convert MicroSecs + 1ms to MilliSecs and then convert to Delay in ticks
-                vTaskDelay(pdMS_TO_TICKS((DelayInUs + 1000) / 1000));
+                FoundAnActiveOutputChannel = true;
             }
-            else
-            {
-                vTaskDelay(pdMS_TO_TICKS(1));
-            }
+        }
+
+        if(!FoundAnActiveOutputChannel)
+        {
+            vTaskDelay(pdMS_TO_TICKS(25));
         }
     }
     else

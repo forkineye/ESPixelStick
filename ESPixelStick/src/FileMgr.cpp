@@ -174,13 +174,19 @@ void c_FileMgr::SetSpiIoPins ()
         // DEBUG_V (String (" clk_pin: ") + String (clk_pin));
         // DEBUG_V (String ("  cs_pin: ") + String (cs_pin));
 
-        SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
-        // DEBUG_V();
+        SPI.end ();
+        pinMode(cs_pin, OUTPUT);
 #       ifdef USE_MISO_PULLUP
         // DEBUG_V("USE_MISO_PULLUP");
         // on some hardware MISO is missing a required pull-up resistor, use internal pull-up.
         pinMode(miso_pin, INPUT_PULLUP);
+#       else
+        pinMode(miso_pin, INPUT);
 #       endif // def USE_MISO_PULLUP
+
+        SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
+        // DEBUG_V();
+        ResetSdCard();
 
         if (!ESP_SD.begin (cs_pin))
 #   else  // ! ARDUINO_ARCH_ESP32
@@ -214,6 +220,31 @@ void c_FileMgr::SetSpiIoPins ()
     // DEBUG_END;
 
 } // SetSpiIoPins
+
+//-----------------------------------------------------------------------------
+/*
+    On occasion, the SD card is left in an unknown state that causes the SD card
+    to appear to not be installed. A power cycle fixes the issue. Clocking the 
+    bus also causes any incomplete transaction to get cleared.
+*/
+void c_FileMgr::ResetSdCard()
+{
+    // DEBUG_START;
+
+    // send 0xff bytes until we get 0xff back
+    byte ResetValue = 0x00;
+    digitalWrite(cs_pin, LOW);
+    SPI.beginTransaction(SPISettings());
+    while(0xff != ResetValue)
+    {
+        delay(1);
+        ResetValue = SPI.transfer(0xff);
+    }
+    SPI.endTransaction();
+    digitalWrite(cs_pin, HIGH);
+
+    // DEBUG_END;
+} // ResetSdCard
 
 //-----------------------------------------------------------------------------
 void c_FileMgr::DeleteConfigFile (const String& FileName)

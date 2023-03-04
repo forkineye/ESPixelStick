@@ -320,7 +320,7 @@ void c_OutputPixel::SetFrameDurration (float _IntensityBitTimeInUs, uint16_t Blo
     int TotalBlockDelayUs           = int (float (NumBlocks) * BlockDelayUs);
 
     ActualFrameDurationMicroSec = (IntensityBitTimeInUs * TotalBits) + InterFrameGapInMicroSec + TotalBlockDelayUs;
-    FrameMinDurationInMicroSec = max(uint32_t(25000), ActualFrameDurationMicroSec);
+    FrameDurationInMicroSec = max(uint32_t(25000), ActualFrameDurationMicroSec);
     
     // DEBUG_V (String ("           OutputBufferSize: ") + String (OutputBufferSize));
     // DEBUG_V (String ("             PixelGroupSize: ") + String (PixelGroupSize));
@@ -339,7 +339,7 @@ void c_OutputPixel::SetFrameDurration (float _IntensityBitTimeInUs, uint16_t Blo
     // DEBUG_V (String ("       IntensityBitTimeInUs: ") + String (IntensityBitTimeInUs));
     // DEBUG_V (String ("    InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
     // DEBUG_V (String ("ActualFrameDurationMicroSec: ") + String (ActualFrameDurationMicroSec));
-    // DEBUG_V (String (" FrameMinDurationInMicroSec: ") + String (FrameMinDurationInMicroSec));
+    // DEBUG_V (String (" FrameDurationInMicroSec: ") + String (FrameDurationInMicroSec));
 
     // DEBUG_END;
 
