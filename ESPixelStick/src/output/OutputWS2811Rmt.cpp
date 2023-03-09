@@ -91,7 +91,6 @@ void c_OutputWS2811Rmt::Begin ()
 
     HasBeenInitialized = true;
 
-    // Start output
     // DEBUG_END;
 
 } // Begin

@@ -266,6 +266,8 @@ void c_OutputMgr::Begin ()
             // DEBUG_V(String("init index: ") + String(index) + " Done");
         }
 
+        // CreateNewConfig ();
+
         // load up the configuration from the saved file. This also starts the drivers
         // DEBUG_V();
         LoadConfig();
@@ -1001,7 +1003,7 @@ void c_OutputMgr::LoadConfig ()
     // try to load and process the config file
     if (!FileMgr.LoadConfigFile(ConfigFileName, [this](DynamicJsonDocument &JsonConfigDoc)
         {
-            // extern void PrettyPrint(JsonConfigDoc & jsonStuff, String Name);
+            // extern void PrettyPrint(DynamicJsonDocument & jsonStuff, String Name);
             // PrettyPrint(JsonConfigDoc, "OM Load Config");
 
             // DEBUG_V ();
@@ -1009,9 +1011,9 @@ void c_OutputMgr::LoadConfig ()
 
             // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
             // PrettyPrint(JsonConfig, "OM Load Config");
-            // DEBUG_V ("Start");
+            // DEBUG_V ();
             this->ProcessJsonConfig(JsonConfig);
-            // DEBUG_V ("End");
+            // DEBUG_V ();
         }))
     {
         if (!IsBooting)
@@ -1095,6 +1097,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
             JsonObject OutputChannelConfig = OutputChannelArray[String(CurrentOutputChannelDriver.DriverId).c_str()];
             // DEBUG_V ();
 
+            // extern void PrettyPrint (JsonObject& jsonStuff, String Name);
             // PrettyPrint(OutputChannelConfig, "ProcessJson Channel Config");
 
             // set a default value for channel type
@@ -1121,11 +1124,12 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
                 continue;
             }
 
+            // DEBUG_V ();
             // PrettyPrint(OutputChannelConfig, "ProcessJson Channel Config");
 
             JsonObject OutputChannelDriverConfig = OutputChannelConfig[String (ChannelType)];
             // DEBUG_V ();
-            // PrettyPrint(OutputChannelDriverConfig, "ProcessJson Channel Driver Config");
+            // PrettyPrint(OutputChannelDriverConfig, "ProcessJson Channel Driver Config before driver create");
             // DEBUG_V ();
 
             // make sure the proper output type is running
@@ -1154,7 +1158,9 @@ bool c_OutputMgr::ProcessJsonConfig (JsonObject& jsonConfig)
         CreateNewConfig ();
     }
 
+    // DEBUG_V ();
     UpdateDisplayBufferReferences ();
+    // DEBUG_V ();
 
     SetSerialUart();
 
@@ -1225,7 +1231,7 @@ void c_OutputMgr::SetSerialUart()
 {
     // DEBUG_START;
 
-    bool NeedToTurnOffSerial = false;
+    bool NeedToTurnOffConsole = false;
 
     // DEBUG_V(String("ConsoleTxGpio: ") + String(ConsoleTxGpio));
     // DEBUG_V(String("ConsoleRxGpio: ") + String(ConsoleRxGpio));
@@ -1237,27 +1243,27 @@ void c_OutputMgr::SetSerialUart()
         {
             // DEBUG_V (String("Output GPIO: ") + String(CurrentOutputChannelDriver.pOutputChannelDriver->GetOutputGpio()));
 
-            NeedToTurnOffSerial |= CurrentOutputChannelDriver.pOutputChannelDriver->ValidateGpio(ConsoleTxGpio, ConsoleRxGpio);
+            NeedToTurnOffConsole |= CurrentOutputChannelDriver.pOutputChannelDriver->ValidateGpio(ConsoleTxGpio, ConsoleRxGpio);
         }
     } // end for each channel
 
-    // DEBUG_V(String("NeedToTurnOffSerial: ") + String(NeedToTurnOffSerial));
-    // DEBUG_V(String(" SerialUartIsActive: ") + String(SerialUartIsActive));
-    if(NeedToTurnOffSerial && SerialUartIsActive)
+    // DEBUG_V(String("NeedToTurnOffConsole: ") + String(NeedToTurnOffConsole));
+    // DEBUG_V(String(" ConsoleUartIsActive: ") + String(ConsoleUartIsActive));
+    if(NeedToTurnOffConsole && ConsoleUartIsActive)
     {
         logcon ("Found an Output that uses a Serial console GPIO. Turning off Serial console output.");
         Serial.end();
-        SerialUartIsActive = false;
+        ConsoleUartIsActive = false;
     }
-    else if(!NeedToTurnOffSerial && !SerialUartIsActive)
+    else if(!NeedToTurnOffConsole && !ConsoleUartIsActive)
     {
         Serial.begin(115200);
-        SerialUartIsActive = true;
-        // DEBUG_V("Turn ON Serial");
+        ConsoleUartIsActive = true;
+        DEBUG_V("Turn ON Console");
     }
     else
     {
-        // DEBUG_V("Leave Serial Alone");
+        // DEBUG_V("Leave Console Alone");
     }
 
     // DEBUG_END;
