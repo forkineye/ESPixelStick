@@ -33,6 +33,7 @@
 #endif
 
 #define ARDUINOJSON_USE_LONG_LONG 1
+#define ARDUINOJSON_DEFAULT_NESTING_LIMIT 15
 
 #include <Ticker.h>
 #include <ArduinoJson.h>

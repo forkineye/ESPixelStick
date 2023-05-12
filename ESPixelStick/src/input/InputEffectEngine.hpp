@@ -86,6 +86,14 @@ public:
         CRGB    color;
     } MQTTConfiguration_s;
 
+    struct MarqueeGroup 
+    {
+       uint32_t NumPixelsInGroup;
+       CRGB     Color;
+       uint8_t  StartingIntensity;
+       uint8_t  EndingIntensity;
+    };
+
     // functions to be provided by the derived class
     void Begin ();                             ///< set up the operating environment based on the current config (or defaults)
     bool SetConfig (JsonObject& jsonConfig);   ///< Set a new config in the driver
@@ -111,6 +119,7 @@ public:
     uint16_t effectNull ();
     uint16_t effectRandom ();
     uint16_t effectTransition ();
+    uint16_t effectMarquee ();
 
 private:
 
@@ -135,6 +144,9 @@ private:
     bool EffectWhiteChannel        = false;
     float EffectBrightness         = 1.0;             /* Externally controlled effect brightness [0, 255] */
     CRGB EffectColor               = { 183, 0, 255 }; /* Externally controlled effect color */
+
+    uint32_t effectMarqueePixelAdvanceCount = 1;
+    uint32_t effectMarqueePixelLocation = 0;
 
     uint32_t   EffectStep            = 0;            /* Shared mutable effect step counter */
     uint32_t   PixelCount            = 0;            /* Number of RGB leds (not channels) */
