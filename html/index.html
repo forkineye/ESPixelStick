@@ -636,6 +636,19 @@
 
                     <!-- Dynamic input / output config -->
                     <div id="fg_input_mode"></div>
+                    <legend class="esps-legend">Triggered Effect</legend>
+                    <div class="form-group" id="fg_Triggerd_Effect">
+                        <label class="control-label col-sm-2" for="TE_Enable">Enable</label>
+                        <div class="checkbox col-sm-2">
+                            <input type="checkbox" id="TE_Enable" title="Trigger Effects using a data channel.">
+                        </div>
+                        <label class="control-label col-sm-2" for="TE_Chan">Channel</label>
+                        <div class="col-sm-2">
+                            <input type="number" class="form-control is-valid" id="TE_Chan" step="1" min="1" value="1"></input>
+                        </div>
+                        <!-- TriggeredEffectList -->
+                        <!-- Effect (dropdown), Channel Value -->
+                    </div>
                     <div id="fg_output_mode"></div>
 
                     <!--  Move elsewhere
@@ -661,7 +674,7 @@
                                 </div>
                             </div>
                         -->
-
+    
                     <!-- Refresh Rate Display -->
                     <div class="form-group">
                         <label class="control-label col-sm-2" for="refresh">Refresh Rate</label>

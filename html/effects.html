@@ -47,14 +47,16 @@
             </div>
         </div>
 
-        <div class="form-group" style="height:200px; overflow:auto;">
-            <div class="col-sm-offset-2 col-sm-2" id="d_transition">
+        <div class="form-group hidden" id="TransitionsConfig">
+        <label class="control-label col-sm-2" for="TransitionColorTable">Transitions</label>
+        <div class="form-group " style="height:200px; overflow:auto;">
+            <div class="col-sm-offset-0 col-sm-2" id="d_transition">
                 <table class="table" id="TransitionColorTable">
                     <thead>
                         <tr>
-                            <th id="transitionId_hr">Transition ID</th>
-                            <th id="TransitionColor_hr">Transition Color</th>
-                            <th id="TransitionDelete_hr">Transition Delete</th>
+                            <th id="transitionId_hr">Row</th>
+                            <th id="TransitionColor_hr">Color</th>
+                            <th id="TransitionDelete_hr">Delete</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -64,4 +66,28 @@
                 <button type="Button" class="btn btn-primary" id="AddTransitionBtn">Add Transition</button>;
             </div>
         </div>
+        </div>
+
+        <div class="form-group hidden" id="MarqueeConfig">
+            <label class="control-label col-sm-2" for="MarqueeGroupTable">Marquee Groups</label>
+            <div class="col-sm-offset-0 col-sm-8 form-group" style="height:200px; overflow:auto;" id="d_MarqueeGroup">
+                <table class="table" id="MarqueeGroupTable">
+                    <thead>
+                        <tr>
+                            <th id="MarqueeGroupId_hr">Row</th>
+                            <th id="MarqueeGroupIntensity_hr">Max %</th>
+                            <th id="MarqueeGroupIntensityEnd_hr">Min %</th>
+                            <th id="MarqueeGroupCount_hr">Num Pixels</th>
+                            <th id="MarqueeGroupColor_hr">Color</th>
+                            <th id="MarqueeGroupDelete_hr">Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr></tr>
+                    </tbody>
+                </table>
+                <button type="Button" class="btn btn-primary" id="AddMarqueeGroupBtn">Add Marquee Group</button>;
+            </div>
+        </div>
+    </div>
 </fieldset>
