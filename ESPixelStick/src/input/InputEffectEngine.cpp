@@ -304,6 +304,8 @@ void c_InputEffectEngine::PollFlash ()
             FlashInfo.NextFlashStartMS = now + random( FlashInfo.MinDelayMS, FlashInfo.MaxDelayMS);
             FlashInfo.NextFlashEndMS = FlashInfo.NextFlashStartMS + random(FlashInfo.MinDurationMS, FlashInfo.MaxDurationMS);
 
+            // force the effect to overwrite the buffer
+            EffectLastRun = 0;
             // DEBUG_V(String("             now: ") + String(now));
             // DEBUG_V(String("           Delay: ") + String(FlashInfo.NextFlashStartMS - now));
             // DEBUG_V(String("        Duration: ") + String(FlashInfo.NextFlashEndMS - FlashInfo.NextFlashStartMS));
