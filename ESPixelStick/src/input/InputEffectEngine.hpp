@@ -170,6 +170,7 @@ private:
     void setBrightness (float brightness);
     void setSpeed (uint16_t speed);
     void setDelay (uint16_t delay);
+    void PollFlash();
 
     void clearAll ();
 
@@ -183,4 +184,17 @@ private:
     bool ColorHasReachedTarget (double tc, double cc, double step);
     void ConditionalIncrementColor(double tc, double & cc, double step);
     void CalculateTransitionStepValue(double tc, double cc, double & step);
+
+    struct FlashInfo_t
+    {
+        bool     Enable           = true;
+		uint32_t MinIntensity     = 100;
+		uint32_t MaxIntensity     = 100;
+		uint32_t MinDelayMS       = 100;
+		uint32_t MaxDelayMS       = 5000;
+		uint32_t MinDurationMS    = 25;
+		uint32_t MaxDurationMS    = 50;
+        uint32_t NextFlashStartMS = 0;
+        uint32_t NextFlashEndMS   = 0;
+    } FlashInfo;
 };

@@ -150,6 +150,15 @@ void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
     jsonConfig[CN_EffectWhiteChannel] = EffectWhiteChannel;
     jsonConfig[CN_EffectColor]        = HexColor;
     jsonConfig[CN_pixel_count]        = effectMarqueePixelAdvanceCount;
+
+    jsonConfig["FlashEnable"]   = FlashInfo.Enable;
+    jsonConfig["FlashMinInt"]   = FlashInfo.MinIntensity;
+    jsonConfig["FlashMaxInt"]   = FlashInfo.MaxIntensity;
+    jsonConfig["FlashMinDelay"] = FlashInfo.MinDelayMS;
+    jsonConfig["FlashMaxDelay"] = FlashInfo.MaxDelayMS;
+    jsonConfig["FlashMinDur"]   = FlashInfo.MinDurationMS;
+    jsonConfig["FlashMaxDur"]   = FlashInfo.MaxDurationMS;
+
     // DEBUG_V ("");
 
     JsonArray EffectsArray = jsonConfig.createNestedArray (CN_effects);
@@ -270,6 +279,52 @@ void c_InputEffectEngine::NextEffect ()
 } // NextEffect
 
 //-----------------------------------------------------------------------------
+void c_InputEffectEngine::PollFlash ()
+{
+    uint32_t now = millis();
+
+    do // once
+    {
+        if(!FlashInfo.Enable)
+        {
+            // not doing random flashing
+            break;
+        }
+
+        if(now < FlashInfo.NextFlashStartMS)
+        {
+            // not time to flash yet
+            break;
+        }
+
+        // is the flash done?
+        if(now > FlashInfo.NextFlashEndMS)
+        {
+            // set up the next flash
+            FlashInfo.NextFlashStartMS = now + random( FlashInfo.MinDelayMS, FlashInfo.MaxDelayMS);
+            FlashInfo.NextFlashEndMS = FlashInfo.NextFlashStartMS + random(FlashInfo.MinDurationMS, FlashInfo.MaxDurationMS);
+
+            // DEBUG_V(String("             now: ") + String(now));
+            // DEBUG_V(String("           Delay: ") + String(FlashInfo.NextFlashStartMS - now));
+            // DEBUG_V(String("        Duration: ") + String(FlashInfo.NextFlashEndMS - FlashInfo.NextFlashStartMS));
+            // DEBUG_V(String("NextFlashStartMS: ") + String(FlashInfo.NextFlashStartMS));
+            // DEBUG_V(String("  NextFlashEndMS: ") + String(FlashInfo.NextFlashEndMS));
+
+            // dont overwrite the buffer
+            break;
+        }
+
+        double intensity = double(random( FlashInfo.MinIntensity, FlashInfo.MaxIntensity)) / 100.0;
+        CRGB color;
+        color.r = uint8_t(intensity * 255);
+        color.g = uint8_t(intensity * 255);
+        color.b = uint8_t(intensity * 255);
+        setAll(color);
+    } while(false);
+
+} // PollFlash
+
+//-----------------------------------------------------------------------------
 void c_InputEffectEngine::Process ()
 {
     // DEBUG_START;
@@ -304,6 +359,8 @@ void c_InputEffectEngine::Process ()
         InputMgr.RestartBlankTimer (GetInputChannelId ());
 
     } while (false);
+
+    PollFlash();
 
     // DEBUG_END;
 
@@ -349,6 +406,18 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     setFromJSON (effectColor, jsonConfig, CN_EffectColor);
     // DEBUG_V (String ("effectColor: ") + effectColor);
     setFromJSON (effectMarqueePixelAdvanceCount, jsonConfig, CN_pixel_count);
+
+    setFromJSON (FlashInfo.Enable,        jsonConfig, "FlashEnable");
+    setFromJSON (FlashInfo.MinIntensity,  jsonConfig, "FlashMinInt");
+    setFromJSON (FlashInfo.MaxIntensity,  jsonConfig, "FlashMaxInt");
+    setFromJSON (FlashInfo.MinDelayMS,    jsonConfig, "FlashMinDelay");
+    setFromJSON (FlashInfo.MaxDelayMS,    jsonConfig, "FlashMaxDelay");
+    setFromJSON (FlashInfo.MinDurationMS, jsonConfig, "FlashMinDur");
+    setFromJSON (FlashInfo.MaxDurationMS, jsonConfig, "FlashMaxDur");
+
+    // force a new flash calculation
+    FlashInfo.NextFlashStartMS = 0;
+    FlashInfo.NextFlashEndMS = 0;
 
     if(jsonConfig.containsKey(CN_transitions))
     {
@@ -919,7 +988,7 @@ uint16_t c_InputEffectEngine::effectMarquee ()
                     ++CurrentMarqueePixelLocation;
                     if(PixelCount <= CurrentMarqueePixelLocation)
                     {
-                        // wrap one past the top of the buffer
+                        // wrap bottom of the buffer
                         CurrentMarqueePixelLocation = 0;
                     }
                 }

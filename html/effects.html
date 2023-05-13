@@ -47,25 +47,51 @@
             </div>
         </div>
 
-        <div class="form-group hidden" id="TransitionsConfig">
-        <label class="control-label col-sm-2" for="TransitionColorTable">Transitions</label>
-        <div class="form-group " style="height:200px; overflow:auto;">
-            <div class="col-sm-offset-0 col-sm-2" id="d_transition">
-                <table class="table" id="TransitionColorTable">
-                    <thead>
-                        <tr>
-                            <th id="transitionId_hr">Row</th>
-                            <th id="TransitionColor_hr">Color</th>
-                            <th id="TransitionDelete_hr">Delete</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr></tr>
-                    </tbody>
-                </table>
-                <button type="Button" class="btn btn-primary" id="AddTransitionBtn">Add Transition</button>;
-            </div>
+        <div>
+            <label class="control-label col-sm-offset-0" for="EffectFlashTable">Effect Flash Settings</label>
+            <table class="table col-sm-offset-1 col-sm-1" id="EffectFlashTable">
+                <thead>
+                    <tr>
+                        <th>Enable</th>
+                        <th>Min Intensity %</th>
+                        <th>Max Intensity %</th>
+                        <th>Min Delay (ms)</th>
+                        <th>Max Delay (ms)</th>
+                        <th>Min Duration (ms)</th>
+                        <th>Max Duration (ms)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <td><input type="checkbox" id="FlashEnable"></td>
+                    <td><input type="number" class="form-control is-valid" id="FlashMinInt"   step="1" min="0"   max="100"    value=50></td>';
+                    <td><input type="number" class="form-control is-valid" id="FlashMaxInt"   step="1" min="0"   max="100"    value=100></td>';
+                    <td><input type="number" class="form-control is-valid" id="FlashMinDelay" step="1" min="100" max="100000" value=100></td>';
+                    <td><input type="number" class="form-control is-valid" id="FlashMaxDelay" step="1" min="100" max="100000" value=10000></td>';
+                    <td><input type="number" class="form-control is-valid" id="FlashMinDur"   step="1" min="10"  max="1000"   value=100></td>';
+                    <td><input type="number" class="form-control is-valid" id="FlashMaxDur"   step="1" min="10"  max="1000"   value=1000></td>';
+                </tbody>
+            </table>
         </div>
+
+        <div class="form-group hidden" id="TransitionsConfig">
+            <label class="control-label col-sm-2" for="TransitionColorTable">Transitions</label>
+            <div class="form-group " style="height:200px; overflow:auto;">
+                <div class="col-sm-offset-0 col-sm-2" id="d_transition">
+                    <table class="table" id="TransitionColorTable">
+                        <thead>
+                            <tr>
+                                <th id="transitionId_hr">Row</th>
+                                <th id="TransitionColor_hr">Color</th>
+                                <th id="TransitionDelete_hr">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr></tr>
+                        </tbody>
+                    </table>
+                    <button type="Button" class="btn btn-primary" id="AddTransitionBtn">Add Transition</button>;
+                </div>
+            </div>
         </div>
 
         <div class="form-group hidden" id="MarqueeConfig">
