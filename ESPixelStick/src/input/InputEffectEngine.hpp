@@ -187,7 +187,7 @@ private:
 
     struct FlashInfo_t
     {
-        bool     Enable           = true;
+        bool     Enable           = false;
 		uint32_t MinIntensity     = 100;
 		uint32_t MaxIntensity     = 100;
 		uint32_t MinDelayMS       = 100;
