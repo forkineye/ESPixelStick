@@ -884,11 +884,6 @@ uint16_t c_InputEffectEngine::effectMarquee ()
 
     // DEBUG_V(String("MarqueeTargetColorId: ") + String(MarqueeTargetColorId));
 
-    CRGB TempColor;
-    TempColor.r = uint8_t(TransitionCurrentColor.r);
-    TempColor.g = uint8_t(TransitionCurrentColor.g);
-    TempColor.b = uint8_t(TransitionCurrentColor.b);
-
     uint32_t CurrentMarqueePixelLocation = effectMarqueePixelLocation;
     uint32_t NumPixelsToProcess = PixelCount;
     do
@@ -897,8 +892,8 @@ uint16_t c_InputEffectEngine::effectMarquee ()
         for(auto CurrentGroup : MarqueueGroupTable)
         {
             uint32_t groupPixelCount = CurrentGroup.NumPixelsInGroup;
-            double CurrentBrightness = CurrentGroup.StartingIntensity;
-            double BrightnessInterval = (CurrentBrightness - double(CurrentGroup.EndingIntensity))/double(groupPixelCount);
+            double CurrentBrightness = (EffectReverse) ? CurrentGroup.EndingIntensity : CurrentGroup.StartingIntensity;
+            double BrightnessInterval = (double(CurrentGroup.StartingIntensity) - double(CurrentGroup.EndingIntensity))/double(groupPixelCount);
             
             // now adjust for 100% = 1
             CurrentBrightness /= 100;
@@ -915,16 +910,31 @@ uint16_t c_InputEffectEngine::effectMarquee ()
                 // output the current value
                 outputEffectColor (CurrentMarqueePixelLocation, color);
 
-                // set the next brightness
-                CurrentBrightness -= BrightnessInterval;
-
                 // advance to the next pixel
-                if(0 == CurrentMarqueePixelLocation)
+                if(EffectReverse)
                 {
-                    // wrap one past the top of the buffer
-                    CurrentMarqueePixelLocation = PixelCount;
+                    // set the next brightness
+                    CurrentBrightness += BrightnessInterval;
+
+                    ++CurrentMarqueePixelLocation;
+                    if(PixelCount <= CurrentMarqueePixelLocation)
+                    {
+                        // wrap one past the top of the buffer
+                        CurrentMarqueePixelLocation = 0;
+                    }
                 }
-                --CurrentMarqueePixelLocation;
+                else // forward
+                {
+                    // set the next brightness
+                    CurrentBrightness -= BrightnessInterval;
+
+                    if(0 == CurrentMarqueePixelLocation)
+                    {
+                        // wrap one past the top of the buffer
+                        CurrentMarqueePixelLocation = PixelCount;
+                    }
+                    --CurrentMarqueePixelLocation;
+                }
             }
 
             // did we stop due to pixel exhaustion
@@ -933,8 +943,6 @@ uint16_t c_InputEffectEngine::effectMarquee ()
                 break;
             }
         }
-
-
 
     } while (NumPixelsToProcess);
     
