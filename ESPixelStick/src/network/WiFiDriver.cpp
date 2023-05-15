@@ -180,7 +180,7 @@ void c_WiFiDriver::Begin ()
 #endif
 
     // set up the poll interval
-    NextPollTime = millis () + PollInterval;
+    NextPoll.StartTimer(PollInterval);
 
     // Main loop should start polling for us
     // pCurrentFsmState->Poll ();
@@ -414,10 +414,10 @@ void c_WiFiDriver::Poll ()
 {
     // DEBUG_START;
 
-    if (millis () > NextPollTime)
+    if (NextPoll.IsExpired())
     {
         // DEBUG_V ("Start Poll");
-        NextPollTime += PollInterval;
+        NextPoll.StartTimer(PollInterval);
         // displayFsmState ();
         pCurrentFsmState->Poll ();
         // displayFsmState ();
@@ -641,11 +641,10 @@ void fsm_WiFi_state_ConnectingUsingConfig::Poll ()
     /// DEBUG_START;
 
     // wait for the connection to complete via the callback function
-    uint32_t CurrentTimeMS = millis ();
 
     if (WiFi.status () != WL_CONNECTED)
     {
-        if (CurrentTimeMS - pWiFiDriver->GetFsmStartTime() > (1000 * pWiFiDriver->Get_sta_timeout()))
+        if (pWiFiDriver->GetFsmTimer().IsExpired())
         {
             /// DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
             logcon (F ("WiFi Failed to connect using Configured Credentials"));
@@ -674,7 +673,7 @@ void fsm_WiFi_state_ConnectingUsingConfig::Init ()
     {
         pWiFiDriver->SetFsmState (this);
         pWiFiDriver->AnnounceState ();
-        pWiFiDriver->SetFsmStartTime (millis ());
+        pWiFiDriver->GetFsmTimer().StartTimer(1000 * pWiFiDriver->Get_sta_timeout());
 
         pWiFiDriver->connectWifi (CurrentSsid, CurrentPassphrase);
     }
@@ -704,13 +703,11 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Poll ()
     /// DEBUG_START;
 
     // wait for the connection to complete via the callback function
-    uint32_t CurrentTimeMS = millis ();
-
     if (WiFi.status () != WL_CONNECTED)
     {
-        if (CurrentTimeMS - pWiFiDriver->GetFsmStartTime () > (1000 * pWiFiDriver->Get_sta_timeout ()))
+        if (pWiFiDriver->GetFsmTimer().IsExpired())
         {
-            /// DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
+            // DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
             logcon (F ("WiFi Failed to connect using default Credentials"));
             fsm_WiFi_state_ConnectingAsAP_imp.Init ();
         }
@@ -728,7 +725,7 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Init ()
     // DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
     pWiFiDriver->SetFsmState (this);
     pWiFiDriver->AnnounceState ();
-    pWiFiDriver->SetFsmStartTime (millis ());
+    pWiFiDriver->GetFsmTimer().StartTimer(1000 * pWiFiDriver->Get_sta_timeout ());
 
     pWiFiDriver->connectWifi (default_ssid, default_passphrase);
     // pWiFiDriver->displayFsmState ();
@@ -762,7 +759,7 @@ void fsm_WiFi_state_ConnectingAsAP::Poll ()
     }
     else
     {
-        if (millis () - pWiFiDriver->GetFsmStartTime () > (1000 * pWiFiDriver->Get_ap_timeout ()))
+        if (pWiFiDriver->GetFsmTimer().IsExpired())
         {
             if( false == pWiFiDriver->Get_ap_StayInApMode())
             {
@@ -783,6 +780,7 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
 
     pWiFiDriver->SetFsmState (this);
     pWiFiDriver->AnnounceState ();
+    pWiFiDriver->GetFsmTimer ().StartTimer(1000 * pWiFiDriver->Get_ap_timeout ());
 
     if (true == pWiFiDriver->Get_ap_fallbackIsEnabled() || pWiFiDriver->Get_ap_StayInApMode())
     {
