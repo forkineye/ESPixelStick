@@ -281,8 +281,6 @@ void c_InputEffectEngine::NextEffect ()
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::PollFlash ()
 {
-    uint32_t now = millis();
-
     do // once
     {
         if(!FlashInfo.Enable)
@@ -291,36 +289,37 @@ void c_InputEffectEngine::PollFlash ()
             break;
         }
 
-        if(now < FlashInfo.NextFlashStartMS)
+        if(!FlashInfo.delaytimer.IsExpired())
         {
             // not time to flash yet
             break;
         }
 
         // is the flash done?
-        if(now > FlashInfo.NextFlashEndMS)
+        if(FlashInfo.durationtimer.IsExpired())
         {
             // set up the next flash
-            FlashInfo.NextFlashStartMS = now + random( FlashInfo.MinDelayMS, FlashInfo.MaxDelayMS);
-            FlashInfo.NextFlashEndMS = FlashInfo.NextFlashStartMS + random(FlashInfo.MinDurationMS, FlashInfo.MaxDurationMS);
+            uint32_t NextDelay = random(FlashInfo.MinDelayMS, FlashInfo.MaxDelayMS);
+            uint32_t NextDuration = random(FlashInfo.MinDurationMS, FlashInfo.MaxDurationMS);
+
+            FlashInfo.delaytimer.StartTimer(NextDelay);
+            FlashInfo.durationtimer.StartTimer(NextDelay + NextDuration);
 
             // force the effect to overwrite the buffer
-            EffectLastRun = 0;
-            // DEBUG_V(String("             now: ") + String(now));
-            // DEBUG_V(String("           Delay: ") + String(FlashInfo.NextFlashStartMS - now));
-            // DEBUG_V(String("        Duration: ") + String(FlashInfo.NextFlashEndMS - FlashInfo.NextFlashStartMS));
-            // DEBUG_V(String("NextFlashStartMS: ") + String(FlashInfo.NextFlashStartMS));
-            // DEBUG_V(String("  NextFlashEndMS: ") + String(FlashInfo.NextFlashEndMS));
+            EffectDelayTimer.CancelTimer();
+            // DEBUG_V(String("         now: ") + String(now));
+            // DEBUG_V(String("   NextDelay: ") + String(NextDelay));
+            // DEBUG_V(String("NextDuration: ") + String(NextDuration));
 
             // dont overwrite the buffer
             break;
         }
 
-        double intensity = double(random( FlashInfo.MinIntensity, FlashInfo.MaxIntensity)) / 100.0;
+        uint8_t intensity = uint8_t(map(random( FlashInfo.MinIntensity, FlashInfo.MaxIntensity),0,100,0,255));
         CRGB color;
-        color.r = uint8_t(intensity * 255);
-        color.g = uint8_t(intensity * 255);
-        color.b = uint8_t(intensity * 255);
+        color.r = intensity;
+        color.g = intensity;
+        color.b = intensity;
         setAll(color);
     } while(false);
 
@@ -348,13 +347,13 @@ void c_InputEffectEngine::Process ()
         }
         // DEBUG_V ("Pixel Count OK");
 
-        if (millis () < (EffectLastRun + EffectWait))
+        if(!EffectDelayTimer.IsExpired())
         {
             break;
         }
 
         // DEBUG_V ("Update output");
-        EffectLastRun = millis ();
+        EffectDelayTimer.StartTimer(EffectWait);
         uint32_t wait = (this->*ActiveEffect->func)();
         EffectWait = max ((int)wait, MIN_EFFECT_DELAY);
         EffectCounter++;
@@ -416,10 +415,6 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     setFromJSON (FlashInfo.MaxDelayMS,    jsonConfig, "FlashMaxDelay");
     setFromJSON (FlashInfo.MinDurationMS, jsonConfig, "FlashMinDur");
     setFromJSON (FlashInfo.MaxDurationMS, jsonConfig, "FlashMaxDur");
-
-    // force a new flash calculation
-    FlashInfo.NextFlashStartMS = 0;
-    FlashInfo.NextFlashEndMS = 0;
 
     if(jsonConfig.containsKey(CN_transitions))
     {
@@ -573,7 +568,7 @@ void c_InputEffectEngine::setEffect (const String & effectName)
             {
                 // DEBUG_V ("Starting Effect");
                 ActiveEffect = &ListOfEffects[EffectIndex];
-                EffectLastRun = millis ();
+                EffectDelayTimer.StartTimer(EffectDelay);
                 EffectWait = MIN_EFFECT_DELAY;
                 EffectCounter = 0;
                 EffectStep = 0;

@@ -133,8 +133,9 @@ private:
 
     using timeType = decltype(millis());
 
+
     uint32_t EffectWait            = 32;              /* How long to wait for the effect to run again */
-    timeType EffectLastRun         = 0;               /* When did the effect last run ? in millis() */
+
     uint32_t EffectCounter         = 0;               /* Counter for the number of calls to the active effect */
     uint16_t EffectSpeed           = 6;               /* Externally controlled effect speed 1..10 */
     uint16_t EffectDelay           = DEFAULT_EFFECT_DELAY; /* Internal representation of speed */
@@ -153,6 +154,7 @@ private:
     uint32_t   MirroredPixelCount    = 0;            /* Number of RGB leds (not channels) */
     uint8_t    ChannelsPerPixel      = 3;
     uint32_t   PixelOffset           = 0;
+    FastTimer  EffectDelayTimer;
 
     void setPixel(uint16_t idx,  CRGB color);
     void GetPixel (uint16_t pixelId, CRGB & out);
@@ -194,7 +196,7 @@ private:
 		uint32_t MaxDelayMS       = 5000;
 		uint32_t MinDurationMS    = 25;
 		uint32_t MaxDurationMS    = 50;
-        uint32_t NextFlashStartMS = 0;
-        uint32_t NextFlashEndMS   = 0;
+        FastTimer delaytimer;
+        FastTimer durationtimer;
     } FlashInfo;
 };
