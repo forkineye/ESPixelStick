@@ -60,8 +60,8 @@ public:
     void DeleteConfig         () { FileMgr.DeleteConfigFile (ConfigFileName); }
     bool GetNetworkState      () { return IsConnected; }
     void GetDriverName        (String & Name) { Name = "InputMgr"; }
-    void RestartBlankTimer    (c_InputMgr::e_InputChannelIds Selector) { BlankEndTime[int(Selector)] = (millis () / 1000) + config.BlankDelay; }
-    bool BlankTimerHasExpired (c_InputMgr::e_InputChannelIds Selector) { return !(BlankEndTime[int(Selector)] > (millis () / 1000)); }
+    void RestartBlankTimer    (c_InputMgr::e_InputChannelIds Selector) { BlankEndTime[int(Selector)].StartTimer(config.BlankDelay * 1000); }
+    bool BlankTimerHasExpired (c_InputMgr::e_InputChannelIds Selector) { return (BlankEndTime[int(Selector)].IsExpired()); }
 
     enum e_InputType
     {
@@ -91,7 +91,7 @@ private:
     };
 
     DriverInfo_t    InputChannelDrivers[InputChannelId_End]; ///< pointer(s) to the current active Input driver
-    uint32_t          InputDataBufferSize = 0;
+    uint32_t        InputDataBufferSize = 0;
     bool            HasBeenInitialized  = false;
     c_ExternalInput ExternalInput;
     bool            EffectEngineIsConfiguredToRun[InputChannelId_End];
@@ -111,7 +111,7 @@ private:
     String ConfigFileName;
     bool   rebootNeeded = false;
 
-    time_t BlankEndTime[InputChannelId_End];
+    FastTimer BlankEndTime[InputChannelId_End];
 
 #define IM_JSON_SIZE (5 * 1024)
 

@@ -270,7 +270,7 @@ void fsm_ExternalInput_on_wait_short_state::Init(c_ExternalInput& pExternalInput
 {
 	// DEBUG_START;
 
-	pExternalInput.m_iInputHoldTimeMS = millis() + INPUT_SHORT_VALUE_MS;
+	pExternalInput.m_InputHoldTimer.StartTimer(INPUT_SHORT_VALUE_MS);
 	pExternalInput.m_CurrentFsmState = fsm_ExternalInput_on_wait_short_state_imp;
 	// DEBUG_V ("Entring Wait Short State");
 
@@ -289,7 +289,7 @@ void fsm_ExternalInput_on_wait_short_state::Poll(c_ExternalInput& pExternalInput
 	{
 		// DEBUG_V("");
 		// decrement the counter
-		if (millis() >= pExternalInput.m_iInputHoldTimeMS)
+		if (pExternalInput.m_InputHoldTimer.IsExpired())
 		{
 			// we really are on
 			fsm_ExternalInput_on_wait_long_state_imp.Init(pExternalInput);
@@ -309,7 +309,7 @@ void fsm_ExternalInput_on_wait_short_state::Poll(c_ExternalInput& pExternalInput
 // Input is always on
 void fsm_ExternalInput_on_wait_long_state::Init (c_ExternalInput& pExternalInput)
 {
-	pExternalInput.m_iInputHoldTimeMS = millis () + INPUT_LONG_VALUE_MS;
+	pExternalInput.m_InputHoldTimer.StartTimer(INPUT_LONG_VALUE_MS);
 	pExternalInput.m_CurrentFsmState = fsm_ExternalInput_on_wait_long_state_imp;
 	// DEBUG_V ("Entring Wait Long State");
 
@@ -329,7 +329,7 @@ void fsm_ExternalInput_on_wait_long_state::Poll (c_ExternalInput& pExternalInput
 	{
 		// DEBUG_V("");
 		// decrement the counter
-		if (millis () >= pExternalInput.m_iInputHoldTimeMS)
+		if (pExternalInput.m_InputHoldTimer.IsExpired())
 		{
 			// we really are on
 			fsm_ExternalInput_wait_for_off_state_imp.Init (pExternalInput);
