@@ -1291,7 +1291,7 @@ uint16_t c_InputEffectEngine::effectBreathe ()
 c_InputEffectEngine::dCHSV c_InputEffectEngine::rgb2hsv (CRGB in_int)
 {
     dCHSV       out;
-    dCRGB       in = { in_int.r / 255.0d, in_int.g / 255.0d, in_int.b / 255.0d };
+    dCRGB       in = { double(in_int.r) / double(255.0), double(in_int.g) / double(255.0), double(in_int.b) / double(255.0) };
     double      min, max, delta;
 
     min = in.r < in.g ? in.r : in.g;
