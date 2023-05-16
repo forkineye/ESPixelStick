@@ -77,7 +77,7 @@ protected:
     // ensures this for all practical purposes.
     static_assert( (((time_t)1) / 2) == 0 ); // Verify time_t is an integer type (alternative: float)
 
-    time_t   PauseEndTime        = 0;
+    FastTimer PauseDelayTimer;
     uint32_t PlayListRepeatCount = 1;
 
     bool ProcessPlayListEntry ();

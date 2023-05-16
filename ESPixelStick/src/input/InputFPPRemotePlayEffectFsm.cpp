@@ -51,7 +51,7 @@ void fsm_PlayEffect_state_Idle::Start (String & ConfigString, float )
     // DEBUG_START;
 
     // DEBUG_V (String ("ConfigString: '") + ConfigString + "'");
-    p_InputFPPRemotePlayEffect->PlayEffectEndTime = millis () + (1000 * p_InputFPPRemotePlayEffect->PlayDurationSec);
+    p_InputFPPRemotePlayEffect->PlayEffectTimer.StartTimer(1000 * p_InputFPPRemotePlayEffect->PlayDurationSec);
     
     // tell the effect engine what it is supposed to be doing
     DynamicJsonDocument EffectConfig (512);
@@ -124,7 +124,7 @@ void fsm_PlayEffect_state_PlayingEffect::Poll ()
     p_InputFPPRemotePlayEffect->EffectsEngine.SetBufferInfo (OutputMgr.GetBufferUsedSize());
     p_InputFPPRemotePlayEffect->EffectsEngine.Process ();
 
-    if (p_InputFPPRemotePlayEffect->PlayEffectEndTime <= millis ())
+    if (p_InputFPPRemotePlayEffect->PlayEffectTimer.IsExpired())
     {
         // DEBUG_V ("");
         Stop ();
@@ -192,12 +192,7 @@ void fsm_PlayEffect_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    time_t now = millis ();
-    time_t SecondsRemaining = (p_InputFPPRemotePlayEffect->PlayEffectEndTime - now) / 1000;
-    if (now > p_InputFPPRemotePlayEffect->PlayEffectEndTime)
-    {
-        SecondsRemaining = 0;
-    }
+    time_t SecondsRemaining = (p_InputFPPRemotePlayEffect->PlayEffectTimer.GetTimeRemaining()) / 1000;
 
     char buf[12];
     ESP_ERROR_CHECK(saferSecondsToFormattedMinutesAndSecondsString(buf, (uint32_t)SecondsRemaining));

@@ -309,7 +309,7 @@ void fsm_PlayList_state_Paused::Poll ()
 {
     // DEBUG_START;
 
-    if (pInputFPPRemotePlayList->PauseEndTime <= millis ())
+    if (pInputFPPRemotePlayList->PauseDelayTimer.IsExpired())
     {
         Stop();
     }
@@ -359,13 +359,7 @@ void fsm_PlayList_state_Paused::GetStatus (JsonObject& jsonStatus)
 
     JsonObject PauseStatus = jsonStatus.createNestedObject (CN_Paused);
 
-    time_t now = millis ();
-
-    time_t SecondsRemaining = (pInputFPPRemotePlayList->PauseEndTime - now) / 1000u;
-    if (now > pInputFPPRemotePlayList->PauseEndTime)
-    {
-        SecondsRemaining = 0;
-    }
+    time_t SecondsRemaining = pInputFPPRemotePlayList->PauseDelayTimer.GetTimeRemaining() / 1000u;
 
     char buf[12];
     // BUGBUG -- casting time_t to integer types is not portable code (can be real ... e.g., float)
