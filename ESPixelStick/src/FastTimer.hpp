@@ -29,6 +29,7 @@ public:
     void StartTimer (uint32_t durationMS);
     bool IsExpired();
     void CancelTimer();
+    uint32_t GetTimeRemaining();
 
 private:
 

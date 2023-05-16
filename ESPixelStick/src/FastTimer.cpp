@@ -64,3 +64,11 @@ void FastTimer::CancelTimer()
     offsetMS = 0;
 
 } // CancelTimer
+
+//-----------------------------------------------------------------------------
+uint32_t FastTimer::GetTimeRemaining()
+{
+    
+    return (IsExpired()) ? 0 : uint32_t(EndTimeMS - (uint64_t(millis()) + uint64_t(offsetMS)));
+
+} // GetTimeRemaining
