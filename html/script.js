@@ -99,11 +99,10 @@ $(function () {
     // DHCP field toggles
     $('#wifi #dhcp').on("change", (function () {
         if ($(this).is(':checked')) {
-            $('.dhcp').removeClass('hidden');
-            $('.dhcp').addClass('hidden');
+            $('.wifiDhcp').addClass('hidden');
         }
         else {
-            $('.dhcp').removeClass('hidden');
+            $('.wifiDhcp').removeClass('hidden');
         }
         $('#btn_network').prop("disabled", ValidateConfigFields($("#network #wifi input")));
     }));
@@ -265,18 +264,6 @@ $(function () {
             wsPingPong();
         }
     });
-
-    // DHCP field toggles
-    $('fg_Triggerd_Effect').on("change", (function () {
-        if ($(this).is(':checked')) {
-            // $('.dhcp').removeClass('hidden');
-            $('.dhcp').addClass('hidden');
-        }
-        else {
-            $('.dhcp').removeClass('hidden');
-        }
-        $('#btn_network').prop("disabled", ValidateConfigFields($("#network #wifi input")));
-    }));
 });
 
 function ProcessLocalConfig(data) {
@@ -1490,7 +1477,7 @@ function wsConnect() {
             target = document.location.host;
         }
 
-        // target = "192.168.10.175";
+        // target = "192.168.10.240";
         // target = "192.168.10.101";
 
         // Open a new web socket and set the binary type
