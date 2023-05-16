@@ -69,8 +69,7 @@ public:
     bool            IsConnected         ();
     inline void     SetFsmState         (fsm_Eth_state * NewState) { pCurrentFsmState = NewState; }
     void            AnnounceState       ();
-    inline void     SetFsmStartTime     (uint32_t NewStartTime)    { FsmTimerEthStartTime = NewStartTime; }
-    inline uint32_t GetFsmStartTime     (void)                     { return FsmTimerEthStartTime; }
+    FastTimer     & GetFsmTimer         () { return FsmTimer; }
     void            NetworkStateChanged (bool NetworkState);
     void            StartEth            ();
     void            InitPowerPin        ();
@@ -82,7 +81,7 @@ private:
 
     void onEventHandler         (const WiFiEvent_t event, const WiFiEventInfo_t info);
 
-    uint32_t         NextPollTime = 0;
+    FastTimer        NextPollTimer;
     uint32_t         PollInterval = 1000;
     bool             HasBeenPreviouslyConfigured = false;
 
@@ -107,7 +106,7 @@ protected:
     friend class fsm_Eth_state_DeviceInitFailed;
     friend class fsm_Eth_state;
     fsm_Eth_state * pCurrentFsmState = nullptr;
-    uint32_t        FsmTimerEthStartTime = 0;
+    FastTimer    FsmTimer;
 
 }; // c_EthernetDriver
 
