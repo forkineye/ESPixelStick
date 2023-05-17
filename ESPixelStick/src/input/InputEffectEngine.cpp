@@ -367,6 +367,12 @@ void c_InputEffectEngine::Process ()
 
 } // process
 
+//----------------------------------------------------------------------------
+void c_InputEffectEngine::ProcessEffectsButtonActions(c_ExternalInput::InputValue_t value)
+{
+
+} // ProcessEffectsButtonActions
+
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::SetBufferInfo (uint32_t BufferSize)
 {
@@ -1278,7 +1284,7 @@ uint16_t c_InputEffectEngine::effectBreathe ()
      */
      // sin() is in radians, so 2*PI rad is a full period; compiler should optimize.
     // DEBUG_START;
-    float val = (exp (sin (millis () / (EffectDelay * 5.0) * 2 * PI)) - 0.367879441) * 0.106364766 + 0.75;
+    float val = (exp (sin (float(millis ()) / (float(EffectDelay) * 5.0) * 2.0 * PI)) - 0.367879441) * 0.106364766 + 0.75;
     setAll ({ uint8_t (EffectColor.r * val),
               uint8_t (EffectColor.g * val),
               uint8_t (EffectColor.b * val) });
