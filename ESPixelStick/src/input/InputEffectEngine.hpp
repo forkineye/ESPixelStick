@@ -106,6 +106,7 @@ public:
     void GetDriverName (String  & sDriverName) { sDriverName = "Effects"; } ///< get the name for the instantiated driver
     void SetBufferInfo (uint32_t BufferSize);
     void NextEffect ();
+    void ProcessEffectsButtonActions(c_ExternalInput::InputValue_t value);
 
     // Effect functions
     uint16_t effectSolidColor ();
@@ -199,4 +200,10 @@ private:
         FastTimer delaytimer;
         FastTimer durationtimer;
     } FlashInfo;
+
+    struct TriggerConfig_t
+    {
+        
+    } TriggerConfig;
+
 };
