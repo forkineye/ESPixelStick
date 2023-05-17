@@ -28,13 +28,13 @@ public:
 
 	void         Init              (uint32_t iInputId, uint32_t iPinId, Polarity_t Poliarity, String & sName);
 	InputValue_t Get               ();
-	inline bool  InputHadLongPush  (bool bClearFlag) { bool tmp = m_bHadLongPush;  if (true == bClearFlag) { m_bHadLongPush  = false; } return tmp; }
-	inline bool  InputHadShortPush (bool bClearFlag) { bool tmp = m_bHadShortPush; if (true == bClearFlag) { m_bHadShortPush = false; } return tmp; }
+	inline bool  InputHadLongPush  (bool bClearFlag) { bool tmp = HadLongPush;  if (true == bClearFlag) { HadLongPush  = false; } return tmp; }
+	inline bool  InputHadShortPush (bool bClearFlag) { bool tmp = HadShortPush; if (true == bClearFlag) { HadShortPush = false; } return tmp; }
 	void         Poll              (void);
 	void         GetConfig         (JsonObject JsonData);
 	void         GetStatistics     (JsonObject JsonData);
 	void         ProcessConfig     (JsonObject JsonData);
-	bool		 IsEnabled ()      { return m_bIsEnabled; }
+	bool		 IsEnabled ()      { return Enabled; }
 	void         GetDriverName     (String & Name) { Name = "ExtInput"; }
 
 protected:
@@ -48,16 +48,17 @@ protected:
 #	define M_POLARITY   CN_polarity
 #   define M_ID         CN_id
 
-	String                    m_name;
-    uint32_t                  m_iPinId              = 0;
-	Polarity_t                m_polarity            = Polarity_t::ActiveLow;
-	time_t                    m_ExpirationTime      = 0;
-	bool                      m_bIsEnabled          = false;
-	uint32_t                  m_iInputDebounceCount = 0;
-	FastTimer                 m_InputHoldTimer;
-	bool                      m_bHadLongPush        = false;
-	bool                      m_bHadShortPush       = false;
-	fsm_ExternalInput_state&  m_CurrentFsmState;    // initialized in constructor
+	String                    name;
+    uint32_t                  GpioId              = 0;
+	uint32_t			      TriggerChannel      = uint32_t(-1);
+	Polarity_t                polarity            = Polarity_t::ActiveLow;
+	// time_t                    m_ExpirationTime      = 0;
+	bool                      Enabled          = false;
+	uint32_t                  InputDebounceCount = 0;
+	FastTimer                 InputHoldTimer;
+	bool                      HadLongPush        = false;
+	bool                      HadShortPush       = false;
+	fsm_ExternalInput_state&  CurrentFsmState;    // initialized in constructor
 
 	friend class fsm_ExternalInput_boot;
 	friend class fsm_ExternalInput_off_state;
