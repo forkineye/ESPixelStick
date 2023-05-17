@@ -117,21 +117,24 @@
         </div>
     </div>
 
-    <legend class="esps-legend">Triggered Effect</legend>
-    <div class="form-group" id="fg_Triggerd_Effect">
-        <label class="control-label col-sm-2" for="TE_Enable">Enable</label>
-        <div class="checkbox col-sm-2">
-            <input type="checkbox" id="TE_Enable" title="Trigger Effects using a data channel.">
+    <div class="col-sm-offset-0">
+        <legend class="esps-legend" for="ecb">Triggered Effect</legend>
+        <div class="form-group col-sm-offset-2" id="ecb">
+
+            <label class="control-label col-sm-offset-1" for="ecb_enable">Enable:</label>
+            <input type="checkbox" id="ecb_enable" title="Trigger Effects using a button or channel.">
+
+            <label class="control-label" for="ecb_gpioid">GPIO</label>
+            <input type="number" class="is-valid" id="ecb_gpioid" name="ecb_gpioid" step="1" min="0" max="40" value="0" title="GPIO to monitor for effects trigger">
+
+            <label class="control-label" for="ecb_polarity">Polarity</label>
+            <select name="ecb_polarity" id="ecb_polarity">
+                <option value="ActiveLow">ActiveLow</option>
+                <option value="ActiveHigh">ActiveHigh</option>
+            </select>
+
+            <label class="control-label" for="ecb_chanid">Channel</label>
+            <input type="number" class="is-valid" id="ecb_chanid" name="ecb_chanid" step="1" min="0" value="0" title="Channel to monitor for effects trigger">
         </div>
-        <label class="control-label col-sm-2" for="TE_Chan">Channel</label>
-        <div class="col-sm-2">
-            <input type="number" class="form-control is-valid" id="TE_Chan" step="1" min="1" value=1></input>
-        </div>
-        <label class="control-label col-sm-2" for="TE_gpio">GPIO</label>
-        <div class="col-sm-2">
-            <input type="number" class="form-control is-valid" id="TE_gpio" step="1" min="0" max="36" value=34></input>
-        </div>
-        <!-- TriggeredEffectList -->
-        <!-- Effect (dropdown), Channel Value -->
     </div>
 </fieldset>
