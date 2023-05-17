@@ -920,6 +920,7 @@ function ProcessInputConfig() {
     $("#ecb_enable").prop("checked", Input_Config.ecb.enabled);
     $("#ecb_gpioid").val(Input_Config.ecb.id);
     $("#ecb_polarity").val(Input_Config.ecb.polarity);
+    $("#ecb_chanid").val(Input_Config.ecb.channels);
 
 } // ProcessInputConfig
 
@@ -1438,6 +1439,7 @@ function submitDeviceConfig() {
     Input_Config.ecb.enabled = $("#ecb_enable").is(':checked');
     Input_Config.ecb.id = $("#ecb_gpioid").val();
     Input_Config.ecb.polarity = $("#ecb_polarity").val();
+    Input_Config.ecb.channels = $("#ecb_chanid").val();
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
