@@ -95,7 +95,7 @@ void c_EthernetDriver::Begin ()
     WiFi.onEvent ([this](WiFiEvent_t event, arduino_event_info_t info) {this->onEventHandler (event, info); });
 
     // set up the poll interval
-    NextPollTime = millis () + PollInterval;
+    NextPollTimer.StartTimer(PollInterval);
 
     // DEBUG_END;
 
@@ -279,10 +279,10 @@ void c_EthernetDriver::Poll ()
 {
     // DEBUG_START;
 
-    if (millis () > NextPollTime)
+    if (NextPollTimer.IsExpired())
     {
         // DEBUG_V ("Polling");
-        NextPollTime += PollInterval;
+        NextPollTimer.StartTimer(PollInterval);
         pCurrentFsmState->Poll ();
     }
 
@@ -451,7 +451,7 @@ void fsm_Eth_state_Boot::Init ()
 
     pEthernetDriver->SetFsmState (this);
     // pEthernetDriver->AnnounceState ();
-    pEthernetDriver->SetFsmStartTime (millis ());
+    pEthernetDriver->GetFsmTimer().StartTimer(10000);
 
     // DEBUG_V(String("pEthernetDriver: 0x") + String(uint32_t(pEthernetDriver), HEX));
 
@@ -465,11 +465,9 @@ void fsm_Eth_state_Boot::Poll ()
 {
     // DEBUG_START;
 
-    uint32_t CurrentTimeMS = millis ();
-
     // DEBUG_V(String("pEthernetDriver: 0x") + String(uint32_t(pEthernetDriver), HEX));
 
-    if (CurrentTimeMS - pEthernetDriver->GetFsmStartTime() > (10000))
+    if (pEthernetDriver->GetFsmTimer().IsExpired())
     {
         // DEBUG_V("Start trying to connect");
         fsm_Eth_state_PoweringUp_imp.Init();
@@ -486,7 +484,7 @@ void fsm_Eth_state_PoweringUp::Init ()
 
     pEthernetDriver->SetFsmState (this);
     pEthernetDriver->AnnounceState ();
-    pEthernetDriver->SetFsmStartTime (millis ());
+    pEthernetDriver->GetFsmTimer().StartTimer (pEthernetDriver->GetPowerPinActiveDelayMs());
 
     pEthernetDriver->InitPowerPin ();
 
@@ -499,8 +497,7 @@ void fsm_Eth_state_PoweringUp::Poll ()
 {
     // DEBUG_START;
 
-    uint32_t CurrentTimeMS = millis ();
-    if (CurrentTimeMS - pEthernetDriver->GetFsmStartTime () > (pEthernetDriver->GetPowerPinActiveDelayMs()))
+    if (pEthernetDriver->GetFsmTimer ().IsExpired())
     {
         // Start trying to connect to based on input config
         fsm_Eth_state_ConnectingToEth_imp.Init ();
@@ -520,7 +517,7 @@ void fsm_Eth_state_ConnectingToEth::Init ()
 
     pEthernetDriver->SetFsmState (this);
     pEthernetDriver->AnnounceState ();
-    pEthernetDriver->SetFsmStartTime (millis ());
+    pEthernetDriver->GetFsmTimer().StartTimer (5000);
 
     // DEBUG_END;
 
@@ -571,7 +568,7 @@ void fsm_Eth_state_WaitForIP::Init ()
 
     pEthernetDriver->SetFsmState (this);
     pEthernetDriver->AnnounceState ();
-    pEthernetDriver->SetFsmStartTime (millis ());
+    pEthernetDriver->GetFsmTimer().StartTimer (5000);
 
     // DEBUG_END;
 

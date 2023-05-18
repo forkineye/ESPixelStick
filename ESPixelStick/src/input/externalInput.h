@@ -54,7 +54,7 @@ protected:
 	time_t                    m_ExpirationTime      = 0;
 	bool                      m_bIsEnabled          = false;
 	uint32_t                  m_iInputDebounceCount = 0;
-	uint32_t                  m_iInputHoldTimeMS    = 0;
+	FastTimer                 m_InputHoldTimer;
 	bool                      m_bHadLongPush        = false;
 	bool                      m_bHadShortPush       = false;
 	fsm_ExternalInput_state&  m_CurrentFsmState;    // initialized in constructor

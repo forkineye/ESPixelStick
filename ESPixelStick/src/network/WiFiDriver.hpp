@@ -69,8 +69,7 @@ public:
 
     void      SetFsmState (fsm_WiFi_state* NewState);
     void      AnnounceState   ();
-    void      SetFsmStartTime (uint32_t NewStartTime)    { FsmTimerWiFiStartTime = NewStartTime; }
-    uint32_t  GetFsmStartTime (void)                     { return FsmTimerWiFiStartTime; }
+    FastTimer &GetFsmTimer (void) { return FsmTimer; }
     bool      IsWiFiConnected () { return ReportedIsWiFiConnected; }
     void      SetIsWiFiConnected (bool value) { ReportedIsWiFiConnected = value; }
     void      GetDriverName   (String & Name) { Name = CN_WiFiDrv; }
@@ -98,7 +97,7 @@ private:
     // config_t           *config = nullptr;                           // Current configuration
     IPAddress   CurrentIpAddress  = IPAddress (0, 0, 0, 0);
     IPAddress   CurrentSubnetMask = IPAddress (0, 0, 0, 0);
-    uint32_t    NextPollTime = 0;
+    FastTimer   NextPoll;
     uint32_t    PollInterval = 1000;
     bool        ReportedIsWiFiConnected = false;
 
@@ -143,7 +142,7 @@ protected:
     friend class fsm_WiFi_state_Disabled;
     friend class fsm_WiFi_state;
     fsm_WiFi_state * pCurrentFsmState = nullptr;
-    uint32_t         FsmTimerWiFiStartTime = 0;
+    FastTimer        FsmTimer;
 
 }; // c_WiFiDriver
 

@@ -40,7 +40,7 @@ wsConnect();
 // jQuery doc ready
 $(function () {
     // Menu navigation for single page layout
-    $('ul.navbar-nav li a').click(function () {
+    $('ul.navbar-nav li a').on("click", (function () {
         // Highlight proper navbar item
         $('.nav li').removeClass('active');
         $(this).parent().addClass('active');
@@ -94,21 +94,20 @@ $(function () {
                 // _("status").innerHTML = "Upload Aborted";
             }
         });
-    });
+    }));
 
     // DHCP field toggles
-    $('#wifi #dhcp').change(function () {
+    $('#wifi #dhcp').on("change", (function () {
         if ($(this).is(':checked')) {
-            $('.dhcp').removeClass('hidden');
-            $('.dhcp').addClass('hidden');
+            $('.wifiDhcp').addClass('hidden');
         }
         else {
-            $('.dhcp').removeClass('hidden');
+            $('.wifiDhcp').removeClass('hidden');
         }
         $('#btn_network').prop("disabled", ValidateConfigFields($("#network #wifi input")));
-    });
+    }));
 
-    $('#eth #dhcp').change(function () {
+    $('#eth #dhcp').on("change", (function () {
         if ($(this).is(':checked')) {
             $('.ethdhcp').addClass('hidden');
         }
@@ -116,7 +115,7 @@ $(function () {
             $('.ethdhcp').removeClass('hidden');
         }
         $('#btn_network').prop("disabled", ValidateConfigFields($("#network #wifi input")));
-    });
+    }));
 
     $('#network').on("input", (function () {
         $('#btn_network').prop("disabled", ValidateConfigFields($("#network #wifi input")));
@@ -126,24 +125,24 @@ $(function () {
         $('#DeviceConfigSave').prop("disabled", ValidateConfigFields($('#config input')));
     }));
 
-    $('#DeviceConfigSave').click(function () {
+    $('#DeviceConfigSave').on("click", (function () {
         submitDeviceConfig();
-    });
+    }));
 
-    $('#btn_network').click(function () {
+    $('#btn_network').on("click", (function () {
         submitNetworkConfig();
-    });
+    }));
 
-    $('#viewStyle').change(function () {
+    $('#viewStyle').on("change", (function () {
         clearStream();
-    });
+    }));
 
     $('#v_columns').on('input', function () {
         clearStream();
     });
 
     //TODO: This should pull a configuration from the stick and not the web interface as web data could be invalid
-    $('#backupconfig').click(function () {
+    $('#backupconfig').on("click", (function () {
         ExtractNetworkConfigFromHtmlPage();
         ExtractChannelConfigFromHtmlPage(Input_Config.channels, "input");
         ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
@@ -155,9 +154,9 @@ $(function () {
         let blob = new Blob([TotalConfig], { type: "text/json;charset=utf-8" });
         let FileName = System_Config.device.id.replace(".", "-").replace(" ", "-").replace(",", "-") + "-" + AdminInfo.flashchipid;
         saveAs(blob, FileName + ".json"); // Filesaver.js
-    });
+    }));
 
-    $('#restoreconfig').change(function () {
+    $('#restoreconfig').on("change", (function () {
         if (this.files.length !== 0) {
             const reader = new FileReader();
             reader.onload = function fileReadCompleted() {
@@ -166,16 +165,16 @@ $(function () {
             };
             reader.readAsText(this.files[0]);
         }
-    });
+    }));
 
-    $('#adminReboot').click(function () {
+    $('#adminReboot').on("click", (function () {
         reboot();
-    });
+    }));
 
-    $('#AdvancedOptions').change(function () {
+    $('#AdvancedOptions').on("change", (function () {
         UpdateAdvancedOptionsMode();
         UpdateChannelCounts();
-    });
+    }));
 
     let finalUrl = "http://" + target + "/upload";
     // console.log(finalUrl);
@@ -241,13 +240,13 @@ $(function () {
 
     $("#filemanagementupload").addClass("dropzone");
 
-    $('#FileDeleteButton').click(function () {
+    $('#FileDeleteButton').on("click", (function () {
         RequestFileDeletion();
-    });
+    }));
     /*
-        $('#FileUploadButton').click(function () {
+        $('#FileUploadButton').on("click", (function () {
             RequestFileUpload();
-        });
+        }));
     */
     // Autoload tab based on URL hash
     let hash = window.location.hash;
@@ -554,9 +553,16 @@ function ProcessModeConfigurationDataEffects(channelConfig) {
         $(jqSelector).append('<option value="' + listEntry.name + '">' + listEntry.name + '</option>');
     });
 
-    // set the current selector value
     $(jqSelector).val(channelConfig.currenteffect);
+    SetEffectVisibility();
 
+    // set the current selector value
+    $(jqSelector).on("change", function()
+    {
+        SetEffectVisibility();
+    });
+
+    // set up the transitions table
     $('#TransitionColorTable tbody').removeData();
 
     channelConfig.transitions.forEach(element => {
@@ -571,13 +577,60 @@ function ProcessModeConfigurationDataEffects(channelConfig) {
     RenumberTransitionTable();
 
     $('#AddTransitionBtn').unbind();
-    $('#AddTransitionBtn').click(function () {
+    $('#AddTransitionBtn').on("click", (function () {
         // console.info("Add a transition");
         transitionAddRow('#000000');
         RenumberTransitionTable();
+    }));
+
+    // set up the marqueue groups table
+    $('#MarqueeGroupTable tbody').removeData();
+
+    channelConfig.MarqueeGroups.forEach(element => {
+        // console.info("Element.r = " + element.r);
+        // console.info("Element.g = " + element.g);
+        // console.info("Element.b = " + element.b);
+        MarqueeGroupAddRow(element);
     });
 
+    RenumberMarqueeGroupTable();
+
+    $('#AddMarqueeGroupBtn').unbind();
+    $('#AddMarqueeGroupBtn').on("click", (function () {
+        // console.info("Add a MarqueeGroup button pressed");
+        let newMarqueeGroup = {};
+        newMarqueeGroup.brightness = 50;
+        newMarqueeGroup.brightnessEnd = 50;
+        newMarqueeGroup.pixel_count = 5;
+        newMarqueeGroup.color = {};
+        newMarqueeGroup.color.r = 128;
+        newMarqueeGroup.color.g = 128;
+        newMarqueeGroup.color.b = 128;
+        MarqueeGroupAddRow(newMarqueeGroup);
+        RenumberMarqueeGroupTable();
+    }));
+
 } // ProcessModeConfigurationDataEffects
+
+function SetEffectVisibility()
+{
+    let jqSelector = "#currenteffect";
+    if($(jqSelector).val()==="Marquee")
+    {
+        $("#MarqueeConfig").removeClass("hidden");
+        $("#TransitionsConfig").addClass("hidden");
+    }
+    else if($(jqSelector).val()==="Transition")
+    {
+        $("#MarqueeConfig").addClass("hidden");
+        $("#TransitionsConfig").removeClass("hidden");
+    }
+    else
+    {
+        $("#MarqueeConfig").addClass("hidden");
+        $("#TransitionsConfig").addClass("hidden");
+    }
+}
 
 function UUID() {
     var uuid = (function () {
@@ -621,7 +674,7 @@ function transitionAddRow(CurrentColor) {
         let TransitionDeletePattern = '<td><button type="Button" class="btn btn-primary" RowId="' + CurrentRowId + '" id="transitionDelete_' + CurrentRowId + '">Delete</button></td>';
         let rowPattern = '<tr id="transitionRow_' + (CurrentRowId) + '" RowId="' + CurrentRowId + '"> ' + TransitionIdPattern + TransitionColorPattern + TransitionDeletePattern + '</tr> ';
         $('#TransitionColorTable tbody tr:last').after(rowPattern);
-        $('#transitionDelete_' + CurrentRowId).click(function () { transitionDeleteRow($(this)); });
+        $('#transitionDelete_' + CurrentRowId).on("click", (function () { transitionDeleteRow($(this)); }));
     }
 } // transitionAddRow
 
@@ -663,6 +716,84 @@ function RenumberTransitionTable() {
     }
 
 } // RenumberTransitionTable
+
+function MarqueeGroupAddRow(CurrentConfig) {
+
+    // console.info("MarqueeGroupAddRow::MarqueeGroupTable length " + $('#MarqueeGroupTable tbody tr').length);
+    // 1 header row + 5 group rows
+    if (6 > $('#MarqueeGroupTable tbody tr').length) {
+        let CurrentRowId = 'UUID_' + UUID().toString().toUpperCase();
+        // console.info("CurrentColor " + CurrentColor);
+
+        let CurrentGroupColor = "#" + ((CurrentConfig.color.r * 256 * 256) + (CurrentConfig.color.g * 256) + CurrentConfig.color.b).toString(16);
+
+        while (-1 !== CurrentRowId.indexOf("-")) 
+        {
+            CurrentRowId = CurrentRowId.replace("-", "_");
+        }
+
+        while (CurrentGroupColor.length < 7) { CurrentGroupColor = CurrentGroupColor.replace("#", "#0"); }
+
+        let MarqueeGroupIdPattern           = '<td>' + (CurrentRowId) + '</td>';
+        let MarqueeGroupIntensityPattern    = '<td><input  type="number" class="form-control is-valid" id="MarqueeGroupIntensity_'    + CurrentRowId + '" step="1" min="0" max="100" value=75></input></td>';
+        let MarqueeGroupIntensityEndPattern = '<td><input  type="number" class="form-control is-valid" id="MarqueeGroupIntensityEnd_' + CurrentRowId + '" step="1" min="0" max="100" value=50></input></td>';
+        let MarqueeGroupCountPattern        = '<td><input  type="number" class="form-control is-valid" id="MarqueeGroupCount_'        + CurrentRowId + '" step="1" min="0" value=25></input></td>';
+        let MarqueeGroupColorPattern        = '<td><input  type="color"  class="form-control"          id="MarqueeGroupColor_'        + CurrentRowId + '" value=#999999></input></td>';
+        let MarqueeGroupDeletePattern       = '<td><button type="Button" class="btn btn-primary"       id="MarqueeGroupDelete_'       + CurrentRowId + '" RowId="' + CurrentRowId + '">Delete</button></td>';
+
+//      var rowPattern = '<tr>' + StartPattern + EndPattern + StartValuePattern + EndValuePattern + OutputPattern + '</tr>';
+        let rowPattern = '<tr id="MarqueeGroupRow_' + (CurrentRowId) + '" RowId="' + CurrentRowId + '">' + 
+                          MarqueeGroupIdPattern + 
+                          MarqueeGroupIntensityPattern + 
+                          MarqueeGroupIntensityEndPattern + 
+                          MarqueeGroupCountPattern + 
+                          MarqueeGroupColorPattern + 
+                          MarqueeGroupDeletePattern + 
+                          '</tr> ';
+        $('#MarqueeGroupTable tbody tr:last').after(rowPattern);
+        $('#MarqueeGroupDelete_' + CurrentRowId).on("click", function () { MarqueeGroupDeleteRow($(this)); });
+        
+        $('#MarqueeGroupIntensity_' + (CurrentRowId)).val(CurrentConfig.brightness);
+        $('#MarqueeGroupIntensityEnd_' + (CurrentRowId)).val(CurrentConfig.brightnessEnd);
+        $('#MarqueeGroupCount_' + (CurrentRowId)).val(CurrentConfig.pixel_count);
+        $('#MarqueeGroupColor_' + (CurrentRowId)).val(CurrentGroupColor);
+    }
+} // MarqueeGroupAddRow
+
+function MarqueeGroupDeleteRow(button) {
+    // console.info("MarqueeGroupDeleteRow::MarqueeGroupTable length " + $('#MarqueeGroupTable tbody tr').length);
+
+    let RowId = $(button).attr("RowId");
+    // console.info("Got Click for CurrentRowId: " + RowId);
+    // console.info("Length: " + $('#MarqueeGroupTable tbody tr').length);
+    // 3 = hdr+2 rows
+    if (3 < $('#MarqueeGroupTable tbody tr').length) {
+        $('#MarqueeGroupRow_' + RowId).remove();
+        RenumberMarqueeGroupTable();
+    }
+
+} // MarqueeGroupDeleteRow
+
+function RenumberMarqueeGroupTable() {
+    // renumber the table
+    // console.info("RenumberMarqueeGroupTable::MarqueeGroupTable length " + $('#MarqueeGroupTable tbody tr').length);
+
+    $('#MarqueeGroupTable tbody tr').each(elementId => {
+        if (0 !== elementId) {
+            // console.info(elementId);
+            $('#MarqueeGroupTable tbody tr:eq(' + elementId + ') td:eq(0)').html((elementId).toString());
+        }
+    });
+
+    // 1 hdr + 5 rows
+    if (6 > $('#MarqueeGroupTable tbody tr').length) {
+        $('#AddMarqueeGroupBtn').show();
+    }
+    else {
+        $('#AddMarqueeGroupBtn').hide();
+    }
+
+} // RenumberMarqueeGroupTable
 
 function ProcessModeConfigurationDataRelay(RelayConfig) {
     // console.log("relaychannelconfigurationtable.rows.length = " + $('#relaychannelconfigurationtable tr').length);
@@ -1156,6 +1287,7 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName) {
 
             // the auto export adds the add color button to the structure. Remove it.
             delete ChannelConfig["AddTransitionBtn"];
+            delete ChannelConfig["AddMarqueeGroupBtn"];
 
             // build a new transitions array
             const transitions = [];
@@ -1194,6 +1326,55 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName) {
             });
 
             ChannelConfig.transitions = transitions;
+
+            // build a new MarqueeGroup array
+            const MarqueeGroups = [];
+            MarqueeGroups.length = $('#MarqueeGroupTable tbody tr').length - 1;
+            elementId = 0; // row counter into the json array
+
+            delete ChannelConfig["MarqueeGroups"];
+
+            $('#MarqueeGroupTable tbody tr').each(function () {
+                let CurRow = $(this)[0];
+                let RowId = $(CurRow).attr("RowId");
+
+                if (undefined !== RowId) {
+                    // console.info("RowId = " + RowId);
+                    let DeleteButtonName = 'MarqueeGroupDelete_' + RowId;
+                    let ColorElementName = 'MarqueeGroupColor_' + RowId;
+                    // console.info("DeleteButtonName = " + DeleteButtonName);
+                    // console.info("elementName = " + elementName);
+
+                    // the auto export adds the delete and table data to the structure. Remove it.
+                    delete ChannelConfig[DeleteButtonName];
+                    delete ChannelConfig['MarqueeGroupIntensity_' + (RowId)];
+                    delete ChannelConfig['MarqueeGroupIntensityEnd_' + (RowId)];
+                    delete ChannelConfig['MarqueeGroupCount_' + (RowId)];
+                    delete ChannelConfig['MarqueeGroupColor_' + (RowId)];
+
+                    let HexValue = $('#' + ColorElementName).val();
+
+                    // console.info("HexValue = " + HexValue);
+                    // console.info("r = " + hexToRgb(HexValue).r);
+                    // console.info("g = " + hexToRgb(HexValue).g);
+                    // console.info("b = " + hexToRgb(HexValue).b);
+
+                    MarqueeGroups[elementId] = {};
+                    let MarqueeGroup = MarqueeGroups[elementId];
+
+                    MarqueeGroup.brightness = $('#MarqueeGroupIntensity_' + (RowId)).val();
+                    MarqueeGroup.brightnessEnd = $('#MarqueeGroupIntensityEnd_' + (RowId)).val();
+                    MarqueeGroup.pixel_count = $('#MarqueeGroupCount_' + (RowId)).val();
+
+                    MarqueeGroup.color = {};
+                    MarqueeGroup.color.r = hexToRgb(HexValue).r;
+                    MarqueeGroup.color.g = hexToRgb(HexValue).g;
+                    MarqueeGroup.color.b = hexToRgb(HexValue).b;
+                    elementId++;
+                }
+            });
+
+            ChannelConfig.MarqueeGroups = MarqueeGroups;
         }
         else {
             ExtractConfigFromHtmlPages(elementids, modeControlName, ChannelConfig);
@@ -1296,7 +1477,7 @@ function wsConnect() {
             target = document.location.host;
         }
 
-        // target = "192.168.10.175";
+        // target = "192.168.10.240";
         // target = "192.168.10.101";
 
         // Open a new web socket and set the binary type
@@ -1884,7 +2065,7 @@ function reboot() {
 }
 
 // Reset config
-$('#confirm-reset .btn-ok').click(function () {
+$('#confirm-reset .btn-ok').on("click", (function () {
     showReboot();
     wsEnqueue('X7');
-});
+}));

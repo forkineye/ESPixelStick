@@ -33,6 +33,7 @@
 #endif
 
 #define ARDUINOJSON_USE_LONG_LONG 1
+#define ARDUINOJSON_DEFAULT_NESTING_LIMIT 15
 
 #include <Ticker.h>
 #include <ArduinoJson.h>
@@ -40,6 +41,7 @@
 #include "memdebug.h"
 #include "ConstNames.hpp"
 #include "GPIO_Defs.hpp"
+#include "FastTimer.hpp"
 
 #define REBOOT_DELAY    100     ///< Delay for rebooting once reboot flag is set
 #define LOG_PORT        Serial  ///< Serial port for console logging

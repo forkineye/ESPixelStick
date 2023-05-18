@@ -371,7 +371,7 @@
                         <label class="control-label col-sm-2" for="hostname">Hostname</label>
                         <div class="col-sm-6">
                             <input type="text" class="form-control is-valid" id="hostname" required
-                                pattern="^[a-zA-Z][a-zA-Z\d-]{1,30}[a-zA-Z\d]$" title="Hostname for this device.">
+                                pattern="^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$" title="Hostname for this device.">
                         </div>
                     </div>
                     <fieldset id="wifi">
@@ -413,30 +413,30 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group dhcp" id="fg_ip">
-                            <label class="control-label col-sm-2 dhcp" for="ip">IP</label>
+                        <div class="form-group wifiDhcp" id="fg_ip">
+                            <label class="control-label col-sm-2 wifiDhcp" for="ip">IP</label>
                             <div class="col-sm-8">
-                                <input type="text" class="form-control is-valid dhcp" id="ip" name="ip" minlength="7"
+                                <input type="text" class="form-control is-valid wifiDhcp" id="ip" name="ip" minlength="7"
                                     maxlength="15" required
-                                    pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$'
+                                    pattern='^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
                                     value="0.0.0.0" title="Static IP Address">
                             </div>
                         </div>
-                        <div class="form-group dhcp" id="fg_netmask">
-                            <label class="control-label col-sm-2 dhcp" for="netmask">Netmask</label>
+                        <div class="form-group wifiDhcp" id="fg_netmask">
+                            <label class="control-label col-sm-2 wifiDhcp" for="netmask">Netmask</label>
                             <div class="col-sm-8">
-                                <input type="text" class="form-control is-valid dhcp" id="netmask" name="netmask"
+                                <input type="text" class="form-control is-valid wifiDhcp" id="netmask" name="netmask"
                                     minlength="7" maxlength="15" required
-                                    pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$'
+                                    pattern='^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
                                     value="0.0.0.0" title="Static Netmask">
                             </div>
                         </div>
-                        <div class="form-group dhcp" id="fg_gateway">
+                        <div class="form-group wifiDhcp" id="fg_gateway">
                             <label class="control-label col-sm-2" for="gateway">Gateway</label>
                             <div class="col-sm-8">
-                                <input type="text" class="form-control is-valid dhcp" id="gateway" name="gateway"
+                                <input type="text" class="form-control is-valid wifiDhcp" id="gateway" name="gateway"
                                     minlength="7" maxlength="15" required
-                                    pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$'
+                                    pattern='^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
                                     value="0.0.0.0" title="Static Gateway">
                             </div>
                         </div>
@@ -481,7 +481,7 @@
                             <div class="col-sm-8">
                                 <input type="text" class="form-control is-valid ethdhcp" id="ip" name="ip" minlength="7"
                                     maxlength="15" required
-                                    pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$'
+                                    pattern='^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
                                     value="0.0.0.0" title="Static IP Address">
                             </div>
                         </div>
@@ -490,7 +490,7 @@
                             <div class="col-sm-8">
                                 <input type="text" class="form-control is-valid ethdhcp" id="netmask" name="netmask"
                                     minlength="7" maxlength="15" required
-                                    pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$'
+                                    pattern='^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
                                     value="0.0.0.0" title="Static Netmask">
                             </div>
                         </div>
@@ -499,7 +499,7 @@
                             <div class="col-sm-8">
                                 <input type="text" class="form-control is-valid ethdhcp" id="gateway" name="gateway"
                                     minlength="7" maxlength="15" required
-                                    pattern='^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$'
+                                    pattern='^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
                                     value="0.0.0.0" title="Static Gateway">
                             </div>
                         </div>
@@ -661,7 +661,7 @@
                                 </div>
                             </div>
                         -->
-
+    
                     <!-- Refresh Rate Display -->
                     <div class="form-group">
                         <label class="control-label col-sm-2" for="refresh">Refresh Rate</label>

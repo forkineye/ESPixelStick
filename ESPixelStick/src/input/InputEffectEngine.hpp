@@ -86,6 +86,14 @@ public:
         CRGB    color;
     } MQTTConfiguration_s;
 
+    struct MarqueeGroup 
+    {
+       uint32_t NumPixelsInGroup;
+       CRGB     Color;
+       uint8_t  StartingIntensity;
+       uint8_t  EndingIntensity;
+    };
+
     // functions to be provided by the derived class
     void Begin ();                             ///< set up the operating environment based on the current config (or defaults)
     bool SetConfig (JsonObject& jsonConfig);   ///< Set a new config in the driver
@@ -111,6 +119,7 @@ public:
     uint16_t effectNull ();
     uint16_t effectRandom ();
     uint16_t effectTransition ();
+    uint16_t effectMarquee ();
 
 private:
 
@@ -124,8 +133,9 @@ private:
 
     using timeType = decltype(millis());
 
+
     uint32_t EffectWait            = 32;              /* How long to wait for the effect to run again */
-    timeType EffectLastRun         = 0;               /* When did the effect last run ? in millis() */
+
     uint32_t EffectCounter         = 0;               /* Counter for the number of calls to the active effect */
     uint16_t EffectSpeed           = 6;               /* Externally controlled effect speed 1..10 */
     uint16_t EffectDelay           = DEFAULT_EFFECT_DELAY; /* Internal representation of speed */
@@ -136,11 +146,15 @@ private:
     float EffectBrightness         = 1.0;             /* Externally controlled effect brightness [0, 255] */
     CRGB EffectColor               = { 183, 0, 255 }; /* Externally controlled effect color */
 
+    uint32_t effectMarqueePixelAdvanceCount = 1;
+    uint32_t effectMarqueePixelLocation = 0;
+
     uint32_t   EffectStep            = 0;            /* Shared mutable effect step counter */
     uint32_t   PixelCount            = 0;            /* Number of RGB leds (not channels) */
     uint32_t   MirroredPixelCount    = 0;            /* Number of RGB leds (not channels) */
     uint8_t    ChannelsPerPixel      = 3;
     uint32_t   PixelOffset           = 0;
+    FastTimer  EffectDelayTimer;
 
     void setPixel(uint16_t idx,  CRGB color);
     void GetPixel (uint16_t pixelId, CRGB & out);
@@ -158,6 +172,7 @@ private:
     void setBrightness (float brightness);
     void setSpeed (uint16_t speed);
     void setDelay (uint16_t delay);
+    void PollFlash();
 
     void clearAll ();
 
@@ -171,4 +186,17 @@ private:
     bool ColorHasReachedTarget (double tc, double cc, double step);
     void ConditionalIncrementColor(double tc, double & cc, double step);
     void CalculateTransitionStepValue(double tc, double cc, double & step);
+
+    struct FlashInfo_t
+    {
+        bool     Enable           = false;
+		uint32_t MinIntensity     = 100;
+		uint32_t MaxIntensity     = 100;
+		uint32_t MinDelayMS       = 100;
+		uint32_t MaxDelayMS       = 5000;
+		uint32_t MinDurationMS    = 25;
+		uint32_t MaxDurationMS    = 50;
+        FastTimer delaytimer;
+        FastTimer durationtimer;
+    } FlashInfo;
 };
