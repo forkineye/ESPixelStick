@@ -117,24 +117,29 @@
         </div>
     </div>
 
-    <div class="col-sm-offset-0">
-        <legend class="esps-legend" for="ecb">Triggered Effect</legend>
-        <div class="form-group col-sm-offset-2" id="ecb">
+    <div class="row">
+        <div class="col-sm-offset-0">
+            <legend class="esps-legend" for="ecb">Triggered Effect</legend>
+            <div class="form-group col-sm-offset-2" id="ecb">
 
-            <label class="control-label col-sm-offset-1" for="ecb_enable">Enable:</label>
-            <input type="checkbox" id="ecb_enable" title="Trigger Effects using a button or channel.">
+                <label class="control-label col-sm-offset-1" for="ecb_enable">Enable:</label>
+                <input type="checkbox" id="ecb_enable" title="Trigger Effects using a button or channel.">
 
-            <label class="control-label" for="ecb_gpioid">GPIO</label>
-            <input type="number" class="is-valid" id="ecb_gpioid" name="ecb_gpioid" step="1" min="0" max="40" value="0" title="GPIO to monitor for effects trigger">
+                <label class="control-label" for="ecb_gpioid">GPIO</label>
+                <input type="number" class="is-valid" id="ecb_gpioid" step="1" min="0" max="40" value="0" title="GPIO to monitor for effects trigger">
 
-            <label class="control-label" for="ecb_polarity">Polarity</label>
-            <select name="ecb_polarity" id="ecb_polarity">
-                <option value="ActiveLow">ActiveLow</option>
-                <option value="ActiveHigh">ActiveHigh</option>
-            </select>
+                <label class="control-label" for="ecb_polarity">Polarity</label>
+                <select id="ecb_polarity">
+                    <option value="ActiveLow">ActiveLow</option>
+                    <option value="ActiveHigh">ActiveHigh</option>
+                </select>
 
-            <label class="control-label" for="ecb_chanid">Channel</label>
-            <input type="number" class="is-valid" id="ecb_chanid" name="ecb_chanid" step="1" min="0" value="0" title="Channel to monitor for effects trigger">
+                <label class="control-label" for="ecb_chanid">Channel</label>
+                <input type="number" class="is-valid" id="ecb_chanid" step="1" min="0" value="0" title="Channel to monitor for effects trigger">
+
+                <label class="control-label" for="ecb_longPress">Min Long Press (MS)</label>
+                <input type="number" class="is-valid" id="ecb_longPress" step="1" min="1000" max="10000" value="1000" title="Time to hold button for long press. Must be longer than short press time.">
+            </div>
         </div>
     </div>
 </fieldset>

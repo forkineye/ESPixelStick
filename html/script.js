@@ -917,11 +917,14 @@ function ProcessModeConfigurationDataServoPCA9685(ServoConfig) {
 } // ProcessModeConfigurationDataServoPCA9685
 
 function ProcessInputConfig() {
-    $("#ecb_enable").prop("checked", Input_Config.ecb.enabled);
-    $("#ecb_gpioid").val(Input_Config.ecb.id);
-    $("#ecb_polarity").val(Input_Config.ecb.polarity);
-    $("#ecb_chanid").val(Input_Config.ecb.channels);
-
+    if($('#ecb_gpioid').length)
+    {
+        $('#ecb_enable').prop("checked", Input_Config.ecb.enabled);
+        $('#ecb_gpioid').val(Input_Config.ecb.id);
+        $('#ecb_polarity').val(Input_Config.ecb.polarity);
+        $('#ecb_chanid').val(Input_Config.ecb.channels);
+        $('#ecb_longPress').val(Input_Config.ecb.long);
+    }
 } // ProcessInputConfig
 
 function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
@@ -1106,8 +1109,8 @@ function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId) {
         // try to load the field definition file for this channel type
         $('#' + OptionListName + 'mode' + DisplayedChannelId).load(HtmlLoadFileName, function () {
             if ("input" === OptionListName) {
-                ProcessInputConfig();
                 ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Input_Config);
+                ProcessInputConfig();
             }
             else if ("output" === OptionListName) {
                 ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Output_Config);
@@ -1436,10 +1439,15 @@ function ValidateConfigFields(ElementList) {
 // Build dynamic JSON config submission for "Device" tab
 function submitDeviceConfig() {
     ExtractChannelConfigFromHtmlPage(Input_Config.channels, "input");
-    Input_Config.ecb.enabled = $("#ecb_enable").is(':checked');
-    Input_Config.ecb.id = $("#ecb_gpioid").val();
-    Input_Config.ecb.polarity = $("#ecb_polarity").val();
-    Input_Config.ecb.channels = $("#ecb_chanid").val();
+
+    if($('#ecb_gpioid').length)
+    {
+        Input_Config.ecb.enabled = $('#ecb_enable').is(':checked');
+        Input_Config.ecb.id = $('#ecb_gpioid').val();
+        Input_Config.ecb.polarity = $("#ecb_polarity").val();
+        Input_Config.ecb.channels = $("#ecb_chanid").val();
+        Input_Config.ecb.long = $("#ecb_longPress").val();
+    }
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
@@ -2019,16 +2027,18 @@ function ProcessReceivedJsonStatusMessage(data) {
     }
 
     let OutputStatus = Status.output[1];
-
-    if ({}.hasOwnProperty.call(OutputStatus, 'Relay')) {
-        $('#RelayStatus').removeClass("hidden")
-
-        OutputStatus.Relay.forEach(function (currentRelay) {
-            $('#RelayValue_' + currentRelay.id).text(currentRelay.activevalue);
-        });
-    }
-    else {
-        $('#RelayStatus').addClass("hidden")
+    if(undefined !== OutputStatus)
+    {
+        if ({}.hasOwnProperty.call(OutputStatus, 'Relay')) {
+            $('#RelayStatus').removeClass("hidden")
+    
+            OutputStatus.Relay.forEach(function (currentRelay) {
+                $('#RelayValue_' + currentRelay.id).text(currentRelay.activevalue);
+            });
+        }
+        else {
+            $('#RelayStatus').addClass("hidden")
+        }
     }
 
     // Device Refresh is dynamic
