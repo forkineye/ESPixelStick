@@ -14,7 +14,6 @@
 
 fsm_ExternalInput_boot                fsm_ExternalInput_boot_imp;
 fsm_ExternalInput_off_state           fsm_ExternalInput_off_state_imp;
-fsm_ExternalInput_on_wait_short_state fsm_ExternalInput_on_wait_short_state_imp;
 fsm_ExternalInput_on_wait_long_state  fsm_ExternalInput_on_wait_long_state_imp;
 fsm_ExternalInput_wait_for_off_state  fsm_ExternalInput_wait_for_off_state_imp;
 
@@ -22,8 +21,7 @@ fsm_ExternalInput_wait_for_off_state  fsm_ExternalInput_wait_for_off_state_imp;
 /* Code                                                                      */
 /*****************************************************************************/
 
-c_ExternalInput::c_ExternalInput(void) :
-	CurrentFsmState(fsm_ExternalInput_boot_imp)
+c_ExternalInput::c_ExternalInput(void)
 {
 	// DEBUG_START;
 	fsm_ExternalInput_boot_imp.Init(*this); // currently redundant, but might Init() might do more ... so important to leave this
@@ -53,7 +51,7 @@ c_ExternalInput::InputValue_t c_ExternalInput::Get()
 {
 	// DEBUG_START;
 
-	return CurrentFsmState.Get();
+	return CurrentFsmState->Get();
 
 	// DEBUG_END;
 
@@ -62,16 +60,18 @@ c_ExternalInput::InputValue_t c_ExternalInput::Get()
 /*****************************************************************************/
 void c_ExternalInput::GetConfig (JsonObject JsonData)
 {
-	DEBUG_START;
+    // DEBUG_START;
 
 	JsonData[M_IO_ENABLED] = Enabled;
 	JsonData[M_NAME]       = name;
 	JsonData[M_ID]         = GpioId;
 	JsonData[M_POLARITY]   = (ActiveHigh == polarity) ? CN_ActiveHigh : CN_ActiveLow;
 	JsonData[CN_channels]  = TriggerChannel;
+	JsonData["long"]       = LongPushDelayMS;
+
 	// DEBUG_V (String ("m_iPinId: ") + String (m_iPinId));
 
-	DEBUG_END;
+    // DEBUG_END;
 
 } // GetConfig
 
@@ -96,11 +96,12 @@ void c_ExternalInput::ProcessConfig (JsonObject JsonData)
 
 	uint32_t oldInputId = GpioId;
 	
-	setFromJSON (Enabled,        JsonData, M_IO_ENABLED);
-	setFromJSON (name,           JsonData, M_NAME);
-	setFromJSON (GpioId,         JsonData, M_ID);
-	setFromJSON (Polarity,       JsonData, M_POLARITY);
-	setFromJSON (TriggerChannel, JsonData, CN_channels);
+	setFromJSON (Enabled,         JsonData, M_IO_ENABLED);
+	setFromJSON (name,            JsonData, M_NAME);
+	setFromJSON (GpioId,          JsonData, M_ID);
+	setFromJSON (Polarity,        JsonData, M_POLARITY);
+	setFromJSON (TriggerChannel,  JsonData, CN_channels);
+	setFromJSON (LongPushDelayMS, JsonData, "long");
 
 	polarity = (String(CN_ActiveHigh) == Polarity) ? ActiveHigh : ActiveLow;
 
@@ -123,7 +124,8 @@ void c_ExternalInput::ProcessConfig (JsonObject JsonData)
 void c_ExternalInput::Poll (void)
 {
 	// DEBUG_START;
-	CurrentFsmState.Poll (*this);
+	
+	CurrentFsmState->Poll (*this);
 
 	// DEBUG_END;
 
@@ -156,9 +158,12 @@ bool c_ExternalInput::ReadInput (void)
 // waiting for the system to come up
 void fsm_ExternalInput_boot::Init (c_ExternalInput& pExternalInput)
 {
-	pExternalInput.CurrentFsmState = fsm_ExternalInput_boot_imp;
+    // DEBUG_START;
 
+	pExternalInput.CurrentFsmState = &fsm_ExternalInput_boot_imp;
 	// dont do anything
+
+    // DEBUG_END;
 
 } // fsm_ExternalInput_boot::Init
 
@@ -166,11 +171,15 @@ void fsm_ExternalInput_boot::Init (c_ExternalInput& pExternalInput)
 // waiting for the system to come up
 void fsm_ExternalInput_boot::Poll (c_ExternalInput& pExternalInput)
 {
+	// DEBUG_START;
+
 	// start normal operation
 	if (pExternalInput.Enabled)
 	{
 		fsm_ExternalInput_off_state_imp.Init (pExternalInput);
 	}
+
+	// DEBUG_END;
 
 } // fsm_ExternalInput_boot::Poll
 
@@ -180,11 +189,13 @@ void fsm_ExternalInput_boot::Poll (c_ExternalInput& pExternalInput)
 // Input is off and is stable
 void fsm_ExternalInput_off_state::Init(c_ExternalInput& pExternalInput)
 {
-	// DEBUG_START;
+    // DEBUG_START;
 
+    // DEBUG_V ("Entring OFF State");
 	pExternalInput.InputDebounceCount = MIN_INPUT_STABLE_VALUE;
-	pExternalInput.CurrentFsmState    = fsm_ExternalInput_off_state_imp;
-	// DEBUG_V ("Entring OFF State");
+	pExternalInput.CurrentFsmState    = &fsm_ExternalInput_off_state_imp;
+
+    // DEBUG_END;
 
 } // fsm_ExternalInput_off_state::Init
 
@@ -204,60 +215,18 @@ void fsm_ExternalInput_off_state::Poll(c_ExternalInput& pExternalInput)
 		if (0 == --pExternalInput.InputDebounceCount)
 		{
 			// we really are on
-			fsm_ExternalInput_on_wait_short_state_imp.Init(pExternalInput);
+			fsm_ExternalInput_on_wait_long_state_imp.Init(pExternalInput);
 		}
 	}
 	else // still off
 	{
-		// DEBUG_V ("");
-		// reset the debounce counter
+		//  DEBUG_V ("reset the debounce counter");
 		pExternalInput.InputDebounceCount = MIN_INPUT_STABLE_VALUE;
 	}
 
-	// DEBUG_END;
+	//  DEBUG_END;
 
 } // fsm_ExternalInput_off_state::Poll
-
-/*****************************************************************************/
-/*****************************************************************************/
-/*****************************************************************************/
-// Input is on and is stable
-void fsm_ExternalInput_on_wait_short_state::Init(c_ExternalInput& pExternalInput)
-{
-	// DEBUG_START;
-
-	pExternalInput.InputHoldTimer.StartTimer(INPUT_SHORT_VALUE_MS);
-	pExternalInput.CurrentFsmState = fsm_ExternalInput_on_wait_short_state_imp;
-	// DEBUG_V ("Entring Wait Short State");
-
-} // fsm_ExternalInput_on_wait_short_state::Init
-
-/*****************************************************************************/
-// Input is on and is stable
-void fsm_ExternalInput_on_wait_short_state::Poll(c_ExternalInput& pExternalInput)
-{
-	// DEBUG_START;
-	// read the input
-	bool bInputValue = pExternalInput.ReadInput ();
-
-	// If the input is "on"
-	if (true == bInputValue)
-	{
-		// DEBUG_V("");
-		// decrement the counter
-		if (pExternalInput.InputHoldTimer.IsExpired())
-		{
-			// we really are on
-			fsm_ExternalInput_on_wait_long_state_imp.Init(pExternalInput);
-		}
-	}
-	else // Turned off
-	{
-		fsm_ExternalInput_off_state_imp.Init (pExternalInput);
-	}
-	// DEBUG_END;
-
-} // fsm_ExternalInput_on_wait_short_state::Poll
 
 /*****************************************************************************/
 /*****************************************************************************/
@@ -265,9 +234,13 @@ void fsm_ExternalInput_on_wait_short_state::Poll(c_ExternalInput& pExternalInput
 // Input is always on
 void fsm_ExternalInput_on_wait_long_state::Init (c_ExternalInput& pExternalInput)
 {
-	pExternalInput.InputHoldTimer.StartTimer(INPUT_LONG_VALUE_MS);
-	pExternalInput.CurrentFsmState = fsm_ExternalInput_on_wait_long_state_imp;
-	// DEBUG_V ("Entring Wait Long State");
+    // DEBUG_START;
+
+    // DEBUG_V ("Entring Wait Long State");
+	pExternalInput.InputHoldTimer.StartTimer(pExternalInput.LongPushDelayMS);
+	pExternalInput.CurrentFsmState = &fsm_ExternalInput_on_wait_long_state_imp;
+
+    // DEBUG_END;
 
 } // fsm_ExternalInput_on_wait_long_state::Init
 
@@ -290,12 +263,14 @@ void fsm_ExternalInput_on_wait_long_state::Poll (c_ExternalInput& pExternalInput
 			// we really are on
 			fsm_ExternalInput_wait_for_off_state_imp.Init (pExternalInput);
 			pExternalInput.HadLongPush = true;
+		    // DEBUG_V("HadLongPush = true")
 		}
 	}
 	else // Turned off
 	{
+	    // DEBUG_V("HadShortPush = true")
 		pExternalInput.HadShortPush = true;
-		fsm_ExternalInput_off_state_imp.Init (pExternalInput);
+		fsm_ExternalInput_wait_for_off_state_imp.Init (pExternalInput);
 	}
 
 	// DEBUG_END;
@@ -308,8 +283,12 @@ void fsm_ExternalInput_on_wait_long_state::Poll (c_ExternalInput& pExternalInput
 // Input is always on
 void fsm_ExternalInput_wait_for_off_state::Init (c_ExternalInput& pExternalInput)
 {
-	pExternalInput.CurrentFsmState = fsm_ExternalInput_wait_for_off_state_imp;
-	// DEBUG_V ("Entring Wait OFF State");
+    // DEBUG_START;
+
+    // DEBUG_V ("Entring Wait OFF State");
+	pExternalInput.CurrentFsmState = &fsm_ExternalInput_wait_for_off_state_imp;
+
+    // DEBUG_END;
 
 } // fsm_ExternalInput_wait_for_off_state::Init
 

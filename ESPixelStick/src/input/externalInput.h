@@ -16,8 +16,8 @@ public:
 	{
 		off = 0,		// input is off
 		on,				// input is on
-		shortOn,		// input was on for 0.5 sec -- NOT CURRENTLY USED/IMPLEMENTED ... must call InputHadShortPush()
-		longOn,         // input was on for 2.0 sec -- NOT CURRENTLY USED/IMPLEMENTED ... must call InputHadLongPush()
+		shortOn,		// input was on for <N MS -- NOT CURRENTLY USED/IMPLEMENTED ... must call InputHadShortPush()
+		longOn,         // input was on for <N MS -- NOT CURRENTLY USED/IMPLEMENTED ... must call InputHadLongPush()
 	};
 
 	enum Polarity_t
@@ -35,6 +35,7 @@ public:
 	void         GetStatistics     (JsonObject JsonData);
 	void         ProcessConfig     (JsonObject JsonData);
 	bool		 IsEnabled ()      { return Enabled; }
+	uint32_t	 GetTriggerChannel() { return TriggerChannel; }
 	void         GetDriverName     (String & Name) { Name = "ExtInput"; }
 
 protected:
@@ -50,19 +51,18 @@ protected:
 
 	String                    name;
     uint32_t                  GpioId              = 0;
-	uint32_t			      TriggerChannel      = uint32_t(-1);
+	uint32_t			      TriggerChannel      = uint32_t(32);
 	Polarity_t                polarity            = Polarity_t::ActiveLow;
-	// time_t                    m_ExpirationTime      = 0;
-	bool                      Enabled          = false;
-	uint32_t                  InputDebounceCount = 0;
+	bool                      Enabled             = false;
+	uint32_t                  InputDebounceCount  = 0;
 	FastTimer                 InputHoldTimer;
-	bool                      HadLongPush        = false;
-	bool                      HadShortPush       = false;
-	fsm_ExternalInput_state&  CurrentFsmState;    // initialized in constructor
+	bool                      HadLongPush         = false;
+	bool                      HadShortPush        = false;
+	uint32_t				  LongPushDelayMS     = 2000;
+	fsm_ExternalInput_state * CurrentFsmState     = nullptr;    // initialized in constructor
 
 	friend class fsm_ExternalInput_boot;
 	friend class fsm_ExternalInput_off_state;
-	friend class fsm_ExternalInput_on_wait_short_state;
 	friend class fsm_ExternalInput_on_wait_long_state;
 	friend class fsm_ExternalInput_wait_for_off_state;
 
@@ -82,8 +82,6 @@ public:
 	virtual ~fsm_ExternalInput_state() {};
 private:
 #define MIN_INPUT_STABLE_VALUE	5
-#define INPUT_SHORT_VALUE_MS    500
-#define INPUT_LONG_VALUE_MS     1500
 
 }; // fsm_ExternalInput_state
 
@@ -111,19 +109,6 @@ public:
 	~fsm_ExternalInput_off_state() override {};
 
 }; // fsm_ExternalInput_off_state
-
-/*****************************************************************************/
-// input is on and is stable
-//
-class fsm_ExternalInput_on_wait_short_state final : public fsm_ExternalInput_state
-{
-public:
-	void Poll(c_ExternalInput& pExternalInput) override;
-	void Init(c_ExternalInput& pExternalInput) override;
-	c_ExternalInput::InputValue_t Get(void) override { return c_ExternalInput::InputValue_t::on; }
-	~fsm_ExternalInput_on_wait_short_state() override {};
-
-}; // fsm_ExternalInput_on_wait_short_state
 
 /*****************************************************************************/
 // input is always reported as on
