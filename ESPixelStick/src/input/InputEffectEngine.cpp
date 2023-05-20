@@ -109,6 +109,7 @@ c_InputEffectEngine::c_InputEffectEngine () :
     // DEBUG_END;
 
 } // c_InputEffectEngine
+
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::~c_InputEffectEngine ()
 {
@@ -264,7 +265,7 @@ void c_InputEffectEngine::NextEffect ()
 
     // we now have the index of the current effect
     ++CurrentEffectIndex;
-    if (String ("Breathe") == ActiveEffect->name)
+    if (sizeof(ListOfEffects)/sizeof(ListOfEffects[0]) <= CurrentEffectIndex)
     {
         // DEBUG_V ("Wrap to first effect");
         CurrentEffectIndex = 0;
@@ -341,7 +342,7 @@ void c_InputEffectEngine::Process ()
         }
         // DEBUG_V ("Init OK");
 
-        if (0 == PixelCount)
+        if ((0 == PixelCount) || (StayDark))
         {
             break;
         }
@@ -349,29 +350,49 @@ void c_InputEffectEngine::Process ()
 
         if(!EffectDelayTimer.IsExpired())
         {
+            PollFlash();
             break;
         }
 
         // DEBUG_V ("Update output");
-        EffectDelayTimer.StartTimer(EffectWait);
         uint32_t wait = (this->*ActiveEffect->func)();
         EffectWait = max ((int)wait, MIN_EFFECT_DELAY);
+        EffectDelayTimer.StartTimer(EffectWait);
         EffectCounter++;
         InputMgr.RestartBlankTimer (GetInputChannelId ());
 
-    } while (false);
+        PollFlash();
 
-    PollFlash();
+    } while (false);
 
     // DEBUG_END;
 
 } // process
 
 //----------------------------------------------------------------------------
-void c_InputEffectEngine::ProcessEffectsButtonActions(c_ExternalInput::InputValue_t value)
+void c_InputEffectEngine::ProcessButtonActions(c_ExternalInput::InputValue_t value)
 {
+    // DEBUG_START;
 
-} // ProcessEffectsButtonActions
+    if(c_ExternalInput::InputValue_t::longOn == value)
+    {
+        // DEBUG_V("flip the dark flag");
+        StayDark = !StayDark;
+        // DEBUG_V(String("StayDark: ") + String(StayDark));
+
+    }
+    else if(c_ExternalInput::InputValue_t::shortOn == value)
+    {
+        // DEBUG_V("Move to the next effect");
+        NextEffect();
+    }
+    else if(c_ExternalInput::InputValue_t::off == value)
+    {
+        // DEBUG_V("Got input Off notification");
+    }
+
+    // DEBUG_END;
+} // ProcessButtonActions
 
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::SetBufferInfo (uint32_t BufferSize)
