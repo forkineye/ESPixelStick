@@ -3,6 +3,7 @@
  */
 #include "externalInput.h"
 #include "../FileMgr.hpp"
+#include "InputMgr.hpp"
 
 /*****************************************************************************/
 /*	Global Data                                                              */
@@ -47,17 +48,6 @@ void c_ExternalInput::Init(uint32_t iInputId, uint32_t iPinId, Polarity_t Polari
 } // Init
 
 /*****************************************************************************/
-c_ExternalInput::InputValue_t c_ExternalInput::Get()
-{
-	// DEBUG_START;
-
-	return CurrentFsmState->Get();
-
-	// DEBUG_END;
-
-} // Get
-
-/*****************************************************************************/
 void c_ExternalInput::GetConfig (JsonObject JsonData)
 {
     // DEBUG_START;
@@ -81,7 +71,7 @@ void c_ExternalInput::GetStatistics (JsonObject JsonData)
 	// DEBUG_START;
 
 	JsonData[M_ID]    = GpioId;
-	JsonData[M_STATE] = (InputValue_t::on == Get ()) ? "on" : "off";
+	JsonData[M_STATE] = (ReadInput()) ? "on" : "off";
 
 	// DEBUG_END;
 
@@ -109,8 +99,6 @@ void c_ExternalInput::ProcessConfig (JsonObject JsonData)
 	{
 		pinMode (oldInputId, INPUT);
 		pinMode (GpioId, INPUT_PULLUP);
-		HadLongPush  = false;
-		HadShortPush = false;
 		fsm_ExternalInput_boot_imp.Init (*this);
 	}
 
@@ -160,6 +148,7 @@ void fsm_ExternalInput_boot::Init (c_ExternalInput& pExternalInput)
 {
     // DEBUG_START;
 
+    // DEBUG_V ("Entring BOOT State");
 	pExternalInput.CurrentFsmState = &fsm_ExternalInput_boot_imp;
 	// dont do anything
 
@@ -194,6 +183,7 @@ void fsm_ExternalInput_off_state::Init(c_ExternalInput& pExternalInput)
     // DEBUG_V ("Entring OFF State");
 	pExternalInput.InputDebounceCount = MIN_INPUT_STABLE_VALUE;
 	pExternalInput.CurrentFsmState    = &fsm_ExternalInput_off_state_imp;
+	InputMgr.ProcessButtonActions(c_ExternalInput::InputValue_t::off);
 
     // DEBUG_END;
 
@@ -262,14 +252,14 @@ void fsm_ExternalInput_on_wait_long_state::Poll (c_ExternalInput& pExternalInput
 		{
 			// we really are on
 			fsm_ExternalInput_wait_for_off_state_imp.Init (pExternalInput);
-			pExternalInput.HadLongPush = true;
+			InputMgr.ProcessButtonActions(c_ExternalInput::InputValue_t::longOn);
 		    // DEBUG_V("HadLongPush = true")
 		}
 	}
 	else // Turned off
 	{
 	    // DEBUG_V("HadShortPush = true")
-		pExternalInput.HadShortPush = true;
+		InputMgr.ProcessButtonActions(c_ExternalInput::InputValue_t::shortOn);
 		fsm_ExternalInput_wait_for_off_state_imp.Init (pExternalInput);
 	}
 
