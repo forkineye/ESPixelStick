@@ -644,7 +644,6 @@ void c_InputMgr::Process ()
         }
 
         ExternalInput.Poll ();
-        ProcessEffectsButtonActions ();
 
         if (true == configLoadNeeded)
         {
@@ -689,21 +688,18 @@ void c_InputMgr::Process ()
 } // Process
 
 //-----------------------------------------------------------------------------
-void c_InputMgr::ProcessEffectsButtonActions ()
+void c_InputMgr::ProcessButtonActions (c_ExternalInput::InputValue_t value)
 {
     // DEBUG_START;
 
-    if (true == ExternalInput.IsEnabled ())
+    for(auto & CurrentInputChannel : InputChannelDrivers)
     {
-        for(auto & CurrentInputChannel : InputChannelDrivers)
-        {
-            CurrentInputChannel.pInputChannelDriver->ProcessEffectsButtonActions(ExternalInput.Get());
-        }
+        CurrentInputChannel.pInputChannelDriver->ProcessButtonActions(value);
     }
 
     // DEBUG_END;
 
-} // ProcessEffectsButtonActions
+} // ProcessButtonActions
 
 //-----------------------------------------------------------------------------
 /*
