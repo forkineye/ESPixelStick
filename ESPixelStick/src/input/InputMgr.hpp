@@ -60,8 +60,9 @@ public:
     void DeleteConfig         () { FileMgr.DeleteConfigFile (ConfigFileName); }
     bool GetNetworkState      () { return IsConnected; }
     void GetDriverName        (String & Name) { Name = "InputMgr"; }
-    void RestartBlankTimer    (c_InputMgr::e_InputChannelIds Selector) { BlankEndTime[int(Selector)].StartTimer(config.BlankDelay * 1000); }
-    bool BlankTimerHasExpired (c_InputMgr::e_InputChannelIds Selector) { return (BlankEndTime[int(Selector)].IsExpired()); }
+    void RestartBlankTimer    (e_InputChannelIds Selector) { BlankEndTime[int(Selector)].StartTimer(config.BlankDelay * 1000); }
+    bool BlankTimerHasExpired (e_InputChannelIds Selector) { return (BlankEndTime[int(Selector)].IsExpired()); }
+    void ProcessButtonActions (c_ExternalInput::InputValue_t value);
 
     enum e_InputType
     {
@@ -106,7 +107,6 @@ private:
     void CreateJsonConfig            (JsonObject & jsonConfig);
     bool ProcessJsonChannelConfig    (JsonObject & jsonConfig, uint32_t ChannelIndex);
     bool InputTypeIsAllowedOnChannel (e_InputType type, e_InputChannelIds ChannelId);
-    void ProcessEffectsButtonActions (void);
 
     String ConfigFileName;
     bool   rebootNeeded = false;
