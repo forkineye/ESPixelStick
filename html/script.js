@@ -917,14 +917,11 @@ function ProcessModeConfigurationDataServoPCA9685(ServoConfig) {
 } // ProcessModeConfigurationDataServoPCA9685
 
 function ProcessInputConfig() {
-    if($('#ecb_gpioid').length)
-    {
-        $('#ecb_enable').prop("checked", Input_Config.ecb.enabled);
-        $('#ecb_gpioid').val(Input_Config.ecb.id);
-        $('#ecb_polarity').val(Input_Config.ecb.polarity);
-        $('#ecb_chanid').val(Input_Config.ecb.channels);
-        $('#ecb_longPress').val(Input_Config.ecb.long);
-    }
+    $('#ecb_enable').prop("checked", Input_Config.ecb.enabled);
+    $('#ecb_gpioid').val(Input_Config.ecb.id);
+    $('#ecb_polarity').val(Input_Config.ecb.polarity);
+    $('#ecb_chanid').val(Input_Config.ecb.channels);
+    $('#ecb_longPress').val(Input_Config.ecb.long);
 } // ProcessInputConfig
 
 function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
@@ -970,13 +967,18 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
         }
     });
 
+    // by default, do not show the ECB config data
+    $('#ecb').addClass("hidden");
+
     if ("fpp_remote" === ChannelTypeName) {
+        $('#ecb').removeClass("hidden");
         if (null !== Fseq_File_List) {
             ProcessModeConfigurationDatafppremote(channelConfig);
         }
     }
 
     else if ("effects" === ChannelTypeName) {
+        $('#ecb').removeClass("hidden");
         ProcessModeConfigurationDataEffects(channelConfig);
     }
 
@@ -1440,14 +1442,11 @@ function ValidateConfigFields(ElementList) {
 function submitDeviceConfig() {
     ExtractChannelConfigFromHtmlPage(Input_Config.channels, "input");
 
-    if($('#ecb_gpioid').length)
-    {
-        Input_Config.ecb.enabled = $('#ecb_enable').is(':checked');
-        Input_Config.ecb.id = $('#ecb_gpioid').val();
-        Input_Config.ecb.polarity = $("#ecb_polarity").val();
-        Input_Config.ecb.channels = $("#ecb_chanid").val();
-        Input_Config.ecb.long = $("#ecb_longPress").val();
-    }
+    Input_Config.ecb.enabled = $('#ecb_enable').is(':checked');
+    Input_Config.ecb.id = $('#ecb_gpioid').val();
+    Input_Config.ecb.polarity = $("#ecb_polarity").val();
+    Input_Config.ecb.channels = $("#ecb_chanid").val();
+    Input_Config.ecb.long = $("#ecb_longPress").val();
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
