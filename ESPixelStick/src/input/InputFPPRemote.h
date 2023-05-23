@@ -41,12 +41,16 @@ class c_InputFPPRemote : public c_InputCommon
       void Process ();                         ///< Call from loop(),  renders Input data
       void GetDriverName (String& sDriverName) { sDriverName = "FPP Remote"; } ///< get the name for the instantiated driver
       void SetBufferInfo (uint32_t BufferSize);
+      void ProcessButtonActions(c_ExternalInput::InputValue_t value);
 
 protected:
-    c_InputFPPRemotePlayItem * pInputFPPRemotePlayItem = nullptr;
-    String StatusType;
 #   define No_LocalFileToPlay "..."
+
+    c_InputFPPRemotePlayItem * pInputFPPRemotePlayItem = nullptr;
     int32_t GetSyncOffsetMS () { return SyncOffsetMS; }
+
+    String StatusType;
+    bool StayDark = false;
 
 private:
 
@@ -57,6 +61,7 @@ private:
     void StopPlaying ();
     bool PlayingFile ();
     bool PlayingRemoteFile ();
+    void PlayNextFile ();
 
     void load ();          ///< Load configuration from File System
     void save ();          ///< Save configuration to File System
