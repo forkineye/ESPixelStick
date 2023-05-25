@@ -250,7 +250,7 @@ void c_InputEffectEngine::NextEffect ()
     // DEBUG_START;
 
     // DEBUG_V ("Find the current effect");
-    int CurrentEffectIndex = 0;
+    uint32_t CurrentEffectIndex = 0;
     for (const EffectDescriptor_t currentEffect : ListOfEffects)
     {
         // DEBUG_V (String ("currentEffect.name: ") + currentEffect.name);
@@ -442,6 +442,12 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     setFromJSON (FlashInfo.MaxDelayMS,    jsonConfig, "FlashMaxDelay");
     setFromJSON (FlashInfo.MinDurationMS, jsonConfig, "FlashMinDur");
     setFromJSON (FlashInfo.MaxDurationMS, jsonConfig, "FlashMaxDur");
+
+    // make sure max is really max
+    if(FlashInfo.MinIntensity >= FlashInfo.MaxIntensity)
+    {
+        FlashInfo.MinIntensity = FlashInfo.MaxIntensity;
+    }
 
     if(jsonConfig.containsKey(CN_transitions))
     {
