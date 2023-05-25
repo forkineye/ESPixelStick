@@ -74,7 +74,7 @@ public:
 	virtual void Init(c_ExternalInput& pExternalInput) = 0;
 	virtual ~fsm_ExternalInput_state() {};
 private:
-#define MIN_INPUT_STABLE_VALUE	5
+#define MIN_INPUT_STABLE_VALUE	50
 
 }; // fsm_ExternalInput_state
 
