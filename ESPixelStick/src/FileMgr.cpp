@@ -795,6 +795,55 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
 } // GetListOfFiles
 
 //-----------------------------------------------------------------------------
+void c_FileMgr::GetListOfSdFiles (std::vector<String> & Response)
+{
+    // DEBUG_START;
+
+    Response.clear();
+    do // once
+    {
+        if (false == SdCardIsInstalled ())
+        {
+            // DEBUG_V("No SD Card installed");
+            break;
+        }
+
+        File dir = ESP_SDFS.open ("/", CN_r);
+
+        while (true)
+        {
+            File entry = dir.openNextFile ();
+
+            if (!entry)
+            {
+                // DEBUG_V("no more files");
+                break;
+            }
+
+            String EntryName = String (entry.name ());
+            EntryName = EntryName.substring ((('/' == EntryName[0]) ? 1 : 0));
+            // DEBUG_V ("EntryName: '" + EntryName + "'");
+            // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
+
+            if ((0 != EntryName.length ()) &&
+                (EntryName != String (F ("System Volume Information"))) &&
+                (0 != entry.size ())
+               )
+            {
+                // DEBUG_V ("Adding File: '" + EntryName + "'");
+                Response.push_back(EntryName);
+            }
+
+            entry.close ();
+        }
+
+        dir.close();
+    } while (false);
+
+    // DEBUG_END;
+} // GetListOfSdFiles
+
+//-----------------------------------------------------------------------------
 void c_FileMgr::printDirectory (File dir, int numTabs)
 {
     // DEBUG_START;

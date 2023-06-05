@@ -160,9 +160,9 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
     // DEBUG_V ("");
     // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
 
-    // PrettyPrint (InputMgrButtonData, String("Before"));
+    // PrettyPrint (InputMgrButtonData, String("Before ECB"));
     ExternalInput.GetConfig (InputMgrButtonData);
-    // PrettyPrint (InputMgrButtonData, String("After"));
+    // PrettyPrint (InputMgrButtonData, String("After ECB"));
 
     // DEBUG_V ("");
 
@@ -644,7 +644,6 @@ void c_InputMgr::Process ()
         }
 
         ExternalInput.Poll ();
-        ProcessEffectsButtonActions ();
 
         if (true == configLoadNeeded)
         {
@@ -689,55 +688,18 @@ void c_InputMgr::Process ()
 } // Process
 
 //-----------------------------------------------------------------------------
-void c_InputMgr::ProcessEffectsButtonActions ()
+void c_InputMgr::ProcessButtonActions (c_ExternalInput::InputValue_t value)
 {
     // DEBUG_START;
 
-    if (false == ExternalInput.IsEnabled ())
+    for(auto & CurrentInputChannel : InputChannelDrivers)
     {
-        // DEBUG_V ("Effects Button is disabled");
-        // is the effects engine running?
-        if (e_InputType::InputType_Effects == InputChannelDrivers[EffectsChannel].pInputChannelDriver->GetInputType ())
-        {
-            // is the effects engine configured to be running?
-            if (false == EffectEngineIsConfiguredToRun[EffectsChannel])
-            {
-                // DEBUG_V ("turn off effects engine");
-                InstantiateNewInputChannel (e_InputChannelIds (EffectsChannel), e_InputType::InputType_Disabled);
-            }
-        }
-    }
-
-    else if (ExternalInput.InputHadLongPush (true))
-    {
-        // DEBUG_V ("Had a Long Push");
-        // Is the effects engine already running?
-        if (e_InputType::InputType_Effects == InputChannelDrivers[EffectsChannel].pInputChannelDriver->GetInputType ())
-        {
-            // DEBUG_V ("turn off effects engine");
-            InstantiateNewInputChannel (e_InputChannelIds (EffectsChannel), e_InputType::InputType_Disabled);
-        }
-        else
-        {
-            // DEBUG_V ("turn on effects engine");
-            InstantiateNewInputChannel (e_InputChannelIds (EffectsChannel), e_InputType::InputType_Effects);
-        }
-    }
-
-    else if (ExternalInput.InputHadShortPush (true))
-    {
-        // DEBUG_V ("Had a Short Push");
-        // is the effects engine running?
-        if (e_InputType::InputType_Effects == InputChannelDrivers[EffectsChannel].pInputChannelDriver->GetInputType ())
-        {
-            // DEBUG_V ("tell the effects engine to go to the next effect");
-            ((c_InputEffectEngine*)(InputChannelDrivers[EffectsChannel].pInputChannelDriver))->NextEffect ();
-        }
+        CurrentInputChannel.pInputChannelDriver->ProcessButtonActions(value);
     }
 
     // DEBUG_END;
 
-} // ProcessEffectsButtonActions
+} // ProcessButtonActions
 
 //-----------------------------------------------------------------------------
 /*

@@ -106,6 +106,7 @@ public:
     void GetDriverName (String  & sDriverName) { sDriverName = "Effects"; } ///< get the name for the instantiated driver
     void SetBufferInfo (uint32_t BufferSize);
     void NextEffect ();
+    void ProcessButtonActions(c_ExternalInput::InputValue_t value);
 
     // Effect functions
     uint16_t effectSolidColor ();
@@ -145,6 +146,7 @@ private:
     bool EffectWhiteChannel        = false;
     float EffectBrightness         = 1.0;             /* Externally controlled effect brightness [0, 255] */
     CRGB EffectColor               = { 183, 0, 255 }; /* Externally controlled effect color */
+    bool StayDark                  = false;
 
     uint32_t effectMarqueePixelAdvanceCount = 1;
     uint32_t effectMarqueePixelLocation = 0;
@@ -199,4 +201,5 @@ private:
         FastTimer delaytimer;
         FastTimer durationtimer;
     } FlashInfo;
+
 };

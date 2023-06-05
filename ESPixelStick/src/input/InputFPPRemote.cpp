@@ -110,10 +110,86 @@ void c_InputFPPRemote::GetStatus (JsonObject& jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
+void c_InputFPPRemote::PlayNextFile ()
+{
+    // DEBUG_START;
+    do // once
+    {
+        std::vector<String> ListOfFiles;
+        FileMgr.GetListOfSdFiles(ListOfFiles);
+        ListOfFiles.shrink_to_fit();
+        // DEBUG_V(String("Num Files Found: ") + String(ListOfFiles.size()));
+
+        if(0 == ListOfFiles.size())
+        {
+            // no files. Dont continue
+            break;
+        }
+
+        // DEBUG_V(String("File Being Played: '") + FileBeingPlayed + "'");
+        // find the current file
+        std::vector<String>::iterator FileIterator = ListOfFiles.end();
+        std::vector<String>::iterator CurrentFileInList = ListOfFiles.begin();
+        while (CurrentFileInList != ListOfFiles.end())
+        {
+            // DEBUG_V(String("CurrentFileInList: '") + *CurrentFileInList + "'");
+
+            if((*CurrentFileInList).equals(FileBeingPlayed))
+            {
+                // DEBUG_V("Found File");
+                FileIterator = ++CurrentFileInList;
+                break;
+            }
+            ++CurrentFileInList;
+        }
+
+        // DEBUG_V("now find the next file");
+        do
+        {
+            // did we wrap?
+            if(ListOfFiles.end() == CurrentFileInList)
+            {
+                // DEBUG_V("Handle wrap");
+                CurrentFileInList = ListOfFiles.begin();
+            }
+            // DEBUG_V(String("CurrentFileInList: '") + *CurrentFileInList + "'");
+
+            // is this a valid file?
+            if( (-1 != (*CurrentFileInList).indexOf(".fseq")) && (-1 != (*CurrentFileInList).indexOf(".pl")))
+            {
+                // DEBUG_V("try the next file");
+                // get the next file
+                ++CurrentFileInList;
+
+                continue;
+            }
+
+            // DEBUG_V(String("CurrentFileInList: '") + *CurrentFileInList + "'");
+
+            // did we come all the way around?
+            if((*CurrentFileInList).equals(FileBeingPlayed))
+            {
+                // DEBUG_V("no other file to play. Keep playing it.");
+                break;
+            }
+
+            // DEBUG_V(String("Succes - we have found a new file to play: '") + *CurrentFileInList + "'");
+            StopPlaying();
+            StartPlaying(*CurrentFileInList);
+            break;
+        } while (FileIterator != CurrentFileInList);
+
+    } while(false);
+
+    // DEBUG_END;
+
+} // PlayNextFile
+
+//-----------------------------------------------------------------------------
 void c_InputFPPRemote::Process ()
 {
     // DEBUG_START;
-    if (!IsInputChannelActive)
+    if (!IsInputChannelActive || StayDark)
     {
         // DEBUG_V ("dont do anything if the channel is not active");
         StopPlaying ();
@@ -134,13 +210,34 @@ void c_InputFPPRemote::Process ()
             StartPlaying (FileBeingPlayed);
         }
     }
-    else
-    {
-    }
 
     // DEBUG_END;
 
 } // process
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemote::ProcessButtonActions(c_ExternalInput::InputValue_t value)
+{
+    // DEBUG_START;
+
+    if(c_ExternalInput::InputValue_t::longOn == value)
+    {
+        // DEBUG_V("flip the dark flag");
+        StayDark = !StayDark;
+        // DEBUG_V(String("StayDark: ") + String(StayDark));
+    }
+    else if(c_ExternalInput::InputValue_t::shortOn == value)
+    {
+        // DEBUG_V("Are we playing a local file?");
+        PlayNextFile();
+    }
+    else if(c_ExternalInput::InputValue_t::off == value)
+    {
+        // DEBUG_V("Got input Off notification");
+    }
+
+    // DEBUG_END;
+} // ProcessButtonActions
 
 //-----------------------------------------------------------------------------
 void c_InputFPPRemote::SetBufferInfo (uint32_t BufferSize)

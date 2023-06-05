@@ -27,6 +27,7 @@
 #   include <SD.h>
 #endif // def SUPPORT_SD_MMC
 #include <map>
+#include <vector>
 
 #ifdef ARDUINO_ARCH_ESP32
 #   ifdef SUPPORT_SD_MMC
@@ -89,6 +90,7 @@ public:
     size_t WriteSdFile      (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite, size_t StartingPosition);
     void   CloseSdFile      (const FileId & FileHandle);
     void   GetListOfSdFiles (String & Response);
+    void   GetListOfSdFiles (std::vector<String> & Response);
     size_t GetSdFileSize    (const String & FileName);
     size_t GetSdFileSize    (const FileId & FileHandle);
     void   GetDriverName    (String& Name) { Name = "FileMgr"; }

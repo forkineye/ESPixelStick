@@ -63,8 +63,8 @@
                 </thead>
                 <tbody>
                     <td><input type="checkbox" id="FlashEnable"></td>
-                    <td><input type="number" class="form-control is-valid" id="FlashMinInt"   step="1" min="0"   max="100"    value=50></td>';
-                    <td><input type="number" class="form-control is-valid" id="FlashMaxInt"   step="1" min="0"   max="100"    value=100></td>';
+                    <td><input type="number" class="form-control is-valid" id="FlashMinInt"   step="1" min="20"  max="100"    value=50></td>';
+                    <td><input type="number" class="form-control is-valid" id="FlashMaxInt"   step="1" min="20"  max="100"    value=100></td>';
                     <td><input type="number" class="form-control is-valid" id="FlashMinDelay" step="1" min="100" max="100000" value=100></td>';
                     <td><input type="number" class="form-control is-valid" id="FlashMaxDelay" step="1" min="100" max="100000" value=10000></td>';
                     <td><input type="number" class="form-control is-valid" id="FlashMinDur"   step="1" min="10"  max="1000"   value=100></td>';
@@ -115,23 +115,5 @@
                 <button type="Button" class="btn btn-primary" id="AddMarqueeGroupBtn">Add Marquee Group</button>;
             </div>
         </div>
-    </div>
-
-    <legend class="esps-legend">Triggered Effect</legend>
-    <div class="form-group" id="fg_Triggerd_Effect">
-        <label class="control-label col-sm-2" for="TE_Enable">Enable</label>
-        <div class="checkbox col-sm-2">
-            <input type="checkbox" id="TE_Enable" title="Trigger Effects using a data channel.">
-        </div>
-        <label class="control-label col-sm-2" for="TE_Chan">Channel</label>
-        <div class="col-sm-2">
-            <input type="number" class="form-control is-valid" id="TE_Chan" step="1" min="1" value=1></input>
-        </div>
-        <label class="control-label col-sm-2" for="TE_gpio">GPIO</label>
-        <div class="col-sm-2">
-            <input type="number" class="form-control is-valid" id="TE_gpio" step="1" min="0" max="36" value=34></input>
-        </div>
-        <!-- TriggeredEffectList -->
-        <!-- Effect (dropdown), Channel Value -->
     </div>
 </fieldset>

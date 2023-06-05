@@ -109,6 +109,7 @@ c_InputEffectEngine::c_InputEffectEngine () :
     // DEBUG_END;
 
 } // c_InputEffectEngine
+
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::~c_InputEffectEngine ()
 {
@@ -249,7 +250,7 @@ void c_InputEffectEngine::NextEffect ()
     // DEBUG_START;
 
     // DEBUG_V ("Find the current effect");
-    int CurrentEffectIndex = 0;
+    uint32_t CurrentEffectIndex = 0;
     for (const EffectDescriptor_t currentEffect : ListOfEffects)
     {
         // DEBUG_V (String ("currentEffect.name: ") + currentEffect.name);
@@ -264,7 +265,7 @@ void c_InputEffectEngine::NextEffect ()
 
     // we now have the index of the current effect
     ++CurrentEffectIndex;
-    if (String ("Breathe") == ActiveEffect->name)
+    if (sizeof(ListOfEffects)/sizeof(ListOfEffects[0]) <= CurrentEffectIndex)
     {
         // DEBUG_V ("Wrap to first effect");
         CurrentEffectIndex = 0;
@@ -341,7 +342,7 @@ void c_InputEffectEngine::Process ()
         }
         // DEBUG_V ("Init OK");
 
-        if (0 == PixelCount)
+        if ((0 == PixelCount) || (StayDark))
         {
             break;
         }
@@ -349,23 +350,49 @@ void c_InputEffectEngine::Process ()
 
         if(!EffectDelayTimer.IsExpired())
         {
+            PollFlash();
             break;
         }
 
         // DEBUG_V ("Update output");
-        EffectDelayTimer.StartTimer(EffectWait);
         uint32_t wait = (this->*ActiveEffect->func)();
         EffectWait = max ((int)wait, MIN_EFFECT_DELAY);
+        EffectDelayTimer.StartTimer(EffectWait);
         EffectCounter++;
         InputMgr.RestartBlankTimer (GetInputChannelId ());
 
-    } while (false);
+        PollFlash();
 
-    PollFlash();
+    } while (false);
 
     // DEBUG_END;
 
 } // process
+
+//----------------------------------------------------------------------------
+void c_InputEffectEngine::ProcessButtonActions(c_ExternalInput::InputValue_t value)
+{
+    // DEBUG_START;
+
+    if(c_ExternalInput::InputValue_t::longOn == value)
+    {
+        // DEBUG_V("flip the dark flag");
+        StayDark = !StayDark;
+        // DEBUG_V(String("StayDark: ") + String(StayDark));
+
+    }
+    else if(c_ExternalInput::InputValue_t::shortOn == value)
+    {
+        // DEBUG_V("Move to the next effect");
+        NextEffect();
+    }
+    else if(c_ExternalInput::InputValue_t::off == value)
+    {
+        // DEBUG_V("Got input Off notification");
+    }
+
+    // DEBUG_END;
+} // ProcessButtonActions
 
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::SetBufferInfo (uint32_t BufferSize)
@@ -415,6 +442,12 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     setFromJSON (FlashInfo.MaxDelayMS,    jsonConfig, "FlashMaxDelay");
     setFromJSON (FlashInfo.MinDurationMS, jsonConfig, "FlashMinDur");
     setFromJSON (FlashInfo.MaxDurationMS, jsonConfig, "FlashMaxDur");
+
+    // make sure max is really max
+    if(FlashInfo.MinIntensity >= FlashInfo.MaxIntensity)
+    {
+        FlashInfo.MinIntensity = FlashInfo.MaxIntensity;
+    }
 
     if(jsonConfig.containsKey(CN_transitions))
     {
@@ -1278,7 +1311,7 @@ uint16_t c_InputEffectEngine::effectBreathe ()
      */
      // sin() is in radians, so 2*PI rad is a full period; compiler should optimize.
     // DEBUG_START;
-    float val = (exp (sin (millis () / (EffectDelay * 5.0) * 2 * PI)) - 0.367879441) * 0.106364766 + 0.75;
+    float val = (exp (sin (float(millis ()) / (float(EffectDelay) * 5.0) * 2.0 * PI)) - 0.367879441) * 0.106364766 + 0.75;
     setAll ({ uint8_t (EffectColor.r * val),
               uint8_t (EffectColor.g * val),
               uint8_t (EffectColor.b * val) });

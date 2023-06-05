@@ -42,6 +42,7 @@ public:
     virtual void SetOperationalState (bool ActiveFlag) { IsInputChannelActive = ActiveFlag; }
     virtual void NetworkStateChanged (bool IsConnected) {}; // used by poorly designed rx functions
     virtual bool isShutDownRebootNeeded () { return false; }
+    virtual void ProcessButtonActions(c_ExternalInput::InputValue_t value) {};
 
     c_InputMgr::e_InputChannelIds GetInputChannelId () { return InputChannelId; }
     c_InputMgr::e_InputType       GetInputType ()      { return ChannelType; }
