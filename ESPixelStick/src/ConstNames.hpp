@@ -176,6 +176,7 @@ extern const CN_PROGMEM char CN_sca[];
 extern const CN_PROGMEM char CN_seconds_elapsed[];
 extern const CN_PROGMEM char CN_seconds_played[];
 extern const CN_PROGMEM char CN_seconds_remaining[];
+extern const CN_PROGMEM char CN_SendFppSync[];
 extern const CN_PROGMEM char CN_sequence_filename[];
 extern const CN_PROGMEM char CN_Serial[];
 extern const CN_PROGMEM char CN_Servo_PCA9685[];
