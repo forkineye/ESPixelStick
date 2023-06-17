@@ -48,6 +48,7 @@ protected:
 
     c_InputFPPRemotePlayItem * pInputFPPRemotePlayItem = nullptr;
     int32_t GetSyncOffsetMS () { return SyncOffsetMS; }
+    bool    GetSendFppSync () { return SendFppSync; }
 
     String StatusType;
     bool StayDark = false;
