@@ -1099,11 +1099,14 @@ void c_FPPDiscovery::GenerateFppSyncMsg(uint8_t Action, const String & FileName,
     SyncPacket.packet_type = CTRL_PKT_SYNC;
     write16 ((uint8_t*)&SyncPacket.data_len, sizeof(SyncPacket));
 
-    SyncPacket.sync_action == Action;
-    SyncPacket.sync_type == SYNC_FILE_SEQ;
+    SyncPacket.sync_action = Action;
+    SyncPacket.sync_type = SYNC_FILE_SEQ;
     write32((uint8_t*)&SyncPacket.frame_number, CurrentFrame);
-    SyncPacket.seconds_elapsed == ElpsedTime;
-    memcpy(SyncPacket.filename, FileName.c_str(), min(sizeof(SyncPacket.filename)-1, FileName.length()));
+    SyncPacket.seconds_elapsed = ElpsedTime;
+
+    // copy the file name and make sure a truncared file name has a proper line termination.
+    strncpy(SyncPacket.filename, FileName.c_str(), size_t(sizeof(SyncPacket.filename)-1));
+    SyncPacket.filename[sizeof(SyncPacket.filename)-1] = 0x00;
 
     udp.writeTo (SyncPacket.raw, sizeof (SyncPacket), IPAddress(255,255,255,255), FPP_DISCOVERY_PORT);
     udp.writeTo (SyncPacket.raw, sizeof (SyncPacket), MulticastAddress, FPP_DISCOVERY_PORT);
