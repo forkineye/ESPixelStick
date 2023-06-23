@@ -110,7 +110,7 @@ private:
 
 #ifdef ARDUINO_ARCH_ESP32
     TaskHandle_t TimerPollTaskHandle = NULL;
-#   define TimerPollHandlerTaskStack 2000
+#   define TimerPollHandlerTaskStack 3000
 // #   define TimerPollHandlerTaskStack 6000
 #endif // def ARDUINO_ARCH_ESP32
 
