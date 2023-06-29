@@ -48,6 +48,7 @@ protected:
 
     c_InputFPPRemotePlayItem * pInputFPPRemotePlayItem = nullptr;
     int32_t GetSyncOffsetMS () { return SyncOffsetMS; }
+    bool    GetSendFppSync () { return SendFppSync; }
 
     String StatusType;
     bool StayDark = false;
@@ -66,8 +67,9 @@ private:
     void load ();          ///< Load configuration from File System
     void save ();          ///< Save configuration to File System
 
-    String FileBeingPlayed;
     int32_t SyncOffsetMS = 0;
+    bool    SendFppSync = false;
+    String  FileBeingPlayed;
 
 #   define JSON_NAME_FILE_TO_PLAY CN_fseqfilename
 

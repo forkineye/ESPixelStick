@@ -20,6 +20,7 @@
 
 #include "InputFPPRemotePlayFile.hpp"
 #include "InputMgr.hpp"
+#include "src/service/FPPDiscovery.h"
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Idle::Poll ()
@@ -128,6 +129,11 @@ void fsm_PlayFile_state_Starting::Init (c_InputFPPRemotePlayFile* Parent)
 
     p_Parent = Parent;
     Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_Starting_imp);
+
+    if(p_Parent->SendFppSync)
+    {
+        FPPDiscovery.GenerateFppSyncMsg(SYNC_PKT_START, p_Parent->GetFileName(), 0, float(0.0));
+    }
 
     // DEBUG_END;
 
@@ -247,6 +253,11 @@ IRAM_ATTR void fsm_PlayFile_state_PlayingFile::TimerPoll ()
         // xDEBUG_V (String ("               MaxBytesToRead: ") + String (MaxBytesToRead));
 
         LastPlayedFrameId = CurrentFrame;
+
+        if(p_Parent->SendFppSync)
+        {
+            FPPDiscovery.GenerateFppSyncMsg(SYNC_PKT_SYNC, p_Parent->GetFileName(), CurrentFrame, float(p_Parent->FrameControl.ElapsedPlayTimeMS) / 1000.0);
+        }
 
         for (auto& CurrentSparseRange : p_Parent->SparseRanges)
         {
@@ -480,6 +491,11 @@ void fsm_PlayFile_state_Stopping::Init (c_InputFPPRemotePlayFile* Parent)
 
     p_Parent->SyncControl.LastRcvdElapsedSeconds = 0;
     p_Parent->FrameControl.ElapsedPlayTimeMS = 0;
+
+    if(p_Parent->SendFppSync)
+    {
+        FPPDiscovery.GenerateFppSyncMsg(SYNC_PKT_STOP, emptyString, 0, float(0.0));
+    }
 
     // DEBUG_END;
 

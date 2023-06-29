@@ -58,6 +58,7 @@ private:
     String UploadFileName;
     IPAddress FppRemoteIp = IPAddress (uint32_t(0));
     c_InputFPPRemotePlayFile * InputFPPRemotePlayFile = nullptr;
+    const IPAddress MulticastAddress = IPAddress (239, 70, 80, 80);
 
     void GetSysInfoJSON    (JsonObject& jsonResponse);
     void BuildFseqResponse (String fname, c_FileMgr::FileId fseq, String & resp);
@@ -85,11 +86,6 @@ private:
         uint32_t pktError;
     };
     MultiSyncStats_t MultiSyncStats;
-
-#   define SYNC_PKT_START       0
-#   define SYNC_PKT_STOP        1
-#   define SYNC_PKT_SYNC        2
-#   define SYNC_PKT_OPEN        3
 
 #   define SYNC_FILE_SEQ        0
 #   define SYNC_FILE_MEDIA      1
@@ -123,6 +119,12 @@ public:
 
     void SetInputFPPRemotePlayFile (c_InputFPPRemotePlayFile * value) { InputFPPRemotePlayFile = value; }
     void ForgetInputFPPRemotePlayFile () { InputFPPRemotePlayFile = nullptr; }
+    void GenerateFppSyncMsg (uint8_t Action, const String & FileName, uint32_t CurrentFrame, const float & ElpsedTime);
+
+#   define SYNC_PKT_START       0
+#   define SYNC_PKT_STOP        1
+#   define SYNC_PKT_SYNC        2
+#   define SYNC_PKT_OPEN        3
 
 };
 

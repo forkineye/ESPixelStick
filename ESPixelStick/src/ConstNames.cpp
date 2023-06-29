@@ -167,6 +167,7 @@ const CN_PROGMEM char CN_sca                      [] = "sca";
 const CN_PROGMEM char CN_seconds_elapsed          [] = "seconds_elapsed";
 const CN_PROGMEM char CN_seconds_played           [] = "seconds_played";
 const CN_PROGMEM char CN_seconds_remaining        [] = "seconds_remaining";
+const CN_PROGMEM char CN_SendFppSync              [] = "SendFppSync";
 const CN_PROGMEM char CN_sequence_filename        [] = "sequence_filename";
 const CN_PROGMEM char CN_Serial                   [] = "Serial";
 const CN_PROGMEM char CN_Servo_PCA9685            [] = "Servo PCA9685";

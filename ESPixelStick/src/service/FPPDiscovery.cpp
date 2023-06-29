@@ -78,7 +78,6 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
 
         // DEBUG_V ();
 
-        IPAddress address = IPAddress (239, 70, 80, 80);
         bool fail = false;
 
         // Try to listen to the broadcast port
@@ -90,7 +89,7 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         }
         //logcon (String (F ("FPPDiscovery subscribed to broadcast")));
 
-        if (!udp.listenMulticast (address, FPP_DISCOVERY_PORT))
+        if (!udp.listenMulticast (MulticastAddress, FPP_DISCOVERY_PORT))
         {
             logcon (String (F ("FAILED to subscribed to multicast messages")));
             fail = true;
@@ -1085,5 +1084,47 @@ bool c_FPPDiscovery::AllowedToRemotePlayFiles()
 
     return (FileMgr.SdCardIsInstalled() && IsEnabled);
 } // AllowedToRemotePlayFiles
+
+//-----------------------------------------------------------------------------
+void c_FPPDiscovery::GenerateFppSyncMsg(uint8_t Action, const String & FileName, uint32_t CurrentFrame, const float & ElpsedTime)
+{
+    // DEBUG_START;
+
+    do // once
+    {
+        if((Action == SYNC_PKT_SYNC) && (CurrentFrame & 0x7))
+        {
+            // only send sync every 8th frame
+            break;
+        }
+        
+        FPPMultiSyncPacket SyncPacket;
+
+        SyncPacket.header[0] = 'F';
+        SyncPacket.header[1] = 'P';
+        SyncPacket.header[2] = 'P';
+        SyncPacket.header[3] = 'D';
+        SyncPacket.packet_type = CTRL_PKT_SYNC;
+        write16 ((uint8_t*)&SyncPacket.data_len, sizeof(SyncPacket));
+
+        SyncPacket.sync_action = Action;
+        SyncPacket.sync_type = SYNC_FILE_SEQ;
+        write32((uint8_t*)&SyncPacket.frame_number, CurrentFrame);
+        SyncPacket.seconds_elapsed = ElpsedTime;
+
+        // copy the file name and make sure a truncated file name has a proper line termination.
+        strncpy(SyncPacket.filename, FileName.c_str(), size_t(sizeof(SyncPacket.filename)-1));
+        SyncPacket.filename[sizeof(SyncPacket.filename)-1] = 0x00;
+
+        if(NetworkMgr.IsConnected())
+        {
+            udp.writeTo (SyncPacket.raw, sizeof (SyncPacket), IPAddress(255,255,255,255), FPP_DISCOVERY_PORT);
+            udp.writeTo (SyncPacket.raw, sizeof (SyncPacket), MulticastAddress, FPP_DISCOVERY_PORT);
+        }
+    } while(false);
+
+
+    // DEBUG_END; 
+} // GenerateFppSyncMsg
 
 c_FPPDiscovery FPPDiscovery;

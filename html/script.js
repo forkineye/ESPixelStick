@@ -1190,7 +1190,7 @@ function ExtractNetworkWiFiConfigFromHtmlPage() {
     wifi.ap_fallback = $('#network #wifi #ap_fallback').prop('checked');
     wifi.ap_reboot = $('#network #wifi #ap_reboot').prop('checked');
     wifi.ap_timeout = $('#network #wifi #ap_timeout').val();
-    wifi.StayInApMode = $('#network #wifi #StayInApMode').val();
+    wifi.StayInApMode = $('#network #wifi #StayInApMode').prop('checked');
 
 } // ExtractNetworkWiFiConfigFromHtmlPage
 

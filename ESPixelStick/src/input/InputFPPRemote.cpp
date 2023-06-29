@@ -75,6 +75,7 @@ void c_InputFPPRemote::GetConfig (JsonObject& jsonConfig)
         jsonConfig[JSON_NAME_FILE_TO_PLAY] = No_LocalFileToPlay;
     }
     jsonConfig[CN_SyncOffset] = SyncOffsetMS;
+    jsonConfig[CN_SendFppSync] = SendFppSync;
 
     // DEBUG_END;
 
@@ -252,11 +253,14 @@ bool c_InputFPPRemote::SetConfig (JsonObject& jsonConfig)
     // DEBUG_START;
 
     String FileToPlay;
-    setFromJSON (FileToPlay, jsonConfig, JSON_NAME_FILE_TO_PLAY);
+    setFromJSON (FileToPlay,   jsonConfig, JSON_NAME_FILE_TO_PLAY);
     setFromJSON (SyncOffsetMS, jsonConfig, CN_SyncOffset);
+    setFromJSON (SendFppSync,  jsonConfig, CN_SendFppSync);
+
     if (pInputFPPRemotePlayItem)
     {
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
+        pInputFPPRemotePlayItem->SetSendFppSync (SendFppSync);
     }
 
     // DEBUG_V ("Config Processing");
@@ -394,6 +398,7 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
         // DEBUG_V (String ("FileName: '") + FileName + "'");
         // DEBUG_V ("Start Playing");
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
+        pInputFPPRemotePlayItem->SetSendFppSync (SendFppSync);
         pInputFPPRemotePlayItem->Start (FileName, 0, 1);
         FileBeingPlayed = FileName;
 
@@ -421,6 +426,7 @@ void c_InputFPPRemote::StartPlayingRemoteFile (String& FileName)
         // DEBUG_V ("Instantiate an FSEQ file player");
         pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (GetInputChannelId ());
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
+        pInputFPPRemotePlayItem->SetSendFppSync (SendFppSync);
         StatusType = CN_File;
         FileBeingPlayed = FileName;
 

@@ -153,6 +153,15 @@ inline uint32_t read32 (uint8_t* buf, int idx) {
     r |= (int)(buf[idx]);
     return r;
 }
+
+inline void write32 (uint8_t* pData, uint32_t value)
+{
+    pData[0] = (value >>  0) & 0xff;
+    pData[1] = (value >>  8) & 0xff;
+    pData[2] = (value >> 16) & 0xff;
+    pData[3] = (value >> 24) & 0xff;
+} // write16
+
 //-----------------------------------------------------------------------------
 inline uint32_t read24 (uint8_t* pData)
 {
@@ -160,9 +169,16 @@ inline uint32_t read24 (uint8_t* pData)
         (uint32_t)(pData[1]) << 8 |
         (uint32_t)(pData[2]) << 16);
 } // read24
+
 //-----------------------------------------------------------------------------
 inline uint16_t read16 (uint8_t* pData)
 {
     return ((uint16_t)(pData[0]) |
         (uint16_t)(pData[1]) << 8);
 } // read16
+
+inline void write16 (uint8_t* pData, uint16_t value)
+{
+    pData[0] = value & 0xff;
+    pData[1] = (value >> 8) & 0xff;
+} // write16

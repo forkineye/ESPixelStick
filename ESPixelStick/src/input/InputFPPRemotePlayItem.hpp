@@ -40,11 +40,13 @@ public:
             void     GetDriverName  (String& Name) { Name = "InputMgr"; }
             int32_t  GetSyncOffsetMS () { return SyncOffsetMS; }
             void     SetSyncOffsetMS (int32_t value) { SyncOffsetMS = value; }
+            void     SetSendFppSync  (bool value) { SendFppSync = value; }
             c_InputMgr::e_InputChannelIds GetInputChannelId () { return InputChannelId; }
 protected:
     String   PlayItemName;
     uint32_t RemainingPlayCount = 0;
     time_t   PlayDurationSec = 0;
+    bool     SendFppSync = false;
 
 private:
     int32_t  SyncOffsetMS = 0;
