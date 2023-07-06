@@ -21,7 +21,9 @@
 // Output Manager
 #define DEFAULT_RMT_0_GPIO  gpio_num_t::GPIO_NUM_16 // Output 1
 #define DEFAULT_RMT_1_GPIO  gpio_num_t::GPIO_NUM_3  // Output 2
+// #define DEFAULT_RMT_1_GPIO  gpio_num_t::GPIO_NUM_27  // Output 2
 #define DEFAULT_RMT_2_GPIO  gpio_num_t::GPIO_NUM_1  // Output 3
+// #define DEFAULT_RMT_2_GPIO  gpio_num_t::GPIO_NUM_25  // Output 3
 #define DEFAULT_RMT_3_GPIO  gpio_num_t::GPIO_NUM_4  // Output 4
 
 // AE+ extra 3 outputs (Level-shifted and 33R resistor)
