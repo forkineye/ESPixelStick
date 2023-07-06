@@ -1016,14 +1016,17 @@ void c_OutputMgr::LoadConfig ()
             // DEBUG_V ();
         }))
     {
-        if (!IsBooting)
+        if (IsBooting)
+        {
+            // on boot, create a config file with default values
+            // DEBUG_V ();
+            CreateNewConfig ();
+        }
+        else
         {
             logcon(CN_stars + String(MN_15) + CN_stars);
+            reboot = true;
         }
-
-        // create a config file with default values
-        // DEBUG_V ();
-        CreateNewConfig ();
     }
 
     // DEBUG_END;
