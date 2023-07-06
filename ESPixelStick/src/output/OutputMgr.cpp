@@ -555,7 +555,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
         } // end there is an existing driver
 
         // DEBUG_V ();
-
+        
         // get the new data and UART info
         CurrentOutputChannelDriver.GpioPin   = OutputChannelIdToGpioAndPort[CurrentOutputChannelDriver.DriverId].GpioPin;
         CurrentOutputChannelDriver.PortType  = OutputChannelIdToGpioAndPort[CurrentOutputChannelDriver.DriverId].PortType;
@@ -772,6 +772,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                 {
                     // DEBUG_V ("RMT");
                     // logcon (CN_stars + String (F (" Starting WS2811 RMT for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    delay(100);
                     CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputWS2811Rmt(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_WS2811);
                     // DEBUG_V ();
                     break;
