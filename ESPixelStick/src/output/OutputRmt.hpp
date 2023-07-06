@@ -157,6 +157,7 @@ public:
 
 // #define USE_RMT_DEBUG_COUNTERS
 #ifdef USE_RMT_DEBUG_COUNTERS
+// #define IncludeBufferData
    // debug counters
    uint32_t DataCallbackCounter = 0;
    uint32_t DataTaskcounter = 0;
