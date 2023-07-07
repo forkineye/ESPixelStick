@@ -230,10 +230,11 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
 void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     // //DEBUG_START;
-
+    
     jsonStatus[F("NumRmtSlotOverruns")] = NumRmtSlotOverruns;
 #ifdef USE_RMT_DEBUG_COUNTERS 
-    jsonStatus[F("OutputIsPaused")] = OutputIsPaused;    JsonObject debugStatus = jsonStatus.createNestedObject("RMT Debug");
+    jsonStatus[F("OutputIsPaused")] = OutputIsPaused;
+    JsonObject debugStatus = jsonStatus.createNestedObject("RMT Debug");
     debugStatus["RmtChannelId"]                 = OutputRmtConfig.RmtChannelId;
     debugStatus["GPIO"]                         = OutputRmtConfig.DataPin;
     debugStatus["conf0"]                        = String(RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf0.val, HEX);
@@ -274,29 +275,37 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     debugStatus["NumRmtSlotsPerIntensityValue"] = NumRmtSlotsPerIntensityValue;
     debugStatus["RmtEntriesTransfered"]         = RmtEntriesTransfered;
     debugStatus["RmtXmtFills"]                  = RmtXmtFills;
+    debugStatus["ZeroBitValue"]                 = String (Intensity2Rmt[RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID].val, HEX);
+    debugStatus["OneBitValue"]                  = String (Intensity2Rmt[RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID].val,  HEX);
 
-// #define IncludeBufferData
 #ifdef IncludeBufferData
-    uint32_t index = 0;
-    for (auto CurrentCounter : BitTypeCounters)
     {
-        debugStatus[String("RMT TYPE used Counter ") + String(index++)] = String(CurrentCounter);
+        uint32_t index = 0;
+        for (auto CurrentCounter : BitTypeCounters)
+        {
+            break;
+            debugStatus[String("RMT TYPE used Counter ") + String(index++)] = String(CurrentCounter);
+        }
     }
-
-    index = 0;
-    uint32_t * CurrentPointer = (uint32_t*)const_cast<rmt_item32_t*>(&SendBuffer[0]);
-    for(index = 0; index < NUM_RMT_SLOTS; index++)
     {
-        uint32_t data = CurrentPointer[index];
-        debugStatus[String("Buffer Data ") + String(index)] = String(data, HEX);
+        uint32_t index = 0;
+        uint32_t * CurrentPointer = (uint32_t*)const_cast<rmt_item32_t*>(&SendBuffer[0]);
+        // for(index = 0; index < NUM_RMT_SLOTS; index++)
+        for(index = 0; index < 2; index++)
+        {
+            uint32_t data = CurrentPointer[index];
+            debugStatus[String("Buffer Data ") + String(index)] = String(data, HEX);
+        }
     }
-
-    index = 0;
-    CurrentPointer = (uint32_t*)const_cast<rmt_item32_t*>(&RMTMEM.chan[OutputRmtConfig.RmtChannelId].data32[0]);
-    for(index = 0; index < NUM_RMT_SLOTS; index++)
     {
-        uint32_t data = CurrentPointer[index];
-        debugStatus[String("RMT Data ") + String(index)] = String(data, HEX);
+        uint32_t index = 0;
+        uint32_t * CurrentPointer = (uint32_t*)const_cast<rmt_item32_t*>(&RMTMEM.chan[OutputRmtConfig.RmtChannelId].data32[0]);
+        // for(index = 0; index < NUM_RMT_SLOTS; index++)
+        for(index = 0; index < 2; index++)
+        {
+            uint32_t data = CurrentPointer[index];
+            debugStatus[String("RMT Data ") + String(index)] = String(data, HEX);
+        }
     }
 #endif // def IncludeBufferData
 #endif // def USE_RMT_DEBUG_COUNTERS

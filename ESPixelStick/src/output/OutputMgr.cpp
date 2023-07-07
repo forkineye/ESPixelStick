@@ -555,11 +555,14 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
         } // end there is an existing driver
 
         // DEBUG_V ();
-
+        
         // get the new data and UART info
         CurrentOutputChannelDriver.GpioPin   = OutputChannelIdToGpioAndPort[CurrentOutputChannelDriver.DriverId].GpioPin;
         CurrentOutputChannelDriver.PortType  = OutputChannelIdToGpioAndPort[CurrentOutputChannelDriver.DriverId].PortType;
         CurrentOutputChannelDriver.PortId    = OutputChannelIdToGpioAndPort[CurrentOutputChannelDriver.DriverId].PortId;
+
+        // give the other tasks a chance to run
+        delay(100);
 
         // DEBUG_V (String("DriverId: ") + String(CurrentOutputChannelDriver.DriverId));
         // DEBUG_V (String(" GpioPin: ") + String(CurrentOutputChannelDriver.PortId));
@@ -1016,14 +1019,17 @@ void c_OutputMgr::LoadConfig ()
             // DEBUG_V ();
         }))
     {
-        if (!IsBooting)
+        if (IsBooting)
+        {
+            // on boot, create a config file with default values
+            // DEBUG_V ();
+            CreateNewConfig ();
+        }
+        else
         {
             logcon(CN_stars + String(MN_15) + CN_stars);
+            reboot = true;
         }
-
-        // create a config file with default values
-        // DEBUG_V ();
-        CreateNewConfig ();
     }
 
     // DEBUG_END;

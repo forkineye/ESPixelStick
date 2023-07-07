@@ -326,7 +326,8 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
         // DEBUG_V();
         if (!file)
         {
-            if (!IsBooting) {
+            if (!IsBooting)
+            {
                 logcon (String (CN_stars) + CfgFileMessagePrefix + String (F (" Could not open file for reading ")) + CN_stars);
             }
             break;
@@ -336,6 +337,19 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
         // DEBUG_V(String("Allocate JSON document. Size = ") + String(JsonDocSize));
         // DEBUG_V(String("Heap: ") + ESP.getFreeHeap());
         DynamicJsonDocument jsonDoc(JsonDocSize);
+        // DEBUG_V(String("jsonDoc.capacity: ") + String(jsonDoc.capacity()));
+
+        // did we get enough memory?
+        if(jsonDoc.capacity() < JsonDocSize)
+        {
+            logcon (String(CN_stars) + CfgFileMessagePrefix + String (F ("Could Not Allocate enough memory to process config ")) + CN_stars);
+
+            // DEBUG_V(String("Allocate JSON document. Size = ") + String(JsonDocSize));
+            // DEBUG_V(String("Heap: ") + ESP.getFreeHeap());
+            // DEBUG_V(String("jsonDoc.capacity: ") + String(jsonDoc.capacity()));
+            file.close ();
+            break;
+        }
 
         // DEBUG_V ("Convert File to JSON document");
         DeserializationError error = deserializeJson (jsonDoc, file);

@@ -615,13 +615,17 @@ void c_InputMgr::LoadConfig ()
             // DEBUG_V ("");
         }))
     {
-        if (!IsBooting) {
-            logcon (CN_stars + String (F (" Error loading Input Manager Config File ")) + CN_stars);
+        if (IsBooting)
+        {
+            // create a config file with default values
+            // DEBUG_V ("");
+            CreateNewConfig ();
         }
-
-        // create a config file with default values
-        // DEBUG_V ("");
-        CreateNewConfig ();
+        else
+        {
+            logcon (CN_stars + String (F (" Error loading Input Manager Config File. Rebooting ")) + CN_stars);
+            reboot = true;
+        }
     }
 
     // DEBUG_END;
