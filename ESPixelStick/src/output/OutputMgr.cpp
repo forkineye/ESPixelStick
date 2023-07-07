@@ -561,6 +561,9 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
         CurrentOutputChannelDriver.PortType  = OutputChannelIdToGpioAndPort[CurrentOutputChannelDriver.DriverId].PortType;
         CurrentOutputChannelDriver.PortId    = OutputChannelIdToGpioAndPort[CurrentOutputChannelDriver.DriverId].PortId;
 
+        // give the other tasks a chance to run
+        delay(100);
+
         // DEBUG_V (String("DriverId: ") + String(CurrentOutputChannelDriver.DriverId));
         // DEBUG_V (String(" GpioPin: ") + String(CurrentOutputChannelDriver.PortId));
         // DEBUG_V (String("PortType: ") + String(CurrentOutputChannelDriver.PortType));
@@ -772,7 +775,6 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                 {
                     // DEBUG_V ("RMT");
                     // logcon (CN_stars + String (F (" Starting WS2811 RMT for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
-                    delay(100);
                     CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputWS2811Rmt(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_WS2811);
                     // DEBUG_V ();
                     break;
