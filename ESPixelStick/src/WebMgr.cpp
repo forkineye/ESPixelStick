@@ -203,6 +203,11 @@ void c_WebMgr::init ()
         	{
         		FPPDiscovery.ProcessGET(request);
         	});
+        webServer.on ("/api/system", HTTP_GET,
+        	[](AsyncWebServerRequest* request)
+        	{
+        		FPPDiscovery.ProcessGET(request);
+        	});
 
     	webServer.on ("/fpp", HTTP_POST | HTTP_PUT,
         	[](AsyncWebServerRequest* request)

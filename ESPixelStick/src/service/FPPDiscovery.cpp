@@ -621,16 +621,16 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 
     do // once
     {
-        if (!request->hasParam (ulrPath))
+        String path = request->url();
+        if (path.startsWith("/fpp/")) 
         {
-            request->send (404);
-            // DEBUG_V ("");
-            break;
+            path = path.substring(4);
         }
 
-        // DEBUG_V ("");
-
-        String path = request->getParam (ulrPath)->value ();
+        if (request->hasParam (ulrPath))
+        {
+            path = request->getParam (ulrPath)->value ();
+        }
 
         // DEBUG_V (String ("Path: ") + path);
 
@@ -662,7 +662,27 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                     }
                 }
                 logcon (String (F ("Could not open: ")) + seq);
-            }
+            } 
+        } 
+        else if (path.startsWith (F ("/api/system/status"))) 
+        {
+            String Response;
+            DynamicJsonDocument JsonDoc (2048);
+            JsonObject JsonData = JsonDoc.to<JsonObject> ();
+            GetStatusJSON(JsonData, true);
+            serializeJson (JsonDoc, Response);
+            // DEBUG_V (String ("JsonDoc: ") + Response);
+            request->send (200, F ("application/json"), Response);
+        } 
+        else if (path.startsWith (F ("/api/system/info"))) 
+        {
+            String Response;
+            DynamicJsonDocument JsonDoc (2048);
+            JsonObject JsonData = JsonDoc.to<JsonObject> ();
+            GetSysInfoJSON(JsonData);
+            serializeJson (JsonDoc, Response);
+            // DEBUG_V (String ("JsonDoc: ") + Response);
+            request->send (200, F ("application/json"), Response);
         }
         request->send (404);
 
@@ -858,6 +878,72 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
 
 } // GetSysInfoJSON
 
+void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv) 
+{
+    JsonObject JsonDataMqtt = JsonData.createNestedObject(F ("MQTT"));
+
+    JsonDataMqtt[F ("configured")] = false;
+    JsonDataMqtt[F ("connected")]  = false;
+
+    JsonObject JsonDataCurrentPlaylist = JsonData.createNestedObject (F ("current_playlist"));
+
+    JsonDataCurrentPlaylist[CN_count]          = "0";
+    JsonDataCurrentPlaylist[F ("description")] = "";
+    JsonDataCurrentPlaylist[F ("index")]       = "0";
+    JsonDataCurrentPlaylist[CN_playlist]       = "";
+    JsonDataCurrentPlaylist[CN_type]           = "";
+
+    JsonData[F ("volume")]         = 70;
+    JsonData[F ("media_filename")] = "";
+    JsonData[F ("fppd")]           = F ("running");
+    JsonData[F ("current_song")]   = "";
+
+    if (false == PlayingFile())
+    {
+        JsonData[CN_current_sequence]  = "";
+        JsonData[CN_playlist]          = "";
+        JsonData[CN_seconds_elapsed]   = String (0);
+        JsonData[CN_seconds_played]    = String (0);
+        JsonData[CN_seconds_remaining] = String (0);
+        JsonData[CN_sequence_filename] = "";
+        JsonData[CN_time_elapsed]      = String("00:00");
+        JsonData[CN_time_remaining]    = String ("00:00");
+
+        JsonData[CN_status] = 0;
+        JsonData[CN_status_name] = F ("idle");
+
+        if (IsEnabled)
+        {
+            JsonData[CN_mode] = 8;
+            JsonData[CN_mode_name] = CN_remote;
+        }
+        else
+        {
+            JsonData[CN_mode] = 1;
+            JsonData[CN_mode_name] = CN_bridge;
+        }
+    }
+    else
+    {
+        if (InputFPPRemotePlayFile)
+        {
+            InputFPPRemotePlayFile->GetStatus (JsonData);
+        }
+        JsonData[CN_status] = 1;
+        JsonData[CN_status_name] = F ("playing");
+
+        JsonData[CN_mode] = 8;
+        JsonData[CN_mode_name] = CN_remote;
+    }
+
+    if (adv)
+    {
+        JsonObject JsonDataAdvancedView = JsonData.createNestedObject (F ("advancedView"));
+        GetSysInfoJSON (JsonDataAdvancedView);
+    }
+
+}
+
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 {
@@ -888,67 +974,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
                 adv = request->getParam (CN_advancedView)->value ();
             }
 
-            JsonObject JsonDataMqtt = JsonData.createNestedObject(F ("MQTT"));
-
-            JsonDataMqtt[F ("configured")] = false;
-            JsonDataMqtt[F ("connected")]  = false;
-
-            JsonObject JsonDataCurrentPlaylist = JsonData.createNestedObject (F ("current_playlist"));
-
-            JsonDataCurrentPlaylist[CN_count]          = "0";
-            JsonDataCurrentPlaylist[F ("description")] = "";
-            JsonDataCurrentPlaylist[F ("index")]       = "0";
-            JsonDataCurrentPlaylist[CN_playlist]       = "";
-            JsonDataCurrentPlaylist[CN_type]           = "";
-
-            JsonData[F ("volume")]         = 70;
-            JsonData[F ("media_filename")] = "";
-            JsonData[F ("fppd")]           = F ("running");
-            JsonData[F ("current_song")]   = "";
-
-            if (false == PlayingFile())
-            {
-                JsonData[CN_current_sequence]  = "";
-                JsonData[CN_playlist]          = "";
-                JsonData[CN_seconds_elapsed]   = String (0);
-                JsonData[CN_seconds_played]    = String (0);
-                JsonData[CN_seconds_remaining] = String (0);
-                JsonData[CN_sequence_filename] = "";
-                JsonData[CN_time_elapsed]      = String("00:00");
-                JsonData[CN_time_remaining]    = String ("00:00");
-
-                JsonData[CN_status] = 0;
-                JsonData[CN_status_name] = F ("idle");
-
-                if (IsEnabled)
-                {
-                    JsonData[CN_mode] = 8;
-                    JsonData[CN_mode_name] = CN_remote;
-                }
-                else
-                {
-                    JsonData[CN_mode] = 1;
-                    JsonData[CN_mode_name] = CN_bridge;
-                }
-            }
-            else
-            {
-                if (InputFPPRemotePlayFile)
-                {
-                    InputFPPRemotePlayFile->GetStatus (JsonData);
-                }
-                JsonData[CN_status] = 1;
-                JsonData[CN_status_name] = F ("playing");
-
-                JsonData[CN_mode] = 8;
-                JsonData[CN_mode_name] = CN_remote;
-            }
-
-            if (adv == CN_true)
-            {
-                JsonObject JsonDataAdvancedView = JsonData.createNestedObject (F ("advancedView"));
-                GetSysInfoJSON (JsonDataAdvancedView);
-            }
+            GetStatusJSON(JsonData, adv == CN_true);
 
             String Response;
             serializeJson (JsonDoc, Response);
