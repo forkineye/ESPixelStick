@@ -61,6 +61,7 @@ private:
     const IPAddress MulticastAddress = IPAddress (239, 70, 80, 80);
 
     void GetSysInfoJSON    (JsonObject& jsonResponse);
+    void GetStatusJSON     (JsonObject& jsonResponse, bool advanced);
     void BuildFseqResponse (String fname, c_FileMgr::FileId fseq, String & resp);
     void StopPlaying       ();
     void StartPlaying      (String & FileName, float SecondsElapsed);
