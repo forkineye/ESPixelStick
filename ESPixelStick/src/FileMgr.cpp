@@ -152,6 +152,7 @@ void c_FileMgr::SetSpiIoPins ()
         ESP_SD.end ();
     }
 #ifdef ARDUINO_ARCH_ESP32
+    // DEBUG_V();
     try
 #endif // def ARDUINO_ARCH_ESP32
     {
@@ -174,20 +175,25 @@ void c_FileMgr::SetSpiIoPins ()
         // DEBUG_V (String (" clk_pin: ") + String (clk_pin));
         // DEBUG_V (String ("  cs_pin: ") + String (cs_pin));
 
+        // DEBUG_V();
         SPI.end ();
+        // DEBUG_V();
         pinMode(cs_pin, OUTPUT);
 #       ifdef USE_MISO_PULLUP
         // DEBUG_V("USE_MISO_PULLUP");
         // on some hardware MISO is missing a required pull-up resistor, use internal pull-up.
         pinMode(miso_pin, INPUT_PULLUP);
 #       else
+        // DEBUG_V();
         pinMode(miso_pin, INPUT);
 #       endif // def USE_MISO_PULLUP
 
+        // DEBUG_V();
         SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
         // DEBUG_V();
         ResetSdCard();
 
+        // DEBUG_V();
         if (!ESP_SD.begin (cs_pin))
 #   else  // ! ARDUINO_ARCH_ESP32
         if (!ESP_SD.begin (SD_CARD_CS_PIN, SD_CARD_CLK_MHZ))
@@ -235,7 +241,9 @@ void c_FileMgr::ResetSdCard()
     byte ResetValue = 0x00;
     digitalWrite(cs_pin, LOW);
     SPI.beginTransaction(SPISettings());
-    while(0xff != ResetValue)
+    // DEBUG_V();
+    uint32_t retry = 2000;
+    while((0xff != ResetValue) && (--retry))
     {
         delay(1);
         ResetValue = SPI.transfer(0xff);
@@ -286,7 +294,7 @@ void c_FileMgr::listDir (fs::FS& fs, String dirname, uint8_t levels)
             {
                 if (levels)
                 {
-                    listDir (fs, MyFile.name (), levels - 1);
+                    listDir (fs, dirname + "/" + MyFile.name (), levels - 1);
                 }
             }
             else
