@@ -75,7 +75,7 @@ bool    dsNetwork              (JsonObject & json);
 extern  bool reboot;
 extern  bool IsBooting;
 extern  bool ResetWiFi;
-static  const String ConfigFileName = "/config.json";
+extern  const String ConfigFileName;
 extern  void FeedWDT ();
 extern  uint32_t DiscardedRxData;
 
