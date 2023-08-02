@@ -14,7 +14,35 @@
     <link rel="stylesheet" href="css/dropzone.css" id="dropzone_styles">
     -->
 
-    <link rel="stylesheet" type="text/css" href="esps.css">
+    <script>
+        let cssnum = document.styleSheets.length;
+
+        let url = "esps.css",
+        head = document.getElementsByTagName('head')[0],
+        link = document.createElement('link');
+        link.type = "text/css"; 
+        link.rel = "stylesheet";
+        link.href = url;
+        head.appendChild(link);
+
+        let ti = setInterval(function() 
+        {
+            if (document.styleSheets.length > cssnum)
+            {
+                // Console.info('Done listening to styleSheets.length change');
+                clearInterval(ti);
+
+                // load the javascript
+                let url = "esps.js",
+                head = document.getElementsByTagName('head')[0],
+                link = document.createElement('link');
+                link.type = "text/js"; 
+                link.rel = "javascript";
+                link.href = url;
+                head.appendChild(link);
+            }   
+        }, 10);
+    </script>
 
 </head>
 
@@ -914,7 +942,6 @@
     <script type="text/javascript" src="js/FileSaver.js"></script>
     -->
 
-    <script type="text/javascript" src="esps.js"></script>
 
 </body>
 
