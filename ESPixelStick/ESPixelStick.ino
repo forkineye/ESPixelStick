@@ -82,6 +82,7 @@ const String VERSION = STRING(ESPS_VERSION);
 const String VERSION = "4.x-dev";
 #endif
 
+const String ConfigFileName = "/config.json";
 const String BUILD_DATE = String(__DATE__) + " - " + String(__TIME__);
 const uint8_t CurrentConfigVersion = 1;
 
@@ -102,7 +103,7 @@ uint32_t DiscardedRxData = 0;
 
 void loadConfig();
 void GetConfig (JsonObject & json);
-void GetDriverName (String & Name) { Name = "ESP"; }
+void GetDriverName (String & Name) { Name = F("ESP"); }
 
 /// Radio configuration
 /** ESP8266 radio configuration routines that are executed at startup. */
@@ -221,7 +222,7 @@ bool validateConfig()
     // Device defaults
     if (!config.id.length ())
     {
-        config.id = "ESPixelStick";
+        config.id = F("ESPixelStick");
         configValid = false;
         // DEBUG_V ();
     }
@@ -454,10 +455,17 @@ String serializeCore(bool pretty)
 /////////////////////////////////////////////////////////
 /// Main Loop
 /** Arduino based main loop */
+// uint32_t HeapTime = 100;
 void loop()
 {
     // DEBUG_START;
-
+/*
+    if(millis() > HeapTime)
+    {
+        DEBUG_V(String("Heap: ") + String(ESP.getFreeHeap()));
+        HeapTime += 1000;
+    }
+*/
     FeedWDT ();
 
     // Keep the Network Open
@@ -507,7 +515,8 @@ void loop()
 
 void _logcon (String & DriverName, String Message)
 {
-    char Spaces[] = { "       " };
+    char Spaces[7];
+    memset(Spaces, ' ', sizeof(Spaces));
     if (DriverName.length() < (sizeof(Spaces)-1))
     {
         Spaces[(sizeof (Spaces) - 1) - DriverName.length ()] = '\0';
@@ -517,7 +526,7 @@ void _logcon (String & DriverName, String Message)
         Spaces[0] = '\0';
     }
 
-    LOG_PORT.println ("[" + String (Spaces) + DriverName + "] " + Message);
+    LOG_PORT.println (F("[") + String (Spaces) + DriverName + F("] ") + Message);
     LOG_PORT.flush ();
 } // logcon
 
