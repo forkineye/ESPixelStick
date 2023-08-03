@@ -25,7 +25,7 @@ gulp.task('html', function() {
 
 /* CSS Task */
 gulp.task('css', function() {
-    return gulp.src(['html/css/bootstrap.css', 'html/css/dropzone.css', 'html/style.css'])
+    return gulp.src(['html/css/bootstrap.css', 'html/css/dropzone.css', 'html/css/style.css'])
         .pipe(plumber())
         .pipe(concat('esps.css'))
         .pipe(cleancss())
