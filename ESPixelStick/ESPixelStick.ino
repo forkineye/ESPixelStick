@@ -526,7 +526,7 @@ void _logcon (String & DriverName, String Message)
         Spaces[0] = '\0';
     }
 
-    LOG_PORT.println (F("[") + String (Spaces) + DriverName + F("] ") + Message);
+    LOG_PORT.println (String(F("[")) + String (Spaces) + DriverName + F("] ") + Message);
     LOG_PORT.flush ();
 } // logcon
 
