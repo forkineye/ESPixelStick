@@ -228,38 +228,38 @@ void c_WebMgr::init ()
     	webServer.on ("/conf", HTTP_POST, 
         	[](AsyncWebServerRequest* request)
         	{
-                DEBUG_V(String("  url: ") + request->url());
-                DEBUG_V ("Trigger a config file read");
-                DEBUG_V ();
+                // DEBUG_V(String("  url: ") + request->url());
+                // DEBUG_V ("Trigger a config file read");
+                // DEBUG_V ();
                 request->send (200);
         	},
 
         	[](AsyncWebServerRequest *request, String filename, uint32_t index, uint8_t *data, uint32_t len, bool final)
         	{
-                DEBUG_V ("Wrong Request Type");
+                // DEBUG_V ("Wrong Request Type");
                 request->send (404);
         	},
 
             [](AsyncWebServerRequest *request, uint8_t *data, uint32_t len, uint32_t index, uint32_t total)
             {
-                DEBUG_V("Save Chunk - Start");
+                // DEBUG_V("Save Chunk - Start");
                 String UploadFileName = request->url().substring(5);
 
-                DEBUG_V(String("  url: ") + request->url());
-                DEBUG_V(String("  len: ") + String(len));
-                DEBUG_V(String("index: ") + String(index));
-                DEBUG_V(String("total: ") + String(total));
-                DEBUG_V(String("  sum: ") + String(index + len));
-                DEBUG_V(String(" file: ") + UploadFileName);
+                // DEBUG_V(String("  url: ") + request->url());
+                // DEBUG_V(String("  len: ") + String(len));
+                // DEBUG_V(String("index: ") + String(index));
+                // DEBUG_V(String("total: ") + String(total));
+                // DEBUG_V(String("  sum: ") + String(index + len));
+                // DEBUG_V(String(" file: ") + UploadFileName);
 
             	if(FileMgr.SaveConfigFile(UploadFileName, index, data, len, total <= (index+len)))
                 {
-                    DEBUG_V("Save Chunk - Success");
+                    // DEBUG_V("Save Chunk - Success");
                     request->send (200);
                 }
                 else
                 {
-                    DEBUG_V("Save Chunk - Failed");
+                    // DEBUG_V("Save Chunk - Failed");
                     request->send (404);
                 }
             }
@@ -326,7 +326,7 @@ void c_WebMgr::init ()
     	webServer.on ("/upload", HTTP_POST | HTTP_PUT | HTTP_OPTIONS,
         	[](AsyncWebServerRequest * request)
             {
-                DEBUG_V ("Got upload post request");
+                // DEBUG_V ("Got upload post request");
                 if (true == FileMgr.SdCardIsInstalled())
                 {
                     // Send status 200 (OK) to tell the client we are ready to receive
@@ -340,17 +340,17 @@ void c_WebMgr::init ()
 
         	[this](AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final)
             {
-                DEBUG_V (String ("Got process File request: index: ") + String (index));
-                DEBUG_V (String ("Got process File request: len:   ") + String (len));
-                DEBUG_V (String ("Got process File request: final: ") + String (final));
+                // DEBUG_V (String ("Got process File request: index: ") + String (index));
+                // DEBUG_V (String ("Got process File request: len:   ") + String (len));
+                // DEBUG_V (String ("Got process File request: final: ") + String (final));
                 FPPDiscovery.ProcessFile (request, filename, index, data, len, final);
             },
 
         	[this](AsyncWebServerRequest* request, uint8_t* data, uint32_t len, uint32_t index, uint32_t total)
             {
-                DEBUG_V (String ("Got process Body request: index: ") + String (index));
-                DEBUG_V (String ("Got process Body request: len:   ") + String (len));
-                DEBUG_V (String ("Got process Body request: total: ") + String (total));
+                // DEBUG_V (String ("Got process Body request: index: ") + String (index));
+                // DEBUG_V (String ("Got process Body request: len:   ") + String (len));
+                // DEBUG_V (String ("Got process Body request: total: ") + String (total));
             	request->send (404, CN_textSLASHplain, "Page Not found");
         	}
     	);
@@ -369,7 +369,7 @@ void c_WebMgr::init ()
 
     		webServer.onNotFound ([this](AsyncWebServerRequest* request)
             {
-                DEBUG_V (String("onNotFound. URL: ") + request->url());
+                // DEBUG_V (String("onNotFound. URL: ") + request->url());
                 if (true == this->IsAlexaCallbackValid())
                 {
                     // DEBUG_V ("IsAlexaCallbackValid == true");
@@ -381,7 +381,7 @@ void c_WebMgr::init ()
                 }
                 else
                 {
-                    DEBUG_V ("IsAlexaCallbackValid == false");
+                    // DEBUG_V ("IsAlexaCallbackValid == false");
                     request->send (404, CN_textSLASHplain, "Page Not found");
         		}
             });
