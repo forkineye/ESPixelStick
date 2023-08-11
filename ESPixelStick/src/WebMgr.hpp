@@ -50,33 +50,18 @@ public:
     void FirmwareUpload        (AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final);
     void NetworkStateChanged   (bool NewNetworkState);
     void GetDriverName         (String & Name) { Name = "WebMgr"; }
+    void CreateAdminInfoFile ();
 
 private:
 
     EFUpdate               efupdate;
     DeviceCallbackFunction pAlexaCallback = nullptr;
     EspalexaDevice *       pAlexaDevice   = nullptr;
-    char *pWebSocketFrameCollectionBuffer = nullptr;
     bool                   HasBeenInitialized = false;
 
-#define WebSocketFrameCollectionBufferSize (OM_MAX_CONFIG_SIZE + 100)
-
-    /// Valid "Simple" message types
-    enum SimpleMessage
-    {
-        GET_STATUS = 'J',
-        GET_ADMIN = 'A',
-        DO_RESET = '6',
-        DO_FACTORYRESET = '7',
-        PING = 'P',
-    };
+#define     STATUS_DOC_SIZE 1000
 
     void init ();
-    void onWsEvent                  (AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, uint32_t len);
-    void ProcessVseriesRequests     (AsyncWebSocketClient  * client);
-    void ProcessGseriesRequests     (AsyncWebSocketClient  * client);
-    void ProcessReceivedJsonMessage (AsyncWebSocketClient  * client);
-    void processCmd                 (AsyncWebSocketClient  * client,  JsonObject & jsonCmd );
     void processCmdGet              (JsonObject & jsonCmd);
     bool processCmdSet              (JsonObject & jsonCmd);
     void processCmdOpt              (JsonObject & jsonCmd);
@@ -85,9 +70,8 @@ private:
 
     void GetConfiguration           ();
     void GetOptions                 ();
-    void ProcessXseriesRequests     (AsyncWebSocketClient * client);
-    void ProcessXARequest           (AsyncWebSocketClient * client);
-    void ProcessXJRequest           (AsyncWebSocketClient * client);
+
+    void ProcessXJRequest           (AsyncWebServerRequest * client);
 
     void GetDeviceOptions           ();
     void GetInputOptions            ();

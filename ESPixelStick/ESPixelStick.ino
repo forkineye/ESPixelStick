@@ -198,10 +198,13 @@ void setup()
 #else
     esp_task_wdt_init (5, true);
 #endif
-    // DEBUG_END;
+
+    WebMgr.CreateAdminInfoFile();
 
     // Done with initialization
     IsBooting = false;
+
+    // DEBUG_END;
 
 } // setup
 
@@ -463,7 +466,7 @@ void loop()
     if(millis() > HeapTime)
     {
         DEBUG_V(String("Heap: ") + String(ESP.getFreeHeap()));
-        HeapTime += 1000;
+        HeapTime += 5000;
     }
 */
     FeedWDT ();
