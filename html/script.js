@@ -1,10 +1,6 @@
-var wsOutputQueue = [];
-var wsBusy = false;
-var wsPaused = false;
-var wsOutputQueueTimer = null;
 var StatusRequestTimer = null;
 var FseqFileListRequestTimer = null;
-var ws = null; // Web Socket
+var DiagTimer = null;
 
 // global data
 var AdminInfo = null;
@@ -13,11 +9,13 @@ var Input_Config = null; // Input Manager configuration record
 var System_Config = null;
 var Fseq_File_List = null;
 var selector = [];
-var target = null;
+var target = document.location.host;
+// var target = "192.168.10.220";
+
 var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
-var pingTimer;
-var pongTimer;
+var ServerTransactionTimer = null;
+var CompletedServerTransaction = true;
 var IsDocumentHidden = false;
 
 // Drawing canvas - move to diagnostics
@@ -31,11 +29,9 @@ $.fn.modal.Constructor.DEFAULTS.backdrop = 'static';
 $.fn.modal.Constructor.DEFAULTS.keyboard = false;
 
 // lets get started
-wsConnect();
-
-// console.log ('************before enqueue');
-// wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'system' } })); // Get general config
-// console.log ('************after enqueue');
+MonitorServerConnection();
+RequestConfigFile("admininfo.json");
+RequestDiagData();
 
 // jQuery doc ready
 $(function () {
@@ -50,6 +46,7 @@ $(function () {
         $($(this).attr('href')).removeClass('hidden');
 
         ProcessWindowChange($($(this))[0].hash);
+        RequestStatusUpdate();  // start self filling status loop
 
         // Collapse the menu on smaller screens
         $('#navbar').removeClass('in').attr('aria-expanded', 'false');
@@ -255,13 +252,12 @@ $(function () {
     // Halt pingpong if document is not visible
     document.addEventListener("visibilitychange", function () {
         if (document.hidden) {
-            clearTimeout(pingTimer);
+            clearTimeout(ServerTransactionTimer);
             clearTimeout(pongTimer);
             IsDocumentHidden = true;
         } else {
             IsDocumentHidden = false;
             wsReadyToSend();
-            wsPingPong();
         }
     });
 });
@@ -270,9 +266,9 @@ function ProcessLocalConfig(data) {
     // console.info(data);
     let ParsedLocalConfig = JSON.parse(data);
 
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'system': ParsedLocalConfig } } }));
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input': { 'input_config': ParsedLocalConfig.input } } } }));
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'output': { 'output_config': ParsedLocalConfig.output } } } }));
+    SendConfigFileToServer("config", {'system': ParsedLocalConfig});
+    SendConfigFileToServer("output_config", {'output_config': ParsedLocalConfig.output});
+    SendConfigFileToServer("input_config",  {'input_config':  ParsedLocalConfig.input});
 
 } // ProcessLocalConfig
 
@@ -305,28 +301,57 @@ function UpdateChannelCounts() {
     }
 } // UpdateChannelCounts
 
+async function SendConfigFileToServer(FileName = "", Data = {})
+{
+    console.info("FileName: " + FileName);
+    console.info("Data: " + JSON.stringify(Data));
+
+    return fetch("conf/" + FileName + ".json",
+    {
+        method: "POST", // *GET, POST, PUT, DELETE, etc.
+        mode: "cors", // no-cors, *cors, same-origin
+        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "same-origin", // include, *same-origin, omit
+        headers: 
+        {
+            "Content-Type": "application/json",
+        },
+        redirect: "follow", // manual, *follow, error
+        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: JSON.stringify(Data), // body data type must match "Content-Type" header
+    })
+    .then(async webResponse => 
+    {
+
+    })
+    .catch(error => 
+    {
+        console.error('SendCommand: Error: ', error);
+        return -1;
+
+    });
+    
+} // SendConfigFileToServer
+
 function ProcessWindowChange(NextWindow) {
 
     if (NextWindow === "#diag") {
-        wsEnqueue('V1');
     }
 
     else if (NextWindow === "#admin") {
-        wsEnqueue('XA');
-        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'system' } })); // Get general config
-        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
-        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
+        RequestConfigFile("output_config.json");
+        RequestConfigFile("input_config.json");
     }
 
     else if ((NextWindow === "#pg_network") || (NextWindow === "#home")) {
-        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'system' } })); // Get general config
+        RequestConfigFile("config.json");
     }
 
     else if (NextWindow === "#config") {
         RequestListOfFiles();
-        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'system' } })); // Get general config
-        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'output' } })); // Get output config
-        wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'input' } }));  // Get input config
+        RequestConfigFile("config.json");
+        RequestConfigFile("output_config.json");
+        RequestConfigFile("input_config.json");
     }
 
     else if (NextWindow === "#filemanagement") {
@@ -338,11 +363,82 @@ function ProcessWindowChange(NextWindow) {
 
 } // ProcessWindowChange
 
-function RequestStatusUpdate() {
+function RequestDiagData()
+{
+    let NextTimePeriodMS = 100;
+    if(null === DiagTimer)
+    {
+        DiagTimer = setInterval(function() 
+        {
+            if ($('#diag').is(':visible'))
+            {
+                fetch("V1", 
+                {
+                    method: "GET", // *GET, POST, PUT, DELETE, etc.
+                    mode: "cors", // no-cors, *cors, same-origin
+                    cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+                    credentials: "same-origin", // include, *same-origin, omit
+                    headers: 
+                    {
+                        "Content-Type": "application/json",
+                    },
+                    redirect: "follow", // manual, *follow, error
+                    referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                })
+                .then(async webResponse => 
+                {
+                    const data = await webResponse.blob();
+                    // console.info("RequestDiagData:webResponse.status: " + webResponse.status);
+                    // console.info("RequestDiagData:webResponse.ok: " + webResponse.ok);
+                    // check for error response
+                    if (!webResponse.ok) 
+                    {
+                        // get error message from body or default to response status
+                        const error = webResponse.status;
+                        console.error("SendCommand: Error: " + Promise.reject(error));
+                    }
+                    else
+                    {
+                        // console.info("SendCommand: Transaction complete");
+                        CompletedServerTransaction = true;
+                        let streamData = new Uint8Array(await data.arrayBuffer());
+                        drawStream(streamData);
+                    }
+                })
+                .catch(async error => 
+                {
+                    console.error('SendCommand: Error: ', error);
+                });
+            }
+        }, NextTimePeriodMS);
+    }
+} // RequestDiagData
+
+function RequestConfigFile(FileName)
+{
+    console.log("RequestConfigFile FileName: " + FileName);
+
+    $.getJSON(FileName, function(data)
+    {
+        
+        console.log("RequestConfigFile: " + JSON.stringify(data));
+        ProcessReceivedJsonConfigMessage(data);
+    }).fail(function()
+    {
+        console.log("Could not read config file: " + FileName);
+    });
+
+} // RequestConfigFile
+
+function RequestStatusUpdate() 
+{
+    // console.log("RequestStatusUpdate Start: ");
     // is the timer running?
-    if (null === StatusRequestTimer) {
+    if (null === StatusRequestTimer) 
+    {
         // timer runs forever
-        StatusRequestTimer = setTimeout(function () {
+        StatusRequestTimer = setTimeout(function ()
+        {
             clearTimeout(StatusRequestTimer);
             StatusRequestTimer = null;
 
@@ -351,9 +447,21 @@ function RequestStatusUpdate() {
         }, 1000);
     } // end timer was not running
 
-    if ($('#home').is(':visible')) {
+    if ($('#home').is(':visible')) 
+    {
         // ask for a status update from the server
-        wsEnqueue('XJ');
+        let FileName = "XJ";
+        console.log("RequestStatusUpdate FileName: " + FileName);
+
+        $.getJSON(FileName, function(data)
+        {
+            console.log("RequestStatusUpdate: " + JSON.stringify(data));
+            CompletedServerTransaction = true;
+            ProcessReceivedJsonStatusMessage(data);
+        }).fail(function()
+        {
+            console.log("Could not read Status file: " + FileName);
+        });
     } // end home (aka status) is visible
 
 } // RequestStatusUpdate
@@ -372,7 +480,7 @@ function RequestListOfFiles() {
     } // end timer was not running
 
     // ask for a file list from the server
-    wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'files' } })); // Get File List
+    // TOBERESTORED wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'files' } })); // Get File List
 
 } // RequestListOfFiles
 
@@ -445,77 +553,10 @@ function RequestFileDeletion() {
         }
     });
 
-    wsEnqueue(JSON.stringify({ 'cmd': { 'delete': { 'files': files } } }));
+    // TOBERESTORED wsEnqueue(JSON.stringify({ 'cmd': { 'delete': { 'files': files } } }));
     RequestListOfFiles();
 
 } // RequestFileDeletion
-
-/*
-function RequestFileUpload()
-{
-    $('#FileManagementTable > tr').each(function (CurRowId)
-    {
-        if (true === $('#FileSelected_' + CurRowId).prop("checked"))
-        {
-            let FileName   = $('#FileName_' + CurRowId).val().toString().replace(" - ", "/");
-            let FileLength = parseInt($('#Length_'   + CurRowId).val());
-            let uri = "data:application/octet-stream";
-            console.info("       uri: " + uri);
-            console.info("  FileName: " + FileName);
-            console.info("FileLength: " + FileName);
-            downloadURI(uri, FileName, FileLength);
-            $('#FileSelected_' + CurRowId).prop("checked", false);
-        }
-    });
-
-} // RequestFileUpload
-*/
-/*
-async function downloadURI(uri, name, totalLength)
-{
-
-    const response = await fetch('http://' + target + '/download/' + name);
-            .then(resp => resp.blob())
-
-    let length = response.headers.get('Content-Length');
-    console.info("length: " + length);
-
-    if (!length)
-    {
-        length = totalLength; // handle the error
-        console.info("Adjusted length: " + length);
-    }
-
-    console.info("response.status: " + response.status);
-    if (response.status >= 200 && response.status < 300)
-    {
-        let results = await response.json();
-    }
-    else
-    {
-        alert("Download '" + name + "' request was rejected by server");
-    }
-
-/*
-    window.status = "Download '" + name + "' Started";
-    fetch('http://' + target + '/download/' + name)
-        .then(resp => resp.blob())
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            // the filename you want
-            a.download = name;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            window.status = "Download '" + name + "' Complete";
-        })
-        .catch(() => alert("Download '" + name + "' Failed"));
-* /
-} // downloadURI
-*/
 
 function ParseParameter(name) {
     return (location.search.split(name + '=')[1] || '').split('&')[0];
@@ -630,7 +671,7 @@ function SetEffectVisibility()
         $("#MarqueeConfig").addClass("hidden");
         $("#TransitionsConfig").addClass("hidden");
     }
-}
+} // SetEffectVisibility
 
 function UUID() {
     var uuid = (function () {
@@ -999,7 +1040,7 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
 } // ProcessModeConfigurationData
 
 function ProcessReceivedJsonConfigMessage(JsonConfigData) {
-    // console.info("ProcessReceivedJsonConfigMessage: Start");
+    console.info("ProcessReceivedJsonConfigMessage: Start");
 
     // is this an output config?
     if ({}.hasOwnProperty.call(JsonConfigData, "output_config")) {
@@ -1036,10 +1077,16 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData) {
         ProcessGetFileListResponse(JsonConfigData);
     }
 
+    // is this an admin msg?
+    else if ({}.hasOwnProperty.call(JsonConfigData, "admin")) {
+        ProcessReceivedJsonAdminMessage(JsonConfigData);
+    }
+
     // is this an ACK response?
     else if ({}.hasOwnProperty.call(JsonConfigData, "OK")) {
         // console.info("Received Acknowledgement to config set command.")
     }
+
 
     else {
         console.error("unknown configuration record type has been ignored.")
@@ -1234,8 +1281,7 @@ function submitNetworkConfig() {
 
     ExtractNetworkConfigFromHtmlPage();
 
-    // console.info("Send: " + JSON.stringify({ 'cmd': { 'set': { 'system': System_Config } } }));
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'system': System_Config } } }));
+    SendConfigFileToServer("config", {'system': System_Config});
 
 } // submitNetworkConfig
 
@@ -1449,8 +1495,9 @@ function submitDeviceConfig() {
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
     submitNetworkConfig();
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'input': { 'input_config': Input_Config } } } }));
-    wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'output': { 'output_config': Output_Config } } } }));
+    SendConfigFileToServer("output_config", {'output_config': Output_Config});
+    SendConfigFileToServer("config", {'system': System_Config});
+    SendConfigFileToServer("input_config", {'input_config': Input_Config});
 
 } // submitDeviceConfig
 
@@ -1472,299 +1519,35 @@ function int2ip(num) {
     return d;
 }
 
-////////////////////////////////////////////////////
-//
-//  Websocket stuff
-//
-////////////////////////////////////////////////////
-// On websocket connect
-function wsConnect() {
-    if ('WebSocket' in window) {
-        if (!(target = ParseParameter('target'))) {
-            target = document.location.host;
-        }
+// Ping every 4sec
+function MonitorServerConnection() 
+{
+    // console.info("MonitorServerConnection");
+    let MonitorTransactionRequestInProgress = false;
+    let MonitorTransactionPreviousResponse = -1;
 
-        // target = "192.168.10.240";
-        // target = "192.168.10.101";
-
-        // Open a new web socket and set the binary type
-        ws = new WebSocket('ws://' + target + '/ws');
-        ws.binaryType = 'arraybuffer';
-        ws.onclose = function (event) {
-            console.error('WebSocket Close: ', event);
-        };
-        // When connection is opened, get core data.
-        // Module data is loaded in module change / load callbacks
-        ws.onopen = function (event) {
-            console.info("ws.onopen " + event);
-
-            // Start ping-pong heartbeat
-            wsPingPong();
-
-            $('#wserror').modal('hide');                               // Remove error modal
-            $('.wsopt').empty();                                       // Clear out option data built from websockets
-
-            // throw away any old messages
-            // console.info("ws.onopen: Flush and Halt");
-            wsFlushAndHaltTheOutputQueue();
-
-            // show we are ready to start processing the output queue
-            // console.info("ws.onopen: Turn On Sending");
-            wsReadyToSend();
-
-            // console.info("ws.onopen: Start Sending");
-            // Push time
-            wsEnqueue(JSON.stringify({ 'cmd': { 'set': { 'time': { 'time_t': convertUTCDateToLocalDate(Date()) / 1000 } } } }));
-
-            // Process an admin message to populate AdminInfo
-            wsEnqueue('XA');
-
-            ProcessWindowChange($(location).attr("hash"));
-
-            RequestStatusUpdate();  // start self filling status loop
-        };
-
-        ws.onmessage = function (event) {
-            // reset the heartbeat timers
-            wsPingPong();
-
-            // console.info("ws.onmessage: Start");
-            if (typeof event.data === "string") {
-                console.debug("WS RECV: " + event.data);
-
-                // Process "simple" X message format
-                // Valid "Simple" message types
-                //   GET_STATUS      = 'J',
-                //   GET_ADMIN       = 'A',
-                //   DO_RESET        = '6',
-                //   DO_FACTORYRESET = '7',
-                //   PING            = 'P',
-
-                if (event.data.startsWith("X")) {
-                    switch (event.data[1]) {
-                        case 'J': {
-                            let data = event.data.substr(2);
-                            ProcessReceivedJsonStatusMessage(data);
-                            break;
-                        }
-                        case 'P': {
-                            // processed above for every received msg
-                            // wsPingPong();
-                            break;
-                        }
-                        case 'A': {
-                            let data = event.data.substr(2);
-                            ProcessReceivedJsonAdminMessage(data);
-                            break;
-                        }
-                    }
-                }
-                else {
-                    // console.info("ws.onmessage: Received: " + event.data);
-                    let msg = JSON.parse(event.data);
-                    // "GET" message is a response to a get request. Populate the frontend.
-                    if ({}.hasOwnProperty.call(msg, "get")) {
-                        ProcessReceivedJsonConfigMessage(msg.get);
-                    }
-
-                    //TODO: This never gets called now as we're sending 'cmd': 'OK' back instead of 'set' with the updated config
-                    // "SET" message is a response to a set request. Data has been validated and saved, Populate the frontend.
-                    if ({}.hasOwnProperty.call(msg, "set")) {
-                        ProcessReceivedJsonConfigMessage(msg.set);
-                        snackSave();
-                    }
-
-                    //TODO: Inform user configuration was saved, but this is broken as the UI could be in an invalid state
-                    //      if the validation routines changed their config. To be fixed in UI update.
-                    if ({}.hasOwnProperty.call(msg, 'cmd')) {
-                        if (msg.cmd === 'OK') {
-                            // console.log('---- OK ----');
-                            snackSave();
-                        }
-                    }
+    if(null === ServerTransactionTimer)
+    {
+        // console.info("MonitorServerConnection: Start Timer");
+        ServerTransactionTimer = setInterval(async function () 
+        {
+            // console.info("MonitorServerConnection: Expired");
+            if(!CompletedServerTransaction && !MonitorTransactionRequestInProgress && !document.hidden)
+            {
+                MonitorTransactionRequestInProgress = true
+                let Response = await SendCommand('XP');
+                MonitorTransactionRequestInProgress = false;
+                console.info("MonitorServerConnection: " + Response);
+                if(MonitorTransactionPreviousResponse !== Response)
+                {
+                    MonitorTransactionPreviousResponse = Response;
+                    $('#wserror').modal((1 === Response) ? "hide" : "show");
                 }
             }
-            else {
-                // console.info("Stream Data");
-
-                let streamData = new Uint8Array(event.data);
-                drawStream(streamData);
-                if ($('#diag').is(':visible')) {
-                    wsEnqueue('V1');
-                }
-            }
-
-            // show we are ready to send
-            // console.info("ws.onmessage: Ask To Send Next Msg");
-            wsReadyToSend();
-
-            // console.info("ws.onmessage: Done");
-        }; // onmessage
-
-        ws.onerror = function (event) {
-            console.error("WebSocket error: ", event);
-
-        };
-    }
-    else {
-        alert('WebSockets is NOT supported by your Browser! You will need to upgrade your browser or downgrade to v2.0 of the ESPixelStick firmware.');
+            CompletedServerTransaction = false;
+        }, 4000);
     }
 }
-
-// Ping every 4sec, Reconnect after 12sec
-function wsPingPong() {
-    // Ping Pong connection detection
-    clearTimeout(pingTimer);
-    clearTimeout(pongTimer);
-
-    if (false === IsDocumentHidden) {
-        pingTimer = setTimeout(function () {
-            // is the socket still open?
-            if (ws.readyState === 3) {
-                wsReconnect();
-            }
-            else {
-                ws.send('XP');
-                // wsEnqueue('XP');
-            }
-
-        }, 1000);
-
-        pongTimer = setTimeout(function () {
-            wsReconnect();
-        }, 6000);
-    }
-}
-
-// Attempt to reconnect
-function wsReconnect() {
-    $('#wserror').modal();
-    clearTimeout(pingTimer);
-    clearTimeout(pongTimer);
-    wsFlushAndHaltTheOutputQueue();
-    ws.close();
-    ws = null;
-    wsConnect();
-}
-
-// Websocket message queuer
-function wsEnqueue(message) {
-    // only send messages if the WS interface is up and document is visible
-    if (ws.readyState !== 1) {
-        console.debug("WS is down - readyState: " + ws.readyState);
-        console.debug("WS is down - Discarding msg: " + message);
-    }
-
-    else if (wsPaused) {
-        console.debug("WS Paused - Discarding msg: " + message)
-    }
-
-    else {
-        wsOutputQueue.push(message);
-        wsProcessOutputQueue();
-
-    } // WS is up
-} // wsEnqueue
-
-function wsFlushAndHaltTheOutputQueue() {
-    // do we have a send timer running?
-    if (null !== wsOutputQueueTimer) {
-        // stop the timer
-        clearTimeout(wsOutputQueueTimer);
-        wsOutputQueueTimer = null;
-    }
-
-    // show we are ready NOT to send the next message
-    wsBusy = true;
-
-    // empty the output queue
-    while (wsOutputQueue.length > 0) {
-        //get the next message from the queue.
-        let message = wsOutputQueue.shift();
-        console.debug("Discarding msg: " + message);
-    }
-} // wsFlushAndHaltTheOutputQueue
-
-// Websocket message queuer
-function wsProcessOutputQueue() {
-    // console.log('wsProcessOutputQueue');
-
-    // only send messages if the WS interface is up
-    if (ws.readyState !== 1) {
-        // The interface is NOT up. Flush the queue
-        // console.log('wsProcessOutputQueue: WS Down. Flush');
-        wsFlushAndHaltTheOutputQueue();
-    }
-
-    // Pause processing
-    else if (document.hidden) {
-        console.debug(`WS Paused - Holding msg: ${wsOutputQueue}`);
-        wsPaused = true;
-        if (null !== wsOutputQueueTimer) {
-            // stop the timer
-            clearTimeout(wsOutputQueueTimer);
-            wsOutputQueueTimer = null;
-            wsBusy = true;
-        }
-    }
-
-    //check if we are currently waiting for a response
-    else if (wsBusy === true) {
-        // console.log('wsProcessOutputQueue: Busy');
-    } // cant send yet
-
-    else if (wsOutputQueue.length > 0) {
-        //set the wsBusy flag indicating that we are waiting for a response
-        wsBusy = true;
-
-        //get the next message from the queue.
-        let OutputMessage = wsOutputQueue.shift();
-
-        // set WaitForResponseTimeMS to clear flag and try next message if response
-        // isn't received.
-        let WaitForResponseTimeMS = 5000; // 5 seconds
-
-        // Short WaitForResponseTimeMS for message types that don't generate a response.
-        let UseShortDelay = ['T0', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'X6'].indexOf(OutputMessage.substr(0, 2));
-        if (UseShortDelay !== -1) {
-            // warning, setting this value too low can cause a rentrance issue
-            WaitForResponseTimeMS = 50;
-        }
-
-        // set up a new timer
-        wsOutputQueueTimer = setTimeout(function () {
-            // console.info('WS Send Timer expired');
-
-            // Move on to the next message
-            wsReadyToSend();
-
-        }, WaitForResponseTimeMS);
-
-        //send it.
-        console.debug('WS SEND: ' + OutputMessage);
-        ws.send(OutputMessage);
-
-    } // message available to send
-
-} // wsProcessOutputQueue
-
-// Websocket message queuer
-function wsReadyToSend() {
-    // is a timer running?
-    if (null !== wsOutputQueueTimer) {
-        // stop the timer
-        clearTimeout(wsOutputQueueTimer);
-        wsOutputQueueTimer = null;
-    }
-
-    // show we are ready to send the next message
-    wsBusy = false;
-    wsPaused = false;
-
-    //send next message
-    wsProcessOutputQueue();
-
-} // wsReadyToSend
 
 // Move to diagnostics
 function drawStream(streamData) {
@@ -1816,8 +1599,8 @@ function clearStream() {
 }
 
 function ProcessReceivedJsonAdminMessage(data) {
-    let ParsedJsonAdmin = JSON.parse(data);
-    AdminInfo = ParsedJsonAdmin.admin;
+    // let ParsedJsonAdmin = JSON.parse(data);
+    AdminInfo = data.admin;
 
     $('#version').text(AdminInfo.version);
     $('#built').text(AdminInfo.built);
@@ -1837,8 +1620,8 @@ function ProcessReceivedJsonAdminMessage(data) {
 } // ProcessReceivedJsonAdminMessage
 
 // ProcessReceivedJsonStatusMessage
-function ProcessReceivedJsonStatusMessage(data) {
-    let JsonStat = JSON.parse(data);
+function ProcessReceivedJsonStatusMessage(JsonStat) {
+    // let JsonStat = JSON.parse(data);
     let Status = JsonStat.status;
     let System = Status.system;
     let Network = System.network;
@@ -2067,14 +1850,57 @@ function showReboot() {
     }, 5000);
 }
 
+async function SendCommand(command)
+{
+    // console.info("SendCommand: " + command);
+    const requestOptions = 
+    {
+        method: 'POST',
+        // mode: "cors", // no-cors, *cors, same-origin
+        headers: { 'Content-Type': 'application/json' },
+        // cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        // credentials: "same-origin", // include, *same-origin, omit
+        // redirect: "follow", // manual, *follow, error
+        // referrerPolicy: "no-referrer" // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+    };
+
+    return fetch(command, requestOptions)
+        .then(async webResponse => 
+        {
+            const isJson = webResponse.headers.get('content-type')?.includes('application/json');
+            const data = isJson && await webResponse.json();
+
+            // console.info("SendCommand:webResponse.status: " + webResponse.status);
+            // console.info("SendCommand:webResponse.ok: " + webResponse.ok);
+            // check for error response
+            if (!webResponse.ok) {
+                // get error message from body or default to response status
+                const error = (data && data.message) || webResponse.status;
+                console.error("SendCommand: Error: " + Promise.reject(error));
+            }
+            else
+            {
+                // console.info("SendCommand: Transaction complete");
+                CompletedServerTransaction = true;
+            }
+            return webResponse.ok ? 1 : 0;
+        })
+        .catch(error => 
+        {
+            console.error('SendCommand: Error: ', error);
+            return -1;
+        });
+
+} // SendCommand
+
 // Queue reboot
 function reboot() {
     showReboot();
-    wsEnqueue('X6');
+    SendCommand('X6');
 }
 
 // Reset config
 $('#confirm-reset .btn-ok').on("click", (function () {
     showReboot();
-    wsEnqueue('X7');
+    SendCommand('X7');
 }));
