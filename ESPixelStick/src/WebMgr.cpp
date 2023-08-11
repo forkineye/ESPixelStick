@@ -226,12 +226,31 @@ void c_WebMgr::init ()
 		//TODO: This is only being used by FPP to get the hostname.  Will submit PR to change FPP and remove this
 		//      https://github.com/FalconChristmas/fpp/blob/ae10a0b6fb1e32d1982c2296afac9af92e4da908/src/NetworkController.cpp#L248
     	webServer.on ("/conf", HTTP_POST, 
-        	[](AsyncWebServerRequest* request)
+        	[this](AsyncWebServerRequest* request)
         	{
-                // DEBUG_V(String("  url: ") + request->url());
-                // DEBUG_V ("Trigger a config file read");
-                // DEBUG_V ();
-                request->send (200);
+                DEBUG_V(String("           url: ") + request->url());
+                String UploadFileName = request->url().substring(6);
+                DEBUG_V(String("UploadFileName: ") + UploadFileName);
+                DEBUG_V ("Trigger a config file read");
+                if(UploadFileName.equals(F("config.json")))
+                {
+                    extern void loadConfig();
+                    loadConfig();
+                }
+                else if(UploadFileName.equals(F("input_config.json")))
+                {
+                    InputMgr.LoadConfig();
+                }
+                else if(UploadFileName.equals(F("output_config.json")))
+                {
+                    OutputMgr.LoadConfig();
+                }
+                else
+                {
+                    logcon(String(F("Unexpected Config File Name: ")) + UploadFileName);
+                }
+
+                request->send (200, CN_textSLASHplain, String(F("ok")));
         	},
 
         	[](AsyncWebServerRequest *request, String filename, uint32_t index, uint8_t *data, uint32_t len, bool final)
@@ -255,12 +274,12 @@ void c_WebMgr::init ()
             	if(FileMgr.SaveConfigFile(UploadFileName, index, data, len, total <= (index+len)))
                 {
                     // DEBUG_V("Save Chunk - Success");
-                    request->send (200);
+                    request->send (200, CN_textSLASHplain, String(F("ok")));
                 }
                 else
                 {
                     // DEBUG_V("Save Chunk - Failed");
-                    request->send (404);
+                    request->send (404, CN_textSLASHplain, String(F("No Such File Supported")));
                 }
             }
         );
