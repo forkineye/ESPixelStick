@@ -32,6 +32,7 @@ $.fn.modal.Constructor.DEFAULTS.keyboard = false;
 MonitorServerConnection();
 RequestConfigFile("admininfo.json");
 RequestDiagData();
+RequestStatusUpdate();  // start self filling status loop
 
 // jQuery doc ready
 $(function () {
@@ -46,7 +47,6 @@ $(function () {
         $($(this).attr('href')).removeClass('hidden');
 
         ProcessWindowChange($($(this))[0].hash);
-        RequestStatusUpdate();  // start self filling status loop
 
         // Collapse the menu on smaller screens
         $('#navbar').removeClass('in').attr('aria-expanded', 'false');
