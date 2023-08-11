@@ -70,7 +70,7 @@ void c_FileMgr::Begin ()
             logcon (String (F ("Flash file system initialized.")));
 #endif // def ARDUINO_ARCH_ESP32
 
-            //listDir (LittleFS, String ("/"), 3);
+            listDir (LittleFS, String ("/"), 3);
         }
 
         SetSpiIoPins ();
@@ -473,6 +473,56 @@ bool c_FileMgr::SaveConfigFile(const String &FileName, JsonDocument &FileData)
         // DEBUG_V("");
 
         size_t NumBytesSaved = serializeJson(FileData, file);
+        // DEBUG_V("");
+
+        file.close();
+
+        logcon(CfgFileMessagePrefix + String(F("saved ")) + String(NumBytesSaved) + F(" bytes."));
+
+        Response = true;
+    }
+
+    // DEBUG_END;
+
+    return Response;
+} // SaveConfigFile
+
+//-----------------------------------------------------------------------------
+bool c_FileMgr::SaveConfigFile(const String FileName, uint32_t index, uint8_t *data, uint32_t len, bool final)
+{
+    // DEBUG_START;
+    bool Response = false;
+
+    String CfgFileMessagePrefix = String(CN_Configuration_File_colon) + "'" + FileName + "' ";
+    // DEBUG_V(String("CfgFileMessagePrefix: ") + CfgFileMessagePrefix);
+    // DEBUG_V(String("            FileName: ") + FileName);
+    // DEBUG_V(String("               index: ") + String(index));
+    // DEBUG_V(String("                 len: ") + String(len));
+    // DEBUG_V(String("               final: ") + String(final));
+
+    fs::File file;
+    
+    if(0 == index) 
+    { 
+        file = LittleFS.open(FileName.c_str(), "w");
+    }
+    else
+    {
+        file = LittleFS.open(FileName.c_str(), "a");
+    }
+    // DEBUG_V("");
+
+    if (!file)
+    {
+        logcon(String(CN_stars) + CfgFileMessagePrefix + String(F("Could not open file for writing..")) + CN_stars);
+    }
+    else
+    {
+        // DEBUG_V("");
+        file.seek(int(index), SeekMode::SeekSet);
+        // DEBUG_V("");
+
+        size_t NumBytesSaved = file.write(data, size_t(len));
         // DEBUG_V("");
 
         file.close();

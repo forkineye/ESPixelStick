@@ -71,6 +71,8 @@ public:
     bool   SaveConfigFile   (const String & FileName, String & FileData);
     bool   SaveConfigFile   (const String & FileName, const char * FileData);
     bool   SaveConfigFile   (const String & FileName, JsonDocument & FileData);
+    bool   SaveConfigFile   (const String   filename, uint32_t index, uint8_t *data, uint32_t len, bool final);
+
     bool   ReadConfigFile   (const String & FileName, String & FileData);
     bool   ReadConfigFile   (const String & FileName, JsonDocument & FileData);
     bool   ReadConfigFile   (const String & FileName, byte * FileData, size_t maxlen);
