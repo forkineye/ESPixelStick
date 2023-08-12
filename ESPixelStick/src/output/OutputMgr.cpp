@@ -1265,7 +1265,7 @@ void c_OutputMgr::SetSerialUart()
     {
         Serial.begin(115200);
         ConsoleUartIsActive = true;
-        DEBUG_V("Turn ON Console");
+        // DEBUG_V("Turn ON Console");
     }
     else
     {

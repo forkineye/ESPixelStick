@@ -245,7 +245,7 @@ void c_WebMgr::init ()
         // ping handler
     	webServer.on ("/files", HTTP_GET | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {
-            DEBUG_V("files");
+            // DEBUG_V("files");
             if(HTTP_OPTIONS == request->method())
             {
                 request->send (200);
