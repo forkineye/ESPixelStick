@@ -59,7 +59,11 @@ private:
     EspalexaDevice *       pAlexaDevice   = nullptr;
     bool                   HasBeenInitialized = false;
 
-#define     STATUS_DOC_SIZE 1000
+#ifdef ARDUINO_ARCH_ESP32
+#   define     STATUS_DOC_SIZE 4000
+#else
+#   define     STATUS_DOC_SIZE 2000
+#endif // def ARDUINO_ARCH_ESP32
 
     void init ();
     void processCmdGet              (JsonObject & jsonCmd);
