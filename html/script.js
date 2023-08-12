@@ -521,7 +521,42 @@ function RequestListOfFiles() {
     } // end timer was not running
 
     // ask for a file list from the server
-    // TOBERESTORED wsEnqueue(JSON.stringify({ 'cmd': { 'get': 'files' } })); // Get File List
+
+    return fetch("HTTP://" + target + "/files", {
+        method: 'GET',
+        mode: "cors", // no-cors, *cors, same-origin
+        headers: { 'Content-Type': 'application/json' },
+        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "same-origin", // include, *same-origin, omit
+        redirect: "follow", // manual, *follow, error
+        referrerPolicy: "no-referrer" // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+    })
+    .then(async webResponse => 
+    {
+        const isJson = webResponse.headers.get('content-type')?.includes('application/json');
+        const data = isJson && await webResponse.json();
+
+        // console.info("SendCommand:webResponse.status: " + webResponse.status);
+        // console.info("SendCommand:webResponse.ok: " + webResponse.ok);
+        // check for error response
+        if (!webResponse.ok) {
+            // get error message from body or default to response status
+            const error = (data && data.message) || webResponse.status;
+            console.error("SendCommand: Error: " + Promise.reject(error));
+        }
+        else
+        {
+            // console.info("SendCommand: Transaction complete");
+            ProcessGetFileListResponse(data);
+            CompletedServerTransaction = true;
+        }
+        return webResponse.ok ? 1 : 0;
+    })
+    .catch(error => 
+    {
+        console.error('SendCommand: Error: ', error);
+        return -1;
+    });
 
 } // RequestListOfFiles
 
