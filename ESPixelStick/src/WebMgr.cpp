@@ -145,111 +145,154 @@ void c_WebMgr::init ()
         using namespace std::placeholders;
 
         // Heap status handler
-    	webServer.on ("/heap", HTTP_GET, [](AsyncWebServerRequest* request)
+    	webServer.on ("/heap", HTTP_GET | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {
             request->send (200, CN_textSLASHplain, String (ESP.getFreeHeap ()).c_str());
         });
 
-    	webServer.on ("/XJ", HTTP_POST | HTTP_GET, [this](AsyncWebServerRequest* request)
+    	webServer.on ("/XJ", HTTP_POST | HTTP_GET | HTTP_OPTIONS, [this](AsyncWebServerRequest* request)
         {
             ProcessXJRequest (request);
         });
 
         // Reboot handler
-    	webServer.on ("/X6", HTTP_GET | HTTP_POST, [](AsyncWebServerRequest* request)
+    	webServer.on ("/X6", HTTP_POST | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {
             // DEBUG_V("X6")
-            reboot = true;
-            request->send (200, CN_textSLASHplain, "Rebooting");
+            if(HTTP_OPTIONS == request->method())
+            {
+                request->send (200);
+            }
+            else
+            {
+                reboot = true;
+                request->send (200, CN_textSLASHplain, "Rebooting");
+            }
         });
 
         // Reboot handler
-    	webServer.on ("/X7", HTTP_GET | HTTP_POST, [](AsyncWebServerRequest* request)
+    	webServer.on ("/X7", HTTP_POST | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {
             // DEBUG_V("X7")
-            extern void DeleteConfig ();
-            // DEBUG_V ("");
-            InputMgr.DeleteConfig ();
-            OutputMgr.DeleteConfig ();
-            DeleteConfig ();
+            if(HTTP_OPTIONS == request->method())
+            {
+                request->send (200);
+            }
+            else
+            {
+                extern void DeleteConfig ();
+                // DEBUG_V ("");
+                InputMgr.DeleteConfig ();
+                OutputMgr.DeleteConfig ();
+                DeleteConfig ();
 
-            request->send (200, CN_textSLASHplain, "Rebooting");
-
-            // DEBUG_V ("");
-            extern bool reboot;
-            reboot = true;
+                request->send (200, CN_textSLASHplain, "Rebooting");
+                // DEBUG_V ("");
+                extern bool reboot;
+                reboot = true;
+            }
         });
 
         // ping handler
-    	webServer.on ("/XP", HTTP_GET | HTTP_POST, [](AsyncWebServerRequest* request)
+    	webServer.on ("/XP", HTTP_GET | HTTP_POST | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {
             // DEBUG_V("XP");
             request->send (200, CN_textSLASHplain, "pong");
         });
 
-    	webServer.on ("/V1", HTTP_GET, [](AsyncWebServerRequest* request)
+    	webServer.on ("/V1", HTTP_GET | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {
             // DEBUG_V("V1");
-            if (OutputMgr.GetBufferUsedSize ())
+            if(HTTP_OPTIONS == request->method())
             {
-                AsyncWebServerResponse *response = request->beginChunkedResponse("text/plain",
-                    [](uint8_t *buffer, size_t MaxChunkLen, size_t index) -> size_t 
-                    {
-                        // Write up to "MaxChunkLen" bytes into "buffer" and return the amount written.
-                        // index equals the amount of bytes that have been already sent
-                        // You will be asked for more data until 0 is returned
-                        // Keep in mind that you can not delay or yield waiting for more data!
-
-                        // DEBUG_V(String("            MaxChunkLen: ") + String(MaxChunkLen));
-                        // DEBUG_V(String("      GetBufferUsedSize: ") + String(OutputMgr.GetBufferUsedSize ()));
-                        // DEBUG_V(String("                  index: ") + String(index));
-                        size_t NumBytesAvailableToSend = min(MaxChunkLen, OutputMgr.GetBufferUsedSize () - index);
-                        // DEBUG_V(String("NumBytesAvailableToSend: ") + String(NumBytesAvailableToSend));
-                        if(0 != NumBytesAvailableToSend)
+                request->send (200);
+            }
+            else
+            {
+                if (OutputMgr.GetBufferUsedSize ())
+                {
+                    AsyncWebServerResponse *response = request->beginChunkedResponse("text/plain",
+                        [](uint8_t *buffer, size_t MaxChunkLen, size_t index) -> size_t 
                         {
-                            memcpy(buffer, OutputMgr.GetBufferAddress () + index, NumBytesAvailableToSend);
-                        }
-                        return NumBytesAvailableToSend;
-                    });
-                response->setContentLength(OutputMgr.GetBufferUsedSize ());
-                response->setContentType("text/plain");
-                response->addHeader(F("server"), F("ESPS Diag Data"));
-                request->send(response);
-            } 
-            else 
+                            // Write up to "MaxChunkLen" bytes into "buffer" and return the amount written.
+                            // index equals the amount of bytes that have been already sent
+                            // You will be asked for more data until 0 is returned
+                            // Keep in mind that you can not delay or yield waiting for more data!
+
+                            // DEBUG_V(String("            MaxChunkLen: ") + String(MaxChunkLen));
+                            // DEBUG_V(String("      GetBufferUsedSize: ") + String(OutputMgr.GetBufferUsedSize ()));
+                            // DEBUG_V(String("                  index: ") + String(index));
+                            size_t NumBytesAvailableToSend = min(MaxChunkLen, (OutputMgr.GetBufferUsedSize () - index));
+                            // DEBUG_V(String("NumBytesAvailableToSend: ") + String(NumBytesAvailableToSend));
+                            if(0 != NumBytesAvailableToSend)
+                            {
+                                memcpy(buffer, OutputMgr.GetBufferAddress () + index, NumBytesAvailableToSend);
+                            }
+                            return NumBytesAvailableToSend;
+                        });
+                    response->setContentLength(OutputMgr.GetBufferUsedSize ());
+                    response->setContentType(F("application/octet-stream"));
+                    response->addHeader(F("server"), F("ESPS Diag Data"));
+                    request->send(response);
+                } 
+                else 
+                {
+                    request->send (404, CN_textSLASHplain, "");
+                }
+            }
+        });
+
+        // ping handler
+    	webServer.on ("/files", HTTP_GET | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
+        {
+            DEBUG_V("files");
+            if(HTTP_OPTIONS == request->method())
             {
-                request->send (404, CN_textSLASHplain, "");
+                request->send (200);
+            }
+            else
+            {
+                String Response;
+                FileMgr.GetListOfSdFiles(Response);
+                request->send (200, CN_textSLASHplain, Response);
             }
         });
 
         // JSON Config Handler
-    	webServer.on ("/conf", HTTP_PUT | HTTP_POST, 
+    	webServer.on ("/conf", HTTP_PUT | HTTP_POST | HTTP_OPTIONS, 
         	[this](AsyncWebServerRequest* request)
         	{
-                // DEBUG_V(String("           url: ") + request->url());
-                String UploadFileName = request->url().substring(6);
-                // DEBUG_V(String("UploadFileName: ") + UploadFileName);
-                // DEBUG_V ("Trigger a config file read");
-                if(UploadFileName.equals(F("config.json")))
+                if(HTTP_OPTIONS == request->method())
                 {
-                    extern void loadConfig();
-                    loadConfig();
-                    request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
-                }
-                else if(UploadFileName.equals(F("input_config.json")))
-                {
-                    InputMgr.LoadConfig();
-                    request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
-                }
-                else if(UploadFileName.equals(F("output_config.json")))
-                {
-                    OutputMgr.LoadConfig();
-                    request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
+                    request->send (200);
                 }
                 else
                 {
-                    logcon(String(F("Unexpected Config File Name: ")) + UploadFileName);
-                    request->send (404, CN_textSLASHplain, String(F("File Not supported")));
+                    // DEBUG_V(String("           url: ") + request->url());
+                    String UploadFileName = request->url().substring(6);
+                    // DEBUG_V(String("UploadFileName: ") + UploadFileName);
+                    // DEBUG_V ("Trigger a config file read");
+                    if(UploadFileName.equals(F("config.json")))
+                    {
+                        extern void loadConfig();
+                        loadConfig();
+                        request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
+                    }
+                    else if(UploadFileName.equals(F("input_config.json")))
+                    {
+                        InputMgr.LoadConfig();
+                        request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
+                    }
+                    else if(UploadFileName.equals(F("output_config.json")))
+                    {
+                        OutputMgr.LoadConfig();
+                        request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
+                    }
+                    else
+                    {
+                        logcon(String(F("Unexpected Config File Name: ")) + UploadFileName);
+                        request->send (404, CN_textSLASHplain, String(F("File Not supported")));
+                    }
                 }
         	},
 
@@ -307,6 +350,7 @@ void c_WebMgr::init ()
         	{
         		FPPDiscovery.ProcessGET(request);
         	});
+
         webServer.on ("/api/system", HTTP_GET,
         	[](AsyncWebServerRequest* request)
         	{
@@ -353,15 +397,22 @@ void c_WebMgr::init ()
     	webServer.on ("/upload", HTTP_POST | HTTP_PUT | HTTP_OPTIONS,
         	[](AsyncWebServerRequest * request)
             {
-                // DEBUG_V ("Got upload post request");
-                if (true == FileMgr.SdCardIsInstalled())
+                if(HTTP_OPTIONS == request->method())
                 {
-                    // Send status 200 (OK) to tell the client we are ready to receive
-                	request->send (200);
+                    request->send (200);
                 }
                 else
                 {
-                	request->send (404, CN_textSLASHplain, "Page Not found");
+                    // DEBUG_V ("Got upload post request");
+                    if (true == FileMgr.SdCardIsInstalled())
+                    {
+                        // Send status 200 (OK) to tell the client we are ready to receive
+                    	request->send (200);
+                    }
+                    else
+                    {
+                    	request->send (404, CN_textSLASHplain, "Page Not found");
+                    }
                 }
             },
 
@@ -382,16 +433,24 @@ void c_WebMgr::init ()
         	}
     	);
 
-    		webServer.on ("/download", HTTP_GET, [](AsyncWebServerRequest* request)
+    		webServer.on ("/download", HTTP_GET | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
             {
-                // DEBUG_V (String ("url: ") + String (request->url ()));
-                String filename = request->url ().substring (String ("/download").length ());
-                // DEBUG_V (String ("filename: ") + String (filename));
+                if(HTTP_OPTIONS == request->method())
+                {
+                    request->send (200);
+                }
+                else
+                {
 
-                AsyncWebServerResponse* response = new AsyncFileResponse (ESP_SDFS, filename, "application/octet-stream", true);
-                request->send (response);
+                    // DEBUG_V (String ("url: ") + String (request->url ()));
+                    String filename = request->url ().substring (String ("/download").length ());
+                    // DEBUG_V (String ("filename: ") + String (filename));
 
-        		// DEBUG_V ("Send File Done");
+                    AsyncWebServerResponse* response = new AsyncFileResponse (ESP_SDFS, filename, F("application/octet-stream"), true);
+                    request->send (response);
+
+            		// DEBUG_V ("Send File Done");
+                }
     		});
 
     		webServer.onNotFound ([this](AsyncWebServerRequest* request)
