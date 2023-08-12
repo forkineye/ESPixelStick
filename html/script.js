@@ -16,7 +16,7 @@ var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
 var ServerTransactionTimer = null;
 var CompletedServerTransaction = true;
-var IsDocumentHidden = false;
+var DocumentIsHidden = false;
 
 // Drawing canvas - move to diagnostics
 var canvas = document.getElementById("canvas");
@@ -28,9 +28,58 @@ ctx.textAlign = "center";
 $.fn.modal.Constructor.DEFAULTS.backdrop = 'static';
 $.fn.modal.Constructor.DEFAULTS.keyboard = false;
 
+class Semaphore {
+    /**
+     * Creates a semaphore that limits the number of concurrent Promises being handled
+     * @param {*} maxConcurrentRequests max number of concurrent promises being handled at any time
+     */
+    constructor(maxConcurrentRequests = 1) {
+        this.currentRequests = [];
+        this.runningRequests = 0;
+        this.maxConcurrentRequests = maxConcurrentRequests;
+    }
+
+    /**
+     * Returns a Promise that will eventually return the result of the function passed in
+     * Use this to limit the number of concurrent function executions
+     * @param {*} fnToCall function that has a cap on the number of concurrent executions
+     * @param  {...any} args any arguments to be passed to fnToCall
+     * @returns Promise that will resolve with the resolved value as if the function passed in was directly called
+     */
+    callFunction(fnToCall, ...args) {
+        return new Promise((resolve, reject) => {
+            this.currentRequests.push({
+                resolve,
+                reject,
+                fnToCall,
+                args,
+            });
+            this.tryNext();
+        });
+    }
+
+    tryNext() {
+        if (!this.currentRequests.length) {
+            return;
+        } else if (this.runningRequests < this.maxConcurrentRequests) {
+            let { resolve, reject, fnToCall, args } = this.currentRequests.shift();
+            this.runningRequests++;
+            let req = fnToCall(...args);
+            req.then((res) => resolve(res))
+                .catch((err) => reject(err))
+                .finally(() => {
+                    this.runningRequests--;
+                    this.tryNext();
+                });
+        }
+    }
+} // Semaphore
+
+const ServerAccess = new Semaphore(1);
+
 // lets get started
 MonitorServerConnection();
-RequestConfigFile("admininfo.json");
+let RcfResponse = RequestConfigFile("admininfo.json");
 RequestDiagData();
 RequestStatusUpdate();  // start self filling status loop
 
@@ -249,15 +298,12 @@ $(function () {
     let hash = window.location.hash;
     hash && $('ul.navbar-nav li a[href="' + hash + '"]').click();
 
-    // Halt pingpong if document is not visible
+    // Halt server health check if document is not visible
     document.addEventListener("visibilitychange", function () {
         if (document.hidden) {
-            clearTimeout(ServerTransactionTimer);
-            clearTimeout(pongTimer);
-            IsDocumentHidden = true;
+            DocumentIsHidden = true;
         } else {
-            IsDocumentHidden = false;
-            wsReadyToSend();
+            DocumentIsHidden = false;
         }
     });
 });
@@ -266,9 +312,9 @@ function ProcessLocalConfig(data) {
     // console.info(data);
     let ParsedLocalConfig = JSON.parse(data);
 
-    SendConfigFileToServer("config", {'system': ParsedLocalConfig});
-    SendConfigFileToServer("output_config", {'output_config': ParsedLocalConfig.output});
-    SendConfigFileToServer("input_config",  {'input_config':  ParsedLocalConfig.input});
+    ServerAccess.callFunction(SendConfigFileToServer, "config", {'system': ParsedLocalConfig});
+    ServerAccess.callFunction(SendConfigFileToServer, "output_config", {'output_config': ParsedLocalConfig.output});
+    ServerAccess.callFunction(SendConfigFileToServer, "input_config", {'input_config': ParsedLocalConfig.input});
 
 } // ProcessLocalConfig
 
@@ -303,34 +349,27 @@ function UpdateChannelCounts() {
 
 async function SendConfigFileToServer(FileName = "", Data = {})
 {
-    console.info("FileName: " + FileName);
-    console.info("Data: " + JSON.stringify(Data));
+    // console.info("FileName: " + FileName);
+    // console.info("Data: " + JSON.stringify(Data));
 
-    return fetch("conf/" + FileName + ".json",
-    {
-        method: "POST", // *GET, POST, PUT, DELETE, etc.
-        mode: "cors", // no-cors, *cors, same-origin
-        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-        credentials: "same-origin", // include, *same-origin, omit
-        headers: 
-        {
-            "Content-Type": "application/json",
-        },
-        redirect: "follow", // manual, *follow, error
-        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-        body: JSON.stringify(Data), // body data type must match "Content-Type" header
-    })
-    .then(async webResponse => 
-    {
+    let ConfigXfer = new XMLHttpRequest();
 
-    })
-    .catch(error => 
+    ConfigXfer.addEventListener("loadend", function() 
     {
-        console.error('SendCommand: Error: ', error);
+        // console.info("SendConfigFileToServer: Success");
+        return 1;
+    }, false);
+    ConfigXfer.addEventListener("error", function () {
+        console.error("SendConfigFileToServer: Error");
+        return 0;
+    }, false);
+    ConfigXfer.addEventListener("abort", function() {
+        console.error("SendConfigFileToServer: abort");
         return -1;
+    }, false);
+    ConfigXfer.open("PUT", "http://" + target + "/conf/" + FileName + ".json");
+    ConfigXfer.send(JSON.stringify(Data));
 
-    });
-    
 } // SendConfigFileToServer
 
 function ProcessWindowChange(NextWindow) {
@@ -339,19 +378,19 @@ function ProcessWindowChange(NextWindow) {
     }
 
     else if (NextWindow === "#admin") {
-        RequestConfigFile("output_config.json");
-        RequestConfigFile("input_config.json");
+        RcfResponse = RequestConfigFile("output_config.json");
+        RcfResponse = RequestConfigFile("input_config.json");
     }
 
     else if ((NextWindow === "#pg_network") || (NextWindow === "#home")) {
-        RequestConfigFile("config.json");
+        RcfResponse = RequestConfigFile("config.json");
     }
 
     else if (NextWindow === "#config") {
         RequestListOfFiles();
-        RequestConfigFile("config.json");
-        RequestConfigFile("output_config.json");
-        RequestConfigFile("input_config.json");
+        RcfResponse = RequestConfigFile("config.json");
+        RcfResponse = RequestConfigFile("output_config.json");
+        RcfResponse = RequestConfigFile("input_config.json");
     }
 
     else if (NextWindow === "#filemanagement") {
@@ -372,7 +411,7 @@ function RequestDiagData()
         {
             if ($('#diag').is(':visible'))
             {
-                fetch("V1", 
+                fetch("HTTP://" + target + "/V1", 
                 {
                     method: "GET", // *GET, POST, PUT, DELETE, etc.
                     mode: "cors", // no-cors, *cors, same-origin
@@ -414,18 +453,20 @@ function RequestDiagData()
     }
 } // RequestDiagData
 
-function RequestConfigFile(FileName)
+async function RequestConfigFile(FileName)
 {
-    console.log("RequestConfigFile FileName: " + FileName);
+    // console.log("RequestConfigFile FileName: " + FileName);
 
-    $.getJSON(FileName, function(data)
+    await $.getJSON("HTTP://" + target + "/" + FileName, function(data)
     {
-        
-        console.log("RequestConfigFile: " + JSON.stringify(data));
+        // console.log("RequestConfigFile: " + JSON.stringify(data));
         ProcessReceivedJsonConfigMessage(data);
-    }).fail(function()
+        return true;
+    })
+    .fail(function()
     {
-        console.log("Could not read config file: " + FileName);
+        console.error("Could not read config file: " + FileName);
+        return false;
     });
 
 } // RequestConfigFile
@@ -450,17 +491,17 @@ function RequestStatusUpdate()
     if ($('#home').is(':visible')) 
     {
         // ask for a status update from the server
-        let FileName = "XJ";
-        console.log("RequestStatusUpdate FileName: " + FileName);
+        let FileName = "HTTP://" + target + "/XJ";
+        // console.log("RequestStatusUpdate FileName: " + FileName);
 
         $.getJSON(FileName, function(data)
         {
-            console.log("RequestStatusUpdate: " + JSON.stringify(data));
+            // console.log("RequestStatusUpdate: " + JSON.stringify(data));
             CompletedServerTransaction = true;
             ProcessReceivedJsonStatusMessage(data);
         }).fail(function()
         {
-            console.log("Could not read Status file: " + FileName);
+            console.error("Could not read Status file: " + FileName);
         });
     } // end home (aka status) is visible
 
@@ -1040,7 +1081,7 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
 } // ProcessModeConfigurationData
 
 function ProcessReceivedJsonConfigMessage(JsonConfigData) {
-    console.info("ProcessReceivedJsonConfigMessage: Start");
+    // console.info("ProcessReceivedJsonConfigMessage: Start");
 
     // is this an output config?
     if ({}.hasOwnProperty.call(JsonConfigData, "output_config")) {
@@ -1281,7 +1322,7 @@ function submitNetworkConfig() {
 
     ExtractNetworkConfigFromHtmlPage();
 
-    SendConfigFileToServer("config", {'system': System_Config});
+    ServerAccess.callFunction(SendConfigFileToServer,"config", {'system': System_Config});
 
 } // submitNetworkConfig
 
@@ -1457,7 +1498,7 @@ function ExtractConfigFromHtmlPages(elementids, modeControlName, ChannelConfig) 
             ChannelConfig[elementid] = $(SelectedElement).val();
         }
     }); // end for each channel
-}
+} // ExtractConfigFromHtmlPages
 
 function ValidateConfigFields(ElementList) {
     // return true if errors were found
@@ -1494,10 +1535,10 @@ function submitDeviceConfig() {
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
-    submitNetworkConfig();
-    SendConfigFileToServer("output_config", {'output_config': Output_Config});
-    SendConfigFileToServer("config", {'system': System_Config});
-    SendConfigFileToServer("input_config", {'input_config': Input_Config});
+    // submitNetworkConfig();
+    ServerAccess.callFunction(SendConfigFileToServer, "output_config", {'output_config': Output_Config});
+    ServerAccess.callFunction(SendConfigFileToServer, "input_config", {'input_config': Input_Config});
+    ServerAccess.callFunction(SendConfigFileToServer, "config", {'system': System_Config});
 
 } // submitDeviceConfig
 
@@ -1517,7 +1558,7 @@ function int2ip(num) {
         d = d + '.' + num % 256;
     }
     return d;
-}
+} // int2ip
 
 // Ping every 4sec
 function MonitorServerConnection() 
@@ -1532,12 +1573,12 @@ function MonitorServerConnection()
         ServerTransactionTimer = setInterval(async function () 
         {
             // console.info("MonitorServerConnection: Expired");
-            if(!CompletedServerTransaction && !MonitorTransactionRequestInProgress && !document.hidden)
+            if(!CompletedServerTransaction && !MonitorTransactionRequestInProgress && !DocumentIsHidden)
             {
                 MonitorTransactionRequestInProgress = true
                 let Response = await SendCommand('XP');
                 MonitorTransactionRequestInProgress = false;
-                console.info("MonitorServerConnection: " + Response);
+                // console.info("MonitorServerConnection: " + Response);
                 if(MonitorTransactionPreviousResponse !== Response)
                 {
                     MonitorTransactionPreviousResponse = Response;
@@ -1547,7 +1588,7 @@ function MonitorServerConnection()
             CompletedServerTransaction = false;
         }, 4000);
     }
-}
+} // MonitorServerConnection
 
 // Move to diagnostics
 function drawStream(streamData) {
@@ -1589,14 +1630,14 @@ function drawStream(streamData) {
         ctx.fillStyle = 'rgb(255,255,255)';
         ctx.fillText("Increase number of columns to show all data", (canvas.width / 2), canvas.height - 5);
     }
-}
+} // drawStream
 
 // Move to diagnostics
 function clearStream() {
     if (typeof ctx !== 'undefined') {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
-}
+} // clearStream
 
 function ProcessReceivedJsonAdminMessage(data) {
     // let ParsedJsonAdmin = JSON.parse(data);
@@ -1833,7 +1874,7 @@ function snackSave() {
     setTimeout(function () {
         x.className = x.className.replace('show', '');
     }, 3000);
-}
+} // snackSave
 
 // Show reboot modal
 function showReboot() {
@@ -1848,23 +1889,20 @@ function showReboot() {
             window.location.assign("http://" + $('#ip').val());
         }
     }, 5000);
-}
+} // showReboot
 
 async function SendCommand(command)
 {
     // console.info("SendCommand: " + command);
-    const requestOptions = 
-    {
-        method: 'POST',
-        // mode: "cors", // no-cors, *cors, same-origin
-        headers: { 'Content-Type': 'application/json' },
-        // cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-        // credentials: "same-origin", // include, *same-origin, omit
-        // redirect: "follow", // manual, *follow, error
-        // referrerPolicy: "no-referrer" // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-    };
-
-    return fetch(command, requestOptions)
+    return fetch("HTTP://" + target + "/" + command, {
+            method: 'POST',
+            mode: "cors", // no-cors, *cors, same-origin
+            headers: { 'Content-Type': 'application/json' },
+            cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+            credentials: "same-origin", // include, *same-origin, omit
+            redirect: "follow", // manual, *follow, error
+            referrerPolicy: "no-referrer" // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        })
         .then(async webResponse => 
         {
             const isJson = webResponse.headers.get('content-type')?.includes('application/json');
@@ -1890,14 +1928,13 @@ async function SendCommand(command)
             console.error('SendCommand: Error: ', error);
             return -1;
         });
-
 } // SendCommand
 
 // Queue reboot
 function reboot() {
     showReboot();
     SendCommand('X6');
-}
+} // reboot
 
 // Reset config
 $('#confirm-reset .btn-ok').on("click", (function () {

@@ -223,43 +223,51 @@ void c_WebMgr::init ()
         });
 
         // JSON Config Handler
-		//TODO: This is only being used by FPP to get the hostname.  Will submit PR to change FPP and remove this
-		//      https://github.com/FalconChristmas/fpp/blob/ae10a0b6fb1e32d1982c2296afac9af92e4da908/src/NetworkController.cpp#L248
-    	webServer.on ("/conf", HTTP_POST, 
+    	webServer.on ("/conf", HTTP_PUT | HTTP_POST, 
         	[this](AsyncWebServerRequest* request)
         	{
-                DEBUG_V(String("           url: ") + request->url());
+                // DEBUG_V(String("           url: ") + request->url());
                 String UploadFileName = request->url().substring(6);
-                DEBUG_V(String("UploadFileName: ") + UploadFileName);
-                DEBUG_V ("Trigger a config file read");
+                // DEBUG_V(String("UploadFileName: ") + UploadFileName);
+                // DEBUG_V ("Trigger a config file read");
                 if(UploadFileName.equals(F("config.json")))
                 {
                     extern void loadConfig();
                     loadConfig();
+                    request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
                 }
                 else if(UploadFileName.equals(F("input_config.json")))
                 {
                     InputMgr.LoadConfig();
+                    request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
                 }
                 else if(UploadFileName.equals(F("output_config.json")))
                 {
                     OutputMgr.LoadConfig();
+                    request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
                 }
                 else
                 {
                     logcon(String(F("Unexpected Config File Name: ")) + UploadFileName);
+                    request->send (404, CN_textSLASHplain, String(F("File Not supported")));
                 }
-
-                request->send (200, CN_textSLASHplain, String(F("ok")));
         	},
 
-        	[](AsyncWebServerRequest *request, String filename, uint32_t index, uint8_t *data, uint32_t len, bool final)
+        	[this](AsyncWebServerRequest *request, String filename, uint32_t index, uint8_t *data, uint32_t len, bool final)
         	{
-                // DEBUG_V ("Wrong Request Type");
-                request->send (404);
+                // DEBUG_V("Save Chunk - Start");
+            	if(FileMgr.SaveConfigFile(filename, index, data, len, final))
+                {
+                    // DEBUG_V("Save Chunk - Success");
+                }
+                else
+                {
+                    // DEBUG_V("Save Chunk - Failed");
+                    request->send (404, CN_textSLASHplain, String(F("Could not save data")));
+                }
         	},
 
-            [](AsyncWebServerRequest *request, uint8_t *data, uint32_t len, uint32_t index, uint32_t total)
+            [this](AsyncWebServerRequest *request, uint8_t *data, uint32_t len, uint32_t index, uint32_t total)
             {
                 // DEBUG_V("Save Chunk - Start");
                 String UploadFileName = request->url().substring(5);
@@ -270,28 +278,28 @@ void c_WebMgr::init ()
                 // DEBUG_V(String("total: ") + String(total));
                 // DEBUG_V(String("  sum: ") + String(index + len));
                 // DEBUG_V(String(" file: ") + UploadFileName);
+                // DEBUG_V(String("final: ") + String(total <= (index+len)));
 
             	if(FileMgr.SaveConfigFile(UploadFileName, index, data, len, total <= (index+len)))
                 {
                     // DEBUG_V("Save Chunk - Success");
-                    request->send (200, CN_textSLASHplain, String(F("ok")));
                 }
                 else
                 {
                     // DEBUG_V("Save Chunk - Failed");
-                    request->send (404, CN_textSLASHplain, String(F("No Such File Supported")));
+                    request->send (404, CN_textSLASHplain, String(F("Could not save data")));
                 }
             }
         );
 
         // Firmware upload handler
     	webServer.on ("/updatefw", HTTP_POST, 
-        [](AsyncWebServerRequest* request)
-        {
-            reboot = true;
-        }, 
-        [](AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final)
-         {WebMgr.FirmwareUpload (request, filename, index, data, len,  final); }).setFilter (ON_STA_FILTER);
+            [](AsyncWebServerRequest* request)
+            {
+                reboot = true;
+            }, 
+            [](AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final)
+             {WebMgr.FirmwareUpload (request, filename, index, data, len,  final); }).setFilter (ON_STA_FILTER);
 
     	// URL's needed for FPP Connect fseq uploading and querying
    	 	webServer.on ("/fpp", HTTP_GET,
