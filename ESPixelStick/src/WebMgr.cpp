@@ -212,7 +212,7 @@ void c_WebMgr::init ()
                 if (OutputMgr.GetBufferUsedSize ())
                 {
                     AsyncWebServerResponse *response = request->beginChunkedResponse("text/plain",
-                        [](uint8_t *buffer, size_t MaxChunkLen, size_t index) -> size_t 
+                        [](uint8_t *buffer, size_t MaxChunkLen, size_t index) -> size_t
                         {
                             // Write up to "MaxChunkLen" bytes into "buffer" and return the amount written.
                             // index equals the amount of bytes that have been already sent
@@ -234,8 +234,8 @@ void c_WebMgr::init ()
                     response->setContentType(F("application/octet-stream"));
                     response->addHeader(F("server"), F("ESPS Diag Data"));
                     request->send(response);
-                } 
-                else 
+                }
+                else
                 {
                     request->send (404, CN_textSLASHplain, "");
                 }
@@ -254,12 +254,12 @@ void c_WebMgr::init ()
             {
                 String Response;
                 FileMgr.GetListOfSdFiles(Response);
-                request->send (200, CN_textSLASHplain, Response);
+                request->send (200, CN_applicationSLASHjson, Response);
             }
         });
 
         // JSON Config Handler
-    	webServer.on ("/conf", HTTP_PUT | HTTP_POST | HTTP_OPTIONS, 
+    	webServer.on ("/conf", HTTP_PUT | HTTP_POST | HTTP_OPTIONS,
         	[this](AsyncWebServerRequest* request)
         	{
                 if(HTTP_OPTIONS == request->method())
@@ -336,11 +336,11 @@ void c_WebMgr::init ()
         );
 
         // Firmware upload handler
-    	webServer.on ("/updatefw", HTTP_POST, 
+    	webServer.on ("/updatefw", HTTP_POST,
             [](AsyncWebServerRequest* request)
             {
                 reboot = true;
-            }, 
+            },
             [](AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final)
              {WebMgr.FirmwareUpload (request, filename, index, data, len,  final); }).setFilter (ON_STA_FILTER);
 
@@ -626,7 +626,7 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
     {
         String Temp;
         serializeJson(WebJsonDoc, Temp);
-        client->send (200, F("application/json"), Temp);
+        client->send (200, CN_applicationSLASHjson, Temp);
     }
 
     // DEBUG_END;

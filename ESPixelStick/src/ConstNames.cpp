@@ -32,6 +32,7 @@ const CN_PROGMEM char CN_ap_fallback              [] = "ap_fallback";
 const CN_PROGMEM char CN_ap_timeout               [] = "ap_timeout";
 const CN_PROGMEM char CN_ap_reboot                [] = "ap_reboot";
 const CN_PROGMEM char CN_appendnullcount          [] = "appendnullcount";
+const CN_PROGMEM char CN_applicationSLASHjson     [] = "application/json";
 const CN_PROGMEM char CN_b                        [] = "b";
 const CN_PROGMEM char CN_b16                      [] = "b16";
 const CN_PROGMEM char CN_baudrate                 [] = "baudrate";
