@@ -197,7 +197,7 @@ void c_WebMgr::init ()
     	webServer.on ("/XP", HTTP_GET | HTTP_POST | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {
             // DEBUG_V("XP");
-            request->send (200, CN_textSLASHplain, "pong");
+            request->send (200, CN_textSLASHplain, "{\"pong\":true}");
         });
 
     	webServer.on ("/V1", HTTP_GET | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
@@ -254,6 +254,7 @@ void c_WebMgr::init ()
             {
                 String Response;
                 FileMgr.GetListOfSdFiles(Response);
+                // DEBUG_V(String("Files: ") + Response);
                 request->send (200, CN_textSLASHplain, Response);
             }
         });
@@ -381,14 +382,14 @@ void c_WebMgr::init ()
             });
 
         // Static Handlers
-   	 	webServer.serveStatic ("/UpdRecipe",          LittleFS, "/UpdRecipe.json");
-   	 	webServer.serveStatic ("/config.json",        LittleFS, "/config.json");
-   	 	webServer.serveStatic ("/input_config.json",  LittleFS, "/input_config.json");
-   	 	webServer.serveStatic ("/output_config.json", LittleFS, "/output_config.json");
-   	 	webServer.serveStatic ("/admininfo.json",     LittleFS, "/admininfo.json");
+   	 	webServer.serveStatic ("/UpdRecipe",               LittleFS, "/UpdRecipe.json");
+   	 	webServer.serveStatic ("/conf/config.json",        LittleFS, "/config.json");
+   	 	webServer.serveStatic ("/conf/input_config.json",  LittleFS, "/input_config.json");
+   	 	webServer.serveStatic ("/conf/output_config.json", LittleFS, "/output_config.json");
+   	 	webServer.serveStatic ("/conf/admininfo.json",     LittleFS, "/admininfo.json");
 
         // must be last servestatic entry
-    	webServer.serveStatic ("/",                   LittleFS, "/www/").setDefaultFile ("index.html");
+    	webServer.serveStatic ("/",                        LittleFS, "/www/").setDefaultFile ("index.html");
 
         // FS Debugging Handler
         // webServer.serveStatic ("/fs", LittleFS, "/" );
