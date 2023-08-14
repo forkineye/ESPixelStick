@@ -857,9 +857,18 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
 
         ResponseJsonDoc[F("usedBytes")] = usedBytes;
 
+        if(ResponseJsonDoc.overflowed())
+        {
+            logcon (String(CN_stars) + F ("ERROR: JSON Doc too small to hold the list of SD files") + CN_stars);
+            break;
+        }
+
+        // DEBUG_V(String("ResponseJsonDoc.size(): ") + String(ResponseJsonDoc.size()));
+        Response.reserve(1024);
+        serializeJson (ResponseJsonDoc, Response);
+
     } while (false);
 
-    serializeJson (ResponseJsonDoc, Response);
     // DEBUG_V (String ("Response: ") + Response);
 
     // DEBUG_END;
