@@ -622,7 +622,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
     do // once
     {
         String path = request->url();
-        if (path.startsWith("/fpp/")) 
+        if (path.startsWith("/fpp/"))
         {
             path = path.substring(4);
         }
@@ -657,14 +657,14 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                         String resp = "";
                         BuildFseqResponse (seq, FileHandle, resp);
                         FileMgr.CloseSdFile (FileHandle);
-                        request->send (200, F ("application/json"), resp);
+                        request->send (200, CN_applicationSLASHjson, resp);
                         break;
                     }
                 }
                 logcon (String (F ("Could not open: ")) + seq);
-            } 
-        } 
-        else if (path.startsWith (F ("/api/system/status"))) 
+            }
+        }
+        else if (path.startsWith (F ("/api/system/status")))
         {
             String Response;
             DynamicJsonDocument JsonDoc (2048);
@@ -672,9 +672,9 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
             GetStatusJSON(JsonData, true);
             serializeJson (JsonDoc, Response);
             // DEBUG_V (String ("JsonDoc: ") + Response);
-            request->send (200, F ("application/json"), Response);
-        } 
-        else if (path.startsWith (F ("/api/system/info"))) 
+            request->send (200, CN_applicationSLASHjson, Response);
+        }
+        else if (path.startsWith (F ("/api/system/info")))
         {
             String Response;
             DynamicJsonDocument JsonDoc (2048);
@@ -682,7 +682,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
             GetSysInfoJSON(JsonData);
             serializeJson (JsonDoc, Response);
             // DEBUG_V (String ("JsonDoc: ") + Response);
-            request->send (200, F ("application/json"), Response);
+            request->send (200, CN_applicationSLASHjson, Response);
         }
         request->send (404);
 
@@ -725,7 +725,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
         String resp = "";
         BuildFseqResponse (filename, FileHandle, resp);
         FileMgr.CloseSdFile (FileHandle);
-        request->send (200, F ("application/json"), resp);
+        request->send (200, CN_applicationSLASHjson, resp);
 
     } while (false);
 
@@ -878,7 +878,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
 
 } // GetSysInfoJSON
 
-void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv) 
+void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
 {
     JsonObject JsonDataMqtt = JsonData.createNestedObject(F ("MQTT"));
 
@@ -979,7 +979,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             String Response;
             serializeJson (JsonDoc, Response);
             // DEBUG_V (String ("JsonDoc: ") + Response);
-            request->send (200, F ("application/json"), Response);
+            request->send (200, CN_applicationSLASHjson, Response);
 
             break;
         }
@@ -991,7 +991,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             String resp = "";
             serializeJson (JsonData, resp);
             // DEBUG_V (String ("JsonDoc: ") + resp);
-            request->send (200, F ("application/json"), resp);
+            request->send (200, CN_applicationSLASHjson, resp);
 
             break;
         }
@@ -1007,7 +1007,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             String resp;
             serializeJson (JsonData, resp);
             // DEBUG_V (String ("resp: ") + resp);
-            request->send (200, F ("application/json"), resp);
+            request->send (200, CN_applicationSLASHjson, resp);
 
             break;
         }
@@ -1023,7 +1023,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
                     OutputMgr.GetConfig (resp);
 
                     // DEBUG_V (String ("resp: ") + resp);
-                    request->send (200, F ("application/json"), resp);
+                    request->send (200, CN_applicationSLASHjson, resp);
 
                     break;
                 }
@@ -1123,7 +1123,7 @@ void c_FPPDiscovery::GenerateFppSyncMsg(uint8_t Action, const String & FileName,
             // only send sync every 8th frame
             break;
         }
-        
+
         FPPMultiSyncPacket SyncPacket;
 
         SyncPacket.header[0] = 'F';
@@ -1150,7 +1150,7 @@ void c_FPPDiscovery::GenerateFppSyncMsg(uint8_t Action, const String & FileName,
     } while(false);
 
 
-    // DEBUG_END; 
+    // DEBUG_END;
 } // GenerateFppSyncMsg
 
 c_FPPDiscovery FPPDiscovery;

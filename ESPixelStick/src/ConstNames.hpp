@@ -41,6 +41,7 @@ extern const CN_PROGMEM char CN_ap_fallback [];
 extern const CN_PROGMEM char CN_ap_timeout [];
 extern const CN_PROGMEM char CN_ap_reboot [];
 extern const CN_PROGMEM char CN_appendnullcount [];
+extern const CN_PROGMEM char CN_applicationSLASHjson [];
 extern const CN_PROGMEM char CN_b[];
 extern const CN_PROGMEM char CN_b16[];
 extern const CN_PROGMEM char CN_baudrate[];
