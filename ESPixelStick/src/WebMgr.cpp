@@ -299,7 +299,14 @@ void c_WebMgr::init ()
 
         	[this](AsyncWebServerRequest *request, String filename, uint32_t index, uint8_t *data, uint32_t len, bool final)
         	{
-                // DEBUG_V("Save Chunk - Start");
+                // DEBUG_V("Save File Chunk - Start");
+                // DEBUG_V(String("  url: ") + request->url());
+                // DEBUG_V(String("  len: ") + String(len));
+                // DEBUG_V(String("index: ") + String(index));
+                // DEBUG_V(String("  sum: ") + String(index + len));
+                // DEBUG_V(String(" file: ") + filename);
+                // DEBUG_V(String("final: ") + String(final));
+
             	if(FileMgr.SaveConfigFile(filename, index, data, len, final))
                 {
                     // DEBUG_V("Save Chunk - Success");
@@ -313,7 +320,7 @@ void c_WebMgr::init ()
 
             [this](AsyncWebServerRequest *request, uint8_t *data, uint32_t len, uint32_t index, uint32_t total)
             {
-                // DEBUG_V("Save Chunk - Start");
+                // DEBUG_V("Save Data Chunk - Start");
                 String UploadFileName = request->url().substring(5);
 
                 // DEBUG_V(String("  url: ") + request->url());
