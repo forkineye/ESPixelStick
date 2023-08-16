@@ -197,7 +197,7 @@ void c_WebMgr::init ()
     	webServer.on ("/XP", HTTP_GET | HTTP_POST | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {
             // DEBUG_V("XP");
-            request->send (200, CN_textSLASHplain, "pong");
+            request->send (200, CN_applicationSLASHjson, "{\"pong\":true}");
         });
 
     	webServer.on ("/V1", HTTP_GET | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
@@ -255,6 +255,7 @@ void c_WebMgr::init ()
                 String Response;
                 FileMgr.GetListOfSdFiles(Response);
                 request->send (200, CN_applicationSLASHjson, Response);
+                // DEBUG_V(String("Files: ") + Response);
             }
         });
 
@@ -298,7 +299,14 @@ void c_WebMgr::init ()
 
         	[this](AsyncWebServerRequest *request, String filename, uint32_t index, uint8_t *data, uint32_t len, bool final)
         	{
-                // DEBUG_V("Save Chunk - Start");
+                // DEBUG_V("Save File Chunk - Start");
+                // DEBUG_V(String("  url: ") + request->url());
+                // DEBUG_V(String("  len: ") + String(len));
+                // DEBUG_V(String("index: ") + String(index));
+                // DEBUG_V(String("  sum: ") + String(index + len));
+                // DEBUG_V(String(" file: ") + filename);
+                // DEBUG_V(String("final: ") + String(final));
+
             	if(FileMgr.SaveConfigFile(filename, index, data, len, final))
                 {
                     // DEBUG_V("Save Chunk - Success");
@@ -312,7 +320,7 @@ void c_WebMgr::init ()
 
             [this](AsyncWebServerRequest *request, uint8_t *data, uint32_t len, uint32_t index, uint32_t total)
             {
-                // DEBUG_V("Save Chunk - Start");
+                // DEBUG_V("Save Data Chunk - Start");
                 String UploadFileName = request->url().substring(5);
 
                 // DEBUG_V(String("  url: ") + request->url());
@@ -336,11 +344,11 @@ void c_WebMgr::init ()
         );
 
         // Firmware upload handler
-    	webServer.on ("/updatefw", HTTP_POST,
+    	webServer.on ("/updatefw", HTTP_POST, 
             [](AsyncWebServerRequest* request)
             {
                 reboot = true;
-            },
+            }, 
             [](AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final)
              {WebMgr.FirmwareUpload (request, filename, index, data, len,  final); }).setFilter (ON_STA_FILTER);
 
@@ -381,14 +389,14 @@ void c_WebMgr::init ()
             });
 
         // Static Handlers
-   	 	webServer.serveStatic ("/UpdRecipe",          LittleFS, "/UpdRecipe.json");
-   	 	webServer.serveStatic ("/config.json",        LittleFS, "/config.json");
-   	 	webServer.serveStatic ("/input_config.json",  LittleFS, "/input_config.json");
-   	 	webServer.serveStatic ("/output_config.json", LittleFS, "/output_config.json");
-   	 	webServer.serveStatic ("/admininfo.json",     LittleFS, "/admininfo.json");
+   	 	webServer.serveStatic ("/UpdRecipe",               LittleFS, "/UpdRecipe.json");
+   	 	webServer.serveStatic ("/conf/config.json",        LittleFS, "/config.json");
+   	 	webServer.serveStatic ("/conf/input_config.json",  LittleFS, "/input_config.json");
+   	 	webServer.serveStatic ("/conf/output_config.json", LittleFS, "/output_config.json");
+   	 	webServer.serveStatic ("/conf/admininfo.json",     LittleFS, "/admininfo.json");
 
         // must be last servestatic entry
-    	webServer.serveStatic ("/",                   LittleFS, "/www/").setDefaultFile ("index.html");
+    	webServer.serveStatic ("/",                        LittleFS, "/www/").setDefaultFile ("index.html");
 
         // FS Debugging Handler
         // webServer.serveStatic ("/fs", LittleFS, "/" );

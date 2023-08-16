@@ -457,7 +457,7 @@ async function RequestConfigFile(FileName)
 {
     // console.log("RequestConfigFile FileName: " + FileName);
 
-    await $.getJSON("HTTP://" + target + "/" + FileName, function(data)
+    await $.getJSON("HTTP://" + target + "/conf/" + FileName, function(data)
     {
         // console.log("RequestConfigFile: " + JSON.stringify(data));
         ProcessReceivedJsonConfigMessage(data);
