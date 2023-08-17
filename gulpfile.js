@@ -38,7 +38,7 @@ gulp.task('js', function() {
     return gulp.src(['html/js/jquery*.js', 'html/js/bootstrap.js', 'html/js/jqColorPicker.js', 'html/script.js', 'html/js/dropzone.js', 'html/js/FileSaver.js', 'html/script.js'])
         .pipe(plumber())
         .pipe(concat('esps.js'))
-        .pipe(terser({ 'toplevel': true }))
+        .pipe(terser({ 'toplevel': true })) /* comment out this line to debug the script file */
         .pipe(gzip())
         .pipe(gulp.dest('ESPixelStick/data/www'));
 });
