@@ -863,11 +863,11 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
             break;
         }
 
-        // DEBUG_V(String("ResponseJsonDoc.size(): ") + String(ResponseJsonDoc.size()));
-        Response.reserve(1024);
-        serializeJson (ResponseJsonDoc, Response);
-
     } while (false);
+
+    // DEBUG_V(String("ResponseJsonDoc.size(): ") + String(ResponseJsonDoc.size()));
+    Response.reserve(1024);
+    serializeJson (ResponseJsonDoc, Response);
 
     // DEBUG_V (String ("Response: ") + Response);
 
