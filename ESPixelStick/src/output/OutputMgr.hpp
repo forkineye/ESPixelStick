@@ -233,6 +233,7 @@ private:
 
     bool HasBeenInitialized = false;
     bool ConfigLoadNeeded   = false;
+    bool ConfigInProgress   = false;
     bool IsOutputPaused     = false;
     bool BuildingNewConfig  = false;
 

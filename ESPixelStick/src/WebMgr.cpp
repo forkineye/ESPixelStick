@@ -242,7 +242,6 @@ void c_WebMgr::init ()
             }
         });
 
-        // ping handler
     	webServer.on ("/files", HTTP_GET | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {
             // DEBUG_V("files");
@@ -256,6 +255,24 @@ void c_WebMgr::init ()
                 FileMgr.GetListOfSdFiles(Response);
                 request->send (200, CN_applicationSLASHjson, Response);
                 // DEBUG_V(String("Files: ") + Response);
+            }
+        });
+
+    	webServer.on ("/file/delete", HTTP_POST | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
+        {
+            // DEBUG_V("/file/delete");
+            // DEBUG_V(String("URL: ") + request->url());
+            if(HTTP_OPTIONS == request->method())
+            {
+                request->send (200);
+            }
+            else
+            {
+                // DEBUG_V (String ("url: ") + String (request->url ()));
+                String filename = request->url ().substring (String ("/file/delete").length ());
+                // DEBUG_V (String ("filename: ") + String (filename));
+                FileMgr.DeleteSdFile(filename);
+                request->send (200);
             }
         });
 
