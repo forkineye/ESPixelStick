@@ -547,6 +547,8 @@ function RequestListOfFiles() {
         else
         {
             // console.info("SendCommand: Transaction complete");
+            clearTimeout(FseqFileListRequestTimer);
+            FseqFileListRequestTimer = null;
             ProcessGetFileListResponse(data);
             CompletedServerTransaction = true;
         }
