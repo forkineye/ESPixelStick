@@ -268,8 +268,7 @@ void c_OutputMgr::Begin ()
 
         // CreateNewConfig ();
 
-        // load up the configuration from the saved file. This also starts the drivers
-        // DEBUG_V();
+        // DEBUG_V("load up the configuration from the saved file. This also starts the drivers");
         LoadConfig();
 
         // CreateNewConfig ();
@@ -1003,6 +1002,9 @@ void c_OutputMgr::LoadConfig ()
 {
     // DEBUG_START;
 
+    ConfigLoadNeeded = false;
+    ConfigInProgress = true;
+
     // try to load and process the config file
     if (!FileMgr.LoadConfigFile(ConfigFileName, [this](DynamicJsonDocument &JsonConfigDoc)
         {
@@ -1031,6 +1033,8 @@ void c_OutputMgr::LoadConfig ()
             reboot = true;
         }
     }
+
+    ConfigInProgress = false;
 
     // DEBUG_END;
 
@@ -1290,11 +1294,10 @@ void c_OutputMgr::Poll()
     // do we need to save the current config?
     if (true == ConfigLoadNeeded)
     {
-        ConfigLoadNeeded = false;
         LoadConfig ();
     } // done need to save the current config
 
-    if (false == IsOutputPaused)
+    if ((false == IsOutputPaused) && (false == ConfigInProgress))
     {
         // //DEBUG_V();
         for (DriverInfo_t & OutputChannel : OutputChannelDrivers)
@@ -1318,11 +1321,12 @@ void c_OutputMgr::TaskPoll()
     // do we need to save the current config?
     if (true == ConfigLoadNeeded)
     {
-        ConfigLoadNeeded = false;
+        // DEBUG_V("Starting config processing");
         LoadConfig ();
+        // DEBUG_V("Done config processing");
     } // done need to save the current config
 
-    if (false == IsOutputPaused)
+    if ((false == IsOutputPaused) && (false == ConfigInProgress))
     {
         // PollCount ++;
         bool FoundAnActiveOutputChannel = false;
@@ -1330,11 +1334,17 @@ void c_OutputMgr::TaskPoll()
         for (DriverInfo_t & OutputChannel : OutputChannelDrivers)
         {
             // //DEBUG_V("Start a new channel");
-            uint32_t DelayInUs = OutputChannel.pOutputChannelDriver->Poll ();
-
-            if(DelayInUs)
+            if(nullptr != OutputChannel.pOutputChannelDriver)
             {
-                FoundAnActiveOutputChannel = true;
+                uint32_t DelayInUs = OutputChannel.pOutputChannelDriver->Poll ();
+                if(DelayInUs)
+                {
+                    FoundAnActiveOutputChannel = true;
+                }
+            }
+            else
+            {
+                // DEBUG_V(String("Missing pOutputChannelDriver for channel: ") + String(OutputChannel.DriverId));
             }
         }
 
