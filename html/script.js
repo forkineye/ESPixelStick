@@ -621,17 +621,16 @@ function ProcessGetFileListResponse(JsonConfigData) {
 } // ProcessGetFileListResponse
 
 function RequestFileDeletion() {
-    let files = [];
 
     $('#FileManagementTable > tr').each(function (CurRowId) {
         if (true === $('#FileSelected_' + CurRowId).prop("checked")) {
-            let FileEntry = {};
-            FileEntry["name"] = $('#FileName_' + CurRowId).val().toString();
-            files.push(FileEntry);
+            let name = $('#FileName_' + CurRowId).val().toString();
+            console.info("delete file: " + name);
+            let Response = SendCommand('file/delete/' + name);
+            // console.info("delete Response: " + Response);
         }
     });
 
-    // TOBERESTORED wsEnqueue(JSON.stringify({ 'cmd': { 'delete': { 'files': files } } }));
     RequestListOfFiles();
 
 } // RequestFileDeletion
