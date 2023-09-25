@@ -68,7 +68,7 @@ private:
 
     fsm_PlayFile_state * pCurrentFsmState = &fsm_PlayFile_state_Idle_imp;
 
-    c_FileMgr::FileId FileHandleForFileBeingPlayed = 0;
+    c_FileMgr::FileId FileHandleForFileBeingPlayed = c_FileMgr::INVALID_FILE_HANDLE;
 
     struct FrameControl_t
     {
