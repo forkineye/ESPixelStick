@@ -284,7 +284,12 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
         FSEQRawHeader    fsqRawHeader;
         FSEQParsedHeader fsqParsedHeader;
 
-        FileHandleForFileBeingPlayed = -1;
+        if(c_FileMgr::INVALID_FILE_HANDLE != FileHandleForFileBeingPlayed)
+        {
+            // DEBUG_V("Unexpected File Handle at fseq Parse.");
+            Stop();
+        }
+
         if (false == FileMgr.OpenSdFile (PlayItemName,
                                          c_FileMgr::FileMode::FileRead,
                                          FileHandleForFileBeingPlayed))
@@ -459,7 +464,8 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 //-----------------------------------------------------------------------------
 void c_InputFPPRemotePlayFile::ClearFileInfo()
 {
-    PlayItemName                               = String ("");
+    // DEBUG_START;
+    PlayItemName                               = emptyString;
     RemainingPlayCount                         = 0;
     SyncControl.LastRcvdElapsedSeconds         = 0.0;
     FrameControl.ElapsedPlayTimeMS             = 0;
@@ -467,7 +473,7 @@ void c_InputFPPRemotePlayFile::ClearFileInfo()
     FrameControl.ChannelsPerFrame              = 0;
     FrameControl.FrameStepTimeMS               = 25;
     FrameControl.TotalNumberOfFramesInSequence = 0;
-
+    // DEBUG_END;
 } // ClearFileInfo
 
 uint32_t c_InputFPPRemotePlayFile::ReadFile(uint32_t DestinationIntensityId, uint32_t NumBytesToRead, uint32_t FileOffset)
