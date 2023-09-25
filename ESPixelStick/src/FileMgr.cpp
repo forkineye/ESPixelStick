@@ -676,7 +676,7 @@ void c_FileMgr::InitSdFileList ()
     int index = 0;
     for (auto& currentFileListEntry : FileList)
     {
-        currentFileListEntry.handle  = 0;
+        currentFileListEntry.handle  = INVALID_FILE_HANDLE;
         currentFileListEntry.entryId = index++;
     }
 
@@ -692,15 +692,18 @@ int c_FileMgr::FileListFindSdFileHandle (FileId HandleToFind)
     int response = -1;
     // DEBUG_V (String ("HandleToFind: ") + String (HandleToFind));
 
-    for (auto & currentFileListEntry : FileList)
+    if(INVALID_FILE_HANDLE != HandleToFind)
     {
-        // DEBUG_V (String ("currentFileListEntry.handle: ")  + String (currentFileListEntry.handle));
-        // DEBUG_V (String ("currentFileListEntry.entryId: ") + String (currentFileListEntry.entryId));
-
-        if (currentFileListEntry.handle == HandleToFind)
+        for (auto & currentFileListEntry : FileList)
         {
-            response = currentFileListEntry.entryId;
-            break;
+            // DEBUG_V (String ("currentFileListEntry.handle: ")  + String (currentFileListEntry.handle));
+            // DEBUG_V (String ("currentFileListEntry.entryId: ") + String (currentFileListEntry.entryId));
+
+            if (currentFileListEntry.handle == HandleToFind)
+            {
+                response = currentFileListEntry.entryId;
+                break;
+            }
         }
     }
 
@@ -714,7 +717,7 @@ c_FileMgr::FileId c_FileMgr::CreateSdFileHandle ()
 {
     // DEBUG_START;
 
-    FileId response = 0;
+    FileId response = INVALID_FILE_HANDLE;
     FileId FileHandle = millis ();
 
     // create a unique handle
@@ -726,7 +729,7 @@ c_FileMgr::FileId c_FileMgr::CreateSdFileHandle ()
     // find an empty slot
     for (auto & currentFileListEntry : FileList)
     {
-        if (currentFileListEntry.handle == 0)
+        if (currentFileListEntry.handle == INVALID_FILE_HANDLE)
         {
             currentFileListEntry.handle = FileHandle;
             response = FileHandle;
@@ -734,7 +737,7 @@ c_FileMgr::FileId c_FileMgr::CreateSdFileHandle ()
         }
     }
 
-    if (0 == response)
+    if (INVALID_FILE_HANDLE == response)
     {
         logcon (String (CN_stars) + F (" Could not allocate another file handle ") + CN_stars);
     }
@@ -968,7 +971,7 @@ void c_FileMgr::SaveSdFile (const String & FileName, String & FileData)
 
     do // once
     {
-        FileId FileHandle = 0;
+        FileId FileHandle = INVALID_FILE_HANDLE;
         if (false == OpenSdFile (FileName, FileMode::FileWrite, FileHandle))
         {
             logcon (String (F ("Could not open '")) + FileName + F ("' for writting."));
@@ -1047,7 +1050,7 @@ bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & Fil
                 logcon(String(F("ERROR: Cannot open '")) + FileName + F("'."));
 
                 // release the file list entry
-                FileList[FileListIndex].handle = 0;
+                FileList[FileListIndex].handle = INVALID_FILE_HANDLE;
 
                 break;
             }
@@ -1079,7 +1082,7 @@ bool c_FileMgr::ReadSdFile (const String & FileName, String & FileData)
     // DEBUG_START;
 
     bool GotFileData = false;
-    FileId FileHandle = 0;
+    FileId FileHandle = INVALID_FILE_HANDLE;
 
     // DEBUG_V (String("File '") + FileName + "' is being opened.");
     if (true == OpenSdFile (FileName, FileMode::FileRead, FileHandle))
@@ -1115,7 +1118,7 @@ bool c_FileMgr::ReadSdFile (const String & FileName, JsonDocument & FileData)
     // DEBUG_START;
 
     bool GotFileData = false;
-    FileId FileHandle = 0;
+    FileId FileHandle = INVALID_FILE_HANDLE;
 
     // DEBUG_V (String("File '") + FileName + "' is being opened.");
     if (true == OpenSdFile (FileName, FileMode::FileRead, FileHandle))
@@ -1232,7 +1235,7 @@ void c_FileMgr::CloseSdFile (const FileId& FileHandle)
     if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
     {
         FileList[FileListIndex].info.close ();
-        FileList[FileListIndex].handle = 0;
+        FileList[FileListIndex].handle = INVALID_FILE_HANDLE;
     }
     else
     {
@@ -1286,7 +1289,7 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
 size_t c_FileMgr::GetSdFileSize (const String& FileName)
 {
     size_t response = 0;
-    FileId Handle;
+    FileId Handle = INVALID_FILE_HANDLE;
     if(OpenSdFile (FileName,   FileMode::FileRead, Handle))
     {
         response = GetSdFileSize(Handle);
