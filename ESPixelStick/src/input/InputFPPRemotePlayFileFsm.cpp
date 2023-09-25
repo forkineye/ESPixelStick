@@ -284,11 +284,8 @@ IRAM_ATTR void fsm_PlayFile_state_PlayingFile::TimerPoll ()
                 // xDEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->TotalNumberOfFramesInSequence));
                 // xDEBUG_V (String ("                 CurrentFrame: ") + String (CurrentFrame));
 
-                if (0 != p_Parent->FileHandleForFileBeingPlayed)
-                {
-                    // logcon (F ("File Playback Failed to read enough data"));
-                    Stop ();
-                }
+                // logcon (F ("File Playback Failed to read enough data"));
+                Stop ();
             }
         }
 
@@ -457,10 +454,10 @@ void fsm_PlayFile_state_Stopping::Poll ()
     // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (p_Parent->FileHandleForFileBeingPlayed));
 
     FileMgr.CloseSdFile (p_Parent->FileHandleForFileBeingPlayed);
-    p_Parent->FileHandleForFileBeingPlayed = 0;
+    p_Parent->FileHandleForFileBeingPlayed = c_FileMgr::INVALID_FILE_HANDLE;
     p_Parent->fsm_PlayFile_state_Idle_imp.Init (p_Parent);
 
-    if (FileName != "")
+    if (!FileName.equals(emptyString))
     {
         // DEBUG_V ("Restarting File");
         p_Parent->Start (FileName, StartingElapsedTime, PlayCount);
