@@ -160,7 +160,7 @@ void fsm_PlayList_state_PlayingFile::Poll ()
     if (pInputFPPRemotePlayList->pInputFPPRemotePlayItem->IsIdle ())
     {
         // DEBUG_V ("Done with all entries");
-        Stop ();
+        pInputFPPRemotePlayList->Stop ();
     }
 
     // DEBUG_END;
@@ -236,7 +236,7 @@ void fsm_PlayList_state_PlayingEffect::Poll ()
     if (pInputFPPRemotePlayList->pInputFPPRemotePlayItem->IsIdle ())
     {
         // DEBUG_V ("Effect Processing Done");
-        Stop ();
+        pInputFPPRemotePlayList->Stop ();
     }
 
     // DEBUG_END;
@@ -311,7 +311,7 @@ void fsm_PlayList_state_Paused::Poll ()
 
     if (pInputFPPRemotePlayList->PauseDelayTimer.IsExpired())
     {
-        Stop();
+        pInputFPPRemotePlayList->Stop();
     }
 
     // DEBUG_END;

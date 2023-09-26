@@ -127,7 +127,7 @@ void fsm_PlayEffect_state_PlayingEffect::Poll ()
     if (p_InputFPPRemotePlayEffect->PlayEffectTimer.IsExpired())
     {
         // DEBUG_V ("");
-        Stop ();
+         p_InputFPPRemotePlayEffect->Stop ();
     }
 
     // DEBUG_END;
