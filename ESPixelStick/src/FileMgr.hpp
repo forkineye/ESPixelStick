@@ -49,6 +49,7 @@ public:
     virtual ~c_FileMgr ();
 
     typedef uint32_t FileId;
+    const static FileId INVALID_FILE_HANDLE = 0;
 
     void    Begin     ();
     void    Poll      () {}
