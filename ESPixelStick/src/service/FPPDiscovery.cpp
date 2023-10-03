@@ -180,7 +180,6 @@ void c_FPPDiscovery::ReadNextFrame ()
 void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
 {
     // DEBUG_START;
-    // return;
     do // once
     {
         // We're in an upload, can't be bothered
