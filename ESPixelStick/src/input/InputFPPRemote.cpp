@@ -257,7 +257,7 @@ bool c_InputFPPRemote::SetConfig (JsonObject& jsonConfig)
     setFromJSON (SyncOffsetMS, jsonConfig, CN_SyncOffset);
     setFromJSON (SendFppSync,  jsonConfig, CN_SendFppSync);
 
-    if (pInputFPPRemotePlayItem)
+    if (PlayingFile())
     {
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
         pInputFPPRemotePlayItem->SetSendFppSync (SendFppSync);
@@ -289,16 +289,19 @@ void c_InputFPPRemote::StopPlaying ()
         FPPDiscovery.Disable ();
         FPPDiscovery.ForgetInputFPPRemotePlayFile ();
 
-        pInputFPPRemotePlayItem->Stop ();
-
-        while (!pInputFPPRemotePlayItem->IsIdle ())
+        if(PlayingFile())
         {
-            pInputFPPRemotePlayItem->Poll ();
             pInputFPPRemotePlayItem->Stop ();
-        }
 
-        delete pInputFPPRemotePlayItem;
-        pInputFPPRemotePlayItem = nullptr;
+            while (!pInputFPPRemotePlayItem->IsIdle ())
+            {
+                pInputFPPRemotePlayItem->Poll ();
+                pInputFPPRemotePlayItem->Stop ();
+            }
+
+            delete pInputFPPRemotePlayItem;
+            pInputFPPRemotePlayItem = nullptr;
+        }
 
         FileBeingPlayed = "";
 
@@ -346,28 +349,8 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
 
     do // once
     {
-        if (PlayingRemoteFile ())
-        {
-            StopPlaying ();
-        }
-
-        // are we already playing a local file?
-        if (PlayingFile ())
-        {
-            // DEBUG_V ("PlayingFile");
-            // has the file changed?
-            if (FileBeingPlayed != FileName)
-            {
-                // DEBUG_V ("StopPlaying");
-                StopPlaying ();
-            }
-            else
-            {
-                // DEBUG_V ("Play It Again");
-                pInputFPPRemotePlayItem->Start (FileName, 0, 1);
-                break;
-            }
-        }
+        // make sure we are stopped (clears pInputFPPRemotePlayItem)
+        StopPlaying();
 
         // DEBUG_V ("Start A New File");
         int Last_dot_pl_Position = FileName.lastIndexOf(CN_Dotpl);

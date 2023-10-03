@@ -121,7 +121,12 @@ void c_InputFPPRemotePlayFile::Stop ()
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Stop ();
+    while (pCurrentFsmState != &fsm_PlayFile_state_Idle_imp)
+    {
+        pCurrentFsmState->Stop ();
+        pCurrentFsmState->Poll ();
+        pCurrentFsmState->TimerPoll ();
+    }
 
     // DEBUG_END;
 } // Stop

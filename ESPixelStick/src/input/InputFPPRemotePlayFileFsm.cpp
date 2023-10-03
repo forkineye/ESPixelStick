@@ -45,6 +45,7 @@ IRAM_ATTR void fsm_PlayFile_state_Idle::TimerPoll ()
 void fsm_PlayFile_state_Idle::Init (c_InputFPPRemotePlayFile* Parent)
 {
     // DEBUG_START;
+    // DEBUG_V("State:Idle");
 
     // DEBUG_V (String (" Parent: 0x") + String ((uint32_t)Parent, HEX));
     p_Parent = Parent;
@@ -59,6 +60,7 @@ void fsm_PlayFile_state_Idle::Init (c_InputFPPRemotePlayFile* Parent)
 void fsm_PlayFile_state_Idle::Start (String& FileName, float ElapsedSeconds, uint32_t RemainingPlayCount)
 {
     // DEBUG_START;
+    // DEBUG_V("State:Idle");
 
     // DEBUG_V (String ("FileName: ") + FileName);
 
@@ -80,6 +82,7 @@ void fsm_PlayFile_state_Idle::Start (String& FileName, float ElapsedSeconds, uin
 void fsm_PlayFile_state_Idle::Stop (void)
 {
     // DEBUG_START;
+    // DEBUG_V("State:Idle");
 
     // Do nothing
 
@@ -91,6 +94,7 @@ void fsm_PlayFile_state_Idle::Stop (void)
 bool fsm_PlayFile_state_Idle::Sync (String& FileName, float ElapsedSeconds)
 {
     // DEBUG_START;
+    // DEBUG_V("State: Idle");
 
     Start (FileName, ElapsedSeconds, 1);
 
@@ -126,6 +130,7 @@ IRAM_ATTR void fsm_PlayFile_state_Starting::TimerPoll ()
 void fsm_PlayFile_state_Starting::Init (c_InputFPPRemotePlayFile* Parent)
 {
     // DEBUG_START;
+    // DEBUG_V("State:Starting");
 
     p_Parent = Parent;
     Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_Starting_imp);
@@ -143,6 +148,7 @@ void fsm_PlayFile_state_Starting::Init (c_InputFPPRemotePlayFile* Parent)
 void fsm_PlayFile_state_Starting::Start (String& FileName, float ElapsedSeconds, uint32_t RemainingPlayCount)
 {
     // DEBUG_START;
+    // DEBUG_V("State:Starting");
 
     // DEBUG_V (String ("FileName: ") + FileName);
     p_Parent->PlayItemName = FileName;
@@ -158,6 +164,7 @@ void fsm_PlayFile_state_Starting::Start (String& FileName, float ElapsedSeconds,
 void fsm_PlayFile_state_Starting::Stop (void)
 {
     // DEBUG_START;
+    // DEBUG_V("State:Starting");
 
     p_Parent->RemainingPlayCount = 0;
     p_Parent->fsm_PlayFile_state_Idle_imp.Init (p_Parent);
@@ -170,6 +177,8 @@ void fsm_PlayFile_state_Starting::Stop (void)
 bool fsm_PlayFile_state_Starting::Sync (String& FileName, float ElapsedSeconds)
 {
     // DEBUG_START;
+    // DEBUG_V("State:Starting");
+
     bool response = false;
 
     Start (FileName, ElapsedSeconds, 1);
@@ -304,6 +313,7 @@ IRAM_ATTR void fsm_PlayFile_state_PlayingFile::TimerPoll ()
 void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
 {
     // DEBUG_START;
+    // DEBUG_V("State:PlayingFile");
 
     p_Parent = Parent;
 
@@ -349,6 +359,7 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
 void fsm_PlayFile_state_PlayingFile::Start (String& FileName, float ElapsedSeconds, uint32_t PlayCount)
 {
     // DEBUG_START;
+    // DEBUG_V("State:PlayingFile");
 
     // DEBUG_V (String ("                     FileName: ") + FileName);
     // DEBUG_V (String ("            LastPlayedFrameId: ") + String (p_Parent->LastPlayedFrameId));
@@ -366,6 +377,7 @@ void fsm_PlayFile_state_PlayingFile::Start (String& FileName, float ElapsedSecon
 void fsm_PlayFile_state_PlayingFile::Stop (void)
 {
     // DEBUG_START;
+    // DEBUG_V("State:PlayingFile");
 
     // DEBUG_V (String (F ("Stop Playing::  FileName: '")) + p_Parent->PlayItemName + "'");
     // DEBUG_V (String ("            LastPlayedFrameId: ") + String (p_Parent->LastPlayedFrameId));
@@ -478,6 +490,7 @@ IRAM_ATTR void fsm_PlayFile_state_Stopping::TimerPoll ()
 void fsm_PlayFile_state_Stopping::Init (c_InputFPPRemotePlayFile* Parent)
 {
     // DEBUG_START;
+    // DEBUG_V("State:Stopping");
 
     FileName = "";
     StartingElapsedTime = 0.0;
@@ -502,12 +515,13 @@ void fsm_PlayFile_state_Stopping::Init (c_InputFPPRemotePlayFile* Parent)
 void fsm_PlayFile_state_Stopping::Start (String& _FileName, float ElapsedTime, uint32_t _PlayCount)
 {
     // DEBUG_START;
+    // DEBUG_V("State:Stopping");
 
     FileName = _FileName;
     StartingElapsedTime = ElapsedTime;
     PlayCount = _PlayCount;
 
-    // DEBUG_END
+    // DEBUG_END;
 
 } // fsm_PlayFile_state_Stopping::Start
 
@@ -515,6 +529,7 @@ void fsm_PlayFile_state_Stopping::Start (String& _FileName, float ElapsedTime, u
 void fsm_PlayFile_state_Stopping::Stop (void)
 {
     // DEBUG_START;
+    // DEBUG_V("State:Stopping");
 
     // DEBUG_END;
 
@@ -524,6 +539,7 @@ void fsm_PlayFile_state_Stopping::Stop (void)
 bool fsm_PlayFile_state_Stopping::Sync (String&, float)
 {
     // DEBUG_START;
+    // DEBUG_V("State:Stopping");
 
     // DEBUG_END;
     return false;
@@ -563,6 +579,7 @@ IRAM_ATTR void fsm_PlayFile_state_Error::TimerPoll ()
 void fsm_PlayFile_state_Error::Init (c_InputFPPRemotePlayFile* Parent)
 {
     // DEBUG_START;
+    // DEBUG_V("State:Error");
 
     p_Parent = Parent;
     Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_Error_imp);
@@ -579,6 +596,7 @@ void fsm_PlayFile_state_Error::Init (c_InputFPPRemotePlayFile* Parent)
 void fsm_PlayFile_state_Error::Start (String& FileName, float ElapsedSeconds, uint32_t PlayCount)
 {
     // DEBUG_START;
+    // DEBUG_V("State:Error");
 
     if (FileName != p_Parent->GetFileName ())
     {
@@ -593,6 +611,7 @@ void fsm_PlayFile_state_Error::Start (String& FileName, float ElapsedSeconds, ui
 void fsm_PlayFile_state_Error::Stop (void)
 {
     // DEBUG_START;
+    // DEBUG_V("State:Error");
 
     p_Parent->fsm_PlayFile_state_Idle_imp.Init (p_Parent);
 
@@ -604,6 +623,7 @@ void fsm_PlayFile_state_Error::Stop (void)
 bool fsm_PlayFile_state_Error::Sync (String& FileName, float ElapsedSeconds)
 {
     // DEBUG_START;
+    // DEBUG_V("State:Error");
 
     if (FileName != p_Parent->GetFileName ())
     {
