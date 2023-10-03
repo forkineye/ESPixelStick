@@ -78,27 +78,34 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
 
         // DEBUG_V ();
 
-        bool fail = false;
-
         // Try to listen to the broadcast port
+        bool Failed = true;
         if (!udp.listen (FPP_DISCOVERY_PORT))
         {
             logcon (String (F ("FAILED to subscribed to broadcast messages")));
-            fail = true;
-            break;
         }
-        //logcon (String (F ("FPPDiscovery subscribed to broadcast")));
+        else
+        {
+            Failed = false;
+            logcon (String (F ("FPPDiscovery subscribed to broadcast messages on port: ")) + String(FPP_DISCOVERY_PORT));
+        }        
 
         if (!udp.listenMulticast (MulticastAddress, FPP_DISCOVERY_PORT))
         {
             logcon (String (F ("FAILED to subscribed to multicast messages")));
-            fail = true;
+        }
+        else
+        {
+            Failed = false;
+            logcon (String (F ("FPPDiscovery subscribed to multicast: ")) + MulticastAddress.toString () + F(":") + String(FPP_DISCOVERY_PORT));
+        }
+
+        // did at least one binding work?
+        if(Failed)
+        {
+            // no active bindings
             break;
         }
-        //logcon (String (F ("FPPDiscovery subscribed to multicast: ")) + address.toString ());
-
-        if (!fail)
-            logcon (String (F ("Listening on port ")) + String(FPP_DISCOVERY_PORT));
 
         udp.onPacket (std::bind (&c_FPPDiscovery::ProcessReceivedUdpPacket, this, std::placeholders::_1));
 
@@ -173,12 +180,13 @@ void c_FPPDiscovery::ReadNextFrame ()
 void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
 {
     // DEBUG_START;
+    // return;
     do // once
     {
         // We're in an upload, can't be bothered
         if (inFileUpload)
         {
-            // DEBUG_V ("")
+            // DEBUG_V ("In Upload, Ignore message");
             break;
         }
 
@@ -244,7 +252,6 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
             case CTRL_PKT_BLANK:
             {
                 // DEBUG_V (String (F ("FPP Blank packet")));
-                // StopPlaying ();
                 MultiSyncStats.pktBlank++;
                 ProcessBlankPacket ();
                 break;
@@ -400,6 +407,7 @@ void c_FPPDiscovery::ProcessBlankPacket ()
 {
     // DEBUG_START;
 
+    StopPlaying ();
     if (IsEnabled)
     {
         memset (OutputMgr.GetBufferAddress(), 0x0, OutputMgr.GetBufferUsedSize ());
@@ -1152,5 +1160,32 @@ void c_FPPDiscovery::GenerateFppSyncMsg(uint8_t Action, const String & FileName,
 
     // DEBUG_END;
 } // GenerateFppSyncMsg
+
+//-----------------------------------------------------------------------------
+void c_FPPDiscovery::SetInputFPPRemotePlayFile (c_InputFPPRemotePlayFile * value)
+{
+    // DEBUG_START;
+
+    InputFPPRemotePlayFile = value;
+
+    // DEBUG_END;
+
+} // SetInputFPPRemotePlayFile
+
+//-----------------------------------------------------------------------------
+void c_FPPDiscovery::ForgetInputFPPRemotePlayFile ()
+{
+    // DEBUG_START;
+
+    if(nullptr != InputFPPRemotePlayFile)
+    {
+        delete InputFPPRemotePlayFile;
+        InputFPPRemotePlayFile = nullptr;
+    }
+
+    // DEBUG_END;
+
+} // SetInputFPPRemotePlayFile
+
 
 c_FPPDiscovery FPPDiscovery;

@@ -118,8 +118,8 @@ public:
     void GetStatus        (JsonObject& jsonStatus);
     void NetworkStateChanged (bool NewNetworkState);
 
-    void SetInputFPPRemotePlayFile (c_InputFPPRemotePlayFile * value) { InputFPPRemotePlayFile = value; }
-    void ForgetInputFPPRemotePlayFile () { InputFPPRemotePlayFile = nullptr; }
+    void SetInputFPPRemotePlayFile (c_InputFPPRemotePlayFile * value);
+    void ForgetInputFPPRemotePlayFile ();
     void GenerateFppSyncMsg (uint8_t Action, const String & FileName, uint32_t CurrentFrame, const float & ElpsedTime);
 
 #   define SYNC_PKT_START       0
