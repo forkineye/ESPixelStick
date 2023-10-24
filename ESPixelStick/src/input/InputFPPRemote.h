@@ -69,7 +69,7 @@ private:
 
     int32_t SyncOffsetMS = 0;
     bool    SendFppSync = false;
-    String  FileBeingPlayed;
+    String  FileBeingPlayed = No_LocalFileToPlay;
 
 #   define JSON_NAME_FILE_TO_PLAY CN_fseqfilename
 
