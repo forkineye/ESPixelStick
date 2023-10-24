@@ -302,9 +302,6 @@ void c_InputFPPRemote::StopPlaying ()
             delete pInputFPPRemotePlayItem;
             pInputFPPRemotePlayItem = nullptr;
         }
-
-        FileBeingPlayed = "";
-
     } while (false);
 
     // DEBUG_END;
@@ -320,14 +317,14 @@ void c_InputFPPRemote::StartPlaying (String& FileName)
     {
         // DEBUG_V (String ("FileName: '") + FileName + "'");
         if ((0 == FileName.length ()) ||
-            (FileName == String ("null")))
+            (FileName.equals("null")))
         {
             // DEBUG_V ("No file to play");
             StopPlaying ();
             break;
         }
 
-        if (FileName == No_LocalFileToPlay)
+        if (FileName.equals(No_LocalFileToPlay))
         {
             StartPlayingRemoteFile (FileName);
         }
@@ -466,7 +463,7 @@ bool c_InputFPPRemote::PlayingRemoteFile ()
             break;
         }
 
-        if (FileBeingPlayed != No_LocalFileToPlay)
+        if (!FileBeingPlayed.equals(No_LocalFileToPlay))
         {
             break;
         }
