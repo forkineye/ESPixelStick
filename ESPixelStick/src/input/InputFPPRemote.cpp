@@ -197,8 +197,8 @@ void c_InputFPPRemote::Process ()
     }
     else if (PlayingRemoteFile ())
     {
-        // DEBUG_V ("PlayingRemoteFile");
-        FPPDiscovery.ReadNextFrame ();
+        // DEBUG_V ("Remote File Play");
+        pInputFPPRemotePlayItem->Poll ();
     }
     else if (PlayingFile ())
     {
@@ -291,6 +291,7 @@ void c_InputFPPRemote::StopPlaying ()
 
         if(PlayingFile())
         {
+            // DEBUG_V(String("pInputFPPRemotePlayItem: ") = String(uint32_t(pInputFPPRemotePlayItem), HEX));
             pInputFPPRemotePlayItem->Stop ();
 
             while (!pInputFPPRemotePlayItem->IsIdle ())
@@ -355,6 +356,11 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
         if (String(CN_Dotpl) == Last_pl_Text)
         {
             // DEBUG_V ("Start Playlist");
+            if(pInputFPPRemotePlayItem)
+            {
+                delete pInputFPPRemotePlayItem;
+                pInputFPPRemotePlayItem = nullptr;
+            }
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayList (GetInputChannelId ());
             StatusType = F ("PlayList");
         }
@@ -370,6 +376,11 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
                 break;
             }
 
+            if(pInputFPPRemotePlayItem)
+            {
+                delete pInputFPPRemotePlayItem;
+                pInputFPPRemotePlayItem = nullptr;
+            }
             // DEBUG_V ("Start Local FSEQ file player");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (GetInputChannelId ());
             StatusType = CN_File;
@@ -404,6 +415,11 @@ void c_InputFPPRemote::StartPlayingRemoteFile (String& FileName)
         StopPlaying ();
 
         // DEBUG_V ("Instantiate an FSEQ file player");
+        if(pInputFPPRemotePlayItem)
+        {
+            delete pInputFPPRemotePlayItem;
+            pInputFPPRemotePlayItem = nullptr;
+        }
         pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (GetInputChannelId ());
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
         pInputFPPRemotePlayItem->SetSendFppSync (SendFppSync);
