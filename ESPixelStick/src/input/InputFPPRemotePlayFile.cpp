@@ -152,11 +152,11 @@ void c_InputFPPRemotePlayFile::Poll ()
 {
     // xDEBUG_START;
 
-    // TimerPoll ();
-    pCurrentFsmState->Poll ();
-
     // Show that we have received a poll
     PollDetectionCounter = 0;
+
+    // TimerPoll ();
+    pCurrentFsmState->Poll ();
 
     // xDEBUG_END;
 
