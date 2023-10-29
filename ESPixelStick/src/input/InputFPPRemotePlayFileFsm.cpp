@@ -199,6 +199,12 @@ void fsm_PlayFile_state_PlayingFile::Poll ()
 
     do // once
     {
+        if(0 == p_Parent->FileHandleForFileBeingPlayed)
+        {
+            // DEBUG_V("Bad FileHandleForFileBeingPlayed");
+            Stop();
+            break;
+        }
         // DEBUG_V (String ("LastPlayedFrameId: ") + String (LastPlayedFrameId));
         // have we reached the end of the file?
         if (p_Parent->FrameControl.TotalNumberOfFramesInSequence <= LastPlayedFrameId)
@@ -238,6 +244,13 @@ IRAM_ATTR void fsm_PlayFile_state_PlayingFile::TimerPoll ()
 
     do // once
     {
+        if(0 == p_Parent->FileHandleForFileBeingPlayed)
+        {
+            // DEBUG_V("Bad FileHandleForFileBeingPlayed");
+            Stop();
+            break;
+        }
+
         uint32_t CurrentFrame = p_Parent->CalculateFrameId (p_Parent->FrameControl.ElapsedPlayTimeMS, p_Parent->GetSyncOffsetMS ());
 
         // xDEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->TotalNumberOfFramesInSequence));
@@ -547,7 +560,6 @@ bool fsm_PlayFile_state_Stopping::Sync (String&, float)
     return false;
 
 } // fsm_PlayFile_state_Stopping::Sync
-
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
