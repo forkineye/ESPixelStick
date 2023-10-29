@@ -1092,6 +1092,7 @@ void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
 } // StartPlaying
 
 //-----------------------------------------------------------------------------
+// Wait for idle.
 void c_FPPDiscovery::StopPlaying ()
 {
     // DEBUG_START;
@@ -1099,7 +1100,11 @@ void c_FPPDiscovery::StopPlaying ()
     // logcon (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
     if (InputFPPRemotePlayFile)
     {
-        InputFPPRemotePlayFile->Stop ();
+        while(!InputFPPRemotePlayFile->IsIdle())
+        {
+            InputFPPRemotePlayFile->Stop ();
+            delay(10);
+        }
     }
 
     // DEBUG_V ("");
