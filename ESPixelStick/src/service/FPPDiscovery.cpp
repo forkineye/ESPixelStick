@@ -978,7 +978,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
         String command = request->getParam (ulrCommand)->value ();
         // DEBUG_V (String ("command: ") + command);
 
-        if (command == F ("getFPPstatus"))
+        if (command.equals(F ("getFPPstatus")))
         {
             String adv = CN_false;
             if (request->hasParam (CN_advancedView))
@@ -996,7 +996,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             break;
         }
 
-        if (command == F ("getSysInfo"))
+        if (command.equals(F ("getSysInfo")))
         {
             GetSysInfoJSON (JsonData);
 
@@ -1008,7 +1008,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             break;
         }
 
-        if (command == F ("getHostNameInfo"))
+        if (command.equals(("getHostNameInfo")))
         {
             String Hostname;
             NetworkMgr.GetHostname (Hostname);
@@ -1024,7 +1024,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             break;
         }
 
-        if (command == F ("getChannelOutputs"))
+        if (command.equals(F ("getChannelOutputs")))
         {
             if (request->hasParam (CN_file))
             {
