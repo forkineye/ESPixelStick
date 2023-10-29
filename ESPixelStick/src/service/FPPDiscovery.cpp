@@ -164,19 +164,6 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::ReadNextFrame ()
-{
-    // DEBUG_START;
-
-    if (InputFPPRemotePlayFile)
-    {
-        InputFPPRemotePlayFile->Poll ();
-    }
-
-    // DEBUG_END;
-} // ReadNextFrame
-
-//-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
 {
     // DEBUG_START;
@@ -415,6 +402,16 @@ void c_FPPDiscovery::ProcessBlankPacket ()
 } // ProcessBlankPacket
 
 //-----------------------------------------------------------------------------
+bool c_FPPDiscovery::PlayingFile ()
+{
+    if (InputFPPRemotePlayFile)
+    {
+        return !InputFPPRemotePlayFile->IsIdle ();
+    }
+    return false;
+} // PlayingFile
+
+//-----------------------------------------------------------------------------
 void c_FPPDiscovery::sendPingPacket (IPAddress destination)
 {
     // DEBUG_START;
@@ -623,7 +620,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 {
-    // DEBUG_START;
+    DEBUG_START;
     printReq(request, false);
 
     do // once
@@ -695,7 +692,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 
     } while (false); // do once
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // ProcessGET
 
@@ -887,6 +884,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
 
 void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
 {
+    DEBUG_START;
     JsonObject JsonDataMqtt = JsonData.createNestedObject(F ("MQTT"));
 
     JsonDataMqtt[F ("configured")] = false;
@@ -899,6 +897,8 @@ void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
     JsonDataCurrentPlaylist[F ("index")]       = "0";
     JsonDataCurrentPlaylist[CN_playlist]       = "";
     JsonDataCurrentPlaylist[CN_type]           = "";
+
+    DEBUG_V();
 
     JsonData[F ("volume")]         = 70;
     JsonData[F ("media_filename")] = "";
@@ -932,8 +932,10 @@ void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
     }
     else
     {
+        DEBUG_V();
         if (InputFPPRemotePlayFile)
         {
+            DEBUG_V();
             InputFPPRemotePlayFile->GetStatus (JsonData);
         }
         JsonData[CN_status] = 1;
@@ -942,13 +944,16 @@ void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
         JsonData[CN_mode] = 8;
         JsonData[CN_mode_name] = CN_remote;
     }
+    DEBUG_V();
 
     if (adv)
     {
+        DEBUG_V();
         JsonObject JsonDataAdvancedView = JsonData.createNestedObject (F ("advancedView"));
         GetSysInfoJSON (JsonDataAdvancedView);
+        DEBUG_V();
     }
-
+    DEBUG_END;
 }
 
 //-----------------------------------------------------------------------------
