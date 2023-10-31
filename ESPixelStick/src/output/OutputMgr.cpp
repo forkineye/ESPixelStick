@@ -245,7 +245,7 @@ void c_OutputMgr::Begin ()
         if (0 == OutputChannelId_End)
         {
             logcon("ERROR: No output Channels defined. Rebooting");
-            reboot = true;
+            RequestReboot(100000);
             break;
         }
 
@@ -1030,7 +1030,7 @@ void c_OutputMgr::LoadConfig ()
         else
         {
             logcon(CN_stars + String(MN_15) + CN_stars);
-            reboot = true;
+            RequestReboot(100000);
         }
     }
 
@@ -1297,7 +1297,7 @@ void c_OutputMgr::Poll()
         LoadConfig ();
     } // done need to save the current config
 
-    if ((false == IsOutputPaused) && (false == ConfigInProgress))
+    if ((false == IsOutputPaused) && (false == ConfigInProgress) && (false == RebootInProgress()) )
     {
         // //DEBUG_V();
         for (DriverInfo_t & OutputChannel : OutputChannelDrivers)
@@ -1326,7 +1326,7 @@ void c_OutputMgr::TaskPoll()
         // DEBUG_V("Done config processing");
     } // done need to save the current config
 
-    if ((false == IsOutputPaused) && (false == ConfigInProgress))
+    if ((false == IsOutputPaused) && (false == ConfigInProgress) && (false == RebootInProgress()) )
     {
         // PollCount ++;
         bool FoundAnActiveOutputChannel = false;

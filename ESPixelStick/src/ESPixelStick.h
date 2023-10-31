@@ -60,6 +60,9 @@
 #define STRINGIFY(X) #X
 #define STRING(X) STRINGIFY(X)
 
+extern void RequestReboot(uint32_t LoopDelay);
+extern bool RebootInProgress();
+
 /// Core configuration structure
 typedef struct {
     // Device
@@ -72,7 +75,7 @@ void    deserializeCoreHandler (DynamicJsonDocument& jsonDoc);
 bool    deserializeCore        (JsonObject & json);
 bool    dsDevice               (JsonObject & json);
 bool    dsNetwork              (JsonObject & json);
-extern  bool reboot;
+
 extern  bool IsBooting;
 extern  bool ResetWiFi;
 extern  const String ConfigFileName;

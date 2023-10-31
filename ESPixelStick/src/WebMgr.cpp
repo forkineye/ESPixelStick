@@ -165,7 +165,7 @@ void c_WebMgr::init ()
             }
             else
             {
-                reboot = true;
+                RequestReboot(100000);
                 request->send (200, CN_textSLASHplain, "Rebooting");
             }
         });
@@ -188,8 +188,7 @@ void c_WebMgr::init ()
 
                 request->send (200, CN_textSLASHplain, "Rebooting");
                 // DEBUG_V ("");
-                extern bool reboot;
-                reboot = true;
+                RequestReboot(100000);;
             }
         });
 
@@ -364,7 +363,7 @@ void c_WebMgr::init ()
     	webServer.on ("/updatefw", HTTP_POST, 
             [](AsyncWebServerRequest* request)
             {
-                reboot = true;
+                RequestReboot(100000);;
             }, 
             [](AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final)
              {WebMgr.FirmwareUpload (request, filename, index, data, len,  final); }).setFilter (ON_STA_FILTER);
@@ -715,8 +714,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
             efupdate.end ();
             // LittleFS.begin ();
 
-            extern bool reboot;
-            reboot = true;
+            RequestReboot(100000);;
         }
 
     } while (false);

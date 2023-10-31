@@ -190,7 +190,7 @@ void c_OutputUart::Begin (OutputUartConfig_t & config )
 
         {
             LOG_PORT.println (F("Invalid UART configuration parameters. Rebooting"));
-            reboot = true;
+            RequestReboot(100000);
             break;
         }
 
