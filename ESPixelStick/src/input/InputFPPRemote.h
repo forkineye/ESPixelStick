@@ -63,13 +63,14 @@ private:
     bool PlayingFile ();
     bool PlayingRemoteFile ();
     void PlayNextFile ();
+    bool Poll ();
 
     void load ();          ///< Load configuration from File System
     void save ();          ///< Save configuration to File System
 
     int32_t SyncOffsetMS = 0;
     bool    SendFppSync = false;
-    String  FileBeingPlayed;
+    String  FileBeingPlayed = No_LocalFileToPlay;
 
 #   define JSON_NAME_FILE_TO_PLAY CN_fseqfilename
 

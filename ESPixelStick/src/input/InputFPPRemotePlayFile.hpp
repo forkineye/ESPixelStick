@@ -39,7 +39,7 @@ public:
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
     virtual void Stop ();
     virtual void Sync (String& FileName, float SecondsElapsed);
-    virtual void Poll ();
+    virtual bool Poll ();
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
 

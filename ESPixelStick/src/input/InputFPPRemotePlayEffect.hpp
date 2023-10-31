@@ -33,7 +33,7 @@ public:
     virtual void Start     (String & FileName, float duration, uint32_t PlayCount);
     virtual void Stop      ();
     virtual void Sync      (String & FileName, float SecondsElapsed);
-    virtual void Poll      ();
+    virtual bool Poll      ();
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle    () { return (pCurrentFsmState == &fsm_PlayEffect_state_Idle_imp); }
 

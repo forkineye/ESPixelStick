@@ -197,13 +197,13 @@ void c_InputFPPRemote::Process ()
     }
     else if (PlayingRemoteFile ())
     {
-        // DEBUG_V ("PlayingRemoteFile");
-        FPPDiscovery.ReadNextFrame ();
+        // DEBUG_V ("Remote File Play");
+        while(Poll ()) {}
     }
     else if (PlayingFile ())
     {
         // DEBUG_V ("Local File Play");
-        pInputFPPRemotePlayItem->Poll ();
+        while(Poll ()) {}
 
         if (pInputFPPRemotePlayItem->IsIdle ())
         {
@@ -215,6 +215,21 @@ void c_InputFPPRemote::Process ()
     // DEBUG_END;
 
 } // process
+
+//-----------------------------------------------------------------------------
+bool c_InputFPPRemote::Poll ()
+{
+    // DEBUG_START;
+    bool Response = false;
+    if(pInputFPPRemotePlayItem)
+    {
+        Response = pInputFPPRemotePlayItem->Poll ();
+    }
+
+    // DEBUG_END;
+    return Response;
+    
+} // Poll
 
 //-----------------------------------------------------------------------------
 void c_InputFPPRemote::ProcessButtonActions(c_ExternalInput::InputValue_t value)
@@ -291,6 +306,7 @@ void c_InputFPPRemote::StopPlaying ()
 
         if(PlayingFile())
         {
+            // DEBUG_V(String("pInputFPPRemotePlayItem: ") = String(uint32_t(pInputFPPRemotePlayItem), HEX));
             pInputFPPRemotePlayItem->Stop ();
 
             while (!pInputFPPRemotePlayItem->IsIdle ())
@@ -302,9 +318,6 @@ void c_InputFPPRemote::StopPlaying ()
             delete pInputFPPRemotePlayItem;
             pInputFPPRemotePlayItem = nullptr;
         }
-
-        FileBeingPlayed = "";
-
     } while (false);
 
     // DEBUG_END;
@@ -320,14 +333,14 @@ void c_InputFPPRemote::StartPlaying (String& FileName)
     {
         // DEBUG_V (String ("FileName: '") + FileName + "'");
         if ((0 == FileName.length ()) ||
-            (FileName == String ("null")))
+            (FileName.equals("null")))
         {
             // DEBUG_V ("No file to play");
             StopPlaying ();
             break;
         }
 
-        if (FileName == No_LocalFileToPlay)
+        if (FileName.equals(No_LocalFileToPlay))
         {
             StartPlayingRemoteFile (FileName);
         }
@@ -358,6 +371,11 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
         if (String(CN_Dotpl) == Last_pl_Text)
         {
             // DEBUG_V ("Start Playlist");
+            if(pInputFPPRemotePlayItem)
+            {
+                delete pInputFPPRemotePlayItem;
+                pInputFPPRemotePlayItem = nullptr;
+            }
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayList (GetInputChannelId ());
             StatusType = F ("PlayList");
         }
@@ -373,6 +391,11 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
                 break;
             }
 
+            if(pInputFPPRemotePlayItem)
+            {
+                delete pInputFPPRemotePlayItem;
+                pInputFPPRemotePlayItem = nullptr;
+            }
             // DEBUG_V ("Start Local FSEQ file player");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (GetInputChannelId ());
             StatusType = CN_File;
@@ -407,6 +430,11 @@ void c_InputFPPRemote::StartPlayingRemoteFile (String& FileName)
         StopPlaying ();
 
         // DEBUG_V ("Instantiate an FSEQ file player");
+        if(pInputFPPRemotePlayItem)
+        {
+            delete pInputFPPRemotePlayItem;
+            pInputFPPRemotePlayItem = nullptr;
+        }
         pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (GetInputChannelId ());
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
         pInputFPPRemotePlayItem->SetSendFppSync (SendFppSync);
@@ -466,7 +494,7 @@ bool c_InputFPPRemote::PlayingRemoteFile ()
             break;
         }
 
-        if (FileBeingPlayed != No_LocalFileToPlay)
+        if (!FileBeingPlayed.equals(No_LocalFileToPlay))
         {
             break;
         }

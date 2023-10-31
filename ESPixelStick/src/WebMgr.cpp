@@ -622,24 +622,22 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
     system[F ("SDinstalled")] = FileMgr.SdCardIsInstalled ();
     system[F ("DiscardedRxData")] = DiscardedRxData;
 
-    // DEBUG_V ("");
-
     // Ask WiFi Stats
+    // DEBUG_V ("NetworkMgr.GetStatus");
     NetworkMgr.GetStatus (system);
-    // DEBUG_V ("");
 
+    // DEBUG_V ("FPPDiscovery.GetStatus");
     FPPDiscovery.GetStatus (system);
-    // DEBUG_V ("");
 
+    // DEBUG_V ("InputMgr.GetStatus");
     // Ask Input Stats
     InputMgr.GetStatus (status);
-    // DEBUG_V ("");
 
     // Ask Output Stats
+    // DEBUG_V ("OutputMgr.GetStatus");
     OutputMgr.GetStatus (status);
-    // DEBUG_V ("");
-
     // Get File Manager Stats
+    // DEBUG_V ("FileMgr.GetStatus");
     FileMgr.GetStatus (system);
     // DEBUG_V ("");
 

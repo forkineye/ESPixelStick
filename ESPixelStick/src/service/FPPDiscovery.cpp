@@ -164,19 +164,6 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::ReadNextFrame ()
-{
-    // DEBUG_START;
-
-    if (InputFPPRemotePlayFile)
-    {
-        InputFPPRemotePlayFile->Poll ();
-    }
-
-    // DEBUG_END;
-} // ReadNextFrame
-
-//-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
 {
     // DEBUG_START;
@@ -413,6 +400,16 @@ void c_FPPDiscovery::ProcessBlankPacket ()
     }
     // DEBUG_END;
 } // ProcessBlankPacket
+
+//-----------------------------------------------------------------------------
+bool c_FPPDiscovery::PlayingFile ()
+{
+    if (InputFPPRemotePlayFile)
+    {
+        return !InputFPPRemotePlayFile->IsIdle ();
+    }
+    return false;
+} // PlayingFile
 
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::sendPingPacket (IPAddress destination)
@@ -887,6 +884,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
 
 void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
 {
+    // DEBUG_START;
     JsonObject JsonDataMqtt = JsonData.createNestedObject(F ("MQTT"));
 
     JsonDataMqtt[F ("configured")] = false;
@@ -899,6 +897,8 @@ void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
     JsonDataCurrentPlaylist[F ("index")]       = "0";
     JsonDataCurrentPlaylist[CN_playlist]       = "";
     JsonDataCurrentPlaylist[CN_type]           = "";
+
+    // DEBUG_V();
 
     JsonData[F ("volume")]         = 70;
     JsonData[F ("media_filename")] = "";
@@ -932,8 +932,10 @@ void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
     }
     else
     {
+        // DEBUG_V();
         if (InputFPPRemotePlayFile)
         {
+            // DEBUG_V();
             InputFPPRemotePlayFile->GetStatus (JsonData);
         }
         JsonData[CN_status] = 1;
@@ -942,13 +944,16 @@ void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
         JsonData[CN_mode] = 8;
         JsonData[CN_mode_name] = CN_remote;
     }
+    // DEBUG_V();
 
     if (adv)
     {
+        // DEBUG_V();
         JsonObject JsonDataAdvancedView = JsonData.createNestedObject (F ("advancedView"));
         GetSysInfoJSON (JsonDataAdvancedView);
+        // DEBUG_V();
     }
-
+    // DEBUG_END;
 }
 
 //-----------------------------------------------------------------------------
@@ -973,7 +978,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
         String command = request->getParam (ulrCommand)->value ();
         // DEBUG_V (String ("command: ") + command);
 
-        if (command == F ("getFPPstatus"))
+        if (command.equals(F ("getFPPstatus")))
         {
             String adv = CN_false;
             if (request->hasParam (CN_advancedView))
@@ -991,7 +996,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             break;
         }
 
-        if (command == F ("getSysInfo"))
+        if (command.equals(F ("getSysInfo")))
         {
             GetSysInfoJSON (JsonData);
 
@@ -1003,7 +1008,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             break;
         }
 
-        if (command == F ("getHostNameInfo"))
+        if (command.equals(("getHostNameInfo")))
         {
             String Hostname;
             NetworkMgr.GetHostname (Hostname);
@@ -1019,7 +1024,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             break;
         }
 
-        if (command == F ("getChannelOutputs"))
+        if (command.equals(F ("getChannelOutputs")))
         {
             if (request->hasParam (CN_file))
             {
@@ -1087,6 +1092,7 @@ void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
 } // StartPlaying
 
 //-----------------------------------------------------------------------------
+// Wait for idle.
 void c_FPPDiscovery::StopPlaying ()
 {
     // DEBUG_START;
@@ -1094,7 +1100,11 @@ void c_FPPDiscovery::StopPlaying ()
     // logcon (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
     if (InputFPPRemotePlayFile)
     {
-        InputFPPRemotePlayFile->Stop ();
+        while(!InputFPPRemotePlayFile->IsIdle())
+        {
+            InputFPPRemotePlayFile->Stop ();
+            delay(10);
+        }
     }
 
     // DEBUG_V ("");

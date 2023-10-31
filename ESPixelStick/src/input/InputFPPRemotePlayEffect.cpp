@@ -82,11 +82,11 @@ void c_InputFPPRemotePlayEffect::Sync (String& FileName, float SecondsElapsed)
 } // Sync
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayEffect::Poll ()
+bool c_InputFPPRemotePlayEffect::Poll ()
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Poll ();
+    return pCurrentFsmState->Poll ();
 
     // DEBUG_END;
 

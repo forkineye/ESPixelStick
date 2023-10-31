@@ -23,14 +23,15 @@
 #include "../utility/SaferStringConversion.hpp"
 
 //-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_Idle::Poll ()
+bool fsm_PlayEffect_state_Idle::Poll ()
 {
     // DEBUG_START;
 
     // do nothing
 
     // DEBUG_END;
-
+    return false;
+    
 } // fsm_PlayEffect_state_Idle::Poll
 
 //-----------------------------------------------------------------------------
@@ -117,7 +118,7 @@ void fsm_PlayEffect_state_Idle::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void fsm_PlayEffect_state_PlayingEffect::Poll ()
+bool fsm_PlayEffect_state_PlayingEffect::Poll ()
 {
     // DEBUG_START;
 
@@ -131,6 +132,7 @@ void fsm_PlayEffect_state_PlayingEffect::Poll ()
     }
 
     // DEBUG_END;
+    return false;
 
 } // fsm_PlayEffect_state_PlayingEffect::Poll
 

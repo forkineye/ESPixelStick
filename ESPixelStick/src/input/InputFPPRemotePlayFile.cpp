@@ -121,12 +121,7 @@ void c_InputFPPRemotePlayFile::Stop ()
 {
     // DEBUG_START;
 
-    while (pCurrentFsmState != &fsm_PlayFile_state_Idle_imp)
-    {
-        pCurrentFsmState->Stop ();
-        pCurrentFsmState->Poll ();
-        pCurrentFsmState->TimerPoll ();
-    }
+    pCurrentFsmState->Stop ();
 
     // DEBUG_END;
 } // Stop
@@ -148,15 +143,15 @@ void c_InputFPPRemotePlayFile::Sync (String & FileName, float SecondsElapsed)
 } // Sync
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::Poll ()
+bool c_InputFPPRemotePlayFile::Poll ()
 {
     // xDEBUG_START;
 
-    // TimerPoll ();
-    pCurrentFsmState->Poll ();
-
     // Show that we have received a poll
     PollDetectionCounter = 0;
+
+    // TimerPoll ();
+    return pCurrentFsmState->Poll ();
 
     // xDEBUG_END;
 
