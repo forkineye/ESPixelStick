@@ -198,12 +198,12 @@ void c_InputFPPRemote::Process ()
     else if (PlayingRemoteFile ())
     {
         // DEBUG_V ("Remote File Play");
-        pInputFPPRemotePlayItem->Poll ();
+        while(Poll ()) {}
     }
     else if (PlayingFile ())
     {
         // DEBUG_V ("Local File Play");
-        pInputFPPRemotePlayItem->Poll ();
+        while(Poll ()) {}
 
         if (pInputFPPRemotePlayItem->IsIdle ())
         {
@@ -215,6 +215,21 @@ void c_InputFPPRemote::Process ()
     // DEBUG_END;
 
 } // process
+
+//-----------------------------------------------------------------------------
+bool c_InputFPPRemote::Poll ()
+{
+    // DEBUG_START;
+    bool Response = false;
+    if(pInputFPPRemotePlayItem)
+    {
+        Response = pInputFPPRemotePlayItem->Poll ();
+    }
+
+    // DEBUG_END;
+    return Response;
+    
+} // Poll
 
 //-----------------------------------------------------------------------------
 void c_InputFPPRemote::ProcessButtonActions(c_ExternalInput::InputValue_t value)

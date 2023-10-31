@@ -28,7 +28,7 @@ public:
     c_InputFPPRemotePlayItem (c_InputMgr::e_InputChannelIds InputChannelId);
     virtual ~c_InputFPPRemotePlayItem ();
 
-    virtual void     Poll           () = 0;
+    virtual bool     Poll           () = 0;
     virtual void     Start          (String & FileName, float SecondsElapsed, uint32_t RemainingPlayCount) = 0;
     virtual void     Stop           () = 0;
     virtual void     Sync           (String & FileName, float SecondsElapsed) = 0;

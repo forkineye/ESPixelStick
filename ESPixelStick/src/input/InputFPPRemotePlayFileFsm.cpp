@@ -23,7 +23,7 @@
 #include "src/service/FPPDiscovery.h"
 
 //-----------------------------------------------------------------------------
-void fsm_PlayFile_state_Idle::Poll ()
+bool fsm_PlayFile_state_Idle::Poll ()
 {
     // DEBUG_START;
 
@@ -32,6 +32,7 @@ void fsm_PlayFile_state_Idle::Poll ()
     // do nothing
 
     // DEBUG_END;
+    return false;
 
 } // fsm_PlayFile_state_Idle::Poll
 
@@ -109,7 +110,7 @@ bool fsm_PlayFile_state_Idle::Sync (String& FileName, float ElapsedSeconds)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void fsm_PlayFile_state_Starting::Poll ()
+bool fsm_PlayFile_state_Starting::Poll ()
 {
     // DEBUG_START;
 
@@ -118,6 +119,7 @@ void fsm_PlayFile_state_Starting::Poll ()
     // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->FrameControl.TotalNumberOfFramesInSequence));
 
     // DEBUG_END;
+    return true;
 
 } // fsm_PlayFile_state_Starting::Poll
 
@@ -193,9 +195,11 @@ bool fsm_PlayFile_state_Starting::Sync (String& FileName, float ElapsedSeconds)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void fsm_PlayFile_state_PlayingFile::Poll ()
+bool fsm_PlayFile_state_PlayingFile::Poll ()
 {
     // xDEBUG_START;
+
+    bool Response = false;
 
     do // once
     {
@@ -225,6 +229,7 @@ void fsm_PlayFile_state_PlayingFile::Poll ()
                 // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->TotalNumberOfFramesInSequence));
                 // DEBUG_V (String ("      Done Playing:: FileName: '") + p_Parent->GetFileName () + "'");
                 p_Parent->Stop ();
+                Response = true;
                 break;
             }
         }
@@ -234,6 +239,7 @@ void fsm_PlayFile_state_PlayingFile::Poll ()
     } while (false);
 
     // xDEBUG_END;
+    return Response;
 
 } // fsm_PlayFile_state_PlayingFile::Poll
 
@@ -474,7 +480,7 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSecond
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void fsm_PlayFile_state_Stopping::Poll ()
+bool fsm_PlayFile_state_Stopping::Poll ()
 {
     // DEBUG_START;
 
@@ -503,6 +509,7 @@ void fsm_PlayFile_state_Stopping::Poll ()
     }
 
     // DEBUG_END;
+    return true;
 
 } // fsm_PlayFile_state_Stopping::Poll
 
@@ -564,7 +571,7 @@ bool fsm_PlayFile_state_Stopping::Sync (String&, float)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void fsm_PlayFile_state_Error::Poll ()
+bool fsm_PlayFile_state_Error::Poll ()
 {
     // xDEBUG_START;
 
@@ -573,6 +580,7 @@ void fsm_PlayFile_state_Error::Poll ()
     p_Parent->FrameControl.TotalNumberOfFramesInSequence = 0;
 
     // xDEBUG_END;
+    return false;
 
 } // fsm_PlayFile_state_Error::Poll
 

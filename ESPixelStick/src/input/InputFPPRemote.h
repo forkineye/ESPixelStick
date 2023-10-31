@@ -63,6 +63,7 @@ private:
     bool PlayingFile ();
     bool PlayingRemoteFile ();
     void PlayNextFile ();
+    bool Poll ();
 
     void load ();          ///< Load configuration from File System
     void save ();          ///< Save configuration to File System

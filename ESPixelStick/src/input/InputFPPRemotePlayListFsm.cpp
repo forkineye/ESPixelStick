@@ -25,14 +25,15 @@
 #include "InputFPPRemotePlayEffect.hpp"
 
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_WaitForStart::Poll ()
+bool fsm_PlayList_state_WaitForStart::Poll ()
 {
     // DEBUG_START;
 
     // do nothing
 
     // DEBUG_END;
-
+    return false;
+    
 } // fsm_PlayList_state_Idle::Poll
 
 //-----------------------------------------------------------------------------
@@ -93,13 +94,14 @@ void fsm_PlayList_state_WaitForStart::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_Idle::Poll ()
+bool fsm_PlayList_state_Idle::Poll ()
 {
     // DEBUG_START;
 
     pInputFPPRemotePlayList->ProcessPlayListEntry ();
 
     // DEBUG_END;
+    return false;
 
 } // fsm_PlayList_state_Idle::Poll
 
@@ -151,11 +153,11 @@ void fsm_PlayList_state_Idle::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_PlayingFile::Poll ()
+bool fsm_PlayList_state_PlayingFile::Poll ()
 {
     // DEBUG_START;
 
-    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll ();
+    bool Response = pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll ();
     
     if (pInputFPPRemotePlayList->pInputFPPRemotePlayItem->IsIdle ())
     {
@@ -164,6 +166,7 @@ void fsm_PlayList_state_PlayingFile::Poll ()
     }
 
     // DEBUG_END;
+    return Response;
 
 } // fsm_PlayList_state_PlayingFile::Poll
 
@@ -227,7 +230,7 @@ void fsm_PlayList_state_PlayingFile::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_PlayingEffect::Poll ()
+bool fsm_PlayList_state_PlayingEffect::Poll ()
 {
     // DEBUG_START;
 
@@ -240,6 +243,7 @@ void fsm_PlayList_state_PlayingEffect::Poll ()
     }
 
     // DEBUG_END;
+    return false;
 
 } // fsm_PlayList_state_PlayingEffect::Poll
 
@@ -305,7 +309,7 @@ void fsm_PlayList_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void fsm_PlayList_state_Paused::Poll ()
+bool fsm_PlayList_state_Paused::Poll ()
 {
     // DEBUG_START;
 
@@ -315,6 +319,7 @@ void fsm_PlayList_state_Paused::Poll ()
     }
 
     // DEBUG_END;
+    return false;
 
 } // fsm_PlayList_state_Paused::Poll
 

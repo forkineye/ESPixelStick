@@ -143,7 +143,7 @@ void c_InputFPPRemotePlayFile::Sync (String & FileName, float SecondsElapsed)
 } // Sync
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::Poll ()
+bool c_InputFPPRemotePlayFile::Poll ()
 {
     // xDEBUG_START;
 
@@ -151,7 +151,7 @@ void c_InputFPPRemotePlayFile::Poll ()
     PollDetectionCounter = 0;
 
     // TimerPoll ();
-    pCurrentFsmState->Poll ();
+    return pCurrentFsmState->Poll ();
 
     // xDEBUG_END;
 
