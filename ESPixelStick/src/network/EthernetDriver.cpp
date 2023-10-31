@@ -353,7 +353,7 @@ bool c_EthernetDriver::SetConfig (JsonObject & json)
     if (ConfigChanged && HasBeenPreviouslyConfigured)
     {
         logcon (F ("Configuration change requires system reboot."));
-        reboot = true;
+        RequestReboot(100000);
     }
 
     HasBeenPreviouslyConfigured = true;

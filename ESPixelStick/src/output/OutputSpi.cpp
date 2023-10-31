@@ -90,7 +90,7 @@ c_OutputSpi::~c_OutputSpi ()
         if (OutputPixel)
         {
             logcon(CN_stars + String(F(" SPI Interface Shutdown requires a reboot ")) + CN_stars);
-            reboot = true;
+            RequestReboot(100000);
         }
     }
     // DEBUG_END;
