@@ -87,7 +87,8 @@ const String BUILD_DATE = String(__DATE__) + " - " + String(__TIME__);
 const uint8_t CurrentConfigVersion = 1;
 
 config_t config;                    // Current configuration
-bool     reboot = false;            // Reboot flag
+static const uint32_t NotRebootingValue = uint32_t(-1);
+uint32_t RebootCount = NotRebootingValue;
 uint32_t lastUpdate;                // Update timeout tracker
 bool     ResetWiFi = false;
 bool     IsBooting = true;  // Configuration initialization flag
@@ -495,11 +496,14 @@ void loop()
     } // end discard loop
 
     // Reboot handler
-    if (reboot)
+    if (NotRebootingValue != RebootCount)
     {
-        logcon (String(CN_stars) + CN_minussigns + F ("Internal Reboot Requested. Rebooting Now"));
-        delay (REBOOT_DELAY);
-        ESP.restart ();
+        if(0 == --RebootCount)
+        {
+            logcon (String(CN_stars) + CN_minussigns + F ("Internal Reboot Requested. Rebooting Now"));
+            delay (REBOOT_DELAY);
+            ESP.restart ();
+        }
     }
 
     if (ConfigLoadNeeded)
@@ -515,6 +519,20 @@ void loop()
     }
 
 } // loop
+
+bool RebootInProgress()
+{
+    return RebootCount != NotRebootingValue;
+}
+
+void RequestReboot(uint32_t LoopDelay)
+{
+    RebootCount = LoopDelay;
+
+    InputMgr.SetOperationalState(false);
+    OutputMgr.PauseOutputs(true);
+
+} // RequestReboot
 
 void _logcon (String & DriverName, String Message)
 {

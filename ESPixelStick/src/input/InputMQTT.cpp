@@ -157,11 +157,11 @@ void c_InputMQTT::Process ()
             // DEBUG_V ("");
             pEffectsEngine->Process ();
         }
-    }
 
-    if (nullptr != pPlayFileEngine)
-    {
-        pPlayFileEngine->Poll ();
+        if (nullptr != pPlayFileEngine)
+        {
+            pPlayFileEngine->Poll ();
+        }
     }
 
     // DEBUG_END;
@@ -772,8 +772,7 @@ void c_InputMQTT::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
     else if (ReBootAllowed)
     {
         // handle a disconnect
-        extern bool reboot;
-        reboot = true;
+        RequestReboot(100000);
         logcon (String (F ("Requesting reboot on loss of network connection.")));
     }
 

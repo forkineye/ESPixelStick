@@ -624,7 +624,7 @@ void c_InputMgr::LoadConfig ()
         else
         {
             logcon (CN_stars + String (F (" Error loading Input Manager Config File. Rebooting ")) + CN_stars);
-            reboot = true;
+            RequestReboot(100000);
         }
     }
 
@@ -659,10 +659,15 @@ void c_InputMgr::Process ()
             configInProgress = false;
         }
 
+        if(RebootInProgress())
+        {
+            break;
+        }
+
         bool aBlankTimerIsRunning = false;
         for (auto & CurrentInput : InputChannelDrivers)
         {
-            // DEBUG_V("");
+            // DEBUG_V(String("pInputChannelDriver: 0x") + String(uint32_t(CurrentInput.pInputChannelDriver), HEX));
             CurrentInput.pInputChannelDriver->Process ();
 
             if (!BlankTimerHasExpired (CurrentInput.pInputChannelDriver->GetInputChannelId()))
@@ -683,7 +688,7 @@ void c_InputMgr::Process ()
         if (rebootNeeded)
         {
             // DEBUG_V("Requesting Reboot");
-            reboot = true;
+            RequestReboot(100000);
         }
 
     } while (false);

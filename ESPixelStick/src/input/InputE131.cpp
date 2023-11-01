@@ -273,7 +273,7 @@ bool c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     if ((OldPortId != PortId) && (ESPAsyncE131Initialized))
     {
         // ask for a reboot.
-        reboot = true;
+        RequestReboot(100000);
         logcon (String (F ("Requesting reboot on change of UDP port.")));
     }
 
@@ -390,8 +390,7 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
     {
         // handle a disconnect
         // E1.31 does not do this gracefully. A loss of connection needs a reboot
-        // extern bool reboot;
-        reboot = true;
+        RequestReboot(100000);
         logcon (String (F ("Input requesting reboot on loss of WiFi connection.")));
     }
 
