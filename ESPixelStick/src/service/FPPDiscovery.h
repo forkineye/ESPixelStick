@@ -65,6 +65,7 @@ private:
     {
         time_t   lastReceiveTime;
         uint32_t pktCommand;
+        uint32_t pktLastCommand;
         uint32_t pktSyncSeqOpen;
         uint32_t pktSyncSeqStart;
         uint32_t pktSyncSeqStop;
@@ -77,7 +78,8 @@ private:
         uint32_t pktPing;
         uint32_t pktPlugin;
         uint32_t pktFPPCommand;
-        uint32_t pktError;
+        uint32_t pktHdrError;
+        uint32_t pktUnknown;
     };
     MultiSyncStats_t MultiSyncStats;
 
@@ -91,6 +93,18 @@ private:
 #   define CTRL_PKT_PING        4
 #   define CTRL_PKT_PLUGIN      5
 #   define CTRL_PKT_FPPCOMMAND  6
+
+#define FPP_DEBUG_ENABLED
+struct SystemDebugStats_t
+{
+    uint32_t ProcessFPPJson = 0;
+    uint32_t CmdGetFPPstatus = 0;
+    uint32_t CmdGetSysInfoJSON = 0;
+    uint32_t CmdGetHostname = 0;
+    uint32_t CmdGetConfig = 0;
+    uint32_t CmdNotFound = 0;
+};
+SystemDebugStats_t SystemDebugStats;
 
 public:
     c_FPPDiscovery ();
