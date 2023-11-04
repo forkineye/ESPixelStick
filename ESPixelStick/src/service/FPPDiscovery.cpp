@@ -147,6 +147,32 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
 
     if (IsEnabled)
     {
+#ifdef FPP_DEBUG_ENABLED
+        jsonStatus[F ("pktCommand")]      = MultiSyncStats.pktCommand;
+        jsonStatus[F ("pktSyncSeqOpen")]  = MultiSyncStats.pktSyncSeqOpen;
+        jsonStatus[F ("pktSyncSeqStart")] = MultiSyncStats.pktSyncSeqStart;
+        jsonStatus[F ("pktSyncSeqStop")]  = MultiSyncStats.pktSyncSeqStop;
+        jsonStatus[F ("pktSyncSeqSync")]  = MultiSyncStats.pktSyncSeqSync;
+        jsonStatus[F ("pktSyncMedOpen")]  = MultiSyncStats.pktSyncMedOpen;
+        jsonStatus[F ("pktSyncMedStart")] = MultiSyncStats.pktSyncMedStart;
+        jsonStatus[F ("pktSyncMedStop")]  = MultiSyncStats.pktSyncMedStop;
+        jsonStatus[F ("pktSyncMedSync")]  = MultiSyncStats.pktSyncMedSync;
+        jsonStatus[F ("pktBlank")]        = MultiSyncStats.pktBlank;
+        jsonStatus[F ("pktPing")]         = MultiSyncStats.pktPing;
+        jsonStatus[F ("pktPlugin")]       = MultiSyncStats.pktPlugin;
+        jsonStatus[F ("pktFPPCommand")]   = MultiSyncStats.pktFPPCommand;
+        jsonStatus[F ("pktHdrError")]     = MultiSyncStats.pktHdrError;
+        jsonStatus[F ("pktUnknown")]      = MultiSyncStats.pktUnknown;
+        jsonStatus[F ("pktLastCommand")]  = MultiSyncStats.pktLastCommand;
+
+        jsonStatus[F ("ProcessFPPJson")]    = SystemDebugStats.ProcessFPPJson;
+        jsonStatus[F ("CmdGetFPPstatus")]   = SystemDebugStats.CmdGetFPPstatus;
+        jsonStatus[F ("CmdGetSysInfoJSON")] = SystemDebugStats.CmdGetSysInfoJSON;
+        jsonStatus[F ("CmdGetHostname")]    = SystemDebugStats.CmdGetHostname;
+        jsonStatus[F ("CmdGetConfig")]      = SystemDebugStats.CmdGetConfig;
+        jsonStatus[F ("CmdNotFound")]       = SystemDebugStats.CmdNotFound;
+#endif // def FPP_DEBUG_ENABLED
+
         // DEBUG_V ("Is Enabled");
         JsonObject MyJsonStatus = jsonStatus.createNestedObject (F ("FPPDiscovery"));
         MyJsonStatus[F ("FppRemoteIp")] = FppRemoteIp.toString ();
@@ -187,7 +213,7 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
             (fppPacket->header[3] != 'D'))
         {
             // DEBUG_V ("Invalid FPP header");
-            MultiSyncStats.pktError++;
+            MultiSyncStats.pktHdrError++;
             break;
         }
         // DEBUG_V ();
@@ -195,7 +221,8 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
         struct timeval tv;
         gettimeofday (&tv, NULL);
         MultiSyncStats.lastReceiveTime = tv.tv_sec;
-
+        MultiSyncStats.pktLastCommand = fppPacket->packet_type;
+        
         switch (fppPacket->packet_type)
         {
             case CTRL_PKT_CMD: // deprecated in favor of FPP Commands
@@ -295,6 +322,8 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
             default:
             {
                 // DEBUG_V (String ("UnHandled PDU: packet_type:  ") + String (fppPacket->packet_type));
+                MultiSyncStats.pktUnknown++;
+
                 break;
             }
         } // switch (fppPacket->packet_type)
@@ -532,7 +561,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
     JsonData[F ("pktPing")]         = MultiSyncStats.pktPing;
     JsonData[F ("pktPlugin")]       = MultiSyncStats.pktPlugin;
     JsonData[F ("pktFPPCommand")]   = MultiSyncStats.pktFPPCommand;
-    JsonData[F ("pktError")]        = MultiSyncStats.pktError;
+    JsonData[F ("pktError")]        = MultiSyncStats.pktHdrError;
 
     uint32_t maxChannel = read32 (fsqHeader.channelCount, 0);
 
@@ -658,14 +687,14 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                     if (FileMgr.GetSdFileSize(FileHandle) > 0)
                     {
                         // DEBUG_V ("found the file. return metadata as json");
-                        String resp = "";
+                        String resp = emptyString;
                         BuildFseqResponse (seq, FileHandle, resp);
                         FileMgr.CloseSdFile (FileHandle);
                         request->send (200, CN_applicationSLASHjson, resp);
                         break;
                     }
                 }
-                logcon (String (F ("Could not open: ")) + seq);
+                logcon (String (F ("Could not open: '")) + seq + F("' for reading"));
             }
         }
         else if (path.startsWith (F ("/api/system/status")))
@@ -677,6 +706,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
             serializeJson (JsonDoc, Response);
             // DEBUG_V (String ("JsonDoc: ") + Response);
             request->send (200, CN_applicationSLASHjson, Response);
+            break;
         }
         else if (path.startsWith (F ("/api/system/info")))
         {
@@ -687,7 +717,9 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
             serializeJson (JsonDoc, Response);
             // DEBUG_V (String ("JsonDoc: ") + Response);
             request->send (200, CN_applicationSLASHjson, Response);
+            break;
         }
+        // DEBUG_V(String("Unknown Request: '") + path + "'");
         request->send (404);
 
     } while (false); // do once
@@ -962,6 +994,8 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
     // DEBUG_START;
     printReq(request, false);
 
+    SystemDebugStats.ProcessFPPJson++;
+
     do // once
     {
         if (!request->hasParam (ulrCommand))
@@ -980,13 +1014,14 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 
         if (command.equals(F ("getFPPstatus")))
         {
+            SystemDebugStats.CmdGetFPPstatus++;
             String adv = CN_false;
             if (request->hasParam (CN_advancedView))
             {
                 adv = request->getParam (CN_advancedView)->value ();
             }
 
-            GetStatusJSON(JsonData, adv == CN_true);
+            GetStatusJSON(JsonData, adv.equals(CN_true));
 
             String Response;
             serializeJson (JsonDoc, Response);
@@ -998,6 +1033,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 
         if (command.equals(F ("getSysInfo")))
         {
+            SystemDebugStats.CmdGetSysInfoJSON++;
             GetSysInfoJSON (JsonData);
 
             String resp = "";
@@ -1010,6 +1046,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 
         if (command.equals(("getHostNameInfo")))
         {
+            SystemDebugStats.CmdGetHostname++;
             String Hostname;
             NetworkMgr.GetHostname (Hostname);
 
@@ -1029,8 +1066,9 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             if (request->hasParam (CN_file))
             {
                 String filename = request->getParam (CN_file)->value ();
-                if (String(F ("co-other")) == filename)
+                if (String(F ("co-other")).equals(filename))
                 {
+                    SystemDebugStats.CmdGetConfig++;
                     String resp;
                     OutputMgr.GetConfig (resp);
 
@@ -1044,6 +1082,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 
         // DEBUG_V (String ("Unknown command: ") + command);
         request->send (404);
+        SystemDebugStats.CmdNotFound++;
 
     } while (false);
 
