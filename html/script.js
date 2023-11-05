@@ -1571,10 +1571,9 @@ function submitDeviceConfig() {
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
-    // submitNetworkConfig();
     ServerAccess.callFunction(SendConfigFileToServer, "output_config", {'output_config': Output_Config});
     ServerAccess.callFunction(SendConfigFileToServer, "input_config", {'input_config': Input_Config});
-    ServerAccess.callFunction(SendConfigFileToServer, "config", {'system': System_Config});
+    submitNetworkConfig();
 
 } // submitDeviceConfig
 
