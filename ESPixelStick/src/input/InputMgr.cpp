@@ -323,6 +323,11 @@ void c_InputMgr::GetStatus (JsonObject& jsonStatus)
     JsonArray InputStatus = jsonStatus.createNestedArray (F ("input"));
     for (auto & CurrentInput : InputChannelDrivers)
     {
+        if(nullptr == CurrentInput.pInputChannelDriver) 
+        {
+            continue;
+        }
+
         JsonObject channelStatus = InputStatus.createNestedObject ();
         CurrentInput.pInputChannelDriver->GetStatus (channelStatus);
         // DEBUG_V("");
@@ -580,10 +585,13 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
         //Serial.println (String (CN_stars) + " '" + sDriverName + F("' Initialization for input: '") + String(ChannelIndex) + "' " + CN_stars);
         if (StartDriver)
         {
-            // DEBUG_V (String ("StartDriver: ") + String (StartDriver));
-            InputChannelDrivers[ChannelIndex].pInputChannelDriver->Begin ();
-            // DEBUG_V ("");
-            InputChannelDrivers[ChannelIndex].pInputChannelDriver->SetBufferInfo (InputDataBufferSize);
+            if(nullptr != InputChannelDrivers[ChannelIndex].pInputChannelDriver) 
+            {
+	            // DEBUG_V (String ("StartDriver: ") + String (StartDriver));
+	            InputChannelDrivers[ChannelIndex].pInputChannelDriver->Begin ();
+	            // DEBUG_V ("");
+	            InputChannelDrivers[ChannelIndex].pInputChannelDriver->SetBufferInfo (InputDataBufferSize);
+            }
         }
         // DEBUG_V ("");
 
@@ -667,6 +675,10 @@ void c_InputMgr::Process ()
         bool aBlankTimerIsRunning = false;
         for (auto & CurrentInput : InputChannelDrivers)
         {
+            if(nullptr == CurrentInput.pInputChannelDriver) 
+            {
+                continue;
+            }
             // DEBUG_V(String("pInputChannelDriver: 0x") + String(uint32_t(CurrentInput.pInputChannelDriver), HEX));
             CurrentInput.pInputChannelDriver->Process ();
 
@@ -703,6 +715,10 @@ void c_InputMgr::ProcessButtonActions (c_ExternalInput::InputValue_t value)
 
     for(auto & CurrentInputChannel : InputChannelDrivers)
     {
+        if(nullptr == CurrentInputChannel.pInputChannelDriver) 
+        {
+            continue;
+        }
         CurrentInputChannel.pInputChannelDriver->ProcessButtonActions(value);
     }
 
@@ -816,12 +832,14 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
             InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex), e_InputType (ChannelType));
             // DEBUG_V (String ("Response: ") + Response);
 
-            EffectEngineIsConfiguredToRun[ChannelIndex] = (e_InputType::InputType_Effects == InputChannelDrivers[ChannelIndex].pInputChannelDriver->GetInputType()) ? true : false;
+            if(nullptr != InputChannelDrivers[ChannelIndex].pInputChannelDriver) 
+            {
+                EffectEngineIsConfiguredToRun[ChannelIndex] = (e_InputType::InputType_Effects == InputChannelDrivers[ChannelIndex].pInputChannelDriver->GetInputType()) ? true : false;
 
-            // send the config to the driver. At this level we have no idea what is in it
-            InputChannelDrivers[ChannelIndex].pInputChannelDriver->SetConfig (InputChannelDriverConfig);
-            // DEBUG_V (String("Response: ") + Response);
-
+                // send the config to the driver. At this level we have no idea what is in it
+                InputChannelDrivers[ChannelIndex].pInputChannelDriver->SetConfig (InputChannelDriverConfig);
+                // DEBUG_V (String("Response: ") + Response);
+            }
         } // end for each channel
 
 		Response = true;
