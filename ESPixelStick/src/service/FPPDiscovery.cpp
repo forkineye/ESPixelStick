@@ -1112,7 +1112,7 @@ void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
         }
         // DEBUG_V ("");
 
-        if (0 == FileName.length())
+        if (FileName.isEmpty())
         {
             // DEBUG_V("Do not have a file to start");
             break;
