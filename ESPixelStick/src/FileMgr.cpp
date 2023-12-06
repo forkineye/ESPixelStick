@@ -797,7 +797,7 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
 {
     // DEBUG_START;
 
-    DynamicJsonDocument ResponseJsonDoc (3 * 1024);
+    DynamicJsonDocument ResponseJsonDoc (4 * 1024);
 
     do // once
     {
@@ -840,8 +840,8 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
             // DEBUG_V ("EntryName: " + EntryName);
             // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
 
-            if ((0 != EntryName.length ()) &&
-                (EntryName != String (F ("System Volume Information"))) &&
+            if ((!EntryName.isEmpty ()) &&
+                (!EntryName.equals(String (F ("System Volume Information")))) &&
                 (0 != entry.size ())
                )
             {
@@ -909,8 +909,8 @@ void c_FileMgr::GetListOfSdFiles (std::vector<String> & Response)
             // DEBUG_V ("EntryName: '" + EntryName + "'");
             // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
 
-            if ((0 != EntryName.length ()) &&
-                (EntryName != String (F ("System Volume Information"))) &&
+            if ((!EntryName.isEmpty ()) &&
+                (!EntryName.equals(String (F ("System Volume Information")))) &&
                 (0 != entry.size ())
                )
             {
