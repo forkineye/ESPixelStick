@@ -250,9 +250,9 @@ void c_WebMgr::init ()
             }
             else
             {
-                DEBUG_V(String("URL: ") + request->url ());
+                // DEBUG_V(String("URL: ") + request->url ());
                 uint32_t StartingFileIndex = request->url ().substring(String(F("/files/")).length()).toInt();
-                DEBUG_V(String("StartingFileIndex: ") + StartingFileIndex);
+                // DEBUG_V(String("StartingFileIndex: ") + StartingFileIndex);
 
                 String Response;
                 FileMgr.GetListOfSdFiles(Response, StartingFileIndex);

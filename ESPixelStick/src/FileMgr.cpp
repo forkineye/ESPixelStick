@@ -839,7 +839,7 @@ void c_FileMgr::GetListOfSdFiles (String & Response, uint32_t FirstFileToSend)
 
             if (!entry)
             {
-                DEBUG_V("no more files to add to list");
+                // DEBUG_V("no more files to add to list");
                 ResponseJsonDoc[F("final")] = true;
                 break;
             }
@@ -869,7 +869,7 @@ void c_FileMgr::GetListOfSdFiles (String & Response, uint32_t FirstFileToSend)
                 uint32_t availableSpace = capacity - usedSpace;
                 if(neededMemory >= availableSpace)
                 {
-                    DEBUG_V("No more file names will fit in the list");
+                    // DEBUG_V("No more file names will fit in the list");
                     entry.close ();
                     break;
                 }
