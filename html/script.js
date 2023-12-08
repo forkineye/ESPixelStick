@@ -1,5 +1,6 @@
 var StatusRequestTimer = null;
 var FseqFileListRequestTimer = null;
+let ExpectedStartingFileIndex = 0;
 var DiagTimer = null;
 
 // global data
@@ -243,7 +244,7 @@ $(function () {
                     // console.log(file);
                     // console.log(resp);
                     Dropzone.forElement('#filemanagementupload').removeAllFiles(true)
-                    RequestListOfFiles();
+                    RequestListOfFiles(0);
                 });
 
                 this.on('complete', function (file, resp) {
@@ -387,14 +388,14 @@ function ProcessWindowChange(NextWindow) {
     }
 
     else if (NextWindow === "#config") {
-        RequestListOfFiles();
+        RequestListOfFiles(0);
         RcfResponse = RequestConfigFile("config.json");
         RcfResponse = RequestConfigFile("output_config.json");
         RcfResponse = RequestConfigFile("input_config.json");
     }
 
     else if (NextWindow === "#filemanagement") {
-        RequestListOfFiles();
+        RequestListOfFiles(0);
     }
 
     UpdateAdvancedOptionsMode();
@@ -507,7 +508,9 @@ function RequestStatusUpdate()
 
 } // RequestStatusUpdate
 
-function RequestListOfFiles() {
+function RequestListOfFiles(StartingFileIndex) {
+    ExpectedStartingFileIndex = StartingFileIndex;
+
     // is the timer running?
     if (null === FseqFileListRequestTimer) {
         // timer runs until we get a response
@@ -515,14 +518,14 @@ function RequestListOfFiles() {
             clearTimeout(FseqFileListRequestTimer);
             FseqFileListRequestTimer = null;
 
-            RequestListOfFiles();
+            RequestListOfFiles(StartingFileIndex);
 
         }, 1000);
     } // end timer was not running
 
     // ask for a file list from the server
 
-    return fetch("HTTP://" + target + "/files", {
+    return fetch("HTTP://" + target + "/files/" + StartingFileIndex, {
         method: 'GET',
         mode: "cors", // no-cors, *cors, same-origin
         headers: { 'Content-Type': 'application/json' },
@@ -586,20 +589,27 @@ function ProcessGetFileListResponse(JsonConfigData) {
     clearTimeout(FseqFileListRequestTimer);
     FseqFileListRequestTimer = null;
 
-    // console.info("$('#FileManagementTable > tr').length " + $('#FileManagementTable > tr').length);
+    // are we starting a fresh list (first chunk)
+    if(JsonConfigData.first === 0)
+    {
+        // console.info("$('#FileManagementTable > tr').length " + $('#FileManagementTable > tr').length);
 
-    while (1 < $('#FileManagementTable > tr').length) {
-        // console.info("Deleting $('#FileManagementTable tr').length " + $('#FileManagementTable tr').length);
-        $('#FileManagementTable tr').last().remove();
-        // console.log("After Delete: $('#FileManagementTable tr').length " + $('#FileManagementTable tr').length);
+        while (1 < $('#FileManagementTable > tr').length) {
+            // console.info("Deleting $('#FileManagementTable tr').length " + $('#FileManagementTable tr').length);
+            $('#FileManagementTable tr').last().remove();
+            // console.log("After Delete: $('#FileManagementTable tr').length " + $('#FileManagementTable tr').length);
+        }
     }
 
-    let CurrentRowId = 0;
+    console.info("Expected File Index: " + ExpectedStartingFileIndex);
+    console.info("Received File index: " + JsonConfigData.first);
+
     JsonConfigData.files.forEach(function (file) {
+        let CurrentRowId = $('#FileManagementTable > tr').length;
         let SelectedPattern = '<td><input  type="checkbox" id="FileSelected_' + (CurrentRowId) + '"></td>';
-        let NamePattern = '<td><output type="text"     id="FileName_' + (CurrentRowId) + '"></td>';
-        let DatePattern = '<td><output type="text"     id="FileDate_' + (CurrentRowId) + '"></td>';
-        let SizePattern = '<td><output type="text"     id="FileSize_' + (CurrentRowId) + '"></td>';
+        let NamePattern = '<td><output type="text" id="FileName_' + (CurrentRowId) + '"></td>';
+        let DatePattern = '<td><output type="text" id="FileDate_' + (CurrentRowId) + '"></td>';
+        let SizePattern = '<td><output type="text" id="FileSize_' + (CurrentRowId) + '"></td>';
 
         let rowPattern = '<tr>' + SelectedPattern + NamePattern + DatePattern + SizePattern + '</tr>';
         $('#FileManagementTable tr:last').after(rowPattern);
@@ -615,9 +625,14 @@ function ProcessGetFileListResponse(JsonConfigData) {
             $('#FileDate_' + (CurrentRowId)).val(new Date(0).toISOString());
             $('#FileSize_' + (CurrentRowId)).val(0);
         }
+    }); // end foreach
 
-        CurrentRowId++;
-    });
+    // was this the last chunk?
+    if(false === JsonConfigData.final)
+    {
+        // not last. Ask for the next chunk
+        RequestListOfFiles(JsonConfigData.last);
+    }
 } // ProcessGetFileListResponse
 
 function RequestFileDeletion() {
@@ -631,7 +646,7 @@ function RequestFileDeletion() {
         }
     });
 
-    RequestListOfFiles();
+    RequestListOfFiles(0);
 
 } // RequestFileDeletion
 
