@@ -62,7 +62,7 @@ private:
 #ifdef ARDUINO_ARCH_ESP32
 #   define     STATUS_DOC_SIZE 4000
 #else
-#   define     STATUS_DOC_SIZE 2000
+#   define     STATUS_DOC_SIZE 2500
 #endif // def ARDUINO_ARCH_ESP32
 
     void init ();
