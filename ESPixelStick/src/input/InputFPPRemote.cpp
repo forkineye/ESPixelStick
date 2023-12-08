@@ -332,7 +332,7 @@ void c_InputFPPRemote::StartPlaying (String& FileName)
     do // once
     {
         // DEBUG_V (String ("FileName: '") + FileName + "'");
-        if ((0 == FileName.length ()) ||
+        if ((FileName.isEmpty ()) ||
             (FileName.equals("null")))
         {
             // DEBUG_V ("No file to play");

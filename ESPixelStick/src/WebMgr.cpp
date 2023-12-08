@@ -250,8 +250,12 @@ void c_WebMgr::init ()
             }
             else
             {
+                // DEBUG_V(String("URL: ") + request->url ());
+                uint32_t StartingFileIndex = request->url ().substring(String(F("/files/")).length()).toInt();
+                // DEBUG_V(String("StartingFileIndex: ") + StartingFileIndex);
+
                 String Response;
-                FileMgr.GetListOfSdFiles(Response);
+                FileMgr.GetListOfSdFiles(Response, StartingFileIndex);
                 request->send (200, CN_applicationSLASHjson, Response);
                 // DEBUG_V(String("Files: ") + Response);
             }

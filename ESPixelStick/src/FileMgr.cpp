@@ -793,15 +793,19 @@ void c_FileMgr::DescribeSdCardToUser ()
 } // DescribeSdCardToUser
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::GetListOfSdFiles (String & Response)
+void c_FileMgr::GetListOfSdFiles (String & Response, uint32_t FirstFileToSend)
 {
     // DEBUG_START;
+    #define EntryReservedSpace 75
+    #define EntryUsageFactor 3
 
-    DynamicJsonDocument ResponseJsonDoc (3 * 1024);
+    DynamicJsonDocument ResponseJsonDoc (1 * 1024);
 
     do // once
     {
-        if (0 == ResponseJsonDoc.capacity ())
+        uint32_t capacity = ResponseJsonDoc.capacity ();
+
+        if (0 == capacity)
         {
             logcon (String(CN_stars) + F ("ERROR: Failed to allocate memory for the GetListOfSdFiles web request response.") + CN_stars);
             break;
@@ -820,6 +824,12 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
         ResponseJsonDoc[F ("totalBytes")] = ESP_SD.size64 ();
 #endif
         uint64_t usedBytes = 0;
+        uint32_t last = 0;
+
+        ResponseJsonDoc[F("usedBytes")] = uint32_t(-1);
+        ResponseJsonDoc[F("first")]     = FirstFileToSend;
+        ResponseJsonDoc[F("last")]      = uint32_t(-1);
+        ResponseJsonDoc[F("final")]     = false;
 
         File dir = ESP_SDFS.open ("/", CN_r);
 
@@ -829,24 +839,42 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
 
             if (!entry)
             {
-                // no more files
+                // DEBUG_V("no more files to add to list");
+                ResponseJsonDoc[F("final")] = true;
                 break;
             }
 
             usedBytes += entry.size ();
+            ++last;
+
+            // have we gotten to a file we have not sent yet?
+            if(FirstFileToSend)
+            {
+                --FirstFileToSend;
+                continue;
+            }
 
             String EntryName = String (entry.name ());
             EntryName = EntryName.substring ((('/' == EntryName[0]) ? 1 : 0));
             // DEBUG_V ("EntryName: " + EntryName);
             // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
 
-            if ((0 != EntryName.length ()) &&
-                (EntryName != String (F ("System Volume Information"))) &&
+            if ((!EntryName.isEmpty ()) &&
+                (!EntryName.equals(String (F ("System Volume Information")))) &&
                 (0 != entry.size ())
                )
             {
-                // DEBUG_V ("Adding File: '" + EntryName + "'");
+                uint32_t neededMemory = EntryReservedSpace + (EntryName.length() * EntryUsageFactor);
+                uint32_t usedSpace = ResponseJsonDoc.memoryUsage();
+                uint32_t availableSpace = capacity - usedSpace;
+                if(neededMemory >= availableSpace)
+                {
+                    // DEBUG_V("No more file names will fit in the list");
+                    entry.close ();
+                    break;
+                }
 
+                // DEBUG_V ("Adding File: '" + EntryName + "'");
                 JsonObject CurrentFile = FileArray.createNestedObject ();
                 CurrentFile[CN_name]      = EntryName;
                 CurrentFile[F ("date")]   = entry.getLastWrite ();
@@ -854,11 +882,12 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
             }
 
             entry.close ();
-        }
+        } // end while true
 
         dir.close();
 
         ResponseJsonDoc[F("usedBytes")] = usedBytes;
+        ResponseJsonDoc[F("last")]      = last;
 
         if(ResponseJsonDoc.overflowed())
         {
@@ -866,7 +895,7 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
             break;
         }
 
-    } while (false);
+    } while (false); // once
 
     // DEBUG_V(String("ResponseJsonDoc.size(): ") + String(ResponseJsonDoc.size()));
     Response.reserve(1024);
@@ -909,8 +938,8 @@ void c_FileMgr::GetListOfSdFiles (std::vector<String> & Response)
             // DEBUG_V ("EntryName: '" + EntryName + "'");
             // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
 
-            if ((0 != EntryName.length ()) &&
-                (EntryName != String (F ("System Volume Information"))) &&
+            if ((!EntryName.isEmpty ()) &&
+                (!EntryName.equals(String (F ("System Volume Information")))) &&
                 (0 != entry.size ())
                )
             {
