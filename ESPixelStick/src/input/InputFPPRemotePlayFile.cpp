@@ -310,6 +310,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
         {
             LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not read FSEQ header: filename: '")) + PlayItemName + "'");
             logcon (LastFailedPlayStatusMsg);
+            FileMgr.CloseSdFile(FileHandleForFileBeingPlayed);
             break;
         }
 
@@ -350,6 +351,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
         {
             LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not start. ")) + PlayItemName + F (" is not a v2 uncompressed sequence"));
             logcon (LastFailedPlayStatusMsg);
+            FileMgr.CloseSdFile(FileHandleForFileBeingPlayed);
             break;
         }
         // DEBUG_V ("");
@@ -377,6 +379,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
             {
                 LastFailedPlayStatusMsg =  (String (F ("ParseFseqFile:: Could not start. ")) + PlayItemName + F (" Too many sparse ranges defined in file header."));
                 logcon (LastFailedPlayStatusMsg);
+                FileMgr.CloseSdFile(FileHandleForFileBeingPlayed);
                 break;
             }
 
