@@ -1,6 +1,10 @@
 
 # Changelog
 
+### 4.0-beta5
+
+Numerous fixes have occurred since beta4, most notably web frontend stability (websockets removed) and FPP / xLights compatibility and synchronization.  You will need to be on a current release of xLights in order for input/output uploading to work.  MacOS libraries for the flash tool have been updated as well, but you will still have to execute the flash tool from the command line and jump through Apple's security hoops to allow mklittlefs to run.  Numerous 3rd party ESP32 platforms have been added for those that like to roll their own controllers.
+
 ### 4.0-beta4
 
 - Moved FPP Remote to secondary input [Issue #388](https://github.com/forkineye/ESPixelStick/issues/388)

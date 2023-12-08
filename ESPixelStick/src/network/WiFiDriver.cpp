@@ -130,24 +130,27 @@ void c_WiFiDriver::Begin ()
 
     if (FileMgr.SdCardIsInstalled())
     {
-        DynamicJsonDocument jsonConfigDoc(1024);
-        // DEBUG_V ("read the sdcard config");
-        if (FileMgr.ReadSdFile (F("wificonfig.json"), jsonConfigDoc))
+        if (ESP_SDFS.exists (F("wificonfig.json")))
         {
-            // DEBUG_V ("Process the sdcard config");
-            JsonObject jsonConfig = jsonConfigDoc.as<JsonObject> ();
+            DynamicJsonDocument jsonConfigDoc(1024);
+            // DEBUG_V ("read the sdcard config");
+            if (FileMgr.ReadSdFile (F("wificonfig.json"), jsonConfigDoc))
+            {
+                // DEBUG_V ("Process the sdcard config");
+                JsonObject jsonConfig = jsonConfigDoc.as<JsonObject> ();
 
-            // copy the fields of interest into the local structure
-            setFromJSON (ssid,       jsonConfig, CN_ssid);
-            setFromJSON (passphrase, jsonConfig, CN_passphrase);
+                // copy the fields of interest into the local structure
+                setFromJSON (ssid,       jsonConfig, CN_ssid);
+                setFromJSON (passphrase, jsonConfig, CN_passphrase);
 
-            ConfigSaveNeeded = true;
+                ConfigSaveNeeded = true;
 
-            FileMgr.DeleteSdFile (F ("wificonfig.json"));
-        }
-        else
-        {
-            // DEBUG_V ("ERROR: Could not read SD card config");
+                FileMgr.DeleteSdFile (F ("wificonfig.json"));
+            }
+            else
+            {
+                // DEBUG_V ("ERROR: Could not read SD card config");
+            }
         }
     }
 
