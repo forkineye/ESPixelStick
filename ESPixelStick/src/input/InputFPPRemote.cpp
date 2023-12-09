@@ -74,8 +74,9 @@ void c_InputFPPRemote::GetConfig (JsonObject& jsonConfig)
     {
         jsonConfig[JSON_NAME_FILE_TO_PLAY] = No_LocalFileToPlay;
     }
-    jsonConfig[CN_SyncOffset] = SyncOffsetMS;
+    jsonConfig[CN_SyncOffset]  = SyncOffsetMS;
     jsonConfig[CN_SendFppSync] = SendFppSync;
+    jsonConfig[CN_blankOnStop] = FPPDiscovery.GetBlankOnStop();
 
     // DEBUG_END;
 
@@ -268,9 +269,12 @@ bool c_InputFPPRemote::SetConfig (JsonObject& jsonConfig)
     // DEBUG_START;
 
     String FileToPlay;
+    bool BlankOnStop = FPPDiscovery.GetBlankOnStop();
     setFromJSON (FileToPlay,   jsonConfig, JSON_NAME_FILE_TO_PLAY);
     setFromJSON (SyncOffsetMS, jsonConfig, CN_SyncOffset);
     setFromJSON (SendFppSync,  jsonConfig, CN_SendFppSync);
+    setFromJSON (BlankOnStop,  jsonConfig, CN_blankOnStop);
+    FPPDiscovery.SetBlankOnStop(BlankOnStop);
 
     if (PlayingFile())
     {
