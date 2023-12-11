@@ -800,6 +800,7 @@ void c_FileMgr::GetListOfSdFiles (String & Response, uint32_t FirstFileToSend)
     #define EntryUsageFactor 3
 
     DynamicJsonDocument ResponseJsonDoc (1 * 1024);
+    FeedWDT ();
 
     do // once
     {
@@ -1035,6 +1036,7 @@ bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & Fil
     bool FileIsOpen = false;
     FileHandle = 0;
     char ReadWrite[2] = { XlateFileMode[Mode], 0 };
+    FileHandle = INVALID_FILE_HANDLE;
 
     do // once
     {
@@ -1077,10 +1079,9 @@ bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & Fil
             if (!FileList[FileListIndex].info)
             {
                 logcon(String(F("ERROR: Cannot open '")) + FileName + F("'."));
-
                 // release the file list entry
                 FileList[FileListIndex].handle = INVALID_FILE_HANDLE;
-
+                CloseSdFile(FileHandle);
                 break;
             }
             // DEBUG_V("");
@@ -1255,7 +1256,7 @@ size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t N
 } // ReadSdFile
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::CloseSdFile (const FileId& FileHandle)
+void c_FileMgr::CloseSdFile (FileId& FileHandle)
 {
     // DEBUG_START;
     // DEBUG_V(String("      FileHandle: ") + String(FileHandle));
@@ -1270,6 +1271,8 @@ void c_FileMgr::CloseSdFile (const FileId& FileHandle)
     {
         logcon (String (F ("CloseSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
+    
+    FileHandle = INVALID_FILE_HANDLE;
 
     // DEBUG_END;
 

@@ -48,6 +48,7 @@ private:
     bool inFileUpload = false;
     bool hasBeenInitialized = false;
     bool IsEnabled = false;
+    bool BlankOnStop = false;
     String UploadFileName;
     IPAddress FppRemoteIp = IPAddress (uint32_t(0));
     c_InputFPPRemotePlayFile * InputFPPRemotePlayFile = nullptr;
@@ -124,6 +125,8 @@ public:
     void GetStatus        (JsonObject& jsonStatus);
     void NetworkStateChanged (bool NewNetworkState);
 
+    void SetBlankOnStop   (bool value) {BlankOnStop = value;}
+    bool GetBlankOnStop   (void) {return BlankOnStop;}    
     void SetInputFPPRemotePlayFile (c_InputFPPRemotePlayFile * value);
     void ForgetInputFPPRemotePlayFile ();
     void GenerateFppSyncMsg (uint8_t Action, const String & FileName, uint32_t CurrentFrame, const float & ElpsedTime);

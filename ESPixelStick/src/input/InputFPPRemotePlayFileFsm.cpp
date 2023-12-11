@@ -203,7 +203,7 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
 
     do // once
     {
-        if(0 == p_Parent->FileHandleForFileBeingPlayed)
+        if(c_FileMgr::INVALID_FILE_HANDLE == p_Parent->FileHandleForFileBeingPlayed)
         {
             // DEBUG_V("Bad FileHandleForFileBeingPlayed");
             Stop();
@@ -250,7 +250,7 @@ IRAM_ATTR void fsm_PlayFile_state_PlayingFile::TimerPoll ()
 
     do // once
     {
-        if(0 == p_Parent->FileHandleForFileBeingPlayed)
+        if(c_FileMgr::INVALID_FILE_HANDLE == p_Parent->FileHandleForFileBeingPlayed)
         {
             // DEBUG_V("Bad FileHandleForFileBeingPlayed");
             Stop();
@@ -488,7 +488,6 @@ bool fsm_PlayFile_state_Stopping::Poll ()
     // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (p_Parent->FileHandleForFileBeingPlayed));
 
     FileMgr.CloseSdFile (p_Parent->FileHandleForFileBeingPlayed);
-    p_Parent->FileHandleForFileBeingPlayed = c_FileMgr::INVALID_FILE_HANDLE;
     p_Parent->fsm_PlayFile_state_Idle_imp.Init (p_Parent);
 
     StartingElapsedTime = 0.0;
@@ -609,6 +608,12 @@ void fsm_PlayFile_state_Error::Init (c_InputFPPRemotePlayFile* Parent)
     p_Parent->FrameControl.ElapsedPlayTimeMS = 0;
     p_Parent->FrameControl.FrameStepTimeMS = 0;
     p_Parent->FrameControl.TotalNumberOfFramesInSequence = 0;
+
+    if(c_FileMgr::INVALID_FILE_HANDLE != p_Parent->FileHandleForFileBeingPlayed)
+    {
+        // DEBUG_V("Unexpected File Handle at error init.");
+        FileMgr.CloseSdFile(p_Parent->FileHandleForFileBeingPlayed);
+    }
 
     // DEBUG_END;
 

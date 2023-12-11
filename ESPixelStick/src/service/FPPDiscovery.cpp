@@ -366,7 +366,14 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, float S
                 // DEBUG_V (String ("SecondsElapsed: ") + SecondsElapsed);
 
                 MultiSyncStats.pktSyncSeqStop++;
-                StopPlaying ();
+                if(BlankOnStop)
+                {
+                    ProcessBlankPacket();
+                }
+                else
+                {
+                    StopPlaying ();
+                }
                 break;
             }
 
