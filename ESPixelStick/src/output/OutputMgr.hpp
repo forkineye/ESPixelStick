@@ -26,6 +26,7 @@
 
 #include "../memdebug.h"
 #include "../FileMgr.hpp"
+#include <TimeLib.h>
 
 class c_OutputCommon; ///< forward declaration to the pure virtual output class that will be defined later.
 
@@ -42,7 +43,8 @@ public:
     virtual ~c_OutputMgr ();
 
     void      Begin             ();                        ///< set up the operating environment based on the current config (or defaults)
-    void      Poll            ();                        ///< Call from loop(),  renders output data
+    void      Poll              ();                        ///< Call from loop(),  renders output data
+    void      ScheduleLoadConfig () {ConfigLoadNeeded = now();}
     void      LoadConfig        ();                        ///< Read the current configuration data from nvram
     void      GetConfig         (byte * Response, uint32_t maxlen);
     void      GetConfig         (String & Response);
@@ -230,9 +232,9 @@ private:
     DriverInfo_t OutputChannelDrivers[OutputChannelId_End];
 
     // configuration parameter names for the channel manager within the config file
-
+    #define NO_CONFIG_NEEDED time_t(-1)
     bool HasBeenInitialized = false;
-    bool ConfigLoadNeeded   = false;
+    time_t ConfigLoadNeeded = NO_CONFIG_NEEDED;
     bool ConfigInProgress   = false;
     bool IsOutputPaused     = false;
     bool BuildingNewConfig  = false;

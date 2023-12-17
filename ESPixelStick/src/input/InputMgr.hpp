@@ -26,6 +26,7 @@
 #include "../FileMgr.hpp"
 #include "../output/OutputMgr.hpp"
 #include "externalInput.h"
+#include <TimeLib.h>
 
 class c_InputCommon; ///< forward declaration to the pure virtual Input class that will be defined later.
 
@@ -49,6 +50,7 @@ public:
 
     void Begin                (uint32_t BufferSize);
     void LoadConfig           ();
+    void ScheduleLoadConfig   () {ConfigLoadNeeded = now();}
     void GetConfig            (byte * Response, uint32_t maxlen);
     void GetStatus            (JsonObject & jsonStatus);
     void SetConfig            (const char * NewConfig);
@@ -90,6 +92,8 @@ private:
         uint32_t DriverId = 0;
         c_InputCommon * pInputChannelDriver = nullptr; ///< pointer(s) to the current active Input driver
     };
+    
+    #define NO_CONFIG_NEEDED time_t(-1)
 
     DriverInfo_t    InputChannelDrivers[InputChannelId_End]; ///< pointer(s) to the current active Input driver
     uint32_t        InputDataBufferSize = 0;
@@ -98,7 +102,7 @@ private:
     bool            EffectEngineIsConfiguredToRun[InputChannelId_End];
     bool            IsConnected         = false;
     bool            configInProgress    = false;
-    bool            configLoadNeeded    = false;
+    time_t          ConfigLoadNeeded    = NO_CONFIG_NEEDED;
 
     // configuration parameter names for the channel manager within the config file
 #   define IM_EffectsControlButtonName F ("ecb")

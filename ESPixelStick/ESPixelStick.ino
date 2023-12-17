@@ -41,6 +41,7 @@
 
 // Services
 #include "src/service/FPPDiscovery.h"
+#include <TimeLib.h>
 
 #ifdef ARDUINO_ARCH_ESP8266
 #include <Hash.h>
@@ -92,7 +93,7 @@ uint32_t RebootCount = NotRebootingValue;
 uint32_t lastUpdate;                // Update timeout tracker
 bool     ResetWiFi = false;
 bool     IsBooting = true;  // Configuration initialization flag
-bool     ConfigLoadNeeded = false;
+time_t   ConfigLoadNeeded = NO_CONFIG_NEEDED;
 bool     ConfigSaveNeeded = false;
 uint32_t DiscardedRxData = 0;
 
@@ -102,7 +103,10 @@ uint32_t DiscardedRxData = 0;
 //
 /////////////////////////////////////////////////////////
 
-void loadConfig();
+#define NO_CONFIG_NEEDED time_t(-1)
+
+void ScheduleLoadConfig() {ConfigLoadNeeded = now(); }
+void LoadConfig();
 void GetConfig (JsonObject & json);
 void GetDriverName (String & Name) { Name = F("ESP"); }
 
@@ -167,7 +171,7 @@ void setup()
     // Load configuration from the File System and set Hostname
     // TestHeap(uint32_t(15));
     // DEBUG_V(String("LoadConfig Heap: ") + String(ESP.getFreeHeap()));
-    loadConfig();
+    LoadConfig();
 
     // TestHeap(uint32_t(20));
     // DEBUG_V(String("InputMgr Heap: ") + String(ESP.getFreeHeap()));
@@ -273,7 +277,7 @@ void SetConfig (const char * DataString)
 //      if they send bad json data.
 
     FileMgr.SaveConfigFile (ConfigFileName, DataString);
-    ConfigLoadNeeded = true;
+    ScheduleLoadConfig();
 
     // DEBUG_END;
 
@@ -380,11 +384,11 @@ void SaveConfig()
 /** Loads and validates the JSON configuration file from the file system.
  *  If no configuration file is found, a new one will be created.
  */
-void loadConfig()
+void LoadConfig()
 {
     // DEBUG_START;
 
-    ConfigLoadNeeded = false;
+    ConfigLoadNeeded = NO_CONFIG_NEEDED;
 
     String temp;
     // DEBUG_V ("");
@@ -506,10 +510,13 @@ void loop()
         }
     }
 
-    if (ConfigLoadNeeded)
+    if (NO_CONFIG_NEEDED != ConfigLoadNeeded)
     {
-        FeedWDT ();
-        loadConfig ();
+        if(abs(now() - ConfigLoadNeeded) > LOAD_CONFIG_DELAY)
+        {
+            FeedWDT ();
+            LoadConfig ();
+        }
     }
 
     if (ConfigSaveNeeded)

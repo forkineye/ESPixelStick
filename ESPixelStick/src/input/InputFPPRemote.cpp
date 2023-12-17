@@ -300,9 +300,17 @@ void c_InputFPPRemote::StopPlaying ()
     {
         if (!PlayingFile ())
         {
-            // DEBUG_ ("Not currently playing a file");
+            // DEBUG_V ("Not currently playing a file");
             break;
         }
+
+        // handle re entrancy
+        if(Stopping)
+        {
+            // already in the process of stopping
+            break;
+        }
+        Stopping = true;
 
         // DEBUG_V ();
         FPPDiscovery.Disable ();
@@ -319,9 +327,13 @@ void c_InputFPPRemote::StopPlaying ()
                 pInputFPPRemotePlayItem->Stop ();
             }
 
+            // DEBUG_V("Delete current playing file");
             delete pInputFPPRemotePlayItem;
             pInputFPPRemotePlayItem = nullptr;
         }
+
+        Stopping = false;
+
     } while (false);
 
     // DEBUG_END;
