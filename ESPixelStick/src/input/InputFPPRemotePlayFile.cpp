@@ -49,9 +49,10 @@ static void TimerPollHandlerTask (void* pvParameters)
     {
         // we start suspended
         vTaskSuspend (NULL); //Suspend Own Task
+        InputFpp->TimerPollInProgress = true;
         // DEBUG_V ("");
         InputFpp->TimerPoll ();
-
+        InputFpp->TimerPollInProgress = false;
     } while (true);
     // DEBUG_END;
 
@@ -85,6 +86,10 @@ c_InputFPPRemotePlayFile::~c_InputFPPRemotePlayFile ()
 #ifdef ARDUINO_ARCH_ESP32
     if (NULL != TimerPollTaskHandle)
     {
+        // DEBUG_V("wait for the timer task to finish");
+        while(TimerPollInProgress == true) {yield();}
+
+        // DEBUG_V("Delete the task");
         vTaskDelete (TimerPollTaskHandle);
         TimerPollTaskHandle = NULL;
     }

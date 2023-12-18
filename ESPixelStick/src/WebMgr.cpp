@@ -295,18 +295,18 @@ void c_WebMgr::init ()
                     // DEBUG_V ("Trigger a config file read");
                     if(UploadFileName.equals(F("config.json")))
                     {
-                        extern void loadConfig();
-                        loadConfig();
+                        extern void ScheduleLoadConfig();
+                        ScheduleLoadConfig();
                         request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
                     }
                     else if(UploadFileName.equals(F("input_config.json")))
                     {
-                        InputMgr.LoadConfig();
+                        InputMgr.ScheduleLoadConfig();
                         request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
                     }
                     else if(UploadFileName.equals(F("output_config.json")))
                     {
-                        OutputMgr.LoadConfig();
+                        OutputMgr.ScheduleLoadConfig();
                         request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
                     }
                     else

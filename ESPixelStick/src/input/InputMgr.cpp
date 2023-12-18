@@ -613,6 +613,8 @@ void c_InputMgr::LoadConfig ()
 {
     // DEBUG_START;
 
+    ConfigLoadNeeded = NO_CONFIG_NEEDED;
+    configInProgress = true;
     // try to load and process the config file
     if (!FileMgr.LoadConfigFile (ConfigFileName, [this](DynamicJsonDocument & JsonConfigDoc)
         {
@@ -636,6 +638,7 @@ void c_InputMgr::LoadConfig ()
         }
     }
 
+    configInProgress = false;
     // DEBUG_END;
 
 } // LoadConfig
@@ -657,14 +660,14 @@ void c_InputMgr::Process ()
 
         ExternalInput.Poll ();
 
-        if (true == configLoadNeeded)
+        if (NO_CONFIG_NEEDED != ConfigLoadNeeded)
         {
-            configLoadNeeded = false;
-            configInProgress = true;
-            // DEBUG_V ("Reload the config");
-            LoadConfig ();
-            // DEBUG_V ("End Save Config");
-            configInProgress = false;
+            if(abs(now() - ConfigLoadNeeded) > LOAD_CONFIG_DELAY)
+            {
+                // DEBUG_V ("Reload the config");
+                LoadConfig ();
+                // DEBUG_V ("End Save Config");
+            }
         }
 
         if(RebootInProgress())
@@ -876,8 +879,7 @@ void c_InputMgr::SetConfig (const char * NewConfigData)
         // FileMgr logs for us
         // logcon (CN_stars + String (F (" Saved Input Manager Config File. ")) + CN_stars);
 
-        configLoadNeeded = true;
-
+        ScheduleLoadConfig();
     } // end we saved the config
     else
     {
@@ -902,8 +904,7 @@ void c_InputMgr::SetConfig(JsonDocument & NewConfigData)
         // FileMgr logs for us
         // logcon (CN_stars + String (F (" Saved Input Manager Config File. ")) + CN_stars);
 
-        configLoadNeeded = true;
-
+        ScheduleLoadConfig();
     } // end we saved the config
     else
     {

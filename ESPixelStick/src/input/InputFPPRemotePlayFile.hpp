@@ -46,6 +46,7 @@ public:
     void TimerPoll ();
 #ifdef ARDUINO_ARCH_ESP32
     TaskHandle_t GetTaskHandle () { return TimerPollTaskHandle; }
+    volatile bool TimerPollInProgress = false;
 #endif // def ARDUINO_ARCH_ESP32
 
 private:
