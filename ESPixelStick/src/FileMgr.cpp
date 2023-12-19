@@ -799,6 +799,8 @@ void c_FileMgr::GetListOfSdFiles (String & Response, uint32_t FirstFileToSend)
     #define EntryReservedSpace 75
     #define EntryUsageFactor 3
 
+    // DEBUG_V ("FirstFileToSend: '" + String(FirstFileToSend) + "'");
+
     DynamicJsonDocument ResponseJsonDoc (1 * 1024);
     FeedWDT ();
 
@@ -836,6 +838,8 @@ void c_FileMgr::GetListOfSdFiles (String & Response, uint32_t FirstFileToSend)
 
         while (true)
         {
+            FeedWDT();
+
             File entry = dir.openNextFile ();
 
             if (!entry)
