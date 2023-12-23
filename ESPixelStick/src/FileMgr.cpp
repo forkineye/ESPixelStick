@@ -827,20 +827,25 @@ void c_FileMgr::GetListOfSdFiles (String & Response, uint32_t FirstFileToSend)
         ResponseJsonDoc[F ("totalBytes")] = ESP_SD.size64 ();
 #endif
         uint64_t usedBytes = 0;
-        uint32_t last = 0;
 
         ResponseJsonDoc[F("usedBytes")] = uint32_t(-1);
         ResponseJsonDoc[F("first")]     = FirstFileToSend;
         ResponseJsonDoc[F("last")]      = uint32_t(-1);
         ResponseJsonDoc[F("final")]     = false;
 
-        File dir = ESP_SDFS.open ("/", CN_r);
+        if((0 == FirstFileToSend) || (LastFileSent != FirstFileToSend))
+        {
+            FileSendDir.close();
+            FileSendDir = ESP_SDFS.open ("/", CN_r);
+            LastFileSent = 0;
+        }
+        FirstFileToSend -= LastFileSent;
 
         while (true)
         {
             FeedWDT();
 
-            File entry = dir.openNextFile ();
+            File entry = FileSendDir.openNextFile ();
 
             if (!entry)
             {
@@ -850,8 +855,8 @@ void c_FileMgr::GetListOfSdFiles (String & Response, uint32_t FirstFileToSend)
             }
 
             usedBytes += entry.size ();
-            ++last;
-
+            ++LastFileSent;
+            // DEBUG_V(String("FirstFileToSend: ") + String(FirstFileToSend));
             // have we gotten to a file we have not sent yet?
             if(FirstFileToSend)
             {
@@ -860,8 +865,8 @@ void c_FileMgr::GetListOfSdFiles (String & Response, uint32_t FirstFileToSend)
             }
 
             String EntryName = String (entry.name ());
-            EntryName = EntryName.substring ((('/' == EntryName[0]) ? 1 : 0));
             // DEBUG_V ("EntryName: " + EntryName);
+            EntryName = EntryName.substring ((('/' == EntryName[0]) ? 1 : 0));
             // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
 
             if ((!EntryName.isEmpty ()) &&
@@ -889,10 +894,9 @@ void c_FileMgr::GetListOfSdFiles (String & Response, uint32_t FirstFileToSend)
             entry.close ();
         } // end while true
 
-        dir.close();
 
         ResponseJsonDoc[F("usedBytes")] = usedBytes;
-        ResponseJsonDoc[F("last")]      = last;
+        ResponseJsonDoc[F("last")]      = LastFileSent;
 
         if(ResponseJsonDoc.overflowed())
         {
@@ -902,8 +906,8 @@ void c_FileMgr::GetListOfSdFiles (String & Response, uint32_t FirstFileToSend)
 
     } while (false); // once
 
-    // DEBUG_V(String("ResponseJsonDoc.size(): ") + String(ResponseJsonDoc.size()));
-    Response.reserve(1024);
+    // DEBUG_V(String("ResponseJsonDoc.memoryUsage(): ") + String(ResponseJsonDoc.memoryUsage()));
+    Response.reserve(ResponseJsonDoc.memoryUsage());
     serializeJson (ResponseJsonDoc, Response);
 
     // DEBUG_V (String ("Response: ") + Response);

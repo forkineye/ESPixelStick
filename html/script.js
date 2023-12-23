@@ -1,5 +1,4 @@
 var StatusRequestTimer = null;
-var FseqFileListRequestTimer = null;
 let ExpectedStartingFileIndex = 0;
 var DiagTimer = null;
 
@@ -511,22 +510,6 @@ function RequestStatusUpdate()
 function RequestListOfFiles(StartingFileIndex) {
     ExpectedStartingFileIndex = StartingFileIndex;
 
-    // is the timer running?
-    if (null === FseqFileListRequestTimer) 
-    {
-        // console.info("RequestStatusUpdate: Starting new timer");
-        // timer runs until we get a response
-        FseqFileListRequestTimer = setTimeout(function () {
-            // console.info("Retrying with index: " + StartingFileIndex);
-
-            clearTimeout(FseqFileListRequestTimer);
-            FseqFileListRequestTimer = null;
-
-            RequestListOfFiles(StartingFileIndex);
-
-        }, 5000);
-    } // end timer was not running
-
     // console.info("ask for a file list from the server, starting at " + StartingFileIndex);
 
     return fetch("HTTP://" + target + "/files/" + StartingFileIndex, {
@@ -550,13 +533,15 @@ function RequestListOfFiles(StartingFileIndex) {
             // get error message from body or default to response status
             const error = (data && data.message) || webResponse.status;
             console.error("SendCommand: Error: " + Promise.reject(error));
+            CompletedServerTransaction = false;
+            RequestListOfFiles(0);
         }
         else
         {
             // console.info("SendCommand: Transaction complete");
 
-            clearTimeout(FseqFileListRequestTimer);
-            FseqFileListRequestTimer = null;
+
+
 
             CompletedServerTransaction = true;
             ProcessGetFileListResponse(data);
@@ -566,6 +551,8 @@ function RequestListOfFiles(StartingFileIndex) {
     .catch(error => 
     {
         console.error('SendCommand: Error: ', error);
+        CompletedServerTransaction = false;
+        RequestListOfFiles(0);
         return -1;
     });
 
