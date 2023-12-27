@@ -179,13 +179,24 @@ $(function () {
         submitNetworkConfig();
     }));
 
-    $('#viewStyle').on("change", (function () {
+    $('#diag #viewStyle').on("change", (function () {
+        $.cookie('diagviewStyle', $('#diag #viewStyle').val());
         clearStream();
     }));
+    if(undefined !== $.cookie('diagviewStyle'))
+    {
+        $('#diag #viewStyle').val($.cookie('diagviewStyle'));
+    }
 
     $('#v_columns').on('input', function () {
+        $.cookie('DiagColumns', parseInt($('#v_columns').val()));
         clearStream();
     });
+    if(undefined !== $.cookie('DiagColumns'))
+    {
+        // let NumColumns = $.cookie('DiagColumns');
+        $('#v_columns').val($.cookie('DiagColumns'));
+    }
 
     //TODO: This should pull a configuration from the stick and not the web interface as web data could be invalid
     $('#backupconfig').on("click", (function () {
@@ -218,9 +229,14 @@ $(function () {
     }));
 
     $('#AdvancedOptions').on("change", (function () {
+	    $.cookie('advancedMode', AdvancedModeState, { expires: 365 });
         UpdateAdvancedOptionsMode();
         UpdateChannelCounts();
     }));
+    if(undefined !== $.cookie('advancedMode'))
+    {
+        $('#AdvancedOptions').prop("checked", $.cookie('advancedMode') === "false" ? false : true);
+    }
 
     let finalUrl = "http://" + target + "/upload";
     // console.log(finalUrl);
@@ -526,7 +542,7 @@ function RequestListOfFiles(StartingFileIndex) {
         const isJson = webResponse.headers.get('content-type')?.includes('application/json');
         const data = isJson && await webResponse.json();
 
-        console.info("SendCommand:webResponse.status: " + webResponse.status);
+        // console.info("SendCommand:webResponse.status: " + webResponse.status);
         // console.info("SendCommand:webResponse.ok: " + webResponse.ok);
         // check for error response
         if (!webResponse.ok) {
