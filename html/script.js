@@ -229,7 +229,7 @@ $(function () {
     }));
 
     $('#AdvancedOptions').on("change", (function () {
-	    $.cookie('advancedMode', AdvancedModeState, { expires: 365 });
+	    $.cookie('advancedMode', $('#AdvancedOptions').prop("checked"), { expires: 365 });
         UpdateAdvancedOptionsMode();
         UpdateChannelCounts();
     }));
