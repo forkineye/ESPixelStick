@@ -141,6 +141,9 @@ private:
     byte   * FileUploadBuffer = nullptr;
     uint32_t FileUploadBufferOffset = 0;
 
+    File        FileSendDir;
+    uint32_t    LastFileSent = 0;
+
 protected:
 
 }; // c_FileMgr

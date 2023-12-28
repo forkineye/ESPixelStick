@@ -1,5 +1,4 @@
 var StatusRequestTimer = null;
-var FseqFileListRequestTimer = null;
 let ExpectedStartingFileIndex = 0;
 var DiagTimer = null;
 
@@ -180,13 +179,24 @@ $(function () {
         submitNetworkConfig();
     }));
 
-    $('#viewStyle').on("change", (function () {
+    $('#diag #viewStyle').on("change", (function () {
+        $.cookie('diagviewStyle', $('#diag #viewStyle').val());
         clearStream();
     }));
+    if(undefined !== $.cookie('diagviewStyle'))
+    {
+        $('#diag #viewStyle').val($.cookie('diagviewStyle'));
+    }
 
     $('#v_columns').on('input', function () {
+        $.cookie('DiagColumns', parseInt($('#v_columns').val()));
         clearStream();
     });
+    if(undefined !== $.cookie('DiagColumns'))
+    {
+        // let NumColumns = $.cookie('DiagColumns');
+        $('#v_columns').val($.cookie('DiagColumns'));
+    }
 
     //TODO: This should pull a configuration from the stick and not the web interface as web data could be invalid
     $('#backupconfig').on("click", (function () {
@@ -219,9 +229,14 @@ $(function () {
     }));
 
     $('#AdvancedOptions').on("change", (function () {
+	    $.cookie('advancedMode', $('#AdvancedOptions').prop("checked"), { expires: 365 });
         UpdateAdvancedOptionsMode();
         UpdateChannelCounts();
     }));
+    if(undefined !== $.cookie('advancedMode'))
+    {
+        $('#AdvancedOptions').prop("checked", $.cookie('advancedMode') === "false" ? false : true);
+    }
 
     let finalUrl = "http://" + target + "/upload";
     // console.log(finalUrl);
@@ -511,22 +526,6 @@ function RequestStatusUpdate()
 function RequestListOfFiles(StartingFileIndex) {
     ExpectedStartingFileIndex = StartingFileIndex;
 
-    // is the timer running?
-    if (null === FseqFileListRequestTimer) 
-    {
-        // console.info("RequestStatusUpdate: Starting new timer");
-        // timer runs until we get a response
-        FseqFileListRequestTimer = setTimeout(function () {
-            // console.info("Retrying with index: " + StartingFileIndex);
-
-            clearTimeout(FseqFileListRequestTimer);
-            FseqFileListRequestTimer = null;
-
-            RequestListOfFiles(StartingFileIndex);
-
-        }, 5000);
-    } // end timer was not running
-
     // console.info("ask for a file list from the server, starting at " + StartingFileIndex);
 
     return fetch("HTTP://" + target + "/files/" + StartingFileIndex, {
@@ -543,20 +542,22 @@ function RequestListOfFiles(StartingFileIndex) {
         const isJson = webResponse.headers.get('content-type')?.includes('application/json');
         const data = isJson && await webResponse.json();
 
-        console.info("SendCommand:webResponse.status: " + webResponse.status);
+        // console.info("SendCommand:webResponse.status: " + webResponse.status);
         // console.info("SendCommand:webResponse.ok: " + webResponse.ok);
         // check for error response
         if (!webResponse.ok) {
             // get error message from body or default to response status
             const error = (data && data.message) || webResponse.status;
             console.error("SendCommand: Error: " + Promise.reject(error));
+            CompletedServerTransaction = false;
+            RequestListOfFiles(0);
         }
         else
         {
             // console.info("SendCommand: Transaction complete");
 
-            clearTimeout(FseqFileListRequestTimer);
-            FseqFileListRequestTimer = null;
+
+
 
             CompletedServerTransaction = true;
             ProcessGetFileListResponse(data);
@@ -566,6 +567,8 @@ function RequestListOfFiles(StartingFileIndex) {
     .catch(error => 
     {
         console.error('SendCommand: Error: ', error);
+        CompletedServerTransaction = false;
+        RequestListOfFiles(0);
         return -1;
     });
 

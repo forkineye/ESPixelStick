@@ -257,6 +257,7 @@ void c_WebMgr::init ()
                 String Response;
                 FileMgr.GetListOfSdFiles(Response, StartingFileIndex);
                 // DEBUG_V(String("Files: ") + Response);
+                // DEBUG_V(String("Size: ") + Response.length());
                 // DEBUG_V(String("heap: ") + String(ESP.getFreeHeap ()));
                 request->send (200, CN_applicationSLASHjson, Response);
                 // DEBUG_V("Send Complete")
