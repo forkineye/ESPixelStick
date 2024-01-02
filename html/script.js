@@ -1172,6 +1172,13 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData) {
             $('#pg_network #network #eth').addClass("hidden")
         }
 
+        if ({}.hasOwnProperty.call(System_Config, 'sensor')) {
+            $('#TemperatureSensorGrp').removeClass("hidden");
+            $('#TemperatureSensorUnits').val(System_Config.sensor.units);
+        }
+        else {
+            $('#TemperatureSensorGrp').addClass("hidden");
+        }
     }
 
     // is this a file list?
@@ -1380,6 +1387,10 @@ function submitNetworkConfig() {
     System_Config.device.mosi_pin = $('#config #device #mosi_pin').val();
     System_Config.device.clock_pin = $('#config #device #clock_pin').val();
     System_Config.device.cs_pin = $('#config #device #cs_pin').val();
+    
+    if ({}.hasOwnProperty.call(System_Config, 'sensor')) {
+        System_Config.sensor.units = parseInt($('#TemperatureSensorUnits').val());
+    }
 
     ExtractNetworkConfigFromHtmlPage();
 
@@ -1594,6 +1605,10 @@ function submitDeviceConfig() {
     Input_Config.ecb.polarity = $("#ecb_polarity").val();
     Input_Config.ecb.long = $("#ecb_longPress").val();
 
+    if ({}.hasOwnProperty.call(System_Config, 'sensor')) {
+        System_Config.sensor.units = parseInt($('#TemperatureSensorUnits').val());
+    }
+
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
     ServerAccess.callFunction(SendConfigFileToServer, "output_config", {'output_config': Output_Config});
@@ -1795,6 +1810,16 @@ function ProcessReceivedJsonStatusMessage(JsonStat) {
         $('#x_size').addClass("hidden");
         $('#i_used').addClass("hidden");
         $('#x_used').addClass("hidden");
+    }
+
+    if ({}.hasOwnProperty.call(System, 'sensor')) {
+        $('#i_temperature').removeClass("hidden");
+        $('#x_temperature').removeClass("hidden");
+        $('#x_temperature').text(System.sensor.reading);
+    }
+    else {
+        $('#i_temperature').addClass("hidden");
+        $('#x_temperature').addClass("hidden");
     }
 
     if (true === System.SDinstalled) {
