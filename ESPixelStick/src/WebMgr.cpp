@@ -35,6 +35,10 @@
 #include <sys/time.h>
 #include <functional>
 
+#ifdef SUPPORT_SENSOR_DS18B20
+#include "service/SensorDS18B20.h"
+#endif // def SUPPORT_SENSOR_DS18B20
+
 // #define ESPALEXA_DEBUG
 #define ESPALEXA_MAXDEVICES 2
 #define ESPALEXA_ASYNC //it is important to define this before #include <Espalexa.h>!
@@ -631,6 +635,11 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
     // Ask WiFi Stats
     // DEBUG_V ("NetworkMgr.GetStatus");
     NetworkMgr.GetStatus (system);
+
+#ifdef SUPPORT_SENSOR_DS18B20
+    // DEBUG_V ("SensorDS18B20.GetStatus");
+    SensorDS18B20.GetStatus(system);
+#endif // def SUPPORT_SENSOR_DS18B20
 
     // DEBUG_V ("FPPDiscovery.GetStatus");
     FPPDiscovery.GetStatus (system);
