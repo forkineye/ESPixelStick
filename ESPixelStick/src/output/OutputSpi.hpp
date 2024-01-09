@@ -24,6 +24,11 @@
 
 #include "../ESPixelStick.h"
 #ifdef SUPPORT_SPI_OUTPUT
+
+#ifdef BOARD_HAS_PSRAM
+#error "Cannot use a SPI interface with PSRAM enabled. Turn off PSRAM support to continue" 
+#endif // def BOARD_HAS_PSRAM
+
 #include "OutputPixel.hpp"
 #include <driver/spi_master.h>
 #include <esp_task.h>
