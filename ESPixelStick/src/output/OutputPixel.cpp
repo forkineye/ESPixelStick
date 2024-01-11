@@ -388,6 +388,7 @@ void c_OutputPixel::StartNewFrame ()
     FrameAppendDataCurrentIndex     = 0;
     SentPixelsCount                 = 0;
     PixelIntensityCurrentIndex      = 0;
+    PixelIntensityCurrentColor      = 0;
     PrependNullPixelCurrentCount    = 0;
     AppendNullPixelCurrentCount     = 0;
     PixelPrependDataCurrentIndex    = 0;
@@ -447,6 +448,8 @@ uint32_t IRAM_ATTR c_OutputPixel::FramePrependData()
         }
         // PixelIntensityCurrentIndex = 0;
         // PixelPrependDataCurrentIndex = 0;
+        // PixelIntensityCurrentColor = 0;
+
     }
     return response;
 }
@@ -476,6 +479,7 @@ uint32_t IRAM_ATTR c_OutputPixel::PixelPrependNulls()
         // pixel is complete. Move to the next one
         PixelIntensityCurrentIndex = 0;
         PixelPrependDataCurrentIndex = 0;
+        PixelIntensityCurrentColor = 0;
 
         if (++PrependNullPixelCurrentCount < PrependNullPixelCount)
         {
@@ -504,6 +508,9 @@ uint32_t IRAM_ATTR c_OutputPixel::PixelSendPrependIntensity()
         // pixel prepend goes here
         if (PixelPrependDataCurrentIndex >= PixelPrependDataSize)
         {
+            // reset the prepend index for the next pixel
+            PixelPrependDataCurrentIndex = 0;
+
 #ifdef SUPPORT_OutputType_GECE
             if (OutputType == OTYPE_t::OutputType_GECE)
             {
@@ -589,6 +596,7 @@ uint32_t IRAM_ATTR c_OutputPixel::PixelAppendNulls()
         // pixel is complete. Move to the next one
         PixelIntensityCurrentIndex = 0;
         PixelPrependDataCurrentIndex = 0;
+        PixelIntensityCurrentColor = 0;
 
         if (++AppendNullPixelCurrentCount < AppendNullPixelCount)
         {
@@ -665,6 +673,7 @@ uint32_t IRAM_ATTR c_OutputPixel::GetIntensityData()
             PixelPrependDataCurrentIndex = 0;
             PixelIntensityCurrentIndex = 0;
             AppendNullPixelCurrentCount = 0;
+            PixelIntensityCurrentColor = 0;
 
             FrameStateFuncPtr = &c_OutputPixel::PixelAppendNulls;
         }
@@ -680,6 +689,12 @@ uint32_t IRAM_ATTR c_OutputPixel::GetIntensityData()
 
             FrameStateFuncPtr = &c_OutputPixel::FrameDone;
         }
+    }
+    // are we at the end of a pixel and are we prepending pixel data?
+    else if(++PixelIntensityCurrentColor >= NumIntensityBytesPerPixel)
+    {
+        PixelIntensityCurrentColor = 0;
+        SetStartingSendPixelState();
     }
 
     return response;
