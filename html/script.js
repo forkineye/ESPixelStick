@@ -320,9 +320,20 @@ $(function () {
             DocumentIsHidden = true;
         } else {
             DocumentIsHidden = false;
+            SetServerTime();
         }
     });
+
+    SetServerTime();
 });
+
+function SetServerTime() 
+{
+    // console.info("SetServerTime");
+    let CurrentDate = Math.floor((new Date()).getTime() / 1000);
+    // console.info("CurrentDate: " + CurrentDate);
+    SendCommand('settime/' + (CurrentDate));
+} // SetServerTime
 
 function ProcessLocalConfig(data) {
     // console.info(data);
@@ -640,6 +651,10 @@ function ProcessGetFileListResponse(JsonConfigData) {
         {
             // console.info("not last. Ask for the next chunk");
             RequestListOfFiles(JsonConfigData.last);
+        }
+        else
+        {
+            SetServerTime();
         }
     } // end expected file ID
 
@@ -1796,6 +1811,17 @@ function ProcessReceivedJsonStatusMessage(JsonStat) {
     str += ("0" + date.getUTCSeconds()).slice(-2);
     $('#x_uptime').text(str);
 
+    date = new Date(1000 * System.currenttime);
+    // console.info("DateMS: " + date.getMilliseconds());
+    $('#x_currenttime').text(date.toUTCString());
+    let CurrDate = new Date();
+    // console.info("CurrDateMS: " + CurrDate);
+    let Delta = Math.abs(CurrDate.getTime() - date.getTime())/1000;
+    // console.info("DeltaS: " + Delta);
+    if(Delta > 5)
+    {
+        SetServerTime();
+    }
     if ({}.hasOwnProperty.call(System, 'used')) {
         $('#i_size').removeClass("hidden");
         $('#x_size').removeClass("hidden");
