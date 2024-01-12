@@ -964,7 +964,7 @@ void fsm_WiFi_state_ConnectionFailed::Init ()
     }
     else
     {
-        DEBUG_V ("WiFi Reboot Disabled. Try Again");
+        // DEBUG_V ("WiFi Reboot Disabled. Try Again");
 
         // start over
         fsm_WiFi_state_Boot_imp.Init ();
