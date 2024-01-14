@@ -23,6 +23,9 @@
 // Services
 #include "src/service/FPPDiscovery.h"
 #include <TimeLib.h>
+#ifdef SUPPORT_SENSOR_DS18B20
+#include "src/service/SensorDS18B20.h"
+#endif // def SUPPORT_SENSOR_DS18B20
 
 #ifdef ARDUINO_ARCH_ESP8266
 #include <Hash.h>
@@ -199,6 +202,12 @@ void setup()
     // Configure and start the web server
     WebMgr.Begin(&config);
 
+#ifdef SUPPORT_SENSOR_DS18B20
+    // TestHeap(uint32_t(60));
+    // DEBUG_V(String("SensorDS18B20 Heap: ") + String(ESP.getFreeHeap()));
+    SensorDS18B20.Begin();
+#endif // def SUPPORT_SENSOR_DS18B20
+
     // DEBUG_V(String("FPPDiscovery Heap: ") + String(ESP.getFreeHeap()));
     FPPDiscovery.begin();
 
@@ -347,6 +356,10 @@ bool deserializeCore(JsonObject &json)
         // DEBUG_V("");
         ConfigSaveNeeded |= NetworkMgr.SetConfig(DeviceConfig);
         // DEBUG_V("");
+#ifdef SUPPORT_SENSOR_DS18B20
+        ConfigSaveNeeded |= SensorDS18B20.SetConfig(DeviceConfig);
+#endif // def SUPPORT_SENSOR_DS18B20
+        // DEBUG_V("");
         DataHasBeenAccepted = true;
 
     } while (false);
@@ -431,6 +444,10 @@ void GetConfig(JsonObject &json)
 
     NetworkMgr.GetConfig(json);
 
+#ifdef SUPPORT_SENSOR_DS18B20
+    SensorDS18B20.GetConfig(json);
+#endif // def SUPPORT_SENSOR_DS18B20
+
     // DEBUG_END;
 } // GetConfig
 
@@ -492,6 +509,10 @@ void loop()
     OutputMgr.Poll();
 
     WebMgr.Process();
+
+#ifdef SUPPORT_SENSOR_DS18B20
+    SensorDS18B20.Poll();
+#endif // def SUPPORT_SENSOR_DS18B20
 
     // need to keep the rx pipeline empty
     size_t BytesToDiscard = min(100, LOG_PORT.available());

@@ -45,6 +45,7 @@ private:
     uint32_t      pixel_count                 = 100;
     uint32_t      SentPixelsCount             = 0;
     uint32_t      PixelIntensityCurrentIndex  = 0;
+    uint32_t      PixelIntensityCurrentColor  = 0;
 
     uint8_t     * pFramePrependData           = nullptr;
     uint32_t      FramePrependDataSize        = 0;

@@ -320,9 +320,20 @@ $(function () {
             DocumentIsHidden = true;
         } else {
             DocumentIsHidden = false;
+            SetServerTime();
         }
     });
+
+    SetServerTime();
 });
+
+function SetServerTime() 
+{
+    // console.info("SetServerTime");
+    let CurrentDate = Math.floor((new Date()).getTime() / 1000);
+    // console.info("CurrentDate: " + CurrentDate);
+    SendCommand('settime/' + (CurrentDate));
+} // SetServerTime
 
 function ProcessLocalConfig(data) {
     // console.info(data);
@@ -640,6 +651,10 @@ function ProcessGetFileListResponse(JsonConfigData) {
         {
             // console.info("not last. Ask for the next chunk");
             RequestListOfFiles(JsonConfigData.last);
+        }
+        else
+        {
+            SetServerTime();
         }
     } // end expected file ID
 
@@ -1172,6 +1187,13 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData) {
             $('#pg_network #network #eth').addClass("hidden")
         }
 
+        if ({}.hasOwnProperty.call(System_Config, 'sensor')) {
+            $('#TemperatureSensorGrp').removeClass("hidden");
+            $('#TemperatureSensorUnits').val(System_Config.sensor.units);
+        }
+        else {
+            $('#TemperatureSensorGrp').addClass("hidden");
+        }
     }
 
     // is this a file list?
@@ -1380,6 +1402,10 @@ function submitNetworkConfig() {
     System_Config.device.mosi_pin = $('#config #device #mosi_pin').val();
     System_Config.device.clock_pin = $('#config #device #clock_pin').val();
     System_Config.device.cs_pin = $('#config #device #cs_pin').val();
+    
+    if ({}.hasOwnProperty.call(System_Config, 'sensor')) {
+        System_Config.sensor.units = parseInt($('#TemperatureSensorUnits').val());
+    }
 
     ExtractNetworkConfigFromHtmlPage();
 
@@ -1594,6 +1620,10 @@ function submitDeviceConfig() {
     Input_Config.ecb.polarity = $("#ecb_polarity").val();
     Input_Config.ecb.long = $("#ecb_longPress").val();
 
+    if ({}.hasOwnProperty.call(System_Config, 'sensor')) {
+        System_Config.sensor.units = parseInt($('#TemperatureSensorUnits').val());
+    }
+
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
     ServerAccess.callFunction(SendConfigFileToServer, "output_config", {'output_config': Output_Config});
@@ -1781,6 +1811,17 @@ function ProcessReceivedJsonStatusMessage(JsonStat) {
     str += ("0" + date.getUTCSeconds()).slice(-2);
     $('#x_uptime').text(str);
 
+    date = new Date(1000 * System.currenttime);
+    // console.info("DateMS: " + date.getMilliseconds());
+    $('#x_currenttime').text(date.toUTCString());
+    let CurrDate = new Date();
+    // console.info("CurrDateMS: " + CurrDate);
+    let Delta = Math.abs(CurrDate.getTime() - date.getTime())/1000;
+    // console.info("DeltaS: " + Delta);
+    if(Delta > 5)
+    {
+        SetServerTime();
+    }
     if ({}.hasOwnProperty.call(System, 'used')) {
         $('#i_size').removeClass("hidden");
         $('#x_size').removeClass("hidden");
@@ -1795,6 +1836,16 @@ function ProcessReceivedJsonStatusMessage(JsonStat) {
         $('#x_size').addClass("hidden");
         $('#i_used').addClass("hidden");
         $('#x_used').addClass("hidden");
+    }
+
+    if ({}.hasOwnProperty.call(System, 'sensor')) {
+        $('#i_temperature').removeClass("hidden");
+        $('#x_temperature').removeClass("hidden");
+        $('#x_temperature').text(System.sensor.reading);
+    }
+    else {
+        $('#i_temperature').addClass("hidden");
+        $('#x_temperature').addClass("hidden");
     }
 
     if (true === System.SDinstalled) {

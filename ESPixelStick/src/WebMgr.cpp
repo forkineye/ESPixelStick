@@ -31,9 +31,9 @@
 #include <FS.h>
 #include <LittleFS.h>
 
-#include <time.h>
-#include <sys/time.h>
-#include <functional>
+#ifdef SUPPORT_SENSOR_DS18B20
+#include "service/SensorDS18B20.h"
+#endif // def SUPPORT_SENSOR_DS18B20
 
 // #define ESPALEXA_DEBUG
 #define ESPALEXA_MAXDEVICES 2
@@ -153,6 +153,23 @@ void c_WebMgr::init ()
     	webServer.on ("/XJ", HTTP_POST | HTTP_GET | HTTP_OPTIONS, [this](AsyncWebServerRequest* request)
         {
             ProcessXJRequest (request);
+        });
+
+    	webServer.on ("/settime", HTTP_POST | HTTP_GET | HTTP_OPTIONS, [this](AsyncWebServerRequest* request)
+        {
+            // DEBUG_V("/settime");
+            // DEBUG_V(String("URL: ") + request->url());
+            if(HTTP_OPTIONS == request->method())
+            {
+                request->send (200);
+            }
+            else
+            {
+                String newDate = request->url ().substring (String (F("/settime/")).length ());
+                // DEBUG_V (String ("newDate: ") + String (newDate));
+                ProcessSetTimeRequest (time_t(newDate.toInt()));
+                request->send (200);
+            }
         });
 
         // Reboot handler
@@ -275,7 +292,7 @@ void c_WebMgr::init ()
             else
             {
                 // DEBUG_V (String ("url: ") + String (request->url ()));
-                String filename = request->url ().substring (String ("/file/delete").length ());
+                String filename = request->url ().substring (String (F("/file/delete")).length ());
                 // DEBUG_V (String ("filename: ") + String (filename));
                 FileMgr.DeleteSdFile(filename);
                 request->send (200);
@@ -625,12 +642,18 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
 
     system[F ("freeheap")] = ESP.getFreeHeap ();
     system[F ("uptime")] = millis ();
+    system[F ("currenttime")] = now ();
     system[F ("SDinstalled")] = FileMgr.SdCardIsInstalled ();
     system[F ("DiscardedRxData")] = DiscardedRxData;
 
     // Ask WiFi Stats
     // DEBUG_V ("NetworkMgr.GetStatus");
     NetworkMgr.GetStatus (system);
+
+#ifdef SUPPORT_SENSOR_DS18B20
+    // DEBUG_V ("SensorDS18B20.GetStatus");
+    SensorDS18B20.GetStatus(system);
+#endif // def SUPPORT_SENSOR_DS18B20
 
     // DEBUG_V ("FPPDiscovery.GetStatus");
     FPPDiscovery.GetStatus (system);
@@ -650,6 +673,7 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
     if(WebJsonDoc.overflowed())
     {
         logcon(F("ERROR: Status Doc is too small"));
+        client->send (401, CN_applicationSLASHjson, F("Internal Error. Status Buffer is too small."));
     }
     else
     {
@@ -661,6 +685,18 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
     // DEBUG_END;
 
 } // ProcessXJRequest
+
+//-----------------------------------------------------------------------------
+void c_WebMgr::ProcessSetTimeRequest (time_t DateTime)
+{
+    // DEBUG_START;
+
+    // DEBUG_V(String("DateTime: ") + String(DateTime));
+    setTime(DateTime);
+    // DEBUG_V(String("now: ") + String(now()));
+
+    // DEBUG_END;
+} // ProcessSetTimeRequest
 
 //-----------------------------------------------------------------------------
 void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,

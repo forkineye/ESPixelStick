@@ -65,12 +65,20 @@
                                 <td><span id="x_uptime"></span></td>
                             </tr>
                             <tr>
+                                <td width="33%">Current Time</td>
+                                <td><span id="x_currenttime"></span></td>
+                            </tr>
+                            <tr>
                                 <td width="33%" id="i_size">Flash Total</td>
                                 <td><span id="x_size"></span></td>
                             </tr>
                             <tr>
                                 <td width="33%" id="i_used">Flash Used</td>
                                 <td><span id="x_used"></span></td>
+                            </tr>
+                            <tr>
+                                <td width="33%" id="i_temperature">Temprature</td>
+                                <td><span id="x_temperature"></span></td>
                             </tr>
                         </table>
                     </fieldset>
@@ -600,6 +608,16 @@
                             <input type="number" class="form-control is-valid col-sm-2" id="blanktime" step="1" min="0"
                                 max="60" value="0" required
                                 title="Time before the Secondary Inputs will be used or display is blanked. Zero is disabled.">
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="TemperatureSensorGrp">
+                        <label class="control-label col-sm-2" for="TemperatureSensorUnits">Temperature Unit</label>
+                        <div class="col-sm-4">
+                            <select id="TemperatureSensorUnits">
+                                <option value="0">Celcius</option>
+                                <option value="1">Fahrenheit</option>
+                            </select>
                         </div>
                     </div>
 
