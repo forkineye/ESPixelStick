@@ -1,5 +1,5 @@
 #pragma once
-/*
+/* ------------- FIXED FOR DEVKIT V1 ---------------
  * GPIO_Defs_ESP32_DevkitC.hpp - Output Management class
  *
  * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
@@ -32,17 +32,17 @@
 #define DEFAULT_SPI_DATA_GPIO   gpio_num_t::GPIO_NUM_16
 #define DEFAULT_SPI_CLOCK_GPIO  gpio_num_t::GPIO_NUM_17
 
-#define DEFAULT_I2C_SDA         gpio_num_t::GPIO_NUM_3
-#define DEFAULT_I2C_SCL         gpio_num_t::GPIO_NUM_5
+#define DEFAULT_I2C_SDA         gpio_num_t::GPIO_NUM_21
+#define DEFAULT_I2C_SCL         gpio_num_t::GPIO_NUM_22
 
-// File Manager
+// File Manager - FIXED JMT
 #define SUPPORT_SD
 #define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_19
 #define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_23
 #define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_18
-#define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_4
+#define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_5
 
-#define DEFAULT_RELAY_GPIO      gpio_num_t::GPIO_NUM_1
+#define DEFAULT_RELAY_GPIO      gpio_num_t::GPIO_NUM_13
 
 // Output Types
 // Not Finished - #define SUPPORT_OutputType_TLS3001

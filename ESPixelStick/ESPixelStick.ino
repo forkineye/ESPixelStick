@@ -1,22 +1,3 @@
-/*
-* ESPixelStick.ino
-*
-* Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2016, 2022 Shelby Merrick
-* http://www.forkineye.com
-*
-*  This program is provided free for you to use in any way that you wish,
-*  subject to the laws and regulations where you are using it.  Due diligence
-*  is strongly suggested before using this code.  Please give credit where due.
-*
-*  The Author makes no warranty of any kind, express or implied, with regard
-*  to this program or the documentation contained in this document.  The
-*  Author shall not be liable in any event for incidental or consequential
-*  damages in connection with, or arising out of, the furnishing, performance
-*  or use of these programs.
-*
-*/
-
 #include <Arduino.h>
 
 // Core
@@ -47,27 +28,29 @@
 #include <Hash.h>
 extern "C"
 {
-#   include <user_interface.h>
+#include <user_interface.h>
 } // extern "C"
 
 #elif defined ARDUINO_ARCH_ESP32
-    // ESP32 user_interface is now built in
-#   include <Update.h>
-#   include <esp_task_wdt.h>
-#   include "soc/soc.h"
-#   include "soc/rtc_cntl_reg.h"
+// ESP32 user_interface is now built in
+#include <Update.h>
+#include <esp_task_wdt.h>
+#include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
 #else
-#	error "Unsupported CPU type."
+#error "Unsupported CPU type."
 #endif
 
 // Debugging support
 #if defined(DEBUG)
 extern "C" void system_set_os_print(uint8 onoff);
-extern "C" void ets_install_putc1(void* routine);
+extern "C" void ets_install_putc1(void *routine);
 
-static void _u0_putc(char c){
-  while(((U0S >> USTXC) & 0x7F) == 0x7F);
-  U0F = c;
+static void _u0_putc(char c)
+{
+    while (((U0S >> USTXC) & 0x7F) == 0x7F)
+        ;
+    U0F = c;
 }
 #endif
 
@@ -76,25 +59,37 @@ static void _u0_putc(char c){
 //  Globals
 //
 /////////////////////////////////////////////////////////
+// OLED
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128    // OLED display width, in pixels
+#define SCREEN_HEIGHT 32    // OLED display height, in pixels
+#define OLED_RESET -1       // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 #ifdef ESPS_VERSION
 const String VERSION = STRING(ESPS_VERSION);
 #else
-const String VERSION = "4.x-dev";
+const String VERSION = "4.x-jmt";
 #endif
-
+int period = 5000;
+unsigned long time_now = 0;
 const String ConfigFileName = "/config.json";
 const String BUILD_DATE = String(__DATE__) + " - " + String(__TIME__);
 const uint8_t CurrentConfigVersion = 1;
 
-config_t config;                    // Current configuration
+config_t config; // Current configuration
 static const uint32_t NotRebootingValue = uint32_t(-1);
 uint32_t RebootCount = NotRebootingValue;
-uint32_t lastUpdate;                // Update timeout tracker
-bool     ResetWiFi = false;
-bool     IsBooting = true;  // Configuration initialization flag
-time_t   ConfigLoadNeeded = NO_CONFIG_NEEDED;
-bool     ConfigSaveNeeded = false;
+uint32_t lastUpdate; // Update timeout tracker
+bool ResetWiFi = false;
+bool IsBooting = true; // Configuration initialization flag
+time_t ConfigLoadNeeded = NO_CONFIG_NEEDED;
+bool ConfigSaveNeeded = false;
 uint32_t DiscardedRxData = 0;
 
 /////////////////////////////////////////////////////////
@@ -105,16 +100,17 @@ uint32_t DiscardedRxData = 0;
 
 #define NO_CONFIG_NEEDED time_t(-1)
 
-void ScheduleLoadConfig() {ConfigLoadNeeded = now(); }
+void ScheduleLoadConfig() { ConfigLoadNeeded = now(); }
 void LoadConfig();
-void GetConfig (JsonObject & json);
-void GetDriverName (String & Name) { Name = F("ESP"); }
+void GetConfig(JsonObject &json);
+void GetDriverName(String &Name) { Name = F("ESP"); }
 
 /// Radio configuration
 /** ESP8266 radio configuration routines that are executed at startup. */
 #ifdef ARDUINO_ARCH_ESP8266
-RF_PRE_INIT() {
-    system_phy_set_powerup_option(3);   // Do full RF calibration on power-up
+RF_PRE_INIT()
+{
+    system_phy_set_powerup_option(3); // Do full RF calibration on power-up
 }
 #endif
 
@@ -133,11 +129,22 @@ void TestHeap(uint32_t Id)
 /** Arduino based setup code that is executed at startup. */
 void setup()
 {
+    if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
+    {
+        for (;;)
+            ; // Don't proceed, loop forever
+    }
 #ifdef DEBUG_GPIO
     pinMode(DEBUG_GPIO, OUTPUT);
     digitalWrite(DEBUG_GPIO, HIGH);
 #endif // def DEBUG_GPIO
+    display.clearDisplay();
 
+    display.setTextSize(2);              // Normal 1:1 pixel scale
+    display.setTextColor(SSD1306_WHITE); // Draw white text
+    display.setCursor(0, 0);             // Start at top-left corner
+    display.println(F("Loading.."));
+    display.display();
     config.BlankDelay = 5;
 #ifdef ARDUINO_ARCH_ESP32
     // disable brownout detector
@@ -151,17 +158,17 @@ void setup()
     // DEBUG_START;
     // DEBUG_HW_START;
 #if defined(DEBUG)
-    ets_install_putc1((void *) &_u0_putc);
+    ets_install_putc1((void *)&_u0_putc);
     system_set_os_print(1);
 #endif
 
     // Dump version and build information
-    LOG_PORT.println ();
-    logcon (String(CN_ESPixelStick) + " v" + VERSION + " (" + BUILD_DATE + ")");
+    LOG_PORT.println();
+    logcon(String(CN_ESPixelStick) + " v" + VERSION + " (" + BUILD_DATE + ")");
 #ifdef ARDUINO_ARCH_ESP8266
-    logcon (ESP.getFullVersion ());
+    logcon(ESP.getFullVersion());
 #else
-    logcon (ESP.getSdkVersion ());
+    logcon(ESP.getSdkVersion());
 #endif
 
     // TestHeap(uint32_t(10));
@@ -176,7 +183,7 @@ void setup()
     // TestHeap(uint32_t(20));
     // DEBUG_V(String("InputMgr Heap: ") + String(ESP.getFreeHeap()));
     // connect the input processing to the output processing.
-    InputMgr.Begin (0);
+    InputMgr.Begin(0);
 
     // TestHeap(uint32_t(30));
     // DEBUG_V(String("OutputMgr Heap: ") + String(ESP.getFreeHeap()));
@@ -193,15 +200,15 @@ void setup()
     WebMgr.Begin(&config);
 
     // DEBUG_V(String("FPPDiscovery Heap: ") + String(ESP.getFreeHeap()));
-    FPPDiscovery.begin ();
+    FPPDiscovery.begin();
 
     // DEBUG_V(String("Final Heap: ") + String(ESP.getFreeHeap()));
 
 #ifdef ARDUINO_ARCH_ESP8266
     // * ((volatile uint32_t*)0x60000900) &= ~(1); // Hardware WDT OFF
-    ESP.wdtEnable (2000); // 2 seconds
+    ESP.wdtEnable(2000); // 2 seconds
 #else
-    esp_task_wdt_init (5, true);
+    esp_task_wdt_init(5, true);
 #endif
 
     WebMgr.CreateAdminInfoFile();
@@ -228,7 +235,7 @@ bool validateConfig()
     bool configValid = true;
 
     // Device defaults
-    if (!config.id.length ())
+    if (!config.id.length())
     {
         config.id = F("ESPixelStick");
         configValid = false;
@@ -241,7 +248,7 @@ bool validateConfig()
 } // validateConfig
 
 /// Deserialize device configuration JSON to config structure - returns true if config change detected
-bool dsDevice(JsonObject & json)
+bool dsDevice(JsonObject &json)
 {
     // DEBUG_START;
     // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
@@ -252,13 +259,13 @@ bool dsDevice(JsonObject & json)
     {
         JsonObject JsonDeviceConfig = json[CN_device];
 
-//TODO: Add configuration upgrade handling - cfgver moved to root level
-        ConfigChanged |= setFromJSON (config.id,         JsonDeviceConfig, CN_id);
-        ConfigChanged |= setFromJSON (config.BlankDelay, JsonDeviceConfig, CN_blanktime);
+        // TODO: Add configuration upgrade handling - cfgver moved to root level
+        ConfigChanged |= setFromJSON(config.id, JsonDeviceConfig, CN_id);
+        ConfigChanged |= setFromJSON(config.BlankDelay, JsonDeviceConfig, CN_blanktime);
     }
     else
     {
-        logcon (String (F ("No device settings found.")));
+        logcon(String(F("No device settings found.")));
     }
 
     // DEBUG_V (String("ConfigChanged: ") + String(ConfigChanged));
@@ -268,22 +275,22 @@ bool dsDevice(JsonObject & json)
 } // dsDevice
 
 // Save the config and schedule a load operation
-void SetConfig (const char * DataString)
+void SetConfig(const char *DataString)
 {
     // DEBUG_START;
 
-//TODO: This is being called from c_WebMgr::processCmdSet() with no validation
-//      of the data. Chance for 3rd party software to muck up the configuraton
-//      if they send bad json data.
+    // TODO: This is being called from c_WebMgr::processCmdSet() with no validation
+    //       of the data. Chance for 3rd party software to muck up the configuraton
+    //       if they send bad json data.
 
-    FileMgr.SaveConfigFile (ConfigFileName, DataString);
+    FileMgr.SaveConfigFile(ConfigFileName, DataString);
     ScheduleLoadConfig();
 
     // DEBUG_END;
 
 } // SetConfig
 
-bool deserializeCore (JsonObject & json)
+bool deserializeCore(JsonObject &json)
 {
     // DEBUG_START;
 
@@ -349,7 +356,7 @@ bool deserializeCore (JsonObject & json)
     return DataHasBeenAccepted;
 }
 
-void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
+void deserializeCoreHandler(DynamicJsonDocument &jsonDoc)
 {
     // DEBUG_START;
 
@@ -357,7 +364,7 @@ void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
     // PrettyPrint(jsonDoc, "deserializeCoreHandler");
 
     JsonObject json = jsonDoc.as<JsonObject>();
-    deserializeCore (json);
+    deserializeCore(json);
 
     // DEBUG_END;
 }
@@ -392,23 +399,23 @@ void LoadConfig()
 
     String temp;
     // DEBUG_V ("");
-    FileMgr.LoadConfigFile (ConfigFileName, &deserializeCoreHandler);
+    FileMgr.LoadConfigFile(ConfigFileName, &deserializeCoreHandler);
 
-    ConfigSaveNeeded |= !validateConfig ();
+    ConfigSaveNeeded |= !validateConfig();
 
     // DEBUG_END;
 } // loadConfig
 
-void DeleteConfig ()
+void DeleteConfig()
 {
     // DEBUG_START;
-    FileMgr.DeleteConfigFile (ConfigFileName);
+    FileMgr.DeleteConfigFile(ConfigFileName);
 
     // DEBUG_END;
 
 } // DeleteConfig
 
-void GetConfig (JsonObject & json)
+void GetConfig(JsonObject &json)
 {
     // DEBUG_START;
 
@@ -416,13 +423,13 @@ void GetConfig (JsonObject & json)
     json[CN_cfgver] = CurrentConfigVersion;
 
     // Device
-    JsonObject device       = json.createNestedObject(CN_device);
-    device[CN_id]           = config.id;
-    device[CN_blanktime]    = config.BlankDelay;
+    JsonObject device = json.createNestedObject(CN_device);
+    device[CN_id] = config.id;
+    device[CN_blanktime] = config.BlankDelay;
 
-    FileMgr.GetConfig (device);
+    FileMgr.GetConfig(device);
 
-    NetworkMgr.GetConfig (json);
+    NetworkMgr.GetConfig(json);
 
     // DEBUG_END;
 } // GetConfig
@@ -438,15 +445,15 @@ String serializeCore(bool pretty)
 
     String jsonConfigString;
 
-    GetConfig (JsonConfig);
+    GetConfig(JsonConfig);
 
     if (pretty)
     {
-        serializeJsonPretty (JsonConfig, jsonConfigString);
+        serializeJsonPretty(JsonConfig, jsonConfigString);
     }
     else
     {
-        serializeJson (JsonConfig, jsonConfigString);
+        serializeJson(JsonConfig, jsonConfigString);
     }
 
     // DEBUG_V (String ("jsonConfigString: ") + jsonConfigString);
@@ -464,35 +471,34 @@ String serializeCore(bool pretty)
 /// Main Loop
 /** Arduino based main loop */
 // uint32_t HeapTime = 100;
+
 void loop()
 {
-    // DEBUG_START;
-/*
-    if(millis() > HeapTime)
-    {
-        DEBUG_V(String("Heap: ") + String(ESP.getFreeHeap()));
-        HeapTime += 5000;
-    }
-*/
-    FeedWDT ();
+
+
+
+
+
+
+    FeedWDT();
 
     // Keep the Network Open
-    NetworkMgr.Poll ();
+    NetworkMgr.Poll();
 
     // Process input data
-    InputMgr.Process ();
+    InputMgr.Process();
 
     // Poll output
     OutputMgr.Poll();
 
-    WebMgr.Process ();
+    WebMgr.Process();
 
     // need to keep the rx pipeline empty
-    size_t BytesToDiscard = min (100, LOG_PORT.available ());
+    size_t BytesToDiscard = min(100, LOG_PORT.available());
     DiscardedRxData += BytesToDiscard;
     while (0 < BytesToDiscard)
     {
-        FeedWDT ();
+        FeedWDT();
 
         // DEBUG_V (String("BytesToDiscard: ") + String(BytesToDiscard));
         BytesToDiscard--;
@@ -502,29 +508,41 @@ void loop()
     // Reboot handler
     if (NotRebootingValue != RebootCount)
     {
-        if(0 == --RebootCount)
+        if (0 == --RebootCount)
         {
-            logcon (String(CN_stars) + CN_minussigns + F ("Internal Reboot Requested. Rebooting Now"));
-            delay (REBOOT_DELAY);
-            ESP.restart ();
+            logcon(String(CN_stars) + CN_minussigns + F("Internal Reboot Requested. Rebooting Now"));
+            delay(REBOOT_DELAY);
+            ESP.restart();
         }
     }
 
     if (NO_CONFIG_NEEDED != ConfigLoadNeeded)
     {
-        if(abs(now() - ConfigLoadNeeded) > LOAD_CONFIG_DELAY)
+        if (abs(now() - ConfigLoadNeeded) > LOAD_CONFIG_DELAY)
         {
-            FeedWDT ();
-            LoadConfig ();
+            FeedWDT();
+            LoadConfig();
         }
     }
 
     if (ConfigSaveNeeded)
     {
-        FeedWDT ();
-        SaveConfig ();
+        FeedWDT();
+        SaveConfig();
     }
-
+    if(millis() >= time_now + period){
+        time_now += period;
+    display.clearDisplay();
+    display.setTextSize(1);              // Normal 1:1 pixel scale
+    display.setTextColor(SSD1306_WHITE); // Draw white text
+    display.setCursor(0, 10);             // Start at top-left corner
+    display.print("IP: ");
+    display.println(WiFi.localIP());
+    display.print("HOST: ");
+    display.println(WiFi.getHostname());
+    display.println("");
+    display.display();
+    }
 } // loop
 
 bool RebootInProgress()
@@ -541,28 +559,28 @@ void RequestReboot(uint32_t LoopDelay)
 
 } // RequestReboot
 
-void _logcon (String & DriverName, String Message)
+void _logcon(String &DriverName, String Message)
 {
     char Spaces[7];
     memset(Spaces, ' ', sizeof(Spaces));
-    if (DriverName.length() < (sizeof(Spaces)-1))
+    if (DriverName.length() < (sizeof(Spaces) - 1))
     {
-        Spaces[(sizeof (Spaces) - 1) - DriverName.length ()] = '\0';
+        Spaces[(sizeof(Spaces) - 1) - DriverName.length()] = '\0';
     }
     else
     {
         Spaces[0] = '\0';
     }
 
-    LOG_PORT.println (String(F("[")) + String (Spaces) + DriverName + F("] ") + Message);
-    LOG_PORT.flush ();
+    LOG_PORT.println(String(F("[")) + String(Spaces) + DriverName + F("] ") + Message);
+    LOG_PORT.flush();
 } // logcon
 
-void FeedWDT ()
+void FeedWDT()
 {
 #ifdef ARDUINO_ARCH_ESP32
-    esp_task_wdt_reset ();
+    esp_task_wdt_reset();
 #else
-    ESP.wdtFeed ();
+    ESP.wdtFeed();
 #endif // def ARDUINO_ARCH_ESP32
 }
