@@ -956,20 +956,18 @@ void fsm_WiFi_state_ConnectionFailed::Init ()
         pWiFiDriver->SetIsWiFiConnected (false);
         NetworkMgr.SetWiFiIsConnected (false);
     }
+
+    if (true == pWiFiDriver->Get_RebootOnWiFiFailureToConnect())
+    {
+        logcon (F ("WiFi Requesting Reboot"));
+        RequestReboot(100000);
+    }
     else
     {
-        if (true == pWiFiDriver->Get_RebootOnWiFiFailureToConnect())
-        {
-            logcon (F ("WiFi Requesting Reboot"));
-            RequestReboot(100000);
-        }
-        else
-        {
-            // DEBUG_V ("WiFi Reboot Disabled.");
+        // DEBUG_V ("WiFi Reboot Disabled. Try Again");
 
-            // start over
-            fsm_WiFi_state_Boot_imp.Init ();
-        }
+        // start over
+        fsm_WiFi_state_Boot_imp.Init ();
     }
 
     // DEBUG_END;
