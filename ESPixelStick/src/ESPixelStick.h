@@ -53,6 +53,7 @@
 #define MicroSecondsInASecond       (MicroSecondsInAmilliSecond * MilliSecondsInASecond)
 #define NanoSecondsInAMicroSecond   1000
 #define NanoSecondsInASecond        (MicroSecondsInASecond * NanoSecondsInAMicroSecond)
+#define NanoSecondsInAMilliSecond   (NanoSecondsInAMicroSecond * MicroSecondsInAmilliSecond)
 
 #define CPU_ClockTimeNS             ((1.0 / float(F_CPU)) * float(NanoSecondsInASecond))
 
