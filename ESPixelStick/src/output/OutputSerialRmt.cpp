@@ -56,7 +56,7 @@ void c_OutputSerialRmt::Begin ()
     c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
     OutputRmtConfig.RmtChannelId            = rmt_channel_t(OutputChannelId);
     OutputRmtConfig.DataPin                 = gpio_num_t(DataPin);
-    OutputRmtConfig.idle_level              = rmt_idle_level_t::RMT_IDLE_LEVEL_HIGH;
+    OutputRmtConfig.idle_level              = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
     OutputRmtConfig.pSerialDataSource       = this;
     OutputRmtConfig.SendInterIntensityBits  = true;
     OutputRmtConfig.SendEndOfFrameBits      = true;
@@ -96,58 +96,80 @@ void c_OutputSerialRmt::SetUpRmtBitTimes()
     rmt_item32_t BitValue;
 
     float BitTimeNS = (1.0 / float(CurrentBaudrate)) * NanoSecondsInASecond;
-    uint32_t BitTimeRmtTicks = uint32_t(BitTimeNS / RMT_TickLengthNS) + 1;
+    uint32_t OneBitTimeInRmtTicks = uint32_t(BitTimeNS / RMT_TickLengthNS) + 1;
     // DEBUG_V(String(" CurrentBaudrate: ") + String(CurrentBaudrate));
     // DEBUG_V(String("       BitTimeNS: ") + String(BitTimeNS));
     // DEBUG_V(String("RMT_TickLengthNS: ") + String(RMT_TickLengthNS));
     // DEBUG_V(String(" BitTimeRmtTicks: ") + String(BitTimeRmtTicks));
 
-    BitValue.duration0 = BitTimeRmtTicks;
+    BitValue.duration0 = OneBitTimeInRmtTicks;
     BitValue.level0 = 1;
-    BitValue.duration1 = BitTimeRmtTicks;
+    BitValue.duration1 = OneBitTimeInRmtTicks;
     BitValue.level1 = 1;
     Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
-    BitValue.duration0 = BitTimeRmtTicks / 2;
+    BitValue.duration0 = OneBitTimeInRmtTicks / 2;
     BitValue.level0 = 0;
-    BitValue.duration1 = BitTimeRmtTicks / 2;
+    BitValue.duration1 = OneBitTimeInRmtTicks / 2;
     BitValue.level1 = 0;
     Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STARTBIT_ID);
 
     // ISR will process two bits at a time. This updates the bit durration based on baudrate
-    BitValue.duration0 = BitTimeRmtTicks / 2;
+    BitValue.duration0 = OneBitTimeInRmtTicks / 2;
     BitValue.level0 = 0;
-    BitValue.duration1 = BitTimeRmtTicks / 2;
+    BitValue.duration1 = OneBitTimeInRmtTicks / 2;
     BitValue.level1 = 0;
     Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID);
 
-    BitValue.duration0 = BitTimeRmtTicks / 2;
+    BitValue.duration0 = OneBitTimeInRmtTicks / 2;
     BitValue.level0 = 1;
-    BitValue.duration1 = BitTimeRmtTicks / 2;
+    BitValue.duration1 = OneBitTimeInRmtTicks / 2;
     BitValue.level1 = 1;
     Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID);
 
-    BitValue.duration0 = BitTimeRmtTicks;
+    BitValue.duration0 = OneBitTimeInRmtTicks;
     BitValue.level0 = 1;
-    BitValue.duration1 = BitTimeRmtTicks;
+    BitValue.duration1 = OneBitTimeInRmtTicks;
     BitValue.level1 = 0;
     Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_TWO_ID);
 
-    BitValue.duration0 = BitTimeRmtTicks;
+    BitValue.duration0 = OneBitTimeInRmtTicks;
     BitValue.level0 = 1;
-    BitValue.duration1 = BitTimeRmtTicks;
+    BitValue.duration1 = OneBitTimeInRmtTicks;
     BitValue.level1 = 1;
     Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_THREE_ID);
 
-    BitValue.duration0 = BitTimeRmtTicks * 2; // Two stop bits
+    BitValue.duration0 = OneBitTimeInRmtTicks * 2; // Two stop bits
     BitValue.level0 = 1;
-    BitValue.duration1 = BitTimeRmtTicks;     // one start bit
+    BitValue.duration1 = OneBitTimeInRmtTicks;     // one start bit
     BitValue.level1 = 0;
     Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STOP_START_BIT_ID);
 
-    BitValue.duration0 = BitTimeRmtTicks;
+    // max number of bits per 25ms frame
+    float NanoSecsPerFrame = 25.0 * NanoSecondsInAMilliSecond;
+    float MaxBitsPerFrame = float(NanoSecsPerFrame / BitTimeNS);
+    // number of bits used in frame
+    float NumBitsUsedInFrame = OutputBufferSize * (1.0 + 8.0 + 2.0);
+    // number of unused frame bits
+    float NumUnusedBitsInFrame = MaxBitsPerFrame - NumBitsUsedInFrame;
+
+    if(NumBitsUsedInFrame >= MaxBitsPerFrame)
+    {
+        // frame is bigger than min frame size set minimum idle time
+        NumUnusedBitsInFrame = 40;
+    }
+    float NumUnusedRmtTicksInFrame = min(float(65535.0), (OneBitTimeInRmtTicks * NumUnusedBitsInFrame));
+    // DEBUG_V(String("        NanoSecsPerFrame: ") + String(NanoSecsPerFrame));
+    // DEBUG_V(String("         MaxBitsPerFrame: ") + String(MaxBitsPerFrame));
+    // DEBUG_V(String("      NumBitsUsedInFrame: ") + String(NumBitsUsedInFrame));
+    // DEBUG_V(String("    NumUnusedBitsInFrame: ") + String(NumUnusedBitsInFrame));
+    // DEBUG_V(String("    OneBitTimeInRmtTicks: ") + String(OneBitTimeInRmtTicks));
+    // DEBUG_V(String("NumUnusedRmtTicksInFrame: ") + String(OneBitTimeInRmtTicks * NumUnusedBitsInFrame));
+    // DEBUG_V(String("NumUnusedRmtTicksInFrame: ") + String(NumUnusedRmtTicksInFrame));
+
+    BitValue.duration0 = uint16_t(NumUnusedRmtTicksInFrame/2.0);
     BitValue.level0 = 1;
-    BitValue.duration1 = BitTimeRmtTicks;
+    BitValue.duration1 = uint16_t(NumUnusedRmtTicksInFrame/2.0);
     BitValue.level1 = 1;
     Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_END_OF_FRAME);
 
@@ -177,6 +199,7 @@ void c_OutputSerialRmt::SetOutputBufferSize(uint32_t NumChannelsAvailable)
     // DEBUG_START;
 
     c_OutputSerial::SetOutputBufferSize (NumChannelsAvailable);
+    SetUpRmtBitTimes();
 
     // DEBUG_END;
 
