@@ -340,6 +340,41 @@
             }
         },
         {
+            "name": "ESP32 BONGO 69",
+            "description": "ESP32 8 port eth controller",
+            "chip": "esp32",
+            "appbin": "esp32/esp32_bongo69-app.bin",
+            "esptool": {
+                "baudrate": "460800",
+                "options": "--before default_reset --after hard_reset",
+                "flashcmd": "write_flash -z"
+            },
+            "binfiles": [
+                {
+                    "name": "esp32/esp32_bongo69-bootloader.bin",
+                    "offset": "0x1000"
+                },
+                {
+                    "name": "esp32/esp32_bongo-partitions.bin",
+                    "offset": "0x8000"
+                },
+                {
+                    "name": "esp32/boot_app0.bin",
+                    "offset": "0xe000"
+                },
+                {
+                    "name": "esp32/esp32_bongo69-app.bin",
+                    "offset": "0x10000"
+                }
+            ],
+            "filesystem": {
+                "page": "256",
+                "block": "4096",
+                "size": "0x50000",
+                "offset": "0x3B0000"
+            }
+        },
+        {
             "name": "ESP32 WTEth 01",
             "description": "ESP32 for DIY builds",
             "chip": "esp32",
