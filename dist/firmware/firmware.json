@@ -355,7 +355,7 @@
                     "offset": "0x1000"
                 },
                 {
-                    "name": "esp32/esp32_bongo-partitions.bin",
+                    "name": "esp32/esp32_bongo69-partitions.bin",
                     "offset": "0x8000"
                 },
                 {
