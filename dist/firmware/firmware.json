@@ -72,29 +72,6 @@
             }
         },
         {
-            "name": "D1 Mini PRO 16MB Flash",
-            "description": "Generic D1 Mini PRO 16MB Flash for DIY builds",
-            "chip": "esp8266",
-            "appbin": "esp8266/d1_mini_pro-app.bin",
-            "esptool": {
-                "baudrate": "921600",
-                "options": "--before default_reset --after hard_reset",
-                "flashcmd": "write_flash"
-            },
-            "binfiles": [
-                {
-                    "name": "esp8266/d1_mini_pro-app.bin",
-                    "offset": "0x0"
-                }
-            ],
-            "filesystem": {
-                "page": "256",
-                "block": "8192",
-                "size": "4145152",
-                "offset": "0x400000"
-            }
-        },
-        {
             "name": "D1 Mini Mhetesp32minikit",
             "description": "D1 Mini Mhetesp32minikit module with PSRAM support for DIY builds",
             "chip": "esp32",
