@@ -15,6 +15,6 @@
     "sta_timeout": 15,
     "ap_fallback": false,
     "ap_timeout": 120,
-    "ap_reboot": true
+    "ap_reboot": false
   }
 }
