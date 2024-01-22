@@ -204,6 +204,7 @@ extern const CN_PROGMEM char CN_TimeRemaining [];
 extern const CN_PROGMEM char CN_time_remaining [];
 extern const CN_PROGMEM char CN_TLS3001 [];
 extern const CN_PROGMEM char CN_TM1814 [];
+extern const CN_PROGMEM char CN_tsensortopic [];
 extern const CN_PROGMEM char CN_topic [];
 extern const CN_PROGMEM char CN_topicset [];
 extern const CN_PROGMEM char CN_transitions [];

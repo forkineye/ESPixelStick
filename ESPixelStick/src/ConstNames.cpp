@@ -195,6 +195,7 @@ const CN_PROGMEM char CN_TimeRemaining            [] = "TimeRemaining";
 const CN_PROGMEM char CN_time_remaining           [] = "time_remaining";
 const CN_PROGMEM char CN_TLS3001                  [] = "TLS3001";
 const CN_PROGMEM char CN_TM1814                   [] = "TM1814";
+const CN_PROGMEM char CN_tsensortopic             [] = "tsensortopic";
 const CN_PROGMEM char CN_topic                    [] = "topic";
 const CN_PROGMEM char CN_topicset                 [] = "topicset";
 const CN_PROGMEM char CN_transitions              [] = "transitions";
