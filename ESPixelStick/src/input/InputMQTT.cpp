@@ -55,6 +55,9 @@ c_InputMQTT::c_InputMQTT (c_InputMgr::e_InputChannelIds NewInputChannelId,
 
     // Set LWT - Must be set before mqtt connect()
     mqtt.setWill (lwtTopic.c_str(), 1, true, LWT_OFFLINE);
+#ifdef SUPPORT_SENSOR_DS18B20
+    TemperatureSensorTopic = "Temperature1";
+#endif // def SUPPORT_SENSOR_DS18B20
 
     // DEBUG_END;
 } // c_InputE131
@@ -67,7 +70,7 @@ c_InputMQTT::~c_InputMQTT ()
     if (HasBeenInitialized)
     {
         // DEBUG_V ("");
-        mqtt.unsubscribe (String(topic + CN_slashset).c_str());
+        mqtt.unsubscribe (lwtTopic.c_str());
         mqtt.disconnect (/*force = */ true);
         mqttTicker.detach ();
 
@@ -120,14 +123,17 @@ void c_InputMQTT::GetConfig (JsonObject & jsonConfig)
     // DEBUG_START;
 
     // Serialize Config
-    jsonConfig[CN_user]     = user;
-    jsonConfig[CN_password] = password;
-    jsonConfig[CN_topic]    = topic;
-    jsonConfig[CN_clean]    = CleanSessionRequired;
-    jsonConfig[CN_hadisco]  = hadisco;
-    jsonConfig[CN_haprefix] = haprefix;
-    jsonConfig[CN_effects]  = true;
-    jsonConfig[CN_play]     = true;
+    jsonConfig[CN_user]         = user;
+    jsonConfig[CN_password]     = password;
+    jsonConfig[CN_topic]        = topic;
+#ifdef SUPPORT_SENSOR_DS18B20
+    jsonConfig[CN_tsensortopic] = TemperatureSensorTopic;
+#endif // def SUPPORT_SENSOR_DS18B20
+    jsonConfig[CN_clean]        = CleanSessionRequired;
+    jsonConfig[CN_hadisco]      = hadisco;
+    jsonConfig[CN_haprefix]     = haprefix;
+    jsonConfig[CN_effects]      = true;
+    jsonConfig[CN_play]         = true;
 
     // DEBUG_END;
 
@@ -190,14 +196,17 @@ bool c_InputMQTT::SetConfig (ArduinoJson::JsonObject & jsonConfig)
     // DEBUG_START;
 
     String OldTopic = topic;
-    setFromJSON (ip,                   jsonConfig, CN_ip);
-    setFromJSON (port,                 jsonConfig, CN_port);
-    setFromJSON (user,                 jsonConfig, CN_user);
-    setFromJSON (password,             jsonConfig, CN_password);
-    setFromJSON (topic,                jsonConfig, CN_topic);
-    setFromJSON (CleanSessionRequired, jsonConfig, CN_clean);
-    setFromJSON (hadisco,              jsonConfig, CN_hadisco);
-    setFromJSON (haprefix,             jsonConfig, CN_haprefix);
+    setFromJSON (ip,                     jsonConfig, CN_ip);
+    setFromJSON (port,                   jsonConfig, CN_port);
+    setFromJSON (user,                   jsonConfig, CN_user);
+    setFromJSON (password,               jsonConfig, CN_password);
+    setFromJSON (topic,                  jsonConfig, CN_topic);
+#ifdef SUPPORT_SENSOR_DS18B20
+    setFromJSON (TemperatureSensorTopic, jsonConfig, CN_tsensortopic);
+#endif // def SUPPORT_SENSOR_DS18B20
+    setFromJSON (CleanSessionRequired,   jsonConfig, CN_clean);
+    setFromJSON (hadisco,                jsonConfig, CN_hadisco);
+    setFromJSON (haprefix,               jsonConfig, CN_haprefix);
 
     validateConfiguration ();
 
@@ -362,7 +371,7 @@ void c_InputMQTT::onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
 
 //-----------------------------------------------------------------------------
 void c_InputMQTT::onMqttMessage(
-    char* RcvTopic,
+    char* rcvTopic,
     char* payload,
     AsyncMqttClientMessageProperties properties,
     uint32_t len,
@@ -371,27 +380,23 @@ void c_InputMQTT::onMqttMessage(
 {
     // DEBUG_START;
 
-    // Payload isn't null terminated
-    char* payloadString = (char*)malloc (len + 1);
-    memcpy (payloadString, payload, len);
-    payloadString[len] = 0x00;
+    String RcvTopic = String(rcvTopic);
 
     do // once
     {
         // DEBUG_V (String ("   topic: ") + String (topic));
         // DEBUG_V (String ("RcvTopic: ") + String (RcvTopic));
-        // DEBUG_V (String (" payload: ") + String (payloadString));
-        // DEBUG_V (String ("   l/i/t: ") + String (len) + " / " + String(index) + " / " + String(total));
+        // DEBUG_V (String ("     len: ") + String (len) + " / " + String(index) + " / " + String(total));
 
-        if ((String (RcvTopic) != topic) &&
-            (String (RcvTopic) != topic + CN_slashset))
+        if (!RcvTopic.equals(topic) &&
+            !RcvTopic.equals(lwtTopic))
         {
             // DEBUG_V ("Not our topic");
-            return;
+            break;
         }
 
         DynamicJsonDocument rootDoc (1024);
-        DeserializationError error = deserializeJson (rootDoc, payloadString, len);
+        DeserializationError error = deserializeJson (rootDoc, payload, len);
 
         // DEBUG_V ("Set new values");
         if (error)
@@ -461,8 +466,6 @@ void c_InputMQTT::onMqttMessage(
 
         // DEBUG_V ("");
     } while (false);
-
-    free (payloadString);
 
     // DEBUG_END;
 
@@ -692,7 +695,7 @@ void c_InputMQTT::publishHA()
         JsonConfig[CN_name]                  = config.id;
         JsonConfig[F ("schema")]             = F ("json");
         JsonConfig[F ("state_topic")]        = topic;
-        JsonConfig[F ("command_topic")]      = topic + CN_slashset;
+        JsonConfig[F ("command_topic")]      = lwtTopic;
         JsonConfig[F ("availability_topic")] = lwtTopic;
         JsonConfig[F ("rgb")]                = CN_true;
 
@@ -748,6 +751,10 @@ void c_InputMQTT::publishState()
     // DEBUG_V (String ("topic: ") + topic);
 
     mqtt.publish(topic.c_str(), 0, true, JsonConfigString.c_str());
+
+#ifdef SUPPORT_SENSOR_DS18B20
+    mqtt.publish(TemperatureSensorTopic.c_str(), 0, true, String("92.3F").c_str());
+#endif // def SUPPORT_SENSOR_DS18B20
 
     // DEBUG_END;
 
