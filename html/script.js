@@ -1079,6 +1079,14 @@ function ProcessInputConfig() {
     $('#ecb_gpioid').val(Input_Config.ecb.id);
     $('#ecb_polarity').val(Input_Config.ecb.polarity);
     $('#ecb_longPress').val(Input_Config.ecb.long);
+
+    if ({}.hasOwnProperty.call(Input_Config.channels[1][2], "tsensortopic")) {
+        $("#temperatureSensor").removeClass("hidden");
+    }
+    else {
+        $("#temperatureSensor").addClass("hidden");
+    }
+
 } // ProcessInputConfig
 
 function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
