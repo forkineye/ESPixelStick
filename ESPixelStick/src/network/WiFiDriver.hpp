@@ -89,7 +89,6 @@ private:
 
     int       ValidateConfig ();
 
-
 #ifdef ARDUINO_ARCH_ESP8266
     WiFiEventHandler    wifiConnectHandler;     // WiFi connect handler
     WiFiEventHandler    wifiDisconnectHandler;  // WiFi disconnect handler
@@ -107,6 +106,7 @@ private:
     IPAddress   netmask = IPAddress ((uint32_t)0);
     IPAddress   gateway = IPAddress ((uint32_t)0);
     bool        UseDhcp = true;
+    uint8_t     ap_channelNumber = 1;
     bool        ap_fallbackIsEnabled = true;
     uint32_t    ap_timeout = AP_TIMEOUT;      ///< How long to wait in AP mode with no connection before rebooting
     uint32_t    sta_timeout = CLIENT_TIMEOUT; ///< Timeout when connection as client (station)

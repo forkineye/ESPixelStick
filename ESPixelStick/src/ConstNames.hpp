@@ -36,7 +36,7 @@ extern const CN_PROGMEM char CN_ActiveLow [];
 extern const CN_PROGMEM char CN_addr [];
 extern const CN_PROGMEM char CN_advancedView [];
 extern const CN_PROGMEM char CN_allleds [];
-extern const CN_PROGMEM char CN_APA102 [];
+extern const CN_PROGMEM char CN_ap_channel [];
 extern const CN_PROGMEM char CN_ap_fallback [];
 extern const CN_PROGMEM char CN_ap_timeout [];
 extern const CN_PROGMEM char CN_ap_reboot [];

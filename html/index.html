@@ -408,12 +408,19 @@
                                     title="When connecting as a client, this is the timeout in seconds.">
                             </div>
                         </div>
-                        <div class="form-group" id="fg_staTimeout">
+                        <div class="form-group" id="fg_apTimeout">
                             <label class="control-label col-sm-2" for="ap_timeout">AP Timeout</label>
                             <div class="col-sm-2">
                                 <input type="number" class="form-control is-valid" id="ap_timeout" step="1" min="15"
                                     max="240" value="0"
                                     title="When waiting for a client to connect, this is the timeout in seconds.">
+                            </div>
+                        </div>
+                        <div class="form-group" id="fg_apChannel">
+                            <label class="control-label col-sm-2" for="ap_channel">AP WiFi Channel</label>
+                            <div class="col-sm-2">
+                                <input type="number" class="form-control is-valid" id="ap_channel" step="1" min="1" max="15"
+                                title="Set the WiFi channel to be used in AP mode.">
                             </div>
                         </div>
                         <div class="form-group">
