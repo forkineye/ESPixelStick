@@ -69,7 +69,9 @@ IF !InstallGulp! == 1 (
 	echo Install gulp
 
     call npm install
+    call npm install --global gulp-cli
     call npm install --global
+    call npm install --save-dev gulp
     call npm audit fix
 ) ELSE (
     echo gulp is installed. Proceeding...
