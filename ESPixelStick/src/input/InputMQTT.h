@@ -62,6 +62,9 @@ private:
     String      user;
     String      password;
     String      topic;
+#ifdef SUPPORT_SENSOR_DS18B20
+    String      TemperatureSensorTopic;
+#endif // def SUPPORT_SENSOR_DS18B20
     bool        CleanSessionRequired = false;
     String      haprefix = "homeassistant";
     bool        hadisco = true;

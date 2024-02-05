@@ -325,6 +325,7 @@ void c_WiFiDriver::GetConfig (JsonObject& json)
     json[CN_StayInApMode] = StayInApMode;
     json[CN_dhcp]         = UseDhcp;
     json[CN_sta_timeout]  = sta_timeout;
+    json[CN_ap_channel]   = ap_channelNumber;
     json[CN_ap_fallback]  = ap_fallbackIsEnabled;
     json[CN_ap_timeout]   = ap_timeout;
     json[CN_ap_reboot]    = RebootOnWiFiFailureToConnect;
@@ -463,6 +464,7 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
 {
     // DEBUG_START;
 
+    // DEBUG_V(String("ap_channelNumber: ") + String(ap_channelNumber));
     bool ConfigChanged = false;
 
     String sIp = ip.toString ();
@@ -475,6 +477,8 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
     ConfigChanged |= setFromJSON (sNetmask, json, CN_netmask);
     ConfigChanged |= setFromJSON (sGateway, json, CN_gateway);
     ConfigChanged |= setFromJSON (UseDhcp, json, CN_dhcp);
+    bool chanChanged = setFromJSON (ap_channelNumber, json, CN_ap_channel);
+    ConfigChanged |= chanChanged;
     ConfigChanged |= setFromJSON (sta_timeout, json, CN_sta_timeout);
     ConfigChanged |= setFromJSON (ap_fallbackIsEnabled, json, CN_ap_fallback);
     ConfigChanged |= setFromJSON (ap_timeout, json, CN_ap_timeout);
@@ -485,6 +489,16 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
     // DEBUG_V ("gateway: " + gateway);
     // DEBUG_V ("netmask: " + netmask);
 
+    // DEBUG_V(String("ap_channelNumber: ") + String(ap_channelNumber));
+    // String StateName;
+    // pCurrentFsmState->GetStateName(StateName);
+    // DEBUG_V(String("       CurrState: ") + StateName);
+    
+    if(chanChanged & pCurrentFsmState == &fsm_WiFi_state_ConnectedToSta_imp)
+    {
+        // DEBUG_V("need to cycle the WiFi to move to a new channel");
+        WiFi.softAPdisconnect();
+    }
     ip.fromString (sIp);
     gateway.fromString (sGateway);
     netmask.fromString (sNetmask);
@@ -792,7 +806,8 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
         String Hostname;
         NetworkMgr.GetHostname (Hostname);
         String ssid = "ESPixelStick-" + String (Hostname);
-        WiFi.softAP (ssid.c_str ());
+        // DEBUG_V(String("ap_channelNumber: ") + String(pWiFiDriver->ap_channelNumber));
+        WiFi.softAP (ssid.c_str (), NULL, pWiFiDriver->ap_channelNumber);
 
         pWiFiDriver->setIpAddress (WiFi.localIP ());
         pWiFiDriver->setIpSubNetMask (WiFi.subnetMask ());

@@ -1079,6 +1079,14 @@ function ProcessInputConfig() {
     $('#ecb_gpioid').val(Input_Config.ecb.id);
     $('#ecb_polarity').val(Input_Config.ecb.polarity);
     $('#ecb_longPress').val(Input_Config.ecb.long);
+
+    if ({}.hasOwnProperty.call(Input_Config.channels[1][2], "tsensortopic")) {
+        $("#temperatureSensor").removeClass("hidden");
+    }
+    else {
+        $("#temperatureSensor").addClass("hidden");
+    }
+
 } // ProcessInputConfig
 
 function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
@@ -1358,6 +1366,7 @@ function ExtractNetworkWiFiConfigFromHtmlPage() {
     wifi.netmask = $('#network #wifi #netmask').val();
     wifi.gateway = $('#network #wifi #gateway').val();
     wifi.dhcp = $('#network #wifi #dhcp').prop('checked');
+    wifi.ap_channel = $('#network #wifi #ap_channel').val();
     wifi.ap_fallback = $('#network #wifi #ap_fallback').prop('checked');
     wifi.ap_reboot = $('#network #wifi #ap_reboot').prop('checked');
     wifi.ap_timeout = $('#network #wifi #ap_timeout').val();
