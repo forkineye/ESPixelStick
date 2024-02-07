@@ -470,27 +470,23 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
     String sIp = ip.toString ();
     String sGateway = gateway.toString ();
     String sNetmask = netmask.toString ();
-    bool apChanged = false;
     ConfigChanged |= setFromJSON (ssid, json, CN_ssid);
-    apChanged     |= setFromJSON (passphrase, json, CN_passphrase);
+    ConfigChanged |= setFromJSON (passphrase, json, CN_passphrase);
     ConfigChanged |= setFromJSON (sIp, json, CN_ip);
     ConfigChanged |= setFromJSON (sNetmask, json, CN_netmask);
     ConfigChanged |= setFromJSON (sGateway, json, CN_gateway);
     ConfigChanged |= setFromJSON (UseDhcp, json, CN_dhcp);
-    apChanged     |= setFromJSON (ap_channelNumber, json, CN_ap_channel);
-    ConfigChanged |= apChanged;
+    ConfigChanged |= setFromJSON (ap_channelNumber, json, CN_ap_channel);
     ConfigChanged |= setFromJSON (sta_timeout, json, CN_sta_timeout);
     ConfigChanged |= setFromJSON (ap_fallbackIsEnabled, json, CN_ap_fallback);
     ConfigChanged |= setFromJSON (ap_timeout, json, CN_ap_timeout);
     ConfigChanged |= setFromJSON (RebootOnWiFiFailureToConnect, json, CN_ap_reboot);
     ConfigChanged |= setFromJSON (StayInApMode, json, CN_StayInApMode);
-    ConfigChanged |= apChanged;
 
-    // DEBUG_V ("     ip: " + ip);
-    // DEBUG_V ("gateway: " + gateway);
-    // DEBUG_V ("netmask: " + netmask);
-
-    // DEBUG_V(String("ap_channelNumber: ") + String(ap_channelNumber));
+    // DEBUG_V ("                     ip: " + ip);
+    // DEBUG_V (                "gateway: " + gateway);
+    // DEBUG_V (                "netmask: " + netmask);
+    // DEBUG_V (String("ap_channelNumber: ") + String(ap_channelNumber));
     // String StateName;
     // pCurrentFsmState->GetStateName(StateName);
     // DEBUG_V(String("       CurrState: ") + StateName);
@@ -505,16 +501,6 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
         passphrase = emptyString;
     }
 
-    if(apChanged)
-    {
-        // DEBUG_V("AP Settings changed");
-        if(pCurrentFsmState == &fsm_WiFi_state_ConnectedToSta_imp)
-        {
-            // DEBUG_V("need to cycle the WiFi to move to new AP settings");
-            WiFi.softAPdisconnect();
-        }
-    }
-    
     if(ConfigChanged)
     {
         // DEBUG_V("WiFi Settings changed");
@@ -522,6 +508,11 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
         {
             // DEBUG_V("need to cycle the WiFi to move to new STA settings");
             WiFi.disconnect();
+        }
+        else if(pCurrentFsmState == &fsm_WiFi_state_ConnectedToSta_imp)
+        {
+            // DEBUG_V("need to cycle the WiFi to move to new AP settings");
+            WiFi.softAPdisconnect();
         }
     }
 
@@ -825,9 +816,13 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
     {
         WiFi.enableSTA(false);
         WiFi.enableAP(true);
-        String Hostname;
-        NetworkMgr.GetHostname (Hostname);
-        String ssid = "ESPixelStick-" + String (Hostname);
+        String ssid =  pWiFiDriver->ssid;
+        if(ssid.equals(emptyString))
+        {
+            String Hostname;
+            NetworkMgr.GetHostname (Hostname);
+            ssid = "ESPixelStick-" + String (Hostname);
+        }
         // DEBUG_V(String("ap_channelNumber: ") + String(pWiFiDriver->ap_channelNumber));
         WiFi.softAP (ssid.c_str (), pWiFiDriver->passphrase.c_str (), int(pWiFiDriver->ap_channelNumber));
 
