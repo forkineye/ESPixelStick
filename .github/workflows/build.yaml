@@ -28,6 +28,9 @@ jobs:
           # Lolin D32 Pro
           - target: "d32_pro"
             chip: "esp32"
+          # ESP32 Bong69
+          - target: "esp32_bong69"
+            chip: "esp32"
           # ESP32 CAM
           - target: "esp32_cam"
             chip: "esp32"
@@ -66,6 +69,9 @@ jobs:
             chip: "esp32"
           # QuinLed UNO Eth
           - target: "esp32_quinled_uno_eth_espsv3"
+            chip: "esp32"
+          # Wasatch
+          - target: "esp32_wasatch"
             chip: "esp32"
           # mh et esp32 mini kit
           - target: "d1_mini_mhetesp32minikit"
