@@ -53,6 +53,7 @@
 #define MicroSecondsInASecond       (MicroSecondsInAmilliSecond * MilliSecondsInASecond)
 #define NanoSecondsInAMicroSecond   1000
 #define NanoSecondsInASecond        (MicroSecondsInASecond * NanoSecondsInAMicroSecond)
+#define NanoSecondsInAMilliSecond   (NanoSecondsInAMicroSecond * MicroSecondsInAmilliSecond)
 
 #define CPU_ClockTimeNS             ((1.0 / float(F_CPU)) * float(NanoSecondsInASecond))
 
@@ -131,6 +132,6 @@ bool setFromJSON (T& OutValue, J& Json, N Name)
 extern config_t config;
 extern bool ConfigSaveNeeded;
 extern const uint8_t CurrentConfigVersion;
-
+#define LOAD_CONFIG_DELAY 4
 // #define DEBUG_GPIO gpio_num_t::GPIO_NUM_25
 // #define DEBUG_GPIO1 gpio_num_t::GPIO_NUM_14

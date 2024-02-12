@@ -65,12 +65,20 @@
                                 <td><span id="x_uptime"></span></td>
                             </tr>
                             <tr>
+                                <td width="33%">Current Time</td>
+                                <td><span id="x_currenttime"></span></td>
+                            </tr>
+                            <tr>
                                 <td width="33%" id="i_size">Flash Total</td>
                                 <td><span id="x_size"></span></td>
                             </tr>
                             <tr>
                                 <td width="33%" id="i_used">Flash Used</td>
                                 <td><span id="x_used"></span></td>
+                            </tr>
+                            <tr>
+                                <td width="33%" id="i_temperature">Temprature</td>
+                                <td><span id="x_temperature"></span></td>
                             </tr>
                         </table>
                     </fieldset>
@@ -400,12 +408,19 @@
                                     title="When connecting as a client, this is the timeout in seconds.">
                             </div>
                         </div>
-                        <div class="form-group" id="fg_staTimeout">
+                        <div class="form-group" id="fg_apTimeout">
                             <label class="control-label col-sm-2" for="ap_timeout">AP Timeout</label>
                             <div class="col-sm-2">
                                 <input type="number" class="form-control is-valid" id="ap_timeout" step="1" min="15"
                                     max="240" value="0"
                                     title="When waiting for a client to connect, this is the timeout in seconds.">
+                            </div>
+                        </div>
+                        <div class="form-group" id="fg_apChannel">
+                            <label class="control-label col-sm-2" for="ap_channel">AP WiFi Channel</label>
+                            <div class="col-sm-2">
+                                <input type="number" class="form-control is-valid" id="ap_channel" step="1" min="1" max="15"
+                                title="Set the WiFi channel to be used in AP mode.">
                             </div>
                         </div>
                         <div class="form-group">
@@ -603,25 +618,35 @@
                         </div>
                     </div>
 
+                    <div class="form-group" id="TemperatureSensorGrp">
+                        <label class="control-label col-sm-2" for="TemperatureSensorUnits">Temperature Unit</label>
+                        <div class="col-sm-4">
+                            <select id="TemperatureSensorUnits">
+                                <option value="0">Celcius</option>
+                                <option value="1">Fahrenheit</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <!-- Advanced Mode -->
                     <div class="hidden AdvancedMode">
                         <div class="form-group hidden AdvancedMode">
-                            <label class="control-label col-sm-2 esp32" for="miso_pin">SD MISO Pin</label>
-                            <div class="col-sm-4 esp32">
-                                <input type="number" class="form-control is-valid esp32" id="miso_pin" step="1" min="1"
+                            <label class="control-label col-sm-2" for="miso_pin">SD MISO Pin</label>
+                            <div class="col-sm-4">
+                                <input type="number" class="form-control is-valid" id="miso_pin" step="1" min="1"
                                     max="40" value="0" required title="GPIO on which MISO will be received">
                             </div>
-                            <label class="control-label col-sm-2 esp32" for="mosi_pin">SD MOSI Pin</label>
-                            <div class="col-sm-4 esp32">
-                                <input type="number" class="form-control is-valid esp32" id="mosi_pin" step="1" min="1"
+                            <label class="control-label col-sm-2" for="mosi_pin">SD MOSI Pin</label>
+                            <div class="col-sm-4">
+                                <input type="number" class="form-control is-valid" id="mosi_pin" step="1" min="1"
                                     max="40" value="0" required title="GPIO on which MOSI will be sent">
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="control-label col-sm-2 esp32" for="clock_pin">SD Clock Pin</label>
-                            <div class="col-sm-4 esp32">
-                                <input type="number" class="form-control is-valid esp32" id="clock_pin" step="1" min="1"
+                            <label class="control-label col-sm-2" for="clock_pin">SD Clock Pin</label>
+                            <div class="col-sm-4">
+                                <input type="number" class="form-control is-valid" id="clock_pin" step="1" min="1"
                                     max="40" value="0" required title="GPIO on which CLOCK will be sent">
                             </div>
                             <label class="control-label col-sm-2" for="cs_pin">SD Chip Select Pin</label>
@@ -700,7 +725,7 @@
                         <label class="control-label col-sm-2" for="v_columns">Columns</label>
                         <div class="col-sm-2">
                             <input type="number" class="form-control is-valid" id="v_columns" name="v_columns" step="1"
-                                min="1" max="100" value="20">
+                                min="1" max="200" value="20">
                         </div>
 
                     </div>
@@ -913,6 +938,7 @@
     <script type="text/javascript" src="js/bootstrap.js"></script>
     <script type="text/javascript" src="js/jqColorPicker.js"></script>
     <script type="text/javascript" src="js/FileSaver.js"></script>
+    <script type="text/javascript" src="js/jquery.cookie.js"></script>
     <script type="text/javascript" src="script.js"></script>
     -->
 

@@ -325,6 +325,7 @@ void c_WiFiDriver::GetConfig (JsonObject& json)
     json[CN_StayInApMode] = StayInApMode;
     json[CN_dhcp]         = UseDhcp;
     json[CN_sta_timeout]  = sta_timeout;
+    json[CN_ap_channel]   = ap_channelNumber;
     json[CN_ap_fallback]  = ap_fallbackIsEnabled;
     json[CN_ap_timeout]   = ap_timeout;
     json[CN_ap_reboot]    = RebootOnWiFiFailureToConnect;
@@ -463,31 +464,57 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
 {
     // DEBUG_START;
 
+    // DEBUG_V(String("ap_channelNumber: ") + String(ap_channelNumber));
     bool ConfigChanged = false;
 
     String sIp = ip.toString ();
     String sGateway = gateway.toString ();
     String sNetmask = netmask.toString ();
-
     ConfigChanged |= setFromJSON (ssid, json, CN_ssid);
     ConfigChanged |= setFromJSON (passphrase, json, CN_passphrase);
     ConfigChanged |= setFromJSON (sIp, json, CN_ip);
     ConfigChanged |= setFromJSON (sNetmask, json, CN_netmask);
     ConfigChanged |= setFromJSON (sGateway, json, CN_gateway);
     ConfigChanged |= setFromJSON (UseDhcp, json, CN_dhcp);
+    ConfigChanged |= setFromJSON (ap_channelNumber, json, CN_ap_channel);
     ConfigChanged |= setFromJSON (sta_timeout, json, CN_sta_timeout);
     ConfigChanged |= setFromJSON (ap_fallbackIsEnabled, json, CN_ap_fallback);
     ConfigChanged |= setFromJSON (ap_timeout, json, CN_ap_timeout);
     ConfigChanged |= setFromJSON (RebootOnWiFiFailureToConnect, json, CN_ap_reboot);
     ConfigChanged |= setFromJSON (StayInApMode, json, CN_StayInApMode);
 
-    // DEBUG_V ("     ip: " + ip);
-    // DEBUG_V ("gateway: " + gateway);
-    // DEBUG_V ("netmask: " + netmask);
-
+    // DEBUG_V ("                     ip: " + ip);
+    // DEBUG_V (                "gateway: " + gateway);
+    // DEBUG_V (                "netmask: " + netmask);
+    // DEBUG_V (String("ap_channelNumber: ") + String(ap_channelNumber));
+    // String StateName;
+    // pCurrentFsmState->GetStateName(StateName);
+    // DEBUG_V(String("       CurrState: ") + StateName);
+    
     ip.fromString (sIp);
     gateway.fromString (sGateway);
     netmask.fromString (sNetmask);
+
+    if((passphrase.length() < 8) && (passphrase.length() > 0))
+    {
+        logcon (String (F ("WiFi Passphrase is too short. Using Empty String")));
+        passphrase = emptyString;
+    }
+
+    if(ConfigChanged)
+    {
+        // DEBUG_V("WiFi Settings changed");
+        if(pCurrentFsmState == &fsm_WiFi_state_ConnectedToAP_imp)
+        {
+            // DEBUG_V("need to cycle the WiFi to move to new STA settings");
+            WiFi.disconnect();
+        }
+        else if(pCurrentFsmState == &fsm_WiFi_state_ConnectedToSta_imp)
+        {
+            // DEBUG_V("need to cycle the WiFi to move to new AP settings");
+            WiFi.softAPdisconnect();
+        }
+    }
 
     // DEBUG_V (String("ConfigChanged: ") + String(ConfigChanged));
     // DEBUG_END;
@@ -789,10 +816,15 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
     {
         WiFi.enableSTA(false);
         WiFi.enableAP(true);
-        String Hostname;
-        NetworkMgr.GetHostname (Hostname);
-        String ssid = "ESPixelStick-" + String (Hostname);
-        WiFi.softAP (ssid.c_str ());
+        String ssid =  pWiFiDriver->ssid;
+        if(ssid.equals(emptyString))
+        {
+            String Hostname;
+            NetworkMgr.GetHostname (Hostname);
+            ssid = "ESPixelStick-" + String (Hostname);
+        }
+        // DEBUG_V(String("ap_channelNumber: ") + String(pWiFiDriver->ap_channelNumber));
+        WiFi.softAP (ssid.c_str (), pWiFiDriver->passphrase.c_str (), int(pWiFiDriver->ap_channelNumber));
 
         pWiFiDriver->setIpAddress (WiFi.localIP ());
         pWiFiDriver->setIpSubNetMask (WiFi.subnetMask ());
@@ -956,20 +988,18 @@ void fsm_WiFi_state_ConnectionFailed::Init ()
         pWiFiDriver->SetIsWiFiConnected (false);
         NetworkMgr.SetWiFiIsConnected (false);
     }
+
+    if (true == pWiFiDriver->Get_RebootOnWiFiFailureToConnect())
+    {
+        logcon (F ("WiFi Requesting Reboot"));
+        RequestReboot(100000);
+    }
     else
     {
-        if (true == pWiFiDriver->Get_RebootOnWiFiFailureToConnect())
-        {
-            logcon (F ("WiFi Requesting Reboot"));
-            RequestReboot(100000);
-        }
-        else
-        {
-            // DEBUG_V ("WiFi Reboot Disabled.");
+        // DEBUG_V ("WiFi Reboot Disabled. Try Again");
 
-            // start over
-            fsm_WiFi_state_Boot_imp.Init ();
-        }
+        // start over
+        fsm_WiFi_state_Boot_imp.Init ();
     }
 
     // DEBUG_END;

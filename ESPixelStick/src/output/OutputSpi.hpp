@@ -24,6 +24,7 @@
 
 #include "../ESPixelStick.h"
 #ifdef SUPPORT_SPI_OUTPUT
+
 #include "OutputPixel.hpp"
 #include <driver/spi_master.h>
 #include <esp_task.h>

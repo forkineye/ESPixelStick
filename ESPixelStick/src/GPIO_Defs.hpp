@@ -112,8 +112,12 @@ typedef enum
 #   include "platformDefinitions/GPIO_Defs_ESP32_QUINLED_UNO_ETH_ESPSV3.hpp"
 #elif defined (BOARD_ESP32_TTGO_T8)
 #   include "platformDefinitions/GPIO_Defs_ESP32_TTGO_T8.hpp"
+#elif defined (BOARD_ESP32_BONG69)
+#   include "platformDefinitions/GPIO_Defs_ESP32_Bong69.hpp"
 #elif defined (BOARD_ESP32_WT32ETH01)
 #   include "platformDefinitions/GPIO_Defs_ESP32_WT32ETH01.hpp"
+#elif defined (BOARD_ESP32_WT32ETH01_WASATCH)
+#   include "platformDefinitions/GPIO_Defs_ESP32_WT32ETH01_Wasatch.hpp"
 #elif defined (BOARD_ESP32_TWILIGHTLORD)
 #   include "platformDefinitions/GPIO_Defs_ESP32_TWILIGHTLORD.hpp"
 #elif defined (BOARD_ESP32_TWILIGHTLORD_ETH)

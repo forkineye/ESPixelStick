@@ -91,8 +91,8 @@ public:
     bool   ReadSdFile       (const String & FileName,   JsonDocument & FileData);
     size_t WriteSdFile      (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite);
     size_t WriteSdFile      (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite, size_t StartingPosition);
-    void   CloseSdFile      (const FileId & FileHandle);
-    void   GetListOfSdFiles (String & Response);
+    void   CloseSdFile      (FileId & FileHandle);
+    void   GetListOfSdFiles (String & Response, uint32_t FirstFileToSend);
     void   GetListOfSdFiles (std::vector<String> & Response);
     size_t GetSdFileSize    (const String & FileName);
     size_t GetSdFileSize    (const FileId & FileHandle);
@@ -140,6 +140,9 @@ private:
 
     byte   * FileUploadBuffer = nullptr;
     uint32_t FileUploadBufferOffset = 0;
+
+    File        FileSendDir;
+    uint32_t    LastFileSent = 0;
 
 protected:
 

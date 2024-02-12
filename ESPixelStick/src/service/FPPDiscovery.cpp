@@ -366,7 +366,14 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, float S
                 // DEBUG_V (String ("SecondsElapsed: ") + SecondsElapsed);
 
                 MultiSyncStats.pktSyncSeqStop++;
-                StopPlaying ();
+                if(BlankOnStop)
+                {
+                    ProcessBlankPacket();
+                }
+                else
+                {
+                    StopPlaying ();
+                }
                 break;
             }
 
@@ -1112,7 +1119,7 @@ void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
         }
         // DEBUG_V ("");
 
-        if (0 == FileName.length())
+        if (FileName.isEmpty())
         {
             // DEBUG_V("Do not have a file to start");
             break;

@@ -41,6 +41,10 @@
 
 // Services
 #include "src/service/FPPDiscovery.h"
+#include <TimeLib.h>
+#ifdef SUPPORT_SENSOR_DS18B20
+#include "src/service/SensorDS18B20.h"
+#endif // def SUPPORT_SENSOR_DS18B20
 
 #ifdef ARDUINO_ARCH_ESP8266
 #include <Hash.h>
@@ -92,7 +96,7 @@ uint32_t RebootCount = NotRebootingValue;
 uint32_t lastUpdate;                // Update timeout tracker
 bool     ResetWiFi = false;
 bool     IsBooting = true;  // Configuration initialization flag
-bool     ConfigLoadNeeded = false;
+time_t   ConfigLoadNeeded = NO_CONFIG_NEEDED;
 bool     ConfigSaveNeeded = false;
 uint32_t DiscardedRxData = 0;
 
@@ -102,7 +106,10 @@ uint32_t DiscardedRxData = 0;
 //
 /////////////////////////////////////////////////////////
 
-void loadConfig();
+#define NO_CONFIG_NEEDED time_t(-1)
+
+void ScheduleLoadConfig() {ConfigLoadNeeded = now(); }
+void LoadConfig();
 void GetConfig (JsonObject & json);
 void GetDriverName (String & Name) { Name = F("ESP"); }
 
@@ -167,7 +174,7 @@ void setup()
     // Load configuration from the File System and set Hostname
     // TestHeap(uint32_t(15));
     // DEBUG_V(String("LoadConfig Heap: ") + String(ESP.getFreeHeap()));
-    loadConfig();
+    LoadConfig();
 
     // TestHeap(uint32_t(20));
     // DEBUG_V(String("InputMgr Heap: ") + String(ESP.getFreeHeap()));
@@ -187,6 +194,12 @@ void setup()
     // DEBUG_V(String("WebMgr Heap: ") + String(ESP.getFreeHeap()));
     // Configure and start the web server
     WebMgr.Begin(&config);
+
+#ifdef SUPPORT_SENSOR_DS18B20
+    // TestHeap(uint32_t(60));
+    // DEBUG_V(String("SensorDS18B20 Heap: ") + String(ESP.getFreeHeap()));
+    SensorDS18B20.Begin();
+#endif // def SUPPORT_SENSOR_DS18B20
 
     // DEBUG_V(String("FPPDiscovery Heap: ") + String(ESP.getFreeHeap()));
     FPPDiscovery.begin ();
@@ -273,7 +286,7 @@ void SetConfig (const char * DataString)
 //      if they send bad json data.
 
     FileMgr.SaveConfigFile (ConfigFileName, DataString);
-    ConfigLoadNeeded = true;
+    ScheduleLoadConfig();
 
     // DEBUG_END;
 
@@ -336,6 +349,10 @@ bool deserializeCore (JsonObject & json)
         // DEBUG_V("");
         ConfigSaveNeeded |= NetworkMgr.SetConfig(DeviceConfig);
         // DEBUG_V("");
+#ifdef SUPPORT_SENSOR_DS18B20
+        ConfigSaveNeeded |= SensorDS18B20.SetConfig(DeviceConfig);
+#endif // def SUPPORT_SENSOR_DS18B20
+        // DEBUG_V("");
         DataHasBeenAccepted = true;
 
     } while (false);
@@ -380,11 +397,11 @@ void SaveConfig()
 /** Loads and validates the JSON configuration file from the file system.
  *  If no configuration file is found, a new one will be created.
  */
-void loadConfig()
+void LoadConfig()
 {
     // DEBUG_START;
 
-    ConfigLoadNeeded = false;
+    ConfigLoadNeeded = NO_CONFIG_NEEDED;
 
     String temp;
     // DEBUG_V ("");
@@ -419,6 +436,10 @@ void GetConfig (JsonObject & json)
     FileMgr.GetConfig (device);
 
     NetworkMgr.GetConfig (json);
+
+#ifdef SUPPORT_SENSOR_DS18B20
+    SensorDS18B20.GetConfig(json);
+#endif // def SUPPORT_SENSOR_DS18B20
 
     // DEBUG_END;
 } // GetConfig
@@ -483,6 +504,10 @@ void loop()
 
     WebMgr.Process ();
 
+#ifdef SUPPORT_SENSOR_DS18B20
+    SensorDS18B20.Poll();
+#endif // def SUPPORT_SENSOR_DS18B20
+
     // need to keep the rx pipeline empty
     size_t BytesToDiscard = min (100, LOG_PORT.available ());
     DiscardedRxData += BytesToDiscard;
@@ -506,10 +531,13 @@ void loop()
         }
     }
 
-    if (ConfigLoadNeeded)
+    if (NO_CONFIG_NEEDED != ConfigLoadNeeded)
     {
-        FeedWDT ();
-        loadConfig ();
+        if(abs(now() - ConfigLoadNeeded) > LOAD_CONFIG_DELAY)
+        {
+            FeedWDT ();
+            LoadConfig ();
+        }
     }
 
     if (ConfigSaveNeeded)

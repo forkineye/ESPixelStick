@@ -793,15 +793,22 @@ void c_FileMgr::DescribeSdCardToUser ()
 } // DescribeSdCardToUser
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::GetListOfSdFiles (String & Response)
+void c_FileMgr::GetListOfSdFiles (String & Response, uint32_t FirstFileToSend)
 {
     // DEBUG_START;
+    #define EntryReservedSpace 75
+    #define EntryUsageFactor 3
 
-    DynamicJsonDocument ResponseJsonDoc (3 * 1024);
+    // DEBUG_V ("FirstFileToSend: '" + String(FirstFileToSend) + "'");
+
+    DynamicJsonDocument ResponseJsonDoc (1 * 1024);
+    FeedWDT ();
 
     do // once
     {
-        if (0 == ResponseJsonDoc.capacity ())
+        uint32_t capacity = ResponseJsonDoc.capacity ();
+
+        if (0 == capacity)
         {
             logcon (String(CN_stars) + F ("ERROR: Failed to allocate memory for the GetListOfSdFiles web request response.") + CN_stars);
             break;
@@ -821,32 +828,63 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
 #endif
         uint64_t usedBytes = 0;
 
-        File dir = ESP_SDFS.open ("/", CN_r);
+        ResponseJsonDoc[F("usedBytes")] = uint32_t(-1);
+        ResponseJsonDoc[F("first")]     = FirstFileToSend;
+        ResponseJsonDoc[F("last")]      = uint32_t(-1);
+        ResponseJsonDoc[F("final")]     = false;
+
+        if((0 == FirstFileToSend) || (LastFileSent != FirstFileToSend))
+        {
+            FileSendDir.close();
+            FileSendDir = ESP_SDFS.open ("/", CN_r);
+            LastFileSent = 0;
+        }
+        FirstFileToSend -= LastFileSent;
 
         while (true)
         {
-            File entry = dir.openNextFile ();
+            FeedWDT();
+
+            File entry = FileSendDir.openNextFile ();
 
             if (!entry)
             {
-                // no more files
+                // DEBUG_V("no more files to add to list");
+                ResponseJsonDoc[F("final")] = true;
                 break;
             }
 
             usedBytes += entry.size ();
+            ++LastFileSent;
+            // DEBUG_V(String("FirstFileToSend: ") + String(FirstFileToSend));
+            // have we gotten to a file we have not sent yet?
+            if(FirstFileToSend)
+            {
+                --FirstFileToSend;
+                continue;
+            }
 
             String EntryName = String (entry.name ());
-            EntryName = EntryName.substring ((('/' == EntryName[0]) ? 1 : 0));
             // DEBUG_V ("EntryName: " + EntryName);
+            EntryName = EntryName.substring ((('/' == EntryName[0]) ? 1 : 0));
             // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
 
-            if ((0 != EntryName.length ()) &&
-                (EntryName != String (F ("System Volume Information"))) &&
+            if ((!EntryName.isEmpty ()) &&
+                (!EntryName.equals(String (F ("System Volume Information")))) &&
                 (0 != entry.size ())
                )
             {
-                // DEBUG_V ("Adding File: '" + EntryName + "'");
+                uint32_t neededMemory = EntryReservedSpace + (EntryName.length() * EntryUsageFactor);
+                uint32_t usedSpace = ResponseJsonDoc.memoryUsage();
+                uint32_t availableSpace = capacity - usedSpace;
+                if(neededMemory >= availableSpace)
+                {
+                    // DEBUG_V("No more file names will fit in the list");
+                    entry.close ();
+                    break;
+                }
 
+                // DEBUG_V ("Adding File: '" + EntryName + "'");
                 JsonObject CurrentFile = FileArray.createNestedObject ();
                 CurrentFile[CN_name]      = EntryName;
                 CurrentFile[F ("date")]   = entry.getLastWrite ();
@@ -854,11 +892,11 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
             }
 
             entry.close ();
-        }
+        } // end while true
 
-        dir.close();
 
         ResponseJsonDoc[F("usedBytes")] = usedBytes;
+        ResponseJsonDoc[F("last")]      = LastFileSent;
 
         if(ResponseJsonDoc.overflowed())
         {
@@ -866,10 +904,10 @@ void c_FileMgr::GetListOfSdFiles (String & Response)
             break;
         }
 
-    } while (false);
+    } while (false); // once
 
-    // DEBUG_V(String("ResponseJsonDoc.size(): ") + String(ResponseJsonDoc.size()));
-    Response.reserve(1024);
+    // DEBUG_V(String("ResponseJsonDoc.memoryUsage(): ") + String(ResponseJsonDoc.memoryUsage()));
+    Response.reserve(ResponseJsonDoc.memoryUsage());
     serializeJson (ResponseJsonDoc, Response);
 
     // DEBUG_V (String ("Response: ") + Response);
@@ -909,8 +947,8 @@ void c_FileMgr::GetListOfSdFiles (std::vector<String> & Response)
             // DEBUG_V ("EntryName: '" + EntryName + "'");
             // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
 
-            if ((0 != EntryName.length ()) &&
-                (EntryName != String (F ("System Volume Information"))) &&
+            if ((!EntryName.isEmpty ()) &&
+                (!EntryName.equals(String (F ("System Volume Information")))) &&
                 (0 != entry.size ())
                )
             {
@@ -1006,6 +1044,7 @@ bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & Fil
     bool FileIsOpen = false;
     FileHandle = 0;
     char ReadWrite[2] = { XlateFileMode[Mode], 0 };
+    FileHandle = INVALID_FILE_HANDLE;
 
     do // once
     {
@@ -1048,10 +1087,9 @@ bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & Fil
             if (!FileList[FileListIndex].info)
             {
                 logcon(String(F("ERROR: Cannot open '")) + FileName + F("'."));
-
                 // release the file list entry
                 FileList[FileListIndex].handle = INVALID_FILE_HANDLE;
-
+                CloseSdFile(FileHandle);
                 break;
             }
             // DEBUG_V("");
@@ -1226,7 +1264,7 @@ size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t N
 } // ReadSdFile
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::CloseSdFile (const FileId& FileHandle)
+void c_FileMgr::CloseSdFile (FileId& FileHandle)
 {
     // DEBUG_START;
     // DEBUG_V(String("      FileHandle: ") + String(FileHandle));
@@ -1241,6 +1279,8 @@ void c_FileMgr::CloseSdFile (const FileId& FileHandle)
     {
         logcon (String (F ("CloseSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
+    
+    FileHandle = INVALID_FILE_HANDLE;
 
     // DEBUG_END;
 

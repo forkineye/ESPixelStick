@@ -23,6 +23,7 @@
 
 #include "../ESPixelStick.h"
 #include "../FileMgr.hpp"
+#include <TimeLib.h>
 
 
 //-----------------------------------------------------------------------------
@@ -1002,7 +1003,7 @@ void c_OutputMgr::LoadConfig ()
 {
     // DEBUG_START;
 
-    ConfigLoadNeeded = false;
+    ConfigLoadNeeded = NO_CONFIG_NEEDED;
     ConfigInProgress = true;
 
     // try to load and process the config file
@@ -1196,7 +1197,7 @@ void c_OutputMgr::SetConfig (const char * ConfigData)
 
     if (true == FileMgr.SaveConfigFile (ConfigFileName, ConfigData))
     {
-        ConfigLoadNeeded = true;
+        ScheduleLoadConfig();
     } // end we got a config and it was good
     else
     {
@@ -1225,7 +1226,7 @@ void c_OutputMgr::SetConfig(ArduinoJson::JsonDocument & ConfigData)
 
     if (true == FileMgr.SaveConfigFile(ConfigFileName, ConfigData))
     {
-        ConfigLoadNeeded = true;
+        ScheduleLoadConfig();
     } // end we got a config and it was good
     else
     {
@@ -1292,9 +1293,12 @@ void c_OutputMgr::Poll()
 
 #if defined(ARDUINO_ARCH_ESP8266)
     // do we need to save the current config?
-    if (true == ConfigLoadNeeded)
+    if (NO_CONFIG_NEEDED != ConfigLoadNeeded)
     {
-        LoadConfig ();
+        if(abs(now() - ConfigLoadNeeded) > LOAD_CONFIG_DELAY)
+        {
+            LoadConfig ();
+        }
     } // done need to save the current config
 
     if ((false == IsOutputPaused) && (false == ConfigInProgress) && (false == RebootInProgress()) )
@@ -1319,11 +1323,14 @@ void c_OutputMgr::TaskPoll()
     // //DEBUG_START;
 
     // do we need to save the current config?
-    if (true == ConfigLoadNeeded)
+    if (NO_CONFIG_NEEDED != ConfigLoadNeeded)
     {
-        // DEBUG_V("Starting config processing");
-        LoadConfig ();
-        // DEBUG_V("Done config processing");
+        if(abs(now() - ConfigLoadNeeded) > LOAD_CONFIG_DELAY)
+        {
+            // DEBUG_V("Starting config processing");
+            LoadConfig ();
+            // DEBUG_V("Done config processing");
+        }
     } // done need to save the current config
 
     if ((false == IsOutputPaused) && (false == ConfigInProgress) && (false == RebootInProgress()) )

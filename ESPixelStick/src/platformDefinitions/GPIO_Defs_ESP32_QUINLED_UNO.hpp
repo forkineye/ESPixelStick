@@ -36,6 +36,10 @@
 #define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_18
 #define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_5
 
+// Temperature Sensor
+#define SUPPORT_SENSOR_DS18B20
+#define ONEWIRE_PIN         gpio_num_t::GPIO_NUM_13
+
 // Output Types
 // Not Finished - #define SUPPORT_OutputType_TLS3001
 // #define SUPPORT_OutputType_APA102           // SPI

@@ -1,5 +1,5 @@
 var StatusRequestTimer = null;
-var FseqFileListRequestTimer = null;
+let ExpectedStartingFileIndex = 0;
 var DiagTimer = null;
 
 // global data
@@ -179,13 +179,24 @@ $(function () {
         submitNetworkConfig();
     }));
 
-    $('#viewStyle').on("change", (function () {
+    $('#diag #viewStyle').on("change", (function () {
+        $.cookie('diagviewStyle', $('#diag #viewStyle').val());
         clearStream();
     }));
+    if(undefined !== $.cookie('diagviewStyle'))
+    {
+        $('#diag #viewStyle').val($.cookie('diagviewStyle'));
+    }
 
     $('#v_columns').on('input', function () {
+        $.cookie('DiagColumns', parseInt($('#v_columns').val()));
         clearStream();
     });
+    if(undefined !== $.cookie('DiagColumns'))
+    {
+        // let NumColumns = $.cookie('DiagColumns');
+        $('#v_columns').val($.cookie('DiagColumns'));
+    }
 
     //TODO: This should pull a configuration from the stick and not the web interface as web data could be invalid
     $('#backupconfig').on("click", (function () {
@@ -218,9 +229,14 @@ $(function () {
     }));
 
     $('#AdvancedOptions').on("change", (function () {
+	    $.cookie('advancedMode', $('#AdvancedOptions').prop("checked"), { expires: 365 });
         UpdateAdvancedOptionsMode();
         UpdateChannelCounts();
     }));
+    if(undefined !== $.cookie('advancedMode'))
+    {
+        $('#AdvancedOptions').prop("checked", $.cookie('advancedMode') === "false" ? false : true);
+    }
 
     let finalUrl = "http://" + target + "/upload";
     // console.log(finalUrl);
@@ -243,7 +259,7 @@ $(function () {
                     // console.log(file);
                     // console.log(resp);
                     Dropzone.forElement('#filemanagementupload').removeAllFiles(true)
-                    RequestListOfFiles();
+                    RequestListOfFiles(0);
                 });
 
                 this.on('complete', function (file, resp) {
@@ -304,9 +320,20 @@ $(function () {
             DocumentIsHidden = true;
         } else {
             DocumentIsHidden = false;
+            SetServerTime();
         }
     });
+
+    SetServerTime();
 });
+
+function SetServerTime() 
+{
+    // console.info("SetServerTime");
+    let CurrentDate = Math.floor((new Date()).getTime() / 1000);
+    // console.info("CurrentDate: " + CurrentDate);
+    SendCommand('settime/' + (CurrentDate));
+} // SetServerTime
 
 function ProcessLocalConfig(data) {
     // console.info(data);
@@ -387,14 +414,14 @@ function ProcessWindowChange(NextWindow) {
     }
 
     else if (NextWindow === "#config") {
-        RequestListOfFiles();
+        RequestListOfFiles(0);
         RcfResponse = RequestConfigFile("config.json");
         RcfResponse = RequestConfigFile("output_config.json");
         RcfResponse = RequestConfigFile("input_config.json");
     }
 
     else if (NextWindow === "#filemanagement") {
-        RequestListOfFiles();
+        RequestListOfFiles(0);
     }
 
     UpdateAdvancedOptionsMode();
@@ -507,22 +534,12 @@ function RequestStatusUpdate()
 
 } // RequestStatusUpdate
 
-function RequestListOfFiles() {
-    // is the timer running?
-    if (null === FseqFileListRequestTimer) {
-        // timer runs until we get a response
-        FseqFileListRequestTimer = setTimeout(function () {
-            clearTimeout(FseqFileListRequestTimer);
-            FseqFileListRequestTimer = null;
+function RequestListOfFiles(StartingFileIndex) {
+    ExpectedStartingFileIndex = StartingFileIndex;
 
-            RequestListOfFiles();
+    // console.info("ask for a file list from the server, starting at " + StartingFileIndex);
 
-        }, 1000);
-    } // end timer was not running
-
-    // ask for a file list from the server
-
-    return fetch("HTTP://" + target + "/files", {
+    return fetch("HTTP://" + target + "/files/" + StartingFileIndex, {
         method: 'GET',
         mode: "cors", // no-cors, *cors, same-origin
         headers: { 'Content-Type': 'application/json' },
@@ -543,20 +560,26 @@ function RequestListOfFiles() {
             // get error message from body or default to response status
             const error = (data && data.message) || webResponse.status;
             console.error("SendCommand: Error: " + Promise.reject(error));
+            CompletedServerTransaction = false;
+            RequestListOfFiles(0);
         }
         else
         {
             // console.info("SendCommand: Transaction complete");
-            clearTimeout(FseqFileListRequestTimer);
-            FseqFileListRequestTimer = null;
-            ProcessGetFileListResponse(data);
+
+
+
+
             CompletedServerTransaction = true;
+            ProcessGetFileListResponse(data);
         }
         return webResponse.ok ? 1 : 0;
     })
     .catch(error => 
     {
         console.error('SendCommand: Error: ', error);
+        CompletedServerTransaction = false;
+        RequestListOfFiles(0);
         return -1;
     });
 
@@ -581,43 +604,60 @@ function ProcessGetFileListResponse(JsonConfigData) {
     $("#usedBytes").val(BytesToMB(JsonConfigData.usedBytes));
     $("#remainingBytes").val(BytesToMB(JsonConfigData.totalBytes - JsonConfigData.usedBytes));
 
-    Fseq_File_List = JsonConfigData;
+    // console.info("Expected File Index: " + ExpectedStartingFileIndex);
+    // console.info("Received File index: " + JsonConfigData.first);
 
-    clearTimeout(FseqFileListRequestTimer);
-    FseqFileListRequestTimer = null;
-
-    // console.info("$('#FileManagementTable > tr').length " + $('#FileManagementTable > tr').length);
-
-    while (1 < $('#FileManagementTable > tr').length) {
-        // console.info("Deleting $('#FileManagementTable tr').length " + $('#FileManagementTable tr').length);
-        $('#FileManagementTable tr').last().remove();
-        // console.log("After Delete: $('#FileManagementTable tr').length " + $('#FileManagementTable tr').length);
-    }
-
-    let CurrentRowId = 0;
-    JsonConfigData.files.forEach(function (file) {
-        let SelectedPattern = '<td><input  type="checkbox" id="FileSelected_' + (CurrentRowId) + '"></td>';
-        let NamePattern = '<td><output type="text"     id="FileName_' + (CurrentRowId) + '"></td>';
-        let DatePattern = '<td><output type="text"     id="FileDate_' + (CurrentRowId) + '"></td>';
-        let SizePattern = '<td><output type="text"     id="FileSize_' + (CurrentRowId) + '"></td>';
-
-        let rowPattern = '<tr>' + SelectedPattern + NamePattern + DatePattern + SizePattern + '</tr>';
-        $('#FileManagementTable tr:last').after(rowPattern);
-
-        try {
-            $('#FileName_' + (CurrentRowId)).val(file.name);
-            $('#FileDate_' + (CurrentRowId)).val(new Date(file.date * 1000).toLocaleString());
-            $('#FileSize_' + (CurrentRowId)).val(file.length);
-        }
-        catch
+    if(ExpectedStartingFileIndex === JsonConfigData.first)
+    {
+        // are we starting a fresh list (first chunk)
+        if(JsonConfigData.first === 0)
         {
-            $('#FileName_' + (CurrentRowId)).val("InvalidFile");
-            $('#FileDate_' + (CurrentRowId)).val(new Date(0).toISOString());
-            $('#FileSize_' + (CurrentRowId)).val(0);
+            // console.info("$('#FileManagementTable > tr').length " + $('#FileManagementTable > tr').length);
+            Fseq_File_List = [];
+
+            while (1 < $('#FileManagementTable > tr').length) {
+                // console.info("Deleting $('#FileManagementTable tr').length " + $('#FileManagementTable tr').length);
+                $('#FileManagementTable tr').last().remove();
+                // console.log("After Delete: $('#FileManagementTable tr').length " + $('#FileManagementTable tr').length);
+            }
         }
 
-        CurrentRowId++;
-    });
+        JsonConfigData.files.forEach(function (file) {
+            let CurrentRowId = $('#FileManagementTable > tr').length;
+            let SelectedPattern = '<td><input  type="checkbox" id="FileSelected_' + (CurrentRowId) + '"></td>';
+            let NamePattern = '<td><output type="text" id="FileName_' + (CurrentRowId) + '"></td>';
+            let DatePattern = '<td><output type="text" id="FileDate_' + (CurrentRowId) + '"></td>';
+            let SizePattern = '<td><output type="text" id="FileSize_' + (CurrentRowId) + '"></td>';
+    
+            let rowPattern = '<tr>' + SelectedPattern + NamePattern + DatePattern + SizePattern + '</tr>';
+            $('#FileManagementTable tr:last').after(rowPattern);
+    
+            try {
+                $('#FileName_' + (CurrentRowId)).val(file.name);
+                $('#FileDate_' + (CurrentRowId)).val(new Date(file.date * 1000).toLocaleString());
+                $('#FileSize_' + (CurrentRowId)).val(file.length);
+                Fseq_File_List.push(file);
+            }
+            catch
+            {
+                $('#FileName_' + (CurrentRowId)).val("InvalidFile");
+                $('#FileDate_' + (CurrentRowId)).val(new Date(0).toISOString());
+                $('#FileSize_' + (CurrentRowId)).val(0);
+            }
+        }); // end foreach
+
+        // was this the last chunk?
+        if(false === JsonConfigData.final)
+        {
+            // console.info("not last. Ask for the next chunk");
+            RequestListOfFiles(JsonConfigData.last);
+        }
+        else
+        {
+            SetServerTime();
+        }
+    } // end expected file ID
+
 } // ProcessGetFileListResponse
 
 function RequestFileDeletion() {
@@ -631,7 +671,7 @@ function RequestFileDeletion() {
         }
     });
 
-    RequestListOfFiles();
+    RequestListOfFiles(0);
 
 } // RequestFileDeletion
 
@@ -648,7 +688,7 @@ function ProcessModeConfigurationDatafppremote(channelConfig) {
     $(jqSelector).append('<option value="...">Play Remote Sequence</option>');
 
     // for each file in the list
-    Fseq_File_List.files.forEach(function (listEntry) {
+    Fseq_File_List.forEach(function (listEntry) {
         // add in a new entry
         $(jqSelector).append('<option value="' + listEntry.name + '">' + listEntry.name + '</option>');
     });
@@ -1039,6 +1079,14 @@ function ProcessInputConfig() {
     $('#ecb_gpioid').val(Input_Config.ecb.id);
     $('#ecb_polarity').val(Input_Config.ecb.polarity);
     $('#ecb_longPress').val(Input_Config.ecb.long);
+
+    if ({}.hasOwnProperty.call(Input_Config.channels[1][2], "tsensortopic")) {
+        $("#temperatureSensor").removeClass("hidden");
+    }
+    else {
+        $("#temperatureSensor").addClass("hidden");
+    }
+
 } // ProcessInputConfig
 
 function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
@@ -1147,6 +1195,13 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData) {
             $('#pg_network #network #eth').addClass("hidden")
         }
 
+        if ({}.hasOwnProperty.call(System_Config, 'sensor')) {
+            $('#TemperatureSensorGrp').removeClass("hidden");
+            $('#TemperatureSensorUnits').val(System_Config.sensor.units);
+        }
+        else {
+            $('#TemperatureSensorGrp').addClass("hidden");
+        }
     }
 
     // is this a file list?
@@ -1311,6 +1366,7 @@ function ExtractNetworkWiFiConfigFromHtmlPage() {
     wifi.netmask = $('#network #wifi #netmask').val();
     wifi.gateway = $('#network #wifi #gateway').val();
     wifi.dhcp = $('#network #wifi #dhcp').prop('checked');
+    wifi.ap_channel = $('#network #wifi #ap_channel').val();
     wifi.ap_fallback = $('#network #wifi #ap_fallback').prop('checked');
     wifi.ap_reboot = $('#network #wifi #ap_reboot').prop('checked');
     wifi.ap_timeout = $('#network #wifi #ap_timeout').val();
@@ -1355,6 +1411,10 @@ function submitNetworkConfig() {
     System_Config.device.mosi_pin = $('#config #device #mosi_pin').val();
     System_Config.device.clock_pin = $('#config #device #clock_pin').val();
     System_Config.device.cs_pin = $('#config #device #cs_pin').val();
+    
+    if ({}.hasOwnProperty.call(System_Config, 'sensor')) {
+        System_Config.sensor.units = parseInt($('#TemperatureSensorUnits').val());
+    }
 
     ExtractNetworkConfigFromHtmlPage();
 
@@ -1569,6 +1629,10 @@ function submitDeviceConfig() {
     Input_Config.ecb.polarity = $("#ecb_polarity").val();
     Input_Config.ecb.long = $("#ecb_longPress").val();
 
+    if ({}.hasOwnProperty.call(System_Config, 'sensor')) {
+        System_Config.sensor.units = parseInt($('#TemperatureSensorUnits').val());
+    }
+
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
     ServerAccess.callFunction(SendConfigFileToServer, "output_config", {'output_config': Output_Config});
@@ -1756,6 +1820,17 @@ function ProcessReceivedJsonStatusMessage(JsonStat) {
     str += ("0" + date.getUTCSeconds()).slice(-2);
     $('#x_uptime').text(str);
 
+    date = new Date(1000 * System.currenttime);
+    // console.info("DateMS: " + date.getMilliseconds());
+    $('#x_currenttime').text(date.toUTCString());
+    let CurrDate = new Date();
+    // console.info("CurrDateMS: " + CurrDate);
+    let Delta = Math.abs(CurrDate.getTime() - date.getTime())/1000;
+    // console.info("DeltaS: " + Delta);
+    if(Delta > 5)
+    {
+        SetServerTime();
+    }
     if ({}.hasOwnProperty.call(System, 'used')) {
         $('#i_size').removeClass("hidden");
         $('#x_size').removeClass("hidden");
@@ -1770,6 +1845,16 @@ function ProcessReceivedJsonStatusMessage(JsonStat) {
         $('#x_size').addClass("hidden");
         $('#i_used').addClass("hidden");
         $('#x_used').addClass("hidden");
+    }
+
+    if ({}.hasOwnProperty.call(System, 'sensor')) {
+        $('#i_temperature').removeClass("hidden");
+        $('#x_temperature').removeClass("hidden");
+        $('#x_temperature').text(System.sensor.reading);
+    }
+    else {
+        $('#i_temperature').addClass("hidden");
+        $('#x_temperature').addClass("hidden");
     }
 
     if (true === System.SDinstalled) {

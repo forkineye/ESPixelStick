@@ -34,6 +34,10 @@
 #define DEFAULT_I2C_SDA gpio_num_t::GPIO_NUM_2
 #define DEFAULT_I2C_SCL gpio_num_t::GPIO_NUM_32
 
+// Temperature Sensor
+#define SUPPORT_SENSOR_DS18B20
+#define ONEWIRE_PIN         gpio_num_t::GPIO_NUM_13
+
 // File Manager
 #define SUPPORT_SD
 #define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_19

@@ -86,13 +86,13 @@ void c_InputArtnet::GetStatus (JsonObject & jsonStatus)
     // DEBUG_START;
 
     JsonObject ArtnetStatus = jsonStatus.createNestedObject (F ("Artnet"));
-    ArtnetStatus[CN_unifirst]      = startUniverse;
-    ArtnetStatus[CN_unilast]       = LastUniverse;
+    ArtnetStatus[CN_unifirst]   = startUniverse;
+    ArtnetStatus[CN_unilast]    = LastUniverse;
     ArtnetStatus[CN_unichanlim] = ChannelsPerUniverse;
     // DEBUG_V ("");
 
-    ArtnetStatus[F ("lastData")]      = lastData;
-    ArtnetStatus[CN_num_packets]      = num_packets;
+    ArtnetStatus[F ("lastData")]   = lastData;
+    ArtnetStatus[CN_num_packets]   = num_packets;
     ArtnetStatus[CN_packet_errors] = packet_errors;
     ArtnetStatus[CN_last_clientIP] = LastRemoteIP.toString ();
 
@@ -126,7 +126,7 @@ void c_InputArtnet::Process ()
 
 //-----------------------------------------------------------------------------
 void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
-                                uint32_t    length,
+                                uint32_t  length,
                                 uint8_t   SequenceNumber,
                                 uint8_t * data,
                                 IPAddress remoteIP)
@@ -143,9 +143,16 @@ void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
         // Do we need to update a sequnce error?
         if (SequenceNumber != CurrentUniverse.SequenceNumber)
         {
-            CurrentUniverse.SequenceErrorCounter++;
+            // DEBUG_V(String("             CurrentUniverseId: ") + String(CurrentUniverseId));
+            // DEBUG_V(String("                SequenceNumber: ") + String(SequenceNumber));
+            // DEBUG_V(String("CurrentUniverse.SequenceNumber: ") + String(CurrentUniverse.SequenceNumber));
             CurrentUniverse.SequenceNumber = SequenceNumber;
-            ++packet_errors;
+            // some systems always send a zero sequence number so we ignore the error in that case.
+            if(0 != SequenceNumber)
+            {
+	            CurrentUniverse.SequenceErrorCounter++;
+                ++packet_errors;
+            }
         }
 
         ++CurrentUniverse.SequenceNumber;
@@ -158,11 +165,7 @@ void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
         OutputMgr.WriteChannelData( CurrentUniverse.DestinationOffset,
                                  min(CurrentUniverse.BytesToCopy, length),
                                  &data[CurrentUniverse.SourceDataOffset]);
-/*
-        memcpy(CurrentUniverse.Destination,
-               &data[CurrentUniverse.SourceDataOffset],
-               min(CurrentUniverse.BytesToCopy, length));
-*/
+
         InputMgr.RestartBlankTimer (GetInputChannelId ());
     }
     else

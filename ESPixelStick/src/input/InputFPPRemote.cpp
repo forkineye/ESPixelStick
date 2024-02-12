@@ -74,8 +74,9 @@ void c_InputFPPRemote::GetConfig (JsonObject& jsonConfig)
     {
         jsonConfig[JSON_NAME_FILE_TO_PLAY] = No_LocalFileToPlay;
     }
-    jsonConfig[CN_SyncOffset] = SyncOffsetMS;
+    jsonConfig[CN_SyncOffset]  = SyncOffsetMS;
     jsonConfig[CN_SendFppSync] = SendFppSync;
+    jsonConfig[CN_blankOnStop] = FPPDiscovery.GetBlankOnStop();
 
     // DEBUG_END;
 
@@ -268,9 +269,12 @@ bool c_InputFPPRemote::SetConfig (JsonObject& jsonConfig)
     // DEBUG_START;
 
     String FileToPlay;
+    bool BlankOnStop = FPPDiscovery.GetBlankOnStop();
     setFromJSON (FileToPlay,   jsonConfig, JSON_NAME_FILE_TO_PLAY);
     setFromJSON (SyncOffsetMS, jsonConfig, CN_SyncOffset);
     setFromJSON (SendFppSync,  jsonConfig, CN_SendFppSync);
+    setFromJSON (BlankOnStop,  jsonConfig, CN_blankOnStop);
+    FPPDiscovery.SetBlankOnStop(BlankOnStop);
 
     if (PlayingFile())
     {
@@ -296,9 +300,17 @@ void c_InputFPPRemote::StopPlaying ()
     {
         if (!PlayingFile ())
         {
-            // DEBUG_ ("Not currently playing a file");
+            // DEBUG_V ("Not currently playing a file");
             break;
         }
+
+        // handle re entrancy
+        if(Stopping)
+        {
+            // already in the process of stopping
+            break;
+        }
+        Stopping = true;
 
         // DEBUG_V ();
         FPPDiscovery.Disable ();
@@ -315,9 +327,13 @@ void c_InputFPPRemote::StopPlaying ()
                 pInputFPPRemotePlayItem->Stop ();
             }
 
+            // DEBUG_V("Delete current playing file");
             delete pInputFPPRemotePlayItem;
             pInputFPPRemotePlayItem = nullptr;
         }
+
+        Stopping = false;
+
     } while (false);
 
     // DEBUG_END;
@@ -332,7 +348,7 @@ void c_InputFPPRemote::StartPlaying (String& FileName)
     do // once
     {
         // DEBUG_V (String ("FileName: '") + FileName + "'");
-        if ((0 == FileName.length ()) ||
+        if ((FileName.isEmpty ()) ||
             (FileName.equals("null")))
         {
             // DEBUG_V ("No file to play");
