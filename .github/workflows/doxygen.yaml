@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout ESPixelStick
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build doxygen pages
         uses: mattnotmitt/doxygen-action@v1

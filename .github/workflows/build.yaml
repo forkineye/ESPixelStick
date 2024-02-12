@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout ESPixelStick
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Create version file
         run: |
@@ -110,7 +110,7 @@ jobs:
           echo "${GITHUB_REF#refs/*/v}" > firmware/VERSION
 
       - name: Cache pip
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -118,13 +118,13 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: Cache PlatformIO
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.platformio
           key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
@@ -144,13 +144,13 @@ jobs:
           ls -al ./debug/${{ matrix.chip }}
 
       - name: Upload Firmware Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Firmware Binaries
           path: firmware
 
       - name: Upload Debugging Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Debug Files
           path: debug
@@ -160,7 +160,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout ESPixelStick
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set release flag
         if: startsWith(github.ref, 'refs/tags/v')
@@ -168,7 +168,7 @@ jobs:
           echo "ESPS_RELEASE=''" >> $GITHUB_ENV
 
       # Download firmware binary artifact
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: Firmware Binaries
           path: dist/firmware
@@ -202,7 +202,7 @@ jobs:
         working-directory: dist
 
       - name: Upload Release Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Release Archive
           path: ${{ env.ARCHFILE }}
@@ -213,7 +213,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Download Package
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Release Archive
       - name: Create Draft Release
