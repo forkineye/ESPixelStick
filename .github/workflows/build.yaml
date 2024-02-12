@@ -146,13 +146,13 @@ jobs:
       - name: Upload Firmware Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Firmware Binaries
+          name: firmware-binary-${{ matrix.target }}
           path: firmware
 
       - name: Upload Debugging Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Debug Files
+          name: firmware-debug-${{ matrix.target }}
           path: debug
 
   package:
@@ -170,8 +170,9 @@ jobs:
       # Download firmware binary artifact
       - uses: actions/download-artifact@v4
         with:
-          name: Firmware Binaries
           path: dist/firmware
+          pattern: firmware-binary-*
+          merge-multiple: true
 
       # Install Node
       - uses: actions/setup-node@v3
