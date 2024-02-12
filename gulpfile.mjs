@@ -1,14 +1,15 @@
-/* Requires */
-var gulp = require('gulp');
-var plumber = require('gulp-plumber');
-var concat = require('gulp-concat');
-var htmlmin = require('gulp-htmlmin');
-var cleancss = require('gulp-clean-css');
-var terser = require('gulp-terser');
-var gzip = require('gulp-gzip');
-var del = require('del');
-var markdown = require('gulp-markdown-github-style');
-var rename = require('gulp-rename');
+/* Imports */
+import gulp from 'gulp';
+const { series, parallel, src, dest, task } = gulp;
+import plumber from 'gulp-plumber';
+import concat from 'gulp-concat';
+import htmlmin from 'gulp-htmlmin';
+import cleancss from 'gulp-clean-css';
+import terser from 'gulp-terser';
+import gzip from 'gulp-gzip';
+import { deleteAsync } from 'del';
+import markdown from 'gulp-markdown-github-style';
+import rename from 'gulp-rename';
 
 /* HTML Task */
 gulp.task('html', function() {
@@ -59,7 +60,7 @@ gulp.task('image', function() {
 
 /* Clean Task */
 gulp.task('clean', function() {
-    return del(['ESPixelStick/data/www/*']);
+    return deleteAsync(['ESPixelStick/data/www/*']);
 });
 
 /* Markdown to HTML Task */
