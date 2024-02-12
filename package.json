@@ -2,7 +2,7 @@
   "name": "espixelstick",
   "version": "1.0.0",
   "description": "Gulp based build system for ESPixelStick web files",
-  "main": "gulpfile.js",
+  "main": "gulpfile.mjs",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
