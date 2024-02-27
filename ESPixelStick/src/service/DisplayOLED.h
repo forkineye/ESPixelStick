@@ -23,13 +23,18 @@
 
 class c_OLED
 {
-
+private:
+    uint64_t updateTimer_OLED = 10000;
+    String dispIP;
+    String dispHostName;
+    int dispRSSI;
 public:
     c_OLED(){};
     virtual ~c_OLED() {}
 
     void Begin();
     void Update();
+    void GetDriverName (String & name) {name = "OLED";}
 };
 
 extern c_OLED OLED;

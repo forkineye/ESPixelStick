@@ -488,7 +488,7 @@ String serializeCore(bool pretty)
 /// Main Loop
 /** Arduino based main loop */
 // uint32_t HeapTime = 100;
-uint32_t updateTimer_OLED = 100;
+
 void loop()
 {
     // DEBUG_START;
@@ -501,13 +501,7 @@ void loop()
 */
     FeedWDT ();
 
-#ifdef USE_OLED
-    if(millis() > updateTimer_OLED) // Lets update OLED only once every 60 seconds after initail boot and connect
-    {
-        OLED.Update();
-        updateTimer_OLED += 60000;
-    }
-#endif // def USE_OLED
+
 
     // Keep the Network Open
     NetworkMgr.Poll ();
@@ -523,7 +517,9 @@ void loop()
 #ifdef SUPPORT_SENSOR_DS18B20
     SensorDS18B20.Poll();
 #endif // def SUPPORT_SENSOR_DS18B20
-
+#ifdef USE_OLED
+        OLED.Update();
+#endif // def USE_OLED
     // need to keep the rx pipeline empty
     size_t BytesToDiscard = min (100, LOG_PORT.available ());
     DiscardedRxData += BytesToDiscard;

@@ -54,4 +54,11 @@
 #define SUPPORT_OutputType_WS2811           // UART / RMT
 #define SUPPORT_OutputType_Relay            // GPIO
 //#define SUPPORT_OutputType_Servo_PCA9685    // I2C (default pins)
+
+
+// OLED SUPPORT
 #define USE_OLED
+#define SCREEN_WIDTH 128        // OLED display width, in pixels
+#define SCREEN_HEIGHT 32        // OLED display height, in pixels
+#define OLED_RESET -1           // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_ADDRESS byte(0x3C) ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
