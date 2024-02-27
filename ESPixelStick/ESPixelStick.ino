@@ -45,7 +45,9 @@
 #ifdef SUPPORT_SENSOR_DS18B20
 #include "src/service/SensorDS18B20.h"
 #endif // def SUPPORT_SENSOR_DS18B20
-
+#ifdef USE_OLED
+#include "src/service/DisplayOLED.h"
+#endif // def USE_OLED
 #ifdef ARDUINO_ARCH_ESP8266
 #include <Hash.h>
 extern "C"
@@ -201,6 +203,11 @@ void setup()
     SensorDS18B20.Begin();
 #endif // def SUPPORT_SENSOR_DS18B20
 
+#ifdef USE_OLED
+    // TestHeap(uint32_t(70));
+    // DEBUG_V(String("OLED Heap: ") + String(ESP.getFreeHeap()));
+    OLED.Begin();
+#endif // def USE_OLED
     // DEBUG_V(String("FPPDiscovery Heap: ") + String(ESP.getFreeHeap()));
     FPPDiscovery.begin ();
 
@@ -481,6 +488,7 @@ String serializeCore(bool pretty)
 /// Main Loop
 /** Arduino based main loop */
 // uint32_t HeapTime = 100;
+uint32_t updateTimer_OLED = 100;
 void loop()
 {
     // DEBUG_START;
@@ -492,6 +500,14 @@ void loop()
     }
 */
     FeedWDT ();
+
+#ifdef USE_OLED
+    if(millis() > updateTimer_OLED) // Lets update OLED only once every 60 seconds after initail boot and connect
+    {
+        OLED.Update();
+        updateTimer_OLED += 60000;
+    }
+#endif // def USE_OLED
 
     // Keep the Network Open
     NetworkMgr.Poll ();
@@ -536,14 +552,14 @@ void loop()
         if(abs(now() - ConfigLoadNeeded) > LOAD_CONFIG_DELAY)
         {
             FeedWDT ();
-            LoadConfig ();
+                    LoadConfig ();
         }
     }
 
     if (ConfigSaveNeeded)
     {
         FeedWDT ();
-        SaveConfig ();
+                SaveConfig ();
     }
 
 } // loop
