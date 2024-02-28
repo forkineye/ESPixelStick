@@ -1,3 +1,4 @@
+#pragma once
 /*
  * DisplayOLED.h
  *
@@ -24,7 +25,7 @@
 class c_OLED
 {
 private:
-    uint64_t updateTimer_OLED = 10000;
+    uint64_t updateTimer_OLED = 10;
     String dispIP;
     String dispHostName;
     int dispRSSI;

@@ -501,8 +501,6 @@ void loop()
 */
     FeedWDT ();
 
-
-
     // Keep the Network Open
     NetworkMgr.Poll ();
 
@@ -548,14 +546,14 @@ void loop()
         if(abs(now() - ConfigLoadNeeded) > LOAD_CONFIG_DELAY)
         {
             FeedWDT ();
-                    LoadConfig ();
+            LoadConfig ();
         }
     }
 
     if (ConfigSaveNeeded)
     {
         FeedWDT ();
-                SaveConfig ();
+        SaveConfig ();
     }
 
 } // loop

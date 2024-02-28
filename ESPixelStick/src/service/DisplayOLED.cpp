@@ -26,6 +26,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include "DisplayOLED.h"
+#include <TimeLib.h>
+#include "../network/NetworkMgr.hpp"
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
@@ -51,12 +53,13 @@ void c_OLED::Begin()
 void c_OLED::Update()
 {
     // DEBUG_START;
-    if (millis() > updateTimer_OLED) // Lets check if OLED needs an update only once every 10 seconds
+    if (now() > updateTimer_OLED) // Lets check if OLED needs an update only once every 10 seconds
     {
-        updateTimer_OLED += 10000;
+        updateTimer_OLED += 10;
         display.stopscroll();
-        String currIP = WiFi.localIP().toString();
-        String currHost = WiFi.getHostname();
+        String currIP = NetworkMgr.GetlocalIP ().toString ();
+        String currHost;
+        NetworkMgr.GetHostname(currHost);
         int rssi = constrain(WiFi.RSSI(), -100, -50);
         int quality = map(rssi, -100, -50, 0, 100);
         if (!dispIP.equals(currIP) || !dispHostName.equals(currHost) || dispRSSI != quality)
