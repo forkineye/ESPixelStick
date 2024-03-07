@@ -44,7 +44,7 @@
 #endif //  __has_include("secrets.h")
 
 #if !defined(SECRETS_SSID)
-#   define SECRETS_SSID "DEFAULT_SSID_NOT_SET"
+#   define SECRETS_SSID DEFAULT_SSID_NOT_SET
 #endif // SECRETS_SSID
 #if !defined(SECRETS_PASS)
 #   define SECRETS_PASS "DEFAULT_PASSPHRASE_NOT_SET"
@@ -753,11 +753,19 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Init ()
     // DEBUG_START;
 
     // DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
-    pWiFiDriver->SetFsmState (this);
-    pWiFiDriver->AnnounceState ();
-    pWiFiDriver->GetFsmTimer().StartTimer(1000 * pWiFiDriver->Get_sta_timeout ());
 
-    pWiFiDriver->connectWifi (default_ssid, default_passphrase);
+    if(!default_ssid.equals(DEFAULT_SSID_NOT_SET))
+    {
+        pWiFiDriver->SetFsmState (this);
+        pWiFiDriver->AnnounceState ();
+        pWiFiDriver->GetFsmTimer().StartTimer(1000 * pWiFiDriver->Get_sta_timeout ());
+        pWiFiDriver->connectWifi (default_ssid, default_passphrase);
+    }
+    else
+    {
+        // no defauult ssid was set at compile time. Just move on to AP mode
+        fsm_WiFi_state_ConnectingAsAP_imp.Init ();
+    }
     // pWiFiDriver->displayFsmState ();
 
     // DEBUG_END;
