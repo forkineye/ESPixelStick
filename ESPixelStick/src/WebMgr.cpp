@@ -390,7 +390,7 @@ void c_WebMgr::init ()
                 RequestReboot(100000);;
             }, 
             [](AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final)
-             {WebMgr.FirmwareUpload (request, filename, index, data, len,  final); }).setFilter (ON_STA_FILTER);
+             {WebMgr.FirmwareUpload (request, filename, index, data, len, final); }); //.setFilter (ON_STA_FILTER);
 
     	// URL's needed for FPP Connect fseq uploading and querying
    	 	webServer.on ("/fpp", HTTP_GET,
@@ -710,15 +710,11 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
 
     do // once
     {
-        // make sure we are in AP mode
-        if (0 == WiFi.softAPgetStationNum ())
-        {
-            // DEBUG_V("Not in AP Mode");
-
-            // we are not talking to a station so we are not in AP mode
-            // break;
-        }
-        // DEBUG_V ("In AP Mode");
+        // DEBUG_V (String (" file: '") + filename + "'");
+        // DEBUG_V (String ("index: ") + String (index));
+        // DEBUG_V (String (" data: 0x") + String (uint32_t(data), HEX));
+        // DEBUG_V (String ("  len: ") + String (len));
+        // DEBUG_V (String ("final: ") + String (final));
 
         // is the first message in the upload?
         if (0 == index)
@@ -733,30 +729,24 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
         }
 
         // DEBUG_V ("Sending data to efupdate");
-        // DEBUG_V (String ("data: 0x") + String (uint32(data), HEX));
-        // DEBUG_V (String (" len: ") + String (len));
 
-        if (!efupdate.process (data, len))
-        {
-            logcon (String(CN_stars) + F (" UPDATE ERROR: ") + String (efupdate.getError ()));
-        }
+        efupdate.process (data, len);
         // DEBUG_V ("Packet has been processed");
 
         if (efupdate.hasError ())
         {
-            // DEBUG_V ("efupdate.hasError");
+            logcon (String(CN_stars) + F (" UPDATE ERROR: ") + String (efupdate.getError ()));
+            DEBUG_V ("efupdate.hasError");
             request->send (200, CN_textSLASHplain, (String (F ("Update Error: ")) + String (efupdate.getError ()).c_str()));
             break;
         }
-        // DEBUG_V ("No Error");
+        // DEBUG_V ("No EFUpdate Error");
 
         if (final)
         {
             request->send (200, CN_textSLASHplain, (String ( F ("Update Finished: ")) + String (efupdate.getError ())).c_str());
-            logcon (F ("Upload Finished."));
+            logcon (F ("Upload Finished. Rebooting"));
             efupdate.end ();
-            // LittleFS.begin ();
-
             RequestReboot(100000);;
         }
 

@@ -46,6 +46,12 @@ void EFUpdate::begin() {
     _state = State::HEADER;
     _loc = 0;
     _error = EFUPDATE_ERROR_OK;
+    Update.onProgress(
+        [this] (size_t progress, size_t total)
+        {
+            LOG_PORT.println(String("\033[Fprogress: ") + String(progress));
+        }
+    );
     // DEBUG_END;
 }
 
@@ -71,7 +77,7 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
                         _loc = 0;
                         _state = State::RECORD;
                     } else {
-                        // DEBUG_V ();
+                        logcon ("FAIL: EFUPDATE_ERROR_SIG");
                         _state = State::FAIL;
                         _error = EFUPDATE_ERROR_SIG;
                     }
@@ -89,10 +95,10 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
                     // DEBUG_V (String("_record.type: ") + uint32_t(_record.type));
                     // DEBUG_V (String("_record.size: ") + _record.size);
                     if (_record.type == RecordType::SKETCH_IMAGE) {
-                        logcon ("Starting Sketch Image");
+                        logcon ("Starting Sketch Image Update\n");
                         // Begin sketch update
                         if (!Update.begin(_record.size, U_FLASH)) {
-                            // DEBUG_V ("Update.begin FAIL");
+                            logcon ("Update.begin FAIL");
                             _state = State::FAIL;
                             _error = Update.getError();
                         } else {
@@ -104,14 +110,14 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
 #endif
                         // DEBUG_V ();
                     } else if (_record.type == RecordType::FS_IMAGE) {
-                        logcon ("Starting FS IMAGE");
-                        // Begin file system update
+                        logcon ("Starting update of FS IMAGE\n");
+                        // DEBUG_V("Begin file system update");
 #ifdef ARDUINO_ARCH_ESP8266
                         LittleFS.end();
 #endif
                         // DEBUG_V ();
                         if (!Update.begin(_record.size, U_SPIFFS)) {
-                            // DEBUG_V ("begin U_SPIFFS failed");
+                            logcon ("begin U_SPIFFS failed");
                             _state = State::FAIL;
                             _error = Update.getError();
                             // DEBUG_V ();
@@ -157,7 +163,7 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
                 break;
 
             case State::FAIL:
-                // DEBUG_V ("FAIL");
+                // DEBUG_V ("Enter FAIL state");
                 index = len;
                 ConfigChanged = false;
                 break;
