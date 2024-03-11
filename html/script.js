@@ -1366,6 +1366,8 @@ function ExtractNetworkWiFiConfigFromHtmlPage() {
     wifi.netmask = $('#network #wifi #netmask').val();
     wifi.gateway = $('#network #wifi #gateway').val();
     wifi.dhcp = $('#network #wifi #dhcp').prop('checked');
+    wifi.ap_ssid = $('#network #wifi #ap_ssid').val();
+    wifi.ap_passphrase = $('#network #wifi #ap_passphrase').val();
     wifi.ap_channel = $('#network #wifi #ap_channel').val();
     wifi.ap_fallback = $('#network #wifi #ap_fallback').prop('checked');
     wifi.ap_reboot = $('#network #wifi #ap_reboot').prop('checked');

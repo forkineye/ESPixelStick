@@ -140,8 +140,10 @@ void c_WiFiDriver::Begin ()
                 JsonObject jsonConfig = jsonConfigDoc.as<JsonObject> ();
 
                 // copy the fields of interest into the local structure
-                setFromJSON (ssid,       jsonConfig, CN_ssid);
-                setFromJSON (passphrase, jsonConfig, CN_passphrase);
+                setFromJSON (ssid,         jsonConfig, CN_ssid);
+                setFromJSON (passphrase,   jsonConfig, CN_passphrase);
+                setFromJSON (ap_ssid,       jsonConfig, CN_ap_ssid);
+                setFromJSON (ap_passphrase, jsonConfig, CN_ap_passphrase);
 
                 ConfigSaveNeeded = true;
 
@@ -156,6 +158,13 @@ void c_WiFiDriver::Begin ()
 
     // Disable persistant credential storage and configure SDK params
     WiFi.persistent (false);
+
+    if(ap_ssid.equals(emptyString))
+    {
+        String Hostname;
+        NetworkMgr.GetHostname (Hostname);
+        ap_ssid = "ESPixelStick-AP-" + String (Hostname);
+    }
 
 #ifdef ARDUINO_ARCH_ESP8266
     wifi_set_sleep_type (NONE_SLEEP_T);
@@ -308,6 +317,8 @@ void c_WiFiDriver::GetConfig (JsonObject& json)
 
     json[CN_ssid] = ssid;
     json[CN_passphrase] = passphrase;
+    json[CN_ap_ssid] = ap_ssid;
+    json[CN_ap_passphrase] = ap_passphrase;
 
 #ifdef ARDUINO_ARCH_ESP8266
     IPAddress Temp = ip;
@@ -476,6 +487,8 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
     ConfigChanged |= setFromJSON (sNetmask, json, CN_netmask);
     ConfigChanged |= setFromJSON (sGateway, json, CN_gateway);
     ConfigChanged |= setFromJSON (UseDhcp, json, CN_dhcp);
+    ConfigChanged |= setFromJSON (ap_ssid, json, CN_ap_ssid);
+    ConfigChanged |= setFromJSON (ap_passphrase, json, CN_ap_passphrase);
     ConfigChanged |= setFromJSON (ap_channelNumber, json, CN_ap_channel);
     ConfigChanged |= setFromJSON (sta_timeout, json, CN_sta_timeout);
     ConfigChanged |= setFromJSON (ap_fallbackIsEnabled, json, CN_ap_fallback);
@@ -824,20 +837,19 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
     {
         WiFi.enableSTA(false);
         WiFi.enableAP(true);
-        String ssid =  pWiFiDriver->ssid;
-        if(ssid.equals(emptyString))
+        if(pWiFiDriver->ap_ssid.equals(emptyString))
         {
             String Hostname;
             NetworkMgr.GetHostname (Hostname);
-            ssid = "ESPixelStick-" + String (Hostname);
+            pWiFiDriver->ap_ssid = "ESPixelStick-" + String (Hostname);
         }
         // DEBUG_V(String("ap_channelNumber: ") + String(pWiFiDriver->ap_channelNumber));
-        WiFi.softAP (ssid.c_str (), pWiFiDriver->passphrase.c_str (), int(pWiFiDriver->ap_channelNumber));
+        WiFi.softAP (pWiFiDriver->ap_ssid.c_str (), pWiFiDriver->ap_passphrase.c_str (), int(pWiFiDriver->ap_channelNumber));
 
         pWiFiDriver->setIpAddress (WiFi.localIP ());
         pWiFiDriver->setIpSubNetMask (WiFi.subnetMask ());
 
-        logcon (String (F ("WiFi SOFTAP:       ssid: '")) + ssid);
+        logcon (String (F ("WiFi SOFTAP:       ssid: '")) + pWiFiDriver->ap_ssid);
         logcon (String (F ("WiFi SOFTAP: IP Address: '")) + pWiFiDriver->getIpAddress ().toString ());
     }
     else
