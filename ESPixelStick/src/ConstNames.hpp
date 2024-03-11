@@ -38,6 +38,8 @@ extern const CN_PROGMEM char CN_advancedView [];
 extern const CN_PROGMEM char CN_allleds [];
 extern const CN_PROGMEM char CN_ap_channel [];
 extern const CN_PROGMEM char CN_ap_fallback [];
+extern const CN_PROGMEM char CN_ap_passphrase [];
+extern const CN_PROGMEM char CN_ap_ssid [];
 extern const CN_PROGMEM char CN_ap_timeout [];
 extern const CN_PROGMEM char CN_ap_reboot [];
 extern const CN_PROGMEM char CN_appendnullcount [];
