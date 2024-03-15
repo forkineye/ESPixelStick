@@ -98,7 +98,10 @@ bool     ResetWiFi = false;
 bool     IsBooting = true;  // Configuration initialization flag
 time_t   ConfigLoadNeeded = NO_CONFIG_NEEDED;
 bool     ConfigSaveNeeded = false;
+bool     RestoredConfig = false;
+
 uint32_t DiscardedRxData = 0;
+const String RestoredConfigFileName = F("/RestoredConfig.json");
 
 /////////////////////////////////////////////////////////
 //
@@ -171,6 +174,15 @@ void setup()
     // DEBUG_V("");
     FileMgr.Begin();
 
+    if(FileMgr.FlashFileExists (RestoredConfigFileName))
+    {
+        // DEBUG_V("Setting Restored Config flag to true");
+        RestoredConfig = true;
+    }
+    else
+    {
+        // DEBUG_V("Setting Restored Config flag to false");
+    }
     // Load configuration from the File System and set Hostname
     // TestHeap(uint32_t(15));
     // DEBUG_V(String("LoadConfig Heap: ") + String(ESP.getFreeHeap()));
@@ -217,6 +229,14 @@ void setup()
 
     // Done with initialization
     IsBooting = false;
+
+    if(RestoredConfig)
+    {
+        // DEBUG_V("Delete Restored Config Flag file");
+        FileMgr.DeleteFlashFile(RestoredConfigFileName);
+        ConfigSaveNeeded = true;
+        RestoredConfig = false;
+    }
 
     // DEBUG_END;
 
@@ -285,7 +305,7 @@ void SetConfig (const char * DataString)
 //      of the data. Chance for 3rd party software to muck up the configuraton
 //      if they send bad json data.
 
-    FileMgr.SaveConfigFile (ConfigFileName, DataString);
+    FileMgr.SaveFlashFile (ConfigFileName, DataString);
     ScheduleLoadConfig();
 
     // DEBUG_END;
@@ -388,7 +408,7 @@ void SaveConfig()
 
     GetConfig(JsonConfig);
 
-    FileMgr.SaveConfigFile(ConfigFileName, jsonConfigDoc);
+    FileMgr.SaveFlashFile(ConfigFileName, jsonConfigDoc);
 
     // DEBUG_END;
 } // SaveConfig
@@ -405,7 +425,7 @@ void LoadConfig()
 
     String temp;
     // DEBUG_V ("");
-    FileMgr.LoadConfigFile (ConfigFileName, &deserializeCoreHandler);
+    FileMgr.LoadFlashFile (ConfigFileName, &deserializeCoreHandler);
 
     ConfigSaveNeeded |= !validateConfig ();
 
@@ -415,7 +435,7 @@ void LoadConfig()
 void DeleteConfig ()
 {
     // DEBUG_START;
-    FileMgr.DeleteConfigFile (ConfigFileName);
+    FileMgr.DeleteFlashFile (ConfigFileName);
 
     // DEBUG_END;
 
@@ -487,7 +507,7 @@ void loop()
 /*
     if(millis() > HeapTime)
     {
-        DEBUG_V(String("Heap: ") + String(ESP.getFreeHeap()));
+        // DEBUG_V(String("Heap: ") + String(ESP.getFreeHeap()));
         HeapTime += 5000;
     }
 */

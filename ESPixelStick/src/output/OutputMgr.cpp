@@ -267,12 +267,14 @@ void c_OutputMgr::Begin ()
             // DEBUG_V(String("init index: ") + String(index) + " Done");
         }
 
-        // CreateNewConfig ();
+        if(RestoredConfig)
+        {
+            // DEBUG_V("create a merged config");
+            CreateNewConfig();
+        }
 
         // DEBUG_V("load up the configuration from the saved file. This also starts the drivers");
         LoadConfig();
-
-        // CreateNewConfig ();
 
         // Preset the output memory
         memset((void*)&OutputBuffer[0], 0x00, sizeof(OutputBuffer));
@@ -301,17 +303,12 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
 
     // add the channels header
     JsonObject OutputMgrChannelsData;
-    if (true == jsonConfig.containsKey (CN_channels))
+    if (!jsonConfig.containsKey (CN_channels))
     {
         // DEBUG_V ();
-        OutputMgrChannelsData = jsonConfig[CN_channels];
+        jsonConfig.createNestedObject (CN_channels);
     }
-    else
-    {
-        // add our section header
-        // DEBUG_V ();
-        OutputMgrChannelsData = jsonConfig.createNestedObject (CN_channels);
-    }
+    OutputMgrChannelsData = jsonConfig[CN_channels];
 
     // add the channel configurations
     // DEBUG_V ("For Each Output Channel");
@@ -401,7 +398,19 @@ void c_OutputMgr::CreateNewConfig ()
     DynamicJsonDocument JsonConfigDoc (OM_MAX_CONFIG_SIZE);
     // DEBUG_V ();
 
-    JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_output_config);
+    // do we create a clean config or do we merge from a restored config?
+    if(RestoredConfig)
+    {
+        logcon("Merging Restored Output Config File");
+        FileMgr.ReadFlashFile(ConfigFileName, JsonConfigDoc);
+    }
+
+    if(!JsonConfigDoc.containsKey(CN_output_config))
+    {
+        // DEBUG_V("Create a new output config area.");
+        JsonConfigDoc.createNestedObject (CN_output_config);
+    }
+    JsonObject JsonConfig = JsonConfigDoc[CN_output_config];
     // DEBUG_V ();
 
     JsonConfig[CN_cfgver] = CurrentConfigVersion;
@@ -471,7 +480,7 @@ void c_OutputMgr::GetConfig (String & Response)
 {
     // DEBUG_START;
 
-    FileMgr.ReadConfigFile (ConfigFileName, Response);
+    FileMgr.ReadFlashFile (ConfigFileName, Response);
 
     // DEBUG_END;
 
@@ -482,7 +491,7 @@ void c_OutputMgr::GetConfig (byte * Response, uint32_t maxlen )
 {
     // DEBUG_START;
 
-    FileMgr.ReadConfigFile (ConfigFileName, Response, maxlen);
+    FileMgr.ReadFlashFile (ConfigFileName, Response, maxlen);
 
     // DEBUG_END;
 
@@ -1007,7 +1016,7 @@ void c_OutputMgr::LoadConfig ()
     ConfigInProgress = true;
 
     // try to load and process the config file
-    if (!FileMgr.LoadConfigFile(ConfigFileName, [this](DynamicJsonDocument &JsonConfigDoc)
+    if (!FileMgr.LoadFlashFile(ConfigFileName, [this](DynamicJsonDocument &JsonConfigDoc)
         {
             // extern void PrettyPrint(DynamicJsonDocument & jsonStuff, String Name);
             // PrettyPrint(JsonConfigDoc, "OM Load Config");
@@ -1195,7 +1204,7 @@ void c_OutputMgr::SetConfig (const char * ConfigData)
 
     // DEBUG_V (String ("ConfigData: ") + ConfigData);
 
-    if (true == FileMgr.SaveConfigFile (ConfigFileName, ConfigData))
+    if (true == FileMgr.SaveFlashFile (ConfigFileName, ConfigData))
     {
         ScheduleLoadConfig();
     } // end we got a config and it was good
@@ -1224,7 +1233,7 @@ void c_OutputMgr::SetConfig(ArduinoJson::JsonDocument & ConfigData)
     // serializeJson(ConfigData, LOG_PORT);
     // DEBUG_V ();
 
-    if (true == FileMgr.SaveConfigFile(ConfigFileName, ConfigData))
+    if (true == FileMgr.SaveFlashFile(ConfigFileName, ConfigData))
     {
         ScheduleLoadConfig();
     } // end we got a config and it was good

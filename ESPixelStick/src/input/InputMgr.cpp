@@ -128,10 +128,14 @@ void c_InputMgr::Begin (uint32_t BufferSize)
     }
     HasBeenInitialized = true;
 
+    if(RestoredConfig)
+    {
+        logcon("Merging Restored Input Config File");
+        CreateNewConfig();
+    }
+
     // load up the configuration from the saved file. This also starts the drivers
     LoadConfig ();
-
-    // CreateNewConfig ();
 
     // DEBUG_END;
 
@@ -258,7 +262,19 @@ void c_InputMgr::CreateNewConfig ()
     DynamicJsonDocument JsonConfigDoc(IM_JSON_SIZE);
     // DEBUG_V("");
 
-    JsonObject JsonConfig = JsonConfigDoc.createNestedObject(CN_input_config);
+    // do we create a clean config or do we merge from a restored config?
+    if(RestoredConfig)
+    {
+        // DEBUG_V("Merge a Restored Config");
+        // read the existing file and add to it as needed
+        FileMgr.ReadFlashFile(ConfigFileName, JsonConfigDoc);
+    }
+
+    if(!JsonConfigDoc.containsKey(CN_input_config))
+    {
+        JsonConfigDoc.createNestedObject(CN_input_config);
+    }
+    JsonObject JsonConfig = JsonConfigDoc[CN_input_config];
     // DEBUG_V("");
 
     JsonConfig[CN_cfgver] = CurrentConfigVersion;
@@ -306,7 +322,7 @@ void c_InputMgr::GetConfig (byte * Response, uint32_t maxlen)
 {
     // DEBUGSTART;
 
-    FileMgr.ReadConfigFile (ConfigFileName, Response, maxlen);
+    FileMgr.ReadFlashFile (ConfigFileName, Response, maxlen);
     // DEBUGV (String ("TempConfigData: ") + TempConfigData);
 
     // DEBUGEND;
@@ -616,7 +632,7 @@ void c_InputMgr::LoadConfig ()
     ConfigLoadNeeded = NO_CONFIG_NEEDED;
     configInProgress = true;
     // try to load and process the config file
-    if (!FileMgr.LoadConfigFile (ConfigFileName, [this](DynamicJsonDocument & JsonConfigDoc)
+    if (!FileMgr.LoadFlashFile (ConfigFileName, [this](DynamicJsonDocument & JsonConfigDoc)
         {
             // DEBUG_V ("");
             JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
@@ -873,7 +889,7 @@ void c_InputMgr::SetConfig (const char * NewConfigData)
 {
     // DEBUG_START;
 
-    if (true == FileMgr.SaveConfigFile (ConfigFileName, NewConfigData))
+    if (true == FileMgr.SaveFlashFile (ConfigFileName, NewConfigData))
     {
         // DEBUG_V (String("NewConfigData: ") + NewConfigData);
         // FileMgr logs for us
@@ -899,7 +915,7 @@ void c_InputMgr::SetConfig(JsonDocument & NewConfigData)
 {
     // DEBUG_START;
 
-    if (true == FileMgr.SaveConfigFile(ConfigFileName, NewConfigData))
+    if (true == FileMgr.SaveFlashFile(ConfigFileName, NewConfigData))
     {
         // FileMgr logs for us
         // logcon (CN_stars + String (F (" Saved Input Manager Config File. ")) + CN_stars);

@@ -73,7 +73,7 @@ class Semaphore {
                 });
         }
     }
-} // Semaphore
+} // callFunction
 
 const ServerAccess = new Semaphore(1);
 
@@ -337,6 +337,7 @@ function ProcessLocalConfig(data) {
     ServerAccess.callFunction(SendConfigFileToServer, "config", {'system': ParsedLocalConfig.system});
     ServerAccess.callFunction(SendConfigFileToServer, "output_config", {'output_config': ParsedLocalConfig.output});
     ServerAccess.callFunction(SendConfigFileToServer, "input_config", {'input_config': ParsedLocalConfig.input});
+    ServerAccess.callFunction(SendConfigFileToServer, "RestoredConfig", {'RestoredConfig': true});
 
 } // ProcessLocalConfig
 

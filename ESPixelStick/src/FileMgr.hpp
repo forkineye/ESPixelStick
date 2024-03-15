@@ -68,16 +68,17 @@ public:
         FileAppend,
     } FileMode;
 
-    void   DeleteConfigFile (const String & FileName);
-    bool   SaveConfigFile   (const String & FileName, String & FileData);
-    bool   SaveConfigFile   (const String & FileName, const char * FileData);
-    bool   SaveConfigFile   (const String & FileName, JsonDocument & FileData);
-    bool   SaveConfigFile   (const String   filename, uint32_t index, uint8_t *data, uint32_t len, bool final);
+    void   DeleteFlashFile (const String & FileName);
+    bool   SaveFlashFile   (const String & FileName, String & FileData);
+    bool   SaveFlashFile   (const String & FileName, const char * FileData);
+    bool   SaveFlashFile   (const String & FileName, JsonDocument & FileData);
+    bool   SaveFlashFile   (const String   filename, uint32_t index, uint8_t *data, uint32_t len, bool final);
 
-    bool   ReadConfigFile   (const String & FileName, String & FileData);
-    bool   ReadConfigFile   (const String & FileName, JsonDocument & FileData);
-    bool   ReadConfigFile   (const String & FileName, byte * FileData, size_t maxlen);
-    bool   LoadConfigFile   (const String & FileName, DeserializationHandler Handler);
+    bool   ReadFlashFile   (const String & FileName, String & FileData);
+    bool   ReadFlashFile   (const String & FileName, JsonDocument & FileData);
+    bool   ReadFlashFile   (const String & FileName, byte * FileData, size_t maxlen);
+    bool   LoadFlashFile   (const String & FileName, DeserializationHandler Handler);
+    bool   FlashFileExists (const String & FileName);
 
     bool   SdCardIsInstalled () { return SdCardInstalled; }
     FileId CreateSdFileHandle ();

@@ -255,7 +255,7 @@ void c_FileMgr::ResetSdCard()
 } // ResetSdCard
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::DeleteConfigFile (const String& FileName)
+void c_FileMgr::DeleteFlashFile (const String& FileName)
 {
     // DEBUG_START;
 
@@ -309,7 +309,7 @@ void c_FileMgr::listDir (fs::FS& fs, String dirname, uint8_t levels)
 } // listDir
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler Handler)
+bool c_FileMgr::LoadFlashFile (const String& FileName, DeserializationHandler Handler)
 {
     // DEBUG_START;
 
@@ -399,18 +399,18 @@ bool c_FileMgr::LoadConfigFile (const String& FileName, DeserializationHandler H
 } // LoadConfigFile
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::SaveConfigFile (const String& FileName, String& FileData)
+bool c_FileMgr::SaveFlashFile (const String& FileName, String& FileData)
 {
     // DEBUG_START;
 
-    bool Response = SaveConfigFile (FileName, FileData.c_str ());
+    bool Response = SaveFlashFile (FileName, FileData.c_str ());
 
     // DEBUG_END;
     return Response;
 } // SaveConfigFile
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::SaveConfigFile (const String& FileName, const char * FileData)
+bool c_FileMgr::SaveFlashFile (const String& FileName, const char * FileData)
 {
     // DEBUG_START;
 
@@ -445,7 +445,7 @@ bool c_FileMgr::SaveConfigFile (const String& FileName, const char * FileData)
 } // SaveConfigFile
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::SaveConfigFile(const String &FileName, JsonDocument &FileData)
+bool c_FileMgr::SaveFlashFile(const String &FileName, JsonDocument &FileData)
 {
     // DEBUG_START;
     bool Response = false;
@@ -488,7 +488,7 @@ bool c_FileMgr::SaveConfigFile(const String &FileName, JsonDocument &FileData)
 } // SaveConfigFile
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::SaveConfigFile(const String FileName, uint32_t index, uint8_t *data, uint32_t len, bool final)
+bool c_FileMgr::SaveFlashFile(const String FileName, uint32_t index, uint8_t *data, uint32_t len, bool final)
 {
     // DEBUG_START;
     bool Response = false;
@@ -538,7 +538,7 @@ bool c_FileMgr::SaveConfigFile(const String FileName, uint32_t index, uint8_t *d
 } // SaveConfigFile
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::ReadConfigFile (const String& FileName, String& FileData)
+bool c_FileMgr::ReadFlashFile (const String& FileName, String& FileData)
 {
     // DEBUG_START;
 
@@ -572,7 +572,7 @@ bool c_FileMgr::ReadConfigFile (const String& FileName, String& FileData)
 } // ReadConfigFile
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::ReadConfigFile (const String& FileName, JsonDocument & FileData)
+bool c_FileMgr::ReadFlashFile (const String& FileName, JsonDocument & FileData)
 {
     // DEBUG_START;
     bool GotFileData = false;
@@ -580,7 +580,7 @@ bool c_FileMgr::ReadConfigFile (const String& FileName, JsonDocument & FileData)
     do // once
     {
         String RawFileData;
-        if (false == ReadConfigFile (FileName, RawFileData))
+        if (false == ReadFlashFile (FileName, RawFileData))
         {
             // DEBUG_V ("Failed to read file");
             break;
@@ -619,7 +619,7 @@ bool c_FileMgr::ReadConfigFile (const String& FileName, JsonDocument & FileData)
 } // ReadConfigFile
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::ReadConfigFile (const String & FileName, byte * FileData, size_t maxlen)
+bool c_FileMgr::ReadFlashFile (const String & FileName, byte * FileData, size_t maxlen)
 {
     // DEBUG_START;
     bool GotFileData = false;
@@ -665,6 +665,13 @@ bool c_FileMgr::ReadConfigFile (const String & FileName, byte * FileData, size_t
     return GotFileData;
 
 } // ReadConfigFile
+
+//-----------------------------------------------------------------------------
+bool c_FileMgr::FlashFileExists (const String & FileName)
+{
+    return LittleFS.exists (FileName.c_str ());
+
+} // FlashFileExists
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
