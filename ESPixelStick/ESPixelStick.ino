@@ -101,7 +101,7 @@ bool     ConfigSaveNeeded = false;
 bool     RestoredConfig = false;
 
 uint32_t DiscardedRxData = 0;
-const String RestoredConfigFileName = F("/RestoredConfig.json");
+const String RestoredConfigFileName = "/RestoredConfig.json";
 
 /////////////////////////////////////////////////////////
 //
