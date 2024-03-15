@@ -73,7 +73,7 @@ class Semaphore {
                 });
         }
     }
-} // Semaphore
+} // callFunction
 
 const ServerAccess = new Semaphore(1);
 
@@ -200,11 +200,6 @@ $(function () {
 
     //TODO: This should pull a configuration from the stick and not the web interface as web data could be invalid
     $('#backupconfig').on("click", (function () {
-        ExtractNetworkConfigFromHtmlPage();
-        ExtractChannelConfigFromHtmlPage(Input_Config.channels, "input");
-        ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
-        System_Config.device.id = $('#config #device #id').val();
-        System_Config.device.blanktime = $('#config #device #blanktime').val();
 
         let TotalConfig = JSON.stringify({ 'system': System_Config, 'input': Input_Config, 'output': Output_Config });
 
@@ -339,9 +334,10 @@ function ProcessLocalConfig(data) {
     // console.info(data);
     let ParsedLocalConfig = JSON.parse(data);
 
-    ServerAccess.callFunction(SendConfigFileToServer, "config", {'system': ParsedLocalConfig});
+    ServerAccess.callFunction(SendConfigFileToServer, "config", {'system': ParsedLocalConfig.system});
     ServerAccess.callFunction(SendConfigFileToServer, "output_config", {'output_config': ParsedLocalConfig.output});
     ServerAccess.callFunction(SendConfigFileToServer, "input_config", {'input_config': ParsedLocalConfig.input});
+    ServerAccess.callFunction(SendConfigFileToServer, "RestoredConfig", {'RestoredConfig': true});
 
 } // ProcessLocalConfig
 
@@ -405,6 +401,7 @@ function ProcessWindowChange(NextWindow) {
     }
 
     else if (NextWindow === "#admin") {
+        RcfResponse = RequestConfigFile("config.json");
         RcfResponse = RequestConfigFile("output_config.json");
         RcfResponse = RequestConfigFile("input_config.json");
     }

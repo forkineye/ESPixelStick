@@ -84,6 +84,8 @@ void c_EthernetDriver::Begin ()
     {
         logcon(String("Failed IP ") + GetIpAddress().toString());
     }
+    // https://github.com/espressif/arduino-esp32/issues/5733 - add delay
+    delay(100);
     while(!GetIpAddress()) {}
     logcon(String("After IP ") + GetIpAddress().toString());
 #endif // def testEth
@@ -113,8 +115,6 @@ void c_EthernetDriver::SetEthHostname ()
     if (0 != Hostname.length ())
     {
         // DEBUG_V (String ("Setting ETH hostname: ") + Hostname);
-
-        // ETH.config (INADDR_NONE, INADDR_NONE, INADDR_NONE);
         ETH.setHostname (Hostname.c_str ());
     }
 
@@ -374,8 +374,6 @@ void c_EthernetDriver::SetUpIp ()
         if (true == UseDhcp)
         {
             logcon (F ("Connecting to Ethernet using DHCP"));
-            // ETH.config (temp, temp, temp, temp);
-
             break;
         }
 
@@ -400,6 +398,8 @@ void c_EthernetDriver::SetUpIp ()
         // DEBUG_V ("gateway: " + gateway.toString ());
 
         // We didn't use DNS, so just set it to our configured gateway
+        // https://github.com/espressif/arduino-esp32/issues/5733 - add delay
+        delay(100);
         ETH.config (ip, gateway, netmask, gateway);
 
         logcon (F ("Connecting to Ethernet with Static IP"));
@@ -419,10 +419,11 @@ void c_EthernetDriver::StartEth ()
 // esp_eth_disable();
     logcon(String("ETH IP Before Start: ") + ETH.localIP().toString());
     if (false == ETH.begin (phy_addr, power_pin /*gpio_num_t(-1)*/, mdc_pin, mdio_pin, phy_type, clk_mode))
-    // if (false == ETH.begin(phy_addr, power_pin, mdc_pin, mdio_pin, phy_type, clk_mode))
     {
         fsm_Eth_state_DeviceInitFailed_imp.Init ();
     }
+    // https://github.com/espressif/arduino-esp32/issues/5733 - Add delay
+    delay(100);
 
     // DEBUG_END;
 } // StartEth
