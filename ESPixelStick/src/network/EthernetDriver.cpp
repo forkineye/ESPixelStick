@@ -419,7 +419,6 @@ void c_EthernetDriver::StartEth ()
 // esp_eth_disable();
     logcon(String("ETH IP Before Start: ") + ETH.localIP().toString());
     if (false == ETH.begin (phy_addr, power_pin /*gpio_num_t(-1)*/, mdc_pin, mdio_pin, phy_type, clk_mode))
-    // if (false == ETH.begin(phy_addr, power_pin, mdc_pin, mdio_pin, phy_type, clk_mode))
     {
         fsm_Eth_state_DeviceInitFailed_imp.Init ();
     }
