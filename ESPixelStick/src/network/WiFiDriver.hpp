@@ -79,6 +79,7 @@ public:
     bool      Get_ap_StayInApMode () { return StayInApMode; }
     bool      Get_RebootOnWiFiFailureToConnect () { return RebootOnWiFiFailureToConnect; }
     String    GetConfig_ssid () { return ssid; }
+    String    GetConfig_apssid () { return ap_ssid; }
     String    GetConfig_passphrase () { return passphrase; }
     void      GetHostname (String& name);
     void      SetHostname (String & name);
@@ -102,6 +103,8 @@ private:
 
     String      ssid;
     String      passphrase;
+    String      ap_ssid;
+    String      ap_passphrase;
     IPAddress   ip      = IPAddress ((uint32_t)0);
     IPAddress   netmask = IPAddress ((uint32_t)0);
     IPAddress   gateway = IPAddress ((uint32_t)0);

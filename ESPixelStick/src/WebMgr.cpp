@@ -329,6 +329,12 @@ void c_WebMgr::init ()
                         OutputMgr.ScheduleLoadConfig();
                         request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
                     }
+                    else if(UploadFileName.equals(F("RestoredConfig.json")))
+                    {
+                        DEBUG_V("Received RestoredConfig message");
+                        request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
+                        RequestReboot(700000);
+                    }
                     else
                     {
                         logcon(String(F("Unexpected Config File Name: ")) + UploadFileName);
@@ -347,7 +353,7 @@ void c_WebMgr::init ()
                 // DEBUG_V(String(" file: ") + filename);
                 // DEBUG_V(String("final: ") + String(final));
 
-            	if(FileMgr.SaveConfigFile(filename, index, data, len, final))
+            	if(FileMgr.SaveFlashFile(filename, index, data, len, final))
                 {
                     // DEBUG_V("Save Chunk - Success");
                 }
@@ -371,7 +377,7 @@ void c_WebMgr::init ()
                 // DEBUG_V(String(" file: ") + UploadFileName);
                 // DEBUG_V(String("final: ") + String(total <= (index+len)));
 
-            	if(FileMgr.SaveConfigFile(UploadFileName, index, data, len, total <= (index+len)))
+            	if(FileMgr.SaveFlashFile(UploadFileName, index, data, len, total <= (index+len)))
                 {
                     // DEBUG_V("Save Chunk - Success");
                 }
@@ -619,7 +625,7 @@ void c_WebMgr::CreateAdminInfoFile ()
 #endif
 
     // write to json file
-    if (true == FileMgr.SaveConfigFile (F("/admininfo.json"), AdminJsonDoc))
+    if (true == FileMgr.SaveFlashFile (F("/admininfo.json"), AdminJsonDoc))
     {
     } // end we saved a config and it was good
     else
