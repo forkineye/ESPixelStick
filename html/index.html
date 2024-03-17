@@ -471,6 +471,24 @@
                                     value="0.0.0.0" title="Static Gateway">
                             </div>
                         </div>
+                        <div class="form-group wifiDhcp" id="fg_dnsp">
+                            <label class="control-label col-sm-2" for="dnsp">Primary DNS</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control is-valid wifiDhcp" id="dnsp" name="dnsp"
+                                    minlength="7" maxlength="15" required
+                                    pattern='^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+                                    value="0.0.0.0" title="Static Primary DNS">
+                            </div>
+                        </div>
+                        <div class="form-group wifiDhcp" id="fg_dnss">
+                            <label class="control-label col-sm-2" for="dnss">Secondary DNS</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control is-valid wifiDhcp" id="dnss" name="dnss"
+                                    minlength="7" maxlength="15" required
+                                    pattern='^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+                                    value="0.0.0.0" title="Static Secondary DNS">
+                            </div>
+                        </div>
                         <div class="form-group">
                             <div class="col-sm-offset-2 col-sm-8">
                                 <div class="checkbox"><label><input type="checkbox" id="ap_reboot"
@@ -532,6 +550,24 @@
                                     minlength="7" maxlength="15" required
                                     pattern='^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
                                     value="0.0.0.0" title="Static Gateway">
+                            </div>
+                        </div>
+                        <div class="form-group ethdhcp" id="fg_dnsp">
+                            <label class="control-label col-sm-2" for="dnsp">Primary DNS</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control is-valid ethdhcp" id="dnsp" name="dnsp"
+                                    minlength="7" maxlength="15" required
+                                    pattern='^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+                                    value="0.0.0.0" title="Static Primary DNS">
+                            </div>
+                        </div>
+                        <div class="form-group ethdhcp" id="fg_dnss">
+                            <label class="control-label col-sm-2" for="dnss">Secondary DNS</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control is-valid ethdhcp" id="dnss" name="dnss"
+                                    minlength="7" maxlength="15" required
+                                    pattern='^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+                                    value="0.0.0.0" title="Static Secondary DNS">
                             </div>
                         </div>
                         <!-- Advanced Mode -->

@@ -88,6 +88,8 @@ private:
     IPAddress        ip        = INADDR_NONE;
     IPAddress        netmask   = INADDR_NONE;
     IPAddress        gateway   = INADDR_NONE;
+    IPAddress        primaryDns = INADDR_NONE;
+    IPAddress        secondaryDns = INADDR_NONE;
     bool             UseDhcp   = true;
     uint32_t         phy_addr  = DEFAULT_ETH_ADDR;
     gpio_num_t       power_pin = DEFAULT_ETH_POWER_PIN;

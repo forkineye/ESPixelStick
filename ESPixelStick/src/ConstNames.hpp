@@ -72,6 +72,8 @@ extern const CN_PROGMEM char CN_device [];
 extern const CN_PROGMEM char CN_dhcp [];
 extern const CN_PROGMEM char CN_Default [];
 extern const CN_PROGMEM char CN_Disabled [];
+extern const CN_PROGMEM char CN_dnsp [];
+extern const CN_PROGMEM char CN_dnss [];
 extern const CN_PROGMEM char CN_Dotfseq [];
 extern const CN_PROGMEM char CN_Dotjson [];
 extern const CN_PROGMEM char CN_Dotpl [];
