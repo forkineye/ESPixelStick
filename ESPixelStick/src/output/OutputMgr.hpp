@@ -238,12 +238,13 @@ private:
     bool IsOutputPaused     = false;
     bool BuildingNewConfig  = false;
 
-    bool ProcessJsonConfig (JsonObject & jsonConfig);
+    bool ProcessJsonConfig (DynamicJsonDocument & jsonConfig);
     void CreateJsonConfig  (JsonObject & jsonConfig);
     void UpdateDisplayBufferReferences (void);
     void InstantiateNewOutputChannel(DriverInfo_t &ChannelIndex, e_OutputType NewChannelType, bool StartDriver = true);
     void CreateNewConfig();
     void SetSerialUart();
+    bool FindJsonChannelConfig (DynamicJsonDocument& jsonConfig, e_OutputChannelIds ChanId, e_OutputType Type, JsonObject& ChanConfig);
 
     String ConfigFileName;
 
