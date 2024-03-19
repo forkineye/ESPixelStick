@@ -1,0 +1,7 @@
+<map id="RequestReboot" name="RequestReboot">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,116,60"/>
+<area shape="rect" id="Node000002" href="$classc___output_mgr.html#aa5fa47aab179e25649aa61acd159586d" title=" " alt="" coords="164,5,349,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,37,151,31,152,37,117,42"/>
+<area shape="rect" id="Node000003" href="$classc___input_mgr.html#a8a195063dcc63c1fd8de7c14ab3bf0a2" title=" " alt="" coords="167,55,346,96"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="117,53,152,58,151,63,116,58"/>
+</map>

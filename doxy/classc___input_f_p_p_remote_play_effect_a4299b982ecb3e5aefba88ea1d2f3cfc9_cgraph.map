@@ -1,0 +1,5 @@
+<map id="c_InputFPPRemotePlayEffect::Stop" name="c_InputFPPRemotePlayEffect::Stop">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,199,46"/>
+<area shape="rect" id="Node000002" href="$classfsm___play_effect__state.html#af6a387da8cf001a357318ac465b3c61b" title=" " alt="" coords="247,5,391,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="199,23,231,23,231,28,199,28"/>
+</map>

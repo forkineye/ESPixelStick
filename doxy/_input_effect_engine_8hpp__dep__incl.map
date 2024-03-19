@@ -1,0 +1,23 @@
+<map id="/github/workspace/ESPixelStick/src/input/InputEffectEngine.hpp" name="/github/workspace/ESPixelStick/src/input/InputEffectEngine.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="449,5,684,46"/>
+<area shape="rect" id="Node000002" href="$_input_alexa_8cpp.html" title=" " alt="" coords="5,102,200,142"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="440,52,212,97,182,104,181,98,211,91,439,47"/>
+<area shape="rect" id="Node000003" href="$_input_effect_engine_8cpp.html" title=" " alt="" coords="224,102,458,142"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="506,55,389,103,387,98,504,50"/>
+<area shape="rect" id="Node000004" href="$_input_f_p_p_remote_play_effect_8cpp.html" title=" " alt="" coords="183,198,393,253"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="547,60,508,113,472,152,428,179,382,199,379,195,426,174,469,148,504,109,542,57"/>
+<area shape="rect" id="Node000005" href="$_input_f_p_p_remote_play_effect_8hpp.html" title=" " alt="" coords="534,94,743,150"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="593,57,620,92,615,95,589,60"/>
+<area shape="rect" id="Node000008" href="$_input_m_q_t_t_8h.html" title=" " alt="" coords="890,102,1075,142"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="669,47,896,98,894,103,668,53"/>
+<area shape="rect" id="Node000010" href="$_input_mgr_8cpp.html" title=" " alt="" coords="1106,205,1291,246"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="699,31,806,38,919,51,1019,68,1059,79,1089,92,1123,116,1152,146,1190,203,1186,206,1148,150,1120,120,1087,96,1057,84,1018,73,918,56,806,44,699,36"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="531,157,383,200,381,194,529,152"/>
+<area shape="rect" id="Node000006" href="$_input_f_p_p_remote_play_effect_fsm_8cpp.html" title=" " alt="" coords="417,198,626,253"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="597,162,554,199,551,195,594,158"/>
+<area shape="rect" id="Node000007" href="$_input_f_p_p_remote_play_list_fsm_8cpp.html" title=" " alt="" coords="650,198,859,253"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="683,158,725,195,722,199,679,162"/>
+<area shape="rect" id="Node000009" href="$_input_m_q_t_t_8cpp.html" title=" " alt="" coords="883,205,1082,246"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="985,158,985,205,980,205,980,158"/>
+<area shape="poly" id="edge10_Node000008_Node000010" title=" " alt="" coords="1039,147,1158,202,1155,207,1037,151"/>
+</map>

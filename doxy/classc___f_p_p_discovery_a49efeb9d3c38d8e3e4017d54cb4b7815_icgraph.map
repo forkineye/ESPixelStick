@@ -1,0 +1,7 @@
+<map id="c_FPPDiscovery::GetBlankOnStop" name="c_FPPDiscovery::GetBlankOnStop">
+<area shape="rect" id="Node000001" title=" " alt="" coords="252,23,430,64"/>
+<area shape="rect" id="Node000002" href="$classc___input_f_p_p_remote.html#ad2e5fbac55b191e2466e8ffc50879fe0" title="Get the current config used by the driver." alt="" coords="5,5,204,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="236,35,204,31,204,26,236,30"/>
+<area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote.html#a1ee15e1c30584550418fd15599f8de61" title="Set a new config in the driver." alt="" coords="6,55,203,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="236,57,204,60,203,55,236,51"/>
+</map>

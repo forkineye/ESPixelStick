@@ -1,0 +1,22 @@
+<map id="/github/workspace/ESPixelStick/src/FastTimer.cpp" name="/github/workspace/ESPixelStick/src/FastTimer.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="203,5,379,46"/>
+<area shape="rect" id="Node000002" href="$_fast_timer_8hpp.html" title=" " alt="" coords="239,94,343,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="294,46,294,78,289,78,289,46"/>
+<area shape="rect" id="Node000003" href="$_e_s_pixel_stick_8h.html" title=" " alt="" coords="238,168,344,193"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="287,120,285,152,280,152,282,120"/>
+<area shape="poly" id="edge11_Node000003_Node000002" title=" " alt="" coords="295,167,297,135,303,135,301,167"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="102,315,177,341"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="238,188,176,195,109,205,50,221,29,232,15,243,9,254,9,264,14,273,24,282,53,298,88,311,86,316,51,303,21,286,10,276,4,265,4,253,10,240,26,227,48,216,108,200,175,189,237,183"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="24,241,92,267"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="252,196,107,241,106,236,251,191"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="116,241,219,267"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="272,196,203,236,200,231,269,192"/>
+<area shape="rect" id="Node000007" href="$memdebug_8h.html" title=" " alt="" coords="244,241,339,267"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="294,194,294,226,289,226,289,194"/>
+<area shape="rect" id="Node000008" href="$_const_names_8hpp.html" title=" " alt="" coords="363,241,484,267"/>
+<area shape="poly" id="edge8_Node000003_Node000008" title=" " alt="" coords="315,192,389,231,386,236,312,196"/>
+<area shape="rect" id="Node000009" href="$_g_p_i_o___defs_8hpp.html" title=" " alt="" coords="508,241,621,267"/>
+<area shape="poly" id="edge9_Node000003_Node000009" title=" " alt="" coords="331,191,497,235,496,240,330,196"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="267,270,180,310,178,306,264,265"/>
+<area shape="poly" id="edge10_Node000009_Node000003" title=" " alt="" coords="524,243,359,200,360,195,526,238"/>
+</map>

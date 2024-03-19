@@ -1,0 +1,26 @@
+<map id="fsm_PlayList_state_Idle" name="fsm_PlayList_state_Idle">
+<area shape="rect" id="Node000001" title=" " alt="" coords="18,16,179,42"/>
+<area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote_play_list.html" title=" " alt="" coords="401,100,583,126"/>
+<area shape="poly" id="edge6_Node000003_Node000001" title=" " alt="" coords="195,40,284,56,377,75,452,97,450,102,376,81,283,61,194,45"/>
+<area shape="rect" id="Node000002" href="$classfsm___play_list__state.html" title=" " alt="" coords="788,73,921,99"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="784,72,675,49,534,27,376,13,295,11,216,14,180,18,179,13,215,9,295,6,376,7,534,22,676,44,785,67"/>
+<area shape="poly" id="edge13_Node000003_Node000002" title=" " alt="" coords="799,106,764,113,671,120,583,120,583,115,671,115,764,108,798,101"/>
+<area shape="rect" id="Node000005" href="$classfsm___play_list__state___wait_for_start.html" title=" " alt="" coords="971,187,1104,228"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="903,104,923,116,948,140,972,165,1000,184,997,189,969,169,944,144,920,120,901,108"/>
+<area shape="rect" id="Node000006" href="$classfsm___play_list__state___playing_file.html" title=" " alt="" coords="971,16,1104,57"/>
+<area shape="poly" id="edge8_Node000006_Node000002" title=" " alt="" coords="919,66,970,52,971,57,921,71"/>
+<area shape="rect" id="Node000007" href="$classfsm___play_list__state___playing_effect.html" title=" " alt="" coords="971,115,1104,156"/>
+<area shape="poly" id="edge10_Node000007_Node000002" title=" " alt="" coords="937,99,947,102,979,112,978,117,946,107,936,105"/>
+<area shape="rect" id="Node000008" href="$classfsm___play_list__state___paused.html" title=" " alt="" coords="971,266,1104,306"/>
+<area shape="poly" id="edge12_Node000008_Node000002" title=" " alt="" coords="910,105,923,116,936,132,943,148,950,177,956,206,973,238,1001,263,997,267,969,241,951,208,945,178,938,149,931,135,919,120,906,109"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="575,94,607,90,702,84,788,82,788,88,702,89,607,95,576,99"/>
+<area shape="rect" id="Node000004" href="$classc___input_f_p_p_remote_play_item.html" title=" " alt="" coords="5,77,192,103"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="207,89,377,97,401,99,400,104,376,102,207,94"/>
+<area shape="poly" id="edge14_Node000003_Node000004" title=" " alt="" coords="162,104,216,114,311,120,400,117,401,123,311,125,215,120,161,110"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="955,202,793,182,699,166,606,147,537,129,538,124,608,142,700,161,794,176,956,197"/>
+<area shape="poly" id="edge7_Node000003_Node000006" title=" " alt="" coords="955,37,793,42,700,52,608,69,561,84,520,102,518,97,559,79,606,63,699,47,793,37,955,32"/>
+<area shape="poly" id="edge9_Node000003_Node000007" title=" " alt="" coords="955,143,921,144,855,146,788,144,583,126,584,121,788,139,855,140,921,139,955,137"/>
+<area shape="poly" id="edge11_Node000003_Node000008" title=" " alt="" coords="955,277,791,242,697,215,606,182,554,155,511,128,514,124,556,150,608,177,699,210,793,237,956,271"/>
+<area shape="rect" id="Node000009" href="$class_fast_timer.html" title=" " alt="" coords="58,148,139,174"/>
+<area shape="poly" id="edge15_Node000003_Node000009" title=" " alt="" coords="154,157,258,153,376,140,447,123,448,129,377,145,258,158,154,163"/>
+</map>

@@ -1,0 +1,22 @@
+<map id="c_OutputCommon::GetOutputType" name="c_OutputCommon::GetOutputType">
+<area shape="rect" id="Node000001" title="Have the instance report its type." alt="" coords="979,56,1199,82"/>
+<area shape="rect" id="Node000002" href="$classc___output_mgr.html#a7a2812dee9affa9705178dd19b69e968" title=" " alt="" coords="768,49,931,89"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="963,72,931,72,931,66,963,66"/>
+<area shape="rect" id="Node000003" href="$classc___output_mgr.html#a90fb3f0faa9e11adcade9b0aee1525f3" title="set up the operating environment based on the current config (or defaults)" alt="" coords="107,5,242,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="752,52,719,46,594,29,468,19,379,18,290,19,242,20,242,15,290,14,379,12,468,14,595,23,720,41,753,46"/>
+<area shape="rect" id="Node000005" href="$classc___output_mgr.html#adc248025f3eafeac3261994673ce96d0" title=" " alt="" coords="516,56,720,82"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="752,72,720,72,720,66,752,66"/>
+<area shape="rect" id="Node000009" href="$classc___output_mgr.html#a82968e06e92c9f6edabc061212492fe8" title=" " alt="" coords="290,106,468,147"/>
+<area shape="poly" id="edge11_Node000002_Node000009" title=" " alt="" coords="753,91,720,97,589,113,469,123,469,118,588,107,719,92,752,86"/>
+<area shape="rect" id="Node000004" href="$_e_s_pixel_stick_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,5,59,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="91,21,59,21,59,16,91,16"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="530,56,468,46,348,33,242,25,242,20,349,28,469,41,531,50"/>
+<area shape="rect" id="Node000006" href="$classc___output_mgr.html#a18f0345656b0c2795b7c925f6d797761" title="Read the current configuration data from nvram." alt="" coords="296,56,463,82"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="501,72,463,72,463,66,501,66"/>
+<area shape="poly" id="edge10_Node000005_Node000009" title=" " alt="" coords="547,88,468,108,466,103,546,83"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="309,54,229,34,230,29,310,49"/>
+<area shape="rect" id="Node000007" href="$classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925" title="Call from loop(), renders output data." alt="" coords="112,56,237,82"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="280,72,237,72,237,66,280,66"/>
+<area shape="rect" id="Node000008" href="$_e_s_pixel_stick_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,56,55,82"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="96,72,55,72,55,66,96,66"/>
+</map>

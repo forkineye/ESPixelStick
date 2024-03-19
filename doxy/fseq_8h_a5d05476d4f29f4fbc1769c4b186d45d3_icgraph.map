@@ -1,0 +1,17 @@
+<map id="write16" name="write16">
+<area shape="rect" id="Node000001" title=" " alt="" coords="792,112,855,137"/>
+<area shape="rect" id="Node000002" href="$classc___f_p_p_discovery.html#a6ef4a34e0c4a6fe52ac7b0ee4034f4dd" title=" " alt="" coords="566,104,744,145"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="776,127,744,127,744,122,776,122"/>
+<area shape="rect" id="Node000003" href="$classfsm___play_file__state___starting.html#ad394ce5f02f91b924c1e7873fb1a2a3c" title=" " alt="" coords="376,39,508,79"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="572,102,508,82,510,77,573,96"/>
+<area shape="rect" id="Node000007" href="$classfsm___play_file__state___stopping.html#a8da7990c94c79959b3893fdeac5c8233" title=" " alt="" coords="376,104,508,145"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="551,127,509,127,509,122,551,122"/>
+<area shape="rect" id="Node000008" href="$classfsm___play_file__state___playing_file.html#a7c3203657c7115e7c12bc41344d7c997" title=" " alt="" coords="366,169,518,210"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="573,152,512,171,510,166,571,147"/>
+<area shape="rect" id="Node000004" href="$classfsm___play_file__state___idle.html#ae4f238b51f02ae7efe147df340077fe8" title=" " alt="" coords="186,39,318,79"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="361,62,318,62,318,56,361,56"/>
+<area shape="rect" id="Node000005" href="$classfsm___play_file__state___error.html#a158cb0287a3ce9aeec887a56f5f50006" title=" " alt="" coords="5,5,138,46"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="170,47,137,41,138,35,171,41"/>
+<area shape="rect" id="Node000006" href="$classfsm___play_file__state___error.html#af91cbc71869fac92d8775b67937c43a8" title=" " alt="" coords="5,71,138,111"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="171,76,138,82,138,77,170,71"/>
+</map>

@@ -1,0 +1,37 @@
+<map id="c_InputCommon::Begin" name="c_InputCommon::Begin">
+<area shape="rect" id="Node000001" title="set up the operating environment based on the current config (or defaults)" alt="" coords="1027,180,1182,206"/>
+<area shape="rect" id="Node000002" href="$classc___input_alexa.html#a8e260d42f46f4fa70cbca61ea001dda6" title="set up the operating environment based on the current config (or defaults)" alt="" coords="820,93,955,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1065,175,978,134,942,122,944,117,980,129,1068,170"/>
+<area shape="rect" id="Node000003" href="$classc___input_m_q_t_t.html#a155372c00c48e65bc4ce1c2433f55d38" title=" " alt="" coords="796,208,979,234"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1012,207,980,212,979,206,1011,202"/>
+<area shape="rect" id="Node000007" href="$classc___input_mgr.html#afe3597df3db9a6deec4140f410f7f1ee" title=" " alt="" coords="797,143,978,184"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="1011,183,977,178,978,173,1012,178"/>
+<area shape="rect" id="Node000015" href="$classc___input_m_q_t_t.html#a3868e04d5b087dc00ec90f0e52fce304" title=" " alt="" coords="805,257,970,283"/>
+<area shape="poly" id="edge17_Node000001_Node000015" title=" " alt="" coords="1062,215,980,249,945,259,944,254,978,244,1060,210"/>
+<area shape="rect" id="Node000004" href="$classc___input_m_q_t_t.html#a47969701bda3653feea63fc0628d4071" title=" " alt="" coords="564,208,731,234"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="780,224,732,224,732,218,780,218"/>
+<area shape="rect" id="Node000005" href="$classc___input_m_q_t_t.html#ad184832d98d3621b7f3466ad3df97f04" title=" " alt="" coords="300,208,495,234"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="548,224,495,224,495,218,548,218"/>
+<area shape="rect" id="Node000006" href="$classc___input_m_q_t_t.html#a00dad1347b7fbe42eb3f3b444f219254" title="set up the operating environment based on the current config (or defaults)" alt="" coords="107,233,247,259"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="284,237,248,241,247,235,284,231"/>
+<area shape="rect" id="Node000008" href="$classc___input_mgr.html#a06a5f6adfd1e87d4d30a7fa0f78ecc33" title="&lt; Start the module" alt="" coords="114,56,240,82"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="782,179,678,187,555,187,423,176,358,164,294,147,263,135,235,118,191,84,194,80,238,113,266,130,296,142,359,159,424,171,555,182,678,181,782,174"/>
+<area shape="rect" id="Node000010" href="$classc___input_mgr.html#a90b28a72c3c887ec9b222744b52a05ec" title=" " alt="" coords="551,56,744,82"/>
+<area shape="poly" id="edge9_Node000007_Node000010" title=" " alt="" coords="806,139,794,134,770,118,746,103,698,85,699,80,749,98,773,114,797,129,808,134"/>
+<area shape="rect" id="Node000014" href="$classc___input_mgr.html#a3982db8dd97b38f17ec31c73e6b4940b" title=" " alt="" coords="295,107,499,132"/>
+<area shape="poly" id="edge16_Node000007_Node000014" title=" " alt="" coords="781,157,500,131,500,126,782,151"/>
+<area shape="rect" id="Node000009" href="$_e_s_pixel_stick_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,56,59,82"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="98,72,59,72,59,66,98,66"/>
+<area shape="poly" id="edge10_Node000010_Node000008" title=" " alt="" coords="535,72,240,72,240,66,535,66"/>
+<area shape="rect" id="Node000011" href="$classc___input_mgr.html#a86facb1b4291c34d64365c6171cd6802" title=" " alt="" coords="319,5,476,31"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="565,55,464,34,465,29,566,50"/>
+<area shape="poly" id="edge15_Node000010_Node000014" title=" " alt="" coords="566,88,465,109,464,103,565,83"/>
+<area shape="poly" id="edge12_Node000011_Node000008" title=" " alt="" coords="324,38,236,58,235,53,323,32"/>
+<area shape="rect" id="Node000012" href="$classc___input_mgr.html#a1823b8316d8574f82bdb06ed1412f161" title="&lt; Called from loop(), renders Input data" alt="" coords="107,5,247,31"/>
+<area shape="poly" id="edge13_Node000011_Node000012" title=" " alt="" coords="303,21,248,21,248,16,303,16"/>
+<area shape="rect" id="Node000013" href="$_e_s_pixel_stick_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,5,55,31"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="91,21,55,21,55,16,91,16"/>
+<area shape="rect" id="Node000016" href="$classc___input_m_q_t_t.html#a18091bce67a4c82c95692bcd9366872f" title=" " alt="" coords="547,257,748,283"/>
+<area shape="poly" id="edge18_Node000015_Node000016" title=" " alt="" coords="789,273,748,273,748,268,789,268"/>
+<area shape="poly" id="edge19_Node000016_Node000006" title=" " alt="" coords="532,267,247,252,247,247,532,262"/>
+</map>

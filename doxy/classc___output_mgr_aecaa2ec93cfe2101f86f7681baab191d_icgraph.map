@@ -1,0 +1,19 @@
+<map id="c_OutputMgr::FindJsonChannelConfig" name="c_OutputMgr::FindJsonChannelConfig">
+<area shape="rect" id="Node000001" title=" " alt="" coords="768,77,970,117"/>
+<area shape="rect" id="Node000002" href="$classc___output_mgr.html#adc248025f3eafeac3261994673ce96d0" title=" " alt="" coords="516,57,720,83"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="752,87,720,84,720,78,752,82"/>
+<area shape="rect" id="Node000008" href="$classc___output_mgr.html#a82968e06e92c9f6edabc061212492fe8" title=" " alt="" coords="290,105,468,145"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="752,106,469,122,469,117,752,101"/>
+<area shape="rect" id="Node000003" href="$classc___output_mgr.html#a90fb3f0faa9e11adcade9b0aee1525f3" title="set up the operating environment based on the current config (or defaults)" alt="" coords="107,5,242,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="538,57,468,45,348,32,242,24,242,19,349,27,469,40,539,51"/>
+<area shape="rect" id="Node000005" href="$classc___output_mgr.html#a18f0345656b0c2795b7c925f6d797761" title="Read the current configuration data from nvram." alt="" coords="296,55,463,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="500,72,463,71,463,66,501,66"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="545,90,470,107,468,102,544,84"/>
+<area shape="rect" id="Node000004" href="$_e_s_pixel_stick_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,5,59,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="91,21,59,21,59,16,91,16"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="307,53,230,34,231,29,308,48"/>
+<area shape="rect" id="Node000006" href="$classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925" title="Call from loop(), renders output data." alt="" coords="112,55,237,80"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="280,70,237,70,237,65,280,65"/>
+<area shape="rect" id="Node000007" href="$_e_s_pixel_stick_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,55,55,80"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="96,70,55,70,55,65,96,65"/>
+</map>

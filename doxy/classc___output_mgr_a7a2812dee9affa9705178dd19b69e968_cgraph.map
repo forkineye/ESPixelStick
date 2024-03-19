@@ -1,0 +1,9 @@
+<map id="c_OutputMgr::InstantiateNewOutputChannel" name="c_OutputMgr::InstantiateNewOutputChannel">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,169,88"/>
+<area shape="rect" id="Node000002" href="$classc___output_common.html#a23ef97415464d74fe780256b6680bfb1" title="set up the operating environment based on the current config (or defaults)" alt="" coords="245,5,411,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,48,246,32,247,37,170,53"/>
+<area shape="rect" id="Node000003" href="$classc___output_common.html#a23228420b2471f0f041c0df0865cc60e" title="get the name for the instantiated driver" alt="" coords="217,55,439,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="169,65,201,65,201,70,169,70"/>
+<area shape="rect" id="Node000004" href="$classc___output_common.html#ad7170942775d16bd0d84c5baf589b51d" title="Have the instance report its type." alt="" coords="218,104,438,130"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="170,82,247,98,246,103,168,87"/>
+</map>

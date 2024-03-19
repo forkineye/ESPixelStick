@@ -1,0 +1,7 @@
+<map id="fsm_ExternalInput_boot::Poll" name="fsm_ExternalInput_boot::Poll">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,163,46"/>
+<area shape="rect" id="Node000002" href="$classfsm___external_input__off__state.html#a41486bae5a578b4c0cec3ecb8b69f1b1" title=" " alt="" coords="211,5,357,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,23,195,23,195,28,163,28"/>
+<area shape="rect" id="Node000003" href="$classc___input_mgr.html#a8c71582b3ef01a7a7e2187377cf7b8ac" title=" " alt="" coords="405,5,583,46"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="357,23,389,23,389,28,357,28"/>
+</map>

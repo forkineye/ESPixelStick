@@ -1,0 +1,16 @@
+<map id="c_InputEffectEngine" name="c_InputEffectEngine">
+<area shape="rect" id="Node000001" title=" " alt="" coords="525,141,661,167"/>
+<area shape="rect" id="Node000002" href="$classc___input_common.html" title=" " alt="" coords="219,5,335,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="351,22,426,37,465,50,502,66,528,83,550,103,584,139,580,143,547,107,524,87,500,71,463,55,424,42,350,27"/>
+<area shape="rect" id="Node000003" href="$structc___input_effect_engine_1_1_c_r_g_b.html" title=" " alt="" coords="209,55,345,96"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="361,84,430,97,502,114,564,138,562,143,500,119,429,102,360,89"/>
+<area shape="rect" id="Node000004" href="$class_fast_timer.html" title=" " alt="" coords="5,156,86,182"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="101,153,109,152,223,143,337,141,525,147,524,152,337,146,224,148,110,157,101,158"/>
+<area shape="rect" id="Node000007" href="$structc___input_effect_engine_1_1_flash_info__t.html" title=" " alt="" coords="209,183,345,224"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="101,180,110,182,209,195,208,200,109,187,100,185"/>
+<area shape="rect" id="Node000005" href="$structc___input_effect_engine_1_1_effect_descriptor__s.html" title=" " alt="" coords="209,249,345,289"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="360,250,429,232,500,207,539,186,572,165,575,170,542,191,502,212,431,237,361,255"/>
+<area shape="rect" id="Node000006" href="$structc___input_effect_engine_1_1d_c_r_g_b.html" title=" " alt="" coords="209,314,345,355"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="360,328,431,314,467,301,499,283,530,256,554,224,584,166,589,169,559,227,534,260,503,288,469,306,433,319,361,333"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="360,188,501,167,524,163,525,168,501,172,361,194"/>
+</map>

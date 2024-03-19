@@ -1,0 +1,25 @@
+<map id="/github/workspace/ESPixelStick/src/utility/SaferStringConversion.hpp" name="/github/workspace/ESPixelStick/src/utility/SaferStringConversion.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="434,5,699,46"/>
+<area shape="rect" id="Node000002" href="$_e_s_pixel_stick_8h.html" title=" " alt="" coords="442,94,558,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="552,48,522,83,518,80,548,45"/>
+<area shape="rect" id="Node000010" href="$backported_8h.html" title=" " alt="" coords="661,94,763,120"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="604,44,678,84,675,89,602,49"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="260,241,335,267"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="442,114,195,133,80,149,41,159,20,170,12,182,8,193,10,202,15,210,37,224,71,235,159,247,244,251,244,256,158,252,70,240,35,229,11,214,4,204,3,192,7,180,17,166,39,154,79,144,194,128,441,108"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="30,168,98,193"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="442,118,296,138,113,170,112,165,296,133,441,113"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="122,168,225,193"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="445,123,241,167,240,162,444,118"/>
+<area shape="rect" id="Node000006" href="$memdebug_8h.html" title=" " alt="" coords="250,168,345,193"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="466,123,347,165,345,159,465,118"/>
+<area shape="rect" id="Node000007" href="$_const_names_8hpp.html" title=" " alt="" coords="369,168,490,193"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="490,122,454,158,450,155,486,118"/>
+<area shape="rect" id="Node000008" href="$_g_p_i_o___defs_8hpp.html" title=" " alt="" coords="514,168,627,193"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="507,118,542,155,538,159,503,122"/>
+<area shape="rect" id="Node000009" href="$_fast_timer_8hpp.html" title=" " alt="" coords="650,168,755,193"/>
+<area shape="poly" id="edge10_Node000002_Node000009" title=" " alt="" coords="528,118,648,160,646,165,527,123"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="300,194,300,226,295,226,295,194"/>
+<area shape="poly" id="edge9_Node000008_Node000002" title=" " alt="" coords="564,169,528,132,532,128,568,165"/>
+<area shape="poly" id="edge11_Node000009_Node000002" title=" " alt="" coords="674,170,555,127,556,122,676,165"/>
+<area shape="poly" id="edge13_Node000010_Node000003" title=" " alt="" coords="731,118,750,134,767,153,775,174,775,185,769,195,747,207,707,217,593,233,351,253,350,247,592,228,706,212,745,202,765,191,769,183,770,175,762,156,746,138,728,122"/>
+</map>

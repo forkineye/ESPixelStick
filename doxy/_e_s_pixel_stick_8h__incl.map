@@ -1,0 +1,20 @@
+<map id="/github/workspace/ESPixelStick/src/ESPixelStick.h" name="/github/workspace/ESPixelStick/src/ESPixelStick.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="335,5,512,46"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="102,168,177,193"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="335,31,245,36,149,48,66,67,35,80,15,96,9,106,9,116,14,125,24,134,53,150,88,163,86,168,51,155,21,139,10,129,4,117,4,105,11,92,33,75,64,62,148,42,244,31,335,26"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="25,94,92,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="336,47,108,96,106,91,334,42"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="116,94,219,120"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="360,49,223,91,221,86,359,44"/>
+<area shape="rect" id="Node000005" href="$memdebug_8h.html" title=" " alt="" coords="244,94,339,120"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="392,49,326,88,323,83,389,44"/>
+<area shape="rect" id="Node000006" href="$_const_names_8hpp.html" title=" " alt="" coords="363,94,484,120"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="426,46,426,78,421,78,421,46"/>
+<area shape="rect" id="Node000007" href="$_g_p_i_o___defs_8hpp.html" title=" " alt="" coords="509,94,621,120"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="452,44,525,84,522,89,450,49"/>
+<area shape="rect" id="Node000008" href="$_fast_timer_8hpp.html" title=" " alt="" coords="645,94,749,120"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="485,44,634,87,632,92,483,49"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="267,123,180,163,178,158,265,118"/>
+<area shape="poly" id="edge8_Node000007_Node000001" title=" " alt="" coords="549,96,479,56,481,51,551,91"/>
+<area shape="poly" id="edge10_Node000008_Node000001" title=" " alt="" coords="661,96,514,53,515,48,662,91"/>
+</map>

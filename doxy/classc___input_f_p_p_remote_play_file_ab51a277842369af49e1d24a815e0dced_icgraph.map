@@ -1,0 +1,7 @@
+<map id="c_InputFPPRemotePlayFile::CalculateFrameId" name="c_InputFPPRemotePlayFile::CalculateFrameId">
+<area shape="rect" id="Node000001" title=" " alt="" coords="206,39,387,79"/>
+<area shape="rect" id="Node000002" href="$classfsm___play_file__state___playing_file.html#ad5c1089dbf8ef58689034e08947f8b4c" title=" " alt="" coords="15,5,148,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,45,147,39,148,33,190,40"/>
+<area shape="rect" id="Node000003" href="$classfsm___play_file__state___playing_file.html#a7c3203657c7115e7c12bc41344d7c997" title=" " alt="" coords="5,71,158,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="190,77,159,82,158,77,190,72"/>
+</map>
