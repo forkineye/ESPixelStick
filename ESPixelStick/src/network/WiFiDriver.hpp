@@ -105,9 +105,11 @@ private:
     String      passphrase;
     String      ap_ssid;
     String      ap_passphrase;
-    IPAddress   ip      = IPAddress ((uint32_t)0);
-    IPAddress   netmask = IPAddress ((uint32_t)0);
-    IPAddress   gateway = IPAddress ((uint32_t)0);
+    IPAddress   ip = INADDR_NONE;
+    IPAddress   netmask = INADDR_NONE;
+    IPAddress   gateway = INADDR_NONE;
+    IPAddress   primaryDns = INADDR_NONE;
+    IPAddress   secondaryDns = INADDR_NONE;
     bool        UseDhcp = true;
     uint8_t     ap_channelNumber = 1;
     bool        ap_fallbackIsEnabled = true;

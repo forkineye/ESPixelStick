@@ -173,7 +173,7 @@ void setup()
     // TestHeap(uint32_t(10));
     // DEBUG_V("");
     FileMgr.Begin();
-
+#ifdef SUPPORT_CONFIG_MERGE
     if(FileMgr.FlashFileExists (RestoredConfigFileName))
     {
         // DEBUG_V("Setting Restored Config flag to true");
@@ -183,6 +183,7 @@ void setup()
     {
         // DEBUG_V("Setting Restored Config flag to false");
     }
+#endif // def SUPPORT_CONFIG_MERGE
     // Load configuration from the File System and set Hostname
     // TestHeap(uint32_t(15));
     // DEBUG_V(String("LoadConfig Heap: ") + String(ESP.getFreeHeap()));

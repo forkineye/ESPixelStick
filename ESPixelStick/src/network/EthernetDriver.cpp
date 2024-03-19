@@ -131,6 +131,8 @@ void c_EthernetDriver::GetConfig (JsonObject& json)
     json[CN_ip]          = ip.toString ();
     json[CN_netmask]     = netmask.toString ();
     json[CN_gateway]     = gateway.toString ();
+    json[CN_dnsp]        = primaryDns.toString ();
+    json[CN_dnss]        = secondaryDns.toString ();
     json[CN_dhcp]        = UseDhcp;
 
     json[CN_type]        = phy_type;
@@ -321,10 +323,14 @@ bool c_EthernetDriver::SetConfig (JsonObject & json)
     String sIP = ip.toString ();
     String sGateway = gateway.toString ();
     String sNetmask = netmask.toString ();
+    String sDnsp = primaryDns.toString ();
+    String sDnss = secondaryDns.toString ();
 
     ConfigChanged |= setFromJSON (sIP,      json, CN_ip);
     ConfigChanged |= setFromJSON (sNetmask, json, CN_netmask);
     ConfigChanged |= setFromJSON (sGateway, json, CN_gateway);
+    ConfigChanged |= setFromJSON (sDnsp,    json, CN_dnsp);
+    ConfigChanged |= setFromJSON (sDnss,    json, CN_dnss);
     ConfigChanged |= setFromJSON (UseDhcp,  json, CN_dhcp);
 
     ConfigChanged |= setFromJSON (phy_addr,  json, CN_addr);
@@ -339,7 +345,9 @@ bool c_EthernetDriver::SetConfig (JsonObject & json)
     ip.fromString (sIP);
     gateway.fromString (sGateway);
     netmask.fromString (sNetmask);
-
+    primaryDns.fromString (sDnsp);
+    secondaryDns.fromString (sDnss);
+    
     // DEBUG_V (String ("     sip: ") + ip.toString ());
     // DEBUG_V (String ("sgateway: ") + gateway.toString ());
     // DEBUG_V (String ("snetmask: ") + netmask.toString ());
@@ -397,10 +405,14 @@ void c_EthernetDriver::SetUpIp ()
         // DEBUG_V ("netmask: " + netmask.toString ());
         // DEBUG_V ("gateway: " + gateway.toString ());
 
+        if(primaryDns == INADDR_NONE)
+        {
+            primaryDns = gateway;
+        }
         // We didn't use DNS, so just set it to our configured gateway
         // https://github.com/espressif/arduino-esp32/issues/5733 - add delay
         delay(100);
-        ETH.config (ip, gateway, netmask, gateway);
+        ETH.config (ip, gateway, netmask, primaryDns, secondaryDns);
 
         logcon (F ("Connecting to Ethernet with Static IP"));
 

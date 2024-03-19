@@ -1181,7 +1181,7 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData) {
     // is this a device config?
     else if ({}.hasOwnProperty.call(JsonConfigData, "system")) {
         System_Config = JsonConfigData.system;
-        // console.info("Got System Config: " + System_Config);
+        // console.info("Got System Config: " + JSON.stringify(System_Config) );
 
         updateFromJSON(System_Config);
 
@@ -1362,6 +1362,8 @@ function ExtractNetworkWiFiConfigFromHtmlPage() {
     wifi.ip = $('#network #wifi #ip').val();
     wifi.netmask = $('#network #wifi #netmask').val();
     wifi.gateway = $('#network #wifi #gateway').val();
+    wifi.dnsp = $('#network #wifi #dnsp').val();
+    wifi.dnss = $('#network #wifi #dnss').val();
     wifi.dhcp = $('#network #wifi #dhcp').prop('checked');
     wifi.ap_ssid = $('#network #wifi #ap_ssid').val();
     wifi.ap_passphrase = $('#network #wifi #ap_passphrase').val();
@@ -1380,6 +1382,8 @@ function ExtractNetworkEthernetConfigFromHtmlPage() {
         System_Config.network.eth.ip = $('#network #eth #ip').val();
         System_Config.network.eth.netmask = $('#network #eth #netmask').val();
         System_Config.network.eth.gateway = $('#network #eth #gateway').val();
+        System_Config.network.eth.dnsp = $('#network #eth #dnsp').val();
+        System_Config.network.eth.dnss = $('#network #eth #dnss').val();
         System_Config.network.eth.dhcp = $('#network #eth #dhcp').prop('checked');
         System_Config.network.eth.type = parseInt($('#network #eth #type option:selected').val(), 10);
         System_Config.network.eth.addr = $('#network #eth #addr').val();

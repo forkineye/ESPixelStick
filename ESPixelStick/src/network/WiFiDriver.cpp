@@ -327,10 +327,16 @@ void c_WiFiDriver::GetConfig (JsonObject& json)
     json[CN_netmask] = Temp.toString ();
     Temp = gateway;
     json[CN_gateway] = Temp.toString ();
+    Temp = primaryDns;
+    json[CN_dnsp] = Temp.toString ();
+    Temp = secondaryDns;
+    json[CN_dnss] = Temp.toString ();
 #else
     json[CN_ip] = ip.toString ();
     json[CN_netmask] = netmask.toString ();
     json[CN_gateway] = gateway.toString ();
+    json[CN_dnsp] = primaryDns.toString ();
+    json[CN_dnss] = secondaryDns.toString ();
 #endif // !def ARDUINO_ARCH_ESP8266
 
     json[CN_StayInApMode] = StayInApMode;
@@ -481,11 +487,16 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
     String sIp = ip.toString ();
     String sGateway = gateway.toString ();
     String sNetmask = netmask.toString ();
+    String sdnsp = primaryDns.toString ();
+    String sdnss = secondaryDns.toString ();
+    
     ConfigChanged |= setFromJSON (ssid, json, CN_ssid);
     ConfigChanged |= setFromJSON (passphrase, json, CN_passphrase);
     ConfigChanged |= setFromJSON (sIp, json, CN_ip);
     ConfigChanged |= setFromJSON (sNetmask, json, CN_netmask);
     ConfigChanged |= setFromJSON (sGateway, json, CN_gateway);
+    ConfigChanged |= setFromJSON (sdnsp, json, CN_dnsp);
+    ConfigChanged |= setFromJSON (sdnss, json, CN_dnss);
     ConfigChanged |= setFromJSON (UseDhcp, json, CN_dhcp);
     ConfigChanged |= setFromJSON (ap_ssid, json, CN_ap_ssid);
     ConfigChanged |= setFromJSON (ap_passphrase, json, CN_ap_passphrase);
@@ -507,6 +518,8 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
     ip.fromString (sIp);
     gateway.fromString (sGateway);
     netmask.fromString (sNetmask);
+    primaryDns.fromString (sdnsp);
+    secondaryDns.fromString (sdnss);
 
     if((passphrase.length() < 8) && (passphrase.length() > 0))
     {
@@ -591,8 +604,15 @@ void c_WiFiDriver::SetUpIp ()
             // correct IP is already set
             break;
         }
+
+        // use gateway if primary DNS is not defined
+        if(primaryDns == INADDR_NONE)
+        {
+            primaryDns = gateway;
+        }
+
         // We didn't use DNS, so just set it to our configured gateway
-        WiFi.config (ip, gateway, netmask, gateway);
+        WiFi.config (ip, gateway, netmask, primaryDns, secondaryDns);
 
         logcon (F ("Using Static IP"));
 

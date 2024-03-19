@@ -111,6 +111,7 @@ private:
     void CreateJsonConfig            (JsonObject & jsonConfig);
     bool ProcessJsonChannelConfig    (JsonObject & jsonConfig, uint32_t ChannelIndex);
     bool InputTypeIsAllowedOnChannel (e_InputType type, e_InputChannelIds ChannelId);
+    bool FindJsonChannelConfig       (JsonObject& jsonConfig, e_InputChannelIds ChanId, JsonObject& ChanConfig);
 
     String ConfigFileName;
     bool   rebootNeeded = false;
