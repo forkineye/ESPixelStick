@@ -98,10 +98,8 @@ bool     ResetWiFi = false;
 bool     IsBooting = true;  // Configuration initialization flag
 time_t   ConfigLoadNeeded = NO_CONFIG_NEEDED;
 bool     ConfigSaveNeeded = false;
-bool     RestoredConfig = false;
 
 uint32_t DiscardedRxData = 0;
-const String RestoredConfigFileName = "/RestoredConfig.json";
 
 /////////////////////////////////////////////////////////
 //
@@ -173,17 +171,6 @@ void setup()
     // TestHeap(uint32_t(10));
     // DEBUG_V("");
     FileMgr.Begin();
-#ifdef SUPPORT_CONFIG_MERGE
-    if(FileMgr.FlashFileExists (RestoredConfigFileName))
-    {
-        // DEBUG_V("Setting Restored Config flag to true");
-        RestoredConfig = true;
-    }
-    else
-    {
-        // DEBUG_V("Setting Restored Config flag to false");
-    }
-#endif // def SUPPORT_CONFIG_MERGE
     // Load configuration from the File System and set Hostname
     // TestHeap(uint32_t(15));
     // DEBUG_V(String("LoadConfig Heap: ") + String(ESP.getFreeHeap()));
@@ -230,14 +217,6 @@ void setup()
 
     // Done with initialization
     IsBooting = false;
-
-    if(RestoredConfig)
-    {
-        // DEBUG_V("Delete Restored Config Flag file");
-        FileMgr.DeleteFlashFile(RestoredConfigFileName);
-        ConfigSaveNeeded = true;
-        RestoredConfig = false;
-    }
 
     // DEBUG_END;
 

@@ -131,7 +131,6 @@ bool setFromJSON (T& OutValue, J& Json, N Name)
 
 extern config_t config;
 extern bool ConfigSaveNeeded;
-extern bool RestoredConfig;
 
 extern const uint8_t CurrentConfigVersion;
 #define LOAD_CONFIG_DELAY 4

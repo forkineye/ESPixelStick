@@ -270,11 +270,7 @@ void c_OutputMgr::Begin ()
         // DEBUG_V("load up the configuration from the saved file. This also starts the drivers");
         LoadConfig();
 
-        if(RestoredConfig)
-        {
-            // DEBUG_V("create a merged config");
-            CreateNewConfig();
-        }
+        // CreateNewConfig();
 
         // Preset the output memory
         memset((void*)&OutputBuffer[0], 0x00, sizeof(OutputBuffer));
@@ -354,7 +350,7 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
         // Populate the driver name
         String DriverName = "";
         CurrentChannel.pOutputChannelDriver->GetDriverName(DriverName);
-        DEBUG_V (String ("DriverName: ") + DriverName);
+        // DEBUG_V (String ("DriverName: ") + DriverName);
 
         ChannelConfigByTypeData[CN_type] = DriverName;
 
@@ -396,42 +392,12 @@ void c_OutputMgr::CreateNewConfig ()
     DynamicJsonDocument JsonConfigDoc (OM_MAX_CONFIG_SIZE);
     // DEBUG_V ();
 
-    // do we create a clean config or do we merge from a restored config?
-    if(RestoredConfig)
-    {
-        logcon("Merging Restored Output Config File");
-        FileMgr.ReadFlashFile(ConfigFileName, JsonConfigDoc);
-        // extern void PrettyPrint(DynamicJsonDocument & jsonStuff, String Name);
-        // PrettyPrint(JsonConfigDoc, "New OutputMgr");
-    }
-
-    if(!JsonConfigDoc.containsKey(CN_output_config))
-    {
-        DEBUG_V("Create a new output config structure.");
-        JsonConfigDoc.createNestedObject (CN_output_config);
-    }
-    JsonObject JsonConfig = JsonConfigDoc[CN_output_config];
+    DEBUG_V("Create a new output config structure.");
+    JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_output_config);
     // DEBUG_V ();
 
     JsonConfig[CN_cfgver] = CurrentConfigVersion;
     JsonConfig[CN_MaxChannels] = sizeof(OutputBuffer);
-
-    e_OutputType SavedOutputTypes[OutputChannelId_End];
-    DEBUG_V("Collect the restored config channel types");
-    for (DriverInfo_t & CurrentOutputChannelDriver : OutputChannelDrivers)
-    {
-        e_OutputChannelIds ChanId = CurrentOutputChannelDriver.DriverId;
-
-        JsonObject OutputChannelConfig;
-        if(!FindJsonChannelConfig(JsonConfigDoc, ChanId, e_OutputType::OutputType_End, OutputChannelConfig))
-        {
-            DEBUG_V(String("Could not find channel config for channel: ") + String(ChanId));
-            continue;
-        }
-
-        setFromJSON (SavedOutputTypes[ChanId], OutputChannelConfig, CN_type);
-        DEBUG_V(String("Saved channel: ") + String(ChanId) + " Type: " + String(SavedOutputTypes[ChanId]));
-    }
 
     DEBUG_V("Collect the all ports disabled config first");
     CreateJsonConfig (JsonConfig);
@@ -445,33 +411,6 @@ void c_OutputMgr::CreateNewConfig ()
         {
             // DEBUG_V (String("DriverId: ") + String(CurrentOutputChannelDriver.DriverId));
             InstantiateNewOutputChannel(CurrentOutputChannelDriver, CurrentOutputType.id, false);
-            if(RestoredConfig)
-            {
-                JsonObject OutputChannelConfig;
-                if(!FindJsonChannelConfig(JsonConfigDoc, CurrentOutputChannelDriver.DriverId, e_OutputType::OutputType_End, OutputChannelConfig))
-                {
-                    DEBUG_V(String("Could not find channel config for channel: ") + String(CurrentOutputChannelDriver.DriverId));
-                }
-                else
-                {
-                    uint32_t ChannelType = CurrentOutputType.id;
-                    // DEBUG_V ();
-
-                    // do we have a configuration for the channel type?
-                    if (false == OutputChannelConfig.containsKey (String (ChannelType)))
-                    {
-                        // if not, flag an error and stop processing
-                        continue;
-                    }
-
-                    DEBUG_V ();
-
-                    JsonObject OutputChannelDriverConfig = OutputChannelConfig[String (ChannelType)];
-                    // PrettyPrint(OutputChannelConfig, "ProcessJson Channel Config");
-
-                    CurrentOutputChannelDriver.pOutputChannelDriver->SetConfig(OutputChannelDriverConfig);
-                }
-            }
 
             // DEBUG_V ();
         } // end for each interface
@@ -494,24 +433,11 @@ void c_OutputMgr::CreateNewConfig ()
         // DEBUG_V ();
     } // end for each output type
 
-    if(RestoredConfig)
+    // DEBUG_V ("leave the outputs disabled");
+    for (auto & CurrentOutputChannelDriver : OutputChannelDrivers)
     {
-        DEBUG_V ("Restore the outputs");
-        for (DriverInfo_t & CurrentOutputChannelDriver : OutputChannelDrivers)
-        {
-            InstantiateNewOutputChannel(CurrentOutputChannelDriver, 
-                                        SavedOutputTypes[CurrentOutputChannelDriver.DriverId], 
-                                        false);
-        }
-    }
-    else
-    {
-        // DEBUG_V ("leave the outputs disabled");
-        for (auto & CurrentOutputChannelDriver : OutputChannelDrivers)
-        {
-            InstantiateNewOutputChannel(CurrentOutputChannelDriver, e_OutputType::OutputType_Disabled);
-        }// end for each interface
-    }
+        InstantiateNewOutputChannel(CurrentOutputChannelDriver, e_OutputType::OutputType_Disabled);
+    }// end for each interface
 
     // PrettyPrint(JsonConfig, "Complete OutputMgr");
 

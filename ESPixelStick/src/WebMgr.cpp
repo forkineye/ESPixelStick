@@ -329,12 +329,6 @@ void c_WebMgr::init ()
                         OutputMgr.ScheduleLoadConfig();
                         request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
                     }
-                    else if(UploadFileName.equals(F("RestoredConfig.json")))
-                    {
-                        DEBUG_V("Received RestoredConfig message");
-                        request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
-                        RequestReboot(700000);
-                    }
                     else
                     {
                         logcon(String(F("Unexpected Config File Name: ")) + UploadFileName);

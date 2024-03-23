@@ -128,14 +128,10 @@ void c_InputMgr::Begin (uint32_t BufferSize)
     }
     HasBeenInitialized = true;
 
-    if(RestoredConfig)
-    {
-        logcon("Merging Restored Input Config File");
-        CreateNewConfig();
-    }
-
     // load up the configuration from the saved file. This also starts the drivers
     LoadConfig ();
+
+    // CreateNewConfig();
 
     // DEBUG_END;
 
@@ -262,20 +258,7 @@ void c_InputMgr::CreateNewConfig ()
     DynamicJsonDocument JsonConfigDoc(IM_JSON_SIZE);
     // DEBUG_V("");
 
-    // do we create a clean config or do we merge from a restored config?
-    if(RestoredConfig)
-    {
-        DEBUG_V("Merge a Restored Input Config");
-        // read the existing file and add to it as needed
-        FileMgr.ReadFlashFile(ConfigFileName, JsonConfigDoc);
-    }
-
-    if(!JsonConfigDoc.containsKey(CN_input_config))
-    {
-        DEBUG_V("Add missing input config fields");
-        JsonConfigDoc.createNestedObject(CN_input_config);
-    }
-    JsonObject JsonConfig = JsonConfigDoc[CN_input_config];
+    JsonObject JsonConfig = JsonConfigDoc.createNestedObject(CN_input_config);
     // DEBUG_V("");
 
     JsonConfig[CN_cfgver] = CurrentConfigVersion;
