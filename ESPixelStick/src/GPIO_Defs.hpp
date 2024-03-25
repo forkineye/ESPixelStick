@@ -130,6 +130,10 @@ typedef enum
 #   include "platformDefinitions/GPIO_Defs_ESP8266_ESPS_V3.hpp"
 #elif defined (BOARD_ESPS_ESP3DEUXQUATRO_DMX)
 #   include "platformDefinitions/GPIO_Defs_ESP32_ESP3DEUXQuattro_DMX.hpp"
+#elif defined (BOARD_ESP32_DEVKITC)
+#   include "platformDefinitions/GPIO_Defs_ESP32_DevkitC.hpp"
+#elif defined (BOARD_ESP32_DEVKITC_V4_OLED)
+#   include "platformDefinitions/GPIO_Defs_ESP32_DevkitC_v4_OLED.hpp"
 #elif defined (ARDUINO_ARCH_ESP32)
 #   include "platformDefinitions/GPIO_Defs_ESP32_generic.hpp"
 #elif defined (ARDUINO_ARCH_ESP8266)
