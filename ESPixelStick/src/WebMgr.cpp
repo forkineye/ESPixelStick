@@ -736,7 +736,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
         if (efupdate.hasError ())
         {
             logcon (String(CN_stars) + F (" UPDATE ERROR: ") + String (efupdate.getError ()));
-            DEBUG_V ("efupdate.hasError");
+            // DEBUG_V ("efupdate.hasError");
             request->send (200, CN_textSLASHplain, (String (F ("Update Error: ")) + String (efupdate.getError ()).c_str()));
             break;
         }
