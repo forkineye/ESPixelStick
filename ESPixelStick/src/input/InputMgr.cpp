@@ -832,7 +832,7 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
             // DEBUG_V ("");
             if(!FindJsonChannelConfig(jsonConfig, e_InputChannelIds(ChannelIndex), InputChannelConfig))
             {
-                DEBUG_V("Did not find the desired channel configuration");
+                // DEBUG_V("Did not find the desired channel configuration");
                 continue;
             }
             // set a default value for channel type
