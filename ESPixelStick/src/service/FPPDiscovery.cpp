@@ -372,7 +372,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, float S
                 }
                 else
                 {
-                    StopPlaying ();
+                    StopPlaying (false);
                 }
                 break;
             }
@@ -429,7 +429,7 @@ void c_FPPDiscovery::ProcessBlankPacket ()
 {
     // DEBUG_START;
 
-    StopPlaying ();
+    StopPlaying (false);
     if (IsEnabled)
     {
         memset (OutputMgr.GetBufferAddress(), 0x0, OutputMgr.GetBufferUsedSize ());
@@ -684,7 +684,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                 // DEBUG_V ("");
 
                 seq = seq.substring (0, seq.length () - 5);
-                StopPlaying ();
+                StopPlaying (false);
 
                 c_FileMgr::FileId FileHandle;
                 // DEBUG_V (String (" seq: ") + seq);
@@ -812,7 +812,7 @@ void c_FPPDiscovery::ProcessFile (
         if(!inFileUpload)
         {
             // DEBUG_V();
-            StopPlaying();
+            StopPlaying(false);
             inFileUpload = true;
             UploadFileName = filename;
         }
@@ -1139,23 +1139,33 @@ void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
 
 //-----------------------------------------------------------------------------
 // Wait for idle.
-void c_FPPDiscovery::StopPlaying ()
+void c_FPPDiscovery::StopPlaying (bool wait)
 {
     // DEBUG_START;
 
-    // logcon (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
-    if (InputFPPRemotePlayFile)
+    // DEBUG_V (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
+    // only process if the pointer is valid
+    while (InputFPPRemotePlayFile)
     {
-        while(!InputFPPRemotePlayFile->IsIdle())
+        // DEBUG_V("Pointer is valid");
+        if(InputFPPRemotePlayFile->IsIdle())
         {
-            InputFPPRemotePlayFile->Stop ();
+            // DEBUG_V("we are done");
+            break;
+        }
+
+        // DEBUG_V("try to stop");
+        InputFPPRemotePlayFile->Stop ();
+
+        if(wait)
+        {
             delay(10);
         }
+        else
+        {
+            break;
+        }
     }
-
-    // DEBUG_V ("");
-
-    // ProcessBlankPacket ();
 
     // DEBUG_END;
 
