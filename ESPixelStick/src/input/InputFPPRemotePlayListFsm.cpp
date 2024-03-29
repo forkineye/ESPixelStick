@@ -315,6 +315,7 @@ bool fsm_PlayList_state_Paused::Poll ()
 
     if (pInputFPPRemotePlayList->PauseDelayTimer.IsExpired())
     {
+        // DEBUG_V();
         pInputFPPRemotePlayList->Stop();
     }
 
