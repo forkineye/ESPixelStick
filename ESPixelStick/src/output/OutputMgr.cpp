@@ -289,7 +289,7 @@ void c_OutputMgr::Begin ()
 //-----------------------------------------------------------------------------
 void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     // extern void PrettyPrint (JsonObject&, String);
     // PrettyPrint (jsonConfig, String ("jsonConfig"));
@@ -370,7 +370,7 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
     // PrettyPrint (jsonConfig, String ("jsonConfig"));
 
     // smile. Your done
-    DEBUG_END;
+    // DEBUG_END;
 } // CreateJsonConfig
 
 //-----------------------------------------------------------------------------
@@ -392,14 +392,14 @@ void c_OutputMgr::CreateNewConfig ()
     DynamicJsonDocument JsonConfigDoc (OM_MAX_CONFIG_SIZE);
     // DEBUG_V ();
 
-    DEBUG_V("Create a new output config structure.");
+    // DEBUG_V("Create a new output config structure.");
     JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_output_config);
     // DEBUG_V ();
 
     JsonConfig[CN_cfgver] = CurrentConfigVersion;
     JsonConfig[CN_MaxChannels] = sizeof(OutputBuffer);
 
-    DEBUG_V("Collect the all ports disabled config first");
+    // DEBUG_V("Collect the all ports disabled config first");
     CreateJsonConfig (JsonConfig);
 
     // DEBUG_V ("for each output type");
@@ -1144,7 +1144,7 @@ bool c_OutputMgr::ProcessJsonConfig (DynamicJsonDocument& jsonConfig)
             JsonObject OutputChannelConfig;
             if(!FindJsonChannelConfig (jsonConfig, CurrentOutputChannelDriver.DriverId, e_OutputType::OutputType_End, OutputChannelConfig))
             {
-                DEBUG_V(String("cant find config for channel: ") + String(CurrentOutputChannelDriver.DriverId));
+                // DEBUG_V(String("cant find config for channel: ") + String(CurrentOutputChannelDriver.DriverId));
                 continue;
             }
             // DEBUG_V ();
