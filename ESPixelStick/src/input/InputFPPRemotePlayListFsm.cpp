@@ -155,7 +155,7 @@ void fsm_PlayList_state_Idle::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 bool fsm_PlayList_state_PlayingFile::Poll ()
 {
-    // DEBUG_START;
+    // xDEBUG_START;
 
     bool Response = pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll ();
     
@@ -165,7 +165,7 @@ bool fsm_PlayList_state_PlayingFile::Poll ()
         pInputFPPRemotePlayList->Stop ();
     }
 
-    // DEBUG_END;
+    // xDEBUG_END;
     return Response;
 
 } // fsm_PlayList_state_PlayingFile::Poll

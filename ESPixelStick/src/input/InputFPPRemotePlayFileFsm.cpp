@@ -389,6 +389,7 @@ void fsm_PlayFile_state_PlayingFile::Start (String& FileName, float ElapsedSecon
     // DEBUG_V (String ("RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
     // DEBUG_V();
     p_Parent->Stop ();
+    // DEBUG_V();
     p_Parent->Start (FileName, ElapsedSeconds, PlayCount);
 
     // DEBUG_END;
@@ -428,6 +429,7 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSecond
         {
             // DEBUG_V ("Sync: Filename change");
             p_Parent->Stop ();
+            // DEBUG_V();
             p_Parent->Start (FileName, ElapsedSeconds, 1);
             break;
         }
