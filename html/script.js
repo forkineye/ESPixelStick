@@ -10,7 +10,7 @@ var System_Config = null;
 var Fseq_File_List = null;
 var selector = [];
 var target = document.location.host;
-// var target = "192.168.10.220";
+// target = "192.168.10.233";
 
 var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
@@ -208,12 +208,15 @@ $(function () {
         saveAs(blob, FileName + ".json"); // Filesaver.js
     }));
 
-    $('#restoreconfig').on("change", (function () {
-        if (this.files.length !== 0) {
+    $('#restoreconfig').on("change", (function ()
+    {
+        if (this.files.length !== 0)
+        {
             const reader = new FileReader();
-            reader.onload = function fileReadCompleted() {
+            reader.onload = function fileReadCompleted()
+            {
                 // when the reader is done, the content is in reader.result.
-                ProcessLocalConfig(reader.result);
+                ProcessConfigFromLocalFile(reader.result);
             };
             reader.readAsText(this.files[0]);
         }
@@ -330,18 +333,149 @@ function SetServerTime()
     SendCommand('settime/' + (CurrentDate));
 } // SetServerTime
 
-function ProcessLocalConfig(data) {
+function ProcessConfigFromLocalFile(data)
+{
     // console.info(data);
     let ParsedLocalConfig = JSON.parse(data);
 
-    ServerAccess.callFunction(SendConfigFileToServer, "config", {'system': ParsedLocalConfig.system});
-    ServerAccess.callFunction(SendConfigFileToServer, "output_config", {'output_config': ParsedLocalConfig.output});
-    ServerAccess.callFunction(SendConfigFileToServer, "input_config", {'input_config': ParsedLocalConfig.input});
-    ServerAccess.callFunction(SendConfigFileToServer, "RestoredConfig", {'RestoredConfig': true});
+    // merge the restored config into the existing config and save the results to the ESP
+    MergeConfig(ParsedLocalConfig.system, System_Config, "config",        'system');
+    MergeConfig(ParsedLocalConfig.output, Output_Config, "output_config", 'output_config');
+    MergeConfig(ParsedLocalConfig.input,  Input_Config,  "input_config",  'input_config');
 
 } // ProcessLocalConfig
 
-function UpdateAdvancedOptionsMode() {
+/**
+ * @param {any} SourceData
+ * @param {any} TargetData
+ * @param {string} FileName
+ * @param {string} SectionName
+ */
+function MergeConfig(SourceData, TargetData, FileName, SectionName)
+{
+    // console.info("SourceData: " + JSON.stringify(SourceData));
+    // console.info("TargetData: " + JSON.stringify(TargetData));
+    
+    let FinalSourceData = JSON.parse('{"' + SectionName + '":' + JSON.stringify(SourceData) + "}");
+    let FinalTargetData = JSON.parse('{"' + SectionName + '":' + JSON.stringify(TargetData) + "}");
+
+    // console.info("FinalSourceData: " + JSON.stringify(FinalSourceData));
+    // console.info("FinalTargetData: " + JSON.stringify(FinalTargetData));
+    
+    MergeConfigTree(FinalSourceData, FinalTargetData, FinalTargetData, "");
+
+    // let DataString = '{"' + SectionName + '":' + JSON.stringify(TargetData) + "}";
+    ServerAccess.callFunction(SendConfigFileToServer, FileName, JSON.stringify(FinalTargetData));
+
+} // MergeConfig
+
+function JsonObjectAccess(obj, Path, value, Action) 
+{
+    try
+    {
+        if(Array.isArray(Path) == false)
+        {
+            Path = [Path];
+        }
+
+        let level = 0;
+        var Return_Value;
+        Path.reduce((a, b)=>
+        {
+            level++;
+            if (level === Path.length)
+            {
+                if(Action === 'Set')
+                {
+                    a[b] = value;
+                    return value;
+                }
+                else if(Action === 'Get')
+                {
+                    Return_Value = a[b];
+                }
+                else if(Action === 'Unset')
+                {
+                    delete a[b];
+                }
+            } 
+            else 
+            {
+                return a[b];
+            }
+        }, obj);
+        return Return_Value;
+    }
+
+    catch(err)
+    {
+        console.error(err);
+        return obj;
+    }
+}
+
+function MergeConfigTree(SourceTree, TargetTree, CurrentTarget, FullSelector)
+{
+    // console.info("Entry: FullSelector: '" + FullSelector + "'");
+
+    // make sure the selector is an array
+    if(!Array.isArray(FullSelector))
+    {
+        FullSelector = [FullSelector];
+        // the first entry into this function has a 
+        // null selector value that needs to be removed
+        if(FullSelector[0] === "")
+        {
+            FullSelector.pop();
+        }
+    }
+
+    // Target drives the data.
+    for (let CurrentElementName in CurrentTarget) 
+    {
+        // console.info("CurrentElement: " + CurrentElementName);
+        // remember the path to this element
+        let CurrentSelectorPath = JSON.parse(JSON.stringify(FullSelector));
+        CurrentSelectorPath.push(CurrentElementName);
+
+        // console.info("CurrentSelectorPath: '" + CurrentSelectorPath + "'");
+        let CurrentElementValue = CurrentTarget[CurrentElementName];
+
+        if(CurrentElementValue === undefined)
+        {
+            console.info("target element is not properly formed");
+            continue;
+        }
+
+        if (typeof CurrentElementValue === 'object')
+        {
+            // console.info("take the current object apart");
+            MergeConfigTree(SourceTree, 
+                            TargetTree,
+                            CurrentElementValue, 
+                            CurrentSelectorPath);
+        }
+        else 
+        {
+            let SourceLookupValue = JsonObjectAccess(SourceTree, CurrentSelectorPath, "", "Get");
+            // let TargetLookupValue = JsonObjectAccess(TargetTree, CurrentSelectorPath, "", "Get");
+
+            // does the source have this element?
+            if(undefined !== SourceLookupValue)
+            {
+                // save the current object value
+                // console.info("Saving CurrentSelectorPath: '" + CurrentSelectorPath + "'");
+                JsonObjectAccess(TargetTree, CurrentSelectorPath, SourceLookupValue, "Set");
+            }
+            else
+            {
+                console.info("NOT Saving CurrentElement. Source value is Not in target tree.");
+            }
+        }
+    }
+} // MergeConfigTree
+
+function UpdateAdvancedOptionsMode(){
     // console.info("UpdateAdvancedOptionsMode");
 
     let am = $('#AdvancedOptions');
@@ -370,7 +504,7 @@ function UpdateChannelCounts() {
     }
 } // UpdateChannelCounts
 
-async function SendConfigFileToServer(FileName = "", Data = {})
+async function SendConfigFileToServer(FileName = "", DataString = "")
 {
     // console.info("FileName: " + FileName);
     // console.info("Data: " + JSON.stringify(Data));
@@ -391,7 +525,9 @@ async function SendConfigFileToServer(FileName = "", Data = {})
         return -1;
     }, false);
     ConfigXfer.open("PUT", "http://" + target + "/conf/" + FileName + ".json");
-    ConfigXfer.send(JSON.stringify(Data));
+    ConfigXfer.send(DataString);
+    // console.info("DataString: " + DataString);
+    // ConfigXfer.send(JSON.stringify(Data));
 
 } // SendConfigFileToServer
 
@@ -1421,7 +1557,7 @@ function submitNetworkConfig() {
 
     ExtractNetworkConfigFromHtmlPage();
 
-    ServerAccess.callFunction(SendConfigFileToServer,"config", {'system': System_Config});
+    ServerAccess.callFunction(SendConfigFileToServer,"config", JSON.stringify({'system': System_Config}));
 
 } // submitNetworkConfig
 
@@ -1638,8 +1774,8 @@ function submitDeviceConfig() {
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
-    ServerAccess.callFunction(SendConfigFileToServer, "output_config", {'output_config': Output_Config});
-    ServerAccess.callFunction(SendConfigFileToServer, "input_config", {'input_config': Input_Config});
+    ServerAccess.callFunction(SendConfigFileToServer, "output_config", JSON.stringify({'output_config': Output_Config}));
+    ServerAccess.callFunction(SendConfigFileToServer, "input_config", JSON.stringify({'input_config': Input_Config}));
     submitNetworkConfig();
 
 } // submitDeviceConfig
