@@ -95,7 +95,11 @@ jobs:
             chip: "esp32"
           - target: "esp32_quinled_uno_espsv3"
             chip: "esp32"
+          # 
           - target: "esp32_tetra2go"
+            chip: "esp32"
+          # KR Lights
+          - target: "esp32_kr_lights_msm"
             chip: "esp32"
 
     runs-on: ubuntu-latest
