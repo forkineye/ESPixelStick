@@ -26,7 +26,7 @@
             }
         },
         {
-            "name": "ESPixelStick V3 ESP01S",
+            "name": "ESPixelStick V2 ESP01S",
             "description": "Official hardware from Forkineye",
             "chip": "esp8266",
             "appbin": "esp8266/esp01s-app.bin",
