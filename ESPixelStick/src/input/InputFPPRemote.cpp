@@ -324,6 +324,7 @@ void c_InputFPPRemote::StopPlaying ()
             while (!pInputFPPRemotePlayItem->IsIdle ())
             {
                 pInputFPPRemotePlayItem->Poll ();
+                // DEBUG_V();
                 pInputFPPRemotePlayItem->Stop ();
             }
 

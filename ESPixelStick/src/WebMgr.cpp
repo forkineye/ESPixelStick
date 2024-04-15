@@ -329,12 +329,6 @@ void c_WebMgr::init ()
                         OutputMgr.ScheduleLoadConfig();
                         request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
                     }
-                    else if(UploadFileName.equals(F("RestoredConfig.json")))
-                    {
-                        DEBUG_V("Received RestoredConfig message");
-                        request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
-                        RequestReboot(700000);
-                    }
                     else
                     {
                         logcon(String(F("Unexpected Config File Name: ")) + UploadFileName);
@@ -742,7 +736,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
         if (efupdate.hasError ())
         {
             logcon (String(CN_stars) + F (" UPDATE ERROR: ") + String (efupdate.getError ()));
-            DEBUG_V ("efupdate.hasError");
+            // DEBUG_V ("efupdate.hasError");
             request->send (200, CN_textSLASHplain, (String (F ("Update Error: ")) + String (efupdate.getError ()).c_str()));
             break;
         }

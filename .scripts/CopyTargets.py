@@ -52,12 +52,43 @@ DST_DIR   = DST_ROOT + BOARD_MCU + "/"
 DST_BIN   = DST_DIR + PIOENV + "-app.bin"
 DST_PART  = DST_DIR + PIOENV + "-partitions.bin"
 DST_BOOT  = DST_DIR + PIOENV + "-bootloader.bin"
+DST_MERG  = DST_DIR + PIOENV + "-merged.bin"
+DST_FS    = DST_DIR + PIOENV + "-littlefs.bin"
 
 DBG_ROOT  = "./debug/"
 DBG_DIR   = DBG_ROOT + BOARD_MCU + "/"
 DST_ELF   = DBG_DIR + PIOENV + ".elf"
 DST_MAP   = DBG_DIR + PIOENV + ".map"
 
+OS_NAME = platform.system().lower()
+FS_BLD_PATH = "./dist/bin/"
+
+if OS_NAME == "windows" :
+    FS_BLD_PATH += "win32/mklittlefs.exe"
+elif OS_NAME == "linux" :
+    FS_BLD_PATH += "linux64/mklittlefs"
+elif OS_NAME == "linux64" :
+    FS_BLD_PATH += "linux64/mklittlefs"
+elif OS_NAME == "darwin" :
+    FS_BLD_PATH += "macos/mklittlefs"
+else:
+    print("ERROR: Could not determine OS type. Got: " + str (OS_NAME))
+    exit(-1)
+
+def merge_bin():
+    # create a file system image
+    FS_BLD_CMD = FS_BLD_PATH + " -b 4096 -p 256 -s 0x50000 -c ./ESPixelStick/data " + DST_FS
+    MERGE_CMD = "./dist/bin/esptool/esptool.exe" + " --chip " + BOARD_MCU + " merge_bin " + " -o " + DST_MERG + " --flash_mode dio" + " --flash_freq 80m" + " --flash_size 4MB" + " 0x0000 " + DST_BOOT + " 0x8000 " + DST_PART + " 0xe000 "  + DST_DIR + "boot_app0.bin" + " 0x10000 " + DST_BIN + " 0x003b0000 " + DST_FS + ""
+    
+    if OS_NAME == "windows" :
+        FS_BLD_CMD = FS_BLD_CMD.replace("/", "\\")
+        MERGE_CMD  = MERGE_CMD.replace("/", "\\")
+
+    print("FS_BLD_CMD: " + FS_BLD_CMD)
+    os.system(FS_BLD_CMD)
+    print("MERGE_CMD: " + MERGE_CMD)
+    os.system(MERGE_CMD)
+    
 def after_build(source, target, env):
 
     DstPath = os.path.join("", DST_DIR)
@@ -105,5 +136,6 @@ def after_build(source, target, env):
                 # print("Copy SRC_BL_DIR: " + SRC_BL_DIR)
                 print("Copy: " + SRC_BL_DIR)
                 shutil.copyfile(SRC_BL_DIR, DST_BOOT)
+    # merge_bin()
 
 env.AddPostAction("buildprog", after_build)

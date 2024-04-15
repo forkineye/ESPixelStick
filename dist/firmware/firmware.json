@@ -26,6 +26,29 @@
             }
         },
         {
+            "name": "ESPixelStick V2 ESP01S",
+            "description": "Official hardware from Forkineye",
+            "chip": "esp8266",
+            "appbin": "esp8266/esp01s-app.bin",
+            "esptool": {
+                "baudrate": "460800",
+                "options": "--before default_reset --after hard_reset",
+                "flashcmd": "write_flash"
+            },
+            "binfiles": [
+                {
+                    "name": "esp8266/esp01s-app.bin",
+                    "offset": "0x0"
+                }
+            ],
+            "filesystem": {
+                "page": "256",
+                "block": "8192",
+                "size": "2072576",
+                "offset": "0x200000"
+            }
+        },
+        {
             "name": "Wemos D1 Mini",
             "description": "Generic Wemos D1 Mini for DIY builds",
             "chip": "esp8266",
@@ -807,6 +830,76 @@
             }
         },
         {
+            "name": "QUINLED UNO on ESPSV3",
+            "description": "ESP32 module with NO PSRAM support for ESPS V3 HW",
+            "chip": "esp32",
+            "appbin": "esp32/esp32_quinled_uno_espsv3-app.bin",
+            "esptool": {
+                "baudrate": "460800",
+                "options": "--before default_reset --after hard_reset",
+                "flashcmd": "write_flash -z"
+            },
+            "binfiles": [
+                {
+                    "name": "esp32/esp32_quinled_uno_espsv3-bootloader.bin",
+                    "offset": "0x1000"
+                },
+                {
+                    "name": "esp32/esp32_quinled_uno_espsv3-partitions.bin",
+                    "offset": "0x8000"
+                },
+                {
+                    "name": "esp32/boot_app0.bin",
+                    "offset": "0xe000"
+                },
+                {
+                    "name": "esp32/esp32_quinled_uno_espsv3-app.bin",
+                    "offset": "0x10000"
+                }
+            ],
+            "filesystem": {
+                "page": "256",
+                "block": "4096",
+                "size": "0x50000",
+                "offset": "0x3B0000"
+            }
+        },
+        {
+            "name": "m5stack atom",
+            "description": "ESP32 module with NO PSRAM",
+            "chip": "esp32",
+            "appbin": "esp32/m5stack_atom-app.bin",
+            "esptool": {
+                "baudrate": "460800",
+                "options": "--before default_reset --after hard_reset",
+                "flashcmd": "write_flash -z"
+            },
+            "binfiles": [
+                {
+                    "name": "esp32/m5stack_atom-bootloader.bin",
+                    "offset": "0x1000"
+                },
+                {
+                    "name": "esp32/m5stack_atom-partitions.bin",
+                    "offset": "0x8000"
+                },
+                {
+                    "name": "esp32/boot_app0.bin",
+                    "offset": "0xe000"
+                },
+                {
+                    "name": "esp32/m5stack_atom-app.bin",
+                    "offset": "0x10000"
+                }
+            ],
+            "filesystem": {
+                "page": "256",
+                "block": "4096",
+                "size": "0x50000",
+                "offset": "0x3B0000"
+            }
+        },
+        {
             "name": "Generic ESP32 4MB",
             "description": "Generic ESP32 with 4MB flash layout for DIY builds",
             "chip": "esp32",
@@ -936,6 +1029,76 @@
                 },
                 {
                     "name": "esp32/olimex_esp32_gw-app.bin",
+                    "offset": "0x10000"
+                }
+            ],
+            "filesystem": {
+                "page": "256",
+                "block": "4096",
+                "size": "0x50000",
+                "offset": "0x3B0000"
+            }
+        },
+        {
+            "name": "ESP32 Tetra2go",
+            "description": "D1 ESP32 based quad controller",
+            "chip": "esp32",
+            "appbin": "esp32/esp32_tetra2go-app.bin",
+            "esptool": {
+                "baudrate": "460800",
+                "options": "--before default_reset --after hard_reset",
+                "flashcmd": "write_flash -z"
+            },
+            "binfiles": [
+                {
+                    "name": "esp32/esp32_tetra2go-bootloader.bin",
+                    "offset": "0x01000"
+                },
+                {
+                    "name": "esp32/esp32_tetra2go-partitions.bin",
+                    "offset": "0x08000"
+                },
+                {
+                    "name": "esp32/boot_app0.bin",
+                    "offset": "0x0e000"
+                },
+                {
+                    "name": "esp32/esp32_tetra2go-app.bin",
+                    "offset": "0x10000"
+                }
+            ],
+            "filesystem": {
+                "page": "256",
+                "block": "4096",
+                "size": "0x50000",
+                "offset": "0x3B0000"
+            }
+        },
+        {
+            "name": "ESP32 KR Lights MSM",
+            "description": "ESP32 based 5 port controller",
+            "chip": "esp32",
+            "appbin": "esp32/esp32_kr_lights_msm32_tetra2go-app.bin",
+            "esptool": {
+                "baudrate": "460800",
+                "options": "",
+                "flashcmd": "write_flash -z"
+            },
+            "binfiles": [
+                {
+                    "name": "esp32/esp32_kr_lights_msm-bootloader.bin",
+                    "offset": "0x01000"
+                },
+                {
+                    "name": "esp32/esp3esp32_kr_lights_msm2_tetra2go-partitions.bin",
+                    "offset": "0x08000"
+                },
+                {
+                    "name": "esp32/boot_app0.bin",
+                    "offset": "0x0e000"
+                },
+                {
+                    "name": "esp32/esp32_kr_lights_msm-app.bin",
                     "offset": "0x10000"
                 }
             ],
