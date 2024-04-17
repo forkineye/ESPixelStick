@@ -90,10 +90,25 @@ bool c_FileMgr::SetConfig (JsonObject & json)
     {
         JsonObject JsonDeviceConfig = json[CN_device];
 
+        extern void PrettyPrint (JsonObject& jsonStuff, String Name);
+        PrettyPrint (JsonDeviceConfig, "c_FileMgr");
+
+        DEBUG_V("miso_pin: " + String(miso_pin));
+        DEBUG_V("mosi_pin: " + String(mosi_pin));
+        DEBUG_V(" clk_pin: " + String(clk_pin));
+        DEBUG_V("  cs_pin: " + String(cs_pin));
+
         ConfigChanged |= setFromJSON (miso_pin, JsonDeviceConfig, CN_miso_pin);
         ConfigChanged |= setFromJSON (mosi_pin, JsonDeviceConfig, CN_mosi_pin);
         ConfigChanged |= setFromJSON (clk_pin,  JsonDeviceConfig, CN_clock_pin);
         ConfigChanged |= setFromJSON (cs_pin,   JsonDeviceConfig, CN_cs_pin);
+
+        DEBUG_V("miso_pin: " + String(miso_pin));
+        DEBUG_V("mosi_pin: " + String(mosi_pin));
+        DEBUG_V(" clk_pin: " + String(clk_pin));
+        DEBUG_V("  cs_pin: " + String(cs_pin));
+
+        DEBUG_V("ConfigChanged: " + String(ConfigChanged));
     }
     else
     {
