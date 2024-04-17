@@ -343,12 +343,12 @@ bool deserializeCore (JsonObject & json)
             // break; // ignoring this error for now.
         }
 
-        DEBUG_V("Checking to see if the config is from the web flash tool");
+        // DEBUG_V("Checking to see if the config is from the web flash tool");
 
         // is this a config from the web flash tool?
         if (DeviceConfig.containsKey("requiresConfigSave"))
         {
-            DEBUG_V("Forcing a save config due to missing GPIO settings");
+            // DEBUG_V("Forcing a save config due to missing GPIO settings");
             ConfigSaveNeeded = true;
         }
 
