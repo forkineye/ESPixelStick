@@ -225,6 +225,7 @@ void c_FileMgr::SetSpiIoPins ()
             // DEBUG_V();
             SdCardInstalled = true;
             DescribeSdCardToUser ();
+            BuildFseqList();
         }
     }
 #ifdef ARDUINO_ARCH_ESP32
@@ -786,6 +787,7 @@ void c_FileMgr::DeleteSdFile (const String & FileName)
     {
         // DEBUG_V (String ("Deleting '") + FileName + "'");
         ESP_SD.remove (FileNamePrefix+FileName);
+        BuildFseqList();
     }
 
     // DEBUG_END;
@@ -804,140 +806,16 @@ void c_FileMgr::DescribeSdCardToUser ()
 #endif // def ARDUINO_ARCH_ESP32
 
     logcon (String (F ("SD Card Size: ")) + int64String (cardSize) + "MB");
-
+/*
     // DEBUG_V("Open Root");
     File root = ESP_SD.open("/");
     printDirectory (root, 0);
     root.close();
     // DEBUG_V("Close Root");
-
+*/
     // DEBUG_END;
 
 } // DescribeSdCardToUser
-
-//-----------------------------------------------------------------------------
-void c_FileMgr::GetListOfSdFiles (String & Response, uint32_t FirstFileToSend)
-{
-    // DEBUG_START;
-    #define EntryReservedSpace 75
-    #define EntryUsageFactor 3
-
-    // DEBUG_V ("FirstFileToSend: '" + String(FirstFileToSend) + "'");
-
-    DynamicJsonDocument ResponseJsonDoc (1 * 1024);
-    FeedWDT ();
-
-    do // once
-    {
-        uint32_t capacity = ResponseJsonDoc.capacity ();
-
-        if (0 == capacity)
-        {
-            logcon (String(CN_stars) + F ("ERROR: Failed to allocate memory for the GetListOfSdFiles web request response.") + CN_stars);
-            break;
-        }
-
-        JsonArray FileArray = ResponseJsonDoc.createNestedArray (CN_files);
-        ResponseJsonDoc[F ("SdCardPresent")] = SdCardIsInstalled ();
-        if (false == SdCardIsInstalled ())
-        {
-            break;
-        }
-
-#ifdef ARDUINO_ARCH_ESP32
-        ResponseJsonDoc[F ("totalBytes")] = ESP_SD.cardSize ();
-#else
-        ResponseJsonDoc[F ("totalBytes")] = ESP_SD.size64 ();
-#endif
-        uint64_t usedBytes = 0;
-
-        ResponseJsonDoc[F("usedBytes")] = uint32_t(-1);
-        ResponseJsonDoc[F("first")]     = FirstFileToSend;
-        ResponseJsonDoc[F("last")]      = uint32_t(-1);
-        ResponseJsonDoc[F("final")]     = false;
-
-        if((0 == FirstFileToSend) || (LastFileSent != FirstFileToSend))
-        {
-            FileSendDir.close();
-            FileSendDir = ESP_SDFS.open ("/", CN_r);
-            LastFileSent = 0;
-        }
-        FirstFileToSend -= LastFileSent;
-
-        while (true)
-        {
-            FeedWDT();
-
-            File entry = FileSendDir.openNextFile ();
-
-            if (!entry)
-            {
-                // DEBUG_V("no more files to add to list");
-                ResponseJsonDoc[F("final")] = true;
-                break;
-            }
-
-            usedBytes += entry.size ();
-            ++LastFileSent;
-            // DEBUG_V(String("FirstFileToSend: ") + String(FirstFileToSend));
-            // have we gotten to a file we have not sent yet?
-            if(FirstFileToSend)
-            {
-                --FirstFileToSend;
-                continue;
-            }
-
-            String EntryName = String (entry.name ());
-            // DEBUG_V ("EntryName: " + EntryName);
-            EntryName = EntryName.substring ((('/' == EntryName[0]) ? 1 : 0));
-            // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
-
-            if ((!EntryName.isEmpty ()) &&
-                (!EntryName.equals(String (F ("System Volume Information")))) &&
-                (0 != entry.size ())
-               )
-            {
-                uint32_t neededMemory = EntryReservedSpace + (EntryName.length() * EntryUsageFactor);
-                uint32_t usedSpace = ResponseJsonDoc.memoryUsage();
-                uint32_t availableSpace = capacity - usedSpace;
-                if(neededMemory >= availableSpace)
-                {
-                    // DEBUG_V("No more file names will fit in the list");
-                    entry.close ();
-                    break;
-                }
-
-                // DEBUG_V ("Adding File: '" + EntryName + "'");
-                JsonObject CurrentFile = FileArray.createNestedObject ();
-                CurrentFile[CN_name]      = EntryName;
-                CurrentFile[F ("date")]   = entry.getLastWrite ();
-                CurrentFile[F ("length")] = entry.size ();
-            }
-
-            entry.close ();
-        } // end while true
-
-
-        ResponseJsonDoc[F("usedBytes")] = usedBytes;
-        ResponseJsonDoc[F("last")]      = LastFileSent;
-
-        if(ResponseJsonDoc.overflowed())
-        {
-            logcon (String(CN_stars) + F ("ERROR: JSON Doc too small to hold the list of SD files") + CN_stars);
-            break;
-        }
-
-    } while (false); // once
-
-    // DEBUG_V(String("ResponseJsonDoc.memoryUsage(): ") + String(ResponseJsonDoc.memoryUsage()));
-    Response.reserve(ResponseJsonDoc.memoryUsage());
-    serializeJson (ResponseJsonDoc, Response);
-
-    // DEBUG_V (String ("Response: ") + Response);
-
-    // DEBUG_END;
-
-} // GetListOfFiles
 
 //-----------------------------------------------------------------------------
 void c_FileMgr::GetListOfSdFiles (std::vector<String> & Response)
@@ -1386,6 +1264,115 @@ size_t c_FileMgr::GetSdFileSize (const FileId& FileHandle)
 } // GetSdFileSize
 
 //-----------------------------------------------------------------------------
+void c_FileMgr::BuildFseqList()
+{
+    // DEBUG_START;
+
+    // cant perform operation
+    FeedWDT ();
+
+    do // once
+    {
+        if(!SdCardIsInstalled())
+        {
+            DEBUG_V("No SD card installed.");
+            break;
+        }
+
+        fs::File InputFile = ESP_SDFS.open ("/", "r");
+        if(!InputFile)
+        {
+            logcon("ERROR: Could not open SD card.");
+            break;
+        }
+
+        // open output file, erase old data
+        fs::File OutputFile = ESP_SDFS.open ("/fseqfilelist.json", "w");
+        if(!OutputFile)
+        {
+            logcon("ERROR: Could not save SD file list.");
+            break;
+        }
+        OutputFile.print("{");
+
+        uint64_t totalBytes = 0;
+
+#ifdef ARDUINO_ARCH_ESP32
+        totalBytes = ESP_SD.cardSize ();
+#else
+        totalBytes = ESP_SD.size64 ();
+#endif
+        String Entry = String("\"totalBytes\" : ") + int64String(totalBytes) + ",";
+        OutputFile.print(Entry);
+
+        uint64_t usedBytes = 0;
+        uint32_t numFiles = 0;
+
+        OutputFile.print("\"files\" : [");
+       while (true)
+        {
+            FeedWDT();
+
+            File entry = InputFile.openNextFile ();
+
+            if (!entry)
+            {
+                // DEBUG_V("no more files to add to list");
+                break;
+            }
+
+            if(entry.isDirectory())
+            {
+                // DEBUG_V("Skip embedded directory");
+                continue;
+            }
+
+            String EntryName = String (entry.name ());
+            // DEBUG_V (         "EntryName: " + EntryName);
+            EntryName = EntryName.substring ((('/' == EntryName[0]) ? 1 : 0));
+            // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
+            // DEBUG_V ("      entry.size(): " + String(entry.size ()));
+
+            if ((!EntryName.isEmpty ()) &&
+                (!EntryName.equals(String (F ("System Volume Information")))) &&
+                (0 != entry.size () &&
+                !EntryName.equals("fseqfilelist.json"))
+               )
+            {
+                // do we need to add a seperator?
+                if(numFiles)
+                {
+                    // DEBUG_V("Adding trailing comma");
+                    OutputFile.print(",");
+                }
+
+                usedBytes += entry.size ();
+                ++numFiles;
+
+                logcon ("SD File: '" + EntryName + "'");
+                OutputFile.print(String("{\"name\" : \"") + EntryName +
+                                 "\",\"date\" : " + entry.getLastWrite () +
+                                 ",\"length\" : " + entry.size () + "}");
+            }
+
+            entry.close ();
+        } // end while true
+
+        // close the array and add the descriptive data
+        OutputFile.print(String("], \"usedBytes\" : ") + int64String(usedBytes) + ",");
+        OutputFile.print(String("\"numFiles\" : ") + String(numFiles));
+
+        // close the data section
+        OutputFile.print("}");
+
+        OutputFile.close();
+    } while(false);
+
+    // DEBUG_END;
+
+} // BuildFseqList
+
+//-----------------------------------------------------------------------------
 void c_FileMgr::handleFileUpload (
     const String & filename,
     size_t index,
@@ -1456,6 +1443,7 @@ void c_FileMgr::handleFileUpload (
                 String (F ("' Done (")) + String (uploadTime) + String (F ("s)")));
 
         CloseSdFile (fsUploadFile);
+        BuildFseqList();
 
         // DEBUG_V(String("Expected: ") + String(totalLen));
         // DEBUG_V(String("     Got: ") + String(GetSdFileSize(fsUploadFileName)));
@@ -1512,7 +1500,7 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
         }
         else
         {
-            // DEBUG_V ("Failed to Allocate file upload buffer");
+            logcon("Failed to Allocate file upload buffer");
         }
     }
 
