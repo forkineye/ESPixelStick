@@ -7,7 +7,7 @@ var AdminInfo = null;
 var Output_Config = null; // Output Manager configuration record
 var Input_Config = null; // Input Manager configuration record
 var System_Config = null;
-var Fseq_File_List = null;
+var Fseq_File_List = [];
 var selector = [];
 var target = document.location.host;
 // target = "192.168.10.233";
@@ -257,7 +257,7 @@ $(function () {
                     // console.log(file);
                     // console.log(resp);
                     Dropzone.forElement('#filemanagementupload').removeAllFiles(true)
-                    RequestListOfFiles(0);
+                    RequestListOfFiles();
                 });
 
                 this.on('complete', function (file, resp) {
@@ -531,7 +531,7 @@ async function SendConfigFileToServer(FileName = "", DataString = "")
 
 } // SendConfigFileToServer
 
-function ProcessWindowChange(NextWindow) {
+async function ProcessWindowChange(NextWindow) {
 
     if (NextWindow === "#diag") {
     }
@@ -547,14 +547,14 @@ function ProcessWindowChange(NextWindow) {
     }
 
     else if (NextWindow === "#config") {
-        RequestListOfFiles(0);
-        RcfResponse = RequestConfigFile("config.json");
-        RcfResponse = RequestConfigFile("output_config.json");
-        RcfResponse = RequestConfigFile("input_config.json");
+        await RequestListOfFiles();
+        RequestConfigFile("config.json");
+        RequestConfigFile("output_config.json");
+        RequestConfigFile("input_config.json");
     }
 
     else if (NextWindow === "#filemanagement") {
-        RequestListOfFiles(0);
+        await RequestListOfFiles();
     }
 
     UpdateAdvancedOptionsMode();
@@ -667,12 +667,16 @@ function RequestStatusUpdate()
 
 } // RequestStatusUpdate
 
-function RequestListOfFiles(StartingFileIndex) {
-    ExpectedStartingFileIndex = StartingFileIndex;
-
+async function RequestListOfFiles() 
+{
     // console.info("ask for a file list from the server, starting at " + StartingFileIndex);
 
-    return fetch("HTTP://" + target + "/files/" + StartingFileIndex, {
+    // build the list
+    await SendCommand("fseqfilelist");
+
+    // retrieve the file with the list of files in it
+    return await fetch("HTTP://" + target + "/fseqfilelist", 
+    {
         method: 'GET',
         mode: "cors", // no-cors, *cors, same-origin
         headers: { 'Content-Type': 'application/json' },
@@ -694,17 +698,13 @@ function RequestListOfFiles(StartingFileIndex) {
             const error = (data && data.message) || webResponse.status;
             console.error("SendCommand: Error: " + Promise.reject(error));
             CompletedServerTransaction = false;
-            RequestListOfFiles(0);
+            RequestListOfFiles();
         }
         else
         {
             // console.info("SendCommand: Transaction complete");
-
-
-
-
             CompletedServerTransaction = true;
-            ProcessGetFileListResponse(data);
+            await ProcessGetFileListResponse(data);
         }
         return webResponse.ok ? 1 : 0;
     })
@@ -712,7 +712,7 @@ function RequestListOfFiles(StartingFileIndex) {
     {
         console.error('SendCommand: Error: ', error);
         CompletedServerTransaction = false;
-        RequestListOfFiles(0);
+        RequestListOfFiles();
         return -1;
     });
 
@@ -723,7 +723,7 @@ function BytesToMB(Value) {
 
 } // BytesToMB
 
-function ProcessGetFileListResponse(JsonConfigData) {
+async function ProcessGetFileListResponse(JsonConfigData) {
     // console.info("ProcessGetFileListResponse");
 
     SdCardIsInstalled = JsonConfigData.SdCardPresent;
@@ -736,60 +736,48 @@ function ProcessGetFileListResponse(JsonConfigData) {
     $("#totalBytes").val(BytesToMB(JsonConfigData.totalBytes));
     $("#usedBytes").val(BytesToMB(JsonConfigData.usedBytes));
     $("#remainingBytes").val(BytesToMB(JsonConfigData.totalBytes - JsonConfigData.usedBytes));
+    $("#filecount").val(BytesToMB(JsonConfigData.numFiles));
 
-    // console.info("Expected File Index: " + ExpectedStartingFileIndex);
-    // console.info("Received File index: " + JsonConfigData.first);
+    console.info("totalBytes: " + JsonConfigData.totalBytes);
+    console.info("usedBytes: " + JsonConfigData.usedBytes);
+    console.info("numFiles: " + JsonConfigData.numFiles);
 
-    if(ExpectedStartingFileIndex === JsonConfigData.first)
+    Fseq_File_List = [];
+
+    // delete current entries
+    $('#FileManagementTable').empty();
+
+    JsonConfigData.files.sort(function(a, b)
     {
-        // are we starting a fresh list (first chunk)
-        if(JsonConfigData.first === 0)
-        {
-            // console.info("$('#FileManagementTable > tr').length " + $('#FileManagementTable > tr').length);
-            Fseq_File_List = [];
+        return a.name.localeCompare(b.name);
+    });
 
-            while (1 < $('#FileManagementTable > tr').length) {
-                // console.info("Deleting $('#FileManagementTable tr').length " + $('#FileManagementTable tr').length);
-                $('#FileManagementTable tr').last().remove();
-                // console.log("After Delete: $('#FileManagementTable tr').length " + $('#FileManagementTable tr').length);
-            }
-        }
+    JsonConfigData.files.forEach(function (file) 
+    {
+        let CurrentRowId = $('#FileManagementTable > tr').length;
+        let SelectedPattern = '<td><input  type="checkbox" id="FileSelected_' + (CurrentRowId) + '"></td>';
+        let NamePattern = '<td><output type="text" id="FileName_' + (CurrentRowId) + '"></td>';
+        let DatePattern = '<td><output type="text" id="FileDate_' + (CurrentRowId) + '"></td>';
+        let SizePattern = '<td><output type="text" id="FileSize_' + (CurrentRowId) + '"></td>';
 
-        JsonConfigData.files.forEach(function (file) {
-            let CurrentRowId = $('#FileManagementTable > tr').length;
-            let SelectedPattern = '<td><input  type="checkbox" id="FileSelected_' + (CurrentRowId) + '"></td>';
-            let NamePattern = '<td><output type="text" id="FileName_' + (CurrentRowId) + '"></td>';
-            let DatePattern = '<td><output type="text" id="FileDate_' + (CurrentRowId) + '"></td>';
-            let SizePattern = '<td><output type="text" id="FileSize_' + (CurrentRowId) + '"></td>';
-    
-            let rowPattern = '<tr>' + SelectedPattern + NamePattern + DatePattern + SizePattern + '</tr>';
-            $('#FileManagementTable tr:last').after(rowPattern);
-    
-            try {
-                $('#FileName_' + (CurrentRowId)).val(file.name);
-                $('#FileDate_' + (CurrentRowId)).val(new Date(file.date * 1000).toLocaleString());
-                $('#FileSize_' + (CurrentRowId)).val(file.length);
-                Fseq_File_List.push(file);
-            }
-            catch
-            {
-                $('#FileName_' + (CurrentRowId)).val("InvalidFile");
-                $('#FileDate_' + (CurrentRowId)).val(new Date(0).toISOString());
-                $('#FileSize_' + (CurrentRowId)).val(0);
-            }
-        }); // end foreach
+        let rowPattern = '<tr>' + SelectedPattern + NamePattern + DatePattern + SizePattern + '</tr>';
+        $('#FileManagementTable tr:last').after(rowPattern);
 
-        // was this the last chunk?
-        if(false === JsonConfigData.final)
-        {
-            // console.info("not last. Ask for the next chunk");
-            RequestListOfFiles(JsonConfigData.last);
+        try {
+            $('#FileName_' + (CurrentRowId)).val(file.name);
+            $('#FileDate_' + (CurrentRowId)).val(new Date(file.date * 1000).toLocaleString());
+            $('#FileSize_' + (CurrentRowId)).val(file.length);
+            Fseq_File_List.push(file);
         }
-        else
+        catch
         {
-            SetServerTime();
+            $('#FileName_' + (CurrentRowId)).val("InvalidFile");
+            $('#FileDate_' + (CurrentRowId)).val(new Date(0).toISOString());
+            $('#FileSize_' + (CurrentRowId)).val(0);
         }
-    } // end expected file ID
+    }); // end foreach
+
+    SetServerTime();
 
 } // ProcessGetFileListResponse
 
@@ -804,7 +792,7 @@ function RequestFileDeletion() {
         }
     });
 
-    RequestListOfFiles(0);
+    RequestListOfFiles();
 
 } // RequestFileDeletion
 
@@ -821,6 +809,7 @@ function ProcessModeConfigurationDatafppremote(channelConfig) {
     $(jqSelector).append('<option value="...">Play Remote Sequence</option>');
 
     // for each file in the list
+    Fseq_File_List.sort();
     Fseq_File_List.forEach(function (listEntry) {
         // add in a new entry
         $(jqSelector).append('<option value="' + listEntry.name + '">' + listEntry.name + '</option>');
@@ -828,7 +817,6 @@ function ProcessModeConfigurationDatafppremote(channelConfig) {
 
     // set the current selector value
     $(jqSelector).val(channelConfig.fseqfilename);
-
 
 } // ProcessModeConfigurationDatafppremote
 
@@ -2153,7 +2141,7 @@ function showReboot() {
 async function SendCommand(command)
 {
     // console.info("SendCommand: " + command);
-    return fetch("HTTP://" + target + "/" + command, {
+    return await fetch("HTTP://" + target + "/" + command, {
             method: 'POST',
             mode: "cors", // no-cors, *cors, same-origin
             headers: { 'Content-Type': 'application/json' },
