@@ -671,9 +671,6 @@ async function RequestListOfFiles()
 {
     // console.info("ask for a file list from the server, starting at " + StartingFileIndex);
 
-    // build the list
-    await SendCommand("fseqfilelist");
-
     // retrieve the file with the list of files in it
     return await fetch("HTTP://" + target + "/fseqfilelist", 
     {
@@ -728,9 +725,11 @@ async function ProcessGetFileListResponse(JsonConfigData) {
 
     SdCardIsInstalled = JsonConfigData.SdCardPresent;
 
-    $("#li-filemanagement").removeClass("hidden");
     if (false === SdCardIsInstalled) {
         $("#li-filemanagement").addClass("hidden");
+    }
+    else{
+        $("#li-filemanagement").removeClass("hidden");
     }
 
     $("#totalBytes").val(BytesToMB(JsonConfigData.totalBytes));
@@ -761,7 +760,7 @@ async function ProcessGetFileListResponse(JsonConfigData) {
         let SizePattern = '<td><output type="text" id="FileSize_' + (CurrentRowId) + '"></td>';
 
         let rowPattern = '<tr>' + SelectedPattern + NamePattern + DatePattern + SizePattern + '</tr>';
-        $('#FileManagementTable tr:last').after(rowPattern);
+        $('#FileManagementTable').append(rowPattern);
 
         try {
             $('#FileName_' + (CurrentRowId)).val(file.name);
