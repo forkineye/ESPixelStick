@@ -735,7 +735,7 @@ async function ProcessGetFileListResponse(JsonConfigData) {
     $("#totalBytes").val(BytesToMB(JsonConfigData.totalBytes));
     $("#usedBytes").val(BytesToMB(JsonConfigData.usedBytes));
     $("#remainingBytes").val(BytesToMB(JsonConfigData.totalBytes - JsonConfigData.usedBytes));
-    $("#filecount").val(BytesToMB(JsonConfigData.numFiles));
+    $("#filecount").val(JsonConfigData.numFiles);
 
     console.info("totalBytes: " + JsonConfigData.totalBytes);
     console.info("usedBytes: " + JsonConfigData.usedBytes);
