@@ -258,7 +258,7 @@ void c_WebMgr::init ()
             }
         });
 
-        webServer.serveStatic("/fseqfilelist", SD, "/fseqfilelist.json");
+        webServer.serveStatic("/fseqfilelist", ESP_SDFS, "/fseqfilelist.json");
 
     	webServer.on ("/file/delete", HTTP_POST | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {
