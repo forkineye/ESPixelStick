@@ -247,7 +247,7 @@ void c_FileMgr::SetSpiIoPins ()
 //-----------------------------------------------------------------------------
 /*
     On occasion, the SD card is left in an unknown state that causes the SD card
-    to appear to not be installed. A power cycle fixes the issue. Clocking the 
+    to appear to not be installed. A power cycle fixes the issue. Clocking the
     bus also causes any incomplete transaction to get cleared.
 */
 void c_FileMgr::ResetSdCard()
@@ -1349,7 +1349,10 @@ void c_FileMgr::BuildFseqList()
                 usedBytes += entry.size ();
                 ++numFiles;
 
-                logcon ("SD File: '" + EntryName + "'");
+                if(IsBooting)
+                {
+                    logcon ("SD File: '" + EntryName + "'");
+                }
                 OutputFile.print(String("{\"name\" : \"") + EntryName +
                                  "\",\"date\" : " + entry.getLastWrite () +
                                  ",\"length\" : " + entry.size () + "}");
