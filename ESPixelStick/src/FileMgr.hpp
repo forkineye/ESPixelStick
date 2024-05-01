@@ -140,11 +140,9 @@ private:
     int FileListFindSdFileHandle (FileId HandleToFind);
     void InitSdFileList ();
 
-    byte   * FileUploadBuffer = nullptr;
-    uint32_t FileUploadBufferOffset = 0;
-
     File        FileSendDir;
     uint32_t    LastFileSent = 0;
+    uint32_t    expectedIndex = 0;
 
 protected:
 

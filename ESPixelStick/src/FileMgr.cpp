@@ -1395,52 +1395,27 @@ void c_FileMgr::handleFileUpload (
     if (0 == index)
     {
         handleFileUploadNewFile (filename);
+        expectedIndex = 0;
     }
+    else if (index != expectedIndex)
+    {
+        logcon(String("ERROR: Expected index: ") + String(expectedIndex) + " does not match actual index: " + String(index));
+    }
+
+    // update the next expected chunk id
+    expectedIndex = index + len;
 
     if ((0 != len) && (0 != fsUploadFileName.length ()))
     {
-        if (nullptr == FileUploadBuffer)
-        {
-            // Write data
-            // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
-            WriteSdFile (fsUploadFile, data, len);
-            // DEBUG_V (String ("Writting bytes: ") + String (index));
-            // LOG_PORT.print (".");
-        }
-        else
-        {
-            // is there space in the buffer for this chunk?
-            if (((len + FileUploadBufferOffset) >= FileUploadBufferSize) &&
-                (0 != FileUploadBufferOffset))
-            {
-                // DEBUG_V ("write out the buffer");
-                WriteSdFile (fsUploadFile, FileUploadBuffer, FileUploadBufferOffset);
-                FileUploadBufferOffset = 0;
-            }
-
-            // will this chunk fit in the buffer
-            if (len < FileUploadBufferSize)
-            {
-                memcpy (&FileUploadBuffer[FileUploadBufferOffset], data, len);
-                FileUploadBufferOffset += len;
-            }
-            else
-            {
-                // DEBUG_V ("chunk is bigger than our buffer");
-                WriteSdFile (fsUploadFile, data, len);
-            }
-        }
+        // Write data
+        // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
+        WriteSdFile (fsUploadFile, data, len);
+        // DEBUG_V (String ("Writing bytes: ") + String (index));
+        // LOG_PORT.print (".");
     }
 
     if ((true == final) && (0 != fsUploadFileName.length ()))
     {
-        if (FileUploadBufferOffset)
-        {
-            // DEBUG_V ("save the last bits");
-            WriteSdFile (fsUploadFile, FileUploadBuffer, FileUploadBufferOffset);
-            FileUploadBufferOffset = 0;
-        }
-
         uint32_t uploadTime = (uint32_t)(millis() - fsUploadStartTime) / 1000;
         logcon (String (F ("Upload File: '")) + fsUploadFileName +
                 String (F ("' Done (")) + String (uploadTime) + String (F ("s)")));
@@ -1452,15 +1427,6 @@ void c_FileMgr::handleFileUpload (
         // DEBUG_V(String("     Got: ") + String(GetSdFileSize(fsUploadFileName)));
 
         fsUploadFileName = "";
-
-        if (nullptr != FileUploadBuffer)
-        {
-            // DEBUG_V (String (" Free Upload Buffer. Heap: ") + String (ESP.getFreeHeap ()));
-            free (FileUploadBuffer);
-            FileUploadBuffer = nullptr;
-            FileUploadBufferOffset = 0;
-            // DEBUG_V (String ("Freed Upload Buffer. Heap: ") + String (ESP.getFreeHeap ()));
-        }
     }
 
     // DEBUG_END;
@@ -1494,25 +1460,9 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
     // Open the file for writing
     FileMgr.OpenSdFile (fsUploadFileName, FileMode::FileWrite, fsUploadFile);
 
-    if (nullptr == FileUploadBuffer)
-    {
-        FileUploadBuffer = (byte*)malloc (FileUploadBufferSize);
-        if (nullptr != FileUploadBuffer)
-        {
-            // DEBUG_V ("Allocated file upload buffer");
-        }
-        else
-        {
-            logcon("Failed to Allocate file upload buffer");
-        }
-    }
-
-    FileUploadBufferOffset = 0;
-
     // DEBUG_END;
 
 } // handleFileUploadNewFile
-
 
 // create a global instance of the File Manager
 c_FileMgr FileMgr;
