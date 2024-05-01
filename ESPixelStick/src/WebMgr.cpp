@@ -482,8 +482,12 @@ void c_WebMgr::init ()
 
     		webServer.onNotFound ([this](AsyncWebServerRequest* request)
             {
+                if (request->method() == HTTP_OPTIONS)
+                {
+                    request->send(200);
+                }
                 // DEBUG_V (String("onNotFound. URL: ") + request->url());
-                if (true == this->IsAlexaCallbackValid())
+                else if (true == this->IsAlexaCallbackValid())
                 {
                     // DEBUG_V ("IsAlexaCallbackValid == true");
                     if (!espalexa.handleAlexaApiCall (request)) //if you don't know the URI, ask espalexa whether it is an Alexa control request
