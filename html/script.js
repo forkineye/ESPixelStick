@@ -737,9 +737,9 @@ async function ProcessGetFileListResponse(JsonConfigData) {
     $("#remainingBytes").val(BytesToMB(JsonConfigData.totalBytes - JsonConfigData.usedBytes));
     $("#filecount").val(JsonConfigData.numFiles);
 
-    console.info("totalBytes: " + JsonConfigData.totalBytes);
-    console.info("usedBytes: " + JsonConfigData.usedBytes);
-    console.info("numFiles: " + JsonConfigData.numFiles);
+    // console.info("totalBytes: " + JsonConfigData.totalBytes);
+    // console.info("usedBytes: " + JsonConfigData.usedBytes);
+    // console.info("numFiles: " + JsonConfigData.numFiles);
 
     Fseq_File_List = [];
 
