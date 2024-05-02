@@ -29,9 +29,6 @@
 #else
 #   define NumBlocksToBuffer        9
 #endif
-
-static const uint32_t FileUploadBufferSize = HTML_TRANSFER_BLOCK_SIZE * NumBlocksToBuffer;
-
 //-----------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
 c_FileMgr::c_FileMgr ()
@@ -1190,20 +1187,40 @@ void c_FileMgr::CloseSdFile (FileId& FileHandle)
 //-----------------------------------------------------------------------------
 size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t NumBytesToWrite)
 {
-    size_t response = 0;
+    size_t NumBytesWritten = 0;
     int FileListIndex;
     // DEBUG_V (String("Bytes to write: ") + String(NumBytesToWrite));
     if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
     {
-        WriteBufferingStream bufferedFileWrite{ FileList[FileListIndex].info, 128 };
-        response = bufferedFileWrite.write (FileData, NumBytesToWrite);
+        while(!FileList[FileListIndex].info.availableForWrite())
+        {
+            yield();
+            break;
+        }
+
+        NumBytesWritten = FileList[FileListIndex].info.write(FileData, NumBytesToWrite);
+        // FileList[FileListIndex].info.flush();
+        FeedWDT();
+        yield();
+        
+        // WriteBufferingStream bufferedFileWrite{ FileList[FileListIndex].info, 128 };
+        // make sure any previous operation is complete
+        // bufferedFileWrite.flush();
+        // write the new data
+        // NumBytesWritten = bufferedFileWrite.write (FileData, NumBytesToWrite);
+        
+        
+        if(NumBytesWritten != NumBytesToWrite)
+        {
+            logcon (String (F ("WriteSdFile::ERROR::Invalid Could not write data. Tried to write: ")) + String (NumBytesToWrite) + " Wrote: " + String(NumBytesWritten));
+        }
     }
     else
     {
         logcon (String (F ("WriteSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
 
-    return response;
+    return NumBytesWritten;
 
 } // WriteSdFile
 
@@ -1417,10 +1434,13 @@ void c_FileMgr::handleFileUpload (
     if ((true == final) && (0 != fsUploadFileName.length ()))
     {
         uint32_t uploadTime = (uint32_t)(millis() - fsUploadStartTime) / 1000;
-        logcon (String (F ("Upload File: '")) + fsUploadFileName +
-                String (F ("' Done (")) + String (uploadTime) + String (F ("s)")));
-
         CloseSdFile (fsUploadFile);
+
+        logcon (String (F ("Upload File: '")) + fsUploadFileName +
+                F ("' Done (") + String (uploadTime) + 
+                F ("s). Received: ") + String(expectedIndex) + 
+                F(" Bytes."));
+
         BuildFseqList();
 
         // DEBUG_V(String("Expected: ") + String(totalLen));
