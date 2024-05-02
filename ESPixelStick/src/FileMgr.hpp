@@ -122,7 +122,7 @@ private:
     uint8_t  mosi_pin = SD_CARD_MOSI_PIN;
     uint8_t  clk_pin  = SD_CARD_CLK_PIN;
     uint8_t  cs_pin   = SD_CARD_CS_PIN;
-    FileId fsUploadFile;
+    FileId   fsUploadFile;
     String   fsUploadFileName;
     bool     fsUploadFileSavedIsEnabled = false;
     uint32_t fsUploadStartTime;
