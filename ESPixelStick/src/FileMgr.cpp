@@ -21,7 +21,6 @@
 #include <Int64String.h>
 
 #include "FileMgr.hpp"
-#include <StreamUtils.h>
 
 #define HTML_TRANSFER_BLOCK_SIZE    563
 #ifdef ARDUINO_ARCH_ESP32
@@ -440,11 +439,7 @@ bool c_FileMgr::SaveFlashFile (const String& FileName, const char * FileData)
     else
     {
         file.seek (0, SeekSet);
-
-        WriteBufferingStream bufferedFileWrite{ file, 128 };
-        bufferedFileWrite.print (FileData);
-        // file.print (FileData);
-
+        file.print (FileData);
         file.close ();
 
         file = LittleFS.open (FileName.c_str (), "r");
@@ -568,8 +563,6 @@ bool c_FileMgr::ReadFlashFile (const String& FileName, String& FileData)
 
         // DEBUG_V (String("File '") + FileName + "' is open.");
         file.seek (0, SeekSet);
-        // ReadBufferingStream bufferedFileRead{ file, 128 };
-        // FileData = bufferedFileRead.readString ();
         FileData = file.readString ();
         file.close ();
         GotFileData = true;
@@ -664,8 +657,6 @@ bool c_FileMgr::ReadFlashFile (const String & FileName, byte * FileData, size_t 
 
         // DEBUG_V (String("File '") + FileName + "' is open.");
         file.seek (0, SeekSet);
-        // ReadBufferingStream bufferedFileRead{ file, 128 };
-        // FileData = bufferedFileRead.readString ();
         file.read (FileData, file.size());
         file.close ();
 
@@ -979,8 +970,9 @@ bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & Fil
         int FileListIndex;
         if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
         {
+            FileList[FileListIndex].Filename = FileNamePrefix + FileName;
             // DEBUG_V(String("Got file handle: ") + String(FileHandle));
-            FileList[FileListIndex].info = ESP_SDFS.open(FileNamePrefix + FileName, ReadWrite);
+            FileList[FileListIndex].info = ESP_SDFS.open(FileList[FileListIndex].Filename, ReadWrite);
             // DEBUG_V("Open return");
             if (!FileList[FileListIndex].info)
             {
@@ -1028,8 +1020,7 @@ bool c_FileMgr::ReadSdFile (const String & FileName, String & FileData)
         if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
         {
             FileList[FileListIndex].info.seek (0, SeekSet);
-            ReadBufferingStream bufferedFileRead{ FileList[FileListIndex].info, 128 };
-            FileData = bufferedFileRead.readString ();
+            FileData = FileList[FileListIndex].info.readString ();
         }
 
         CloseSdFile (FileHandle);
@@ -1065,8 +1056,7 @@ bool c_FileMgr::ReadSdFile (const String & FileName, JsonDocument & FileData)
         {
 
             FileList[FileListIndex].info.seek (0, SeekSet);
-            ReadBufferingStream bufferedFileRead{ FileList[FileListIndex].info, 128 };
-            String RawFileData = bufferedFileRead.readString ();
+            String RawFileData = FileList[FileListIndex].info.readString ();
 
             // DEBUG_V ("Convert File to JSON document");
             DeserializationError error = deserializeJson (FileData, RawFileData);
@@ -1146,9 +1136,7 @@ size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t N
     int FileListIndex;
     if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
     {
-        ReadBufferingStream bufferedFileRead{ FileList[FileListIndex].info, 128 };
-        response = bufferedFileRead.readBytes (((char*)FileData), NumBytesToRead);
-        // response = FileList[FileListIndex].info.readBytes(((char *)FileData), NumBytesToRead);
+        response = FileList[FileListIndex].info.readBytes(((char *)FileData), NumBytesToRead);
         // DEBUG_V(String("         response: ") + String(response));
     }
     else
@@ -1185,6 +1173,89 @@ void c_FileMgr::CloseSdFile (FileId& FileHandle)
 } // CloseSdFile
 
 //-----------------------------------------------------------------------------
+bool c_FileMgr::ReopenSdFile(FileId& FileHandle)
+{
+    // DEBUG_START;
+    bool response = false;
+    int FileListIndex;
+    if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
+    {
+        response = ReopenSdFile(FileListIndex);
+    }
+    // DEBUG_END;
+    return response;
+} // ReopenSdFile
+
+//-----------------------------------------------------------------------------
+bool c_FileMgr::ReopenSdFile(int FileListIndex)
+{
+    // DEBUG_START;
+    bool response = false;
+
+    // DEBUG_V ("Trying to reopen SD file");
+    do // once
+    {
+        yield();
+        // close the file
+        FileList[FileListIndex].info.close();
+        FileList[FileListIndex].writeCount = 0;
+        // open the file in append mode
+        FileList[FileListIndex].info = ESP_SDFS.open(FileList[FileListIndex].Filename, "a");
+        // DEBUG_V(String("FileSize: ") + String(FileList[FileListIndex].info.size()));
+        // DEBUG_V(String("RcvCount: ") + String(FileList[FileListIndex].rcvCount));
+
+        if(!FileList[FileListIndex].info)
+        {
+            logcon("ERROR: Failed to reopen the SD file.");
+            break;
+        }
+        response = true;
+    } while(false);
+
+    // DEBUG_END;
+    return response;
+} // ReopenSdFile
+
+//-----------------------------------------------------------------------------
+size_t c_FileMgr::RecoverSdWrite(int FileListIndex, byte* FileData, size_t TotalNumBytesToWrite, size_t NumBytesAlreadyWritten)
+{
+    // DEBUG_START;
+    size_t response = NumBytesAlreadyWritten;
+    size_t NumBytesToWrite = TotalNumBytesToWrite - NumBytesAlreadyWritten;
+
+    logcon ("Trying to recover SD write operation after write failure");
+    do // once
+    {
+        // DEBUG_V (String ("rcvCount: ") + String(FileList[FileListIndex].rcvCount));
+
+        ReopenSdFile(FileListIndex);
+
+        if(!FileList[FileListIndex].info)
+        {
+            // DEBUG_V("ERROR: Failed to reopen the SD file.");
+            break;
+        }
+
+        // write the remainder of the data to the file
+        response += FileList[FileListIndex].info.write(&FileData[NumBytesAlreadyWritten], NumBytesToWrite);
+        // DEBUG_V("         FileListIndex: " + String(FileListIndex));
+        // DEBUG_V("  TotalNumBytesToWrite: " + String(TotalNumBytesToWrite));
+        // DEBUG_V("NumBytesAlreadyWritten: " + String(NumBytesAlreadyWritten));
+        // DEBUG_V("       NumBytesToWrite: " + String(NumBytesToWrite));
+        // DEBUG_V("              response: " + String(response));
+        
+        if(response != TotalNumBytesToWrite)
+        {
+            logcon("ERROR: 2nd write failed");
+            break;
+        }
+    } while(false);
+
+    DEBUG_END;
+    return response;
+} // RecoverSdWrite
+
+//-----------------------------------------------------------------------------
 size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t NumBytesToWrite)
 {
     size_t NumBytesWritten = 0;
@@ -1192,27 +1263,19 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
     // DEBUG_V (String("Bytes to write: ") + String(NumBytesToWrite));
     if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
     {
-        while(!FileList[FileListIndex].info.availableForWrite())
+        if(1*1024*1024 < FileList[FileListIndex].writeCount)
         {
-            yield();
-            break;
+            ReopenSdFile(FileListIndex);
         }
-
+        FileList[FileListIndex].rcvCount += NumBytesToWrite;
+        FileList[FileListIndex].writeCount += NumBytesToWrite;
         NumBytesWritten = FileList[FileListIndex].info.write(FileData, NumBytesToWrite);
         // FileList[FileListIndex].info.flush();
-        FeedWDT();
-        yield();
-        
-        // WriteBufferingStream bufferedFileWrite{ FileList[FileListIndex].info, 128 };
-        // make sure any previous operation is complete
-        // bufferedFileWrite.flush();
-        // write the new data
-        // NumBytesWritten = bufferedFileWrite.write (FileData, NumBytesToWrite);
-        
-        
+
         if(NumBytesWritten != NumBytesToWrite)
         {
-            logcon (String (F ("WriteSdFile::ERROR::Invalid Could not write data. Tried to write: ")) + String (NumBytesToWrite) + " Wrote: " + String(NumBytesWritten));
+            logcon (String (F ("WriteSdFile::ERROR:: Could not write data. Tried to write: ")) + String (NumBytesToWrite) + " Wrote: " + String(NumBytesWritten));
+            NumBytesWritten = RecoverSdWrite(FileListIndex, FileData, NumBytesToWrite, NumBytesWritten);
         }
     }
     else
@@ -1393,7 +1456,7 @@ void c_FileMgr::BuildFseqList()
 } // BuildFseqList
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::handleFileUpload (
+bool c_FileMgr::handleFileUpload (
     const String & filename,
     size_t index,
     uint8_t* data,
@@ -1402,6 +1465,7 @@ void c_FileMgr::handleFileUpload (
     uint32_t totalLen)
 {
     // DEBUG_START;
+    bool response = false;
 
     // DEBUG_V (String ("filename: ") + filename);
     // DEBUG_V (String ("   index: ") + String (index));
@@ -1422,16 +1486,16 @@ void c_FileMgr::handleFileUpload (
     // update the next expected chunk id
     expectedIndex = index + len;
 
-    if ((0 != len) && (0 != fsUploadFileName.length ()))
+    if (len)
     {
         // Write data
         // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
-        WriteSdFile (fsUploadFile, data, len);
+        response = (len == WriteSdFile (fsUploadFile, data, len));
         // DEBUG_V (String ("Writing bytes: ") + String (index));
         // LOG_PORT.print (".");
     }
 
-    if ((true == final) && (0 != fsUploadFileName.length ()))
+    if (((true == final) || (false == response)) && (0 != fsUploadFileName.length ()))
     {
         uint32_t uploadTime = (uint32_t)(millis() - fsUploadStartTime) / 1000;
         CloseSdFile (fsUploadFile);
@@ -1439,7 +1503,8 @@ void c_FileMgr::handleFileUpload (
         logcon (String (F ("Upload File: '")) + fsUploadFileName +
                 F ("' Done (") + String (uploadTime) + 
                 F ("s). Received: ") + String(expectedIndex) + 
-                F(" Bytes."));
+                F(" Bytes out of ") + String(totalLen) + 
+                F(" bytes. FileLen: ") + GetSdFileSize(filename));
 
         BuildFseqList();
 
@@ -1450,6 +1515,7 @@ void c_FileMgr::handleFileUpload (
     }
 
     // DEBUG_END;
+    return response;
 } // handleFileUpload
 
 //-----------------------------------------------------------------------------

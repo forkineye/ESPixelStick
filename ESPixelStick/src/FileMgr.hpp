@@ -57,7 +57,7 @@ public:
     bool    SetConfig (JsonObject& json);
     void    GetStatus (JsonObject& json);
 
-    void    handleFileUpload (const String & filename, size_t index, uint8_t * data, size_t len, bool final, uint32_t totalLen);
+    bool    handleFileUpload (const String & filename, size_t index, uint8_t * data, size_t len, bool final, uint32_t totalLen);
 
     typedef std::function<void (DynamicJsonDocument& json)> DeserializationHandler;
 
@@ -116,6 +116,9 @@ private:
     void DescribeSdCardToUser ();
     void handleFileUploadNewFile (const String & filename);
     void printDirectory (File dir, int numTabs);
+    size_t RecoverSdWrite(int FileListIndex, byte* FileData, size_t NumBytesToWrite, size_t NumBytesWritten);
+    bool ReopenSdFile(int FileListIndex);
+    bool ReopenSdFile(FileId& FileHandle);
 
     bool     SdCardInstalled = false;
     uint8_t  miso_pin = SD_CARD_MISO_PIN;
@@ -133,8 +136,11 @@ private:
     {
         FileId  handle;
         File    info;
-        size_t  size;
+        size_t  size = 0;
+        size_t  writeCount = 0;
+        size_t  rcvCount = 0;
         int     entryId;
+        String  Filename;
     };
     FileListEntry_t FileList[MaxOpenFiles];
     int FileListFindSdFileHandle (FileId HandleToFind);
