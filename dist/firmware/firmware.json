@@ -95,6 +95,29 @@
             }
         },
         {
+            "name": "D1 Mini LoLin SD",
+            "description": "Generic D1 Mini PRO for DIY builds",
+            "chip": "esp8266",
+            "appbin": "esp8266/d1_mini_lolinsd-app.bin",
+            "esptool": {
+                "baudrate": "460800",
+                "options": "--before default_reset --after hard_reset",
+                "flashcmd": "write_flash"
+            },
+            "binfiles": [
+                {
+                    "name": "esp8266/d1_mini_lolinsd-app.bin",
+                    "offset": "0x0"
+                }
+            ],
+            "filesystem": {
+                "page": "256",
+                "block": "8192",
+                "size": "2072576",
+                "offset": "0x200000"
+            }
+        },
+        {
             "name": "D1 Mini Mhetesp32minikit",
             "description": "D1 Mini Mhetesp32minikit module with PSRAM support for DIY builds",
             "chip": "esp32",

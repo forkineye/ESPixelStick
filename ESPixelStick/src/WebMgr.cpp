@@ -258,28 +258,7 @@ void c_WebMgr::init ()
             }
         });
 
-    	webServer.on ("/files", HTTP_GET | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
-        {
-            // DEBUG_V("files");
-            if(HTTP_OPTIONS == request->method())
-            {
-                request->send (200);
-            }
-            else
-            {
-                // DEBUG_V(String("URL: ") + request->url ());
-                uint32_t StartingFileIndex = request->url ().substring(String(F("/files/")).length()).toInt();
-                // DEBUG_V(String("StartingFileIndex: ") + StartingFileIndex);
-
-                String Response;
-                FileMgr.GetListOfSdFiles(Response, StartingFileIndex);
-                // DEBUG_V(String("Files: ") + Response);
-                // DEBUG_V(String("Size: ") + Response.length());
-                // DEBUG_V(String("heap: ") + String(ESP.getFreeHeap ()));
-                request->send (200, CN_applicationSLASHjson, Response);
-                // DEBUG_V("Send Complete")
-            }
-        });
+        webServer.serveStatic("/fseqfilelist", ESP_SDFS, "/fseqfilelist.json");
 
     	webServer.on ("/file/delete", HTTP_POST | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {
@@ -503,8 +482,12 @@ void c_WebMgr::init ()
 
     		webServer.onNotFound ([this](AsyncWebServerRequest* request)
             {
+                if (request->method() == HTTP_OPTIONS)
+                {
+                    request->send(200);
+                }
                 // DEBUG_V (String("onNotFound. URL: ") + request->url());
-                if (true == this->IsAlexaCallbackValid())
+                else if (true == this->IsAlexaCallbackValid())
                 {
                     // DEBUG_V ("IsAlexaCallbackValid == true");
                     if (!espalexa.handleAlexaApiCall (request)) //if you don't know the URI, ask espalexa whether it is an Alexa control request

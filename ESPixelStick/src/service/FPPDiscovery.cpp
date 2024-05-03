@@ -818,10 +818,10 @@ void c_FPPDiscovery::ProcessFile (
         }
 
         // DEBUG_V();
-        FileMgr.handleFileUpload (UploadFileName, index, data, len, final, ContentLength);
+        bool writeFinished = FileMgr.handleFileUpload (UploadFileName, index, data, len, final, ContentLength);
 
         // DEBUG_V();
-        if (final)
+        if (final || !writeFinished)
         {
             inFileUpload = false;
             UploadFileName = "";

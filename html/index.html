@@ -247,7 +247,7 @@
                                 <td width="50%">Time Remaining: </td>
                                 <td><span id="fppremoteFilePlayerTimeRemaining"></span></td>
                             </tr>
-                            <tr class="hidden AdvancedMode">
+                            <tr class>
                                 <td width="50%">Last Error: </td>
                                 <td><span id="fppremotelasterror"></span></td>
                             </tr>
@@ -274,6 +274,10 @@
                                 <td width="50%">Remaining Repeat: </td>
                                 <td><span id="localPlayListRepeat"></span></td>
                             </tr>
+                            <tr class>
+                                <td width="50%">Last Error: </td>
+                                <td><span id="fppremotelasterror"></span></td>
+                            </tr>
                         </table>
                     </fieldset>
                 </div>
@@ -292,6 +296,10 @@
                             <tr>
                                 <td width="50%">Time Remaining: </td>
                                 <td><span id="localFilePlayerTimeRemaining"></span></td>
+                            </tr>
+                            <tr class>
+                                <td width="50%">Last Error: </td>
+                                <td><span id="fppremotelasterror"></span></td>
                             </tr>
                         </table>
                     </fieldset>
@@ -318,6 +326,10 @@
                             <tr>
                                 <td width="50%">Time Remaining: </td>
                                 <td><span id="PausedTimeRemaining"></span></td>
+                            </tr>
+                            <tr class>
+                                <td width="50%">Last Error: </td>
+                                <td><span id="fppremotelasterror"></span></td>
                             </tr>
                         </table>
                     </fieldset>
@@ -629,12 +641,12 @@
                                 <label class="control-label col-sm-2 esp32" for="mdc_pin">MDC Pin</label>
                                 <div class="col-sm-3 esp32">
                                     <input type="number" class="form-control is-valid esp32" id="mdc_pin" step="1"
-                                        min="1" max="32" value="0" required title="GPIO on which MDC will be sent">
+                                        min="0" max="32" value="0" required title="GPIO on which MDC will be sent">
                                 </div>
                                 <label class="control-label col-sm-2 esp32" for="mdio_pin">MDIO Pin</label>
                                 <div class="col-sm-2 esp32">
                                     <input type="number" class="form-control is-valid esp32" id="mdio_pin" step="1"
-                                        min="1" max="32" value="0" required
+                                        min="0" max="32" value="0" required
                                         title="GPIO on which MDIO will be transfered">
                                 </div>
                             </div>
@@ -683,12 +695,12 @@
                         <div class="form-group hidden AdvancedMode">
                             <label class="control-label col-sm-2" for="miso_pin">SD MISO Pin</label>
                             <div class="col-sm-4">
-                                <input type="number" class="form-control is-valid" id="miso_pin" step="1" min="1"
+                                <input type="number" class="form-control is-valid" id="miso_pin" step="1" min="0"
                                     max="40" value="0" required title="GPIO on which MISO will be received">
                             </div>
                             <label class="control-label col-sm-2" for="mosi_pin">SD MOSI Pin</label>
                             <div class="col-sm-4">
-                                <input type="number" class="form-control is-valid" id="mosi_pin" step="1" min="1"
+                                <input type="number" class="form-control is-valid" id="mosi_pin" step="1" min="0"
                                     max="40" value="0" required title="GPIO on which MOSI will be sent">
                             </div>
                         </div>
@@ -696,12 +708,12 @@
                         <div class="form-group">
                             <label class="control-label col-sm-2" for="clock_pin">SD Clock Pin</label>
                             <div class="col-sm-4">
-                                <input type="number" class="form-control is-valid" id="clock_pin" step="1" min="1"
+                                <input type="number" class="form-control is-valid" id="clock_pin" step="1" min="0"
                                     max="40" value="0" required title="GPIO on which CLOCK will be sent">
                             </div>
                             <label class="control-label col-sm-2" for="cs_pin">SD Chip Select Pin</label>
                             <div class="col-sm-4">
-                                <input type="number" class="form-control is-valid" id="cs_pin" step="1" min="1" max="40"
+                                <input type="number" class="form-control is-valid" id="cs_pin" step="1" min="0" max="40"
                                     value="0" required title="GPIO on which Chip Select will be sent">
                             </div>
                         </div>
@@ -791,14 +803,14 @@
             <fieldset>
                 <legend class="esps-legend">File Management</legend>
                 <form>
+                    <label class="control-label col-sm-2" for="filecount">Number of files:</label>
+                    <output id="filecount"></output>
                     <label class="control-label col-sm-2" for="totalBytes">SD Size (MB):</label>
                     <output id="totalBytes"></output>
                     <label class="control-label col-sm-2" for="usedBytes">SD Used (MB):</label>
                     <output id="usedBytes"></output>
                     <label class="control-label col-sm-2" for="remainingBytes">SD Remaining (MB):</label>
                     <output id="remainingBytes"></output>
-                    <label class="control-label col-sm-2" for="FileNameLen">File Name max len:</label>
-                    <output id="FileNameLen" value="64"></output>
                 </form>
                 <br />
                 <div>
