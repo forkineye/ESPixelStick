@@ -58,6 +58,7 @@ void c_NetworkMgr::AdvertiseNewState ()
         InputMgr.NetworkStateChanged (IsConnected ());
         WebMgr.NetworkStateChanged (IsConnected ());
         FPPDiscovery.NetworkStateChanged (IsConnected ());
+        FileMgr.NetworkStateChanged (IsConnected ());
     }
 
     // DEBUG_END;
