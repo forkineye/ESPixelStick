@@ -513,6 +513,8 @@ void loop()
 
     WebMgr.Process ();
 
+    FileMgr.Poll();
+
 #ifdef SUPPORT_SENSOR_DS18B20
     SensorDS18B20.Poll();
 #endif // def SUPPORT_SENSOR_DS18B20
