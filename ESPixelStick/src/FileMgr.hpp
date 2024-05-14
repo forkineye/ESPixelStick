@@ -52,7 +52,7 @@ public:
     const static FileId INVALID_FILE_HANDLE = 0;
 
     void    Begin     ();
-    void    Poll      () {}
+    void    Poll      ();
     void    GetConfig (JsonObject& json);
     bool    SetConfig (JsonObject& json);
     void    GetStatus (JsonObject& json);
@@ -99,6 +99,7 @@ public:
     void   BuildFseqList    ();
     
     void   GetDriverName    (String& Name) { Name = "FileMgr"; }
+    void   NetworkStateChanged (bool NewState);
 
     // Configuration file params
 #if defined ARDUINO_ARCH_ESP8266
