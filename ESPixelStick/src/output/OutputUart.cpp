@@ -1162,7 +1162,7 @@ void c_OutputUart::TerminateSerialPortOperation()
         case UART_NUM_2:
         {
             // DEBUG_V ("UART_NUM_2");
-            Serial2.end(true);
+            Serial2.end();
             break;
         }
         #endif // def ARDUINO_ARCH_ESP32
