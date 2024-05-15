@@ -1037,7 +1037,10 @@ bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & Fil
             FileList[FileListIndex].Filename = FileNamePrefix + FileName;
             // DEBUG_V(String("Got file handle: ") + String(FileHandle));
             FileList[FileListIndex].file = ESP_SDFS.open(FileList[FileListIndex].Filename, XlateFileMode[Mode]);
+#ifdef ARDUINO_ARCH_ESP32
             FileList[FileListIndex].file.setBufferSize(1500);
+#endif // defined (ARDUINO_ARCH_ESP32)
+
             // DEBUG_V(String("ReadWrite: ") + String(XlateFileMode[Mode]));
             // DEBUG_V(String("File Size: ") + String(FileList[FileListIndex].file.size()));
             FileList[FileListIndex].mode = Mode;
