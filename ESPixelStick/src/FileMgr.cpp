@@ -1269,7 +1269,7 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
 
         if(NumBytesWritten != NumBytesToWrite)
         {
-            logcon(String("ERROR: SD Write failed. Tried writting ") + String(NumBytesToWrite) + " bytes. Actually wrote " + String(NumBytesWritten) + " bytes.");
+            logcon(String(F("ERROR: SD Write failed. Tried writting ")) + String(NumBytesToWrite) + F(" bytes. Actually wrote ") + String(NumBytesWritten) + F(" bytes."));
                     NumBytesWritten = 0;
                     break;
         }
@@ -1313,7 +1313,7 @@ size_t c_FileMgr::GetSdFileSize (const String& FileName)
     }
     else
     {
-        logcon(String("Could not open '") + FileName + "' to check size.");
+        logcon(String(F("Could not open '")) + FileName + F("' to check size."));
     }
 
     return response;
@@ -1423,15 +1423,15 @@ void c_FileMgr::BuildFseqList()
         fs::File InputFile = ESP_SDFS.open ("/", "r");
         if(!InputFile)
         {
-            logcon("ERROR: Could not open SD card.");
+            logcon(F("ERROR: Could not open SD card."));
             break;
         }
 
         // open output file, erase old data
-        fs::File OutputFile = ESP_SDFS.open ("/fseqfilelist.json", "w");
+        fs::File OutputFile = ESP_SDFS.open (F("/fseqfilelist.json"), FILE_WRITE);
         if(!OutputFile)
         {
-            logcon("ERROR: Could not save SD file list.");
+            logcon(F("ERROR: Could not save SD file list."));
             break;
         }
         OutputFile.print("{");
@@ -1492,7 +1492,7 @@ void c_FileMgr::BuildFseqList()
 
                 if(IsBooting)
                 {
-                    logcon ("SD File: '" + EntryName + "'");
+                    logcon (String(F("SD File: '")) + EntryName + "'");
                 }
                 OutputFile.print(String("{\"name\" : \"") + EntryName +
                                  "\",\"date\" : " + entry.getLastWrite () +
