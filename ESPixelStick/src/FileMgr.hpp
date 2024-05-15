@@ -129,8 +129,8 @@ private:
     String   fsUploadFileName;
     bool     fsUploadFileSavedIsEnabled = false;
     uint32_t fsUploadStartTime;
-    String   FtpUserName = String(F("esps"));
-    String  FtpPassword = String(F("esps"));
+    String   FtpUserName = "esps";
+    String   FtpPassword = "esps";
 
 #define MaxOpenFiles 5
     struct FileListEntry_t
