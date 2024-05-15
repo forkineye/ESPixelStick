@@ -85,7 +85,7 @@ public:
     void   DeleteSdFile     (const String & FileName);
     void   SaveSdFile       (const String & FileName,   String & FileData);
     void   SaveSdFile       (const String & FileName,   JsonVariant & FileData);
-    bool   OpenSdFile       (const String & FileName,   FileMode Mode, FileId & FileHandle);
+    bool   OpenSdFile       (const String & FileName,   FileMode Mode, FileId & FileHandle, int FileListIndex = -1);
     size_t ReadSdFile       (const FileId & FileHandle, byte * FileData, size_t NumBytesToRead);
     size_t ReadSdFile       (const FileId & FileHandle, byte * FileData, size_t NumBytesToRead,  size_t StartingPosition);
     bool   ReadSdFile       (const String & FileName,   String & FileData);
@@ -97,7 +97,9 @@ public:
     size_t GetSdFileSize    (const String & FileName);
     size_t GetSdFileSize    (const FileId & FileHandle);
     void   BuildFseqList    ();
-    
+    void   ResumeSdFile     (const FileId & FileHandle);
+    void   PauseSdFile      (const FileId & FileHandle);
+
     void   GetDriverName    (String& Name) { Name = "FileMgr"; }
     void   NetworkStateChanged (bool NewState);
 
@@ -117,9 +119,6 @@ private:
     void DescribeSdCardToUser ();
     void handleFileUploadNewFile (const String & filename);
     void printDirectory (File dir, int numTabs);
-    size_t RecoverSdWrite(int FileListIndex, byte* FileData, size_t NumBytesToWrite, size_t NumBytesWritten);
-    bool ReopenSdFile(int FileListIndex);
-    bool ReopenSdFile(FileId& FileHandle);
 
     bool     SdCardInstalled = false;
     uint8_t  miso_pin = SD_CARD_MISO_PIN;
@@ -130,18 +129,17 @@ private:
     String   fsUploadFileName;
     bool     fsUploadFileSavedIsEnabled = false;
     uint32_t fsUploadStartTime;
-    char     XlateFileMode[3] = { 'r', 'w', 'w' };
 
 #define MaxOpenFiles 5
     struct FileListEntry_t
     {
-        FileId  handle;
-        File    info;
-        size_t  size = 0;
-        size_t  writeCount = 0;
-        size_t  rcvCount = 0;
-        int     entryId;
-        String  Filename;
+        FileId      handle = INVALID_FILE_HANDLE;
+        File        file;
+        size_t      size = 0;
+        int         entryId = -1;
+        String      Filename = emptyString;
+        bool        Paused = false;
+        FileMode    mode = FileMode::FileRead;
     };
     FileListEntry_t FileList[MaxOpenFiles];
     int FileListFindSdFileHandle (FileId HandleToFind);
