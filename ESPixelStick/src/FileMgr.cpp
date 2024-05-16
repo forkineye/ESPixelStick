@@ -32,19 +32,7 @@
 #include <SimpleFTPServer.h>
 FtpServer   ftpSrv;
 
-#ifndef FILE_READ
-#define FILE_READ "r"
-#endif // ndef FILE_READ
-
-#ifndef FILE_WRITE
-#define FILE_WRITE "w"
-#endif // ndef FILE_WRITE
-
-#ifndef FILE_APPEND
-#define FILE_APPEND "a"
-#endif // ndef FILE_APPEND
-
-const char XlateFileMode[3][2] = { FILE_READ, FILE_WRITE, FILE_APPEND };
+const char XlateFileMode[3][2] = { "r", "w", "a" };
 
 //-----------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
@@ -1537,7 +1525,7 @@ void c_FileMgr::BuildFseqList()
         }
 
         // open output file, erase old data
-        fs::File OutputFile = ESP_SDFS.open (F("/fseqfilelist.json"), FILE_WRITE);
+        fs::File OutputFile = ESP_SDFS.open (F("/fseqfilelist.json"), "w");
         if(!OutputFile)
         {
             logcon(F("ERROR: Could not save SD file list."));
