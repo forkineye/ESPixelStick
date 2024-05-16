@@ -547,9 +547,9 @@ async function ProcessWindowChange(NextWindow) {
 
     else if (NextWindow === "#config") {
         await RequestListOfFiles();
-        RequestConfigFile("config.json");
-        RequestConfigFile("output_config.json");
-        RequestConfigFile("input_config.json");
+        await RequestConfigFile("config.json");
+        await RequestConfigFile("output_config.json");
+        await RequestConfigFile("input_config.json");
     }
 
     else if (NextWindow === "#filemanagement") {
@@ -1306,6 +1306,8 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData) {
         // console.info("Got System Config: " + JSON.stringify(System_Config) );
 
         updateFromJSON(System_Config);
+        $('#ftpusername').val(System_Config.device.user);
+        $('#ftppassword').val(System_Config.device.password);
 
         if ({}.hasOwnProperty.call(System_Config.network, 'eth')) {
             $('#pg_network #network #eth').removeClass("hidden")
@@ -1536,7 +1538,9 @@ function submitNetworkConfig() {
     System_Config.device.mosi_pin = $('#config #device #mosi_pin').val();
     System_Config.device.clock_pin = $('#config #device #clock_pin').val();
     System_Config.device.cs_pin = $('#config #device #cs_pin').val();
-    
+    System_Config.device.user = $('#ftpusername').val();
+    System_Config.device.password = $('#ftppassword').val();
+
     if ({}.hasOwnProperty.call(System_Config, 'sensor')) {
         System_Config.sensor.units = parseInt($('#TemperatureSensorUnits').val());
     }
