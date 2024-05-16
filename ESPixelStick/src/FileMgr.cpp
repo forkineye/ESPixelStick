@@ -32,6 +32,18 @@
 #include <SimpleFTPServer.h>
 FtpServer   ftpSrv;
 
+#ifndef FILE_READ
+#define FILE_READ "r"
+#endif // ndef FILE_READ
+
+#ifndef FILE_WRITE
+#define FILE_WRITE "w"
+#endif // ndef FILE_WRITE
+
+#ifndef FILE_APPEND
+#define FILE_APPEND "a"
+#endif // ndef FILE_APPEND
+
 const char XlateFileMode[3][2] = { FILE_READ, FILE_WRITE, FILE_APPEND };
 
 //-----------------------------------------------------------------------------
