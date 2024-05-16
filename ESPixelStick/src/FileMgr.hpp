@@ -90,6 +90,7 @@ public:
     size_t ReadSdFile       (const FileId & FileHandle, byte * FileData, size_t NumBytesToRead,  size_t StartingPosition);
     bool   ReadSdFile       (const String & FileName,   String & FileData);
     bool   ReadSdFile       (const String & FileName,   JsonDocument & FileData);
+    size_t WriteSdFileBuf   (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite);
     size_t WriteSdFile      (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite);
     size_t WriteSdFile      (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite, size_t StartingPosition);
     void   CloseSdFile      (FileId & FileHandle);
@@ -125,7 +126,7 @@ private:
     uint8_t  mosi_pin = SD_CARD_MOSI_PIN;
     uint8_t  clk_pin  = SD_CARD_CLK_PIN;
     uint8_t  cs_pin   = SD_CARD_CS_PIN;
-    FileId   fsUploadFile;
+    FileId   fsUploadFileHandle;
     String   fsUploadFileName;
     bool     fsUploadFileSavedIsEnabled = false;
     uint32_t fsUploadStartTime;
@@ -142,7 +143,15 @@ private:
         String      Filename = emptyString;
         bool        Paused = false;
         FileMode    mode = FileMode::FileRead;
+        struct
+        {
+            byte    *DataBuffer = nullptr;
+            size_t  size = 0;
+            size_t  offset = 0;
+        } buffer;
     };
+#define DATABUFFERSIZE (5 * 1024)
+
     FileListEntry_t FileList[MaxOpenFiles];
     int FileListFindSdFileHandle (FileId HandleToFind);
     void InitSdFileList ();
