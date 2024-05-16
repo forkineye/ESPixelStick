@@ -13,6 +13,11 @@ The recommended installation method is to download the latest [stable release](h
 
 If you are interested in bleeding edge / un-tested builds, automated CI builds are generated for every code push and are available as Artifact attachments to the [ESPixelStick CI](https://github.com/forkineye/ESPixelStick/actions/workflows/build.yaml) workflow runs.  Just click on the latest successful run and look for **Release Archive** towards the bottom.  Note to download Artifact attachments though, you will have to be logged into GitHub.
 
+If you are interested in using the experimental web based flash tool, connect to:
+HTTPS://espixelstickwebflasher.from-ct.com:5000 
+This tool will always have a few of the most recent CI builds available for flashing to your device.
+
+
 If you would like to compile the project yourself and modify the source code, go down to [Build Requirements](#build-requirements).
 
 ## Hardware
@@ -88,6 +93,9 @@ Details on the supported input protocols and outputs can be found in the [wiki](
 The current device configuration can be saved to a local drive using the Backup button on the Admin page. Pressing the Backup button will result in a local file save operation to the default download directory. The file will be named using the Device name from the device configuration page PLUS the ESP unique ID found on the admin page.
 The current configuration can be over written from a file located on the local drive (in any directory you chose) by pressing the Restore button on the admin page. A popup will help you select the file to upload.
 NOTE: A restore is an OVER WRITE, not a merge. Any changes made since the backup file was created will be lost.
+
+## SD File Management
+The file management page is available on the UI when an SD card is detected by the ESP. You can add / remove files using the file management screen. It is known that the HTTP based file transfer used by the File Management screen can be very slow for large files. Alternativly, you can use your favorite FTP client (tested with FileZilla) to transfer files to the ESP. NOTE: You must configure the FTP client to run in single connection (port) mode. The ESP does not have enough resources to support concurrent command and data connections.
 
 ## Resources
 
