@@ -122,7 +122,7 @@ typedef enum
 #   include "platformDefinitions/GPIO_Defs_ESP32_TWILIGHTLORD.hpp"
 #elif defined (BOARD_ESP32_TWILIGHTLORD_ETH)
 #   include "platformDefinitions/GPIO_Defs_ESP32_TWILIGHTLORD_ETH.hpp"
-#elif defined (BOARD_ESP32_TWILIGHTLORD_ETH)
+#elif defined (BOARD_ESP32_DEVKITC)
 #   include "platformDefinitions/GPIO_Defs_ESP32_DevkitC.hpp"
 #elif defined (BOARD_ESP01S)
 #   include "platformDefinitions/GPIO_Defs_ESP8266_ESP01S.hpp"
@@ -134,6 +134,12 @@ typedef enum
 #   include "platformDefinitions/GPIO_Defs_ESP32_DevkitC.hpp"
 #elif defined (BOARD_ESP32_DEVKITC_V4_OLED)
 #   include "platformDefinitions/GPIO_Defs_ESP32_DevkitC_v4_OLED.hpp"
+#elif defined (BOARD_ESP32_TETRA2GO)
+#   include "platformDefinitions/GPIO_Defs_ESP32_Tetra2go.hpp"
+#elif defined (BOARD_ESP32_KR_LIGHTS_MSM)
+#   include "platformDefinitions/GPIO_Defs_ESP32_kr_lights_msm.hpp"
+#elif defined (BOARD_ESP8266_D1MINI_LOLIN_SD)
+#   include "platformDefinitions/GPIO_Defs_ESP8266_D1_mini_lolinsd.hpp"
 #elif defined (ARDUINO_ARCH_ESP32)
 #   include "platformDefinitions/GPIO_Defs_ESP32_generic.hpp"
 #elif defined (ARDUINO_ARCH_ESP8266)

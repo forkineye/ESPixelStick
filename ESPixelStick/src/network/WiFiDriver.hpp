@@ -79,6 +79,7 @@ public:
     bool      Get_ap_StayInApMode () { return StayInApMode; }
     bool      Get_RebootOnWiFiFailureToConnect () { return RebootOnWiFiFailureToConnect; }
     String    GetConfig_ssid () { return ssid; }
+    String    GetConfig_apssid () { return ap_ssid; }
     String    GetConfig_passphrase () { return passphrase; }
     void      GetHostname (String& name);
     void      SetHostname (String & name);
@@ -86,7 +87,7 @@ public:
     void      Enable ();
 
 private:
-
+#define DEFAULT_SSID_NOT_SET "DEFAULT_SSID_NOT_SET"
     int       ValidateConfig ();
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -102,9 +103,13 @@ private:
 
     String      ssid;
     String      passphrase;
-    IPAddress   ip      = IPAddress ((uint32_t)0);
-    IPAddress   netmask = IPAddress ((uint32_t)0);
-    IPAddress   gateway = IPAddress ((uint32_t)0);
+    String      ap_ssid;
+    String      ap_passphrase;
+    IPAddress   ip = INADDR_NONE;
+    IPAddress   netmask = INADDR_NONE;
+    IPAddress   gateway = INADDR_NONE;
+    IPAddress   primaryDns = INADDR_NONE;
+    IPAddress   secondaryDns = INADDR_NONE;
     bool        UseDhcp = true;
     uint8_t     ap_channelNumber = 1;
     bool        ap_fallbackIsEnabled = true;

@@ -314,7 +314,7 @@ IRAM_ATTR void fsm_PlayFile_state_PlayingFile::TimerPoll ()
                 // xDEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->TotalNumberOfFramesInSequence));
                 // xDEBUG_V (String ("                 CurrentFrame: ") + String (CurrentFrame));
 
-                // logcon (F ("File Playback Failed to read enough data"));
+                // DEBUG_V (F ("File Playback Failed to read enough data"));
                 p_Parent->Stop ();
             }
         }
@@ -347,6 +347,7 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
         // DEBUG_V (String ("RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
         if (0 == p_Parent->RemainingPlayCount)
         {
+            // DEBUG_V();
             p_Parent->Stop ();
             break;
         }
@@ -386,8 +387,9 @@ void fsm_PlayFile_state_PlayingFile::Start (String& FileName, float ElapsedSecon
     // DEBUG_V (String ("            LastPlayedFrameId: ") + String (p_Parent->LastPlayedFrameId));
     // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->TotalNumberOfFramesInSequence));
     // DEBUG_V (String ("RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
-
+    // DEBUG_V();
     p_Parent->Stop ();
+    // DEBUG_V();
     p_Parent->Start (FileName, ElapsedSeconds, PlayCount);
 
     // DEBUG_END;
@@ -427,6 +429,7 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSecond
         {
             // DEBUG_V ("Sync: Filename change");
             p_Parent->Stop ();
+            // DEBUG_V();
             p_Parent->Start (FileName, ElapsedSeconds, 1);
             break;
         }
@@ -551,7 +554,7 @@ void fsm_PlayFile_state_Stopping::Stop (void)
 {
     // DEBUG_START;
     // DEBUG_V("fsm_PlayFile_state_Stopping::Stop");
-
+    // DEBUG_V("Not actually doing anything");
     // DEBUG_END;
 
 } // fsm_PlayFile_state_Stopping::Stop

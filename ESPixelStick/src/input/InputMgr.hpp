@@ -59,7 +59,7 @@ public:
     void SetBufferInfo        (uint32_t BufferSize);
     void SetOperationalState  (bool Active);
     void NetworkStateChanged  (bool IsConnected);
-    void DeleteConfig         () { FileMgr.DeleteConfigFile (ConfigFileName); }
+    void DeleteConfig         () { FileMgr.DeleteFlashFile (ConfigFileName); }
     bool GetNetworkState      () { return IsConnected; }
     void GetDriverName        (String & Name) { Name = "InputMgr"; }
     void RestartBlankTimer    (e_InputChannelIds Selector) { BlankEndTime[int(Selector)].StartTimer(config.BlankDelay * 1000); }
@@ -111,6 +111,7 @@ private:
     void CreateJsonConfig            (JsonObject & jsonConfig);
     bool ProcessJsonChannelConfig    (JsonObject & jsonConfig, uint32_t ChannelIndex);
     bool InputTypeIsAllowedOnChannel (e_InputType type, e_InputChannelIds ChannelId);
+    bool FindJsonChannelConfig       (JsonObject& jsonConfig, e_InputChannelIds ChanId, JsonObject& ChanConfig);
 
     String ConfigFileName;
     bool   rebootNeeded = false;

@@ -16,6 +16,9 @@ jobs:
           # Wemos D1 Mini PRO ESP8266
           - target: "d1_mini_pro"
             chip: "esp8266"
+          # Wemos D1 Mini ESP8266 Plus LoLinSD Card
+          - target: "d1_mini_lolinsd"
+            chip: "esp8266"
           # ESP01S
           - target: "esp01s"
             chip: "esp8266"
@@ -92,6 +95,14 @@ jobs:
           - target: "m5stack_atom"
             chip: "esp32"
           - target: "esp3deuxquatro_dmx"
+            chip: "esp32"
+          - target: "esp32_quinled_uno_espsv3"
+            chip: "esp32"
+          # 
+          - target: "esp32_tetra2go"
+            chip: "esp32"
+          # KR Lights
+          - target: "esp32_kr_lights_msm"
             chip: "esp32"
 
     runs-on: ubuntu-latest

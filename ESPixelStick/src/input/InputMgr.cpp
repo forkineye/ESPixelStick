@@ -131,7 +131,7 @@ void c_InputMgr::Begin (uint32_t BufferSize)
     // load up the configuration from the saved file. This also starts the drivers
     LoadConfig ();
 
-    // CreateNewConfig ();
+    // CreateNewConfig();
 
     // DEBUG_END;
 
@@ -306,7 +306,7 @@ void c_InputMgr::GetConfig (byte * Response, uint32_t maxlen)
 {
     // DEBUGSTART;
 
-    FileMgr.ReadConfigFile (ConfigFileName, Response, maxlen);
+    FileMgr.ReadFlashFile (ConfigFileName, Response, maxlen);
     // DEBUGV (String ("TempConfigData: ") + TempConfigData);
 
     // DEBUGEND;
@@ -616,7 +616,7 @@ void c_InputMgr::LoadConfig ()
     ConfigLoadNeeded = NO_CONFIG_NEEDED;
     configInProgress = true;
     // try to load and process the config file
-    if (!FileMgr.LoadConfigFile (ConfigFileName, [this](DynamicJsonDocument & JsonConfigDoc)
+    if (!FileMgr.LoadFlashFile (ConfigFileName, [this](DynamicJsonDocument & JsonConfigDoc)
         {
             // DEBUG_V ("");
             JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();
@@ -730,16 +730,16 @@ void c_InputMgr::ProcessButtonActions (c_ExternalInput::InputValue_t value)
 } // ProcessButtonActions
 
 //-----------------------------------------------------------------------------
-/*
-    check the contents of the config and send
-    the proper portion of the config to the currently instantiated channels
-*/
-bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
+bool c_InputMgr::FindJsonChannelConfig (JsonObject& jsonConfig, 
+                                         e_InputChannelIds ChanId, 
+                                         JsonObject& ChanConfig)
 {
     // DEBUG_START;
     bool Response = false;
+    // DEBUG_V ();
 
-    // DEBUG_V ("InputDataBufferSize: " + String (InputDataBufferSize));
+    // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
+    // PrettyPrint(jsonConfig, "ProcessJsonConfig");
 
     do // once
     {
@@ -789,21 +789,52 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
         JsonObject InputChannelArray = InputChannelMgrData[CN_channels];
         // DEBUG_V ("");
 
+        // get access to the channel config
+        if (false == InputChannelArray.containsKey (String (ChanId)))
+        {
+            // if not, flag an error and stop processing
+            logcon (String (F ("No Input Settings Found for Channel '")) + ChanId + String (F ("'. Using Defaults")));
+            continue;
+        }
+        ChanConfig = InputChannelArray[String(ChanId)];
+        // DEBUG_V ();
+
+        // all went well
+        Response = true;
+
+    } while (false);
+
+    // DEBUG_END;
+    return Response;
+
+} // FindChannelJsonConfig
+
+//-----------------------------------------------------------------------------
+/*
+    check the contents of the config and send
+    the proper portion of the config to the currently instantiated channels
+*/
+bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
+{
+    // DEBUG_START;
+    bool Response = false;
+
+    // DEBUG_V ("InputDataBufferSize: " + String (InputDataBufferSize));
+
+    do // once
+    {
         // for each Input channel
         for (uint32_t ChannelIndex = uint32_t (InputChannelId_Start);
             ChannelIndex < uint32_t (InputChannelId_End);
             ChannelIndex++)
         {
-            // get access to the channel config
-            if (false == InputChannelArray.containsKey (String (ChannelIndex)))
+            JsonObject InputChannelConfig;
+            // DEBUG_V ("");
+            if(!FindJsonChannelConfig(jsonConfig, e_InputChannelIds(ChannelIndex), InputChannelConfig))
             {
-                // if not, flag an error and stop processing
-                logcon (String (F ("No Input Settings Found for Channel '")) + ChannelIndex + String (F ("'. Using Defaults")));
+                // DEBUG_V("Did not find the desired channel configuration");
                 continue;
             }
-            JsonObject InputChannelConfig = InputChannelArray[String (ChannelIndex)];
-            // DEBUG_V ("");
-
             // set a default value for channel type
             uint32_t ChannelType = uint32_t (InputType_Default);
             setFromJSON (ChannelType, InputChannelConfig, CN_type);
@@ -873,7 +904,7 @@ void c_InputMgr::SetConfig (const char * NewConfigData)
 {
     // DEBUG_START;
 
-    if (true == FileMgr.SaveConfigFile (ConfigFileName, NewConfigData))
+    if (true == FileMgr.SaveFlashFile (ConfigFileName, NewConfigData))
     {
         // DEBUG_V (String("NewConfigData: ") + NewConfigData);
         // FileMgr logs for us
@@ -899,7 +930,7 @@ void c_InputMgr::SetConfig(JsonDocument & NewConfigData)
 {
     // DEBUG_START;
 
-    if (true == FileMgr.SaveConfigFile(ConfigFileName, NewConfigData))
+    if (true == FileMgr.SaveFlashFile(ConfigFileName, NewConfigData))
     {
         // FileMgr logs for us
         // logcon (CN_stars + String (F (" Saved Input Manager Config File. ")) + CN_stars);

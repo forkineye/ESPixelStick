@@ -1,2 +1,2 @@
 rem http-server -p8000
-node NodeJsServer
+node NodeJsServer.cjs
