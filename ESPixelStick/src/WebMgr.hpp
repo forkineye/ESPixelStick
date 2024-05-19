@@ -51,6 +51,7 @@ public:
     void NetworkStateChanged   (bool NewNetworkState);
     void GetDriverName         (String & Name) { Name = "WebMgr"; }
     void CreateAdminInfoFile ();
+    void GetFseqFileListHandler(AsyncWebServerRequest *request);
 
 private:
 
@@ -77,7 +78,7 @@ private:
 
     void ProcessXJRequest           (AsyncWebServerRequest * client);
     void ProcessSetTimeRequest      (time_t DateTime);
-    
+
     void GetDeviceOptions           ();
     void GetInputOptions            ();
     void GetOutputOptions           ();
@@ -108,7 +109,10 @@ private:
 #endif // def BOARD_HAS_PSRAM
 
     WebJsonDocument *WebJsonDoc = nullptr;
-
+    size_t GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t index);
+    c_FileMgr::FileId FileHandle = c_FileMgr::INVALID_FILE_HANDLE;
+    size_t TotalFileSizeToTransfer = 0;
+    size_t NumberOfBytesTransfered = 0;
 }; // c_WebMgr
 
 extern c_WebMgr WebMgr;

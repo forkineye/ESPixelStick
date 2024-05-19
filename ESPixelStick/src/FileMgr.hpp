@@ -22,9 +22,13 @@
 #include <LittleFS.h>
 #ifdef SUPPORT_SD_MMC
 #   include <SD_MMC.h>
+#   define DISABLE_FS_H_WARNING
+#   include "SdFat.h"
 #else
-#   include <FS.h>
-#   include <SD.h>
+// #   include <FS.h>
+#   define DISABLE_FS_H_WARNING
+#   include "SdFat.h"
+
 #endif // def SUPPORT_SD_MMC
 #include <map>
 #include <vector>
@@ -34,12 +38,13 @@
 #       define ESP_SD   SD_MMC
 #	    define ESP_SDFS SD_MMC
 #   else // !def SUPPORT_SD_MMC
-#       define ESP_SD   SD
-#	    define ESP_SDFS SD
+extern SdFat sd;
+#       define ESP_SD   sd
+#	    define ESP_SDFS SdFile
 #   endif // !def SUPPORT_SD_MMC
 #else // !ARDUINO_ARCH_ESP32
-#   define ESP_SD   SD
-#   define ESP_SDFS SDFS
+#   define ESP_SD   sd
+#   define ESP_SDFS SdFile
 #endif // !ARDUINO_ARCH_ESP32
 
 class c_FileMgr
@@ -95,8 +100,8 @@ public:
     size_t WriteSdFile      (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite, size_t StartingPosition);
     void   CloseSdFile      (FileId & FileHandle);
     void   GetListOfSdFiles (std::vector<String> & Response);
-    size_t GetSdFileSize    (const String & FileName);
-    size_t GetSdFileSize    (const FileId & FileHandle);
+    uint64_t GetSdFileSize    (const String & FileName);
+    uint64_t GetSdFileSize    (const FileId & FileHandle);
     void   BuildFseqList    ();
     void   ResumeSdFile     (const FileId & FileHandle);
     void   PauseSdFile      (const FileId & FileHandle);
@@ -104,6 +109,7 @@ public:
     void   GetDriverName    (String& Name) { Name = "FileMgr"; }
     void   NetworkStateChanged (bool NewState);
 
+#define FSEQFILELIST "fseqfilelist.json"
     // Configuration file params
 #if defined ARDUINO_ARCH_ESP8266
 #   // define CONFIG_MAX_SIZE (3*1024)    ///< Sanity limit for config file
@@ -119,7 +125,7 @@ private:
     void listDir (fs::FS& fs, String dirname, uint8_t levels);
     void DescribeSdCardToUser ();
     void handleFileUploadNewFile (const String & filename);
-    void printDirectory (File dir, int numTabs);
+    void printDirectory (FsFile & dir, int numTabs);
 
     bool     SdCardInstalled = false;
     uint8_t  miso_pin = SD_CARD_MISO_PIN;
@@ -132,17 +138,43 @@ private:
     uint32_t fsUploadStartTime;
     String   FtpUserName = "esps";
     String   FtpPassword = "esps";
+    uint64_t SdCardSizeMB = 0;
+
+cid_t cid;
+csd_t csd;
+scr_t scr;
+
+#define SD_FAT_TYPE 3
+
+#if SD_FAT_TYPE == 0
+    SdFat sd;
+    File file;
+    File root;
+#elif SD_FAT_TYPE == 1
+    SdFat32 sd;
+    File32 file;
+    File32 root;
+#elif SD_FAT_TYPE == 2
+    SdExFat sd;
+    ExFile file;
+    ExFile root;
+#elif SD_FAT_TYPE == 3
+    // SdFs sd;
+    // FsFile fsfile;
+    // FsFile fsRoot;
+#endif  // SD_FAT_TYPE
 
 #define MaxOpenFiles 5
     struct FileListEntry_t
     {
         FileId      handle = INVALID_FILE_HANDLE;
-        File        file;
-        size_t      size = 0;
+        FsFile      fsFile;
+        uint64_t    size = 0;
         int         entryId = -1;
         String      Filename = emptyString;
         bool        Paused = false;
         FileMode    mode = FileMode::FileRead;
+        bool        IsOpen = false;
         struct
         {
             byte    *DataBuffer = nullptr;
