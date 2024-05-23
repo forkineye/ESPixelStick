@@ -24,8 +24,11 @@
 #include "FileMgr.hpp"
 #include "network/NetworkMgr.hpp"
 
+#ifdef SUPPORT_FTP
 #include <SimpleFTPServer.h>
 FtpServer   ftpSrv;
+#endif // def SUPPORT_FTP
+
 SdFat sd;
 
 oflag_t XlateFileMode[3] = { O_READ , O_WRITE | O_CREAT, O_WRITE | O_APPEND };
@@ -82,13 +85,16 @@ void c_FileMgr::Begin ()
 void c_FileMgr::NetworkStateChanged (bool NewState)
 {
     // DEBUG_START;
+#ifdef SUPPORT_FTP
     ftpSrv.end();
+
     if(NewState && SdCardInstalled)
     {
         ftpSrv.end();
         // DEBUG_V("Start FTP");
         ftpSrv.begin(FtpUserName.c_str(), FtpPassword.c_str(), String(F("ESPS V4 FTP")).c_str());
     }
+#endif // def SUPPORT_FTP
 
     // DEBUG_END;
 } // NetworkStateChanged
@@ -97,9 +103,9 @@ void c_FileMgr::NetworkStateChanged (bool NewState)
  void c_FileMgr::Poll()
  {
     // DEBUG_START;
+#ifdef SUPPORT_FTP
     ftpSrv.handleFTP();
-    // ftpSrv.handle();
-    // DEBUG_END;
+#endif // def SUPPORT_FTP
  } // Poll
 
 //-----------------------------------------------------------------------------
@@ -125,8 +131,10 @@ bool c_FileMgr::SetConfig (JsonObject & json)
         ConfigChanged |= setFromJSON (clk_pin,  JsonDeviceConfig, CN_clock_pin);
         ConfigChanged |= setFromJSON (cs_pin,   JsonDeviceConfig, CN_cs_pin);
 
+#ifdef SUPPORT_FTP
         ConfigChanged |= setFromJSON (FtpUserName, JsonDeviceConfig, CN_user);
         ConfigChanged |= setFromJSON (FtpPassword, JsonDeviceConfig, CN_password);
+#endif // def SUPPORT_FTP
 /*
         // DEBUG_V("miso_pin: " + String(miso_pin));
         // DEBUG_V("mosi_pin: " + String(mosi_pin));
@@ -165,8 +173,10 @@ void c_FileMgr::GetConfig (JsonObject& json)
     json[CN_clock_pin] = clk_pin;
     json[CN_cs_pin]    = cs_pin;
 
+#ifdef SUPPORT_FTP
     json[CN_user]      = FtpUserName;
     json[CN_password]  = FtpPassword;
+#endif // def SUPPORT_FTP
 
     // DEBUG_END;
 
@@ -222,7 +232,9 @@ void c_FileMgr::SetSpiIoPins ()
     if (SdCardInstalled)
     {
         // DEBUG_V("Terminate current SD session");
+#ifdef ARDUINO_ARCH_ESP32
         ESP_SD.end ();
+#endif // def ARDUINO_ARCH_ESP32
     }
 
     FsDateTime::setCallback(dateTime);
@@ -262,25 +274,28 @@ void c_FileMgr::SetSpiIoPins ()
         // DEBUG_V();
         pinMode(miso_pin, INPUT);
 #       endif // def USE_MISO_PULLUP
-
-        // DEBUG_V();
         SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
+#   else
+        SPI.begin ();
+#   endif // ! ARDUINO_ARCH_ESP32
         // DEBUG_V();
         ResetSdCard();
 
         // DEBUG_V();
-        if (!ESP_SD.begin (SdSpiConfig(cs_pin, SHARED_SPI, SD_SCK_MHZ(25))))
-#   else  // ! ARDUINO_ARCH_ESP32
-        if (!ESP_SD.begin (SD_CARD_CS_PIN, SD_CARD_CLK_MHZ))
-#   endif // ! ARDUINO_ARCH_ESP32
+        if (!ESP_SD.begin (SdSpiConfig(cs_pin, SHARED_SPI, SD_CARD_CLK_MHZ, &SPI)))
 #endif // !def SUPPORT_SD_MMC
         {
             // DEBUG_V();
             logcon(String(F("No SD card installed")));
             SdCardInstalled = false;
-            if (ESP_SD.card()->errorCode())
+            // DEBUG_V();
+            if(nullptr == ESP_SD.card())
             {
-                logcon(F("SD initialization failed."));
+                logcon(F("SD 'Card' setup failed."));
+            }
+            else if (ESP_SD.card()->errorCode())
+            {
+                logcon(String(F("SD initialization failed: ")) + String(ESP_SD.card()->errorCode()));
             }
             else if (ESP_SD.vol()->fatType() == 0)
             {
@@ -295,9 +310,17 @@ void c_FileMgr::SetSpiIoPins ()
         {
             // DEBUG_V();
             SdCardInstalled = true;
-            ESP_SD.card()->readCSD(&csd);
-            SdCardSizeMB = 0.000512 * csd.capacity();
             // DEBUG_V();
+            csd_t csd;
+            // DEBUG_V();
+            ESP_SD.card()->readCSD(&csd);
+            // DEBUG_V();
+#ifdef ARDUINO_ARCH_ESP32
+            SdCardSizeMB = 0.000512 * csd.capacity();
+#else // ! ESP32
+            SdCardSizeMB = ((csd.v2.c_size_high << 16) + (csd.v2.c_size_mid << 8) + csd.v2.c_size_low) / (1024 * 1024);
+#endif // !def(ARDUINO_ARCH_ESP32)
+            // DEBUG_V(String("SdCardSizeMB: ") + String(SdCardSizeMB));
 
             DescribeSdCardToUser ();
             // DEBUG_V();
