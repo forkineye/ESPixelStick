@@ -3,7 +3,7 @@
 * FileMgr.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2024 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -22,14 +22,8 @@
 #include <LittleFS.h>
 #ifdef SUPPORT_SD_MMC
 #   include <SD_MMC.h>
-#   define DISABLE_FS_H_WARNING
-#   include "SdFat.h"
-#else
-// #   include <FS.h>
-#   define DISABLE_FS_H_WARNING
-#   include "SdFat.h"
-
 #endif // def SUPPORT_SD_MMC
+#include "SdFat.h"
 #include <map>
 #include <vector>
 
@@ -139,30 +133,6 @@ private:
     String   FtpUserName = "esps";
     String   FtpPassword = "esps";
     uint64_t SdCardSizeMB = 0;
-
-cid_t cid;
-csd_t csd;
-scr_t scr;
-
-#define SD_FAT_TYPE 3
-
-#if SD_FAT_TYPE == 0
-    SdFat sd;
-    File file;
-    File root;
-#elif SD_FAT_TYPE == 1
-    SdFat32 sd;
-    File32 file;
-    File32 root;
-#elif SD_FAT_TYPE == 2
-    SdExFat sd;
-    ExFile file;
-    ExFile root;
-#elif SD_FAT_TYPE == 3
-    // SdFs sd;
-    // FsFile fsfile;
-    // FsFile fsRoot;
-#endif  // SD_FAT_TYPE
 
 #define MaxOpenFiles 5
     struct FileListEntry_t
