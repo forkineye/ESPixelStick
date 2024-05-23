@@ -3,7 +3,7 @@
 * WebMgr.hpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2024 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -23,16 +23,6 @@
 #include <ESPAsyncWebServer.h>
 #include <EspalexaDevice.h>
 #include "output/OutputMgr.hpp"
-
-#ifdef ARDUINO_ARCH_ESP32
-#   if __has_include("SD.h")
-#       include <SD.h>
-#   endif //  __has_include("SD.h")
-#else
-#   if __has_include("SDFS.h")
-#       include <SDFS.h>
-#   endif //  __has_include("SDFS.h")
-#endif // def ARDUINO_ARCH_ESP32
 
 class c_WebMgr
 {

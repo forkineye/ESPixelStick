@@ -17,15 +17,13 @@
 *
 */
 
-#include "ESPixelStick.h"
+#include "WebMgr.hpp"
+#include "FileMgr.hpp"
 
-#include "output/OutputMgr.hpp"
 #include "input/InputMgr.hpp"
 #include "service/FPPDiscovery.h"
 #include "network/NetworkMgr.hpp"
 
-#include "WebMgr.hpp"
-#include "FileMgr.hpp"
 #include <Int64String.h>
 
 #include <FS.h>
@@ -618,7 +616,6 @@ void c_WebMgr::CreateAdminInfoFile ()
 void c_WebMgr::GetFseqFileListHandler(AsyncWebServerRequest *request)
 {
     // DEBUG_START;
-    uint32_t ResponseCount = 0;
 
     AsyncWebServerResponse *response =
         request->beginChunkedResponse("application/json",
