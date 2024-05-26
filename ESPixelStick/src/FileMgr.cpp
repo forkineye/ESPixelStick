@@ -295,7 +295,9 @@ void c_FileMgr::SetSpiIoPins ()
             }
             else if (ESP_SD.card()->errorCode())
             {
-                logcon(String(F("SD initialization failed: ")) + String(ESP_SD.card()->errorCode()));
+                logcon(String(F("SD initialization failed - code: ")) + String(ESP_SD.card()->errorCode()));
+                // DEBUG_V(String(F("SD initialization failed - data: ")) + String(ESP_SD.card()->errorData()));
+                printSdErrorText(&Serial, ESP_SD.card()->errorCode()); Serial.println("");
             }
             else if (ESP_SD.vol()->fatType() == 0)
             {
