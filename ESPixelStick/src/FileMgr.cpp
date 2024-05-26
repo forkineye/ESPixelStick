@@ -314,8 +314,44 @@ void c_FileMgr::SetSpiIoPins ()
             SdCardInstalled = true;
             // DEBUG_V();
             csd_t csd;
+            CSD MyCsd;
             // DEBUG_V();
             ESP_SD.card()->readCSD(&csd);
+            memcpy (&MyCsd, &csd.csd[0], sizeof(csd.csd));
+            // DEBUG_V(String("TRAN Speed: 0x") + String(MyCsd.Decode_0.tran_speed,HEX));
+
+            switch(csd.csd[96/8])
+            {
+                case 0x32:
+                {
+                    SPI.setFrequency(25 * 1024 * 1024);
+                    logcon("Set SD speed to 25Mhz");
+                    break;
+                }
+                case 0x5A:
+                {
+                    SPI.setFrequency(50 * 1024 * 1024);
+                    logcon("Set SD speed to 50Mhz");
+                    break;
+                }
+                case 0x0B:
+                {
+                    SPI.setFrequency(100 * 1024 * 1024);
+                    logcon("Set SD speed to 100Mhz");
+                    break;
+                }
+                case 0x2B:
+                {
+                    SPI.setFrequency(200 * 1024 * 1024);
+                    logcon("Set SD speed to 200Mhz");
+                    break;
+                }
+                default:
+                {
+                    SPI.setFrequency(25 * 1024 * 1024);
+                    logcon("Set Default SD speed to 25Mhz");
+                }
+            }
             // DEBUG_V();
 #ifdef ARDUINO_ARCH_ESP32
             SdCardSizeMB = 0.000512 * csd.capacity();
