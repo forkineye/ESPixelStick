@@ -45,7 +45,9 @@
 #ifdef SUPPORT_SENSOR_DS18B20
 #include "src/service/SensorDS18B20.h"
 #endif // def SUPPORT_SENSOR_DS18B20
-
+#ifdef USE_OLED
+#include "src/service/DisplayOLED.h"
+#endif // def USE_OLED
 #ifdef ARDUINO_ARCH_ESP8266
 #include <Hash.h>
 extern "C"
@@ -201,6 +203,11 @@ void setup()
     SensorDS18B20.Begin();
 #endif // def SUPPORT_SENSOR_DS18B20
 
+#ifdef USE_OLED
+    // TestHeap(uint32_t(70));
+    // DEBUG_V(String("OLED Heap: ") + String(ESP.getFreeHeap()));
+    OLED.Begin();
+#endif // def USE_OLED
     // DEBUG_V(String("FPPDiscovery Heap: ") + String(ESP.getFreeHeap()));
     FPPDiscovery.begin ();
 
@@ -490,6 +497,7 @@ String serializeCore(bool pretty)
 /// Main Loop
 /** Arduino based main loop */
 // uint32_t HeapTime = 100;
+
 void loop()
 {
     // DEBUG_START;
@@ -516,7 +524,9 @@ void loop()
 #ifdef SUPPORT_SENSOR_DS18B20
     SensorDS18B20.Poll();
 #endif // def SUPPORT_SENSOR_DS18B20
-
+#ifdef USE_OLED
+        OLED.Update();
+#endif // def USE_OLED
     // need to keep the rx pipeline empty
     size_t BytesToDiscard = min (100, LOG_PORT.available ());
     DiscardedRxData += BytesToDiscard;
