@@ -57,7 +57,7 @@ private:
     void GetSysInfoJSON    (JsonObject& jsonResponse);
     void GetStatusJSON     (JsonObject& jsonResponse, bool advanced);
     void BuildFseqResponse (String fname, c_FileMgr::FileId fseq, String & resp);
-    void StopPlaying       ();
+    void StopPlaying       (bool wait = true);
     void StartPlaying      (String & FileName, float SecondsElapsed);
     bool AllowedToRemotePlayFiles ();
     void GetDriverName     (String & Name) { Name = "FPPD"; }

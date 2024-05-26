@@ -55,7 +55,7 @@ public:
     uint8_t*  GetBufferAddress  () { return OutputBuffer; } ///< Get the address of the buffer into which the E1.31 handler will stuff data
     uint32_t  GetBufferUsedSize () { return UsedBufferSize; } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
     uint32_t  GetBufferSize     () { return sizeof(OutputBuffer); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
-    void      DeleteConfig      () { FileMgr.DeleteConfigFile (ConfigFileName); }
+    void      DeleteConfig      () { FileMgr.DeleteFlashFile (ConfigFileName); }
     void      PauseOutputs      (bool NewState);
     void      GetDriverName     (String & Name) { Name = "OutputMgr"; }
     void      WriteChannelData  (uint32_t StartChannelId, uint32_t ChannelCount, uint8_t * pData);
@@ -192,12 +192,11 @@ public:
 #   define OM_MAX_NUM_CHANNELS      (1200 * 3)
 #   define OM_MAX_CONFIG_SIZE       ((uint32_t)(3 * 1024))
 #else // ARDUINO_ARCH_ESP32
+#   define OM_MAX_CONFIG_SIZE       ((uint32_t)(20 * 1024))
 #   ifdef BOARD_HAS_PSRAM
 #       define OM_MAX_NUM_CHANNELS  (7000 * 3)
-#       define OM_MAX_CONFIG_SIZE   ((uint32_t)(20 * 1024))
 #   else
 #       define OM_MAX_NUM_CHANNELS  (3000 * 3)
-#       define OM_MAX_CONFIG_SIZE   ((uint32_t)(13 * 1024))
 #   endif // !def BOARD_HAS_PSRAM
 #endif // !def ARDUINO_ARCH_ESP32
 
@@ -239,12 +238,13 @@ private:
     bool IsOutputPaused     = false;
     bool BuildingNewConfig  = false;
 
-    bool ProcessJsonConfig (JsonObject & jsonConfig);
+    bool ProcessJsonConfig (DynamicJsonDocument & jsonConfig);
     void CreateJsonConfig  (JsonObject & jsonConfig);
     void UpdateDisplayBufferReferences (void);
     void InstantiateNewOutputChannel(DriverInfo_t &ChannelIndex, e_OutputType NewChannelType, bool StartDriver = true);
     void CreateNewConfig();
     void SetSerialUart();
+    bool FindJsonChannelConfig (DynamicJsonDocument& jsonConfig, e_OutputChannelIds ChanId, e_OutputType Type, JsonObject& ChanConfig);
 
     String ConfigFileName;
 

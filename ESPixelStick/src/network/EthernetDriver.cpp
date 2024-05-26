@@ -84,6 +84,8 @@ void c_EthernetDriver::Begin ()
     {
         logcon(String("Failed IP ") + GetIpAddress().toString());
     }
+    // https://github.com/espressif/arduino-esp32/issues/5733 - add delay
+    delay(100);
     while(!GetIpAddress()) {}
     logcon(String("After IP ") + GetIpAddress().toString());
 #endif // def testEth
@@ -113,8 +115,6 @@ void c_EthernetDriver::SetEthHostname ()
     if (0 != Hostname.length ())
     {
         // DEBUG_V (String ("Setting ETH hostname: ") + Hostname);
-
-        // ETH.config (INADDR_NONE, INADDR_NONE, INADDR_NONE);
         ETH.setHostname (Hostname.c_str ());
     }
 
@@ -131,6 +131,8 @@ void c_EthernetDriver::GetConfig (JsonObject& json)
     json[CN_ip]          = ip.toString ();
     json[CN_netmask]     = netmask.toString ();
     json[CN_gateway]     = gateway.toString ();
+    json[CN_dnsp]        = primaryDns.toString ();
+    json[CN_dnss]        = secondaryDns.toString ();
     json[CN_dhcp]        = UseDhcp;
 
     json[CN_type]        = phy_type;
@@ -321,10 +323,14 @@ bool c_EthernetDriver::SetConfig (JsonObject & json)
     String sIP = ip.toString ();
     String sGateway = gateway.toString ();
     String sNetmask = netmask.toString ();
+    String sDnsp = primaryDns.toString ();
+    String sDnss = secondaryDns.toString ();
 
     ConfigChanged |= setFromJSON (sIP,      json, CN_ip);
     ConfigChanged |= setFromJSON (sNetmask, json, CN_netmask);
     ConfigChanged |= setFromJSON (sGateway, json, CN_gateway);
+    ConfigChanged |= setFromJSON (sDnsp,    json, CN_dnsp);
+    ConfigChanged |= setFromJSON (sDnss,    json, CN_dnss);
     ConfigChanged |= setFromJSON (UseDhcp,  json, CN_dhcp);
 
     ConfigChanged |= setFromJSON (phy_addr,  json, CN_addr);
@@ -339,7 +345,9 @@ bool c_EthernetDriver::SetConfig (JsonObject & json)
     ip.fromString (sIP);
     gateway.fromString (sGateway);
     netmask.fromString (sNetmask);
-
+    primaryDns.fromString (sDnsp);
+    secondaryDns.fromString (sDnss);
+    
     // DEBUG_V (String ("     sip: ") + ip.toString ());
     // DEBUG_V (String ("sgateway: ") + gateway.toString ());
     // DEBUG_V (String ("snetmask: ") + netmask.toString ());
@@ -374,8 +382,6 @@ void c_EthernetDriver::SetUpIp ()
         if (true == UseDhcp)
         {
             logcon (F ("Connecting to Ethernet using DHCP"));
-            // ETH.config (temp, temp, temp, temp);
-
             break;
         }
 
@@ -399,8 +405,14 @@ void c_EthernetDriver::SetUpIp ()
         // DEBUG_V ("netmask: " + netmask.toString ());
         // DEBUG_V ("gateway: " + gateway.toString ());
 
+        if(primaryDns == INADDR_NONE)
+        {
+            primaryDns = gateway;
+        }
         // We didn't use DNS, so just set it to our configured gateway
-        ETH.config (ip, gateway, netmask, gateway);
+        // https://github.com/espressif/arduino-esp32/issues/5733 - add delay
+        delay(100);
+        ETH.config (ip, gateway, netmask, primaryDns, secondaryDns);
 
         logcon (F ("Connecting to Ethernet with Static IP"));
 
@@ -419,10 +431,11 @@ void c_EthernetDriver::StartEth ()
 // esp_eth_disable();
     logcon(String("ETH IP Before Start: ") + ETH.localIP().toString());
     if (false == ETH.begin (phy_addr, power_pin /*gpio_num_t(-1)*/, mdc_pin, mdio_pin, phy_type, clk_mode))
-    // if (false == ETH.begin(phy_addr, power_pin, mdc_pin, mdio_pin, phy_type, clk_mode))
     {
         fsm_Eth_state_DeviceInitFailed_imp.Init ();
     }
+    // https://github.com/espressif/arduino-esp32/issues/5733 - Add delay
+    delay(100);
 
     // DEBUG_END;
 } // StartEth

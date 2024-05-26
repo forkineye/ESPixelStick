@@ -100,6 +100,7 @@ bool     ResetWiFi = false;
 bool     IsBooting = true;  // Configuration initialization flag
 time_t   ConfigLoadNeeded = NO_CONFIG_NEEDED;
 bool     ConfigSaveNeeded = false;
+
 uint32_t DiscardedRxData = 0;
 
 /////////////////////////////////////////////////////////
@@ -172,7 +173,6 @@ void setup()
     // TestHeap(uint32_t(10));
     // DEBUG_V("");
     FileMgr.Begin();
-
     // Load configuration from the File System and set Hostname
     // TestHeap(uint32_t(15));
     // DEBUG_V(String("LoadConfig Heap: ") + String(ESP.getFreeHeap()));
@@ -292,7 +292,7 @@ void SetConfig (const char * DataString)
 //      of the data. Chance for 3rd party software to muck up the configuraton
 //      if they send bad json data.
 
-    FileMgr.SaveConfigFile (ConfigFileName, DataString);
+    FileMgr.SaveFlashFile (ConfigFileName, DataString);
     ScheduleLoadConfig();
 
     // DEBUG_END;
@@ -350,6 +350,15 @@ bool deserializeCore (JsonObject & json)
             // break; // ignoring this error for now.
         }
 
+        // DEBUG_V("Checking to see if the config is from the web flash tool");
+
+        // is this a config from the web flash tool?
+        if (DeviceConfig.containsKey("requiresConfigSave"))
+        {
+            // DEBUG_V("Forcing a save config due to missing GPIO settings");
+            ConfigSaveNeeded = true;
+        }
+
         dsDevice(DeviceConfig);
         // DEBUG_V("");
         FileMgr.SetConfig(DeviceConfig);
@@ -395,7 +404,7 @@ void SaveConfig()
 
     GetConfig(JsonConfig);
 
-    FileMgr.SaveConfigFile(ConfigFileName, jsonConfigDoc);
+    FileMgr.SaveFlashFile(ConfigFileName, jsonConfigDoc);
 
     // DEBUG_END;
 } // SaveConfig
@@ -412,7 +421,7 @@ void LoadConfig()
 
     String temp;
     // DEBUG_V ("");
-    FileMgr.LoadConfigFile (ConfigFileName, &deserializeCoreHandler);
+    FileMgr.LoadFlashFile (ConfigFileName, &deserializeCoreHandler);
 
     ConfigSaveNeeded |= !validateConfig ();
 
@@ -422,7 +431,7 @@ void LoadConfig()
 void DeleteConfig ()
 {
     // DEBUG_START;
-    FileMgr.DeleteConfigFile (ConfigFileName);
+    FileMgr.DeleteFlashFile (ConfigFileName);
 
     // DEBUG_END;
 
@@ -495,7 +504,7 @@ void loop()
 /*
     if(millis() > HeapTime)
     {
-        DEBUG_V(String("Heap: ") + String(ESP.getFreeHeap()));
+        // DEBUG_V(String("Heap: ") + String(ESP.getFreeHeap()));
         HeapTime += 5000;
     }
 */

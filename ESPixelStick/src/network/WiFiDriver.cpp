@@ -44,7 +44,7 @@
 #endif //  __has_include("secrets.h")
 
 #if !defined(SECRETS_SSID)
-#   define SECRETS_SSID "DEFAULT_SSID_NOT_SET"
+#   define SECRETS_SSID DEFAULT_SSID_NOT_SET
 #endif // SECRETS_SSID
 #if !defined(SECRETS_PASS)
 #   define SECRETS_PASS "DEFAULT_PASSPHRASE_NOT_SET"
@@ -140,8 +140,10 @@ void c_WiFiDriver::Begin ()
                 JsonObject jsonConfig = jsonConfigDoc.as<JsonObject> ();
 
                 // copy the fields of interest into the local structure
-                setFromJSON (ssid,       jsonConfig, CN_ssid);
-                setFromJSON (passphrase, jsonConfig, CN_passphrase);
+                setFromJSON (ssid,         jsonConfig, CN_ssid);
+                setFromJSON (passphrase,   jsonConfig, CN_passphrase);
+                setFromJSON (ap_ssid,       jsonConfig, CN_ap_ssid);
+                setFromJSON (ap_passphrase, jsonConfig, CN_ap_passphrase);
 
                 ConfigSaveNeeded = true;
 
@@ -156,6 +158,13 @@ void c_WiFiDriver::Begin ()
 
     // Disable persistant credential storage and configure SDK params
     WiFi.persistent (false);
+
+    if(ap_ssid.equals(emptyString))
+    {
+        String Hostname;
+        NetworkMgr.GetHostname (Hostname);
+        ap_ssid = "ESPixelStick-AP-" + String (Hostname);
+    }
 
 #ifdef ARDUINO_ARCH_ESP8266
     wifi_set_sleep_type (NONE_SLEEP_T);
@@ -308,6 +317,8 @@ void c_WiFiDriver::GetConfig (JsonObject& json)
 
     json[CN_ssid] = ssid;
     json[CN_passphrase] = passphrase;
+    json[CN_ap_ssid] = ap_ssid;
+    json[CN_ap_passphrase] = ap_passphrase;
 
 #ifdef ARDUINO_ARCH_ESP8266
     IPAddress Temp = ip;
@@ -316,10 +327,16 @@ void c_WiFiDriver::GetConfig (JsonObject& json)
     json[CN_netmask] = Temp.toString ();
     Temp = gateway;
     json[CN_gateway] = Temp.toString ();
+    Temp = primaryDns;
+    json[CN_dnsp] = Temp.toString ();
+    Temp = secondaryDns;
+    json[CN_dnss] = Temp.toString ();
 #else
     json[CN_ip] = ip.toString ();
     json[CN_netmask] = netmask.toString ();
     json[CN_gateway] = gateway.toString ();
+    json[CN_dnsp] = primaryDns.toString ();
+    json[CN_dnss] = secondaryDns.toString ();
 #endif // !def ARDUINO_ARCH_ESP8266
 
     json[CN_StayInApMode] = StayInApMode;
@@ -470,12 +487,19 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
     String sIp = ip.toString ();
     String sGateway = gateway.toString ();
     String sNetmask = netmask.toString ();
+    String sdnsp = primaryDns.toString ();
+    String sdnss = secondaryDns.toString ();
+    
     ConfigChanged |= setFromJSON (ssid, json, CN_ssid);
     ConfigChanged |= setFromJSON (passphrase, json, CN_passphrase);
     ConfigChanged |= setFromJSON (sIp, json, CN_ip);
     ConfigChanged |= setFromJSON (sNetmask, json, CN_netmask);
     ConfigChanged |= setFromJSON (sGateway, json, CN_gateway);
+    ConfigChanged |= setFromJSON (sdnsp, json, CN_dnsp);
+    ConfigChanged |= setFromJSON (sdnss, json, CN_dnss);
     ConfigChanged |= setFromJSON (UseDhcp, json, CN_dhcp);
+    ConfigChanged |= setFromJSON (ap_ssid, json, CN_ap_ssid);
+    ConfigChanged |= setFromJSON (ap_passphrase, json, CN_ap_passphrase);
     ConfigChanged |= setFromJSON (ap_channelNumber, json, CN_ap_channel);
     ConfigChanged |= setFromJSON (sta_timeout, json, CN_sta_timeout);
     ConfigChanged |= setFromJSON (ap_fallbackIsEnabled, json, CN_ap_fallback);
@@ -494,6 +518,8 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
     ip.fromString (sIp);
     gateway.fromString (sGateway);
     netmask.fromString (sNetmask);
+    primaryDns.fromString (sdnsp);
+    secondaryDns.fromString (sdnss);
 
     if((passphrase.length() < 8) && (passphrase.length() > 0))
     {
@@ -578,8 +604,15 @@ void c_WiFiDriver::SetUpIp ()
             // correct IP is already set
             break;
         }
+
+        // use gateway if primary DNS is not defined
+        if(primaryDns == INADDR_NONE)
+        {
+            primaryDns = gateway;
+        }
+
         // We didn't use DNS, so just set it to our configured gateway
-        WiFi.config (ip, gateway, netmask, gateway);
+        WiFi.config (ip, gateway, netmask, primaryDns, secondaryDns);
 
         logcon (F ("Using Static IP"));
 
@@ -753,11 +786,19 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Init ()
     // DEBUG_START;
 
     // DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
-    pWiFiDriver->SetFsmState (this);
-    pWiFiDriver->AnnounceState ();
-    pWiFiDriver->GetFsmTimer().StartTimer(1000 * pWiFiDriver->Get_sta_timeout ());
 
-    pWiFiDriver->connectWifi (default_ssid, default_passphrase);
+    if(!default_ssid.equals(DEFAULT_SSID_NOT_SET))
+    {
+        pWiFiDriver->SetFsmState (this);
+        pWiFiDriver->AnnounceState ();
+        pWiFiDriver->GetFsmTimer().StartTimer(1000 * pWiFiDriver->Get_sta_timeout ());
+        pWiFiDriver->connectWifi (default_ssid, default_passphrase);
+    }
+    else
+    {
+        // no defauult ssid was set at compile time. Just move on to AP mode
+        fsm_WiFi_state_ConnectingAsAP_imp.Init ();
+    }
     // pWiFiDriver->displayFsmState ();
 
     // DEBUG_END;
@@ -816,20 +857,19 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
     {
         WiFi.enableSTA(false);
         WiFi.enableAP(true);
-        String ssid =  pWiFiDriver->ssid;
-        if(ssid.equals(emptyString))
+        if(pWiFiDriver->ap_ssid.equals(emptyString))
         {
             String Hostname;
             NetworkMgr.GetHostname (Hostname);
-            ssid = "ESPixelStick-" + String (Hostname);
+            pWiFiDriver->ap_ssid = "ESPixelStick-" + String (Hostname);
         }
         // DEBUG_V(String("ap_channelNumber: ") + String(pWiFiDriver->ap_channelNumber));
-        WiFi.softAP (ssid.c_str (), pWiFiDriver->passphrase.c_str (), int(pWiFiDriver->ap_channelNumber));
+        WiFi.softAP (pWiFiDriver->ap_ssid.c_str (), pWiFiDriver->ap_passphrase.c_str (), int(pWiFiDriver->ap_channelNumber));
 
         pWiFiDriver->setIpAddress (WiFi.localIP ());
         pWiFiDriver->setIpSubNetMask (WiFi.subnetMask ());
 
-        logcon (String (F ("WiFi SOFTAP:       ssid: '")) + ssid);
+        logcon (String (F ("WiFi SOFTAP:       ssid: '")) + pWiFiDriver->ap_ssid);
         logcon (String (F ("WiFi SOFTAP: IP Address: '")) + pWiFiDriver->getIpAddress ().toString ());
     }
     else

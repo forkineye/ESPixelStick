@@ -57,7 +57,7 @@ public:
     bool    SetConfig (JsonObject& json);
     void    GetStatus (JsonObject& json);
 
-    void    handleFileUpload (const String & filename, size_t index, uint8_t * data, size_t len, bool final, uint32_t totalLen);
+    bool    handleFileUpload (const String & filename, size_t index, uint8_t * data, size_t len, bool final, uint32_t totalLen);
 
     typedef std::function<void (DynamicJsonDocument& json)> DeserializationHandler;
 
@@ -68,16 +68,17 @@ public:
         FileAppend,
     } FileMode;
 
-    void   DeleteConfigFile (const String & FileName);
-    bool   SaveConfigFile   (const String & FileName, String & FileData);
-    bool   SaveConfigFile   (const String & FileName, const char * FileData);
-    bool   SaveConfigFile   (const String & FileName, JsonDocument & FileData);
-    bool   SaveConfigFile   (const String   filename, uint32_t index, uint8_t *data, uint32_t len, bool final);
+    void   DeleteFlashFile (const String & FileName);
+    bool   SaveFlashFile   (const String & FileName, String & FileData);
+    bool   SaveFlashFile   (const String & FileName, const char * FileData);
+    bool   SaveFlashFile   (const String & FileName, JsonDocument & FileData);
+    bool   SaveFlashFile   (const String   filename, uint32_t index, uint8_t *data, uint32_t len, bool final);
 
-    bool   ReadConfigFile   (const String & FileName, String & FileData);
-    bool   ReadConfigFile   (const String & FileName, JsonDocument & FileData);
-    bool   ReadConfigFile   (const String & FileName, byte * FileData, size_t maxlen);
-    bool   LoadConfigFile   (const String & FileName, DeserializationHandler Handler);
+    bool   ReadFlashFile   (const String & FileName, String & FileData);
+    bool   ReadFlashFile   (const String & FileName, JsonDocument & FileData);
+    bool   ReadFlashFile   (const String & FileName, byte * FileData, size_t maxlen);
+    bool   LoadFlashFile   (const String & FileName, DeserializationHandler Handler);
+    bool   FlashFileExists (const String & FileName);
 
     bool   SdCardIsInstalled () { return SdCardInstalled; }
     FileId CreateSdFileHandle ();
@@ -92,10 +93,11 @@ public:
     size_t WriteSdFile      (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite);
     size_t WriteSdFile      (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite, size_t StartingPosition);
     void   CloseSdFile      (FileId & FileHandle);
-    void   GetListOfSdFiles (String & Response, uint32_t FirstFileToSend);
     void   GetListOfSdFiles (std::vector<String> & Response);
     size_t GetSdFileSize    (const String & FileName);
     size_t GetSdFileSize    (const FileId & FileHandle);
+    void   BuildFseqList    ();
+    
     void   GetDriverName    (String& Name) { Name = "FileMgr"; }
 
     // Configuration file params
@@ -114,13 +116,16 @@ private:
     void DescribeSdCardToUser ();
     void handleFileUploadNewFile (const String & filename);
     void printDirectory (File dir, int numTabs);
+    size_t RecoverSdWrite(int FileListIndex, byte* FileData, size_t NumBytesToWrite, size_t NumBytesWritten);
+    bool ReopenSdFile(int FileListIndex);
+    bool ReopenSdFile(FileId& FileHandle);
 
     bool     SdCardInstalled = false;
     uint8_t  miso_pin = SD_CARD_MISO_PIN;
     uint8_t  mosi_pin = SD_CARD_MOSI_PIN;
     uint8_t  clk_pin  = SD_CARD_CLK_PIN;
     uint8_t  cs_pin   = SD_CARD_CS_PIN;
-    FileId fsUploadFile;
+    FileId   fsUploadFile;
     String   fsUploadFileName;
     bool     fsUploadFileSavedIsEnabled = false;
     uint32_t fsUploadStartTime;
@@ -131,18 +136,19 @@ private:
     {
         FileId  handle;
         File    info;
-        size_t  size;
+        size_t  size = 0;
+        size_t  writeCount = 0;
+        size_t  rcvCount = 0;
         int     entryId;
+        String  Filename;
     };
     FileListEntry_t FileList[MaxOpenFiles];
     int FileListFindSdFileHandle (FileId HandleToFind);
     void InitSdFileList ();
 
-    byte   * FileUploadBuffer = nullptr;
-    uint32_t FileUploadBufferOffset = 0;
-
     File        FileSendDir;
     uint32_t    LastFileSent = 0;
+    uint32_t    expectedIndex = 0;
 
 protected:
 

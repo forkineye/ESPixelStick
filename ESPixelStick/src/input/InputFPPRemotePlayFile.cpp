@@ -360,13 +360,15 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
             break;
         }
         // DEBUG_V ("");
-        size_t ChannelDataSize = FileMgr.GetSdFileSize (FileHandleForFileBeingPlayed) - sizeof(fsqParsedHeader);
-        size_t ExpectedSize = fsqParsedHeader.TotalNumberOfFramesInSequence * fsqParsedHeader.channelCount;
-        if ((ExpectedSize) > ChannelDataSize)
+        size_t ActualDataSize = FileMgr.GetSdFileSize (FileHandleForFileBeingPlayed) - sizeof(fsqParsedHeader);
+        size_t NeededDataSize = fsqParsedHeader.TotalNumberOfFramesInSequence * fsqParsedHeader.channelCount;
+        // DEBUG_V("NeededDataSize: " + String(NeededDataSize));
+        // DEBUG_V("ActualDataSize: " + String(ActualDataSize));
+        if (NeededDataSize > ActualDataSize)
         {
             LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not start: ")) + PlayItemName +
-                                      F (" File does not contain enough data to meet the Stated Channel Count * Number of Frames value. Expected ") +
-                                      String (ExpectedSize) + F (", Got: ") + String (ChannelDataSize));
+                                      F (" File does not contain enough data to meet the Stated Channel Count * Number of Frames value. Need: ") +
+                                      String (NeededDataSize) + F (", Got: ") + String (ActualDataSize));
             logcon (LastFailedPlayStatusMsg);
             break;
         }

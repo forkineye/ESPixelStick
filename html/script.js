@@ -7,10 +7,10 @@ var AdminInfo = null;
 var Output_Config = null; // Output Manager configuration record
 var Input_Config = null; // Input Manager configuration record
 var System_Config = null;
-var Fseq_File_List = null;
+var Fseq_File_List = [];
 var selector = [];
 var target = document.location.host;
-// var target = "192.168.10.220";
+// target = "192.168.10.233";
 
 var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
@@ -73,7 +73,7 @@ class Semaphore {
                 });
         }
     }
-} // Semaphore
+} // callFunction
 
 const ServerAccess = new Semaphore(1);
 
@@ -200,11 +200,6 @@ $(function () {
 
     //TODO: This should pull a configuration from the stick and not the web interface as web data could be invalid
     $('#backupconfig').on("click", (function () {
-        ExtractNetworkConfigFromHtmlPage();
-        ExtractChannelConfigFromHtmlPage(Input_Config.channels, "input");
-        ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
-        System_Config.device.id = $('#config #device #id').val();
-        System_Config.device.blanktime = $('#config #device #blanktime').val();
 
         let TotalConfig = JSON.stringify({ 'system': System_Config, 'input': Input_Config, 'output': Output_Config });
 
@@ -213,12 +208,15 @@ $(function () {
         saveAs(blob, FileName + ".json"); // Filesaver.js
     }));
 
-    $('#restoreconfig').on("change", (function () {
-        if (this.files.length !== 0) {
+    $('#restoreconfig').on("change", (function ()
+    {
+        if (this.files.length !== 0)
+        {
             const reader = new FileReader();
-            reader.onload = function fileReadCompleted() {
+            reader.onload = function fileReadCompleted()
+            {
                 // when the reader is done, the content is in reader.result.
-                ProcessLocalConfig(reader.result);
+                ProcessConfigFromLocalFile(reader.result);
             };
             reader.readAsText(this.files[0]);
         }
@@ -259,7 +257,7 @@ $(function () {
                     // console.log(file);
                     // console.log(resp);
                     Dropzone.forElement('#filemanagementupload').removeAllFiles(true)
-                    RequestListOfFiles(0);
+                    RequestListOfFiles();
                 });
 
                 this.on('complete', function (file, resp) {
@@ -335,17 +333,149 @@ function SetServerTime()
     SendCommand('settime/' + (CurrentDate));
 } // SetServerTime
 
-function ProcessLocalConfig(data) {
+function ProcessConfigFromLocalFile(data)
+{
     // console.info(data);
     let ParsedLocalConfig = JSON.parse(data);
 
-    ServerAccess.callFunction(SendConfigFileToServer, "config", {'system': ParsedLocalConfig});
-    ServerAccess.callFunction(SendConfigFileToServer, "output_config", {'output_config': ParsedLocalConfig.output});
-    ServerAccess.callFunction(SendConfigFileToServer, "input_config", {'input_config': ParsedLocalConfig.input});
+    // merge the restored config into the existing config and save the results to the ESP
+    MergeConfig(ParsedLocalConfig.system, System_Config, "config",        'system');
+    MergeConfig(ParsedLocalConfig.output, Output_Config, "output_config", 'output_config');
+    MergeConfig(ParsedLocalConfig.input,  Input_Config,  "input_config",  'input_config');
 
 } // ProcessLocalConfig
 
-function UpdateAdvancedOptionsMode() {
+/**
+ * @param {any} SourceData
+ * @param {any} TargetData
+ * @param {string} FileName
+ * @param {string} SectionName
+ */
+function MergeConfig(SourceData, TargetData, FileName, SectionName)
+{
+    // console.info("SourceData: " + JSON.stringify(SourceData));
+    // console.info("TargetData: " + JSON.stringify(TargetData));
+    
+    let FinalSourceData = JSON.parse('{"' + SectionName + '":' + JSON.stringify(SourceData) + "}");
+    let FinalTargetData = JSON.parse('{"' + SectionName + '":' + JSON.stringify(TargetData) + "}");
+
+    // console.info("FinalSourceData: " + JSON.stringify(FinalSourceData));
+    // console.info("FinalTargetData: " + JSON.stringify(FinalTargetData));
+    
+    MergeConfigTree(FinalSourceData, FinalTargetData, FinalTargetData, "");
+
+    // let DataString = '{"' + SectionName + '":' + JSON.stringify(TargetData) + "}";
+    ServerAccess.callFunction(SendConfigFileToServer, FileName, JSON.stringify(FinalTargetData));
+
+} // MergeConfig
+
+function JsonObjectAccess(obj, Path, value, Action) 
+{
+    try
+    {
+        if(Array.isArray(Path) == false)
+        {
+            Path = [Path];
+        }
+
+        let level = 0;
+        var Return_Value;
+        Path.reduce((a, b)=>
+        {
+            level++;
+            if (level === Path.length)
+            {
+                if(Action === 'Set')
+                {
+                    a[b] = value;
+                    return value;
+                }
+                else if(Action === 'Get')
+                {
+                    Return_Value = a[b];
+                }
+                else if(Action === 'Unset')
+                {
+                    delete a[b];
+                }
+            } 
+            else 
+            {
+                return a[b];
+            }
+        }, obj);
+        return Return_Value;
+    }
+
+    catch(err)
+    {
+        console.error(err);
+        return obj;
+    }
+}
+
+function MergeConfigTree(SourceTree, TargetTree, CurrentTarget, FullSelector)
+{
+    // console.info("Entry: FullSelector: '" + FullSelector + "'");
+
+    // make sure the selector is an array
+    if(!Array.isArray(FullSelector))
+    {
+        FullSelector = [FullSelector];
+        // the first entry into this function has a 
+        // null selector value that needs to be removed
+        if(FullSelector[0] === "")
+        {
+            FullSelector.pop();
+        }
+    }
+
+    // Target drives the data.
+    for (let CurrentElementName in CurrentTarget) 
+    {
+        // console.info("CurrentElement: " + CurrentElementName);
+        // remember the path to this element
+        let CurrentSelectorPath = JSON.parse(JSON.stringify(FullSelector));
+        CurrentSelectorPath.push(CurrentElementName);
+
+        // console.info("CurrentSelectorPath: '" + CurrentSelectorPath + "'");
+        let CurrentElementValue = CurrentTarget[CurrentElementName];
+
+        if(CurrentElementValue === undefined)
+        {
+            console.info("target element is not properly formed");
+            continue;
+        }
+
+        if (typeof CurrentElementValue === 'object')
+        {
+            // console.info("take the current object apart");
+            MergeConfigTree(SourceTree, 
+                            TargetTree,
+                            CurrentElementValue, 
+                            CurrentSelectorPath);
+        }
+        else 
+        {
+            let SourceLookupValue = JsonObjectAccess(SourceTree, CurrentSelectorPath, "", "Get");
+            // let TargetLookupValue = JsonObjectAccess(TargetTree, CurrentSelectorPath, "", "Get");
+
+            // does the source have this element?
+            if(undefined !== SourceLookupValue)
+            {
+                // save the current object value
+                // console.info("Saving CurrentSelectorPath: '" + CurrentSelectorPath + "'");
+                JsonObjectAccess(TargetTree, CurrentSelectorPath, SourceLookupValue, "Set");
+            }
+            else
+            {
+                console.info("NOT Saving CurrentElement. Source value is Not in target tree.");
+            }
+        }
+    }
+} // MergeConfigTree
+
+function UpdateAdvancedOptionsMode(){
     // console.info("UpdateAdvancedOptionsMode");
 
     let am = $('#AdvancedOptions');
@@ -374,7 +504,7 @@ function UpdateChannelCounts() {
     }
 } // UpdateChannelCounts
 
-async function SendConfigFileToServer(FileName = "", Data = {})
+async function SendConfigFileToServer(FileName = "", DataString = "")
 {
     // console.info("FileName: " + FileName);
     // console.info("Data: " + JSON.stringify(Data));
@@ -395,16 +525,19 @@ async function SendConfigFileToServer(FileName = "", Data = {})
         return -1;
     }, false);
     ConfigXfer.open("PUT", "http://" + target + "/conf/" + FileName + ".json");
-    ConfigXfer.send(JSON.stringify(Data));
+    ConfigXfer.send(DataString);
+    // console.info("DataString: " + DataString);
+    // ConfigXfer.send(JSON.stringify(Data));
 
 } // SendConfigFileToServer
 
-function ProcessWindowChange(NextWindow) {
+async function ProcessWindowChange(NextWindow) {
 
     if (NextWindow === "#diag") {
     }
 
     else if (NextWindow === "#admin") {
+        RcfResponse = RequestConfigFile("config.json");
         RcfResponse = RequestConfigFile("output_config.json");
         RcfResponse = RequestConfigFile("input_config.json");
     }
@@ -414,14 +547,14 @@ function ProcessWindowChange(NextWindow) {
     }
 
     else if (NextWindow === "#config") {
-        RequestListOfFiles(0);
-        RcfResponse = RequestConfigFile("config.json");
-        RcfResponse = RequestConfigFile("output_config.json");
-        RcfResponse = RequestConfigFile("input_config.json");
+        await RequestListOfFiles();
+        RequestConfigFile("config.json");
+        RequestConfigFile("output_config.json");
+        RequestConfigFile("input_config.json");
     }
 
     else if (NextWindow === "#filemanagement") {
-        RequestListOfFiles(0);
+        await RequestListOfFiles();
     }
 
     UpdateAdvancedOptionsMode();
@@ -534,12 +667,13 @@ function RequestStatusUpdate()
 
 } // RequestStatusUpdate
 
-function RequestListOfFiles(StartingFileIndex) {
-    ExpectedStartingFileIndex = StartingFileIndex;
-
+async function RequestListOfFiles() 
+{
     // console.info("ask for a file list from the server, starting at " + StartingFileIndex);
 
-    return fetch("HTTP://" + target + "/files/" + StartingFileIndex, {
+    // retrieve the file with the list of files in it
+    return await fetch("HTTP://" + target + "/fseqfilelist", 
+    {
         method: 'GET',
         mode: "cors", // no-cors, *cors, same-origin
         headers: { 'Content-Type': 'application/json' },
@@ -561,17 +695,13 @@ function RequestListOfFiles(StartingFileIndex) {
             const error = (data && data.message) || webResponse.status;
             console.error("SendCommand: Error: " + Promise.reject(error));
             CompletedServerTransaction = false;
-            RequestListOfFiles(0);
+            RequestListOfFiles();
         }
         else
         {
             // console.info("SendCommand: Transaction complete");
-
-
-
-
             CompletedServerTransaction = true;
-            ProcessGetFileListResponse(data);
+            await ProcessGetFileListResponse(data);
         }
         return webResponse.ok ? 1 : 0;
     })
@@ -579,7 +709,7 @@ function RequestListOfFiles(StartingFileIndex) {
     {
         console.error('SendCommand: Error: ', error);
         CompletedServerTransaction = false;
-        RequestListOfFiles(0);
+        RequestListOfFiles();
         return -1;
     });
 
@@ -590,73 +720,63 @@ function BytesToMB(Value) {
 
 } // BytesToMB
 
-function ProcessGetFileListResponse(JsonConfigData) {
+async function ProcessGetFileListResponse(JsonConfigData) {
     // console.info("ProcessGetFileListResponse");
 
     SdCardIsInstalled = JsonConfigData.SdCardPresent;
 
-    $("#li-filemanagement").removeClass("hidden");
     if (false === SdCardIsInstalled) {
         $("#li-filemanagement").addClass("hidden");
+    }
+    else{
+        $("#li-filemanagement").removeClass("hidden");
     }
 
     $("#totalBytes").val(BytesToMB(JsonConfigData.totalBytes));
     $("#usedBytes").val(BytesToMB(JsonConfigData.usedBytes));
     $("#remainingBytes").val(BytesToMB(JsonConfigData.totalBytes - JsonConfigData.usedBytes));
+    $("#filecount").val(JsonConfigData.numFiles);
 
-    // console.info("Expected File Index: " + ExpectedStartingFileIndex);
-    // console.info("Received File index: " + JsonConfigData.first);
+    // console.info("totalBytes: " + JsonConfigData.totalBytes);
+    // console.info("usedBytes: " + JsonConfigData.usedBytes);
+    // console.info("numFiles: " + JsonConfigData.numFiles);
 
-    if(ExpectedStartingFileIndex === JsonConfigData.first)
+    Fseq_File_List = [];
+
+    // delete current entries
+    $('#FileManagementTable').empty();
+
+    JsonConfigData.files.sort(function(a, b)
     {
-        // are we starting a fresh list (first chunk)
-        if(JsonConfigData.first === 0)
-        {
-            // console.info("$('#FileManagementTable > tr').length " + $('#FileManagementTable > tr').length);
-            Fseq_File_List = [];
+        return a.name.localeCompare(b.name);
+    });
 
-            while (1 < $('#FileManagementTable > tr').length) {
-                // console.info("Deleting $('#FileManagementTable tr').length " + $('#FileManagementTable tr').length);
-                $('#FileManagementTable tr').last().remove();
-                // console.log("After Delete: $('#FileManagementTable tr').length " + $('#FileManagementTable tr').length);
-            }
-        }
+    JsonConfigData.files.forEach(function (file) 
+    {
+        let CurrentRowId = $('#FileManagementTable > tr').length;
+        let SelectedPattern = '<td><input  type="checkbox" id="FileSelected_' + (CurrentRowId) + '"></td>';
+        let NamePattern = '<td><output type="text" id="FileName_' + (CurrentRowId) + '"></td>';
+        let DatePattern = '<td><output type="text" id="FileDate_' + (CurrentRowId) + '"></td>';
+        let SizePattern = '<td><output type="text" id="FileSize_' + (CurrentRowId) + '"></td>';
 
-        JsonConfigData.files.forEach(function (file) {
-            let CurrentRowId = $('#FileManagementTable > tr').length;
-            let SelectedPattern = '<td><input  type="checkbox" id="FileSelected_' + (CurrentRowId) + '"></td>';
-            let NamePattern = '<td><output type="text" id="FileName_' + (CurrentRowId) + '"></td>';
-            let DatePattern = '<td><output type="text" id="FileDate_' + (CurrentRowId) + '"></td>';
-            let SizePattern = '<td><output type="text" id="FileSize_' + (CurrentRowId) + '"></td>';
-    
-            let rowPattern = '<tr>' + SelectedPattern + NamePattern + DatePattern + SizePattern + '</tr>';
-            $('#FileManagementTable tr:last').after(rowPattern);
-    
-            try {
-                $('#FileName_' + (CurrentRowId)).val(file.name);
-                $('#FileDate_' + (CurrentRowId)).val(new Date(file.date * 1000).toLocaleString());
-                $('#FileSize_' + (CurrentRowId)).val(file.length);
-                Fseq_File_List.push(file);
-            }
-            catch
-            {
-                $('#FileName_' + (CurrentRowId)).val("InvalidFile");
-                $('#FileDate_' + (CurrentRowId)).val(new Date(0).toISOString());
-                $('#FileSize_' + (CurrentRowId)).val(0);
-            }
-        }); // end foreach
+        let rowPattern = '<tr>' + SelectedPattern + NamePattern + DatePattern + SizePattern + '</tr>';
+        $('#FileManagementTable').append(rowPattern);
 
-        // was this the last chunk?
-        if(false === JsonConfigData.final)
-        {
-            // console.info("not last. Ask for the next chunk");
-            RequestListOfFiles(JsonConfigData.last);
+        try {
+            $('#FileName_' + (CurrentRowId)).val(file.name);
+            $('#FileDate_' + (CurrentRowId)).val(new Date(file.date * 1000).toLocaleString());
+            $('#FileSize_' + (CurrentRowId)).val(file.length);
+            Fseq_File_List.push(file);
         }
-        else
+        catch
         {
-            SetServerTime();
+            $('#FileName_' + (CurrentRowId)).val("InvalidFile");
+            $('#FileDate_' + (CurrentRowId)).val(new Date(0).toISOString());
+            $('#FileSize_' + (CurrentRowId)).val(0);
         }
-    } // end expected file ID
+    }); // end foreach
+
+    SetServerTime();
 
 } // ProcessGetFileListResponse
 
@@ -671,7 +791,7 @@ function RequestFileDeletion() {
         }
     });
 
-    RequestListOfFiles(0);
+    RequestListOfFiles();
 
 } // RequestFileDeletion
 
@@ -688,6 +808,7 @@ function ProcessModeConfigurationDatafppremote(channelConfig) {
     $(jqSelector).append('<option value="...">Play Remote Sequence</option>');
 
     // for each file in the list
+    Fseq_File_List.sort();
     Fseq_File_List.forEach(function (listEntry) {
         // add in a new entry
         $(jqSelector).append('<option value="' + listEntry.name + '">' + listEntry.name + '</option>');
@@ -695,7 +816,6 @@ function ProcessModeConfigurationDatafppremote(channelConfig) {
 
     // set the current selector value
     $(jqSelector).val(channelConfig.fseqfilename);
-
 
 } // ProcessModeConfigurationDatafppremote
 
@@ -1184,7 +1304,7 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData) {
     // is this a device config?
     else if ({}.hasOwnProperty.call(JsonConfigData, "system")) {
         System_Config = JsonConfigData.system;
-        // console.info("Got System Config: " + System_Config);
+        // console.info("Got System Config: " + JSON.stringify(System_Config) );
 
         updateFromJSON(System_Config);
 
@@ -1365,7 +1485,11 @@ function ExtractNetworkWiFiConfigFromHtmlPage() {
     wifi.ip = $('#network #wifi #ip').val();
     wifi.netmask = $('#network #wifi #netmask').val();
     wifi.gateway = $('#network #wifi #gateway').val();
+    wifi.dnsp = $('#network #wifi #dnsp').val();
+    wifi.dnss = $('#network #wifi #dnss').val();
     wifi.dhcp = $('#network #wifi #dhcp').prop('checked');
+    wifi.ap_ssid = $('#network #wifi #ap_ssid').val();
+    wifi.ap_passphrase = $('#network #wifi #ap_passphrase').val();
     wifi.ap_channel = $('#network #wifi #ap_channel').val();
     wifi.ap_fallback = $('#network #wifi #ap_fallback').prop('checked');
     wifi.ap_reboot = $('#network #wifi #ap_reboot').prop('checked');
@@ -1381,6 +1505,8 @@ function ExtractNetworkEthernetConfigFromHtmlPage() {
         System_Config.network.eth.ip = $('#network #eth #ip').val();
         System_Config.network.eth.netmask = $('#network #eth #netmask').val();
         System_Config.network.eth.gateway = $('#network #eth #gateway').val();
+        System_Config.network.eth.dnsp = $('#network #eth #dnsp').val();
+        System_Config.network.eth.dnss = $('#network #eth #dnss').val();
         System_Config.network.eth.dhcp = $('#network #eth #dhcp').prop('checked');
         System_Config.network.eth.type = parseInt($('#network #eth #type option:selected').val(), 10);
         System_Config.network.eth.addr = $('#network #eth #addr').val();
@@ -1418,7 +1544,7 @@ function submitNetworkConfig() {
 
     ExtractNetworkConfigFromHtmlPage();
 
-    ServerAccess.callFunction(SendConfigFileToServer,"config", {'system': System_Config});
+    ServerAccess.callFunction(SendConfigFileToServer,"config", JSON.stringify({'system': System_Config}));
 
 } // submitNetworkConfig
 
@@ -1635,8 +1761,8 @@ function submitDeviceConfig() {
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
-    ServerAccess.callFunction(SendConfigFileToServer, "output_config", {'output_config': Output_Config});
-    ServerAccess.callFunction(SendConfigFileToServer, "input_config", {'input_config': Input_Config});
+    ServerAccess.callFunction(SendConfigFileToServer, "output_config", JSON.stringify({'output_config': Output_Config}));
+    ServerAccess.callFunction(SendConfigFileToServer, "input_config", JSON.stringify({'input_config': Input_Config}));
     submitNetworkConfig();
 
 } // submitDeviceConfig
@@ -2014,7 +2140,7 @@ function showReboot() {
 async function SendCommand(command)
 {
     // console.info("SendCommand: " + command);
-    return fetch("HTTP://" + target + "/" + command, {
+    return await fetch("HTTP://" + target + "/" + command, {
             method: 'POST',
             mode: "cors", // no-cors, *cors, same-origin
             headers: { 'Content-Type': 'application/json' },
