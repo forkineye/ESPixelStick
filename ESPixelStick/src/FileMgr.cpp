@@ -366,13 +366,19 @@ void c_FileMgr::SetSpiIoPins ()
             SdCardInstalled = true;
             // DEBUG_V();
             csd_t csd;
+            uint8_t tran_speed = 0;
+#ifdef ARDUINO_ARCH_ESP32
             CSD MyCsd;
             // DEBUG_V();
             ESP_SD.card()->readCSD(&csd);
             memcpy (&MyCsd, &csd.csd[0], sizeof(csd.csd));
             // DEBUG_V(String("TRAN Speed: 0x") + String(MyCsd.Decode_0.tran_speed,HEX));
+            tran_speed = MyCsd.Decode_0.tran_speed;
+#else
+            tran_speed = csd.v2.tran_speed;
+#endif // def ARDUINO_ARCH_ESP32
 
-            switch(csd.csd[96/8])
+            switch(tran_speed)
             {
                 case 0x32:
                 {
