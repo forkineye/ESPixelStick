@@ -132,6 +132,7 @@ private:
     uint32_t fsUploadStartTime;
     String   FtpUserName = "esps";
     String   FtpPassword = "esps";
+    bool     FtpEnabled = false;
     uint64_t SdCardSizeMB = 0;
 
 public: struct __attribute__((__packed__, aligned(4))) CSD {

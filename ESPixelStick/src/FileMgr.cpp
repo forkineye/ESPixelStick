@@ -24,7 +24,6 @@
 #include "FileMgr.hpp"
 #include "network/NetworkMgr.hpp"
 
-
 SdFat sd;
 
 oflag_t XlateFileMode[3] = { O_READ , O_WRITE | O_CREAT, O_WRITE | O_APPEND };
@@ -156,7 +155,10 @@ void c_FileMgr::NetworkStateChanged (bool NewState)
  {
     // DEBUG_START;
 #ifdef SUPPORT_FTP
-    ftpSrv.handleFTP();
+    if(FtpEnabled)
+    {
+        ftpSrv.handleFTP();
+    }
 #endif // def SUPPORT_FTP
  } // Poll
 
@@ -186,6 +188,7 @@ bool c_FileMgr::SetConfig (JsonObject & json)
 #ifdef SUPPORT_FTP
         ConfigChanged |= setFromJSON (FtpUserName, JsonDeviceConfig, CN_user);
         ConfigChanged |= setFromJSON (FtpPassword, JsonDeviceConfig, CN_password);
+        ConfigChanged |= setFromJSON (FtpEnabled, JsonDeviceConfig, CN_enabled);
 #endif // def SUPPORT_FTP
 /*
         // DEBUG_V("miso_pin: " + String(miso_pin));
@@ -228,6 +231,7 @@ void c_FileMgr::GetConfig (JsonObject& json)
 #ifdef SUPPORT_FTP
     json[CN_user]      = FtpUserName;
     json[CN_password]  = FtpPassword;
+    json[CN_enabled]   = FtpEnabled;
 #endif // def SUPPORT_FTP
 
     // DEBUG_END;
@@ -374,7 +378,7 @@ void c_FileMgr::SetSpiIoPins ()
             memcpy (&MyCsd, &csd.csd[0], sizeof(csd.csd));
             // DEBUG_V(String("TRAN Speed: 0x") + String(MyCsd.Decode_0.tran_speed,HEX));
             tran_speed = MyCsd.Decode_0.tran_speed;
-#else
+#else // ESP8266
             tran_speed = csd.v2.tran_speed;
 #endif // def ARDUINO_ARCH_ESP32
 
