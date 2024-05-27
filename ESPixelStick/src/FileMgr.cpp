@@ -24,14 +24,64 @@
 #include "FileMgr.hpp"
 #include "network/NetworkMgr.hpp"
 
-#ifdef SUPPORT_FTP
-#include <SimpleFTPServer.h>
-FtpServer   ftpSrv;
-#endif // def SUPPORT_FTP
 
 SdFat sd;
 
 oflag_t XlateFileMode[3] = { O_READ , O_WRITE | O_CREAT, O_WRITE | O_APPEND };
+#ifdef SUPPORT_FTP
+#include <SimpleFTPServer.h>
+FtpServer   ftpSrv;
+
+void ftp_callback(FtpOperation ftpOperation, unsigned int freeSpace, unsigned int totalSpace){
+  switch (ftpOperation) {
+    case FTP_CONNECT:
+      // LOG_PORT.println(F("FTP: Connected!"));
+      break;
+    case FTP_DISCONNECT:
+      // LOG_PORT.println(F("FTP: Disconnected!"));
+      break;
+    case FTP_FREE_SPACE_CHANGE:
+        FileMgr.BuildFseqList();
+      // LOG_PORT.printf("FTP: Free space change, free %u of %u!\n", freeSpace, totalSpace);
+      break;
+    default:
+      break;
+  }
+};
+void ftp_transferCallback(FtpTransferOperation ftpOperation, const char* name, unsigned int transferredSize){
+  switch (ftpOperation) {
+    case FTP_UPLOAD_START:
+      // LOG_PORT.println(F("FTP: Upload start!"));
+      break;
+    case FTP_UPLOAD:
+      // LOG_PORT.printf("FTP: Upload of file %s byte %u\n", name, transferredSize);
+      break;
+    case FTP_TRANSFER_STOP:
+      // LOG_PORT.println(F("FTP: Finish transfer!"));
+      break;
+    case FTP_TRANSFER_ERROR:
+      // LOG_PORT.println(F("FTP: Transfer error!"));
+      break;
+    default:
+      break;
+  }
+
+  /* FTP_UPLOAD_START = 0,
+   * FTP_UPLOAD = 1,
+   *
+   * FTP_DOWNLOAD_START = 2,
+   * FTP_DOWNLOAD = 3,
+   *
+   * FTP_TRANSFER_STOP = 4,
+   * FTP_DOWNLOAD_STOP = 4,
+   * FTP_UPLOAD_STOP = 4,
+   *
+   * FTP_TRANSFER_ERROR = 5,
+   * FTP_DOWNLOAD_ERROR = 5,
+   * FTP_UPLOAD_ERROR = 5
+   */
+};
+#endif // def SUPPORT_FTP
 
 //-----------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
@@ -93,6 +143,8 @@ void c_FileMgr::NetworkStateChanged (bool NewState)
         ftpSrv.end();
         // DEBUG_V("Start FTP");
         ftpSrv.begin(FtpUserName.c_str(), FtpPassword.c_str(), String(F("ESPS V4 FTP")).c_str());
+        ftpSrv.setCallback(ftp_callback);
+        ftpSrv.setTransferCallback(ftp_transferCallback);
     }
 #endif // def SUPPORT_FTP
 
@@ -297,7 +349,7 @@ void c_FileMgr::SetSpiIoPins ()
             {
                 logcon(String(F("SD initialization failed - code: ")) + String(ESP_SD.card()->errorCode()));
                 // DEBUG_V(String(F("SD initialization failed - data: ")) + String(ESP_SD.card()->errorData()));
-                printSdErrorText(&Serial, ESP_SD.card()->errorCode()); Serial.println("");
+                printSdErrorText(&Serial, ESP_SD.card()->errorCode()); LOG_PORT.println("");
             }
             else if (ESP_SD.vol()->fatType() == 0)
             {
@@ -1703,7 +1755,7 @@ void c_FileMgr::BuildFseqList()
                 OutputFile.print(String("{\"name\" : \"") + EntryName +
                                  "\",\"date\" : " + String(makeTime(tm)) +
                                  ",\"length\" : " + int64String(CurrentEntry.size ()) + "}");
-                /*Serial.print(String("{\"name\" : \"") + EntryName +
+                /*LOG_PORT.print(String("{\"name\" : \"") + EntryName +
                                  "\",\"date\" : " + String(Date) +
                                  ",\"length\" : " + int64String(CurrentEntry.size ()) + "}");
                 */
