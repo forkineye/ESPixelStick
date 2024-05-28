@@ -1930,5 +1930,22 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
 
 } // handleFileUploadNewFile
 
+//-----------------------------------------------------------------------------
+size_t c_FileMgr::GetDefaultFseqFileList(uint8_t * buffer, size_t maxlen)
+{
+    // DEBUG_START;
+
+    memset(buffer, 0x0, maxlen);
+    memcpy(buffer, String(F("{\"totalBytes\" : 0," \
+    "\"files\" : []," \
+    "\"usedBytes\" : 0," \
+    "\"numFiles\" : 0" \
+    "}")).c_str(), maxlen-1);
+
+    // DEBUG_V(String("buffer: ") + String((char*)buffer));
+    // DEBUG_END;
+    return strlen((char*)buffer);
+} // GetDefaultFseqFileList
+
 // create a global instance of the File Manager
 c_FileMgr FileMgr;

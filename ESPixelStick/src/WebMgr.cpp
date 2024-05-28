@@ -636,6 +636,18 @@ size_t c_WebMgr::GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t ind
 
     do // once
     {
+        if(!FileMgr.SdCardIsInstalled())
+        {
+            if(0 == index)
+            {
+                response = FileMgr.GetDefaultFseqFileList(buffer, maxlen);
+            }
+            else
+            {
+                response = 0;
+            }
+            break;
+        }
         // is it a new request
         if (index == 0)
         {

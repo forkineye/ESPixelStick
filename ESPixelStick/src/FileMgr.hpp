@@ -102,7 +102,8 @@ public:
 
     void   GetDriverName    (String& Name) { Name = "FileMgr"; }
     void   NetworkStateChanged (bool NewState);
-
+    size_t GetDefaultFseqFileList(uint8_t * buffer, size_t maxlen);
+    
 #define FSEQFILELIST "fseqfilelist.json"
     // Configuration file params
 #if defined ARDUINO_ARCH_ESP8266
