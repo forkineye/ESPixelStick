@@ -82,6 +82,13 @@ void ftp_transferCallback(FtpTransferOperation ftpOperation, const char* name, u
 };
 #endif // def SUPPORT_FTP
 
+static PROGMEM const char DefaultFseqResponse[] =
+    "{\"totalBytes\" : 0," \
+    "\"files\" : []," \
+    "\"usedBytes\" : 0," \
+    "\"numFiles\" : 0" \
+    "}";
+
 //-----------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
 c_FileMgr::c_FileMgr ()
@@ -1936,15 +1943,12 @@ size_t c_FileMgr::GetDefaultFseqFileList(uint8_t * buffer, size_t maxlen)
     // DEBUG_START;
 
     memset(buffer, 0x0, maxlen);
-    memcpy(buffer, String(F("{\"totalBytes\" : 0," \
-    "\"files\" : []," \
-    "\"usedBytes\" : 0," \
-    "\"numFiles\" : 0" \
-    "}")).c_str(), maxlen-1);
+    strcpy_P((char*)&buffer[0], DefaultFseqResponse);
 
     // DEBUG_V(String("buffer: ") + String((char*)buffer));
     // DEBUG_END;
-    return strlen((char*)buffer);
+
+    return strlen((char*)&buffer[0]);
 } // GetDefaultFseqFileList
 
 // create a global instance of the File Manager
