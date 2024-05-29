@@ -31,39 +31,73 @@ oflag_t XlateFileMode[3] = { O_READ , O_WRITE | O_CREAT, O_WRITE | O_APPEND };
 #include <SimpleFTPServer.h>
 FtpServer   ftpSrv;
 
-void ftp_callback(FtpOperation ftpOperation, unsigned int freeSpace, unsigned int totalSpace){
-  switch (ftpOperation) {
-    case FTP_CONNECT:
-      // LOG_PORT.println(F("FTP: Connected!"));
-      break;
-    case FTP_DISCONNECT:
-      // LOG_PORT.println(F("FTP: Disconnected!"));
-      break;
-    case FTP_FREE_SPACE_CHANGE:
-        FileMgr.BuildFseqList();
-      // LOG_PORT.printf("FTP: Free space change, free %u of %u!\n", freeSpace, totalSpace);
-      break;
-    default:
-      break;
-  }
+//-----------------------------------------------------------------------------
+void ftp_callback(FtpOperation ftpOperation, unsigned int freeSpace, unsigned int totalSpace)
+{
+    switch (ftpOperation)
+    {
+        case FTP_CONNECT:
+        {
+            LOG_PORT.println(F("FTP: Connected!"));
+            break;
+        }
+
+        case FTP_DISCONNECT:
+        {
+            LOG_PORT.println(F("FTP: Disconnected!"));
+            break;
+        }
+
+        case FTP_FREE_SPACE_CHANGE:
+        {
+            FileMgr.BuildFseqList();
+            LOG_PORT.printf("FTP: Free space change, free %u of %u!\n", freeSpace, totalSpace);
+            break;
+        }
+
+        default:
+        {
+            LOG_PORT.println(F("FTP: unknown callback!"));
+            break;
+        }
+    }
 };
-void ftp_transferCallback(FtpTransferOperation ftpOperation, const char* name, unsigned int transferredSize){
-  switch (ftpOperation) {
-    case FTP_UPLOAD_START:
-      // LOG_PORT.println(F("FTP: Upload start!"));
-      break;
-    case FTP_UPLOAD:
-      // LOG_PORT.printf("FTP: Upload of file %s byte %u\n", name, transferredSize);
-      break;
-    case FTP_TRANSFER_STOP:
-      // LOG_PORT.println(F("FTP: Finish transfer!"));
-      break;
-    case FTP_TRANSFER_ERROR:
-      // LOG_PORT.println(F("FTP: Transfer error!"));
-      break;
-    default:
-      break;
-  }
+
+//-----------------------------------------------------------------------------
+void ftp_transferCallback(FtpTransferOperation ftpOperation, const char* name, unsigned int transferredSize)
+{
+    switch (ftpOperation)
+    {
+        case FTP_UPLOAD_START:
+        {
+            LOG_PORT.println(F("FTP: Upload start!"));
+            break;
+        }
+
+        case FTP_UPLOAD:
+        {
+            LOG_PORT.printf("FTP: Upload of file %s byte %u\n", name, transferredSize);
+            break;
+        }
+
+        case FTP_TRANSFER_STOP:
+        {
+            LOG_PORT.println(F("FTP: Finish transfer!"));
+            break;
+        }
+
+        case FTP_TRANSFER_ERROR:
+        {
+            LOG_PORT.println(F("FTP: Transfer error!"));
+            break;
+        }
+
+        default:
+        {
+            LOG_PORT.println(F("FTP: Unknown Transfer Callback!"));
+            break;
+        }
+    }
 
   /* FTP_UPLOAD_START = 0,
    * FTP_UPLOAD = 1,
@@ -82,6 +116,7 @@ void ftp_transferCallback(FtpTransferOperation ftpOperation, const char* name, u
 };
 #endif // def SUPPORT_FTP
 
+//-----------------------------------------------------------------------------
 static PROGMEM const char DefaultFseqResponse[] =
     "{\"totalBytes\" : 0," \
     "\"files\" : []," \
@@ -295,9 +330,7 @@ void c_FileMgr::SetSpiIoPins ()
     if (SdCardInstalled)
     {
         // DEBUG_V("Terminate current SD session");
-#ifdef ARDUINO_ARCH_ESP32
         ESP_SD.end ();
-#endif // def ARDUINO_ARCH_ESP32
     }
 
     FsDateTime::setCallback(dateTime);
@@ -338,7 +371,8 @@ void c_FileMgr::SetSpiIoPins ()
         pinMode(miso_pin, INPUT);
 #       endif // def USE_MISO_PULLUP
         SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
-#   else
+#   else // ESP8266
+        SPI.end ();
         SPI.begin ();
 #   endif // ! ARDUINO_ARCH_ESP32
         // DEBUG_V();
@@ -378,16 +412,13 @@ void c_FileMgr::SetSpiIoPins ()
             // DEBUG_V();
             csd_t csd;
             uint8_t tran_speed = 0;
-#ifdef ARDUINO_ARCH_ESP32
+
             CSD MyCsd;
             // DEBUG_V();
             ESP_SD.card()->readCSD(&csd);
             memcpy (&MyCsd, &csd.csd[0], sizeof(csd.csd));
             // DEBUG_V(String("TRAN Speed: 0x") + String(MyCsd.Decode_0.tran_speed,HEX));
             tran_speed = MyCsd.Decode_0.tran_speed;
-#else // ESP8266
-            tran_speed = csd.v2.tran_speed;
-#endif // def ARDUINO_ARCH_ESP32
 
             switch(tran_speed)
             {
@@ -422,11 +453,7 @@ void c_FileMgr::SetSpiIoPins ()
                 }
             }
             // DEBUG_V();
-#ifdef ARDUINO_ARCH_ESP32
             SdCardSizeMB = 0.000512 * csd.capacity();
-#else // ! ESP32
-            SdCardSizeMB = ((csd.v2.c_size_high << 16) + (csd.v2.c_size_mid << 8) + csd.v2.c_size_low) / (1024 * 1024);
-#endif // !def(ARDUINO_ARCH_ESP32)
             // DEBUG_V(String("SdCardSizeMB: ") + String(SdCardSizeMB));
 
             DescribeSdCardToUser ();
@@ -1798,10 +1825,11 @@ void c_FileMgr::BuildFseqList()
         InputFile.close();
     } while(false);
 
-    // DEBUG_END;
     // String Temp;
     // ReadSdFile(FSEQFILELIST, Temp);
     // DEBUG_V(Temp);
+
+    // DEBUG_END;
 
 } // BuildFseqList
 
