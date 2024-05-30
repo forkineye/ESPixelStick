@@ -1541,7 +1541,7 @@ function submitNetworkConfig() {
     System_Config.device.cs_pin = $('#config #device #cs_pin').val();
     System_Config.device.user = $('#ftpusername').val();
     System_Config.device.password = $('#ftppassword').val();
-    System_Config.device.enabled = $('#ftp_enable').prop("checked");
+    System_Config.device.enabled = $('#ftp_enable').prop('checked');
 
     if ({}.hasOwnProperty.call(System_Config, 'sensor')) {
         System_Config.sensor.units = parseInt($('#TemperatureSensorUnits').val());
