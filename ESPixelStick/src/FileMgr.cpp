@@ -2,7 +2,7 @@
 * FileMgr.cpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2024 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -34,6 +34,7 @@ FtpServer   ftpSrv;
 //-----------------------------------------------------------------------------
 void ftp_callback(FtpOperation ftpOperation, unsigned int freeSpace, unsigned int totalSpace)
 {
+    FeedWDT();
     switch (ftpOperation)
     {
         case FTP_CONNECT:
@@ -66,6 +67,7 @@ void ftp_callback(FtpOperation ftpOperation, unsigned int freeSpace, unsigned in
 //-----------------------------------------------------------------------------
 void ftp_transferCallback(FtpTransferOperation ftpOperation, const char* name, unsigned int transferredSize)
 {
+    FeedWDT();
     switch (ftpOperation)
     {
         case FTP_UPLOAD_START:
@@ -76,7 +78,7 @@ void ftp_transferCallback(FtpTransferOperation ftpOperation, const char* name, u
 
         case FTP_UPLOAD:
         {
-            LOG_PORT.printf("FTP: Upload of file %s byte %u\n", name, transferredSize);
+            // LOG_PORT.printf("FTP: Upload of file %s byte %u\n", name, transferredSize);
             break;
         }
 
@@ -179,10 +181,13 @@ void c_FileMgr::NetworkStateChanged (bool NewState)
 #ifdef SUPPORT_FTP
     ftpSrv.end();
 
-    if(NewState && SdCardInstalled)
+    DEBUG_V(String("       NewState: ") + String(NewState));
+    DEBUG_V(String("SdCardInstalled: ") + String(SdCardInstalled));
+    DEBUG_V(String("     FtpEnabled: ") + String(FtpEnabled));
+    if(NewState && SdCardInstalled && FtpEnabled)
     {
         ftpSrv.end();
-        // DEBUG_V("Start FTP");
+        DEBUG_V("Start FTP");
         ftpSrv.begin(FtpUserName.c_str(), FtpPassword.c_str(), String(F("ESPS V4 FTP")).c_str());
         ftpSrv.setCallback(ftp_callback);
         ftpSrv.setTransferCallback(ftp_transferCallback);
@@ -199,6 +204,7 @@ void c_FileMgr::NetworkStateChanged (bool NewState)
 #ifdef SUPPORT_FTP
     if(FtpEnabled)
     {
+        FeedWDT();
         ftpSrv.handleFTP();
     }
 #endif // def SUPPORT_FTP
@@ -227,11 +233,9 @@ bool c_FileMgr::SetConfig (JsonObject & json)
         ConfigChanged |= setFromJSON (clk_pin,  JsonDeviceConfig, CN_clock_pin);
         ConfigChanged |= setFromJSON (cs_pin,   JsonDeviceConfig, CN_cs_pin);
 
-#ifdef SUPPORT_FTP
         ConfigChanged |= setFromJSON (FtpUserName, JsonDeviceConfig, CN_user);
         ConfigChanged |= setFromJSON (FtpPassword, JsonDeviceConfig, CN_password);
         ConfigChanged |= setFromJSON (FtpEnabled, JsonDeviceConfig, CN_enabled);
-#endif // def SUPPORT_FTP
 /*
         // DEBUG_V("miso_pin: " + String(miso_pin));
         // DEBUG_V("mosi_pin: " + String(mosi_pin));
@@ -270,11 +274,9 @@ void c_FileMgr::GetConfig (JsonObject& json)
     json[CN_clock_pin] = clk_pin;
     json[CN_cs_pin]    = cs_pin;
 
-#ifdef SUPPORT_FTP
     json[CN_user]      = FtpUserName;
     json[CN_password]  = FtpPassword;
     json[CN_enabled]   = FtpEnabled;
-#endif // def SUPPORT_FTP
 
     // DEBUG_END;
 
