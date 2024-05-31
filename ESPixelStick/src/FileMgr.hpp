@@ -103,7 +103,7 @@ public:
     void   GetDriverName    (String& Name) { Name = "FileMgr"; }
     void   NetworkStateChanged (bool NewState);
     size_t GetDefaultFseqFileList(uint8_t * buffer, size_t maxlen);
-    
+
 #define FSEQFILELIST "fseqfilelist.json"
     // Configuration file params
 #if defined ARDUINO_ARCH_ESP8266
@@ -133,7 +133,7 @@ private:
     uint32_t fsUploadStartTime;
     String   FtpUserName = "esps";
     String   FtpPassword = "esps";
-    bool     FtpEnabled = false;
+    bool     FtpEnabled = true;
     uint64_t SdCardSizeMB = 0;
 
 public: struct __attribute__((__packed__, aligned(4))) CSD {
