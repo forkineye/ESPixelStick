@@ -52,7 +52,7 @@ void ftp_callback(FtpOperation ftpOperation, unsigned int freeSpace, unsigned in
         case FTP_FREE_SPACE_CHANGE:
         {
             FileMgr.BuildFseqList();
-            LOG_PORT.printf("FTP: Free space change, free %u of %u!\n", freeSpace, totalSpace);
+            LOG_PORT.printf("FTP: Free space change, free %u of %u! Rebuilding FSEQ file list\n", freeSpace, totalSpace);
             break;
         }
 
@@ -72,7 +72,7 @@ void ftp_transferCallback(FtpTransferOperation ftpOperation, const char* name, u
     {
         case FTP_UPLOAD_START:
         {
-            LOG_PORT.println(F("FTP: Upload start!"));
+            LOG_PORT.println(String(F("FTP: Start Uploading '")) + name + "'");
             break;
         }
 
@@ -84,13 +84,13 @@ void ftp_transferCallback(FtpTransferOperation ftpOperation, const char* name, u
 
         case FTP_TRANSFER_STOP:
         {
-            LOG_PORT.println(F("FTP: Finish transfer!"));
+            LOG_PORT.println(String(F("FTP: Done Uploading '")) + name + "'");
             break;
         }
 
         case FTP_TRANSFER_ERROR:
         {
-            LOG_PORT.println(F("FTP: Transfer error!"));
+            LOG_PORT.println(String(F("FTP: Error Uploading '")) + name + "'");
             break;
         }
 
@@ -181,13 +181,13 @@ void c_FileMgr::NetworkStateChanged (bool NewState)
 #ifdef SUPPORT_FTP
     ftpSrv.end();
 
-    DEBUG_V(String("       NewState: ") + String(NewState));
-    DEBUG_V(String("SdCardInstalled: ") + String(SdCardInstalled));
-    DEBUG_V(String("     FtpEnabled: ") + String(FtpEnabled));
+    // DEBUG_V(String("       NewState: ") + String(NewState));
+    // DEBUG_V(String("SdCardInstalled: ") + String(SdCardInstalled));
+    // DEBUG_V(String("     FtpEnabled: ") + String(FtpEnabled));
     if(NewState && SdCardInstalled && FtpEnabled)
     {
         ftpSrv.end();
-        DEBUG_V("Start FTP");
+        logcon("Starting FTP server.");
         ftpSrv.begin(FtpUserName.c_str(), FtpPassword.c_str(), String(F("ESPS V4 FTP")).c_str());
         ftpSrv.setCallback(ftp_callback);
         ftpSrv.setTransferCallback(ftp_transferCallback);
