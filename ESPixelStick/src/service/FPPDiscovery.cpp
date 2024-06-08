@@ -88,7 +88,7 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         {
             Failed = false;
             logcon (String (F ("FPPDiscovery subscribed to broadcast messages on port: ")) + String(FPP_DISCOVERY_PORT));
-        }        
+        }
 
         if (!udp.listenMulticast (MulticastAddress, FPP_DISCOVERY_PORT))
         {
@@ -222,7 +222,7 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
         gettimeofday (&tv, NULL);
         MultiSyncStats.lastReceiveTime = tv.tv_sec;
         MultiSyncStats.pktLastCommand = fppPacket->packet_type;
-        
+
         switch (fppPacket->packet_type)
         {
             case CTRL_PKT_CMD: // deprecated in favor of FPP Commands
