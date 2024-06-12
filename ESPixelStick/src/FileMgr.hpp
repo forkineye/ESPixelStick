@@ -133,6 +133,7 @@ private:
     uint32_t fsUploadStartTime;
     String   FtpUserName = "esps";
     String   FtpPassword = "esps";
+    String   WelcomeString = "ESPS V4 FTP";
     bool     FtpEnabled = true;
     uint64_t SdCardSizeMB = 0;
 
