@@ -188,7 +188,7 @@ void c_FileMgr::NetworkStateChanged (bool NewState)
     {
         ftpSrv.end();
         logcon("Starting FTP server.");
-        ftpSrv.begin(FtpUserName.c_str(), FtpPassword.c_str(), String(F("ESPS V4 FTP")).c_str());
+        ftpSrv.begin(FtpUserName.c_str(), FtpPassword.c_str(), WelcomeString.c_str());
         ftpSrv.setCallback(ftp_callback);
         ftpSrv.setTransferCallback(ftp_transferCallback);
     }
