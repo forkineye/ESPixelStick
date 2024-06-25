@@ -316,7 +316,7 @@ void c_OutputRelay::GetConfig (ArduinoJson::JsonObject & jsonConfig)
         JsonChannelData[OM_RELAY_CHANNEL_INVERT_NAME]  = currentRelay.InvertOutput;
         JsonChannelData[OM_RELAY_CHANNEL_PWM_NAME]     = currentRelay.Pwm;
         JsonChannelData[CN_trig]                       = currentRelay.OnOffTriggerLevel;
-        JsonChannelData[CN_gid]                        = currentRelay.GpioId;
+        JsonChannelData[CN_gid]                        = int(currentRelay.GpioId);
 
 #if defined(ARDUINO_ARCH_ESP32)
         JsonChannelData[CN_Frequency]                  = currentRelay.PwmFrequency;
