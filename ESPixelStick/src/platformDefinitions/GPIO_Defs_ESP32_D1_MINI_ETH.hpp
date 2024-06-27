@@ -41,6 +41,7 @@
 #define SUPPORT_SPI_OUTPUT
 #define DEFAULT_SPI_DATA_GPIO    gpio_num_t::GPIO_NUM_15
 #define DEFAULT_SPI_CLOCK_GPIO   gpio_num_t::GPIO_NUM_25
+#define DEFAULT_SPI_DEVICE       HSPI_HOST
 
 #include <ETH.h>
 
