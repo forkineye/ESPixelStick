@@ -3,7 +3,7 @@
 * GPIO_Defs_ESP32_D1_MINI.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2024 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -30,6 +30,7 @@
 #define SUPPORT_SPI_OUTPUT
 #define DEFAULT_SPI_DATA_GPIO  gpio_num_t::GPIO_NUM_15
 #define DEFAULT_SPI_CLOCK_GPIO gpio_num_t::GPIO_NUM_25
+#define DEFAULT_SPI_DEVICE     HSPI_HOST
 
 #define DEFAULT_I2C_SDA        gpio_num_t::GPIO_NUM_21
 #define DEFAULT_I2C_SCL        gpio_num_t::GPIO_NUM_22
