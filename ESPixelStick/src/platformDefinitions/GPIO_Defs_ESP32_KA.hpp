@@ -22,7 +22,7 @@
 #define DEFAULT_RMT_0_GPIO     gpio_num_t::GPIO_NUM_2
 #define DEFAULT_RMT_1_GPIO     gpio_num_t::GPIO_NUM_4
 #define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_0
-#define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_16
+#define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_5
 
 // SPI Output
 #define SUPPORT_SPI_OUTPUT
@@ -38,7 +38,7 @@
 #define SD_CARD_MISO_PIN        gpio_num_t::GPIO_NUM_19
 #define SD_CARD_MOSI_PIN        gpio_num_t::GPIO_NUM_23
 #define SD_CARD_CLK_PIN         gpio_num_t::GPIO_NUM_18
-#define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_5
+#define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_26
 
 // Output Types
 // Not Finished - #define SUPPORT_OutputType_TLS3001
