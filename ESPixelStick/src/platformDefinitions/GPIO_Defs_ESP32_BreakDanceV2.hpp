@@ -1,6 +1,6 @@
 #pragma once
 /*
- * GPIO_Defs_ESP32_LoLin_D32_PRO.hpp - Output Management class
+ * GPIO_Defs_ESP32_BreakDanceV2.hpp - Output Management class
  *
  * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
  * Copyright (c) 2021 - 2022 Shelby Merrick

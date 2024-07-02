@@ -3,7 +3,7 @@
 * WebMgr.hpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2024 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -24,16 +24,6 @@
 #include <EspalexaDevice.h>
 #include "output/OutputMgr.hpp"
 
-#ifdef ARDUINO_ARCH_ESP32
-#   if __has_include("SD.h")
-#       include <SD.h>
-#   endif //  __has_include("SD.h")
-#else
-#   if __has_include("SDFS.h")
-#       include <SDFS.h>
-#   endif //  __has_include("SDFS.h")
-#endif // def ARDUINO_ARCH_ESP32
-
 class c_WebMgr
 {
 public:
@@ -51,6 +41,7 @@ public:
     void NetworkStateChanged   (bool NewNetworkState);
     void GetDriverName         (String & Name) { Name = "WebMgr"; }
     void CreateAdminInfoFile ();
+    void GetFseqFileListHandler(AsyncWebServerRequest *request);
 
 private:
 
@@ -77,7 +68,7 @@ private:
 
     void ProcessXJRequest           (AsyncWebServerRequest * client);
     void ProcessSetTimeRequest      (time_t DateTime);
-    
+
     void GetDeviceOptions           ();
     void GetInputOptions            ();
     void GetOutputOptions           ();
@@ -108,7 +99,10 @@ private:
 #endif // def BOARD_HAS_PSRAM
 
     WebJsonDocument *WebJsonDoc = nullptr;
-
+    size_t GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t index);
+    c_FileMgr::FileId FileHandle = c_FileMgr::INVALID_FILE_HANDLE;
+    size_t TotalFileSizeToTransfer = 0;
+    size_t NumberOfBytesTransfered = 0;
 }; // c_WebMgr
 
 extern c_WebMgr WebMgr;

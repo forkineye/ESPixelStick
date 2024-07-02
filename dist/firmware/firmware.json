@@ -1101,7 +1101,7 @@
             "name": "ESP32 KR Lights MSM",
             "description": "ESP32 based 5 port controller",
             "chip": "esp32",
-            "appbin": "esp32/esp32_kr_lights_msm32_tetra2go-app.bin",
+            "appbin": "esp32/esp32_kr_lights_msm-app.bin",
             "esptool": {
                 "baudrate": "460800",
                 "options": "",
@@ -1113,7 +1113,7 @@
                     "offset": "0x01000"
                 },
                 {
-                    "name": "esp32/esp3esp32_kr_lights_msm2_tetra2go-partitions.bin",
+                    "name": "esp32/esp32_kr_lights_msm-partitions.bin",
                     "offset": "0x08000"
                 },
                 {
@@ -1122,6 +1122,76 @@
                 },
                 {
                     "name": "esp32/esp32_kr_lights_msm-app.bin",
+                    "offset": "0x10000"
+                }
+            ],
+            "filesystem": {
+                "page": "256",
+                "block": "4096",
+                "size": "0x50000",
+                "offset": "0x3B0000"
+            }
+        },
+        {
+            "name": "ESP32 KA",
+            "description": "ESP32 based 4 port + Relay controller",
+            "chip": "esp32",
+            "appbin": "esp32/esp32_ka-app.bin",
+            "esptool": {
+                "baudrate": "460800",
+                "options": "",
+                "flashcmd": "write_flash -z"
+            },
+            "binfiles": [
+                {
+                    "name": "esp32/esp32_ka-bootloader.bin",
+                    "offset": "0x01000"
+                },
+                {
+                    "name": "esp32/esp32_ka-partitions.bin",
+                    "offset": "0x08000"
+                },
+                {
+                    "name": "esp32/boot_app0.bin",
+                    "offset": "0x0e000"
+                },
+                {
+                    "name": "esp32/esp32_ka-app.bin",
+                    "offset": "0x10000"
+                }
+            ],
+            "filesystem": {
+                "page": "256",
+                "block": "4096",
+                "size": "0x50000",
+                "offset": "0x3B0000"
+            }
+        },
+        {
+            "name": "ESP32S Break Dance V2",
+            "description": "ESP32S based 4 port controller",
+            "chip": "esp32",
+            "appbin": "esp32/esp32_breakdancev2-app.bin",
+            "esptool": {
+                "baudrate": "460800",
+                "options": "",
+                "flashcmd": "write_flash -z"
+            },
+            "binfiles": [
+                {
+                    "name": "esp32/esp32_breakdancev2-bootloader.bin",
+                    "offset": "0x01000"
+                },
+                {
+                    "name": "esp32/esp32_breakdancev2-partitions.bin",
+                    "offset": "0x08000"
+                },
+                {
+                    "name": "esp32/boot_app0.bin",
+                    "offset": "0x0e000"
+                },
+                {
+                    "name": "esp32/esp32_breakdancev2-app.bin",
                     "offset": "0x10000"
                 }
             ],

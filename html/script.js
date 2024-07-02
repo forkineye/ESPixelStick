@@ -1,5 +1,4 @@
 var StatusRequestTimer = null;
-let ExpectedStartingFileIndex = 0;
 var DiagTimer = null;
 
 // global data
@@ -79,7 +78,7 @@ const ServerAccess = new Semaphore(1);
 
 // lets get started
 MonitorServerConnection();
-let RcfResponse = RequestConfigFile("admininfo.json");
+RequestConfigFile("admininfo.json");
 RequestDiagData();
 RequestStatusUpdate();  // start self filling status loop
 
@@ -102,7 +101,7 @@ $(function () {
         $('.navbar-toggle').attr('aria-expanded', 'false');
 
         // Firmware selection and upload
-        $('#efu').change(function () {
+        $('#efu').on("change" ,function () {
             let file = _('efu').files[0];
             let formdata = new FormData();
             formdata.append("file", file);
@@ -548,9 +547,9 @@ async function ProcessWindowChange(NextWindow) {
 
     else if (NextWindow === "#config") {
         await RequestListOfFiles();
-        RequestConfigFile("config.json");
-        RequestConfigFile("output_config.json");
-        RequestConfigFile("input_config.json");
+        await RequestConfigFile("config.json");
+        await RequestConfigFile("output_config.json");
+        await RequestConfigFile("input_config.json");
     }
 
     else if (NextWindow === "#filemanagement") {
@@ -577,14 +576,14 @@ function RequestDiagData()
                     mode: "cors", // no-cors, *cors, same-origin
                     cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
                     credentials: "same-origin", // include, *same-origin, omit
-                    headers: 
+                    headers:
                     {
                         "Content-Type": "application/json",
                     },
                     redirect: "follow", // manual, *follow, error
                     referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
                 })
-                .then(async webResponse => 
+                .then(async webResponse =>
                 {
                     const data = await webResponse.blob();
                     // console.info("RequestDiagData:webResponse.status: " + webResponse.status);
@@ -604,7 +603,7 @@ function RequestDiagData()
                         drawStream(streamData);
                     }
                 })
-                .catch(async error => 
+                .catch(async error =>
                 {
                     console.error('SendCommand: Error: ', error);
                 });
@@ -1307,6 +1306,9 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData) {
         // console.info("Got System Config: " + JSON.stringify(System_Config) );
 
         updateFromJSON(System_Config);
+        $('#ftpusername').val(System_Config.device.user);
+        $('#ftppassword').val(System_Config.device.password);
+        $('#ftp_enable').prop("checked", System_Config.device.enabled);
 
         if ({}.hasOwnProperty.call(System_Config.network, 'eth')) {
             $('#pg_network #network #eth').removeClass("hidden")
@@ -1537,7 +1539,10 @@ function submitNetworkConfig() {
     System_Config.device.mosi_pin = $('#config #device #mosi_pin').val();
     System_Config.device.clock_pin = $('#config #device #clock_pin').val();
     System_Config.device.cs_pin = $('#config #device #cs_pin').val();
-    
+    System_Config.device.user = $('#ftpusername').val();
+    System_Config.device.password = $('#ftppassword').val();
+    System_Config.device.enabled = $('#ftp_enable').prop('checked');
+
     if ({}.hasOwnProperty.call(System_Config, 'sensor')) {
         System_Config.sensor.units = parseInt($('#TemperatureSensorUnits').val());
     }
@@ -1766,15 +1771,6 @@ function submitDeviceConfig() {
     submitNetworkConfig();
 
 } // submitDeviceConfig
-
-function convertUTCDateToLocalDate(date) {
-    date = new Date(date);
-    let localOffset = date.getTimezoneOffset() * 60000;
-    let localTime = date.getTime();
-    date = localTime - localOffset;
-
-    return date;
-} // convertUTCDateToLocalDate
 
 function int2ip(num) {
     let d = num % 256;

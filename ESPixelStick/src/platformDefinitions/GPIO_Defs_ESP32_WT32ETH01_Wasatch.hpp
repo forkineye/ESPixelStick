@@ -29,7 +29,7 @@
 #define DEFAULT_RMT_4_GPIO      gpio_num_t::GPIO_NUM_15
 #define DEFAULT_RMT_5_GPIO      gpio_num_t::GPIO_NUM_17
 #define DEFAULT_RMT_6_GPIO      gpio_num_t::GPIO_NUM_5
-#define DEFAULT_RMT_7_GPIO      gpio_num_t::GPIO_NUM_3
+#define DEFAULT_RMT_7_GPIO      gpio_num_t::GPIO_NUM_33
 
 // #   define SUPPORT_SPI_OUTPUT
 // #define DEFAULT_SPI_DATA_GPIO  gpio_num_t::GPIO_NUM_15
@@ -54,12 +54,12 @@
    * ETH_CLOCK_GPIO16_OUT - 50MHz clock from internal APLL output on GPIO16 - possibly an inverter is needed for LAN8720
    * ETH_CLOCK_GPIO17_OUT - 50MHz clock from internal APLL inverted output on GPIO17 - tested with LAN8720
 */
-#define DEFAULT_ETH_CLK_MODE           eth_clock_mode_t::ETH_CLOCK_GPIO17_OUT
+#define DEFAULT_ETH_CLK_MODE           eth_clock_mode_t::ETH_CLOCK_GPIO0_IN
 
 // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
 #define DEFAULT_ETH_POWER_PIN          gpio_num_t::GPIO_NUM_16
 #define ETH_POWER_PIN                  DEFAULT_ETH_POWER_PIN
-#define DEFAULT_ETH_POWER_PIN_ACTIVE   HIGH
+#define DEFAULT_ETH_POWER_PIN_ACTIVE   LOW
 
 // Type of the Ethernet PHY (LAN8720 or TLK110)
 #define DEFAULT_ETH_TYPE               eth_phy_type_t::ETH_PHY_LAN8720

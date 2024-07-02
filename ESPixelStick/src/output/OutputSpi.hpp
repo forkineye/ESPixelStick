@@ -53,7 +53,7 @@ private:
 #define SPI_NUM_TRANSACTIONS                 2
 #define SPI_NUM_INTENSITY_PER_TRANSACTION    128
 #define SPI_BITS_PER_INTENSITY               8
-#define SPI_SPI_HOST                         VSPI_HOST
+#define SPI_SPI_HOST                         DEFAULT_SPI_DEVICE
 #define SPI_SPI_DMA_CHANNEL                  2
 
     uint8_t NumIntensityValuesPerInterrupt = 0;
