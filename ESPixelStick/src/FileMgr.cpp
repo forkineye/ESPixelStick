@@ -120,7 +120,8 @@ void ftp_transferCallback(FtpTransferOperation ftpOperation, const char* name, u
 
 //-----------------------------------------------------------------------------
 static PROGMEM const char DefaultFseqResponse[] =
-    "{\"totalBytes\" : 0," \
+    "{\"SdCardPresent\" : false," \
+    "\"totalBytes\" : 0," \
     "\"files\" : []," \
     "\"usedBytes\" : 0," \
     "\"numFiles\" : 0" \
