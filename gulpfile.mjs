@@ -10,11 +10,13 @@ import gzip from "gulp-gzip";
 import { deleteAsync } from "del";
 import markdown from "gulp-markdown-github-style";
 import rename from "gulp-rename";
+import using from "gulp-using";
 
 /* HTML Task */
 gulp.task("html", function () {
   return gulp
     .src(["html/*.html"])
+    .pipe(using())
     .pipe(plumber())
     .pipe(
       htmlmin({
@@ -31,12 +33,9 @@ gulp.task("html", function () {
 /* CSS Task */
 gulp.task("css", function () {
   return gulp
-    .src([
-      "html/css/bootstrap.css",
-      "html/css/dropzone.css",
-      "html/css/style.css",
-    ])
+    .src(["html/css/*.css"])
     .pipe(plumber())
+    .pipe(using())
     .pipe(concat("esps.css"))
     .pipe(cleancss())
     .pipe(gzip())
@@ -56,11 +55,13 @@ gulp.task("js", function () {
       "html/script.js",
     ])
     .pipe(plumber())
+    .pipe(using())
     .pipe(concat("esps.js"))
     .pipe(
       terser({ toplevel: true })
     ) /* comment out this line to debug the script file */
     .pipe(gzip())
+    .pipe(using())
     .pipe(gulp.dest("ESPixelStick/data/www"));
 });
 
@@ -68,6 +69,7 @@ gulp.task("js", function () {
 gulp.task("json", function () {
   return gulp
     .src("html/*.json")
+    .pipe(using())
     .pipe(plumber())
     .pipe(gulp.dest("ESPixelStick/data"));
 });
@@ -76,6 +78,7 @@ gulp.task("json", function () {
 gulp.task("image", function () {
   return gulp
     .src(["html/**/*.png", "html/**/*.ico"])
+    .pipe(using())
     .pipe(plumber())
     .pipe(gulp.dest("ESPixelStick/data/www"));
 });
