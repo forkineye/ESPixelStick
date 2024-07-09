@@ -112,20 +112,6 @@ void c_InputArtnet::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-void c_InputArtnet::Process ()
-{
-    // DEBUG_START;
-    if ((nullptr != pArtnet) && (NetworkMgr.IsConnected ()))
-    {
-        // DEBUG_V ("");
-        pArtnet->read ();
-    }
-
-    // DEBUG_END;
-
-} // process
-
-//-----------------------------------------------------------------------------
 void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
                                 uint32_t  length,
                                 uint8_t   SequenceNumber,
