@@ -136,8 +136,6 @@ void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
 
     if ((startUniverse <= CurrentUniverseId) && (LastUniverse >= CurrentUniverseId))
     {
-        // LastRemoteIP = remoteIP;
-
         // Universe offset and sequence tracking
         Universe_t & CurrentUniverse = UniverseArray[CurrentUniverseId - startUniverse];
 
@@ -172,6 +170,9 @@ void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
     else
     {
         // DEBUG_V ("Not interested in this universe");
+        // DEBUG_V(String("CurrentUniverseId: ") + String(CurrentUniverseId));
+        // DEBUG_V(String("    startUniverse: ") + String(startUniverse));
+        // DEBUG_V(String("     LastUniverse: ") + String(LastUniverse));
     }
     // DEBUG_END;
 }
@@ -317,13 +318,6 @@ void c_InputArtnet::validateConfiguration ()
     // DEBUG_V (String ("       ChannelsPerUniverse: ") + String (ChannelsPerUniverse));
     // DEBUG_V (String ("FirstUniverseChannelOffset: ") + String (FirstUniverseChannelOffset));
     // DEBUG_V (String ("              LastUniverse: ") + String (startUniverse));
-
-    if (startUniverse < 1)
-    {
-        // DEBUG_V (String("ERROR: startUniverse: ") + String(startUniverse));
-
-        startUniverse = 1;
-    }
 
     // DEBUG_V ("");
     if (ChannelsPerUniverse > UNIVERSE_MAX || ChannelsPerUniverse < 1)
