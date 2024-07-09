@@ -37,7 +37,7 @@ class c_InputArtnet : public c_InputCommon
     uint16_t    FirstUniverseChannelOffset = 1;    ///< Channel to start listening at - 1 based
     uint32_t    num_packets                = 0;
     uint32_t    packet_errors              = 0;
-    IPAddress   LastRemoteIP;
+    uint32_t    PollCounter                = 0;
 
     uint8_t     lastData = 255;
 
@@ -46,12 +46,12 @@ class c_InputArtnet : public c_InputCommon
 
     typedef struct
     {
-        uint32_t   DestinationOffset;
-        uint32_t   BytesToCopy;
-        uint32_t   SourceDataOffset;
-        uint32_t SequenceErrorCounter;
-        uint8_t  SequenceNumber;
-        uint32_t num_packets;
+        uint32_t    DestinationOffset;
+        uint32_t    BytesToCopy;
+        uint32_t    SourceDataOffset;
+        uint32_t    SequenceErrorCounter;
+        uint8_t     SequenceNumber;
+        uint32_t    num_packets;
 
     } Universe_t;
     Universe_t UniverseArray[MAX_NUM_UNIVERSES];
@@ -61,6 +61,7 @@ class c_InputArtnet : public c_InputCommon
     void NetworkStateChanged (bool IsConnected, bool RebootAllowed); // used by poorly designed rx functions
     void SetBufferTranslation ();
     void onDmxFrame (uint16_t CurrentUniverseId, uint32_t length, uint8_t sequence, uint8_t* data, IPAddress remoteIP);
+    void onDmxPoll (IPAddress  broadcastIP);
 
   public:
 

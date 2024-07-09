@@ -157,6 +157,7 @@ const CN_PROGMEM char CN_playFseq                 [] = "playFseq";
 const CN_PROGMEM char CN_playlist                 [] = "playlist";
 const CN_PROGMEM char CN_plussigns                [] = "+++++";
 const CN_PROGMEM char CN_polarity                 [] = "polarity";
+const CN_PROGMEM char CN_PollCounter              [] = "PollCounter";
 const CN_PROGMEM char CN_port                     [] = "port";
 const CN_PROGMEM char CN_power_pin                [] = "power_pin";
 const CN_PROGMEM char CN_prependnullcount         [] = "prependnullcount";

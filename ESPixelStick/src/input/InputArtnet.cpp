@@ -94,7 +94,8 @@ void c_InputArtnet::GetStatus (JsonObject & jsonStatus)
     ArtnetStatus[F ("lastData")]   = lastData;
     ArtnetStatus[CN_num_packets]   = num_packets;
     ArtnetStatus[CN_packet_errors] = packet_errors;
-    ArtnetStatus[CN_last_clientIP] = LastRemoteIP.toString ();
+    ArtnetStatus[CN_last_clientIP] = pArtnet->getRemoteIP().toString ();
+    ArtnetStatus[CN_PollCounter]   = PollCounter;
 
     JsonArray ArtnetUniverseStatus = ArtnetStatus.createNestedArray (CN_channels);
 
@@ -135,7 +136,7 @@ void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
 
     if ((startUniverse <= CurrentUniverseId) && (LastUniverse >= CurrentUniverseId))
     {
-        LastRemoteIP = remoteIP;
+        // LastRemoteIP = remoteIP;
 
         // Universe offset and sequence tracking
         Universe_t & CurrentUniverse = UniverseArray[CurrentUniverseId - startUniverse];
@@ -174,6 +175,18 @@ void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
     }
     // DEBUG_END;
 }
+
+//-----------------------------------------------------------------------------
+void c_InputArtnet::onDmxPoll (IPAddress  BroadcastIP)
+{
+    // DEBUG_START;
+
+    logcon(String(F("POLL from ")) + pArtnet->getRemoteIP().toString() +  F(", broadcast addr: ") + BroadcastIP.toString());
+    PollCounter ++;
+
+    // DEBUG_END;
+}
+
 //-----------------------------------------------------------------------------
 void c_InputArtnet::SetBufferInfo (uint32_t BufferSize)
 {
@@ -277,10 +290,14 @@ void c_InputArtnet::SetUpArtnet ()
 
         fMe = this; // hate this
         pArtnet->setArtDmxCallback ([](uint16_t UniverseId, uint16_t length, uint8_t sequence, uint8_t* data, IPAddress remoteIP)
-            {
-                // logcon ("fMe");
-                fMe->onDmxFrame (UniverseId, length, sequence, data, remoteIP);
-            });
+        {
+            fMe->onDmxFrame (UniverseId, length, sequence, data, remoteIP);
+        });
+
+        pArtnet->setArtPollCallback ([](IPAddress BroadcastIP)
+        {
+            fMe->onDmxPoll (BroadcastIP);
+        });
     }
     // DEBUG_V ("");
 

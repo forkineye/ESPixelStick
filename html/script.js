@@ -2013,6 +2013,7 @@ function ProcessReceivedJsonStatusMessage(JsonStat) {
         $('#an_pkts').text(InputStatus.Artnet.num_packets);
         $('#an_chanlim').text(InputStatus.Artnet.unichanlim);
         $('#an_perr').text(InputStatus.Artnet.packet_errors);
+        $('#an_PollCounter').text(InputStatus.Artnet.PollCounter);
         $('#an_clientip').text(InputStatus.Artnet.last_clientIP);
     }
     else {
