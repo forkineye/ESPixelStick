@@ -94,7 +94,8 @@ void c_InputArtnet::GetStatus (JsonObject & jsonStatus)
     ArtnetStatus[F ("lastData")]   = lastData;
     ArtnetStatus[CN_num_packets]   = num_packets;
     ArtnetStatus[CN_packet_errors] = packet_errors;
-    ArtnetStatus[CN_last_clientIP] = LastRemoteIP.toString ();
+    ArtnetStatus[CN_last_clientIP] = pArtnet->getRemoteIP().toString ();
+    ArtnetStatus[CN_PollCounter]   = PollCounter;
 
     JsonArray ArtnetUniverseStatus = ArtnetStatus.createNestedArray (CN_channels);
 
@@ -111,20 +112,6 @@ void c_InputArtnet::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-void c_InputArtnet::Process ()
-{
-    // DEBUG_START;
-    if ((nullptr != pArtnet) && (NetworkMgr.IsConnected ()))
-    {
-        // DEBUG_V ("");
-        pArtnet->read ();
-    }
-
-    // DEBUG_END;
-
-} // process
-
-//-----------------------------------------------------------------------------
 void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
                                 uint32_t  length,
                                 uint8_t   SequenceNumber,
@@ -135,8 +122,6 @@ void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
 
     if ((startUniverse <= CurrentUniverseId) && (LastUniverse >= CurrentUniverseId))
     {
-        LastRemoteIP = remoteIP;
-
         // Universe offset and sequence tracking
         Universe_t & CurrentUniverse = UniverseArray[CurrentUniverseId - startUniverse];
 
@@ -171,9 +156,24 @@ void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
     else
     {
         // DEBUG_V ("Not interested in this universe");
+        // DEBUG_V(String("CurrentUniverseId: ") + String(CurrentUniverseId));
+        // DEBUG_V(String("    startUniverse: ") + String(startUniverse));
+        // DEBUG_V(String("     LastUniverse: ") + String(LastUniverse));
     }
     // DEBUG_END;
 }
+
+//-----------------------------------------------------------------------------
+void c_InputArtnet::onDmxPoll (IPAddress  BroadcastIP)
+{
+    // DEBUG_START;
+
+    logcon(String(F("POLL from ")) + pArtnet->getRemoteIP().toString() +  F(", broadcast addr: ") + BroadcastIP.toString());
+    PollCounter ++;
+
+    // DEBUG_END;
+}
+
 //-----------------------------------------------------------------------------
 void c_InputArtnet::SetBufferInfo (uint32_t BufferSize)
 {
@@ -277,10 +277,14 @@ void c_InputArtnet::SetUpArtnet ()
 
         fMe = this; // hate this
         pArtnet->setArtDmxCallback ([](uint16_t UniverseId, uint16_t length, uint8_t sequence, uint8_t* data, IPAddress remoteIP)
-            {
-                // logcon ("fMe");
-                fMe->onDmxFrame (UniverseId, length, sequence, data, remoteIP);
-            });
+        {
+            fMe->onDmxFrame (UniverseId, length, sequence, data, remoteIP);
+        });
+
+        pArtnet->setArtPollCallback ([](IPAddress BroadcastIP)
+        {
+            fMe->onDmxPoll (BroadcastIP);
+        });
     }
     // DEBUG_V ("");
 
@@ -300,13 +304,6 @@ void c_InputArtnet::validateConfiguration ()
     // DEBUG_V (String ("       ChannelsPerUniverse: ") + String (ChannelsPerUniverse));
     // DEBUG_V (String ("FirstUniverseChannelOffset: ") + String (FirstUniverseChannelOffset));
     // DEBUG_V (String ("              LastUniverse: ") + String (startUniverse));
-
-    if (startUniverse < 1)
-    {
-        // DEBUG_V (String("ERROR: startUniverse: ") + String(startUniverse));
-
-        startUniverse = 1;
-    }
 
     // DEBUG_V ("");
     if (ChannelsPerUniverse > UNIVERSE_MAX || ChannelsPerUniverse < 1)

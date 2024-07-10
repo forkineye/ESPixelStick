@@ -9,7 +9,7 @@ var System_Config = null;
 var Fseq_File_List = [];
 var selector = [];
 var target = document.location.host;
-// target = "192.168.10.233";
+// target = "192.168.10.188";
 
 var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
@@ -719,22 +719,25 @@ function BytesToMB(Value) {
 
 } // BytesToMB
 
-async function ProcessGetFileListResponse(JsonConfigData) {
+async function ProcessGetFileListResponse(JsonData) {
     // console.info("ProcessGetFileListResponse");
 
-    SdCardIsInstalled = JsonConfigData.SdCardPresent;
+    SdCardIsInstalled = JsonData.SdCardPresent;
+    // console.info("SdCardIsInstalled: " + SdCardIsInstalled);
 
-    if (false === SdCardIsInstalled) {
-        $("#li-filemanagement").addClass("hidden");
-    }
-    else{
+    if (true === SdCardIsInstalled)
+    {
         $("#li-filemanagement").removeClass("hidden");
     }
+    else
+    {
+        $("#li-filemanagement").addClass("hidden");
+    }
 
-    $("#totalBytes").val(BytesToMB(JsonConfigData.totalBytes));
-    $("#usedBytes").val(BytesToMB(JsonConfigData.usedBytes));
-    $("#remainingBytes").val(BytesToMB(JsonConfigData.totalBytes - JsonConfigData.usedBytes));
-    $("#filecount").val(JsonConfigData.numFiles);
+    $("#totalBytes").val(BytesToMB(JsonData.totalBytes));
+    $("#usedBytes").val(BytesToMB(JsonData.usedBytes));
+    $("#remainingBytes").val(BytesToMB(JsonData.totalBytes - JsonData.usedBytes));
+    $("#filecount").val(JsonData.numFiles);
 
     // console.info("totalBytes: " + JsonConfigData.totalBytes);
     // console.info("usedBytes: " + JsonConfigData.usedBytes);
@@ -745,12 +748,12 @@ async function ProcessGetFileListResponse(JsonConfigData) {
     // delete current entries
     $('#FileManagementTable').empty();
 
-    JsonConfigData.files.sort(function(a, b)
+    JsonData.files.sort(function(a, b)
     {
         return a.name.localeCompare(b.name);
     });
 
-    JsonConfigData.files.forEach(function (file) 
+    JsonData.files.forEach(function (file)
     {
         let CurrentRowId = $('#FileManagementTable > tr').length;
         let SelectedPattern = '<td><input  type="checkbox" id="FileSelected_' + (CurrentRowId) + '"></td>';
@@ -2010,6 +2013,7 @@ function ProcessReceivedJsonStatusMessage(JsonStat) {
         $('#an_pkts').text(InputStatus.Artnet.num_packets);
         $('#an_chanlim').text(InputStatus.Artnet.unichanlim);
         $('#an_perr').text(InputStatus.Artnet.packet_errors);
+        $('#an_PollCounter').text(InputStatus.Artnet.PollCounter);
         $('#an_clientip').text(InputStatus.Artnet.last_clientIP);
     }
     else {
