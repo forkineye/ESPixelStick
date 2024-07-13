@@ -648,14 +648,15 @@ size_t c_WebMgr::GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t ind
             }
             break;
         }
-        // is it a new request
+
+        // DEBUG_V("is it a new request");
         if (index == 0)
         {
             NumberOfBytesTransfered = 0;             // reset the log line index when we get a new request
             TotalFileSizeToTransfer = 0;
             buffer[0] = '\0';
 
-            // Try to open the file
+            // DEBUG_V("Try to open the file");
             if(!FileMgr.OpenSdFile(FSEQFILELIST, c_FileMgr::FileMode::FileRead, FileHandle))
             {
                 logcon(F("ERROR: Could not open List of Fseq files for reading"));
@@ -665,6 +666,7 @@ size_t c_WebMgr::GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t ind
                 break;
             }
 
+            // DEBUG_V("Get the file size");
             TotalFileSizeToTransfer = FileMgr.GetSdFileSize(FileHandle);
         }
 
@@ -696,6 +698,7 @@ size_t c_WebMgr::GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t ind
             break;
         }
 
+        // DEBUG_V("Read a chunk");
         memset(buffer, 0x0, maxlen-1);
         FileMgr.ReadSdFile(FileHandle,
                            buffer,
@@ -703,7 +706,7 @@ size_t c_WebMgr::GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t ind
         // buffer[DataToSendThisChunk] = 'A';
         NumberOfBytesTransfered += DataToSendThisChunk;
         response = DataToSendThisChunk;
-        // DEBUG_VV(String("buffer: ") + String((char*)buffer));
+        // DEBUG_V(String("buffer: ") + String((char*)buffer));
 
     } while(false);
 
