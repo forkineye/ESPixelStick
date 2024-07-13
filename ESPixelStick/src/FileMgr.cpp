@@ -24,7 +24,16 @@
 #include "FileMgr.hpp"
 #include "network/NetworkMgr.hpp"
 
-SdFat sd;
+SdFs sd;
+const int8_t DISABLE_CS_PIN = -1;
+
+#if HAS_SDIO_CLASS
+#define SD_CONFIG SdioConfig(FIFO_SDIO)
+#elif ENABLE_DEDICATED_SPI
+#define SD_CONFIG SdSpiConfig(SD_CS_PIN, DEDICATED_SPI, SD_SCK_MHZ(16))
+#else  // HAS_SDIO_CLASS
+#define SD_CONFIG SdSpiConfig(SD_CS_PIN, SHARED_SPI, SD_SCK_MHZ(16))
+#endif  // HAS_SDIO_CLASS
 
 oflag_t XlateFileMode[3] = { O_READ , O_WRITE | O_CREAT, O_WRITE | O_APPEND };
 #ifdef SUPPORT_FTP
@@ -373,16 +382,13 @@ void c_FileMgr::SetSpiIoPins ()
         // DEBUG_V();
         pinMode(miso_pin, INPUT);
 #       endif // def USE_MISO_PULLUP
-        SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin);
+        SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin); // uses HSPI by default
 #   else // ESP8266
         SPI.end ();
         SPI.begin ();
 #   endif // ! ARDUINO_ARCH_ESP32
         // DEBUG_V();
-        ResetSdCard();
-
-        // DEBUG_V();
-        if (!ESP_SD.begin (SdSpiConfig(cs_pin, SHARED_SPI, SD_CARD_CLK_MHZ, &SPI)))
+        if (!ESP_SD.begin (SdSpiConfig(cs_pin, SHARED_SPI, SD_SCK_MHZ(16))))
 #endif // !def SUPPORT_SD_MMC
         {
             // DEBUG_V();
@@ -1192,11 +1198,11 @@ bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & Fil
 
         // DEBUG_V ();
 
-        // DEBUG_V (String("FileName: '") + FileNamePrefix + FileName + "'");
+        // DEBUG_V (String("FileName: '") + FileName + "'");
 
         if (FileMode::FileRead == Mode)
         {
-            // DEBUG_V (String("Read FIle"));
+            // DEBUG_V (String("Read mode"));
             if (false == ESP_SD.exists (FileName))
             {
                 logcon (String (F ("ERROR: Cannot find '")) + FileName + F ("' for reading. File does not exist."));
@@ -1221,7 +1227,7 @@ bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & Fil
             FileHandle = FileList[FileListIndex].handle;
         }
 
-        // did we get an index
+        // DEBUG_V("did we get an index");
         if (-1 != FileListIndex)
         {
             // DEBUG_V(String("Valid FileListIndex: ") + String(FileListIndex));
