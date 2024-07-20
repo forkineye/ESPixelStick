@@ -95,10 +95,6 @@ void c_InputAlexa::GetConfig (JsonObject & jsonConfig)
 void c_InputAlexa::GetStatus (JsonObject& /* jsonStatus */)
 {
     // DEBUG_START;
-
-    // JsonObject mqttStatus = jsonStatus.createNestedObject (F ("mqtt"));
-    // mqttStatus["unifirst"] = startUniverse;
-
     // DEBUG_END;
 
 } // GetStatus
@@ -170,8 +166,8 @@ void c_InputAlexa::onMessage(EspalexaDevice * pDevice)
         // DEBUG_V (String ("pDevice->getG: ") + String (pDevice->getG ()));
         // DEBUG_V (String ("pDevice->getB: ") + String (pDevice->getB ()));
 
-        DynamicJsonDocument JsonConfigDoc (1024);
-        JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_config);
+        JsonDocument JsonConfigDoc;
+        JsonObject JsonConfig = JsonConfigDoc[CN_config].to<JsonObject> ();
 
         JsonConfig[CN_EffectSpeed]      = 1;
         JsonConfig[CN_EffectReverse]    = false;

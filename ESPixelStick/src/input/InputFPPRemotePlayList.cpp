@@ -108,7 +108,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
     // DEBUG_START;
     bool response = false;
 
-    DynamicJsonDocument JsonPlayListDoc (2048);
+    JsonDocument JsonPlayListDoc;
 
     extern void PrettyPrint (JsonArray & jsonStuff, String Name);
     extern void PrettyPrint (JsonObject & jsonStuff, String Name);

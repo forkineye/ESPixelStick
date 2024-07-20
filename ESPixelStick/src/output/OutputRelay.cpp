@@ -304,12 +304,12 @@ void c_OutputRelay::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 
     jsonConfig[OM_RELAY_UPDATE_INTERVAL_NAME] = UpdateInterval;
 
-    JsonArray JsonChannelList = jsonConfig.createNestedArray (CN_channels);
+    JsonArray JsonChannelList = jsonConfig[CN_channels].to<JsonArray> ();
 
     uint8_t ChannelId = 0;
     for (RelayChannel_t & currentRelay : OutputList)
     {
-        JsonObject JsonChannelData = JsonChannelList.createNestedObject ();
+        JsonObject JsonChannelData = JsonChannelList.add<JsonObject> ();
 
         JsonChannelData[CN_id]                         = ChannelId;
         JsonChannelData[OM_RELAY_CHANNEL_ENABLED_NAME] = currentRelay.Enabled;
@@ -341,12 +341,12 @@ void c_OutputRelay::GetStatus(ArduinoJson::JsonObject &jsonStatus)
     // DEBUG_START;
 
     c_OutputCommon::GetStatus(jsonStatus);
-    JsonArray JsonChannelList = jsonStatus.createNestedArray (CN_Relay);
+    JsonArray JsonChannelList = jsonStatus[CN_Relay].to<JsonArray> ();
 
     uint8_t ChannelId = 0;
     for (RelayChannel_t & currentRelay : OutputList)
     {
-        JsonObject JsonChannelData = JsonChannelList.createNestedObject ();
+        JsonObject JsonChannelData = JsonChannelList.add<JsonObject> ();
 
         JsonChannelData[CN_id]          = ChannelId;
         JsonChannelData[CN_activevalue] = currentRelay.previousValue;

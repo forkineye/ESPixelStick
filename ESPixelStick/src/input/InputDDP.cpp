@@ -89,7 +89,7 @@ void c_InputDDP::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject ddpStatus = jsonStatus.createNestedObject (F ("ddp"));
+    JsonObject ddpStatus = jsonStatus[F ("ddp")].to<JsonObject> ();
     // DEBUG_V ("");
 
     ddpStatus["packetsreceived"] = stats.packetsReceived;
@@ -317,8 +317,8 @@ void c_InputDDP::ProcessReceivedQuery ()
         {
             // DEBUG_V ("DDP_ID_CONFIG query");
 
-            DynamicJsonDocument JsonConfigDoc (2048);
-            JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_config);
+            JsonDocument JsonConfigDoc;
+            JsonObject JsonConfig = JsonConfigDoc[CN_config].to<JsonObject> ();
             String hostname;
             NetworkMgr.GetHostname (hostname);
             JsonConfig[CN_hostname] = hostname;

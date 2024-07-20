@@ -92,17 +92,17 @@ void c_NetworkMgr::GetConfig (JsonObject & json)
 {
     // DEBUG_START;
 
-    JsonObject NetworkConfig = json.createNestedObject (CN_network);
+    JsonObject NetworkConfig = json[CN_network].to<JsonObject> ();
 
     NetworkConfig[CN_hostname] = hostname;
 
-    JsonObject NetworkWiFiConfig = NetworkConfig.createNestedObject (CN_wifi);
+    JsonObject NetworkWiFiConfig = NetworkConfig[CN_wifi].to<JsonObject> ();
     WiFiDriver.GetConfig (NetworkWiFiConfig);
 
 #ifdef SUPPORT_ETHERNET
     NetworkConfig[CN_weus] = AllowWiFiAndEthUpSimultaneously;
 
-    JsonObject NetworkEthConfig = NetworkConfig.createNestedObject (CN_eth);
+    JsonObject NetworkEthConfig = NetworkConfig[CN_eth].to<JsonObject> ();
     EthernetDriver.GetConfig (NetworkEthConfig);
 
 #endif // def SUPPORT_ETHERNET
@@ -121,16 +121,16 @@ void c_NetworkMgr::GetStatus (JsonObject & json)
 {
     // DEBUG_START;
 
-    JsonObject NetworkStatus = json.createNestedObject (CN_network);
+    JsonObject NetworkStatus = json[CN_network].to<JsonObject> ();
     String name;
     GetHostname (name);
     NetworkStatus[CN_hostname] = name;
 
-    JsonObject NetworkWiFiStatus = NetworkStatus.createNestedObject (CN_wifi);
+    JsonObject NetworkWiFiStatus = NetworkStatus[CN_wifi].to<JsonObject> ();
     WiFiDriver.GetStatus (NetworkWiFiStatus);
 
 #ifdef SUPPORT_ETHERNET
-    JsonObject NetworkEthStatus = NetworkStatus.createNestedObject (CN_eth);
+    JsonObject NetworkEthStatus = NetworkStatus[CN_eth].to<JsonObject> ();
     EthernetDriver.GetStatus (NetworkEthStatus);
 #endif // def SUPPORT_ETHERNET
 

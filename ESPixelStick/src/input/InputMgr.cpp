@@ -155,7 +155,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
     else
     {
         // DEBUG_V ("");
-        InputMgrButtonData = jsonConfig.createNestedObject (IM_EffectsControlButtonName);
+        InputMgrButtonData = jsonConfig[IM_EffectsControlButtonName].to<JsonObject> ();
     }
     // DEBUG_V ("");
     // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
@@ -177,7 +177,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
     {
         // add our section header
         // DEBUG_V ("");
-        InputMgrChannelsData = jsonConfig.createNestedObject (CN_channels);
+        InputMgrChannelsData = jsonConfig[CN_channels].to<JsonObject> ();
     }
 
     // add the channel configurations
@@ -203,7 +203,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
         {
             // add our section header
             // DEBUG_V ("");
-            ChannelConfigData = InputMgrChannelsData.createNestedObject (sChannelId);
+            ChannelConfigData = InputMgrChannelsData[sChannelId].to<JsonObject> ();
         }
 
         // save the name as the selected channel type
@@ -220,7 +220,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
         {
             // add our section header
             // DEBUG_V ("");
-            ChannelConfigByTypeData = ChannelConfigData.createNestedObject (DriverTypeId);
+            ChannelConfigByTypeData = ChannelConfigData[DriverTypeId].to<JsonObject> ();
         }
 
         // ask the channel to add its data to the record
@@ -255,10 +255,10 @@ void c_InputMgr::CreateNewConfig ()
     // create a place to save the config
     // DEBUG_V(String("Heap: ") + String(ESP.getFreeHeap()));
 
-    DynamicJsonDocument JsonConfigDoc(IM_JSON_SIZE);
+    JsonDocument JsonConfigDoc;
     // DEBUG_V("");
 
-    JsonObject JsonConfig = JsonConfigDoc.createNestedObject(CN_input_config);
+    JsonObject JsonConfig = JsonConfigDoc[CN_input_config].to<JsonObject>();
     // DEBUG_V("");
 
     JsonConfig[CN_cfgver] = CurrentConfigVersion;
@@ -317,18 +317,18 @@ void c_InputMgr::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject InputButtonStatus = jsonStatus.createNestedObject (F ("inputbutton"));
+    JsonObject InputButtonStatus = jsonStatus[F ("inputbutton")].to<JsonObject> ();
     ExternalInput.GetStatistics (InputButtonStatus);
 
-    JsonArray InputStatus = jsonStatus.createNestedArray (F ("input"));
+    JsonArray InputStatus = jsonStatus[F ("input")].to<JsonArray> ();
     for (auto & CurrentInput : InputChannelDrivers)
     {
-        if(nullptr == CurrentInput.pInputChannelDriver) 
+        if(nullptr == CurrentInput.pInputChannelDriver)
         {
             continue;
         }
 
-        JsonObject channelStatus = InputStatus.createNestedObject ();
+        JsonObject channelStatus = InputStatus.add<JsonObject> ();
         CurrentInput.pInputChannelDriver->GetStatus (channelStatus);
         // DEBUG_V("");
     }
@@ -616,7 +616,7 @@ void c_InputMgr::LoadConfig ()
     ConfigLoadNeeded = NO_CONFIG_NEEDED;
     configInProgress = true;
     // try to load and process the config file
-    if (!FileMgr.LoadFlashFile (ConfigFileName, [this](DynamicJsonDocument & JsonConfigDoc)
+    if (!FileMgr.LoadFlashFile (ConfigFileName, [this](JsonDocument & JsonConfigDoc)
         {
             // DEBUG_V ("");
             JsonObject JsonConfig = JsonConfigDoc.as<JsonObject> ();

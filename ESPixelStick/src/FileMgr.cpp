@@ -606,20 +606,8 @@ bool c_FileMgr::LoadFlashFile (const String& FileName, DeserializationHandler Ha
         size_t JsonDocSize = file.size () * 3;
         // DEBUG_V(String("Allocate JSON document. Size = ") + String(JsonDocSize));
         // DEBUG_V(String("Heap: ") + ESP.getFreeHeap());
-        DynamicJsonDocument jsonDoc(JsonDocSize);
+        JsonDocument jsonDoc;
         // DEBUG_V(String("jsonDoc.capacity: ") + String(jsonDoc.capacity()));
-
-        // did we get enough memory?
-        if(jsonDoc.capacity() < JsonDocSize)
-        {
-            logcon (String(CN_stars) + CfgFileMessagePrefix + String (F ("Could Not Allocate enough memory to process config ")) + CN_stars);
-
-            // DEBUG_V(String("Allocate JSON document. Size = ") + String(JsonDocSize));
-            // DEBUG_V(String("Heap: ") + ESP.getFreeHeap());
-            // DEBUG_V(String("jsonDoc.capacity: ") + String(jsonDoc.capacity()));
-            file.close ();
-            break;
-        }
 
         // DEBUG_V ("Convert File to JSON document");
         DeserializationError error = deserializeJson (jsonDoc, file);
@@ -639,12 +627,10 @@ bool c_FileMgr::LoadFlashFile (const String& FileName, DeserializationHandler Ha
             break;
         }
 
-        // extern void PrettyPrint(DynamicJsonDocument & jsonStuff, String Name);
+        // extern void PrettyPrint(JsonDocument & jsonStuff, String Name);
         // PrettyPrint(jsonDoc, CfgFileMessagePrefix);
 
         // DEBUG_V ();
-        jsonDoc.garbageCollect ();
-
         logcon (CfgFileMessagePrefix + String (F ("loaded.")));
 
         // DEBUG_V ();

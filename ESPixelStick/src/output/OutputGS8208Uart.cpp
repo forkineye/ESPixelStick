@@ -127,7 +127,7 @@ void c_OutputGS8208Uart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
     Uart.GetStatus(jsonStatus);
 
 #ifdef GS8208_UART_DEBUG_COUNTERS
-    JsonObject debugStatus = jsonStatus.createNestedObject("GS8208 UART Debug");
+    JsonObject debugStatus = jsonStatus["GS8208 UART Debug"].to<JsonObject>();
     debugStatus["NewFrameCounter"] = NewFrameCounter;
     debugStatus["TimeSinceLastFrameMS"] = TimeSinceLastFrameMS;
     debugStatus["TimeLastFrameStartedMS"] = TimeLastFrameStartedMS;

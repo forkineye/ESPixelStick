@@ -128,7 +128,7 @@ void TestHeap(uint32_t Id)
     DEBUG_V(String("Allocate JSON document. Size = ") + String(20 * 1024));
     DEBUG_V(String("Heap Before: ") + ESP.getFreeHeap());
     {
-        DynamicJsonDocument jsonDoc(20 * 1024);
+        JsonDocument jsonDoc;
     }
     DEBUG_V(String(" Heap After: ") + ESP.getFreeHeap());
 }
@@ -371,11 +371,11 @@ bool deserializeCore (JsonObject & json)
     return DataHasBeenAccepted;
 }
 
-void deserializeCoreHandler (DynamicJsonDocument & jsonDoc)
+void deserializeCoreHandler (JsonDocument & jsonDoc)
 {
     // DEBUG_START;
 
-    // extern void PrettyPrint(DynamicJsonDocument & jsonStuff, String Name);
+    // extern void PrettyPrint(JsonDocument & jsonStuff, String Name);
     // PrettyPrint(jsonDoc, "deserializeCoreHandler");
 
     JsonObject json = jsonDoc.as<JsonObject>();
@@ -392,8 +392,8 @@ void SaveConfig()
     ConfigSaveNeeded = false;
 
     // Create buffer and root object
-    DynamicJsonDocument jsonConfigDoc(2048);
-    JsonObject JsonConfig = jsonConfigDoc.createNestedObject(CN_system);
+    JsonDocument jsonConfigDoc;
+    JsonObject JsonConfig = jsonConfigDoc[CN_system].to<JsonObject>();
 
     GetConfig(JsonConfig);
 
@@ -438,7 +438,7 @@ void GetConfig (JsonObject & json)
     json[CN_cfgver] = CurrentConfigVersion;
 
     // Device
-    JsonObject device       = json.createNestedObject(CN_device);
+    JsonObject device       = json[CN_device].to<JsonObject>();
     device[CN_id]           = config.id;
     device[CN_blanktime]    = config.BlankDelay;
 
@@ -459,8 +459,8 @@ String serializeCore(bool pretty)
     // DEBUG_START;
 
     // Create buffer and root object
-    DynamicJsonDocument jsonConfigDoc(2048);
-    JsonObject JsonConfig = jsonConfigDoc.createNestedObject();
+    JsonDocument jsonConfigDoc;
+    JsonObject JsonConfig = jsonConfigDoc.add<JsonObject>();
 
     String jsonConfigString;
 

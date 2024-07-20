@@ -40,11 +40,11 @@ void c_SensorDS18B20::Begin ()
 } // Begin
 
 //-----------------------------------------------------------------------------
-void c_SensorDS18B20::GetConfig (JsonObject& json) 
+void c_SensorDS18B20::GetConfig (JsonObject& json)
 {
     // DEBUG_START;
 
-    JsonObject SensorConfig = json.createNestedObject (CN_sensor);
+    JsonObject SensorConfig = json[CN_sensor].to<JsonObject> ();
 
     SensorConfig[CN_units] = TempUnit;
 
@@ -93,7 +93,7 @@ void c_SensorDS18B20::GetStatus (JsonObject& json)
             break;
         }
 
-        JsonObject SensorStatus = json.createNestedObject (CN_sensor);
+        JsonObject SensorStatus = json[CN_sensor].to<JsonObject> ();
 
         SensorStatus[CN_reading] = String(LastReading) + ((TempUnit == TempUnit_t::TempUnitCentegrade) ? " C" : " F");
 

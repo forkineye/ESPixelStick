@@ -45,7 +45,7 @@ static EFUpdate         efupdate; /// EFU Update Handler
 static AsyncWebServer   webServer (HTTP_PORT);  // Web Server
 
 //-----------------------------------------------------------------------------
-void PrettyPrint(DynamicJsonDocument &jsonStuff, String Name)
+void PrettyPrint(JsonDocument &jsonStuff, String Name)
 {
     // DEBUG_V ("---------------------------------------------");
     LOG_PORT.println (String (F ("---- Pretty Print: '")) + Name + "'");
@@ -557,14 +557,9 @@ void c_WebMgr::GetDeviceOptions ()
     // set up a framework to get the option data
     WebJsonDoc->clear ();
 
-    if (0 == WebJsonDoc->capacity ())
-    {
-        logcon (F ("ERROR: Failed to allocate memory for the GetDeviceOptions web request response."));
-    }
-
     // DEBUG_V ("");
-    JsonObject WebOptions = WebJsonDoc->createNestedObject (F ("options"));
-    JsonObject JsonDeviceOptions = WebOptions.createNestedObject (CN_device);
+    JsonObject WebOptions = (*WebJsonDoc)[F ("options")].to<JsonObject>();
+    JsonObject JsonDeviceOptions = WebOptions[CN_device].to<JsonObject> ();
     // DEBUG_V("");
 
     // PrettyPrint (WebOptions);
@@ -585,8 +580,8 @@ void c_WebMgr::CreateAdminInfoFile ()
 {
     // DEBUG_START;
 
-    DynamicJsonDocument AdminJsonDoc(1024);
-    JsonObject jsonAdmin = AdminJsonDoc.createNestedObject (F ("admin"));
+    JsonDocument AdminJsonDoc;
+    JsonObject jsonAdmin = AdminJsonDoc[F ("admin")].to<JsonObject> ();
 
     jsonAdmin[CN_version] = VERSION;
     jsonAdmin["built"] = BUILD_DATE;
@@ -722,10 +717,10 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
 {
     // DEBUG_START;
 
-    DynamicJsonDocument WebJsonDoc(STATUS_DOC_SIZE);
+    JsonDocument WebJsonDoc;
     WebJsonDoc.clear ();
-    JsonObject status = WebJsonDoc.createNestedObject (CN_status);
-    JsonObject system = status.createNestedObject (CN_system);
+    JsonObject status = WebJsonDoc[CN_status].to<JsonObject> ();
+    JsonObject system = status[CN_system].to<JsonObject> ();
 
     system[F ("freeheap")] = ESP.getFreeHeap ();
     system[F ("uptime")] = millis ();

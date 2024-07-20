@@ -126,7 +126,7 @@ void c_OutputGECEUart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
     Uart.GetStatus(jsonStatus);
 
 #ifdef GECE_UART_DEBUG_COUNTERS
-    JsonObject debugStatus = jsonStatus.createNestedObject("GECE UART Debug");
+    JsonObject debugStatus = jsonStatus["GECE UART Debug"].to<JsonObject>();
     debugStatus["NewFrameCounter"]          = NewFrameCounter;
     debugStatus["TimeSinceLastFrameMS"]     = TimeSinceLastFrameMS;
     debugStatus["TimeLastFrameStartedMS"]   = TimeLastFrameStartedMS;

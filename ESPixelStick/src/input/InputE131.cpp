@@ -92,7 +92,7 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject e131Status = jsonStatus.createNestedObject (F ("e131"));
+    JsonObject e131Status = jsonStatus[F ("e131")].to<JsonObject> ();
     e131Status[CN_id]         = InputChannelId;
     e131Status[CN_unifirst]   = startUniverse;
     e131Status[CN_unilast ]   = LastUniverse;
@@ -102,11 +102,11 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
     e131Status[CN_last_clientIP] = uint32_t(e131->stats.last_clientIP);
     // DEBUG_V ("");
 
-    JsonArray e131UniverseStatus = e131Status.createNestedArray (CN_channels);
+    JsonArray e131UniverseStatus = e131Status[CN_channels].to<JsonArray> ();
     uint32_t TotalErrors = e131->stats.packet_errors;
     for (auto & CurrentUniverse : UniverseArray)
     {
-        JsonObject e131CurrentUniverseStatus = e131UniverseStatus.createNestedObject ();
+        JsonObject e131CurrentUniverseStatus = e131UniverseStatus.add<JsonObject> ();
 
         e131CurrentUniverseStatus[CN_errors] = CurrentUniverse.SequenceErrorCounter;
         TotalErrors += CurrentUniverse.SequenceErrorCounter;

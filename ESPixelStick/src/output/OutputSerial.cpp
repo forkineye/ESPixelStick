@@ -84,7 +84,7 @@ void c_OutputSerial::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     c_OutputCommon::GetStatus (jsonStatus);
 
 #ifdef USE_SERIAL_DEBUG_COUNTERS
-    JsonObject debugStatus = jsonStatus.createNestedObject("Serial Debug");
+    JsonObject debugStatus = jsonStatus["Serial Debug"].to<JsonObject>();
     debugStatus["Num_Channels"]                = Num_Channels;
     debugStatus["NextIntensityToSend"]         = String(int(NextIntensityToSend), HEX);
     debugStatus["IntensityBytesSent"]          = IntensityBytesSent;

@@ -296,7 +296,7 @@ void c_OutputUart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
     // DEBUG_START;
 
 #ifdef USE_UART_DEBUG_COUNTERS
-    JsonObject debugStatus = jsonStatus.createNestedObject("UART Debug");
+    JsonObject debugStatus = jsonStatus["UART Debug"].to<JsonObject>();
     debugStatus["ChannelId"]                     = OutputUartConfig.ChannelId;
     debugStatus["RxIsr"]                         = RxIsr;
     debugStatus["FiFoISRcounter"]                = FiFoISRcounter;
