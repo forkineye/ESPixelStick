@@ -116,7 +116,7 @@ void c_OutputTM1814Uart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
     Uart.GetStatus(jsonStatus);
 
 #ifdef TM1814_UART_DEBUG_COUNTERS
-    JsonObject debugStatus = jsonStatus.createNestedObject("TM1814 UART Debug");
+    JsonObject debugStatus = jsonStatus["TM1814 UART Debug"].to<JsonObject>();
     debugStatus["NewFrameCounter"] = NewFrameCounter;
     debugStatus["TimeSinceLastFrameMS"] = TimeSinceLastFrameMS;
     debugStatus["TimeLastFrameStartedMS"] = TimeLastFrameStartedMS;

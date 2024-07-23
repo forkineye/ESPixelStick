@@ -144,7 +144,7 @@ void c_InputMQTT::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject Status = jsonStatus.createNestedObject (F ("mqtt"));
+    JsonObject Status = jsonStatus[F ("mqtt")].to<JsonObject> ();
     Status[CN_id] = InputChannelId;
 
     // DEBUG_END;
@@ -395,7 +395,7 @@ void c_InputMQTT::onMqttMessage(
             break;
         }
 
-        DynamicJsonDocument rootDoc (1024);
+        JsonDocument rootDoc;
         DeserializationError error = deserializeJson (rootDoc, payload, len);
 
         // DEBUG_V ("Set new values");
@@ -618,7 +618,7 @@ void c_InputMQTT::GetEngineConfig (JsonObject & JsonConfig)
     JsonConfig[CN_brightness]         = effectConfig.brightness;
     JsonConfig[CN_EffectWhiteChannel] = effectConfig.whiteChannel;
 
-    JsonObject color = JsonConfig.createNestedObject (CN_color);
+    JsonObject color = JsonConfig[CN_color].to<JsonObject> ();
     color[CN_r] = effectConfig.color.r;
     color[CN_g] = effectConfig.color.g;
     color[CN_b] = effectConfig.color.b;
@@ -688,7 +688,7 @@ void c_InputMQTT::publishHA()
     if (hadisco)
     {
         // DEBUG_V ("");
-        DynamicJsonDocument root(1024);
+        JsonDocument root;
         JsonObject JsonConfig = root.to<JsonObject> ();
 
         JsonConfig[F ("platform")]           = F ("MQTT");
@@ -708,7 +708,7 @@ void c_InputMQTT::publishHA()
         // to enable integration support in HomeAssistant.
         JsonConfig[F ("unique_id")] = CN_ESPixelStick + chipId;
 
-        JsonObject device = JsonConfig.createNestedObject (CN_device);
+        JsonObject device = JsonConfig[CN_device].to<JsonObject> ();
         device[F ("identifiers")]  = WiFi.macAddress ();
         device[F ("manufacturer")] = F ("Forkineye");
         device[F ("model")]        = CN_ESPixelStick;
@@ -736,8 +736,8 @@ void c_InputMQTT::publishState()
 {
     // DEBUG_START;
 
-    DynamicJsonDocument root(1024);
-    JsonObject JsonConfig = root.createNestedObject(F ("MQTT"));
+    JsonDocument root;
+    JsonObject JsonConfig = root[F ("MQTT")].to<JsonObject>();
 
     JsonConfig[CN_state] = (true == stateOn) ? String(ON) : String(OFF);
 

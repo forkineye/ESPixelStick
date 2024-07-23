@@ -72,7 +72,7 @@ typedef struct {
 } config_t;
 
 String  serializeCore          (bool pretty = false);
-void    deserializeCoreHandler (DynamicJsonDocument& jsonDoc);
+void    deserializeCoreHandler (JsonDocument& jsonDoc);
 bool    deserializeCore        (JsonObject & json);
 bool    dsDevice               (JsonObject & json);
 bool    dsNetwork              (JsonObject & json);

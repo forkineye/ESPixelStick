@@ -53,9 +53,9 @@ void fsm_PlayEffect_state_Idle::Start (String & ConfigString, float )
 
     // DEBUG_V (String ("ConfigString: '") + ConfigString + "'");
     p_InputFPPRemotePlayEffect->PlayEffectTimer.StartTimer(1000 * p_InputFPPRemotePlayEffect->PlayDurationSec);
-    
+
     // tell the effect engine what it is supposed to be doing
-    DynamicJsonDocument EffectConfig (512);
+    JsonDocument EffectConfig;
     DeserializationError error = deserializeJson ((EffectConfig), (const String)ConfigString);
 
     // DEBUG_V ("Error Check");

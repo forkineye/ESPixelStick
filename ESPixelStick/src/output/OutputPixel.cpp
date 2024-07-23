@@ -74,7 +74,7 @@ void c_OutputPixel::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     c_OutputCommon::GetStatus (jsonStatus);
 
 #ifdef USE_PIXEL_DEBUG_COUNTERS
-    JsonObject debugStatus = jsonStatus.createNestedObject("Pixel Debug");
+    JsonObject debugStatus = jsonStatus["Pixel Debug"].to<JsonObject>();
     debugStatus["NumIntensityBytesPerPixel"]        = NumIntensityBytesPerPixel;
     debugStatus["PixelsToSend"]                     = PixelsToSend;
     debugStatus["FrameStartCounter"]                = FrameStartCounter;

@@ -58,7 +58,7 @@ public:
 
     bool    handleFileUpload (const String & filename, size_t index, uint8_t * data, size_t len, bool final, uint32_t totalLen);
 
-    typedef std::function<void (DynamicJsonDocument& json)> DeserializationHandler;
+    typedef std::function<void (JsonDocument& json)> DeserializationHandler;
 
     typedef enum
     {

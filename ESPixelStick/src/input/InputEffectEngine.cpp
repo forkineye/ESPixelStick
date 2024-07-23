@@ -162,31 +162,31 @@ void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
 
     // DEBUG_V ("");
 
-    JsonArray EffectsArray = jsonConfig.createNestedArray (CN_effects);
+    JsonArray EffectsArray = jsonConfig[CN_effects].to<JsonArray> ();
     // DEBUG_V ("");
 
     for (EffectDescriptor_t currentEffect : ListOfEffects)
     {
         // DEBUG_V ("");
-        JsonObject currentJsonEntry = EffectsArray.createNestedObject ();
+        JsonObject currentJsonEntry = EffectsArray.add<JsonObject> ();
         currentJsonEntry[CN_name] = currentEffect.name;
     }
 
-    JsonArray TransitionsArray = jsonConfig.createNestedArray (CN_transitions);
+    JsonArray TransitionsArray = jsonConfig[CN_transitions].to<JsonArray> ();
     for (auto currentTransition : TransitionColorTable)
     {
         // DEBUG_V ("");
-        JsonObject currentJsonEntry = TransitionsArray.createNestedObject ();
+        JsonObject currentJsonEntry = TransitionsArray.add<JsonObject> ();
         currentJsonEntry["r"] = currentTransition.r;
         currentJsonEntry["g"] = currentTransition.g;
         currentJsonEntry["b"] = currentTransition.b;
     }
 
-    JsonArray MarqueeGroupArray = jsonConfig.createNestedArray (CN_MarqueeGroups);
+    JsonArray MarqueeGroupArray = jsonConfig[CN_MarqueeGroups].to<JsonArray> ();
     for(auto CurrentMarqueeGroup : MarqueueGroupTable)
     {
-        JsonObject currentJsonEntry = MarqueeGroupArray.createNestedObject ();
-        JsonObject currentJsonEntryColor = currentJsonEntry.createNestedObject (CN_color);
+        JsonObject currentJsonEntry = MarqueeGroupArray.add<JsonObject> ();
+        JsonObject currentJsonEntryColor = currentJsonEntry[CN_color].to<JsonObject> ();
         currentJsonEntryColor["r"] = CurrentMarqueeGroup.Color.r;
         currentJsonEntryColor["g"] = CurrentMarqueeGroup.Color.g;
         currentJsonEntryColor["b"] = CurrentMarqueeGroup.Color.b;
@@ -203,7 +203,7 @@ void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
 void c_InputEffectEngine::GetMqttEffectList (JsonObject& jsonConfig)
 {
     // DEBUG_START;
-    JsonArray EffectsArray = jsonConfig.createNestedArray (CN_effect_list);
+    JsonArray EffectsArray = jsonConfig[CN_effect_list].to<JsonArray> ();
 
     for (EffectDescriptor_t currentEffect : ListOfEffects)
     {
@@ -236,7 +236,7 @@ void c_InputEffectEngine::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject Status = jsonStatus.createNestedObject (F ("effects"));
+    JsonObject Status = jsonStatus[F ("effects")].to<JsonObject> ();
     Status[CN_currenteffect] = ActiveEffect->name;
     Status[CN_id] = InputChannelId;
 

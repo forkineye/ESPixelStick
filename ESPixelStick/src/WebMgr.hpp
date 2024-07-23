@@ -95,7 +95,7 @@ private:
 
     using WebJsonDocument = BasicJsonDocument<SpiRamAllocator>;
 #else
-    using WebJsonDocument = DynamicJsonDocument;
+    using WebJsonDocument = JsonDocument;
 #endif // def BOARD_HAS_PSRAM
 
     WebJsonDocument *WebJsonDoc = nullptr;

@@ -302,7 +302,7 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
     if (!jsonConfig.containsKey (CN_channels))
     {
         // DEBUG_V ();
-        jsonConfig.createNestedObject (CN_channels);
+        jsonConfig[CN_channels].to<JsonObject> ();
     }
     OutputMgrChannelsData = jsonConfig[CN_channels];
 
@@ -322,7 +322,7 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
         else
         {
             // DEBUG_V (String ("add our channel section header. Chan: ") + sChannelId);
-            ChannelConfigData = OutputMgrChannelsData.createNestedObject (sChannelId);
+            ChannelConfigData = OutputMgrChannelsData[sChannelId].to<JsonObject> ();
         }
 
         // save the name as the selected channel type
@@ -338,7 +338,7 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
         else
         {
             // DEBUG_V (String("Add Channel Type Data for chan: ") + sChannelId + " Type: " + DriverTypeId);
-            ChannelConfigByTypeData = ChannelConfigData.createNestedObject (DriverTypeId);
+            ChannelConfigByTypeData = ChannelConfigData[DriverTypeId].to<JsonObject> ();
         }
 
         // DEBUG_V ();
@@ -389,11 +389,11 @@ void c_OutputMgr::CreateNewConfig ()
     BuildingNewConfig = true;
 
     // create a place to save the config
-    DynamicJsonDocument JsonConfigDoc (OM_MAX_CONFIG_SIZE);
+    JsonDocument JsonConfigDoc;
     // DEBUG_V ();
 
     // DEBUG_V("Create a new output config structure.");
-    JsonObject JsonConfig = JsonConfigDoc.createNestedObject (CN_output_config);
+    JsonObject JsonConfig = JsonConfigDoc[CN_output_config].to<JsonObject> ();
     // DEBUG_V ();
 
     JsonConfig[CN_cfgver] = CurrentConfigVersion;
@@ -490,11 +490,11 @@ void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
     // jsonStatus["PollCount"] = PollCount;
 #endif // defined(ARDUINO_ARCH_ESP32)
 
-    JsonArray OutputStatus = jsonStatus.createNestedArray (CN_output);
+    JsonArray OutputStatus = jsonStatus[CN_output].to<JsonArray> ();
     for (auto & CurrentOutput : OutputChannelDrivers)
     {
         // DEBUG_V ();
-        JsonObject channelStatus = OutputStatus.createNestedObject ();
+        JsonObject channelStatus = OutputStatus.add<JsonObject> ();
         CurrentOutput.pOutputChannelDriver->GetStatus(channelStatus);
         // DEBUG_V ();
     }
@@ -1000,9 +1000,9 @@ void c_OutputMgr::LoadConfig ()
     ConfigInProgress = true;
 
     // try to load and process the config file
-    if (!FileMgr.LoadFlashFile(ConfigFileName, [this](DynamicJsonDocument &JsonConfigDoc)
+    if (!FileMgr.LoadFlashFile(ConfigFileName, [this](JsonDocument &JsonConfigDoc)
         {
-            // extern void PrettyPrint(DynamicJsonDocument & jsonStuff, String Name);
+            // extern void PrettyPrint(JsonDocument & jsonStuff, String Name);
             // PrettyPrint(JsonConfigDoc, "OM Load Config");
 
             // DEBUG_V ();
@@ -1033,7 +1033,7 @@ void c_OutputMgr::LoadConfig ()
 } // LoadConfig
 
 //-----------------------------------------------------------------------------
-bool c_OutputMgr::FindJsonChannelConfig (DynamicJsonDocument& jsonConfig, 
+bool c_OutputMgr::FindJsonChannelConfig (JsonDocument& jsonConfig, 
                                          e_OutputChannelIds ChanId,
                                          e_OutputType Type,
                                          JsonObject& ChanConfig)
@@ -1126,7 +1126,7 @@ bool c_OutputMgr::FindJsonChannelConfig (DynamicJsonDocument& jsonConfig,
 } // FindChannelJsonConfig
 
 //-----------------------------------------------------------------------------
-bool c_OutputMgr::ProcessJsonConfig (DynamicJsonDocument& jsonConfig)
+bool c_OutputMgr::ProcessJsonConfig (JsonDocument& jsonConfig)
 {
     // DEBUG_START;
     bool Response = false;

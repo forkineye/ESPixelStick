@@ -115,7 +115,7 @@ void c_OutputUCS1903Uart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
     Uart.GetStatus(jsonStatus);
 
 #ifdef UCS1903_UART_DEBUG_COUNTERS
-    JsonObject debugStatus = jsonStatus.createNestedObject("UCS1903 UART Debug");
+    JsonObject debugStatus = jsonStatus["UCS1903 UART Debug"].to<JsonObject>();
     debugStatus["NewFrameCounter"] = NewFrameCounter;
     debugStatus["TimeSinceLastFrameMS"] = TimeSinceLastFrameMS;
     debugStatus["TimeLastFrameStartedMS"] = TimeLastFrameStartedMS;

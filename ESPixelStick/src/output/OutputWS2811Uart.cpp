@@ -122,7 +122,7 @@ void c_OutputWS2811Uart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
     Uart.GetStatus(jsonStatus);
 
 #ifdef WS2811_UART_DEBUG_COUNTERS
-    JsonObject debugStatus = jsonStatus.createNestedObject("WS2811 UART Debug");
+    JsonObject debugStatus = jsonStatus["WS2811 UART Debug"].to<JsonObject>();
     debugStatus["NewFrameCounter"]        = NewFrameCounter;
     debugStatus["TimeSinceLastFrameMS"]   = TimeSinceLastFrameMS;
     debugStatus["TimeLastFrameStartedMS"] = TimeLastFrameStartedMS;
