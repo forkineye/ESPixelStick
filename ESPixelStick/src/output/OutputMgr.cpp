@@ -2,7 +2,7 @@
 * OutputMgr.cpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2024 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -32,6 +32,7 @@
 #include "OutputAPA102Spi.hpp"
 #include "OutputGECEUart.hpp"
 #include "OutputGECERmt.hpp"
+#include "OutputGrinchSpi.hpp"
 #include "OutputRelay.hpp"
 #include "OutputSerialUart.hpp"
 #include "OutputSerialRmt.hpp"
@@ -88,6 +89,10 @@ static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::
 #ifdef SUPPORT_OutputType_GECE
         {c_OutputMgr::e_OutputType::OutputType_GECE, "GECE"},
 #endif // def SUPPORT_OutputType_GECE
+
+#ifdef SUPPORT_OutputType_GRINCH
+        {c_OutputMgr::e_OutputType::OutputType_GRINCH, "Grinch"},
+#endif // def SUPPORT_OutputType_GRINCH
 
 #ifdef SUPPORT_OutputType_GS8208
         {c_OutputMgr::e_OutputType::OutputType_GS8208, "GS8208"},
@@ -844,6 +849,28 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
                 break;
             }
 #endif // def SUPPORT_OutputType_TM1814
+
+#ifdef SUPPORT_OutputType_GRINCH
+            case e_OutputType::OutputType_GRINCH:
+            {
+                if (CurrentOutputChannelDriver.PortType == OM_PortType_t::Spi)
+                {
+                    // logcon (CN_stars + String ((" Starting GRINCH SPI for channel '")) + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                    CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputGrinchSpi(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_GRINCH);
+                    // DEBUG_V ();
+                    break;
+                }
+
+                if (!BuildingNewConfig)
+                {
+                    logcon(CN_stars + String(MN_07) + F("Grinch") + MN_08 + CurrentOutputChannelDriver.DriverId + "'. " + CN_stars);
+                }
+                CurrentOutputChannelDriver.pOutputChannelDriver = new c_OutputDisabled(CurrentOutputChannelDriver.DriverId, CurrentOutputChannelDriver.GpioPin,  CurrentOutputChannelDriver.PortId, OutputType_Disabled);
+                // DEBUG_V ();
+
+                break;
+            }
+#endif // def SUPPORT_OutputType_GRINCH
 
 #ifdef SUPPORT_OutputType_WS2801
             case e_OutputType::OutputType_WS2801:

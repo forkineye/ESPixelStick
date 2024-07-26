@@ -31,6 +31,7 @@
 #define SUPPORT_SPI_OUTPUT
 #define DEFAULT_SPI_DATA_GPIO   gpio_num_t::GPIO_NUM_16
 #define DEFAULT_SPI_CLOCK_GPIO  gpio_num_t::GPIO_NUM_17
+#define DEFAULT_SPI_CS_GPIO     gpio_num_t::GPIO_NUM_0
 #define DEFAULT_SPI_DEVICE      VSPI_HOST
 
 #define DEFAULT_I2C_SDA         gpio_num_t::GPIO_NUM_3
@@ -60,3 +61,4 @@
 #define SUPPORT_OutputType_WS2811           // UART / RMT
 #define SUPPORT_OutputType_Relay            // GPIO
 #define SUPPORT_OutputType_Servo_PCA9685    // I2C (default pins)
+#define SUPPORT_OutputType_GRINCH           // SPI
