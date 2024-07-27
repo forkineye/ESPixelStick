@@ -52,7 +52,7 @@ void c_OutputGrinchSpi::Begin ()
 {
     // DEBUG_START;
     Spi.Begin (this);
-
+    Spi.SetCsPin(DataStrobe);
     HasBeenInitialized = true;
 
     // DEBUG_END;

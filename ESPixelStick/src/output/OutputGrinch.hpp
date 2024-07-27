@@ -51,12 +51,12 @@ protected:
 
 #define MAX_NUM_SUPPORTED_GRINCHES 4
 #define DATA_CHANNELS_PER_GRINCH 64
+    gpio_num_t  DataStrobe = DEFAULT_SPI_CS_GPIO;
 
 private:
     uint8_t     NumberOfGrinchControllers = 1;
     uint8_t     NumberOfGrinchChannels =  NumberOfGrinchControllers * DATA_CHANNELS_PER_GRINCH;
     uint8_t     NumberOfGrinchDataBytes = NumberOfGrinchChannels / 8;
-    gpio_num_t  DataStrobe = DEFAULT_SPI_CS_GPIO;
     uint64_t    dataBuffer[MAX_NUM_SUPPORTED_GRINCHES];
     uint8_t     SpiOutputDataByteIndex = 0;
 

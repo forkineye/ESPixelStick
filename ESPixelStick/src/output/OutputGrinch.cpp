@@ -102,10 +102,6 @@ bool c_OutputGrinch::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_V(String("  NumberOfGrinchDataBytes: ") + String(NumberOfGrinchDataBytes));
     SetOutputBufferSize(NumberOfGrinchChannels);
 
-    // turn off the outout strobe (latch data)
-    pinMode(DataStrobe, OUTPUT);
-    digitalWrite(DataStrobe, HIGH);
-
     // Calculate our refresh time
     // SetFrameDurration (((1.0 / float (GRINCH_BIT_RATE)) * MicroSecondsInASecond), BlockSize, BlockDelay);
 
@@ -131,11 +127,6 @@ bool IRAM_ATTR c_OutputGrinch::ISR_GetNextIntensityToSend (uint32_t &DataToSend)
 void c_OutputGrinch::StartNewFrame()
 {
     // DEBUG_START;
-
-    // put the shift registers into clock through mode.
-    digitalWrite(DataStrobe, HIGH);
-    delay(1);
-    digitalWrite(DataStrobe, LOW);
 
     // build the data frame
     uint32_t    NumChannelsToProcess = GetNumOutputBufferBytesNeeded();

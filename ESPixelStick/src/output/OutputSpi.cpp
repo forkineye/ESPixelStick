@@ -140,7 +140,7 @@ void c_OutputSpi::Begin (c_OutputPixel* _OutputPixel)
     SpiDeviceConfiguration.clock_speed_hz = SPI_SPI_MASTER_FREQ_1M;
     SpiDeviceConfiguration.mode = 0;                                // SPI mode 0
     SpiDeviceConfiguration.spics_io_num = -1;                       // we will NOT use CS pin
-    SpiDeviceConfiguration.queue_size = 10 * SPI_NUM_TRANSACTIONS;    // We want to be able to queue 2 transactions at a time
+    SpiDeviceConfiguration.queue_size = 1;    // We want to be able to queue 2 transactions at a time
     // SpiDeviceConfiguration.pre_cb = nullptr;                     // Specify pre-transfer callback to handle D/C line
     SpiDeviceConfiguration.post_cb = spi_transfer_callback;      // Specify post-transfer callback to handle D/C line
     // SpiDeviceConfiguration.flags = 0;
@@ -223,11 +223,29 @@ void c_OutputSpi::SendIntensityData ()
             TransactionToFill.length++;
         }
 
+        if(gpio_num_t(-1) != cs_pin)
+        {
+            // turn on the output strobe (latch data)
+            digitalWrite(cs_pin, LOW);
+        }
+
         ESP_ERROR_CHECK (spi_device_queue_trans (spi_device_handle, &Transactions[NextTransactionToFill], portMAX_DELAY));
 
         if (++NextTransactionToFill >= SPI_NUM_TRANSACTIONS)
         {
             NextTransactionToFill = 0;
+        }
+
+        if(gpio_num_t(-1) != cs_pin)
+        {
+            if (!ISR_MoreDataToSend ())
+            {
+                spi_transaction_t * pspi_transaction = &TransactionToFill;
+                spi_device_get_trans_result(spi_device_handle, &pspi_transaction, 100);
+
+                // turn on the output strobe (latch data)
+                digitalWrite(cs_pin, HIGH);
+            }
         }
     }
 
@@ -262,6 +280,12 @@ bool c_OutputSpi::Poll ()
 
     StartNewFrame ();
 
+    if(gpio_num_t(-1) != cs_pin)
+    {
+        // turn on the output strobe (latch data)
+        pinMode(cs_pin, OUTPUT);
+    }
+
     // fill all the available buffers
     NextTransactionToFill = 0;
     for (auto& TransactionToFill : Transactions)
@@ -271,6 +295,7 @@ bool c_OutputSpi::Poll ()
             vTaskResume (SendIntensityDataTaskHandle);
         }
     }
+
     spi_transfer_callback_enabled = true;
     Response = true;
 

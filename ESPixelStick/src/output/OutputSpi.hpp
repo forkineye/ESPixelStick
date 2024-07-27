@@ -49,6 +49,7 @@ public:
     void    GetDriverName (String& Name) { Name = CN_OutputSpi; }
     void    DataOutputTask (void* pvParameters);
     void    SendIntensityData ();
+    void    SetCsPin(gpio_num_t _cs_pin) {cs_pin = _cs_pin;}
 
     uint32_t DataTaskcounter = 0;
     uint32_t DataCbCounter = 0;
@@ -69,6 +70,7 @@ private:
     uint8_t NumIntensityValuesPerInterrupt = 0;
     uint8_t NumIntensityBitsPerInterrupt = 0;
     spi_device_handle_t spi_device_handle = 0;
+    gpio_num_t cs_pin = gpio_num_t(-1);
 
     // uint32_t FrameStartCounter = 0;
     uint32_t SendIntensityDataCounter = 0;
