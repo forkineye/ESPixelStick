@@ -324,7 +324,7 @@ $(function () {
     SetServerTime();
 });
 
-function SetServerTime() 
+function SetServerTime()
 {
     // console.info("SetServerTime");
     let CurrentDate = Math.floor((new Date()).getTime() / 1000);
@@ -368,7 +368,7 @@ function MergeConfig(SourceData, TargetData, FileName, SectionName)
 
 } // MergeConfig
 
-function JsonObjectAccess(obj, Path, value, Action) 
+function JsonObjectAccess(obj, Path, value, Action)
 {
     try
     {
@@ -630,11 +630,11 @@ async function RequestConfigFile(FileName)
 
 } // RequestConfigFile
 
-function RequestStatusUpdate() 
+function RequestStatusUpdate()
 {
     // console.log("RequestStatusUpdate Start: ");
     // is the timer running?
-    if (null === StatusRequestTimer) 
+    if (null === StatusRequestTimer)
     {
         // timer runs forever
         StatusRequestTimer = setTimeout(function ()
@@ -647,7 +647,7 @@ function RequestStatusUpdate()
         }, 1000);
     } // end timer was not running
 
-    if ($('#home').is(':visible')) 
+    if ($('#home').is(':visible'))
     {
         // ask for a status update from the server
         let FileName = "HTTP://" + target + "/XJ";
@@ -666,7 +666,7 @@ function RequestStatusUpdate()
 
 } // RequestStatusUpdate
 
-async function RequestListOfFiles() 
+async function RequestListOfFiles()
 {
     // console.info("ask for a file list from the server, starting at " + StartingFileIndex);
 
@@ -1139,6 +1139,16 @@ function ProcessModeConfigurationDataRelay(RelayConfig) {
 
 } // ProcessModeConfigurationDataRelay
 
+function ProcessModeConfigurationDataGrinch(GrinchConfig)
+{
+    // console.log("ProcessModeConfigurationDataGrinch");
+    // console.info("GrinchConfig: " + JSON.stringify(GrinchConfig));
+
+    $('#grinch #controller_count' ).val(GrinchConfig.count);
+    $('#grinch #cs_pin' ).val(GrinchConfig.cs_pin);
+
+} // ProcessModeConfigurationDataGrinch
+
 function ProcessModeConfigurationDataServoPCA9685(ServoConfig) {
     // console.log("Servochannelconfigurationtable.rows.length = " + $('#servo_pca9685channelconfigurationtable tr').length);
 
@@ -1213,7 +1223,9 @@ function ProcessInputConfig() {
 
 function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
     // console.info("ProcessModeConfigurationData: Start");
-
+    // console.info("channelId: " + channelId);
+    // console.info("ChannelType: " + ChannelType);
+    // console.info("JsonConfig: " + JSON.stringify(JsonConfig));
     // determine the type of in/output that has been selected and populate the form
     let TypeOfChannelId = parseInt($('#' + ChannelType + channelId + " option:selected").val(), 10);
     let channelConfigSet = JsonConfig.channels[channelId];
@@ -1277,6 +1289,11 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
     else if ("servo_pca9685" === ChannelTypeName) {
         // console.info("ProcessModeConfigurationData: servo");
         ProcessModeConfigurationDataServoPCA9685(channelConfig);
+    }
+
+    else if ("grinch" === ChannelTypeName) {
+        // console.info("ProcessModeConfigurationData: grinch");
+        ProcessModeConfigurationDataGrinch(channelConfig);
     }
 
     UpdateAdvancedOptionsMode();
@@ -1698,6 +1715,11 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName) {
 
             ChannelConfig.MarqueeGroups = MarqueeGroups;
         }
+        else if(ChannelConfig.type === "Grinch")
+        {
+            ChannelConfig.count = $('#grinch #controller_count' ).val();
+            ChannelConfig.cs_pin = $('#grinch #cs_pin' ).val();
+        }
         else {
             ExtractConfigFromHtmlPages(elementids, modeControlName, ChannelConfig);
         }
@@ -1785,7 +1807,7 @@ function int2ip(num) {
 } // int2ip
 
 // Ping every 4sec
-function MonitorServerConnection() 
+function MonitorServerConnection()
 {
     // console.info("MonitorServerConnection");
     let MonitorTransactionRequestInProgress = false;

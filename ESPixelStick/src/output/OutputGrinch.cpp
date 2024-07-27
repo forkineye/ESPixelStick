@@ -94,6 +94,14 @@ bool c_OutputGrinch::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     response |= setFromJSON (DataStrobe, jsonConfig, CN_cs_pin);
     response |= setFromJSON (NumberOfGrinchControllers, jsonConfig, CN_count);
 
+    NumberOfGrinchChannels = NumberOfGrinchControllers * DATA_CHANNELS_PER_GRINCH;
+    NumberOfGrinchDataBytes = NumberOfGrinchChannels / (sizeof(uint8_t) * 8);
+
+    // DEBUG_V(String("NumberOfGrinchControllers: ") + String(NumberOfGrinchControllers));
+    // DEBUG_V(String("   NumberOfGrinchChannels: ") + String(NumberOfGrinchChannels));
+    // DEBUG_V(String("  NumberOfGrinchDataBytes: ") + String(NumberOfGrinchDataBytes));
+    SetOutputBufferSize(NumberOfGrinchChannels);
+
     // turn off the outout strobe (latch data)
     pinMode(DataStrobe, OUTPUT);
     digitalWrite(DataStrobe, HIGH);
@@ -109,16 +117,24 @@ bool c_OutputGrinch::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 //----------------------------------------------------------------------------
 bool IRAM_ATTR c_OutputGrinch::ISR_GetNextIntensityToSend (uint32_t &DataToSend)
 {
-    DataToSend = 0x55;
-    return true;
-}
+    if(ISR_MoreDataToSend())
+    {
+        // DEBUG_V(String("DataToSend: ") + String(DataToSend));
+        DataToSend = ((uint8_t*)&dataBuffer[0])[SpiOutputDataByteIndex-1];
+        SpiOutputDataByteIndex--;
+    }
+
+    return ISR_MoreDataToSend();
+} // ISR_GetNextIntensityToSend
 
 //----------------------------------------------------------------------------
 void c_OutputGrinch::StartNewFrame()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     // put the shift registers into clock through mode.
+    digitalWrite(DataStrobe, HIGH);
+    delay(1);
     digitalWrite(DataStrobe, LOW);
 
     // build the data frame
@@ -148,9 +164,9 @@ void c_OutputGrinch::StartNewFrame()
         NumChannelsToProcess--;
     }
 
-    SpiOutputDataIndex = 0;
+    SpiOutputDataByteIndex = NumberOfGrinchDataBytes;
 
-    DEBUG_END;
+    // DEBUG_END;
 } // StartNewFrame
 
 #endif // def SUPPORT_OutputType_GRINCH

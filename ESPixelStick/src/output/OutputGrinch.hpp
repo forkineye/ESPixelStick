@@ -40,11 +40,11 @@ public:
             void GetDriverName (String & sDriverName) { sDriverName = F("Grinch"); }
     virtual void GetStatus (ArduinoJson::JsonObject & jsonStatus);
     virtual void SetOutputBufferSize (uint32_t NumChannelsAvailable);
-    uint32_t     GetNumOutputBufferBytesNeeded () { return (NumberOfGrinchControllers * 64); }
-    uint32_t     GetNumOutputBufferChannelsServiced () { return (NumberOfGrinchControllers * 64); }
+    uint32_t     GetNumOutputBufferBytesNeeded () { return (NumberOfGrinchChannels); }
+    uint32_t     GetNumOutputBufferChannelsServiced () { return (NumberOfGrinchChannels); }
 
              void           StartNewFrame();
-    inline   bool IRAM_ATTR ISR_MoreDataToSend () {return false;}
+    inline   bool IRAM_ATTR ISR_MoreDataToSend () {return SpiOutputDataByteIndex > 0;}
              bool IRAM_ATTR ISR_GetNextIntensityToSend (uint32_t &DataToSend);
 
 protected:
@@ -54,9 +54,11 @@ protected:
 
 private:
     uint8_t     NumberOfGrinchControllers = 1;
+    uint8_t     NumberOfGrinchChannels =  NumberOfGrinchControllers * DATA_CHANNELS_PER_GRINCH;
+    uint8_t     NumberOfGrinchDataBytes = NumberOfGrinchChannels / 8;
     gpio_num_t  DataStrobe = DEFAULT_SPI_CS_GPIO;
     uint64_t    dataBuffer[MAX_NUM_SUPPORTED_GRINCHES];
-    uint8_t     SpiOutputDataIndex = 0;
+    uint8_t     SpiOutputDataByteIndex = 0;
 
 }; // c_OutputGrinch
 #endif // def SUPPORT_OutputType_GRINCH

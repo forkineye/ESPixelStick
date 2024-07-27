@@ -260,7 +260,7 @@ bool c_OutputSpi::Poll ()
 
     // DEBUG_START;
 
-    OutputPixel->StartNewFrame ();
+    StartNewFrame ();
 
     // fill all the available buffers
     NextTransactionToFill = 0;
