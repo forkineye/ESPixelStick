@@ -33,6 +33,7 @@
 #define SUPPORT_SPI_OUTPUT
 #define DEFAULT_SPI_DATA_GPIO  gpio_num_t::GPIO_NUM_16
 #define DEFAULT_SPI_CLOCK_GPIO gpio_num_t::GPIO_NUM_17
+#define DEFAULT_SPI_CS_GPIO    gpio_num_t::GPIO_NUM_0
 #define DEFAULT_SPI_DEVICE     VSPI_HOST
 
 #define DEFAULT_I2C_SDA         gpio_num_t::GPIO_NUM_21
@@ -51,6 +52,7 @@
 #define SUPPORT_OutputType_DMX              // UART
 #define SUPPORT_OutputType_GECE             // UART
 #define SUPPORT_OutputType_GS8208           // UART / RMT
+#define SUPPORT_OutputType_GRINCH           // SPI
 #define SUPPORT_OutputType_Renard           // UART
 #define SUPPORT_OutputType_Serial           // UART
 #define SUPPORT_OutputType_TM1814           // UART / RMT
