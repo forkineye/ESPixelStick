@@ -147,8 +147,8 @@ void c_OutputGrinch::StartNewFrame()
             OutputData = 0;
         }
 
-        // set the output bit to one if the output is greater than half on
-        OutputData = (OutputData << 1) | (pInputData[0] < 128);
+        // set the output bit to ON (zero) if the output is greater than 50% intensity
+        OutputData = (OutputData << 1) | (*pInputData < 128);
         dataBuffer[OutputDataIndex] = OutputData;
         pInputData ++;
         bitCounter ++;
