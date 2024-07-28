@@ -1705,7 +1705,7 @@ void c_FileMgr::BuildFseqList()
 
         // open output file, erase old data
         ESP_SD.chdir(); // Set to sd root
-        FileMgr.DeleteSdFile(String(FSEQFILELIST));
+        DeleteSdFile(String(FSEQFILELIST));
 
         FsFile OutputFile;
         if(!OutputFile.open (String(F(FSEQFILELIST)).c_str(), O_WRITE | O_CREAT))
@@ -1810,7 +1810,7 @@ void c_FileMgr::BuildFseqList()
         OutputFile.print(String("], \"usedBytes\" : ") + int64String(usedBytes));
         // LOG_PORT.print(String("], \"usedBytes\" : ") + int64String(usedBytes));
         OutputFile.print(String(", \"numFiles\" : ") + String(numFiles));
-        // LOG_PORT.print(String(", \"numFiles\" : ") + String(numFiles));
+        OutputFile.print(String(", \"SdCardPresent\" : true"));
 
         // close the data section
         OutputFile.print("}");
