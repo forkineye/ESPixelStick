@@ -54,11 +54,24 @@ protected:
     gpio_num_t  DataStrobe = DEFAULT_SPI_CS_GPIO;
 
 private:
-    uint8_t     NumberOfGrinchControllers = 1;
-    uint8_t     NumberOfGrinchChannels =  NumberOfGrinchControllers * DATA_CHANNELS_PER_GRINCH;
-    uint8_t     NumberOfGrinchDataBytes = NumberOfGrinchChannels / 8;
-    uint64_t    dataBuffer[MAX_NUM_SUPPORTED_GRINCHES];
-    uint8_t     SpiOutputDataByteIndex = 0;
+    uint8_t NumberOfGrinchControllers = 1;
+    uint8_t NumberOfGrinchChannels =  NumberOfGrinchControllers * DATA_CHANNELS_PER_GRINCH;
+    uint8_t NumberOfGrinchDataBytes = NumberOfGrinchChannels / 8;
+    uint8_t SpiOutputDataByteIndex = 0;
+
+    union GrinchData_s
+    {
+        struct GrinchLatchData
+        {
+            uint8_t LatchChan_01_08 = 0;
+            uint8_t LatchChan_09_16 = 0;
+            uint8_t LatchChan_17_24 = 0;
+            uint8_t LatchChan_25_32 = 0;
+        };
+        uint8_t Data[4];
+    };
+    GrinchData_s dataBuffer[MAX_NUM_SUPPORTED_GRINCHES];
+
 
 }; // c_OutputGrinch
 #endif // def SUPPORT_OutputType_GRINCH

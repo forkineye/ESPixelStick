@@ -33,6 +33,7 @@ c_OutputGrinch::c_OutputGrinch (c_OutputMgr::e_OutputChannelIds OutputChannelId,
 
     // InterFrameGapInMicroSec = GRINCH_MIN_IDLE_TIME_US;
 
+    memset(dataBuffer, 0x00, sizeof(dataBuffer));
     // DEBUG_END;
 } // c_OutputGrinch
 
@@ -116,7 +117,7 @@ bool IRAM_ATTR c_OutputGrinch::ISR_GetNextIntensityToSend (uint32_t &DataToSend)
     if(ISR_MoreDataToSend())
     {
         // DEBUG_V(String("DataToSend: ") + String(DataToSend));
-        DataToSend = ((uint8_t*)&dataBuffer[0])[SpiOutputDataByteIndex-1];
+        DataToSend = dataBuffer[0].Data[SpiOutputDataByteIndex-1];
         SpiOutputDataByteIndex--;
     }
 
@@ -131,8 +132,8 @@ void c_OutputGrinch::StartNewFrame()
     // build the data frame
     uint32_t    NumChannelsToProcess = GetNumOutputBufferBytesNeeded();
     uint8_t     * pInputData = GetBufferAddress();
-    uint64_t    OutputData = 0;
-    uint8_t     OutputDataIndex = 0;
+    uint8_t     OutputData = 0;
+    uint8_t     OutputDataByteIndex = 0;
     uint8_t     bitCounter = 0;
 
     while(NumChannelsToProcess)
@@ -140,16 +141,17 @@ void c_OutputGrinch::StartNewFrame()
         if(bitCounter >= (sizeof(OutputData) * 8))
         {
             // write the output data
-            OutputDataIndex ++;
+            OutputDataByteIndex ++;
 
-            // move to the next controller
+            // move to the next data byte
             bitCounter = 0;
+            // clear the starting data
             OutputData = 0;
         }
 
         // set the output bit to ON (zero) if the output is greater than 50% intensity
         OutputData = (OutputData << 1) | (*pInputData < 128);
-        dataBuffer[OutputDataIndex] = OutputData;
+        dataBuffer[0].Data[OutputDataByteIndex] = OutputData;
         pInputData ++;
         bitCounter ++;
         NumChannelsToProcess--;
