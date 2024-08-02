@@ -3,7 +3,7 @@
 * OutputSpi.h - SPI driver code for ESPixelStick Spi Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015, 2022 Shelby Merrick
+* Copyright (c) 2015, 2024 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -28,6 +28,9 @@
 #include "OutputPixel.hpp"
 #include <driver/spi_master.h>
 #include <esp_task.h>
+#if defined(SUPPORT_OutputType_GRINCH)
+    #include "OutputGrinch.hpp"
+#endif // defined(SUPPORT_OutputType_GRINCH)
 
 class c_OutputSpi
 {
@@ -38,11 +41,15 @@ public:
 
     // functions to be provided by the derived class
     void    Begin (c_OutputPixel* _OutputPixel);
+#if defined(SUPPORT_OutputType_GRINCH)
+    void    Begin (c_OutputGrinch* _OutputSerial);
+#endif // defined(SUPPORT_OutputType_GRINCH)
     bool    Poll ();                                        ///< Call from loop (),  renders output data
     TaskHandle_t GetTaskHandle () { return SendIntensityDataTaskHandle; }
     void    GetDriverName (String& Name) { Name = CN_OutputSpi; }
     void    DataOutputTask (void* pvParameters);
     void    SendIntensityData ();
+    void    SetCsPin(gpio_num_t _cs_pin) {cs_pin = _cs_pin;}
 
     uint32_t DataTaskcounter = 0;
     uint32_t DataCbCounter = 0;
@@ -56,9 +63,14 @@ private:
 #define SPI_SPI_HOST                         DEFAULT_SPI_DEVICE
 #define SPI_SPI_DMA_CHANNEL                  2
 
+    bool ISR_MoreDataToSend();
+    bool ISR_GetNextIntensityToSend(uint32_t& Data);
+    void StartNewFrame();
+
     uint8_t NumIntensityValuesPerInterrupt = 0;
     uint8_t NumIntensityBitsPerInterrupt = 0;
     spi_device_handle_t spi_device_handle = 0;
+    gpio_num_t cs_pin = gpio_num_t(-1);
 
     // uint32_t FrameStartCounter = 0;
     uint32_t SendIntensityDataCounter = 0;
@@ -74,6 +86,9 @@ private:
     gpio_num_t ClockPin = DEFAULT_SPI_CLOCK_GPIO;
 
     c_OutputPixel* OutputPixel = nullptr;
+#if defined(SUPPORT_OutputType_GRINCH)
+    c_OutputGrinch * OutputGrinch = nullptr;
+#endif // defined(SUPPORT_OutputType_GRINCH)
 
 #ifndef HasBeenInitialized
     bool HasBeenInitialized = false;

@@ -87,15 +87,20 @@ c_OutputSpi::~c_OutputSpi ()
     if(HasBeenInitialized)
     {
         spi_transfer_callback_enabled = false;
-        if (OutputPixel)
-        {
-            logcon(CN_stars + String(F(" SPI Interface Shutdown requires a reboot ")) + CN_stars);
-            RequestReboot(100000);
-        }
+        logcon(CN_stars + String(F(" SPI Interface Shutdown requires a reboot ")) + CN_stars);
+        RequestReboot(100000);
     }
     // DEBUG_END;
 
 } // ~c_OutputSpi
+
+#if defined(SUPPORT_OutputType_GRINCH)
+void c_OutputSpi::Begin (c_OutputGrinch* _OutputGrinch)
+{
+    OutputGrinch = _OutputGrinch;
+    Begin ((c_OutputPixel*)nullptr);
+}
+#endif // defined(SUPPORT_OutputType_GRINCH)
 
 //----------------------------------------------------------------------------
 void c_OutputSpi::Begin (c_OutputPixel* _OutputPixel)
@@ -135,7 +140,7 @@ void c_OutputSpi::Begin (c_OutputPixel* _OutputPixel)
     SpiDeviceConfiguration.clock_speed_hz = SPI_SPI_MASTER_FREQ_1M;
     SpiDeviceConfiguration.mode = 0;                                // SPI mode 0
     SpiDeviceConfiguration.spics_io_num = -1;                       // we will NOT use CS pin
-    SpiDeviceConfiguration.queue_size = 10 * SPI_NUM_TRANSACTIONS;    // We want to be able to queue 2 transactions at a time
+    SpiDeviceConfiguration.queue_size = 1;    // We want to be able to queue 2 transactions at a time
     // SpiDeviceConfiguration.pre_cb = nullptr;                     // Specify pre-transfer callback to handle D/C line
     SpiDeviceConfiguration.post_cb = spi_transfer_callback;      // Specify post-transfer callback to handle D/C line
     // SpiDeviceConfiguration.flags = 0;
@@ -153,12 +158,48 @@ void c_OutputSpi::Begin (c_OutputPixel* _OutputPixel)
 } // Begin
 
 //----------------------------------------------------------------------------
+bool c_OutputSpi::ISR_MoreDataToSend()
+{
+    bool response = false;
+    if(OutputPixel)
+    {
+        response = OutputPixel->ISR_MoreDataToSend ();
+    }
+#if defined(SUPPORT_OutputType_GRINCH)
+    else if(OutputGrinch)
+    {
+        response = OutputGrinch->ISR_MoreDataToSend ();
+    }
+#endif // defined(SUPPORT_OutputType_GRINCH)
+    return response;
+}
+
+//----------------------------------------------------------------------------
+bool c_OutputSpi::ISR_GetNextIntensityToSend(uint32_t& Data)
+{
+    bool response = false;
+
+    if(OutputPixel)
+    {
+        response = OutputPixel->ISR_GetNextIntensityToSend (Data);
+    }
+#if defined(SUPPORT_OutputType_GRINCH)
+    else if(OutputGrinch)
+    {
+        response = OutputGrinch->ISR_GetNextIntensityToSend (Data);
+    }
+#endif // defined(SUPPORT_OutputType_GRINCH)
+
+    return response;
+} // ISR_GetNextIntensityToSend
+
+//----------------------------------------------------------------------------
 void c_OutputSpi::SendIntensityData ()
 {
     // DEBUG_START;
     SendIntensityDataCounter++;
 
-    if (OutputPixel->ISR_MoreDataToSend ())
+    if (ISR_MoreDataToSend ())
     {
         spi_transaction_t & TransactionToFill = Transactions[NextTransactionToFill];
         memset ( (void*)&Transactions[NextTransactionToFill], 0x00, sizeof (spi_transaction_t));
@@ -169,17 +210,23 @@ void c_OutputSpi::SendIntensityData ()
         uint32_t NumEmptyIntensitySlots = SPI_NUM_INTENSITY_PER_TRANSACTION;
         uint32_t IntensityData = 0;
 
-        while ( (NumEmptyIntensitySlots) && (OutputPixel->ISR_MoreDataToSend ()))
+        while ( (NumEmptyIntensitySlots) && (ISR_MoreDataToSend ()))
         {
-            OutputPixel->ISR_GetNextIntensityToSend (IntensityData);
+            ISR_GetNextIntensityToSend (IntensityData);
             *pMem++ = byte(IntensityData);
             --NumEmptyIntensitySlots;
         } // end while there is space in the buffer
 
         TransactionToFill.length = SPI_BITS_PER_INTENSITY * (SPI_NUM_INTENSITY_PER_TRANSACTION - NumEmptyIntensitySlots);
-        if (!OutputPixel->ISR_MoreDataToSend ())
+        if (!ISR_MoreDataToSend ())
         {
             TransactionToFill.length++;
+        }
+
+        if(gpio_num_t(-1) != cs_pin)
+        {
+            // turn on the output strobe (latch data)
+            digitalWrite(cs_pin, LOW);
         }
 
         ESP_ERROR_CHECK (spi_device_queue_trans (spi_device_handle, &Transactions[NextTransactionToFill], portMAX_DELAY));
@@ -188,11 +235,41 @@ void c_OutputSpi::SendIntensityData ()
         {
             NextTransactionToFill = 0;
         }
+
+        if(gpio_num_t(-1) != cs_pin)
+        {
+            if (!ISR_MoreDataToSend ())
+            {
+                spi_transaction_t * pspi_transaction = &TransactionToFill;
+                spi_device_get_trans_result(spi_device_handle, &pspi_transaction, 100);
+
+                // turn on the output strobe (latch data)
+                digitalWrite(cs_pin, HIGH);
+            }
+        }
     }
 
     // DEBUG_END;
 
 } // SendIntensityData
+
+//----------------------------------------------------------------------------
+void c_OutputSpi::StartNewFrame()
+{
+    bool response = false;
+
+    if(OutputPixel)
+    {
+        OutputPixel->StartNewFrame ();
+    }
+#if defined(SUPPORT_OutputType_GRINCH)
+    else if(OutputGrinch)
+    {
+        OutputGrinch->StartNewFrame ();
+    }
+#endif // defined(SUPPORT_OutputType_GRINCH)
+
+} // StartNewFrame
 
 //----------------------------------------------------------------------------
 bool c_OutputSpi::Poll ()
@@ -201,7 +278,13 @@ bool c_OutputSpi::Poll ()
 
     // DEBUG_START;
 
-    OutputPixel->StartNewFrame ();
+    StartNewFrame ();
+
+    if(gpio_num_t(-1) != cs_pin)
+    {
+        // turn on the output strobe (latch data)
+        pinMode(cs_pin, OUTPUT);
+    }
 
     // fill all the available buffers
     NextTransactionToFill = 0;
@@ -212,6 +295,7 @@ bool c_OutputSpi::Poll ()
             vTaskResume (SendIntensityDataTaskHandle);
         }
     }
+
     spi_transfer_callback_enabled = true;
     Response = true;
 

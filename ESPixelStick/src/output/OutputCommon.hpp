@@ -75,7 +75,7 @@ protected:
     uint32_t    OutputBufferSize            = 0;
     uint32_t    FrameCount                  = 0;
 
-    void ReportNewFrame ();
+    virtual void ReportNewFrame ();
 
     inline bool canRefresh ()
     {

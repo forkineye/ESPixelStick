@@ -1,0 +1,14 @@
+<fieldset id="grinch">
+    <legend class="esps-legend" id="Title">Grinch Configuration</legend>
+    <div class="form-group">
+        <label class="control-label col-sm-2" for="controller_count">Controller Count</label>
+        <div class="col-sm-4">
+            <input type="number" class="form-control is-valid ControllerCount" id="controller_count" step="1" min="1" max="4" value="0" required title="Number of Grinch Controllers">
+        </div>
+    </div>
+
+    <label class="control-label col-sm-2 hidden AdvancedMode" for="cs_pin">GPIO SPI CS</label>
+    <div class="col-sm-4">
+        <input type="number" class="form-control is-valid hidden AdvancedMode" id="cs_pin" step="1" min="0" max="64" value="65" required title="GPIO pin on which to output Strobe signals">
+    </div>
+</fieldset>
