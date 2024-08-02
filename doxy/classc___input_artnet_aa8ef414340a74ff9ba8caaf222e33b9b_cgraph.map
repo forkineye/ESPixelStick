@@ -1,0 +1,11 @@
+<map id="c_InputArtnet::SetConfig" name="c_InputArtnet::SetConfig">
+<area shape="rect" id="Node000001" title="Set a new config in the driver." alt="" coords="5,55,167,80"/>
+<area shape="rect" id="Node000002" href="$classc___input_artnet.html#ae18005028b9d8ed8870824ba40b043cb" title="Get the current config used by the driver." alt="" coords="246,5,409,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,51,245,32,246,37,153,57"/>
+<area shape="rect" id="Node000003" href="$_e_s_pixel_stick_8h.html#a41e121c8cd723982e1127a1ccf29b756" title=" " alt="" coords="275,55,380,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="167,65,259,65,259,70,167,70"/>
+<area shape="rect" id="Node000004" href="$classc___input_artnet.html#ac6bd00a3f820560363715444d2c51acc" title=" " alt="" coords="215,104,440,130"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="153,78,246,98,245,103,152,84"/>
+<area shape="rect" id="Node000005" href="$classc___input_artnet.html#aa6db03c1ab9369151325ea72fd12516a" title=" " alt="" coords="488,97,647,137"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="441,114,472,114,472,120,441,120"/>
+</map>

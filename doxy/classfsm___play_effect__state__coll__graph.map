@@ -1,0 +1,30 @@
+<map id="fsm_PlayEffect_state" name="fsm_PlayEffect_state">
+<area shape="rect" id="Node000001" title=" " alt="" coords="209,98,353,124"/>
+<area shape="rect" id="Node000002" href="$classc___input_f_p_p_remote_play_effect.html" title=" " alt="" coords="893,188,1087,213"/>
+<area shape="poly" id="edge7_Node000002_Node000001" title=" " alt="" coords="326,90,428,56,494,39,567,26,643,18,721,19,798,31,871,57,911,84,944,120,969,157,985,186,980,188,964,160,940,124,908,88,868,61,796,36,721,25,643,23,567,31,495,44,430,61,328,95"/>
+<area shape="rect" id="Node000004" href="$classfsm___play_effect__state___idle.html" title=" " alt="" coords="540,70,712,96"/>
+<area shape="poly" id="edge4_Node000004_Node000001" title=" " alt="" coords="368,101,539,87,540,93,369,107"/>
+<area shape="rect" id="Node000005" href="$classfsm___play_effect__state___playing_effect.html" title=" " alt="" coords="554,120,698,161"/>
+<area shape="poly" id="edge6_Node000005_Node000001" title=" " alt="" coords="369,116,554,132,553,137,369,121"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="878,208,714,207,623,201,533,190,472,177,412,160,315,127,317,122,413,155,473,172,533,185,623,196,714,202,878,203"/>
+<area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote_play_item.html" title=" " alt="" coords="533,249,719,275"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="721,243,909,211,910,216,722,248"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="728,88,799,101,870,122,929,153,974,185,971,189,926,157,868,127,798,106,727,94"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="714,152,908,184,908,190,713,157"/>
+<area shape="rect" id="Node000006" href="$class_fast_timer.html" title=" " alt="" coords="5,352,86,377"/>
+<area shape="poly" id="edge8_Node000002_Node000006" title=" " alt="" coords="100,349,109,347,280,325,415,317,548,308,719,284,795,269,868,246,958,211,960,216,870,251,796,274,720,290,549,313,415,322,281,330,110,352,101,354"/>
+<area shape="rect" id="Node000007" href="$classc___input_effect_engine.html" title=" " alt="" coords="558,477,694,503"/>
+<area shape="poly" id="edge12_Node000007_Node000006" title=" " alt="" coords="101,363,182,367,285,378,398,397,510,427,562,450,605,474,602,479,560,455,508,432,397,402,284,383,181,372,100,368"/>
+<area shape="rect" id="Node000012" href="$structc___input_effect_engine_1_1_flash_info__t.html" title=" " alt="" coords="213,412,349,453"/>
+<area shape="poly" id="edge16_Node000012_Node000006" title=" " alt="" coords="72,386,90,399,111,411,161,425,212,430,212,436,160,430,109,415,87,404,69,390"/>
+<area shape="poly" id="edge9_Node000002_Node000007" title=" " alt="" coords="669,468,764,417,817,382,868,344,903,310,934,273,978,212,982,215,938,276,907,313,871,348,821,387,767,421,672,472"/>
+<area shape="rect" id="Node000008" href="$classc___input_common.html" title=" " alt="" coords="223,477,339,503"/>
+<area shape="poly" id="edge10_Node000007_Node000008" title=" " alt="" coords="355,487,558,487,558,492,355,492"/>
+<area shape="rect" id="Node000009" href="$structc___input_effect_engine_1_1_c_r_g_b.html" title=" " alt="" coords="213,527,349,567"/>
+<area shape="poly" id="edge11_Node000007_Node000009" title=" " alt="" coords="364,531,509,507,557,499,558,504,509,513,364,537"/>
+<area shape="rect" id="Node000010" href="$structc___input_effect_engine_1_1_effect_descriptor__s.html" title=" " alt="" coords="213,592,349,633"/>
+<area shape="poly" id="edge13_Node000007_Node000010" title=" " alt="" coords="363,593,435,574,508,549,559,525,602,501,605,505,562,530,510,554,436,579,365,598"/>
+<area shape="rect" id="Node000011" href="$structc___input_effect_engine_1_1d_c_r_g_b.html" title=" " alt="" coords="213,657,349,698"/>
+<area shape="poly" id="edge14_Node000007_Node000011" title=" " alt="" coords="364,669,437,653,473,640,508,623,544,594,575,561,615,501,620,504,579,564,547,598,510,627,475,645,438,658,365,674"/>
+<area shape="poly" id="edge15_Node000007_Node000012" title=" " alt="" coords="365,443,558,476,557,481,364,449"/>
+</map>

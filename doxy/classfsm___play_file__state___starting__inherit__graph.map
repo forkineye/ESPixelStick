@@ -1,0 +1,5 @@
+<map id="fsm_PlayFile_state_Starting" name="fsm_PlayFile_state_Starting">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,138,120"/>
+<area shape="rect" id="Node000002" href="$classfsm___play_file__state.html" title=" " alt="" coords="5,5,138,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="74,46,74,79,69,79,69,46"/>
+</map>

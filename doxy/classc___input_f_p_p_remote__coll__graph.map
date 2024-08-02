@@ -1,0 +1,7 @@
+<map id="c_InputFPPRemote" name="c_InputFPPRemote">
+<area shape="rect" id="Node000001" title=" " alt="" coords="84,94,219,120"/>
+<area shape="rect" id="Node000002" href="$classc___input_common.html" title=" " alt="" coords="5,5,122,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,40,141,92,138,96,85,44"/>
+<area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote_play_item.html" title=" " alt="" coords="146,5,333,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="218,44,165,96,162,92,215,40"/>
+</map>

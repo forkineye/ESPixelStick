@@ -1,0 +1,9 @@
+<map id="/github/workspace/ESPixelStick/src/input/InputFPPRemotePlayEffect.hpp" name="/github/workspace/ESPixelStick/src/input/InputFPPRemotePlayEffect.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="239,5,448,61"/>
+<area shape="rect" id="Node000002" href="$_input_f_p_p_remote_play_effect_8cpp.html" title=" " alt="" coords="5,109,215,165"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="268,70,174,111,172,106,266,65"/>
+<area shape="rect" id="Node000003" href="$_input_f_p_p_remote_play_effect_fsm_8cpp.html" title=" " alt="" coords="239,109,448,165"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="346,77,346,108,341,108,341,77"/>
+<area shape="rect" id="Node000004" href="$_input_f_p_p_remote_play_list_fsm_8cpp.html" title=" " alt="" coords="472,109,681,165"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="421,65,515,106,513,111,419,70"/>
+</map>

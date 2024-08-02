@@ -1,0 +1,41 @@
+<map id="c_InputMgr::Begin" name="c_InputMgr::Begin">
+<area shape="rect" id="Node000001" title="&lt; Start the module" alt="" coords="5,221,131,247"/>
+<area shape="rect" id="Node000002" href="$classc___external_input.html#a8b0e3b32b4eeba8e946da0d05a29f116" title=" " alt="" coords="190,171,325,196"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="118,218,192,198,193,203,120,223"/>
+<area shape="rect" id="Node000003" href="$classc___input_mgr.html#afe3597df3db9a6deec4140f410f7f1ee" title=" " alt="" coords="632,170,813,211"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="131,227,617,195,617,200,131,233"/>
+<area shape="rect" id="Node000009" href="$classc___input_mgr.html#a86facb1b4291c34d64365c6171cd6802" title=" " alt="" coords="179,296,336,322"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="104,245,209,287,207,292,102,250"/>
+<area shape="rect" id="Node000004" href="$classc___input_common.html#ab048d5e7494a1f0f2b56ac04d1fab490" title="set up the operating environment based on the current config (or defaults)" alt="" coords="896,5,1052,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="736,168,788,104,825,69,866,40,880,33,882,38,869,44,828,73,792,107,740,171"/>
+<area shape="rect" id="Node000005" href="$classc___input_common.html#a748af3e95c6f199379cdf6c95bb0f245" title="get the name for the instantiated driver" alt="" coords="868,55,1080,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="747,167,800,128,867,90,887,83,889,88,869,95,803,132,750,171"/>
+<area shape="rect" id="Node000006" href="$classc___input_mgr.html#a20bc4c894b378f7f4e9acb19ec76b45f" title=" " alt="" coords="871,105,1077,145"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="803,167,877,147,879,152,804,172"/>
+<area shape="rect" id="Node000007" href="$classc___input_common.html#ac6be1a5317faa008bc8f616864d74cab" title=" " alt="" coords="878,170,1070,211"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="813,188,862,188,862,193,813,193"/>
+<area shape="rect" id="Node000008" href="$classc___input_common.html#ad7de5817a9b501804f89c2a5e63d8cdc" title=" " alt="" coords="875,235,1073,260"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="814,208,900,228,899,233,813,213"/>
+<area shape="rect" id="Node000010" href="$classc___input_mgr.html#a90b28a72c3c887ec9b222744b52a05ec" title=" " alt="" coords="384,284,577,310"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="336,302,368,300,369,306,337,307"/>
+<area shape="rect" id="Node000016" href="$classc___file_mgr.html#a56a3ece591539d6b844ac99ecb2162bc" title=" " alt="" coords="398,333,564,359"/>
+<area shape="poly" id="edge17_Node000009_Node000016" title=" " alt="" coords="337,319,385,328,385,333,336,325"/>
+<area shape="rect" id="Node000017" href="$_e_s_pixel_stick_8ino.html#a07c188498d1aa5b7b068c7a0e09a75f4" title=" " alt="" coords="426,395,536,420"/>
+<area shape="poly" id="edge18_Node000009_Node000017" title=" " alt="" coords="285,320,385,369,428,386,426,391,383,374,283,325"/>
+<area shape="poly" id="edge12_Node000010_Node000003" title=" " alt="" coords="511,281,660,215,662,219,513,286"/>
+<area shape="rect" id="Node000011" href="$classc___input_mgr.html#a18e0b867953657d8362cdee1db08b0f7" title=" " alt="" coords="625,284,820,310"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="578,294,610,294,610,300,578,300"/>
+<area shape="rect" id="Node000013" href="$classc___input_mgr.html#aae28e335276bd983bcad342f1f9532d8" title=" " alt="" coords="648,345,797,371"/>
+<area shape="poly" id="edge13_Node000010_Node000013" title=" " alt="" coords="536,308,578,318,656,338,654,343,577,323,535,313"/>
+<area shape="rect" id="Node000012" href="$classc___external_input.html#a6c2e127e96ae50d0cda699b9fb981373" title=" " alt="" coords="887,284,1061,310"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="820,294,871,294,871,300,820,300"/>
+<area shape="rect" id="Node000014" href="$classc___file_mgr.html#a91d8ba978954c06f5448afb5c75f34b4" title=" " alt="" coords="890,357,1058,383"/>
+<area shape="poly" id="edge14_Node000013_Node000014" title=" " alt="" coords="797,359,875,363,875,368,797,364"/>
+<area shape="rect" id="Node000015" href="$classc___input_mgr.html#a47a66106086819f5c9edf6c94df9adc5" title=" " alt="" coords="886,407,1062,448"/>
+<area shape="poly" id="edge16_Node000013_Node000015" title=" " alt="" coords="780,369,820,380,890,400,889,405,819,385,779,374"/>
+<area shape="poly" id="edge15_Node000014_Node000014" title=" " alt="" coords="932,359,924,349,929,339,946,333,974,331,1005,333,1020,341,1018,345,1004,339,974,336,947,338,933,343,929,348,936,355"/>
+<area shape="rect" id="Node000018" href="$classc___output_mgr.html#aa5fa47aab179e25649aa61acd159586d" title=" " alt="" coords="630,395,815,420"/>
+<area shape="poly" id="edge19_Node000017_Node000018" title=" " alt="" coords="536,405,614,405,614,410,536,410"/>
+<area shape="rect" id="Node000019" href="$classc___input_mgr.html#a8a195063dcc63c1fd8de7c14ab3bf0a2" title=" " alt="" coords="633,445,812,485"/>
+<area shape="poly" id="edge20_Node000017_Node000019" title=" " alt="" coords="537,418,620,438,618,443,536,423"/>
+</map>

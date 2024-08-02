@@ -1,0 +1,34 @@
+<map id="fsm_PlayEffect_state_Idle::Start" name="fsm_PlayEffect_state_Idle::Start">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,297,150,338"/>
+<area shape="rect" id="Node000002" href="$classfsm___play_effect__state___playing_effect.html#aff6b7708a50695d14f78b039fb5a5663" title=" " alt="" coords="198,104,342,145"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,295,236,154,240,158,101,299"/>
+<area shape="rect" id="Node000004" href="$classc___input_effect_engine.html#acf078d65ad2078ad5f32afe6867284a2" title="Set a new config in the driver." alt="" coords="202,267,338,307"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="150,304,186,298,187,303,150,309"/>
+<area shape="rect" id="Node000010" href="$class_fast_timer.html#ae9fd21e0e04f87197a49ad166d0ec1e3" title="&lt; Start the module" alt="" coords="663,353,810,379"/>
+<area shape="poly" id="edge17_Node000001_Node000010" title=" " alt="" coords="116,336,199,377,293,412,335,423,390,432,495,445,540,443,598,432,654,412,702,385,705,390,656,416,599,438,541,449,495,451,390,438,334,428,291,417,197,381,114,341"/>
+<area shape="rect" id="Node000011" href="$_e_s_pixel_stick_8h.html#a41e121c8cd723982e1127a1ccf29b756" title=" " alt="" coords="442,397,547,423"/>
+<area shape="poly" id="edge16_Node000001_Node000011" title=" " alt="" coords="151,331,427,392,425,397,149,336"/>
+<area shape="rect" id="Node000003" href="$classc___input_common.html#a1649cd7444c3219b37fd8627754e2e56" title=" " alt="" coords="390,5,598,46"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="304,101,389,57,408,49,410,54,391,61,306,106"/>
+<area shape="rect" id="Node000005" href="$classc___input_effect_engine.html#a711dc7de895ef3f4b0b599ac2d6eaa9c" title="Get the current config used by the driver." alt="" coords="426,201,562,242"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="338,265,410,243,412,248,339,270"/>
+<area shape="rect" id="Node000007" href="$classc___input_effect_engine.html#a69e94e80d206e30387cd73d257a19605" title=" " alt="" coords="426,332,562,373"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="339,304,412,326,410,331,338,309"/>
+<area shape="rect" id="Node000008" href="$classc___input_effect_engine.html#a008c4deb4332e0e98966544e6da6958d" title=" " alt="" coords="426,71,562,111"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="279,265,320,195,351,156,388,122,410,110,413,114,392,126,355,160,324,198,283,268"/>
+<area shape="rect" id="Node000009" href="$classc___input_effect_engine.html#a80cd28e720963e39357b96dc2e516291" title=" " alt="" coords="426,267,562,307"/>
+<area shape="poly" id="edge8_Node000004_Node000009" title=" " alt="" coords="338,284,410,284,410,290,338,290"/>
+<area shape="poly" id="edge10_Node000004_Node000011" title=" " alt="" coords="292,306,336,345,362,365,391,382,427,395,426,400,389,387,359,369,332,349,289,310"/>
+<area shape="rect" id="Node000012" href="$classc___input_effect_engine.html#abcbf05e7ca16985fa97382121a08867b" title=" " alt="" coords="421,136,568,177"/>
+<area shape="poly" id="edge11_Node000004_Node000012" title=" " alt="" coords="290,264,333,225,389,187,405,179,407,184,391,192,337,230,293,268"/>
+<area shape="rect" id="Node000006" href="$_safer_string_conversion_8hpp.html#abaa5f3baa5ae9ae6df677674285ab8da" title=" " alt="" coords="646,238,827,264"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="563,227,631,236,631,241,563,233"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="561,305,599,318,681,345,680,350,598,323,559,310"/>
+<area shape="rect" id="Node000013" href="$classc___input_effect_engine.html#a80416202be606d8a4c68312aecb69c1c" title=" " alt="" coords="668,173,805,214"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="568,165,653,178,652,183,568,170"/>
+<area shape="rect" id="Node000014" href="$classc___input_effect_engine.html#a8fa707bf9c7e9c79bfeae6d98adfc30c" title=" " alt="" coords="875,80,1011,121"/>
+<area shape="poly" id="edge13_Node000012_Node000014" title=" " alt="" coords="565,133,597,121,621,106,645,94,700,84,756,80,859,85,859,90,756,85,701,89,647,99,623,111,600,125,567,138"/>
+<area shape="rect" id="Node000015" href="$classc___input_effect_engine.html#a3628411bc599079aa0e45dd3df1682fc" title=" " alt="" coords="668,108,805,149"/>
+<area shape="poly" id="edge14_Node000012_Node000015" title=" " alt="" coords="568,145,653,135,653,141,568,151"/>
+<area shape="poly" id="edge15_Node000015_Node000014" title=" " alt="" coords="805,116,859,109,860,114,805,122"/>
+</map>

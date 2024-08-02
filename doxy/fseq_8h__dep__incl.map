@@ -1,0 +1,39 @@
+<map id="/github/workspace/ESPixelStick/src/service/fseq.h" name="/github/workspace/ESPixelStick/src/service/fseq.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1924,5,2101,46"/>
+<area shape="rect" id="Node000002" href="$_input_f_p_p_remote_play_file_8cpp.html" title=" " alt="" coords="1908,286,2117,342"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="2015,62,2015,286,2010,286,2010,62"/>
+<area shape="rect" id="Node000003" href="$_input_f_p_p_remote_play_file_8hpp.html" title=" " alt="" coords="1051,94,1260,150"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1909,41,1261,112,1260,106,1909,36"/>
+<area shape="rect" id="Node000016" href="$_f_p_p_discovery_8cpp.html" title=" " alt="" coords="2141,294,2372,335"/>
+<area shape="poly" id="edge21_Node000001_Node000016" title=" " alt="" coords="2041,56,2242,292,2238,295,2037,60"/>
+<area shape="poly" id="edge4_Node000003_Node000002" title=" " alt="" coords="1275,147,1896,284,1908,287,1907,292,1895,289,1274,152"/>
+<area shape="rect" id="Node000004" href="$_input_f_p_p_remote_8cpp.html" title=" " alt="" coords="1067,390,1300,431"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1035,130,722,148,536,164,355,186,196,214,130,230,76,249,36,269,13,291,9,303,9,314,14,327,24,340,37,346,66,353,160,364,449,383,786,396,1066,404,1066,409,786,402,449,389,159,370,65,358,35,351,20,344,9,329,4,315,4,302,9,288,33,265,74,244,128,225,195,208,354,180,536,159,721,143,1035,125"/>
+<area shape="rect" id="Node000005" href="$_input_f_p_p_remote_play_file_fsm_8cpp.html" title=" " alt="" coords="35,286,244,342"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="1135,165,1103,206,1082,225,1058,241,1024,254,984,265,889,278,779,284,662,285,432,282,334,283,255,289,244,291,244,285,255,284,334,278,432,277,662,280,779,279,888,273,983,260,1022,249,1055,236,1078,221,1099,203,1131,161"/>
+<area shape="rect" id="Node000006" href="$_input_m_q_t_t_8cpp.html" title=" " alt="" coords="845,198,1044,238"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="1082,159,990,200,988,195,1079,154"/>
+<area shape="rect" id="Node000007" href="$_f_p_p_discovery_8h.html" title=" " alt="" coords="1119,198,1335,238"/>
+<area shape="poly" id="edge7_Node000003_Node000007" title=" " alt="" coords="1187,160,1214,196,1210,199,1183,164"/>
+<area shape="poly" id="edge15_Node000007_Node000002" title=" " alt="" coords="1351,225,1603,246,1750,263,1896,284,1908,286,1907,291,1895,289,1749,268,1603,252,1351,230"/>
+<area shape="poly" id="edge10_Node000007_Node000004" title=" " alt="" coords="1223,254,1204,343,1192,390,1186,389,1199,341,1218,253"/>
+<area shape="poly" id="edge16_Node000007_Node000005" title=" " alt="" coords="1104,241,1101,241,972,252,863,257,677,260,492,265,383,273,256,289,244,291,244,285,255,284,383,268,492,259,677,254,863,252,972,247,1100,236,1103,235"/>
+<area shape="rect" id="Node000008" href="$_e_s_pixel_stick_8ino.html" title=" " alt="" coords="1507,294,1683,335"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="1322,240,1496,284,1522,291,1521,296,1495,289,1321,245"/>
+<area shape="rect" id="Node000009" href="$_web_mgr_8cpp.html" title=" " alt="" coords="1707,294,1883,335"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="1351,230,1515,252,1696,284,1726,291,1725,296,1695,289,1514,258,1350,236"/>
+<area shape="rect" id="Node000010" href="$_input_f_p_p_remote_8h.html" title=" " alt="" coords="1264,294,1484,335"/>
+<area shape="poly" id="edge11_Node000007_Node000010" title=" " alt="" coords="1272,245,1345,291,1342,296,1269,249"/>
+<area shape="rect" id="Node000012" href="$_input_f_p_p_remote_play_effect_fsm_8cpp.html" title=" " alt="" coords="268,286,477,342"/>
+<area shape="poly" id="edge14_Node000007_Node000012" title=" " alt="" coords="1104,241,1101,241,929,256,794,261,660,268,489,289,478,291,477,286,488,284,660,263,794,256,928,250,1100,236,1103,235"/>
+<area shape="rect" id="Node000013" href="$_input_f_p_p_remote_play_list_8cpp.html" title=" " alt="" coords="501,286,711,342"/>
+<area shape="poly" id="edge17_Node000007_Node000013" title=" " alt="" coords="1104,241,1101,241,911,263,828,272,722,289,711,291,710,286,721,284,827,267,911,257,1100,236,1103,235"/>
+<area shape="rect" id="Node000014" href="$_input_f_p_p_remote_play_list_fsm_8cpp.html" title=" " alt="" coords="735,286,944,342"/>
+<area shape="poly" id="edge18_Node000007_Node000014" title=" " alt="" coords="1132,245,945,290,944,285,1130,240"/>
+<area shape="rect" id="Node000015" href="$_network_mgr_8cpp.html" title=" " alt="" coords="968,294,1190,335"/>
+<area shape="poly" id="edge19_Node000007_Node000015" title=" " alt="" coords="1185,249,1112,296,1109,291,1182,245"/>
+<area shape="poly" id="edge20_Node000007_Node000016" title=" " alt="" coords="1351,221,1701,240,1915,258,2129,284,2170,291,2169,296,2128,289,1915,264,1701,246,1351,226"/>
+<area shape="poly" id="edge12_Node000010_Node000004" title=" " alt="" coords="1321,344,1224,392,1222,387,1319,339"/>
+<area shape="rect" id="Node000011" href="$_input_mgr_8cpp.html" title=" " alt="" coords="1324,390,1509,431"/>
+<area shape="poly" id="edge13_Node000010_Node000011" title=" " alt="" coords="1391,348,1410,389,1405,391,1387,350"/>
+</map>

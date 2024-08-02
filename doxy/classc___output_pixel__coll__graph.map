@@ -1,0 +1,9 @@
+<map id="c_OutputPixel" name="c_OutputPixel">
+<area shape="rect" id="Node000001" title=" " alt="" coords="73,198,176,223"/>
+<area shape="rect" id="Node000002" href="$classc___output_common.html" title=" " alt="" coords="5,109,132,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,147,119,196,115,199,82,149"/>
+<area shape="rect" id="Node000003" href="$unionc___output_pixel_1_1_color_offsets__s.html" title=" " alt="" coords="155,109,350,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="224,146,144,199,141,195,221,141"/>
+<area shape="rect" id="Node000004" href="$structc___output_pixel_1_1_color_offsets__s_1_1offsets.html" title=" " alt="" coords="162,5,343,46"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="255,61,255,109,250,109,250,61"/>
+</map>
