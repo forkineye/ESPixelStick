@@ -52,7 +52,6 @@ void c_OutputGrinchSpi::Begin ()
 {
     // DEBUG_START;
     Spi.Begin (this);
-    Spi.SetCsPin(DataStrobe);
     HasBeenInitialized = true;
 
     // DEBUG_END;
@@ -62,11 +61,15 @@ void c_OutputGrinchSpi::Begin ()
 //----------------------------------------------------------------------------
 void c_OutputGrinchSpi::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
     c_OutputGrinch::GetConfig (jsonConfig);
+    Spi.GetConfig (jsonConfig);
 
-    // DEBUG_END;
+    extern void PrettyPrint (JsonObject& jsonStuff, String Name);
+    PrettyPrint(jsonConfig, "Grinch");
+
+    DEBUG_END;
 } // GetConfig
 
 //----------------------------------------------------------------------------
@@ -75,6 +78,7 @@ bool c_OutputGrinchSpi::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_START;
 
     bool response = c_OutputGrinch::SetConfig (jsonConfig);
+    response |= Spi.SetConfig (jsonConfig);
 
     // DEBUG_END;
     return response;

@@ -1145,7 +1145,9 @@ function ProcessModeConfigurationDataGrinch(GrinchConfig)
     // console.info("GrinchConfig: " + JSON.stringify(GrinchConfig));
 
     $('#grinch #controller_count' ).val(GrinchConfig.count);
-    $('#grinch #cs_pin' ).val(GrinchConfig.cs_pin);
+    $('#grinch #cs_pin' ).val(GrinchConfig.dataspi.cs_pin);
+    $('#grinch #data_pin' ).val(GrinchConfig.dataspi.data_pin);
+    $('#grinch #clock_pin' ).val(GrinchConfig.dataspi.clock_pin);
 
 } // ProcessModeConfigurationDataGrinch
 
@@ -1717,8 +1719,10 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName) {
         }
         else if(ChannelConfig.type === "Grinch")
         {
-            ChannelConfig.count = $('#grinch #controller_count' ).val();
-            ChannelConfig.cs_pin = $('#grinch #cs_pin' ).val();
+            ChannelConfig.count     = $('#grinch #controller_count' ).val();
+            ChannelConfig.dataspi.cs_pin    = $('#grinch #cs_pin' ).val();
+            ChannelConfig.dataspi.clock_pin = $('#grinch #clock_pin' ).val();
+            ChannelConfig.dataspi.data_pin  = $('#grinch #data_pin' ).val();
         }
         else {
             ExtractConfigFromHtmlPages(elementids, modeControlName, ChannelConfig);

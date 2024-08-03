@@ -49,7 +49,8 @@ public:
     void    GetDriverName (String& Name) { Name = CN_OutputSpi; }
     void    DataOutputTask (void* pvParameters);
     void    SendIntensityData ();
-    void    SetCsPin(gpio_num_t _cs_pin) {cs_pin = _cs_pin;}
+    bool    SetConfig (ArduinoJson::JsonObject & jsonConfig);
+    void    GetConfig (ArduinoJson::JsonObject & jsonConfig);
 
     uint32_t DataTaskcounter = 0;
     uint32_t DataCbCounter = 0;
@@ -70,7 +71,6 @@ private:
     uint8_t NumIntensityValuesPerInterrupt = 0;
     uint8_t NumIntensityBitsPerInterrupt = 0;
     spi_device_handle_t spi_device_handle = 0;
-    gpio_num_t cs_pin = gpio_num_t(-1);
 
     // uint32_t FrameStartCounter = 0;
     uint32_t SendIntensityDataCounter = 0;
@@ -84,6 +84,7 @@ private:
 
     gpio_num_t DataPin = DEFAULT_SPI_DATA_GPIO;
     gpio_num_t ClockPin = DEFAULT_SPI_CLOCK_GPIO;
+    gpio_num_t CsPin = DEFAULT_SPI_CS_GPIO;
 
     c_OutputPixel* OutputPixel = nullptr;
 #if defined(SUPPORT_OutputType_GRINCH)

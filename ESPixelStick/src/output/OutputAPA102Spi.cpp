@@ -71,8 +71,7 @@ void c_OutputAPA102Spi::GetConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_START;
 
     c_OutputAPA102::GetConfig (jsonConfig);
-
-    jsonConfig[CN_clock_pin] = DEFAULT_SPI_CLOCK_GPIO;
+    Spi.GetConfig(jsonConfig);
 
     // DEBUG_END;
 } // GetConfig
@@ -83,6 +82,7 @@ bool c_OutputAPA102Spi::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_START;
 
     bool response = c_OutputAPA102::SetConfig (jsonConfig);
+    response |= Spi.SetConfig(jsonConfig);
 
     // DEBUG_END;
     return response;
