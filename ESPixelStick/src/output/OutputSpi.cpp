@@ -160,15 +160,17 @@ void c_OutputSpi::Begin (c_OutputPixel* _OutputPixel)
 //----------------------------------------------------------------------------
 bool c_OutputSpi::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     bool response = true;
+    JsonObject SpiConfig = jsonConfig["dataspi"];
+    response |= setFromJSON(CsPin,    SpiConfig, CN_cs_pin);
+
 /*
-    response |= setFromJSON(CsPin,    jsonConfig, CN_cs_pin);
-    response |= setFromJSON(DataPin,  jsonConfig, CN_data_pin);
-    response |= setFromJSON(ClockPin, jsonConfig, CN_clock_pin);
+    response |= setFromJSON(DataPin,  SpiConfig, CN_data_pin);
+    response |= setFromJSON(ClockPin, SpiConfig, CN_clock_pin);
 */
-    DEBUG_END;
+    // DEBUG_END;
 
     return response;
 } // SetConfig
@@ -176,14 +178,14 @@ bool c_OutputSpi::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 //----------------------------------------------------------------------------
 void c_OutputSpi::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     JsonObject SpiConfig = jsonConfig["dataspi"].to<JsonObject>();
     SpiConfig[CN_cs_pin]    = CsPin;
     SpiConfig[CN_data_pin]  = DataPin;
     SpiConfig[CN_clock_pin] = ClockPin;
 
-    DEBUG_END;
+    // DEBUG_END;
 } // GetConfig
 
 //----------------------------------------------------------------------------
