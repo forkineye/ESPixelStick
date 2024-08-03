@@ -553,7 +553,7 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutputChanne
         } // end there is an existing driver
 
         // DEBUG_V ();
-        
+
         // get the new data and UART info
         CurrentOutputChannelDriver.GpioPin   = OutputChannelIdToGpioAndPort[CurrentOutputChannelDriver.DriverId].GpioPin;
         CurrentOutputChannelDriver.PortType  = OutputChannelIdToGpioAndPort[CurrentOutputChannelDriver.DriverId].PortType;
