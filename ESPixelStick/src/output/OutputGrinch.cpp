@@ -92,6 +92,8 @@ bool c_OutputGrinch::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     bool response = c_OutputCommon::SetConfig (jsonConfig);
     response |= setFromJSON (NumberOfGrinchControllers, jsonConfig, CN_count);
+    NumberOfGrinchControllers = min(uint8_t(MAX_NUM_SUPPORTED_GRINCHES), NumberOfGrinchControllers);
+    NumberOfGrinchControllers = max(uint8_t(1), NumberOfGrinchControllers);
 
     NumberOfGrinchChannels = NumberOfGrinchControllers * DATA_CHANNELS_PER_GRINCH;
     NumberOfGrinchDataBytes = NumberOfGrinchChannels / (sizeof(uint8_t) * 8);
