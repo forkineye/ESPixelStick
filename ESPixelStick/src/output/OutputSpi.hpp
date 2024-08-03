@@ -82,6 +82,10 @@ private:
     uint8_t NextTransactionToFill = 0;
     TaskHandle_t SendIntensityDataTaskHandle = NULL;
 
+#ifndef DEFAULT_SPI_CS_GPIO
+#   define DEFAULT_SPI_CS_GPIO gpio_num_t(-1)
+#endif // ndef DEFAULT_SPI_CS_GPIO
+
     gpio_num_t DataPin = DEFAULT_SPI_DATA_GPIO;
     gpio_num_t ClockPin = DEFAULT_SPI_CLOCK_GPIO;
     gpio_num_t CsPin = DEFAULT_SPI_CS_GPIO;
