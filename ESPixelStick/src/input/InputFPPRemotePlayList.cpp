@@ -118,7 +118,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         // DEBUG_V ("");
         uint32_t FrameId = 0;
         uint32_t PlayCount = 1;
-        PauseDelayTimer.StartTimer(10000);
+        PauseDelayTimer.StartTimer(10000, false);
 
         // Get the playlist file
         String FileData;
@@ -165,7 +165,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         {
             // DEBUG_V ("Entry is empty. Do a Pause");
 
-            PauseDelayTimer.StartTimer(1000);
+            PauseDelayTimer.StartTimer(1000, false);
             fsm_PlayList_state_Paused_imp.Init (this);
             pCurrentFsmState->Start (PlayItemName, PauseDelayTimer.GetTimeRemaining() / 1000, PlayCount);
             break;
@@ -209,7 +209,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
             uint32_t PlayListEntryDuration = 0;
             setFromJSON (PlayListEntryDuration, JsonPlayListArrayEntry, CN_duration);
             // DEBUG_V (String ("PlayListEntryDuration: '") + String (PlayListEntryDuration) + "'");
-            PauseDelayTimer.StartTimer(PlayListEntryDuration * 1000);
+            PauseDelayTimer.StartTimer(PlayListEntryDuration * 1000, false);
             // DEBUG_V (String ("         PauseEndTime: '") + String (PauseEndTime) + "'");
 
             fsm_PlayList_state_Paused_imp.Init (this);
@@ -219,7 +219,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         else
         {
             logcon (String (F ("Unsupported Play List Entry type: '")) + PlayListEntryType + "'");
-            PauseDelayTimer.StartTimer(10000);
+            PauseDelayTimer.StartTimer(10000, false);
             fsm_PlayList_state_Paused_imp.Init (this);
             pCurrentFsmState->Start (PlayListEntryName, FrameId, PlayCount);
             break;

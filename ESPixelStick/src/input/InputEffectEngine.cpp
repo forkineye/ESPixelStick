@@ -303,8 +303,8 @@ void c_InputEffectEngine::PollFlash ()
             uint32_t NextDelay = random(FlashInfo.MinDelayMS, FlashInfo.MaxDelayMS);
             uint32_t NextDuration = random(FlashInfo.MinDurationMS, FlashInfo.MaxDurationMS);
 
-            FlashInfo.delaytimer.StartTimer(NextDelay);
-            FlashInfo.durationtimer.StartTimer(NextDelay + NextDuration);
+            FlashInfo.delaytimer.StartTimer(NextDelay, false);
+            FlashInfo.durationtimer.StartTimer(NextDelay + NextDuration, false);
 
             // force the effect to overwrite the buffer
             EffectDelayTimer.CancelTimer();
@@ -354,10 +354,15 @@ void c_InputEffectEngine::Process ()
             break;
         }
 
-        // DEBUG_V ("Update output");
+        // timer has expired
         uint32_t wait = (this->*ActiveEffect->func)();
-        EffectWait = max ((int)wait, MIN_EFFECT_DELAY);
-        EffectDelayTimer.StartTimer(EffectWait);
+        uint32_t NewEffectWait = max ((int)wait, MIN_EFFECT_DELAY);
+        if(NewEffectWait != EffectWait)
+        {
+            EffectWait = NewEffectWait;
+            // DEBUG_V ("Update timer");
+            EffectDelayTimer.StartTimer(EffectWait, true);
+        }
         EffectCounter++;
         InputMgr.RestartBlankTimer (GetInputChannelId ());
 
@@ -570,6 +575,7 @@ void c_InputEffectEngine::setBrightness (float brightness)
 void c_InputEffectEngine::setSpeed (uint16_t speed)
 {
     EffectSpeed = speed;
+    // DEBUG_V(String("EffectSpeed: ") + String(speed));
     setDelay (pow (10, (10 - speed) / 4.0 + 2));
 }
 
@@ -583,6 +589,8 @@ void c_InputEffectEngine::setDelay (uint16_t delay)
     {
         EffectDelay = MIN_EFFECT_DELAY;
     }
+    // DEBUG_V(String("EffectDelay: ") + String(EffectDelay));
+
     // DEBUG_END;
 } // setDelay
 
@@ -599,9 +607,9 @@ void c_InputEffectEngine::setEffect (const String & effectName)
             // DEBUG_V ("Found desired effect");
             if (!ActiveEffect->name.equalsIgnoreCase (currentEffect.name))
             {
-                // DEBUG_V ("Starting Effect");
+                // DEBUG_V ("Starting New Effect");
                 ActiveEffect = &ListOfEffects[EffectIndex];
-                EffectDelayTimer.StartTimer(EffectDelay);
+                EffectDelayTimer.StartTimer(EffectDelay, true);
                 EffectWait = MIN_EFFECT_DELAY;
                 EffectCounter = 0;
                 EffectStep = 0;
@@ -761,7 +769,7 @@ uint16_t c_InputEffectEngine::effectSolidColor ()
 //-----------------------------------------------------------------------------
 void c_InputEffectEngine::outputEffectColor (uint16_t pixelId, CRGB outputColor)
 {
-    //  DEBUG_START;
+    // DEBUG_START;
 
     uint16_t NumPixels = MirroredPixelCount;
 

@@ -52,7 +52,7 @@ void fsm_PlayEffect_state_Idle::Start (String & ConfigString, float )
     // DEBUG_START;
 
     // DEBUG_V (String ("ConfigString: '") + ConfigString + "'");
-    p_InputFPPRemotePlayEffect->PlayEffectTimer.StartTimer(1000 * p_InputFPPRemotePlayEffect->PlayDurationSec);
+    p_InputFPPRemotePlayEffect->PlayEffectTimer.StartTimer(1000 * p_InputFPPRemotePlayEffect->PlayDurationSec, false);
 
     // tell the effect engine what it is supposed to be doing
     JsonDocument EffectConfig;

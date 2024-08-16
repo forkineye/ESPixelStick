@@ -38,14 +38,23 @@ FastTimer::~FastTimer ()
 
 //-----------------------------------------------------------------------------
 ///< Start the module
-void FastTimer::StartTimer (uint32_t DurationMS)
+void FastTimer::StartTimer (uint32_t _DurationMS, bool _continuous)
 {
     // DEBUG_START;
+
+    DurationMS = _DurationMS;
+    Continuous = _continuous;
 
     uint64_t now = uint64_t(millis());
 
     EndTimeMS = now + uint64_t(DurationMS);
-    offsetMS = uint64_t((EndTimeMS > uint32_t(-1)) ? uint32_t(-1) : uint32_t(0));
+    OffsetMS = uint64_t((EndTimeMS > uint32_t(-1)) ? uint32_t(-1) : uint32_t(0));
+
+    // DEBUG_V(String("DurationMS: ") + String(DurationMS));
+    // DEBUG_V(String("continuous: ") + String(Continuous));
+    // DEBUG_V(String("       now: ") + String(now));
+    // DEBUG_V(String(" EndTimeMS: ") + String(EndTimeMS));
+    // DEBUG_V(String("  OffsetMS: ") + String(OffsetMS));
 
     // DEBUG_END;
 } // StartTimer
@@ -53,22 +62,30 @@ void FastTimer::StartTimer (uint32_t DurationMS)
 //-----------------------------------------------------------------------------
 bool FastTimer::IsExpired ()
 {
-    return ((uint64_t(millis ()) + uint64_t(offsetMS)) >= EndTimeMS);
+    bool Expired = ((uint64_t(millis ()) + uint64_t(OffsetMS)) >= EndTimeMS);
+
+    // do we need to restart the timer?
+    if(Expired && Continuous)
+    {
+        // adjust for next invocation
+        EndTimeMS += DurationMS;
+    }
+    return Expired;
 
 } // IsExpired
 
 //-----------------------------------------------------------------------------
 void FastTimer::CancelTimer()
 {
-    EndTimeMS = millis();
-    offsetMS = 0;
-
+    EndTimeMS  = 0;
+    OffsetMS   = 0;
+    DurationMS = 0;
+    Continuous = false;
 } // CancelTimer
 
 //-----------------------------------------------------------------------------
 uint32_t FastTimer::GetTimeRemaining()
 {
-    
-    return (IsExpired()) ? 0 : uint32_t(EndTimeMS - (uint64_t(millis()) + uint64_t(offsetMS)));
+    return (IsExpired()) ? 0 : uint32_t(EndTimeMS - (uint64_t(millis()) + uint64_t(OffsetMS)));
 
 } // GetTimeRemaining
