@@ -50,14 +50,19 @@ protected:
 
 #define WS2811_PIXEL_DATA_RATE              800000.0
 #define WS2811_PIXEL_NS_BIT_TOTAL           ( (1.0 / WS2811_PIXEL_DATA_RATE) * NanoSecondsInASecond)
+#ifdef ARDUINO_ARCH_ESP32
+    #define WS2811_PIXEL_NS_BIT_0_HIGH          312.0 // = 312 on logic analyzer 220ns - 380ns per datasheet
+    #define WS2811_PIXEL_NS_BIT_0_LOW           945.0 // = 937 on logic analyzer 580ns - 1.6us per datasheet
+    #define WS2811_PIXEL_NS_BIT_1_HIGH          975.0 // = 937 on logic analyzer 580ns - 1.6us per datasheet
+    #define WS2811_PIXEL_NS_BIT_1_LOW           300.0 // = 312 on logic analyzer 220ns - 380ns per datasheet
+#else
+    #define WS2811_PIXEL_NS_BIT_0_HIGH          312.0 // 220ns - 380ns per datasheet
+    #define WS2811_PIXEL_NS_BIT_0_LOW           (WS2811_PIXEL_NS_BIT_TOTAL - WS2811_PIXEL_NS_BIT_0_HIGH)
+    #define WS2811_PIXEL_NS_BIT_1_HIGH          975.0 // 580ns - 1.6us per datasheet
+    #define WS2811_PIXEL_NS_BIT_1_LOW           (WS2811_PIXEL_NS_BIT_TOTAL - WS2811_PIXEL_NS_BIT_1_HIGH)
+#endif // ARDUINO_ARCH_ESP32
 
-#define WS2811_PIXEL_NS_BIT_0_HIGH          250.0 // 250ns +/- 150ns per datasheet
-#define WS2811_PIXEL_NS_BIT_0_LOW           (WS2811_PIXEL_NS_BIT_TOTAL - WS2811_PIXEL_NS_BIT_0_HIGH)
-
-#define WS2811_PIXEL_NS_BIT_1_HIGH          600.0 // 600ns +/- 150ns per datasheet
-#define WS2811_PIXEL_NS_BIT_1_LOW           (WS2811_PIXEL_NS_BIT_TOTAL - WS2811_PIXEL_NS_BIT_1_HIGH)
-
-#define WS2811_PIXEL_IDLE_TIME_NS           300000.0 // 300us per datasheet
+#define WS2811_PIXEL_IDLE_TIME_NS           350000.0 // 350us per datasheet
 #define WS2811_PIXEL_IDLE_TIME_US           (WS2811_PIXEL_IDLE_TIME_NS / float(NanoSecondsInAMicroSecond))
 
 #define WS2811_PIXEL_BITS_PER_INTENSITY     8

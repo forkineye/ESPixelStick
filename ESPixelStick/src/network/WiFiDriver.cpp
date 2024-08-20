@@ -189,7 +189,7 @@ void c_WiFiDriver::Begin ()
 #endif
 
     // set up the poll interval
-    NextPoll.StartTimer(PollInterval);
+    NextPoll.StartTimer(PollInterval, false);
 
     // Main loop should start polling for us
     // pCurrentFsmState->Poll ();
@@ -435,7 +435,7 @@ void c_WiFiDriver::Poll ()
     if (NextPoll.IsExpired())
     {
         // DEBUG_V ("Start Poll");
-        NextPoll.StartTimer(PollInterval);
+        NextPoll.StartTimer(PollInterval, false);
         // displayFsmState ();
         pCurrentFsmState->Poll ();
         // displayFsmState ();
@@ -733,7 +733,7 @@ void fsm_WiFi_state_ConnectingUsingConfig::Init ()
     {
         pWiFiDriver->SetFsmState (this);
         pWiFiDriver->AnnounceState ();
-        pWiFiDriver->GetFsmTimer().StartTimer(1000 * pWiFiDriver->Get_sta_timeout());
+        pWiFiDriver->GetFsmTimer().StartTimer(1000 * pWiFiDriver->Get_sta_timeout(), false);
 
         pWiFiDriver->connectWifi (CurrentSsid, CurrentPassphrase);
     }
@@ -788,7 +788,7 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Init ()
     {
         pWiFiDriver->SetFsmState (this);
         pWiFiDriver->AnnounceState ();
-        pWiFiDriver->GetFsmTimer().StartTimer(1000 * pWiFiDriver->Get_sta_timeout ());
+        pWiFiDriver->GetFsmTimer().StartTimer(1000 * pWiFiDriver->Get_sta_timeout (), false);
         pWiFiDriver->connectWifi (default_ssid, default_passphrase);
     }
     else
@@ -848,7 +848,7 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
 
     pWiFiDriver->SetFsmState (this);
     pWiFiDriver->AnnounceState ();
-    pWiFiDriver->GetFsmTimer ().StartTimer(1000 * pWiFiDriver->Get_ap_timeout ());
+    pWiFiDriver->GetFsmTimer ().StartTimer(1000 * pWiFiDriver->Get_ap_timeout (), false);
 
     if (true == pWiFiDriver->Get_ap_fallbackIsEnabled() || pWiFiDriver->Get_ap_StayInApMode())
     {

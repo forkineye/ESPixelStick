@@ -67,8 +67,7 @@ void c_OutputWS2801Spi::GetConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_START;
 
     c_OutputWS2801::GetConfig (jsonConfig);
-
-    jsonConfig[CN_clock_pin] = DEFAULT_SPI_CLOCK_GPIO;
+    Spi.GetConfig(jsonConfig);
 
     // DEBUG_END;
 } // GetConfig
@@ -79,6 +78,7 @@ bool c_OutputWS2801Spi::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_START;
 
     bool response = c_OutputWS2801::SetConfig (jsonConfig);
+    response |= Spi.SetConfig(jsonConfig);
 
     // DEBUG_END;
     return response;

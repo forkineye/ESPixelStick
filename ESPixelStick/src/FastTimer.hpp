@@ -26,15 +26,16 @@ public:
     FastTimer ();
     virtual ~FastTimer ();
 
-    void StartTimer (uint32_t durationMS);
+    void StartTimer (uint32_t DurationMS, bool continuous);
     bool IsExpired();
     void CancelTimer();
     uint32_t GetTimeRemaining();
 
 private:
-
+    bool     Continuous = false;
+    uint32_t DurationMS = 0;
     uint64_t EndTimeMS = 0;
-    uint32_t offsetMS = 0;
+    uint32_t OffsetMS = 0;
 
 protected:
 

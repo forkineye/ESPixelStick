@@ -158,6 +158,37 @@ void c_OutputSpi::Begin (c_OutputPixel* _OutputPixel)
 } // Begin
 
 //----------------------------------------------------------------------------
+bool c_OutputSpi::SetConfig (ArduinoJson::JsonObject & jsonConfig)
+{
+    // DEBUG_START;
+
+    bool response = true;
+    JsonObject SpiConfig = jsonConfig["dataspi"];
+    response |= setFromJSON(CsPin,    SpiConfig, CN_cs_pin);
+
+/*
+    response |= setFromJSON(DataPin,  SpiConfig, CN_data_pin);
+    response |= setFromJSON(ClockPin, SpiConfig, CN_clock_pin);
+*/
+    // DEBUG_END;
+
+    return response;
+} // SetConfig
+
+//----------------------------------------------------------------------------
+void c_OutputSpi::GetConfig (ArduinoJson::JsonObject & jsonConfig)
+{
+    // DEBUG_START;
+
+    JsonObject SpiConfig = jsonConfig["dataspi"].to<JsonObject>();
+    SpiConfig[CN_cs_pin]    = CsPin;
+    SpiConfig[CN_data_pin]  = DataPin;
+    SpiConfig[CN_clock_pin] = ClockPin;
+
+    // DEBUG_END;
+} // GetConfig
+
+//----------------------------------------------------------------------------
 bool c_OutputSpi::ISR_MoreDataToSend()
 {
     bool response = false;
@@ -223,10 +254,10 @@ void c_OutputSpi::SendIntensityData ()
             TransactionToFill.length++;
         }
 
-        if(gpio_num_t(-1) != cs_pin)
+        if(gpio_num_t(-1) != CsPin)
         {
             // turn on the output strobe (latch data)
-            digitalWrite(cs_pin, LOW);
+            digitalWrite(CsPin, LOW);
         }
 
         ESP_ERROR_CHECK (spi_device_queue_trans (spi_device_handle, &Transactions[NextTransactionToFill], portMAX_DELAY));
@@ -236,7 +267,7 @@ void c_OutputSpi::SendIntensityData ()
             NextTransactionToFill = 0;
         }
 
-        if(gpio_num_t(-1) != cs_pin)
+        if(gpio_num_t(-1) != CsPin)
         {
             if (!ISR_MoreDataToSend ())
             {
@@ -244,7 +275,7 @@ void c_OutputSpi::SendIntensityData ()
                 spi_device_get_trans_result(spi_device_handle, &pspi_transaction, 100);
 
                 // turn on the output strobe (latch data)
-                digitalWrite(cs_pin, HIGH);
+                digitalWrite(CsPin, HIGH);
             }
         }
     }
@@ -280,10 +311,10 @@ bool c_OutputSpi::Poll ()
 
     StartNewFrame ();
 
-    if(gpio_num_t(-1) != cs_pin)
+    if(gpio_num_t(-1) != CsPin)
     {
         // turn on the output strobe (latch data)
-        pinMode(cs_pin, OUTPUT);
+        pinMode(CsPin, OUTPUT);
     }
 
     // fill all the available buffers

@@ -129,17 +129,13 @@ private:
     bool HasBeenInitialized = false;
 
 #define MIN_EFFECT_DELAY 10
-#define MAX_EFFECT_DELAY 65535
-#define DEFAULT_EFFECT_DELAY 1000
 
     using timeType = decltype(millis());
 
-
-    uint32_t EffectWait            = 32;              /* How long to wait for the effect to run again */
-
+    uint32_t EffectWait            = 0;               /* How long to wait for the effect to run again */
     uint32_t EffectCounter         = 0;               /* Counter for the number of calls to the active effect */
-    uint16_t EffectSpeed           = 6;               /* Externally controlled effect speed 1..10 */
-    uint16_t EffectDelay           = DEFAULT_EFFECT_DELAY; /* Internal representation of speed */
+    uint32_t EffectSpeed           = 6;               /* Externally controlled effect speed 1..10 */
+    uint32_t EffectDelay           = 0;               /* Internal representation of speed */
     bool EffectReverse             = false;           /* Externally controlled effect reverse option */
     bool EffectMirror              = false;           /* Externally controlled effect mirroring (start at center) */
     bool EffectAllLeds             = false;           /* Externally controlled effect all leds = 1st led */

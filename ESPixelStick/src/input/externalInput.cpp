@@ -227,7 +227,7 @@ void fsm_ExternalInput_on_wait_long_state::Init (c_ExternalInput& pExternalInput
     // DEBUG_START;
 
     // DEBUG_V ("Entring Wait Long State");
-	pExternalInput.InputHoldTimer.StartTimer(pExternalInput.LongPushDelayMS);
+	pExternalInput.InputHoldTimer.StartTimer(pExternalInput.LongPushDelayMS, false);
 	pExternalInput.CurrentFsmState = &fsm_ExternalInput_on_wait_long_state_imp;
 
     // DEBUG_END;

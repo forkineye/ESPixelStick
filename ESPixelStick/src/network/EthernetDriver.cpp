@@ -97,7 +97,7 @@ void c_EthernetDriver::Begin ()
     WiFi.onEvent ([this](WiFiEvent_t event, arduino_event_info_t info) {this->onEventHandler (event, info); });
 
     // set up the poll interval
-    NextPollTimer.StartTimer(PollInterval);
+    NextPollTimer.StartTimer(PollInterval, false);
 
     // DEBUG_END;
 
@@ -284,7 +284,7 @@ void c_EthernetDriver::Poll ()
     if (NextPollTimer.IsExpired())
     {
         // DEBUG_V ("Polling");
-        NextPollTimer.StartTimer(PollInterval);
+        NextPollTimer.StartTimer(PollInterval, false);
         pCurrentFsmState->Poll ();
     }
 
@@ -464,7 +464,7 @@ void fsm_Eth_state_Boot::Init ()
 
     pEthernetDriver->SetFsmState (this);
     // pEthernetDriver->AnnounceState ();
-    pEthernetDriver->GetFsmTimer().StartTimer(10000);
+    pEthernetDriver->GetFsmTimer().StartTimer(10000, false);
 
     // DEBUG_V(String("pEthernetDriver: 0x") + String(uint32_t(pEthernetDriver), HEX));
 
@@ -497,7 +497,7 @@ void fsm_Eth_state_PoweringUp::Init ()
 
     pEthernetDriver->SetFsmState (this);
     pEthernetDriver->AnnounceState ();
-    pEthernetDriver->GetFsmTimer().StartTimer (pEthernetDriver->GetPowerPinActiveDelayMs());
+    pEthernetDriver->GetFsmTimer().StartTimer (pEthernetDriver->GetPowerPinActiveDelayMs(), false);
 
     pEthernetDriver->InitPowerPin ();
 
@@ -530,7 +530,7 @@ void fsm_Eth_state_ConnectingToEth::Init ()
 
     pEthernetDriver->SetFsmState (this);
     pEthernetDriver->AnnounceState ();
-    pEthernetDriver->GetFsmTimer().StartTimer (5000);
+    pEthernetDriver->GetFsmTimer().StartTimer (5000, false);
 
     // DEBUG_END;
 
@@ -581,7 +581,7 @@ void fsm_Eth_state_WaitForIP::Init ()
 
     pEthernetDriver->SetFsmState (this);
     pEthernetDriver->AnnounceState ();
-    pEthernetDriver->GetFsmTimer().StartTimer (5000);
+    pEthernetDriver->GetFsmTimer().StartTimer (5000, false);
 
     // DEBUG_END;
 

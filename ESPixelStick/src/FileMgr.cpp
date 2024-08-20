@@ -603,11 +603,7 @@ bool c_FileMgr::LoadFlashFile (const String& FileName, DeserializationHandler Ha
             break;
         }
 
-        size_t JsonDocSize = file.size () * 3;
-        // DEBUG_V(String("Allocate JSON document. Size = ") + String(JsonDocSize));
-        // DEBUG_V(String("Heap: ") + ESP.getFreeHeap());
         JsonDocument jsonDoc;
-        // DEBUG_V(String("jsonDoc.capacity: ") + String(jsonDoc.capacity()));
 
         // DEBUG_V ("Convert File to JSON document");
         DeserializationError error = deserializeJson (jsonDoc, file);
