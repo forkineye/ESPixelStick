@@ -164,13 +164,13 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
         pwm->setPWMFreq (UpdateFrequency);
 
         // do we have a channel configuration array?
-        if (false == jsonConfig.containsKey (OM_SERVO_PCA9685_CHANNELS_NAME))
+        JsonArray JsonChannelList = jsonConfig[OM_SERVO_PCA9685_CHANNELS_NAME];
+        if (!JsonChannelList)
         {
             // if not, flag an error and stop processing
             logcon (MN_04);
             break;
         }
-        JsonArray JsonChannelList = jsonConfig[OM_SERVO_PCA9685_CHANNELS_NAME];
 
         for (JsonVariant JsonChannelData : JsonChannelList)
         {

@@ -303,13 +303,12 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
     // DEBUG_V ();
 
     // add the channels header
-    JsonObject OutputMgrChannelsData;
-    if (!jsonConfig.containsKey (CN_channels))
+    JsonObject OutputMgrChannelsData = jsonConfig[CN_channels];
+    if (!OutputMgrChannelsData)
     {
         // DEBUG_V ();
-        jsonConfig[CN_channels].to<JsonObject> ();
+        OutputMgrChannelsData = jsonConfig[CN_channels].to<JsonObject> ();
     }
-    OutputMgrChannelsData = jsonConfig[CN_channels];
 
     // add the channel configurations
     // DEBUG_V ("For Each Output Channel");
@@ -317,14 +316,9 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
     {
         // DEBUG_V (String("Create Section in Config file for the output channel: '") + CurrentChannel.pOutputChannelDriver->GetOutputChannelId() + "'");
         // create a record for this channel
-        JsonObject ChannelConfigData;
         String sChannelId = String(CurrentChannel.pOutputChannelDriver->GetOutputChannelId());
-        if (true == OutputMgrChannelsData.containsKey (sChannelId))
-        {
-            // DEBUG_V (String("Channel Exists: ") + sChannelId);
-            ChannelConfigData = OutputMgrChannelsData[sChannelId];
-        }
-        else
+        JsonObject ChannelConfigData = OutputMgrChannelsData[sChannelId];
+        if (!ChannelConfigData)
         {
             // DEBUG_V (String ("add our channel section header. Chan: ") + sChannelId);
             ChannelConfigData = OutputMgrChannelsData[sChannelId].to<JsonObject> ();
@@ -334,13 +328,8 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
         ChannelConfigData[CN_type] = int(CurrentChannel.pOutputChannelDriver->GetOutputType());
 
         String DriverTypeId = String(int(CurrentChannel.pOutputChannelDriver->GetOutputType()));
-        JsonObject ChannelConfigByTypeData;
-        if (true == ChannelConfigData.containsKey (String (DriverTypeId)))
-        {
-            // DEBUG_V (String("Channel Type Data exists for chan: ") + sChannelId + " Type: " + DriverTypeId);
-            ChannelConfigByTypeData = ChannelConfigData[DriverTypeId];
-        }
-        else
+        JsonObject ChannelConfigByTypeData = ChannelConfigData[String (DriverTypeId)];
+        if (!ChannelConfigByTypeData)
         {
             // DEBUG_V (String("Add Channel Type Data for chan: ") + sChannelId + " Type: " + DriverTypeId);
             ChannelConfigByTypeData = ChannelConfigData[DriverTypeId].to<JsonObject> ();
@@ -1060,7 +1049,7 @@ void c_OutputMgr::LoadConfig ()
 } // LoadConfig
 
 //-----------------------------------------------------------------------------
-bool c_OutputMgr::FindJsonChannelConfig (JsonDocument& jsonConfig, 
+bool c_OutputMgr::FindJsonChannelConfig (JsonDocument& jsonConfig,
                                          e_OutputChannelIds ChanId,
                                          e_OutputType Type,
                                          JsonObject& ChanConfig)
@@ -1068,18 +1057,21 @@ bool c_OutputMgr::FindJsonChannelConfig (JsonDocument& jsonConfig,
     // DEBUG_START;
     bool Response = false;
     // DEBUG_V ();
+    // DEBUG_V(String("ChanId: ") + String(ChanId));
+    // DEBUG_V(String("  Type: ") + String(Type));
 
+    // extern void PrettyPrint(JsonDocument & jsonStuff, String Name);
     // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
-    // PrettyPrint(jsonConfig, "ProcessJsonConfig");
+    // PrettyPrint(jsonConfig, "FindJsonChannelConfig");
 
     do // once
     {
-        if (!jsonConfig.containsKey (CN_output_config))
+        JsonObject OutputChannelMgrData = jsonConfig[CN_output_config];
+        if (!OutputChannelMgrData)
         {
             logcon(String(MN_16) + MN_18);
             break;
         }
-        JsonObject OutputChannelMgrData = jsonConfig[CN_output_config];
         // DEBUG_V ();
 
         uint8_t TempVersion = !CurrentConfigVersion;
@@ -1087,7 +1079,6 @@ bool c_OutputMgr::FindJsonChannelConfig (JsonDocument& jsonConfig,
 
         // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
         // DEBUG_V (String ("CurrentConfigVersion: ") + String (CurrentConfigVersion));
-        // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
         // PrettyPrint (OutputChannelMgrData, "Output Config");
         if (TempVersion != CurrentConfigVersion)
         {
@@ -1096,38 +1087,42 @@ bool c_OutputMgr::FindJsonChannelConfig (JsonDocument& jsonConfig,
         }
 
         // do we have a channel configuration array?
-        if (!OutputChannelMgrData.containsKey (CN_channels))
+        JsonObject OutputChannelArray = OutputChannelMgrData[CN_channels];
+        if (!OutputChannelArray)
         {
             // if not, flag an error and stop processing
-                logcon(String(MN_16) + MN_18);
+            logcon(String(MN_16) + MN_18);
             break;
         }
-        JsonObject OutputChannelArray = OutputChannelMgrData[CN_channels];
         // DEBUG_V ();
 
         // get access to the channel config
-        if (false == OutputChannelArray.containsKey(String(ChanId)))
+        ChanConfig = OutputChannelArray[String(ChanId)];
+        if (!ChanConfig)
         {
             // if not, flag an error and stop processing
             logcon(String(MN_16) + ChanId + MN_18);
             break;
         }
+        // PrettyPrint(ChanConfig, "ProcessJson Channel Config");
 
         // do we need to go deeper into the config?
         if(e_OutputType::OutputType_End == Type)
         {
-            // only looking for the overall channel config
-            ChanConfig = OutputChannelArray[String(ChanId)];
+            // DEBUG_V("only looking for the overall channel config");
             Response = true;
             break;
         }
         // go deeper and get the config for the specific channel type
+        // PrettyPrint(ChanConfig, "ProcessJson Channel Config");
 
         // DEBUG_V ();
         JsonObject OutputChannelConfig = OutputChannelArray[String(ChanId)];
+        // PrettyPrint (OutputChannelConfig, "Output Channel Config");
 
         // do we have a configuration for the channel type?
-        if (!OutputChannelConfig.containsKey (String (Type)))
+        ChanConfig = OutputChannelConfig[String (Type)];
+        if (!ChanConfig)
         {
             // Not found
             logcon(String(MN_16) + ChanId + MN_18);
@@ -1136,11 +1131,6 @@ bool c_OutputMgr::FindJsonChannelConfig (JsonDocument& jsonConfig,
 
         // DEBUG_V ();
         // PrettyPrint(OutputChannelConfig, "ProcessJson Channel Config");
-
-        ChanConfig = OutputChannelConfig[String (Type)];
-        // DEBUG_V ();
-        // PrettyPrint(ChanConfig, "ProcessJson Channel Driver Config before driver create");
-        // DEBUG_V ();
 
         // all went well
         Response = true;
@@ -1160,6 +1150,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonDocument& jsonConfig)
 
     // DEBUG_V ();
 
+    // extern void PrettyPrint(JsonDocument & jsonStuff, String Name);
     // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
     // PrettyPrint(jsonConfig, "ProcessJsonConfig");
 
@@ -1187,6 +1178,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonDocument& jsonConfig)
             // is it a valid / supported channel type
             if (ChannelType >= uint32_t (OutputType_End))
             {
+                // DEBUG_V (String("OutputType_End: ") + String(OutputType_End));
                 // if not, flag an error and move on to the next channel
                 logcon(String(MN_19) + ChannelType + MN_20 + CurrentOutputChannelDriver.DriverId + MN_03);
                 InstantiateNewOutputChannel(CurrentOutputChannelDriver, e_OutputType::OutputType_Disabled);
@@ -1195,18 +1187,14 @@ bool c_OutputMgr::ProcessJsonConfig (JsonDocument& jsonConfig)
             // DEBUG_V ();
 
             // do we have a configuration for the channel type?
-            if (false == OutputChannelConfig.containsKey (String (ChannelType)))
+            JsonObject OutputChannelDriverConfig = OutputChannelConfig[String (ChannelType)];
+            if (!OutputChannelDriverConfig)
             {
                 // if not, flag an error and stop processing
                 logcon(String(MN_16) + CurrentOutputChannelDriver.DriverId + MN_18);
                 InstantiateNewOutputChannel(CurrentOutputChannelDriver, e_OutputType::OutputType_Disabled);
                 continue;
             }
-
-            // DEBUG_V ();
-            // PrettyPrint(OutputChannelConfig, "ProcessJson Channel Config");
-
-            JsonObject OutputChannelDriverConfig = OutputChannelConfig[String (ChannelType)];
             // DEBUG_V ();
             // PrettyPrint(OutputChannelDriverConfig, "ProcessJson Channel Driver Config before driver create");
             // DEBUG_V ();

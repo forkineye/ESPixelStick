@@ -165,7 +165,8 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
 
     do // once
     {
-        if (!json.containsKey (CN_network))
+        JsonObject network = json[CN_network];
+        if (!network)
         {
             logcon (String (F ("No network config found. Use default settings")));
             // request config save
@@ -174,15 +175,14 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
         }
         // DEBUG_V("");
 
-        JsonObject network = json[CN_network];
 
         HostnameChanged = setFromJSON (hostname, network, CN_hostname);
         // DEBUG_V("");
 
-        if (network.containsKey (CN_wifi))
+        JsonObject networkWiFi = network[CN_wifi];
+        if (networkWiFi)
         {
             // DEBUG_V("");
-            JsonObject networkWiFi = network[CN_wifi];
             ConfigChanged |= WiFiDriver.SetConfig (networkWiFi);
         }
         else
@@ -205,9 +205,9 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
 #ifdef SUPPORT_ETHERNET
         ConfigChanged = setFromJSON (AllowWiFiAndEthUpSimultaneously, network, CN_weus);
 
-        if (network.containsKey (CN_eth))
+        JsonObject networkEth = network[CN_eth];
+        if (networkEth)
         {
-            JsonObject networkEth = network[CN_eth];
             ConfigChanged |= EthernetDriver.SetConfig (networkEth);
         }
         else

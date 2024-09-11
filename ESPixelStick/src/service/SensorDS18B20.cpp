@@ -60,13 +60,12 @@ bool c_SensorDS18B20::SetConfig (JsonObject& json)
 
     do // once
     {
-        if (!json.containsKey (CN_sensor))
+        JsonObject JsonDeviceConfig = json[CN_sensor];
+        if (!JsonDeviceConfig)
         {
             logcon (F ("No Sensor settings found."));
             break;
         }
-
-        JsonObject JsonDeviceConfig = json[CN_sensor];
 
         ConfigChanged |= setFromJSON (TempUnit, JsonDeviceConfig, CN_units);
         LastReadingTime = 0; // force a reading

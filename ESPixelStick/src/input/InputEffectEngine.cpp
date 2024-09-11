@@ -454,11 +454,11 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
         FlashInfo.MinIntensity = FlashInfo.MaxIntensity;
     }
 
-    if(jsonConfig.containsKey(CN_transitions))
+    JsonArray TransitionsArray = jsonConfig[CN_transitions];
+    if(TransitionsArray)
     {
         TransitionColorTable.clear();
 
-        JsonArray TransitionsArray = jsonConfig[CN_transitions];
         for (auto currentTransition : TransitionsArray)
         {
             // DEBUG_V ("");
@@ -474,11 +474,11 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
         }
     }
 
-    if(jsonConfig.containsKey(CN_MarqueeGroups))
+    JsonArray MarqueeGroupArray = jsonConfig[CN_MarqueeGroups];
+    if(MarqueeGroupArray)
     {
         MarqueueGroupTable.clear();
 
-        JsonArray MarqueeGroupArray = jsonConfig[CN_MarqueeGroups];
         for (auto currentMarqueeGroup : MarqueeGroupArray)
         {
             MarqueeGroup NewGroup;

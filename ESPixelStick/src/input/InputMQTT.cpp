@@ -797,9 +797,9 @@ void c_InputMQTT::UpdateEffectConfiguration (JsonObject & JsonConfig)
     setFromJSON (effectConfig.brightness,   JsonConfig, CN_brightness);
     setFromJSON (effectConfig.whiteChannel, JsonConfig, CN_EffectWhiteChannel);
 
-    if (JsonConfig.containsKey (CN_color))
+    JsonObject JsonColor = JsonConfig[CN_color];
+    if (JsonColor)
     {
-        JsonObject JsonColor = JsonConfig[CN_color];
         setFromJSON (effectConfig.color.r, JsonColor, CN_r);
         setFromJSON (effectConfig.color.g, JsonColor, CN_g);
         setFromJSON (effectConfig.color.b, JsonColor, CN_b);

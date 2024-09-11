@@ -145,16 +145,11 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
     // add IM config parameters
     // DEBUG_V ("");
 
-    JsonObject InputMgrButtonData;
+    JsonObject InputMgrButtonData = jsonConfig[IM_EffectsControlButtonName];
 
-    if (true == jsonConfig.containsKey (IM_EffectsControlButtonName))
+    if (!InputMgrButtonData)
     {
-        // DEBUG_V ("");
-        InputMgrButtonData = jsonConfig[IM_EffectsControlButtonName];
-    }
-    else
-    {
-        // DEBUG_V ("");
+        // DEBUG_V ("Create button data");
         InputMgrButtonData = jsonConfig[IM_EffectsControlButtonName].to<JsonObject> ();
     }
     // DEBUG_V ("");
@@ -167,13 +162,8 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
     // DEBUG_V ("");
 
     // add the channels header
-    JsonObject InputMgrChannelsData;
-    if (true == jsonConfig.containsKey (CN_channels))
-    {
-        // DEBUG_V ("");
-        InputMgrChannelsData = jsonConfig[CN_channels];
-    }
-    else
+    JsonObject InputMgrChannelsData = jsonConfig[CN_channels];
+    if (!InputMgrChannelsData)
     {
         // add our section header
         // DEBUG_V ("");
@@ -192,14 +182,9 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
 
         // DEBUG_V (String("Create Section in Config file for the Input channel: '") + CurrentChannel.pInputChannelDriver->GetInputChannelId() + "'");
         // create a record for this channel
-        JsonObject ChannelConfigData;
         String sChannelId = String (CurrentChannel.pInputChannelDriver->GetInputChannelId ());
-        if (true == InputMgrChannelsData.containsKey (sChannelId))
-        {
-            // DEBUG_V ("");
-            ChannelConfigData = InputMgrChannelsData[sChannelId];
-        }
-        else
+        JsonObject ChannelConfigData = InputMgrChannelsData[sChannelId];
+        if (!ChannelConfigData)
         {
             // add our section header
             // DEBUG_V ("");
@@ -210,13 +195,8 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
         ChannelConfigData[CN_type] = int (CurrentChannel.pInputChannelDriver->GetInputType ());
 
         String DriverTypeId = String (int (CurrentChannel.pInputChannelDriver->GetInputType ()));
-        JsonObject ChannelConfigByTypeData;
-        if (true == ChannelConfigData.containsKey (String (DriverTypeId)))
-        {
-            ChannelConfigByTypeData = ChannelConfigData[DriverTypeId];
-            // DEBUG_V ("");
-        }
-        else
+        JsonObject ChannelConfigByTypeData = ChannelConfigData[(String (DriverTypeId))];
+        if (!ChannelConfigByTypeData)
         {
             // add our section header
             // DEBUG_V ("");
@@ -743,14 +723,14 @@ bool c_InputMgr::FindJsonChannelConfig (JsonObject& jsonConfig,
 
     do // once
     {
-        if (false == jsonConfig.containsKey (CN_input_config))
+        JsonObject InputChannelMgrData = jsonConfig[CN_input_config];
+        if (!InputChannelMgrData)
         {
             logcon (String (F ("No Input Interface Settings Found. Using Defaults")));
             extern void PrettyPrint (JsonObject & jsonStuff, String Name);
             PrettyPrint (jsonConfig, String(F ("c_InputMgr::ProcessJsonConfig")));
             break;
         }
-        JsonObject InputChannelMgrData = jsonConfig[CN_input_config];
         // DEBUG_V ("");
 
         uint8_t TempVersion = !InputChannelMgrData;
@@ -763,40 +743,40 @@ bool c_InputMgr::FindJsonChannelConfig (JsonObject& jsonConfig,
 
         if (TempVersion != CurrentConfigVersion)
         {
-            logcon (String (F ("InputMgr: Incorrect Version found. Using existing/default config.")));
+            logcon (String (F ("Incorrect Version found. Using existing/default config.")));
             // break;
         }
 
         // extract my own config data here
-        if (true == InputChannelMgrData.containsKey (IM_EffectsControlButtonName))
+        JsonObject InputButtonConfig = InputChannelMgrData[IM_EffectsControlButtonName];
+        if (InputButtonConfig)
         {
             // DEBUG_V ("Found Input Button Config");
-            JsonObject InputButtonConfig = InputChannelMgrData[IM_EffectsControlButtonName];
             ExternalInput.ProcessConfig (InputButtonConfig);
         }
         else
         {
-            logcon (String (F ("InputMgr: No Input Button Settings Found. Using Defaults")));
+            logcon (String (F ("No Input Button Settings Found. Using Defaults")));
         }
 
         // do we have a channel configuration array?
-        if (false == InputChannelMgrData.containsKey (CN_channels))
+        JsonObject InputChannelArray = InputChannelMgrData[CN_channels];
+        if (!InputChannelArray)
         {
             // if not, flag an error and stop processing
             logcon (String (F ("No Input Channel Settings Found. Using Defaults")));
             break;
         }
-        JsonObject InputChannelArray = InputChannelMgrData[CN_channels];
         // DEBUG_V ("");
 
         // get access to the channel config
-        if (false == InputChannelArray.containsKey (String (ChanId)))
+        ChanConfig = InputChannelArray[String(ChanId)];
+        if (!ChanConfig)
         {
             // if not, flag an error and stop processing
             logcon (String (F ("No Input Settings Found for Channel '")) + ChanId + String (F ("'. Using Defaults")));
             continue;
         }
-        ChanConfig = InputChannelArray[String(ChanId)];
         // DEBUG_V ();
 
         // all went well
@@ -844,22 +824,21 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
             if (/*(ChannelType < uint32_t (InputType_Start)) ||*/ (ChannelType >= uint32_t (InputType_End)))
             {
                 // if not, flag an error and move on to the next channel
-                logcon (String (F ("Invalid Channel Type in config '")) + ChannelType + String (F ("'. Specified for channel '")) + ChannelIndex + "'. Disabling channel");
+                logcon (String (MN_19) + ChannelType + String (MN_20) + ChannelIndex + String(MN_03));
                 InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex), e_InputType::InputType_Disabled);
                 continue;
             }
             // DEBUG_V ("");
 
             // do we have a configuration for the channel type?
-            if (false == InputChannelConfig.containsKey (String (ChannelType)))
+            JsonObject InputChannelDriverConfig = InputChannelConfig[String (ChannelType)];
+            if (!InputChannelDriverConfig)
             {
                 // if not, flag an error and stop processing
                 logcon (String (F ("No Input Settings Found for Channel '")) + ChannelIndex + String (F ("'. Using Defaults")));
                 InstantiateNewInputChannel (e_InputChannelIds (ChannelIndex), e_InputType::InputType_Disabled);
                 continue;
             }
-
-            JsonObject InputChannelDriverConfig = InputChannelConfig[String (ChannelType)];
             // DEBUG_V ("");
 
             // make sure the proper Input type is running
