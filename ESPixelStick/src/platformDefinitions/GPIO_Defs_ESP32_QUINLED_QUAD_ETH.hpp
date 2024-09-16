@@ -43,7 +43,7 @@
 
 // Temperature Sensor
 #define SUPPORT_SENSOR_DS18B20
-#define ONEWIRE_PIN             gpio_num_t::GPIO_NUM_18
+#define ONEWIRE_PIN             gpio_num_t::GPIO_NUM_13
 
 #include <ETH.h>
 
