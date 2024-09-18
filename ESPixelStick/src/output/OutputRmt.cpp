@@ -2,7 +2,7 @@
 * OutputRmt.cpp - driver code for ESPixelStick RMT Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015, 2022 Shelby Merrick
+* Copyright (c) 2015, 2024 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -24,7 +24,7 @@
 // forward declaration for the isr handler
 static void IRAM_ATTR   rmt_intr_handler (void* param);
 static rmt_isr_handle_t RMT_intr_handle = NULL;
-static c_OutputRmt *    rmt_isr_ThisPtrs[8];
+static c_OutputRmt *    rmt_isr_ThisPtrs[MAX_NUM_RMT_CHANNELS];
 static bool             InIsr = false;
 
 #ifdef USE_RMT_DEBUG_COUNTERS
@@ -39,7 +39,7 @@ c_OutputRmt::c_OutputRmt()
     memset((void *)&Intensity2Rmt[0],   0x00, sizeof(Intensity2Rmt));
     memset((void *)&SendBuffer[0], 0x00, sizeof(SendBuffer));
 
-    if(NULL == RMT_intr_handle)
+    if(NULL != RMT_intr_handle)
     {
         for(auto & currentThisPtr : rmt_isr_ThisPtrs)
         {
@@ -89,7 +89,7 @@ static void IRAM_ATTR rmt_intr_handler (void* param)
     if(!InIsr)
     {
         InIsr = true;
-        
+
         // read the current ISR flags
         uint32_t isrFlags = RMT.int_st.val;
         RMT.int_clr.val = uint32_t(-1);
@@ -230,7 +230,7 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
 void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     // //DEBUG_START;
-    
+
     jsonStatus[F("NumRmtSlotOverruns")] = NumRmtSlotOverruns;
 #ifdef USE_RMT_DEBUG_COUNTERS 
     jsonStatus[F("OutputIsPaused")] = OutputIsPaused;
