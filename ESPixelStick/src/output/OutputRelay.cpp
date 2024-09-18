@@ -142,7 +142,7 @@ bool c_OutputRelay::validate ()
 
         for (int ChannelIndex = OM_RELAY_CHANNEL_LIMIT - 1; ChannelIndex > Num_Channels; ChannelIndex--)
         {
-            logcon (String (CN_stars + String(F (" Disabling channel '")) + String(ChannelIndex + 1) + "' " + CN_stars));
+            logcon (String (CN_stars + String(MN_03) + String(ChannelIndex + 1) + "' " + CN_stars));
             OutputList[ChannelIndex].Enabled = false;
         }
 
@@ -226,13 +226,13 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
         setFromJSON (UpdateInterval, jsonConfig, OM_RELAY_UPDATE_INTERVAL_NAME);
 
         // do we have a channel configuration array?
-        if (false == jsonConfig.containsKey (CN_channels))
+        JsonArray JsonChannelList = jsonConfig[CN_channels];
+        if (!JsonChannelList)
         {
             // if not, flag an error and stop processing
             logcon (F ("No output channel settings found. Using defaults."));
             break;
         }
-        JsonArray JsonChannelList = jsonConfig[CN_channels];
 
         for (JsonVariant JsonChannelData : JsonChannelList)
         {

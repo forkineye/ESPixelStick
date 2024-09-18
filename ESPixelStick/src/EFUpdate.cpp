@@ -66,13 +66,17 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
 
         switch (_state) {
             case State::HEADER:
+                // DEBUG_V (String ("  len: 0x") + String (len, HEX));
+                // DEBUG_V (String ("index: ") + String (index));
                 // DEBUG_V ("Process HEADER record");
                 _header.raw[_loc++] = data[index++];
                 // DEBUG_V ();
                 if (_loc == sizeof(efuheader_t)) {
+                    // DEBUG_V (String("signature: 0x") + String(_header.signature, HEX));
                     if (_header.signature == EFU_ID) {
                         // DEBUG_V ();
                         _header.version = ntohs(_header.version);
+                        // DEBUG_V (String("version: ") + String(_header.version));
                         memset(&_record, 0, sizeof(efurecord_t));
                         _loc = 0;
                         _state = State::RECORD;
@@ -86,6 +90,14 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
                 break;
             case State::RECORD:
                 // DEBUG_V ("Process Data RECORD Type");
+                // DEBUG_V (String ("              len: 0x") + String (len, HEX));
+                // DEBUG_V (String ("AccumulatedLentgh: 0x") + String (AccumulatedLentgh, HEX));
+                // DEBUG_V (String ("            index: ") + String (index));
+                // DEBUG_V (String (" AccumulatedIndex: ") + String (AccumulatedIndex));
+                // DEBUG_V (String (" AccumulatedIndex: 0x") + String (AccumulatedIndex, HEX));
+                // DEBUG_V (String ("             Data: 0x") + String (data[index], HEX));
+                // DEBUG_V (String ("             Data: ") + String (data[index]));
+
                 _record.raw[_loc++] = data[index++];
                 if (_loc == sizeof(efurecord_t)) {
                     // DEBUG_V ();
@@ -93,7 +105,9 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
                     _record.size = ntohl(_record.size);
                     _loc = 0;
                     // DEBUG_V (String("_record.type: ") + uint32_t(_record.type));
+                    // DEBUG_V (String("_record.type: 0x") + String(uint32_t(_record.type), HEX));
                     // DEBUG_V (String("_record.size: ") + _record.size);
+                    // DEBUG_V (String("_record.size: 0x") + String(_record.size, HEX));
                     if (_record.type == RecordType::SKETCH_IMAGE) {
                         logcon ("Starting Sketch Image Update\n");
                         // Begin sketch update
@@ -104,6 +118,20 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
                         } else {
                             // DEBUG_V ("PASS");
                             _state = State::DATA;
+                            // esp_image_header_t *esp_image_header = (esp_image_header_t*)&data[index];
+                            // DEBUG_V(String("            magic: 0x") + String(esp_image_header->magic, HEX));
+                            // DEBUG_V(String("    segment_count: 0x") + String(esp_image_header->segment_count, HEX));
+                            // DEBUG_V(String("         spi_mode: 0x") + String(esp_image_header->spi_mode, HEX));
+                            // DEBUG_V(String("        spi_speed: 0x") + String(esp_image_header->spi_speed, HEX));
+                            // DEBUG_V(String("         spi_size: 0x") + String(esp_image_header->spi_size, HEX));
+                            // DEBUG_V(String("       entry_addr: 0x") + String(esp_image_header->entry_addr, HEX));
+                            // DEBUG_V(String("           wp_pin: 0x") + String(esp_image_header->wp_pin, HEX));
+                            // DEBUG_V(String("      spi_pin_drv: 0x") + String(esp_image_header->spi_pin_drv, HEX));
+                            // DEBUG_V(String("          chip_id: 0x") + String(esp_image_header->chip_id, HEX));
+                            // DEBUG_V(String("     min_chip_rev: 0x") + String(esp_image_header->min_chip_rev, HEX));
+                            // DEBUG_V(String("min_chip_rev_full: 0x") + String(esp_image_header->min_chip_rev_full, HEX));
+                            // DEBUG_V(String("max_chip_rev_full: 0x") + String(esp_image_header->max_chip_rev_full, HEX));
+                            // esp_image_header->min_chip_rev_full = 0;
                         }
 #ifdef ARDUINO_ARCH_ESP8266
                         Update.runAsync (true);

@@ -226,9 +226,9 @@ bool c_FileMgr::SetConfig (JsonObject & json)
     // DEBUG_START;
 
     bool ConfigChanged = false;
-    if (json.containsKey (CN_device))
+    JsonObject JsonDeviceConfig = json[CN_device];
+    if (JsonDeviceConfig)
     {
-        JsonObject JsonDeviceConfig = json[CN_device];
 /*
         extern void PrettyPrint (JsonObject& jsonStuff, String Name);
         PrettyPrint (JsonDeviceConfig, "c_FileMgr");
