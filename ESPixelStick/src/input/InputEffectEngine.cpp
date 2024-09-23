@@ -88,7 +88,7 @@ c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInput
 
     SetBufferInfo (BufferSize);
 
-    TransitionTargetColorIterator = TransitionColorTable.begin();
+    TransitionInfo.TargetColorIterator = TransitionColorTable.begin();
 
     // DEBUG_END;
 } // c_InputEffectEngine
@@ -104,7 +104,7 @@ c_InputEffectEngine::c_InputEffectEngine () :
 
     SetBufferInfo (0);
 
-    TransitionTargetColorIterator = TransitionColorTable.begin();
+    TransitionInfo.TargetColorIterator = TransitionColorTable.begin();
 
     // DEBUG_END;
 
@@ -159,6 +159,7 @@ void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
     jsonConfig["FlashMaxDelay"] = FlashInfo.MaxDelayMS;
     jsonConfig["FlashMinDur"]   = FlashInfo.MinDurationMS;
     jsonConfig["FlashMaxDur"]   = FlashInfo.MaxDurationMS;
+    jsonConfig["TransCount"]    = TransitionInfo.StepsToTarget;
 
     // DEBUG_V ("");
 
@@ -429,24 +430,31 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     String effectName;
     String effectColor;
 
-    setFromJSON (EffectSpeed, jsonConfig, CN_EffectSpeed);
-    setFromJSON (EffectReverse, jsonConfig, CN_EffectReverse);
-    setFromJSON (EffectMirror, jsonConfig, CN_EffectMirror);
-    setFromJSON (EffectAllLeds, jsonConfig, CN_EffectAllLeds);
-    setFromJSON (EffectBrightness, jsonConfig, CN_EffectBrightness);
+    setFromJSON (EffectSpeed,        jsonConfig, CN_EffectSpeed);
+    setFromJSON (EffectReverse,      jsonConfig, CN_EffectReverse);
+    setFromJSON (EffectMirror,       jsonConfig, CN_EffectMirror);
+    setFromJSON (EffectAllLeds,      jsonConfig, CN_EffectAllLeds);
+    setFromJSON (EffectBrightness,   jsonConfig, CN_EffectBrightness);
     setFromJSON (EffectWhiteChannel, jsonConfig, CN_EffectWhiteChannel);
-    setFromJSON (effectName, jsonConfig, CN_currenteffect);
-    setFromJSON (effectColor, jsonConfig, CN_EffectColor);
+    setFromJSON (effectName,         jsonConfig, CN_currenteffect);
+    setFromJSON (effectColor,        jsonConfig, CN_EffectColor);
     // DEBUG_V (String ("effectColor: ") + effectColor);
     setFromJSON (effectMarqueePixelAdvanceCount, jsonConfig, CN_pixel_count);
 
-    setFromJSON (FlashInfo.Enable,        jsonConfig, "FlashEnable");
-    setFromJSON (FlashInfo.MinIntensity,  jsonConfig, "FlashMinInt");
-    setFromJSON (FlashInfo.MaxIntensity,  jsonConfig, "FlashMaxInt");
-    setFromJSON (FlashInfo.MinDelayMS,    jsonConfig, "FlashMinDelay");
-    setFromJSON (FlashInfo.MaxDelayMS,    jsonConfig, "FlashMaxDelay");
-    setFromJSON (FlashInfo.MinDurationMS, jsonConfig, "FlashMinDur");
-    setFromJSON (FlashInfo.MaxDurationMS, jsonConfig, "FlashMaxDur");
+    setFromJSON (FlashInfo.Enable,             jsonConfig, "FlashEnable");
+    setFromJSON (FlashInfo.MinIntensity,       jsonConfig, "FlashMinInt");
+    setFromJSON (FlashInfo.MaxIntensity,       jsonConfig, "FlashMaxInt");
+    setFromJSON (FlashInfo.MinDelayMS,         jsonConfig, "FlashMinDelay");
+    setFromJSON (FlashInfo.MaxDelayMS,         jsonConfig, "FlashMaxDelay");
+    setFromJSON (FlashInfo.MinDurationMS,      jsonConfig, "FlashMinDur");
+    setFromJSON (FlashInfo.MaxDurationMS,      jsonConfig, "FlashMaxDur");
+
+    setFromJSON (TransitionInfo.StepsToTarget, jsonConfig, "TransCount");
+
+    // avoid divide by zero errors later in the processing.
+    TransitionInfo.StepsToTarget = max(double(1.0), TransitionInfo.StepsToTarget);
+    // Pretend we reached the currnt color.
+    TransitionInfo.CurrentColor = *TransitionInfo.TargetColorIterator;
 
     // make sure max is really max
     if(FlashInfo.MinIntensity >= FlashInfo.MaxIntensity)
@@ -923,44 +931,44 @@ uint16_t c_InputEffectEngine::effectTransition ()
         // DEBUG_V("need to calculate a new target color");
 
         // remove any calculation errors
-        dCRGB TransitionCurrentColor = *TransitionTargetColorIterator;
+        TransitionInfo.CurrentColor = *TransitionInfo.TargetColorIterator;
 
-        ++TransitionTargetColorIterator;
+        ++TransitionInfo.TargetColorIterator;
 
         // wrap the index
-        if(TransitionTargetColorIterator == TransitionColorTable.end())
+        if(TransitionInfo.TargetColorIterator == TransitionColorTable.end())
         {
             // DEBUG_V("Wrap Transition iterator");
-            TransitionTargetColorIterator = TransitionColorTable.begin();
+            TransitionInfo.TargetColorIterator = TransitionColorTable.begin();
         }
 
-        CalculateTransitionStepValue (TransitionTargetColorIterator->r, TransitionCurrentColor.r, TransitionStepValue.r);
-        CalculateTransitionStepValue (TransitionTargetColorIterator->g, TransitionCurrentColor.g, TransitionStepValue.g);
-        CalculateTransitionStepValue (TransitionTargetColorIterator->b, TransitionCurrentColor.b, TransitionStepValue.b);
+        CalculateTransitionStepValue (TransitionInfo.TargetColorIterator->r, TransitionInfo.CurrentColor.r, TransitionInfo.StepValue.r);
+        CalculateTransitionStepValue (TransitionInfo.TargetColorIterator->g, TransitionInfo.CurrentColor.g, TransitionInfo.StepValue.g);
+        CalculateTransitionStepValue (TransitionInfo.TargetColorIterator->b, TransitionInfo.CurrentColor.b, TransitionInfo.StepValue.b);
 
-        // DEBUG_V(String("   TransitionStepValue.r: ") + String(TransitionStepValue.r));
-        // DEBUG_V(String("   TransitionStepValue.g: ") + String(TransitionStepValue.g));
-        // DEBUG_V(String("   TransitionStepValue.b: ") + String(TransitionStepValue.b));
-        // DEBUG_V(String("           TargetColor.r: ") + String(TransitionTargetColorIterator->r));
-        // DEBUG_V(String("           TargetColor.g: ") + String(TransitionTargetColorIterator->g));
-        // DEBUG_V(String("           TargetColor.b: ") + String(TransitionTargetColorIterator->b));
-        // DEBUG_V(String("TransitionCurrentColor.r: ") + String(TransitionCurrentColor.r));
-        // DEBUG_V(String("TransitionCurrentColor.g: ") + String(TransitionCurrentColor.g));
-        // DEBUG_V(String("TransitionCurrentColor.b: ") + String(TransitionCurrentColor.b));
+        // DEBUG_V(String("   TransitionInfo.StepValue.r: ") + String(TransitionInfo.StepValue.r));
+        // DEBUG_V(String("   TransitionInfo.StepValue.g: ") + String(TransitionInfo.StepValue.g));
+        // DEBUG_V(String("   TransitionInfo.StepValue.b: ") + String(TransitionInfo.StepValue.b));
+        // DEBUG_V(String("           TargetColor.r: ") + String(TransitionInfo.TargetColorIterator->r));
+        // DEBUG_V(String("           TargetColor.g: ") + String(TransitionInfo.TargetColorIterator->g));
+        // DEBUG_V(String("           TargetColor.b: ") + String(TransitionInfo.TargetColorIterator->b));
+        // DEBUG_V(String("TransitionInfo.CurrentColor.r: ") + String(TransitionInfo.CurrentColor.r));
+        // DEBUG_V(String("TransitionInfo.CurrentColor.g: ") + String(TransitionInfo.CurrentColor.g));
+        // DEBUG_V(String("TransitionInfo.CurrentColor.b: ") + String(TransitionInfo.CurrentColor.b));
     }
     else
     {
         // DEBUG_V("need to calculate next transition color");
 
-        ConditionalIncrementColor(TransitionTargetColorIterator->r, TransitionCurrentColor.r, TransitionStepValue.r);
-        ConditionalIncrementColor(TransitionTargetColorIterator->g, TransitionCurrentColor.g, TransitionStepValue.g);
-        ConditionalIncrementColor(TransitionTargetColorIterator->b, TransitionCurrentColor.b, TransitionStepValue.b);
+        ConditionalIncrementColor(TransitionInfo.TargetColorIterator->r, TransitionInfo.CurrentColor.r, TransitionInfo.StepValue.r);
+        ConditionalIncrementColor(TransitionInfo.TargetColorIterator->g, TransitionInfo.CurrentColor.g, TransitionInfo.StepValue.g);
+        ConditionalIncrementColor(TransitionInfo.TargetColorIterator->b, TransitionInfo.CurrentColor.b, TransitionInfo.StepValue.b);
     }
 
     CRGB TempColor;
-    TempColor.r = uint8_t(TransitionCurrentColor.r);
-    TempColor.g = uint8_t(TransitionCurrentColor.g);
-    TempColor.b = uint8_t(TransitionCurrentColor.b);
+    TempColor.r = uint8_t(TransitionInfo.CurrentColor.r);
+    TempColor.g = uint8_t(TransitionInfo.CurrentColor.g);
+    TempColor.b = uint8_t(TransitionInfo.CurrentColor.b);
 
     // DEBUG_V(String("r: ") + String(TempColor.r));
     // DEBUG_V(String("g: ") + String(TempColor.g));
@@ -1070,9 +1078,9 @@ uint16_t c_InputEffectEngine::effectMarquee ()
 void c_InputEffectEngine::CalculateTransitionStepValue(double tc, double cc, double & step)
 {
     // DEBUG_START;
-    step = (tc - cc) / NumStepsToTarget;
+    step = (tc - cc) / TransitionInfo.StepsToTarget;
 
-    #define MinStepValue (1.0 / NumStepsToTarget)
+    #define MinStepValue (1.0 / TransitionInfo.StepsToTarget)
     if(MinStepValue > fabs(step))
     {
         if(step < 0.0)
@@ -1152,9 +1160,9 @@ bool c_InputEffectEngine::ColorHasReachedTarget()
 {
     // DEBUG_START;
 
-    bool response = ( ColorHasReachedTarget(TransitionTargetColorIterator->r, TransitionCurrentColor.r, TransitionStepValue.r) &&
-                      ColorHasReachedTarget(TransitionTargetColorIterator->g, TransitionCurrentColor.g, TransitionStepValue.g) &&
-                      ColorHasReachedTarget(TransitionTargetColorIterator->b, TransitionCurrentColor.b, TransitionStepValue.b));
+    bool response = ( ColorHasReachedTarget(TransitionInfo.TargetColorIterator->r, TransitionInfo.CurrentColor.r, TransitionInfo.StepValue.r) &&
+                      ColorHasReachedTarget(TransitionInfo.TargetColorIterator->g, TransitionInfo.CurrentColor.g, TransitionInfo.StepValue.g) &&
+                      ColorHasReachedTarget(TransitionInfo.TargetColorIterator->b, TransitionInfo.CurrentColor.b, TransitionInfo.StepValue.b));
 
     if(response)
     {
