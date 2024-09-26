@@ -1,0 +1,20 @@
+<map id="c_InputFPPRemotePlayEffect::c_InputFPPRemotePlayEffect" name="c_InputFPPRemotePlayEffect::c_InputFPPRemotePlayEffect">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,161,205,202"/>
+<area shape="rect" id="Node000002" href="$classc___input_effect_engine.html#a2ebc1a0fb53a9bf1fda61f25f770ef4f" title="set up the operating environment based on the current config (or defaults)" alt="" coords="289,63,425,103"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,158,252,114,273,106,275,111,254,119,151,163"/>
+<area shape="rect" id="Node000007" href="$classfsm___play_effect__state___idle.html#a38f2e1f4719944a61396967a1fece4f3" title=" " alt="" coords="285,128,429,169"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="205,166,269,157,270,163,206,171"/>
+<area shape="rect" id="Node000008" href="$classc___input_mgr.html#a8a195063dcc63c1fd8de7c14ab3bf0a2" title=" " alt="" coords="268,193,446,234"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="206,192,253,198,252,203,205,197"/>
+<area shape="rect" id="Node000009" href="$classc___input_common.html#a1649cd7444c3219b37fd8627754e2e56" title=" " alt="" coords="253,259,461,299"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="152,200,254,243,274,251,272,256,252,248,150,205"/>
+<area shape="rect" id="Node000003" href="$classc___input_effect_engine.html#abcbf05e7ca16985fa97382121a08867b" title=" " alt="" coords="509,63,656,103"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="425,80,494,80,494,86,425,86"/>
+<area shape="rect" id="Node000004" href="$classc___input_effect_engine.html#a80416202be606d8a4c68312aecb69c1c" title=" " alt="" coords="704,5,841,46"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="651,60,689,48,690,53,653,65"/>
+<area shape="rect" id="Node000005" href="$classc___input_effect_engine.html#a8fa707bf9c7e9c79bfeae6d98adfc30c" title=" " alt="" coords="889,92,1025,133"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="657,86,873,103,873,108,657,91"/>
+<area shape="rect" id="Node000006" href="$classc___input_effect_engine.html#a3628411bc599079aa0e45dd3df1682fc" title=" " alt="" coords="704,120,841,161"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="653,101,690,113,689,118,651,106"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="841,127,873,122,873,128,841,133"/>
+</map>

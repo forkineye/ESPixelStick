@@ -1,0 +1,17 @@
+<map id="fsm_PlayFile_state_PlayingFile::Poll" name="fsm_PlayFile_state_PlayingFile::Poll">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,104,138,145"/>
+<area shape="rect" id="Node000002" href="$classc___input_f_p_p_remote_play_item.html#a6e0e0d5ded2fbb53fc654fe43afcd207" title=" " alt="" coords="186,5,372,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,101,184,57,200,50,202,55,187,61,106,106"/>
+<area shape="rect" id="Node000003" href="$classc___input_mgr.html#ac50551f90f209dbaa2b476a20b524b71" title=" " alt="" coords="195,71,363,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="138,111,180,104,181,109,139,116"/>
+<area shape="rect" id="Node000005" href="$classc___input_f_p_p_remote_play_file.html#a28afd8eea9136543891254dbda371dc2" title=" " alt="" coords="188,136,370,177"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="139,132,173,137,172,143,138,137"/>
+<area shape="rect" id="Node000007" href="$classfsm___play_file__state___playing_file.html#ac2ef6559ac28ad864927766c57b368d0" title=" " alt="" coords="213,201,345,242"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="107,143,187,186,203,193,201,198,184,191,105,148"/>
+<area shape="rect" id="Node000004" href="$class_fast_timer.html#a775ab52aa49e9a1f7092eefcbdbd673e" title="&lt; Start the module" alt="" coords="420,78,567,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="363,88,404,88,404,94,363,94"/>
+<area shape="rect" id="Node000006" href="$classfsm___play_file__state.html#afc9f1b66b51391f2f12166a851fdbfd7" title=" " alt="" coords="428,136,560,177"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="370,154,412,154,412,159,370,159"/>
+<area shape="rect" id="Node000008" href="$classfsm___play_file__state___stopping.html#ab181e3e139aa1682176df6c725e353af" title=" " alt="" coords="428,201,560,242"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="346,219,412,219,412,224,346,224"/>
+</map>

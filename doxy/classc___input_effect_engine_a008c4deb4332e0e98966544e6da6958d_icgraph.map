@@ -1,0 +1,7 @@
+<map id="c_InputEffectEngine::setColor" name="c_InputEffectEngine::setColor">
+<area shape="rect" id="Node000001" title=" " alt="" coords="382,5,518,46"/>
+<area shape="rect" id="Node000002" href="$classc___input_effect_engine.html#acf078d65ad2078ad5f32afe6867284a2" title="Set a new config in the driver." alt="" coords="198,5,334,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="367,28,335,28,335,23,367,23"/>
+<area shape="rect" id="Node000003" href="$classfsm___play_effect__state___idle.html#ada2b3107cabbc50be21d6907e25f417c" title=" " alt="" coords="5,5,150,46"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="182,28,150,28,150,23,182,23"/>
+</map>

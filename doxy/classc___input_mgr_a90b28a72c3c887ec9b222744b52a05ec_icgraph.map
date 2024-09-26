@@ -1,0 +1,15 @@
+<map id="c_InputMgr::CreateNewConfig" name="c_InputMgr::CreateNewConfig">
+<area shape="rect" id="Node000001" title=" " alt="" coords="547,55,741,80"/>
+<area shape="rect" id="Node000002" href="$classc___input_mgr.html#a86facb1b4291c34d64365c6171cd6802" title=" " alt="" coords="319,29,476,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="532,59,476,53,477,48,532,53"/>
+<area shape="rect" id="Node000007" href="$classc___input_mgr.html#a3982db8dd97b38f17ec31c73e6b4940b" title=" " alt="" coords="295,79,499,104"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="532,81,500,84,499,79,532,76"/>
+<area shape="rect" id="Node000003" href="$classc___input_mgr.html#a06a5f6adfd1e87d4d30a7fa0f78ecc33" title="&lt; Start the module" alt="" coords="114,5,240,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="302,35,240,28,240,22,303,29"/>
+<area shape="rect" id="Node000005" href="$classc___input_mgr.html#a1823b8316d8574f82bdb06ed1412f161" title="&lt; Called from loop(), renders Input data" alt="" coords="107,55,247,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="303,56,248,62,247,57,303,50"/>
+<area shape="rect" id="Node000004" href="$_e_s_pixel_stick_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,5,59,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="98,21,59,21,59,16,98,16"/>
+<area shape="rect" id="Node000006" href="$_e_s_pixel_stick_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,55,55,80"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="91,70,55,70,55,65,91,65"/>
+</map>

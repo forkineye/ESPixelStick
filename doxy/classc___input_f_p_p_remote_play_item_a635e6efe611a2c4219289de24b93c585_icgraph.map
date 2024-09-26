@@ -1,0 +1,30 @@
+<map id="c_InputFPPRemotePlayItem::IsIdle" name="c_InputFPPRemotePlayItem::IsIdle">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1282,100,1468,141"/>
+<area shape="rect" id="Node000002" href="$classfsm___play_list__state___playing_file.html#a6d4ff27930b37b98f423091145487648" title=" " alt="" coords="1062,5,1196,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1315,96,1233,61,1195,48,1197,43,1235,57,1317,91"/>
+<area shape="rect" id="Node000003" href="$classfsm___play_list__state___playing_effect.html#afe6b59d135d0c3467e6f8014de53cdb1" title=" " alt="" coords="1062,71,1196,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1266,110,1196,102,1196,96,1267,105"/>
+<area shape="rect" id="Node000004" href="$classc___input_f_p_p_remote.html#a443df599d56a819b87102cefe5d45cd3" title="Call from loop(), renders Input data." alt="" coords="255,186,445,212"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1267,131,445,194,445,189,1266,126"/>
+<area shape="rect" id="Node000005" href="$classc___input_f_p_p_remote.html#a7b84b8b1119182f7a2c6a72c00d1d1da" title=" " alt="" coords="1024,294,1234,320"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1336,152,1149,296,1146,291,1333,148"/>
+<area shape="poly" id="edge7_Node000005_Node000004" title=" " alt="" coords="1082,290,1031,272,975,256,831,231,687,216,554,207,445,203,445,197,554,201,687,210,832,226,976,251,1033,267,1084,285"/>
+<area shape="rect" id="Node000006" href="$classc___input_f_p_p_remote.html#a2e5e64a21ad76c7015c6500393be7da3" title=" " alt="" coords="243,380,457,405"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="1103,332,1048,373,1013,392,976,407,900,425,821,435,741,439,664,438,522,426,414,408,415,403,523,420,664,432,741,433,820,429,899,419,975,402,1011,388,1045,369,1100,328"/>
+<area shape="rect" id="Node000008" href="$classc___input_f_p_p_remote.html#a25cf9123173d9c89fe7e5f2f77f90f42" title=" " alt="" coords="505,294,716,320"/>
+<area shape="poly" id="edge8_Node000005_Node000008" title=" " alt="" coords="1061,293,975,278,870,270,765,278,664,296,663,291,764,272,870,265,976,272,1062,287"/>
+<area shape="rect" id="Node000010" href="$classc___input_f_p_p_remote.html#ad3bc5af64fe8523ba3c2f35cffa62fa0" title=" " alt="" coords="764,287,976,327"/>
+<area shape="poly" id="edge12_Node000005_Node000010" title=" " alt="" coords="1008,310,976,310,976,304,1008,304"/>
+<area shape="rect" id="Node000011" href="$classc___input_f_p_p_remote.html#a8148ddeeaff99c8f343c66e7e3a08a5d" title=" " alt="" coords="764,352,976,393"/>
+<area shape="poly" id="edge14_Node000005_Node000011" title=" " alt="" coords="1061,327,954,354,953,349,1060,321"/>
+<area shape="rect" id="Node000012" href="$classc___input_f_p_p_remote.html#a53f59cf53b918b6ac45432aee251f808" title=" " alt="" coords="799,467,941,507"/>
+<area shape="poly" id="edge16_Node000005_Node000012" title=" " alt="" coords="1109,333,1053,391,1016,423,977,451,941,469,938,464,974,446,1013,419,1049,387,1105,330"/>
+<area shape="rect" id="Node000007" href="$classc___input_f_p_p_remote.html#a3695b4762e16bd621444ae3460e50cbe" title=" " alt="" coords="5,372,195,413"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="227,395,195,395,195,390,227,390"/>
+<area shape="poly" id="edge10_Node000008_Node000004" title=" " alt="" coords="562,290,382,215,384,210,564,285"/>
+<area shape="poly" id="edge9_Node000008_Node000006" title=" " alt="" coords="555,328,392,381,391,376,554,323"/>
+<area shape="rect" id="Node000009" href="$classc___input_f_p_p_remote.html#a1ee15e1c30584550418fd15599f8de61" title="Set a new config in the driver." alt="" coords="251,294,449,320"/>
+<area shape="poly" id="edge11_Node000008_Node000009" title=" " alt="" coords="489,310,449,310,449,304,489,304"/>
+<area shape="poly" id="edge13_Node000010_Node000008" title=" " alt="" coords="749,310,717,310,717,304,749,304"/>
+<area shape="poly" id="edge15_Node000011_Node000008" title=" " alt="" coords="771,350,664,323,665,318,772,345"/>
+</map>

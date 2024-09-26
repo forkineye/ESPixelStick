@@ -1,0 +1,5 @@
+<map id="c_OutputPixel::GetConfig" name="c_OutputPixel::GetConfig">
+<area shape="rect" id="Node000001" title="Get the current config used by the driver." alt="" coords="218,5,383,31"/>
+<area shape="rect" id="Node000002" href="$classc___output_pixel.html#aba69c60f370711f72ed8d1166e2bec41" title="Set a new config in the driver." alt="" coords="5,5,170,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="202,21,170,21,170,16,202,16"/>
+</map>

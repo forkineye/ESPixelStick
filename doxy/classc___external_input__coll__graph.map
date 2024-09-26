@@ -1,0 +1,7 @@
+<map id="c_ExternalInput" name="c_ExternalInput">
+<area shape="rect" id="Node000001" title=" " alt="" coords="62,94,173,120"/>
+<area shape="rect" id="Node000002" href="$class_fast_timer.html" title=" " alt="" coords="5,5,86,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="57,44,72,68,99,92,95,96,67,72,53,47"/>
+<area shape="rect" id="Node000003" href="$classfsm___external_input__state.html" title=" " alt="" coords="110,5,272,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="181,46,164,72,137,95,134,91,159,68,176,43"/>
+</map>
