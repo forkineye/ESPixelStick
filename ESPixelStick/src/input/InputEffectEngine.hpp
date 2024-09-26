@@ -86,7 +86,7 @@ public:
         CRGB    color;
     } MQTTConfiguration_s;
 
-    struct MarqueeGroup 
+    struct MarqueeGroup
     {
        uint32_t NumPixelsInGroup;
        CRGB     Color;
@@ -176,10 +176,13 @@ private:
 
     const EffectDescriptor_t * ActiveEffect = nullptr;
 
-    dCRGB   TransitionCurrentColor = {0.0, 0.0, 0.0};
-    std::vector<c_InputEffectEngine::dCRGB>::iterator TransitionTargetColorIterator;
-    dCRGB   TransitionStepValue    = {2.0, 2.0, 2.0};
-    #define NumStepsToTarget         300.0
+    struct Transition_t
+    {
+        dCRGB       CurrentColor = {0.0, 0.0, 0.0};
+        std::vector<c_InputEffectEngine::dCRGB>::iterator TargetColorIterator;
+        dCRGB       StepValue    = {2.0, 2.0, 2.0};
+        double      StepsToTarget = 300; // number of NumStepsToTarget
+    } TransitionInfo;
     bool ColorHasReachedTarget ();
     bool ColorHasReachedTarget (double tc, double cc, double step);
     void ConditionalIncrementColor(double tc, double & cc, double step);
