@@ -234,8 +234,10 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             break;
         }
 
-        for (JsonVariant JsonChannelData : JsonChannelList)
+        for (JsonVariant ChannelData : JsonChannelList)
         {
+            JsonObject JsonChannelData = ChannelData.as<JsonObject>();
+
             uint8_t ChannelId = OM_RELAY_CHANNEL_LIMIT;
             setFromJSON (ChannelId, JsonChannelData, CN_id);
 

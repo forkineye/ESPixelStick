@@ -467,10 +467,11 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     {
         TransitionColorTable.clear();
 
-        for (auto currentTransition : TransitionsArray)
+        for (auto Transition : TransitionsArray)
         {
             // DEBUG_V ("");
             dCRGB NewColorTarget;
+            JsonObject currentTransition = Transition.as<JsonObject>();
             setFromJSON (NewColorTarget.r, currentTransition, "r");
             setFromJSON (NewColorTarget.g, currentTransition, "g");
             setFromJSON (NewColorTarget.b, currentTransition, "b");
@@ -487,9 +488,10 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     {
         MarqueueGroupTable.clear();
 
-        for (auto currentMarqueeGroup : MarqueeGroupArray)
+        for (auto _MarqueeGroup : MarqueeGroupArray)
         {
             MarqueeGroup NewGroup;
+            JsonObject currentMarqueeGroup = _MarqueeGroup.as<JsonObject>();
             // DEBUG_V ("");
             JsonObject GroupColor = currentMarqueeGroup[CN_color];
             setFromJSON (NewGroup.Color.r, GroupColor, "r");

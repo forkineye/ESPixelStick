@@ -352,11 +352,8 @@ bool deserializeCore (JsonObject & json)
         // DEBUG_V("Checking to see if the config is from the web flash tool");
 
         // is this a config from the web flash tool?
-        if (DeviceConfig.containsKey("requiresConfigSave"))
-        {
-            // DEBUG_V("Forcing a save config due to missing GPIO settings");
-            ConfigSaveNeeded = true;
-        }
+        // DEBUG_V("Forcing a save config due to missing GPIO settings");
+        ConfigSaveNeeded = DeviceConfig["requiresConfigSave"].is<bool>();
 
         dsDevice(DeviceConfig);
         // DEBUG_V("");
@@ -364,9 +361,9 @@ bool deserializeCore (JsonObject & json)
         // DEBUG_V("");
         ConfigSaveNeeded |= NetworkMgr.SetConfig(DeviceConfig);
         // DEBUG_V("");
-#ifdef SUPPORT_SENSOR_DS18B20
+        #ifdef SUPPORT_SENSOR_DS18B20
         ConfigSaveNeeded |= SensorDS18B20.SetConfig(DeviceConfig);
-#endif // def SUPPORT_SENSOR_DS18B20
+        #endif // def SUPPORT_SENSOR_DS18B20
         // DEBUG_V("");
         DataHasBeenAccepted = true;
 
@@ -604,3 +601,156 @@ void FeedWDT ()
     ESP.wdtFeed ();
 #endif // def ARDUINO_ARCH_ESP32
 }
+
+bool setFromJSON (time_t & OutValue, JsonObject  & Json, const char * Name)
+{
+    bool HasBeenModified = false;
+
+    if (Json[Name].is<time_t>())
+    {
+        time_t temp = Json[Name];
+        if (temp != OutValue)
+        {
+            OutValue = temp;
+            HasBeenModified = true;
+        }
+    }
+
+    return HasBeenModified;
+};
+
+bool setFromJSON (String & OutValue, JsonObject & Json, const char * Name)
+{
+    bool HasBeenModified = false;
+
+    if (Json[Name].is<String>())
+    {
+        String temp = Json[Name];
+        if (temp != OutValue)
+        {
+            OutValue = temp;
+            HasBeenModified = true;
+        }
+    }
+
+    return HasBeenModified;
+};
+
+bool setFromJSON (float  & OutValue, JsonObject & Json, const char * Name)
+{
+    bool HasBeenModified = false;
+
+    if (Json[Name].is<float>())
+    {
+        float temp = Json[Name];
+        if (fabs (temp - OutValue) > 0.000005F)
+        {
+            OutValue = temp;
+            HasBeenModified = true;
+        }
+    }
+
+    return HasBeenModified;
+} // setFromJSON
+
+bool setFromJSON (double & OutValue, JsonObject & Json, const char * Name)
+{
+    bool HasBeenModified = false;
+
+    if (Json[Name].is<double>())
+    {
+        double temp = Json[Name];
+        if (fabs (temp - OutValue) > 0.000005F)
+        {
+            OutValue = temp;
+            HasBeenModified = true;
+        }
+    }
+
+    return HasBeenModified;
+} // setFromJSON
+
+bool setFromJSON (uint8_t & OutValue, JsonObject & Json, const char * Name)
+{
+    bool HasBeenModified = false;
+
+    if (Json[Name].is<uint8_t>())
+    {
+        uint8_t temp = Json[Name];
+        if (temp != OutValue)
+        {
+            OutValue = temp;
+            HasBeenModified = true;
+        }
+    }
+
+    return HasBeenModified;
+} // setFromJSON
+
+bool setFromJSON (bool & OutValue, JsonObject & Json, const char * Name)
+{
+    bool HasBeenModified = false;
+
+    if (Json[Name].is<bool>())
+    {
+        bool temp = Json[Name];
+        if (temp != OutValue)
+        {
+            OutValue = temp;
+            HasBeenModified = true;
+        }
+    }
+
+    return HasBeenModified;
+} // setFromJSON
+
+bool setFromJSON (uint16_t & OutValue, JsonObject & Json, const char * Name)
+{
+    bool HasBeenModified = false;
+
+    if (Json[Name].is<uint16_t>())
+    {
+        uint16_t temp = Json[Name];
+        if (temp != OutValue)
+        {
+            OutValue = temp;
+            HasBeenModified = true;
+        }
+    }
+
+    return HasBeenModified;
+} // setFromJSON
+
+bool setFromJSON (uint32_t & OutValue, JsonObject & Json, const char * Name)
+{
+    bool HasBeenModified = false;
+
+    if (Json[Name].is<uint32_t>())
+    {
+        uint32_t temp = Json[Name];
+        if (temp != OutValue)
+        {
+            OutValue = temp;
+            HasBeenModified = true;
+        }
+    }
+
+    return HasBeenModified;
+} // setFromJSON
+
+bool setFromJSON (int32_t & OutValue, JsonObject & Json, const char * Name)
+{
+    bool HasBeenModified = false;
+
+    if (Json[Name].is<int32_t>())
+    {
+        int32_t temp = Json[Name];
+        if (temp != OutValue)
+        {
+            OutValue = temp;
+            HasBeenModified = true;
+        }
+    }
+
+    return HasBeenModified;
+} // setFromJSON

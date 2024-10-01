@@ -83,43 +83,15 @@ extern  const String ConfigFileName;
 extern  void FeedWDT ();
 extern  uint32_t DiscardedRxData;
 
-template <typename J, typename N>
-bool setFromJSON (float & OutValue, J& Json, N Name)
-{
-    bool HasBeenModified = false;
-
-    if (true == Json.containsKey (Name))
-    {
-        float temp = Json[Name];
-        if (fabs (temp - OutValue) > 0.000005F)
-        {
-            OutValue = temp;
-            HasBeenModified = true;
-        }
-    }
-
-    return HasBeenModified;
-};
-
-template <typename T, typename J, typename N>
-bool setFromJSON (T& OutValue, J& Json, N Name)
-{
-    bool HasBeenModified = false;
-
-    if (true == Json.containsKey (Name))
-    {
-        T temp = Json[Name];
-        if (temp != OutValue)
-        {
-            OutValue = temp;
-            HasBeenModified = true;
-        }
-    }
-
-    return HasBeenModified;
-};
-
-
+extern bool setFromJSON (float    & OutValue, JsonObject & Json, const char * Name);
+extern bool setFromJSON (double   & OutValue, JsonObject & Json, const char * Name);
+extern bool setFromJSON (String   & OutValue, JsonObject & Json, const char * Name);
+extern bool setFromJSON (time_t   & OutValue, JsonObject & Json, const char * Name);
+extern bool setFromJSON (uint8_t  & OutValue, JsonObject & Json, const char * Name);
+extern bool setFromJSON (bool     & OutValue, JsonObject & Json, const char * Name);
+extern bool setFromJSON (uint16_t & OutValue, JsonObject & Json, const char * Name);
+extern bool setFromJSON (uint32_t & OutValue, JsonObject & Json, const char * Name);
+extern bool setFromJSON (int32_t  & OutValue, JsonObject & Json, const char * Name);
 
 #define logcon(msg) \
 { \

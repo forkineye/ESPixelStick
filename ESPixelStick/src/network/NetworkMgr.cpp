@@ -189,7 +189,7 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
         {
             // DEBUG_V("");
             // this may be an old style config
-            if (network.containsKey (CN_ssid))
+            if (network[CN_ssid].is<String>())
             {
                 logcon (String (F ("Using old style WiFi Settings")));
                 // request config save
