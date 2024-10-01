@@ -153,6 +153,7 @@ const CN_PROGMEM char CN_Paused                   [] = "Paused";
 const CN_PROGMEM char CN_pixel_count              [] = "pixel_count";
 const CN_PROGMEM char CN_Platform                 [] = "Platform";
 const CN_PROGMEM char CN_play                     [] = "play";
+const CN_PROGMEM char CN_playcount                [] = "playcount";
 const CN_PROGMEM char CN_playFseq                 [] = "playFseq";
 const CN_PROGMEM char CN_playlist                 [] = "playlist";
 const CN_PROGMEM char CN_plussigns                [] = "+++++";

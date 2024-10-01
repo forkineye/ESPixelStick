@@ -162,6 +162,7 @@ extern const CN_PROGMEM char CN_Paused [];
 extern const CN_PROGMEM char CN_pixel_count [];
 extern const CN_PROGMEM char CN_Platform [];
 extern const CN_PROGMEM char CN_play [];
+extern const CN_PROGMEM char CN_playcount [];
 extern const CN_PROGMEM char CN_playFseq [];
 extern const CN_PROGMEM char CN_playlist [];
 extern const CN_PROGMEM char CN_plussigns [];
