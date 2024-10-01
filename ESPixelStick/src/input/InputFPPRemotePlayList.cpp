@@ -187,7 +187,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         {
             FrameId = 1;
             PlayCount = 1;
-            setFromJSON (PlayCount, JsonPlayListArrayEntry, F ("playcount"));
+            setFromJSON (PlayCount, JsonPlayListArrayEntry, CN_playcount);
             // DEBUG_V (String ("PlayListEntryPlayCount: '") + String (FrameId) + "'");
 
             fsm_PlayList_state_PlayingFile_imp.Init (this);
