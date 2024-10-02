@@ -754,3 +754,20 @@ bool setFromJSON (int32_t & OutValue, JsonObject & Json, const char * Name)
 
     return HasBeenModified;
 } // setFromJSON
+
+bool setFromJSON (gpio_num_t & OutValue, JsonObject & Json, const char * Name)
+{
+    bool HasBeenModified = false;
+
+    if (Json[Name].is<gpio_num_t>())
+    {
+        gpio_num_t temp = Json[Name];
+        if (temp != OutValue)
+        {
+            OutValue = temp;
+            HasBeenModified = true;
+        }
+    }
+
+    return HasBeenModified;
+} // setFromJSON

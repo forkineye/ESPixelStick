@@ -92,6 +92,7 @@ extern bool setFromJSON (bool     & OutValue, JsonObject & Json, const char * Na
 extern bool setFromJSON (uint16_t & OutValue, JsonObject & Json, const char * Name);
 extern bool setFromJSON (uint32_t & OutValue, JsonObject & Json, const char * Name);
 extern bool setFromJSON (int32_t  & OutValue, JsonObject & Json, const char * Name);
+extern bool setFromJSON (gpio_num_t  & OutValue, JsonObject & Json, const char * Name);
 
 #define logcon(msg) \
 { \
