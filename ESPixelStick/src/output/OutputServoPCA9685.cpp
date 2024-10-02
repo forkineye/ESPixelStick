@@ -172,8 +172,9 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             break;
         }
 
-        for (JsonVariant JsonChannelData : JsonChannelList)
+        for (JsonVariant ChannelData : JsonChannelList)
         {
+            JsonObject JsonChannelData = ChannelData.as<JsonObject>();
             uint8_t ChannelId = OM_SERVO_PCA9685_CHANNEL_LIMIT;
             setFromJSON (ChannelId, JsonChannelData, OM_SERVO_PCA9685_CHANNEL_ID_NAME);
 
