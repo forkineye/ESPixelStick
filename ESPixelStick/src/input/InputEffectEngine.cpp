@@ -160,6 +160,7 @@ void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
     jsonConfig["FlashMinDur"]   = FlashInfo.MinDurationMS;
     jsonConfig["FlashMaxDur"]   = FlashInfo.MaxDurationMS;
     jsonConfig["TransCount"]    = TransitionInfo.StepsToTarget;
+    jsonConfig["TransDelay"]    = TransitionInfo.TimeAtTargetMs;
 
     // DEBUG_V ("");
 
@@ -430,6 +431,9 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     String effectName;
     String effectColor;
 
+    // extern void PrettyPrint (JsonObject& jsonStuff, String Name);
+    // PrettyPrint(jsonConfig, "Effects");
+
     setFromJSON (EffectSpeed,        jsonConfig, CN_EffectSpeed);
     setFromJSON (EffectReverse,      jsonConfig, CN_EffectReverse);
     setFromJSON (EffectMirror,       jsonConfig, CN_EffectMirror);
@@ -449,12 +453,20 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     setFromJSON (FlashInfo.MinDurationMS,      jsonConfig, "FlashMinDur");
     setFromJSON (FlashInfo.MaxDurationMS,      jsonConfig, "FlashMaxDur");
 
-    setFromJSON (TransitionInfo.StepsToTarget, jsonConfig, "TransCount");
+    setFromJSON (TransitionInfo.StepsToTarget,  jsonConfig, "TransCount");
+    setFromJSON (TransitionInfo.TimeAtTargetMs, jsonConfig, "TransDelay");
+    // DEBUG_V(String(" TransitionInfo.StepsToTarget: ") + String(TransitionInfo.StepsToTarget));
+    // DEBUG_V(String("TransitionInfo.TimeAtTargetMs: ") + String(TransitionInfo.TimeAtTargetMs));
 
     // avoid divide by zero errors later in the processing.
-    TransitionInfo.StepsToTarget = max(double(1.0), TransitionInfo.StepsToTarget);
+    TransitionInfo.StepsToTarget = max(uint32_t(1), TransitionInfo.StepsToTarget);
     // Pretend we reached the currnt color.
     TransitionInfo.CurrentColor = *TransitionInfo.TargetColorIterator;
+
+    // apply minimum transition hold time
+    TransitionInfo.TimeAtTargetMs = max(uint32_t(1), TransitionInfo.TimeAtTargetMs);
+    // DEBUG_V(String(" TransitionInfo.StepsToTarget: ") + String(TransitionInfo.StepsToTarget));
+    // DEBUG_V(String("TransitionInfo.TimeAtTargetMs: ") + String(TransitionInfo.TimeAtTargetMs));
 
     // make sure max is really max
     if(FlashInfo.MinIntensity >= FlashInfo.MaxIntensity)
@@ -928,7 +940,18 @@ uint16_t c_InputEffectEngine::effectTransition ()
     // DEBUG_START;
     // DEBUG_V(String("TransitionTargetColorId: ") + String(TransitionTargetColorId));
 
-    if(ColorHasReachedTarget())
+    if(0 != TransitionInfo.HoldStartTimeMs)
+    {
+        uint32_t timeSinceTimerStarted = abs(int32_t(millis()) - int32_t(TransitionInfo.HoldStartTimeMs));
+        // DEBUG_V(String("        timeSinceTimerStarted: ") + String(timeSinceTimerStarted));
+        // DEBUG_V(String("TransitionInfo.TimeAtTargetMs: ") + String(TransitionInfo.TimeAtTargetMs));
+        if(TransitionInfo.TimeAtTargetMs < timeSinceTimerStarted)
+        {
+            // DEBUG_V("Transition Timer Has Expired");
+            TransitionInfo.HoldStartTimeMs = 0;
+        }
+    }
+    else if(ColorHasReachedTarget())
     {
         // DEBUG_V("need to calculate a new target color");
 
@@ -948,6 +971,11 @@ uint16_t c_InputEffectEngine::effectTransition ()
         CalculateTransitionStepValue (TransitionInfo.TargetColorIterator->g, TransitionInfo.CurrentColor.g, TransitionInfo.StepValue.g);
         CalculateTransitionStepValue (TransitionInfo.TargetColorIterator->b, TransitionInfo.CurrentColor.b, TransitionInfo.StepValue.b);
 
+        // start timer to hold color
+        TransitionInfo.HoldStartTimeMs = millis();
+        // DEBUG_V("Transition Timer Has Been started");
+
+        // DEBUG_V(String("   TransitionInfo.HoldStartTimeMs: ") + String(TransitionInfo.HoldStartTimeMs));
         // DEBUG_V(String("   TransitionInfo.StepValue.r: ") + String(TransitionInfo.StepValue.r));
         // DEBUG_V(String("   TransitionInfo.StepValue.g: ") + String(TransitionInfo.StepValue.g));
         // DEBUG_V(String("   TransitionInfo.StepValue.b: ") + String(TransitionInfo.StepValue.b));
@@ -1011,7 +1039,7 @@ uint16_t c_InputEffectEngine::effectMarquee ()
             uint32_t groupPixelCount = CurrentGroup.NumPixelsInGroup;
             double CurrentBrightness = (EffectReverse) ? CurrentGroup.EndingIntensity : CurrentGroup.StartingIntensity;
             double BrightnessInterval = (double(CurrentGroup.StartingIntensity) - double(CurrentGroup.EndingIntensity))/double(groupPixelCount);
-            
+
             // now adjust for 100% = 1
             CurrentBrightness /= 100;
             BrightnessInterval /= 100;
@@ -1062,7 +1090,7 @@ uint16_t c_InputEffectEngine::effectMarquee ()
         }
 
     } while (NumPixelsToProcess);
-    
+
     // advance to the next starting location
     effectMarqueePixelLocation += effectMarqueePixelAdvanceCount;
     if(effectMarqueePixelLocation >= PixelCount)
@@ -1080,9 +1108,9 @@ uint16_t c_InputEffectEngine::effectMarquee ()
 void c_InputEffectEngine::CalculateTransitionStepValue(double tc, double cc, double & step)
 {
     // DEBUG_START;
-    step = (tc - cc) / TransitionInfo.StepsToTarget;
+    step = (tc - cc) / double(TransitionInfo.StepsToTarget);
 
-    #define MinStepValue (1.0 / TransitionInfo.StepsToTarget)
+    #define MinStepValue (1.0 / double(TransitionInfo.StepsToTarget))
     if(MinStepValue > fabs(step))
     {
         if(step < 0.0)
@@ -1095,9 +1123,10 @@ void c_InputEffectEngine::CalculateTransitionStepValue(double tc, double cc, dou
         }
     }
 
-    // DEBUG_V(String("  tc: ") + String(tc));
-    // DEBUG_V(String("  cc: ") + String(cc));
-    // DEBUG_V(String("step: ") + String(step));
+    // DEBUG_V(String("   tc: ") + String(tc));
+    // DEBUG_V(String("   cc: ") + String(cc));
+    // DEBUG_V(String(" step: ") + String(step));
+    // DEBUG_V(String("steps: ") + String(TransitionInfo.StepsToTarget));
 
     // DEBUG_END;
 }
@@ -1138,7 +1167,7 @@ bool c_InputEffectEngine::ColorHasReachedTarget(double tc, double cc, double ste
 
     double diff = fabs(tc - cc);
 
-    if(diff <= fabs(2 * step))
+    if(diff <= fabs(2.0 * step))
     {
         // DEBUG_V("Single Color has reached target")
         response = true;

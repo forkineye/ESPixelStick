@@ -178,11 +178,14 @@ private:
 
     struct Transition_t
     {
-        dCRGB       CurrentColor = {0.0, 0.0, 0.0};
+        dCRGB       CurrentColor    = {0.0, 0.0, 0.0};
+        dCRGB       StepValue       = {2.0, 2.0, 2.0};
+        uint32_t    StepsToTarget   = 300; // number of NumStepsToTarget
+        uint32_t    TimeAtTargetMs  = 100; // number of milli seconds to stay at the target color.
+        uint32_t    HoldStartTimeMs = 0; // time at which transition hold time was started. 0 == off
         std::vector<c_InputEffectEngine::dCRGB>::iterator TargetColorIterator;
-        dCRGB       StepValue    = {2.0, 2.0, 2.0};
-        double      StepsToTarget = 300; // number of NumStepsToTarget
     } TransitionInfo;
+
     bool ColorHasReachedTarget ();
     bool ColorHasReachedTarget (double tc, double cc, double step);
     void ConditionalIncrementColor(double tc, double & cc, double step);
