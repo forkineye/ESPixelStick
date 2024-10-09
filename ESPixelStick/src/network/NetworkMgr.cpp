@@ -175,7 +175,6 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
         }
         // DEBUG_V("");
 
-
         HostnameChanged = setFromJSON (hostname, network, CN_hostname);
         // DEBUG_V("");
 
@@ -188,8 +187,9 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
         else
         {
             // DEBUG_V("");
+            JsonObject ssid = network[CN_ssid];
             // this may be an old style config
-            if (network[CN_ssid].is<String>())
+            if (!ssid)
             {
                 logcon (String (F ("Using old style WiFi Settings")));
                 // request config save
