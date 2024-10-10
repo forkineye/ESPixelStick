@@ -88,7 +88,7 @@ bool setFromJSON (float & OutValue, J& Json, N Name)
 {
     bool HasBeenModified = false;
 
-    if (true == Json.containsKey (Name))
+    if (Json[Name].template is<float>())
     {
         float temp = Json[Name];
         if (fabs (temp - OutValue) > 0.000005F)
@@ -110,7 +110,7 @@ bool setFromJSON (T& OutValue, J& Json, N Name)
 {
     bool HasBeenModified = false;
 
-    if (true == Json.containsKey (Name))
+    if (Json[Name].template is<T>())
     {
         T temp = Json[Name];
         if (temp != OutValue)
