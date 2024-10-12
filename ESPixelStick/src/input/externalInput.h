@@ -38,13 +38,13 @@ protected:
 
 	// read the adjusted value of the input pin
 	bool ReadInput (void);
-
+/*
 #	define M_NAME       CN_name
 #	define M_IO_ENABLED CN_enabled
 #	define M_STATE      CN_state
 #	define M_POLARITY   CN_polarity
 #   define M_ID         CN_id
-
+*/
 	String                    name;
     uint32_t                  GpioId              = 0;
 	uint32_t			      TriggerChannel      = uint32_t(32);

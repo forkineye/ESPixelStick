@@ -431,7 +431,6 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     String effectName;
     String effectColor;
 
-    // extern void PrettyPrint (JsonObject& jsonStuff, String Name);
     // PrettyPrint(jsonConfig, "Effects");
 
     setFromJSON (EffectSpeed,        jsonConfig, CN_EffectSpeed);

@@ -66,7 +66,6 @@ void c_OutputGrinchSpi::GetConfig (ArduinoJson::JsonObject& jsonConfig)
     c_OutputGrinch::GetConfig (jsonConfig);
     Spi.GetConfig (jsonConfig);
 
-    // extern void PrettyPrint (JsonObject& jsonStuff, String Name);
     // PrettyPrint(jsonConfig, "Grinch");
 
     // DEBUG_END;

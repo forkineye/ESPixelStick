@@ -220,8 +220,6 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 
     do // once
     {
-        // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
-
         // PrettyPrint (jsonConfig, String("c_OutputRelay::SetConfig"));
         setFromJSON (UpdateInterval, jsonConfig, OM_RELAY_UPDATE_INTERVAL_NAME);
 

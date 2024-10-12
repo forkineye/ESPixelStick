@@ -110,9 +110,6 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
 
     JsonDocument JsonPlayListDoc;
 
-    extern void PrettyPrint (JsonArray & jsonStuff, String Name);
-    extern void PrettyPrint (JsonObject & jsonStuff, String Name);
-
     do // once
     {
         // DEBUG_V ("");

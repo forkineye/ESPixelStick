@@ -230,7 +230,6 @@ bool c_FileMgr::SetConfig (JsonObject & json)
     if (JsonDeviceConfig)
     {
 /*
-        extern void PrettyPrint (JsonObject& jsonStuff, String Name);
         PrettyPrint (JsonDeviceConfig, "c_FileMgr");
 
         // DEBUG_V("miso_pin: " + String(miso_pin));
@@ -622,9 +621,6 @@ bool c_FileMgr::LoadFlashFile (const String& FileName, DeserializationHandler Ha
     	    // DEBUG_V (String ("    jsonDoc.capacity: ") + String (jsonDoc.capacity ()));
             break;
         }
-
-        // extern void PrettyPrint(JsonDocument & jsonStuff, String Name);
-        // PrettyPrint(jsonDoc, CfgFileMessagePrefix);
 
         // DEBUG_V ();
         logcon (CfgFileMessagePrefix + String (F ("loaded.")));

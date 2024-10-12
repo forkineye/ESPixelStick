@@ -296,7 +296,6 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
-    // extern void PrettyPrint (JsonObject&, String);
     // PrettyPrint (jsonConfig, String ("jsonConfig"));
 
     // add OM config parameters
@@ -376,7 +375,6 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
 void c_OutputMgr::CreateNewConfig ()
 {
     // DEBUG_START;
-    // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
 
     // DEBUG_V (String (("--- WARNING: Creating a new Output Manager configuration Data set ---")));
 
@@ -1018,11 +1016,9 @@ void c_OutputMgr::LoadConfig ()
     // try to load and process the config file
     if (!FileMgr.LoadFlashFile(ConfigFileName, [this](JsonDocument &JsonConfigDoc)
         {
-            // extern void PrettyPrint(JsonDocument & jsonStuff, String Name);
             // PrettyPrint(JsonConfigDoc, "OM Load Config");
 
             // DEBUG_V ();
-            // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
             // PrettyPrint(JsonConfig, "OM Load Config");
             // DEBUG_V ();
             this->ProcessJsonConfig(JsonConfigDoc);
@@ -1060,8 +1056,6 @@ bool c_OutputMgr::FindJsonChannelConfig (JsonDocument& jsonConfig,
     // DEBUG_V(String("ChanId: ") + String(ChanId));
     // DEBUG_V(String("  Type: ") + String(Type));
 
-    // extern void PrettyPrint(JsonDocument & jsonStuff, String Name);
-    // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
     // PrettyPrint(jsonConfig, "FindJsonChannelConfig");
 
     do // once
@@ -1150,8 +1144,6 @@ bool c_OutputMgr::ProcessJsonConfig (JsonDocument& jsonConfig)
 
     // DEBUG_V ();
 
-    // extern void PrettyPrint(JsonDocument & jsonStuff, String Name);
-    // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
     // PrettyPrint(jsonConfig, "ProcessJsonConfig");
 
     do // once
@@ -1167,7 +1159,6 @@ bool c_OutputMgr::ProcessJsonConfig (JsonDocument& jsonConfig)
             }
             // DEBUG_V ();
 
-            // extern void PrettyPrint (JsonObject& jsonStuff, String Name);
             // PrettyPrint(OutputChannelConfig, "ProcessJson Channel Config");
 
             // set a default value for channel type

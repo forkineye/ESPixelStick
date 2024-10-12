@@ -253,13 +253,13 @@ bool validateConfig()
 bool dsDevice(JsonObject & json)
 {
     // DEBUG_START;
-    // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
     // PrettyPrint (json, "dsDevice");
 
     bool ConfigChanged = false;
     JsonObject JsonDeviceConfig = json[CN_device];
     if (JsonDeviceConfig)
     {
+        // PrettyPrint(JsonDeviceConfig, "device");
 
 //TODO: Add configuration upgrade handling - cfgver moved to root level
         ConfigChanged |= setFromJSON (config.id,         JsonDeviceConfig, CN_id);
@@ -298,7 +298,6 @@ bool deserializeCore (JsonObject & json)
 
     bool DataHasBeenAccepted = false;
 
-    // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
     // PrettyPrint (json, "Main Config");
     JsonObject SystemConfig = json[CN_system];
     JsonObject InitConfig = json[CN_init];
@@ -378,7 +377,6 @@ void deserializeCoreHandler (JsonDocument & jsonDoc)
 {
     // DEBUG_START;
 
-    // extern void PrettyPrint(JsonDocument & jsonStuff, String Name);
     // PrettyPrint(jsonDoc, "deserializeCoreHandler");
 
     JsonObject json = jsonDoc.as<JsonObject>();
@@ -444,6 +442,8 @@ void GetConfig (JsonObject & json)
     JsonObject device       = json[CN_device].to<JsonObject>();
     device[CN_id]           = config.id;
     device[CN_blanktime]    = config.BlankDelay;
+
+    // PrettyPrint(device, "device");
 
     FileMgr.GetConfig (device);
 
