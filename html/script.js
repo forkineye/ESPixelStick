@@ -9,7 +9,7 @@ var System_Config = null;
 var Fseq_File_List = [];
 var selector = [];
 var target = document.location.host;
-target = "192.168.10.220";
+// target = "192.168.10.220";
 
 var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
@@ -1721,19 +1721,8 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName) {
             ChannelConfig.dataspi.clock_pin = parseInt($('#grinch #clock_pin' ).val());
             ChannelConfig.dataspi.data_pin  = parseInt($('#grinch #data_pin' ).val());
         }
-        /*
-        else if(ChannelConfig.type === "E1.31")
-        {
-            // "type":"E1.31","universe":"1","universe_limit":"512","universe_start":"1","port":"5568"
-            ChannelConfig.universe       = parseInt($('#E1_31 #universe').val());
-            ChannelConfig.universe_limit = parseInt($('#E1_31 #universe_limit').val());
-            ChannelConfig.universe_start = parseInt($('#E1_31 #universe_start').val());
-            // ChannelConfig.port           = parseInt($('#E1_31 #port').val());
-        }
-        */
         else
         {
-            console.error("Missing handler for: " + ChannelConfig.type);
             ExtractConfigFromHtmlPages(elementids, modeControlName, ChannelConfig);
         }
     });
