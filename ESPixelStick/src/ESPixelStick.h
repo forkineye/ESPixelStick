@@ -68,7 +68,7 @@ extern bool RebootInProgress();
 typedef struct {
     // Device
     String      id;
-    time_t      BlankDelay = time_t(5);
+    uint32_t    BlankDelay = uint32_t(5);
 } config_t;
 
 String  serializeCore          (bool pretty = false);
@@ -83,30 +83,12 @@ extern  const String ConfigFileName;
 extern  void FeedWDT ();
 extern  uint32_t DiscardedRxData;
 
-template <typename J, typename N>
-bool setFromJSON (float & OutValue, J& Json, N Name)
-{
-    bool HasBeenModified = false;
+extern void PrettyPrint (JsonObject& jsonStuff, String Name);
+extern void PrettyPrint (JsonArray& jsonStuff, String Name);
+extern void PrettyPrint(JsonDocument &jsonStuff, String Name);
 
-    if (Json[Name].template is<float>())
-    {
-        float temp = Json[Name];
-        if (fabs (temp - OutValue) > 0.000005F)
-        {
-            OutValue = temp;
-            HasBeenModified = true;
-        }
-    }
-    else
-    {
-        // DEBUG_V(String("Could not find field '") + Name + "' in the json record");
-    }
-
-    return HasBeenModified;
-};
-
-template <typename T, typename J, typename N>
-bool setFromJSON (T& OutValue, J& Json, N Name)
+template <typename T, typename N>
+bool setFromJSON (T& OutValue, JsonObject & Json, N Name)
 {
     bool HasBeenModified = false;
 
@@ -121,13 +103,35 @@ bool setFromJSON (T& OutValue, J& Json, N Name)
     }
     else
     {
-        // DEBUG_V(String("Could not find field '") + Name + "' in the json record");
+        DEBUG_V(String("Could not find field '") + Name + "' in the json record");
+        PrettyPrint (Json, Name);
     }
 
     return HasBeenModified;
 };
 
+template <typename T, typename N>
+bool setFromJSON (T& OutValue, JsonVariant & Json, N Name)
+{
+    bool HasBeenModified = false;
 
+    if (Json[Name].template is<T>())
+    {
+        T temp = Json[Name];
+        if (temp != OutValue)
+        {
+            OutValue = temp;
+            HasBeenModified = true;
+        }
+    }
+    else
+    {
+        DEBUG_V(String("Could not find field '") + Name + "' in the json record");
+        PrettyPrint (Json, Name);
+    }
+
+    return HasBeenModified;
+};
 
 #define logcon(msg) \
 { \
