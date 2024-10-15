@@ -170,6 +170,10 @@ void setup()
 
     // TestHeap(uint32_t(10));
     // DEBUG_V("");
+
+    logcon(String("CPU Frequency: ") + String(getCpuFrequencyMhz()) + "MHz");
+    logcon(String("APB Frequency: ") + String(getApbFrequency() / 1000000) + "MHz");
+
     FileMgr.Begin();
     // Load configuration from the File System and set Hostname
     // TestHeap(uint32_t(15));
