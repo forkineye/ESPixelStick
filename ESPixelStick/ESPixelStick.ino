@@ -170,9 +170,10 @@ void setup()
 
     // TestHeap(uint32_t(10));
     // DEBUG_V("");
-
+#ifdef ARDUINO_ARCH_ESP32
     logcon(String("CPU Frequency: ") + String(getCpuFrequencyMhz()) + "MHz");
     logcon(String("APB Frequency: ") + String(getApbFrequency() / 1000000) + "MHz");
+#endif // def ARDUINO_ARCH_ESP32
 
     FileMgr.Begin();
     // Load configuration from the File System and set Hostname
