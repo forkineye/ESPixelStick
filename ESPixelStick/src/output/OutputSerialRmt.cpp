@@ -64,7 +64,7 @@ void c_OutputSerialRmt::Begin ()
     OutputRmtConfig.NumIdleBits             = 1;
     OutputRmtConfig.DataDirection           = c_OutputRmt::OutputRmtConfig_t::DataDirection_t::LSB2MSB;
 
-    Rmt.Begin(OutputRmtConfig);
+    Rmt.Begin(OutputRmtConfig, this);
 
     SetUpRmtBitTimes();
     HasBeenInitialized = true;
@@ -220,36 +220,35 @@ void c_OutputSerialRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 uint32_t c_OutputSerialRmt::Poll ()
 {
     // DEBUG_START;
-    uint32_t FrameLen = ActualFrameDurationMicroSec;
 
+    // DEBUG_END;
+    return ActualFrameDurationMicroSec;
+
+} // Poll
+
+//----------------------------------------------------------------------------
+bool c_OutputSerialRmt::RmtPoll ()
+{
+    // DEBUG_START;
+    bool Response = false;
     do // Once
     {
         if (gpio_num_t(-1) == DataPin)
         {
-            FrameLen = 0;
-            break;
-        }
-
-        if (!canRefresh())
-        {
-            FrameLen = 0;
             break;
         }
 
         // DEBUG_V("get the next frame started");
-
-        if (Rmt.StartNewFrame (ActualFrameDurationMicroSec))
-        {
-            ReportNewFrame ();
-        }
+        ReportNewFrame ();
+        Rmt.StartNewFrame ();
 
         // DEBUG_V();
 
     } while (false);
 
     // DEBUG_END;
-    return FrameLen;
+    return Response;
 
-} // Render
+} // Poll
 
 #endif // (defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)) && defined(ARDUINO_ARCH_ESP32)

@@ -31,21 +31,54 @@ static bool             InIsr = false;
 static uint32_t RawIsrCounter = 0;
 #endif // def USE_RMT_DEBUG_COUNTERS
 
+static TaskHandle_t SendFrameTaskHandle = NULL;
+
+void RMT_Task (void *arg)
+{
+    uint32_t FrameStartTime = millis();
+    uint32_t FrameEndTime = FrameStartTime;
+    uint32_t DelayTime = pdMS_TO_TICKS(25);
+    const uint32_t MinFrameTimeMs = 25;
+
+    while(1)
+    {
+        uint32_t DeltaTime = FrameEndTime - FrameStartTime;
+
+        if (DeltaTime < MinFrameTimeMs)
+        {
+            DelayTime = pdMS_TO_TICKS(MinFrameTimeMs - DeltaTime);
+        }
+        else
+        {
+            // handle time wrap and long frames
+            DelayTime = pdMS_TO_TICKS(1);
+        }
+        vTaskDelay(DelayTime);
+
+        FrameStartTime = millis();
+        // process all possible channels
+        for (c_OutputRmt * pRmt : rmt_isr_ThisPtrs)
+        {
+            // do we have a driver on this channel?
+            if(nullptr != pRmt)
+            {
+                // invoke the channel
+                pRmt->StartNextFrame();
+                vTaskSuspend( SendFrameTaskHandle );
+            }
+        }
+        // record the loop end time
+        FrameEndTime = millis();
+    }
+} // RMT_Task
+
 //----------------------------------------------------------------------------
 c_OutputRmt::c_OutputRmt()
 {
     // DEBUG_START;
 
-    memset((void *)&Intensity2Rmt[0],   0x00, sizeof(Intensity2Rmt));
-    memset((void *)&SendBuffer[0], 0x00, sizeof(SendBuffer));
-
-    if(NULL != RMT_intr_handle)
-    {
-        for(auto & currentThisPtr : rmt_isr_ThisPtrs)
-        {
-            currentThisPtr = nullptr;
-        }
-    }
+    memset((void *)&Intensity2Rmt[0], 0x00, sizeof(Intensity2Rmt));
+    memset((void *)&SendBuffer[0],    0x00, sizeof(SendBuffer));
 
 #ifdef USE_RMT_DEBUG_COUNTERS
     memset((void *)&BitTypeCounters[0], 0x00, sizeof(BitTypeCounters));
@@ -116,7 +149,7 @@ static void IRAM_ATTR rmt_intr_handler (void* param)
 } // rmt_intr_handler
 
 //----------------------------------------------------------------------------
-void c_OutputRmt::Begin (OutputRmtConfig_t config )
+void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
 {
     // DEBUG_START;
 
@@ -171,7 +204,6 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
 
         // DEBUG_V();
         // ESP_ERROR_CHECK(rmt_set_source_clk(RmtConfig.channel, rmt_source_clk_t::RMT_BASECLK_APB));
-        rmt_isr_ThisPtrs[OutputRmtConfig.RmtChannelId] = this;
 
         if(NULL == RMT_intr_handle)
         {
@@ -211,13 +243,24 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
 
         // DEBUG_V (String ("                Intensity2Rmt[0]: 0x") + String (uint32_t (Intensity2Rmt[0].val), HEX));
         // DEBUG_V (String ("                Intensity2Rmt[1]: 0x") + String (uint32_t (Intensity2Rmt[1].val), HEX));
+        if(!SendFrameTaskHandle)
+        {
+            DEBUG_V("Start SendFrameTask");
 
-        WaitFrameDone = xSemaphoreCreateBinary();
+            if(RMT_intr_handle)
+            {
+                for(auto & currentThisPtr : rmt_isr_ThisPtrs)
+                {
+                    currentThisPtr = nullptr;
+                }
+            }
 
-#ifdef RMT_USE_ISR_TASK
-        // This is for debugging only
-        xTaskCreate(SendRmtIntensityDataTask, "RMTTask", 4000, this, ESP_TASK_PRIO_MIN + 4, &SendIntensityDataTaskHandle);
-#endif // def RMT_USE_ISR_TASK
+            xTaskCreatePinnedToCore(RMT_Task, "RMT_Task", 4096, NULL, 10, &SendFrameTaskHandle, 0);
+            vTaskPrioritySet(SendFrameTaskHandle, 5);
+        }
+        // DEBUG_V("Add this instance to the running list");
+        pParent = _pParent;
+        rmt_isr_ThisPtrs[OutputRmtConfig.RmtChannelId] = this;
 
         HasBeenInitialized = true;
     } while (false);
@@ -229,10 +272,10 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config )
 //----------------------------------------------------------------------------
 void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
-    // //DEBUG_START;
+    // // DEBUG_START;
 
     jsonStatus[F("NumRmtSlotOverruns")] = NumRmtSlotOverruns;
-#ifdef USE_RMT_DEBUG_COUNTERS 
+#ifdef USE_RMT_DEBUG_COUNTERS
     jsonStatus[F("OutputIsPaused")] = OutputIsPaused;
     JsonObject debugStatus = jsonStatus["RMT Debug"].to<JsonObject>();
     debugStatus["RmtChannelId"]                 = OutputRmtConfig.RmtChannelId;
@@ -455,16 +498,16 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler (uint32_t isrFlags)
 
                 // terminate the data stream
                 RMTMEM.chan[OutputRmtConfig.RmtChannelId].data32[RmtBufferWriteIndex].val = 0x0;
-                // xSemaphoreGive(WaitFrameDone);
             }
         }
         else
         {
             DisableRmtInterrupts;
-            xSemaphoreGive(WaitFrameDone);
 #ifdef USE_RMT_DEBUG_COUNTERS
             FrameEndISRcounter++;
 #endif // def USE_RMT_DEBUG_COUNTERS
+            vTaskResume ( SendFrameTaskHandle );
+
         }
     }
 #ifdef USE_RMT_DEBUG_COUNTERS
@@ -534,7 +577,7 @@ void IRAM_ATTR c_OutputRmt::ISR_TransferIntensityDataToRMT ()
         RmtEntriesTransfered = NumEntriesToTransfer;
     }
 #endif // def USE_RMT_DEBUG_COUNTERS
-        
+
     while(NumEntriesToTransfer)
     {
         RMTMEM.chan[OutputRmtConfig.RmtChannelId].data32[RmtBufferWriteIndex].val = SendBuffer[SendBufferReadIndex].val;
@@ -581,7 +624,7 @@ void c_OutputRmt::PauseOutput(bool PauseOutput)
 }
 
 //----------------------------------------------------------------------------
-bool c_OutputRmt::StartNewFrame (uint32_t FrameDurationInMicroSec)
+bool c_OutputRmt::StartNewFrame ()
 {
     // //DEBUG_START;
 
@@ -595,17 +638,17 @@ bool c_OutputRmt::StartNewFrame (uint32_t FrameDurationInMicroSec)
             break;
         }
 
-#ifdef USE_RMT_DEBUG_COUNTERS
         if(InterrupsAreEnabled)
         {
+#ifdef USE_RMT_DEBUG_COUNTERS
             IncompleteFrame++;
-        }
 #endif // def USE_RMT_DEBUG_COUNTERS
+            break;
+        }
 
         DisableRmtInterrupts;
         RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 0;
 
-        // rmt_tx_memory_reset(OutputRmtConfig.RmtChannelId);
         ISR_ResetRmtBlockPointers ();
 
         // //DEBUG_V(String("NumIdleBits: ") + String(OutputRmtConfig.NumIdleBits));
@@ -669,8 +712,6 @@ bool c_OutputRmt::StartNewFrame (uint32_t FrameDurationInMicroSec)
         rmt_set_gpio(OutputRmtConfig.RmtChannelId, RMT_MODE_TX, OutputRmtConfig.DataPin, false);
         RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 1;
 
-        // wait for the ISR to finish
-        xSemaphoreTake(WaitFrameDone, pdMS_TO_TICKS((FrameDurationInMicroSec+2000)/1000));
         Response = true;
     } while(false);
 

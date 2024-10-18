@@ -69,9 +69,9 @@ void c_OutputPixel::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 //----------------------------------------------------------------------------
 void c_OutputPixel::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
-    // DEBUG_START;
+    // // DEBUG_START;
 
-    c_OutputCommon::GetStatus (jsonStatus);
+    c_OutputCommon::BaseGetStatus (jsonStatus);
 
 #ifdef USE_PIXEL_DEBUG_COUNTERS
     JsonObject debugStatus = jsonStatus["Pixel Debug"].to<JsonObject>();
@@ -98,7 +98,7 @@ void c_OutputPixel::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     debugStatus["AdjustedBrightness"]               = AdjustedBrightness;
 #endif // def USE_PIXEL_DEBUG_COUNTERS
 
-    // DEBUG_END;
+    // // DEBUG_END;
 } // GetStatus
 
 //----------------------------------------------------------------------------

@@ -340,7 +340,7 @@ void c_OutputRelay::GetStatus(ArduinoJson::JsonObject &jsonStatus)
 {
     // DEBUG_START;
 
-    c_OutputCommon::GetStatus(jsonStatus);
+    c_OutputCommon::BaseGetStatus(jsonStatus);
     JsonArray JsonChannelList = jsonStatus[CN_Relay].to<JsonArray> ();
 
     uint8_t ChannelId = 0;

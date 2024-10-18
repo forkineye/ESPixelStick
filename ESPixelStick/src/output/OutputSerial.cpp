@@ -81,7 +81,7 @@ void c_OutputSerial::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    c_OutputCommon::GetStatus (jsonStatus);
+    c_OutputCommon::BaseGetStatus (jsonStatus);
 
 #ifdef USE_SERIAL_DEBUG_COUNTERS
     JsonObject debugStatus = jsonStatus["Serial Debug"].to<JsonObject>();

@@ -65,7 +65,7 @@ void c_OutputCommon::ClearBuffer ()
 } // ClearBuffer
 
 //-----------------------------------------------------------------------------
-void c_OutputCommon::GetStatus (JsonObject & jsonStatus)
+void c_OutputCommon::BaseGetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 

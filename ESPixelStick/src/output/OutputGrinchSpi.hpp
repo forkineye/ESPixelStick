@@ -42,6 +42,9 @@ public:
     void    GetConfig (ArduinoJson::JsonObject& jsonConfig);
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);  ///< Set a new config in the driver
     uint32_t Poll ();                                        ///< Call from loop(),  renders output data
+#if defined(ARDUINO_ARCH_ESP32)
+    bool     RmtPoll () {return false;}
+#endif // defined(ARDUINO_ARCH_ESP32)
     void    PauseOutput () {};
 
 private:

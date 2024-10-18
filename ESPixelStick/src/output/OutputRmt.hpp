@@ -127,8 +127,9 @@ public:
     c_OutputRmt ();
     virtual ~c_OutputRmt ();
 
-    void Begin                                  (OutputRmtConfig_t config);
-    bool StartNewFrame                          (uint32_t FrameDurationInMicroSec);
+    void Begin                                  (OutputRmtConfig_t config, c_OutputCommon * pParent);
+    bool StartNewFrame                          ();
+    bool StartNextFrame                         () { return (pParent) ? pParent->RmtPoll() : false; }
     void GetStatus                              (ArduinoJson::JsonObject& jsonStatus);
     void set_pin                                (gpio_num_t _DataPin) { OutputRmtConfig.DataPin = _DataPin; rmt_set_gpio (OutputRmtConfig.RmtChannelId, rmt_mode_t::RMT_MODE_TX, OutputRmtConfig.DataPin, false); }
     void PauseOutput                            (bool State);
@@ -153,8 +154,7 @@ public:
     bool NoFrameInProgress () { return (0 == (RMT.int_ena.val & (RMT_ISR_BITS))); }
 
     void IRAM_ATTR ISR_Handler (uint32_t isrFlags);
-
-    SemaphoreHandle_t  WaitFrameDone;
+    c_OutputCommon * pParent = nullptr;
 
 // #define USE_RMT_DEBUG_COUNTERS
 #ifdef USE_RMT_DEBUG_COUNTERS
@@ -163,7 +163,7 @@ public:
    uint32_t DataCallbackCounter = 0;
    uint32_t DataTaskcounter = 0;
    uint32_t ISRcounter = 0;
-   uint32_t FrameStartCounter = 0; 
+   uint32_t FrameStartCounter = 0;
    uint32_t FrameEndISRcounter = 0;
    uint32_t SendBlockIsrCounter = 0;
    uint32_t RanOutOfData = 0;
@@ -177,11 +177,10 @@ public:
    uint32_t IntensityValuesSentLastFrame = 0;
    uint32_t IntensityBitsSentLastFrame = 0;
    uint32_t IncompleteFrame = 0;
-   uint32_t IncompleteFrameLastFrame = 0;
    uint32_t BitTypeCounters[RmtDataBitIdType_t::RMT_NUM_BIT_TYPES];
    uint32_t RmtEntriesTransfered = 0;
    uint32_t RmtXmtFills = 0;
-   
+
 #endif // def USE_RMT_DEBUG_COUNTERS
 
 };

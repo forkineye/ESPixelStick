@@ -42,6 +42,9 @@ public:
     // functions to be provided by the derived class
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
     uint32_t Poll ();                                        ///< Call from loop(),  renders output data
+#if defined(ARDUINO_ARCH_ESP32)
+    bool     RmtPoll () {return false;}
+#endif // defined(ARDUINO_ARCH_ESP32)
     void    PauseOutput (bool State);
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);
     void    GetConfig (ArduinoJson::JsonObject& jsonConfig);
