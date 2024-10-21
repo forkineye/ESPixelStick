@@ -1557,6 +1557,7 @@ function submitNetworkConfig() {
     System_Config.device.mosi_pin = parseInt($('#config #device #mosi_pin').val());
     System_Config.device.clock_pin = parseInt($('#config #device #clock_pin').val());
     System_Config.device.cs_pin = parseInt($('#config #device #cs_pin').val());
+    System_Config.device.sdspeed = parseInt($('#config #device #sdspeed').val());
     System_Config.device.user = $('#ftpusername').val();
     System_Config.device.password = $('#ftppassword').val();
     System_Config.device.enabled = $('#ftp_enable').prop('checked');

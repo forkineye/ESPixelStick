@@ -176,6 +176,7 @@ const CN_PROGMEM char CN_reverse                  [] = "reverse";
 const CN_PROGMEM char CN_RMT                      [] = "RMT";
 const CN_PROGMEM char CN_rssi                     [] = "rssi";
 const CN_PROGMEM char CN_sca                      [] = "sca";
+const CN_PROGMEM char CN_sdspeed                  [] = "sdspeed";
 const CN_PROGMEM char CN_seconds_elapsed          [] = "seconds_elapsed";
 const CN_PROGMEM char CN_seconds_played           [] = "seconds_played";
 const CN_PROGMEM char CN_seconds_remaining        [] = "seconds_remaining";

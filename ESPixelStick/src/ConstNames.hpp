@@ -185,6 +185,7 @@ extern const CN_PROGMEM char CN_reverse [];
 extern const CN_PROGMEM char CN_RMT [];
 extern const CN_PROGMEM char CN_rssi [];
 extern const CN_PROGMEM char CN_sca [];
+extern const CN_PROGMEM char CN_sdspeed [];
 extern const CN_PROGMEM char CN_seconds_elapsed [];
 extern const CN_PROGMEM char CN_seconds_played [];
 extern const CN_PROGMEM char CN_seconds_remaining [];
