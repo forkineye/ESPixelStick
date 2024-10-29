@@ -21,7 +21,6 @@
 
 #include "OutputSerialRmt.hpp"
 
-
 //----------------------------------------------------------------------------
 c_OutputSerialRmt::c_OutputSerialRmt (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     gpio_num_t outputGpio,
@@ -64,12 +63,10 @@ void c_OutputSerialRmt::Begin ()
     OutputRmtConfig.NumIdleBits             = 1;
     OutputRmtConfig.DataDirection           = c_OutputRmt::OutputRmtConfig_t::DataDirection_t::LSB2MSB;
 
-    Rmt.Begin(OutputRmtConfig, this);
-
     SetUpRmtBitTimes();
+    Rmt.Begin(OutputRmtConfig, this);
     HasBeenInitialized = true;
 
-    // Start output
     // DEBUG_END;
 
 } // Begin
@@ -100,7 +97,7 @@ void c_OutputSerialRmt::SetUpRmtBitTimes()
     // DEBUG_V(String(" CurrentBaudrate: ") + String(CurrentBaudrate));
     // DEBUG_V(String("       BitTimeNS: ") + String(BitTimeNS));
     // DEBUG_V(String("RMT_TickLengthNS: ") + String(RMT_TickLengthNS));
-    // DEBUG_V(String(" BitTimeRmtTicks: ") + String(BitTimeRmtTicks));
+    // DEBUG_V(String(" BitTimeRmtTicks: ") + String(OneBitTimeInRmtTicks));
 
     BitValue.duration0 = OneBitTimeInRmtTicks;
     BitValue.level0 = 1;
