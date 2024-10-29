@@ -70,11 +70,47 @@ static std::vector<c_InputEffectEngine::dCRGB> TransitionColorTable =
 	{100, 100,  55},
 };
 
-static std::vector<c_InputEffectEngine::MarqueeGroup> MarqueueGroupTable = 
+static std::vector<c_InputEffectEngine::MarqueeGroup> MarqueueGroupTable =
 {
     {5, {255, 0, 0}, 100, 100},
     {5, {255, 255, 255}, 100, 0},
 }; // MarqueueGroupTable
+
+#ifdef ARDUINO_ARCH_ESP32
+static TaskHandle_t PollTaskHandle = NULL;
+static c_InputEffectEngine *pEffectsInstance = nullptr;
+//----------------------------------------------------------------------------
+void EffectsTask (void *arg)
+{
+    uint32_t PollStartTime = millis();
+    uint32_t PollEndTime = PollStartTime;
+    uint32_t PollTime = pdMS_TO_TICKS(25);
+    const uint32_t MinPollTimeMs = 25;
+
+    while(1)
+    {
+        uint32_t DeltaTime = PollEndTime - PollStartTime;
+
+        if (DeltaTime < MinPollTimeMs)
+        {
+            PollTime = pdMS_TO_TICKS(MinPollTimeMs - DeltaTime);
+        }
+        else
+        {
+            // handle time wrap and long frames
+            PollTime = pdMS_TO_TICKS(1);
+        }
+        vTaskDelay(PollTime);
+
+        PollStartTime = millis();
+
+        pEffectsInstance->Poll();
+
+        // record the loop end time
+        PollEndTime = millis();
+    }
+} // EffectsTask
+#endif // def ARDUINO_ARCH_ESP32
 
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInputChannelId,
@@ -113,6 +149,14 @@ c_InputEffectEngine::c_InputEffectEngine () :
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::~c_InputEffectEngine ()
 {
+#ifdef ARDUINO_ARCH_ESP32
+    if(PollTaskHandle)
+    {
+        logcon("Stop EffectsTask");
+        vTaskDelete(PollTaskHandle);
+        PollTaskHandle = NULL;
+    }
+#endif // def ARDUINO_ARCH_ESP32
 
 } // ~c_InputEffectEngine
 
@@ -129,7 +173,6 @@ void c_InputEffectEngine::Begin ()
 
     validateConfiguration ();
     // DEBUG_V ("");
-
 
     // DEBUG_END;
 } // Begin
@@ -335,7 +378,7 @@ void c_InputEffectEngine::Process ()
 
     // DEBUG_V (String ("HasBeenInitialized: ") + HasBeenInitialized);
     // DEBUG_V (String ("PixelCount: ") + PixelCount);
-
+#ifndef ARDUINO_ARCH_ESP32
     do // once
     {
         if (!HasBeenInitialized)
@@ -373,6 +416,80 @@ void c_InputEffectEngine::Process ()
     } while (false);
 
     // DEBUG_END;
+#else
+    if(!PollTaskHandle)
+    {
+        logcon("Start EffectsTask");
+        pEffectsInstance = this;
+        xTaskCreatePinnedToCore(EffectsTask, "EffectsTask", 4096, NULL, 10, &PollTaskHandle, 0);
+        vTaskPrioritySet(PollTaskHandle, 5);
+        // DEBUG_V("End EffectsTask");
+    }
+#endif // ndef ARDUINO_ARCH_ESP32
+
+} // process
+
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::Poll ()
+{
+    // // DEBUG_START;
+
+    // // DEBUG_V (String ("HasBeenInitialized: ") + HasBeenInitialized);
+    // // DEBUG_V (String ("PixelCount: ") + PixelCount);
+#ifdef ARDUINO_ARCH_ESP32
+    do // once
+    {
+        if (!HasBeenInitialized)
+        {
+            break;
+        }
+        // // DEBUG_V ("Init OK");
+
+        if ((0 == PixelCount) || (StayDark))
+        {
+            break;
+        }
+        // // DEBUG_V ("Pixel Count OK");
+
+        // do we have an active effect?
+        if(ActiveEffect == nullptr)
+        {
+            break;
+        }
+        // // DEBUG_V("Have Active effect");
+        if(ActiveEffect->func == nullptr)
+        {
+            break;
+        }
+
+        // // DEBUG_V("has the flash timer expired?");
+        if(!EffectDelayTimer.IsExpired())
+        {
+            // // DEBUG_V("Flash Timer has NOT expired");
+            PollFlash();
+            break;
+        }
+
+        // // DEBUG_V("timer has expired");
+        uint32_t wait = (this->*ActiveEffect->func)();
+        uint32_t NewEffectWait = max ((int)wait, MIN_EFFECT_DELAY);
+        if(NewEffectWait != EffectWait)
+        {
+            EffectWait = NewEffectWait;
+            // // DEBUG_V ("Update timer");
+            EffectDelayTimer.StartTimer(EffectWait, true);
+        }
+        // // DEBUG_V("Update Blank timer");
+        EffectCounter++;
+        InputMgr.RestartBlankTimer (GetInputChannelId ());
+
+        // // DEBUG_V("Check Flash operation");
+        PollFlash();
+
+    } while (false);
+
+    // // DEBUG_END;
+#endif // def ARDUINO_ARCH_ESP32
 
 } // process
 
