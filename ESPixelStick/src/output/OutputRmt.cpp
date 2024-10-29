@@ -32,7 +32,6 @@ static uint32_t RawIsrCounter = 0;
 #endif // def USE_RMT_DEBUG_COUNTERS
 
 static TaskHandle_t SendFrameTaskHandle = NULL;
-// const  UBaseType_t SendFrameTaskArrayIndex = 1;
 static BaseType_t xHigherPriorityTaskWoken = pdTRUE;
 static uint32_t FrameCompletes = 0;
 static uint32_t FrameTimeouts = 0;
