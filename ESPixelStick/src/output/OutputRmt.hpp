@@ -181,6 +181,12 @@ public:
    uint32_t RmtEntriesTransfered = 0;
    uint32_t RmtXmtFills = 0;
 
+#define RMT_DEBUG_COUNTER(p) p
+
+#else
+
+#define RMT_DEBUG_COUNTER(p)
+
 #endif // def USE_RMT_DEBUG_COUNTERS
 
 };
