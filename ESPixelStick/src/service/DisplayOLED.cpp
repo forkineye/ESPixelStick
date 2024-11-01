@@ -16,54 +16,72 @@
  *  or use of these programs.
  *
  */
+
 #include "../ESPixelStick.h"
 #ifdef USE_OLED
+
 // OLED - Standard 128x32 i2c
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include "DisplayOLED.h"
-int SCREEN_WIDTH = 128;        // OLED display width, in pixels
-int SCREEN_HEIGHT = 32;        // OLED display height, in pixels
-int OLED_RESET = -1;           // Reset pin # (or -1 if sharing Arduino reset pin)
-byte SCREEN_ADDRESS = byte(0x3C); ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
+#include <TimeLib.h>
+#include "../network/NetworkMgr.hpp"
+
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
 void c_OLED::Begin()
 {
     // DEBUG_START;
     // DEBUG_V("OLED BEGIN");
-// DEBUG_V(String("OLED Enabled: ") + String("WIDTH: " + SCREEN_WIDTH + " HEIGHT: " + SCREEN_HEIGHT + "ADDRESS: " +SCREEN_ADDRESS);
+    // DEBUG_V(String("OLED Enabled: ") + String("WIDTH: " + SCREEN_WIDTH + " HEIGHT: " + SCREEN_HEIGHT + "ADDRESS: " +SCREEN_ADDRESS);
+
     display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
     display.clearDisplay();
     display.setTextSize(2);
     display.setTextColor(SSD1306_WHITE);
-    display.setCursor(0, 0);
-    display.println(F("Loading.."));
-    display.display();
     display.setRotation(2);
+    display.setCursor(0, 3);
+    display.println(F("Loading...  "));
     display.display();
+    display.startscrollright(0x00,0x0F);
+    logcon(String(F("OLED Loaded")));
     // DEBUG_END;
 } // Begin
+
 void c_OLED::Update()
 {
-    // DEBUG_START;    
-    
-        display.clearDisplay();
-        display.setTextSize(1);
-        display.setTextColor(SSD1306_WHITE);
-        display.setCursor(0, 2);
-        display.print("IP: ");
-        display.println(WiFi.localIP());
-        display.print("HOST: ");
-        display.println(WiFi.getHostname());
+    // DEBUG_START;
+    if (now() > updateTimer_OLED) // Lets check if OLED needs an update only once every 10 seconds
+    {
+        updateTimer_OLED += 10;
+        display.stopscroll();
+        String currIP = NetworkMgr.GetlocalIP ().toString ();
+        String currHost;
+        NetworkMgr.GetHostname(currHost);
         int rssi = constrain(WiFi.RSSI(), -100, -50);
         int quality = map(rssi, -100, -50, 0, 100);
-        display.print("SIGNAL: ");
-        display.print(quality);
-        display.println("%");    
-        display.display();
+        if (!dispIP.equals(currIP) || !dispHostName.equals(currHost) || dispRSSI != quality)
+        {
+            display.clearDisplay();
+            display.setTextSize(1);
+            display.setTextColor(SSD1306_WHITE);
+            display.setCursor(0, 2);
+            display.println("IP: " + currIP);
+            display.println("HOST: " + currHost);
+            display.print("SIGNAL: ");
+            display.print(quality);
+            display.println("%");
+            display.display();
+            dispIP = currIP;
+            dispHostName = currHost;
+            dispRSSI = quality;
+            logcon(String(F("OLED UPDATED")));
+        }
+    }
     // DEBUG_END;
 } // Update
+
 c_OLED OLED;
 #endif // def USE_OLED
