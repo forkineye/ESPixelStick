@@ -421,7 +421,7 @@ void c_InputEffectEngine::Process ()
     {
         logcon("Start EffectsTask");
         pEffectsInstance = this;
-        xTaskCreatePinnedToCore(EffectsTask, "EffectsTask", 4096, NULL, 10, &PollTaskHandle, 0);
+        xTaskCreatePinnedToCore(EffectsTask, "EffectsTask", 4096, NULL, 10, &PollTaskHandle, 1);
         vTaskPrioritySet(PollTaskHandle, 5);
         // DEBUG_V("End EffectsTask");
     }
