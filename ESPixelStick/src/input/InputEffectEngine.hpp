@@ -124,6 +124,7 @@ public:
     uint16_t effectMarquee ();
 
 private:
+#define EFFECTS_TASK_PRIORITY 8
 
     void validateConfiguration ();
 

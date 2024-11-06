@@ -421,8 +421,8 @@ void c_InputEffectEngine::Process ()
     {
         logcon("Start EffectsTask");
         pEffectsInstance = this;
-        xTaskCreatePinnedToCore(EffectsTask, "EffectsTask", 4096, NULL, 10, &PollTaskHandle, 1);
-        vTaskPrioritySet(PollTaskHandle, 5);
+        xTaskCreatePinnedToCore(EffectsTask, "EffectsTask", 4096, NULL, EFFECTS_TASK_PRIORITY, &PollTaskHandle, 1);
+        vTaskPrioritySet(PollTaskHandle, EFFECTS_TASK_PRIORITY);
         // DEBUG_V("End EffectsTask");
     }
 #endif // ndef ARDUINO_ARCH_ESP32
