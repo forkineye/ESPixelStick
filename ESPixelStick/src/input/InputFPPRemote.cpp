@@ -26,7 +26,41 @@
 
 #if defined ARDUINO_ARCH_ESP32
 #   include <functional>
-#endif
+
+static TaskHandle_t PollTaskHandle = NULL;
+static c_InputFPPRemote *pFppRemoteInstance = nullptr;
+//----------------------------------------------------------------------------
+void FppRemoteTask (void *arg)
+{
+    uint32_t PollStartTime = millis();
+    uint32_t PollEndTime = PollStartTime;
+    uint32_t PollTime = pdMS_TO_TICKS(25);
+    const uint32_t MinPollTimeMs = 25;
+
+    while(1)
+    {
+        uint32_t DeltaTime = PollEndTime - PollStartTime;
+
+        if (DeltaTime < MinPollTimeMs)
+        {
+            PollTime = pdMS_TO_TICKS(MinPollTimeMs - DeltaTime);
+        }
+        else
+        {
+            // handle time wrap and long frames
+            PollTime = pdMS_TO_TICKS(1);
+        }
+        vTaskDelay(PollTime);
+
+        PollStartTime = millis();
+
+        pFppRemoteInstance->TaskProcess();
+
+        // record the loop end time
+        PollEndTime = millis();
+    }
+} // FppRemoteTask
+#endif // def ARDUINO_ARCH_ESP32
 
 //-----------------------------------------------------------------------------
 c_InputFPPRemote::c_InputFPPRemote (c_InputMgr::e_InputChannelIds NewInputChannelId,
@@ -48,6 +82,16 @@ c_InputFPPRemote::~c_InputFPPRemote ()
     {
         StopPlaying ();
     }
+
+#ifdef ARDUINO_ARCH_ESP32
+    if(PollTaskHandle)
+    {
+        logcon("Stop FPP Remote Task");
+        vTaskDelete(PollTaskHandle);
+        PollTaskHandle = NULL;
+    }
+#endif // def ARDUINO_ARCH_ESP32
+
 } // ~c_InputFPPRemote
 
 //-----------------------------------------------------------------------------
@@ -191,6 +235,7 @@ void c_InputFPPRemote::PlayNextFile ()
 void c_InputFPPRemote::Process ()
 {
     // DEBUG_START;
+#ifndef ARDUINO_ARCH_ESP32
     if (!IsInputChannelActive || StayDark)
     {
         // DEBUG_V ("dont do anything if the channel is not active");
@@ -212,10 +257,50 @@ void c_InputFPPRemote::Process ()
             StartPlaying (FileBeingPlayed);
         }
     }
-
+#else
+    if(!PollTaskHandle)
+    {
+        logcon("Start FPP Remote Task");
+        pFppRemoteInstance = this;
+        xTaskCreatePinnedToCore(FppRemoteTask, "FppRemoteTask", 4096, NULL, FPP_REMOTE_TASK_PRIORITY, &PollTaskHandle, 1);
+        vTaskPrioritySet(PollTaskHandle, FPP_REMOTE_TASK_PRIORITY);
+        // DEBUG_V("End FppRemoteTask");
+    }
+#endif // ndef ARDUINO_ARCH_ESP32
     // DEBUG_END;
 
 } // process
+
+#ifdef ARDUINO_ARCH_ESP32
+//-----------------------------------------------------------------------------
+void c_InputFPPRemote::TaskProcess ()
+{
+    // DEBUG_START;
+    if (!IsInputChannelActive || StayDark)
+    {
+        // DEBUG_V ("dont do anything if the channel is not active");
+        StopPlaying ();
+    }
+    else if (PlayingRemoteFile ())
+    {
+        // DEBUG_V ("Remote File Play");
+        while(Poll ()) {}
+    }
+    else if (PlayingFile ())
+    {
+        // DEBUG_V ("Local File Play");
+        while(Poll ()) {}
+
+        if (pInputFPPRemotePlayItem->IsIdle ())
+        {
+            // DEBUG_V ("Idle Processing");
+            StartPlaying (FileBeingPlayed);
+        }
+    }
+    // DEBUG_END;
+
+} // TaskProcess
+#endif // def ARDUINO_ARCH_ESP32
 
 //-----------------------------------------------------------------------------
 bool c_InputFPPRemote::Poll ()
@@ -229,7 +314,7 @@ bool c_InputFPPRemote::Poll ()
 
     // DEBUG_END;
     return Response;
-    
+
 } // Poll
 
 //-----------------------------------------------------------------------------

@@ -39,12 +39,14 @@ class c_InputFPPRemote : public c_InputCommon
       void GetConfig (JsonObject& jsonConfig); ///< Get the current config used by the driver
       void GetStatus (JsonObject& jsonStatus);
       void Process ();                         ///< Call from loop(),  renders Input data
+      void TaskProcess ();                     ///< Call from loop(),  renders Input data
       void GetDriverName (String& sDriverName) { sDriverName = "FPP Remote"; } ///< get the name for the instantiated driver
       void SetBufferInfo (uint32_t BufferSize);
       void ProcessButtonActions(c_ExternalInput::InputValue_t value);
 
 protected:
 #   define No_LocalFileToPlay "..."
+#   define FPP_REMOTE_TASK_PRIORITY 8
 
     c_InputFPPRemotePlayItem * pInputFPPRemotePlayItem = nullptr;
     int32_t GetSyncOffsetMS () { return SyncOffsetMS; }
