@@ -236,27 +236,7 @@ void c_InputFPPRemote::Process ()
 {
     // DEBUG_START;
 #ifndef ARDUINO_ARCH_ESP32
-    if (!IsInputChannelActive || StayDark)
-    {
-        // DEBUG_V ("dont do anything if the channel is not active");
-        StopPlaying ();
-    }
-    else if (PlayingRemoteFile ())
-    {
-        // DEBUG_V ("Remote File Play");
-        while(Poll ()) {}
-    }
-    else if (PlayingFile ())
-    {
-        // DEBUG_V ("Local File Play");
-        while(Poll ()) {}
-
-        if (pInputFPPRemotePlayItem->IsIdle ())
-        {
-            // DEBUG_V ("Idle Processing");
-            StartPlaying (FileBeingPlayed);
-        }
-    }
+    TaskProcess();
 #else
     if(!PollTaskHandle)
     {
@@ -271,7 +251,6 @@ void c_InputFPPRemote::Process ()
 
 } // process
 
-#ifdef ARDUINO_ARCH_ESP32
 //-----------------------------------------------------------------------------
 void c_InputFPPRemote::TaskProcess ()
 {
@@ -300,7 +279,6 @@ void c_InputFPPRemote::TaskProcess ()
     // DEBUG_END;
 
 } // TaskProcess
-#endif // def ARDUINO_ARCH_ESP32
 
 //-----------------------------------------------------------------------------
 bool c_InputFPPRemote::Poll ()
