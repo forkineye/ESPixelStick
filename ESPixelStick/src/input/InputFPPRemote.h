@@ -74,7 +74,7 @@ private:
     bool    SendFppSync = false;
     String  FileBeingPlayed = No_LocalFileToPlay;
     bool    Stopping = false;
-    
+
 #   define JSON_NAME_FILE_TO_PLAY CN_fseqfilename
 
 };
