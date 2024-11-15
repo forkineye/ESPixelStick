@@ -180,6 +180,7 @@ public:
    uint32_t BitTypeCounters[RmtDataBitIdType_t::RMT_NUM_BIT_TYPES];
    uint32_t RmtEntriesTransfered = 0;
    uint32_t RmtXmtFills = 0;
+   uint32_t RmtWhiteDetected = 0;
 
 #define RMT_DEBUG_COUNTER(p) p
 

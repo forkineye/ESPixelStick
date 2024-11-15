@@ -39,24 +39,27 @@ static uint32_t FrameTimeouts = 0;
 //----------------------------------------------------------------------------
 void RMT_Task (void *arg)
 {
-    uint32_t FrameStartTime = millis();
-    uint32_t FrameEndTime = FrameStartTime;
-    uint32_t DelayTime = pdMS_TO_TICKS(25);
+    unsigned long  FrameStartTime = millis();
+    unsigned long  FrameEndTime = FrameStartTime;
+    TickType_t     DelayTime = pdMS_TO_TICKS(25);
     const uint32_t MinFrameTimeMs = 25;
 
     while(1)
     {
         uint32_t DeltaTime = FrameEndTime - FrameStartTime;
-
-        if (DeltaTime < MinFrameTimeMs)
+        // did the timer wrap?
+        if (DeltaTime > MinFrameTimeMs)
         {
-            DelayTime = pdMS_TO_TICKS(MinFrameTimeMs - DeltaTime);
+            // Timer has wrapped or
+            // frame took longer than 25MS to run.
+            // Dont wait a long time for the next one.
+            DelayTime = pdMS_TO_TICKS(1);
         }
         else
         {
-            // handle time wrap and long frames
-            DelayTime = pdMS_TO_TICKS(1);
+            DelayTime = pdMS_TO_TICKS( MinFrameTimeMs - DeltaTime );
         }
+
         vTaskDelay(DelayTime);
 
         FrameStartTime = millis();
@@ -334,6 +337,7 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     debugStatus["OneBitValue"]                  = String (Intensity2Rmt[RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID].val,  HEX);
     debugStatus["FrameCompletes"]               = String (FrameCompletes);
     debugStatus["FrameTimeouts"]                = String (FrameTimeouts);
+    debugStatus["RmtWhiteDetected"]             = String (RmtWhiteDetected);
 
 #ifdef IncludeBufferData
     {
@@ -366,7 +370,7 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     }
 #endif // def IncludeBufferData
 #endif // def USE_RMT_DEBUG_COUNTERS
-    // //DEBUG_END;
+    // // DEBUG_END;
 } // GetStatus
 
 //----------------------------------------------------------------------------
@@ -383,6 +387,12 @@ void IRAM_ATTR c_OutputRmt::ISR_CreateIntensityData ()
     {
         ThereIsDataToSend = ISR_GetNextIntensityToSend(IntensityValue);
         RMT_DEBUG_COUNTER(IntensityValuesSent++);
+#ifdef USE_RMT_DEBUG_COUNTERS
+        if(200 < IntensityValue)
+        {
+            ++RmtWhiteDetected;
+        }
+#endif // def USE_RMT_DEBUG_COUNTERS
 
         // convert the intensity data into RMT slot data
         uint32_t bitmask = TxIntensityDataStartingMask;
