@@ -224,6 +224,10 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
         {
             // DEBUG_V();
             // ESP_ERROR_CHECK (esp_intr_alloc (ETS_RMT_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3 | ESP_INTR_FLAG_SHARED, rmt_intr_handler, this, &RMT_intr_handle));
+            for(auto & currentThisPtr : rmt_isr_ThisPtrs)
+            {
+                currentThisPtr = nullptr;
+            }
             ESP_ERROR_CHECK(rmt_isr_register(rmt_intr_handler, this, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL1 | ESP_INTR_FLAG_SHARED, &RMT_intr_handle));
         }
         // DEBUG_V();
@@ -261,16 +265,7 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
         if(!SendFrameTaskHandle)
         {
             // DEBUG_V("Start SendFrameTask");
-
-            if(RMT_intr_handle)
-            {
-                for(auto & currentThisPtr : rmt_isr_ThisPtrs)
-                {
-                    currentThisPtr = nullptr;
-                }
-            }
-
-            xTaskCreatePinnedToCore(RMT_Task, "RMT_Task", 4096, NULL, 10, &SendFrameTaskHandle, 0);
+            xTaskCreatePinnedToCore(RMT_Task, "RMT_Task", 4096, NULL, 5, &SendFrameTaskHandle, 0);
             vTaskPrioritySet(SendFrameTaskHandle, 5);
         }
         // DEBUG_V("Add this instance to the running list");
