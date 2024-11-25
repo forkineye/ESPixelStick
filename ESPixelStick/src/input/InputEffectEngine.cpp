@@ -334,6 +334,7 @@ void c_InputEffectEngine::PollFlash ()
             // not doing random flashing
             break;
         }
+        //  // DEBUG_V("Flash is enabled");
 
         if(!FlashInfo.delaytimer.IsExpired())
         {
