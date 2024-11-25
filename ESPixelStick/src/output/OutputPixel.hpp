@@ -61,7 +61,6 @@ private:
 
     uint32_t      PixelGroupSize              = 1;
     uint32_t      PixelGroups                 = 1;
-    // uint32_t      PixelGroupSizeCurrentCount  = 0;
 
     float       IntensityBitTimeInUs        = 0.0;
     uint32_t    BlockSize                   = 1;
@@ -80,25 +79,26 @@ private:
 
 // #define USE_PIXEL_DEBUG_COUNTERS
 #ifdef USE_PIXEL_DEBUG_COUNTERS
-    uint32_t   PixelsToSend                     = 0;
-    uint32_t   IntensityBytesSent               = 0;
-    uint32_t   IntensityBytesSentLastFrame      = 0;
-    uint32_t   FrameStartCounter                = 0;
-    uint32_t   FrameEndCounter                  = 0;
-    uint32_t   SentPixels                       = 0;
-    uint32_t   AbortFrameCounter                = 0;
-    uint32_t   FramePrependDataCounter          = 0;
-    uint32_t   FrameSendPixelsCounter           = 0;
-    uint32_t   FrameAppendDataCounter           = 0;
-    uint32_t   FrameDoneCounter                 = 0;
-    uint32_t   FrameStateUnknownCounter         = 0;
-    uint32_t   PixelPrependNullsCounter         = 0;
-    uint32_t   PixelSendIntensityCounter        = 0;
-    uint32_t   PixelAppendNullsCounter          = 0;
-    uint32_t   PixelUnkownState                 = 0;
-    uint32_t   GetNextIntensityToSendCounter    = 0;
-    uint32_t   LastGECEdataSent                 = uint32_t(-1);
-    uint32_t   NumGECEdataSent                  = 0;
+    uint32_t   PixelsToSend                        = 0;
+    uint32_t   IntensityBytesSent                  = 0;
+    uint32_t   IntensityBytesSentLastFrame         = 0;
+    uint32_t   FrameStartCounter                   = 0;
+    uint32_t   FrameEndCounter                     = 0;
+    uint32_t   SentPixels                          = 0;
+    uint32_t   AbortFrameCounter                   = 0;
+    uint32_t   FramePrependDataCounter             = 0;
+    uint32_t   FrameSendPixelsCounter              = 0;
+    uint32_t   FrameAppendDataCounter              = 0;
+    uint32_t   FrameDoneCounter                    = 0;
+    uint32_t   FrameStateUnknownCounter            = 0;
+    uint32_t   PixelPrependNullsCounter            = 0;
+    uint32_t   PixelSendIntensityCounter           = 0;
+    uint32_t   PixelAppendNullsCounter             = 0;
+    uint32_t   PixelUnkownState                    = 0;
+    uint32_t   GetNextIntensityToSendCounter       = 0;
+    uint32_t   GetNextIntensityToSendFailedCounter = 0;
+    uint32_t   LastGECEdataSent                    = uint32_t(-1);
+    uint32_t   NumGECEdataSent                     = 0;
 #endif // def USE_PIXEL_DEBUG_COUNTERS
 
     // functions used to implement pixel FSM
