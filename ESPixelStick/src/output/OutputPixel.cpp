@@ -83,6 +83,7 @@ void c_OutputPixel::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     debugStatus["IntensityBytesSentLastFrame"]      = IntensityBytesSentLastFrame;
     debugStatus["AbortFrameCounter"]                = AbortFrameCounter;
     debugStatus["GetNextIntensityToSendCounter"]    = GetNextIntensityToSendCounter;
+    debugStatus["GetNextIntensityToSendFailedCounter"] = GetNextIntensityToSendFailedCounter;
     debugStatus["FramePrependDataCounter"]          = FramePrependDataCounter;
     debugStatus["FrameSendPixelsCounter"]           = FrameSendPixelsCounter;
     debugStatus["PixelPrependNullsCounter"]         = PixelPrependNullsCounter;
@@ -644,6 +645,10 @@ bool IRAM_ATTR c_OutputPixel::ISR_GetNextIntensityToSend (uint32_t &DataToSend)
 
 #ifdef USE_PIXEL_DEBUG_COUNTERS
     GetNextIntensityToSendCounter++;
+    if(!ISR_MoreDataToSend())
+    {
+        GetNextIntensityToSendFailedCounter++;
+    }
 #endif // def USE_PIXEL_DEBUG_COUNTERS
 
     DataToSend = (this->*FrameStateFuncPtr)();
