@@ -153,7 +153,6 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
         InputMgrButtonData = jsonConfig[IM_EffectsControlButtonName].to<JsonObject> ();
     }
     // DEBUG_V ("");
-    // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
 
     // PrettyPrint (InputMgrButtonData, String("Before ECB"));
     ExternalInput.GetConfig (InputMgrButtonData);
@@ -658,7 +657,7 @@ void c_InputMgr::Process ()
         bool aBlankTimerIsRunning = false;
         for (auto & CurrentInput : InputChannelDrivers)
         {
-            if(nullptr == CurrentInput.pInputChannelDriver) 
+            if(nullptr == CurrentInput.pInputChannelDriver)
             {
                 continue;
             }
@@ -710,15 +709,14 @@ void c_InputMgr::ProcessButtonActions (c_ExternalInput::InputValue_t value)
 } // ProcessButtonActions
 
 //-----------------------------------------------------------------------------
-bool c_InputMgr::FindJsonChannelConfig (JsonObject& jsonConfig, 
-                                         e_InputChannelIds ChanId, 
+bool c_InputMgr::FindJsonChannelConfig (JsonObject& jsonConfig,
+                                         e_InputChannelIds ChanId,
                                          JsonObject& ChanConfig)
 {
     // DEBUG_START;
     bool Response = false;
     // DEBUG_V ();
 
-    // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
     // PrettyPrint(jsonConfig, "ProcessJsonConfig");
 
     do // once
@@ -727,7 +725,6 @@ bool c_InputMgr::FindJsonChannelConfig (JsonObject& jsonConfig,
         if (!InputChannelMgrData)
         {
             logcon (String (F ("No Input Interface Settings Found. Using Defaults")));
-            extern void PrettyPrint (JsonObject & jsonStuff, String Name);
             PrettyPrint (jsonConfig, String(F ("c_InputMgr::ProcessJsonConfig")));
             break;
         }
@@ -738,7 +735,6 @@ bool c_InputMgr::FindJsonChannelConfig (JsonObject& jsonConfig,
 
         // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
         // DEBUG_V (String ("CurrentConfigVersion: ") + String (CurrentConfigVersion));
-        // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
         // PrettyPrint (InputChannelMgrData, "Output Config");
 
         if (TempVersion != CurrentConfigVersion)

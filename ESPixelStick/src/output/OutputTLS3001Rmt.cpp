@@ -86,7 +86,7 @@ void c_OutputTLS3001Rmt::Begin ()
     OutputRmtConfig.pPixelDataSource = this;
     OutputRmtConfig.CitrdsArray      = ConvertIntensityToRmtDataStream;
 
-    Rmt.Begin(OutputRmtConfig);
+    Rmt.Begin(OutputRmtConfig, this);
 
 
     // DEBUG_END;
@@ -128,10 +128,20 @@ void c_OutputTLS3001Rmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputTLS3001Rmt::Poll ()
+uint32_t c_OutputTLS3001Rmt::Poll ()
 {
     // DEBUG_START;
 
+    // DEBUG_END;
+    return ActualFrameDurationMicroSec;
+
+} // Poll
+
+//----------------------------------------------------------------------------
+bool c_OutputTLS3001Rmt::RmtPoll ()
+{
+    // DEBUG_START;
+    bool Response = false;
     do // Once
     {
         if (gpio_num_t(-1) == DataPin)
@@ -139,31 +149,17 @@ void c_OutputTLS3001Rmt::Poll ()
             break;
         }
 
-        if (!canRefresh())
-        {
-            break;
-        }
-
-        if (Rmt.NoFrameInProgress ())
-        {
-            pCurrentFsmState->Poll (this);
-
-        }
-
         // DEBUG_V("get the next frame started");
-
-        if (Rmt.Poll ())
-        {
-            ReportNewFrame ();
-        }
+        ReportNewFrame ();
+        pCurrentFsmState->Poll();
+        Rmt.StartNewFrame ();
 
         // DEBUG_V();
 
     } while (false);
 
-    // DEBUG_END;    }
-
     // DEBUG_END;
+    return Response;
 
 } // Poll
 

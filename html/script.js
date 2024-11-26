@@ -9,7 +9,7 @@ var System_Config = null;
 var Fseq_File_List = [];
 var selector = [];
 var target = document.location.host;
-// target = "192.168.10.188";
+// target = "192.168.10.220";
 
 var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
@@ -354,13 +354,13 @@ function MergeConfig(SourceData, TargetData, FileName, SectionName)
 {
     // console.info("SourceData: " + JSON.stringify(SourceData));
     // console.info("TargetData: " + JSON.stringify(TargetData));
-    
+
     let FinalSourceData = JSON.parse('{"' + SectionName + '":' + JSON.stringify(SourceData) + "}");
     let FinalTargetData = JSON.parse('{"' + SectionName + '":' + JSON.stringify(TargetData) + "}");
 
     // console.info("FinalSourceData: " + JSON.stringify(FinalSourceData));
     // console.info("FinalTargetData: " + JSON.stringify(FinalTargetData));
-    
+
     MergeConfigTree(FinalSourceData, FinalTargetData, FinalTargetData, "");
 
     // let DataString = '{"' + SectionName + '":' + JSON.stringify(TargetData) + "}";
@@ -397,8 +397,8 @@ function JsonObjectAccess(obj, Path, value, Action)
                 {
                     delete a[b];
                 }
-            } 
-            else 
+            }
+            else
             {
                 return a[b];
             }
@@ -421,7 +421,7 @@ function MergeConfigTree(SourceTree, TargetTree, CurrentTarget, FullSelector)
     if(!Array.isArray(FullSelector))
     {
         FullSelector = [FullSelector];
-        // the first entry into this function has a 
+        // the first entry into this function has a
         // null selector value that needs to be removed
         if(FullSelector[0] === "")
         {
@@ -430,7 +430,7 @@ function MergeConfigTree(SourceTree, TargetTree, CurrentTarget, FullSelector)
     }
 
     // Target drives the data.
-    for (let CurrentElementName in CurrentTarget) 
+    for (let CurrentElementName in CurrentTarget)
     {
         // console.info("CurrentElement: " + CurrentElementName);
         // remember the path to this element
@@ -449,12 +449,12 @@ function MergeConfigTree(SourceTree, TargetTree, CurrentTarget, FullSelector)
         if (typeof CurrentElementValue === 'object')
         {
             // console.info("take the current object apart");
-            MergeConfigTree(SourceTree, 
+            MergeConfigTree(SourceTree,
                             TargetTree,
-                            CurrentElementValue, 
+                            CurrentElementValue,
                             CurrentSelectorPath);
         }
-        else 
+        else
         {
             let SourceLookupValue = JsonObjectAccess(SourceTree, CurrentSelectorPath, "", "Get");
             // let TargetLookupValue = JsonObjectAccess(TargetTree, CurrentSelectorPath, "", "Get");
@@ -510,7 +510,7 @@ async function SendConfigFileToServer(FileName = "", DataString = "")
 
     let ConfigXfer = new XMLHttpRequest();
 
-    ConfigXfer.addEventListener("loadend", function() 
+    ConfigXfer.addEventListener("loadend", function()
     {
         // console.info("SendConfigFileToServer: Success");
         return 1;
@@ -566,11 +566,11 @@ function RequestDiagData()
     let NextTimePeriodMS = 100;
     if(null === DiagTimer)
     {
-        DiagTimer = setInterval(function() 
+        DiagTimer = setInterval(function()
         {
             if ($('#diag').is(':visible'))
             {
-                fetch("HTTP://" + target + "/V1", 
+                fetch("HTTP://" + target + "/V1",
                 {
                     method: "GET", // *GET, POST, PUT, DELETE, etc.
                     mode: "cors", // no-cors, *cors, same-origin
@@ -589,7 +589,7 @@ function RequestDiagData()
                     // console.info("RequestDiagData:webResponse.status: " + webResponse.status);
                     // console.info("RequestDiagData:webResponse.ok: " + webResponse.ok);
                     // check for error response
-                    if (!webResponse.ok) 
+                    if (!webResponse.ok)
                     {
                         // get error message from body or default to response status
                         const error = webResponse.status;
@@ -671,7 +671,7 @@ async function RequestListOfFiles()
     // console.info("ask for a file list from the server, starting at " + StartingFileIndex);
 
     // retrieve the file with the list of files in it
-    return await fetch("HTTP://" + target + "/fseqfilelist", 
+    return await fetch("HTTP://" + target + "/fseqfilelist",
     {
         method: 'GET',
         mode: "cors", // no-cors, *cors, same-origin
@@ -681,7 +681,7 @@ async function RequestListOfFiles()
         redirect: "follow", // manual, *follow, error
         referrerPolicy: "no-referrer" // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
     })
-    .then(async webResponse => 
+    .then(async webResponse =>
     {
         const isJson = webResponse.headers.get('content-type')?.includes('application/json');
         const data = isJson && await webResponse.json();
@@ -704,7 +704,7 @@ async function RequestListOfFiles()
         }
         return webResponse.ok ? 1 : 0;
     })
-    .catch(error => 
+    .catch(error =>
     {
         console.error('SendCommand: Error: ', error);
         CompletedServerTransaction = false;
@@ -796,10 +796,6 @@ function RequestFileDeletion() {
     RequestListOfFiles();
 
 } // RequestFileDeletion
-
-function ParseParameter(name) {
-    return (location.search.split(name + '=')[1] || '').split('&')[0];
-} // ParseParameter
 
 function ProcessModeConfigurationDatafppremote(channelConfig) {
     let jqSelector = "#fseqfilename";
@@ -1505,7 +1501,7 @@ function ExtractNetworkWiFiConfigFromHtmlPage() {
     let wifi = System_Config.network.wifi;
     wifi.ssid = $('#network #wifi #ssid').val();
     wifi.passphrase = $('#network #wifi #passphrase').val();
-    wifi.sta_timeout = $('#network #wifi #sta_timeout').val();
+    wifi.sta_timeout = parseInt($('#network #wifi #sta_timeout').val());
     wifi.ip = $('#network #wifi #ip').val();
     wifi.netmask = $('#network #wifi #netmask').val();
     wifi.gateway = $('#network #wifi #gateway').val();
@@ -1514,10 +1510,10 @@ function ExtractNetworkWiFiConfigFromHtmlPage() {
     wifi.dhcp = $('#network #wifi #dhcp').prop('checked');
     wifi.ap_ssid = $('#network #wifi #ap_ssid').val();
     wifi.ap_passphrase = $('#network #wifi #ap_passphrase').val();
-    wifi.ap_channel = $('#network #wifi #ap_channel').val();
+    wifi.ap_channel = parseInt($('#network #wifi #ap_channel').val());
     wifi.ap_fallback = $('#network #wifi #ap_fallback').prop('checked');
     wifi.ap_reboot = $('#network #wifi #ap_reboot').prop('checked');
-    wifi.ap_timeout = $('#network #wifi #ap_timeout').val();
+    wifi.ap_timeout = parseInt($('#network #wifi #ap_timeout').val());
     wifi.StayInApMode = $('#network #wifi #StayInApMode').prop('checked');
 
 } // ExtractNetworkWiFiConfigFromHtmlPage
@@ -1534,12 +1530,12 @@ function ExtractNetworkEthernetConfigFromHtmlPage() {
         System_Config.network.eth.dhcp = $('#network #eth #dhcp').prop('checked');
         System_Config.network.eth.type = parseInt($('#network #eth #type option:selected').val(), 10);
         System_Config.network.eth.addr = $('#network #eth #addr').val();
-        System_Config.network.eth.power_pin = $('#network #eth #power_pin').val();
-        System_Config.network.eth.mode = parseInt($('#network #eth #mode option:selected').val(), 10);
-        System_Config.network.eth.mdc_pin = $('#network #eth #mdc_pin').val();
-        System_Config.network.eth.mdio_pin = $('#network #eth #mdio_pin').val();
+        System_Config.network.eth.power_pin = parseInt($('#network #eth #power_pin').val());
+        System_Config.network.eth.mode = $('#network #eth #mode option:selected').val(), 10;
+        System_Config.network.eth.mdc_pin = parseInt($('#network #eth #mdc_pin').val());
+        System_Config.network.eth.mdio_pin = parseInt($('#network #eth #mdio_pin').val());
         System_Config.network.eth.activevalue = (parseInt($('#network #eth #activevalue option:selected').val(), 10) === 1);
-        System_Config.network.eth.activedelay = $('#network #eth #activedelay').val();
+        System_Config.network.eth.activedelay = parseInt($('#network #eth #activedelay').val());
     }
 
 } // ExtractNetworkEthernetConfigFromHtmlPage
@@ -1556,11 +1552,12 @@ function ExtractNetworkConfigFromHtmlPage() {
 // Builds JSON config submission for "WiFi" tab
 function submitNetworkConfig() {
     System_Config.device.id = $('#config #device #id').val();
-    System_Config.device.blanktime = $('#config #device #blanktime').val();
-    System_Config.device.miso_pin = $('#config #device #miso_pin').val();
-    System_Config.device.mosi_pin = $('#config #device #mosi_pin').val();
-    System_Config.device.clock_pin = $('#config #device #clock_pin').val();
-    System_Config.device.cs_pin = $('#config #device #cs_pin').val();
+    System_Config.device.blanktime = parseInt($('#config #device #blanktime').val());
+    System_Config.device.miso_pin = parseInt($('#config #device #miso_pin').val());
+    System_Config.device.mosi_pin = parseInt($('#config #device #mosi_pin').val());
+    System_Config.device.clock_pin = parseInt($('#config #device #clock_pin').val());
+    System_Config.device.cs_pin = parseInt($('#config #device #cs_pin').val());
+    System_Config.device.sdspeed = parseInt($('#config #device #sdspeed').val());
     System_Config.device.user = $('#ftpusername').val();
     System_Config.device.password = $('#ftppassword').val();
     System_Config.device.enabled = $('#ftp_enable').prop('checked');
@@ -1580,7 +1577,8 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName) {
     jQuery.each(JsonConfig, function (DisplayedChannelId, CurrentChannelConfigurationData) {
         let elementids = [];
         let modeControlName = '#' + SectionName + 'mode' + DisplayedChannelId;
-        elementids = $(modeControlName + ' *[id]').filter(":input").map(function () {
+        elementids = $(modeControlName + ' *[id]').filter(":input").map(function ()
+        {
             return $(this).attr('id');
         }).get();
 
@@ -1703,9 +1701,9 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName) {
                     MarqueeGroups[elementId] = {};
                     let MarqueeGroup = MarqueeGroups[elementId];
 
-                    MarqueeGroup.brightness = $('#MarqueeGroupIntensity_' + (RowId)).val();
-                    MarqueeGroup.brightnessEnd = $('#MarqueeGroupIntensityEnd_' + (RowId)).val();
-                    MarqueeGroup.pixel_count = $('#MarqueeGroupCount_' + (RowId)).val();
+                    MarqueeGroup.brightness = parseFloat($('#MarqueeGroupIntensity_' + (RowId)).val());
+                    MarqueeGroup.brightnessEnd = parseFloat($('#MarqueeGroupIntensityEnd_' + (RowId)).val());
+                    MarqueeGroup.pixel_count = parseInt($('#MarqueeGroupCount_' + (RowId)).val());
 
                     MarqueeGroup.color = {};
                     MarqueeGroup.color.r = hexToRgb(HexValue).r;
@@ -1719,12 +1717,13 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName) {
         }
         else if(ChannelConfig.type === "Grinch")
         {
-            ChannelConfig.count     = $('#grinch #controller_count' ).val();
-            ChannelConfig.dataspi.cs_pin    = $('#grinch #cs_pin' ).val();
-            ChannelConfig.dataspi.clock_pin = $('#grinch #clock_pin' ).val();
-            ChannelConfig.dataspi.data_pin  = $('#grinch #data_pin' ).val();
+            ChannelConfig.count             = parseInt($('#grinch #controller_count' ).val());
+            ChannelConfig.dataspi.cs_pin    = parseInt($('#grinch #cs_pin' ).val());
+            ChannelConfig.dataspi.clock_pin = parseInt($('#grinch #clock_pin' ).val());
+            ChannelConfig.dataspi.data_pin  = parseInt($('#grinch #data_pin' ).val());
         }
-        else {
+        else
+        {
             ExtractConfigFromHtmlPages(elementids, modeControlName, ChannelConfig);
         }
     });
@@ -1741,16 +1740,27 @@ function hexToRgb(hex) {
     } : null;
 } // hexToRgb
 
-function ExtractConfigFromHtmlPages(elementids, modeControlName, ChannelConfig) {
+function ExtractConfigFromHtmlPages(elementids, modeControlName, ChannelConfig)
+{
+    console.info("Preping config to send to ESP");
+    console.info("num elementids: " + elementids.length);
 
-    elementids.forEach(function (elementid) {
-
+    elementids.forEach(function (elementid)
+    {
         let SelectedElement = modeControlName + ' #' + elementid;
+        console.info("Element ID: " + $(SelectedElement).id)
 
-        if ($(SelectedElement).is(':checkbox')) {
+        if ($(SelectedElement).is(':checkbox'))
+        {
             ChannelConfig[elementid] = $(SelectedElement).prop('checked');
         }
-        else {
+        else if ($(SelectedElement).attr('type') === 'number')
+        {
+            console.info("Found Number: " + $(SelectedElement).id)
+            ChannelConfig[elementid] = parseInt($(SelectedElement).val());
+        }
+        else
+        {
             ChannelConfig[elementid] = $(SelectedElement).val();
         }
     }); // end for each channel
@@ -1785,9 +1795,9 @@ function submitDeviceConfig() {
     ExtractChannelConfigFromHtmlPage(Input_Config.channels, "input");
 
     Input_Config.ecb.enabled = $('#ecb_enable').is(':checked');
-    Input_Config.ecb.id = $('#ecb_gpioid').val();
+    Input_Config.ecb.id = parseInt($('#ecb_gpioid').val());
     Input_Config.ecb.polarity = $("#ecb_polarity").val();
-    Input_Config.ecb.long = $("#ecb_longPress").val();
+    Input_Config.ecb.long = parseInt($("#ecb_longPress").val());
 
     if ({}.hasOwnProperty.call(System_Config, 'sensor')) {
         System_Config.sensor.units = parseInt($('#TemperatureSensorUnits').val());

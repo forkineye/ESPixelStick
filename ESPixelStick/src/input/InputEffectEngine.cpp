@@ -70,11 +70,47 @@ static std::vector<c_InputEffectEngine::dCRGB> TransitionColorTable =
 	{100, 100,  55},
 };
 
-static std::vector<c_InputEffectEngine::MarqueeGroup> MarqueueGroupTable = 
+static std::vector<c_InputEffectEngine::MarqueeGroup> MarqueueGroupTable =
 {
     {5, {255, 0, 0}, 100, 100},
     {5, {255, 255, 255}, 100, 0},
 }; // MarqueueGroupTable
+
+#ifdef ARDUINO_ARCH_ESP32
+static TaskHandle_t PollTaskHandle = NULL;
+static c_InputEffectEngine *pEffectsInstance = nullptr;
+//----------------------------------------------------------------------------
+void EffectsTask (void *arg)
+{
+    uint32_t PollStartTime = millis();
+    uint32_t PollEndTime = PollStartTime;
+    uint32_t PollTime = pdMS_TO_TICKS(25);
+    const uint32_t MinPollTimeMs = 25;
+
+    while(1)
+    {
+        uint32_t DeltaTime = PollEndTime - PollStartTime;
+
+        if (DeltaTime < MinPollTimeMs)
+        {
+            PollTime = pdMS_TO_TICKS(MinPollTimeMs - DeltaTime);
+        }
+        else
+        {
+            // handle time wrap and long frames
+            PollTime = pdMS_TO_TICKS(1);
+        }
+        vTaskDelay(PollTime);
+
+        PollStartTime = millis();
+
+        pEffectsInstance->Poll();
+
+        // record the loop end time
+        PollEndTime = millis();
+    }
+} // EffectsTask
+#endif // def ARDUINO_ARCH_ESP32
 
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInputChannelId,
@@ -113,6 +149,14 @@ c_InputEffectEngine::c_InputEffectEngine () :
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::~c_InputEffectEngine ()
 {
+#ifdef ARDUINO_ARCH_ESP32
+    if(PollTaskHandle)
+    {
+        logcon("Stop EffectsTask");
+        vTaskDelete(PollTaskHandle);
+        PollTaskHandle = NULL;
+    }
+#endif // def ARDUINO_ARCH_ESP32
 
 } // ~c_InputEffectEngine
 
@@ -129,7 +173,6 @@ void c_InputEffectEngine::Begin ()
 
     validateConfiguration ();
     // DEBUG_V ("");
-
 
     // DEBUG_END;
 } // Begin
@@ -160,6 +203,7 @@ void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
     jsonConfig["FlashMinDur"]   = FlashInfo.MinDurationMS;
     jsonConfig["FlashMaxDur"]   = FlashInfo.MaxDurationMS;
     jsonConfig["TransCount"]    = TransitionInfo.StepsToTarget;
+    jsonConfig["TransDelay"]    = TransitionInfo.TimeAtTargetMs;
 
     // DEBUG_V ("");
 
@@ -290,6 +334,7 @@ void c_InputEffectEngine::PollFlash ()
             // not doing random flashing
             break;
         }
+        //  // DEBUG_V("Flash is enabled");
 
         if(!FlashInfo.delaytimer.IsExpired())
         {
@@ -334,7 +379,7 @@ void c_InputEffectEngine::Process ()
 
     // DEBUG_V (String ("HasBeenInitialized: ") + HasBeenInitialized);
     // DEBUG_V (String ("PixelCount: ") + PixelCount);
-
+#ifndef ARDUINO_ARCH_ESP32
     do // once
     {
         if (!HasBeenInitialized)
@@ -372,6 +417,80 @@ void c_InputEffectEngine::Process ()
     } while (false);
 
     // DEBUG_END;
+#else
+    if(!PollTaskHandle)
+    {
+        logcon("Start EffectsTask");
+        pEffectsInstance = this;
+        xTaskCreatePinnedToCore(EffectsTask, "EffectsTask", 4096, NULL, EFFECTS_TASK_PRIORITY, &PollTaskHandle, 1);
+        vTaskPrioritySet(PollTaskHandle, EFFECTS_TASK_PRIORITY);
+        // DEBUG_V("End EffectsTask");
+    }
+#endif // ndef ARDUINO_ARCH_ESP32
+
+} // process
+
+//-----------------------------------------------------------------------------
+void c_InputEffectEngine::Poll ()
+{
+    // // DEBUG_START;
+
+    // // DEBUG_V (String ("HasBeenInitialized: ") + HasBeenInitialized);
+    // // DEBUG_V (String ("PixelCount: ") + PixelCount);
+#ifdef ARDUINO_ARCH_ESP32
+    do // once
+    {
+        if (!HasBeenInitialized)
+        {
+            break;
+        }
+        // // DEBUG_V ("Init OK");
+
+        if ((0 == PixelCount) || (StayDark))
+        {
+            break;
+        }
+        // // DEBUG_V ("Pixel Count OK");
+
+        // do we have an active effect?
+        if(ActiveEffect == nullptr)
+        {
+            break;
+        }
+        // // DEBUG_V("Have Active effect");
+        if(ActiveEffect->func == nullptr)
+        {
+            break;
+        }
+
+        // // DEBUG_V("has the flash timer expired?");
+        if(!EffectDelayTimer.IsExpired())
+        {
+            // // DEBUG_V("Flash Timer has NOT expired");
+            PollFlash();
+            break;
+        }
+
+        // // DEBUG_V("timer has expired");
+        uint32_t wait = (this->*ActiveEffect->func)();
+        uint32_t NewEffectWait = max ((int)wait, MIN_EFFECT_DELAY);
+        if(NewEffectWait != EffectWait)
+        {
+            EffectWait = NewEffectWait;
+            // // DEBUG_V ("Update timer");
+            EffectDelayTimer.StartTimer(EffectWait, true);
+        }
+        // // DEBUG_V("Update Blank timer");
+        EffectCounter++;
+        InputMgr.RestartBlankTimer (GetInputChannelId ());
+
+        // // DEBUG_V("Check Flash operation");
+        PollFlash();
+
+    } while (false);
+
+    // // DEBUG_END;
+#endif // def ARDUINO_ARCH_ESP32
 
 } // process
 
@@ -430,6 +549,8 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     String effectName;
     String effectColor;
 
+    // PrettyPrint(jsonConfig, "Effects");
+
     setFromJSON (EffectSpeed,        jsonConfig, CN_EffectSpeed);
     setFromJSON (EffectReverse,      jsonConfig, CN_EffectReverse);
     setFromJSON (EffectMirror,       jsonConfig, CN_EffectMirror);
@@ -449,12 +570,20 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     setFromJSON (FlashInfo.MinDurationMS,      jsonConfig, "FlashMinDur");
     setFromJSON (FlashInfo.MaxDurationMS,      jsonConfig, "FlashMaxDur");
 
-    setFromJSON (TransitionInfo.StepsToTarget, jsonConfig, "TransCount");
+    setFromJSON (TransitionInfo.StepsToTarget,  jsonConfig, "TransCount");
+    setFromJSON (TransitionInfo.TimeAtTargetMs, jsonConfig, "TransDelay");
+    // DEBUG_V(String(" TransitionInfo.StepsToTarget: ") + String(TransitionInfo.StepsToTarget));
+    // DEBUG_V(String("TransitionInfo.TimeAtTargetMs: ") + String(TransitionInfo.TimeAtTargetMs));
 
     // avoid divide by zero errors later in the processing.
-    TransitionInfo.StepsToTarget = max(double(1.0), TransitionInfo.StepsToTarget);
+    TransitionInfo.StepsToTarget = max(uint32_t(1), TransitionInfo.StepsToTarget);
     // Pretend we reached the currnt color.
     TransitionInfo.CurrentColor = *TransitionInfo.TargetColorIterator;
+
+    // apply minimum transition hold time
+    TransitionInfo.TimeAtTargetMs = max(uint32_t(1), TransitionInfo.TimeAtTargetMs);
+    // DEBUG_V(String(" TransitionInfo.StepsToTarget: ") + String(TransitionInfo.StepsToTarget));
+    // DEBUG_V(String("TransitionInfo.TimeAtTargetMs: ") + String(TransitionInfo.TimeAtTargetMs));
 
     // make sure max is really max
     if(FlashInfo.MinIntensity >= FlashInfo.MaxIntensity)
@@ -467,10 +596,11 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     {
         TransitionColorTable.clear();
 
-        for (auto currentTransition : TransitionsArray)
+        for (auto Transition : TransitionsArray)
         {
             // DEBUG_V ("");
             dCRGB NewColorTarget;
+            JsonObject currentTransition = Transition.as<JsonObject>();
             setFromJSON (NewColorTarget.r, currentTransition, "r");
             setFromJSON (NewColorTarget.g, currentTransition, "g");
             setFromJSON (NewColorTarget.b, currentTransition, "b");
@@ -487,9 +617,10 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     {
         MarqueueGroupTable.clear();
 
-        for (auto currentMarqueeGroup : MarqueeGroupArray)
+        for (auto _MarqueeGroup : MarqueeGroupArray)
         {
             MarqueeGroup NewGroup;
+            JsonObject currentMarqueeGroup = _MarqueeGroup.as<JsonObject>();
             // DEBUG_V ("");
             JsonObject GroupColor = currentMarqueeGroup[CN_color];
             setFromJSON (NewGroup.Color.r, GroupColor, "r");
@@ -926,7 +1057,18 @@ uint16_t c_InputEffectEngine::effectTransition ()
     // DEBUG_START;
     // DEBUG_V(String("TransitionTargetColorId: ") + String(TransitionTargetColorId));
 
-    if(ColorHasReachedTarget())
+    if(0 != TransitionInfo.HoldStartTimeMs)
+    {
+        uint32_t timeSinceTimerStarted = abs(int32_t(millis()) - int32_t(TransitionInfo.HoldStartTimeMs));
+        // DEBUG_V(String("        timeSinceTimerStarted: ") + String(timeSinceTimerStarted));
+        // DEBUG_V(String("TransitionInfo.TimeAtTargetMs: ") + String(TransitionInfo.TimeAtTargetMs));
+        if(TransitionInfo.TimeAtTargetMs < timeSinceTimerStarted)
+        {
+            // DEBUG_V("Transition Timer Has Expired");
+            TransitionInfo.HoldStartTimeMs = 0;
+        }
+    }
+    else if(ColorHasReachedTarget())
     {
         // DEBUG_V("need to calculate a new target color");
 
@@ -946,6 +1088,11 @@ uint16_t c_InputEffectEngine::effectTransition ()
         CalculateTransitionStepValue (TransitionInfo.TargetColorIterator->g, TransitionInfo.CurrentColor.g, TransitionInfo.StepValue.g);
         CalculateTransitionStepValue (TransitionInfo.TargetColorIterator->b, TransitionInfo.CurrentColor.b, TransitionInfo.StepValue.b);
 
+        // start timer to hold color
+        TransitionInfo.HoldStartTimeMs = millis();
+        // DEBUG_V("Transition Timer Has Been started");
+
+        // DEBUG_V(String("   TransitionInfo.HoldStartTimeMs: ") + String(TransitionInfo.HoldStartTimeMs));
         // DEBUG_V(String("   TransitionInfo.StepValue.r: ") + String(TransitionInfo.StepValue.r));
         // DEBUG_V(String("   TransitionInfo.StepValue.g: ") + String(TransitionInfo.StepValue.g));
         // DEBUG_V(String("   TransitionInfo.StepValue.b: ") + String(TransitionInfo.StepValue.b));
@@ -1009,7 +1156,7 @@ uint16_t c_InputEffectEngine::effectMarquee ()
             uint32_t groupPixelCount = CurrentGroup.NumPixelsInGroup;
             double CurrentBrightness = (EffectReverse) ? CurrentGroup.EndingIntensity : CurrentGroup.StartingIntensity;
             double BrightnessInterval = (double(CurrentGroup.StartingIntensity) - double(CurrentGroup.EndingIntensity))/double(groupPixelCount);
-            
+
             // now adjust for 100% = 1
             CurrentBrightness /= 100;
             BrightnessInterval /= 100;
@@ -1060,7 +1207,7 @@ uint16_t c_InputEffectEngine::effectMarquee ()
         }
 
     } while (NumPixelsToProcess);
-    
+
     // advance to the next starting location
     effectMarqueePixelLocation += effectMarqueePixelAdvanceCount;
     if(effectMarqueePixelLocation >= PixelCount)
@@ -1078,9 +1225,9 @@ uint16_t c_InputEffectEngine::effectMarquee ()
 void c_InputEffectEngine::CalculateTransitionStepValue(double tc, double cc, double & step)
 {
     // DEBUG_START;
-    step = (tc - cc) / TransitionInfo.StepsToTarget;
+    step = (tc - cc) / double(TransitionInfo.StepsToTarget);
 
-    #define MinStepValue (1.0 / TransitionInfo.StepsToTarget)
+    #define MinStepValue (1.0 / double(TransitionInfo.StepsToTarget))
     if(MinStepValue > fabs(step))
     {
         if(step < 0.0)
@@ -1093,9 +1240,10 @@ void c_InputEffectEngine::CalculateTransitionStepValue(double tc, double cc, dou
         }
     }
 
-    // DEBUG_V(String("  tc: ") + String(tc));
-    // DEBUG_V(String("  cc: ") + String(cc));
-    // DEBUG_V(String("step: ") + String(step));
+    // DEBUG_V(String("   tc: ") + String(tc));
+    // DEBUG_V(String("   cc: ") + String(cc));
+    // DEBUG_V(String(" step: ") + String(step));
+    // DEBUG_V(String("steps: ") + String(TransitionInfo.StepsToTarget));
 
     // DEBUG_END;
 }
@@ -1136,7 +1284,7 @@ bool c_InputEffectEngine::ColorHasReachedTarget(double tc, double cc, double ste
 
     double diff = fabs(tc - cc);
 
-    if(diff <= fabs(2 * step))
+    if(diff <= fabs(2.0 * step))
     {
         // DEBUG_V("Single Color has reached target")
         response = true;

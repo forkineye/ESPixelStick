@@ -229,31 +229,30 @@ bool c_FileMgr::SetConfig (JsonObject & json)
     JsonObject JsonDeviceConfig = json[CN_device];
     if (JsonDeviceConfig)
     {
-/*
-        extern void PrettyPrint (JsonObject& jsonStuff, String Name);
-        PrettyPrint (JsonDeviceConfig, "c_FileMgr");
+        // PrettyPrint (JsonDeviceConfig, "c_FileMgr");
 
         // DEBUG_V("miso_pin: " + String(miso_pin));
         // DEBUG_V("mosi_pin: " + String(mosi_pin));
         // DEBUG_V(" clk_pin: " + String(clk_pin));
         // DEBUG_V("  cs_pin: " + String(cs_pin));
-*/
-        ConfigChanged |= setFromJSON (miso_pin, JsonDeviceConfig, CN_miso_pin);
-        ConfigChanged |= setFromJSON (mosi_pin, JsonDeviceConfig, CN_mosi_pin);
-        ConfigChanged |= setFromJSON (clk_pin,  JsonDeviceConfig, CN_clock_pin);
-        ConfigChanged |= setFromJSON (cs_pin,   JsonDeviceConfig, CN_cs_pin);
+
+        ConfigChanged |= setFromJSON (miso_pin,   JsonDeviceConfig, CN_miso_pin);
+        ConfigChanged |= setFromJSON (mosi_pin,   JsonDeviceConfig, CN_mosi_pin);
+        ConfigChanged |= setFromJSON (clk_pin,    JsonDeviceConfig, CN_clock_pin);
+        ConfigChanged |= setFromJSON (cs_pin,     JsonDeviceConfig, CN_cs_pin);
+        ConfigChanged |= setFromJSON (MaxSdSpeed, JsonDeviceConfig, CN_sdspeed);
 
         ConfigChanged |= setFromJSON (FtpUserName, JsonDeviceConfig, CN_user);
         ConfigChanged |= setFromJSON (FtpPassword, JsonDeviceConfig, CN_password);
-        ConfigChanged |= setFromJSON (FtpEnabled, JsonDeviceConfig, CN_enabled);
-/*
+        ConfigChanged |= setFromJSON (FtpEnabled,  JsonDeviceConfig, CN_enabled);
+
         // DEBUG_V("miso_pin: " + String(miso_pin));
         // DEBUG_V("mosi_pin: " + String(mosi_pin));
         // DEBUG_V(" clk_pin: " + String(clk_pin));
         // DEBUG_V("  cs_pin: " + String(cs_pin));
+        // DEBUG_V("   Speed: " + String(MaxSdSpeed));
 
         // DEBUG_V("ConfigChanged: " + String(ConfigChanged));
-*/
     }
     else
     {
@@ -283,6 +282,7 @@ void c_FileMgr::GetConfig (JsonObject& json)
     json[CN_mosi_pin]  = mosi_pin;
     json[CN_clock_pin] = clk_pin;
     json[CN_cs_pin]    = cs_pin;
+    json[CN_sdspeed]   = MaxSdSpeed;
 
     json[CN_user]      = FtpUserName;
     json[CN_password]  = FtpPassword;
@@ -419,50 +419,8 @@ void c_FileMgr::SetSpiIoPins ()
             // DEBUG_V();
             SdCardInstalled = true;
             // DEBUG_V();
-            csd_t csd;
-            uint8_t tran_speed = 0;
+            SetSdSpeed ();
 
-            CSD MyCsd;
-            // DEBUG_V();
-            ESP_SD.card()->readCSD(&csd);
-            memcpy (&MyCsd, &csd.csd[0], sizeof(csd.csd));
-            // DEBUG_V(String("TRAN Speed: 0x") + String(MyCsd.Decode_0.tran_speed,HEX));
-            tran_speed = MyCsd.Decode_0.tran_speed;
-
-            switch(tran_speed)
-            {
-                case 0x32:
-                {
-                    SPI.setFrequency(25 * 1024 * 1024);
-                    logcon("Set SD speed to 25Mhz");
-                    break;
-                }
-                case 0x5A:
-                {
-                    SPI.setFrequency(50 * 1024 * 1024);
-                    logcon("Set SD speed to 50Mhz");
-                    break;
-                }
-                case 0x0B:
-                {
-                    SPI.setFrequency(100 * 1024 * 1024);
-                    logcon("Set SD speed to 100Mhz");
-                    break;
-                }
-                case 0x2B:
-                {
-                    SPI.setFrequency(200 * 1024 * 1024);
-                    logcon("Set SD speed to 200Mhz");
-                    break;
-                }
-                default:
-                {
-                    SPI.setFrequency(25 * 1024 * 1024);
-                    logcon("Set Default SD speed to 25Mhz");
-                }
-            }
-            // DEBUG_V();
-            SdCardSizeMB = 0.000512 * csd.capacity();
             // DEBUG_V(String("SdCardSizeMB: ") + String(SdCardSizeMB));
 
             DescribeSdCardToUser ();
@@ -488,6 +446,66 @@ void c_FileMgr::SetSpiIoPins ()
     // DEBUG_END;
 
 } // SetSpiIoPins
+
+//-----------------------------------------------------------------------------
+void c_FileMgr::SetSdSpeed ()
+{
+    // DEBUG_START;
+#if defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
+    if (SdCardInstalled)
+    {
+        // DEBUG_V();
+        csd_t csd;
+        uint8_t tran_speed = 0;
+
+        CSD MyCsd;
+        // DEBUG_V();
+        ESP_SD.card()->readCSD(&csd);
+        memcpy (&MyCsd, &csd.csd[0], sizeof(csd.csd));
+        // DEBUG_V(String("TRAN Speed: 0x") + String(MyCsd.Decode_0.tran_speed,HEX));
+        tran_speed = MyCsd.Decode_0.tran_speed;
+        uint32_t FinalTranSpeedMHz = MaxSdSpeed;
+
+        switch(tran_speed)
+        {
+            case 0x32:
+            {
+                FinalTranSpeedMHz = 25;
+                break;
+            }
+            case 0x5A:
+            {
+                FinalTranSpeedMHz = 50;
+                break;
+            }
+            case 0x0B:
+            {
+                FinalTranSpeedMHz = 100;
+                break;
+            }
+            case 0x2B:
+            {
+                FinalTranSpeedMHz = 200;
+                break;
+            }
+            default:
+            {
+                FinalTranSpeedMHz = 25;
+            }
+        }
+        // DEBUG_V();
+        FinalTranSpeedMHz = min(FinalTranSpeedMHz, MaxSdSpeed);
+        SPI.setFrequency(FinalTranSpeedMHz * 1024 * 1024);
+        logcon(String("Set SD speed to ") + String(FinalTranSpeedMHz) + "Mhz");
+
+        SdCardSizeMB = 0.000512 * csd.capacity();
+        // DEBUG_V(String("SdCardSizeMB: ") + String(SdCardSizeMB));
+    }
+#endif // defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
+
+    // DEBUG_END;
+
+} // SetSdSpeed
 
 //-----------------------------------------------------------------------------
 /*
@@ -622,9 +640,6 @@ bool c_FileMgr::LoadFlashFile (const String& FileName, DeserializationHandler Ha
     	    // DEBUG_V (String ("    jsonDoc.capacity: ") + String (jsonDoc.capacity ()));
             break;
         }
-
-        // extern void PrettyPrint(JsonDocument & jsonStuff, String Name);
-        // PrettyPrint(jsonDoc, CfgFileMessagePrefix);
 
         // DEBUG_V ();
         logcon (CfgFileMessagePrefix + String (F ("loaded.")));

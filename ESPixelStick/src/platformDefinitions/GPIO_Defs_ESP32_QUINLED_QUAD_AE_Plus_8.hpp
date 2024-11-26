@@ -38,6 +38,7 @@
 #define SD_CARD_MOSI_PIN    gpio_num_t::GPIO_NUM_23
 #define SD_CARD_CLK_PIN     gpio_num_t::GPIO_NUM_18
 #define SD_CARD_CS_PIN      gpio_num_t::GPIO_NUM_5
+#define MaxSdTransSpeedMHz  15
 
 // Temperature Sensor
 #define SUPPORT_SENSOR_DS18B20

@@ -319,6 +319,7 @@ bool c_EthernetDriver::SetConfig (JsonObject & json)
     // DEBUG_START;
 
     bool ConfigChanged = false;
+    uint32_t temp = 0;
 
     String sIP = ip.toString ();
     String sGateway = gateway.toString ();
@@ -337,8 +338,12 @@ bool c_EthernetDriver::SetConfig (JsonObject & json)
     ConfigChanged |= setFromJSON (power_pin, json, CN_power_pin);
     ConfigChanged |= setFromJSON (mdc_pin,   json, CN_mdc_pin);
     ConfigChanged |= setFromJSON (mdio_pin,  json, CN_mdio_pin);
-    ConfigChanged |= setFromJSON (phy_type,  json, CN_type);
-    ConfigChanged |= setFromJSON (clk_mode,  json, CN_mode);
+    temp = uint32_t (phy_type);
+    ConfigChanged |= setFromJSON (temp,  json, CN_type);
+    phy_type = eth_phy_type_t (temp);
+    temp = uint32_t (clk_mode);
+    ConfigChanged |= setFromJSON (temp,  json, CN_mode);
+    clk_mode = eth_clock_mode_t (temp);
     ConfigChanged |= setFromJSON (powerPinActiveValue,   json, CN_activevalue);
     ConfigChanged |= setFromJSON (powerPinActiveDelayMs, json, CN_activedelay);
 
@@ -347,7 +352,7 @@ bool c_EthernetDriver::SetConfig (JsonObject & json)
     netmask.fromString (sNetmask);
     primaryDns.fromString (sDnsp);
     secondaryDns.fromString (sDnss);
-    
+
     // DEBUG_V (String ("     sip: ") + ip.toString ());
     // DEBUG_V (String ("sgateway: ") + gateway.toString ());
     // DEBUG_V (String ("snetmask: ") + netmask.toString ());
