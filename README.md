@@ -23,7 +23,7 @@ Being open source, you are free to use the ESPixelStick firmware on the device o
 
 ## Build Requirements
 
-The recommended way to build ESPixelStick is with PlatformIO. However, due to current [issues](#platformio-issues) with PlatformIO filesystem handling, Arduino IDE should be used for uploading the filesystem. Building with the Arduino IDE is supported, but not recommended.
+The recommended way to build ESPixelStick is with PlatformIO. Building from the Arduino IDE is no longer supported.
 
 ### Platform IO Instructions
 
@@ -36,50 +36,7 @@ The recommended way to build ESPixelStick is with PlatformIO. However, due to cu
 - Open `platform_user.ini` and define which serial port(s) you are using for programming and monitoring your device(s).
 - In the status bar at the bottom of Visual Studio Code, select your target build environment. By default, it will say `Default (ESPixelStick)`. Build environments are defined in `platformio.ini` if you need more information on build targets.
 - In the same status bar, click ☑️ to compile or ➡️ to compile and upload.
-- To build and upload the filesystem, click on the PlatformIO icon on the left bar, then click on _Project Tasks->[env]->Platform->Upload Filesystem Image_. Note that before the filesystem is built, the web pages **must** be processed. Instructions are processing the web pages are in the html [README](html/README.md).
-
-### Arduino IDE Instructions (not recommended, No longer supported for ESP32)
-
-Due to dependencies and software versioning, building with the Arduino IDE is not recommended. If you wish to build with the Arduino IDE, below is what you will need to install.
-
-- [Arduino for ESP8266](https://github.com/esp8266/Arduino) - Arduino core for ESP8266
-- [Arduino ESP8266 Filesystem Uploader](https://github.com/earlephilhower/arduino-esp8266littlefs-plugin) - Arduino plugin for uploading files to ESP8266 platforms
-- [Arduino for ESP32](https://github.com/espressif/arduino-esp32) - Arduino core for ESP32
-- [Arduino ESP32 Filesystem Uploader](https://github.com/lorol/arduino-esp32fs-plugin) - Arduino plugin for uploading files to ESP32 platforms
-- [gulp](http://gulpjs.com/) - Build system required to process web sources. Refer to the html [README](html/README.md) for more information.
-
-The following libraries are required. Extract the folder in each of these zip files and place it in the "library" folder under your arduino environment.
-
-Required for all platforms:
-
-- [ArduinoJson](https://github.com/bblanchon/ArduinoJson) - Arduino JSON Library
-- [ESPAsyncE131](https://github.com/forkineye/ESPAsyncE131) - Asynchronous E1.31 (sACN) library
-- [ESPAsyncWebServer](https://github.com/forkineye/ESPAsyncWebServer) - Asynchronous Web Server Library
-- [async-mqtt-client](https://github.com/marvinroger/async-mqtt-client) - Asynchronous MQTT Client
-- [Int64String](https://github.com/djGrrr/Int64String) - Converts 64 bit integers into a string
-- [EspAlexa](https://github.com/MartinMueller2003/Espalexa) - Alexa Direct control Library
-- [Adafruit-PWM-Servo-Driver-Library](https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library) - Servo Motor I2C control
-- [Artnet](https://github.com/natcl/Artnet) - Artnet access library
-- [ArduinoStreamUtils](https://github.com/bblanchon/ArduinoStreamUtils) - Streaming library
-
-Required for ESP8266:
-
-- [ESPAsyncTCP](https://github.com/forkineye/ESPAsyncTCP) - Asynchronous TCP Library
-- [ESPAsyncUDP](https://github.com/me-no-dev/ESPAsyncUDP) - Asynchronous UDP Library
-
-Required for ESP32:
-
-- [AsyncTCP](https://github.com/forkineye/AsyncTCP) - Asynchronous TCP Library
-
-#### Arduino Compiling and Flashing - ESP8266 ONLY
-
-- Web pages **must** be processed, placed into `data/www`, and uploaded with the upload plugin. Gulp will process the pages and put them in `data/www` for you. Refer to the html [README](html/README.md) for more information.
-- In order to use the upload plugin, the ESP **must** be placed into programming mode and the Arduino serial monitor **must** be closed.
-- ESP8266 modules **must** be configured for 4MB flash and 2MB File System within the Arduino IDE for OTA updates to work.
-- For best performance on ESP8266 modules, set the CPU frequency to 160MHz (Tools->CPU Frequency). You may experience lag and other issues if running at 80MHz.
-- For best performance on ESP32 modules, set the PSRAM option to ENABLED if it is available.
-- Depending on your settings of `Tools->Erase Flash`, you may have to re-upload the filesystem after uploading the sketch.
-- If not performing a full erase during sketch upload, it is recommended that you do a factory reset via the browser admin page after performing a new sketch upload.
+- To build and upload the filesystem, click on the PlatformIO icon on the left bar, then click on _Project Tasks->Platform->Upload Filesystem Image_. Note that before the filesystem is built, the web pages **must** be processed. Instructions for processing the web pages are in the html [README](html/README.md).
 
 ## Supported Inputs and Outputs
 
