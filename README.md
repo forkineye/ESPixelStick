@@ -38,7 +38,7 @@ The recommended way to build ESPixelStick is with PlatformIO. Building from the 
 - In the same status bar, click ☑️ to compile or ➡️ to compile and upload.
 - To build and upload the filesystem, click on the PlatformIO icon on the left bar, then click on _Project Tasks->Platform->Upload Filesystem Image_. Note that before the filesystem is built, the web pages **must** be processed. Instructions for processing the web pages are in the html [README](html/README.md).
 
-## Directory Structure
+## Project Structure
 
 ESPixelStick is now a PlatformIO project and follows the standard PlatformIO directory structure. All code should be in the releveant `src` and `include` sub-directories. Within each you will find the follwing directories:
 
@@ -53,7 +53,9 @@ Other notable directories:
 - `dist` - These are the files used for creating the binary distributions. Updated binaries for flashing, ESPSFlashTool and `firmware.json` should all be updated here.
 - `html` - All frontend / web related code, refer to the html [README](html/README.md) for details.
 - `SupportingDocs` - Datasheets and protocol formats related to this project.
-- `tools` = Misc tools related to this project.
+- `tools` = Misc tools related to this project, refer to the tools [README](toosl/README.md) for details.
+
+Checkout the doxygen [source code documentation](https://forkineye.github.io/ESPixelStick/doxy/) which is generated every pipeline run.
 
 ## Supported Inputs and Outputs
 
