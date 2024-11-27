@@ -81,7 +81,7 @@ void c_OutputSerial::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    c_OutputCommon::GetStatus (jsonStatus);
+    c_OutputCommon::BaseGetStatus (jsonStatus);
 
 #ifdef USE_SERIAL_DEBUG_COUNTERS
     JsonObject debugStatus = jsonStatus["Serial Debug"].to<JsonObject>();
@@ -93,6 +93,11 @@ void c_OutputSerial::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     debugStatus["FrameEndCounter"]             = FrameEndCounter;
     debugStatus["AbortFrameCounter"]           = AbortFrameCounter;
     debugStatus["LastDataSent"]                = LastDataSent;
+    debugStatus["SerialFrameState"]            = SerialFrameState;
+    debugStatus["DmxFrameStart"]               = DmxFrameStart;
+    debugStatus["DmxSendData"]                 = DmxSendData;
+    debugStatus["Serialidle"]                  = Serialidle;
+
 #endif // def USE_SERIAL_DEBUG_COUNTERS
 
     // DEBUG_END;
@@ -283,11 +288,9 @@ void c_OutputSerial::StartNewFrame ()
     SerialHeaderIndex   = 0;
     SerialFooterIndex   = 0;
 
-#ifdef USE_SERIAL_DEBUG_COUNTERS
-    IntensityBytesSentLastFrame = IntensityBytesSent;
-    IntensityBytesSent = 0;
-    // IntensityBytesSentLastFrame = 0;
-#endif // def USE_SERIAL_DEBUG_COUNTERS
+    SERIAL_DEBUG_COUNTER(IntensityBytesSentLastFrame = IntensityBytesSent);
+    SERIAL_DEBUG_COUNTER(IntensityBytesSent = 0);
+    SERIAL_DEBUG_COUNTER(IntensityBytesSentLastFrame = 0);
 
     // start the next frame
     switch (OutputType)
@@ -322,7 +325,7 @@ void c_OutputSerial::StartNewFrame ()
 
     } // end switch (OutputType)
 
-    ReportNewFrame();
+    // ReportNewFrame();
 
     // DEBUG_END;
 
@@ -333,9 +336,7 @@ bool IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend (uint32_t &DataToSend)
 {
     DataToSend = 0x00;
 
-#ifdef USE_SERIAL_DEBUG_COUNTERS
-    IntensityBytesSent++;
-#endif // def USE_SERIAL_DEBUG_COUNTERS
+    SERIAL_DEBUG_COUNTER(IntensityBytesSent++);
 
     switch (SerialFrameState)
     {
@@ -400,6 +401,7 @@ bool IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend (uint32_t &DataToSend)
 
         case SerialFrameState_t::DMXSendFrameStart:
         {
+            SERIAL_DEBUG_COUNTER(DmxFrameStart++);
             DataToSend = 0x00; // DMX Lighting frame start
             SerialFrameState = SerialFrameState_t::DMXSendData;
             break;
@@ -407,13 +409,12 @@ bool IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend (uint32_t &DataToSend)
 
         case SerialFrameState_t::DMXSendData:
         {
+            SERIAL_DEBUG_COUNTER(DmxSendData++);
             DataToSend = *NextIntensityToSend++;
             if (0 == --intensity_count)
             {
                 SerialFrameState = SerialFrameState_t::SerialIdle;
-#ifdef USE_SERIAL_DEBUG_COUNTERS
-                ++FrameEndCounter;
-#endif // def USE_SERIAL_DEBUG_COUNTERS
+                SERIAL_DEBUG_COUNTER(++FrameEndCounter);
             }
             break;
         }
@@ -464,14 +465,12 @@ bool IRAM_ATTR c_OutputSerial::ISR_GetNextIntensityToSend (uint32_t &DataToSend)
         case SerialFrameState_t::SerialIdle:
         default:
         {
+            SERIAL_DEBUG_COUNTER(++Serialidle);
             break;
         }
     } // switch SerialFrameState
 
-
-#ifdef USE_SERIAL_DEBUG_COUNTERS
-    LastDataSent = data;
-#endif // def USE_SERIAL_DEBUG_COUNTERS
+    SERIAL_DEBUG_COUNTER(LastDataSent = DataToSend);
     return ISR_MoreDataToSend();
 } // NextIntensityToSend
 

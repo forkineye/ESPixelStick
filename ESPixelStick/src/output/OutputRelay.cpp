@@ -220,8 +220,6 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 
     do // once
     {
-        // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
-
         // PrettyPrint (jsonConfig, String("c_OutputRelay::SetConfig"));
         setFromJSON (UpdateInterval, jsonConfig, OM_RELAY_UPDATE_INTERVAL_NAME);
 
@@ -234,8 +232,10 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             break;
         }
 
-        for (JsonVariant JsonChannelData : JsonChannelList)
+        for (JsonVariant ChannelData : JsonChannelList)
         {
+            JsonObject JsonChannelData = ChannelData.as<JsonObject>();
+
             uint8_t ChannelId = OM_RELAY_CHANNEL_LIMIT;
             setFromJSON (ChannelId, JsonChannelData, CN_id);
 
@@ -340,7 +340,7 @@ void c_OutputRelay::GetStatus(ArduinoJson::JsonObject &jsonStatus)
 {
     // DEBUG_START;
 
-    c_OutputCommon::GetStatus(jsonStatus);
+    c_OutputCommon::BaseGetStatus(jsonStatus);
     JsonArray JsonChannelList = jsonStatus[CN_Relay].to<JsonArray> ();
 
     uint8_t ChannelId = 0;

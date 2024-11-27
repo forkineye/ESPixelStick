@@ -69,9 +69,9 @@ void c_OutputPixel::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 //----------------------------------------------------------------------------
 void c_OutputPixel::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
-    // DEBUG_START;
+    // // DEBUG_START;
 
-    c_OutputCommon::GetStatus (jsonStatus);
+    c_OutputCommon::BaseGetStatus (jsonStatus);
 
 #ifdef USE_PIXEL_DEBUG_COUNTERS
     JsonObject debugStatus = jsonStatus["Pixel Debug"].to<JsonObject>();
@@ -83,6 +83,7 @@ void c_OutputPixel::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     debugStatus["IntensityBytesSentLastFrame"]      = IntensityBytesSentLastFrame;
     debugStatus["AbortFrameCounter"]                = AbortFrameCounter;
     debugStatus["GetNextIntensityToSendCounter"]    = GetNextIntensityToSendCounter;
+    debugStatus["GetNextIntensityToSendFailedCounter"] = GetNextIntensityToSendFailedCounter;
     debugStatus["FramePrependDataCounter"]          = FramePrependDataCounter;
     debugStatus["FrameSendPixelsCounter"]           = FrameSendPixelsCounter;
     debugStatus["PixelPrependNullsCounter"]         = PixelPrependNullsCounter;
@@ -98,7 +99,7 @@ void c_OutputPixel::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     debugStatus["AdjustedBrightness"]               = AdjustedBrightness;
 #endif // def USE_PIXEL_DEBUG_COUNTERS
 
-    // DEBUG_END;
+    // // DEBUG_END;
 } // GetStatus
 
 //----------------------------------------------------------------------------
@@ -644,6 +645,10 @@ bool IRAM_ATTR c_OutputPixel::ISR_GetNextIntensityToSend (uint32_t &DataToSend)
 
 #ifdef USE_PIXEL_DEBUG_COUNTERS
     GetNextIntensityToSendCounter++;
+    if(!ISR_MoreDataToSend())
+    {
+        GetNextIntensityToSendFailedCounter++;
+    }
 #endif // def USE_PIXEL_DEBUG_COUNTERS
 
     DataToSend = (this->*FrameStateFuncPtr)();

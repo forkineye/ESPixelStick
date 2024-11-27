@@ -94,12 +94,17 @@ jobs:
           # M5Stack Atom
           - target: "m5stack_atom"
             chip: "esp32"
+          #
           - target: "esp3deuxquatro_dmx"
             chip: "esp32"
+          #
           - target: "esp32_quinled_uno_espsv3"
             chip: "esp32"
           #
           - target: "esp32_tetra2go"
+            chip: "esp32"
+          #
+          - target: "esp32_octa2go"
             chip: "esp32"
           # KR Lights
           - target: "esp32_kr_lights_msm"

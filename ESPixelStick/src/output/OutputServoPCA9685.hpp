@@ -57,8 +57,11 @@ public:
     bool        SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
     void        GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
     uint32_t    Poll ();                                        ///< Call from loop(),  renders output data
+#if defined(ARDUINO_ARCH_ESP32)
+    bool            RmtPoll () {return false;}
+#endif // defined(ARDUINO_ARCH_ESP32)
     void        GetDriverName (String& sDriverName);
-    void        GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::GetStatus (jsonStatus); }
+    void        GetStatus (ArduinoJson::JsonObject & jsonStatus) { c_OutputCommon::BaseGetStatus (jsonStatus); }
     uint32_t    GetNumOutputBufferBytesNeeded () { return OutputBufferSize; };
     uint32_t    GetNumOutputBufferChannelsServiced () { return OutputBufferSize; };
 

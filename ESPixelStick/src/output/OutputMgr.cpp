@@ -25,7 +25,6 @@
 #include "../FileMgr.hpp"
 #include <TimeLib.h>
 
-
 //-----------------------------------------------------------------------------
 // bring in driver definitions
 #include "OutputDisabled.hpp"
@@ -56,16 +55,6 @@
 #ifndef DEFAULT_RELAY_GPIO
     #define DEFAULT_RELAY_GPIO      gpio_num_t::GPIO_NUM_1
 #endif // ndef DEFAULT_RELAY_GPIO
-
-#if defined(ARDUINO_ARCH_ESP32)
-void OM_Task (void *arg)
-{
-    while(1){
-        // DEBUG_V();
-        OutputMgr.TaskPoll();
-    }
-}
-#endif // defined(ARDUINO_ARCH_ESP32)
 
 //-----------------------------------------------------------------------------
 // Local Data definitions
@@ -280,11 +269,6 @@ void c_OutputMgr::Begin ()
         // Preset the output memory
         memset((void*)&OutputBuffer[0], 0x00, sizeof(OutputBuffer));
 
-#if defined(ARDUINO_ARCH_ESP32)
-        xTaskCreatePinnedToCore(OM_Task, "OM_Task", 4096, NULL, 10, &myTaskHandle, 0);
-        vTaskPrioritySet(myTaskHandle, 4);
-#endif // defined(ARDUINO_ARCH_ESP32)
-
     } while (false);
 
     // DEBUG_END;
@@ -296,7 +280,6 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
-    // extern void PrettyPrint (JsonObject&, String);
     // PrettyPrint (jsonConfig, String ("jsonConfig"));
 
     // add OM config parameters
@@ -376,7 +359,6 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
 void c_OutputMgr::CreateNewConfig ()
 {
     // DEBUG_START;
-    // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
 
     // DEBUG_V (String (("--- WARNING: Creating a new Output Manager configuration Data set ---")));
 
@@ -1018,11 +1000,9 @@ void c_OutputMgr::LoadConfig ()
     // try to load and process the config file
     if (!FileMgr.LoadFlashFile(ConfigFileName, [this](JsonDocument &JsonConfigDoc)
         {
-            // extern void PrettyPrint(JsonDocument & jsonStuff, String Name);
             // PrettyPrint(JsonConfigDoc, "OM Load Config");
 
             // DEBUG_V ();
-            // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
             // PrettyPrint(JsonConfig, "OM Load Config");
             // DEBUG_V ();
             this->ProcessJsonConfig(JsonConfigDoc);
@@ -1060,8 +1040,6 @@ bool c_OutputMgr::FindJsonChannelConfig (JsonDocument& jsonConfig,
     // DEBUG_V(String("ChanId: ") + String(ChanId));
     // DEBUG_V(String("  Type: ") + String(Type));
 
-    // extern void PrettyPrint(JsonDocument & jsonStuff, String Name);
-    // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
     // PrettyPrint(jsonConfig, "FindJsonChannelConfig");
 
     do // once
@@ -1150,8 +1128,6 @@ bool c_OutputMgr::ProcessJsonConfig (JsonDocument& jsonConfig)
 
     // DEBUG_V ();
 
-    // extern void PrettyPrint(JsonDocument & jsonStuff, String Name);
-    // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
     // PrettyPrint(jsonConfig, "ProcessJsonConfig");
 
     do // once
@@ -1167,7 +1143,6 @@ bool c_OutputMgr::ProcessJsonConfig (JsonDocument& jsonConfig)
             }
             // DEBUG_V ();
 
-            // extern void PrettyPrint (JsonObject& jsonStuff, String Name);
             // PrettyPrint(OutputChannelConfig, "ProcessJson Channel Config");
 
             // set a default value for channel type
@@ -1337,7 +1312,6 @@ void c_OutputMgr::SetSerialUart()
 }
 
 //-----------------------------------------------------------------------------
-///< Called from loop(), Does Nothing
 void c_OutputMgr::Poll()
 {
     // //DEBUG_START;
@@ -1347,7 +1321,6 @@ void c_OutputMgr::Poll()
     digitalWrite (LED_FLASH_GPIO, LED_FLASH_OFF);
 #endif // def LED_FLASH_GPIO
 
-#if defined(ARDUINO_ARCH_ESP8266)
     // do we need to save the current config?
     if (NO_CONFIG_NEEDED != ConfigLoadNeeded)
     {
@@ -1362,68 +1335,13 @@ void c_OutputMgr::Poll()
         // //DEBUG_V();
         for (DriverInfo_t & OutputChannel : OutputChannelDrivers)
         {
-            // //DEBUG_V("Start a new channel");
+            // //DEBUG_V("Poll a channel");
             OutputChannel.pOutputChannelDriver->Poll ();
         }
     }
 
-#endif //  defined(ARDUINO_ARCH_ESP8266)
-
     // //DEBUG_END;
 } // Poll
-
-#if defined(ARDUINO_ARCH_ESP32)
-//-----------------------------------------------------------------------------
-void c_OutputMgr::TaskPoll()
-{
-    // //DEBUG_START;
-
-    // do we need to save the current config?
-    if (NO_CONFIG_NEEDED != ConfigLoadNeeded)
-    {
-        if(abs(now() - ConfigLoadNeeded) > LOAD_CONFIG_DELAY)
-        {
-            // DEBUG_V("Starting config processing");
-            LoadConfig ();
-            // DEBUG_V("Done config processing");
-        }
-    } // done need to save the current config
-
-    if ((false == IsOutputPaused) && (false == ConfigInProgress) && (false == RebootInProgress()) )
-    {
-        // PollCount ++;
-        bool FoundAnActiveOutputChannel = false;
-        // //DEBUG_V();
-        for (DriverInfo_t & OutputChannel : OutputChannelDrivers)
-        {
-            // //DEBUG_V("Start a new channel");
-            if(nullptr != OutputChannel.pOutputChannelDriver)
-            {
-                uint32_t DelayInUs = OutputChannel.pOutputChannelDriver->Poll ();
-                if(DelayInUs)
-                {
-                    FoundAnActiveOutputChannel = true;
-                }
-            }
-            else
-            {
-                // DEBUG_V(String("Missing pOutputChannelDriver for channel: ") + String(OutputChannel.DriverId));
-            }
-        }
-
-        if(!FoundAnActiveOutputChannel)
-        {
-            vTaskDelay(pdMS_TO_TICKS(25));
-        }
-    }
-    else
-    {
-        // one second delay
-        vTaskDelay(pdMS_TO_TICKS(1000));
-    }
-    // //DEBUG_END;
-} // TaskPoll
-#endif // defined(ARDUINO_ARCH_ESP32)
 
 //-----------------------------------------------------------------------------
 void c_OutputMgr::UpdateDisplayBufferReferences (void)

@@ -171,7 +171,6 @@ private:
     uint32_t IntensityValuesSentLastFrame = 0;
     uint32_t IntensityBitsSentLastFrame = 0;
     uint32_t IncompleteFrame = 0;
-    uint32_t IncompleteFrameLastFrame = 0;
     uint32_t EnqueueCounter = 0;
     uint32_t FiFoNotEmpty = 0;
     uint32_t FiFoEmpty = 0;

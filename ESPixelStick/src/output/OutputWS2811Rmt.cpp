@@ -87,7 +87,7 @@ void c_OutputWS2811Rmt::Begin ()
     OutputRmtConfig.NumIdleBits       = 1;
 
     // DEBUG_V();
-    Rmt.Begin(OutputRmtConfig);
+    Rmt.Begin(OutputRmtConfig, this);
 
     HasBeenInitialized = true;
 
@@ -136,44 +136,44 @@ void c_OutputWS2811Rmt::SetOutputBufferSize (uint32_t NumChannelsAvailable)
 //----------------------------------------------------------------------------
 void c_OutputWS2811Rmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
+    // // DEBUG_START;
     c_OutputWS2811::GetStatus (jsonStatus);
     Rmt.GetStatus (jsonStatus);
-
+    // // DEBUG_END;
 } // GetStatus
 
 //----------------------------------------------------------------------------
 uint32_t c_OutputWS2811Rmt::Poll ()
 {
     // DEBUG_START;
-    uint32_t FrameLen = ActualFrameDurationMicroSec;
 
+    // DEBUG_END;
+    return ActualFrameDurationMicroSec;
+
+} // Poll
+
+//----------------------------------------------------------------------------
+bool c_OutputWS2811Rmt::RmtPoll ()
+{
+    // DEBUG_START;
+    bool Response = false;
     do // Once
     {
         if (gpio_num_t(-1) == DataPin)
         {
-            FrameLen = 0;
             break;
         }
 
-        if (!canRefresh())
-        {
-            FrameLen = 0;
-            break;
-        }
-
-        // DEBUG_V("get the next frame started");
-
-        if (Rmt.StartNewFrame (ActualFrameDurationMicroSec))
-        {
-            ReportNewFrame ();
-        }
+        // DEBUG_V(String("get the next frame started on ") + String(DataPin));
+        ReportNewFrame ();
+        Rmt.StartNewFrame ();
 
         // DEBUG_V();
 
     } while (false);
 
     // DEBUG_END;
-    return FrameLen;
+    return Response;
 
 } // Poll
 

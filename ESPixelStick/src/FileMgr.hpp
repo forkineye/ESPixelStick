@@ -112,10 +112,14 @@ public:
 #   // define CONFIG_MAX_SIZE (4*1024)    ///< Sanity limit for config file
 #endif
 private:
-    void   SetSpiIoPins ();
-    void   ResetSdCard ();
+    void    SetSpiIoPins ();
+    void    SetSdSpeed ();
+    void    ResetSdCard ();
 
 #   define SD_CARD_CLK_MHZ     SD_SCK_MHZ(37)  // 50 MHz SPI clock
+#ifndef MaxSdTransSpeedMHz
+#   define MaxSdTransSpeedMHz 200
+#endif // ndef MaxSdTransSpeedMHz
 
     void listDir (fs::FS& fs, String dirname, uint8_t levels);
     void DescribeSdCardToUser ();
@@ -136,6 +140,7 @@ private:
     String   WelcomeString = "ESPS V4 FTP";
     bool     FtpEnabled = true;
     uint64_t SdCardSizeMB = 0;
+    uint32_t MaxSdSpeed = MaxSdTransSpeedMHz;
 
 public: struct __attribute__((__packed__, aligned(4))) CSD {
 	public: union {

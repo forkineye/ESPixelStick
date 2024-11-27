@@ -1,6 +1,6 @@
 #pragma once
 /*
-* GPIO_Defs_ESP32_Tetra2go.hpp - Output Management class
+* GPIO_Defs_ESP32_Octa2go.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2024 Shelby Merrick
@@ -23,6 +23,10 @@
 #define DEFAULT_RMT_1_GPIO      gpio_num_t::GPIO_NUM_13
 #define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_12
 #define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_14
+#define DEFAULT_RMT_4_GPIO      gpio_num_t::GPIO_NUM_4
+#define DEFAULT_RMT_5_GPIO      gpio_num_t::GPIO_NUM_16
+#define DEFAULT_RMT_6_GPIO      gpio_num_t::GPIO_NUM_32
+#define DEFAULT_RMT_7_GPIO      gpio_num_t::GPIO_NUM_33
 
 // SPI Output
 #define SUPPORT_SPI_OUTPUT

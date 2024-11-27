@@ -170,6 +170,11 @@ void setup()
 
     // TestHeap(uint32_t(10));
     // DEBUG_V("");
+#ifdef ARDUINO_ARCH_ESP32
+    logcon(String("CPU Frequency: ") + String(getCpuFrequencyMhz()) + "MHz");
+    logcon(String("APB Frequency: ") + String(getApbFrequency() / 1000000) + "MHz");
+#endif // def ARDUINO_ARCH_ESP32
+
     FileMgr.Begin();
     // Load configuration from the File System and set Hostname
     // TestHeap(uint32_t(15));
@@ -253,13 +258,13 @@ bool validateConfig()
 bool dsDevice(JsonObject & json)
 {
     // DEBUG_START;
-    // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
     // PrettyPrint (json, "dsDevice");
 
     bool ConfigChanged = false;
     JsonObject JsonDeviceConfig = json[CN_device];
     if (JsonDeviceConfig)
     {
+        // PrettyPrint(JsonDeviceConfig, "device");
 
 //TODO: Add configuration upgrade handling - cfgver moved to root level
         ConfigChanged |= setFromJSON (config.id,         JsonDeviceConfig, CN_id);
@@ -298,7 +303,6 @@ bool deserializeCore (JsonObject & json)
 
     bool DataHasBeenAccepted = false;
 
-    // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
     // PrettyPrint (json, "Main Config");
     JsonObject SystemConfig = json[CN_system];
     JsonObject InitConfig = json[CN_init];
@@ -352,11 +356,8 @@ bool deserializeCore (JsonObject & json)
         // DEBUG_V("Checking to see if the config is from the web flash tool");
 
         // is this a config from the web flash tool?
-        if (DeviceConfig.containsKey("requiresConfigSave"))
-        {
-            // DEBUG_V("Forcing a save config due to missing GPIO settings");
-            ConfigSaveNeeded = true;
-        }
+        // DEBUG_V("Forcing a save config due to missing GPIO settings");
+        ConfigSaveNeeded = DeviceConfig["requiresConfigSave"].is<bool>();
 
         dsDevice(DeviceConfig);
         // DEBUG_V("");
@@ -364,9 +365,9 @@ bool deserializeCore (JsonObject & json)
         // DEBUG_V("");
         ConfigSaveNeeded |= NetworkMgr.SetConfig(DeviceConfig);
         // DEBUG_V("");
-#ifdef SUPPORT_SENSOR_DS18B20
+        #ifdef SUPPORT_SENSOR_DS18B20
         ConfigSaveNeeded |= SensorDS18B20.SetConfig(DeviceConfig);
-#endif // def SUPPORT_SENSOR_DS18B20
+        #endif // def SUPPORT_SENSOR_DS18B20
         // DEBUG_V("");
         DataHasBeenAccepted = true;
 
@@ -381,7 +382,6 @@ void deserializeCoreHandler (JsonDocument & jsonDoc)
 {
     // DEBUG_START;
 
-    // extern void PrettyPrint(JsonDocument & jsonStuff, String Name);
     // PrettyPrint(jsonDoc, "deserializeCoreHandler");
 
     JsonObject json = jsonDoc.as<JsonObject>();
@@ -447,6 +447,8 @@ void GetConfig (JsonObject & json)
     JsonObject device       = json[CN_device].to<JsonObject>();
     device[CN_id]           = config.id;
     device[CN_blanktime]    = config.BlankDelay;
+
+    // PrettyPrint(device, "device");
 
     FileMgr.GetConfig (device);
 

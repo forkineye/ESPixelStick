@@ -92,7 +92,7 @@ private:
         uint32_t DriverId = 0;
         c_InputCommon * pInputChannelDriver = nullptr; ///< pointer(s) to the current active Input driver
     };
-    
+
     #define NO_CONFIG_NEEDED time_t(-1)
 
     DriverInfo_t    InputChannelDrivers[InputChannelId_End]; ///< pointer(s) to the current active Input driver
@@ -117,8 +117,6 @@ private:
     bool   rebootNeeded = false;
 
     FastTimer BlankEndTime[InputChannelId_End];
-
-#define IM_JSON_SIZE (5 * 1024)
 
 }; // c_InputMgr
 

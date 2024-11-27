@@ -44,13 +44,17 @@ public:
     virtual bool         SetConfig (ArduinoJson::JsonObject & jsonConfig);     ///< Set a new config in the driver
     virtual void         GetConfig (ArduinoJson::JsonObject & jsonConfig);     ///< Get the current config used by the driver
     virtual uint32_t     Poll () = 0;                                        ///< Call from loop(),  renders output data
+#ifdef ARDUINO_ARCH_ESP32
+    virtual bool         RmtPoll () = 0;                                        ///< Call from loop(),  renders output data
+#endif // def ARDUINO_ARCH_ESP32
     virtual void         GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
             OID_t        GetOutputChannelId () { return OutputChannelId; }     ///< return the output channel number
             uint8_t    * GetBufferAddress ()   { return pOutputBuffer;}        ///< Get the address of the buffer into which the E1.31 handler will stuff data
             uint32_t     GetBufferUsedSize ()  { return OutputBufferSize;}     ///< Get the address of the buffer into which the E1.31 handler will stuff data
             gpio_num_t   GetOutputGpio ()      { return DataPin; }
             OTYPE_t      GetOutputType ()      { return OutputType; }          ///< Have the instance report its type.
-    virtual void         GetStatus (ArduinoJson::JsonObject & jsonStatus);
+    virtual void         GetStatus (ArduinoJson::JsonObject & jsonStatus) = 0;
+    virtual void         BaseGetStatus (ArduinoJson::JsonObject & jsonStatus);
             void         SetOutputBufferAddress (uint8_t* pNewOutputBuffer) { pOutputBuffer = pNewOutputBuffer; }
     virtual void         SetOutputBufferSize (uint32_t NewOutputBufferSize)  { OutputBufferSize = NewOutputBufferSize; };
     virtual uint32_t     GetNumOutputBufferBytesNeeded () = 0;

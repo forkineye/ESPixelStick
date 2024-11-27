@@ -103,6 +103,7 @@ public:
     void GetMqttEffectList (JsonObject& jsonConfig);   ///< Get the current config used by the driver
     void GetStatus (JsonObject& jsonStatus);
     void Process ();                           ///< Call from loop(),  renders Input data
+    void Poll ();                              ///< Call from loop(),  renders Input data
     void GetDriverName (String  & sDriverName) { sDriverName = "Effects"; } ///< get the name for the instantiated driver
     void SetBufferInfo (uint32_t BufferSize);
     void NextEffect ();
@@ -123,6 +124,7 @@ public:
     uint16_t effectMarquee ();
 
 private:
+#define EFFECTS_TASK_PRIORITY 5
 
     void validateConfiguration ();
 
@@ -178,11 +180,14 @@ private:
 
     struct Transition_t
     {
-        dCRGB       CurrentColor = {0.0, 0.0, 0.0};
+        dCRGB       CurrentColor    = {0.0, 0.0, 0.0};
+        dCRGB       StepValue       = {2.0, 2.0, 2.0};
+        uint32_t    StepsToTarget   = 300; // number of NumStepsToTarget
+        uint32_t    TimeAtTargetMs  = 100; // number of milli seconds to stay at the target color.
+        uint32_t    HoldStartTimeMs = 0; // time at which transition hold time was started. 0 == off
         std::vector<c_InputEffectEngine::dCRGB>::iterator TargetColorIterator;
-        dCRGB       StepValue    = {2.0, 2.0, 2.0};
-        double      StepsToTarget = 300; // number of NumStepsToTarget
     } TransitionInfo;
+
     bool ColorHasReachedTarget ();
     bool ColorHasReachedTarget (double tc, double cc, double step);
     void ConditionalIncrementColor(double tc, double & cc, double step);

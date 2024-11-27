@@ -110,9 +110,6 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
 
     JsonDocument JsonPlayListDoc;
 
-    extern void PrettyPrint (JsonArray & jsonStuff, String Name);
-    extern void PrettyPrint (JsonObject & jsonStuff, String Name);
-
     do // once
     {
         // DEBUG_V ("");
@@ -187,7 +184,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         {
             FrameId = 1;
             PlayCount = 1;
-            setFromJSON (PlayCount, JsonPlayListArrayEntry, F ("playcount"));
+            setFromJSON (PlayCount, JsonPlayListArrayEntry, CN_playcount);
             // DEBUG_V (String ("PlayListEntryPlayCount: '") + String (FrameId) + "'");
 
             fsm_PlayList_state_PlayingFile_imp.Init (this);

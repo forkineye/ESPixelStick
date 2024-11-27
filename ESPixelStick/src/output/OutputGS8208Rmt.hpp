@@ -42,6 +42,9 @@ public:
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);  ///< Set a new config in the driver
     uint32_t Poll ();                                        ///< Call from loop (),  renders output data
+#if defined(ARDUINO_ARCH_ESP32)
+    bool    RmtPoll ();
+#endif // defined(ARDUINO_ARCH_ESP32)
     void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
     void    SetOutputBufferSize (uint32_t NumChannelsAvailable);
 

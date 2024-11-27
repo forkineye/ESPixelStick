@@ -59,7 +59,7 @@ void c_OutputGrinch::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 //----------------------------------------------------------------------------
 void c_OutputGrinch::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
-    c_OutputCommon::GetStatus (jsonStatus);
+    c_OutputCommon::BaseGetStatus (jsonStatus);
 
 } // GetStatus
 

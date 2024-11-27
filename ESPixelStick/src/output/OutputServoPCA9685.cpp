@@ -157,8 +157,6 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 
     do // once
     {
-        // extern void PrettyPrint (JsonObject & jsonStuff, String Name);
-
         // PrettyPrint (jsonConfig, String("c_OutputServoPCA9685::SetConfig"));
         setFromJSON (UpdateFrequency, jsonConfig, OM_SERVO_PCA9685_UPDATE_INTERVAL_NAME);
         pwm->setPWMFreq (UpdateFrequency);
@@ -172,8 +170,9 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             break;
         }
 
-        for (JsonVariant JsonChannelData : JsonChannelList)
+        for (JsonVariant ChannelData : JsonChannelList)
         {
+            JsonObject JsonChannelData = ChannelData.as<JsonObject>();
             uint8_t ChannelId = OM_SERVO_PCA9685_CHANNEL_LIMIT;
             setFromJSON (ChannelId, JsonChannelData, OM_SERVO_PCA9685_CHANNEL_ID_NAME);
 
@@ -244,7 +243,6 @@ void c_OutputServoPCA9685::GetConfig (ArduinoJson::JsonObject & jsonConfig)
         ++ChannelId;
     }
 
-    // extern void PrettyPrint(JsonObject & jsonStuff, String Name);
     // PrettyPrint(jsonConfig, "Servo");
 
     // DEBUG_END;

@@ -52,12 +52,12 @@ void c_ExternalInput::GetConfig (JsonObject JsonData)
 {
     // DEBUG_START;
 
-	JsonData[M_IO_ENABLED] = Enabled;
-	JsonData[M_NAME]       = name;
-	JsonData[M_ID]         = GpioId;
-	JsonData[M_POLARITY]   = (ActiveHigh == polarity) ? CN_ActiveHigh : CN_ActiveLow;
-	JsonData[CN_channels]  = TriggerChannel;
-	JsonData["long"]       = LongPushDelayMS;
+	JsonData[CN_enabled]  = Enabled;
+	JsonData[CN_name]     = name;
+	JsonData[CN_id]       = GpioId;
+	JsonData[CN_polarity] = (ActiveHigh == polarity) ? CN_ActiveHigh : CN_ActiveLow;
+	JsonData[CN_channels] = TriggerChannel;
+	JsonData[CN_long]     = LongPushDelayMS;
 
 	// DEBUG_V (String ("m_iPinId: ") + String (m_iPinId));
 
@@ -70,8 +70,8 @@ void c_ExternalInput::GetStatistics (JsonObject JsonData)
 {
 	// DEBUG_START;
 
-	JsonData[M_ID]    = GpioId;
-	JsonData[M_STATE] = (ReadInput()) ? "on" : "off";
+	JsonData[CN_id]    = GpioId;
+	JsonData[CN_state] = (ReadInput()) ? CN_on : CN_off;
 
 	// DEBUG_END;
 
@@ -86,12 +86,12 @@ void c_ExternalInput::ProcessConfig (JsonObject JsonData)
 
 	uint32_t oldInputId = GpioId;
 	
-	setFromJSON (Enabled,         JsonData, M_IO_ENABLED);
-	setFromJSON (name,            JsonData, M_NAME);
-	setFromJSON (GpioId,          JsonData, M_ID);
-	setFromJSON (Polarity,        JsonData, M_POLARITY);
+	setFromJSON (Enabled,         JsonData, CN_enabled);
+	setFromJSON (name,            JsonData, CN_name);
+	setFromJSON (GpioId,          JsonData, CN_id);
+	setFromJSON (Polarity,        JsonData, CN_polarity);
 	setFromJSON (TriggerChannel,  JsonData, CN_channels);
-	setFromJSON (LongPushDelayMS, JsonData, "long");
+	setFromJSON (LongPushDelayMS, JsonData, CN_long);
 
 	polarity = (String(CN_ActiveHigh) == Polarity) ? ActiveHigh : ActiveLow;
 

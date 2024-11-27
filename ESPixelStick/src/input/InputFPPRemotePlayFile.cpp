@@ -71,7 +71,7 @@ c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelId
     MsTicker.attach_ms (uint32_t (FPP_TICKER_PERIOD_MS), &TimerPollHandler, (void*)this); // Add ISR Function
 
 #ifdef ARDUINO_ARCH_ESP32
-    xTaskCreate (TimerPollHandlerTask, "FPPTask", TimerPollHandlerTaskStack, this, ESP_TASK_PRIO_MIN + 4, &TimerPollTaskHandle);
+    xTaskCreate (TimerPollHandlerTask, "FPPTask", TimerPollHandlerTaskStack, this, ESP_TASK_PRIO_MIN + 8, &TimerPollTaskHandle);
 #endif // def ARDUINO_ARCH_ESP32
 
     // DEBUG_END;

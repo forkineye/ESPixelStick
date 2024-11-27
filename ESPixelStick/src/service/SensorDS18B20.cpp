@@ -52,7 +52,7 @@ void c_SensorDS18B20::GetConfig (JsonObject& json)
 } // GetConfig
 
 //-----------------------------------------------------------------------------
-bool c_SensorDS18B20::SetConfig (JsonObject& json) 
+bool c_SensorDS18B20::SetConfig (JsonObject& json)
 {
     // DEBUG_START;
 
@@ -66,8 +66,9 @@ bool c_SensorDS18B20::SetConfig (JsonObject& json)
             logcon (F ("No Sensor settings found."));
             break;
         }
-
-        ConfigChanged |= setFromJSON (TempUnit, JsonDeviceConfig, CN_units);
+        uint32_t t = TempUnit_t::TempUnitCentegrade;
+        ConfigChanged |= setFromJSON (t, JsonDeviceConfig, CN_units);
+        TempUnit = TempUnit_t(t);
         LastReadingTime = 0; // force a reading
     } while(false);
 

@@ -85,7 +85,7 @@ void c_OutputUCS1903Rmt::Begin ()
     OutputRmtConfig.pPixelDataSource = this;
     OutputRmtConfig.CitrdsArray      = ConvertIntensityToRmtDataStream;
 
-    Rmt.Begin(OutputRmtConfig);
+    Rmt.Begin(OutputRmtConfig, this);
 
     HasBeenInitialized = true;
 
@@ -140,35 +140,35 @@ void c_OutputUCS1903Rmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 uint32_t c_OutputUCS1903Rmt::Poll ()
 {
     // DEBUG_START;
-    uint32_t FrameLen = ActualFrameDurationMicroSec;
 
+    // DEBUG_END;
+    return ActualFrameDurationMicroSec;
+
+} // Poll
+
+//----------------------------------------------------------------------------
+bool c_OutputUCS1903Rmt::RmtPoll ()
+{
+    // DEBUG_START;
+    bool Response = false;
     do // Once
     {
         if (gpio_num_t(-1) == DataPin)
         {
-            FrameLen = 0;
-            break;
-        }
-
-        if (!canRefresh())
-        {
-            FrameLen = 0;
             break;
         }
 
         // DEBUG_V("get the next frame started");
-
-        if (Rmt.StartNewFrame (ActualFrameDurationMicroSec))
-        {
-            ReportNewFrame ();
-        }
+        ReportNewFrame ();
+        Rmt.StartNewFrame ();
 
         // DEBUG_V();
 
     } while (false);
 
     // DEBUG_END;
-    return FrameLen;
+    return Response;
+
 } // Poll
 
 #endif // defined(SUPPORT_OutputType_UCS1903) && defined(ARDUINO_ARCH_ESP32)

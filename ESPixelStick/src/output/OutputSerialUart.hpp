@@ -44,6 +44,9 @@ public:
     virtual void    GetConfig(ArduinoJson::JsonObject &jsonConfig); ///< Set a new config in the driver
     virtual void    GetStatus(ArduinoJson::JsonObject &jsonStatus);
     uint32_t        Poll();
+#if defined(ARDUINO_ARCH_ESP32)
+    bool            RmtPoll () {return false;}
+#endif // defined(ARDUINO_ARCH_ESP32)
 
 private:
     c_OutputUart Uart;
