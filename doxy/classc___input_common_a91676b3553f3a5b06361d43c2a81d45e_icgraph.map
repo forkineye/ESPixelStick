@@ -1,0 +1,9 @@
+<map id="c_InputCommon::SetConfig" name="c_InputCommon::SetConfig">
+<area shape="rect" id="Node000001" title="Set a new config in the driver." alt="" coords="441,31,619,56"/>
+<area shape="rect" id="Node000002" href="$classc___input_alexa.html#adf1dcecdbc97eb955ad2ca3954678c80" title=" " alt="" coords="206,5,376,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="425,35,376,30,376,24,426,30"/>
+<area shape="rect" id="Node000004" href="$classc___input_mgr.html#a3982db8dd97b38f17ec31c73e6b4940b" title=" " alt="" coords="189,55,393,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="425,57,394,60,393,55,425,51"/>
+<area shape="rect" id="Node000003" href="$classc___input_alexa.html#a8e260d42f46f4fa70cbca61ea001dda6" title="set up the operating environment based on the current config (or defaults)" alt="" coords="5,5,141,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="191,21,141,21,141,16,191,16"/>
+</map>

@@ -1,0 +1,15 @@
+<map id="c_OutputUart" name="c_OutputUart">
+<area shape="rect" id="Node000001" title=" " alt="" coords="127,405,226,431"/>
+<area shape="rect" id="Node000002" href="$structc___output_uart_1_1_output_uart_config__t.html" title=" " alt="" coords="92,301,261,342"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,357,179,405,174,405,174,357"/>
+<area shape="rect" id="Node000003" href="$classc___output_pixel.html" title=" " alt="" coords="39,205,141,231"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="107,243,131,276,155,299,151,303,127,279,103,246"/>
+<area shape="rect" id="Node000004" href="$classc___output_common.html" title=" " alt="" coords="5,109,132,135"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="77,149,90,204,84,205,72,150"/>
+<area shape="rect" id="Node000005" href="$unionc___output_pixel_1_1_color_offsets__s.html" title=" " alt="" coords="155,109,350,135"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="220,145,112,207,109,202,217,140"/>
+<area shape="rect" id="Node000006" href="$structc___output_pixel_1_1_color_offsets__s_1_1offsets.html" title=" " alt="" coords="162,5,343,46"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="255,61,255,109,250,109,250,61"/>
+<area shape="rect" id="Node000007" href="$structc___output_uart_1_1_convert_intensity_to_uart_data_stream_entry__t.html" title=" " alt="" coords="165,198,364,238"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="253,254,237,279,210,303,207,299,233,276,249,251"/>
+</map>

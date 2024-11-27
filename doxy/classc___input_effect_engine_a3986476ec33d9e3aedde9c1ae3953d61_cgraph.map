@@ -1,0 +1,17 @@
+<map id="c_InputEffectEngine::PollFlash" name="c_InputEffectEngine::PollFlash">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,77,142,117"/>
+<area shape="rect" id="Node000002" href="$class_fast_timer.html#acd3946e3c51632727ad0a4eef47563e7" title=" " alt="" coords="190,5,349,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="114,73,189,40,205,34,207,39,191,45,116,78"/>
+<area shape="rect" id="Node000003" href="$class_fast_timer.html#a405ba0c8e0b6b111326da0e5588342b1" title=" " alt="" coords="200,55,339,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="141,84,184,78,184,83,142,89"/>
+<area shape="rect" id="Node000004" href="$classc___input_effect_engine.html#af6c8141b2b5d63e69151cb0f07fe9281" title=" " alt="" coords="201,105,338,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="142,104,186,110,186,116,141,109"/>
+<area shape="rect" id="Node000008" href="$class_fast_timer.html#a775ab52aa49e9a1f7092eefcbdbd673e" title="&lt; Start the module" alt="" coords="196,169,343,195"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="112,115,191,154,209,161,207,166,189,159,110,120"/>
+<area shape="rect" id="Node000005" href="$classc___input_effect_engine.html#aff4693217ee5e68868068613b318a281" title=" " alt="" coords="397,105,533,145"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="338,122,382,122,382,128,338,128"/>
+<area shape="rect" id="Node000006" href="$classc___input_effect_engine.html#a4faf62f24ce641ec7999f5e246eb458c" title=" " alt="" coords="581,105,718,145"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="534,122,566,122,566,128,534,128"/>
+<area shape="rect" id="Node000007" href="$classc___output_mgr.html#abe0292b6380f75279c4758c2b2e4e465" title=" " alt="" coords="766,112,972,138"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="718,122,750,122,750,128,718,128"/>
+</map>

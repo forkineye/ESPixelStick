@@ -1,0 +1,7 @@
+<map id="fsm_WiFi_state_ConnectedToSta::Init" name="fsm_WiFi_state_ConnectedToSta::Init">
+<area shape="rect" id="Node000001" title=" " alt="" coords="238,39,419,79"/>
+<area shape="rect" id="Node000002" href="$classfsm___wi_fi__state___connecting_as_a_p.html#a7ef8d7da8114f886dcad4e1b4c95af3b" title=" " alt="" coords="5,5,190,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="222,46,190,42,190,36,223,41"/>
+<area shape="rect" id="Node000003" href="$classfsm___wi_fi__state___connecting_as_a_p.html#abfa70db6d7a2dedf0c0fe1f87f679f63" title=" " alt="" coords="5,71,190,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="223,76,190,81,190,76,222,71"/>
+</map>

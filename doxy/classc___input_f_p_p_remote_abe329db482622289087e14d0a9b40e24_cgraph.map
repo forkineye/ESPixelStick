@@ -1,0 +1,18 @@
+<map id="c_InputFPPRemote::GetStatus" name="c_InputFPPRemote::GetStatus">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,132,206,157"/>
+<area shape="rect" id="Node000002" href="$classc___f_p_p_discovery.html#a6bdea2dba75e7efa05e00a80218de53c" title=" " alt="" coords="255,45,439,71"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,129,253,80,277,73,278,78,255,86,137,133"/>
+<area shape="rect" id="Node000006" href="$classc___input_f_p_p_remote_play_item.html#ae81c0361879c195c589b73e033cd845f" title=" " alt="" coords="254,95,440,135"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="206,129,237,126,238,131,207,135"/>
+<area shape="rect" id="Node000007" href="$classc___input_f_p_p_remote.html#a7cba6247fa182067f09371d891c53adb" title=" " alt="" coords="488,188,692,213"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="206,153,473,184,472,189,206,159"/>
+<area shape="rect" id="Node000008" href="$classc___input_f_p_p_remote.html#ac3caebaeae0b77be9680516b54edaa5b" title=" " alt="" coords="255,209,439,250"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="145,155,274,201,272,206,143,160"/>
+<area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote_play_file.html#a3817166d37aee9933378edc4a8eb5500" title=" " alt="" coords="500,37,681,78"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="439,55,484,55,484,60,439,60"/>
+<area shape="rect" id="Node000004" href="$classc___input_f_p_p_remote_play_item.html#a18aa37d56d43b19d1b5801a7a304e06c" title=" " alt="" coords="758,5,944,46"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="681,44,742,36,743,42,682,49"/>
+<area shape="rect" id="Node000005" href="$_safer_string_conversion_8hpp.html#aeab01c8a84641e02d18990accf788d9f" title=" " alt="" coords="740,71,962,111"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="682,67,725,72,725,78,681,72"/>
+<area shape="poly" id="edge8_Node000008_Node000007" title=" " alt="" coords="439,216,472,212,473,217,439,221"/>
+</map>

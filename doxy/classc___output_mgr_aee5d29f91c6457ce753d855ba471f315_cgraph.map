@@ -1,0 +1,8 @@
+<map id="c_OutputMgr::SetConfig" name="c_OutputMgr::SetConfig">
+<area shape="rect" id="Node000001" title="Save the current configuration data to nvram." alt="" coords="5,59,164,84"/>
+<area shape="rect" id="Node000002" href="$classc___file_mgr.html#a91d8ba978954c06f5448afb5c75f34b4" title=" " alt="" coords="221,29,388,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,58,205,53,206,58,165,64"/>
+<area shape="rect" id="Node000003" href="$classc___output_mgr.html#ac9742371ff3eae19bc7f0ece84ea6c79" title=" " alt="" coords="212,79,397,120"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="165,79,196,83,196,88,164,84"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="268,31,261,21,265,11,280,5,304,3,331,5,345,12,343,17,330,10,304,8,281,10,269,15,266,20,272,27"/>
+</map>

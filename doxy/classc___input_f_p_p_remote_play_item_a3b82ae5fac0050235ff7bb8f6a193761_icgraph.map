@@ -1,0 +1,21 @@
+<map id="c_InputFPPRemotePlayItem::SetSendFppSync" name="c_InputFPPRemotePlayItem::SetSendFppSync">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1028,54,1214,95"/>
+<area shape="rect" id="Node000002" href="$classc___input_f_p_p_remote.html#a1ee15e1c30584550418fd15599f8de61" title="Set a new config in the driver." alt="" coords="253,5,451,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1024,53,979,45,836,30,692,22,451,19,451,14,692,17,836,25,980,40,1025,47"/>
+<area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote.html#ad3bc5af64fe8523ba3c2f35cffa62fa0" title=" " alt="" coords="768,54,980,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1012,77,980,77,980,72,1012,72"/>
+<area shape="rect" id="Node000009" href="$classc___input_f_p_p_remote.html#a8148ddeeaff99c8f343c66e7e3a08a5d" title=" " alt="" coords="768,119,980,160"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="1027,102,954,121,953,116,1026,96"/>
+<area shape="rect" id="Node000004" href="$classc___input_f_p_p_remote.html#a25cf9123173d9c89fe7e5f2f77f90f42" title=" " alt="" coords="509,61,720,87"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="753,77,721,77,721,72,753,72"/>
+<area shape="poly" id="edge6_Node000004_Node000002" title=" " alt="" coords="536,60,415,34,416,29,537,55"/>
+<area shape="rect" id="Node000005" href="$classc___input_f_p_p_remote.html#a2e5e64a21ad76c7015c6500393be7da3" title=" " alt="" coords="245,59,459,84"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="494,76,459,75,459,70,494,70"/>
+<area shape="rect" id="Node000007" href="$classc___input_f_p_p_remote.html#a52a0259a23c09e3cde5501eafae94e8a" title="Call from loop(), renders Input data." alt="" coords="243,109,461,135"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="526,93,427,111,426,106,525,88"/>
+<area shape="rect" id="Node000006" href="$classc___input_f_p_p_remote.html#a3695b4762e16bd621444ae3460e50cbe" title=" " alt="" coords="5,49,195,89"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="229,73,195,73,195,67,229,68"/>
+<area shape="rect" id="Node000008" href="$classc___input_f_p_p_remote.html#a443df599d56a819b87102cefe5d45cd3" title="Call from loop(), renders Input data." alt="" coords="5,113,195,139"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="227,127,195,127,195,122,227,121"/>
+<area shape="poly" id="edge10_Node000009_Node000004" title=" " alt="" coords="775,117,668,90,669,85,776,112"/>
+</map>

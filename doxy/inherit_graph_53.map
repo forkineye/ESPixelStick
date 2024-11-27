@@ -1,0 +1,19 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$classfsm___wi_fi__state.html" title=" " alt="" coords="5,199,118,224"/>
+<area shape="rect" id="Node000001" href="$classfsm___wi_fi__state___boot.html" title=" " alt="" coords="202,5,348,31"/>
+<area shape="poly" id="edge30_Node000000_Node000001" title=" " alt="" coords="69,183,83,150,103,111,130,72,164,40,200,23,202,28,167,44,134,76,107,114,88,152,74,185"/>
+<area shape="rect" id="Node000002" href="$classfsm___wi_fi__state___connected_to_a_p.html" title=" " alt="" coords="168,55,382,80"/>
+<area shape="poly" id="edge31_Node000000_Node000002" title=" " alt="" coords="76,184,112,136,137,111,164,91,191,78,193,83,167,95,140,115,116,139,81,187"/>
+<area shape="rect" id="Node000003" href="$classfsm___wi_fi__state___connected_to_sta.html" title=" " alt="" coords="184,105,366,145"/>
+<area shape="poly" id="edge32_Node000000_Node000003" title=" " alt="" coords="97,188,165,154,195,143,197,148,167,159,99,193"/>
+<area shape="rect" id="Node000004" href="$classfsm___wi_fi__state___connecting_as_a_p.html" title=" " alt="" coords="166,169,384,195"/>
+<area shape="poly" id="edge33_Node000000_Node000004" title=" " alt="" coords="133,199,176,193,177,198,134,204"/>
+<area shape="rect" id="Node000005" href="$classfsm___wi_fi__state___connecting_using_config.html" title=" " alt="" coords="183,219,367,260"/>
+<area shape="poly" id="edge34_Node000000_Node000005" title=" " alt="" coords="133,218,183,225,182,230,133,223"/>
+<area shape="rect" id="Node000006" href="$classfsm___wi_fi__state___connecting_using_defaults.html" title=" " alt="" coords="183,285,367,325"/>
+<area shape="poly" id="edge35_Node000000_Node000006" title=" " alt="" coords="96,231,167,269,199,281,197,286,165,274,94,235"/>
+<area shape="rect" id="Node000007" href="$classfsm___wi_fi__state___connection_failed.html" title=" " alt="" coords="183,350,367,391"/>
+<area shape="poly" id="edge36_Node000000_Node000007" title=" " alt="" coords="80,236,116,286,140,312,167,335,190,347,188,352,164,339,136,316,112,290,75,239"/>
+<area shape="rect" id="Node000008" href="$classfsm___wi_fi__state___disabled.html" title=" " alt="" coords="190,415,360,440"/>
+<area shape="poly" id="edge37_Node000000_Node000008" title=" " alt="" coords="72,238,85,275,104,319,131,363,167,400,191,413,188,418,164,404,127,367,100,322,80,277,67,240"/>
+</map>

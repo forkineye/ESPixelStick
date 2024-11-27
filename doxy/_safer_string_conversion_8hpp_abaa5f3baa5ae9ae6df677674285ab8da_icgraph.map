@@ -1,0 +1,13 @@
+<map id="saferRgbToHtmlColorString" name="saferRgbToHtmlColorString">
+<area shape="rect" id="Node000001" title=" " alt="" coords="599,42,780,68"/>
+<area shape="rect" id="Node000002" href="$classc___input_effect_engine.html#a711dc7de895ef3f4b0b599ac2d6eaa9c" title="Get the current config used by the driver." alt="" coords="399,5,535,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="584,44,535,37,536,32,584,38"/>
+<area shape="rect" id="Node000005" href="$classc___input_alexa.html#adf1dcecdbc97eb955ad2ca3954678c80" title=" " alt="" coords="382,70,551,96"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="584,71,552,75,552,70,584,66"/>
+<area shape="rect" id="Node000003" href="$classc___input_effect_engine.html#acf078d65ad2078ad5f32afe6867284a2" title="Set a new config in the driver." alt="" coords="198,5,334,46"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="383,28,335,28,335,23,383,23"/>
+<area shape="rect" id="Node000004" href="$classfsm___play_effect__state___idle.html#ada2b3107cabbc50be21d6907e25f417c" title=" " alt="" coords="5,5,150,46"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="182,28,150,28,150,23,182,23"/>
+<area shape="rect" id="Node000006" href="$classc___input_alexa.html#a8e260d42f46f4fa70cbca61ea001dda6" title="set up the operating environment based on the current config (or defaults)" alt="" coords="198,70,334,96"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="367,86,334,86,334,80,367,80"/>
+</map>

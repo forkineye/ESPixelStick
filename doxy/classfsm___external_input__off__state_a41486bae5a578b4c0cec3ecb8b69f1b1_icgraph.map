@@ -1,0 +1,7 @@
+<map id="fsm_ExternalInput_off_state::Init" name="fsm_ExternalInput_off_state::Init">
+<area shape="rect" id="Node000001" title=" " alt="" coords="211,39,357,79"/>
+<area shape="rect" id="Node000002" href="$classfsm___external_input__boot.html#a52b7184cc84873477a840fef5ad7fbd7" title=" " alt="" coords="5,5,163,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="195,47,163,41,164,36,196,42"/>
+<area shape="rect" id="Node000003" href="$classfsm___external_input__wait__for__off__state.html#ae7caefcec18801509e5b3a493abd907a" title=" " alt="" coords="6,71,162,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="196,76,163,81,162,76,195,71"/>
+</map>

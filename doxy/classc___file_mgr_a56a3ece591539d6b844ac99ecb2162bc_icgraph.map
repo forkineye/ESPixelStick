@@ -1,0 +1,25 @@
+<map id="c_FileMgr::LoadFlashFile" name="c_FileMgr::LoadFlashFile">
+<area shape="rect" id="Node000001" title=" " alt="" coords="510,104,677,130"/>
+<area shape="rect" id="Node000002" href="$_e_s_pixel_stick_8ino.html#a3e32a397e7564d7bbd024686c107ccf1" title="Load configuration file." alt="" coords="134,153,220,179"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="516,136,463,145,330,159,220,167,220,161,330,154,462,140,515,131"/>
+<area shape="rect" id="Node000005" href="$classc___input_mgr.html#a86facb1b4291c34d64365c6171cd6802" title=" " alt="" coords="300,55,457,80"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="519,103,437,84,439,78,520,97"/>
+<area shape="rect" id="Node000008" href="$classc___output_mgr.html#a18f0345656b0c2795b7c925f6d797761" title="Read the current configuration data from nvram." alt="" coords="295,104,462,130"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="495,120,463,120,463,114,495,114"/>
+<area shape="rect" id="Node000003" href="$_e_s_pixel_stick_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,153,55,179"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="118,169,55,169,55,164,118,164"/>
+<area shape="rect" id="Node000004" href="$_e_s_pixel_stick_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,104,59,130"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="121,150,58,128,60,123,123,145"/>
+<area shape="rect" id="Node000006" href="$classc___input_mgr.html#a06a5f6adfd1e87d4d30a7fa0f78ecc33" title="&lt; Start the module" alt="" coords="114,5,240,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="308,53,232,34,233,29,309,48"/>
+<area shape="rect" id="Node000007" href="$classc___input_mgr.html#a1823b8316d8574f82bdb06ed1412f161" title="&lt; Called from loop(), renders Input data" alt="" coords="107,55,247,80"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="285,70,247,70,247,65,285,65"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="116,40,108,44,72,75,45,105,41,102,68,71,105,40,113,35"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="115,89,108,94,83,117,61,144,49,155,46,151,57,140,79,113,105,89,113,85"/>
+<area shape="rect" id="Node000009" href="$classc___output_mgr.html#a90fb3f0faa9e11adcade9b0aee1525f3" title="set up the operating environment based on the current config (or defaults)" alt="" coords="109,104,245,130"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="280,120,245,120,245,114,280,114"/>
+<area shape="rect" id="Node000010" href="$classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925" title="Call from loop(), renders output data." alt="" coords="115,203,239,228"/>
+<area shape="poly" id="edge12_Node000008_Node000010" title=" " alt="" coords="345,141,300,167,248,194,222,205,220,200,246,189,297,163,343,136"/>
+<area shape="poly" id="edge11_Node000009_Node000004" title=" " alt="" coords="93,120,59,120,59,114,93,114"/>
+<area shape="poly" id="edge13_Node000010_Node000003" title=" " alt="" coords="122,200,54,176,56,171,123,195"/>
+</map>

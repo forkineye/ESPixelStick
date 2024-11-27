@@ -1,0 +1,13 @@
+<map id="fsm_PlayFile_state" name="fsm_PlayFile_state">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,128,138,153"/>
+<area shape="rect" id="Node000002" href="$classfsm___play_file__state___error.html" title=" " alt="" coords="200,5,332,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,115,138,85,184,55,207,44,209,49,187,60,141,89,102,119"/>
+<area shape="rect" id="Node000003" href="$classfsm___play_file__state___idle.html" title=" " alt="" coords="186,70,346,96"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="132,120,219,94,221,99,133,125"/>
+<area shape="rect" id="Node000004" href="$classfsm___play_file__state___playing_file.html" title=" " alt="" coords="200,120,332,161"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="153,138,199,138,199,143,153,143"/>
+<area shape="rect" id="Node000005" href="$classfsm___play_file__state___starting.html" title=" " alt="" coords="200,185,332,226"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="127,156,204,182,202,187,125,161"/>
+<area shape="rect" id="Node000006" href="$classfsm___play_file__state___stopping.html" title=" " alt="" coords="200,251,332,291"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="98,163,138,199,187,235,210,248,208,253,184,240,135,203,95,167"/>
+</map>

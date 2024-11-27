@@ -1,0 +1,7 @@
+<map id="dsDevice" name="dsDevice">
+<area shape="rect" id="Node000001" title="Deserialize device configuration JSON to config structure &#45; returns true if config change detected." alt="" coords="5,5,81,31"/>
+<area shape="rect" id="Node000002" href="$_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d" title=" " alt="" coords="129,5,234,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,16,113,16,113,21,81,21"/>
+<area shape="rect" id="Node000003" href="$_web_mgr_8cpp.html#a47bc5f5aa91e940e6cfc297466285595" title=" " alt="" coords="282,5,364,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="234,16,267,16,267,21,234,21"/>
+</map>
