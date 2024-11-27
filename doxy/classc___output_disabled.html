@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classc___output_disabled.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,7 +89,6 @@ $(function() {
 </div>
 </div>
 
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
@@ -87,7 +107,7 @@ Inheritance diagram for c_OutputDisabled:</div>
 <area shape="rect" href="classc___output_common.html" title=" " alt="" coords="5,5,132,31"/>
 <area shape="poly" title=" " alt="" coords="71,46,71,79,66,79,66,46"/>
 </map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <div class="dynheader">
 Collaboration diagram for c_OutputDisabled:</div>
 <div class="dyncontent">
@@ -97,7 +117,7 @@ Collaboration diagram for c_OutputDisabled:</div>
 <area shape="rect" href="classc___output_common.html" title=" " alt="" coords="5,5,132,31"/>
 <area shape="poly" title=" " alt="" coords="71,46,71,79,66,79,66,46"/>
 </map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -117,7 +137,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a695fbafa0f7b5e42b9bee969854ad89b" id="r_a695fbafa0f7b5e42b9bee969854ad89b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_disabled.html#a695fbafa0f7b5e42b9bee969854ad89b">GetStatus</a> (ArduinoJson::JsonObject &amp;jsonConfig)</td></tr>
 <tr class="separator:a695fbafa0f7b5e42b9bee969854ad89b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7950c262201cc59a1356da0a3d2509fb" id="r_a7950c262201cc59a1356da0a3d2509fb"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_disabled.html#a7950c262201cc59a1356da0a3d2509fb">Poll</a> ()</td></tr>
-<tr class="memdesc:a7950c262201cc59a1356da0a3d2509fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call from <a class="el" href="_e_s_pixel_stick_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders output data.  <br /></td></tr>
+<tr class="memdesc:a7950c262201cc59a1356da0a3d2509fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call from <a class="el" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders output data.  <br /></td></tr>
 <tr class="separator:a7950c262201cc59a1356da0a3d2509fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acdb17900a1a643dc2776d475f0139b4b" id="r_acdb17900a1a643dc2776d475f0139b4b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_disabled.html#acdb17900a1a643dc2776d475f0139b4b">GetDriverName</a> (String &amp;sDriverName)</td></tr>
 <tr class="memdesc:acdb17900a1a643dc2776d475f0139b4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the name for the instantiated driver  <br /></td></tr>
@@ -462,7 +482,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Call from <a class="el" href="_e_s_pixel_stick_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders output data. </p>
+<p>Call from <a class="el" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders output data. </p>
 
 <p>Implements <a class="el" href="classc___output_common.html#ac254686a33bd04f5255a69f40a5a2788">c_OutputCommon</a>.</p>
 
@@ -499,13 +519,17 @@ Additional Inherited Members</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>/github/workspace/ESPixelStick/src/output/<a class="el" href="_output_disabled_8hpp_source.html">OutputDisabled.hpp</a></li>
-<li>/github/workspace/ESPixelStick/src/output/<a class="el" href="_output_disabled_8cpp.html">OutputDisabled.cpp</a></li>
+<li>/github/workspace/include/output/<a class="el" href="_output_disabled_8hpp_source.html">OutputDisabled.hpp</a></li>
+<li>/github/workspace/src/output/<a class="el" href="_output_disabled_8cpp.html">OutputDisabled.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classc___output_disabled.html">c_OutputDisabled</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

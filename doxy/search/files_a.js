@@ -1,6 +1,7 @@
 var searchData=
 [
-  ['saferstringconversion_2ehpp_0',['SaferStringConversion.hpp',['../_safer_string_conversion_8hpp.html',1,'']]],
-  ['sensords18b20_2ecpp_1',['SensorDS18B20.cpp',['../_sensor_d_s18_b20_8cpp.html',1,'']]],
-  ['sensords18b20_2eh_2',['SensorDS18B20.h',['../_sensor_d_s18_b20_8h.html',1,'']]]
+  ['webmgr_2ecpp_0',['WebMgr.cpp',['../_web_mgr_8cpp.html',1,'']]],
+  ['webmgr_2ehpp_1',['WebMgr.hpp',['../_web_mgr_8hpp.html',1,'']]],
+  ['wifidriver_2ecpp_2',['WiFiDriver.cpp',['../_wi_fi_driver_8cpp.html',1,'']]],
+  ['wifidriver_2ehpp_3',['WiFiDriver.hpp',['../_wi_fi_driver_8hpp.html',1,'']]]
 ];

@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classc___input_e131.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,7 +89,6 @@ $(function() {
 </div>
 </div>
 
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
@@ -91,7 +111,7 @@ Inheritance diagram for c_InputE131:</div>
 <area shape="rect" href="classc___input_common.html" title=" " alt="" coords="5,5,122,31"/>
 <area shape="poly" title=" " alt="" coords="66,46,66,79,61,79,61,46"/>
 </map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <div class="dynheader">
 Collaboration diagram for c_InputE131:</div>
 <div class="dyncontent">
@@ -103,7 +123,7 @@ Collaboration diagram for c_InputE131:</div>
 <area shape="rect" href="structc___input_e131_1_1_universe__t.html" title=" " alt="" coords="146,5,309,31"/>
 <area shape="poly" title=" " alt="" coords="207,44,158,95,154,92,204,41"/>
 </map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
@@ -128,7 +148,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a827ddca3da4e4c1dae629a7250dd4917" id="r_a827ddca3da4e4c1dae629a7250dd4917"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_e131.html#a827ddca3da4e4c1dae629a7250dd4917">GetStatus</a> (JsonObject &amp;jsonStatus)</td></tr>
 <tr class="separator:a827ddca3da4e4c1dae629a7250dd4917"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a437558e6f5fa0c69cf1f7d7c3a570102" id="r_a437558e6f5fa0c69cf1f7d7c3a570102"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_e131.html#a437558e6f5fa0c69cf1f7d7c3a570102">Process</a> ()</td></tr>
-<tr class="memdesc:a437558e6f5fa0c69cf1f7d7c3a570102"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call from <a class="el" href="_e_s_pixel_stick_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data.  <br /></td></tr>
+<tr class="memdesc:a437558e6f5fa0c69cf1f7d7c3a570102"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call from <a class="el" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data.  <br /></td></tr>
 <tr class="separator:a437558e6f5fa0c69cf1f7d7c3a570102"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab40ad7f0b7c47bfb4c51f4d2526dab9a" id="r_ab40ad7f0b7c47bfb4c51f4d2526dab9a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_e131.html#ab40ad7f0b7c47bfb4c51f4d2526dab9a">GetDriverName</a> (String &amp;sDriverName)</td></tr>
 <tr class="memdesc:ab40ad7f0b7c47bfb4c51f4d2526dab9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the name for the instantiated driver  <br /></td></tr>
@@ -320,7 +340,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="138,73,190,73,190,78,138,78"/>
 <area shape="rect" href="classc___input_e131.html#a15895b3f2f8627744022fe5466278491" title=" " alt="" coords="186,120,405,146"/>
 <area shape="poly" title=" " alt="" coords="119,86,186,105,220,113,219,118,185,110,118,91"/>
-<area shape="rect" href="_e_s_pixel_stick_8ino.html#a07c188498d1aa5b7b068c7a0e09a75f4" title=" " alt="" coords="507,63,617,88"/>
+<area shape="rect" href="main_8cpp.html#a07c188498d1aa5b7b068c7a0e09a75f4" title=" " alt="" coords="507,63,617,88"/>
 <area shape="poly" title=" " alt="" coords="386,73,491,73,491,78,386,78"/>
 <area shape="rect" href="classc___output_mgr.html#aa5fa47aab179e25649aa61acd159586d" title=" " alt="" coords="718,35,904,60"/>
 <area shape="poly" title=" " alt="" coords="617,67,703,57,703,62,617,72"/>
@@ -491,7 +511,7 @@ Here is the call graph for this function:</div>
 <area shape="rect" title=" " alt="" coords="5,27,185,68"/>
 <area shape="rect" href="classc___input_e131.html#a6098950d3be2934c5ae667a42cf9ccf1" title=" " alt="" coords="233,27,412,68"/>
 <area shape="poly" title=" " alt="" coords="185,45,217,45,217,50,185,50"/>
-<area shape="rect" href="_e_s_pixel_stick_8ino.html#a07c188498d1aa5b7b068c7a0e09a75f4" title=" " alt="" coords="460,35,570,60"/>
+<area shape="rect" href="main_8cpp.html#a07c188498d1aa5b7b068c7a0e09a75f4" title=" " alt="" coords="460,35,570,60"/>
 <area shape="poly" title=" " alt="" coords="413,45,444,45,444,50,413,50"/>
 <area shape="rect" href="classc___output_mgr.html#aa5fa47aab179e25649aa61acd159586d" title=" " alt="" coords="618,5,804,31"/>
 <area shape="poly" title=" " alt="" coords="570,37,606,31,607,37,571,42"/>
@@ -541,7 +561,7 @@ Here is the call graph for this function:</div>
 <div class="center"><img src="classc___input_e131_a6098950d3be2934c5ae667a42cf9ccf1_cgraph.png" border="0" usemap="#aclassc___input_e131_a6098950d3be2934c5ae667a42cf9ccf1_cgraph" alt=""/></div>
 <map name="aclassc___input_e131_a6098950d3be2934c5ae667a42cf9ccf1_cgraph" id="aclassc___input_e131_a6098950d3be2934c5ae667a42cf9ccf1_cgraph">
 <area shape="rect" title=" " alt="" coords="5,27,185,68"/>
-<area shape="rect" href="_e_s_pixel_stick_8ino.html#a07c188498d1aa5b7b068c7a0e09a75f4" title=" " alt="" coords="233,35,343,60"/>
+<area shape="rect" href="main_8cpp.html#a07c188498d1aa5b7b068c7a0e09a75f4" title=" " alt="" coords="233,35,343,60"/>
 <area shape="poly" title=" " alt="" coords="185,45,217,45,217,50,185,50"/>
 <area shape="rect" href="classc___output_mgr.html#aa5fa47aab179e25649aa61acd159586d" title=" " alt="" coords="391,5,576,31"/>
 <area shape="poly" title=" " alt="" coords="343,37,378,31,379,37,344,42"/>
@@ -589,7 +609,7 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p>Call from <a class="el" href="_e_s_pixel_stick_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data. </p>
+<p>Call from <a class="el" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data. </p>
 
 <p>Implements <a class="el" href="classc___input_common.html#ac30bc0d37e45246fbecb47f4b9d93f63">c_InputCommon</a>.</p>
 
@@ -670,7 +690,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="361,94,413,87,414,92,362,99"/>
 <area shape="rect" href="classc___input_e131.html#a15895b3f2f8627744022fe5466278491" title=" " alt="" coords="409,120,628,146"/>
 <area shape="poly" title=" " alt="" coords="362,110,396,115,395,120,361,116"/>
-<area shape="rect" href="_e_s_pixel_stick_8ino.html#a07c188498d1aa5b7b068c7a0e09a75f4" title=" " alt="" coords="730,63,840,88"/>
+<area shape="rect" href="main_8cpp.html#a07c188498d1aa5b7b068c7a0e09a75f4" title=" " alt="" coords="730,63,840,88"/>
 <area shape="poly" title=" " alt="" coords="609,73,714,73,714,78,609,78"/>
 <area shape="rect" href="classc___output_mgr.html#aa5fa47aab179e25649aa61acd159586d" title=" " alt="" coords="942,35,1127,60"/>
 <area shape="poly" title=" " alt="" coords="840,67,926,57,927,62,841,72"/>
@@ -749,7 +769,7 @@ Here is the call graph for this function:</div>
 <area shape="rect" title="Set a new config in the driver." alt="" coords="5,95,161,120"/>
 <area shape="rect" href="classc___input_e131.html#ab0144cfa0af7372b295f443b49265e50" title="Get the current config used by the driver." alt="" coords="240,16,397,42"/>
 <area shape="poly" title=" " alt="" coords="109,92,155,71,208,50,232,43,233,48,210,55,157,76,112,97"/>
-<area shape="rect" href="_e_s_pixel_stick_8ino.html#a07c188498d1aa5b7b068c7a0e09a75f4" title=" " alt="" coords="263,65,374,91"/>
+<area shape="rect" href="main_8cpp.html#a07c188498d1aa5b7b068c7a0e09a75f4" title=" " alt="" coords="263,65,374,91"/>
 <area shape="poly" title=" " alt="" coords="161,95,247,84,248,90,161,100"/>
 <area shape="rect" href="_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d" title=" " alt="" coords="266,119,371,144"/>
 <area shape="poly" title=" " alt="" coords="161,113,251,122,250,127,161,118"/>
@@ -1097,13 +1117,17 @@ Here is the caller graph for this function:</div>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>/github/workspace/ESPixelStick/src/input/<a class="el" href="_input_e131_8hpp_source.html">InputE131.hpp</a></li>
-<li>/github/workspace/ESPixelStick/src/input/<a class="el" href="_input_e131_8cpp.html">InputE131.cpp</a></li>
+<li>/github/workspace/include/input/<a class="el" href="_input_e131_8hpp_source.html">InputE131.hpp</a></li>
+<li>/github/workspace/src/input/<a class="el" href="_input_e131_8cpp.html">InputE131.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classc___input_e131.html">c_InputE131</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

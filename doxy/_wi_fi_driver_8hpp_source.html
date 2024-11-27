@@ -5,10 +5,14 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ESPixelStick Firmware: /github/workspace/ESPixelStick/src/network/WiFiDriver.hpp Source File</title>
+<title>ESPixelStick Firmware: /github/workspace/include/network/WiFiDriver.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('_wi_fi_driver_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_6897cfe3a3710a15d6e7e7902937574c.html">ESPixelStick</a></li><li class="navelem"><a class="el" href="dir_eee9e53857a495290c255d9ab855f283.html">src</a></li><li class="navelem"><a class="el" href="dir_26a9c132aaffc3d0bcac94afd65aac6d.html">network</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">WiFiDriver.hpp</div></div>
 </div><!--header-->
@@ -102,7 +118,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">*</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">*/</span></div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;../ESPixelStick.h&quot;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;<a class="code" href="_e_s_pixel_stick_8h.html">ESPixelStick.h</a>&quot;</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#ifdef ARDUINO_ARCH_ESP8266</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#   include &lt;ESP8266WiFi.h&gt;</span></div>
@@ -382,6 +398,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>}; <span class="comment">// fsm_WiFi_state_Disabled</span></div>
 </div>
 <div class="ttc" id="a_const_names_8cpp_html_a65dd8392aae42ccebbc0546a8d7b55ea"><div class="ttname"><a href="_const_names_8cpp.html#a65dd8392aae42ccebbc0546a8d7b55ea">CN_WiFiDrv</a></div><div class="ttdeci">const CN_PROGMEM char CN_WiFiDrv[]</div><div class="ttdef"><b>Definition</b> ConstNames.cpp:231</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html"><div class="ttname"><a href="_e_s_pixel_stick_8h.html">ESPixelStick.h</a></div></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html_a451cb6ba5f124792512fb24f05299229"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a451cb6ba5f124792512fb24f05299229">AP_TIMEOUT</a></div><div class="ttdeci">#define AP_TIMEOUT</div><div class="ttdoc">In AP mode, wait 120 seconds for a connection or reboot.</div><div class="ttdef"><b>Definition</b> ESPixelStick.h:49</div></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html_acbb5358766b3fd26fcb09271b5f8b1e3"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#acbb5358766b3fd26fcb09271b5f8b1e3">CLIENT_TIMEOUT</a></div><div class="ttdeci">#define CLIENT_TIMEOUT</div><div class="ttdoc">In station/client mode try to connection for 15 seconds.</div><div class="ttdef"><b>Definition</b> ESPixelStick.h:48</div></div>
 <div class="ttc" id="aclass_fast_timer_html"><div class="ttname"><a href="class_fast_timer.html">FastTimer</a></div><div class="ttdef"><b>Definition</b> FastTimer.hpp:24</div></div>
@@ -522,9 +539,13 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassfsm___wi_fi__state_html_ac8864302765a2c9850f2765ac65e6ad3"><div class="ttname"><a href="classfsm___wi_fi__state.html#ac8864302765a2c9850f2765ac65e6ad3">fsm_WiFi_state::Init</a></div><div class="ttdeci">virtual void Init(void)=0</div></div>
 <div class="ttc" id="aclassfsm___wi_fi__state_html_adef6b78f9ec6131aaca66637d818275b"><div class="ttname"><a href="classfsm___wi_fi__state.html#adef6b78f9ec6131aaca66637d818275b">fsm_WiFi_state::~fsm_WiFi_state</a></div><div class="ttdeci">virtual ~fsm_WiFi_state()</div><div class="ttdef"><b>Definition</b> WiFiDriver.hpp:40</div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_dafb25a37831a87d2e2e8b780f24e872.html">network</a></li><li class="navelem"><a class="el" href="_wi_fi_driver_8hpp.html">WiFiDriver.hpp</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

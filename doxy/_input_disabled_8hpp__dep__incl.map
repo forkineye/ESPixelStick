@@ -1,7 +1,7 @@
-<map id="/github/workspace/ESPixelStick/src/input/InputDisabled.hpp" name="/github/workspace/ESPixelStick/src/input/InputDisabled.hpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="116,5,328,46"/>
-<area shape="rect" id="Node000002" href="$_input_disabled_8cpp.html" title=" " alt="" coords="5,94,218,135"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,58,138,96,135,91,184,54"/>
-<area shape="rect" id="Node000003" href="$_input_mgr_8cpp.html" title=" " alt="" coords="242,94,426,135"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="261,53,310,91,307,96,258,58"/>
+<map id="/github/workspace/include/input/InputDisabled.hpp" name="/github/workspace/include/input/InputDisabled.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="89,5,261,46"/>
+<area shape="rect" id="Node000002" href="$_input_disabled_8cpp.html" title=" " alt="" coords="5,94,166,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,59,108,95,104,92,142,55"/>
+<area shape="rect" id="Node000003" href="$_input_mgr_8cpp.html" title=" " alt="" coords="190,94,339,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="208,55,246,92,242,95,204,59"/>
 </map>

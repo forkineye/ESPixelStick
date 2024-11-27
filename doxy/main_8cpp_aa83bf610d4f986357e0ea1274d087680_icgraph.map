@@ -1,0 +1,9 @@
+<map id="validateConfig" name="validateConfig">
+<area shape="rect" id="Node000001" title="Configuration Validations." alt="" coords="241,31,343,56"/>
+<area shape="rect" id="Node000002" href="$main_8cpp.html#a3e32a397e7564d7bbd024686c107ccf1" title="Load configuration file." alt="" coords="107,31,193,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="225,46,193,46,193,41,225,41"/>
+<area shape="rect" id="Node000003" href="$main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,5,55,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="91,34,54,26,55,20,92,28"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,55,59,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="92,58,60,65,59,60,91,53"/>
+</map>

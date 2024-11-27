@@ -5,10 +5,14 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ESPixelStick Firmware: /github/workspace/ESPixelStick/src/input/externalInput.h Source File</title>
+<title>ESPixelStick Firmware: /github/workspace/include/input/externalInput.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('external_input_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_6897cfe3a3710a15d6e7e7902937574c.html">ESPixelStick</a></li><li class="navelem"><a class="el" href="dir_eee9e53857a495290c255d9ab855f283.html">src</a></li><li class="navelem"><a class="el" href="dir_dcf3de4da18b68bab80178e259cd7085.html">input</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">externalInput.h</div></div>
 </div><!--header-->
@@ -86,7 +102,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">// only allow the file to be included once.</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &quot;../ESPixelStick.h&quot;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &quot;<a class="code" href="_e_s_pixel_stick_8h.html">ESPixelStick.h</a>&quot;</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">/*****************************************************************************/</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="keyword">class </span><a class="code hl_class" href="classfsm___external_input__state.html">fsm_ExternalInput_state</a>;</div>
@@ -225,6 +241,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>}; <span class="comment">// fsm_ExternalInput_wait_for_off_state</span></div>
 </div>
 <div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html"><div class="ttname"><a href="_e_s_pixel_stick_8h.html">ESPixelStick.h</a></div></div>
 <div class="ttc" id="aclass_fast_timer_html"><div class="ttname"><a href="class_fast_timer.html">FastTimer</a></div><div class="ttdef"><b>Definition</b> FastTimer.hpp:24</div></div>
 <div class="ttc" id="aclassc___external_input_html"><div class="ttname"><a href="classc___external_input.html">c_ExternalInput</a></div><div class="ttdef"><b>Definition</b> externalInput.h:10</div></div>
 <div class="ttc" id="aclassc___external_input_html_a062079f046bcc63d7075e50142c8138e"><div class="ttname"><a href="classc___external_input.html#a062079f046bcc63d7075e50142c8138e">c_ExternalInput::Poll</a></div><div class="ttdeci">void Poll(void)</div><div class="ttdef"><b>Definition</b> externalInput.cpp:112</div></div>
@@ -275,9 +292,13 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassfsm___external_input__wait__for__off__state_html_ab31e373fb1533813c3a32600a01bdfb7"><div class="ttname"><a href="classfsm___external_input__wait__for__off__state.html#ab31e373fb1533813c3a32600a01bdfb7">fsm_ExternalInput_wait_for_off_state::Init</a></div><div class="ttdeci">void Init(c_ExternalInput &amp;pExternalInput) override</div><div class="ttdef"><b>Definition</b> externalInput.cpp:274</div></div>
 <div class="ttc" id="aclassfsm___external_input__wait__for__off__state_html_ae7caefcec18801509e5b3a493abd907a"><div class="ttname"><a href="classfsm___external_input__wait__for__off__state.html#ae7caefcec18801509e5b3a493abd907a">fsm_ExternalInput_wait_for_off_state::Poll</a></div><div class="ttdeci">void Poll(c_ExternalInput &amp;pExternalInput) override</div><div class="ttdef"><b>Definition</b> externalInput.cpp:287</div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_9f5c276ab9fb4f37ad248a8f0e5ee4a1.html">input</a></li><li class="navelem"><a class="el" href="external_input_8h.html">externalInput.h</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

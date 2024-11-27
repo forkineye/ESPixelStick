@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classc___input_d_d_p.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,7 +89,6 @@ $(function() {
 </div>
 </div>
 
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
@@ -91,7 +111,7 @@ Inheritance diagram for c_InputDDP:</div>
 <area shape="rect" href="classc___input_common.html" title=" " alt="" coords="5,5,122,31"/>
 <area shape="poly" title=" " alt="" coords="66,46,66,79,61,79,61,46"/>
 </map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <div class="dynheader">
 Collaboration diagram for c_InputDDP:</div>
 <div class="dyncontent">
@@ -103,7 +123,7 @@ Collaboration diagram for c_InputDDP:</div>
 <area shape="rect" href="structc___input_d_d_p_1_1_packet_buffer__t.html" title=" " alt="" coords="145,5,329,31"/>
 <area shape="poly" title=" " alt="" coords="216,44,164,96,160,92,212,40"/>
 </map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
@@ -128,7 +148,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a566ec949bf0b2c581cf8fd796d964ebd" id="r_a566ec949bf0b2c581cf8fd796d964ebd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_d_d_p.html#a566ec949bf0b2c581cf8fd796d964ebd">GetStatus</a> (JsonObject &amp;jsonStatus)</td></tr>
 <tr class="separator:a566ec949bf0b2c581cf8fd796d964ebd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3ce4a8b28f73e04be6ae752efe285238" id="r_a3ce4a8b28f73e04be6ae752efe285238"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_d_d_p.html#a3ce4a8b28f73e04be6ae752efe285238">Process</a> ()</td></tr>
-<tr class="memdesc:a3ce4a8b28f73e04be6ae752efe285238"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call from <a class="el" href="_e_s_pixel_stick_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data.  <br /></td></tr>
+<tr class="memdesc:a3ce4a8b28f73e04be6ae752efe285238"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call from <a class="el" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data.  <br /></td></tr>
 <tr class="separator:a3ce4a8b28f73e04be6ae752efe285238"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3163cf5eae1b038b9c9595dfa5d99295" id="r_a3163cf5eae1b038b9c9595dfa5d99295"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_d_d_p.html#a3163cf5eae1b038b9c9595dfa5d99295">GetDriverName</a> (String &amp;sDriverName)</td></tr>
 <tr class="memdesc:a3163cf5eae1b038b9c9595dfa5d99295"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the name for the instantiated driver  <br /></td></tr>
@@ -654,7 +674,7 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p>Call from <a class="el" href="_e_s_pixel_stick_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data. </p>
+<p>Call from <a class="el" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data. </p>
 
 <p>Implements <a class="el" href="classc___input_common.html#ac30bc0d37e45246fbecb47f4b9d93f63">c_InputCommon</a>.</p>
 <div class="dynheader">
@@ -1119,13 +1139,17 @@ Here is the caller graph for this function:</div>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>/github/workspace/ESPixelStick/src/input/<a class="el" href="_input_d_d_p_8h_source.html">InputDDP.h</a></li>
-<li>/github/workspace/ESPixelStick/src/input/<a class="el" href="_input_d_d_p_8cpp.html">InputDDP.cpp</a></li>
+<li>/github/workspace/include/input/<a class="el" href="_input_d_d_p_8h_source.html">InputDDP.h</a></li>
+<li>/github/workspace/src/input/<a class="el" href="_input_d_d_p_8cpp.html">InputDDP.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classc___input_d_d_p.html">c_InputDDP</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

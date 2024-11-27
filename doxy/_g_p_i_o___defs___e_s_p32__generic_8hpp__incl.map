@@ -1,5 +1,5 @@
-<map id="/github/workspace/ESPixelStick/src/platformDefinitions/GPIO_Defs_ESP32_generic.hpp" name="/github/workspace/ESPixelStick/src/platformDefinitions/GPIO_Defs_ESP32_generic.hpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,218,61"/>
-<area shape="rect" id="Node000002" href="$_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o_8hpp.html" title=" " alt="" coords="24,109,199,150"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="114,62,114,94,109,94,109,62"/>
+<map id="/github/workspace/include/platforms/GPIO_Defs_ESP32_generic.hpp" name="/github/workspace/include/platforms/GPIO_Defs_ESP32_generic.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,203,61"/>
+<area shape="rect" id="Node000002" href="$_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o_8hpp.html" title=" " alt="" coords="16,109,192,150"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,62,107,94,101,94,101,62"/>
 </map>

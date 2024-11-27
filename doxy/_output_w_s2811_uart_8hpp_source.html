@@ -5,10 +5,14 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ESPixelStick Firmware: /github/workspace/ESPixelStick/src/output/OutputWS2811Uart.hpp Source File</title>
+<title>ESPixelStick Firmware: /github/workspace/include/output/OutputWS2811Uart.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('_output_w_s2811_uart_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_6897cfe3a3710a15d6e7e7902937574c.html">ESPixelStick</a></li><li class="navelem"><a class="el" href="dir_eee9e53857a495290c255d9ab855f283.html">src</a></li><li class="navelem"><a class="el" href="dir_34ec01f8a0afbb52dfd10e3bf1b322a9.html">output</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">OutputWS2811Uart.hpp</div></div>
 </div><!--header-->
@@ -106,7 +122,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">*</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">*/</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &quot;../ESPixelStick.h&quot;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &quot;<a class="code" href="_e_s_pixel_stick_8h.html">ESPixelStick.h</a>&quot;</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#if defined(SUPPORT_OutputType_WS2811)</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;<a class="code" href="_output_w_s2811_8hpp.html">OutputWS2811.hpp</a>&quot;</span></div>
@@ -129,8 +145,8 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keywordtype">bool</span>     RmtPoll () {<span class="keywordflow">return</span> <span class="keyword">false</span>;}</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#endif </span><span class="comment">// defined(ARDUINO_ARCH_ESP32)</span></div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keywordtype">void</span>    PauseOutput (<span class="keywordtype">bool</span> State);</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordtype">bool</span>    <a class="code hl_function" href="_e_s_pixel_stick_8ino.html#aaf4b39e91ed471ae190191b8f458a105">SetConfig</a> (ArduinoJson::JsonObject&amp; jsonConfig);</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="_e_s_pixel_stick_8ino.html#a653ee970a35bc7e905130d21d21abc99">GetConfig</a> (ArduinoJson::JsonObject&amp; jsonConfig);</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordtype">bool</span>    <a class="code hl_function" href="main_8cpp.html#aaf4b39e91ed471ae190191b8f458a105">SetConfig</a> (ArduinoJson::JsonObject&amp; jsonConfig);</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="main_8cpp.html#a653ee970a35bc7e905130d21d21abc99">GetConfig</a> (ArduinoJson::JsonObject&amp; jsonConfig);</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="keywordtype">void</span>    GetStatus (ArduinoJson::JsonObject&amp; jsonStatus);</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#define WS2811_NUM_DATA_BYTES_PER_INTENSITY_BYTE    4</span></div>
@@ -146,17 +162,22 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>}; <span class="comment">// c_OutputWS2811Uart</span></div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="preprocessor">#endif </span><span class="comment">// defined(SUPPORT_OutputType_WS2811)</span></div>
-<div class="ttc" id="a_e_s_pixel_stick_8ino_html_a653ee970a35bc7e905130d21d21abc99"><div class="ttname"><a href="_e_s_pixel_stick_8ino.html#a653ee970a35bc7e905130d21d21abc99">GetConfig</a></div><div class="ttdeci">void GetConfig(JsonObject &amp;json)</div><div class="ttdef"><b>Definition</b> ESPixelStick.ino:439</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8ino_html_aaf4b39e91ed471ae190191b8f458a105"><div class="ttname"><a href="_e_s_pixel_stick_8ino.html#aaf4b39e91ed471ae190191b8f458a105">SetConfig</a></div><div class="ttdeci">void SetConfig(const char *DataString)</div><div class="ttdef"><b>Definition</b> ESPixelStick.ino:285</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html"><div class="ttname"><a href="_e_s_pixel_stick_8h.html">ESPixelStick.h</a></div></div>
 <div class="ttc" id="a_output_uart_8hpp_html"><div class="ttname"><a href="_output_uart_8hpp.html">OutputUart.hpp</a></div></div>
 <div class="ttc" id="a_output_w_s2811_8hpp_html"><div class="ttname"><a href="_output_w_s2811_8hpp.html">OutputWS2811.hpp</a></div></div>
-<div class="ttc" id="aclassc___output_mgr_html_a07f4eaebe8ab66e698e06a425c31b2ff"><div class="ttname"><a href="classc___output_mgr.html#a07f4eaebe8ab66e698e06a425c31b2ff">c_OutputMgr::e_OutputChannelIds</a></div><div class="ttdeci">e_OutputChannelIds</div><div class="ttdef"><b>Definition</b> OutputMgr.hpp:68</div></div>
-<div class="ttc" id="aclassc___output_mgr_html_a161cacaceae9b3d67bad54de378fac20"><div class="ttname"><a href="classc___output_mgr.html#a161cacaceae9b3d67bad54de378fac20">c_OutputMgr::e_OutputType</a></div><div class="ttdeci">e_OutputType</div><div class="ttdef"><b>Definition</b> OutputMgr.hpp:127</div></div>
+<div class="ttc" id="aclassc___output_mgr_html_a07f4eaebe8ab66e698e06a425c31b2ff"><div class="ttname"><a href="classc___output_mgr.html#a07f4eaebe8ab66e698e06a425c31b2ff">c_OutputMgr::e_OutputChannelIds</a></div><div class="ttdeci">e_OutputChannelIds</div><div class="ttdef"><b>Definition</b> OutputMgr.hpp:67</div></div>
+<div class="ttc" id="aclassc___output_mgr_html_a161cacaceae9b3d67bad54de378fac20"><div class="ttname"><a href="classc___output_mgr.html#a161cacaceae9b3d67bad54de378fac20">c_OutputMgr::e_OutputType</a></div><div class="ttdeci">e_OutputType</div><div class="ttdef"><b>Definition</b> OutputMgr.hpp:126</div></div>
 <div class="ttc" id="aclassc___output_uart_html"><div class="ttname"><a href="classc___output_uart.html">c_OutputUart</a></div><div class="ttdef"><b>Definition</b> OutputUart.hpp:33</div></div>
+<div class="ttc" id="amain_8cpp_html_a653ee970a35bc7e905130d21d21abc99"><div class="ttname"><a href="main_8cpp.html#a653ee970a35bc7e905130d21d21abc99">GetConfig</a></div><div class="ttdeci">void GetConfig(JsonObject &amp;json)</div><div class="ttdef"><b>Definition</b> main.cpp:439</div></div>
+<div class="ttc" id="amain_8cpp_html_aaf4b39e91ed471ae190191b8f458a105"><div class="ttname"><a href="main_8cpp.html#aaf4b39e91ed471ae190191b8f458a105">SetConfig</a></div><div class="ttdeci">void SetConfig(const char *DataString)</div><div class="ttdef"><b>Definition</b> main.cpp:285</div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_28ea8e66f7bbbd0bcb5bade88239d5de.html">output</a></li><li class="navelem"><a class="el" href="_output_w_s2811_uart_8hpp.html">OutputWS2811Uart.hpp</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

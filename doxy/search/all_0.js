@@ -4,7 +4,7 @@ var searchData=
   ['_5ferror_1',['_error',['../class_e_f_update.html#a6fabab7139c4c4ab4181858583923962',1,'EFUpdate']]],
   ['_5fheader_2',['_header',['../class_e_f_update.html#a2b9c5e658b9829dc4e67821ca6a7d16d',1,'EFUpdate']]],
   ['_5floc_3',['_loc',['../class_e_f_update.html#ab70a5cf17012161cc7af407ff046f02d',1,'EFUpdate']]],
-  ['_5flogcon_4',['_logcon',['../_e_s_pixel_stick_8ino.html#a1af7f3c5a2d6b297590babbefc5c6fe8',1,'ESPixelStick.ino']]],
+  ['_5flogcon_4',['_logcon',['../main_8cpp.html#a1af7f3c5a2d6b297590babbefc5c6fe8',1,'main.cpp']]],
   ['_5fmaxsketchspace_5',['_maxSketchSpace',['../class_e_f_update.html#abbb18e4ba02b148661d37461cd70c7ef',1,'EFUpdate']]],
   ['_5frecord_6',['_record',['../class_e_f_update.html#a4a1fbf08d9ba11b042e68943f5ceb6b9',1,'EFUpdate']]],
   ['_5fstate_7',['_state',['../class_e_f_update.html#a3c6212ad0e2fdb6c37b51e189a830053',1,'EFUpdate']]]

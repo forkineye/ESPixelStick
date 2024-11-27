@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['name_0',['name',['../classc___external_input.html#a33f0e5609a4059c422f2b075ab21d16c',1,'c_ExternalInput::name'],['../structc___input_effect_engine_1_1_effect_descriptor__s.html#a844a2c9abe1e777b03c7ea73714e8d85',1,'c_InputEffectEngine::EffectDescriptor_s::name'],['../struct_input_type_xlate_map__t.html#a93006abf40948208b0f3b9443e2b0dfd',1,'InputTypeXlateMap_t::name'],['../struct_output_type_xlate_map__t.html#ab057221cbf20eb7f3effc1a61aa8ac29',1,'OutputTypeXlateMap_t::name']]],
+  ['name_0',['name',['../struct_input_type_xlate_map__t.html#a93006abf40948208b0f3b9443e2b0dfd',1,'InputTypeXlateMap_t::name'],['../struct_output_type_xlate_map__t.html#ab057221cbf20eb7f3effc1a61aa8ac29',1,'OutputTypeXlateMap_t::name'],['../classc___external_input.html#a33f0e5609a4059c422f2b075ab21d16c',1,'c_ExternalInput::name'],['../structc___input_effect_engine_1_1_effect_descriptor__s.html#a844a2c9abe1e777b03c7ea73714e8d85',1,'c_InputEffectEngine::EffectDescriptor_s::name']]],
   ['nanosecondsinamicrosecond_1',['NanoSecondsInAMicroSecond',['../_e_s_pixel_stick_8h.html#adc742cd4c34a5cf8027ad01f623d218e',1,'ESPixelStick.h']]],
   ['nanosecondsinamillisecond_2',['NanoSecondsInAMilliSecond',['../_e_s_pixel_stick_8h.html#a2bae0e6b7c8b96bd7e9c2a326e7d8333',1,'ESPixelStick.h']]],
   ['nanosecondsinasecond_3',['NanoSecondsInASecond',['../_e_s_pixel_stick_8h.html#ab73f925aed9ed21d9f3da5037e690023',1,'ESPixelStick.h']]],
@@ -12,10 +12,10 @@ var searchData=
   ['nexteffect_9',['NextEffect',['../classc___input_effect_engine.html#ad8d24a5492296d0018c7eafd7191fdef',1,'c_InputEffectEngine']]],
   ['nextpixeltosend_10',['NextPixelToSend',['../classc___output_pixel.html#a30e002d7c9680cad7d1de26088820f9f',1,'c_OutputPixel']]],
   ['nextpoll_11',['NextPoll',['../classc___wi_fi_driver.html#a079d8297ba7a37b94f47eb3ef76f46e2',1,'c_WiFiDriver']]],
-  ['no_5fconfig_5fneeded_12',['no_config_needed',['../_output_mgr_8hpp.html#a45b6758583c33d0a16c97e1389e8f155',1,'NO_CONFIG_NEEDED:&#160;OutputMgr.hpp'],['../_input_mgr_8hpp.html#a45b6758583c33d0a16c97e1389e8f155',1,'NO_CONFIG_NEEDED:&#160;InputMgr.hpp'],['../_e_s_pixel_stick_8ino.html#a45b6758583c33d0a16c97e1389e8f155',1,'NO_CONFIG_NEEDED:&#160;ESPixelStick.ino']]],
+  ['no_5fconfig_5fneeded_12',['no_config_needed',['../_output_mgr_8hpp.html#a45b6758583c33d0a16c97e1389e8f155',1,'NO_CONFIG_NEEDED:&#160;OutputMgr.hpp'],['../_input_mgr_8hpp.html#a45b6758583c33d0a16c97e1389e8f155',1,'NO_CONFIG_NEEDED:&#160;InputMgr.hpp'],['../main_8cpp.html#a45b6758583c33d0a16c97e1389e8f155',1,'NO_CONFIG_NEEDED:&#160;main.cpp']]],
   ['no_5flocalfiletoplay_13',['No_LocalFileToPlay',['../_input_f_p_p_remote_8h.html#a2be098d5f7991f7854f1b3f49dcf8845',1,'InputFPPRemote.h']]],
   ['notranslation_14',['NoTranslation',['../classc___output_uart.html#afa50de8c9fc4b848160d18576694c4b8a84e7bc8789d38d9f54c35bf95f4555a4',1,'c_OutputUart']]],
-  ['notrebootingvalue_15',['NotRebootingValue',['../_e_s_pixel_stick_8ino.html#a46e452f7ab425f93a94b6dc1d2d43998',1,'ESPixelStick.ino']]],
+  ['notrebootingvalue_15',['NotRebootingValue',['../main_8cpp.html#a46e452f7ab425f93a94b6dc1d2d43998',1,'main.cpp']]],
   ['null_5frecord_16',['NULL_RECORD',['../class_e_f_update.html#a66c9263ed88f557250172870c2b1cb81a0b39509f6c0ebaaf67a2eaf8710b3901',1,'EFUpdate']]],
   ['num_5fpackets_17',['num_packets',['../classc___input_artnet.html#a84c073defa359fe12b3d177b1c667eef',1,'c_InputArtnet::num_packets'],['../structc___input_artnet_1_1_universe__t.html#a18a61538c798e8f87ea1adbac604e8a3',1,'c_InputArtnet::Universe_t::num_packets']]],
   ['num_5fuarts_18',['NUM_UARTS',['../_output_mgr_8hpp.html#a8309e50d2ad7393eda0b9b3dccb273b0',1,'OutputMgr.hpp']]],

@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -48,6 +52,22 @@ $(function() {
 </script>
 <div id="main-nav"></div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('globals_c.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -126,8 +146,8 @@ $(function() {
 <li>CN_Dotjson&#160;:&#160;<a class="el" href="_const_names_8cpp.html#a8483f4f3713eb4eec302849298f76fce">ConstNames.cpp</a>, <a class="el" href="_const_names_8hpp.html#a8483f4f3713eb4eec302849298f76fce">ConstNames.hpp</a></li>
 <li>CN_Dotpl&#160;:&#160;<a class="el" href="_const_names_8cpp.html#a9d8443e4d32ea9f3afabf1fa4c349ebb">ConstNames.cpp</a>, <a class="el" href="_const_names_8hpp.html#a9d8443e4d32ea9f3afabf1fa4c349ebb">ConstNames.hpp</a></li>
 <li>CN_duration&#160;:&#160;<a class="el" href="_const_names_8cpp.html#ab2b60b057a383911ff14b70fd21d8112">ConstNames.cpp</a>, <a class="el" href="_const_names_8hpp.html#ab2b60b057a383911ff14b70fd21d8112">ConstNames.hpp</a></li>
-<li>CN_effect&#160;:&#160;<a class="el" href="_const_names_8cpp.html#abc840f526b636d39aeae3682a817a40c">ConstNames.cpp</a>, <a class="el" href="_const_names_8hpp.html#abc840f526b636d39aeae3682a817a40c">ConstNames.hpp</a></li>
 <li>CN_Effect&#160;:&#160;<a class="el" href="_const_names_8cpp.html#a4c952fab53f1e45f3ec2a2d558da1f67">ConstNames.cpp</a>, <a class="el" href="_const_names_8hpp.html#a4c952fab53f1e45f3ec2a2d558da1f67">ConstNames.hpp</a></li>
+<li>CN_effect&#160;:&#160;<a class="el" href="_const_names_8cpp.html#abc840f526b636d39aeae3682a817a40c">ConstNames.cpp</a>, <a class="el" href="_const_names_8hpp.html#abc840f526b636d39aeae3682a817a40c">ConstNames.hpp</a></li>
 <li>CN_effect_list&#160;:&#160;<a class="el" href="_const_names_8cpp.html#a731f45562851876cd6fc4eb50b94e75d">ConstNames.cpp</a>, <a class="el" href="_const_names_8hpp.html#a731f45562851876cd6fc4eb50b94e75d">ConstNames.hpp</a></li>
 <li>CN_EffectAllLeds&#160;:&#160;<a class="el" href="_const_names_8cpp.html#a794da9aae72ddc6c3cc3746f7f79af6a">ConstNames.cpp</a>, <a class="el" href="_const_names_8hpp.html#a794da9aae72ddc6c3cc3746f7f79af6a">ConstNames.hpp</a></li>
 <li>CN_EffectBrightness&#160;:&#160;<a class="el" href="_const_names_8hpp.html#a485643394f04b81774252fba7b1325c0">ConstNames.hpp</a>, <a class="el" href="_const_names_8cpp.html#a485643394f04b81774252fba7b1325c0">ConstNames.cpp</a></li>
@@ -291,10 +311,10 @@ $(function() {
 <li>CN_XP&#160;:&#160;<a class="el" href="_const_names_8cpp.html#a4fa40d587c962b4aef8724b1327c25e7">ConstNames.cpp</a>, <a class="el" href="_const_names_8hpp.html#a4fa40d587c962b4aef8724b1327c25e7">ConstNames.hpp</a></li>
 <li>CN_zig_size&#160;:&#160;<a class="el" href="_const_names_8cpp.html#ae02a077c7e5c206d5b9cf702197b005a">ConstNames.cpp</a>, <a class="el" href="_const_names_8hpp.html#ae02a077c7e5c206d5b9cf702197b005a">ConstNames.hpp</a></li>
 <li>compressionType&#160;:&#160;<a class="el" href="fseq_8h.html#a67006d5d0768f897b216abbf48e1f12d">fseq.h</a></li>
-<li>config&#160;:&#160;<a class="el" href="_e_s_pixel_stick_8ino.html#a25ce4b69d296fc9a3324b494542c2420">ESPixelStick.ino</a>, <a class="el" href="_e_s_pixel_stick_8h.html#a25ce4b69d296fc9a3324b494542c2420">ESPixelStick.h</a></li>
-<li>ConfigFileName&#160;:&#160;<a class="el" href="_e_s_pixel_stick_8h.html#af10a8dbb4e9867627fe5b7443940e5b0">ESPixelStick.h</a>, <a class="el" href="_e_s_pixel_stick_8ino.html#af10a8dbb4e9867627fe5b7443940e5b0">ESPixelStick.ino</a></li>
-<li>ConfigLoadNeeded&#160;:&#160;<a class="el" href="_e_s_pixel_stick_8ino.html#acdf4ed1900624d89fafc8866ad45d29f">ESPixelStick.ino</a></li>
-<li>ConfigSaveNeeded&#160;:&#160;<a class="el" href="_e_s_pixel_stick_8ino.html#ae44595345afc966d1f3de593d4c9b0f8">ESPixelStick.ino</a>, <a class="el" href="_e_s_pixel_stick_8h.html#ae44595345afc966d1f3de593d4c9b0f8">ESPixelStick.h</a></li>
+<li>config&#160;:&#160;<a class="el" href="main_8cpp.html#a25ce4b69d296fc9a3324b494542c2420">main.cpp</a>, <a class="el" href="_e_s_pixel_stick_8h.html#a25ce4b69d296fc9a3324b494542c2420">ESPixelStick.h</a></li>
+<li>ConfigFileName&#160;:&#160;<a class="el" href="_e_s_pixel_stick_8h.html#af10a8dbb4e9867627fe5b7443940e5b0">ESPixelStick.h</a>, <a class="el" href="main_8cpp.html#af10a8dbb4e9867627fe5b7443940e5b0">main.cpp</a></li>
+<li>ConfigLoadNeeded&#160;:&#160;<a class="el" href="main_8cpp.html#acdf4ed1900624d89fafc8866ad45d29f">main.cpp</a></li>
+<li>ConfigSaveNeeded&#160;:&#160;<a class="el" href="main_8cpp.html#ae44595345afc966d1f3de593d4c9b0f8">main.cpp</a>, <a class="el" href="_e_s_pixel_stick_8h.html#ae44595345afc966d1f3de593d4c9b0f8">ESPixelStick.h</a></li>
 <li>CPU_ClockTimeNS&#160;:&#160;<a class="el" href="_e_s_pixel_stick_8h.html#ab3b00ae1732177f97702f50c52d365d3">ESPixelStick.h</a></li>
 <li>CTRL_PKT_BLANK&#160;:&#160;<a class="el" href="_f_p_p_discovery_8h.html#acece02e01f4bc2e9d9a3c1f3e8fde51c">FPPDiscovery.h</a></li>
 <li>CTRL_PKT_CMD&#160;:&#160;<a class="el" href="_f_p_p_discovery_8h.html#a7ab84e3aad0ff6c16c667c10830c60dd">FPPDiscovery.h</a></li>
@@ -303,12 +323,15 @@ $(function() {
 <li>CTRL_PKT_PING&#160;:&#160;<a class="el" href="_f_p_p_discovery_8h.html#abb98c26b42ca9557a0b4e9528367ee05">FPPDiscovery.h</a></li>
 <li>CTRL_PKT_PLUGIN&#160;:&#160;<a class="el" href="_f_p_p_discovery_8h.html#a6fe35a8d9dd7ae46b869873e2206b67a">FPPDiscovery.h</a></li>
 <li>CTRL_PKT_SYNC&#160;:&#160;<a class="el" href="_f_p_p_discovery_8h.html#a8f4516815aa55ef1e2d53e11c8d9040c">FPPDiscovery.h</a></li>
-<li>CurrentConfigVersion&#160;:&#160;<a class="el" href="_e_s_pixel_stick_8ino.html#a7a9dbece103fe34ae437a90c4e517782">ESPixelStick.ino</a>, <a class="el" href="_e_s_pixel_stick_8h.html#a7a9dbece103fe34ae437a90c4e517782">ESPixelStick.h</a></li>
+<li>CurrentConfigVersion&#160;:&#160;<a class="el" href="main_8cpp.html#a7a9dbece103fe34ae437a90c4e517782">main.cpp</a>, <a class="el" href="_e_s_pixel_stick_8h.html#a7a9dbece103fe34ae437a90c4e517782">ESPixelStick.h</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classc___input_common.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,7 +89,6 @@ $(function() {
 </div>
 </div>
 
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
@@ -102,7 +122,7 @@ Inheritance diagram for c_InputCommon:</div>
 <area shape="rect" href="classc___input_m_q_t_t.html" title=" " alt="" coords="187,351,289,376"/>
 <area shape="poly" title=" " alt="" coords="80,217,116,278,141,310,171,337,189,348,187,352,168,342,137,313,111,281,75,220"/>
 </map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -123,7 +143,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af5a76f0f680384ee554a21c2b85976f1" id="r_af5a76f0f680384ee554a21c2b85976f1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_common.html#af5a76f0f680384ee554a21c2b85976f1">GetStatus</a> (JsonObject &amp;jsonStatus)=0</td></tr>
 <tr class="separator:af5a76f0f680384ee554a21c2b85976f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac30bc0d37e45246fbecb47f4b9d93f63" id="r_ac30bc0d37e45246fbecb47f4b9d93f63"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_common.html#ac30bc0d37e45246fbecb47f4b9d93f63">Process</a> ()=0</td></tr>
-<tr class="memdesc:ac30bc0d37e45246fbecb47f4b9d93f63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call from <a class="el" href="_e_s_pixel_stick_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data.  <br /></td></tr>
+<tr class="memdesc:ac30bc0d37e45246fbecb47f4b9d93f63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call from <a class="el" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data.  <br /></td></tr>
 <tr class="separator:ac30bc0d37e45246fbecb47f4b9d93f63"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a748af3e95c6f199379cdf6c95bb0f245" id="r_a748af3e95c6f199379cdf6c95bb0f245"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_common.html#a748af3e95c6f199379cdf6c95bb0f245">GetDriverName</a> (String &amp;sDriverName)=0</td></tr>
 <tr class="memdesc:a748af3e95c6f199379cdf6c95bb0f245"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the name for the instantiated driver  <br /></td></tr>
@@ -281,7 +301,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="782,208,745,212,745,206,781,203"/>
 <area shape="rect" href="classc___input_mgr.html#a3982db8dd97b38f17ec31c73e6b4940b" title=" " alt="" coords="295,155,499,180"/>
 <area shape="poly" title=" " alt="" coords="781,192,500,176,500,171,782,187"/>
-<area shape="rect" href="_e_s_pixel_stick_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,255,59,280"/>
+<area shape="rect" href="main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,255,59,280"/>
 <area shape="poly" title=" " alt="" coords="98,270,59,270,59,265,98,265"/>
 <area shape="rect" href="classc___input_mgr.html#a86facb1b4291c34d64365c6171cd6802" title=" " alt="" coords="319,205,476,231"/>
 <area shape="poly" title=" " alt="" coords="535,221,476,221,476,216,535,216"/>
@@ -289,7 +309,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="322,238,238,257,237,251,321,232"/>
 <area shape="rect" href="classc___input_mgr.html#a1823b8316d8574f82bdb06ed1412f161" title="&lt; Called from loop(), renders Input data" alt="" coords="107,205,247,231"/>
 <area shape="poly" title=" " alt="" coords="303,221,248,221,248,216,303,216"/>
-<area shape="rect" href="_e_s_pixel_stick_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,205,55,231"/>
+<area shape="rect" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,205,55,231"/>
 <area shape="poly" title=" " alt="" coords="91,221,55,221,55,216,91,216"/>
 <area shape="rect" href="classc___input_m_q_t_t.html#a18091bce67a4c82c95692bcd9366872f" title=" " alt="" coords="547,55,748,80"/>
 <area shape="poly" title=" " alt="" coords="789,70,748,70,748,65,789,65"/>
@@ -368,7 +388,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="773,70,741,70,741,65,773,65"/>
 <area shape="rect" href="classc___input_mgr.html#a3982db8dd97b38f17ec31c73e6b4940b" title=" " alt="" coords="295,104,499,130"/>
 <area shape="poly" title=" " alt="" coords="774,91,741,95,616,108,500,115,500,110,615,103,740,90,773,85"/>
-<area shape="rect" href="_e_s_pixel_stick_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,5,59,31"/>
+<area shape="rect" href="main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,5,59,31"/>
 <area shape="poly" title=" " alt="" coords="98,21,59,21,59,16,98,16"/>
 <area shape="rect" href="classc___input_mgr.html#a86facb1b4291c34d64365c6171cd6802" title=" " alt="" coords="319,55,476,80"/>
 <area shape="poly" title=" " alt="" coords="532,70,476,70,476,65,532,65"/>
@@ -376,7 +396,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="321,53,237,34,238,29,322,48"/>
 <area shape="rect" href="classc___input_mgr.html#a1823b8316d8574f82bdb06ed1412f161" title="&lt; Called from loop(), renders Input data" alt="" coords="107,55,247,80"/>
 <area shape="poly" title=" " alt="" coords="303,70,248,70,248,65,303,65"/>
-<area shape="rect" href="_e_s_pixel_stick_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,55,55,80"/>
+<area shape="rect" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,55,55,80"/>
 <area shape="poly" title=" " alt="" coords="91,70,55,70,55,65,91,65"/>
 </map>
 </div>
@@ -570,7 +590,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="773,70,741,70,741,65,773,65"/>
 <area shape="rect" href="classc___input_mgr.html#a3982db8dd97b38f17ec31c73e6b4940b" title=" " alt="" coords="295,104,499,130"/>
 <area shape="poly" title=" " alt="" coords="774,91,741,95,616,108,500,115,500,110,615,103,740,90,773,85"/>
-<area shape="rect" href="_e_s_pixel_stick_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,5,59,31"/>
+<area shape="rect" href="main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,5,59,31"/>
 <area shape="poly" title=" " alt="" coords="98,21,59,21,59,16,98,16"/>
 <area shape="rect" href="classc___input_mgr.html#a86facb1b4291c34d64365c6171cd6802" title=" " alt="" coords="319,55,476,80"/>
 <area shape="poly" title=" " alt="" coords="532,70,476,70,476,65,532,65"/>
@@ -578,7 +598,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="321,53,237,34,238,29,322,48"/>
 <area shape="rect" href="classc___input_mgr.html#a1823b8316d8574f82bdb06ed1412f161" title="&lt; Called from loop(), renders Input data" alt="" coords="107,55,247,80"/>
 <area shape="poly" title=" " alt="" coords="303,70,248,70,248,65,303,65"/>
-<area shape="rect" href="_e_s_pixel_stick_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,55,55,80"/>
+<area shape="rect" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,55,55,80"/>
 <area shape="poly" title=" " alt="" coords="91,70,55,70,55,65,91,65"/>
 </map>
 </div>
@@ -636,7 +656,7 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 
-<p>Call from <a class="el" href="_e_s_pixel_stick_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data. </p>
+<p>Call from <a class="el" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data. </p>
 
 <p>Implemented in <a class="el" href="classc___input_alexa.html#a2424f6e4c061e9437f45040d3ca5e42e">c_InputAlexa</a>, <a class="el" href="classc___input_artnet.html#a7e336e0df0e7b60981c0e59e98f2024d">c_InputArtnet</a>, <a class="el" href="classc___input_d_d_p.html#a3ce4a8b28f73e04be6ae752efe285238">c_InputDDP</a>, <a class="el" href="classc___input_disabled.html#a9c0ada21315e4c3c23240a441917b799">c_InputDisabled</a>, <a class="el" href="classc___input_e131.html#a437558e6f5fa0c69cf1f7d7c3a570102">c_InputE131</a>, <a class="el" href="classc___input_effect_engine.html#a77cbebfae3207a36a760ed4e5b439c66">c_InputEffectEngine</a>, <a class="el" href="classc___input_f_p_p_remote.html#a443df599d56a819b87102cefe5d45cd3">c_InputFPPRemote</a>, and <a class="el" href="classc___input_m_q_t_t.html#ab5dde0503d4a7eaf1efa0f254dc3fe5e">c_InputMQTT</a>.</p>
 <div class="dynheader">
@@ -729,7 +749,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="781,77,745,75,745,70,782,72"/>
 <area shape="rect" href="classc___input_mgr.html#a3982db8dd97b38f17ec31c73e6b4940b" title=" " alt="" coords="295,105,499,131"/>
 <area shape="poly" title=" " alt="" coords="782,92,748,95,500,114,500,109,747,90,781,87"/>
-<area shape="rect" href="_e_s_pixel_stick_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,5,59,31"/>
+<area shape="rect" href="main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,5,59,31"/>
 <area shape="poly" title=" " alt="" coords="98,21,59,21,59,16,98,16"/>
 <area shape="rect" href="classc___input_mgr.html#a86facb1b4291c34d64365c6171cd6802" title=" " alt="" coords="319,55,476,80"/>
 <area shape="poly" title=" " alt="" coords="535,70,476,70,476,65,535,65"/>
@@ -737,7 +757,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="321,53,237,34,238,29,322,48"/>
 <area shape="rect" href="classc___input_mgr.html#a1823b8316d8574f82bdb06ed1412f161" title="&lt; Called from loop(), renders Input data" alt="" coords="107,55,247,80"/>
 <area shape="poly" title=" " alt="" coords="303,70,248,70,248,65,303,65"/>
-<area shape="rect" href="_e_s_pixel_stick_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,55,55,80"/>
+<area shape="rect" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,55,55,80"/>
 <area shape="poly" title=" " alt="" coords="91,70,55,70,55,65,91,65"/>
 <area shape="rect" href="classc___input_m_q_t_t.html#a18091bce67a4c82c95692bcd9366872f" title=" " alt="" coords="547,156,748,182"/>
 <area shape="poly" title=" " alt="" coords="790,159,748,163,748,157,789,154"/>
@@ -971,13 +991,17 @@ Here is the caller graph for this function:</div>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>/github/workspace/ESPixelStick/src/input/<a class="el" href="_input_common_8hpp_source.html">InputCommon.hpp</a></li>
-<li>/github/workspace/ESPixelStick/src/input/<a class="el" href="_input_common_8cpp.html">InputCommon.cpp</a></li>
+<li>/github/workspace/include/input/<a class="el" href="_input_common_8hpp_source.html">InputCommon.hpp</a></li>
+<li>/github/workspace/src/input/<a class="el" href="_input_common_8cpp.html">InputCommon.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classc___input_common.html">c_InputCommon</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

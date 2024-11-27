@@ -1,5 +1,5 @@
-<map id="/github/workspace/ESPixelStick/src/platformDefinitions/GPIO_Defs_ESP32_WT32ETH01_Wasatch.hpp" name="/github/workspace/ESPixelStick/src/platformDefinitions/GPIO_Defs_ESP32_WT32ETH01_Wasatch.hpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,226,76"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="87,124,144,150"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="118,76,118,108,113,108,113,76"/>
+<map id="/github/workspace/include/platforms/GPIO_Defs_ESP32_WT32ETH01_Wasatch.hpp" name="/github/workspace/include/platforms/GPIO_Defs_ESP32_WT32ETH01_Wasatch.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,203,61"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="75,109,133,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,61,107,93,101,93,101,61"/>
 </map>

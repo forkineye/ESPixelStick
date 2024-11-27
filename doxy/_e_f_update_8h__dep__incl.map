@@ -1,25 +1,25 @@
-<map id="/github/workspace/ESPixelStick/src/EFUpdate.h" name="/github/workspace/ESPixelStick/src/EFUpdate.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="188,5,364,46"/>
-<area shape="rect" id="Node000002" href="$_e_s_pixel_stick_8ino.html" title=" " alt="" coords="5,183,182,223"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,57,178,96,138,141,108,184,103,181,133,138,174,92,227,52"/>
-<area shape="rect" id="Node000003" href="$_e_f_update_8cpp.html" title=" " alt="" coords="188,94,364,135"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="279,62,279,94,274,94,274,62"/>
-<area shape="rect" id="Node000004" href="$_web_mgr_8hpp.html" title=" " alt="" coords="397,94,574,135"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="339,50,439,91,437,96,337,55"/>
-<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="383,141,183,185,182,180,382,136"/>
-<area shape="rect" id="Node000005" href="$_web_mgr_8cpp.html" title=" " alt="" coords="205,183,382,223"/>
-<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="429,144,338,185,336,180,427,139"/>
-<area shape="rect" id="Node000006" href="$_input_alexa_8h.html" title=" " alt="" coords="406,183,586,223"/>
-<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="492,150,496,182,491,183,487,151"/>
-<area shape="rect" id="Node000009" href="$_input_f_p_p_remote_8h.html" title=" " alt="" coords="611,183,830,223"/>
-<area shape="poly" id="edge9_Node000004_Node000009" title=" " alt="" coords="554,138,668,180,666,185,552,143"/>
-<area shape="rect" id="Node000011" href="$_network_mgr_8cpp.html" title=" " alt="" coords="854,183,1077,223"/>
-<area shape="poly" id="edge12_Node000004_Node000011" title=" " alt="" coords="589,132,856,179,855,185,588,137"/>
-<area shape="rect" id="Node000007" href="$_input_alexa_8cpp.html" title=" " alt="" coords="292,271,487,312"/>
-<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="462,235,415,273,412,269,459,231"/>
-<area shape="rect" id="Node000008" href="$_input_mgr_8cpp.html" title=" " alt="" coords="511,271,695,312"/>
-<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="534,231,580,269,577,273,530,235"/>
-<area shape="poly" id="edge11_Node000009_Node000008" title=" " alt="" coords="683,235,631,273,628,269,680,230"/>
-<area shape="rect" id="Node000010" href="$_input_f_p_p_remote_8cpp.html" title=" " alt="" coords="720,271,953,312"/>
-<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="760,231,812,269,808,273,757,235"/>
+<map id="/github/workspace/include/EFUpdate.h" name="/github/workspace/include/EFUpdate.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="750,5,922,46"/>
+<area shape="rect" id="Node000002" href="$_web_mgr_8hpp.html" title=" " alt="" coords="550,94,722,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="778,55,683,96,680,91,776,50"/>
+<area shape="rect" id="Node000009" href="$main_8cpp.html" title=" " alt="" coords="837,183,987,223"/>
+<area shape="poly" id="edge12_Node000001_Node000009" title=" " alt="" coords="843,61,851,97,864,134,879,159,896,181,892,184,875,162,859,136,846,98,838,62"/>
+<area shape="rect" id="Node000011" href="$_e_f_update_8cpp.html" title=" " alt="" coords="873,94,1023,135"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="875,53,924,91,921,96,872,58"/>
+<area shape="rect" id="Node000003" href="$_input_alexa_8h.html" title=" " alt="" coords="77,183,249,223"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="535,136,260,185,250,187,249,182,260,180,534,131"/>
+<area shape="rect" id="Node000006" href="$_input_f_p_p_remote_8h.html" title=" " alt="" coords="273,183,445,223"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="559,142,422,185,421,180,558,137"/>
+<area shape="rect" id="Node000008" href="$_web_mgr_8cpp.html" title=" " alt="" coords="469,183,619,223"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="606,147,567,184,563,180,602,143"/>
+<area shape="poly" id="edge9_Node000002_Node000009" title=" " alt="" coords="714,137,850,180,849,185,712,142"/>
+<area shape="rect" id="Node000010" href="$_network_mgr_8cpp.html" title=" " alt="" coords="643,183,813,223"/>
+<area shape="poly" id="edge10_Node000002_Node000010" title=" " alt="" coords="670,143,709,180,705,184,666,147"/>
+<area shape="rect" id="Node000004" href="$_input_alexa_8cpp.html" title=" " alt="" coords="5,271,155,312"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="135,237,101,273,97,269,131,233"/>
+<area shape="rect" id="Node000005" href="$_input_mgr_8cpp.html" title=" " alt="" coords="179,271,328,312"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="196,232,235,269,231,273,192,236"/>
+<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="325,235,279,273,275,269,321,231"/>
+<area shape="rect" id="Node000007" href="$_input_f_p_p_remote_8cpp.html" title=" " alt="" coords="352,271,533,312"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="390,233,426,269,422,273,387,237"/>
 </map>

@@ -1,5 +1,5 @@
-<map id="/github/workspace/ESPixelStick/src/platformDefinitions/GPIO_Defs_ESP32_D1_MINI_ETH.hpp" name="/github/workspace/ESPixelStick/src/platformDefinitions/GPIO_Defs_ESP32_D1_MINI_ETH.hpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,261,61"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="104,109,162,135"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,61,136,93,130,93,130,61"/>
+<map id="/github/workspace/include/platforms/GPIO_Defs_ESP32_D1_MINI_ETH.hpp" name="/github/workspace/include/platforms/GPIO_Defs_ESP32_D1_MINI_ETH.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,203,61"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="75,109,133,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,61,107,93,101,93,101,61"/>
 </map>

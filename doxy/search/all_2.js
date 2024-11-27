@@ -16,7 +16,7 @@ var searchData=
   ['bufferisavailable_13',['BufferIsAvailable',['../classc___input_d_d_p.html#a2b843993182f3c31a98d3b0300fa6d53ac34c83c60be5b54785dd9e57a2c8a231',1,'c_InputDDP']]],
   ['bufferisbeingprocessed_14',['BufferIsBeingProcessed',['../classc___input_d_d_p.html#a2b843993182f3c31a98d3b0300fa6d53a1228841766f57725e2f5457368d7aa6a',1,'c_InputDDP']]],
   ['bufferisfilled_15',['BufferIsFilled',['../classc___input_d_d_p.html#a2b843993182f3c31a98d3b0300fa6d53a5bc4ac602ab2a4bbe7df55f694d9f05d',1,'c_InputDDP']]],
-  ['build_5fdate_16',['build_date',['../_e_s_pixel_stick_8ino.html#a0e2463c67702bd0a35c61f2e684dc284',1,'BUILD_DATE:&#160;ESPixelStick.ino'],['../_const_names_8hpp.html#a0e2463c67702bd0a35c61f2e684dc284',1,'BUILD_DATE:&#160;ESPixelStick.ino']]],
+  ['build_5fdate_16',['build_date',['../main_8cpp.html#a0e2463c67702bd0a35c61f2e684dc284',1,'BUILD_DATE:&#160;main.cpp'],['../_const_names_8hpp.html#a0e2463c67702bd0a35c61f2e684dc284',1,'BUILD_DATE:&#160;main.cpp']]],
   ['buildfseqlist_17',['BuildFseqList',['../classc___file_mgr.html#a3ad285b74b19569d52a9ed3732b6cb28',1,'c_FileMgr']]],
   ['buildfseqresponse_18',['BuildFseqResponse',['../classc___f_p_p_discovery.html#aebf914d165d32003ef1c96b38ba2be51',1,'c_FPPDiscovery']]],
   ['buildingnewconfig_19',['BuildingNewConfig',['../classc___output_mgr.html#a7b94e1a3bb3211dea24dbaf74caf6bcf',1,'c_OutputMgr']]],

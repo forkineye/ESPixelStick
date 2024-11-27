@@ -1,0 +1,8 @@
+<map id="SetConfig" name="SetConfig">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,83,80"/>
+<area shape="rect" id="Node000002" href="$classc___file_mgr.html#a91d8ba978954c06f5448afb5c75f34b4" title=" " alt="" coords="131,29,298,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,59,115,54,116,60,83,64"/>
+<area shape="rect" id="Node000003" href="$main_8cpp.html#a23c1f5f645fafe9824320be65b1ae241" title=" " alt="" coords="144,79,285,104"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="83,70,129,77,129,82,83,76"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="185,30,180,21,183,11,195,5,214,3,235,5,246,12,243,16,233,10,214,8,197,10,187,15,185,20,190,28"/>
+</map>

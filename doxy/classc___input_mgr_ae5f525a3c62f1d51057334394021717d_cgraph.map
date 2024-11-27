@@ -1,13 +1,14 @@
 <map id="c_InputMgr::FindJsonChannelConfig" name="c_InputMgr::FindJsonChannelConfig">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,198,76"/>
-<area shape="rect" id="Node000002" href="$_web_mgr_8cpp.html#a47bc5f5aa91e940e6cfc297466285595" title=" " alt="" coords="663,43,746,68"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="182,32,245,21,349,9,431,3,513,6,616,21,661,34,660,39,615,26,512,12,431,9,350,14,246,26,182,37"/>
-<area shape="rect" id="Node000003" href="$classc___external_input.html#ade8595d667e193c7eda9ee516b85bb88" title=" " alt="" coords="246,35,410,76"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="198,53,230,53,230,58,198,58"/>
-<area shape="rect" id="Node000005" href="$_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d" title=" " alt="" coords="484,100,589,126"/>
-<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="188,74,246,85,364,99,469,107,469,112,363,104,245,90,187,79"/>
-<area shape="rect" id="Node000004" href="$classfsm___external_input__boot.html#a0335b6f4d497ac2ee19de76678625c52" title=" " alt="" coords="458,35,615,76"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="411,53,442,53,442,58,411,58"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="405,74,473,93,472,98,403,79"/>
-<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="579,97,614,85,652,71,654,76,616,90,581,102"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,198,96"/>
+<area shape="rect" id="Node000002" href="$_web_mgr_8cpp.html#a9ff9121bc3b70ed36279c307fdcde0ca" title=" " alt="" coords="287,5,369,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,52,271,30,272,35,185,57"/>
+<area shape="rect" id="Node000003" href="$classc___external_input.html#ade8595d667e193c7eda9ee516b85bb88" title=" " alt="" coords="246,55,410,96"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="198,73,230,73,230,78,198,78"/>
+<area shape="rect" id="Node000005" href="$_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d" title=" " alt="" coords="484,120,589,146"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="188,94,246,105,364,119,469,127,469,132,363,124,245,110,187,99"/>
+<area shape="rect" id="Node000004" href="$classfsm___external_input__boot.html#a0335b6f4d497ac2ee19de76678625c52" title=" " alt="" coords="458,55,615,96"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="411,73,442,73,442,78,411,78"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="405,94,473,113,472,118,403,99"/>
+<area shape="rect" id="Node000006" href="$_web_mgr_8cpp.html#a47bc5f5aa91e940e6cfc297466285595" title=" " alt="" coords="663,120,746,146"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="590,130,648,130,648,136,590,136"/>
 </map>

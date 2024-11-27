@@ -4,7 +4,7 @@
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,173,251,142,404,113,538,96,660,86,660,92,538,102,404,118,252,148,126,178"/>
 <area shape="rect" id="Node000006" href="$classc___output_mgr.html#a18f0345656b0c2795b7c925f6d797761" title="Read the current configuration data from nvram." alt="" coords="189,176,356,202"/>
 <area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="141,186,173,186,173,192,141,192"/>
-<area shape="rect" id="Node000013" href="$_e_s_pixel_stick_8ino.html#a07c188498d1aa5b7b068c7a0e09a75f4" title=" " alt="" coords="451,227,561,252"/>
+<area shape="rect" id="Node000013" href="$main_8cpp.html#a07c188498d1aa5b7b068c7a0e09a75f4" title=" " alt="" coords="451,227,561,252"/>
 <area shape="poly" id="edge17_Node000001_Node000013" title=" " alt="" coords="128,200,189,212,319,226,435,234,435,239,319,232,188,217,127,205"/>
 <area shape="rect" id="Node000003" href="$classc___output_common.html#a23ef97415464d74fe780256b6680bfb1" title="set up the operating environment based on the current config (or defaults)" alt="" coords="936,5,1102,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="831,60,907,40,937,32,939,38,908,45,832,65"/>

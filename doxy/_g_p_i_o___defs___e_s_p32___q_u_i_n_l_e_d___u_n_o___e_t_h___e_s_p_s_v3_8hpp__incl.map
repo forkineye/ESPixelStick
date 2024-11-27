@@ -1,5 +1,5 @@
-<map id="/github/workspace/ESPixelStick/src/platformDefinitions/GPIO_Defs_ESP32_QUINLED_UNO_ETH_ESPSV3.hpp" name="/github/workspace/ESPixelStick/src/platformDefinitions/GPIO_Defs_ESP32_QUINLED_UNO_ETH_ESPSV3.hpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,248,76"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="98,124,155,150"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,76,129,108,124,108,124,76"/>
+<map id="/github/workspace/include/platforms/GPIO_Defs_ESP32_QUINLED_UNO_ETH_ESPSV3.hpp" name="/github/workspace/include/platforms/GPIO_Defs_ESP32_QUINLED_UNO_ETH_ESPSV3.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,245,61"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="96,109,154,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="128,61,128,93,122,93,122,61"/>
 </map>

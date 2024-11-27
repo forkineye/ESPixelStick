@@ -1,5 +1,5 @@
 <map id="c_InputMgr::Begin" name="c_InputMgr::Begin">
 <area shape="rect" id="Node000001" title="&lt; Start the module" alt="" coords="107,5,232,31"/>
-<area shape="rect" id="Node000002" href="$_e_s_pixel_stick_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,5,59,31"/>
+<area shape="rect" id="Node000002" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,5,59,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,21,59,21,59,16,91,16"/>
 </map>

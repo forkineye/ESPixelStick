@@ -1,7 +1,7 @@
-<map id="/github/workspace/ESPixelStick/src/FileMgr.cpp" name="/github/workspace/ESPixelStick/src/FileMgr.cpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="285,5,461,46"/>
+<map id="/github/workspace/src/FileMgr.cpp" name="/github/workspace/src/FileMgr.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="298,5,448,46"/>
 <area shape="rect" id="Node000002" href="$_e_s_pixel_stick_8h.html" title=" " alt="" coords="370,241,477,267"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="285,43,241,63,222,78,206,95,203,106,206,119,220,160,231,175,248,191,273,208,300,221,356,239,354,244,298,226,270,213,245,195,227,179,215,162,201,120,197,106,201,93,218,74,238,59,283,39"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="299,40,247,60,224,75,206,95,203,106,206,119,220,160,231,175,248,191,273,208,300,221,356,239,354,244,298,226,270,213,245,195,227,179,215,162,201,120,197,106,201,93,221,71,245,55,297,35"/>
 <area shape="rect" id="Node000010" title=" " alt="" coords="215,94,309,120"/>
 <area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="347,49,293,87,290,82,344,44"/>
 <area shape="rect" id="Node000011" title=" " alt="" coords="334,94,412,120"/>

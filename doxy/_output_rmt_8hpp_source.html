@@ -5,10 +5,14 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ESPixelStick Firmware: /github/workspace/ESPixelStick/src/output/OutputRmt.hpp Source File</title>
+<title>ESPixelStick Firmware: /github/workspace/include/output/OutputRmt.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('_output_rmt_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_6897cfe3a3710a15d6e7e7902937574c.html">ESPixelStick</a></li><li class="navelem"><a class="el" href="dir_eee9e53857a495290c255d9ab855f283.html">src</a></li><li class="navelem"><a class="el" href="dir_34ec01f8a0afbb52dfd10e3bf1b322a9.html">output</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">OutputRmt.hpp</div></div>
 </div><!--header-->
@@ -102,7 +118,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">*</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">*/</span></div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;../ESPixelStick.h&quot;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;<a class="code" href="_e_s_pixel_stick_8h.html">ESPixelStick.h</a>&quot;</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#ifdef ARDUINO_ARCH_ESP32</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;driver/rmt.h&gt;</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;<a class="code" href="_output_pixel_8hpp.html">OutputPixel.hpp</a>&quot;</span></div>
@@ -211,14 +227,14 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    c_OutputRmt ();</div>
 <div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="keyword">virtual</span> ~c_OutputRmt ();</div>
 <div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="keywordtype">void</span> Begin                                  (OutputRmtConfig_t <a class="code hl_variable" href="_e_s_pixel_stick_8ino.html#a25ce4b69d296fc9a3324b494542c2420">config</a>, <a class="code hl_class" href="classc___output_common.html">c_OutputCommon</a> * pParent);</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="keywordtype">void</span> Begin                                  (OutputRmtConfig_t <a class="code hl_variable" href="main_8cpp.html#a25ce4b69d296fc9a3324b494542c2420">config</a>, <a class="code hl_class" href="classc___output_common.html">c_OutputCommon</a> * pParent);</div>
 <div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="keywordtype">bool</span> StartNewFrame                          ();</div>
 <div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="keywordtype">bool</span> StartNextFrame                         () { <span class="keywordflow">return</span> (pParent) ? pParent-&gt;RmtPoll() : <span class="keyword">false</span>; }</div>
 <div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="keywordtype">void</span> GetStatus                              (ArduinoJson::JsonObject&amp; jsonStatus);</div>
 <div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    <span class="keywordtype">void</span> set_pin                                (gpio_num_t _DataPin) { OutputRmtConfig.DataPin = _DataPin; rmt_set_gpio (OutputRmtConfig.RmtChannelId, rmt_mode_t::RMT_MODE_TX, OutputRmtConfig.DataPin, <span class="keyword">false</span>); }</div>
 <div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    <span class="keywordtype">void</span> PauseOutput                            (<span class="keywordtype">bool</span> State);</div>
 <div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    <span class="keyword">inline</span> uint32_t IRAM_ATTR GetRmtIntMask     ()               { <span class="keywordflow">return</span> ((RMT_INT_TX_END_BIT | RMT_INT_ERROR_BIT | RMT_INT_ERROR_BIT)); }</div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="_e_s_pixel_stick_8ino.html#a4d11f89c2bddb3507fe402ff80136079">GetDriverName</a>                          (String &amp;value)  { value = <a class="code hl_variable" href="_const_names_8cpp.html#aa6d8be52e05af7a9ec25d2885dac6550">CN_RMT</a>; }</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="main_8cpp.html#a4d11f89c2bddb3507fe402ff80136079">GetDriverName</a>                          (String &amp;value)  { value = <a class="code hl_variable" href="_const_names_8cpp.html#aa6d8be52e05af7a9ec25d2885dac6550">CN_RMT</a>; }</div>
 <div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
 <div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span><span class="preprocessor">#define RMT_ISR_BITS         (RMT_INT_TX_END_BIT | RMT_INT_THR_EVNT_BIT)</span></div>
 <div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span><span class="preprocessor">#define DisableRmtInterrupts RMT.int_ena.val &amp;= ~(RMT_ISR_BITS)</span></div>
@@ -277,16 +293,21 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>};</div>
 <div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span><span class="preprocessor">#endif </span><span class="comment">// def #ifdef ARDUINO_ARCH_ESP32</span></div>
 <div class="ttc" id="a_const_names_8cpp_html_aa6d8be52e05af7a9ec25d2885dac6550"><div class="ttname"><a href="_const_names_8cpp.html#aa6d8be52e05af7a9ec25d2885dac6550">CN_RMT</a></div><div class="ttdeci">const CN_PROGMEM char CN_RMT[]</div><div class="ttdef"><b>Definition</b> ConstNames.cpp:176</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8ino_html_a25ce4b69d296fc9a3324b494542c2420"><div class="ttname"><a href="_e_s_pixel_stick_8ino.html#a25ce4b69d296fc9a3324b494542c2420">config</a></div><div class="ttdeci">config_t config</div><div class="ttdef"><b>Definition</b> ESPixelStick.ino:93</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8ino_html_a4d11f89c2bddb3507fe402ff80136079"><div class="ttname"><a href="_e_s_pixel_stick_8ino.html#a4d11f89c2bddb3507fe402ff80136079">GetDriverName</a></div><div class="ttdeci">void GetDriverName(String &amp;Name)</div><div class="ttdef"><b>Definition</b> ESPixelStick.ino:115</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html"><div class="ttname"><a href="_e_s_pixel_stick_8h.html">ESPixelStick.h</a></div></div>
 <div class="ttc" id="a_output_pixel_8hpp_html"><div class="ttname"><a href="_output_pixel_8hpp.html">OutputPixel.hpp</a></div></div>
 <div class="ttc" id="a_output_serial_8hpp_html"><div class="ttname"><a href="_output_serial_8hpp.html">OutputSerial.hpp</a></div></div>
 <div class="ttc" id="aclassc___output_common_html"><div class="ttname"><a href="classc___output_common.html">c_OutputCommon</a></div><div class="ttdef"><b>Definition</b> OutputCommon.hpp:31</div></div>
 <div class="ttc" id="aclassc___output_pixel_html"><div class="ttname"><a href="classc___output_pixel.html">c_OutputPixel</a></div><div class="ttdef"><b>Definition</b> OutputPixel.hpp:28</div></div>
+<div class="ttc" id="amain_8cpp_html_a25ce4b69d296fc9a3324b494542c2420"><div class="ttname"><a href="main_8cpp.html#a25ce4b69d296fc9a3324b494542c2420">config</a></div><div class="ttdeci">config_t config</div><div class="ttdef"><b>Definition</b> main.cpp:93</div></div>
+<div class="ttc" id="amain_8cpp_html_a4d11f89c2bddb3507fe402ff80136079"><div class="ttname"><a href="main_8cpp.html#a4d11f89c2bddb3507fe402ff80136079">GetDriverName</a></div><div class="ttdeci">void GetDriverName(String &amp;Name)</div><div class="ttdef"><b>Definition</b> main.cpp:115</div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_28ea8e66f7bbbd0bcb5bade88239d5de.html">output</a></li><li class="navelem"><a class="el" href="_output_rmt_8hpp.html">OutputRmt.hpp</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

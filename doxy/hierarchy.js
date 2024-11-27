@@ -1,0 +1,105 @@
+var hierarchy =
+[
+    [ "c_ExternalInput", "classc___external_input.html", null ],
+    [ "c_FileMgr", "classc___file_mgr.html", null ],
+    [ "c_FPPDiscovery", "classc___f_p_p_discovery.html", null ],
+    [ "c_InputCommon", "classc___input_common.html", [
+      [ "c_InputAlexa", "classc___input_alexa.html", null ],
+      [ "c_InputArtnet", "classc___input_artnet.html", null ],
+      [ "c_InputDDP", "classc___input_d_d_p.html", null ],
+      [ "c_InputDisabled", "classc___input_disabled.html", null ],
+      [ "c_InputE131", "classc___input_e131.html", null ],
+      [ "c_InputEffectEngine", "classc___input_effect_engine.html", null ],
+      [ "c_InputFPPRemote", "classc___input_f_p_p_remote.html", null ],
+      [ "c_InputMQTT", "classc___input_m_q_t_t.html", null ]
+    ] ],
+    [ "c_InputFPPRemotePlayItem", "classc___input_f_p_p_remote_play_item.html", [
+      [ "c_InputFPPRemotePlayEffect", "classc___input_f_p_p_remote_play_effect.html", null ],
+      [ "c_InputFPPRemotePlayFile", "classc___input_f_p_p_remote_play_file.html", null ],
+      [ "c_InputFPPRemotePlayList", "classc___input_f_p_p_remote_play_list.html", null ]
+    ] ],
+    [ "c_InputMgr", "classc___input_mgr.html", null ],
+    [ "c_NetworkMgr", "classc___network_mgr.html", null ],
+    [ "c_OutputCommon", "classc___output_common.html", [
+      [ "c_OutputDisabled", "classc___output_disabled.html", null ],
+      [ "c_OutputPixel", "classc___output_pixel.html", null ]
+    ] ],
+    [ "c_OutputMgr", "classc___output_mgr.html", null ],
+    [ "c_OutputUart", "classc___output_uart.html", null ],
+    [ "c_WebMgr", "classc___web_mgr.html", null ],
+    [ "c_WiFiDriver", "classc___wi_fi_driver.html", null ],
+    [ "c_OutputPixel::ColorOffsets_s", "unionc___output_pixel_1_1_color_offsets__s.html", null ],
+    [ "config_t", "structconfig__t.html", null ],
+    [ "c_OutputUart::ConvertIntensityToUartDataStreamEntry_t", "structc___output_uart_1_1_convert_intensity_to_uart_data_stream_entry__t.html", null ],
+    [ "c_InputEffectEngine::CRGB", "structc___input_effect_engine_1_1_c_r_g_b.html", null ],
+    [ "c_InputEffectEngine::dCHSV", "structc___input_effect_engine_1_1d_c_h_s_v.html", null ],
+    [ "c_InputEffectEngine::dCRGB", "structc___input_effect_engine_1_1d_c_r_g_b.html", null ],
+    [ "c_InputMgr::DriverInfo_t", "structc___input_mgr_1_1_driver_info__t.html", null ],
+    [ "c_OutputMgr::DriverInfo_t", "structc___output_mgr_1_1_driver_info__t.html", null ],
+    [ "c_InputEffectEngine::EffectDescriptor_s", "structc___input_effect_engine_1_1_effect_descriptor__s.html", null ],
+    [ "EFUpdate::efuheader_t", "union_e_f_update_1_1efuheader__t.html", null ],
+    [ "EFUpdate", "class_e_f_update.html", null ],
+    [ "EFUpdate::efurecord_t", "union_e_f_update_1_1efurecord__t.html", null ],
+    [ "FastTimer", "class_fast_timer.html", null ],
+    [ "c_FileMgr::FileListEntry_t", "structc___file_mgr_1_1_file_list_entry__t.html", null ],
+    [ "c_InputEffectEngine::FlashInfo_t", "structc___input_effect_engine_1_1_flash_info__t.html", null ],
+    [ "FPPMultiSyncPacket", "union_f_p_p_multi_sync_packet.html", null ],
+    [ "FPPPacket", "union_f_p_p_packet.html", null ],
+    [ "FPPPingPacket", "union_f_p_p_ping_packet.html", null ],
+    [ "c_InputFPPRemotePlayFile::FrameControl_t", "structc___input_f_p_p_remote_play_file_1_1_frame_control__t.html", null ],
+    [ "FSEQParsedHeader", "struct_f_s_e_q_parsed_header.html", null ],
+    [ "FSEQParsedRangeEntry", "struct_f_s_e_q_parsed_range_entry.html", null ],
+    [ "FSEQParsedVariableDataHeader", "struct_f_s_e_q_parsed_variable_data_header.html", null ],
+    [ "FSEQRawHeader", "struct_f_s_e_q_raw_header.html", null ],
+    [ "FSEQRawRangeEntry", "struct_f_s_e_q_raw_range_entry.html", null ],
+    [ "FSEQRawVariableDataHeader", "struct_f_s_e_q_raw_variable_data_header.html", null ],
+    [ "fsm_ExternalInput_state", "classfsm___external_input__state.html", [
+      [ "fsm_ExternalInput_boot", "classfsm___external_input__boot.html", null ],
+      [ "fsm_ExternalInput_off_state", "classfsm___external_input__off__state.html", null ],
+      [ "fsm_ExternalInput_on_wait_long_state", "classfsm___external_input__on__wait__long__state.html", null ],
+      [ "fsm_ExternalInput_wait_for_off_state", "classfsm___external_input__wait__for__off__state.html", null ]
+    ] ],
+    [ "fsm_PlayEffect_state", "classfsm___play_effect__state.html", [
+      [ "fsm_PlayEffect_state_Idle", "classfsm___play_effect__state___idle.html", null ],
+      [ "fsm_PlayEffect_state_PlayingEffect", "classfsm___play_effect__state___playing_effect.html", null ]
+    ] ],
+    [ "fsm_PlayFile_state", "classfsm___play_file__state.html", [
+      [ "fsm_PlayFile_state_Error", "classfsm___play_file__state___error.html", null ],
+      [ "fsm_PlayFile_state_Idle", "classfsm___play_file__state___idle.html", null ],
+      [ "fsm_PlayFile_state_PlayingFile", "classfsm___play_file__state___playing_file.html", null ],
+      [ "fsm_PlayFile_state_Starting", "classfsm___play_file__state___starting.html", null ],
+      [ "fsm_PlayFile_state_Stopping", "classfsm___play_file__state___stopping.html", null ]
+    ] ],
+    [ "fsm_PlayList_state", "classfsm___play_list__state.html", [
+      [ "fsm_PlayList_state_Idle", "classfsm___play_list__state___idle.html", null ],
+      [ "fsm_PlayList_state_Paused", "classfsm___play_list__state___paused.html", null ],
+      [ "fsm_PlayList_state_PlayingEffect", "classfsm___play_list__state___playing_effect.html", null ],
+      [ "fsm_PlayList_state_PlayingFile", "classfsm___play_list__state___playing_file.html", null ],
+      [ "fsm_PlayList_state_WaitForStart", "classfsm___play_list__state___wait_for_start.html", null ]
+    ] ],
+    [ "fsm_WiFi_state", "classfsm___wi_fi__state.html", [
+      [ "fsm_WiFi_state_Boot", "classfsm___wi_fi__state___boot.html", null ],
+      [ "fsm_WiFi_state_ConnectedToAP", "classfsm___wi_fi__state___connected_to_a_p.html", null ],
+      [ "fsm_WiFi_state_ConnectedToSta", "classfsm___wi_fi__state___connected_to_sta.html", null ],
+      [ "fsm_WiFi_state_ConnectingAsAP", "classfsm___wi_fi__state___connecting_as_a_p.html", null ],
+      [ "fsm_WiFi_state_ConnectingUsingConfig", "classfsm___wi_fi__state___connecting_using_config.html", null ],
+      [ "fsm_WiFi_state_ConnectingUsingDefaults", "classfsm___wi_fi__state___connecting_using_defaults.html", null ],
+      [ "fsm_WiFi_state_ConnectionFailed", "classfsm___wi_fi__state___connection_failed.html", null ],
+      [ "fsm_WiFi_state_Disabled", "classfsm___wi_fi__state___disabled.html", null ]
+    ] ],
+    [ "InputTypeXlateMap_t", "struct_input_type_xlate_map__t.html", null ],
+    [ "c_InputEffectEngine::MarqueeGroup", "structc___input_effect_engine_1_1_marquee_group.html", null ],
+    [ "c_InputEffectEngine::MQTTConfiguration_s", "structc___input_effect_engine_1_1_m_q_t_t_configuration__s.html", null ],
+    [ "c_FPPDiscovery::MultiSyncStats_t", "structc___f_p_p_discovery_1_1_multi_sync_stats__t.html", null ],
+    [ "c_OutputPixel::ColorOffsets_s::offsets", "structc___output_pixel_1_1_color_offsets__s_1_1offsets.html", null ],
+    [ "OutputChannelIdToGpioAndPortEntry_t", "struct_output_channel_id_to_gpio_and_port_entry__t.html", null ],
+    [ "OutputTypeXlateMap_t", "struct_output_type_xlate_map__t.html", null ],
+    [ "c_OutputUart::OutputUartConfig_t", "structc___output_uart_1_1_output_uart_config__t.html", null ],
+    [ "c_InputDDP::PacketBuffer_t", "structc___input_d_d_p_1_1_packet_buffer__t.html", null ],
+    [ "fsm_PlayFile_state_PlayingFile::SparseRange", "structfsm___play_file__state___playing_file_1_1_sparse_range.html", null ],
+    [ "c_InputFPPRemotePlayFile::SyncControl_t", "structc___input_f_p_p_remote_play_file_1_1_sync_control__t.html", null ],
+    [ "c_FPPDiscovery::SystemDebugStats_t", "structc___f_p_p_discovery_1_1_system_debug_stats__t.html", null ],
+    [ "c_InputEffectEngine::Transition_t", "structc___input_effect_engine_1_1_transition__t.html", null ],
+    [ "c_InputArtnet::Universe_t", "structc___input_artnet_1_1_universe__t.html", null ],
+    [ "c_InputE131::Universe_t", "structc___input_e131_1_1_universe__t.html", null ]
+];

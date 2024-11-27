@@ -5,10 +5,14 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ESPixelStick Firmware: /github/workspace/ESPixelStick/src/network/EthernetDriver.hpp Source File</title>
+<title>ESPixelStick Firmware: /github/workspace/include/network/EthernetDriver.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('_ethernet_driver_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_6897cfe3a3710a15d6e7e7902937574c.html">ESPixelStick</a></li><li class="navelem"><a class="el" href="dir_eee9e53857a495290c255d9ab855f283.html">src</a></li><li class="navelem"><a class="el" href="dir_26a9c132aaffc3d0bcac94afd65aac6d.html">network</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">EthernetDriver.hpp</div></div>
 </div><!--header-->
@@ -102,7 +118,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">*</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">*/</span></div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;../ESPixelStick.h&quot;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;<a class="code" href="_e_s_pixel_stick_8h.html">ESPixelStick.h</a>&quot;</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#ifdef SUPPORT_ETHERNET</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">// forward declaration</span></div>
@@ -124,7 +140,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> OnGotIp (<span class="keywordtype">void</span>) = 0;</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> OnDisconnect (<span class="keywordtype">void</span>) = 0;</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordtype">void</span> SetParent (c_EthernetDriver* parent) { pEthernetDriver = parent; }</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="_e_s_pixel_stick_8ino.html#a4d11f89c2bddb3507fe402ff80136079">GetDriverName</a> (String &amp; value) { value = <a class="code hl_variable" href="_const_names_8cpp.html#aa8197bb9603397cc3ca37c13eef1ac8e">CN_EthDrv</a>; }</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="main_8cpp.html#a4d11f89c2bddb3507fe402ff80136079">GetDriverName</a> (String &amp; value) { value = <a class="code hl_variable" href="_const_names_8cpp.html#aa8197bb9603397cc3ca37c13eef1ac8e">CN_EthDrv</a>; }</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>}; <span class="comment">// fsm_Eth_state</span></div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
@@ -135,9 +151,9 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keyword">virtual</span> ~c_EthernetDriver ();</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordtype">void</span>            Begin               (); </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordtype">void</span>            <a class="code hl_function" href="_e_s_pixel_stick_8ino.html#a653ee970a35bc7e905130d21d21abc99">GetConfig</a>           (JsonObject &amp; json);</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordtype">bool</span>            <a class="code hl_function" href="_e_s_pixel_stick_8ino.html#aaf4b39e91ed471ae190191b8f458a105">SetConfig</a>           (JsonObject &amp; json);</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordtype">void</span>            <a class="code hl_function" href="_e_s_pixel_stick_8ino.html#a4d11f89c2bddb3507fe402ff80136079">GetDriverName</a>       (String &amp; value) { value = <a class="code hl_variable" href="_const_names_8cpp.html#aa8197bb9603397cc3ca37c13eef1ac8e">CN_EthDrv</a>; }</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordtype">void</span>            <a class="code hl_function" href="main_8cpp.html#a653ee970a35bc7e905130d21d21abc99">GetConfig</a>           (JsonObject &amp; json);</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordtype">bool</span>            <a class="code hl_function" href="main_8cpp.html#aaf4b39e91ed471ae190191b8f458a105">SetConfig</a>           (JsonObject &amp; json);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordtype">void</span>            <a class="code hl_function" href="main_8cpp.html#a4d11f89c2bddb3507fe402ff80136079">GetDriverName</a>       (String &amp; value) { value = <a class="code hl_variable" href="_const_names_8cpp.html#aa8197bb9603397cc3ca37c13eef1ac8e">CN_EthDrv</a>; }</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordtype">int</span>             ValidateConfig      ();</div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    IPAddress       GetIpAddress        ();</div>
@@ -302,9 +318,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span> </div>
 <div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span><span class="preprocessor">#endif </span><span class="comment">// def SUPPORT_ETHERNET</span></div>
 <div class="ttc" id="a_const_names_8cpp_html_aa8197bb9603397cc3ca37c13eef1ac8e"><div class="ttname"><a href="_const_names_8cpp.html#aa8197bb9603397cc3ca37c13eef1ac8e">CN_EthDrv</a></div><div class="ttdeci">const CN_PROGMEM char CN_EthDrv[]</div><div class="ttdef"><b>Definition</b> ConstNames.cpp:91</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8ino_html_a4d11f89c2bddb3507fe402ff80136079"><div class="ttname"><a href="_e_s_pixel_stick_8ino.html#a4d11f89c2bddb3507fe402ff80136079">GetDriverName</a></div><div class="ttdeci">void GetDriverName(String &amp;Name)</div><div class="ttdef"><b>Definition</b> ESPixelStick.ino:115</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8ino_html_a653ee970a35bc7e905130d21d21abc99"><div class="ttname"><a href="_e_s_pixel_stick_8ino.html#a653ee970a35bc7e905130d21d21abc99">GetConfig</a></div><div class="ttdeci">void GetConfig(JsonObject &amp;json)</div><div class="ttdef"><b>Definition</b> ESPixelStick.ino:439</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8ino_html_aaf4b39e91ed471ae190191b8f458a105"><div class="ttname"><a href="_e_s_pixel_stick_8ino.html#aaf4b39e91ed471ae190191b8f458a105">SetConfig</a></div><div class="ttdeci">void SetConfig(const char *DataString)</div><div class="ttdef"><b>Definition</b> ESPixelStick.ino:285</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html"><div class="ttname"><a href="_e_s_pixel_stick_8h.html">ESPixelStick.h</a></div></div>
 <div class="ttc" id="a_g_p_i_o___defs___e_s_p32___bong69_8hpp_html_a24563fc9b3d447e20443d214a34cbb3c"><div class="ttname"><a href="_g_p_i_o___defs___e_s_p32___bong69_8hpp.html#a24563fc9b3d447e20443d214a34cbb3c">DEFAULT_ETH_POWER_PIN_ACTIVE</a></div><div class="ttdeci">#define DEFAULT_ETH_POWER_PIN_ACTIVE</div><div class="ttdef"><b>Definition</b> GPIO_Defs_ESP32_Bong69.hpp:61</div></div>
 <div class="ttc" id="a_g_p_i_o___defs___e_s_p32___bong69_8hpp_html_a25447d1b37bd6e17ae39f91026569850"><div class="ttname"><a href="_g_p_i_o___defs___e_s_p32___bong69_8hpp.html#a25447d1b37bd6e17ae39f91026569850">DEFAULT_ETH_POWER_PIN</a></div><div class="ttdeci">#define DEFAULT_ETH_POWER_PIN</div><div class="ttdef"><b>Definition</b> GPIO_Defs_ESP32_Bong69.hpp:59</div></div>
 <div class="ttc" id="a_g_p_i_o___defs___e_s_p32___bong69_8hpp_html_a319d1c078a4ace47775ecd6615a796a7"><div class="ttname"><a href="_g_p_i_o___defs___e_s_p32___bong69_8hpp.html#a319d1c078a4ace47775ecd6615a796a7">DEFAULT_ETH_CLK_MODE</a></div><div class="ttdeci">#define DEFAULT_ETH_CLK_MODE</div><div class="ttdef"><b>Definition</b> GPIO_Defs_ESP32_Bong69.hpp:56</div></div>
@@ -313,10 +327,17 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="a_g_p_i_o___defs___e_s_p32___bong69_8hpp_html_aeaea1905632a9d6e4909b54c29fb6d56"><div class="ttname"><a href="_g_p_i_o___defs___e_s_p32___bong69_8hpp.html#aeaea1905632a9d6e4909b54c29fb6d56">DEFAULT_ETH_MDC_PIN</a></div><div class="ttdeci">#define DEFAULT_ETH_MDC_PIN</div><div class="ttdef"><b>Definition</b> GPIO_Defs_ESP32_Bong69.hpp:76</div></div>
 <div class="ttc" id="a_g_p_i_o___defs___e_s_p32___bong69_8hpp_html_aeed05cdd33507563bb8551bc006bc0f1"><div class="ttname"><a href="_g_p_i_o___defs___e_s_p32___bong69_8hpp.html#aeed05cdd33507563bb8551bc006bc0f1">DEFAULT_ETH_MDIO_PIN</a></div><div class="ttdeci">#define DEFAULT_ETH_MDIO_PIN</div><div class="ttdef"><b>Definition</b> GPIO_Defs_ESP32_Bong69.hpp:77</div></div>
 <div class="ttc" id="aclass_fast_timer_html"><div class="ttname"><a href="class_fast_timer.html">FastTimer</a></div><div class="ttdef"><b>Definition</b> FastTimer.hpp:24</div></div>
+<div class="ttc" id="amain_8cpp_html_a4d11f89c2bddb3507fe402ff80136079"><div class="ttname"><a href="main_8cpp.html#a4d11f89c2bddb3507fe402ff80136079">GetDriverName</a></div><div class="ttdeci">void GetDriverName(String &amp;Name)</div><div class="ttdef"><b>Definition</b> main.cpp:115</div></div>
+<div class="ttc" id="amain_8cpp_html_a653ee970a35bc7e905130d21d21abc99"><div class="ttname"><a href="main_8cpp.html#a653ee970a35bc7e905130d21d21abc99">GetConfig</a></div><div class="ttdeci">void GetConfig(JsonObject &amp;json)</div><div class="ttdef"><b>Definition</b> main.cpp:439</div></div>
+<div class="ttc" id="amain_8cpp_html_aaf4b39e91ed471ae190191b8f458a105"><div class="ttname"><a href="main_8cpp.html#aaf4b39e91ed471ae190191b8f458a105">SetConfig</a></div><div class="ttdeci">void SetConfig(const char *DataString)</div><div class="ttdef"><b>Definition</b> main.cpp:285</div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_dafb25a37831a87d2e2e8b780f24e872.html">network</a></li><li class="navelem"><a class="el" href="_ethernet_driver_8hpp.html">EthernetDriver.hpp</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

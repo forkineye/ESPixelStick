@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classc___output_uart.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,7 +89,6 @@ $(function() {
 </div>
 </div>
 
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
@@ -101,7 +121,7 @@ Collaboration diagram for c_OutputUart:</div>
 <area shape="rect" href="structc___output_uart_1_1_convert_intensity_to_uart_data_stream_entry__t.html" title=" " alt="" coords="165,198,364,238"/>
 <area shape="poly" title=" " alt="" coords="253,254,237,279,210,303,207,299,233,276,249,251"/>
 </map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
@@ -151,7 +171,7 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a3fe22c593d1ef359a77df27a1adddc07"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a270df473ac7323c547962c340b0146bd" id="r_a270df473ac7323c547962c340b0146bd"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_uart.html#a270df473ac7323c547962c340b0146bd">~c_OutputUart</a> ()</td></tr>
 <tr class="separator:a270df473ac7323c547962c340b0146bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a53c5ab20679c0ebd73e2a13d45742115" id="r_a53c5ab20679c0ebd73e2a13d45742115"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_uart.html#a53c5ab20679c0ebd73e2a13d45742115">Begin</a> (<a class="el" href="structc___output_uart_1_1_output_uart_config__t.html">c_OutputUart::OutputUartConfig_t</a> &amp;<a class="el" href="_e_s_pixel_stick_8ino.html#a25ce4b69d296fc9a3324b494542c2420">config</a>)</td></tr>
+<tr class="memitem:a53c5ab20679c0ebd73e2a13d45742115" id="r_a53c5ab20679c0ebd73e2a13d45742115"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_uart.html#a53c5ab20679c0ebd73e2a13d45742115">Begin</a> (<a class="el" href="structc___output_uart_1_1_output_uart_config__t.html">c_OutputUart::OutputUartConfig_t</a> &amp;<a class="el" href="main_8cpp.html#a25ce4b69d296fc9a3324b494542c2420">config</a>)</td></tr>
 <tr class="separator:a53c5ab20679c0ebd73e2a13d45742115"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac46575620d6687d26468934e3146fc4d" id="r_ac46575620d6687d26468934e3146fc4d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_uart.html#ac46575620d6687d26468934e3146fc4d">SetConfig</a> (ArduinoJson::JsonObject &amp;jsonConfig)</td></tr>
 <tr class="separator:ac46575620d6687d26468934e3146fc4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -395,7 +415,7 @@ Here is the call graph for this function:</div>
 <div class="center"><img src="classc___output_uart_a53c5ab20679c0ebd73e2a13d45742115_cgraph.png" border="0" usemap="#aclassc___output_uart_a53c5ab20679c0ebd73e2a13d45742115_cgraph" alt=""/></div>
 <map name="aclassc___output_uart_a53c5ab20679c0ebd73e2a13d45742115_cgraph" id="aclassc___output_uart_a53c5ab20679c0ebd73e2a13d45742115_cgraph">
 <area shape="rect" title=" " alt="" coords="5,83,144,108"/>
-<area shape="rect" href="_e_s_pixel_stick_8ino.html#a07c188498d1aa5b7b068c7a0e09a75f4" title=" " alt="" coords="240,33,350,59"/>
+<area shape="rect" href="main_8cpp.html#a07c188498d1aa5b7b068c7a0e09a75f4" title=" " alt="" coords="240,33,350,59"/>
 <area shape="poly" title=" " alt="" coords="135,79,224,59,225,64,136,85"/>
 <area shape="rect" href="classc___output_uart.html#a75a821962da2b1f16406a637410930bd" title=" " alt="" coords="192,83,398,108"/>
 <area shape="poly" title=" " alt="" coords="144,93,176,93,176,98,144,98"/>
@@ -1925,13 +1945,17 @@ Here is the caller graph for this function:</div>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>/github/workspace/ESPixelStick/src/output/<a class="el" href="_output_uart_8hpp_source.html">OutputUart.hpp</a></li>
-<li>/github/workspace/ESPixelStick/src/output/<a class="el" href="_output_uart_8cpp.html">OutputUart.cpp</a></li>
+<li>/github/workspace/include/output/<a class="el" href="_output_uart_8hpp_source.html">OutputUart.hpp</a></li>
+<li>/github/workspace/src/output/<a class="el" href="_output_uart_8cpp.html">OutputUart.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classc___output_uart.html">c_OutputUart</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

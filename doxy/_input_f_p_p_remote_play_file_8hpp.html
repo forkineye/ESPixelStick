@@ -5,10 +5,14 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ESPixelStick Firmware: /github/workspace/ESPixelStick/src/input/InputFPPRemotePlayFile.hpp File Reference</title>
+<title>ESPixelStick Firmware: /github/workspace/include/input/InputFPPRemotePlayFile.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('_input_f_p_p_remote_play_file_8hpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,11 +89,6 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_6897cfe3a3710a15d6e7e7902937574c.html">ESPixelStick</a></li><li class="navelem"><a class="el" href="dir_eee9e53857a495290c255d9ab855f283.html">src</a></li><li class="navelem"><a class="el" href="dir_dcf3de4da18b68bab80178e259cd7085.html">input</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
@@ -80,111 +96,111 @@ $(function() {
   <div class="headertitle"><div class="title">InputFPPRemotePlayFile.hpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="_e_s_pixel_stick_8h_source.html">../ESPixelStick.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="_e_s_pixel_stick_8h_source.html">ESPixelStick.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_input_f_p_p_remote_play_item_8hpp_source.html">InputFPPRemotePlayItem.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_input_f_p_p_remote_play_file_fsm_8hpp_source.html">InputFPPRemotePlayFileFsm.hpp</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="fseq_8h_source.html">../service/fseq.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="fseq_8h_source.html">service/fseq.h</a>&quot;</code><br />
 <code>#include &lt;Ticker.h&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for InputFPPRemotePlayFile.hpp:</div>
 <div class="dyncontent">
-<div class="center"><img src="_input_f_p_p_remote_play_file_8hpp__incl.png" border="0" usemap="#a_2github_2workspace_2_e_s_pixel_stick_2src_2input_2_input_f_p_p_remote_play_file_8hpp" alt=""/></div>
-<map name="a_2github_2workspace_2_e_s_pixel_stick_2src_2input_2_input_f_p_p_remote_play_file_8hpp" id="a_2github_2workspace_2_e_s_pixel_stick_2src_2input_2_input_f_p_p_remote_play_file_8hpp">
-<area shape="rect" title=" " alt="" coords="290,5,500,61"/>
-<area shape="rect" href="_e_s_pixel_stick_8h.html" title=" " alt="" coords="418,404,535,429"/>
-<area shape="poly" title=" " alt="" coords="345,64,311,87,280,118,256,153,249,173,247,194,247,270,251,296,262,319,279,339,300,356,351,382,404,399,402,404,349,387,297,360,275,343,257,322,246,298,242,271,242,194,244,172,251,151,276,114,308,83,342,59"/>
-<area shape="rect" title=" " alt="" coords="5,477,73,503"/>
-<area shape="poly" title=" " alt="" coords="291,54,231,72,175,101,152,119,135,141,123,166,119,194,119,344,113,380,99,414,81,443,63,467,59,464,77,440,95,411,108,379,114,344,114,194,118,164,130,138,149,116,172,96,229,68,289,49"/>
-<area shape="rect" href="_input_f_p_p_remote_play_item_8hpp.html" title=" " alt="" coords="297,109,493,135"/>
-<area shape="poly" title=" " alt="" coords="398,61,398,93,392,93,392,61"/>
-<area shape="rect" href="_input_f_p_p_remote_play_file_fsm_8hpp.html" title=" " alt="" coords="789,256,1006,282"/>
-<area shape="poly" title=" " alt="" coords="443,59,580,132,728,198,853,248,851,253,726,203,578,137,440,64"/>
-<area shape="rect" href="fseq_8h.html" title=" " alt="" coords="591,109,703,135"/>
-<area shape="poly" title=" " alt="" coords="475,59,598,101,596,106,474,64"/>
-<area shape="rect" title=" " alt="" coords="383,551,458,577"/>
-<area shape="poly" title=" " alt="" coords="418,422,342,427,257,436,183,454,155,465,137,479,128,492,125,503,126,513,132,521,155,536,190,547,280,558,367,561,367,566,280,563,189,552,153,541,128,525,121,515,120,503,123,490,133,476,152,461,181,448,256,431,341,421,417,417"/>
-<area shape="poly" title=" " alt="" coords="418,428,270,450,91,480,88,481,87,475,91,475,269,445,418,423"/>
-<area shape="rect" title=" " alt="" coords="147,477,251,503"/>
-<area shape="poly" title=" " alt="" coords="430,432,261,476,260,470,429,427"/>
-<area shape="rect" href="memdebug_8h.html" title=" " alt="" coords="685,477,780,503"/>
-<area shape="poly" title=" " alt="" coords="520,427,675,470,673,475,519,432"/>
-<area shape="rect" href="_const_names_8hpp.html" title=" " alt="" coords="274,477,396,503"/>
-<area shape="poly" title=" " alt="" coords="454,432,374,472,371,468,451,427"/>
-<area shape="rect" href="_g_p_i_o___defs_8hpp.html" title=" " alt="" coords="420,477,533,503"/>
-<area shape="poly" title=" " alt="" coords="472,430,470,462,465,462,467,429"/>
-<area shape="rect" href="_fast_timer_8hpp.html" title=" " alt="" coords="556,477,661,503"/>
-<area shape="poly" title=" " alt="" coords="493,428,566,468,564,472,490,432"/>
-<area shape="poly" title=" " alt="" coords="685,505,474,553,473,548,684,500"/>
-<area shape="poly" title=" " alt="" coords="481,477,482,444,488,445,486,477"/>
-<area shape="poly" title=" " alt="" coords="592,479,518,439,521,434,594,474"/>
-<area shape="poly" title=" " alt="" coords="387,136,357,176,324,232,313,263,307,295,310,326,323,354,339,372,358,385,404,403,402,408,356,390,335,376,318,357,305,327,302,295,308,262,319,230,352,173,383,133"/>
-<area shape="rect" href="_input_mgr_8hpp.html" title=" " alt="" coords="420,183,517,208"/>
-<area shape="poly" title=" " alt="" coords="409,133,447,170,443,174,405,137"/>
-<area shape="poly" title=" " alt="" coords="471,208,478,388,473,388,466,209"/>
-<area shape="rect" href="_file_mgr_8hpp.html" title=" " alt="" coords="783,330,882,356"/>
-<area shape="poly" title=" " alt="" coords="517,203,632,226,687,240,727,254,774,284,812,317,809,321,771,289,724,259,686,245,631,231,516,208"/>
-<area shape="rect" href="_output_mgr_8hpp.html" title=" " alt="" coords="557,256,713,282"/>
-<area shape="poly" title=" " alt="" coords="498,206,594,247,592,252,496,211"/>
-<area shape="rect" title=" " alt="" coords="513,330,592,356"/>
-<area shape="poly" title=" " alt="" coords="478,207,540,315,535,318,473,210"/>
-<area shape="rect" href="external_input_8h.html" title=" " alt="" coords="333,330,438,356"/>
-<area shape="poly" title=" " alt="" coords="464,210,402,318,398,315,459,207"/>
-<area shape="poly" title=" " alt="" coords="783,357,550,403,549,398,782,351"/>
-<area shape="rect" title=" " alt="" coords="799,404,876,429"/>
-<area shape="poly" title=" " alt="" coords="836,356,838,388,833,388,831,356"/>
-<area shape="rect" title=" " alt="" coords="901,404,967,429"/>
-<area shape="poly" title=" " alt="" coords="851,354,905,392,902,396,848,358"/>
-<area shape="rect" title=" " alt="" coords="991,404,1037,429"/>
-<area shape="poly" title=" " alt="" coords="864,354,977,398,975,403,862,359"/>
-<area shape="rect" title=" " alt="" coords="717,404,774,429"/>
-<area shape="poly" title=" " alt="" coords="819,358,773,396,770,392,816,354"/>
-<area shape="poly" title=" " alt="" coords="636,283,627,319,618,339,605,357,573,383,537,400,535,396,570,378,601,354,613,337,622,317,631,282"/>
-<area shape="poly" title=" " alt="" coords="643,281,708,428,723,462,718,464,703,430,638,284"/>
-<area shape="poly" title=" " alt="" coords="669,280,786,322,784,327,668,285"/>
-<area shape="poly" title=" " alt="" coords="623,285,579,322,576,318,619,281"/>
-<area shape="poly" title=" " alt="" coords="403,354,451,392,448,396,399,358"/>
-<area shape="poly" title=" " alt="" coords="863,285,527,401,525,396,862,280"/>
-<area shape="poly" title=" " alt="" coords="889,284,856,320,852,317,885,280"/>
+<div class="center"><img src="_input_f_p_p_remote_play_file_8hpp__incl.png" border="0" usemap="#a_2github_2workspace_2include_2input_2_input_f_p_p_remote_play_file_8hpp" alt=""/></div>
+<map name="a_2github_2workspace_2include_2input_2_input_f_p_p_remote_play_file_8hpp" id="a_2github_2workspace_2include_2input_2_input_f_p_p_remote_play_file_8hpp">
+<area shape="rect" title=" " alt="" coords="284,5,511,46"/>
+<area shape="rect" href="_e_s_pixel_stick_8h.html" title=" " alt="" coords="423,389,530,414"/>
+<area shape="poly" title=" " alt="" coords="355,49,320,69,289,96,257,134,250,153,247,179,247,255,251,282,262,305,280,325,302,342,354,368,409,385,407,390,353,373,299,347,276,329,258,308,246,284,242,256,242,179,244,152,253,131,285,92,317,65,352,44"/>
+<area shape="rect" title=" " alt="" coords="5,462,73,488"/>
+<area shape="poly" title=" " alt="" coords="284,45,226,63,172,90,151,107,134,128,123,152,119,179,119,329,113,365,99,399,81,428,63,452,59,449,77,425,95,396,108,364,114,329,114,179,118,150,129,125,147,104,169,86,224,58,283,40"/>
+<area shape="rect" href="_input_f_p_p_remote_play_item_8hpp.html" title=" " alt="" coords="300,94,496,120"/>
+<area shape="poly" title=" " alt="" coords="400,46,400,78,395,78,395,46"/>
+<area shape="rect" href="_input_f_p_p_remote_play_file_fsm_8hpp.html" title=" " alt="" coords="781,241,998,267"/>
+<area shape="poly" title=" " alt="" coords="436,44,583,117,727,182,847,232,845,237,725,187,581,122,434,49"/>
+<area shape="rect" href="fseq_8h.html" title=" " alt="" coords="593,94,696,120"/>
+<area shape="poly" title=" " alt="" coords="460,44,593,86,591,91,458,49"/>
+<area shape="rect" title=" " alt="" coords="383,536,458,562"/>
+<area shape="poly" title=" " alt="" coords="423,407,346,411,260,421,184,438,155,450,137,464,128,477,125,488,126,498,132,506,155,521,190,532,280,543,367,546,367,551,280,548,189,537,153,526,128,510,121,500,120,488,123,475,133,461,153,445,182,433,259,416,346,406,422,401"/>
+<area shape="poly" title=" " alt="" coords="423,413,273,434,91,465,88,466,87,460,91,460,273,429,422,407"/>
+<area shape="rect" title=" " alt="" coords="147,462,251,488"/>
+<area shape="poly" title=" " alt="" coords="430,417,261,461,260,455,429,412"/>
+<area shape="rect" href="memdebug_8h.html" title=" " alt="" coords="685,462,780,488"/>
+<area shape="poly" title=" " alt="" coords="520,412,675,455,673,460,519,417"/>
+<area shape="rect" href="_const_names_8hpp.html" title=" " alt="" coords="274,462,396,488"/>
+<area shape="poly" title=" " alt="" coords="454,417,374,457,371,453,451,412"/>
+<area shape="rect" href="_g_p_i_o___defs_8hpp.html" title=" " alt="" coords="420,462,533,488"/>
+<area shape="poly" title=" " alt="" coords="472,415,470,447,465,447,467,414"/>
+<area shape="rect" href="_fast_timer_8hpp.html" title=" " alt="" coords="556,462,661,488"/>
+<area shape="poly" title=" " alt="" coords="493,413,566,453,564,457,490,417"/>
+<area shape="poly" title=" " alt="" coords="685,490,474,538,473,533,684,485"/>
+<area shape="poly" title=" " alt="" coords="481,462,482,429,488,430,486,462"/>
+<area shape="poly" title=" " alt="" coords="592,464,518,424,521,419,594,459"/>
+<area shape="poly" title=" " alt="" coords="389,121,358,161,325,217,313,248,307,280,310,311,323,339,340,358,361,372,409,389,407,394,358,377,336,362,318,342,305,312,302,280,308,247,320,215,354,158,385,118"/>
+<area shape="rect" href="_input_mgr_8hpp.html" title=" " alt="" coords="423,168,519,193"/>
+<area shape="poly" title=" " alt="" coords="412,118,450,155,446,159,408,122"/>
+<area shape="poly" title=" " alt="" coords="474,194,478,373,473,373,469,194"/>
+<area shape="rect" href="_file_mgr_8hpp.html" title=" " alt="" coords="787,315,875,341"/>
+<area shape="poly" title=" " alt="" coords="520,188,629,212,681,226,719,239,769,269,809,302,806,306,766,274,717,244,680,231,628,217,519,194"/>
+<area shape="rect" href="_output_mgr_8hpp.html" title=" " alt="" coords="559,241,706,267"/>
+<area shape="poly" title=" " alt="" coords="499,191,592,232,590,237,497,196"/>
+<area shape="rect" title=" " alt="" coords="513,315,592,341"/>
+<area shape="poly" title=" " alt="" coords="480,192,540,300,536,303,475,195"/>
+<area shape="rect" href="external_input_8h.html" title=" " alt="" coords="333,315,438,341"/>
+<area shape="poly" title=" " alt="" coords="466,195,403,303,398,300,462,192"/>
+<area shape="poly" title=" " alt="" coords="787,341,545,389,544,384,786,335"/>
+<area shape="rect" title=" " alt="" coords="799,389,876,414"/>
+<area shape="poly" title=" " alt="" coords="835,341,838,373,832,373,829,341"/>
+<area shape="rect" title=" " alt="" coords="901,389,967,414"/>
+<area shape="poly" title=" " alt="" coords="850,339,906,377,902,382,847,343"/>
+<area shape="rect" title=" " alt="" coords="991,389,1037,414"/>
+<area shape="poly" title=" " alt="" coords="863,339,977,383,975,388,861,344"/>
+<area shape="rect" title=" " alt="" coords="717,389,774,414"/>
+<area shape="poly" title=" " alt="" coords="818,343,773,381,770,377,815,339"/>
+<area shape="poly" title=" " alt="" coords="634,268,626,304,617,324,605,342,574,368,538,385,536,381,571,363,601,339,613,322,621,302,629,267"/>
+<area shape="poly" title=" " alt="" coords="640,266,723,447,718,449,635,268"/>
+<area shape="poly" title=" " alt="" coords="667,265,784,307,782,312,665,270"/>
+<area shape="poly" title=" " alt="" coords="621,270,579,307,575,303,617,266"/>
+<area shape="poly" title=" " alt="" coords="403,339,451,377,448,381,399,343"/>
+<area shape="poly" title=" " alt="" coords="856,270,526,386,524,381,854,265"/>
+<area shape="poly" title=" " alt="" coords="882,269,852,305,848,301,878,266"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
 This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
-<div class="center"><img src="_input_f_p_p_remote_play_file_8hpp__dep__incl.png" border="0" usemap="#a_2github_2workspace_2_e_s_pixel_stick_2src_2input_2_input_f_p_p_remote_play_file_8hppdep" alt=""/></div>
-<map name="a_2github_2workspace_2_e_s_pixel_stick_2src_2input_2_input_f_p_p_remote_play_file_8hppdep" id="a_2github_2workspace_2_e_s_pixel_stick_2src_2input_2_input_f_p_p_remote_play_file_8hppdep">
-<area shape="rect" title=" " alt="" coords="271,5,480,61"/>
-<area shape="rect" href="_input_f_p_p_remote_8cpp.html" title=" " alt="" coords="358,301,591,342"/>
-<area shape="poly" title=" " alt="" coords="257,63,155,95,106,115,63,138,31,163,12,190,8,204,10,219,16,235,27,251,48,268,79,281,163,301,262,312,358,317,357,322,261,317,162,306,77,286,45,272,23,255,11,238,4,221,3,204,7,188,27,159,60,133,104,110,153,90,255,58"/>
-<area shape="rect" href="_input_f_p_p_remote_play_file_8cpp.html" title=" " alt="" coords="38,198,247,253"/>
-<area shape="poly" title=" " alt="" coords="333,73,177,199,174,195,330,69"/>
-<area shape="rect" href="_input_f_p_p_remote_play_file_fsm_8cpp.html" title=" " alt="" coords="271,198,480,253"/>
-<area shape="poly" title=" " alt="" coords="378,77,378,198,373,198,373,77"/>
-<area shape="rect" href="_input_m_q_t_t_8cpp.html" title=" " alt="" coords="1019,109,1218,150"/>
-<area shape="poly" title=" " alt="" coords="496,44,733,71,1007,106,1019,108,1018,113,1006,112,732,76,496,50"/>
-<area shape="rect" href="_f_p_p_discovery_8h.html" title=" " alt="" coords="778,109,995,150"/>
-<area shape="poly" title=" " alt="" coords="496,54,780,106,779,111,495,59"/>
-<area shape="poly" title=" " alt="" coords="763,146,636,168,582,183,545,200,522,222,504,250,482,302,477,300,499,247,518,219,542,195,580,178,635,163,763,141"/>
-<area shape="poly" title=" " alt="" coords="763,142,529,164,393,180,259,200,248,202,247,197,258,195,393,175,528,159,763,137"/>
-<area shape="poly" title=" " alt="" coords="764,153,500,200,481,204,480,199,499,195,763,148"/>
-<area shape="rect" href="_e_s_pixel_stick_8ino.html" title=" " alt="" coords="798,205,975,246"/>
-<area shape="poly" title=" " alt="" coords="889,165,889,205,884,205,884,165"/>
-<area shape="rect" href="_web_mgr_8cpp.html" title=" " alt="" coords="998,205,1175,246"/>
-<area shape="poly" title=" " alt="" coords="943,154,1046,202,1043,207,941,159"/>
-<area shape="rect" href="_input_f_p_p_remote_8h.html" title=" " alt="" coords="555,205,775,246"/>
-<area shape="poly" title=" " alt="" coords="827,159,713,207,710,202,825,154"/>
-<area shape="rect" href="_input_f_p_p_remote_play_effect_fsm_8cpp.html" title=" " alt="" coords="1199,198,1408,253"/>
-<area shape="poly" title=" " alt="" coords="990,151,1187,195,1200,198,1198,203,1186,200,989,156"/>
-<area shape="rect" href="_input_f_p_p_remote_play_list_8cpp.html" title=" " alt="" coords="1432,198,1642,253"/>
-<area shape="poly" title=" " alt="" coords="1010,147,1127,161,1218,169,1308,178,1422,195,1433,197,1432,202,1421,200,1307,183,1217,174,1126,166,1010,153"/>
-<area shape="rect" href="_input_f_p_p_remote_play_list_fsm_8cpp.html" title=" " alt="" coords="1666,198,1875,253"/>
-<area shape="poly" title=" " alt="" coords="1010,147,1192,162,1334,167,1476,174,1655,195,1666,197,1665,202,1654,200,1475,180,1334,173,1192,168,1010,153"/>
-<area shape="rect" href="_network_mgr_8cpp.html" title=" " alt="" coords="1899,205,2122,246"/>
-<area shape="poly" title=" " alt="" coords="1010,147,1144,159,1258,164,1451,167,1644,171,1756,180,1888,195,1929,202,1928,207,1887,200,1756,185,1643,177,1451,172,1257,170,1144,164,1010,153"/>
-<area shape="rect" href="_f_p_p_discovery_8cpp.html" title=" " alt="" coords="2146,205,2376,246"/>
-<area shape="poly" title=" " alt="" coords="1010,147,1181,161,1326,167,1574,166,1693,166,1820,169,1964,177,2134,195,2177,202,2176,207,2133,200,1964,183,1820,174,1693,171,1574,172,1326,172,1181,166,1010,153"/>
-<area shape="poly" title=" " alt="" coords="613,255,516,303,513,298,610,251"/>
-<area shape="rect" href="_input_mgr_8cpp.html" title=" " alt="" coords="616,301,800,342"/>
-<area shape="poly" title=" " alt="" coords="683,259,701,300,697,302,678,261"/>
+<div class="center"><img src="_input_f_p_p_remote_play_file_8hpp__dep__incl.png" border="0" usemap="#a_2github_2workspace_2include_2input_2_input_f_p_p_remote_play_file_8hppdep" alt=""/></div>
+<map name="a_2github_2workspace_2include_2input_2_input_f_p_p_remote_play_file_8hppdep" id="a_2github_2workspace_2include_2input_2_input_f_p_p_remote_play_file_8hppdep">
+<area shape="rect" title=" " alt="" coords="818,5,1045,46"/>
+<area shape="rect" href="_f_p_p_discovery_8h.html" title=" " alt="" coords="845,94,1018,135"/>
+<area shape="poly" title=" " alt="" coords="934,62,934,94,929,94,929,62"/>
+<area shape="rect" href="_input_f_p_p_remote_8cpp.html" title=" " alt="" coords="169,286,350,327"/>
+<area shape="poly" title=" " alt="" coords="803,32,597,42,480,52,361,66,249,86,149,112,107,127,71,145,41,164,19,184,11,198,8,210,11,223,19,237,41,253,78,268,169,289,168,294,76,273,39,258,15,240,6,225,3,210,6,196,15,181,38,159,68,140,105,122,148,107,247,81,360,61,479,47,597,36,802,26"/>
+<area shape="rect" href="_input_f_p_p_remote_play_file_8cpp.html" title=" " alt="" coords="29,190,256,231"/>
+<area shape="poly" title=" " alt="" coords="833,53,228,192,227,187,831,47"/>
+<area shape="rect" href="_input_f_p_p_remote_play_file_fsm_8cpp.html" title=" " alt="" coords="1991,183,2195,238"/>
+<area shape="poly" title=" " alt="" coords="976,53,1032,92,1056,115,1066,124,1082,132,1120,144,1165,153,1272,166,1395,171,1526,172,1782,171,1892,173,1980,180,1992,182,1991,187,1979,185,1892,178,1782,176,1526,178,1395,176,1272,171,1165,159,1119,149,1080,137,1063,129,1052,119,1029,96,973,57"/>
+<area shape="rect" href="_input_m_q_t_t_8cpp.html" title=" " alt="" coords="1093,94,1242,135"/>
+<area shape="poly" title=" " alt="" coords="1000,49,1115,91,1113,96,998,54"/>
+<area shape="rect" href="_input_f_p_p_remote_8h.html" title=" " alt="" coords="331,190,503,231"/>
+<area shape="poly" title=" " alt="" coords="831,132,682,154,516,185,487,192,486,187,515,180,681,149,830,126"/>
+<area shape="poly" title=" " alt="" coords="830,124,528,148,393,165,346,175,320,185,298,207,282,234,265,287,260,285,277,232,294,204,317,180,344,170,392,160,528,142,830,119"/>
+<area shape="rect" href="_web_mgr_8cpp.html" title=" " alt="" coords="528,190,677,231"/>
+<area shape="poly" title=" " alt="" coords="845,142,690,185,666,192,665,187,688,180,843,137"/>
+<area shape="rect" href="_input_f_p_p_remote_play_effect_fsm_8cpp.html" title=" " alt="" coords="701,183,917,238"/>
+<area shape="poly" title=" " alt="" coords="896,146,846,184,843,180,892,142"/>
+<area shape="poly" title=" " alt="" coords="830,126,577,148,426,165,275,185,234,192,234,187,274,180,425,160,577,143,830,120"/>
+<area shape="poly" title=" " alt="" coords="1033,132,1037,132,1180,145,1302,152,1509,152,1716,155,1837,163,1980,180,1992,182,1991,187,1979,185,1837,168,1716,160,1509,157,1302,157,1180,151,1037,137,1033,137"/>
+<area shape="rect" href="_input_f_p_p_remote_play_list_8cpp.html" title=" " alt="" coords="940,190,1168,231"/>
+<area shape="poly" title=" " alt="" coords="971,142,1030,188,1027,192,967,146"/>
+<area shape="rect" href="_input_f_p_p_remote_play_list_fsm_8cpp.html" title=" " alt="" coords="1192,183,1396,238"/>
+<area shape="poly" title=" " alt="" coords="1023,137,1192,180,1191,185,1022,142"/>
+<area shape="rect" href="main_8cpp.html" title=" " alt="" coords="1421,190,1570,231"/>
+<area shape="poly" title=" " alt="" coords="1033,131,1037,132,1142,145,1224,152,1306,161,1409,180,1437,187,1436,192,1408,185,1305,167,1223,158,1141,151,1037,137,1032,137"/>
+<area shape="rect" href="_network_mgr_8cpp.html" title=" " alt="" coords="1594,190,1765,231"/>
+<area shape="poly" title=" " alt="" coords="1033,131,1037,132,1190,147,1310,152,1430,159,1583,180,1615,187,1613,192,1582,185,1430,164,1310,157,1190,152,1037,137,1033,137"/>
+<area shape="rect" href="_f_p_p_discovery_8cpp.html" title=" " alt="" coords="1789,190,1967,231"/>
+<area shape="poly" title=" " alt="" coords="1033,132,1037,132,1149,143,1245,149,1408,151,1570,156,1665,164,1777,180,1811,187,1810,192,1776,185,1665,170,1570,161,1407,157,1245,154,1149,149,1037,137,1033,137"/>
+<area shape="poly" title=" " alt="" coords="372,241,294,288,291,283,370,237"/>
+<area shape="rect" href="_input_mgr_8cpp.html" title=" " alt="" coords="374,286,524,327"/>
+<area shape="poly" title=" " alt="" coords="431,245,445,285,440,287,426,246"/>
 </map>
 </div>
 </div>
@@ -252,9 +268,13 @@ Macros</h2></td></tr>
 </div>
 </div>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_9f5c276ab9fb4f37ad248a8f0e5ee4a1.html">input</a></li><li class="navelem"><a class="el" href="_input_f_p_p_remote_play_file_8hpp.html">InputFPPRemotePlayFile.hpp</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

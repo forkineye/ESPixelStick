@@ -20,7 +20,7 @@
 <area shape="poly" id="edge59_Node000001_Node000050" title=" " alt="" coords="3080,421,3060,384,3031,342,2994,302,2950,270,2915,254,2878,243,2800,230,2725,227,2658,231,2658,226,2725,222,2801,225,2879,238,2917,249,2953,265,2998,298,3035,339,3064,382,3085,418"/>
 <area shape="rect" id="Node000003" href="$classc___network_mgr.html#a30fdcc713ea1db9f7a207427e5e6cdc2" title="&lt; Start the module" alt="" coords="1962,561,2107,587"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="2756,564,2107,576,2107,570,2756,558"/>
-<area shape="rect" id="Node000004" href="$_e_s_pixel_stick_8ino.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="1492,436,1545,462"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="1492,436,1545,462"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1962,560,1545,458,1546,453,1964,555"/>
 <area shape="rect" id="Node000008" href="$classc___web_mgr.html#acffc5a44584e814738cfa0034a899f7e" title=" " alt="" coords="2197,509,2398,535"/>
 <area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="2738,507,2399,521,2399,516,2737,502"/>
@@ -91,7 +91,7 @@
 <area shape="poly" id="edge45_Node000040_Node000043" title=" " alt="" coords="922,128,622,148,622,143,921,122"/>
 <area shape="rect" id="Node000042" href="$classc___network_mgr.html#a1a7aa80b325ff6d1610ba4ea775724bf" title="&lt; Called from loop()" alt="" coords="464,5,598,31"/>
 <area shape="poly" id="edge43_Node000041_Node000042" title=" " alt="" coords="692,21,598,21,598,16,692,16"/>
-<area shape="rect" id="Node000028" href="$_e_s_pixel_stick_8ino.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="269,5,315,31"/>
+<area shape="rect" id="Node000028" href="$main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="269,5,315,31"/>
 <area shape="poly" id="edge44_Node000042_Node000028" title=" " alt="" coords="448,21,315,21,315,16,448,16"/>
 <area shape="poly" id="edge46_Node000043_Node000024" title=" " alt="" coords="481,173,330,230,328,225,479,168"/>
 <area shape="rect" id="Node000045" href="$classc___f_p_p_discovery.html#ad7458433d0f12998bff6aa34bcbfc501" title=" " alt="" coords="2459,433,2678,459"/>

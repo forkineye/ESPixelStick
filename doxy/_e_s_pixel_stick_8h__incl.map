@@ -1,9 +1,9 @@
-<map id="/github/workspace/ESPixelStick/src/ESPixelStick.h" name="/github/workspace/ESPixelStick/src/ESPixelStick.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="335,5,512,46"/>
+<map id="/github/workspace/include/ESPixelStick.h" name="/github/workspace/include/ESPixelStick.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="337,5,510,46"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="102,168,177,193"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="335,31,245,36,149,48,66,67,35,80,15,96,9,106,9,116,14,125,24,134,53,150,88,163,86,168,51,155,21,139,10,129,4,117,4,105,11,92,33,75,64,62,148,42,244,31,335,26"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="337,31,247,36,150,47,66,67,35,80,15,96,9,106,9,116,14,125,24,134,53,150,88,163,86,168,51,155,21,139,10,129,4,117,4,105,11,92,33,75,65,62,149,42,246,31,337,26"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="25,94,92,120"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="336,47,108,96,106,91,334,42"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="337,47,108,96,107,91,336,42"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="116,94,219,120"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="360,49,223,91,221,86,359,44"/>
 <area shape="rect" id="Node000005" href="$memdebug_8h.html" title=" " alt="" coords="244,94,339,120"/>
