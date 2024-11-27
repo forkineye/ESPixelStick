@@ -27,7 +27,7 @@ gulp.task("html", function () {
       })
     )
     .pipe(gzip())
-    .pipe(gulp.dest("ESPixelStick/data/www"));
+    .pipe(gulp.dest("data/www"));
 });
 
 /* CSS Task */
@@ -39,7 +39,7 @@ gulp.task("css", function () {
     .pipe(concat("esps.css"))
     .pipe(cleancss())
     .pipe(gzip())
-    .pipe(gulp.dest("ESPixelStick/data/www"));
+    .pipe(gulp.dest("data/www"));
 });
 
 /* JavaScript Task */
@@ -62,7 +62,7 @@ gulp.task("js", function () {
     ) /* comment out this line to debug the script file */
     .pipe(gzip())
     .pipe(using())
-    .pipe(gulp.dest("ESPixelStick/data/www"));
+    .pipe(gulp.dest("data/www"));
 });
 
 /* json Task */
@@ -71,7 +71,7 @@ gulp.task("json", function () {
     .src("html/*.json")
     .pipe(using())
     .pipe(plumber())
-    .pipe(gulp.dest("ESPixelStick/data"));
+    .pipe(gulp.dest("data"));
 });
 
 /* Image Task */
@@ -80,12 +80,12 @@ gulp.task("image", function () {
     .src(["html/**/*.png", "html/**/*.ico"])
     .pipe(using())
     .pipe(plumber())
-    .pipe(gulp.dest("ESPixelStick/data/www"));
+    .pipe(gulp.dest("data/www"));
 });
 
 /* Clean Task */
 gulp.task("clean", function () {
-  return deleteAsync(["ESPixelStick/data/www/*"]);
+  return deleteAsync(["data/www/*"]);
 });
 
 /* Markdown to HTML Task */
