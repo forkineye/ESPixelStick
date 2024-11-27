@@ -13,7 +13,7 @@ jobs:
       - name: Build doxygen pages
         uses: mattnotmitt/doxygen-action@v1
         with:
-          additional-packages: font-fira-code
+          additional-packages: font-fira-code-nerd
           working-directory: ".doxygen"
           doxyfile-path: "Doxyfile"
 
