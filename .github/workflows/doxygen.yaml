@@ -13,13 +13,13 @@ jobs:
       - name: Build doxygen pages
         uses: mattnotmitt/doxygen-action@v1
         with:
-          working-directory: '.doxygen'
-          doxyfile-path: 'Doxyfile'
+          additional-packages: font-fira-code
+          working-directory: ".doxygen"
+          doxyfile-path: "Doxyfile"
 
       - name: Deploy to gh-pages
-        uses: JamesIves/github-pages-deploy-action@v4
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          branch: gh-pages
-          folder: .doxygen/doc/html
-          target-folder: doxy
-          single-commit: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .doxygen/doc/html
+          destination_dir: doxy
