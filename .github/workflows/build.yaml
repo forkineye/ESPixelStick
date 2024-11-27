@@ -1,7 +1,7 @@
 name: ESPixelStick CI
 on: [push, pull_request, workflow_dispatch]
 env:
-  VERSION_BASE: '4.0'
+  VERSION_BASE: "4.0"
 jobs:
   firmware:
     strategy:
@@ -148,7 +148,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Install PlatformIO
         run: |
@@ -199,7 +199,7 @@ jobs:
       # Install Node
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
       - run: npm install
 
       # Build and move the web pages
@@ -210,7 +210,7 @@ jobs:
           if [ -z "$ESPS_RELEASE" ]; then
           gulp ci
           fi
-          mv ESPixelStick/data/* dist/fs
+          mv data/* dist/fs
 
       - name: Set release archive filename
         run: |

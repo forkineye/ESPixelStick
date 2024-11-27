@@ -1,13 +1,12 @@
 /debug/
 /firmware/
-/ESPixelStick/ESPixelStick.ino.cpp
 /.doxygen/doc/
-/.pio/
 /.vscode/
 !/.vscode/extensions.json
 /dist/*.html
 /node_modules/
-/ESPixelStick/data
+/data
+/.pio
 __pycache__
 platformio_user.ini
 secrets.h

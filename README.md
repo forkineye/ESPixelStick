@@ -38,6 +38,23 @@ The recommended way to build ESPixelStick is with PlatformIO. Building from the 
 - In the same status bar, click ☑️ to compile or ➡️ to compile and upload.
 - To build and upload the filesystem, click on the PlatformIO icon on the left bar, then click on _Project Tasks->Platform->Upload Filesystem Image_. Note that before the filesystem is built, the web pages **must** be processed. Instructions for processing the web pages are in the html [README](html/README.md).
 
+## Directory Structure
+
+ESPixelStick is now a PlatformIO project and follows the standard PlatformIO directory structure. All code should be in the releveant `src` and `include` sub-directories. Within each you will find the follwing directories:
+
+- `input` - Show input modules should reside here and inherit from `c_InputCommon` as defined in `InputCommon.hpp`.
+- `ouput` - Show output modules should reside here and inherit from `c_OutputCommon` as defined in `OutputCommon.hpp`.
+- `service` - Auxiliary services should reside here. These include non-show critical input mechansims like FPP discovery / configuration mechanisms.
+
+You'll want to refer to `src/input/InputMgr.cpp` and `src/output/OutputMgr.cpp` for adding modules to the system.
+
+Other notable directories:
+
+- `dist` - These are the files used for creating the binary distributions. Updated binaries for flashing, ESPSFlashTool and `firmware.json` should all be updated here.
+- `html` - All frontend / web related code, refer to the html [README](html/README.md) for details.
+- `SupportingDocs` - Datasheets and protocol formats related to this project.
+- `tools` = Misc tools related to this project.
+
 ## Supported Inputs and Outputs
 
 Details on the supported input protocols and outputs can be found in the [wiki](https://github.com/forkineye/ESPixelStick/wiki/Supported-Inputs-and-Outputs).
