@@ -499,7 +499,7 @@ static void printReq (AsyncWebServerRequest* request, bool post)
     for (int i = 0; i < params; i++)
     {
         // DEBUG_V (String ("current Param: ") + String (i));
-        AsyncWebParameter* p = request->getParam (i);
+        const AsyncWebParameter* p = request->getParam (i);
         // DEBUG_V (String ("      p->name: ") + String (p->name()));
         // DEBUG_V (String ("     p->value: ") + String (p->value()));
 
