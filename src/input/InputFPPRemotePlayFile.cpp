@@ -368,7 +368,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
         {
             LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not start: ")) + PlayItemName +
                                       F (" File does not contain enough data to meet the Stated Channel Count * Number of Frames value. Need: ") +
-                                      String (NeededDataSize) + F (", Got: ") + String (ActualDataSize));
+                                      String (NeededDataSize) + F (", SD File Size: ") + String (ActualDataSize));
             logcon (LastFailedPlayStatusMsg);
             break;
         }
