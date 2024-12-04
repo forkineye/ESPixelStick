@@ -1473,11 +1473,9 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
 
         delay(10);
         FeedWDT();
-        feedLoopWDT();
         NumBytesWritten = FileList[FileListIndex].fsFile.write(FileData, NumBytesToWrite);
         FileList[FileListIndex].fsFile.flush();
         FeedWDT();
-        feedLoopWDT();
         delay(10);
         // DEBUG_V (String (" FileHandle: ") + String (FileHandle));
         // DEBUG_V (String ("File.Handle: ") + String (FileList[FileListIndex].handle));
@@ -1525,7 +1523,6 @@ size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size
 
         delay(10);
         FeedWDT();
-        feedLoopWDT();
 
         // are we using a buffer in front of the SD card?
         if(nullptr == FileList[FileListIndex].buffer.DataBuffer)
@@ -1572,7 +1569,6 @@ size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size
         // DEBUG_V (String ("File.Handle: ") + String (FileList[FileListIndex].handle));
         delay(20);
         FeedWDT();
-        feedLoopWDT();
 
         if(NumBytesWritten != NumBytesToWrite)
         {
