@@ -366,7 +366,7 @@ void c_WebMgr::init ()
             [](AsyncWebServerRequest* request)
             {
                 RequestReboot(100000);;
-            }, 
+            },
             [](AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final)
              {WebMgr.FirmwareUpload (request, filename, index, data, len, final); }); //.setFilter (ON_STA_FILTER);
 
@@ -404,6 +404,31 @@ void c_WebMgr::init ()
     	webServer.on ("/fppjson.php", HTTP_GET, [](AsyncWebServerRequest* request)
             {
                 FPPDiscovery.ProcessFPPJson(request);
+            });
+
+    	webServer.on ("/api/fppd", HTTP_GET, [](AsyncWebServerRequest* request)
+            {
+                FPPDiscovery.ProcessFPPDJson(request);
+            });
+
+    	webServer.on ("/api/channel", HTTP_GET, [](AsyncWebServerRequest* request)
+            {
+                FPPDiscovery.ProcessFPPDJson(request);
+            });
+
+    	webServer.on ("/api/playlists", HTTP_GET, [](AsyncWebServerRequest* request)
+            {
+                FPPDiscovery.ProcessFPPDJson(request);
+            });
+
+    	webServer.on ("/api/cape", HTTP_GET, [](AsyncWebServerRequest* request)
+            {
+                FPPDiscovery.ProcessFPPDJson(request);
+            });
+
+    	webServer.on ("/api/proxies", HTTP_GET, [](AsyncWebServerRequest* request)
+            {
+                FPPDiscovery.ProcessFPPDJson(request);
             });
 
         // Static Handlers

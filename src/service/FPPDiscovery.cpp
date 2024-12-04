@@ -165,6 +165,7 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
         jsonStatus[F ("pktLastCommand")]  = MultiSyncStats.pktLastCommand;
 
         jsonStatus[F ("ProcessFPPJson")]    = SystemDebugStats.ProcessFPPJson;
+        jsonStatus[F ("ProcessFPPDJson")]   = SystemDebugStats.ProcessFPPDJson;
         jsonStatus[F ("CmdGetFPPstatus")]   = SystemDebugStats.CmdGetFPPstatus;
         jsonStatus[F ("CmdGetSysInfoJSON")] = SystemDebugStats.CmdGetSysInfoJSON;
         jsonStatus[F ("CmdGetHostname")]    = SystemDebugStats.CmdGetHostname;
@@ -1101,6 +1102,34 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
     // DEBUG_END;
 
 } // ProcessFPPJson
+
+//-----------------------------------------------------------------------------
+void c_FPPDiscovery::ProcessFPPDJson (AsyncWebServerRequest* request)
+{
+    // DEBUG_START;
+    printReq(request, false);
+
+    SystemDebugStats.ProcessFPPDJson++;
+
+    do // once
+    {
+        if (!request->hasParam (ulrCommand))
+        {
+            request->send (404);
+            // DEBUG_V (String ("Missing Param: 'command' "));
+
+            break;
+        }
+
+        // DEBUG_V (String ("Unknown command: ") + command);
+        request->send (404);
+        SystemDebugStats.CmdNotFound++;
+
+    } while (false);
+
+    // DEBUG_END;
+
+} // ProcessFPPDJson
 
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
