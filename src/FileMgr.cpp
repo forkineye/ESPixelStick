@@ -1240,7 +1240,7 @@ bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & Fil
             // DEBUG_V("Open return");
             if (!FileList[FileListIndex].IsOpen)
             {
-                logcon(String(F("ERROR: Cannot open '")) + FileName + F("'."));
+                logcon(String(F("ERROR: Could not open '")) + FileName + F("'."));
                 // release the file list entry
                 CloseSdFile(FileHandle);
                 break;
@@ -1259,6 +1259,10 @@ bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & Fil
 
             FileIsOpen = true;
             // DEBUG_V (String ("File.Handle: ") + String (FileList[FileListIndex].handle));
+        }
+        else
+        {
+            // DEBUG_V("Could not get a file list index");
         }
 
     } while (false);
@@ -1424,6 +1428,7 @@ void c_FileMgr::CloseSdFile (FileId& FileHandle)
     {
         if(!FileList[FileListIndex].Paused)
         {
+            delay(10);
             FileList[FileListIndex].fsFile.close ();
         }
         FileList[FileListIndex].IsOpen = false;
@@ -1461,12 +1466,19 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
         // DEBUG_V (String("Bytes to write: ") + String(NumBytesToWrite));
         if (-1 == (FileListIndex = FileListFindSdFileHandle (FileHandle)))
         {
+            // DEBUG_V (String("FileHandle: ") + String(FileHandle));
             logcon (String (F ("WriteSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
             break;
         }
 
+        delay(10);
+        FeedWDT();
+        feedLoopWDT();
         NumBytesWritten = FileList[FileListIndex].fsFile.write(FileData, NumBytesToWrite);
         FileList[FileListIndex].fsFile.flush();
+        FeedWDT();
+        feedLoopWDT();
+        delay(10);
         // DEBUG_V (String (" FileHandle: ") + String (FileHandle));
         // DEBUG_V (String ("File.Handle: ") + String (FileList[FileListIndex].handle));
 
@@ -1511,6 +1523,10 @@ size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size
         }
 #endif // defined (ARDUINO_ARCH_ESP32)
 
+        delay(10);
+        FeedWDT();
+        feedLoopWDT();
+
         // are we using a buffer in front of the SD card?
         if(nullptr == FileList[FileListIndex].buffer.DataBuffer)
         {
@@ -1554,6 +1570,9 @@ size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size
         }
         // DEBUG_V (String (" FileHandle: ") + String (FileHandle));
         // DEBUG_V (String ("File.Handle: ") + String (FileList[FileListIndex].handle));
+        delay(20);
+        FeedWDT();
+        feedLoopWDT();
 
         if(NumBytesWritten != NumBytesToWrite)
         {
@@ -1684,6 +1703,7 @@ void c_FileMgr::PauseSdFile (const FileId & FileHandle)
             break;
         }
 
+        delay(10);
         FileList[FileListIndex].fsFile.close ();
         FileList[FileListIndex].Paused = true;
 
