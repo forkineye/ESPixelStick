@@ -1700,6 +1700,8 @@ void c_FileMgr::PauseSdFile (const FileId & FileHandle)
         }
 
         delay(10);
+        FeedWDT();
+
         FileList[FileListIndex].fsFile.close ();
         FileList[FileListIndex].Paused = true;
 
@@ -1711,7 +1713,7 @@ void c_FileMgr::PauseSdFile (const FileId & FileHandle)
 //-----------------------------------------------------------------------------
 void c_FileMgr::BuildFseqList()
 {
-    // DEBUG_START;
+    DEBUG_START;
     char entryName [256];
 
     do // once
@@ -1721,6 +1723,8 @@ void c_FileMgr::BuildFseqList()
             // DEBUG_V("No SD card installed.");
             break;
         }
+
+        FeedWDT();
 
         FsFile InputFile;
         ESP_SD.chdir(); // Set to sd root
@@ -1851,7 +1855,7 @@ void c_FileMgr::BuildFseqList()
     // ReadSdFile(FSEQFILELIST, Temp);
     // DEBUG_V(Temp);
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // BuildFseqList
 
@@ -1875,6 +1879,7 @@ bool c_FileMgr::handleFileUpload (
 
     do // once
     {
+        FeedWDT();
         if ((0 == index))
         {
             // DEBUG_V("New File");
@@ -1933,6 +1938,7 @@ bool c_FileMgr::handleFileUpload (
         // cause the remainder in the buffer to be written.
         WriteSdFileBuf (fsUploadFileHandle, data, 0);
         uint32_t uploadTime = (uint32_t)(millis() - fsUploadStartTime) / 1000;
+        FeedWDT();
         CloseSdFile (fsUploadFileHandle);
         fsUploadFileHandle = INVALID_FILE_HANDLE;
 
