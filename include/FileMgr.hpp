@@ -81,24 +81,22 @@ public:
 
     bool   SdCardIsInstalled () { return SdCardInstalled; }
     FileId CreateSdFileHandle ();
-    void   DeleteSdFile     (const String & FileName);
-    void   SaveSdFile       (const String & FileName,   String & FileData);
-    void   SaveSdFile       (const String & FileName,   JsonVariant & FileData);
-    bool   OpenSdFile       (const String & FileName,   FileMode Mode, FileId & FileHandle, int FileListIndex = -1);
-    size_t ReadSdFile       (const FileId & FileHandle, byte * FileData, size_t NumBytesToRead);
-    size_t ReadSdFile       (const FileId & FileHandle, byte * FileData, size_t NumBytesToRead,  size_t StartingPosition);
-    bool   ReadSdFile       (const String & FileName,   String & FileData);
-    bool   ReadSdFile       (const String & FileName,   JsonDocument & FileData);
-    size_t WriteSdFileBuf   (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite);
-    size_t WriteSdFile      (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite);
-    size_t WriteSdFile      (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite, size_t StartingPosition);
-    void   CloseSdFile      (FileId & FileHandle);
-    void   GetListOfSdFiles (std::vector<String> & Response);
-    uint64_t GetSdFileSize    (const String & FileName);
-    uint64_t GetSdFileSize    (const FileId & FileHandle);
-    void   BuildFseqList    ();
-    void   ResumeSdFile     (const FileId & FileHandle);
-    void   PauseSdFile      (const FileId & FileHandle);
+    void   DeleteSdFile     (const String & FileName,   bool LockStatus = false);
+    void   SaveSdFile       (const String & FileName,   String & FileData, bool LockStatus = false);
+    void   SaveSdFile       (const String & FileName,   JsonVariant & FileData, bool LockStatus = false);
+    bool   OpenSdFile       (const String & FileName,   FileMode Mode, FileId & FileHandle, int FileListIndex, bool LockStatus = false);
+    size_t ReadSdFile       (const FileId & FileHandle, byte * FileData, size_t NumBytesToRead, bool LockStatus = false);
+    size_t ReadSdFile       (const FileId & FileHandle, byte * FileData, size_t NumBytesToRead,  size_t StartingPosition, bool LockStatus = false);
+    bool   ReadSdFile       (const String & FileName,   String & FileData, bool LockStatus = false);
+    bool   ReadSdFile       (const String & FileName,   JsonDocument & FileData, bool LockStatus = false);
+    size_t WriteSdFileBuf   (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite, bool LockStatus = false);
+    size_t WriteSdFile      (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite, bool LockStatus = false);
+    size_t WriteSdFile      (const FileId & FileHandle, byte * FileData, size_t NumBytesToWrite, size_t StartingPosition, bool LockStatus = false);
+    void   CloseSdFile      (FileId & FileHandle, bool LockStatus = false);
+    void   GetListOfSdFiles (std::vector<String> & Response, bool LockStatus = false);
+    uint64_t GetSdFileSize  (const String & FileName, bool LockStatus = false);
+    uint64_t GetSdFileSize  (const FileId & FileHandle, bool LockStatus = false);
+    void   BuildFseqList    (bool LockStatus = false);
 
     void   GetDriverName    (String& Name) { Name = "FileMgr"; }
     void   NetworkStateChanged (bool NewState);
@@ -115,6 +113,8 @@ private:
     void    SetSpiIoPins ();
     void    SetSdSpeed ();
     void    ResetSdCard ();
+    void    LockSd(bool ExistingLockStatus);
+    void    UnLockSd(bool ExistingLockStatus);
 
 #   define SD_CARD_CLK_MHZ     SD_SCK_MHZ(37)  // 50 MHz SPI clock
 #ifndef MaxSdTransSpeedMHz
@@ -239,6 +239,8 @@ public: struct __attribute__((__packed__, aligned(4))) CSD {
     File        FileSendDir;
     uint32_t    LastFileSent = 0;
     uint32_t    expectedIndex = 0;
+
+    bool SdAccessSemaphore = false;
 
 protected:
 
