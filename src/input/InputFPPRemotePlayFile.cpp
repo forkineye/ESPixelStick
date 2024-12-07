@@ -297,7 +297,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 
         if (false == FileMgr.OpenSdFile (PlayItemName,
                                          c_FileMgr::FileMode::FileRead,
-                                         FileHandleForFileBeingPlayed))
+                                         FileHandleForFileBeingPlayed, -1))
         {
             LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not open file: filename: '")) + PlayItemName + "'");
             logcon (LastFailedPlayStatusMsg);
@@ -307,7 +307,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
         // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (FileHandleForFileBeingPlayed));
         uint32_t BytesRead = FileMgr.ReadSdFile (FileHandleForFileBeingPlayed,
                                                (uint8_t*)&fsqRawHeader,
-                                               sizeof (fsqRawHeader), 0);
+                                               sizeof (fsqRawHeader), size_t(0));
         // DEBUG_V (String ("                    BytesRead: ") + String (BytesRead));
         // DEBUG_V (String ("        sizeof (fsqRawHeader): ") + String (sizeof (fsqRawHeader)));
 
