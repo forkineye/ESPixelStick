@@ -532,7 +532,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
     JsonObject JsonData = JsonDoc.to<JsonObject> ();
 
     FSEQRawHeader fsqHeader;
-    FileMgr.ReadSdFile (fseq, (byte*)&fsqHeader, sizeof (fsqHeader), 0);
+    FileMgr.ReadSdFile (fseq, (byte*)&fsqHeader, sizeof (fsqHeader), size_t(0));
 
     JsonData[F ("Name")]            = fname;
     JsonData[CN_Version]            = String (fsqHeader.majorVersion) + "." + String (fsqHeader.minorVersion);
@@ -581,7 +581,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
         uint8_t* RangeDataBuffer = (uint8_t*)malloc (sizeof(FSEQRawRangeEntry) * fsqHeader.numSparseRanges);
         FSEQRawRangeEntry* CurrentFSEQRangeEntry = (FSEQRawRangeEntry*)RangeDataBuffer;
 
-        FileMgr.ReadSdFile (fseq, RangeDataBuffer, sizeof (FSEQRawRangeEntry), fsqHeader.numCompressedBlocks * 8 + 32);
+        FileMgr.ReadSdFile (fseq, RangeDataBuffer, sizeof (FSEQRawRangeEntry), size_t(fsqHeader.numCompressedBlocks * 8 + 32));
 
         for (int CurrentRangeIndex = 0;
              CurrentRangeIndex < fsqHeader.numSparseRanges;
@@ -689,7 +689,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                 c_FileMgr::FileId FileHandle;
                 // DEBUG_V (String (" seq: ") + seq);
 
-                if (FileMgr.OpenSdFile (seq, c_FileMgr::FileMode::FileRead, FileHandle))
+                if (FileMgr.OpenSdFile (seq, c_FileMgr::FileMode::FileRead, FileHandle, -1))
                 {
                     if (FileMgr.GetSdFileSize(FileHandle) > 0)
                     {
@@ -757,7 +757,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
         // DEBUG_V (String(F ("FileName: ")) + filename);
 
         c_FileMgr::FileId FileHandle;
-        if (false == FileMgr.OpenSdFile (filename, c_FileMgr::FileMode::FileRead, FileHandle))
+        if (false == FileMgr.OpenSdFile (filename, c_FileMgr::FileMode::FileRead, FileHandle, -1))
         {
             logcon (String (F ("c_FPPDiscovery::ProcessPOST: File Does Not Exist - FileName: ")) + filename);
             request->send (404);
