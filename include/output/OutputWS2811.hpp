@@ -3,7 +3,7 @@
 * OutputWS2811.h - WS2811 driver code for ESPixelStick
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015, 2022 Shelby Merrick
+* Copyright (c) 2015, 2024 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -52,10 +52,14 @@ protected:
 #define WS2811_PIXEL_NS_BIT_TOTAL           ( (1.0 / WS2811_PIXEL_DATA_RATE) * NanoSecondsInASecond)
 #ifdef ARDUINO_ARCH_ESP32
                                             // values have been adjusted to work with seed pixels.
-    #define WS2811_PIXEL_NS_BIT_0_HIGH      312.0 // = 312 on logic analyzer 220ns - 380ns per datasheet
-    #define WS2811_PIXEL_NS_BIT_0_LOW       945.0 // = 937 on logic analyzer 580ns - 1.6us per datasheet
-    #define WS2811_PIXEL_NS_BIT_1_HIGH      975.0 // = 937 on logic analyzer 580ns - 1.6us per datasheet
-    #define WS2811_PIXEL_NS_BIT_1_LOW       300.0 // = 312 on logic analyzer 220ns - 380ns per datasheet
+//    #define WS2811_PIXEL_NS_BIT_0_HIGH      312.0 // = 312 on logic analyzer 220ns - 380ns per datasheet
+//    #define WS2811_PIXEL_NS_BIT_0_LOW       945.0 // = 937 on logic analyzer 580ns - 1.6us per datasheet
+//    #define WS2811_PIXEL_NS_BIT_1_HIGH      975.0 // = 937 on logic analyzer 580ns - 1.6us per datasheet
+//    #define WS2811_PIXEL_NS_BIT_1_LOW       300.0 // = 312 on logic analyzer 220ns - 380ns per datasheet
+    #define WS2811_PIXEL_NS_BIT_0_HIGH      300.0 // 220ns - 380ns per datasheet
+    #define WS2811_PIXEL_NS_BIT_0_LOW       (WS2811_PIXEL_NS_BIT_TOTAL - WS2811_PIXEL_NS_BIT_0_HIGH)
+    #define WS2811_PIXEL_NS_BIT_1_HIGH      WS2811_PIXEL_NS_BIT_0_LOW
+    #define WS2811_PIXEL_NS_BIT_1_LOW       WS2811_PIXEL_NS_BIT_0_HIGH
 #else
     #define WS2811_PIXEL_NS_BIT_0_HIGH      312.0 // 220ns - 380ns per datasheet
     #define WS2811_PIXEL_NS_BIT_0_LOW       (WS2811_PIXEL_NS_BIT_TOTAL - WS2811_PIXEL_NS_BIT_0_HIGH)

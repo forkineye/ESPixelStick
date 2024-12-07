@@ -467,7 +467,21 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSecond
 
         // Adjust the start of the file time to align with the master FPP
         noInterrupts ();
-        p_Parent->FrameControl.ElapsedPlayTimeMS = (TargetElapsedMS + p_Parent->FrameControl.ElapsedPlayTimeMS) / 2;
+        if (20 < abs (FrameDiff))
+        {
+            // DEBUG_V ("Large Setp Adjustment");
+            p_Parent->FrameControl.ElapsedPlayTimeMS = TargetElapsedMS;
+        }
+        else if(CurrentFrame > TargetFrameId)
+        {
+            // DEBUG_V("go back a frame");
+            p_Parent->FrameControl.ElapsedPlayTimeMS -= p_Parent->FrameControl.FrameStepTimeMS;
+        }
+        else
+        {
+            // DEBUG_V("go forward a frame");
+            p_Parent->FrameControl.ElapsedPlayTimeMS += p_Parent->FrameControl.FrameStepTimeMS;
+        }
         interrupts ();
 
         response = true;

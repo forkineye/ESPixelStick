@@ -366,7 +366,7 @@ void c_WebMgr::init ()
             [](AsyncWebServerRequest* request)
             {
                 RequestReboot(100000);;
-            }, 
+            },
             [](AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final)
              {WebMgr.FirmwareUpload (request, filename, index, data, len, final); }); //.setFilter (ON_STA_FILTER);
 
@@ -377,12 +377,14 @@ void c_WebMgr::init ()
         		FPPDiscovery.ProcessGET(request);
         	});
 
+    	// URL's needed for FPP Connect fseq uploading and querying
         webServer.on ("/api/system", HTTP_GET,
         	[](AsyncWebServerRequest* request)
         	{
         		FPPDiscovery.ProcessGET(request);
         	});
 
+    	// URL's needed for FPP Connect fseq uploading and querying
     	webServer.on ("/fpp", HTTP_POST | HTTP_PUT,
         	[](AsyncWebServerRequest* request)
         	{
@@ -406,6 +408,36 @@ void c_WebMgr::init ()
                 FPPDiscovery.ProcessFPPJson(request);
             });
 
+    	// URL's needed for FPP Connect fseq uploading and querying
+    	webServer.on ("/api/fppd", HTTP_GET, [](AsyncWebServerRequest* request)
+            {
+                FPPDiscovery.ProcessFPPDJson(request);
+            });
+
+    	// URL's needed for FPP Connect fseq uploading and querying
+    	webServer.on ("/api/channel", HTTP_GET, [](AsyncWebServerRequest* request)
+            {
+                FPPDiscovery.ProcessFPPDJson(request);
+            });
+
+    	// URL's needed for FPP Connect fseq uploading and querying
+    	webServer.on ("/api/playlists", HTTP_GET, [](AsyncWebServerRequest* request)
+            {
+                FPPDiscovery.ProcessFPPDJson(request);
+            });
+
+    	// URL's needed for FPP Connect fseq uploading and querying
+    	webServer.on ("/api/cape", HTTP_GET, [](AsyncWebServerRequest* request)
+            {
+                FPPDiscovery.ProcessFPPDJson(request);
+            });
+
+    	// URL's needed for FPP Connect fseq uploading and querying
+    	webServer.on ("/api/proxies", HTTP_GET, [](AsyncWebServerRequest* request)
+            {
+                FPPDiscovery.ProcessFPPDJson(request);
+            });
+
         // Static Handlers
    	 	webServer.serveStatic ("/UpdRecipe",               LittleFS, "/UpdRecipe.json");
    	 	webServer.serveStatic ("/conf/config.json",        LittleFS, "/config.json");
@@ -419,7 +451,7 @@ void c_WebMgr::init ()
         // FS Debugging Handler
         // webServer.serveStatic ("/fs", LittleFS, "/" );
 
-        // if the client posts to the upload page
+        // if the client posts to the file upload page
     	webServer.on ("/upload", HTTP_POST | HTTP_PUT | HTTP_OPTIONS,
         	[](AsyncWebServerRequest * request)
             {
@@ -652,7 +684,7 @@ size_t c_WebMgr::GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t ind
             buffer[0] = '\0';
 
             // DEBUG_V("Try to open the file");
-            if(!FileMgr.OpenSdFile(FSEQFILELIST, c_FileMgr::FileMode::FileRead, FileHandle))
+            if(!FileMgr.OpenSdFile(FSEQFILELIST, c_FileMgr::FileMode::FileRead, FileHandle, -1))
             {
                 logcon(F("ERROR: Could not open List of Fseq files for reading"));
                 response = FileMgr.GetDefaultFseqFileList(buffer, maxlen);
