@@ -812,7 +812,8 @@ void c_FPPDiscovery::ProcessFile (
         if(!inFileUpload)
         {
             // DEBUG_V();
-            StopPlaying(false);
+            // wait for the player to become idle
+            StopPlaying(true);
             inFileUpload = true;
             UploadFileName = filename;
         }
@@ -1176,6 +1177,8 @@ void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
 void c_FPPDiscovery::StopPlaying (bool wait)
 {
     // DEBUG_START;
+
+    FeedWDT();
 
     // DEBUG_V (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
     // only process if the pointer is valid
