@@ -377,12 +377,14 @@ void c_WebMgr::init ()
         		FPPDiscovery.ProcessGET(request);
         	});
 
+    	// URL's needed for FPP Connect fseq uploading and querying
         webServer.on ("/api/system", HTTP_GET,
         	[](AsyncWebServerRequest* request)
         	{
         		FPPDiscovery.ProcessGET(request);
         	});
 
+    	// URL's needed for FPP Connect fseq uploading and querying
     	webServer.on ("/fpp", HTTP_POST | HTTP_PUT,
         	[](AsyncWebServerRequest* request)
         	{
@@ -406,26 +408,31 @@ void c_WebMgr::init ()
                 FPPDiscovery.ProcessFPPJson(request);
             });
 
+    	// URL's needed for FPP Connect fseq uploading and querying
     	webServer.on ("/api/fppd", HTTP_GET, [](AsyncWebServerRequest* request)
             {
                 FPPDiscovery.ProcessFPPDJson(request);
             });
 
+    	// URL's needed for FPP Connect fseq uploading and querying
     	webServer.on ("/api/channel", HTTP_GET, [](AsyncWebServerRequest* request)
             {
                 FPPDiscovery.ProcessFPPDJson(request);
             });
 
+    	// URL's needed for FPP Connect fseq uploading and querying
     	webServer.on ("/api/playlists", HTTP_GET, [](AsyncWebServerRequest* request)
             {
                 FPPDiscovery.ProcessFPPDJson(request);
             });
 
+    	// URL's needed for FPP Connect fseq uploading and querying
     	webServer.on ("/api/cape", HTTP_GET, [](AsyncWebServerRequest* request)
             {
                 FPPDiscovery.ProcessFPPDJson(request);
             });
 
+    	// URL's needed for FPP Connect fseq uploading and querying
     	webServer.on ("/api/proxies", HTTP_GET, [](AsyncWebServerRequest* request)
             {
                 FPPDiscovery.ProcessFPPDJson(request);

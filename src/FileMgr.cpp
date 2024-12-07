@@ -1713,7 +1713,7 @@ void c_FileMgr::PauseSdFile (const FileId & FileHandle)
 //-----------------------------------------------------------------------------
 void c_FileMgr::BuildFseqList()
 {
-    DEBUG_START;
+    // DEBUG_START;
     char entryName [256];
 
     do // once
@@ -1855,7 +1855,7 @@ void c_FileMgr::BuildFseqList()
     // ReadSdFile(FSEQFILELIST, Temp);
     // DEBUG_V(Temp);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // BuildFseqList
 
