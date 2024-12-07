@@ -451,7 +451,7 @@ void c_WebMgr::init ()
         // FS Debugging Handler
         // webServer.serveStatic ("/fs", LittleFS, "/" );
 
-        // if the client posts to the upload page
+        // if the client posts to the file upload page
     	webServer.on ("/upload", HTTP_POST | HTTP_PUT | HTTP_OPTIONS,
         	[](AsyncWebServerRequest * request)
             {
