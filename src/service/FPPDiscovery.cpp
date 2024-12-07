@@ -830,6 +830,7 @@ void c_FPPDiscovery::ProcessFile (
         // DEBUG_V();
         if (final || writeFailed)
         {
+            // DEBUG_V("Allow file to play");
             inFileUpload = false;
             UploadFileName = "";
         }
