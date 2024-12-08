@@ -51,10 +51,12 @@ void FppRemoteTask (void *arg)
             PollTime = pdMS_TO_TICKS(1);
         }
         vTaskDelay(PollTime);
+        FeedWDT();
 
         PollStartTime = millis();
 
         pFppRemoteInstance->TaskProcess();
+        FeedWDT();
 
         // record the loop end time
         PollEndTime = millis();

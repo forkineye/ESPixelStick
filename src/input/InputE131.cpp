@@ -157,14 +157,12 @@ void c_InputE131::ProcessIncomingE131Data (e131_packet_t * packet)
             // Do we need to update a sequnce error?
             if (packet->sequence_number != CurrentUniverse.SequenceNumber)
             {
-                // DEBUG_V (F ("E1.31 Sequence Error - expected: "));
-                // DEBUG_V (CurrentUniverse.SequenceNumber);
-                // DEBUG_V (F (" actual: "));
-                // DEBUG_V (packet->sequence_number);
-                // DEBUG_V (" " + String (CN_universe) + " : ");
-                // DEBUG_V (CurrentUniverseId);
-
-                CurrentUniverse.SequenceErrorCounter++;
+                // DEBUG_V (String ("E1.31 Sequence Error - expected: ") + String(CurrentUniverse.SequenceNumber) + " actual: " + packet->sequence_number + " " + String (CN_universe) + " : " + CurrentUniverseId);
+                // zero is special. Some data sources do not use the sequence number and set this field to zero
+                if(0 != packet->sequence_number)
+                {
+                    CurrentUniverse.SequenceErrorCounter++;
+                }
                 CurrentUniverse.SequenceNumber = packet->sequence_number;
             }
 
@@ -221,7 +219,7 @@ void c_InputE131::SetBufferTranslation ()
 
     uint32_t InputOffset = FirstUniverseChannelOffset - 1;
     uint32_t DestinationOffset = 0;
-    uint32_t  BytesLeftToMap = InputDataBufferSize;
+    uint32_t BytesLeftToMap = InputDataBufferSize;
 
     // set up the bytes for the First Universe
     uint32_t BytesInUniverse = ChannelsPerUniverse - InputOffset;
