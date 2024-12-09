@@ -1,5 +1,6 @@
 var StatusRequestTimer = null;
 var DiagTimer = null;
+var ConfigSessionId = new Date().getTime();
 
 // global data
 var AdminInfo = null;
@@ -616,7 +617,9 @@ async function RequestConfigFile(FileName)
 {
     // console.log("RequestConfigFile FileName: " + FileName);
 
-    await $.getJSON("HTTP://" + target + "/conf/" + FileName, function(data)
+    var url = "HTTP://" + target + "/conf/" + FileName + '?t=' + ConfigSessionId;
+    // console.info("'GET' Config URL: '" + url + "'");
+    await $.getJSON(url, function(data)
     {
         // console.log("RequestConfigFile: " + JSON.stringify(data));
         ProcessReceivedJsonConfigMessage(data);
@@ -1805,6 +1808,7 @@ function submitDeviceConfig() {
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
+    ConfigSessionId = new Date().getTime();
     ServerAccess.callFunction(SendConfigFileToServer, "output_config", JSON.stringify({'output_config': Output_Config}));
     ServerAccess.callFunction(SendConfigFileToServer, "input_config", JSON.stringify({'input_config': Input_Config}));
     submitNetworkConfig();
@@ -2222,4 +2226,5 @@ function reboot() {
 $('#confirm-reset .btn-ok').on("click", (function () {
     showReboot();
     SendCommand('X7');
+    ConfigSessionId = new Date().getTime();
 }));
