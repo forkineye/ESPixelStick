@@ -1,9 +1,11 @@
 <map id="c_FPPDiscovery::StopPlaying" name="c_FPPDiscovery::StopPlaying">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,46,199,72"/>
-<area shape="rect" id="Node000002" href="$classc___input_f_p_p_remote_play_file.html#a832119422e2b13fc06059dd73215cf75" title=" " alt="" coords="247,5,428,46"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="197,43,231,38,232,43,198,48"/>
-<area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote_play_file.html#a28afd8eea9136543891254dbda371dc2" title=" " alt="" coords="247,71,428,111"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="200,70,232,74,231,79,199,75"/>
-<area shape="rect" id="Node000004" href="$classfsm___play_file__state.html#afc9f1b66b51391f2f12166a851fdbfd7" title=" " alt="" coords="476,71,608,111"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="429,88,460,88,460,94,429,94"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,63,199,88"/>
+<area shape="rect" id="Node000002" href="$main_8cpp.html#ace03924f16faf7e0c24590ede39ae2f2" title=" " alt="" coords="298,5,377,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,59,282,29,283,34,159,65"/>
+<area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote_play_file.html#a832119422e2b13fc06059dd73215cf75" title=" " alt="" coords="247,55,428,96"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="199,73,231,73,231,78,199,78"/>
+<area shape="rect" id="Node000004" href="$classc___input_f_p_p_remote_play_file.html#a28afd8eea9136543891254dbda371dc2" title=" " alt="" coords="247,121,428,161"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="152,86,247,113,246,118,150,91"/>
+<area shape="rect" id="Node000005" href="$classfsm___play_file__state.html#afc9f1b66b51391f2f12166a851fdbfd7" title=" " alt="" coords="476,121,608,161"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="429,138,460,138,460,144,429,144"/>
 </map>

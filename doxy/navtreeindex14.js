@@ -1,5 +1,7 @@
 var NAVTREEINDEX14 =
 {
+"struct_output_channel_id_to_gpio_and_port_entry__t.html":[0,0,67],
+"struct_output_channel_id_to_gpio_and_port_entry__t.html#a36ecb20c20f96038b336338b548766c5":[0,0,67,1],
 "struct_output_channel_id_to_gpio_and_port_entry__t.html#a686a817d1f29961de5c7cba2e317ad14":[0,0,67,0],
 "struct_output_channel_id_to_gpio_and_port_entry__t.html#ad49b54ca07c9522fe805c5ec4e26ea36":[0,0,67,2],
 "struct_output_type_xlate_map__t.html":[0,0,68],
@@ -25,10 +27,11 @@ var NAVTREEINDEX14 =
 "structc___f_p_p_discovery_1_1_multi_sync_stats__t.html#ad2de3616602611cfaaa6b5a2c8b93a8a":[0,0,2,0,11],
 "structc___f_p_p_discovery_1_1_system_debug_stats__t.html":[0,0,2,1],
 "structc___f_p_p_discovery_1_1_system_debug_stats__t.html#a158e88967c8f8e07789e7960bc897210":[0,0,2,1,2],
+"structc___f_p_p_discovery_1_1_system_debug_stats__t.html#a3d3beb9535d5b4347382fdf6c51505a0":[0,0,2,1,5],
 "structc___f_p_p_discovery_1_1_system_debug_stats__t.html#a4dd1a9884f39d9a5667025be8ade850a":[0,0,2,1,4],
 "structc___f_p_p_discovery_1_1_system_debug_stats__t.html#a5bf429ebec2bb8a444fa27775c3d6d98":[0,0,2,1,0],
 "structc___f_p_p_discovery_1_1_system_debug_stats__t.html#aa9cda1eda4d67142500cfa34f908297b":[0,0,2,1,3],
-"structc___f_p_p_discovery_1_1_system_debug_stats__t.html#aab364eaa7edfa41ee14d6fec89eb56f6":[0,0,2,1,5],
+"structc___f_p_p_discovery_1_1_system_debug_stats__t.html#aab364eaa7edfa41ee14d6fec89eb56f6":[0,0,2,1,6],
 "structc___f_p_p_discovery_1_1_system_debug_stats__t.html#adb3d35e6c143e55144e009b1d4296caf":[0,0,2,1,1],
 "structc___file_mgr_1_1_file_list_entry__t.html":[0,0,1,0],
 "structc___file_mgr_1_1_file_list_entry__t.html#a004583b0bfee708652aa238b715bc57c":[0,0,1,0,10],

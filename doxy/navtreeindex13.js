@@ -1,5 +1,7 @@
 var NAVTREEINDEX13 =
 {
+"fseq_8h.html#a9f3166333902b30dbb182974d5390be0":[1,0,0,4,1,37],
+"fseq_8h.html#aa0a25f66460f3c721b0b4d31b48ebceb":[1,0,0,4,1,12],
 "fseq_8h.html#aa0f0acd37a1403c67b86fb03c23898f1":[1,0,0,4,1,27],
 "fseq_8h.html#aa2585d779da0ab21273a8d92de9a0ebe":[1,0,0,4,1,22],
 "fseq_8h.html#ab8797f1da914d19428f23f254854f920":[1,0,0,4,1,36],
@@ -19,8 +21,8 @@ var NAVTREEINDEX13 =
 "fseq_8h.html#af5832b014375b58f4cb5545879ae3ef4":[1,0,0,4,1,23],
 "fseq_8h.html#afaf5a1759edbb499eae879c9e6c91341":[1,0,0,4,1,17],
 "fseq_8h_source.html":[1,0,0,4,1],
-"functions.html":[0,3,0],
 "functions.html":[0,3,0,0],
+"functions.html":[0,3,0],
 "functions_a.html":[0,3,0,1],
 "functions_b.html":[0,3,0,2],
 "functions_c.html":[0,3,0,3],
@@ -29,8 +31,8 @@ var NAVTREEINDEX13 =
 "functions_enum.html":[0,3,4],
 "functions_eval.html":[0,3,5],
 "functions_f.html":[0,3,0,6],
-"functions_func.html":[0,3,1,0],
 "functions_func.html":[0,3,1],
+"functions_func.html":[0,3,1,0],
 "functions_func_a.html":[0,3,1,1],
 "functions_func_b.html":[0,3,1,2],
 "functions_func_c.html":[0,3,1,3],
@@ -93,14 +95,14 @@ var NAVTREEINDEX13 =
 "functions_w.html":[0,3,0,20],
 "functions_z.html":[0,3,0,21],
 "functions_~.html":[0,3,0,22],
-"globals.html":[1,1,0],
 "globals.html":[1,1,0,0],
+"globals.html":[1,1,0],
 "globals_a.html":[1,1,0,1],
 "globals_b.html":[1,1,0,2],
 "globals_c.html":[1,1,0,3],
 "globals_d.html":[1,1,0,4],
-"globals_defs.html":[1,1,3],
 "globals_defs.html":[1,1,3,0],
+"globals_defs.html":[1,1,3],
 "globals_defs_c.html":[1,1,3,1],
 "globals_defs_d.html":[1,1,3,2],
 "globals_defs_e.html":[1,1,3,3],
@@ -247,7 +249,5 @@ var NAVTREEINDEX13 =
 "struct_input_type_xlate_map__t.html":[0,0,66],
 "struct_input_type_xlate_map__t.html#a6b695ab0be20c2adc623256f9345cfa1":[0,0,66,1],
 "struct_input_type_xlate_map__t.html#a93006abf40948208b0f3b9443e2b0dfd":[0,0,66,2],
-"struct_input_type_xlate_map__t.html#abb9708f4a5eec8343c96e6a8e5594a53":[0,0,66,0],
-"struct_output_channel_id_to_gpio_and_port_entry__t.html":[0,0,67],
-"struct_output_channel_id_to_gpio_and_port_entry__t.html#a36ecb20c20f96038b336338b548766c5":[0,0,67,1]
+"struct_input_type_xlate_map__t.html#abb9708f4a5eec8343c96e6a8e5594a53":[0,0,66,0]
 };

@@ -73,6 +73,7 @@ var searchData=
   ['prependnullpixelcurrentcount_70',['PrependNullPixelCurrentCount',['../classc___output_pixel.html#aeac02de7e78d3cd47025f840d487f5ed',1,'c_OutputPixel']]],
   ['previousstate_71',['PreviousState',['../classc___network_mgr.html#ad0481bf9efb052bc76c239c6f6b90c54',1,'c_NetworkMgr']]],
   ['primarydns_72',['primaryDns',['../classc___wi_fi_driver.html#a84dce4da7ef6bf0afd546a8b693340cd',1,'c_WiFiDriver']]],
-  ['processfppjson_73',['ProcessFPPJson',['../structc___f_p_p_discovery_1_1_system_debug_stats__t.html#aab364eaa7edfa41ee14d6fec89eb56f6',1,'c_FPPDiscovery::SystemDebugStats_t']]],
-  ['pwifidriver_74',['pWiFiDriver',['../classfsm___wi_fi__state.html#a97a2adc75a27ce7c9feefa0d2e85a5dd',1,'fsm_WiFi_state']]]
+  ['processfppdjson_73',['ProcessFPPDJson',['../structc___f_p_p_discovery_1_1_system_debug_stats__t.html#a3d3beb9535d5b4347382fdf6c51505a0',1,'c_FPPDiscovery::SystemDebugStats_t']]],
+  ['processfppjson_74',['ProcessFPPJson',['../structc___f_p_p_discovery_1_1_system_debug_stats__t.html#aab364eaa7edfa41ee14d6fec89eb56f6',1,'c_FPPDiscovery::SystemDebugStats_t']]],
+  ['pwifidriver_75',['pWiFiDriver',['../classfsm___wi_fi__state.html#a97a2adc75a27ce7c9feefa0d2e85a5dd',1,'fsm_WiFi_state']]]
 ];

@@ -11,7 +11,7 @@ var searchData=
   ['readfile_8',['ReadFile',['../classc___input_f_p_p_remote_play_file.html#ad9ba8efa7a89f694f337a208833daa25',1,'c_InputFPPRemotePlayFile']]],
   ['readflashfile_9',['readflashfile',['../classc___file_mgr.html#aab11aa92f9253ec95ec5b2dc7be1c55e',1,'c_FileMgr::ReadFlashFile(const String &amp;FileName, String &amp;FileData)'],['../classc___file_mgr.html#a7805d4138f98227fbec656ee5b63e897',1,'c_FileMgr::ReadFlashFile(const String &amp;FileName, JsonDocument &amp;FileData)'],['../classc___file_mgr.html#a50e2fa2750987e264218896dede53778',1,'c_FileMgr::ReadFlashFile(const String &amp;FileName, byte *FileData, size_t maxlen)']]],
   ['readinput_10',['ReadInput',['../classc___external_input.html#aa8c12cd0c690a094962ba8f7f5361282',1,'c_ExternalInput']]],
-  ['readsdfile_11',['readsdfile',['../classc___file_mgr.html#a8691c90e2a239cde2087bf72e84f4436',1,'c_FileMgr::ReadSdFile(const String &amp;FileName, JsonDocument &amp;FileData)'],['../classc___file_mgr.html#a99bd795457bb43cc30780a1fc9d43c90',1,'c_FileMgr::ReadSdFile(const String &amp;FileName, String &amp;FileData)'],['../classc___file_mgr.html#a59e8cbf45c018d31f804a7d5de5395ef',1,'c_FileMgr::ReadSdFile(const FileId &amp;FileHandle, byte *FileData, size_t NumBytesToRead, size_t StartingPosition)'],['../classc___file_mgr.html#a52b312d37c19138ae3f6397e3aa919f4',1,'c_FileMgr::ReadSdFile(const FileId &amp;FileHandle, byte *FileData, size_t NumBytesToRead)']]],
+  ['readsdfile_11',['readsdfile',['../classc___file_mgr.html#ab4abd9b3bf5026c6bedbbe3d5f72f54b',1,'c_FileMgr::ReadSdFile(const String &amp;FileName, JsonDocument &amp;FileData, bool LockStatus=false)'],['../classc___file_mgr.html#a048fab6ed912c57a0f8868bca5d71737',1,'c_FileMgr::ReadSdFile(const String &amp;FileName, String &amp;FileData, bool LockStatus=false)'],['../classc___file_mgr.html#aa9a93d1617e9d46e35a92a8a5a9a19ca',1,'c_FileMgr::ReadSdFile(const FileId &amp;FileHandle, byte *FileData, size_t NumBytesToRead, size_t StartingPosition, bool LockStatus=false)'],['../classc___file_mgr.html#aaa2a2d57672ad20058c3f877008416c4',1,'c_FileMgr::ReadSdFile(const FileId &amp;FileHandle, byte *FileData, size_t NumBytesToRead, bool LockStatus=false)']]],
   ['reboot_5fdelay_12',['REBOOT_DELAY',['../_e_s_pixel_stick_8h.html#a379de1a2f9b4453dbc110c28ecb25834',1,'ESPixelStick.h']]],
   ['rebootcount_13',['RebootCount',['../main_8cpp.html#a7876ec0ea2b6d345c51ff1afd96a5086',1,'main.cpp']]],
   ['rebootinprogress_14',['rebootinprogress',['../_e_s_pixel_stick_8h.html#aee3a92a77acd81bd67090432b16e23a1',1,'RebootInProgress():&#160;main.cpp'],['../main_8cpp.html#aee3a92a77acd81bd67090432b16e23a1',1,'RebootInProgress():&#160;main.cpp']]],
@@ -24,7 +24,7 @@ var searchData=
   ['relay_21',['Relay',['../classc___output_mgr.html#a970adc830ccb78bebef75d526c515cc9ac572c651ab04a645468cef2d7510045e',1,'c_OutputMgr']]],
   ['remainingplaycount_22',['RemainingPlayCount',['../classc___input_f_p_p_remote_play_item.html#ac66be65fa51481d84e0cee5c7ba9bdd5',1,'c_InputFPPRemotePlayItem']]],
   ['reportediswificonnected_23',['ReportedIsWiFiConnected',['../classc___wi_fi_driver.html#a4d752718b07127ffc3291d7b0e360d9d',1,'c_WiFiDriver']]],
-  ['reportnewframe_24',['reportnewframe',['../classc___output_common.html#ae4db3605be43e71dbd0b4f929b69aa85',1,'c_OutputCommon::ReportNewFrame()'],['../classc___output_uart.html#a535f40a45bc69ba9c67de5ed3da80467',1,'c_OutputUart::ReportNewFrame()']]],
+  ['reportnewframe_24',['reportnewframe',['../classc___output_uart.html#a535f40a45bc69ba9c67de5ed3da80467',1,'c_OutputUart::ReportNewFrame()'],['../classc___output_common.html#ae4db3605be43e71dbd0b4f929b69aa85',1,'c_OutputCommon::ReportNewFrame()']]],
   ['requestreboot_25',['requestreboot',['../_e_s_pixel_stick_8h.html#a07c188498d1aa5b7b068c7a0e09a75f4',1,'RequestReboot(uint32_t LoopDelay):&#160;main.cpp'],['../main_8cpp.html#a07c188498d1aa5b7b068c7a0e09a75f4',1,'RequestReboot(uint32_t LoopDelay):&#160;main.cpp']]],
   ['reset_26',['reset',['../classc___wi_fi_driver.html#a73ac32c8db2b76fe03893dde2a2ad134',1,'c_WiFiDriver']]],
   ['resetsdcard_27',['ResetSdCard',['../classc___file_mgr.html#abf9680ad0d546bd42476f6460e387ba0',1,'c_FileMgr']]],
@@ -33,7 +33,6 @@ var searchData=
   ['responseport_30',['ResponsePort',['../structc___input_d_d_p_1_1_packet_buffer__t.html#a0fe17b362993358cd7402373774ab977',1,'c_InputDDP::PacketBuffer_t']]],
   ['restartblanktimer_31',['RestartBlankTimer',['../classc___input_mgr.html#ac50551f90f209dbaa2b476a20b524b71',1,'c_InputMgr']]],
   ['restoreserialportoperation_32',['RestoreSerialPortOperation',['../classc___output_uart.html#a4a957a10495a41bc1ff8f469be391e04',1,'c_OutputUart']]],
-  ['resumesdfile_33',['ResumeSdFile',['../classc___file_mgr.html#a2f32ef0093af2a5a36f9b7b6460f9aae',1,'c_FileMgr']]],
-  ['rgb2hsv_34',['rgb2hsv',['../classc___input_effect_engine.html#a6751a5a67dd911744b80574029cac95c',1,'c_InputEffectEngine']]],
-  ['rmt_35',['Rmt',['../classc___output_mgr.html#a970adc830ccb78bebef75d526c515cc9afb1a932142103c9fcad347c899382cbf',1,'c_OutputMgr']]]
+  ['rgb2hsv_33',['rgb2hsv',['../classc___input_effect_engine.html#a6751a5a67dd911744b80574029cac95c',1,'c_InputEffectEngine']]],
+  ['rmt_34',['Rmt',['../classc___output_mgr.html#a970adc830ccb78bebef75d526c515cc9afb1a932142103c9fcad347c899382cbf',1,'c_OutputMgr']]]
 ];

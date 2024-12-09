@@ -22,6 +22,7 @@ var classc___f_p_p_discovery =
     [ "ProcessBlankPacket", "classc___f_p_p_discovery.html#a427a0facd1716a38fe6bf5afa87fd49c", null ],
     [ "ProcessBody", "classc___f_p_p_discovery.html#a13f8ae4f868abed68dbd07ec7b27930e", null ],
     [ "ProcessFile", "classc___f_p_p_discovery.html#a23c80db87a22d64ac4d4ea91c9ffccde", null ],
+    [ "ProcessFPPDJson", "classc___f_p_p_discovery.html#a56fa1b46a4d6fd283665408a2fb40473", null ],
     [ "ProcessFPPJson", "classc___f_p_p_discovery.html#a99fba021d3c16c82798bb98db9f36f5a", null ],
     [ "ProcessGET", "classc___f_p_p_discovery.html#a2e06d4a3b80cd325dddc55621b47115e", null ],
     [ "ProcessPOST", "classc___f_p_p_discovery.html#a1f59ce0b751f091c5546ce96e1b41028", null ],

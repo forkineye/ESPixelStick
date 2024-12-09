@@ -103,7 +103,7 @@ $(document).ready(function(){initNavTree('_output_w_s2811_8hpp_source.html','');
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment">* OutputWS2811.h - WS2811 driver code for ESPixelStick</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">*</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">* Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">* Copyright (c) 2015, 2022 Shelby Merrick</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">* Copyright (c) 2015, 2024 Shelby Merrick</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">* http://www.forkineye.com</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">*</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">*  This program is provided free for you to use in any way that you wish,</span></div>
@@ -152,25 +152,29 @@ $(document).ready(function(){initNavTree('_output_w_s2811_8hpp_source.html','');
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#define WS2811_PIXEL_NS_BIT_TOTAL           ( (1.0 / WS2811_PIXEL_DATA_RATE) * NanoSecondsInASecond)</span></div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#ifdef ARDUINO_ARCH_ESP32</span></div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>                                            <span class="comment">// values have been adjusted to work with seed pixels.</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">    #define WS2811_PIXEL_NS_BIT_0_HIGH      312.0 </span><span class="comment">// = 312 on logic analyzer 220ns - 380ns per datasheet</span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">    #define WS2811_PIXEL_NS_BIT_0_LOW       945.0 </span><span class="comment">// = 937 on logic analyzer 580ns - 1.6us per datasheet</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">    #define WS2811_PIXEL_NS_BIT_1_HIGH      975.0 </span><span class="comment">// = 937 on logic analyzer 580ns - 1.6us per datasheet</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">    #define WS2811_PIXEL_NS_BIT_1_LOW       300.0 </span><span class="comment">// = 312 on logic analyzer 220ns - 380ns per datasheet</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="preprocessor">    #define WS2811_PIXEL_NS_BIT_0_HIGH      312.0 </span><span class="comment">// 220ns - 380ns per datasheet</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">    #define WS2811_PIXEL_NS_BIT_0_LOW       (WS2811_PIXEL_NS_BIT_TOTAL - WS2811_PIXEL_NS_BIT_0_HIGH)</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">    #define WS2811_PIXEL_NS_BIT_1_HIGH      975.0 </span><span class="comment">// 580ns - 1.6us per datasheet</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="preprocessor">    #define WS2811_PIXEL_NS_BIT_1_LOW       (WS2811_PIXEL_NS_BIT_TOTAL - WS2811_PIXEL_NS_BIT_1_HIGH)</span></div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="preprocessor">#endif </span><span class="comment">// ARDUINO_ARCH_ESP32</span></div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="preprocessor">#define WS2811_PIXEL_IDLE_TIME_US           350.0 </span><span class="comment">// 350us per datasheet</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">#define WS2811_PIXEL_IDLE_TIME_NS           WS2811_PIXEL_IDLE_TIME_US * NanoSecondsInAMicroSecond</span></div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#define WS2811_PIXEL_BITS_PER_INTENSITY     8</span></div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>}; <span class="comment">// c_OutputWS2811</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="comment">//    #define WS2811_PIXEL_NS_BIT_0_HIGH      312.0 // = 312 on logic analyzer 220ns - 380ns per datasheet</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="comment">//    #define WS2811_PIXEL_NS_BIT_0_LOW       945.0 // = 937 on logic analyzer 580ns - 1.6us per datasheet</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="comment">//    #define WS2811_PIXEL_NS_BIT_1_HIGH      975.0 // = 937 on logic analyzer 580ns - 1.6us per datasheet</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment">//    #define WS2811_PIXEL_NS_BIT_1_LOW       300.0 // = 312 on logic analyzer 220ns - 380ns per datasheet</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">    #define WS2811_PIXEL_NS_BIT_0_HIGH      300.0 </span><span class="comment">// 220ns - 380ns per datasheet</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="preprocessor">    #define WS2811_PIXEL_NS_BIT_0_LOW       (WS2811_PIXEL_NS_BIT_TOTAL - WS2811_PIXEL_NS_BIT_0_HIGH)</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">    #define WS2811_PIXEL_NS_BIT_1_HIGH      WS2811_PIXEL_NS_BIT_0_LOW</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">    #define WS2811_PIXEL_NS_BIT_1_LOW       WS2811_PIXEL_NS_BIT_0_HIGH</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="preprocessor">    #define WS2811_PIXEL_NS_BIT_0_HIGH      312.0 </span><span class="comment">// 220ns - 380ns per datasheet</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">    #define WS2811_PIXEL_NS_BIT_0_LOW       (WS2811_PIXEL_NS_BIT_TOTAL - WS2811_PIXEL_NS_BIT_0_HIGH)</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="preprocessor">    #define WS2811_PIXEL_NS_BIT_1_HIGH      975.0 </span><span class="comment">// 580ns - 1.6us per datasheet</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">    #define WS2811_PIXEL_NS_BIT_1_LOW       (WS2811_PIXEL_NS_BIT_TOTAL - WS2811_PIXEL_NS_BIT_1_HIGH)</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="preprocessor">#endif </span><span class="comment">// ARDUINO_ARCH_ESP32</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="preprocessor">#define WS2811_PIXEL_IDLE_TIME_US           350.0 </span><span class="comment">// 350us per datasheet</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#define WS2811_PIXEL_IDLE_TIME_NS           WS2811_PIXEL_IDLE_TIME_US * NanoSecondsInAMicroSecond</span></div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">#endif </span><span class="comment">// defined(SUPPORT_OutputType_WS2811)</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">#define WS2811_PIXEL_BITS_PER_INTENSITY     8</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>}; <span class="comment">// c_OutputWS2811</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="preprocessor">#endif </span><span class="comment">// defined(SUPPORT_OutputType_WS2811)</span></div>
 <div class="ttc" id="a_const_names_8cpp_html_aefbb8accccfecd263e5ba9a2d5d7bdcf"><div class="ttname"><a href="_const_names_8cpp.html#aefbb8accccfecd263e5ba9a2d5d7bdcf">CN_WS2811</a></div><div class="ttdeci">const CN_PROGMEM char CN_WS2811[]</div><div class="ttdef"><b>Definition</b> ConstNames.cpp:233</div></div>
 <div class="ttc" id="a_output_pixel_8hpp_html"><div class="ttname"><a href="_output_pixel_8hpp.html">OutputPixel.hpp</a></div></div>
 <div class="ttc" id="aclassc___output_common_html_a23228420b2471f0f041c0df0865cc60e"><div class="ttname"><a href="classc___output_common.html#a23228420b2471f0f041c0df0865cc60e">c_OutputCommon::GetDriverName</a></div><div class="ttdeci">virtual void GetDriverName(String &amp;sDriverName)=0</div><div class="ttdoc">get the name for the instantiated driver</div></div>
