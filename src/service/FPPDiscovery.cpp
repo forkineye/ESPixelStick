@@ -165,6 +165,7 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
         jsonStatus[F ("pktLastCommand")]  = MultiSyncStats.pktLastCommand;
 
         jsonStatus[F ("ProcessFPPJson")]    = SystemDebugStats.ProcessFPPJson;
+        jsonStatus[F ("ProcessFPPDJson")]   = SystemDebugStats.ProcessFPPDJson;
         jsonStatus[F ("CmdGetFPPstatus")]   = SystemDebugStats.CmdGetFPPstatus;
         jsonStatus[F ("CmdGetSysInfoJSON")] = SystemDebugStats.CmdGetSysInfoJSON;
         jsonStatus[F ("CmdGetHostname")]    = SystemDebugStats.CmdGetHostname;
@@ -499,7 +500,7 @@ static void printReq (AsyncWebServerRequest* request, bool post)
     for (int i = 0; i < params; i++)
     {
         // DEBUG_V (String ("current Param: ") + String (i));
-        AsyncWebParameter* p = request->getParam (i);
+        const AsyncWebParameter* p = request->getParam (i);
         // DEBUG_V (String ("      p->name: ") + String (p->name()));
         // DEBUG_V (String ("     p->value: ") + String (p->value()));
 
@@ -531,7 +532,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
     JsonObject JsonData = JsonDoc.to<JsonObject> ();
 
     FSEQRawHeader fsqHeader;
-    FileMgr.ReadSdFile (fseq, (byte*)&fsqHeader, sizeof (fsqHeader), 0);
+    FileMgr.ReadSdFile (fseq, (byte*)&fsqHeader, sizeof (fsqHeader), size_t(0));
 
     JsonData[F ("Name")]            = fname;
     JsonData[CN_Version]            = String (fsqHeader.majorVersion) + "." + String (fsqHeader.minorVersion);
@@ -580,7 +581,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
         uint8_t* RangeDataBuffer = (uint8_t*)malloc (sizeof(FSEQRawRangeEntry) * fsqHeader.numSparseRanges);
         FSEQRawRangeEntry* CurrentFSEQRangeEntry = (FSEQRawRangeEntry*)RangeDataBuffer;
 
-        FileMgr.ReadSdFile (fseq, RangeDataBuffer, sizeof (FSEQRawRangeEntry), fsqHeader.numCompressedBlocks * 8 + 32);
+        FileMgr.ReadSdFile (fseq, RangeDataBuffer, sizeof (FSEQRawRangeEntry), size_t(fsqHeader.numCompressedBlocks * 8 + 32));
 
         for (int CurrentRangeIndex = 0;
              CurrentRangeIndex < fsqHeader.numSparseRanges;
@@ -688,7 +689,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                 c_FileMgr::FileId FileHandle;
                 // DEBUG_V (String (" seq: ") + seq);
 
-                if (FileMgr.OpenSdFile (seq, c_FileMgr::FileMode::FileRead, FileHandle))
+                if (FileMgr.OpenSdFile (seq, c_FileMgr::FileMode::FileRead, FileHandle, -1))
                 {
                     if (FileMgr.GetSdFileSize(FileHandle) > 0)
                     {
@@ -756,7 +757,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
         // DEBUG_V (String(F ("FileName: ")) + filename);
 
         c_FileMgr::FileId FileHandle;
-        if (false == FileMgr.OpenSdFile (filename, c_FileMgr::FileMode::FileRead, FileHandle))
+        if (false == FileMgr.OpenSdFile (filename, c_FileMgr::FileMode::FileRead, FileHandle, -1))
         {
             logcon (String (F ("c_FPPDiscovery::ProcessPOST: File Does Not Exist - FileName: ")) + filename);
             request->send (404);
@@ -811,7 +812,8 @@ void c_FPPDiscovery::ProcessFile (
         if(!inFileUpload)
         {
             // DEBUG_V();
-            StopPlaying(false);
+            // wait for the player to become idle
+            StopPlaying(true);
             inFileUpload = true;
             UploadFileName = filename;
         }
@@ -828,6 +830,7 @@ void c_FPPDiscovery::ProcessFile (
         // DEBUG_V();
         if (final || writeFailed)
         {
+            // DEBUG_V("Allow file to play");
             inFileUpload = false;
             UploadFileName = "";
         }
@@ -1103,6 +1106,34 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 } // ProcessFPPJson
 
 //-----------------------------------------------------------------------------
+void c_FPPDiscovery::ProcessFPPDJson (AsyncWebServerRequest* request)
+{
+    // DEBUG_START;
+    printReq(request, false);
+
+    SystemDebugStats.ProcessFPPDJson++;
+
+    do // once
+    {
+        if (!request->hasParam (ulrCommand))
+        {
+            request->send (404);
+            // DEBUG_V (String ("Missing Param: 'command' "));
+
+            break;
+        }
+
+        // DEBUG_V (String ("Unknown command: ") + command);
+        request->send (404);
+        SystemDebugStats.CmdNotFound++;
+
+    } while (false);
+
+    // DEBUG_END;
+
+} // ProcessFPPDJson
+
+//-----------------------------------------------------------------------------
 void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
 {
     // DEBUG_START;
@@ -1147,6 +1178,8 @@ void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
 void c_FPPDiscovery::StopPlaying (bool wait)
 {
     // DEBUG_START;
+
+    FeedWDT();
 
     // DEBUG_V (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
     // only process if the pointer is valid
