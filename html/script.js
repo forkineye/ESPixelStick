@@ -1,5 +1,6 @@
 var StatusRequestTimer = null;
 var DiagTimer = null;
+var ConfigSessionId = new Date().getTime();
 
 // global data
 var AdminInfo = null;
@@ -267,7 +268,7 @@ $(function () {
 
                     let DeltaTime = (new Date().getTime() - FseqFileTransferStartTime.getTime()) / 1000;
                     let rate = Math.floor((file.size / DeltaTime) / 1000);
-                    console.debug("Final Transfer Rate: " + rate + "KBps");
+                    // console.debug("Final Transfer Rate: " + rate + "KBps");
                 });
 
                 this.on('addedfile', function (file, resp) {
@@ -442,7 +443,7 @@ function MergeConfigTree(SourceTree, TargetTree, CurrentTarget, FullSelector)
 
         if(CurrentElementValue === undefined)
         {
-            console.info("target element is not properly formed");
+            console.error("target element is not properly formed");
             continue;
         }
 
@@ -468,7 +469,7 @@ function MergeConfigTree(SourceTree, TargetTree, CurrentTarget, FullSelector)
             }
             else
             {
-                console.info("NOT Saving CurrentElement. Source value is Not in target tree.");
+                console.error("NOT Saving CurrentElement. Source value is Not in target tree.");
             }
         }
     }
@@ -616,7 +617,9 @@ async function RequestConfigFile(FileName)
 {
     // console.log("RequestConfigFile FileName: " + FileName);
 
-    await $.getJSON("HTTP://" + target + "/conf/" + FileName, function(data)
+    var url = "HTTP://" + target + "/conf/" + FileName + '?t=' + ConfigSessionId;
+    // console.info("'GET' Config URL: '" + url + "'");
+    await $.getJSON(url, function(data)
     {
         // console.log("RequestConfigFile: " + JSON.stringify(data));
         ProcessReceivedJsonConfigMessage(data);
@@ -1742,13 +1745,13 @@ function hexToRgb(hex) {
 
 function ExtractConfigFromHtmlPages(elementids, modeControlName, ChannelConfig)
 {
-    console.info("Preping config to send to ESP");
-    console.info("num elementids: " + elementids.length);
+    // console.debug("Preping config to send to ESP");
+    // console.debug("num elementids: " + elementids.length);
 
     elementids.forEach(function (elementid)
     {
         let SelectedElement = modeControlName + ' #' + elementid;
-        console.info("Element ID: " + $(SelectedElement).id)
+        // console.debug("Element ID: " + $(SelectedElement).id)
 
         if ($(SelectedElement).is(':checkbox'))
         {
@@ -1756,7 +1759,7 @@ function ExtractConfigFromHtmlPages(elementids, modeControlName, ChannelConfig)
         }
         else if ($(SelectedElement).attr('type') === 'number')
         {
-            console.info("Found Number: " + $(SelectedElement).id)
+            // console.debug("Found Number: " + $(SelectedElement).id)
             ChannelConfig[elementid] = parseInt($(SelectedElement).val());
         }
         else
@@ -1805,6 +1808,7 @@ function submitDeviceConfig() {
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
+    ConfigSessionId = new Date().getTime();
     ServerAccess.callFunction(SendConfigFileToServer, "output_config", JSON.stringify({'output_config': Output_Config}));
     ServerAccess.callFunction(SendConfigFileToServer, "input_config", JSON.stringify({'input_config': Input_Config}));
     submitNetworkConfig();
@@ -2222,4 +2226,5 @@ function reboot() {
 $('#confirm-reset .btn-ok').on("click", (function () {
     showReboot();
     SendCommand('X7');
+    ConfigSessionId = new Date().getTime();
 }));

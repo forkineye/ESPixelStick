@@ -123,6 +123,8 @@ void c_InputMQTT::GetConfig (JsonObject & jsonConfig)
     // DEBUG_START;
 
     // Serialize Config
+    jsonConfig[CN_ip]           = ip;
+    jsonConfig[CN_port]         = port;
     jsonConfig[CN_user]         = user;
     jsonConfig[CN_password]     = password;
     jsonConfig[CN_topic]        = topic;
@@ -164,9 +166,13 @@ void c_InputMQTT::Process ()
             pEffectsEngine->Process ();
         }
 
-        if (nullptr != pPlayFileEngine)
+        else if (nullptr != pPlayFileEngine)
         {
             pPlayFileEngine->Poll ();
+        }
+        else
+        {
+            // DEBUG_V("No active data generation channel");
         }
     }
 
@@ -411,7 +417,7 @@ void c_InputMQTT::onMqttMessage(
         // if its a retained message and we want a clean session, ignore it
         if (properties.retain && CleanSessionRequired)
         {
-            // DEBUG_V ("");
+            // DEBUG_V ("Ignore retained session.");
             break;
         }
 

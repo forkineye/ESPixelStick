@@ -103,7 +103,7 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
     // DEBUG_V ("");
 
     JsonArray e131UniverseStatus = e131Status[CN_channels].to<JsonArray> ();
-    uint32_t TotalErrors = e131->stats.packet_errors;
+    uint32_t TotalErrors = 0; // e131->stats.packet_errors;
     for (auto & CurrentUniverse : UniverseArray)
     {
         JsonObject e131CurrentUniverseStatus = e131UniverseStatus.add<JsonObject> ();
