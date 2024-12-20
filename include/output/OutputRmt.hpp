@@ -129,7 +129,7 @@ public:
 
     void Begin                                  (OutputRmtConfig_t config, c_OutputCommon * pParent);
     bool StartNewFrame                          ();
-    bool StartNextFrame                         () { return (pParent) ? pParent->RmtPoll() : false; }
+    bool StartNextFrame                         () { return ((nullptr != pParent) & (!OutputIsPaused)) ? pParent->RmtPoll() : false; }
     void GetStatus                              (ArduinoJson::JsonObject& jsonStatus);
     void set_pin                                (gpio_num_t _DataPin) { OutputRmtConfig.DataPin = _DataPin; rmt_set_gpio (OutputRmtConfig.RmtChannelId, rmt_mode_t::RMT_MODE_TX, OutputRmtConfig.DataPin, false); }
     void PauseOutput                            (bool State);
