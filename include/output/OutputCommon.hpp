@@ -59,13 +59,15 @@ public:
     virtual void         SetOutputBufferSize (uint32_t NewOutputBufferSize)  { OutputBufferSize = NewOutputBufferSize; };
     virtual uint32_t     GetNumOutputBufferBytesNeeded () = 0;
     virtual uint32_t     GetNumOutputBufferChannelsServiced () = 0;
-    virtual void         PauseOutput (bool State) {}
+    virtual void         PauseOutput (bool NewState) {Paused = NewState;}
     virtual void         ClearBuffer ();
     virtual void         WriteChannelData (uint32_t StartChannelId, uint32_t ChannelCount, byte *pSourceData);
     virtual void         ReadChannelData (uint32_t StartChannelId, uint32_t ChannelCount, byte *pTargetData);
     virtual bool         ValidateGpio (gpio_num_t ConsoleTxGpio, gpio_num_t ConsoleRxGpio);
     virtual bool         DriverIsSendingIntensityData() {return false;}
     virtual uint32_t     GetFrameTimeMs() {return 1 + (ActualFrameDurationMicroSec / 1000); }
+    bool                 IsPaused() {return Paused;}
+
 protected:
 
     gpio_num_t  DataPin                     = gpio_num_t (-1);
@@ -78,6 +80,7 @@ protected:
     uint8_t   * pOutputBuffer               = nullptr;
     uint32_t    OutputBufferSize            = 0;
     uint32_t    FrameCount                  = 0;
+    bool        Paused = false;
 
     virtual void ReportNewFrame ();
 
