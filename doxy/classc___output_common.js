@@ -20,7 +20,8 @@ var classc___output_common =
     [ "GetOutputGpio", "classc___output_common.html#ac3bb5b399f1e8473f057cd7a360ff9a5", null ],
     [ "GetOutputType", "classc___output_common.html#ad7170942775d16bd0d84c5baf589b51d", null ],
     [ "GetStatus", "classc___output_common.html#ac021e275ea90fcfbdc659918d2b78c03", null ],
-    [ "PauseOutput", "classc___output_common.html#ac0f456d9ada8677dc52071ee8818f00c", null ],
+    [ "IsPaused", "classc___output_common.html#aa9f90f7b993e5c19fe5d5835abcca575", null ],
+    [ "PauseOutput", "classc___output_common.html#a827738159d56992021250d85905782b7", null ],
     [ "Poll", "classc___output_common.html#ac254686a33bd04f5255a69f40a5a2788", null ],
     [ "ReadChannelData", "classc___output_common.html#adbf439d37fe45012612f47c83012f6fc", null ],
     [ "ReportNewFrame", "classc___output_common.html#ae4db3605be43e71dbd0b4f929b69aa85", null ],
@@ -38,6 +39,7 @@ var classc___output_common =
     [ "OutputBufferSize", "classc___output_common.html#a6c6a0c4679e3059f945887fe7eac30aa", null ],
     [ "OutputChannelId", "classc___output_common.html#a3acb3b1b8979ad0a28d525a23d3393eb", null ],
     [ "OutputType", "classc___output_common.html#a9b9ccc6ceee5ad7033235824b2d87b43", null ],
+    [ "Paused", "classc___output_common.html#a4c446205cc91c0b16628e5334b7b5c22", null ],
     [ "pOutputBuffer", "classc___output_common.html#a4a14a3bbbc484b50ff0abf62d4e3e732", null ],
     [ "UartId", "classc___output_common.html#a6f3d0f71c2d14f8c06db0068215dfccb", null ]
 ];

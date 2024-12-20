@@ -170,8 +170,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ac657725842d075415641e11871bd01f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a68284ed16932a4f76be6ccddd7871f26" id="r_a68284ed16932a4f76be6ccddd7871f26"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a68284ed16932a4f76be6ccddd7871f26">GetNumOutputBufferChannelsServiced</a> ()=0</td></tr>
 <tr class="separator:a68284ed16932a4f76be6ccddd7871f26"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac0f456d9ada8677dc52071ee8818f00c" id="r_ac0f456d9ada8677dc52071ee8818f00c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#ac0f456d9ada8677dc52071ee8818f00c">PauseOutput</a> (bool State)</td></tr>
-<tr class="separator:ac0f456d9ada8677dc52071ee8818f00c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a827738159d56992021250d85905782b7" id="r_a827738159d56992021250d85905782b7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a827738159d56992021250d85905782b7">PauseOutput</a> (bool NewState)</td></tr>
+<tr class="separator:a827738159d56992021250d85905782b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adc129a5642920dc4d36e3e717aaf1f3c" id="r_adc129a5642920dc4d36e3e717aaf1f3c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#adc129a5642920dc4d36e3e717aaf1f3c">ClearBuffer</a> ()</td></tr>
 <tr class="separator:adc129a5642920dc4d36e3e717aaf1f3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89a48db3e49b37b61b0049d4c411cded" id="r_a89a48db3e49b37b61b0049d4c411cded"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a89a48db3e49b37b61b0049d4c411cded">WriteChannelData</a> (uint32_t StartChannelId, uint32_t ChannelCount, byte *pSourceData)</td></tr>
@@ -184,6 +184,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a6b5a27c4548473466e0832698401a489"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5a960482b9b025836df5d6eda4375aaa" id="r_a5a960482b9b025836df5d6eda4375aaa"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a5a960482b9b025836df5d6eda4375aaa">GetFrameTimeMs</a> ()</td></tr>
 <tr class="separator:a5a960482b9b025836df5d6eda4375aaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9f90f7b993e5c19fe5d5835abcca575" id="r_aa9f90f7b993e5c19fe5d5835abcca575"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#aa9f90f7b993e5c19fe5d5835abcca575">IsPaused</a> ()</td></tr>
+<tr class="separator:aa9f90f7b993e5c19fe5d5835abcca575"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -214,6 +216,8 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a6c6a0c4679e3059f945887fe7eac30aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3490e2a7b2ba343004d367a45faddd3c" id="r_a3490e2a7b2ba343004d367a45faddd3c"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a3490e2a7b2ba343004d367a45faddd3c">FrameCount</a> = 0</td></tr>
 <tr class="separator:a3490e2a7b2ba343004d367a45faddd3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c446205cc91c0b16628e5334b7b5c22" id="r_a4c446205cc91c0b16628e5334b7b5c22"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a4c446205cc91c0b16628e5334b7b5c22">Paused</a> = false</td></tr>
+<tr class="separator:a4c446205cc91c0b16628e5334b7b5c22"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -896,8 +900,33 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
-<a id="ac0f456d9ada8677dc52071ee8818f00c" name="ac0f456d9ada8677dc52071ee8818f00c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac0f456d9ada8677dc52071ee8818f00c">&#9670;&#160;</a></span>PauseOutput()</h2>
+<a id="aa9f90f7b993e5c19fe5d5835abcca575" name="aa9f90f7b993e5c19fe5d5835abcca575"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9f90f7b993e5c19fe5d5835abcca575">&#9670;&#160;</a></span>IsPaused()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool c_OutputCommon::IsPaused </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a827738159d56992021250d85905782b7" name="a827738159d56992021250d85905782b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a827738159d56992021250d85905782b7">&#9670;&#160;</a></span>PauseOutput()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -909,7 +938,7 @@ Here is the caller graph for this function:</div>
           <td class="memname">virtual void c_OutputCommon::PauseOutput </td>
           <td>(</td>
           <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>State</em></td><td>)</td>
+          <td class="paramname"><em>NewState</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -1418,6 +1447,28 @@ Here is the caller graph for this function:</div>
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="classc___output_mgr.html#a161cacaceae9b3d67bad54de378fac20">OTYPE_t</a> c_OutputCommon::OutputType = OTYPE_t::OutputType_Disabled</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4c446205cc91c0b16628e5334b7b5c22" name="a4c446205cc91c0b16628e5334b7b5c22"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c446205cc91c0b16628e5334b7b5c22">&#9670;&#160;</a></span>Paused</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool c_OutputCommon::Paused = false</td>
         </tr>
       </table>
   </td>

@@ -103,7 +103,7 @@ $(document).ready(function(){initNavTree('_output_w_s2811_rmt_8hpp_source.html',
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment">* OutputWS2811Rmt.h - WS2811 driver code for ESPixelStick RMT Channel</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">*</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">* Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">* Copyright (c) 2015, 2022 Shelby Merrick</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">* Copyright (c) 2015, 2025 Shelby Merrick</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">* http://www.forkineye.com</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">*</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">*  This program is provided free for you to use in any way that you wish,</span></div>
@@ -145,14 +145,15 @@ $(document).ready(function(){initNavTree('_output_w_s2811_rmt_8hpp_source.html',
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keywordtype">void</span>    GetStatus (ArduinoJson::JsonObject&amp; jsonStatus);</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordtype">void</span>    SetOutputBufferSize (uint32_t NumChannelsAvailable);</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keywordtype">bool</span>    DriverIsSendingIntensityData() {<span class="keywordflow">return</span> (Rmt.DriverIsSendingIntensityData() || <span class="keyword">false</span> == canRefresh());}</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    c_OutputRmt Rmt;</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>}; <span class="comment">// c_OutputWS2811Rmt</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#endif </span><span class="comment">// defined(SUPPORT_OutputType_WS2811) &amp;&amp; defined(ARDUINO_ARCH_ESP32)</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordtype">void</span>    PauseOutput(<span class="keywordtype">bool</span> State);</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    c_OutputRmt Rmt;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>}; <span class="comment">// c_OutputWS2811Rmt</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#endif </span><span class="comment">// defined(SUPPORT_OutputType_WS2811) &amp;&amp; defined(ARDUINO_ARCH_ESP32)</span></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html"><div class="ttname"><a href="_e_s_pixel_stick_8h.html">ESPixelStick.h</a></div></div>
 <div class="ttc" id="a_output_rmt_8hpp_html"><div class="ttname"><a href="_output_rmt_8hpp.html">OutputRmt.hpp</a></div></div>
 <div class="ttc" id="a_output_w_s2811_8hpp_html"><div class="ttname"><a href="_output_w_s2811_8hpp.html">OutputWS2811.hpp</a></div></div>

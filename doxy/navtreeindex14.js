@@ -1,5 +1,7 @@
 var NAVTREEINDEX14 =
 {
+"struct_input_type_xlate_map__t.html#a93006abf40948208b0f3b9443e2b0dfd":[0,0,66,2],
+"struct_input_type_xlate_map__t.html#abb9708f4a5eec8343c96e6a8e5594a53":[0,0,66,0],
 "struct_output_channel_id_to_gpio_and_port_entry__t.html":[0,0,67],
 "struct_output_channel_id_to_gpio_and_port_entry__t.html#a36ecb20c20f96038b336338b548766c5":[0,0,67,1],
 "struct_output_channel_id_to_gpio_and_port_entry__t.html#a686a817d1f29961de5c7cba2e317ad14":[0,0,67,0],
