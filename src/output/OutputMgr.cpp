@@ -2,7 +2,7 @@
 * OutputMgr.cpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2024 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -1418,6 +1418,8 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
 void c_OutputMgr::PauseOutputs(bool PauseTheOutput)
 {
     // DEBUG_START;
+    // DEBUG_V(String("PauseTheOutput: ") + String(PauseTheOutput));
+
     IsOutputPaused = PauseTheOutput;
 
     for (auto & CurrentOutput : OutputChannelDrivers)
