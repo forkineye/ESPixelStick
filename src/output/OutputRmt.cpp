@@ -70,17 +70,19 @@ void RMT_Task (void *arg)
             if(nullptr != pRmt)
             {
                 // invoke the channel
-                pRmt->StartNextFrame();
-                uint32_t NotificationValue = ulTaskNotifyTake( pdTRUE, pdMS_TO_TICKS(100) );
-                if(1 == NotificationValue)
+                if (pRmt->StartNextFrame())
                 {
-                    // DEBUG_V("The transmission ended as expected.");
-                    ++FrameCompletes;
-                }
-                else
-                {
-                    ++FrameTimeouts;
-                    // DEBUG_V("Transmit Timed Out.");
+                    uint32_t NotificationValue = ulTaskNotifyTake( pdTRUE, pdMS_TO_TICKS(100) );
+                    if(1 == NotificationValue)
+                    {
+                        // DEBUG_V("The transmission ended as expected.");
+                        ++FrameCompletes;
+                    }
+                    else
+                    {
+                        ++FrameTimeouts;
+                        // DEBUG_V("Transmit Timed Out.");
+                    }
                 }
             }
         }
@@ -464,9 +466,12 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler (uint32_t isrFlags)
     // ClearRmtInterrupts;
 
     RMT_DEBUG_COUNTER(++ISRcounter);
-
+    if(OutputIsPaused)
+    {
+        DisableRmtInterrupts;
+    }
     // did the transmitter stall?
-    if (isrFlags & RMT_INT_TX_END_BIT )
+    else if (isrFlags & RMT_INT_TX_END_BIT )
     {
         RMT_DEBUG_COUNTER(++IntTxEndIsrCounter);
         DisableRmtInterrupts;
@@ -633,7 +638,7 @@ void c_OutputRmt::PauseOutput(bool PauseOutput)
     OutputIsPaused = PauseOutput;
 
     // //DEBUG_END;
-}
+} // PauseOutput
 
 //----------------------------------------------------------------------------
 bool c_OutputRmt::StartNewFrame ()
@@ -647,6 +652,8 @@ bool c_OutputRmt::StartNewFrame ()
         if(OutputIsPaused)
         {
             // DEBUG_V("Paused");
+            DisableRmtInterrupts;
+            ClearRmtInterrupts;
             break;
         }
 

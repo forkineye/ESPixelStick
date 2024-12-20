@@ -1,7 +1,7 @@
 /******************************************************************
 *
 *       Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel (And Serial!) driver
-*       Orginal ESPixelStickproject by 2015 Shelby Merrick
+*       Orginal ESPixelStickproject by 2015 - 2025 Shelby Merrick
 *
 *This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or(at your option) any later version.
 This program is distributed in the hope that it will be useful,
@@ -116,7 +116,7 @@ uint32_t c_OutputSerialUart::Poll ()
         Uart.StartNewFrame();
         ReportNewFrame();
     }
-    else 
+    else
     {
         FrameLen = 0;
     }
@@ -125,5 +125,16 @@ uint32_t c_OutputSerialUart::Poll ()
     return FrameLen;
 
 } // render
+
+//----------------------------------------------------------------------------
+void c_OutputSerialUart::PauseOutput (bool State)
+{
+    // DEBUG_START;
+
+    c_OutputSerial::PauseOutput(State);
+    Uart.PauseOutput(State);
+
+    // DEBUG_END;
+} // PauseOutput
 
 #endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)

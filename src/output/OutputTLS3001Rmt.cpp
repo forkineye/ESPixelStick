@@ -2,7 +2,7 @@
 * OutputTLS3001Rmt.cpp - TLS3001 driver code for ESPixelStick RMT Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015, 2022 Shelby Merrick
+* Copyright (c) 2015, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -162,6 +162,17 @@ bool c_OutputTLS3001Rmt::RmtPoll ()
     return Response;
 
 } // Poll
+
+//----------------------------------------------------------------------------
+void c_OutputTLS3001Rmt::PauseOutput (bool State)
+{
+    // DEBUG_START;
+
+    c_OutputTLS3001::PauseOutput(State);
+    Rmt.PauseOutput(State);
+
+    // DEBUG_END;
+} // PauseOutput
 
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
