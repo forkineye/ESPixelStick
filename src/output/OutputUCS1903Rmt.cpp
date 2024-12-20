@@ -2,7 +2,7 @@
 * OutputUCS1903Rmt.cpp - UCS1903 driver code for ESPixelStick RMT Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015, 2022 Shelby Merrick
+* Copyright (c) 2015, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -170,5 +170,16 @@ bool c_OutputUCS1903Rmt::RmtPoll ()
     return Response;
 
 } // Poll
+
+//----------------------------------------------------------------------------
+void c_OutputUCS1903Rmt::PauseOutput (bool State)
+{
+    // DEBUG_START;
+
+    c_OutputUCS1903::PauseOutput(State);
+    Rmt.PauseOutput(State);
+
+    // DEBUG_END;
+} // PauseOutput
 
 #endif // defined(SUPPORT_OutputType_UCS1903) && defined(ARDUINO_ARCH_ESP32)

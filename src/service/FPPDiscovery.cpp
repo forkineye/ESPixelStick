@@ -1,7 +1,7 @@
 /*
 * c_FPPDiscovery.cpp
 
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -816,6 +816,9 @@ void c_FPPDiscovery::ProcessFile (
             StopPlaying(true);
             inFileUpload = true;
             UploadFileName = filename;
+            InputMgr.SetOperationalState(false);
+            OutputMgr.PauseOutputs(true);
+            memset(OutputMgr.GetBufferAddress(), 0x00, OutputMgr.GetBufferSize());
         }
 
         // DEBUG_V();
@@ -833,6 +836,8 @@ void c_FPPDiscovery::ProcessFile (
             // DEBUG_V("Allow file to play");
             inFileUpload = false;
             UploadFileName = "";
+            InputMgr.SetOperationalState(true);
+            OutputMgr.PauseOutputs(false);
         }
 
     } while (false);

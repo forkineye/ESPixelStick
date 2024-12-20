@@ -98,7 +98,7 @@ private:
     uint32_t            NumRmtSlotOverruns                = 0;
     uint32_t            MaxNumRmtSlotsPerInterrupt        = (NUM_RMT_SLOTS/2);
 
-    rmt_item32_t    SendBuffer[NUM_RMT_SLOTS];
+    rmt_item32_t    SendBuffer[NUM_RMT_SLOTS * 2];
     uint32_t        RmtBufferWriteIndex         = 0;
     uint32_t        SendBufferWriteIndex        = 0;
     uint32_t        SendBufferReadIndex         = 0;
@@ -109,7 +109,7 @@ private:
     uint32_t            TxIntensityDataStartingMask = 0x80;
     RmtDataBitIdType_t  InterIntensityValueId       = RMT_INVALID_VALUE;
 
-    inline void IRAM_ATTR ISR_TransferIntensityDataToRMT ();
+    inline void IRAM_ATTR ISR_TransferIntensityDataToRMT (uint32_t NumEntriesToTransfer);
     inline void IRAM_ATTR ISR_CreateIntensityData ();
     inline void IRAM_ATTR ISR_WriteToBuffer(uint32_t value);
     inline bool IRAM_ATTR ISR_MoreDataToSend();
@@ -129,7 +129,7 @@ public:
 
     void Begin                                  (OutputRmtConfig_t config, c_OutputCommon * pParent);
     bool StartNewFrame                          ();
-    bool StartNextFrame                         () { return (pParent) ? pParent->RmtPoll() : false; }
+    bool StartNextFrame                         () { return ((nullptr != pParent) & (!OutputIsPaused)) ? pParent->RmtPoll() : false; }
     void GetStatus                              (ArduinoJson::JsonObject& jsonStatus);
     void set_pin                                (gpio_num_t _DataPin) { OutputRmtConfig.DataPin = _DataPin; rmt_set_gpio (OutputRmtConfig.RmtChannelId, rmt_mode_t::RMT_MODE_TX, OutputRmtConfig.DataPin, false); }
     void PauseOutput                            (bool State);
@@ -164,7 +164,6 @@ public:
    uint32_t DataTaskcounter = 0;
    uint32_t ISRcounter = 0;
    uint32_t FrameStartCounter = 0;
-   uint32_t FrameEndISRcounter = 0;
    uint32_t SendBlockIsrCounter = 0;
    uint32_t RanOutOfData = 0;
    uint32_t UnknownISRcounter = 0;
@@ -181,6 +180,7 @@ public:
    uint32_t RmtEntriesTransfered = 0;
    uint32_t RmtXmtFills = 0;
    uint32_t RmtWhiteDetected = 0;
+   uint32_t FailedToSendAllData = 0;
 
 #define RMT_DEBUG_COUNTER(p) p
 

@@ -2,7 +2,7 @@
 * OutputGS8208Rmt.cpp - GS8208 driver code for ESPixelStick RMT Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015, 2022 Shelby Merrick
+* Copyright (c) 2015, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -170,5 +170,16 @@ bool c_OutputGS8208Rmt::RmtPoll ()
     return Response;
 
 } // Poll
+
+//----------------------------------------------------------------------------
+void c_OutputGS8208Rmt::PauseOutput (bool State)
+{
+    // DEBUG_START;
+
+    c_OutputGS8208::PauseOutput(State);
+    Rmt.PauseOutput(State);
+
+    // DEBUG_END;
+} // PauseOutput
 
 #endif // defined(SUPPORT_OutputType_GS8208) && defined(ARDUINO_ARCH_ESP32)
