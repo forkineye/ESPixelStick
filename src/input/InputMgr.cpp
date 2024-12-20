@@ -2,7 +2,7 @@
 * InputMgr.cpp - Input Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -950,6 +950,7 @@ void c_InputMgr::SetBufferInfo (uint32_t BufferSize)
 void c_InputMgr::SetOperationalState (bool ActiveFlag)
 {
     // DEBUG_START;
+    // DEBUG_V(String("ActiveFlag: ") + String(ActiveFlag));
 
     // pass through each active interface and set the active state
     for (auto & InputChannel : InputChannelDrivers)
