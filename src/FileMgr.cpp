@@ -23,6 +23,7 @@
 
 #include "FileMgr.hpp"
 #include "network/NetworkMgr.hpp"
+#include "output/OutputMgr.hpp"
 
 SdFs sd;
 const int8_t DISABLE_CS_PIN = -1;
@@ -1465,7 +1466,10 @@ void c_FileMgr::CloseSdFile (FileId& FileHandle, bool LockStatus)
 
         if (nullptr != FileList[FileListIndex].buffer.DataBuffer)
         {
-            free(FileList[FileListIndex].buffer.DataBuffer);
+            if(FileList[FileListIndex].buffer.DataBuffer != OutputMgr.GetBufferAddress())
+            {
+                free(FileList[FileListIndex].buffer.DataBuffer);
+            }
         }
         FileList[FileListIndex].buffer.DataBuffer = nullptr;
         FileList[FileListIndex].buffer.size = 0;
@@ -1553,15 +1557,18 @@ size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size
         }
 #endif // defined (ARDUINO_ARCH_ESP32)
 
-        delay(10);
-        FeedWDT();
-
         // are we using a buffer in front of the SD card?
         if(nullptr == FileList[FileListIndex].buffer.DataBuffer)
         {
+            delay(10);
+            FeedWDT();
+
             // DEBUG_V("Not using buffers");
             NumBytesWritten = FileList[FileListIndex].fsFile.write(FileData, NumBytesToWrite);
             FileList[FileListIndex].fsFile.flush();
+
+            delay(20);
+            FeedWDT();
         }
         else // buffered mode
         {
@@ -1574,12 +1581,16 @@ size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size
             // DEBUG_V(String("        Offset: ") + String(FileList[FileListIndex].buffer.offset));
             if(WontFit || WriteRemainder)
             {
+                delay(10);
+                FeedWDT();
                 // DEBUG_V("Buffer cant hold this data. Write out the buffer");
                 size_t bufferWriteSize = FileList[FileListIndex].fsFile.write(FileData, FileList[FileListIndex].buffer.offset);
                 FileList[FileListIndex].fsFile.flush();
+                delay(20);
+                FeedWDT();
                 if(FileList[FileListIndex].buffer.offset != bufferWriteSize)
                 {
-                    logcon (String("WriteSdFileBuf:ERROR:SD Write Failed. Tried to write: ") + 
+                    logcon (String("WriteSdFileBuf:ERROR:SD Write Failed. Tried to write: ") +
                             String(FileList[FileListIndex].buffer.offset) +
                             " bytes. Actually wrote: " + String(bufferWriteSize))
                     NumBytesWritten = 0;
@@ -1597,8 +1608,6 @@ size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size
         }
         // DEBUG_V (String (" FileHandle: ") + String (FileHandle));
         // DEBUG_V (String ("File.Handle: ") + String (FileList[FileListIndex].handle));
-        delay(20);
-        FeedWDT();
 
         if(NumBytesWritten != NumBytesToWrite)
         {
@@ -1935,8 +1944,6 @@ bool c_FileMgr::handleFileUpload (
 void c_FileMgr::handleFileUploadNewFile (const String & filename)
 {
     // DEBUG_START;
-
-    // save the filename
     // DEBUG_V ("UploadStart: " + filename);
 
     fsUploadStartTime = millis();
@@ -1958,6 +1965,19 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
 
     // Open the file for writing
     OpenSdFile (fsUploadFileName, FileMode::FileWrite, fsUploadFileHandle, -1 /*first access*/, false);
+    int FileListIndex;
+    // DEBUG_V (String("NumBytesToWrite: ") + String(NumBytesToWrite));
+    if (-1 == (FileListIndex = FileListFindSdFileHandle (fsUploadFileHandle)))
+    {
+        logcon (String (F ("WriteSdFileBuf::ERROR::Invalid File Handle: ")) + String (fsUploadFileHandle));
+    }
+    else
+    {
+        // DEBUG_V("Use the output buffer as a data buffer");
+        FileList[FileListIndex].buffer.offset = 0;
+        FileList[FileListIndex].buffer.size = OutputMgr.GetBufferSize();
+        FileList[FileListIndex].buffer.DataBuffer = OutputMgr.GetBufferAddress();
+    }
 
     // DEBUG_END;
 
