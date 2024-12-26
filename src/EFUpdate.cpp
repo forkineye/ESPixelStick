@@ -2,7 +2,7 @@
 * EFUpdate.cpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2016, 2022 Shelby Merrick
+* Copyright (c) 2016, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -23,11 +23,11 @@
 
 #include <lwip/def.h>
 #include "EFUpdate.h"
-#include <esp_app_format.h>
 
 #ifdef ARDUINO_ARCH_ESP32
 #   include <Update.h>
 #   include <esp_task_wdt.h>
+#   include <esp_app_format.h>
 #endif
 
 #ifndef U_SPIFFS
