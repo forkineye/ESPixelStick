@@ -23,6 +23,7 @@
 
 #include <lwip/def.h>
 #include "EFUpdate.h"
+#include <esp_app_format.h>
 
 #ifdef ARDUINO_ARCH_ESP32
 #   include <Update.h>
@@ -91,10 +92,7 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
             case State::RECORD:
                 // DEBUG_V ("Process Data RECORD Type");
                 // DEBUG_V (String ("              len: 0x") + String (len, HEX));
-                // DEBUG_V (String ("AccumulatedLentgh: 0x") + String (AccumulatedLentgh, HEX));
                 // DEBUG_V (String ("            index: ") + String (index));
-                // DEBUG_V (String (" AccumulatedIndex: ") + String (AccumulatedIndex));
-                // DEBUG_V (String (" AccumulatedIndex: 0x") + String (AccumulatedIndex, HEX));
                 // DEBUG_V (String ("             Data: 0x") + String (data[index], HEX));
                 // DEBUG_V (String ("             Data: ") + String (data[index]));
 
@@ -116,9 +114,9 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
                             _state = State::FAIL;
                             _error = Update.getError();
                         } else {
-                            // DEBUG_V ("PASS");
+                            /// DEBUG_V ("PASS");
                             _state = State::DATA;
-                            // esp_image_header_t *esp_image_header = (esp_image_header_t*)&data[index];
+                            esp_image_header_t *esp_image_header = (esp_image_header_t*)&data[index];
                             // DEBUG_V(String("            magic: 0x") + String(esp_image_header->magic, HEX));
                             // DEBUG_V(String("    segment_count: 0x") + String(esp_image_header->segment_count, HEX));
                             // DEBUG_V(String("         spi_mode: 0x") + String(esp_image_header->spi_mode, HEX));

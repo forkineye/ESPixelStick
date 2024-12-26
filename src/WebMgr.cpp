@@ -2,7 +2,7 @@
 * WebMgr.cpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -834,12 +834,24 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
         // is the first message in the upload?
         if (0 == index)
         {
+            if(efupdate.UpdateIsInProgress())
+            {
+                logcon("An update is already in progress");
+                // send back an error response
+                request->send (429, CN_textSLASHplain, F ("Update Error: Too many requests."));
+                break;
+            }
 #ifdef ARDUINO_ARCH_ESP8266
             WiFiUDP::stopAll ();
 #else
             // this is not supported for ESP32
 #endif
             logcon (String(F ("Upload Started: ")) + filename);
+            // stop all input and output processing of intensity data.
+            // InputMgr.SetOperationalState(false);
+            // OutputMgr.PauseOutputs(true);
+
+            // start the update
             efupdate.begin ();
         }
 
@@ -852,7 +864,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
         {
             logcon (String(CN_stars) + F (" UPDATE ERROR: ") + String (efupdate.getError ()));
             // DEBUG_V ("efupdate.hasError");
-            request->send (200, CN_textSLASHplain, (String (F ("Update Error: ")) + String (efupdate.getError ()).c_str()));
+            request->send (500, CN_textSLASHplain, (String (F ("Update Error: ")) + String (efupdate.getError ()).c_str()));
             break;
         }
         // DEBUG_V ("No EFUpdate Error");
@@ -862,7 +874,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
             request->send (200, CN_textSLASHplain, (String ( F ("Update Finished: ")) + String (efupdate.getError ())).c_str());
             logcon (F ("Upload Finished. Rebooting"));
             efupdate.end ();
-            RequestReboot(100000);;
+            RequestReboot(100000);
         }
 
     } while (false);

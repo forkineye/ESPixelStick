@@ -36,7 +36,8 @@ class EFUpdate {
      bool hasError();
      uint8_t getError();
      bool end();
-    void GetDriverName(String & name) {name = String(F("EFUPD"));}
+     void GetDriverName(String & name) {name = String(F("EFUPD"));}
+     bool UpdateIsInProgress() {return _state != State::IDLE;}
 
  private:
     /* Record types */
@@ -52,7 +53,8 @@ class EFUpdate {
         HEADER,
         RECORD,
         DATA,
-        FAIL
+        FAIL,
+        IDLE
     };
 
     /* EFU Header */
@@ -75,7 +77,7 @@ class EFUpdate {
         uint8_t raw[6];
     } efurecord_t;
 
-    State       _state = State::FAIL;
+    State       _state = State::IDLE;
     uint32_t      _loc = 0;
     efuheader_t _header;
     efurecord_t _record;
