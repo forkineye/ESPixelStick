@@ -78,7 +78,7 @@ class EFUpdate {
     } efurecord_t;
 
     State       _state = State::IDLE;
-    uint32_t      _loc = 0;
+    uint32_t    _loc = 0;
     efuheader_t _header;
     efurecord_t _record;
     uint32_t    _maxSketchSpace;

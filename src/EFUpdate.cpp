@@ -27,7 +27,7 @@
 #ifdef ARDUINO_ARCH_ESP32
 #   include <Update.h>
 #   include <esp_task_wdt.h>
-#   include <esp_app_format.h>
+// #   include <esp_app_format.h>
 #endif
 
 #ifndef U_SPIFFS
@@ -116,7 +116,7 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
                         } else {
                             /// DEBUG_V ("PASS");
                             _state = State::DATA;
-                            esp_image_header_t *esp_image_header = (esp_image_header_t*)&data[index];
+                            // esp_efu_header_t *esp_image_header = (efuheader_t*)&data[index];
                             // DEBUG_V(String("            magic: 0x") + String(esp_image_header->magic, HEX));
                             // DEBUG_V(String("    segment_count: 0x") + String(esp_image_header->segment_count, HEX));
                             // DEBUG_V(String("         spi_mode: 0x") + String(esp_image_header->spi_mode, HEX));
