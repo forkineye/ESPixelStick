@@ -193,6 +193,11 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
                 index = len;
                 ConfigChanged = false;
                 break;
+            case State::IDLE:
+            {
+                // dont do anything
+                break;
+            }
         }
     }
     // DEBUG_END;
