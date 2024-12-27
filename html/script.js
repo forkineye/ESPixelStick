@@ -241,13 +241,15 @@ $(function () {
                 _("EfuProgressBar").value = 0; //will clear progress bar after successful upload
                 $("#EfuProgressBar").addClass("hidden");
 
-                if(event.target.status === '200')
+                if(event.target.status === 200)
                 {
+                    alert("Firmware Upload SUCCESS!");
                     showReboot();
                 }
                 else
                 {
                     alert("Firmware Upload FAILED!\n" + event.target.response);
+                    showReboot();
                 }
             }
 
