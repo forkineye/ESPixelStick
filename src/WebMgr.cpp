@@ -365,7 +365,20 @@ void c_WebMgr::init ()
     	webServer.on ("/updatefw", HTTP_POST,
             [](AsyncWebServerRequest* request)
             {
-                RequestReboot(100000);;
+                // DEBUG_V("Client requested reboot");
+                if (WebMgr.efupdate.hasError ())
+                {
+                    // DEBUG_V ("efupdate.hasError, ignoring reboot request");
+                    String ErrorMsg;
+                    WebMgr.efupdate.getError (ErrorMsg);
+                    request->send (500, CN_textSLASHplain, (String (F ("Update Error: ")) + ErrorMsg.c_str()));
+                }
+                else
+                {
+                    // DEBUG_V ("efupdate.hasError == false");
+                    request->send (200, CN_textSLASHplain, (String (F ("Update Success"))));
+                    RequestReboot(100000);
+                }
             },
             [](AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final)
              {WebMgr.FirmwareUpload (request, filename, index, data, len, final); }); //.setFilter (ON_STA_FILTER);
@@ -830,6 +843,15 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
         // DEBUG_V (String (" data: 0x") + String (uint32_t(data), HEX));
         // DEBUG_V (String ("  len: ") + String (len));
         // DEBUG_V (String ("final: ") + String (final));
+        if (efupdate.hasError ())
+        {
+            // logcon (String(CN_stars) + F (" UPDATE ERROR: ") + String (efupdate.getError ()));
+            // DEBUG_V ("efupdate.hasError");
+            String ErrorMsg;
+            WebMgr.efupdate.getError (ErrorMsg);
+            request->send (500, CN_textSLASHplain, (String (F ("Update Error: ")) + ErrorMsg.c_str()));
+            break;
+        }
 
         // is the first message in the upload?
         if (0 == index)
@@ -841,6 +863,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
                 request->send (429, CN_textSLASHplain, F ("Update Error: Too many requests."));
                 break;
             }
+
 #ifdef ARDUINO_ARCH_ESP8266
             WiFiUDP::stopAll ();
 #else
@@ -853,6 +876,15 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
 
             // start the update
             efupdate.begin ();
+            if (efupdate.hasError ())
+            {
+                // logcon (String(CN_stars) + F (" UPDATE ERROR: ") + String (efupdate.getError ()));
+                // DEBUG_V ("efupdate.hasError");
+                String ErrorMsg;
+                WebMgr.efupdate.getError (ErrorMsg);
+                request->send (500, CN_textSLASHplain, (String (F ("Update Error: ")) + ErrorMsg.c_str()));
+                break;
+            }
         }
 
         // DEBUG_V ("Sending data to efupdate");
@@ -862,16 +894,18 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
 
         if (efupdate.hasError ())
         {
-            logcon (String(CN_stars) + F (" UPDATE ERROR: ") + String (efupdate.getError ()));
+            // logcon (String(CN_stars) + F (" UPDATE ERROR: ") + String (efupdate.getError ()));
             // DEBUG_V ("efupdate.hasError");
-            request->send (500, CN_textSLASHplain, (String (F ("Update Error: ")) + String (efupdate.getError ()).c_str()));
+            String ErrorMsg;
+            WebMgr.efupdate.getError (ErrorMsg);
+            request->send (500, CN_textSLASHplain, (String (F ("Update Error: ")) + ErrorMsg.c_str()));
             break;
         }
         // DEBUG_V ("No EFUpdate Error");
 
         if (final)
         {
-            request->send (200, CN_textSLASHplain, (String ( F ("Update Finished: ")) + String (efupdate.getError ())).c_str());
+            request->send (200, CN_textSLASHplain, (String ( F ("Update Finished"))));
             logcon (F ("Upload Finished. Rebooting"));
             efupdate.end ();
             RequestReboot(100000);
