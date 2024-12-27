@@ -280,6 +280,7 @@ void EFUpdate::ConvertErrorToString()
             _errorMsg = F("Magic Byte Mismatch");
             break;
         }
+#ifdef ARDUINO_ARCH_ESP32
         case UPDATE_ERROR_ACTIVATE:
         {
             _errorMsg = F("Could Not activate the alternate partition");
@@ -300,6 +301,7 @@ void EFUpdate::ConvertErrorToString()
             _errorMsg = F("Operation Aborted");
             break;
         }
+#endif // def ARDUINO_ARCH_ESP32
         default:
         {
             _errorMsg = F("Unknown Error Code");
