@@ -3,7 +3,7 @@
 * InputFPPRemotePlayItem.hpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -28,7 +28,7 @@ public:
     c_InputFPPRemotePlayItem (c_InputMgr::e_InputChannelIds InputChannelId);
     virtual ~c_InputFPPRemotePlayItem ();
 
-    virtual bool     Poll           () = 0;
+    virtual bool     Poll           (bool StayDark) = 0;
     virtual void     Start          (String & FileName, float SecondsElapsed, uint32_t RemainingPlayCount) = 0;
     virtual void     Stop           () = 0;
     virtual void     Sync           (String & FileName, float SecondsElapsed) = 0;

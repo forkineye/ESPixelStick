@@ -2,7 +2,7 @@
 * InputFPPRemotePlayFile.cpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -98,7 +98,7 @@ c_InputFPPRemotePlayFile::~c_InputFPPRemotePlayFile ()
     for (uint32_t LoopCount = 10000; (LoopCount != 0) && (!IsIdle ()); LoopCount--)
     {
         Stop ();
-        Poll ();
+        Poll (false);
     }
     // DEBUG_END;
 
@@ -148,7 +148,7 @@ void c_InputFPPRemotePlayFile::Sync (String & FileName, float SecondsElapsed)
 } // Sync
 
 //-----------------------------------------------------------------------------
-bool c_InputFPPRemotePlayFile::Poll ()
+bool c_InputFPPRemotePlayFile::Poll (bool StayDark)
 {
     // xDEBUG_START;
 
@@ -156,7 +156,7 @@ bool c_InputFPPRemotePlayFile::Poll ()
     PollDetectionCounter = 0;
 
     // TimerPoll ();
-    return pCurrentFsmState->Poll ();
+    return pCurrentFsmState->Poll (StayDark);
 
     // xDEBUG_END;
 

@@ -3,7 +3,7 @@
 * InputFPPRemotePlayFile.hpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -39,7 +39,7 @@ public:
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
     virtual void Stop ();
     virtual void Sync (String& FileName, float SecondsElapsed);
-    virtual bool Poll ();
+    virtual bool Poll (bool StayDark);
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
 
@@ -73,11 +73,11 @@ private:
 
     struct FrameControl_t
     {
-        uint32_t            DataOffset = 0;
-        uint32_t            ChannelsPerFrame = 0;
-        uint32_t          FrameStepTimeMS = 1;
-        uint32_t          TotalNumberOfFramesInSequence = 0;
-        uint32_t          ElapsedPlayTimeMS = 0;
+        uint32_t    DataOffset = 0;
+        uint32_t    ChannelsPerFrame = 0;
+        uint32_t    FrameStepTimeMS = 1;
+        uint32_t    TotalNumberOfFramesInSequence = 0;
+        uint32_t    ElapsedPlayTimeMS = 0;
 
     } FrameControl;
 

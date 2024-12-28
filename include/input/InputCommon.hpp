@@ -36,7 +36,7 @@ public:
     virtual bool SetConfig (ArduinoJson::JsonObject & jsonConfig) = 0; ///< Set a new config in the driver
     virtual void GetConfig (ArduinoJson::JsonObject & jsonConfig) = 0; ///< Get the current config used by the driver
     virtual void GetStatus (JsonObject & jsonStatus) = 0;
-    virtual void Process () = 0;                                       ///< Call from loop(),  renders Input data
+    virtual void Process (bool StayDark) = 0;                                       ///< Call from loop(),  renders Input data
     virtual void GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
     virtual void SetBufferInfo (uint32_t BufferSize) = 0;
     virtual void SetOperationalState (bool ActiveFlag) { IsInputChannelActive = ActiveFlag; }

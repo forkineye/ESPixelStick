@@ -234,9 +234,10 @@ void c_InputFPPRemote::PlayNextFile ()
 } // PlayNextFile
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemote::Process ()
+void c_InputFPPRemote::Process (bool StayDark)
 {
     // DEBUG_START;
+    Disabled = StayDark;
 #ifndef ARDUINO_ARCH_ESP32
     TaskProcess();
 #else
@@ -257,7 +258,7 @@ void c_InputFPPRemote::Process ()
 void c_InputFPPRemote::TaskProcess ()
 {
     // DEBUG_START;
-    if (!IsInputChannelActive || StayDark)
+    if (!IsInputChannelActive || StayDark || Disabled)
     {
         // DEBUG_V ("dont do anything if the channel is not active");
         StopPlaying ();
@@ -289,7 +290,7 @@ bool c_InputFPPRemote::Poll ()
     bool Response = false;
     if(pInputFPPRemotePlayItem)
     {
-        Response = pInputFPPRemotePlayItem->Poll ();
+        Response = pInputFPPRemotePlayItem->Poll (Disabled);
     }
 
     // DEBUG_END;
@@ -387,7 +388,7 @@ void c_InputFPPRemote::StopPlaying ()
 
             while (!pInputFPPRemotePlayItem->IsIdle ())
             {
-                pInputFPPRemotePlayItem->Poll ();
+                pInputFPPRemotePlayItem->Poll (Disabled);
                 // DEBUG_V();
                 pInputFPPRemotePlayItem->Stop ();
             }

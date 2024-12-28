@@ -2,7 +2,7 @@
 * InputFPPRemoteFsm.cpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -23,7 +23,7 @@
 #include "utility/SaferStringConversion.hpp"
 
 //-----------------------------------------------------------------------------
-bool fsm_PlayEffect_state_Idle::Poll ()
+bool fsm_PlayEffect_state_Idle::Poll (bool /* StayDark */)
 {
     // DEBUG_START;
 
@@ -31,7 +31,7 @@ bool fsm_PlayEffect_state_Idle::Poll ()
 
     // DEBUG_END;
     return false;
-    
+
 } // fsm_PlayEffect_state_Idle::Poll
 
 //-----------------------------------------------------------------------------
@@ -118,12 +118,12 @@ void fsm_PlayEffect_state_Idle::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayEffect_state_PlayingEffect::Poll ()
+bool fsm_PlayEffect_state_PlayingEffect::Poll (bool StayDark)
 {
     // DEBUG_START;
 
     p_InputFPPRemotePlayEffect->EffectsEngine.SetBufferInfo (OutputMgr.GetBufferUsedSize());
-    p_InputFPPRemotePlayEffect->EffectsEngine.Process ();
+    p_InputFPPRemotePlayEffect->EffectsEngine.Process (StayDark);
 
     if (p_InputFPPRemotePlayEffect->PlayEffectTimer.IsExpired())
     {
