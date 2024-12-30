@@ -111,6 +111,8 @@ void c_InputMgr::Begin (uint32_t BufferSize)
 {
     // DEBUG_START;
 
+    // DEBUG_V(String("Current CPU ID: ") + String(xPortGetCoreID()));
+
     InputDataBufferSize = BufferSize;
     // DEBUG_V (String("InputDataBufferSize: ") + String (InputDataBufferSize));
 
