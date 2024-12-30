@@ -4,7 +4,7 @@ var classc___input_f_p_p_remote_play_list =
     [ "~c_InputFPPRemotePlayList", "classc___input_f_p_p_remote_play_list.html#ac160e1d397d20ad38e3b5216cbb9ab81", null ],
     [ "GetStatus", "classc___input_f_p_p_remote_play_list.html#aa1b7a712f2c4b3ea3278aa85a86d16cd", null ],
     [ "IsIdle", "classc___input_f_p_p_remote_play_list.html#a42caa09112959030b8bd4c12bcbf8219", null ],
-    [ "Poll", "classc___input_f_p_p_remote_play_list.html#a16b9241330bbf4090aba25d380d9b506", null ],
+    [ "Poll", "classc___input_f_p_p_remote_play_list.html#a0707c0dbad38b83695ce861840cceed0", null ],
     [ "ProcessPlayListEntry", "classc___input_f_p_p_remote_play_list.html#a7c9150d33dd2d0752c2cabe86b462430", null ],
     [ "Start", "classc___input_f_p_p_remote_play_list.html#a268dded5f467ce5207de4b8ba9a87c2a", null ],
     [ "Stop", "classc___input_f_p_p_remote_play_list.html#a191a7b77cedcabf77e01d19c29893b44", null ],

@@ -4,7 +4,7 @@ var classc___input_f_p_p_remote_play_effect =
     [ "~c_InputFPPRemotePlayEffect", "classc___input_f_p_p_remote_play_effect.html#abe200a38971f7a1eec4b5c71b144f4e8", null ],
     [ "GetStatus", "classc___input_f_p_p_remote_play_effect.html#a2a87282bf4f538ce69e22d0393dc1931", null ],
     [ "IsIdle", "classc___input_f_p_p_remote_play_effect.html#a4b731c634f7ca1c6937b7af35d73679c", null ],
-    [ "Poll", "classc___input_f_p_p_remote_play_effect.html#a9328145d42e27e1f8817ab66de87a9a0", null ],
+    [ "Poll", "classc___input_f_p_p_remote_play_effect.html#a1b1ac9ba1063a3cdd4fffcbe6039b190", null ],
     [ "Start", "classc___input_f_p_p_remote_play_effect.html#a71e6862f4d7986fbd70476b694f6a2b6", null ],
     [ "Stop", "classc___input_f_p_p_remote_play_effect.html#a4299b982ecb3e5aefba88ea1d2f3cfc9", null ],
     [ "Sync", "classc___input_f_p_p_remote_play_effect.html#a5b924d87d4d140b654f09de5a50159bc", null ],

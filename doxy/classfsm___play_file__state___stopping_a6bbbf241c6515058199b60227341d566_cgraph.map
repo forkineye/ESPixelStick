@@ -1,0 +1,32 @@
+<map id="fsm_PlayFile_state_Stopping::Poll" name="fsm_PlayFile_state_Stopping::Poll">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,301,138,342"/>
+<area shape="rect" id="Node000002" href="$classc___file_mgr.html#ae43240caa74e07c85bb523875729e0f1" title=" " alt="" coords="199,120,354,145"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,299,248,154,252,158,97,303"/>
+<area shape="rect" id="Node000007" href="$classc___f_p_p_discovery.html#a6ef4a34e0c4a6fe52ac7b0ee4034f4dd" title=" " alt="" coords="188,284,365,325"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="138,313,172,311,172,316,138,319"/>
+<area shape="rect" id="Node000011" href="$classfsm___play_file__state___idle.html#aec3b675c72070641bb54eb10ee20a84e" title=" " alt="" coords="452,367,584,407"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="139,329,437,373,436,378,138,334"/>
+<area shape="rect" id="Node000013" href="$classc___input_f_p_p_remote_play_file.html#ac9b4b56c2a719407dc09530078d609de" title=" " alt="" coords="186,412,367,453"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="104,340,187,391,211,403,208,408,184,396,101,345"/>
+<area shape="rect" id="Node000003" href="$classc___file_mgr.html#a5744b69d4ab94abb4a8839fa295153db" title=" " alt="" coords="434,5,602,46"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="298,117,350,87,414,55,429,49,431,54,416,60,352,92,300,121"/>
+<area shape="rect" id="Node000004" href="$classc___output_mgr.html#aec62685e8fb4eff73bfefd3ed5321b01" title="Get the address of the buffer into which the E1.31 handler will stuff data." alt="" coords="415,70,620,96"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="342,116,436,97,437,102,343,121"/>
+<area shape="rect" id="Node000005" href="$classc___file_mgr.html#af682e9f6db1495ac9993ca46e68cbc4b" title=" " alt="" coords="453,120,582,145"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="354,130,437,130,437,135,354,135"/>
+<area shape="rect" id="Node000006" href="$classc___file_mgr.html#aa46e2aee2131e6fb5c937c4522b5dafb" title=" " alt="" coords="445,169,591,195"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="343,143,437,162,436,168,342,148"/>
+<area shape="rect" id="Node000008" href="$classc___network_mgr.html#adb2bfe0b52822c8b9936696d9d03031d" title=" " alt="" coords="425,218,610,244"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="330,281,414,252,439,246,440,251,416,258,332,286"/>
+<area shape="rect" id="Node000009" href="$fseq_8h.html#a5d05476d4f29f4fbc1769c4b186d45d3" title=" " alt="" coords="486,268,549,293"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="365,293,470,282,471,288,366,298"/>
+<area shape="rect" id="Node000010" href="$fseq_8h.html#a3acd03a9c12a4b6126f59bbe3442f141" title=" " alt="" coords="486,317,549,343"/>
+<area shape="poly" id="edge9_Node000007_Node000010" title=" " alt="" coords="366,311,471,322,470,327,365,316"/>
+<area shape="rect" id="Node000012" href="$classc___input_f_p_p_remote_play_file.html#a2848f54d1ec8462d0fc54a47c564b035" title=" " alt="" coords="668,367,850,407"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="584,384,653,384,653,390,584,390"/>
+<area shape="poly" id="edge13_Node000013_Node000011" title=" " alt="" coords="367,413,436,400,437,405,368,418"/>
+<area shape="rect" id="Node000014" href="$classc___file_mgr.html#a9d269a5325ae97f480a9c8e7671c862e" title=" " alt="" coords="424,432,611,457"/>
+<area shape="poly" id="edge14_Node000013_Node000014" title=" " alt="" coords="368,434,408,436,408,442,367,440"/>
+<area shape="rect" id="Node000015" href="$classfsm___play_file__state.html#acca480317740eade01072debaf792573" title=" " alt="" coords="452,481,584,522"/>
+<area shape="poly" id="edge15_Node000013_Node000015" title=" " alt="" coords="351,451,437,476,436,481,349,456"/>
+</map>

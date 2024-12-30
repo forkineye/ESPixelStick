@@ -9,7 +9,7 @@ var classc___input_f_p_p_remote_play_item =
     [ "GetStatus", "classc___input_f_p_p_remote_play_item.html#ae81c0361879c195c589b73e033cd845f", null ],
     [ "GetSyncOffsetMS", "classc___input_f_p_p_remote_play_item.html#a68f2dc3163ec0909d225ff6ca3fe1345", null ],
     [ "IsIdle", "classc___input_f_p_p_remote_play_item.html#a635e6efe611a2c4219289de24b93c585", null ],
-    [ "Poll", "classc___input_f_p_p_remote_play_item.html#ad62453249e91e547582ea77cd6db6c04", null ],
+    [ "Poll", "classc___input_f_p_p_remote_play_item.html#a3aab9f682ed32743d2972bab98a178c2", null ],
     [ "SetDuration", "classc___input_f_p_p_remote_play_item.html#a0cac6e8fbf28021b311e5709a6fd3424", null ],
     [ "SetSendFppSync", "classc___input_f_p_p_remote_play_item.html#a3b82ae5fac0050235ff7bb8f6a193761", null ],
     [ "SetSyncOffsetMS", "classc___input_f_p_p_remote_play_item.html#a4f73b1035757782b9e521a7458a39646", null ],

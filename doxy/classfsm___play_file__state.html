@@ -158,8 +158,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aa3a6435758d117eb0ec31a16c25d5a18"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad47cfa459bad0d65ea8345f4fcbeeb9a" id="r_ad47cfa459bad0d65ea8345f4fcbeeb9a"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classfsm___play_file__state.html#ad47cfa459bad0d65ea8345f4fcbeeb9a">~fsm_PlayFile_state</a> ()</td></tr>
 <tr class="separator:ad47cfa459bad0d65ea8345f4fcbeeb9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a47eed113e32624b44ff0ff061f93498f" id="r_a47eed113e32624b44ff0ff061f93498f"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classfsm___play_file__state.html#a47eed113e32624b44ff0ff061f93498f">Poll</a> ()=0</td></tr>
-<tr class="separator:a47eed113e32624b44ff0ff061f93498f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4de54d20378d0b5002ecad5725f9b4f7" id="r_a4de54d20378d0b5002ecad5725f9b4f7"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classfsm___play_file__state.html#a4de54d20378d0b5002ecad5725f9b4f7">Poll</a> (bool StayDark)=0</td></tr>
+<tr class="separator:a4de54d20378d0b5002ecad5725f9b4f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5081dfb01307ad53249877cefaaa2938" id="r_a5081dfb01307ad53249877cefaaa2938"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classfsm___play_file__state.html#a5081dfb01307ad53249877cefaaa2938">Init</a> (<a class="el" href="classc___input_f_p_p_remote_play_file.html">c_InputFPPRemotePlayFile</a> *Parent)=0</td></tr>
 <tr class="separator:a5081dfb01307ad53249877cefaaa2938"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a40f2dec7cad22660e99064c080d7a69d" id="r_a40f2dec7cad22660e99064c080d7a69d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classfsm___play_file__state.html#a40f2dec7cad22660e99064c080d7a69d">GetStateName</a> (String &amp;sName)=0</td></tr>
@@ -314,8 +314,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a47eed113e32624b44ff0ff061f93498f" name="a47eed113e32624b44ff0ff061f93498f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a47eed113e32624b44ff0ff061f93498f">&#9670;&#160;</a></span>Poll()</h2>
+<a id="a4de54d20378d0b5002ecad5725f9b4f7" name="a4de54d20378d0b5002ecad5725f9b4f7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4de54d20378d0b5002ecad5725f9b4f7">&#9670;&#160;</a></span>Poll()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -326,7 +326,8 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">virtual bool fsm_PlayFile_state::Poll </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>StayDark</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -337,14 +338,14 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="classfsm___play_file__state___idle.html#af0326b39d0e8278959096655ba2ec278">fsm_PlayFile_state_Idle</a>, <a class="el" href="classfsm___play_file__state___starting.html#a3de92f0e9c7aa31adaba1a7f7ff6f7a6">fsm_PlayFile_state_Starting</a>, <a class="el" href="classfsm___play_file__state___playing_file.html#a78f01a0f55770883e74f07e65769f8a2">fsm_PlayFile_state_PlayingFile</a>, <a class="el" href="classfsm___play_file__state___stopping.html#a8da7990c94c79959b3893fdeac5c8233">fsm_PlayFile_state_Stopping</a>, and <a class="el" href="classfsm___play_file__state___error.html#ad02774153496bdd3710fe8b46a03f387">fsm_PlayFile_state_Error</a>.</p>
+<p>Implemented in <a class="el" href="classfsm___play_file__state___idle.html#a3100e4b52480149515c09628a0038083">fsm_PlayFile_state_Idle</a>, <a class="el" href="classfsm___play_file__state___starting.html#a228dd8766ec2098def5dd1fa73e65cb7">fsm_PlayFile_state_Starting</a>, <a class="el" href="classfsm___play_file__state___playing_file.html#a9e4975758937acf3f68c840cd2feb032">fsm_PlayFile_state_PlayingFile</a>, <a class="el" href="classfsm___play_file__state___stopping.html#a6bbbf241c6515058199b60227341d566">fsm_PlayFile_state_Stopping</a>, and <a class="el" href="classfsm___play_file__state___error.html#afe69de882f3cdb09bc9dd06384a8dc74">fsm_PlayFile_state_Error</a>.</p>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="classfsm___play_file__state_a47eed113e32624b44ff0ff061f93498f_icgraph.png" border="0" usemap="#aclassfsm___play_file__state_a47eed113e32624b44ff0ff061f93498f_icgraph" alt=""/></div>
-<map name="aclassfsm___play_file__state_a47eed113e32624b44ff0ff061f93498f_icgraph" id="aclassfsm___play_file__state_a47eed113e32624b44ff0ff061f93498f_icgraph">
+<div class="center"><img src="classfsm___play_file__state_a4de54d20378d0b5002ecad5725f9b4f7_icgraph.png" border="0" usemap="#aclassfsm___play_file__state_a4de54d20378d0b5002ecad5725f9b4f7_icgraph" alt=""/></div>
+<map name="aclassfsm___play_file__state_a4de54d20378d0b5002ecad5725f9b4f7_icgraph" id="aclassfsm___play_file__state_a4de54d20378d0b5002ecad5725f9b4f7_icgraph">
 <area shape="rect" title=" " alt="" coords="477,5,609,46"/>
-<area shape="rect" href="classc___input_f_p_p_remote_play_file.html#aec64aeee6a300e6bade15d4e41d5b1fe" title=" " alt="" coords="248,5,429,46"/>
+<area shape="rect" href="classc___input_f_p_p_remote_play_file.html#a1e8646db1a894960aed8e5d77a9537a4" title=" " alt="" coords="248,5,429,46"/>
 <area shape="poly" title=" " alt="" coords="462,28,429,28,429,23,462,23"/>
 <area shape="rect" href="classc___input_f_p_p_remote_play_file.html#af23b055872e43550e0beb3eb3380ac47" title=" " alt="" coords="5,5,200,46"/>
 <area shape="poly" title=" " alt="" coords="232,28,200,28,200,23,232,23"/>
@@ -402,7 +403,7 @@ Here is the caller graph for this function:</div>
 <area shape="rect" title=" " alt="" coords="3349,633,3482,674"/>
 <area shape="rect" href="classc___input_f_p_p_remote_play_file.html#ac9b4b56c2a719407dc09530078d609de" title=" " alt="" coords="3120,633,3301,674"/>
 <area shape="poly" title=" " alt="" coords="3334,656,3302,656,3302,651,3334,651"/>
-<area shape="rect" href="classfsm___play_file__state___stopping.html#a8da7990c94c79959b3893fdeac5c8233" title=" " alt="" coords="2909,539,3041,579"/>
+<area shape="rect" href="classfsm___play_file__state___stopping.html#a6bbbf241c6515058199b60227341d566" title=" " alt="" coords="2909,539,3041,579"/>
 <area shape="poly" title=" " alt="" coords="3150,629,3071,595,3038,582,3040,577,3073,590,3152,624"/>
 <area shape="rect" href="classfsm___play_file__state___playing_file.html#afd10581b93a5c936d056cc0820d55bb7" title=" " alt="" coords="2909,604,3041,645"/>
 <area shape="poly" title=" " alt="" coords="3104,643,3041,635,3042,630,3105,638"/>
@@ -534,7 +535,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="2615,202,2596,163,2570,120,2535,78,2492,46,2459,31,2423,20,2349,9,2277,10,2216,16,2215,11,2277,4,2349,4,2424,15,2461,26,2495,41,2539,74,2574,116,2601,161,2620,199"/>
 <area shape="rect" href="classc___input_f_p_p_remote_play_file.html#a588e1c419a88dc3536d9867f25f074cd" title=" " alt="" coords="2306,55,2487,96"/>
 <area shape="poly" title=" " alt="" coords="2601,205,2553,157,2524,133,2492,111,2467,99,2470,94,2495,107,2527,128,2557,153,2605,202"/>
-<area shape="rect" href="classfsm___play_file__state___playing_file.html#a78f01a0f55770883e74f07e65769f8a2" title=" " alt="" coords="2330,121,2463,161"/>
+<area shape="rect" href="classfsm___play_file__state___playing_file.html#a9e4975758937acf3f68c840cd2feb032" title=" " alt="" coords="2330,121,2463,161"/>
 <area shape="poly" title=" " alt="" coords="2572,211,2493,177,2460,164,2461,159,2495,172,2574,206"/>
 <area shape="rect" href="classfsm___play_file__state___playing_file.html#afd10581b93a5c936d056cc0820d55bb7" title=" " alt="" coords="2330,186,2463,227"/>
 <area shape="poly" title=" " alt="" coords="2526,225,2463,217,2463,212,2527,220"/>
@@ -546,7 +547,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="2603,269,2554,313,2495,355,2469,368,2467,363,2492,351,2551,309,2599,265"/>
 <area shape="rect" href="classc___input_f_p_p_remote_play_file.html#af23b055872e43550e0beb3eb3380ac47" title=" " alt="" coords="2299,431,2494,472"/>
 <area shape="poly" title=" " alt="" coords="2616,271,2568,346,2534,386,2495,420,2474,433,2471,428,2492,416,2530,382,2564,343,2611,268"/>
-<area shape="rect" href="classfsm___play_file__state___starting.html#a3de92f0e9c7aa31adaba1a7f7ff6f7a6" title=" " alt="" coords="1827,6,1959,47"/>
+<area shape="rect" href="classfsm___play_file__state___starting.html#a228dd8766ec2098def5dd1fa73e65cb7" title=" " alt="" coords="1827,6,1959,47"/>
 <area shape="poly" title=" " alt="" coords="2067,29,1960,29,1960,24,2067,24"/>
 <area shape="poly" title=" " alt="" coords="2290,57,2215,42,2216,37,2291,52"/>
 <area shape="rect" href="classc___f_p_p_discovery.html#a09dd955e78cdd72066e022c493a59d96" title=" " alt="" coords="1010,161,1166,187"/>
@@ -583,7 +584,7 @@ Here is the caller graph for this function:</div>
 <area shape="rect" href="classc___input_f_p_p_remote.html#a1ee15e1c30584550418fd15599f8de61" title="Set a new config in the driver." alt="" coords="989,428,1187,454"/>
 <area shape="poly" title=" " alt="" coords="1234,444,1187,444,1187,438,1234,438"/>
 <area shape="poly" title=" " alt="" coords="1299,461,1131,515,1130,510,1298,456"/>
-<area shape="rect" href="classc___input_f_p_p_remote.html#a443df599d56a819b87102cefe5d45cd3" title="Call from loop(), renders Input data." alt="" coords="720,513,910,539"/>
+<area shape="rect" href="classc___input_f_p_p_remote.html#afabf7e50d6b7e7387144c6de2e301e8c" title="Call from loop(), renders Input data." alt="" coords="720,513,910,539"/>
 <area shape="poly" title=" " alt="" coords="963,529,910,529,910,524,963,524"/>
 <area shape="poly" title=" " alt="" coords="1505,444,1461,444,1461,438,1505,438"/>
 <area shape="poly" title=" " alt="" coords="1524,484,1411,457,1412,452,1525,479"/>

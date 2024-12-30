@@ -1,9 +1,11 @@
 <map id="fsm_PlayFile_state_Stopping::Init" name="fsm_PlayFile_state_Stopping::Init">
 <area shape="rect" id="Node000001" title=" " alt="" coords="386,39,518,79"/>
-<area shape="rect" id="Node000002" href="$classfsm___play_file__state___playing_file.html#ac2ef6559ac28ad864927766c57b368d0" title=" " alt="" coords="206,39,338,79"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="371,62,338,62,338,56,371,56"/>
-<area shape="rect" id="Node000003" href="$classfsm___play_file__state___playing_file.html#a78f01a0f55770883e74f07e65769f8a2" title=" " alt="" coords="15,5,148,46"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="190,47,147,40,148,35,191,42"/>
-<area shape="rect" id="Node000004" href="$classfsm___play_file__state___playing_file.html#a7c3203657c7115e7c12bc41344d7c997" title=" " alt="" coords="5,71,158,111"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="191,75,159,81,158,76,190,70"/>
+<area shape="rect" id="Node000002" href="$classfsm___play_file__state___starting.html#a228dd8766ec2098def5dd1fa73e65cb7" title=" " alt="" coords="206,5,338,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="370,47,338,41,339,35,371,41"/>
+<area shape="rect" id="Node000003" href="$classfsm___play_file__state___playing_file.html#ac2ef6559ac28ad864927766c57b368d0" title=" " alt="" coords="206,71,338,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="371,76,339,82,338,77,370,71"/>
+<area shape="rect" id="Node000004" href="$classfsm___play_file__state___playing_file.html#a9e4975758937acf3f68c840cd2feb032" title=" " alt="" coords="15,37,148,78"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="190,79,147,72,148,67,191,74"/>
+<area shape="rect" id="Node000005" href="$classfsm___play_file__state___playing_file.html#a7c3203657c7115e7c12bc41344d7c997" title=" " alt="" coords="5,103,158,143"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="191,107,159,113,158,108,190,102"/>
 </map>

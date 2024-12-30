@@ -142,9 +142,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ad2e5fbac55b191e2466e8ffc50879fe0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abe329db482622289087e14d0a9b40e24" id="r_abe329db482622289087e14d0a9b40e24"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_f_p_p_remote.html#abe329db482622289087e14d0a9b40e24">GetStatus</a> (JsonObject &amp;jsonStatus)</td></tr>
 <tr class="separator:abe329db482622289087e14d0a9b40e24"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a443df599d56a819b87102cefe5d45cd3" id="r_a443df599d56a819b87102cefe5d45cd3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_f_p_p_remote.html#a443df599d56a819b87102cefe5d45cd3">Process</a> ()</td></tr>
-<tr class="memdesc:a443df599d56a819b87102cefe5d45cd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call from <a class="el" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data.  <br /></td></tr>
-<tr class="separator:a443df599d56a819b87102cefe5d45cd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afabf7e50d6b7e7387144c6de2e301e8c" id="r_afabf7e50d6b7e7387144c6de2e301e8c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_f_p_p_remote.html#afabf7e50d6b7e7387144c6de2e301e8c">Process</a> (bool <a class="el" href="classc___input_f_p_p_remote.html#a5d87accf4b1fb74a4486d5f3d8de71ec">StayDark</a>)</td></tr>
+<tr class="memdesc:afabf7e50d6b7e7387144c6de2e301e8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call from <a class="el" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data.  <br /></td></tr>
+<tr class="separator:afabf7e50d6b7e7387144c6de2e301e8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a52a0259a23c09e3cde5501eafae94e8a" id="r_a52a0259a23c09e3cde5501eafae94e8a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_f_p_p_remote.html#a52a0259a23c09e3cde5501eafae94e8a">TaskProcess</a> ()</td></tr>
 <tr class="memdesc:a52a0259a23c09e3cde5501eafae94e8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call from <a class="el" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data.  <br /></td></tr>
 <tr class="separator:a52a0259a23c09e3cde5501eafae94e8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -193,6 +193,8 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:ac4e408789e2c39cea4df6df3dd2ade59"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5d87accf4b1fb74a4486d5f3d8de71ec" id="r_a5d87accf4b1fb74a4486d5f3d8de71ec"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_f_p_p_remote.html#a5d87accf4b1fb74a4486d5f3d8de71ec">StayDark</a> = false</td></tr>
 <tr class="separator:a5d87accf4b1fb74a4486d5f3d8de71ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ab02a00152bdbadfa7c9df038911da6" id="r_a2ab02a00152bdbadfa7c9df038911da6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_f_p_p_remote.html#a2ab02a00152bdbadfa7c9df038911da6">Disabled</a> = false</td></tr>
+<tr class="separator:a2ab02a00152bdbadfa7c9df038911da6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classc___input_common"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classc___input_common')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classc___input_common.html">c_InputCommon</a></td></tr>
 <tr class="memitem:a998706211cdea080c6cdbb2a54ababc3 inherit pro_attribs_classc___input_common" id="r_a998706211cdea080c6cdbb2a54ababc3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_common.html#a998706211cdea080c6cdbb2a54ababc3">HasBeenInitialized</a> = false</td></tr>
 <tr class="separator:a998706211cdea080c6cdbb2a54ababc3 inherit pro_attribs_classc___input_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -316,7 +318,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="406,213,447,208,448,213,407,218"/>
 <area shape="rect" href="classc___input_f_p_p_remote.html#a7cba6247fa182067f09371d891c53adb" title=" " alt="" coords="454,243,658,268"/>
 <area shape="poly" title=" " alt="" coords="407,236,439,240,438,245,406,242"/>
-<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#ad62453249e91e547582ea77cd6db6c04" title=" " alt="" coords="463,293,649,333"/>
+<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a3aab9f682ed32743d2972bab98a178c2" title=" " alt="" coords="463,293,649,333"/>
 <area shape="poly" title=" " alt="" coords="340,238,455,278,474,285,473,290,453,283,339,243"/>
 <area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a380f107fc7811c931aa4fa63cd8c1ac0" title=" " alt="" coords="463,358,649,399"/>
 <area shape="poly" title=" " alt="" coords="318,239,375,289,414,317,455,342,469,349,466,354,453,347,411,322,372,293,314,243"/>
@@ -609,7 +611,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="578,382,373,254,376,249,580,377"/>
 <area shape="rect" href="classc___input_f_p_p_remote.html#a3695b4762e16bd621444ae3460e50cbe" title=" " alt="" coords="5,355,195,396"/>
 <area shape="poly" title=" " alt="" coords="229,378,195,378,195,373,229,373"/>
-<area shape="rect" href="classc___input_f_p_p_remote.html#a443df599d56a819b87102cefe5d45cd3" title="Call from loop(), renders Input data." alt="" coords="5,225,195,251"/>
+<area shape="rect" href="classc___input_f_p_p_remote.html#afabf7e50d6b7e7387144c6de2e301e8c" title="Call from loop(), renders Input data." alt="" coords="5,225,195,251"/>
 <area shape="poly" title=" " alt="" coords="227,241,195,241,195,236,227,236"/>
 <area shape="poly" title=" " alt="" coords="1089,329,979,279,933,262,935,257,981,274,1091,324"/>
 <area shape="poly" title=" " alt="" coords="1105,371,1050,408,1016,425,980,438,936,447,891,451,802,447,720,433,657,417,658,412,722,428,802,441,891,445,936,442,979,433,1014,420,1047,403,1102,367"/>
@@ -678,7 +680,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="533,99,419,122,418,117,532,93"/>
 <area shape="rect" href="classc___input_f_p_p_remote.html#a3695b4762e16bd621444ae3460e50cbe" title=" " alt="" coords="5,14,195,55"/>
 <area shape="poly" title=" " alt="" coords="229,37,195,37,195,32,229,32"/>
-<area shape="rect" href="classc___input_f_p_p_remote.html#a443df599d56a819b87102cefe5d45cd3" title="Call from loop(), renders Input data." alt="" coords="5,120,195,146"/>
+<area shape="rect" href="classc___input_f_p_p_remote.html#afabf7e50d6b7e7387144c6de2e301e8c" title="Call from loop(), renders Input data." alt="" coords="5,120,195,146"/>
 <area shape="poly" title=" " alt="" coords="227,136,195,136,195,130,227,130"/>
 </map>
 </div>
@@ -747,7 +749,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="994,176,1018,188,1035,204,1043,220,1051,237,1066,252,1074,257,1071,262,1063,256,1047,240,1039,223,1031,207,1015,192,991,181"/>
 <area shape="rect" href="classc___input_f_p_p_remote.html#a7cba6247fa182067f09371d891c53adb" title=" " alt="" coords="1065,451,1269,476"/>
 <area shape="poly" title=" " alt="" coords="1000,176,1018,188,1033,203,1042,219,1050,249,1054,281,1067,318,1108,384,1147,437,1143,440,1103,387,1062,321,1049,283,1045,250,1037,221,1029,207,1015,192,997,180"/>
-<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#ad62453249e91e547582ea77cd6db6c04" title=" " alt="" coords="1074,22,1260,63"/>
+<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a3aab9f682ed32743d2972bab98a178c2" title=" " alt="" coords="1074,22,1260,63"/>
 <area shape="poly" title=" " alt="" coords="923,149,985,113,1064,73,1081,66,1083,71,1066,78,987,117,926,154"/>
 <area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a380f107fc7811c931aa4fa63cd8c1ac0" title=" " alt="" coords="1074,87,1260,128"/>
 <area shape="poly" title=" " alt="" coords="964,149,1058,128,1059,133,965,154"/>
@@ -815,7 +817,7 @@ Here is the call graph for this function:</div>
 <div class="center"><img src="classc___input_f_p_p_remote_a5ffd24117059ff8bd76688370235c19f_cgraph.png" border="0" usemap="#aclassc___input_f_p_p_remote_a5ffd24117059ff8bd76688370235c19f_cgraph" alt=""/></div>
 <map name="aclassc___input_f_p_p_remote_a5ffd24117059ff8bd76688370235c19f_cgraph" id="aclassc___input_f_p_p_remote_a5ffd24117059ff8bd76688370235c19f_cgraph">
 <area shape="rect" title=" " alt="" coords="5,13,169,39"/>
-<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#ad62453249e91e547582ea77cd6db6c04" title=" " alt="" coords="217,5,403,46"/>
+<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a3aab9f682ed32743d2972bab98a178c2" title=" " alt="" coords="217,5,403,46"/>
 <area shape="poly" title=" " alt="" coords="169,23,201,23,201,28,169,28"/>
 </map>
 </div>
@@ -827,15 +829,15 @@ Here is the caller graph for this function:</div>
 <area shape="rect" title=" " alt="" coords="509,5,672,31"/>
 <area shape="rect" href="classc___input_f_p_p_remote.html#a52a0259a23c09e3cde5501eafae94e8a" title="Call from loop(), renders Input data." alt="" coords="243,5,461,31"/>
 <area shape="poly" title=" " alt="" coords="493,21,461,21,461,16,493,16"/>
-<area shape="rect" href="classc___input_f_p_p_remote.html#a443df599d56a819b87102cefe5d45cd3" title="Call from loop(), renders Input data." alt="" coords="5,5,195,31"/>
+<area shape="rect" href="classc___input_f_p_p_remote.html#afabf7e50d6b7e7387144c6de2e301e8c" title="Call from loop(), renders Input data." alt="" coords="5,5,195,31"/>
 <area shape="poly" title=" " alt="" coords="227,21,195,21,195,16,227,16"/>
 </map>
 </div>
 
 </div>
 </div>
-<a id="a443df599d56a819b87102cefe5d45cd3" name="a443df599d56a819b87102cefe5d45cd3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a443df599d56a819b87102cefe5d45cd3">&#9670;&#160;</a></span>Process()</h2>
+<a id="afabf7e50d6b7e7387144c6de2e301e8c" name="afabf7e50d6b7e7387144c6de2e301e8c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afabf7e50d6b7e7387144c6de2e301e8c">&#9670;&#160;</a></span>Process()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -846,7 +848,8 @@ Here is the caller graph for this function:</div>
         <tr>
           <td class="memname">void c_InputFPPRemote::Process </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>StayDark</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -859,12 +862,12 @@ Here is the caller graph for this function:</div>
 
 <p>Call from <a class="el" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data. </p>
 
-<p>Implements <a class="el" href="classc___input_common.html#ac30bc0d37e45246fbecb47f4b9d93f63">c_InputCommon</a>.</p>
+<p>Implements <a class="el" href="classc___input_common.html#aa6f6cfde6c73d160d97457294f9c6935">c_InputCommon</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="classc___input_f_p_p_remote_a443df599d56a819b87102cefe5d45cd3_cgraph.png" border="0" usemap="#aclassc___input_f_p_p_remote_a443df599d56a819b87102cefe5d45cd3_cgraph" alt=""/></div>
-<map name="aclassc___input_f_p_p_remote_a443df599d56a819b87102cefe5d45cd3_cgraph" id="aclassc___input_f_p_p_remote_a443df599d56a819b87102cefe5d45cd3_cgraph">
+<div class="center"><img src="classc___input_f_p_p_remote_afabf7e50d6b7e7387144c6de2e301e8c_cgraph.png" border="0" usemap="#aclassc___input_f_p_p_remote_afabf7e50d6b7e7387144c6de2e301e8c_cgraph" alt=""/></div>
+<map name="aclassc___input_f_p_p_remote_afabf7e50d6b7e7387144c6de2e301e8c_cgraph" id="aclassc___input_f_p_p_remote_afabf7e50d6b7e7387144c6de2e301e8c_cgraph">
 <area shape="rect" title="Call from loop(), renders Input data." alt="" coords="5,368,195,393"/>
 <area shape="rect" href="classc___input_f_p_p_remote.html#a52a0259a23c09e3cde5501eafae94e8a" title="Call from loop(), renders Input data." alt="" coords="243,368,461,393"/>
 <area shape="poly" title=" " alt="" coords="195,378,227,378,227,383,195,383"/>
@@ -881,7 +884,7 @@ Here is the call graph for this function:</div>
 <area shape="rect" href="classc___input_f_p_p_remote.html#a7b84b8b1119182f7a2c6a72c00d1d1da" title=" " alt="" coords="1038,78,1248,104"/>
 <area shape="poly" title=" " alt="" coords="367,365,427,318,508,265,573,232,641,204,781,158,914,126,1027,104,1028,109,915,131,782,163,643,209,575,237,510,269,430,322,370,369"/>
 <area shape="poly" title=" " alt="" coords="1235,506,1291,506,1291,511,1235,511"/>
-<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#ad62453249e91e547582ea77cd6db6c04" title=" " alt="" coords="1315,571,1501,611"/>
+<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a3aab9f682ed32743d2972bab98a178c2" title=" " alt="" coords="1315,571,1501,611"/>
 <area shape="poly" title=" " alt="" coords="697,611,1299,592,1300,597,697,616"/>
 <area shape="rect" href="classc___input_f_p_p_remote.html#ad3bc5af64fe8523ba3c2f35cffa62fa0" title=" " alt="" coords="768,237,980,278"/>
 <area shape="poly" title=" " alt="" coords="715,276,753,271,753,276,716,282"/>
@@ -997,7 +1000,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="1231,176,1256,188,1272,204,1281,220,1289,237,1304,252,1311,257,1309,262,1300,256,1284,240,1276,223,1268,207,1252,192,1228,181"/>
 <area shape="rect" href="classc___input_f_p_p_remote.html#a7cba6247fa182067f09371d891c53adb" title=" " alt="" coords="1302,451,1506,476"/>
 <area shape="poly" title=" " alt="" coords="1237,176,1256,188,1270,203,1279,219,1287,249,1292,281,1304,318,1345,384,1385,437,1380,440,1341,387,1300,321,1286,283,1282,250,1275,221,1266,207,1252,192,1234,180"/>
-<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#ad62453249e91e547582ea77cd6db6c04" title=" " alt="" coords="1311,22,1497,63"/>
+<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a3aab9f682ed32743d2972bab98a178c2" title=" " alt="" coords="1311,22,1497,63"/>
 <area shape="poly" title=" " alt="" coords="1160,149,1222,113,1301,73,1319,66,1321,71,1303,78,1225,117,1163,154"/>
 <area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a380f107fc7811c931aa4fa63cd8c1ac0" title=" " alt="" coords="1311,87,1497,128"/>
 <area shape="poly" title=" " alt="" coords="1201,149,1296,128,1297,133,1202,154"/>
@@ -1145,7 +1148,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="992,492,1041,492,1041,498,992,498"/>
 <area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a635e6efe611a2c4219289de24b93c585" title=" " alt="" coords="1059,540,1245,581"/>
 <area shape="poly" title=" " alt="" coords="951,506,1002,518,1061,533,1060,538,1001,523,950,511"/>
-<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#ad62453249e91e547582ea77cd6db6c04" title=" " alt="" coords="1059,605,1245,646"/>
+<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a3aab9f682ed32743d2972bab98a178c2" title=" " alt="" coords="1059,605,1245,646"/>
 <area shape="poly" title=" " alt="" coords="980,506,1003,518,1020,536,1029,555,1036,573,1051,590,1059,595,1056,600,1048,594,1031,576,1024,557,1016,539,1000,522,978,511"/>
 <area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a380f107fc7811c931aa4fa63cd8c1ac0" title=" " alt="" coords="1059,360,1245,401"/>
 <area shape="poly" title=" " alt="" coords="975,479,1000,467,1015,454,1024,440,1032,425,1048,410,1055,406,1058,410,1051,414,1037,428,1028,443,1019,458,1003,472,977,484"/>
@@ -1227,7 +1230,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="658,141,720,100,801,57,818,50,820,54,803,61,723,105,661,145"/>
 <area shape="rect" href="classc___input_f_p_p_remote.html#a7cba6247fa182067f09371d891c53adb" title=" " alt="" coords="802,405,1007,431"/>
 <area shape="poly" title=" " alt="" coords="737,168,756,180,770,194,779,209,786,237,791,268,805,302,842,352,880,392,876,396,838,355,800,304,786,269,781,238,774,211,766,197,753,184,734,172"/>
-<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#ad62453249e91e547582ea77cd6db6c04" title=" " alt="" coords="811,71,998,111"/>
+<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a3aab9f682ed32743d2972bab98a178c2" title=" " alt="" coords="811,71,998,111"/>
 <area shape="poly" title=" " alt="" coords="694,140,804,113,805,118,695,146"/>
 <area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a380f107fc7811c931aa4fa63cd8c1ac0" title=" " alt="" coords="811,136,998,177"/>
 <area shape="poly" title=" " alt="" coords="745,154,796,154,796,159,745,159"/>
@@ -1268,7 +1271,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="528,94,425,113,424,108,527,89"/>
 <area shape="rect" href="classc___input_f_p_p_remote.html#a3695b4762e16bd621444ae3460e50cbe" title=" " alt="" coords="5,5,195,46"/>
 <area shape="poly" title=" " alt="" coords="229,28,195,28,195,23,229,23"/>
-<area shape="rect" href="classc___input_f_p_p_remote.html#a443df599d56a819b87102cefe5d45cd3" title="Call from loop(), renders Input data." alt="" coords="5,112,195,137"/>
+<area shape="rect" href="classc___input_f_p_p_remote.html#afabf7e50d6b7e7387144c6de2e301e8c" title="Call from loop(), renders Input data." alt="" coords="5,112,195,137"/>
 <area shape="poly" title=" " alt="" coords="227,127,195,127,195,122,227,122"/>
 </map>
 </div>
@@ -1322,7 +1325,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="485,249,537,243,537,249,486,255"/>
 <area shape="rect" href="classc___input_f_p_p_remote.html#a7cba6247fa182067f09371d891c53adb" title=" " alt="" coords="543,279,747,304"/>
 <area shape="poly" title=" " alt="" coords="486,272,528,276,527,282,485,277"/>
-<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#ad62453249e91e547582ea77cd6db6c04" title=" " alt="" coords="552,329,738,369"/>
+<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a3aab9f682ed32743d2972bab98a178c2" title=" " alt="" coords="552,329,738,369"/>
 <area shape="poly" title=" " alt="" coords="423,274,544,314,564,321,563,326,542,319,421,280"/>
 <area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a380f107fc7811c931aa4fa63cd8c1ac0" title=" " alt="" coords="552,394,738,435"/>
 <area shape="poly" title=" " alt="" coords="398,275,459,324,501,353,544,378,559,385,556,390,542,383,498,358,456,329,395,279"/>
@@ -1354,7 +1357,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="528,94,425,113,424,108,527,89"/>
 <area shape="rect" href="classc___input_f_p_p_remote.html#a3695b4762e16bd621444ae3460e50cbe" title=" " alt="" coords="5,5,195,46"/>
 <area shape="poly" title=" " alt="" coords="229,28,195,28,195,23,229,23"/>
-<area shape="rect" href="classc___input_f_p_p_remote.html#a443df599d56a819b87102cefe5d45cd3" title="Call from loop(), renders Input data." alt="" coords="5,112,195,137"/>
+<area shape="rect" href="classc___input_f_p_p_remote.html#afabf7e50d6b7e7387144c6de2e301e8c" title="Call from loop(), renders Input data." alt="" coords="5,112,195,137"/>
 <area shape="poly" title=" " alt="" coords="227,127,195,127,195,122,227,122"/>
 </map>
 </div>
@@ -1413,7 +1416,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="443,362,494,350,553,335,554,340,496,355,445,367"/>
 <area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a635e6efe611a2c4219289de24b93c585" title=" " alt="" coords="552,358,738,399"/>
 <area shape="poly" title=" " alt="" coords="485,376,536,376,536,381,485,381"/>
-<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#ad62453249e91e547582ea77cd6db6c04" title=" " alt="" coords="552,423,738,464"/>
+<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a3aab9f682ed32743d2972bab98a178c2" title=" " alt="" coords="552,423,738,464"/>
 <area shape="poly" title=" " alt="" coords="436,389,546,416,544,421,434,394"/>
 <area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a380f107fc7811c931aa4fa63cd8c1ac0" title=" " alt="" coords="552,489,738,529"/>
 <area shape="poly" title=" " alt="" coords="402,389,464,430,544,473,561,480,558,485,542,478,461,434,399,394"/>
@@ -1445,7 +1448,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="528,94,425,113,424,108,527,89"/>
 <area shape="rect" href="classc___input_f_p_p_remote.html#a3695b4762e16bd621444ae3460e50cbe" title=" " alt="" coords="5,5,195,46"/>
 <area shape="poly" title=" " alt="" coords="229,28,195,28,195,23,229,23"/>
-<area shape="rect" href="classc___input_f_p_p_remote.html#a443df599d56a819b87102cefe5d45cd3" title="Call from loop(), renders Input data." alt="" coords="5,112,195,137"/>
+<area shape="rect" href="classc___input_f_p_p_remote.html#afabf7e50d6b7e7387144c6de2e301e8c" title="Call from loop(), renders Input data." alt="" coords="5,112,195,137"/>
 <area shape="poly" title=" " alt="" coords="227,127,195,127,195,122,227,122"/>
 </map>
 </div>
@@ -1488,7 +1491,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="216,213,257,208,257,213,216,218"/>
 <area shape="rect" href="classc___input_f_p_p_remote.html#a7cba6247fa182067f09371d891c53adb" title=" " alt="" coords="264,243,468,268"/>
 <area shape="poly" title=" " alt="" coords="216,236,249,240,248,245,216,242"/>
-<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#ad62453249e91e547582ea77cd6db6c04" title=" " alt="" coords="273,293,459,333"/>
+<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a3aab9f682ed32743d2972bab98a178c2" title=" " alt="" coords="273,293,459,333"/>
 <area shape="poly" title=" " alt="" coords="150,238,265,278,284,285,282,290,263,283,148,243"/>
 <area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a380f107fc7811c931aa4fa63cd8c1ac0" title=" " alt="" coords="273,358,459,399"/>
 <area shape="poly" title=" " alt="" coords="128,239,185,289,224,317,265,342,278,349,276,354,262,347,221,322,182,293,124,243"/>
@@ -1528,7 +1531,7 @@ Here is the caller graph for this function:</div>
 <area shape="rect" href="classc___input_f_p_p_remote.html#a1ee15e1c30584550418fd15599f8de61" title="Set a new config in the driver." alt="" coords="253,92,451,117"/>
 <area shape="poly" title=" " alt="" coords="493,107,451,107,451,102,493,102"/>
 <area shape="poly" title=" " alt="" coords="559,125,395,179,393,174,557,120"/>
-<area shape="rect" href="classc___input_f_p_p_remote.html#a443df599d56a819b87102cefe5d45cd3" title="Call from loop(), renders Input data." alt="" coords="5,177,195,203"/>
+<area shape="rect" href="classc___input_f_p_p_remote.html#afabf7e50d6b7e7387144c6de2e301e8c" title="Call from loop(), renders Input data." alt="" coords="5,177,195,203"/>
 <area shape="poly" title=" " alt="" coords="227,192,195,192,195,187,227,187"/>
 <area shape="poly" title=" " alt="" coords="753,107,721,107,721,102,753,102"/>
 <area shape="poly" title=" " alt="" coords="775,148,668,120,669,115,776,142"/>
@@ -1572,7 +1575,7 @@ Here is the call graph for this function:</div>
 <area shape="rect" href="classc___input_f_p_p_remote.html#a7b84b8b1119182f7a2c6a72c00d1d1da" title=" " alt="" coords="800,78,1011,104"/>
 <area shape="poly" title=" " alt="" coords="130,365,189,318,270,265,336,232,404,204,544,158,677,126,789,104,790,109,678,131,545,163,406,209,338,237,273,269,192,322,133,369"/>
 <area shape="poly" title=" " alt="" coords="998,506,1053,506,1053,511,998,511"/>
-<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#ad62453249e91e547582ea77cd6db6c04" title=" " alt="" coords="1078,571,1264,611"/>
+<area shape="rect" href="classc___input_f_p_p_remote_play_item.html#a3aab9f682ed32743d2972bab98a178c2" title=" " alt="" coords="1078,571,1264,611"/>
 <area shape="poly" title=" " alt="" coords="459,611,1062,592,1062,597,460,616"/>
 <area shape="rect" href="classc___input_f_p_p_remote.html#ad3bc5af64fe8523ba3c2f35cffa62fa0" title=" " alt="" coords="531,237,742,278"/>
 <area shape="poly" title=" " alt="" coords="478,276,515,271,516,276,479,282"/>
@@ -1624,7 +1627,7 @@ Here is the caller graph for this function:</div>
 <div class="center"><img src="classc___input_f_p_p_remote_a52a0259a23c09e3cde5501eafae94e8a_icgraph.png" border="0" usemap="#aclassc___input_f_p_p_remote_a52a0259a23c09e3cde5501eafae94e8a_icgraph" alt=""/></div>
 <map name="aclassc___input_f_p_p_remote_a52a0259a23c09e3cde5501eafae94e8a_icgraph" id="aclassc___input_f_p_p_remote_a52a0259a23c09e3cde5501eafae94e8a_icgraph">
 <area shape="rect" title="Call from loop(), renders Input data." alt="" coords="243,5,461,31"/>
-<area shape="rect" href="classc___input_f_p_p_remote.html#a443df599d56a819b87102cefe5d45cd3" title="Call from loop(), renders Input data." alt="" coords="5,5,195,31"/>
+<area shape="rect" href="classc___input_f_p_p_remote.html#afabf7e50d6b7e7387144c6de2e301e8c" title="Call from loop(), renders Input data." alt="" coords="5,5,195,31"/>
 <area shape="poly" title=" " alt="" coords="227,21,195,21,195,16,227,16"/>
 </map>
 </div>
@@ -1657,6 +1660,28 @@ Here is the caller graph for this function:</div>
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
+<a id="a2ab02a00152bdbadfa7c9df038911da6" name="a2ab02a00152bdbadfa7c9df038911da6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ab02a00152bdbadfa7c9df038911da6">&#9670;&#160;</a></span>Disabled</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool c_InputFPPRemote::Disabled = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ae0661236c6c8f91e0f9162d941b9f2de" name="ae0661236c6c8f91e0f9162d941b9f2de"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae0661236c6c8f91e0f9162d941b9f2de">&#9670;&#160;</a></span>FileBeingPlayed</h2>
 

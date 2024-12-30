@@ -193,9 +193,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:acb87ac54f56ff9db9ece09ca563eaf2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac72ca675a1cfc0a09b8e9a4be610bcd9" id="r_ac72ca675a1cfc0a09b8e9a4be610bcd9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_effect_engine.html#ac72ca675a1cfc0a09b8e9a4be610bcd9">GetStatus</a> (JsonObject &amp;jsonStatus)</td></tr>
 <tr class="separator:ac72ca675a1cfc0a09b8e9a4be610bcd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a77cbebfae3207a36a760ed4e5b439c66" id="r_a77cbebfae3207a36a760ed4e5b439c66"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_effect_engine.html#a77cbebfae3207a36a760ed4e5b439c66">Process</a> ()</td></tr>
-<tr class="memdesc:a77cbebfae3207a36a760ed4e5b439c66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call from <a class="el" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data.  <br /></td></tr>
-<tr class="separator:a77cbebfae3207a36a760ed4e5b439c66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16a48567bdaed69d1378156f6cf617b9" id="r_a16a48567bdaed69d1378156f6cf617b9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_effect_engine.html#a16a48567bdaed69d1378156f6cf617b9">Process</a> (bool <a class="el" href="classc___input_effect_engine.html#a00565b280e17e0ba56d2f1667b1f2c0a">StayDark</a>)</td></tr>
+<tr class="memdesc:a16a48567bdaed69d1378156f6cf617b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call from <a class="el" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data.  <br /></td></tr>
+<tr class="separator:a16a48567bdaed69d1378156f6cf617b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a054251f6f3f1c337c8742c05e5ad6563" id="r_a054251f6f3f1c337c8742c05e5ad6563"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_effect_engine.html#a054251f6f3f1c337c8742c05e5ad6563">Poll</a> ()</td></tr>
 <tr class="memdesc:a054251f6f3f1c337c8742c05e5ad6563"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call from <a class="el" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data.  <br /></td></tr>
 <tr class="separator:a054251f6f3f1c337c8742c05e5ad6563"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -331,6 +331,8 @@ Private Attributes</h2></td></tr>
 <tr class="separator:a728d914d1b5e7b226ac7399d6b25dd62"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a00565b280e17e0ba56d2f1667b1f2c0a" id="r_a00565b280e17e0ba56d2f1667b1f2c0a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_effect_engine.html#a00565b280e17e0ba56d2f1667b1f2c0a">StayDark</a> = false</td></tr>
 <tr class="separator:a00565b280e17e0ba56d2f1667b1f2c0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac65e7f765bfe855b23ca9388f257fecb" id="r_ac65e7f765bfe855b23ca9388f257fecb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_effect_engine.html#ac65e7f765bfe855b23ca9388f257fecb">Disabled</a> = false</td></tr>
+<tr class="separator:ac65e7f765bfe855b23ca9388f257fecb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeac381967f9b9f4621137235870e2d8d" id="r_aeac381967f9b9f4621137235870e2d8d"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_effect_engine.html#aeac381967f9b9f4621137235870e2d8d">effectMarqueePixelAdvanceCount</a> = 1</td></tr>
 <tr class="separator:aeac381967f9b9f4621137235870e2d8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a31d0c042491ccd5d8783b4587f048cf2" id="r_a31d0c042491ccd5d8783b4587f048cf2"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_effect_engine.html#a31d0c042491ccd5d8783b4587f048cf2">effectMarqueePixelLocation</a> = 0</td></tr>
@@ -1792,17 +1794,17 @@ Here is the caller graph for this function:</div>
 <area shape="rect" title=" " alt="" coords="382,39,518,79"/>
 <area shape="rect" href="classc___input_effect_engine.html#a054251f6f3f1c337c8742c05e5ad6563" title="Call from loop(), renders Input data." alt="" coords="198,5,334,46"/>
 <area shape="poly" title=" " alt="" coords="366,47,334,41,335,35,367,41"/>
-<area shape="rect" href="classc___input_effect_engine.html#a77cbebfae3207a36a760ed4e5b439c66" title="Call from loop(), renders Input data." alt="" coords="198,71,334,111"/>
+<area shape="rect" href="classc___input_effect_engine.html#a16a48567bdaed69d1378156f6cf617b9" title="Call from loop(), renders Input data." alt="" coords="198,71,334,111"/>
 <area shape="poly" title=" " alt="" coords="367,76,335,82,334,76,366,71"/>
-<area shape="rect" href="classfsm___play_effect__state___playing_effect.html#a0bd06217392513ebcc5d436896e73550" title=" " alt="" coords="5,71,150,111"/>
+<area shape="rect" href="classfsm___play_effect__state___playing_effect.html#a39a4614a4191cdd92dd2c7bc48168a82" title=" " alt="" coords="5,71,150,111"/>
 <area shape="poly" title=" " alt="" coords="182,94,150,94,150,88,182,88"/>
 </map>
 </div>
 
 </div>
 </div>
-<a id="a77cbebfae3207a36a760ed4e5b439c66" name="a77cbebfae3207a36a760ed4e5b439c66"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a77cbebfae3207a36a760ed4e5b439c66">&#9670;&#160;</a></span>Process()</h2>
+<a id="a16a48567bdaed69d1378156f6cf617b9" name="a16a48567bdaed69d1378156f6cf617b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a16a48567bdaed69d1378156f6cf617b9">&#9670;&#160;</a></span>Process()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1813,7 +1815,8 @@ Here is the caller graph for this function:</div>
         <tr>
           <td class="memname">void c_InputEffectEngine::Process </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>StayDark</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -1826,12 +1829,12 @@ Here is the caller graph for this function:</div>
 
 <p>Call from <a class="el" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop.">loop()</a>, renders Input data. </p>
 
-<p>Implements <a class="el" href="classc___input_common.html#ac30bc0d37e45246fbecb47f4b9d93f63">c_InputCommon</a>.</p>
+<p>Implements <a class="el" href="classc___input_common.html#aa6f6cfde6c73d160d97457294f9c6935">c_InputCommon</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="classc___input_effect_engine_a77cbebfae3207a36a760ed4e5b439c66_cgraph.png" border="0" usemap="#aclassc___input_effect_engine_a77cbebfae3207a36a760ed4e5b439c66_cgraph" alt=""/></div>
-<map name="aclassc___input_effect_engine_a77cbebfae3207a36a760ed4e5b439c66_cgraph" id="aclassc___input_effect_engine_a77cbebfae3207a36a760ed4e5b439c66_cgraph">
+<div class="center"><img src="classc___input_effect_engine_a16a48567bdaed69d1378156f6cf617b9_cgraph.png" border="0" usemap="#aclassc___input_effect_engine_a16a48567bdaed69d1378156f6cf617b9_cgraph" alt=""/></div>
+<map name="aclassc___input_effect_engine_a16a48567bdaed69d1378156f6cf617b9_cgraph" id="aclassc___input_effect_engine_a16a48567bdaed69d1378156f6cf617b9_cgraph">
 <area shape="rect" title="Call from loop(), renders Input data." alt="" coords="5,106,142,147"/>
 <area shape="rect" href="classc___input_common.html#ac3751b26171be9a48861c73d8d4a5fe3" title=" " alt="" coords="190,5,420,31"/>
 <area shape="poly" title=" " alt="" coords="100,103,140,75,189,48,227,33,229,38,191,53,143,79,103,107"/>
@@ -1861,10 +1864,10 @@ Here is the call graph for this function:</div>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="classc___input_effect_engine_a77cbebfae3207a36a760ed4e5b439c66_icgraph.png" border="0" usemap="#aclassc___input_effect_engine_a77cbebfae3207a36a760ed4e5b439c66_icgraph" alt=""/></div>
-<map name="aclassc___input_effect_engine_a77cbebfae3207a36a760ed4e5b439c66_icgraph" id="aclassc___input_effect_engine_a77cbebfae3207a36a760ed4e5b439c66_icgraph">
+<div class="center"><img src="classc___input_effect_engine_a16a48567bdaed69d1378156f6cf617b9_icgraph.png" border="0" usemap="#aclassc___input_effect_engine_a16a48567bdaed69d1378156f6cf617b9_icgraph" alt=""/></div>
+<map name="aclassc___input_effect_engine_a16a48567bdaed69d1378156f6cf617b9_icgraph" id="aclassc___input_effect_engine_a16a48567bdaed69d1378156f6cf617b9_icgraph">
 <area shape="rect" title="Call from loop(), renders Input data." alt="" coords="198,5,334,46"/>
-<area shape="rect" href="classfsm___play_effect__state___playing_effect.html#a0bd06217392513ebcc5d436896e73550" title=" " alt="" coords="5,5,150,46"/>
+<area shape="rect" href="classfsm___play_effect__state___playing_effect.html#a39a4614a4191cdd92dd2c7bc48168a82" title=" " alt="" coords="5,5,150,46"/>
 <area shape="poly" title=" " alt="" coords="182,28,150,28,150,23,182,23"/>
 </map>
 </div>
@@ -2006,9 +2009,9 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="612,224,572,273,520,321,501,334,498,329,517,317,568,269,608,221"/>
 <area shape="rect" href="classc___input_effect_engine.html#a054251f6f3f1c337c8742c05e5ad6563" title="Call from loop(), renders Input data." alt="" coords="198,299,334,339"/>
 <area shape="poly" title=" " alt="" coords="366,340,334,334,335,329,367,335"/>
-<area shape="rect" href="classc___input_effect_engine.html#a77cbebfae3207a36a760ed4e5b439c66" title="Call from loop(), renders Input data." alt="" coords="198,364,334,405"/>
+<area shape="rect" href="classc___input_effect_engine.html#a16a48567bdaed69d1378156f6cf617b9" title="Call from loop(), renders Input data." alt="" coords="198,364,334,405"/>
 <area shape="poly" title=" " alt="" coords="367,369,335,375,334,370,366,364"/>
-<area shape="rect" href="classfsm___play_effect__state___playing_effect.html#a0bd06217392513ebcc5d436896e73550" title=" " alt="" coords="5,364,150,405"/>
+<area shape="rect" href="classfsm___play_effect__state___playing_effect.html#a39a4614a4191cdd92dd2c7bc48168a82" title=" " alt="" coords="5,364,150,405"/>
 <area shape="poly" title=" " alt="" coords="182,387,150,387,150,382,182,382"/>
 </map>
 </div>
@@ -2096,7 +2099,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="423,127,385,94,341,61,319,49,321,44,343,57,388,90,427,123"/>
 <area shape="rect" href="classc___input_effect_engine.html#a61dc0e2f64570d9a7f7b534027a24863" title=" " alt="" coords="199,71,341,111"/>
 <area shape="poly" title=" " alt="" coords="382,133,330,114,331,109,384,128"/>
-<area shape="rect" href="classfsm___play_effect__state___playing_effect.html#a0bd06217392513ebcc5d436896e73550" title=" " alt="" coords="198,136,342,177"/>
+<area shape="rect" href="classfsm___play_effect__state___playing_effect.html#a39a4614a4191cdd92dd2c7bc48168a82" title=" " alt="" coords="198,136,342,177"/>
 <area shape="poly" title=" " alt="" coords="375,159,342,159,342,154,375,154"/>
 <area shape="rect" href="classc___input_effect_engine.html#acf078d65ad2078ad5f32afe6867284a2" title="Set a new config in the driver." alt="" coords="202,201,338,242"/>
 <area shape="poly" title=" " alt="" coords="384,185,331,203,330,198,382,180"/>
@@ -2445,9 +2448,9 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="551,224,519,224,519,219,551,219"/>
 <area shape="rect" href="classc___input_effect_engine.html#a054251f6f3f1c337c8742c05e5ad6563" title="Call from loop(), renders Input data." alt="" coords="198,169,334,210"/>
 <area shape="poly" title=" " alt="" coords="366,210,334,204,335,199,367,205"/>
-<area shape="rect" href="classc___input_effect_engine.html#a77cbebfae3207a36a760ed4e5b439c66" title="Call from loop(), renders Input data." alt="" coords="198,235,334,275"/>
+<area shape="rect" href="classc___input_effect_engine.html#a16a48567bdaed69d1378156f6cf617b9" title="Call from loop(), renders Input data." alt="" coords="198,235,334,275"/>
 <area shape="poly" title=" " alt="" coords="367,239,335,245,334,240,366,234"/>
-<area shape="rect" href="classfsm___play_effect__state___playing_effect.html#a0bd06217392513ebcc5d436896e73550" title=" " alt="" coords="5,235,150,275"/>
+<area shape="rect" href="classfsm___play_effect__state___playing_effect.html#a39a4614a4191cdd92dd2c7bc48168a82" title=" " alt="" coords="5,235,150,275"/>
 <area shape="poly" title=" " alt="" coords="182,258,150,258,150,252,182,252"/>
 </map>
 </div>
@@ -2529,9 +2532,9 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="612,224,572,273,520,321,501,334,498,329,517,317,568,269,608,221"/>
 <area shape="rect" href="classc___input_effect_engine.html#a054251f6f3f1c337c8742c05e5ad6563" title="Call from loop(), renders Input data." alt="" coords="198,299,334,339"/>
 <area shape="poly" title=" " alt="" coords="366,340,334,334,335,329,367,335"/>
-<area shape="rect" href="classc___input_effect_engine.html#a77cbebfae3207a36a760ed4e5b439c66" title="Call from loop(), renders Input data." alt="" coords="198,364,334,405"/>
+<area shape="rect" href="classc___input_effect_engine.html#a16a48567bdaed69d1378156f6cf617b9" title="Call from loop(), renders Input data." alt="" coords="198,364,334,405"/>
 <area shape="poly" title=" " alt="" coords="367,369,335,375,334,370,366,364"/>
-<area shape="rect" href="classfsm___play_effect__state___playing_effect.html#a0bd06217392513ebcc5d436896e73550" title=" " alt="" coords="5,364,150,405"/>
+<area shape="rect" href="classfsm___play_effect__state___playing_effect.html#a39a4614a4191cdd92dd2c7bc48168a82" title=" " alt="" coords="5,364,150,405"/>
 <area shape="poly" title=" " alt="" coords="182,387,150,387,150,382,182,382"/>
 </map>
 </div>
@@ -2686,6 +2689,28 @@ Here is the caller graph for this function:</div>
       <table class="memname">
         <tr>
           <td class="memname">uint8_t c_InputEffectEngine::ChannelsPerPixel = 3</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac65e7f765bfe855b23ca9388f257fecb" name="ac65e7f765bfe855b23ca9388f257fecb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac65e7f765bfe855b23ca9388f257fecb">&#9670;&#160;</a></span>Disabled</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool c_InputEffectEngine::Disabled = false</td>
         </tr>
       </table>
   </td>

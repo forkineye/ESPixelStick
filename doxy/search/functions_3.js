@@ -42,8 +42,9 @@ var searchData=
   ['conditionalincrementcolor_39',['ConditionalIncrementColor',['../classc___input_effect_engine.html#af644c98b39b0208e8ac0fdeae19ea999',1,'c_InputEffectEngine']]],
   ['connecttomqtt_40',['connectToMqtt',['../classc___input_m_q_t_t.html#a8dcaa1fe9629a2ac95927cfafb7b5e56',1,'c_InputMQTT']]],
   ['connectwifi_41',['connectWifi',['../classc___wi_fi_driver.html#a4957b3cc3db8f59af3909ccd9d9f45bd',1,'c_WiFiDriver']]],
-  ['createadmininfofile_42',['CreateAdminInfoFile',['../classc___web_mgr.html#a8cabfe1c5b1f05b02d4112cb6b85978d',1,'c_WebMgr']]],
-  ['createjsonconfig_43',['createjsonconfig',['../classc___input_mgr.html#a18e0b867953657d8362cdee1db08b0f7',1,'c_InputMgr::CreateJsonConfig()'],['../classc___output_mgr.html#a1e460ab7d570adbbb53dd0e4c6651f6d',1,'c_OutputMgr::CreateJsonConfig()']]],
-  ['createnewconfig_44',['createnewconfig',['../classc___input_mgr.html#a90b28a72c3c887ec9b222744b52a05ec',1,'c_InputMgr::CreateNewConfig()'],['../classc___output_mgr.html#adc248025f3eafeac3261994673ce96d0',1,'c_OutputMgr::CreateNewConfig()']]],
-  ['createsdfilehandle_45',['CreateSdFileHandle',['../classc___file_mgr.html#a02e1ea347dc4fb24bdc43aa282d5a665',1,'c_FileMgr']]]
+  ['converterrortostring_42',['ConvertErrorToString',['../class_e_f_update.html#a4b0df00ea2edfd6e93ecdf9c1142832b',1,'EFUpdate']]],
+  ['createadmininfofile_43',['CreateAdminInfoFile',['../classc___web_mgr.html#a8cabfe1c5b1f05b02d4112cb6b85978d',1,'c_WebMgr']]],
+  ['createjsonconfig_44',['createjsonconfig',['../classc___input_mgr.html#a18e0b867953657d8362cdee1db08b0f7',1,'c_InputMgr::CreateJsonConfig()'],['../classc___output_mgr.html#a1e460ab7d570adbbb53dd0e4c6651f6d',1,'c_OutputMgr::CreateJsonConfig()']]],
+  ['createnewconfig_45',['createnewconfig',['../classc___input_mgr.html#a90b28a72c3c887ec9b222744b52a05ec',1,'c_InputMgr::CreateNewConfig()'],['../classc___output_mgr.html#adc248025f3eafeac3261994673ce96d0',1,'c_OutputMgr::CreateNewConfig()']]],
+  ['createsdfilehandle_46',['CreateSdFileHandle',['../classc___file_mgr.html#a02e1ea347dc4fb24bdc43aa282d5a665',1,'c_FileMgr']]]
 ];
