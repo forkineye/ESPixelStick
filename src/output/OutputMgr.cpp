@@ -225,6 +225,7 @@ c_OutputMgr::~c_OutputMgr()
 void c_OutputMgr::Begin ()
 {
     // DEBUG_START;
+    // DEBUG_V(String("Current CPU ID: ") + String(xPortGetCoreID()));
 
     // IsBooting = false;
     // FileMgr.DeleteConfigFile(ConfigFileName);
