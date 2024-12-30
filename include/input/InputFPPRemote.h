@@ -55,6 +55,7 @@ protected:
     String StatusType;
     bool StayDark = false;
     bool Disabled = false;
+    bool DisableTask = false;
 
 private:
 

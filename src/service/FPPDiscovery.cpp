@@ -812,17 +812,15 @@ void c_FPPDiscovery::ProcessFile (
         if(!inFileUpload)
         {
             // DEBUG_V(String("Current CPU ID: ") + String(xPortGetCoreID()));
-            // DEBUG_V();
-            // wait for the player to become idle
+            // DEBUG_V("wait for the player to become idle");
             StopPlaying(true);
             inFileUpload = true;
             UploadFileName = filename;
             InputMgr.SetOperationalState(false);
             OutputMgr.PauseOutputs(true);
-            memset(OutputMgr.GetBufferAddress(), 0x00, OutputMgr.GetBufferSize());
         }
 
-        // DEBUG_V();
+        // DEBUG_V("Write the file block");
         bool writeFailed = !FileMgr.handleFileUpload (UploadFileName, index, data, len, final, ContentLength);
 
         if(writeFailed)
@@ -867,7 +865,7 @@ void c_FPPDiscovery::ProcessBody (
         // is this the first packet?
         if (0 == index)
         {
-            // DEBUG_V();
+            // DEBUG_V("New Download");
 
             if(!request->hasParam(ulrPath))
             {
@@ -1184,31 +1182,41 @@ void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
 void c_FPPDiscovery::StopPlaying (bool wait)
 {
     // DEBUG_START;
+    // DEBUG_V(String("Current Task Priority: ") + String(uxTaskPriorityGet(NULL)));
+    // DEBUG_V (String ("FPPDiscovery::StopPlaying '") + InputFPPRemotePlayFile->GetFileName() + "'");
 
-    FeedWDT();
-
-    // DEBUG_V (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
-    // only process if the pointer is valid
-    while (InputFPPRemotePlayFile)
+    // prevent reentrant issues
+    if(!StopInProgress)
     {
-        // DEBUG_V("Pointer is valid");
-        if(InputFPPRemotePlayFile->IsIdle())
+        StopInProgress = true;
+        // only process if the pointer is valid
+        while (InputFPPRemotePlayFile)
         {
-            // DEBUG_V("we are done");
-            break;
-        }
+            // DEBUG_V("Pointer is valid");
+            if(InputFPPRemotePlayFile->IsIdle())
+            {
+                // DEBUG_V("we are done");
+                break;
+            }
 
-        // DEBUG_V("try to stop");
-        InputFPPRemotePlayFile->Stop ();
+            // DEBUG_V("try to stop");
+            InputFPPRemotePlayFile->Stop ();
 
-        if(wait)
-        {
-            delay(10);
+            if(wait)
+            {
+                FeedWDT();
+                delay(25);
+            }
+            else
+            {
+                break;
+            }
         }
-        else
-        {
-            break;
-        }
+        StopInProgress = false;
+    }
+    else
+    {
+        // DEBUG_V("Ignoring duplicate request to stop");
     }
 
     // DEBUG_END;

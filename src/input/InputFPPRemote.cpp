@@ -84,6 +84,7 @@ c_InputFPPRemote::~c_InputFPPRemote ()
 {
     if (HasBeenInitialized)
     {
+        // DEBUG_V();
         StopPlaying ();
     }
 
@@ -259,10 +260,9 @@ void c_InputFPPRemote::Process (bool StayDark)
 void c_InputFPPRemote::TaskProcess ()
 {
     // DEBUG_START;
-    if (!IsInputChannelActive || StayDark || Disabled)
+    if (!IsInputChannelActive || StayDark || Disabled || DisableTask)
     {
         // DEBUG_V ("dont do anything if the channel is not active");
-        StopPlaying ();
     }
     else if (PlayingRemoteFile ())
     {
@@ -363,6 +363,12 @@ bool c_InputFPPRemote::SetConfig (JsonObject& jsonConfig)
 void c_InputFPPRemote::StopPlaying ()
 {
     // DEBUG_START;
+    // DEBUG_V(String("Current Task Priority: ") + String(uxTaskPriorityGet(NULL)));
+
+    // save current disable state and disable FPP task.
+    bool SavedDisableTaskFlag = DisableTask;
+    DisableTask = true;
+
     do // once
     {
         if (!PlayingFile ())
@@ -371,7 +377,7 @@ void c_InputFPPRemote::StopPlaying ()
             break;
         }
 
-        // handle re entrancy
+        // handle reentrancy
         if(Stopping)
         {
             // DEBUG_V("already in the process of stopping");
@@ -387,6 +393,7 @@ void c_InputFPPRemote::StopPlaying ()
         if(PlayingFile())
         {
             // DEBUG_V();
+            // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
             pInputFPPRemotePlayItem->Stop ();
 
             // DEBUG_V();
@@ -400,11 +407,15 @@ void c_InputFPPRemote::StopPlaying ()
             // DEBUG_V("Delete current playing file");
             delete pInputFPPRemotePlayItem;
             pInputFPPRemotePlayItem = nullptr;
+            // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
         }
 
         Stopping = false;
 
     } while (false);
+
+    // restore previous state of the flag
+    DisableTask = SavedDisableTaskFlag;
 
     // DEBUG_END;
 
@@ -448,7 +459,7 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
 
     do // once
     {
-        // make sure we are stopped (clears pInputFPPRemotePlayItem)
+        // DEBUG_V("make sure we are stopped (clears pInputFPPRemotePlayItem)");
         StopPlaying();
 
         // DEBUG_V ("Start A New File");
@@ -461,9 +472,11 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
                 // DEBUG_V ("Delete existing play item");
                 delete pInputFPPRemotePlayItem;
                 pInputFPPRemotePlayItem = nullptr;
+                // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
             }
             // DEBUG_V ("Start a new Playlist");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayList (GetInputChannelId ());
+            // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
             StatusType = F ("PlayList");
         }
         else
@@ -483,10 +496,12 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
                 // DEBUG_V ("Delete existing item");
                 delete pInputFPPRemotePlayItem;
                 pInputFPPRemotePlayItem = nullptr;
+                // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
             }
             // DEBUG_V ("Start Local FSEQ file player");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (GetInputChannelId ());
             StatusType = CN_File;
+            // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
         }
 
         // DEBUG_V (String ("FileName: '") + FileName + "'");
@@ -515,6 +530,7 @@ void c_InputFPPRemote::StartPlayingRemoteFile (String& FileName)
             break;
         }
 
+        // DEBUG_V();
         StopPlaying ();
 
         // DEBUG_V ("Instantiate an FSEQ file player");
@@ -523,9 +539,11 @@ void c_InputFPPRemote::StartPlayingRemoteFile (String& FileName)
             // DEBUG_V ("Delete existing play item");
             delete pInputFPPRemotePlayItem;
             pInputFPPRemotePlayItem = nullptr;
+            // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
         }
         // DEBUG_V ("Start Local FSEQ file player");
         pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (GetInputChannelId ());
+        // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
         pInputFPPRemotePlayItem->SetSendFppSync (SendFppSync);
         StatusType = CN_File;
@@ -551,25 +569,7 @@ void c_InputFPPRemote::validateConfiguration ()
 //-----------------------------------------------------------------------------
 bool c_InputFPPRemote::PlayingFile ()
 {
-    // DEBUG_START;
-
-    bool response = false;
-
-    do // once
-    {
-        // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
-        if (nullptr == pInputFPPRemotePlayItem)
-        {
-            // DEBUG_V("Stop processing if the play item pointer is null");
-            break;
-        }
-
-        response = true;
-    } while (false);
-
-    // DEBUG_END;
-    return response;
-
+    return (nullptr != pInputFPPRemotePlayItem);
 } // PlayingFile
 
 //-----------------------------------------------------------------------------

@@ -3,7 +3,7 @@
 * c_FPPDiscovery.h
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2018, 2022 Shelby Merrick
+* Copyright (c) 2018, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -49,6 +49,7 @@ private:
     bool hasBeenInitialized = false;
     bool IsEnabled = false;
     bool BlankOnStop = false;
+    bool StopInProgress = false;
     String UploadFileName;
     IPAddress FppRemoteIp = IPAddress (uint32_t(0));
     c_InputFPPRemotePlayFile * InputFPPRemotePlayFile = nullptr;
