@@ -811,6 +811,7 @@ void c_FPPDiscovery::ProcessFile (
 
         if(!inFileUpload)
         {
+            // DEBUG_V(String("Current CPU ID: ") + String(xPortGetCoreID()));
             // DEBUG_V();
             // wait for the player to become idle
             StopPlaying(true);
