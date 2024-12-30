@@ -46,7 +46,7 @@ class c_InputFPPRemote : public c_InputCommon
 
 protected:
 #   define No_LocalFileToPlay "..."
-#   define FPP_REMOTE_TASK_PRIORITY 5
+#   define FPP_REMOTE_TASK_PRIORITY 6
 
     c_InputFPPRemotePlayItem * pInputFPPRemotePlayItem = nullptr;
     int32_t GetSyncOffsetMS () { return SyncOffsetMS; }
