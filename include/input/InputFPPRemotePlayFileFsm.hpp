@@ -3,7 +3,7 @@
 * InputFPPRemotePlayFileFsm.hpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -36,7 +36,7 @@ public:
     fsm_PlayFile_state() {}
     virtual ~fsm_PlayFile_state() {}
 
-    virtual bool Poll () = 0;
+    virtual bool Poll (bool StayDark) = 0;
     virtual void Init (c_InputFPPRemotePlayFile * Parent) = 0;
     virtual void GetStateName (String & sName) = 0;
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t RemainingPlayCount) = 0;
@@ -57,7 +57,7 @@ public:
     fsm_PlayFile_state_Idle() {}
     virtual ~fsm_PlayFile_state_Idle() {}
 
-    virtual bool Poll ();
+    virtual bool Poll (bool StayDark);
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Idle; }
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
@@ -74,7 +74,7 @@ public:
     fsm_PlayFile_state_Starting() {}
     virtual ~fsm_PlayFile_state_Starting() {}
 
-    virtual bool Poll ();
+    virtual bool Poll (bool StayDark);
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String& sName) { sName = F ("Starting"); }
     virtual void Start (String& FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
@@ -91,7 +91,7 @@ public:
     fsm_PlayFile_state_PlayingFile() {}
     virtual ~fsm_PlayFile_state_PlayingFile() {}
 
-    virtual bool Poll ();
+    virtual bool Poll (bool StayDark);
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String & sName) { sName = CN_File; }
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
@@ -116,7 +116,7 @@ public:
     fsm_PlayFile_state_Stopping() {}
     virtual ~fsm_PlayFile_state_Stopping() {}
 
-    virtual bool Poll ();
+    virtual bool Poll (bool StayDark);
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String& sName) { sName = F("Stopping"); }
     virtual void Start (String& FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
@@ -138,7 +138,7 @@ public:
     fsm_PlayFile_state_Error() {}
     virtual ~fsm_PlayFile_state_Error() {}
 
-    virtual bool Poll ();
+    virtual bool Poll (bool StayDark);
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String& sName) { sName = F ("Error"); }
     virtual void Start (String& FileName, float SecondsElapsed, uint32_t RemainingPlayCount);

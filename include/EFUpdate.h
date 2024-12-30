@@ -2,7 +2,7 @@
 * EFUpdate.h
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2016, 2022 Shelby Merrick
+* Copyright (c) 2016, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -34,9 +34,10 @@ class EFUpdate {
      void begin();
      bool process(uint8_t *data, uint32_t len);
      bool hasError();
-     uint8_t getError();
+     uint8_t getError(String & msg);
      bool end();
-    void GetDriverName(String & name) {name = String(F("EFUPD"));}
+     void GetDriverName(String & name) {name = String(F("EFUPD"));}
+     bool UpdateIsInProgress() {return _state != State::IDLE;}
 
  private:
     /* Record types */
@@ -52,7 +53,8 @@ class EFUpdate {
         HEADER,
         RECORD,
         DATA,
-        FAIL
+        FAIL,
+        IDLE
     };
 
     /* EFU Header */
@@ -75,12 +77,16 @@ class EFUpdate {
         uint8_t raw[6];
     } efurecord_t;
 
-    State       _state = State::FAIL;
-    uint32_t      _loc = 0;
+    State       _state = State::IDLE;
+    uint32_t    _loc = 0;
     efuheader_t _header;
     efurecord_t _record;
-    uint32_t    _maxSketchSpace;
-    uint8_t     _error;
+    uint32_t    _maxSketchSpace = 0;
+    uint8_t     _error = EFUPDATE_ERROR_OK;
+    String      _errorMsg;
+
+    void ConvertErrorToString();
+
 };
 
 #endif /* EFUPDATE_H_ */

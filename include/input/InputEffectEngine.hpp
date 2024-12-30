@@ -3,7 +3,7 @@
 * InputEffectEngine.cpp - Input Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -102,7 +102,7 @@ public:
     void GetMqttConfig (MQTTConfiguration_s& mqttConfig);   ///< Get the current config used by the driver
     void GetMqttEffectList (JsonObject& jsonConfig);   ///< Get the current config used by the driver
     void GetStatus (JsonObject& jsonStatus);
-    void Process ();                           ///< Call from loop(),  renders Input data
+    void Process   (bool StayDark);
     void Poll ();                              ///< Call from loop(),  renders Input data
     void GetDriverName (String  & sDriverName) { sDriverName = "Effects"; } ///< get the name for the instantiated driver
     void SetBufferInfo (uint32_t BufferSize);
@@ -145,6 +145,7 @@ private:
     float EffectBrightness         = 1.0;             /* Externally controlled effect brightness [0, 255] */
     CRGB EffectColor               = { 183, 0, 255 }; /* Externally controlled effect color */
     bool StayDark                  = false;
+    bool Disabled                  = false;
 
     uint32_t effectMarqueePixelAdvanceCount = 1;
     uint32_t effectMarqueePixelLocation = 0;

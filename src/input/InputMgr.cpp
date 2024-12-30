@@ -637,7 +637,7 @@ void c_InputMgr::Process ()
             break;
         }
 
-        ExternalInput.Poll ();
+        ExternalInput.Poll (false);
 
         if (NO_CONFIG_NEEDED != ConfigLoadNeeded)
         {
@@ -662,13 +662,13 @@ void c_InputMgr::Process ()
                 continue;
             }
             // DEBUG_V(String("pInputChannelDriver: 0x") + String(uint32_t(CurrentInput.pInputChannelDriver), HEX));
-            CurrentInput.pInputChannelDriver->Process ();
+            CurrentInput.pInputChannelDriver->Process (aBlankTimerIsRunning);
 
             if (!BlankTimerHasExpired (CurrentInput.pInputChannelDriver->GetInputChannelId()))
             {
                 // DEBUG_V (String ("Blank Timer is running: ") + String (CurrentInput.pInputChannelDriver->GetInputChannelId ()));
                 aBlankTimerIsRunning = true;
-                break;
+                // break;
             }
         }
 

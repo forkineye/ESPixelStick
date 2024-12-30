@@ -2,7 +2,7 @@
 * EFUpdate.cpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2016, 2022 Shelby Merrick
+* Copyright (c) 2016, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -27,6 +27,7 @@
 #ifdef ARDUINO_ARCH_ESP32
 #   include <Update.h>
 #   include <esp_task_wdt.h>
+// #   include <esp_app_format.h>
 #endif
 
 #ifndef U_SPIFFS
@@ -46,6 +47,7 @@ void EFUpdate::begin() {
     _state = State::HEADER;
     _loc = 0;
     _error = EFUPDATE_ERROR_OK;
+    _errorMsg = "";
     Update.onProgress(
         [this] (size_t progress, size_t total)
         {
@@ -60,12 +62,15 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
     uint32_t index = 0;
     bool ConfigChanged = true;
 
-    while (index < len) {
+    while (!hasError() && (index < len))
+    {
         // DEBUG_V (String ("  len: 0x") + String (len, HEX));
         // DEBUG_V (String ("index: 0X") + String (index, HEX));
 
-        switch (_state) {
+        switch (_state)
+        {
             case State::HEADER:
+            {
                 // DEBUG_V (String ("  len: 0x") + String (len, HEX));
                 // DEBUG_V (String ("index: ") + String (index));
                 // DEBUG_V ("Process HEADER record");
@@ -81,20 +86,20 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
                         _loc = 0;
                         _state = State::RECORD;
                     } else {
-                        logcon ("FAIL: EFUPDATE_ERROR_SIG");
+                        logcon (F("FAIL: EFUPDATE_ERROR_SIG"));
                         _state = State::FAIL;
                         _error = EFUPDATE_ERROR_SIG;
+                        _errorMsg = F("Invalid EFU Signature");
                     }
                 }
                 // DEBUG_V ();
                 break;
+            }
             case State::RECORD:
+            {
                 // DEBUG_V ("Process Data RECORD Type");
                 // DEBUG_V (String ("              len: 0x") + String (len, HEX));
-                // DEBUG_V (String ("AccumulatedLentgh: 0x") + String (AccumulatedLentgh, HEX));
                 // DEBUG_V (String ("            index: ") + String (index));
-                // DEBUG_V (String (" AccumulatedIndex: ") + String (AccumulatedIndex));
-                // DEBUG_V (String (" AccumulatedIndex: 0x") + String (AccumulatedIndex, HEX));
                 // DEBUG_V (String ("             Data: 0x") + String (data[index], HEX));
                 // DEBUG_V (String ("             Data: ") + String (data[index]));
 
@@ -112,13 +117,14 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
                         logcon ("Starting Sketch Image Update\n");
                         // Begin sketch update
                         if (!Update.begin(_record.size, U_FLASH)) {
-                            logcon ("Update.begin FAIL");
+                            logcon (F("Update.begin FAIL"));
                             _state = State::FAIL;
                             _error = Update.getError();
+                            ConvertErrorToString();
                         } else {
-                            // DEBUG_V ("PASS");
+                            /// DEBUG_V ("PASS");
                             _state = State::DATA;
-                            // esp_image_header_t *esp_image_header = (esp_image_header_t*)&data[index];
+                            // esp_efu_header_t *esp_image_header = (efuheader_t*)&data[index];
                             // DEBUG_V(String("            magic: 0x") + String(esp_image_header->magic, HEX));
                             // DEBUG_V(String("    segment_count: 0x") + String(esp_image_header->segment_count, HEX));
                             // DEBUG_V(String("         spi_mode: 0x") + String(esp_image_header->spi_mode, HEX));
@@ -145,9 +151,10 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
 #endif
                         // DEBUG_V ();
                         if (!Update.begin(_record.size, U_SPIFFS)) {
-                            logcon ("begin U_SPIFFS failed");
+                            logcon (F("begin U_SPIFFS failed"));
                             _state = State::FAIL;
                             _error = Update.getError();
+                            ConvertErrorToString();
                             // DEBUG_V ();
                         } else {
                             // DEBUG_V ("begin U_SPIFFS");
@@ -157,14 +164,17 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
                         Update.runAsync (true);
 #endif
                     } else {
-                        logcon ("Unknown Record Type");
+                        logcon (F("Unknown Record Type"));
                         _state = State::FAIL;
                         _error = EFUPDATE_ERROR_REC;
+                        _errorMsg = F("Unknown Record Type");
                     }
                 }
                 // DEBUG_V ();
                 break;
+            }
             case State::DATA:
+            {
                 // DEBUG_V ("DATA");
                 uint32_t toWrite;
 
@@ -189,12 +199,19 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
                 }
                 // DEBUG_V ();
                 break;
-
+            }
             case State::FAIL:
+            {
                 // DEBUG_V ("Enter FAIL state");
                 index = len;
                 ConfigChanged = false;
                 break;
+            }
+            case State::IDLE:
+            {
+                // dont do anything
+                break;
+            }
         }
     }
     // DEBUG_END;
@@ -207,10 +224,91 @@ bool EFUpdate::hasError() {
     return _error != EFUPDATE_ERROR_OK;
 }
 
-uint8_t EFUpdate::getError() {
+uint8_t EFUpdate::getError(String & msg)
+{
     // DEBUG_V ();
+    msg = _errorMsg;
     return _error;
 }
+
+void EFUpdate::ConvertErrorToString()
+{
+    switch (_error)
+    {
+        case UPDATE_ERROR_OK:
+        {
+            _errorMsg = F("OK");
+            break;
+        }
+        case UPDATE_ERROR_WRITE:
+        {
+            _errorMsg = F("Error writting to Flash");
+            break;
+        }
+        case UPDATE_ERROR_ERASE:
+        {
+            _errorMsg = F("Error Erasing Flash");
+            break;
+        }
+        case UPDATE_ERROR_READ:
+        {
+            _errorMsg = F("Could not read from FLASH");
+            break;
+        }
+        case UPDATE_ERROR_SPACE:
+        {
+            _errorMsg = F("Not enough space in partition");
+            break;
+        }
+        case UPDATE_ERROR_SIZE:
+        {
+            _errorMsg = F("File Size mismatch");
+            break;
+        }
+        case UPDATE_ERROR_STREAM:
+        {
+            _errorMsg = F("Stream writer failed");
+            break;
+        }
+        case UPDATE_ERROR_MD5:
+        {
+            _errorMsg = F("MD5 checksum failed");
+            break;
+        }
+        case UPDATE_ERROR_MAGIC_BYTE:
+        {
+            _errorMsg = F("Magic Byte Mismatch");
+            break;
+        }
+#ifdef ARDUINO_ARCH_ESP32
+        case UPDATE_ERROR_ACTIVATE:
+        {
+            _errorMsg = F("Could Not activate the alternate partition");
+            break;
+        }
+        case UPDATE_ERROR_NO_PARTITION:
+        {
+            _errorMsg = F("No partition defined for target");
+            break;
+        }
+        case UPDATE_ERROR_BAD_ARGUMENT:
+        {
+            _errorMsg = F("Invalid argument");
+            break;
+        }
+        case UPDATE_ERROR_ABORT:
+        {
+            _errorMsg = F("Operation Aborted");
+            break;
+        }
+#endif // def ARDUINO_ARCH_ESP32
+        default:
+        {
+            _errorMsg = F("Unknown Error Code");
+            break;
+        }
+    }
+} // ConvertErrorToString
 
 bool EFUpdate::end() {
     // DEBUG_V ();

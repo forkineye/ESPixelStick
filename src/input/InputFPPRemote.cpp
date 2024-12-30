@@ -2,7 +2,7 @@
 * InputFPPRemote.cpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -234,9 +234,10 @@ void c_InputFPPRemote::PlayNextFile ()
 } // PlayNextFile
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemote::Process ()
+void c_InputFPPRemote::Process (bool StayDark)
 {
     // DEBUG_START;
+    Disabled = StayDark;
 #ifndef ARDUINO_ARCH_ESP32
     TaskProcess();
 #else
@@ -257,7 +258,7 @@ void c_InputFPPRemote::Process ()
 void c_InputFPPRemote::TaskProcess ()
 {
     // DEBUG_START;
-    if (!IsInputChannelActive || StayDark)
+    if (!IsInputChannelActive || StayDark || Disabled)
     {
         // DEBUG_V ("dont do anything if the channel is not active");
         StopPlaying ();
@@ -289,7 +290,7 @@ bool c_InputFPPRemote::Poll ()
     bool Response = false;
     if(pInputFPPRemotePlayItem)
     {
-        Response = pInputFPPRemotePlayItem->Poll ();
+        Response = pInputFPPRemotePlayItem->Poll (Disabled);
     }
 
     // DEBUG_END;
@@ -372,23 +373,22 @@ void c_InputFPPRemote::StopPlaying ()
         // handle re entrancy
         if(Stopping)
         {
-            // already in the process of stopping
+            // DEBUG_V("already in the process of stopping");
             break;
         }
         Stopping = true;
 
-        // DEBUG_V ();
+        // DEBUG_V ("Disable FPP Discovery");
         FPPDiscovery.Disable ();
         FPPDiscovery.ForgetInputFPPRemotePlayFile ();
 
         if(PlayingFile())
         {
-            // DEBUG_V(String("pInputFPPRemotePlayItem: ") = String(uint32_t(pInputFPPRemotePlayItem), HEX));
             pInputFPPRemotePlayItem->Stop ();
 
             while (!pInputFPPRemotePlayItem->IsIdle ())
             {
-                pInputFPPRemotePlayItem->Poll ();
+                pInputFPPRemotePlayItem->Poll (Disabled);
                 // DEBUG_V();
                 pInputFPPRemotePlayItem->Stop ();
             }
@@ -549,8 +549,10 @@ bool c_InputFPPRemote::PlayingFile ()
 
     do // once
     {
+        // DEBUG_V(String("pInputFPPRemotePlayItem: ") = String(uint32_t(pInputFPPRemotePlayItem), HEX));
         if (nullptr == pInputFPPRemotePlayItem)
         {
+            // DEBUG_V("Stop processing if the play item pointer is null");
             break;
         }
 

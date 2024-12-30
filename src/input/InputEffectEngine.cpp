@@ -373,10 +373,10 @@ void c_InputEffectEngine::PollFlash ()
 } // PollFlash
 
 //-----------------------------------------------------------------------------
-void c_InputEffectEngine::Process ()
+void c_InputEffectEngine::Process (bool _StayDark)
 {
     // DEBUG_START;
-
+    Disabled = _StayDark;
     // DEBUG_V (String ("HasBeenInitialized: ") + HasBeenInitialized);
     // DEBUG_V (String ("PixelCount: ") + PixelCount);
 #ifndef ARDUINO_ARCH_ESP32
@@ -440,7 +440,7 @@ void c_InputEffectEngine::Poll ()
 #ifdef ARDUINO_ARCH_ESP32
     do // once
     {
-        if (!HasBeenInitialized)
+        if (!HasBeenInitialized || Disabled)
         {
             break;
         }

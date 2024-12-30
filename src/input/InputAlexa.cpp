@@ -2,7 +2,7 @@
 * InputAlexa.cpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -100,12 +100,12 @@ void c_InputAlexa::GetStatus (JsonObject& /* jsonStatus */)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-void c_InputAlexa::Process ()
+void c_InputAlexa::Process (bool StayDark)
 {
     // DEBUG_START;
     if (IsInputChannelActive)
     {
-        pEffectsEngine->Process ();
+        pEffectsEngine->Process (StayDark);
     }
 
     // DEBUG_END;

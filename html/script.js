@@ -230,19 +230,39 @@ $(function () {
             }
 
             function completeHandler(event) {
+                console.info("Transfer Complete");
+                // console.info("event: '" + event + "'");
+                // console.info("event.target.response: '" + event.target.response + "'");
+                // console.info("event.target.responseText: '" + event.target.responseText + "'");
+                // console.info("event.target.status : '" + event.target.status + "'");
+                // console.info("event.target.statusText : '" + event.target.statusText + "'");
+
                 // _("status").innerHTML = event.target.responseText;
                 _("EfuProgressBar").value = 0; //will clear progress bar after successful upload
-                showReboot();
+                $("#EfuProgressBar").addClass("hidden");
+
+                if(event.target.status === 200)
+                {
+                    alert("Firmware Upload SUCCESS!");
+                    showReboot();
+                }
+                else
+                {
+                    alert("Firmware Upload FAILED!\n" + event.target.response);
+                    showReboot();
+                }
             }
 
             function errorHandler(event) {
                 console.error("Transfer Error");
-                // _("status").innerHTML = "Upload Failed";
+                $("#EfuProgressBar").addClass("hidden");
+                alert("Firmware Upload FAILED!");
             }
 
             function abortHandler(event) {
                 console.error("Transfer Abort");
-                // _("status").innerHTML = "Upload Aborted";
+                $("#EfuProgressBar").addClass("hidden");
+                alert("Firmware Upload FAILED!");
             }
         });
     }));

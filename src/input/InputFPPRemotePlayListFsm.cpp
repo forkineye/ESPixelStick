@@ -2,7 +2,7 @@
 * InputFPPRemotePlayListFsm.cpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -25,7 +25,7 @@
 #include "input/InputFPPRemotePlayEffect.hpp"
 
 //-----------------------------------------------------------------------------
-bool fsm_PlayList_state_WaitForStart::Poll ()
+bool fsm_PlayList_state_WaitForStart::Poll (bool /* StayDark */)
 {
     // DEBUG_START;
 
@@ -33,7 +33,7 @@ bool fsm_PlayList_state_WaitForStart::Poll ()
 
     // DEBUG_END;
     return false;
-    
+
 } // fsm_PlayList_state_Idle::Poll
 
 //-----------------------------------------------------------------------------
@@ -94,7 +94,7 @@ void fsm_PlayList_state_WaitForStart::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayList_state_Idle::Poll ()
+bool fsm_PlayList_state_Idle::Poll (bool /* StayDark */)
 {
     // DEBUG_START;
 
@@ -153,12 +153,12 @@ void fsm_PlayList_state_Idle::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayList_state_PlayingFile::Poll ()
+bool fsm_PlayList_state_PlayingFile::Poll (bool StayDark)
 {
     // xDEBUG_START;
 
-    bool Response = pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll ();
-    
+    bool Response = pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll (StayDark);
+
     if (pInputFPPRemotePlayList->pInputFPPRemotePlayItem->IsIdle ())
     {
         // DEBUG_V ("Done with all entries");
@@ -230,11 +230,11 @@ void fsm_PlayList_state_PlayingFile::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayList_state_PlayingEffect::Poll ()
+bool fsm_PlayList_state_PlayingEffect::Poll (bool StayDark)
 {
     // DEBUG_START;
 
-    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll ();
+    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll (StayDark);
 
     if (pInputFPPRemotePlayList->pInputFPPRemotePlayItem->IsIdle ())
     {
@@ -309,7 +309,7 @@ void fsm_PlayList_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayList_state_Paused::Poll ()
+bool fsm_PlayList_state_Paused::Poll (bool /* StayDark */)
 {
     // DEBUG_START;
 

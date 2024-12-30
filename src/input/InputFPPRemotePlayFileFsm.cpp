@@ -2,7 +2,7 @@
 * InputFPPRemotePlayFileFsm.cpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -23,7 +23,7 @@
 #include "service/FPPDiscovery.h"
 
 //-----------------------------------------------------------------------------
-bool fsm_PlayFile_state_Idle::Poll ()
+bool fsm_PlayFile_state_Idle::Poll (bool /* StayDark */)
 {
     // DEBUG_START;
 
@@ -110,11 +110,18 @@ bool fsm_PlayFile_state_Idle::Sync (String& FileName, float ElapsedSeconds)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayFile_state_Starting::Poll ()
+bool fsm_PlayFile_state_Starting::Poll (bool StayDark)
 {
     // DEBUG_START;
 
-    p_Parent->fsm_PlayFile_state_PlayingFile_imp.Init (p_Parent);
+    if(StayDark)
+    {
+        p_Parent->fsm_PlayFile_state_Stopping_imp.Init (p_Parent);
+    }
+    else
+    {
+        p_Parent->fsm_PlayFile_state_PlayingFile_imp.Init (p_Parent);
+    }
     // DEBUG_V (String ("           RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
     // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->FrameControl.TotalNumberOfFramesInSequence));
 
@@ -195,7 +202,7 @@ bool fsm_PlayFile_state_Starting::Sync (String& FileName, float ElapsedSeconds)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayFile_state_PlayingFile::Poll ()
+bool fsm_PlayFile_state_PlayingFile::Poll (bool StayDark)
 {
     // xDEBUG_START;
 
@@ -203,7 +210,7 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
 
     do // once
     {
-        if(c_FileMgr::INVALID_FILE_HANDLE == p_Parent->FileHandleForFileBeingPlayed)
+        if(!StayDark || (c_FileMgr::INVALID_FILE_HANDLE == p_Parent->FileHandleForFileBeingPlayed))
         {
             // DEBUG_V("Bad FileHandleForFileBeingPlayed");
             Stop();
@@ -497,7 +504,7 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSecond
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayFile_state_Stopping::Poll ()
+bool fsm_PlayFile_state_Stopping::Poll (bool /* StayDark */)
 {
     // DEBUG_START;
 
@@ -587,7 +594,7 @@ bool fsm_PlayFile_state_Stopping::Sync (String&, float)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayFile_state_Error::Poll ()
+bool fsm_PlayFile_state_Error::Poll (bool /* StayDark */)
 {
     // xDEBUG_START;
 

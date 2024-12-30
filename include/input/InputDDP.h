@@ -3,7 +3,7 @@
 * InputDDP.h
 *
 * Project: InputDDP - Asynchronous DDP library for Arduino ESP8266 and ESP32
-* Copyright (c) 2019, 2022 Daniel Kulp, Shelby Merrick
+* Copyright (c) 2019, 2025 Daniel Kulp, Shelby Merrick
 *
 *  This program is provided free for you to use in any way that you wish,
 *  subject to the laws and regulations where you are using it.  Due diligence
@@ -137,7 +137,7 @@ public:
     bool SetConfig (JsonObject& jsonConfig);   ///< Set a new config in the driver
     void GetConfig (JsonObject& jsonConfig);   ///< Get the current config used by the driver
     void GetStatus (JsonObject& jsonStatus);
-    void Process ();                                        ///< Call from loop(),  renders Input data
+    void Process (bool StayDark);                                        ///< Call from loop(),  renders Input data
     void GetDriverName (String& sDriverName) { sDriverName = "DDP"; } ///< get the name for the instantiated driver
     void SetBufferInfo (uint32_t BufferSize);
     bool isShutDownRebootNeeded () { return HasBeenInitialized; }

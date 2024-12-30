@@ -2,7 +2,7 @@
 * InputMQTT.cpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -154,7 +154,7 @@ void c_InputMQTT::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-void c_InputMQTT::Process ()
+void c_InputMQTT::Process (bool StayDark)
 {
     // DEBUG_START;
 
@@ -163,12 +163,12 @@ void c_InputMQTT::Process ()
         if (nullptr != pEffectsEngine)
         {
             // DEBUG_V ("");
-            pEffectsEngine->Process ();
+            pEffectsEngine->Process (StayDark);
         }
 
         else if (nullptr != pPlayFileEngine)
         {
-            pPlayFileEngine->Poll ();
+            pPlayFileEngine->Poll (StayDark);
         }
         else
         {
