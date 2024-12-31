@@ -2213,7 +2213,7 @@ function ProcessReceivedJsonStatusMessage(JsonStat) {
             $('#fppremoteFilePlayerFilename').text(FPPDstatus.current_sequence);
             $('#fppremoteFilePlayerTimeElapsed').text(FPPDstatus.time_elapsed);
             $('#fppremoteFilePlayerTimeRemaining').text(FPPDstatus.time_remaining);
-            $('#fppremotelasterror').text(FPPDstatus.errors);
+            $('#fppremoteFilePlayerlasterror').text(FPPDstatus.errors);
         }
         else {
             $('#FPPRemoteStatus').addClass("hidden")
@@ -2226,6 +2226,7 @@ function ProcessReceivedJsonStatusMessage(JsonStat) {
             $('#localFilePlayerFilename').text(FilePlayerStatus.current_sequence);
             $('#localFilePlayerTimeElapsed').text(FilePlayerStatus.time_elapsed);
             $('#localFilePlayerTimeRemaining').text(FilePlayerStatus.time_remaining);
+            $('#localFilePlayerlasterror').text(FilePlayerStatus.errors);
         }
         else {
             $('#LocalFilePlayerStatus').addClass("hidden");
