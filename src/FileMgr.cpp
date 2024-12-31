@@ -1581,12 +1581,12 @@ size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size
             // DEBUG_V(String("        Offset: ") + String(FileList[FileListIndex].buffer.offset));
             if(WontFit || WriteRemainder)
             {
-                delay(10);
+                delay(20);
                 FeedWDT();
                 // DEBUG_V("Buffer cant hold this data. Write out the buffer");
                 size_t bufferWriteSize = FileList[FileListIndex].fsFile.write(FileList[FileListIndex].buffer.DataBuffer, FileList[FileListIndex].buffer.offset);
                 FileList[FileListIndex].fsFile.flush();
-                delay(20);
+                delay(30);
                 FeedWDT();
                 if(FileList[FileListIndex].buffer.offset != bufferWriteSize)
                 {
