@@ -3,7 +3,7 @@
 * GPIO_Defs_ESP32_D1_MINI.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2024 Shelby Merrick
+* Copyright (c) 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -22,9 +22,9 @@
 #define DEFAULT_RMT_0_GPIO     gpio_num_t::GPIO_NUM_2
 #define DEFAULT_RMT_1_GPIO     gpio_num_t::GPIO_NUM_4
 
-#define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_0
-#define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_5
-#define DEFAULT_RMT_4_GPIO      gpio_num_t::GPIO_NUM_16
+#define DEFAULT_RMT_2_GPIO     gpio_num_t::GPIO_NUM_12
+#define DEFAULT_RMT_3_GPIO     gpio_num_t::GPIO_NUM_14
+#define DEFAULT_RMT_4_GPIO     gpio_num_t::GPIO_NUM_16
 
 // SPI Output
 #define SUPPORT_SPI_OUTPUT
