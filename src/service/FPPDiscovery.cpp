@@ -839,6 +839,8 @@ void c_FPPDiscovery::ProcessFile (
             memset(OutputMgr.GetBufferAddress(), 0x00, OutputMgr.GetBufferSize());
             InputMgr.SetOperationalState(true);
             OutputMgr.PauseOutputs(false);
+            delay(10);
+            StartPlaying(UploadFileName, 0.0);
         }
 
     } while (false);
@@ -1173,6 +1175,7 @@ void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
 
         if (InputFPPRemotePlayFile)
         {
+            // DEBUG_V ("Ask FSM to start playing");
             InputFPPRemotePlayFile->Start (FileName, SecondsElapsed, 1);
         }
 
@@ -1210,7 +1213,7 @@ void c_FPPDiscovery::StopPlaying (bool wait)
             if(wait)
             {
                 FeedWDT();
-                delay(25);
+                delay(5);
             }
             else
             {
