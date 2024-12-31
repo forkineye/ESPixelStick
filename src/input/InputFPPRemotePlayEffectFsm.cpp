@@ -23,7 +23,7 @@
 #include "utility/SaferStringConversion.hpp"
 
 //-----------------------------------------------------------------------------
-bool fsm_PlayEffect_state_Idle::Poll (bool /* StayDark */)
+bool fsm_PlayEffect_state_Idle::Poll ()
 {
     // DEBUG_START;
 
@@ -118,12 +118,12 @@ void fsm_PlayEffect_state_Idle::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayEffect_state_PlayingEffect::Poll (bool StayDark)
+bool fsm_PlayEffect_state_PlayingEffect::Poll ()
 {
     // DEBUG_START;
 
     p_InputFPPRemotePlayEffect->EffectsEngine.SetBufferInfo (OutputMgr.GetBufferUsedSize());
-    p_InputFPPRemotePlayEffect->EffectsEngine.Process (StayDark);
+    p_InputFPPRemotePlayEffect->EffectsEngine.Process ();
 
     if (p_InputFPPRemotePlayEffect->PlayEffectTimer.IsExpired())
     {

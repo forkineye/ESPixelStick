@@ -38,8 +38,7 @@ class c_InputFPPRemote : public c_InputCommon
       bool SetConfig (JsonObject& jsonConfig); ///< Set a new config in the driver
       void GetConfig (JsonObject& jsonConfig); ///< Get the current config used by the driver
       void GetStatus (JsonObject& jsonStatus);
-      void Process   (bool StayDark);
-      void TaskProcess ();                     ///< Call from loop(),  renders Input data
+      void Process   ();
       void GetDriverName (String& sDriverName) { sDriverName = "FPP Remote"; } ///< get the name for the instantiated driver
       void SetBufferInfo (uint32_t BufferSize);
       void ProcessButtonActions(c_ExternalInput::InputValue_t value);
@@ -53,9 +52,6 @@ protected:
     bool    GetSendFppSync () { return SendFppSync; }
 
     String StatusType;
-    bool StayDark = false;
-    bool Disabled = false;
-    bool DisableTask = false;
 
 private:
 

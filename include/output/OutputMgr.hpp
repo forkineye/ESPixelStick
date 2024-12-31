@@ -3,7 +3,7 @@
 * OutputMgr.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -238,7 +238,7 @@ private:
     bool HasBeenInitialized = false;
     time_t ConfigLoadNeeded = NO_CONFIG_NEEDED;
     bool ConfigInProgress   = false;
-    bool IsOutputPaused     = false;
+    bool OutputIsPaused     = false;
     bool BuildingNewConfig  = false;
 
     bool ProcessJsonConfig (JsonDocument & jsonConfig);

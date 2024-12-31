@@ -125,7 +125,7 @@ void c_ExternalInput::ProcessConfig (JsonObject JsonData)
 } // ProcessConfig
 
 /*****************************************************************************/
-void c_ExternalInput::Poll (bool StayDark)
+void c_ExternalInput::Poll ()
 {
 	// DEBUG_START;
 

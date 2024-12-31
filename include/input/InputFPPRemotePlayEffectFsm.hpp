@@ -35,7 +35,7 @@ public:
     fsm_PlayEffect_state() {}
     virtual ~fsm_PlayEffect_state() {}
 
-    virtual bool Poll (bool StayDark) = 0;
+    virtual bool Poll () = 0;
     virtual void Init (c_InputFPPRemotePlayEffect * Parent) = 0;
     virtual void GetStateName (String & sName) = 0;
     virtual void Start (String & FileName, float SecondsElapsed) = 0;
@@ -56,7 +56,7 @@ public:
     fsm_PlayEffect_state_Idle() {}
     virtual ~fsm_PlayEffect_state_Idle() {}
 
-    virtual bool Poll (bool StayDark);
+    virtual bool Poll ();
     virtual void Init (c_InputFPPRemotePlayEffect* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Idle; }
     virtual void Start (String & FileName, float SecondsElapsed);
@@ -73,7 +73,7 @@ public:
     fsm_PlayEffect_state_PlayingEffect() {}
     virtual ~fsm_PlayEffect_state_PlayingEffect() {}
 
-    virtual bool Poll (bool StayDark);
+    virtual bool Poll ();
     virtual void Init (c_InputFPPRemotePlayEffect* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Effect; }
     virtual void Start (String & FileName, float SecondsElapsed);

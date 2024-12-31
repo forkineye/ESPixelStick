@@ -1331,7 +1331,7 @@ void c_OutputMgr::Poll()
         }
     } // done need to save the current config
 
-    if ((false == IsOutputPaused) && (false == ConfigInProgress) && (false == RebootInProgress()) )
+    if ((false == OutputIsPaused) && (false == ConfigInProgress) && (false == RebootInProgress()) )
     {
         // //DEBUG_V();
         for (DriverInfo_t & OutputChannel : OutputChannelDrivers)
@@ -1421,7 +1421,7 @@ void c_OutputMgr::PauseOutputs(bool PauseTheOutput)
     // DEBUG_START;
     // DEBUG_V(String("PauseTheOutput: ") + String(PauseTheOutput));
 
-    IsOutputPaused = PauseTheOutput;
+    OutputIsPaused = PauseTheOutput;
 
     for (auto & CurrentOutput : OutputChannelDrivers)
     {
@@ -1438,6 +1438,11 @@ void c_OutputMgr::WriteChannelData(uint32_t StartChannelId, uint32_t ChannelCoun
 
     do // once
     {
+        if(OutputIsPaused)
+        {
+            // DEBUG_V("Ignore the write request");
+            break;
+        }
         if (((StartChannelId + ChannelCount) > UsedBufferSize) || (0 == ChannelCount))
         {
             // DEBUG_V (String("ERROR: Invalid parameters"));
@@ -1497,6 +1502,11 @@ void c_OutputMgr::ReadChannelData(uint32_t StartChannelId, uint32_t ChannelCount
 
     do // once
     {
+        if(OutputIsPaused)
+        {
+            // DEBUG_V("Ignore the read request");
+            break;
+        }
         if ((StartChannelId + ChannelCount) > UsedBufferSize)
         {
             // DEBUG_V (String("ERROR: Invalid parameters"));

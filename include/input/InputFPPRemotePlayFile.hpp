@@ -39,7 +39,7 @@ public:
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
     virtual void Stop ();
     virtual void Sync (String& FileName, float SecondsElapsed);
-    virtual bool Poll (bool StayDark);
+    virtual bool Poll ();
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
 
@@ -105,7 +105,7 @@ private:
     void        UpdateElapsedPlayTimeMS ();
     uint32_t    CalculateFrameId (uint32_t ElapsedMS, int32_t SyncOffsetMS);
     bool        ParseFseqFile ();
-    uint32_t      ReadFile(uint32_t DestinationIntensityId, uint32_t NumBytesToRead, uint32_t FileOffset);
+    uint32_t    ReadFile(uint32_t DestinationIntensityId, uint32_t NumBytesToRead, uint32_t FileOffset);
 
     String      LastFailedPlayStatusMsg;
 

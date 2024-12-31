@@ -62,6 +62,48 @@ static const InputTypeXlateMap_t InputTypeXlateMap[c_InputMgr::e_InputType::Inpu
     {c_InputMgr::e_InputType::InputType_Disabled, "Disabled",   c_InputMgr::e_InputChannelIds::InputChannelId_ALL}
 };
 
+
+#if defined ARDUINO_ARCH_ESP32
+#   include <functional>
+
+static TaskHandle_t PollTaskHandle = NULL;
+//----------------------------------------------------------------------------
+void InputMgrTask (void *arg)
+{
+    // DEBUG_V(String("Current CPU ID: ") + String(xPortGetCoreID()));
+    // DEBUG_V(String("Current Task Priority: ") + String(uxTaskPriorityGet(NULL)));
+    uint32_t PollStartTime = millis();
+    uint32_t PollEndTime = PollStartTime;
+    uint32_t PollTime = pdMS_TO_TICKS(25);
+    const uint32_t MinPollTimeMs = 25;
+
+    while(1)
+    {
+        uint32_t DeltaTime = PollEndTime - PollStartTime;
+
+        if (DeltaTime < MinPollTimeMs)
+        {
+            PollTime = pdMS_TO_TICKS(MinPollTimeMs - DeltaTime);
+        }
+        else
+        {
+            // handle time wrap and long frames
+            PollTime = pdMS_TO_TICKS(1);
+        }
+        vTaskDelay(PollTime);
+        FeedWDT();
+
+        PollStartTime = millis();
+
+        InputMgr.Process();
+        FeedWDT();
+
+        // record the loop end time
+        PollEndTime = millis();
+    }
+} // InputMgrTask
+#endif // def ARDUINO_ARCH_ESP32
+
 //-----------------------------------------------------------------------------
 // Methods
 //-----------------------------------------------------------------------------
@@ -88,6 +130,15 @@ c_InputMgr::c_InputMgr ()
 c_InputMgr::~c_InputMgr ()
 {
     // DEBUG_START;
+
+#ifdef ARDUINO_ARCH_ESP32
+    if(PollTaskHandle)
+    {
+        logcon("Stop Input Task");
+        vTaskDelete(PollTaskHandle);
+        PollTaskHandle = NULL;
+    }
+#endif // def ARDUINO_ARCH_ESP32
 
     // delete pInputInstances;
     int pInputChannelDriversIndex = 0;
@@ -128,12 +179,17 @@ void c_InputMgr::Begin (uint32_t BufferSize)
         InstantiateNewInputChannel(e_InputChannelIds(CurrentInput.DriverId), e_InputType::InputType_Disabled);
         // DEBUG_V ("");
     }
-    HasBeenInitialized = true;
 
     // load up the configuration from the saved file. This also starts the drivers
     LoadConfig ();
 
     // CreateNewConfig();
+
+#if defined ARDUINO_ARCH_ESP32
+    xTaskCreatePinnedToCore(InputMgrTask, "InputMgrTask", 4096, NULL, INPUTMGR_TASK_PRIORITY, &PollTaskHandle, 1);
+#endif // defined ARDUINO_ARCH_ESP32
+
+    HasBeenInitialized = true;
 
     // DEBUG_END;
 
@@ -633,13 +689,13 @@ void c_InputMgr::Process ()
 
     do // once
     {
-        if (configInProgress)
+        if (configInProgress || PauseProcessing)
         {
             // prevent calls to process when we are doing a long operation
             break;
         }
 
-        ExternalInput.Poll (false);
+        ExternalInput.Poll ();
 
         if (NO_CONFIG_NEEDED != ConfigLoadNeeded)
         {
@@ -659,12 +715,12 @@ void c_InputMgr::Process ()
         bool aBlankTimerIsRunning = false;
         for (auto & CurrentInput : InputChannelDrivers)
         {
-            if(nullptr == CurrentInput.pInputChannelDriver)
+            if(nullptr == CurrentInput.pInputChannelDriver || aBlankTimerIsRunning)
             {
                 continue;
             }
             // DEBUG_V(String("pInputChannelDriver: 0x") + String(uint32_t(CurrentInput.pInputChannelDriver), HEX));
-            CurrentInput.pInputChannelDriver->Process (aBlankTimerIsRunning);
+            CurrentInput.pInputChannelDriver->Process ();
 
             if (!BlankTimerHasExpired (CurrentInput.pInputChannelDriver->GetInputChannelId()))
             {
@@ -953,6 +1009,8 @@ void c_InputMgr::SetOperationalState (bool ActiveFlag)
 {
     // DEBUG_START;
     // DEBUG_V(String("ActiveFlag: ") + String(ActiveFlag));
+
+    PauseProcessing = ActiveFlag;
 
     // pass through each active interface and set the active state
     for (auto & InputChannel : InputChannelDrivers)

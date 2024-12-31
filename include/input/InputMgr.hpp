@@ -3,7 +3,7 @@
 * InputMgr.hpp - Input Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -94,6 +94,7 @@ private:
     };
 
     #define NO_CONFIG_NEEDED time_t(-1)
+    #define INPUTMGR_TASK_PRIORITY 6
 
     DriverInfo_t    InputChannelDrivers[InputChannelId_End]; ///< pointer(s) to the current active Input driver
     uint32_t        InputDataBufferSize = 0;
@@ -103,6 +104,7 @@ private:
     bool            IsConnected         = false;
     bool            configInProgress    = false;
     time_t          ConfigLoadNeeded    = NO_CONFIG_NEEDED;
+    bool            PauseProcessing     = false;
 
     // configuration parameter names for the channel manager within the config file
 #   define IM_EffectsControlButtonName F ("ecb")

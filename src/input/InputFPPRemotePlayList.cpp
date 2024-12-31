@@ -77,11 +77,11 @@ void c_InputFPPRemotePlayList::Sync (String & FileName, float ElapsedSeconds)
 } // Sync
 
 //-----------------------------------------------------------------------------
-bool c_InputFPPRemotePlayList::Poll (bool StayDark)
+bool c_InputFPPRemotePlayList::Poll ()
 {
     // DEBUG_START;
 
-    return pCurrentFsmState->Poll (StayDark);
+    return pCurrentFsmState->Poll ();
 
     // DEBUG_END;
 

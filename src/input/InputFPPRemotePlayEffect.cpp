@@ -44,7 +44,6 @@ c_InputFPPRemotePlayEffect::~c_InputFPPRemotePlayEffect ()
     // DEBUG_START;
 
     // allow the other input channels to run
-    InputMgr.SetOperationalState (true);
     EffectsEngine.SetOperationalState (false);
 
     // DEBUG_END;
@@ -82,11 +81,11 @@ void c_InputFPPRemotePlayEffect::Sync (String& FileName, float SecondsElapsed)
 } // Sync
 
 //-----------------------------------------------------------------------------
-bool c_InputFPPRemotePlayEffect::Poll (bool StayDark)
+bool c_InputFPPRemotePlayEffect::Poll ()
 {
     // DEBUG_START;
 
-    return pCurrentFsmState->Poll (StayDark);
+    return pCurrentFsmState->Poll ();
 
     // DEBUG_END;
 

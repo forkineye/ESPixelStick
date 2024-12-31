@@ -46,6 +46,7 @@ private:
     bool PlayingFile ();
 
     bool inFileUpload = false;
+    bool writeFailed = false;
     bool hasBeenInitialized = false;
     bool IsEnabled = false;
     bool BlankOnStop = false;

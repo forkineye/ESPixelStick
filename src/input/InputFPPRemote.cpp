@@ -24,47 +24,6 @@
 #include "input/InputFPPRemotePlayList.hpp"
 #include <Int64String.h>
 
-#if defined ARDUINO_ARCH_ESP32
-#   include <functional>
-
-static TaskHandle_t PollTaskHandle = NULL;
-static c_InputFPPRemote *pFppRemoteInstance = nullptr;
-//----------------------------------------------------------------------------
-void FppRemoteTask (void *arg)
-{
-    // DEBUG_V(String("Current CPU ID: ") + String(xPortGetCoreID()));
-    // DEBUG_V(String("Current Task Priority: ") + String(uxTaskPriorityGet(NULL)));
-    uint32_t PollStartTime = millis();
-    uint32_t PollEndTime = PollStartTime;
-    uint32_t PollTime = pdMS_TO_TICKS(25);
-    const uint32_t MinPollTimeMs = 25;
-
-    while(1)
-    {
-        uint32_t DeltaTime = PollEndTime - PollStartTime;
-
-        if (DeltaTime < MinPollTimeMs)
-        {
-            PollTime = pdMS_TO_TICKS(MinPollTimeMs - DeltaTime);
-        }
-        else
-        {
-            // handle time wrap and long frames
-            PollTime = pdMS_TO_TICKS(1);
-        }
-        vTaskDelay(PollTime);
-        FeedWDT();
-
-        PollStartTime = millis();
-
-        pFppRemoteInstance->TaskProcess();
-        FeedWDT();
-
-        // record the loop end time
-        PollEndTime = millis();
-    }
-} // FppRemoteTask
-#endif // def ARDUINO_ARCH_ESP32
 
 //-----------------------------------------------------------------------------
 c_InputFPPRemote::c_InputFPPRemote (c_InputMgr::e_InputChannelIds NewInputChannelId,
@@ -87,15 +46,6 @@ c_InputFPPRemote::~c_InputFPPRemote ()
         // DEBUG_V();
         StopPlaying ();
     }
-
-#ifdef ARDUINO_ARCH_ESP32
-    if(PollTaskHandle)
-    {
-        logcon("Stop FPP Remote Task");
-        vTaskDelete(PollTaskHandle);
-        PollTaskHandle = NULL;
-    }
-#endif // def ARDUINO_ARCH_ESP32
 
 } // ~c_InputFPPRemote
 
@@ -237,30 +187,11 @@ void c_InputFPPRemote::PlayNextFile ()
 } // PlayNextFile
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemote::Process (bool StayDark)
+void c_InputFPPRemote::Process ()
 {
     // DEBUG_START;
-    Disabled = StayDark;
-#ifndef ARDUINO_ARCH_ESP32
-    TaskProcess();
-#else
-    if(!PollTaskHandle)
-    {
-        logcon("Start FPP Remote Task");
-        pFppRemoteInstance = this;
-        xTaskCreatePinnedToCore(FppRemoteTask, "FppRemoteTask", 4096, NULL, FPP_REMOTE_TASK_PRIORITY, &PollTaskHandle, 1);
-        // DEBUG_V("End FppRemoteTask");
-    }
-#endif // ndef ARDUINO_ARCH_ESP32
-    // DEBUG_END;
 
-} // process
-
-//-----------------------------------------------------------------------------
-void c_InputFPPRemote::TaskProcess ()
-{
-    // DEBUG_START;
-    if (!IsInputChannelActive || StayDark || Disabled || DisableTask)
+    if (!IsInputChannelActive)
     {
         // DEBUG_V ("dont do anything if the channel is not active");
     }
@@ -282,16 +213,16 @@ void c_InputFPPRemote::TaskProcess ()
     }
     // DEBUG_END;
 
-} // TaskProcess
+} // process
 
 //-----------------------------------------------------------------------------
 bool c_InputFPPRemote::Poll ()
 {
     // DEBUG_START;
     bool Response = false;
-    if(pInputFPPRemotePlayItem)
+    if(pInputFPPRemotePlayItem && IsInputChannelActive)
     {
-        Response = pInputFPPRemotePlayItem->Poll (Disabled);
+        Response = pInputFPPRemotePlayItem->Poll ();
     }
 
     // DEBUG_END;
@@ -306,9 +237,6 @@ void c_InputFPPRemote::ProcessButtonActions(c_ExternalInput::InputValue_t value)
 
     if(c_ExternalInput::InputValue_t::longOn == value)
     {
-        // DEBUG_V("flip the dark flag");
-        StayDark = !StayDark;
-        // DEBUG_V(String("StayDark: ") + String(StayDark));
     }
     else if(c_ExternalInput::InputValue_t::shortOn == value)
     {
@@ -363,11 +291,6 @@ bool c_InputFPPRemote::SetConfig (JsonObject& jsonConfig)
 void c_InputFPPRemote::StopPlaying ()
 {
     // DEBUG_START;
-    // DEBUG_V(String("Current Task Priority: ") + String(uxTaskPriorityGet(NULL)));
-
-    // save current disable state and disable FPP task.
-    bool SavedDisableTaskFlag = DisableTask;
-    DisableTask = true;
 
     do // once
     {
@@ -385,7 +308,6 @@ void c_InputFPPRemote::StopPlaying ()
         }
         Stopping = true;
 
-        // DEBUG_V(String("Current Task Priority: ") + String(uxTaskPriorityGet(NULL)));
         // DEBUG_V ("Disable FPP Discovery");
         FPPDiscovery.Disable ();
         FPPDiscovery.ForgetInputFPPRemotePlayFile ();
@@ -399,7 +321,7 @@ void c_InputFPPRemote::StopPlaying ()
             // DEBUG_V();
             while (!pInputFPPRemotePlayItem->IsIdle ())
             {
-                pInputFPPRemotePlayItem->Poll (Disabled);
+                pInputFPPRemotePlayItem->Poll ();
                 // DEBUG_V();
                 pInputFPPRemotePlayItem->Stop ();
             }
@@ -413,9 +335,6 @@ void c_InputFPPRemote::StopPlaying ()
         Stopping = false;
 
     } while (false);
-
-    // restore previous state of the flag
-    DisableTask = SavedDisableTaskFlag;
 
     // DEBUG_END;
 
@@ -474,7 +393,7 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
                 pInputFPPRemotePlayItem = nullptr;
                 // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
             }
-            // DEBUG_V ("Start a new Playlist");
+            // DEBUG_V ("Start a new Local File");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayList (GetInputChannelId ());
             // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
             StatusType = F ("PlayList");

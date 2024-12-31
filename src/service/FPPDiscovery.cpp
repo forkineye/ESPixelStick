@@ -821,7 +821,7 @@ void c_FPPDiscovery::ProcessFile (
         }
 
         // DEBUG_V("Write the file block");
-        bool writeFailed = !FileMgr.handleFileUpload (UploadFileName, index, data, len, final, ContentLength);
+        writeFailed = !FileMgr.handleFileUpload (UploadFileName, index, data, len, final, ContentLength);
 
         if(writeFailed)
         {
@@ -830,11 +830,13 @@ void c_FPPDiscovery::ProcessFile (
         }
 
         // DEBUG_V();
-        if (final || writeFailed)
+        if (final)
         {
             // DEBUG_V("Allow file to play");
             inFileUpload = false;
             UploadFileName = "";
+            writeFailed = false;
+            memset(OutputMgr.GetBufferAddress(), 0x00, OutputMgr.GetBufferSize());
             InputMgr.SetOperationalState(true);
             OutputMgr.PauseOutputs(false);
         }
@@ -887,6 +889,8 @@ void c_FPPDiscovery::ProcessBody (
                 // DEBUG_V ("");
             }
 
+            writeFailed = false;
+
             // DEBUG_V (String ("         name: ") + UploadFileName);
             // DEBUG_V (String ("        index: ") + String (index));
             // DEBUG_V (String ("          len: ") + String (len));
@@ -933,6 +937,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
 
 } // GetSysInfoJSON
 
+//-----------------------------------------------------------------------------
 void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
 {
     // DEBUG_START;
