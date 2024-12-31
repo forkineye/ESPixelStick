@@ -2,7 +2,7 @@
 * FileMgr.cpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2024 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -1584,7 +1584,7 @@ size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size
                 delay(10);
                 FeedWDT();
                 // DEBUG_V("Buffer cant hold this data. Write out the buffer");
-                size_t bufferWriteSize = FileList[FileListIndex].fsFile.write(FileData, FileList[FileListIndex].buffer.offset);
+                size_t bufferWriteSize = FileList[FileListIndex].fsFile.write(FileList[FileListIndex].buffer.DataBuffer, FileList[FileListIndex].buffer.offset);
                 FileList[FileListIndex].fsFile.flush();
                 delay(20);
                 FeedWDT();
@@ -1601,8 +1601,8 @@ size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size
             } // End buffer cant take the new data
 
             // DEBUG_V(String("Writing ") + String(NumBytesToWrite) + " bytes to the buffer");
-            memcpy(&FileList[FileListIndex].buffer.DataBuffer[FileList[FileListIndex].buffer.offset],
-                   FileData, NumBytesToWrite);
+            memcpy(&(FileList[FileListIndex].buffer.DataBuffer[FileList[FileListIndex].buffer.offset]), FileData, NumBytesToWrite);
+
             FileList[FileListIndex].buffer.offset += NumBytesToWrite;
             NumBytesWritten = NumBytesToWrite;
         }
