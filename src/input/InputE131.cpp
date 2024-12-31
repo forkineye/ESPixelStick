@@ -119,7 +119,7 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-void c_InputE131::Process (bool /* StayDark */)
+void c_InputE131::Process ()
 {
     // DEBUG_START;
 
@@ -137,7 +137,7 @@ void c_InputE131::ProcessIncomingE131Data (e131_packet_t * packet)
 
     do // once
     {
-        if (0 == InputDataBufferSize)
+        if ((0 == InputDataBufferSize) || !IsInputChannelActive)
         {
             // no place to put any data
             break;

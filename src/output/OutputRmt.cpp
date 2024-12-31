@@ -39,6 +39,8 @@ static uint32_t FrameTimeouts = 0;
 //----------------------------------------------------------------------------
 void RMT_Task (void *arg)
 {
+    // DEBUG_V(String("Current CPU ID: ") + String(xPortGetCoreID()));
+
     unsigned long  FrameStartTimeMS = millis();
     unsigned long  FrameEndTimeMS = FrameStartTimeMS;
     const uint32_t MinFrameTimeMs = 25;

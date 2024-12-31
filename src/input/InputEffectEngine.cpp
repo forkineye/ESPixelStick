@@ -2,7 +2,7 @@
 * InputEffectEngine.cpp - Code to wrap ESPAsyncE131 for input
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -76,42 +76,6 @@ static std::vector<c_InputEffectEngine::MarqueeGroup> MarqueueGroupTable =
     {5, {255, 255, 255}, 100, 0},
 }; // MarqueueGroupTable
 
-#ifdef ARDUINO_ARCH_ESP32
-static TaskHandle_t PollTaskHandle = NULL;
-static c_InputEffectEngine *pEffectsInstance = nullptr;
-//----------------------------------------------------------------------------
-void EffectsTask (void *arg)
-{
-    uint32_t PollStartTime = millis();
-    uint32_t PollEndTime = PollStartTime;
-    uint32_t PollTime = pdMS_TO_TICKS(25);
-    const uint32_t MinPollTimeMs = 25;
-
-    while(1)
-    {
-        uint32_t DeltaTime = PollEndTime - PollStartTime;
-
-        if (DeltaTime < MinPollTimeMs)
-        {
-            PollTime = pdMS_TO_TICKS(MinPollTimeMs - DeltaTime);
-        }
-        else
-        {
-            // handle time wrap and long frames
-            PollTime = pdMS_TO_TICKS(1);
-        }
-        vTaskDelay(PollTime);
-
-        PollStartTime = millis();
-
-        pEffectsInstance->Poll();
-
-        // record the loop end time
-        PollEndTime = millis();
-    }
-} // EffectsTask
-#endif // def ARDUINO_ARCH_ESP32
-
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInputChannelId,
                                           c_InputMgr::e_InputType       NewChannelType,
@@ -149,14 +113,6 @@ c_InputEffectEngine::c_InputEffectEngine () :
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::~c_InputEffectEngine ()
 {
-#ifdef ARDUINO_ARCH_ESP32
-    if(PollTaskHandle)
-    {
-        logcon("Stop EffectsTask");
-        vTaskDelete(PollTaskHandle);
-        PollTaskHandle = NULL;
-    }
-#endif // def ARDUINO_ARCH_ESP32
 
 } // ~c_InputEffectEngine
 
@@ -373,13 +329,12 @@ void c_InputEffectEngine::PollFlash ()
 } // PollFlash
 
 //-----------------------------------------------------------------------------
-void c_InputEffectEngine::Process (bool _StayDark)
+void c_InputEffectEngine::Process ()
 {
     // DEBUG_START;
-    Disabled = _StayDark;
     // DEBUG_V (String ("HasBeenInitialized: ") + HasBeenInitialized);
     // DEBUG_V (String ("PixelCount: ") + PixelCount);
-#ifndef ARDUINO_ARCH_ESP32
+
     do // once
     {
         if (!HasBeenInitialized)
@@ -388,7 +343,7 @@ void c_InputEffectEngine::Process (bool _StayDark)
         }
         // DEBUG_V ("Init OK");
 
-        if ((0 == PixelCount) || (StayDark))
+        if (0 == PixelCount)
         {
             break;
         }
@@ -417,16 +372,6 @@ void c_InputEffectEngine::Process (bool _StayDark)
     } while (false);
 
     // DEBUG_END;
-#else
-    if(!PollTaskHandle)
-    {
-        logcon("Start EffectsTask");
-        pEffectsInstance = this;
-        xTaskCreatePinnedToCore(EffectsTask, "EffectsTask", 4096, NULL, EFFECTS_TASK_PRIORITY, &PollTaskHandle, 1);
-        vTaskPrioritySet(PollTaskHandle, EFFECTS_TASK_PRIORITY);
-        // DEBUG_V("End EffectsTask");
-    }
-#endif // ndef ARDUINO_ARCH_ESP32
 
 } // process
 

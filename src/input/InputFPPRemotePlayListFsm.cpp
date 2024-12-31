@@ -25,7 +25,7 @@
 #include "input/InputFPPRemotePlayEffect.hpp"
 
 //-----------------------------------------------------------------------------
-bool fsm_PlayList_state_WaitForStart::Poll (bool /* StayDark */)
+bool fsm_PlayList_state_WaitForStart::Poll ()
 {
     // DEBUG_START;
 
@@ -94,7 +94,7 @@ void fsm_PlayList_state_WaitForStart::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayList_state_Idle::Poll (bool /* StayDark */)
+bool fsm_PlayList_state_Idle::Poll ()
 {
     // DEBUG_START;
 
@@ -153,11 +153,11 @@ void fsm_PlayList_state_Idle::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayList_state_PlayingFile::Poll (bool StayDark)
+bool fsm_PlayList_state_PlayingFile::Poll ()
 {
     // xDEBUG_START;
 
-    bool Response = pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll (StayDark);
+    bool Response = pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll ();
 
     if (pInputFPPRemotePlayList->pInputFPPRemotePlayItem->IsIdle ())
     {
@@ -230,11 +230,11 @@ void fsm_PlayList_state_PlayingFile::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayList_state_PlayingEffect::Poll (bool StayDark)
+bool fsm_PlayList_state_PlayingEffect::Poll ()
 {
     // DEBUG_START;
 
-    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll (StayDark);
+    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll ();
 
     if (pInputFPPRemotePlayList->pInputFPPRemotePlayItem->IsIdle ())
     {
@@ -309,7 +309,7 @@ void fsm_PlayList_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayList_state_Paused::Poll (bool /* StayDark */)
+bool fsm_PlayList_state_Paused::Poll ()
 {
     // DEBUG_START;
 

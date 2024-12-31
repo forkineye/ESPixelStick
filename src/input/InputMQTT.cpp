@@ -154,7 +154,7 @@ void c_InputMQTT::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-void c_InputMQTT::Process (bool StayDark)
+void c_InputMQTT::Process ()
 {
     // DEBUG_START;
 
@@ -163,12 +163,12 @@ void c_InputMQTT::Process (bool StayDark)
         if (nullptr != pEffectsEngine)
         {
             // DEBUG_V ("");
-            pEffectsEngine->Process (StayDark);
+            pEffectsEngine->Process ();
         }
 
         else if (nullptr != pPlayFileEngine)
         {
-            pPlayFileEngine->Poll (StayDark);
+            pPlayFileEngine->Poll ();
         }
         else
         {

@@ -2,7 +2,7 @@
 * ArtnetInput.cpp - Code to wrap ESPAsyncArtnet for input
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and Artnet based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -120,8 +120,9 @@ void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
                                 IPAddress remoteIP)
 {
     // DEBUG_START;
-
-    if ((startUniverse <= CurrentUniverseId) && (LastUniverse >= CurrentUniverseId))
+    if(!IsInputChannelActive)
+    {}
+    else if ((startUniverse <= CurrentUniverseId) && (LastUniverse >= CurrentUniverseId))
     {
         // Universe offset and sequence tracking
         Universe_t & CurrentUniverse = UniverseArray[CurrentUniverseId - startUniverse];

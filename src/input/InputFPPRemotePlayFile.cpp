@@ -98,7 +98,7 @@ c_InputFPPRemotePlayFile::~c_InputFPPRemotePlayFile ()
     for (uint32_t LoopCount = 10000; (LoopCount != 0) && (!IsIdle ()); LoopCount--)
     {
         Stop ();
-        Poll (false);
+        Poll ();
     }
     // DEBUG_END;
 
@@ -148,7 +148,7 @@ void c_InputFPPRemotePlayFile::Sync (String & FileName, float SecondsElapsed)
 } // Sync
 
 //-----------------------------------------------------------------------------
-bool c_InputFPPRemotePlayFile::Poll (bool StayDark)
+bool c_InputFPPRemotePlayFile::Poll ()
 {
     // xDEBUG_START;
 
@@ -156,7 +156,7 @@ bool c_InputFPPRemotePlayFile::Poll (bool StayDark)
     PollDetectionCounter = 0;
 
     // TimerPoll ();
-    return pCurrentFsmState->Poll (StayDark);
+    return pCurrentFsmState->Poll ();
 
     // xDEBUG_END;
 

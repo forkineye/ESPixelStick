@@ -100,12 +100,12 @@ void c_InputAlexa::GetStatus (JsonObject& /* jsonStatus */)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-void c_InputAlexa::Process (bool StayDark)
+void c_InputAlexa::Process ()
 {
     // DEBUG_START;
     if (IsInputChannelActive)
     {
-        pEffectsEngine->Process (StayDark);
+        pEffectsEngine->Process ();
     }
 
     // DEBUG_END;

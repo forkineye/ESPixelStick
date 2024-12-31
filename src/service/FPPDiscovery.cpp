@@ -811,18 +811,17 @@ void c_FPPDiscovery::ProcessFile (
 
         if(!inFileUpload)
         {
-            // DEBUG_V();
-            // wait for the player to become idle
+            // DEBUG_V(String("Current CPU ID: ") + String(xPortGetCoreID()));
+            // DEBUG_V("wait for the player to become idle");
             StopPlaying(true);
             inFileUpload = true;
             UploadFileName = filename;
             InputMgr.SetOperationalState(false);
             OutputMgr.PauseOutputs(true);
-            memset(OutputMgr.GetBufferAddress(), 0x00, OutputMgr.GetBufferSize());
         }
 
-        // DEBUG_V();
-        bool writeFailed = !FileMgr.handleFileUpload (UploadFileName, index, data, len, final, ContentLength);
+        // DEBUG_V("Write the file block");
+        writeFailed = !FileMgr.handleFileUpload (UploadFileName, index, data, len, final, ContentLength);
 
         if(writeFailed)
         {
@@ -831,13 +830,17 @@ void c_FPPDiscovery::ProcessFile (
         }
 
         // DEBUG_V();
-        if (final || writeFailed)
+        if (final)
         {
             // DEBUG_V("Allow file to play");
             inFileUpload = false;
             UploadFileName = "";
+            writeFailed = false;
+            memset(OutputMgr.GetBufferAddress(), 0x00, OutputMgr.GetBufferSize());
             InputMgr.SetOperationalState(true);
             OutputMgr.PauseOutputs(false);
+            delay(10);
+            StartPlaying(UploadFileName, 0.0);
         }
 
     } while (false);
@@ -866,7 +869,7 @@ void c_FPPDiscovery::ProcessBody (
         // is this the first packet?
         if (0 == index)
         {
-            // DEBUG_V();
+            // DEBUG_V("New Download");
 
             if(!request->hasParam(ulrPath))
             {
@@ -887,6 +890,8 @@ void c_FPPDiscovery::ProcessBody (
                 UploadFileName = String (request->getParam (CN_filename)->value ());
                 // DEBUG_V ("");
             }
+
+            writeFailed = false;
 
             // DEBUG_V (String ("         name: ") + UploadFileName);
             // DEBUG_V (String ("        index: ") + String (index));
@@ -934,6 +939,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
 
 } // GetSysInfoJSON
 
+//-----------------------------------------------------------------------------
 void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
 {
     // DEBUG_START;
@@ -1169,6 +1175,7 @@ void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
 
         if (InputFPPRemotePlayFile)
         {
+            // DEBUG_V ("Ask FSM to start playing");
             InputFPPRemotePlayFile->Start (FileName, SecondsElapsed, 1);
         }
 
@@ -1183,31 +1190,41 @@ void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
 void c_FPPDiscovery::StopPlaying (bool wait)
 {
     // DEBUG_START;
+    // DEBUG_V(String("Current Task Priority: ") + String(uxTaskPriorityGet(NULL)));
+    // DEBUG_V (String ("FPPDiscovery::StopPlaying '") + InputFPPRemotePlayFile->GetFileName() + "'");
 
-    FeedWDT();
-
-    // DEBUG_V (String (F ("FPPDiscovery::StopPlaying '")) + InputFPPRemotePlayFile.GetFileName() + "'");
-    // only process if the pointer is valid
-    while (InputFPPRemotePlayFile)
+    // prevent reentrant issues
+    if(!StopInProgress)
     {
-        // DEBUG_V("Pointer is valid");
-        if(InputFPPRemotePlayFile->IsIdle())
+        StopInProgress = true;
+        // only process if the pointer is valid
+        while (InputFPPRemotePlayFile)
         {
-            // DEBUG_V("we are done");
-            break;
-        }
+            // DEBUG_V("Pointer is valid");
+            if(InputFPPRemotePlayFile->IsIdle())
+            {
+                // DEBUG_V("we are done");
+                break;
+            }
 
-        // DEBUG_V("try to stop");
-        InputFPPRemotePlayFile->Stop ();
+            // DEBUG_V("try to stop");
+            InputFPPRemotePlayFile->Stop ();
 
-        if(wait)
-        {
-            delay(10);
+            if(wait)
+            {
+                FeedWDT();
+                delay(5);
+            }
+            else
+            {
+                break;
+            }
         }
-        else
-        {
-            break;
-        }
+        StopInProgress = false;
+    }
+    else
+    {
+        // DEBUG_V("Ignoring duplicate request to stop");
     }
 
     // DEBUG_END;

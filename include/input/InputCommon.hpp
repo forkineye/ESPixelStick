@@ -3,7 +3,7 @@
 * InputCommon.hpp - Input base class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -36,7 +36,7 @@ public:
     virtual bool SetConfig (ArduinoJson::JsonObject & jsonConfig) = 0; ///< Set a new config in the driver
     virtual void GetConfig (ArduinoJson::JsonObject & jsonConfig) = 0; ///< Get the current config used by the driver
     virtual void GetStatus (JsonObject & jsonStatus) = 0;
-    virtual void Process (bool StayDark) = 0;                                       ///< Call from loop(),  renders Input data
+    virtual void Process (void) = 0;                                       ///< Call from loop(),  renders Input data
     virtual void GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
     virtual void SetBufferInfo (uint32_t BufferSize) = 0;
     virtual void SetOperationalState (bool ActiveFlag) { IsInputChannelActive = ActiveFlag; }
@@ -49,7 +49,7 @@ public:
 
 protected:
     bool        HasBeenInitialized  = false;
-    uint32_t      InputDataBufferSize = 0;
+    uint32_t    InputDataBufferSize = 0;
     bool        IsInputChannelActive = true;
     c_InputMgr::e_InputChannelIds InputChannelId = c_InputMgr::e_InputChannelIds::InputChannelId_ALL;
     c_InputMgr::e_InputType       ChannelType = c_InputMgr::e_InputType::InputType_Disabled;

@@ -23,7 +23,7 @@
 #include "service/FPPDiscovery.h"
 
 //-----------------------------------------------------------------------------
-bool fsm_PlayFile_state_Idle::Poll (bool /* StayDark */)
+bool fsm_PlayFile_state_Idle::Poll ()
 {
     // DEBUG_START;
 
@@ -110,18 +110,11 @@ bool fsm_PlayFile_state_Idle::Sync (String& FileName, float ElapsedSeconds)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayFile_state_Starting::Poll (bool StayDark)
+bool fsm_PlayFile_state_Starting::Poll ()
 {
     // DEBUG_START;
 
-    if(StayDark)
-    {
-        p_Parent->fsm_PlayFile_state_Stopping_imp.Init (p_Parent);
-    }
-    else
-    {
-        p_Parent->fsm_PlayFile_state_PlayingFile_imp.Init (p_Parent);
-    }
+    p_Parent->fsm_PlayFile_state_PlayingFile_imp.Init (p_Parent);
     // DEBUG_V (String ("           RemainingPlayCount: ") + p_Parent->RemainingPlayCount);
     // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->FrameControl.TotalNumberOfFramesInSequence));
 
@@ -202,7 +195,7 @@ bool fsm_PlayFile_state_Starting::Sync (String& FileName, float ElapsedSeconds)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayFile_state_PlayingFile::Poll (bool StayDark)
+bool fsm_PlayFile_state_PlayingFile::Poll ()
 {
     // xDEBUG_START;
 
@@ -210,7 +203,7 @@ bool fsm_PlayFile_state_PlayingFile::Poll (bool StayDark)
 
     do // once
     {
-        if(!StayDark || (c_FileMgr::INVALID_FILE_HANDLE == p_Parent->FileHandleForFileBeingPlayed))
+        if(c_FileMgr::INVALID_FILE_HANDLE == p_Parent->FileHandleForFileBeingPlayed)
         {
             // DEBUG_V("Bad FileHandleForFileBeingPlayed");
             Stop();
@@ -504,7 +497,7 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSecond
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayFile_state_Stopping::Poll (bool /* StayDark */)
+bool fsm_PlayFile_state_Stopping::Poll ()
 {
     // DEBUG_START;
 
@@ -594,7 +587,7 @@ bool fsm_PlayFile_state_Stopping::Sync (String&, float)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayFile_state_Error::Poll (bool /* StayDark */)
+bool fsm_PlayFile_state_Error::Poll ()
 {
     // xDEBUG_START;
 

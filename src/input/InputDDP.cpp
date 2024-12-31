@@ -192,13 +192,13 @@ void c_InputDDP::ProcessReceivedUdpPacket(AsyncUDPPacket ReceivedPacket)
 } // ProcessReceivedUdpPacket
 
 //-----------------------------------------------------------------------------
-void c_InputDDP::Process (bool StayDark)
+void c_InputDDP::Process ()
 {
     // DEBUG_START;
 
     do // once
     {
-        if(!IsInputChannelActive || StayDark)
+        if(!IsInputChannelActive)
         {
             break;
         }

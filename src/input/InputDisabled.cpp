@@ -92,7 +92,7 @@ void c_InputDisabled::GetConfig(ArduinoJson::JsonObject & jsonConfig)
 } // GetConfig
 
 //----------------------------------------------------------------------------
-void c_InputDisabled::Process(bool /* StayDark */)
+void c_InputDisabled::Process()
 {
     // DEBUG_START;
 

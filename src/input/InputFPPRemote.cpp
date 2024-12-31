@@ -24,45 +24,6 @@
 #include "input/InputFPPRemotePlayList.hpp"
 #include <Int64String.h>
 
-#if defined ARDUINO_ARCH_ESP32
-#   include <functional>
-
-static TaskHandle_t PollTaskHandle = NULL;
-static c_InputFPPRemote *pFppRemoteInstance = nullptr;
-//----------------------------------------------------------------------------
-void FppRemoteTask (void *arg)
-{
-    uint32_t PollStartTime = millis();
-    uint32_t PollEndTime = PollStartTime;
-    uint32_t PollTime = pdMS_TO_TICKS(25);
-    const uint32_t MinPollTimeMs = 25;
-
-    while(1)
-    {
-        uint32_t DeltaTime = PollEndTime - PollStartTime;
-
-        if (DeltaTime < MinPollTimeMs)
-        {
-            PollTime = pdMS_TO_TICKS(MinPollTimeMs - DeltaTime);
-        }
-        else
-        {
-            // handle time wrap and long frames
-            PollTime = pdMS_TO_TICKS(1);
-        }
-        vTaskDelay(PollTime);
-        FeedWDT();
-
-        PollStartTime = millis();
-
-        pFppRemoteInstance->TaskProcess();
-        FeedWDT();
-
-        // record the loop end time
-        PollEndTime = millis();
-    }
-} // FppRemoteTask
-#endif // def ARDUINO_ARCH_ESP32
 
 //-----------------------------------------------------------------------------
 c_InputFPPRemote::c_InputFPPRemote (c_InputMgr::e_InputChannelIds NewInputChannelId,
@@ -82,17 +43,9 @@ c_InputFPPRemote::~c_InputFPPRemote ()
 {
     if (HasBeenInitialized)
     {
+        // DEBUG_V();
         StopPlaying ();
     }
-
-#ifdef ARDUINO_ARCH_ESP32
-    if(PollTaskHandle)
-    {
-        logcon("Stop FPP Remote Task");
-        vTaskDelete(PollTaskHandle);
-        PollTaskHandle = NULL;
-    }
-#endif // def ARDUINO_ARCH_ESP32
 
 } // ~c_InputFPPRemote
 
@@ -234,34 +187,13 @@ void c_InputFPPRemote::PlayNextFile ()
 } // PlayNextFile
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemote::Process (bool StayDark)
+void c_InputFPPRemote::Process ()
 {
     // DEBUG_START;
-    Disabled = StayDark;
-#ifndef ARDUINO_ARCH_ESP32
-    TaskProcess();
-#else
-    if(!PollTaskHandle)
-    {
-        logcon("Start FPP Remote Task");
-        pFppRemoteInstance = this;
-        xTaskCreatePinnedToCore(FppRemoteTask, "FppRemoteTask", 4096, NULL, FPP_REMOTE_TASK_PRIORITY, &PollTaskHandle, 1);
-        vTaskPrioritySet(PollTaskHandle, FPP_REMOTE_TASK_PRIORITY);
-        // DEBUG_V("End FppRemoteTask");
-    }
-#endif // ndef ARDUINO_ARCH_ESP32
-    // DEBUG_END;
 
-} // process
-
-//-----------------------------------------------------------------------------
-void c_InputFPPRemote::TaskProcess ()
-{
-    // DEBUG_START;
-    if (!IsInputChannelActive || StayDark || Disabled)
+    if (!IsInputChannelActive)
     {
         // DEBUG_V ("dont do anything if the channel is not active");
-        StopPlaying ();
     }
     else if (PlayingRemoteFile ())
     {
@@ -281,16 +213,16 @@ void c_InputFPPRemote::TaskProcess ()
     }
     // DEBUG_END;
 
-} // TaskProcess
+} // process
 
 //-----------------------------------------------------------------------------
 bool c_InputFPPRemote::Poll ()
 {
     // DEBUG_START;
     bool Response = false;
-    if(pInputFPPRemotePlayItem)
+    if(pInputFPPRemotePlayItem && IsInputChannelActive)
     {
-        Response = pInputFPPRemotePlayItem->Poll (Disabled);
+        Response = pInputFPPRemotePlayItem->Poll ();
     }
 
     // DEBUG_END;
@@ -305,9 +237,6 @@ void c_InputFPPRemote::ProcessButtonActions(c_ExternalInput::InputValue_t value)
 
     if(c_ExternalInput::InputValue_t::longOn == value)
     {
-        // DEBUG_V("flip the dark flag");
-        StayDark = !StayDark;
-        // DEBUG_V(String("StayDark: ") + String(StayDark));
     }
     else if(c_ExternalInput::InputValue_t::shortOn == value)
     {
@@ -362,6 +291,7 @@ bool c_InputFPPRemote::SetConfig (JsonObject& jsonConfig)
 void c_InputFPPRemote::StopPlaying ()
 {
     // DEBUG_START;
+
     do // once
     {
         if (!PlayingFile ())
@@ -370,7 +300,7 @@ void c_InputFPPRemote::StopPlaying ()
             break;
         }
 
-        // handle re entrancy
+        // handle reentrancy
         if(Stopping)
         {
             // DEBUG_V("already in the process of stopping");
@@ -384,11 +314,14 @@ void c_InputFPPRemote::StopPlaying ()
 
         if(PlayingFile())
         {
+            // DEBUG_V();
+            // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
             pInputFPPRemotePlayItem->Stop ();
 
+            // DEBUG_V();
             while (!pInputFPPRemotePlayItem->IsIdle ())
             {
-                pInputFPPRemotePlayItem->Poll (Disabled);
+                pInputFPPRemotePlayItem->Poll ();
                 // DEBUG_V();
                 pInputFPPRemotePlayItem->Stop ();
             }
@@ -396,6 +329,7 @@ void c_InputFPPRemote::StopPlaying ()
             // DEBUG_V("Delete current playing file");
             delete pInputFPPRemotePlayItem;
             pInputFPPRemotePlayItem = nullptr;
+            // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
         }
 
         Stopping = false;
@@ -444,7 +378,7 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
 
     do // once
     {
-        // make sure we are stopped (clears pInputFPPRemotePlayItem)
+        // DEBUG_V("make sure we are stopped (clears pInputFPPRemotePlayItem)");
         StopPlaying();
 
         // DEBUG_V ("Start A New File");
@@ -452,13 +386,16 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
         String Last_pl_Text = FileName.substring(Last_dot_pl_Position);
         if (String(CN_Dotpl) == Last_pl_Text)
         {
-            // DEBUG_V ("Start Playlist");
             if(pInputFPPRemotePlayItem)
             {
+                // DEBUG_V ("Delete existing play item");
                 delete pInputFPPRemotePlayItem;
                 pInputFPPRemotePlayItem = nullptr;
+                // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
             }
+            // DEBUG_V ("Start a new Local File");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayList (GetInputChannelId ());
+            // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
             StatusType = F ("PlayList");
         }
         else
@@ -475,12 +412,15 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
 
             if(pInputFPPRemotePlayItem)
             {
+                // DEBUG_V ("Delete existing item");
                 delete pInputFPPRemotePlayItem;
                 pInputFPPRemotePlayItem = nullptr;
+                // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
             }
             // DEBUG_V ("Start Local FSEQ file player");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (GetInputChannelId ());
             StatusType = CN_File;
+            // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
         }
 
         // DEBUG_V (String ("FileName: '") + FileName + "'");
@@ -509,15 +449,20 @@ void c_InputFPPRemote::StartPlayingRemoteFile (String& FileName)
             break;
         }
 
+        // DEBUG_V();
         StopPlaying ();
 
         // DEBUG_V ("Instantiate an FSEQ file player");
         if(pInputFPPRemotePlayItem)
         {
+            // DEBUG_V ("Delete existing play item");
             delete pInputFPPRemotePlayItem;
             pInputFPPRemotePlayItem = nullptr;
+            // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
         }
+        // DEBUG_V ("Start Local FSEQ file player");
         pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (GetInputChannelId ());
+        // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
         pInputFPPRemotePlayItem->SetSendFppSync (SendFppSync);
         StatusType = CN_File;
@@ -543,25 +488,7 @@ void c_InputFPPRemote::validateConfiguration ()
 //-----------------------------------------------------------------------------
 bool c_InputFPPRemote::PlayingFile ()
 {
-    // DEBUG_START;
-
-    bool response = false;
-
-    do // once
-    {
-        // DEBUG_V(String("pInputFPPRemotePlayItem: ") = String(uint32_t(pInputFPPRemotePlayItem), HEX));
-        if (nullptr == pInputFPPRemotePlayItem)
-        {
-            // DEBUG_V("Stop processing if the play item pointer is null");
-            break;
-        }
-
-        response = true;
-    } while (false);
-
-    // DEBUG_END;
-    return response;
-
+    return (nullptr != pInputFPPRemotePlayItem);
 } // PlayingFile
 
 //-----------------------------------------------------------------------------
