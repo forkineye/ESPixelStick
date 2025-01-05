@@ -37,8 +37,6 @@
 #include "input/InputMgr.hpp"
 
 //-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 // Local Data definitions
 //-----------------------------------------------------------------------------
 typedef struct
@@ -62,6 +60,7 @@ static const InputTypeXlateMap_t InputTypeXlateMap[c_InputMgr::e_InputType::Inpu
     {c_InputMgr::e_InputType::InputType_Disabled, "Disabled",   c_InputMgr::e_InputChannelIds::InputChannelId_ALL}
 };
 
+uint32_t DeltaTime = 0;
 
 #if defined ARDUINO_ARCH_ESP32
 #   include <functional>
@@ -79,18 +78,17 @@ void InputMgrTask (void *arg)
 
     while(1)
     {
-        uint32_t DeltaTime = PollEndTime - PollStartTime;
+        DeltaTime = PollEndTime - PollStartTime;
 
         if (DeltaTime < MinPollTimeMs)
         {
             PollTime = pdMS_TO_TICKS(MinPollTimeMs - DeltaTime);
+            vTaskDelay(PollTime);
         }
         else
         {
-            // handle time wrap and long frames
-            PollTime = pdMS_TO_TICKS(1);
+            // DEBUG_V(String("handle time wrap and long frames. DeltaTime:") + String(DeltaTime));
         }
-        vTaskDelay(PollTime);
         FeedWDT();
 
         PollStartTime = millis();
@@ -102,6 +100,11 @@ void InputMgrTask (void *arg)
         PollEndTime = millis();
     }
 } // InputMgrTask
+#else
+void TimerPollHandler()
+{
+    InputMgr.Process();
+}
 #endif // def ARDUINO_ARCH_ESP32
 
 //-----------------------------------------------------------------------------
@@ -187,7 +190,10 @@ void c_InputMgr::Begin (uint32_t BufferSize)
 
 #if defined ARDUINO_ARCH_ESP32
     xTaskCreatePinnedToCore(InputMgrTask, "InputMgrTask", 4096, NULL, INPUTMGR_TASK_PRIORITY, &PollTaskHandle, 1);
-#endif // defined ARDUINO_ARCH_ESP32
+#else
+    LastIsrTimeStampMS = millis ();
+    MsTicker.attach_ms (uint32_t (FPP_TICKER_PERIOD_MS), &TimerPollHandler, (void*)this); // Add ISR Function
+#endif // ! defined ARDUINO_ARCH_ESP32
 
     HasBeenInitialized = true;
 
@@ -1010,7 +1016,7 @@ void c_InputMgr::SetOperationalState (bool ActiveFlag)
     // DEBUG_START;
     // DEBUG_V(String("ActiveFlag: ") + String(ActiveFlag));
 
-    PauseProcessing = ActiveFlag;
+    PauseProcessing = !ActiveFlag;
 
     // pass through each active interface and set the active state
     for (auto & InputChannel : InputChannelDrivers)

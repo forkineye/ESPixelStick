@@ -513,11 +513,6 @@ void loop()
     // Keep the Network Open
     NetworkMgr.Poll ();
 
-#if !defined ARDUINO_ARCH_ESP32
-    // Process input data
-    InputMgr.Process ();
-#endif // defined ARDUINO_ARCH_ESP32
-
     // Poll output
     OutputMgr.Poll();
 

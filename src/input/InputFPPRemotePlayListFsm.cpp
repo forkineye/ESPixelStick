@@ -55,13 +55,13 @@ void fsm_PlayList_state_WaitForStart::Start (String & FileName, float, uint32_t)
 
     do // once
     {
-        pInputFPPRemotePlayList->PlayItemName = FileName;
+        pInputFPPRemotePlayList->FileControl[CurrentFile].FileName = FileName;
         pInputFPPRemotePlayList->PlayListEntryId = 0;
 
         // DEBUG_V (String ("PlayItemName: '") + pInputFPPRemotePlayList->PlayItemName + "'");
 
         pInputFPPRemotePlayList->fsm_PlayList_state_Idle_imp.Init (pInputFPPRemotePlayList);
-    
+
     } while (false);
 
     // DEBUG_END;

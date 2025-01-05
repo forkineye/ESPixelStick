@@ -27,6 +27,7 @@
 #include "output/OutputMgr.hpp"
 #include "externalInput.h"
 #include <TimeLib.h>
+#include <Ticker.h>
 
 class c_InputCommon; ///< forward declaration to the pure virtual Input class that will be defined later.
 
@@ -94,7 +95,7 @@ private:
     };
 
     #define NO_CONFIG_NEEDED time_t(-1)
-    #define INPUTMGR_TASK_PRIORITY 6
+    #define INPUTMGR_TASK_PRIORITY 5
 
     DriverInfo_t    InputChannelDrivers[InputChannelId_End]; ///< pointer(s) to the current active Input driver
     uint32_t        InputDataBufferSize = 0;
@@ -119,6 +120,10 @@ private:
     bool   rebootNeeded = false;
 
     FastTimer BlankEndTime[InputChannelId_End];
+
+#   define    FPP_TICKER_PERIOD_MS 25
+    Ticker    MsTicker;
+    uint32_t  LastTickerTimeStampMS = 0;
 
 }; // c_InputMgr
 

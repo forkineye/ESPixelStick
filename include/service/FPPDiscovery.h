@@ -116,24 +116,25 @@ public:
 
     void begin ();
 
-    void ProcessFPPJson   (AsyncWebServerRequest* request);
-    void ProcessFPPDJson  (AsyncWebServerRequest* request);
-    void ProcessGET       (AsyncWebServerRequest* request);
-    void ProcessPOST      (AsyncWebServerRequest* request);
-    void ProcessFile      (AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final, uint32_t contentLength = 0);
-    void ProcessBody      (AsyncWebServerRequest* request, uint8_t* data, uint32_t len, uint32_t index, uint32_t total);
-    void sendPingPacket   (IPAddress destination = IPAddress(255, 255, 255, 255));
-    void PlayFile         (String & FileToPlay);
-    void Enable           (void);
-    void Disable          (void);
-    void GetStatus        (JsonObject& jsonStatus);
+    void ProcessFPPJson     (AsyncWebServerRequest* request);
+    void ProcessFPPDJson    (AsyncWebServerRequest* request);
+    void ProcessGET         (AsyncWebServerRequest* request);
+    void ProcessPOST        (AsyncWebServerRequest* request);
+    void ProcessFile        (AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final, uint32_t contentLength = 0);
+    void ProcessBody        (AsyncWebServerRequest* request, uint8_t* data, uint32_t len, uint32_t index, uint32_t total);
+    void sendPingPacket     (IPAddress destination = IPAddress(255, 255, 255, 255));
+    void PlayFile           (String & FileToPlay);
+    void Enable             (void);
+    void Disable            (void);
+    void GetStatus          (JsonObject& jsonStatus);
     void NetworkStateChanged (bool NewNetworkState);
+    void SetOperationalState (bool ActiveFlag);
 
-    void SetBlankOnStop   (bool value) {BlankOnStop = value;}
-    bool GetBlankOnStop   (void) {return BlankOnStop;}    
-    void SetInputFPPRemotePlayFile (c_InputFPPRemotePlayFile * value);
+    void SetBlankOnStop               (bool value) {BlankOnStop = value;}
+    bool GetBlankOnStop               (void) {return BlankOnStop;}
+    void SetInputFPPRemotePlayFile    (c_InputFPPRemotePlayFile * value);
     void ForgetInputFPPRemotePlayFile ();
-    void GenerateFppSyncMsg (uint8_t Action, const String & FileName, uint32_t CurrentFrame, const float & ElpsedTime);
+    void GenerateFppSyncMsg           (uint8_t Action, const String & FileName, uint32_t CurrentFrame, const float & ElpsedTime);
 
 #   define SYNC_PKT_START       0
 #   define SYNC_PKT_STOP        1

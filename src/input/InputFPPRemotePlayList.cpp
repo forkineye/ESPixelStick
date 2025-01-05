@@ -48,7 +48,10 @@ void c_InputFPPRemotePlayList::Start (String & FileName, float ElapsedSeconds, u
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Start (FileName, ElapsedSeconds, PlayCount);
+    if(!InputIsPaused())
+    {
+        pCurrentFsmState->Start (FileName, ElapsedSeconds, PlayCount);
+    }
 
     // DEBUG_END;
 
@@ -59,7 +62,10 @@ void c_InputFPPRemotePlayList::Stop ()
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Stop ();
+    if(!InputIsPaused())
+    {
+        pCurrentFsmState->Stop ();
+    }
 
     // DEBUG_END;
 
@@ -70,7 +76,10 @@ void c_InputFPPRemotePlayList::Sync (String & FileName, float ElapsedSeconds)
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Sync (FileName, ElapsedSeconds);
+    if(!InputIsPaused())
+    {
+        pCurrentFsmState->Sync (FileName, ElapsedSeconds);
+    }
 
     // DEBUG_END;
 
@@ -80,10 +89,15 @@ void c_InputFPPRemotePlayList::Sync (String & FileName, float ElapsedSeconds)
 bool c_InputFPPRemotePlayList::Poll ()
 {
     // DEBUG_START;
+    bool Response = false;
+    if(!InputIsPaused())
+    {
+        // Show that we have received a poll
+        Response = pCurrentFsmState->Poll ();
+    }
 
-    return pCurrentFsmState->Poll ();
-
-    // DEBUG_END;
+    // xDEBUG_END;
+    return Response;
 
 } // Poll
 
@@ -119,11 +133,11 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
 
         // Get the playlist file
         String FileData;
-        if (0 == FileMgr.ReadSdFile (PlayItemName, FileData))
+        if (0 == FileMgr.ReadSdFile (FileControl[CurrentFile].FileName, FileData))
         {
-            logcon (String (F ("Could not read Playlist file: '")) + PlayItemName + "'");
+            logcon (String (F ("Could not read Playlist file: '")) + FileControl[CurrentFile].FileName + "'");
             fsm_PlayList_state_Paused_imp.Init (this);
-            pCurrentFsmState->Start (PlayItemName, PauseDelayTimer.GetTimeRemaining() / 1000, 1);
+            pCurrentFsmState->Start (FileControl[CurrentFile].FileName, PauseDelayTimer.GetTimeRemaining() / 1000, 1);
             break;
         }
         // DEBUG_V ("");
@@ -133,12 +147,12 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         // DEBUG_V ("Error Check");
         if (error)
         {
-            String CfgFileMessagePrefix = String (F ("SD file: '")) + PlayItemName + "' ";
+            String CfgFileMessagePrefix = String (F ("SD file: '")) + FileControl[CurrentFile].FileName + "' ";
             logcon (CN_Heap_colon + String (ESP.getFreeHeap ()));
             logcon (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
             logcon (String (F ("++++")) + FileData + String (F ("----")));
             fsm_PlayList_state_Paused_imp.Init (this);
-            pCurrentFsmState->Start (PlayItemName, PauseDelayTimer.GetTimeRemaining() / 1000, PlayCount);
+            pCurrentFsmState->Start (FileControl[CurrentFile].FileName, PauseDelayTimer.GetTimeRemaining() / 1000, PlayCount);
             break;
         }
 
@@ -164,7 +178,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
 
             PauseDelayTimer.StartTimer(1000, false);
             fsm_PlayList_state_Paused_imp.Init (this);
-            pCurrentFsmState->Start (PlayItemName, PauseDelayTimer.GetTimeRemaining() / 1000, PlayCount);
+            pCurrentFsmState->Start (FileControl[CurrentFile].FileName, PauseDelayTimer.GetTimeRemaining() / 1000, PlayCount);
             break;
         }
 

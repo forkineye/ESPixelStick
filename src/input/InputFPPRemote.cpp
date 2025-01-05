@@ -288,6 +288,21 @@ bool c_InputFPPRemote::SetConfig (JsonObject& jsonConfig)
 } // SetConfig
 
 //-----------------------------------------------------------------------------
+void c_InputFPPRemote::SetOperationalState (bool ActiveFlag)
+{
+    // DEBUG_START;
+
+    if(pInputFPPRemotePlayItem)
+    {
+        pInputFPPRemotePlayItem->SetOperationalState (ActiveFlag);
+    }
+
+    FPPDiscovery.SetOperationalState(ActiveFlag);
+
+    // DEBUG_END;
+} // SetOperationalState
+
+//-----------------------------------------------------------------------------
 void c_InputFPPRemote::StopPlaying ()
 {
     // DEBUG_START;
@@ -309,7 +324,7 @@ void c_InputFPPRemote::StopPlaying ()
         Stopping = true;
 
         // DEBUG_V ("Disable FPP Discovery");
-        FPPDiscovery.Disable ();
+        // FPPDiscovery.Disable ();
         FPPDiscovery.ForgetInputFPPRemotePlayFile ();
 
         if(PlayingFile())
@@ -347,6 +362,11 @@ void c_InputFPPRemote::StartPlaying (String& FileName)
 
     do // once
     {
+        if(!IsInputChannelActive)
+        {
+            break;
+        }
+
         // DEBUG_V (String ("FileName: '") + FileName + "'");
         if ((FileName.isEmpty ()) ||
             (FileName.equals("null")))

@@ -140,6 +140,17 @@ void c_FPPDiscovery::Enable ()
 } // Enable
 
 //-----------------------------------------------------------------------------
+void c_FPPDiscovery::SetOperationalState (bool ActiveFlag)
+{
+    // DEBUG_START;
+
+    // Do NOT call enable / disable since they call other functions.
+    IsEnabled = ActiveFlag;
+
+    // DEBUG_END;
+}
+
+//-----------------------------------------------------------------------------
 void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
@@ -338,7 +349,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, float S
     // DEBUG_START;
     do // once
     {
-        if (!AllowedToRemotePlayFiles ())
+        if (!IsEnabled || !AllowedToRemotePlayFiles ())
         {
             // DEBUG_V ("Not allowed to play remote files");
             break;
@@ -429,9 +440,9 @@ void c_FPPDiscovery::ProcessBlankPacket ()
 {
     // DEBUG_START;
 
-    StopPlaying (false);
     if (IsEnabled)
     {
+        StopPlaying (false);
         memset (OutputMgr.GetBufferAddress(), 0x0, OutputMgr.GetBufferUsedSize ());
     }
     // DEBUG_END;
@@ -530,6 +541,8 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
 
     JsonDocument JsonDoc;
     JsonObject JsonData = JsonDoc.to<JsonObject> ();
+
+    // DEBUG_V(String("FileHandle: ") + String(fseq));
 
     FSEQRawHeader fsqHeader;
     FileMgr.ReadSdFile (fseq, (byte*)&fsqHeader, sizeof (fsqHeader), size_t(0));
@@ -832,14 +845,16 @@ void c_FPPDiscovery::ProcessFile (
         // DEBUG_V();
         if (final)
         {
-            // DEBUG_V("Allow file to play");
             inFileUpload = false;
             UploadFileName = "";
             writeFailed = false;
             memset(OutputMgr.GetBufferAddress(), 0x00, OutputMgr.GetBufferSize());
             InputMgr.SetOperationalState(true);
             OutputMgr.PauseOutputs(false);
-            delay(10);
+            FeedWDT();
+            delay(1000);
+            FeedWDT();
+            // DEBUG_V("Allow file to play");
             StartPlaying(UploadFileName, 0.0);
         }
 
@@ -1149,6 +1164,7 @@ void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
 {
     // DEBUG_START;
     // DEBUG_V (String("Open:: FileName: ") + FileName);
+    // DEBUG_V (String ("IsEnabled '") + String(IsEnabled));
 
     do // once
     {
@@ -1190,11 +1206,12 @@ void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
 void c_FPPDiscovery::StopPlaying (bool wait)
 {
     // DEBUG_START;
-    // DEBUG_V(String("Current Task Priority: ") + String(uxTaskPriorityGet(NULL)));
-    // DEBUG_V (String ("FPPDiscovery::StopPlaying '") + InputFPPRemotePlayFile->GetFileName() + "'");
+    // DEBUG_V (String ("Current Task Priority: ") + String(uxTaskPriorityGet(NULL)));
+    // xDEBUG_V (String ("FPPDiscovery::StopPlaying '") + InputFPPRemotePlayFile->GetFileName() + "'");
+    // DEBUG_V (String ("IsEnabled '") + String(IsEnabled));
 
     // prevent reentrant issues
-    if(!StopInProgress)
+    if(!StopInProgress && IsEnabled)
     {
         StopInProgress = true;
         // only process if the pointer is valid
@@ -1209,6 +1226,7 @@ void c_FPPDiscovery::StopPlaying (bool wait)
 
             // DEBUG_V("try to stop");
             InputFPPRemotePlayFile->Stop ();
+            InputFPPRemotePlayFile->Poll ();
 
             if(wait)
             {
@@ -1311,6 +1329,5 @@ void c_FPPDiscovery::ForgetInputFPPRemotePlayFile ()
     // DEBUG_END;
 
 } // SetInputFPPRemotePlayFile
-
 
 c_FPPDiscovery FPPDiscovery;

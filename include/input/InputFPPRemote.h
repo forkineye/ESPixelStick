@@ -42,14 +42,14 @@ class c_InputFPPRemote : public c_InputCommon
       void GetDriverName (String& sDriverName) { sDriverName = "FPP Remote"; } ///< get the name for the instantiated driver
       void SetBufferInfo (uint32_t BufferSize);
       void ProcessButtonActions(c_ExternalInput::InputValue_t value);
+      void SetOperationalState (bool ActiveFlag);
 
 protected:
 #   define No_LocalFileToPlay "..."
-#   define FPP_REMOTE_TASK_PRIORITY 6
 
     c_InputFPPRemotePlayItem * pInputFPPRemotePlayItem = nullptr;
     int32_t GetSyncOffsetMS () { return SyncOffsetMS; }
-    bool    GetSendFppSync () { return SendFppSync; }
+    bool    GetSendFppSync ()  { return SendFppSync; }
 
     String StatusType;
 

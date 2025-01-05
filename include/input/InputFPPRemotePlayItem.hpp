@@ -24,32 +24,52 @@
 
 class c_InputFPPRemotePlayItem
 {
+protected:
+    time_t   PlayDurationSec = 0;
+    bool     SendFppSync = false;
+
+private:
+    bool    InputPaused = false;
+    int32_t SyncOffsetMS = 0;
+    c_InputMgr::e_InputChannelIds InputChannelId = c_InputMgr::e_InputChannelIds::InputChannelId_ALL;
+
 public:
     c_InputFPPRemotePlayItem (c_InputMgr::e_InputChannelIds InputChannelId);
     virtual ~c_InputFPPRemotePlayItem ();
 
+    struct FileControl_t
+    {
+        String      FileName;
+        c_FileMgr::FileId FileHandleForFileBeingPlayed = c_FileMgr::INVALID_FILE_HANDLE;
+        uint32_t    RemainingPlayCount = 0;
+        uint32_t    DataOffset = 0;
+        uint32_t    ChannelsPerFrame = 0;
+        uint32_t    FrameStepTimeMS = 25;
+        uint32_t    TotalNumberOfFramesInSequence = 0;
+        uint32_t    ElapsedPlayTimeMS = 0;
+        uint32_t    StartingTimeMS = 0;
+        uint32_t    LastPollTimeMS = 0;
+        uint32_t    LastPlayedFrameId = 0;
+    } FileControl[2];
+    #define CurrentFile 0
+    #define NextFile 1
+
     virtual bool     Poll           () = 0;
     virtual void     Start          (String & FileName, float SecondsElapsed, uint32_t RemainingPlayCount) = 0;
     virtual void     Stop           () = 0;
+    virtual void     SetPauseState  (bool _PauseInput) {InputPaused = _PauseInput;}
     virtual void     Sync           (String & FileName, float SecondsElapsed) = 0;
     virtual void     GetStatus      (JsonObject & jsonStatus) = 0;
     virtual bool     IsIdle         () = 0;
-            String   GetFileName    () { return PlayItemName; }
-            uint32_t GetRepeatCount () { return RemainingPlayCount; }
+            String   GetFileName    () { return FileControl[CurrentFile].FileName; }
+            uint32_t GetRepeatCount () { return FileControl[CurrentFile].RemainingPlayCount; }
             void     SetDuration    (time_t value) { PlayDurationSec = value; }
             void     GetDriverName  (String& Name) { Name = "InputMgr"; }
             int32_t  GetSyncOffsetMS () { return SyncOffsetMS; }
             void     SetSyncOffsetMS (int32_t value) { SyncOffsetMS = value; }
             void     SetSendFppSync  (bool value) { SendFppSync = value; }
             c_InputMgr::e_InputChannelIds GetInputChannelId () { return InputChannelId; }
-protected:
-    String   PlayItemName;
-    uint32_t RemainingPlayCount = 0;
-    time_t   PlayDurationSec = 0;
-    bool     SendFppSync = false;
-
-private:
-    int32_t  SyncOffsetMS = 0;
-    c_InputMgr::e_InputChannelIds InputChannelId = c_InputMgr::e_InputChannelIds::InputChannelId_ALL;
+            bool     InputIsPaused   () { return InputPaused; }
+            void     SetOperationalState (bool ActiveFlag) {InputPaused = !ActiveFlag;}
 
 }; // c_InputFPPRemotePlayItem
