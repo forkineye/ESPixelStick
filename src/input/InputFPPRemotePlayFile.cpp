@@ -84,7 +84,7 @@ void c_InputFPPRemotePlayFile::Stop ()
 //-----------------------------------------------------------------------------
 void c_InputFPPRemotePlayFile::Sync (String & FileName, float SecondsElapsed)
 {
-    // DEBUG_START;
+    // xDEBUG_START;
 
     if(!InputIsPaused())
     {
@@ -96,7 +96,7 @@ void c_InputFPPRemotePlayFile::Sync (String & FileName, float SecondsElapsed)
         }
     }
 
-    // DEBUG_END;
+    // xDEBUG_END;
 
 } // Sync
 
@@ -193,25 +193,25 @@ void c_InputFPPRemotePlayFile::UpdateElapsedPlayTimeMS ()
 //-----------------------------------------------------------------------------
 uint32_t c_InputFPPRemotePlayFile::CalculateFrameId (uint32_t ElapsedMS, int32_t SyncOffsetMS)
 {
-    // DEBUG_START;
+    // xDEBUG_START;
 
     uint32_t CurrentFrameId = 0;
 
     do // once
     {
         uint32_t AdjustedPlayTime = ElapsedMS + SyncOffsetMS;
-        // DEBUG_V (String ("AdjustedPlayTime: ") + String (AdjustedPlayTime));
+        // xDEBUG_V (String ("AdjustedPlayTime: ") + String (AdjustedPlayTime));
         if ((0 > SyncOffsetMS) && (ElapsedMS < abs(SyncOffsetMS)))
         {
             break;
         }
 
         CurrentFrameId = (AdjustedPlayTime / FileControl[CurrentFile].FrameStepTimeMS);
-        // DEBUG_V (String ("  CurrentFrameId: ") + String (CurrentFrameId));
+        // xDEBUG_V (String ("  CurrentFrameId: ") + String (CurrentFrameId));
 
     } while (false);
 
-    // DEBUG_END;
+    // xDEBUG_END;
 
     return CurrentFrameId;
 
@@ -230,7 +230,6 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 
         if(c_FileMgr::INVALID_FILE_HANDLE != FileControl[CurrentFile].FileHandleForFileBeingPlayed)
         {
-            // DEBUG_V("Unexpected File Handle at fseq Parse.");
             FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
         }
 
@@ -416,6 +415,7 @@ void c_InputFPPRemotePlayFile::ClearFileInfo()
 {
     // DEBUG_START;
     FileControl[NextFile].FileName                      = emptyString;
+    FileControl[NextFile].FileHandleForFileBeingPlayed  = c_FileMgr::INVALID_FILE_HANDLE;
     FileControl[NextFile].RemainingPlayCount            = 0;
     SyncControl.LastRcvdElapsedSeconds                  = 0.0;
     FileControl[NextFile].ElapsedPlayTimeMS             = 0;
@@ -429,31 +429,34 @@ void c_InputFPPRemotePlayFile::ClearFileInfo()
 //-----------------------------------------------------------------------------
 uint32_t c_InputFPPRemotePlayFile::ReadFile(uint32_t DestinationIntensityId, uint32_t NumBytesToRead, uint32_t FileOffset)
 {
-    // DEBUG_START;
-
-    if(c_FileMgr::INVALID_FILE_HANDLE == FileControl[CurrentFile].FileHandleForFileBeingPlayed)
-    {
-        // DEBUG_V(String("FileHandleForFileBeingPlayed: ") + String(FileControl[CurrentFile].FileHandleForFileBeingPlayed));
-    }
-
-    uint8_t LocalIntensityBuffer[200];
+    // xDEBUG_START;
 
     uint32_t NumBytesRead = 0;
+    uint8_t LocalIntensityBuffer[200];
 
-    while (NumBytesRead < NumBytesToRead)
+    do // once
     {
-        uint32_t NumBytesReadThisPass = FileMgr.ReadSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed,
-                                                         LocalIntensityBuffer,
-                                                         min((NumBytesToRead - NumBytesRead), sizeof(LocalIntensityBuffer)),
-                                                         FileOffset);
+        if(c_FileMgr::INVALID_FILE_HANDLE == FileControl[CurrentFile].FileHandleForFileBeingPlayed)
+        {
+            // DEBUG_V(String("FileHandleForFileBeingPlayed: ") + String(FileControl[CurrentFile].FileHandleForFileBeingPlayed));
+            break;
+        }
 
-        OutputMgr.WriteChannelData(DestinationIntensityId, NumBytesReadThisPass, LocalIntensityBuffer);
+        while (NumBytesRead < NumBytesToRead)
+        {
+            uint32_t NumBytesReadThisPass = FileMgr.ReadSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed,
+                                                            LocalIntensityBuffer,
+                                                            min((NumBytesToRead - NumBytesRead), sizeof(LocalIntensityBuffer)),
+                                                            FileOffset);
 
-        FileOffset += NumBytesReadThisPass;
-        NumBytesRead += NumBytesReadThisPass;
-        DestinationIntensityId += NumBytesReadThisPass;
-    }
+            OutputMgr.WriteChannelData(DestinationIntensityId, NumBytesReadThisPass, LocalIntensityBuffer);
 
-    // DEBUG_END;
+            FileOffset += NumBytesReadThisPass;
+            NumBytesRead += NumBytesReadThisPass;
+            DestinationIntensityId += NumBytesReadThisPass;
+        }
+    } while (false);
+
+    // xDEBUG_END;
     return NumBytesRead;
 } // ReadFile
