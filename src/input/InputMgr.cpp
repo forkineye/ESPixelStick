@@ -191,8 +191,7 @@ void c_InputMgr::Begin (uint32_t BufferSize)
 #if defined ARDUINO_ARCH_ESP32
     xTaskCreatePinnedToCore(InputMgrTask, "InputMgrTask", 4096, NULL, INPUTMGR_TASK_PRIORITY, &PollTaskHandle, 1);
 #else
-    LastIsrTimeStampMS = millis ();
-    MsTicker.attach_ms (uint32_t (FPP_TICKER_PERIOD_MS), &TimerPollHandler, (void*)this); // Add ISR Function
+    MsTicker.attach_ms (uint32_t (FPP_TICKER_PERIOD_MS), &TimerPollHandler); // Add Timer Function
 #endif // ! defined ARDUINO_ARCH_ESP32
 
     HasBeenInitialized = true;
