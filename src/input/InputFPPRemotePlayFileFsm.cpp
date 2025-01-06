@@ -180,7 +180,7 @@ void fsm_PlayFile_state_Starting::Start (String& FileName, float ElapsedSeconds,
     // DEBUG_V (String ("     StartingTimeMS: ") + p_Parent->FileControl[NextFile].StartingTimeMS);
     // DEBUG_V (String (" RemainingPlayCount: ") + p_Parent->FileControl[NextFile].RemainingPlayCount);
 
-    p_Parent->fsm_PlayFile_state_Idle_imp.Init(p_Parent);
+    p_Parent->fsm_PlayFile_state_Stopping_imp.Init(p_Parent);
 
     // DEBUG_END;
 
@@ -193,7 +193,7 @@ void fsm_PlayFile_state_Starting::Stop (void)
     // DEBUG_V("fsm_PlayFile_state_Starting::Stop");
 
     p_Parent->FileControl[CurrentFile].RemainingPlayCount = 0;
-    p_Parent->fsm_PlayFile_state_Idle_imp.Init (p_Parent);
+    p_Parent->fsm_PlayFile_state_Stopping_imp.Init (p_Parent);
 
     // DEBUG_END;
 
@@ -227,7 +227,7 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
     {
         if(c_FileMgr::INVALID_FILE_HANDLE == p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed)
         {
-            // DEBUG_V("Bad FileHandleForFileBeingPlayed");
+            // DEBUG_V("Unexpected missing file handle");
             Stop();
             break;
         }
@@ -438,7 +438,6 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSecond
         // xDEBUG_V (String ("        FrameDiff: ") + String (FrameDiff));
 
         // Adjust the start of the file time to align with the master FPP
-        noInterrupts ();
         if (20 < abs (FrameDiff))
         {
             // xDEBUG_V ("Large Setp Adjustment");
@@ -457,7 +456,6 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSecond
             p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS += p_Parent->FileControl[CurrentFile].FrameStepTimeMS;
             p_Parent->FileControl[CurrentFile].StartingTimeMS = millis() - p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS;
         }
-        interrupts ();
 
         response = true;
         // xDEBUG_V (String ("ElapsedPlayTimeMS: ") + String (p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS));
@@ -570,6 +568,10 @@ bool fsm_PlayFile_state_Error::Poll ()
     {
         // DEBUG_V("Unexpected file handle in Error handler.");
         FileMgr.CloseSdFile (p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
+    }
+    else
+    {
+        // DEBUG_V("Unexpected missing file handle");
     }
 
     p_Parent->FileControl[CurrentFile].FileName.clear();
