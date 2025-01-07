@@ -167,15 +167,15 @@ void c_InputAlexa::onMessage(EspalexaDevice * pDevice)
         // DEBUG_V (String ("pDevice->getB: ") + String (pDevice->getB ()));
 
         JsonDocument JsonConfigDoc;
-        JsonObject JsonConfig = JsonConfigDoc[CN_config].to<JsonObject> ();
+        JsonObject JsonConfig = JsonConfigDoc[(char*)CN_config].to<JsonObject> ();
 
-        JsonConfig[CN_EffectSpeed]      = 1;
-        JsonConfig[CN_EffectReverse]    = false;
-        JsonConfig[CN_EffectMirror]     = false;
-        JsonConfig[CN_EffectAllLeds]    = true;
-        JsonConfig[CN_EffectBrightness] = map (pDevice->getValue (), 0, 255, 0, 100);
-        JsonConfig[CN_currenteffect]    = F ("Solid");
-        JsonConfig[CN_EffectColor]      = HexColor;
+        JsonWrite(JsonConfig, CN_EffectSpeed,      1);
+        JsonWrite(JsonConfig, CN_EffectReverse,    false);
+        JsonWrite(JsonConfig, CN_EffectMirror,     false);
+        JsonWrite(JsonConfig, CN_EffectAllLeds,    true);
+        JsonWrite(JsonConfig, CN_EffectBrightness, map (pDevice->getValue (), 0, 255, 0, 100));
+        JsonWrite(JsonConfig, CN_currenteffect,    F ("Solid"));
+        JsonWrite(JsonConfig, CN_EffectColor,      HexColor);
         // DEBUG_V (String ("CN_EffectBrightness: ") + String (pDevice->getValue ()));
         // DEBUG_V (String ("getState: ") + String (pDevice->getState ()));
 

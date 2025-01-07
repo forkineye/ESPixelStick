@@ -128,21 +128,21 @@ void c_EthernetDriver::GetConfig (JsonObject& json)
 {
     // DEBUG_START;
 
-    json[CN_ip]          = ip.toString ();
-    json[CN_netmask]     = netmask.toString ();
-    json[CN_gateway]     = gateway.toString ();
-    json[CN_dnsp]        = primaryDns.toString ();
-    json[CN_dnss]        = secondaryDns.toString ();
-    json[CN_dhcp]        = UseDhcp;
+    JsonWrite(json, CN_ip,          ip.toString ());
+    JsonWrite(json, CN_netmask,     netmask.toString ());
+    JsonWrite(json, CN_gateway,     gateway.toString ());
+    JsonWrite(json, CN_dnsp,        primaryDns.toString ());
+    JsonWrite(json, CN_dnss,        secondaryDns.toString ());
+    JsonWrite(json, CN_dhcp,        UseDhcp);
 
-    json[CN_type]        = phy_type;
-    json[CN_addr]        = phy_addr;
-    json[CN_power_pin]   = power_pin;
-    json[CN_mode]        = clk_mode;
-    json[CN_mdc_pin]     = mdc_pin;
-    json[CN_mdio_pin]    = mdio_pin;
-    json[CN_activevalue] = powerPinActiveValue;
-    json[CN_activedelay] = powerPinActiveDelayMs;
+    JsonWrite(json, CN_type,        phy_type);
+    JsonWrite(json, CN_addr,        phy_addr);
+    JsonWrite(json, CN_power_pin,   power_pin);
+    JsonWrite(json, CN_mode,        clk_mode);
+    JsonWrite(json, CN_mdc_pin,     mdc_pin);
+    JsonWrite(json, CN_mdio_pin,    mdio_pin);
+    JsonWrite(json, CN_activevalue, powerPinActiveValue);
+    JsonWrite(json, CN_activedelay, powerPinActiveDelayMs);
 
     // DEBUG_END;
 
@@ -185,14 +185,12 @@ void c_EthernetDriver::GetStatus (JsonObject& jsonStatus)
 
     String Hostname;
     GetHostname (Hostname);
-    jsonStatus[CN_hostname] = Hostname;
-
-    jsonStatus[CN_ip]        = GetIpAddress ().toString ();
-    jsonStatus[CN_subnet]    = GetIpSubNetMask ().toString ();
-    jsonStatus[CN_mac]       = GetMacAddress ();
-    jsonStatus[CN_gateway]   = GetIpGateway ();
-
-    jsonStatus[CN_connected] = IsConnected ();
+    JsonWrite(jsonStatus, CN_hostname,  Hostname);
+    JsonWrite(jsonStatus, CN_ip,        GetIpAddress ().toString ());
+    JsonWrite(jsonStatus, CN_subnet,    GetIpSubNetMask ().toString ());
+    JsonWrite(jsonStatus, CN_mac,       GetMacAddress ());
+    JsonWrite(jsonStatus, CN_gateway,   GetIpGateway ());
+    JsonWrite(jsonStatus, CN_connected, IsConnected ());
 
     // DEBUG_END;
 } // GetStatus

@@ -61,7 +61,7 @@ void c_OutputTM1814::GetConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_START;
 
     c_OutputPixel::GetConfig (jsonConfig);
-    jsonConfig[CN_currentlimit] = CurrentLimit;
+    JsonWrite(jsonConfig, CN_currentlimit, CurrentLimit);
 
     // DEBUG_END;
 } // GetConfig

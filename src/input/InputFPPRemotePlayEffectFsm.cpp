@@ -109,7 +109,7 @@ void fsm_PlayEffect_state_Idle::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    jsonStatus[CN_TimeRemaining] = F ("00:00");
+    JsonWrite(jsonStatus, CN_TimeRemaining, F ("00:00"));
 
     // DEBUG_END;
 
@@ -198,7 +198,7 @@ void fsm_PlayEffect_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
 
     char buf[12];
     ESP_ERROR_CHECK(saferSecondsToFormattedMinutesAndSecondsString(buf, (uint32_t)SecondsRemaining));
-    jsonStatus[CN_TimeRemaining] = buf;
+    JsonWrite(jsonStatus, CN_TimeRemaining, buf);
 
     p_InputFPPRemotePlayEffect->EffectsEngine.GetStatus (jsonStatus);
 

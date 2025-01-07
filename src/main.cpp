@@ -261,7 +261,7 @@ bool dsDevice(JsonObject & json)
     // PrettyPrint (json, "dsDevice");
 
     bool ConfigChanged = false;
-    JsonObject JsonDeviceConfig = json[CN_device];
+    JsonObject JsonDeviceConfig = json[(char*)CN_device];
     if (JsonDeviceConfig)
     {
         // PrettyPrint(JsonDeviceConfig, "device");
@@ -304,9 +304,9 @@ bool deserializeCore (JsonObject & json)
     bool DataHasBeenAccepted = false;
 
     // PrettyPrint (json, "Main Config");
-    JsonObject SystemConfig = json[CN_system];
-    JsonObject InitConfig = json[CN_init];
-    JsonObject NetworkConfig = json[CN_network];
+    JsonObject SystemConfig = json[(char*)CN_system];
+    JsonObject InitConfig = json[(char*)CN_init];
+    JsonObject NetworkConfig = json[(char*)CN_network];
     JsonObject DeviceConfig;
 
     do // once
@@ -315,7 +315,7 @@ bool deserializeCore (JsonObject & json)
         if (SystemConfig)
         {
             // DEBUG_V("Detected a System Config");
-            DeviceConfig = json[CN_system];
+            DeviceConfig = json[(char*)CN_system];
             // PrettyPrint (DeviceConfig, "System based DeviceConfig");
         }
         // is this an initial config from the flash tool?
@@ -399,7 +399,7 @@ void SaveConfig()
 
     // Create buffer and root object
     JsonDocument jsonConfigDoc;
-    JsonObject JsonConfig = jsonConfigDoc[CN_system].to<JsonObject>();
+    JsonObject JsonConfig = jsonConfigDoc[(char*)CN_system].to<JsonObject>();
 
     GetConfig(JsonConfig);
 
@@ -441,12 +441,12 @@ void GetConfig (JsonObject & json)
     // DEBUG_START;
 
     // Config Version
-    json[CN_cfgver] = CurrentConfigVersion;
+    json[(char*)CN_cfgver] = CurrentConfigVersion;
 
     // Device
-    JsonObject device       = json[CN_device].to<JsonObject>();
-    device[CN_id]           = config.id;
-    device[CN_blanktime]    = config.BlankDelay;
+    JsonObject device = json[(char*)CN_device].to<JsonObject>();
+    JsonWrite(device, CN_id,        config.id);
+    JsonWrite(device, CN_blanktime, config.BlankDelay);
 
     // PrettyPrint(device, "device");
 

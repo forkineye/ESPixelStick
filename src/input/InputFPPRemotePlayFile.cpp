@@ -143,29 +143,28 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
         secsRem = 0; // set to zero remaining seconds when overflow occurs
     }
 
-    JsonStatus[F ("SyncCount")]           = SyncControl.SyncCount;
-    JsonStatus[F ("SyncAdjustmentCount")] = SyncControl.SyncAdjustmentCount;
+    JsonWrite(JsonStatus, F ("SyncCount"),           SyncControl.SyncCount);
+    JsonWrite(JsonStatus, F ("SyncAdjustmentCount"), SyncControl.SyncAdjustmentCount);
 
     String temp = GetFileName ();
 
-    JsonStatus[CN_current_sequence]  = temp;
-    JsonStatus[CN_playlist]          = temp;
-    JsonStatus[CN_seconds_elapsed]   = String (secs);
-    JsonStatus[CN_seconds_played]    = String (secs);
-    JsonStatus[CN_seconds_remaining] = String (secsRem);
-    JsonStatus[CN_sequence_filename] = temp;
-    JsonStatus[F("PlayedFileCount")] = PlayedFileCount;
+    JsonWrite(JsonStatus, CN_current_sequence,  temp);
+    JsonWrite(JsonStatus, CN_playlist,          temp);
+    JsonWrite(JsonStatus, CN_seconds_elapsed,   String (secs));
+    JsonWrite(JsonStatus, CN_seconds_played,    String (secs));
+    JsonWrite(JsonStatus, CN_seconds_remaining, String (secsRem));
+    JsonWrite(JsonStatus, CN_sequence_filename, temp);
+    JsonWrite(JsonStatus, F("PlayedFileCount"), PlayedFileCount);
 
     // After inserting the total seconds and total seconds remaining,
     // JsonStatus also includes formatted "minutes + seconds" for both
     // time Elapsed and time Remaining
     char buf[12];
     ESP_ERROR_CHECK(saferSecondsToFormattedMinutesAndSecondsString(buf, secs));
-    JsonStatus[CN_time_elapsed] = buf;
+    JsonWrite(JsonStatus, CN_time_elapsed,   buf);
     ESP_ERROR_CHECK(saferSecondsToFormattedMinutesAndSecondsString(buf, secsRem));
-    JsonStatus[CN_time_remaining] = buf;
-
-    JsonStatus[CN_errors] = LastFailedPlayStatusMsg;
+    JsonWrite(JsonStatus, CN_time_remaining, buf);
+    JsonWrite(JsonStatus, CN_errors,         LastFailedPlayStatusMsg);
 
     // xDEBUG_END;
 

@@ -92,11 +92,11 @@ void c_InputDDP::GetStatus (JsonObject& jsonStatus)
     JsonObject ddpStatus = jsonStatus[F ("ddp")].to<JsonObject> ();
     // DEBUG_V ("");
 
-    ddpStatus["packetsreceived"] = stats.packetsReceived;
-    ddpStatus["bytesreceived"]   = float(stats.bytesReceived) / 1024.0;
-    ddpStatus[CN_errors]         = stats.errors;
-    ddpStatus[CN_id]             = InputChannelId;
-    ddpStatus["lastError"]       = lastError;
+    JsonWrite(ddpStatus, F("packetsreceived"), stats.packetsReceived);
+    JsonWrite(ddpStatus, F("bytesreceived"),  float(stats.bytesReceived) / 1024.0);
+    JsonWrite(ddpStatus, CN_errors,           stats.errors);
+    JsonWrite(ddpStatus, CN_id,               InputChannelId);
+    JsonWrite(ddpStatus, F("lastError"),      lastError);
 
     // DEBUG_END;
 
@@ -323,21 +323,21 @@ void c_InputDDP::ProcessReceivedQuery ()
             // DEBUG_V ("DDP_ID_CONFIG query");
 
             JsonDocument JsonConfigDoc;
-            JsonObject JsonConfig = JsonConfigDoc[CN_config].to<JsonObject> ();
+            JsonObject JsonConfig = JsonConfigDoc[(char*)CN_config].to<JsonObject> ();
             String hostname;
             NetworkMgr.GetHostname (hostname);
-            JsonConfig[CN_hostname] = hostname;
-            JsonConfig[CN_id] = config.id;
-            JsonConfig[CN_ip] = NetworkMgr.GetlocalIP ().toString ();
-            JsonConfig[CN_version] = VERSION;
-            JsonConfig["hardwareType"] = FPP_VARIANT_NAME;
-            JsonConfig[CN_type] = FPP_TYPE_ID;
-            JsonConfig[CN_num_chan] = InputDataBufferSize;
+            JsonWrite(JsonConfig, CN_hostname,        hostname);
+            JsonWrite(JsonConfig, CN_id,              config.id);
+            JsonWrite(JsonConfig, CN_ip,              NetworkMgr.GetlocalIP ().toString ());
+            JsonWrite(JsonConfig, CN_version,         VERSION);
+            JsonWrite(JsonConfig, F("hardwareType"),  FPP_VARIANT_NAME);
+            JsonWrite(JsonConfig, CN_type,            FPP_TYPE_ID);
+            JsonWrite(JsonConfig, CN_num_chan,        InputDataBufferSize);
             uint16_t PixelPortCount;
             uint16_t SerialPortCount;
             OutputMgr.GetPortCounts (PixelPortCount, SerialPortCount);
-            JsonConfig["NumPixelPort"] = PixelPortCount;
-            JsonConfig["NumSerialPort"] = SerialPortCount;
+            JsonWrite(JsonConfig, F("NumPixelPort"),  PixelPortCount);
+            JsonWrite(JsonConfig, F("NumSerialPort"), SerialPortCount);
 
             String JsonResponse;
             serializeJson (JsonConfigDoc, JsonResponse);

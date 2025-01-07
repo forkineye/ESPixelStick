@@ -161,7 +161,7 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
         pwm->setPWMFreq (UpdateFrequency);
 
         // do we have a channel configuration array?
-        JsonArray JsonChannelList = jsonConfig[OM_SERVO_PCA9685_CHANNELS_NAME];
+        JsonArray JsonChannelList = jsonConfig[(char*)OM_SERVO_PCA9685_CHANNELS_NAME];
         if (!JsonChannelList)
         {
             // if not, flag an error and stop processing
@@ -216,23 +216,23 @@ void c_OutputServoPCA9685::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
-    jsonConfig[OM_SERVO_PCA9685_UPDATE_INTERVAL_NAME] = UpdateFrequency;
+    JsonWrite(jsonConfig, OM_SERVO_PCA9685_UPDATE_INTERVAL_NAME, UpdateFrequency);
 
-    JsonArray JsonChannelList = jsonConfig[OM_SERVO_PCA9685_CHANNELS_NAME].to<JsonArray> ();
+    JsonArray JsonChannelList = jsonConfig[(char*)OM_SERVO_PCA9685_CHANNELS_NAME].to<JsonArray> ();
 
     uint8_t ChannelId = 0;
     for (ServoPCA9685Channel_t & currentServoPCA9685 : OutputList)
     {
         JsonObject JsonChannelData = JsonChannelList.add<JsonObject> ();
 
-        JsonChannelData[OM_SERVO_PCA9685_CHANNEL_ID_NAME]       = ChannelId;
-        JsonChannelData[OM_SERVO_PCA9685_CHANNEL_ENABLED_NAME]  = currentServoPCA9685.Enabled;
-        JsonChannelData[OM_SERVO_PCA9685_CHANNEL_MINLEVEL_NAME] = currentServoPCA9685.MinLevel;
-        JsonChannelData[OM_SERVO_PCA9685_CHANNEL_MAXLEVEL_NAME] = currentServoPCA9685.MaxLevel;
-        JsonChannelData[OM_SERVO_PCA9685_CHANNEL_REVERSED]      = currentServoPCA9685.IsReversed;
-        JsonChannelData[OM_SERVO_PCA9685_CHANNEL_16BITS]        = currentServoPCA9685.Is16Bit;
-        JsonChannelData[OM_SERVO_PCA9685_CHANNEL_SCALED]        = currentServoPCA9685.IsScaled;
-        JsonChannelData[OM_SERVO_PCA9685_CHANNEL_HOME]          = currentServoPCA9685.HomeValue;
+        JsonWrite(JsonChannelData, OM_SERVO_PCA9685_CHANNEL_ID_NAME,       ChannelId);
+        JsonWrite(JsonChannelData, OM_SERVO_PCA9685_CHANNEL_ENABLED_NAME,  currentServoPCA9685.Enabled);
+        JsonWrite(JsonChannelData, OM_SERVO_PCA9685_CHANNEL_MINLEVEL_NAME, currentServoPCA9685.MinLevel);
+        JsonWrite(JsonChannelData, OM_SERVO_PCA9685_CHANNEL_MAXLEVEL_NAME, currentServoPCA9685.MaxLevel);
+        JsonWrite(JsonChannelData, OM_SERVO_PCA9685_CHANNEL_REVERSED,      currentServoPCA9685.IsReversed);
+        JsonWrite(JsonChannelData, OM_SERVO_PCA9685_CHANNEL_16BITS,        currentServoPCA9685.Is16Bit);
+        JsonWrite(JsonChannelData, OM_SERVO_PCA9685_CHANNEL_SCALED,        currentServoPCA9685.IsScaled);
+        JsonWrite(JsonChannelData, OM_SERVO_PCA9685_CHANNEL_HOME,          currentServoPCA9685.HomeValue);
 
         // DEBUG_V (String ("ChannelId: ") + String (ChannelId));
         // DEBUG_V (String ("  Enabled: ") + String (currentServoPCA9685.Enabled));

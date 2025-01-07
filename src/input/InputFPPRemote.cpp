@@ -67,15 +67,15 @@ void c_InputFPPRemote::GetConfig (JsonObject& jsonConfig)
 
     if (PlayingFile ())
     {
-        jsonConfig[JSON_NAME_FILE_TO_PLAY] = pInputFPPRemotePlayItem->GetFileName ();
+        JsonWrite(jsonConfig, JSON_NAME_FILE_TO_PLAY, pInputFPPRemotePlayItem->GetFileName ());
     }
     else
     {
-        jsonConfig[JSON_NAME_FILE_TO_PLAY] = No_LocalFileToPlay;
+        JsonWrite(jsonConfig, JSON_NAME_FILE_TO_PLAY, No_LocalFileToPlay);
     }
-    jsonConfig[CN_SyncOffset]  = SyncOffsetMS;
-    jsonConfig[CN_SendFppSync] = SendFppSync;
-    jsonConfig[CN_blankOnStop] = FPPDiscovery.GetBlankOnStop();
+    JsonWrite(jsonConfig, CN_SyncOffset,  SyncOffsetMS);
+    JsonWrite(jsonConfig, CN_SendFppSync, SendFppSync);
+    JsonWrite(jsonConfig, CN_blankOnStop, FPPDiscovery.GetBlankOnStop());
 
     // DEBUG_END;
 
@@ -87,8 +87,8 @@ void c_InputFPPRemote::GetStatus (JsonObject& jsonStatus)
     // DEBUG_START;
 
     JsonObject LocalPlayerStatus = jsonStatus[F ("Player")].to<JsonObject> ();
-    LocalPlayerStatus[CN_id] = InputChannelId;
-    LocalPlayerStatus[CN_active] = PlayingFile ();
+    JsonWrite(LocalPlayerStatus, CN_id,     InputChannelId);
+    JsonWrite(LocalPlayerStatus, CN_active, PlayingFile ());
 
     if (PlayingRemoteFile ())
     {

@@ -83,6 +83,7 @@ const CN_PROGMEM char CN_Effect                   [] = "Effect";
 const CN_PROGMEM char CN_effects                  [] = "effects";
 const CN_PROGMEM char CN_en                       [] = "en";
 const CN_PROGMEM char CN_enabled                  [] = "enabled";
+const CN_PROGMEM char CN_entry                    [] = "entry";
 const CN_PROGMEM char CN_errors                   [] = "errors";
 const CN_PROGMEM char CN_ESP32                    [] = "ESP32";
 const CN_PROGMEM char CN_ESP8266                  [] = "ESP8266";

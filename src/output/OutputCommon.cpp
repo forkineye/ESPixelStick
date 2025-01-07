@@ -69,17 +69,9 @@ void c_OutputCommon::BaseGetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    jsonStatus[CN_id] = OutputChannelId;
-    jsonStatus["framerefreshrate"] = int(MicroSecondsInASecond / FrameDurationInMicroSec);
-    jsonStatus["FrameCount"] = FrameCount;
-
-    // jsonStatus["ActualFrameDurationMicroSec"] = ActualFrameDurationMicroSec;
-    // jsonStatus["FrameDurationInMicroSec"]     = FrameDurationInMicroSec;
-    // jsonStatus["FrameRefreshTimeInMicroSec"]  = FrameRefreshTimeInMicroSec;
-    // jsonStatus["FrameStartTimeInMicroSec"]    = FrameStartTimeInMicroSec;
-    // jsonStatus["FrameEndTimeInMicroSec"]      = FrameEndTimeInMicroSec;
-    // jsonStatus["FrameTimeDeltaUs"]            = FrameTimeDeltaInMicroSec;
-    // jsonStatus["micros"]                      = micros();
+    JsonWrite(jsonStatus, CN_id,                 OutputChannelId);
+    JsonWrite(jsonStatus, F("framerefreshrate"), int(MicroSecondsInASecond / FrameDurationInMicroSec));
+    JsonWrite(jsonStatus, F("FrameCount"),       FrameCount);
 
     // DEBUG_END;
 } // GetStatus
@@ -121,7 +113,7 @@ void c_OutputCommon::GetConfig (JsonObject & jsonConfig)
     // DEBUG_START;
 
     // enums need to be converted to uints for json
-    jsonConfig[CN_data_pin] = uint8_t (DataPin);
+    JsonWrite(jsonConfig, CN_data_pin, uint8_t (DataPin));
 
     // DEBUG_V(String(" DataPin: ") + String(DataPin));
 

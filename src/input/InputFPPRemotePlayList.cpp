@@ -106,9 +106,9 @@ void c_InputFPPRemotePlayList::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    jsonStatus[CN_name]  = GetFileName ();
-    jsonStatus[F ("entry")] = PlayListEntryId;
-    jsonStatus[CN_count] = PlayListRepeatCount;
+    JsonWrite(jsonStatus, CN_name,  GetFileName ());
+    JsonWrite(jsonStatus, CN_entry, PlayListEntryId);
+    JsonWrite(jsonStatus, CN_count, PlayListRepeatCount);
 
     pCurrentFsmState->GetStatus (jsonStatus);
 
@@ -206,7 +206,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
 
         else if (String (CN_effect) == PlayListEntryType)
         {
-            JsonObject EffectConfig = JsonPlayListArrayEntry[CN_config];
+            JsonObject EffectConfig = JsonPlayListArrayEntry[(char*)CN_config].to<JsonObject>();
             serializeJson (EffectConfig, PlayListEntryName);
 
             FrameId = 10;

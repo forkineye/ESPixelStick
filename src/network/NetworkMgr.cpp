@@ -92,17 +92,17 @@ void c_NetworkMgr::GetConfig (JsonObject & json)
 {
     // DEBUG_START;
 
-    JsonObject NetworkConfig = json[CN_network].to<JsonObject> ();
+    JsonObject NetworkConfig = json[(char*)CN_network].to<JsonObject> ();
 
-    NetworkConfig[CN_hostname] = hostname;
+    JsonWrite(NetworkConfig, CN_hostname, hostname);
 
-    JsonObject NetworkWiFiConfig = NetworkConfig[CN_wifi].to<JsonObject> ();
+    JsonObject NetworkWiFiConfig = NetworkConfig[(char*)CN_wifi].to<JsonObject> ();
     WiFiDriver.GetConfig (NetworkWiFiConfig);
 
 #ifdef SUPPORT_ETHERNET
-    NetworkConfig[CN_weus] = AllowWiFiAndEthUpSimultaneously;
+    JsonWrite(NetworkConfig, CN_weus, AllowWiFiAndEthUpSimultaneously);
 
-    JsonObject NetworkEthConfig = NetworkConfig[CN_eth].to<JsonObject> ();
+    JsonObject NetworkEthConfig = NetworkConfig[(char*)CN_eth].to<JsonObject> ();
     EthernetDriver.GetConfig (NetworkEthConfig);
 
 #endif // def SUPPORT_ETHERNET
@@ -121,16 +121,16 @@ void c_NetworkMgr::GetStatus (JsonObject & json)
 {
     // DEBUG_START;
 
-    JsonObject NetworkStatus = json[CN_network].to<JsonObject> ();
+    JsonObject NetworkStatus = json[(char*)CN_network].to<JsonObject> ();
     String name;
     GetHostname (name);
-    NetworkStatus[CN_hostname] = name;
+    JsonWrite(NetworkStatus, CN_hostname, name);
 
-    JsonObject NetworkWiFiStatus = NetworkStatus[CN_wifi].to<JsonObject> ();
+    JsonObject NetworkWiFiStatus = NetworkStatus[(char*)CN_wifi].to<JsonObject> ();
     WiFiDriver.GetStatus (NetworkWiFiStatus);
 
 #ifdef SUPPORT_ETHERNET
-    JsonObject NetworkEthStatus = NetworkStatus[CN_eth].to<JsonObject> ();
+    JsonObject NetworkEthStatus = NetworkStatus[(char*)CN_eth].to<JsonObject> ();
     EthernetDriver.GetStatus (NetworkEthStatus);
 #endif // def SUPPORT_ETHERNET
 
@@ -165,7 +165,7 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
 
     do // once
     {
-        JsonObject network = json[CN_network];
+        JsonObject network = json[(char*)CN_network];
         if (!network)
         {
             logcon (String (F ("No network config found. Use default settings")));
@@ -178,7 +178,7 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
         HostnameChanged = setFromJSON (hostname, network, CN_hostname);
         // DEBUG_V("");
 
-        JsonObject networkWiFi = network[CN_wifi];
+        JsonObject networkWiFi = network[(char*)CN_wifi];
         if (networkWiFi)
         {
             // DEBUG_V("");
@@ -187,7 +187,7 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
         else
         {
             // DEBUG_V("");
-            JsonObject ssid = network[CN_ssid];
+            JsonObject ssid = network[(char*)CN_ssid];
             // this may be an old style config
             if (!ssid)
             {
@@ -205,7 +205,7 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
 #ifdef SUPPORT_ETHERNET
         ConfigChanged = setFromJSON (AllowWiFiAndEthUpSimultaneously, network, CN_weus);
 
-        JsonObject networkEth = network[CN_eth];
+        JsonObject networkEth = network[(char*)CN_eth];
         if (networkEth)
         {
             ConfigChanged |= EthernetDriver.SetConfig (networkEth);

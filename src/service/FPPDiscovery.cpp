@@ -158,35 +158,35 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
     if (IsEnabled)
     {
 #ifdef FPP_DEBUG_ENABLED
-        jsonStatus[F ("pktCommand")]      = MultiSyncStats.pktCommand;
-        jsonStatus[F ("pktSyncSeqOpen")]  = MultiSyncStats.pktSyncSeqOpen;
-        jsonStatus[F ("pktSyncSeqStart")] = MultiSyncStats.pktSyncSeqStart;
-        jsonStatus[F ("pktSyncSeqStop")]  = MultiSyncStats.pktSyncSeqStop;
-        jsonStatus[F ("pktSyncSeqSync")]  = MultiSyncStats.pktSyncSeqSync;
-        jsonStatus[F ("pktSyncMedOpen")]  = MultiSyncStats.pktSyncMedOpen;
-        jsonStatus[F ("pktSyncMedStart")] = MultiSyncStats.pktSyncMedStart;
-        jsonStatus[F ("pktSyncMedStop")]  = MultiSyncStats.pktSyncMedStop;
-        jsonStatus[F ("pktSyncMedSync")]  = MultiSyncStats.pktSyncMedSync;
-        jsonStatus[F ("pktBlank")]        = MultiSyncStats.pktBlank;
-        jsonStatus[F ("pktPing")]         = MultiSyncStats.pktPing;
-        jsonStatus[F ("pktPlugin")]       = MultiSyncStats.pktPlugin;
-        jsonStatus[F ("pktFPPCommand")]   = MultiSyncStats.pktFPPCommand;
-        jsonStatus[F ("pktHdrError")]     = MultiSyncStats.pktHdrError;
-        jsonStatus[F ("pktUnknown")]      = MultiSyncStats.pktUnknown;
-        jsonStatus[F ("pktLastCommand")]  = MultiSyncStats.pktLastCommand;
+        JsonWrite(jsonStatus, F ("pktCommand"),      MultiSyncStats.pktCommand);
+        JsonWrite(jsonStatus, F ("pktSyncSeqOpen"),  MultiSyncStats.pktSyncSeqOpen);
+        JsonWrite(jsonStatus, F ("pktSyncSeqStart"), MultiSyncStats.pktSyncSeqStart);
+        JsonWrite(jsonStatus, F ("pktSyncSeqStop"),  MultiSyncStats.pktSyncSeqStop);
+        JsonWrite(jsonStatus, F ("pktSyncSeqSync"),  MultiSyncStats.pktSyncSeqSync);
+        JsonWrite(jsonStatus, F ("pktSyncMedOpen"),  MultiSyncStats.pktSyncMedOpen);
+        JsonWrite(jsonStatus, F ("pktSyncMedStart"), MultiSyncStats.pktSyncMedStart);
+        JsonWrite(jsonStatus, F ("pktSyncMedStop"),  MultiSyncStats.pktSyncMedStop);
+        JsonWrite(jsonStatus, F ("pktSyncMedSync"),  MultiSyncStats.pktSyncMedSync);
+        JsonWrite(jsonStatus, F ("pktBlank"),        MultiSyncStats.pktBlank);
+        JsonWrite(jsonStatus, F ("pktPing"),         MultiSyncStats.pktPing);
+        JsonWrite(jsonStatus, F ("pktPlugin"),       MultiSyncStats.pktPlugin);
+        JsonWrite(jsonStatus, F ("pktFPPCommand"),   MultiSyncStats.pktFPPCommand);
+        JsonWrite(jsonStatus, F ("pktHdrError"),     MultiSyncStats.pktHdrError);
+        JsonWrite(jsonStatus, F ("pktUnknown"),      MultiSyncStats.pktUnknown);
+        JsonWrite(jsonStatus, F ("pktLastCommand"),  MultiSyncStats.pktLastCommand);
 
-        jsonStatus[F ("ProcessFPPJson")]    = SystemDebugStats.ProcessFPPJson;
-        jsonStatus[F ("ProcessFPPDJson")]   = SystemDebugStats.ProcessFPPDJson;
-        jsonStatus[F ("CmdGetFPPstatus")]   = SystemDebugStats.CmdGetFPPstatus;
-        jsonStatus[F ("CmdGetSysInfoJSON")] = SystemDebugStats.CmdGetSysInfoJSON;
-        jsonStatus[F ("CmdGetHostname")]    = SystemDebugStats.CmdGetHostname;
-        jsonStatus[F ("CmdGetConfig")]      = SystemDebugStats.CmdGetConfig;
-        jsonStatus[F ("CmdNotFound")]       = SystemDebugStats.CmdNotFound;
+        JsonWrite(jsonStatus, F ("ProcessFPPJson"),    SystemDebugStats.ProcessFPPJson);
+        JsonWrite(jsonStatus, F ("ProcessFPPDJson"),   SystemDebugStats.ProcessFPPDJson);
+        JsonWrite(jsonStatus, F ("CmdGetFPPstatus"),   SystemDebugStats.CmdGetFPPstatus);
+        JsonWrite(jsonStatus, F ("CmdGetSysInfoJSON"), SystemDebugStats.CmdGetSysInfoJSON);
+        JsonWrite(jsonStatus, F ("CmdGetHostname"),    SystemDebugStats.CmdGetHostname);
+        JsonWrite(jsonStatus, F ("CmdGetConfig"),      SystemDebugStats.CmdGetConfig);
+        JsonWrite(jsonStatus, F ("CmdNotFound"),       SystemDebugStats.CmdNotFound);
 #endif // def FPP_DEBUG_ENABLED
 
         // DEBUG_V ("Is Enabled");
         JsonObject MyJsonStatus = jsonStatus[F ("FPPDiscovery")].to<JsonObject> ();
-        MyJsonStatus[F ("FppRemoteIp")] = FppRemoteIp.toString ();
+        JsonWrite(MyJsonStatus, F ("FppRemoteIp"), FppRemoteIp.toString ());
         if (InputFPPRemotePlayFile)
         {
             InputFPPRemotePlayFile->GetStatus (MyJsonStatus);
@@ -547,12 +547,12 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
     FSEQRawHeader fsqHeader;
     FileMgr.ReadSdFile (fseq, (byte*)&fsqHeader, sizeof (fsqHeader), size_t(0));
 
-    JsonData[F ("Name")]            = fname;
-    JsonData[CN_Version]            = String (fsqHeader.majorVersion) + "." + String (fsqHeader.minorVersion);
-    JsonData[F ("ID")]              = int64String (read64 (fsqHeader.id, 0));
-    JsonData[F ("StepTime")]        = String (fsqHeader.stepTime);
-    JsonData[F ("NumFrames")]       = String (read32 (fsqHeader.TotalNumberOfFramesInSequence, 0));
-    JsonData[F ("CompressionType")] = fsqHeader.compressionType;
+    JsonWrite(JsonData, F ("Name"),            fname);
+    JsonWrite(JsonData, CN_Version,            String (fsqHeader.majorVersion) + "." + String (fsqHeader.minorVersion));
+    JsonWrite(JsonData, F ("ID"),              int64String (read64 (fsqHeader.id, 0)));
+    JsonWrite(JsonData, F ("StepTime"),        String (fsqHeader.stepTime));
+    JsonWrite(JsonData, F ("NumFrames"),       String (read32 (fsqHeader.TotalNumberOfFramesInSequence, 0)));
+    JsonWrite(JsonData, F ("CompressionType"), fsqHeader.compressionType);
 
     static const int TIME_STR_CHAR_COUNT = 32;
     char timeStr[TIME_STR_CHAR_COUNT];
@@ -565,23 +565,23 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
 
     // TODO: assert ((actuallyWritten > 0) && (actuallyWritten < TIME_STR_CHAR_COUNT))
     if ((actuallyWritten > 0) && (actuallyWritten < TIME_STR_CHAR_COUNT)) {
-        JsonData[F ("lastReceiveTime")] = timeStr;
+        JsonWrite(JsonData, F ("lastReceiveTime"), timeStr);
     }
 
-    JsonData[F ("pktCommand")]      = MultiSyncStats.pktCommand;
-    JsonData[F ("pktSyncSeqOpen")]  = MultiSyncStats.pktSyncSeqOpen;
-    JsonData[F ("pktSyncSeqStart")] = MultiSyncStats.pktSyncSeqStart;
-    JsonData[F ("pktSyncSeqStop")]  = MultiSyncStats.pktSyncSeqStop;
-    JsonData[F ("pktSyncSeqSync")]  = MultiSyncStats.pktSyncSeqSync;
-    JsonData[F ("pktSyncMedOpen")]  = MultiSyncStats.pktSyncMedOpen;
-    JsonData[F ("pktSyncMedStart")] = MultiSyncStats.pktSyncMedStart;
-    JsonData[F ("pktSyncMedStop")]  = MultiSyncStats.pktSyncMedStop;
-    JsonData[F ("pktSyncMedSync")]  = MultiSyncStats.pktSyncMedSync;
-    JsonData[F ("pktBlank")]        = MultiSyncStats.pktBlank;
-    JsonData[F ("pktPing")]         = MultiSyncStats.pktPing;
-    JsonData[F ("pktPlugin")]       = MultiSyncStats.pktPlugin;
-    JsonData[F ("pktFPPCommand")]   = MultiSyncStats.pktFPPCommand;
-    JsonData[F ("pktError")]        = MultiSyncStats.pktHdrError;
+    JsonWrite(JsonData, F ("pktCommand"),      MultiSyncStats.pktCommand);
+    JsonWrite(JsonData, F ("pktSyncSeqOpen"),  MultiSyncStats.pktSyncSeqOpen);
+    JsonWrite(JsonData, F ("pktSyncSeqStart"), MultiSyncStats.pktSyncSeqStart);
+    JsonWrite(JsonData, F ("pktSyncSeqStop"),  MultiSyncStats.pktSyncSeqStop);
+    JsonWrite(JsonData, F ("pktSyncSeqSync"),  MultiSyncStats.pktSyncSeqSync);
+    JsonWrite(JsonData, F ("pktSyncMedOpen"),  MultiSyncStats.pktSyncMedOpen);
+    JsonWrite(JsonData, F ("pktSyncMedStart"), MultiSyncStats.pktSyncMedStart);
+    JsonWrite(JsonData, F ("pktSyncMedStop"),  MultiSyncStats.pktSyncMedStop);
+    JsonWrite(JsonData, F ("pktSyncMedSync"),  MultiSyncStats.pktSyncMedSync);
+    JsonWrite(JsonData, F ("pktBlank"),        MultiSyncStats.pktBlank);
+    JsonWrite(JsonData, F ("pktPing"),         MultiSyncStats.pktPing);
+    JsonWrite(JsonData, F ("pktPlugin"),       MultiSyncStats.pktPlugin);
+    JsonWrite(JsonData, F ("pktFPPCommand"),   MultiSyncStats.pktFPPCommand);
+    JsonWrite(JsonData, F ("pktError"),        MultiSyncStats.pktHdrError);
 
     uint32_t maxChannel = read32 (fsqHeader.channelCount, 0);
 
@@ -604,8 +604,8 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
             uint32_t RangeLength = read24 (CurrentFSEQRangeEntry->Length);
 
             JsonObject JsonRange = JsonDataRanges.add<JsonObject> ();
-            JsonRange[F ("Start")]  = String (RangeStart);
-            JsonRange[F ("Length")] = String (RangeLength);
+            JsonWrite(JsonRange, F ("Start"),  String (RangeStart));
+            JsonWrite(JsonRange, F ("Length"), String (RangeLength));
 
             if ((RangeStart + RangeLength - 1) > maxChannel)
             {
@@ -616,8 +616,8 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
         free (RangeDataBuffer);
     }
 
-    JsonData[F ("MaxChannel")]   = String (maxChannel);
-    JsonData[F ("ChannelCount")] = String (read32 (fsqHeader.channelCount,0));
+    JsonWrite(JsonData, F ("MaxChannel"),   String (maxChannel));
+    JsonWrite(JsonData, F ("ChannelCount"), String (read32 (fsqHeader.channelCount,0)));
 
     uint32_t FileOffsetToCurrentHeaderRecord = read16 (fsqHeader.VariableHdrOffset);
     uint32_t FileOffsetToStartOfSequenceData = read16 (fsqHeader.dataOffset); // DataOffset
@@ -650,7 +650,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
                 FileMgr.ReadSdFile (fseq, (byte*)VariableDataHeaderDataBuffer, VariableDataHeaderDataLength, FileOffsetToCurrentHeaderRecord);
 
                 JsonObject JsonDataHeader = JsonDataHeaders.add<JsonObject> ();
-                JsonDataHeader[HeaderTypeCode] = String (VariableDataHeaderDataBuffer);
+                JsonWrite(JsonDataHeader, HeaderTypeCode.c_str(), String (VariableDataHeaderDataBuffer));
 
                 free (VariableDataHeaderDataBuffer);
             }
@@ -689,12 +689,12 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 
         if (path.startsWith (F ("/api/sequence/")) && AllowedToRemotePlayFiles())
         {
-            // DEBUG_V ("");
+            // DEBUG_V (emptyString);
 
             String seq = path.substring (14);
             if (seq.endsWith (F ("/meta")))
             {
-                // DEBUG_V ("");
+                // DEBUG_V (emptyString);
 
                 seq = seq.substring (0, seq.length () - 5);
                 StopPlaying (false);
@@ -778,7 +778,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
         }
 
         // DEBUG_V ("BuildFseqResponse");
-        String resp = "";
+        String resp = emptyString;
         BuildFseqResponse (filename, FileHandle, resp);
         FileMgr.CloseSdFile (FileHandle);
         request->send (200, CN_applicationSLASHjson, resp);
@@ -846,7 +846,7 @@ void c_FPPDiscovery::ProcessFile (
         if (final)
         {
             inFileUpload = false;
-            UploadFileName = "";
+            UploadFileName = emptyString;
             writeFailed = false;
             memset(OutputMgr.GetBufferAddress(), 0x00, OutputMgr.GetBufferSize());
             InputMgr.SetOperationalState(true);
@@ -903,7 +903,7 @@ void c_FPPDiscovery::ProcessBody (
                     break;
                 }
                 UploadFileName = String (request->getParam (CN_filename)->value ());
-                // DEBUG_V ("");
+                // DEBUG_V (emptyString);
             }
 
             writeFailed = false;
@@ -929,24 +929,24 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     String Hostname;
     NetworkMgr.GetHostname (Hostname);
 
-    jsonResponse[CN_HostName]           = Hostname;
-    jsonResponse[F ("HostDescription")] = config.id;
-    jsonResponse[CN_Platform]           = CN_ESPixelStick;
-    jsonResponse[F ("Variant")]         = FPP_VARIANT_NAME;
-    jsonResponse[F ("Mode")]            = (true == AllowedToRemotePlayFiles()) ? CN_remote : CN_bridge;
-    jsonResponse[CN_Version]            = VERSION;
+    JsonWrite(jsonResponse, CN_HostName,           Hostname);
+    JsonWrite(jsonResponse, F ("HostDescription"), config.id);
+    JsonWrite(jsonResponse, CN_Platform,           String(CN_ESPixelStick));
+    JsonWrite(jsonResponse, F ("Variant"),         FPP_VARIANT_NAME);
+    JsonWrite(jsonResponse, F ("Mode"),            String((true == AllowedToRemotePlayFiles()) ? CN_remote : CN_bridge));
+    JsonWrite(jsonResponse, CN_Version,            VERSION);
 
     const char* version = VERSION.c_str ();
 
-    jsonResponse[F ("majorVersion")] = (uint16_t)atoi (version);
-    jsonResponse[F ("minorVersion")] = (uint16_t)atoi (&version[2]);
-    jsonResponse[F ("typeId")]       = FPP_TYPE_ID;
+    JsonWrite(jsonResponse, F ("majorVersion"), (uint16_t)atoi (version));
+    JsonWrite(jsonResponse, F ("minorVersion"), (uint16_t)atoi (&version[2]));
+    JsonWrite(jsonResponse, F ("typeId"),       FPP_TYPE_ID);
 
     JsonObject jsonResponseUtilization = jsonResponse[F ("Utilization")].to<JsonObject> ();
-    jsonResponseUtilization[F ("MemoryFree")] = ESP.getFreeHeap ();
-    jsonResponseUtilization[F ("Uptime")]     = millis ();
+    JsonWrite(jsonResponseUtilization, F ("MemoryFree"), ESP.getFreeHeap ());
+    JsonWrite(jsonResponseUtilization, F ("Uptime"),     millis ());
 
-    jsonResponse[CN_rssi] = WiFi.RSSI ();
+    JsonWrite(jsonResponse, CN_rssi, WiFi.RSSI ());
     JsonArray jsonResponseIpAddresses = jsonResponse[F ("IPS")].to<JsonArray> ();
     jsonResponseIpAddresses.add(WiFi.localIP ().toString ());
 
@@ -960,47 +960,46 @@ void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
     // DEBUG_START;
     JsonObject JsonDataMqtt = JsonData[F ("MQTT")].to<JsonObject>();
 
-    JsonDataMqtt[F ("configured")] = false;
-    JsonDataMqtt[F ("connected")]  = false;
+    JsonWrite(JsonDataMqtt, F ("configured"), false);
+    JsonWrite(JsonDataMqtt, F ("connected"),  false);
 
     JsonObject JsonDataCurrentPlaylist = JsonData[F ("current_playlist")].to<JsonObject> ();
 
-    JsonDataCurrentPlaylist[CN_count]          = "0";
-    JsonDataCurrentPlaylist[F ("description")] = "";
-    JsonDataCurrentPlaylist[F ("index")]       = "0";
-    JsonDataCurrentPlaylist[CN_playlist]       = "";
-    JsonDataCurrentPlaylist[CN_type]           = "";
+    JsonWrite(JsonDataCurrentPlaylist, CN_count,          "0");
+    JsonWrite(JsonDataCurrentPlaylist, F ("description"), emptyString);
+    JsonWrite(JsonDataCurrentPlaylist, F ("index"),       "0");
+    JsonWrite(JsonDataCurrentPlaylist, CN_playlist,       emptyString);
+    JsonWrite(JsonDataCurrentPlaylist, CN_type,           emptyString);
 
     // DEBUG_V();
 
-    JsonData[F ("volume")]         = 70;
-    JsonData[F ("media_filename")] = "";
-    JsonData[F ("fppd")]           = F ("running");
-    JsonData[F ("current_song")]   = "";
+    JsonWrite(JsonData, F ("volume"),         70);
+    JsonWrite(JsonData, F ("media_filename"), emptyString);
+    JsonWrite(JsonData, F ("fppd"),           F ("running"));
+    JsonWrite(JsonData, F ("current_song"),   emptyString);
 
     if (false == PlayingFile())
     {
-        JsonData[CN_current_sequence]  = "";
-        JsonData[CN_playlist]          = "";
-        JsonData[CN_seconds_elapsed]   = String (0);
-        JsonData[CN_seconds_played]    = String (0);
-        JsonData[CN_seconds_remaining] = String (0);
-        JsonData[CN_sequence_filename] = "";
-        JsonData[CN_time_elapsed]      = String("00:00");
-        JsonData[CN_time_remaining]    = String ("00:00");
-
-        JsonData[CN_status] = 0;
-        JsonData[CN_status_name] = F ("idle");
+        JsonWrite(JsonData, CN_current_sequence,   emptyString);
+        JsonWrite(JsonData, CN_playlist,           emptyString);
+        JsonWrite(JsonData, CN_seconds_elapsed,    String (0));
+        JsonWrite(JsonData, CN_seconds_played,     String (0));
+        JsonWrite(JsonData, CN_seconds_remaining,  String (0));
+        JsonWrite(JsonData, CN_sequence_filename,  emptyString);
+        JsonWrite(JsonData, CN_time_elapsed,       String("00:00"));
+        JsonWrite(JsonData, CN_time_remaining,     String ("00:00"));
+        JsonWrite(JsonData, CN_status,             0);
+        JsonWrite(JsonData, CN_status_name,        F ("idle"));
 
         if (IsEnabled)
         {
-            JsonData[CN_mode] = 8;
-            JsonData[CN_mode_name] = CN_remote;
+            JsonWrite(JsonData, CN_mode,      8);
+            JsonWrite(JsonData, CN_mode_name, String(CN_remote));
         }
         else
         {
-            JsonData[CN_mode] = 1;
-            JsonData[CN_mode_name] = CN_bridge;
+            JsonWrite(JsonData, CN_mode,      1);
+            JsonWrite(JsonData, CN_mode_name, String(CN_bridge));
         }
     }
     else
@@ -1011,11 +1010,11 @@ void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
             // DEBUG_V();
             InputFPPRemotePlayFile->GetStatus (JsonData);
         }
-        JsonData[CN_status] = 1;
-        JsonData[CN_status_name] = F ("playing");
+        JsonWrite(JsonData, CN_status,      1);
+        JsonWrite(JsonData, CN_status_name, F ("playing"));
 
-        JsonData[CN_mode] = 8;
-        JsonData[CN_mode_name] = CN_remote;
+        JsonWrite(JsonData, CN_mode,      8);
+        JsonWrite(JsonData, CN_mode_name, String(CN_remote));
     }
     // DEBUG_V();
 
@@ -1077,7 +1076,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             SystemDebugStats.CmdGetSysInfoJSON++;
             GetSysInfoJSON (JsonData);
 
-            String resp = "";
+            String resp = emptyString;
             serializeJson (JsonData, resp);
             // DEBUG_V (String ("JsonDoc: ") + resp);
             request->send (200, CN_applicationSLASHjson, resp);
@@ -1091,8 +1090,8 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
             String Hostname;
             NetworkMgr.GetHostname (Hostname);
 
-            JsonData[CN_HostName] = Hostname;
-            JsonData[F ("HostDescription")] = config.id;
+            JsonWrite(JsonData, CN_HostName,           Hostname);
+            JsonWrite(JsonData, F ("HostDescription"), config.id);
 
             String resp;
             serializeJson (JsonData, resp);
@@ -1173,14 +1172,14 @@ void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
             // DEBUG_V ("Not Enabled");
             break;
         }
-        // DEBUG_V ("");
+        // DEBUG_V (emptyString);
 
         if (inFileUpload)
         {
             // DEBUG_V ("Uploading");
             break;
         }
-        // DEBUG_V ("");
+        // DEBUG_V (emptyString);
 
         if (FileName.isEmpty())
         {

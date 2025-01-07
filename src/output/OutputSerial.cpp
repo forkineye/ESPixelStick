@@ -66,10 +66,10 @@ void c_OutputSerial::GetConfig(ArduinoJson::JsonObject &jsonConfig)
 {
     // DEBUG_START;
 
-    jsonConfig[CN_gen_ser_hdr] = GenericSerialHeader;
-    jsonConfig[CN_gen_ser_ftr] = GenericSerialFooter;
-    jsonConfig[CN_num_chan]    = Num_Channels;
-    jsonConfig[CN_baudrate]    = CurrentBaudrate;
+    JsonWrite(jsonConfig, CN_gen_ser_hdr, GenericSerialHeader);
+    JsonWrite(jsonConfig, CN_gen_ser_ftr, GenericSerialFooter);
+    JsonWrite(jsonConfig, CN_num_chan,    Num_Channels);
+    JsonWrite(jsonConfig, CN_baudrate,    CurrentBaudrate);
 
     c_OutputCommon::GetConfig (jsonConfig);
 
@@ -177,7 +177,7 @@ bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 #if defined(SUPPORT_OutputType_DMX)
     if (OutputType == c_OutputMgr::e_OutputType::OutputType_DMX)
     {
-        jsonConfig[CN_baudrate] = uint32_t(BaudRate::BR_DMX);
+        JsonWrite(jsonConfig, CN_baudrate, uint32_t(BaudRate::BR_DMX));
     }
 #endif // defined(SUPPORT_OutputType_DMX)
 

@@ -58,7 +58,7 @@ void c_InputDisabled::GetStatus (JsonObject & jsonStatus)
     // DEBUG_START;
 
     JsonObject Status = jsonStatus[F ("disabled")].to<JsonObject> ();
-    Status[CN_id] = InputChannelId;
+    JsonWrite(Status, CN_id, InputChannelId);
 
     // DEBUG_END;
 

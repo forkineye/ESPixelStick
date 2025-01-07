@@ -628,16 +628,16 @@ void c_WebMgr::CreateAdminInfoFile ()
     JsonDocument AdminJsonDoc;
     JsonObject jsonAdmin = AdminJsonDoc[F ("admin")].to<JsonObject> ();
 
-    jsonAdmin[CN_version] = VERSION;
-    jsonAdmin["built"] = BUILD_DATE;
-    jsonAdmin["realflashsize"] = String (ESP.getFlashChipSize ());
-    jsonAdmin["BoardName"] = String(BOARD_NAME);
+    JsonWrite(jsonAdmin, CN_version, VERSION);
+    JsonWrite(jsonAdmin, "built", BUILD_DATE);
+    JsonWrite(jsonAdmin, "realflashsize", String (ESP.getFlashChipSize ()));
+    JsonWrite(jsonAdmin, "BoardName", String(BOARD_NAME));
 #ifdef ARDUINO_ARCH_ESP8266
-    jsonAdmin["arch"] = CN_ESP8266;
-    jsonAdmin["flashchipid"] = String (ESP.getChipId (), HEX);
+    JsonWrite(jsonAdmin, "arch", String(CN_ESP8266));
+    JsonWrite(jsonAdmin, "flashchipid", String (ESP.getChipId (), HEX));
 #elif defined (ARDUINO_ARCH_ESP32)
-    jsonAdmin["arch"] = CN_ESP32;
-    jsonAdmin["flashchipid"] = int64String (ESP.getEfuseMac (), HEX);
+    JsonWrite(jsonAdmin, "arch", String(CN_ESP32));
+    JsonWrite(jsonAdmin, "flashchipid", int64String (ESP.getEfuseMac (), HEX));
 #endif
 
     // write to json file
@@ -765,14 +765,14 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
 
     JsonDocument WebJsonDoc;
     WebJsonDoc.clear ();
-    JsonObject status = WebJsonDoc[CN_status].to<JsonObject> ();
-    JsonObject system = status[CN_system].to<JsonObject> ();
+    JsonObject status = WebJsonDoc[(char*)CN_status].to<JsonObject> ();
+    JsonObject system = status[(char*)CN_system].to<JsonObject> ();
 
-    system[F ("freeheap")] = ESP.getFreeHeap ();
-    system[F ("uptime")] = millis ();
-    system[F ("currenttime")] = now ();
-    system[F ("SDinstalled")] = FileMgr.SdCardIsInstalled ();
-    system[F ("DiscardedRxData")] = DiscardedRxData;
+    JsonWrite(system, F ("freeheap"), ESP.getFreeHeap ());
+    JsonWrite(system, F ("uptime"), millis ());
+    JsonWrite(system, F ("currenttime"), now ());
+    JsonWrite(system, F ("SDinstalled"), FileMgr.SdCardIsInstalled ());
+    JsonWrite(system, F ("DiscardedRxData"), DiscardedRxData);
 
     // Ask WiFi Stats
     // DEBUG_V ("NetworkMgr.GetStatus");

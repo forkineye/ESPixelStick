@@ -223,7 +223,7 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
         setFromJSON (UpdateInterval, jsonConfig, OM_RELAY_UPDATE_INTERVAL_NAME);
 
         // do we have a channel configuration array?
-        JsonArray JsonChannelList = jsonConfig[CN_channels];
+        JsonArray JsonChannelList = jsonConfig[(char*)CN_channels];
         if (!JsonChannelList)
         {
             // if not, flag an error and stop processing
@@ -301,24 +301,24 @@ void c_OutputRelay::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
-    jsonConfig[OM_RELAY_UPDATE_INTERVAL_NAME] = UpdateInterval;
+    JsonWrite(jsonConfig, OM_RELAY_UPDATE_INTERVAL_NAME, UpdateInterval);
 
-    JsonArray JsonChannelList = jsonConfig[CN_channels].to<JsonArray> ();
+    JsonArray JsonChannelList = jsonConfig[(char*)CN_channels].to<JsonArray> ();
 
     uint8_t ChannelId = 0;
     for (RelayChannel_t & currentRelay : OutputList)
     {
         JsonObject JsonChannelData = JsonChannelList.add<JsonObject> ();
 
-        JsonChannelData[CN_id]                         = ChannelId;
-        JsonChannelData[OM_RELAY_CHANNEL_ENABLED_NAME] = currentRelay.Enabled;
-        JsonChannelData[OM_RELAY_CHANNEL_INVERT_NAME]  = currentRelay.InvertOutput;
-        JsonChannelData[OM_RELAY_CHANNEL_PWM_NAME]     = currentRelay.Pwm;
-        JsonChannelData[CN_trig]                       = currentRelay.OnOffTriggerLevel;
-        JsonChannelData[CN_gid]                        = int(currentRelay.GpioId);
+        JsonWrite(JsonChannelData, CN_id,                         ChannelId);
+        JsonWrite(JsonChannelData, OM_RELAY_CHANNEL_ENABLED_NAME, currentRelay.Enabled);
+        JsonWrite(JsonChannelData, OM_RELAY_CHANNEL_INVERT_NAME,  currentRelay.InvertOutput);
+        JsonWrite(JsonChannelData, OM_RELAY_CHANNEL_PWM_NAME,     currentRelay.Pwm);
+        JsonWrite(JsonChannelData, CN_trig,                       currentRelay.OnOffTriggerLevel);
+        JsonWrite(JsonChannelData, CN_gid,                        int(currentRelay.GpioId));
 
 #if defined(ARDUINO_ARCH_ESP32)
-        JsonChannelData[CN_Frequency]                  = currentRelay.PwmFrequency;
+        JsonWrite(JsonChannelData, CN_Frequency,                  currentRelay.PwmFrequency);
 #endif // defined(ARDUINO_ARCH_ESP32)
 
         // DEBUGV (String ("CurrentRelayChanIndex: ") + String (ChannelId));
@@ -340,15 +340,15 @@ void c_OutputRelay::GetStatus(ArduinoJson::JsonObject &jsonStatus)
     // DEBUG_START;
 
     c_OutputCommon::BaseGetStatus(jsonStatus);
-    JsonArray JsonChannelList = jsonStatus[CN_Relay].to<JsonArray> ();
+    JsonArray JsonChannelList = jsonStatus[(char*)CN_Relay].to<JsonArray> ();
 
     uint8_t ChannelId = 0;
     for (RelayChannel_t & currentRelay : OutputList)
     {
         JsonObject JsonChannelData = JsonChannelList.add<JsonObject> ();
 
-        JsonChannelData[CN_id]          = ChannelId;
-        JsonChannelData[CN_activevalue] = currentRelay.previousValue;
+        JsonWrite(JsonChannelData, CN_id,          ChannelId);
+        JsonWrite(JsonChannelData, CN_activevalue, currentRelay.previousValue);
 
         ++ChannelId;
     }

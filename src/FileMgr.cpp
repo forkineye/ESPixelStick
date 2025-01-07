@@ -228,7 +228,7 @@ bool c_FileMgr::SetConfig (JsonObject & json)
     // DEBUG_START;
 
     bool ConfigChanged = false;
-    JsonObject JsonDeviceConfig = json[CN_device];
+    JsonObject JsonDeviceConfig = json[(char*)CN_device].as<JsonObject>();
     if (JsonDeviceConfig)
     {
         // PrettyPrint (JsonDeviceConfig, "c_FileMgr");
@@ -280,15 +280,15 @@ void c_FileMgr::GetConfig (JsonObject& json)
 {
     // DEBUG_START;
 
-    json[CN_miso_pin]  = miso_pin;
-    json[CN_mosi_pin]  = mosi_pin;
-    json[CN_clock_pin] = clk_pin;
-    json[CN_cs_pin]    = cs_pin;
-    json[CN_sdspeed]   = MaxSdSpeed;
+    JsonWrite(json, CN_miso_pin,  miso_pin);
+    JsonWrite(json, CN_mosi_pin,  mosi_pin);
+    JsonWrite(json, CN_clock_pin, clk_pin);
+    JsonWrite(json, CN_cs_pin,    cs_pin);
+    JsonWrite(json, CN_sdspeed,   MaxSdSpeed);
 
-    json[CN_user]      = FtpUserName;
-    json[CN_password]  = FtpPassword;
-    json[CN_enabled]   = FtpEnabled;
+    JsonWrite(json, CN_user,      FtpUserName);
+    JsonWrite(json, CN_password,  FtpPassword);
+    JsonWrite(json, CN_enabled,   FtpEnabled);
 
     // DEBUG_END;
 

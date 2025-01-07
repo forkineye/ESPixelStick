@@ -84,7 +84,7 @@ void fsm_PlayList_state_WaitForStart::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    // JsonObject FileStatus = jsonStatus[CN_Idle].to<JsonObject> ();
+    // JsonObject FileStatus = jsonStatus[(char*)CN_Idle].to<JsonObject> ();
 
     // DEBUG_END;
 
@@ -144,7 +144,7 @@ void fsm_PlayList_state_Idle::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    // JsonObject FileStatus = jsonStatus[CN_Idle].to<JsonObject> ();
+    // JsonObject FileStatus = jsonStatus[(char*)CN_Idle].to<JsonObject> ();
 
     // DEBUG_END;
 
@@ -220,7 +220,7 @@ void fsm_PlayList_state_PlayingFile::GetStatus (JsonObject& jsonStatus)
 
     jsonStatus[F ("repeat")] = pInputFPPRemotePlayList->pInputFPPRemotePlayItem->GetRepeatCount ();
 
-    JsonObject FileStatus = jsonStatus[CN_File].to<JsonObject> ();
+    JsonObject FileStatus = jsonStatus[(char*)CN_File].to<JsonObject> ();
     pInputFPPRemotePlayList->pInputFPPRemotePlayItem->GetStatus (FileStatus);
 
     // DEBUG_END;
@@ -299,7 +299,7 @@ void fsm_PlayList_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject EffectStatus = jsonStatus[CN_Effect].to<JsonObject> ();
+    JsonObject EffectStatus = jsonStatus[(char*)CN_Effect].to<JsonObject> ();
     pInputFPPRemotePlayList->pInputFPPRemotePlayItem->GetStatus (EffectStatus);
 
     // DEBUG_END;
@@ -363,7 +363,7 @@ void fsm_PlayList_state_Paused::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject PauseStatus = jsonStatus[CN_Paused].to<JsonObject> ();
+    JsonObject PauseStatus = jsonStatus[(char*)CN_Paused].to<JsonObject> ();
 
     time_t SecondsRemaining = pInputFPPRemotePlayList->PauseDelayTimer.GetTimeRemaining() / 1000u;
 

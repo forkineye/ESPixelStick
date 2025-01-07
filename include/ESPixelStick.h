@@ -92,9 +92,9 @@ bool setFromJSON (T& OutValue, JsonObject & Json, N Name)
 {
     bool HasBeenModified = false;
 
-    if (Json[Name].template is<T>())
+    if (Json[(char*)Name].template is<T>())
     {
-        T temp = Json[Name];
+        T temp = Json[(char*)Name];
         if (temp != OutValue)
         {
             OutValue = temp;
@@ -115,9 +115,9 @@ bool setFromJSON (T& OutValue, JsonVariant & Json, N Name)
 {
     bool HasBeenModified = false;
 
-    if (Json[Name].template is<T>())
+    if (Json[(char*)Name].template is<T>())
     {
-        T temp = Json[Name];
+        T temp = Json[(char*)Name];
         if (temp != OutValue)
         {
             OutValue = temp;
@@ -132,6 +132,8 @@ bool setFromJSON (T& OutValue, JsonVariant & Json, N Name)
 
     return HasBeenModified;
 };
+
+#define JsonWrite(j, n, v)  (j)[(char*)(n)] = (v)
 
 #define logcon(msg) \
 { \

@@ -283,7 +283,7 @@ void c_OutputUart::GetConfig(JsonObject &jsonConfig)
 
     // enums need to be converted to uints for json
     // jsonConfig[CN_data_pin] = uint8_t(OutputUartConfig.DataPin);
-    jsonConfig[CN_baudrate] = OutputUartConfig.Baudrate;
+    JsonWrite(jsonConfig, CN_baudrate, OutputUartConfig.Baudrate);
     // DEBUG_V(String(" DataPin: ") + String(OutputUartConfig.DataPin));
     // DEBUG_V(String("Baudrate: ") + String(OutputUartConfig.Baudrate));
 

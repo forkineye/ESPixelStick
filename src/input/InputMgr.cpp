@@ -224,12 +224,12 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
     // DEBUG_V ("");
 
     // add the channels header
-    JsonObject InputMgrChannelsData = jsonConfig[CN_channels];
+    JsonObject InputMgrChannelsData = jsonConfig[(char*)CN_channels];
     if (!InputMgrChannelsData)
     {
         // add our section header
         // DEBUG_V ("");
-        InputMgrChannelsData = jsonConfig[CN_channels].to<JsonObject> ();
+        InputMgrChannelsData = jsonConfig[(char*)CN_channels].to<JsonObject> ();
     }
 
     // add the channel configurations
@@ -254,7 +254,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
         }
 
         // save the name as the selected channel type
-        ChannelConfigData[CN_type] = int (CurrentChannel.pInputChannelDriver->GetInputType ());
+        JsonWrite(ChannelConfigData, CN_type, int (CurrentChannel.pInputChannelDriver->GetInputType ()));
 
         String DriverTypeId = String (int (CurrentChannel.pInputChannelDriver->GetInputType ()));
         JsonObject ChannelConfigByTypeData = ChannelConfigData[(String (DriverTypeId))];
@@ -270,7 +270,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
 
         // Populate the driver name
         String DriverName = ""; CurrentChannel.pInputChannelDriver->GetDriverName (DriverName);
-        ChannelConfigByTypeData[CN_type] = DriverName;
+        JsonWrite(ChannelConfigByTypeData, CN_type, DriverName);
 
         CurrentChannel.pInputChannelDriver->GetConfig (ChannelConfigByTypeData);
         // DEBUG_V ("");
@@ -300,10 +300,10 @@ void c_InputMgr::CreateNewConfig ()
     JsonDocument JsonConfigDoc;
     // DEBUG_V("");
 
-    JsonObject JsonConfig = JsonConfigDoc[CN_input_config].to<JsonObject>();
+    JsonObject JsonConfig = JsonConfigDoc[(char*)CN_input_config].to<JsonObject>();
     // DEBUG_V("");
 
-    JsonConfig[CN_cfgver] = CurrentConfigVersion;
+    JsonWrite(JsonConfig, CN_cfgver, CurrentConfigVersion);
 
     // DEBUG_V ("for each Input type");
     for (int InputTypeId = int (InputType_Start);
@@ -784,7 +784,7 @@ bool c_InputMgr::FindJsonChannelConfig (JsonObject& jsonConfig,
 
     do // once
     {
-        JsonObject InputChannelMgrData = jsonConfig[CN_input_config];
+        JsonObject InputChannelMgrData = jsonConfig[(char*)CN_input_config];
         if (!InputChannelMgrData)
         {
             logcon (String (F ("No Input Interface Settings Found. Using Defaults")));
@@ -819,7 +819,7 @@ bool c_InputMgr::FindJsonChannelConfig (JsonObject& jsonConfig,
         }
 
         // do we have a channel configuration array?
-        JsonObject InputChannelArray = InputChannelMgrData[CN_channels];
+        JsonObject InputChannelArray = InputChannelMgrData[(char*)CN_channels];
         if (!InputChannelArray)
         {
             // if not, flag an error and stop processing
