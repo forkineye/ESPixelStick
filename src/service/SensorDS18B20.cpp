@@ -44,9 +44,9 @@ void c_SensorDS18B20::GetConfig (JsonObject& json)
 {
     // DEBUG_START;
 
-    JsonObject SensorConfig = json[CN_sensor].to<JsonObject> ();
+    JsonObject SensorConfig = json[(char*)CN_sensor].to<JsonObject> ();
 
-    SensorConfig[CN_units] = TempUnit;
+    JsonWrite(SensorConfig, CN_units, TempUnit);
 
     // DEBUG_END;
 } // GetConfig
@@ -60,7 +60,7 @@ bool c_SensorDS18B20::SetConfig (JsonObject& json)
 
     do // once
     {
-        JsonObject JsonDeviceConfig = json[CN_sensor];
+        JsonObject JsonDeviceConfig = json[(char*)CN_sensor];
         if (!JsonDeviceConfig)
         {
             logcon (F ("No Sensor settings found."));
@@ -82,7 +82,7 @@ bool c_SensorDS18B20::SetConfig (JsonObject& json)
 } // SetConfig
 
 //-----------------------------------------------------------------------------
-void c_SensorDS18B20::GetStatus (JsonObject& json) 
+void c_SensorDS18B20::GetStatus (JsonObject& json)
 {
     // DEBUG_START;
 
@@ -93,9 +93,9 @@ void c_SensorDS18B20::GetStatus (JsonObject& json)
             break;
         }
 
-        JsonObject SensorStatus = json[CN_sensor].to<JsonObject> ();
+        JsonObject SensorStatus = json[(char*)CN_sensor].to<JsonObject> ();
 
-        SensorStatus[CN_reading] = String(LastReading) + ((TempUnit == TempUnit_t::TempUnitCentegrade) ? " C" : " F");
+        JsonWrite(SensorStatus, CN_reading, String(LastReading) + ((TempUnit == TempUnit_t::TempUnitCentegrade) ? " C" : " F"));
 
     } while(false);
 
