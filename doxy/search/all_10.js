@@ -22,7 +22,7 @@ var searchData=
   ['registeralexacallback_19',['RegisterAlexaCallback',['../classc___web_mgr.html#aaad811dbabf3626c6ddb95f13f301f7f',1,'c_WebMgr']]],
   ['registeruartisrhandler_20',['RegisterUartIsrHandler',['../classc___output_uart.html#a1ff07f65e62b2df59536624f3fbdc00a',1,'c_OutputUart']]],
   ['relay_21',['Relay',['../classc___output_mgr.html#a970adc830ccb78bebef75d526c515cc9ac572c651ab04a645468cef2d7510045e',1,'c_OutputMgr']]],
-  ['remainingplaycount_22',['RemainingPlayCount',['../classc___input_f_p_p_remote_play_item.html#ac66be65fa51481d84e0cee5c7ba9bdd5',1,'c_InputFPPRemotePlayItem']]],
+  ['remainingplaycount_22',['RemainingPlayCount',['../structc___input_f_p_p_remote_play_item_1_1_file_control__t.html#afab732064f1162ed86a513660420385e',1,'c_InputFPPRemotePlayItem::FileControl_t']]],
   ['reportediswificonnected_23',['ReportedIsWiFiConnected',['../classc___wi_fi_driver.html#a4d752718b07127ffc3291d7b0e360d9d',1,'c_WiFiDriver']]],
   ['reportnewframe_24',['reportnewframe',['../classc___output_uart.html#a535f40a45bc69ba9c67de5ed3da80467',1,'c_OutputUart::ReportNewFrame()'],['../classc___output_common.html#ae4db3605be43e71dbd0b4f929b69aa85',1,'c_OutputCommon::ReportNewFrame()']]],
   ['requestreboot_25',['requestreboot',['../_e_s_pixel_stick_8h.html#a07c188498d1aa5b7b068c7a0e09a75f4',1,'RequestReboot(uint32_t LoopDelay):&#160;main.cpp'],['../main_8cpp.html#a07c188498d1aa5b7b068c7a0e09a75f4',1,'RequestReboot(uint32_t LoopDelay):&#160;main.cpp']]],

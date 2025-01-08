@@ -1,12 +1,12 @@
 var searchData=
 [
   ['fasttimer_0',['FastTimer',['../class_fast_timer.html',1,'']]],
-  ['filelistentry_5ft_1',['FileListEntry_t',['../structc___file_mgr_1_1_file_list_entry__t.html',1,'c_FileMgr']]],
-  ['flashinfo_5ft_2',['FlashInfo_t',['../structc___input_effect_engine_1_1_flash_info__t.html',1,'c_InputEffectEngine']]],
-  ['fppmultisyncpacket_3',['FPPMultiSyncPacket',['../union_f_p_p_multi_sync_packet.html',1,'']]],
-  ['fpppacket_4',['FPPPacket',['../union_f_p_p_packet.html',1,'']]],
-  ['fpppingpacket_5',['FPPPingPacket',['../union_f_p_p_ping_packet.html',1,'']]],
-  ['framecontrol_5ft_6',['FrameControl_t',['../structc___input_f_p_p_remote_play_file_1_1_frame_control__t.html',1,'c_InputFPPRemotePlayFile']]],
+  ['filecontrol_5ft_1',['FileControl_t',['../structc___input_f_p_p_remote_play_item_1_1_file_control__t.html',1,'c_InputFPPRemotePlayItem']]],
+  ['filelistentry_5ft_2',['FileListEntry_t',['../structc___file_mgr_1_1_file_list_entry__t.html',1,'c_FileMgr']]],
+  ['flashinfo_5ft_3',['FlashInfo_t',['../structc___input_effect_engine_1_1_flash_info__t.html',1,'c_InputEffectEngine']]],
+  ['fppmultisyncpacket_4',['FPPMultiSyncPacket',['../union_f_p_p_multi_sync_packet.html',1,'']]],
+  ['fpppacket_5',['FPPPacket',['../union_f_p_p_packet.html',1,'']]],
+  ['fpppingpacket_6',['FPPPingPacket',['../union_f_p_p_ping_packet.html',1,'']]],
   ['fseqparsedheader_7',['FSEQParsedHeader',['../struct_f_s_e_q_parsed_header.html',1,'']]],
   ['fseqparsedrangeentry_8',['FSEQParsedRangeEntry',['../struct_f_s_e_q_parsed_range_entry.html',1,'']]],
   ['fseqparsedvariabledataheader_9',['FSEQParsedVariableDataHeader',['../struct_f_s_e_q_parsed_variable_data_header.html',1,'']]],

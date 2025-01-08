@@ -6,7 +6,7 @@ var classfsm___play_list__state =
     [ "GetStateName", "classfsm___play_list__state.html#a7b9e7a138e79dc03b3921ac21dc8fa72", null ],
     [ "GetStatus", "classfsm___play_list__state.html#a09be290de40105a2e6aed57f68786109", null ],
     [ "Init", "classfsm___play_list__state.html#af4b0177278ab605b040ff092dc853086", null ],
-    [ "Poll", "classfsm___play_list__state.html#ab212eb59ba21a4e16a8278ffef13784a", null ],
+    [ "Poll", "classfsm___play_list__state.html#a5fddf40fba9f9c4c2a4bea7d4c944896", null ],
     [ "Start", "classfsm___play_list__state.html#afcdf6ed9ab34115007f66289857962e5", null ],
     [ "Stop", "classfsm___play_list__state.html#a18b5978b6cac796fd91948aaa6cf23b5", null ],
     [ "Sync", "classfsm___play_list__state.html#af656699788b7101dd1a832edeb5bb5eb", null ],

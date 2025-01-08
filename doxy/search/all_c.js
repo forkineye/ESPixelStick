@@ -57,7 +57,7 @@ var searchData=
   ['mqtt_5fport_54',['MQTT_PORT',['../_input_m_q_t_t_8h.html#aa8632baff6bbb5004385998918f1e6bd',1,'InputMQTT.h']]],
   ['mqttconfiguration_5fs_55',['mqttconfiguration_s',['../structc___input_effect_engine_1_1_m_q_t_t_configuration__s.html',1,'c_InputEffectEngine::MQTTConfiguration_s'],['../classc___input_effect_engine.html#ae1e970ae945a2f2641d38f77eea860f3',1,'c_InputEffectEngine::MQTTConfiguration_s']]],
   ['mqttticker_56',['mqttticker',['../classc___input_m_q_t_t.html#a2f4e5adfccd050876a6ab2cb8dae4d65',1,'c_InputMQTT::mqttTicker'],['../classc___input_alexa.html#a0801055d6d18e87835a6e91a0483497c',1,'c_InputAlexa::mqttTicker']]],
-  ['msticker_57',['MsTicker',['../classc___input_f_p_p_remote_play_file.html#aa3c9b9d57d149771a672b1a14b285ea0',1,'c_InputFPPRemotePlayFile']]],
+  ['msticker_57',['MsTicker',['../classc___input_mgr.html#a3be38776a8a8ac6eb6f6027373735ba9',1,'c_InputMgr']]],
   ['multicastaddress_58',['MulticastAddress',['../classc___f_p_p_discovery.html#a64af0f5f9ca083b423a462e65ce69620',1,'c_FPPDiscovery']]],
   ['multisyncstats_59',['MultiSyncStats',['../classc___f_p_p_discovery.html#a87f0ed24997d38a9021a3d0d2f489f48',1,'c_FPPDiscovery']]],
   ['multisyncstats_5ft_60',['MultiSyncStats_t',['../structc___f_p_p_discovery_1_1_multi_sync_stats__t.html',1,'c_FPPDiscovery']]],

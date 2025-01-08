@@ -6,5 +6,6 @@ var searchData=
   ['welcomestring_3',['WelcomeString',['../classc___file_mgr.html#a7a93f103051d82e6e210966cf29c5507',1,'c_FileMgr']]],
   ['whitechannel_4',['whiteChannel',['../structc___input_effect_engine_1_1_m_q_t_t_configuration__s.html#a0c1d21d6a76d76d8b3d9d6366729a568',1,'c_InputEffectEngine::MQTTConfiguration_s']]],
   ['wifidriver_5',['WiFiDriver',['../classc___network_mgr.html#aa10ed0ae6b19ee3c4859b41e57d5ec8f',1,'c_NetworkMgr']]],
-  ['wstcode_6',['wsTCode',['../structc___input_effect_engine_1_1_effect_descriptor__s.html#aa54163ef3be0eb92618e82e15647dd12',1,'c_InputEffectEngine::EffectDescriptor_s']]]
+  ['writefailed_6',['writeFailed',['../classc___f_p_p_discovery.html#aec4afca829e622d2e50fb9d1caa43ceb',1,'c_FPPDiscovery']]],
+  ['wstcode_7',['wsTCode',['../structc___input_effect_engine_1_1_effect_descriptor__s.html#aa54163ef3be0eb92618e82e15647dd12',1,'c_InputEffectEngine::EffectDescriptor_s']]]
 ];

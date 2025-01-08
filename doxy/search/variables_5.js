@@ -21,7 +21,7 @@ var searchData=
   ['effectwhitechannel_18',['EffectWhiteChannel',['../classc___input_effect_engine.html#a8c74d0bade5c23cd62336cc691adc958',1,'c_InputEffectEngine']]],
   ['efu_5fid_19',['EFU_ID',['../class_e_f_update.html#ad2278a732362661ffb4d1dd5cfc71fce',1,'EFUpdate']]],
   ['efupdate_20',['efupdate',['../classc___web_mgr.html#aeb7f891688b50a8ac2ac6865aec01006',1,'c_WebMgr::efupdate'],['../_web_mgr_8cpp.html#ad5f3fb1400161c793beaa51883045634',1,'efupdate:&#160;WebMgr.cpp']]],
-  ['elapsedplaytimems_21',['ElapsedPlayTimeMS',['../structc___input_f_p_p_remote_play_file_1_1_frame_control__t.html#afa89f0dc75419b9c45c1fb5a6b41559b',1,'c_InputFPPRemotePlayFile::FrameControl_t']]],
+  ['elapsedplaytimems_21',['ElapsedPlayTimeMS',['../structc___input_f_p_p_remote_play_item_1_1_file_control__t.html#afabd2e7a215bb39f0358bbd67fd71887',1,'c_InputFPPRemotePlayItem::FileControl_t']]],
   ['enable_22',['Enable',['../structc___input_effect_engine_1_1_flash_info__t.html#ad0dac95dfe7d15c9a766f8d0fffe82e6',1,'c_InputEffectEngine::FlashInfo_t']]],
   ['enabled_23',['Enabled',['../classc___external_input.html#a829a67d0af2b787d02568d2bf9e816ae',1,'c_ExternalInput']]],
   ['endingintensity_24',['EndingIntensity',['../structc___input_effect_engine_1_1_marquee_group.html#a206df6bf43eb052172b4c4d825d0a56a',1,'c_InputEffectEngine::MarqueeGroup']]],

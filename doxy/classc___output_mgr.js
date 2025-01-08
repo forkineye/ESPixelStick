@@ -54,8 +54,8 @@ var classc___output_mgr =
     [ "ConsoleTxGpio", "classc___output_mgr.html#ac9701b8ceebd130258b2bc0a4a53d02d", null ],
     [ "ConsoleUartIsActive", "classc___output_mgr.html#a021718f10f6d648d70a22d3e0a5f72fc", null ],
     [ "HasBeenInitialized", "classc___output_mgr.html#aff2c5504636afdba4780a62c204969fb", null ],
-    [ "IsOutputPaused", "classc___output_mgr.html#aef97045cc8e687bb6dfc6925f08cb46f", null ],
     [ "OutputBuffer", "classc___output_mgr.html#a5f00159a5326bf76a2c3be9fc387b340", null ],
     [ "OutputChannelDrivers", "classc___output_mgr.html#ae8316c09c0d04872e1ef067ef2f993ea", null ],
+    [ "OutputIsPaused", "classc___output_mgr.html#affde0fc6a806f815ee874e5cb3d24a03", null ],
     [ "UsedBufferSize", "classc___output_mgr.html#a5484318ee435976c6ab5b9b2c32e53da", null ]
 ];

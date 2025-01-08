@@ -42,7 +42,7 @@ var searchData=
   ['mosi_5fpin_39',['mosi_pin',['../classc___file_mgr.html#a7ed46a08080b395e231db4496e600c02',1,'c_FileMgr']]],
   ['mqtt_40',['mqtt',['../classc___input_m_q_t_t.html#a88bf376b482e87f3b8ade9046d4cba15',1,'c_InputMQTT']]],
   ['mqttticker_41',['mqttticker',['../classc___input_alexa.html#a0801055d6d18e87835a6e91a0483497c',1,'c_InputAlexa::mqttTicker'],['../classc___input_m_q_t_t.html#a2f4e5adfccd050876a6ab2cb8dae4d65',1,'c_InputMQTT::mqttTicker']]],
-  ['msticker_42',['MsTicker',['../classc___input_f_p_p_remote_play_file.html#aa3c9b9d57d149771a672b1a14b285ea0',1,'c_InputFPPRemotePlayFile']]],
+  ['msticker_42',['MsTicker',['../classc___input_mgr.html#a3be38776a8a8ac6eb6f6027373735ba9',1,'c_InputMgr']]],
   ['multicastaddress_43',['MulticastAddress',['../classc___f_p_p_discovery.html#a64af0f5f9ca083b423a462e65ce69620',1,'c_FPPDiscovery']]],
   ['multisyncstats_44',['MultiSyncStats',['../classc___f_p_p_discovery.html#a87f0ed24997d38a9021a3d0d2f489f48',1,'c_FPPDiscovery']]]
 ];

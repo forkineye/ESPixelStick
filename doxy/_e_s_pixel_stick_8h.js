@@ -6,6 +6,7 @@ var _e_s_pixel_stick_8h =
     [ "ARDUINOJSON_USE_LONG_LONG", "_e_s_pixel_stick_8h.html#ad04364871efb11788ea94d5f5417072c", null ],
     [ "CLIENT_TIMEOUT", "_e_s_pixel_stick_8h.html#acbb5358766b3fd26fcb09271b5f8b1e3", null ],
     [ "CPU_ClockTimeNS", "_e_s_pixel_stick_8h.html#ab3b00ae1732177f97702f50c52d365d3", null ],
+    [ "JsonWrite", "_e_s_pixel_stick_8h.html#afc87444a05705e18a81a8fdac2d51080", null ],
     [ "LOAD_CONFIG_DELAY", "_e_s_pixel_stick_8h.html#ac54e13f4dd04bbd4e13299fb7062a6b1", null ],
     [ "LOG_PORT", "_e_s_pixel_stick_8h.html#a5e815f21743ba9f4780ab35d012fbe01", null ],
     [ "logcon", "_e_s_pixel_stick_8h.html#a5f7d358c60a640fdab4b7a753a6a1646", null ],

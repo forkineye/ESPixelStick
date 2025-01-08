@@ -1,11 +1,12 @@
 <map id="c_InputMgr::LoadConfig" name="c_InputMgr::LoadConfig">
-<area shape="rect" id="Node000001" title=" " alt="" coords="295,31,452,56"/>
-<area shape="rect" id="Node000002" href="$classc___input_mgr.html#a06a5f6adfd1e87d4d30a7fa0f78ecc33" title="&lt; Start the module" alt="" coords="114,5,240,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="279,34,240,29,240,24,280,29"/>
-<area shape="rect" id="Node000004" href="$classc___input_mgr.html#a1823b8316d8574f82bdb06ed1412f161" title="&lt; Called from loop(), renders Input data" alt="" coords="107,55,247,80"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="280,58,248,62,247,56,279,52"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="638,5,795,31"/>
+<area shape="rect" id="Node000002" href="$classc___input_mgr.html#a06a5f6adfd1e87d4d30a7fa0f78ecc33" title="&lt; Start the module" alt="" coords="107,5,232,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="622,21,232,21,232,16,622,16"/>
+<area shape="rect" id="Node000004" href="$classc___input_mgr.html#a1823b8316d8574f82bdb06ed1412f161" title="&lt; Called from loop(), renders Input data" alt="" coords="449,31,590,56"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="622,33,590,37,590,32,622,28"/>
 <area shape="rect" id="Node000003" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,5,59,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="98,21,59,21,59,16,98,16"/>
-<area shape="rect" id="Node000005" href="$main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,55,55,80"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="91,70,55,70,55,65,91,65"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="91,21,59,21,59,16,91,16"/>
+<area shape="rect" id="Node000005" href="$_input_mgr_8cpp.html#acaee0a3ecdf748027dec320e1f7bb64e" title=" " alt="" coords="280,31,401,56"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="434,46,402,46,402,41,434,41"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="264,35,232,30,233,25,265,30"/>
 </map>

@@ -6,7 +6,7 @@ var searchData=
   ['rebootcount_3',['RebootCount',['../main_8cpp.html#a7876ec0ea2b6d345c51ff1afd96a5086',1,'main.cpp']]],
   ['rebootneeded_4',['rebootNeeded',['../classc___input_mgr.html#a3f7851b54dc34c8a9eb6dd7767589540',1,'c_InputMgr']]],
   ['rebootonwififailuretoconnect_5',['RebootOnWiFiFailureToConnect',['../classc___wi_fi_driver.html#a53740734d7bafcede27e36f52b927444',1,'c_WiFiDriver']]],
-  ['remainingplaycount_6',['RemainingPlayCount',['../classc___input_f_p_p_remote_play_item.html#ac66be65fa51481d84e0cee5c7ba9bdd5',1,'c_InputFPPRemotePlayItem']]],
+  ['remainingplaycount_6',['RemainingPlayCount',['../structc___input_f_p_p_remote_play_item_1_1_file_control__t.html#afab732064f1162ed86a513660420385e',1,'c_InputFPPRemotePlayItem::FileControl_t']]],
   ['reportediswificonnected_7',['ReportedIsWiFiConnected',['../classc___wi_fi_driver.html#a4d752718b07127ffc3291d7b0e360d9d',1,'c_WiFiDriver']]],
   ['resetwifi_8',['resetwifi',['../main_8cpp.html#a71cd754e8f1472f27fc5b805dfcb4251',1,'ResetWiFi:&#160;main.cpp'],['../_e_s_pixel_stick_8h.html#a71cd754e8f1472f27fc5b805dfcb4251',1,'ResetWiFi:&#160;main.cpp']]],
   ['responseaddress_9',['ResponseAddress',['../structc___input_d_d_p_1_1_packet_buffer__t.html#afaabcf7bfdf68f8ffcdadbfb1104ff11',1,'c_InputDDP::PacketBuffer_t']]],

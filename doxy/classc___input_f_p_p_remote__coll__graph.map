@@ -1,7 +1,9 @@
 <map id="c_InputFPPRemote" name="c_InputFPPRemote">
-<area shape="rect" id="Node000001" title=" " alt="" coords="84,94,219,120"/>
-<area shape="rect" id="Node000002" href="$classc___input_common.html" title=" " alt="" coords="5,5,122,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,40,141,92,138,96,85,44"/>
-<area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote_play_item.html" title=" " alt="" coords="146,5,333,31"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="218,44,165,96,162,92,215,40"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="17,198,153,223"/>
+<area shape="rect" id="Node000002" href="$classc___input_common.html" title=" " alt="" coords="5,109,122,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="73,149,84,197,79,198,68,151"/>
+<area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote_play_item.html" title=" " alt="" coords="146,109,333,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="206,145,108,199,105,195,203,140"/>
+<area shape="rect" id="Node000004" href="$structc___input_f_p_p_remote_play_item_1_1_file_control__t.html" title=" " alt="" coords="146,5,333,46"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="242,61,242,109,237,109,237,61"/>
 </map>

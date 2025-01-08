@@ -1,0 +1,7 @@
+<map id="c_InputFPPRemotePlayEffect::Poll" name="c_InputFPPRemotePlayEffect::Poll">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,39,199,79"/>
+<area shape="rect" id="Node000002" href="$classc___input_f_p_p_remote_play_item.html#afeaf66cce65cdfda170cd94f15555b51" title=" " alt="" coords="247,5,433,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="199,43,231,38,232,44,200,48"/>
+<area shape="rect" id="Node000003" href="$classfsm___play_effect__state.html#a896a049a50ec0f05330687439826b213" title=" " alt="" coords="268,71,412,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="200,69,253,77,252,82,199,75"/>
+</map>

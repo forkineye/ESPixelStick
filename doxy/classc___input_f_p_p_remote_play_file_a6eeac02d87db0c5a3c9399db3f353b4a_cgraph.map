@@ -1,9 +1,7 @@
 <map id="c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile" name="c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,193,75"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,193,46"/>
 <area shape="rect" id="Node000002" href="$classfsm___play_file__state___idle.html#aec3b675c72070641bb54eb10ee20a84e" title=" " alt="" coords="241,5,373,46"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="193,39,225,34,226,40,194,44"/>
-<area shape="rect" id="Node000004" href="$_input_f_p_p_remote_play_file_8cpp.html#a40500bc9d3e9d966c28a4574ca1b8743" title=" " alt="" coords="246,70,368,96"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="194,65,231,70,230,75,193,70"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="193,23,225,23,225,28,193,28"/>
 <area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote_play_file.html#a2848f54d1ec8462d0fc54a47c564b035" title=" " alt="" coords="421,5,602,46"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="373,23,406,23,406,28,373,28"/>
 </map>

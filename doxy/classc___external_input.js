@@ -17,7 +17,7 @@ var classc___external_input =
     [ "GetTriggerChannel", "classc___external_input.html#a94779c4dde6f732a7b231a168e812a7e", null ],
     [ "Init", "classc___external_input.html#a8b0e3b32b4eeba8e946da0d05a29f116", null ],
     [ "IsEnabled", "classc___external_input.html#a40b6a6d2f83211b1e7e659a9dc42199f", null ],
-    [ "Poll", "classc___external_input.html#ac6191f62343bfd0d5dc6895789302ffc", null ],
+    [ "Poll", "classc___external_input.html#a062079f046bcc63d7075e50142c8138e", null ],
     [ "ProcessConfig", "classc___external_input.html#ade8595d667e193c7eda9ee516b85bb88", null ],
     [ "ReadInput", "classc___external_input.html#aa8c12cd0c690a094962ba8f7f5361282", null ],
     [ "fsm_ExternalInput_boot", "classc___external_input.html#a02e0704d9cdebcc0b0dab7407e9d432f", null ],

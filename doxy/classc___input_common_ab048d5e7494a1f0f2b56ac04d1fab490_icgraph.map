@@ -1,36 +1,37 @@
 <map id="c_InputCommon::Begin" name="c_InputCommon::Begin">
-<area shape="rect" id="Node000001" title="set up the operating environment based on the current config (or defaults)" alt="" coords="1027,80,1182,106"/>
-<area shape="rect" id="Node000002" href="$classc___input_alexa.html#a8e260d42f46f4fa70cbca61ea001dda6" title="set up the operating environment based on the current config (or defaults)" alt="" coords="820,5,955,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1059,76,978,45,943,34,945,29,980,40,1061,71"/>
-<area shape="rect" id="Node000003" href="$classc___input_m_q_t_t.html#a155372c00c48e65bc4ce1c2433f55d38" title=" " alt="" coords="796,104,979,130"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1012,106,980,109,979,104,1011,100"/>
-<area shape="rect" id="Node000007" href="$classc___input_mgr.html#afe3597df3db9a6deec4140f410f7f1ee" title=" " alt="" coords="797,175,978,216"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="1063,115,934,177,931,172,1060,110"/>
-<area shape="rect" id="Node000015" href="$classc___input_m_q_t_t.html#a3868e04d5b087dc00ec90f0e52fce304" title=" " alt="" coords="805,55,970,80"/>
-<area shape="poly" id="edge16_Node000001_Node000015" title=" " alt="" coords="1011,85,970,80,971,75,1012,79"/>
-<area shape="rect" id="Node000004" href="$classc___input_m_q_t_t.html#a47969701bda3653feea63fc0628d4071" title=" " alt="" coords="564,104,731,130"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="780,120,732,120,732,114,780,114"/>
-<area shape="rect" id="Node000005" href="$classc___input_m_q_t_t.html#ad184832d98d3621b7f3466ad3df97f04" title=" " alt="" coords="300,105,495,131"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="548,120,495,120,495,115,548,115"/>
-<area shape="rect" id="Node000006" href="$classc___input_m_q_t_t.html#a00dad1347b7fbe42eb3f3b444f219254" title="set up the operating environment based on the current config (or defaults)" alt="" coords="107,80,247,106"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="284,108,247,104,248,98,284,102"/>
-<area shape="rect" id="Node000008" href="$classc___input_mgr.html#a06a5f6adfd1e87d4d30a7fa0f78ecc33" title="&lt; Start the module" alt="" coords="114,255,240,280"/>
-<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="824,224,748,246,607,266,465,274,338,276,240,273,240,268,338,270,465,269,606,260,747,241,822,219"/>
-<area shape="rect" id="Node000010" href="$classc___input_mgr.html#a90b28a72c3c887ec9b222744b52a05ec" title=" " alt="" coords="551,205,744,231"/>
-<area shape="poly" id="edge9_Node000007_Node000010" title=" " alt="" coords="782,208,745,212,745,206,781,203"/>
-<area shape="rect" id="Node000014" href="$classc___input_mgr.html#a3982db8dd97b38f17ec31c73e6b4940b" title=" " alt="" coords="295,155,499,180"/>
-<area shape="poly" id="edge15_Node000007_Node000014" title=" " alt="" coords="781,192,500,176,500,171,782,187"/>
-<area shape="rect" id="Node000009" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,255,59,280"/>
-<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="98,270,59,270,59,265,98,265"/>
-<area shape="rect" id="Node000011" href="$classc___input_mgr.html#a86facb1b4291c34d64365c6171cd6802" title=" " alt="" coords="319,205,476,231"/>
-<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="535,221,476,221,476,216,535,216"/>
-<area shape="poly" id="edge14_Node000010_Node000014" title=" " alt="" coords="565,204,464,184,465,178,566,199"/>
-<area shape="poly" id="edge11_Node000011_Node000008" title=" " alt="" coords="322,238,238,257,237,251,321,232"/>
-<area shape="rect" id="Node000012" href="$classc___input_mgr.html#a1823b8316d8574f82bdb06ed1412f161" title="&lt; Called from loop(), renders Input data" alt="" coords="107,205,247,231"/>
-<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="303,221,248,221,248,216,303,216"/>
-<area shape="rect" id="Node000013" href="$main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,205,55,231"/>
-<area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="91,221,55,221,55,216,91,216"/>
-<area shape="rect" id="Node000016" href="$classc___input_m_q_t_t.html#a18091bce67a4c82c95692bcd9366872f" title=" " alt="" coords="547,55,748,80"/>
-<area shape="poly" id="edge17_Node000015_Node000016" title=" " alt="" coords="789,70,748,70,748,65,789,65"/>
-<area shape="poly" id="edge18_Node000016_Node000006" title=" " alt="" coords="532,76,247,92,247,86,532,71"/>
+<area shape="rect" id="Node000001" title="set up the operating environment based on the current config (or defaults)" alt="" coords="1370,80,1525,106"/>
+<area shape="rect" id="Node000002" href="$classc___input_alexa.html#a8e260d42f46f4fa70cbca61ea001dda6" title="set up the operating environment based on the current config (or defaults)" alt="" coords="1162,5,1298,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1401,76,1321,45,1286,34,1287,29,1323,40,1403,71"/>
+<area shape="rect" id="Node000003" href="$classc___input_m_q_t_t.html#a155372c00c48e65bc4ce1c2433f55d38" title=" " alt="" coords="1138,55,1322,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1354,85,1322,81,1322,76,1355,79"/>
+<area shape="rect" id="Node000007" href="$classc___input_mgr.html#afe3597df3db9a6deec4140f410f7f1ee" title=" " alt="" coords="1140,175,1320,216"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="1405,115,1276,177,1274,172,1403,110"/>
+<area shape="rect" id="Node000015" href="$classc___input_m_q_t_t.html#a3868e04d5b087dc00ec90f0e52fce304" title=" " alt="" coords="1147,104,1313,130"/>
+<area shape="poly" id="edge17_Node000001_Node000015" title=" " alt="" coords="1354,106,1313,110,1313,105,1354,100"/>
+<area shape="rect" id="Node000004" href="$classc___input_m_q_t_t.html#a47969701bda3653feea63fc0628d4071" title=" " alt="" coords="907,55,1074,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1123,70,1074,70,1074,65,1123,65"/>
+<area shape="rect" id="Node000005" href="$classc___input_m_q_t_t.html#ad184832d98d3621b7f3466ad3df97f04" title=" " alt="" coords="642,53,838,79"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="891,70,838,69,838,64,891,64"/>
+<area shape="rect" id="Node000006" href="$classc___input_m_q_t_t.html#a00dad1347b7fbe42eb3f3b444f219254" title="set up the operating environment based on the current config (or defaults)" alt="" coords="449,79,590,104"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="627,82,590,86,590,81,626,77"/>
+<area shape="rect" id="Node000008" href="$classc___input_mgr.html#a06a5f6adfd1e87d4d30a7fa0f78ecc33" title="&lt; Start the module" alt="" coords="107,205,232,231"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="1124,189,945,176,741,170,518,170,439,174,360,183,228,207,227,202,359,178,439,169,518,165,741,165,946,171,1125,183"/>
+<area shape="rect" id="Node000010" href="$classc___input_mgr.html#a90b28a72c3c887ec9b222744b52a05ec" title=" " alt="" coords="894,205,1087,231"/>
+<area shape="poly" id="edge9_Node000007_Node000010" title=" " alt="" coords="1124,208,1088,212,1087,206,1124,203"/>
+<area shape="rect" id="Node000014" href="$classc___input_mgr.html#a3982db8dd97b38f17ec31c73e6b4940b" title=" " alt="" coords="638,255,842,280"/>
+<area shape="poly" id="edge16_Node000007_Node000014" title=" " alt="" coords="1166,224,1091,246,1027,257,962,264,843,270,842,265,962,259,1026,251,1090,241,1164,219"/>
+<area shape="rect" id="Node000009" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,205,59,231"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="91,221,59,221,59,216,91,216"/>
+<area shape="rect" id="Node000011" href="$classc___input_mgr.html#a86facb1b4291c34d64365c6171cd6802" title=" " alt="" coords="661,205,819,231"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="878,221,819,221,819,216,878,216"/>
+<area shape="poly" id="edge15_Node000010_Node000014" title=" " alt="" coords="907,237,809,257,808,251,906,232"/>
+<area shape="poly" id="edge11_Node000011_Node000008" title=" " alt="" coords="646,221,232,221,232,216,646,216"/>
+<area shape="rect" id="Node000012" href="$classc___input_mgr.html#a1823b8316d8574f82bdb06ed1412f161" title="&lt; Called from loop(), renders Input data" alt="" coords="449,256,590,282"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="666,238,579,258,578,253,665,232"/>
+<area shape="rect" id="Node000013" href="$_input_mgr_8cpp.html#acaee0a3ecdf748027dec320e1f7bb64e" title=" " alt="" coords="280,256,401,282"/>
+<area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="434,272,402,272,402,266,434,266"/>
+<area shape="poly" id="edge14_Node000013_Node000008" title=" " alt="" coords="279,254,214,234,216,229,281,249"/>
+<area shape="rect" id="Node000016" href="$classc___input_m_q_t_t.html#a18091bce67a4c82c95692bcd9366872f" title=" " alt="" coords="890,104,1090,130"/>
+<area shape="poly" id="edge18_Node000015_Node000016" title=" " alt="" coords="1132,120,1091,120,1091,114,1132,114"/>
+<area shape="poly" id="edge19_Node000016_Node000006" title=" " alt="" coords="874,113,590,98,590,93,875,108"/>
 </map>

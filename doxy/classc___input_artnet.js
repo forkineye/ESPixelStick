@@ -12,7 +12,7 @@ var classc___input_artnet =
     [ "NetworkStateChanged", "classc___input_artnet.html#a42c0a5c8c246a240d91d2d0b7c5757a3", null ],
     [ "onDmxFrame", "classc___input_artnet.html#acf91f737e9f231b01b6b53ceb1d0a6fa", null ],
     [ "onDmxPoll", "classc___input_artnet.html#a19b7fdb0a93a6fa37e81e4bdd62dfda1", null ],
-    [ "Process", "classc___input_artnet.html#a999bfb51376b6ca0097c7e742fdb49fd", null ],
+    [ "Process", "classc___input_artnet.html#a7e336e0df0e7b60981c0e59e98f2024d", null ],
     [ "SetBufferInfo", "classc___input_artnet.html#a9396efd7449198caf16fb4cbc055277e", null ],
     [ "SetBufferTranslation", "classc___input_artnet.html#aa6db03c1ab9369151325ea72fd12516a", null ],
     [ "SetConfig", "classc___input_artnet.html#aa8ef414340a74ff9ba8caaf222e33b9b", null ],

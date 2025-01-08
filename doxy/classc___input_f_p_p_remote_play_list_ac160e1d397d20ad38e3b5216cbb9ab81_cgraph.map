@@ -1,7 +1,9 @@
 <map id="c_InputFPPRemotePlayList::~c_InputFPPRemotePlayList" name="c_InputFPPRemotePlayList::~c_InputFPPRemotePlayList">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,201,46"/>
-<area shape="rect" id="Node000002" href="$classc___input_f_p_p_remote_play_list.html#a191a7b77cedcabf77e01d19c29893b44" title=" " alt="" coords="249,5,431,46"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="201,23,233,23,233,28,201,28"/>
-<area shape="rect" id="Node000003" href="$classfsm___play_list__state.html#a18b5978b6cac796fd91948aaa6cf23b5" title=" " alt="" coords="479,5,612,46"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="431,23,464,23,464,28,431,28"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,39,201,79"/>
+<area shape="rect" id="Node000002" href="$classc___input_f_p_p_remote_play_list.html#a191a7b77cedcabf77e01d19c29893b44" title=" " alt="" coords="249,39,431,79"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="201,56,233,56,233,62,201,62"/>
+<area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote_play_item.html#afeaf66cce65cdfda170cd94f15555b51" title=" " alt="" coords="479,5,665,46"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="431,43,463,39,464,44,432,49"/>
+<area shape="rect" id="Node000004" href="$classfsm___play_list__state.html#a18b5978b6cac796fd91948aaa6cf23b5" title=" " alt="" coords="506,71,639,111"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="432,69,491,77,490,82,431,74"/>
 </map>

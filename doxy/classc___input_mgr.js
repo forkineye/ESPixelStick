@@ -57,5 +57,8 @@ var classc___input_mgr =
     [ "InputChannelDrivers", "classc___input_mgr.html#a2ad36c6fdf26a714ede66fe89a7b2f47", null ],
     [ "InputDataBufferSize", "classc___input_mgr.html#a6ab1fc130e64f8a25a03a31f532362e9", null ],
     [ "IsConnected", "classc___input_mgr.html#a7dec5704135732cd641ff5671ac83b16", null ],
+    [ "LastTickerTimeStampMS", "classc___input_mgr.html#ac6ce42fbab2f848ff825fd77e39af2c8", null ],
+    [ "MsTicker", "classc___input_mgr.html#a3be38776a8a8ac6eb6f6027373735ba9", null ],
+    [ "PauseProcessing", "classc___input_mgr.html#a8ed3d7827a0d0b37b80611b286a79bec", null ],
     [ "rebootNeeded", "classc___input_mgr.html#a3f7851b54dc34c8a9eb6dd7767589540", null ]
 ];

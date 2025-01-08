@@ -1,7 +1,5 @@
 <map id="fsm_PlayFile_state_Starting::Stop" name="fsm_PlayFile_state_Starting::Stop">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,5,138,46"/>
-<area shape="rect" id="Node000002" href="$classfsm___play_file__state___idle.html#aec3b675c72070641bb54eb10ee20a84e" title=" " alt="" coords="186,5,318,46"/>
+<area shape="rect" id="Node000002" href="$classfsm___play_file__state___stopping.html#ab181e3e139aa1682176df6c725e353af" title=" " alt="" coords="186,5,318,46"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,23,170,23,170,28,138,28"/>
-<area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote_play_file.html#a2848f54d1ec8462d0fc54a47c564b035" title=" " alt="" coords="366,5,547,46"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="318,23,351,23,351,28,318,28"/>
 </map>

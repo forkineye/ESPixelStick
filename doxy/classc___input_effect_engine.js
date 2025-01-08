@@ -46,7 +46,7 @@ var classc___input_effect_engine =
     [ "outputEffectColor", "classc___input_effect_engine.html#ace4683386e8bbc65842f9b52cf753718", null ],
     [ "Poll", "classc___input_effect_engine.html#a054251f6f3f1c337c8742c05e5ad6563", null ],
     [ "PollFlash", "classc___input_effect_engine.html#a3986476ec33d9e3aedde9c1ae3953d61", null ],
-    [ "Process", "classc___input_effect_engine.html#a16a48567bdaed69d1378156f6cf617b9", null ],
+    [ "Process", "classc___input_effect_engine.html#a77cbebfae3207a36a760ed4e5b439c66", null ],
     [ "ProcessButtonActions", "classc___input_effect_engine.html#ad33270be32be7f55c35813779f459448", null ],
     [ "rgb2hsv", "classc___input_effect_engine.html#a6751a5a67dd911744b80574029cac95c", null ],
     [ "setAll", "classc___input_effect_engine.html#af6c8141b2b5d63e69151cb0f07fe9281", null ],

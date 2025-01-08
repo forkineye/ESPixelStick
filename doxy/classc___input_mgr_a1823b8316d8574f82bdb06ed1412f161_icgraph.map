@@ -1,5 +1,9 @@
 <map id="c_InputMgr::Process" name="c_InputMgr::Process">
-<area shape="rect" id="Node000001" title="&lt; Called from loop(), renders Input data" alt="" coords="99,5,239,31"/>
-<area shape="rect" id="Node000002" href="$main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="5,5,51,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,21,51,21,51,16,83,16"/>
+<area shape="rect" id="Node000001" title="&lt; Called from loop(), renders Input data" alt="" coords="449,5,590,31"/>
+<area shape="rect" id="Node000002" href="$_input_mgr_8cpp.html#acaee0a3ecdf748027dec320e1f7bb64e" title=" " alt="" coords="280,5,401,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="434,21,402,21,402,16,434,16"/>
+<area shape="rect" id="Node000003" href="$classc___input_mgr.html#a06a5f6adfd1e87d4d30a7fa0f78ecc33" title="&lt; Start the module" alt="" coords="107,5,232,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="264,21,232,21,232,16,264,16"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,5,59,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="91,21,59,21,59,16,91,16"/>
 </map>

@@ -1,7 +1,5 @@
 <map id="c_InputFPPRemotePlayEffect::~c_InputFPPRemotePlayEffect" name="c_InputFPPRemotePlayEffect::~c_InputFPPRemotePlayEffect">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,39,212,79"/>
-<area shape="rect" id="Node000002" href="$classc___input_mgr.html#a8a195063dcc63c1fd8de7c14ab3bf0a2" title=" " alt="" coords="275,5,453,46"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,43,259,37,260,42,213,48"/>
-<area shape="rect" id="Node000003" href="$classc___input_common.html#a1649cd7444c3219b37fd8627754e2e56" title=" " alt="" coords="260,71,468,111"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="213,69,244,73,244,79,212,75"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,212,46"/>
+<area shape="rect" id="Node000002" href="$classc___input_common.html#a1649cd7444c3219b37fd8627754e2e56" title=" " alt="" coords="260,5,468,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,23,244,23,244,28,212,28"/>
 </map>

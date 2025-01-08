@@ -1,0 +1,7 @@
+<map id="c_InputFPPRemotePlayFile::Poll" name="c_InputFPPRemotePlayFile::Poll">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,39,187,79"/>
+<area shape="rect" id="Node000002" href="$classc___input_f_p_p_remote_play_item.html#afeaf66cce65cdfda170cd94f15555b51" title=" " alt="" coords="235,5,421,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,43,219,39,220,44,188,49"/>
+<area shape="rect" id="Node000003" href="$classfsm___play_file__state.html#aa0d28381c1932e9639e0d28a7b07ea2f" title=" " alt="" coords="262,71,394,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="188,69,247,77,246,82,187,74"/>
+</map>

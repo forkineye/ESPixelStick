@@ -9,5 +9,6 @@ var searchData=
   ['ctrl_5fpkt_5ffppcommand_6',['CTRL_PKT_FPPCOMMAND',['../_f_p_p_discovery_8h.html#a0a34efb35ab89ce42768326c10de3cb1',1,'FPPDiscovery.h']]],
   ['ctrl_5fpkt_5fping_7',['CTRL_PKT_PING',['../_f_p_p_discovery_8h.html#abb98c26b42ca9557a0b4e9528367ee05',1,'FPPDiscovery.h']]],
   ['ctrl_5fpkt_5fplugin_8',['CTRL_PKT_PLUGIN',['../_f_p_p_discovery_8h.html#a6fe35a8d9dd7ae46b869873e2206b67a',1,'FPPDiscovery.h']]],
-  ['ctrl_5fpkt_5fsync_9',['CTRL_PKT_SYNC',['../_f_p_p_discovery_8h.html#a8f4516815aa55ef1e2d53e11c8d9040c',1,'FPPDiscovery.h']]]
+  ['ctrl_5fpkt_5fsync_9',['CTRL_PKT_SYNC',['../_f_p_p_discovery_8h.html#a8f4516815aa55ef1e2d53e11c8d9040c',1,'FPPDiscovery.h']]],
+  ['currentfile_10',['CurrentFile',['../_input_f_p_p_remote_play_item_8hpp.html#a90d9c9f8f8b34535844a84acea29249c',1,'InputFPPRemotePlayItem.hpp']]]
 ];

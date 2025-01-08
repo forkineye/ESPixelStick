@@ -194,9 +194,9 @@ $(document).ready(function(){initNavTree('_e_s_pixel_stick_8h_source.html',''); 
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>{</div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="keywordtype">bool</span> HasBeenModified = <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keywordflow">if</span> (Json[Name].<span class="keyword">template</span> is&lt;T&gt;())</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keywordflow">if</span> (Json[(<span class="keywordtype">char</span>*)Name].<span class="keyword">template</span> is&lt;T&gt;())</div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    {</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        T temp = Json[Name];</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        T temp = Json[(<span class="keywordtype">char</span>*)Name];</div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        <span class="keywordflow">if</span> (temp != OutValue)</div>
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        {</div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>            OutValue = temp;</div>
@@ -219,9 +219,9 @@ $(document).ready(function(){initNavTree('_e_s_pixel_stick_8h_source.html',''); 
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>{</div>
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    <span class="keywordtype">bool</span> HasBeenModified = <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="keywordflow">if</span> (Json[Name].<span class="keyword">template</span> is&lt;T&gt;())</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="keywordflow">if</span> (Json[(<span class="keywordtype">char</span>*)Name].<span class="keyword">template</span> is&lt;T&gt;())</div>
 <div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    {</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>        T temp = Json[Name];</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>        T temp = Json[(<span class="keywordtype">char</span>*)Name];</div>
 <div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>        <span class="keywordflow">if</span> (temp != OutValue)</div>
 <div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        {</div>
 <div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>            OutValue = temp;</div>
@@ -238,26 +238,28 @@ $(document).ready(function(){initNavTree('_e_s_pixel_stick_8h_source.html',''); 
 <div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>};</div>
 </div>
 <div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
-<div class="foldopen" id="foldopen00136" data-start="" data-end="">
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#a5f7d358c60a640fdab4b7a753a6a1646">  136</a></span><span class="preprocessor">#define logcon(msg) \</span></div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span><span class="preprocessor">{ \</span></div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span><span class="preprocessor">    String DN; \</span></div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span><span class="preprocessor">    GetDriverName (DN); \</span></div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span><span class="preprocessor">    extern void _logcon (String &amp; DriverName, String Message); \</span></div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span><span class="preprocessor">    _logcon (DN, msg); \</span></div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span><span class="preprocessor">}</span></div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#afc87444a05705e18a81a8fdac2d51080">  136</a></span><span class="preprocessor">#define JsonWrite(j, n, v)  (j)[(char*)(n)] = (v)</span></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="foldopen" id="foldopen00138" data-start="" data-end="">
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#a5f7d358c60a640fdab4b7a753a6a1646">  138</a></span><span class="preprocessor">#define logcon(msg) \</span></div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span><span class="preprocessor">{ \</span></div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span><span class="preprocessor">    String DN; \</span></div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span><span class="preprocessor">    GetDriverName (DN); \</span></div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span><span class="preprocessor">    extern void _logcon (String &amp; DriverName, String Message); \</span></div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span><span class="preprocessor">    _logcon (DN, msg); \</span></div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span><span class="preprocessor">}</span></div>
 </div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span> </div>
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span><span class="keyword">extern</span> <a class="code hl_struct" href="structconfig__t.html">config_t</a> <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#a25ce4b69d296fc9a3324b494542c2420">config</a>;</div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span><span class="keyword">extern</span> <span class="keywordtype">bool</span> <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#ae44595345afc966d1f3de593d4c9b0f8">ConfigSaveNeeded</a>;</div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span><span class="keyword">extern</span> <span class="keyword">const</span> uint8_t <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#a7a9dbece103fe34ae437a90c4e517782">CurrentConfigVersion</a>;</div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#ac54e13f4dd04bbd4e13299fb7062a6b1">  148</a></span><span class="preprocessor">#define LOAD_CONFIG_DELAY 4</span></div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span><span class="comment">// #define DEBUG_GPIO gpio_num_t::GPIO_NUM_25</span></div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span><span class="comment">// #define DEBUG_GPIO1 gpio_num_t::GPIO_NUM_14</span></div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span> </div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span><span class="keyword">extern</span> <a class="code hl_struct" href="structconfig__t.html">config_t</a> <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#a25ce4b69d296fc9a3324b494542c2420">config</a>;</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span><span class="keyword">extern</span> <span class="keywordtype">bool</span> <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#ae44595345afc966d1f3de593d4c9b0f8">ConfigSaveNeeded</a>;</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span><span class="keyword">extern</span> <span class="keyword">const</span> uint8_t <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#a7a9dbece103fe34ae437a90c4e517782">CurrentConfigVersion</a>;</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#ac54e13f4dd04bbd4e13299fb7062a6b1">  150</a></span><span class="preprocessor">#define LOAD_CONFIG_DELAY 4</span></div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span><span class="comment">// #define DEBUG_GPIO gpio_num_t::GPIO_NUM_25</span></div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span><span class="comment">// #define DEBUG_GPIO1 gpio_num_t::GPIO_NUM_14</span></div>
 <div class="ttc" id="a_const_names_8hpp_html"><div class="ttname"><a href="_const_names_8hpp.html">ConstNames.hpp</a></div></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html_a067b67c856af5452506085e83cdb2b01"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a067b67c856af5452506085e83cdb2b01">deserializeCore</a></div><div class="ttdeci">bool deserializeCore(JsonObject &amp;json)</div><div class="ttdef"><b>Definition</b> main.cpp:300</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_a07c188498d1aa5b7b068c7a0e09a75f4"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a07c188498d1aa5b7b068c7a0e09a75f4">RequestReboot</a></div><div class="ttdeci">void RequestReboot(uint32_t LoopDelay)</div><div class="ttdef"><b>Definition</b> main.cpp:575</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_a07c188498d1aa5b7b068c7a0e09a75f4"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a07c188498d1aa5b7b068c7a0e09a75f4">RequestReboot</a></div><div class="ttdeci">void RequestReboot(uint32_t LoopDelay)</div><div class="ttdef"><b>Definition</b> main.cpp:572</div></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html_a0b66f59517303936e5ecb82ddf4c8780"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a0b66f59517303936e5ecb82ddf4c8780">dsNetwork</a></div><div class="ttdeci">bool dsNetwork(JsonObject &amp;json)</div></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html_a23e7afe154bda4f1d2e44818ed09843e"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a23e7afe154bda4f1d2e44818ed09843e">deserializeCoreHandler</a></div><div class="ttdeci">void deserializeCoreHandler(JsonDocument &amp;jsonDoc)</div><div class="ttdef"><b>Definition</b> main.cpp:381</div></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html_a25ce4b69d296fc9a3324b494542c2420"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a25ce4b69d296fc9a3324b494542c2420">config</a></div><div class="ttdeci">config_t config</div><div class="ttdef"><b>Definition</b> main.cpp:93</div></div>
@@ -268,10 +270,10 @@ $(document).ready(function(){initNavTree('_e_s_pixel_stick_8h_source.html',''); 
 <div class="ttc" id="a_e_s_pixel_stick_8h_html_a7a9dbece103fe34ae437a90c4e517782"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a7a9dbece103fe34ae437a90c4e517782">CurrentConfigVersion</a></div><div class="ttdeci">const uint8_t CurrentConfigVersion</div><div class="ttdef"><b>Definition</b> main.cpp:91</div></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html_a8295d2ec53bab395bfc5811cfd78ca4d"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d">setFromJSON</a></div><div class="ttdeci">bool setFromJSON(T &amp;OutValue, JsonObject &amp;Json, N Name)</div><div class="ttdef"><b>Definition</b> ESPixelStick.h:91</div></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html_ab73fab3bfc2da224ec67cc789fe7616a"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#ab73fab3bfc2da224ec67cc789fe7616a">IsBooting</a></div><div class="ttdeci">bool IsBooting</div><div class="ttdef"><b>Definition</b> main.cpp:98</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_ace03924f16faf7e0c24590ede39ae2f2"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#ace03924f16faf7e0c24590ede39ae2f2">FeedWDT</a></div><div class="ttdeci">void FeedWDT()</div><div class="ttdef"><b>Definition</b> main.cpp:601</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_ace03924f16faf7e0c24590ede39ae2f2"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#ace03924f16faf7e0c24590ede39ae2f2">FeedWDT</a></div><div class="ttdeci">void FeedWDT()</div><div class="ttdef"><b>Definition</b> main.cpp:598</div></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html_ae3fa381b4975543d1b331c6aa0d4526a"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#ae3fa381b4975543d1b331c6aa0d4526a">dsDevice</a></div><div class="ttdeci">bool dsDevice(JsonObject &amp;json)</div><div class="ttdoc">Deserialize device configuration JSON to config structure - returns true if config change detected.</div><div class="ttdef"><b>Definition</b> main.cpp:258</div></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html_ae44595345afc966d1f3de593d4c9b0f8"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#ae44595345afc966d1f3de593d4c9b0f8">ConfigSaveNeeded</a></div><div class="ttdeci">bool ConfigSaveNeeded</div><div class="ttdef"><b>Definition</b> main.cpp:100</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_aee3a92a77acd81bd67090432b16e23a1"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#aee3a92a77acd81bd67090432b16e23a1">RebootInProgress</a></div><div class="ttdeci">bool RebootInProgress()</div><div class="ttdef"><b>Definition</b> main.cpp:570</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_aee3a92a77acd81bd67090432b16e23a1"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#aee3a92a77acd81bd67090432b16e23a1">RebootInProgress</a></div><div class="ttdeci">bool RebootInProgress()</div><div class="ttdef"><b>Definition</b> main.cpp:567</div></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html_af10a8dbb4e9867627fe5b7443940e5b0"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#af10a8dbb4e9867627fe5b7443940e5b0">ConfigFileName</a></div><div class="ttdeci">const String ConfigFileName</div><div class="ttdef"><b>Definition</b> main.cpp:89</div></div>
 <div class="ttc" id="a_fast_timer_8hpp_html"><div class="ttname"><a href="_fast_timer_8hpp.html">FastTimer.hpp</a></div></div>
 <div class="ttc" id="a_g_p_i_o___defs_8hpp_html"><div class="ttname"><a href="_g_p_i_o___defs_8hpp.html">GPIO_Defs.hpp</a></div></div>

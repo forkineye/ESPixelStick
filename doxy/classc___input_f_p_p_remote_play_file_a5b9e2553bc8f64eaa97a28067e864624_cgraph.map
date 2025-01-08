@@ -1,7 +1,9 @@
 <map id="c_InputFPPRemotePlayFile::Sync" name="c_InputFPPRemotePlayFile::Sync">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,39,187,79"/>
-<area shape="rect" id="Node000002" href="$classfsm___play_file__state.html#a0ea185a29a785f198cc43ef410d76d6c" title=" " alt="" coords="263,5,396,46"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,43,248,35,248,40,188,49"/>
-<area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote_play_file.html#a68edbb2d52a03e900860bc61203bae06" title=" " alt="" coords="235,71,424,111"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="188,69,220,73,219,79,187,74"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,71,187,111"/>
+<area shape="rect" id="Node000002" href="$classc___input_f_p_p_remote_play_item.html#afeaf66cce65cdfda170cd94f15555b51" title=" " alt="" coords="236,5,423,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,68,239,48,240,53,172,73"/>
+<area shape="rect" id="Node000003" href="$classfsm___play_file__state.html#a0ea185a29a785f198cc43ef410d76d6c" title=" " alt="" coords="263,71,396,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="187,88,247,88,247,94,187,94"/>
+<area shape="rect" id="Node000004" href="$classc___input_f_p_p_remote_play_file.html#a68edbb2d52a03e900860bc61203bae06" title=" " alt="" coords="235,136,424,177"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="172,109,240,129,239,134,170,114"/>
 </map>

@@ -1,13 +1,17 @@
 <map id="c_OutputMgr::ClearBuffer" name="c_OutputMgr::ClearBuffer">
-<area shape="rect" id="Node000001" title=" " alt="" coords="461,55,627,80"/>
-<area shape="rect" id="Node000002" href="$classc___input_alexa.html#adf1dcecdbc97eb955ad2ca3954678c80" title=" " alt="" coords="216,5,386,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="462,54,367,34,368,29,463,48"/>
-<area shape="rect" id="Node000004" href="$classc___input_mgr.html#a1823b8316d8574f82bdb06ed1412f161" title="&lt; Called from loop(), renders Input data" alt="" coords="231,55,371,80"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="445,70,371,70,371,65,445,65"/>
-<area shape="rect" id="Node000006" href="$classc___input_common.html#aa12aa6b031d2b37ed2009b56f8bf6bc4" title=" " alt="" coords="189,104,413,130"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="463,87,368,106,367,101,462,81"/>
-<area shape="rect" id="Node000003" href="$classc___input_alexa.html#a8e260d42f46f4fa70cbca61ea001dda6" title="set up the operating environment based on the current config (or defaults)" alt="" coords="5,5,141,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="200,21,141,21,141,16,200,16"/>
-<area shape="rect" id="Node000005" href="$main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="50,55,96,80"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="215,70,96,70,96,65,215,65"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="736,55,902,80"/>
+<area shape="rect" id="Node000002" href="$classc___input_alexa.html#adf1dcecdbc97eb955ad2ca3954678c80" title=" " alt="" coords="491,5,660,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="736,54,642,34,643,29,738,48"/>
+<area shape="rect" id="Node000004" href="$classc___input_mgr.html#a1823b8316d8574f82bdb06ed1412f161" title="&lt; Called from loop(), renders Input data" alt="" coords="505,55,646,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="720,70,646,70,646,65,720,65"/>
+<area shape="rect" id="Node000008" href="$classc___input_common.html#aa12aa6b031d2b37ed2009b56f8bf6bc4" title=" " alt="" coords="463,104,688,130"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="738,87,643,106,642,101,736,81"/>
+<area shape="rect" id="Node000003" href="$classc___input_alexa.html#a8e260d42f46f4fa70cbca61ea001dda6" title="set up the operating environment based on the current config (or defaults)" alt="" coords="280,5,415,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="475,21,416,21,416,16,475,16"/>
+<area shape="rect" id="Node000005" href="$_input_mgr_8cpp.html#acaee0a3ecdf748027dec320e1f7bb64e" title=" " alt="" coords="287,55,408,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="490,70,409,70,409,65,490,65"/>
+<area shape="rect" id="Node000006" href="$classc___input_mgr.html#a06a5f6adfd1e87d4d30a7fa0f78ecc33" title="&lt; Start the module" alt="" coords="107,55,232,80"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="271,70,232,70,232,65,271,65"/>
+<area shape="rect" id="Node000007" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,55,59,80"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="91,70,59,70,59,65,91,65"/>
 </map>

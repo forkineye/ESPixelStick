@@ -31,6 +31,7 @@ var classc___f_p_p_discovery =
     [ "sendPingPacket", "classc___f_p_p_discovery.html#aed2b9148b3ad82d03c7bab89cc2927e8", null ],
     [ "SetBlankOnStop", "classc___f_p_p_discovery.html#ad8875e6015a2c55a128e50e68b5010d6", null ],
     [ "SetInputFPPRemotePlayFile", "classc___f_p_p_discovery.html#a60745e73513bb09ee95b04360f7b9ed2", null ],
+    [ "SetOperationalState", "classc___f_p_p_discovery.html#af0c89e6c2aa9b31042c34087150dad6c", null ],
     [ "StartPlaying", "classc___f_p_p_discovery.html#a43c069118ce152afe8425d7db1b157a1", null ],
     [ "StopPlaying", "classc___f_p_p_discovery.html#a2e1b906ef676796f0b6e17ae1f591658", null ],
     [ "BlankOnStop", "classc___f_p_p_discovery.html#ae914fc22cddc9550a2f2b45d4a01958a", null ],
@@ -41,7 +42,9 @@ var classc___f_p_p_discovery =
     [ "IsEnabled", "classc___f_p_p_discovery.html#a8f9fcde96d757bcdf3350dc662cdb2ec", null ],
     [ "MulticastAddress", "classc___f_p_p_discovery.html#a64af0f5f9ca083b423a462e65ce69620", null ],
     [ "MultiSyncStats", "classc___f_p_p_discovery.html#a87f0ed24997d38a9021a3d0d2f489f48", null ],
+    [ "StopInProgress", "classc___f_p_p_discovery.html#a22bb6cca72bcb497cf4fc7c11a0ba778", null ],
     [ "SystemDebugStats", "classc___f_p_p_discovery.html#a38be0cf367311632769fff3c0eeb2a41", null ],
     [ "udp", "classc___f_p_p_discovery.html#a39129a05c7f60b4e9e2a96fce7dc6465", null ],
-    [ "UploadFileName", "classc___f_p_p_discovery.html#ad049dc0d0f6cfc9d3430be8d19f90932", null ]
+    [ "UploadFileName", "classc___f_p_p_discovery.html#ad049dc0d0f6cfc9d3430be8d19f90932", null ],
+    [ "writeFailed", "classc___f_p_p_discovery.html#aec4afca829e622d2e50fb9d1caa43ceb", null ]
 ];
