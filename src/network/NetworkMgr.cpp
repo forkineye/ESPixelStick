@@ -25,6 +25,7 @@
 #include "network/NetworkMgr.hpp"
 #include "input/InputMgr.hpp"
 #include "service/FPPDiscovery.h"
+#include "service/DisplayOLED.h"
 #include "WebMgr.hpp"
 #include <Int64String.h>
 
@@ -50,7 +51,9 @@ c_NetworkMgr::~c_NetworkMgr ()
 void c_NetworkMgr::AdvertiseNewState ()
 {
     // DEBUG_START;
-
+#ifdef SUPPORT_OLED
+    OLED.Update();
+#endif // def SUPPORT_OLED
     if (PreviousState != IsConnected ())
     {
         // DEBUG_V ("Sending Advertisments");
@@ -133,7 +136,9 @@ void c_NetworkMgr::GetStatus (JsonObject & json)
     JsonObject NetworkEthStatus = NetworkStatus[(char*)CN_eth].to<JsonObject> ();
     EthernetDriver.GetStatus (NetworkEthStatus);
 #endif // def SUPPORT_ETHERNET
-
+#ifdef SUPPORT_OLED
+    OLED.Update();
+#endif // def SUPPORT_OLED
     // DEBUG_END;
 } // GetStatus
 

@@ -45,7 +45,9 @@
 #ifdef SUPPORT_SENSOR_DS18B20
 #include "service/SensorDS18B20.h"
 #endif // def SUPPORT_SENSOR_DS18B20
-
+#ifdef SUPPORT_OLED
+#include "service/DisplayOLED.h"
+#endif // def SUPPORT_OLED
 #ifdef ARDUINO_ARCH_ESP8266
 #include <Hash.h>
 extern "C"
@@ -147,7 +149,9 @@ void setup()
     // disable brownout detector
     WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
 #endif // def ARDUINO_ARCH_ESP32
-
+#ifdef SUPPORT_OLED
+    OLED.Begin();
+#endif // def SUPPORT_OLED
     // Setup serial log port
     LOG_PORT.begin(115200);
     delay(10);
@@ -199,7 +203,9 @@ void setup()
     // DEBUG_V(String("WebMgr Heap: ") + String(ESP.getFreeHeap()));
     // Configure and start the web server
     WebMgr.Begin(&config);
-
+#ifdef SUPPORT_OLED
+    OLED.Loading();
+#endif // def SUPPORT_OLED
 #ifdef SUPPORT_SENSOR_DS18B20
     // TestHeap(uint32_t(60));
     // DEBUG_V(String("SensorDS18B20 Heap: ") + String(ESP.getFreeHeap()));
