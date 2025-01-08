@@ -115,7 +115,13 @@ jobs:
           #
           - target: "esp32_breakdancev2"
             chip: "esp32"
-
+          #
+          - target: "esp32_bigboi"
+            chip: "esp32"
+          #
+          - target: "esp32_dev4"
+            chip: "esp32"
+            
     runs-on: ubuntu-latest
     steps:
       # Checkout ESPixelStick
