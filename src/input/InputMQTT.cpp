@@ -123,19 +123,19 @@ void c_InputMQTT::GetConfig (JsonObject & jsonConfig)
     // DEBUG_START;
 
     // Serialize Config
-    jsonConfig[CN_ip]           = ip;
-    jsonConfig[CN_port]         = port;
-    jsonConfig[CN_user]         = user;
-    jsonConfig[CN_password]     = password;
-    jsonConfig[CN_topic]        = topic;
+    JsonWrite(jsonConfig, CN_ip,           ip);
+    JsonWrite(jsonConfig, CN_port,         port);
+    JsonWrite(jsonConfig, CN_user,         user);
+    JsonWrite(jsonConfig, CN_password,     password);
+    JsonWrite(jsonConfig, CN_topic,        topic);
 #ifdef SUPPORT_SENSOR_DS18B20
-    jsonConfig[CN_tsensortopic] = TemperatureSensorTopic;
+    JsonWrite(jsonConfig, CN_tsensortopic, TemperatureSensorTopic);
 #endif // def SUPPORT_SENSOR_DS18B20
-    jsonConfig[CN_clean]        = CleanSessionRequired;
-    jsonConfig[CN_hadisco]      = hadisco;
-    jsonConfig[CN_haprefix]     = haprefix;
-    jsonConfig[CN_effects]      = true;
-    jsonConfig[CN_play]         = true;
+    JsonWrite(jsonConfig, CN_clean,        CleanSessionRequired);
+    JsonWrite(jsonConfig, CN_hadisco,      hadisco);
+    JsonWrite(jsonConfig, CN_haprefix,     haprefix);
+    JsonWrite(jsonConfig, CN_effects,      true);
+    JsonWrite(jsonConfig, CN_play,         true);
 
     // DEBUG_END;
 
@@ -147,14 +147,14 @@ void c_InputMQTT::GetStatus (JsonObject & jsonStatus)
     // DEBUG_START;
 
     JsonObject Status = jsonStatus[F ("mqtt")].to<JsonObject> ();
-    Status[CN_id] = InputChannelId;
+    JsonWrite(Status, CN_id, InputChannelId);
 
     // DEBUG_END;
 
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-void c_InputMQTT::Process (bool StayDark)
+void c_InputMQTT::Process ()
 {
     // DEBUG_START;
 
@@ -163,12 +163,12 @@ void c_InputMQTT::Process (bool StayDark)
         if (nullptr != pEffectsEngine)
         {
             // DEBUG_V ("");
-            pEffectsEngine->Process (StayDark);
+            pEffectsEngine->Process ();
         }
 
         else if (nullptr != pPlayFileEngine)
         {
-            pPlayFileEngine->Poll (StayDark);
+            pPlayFileEngine->Poll ();
         }
         else
         {
@@ -614,29 +614,31 @@ void c_InputMQTT::GetEngineConfig (JsonObject & JsonConfig)
     {
         // DEBUG_V ("Effects engine running");
         ((c_InputEffectEngine*)(pEffectsEngine))->GetMqttConfig (effectConfig);
-    } else {
-        // DEBUG_V ("Effects engine not running");
-    }
-
-    JsonConfig[CN_effect]             = effectConfig.effect;
-    JsonConfig[CN_mirror]             = effectConfig.mirror;
-    JsonConfig[CN_allleds]            = effectConfig.allLeds;
-    JsonConfig[CN_brightness]         = effectConfig.brightness;
-    JsonConfig[CN_EffectWhiteChannel] = effectConfig.whiteChannel;
-
-    JsonObject color = JsonConfig[CN_color].to<JsonObject> ();
-    color[CN_r] = effectConfig.color.r;
-    color[CN_g] = effectConfig.color.g;
-    color[CN_b] = effectConfig.color.b;
-
-    if (nullptr != pPlayFileEngine)
-    {
-        JsonConfig[CN_effect] = CN_playFseq;
-        JsonConfig[CN_filename] = pPlayFileEngine->GetFileName ();
     }
     else
     {
-        JsonConfig[CN_filename] = String ("");
+        // DEBUG_V ("Effects engine not running");
+    }
+
+    JsonWrite(JsonConfig, CN_effect,             effectConfig.effect);
+    JsonWrite(JsonConfig, CN_mirror,             effectConfig.mirror);
+    JsonWrite(JsonConfig, CN_allleds,            effectConfig.allLeds);
+    JsonWrite(JsonConfig, CN_brightness,         effectConfig.brightness);
+    JsonWrite(JsonConfig, CN_EffectWhiteChannel, effectConfig.whiteChannel);
+
+    JsonObject color = JsonConfig[(char*)CN_color].to<JsonObject> ();
+    JsonWrite(color, CN_r, effectConfig.color.r);
+    JsonWrite(color, CN_g, effectConfig.color.g);
+    JsonWrite(color, CN_b, effectConfig.color.b);
+
+    if (nullptr != pPlayFileEngine)
+    {
+        JsonWrite(JsonConfig, CN_effect,   String(CN_playFseq));
+        JsonWrite(JsonConfig, CN_filename, pPlayFileEngine->GetFileName ());
+    }
+    else
+    {
+        JsonWrite(JsonConfig, CN_filename, emptyString);
     }
 
     // DEBUG_END;
@@ -658,9 +660,9 @@ void c_InputMQTT::GetEffectList (JsonObject & JsonConfig)
     }
     // DEBUG_V ("");
 
-    JsonConfig[CN_brightness] = CN_true;
+    JsonWrite(JsonConfig, CN_brightness, String(CN_true));
     ((c_InputEffectEngine*)(pEffectsEngine))->GetMqttEffectList (JsonConfig);
-    JsonConfig[CN_effect] = CN_true;
+    JsonWrite(JsonConfig, CN_effect, String(CN_true));
 
     if (!EffectEngineIsRunning)
     {
@@ -668,7 +670,7 @@ void c_InputMQTT::GetEffectList (JsonObject & JsonConfig)
         pEffectsEngine = nullptr;
     }
 
-    JsonConfig[CN_effect_list].add (CN_playFseq);
+    JsonConfig[(char*)CN_effect_list].add ((char*)CN_playFseq);
 
     // add the file play fields.
     // DEBUG_END;
@@ -697,29 +699,29 @@ void c_InputMQTT::publishHA()
         JsonDocument root;
         JsonObject JsonConfig = root.to<JsonObject> ();
 
-        JsonConfig[F ("platform")]           = F ("MQTT");
-        JsonConfig[CN_name]                  = config.id;
-        JsonConfig[F ("schema")]             = F ("json");
-        JsonConfig[F ("state_topic")]        = topic;
-        JsonConfig[F ("command_topic")]      = lwtTopic;
-        JsonConfig[F ("availability_topic")] = lwtTopic;
-        JsonConfig[F ("rgb")]                = CN_true;
+        JsonWrite(JsonConfig, F ("platform"),           F ("MQTT"));
+        JsonWrite(JsonConfig, CN_name,                  config.id);
+        JsonWrite(JsonConfig, F ("schema"),             F ("json"));
+        JsonWrite(JsonConfig, F ("state_topic"),        topic);
+        JsonWrite(JsonConfig, F ("command_topic"),      lwtTopic);
+        JsonWrite(JsonConfig, F ("availability_topic"), lwtTopic);
+        JsonWrite(JsonConfig, F ("rgb"),                String(CN_true));
 
         GetEffectList (JsonConfig);
 
         // Register the attributes topic
-        JsonConfig[F ("json_attributes_topic")] = topic + F ("/attributes");
+        JsonWrite(JsonConfig, F ("json_attributes_topic"), topic + F ("/attributes"));
 
         // Create a unique id using the chip id, and fill in the device properties
         // to enable integration support in HomeAssistant.
-        JsonConfig[F ("unique_id")] = CN_ESPixelStick + chipId;
+        JsonWrite(JsonConfig, F ("unique_id"), CN_ESPixelStick + chipId);
 
-        JsonObject device = JsonConfig[CN_device].to<JsonObject> ();
-        device[F ("identifiers")]  = WiFi.macAddress ();
-        device[F ("manufacturer")] = F ("Forkineye");
-        device[F ("model")]        = CN_ESPixelStick;
-        device[CN_name]            = config.id;
-        device[F ("sw_version")]   = String (CN_ESPixelStick) + " v" + VERSION;
+        JsonObject device = JsonConfig[(char*)CN_device].to<JsonObject> ();
+        JsonWrite(device, F ("identifiers"),  WiFi.macAddress ());
+        JsonWrite(device, F ("manufacturer"), F ("Forkineye"));
+        JsonWrite(device, F ("model"),        String(CN_ESPixelStick));
+        JsonWrite(device, CN_name,            config.id);
+        JsonWrite(device, F ("sw_version"),   String (CN_ESPixelStick) + " v" + VERSION);
 
         String HaJsonConfig;
         serializeJson(JsonConfig, HaJsonConfig);
@@ -745,7 +747,7 @@ void c_InputMQTT::publishState()
     JsonDocument root;
     JsonObject JsonConfig = root[F ("MQTT")].to<JsonObject>();
 
-    JsonConfig[CN_state] = (true == stateOn) ? String(ON) : String(OFF);
+    JsonWrite(JsonConfig, CN_state, String((true == stateOn) ? ON : OFF));
 
     // populate the effect information
     GetEngineConfig (JsonConfig);
@@ -803,7 +805,7 @@ void c_InputMQTT::UpdateEffectConfiguration (JsonObject & JsonConfig)
     setFromJSON (effectConfig.brightness,   JsonConfig, CN_brightness);
     setFromJSON (effectConfig.whiteChannel, JsonConfig, CN_EffectWhiteChannel);
 
-    JsonObject JsonColor = JsonConfig[CN_color];
+    JsonObject JsonColor = JsonConfig[(char*)CN_color].to<JsonObject>();
     if (JsonColor)
     {
         setFromJSON (effectConfig.color.r, JsonColor, CN_r);

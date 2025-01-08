@@ -24,55 +24,12 @@
 #include "utility/SaferStringConversion.hpp"
 
 //-----------------------------------------------------------------------------
-static void TimerPollHandler (void * p)
-{
-#ifdef ARDUINO_ARCH_ESP32
-    TaskHandle_t Handle = reinterpret_cast <c_InputFPPRemotePlayFile*> (p)->GetTaskHandle ();
-    if (Handle)
-    {
-        vTaskResume (Handle);
-    }
-#else
-    reinterpret_cast<c_InputFPPRemotePlayFile*>(p)->TimerPoll ();
-#endif // def ARDUINO_ARCH_ESP32
-
-} // TimerPollHandler
-
-#ifdef ARDUINO_ARCH_ESP32
-//----------------------------------------------------------------------------
-static void TimerPollHandlerTask (void* pvParameters)
-{
-    // DEBUG_START; // Need extra stack space to run this
-    c_InputFPPRemotePlayFile* InputFpp = reinterpret_cast <c_InputFPPRemotePlayFile*> (pvParameters);
-
-    do
-    {
-        // we start suspended
-        vTaskSuspend (NULL); //Suspend Own Task
-        InputFpp->TimerPollInProgress = true;
-        // DEBUG_V ("");
-        InputFpp->TimerPoll ();
-        InputFpp->TimerPollInProgress = false;
-    } while (true);
-    // DEBUG_END;
-
-} // TimerPollHandlerTask
-#endif // def ARDUINO_ARCH_ESP32
-
-//-----------------------------------------------------------------------------
 c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelIds InputChannelId) :
     c_InputFPPRemotePlayItem (InputChannelId)
 {
     // DEBUG_START;
 
     fsm_PlayFile_state_Idle_imp.Init (this);
-
-    LastIsrTimeStampMS = millis ();
-    MsTicker.attach_ms (uint32_t (FPP_TICKER_PERIOD_MS), &TimerPollHandler, (void*)this); // Add ISR Function
-
-#ifdef ARDUINO_ARCH_ESP32
-    xTaskCreate (TimerPollHandlerTask, "FPPTask", TimerPollHandlerTaskStack, this, ESP_TASK_PRIO_MIN + 8, &TimerPollTaskHandle);
-#endif // def ARDUINO_ARCH_ESP32
 
     // DEBUG_END;
 } // c_InputFPPRemotePlayFile
@@ -81,25 +38,13 @@ c_InputFPPRemotePlayFile::c_InputFPPRemotePlayFile (c_InputMgr::e_InputChannelId
 c_InputFPPRemotePlayFile::~c_InputFPPRemotePlayFile ()
 {
     // DEBUG_START;
-    MsTicker.detach ();
-
-#ifdef ARDUINO_ARCH_ESP32
-    if (NULL != TimerPollTaskHandle)
-    {
-        // DEBUG_V("wait for the timer task to finish");
-        while(TimerPollInProgress == true) {yield();}
-
-        // DEBUG_V("Delete the task");
-        vTaskDelete (TimerPollTaskHandle);
-        TimerPollTaskHandle = NULL;
-    }
-#endif // def ARDUINO_ARCH_ESP32
 
     for (uint32_t LoopCount = 10000; (LoopCount != 0) && (!IsIdle ()); LoopCount--)
     {
         Stop ();
-        Poll (false);
+        Poll ();
     }
+
     // DEBUG_END;
 
 } // ~c_InputFPPRemotePlayFile
@@ -108,13 +53,15 @@ c_InputFPPRemotePlayFile::~c_InputFPPRemotePlayFile ()
 void c_InputFPPRemotePlayFile::Start (String & FileName, float SecondsElapsed, uint32_t PlayCount)
 {
     // DEBUG_START;
-    if (FileMgr.SdCardIsInstalled ())
+
+    if (!InputIsPaused() && FileMgr.SdCardIsInstalled ())
     {
+        // DEBUG_V("Ask FSM to start the sequence.");
         pCurrentFsmState->Start (FileName, SecondsElapsed, PlayCount);
     }
     else
     {
-        // DEBUG_V ("No SD Card installed. Ignore Start request");
+        // DEBUG_V ("Paused or No SD Card installed. Ignore Start request");
         fsm_PlayFile_state_Idle_imp.Init (this);
     }
 
@@ -126,7 +73,10 @@ void c_InputFPPRemotePlayFile::Stop ()
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Stop ();
+    if(!InputIsPaused())
+    {
+        pCurrentFsmState->Stop ();
+    }
 
     // DEBUG_END;
 } // Stop
@@ -134,49 +84,38 @@ void c_InputFPPRemotePlayFile::Stop ()
 //-----------------------------------------------------------------------------
 void c_InputFPPRemotePlayFile::Sync (String & FileName, float SecondsElapsed)
 {
-    // DEBUG_START;
+    // xDEBUG_START;
 
-    SyncControl.SyncCount++;
-    UpdateElapsedPlayTimeMS ();
-    if (pCurrentFsmState->Sync (FileName, SecondsElapsed))
+    if(!InputIsPaused())
     {
-        SyncControl.SyncAdjustmentCount++;
+        SyncControl.SyncCount++;
+        UpdateElapsedPlayTimeMS ();
+        if (pCurrentFsmState->Sync (FileName, SecondsElapsed))
+        {
+            SyncControl.SyncAdjustmentCount++;
+        }
     }
 
-    // DEBUG_END;
+    // xDEBUG_END;
 
 } // Sync
 
 //-----------------------------------------------------------------------------
-bool c_InputFPPRemotePlayFile::Poll (bool StayDark)
+bool c_InputFPPRemotePlayFile::Poll ()
 {
     // xDEBUG_START;
+    bool Response = false;
 
-    // Show that we have received a poll
-    PollDetectionCounter = 0;
-
-    // TimerPoll ();
-    return pCurrentFsmState->Poll (StayDark);
+    if(!InputIsPaused())
+    {
+        // xDEBUG_V("Poll the FSM");
+        Response =  pCurrentFsmState->Poll ();
+    }
 
     // xDEBUG_END;
+    return Response;
 
 } // Poll
-
-//-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::TimerPoll ()
-{
-    // xDEBUG_START;
-
-    // Are polls still coming in?
-    if (PollDetectionCounter < PollDetectionCounterLimit)
-    {
-        PollDetectionCounter++;
-        UpdateElapsedPlayTimeMS ();
-        pCurrentFsmState->TimerPoll ();
-    }
-    // xDEBUG_END;
-
-} // TimerPoll
 
 //-----------------------------------------------------------------------------
 void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
@@ -188,9 +127,9 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
     // variables ending in "Rem"   reflect remaining play time
 
     // File uses milliseconds to store elapsed and total play time
-    uint32_t mseconds = FrameControl.ElapsedPlayTimeMS;
+    uint32_t mseconds = FileControl[CurrentFile].ElapsedPlayTimeMS;
     uint32_t msecondsTotal;
-    if (__builtin_mul_overflow(FrameControl.FrameStepTimeMS, FrameControl.TotalNumberOfFramesInSequence, &msecondsTotal)) {
+    if (__builtin_mul_overflow(FileControl[CurrentFile].FrameStepTimeMS, FileControl[CurrentFile].TotalNumberOfFramesInSequence, &msecondsTotal)) {
         // returned non-zero: there has been an overflow
         msecondsTotal = MilliSecondsInASecond; // set to one second total when overflow occurs
     }
@@ -204,29 +143,28 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
         secsRem = 0; // set to zero remaining seconds when overflow occurs
     }
 
-    JsonStatus[F ("SyncCount")]           = SyncControl.SyncCount;
-    JsonStatus[F ("SyncAdjustmentCount")] = SyncControl.SyncAdjustmentCount;
+    JsonWrite(JsonStatus, F ("SyncCount"),           SyncControl.SyncCount);
+    JsonWrite(JsonStatus, F ("SyncAdjustmentCount"), SyncControl.SyncAdjustmentCount);
 
     String temp = GetFileName ();
 
-    JsonStatus[CN_current_sequence]  = temp;
-    JsonStatus[CN_playlist]          = temp;
-    JsonStatus[CN_seconds_elapsed]   = String (secs);
-    JsonStatus[CN_seconds_played]    = String (secs);
-    JsonStatus[CN_seconds_remaining] = String (secsRem);
-    JsonStatus[CN_sequence_filename] = temp;
-    JsonStatus[F("PlayedFileCount")] = PlayedFileCount;
+    JsonWrite(JsonStatus, CN_current_sequence,  temp);
+    JsonWrite(JsonStatus, CN_playlist,          temp);
+    JsonWrite(JsonStatus, CN_seconds_elapsed,   String (secs));
+    JsonWrite(JsonStatus, CN_seconds_played,    String (secs));
+    JsonWrite(JsonStatus, CN_seconds_remaining, String (secsRem));
+    JsonWrite(JsonStatus, CN_sequence_filename, temp);
+    JsonWrite(JsonStatus, F("PlayedFileCount"), PlayedFileCount);
 
     // After inserting the total seconds and total seconds remaining,
     // JsonStatus also includes formatted "minutes + seconds" for both
-    // timeElapsed and timeRemaining
+    // time Elapsed and time Remaining
     char buf[12];
     ESP_ERROR_CHECK(saferSecondsToFormattedMinutesAndSecondsString(buf, secs));
-    JsonStatus[CN_time_elapsed] = buf;
+    JsonWrite(JsonStatus, CN_time_elapsed,   buf);
     ESP_ERROR_CHECK(saferSecondsToFormattedMinutesAndSecondsString(buf, secsRem));
-    JsonStatus[CN_time_remaining] = buf;
-
-    JsonStatus[CN_errors] = LastFailedPlayStatusMsg;
+    JsonWrite(JsonStatus, CN_time_remaining, buf);
+    JsonWrite(JsonStatus, CN_errors,         LastFailedPlayStatusMsg);
 
     // xDEBUG_END;
 
@@ -235,44 +173,44 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
 //-----------------------------------------------------------------------------
 void c_InputFPPRemotePlayFile::UpdateElapsedPlayTimeMS ()
 {
-    noInterrupts ();
+    // noInterrupts ();
 
     uint32_t now = millis ();
-    uint32_t elapsedMS = now - LastIsrTimeStampMS;
-    if (now < LastIsrTimeStampMS)
+    uint32_t elapsedMS = now - FileControl[CurrentFile].LastPollTimeMS;
+    if (now < FileControl[CurrentFile].LastPollTimeMS)
     {
         // handle wrap
-        elapsedMS = (0 - LastIsrTimeStampMS) + now;
+        elapsedMS = (0 - FileControl[CurrentFile].LastPollTimeMS) + now;
     }
 
-    LastIsrTimeStampMS = now;
-    FrameControl.ElapsedPlayTimeMS += elapsedMS;
+    FileControl[CurrentFile].LastPollTimeMS = now;
+    FileControl[CurrentFile].ElapsedPlayTimeMS += elapsedMS;
 
-    interrupts ();
+    // interrupts ();
 } // UpdateElapsedPlayTimeMS
 
 //-----------------------------------------------------------------------------
 uint32_t c_InputFPPRemotePlayFile::CalculateFrameId (uint32_t ElapsedMS, int32_t SyncOffsetMS)
 {
-    // DEBUG_START;
+    // xDEBUG_START;
 
     uint32_t CurrentFrameId = 0;
 
     do // once
     {
         uint32_t AdjustedPlayTime = ElapsedMS + SyncOffsetMS;
-        // DEBUG_V (String ("AdjustedPlayTime: ") + String (AdjustedPlayTime));
+        // xDEBUG_V (String ("AdjustedPlayTime: ") + String (AdjustedPlayTime));
         if ((0 > SyncOffsetMS) && (ElapsedMS < abs(SyncOffsetMS)))
         {
             break;
         }
 
-        CurrentFrameId = (AdjustedPlayTime / FrameControl.FrameStepTimeMS);
-        // DEBUG_V (String ("  CurrentFrameId: ") + String (CurrentFrameId));
+        CurrentFrameId = (AdjustedPlayTime / FileControl[CurrentFile].FrameStepTimeMS);
+        // xDEBUG_V (String ("  CurrentFrameId: ") + String (CurrentFrameId));
 
     } while (false);
 
-    // DEBUG_END;
+    // xDEBUG_END;
 
     return CurrentFrameId;
 
@@ -289,23 +227,22 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
         FSEQRawHeader    fsqRawHeader;
         FSEQParsedHeader fsqParsedHeader;
 
-        if(c_FileMgr::INVALID_FILE_HANDLE != FileHandleForFileBeingPlayed)
+        if(c_FileMgr::INVALID_FILE_HANDLE != FileControl[CurrentFile].FileHandleForFileBeingPlayed)
         {
-            // DEBUG_V("Unexpected File Handle at fseq Parse.");
-            Stop();
+            FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
         }
 
-        if (false == FileMgr.OpenSdFile (PlayItemName,
+        if (false == FileMgr.OpenSdFile (FileControl[CurrentFile].FileName,
                                          c_FileMgr::FileMode::FileRead,
-                                         FileHandleForFileBeingPlayed, -1))
+                                         FileControl[CurrentFile].FileHandleForFileBeingPlayed, -1))
         {
-            LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not open file: filename: '")) + PlayItemName + "'");
+            LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not open file: filename: '")) + FileControl[CurrentFile].FileName + "'");
             logcon (LastFailedPlayStatusMsg);
             break;
         }
 
-        // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (FileHandleForFileBeingPlayed));
-        uint32_t BytesRead = FileMgr.ReadSdFile (FileHandleForFileBeingPlayed,
+        // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (FileControl[CurrentFile].FileHandleForFileBeingPlayed));
+        uint32_t BytesRead = FileMgr.ReadSdFile (FileControl[CurrentFile].FileHandleForFileBeingPlayed,
                                                (uint8_t*)&fsqRawHeader,
                                                sizeof (fsqRawHeader), size_t(0));
         // DEBUG_V (String ("                    BytesRead: ") + String (BytesRead));
@@ -313,9 +250,9 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 
         if (BytesRead != sizeof (fsqRawHeader))
         {
-            LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not read FSEQ header: filename: '")) + PlayItemName + "'");
+            LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not read FSEQ header: filename: '")) + FileControl[CurrentFile].FileName + "'");
             logcon (LastFailedPlayStatusMsg);
-            FileMgr.CloseSdFile(FileHandleForFileBeingPlayed);
+            FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             break;
         }
 
@@ -337,62 +274,63 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 
 // #define DUMP_FSEQ_HEADER
 #ifdef DUMP_FSEQ_HEADER
-        DEBUG_V (String ("                   dataOffset: ") + String (fsqParsedHeader.dataOffset));
-        DEBUG_V (String ("                 minorVersion: ") + String (fsqParsedHeader.minorVersion));
-        DEBUG_V (String ("                 majorVersion: ") + String (fsqParsedHeader.majorVersion));
-        DEBUG_V (String ("            VariableHdrOffset: ") + String (fsqParsedHeader.VariableHdrOffset));
-        DEBUG_V (String ("                 channelCount: ") + String (fsqParsedHeader.channelCount));
-        DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (fsqParsedHeader.TotalNumberOfFramesInSequence));
-        DEBUG_V (String ("                     stepTime: ") + String (fsqParsedHeader.stepTime));
-        DEBUG_V (String ("                        flags: ") + String (fsqParsedHeader.flags));
-        DEBUG_V (String ("              compressionType: 0x") + String (fsqParsedHeader.compressionType, HEX));
-        DEBUG_V (String ("          numCompressedBlocks: ") + String (fsqParsedHeader.numCompressedBlocks));
-        DEBUG_V (String ("              numSparseRanges: ") + String (fsqParsedHeader.numSparseRanges));
-        DEBUG_V (String ("                       flags2: ") + String (fsqParsedHeader.flags2));
-        DEBUG_V (String ("                           id: 0x") + String ((unsigned long)fsqParsedHeader.id, HEX));
+        // DEBUG_V (String ("                   dataOffset: ") + String (fsqParsedHeader.dataOffset));
+        // DEBUG_V (String ("                 minorVersion: ") + String (fsqParsedHeader.minorVersion));
+        // DEBUG_V (String ("                 majorVersion: ") + String (fsqParsedHeader.majorVersion));
+        // DEBUG_V (String ("            VariableHdrOffset: ") + String (fsqParsedHeader.VariableHdrOffset));
+        // DEBUG_V (String ("                 channelCount: ") + String (fsqParsedHeader.channelCount));
+        // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (fsqParsedHeader.TotalNumberOfFramesInSequence));
+        // DEBUG_V (String ("                     stepTime: ") + String (fsqParsedHeader.stepTime));
+        // DEBUG_V (String ("                        flags: ") + String (fsqParsedHeader.flags));
+        // DEBUG_V (String ("              compressionType: 0x") + String (fsqParsedHeader.compressionType, HEX));
+        // DEBUG_V (String ("          numCompressedBlocks: ") + String (fsqParsedHeader.numCompressedBlocks));
+        // DEBUG_V (String ("              numSparseRanges: ") + String (fsqParsedHeader.numSparseRanges));
+        // DEBUG_V (String ("                       flags2: ") + String (fsqParsedHeader.flags2));
+        // DEBUG_V (String ("                           id: 0x") + String ((unsigned long)fsqParsedHeader.id, HEX));
 #endif // def DUMP_FSEQ_HEADER
 
         if (fsqParsedHeader.majorVersion != 2 || fsqParsedHeader.compressionType != 0)
         {
-            LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not start. ")) + PlayItemName + F (" is not a v2 uncompressed sequence"));
+            LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not start. ")) + FileControl[CurrentFile].FileName + F (" is not a v2 uncompressed sequence"));
             logcon (LastFailedPlayStatusMsg);
-            FileMgr.CloseSdFile(FileHandleForFileBeingPlayed);
+            FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             break;
         }
         // DEBUG_V ("");
-        size_t ActualDataSize = FileMgr.GetSdFileSize (FileHandleForFileBeingPlayed) - sizeof(fsqParsedHeader);
+        size_t ActualDataSize = FileMgr.GetSdFileSize (FileControl[CurrentFile].FileHandleForFileBeingPlayed) - sizeof(fsqParsedHeader);
         size_t NeededDataSize = fsqParsedHeader.TotalNumberOfFramesInSequence * fsqParsedHeader.channelCount;
         // DEBUG_V("NeededDataSize: " + String(NeededDataSize));
         // DEBUG_V("ActualDataSize: " + String(ActualDataSize));
         if (NeededDataSize > ActualDataSize)
         {
-            LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not start: ")) + PlayItemName +
+            LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not start: ")) + FileControl[CurrentFile].FileName +
                                       F (" File does not contain enough data to meet the Stated Channel Count * Number of Frames value. Need: ") +
                                       String (NeededDataSize) + F (", SD File Size: ") + String (ActualDataSize));
             logcon (LastFailedPlayStatusMsg);
+            FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             break;
         }
 
-        FrameControl.FrameStepTimeMS = max ((uint8_t)25, fsqParsedHeader.stepTime);
-        FrameControl.TotalNumberOfFramesInSequence = fsqParsedHeader.TotalNumberOfFramesInSequence;
+        FileControl[CurrentFile].FrameStepTimeMS = max ((uint8_t)25, fsqParsedHeader.stepTime);
+        FileControl[CurrentFile].TotalNumberOfFramesInSequence = fsqParsedHeader.TotalNumberOfFramesInSequence;
 
-        FrameControl.DataOffset = fsqParsedHeader.dataOffset;
-        FrameControl.ChannelsPerFrame = fsqParsedHeader.channelCount;
+        FileControl[CurrentFile].DataOffset = fsqParsedHeader.dataOffset;
+        FileControl[CurrentFile].ChannelsPerFrame = fsqParsedHeader.channelCount;
 
         memset ((void*)&SparseRanges, 0x00, sizeof (SparseRanges));
         if (fsqParsedHeader.numSparseRanges)
         {
             if (MAX_NUM_SPARSE_RANGES < fsqParsedHeader.numSparseRanges)
             {
-                LastFailedPlayStatusMsg =  (String (F ("ParseFseqFile:: Could not start. ")) + PlayItemName + F (" Too many sparse ranges defined in file header."));
+                LastFailedPlayStatusMsg =  (String (F ("ParseFseqFile:: Could not start. ")) + FileControl[CurrentFile].FileName + F (" Too many sparse ranges defined in file header."));
                 logcon (LastFailedPlayStatusMsg);
-                FileMgr.CloseSdFile(FileHandleForFileBeingPlayed);
+                FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
                 break;
             }
 
             FSEQRawRangeEntry FseqRawRanges[MAX_NUM_SPARSE_RANGES];
 
-            FileMgr.ReadSdFile (FileHandleForFileBeingPlayed,
+            FileMgr.ReadSdFile (FileControl[CurrentFile].FileHandleForFileBeingPlayed,
                                 (uint8_t*)&FseqRawRanges[0],
                                 sizeof (FseqRawRanges),
                                 sizeof (FSEQRawHeader) + fsqParsedHeader.numCompressedBlocks * 8);
@@ -430,7 +368,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 #endif // def DUMP_FSEQ_HEADER
             if (0 == TotalChannels)
             {
-                LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Ignoring Range Info. ")) + PlayItemName + F (" No channels defined in Sparse Ranges."));
+                LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Ignoring Range Info. ")) + FileControl[CurrentFile].FileName + F (" No channels defined in Sparse Ranges."));
                 logcon (LastFailedPlayStatusMsg);
                 memset ((void*)&SparseRanges, 0x00, sizeof (SparseRanges));
                 SparseRanges[0].ChannelCount = fsqParsedHeader.channelCount;
@@ -438,7 +376,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 
             else if (TotalChannels > fsqParsedHeader.channelCount)
             {
-                LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Ignoring Range Info. ")) + PlayItemName + F (" Too many channels defined in Sparse Ranges."));
+                LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Ignoring Range Info. ")) + FileControl[CurrentFile].FileName + F (" Too many channels defined in Sparse Ranges."));
                 logcon (LastFailedPlayStatusMsg);
                 memset ((void*)&SparseRanges, 0x00, sizeof (SparseRanges));
                 SparseRanges[0].ChannelCount = fsqParsedHeader.channelCount;
@@ -446,7 +384,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 
             else if (LargestBlock > fsqParsedHeader.channelCount)
             {
-                LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Ignoring Range Info. ")) + PlayItemName + F (" Sparse Range Frame offset + Num channels is larger than frame size."));
+                LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Ignoring Range Info. ")) + FileControl[CurrentFile].FileName + F (" Sparse Range Frame offset + Num channels is larger than frame size."));
                 logcon (LastFailedPlayStatusMsg);
                 memset ((void*)&SparseRanges, 0x00, sizeof (SparseRanges));
                 SparseRanges[0].ChannelCount = fsqParsedHeader.channelCount;
@@ -475,46 +413,49 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 void c_InputFPPRemotePlayFile::ClearFileInfo()
 {
     // DEBUG_START;
-    PlayItemName                               = emptyString;
-    RemainingPlayCount                         = 0;
-    SyncControl.LastRcvdElapsedSeconds         = 0.0;
-    FrameControl.ElapsedPlayTimeMS             = 0;
-    FrameControl.DataOffset                    = 0;
-    FrameControl.ChannelsPerFrame              = 0;
-    FrameControl.FrameStepTimeMS               = 25;
-    FrameControl.TotalNumberOfFramesInSequence = 0;
+    FileControl[NextFile].FileName                      = emptyString;
+    FileControl[NextFile].FileHandleForFileBeingPlayed  = c_FileMgr::INVALID_FILE_HANDLE;
+    FileControl[NextFile].RemainingPlayCount            = 0;
+    SyncControl.LastRcvdElapsedSeconds                  = 0.0;
+    FileControl[NextFile].ElapsedPlayTimeMS             = 0;
+    FileControl[NextFile].DataOffset                    = 0;
+    FileControl[NextFile].ChannelsPerFrame              = 0;
+    FileControl[NextFile].FrameStepTimeMS               = 25;
+    FileControl[NextFile].TotalNumberOfFramesInSequence = 0;
     // DEBUG_END;
 } // ClearFileInfo
 
+//-----------------------------------------------------------------------------
 uint32_t c_InputFPPRemotePlayFile::ReadFile(uint32_t DestinationIntensityId, uint32_t NumBytesToRead, uint32_t FileOffset)
 {
-    // DEBUG_START;
-// #define WRITE_DIRECT_TO_OUTPUT_BUFFER
-#ifdef WRITE_DIRECT_TO_OUTPUT_BUFFER
-    uint32_t NumBytesRead = FileMgr.ReadSdFile(FileHandleForFileBeingPlayed,
-                                             OutputMgr.GetBufferAddress(),
-                                             min((NumBytesToRead), OutputMgr.GetBufferUsedSize()),
-                                             FileOffset);
-#else
-    uint8_t LocalIntensityBuffer[200];
+    // xDEBUG_START;
 
     uint32_t NumBytesRead = 0;
+    uint8_t LocalIntensityBuffer[200];
 
-    while (NumBytesRead < NumBytesToRead)
+    do // once
     {
-        uint32_t NumBytesReadThisPass = FileMgr.ReadSdFile(FileHandleForFileBeingPlayed,
-                                                         LocalIntensityBuffer,
-                                                         min((NumBytesToRead - NumBytesRead), sizeof(LocalIntensityBuffer)),
-                                                         FileOffset);
+        if(c_FileMgr::INVALID_FILE_HANDLE == FileControl[CurrentFile].FileHandleForFileBeingPlayed)
+        {
+            // DEBUG_V(String("FileHandleForFileBeingPlayed: ") + String(FileControl[CurrentFile].FileHandleForFileBeingPlayed));
+            break;
+        }
 
-        OutputMgr.WriteChannelData(DestinationIntensityId, NumBytesReadThisPass, LocalIntensityBuffer);
+        while (NumBytesRead < NumBytesToRead)
+        {
+            uint32_t NumBytesReadThisPass = FileMgr.ReadSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed,
+                                                            LocalIntensityBuffer,
+                                                            min((NumBytesToRead - NumBytesRead), sizeof(LocalIntensityBuffer)),
+                                                            FileOffset);
 
-        FileOffset += NumBytesReadThisPass;
-        NumBytesRead += NumBytesReadThisPass;
-        DestinationIntensityId += NumBytesReadThisPass;
-    }
-#endif // !def WRITE_DIRECT_TO_OUTPUT_BUFFER
+            OutputMgr.WriteChannelData(DestinationIntensityId, NumBytesReadThisPass, LocalIntensityBuffer);
 
-    // DEBUG_END;
+            FileOffset += NumBytesReadThisPass;
+            NumBytesRead += NumBytesReadThisPass;
+            DestinationIntensityId += NumBytesReadThisPass;
+        }
+    } while (false);
+
+    // xDEBUG_END;
     return NumBytesRead;
 } // ReadFile

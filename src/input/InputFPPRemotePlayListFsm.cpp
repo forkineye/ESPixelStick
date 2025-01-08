@@ -25,7 +25,7 @@
 #include "input/InputFPPRemotePlayEffect.hpp"
 
 //-----------------------------------------------------------------------------
-bool fsm_PlayList_state_WaitForStart::Poll (bool /* StayDark */)
+bool fsm_PlayList_state_WaitForStart::Poll ()
 {
     // DEBUG_START;
 
@@ -55,13 +55,13 @@ void fsm_PlayList_state_WaitForStart::Start (String & FileName, float, uint32_t)
 
     do // once
     {
-        pInputFPPRemotePlayList->PlayItemName = FileName;
+        pInputFPPRemotePlayList->FileControl[CurrentFile].FileName = FileName;
         pInputFPPRemotePlayList->PlayListEntryId = 0;
 
         // DEBUG_V (String ("PlayItemName: '") + pInputFPPRemotePlayList->PlayItemName + "'");
 
         pInputFPPRemotePlayList->fsm_PlayList_state_Idle_imp.Init (pInputFPPRemotePlayList);
-    
+
     } while (false);
 
     // DEBUG_END;
@@ -84,7 +84,7 @@ void fsm_PlayList_state_WaitForStart::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    // JsonObject FileStatus = jsonStatus[CN_Idle].to<JsonObject> ();
+    // JsonObject FileStatus = jsonStatus[(char*)CN_Idle].to<JsonObject> ();
 
     // DEBUG_END;
 
@@ -94,7 +94,7 @@ void fsm_PlayList_state_WaitForStart::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayList_state_Idle::Poll (bool /* StayDark */)
+bool fsm_PlayList_state_Idle::Poll ()
 {
     // DEBUG_START;
 
@@ -144,7 +144,7 @@ void fsm_PlayList_state_Idle::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    // JsonObject FileStatus = jsonStatus[CN_Idle].to<JsonObject> ();
+    // JsonObject FileStatus = jsonStatus[(char*)CN_Idle].to<JsonObject> ();
 
     // DEBUG_END;
 
@@ -153,11 +153,11 @@ void fsm_PlayList_state_Idle::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayList_state_PlayingFile::Poll (bool StayDark)
+bool fsm_PlayList_state_PlayingFile::Poll ()
 {
     // xDEBUG_START;
 
-    bool Response = pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll (StayDark);
+    bool Response = pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll ();
 
     if (pInputFPPRemotePlayList->pInputFPPRemotePlayItem->IsIdle ())
     {
@@ -220,7 +220,7 @@ void fsm_PlayList_state_PlayingFile::GetStatus (JsonObject& jsonStatus)
 
     jsonStatus[F ("repeat")] = pInputFPPRemotePlayList->pInputFPPRemotePlayItem->GetRepeatCount ();
 
-    JsonObject FileStatus = jsonStatus[CN_File].to<JsonObject> ();
+    JsonObject FileStatus = jsonStatus[(char*)CN_File].to<JsonObject> ();
     pInputFPPRemotePlayList->pInputFPPRemotePlayItem->GetStatus (FileStatus);
 
     // DEBUG_END;
@@ -230,11 +230,11 @@ void fsm_PlayList_state_PlayingFile::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayList_state_PlayingEffect::Poll (bool StayDark)
+bool fsm_PlayList_state_PlayingEffect::Poll ()
 {
     // DEBUG_START;
 
-    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll (StayDark);
+    pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Poll ();
 
     if (pInputFPPRemotePlayList->pInputFPPRemotePlayItem->IsIdle ())
     {
@@ -299,7 +299,7 @@ void fsm_PlayList_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject EffectStatus = jsonStatus[CN_Effect].to<JsonObject> ();
+    JsonObject EffectStatus = jsonStatus[(char*)CN_Effect].to<JsonObject> ();
     pInputFPPRemotePlayList->pInputFPPRemotePlayItem->GetStatus (EffectStatus);
 
     // DEBUG_END;
@@ -309,7 +309,7 @@ void fsm_PlayList_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayList_state_Paused::Poll (bool /* StayDark */)
+bool fsm_PlayList_state_Paused::Poll ()
 {
     // DEBUG_START;
 
@@ -363,7 +363,7 @@ void fsm_PlayList_state_Paused::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject PauseStatus = jsonStatus[CN_Paused].to<JsonObject> ();
+    JsonObject PauseStatus = jsonStatus[(char*)CN_Paused].to<JsonObject> ();
 
     time_t SecondsRemaining = pInputFPPRemotePlayList->PauseDelayTimer.GetTimeRemaining() / 1000u;
 

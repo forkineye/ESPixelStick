@@ -42,7 +42,7 @@ public:
 	};
 
 	void         Init              (uint32_t iInputId, uint32_t iPinId, Polarity_t Poliarity, String & sName);
-	void         Poll              (bool StayDark);
+	void         Poll              (void);
 	void         GetConfig         (JsonObject JsonData);
 	void         GetStatistics     (JsonObject JsonData);
 	void         ProcessConfig     (JsonObject JsonData);

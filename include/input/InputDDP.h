@@ -137,7 +137,7 @@ public:
     bool SetConfig (JsonObject& jsonConfig);   ///< Set a new config in the driver
     void GetConfig (JsonObject& jsonConfig);   ///< Get the current config used by the driver
     void GetStatus (JsonObject& jsonStatus);
-    void Process (bool StayDark);                                        ///< Call from loop(),  renders Input data
+    void Process ();                                        ///< Call from loop(),  renders Input data
     void GetDriverName (String& sDriverName) { sDriverName = "DDP"; } ///< get the name for the instantiated driver
     void SetBufferInfo (uint32_t BufferSize);
     bool isShutDownRebootNeeded () { return HasBeenInitialized; }

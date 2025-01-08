@@ -68,12 +68,12 @@ void c_ExternalInput::GetConfig (JsonObject JsonData)
 {
     // DEBUG_START;
 
-	JsonData[CN_enabled]  = Enabled;
-	JsonData[CN_name]     = name;
-	JsonData[CN_id]       = GpioId;
-	JsonData[CN_polarity] = (ActiveHigh == polarity) ? CN_ActiveHigh : CN_ActiveLow;
-	JsonData[CN_channels] = TriggerChannel;
-	JsonData[CN_long]     = LongPushDelayMS;
+	JsonWrite(JsonData, CN_enabled,  Enabled);
+	JsonWrite(JsonData, CN_name,     name);
+	JsonWrite(JsonData, CN_id,       GpioId);
+	JsonWrite(JsonData, CN_polarity, String((ActiveHigh == polarity) ? CN_ActiveHigh : CN_ActiveLow));
+	JsonWrite(JsonData, CN_channels, TriggerChannel);
+	JsonWrite(JsonData, CN_long,     LongPushDelayMS);
 
 	// DEBUG_V (String ("m_iPinId: ") + String (m_iPinId));
 
@@ -86,8 +86,8 @@ void c_ExternalInput::GetStatistics (JsonObject JsonData)
 {
 	// DEBUG_START;
 
-	JsonData[CN_id]    = GpioId;
-	JsonData[CN_state] = (ReadInput()) ? CN_on : CN_off;
+	JsonWrite(JsonData, CN_id,    GpioId);
+	JsonWrite(JsonData, CN_state, String((ReadInput()) ? CN_on : CN_off));
 
 	// DEBUG_END;
 
@@ -125,7 +125,7 @@ void c_ExternalInput::ProcessConfig (JsonObject JsonData)
 } // ProcessConfig
 
 /*****************************************************************************/
-void c_ExternalInput::Poll (bool StayDark)
+void c_ExternalInput::Poll ()
 {
 	// DEBUG_START;
 

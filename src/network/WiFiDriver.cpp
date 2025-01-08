@@ -312,37 +312,37 @@ void c_WiFiDriver::GetConfig (JsonObject& json)
 {
     // DEBUG_START;
 
-    json[CN_ssid] = ssid;
-    json[CN_passphrase] = passphrase;
-    json[CN_ap_ssid] = ap_ssid;
-    json[CN_ap_passphrase] = ap_passphrase;
+    JsonWrite(json, CN_ssid,          ssid);
+    JsonWrite(json, CN_passphrase,    passphrase);
+    JsonWrite(json, CN_ap_ssid,       ap_ssid);
+    JsonWrite(json, CN_ap_passphrase, ap_passphrase);
 
 #ifdef ARDUINO_ARCH_ESP8266
     IPAddress Temp = ip;
-    json[CN_ip] = Temp.toString ();
+    JsonWrite(json, CN_ip,           Temp.toString ());
     Temp = netmask;
-    json[CN_netmask] = Temp.toString ();
+    JsonWrite(json, CN_netmask,      Temp.toString ());
     Temp = gateway;
-    json[CN_gateway] = Temp.toString ();
+    JsonWrite(json, CN_gateway,      Temp.toString ());
     Temp = primaryDns;
-    json[CN_dnsp] = Temp.toString ();
+    JsonWrite(json, CN_dnsp,         Temp.toString ());
     Temp = secondaryDns;
-    json[CN_dnss] = Temp.toString ();
+    JsonWrite(json, CN_dnss,         Temp.toString ());
 #else
-    json[CN_ip] = ip.toString ();
-    json[CN_netmask] = netmask.toString ();
-    json[CN_gateway] = gateway.toString ();
-    json[CN_dnsp] = primaryDns.toString ();
-    json[CN_dnss] = secondaryDns.toString ();
+    JsonWrite(json, CN_ip,           ip.toString ());
+    JsonWrite(json, CN_netmask,      netmask.toString ());
+    JsonWrite(json, CN_gateway,      gateway.toString ());
+    JsonWrite(json, CN_dnsp,         primaryDns.toString ());
+    JsonWrite(json, CN_dnss,         secondaryDns.toString ());
 #endif // !def ARDUINO_ARCH_ESP8266
 
-    json[CN_StayInApMode] = StayInApMode;
-    json[CN_dhcp]         = UseDhcp;
-    json[CN_sta_timeout]  = sta_timeout;
-    json[CN_ap_channel]   = ap_channelNumber;
-    json[CN_ap_fallback]  = ap_fallbackIsEnabled;
-    json[CN_ap_timeout]   = ap_timeout;
-    json[CN_ap_reboot]    = RebootOnWiFiFailureToConnect;
+    JsonWrite(json, CN_StayInApMode, StayInApMode);
+    JsonWrite(json, CN_dhcp,         UseDhcp);
+    JsonWrite(json, CN_sta_timeout,  sta_timeout);
+    JsonWrite(json, CN_ap_channel,   ap_channelNumber);
+    JsonWrite(json, CN_ap_fallback,  ap_fallbackIsEnabled);
+    JsonWrite(json, CN_ap_timeout,   ap_timeout);
+    JsonWrite(json, CN_ap_reboot,    RebootOnWiFiFailureToConnect);
 
     // DEBUG_END;
 
@@ -365,14 +365,13 @@ void c_WiFiDriver::GetStatus (JsonObject& jsonStatus)
     // DEBUG_START;
     String Hostname;
     GetHostname (Hostname);
-    jsonStatus[CN_hostname] = Hostname;
-
-    jsonStatus[CN_rssi] = WiFi.RSSI ();
-    jsonStatus[CN_ip] = getIpAddress ().toString ();
-    jsonStatus[CN_subnet] = getIpSubNetMask ().toString ();
-    jsonStatus[CN_mac] = WiFi.macAddress ();
-    jsonStatus[CN_ssid] = WiFi.SSID ();
-    jsonStatus[CN_connected] = IsWiFiConnected ();
+    JsonWrite(jsonStatus, CN_hostname,  Hostname);
+    JsonWrite(jsonStatus, CN_rssi,      WiFi.RSSI ());
+    JsonWrite(jsonStatus, CN_ip,        getIpAddress ().toString ());
+    JsonWrite(jsonStatus, CN_subnet,    getIpSubNetMask ().toString ());
+    JsonWrite(jsonStatus, CN_mac,       WiFi.macAddress ());
+    JsonWrite(jsonStatus, CN_ssid,      WiFi.SSID ());
+    JsonWrite(jsonStatus, CN_connected, IsWiFiConnected ());
 
     // DEBUG_END;
 } // GetStatus

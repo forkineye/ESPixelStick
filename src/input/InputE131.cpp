@@ -78,10 +78,10 @@ void c_InputE131::GetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
-    jsonConfig[CN_universe]       = startUniverse;
-    jsonConfig[CN_universe_limit] = ChannelsPerUniverse;
-    jsonConfig[CN_universe_start] = FirstUniverseChannelOffset;
-    jsonConfig[CN_port]           = PortId;
+    JsonWrite(jsonConfig, CN_universe,       startUniverse);
+    JsonWrite(jsonConfig, CN_universe_limit, ChannelsPerUniverse);
+    JsonWrite(jsonConfig, CN_universe_start, FirstUniverseChannelOffset);
+    JsonWrite(jsonConfig, CN_port,           PortId);
 
     // DEBUG_END;
 
@@ -92,34 +92,34 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject e131Status = jsonStatus[F ("e131")].to<JsonObject> ();
-    e131Status[CN_id]         = InputChannelId;
-    e131Status[CN_unifirst]   = startUniverse;
-    e131Status[CN_unilast ]   = LastUniverse;
-    e131Status[CN_unichanlim] = ChannelsPerUniverse;
+    JsonObject e131Status = jsonStatus[(char*)F ("e131")].to<JsonObject> ();
+    JsonWrite(e131Status, CN_id,         InputChannelId);
+    JsonWrite(e131Status, CN_unifirst,   startUniverse);
+    JsonWrite(e131Status, CN_unilast,    LastUniverse);
+    JsonWrite(e131Status, CN_unichanlim, ChannelsPerUniverse);
 
-    e131Status[CN_num_packets]   = e131->stats.num_packets;
-    e131Status[CN_last_clientIP] = uint32_t(e131->stats.last_clientIP);
+    JsonWrite(e131Status, CN_num_packets,   e131->stats.num_packets);
+    JsonWrite(e131Status, CN_last_clientIP, uint32_t(e131->stats.last_clientIP));
     // DEBUG_V ("");
 
-    JsonArray e131UniverseStatus = e131Status[CN_channels].to<JsonArray> ();
+    JsonArray e131UniverseStatus = e131Status[(char*)CN_channels].to<JsonArray> ();
     uint32_t TotalErrors = 0; // e131->stats.packet_errors;
     for (auto & CurrentUniverse : UniverseArray)
     {
         JsonObject e131CurrentUniverseStatus = e131UniverseStatus.add<JsonObject> ();
 
-        e131CurrentUniverseStatus[CN_errors] = CurrentUniverse.SequenceErrorCounter;
+        JsonWrite(e131CurrentUniverseStatus, CN_errors, CurrentUniverse.SequenceErrorCounter);
         TotalErrors += CurrentUniverse.SequenceErrorCounter;
     }
 
-    e131Status[CN_packet_errors] = TotalErrors;
+    JsonWrite(e131Status, CN_packet_errors, TotalErrors);
 
     // DEBUG_END;
 
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-void c_InputE131::Process (bool /* StayDark */)
+void c_InputE131::Process ()
 {
     // DEBUG_START;
 
@@ -137,7 +137,7 @@ void c_InputE131::ProcessIncomingE131Data (e131_packet_t * packet)
 
     do // once
     {
-        if (0 == InputDataBufferSize)
+        if ((0 == InputDataBufferSize) || !IsInputChannelActive)
         {
             // no place to put any data
             break;

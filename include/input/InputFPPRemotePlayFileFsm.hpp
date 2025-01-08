@@ -36,14 +36,13 @@ public:
     fsm_PlayFile_state() {}
     virtual ~fsm_PlayFile_state() {}
 
-    virtual bool Poll (bool StayDark) = 0;
+    virtual IRAM_ATTR bool Poll () = 0;
     virtual void Init (c_InputFPPRemotePlayFile * Parent) = 0;
     virtual void GetStateName (String & sName) = 0;
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t RemainingPlayCount) = 0;
     virtual void Stop (void) = 0;
     virtual bool Sync (String& FileName, float SecondsElapsed) = 0;
     void GetDriverName (String& Name) { Name = "InputMgr"; }
-    virtual IRAM_ATTR void TimerPoll () = 0;
 
 protected:
     c_InputFPPRemotePlayFile * p_Parent = nullptr;
@@ -57,13 +56,12 @@ public:
     fsm_PlayFile_state_Idle() {}
     virtual ~fsm_PlayFile_state_Idle() {}
 
-    virtual bool Poll (bool StayDark);
+    virtual IRAM_ATTR bool Poll ();
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String & sName) { sName = CN_Idle; }
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
     virtual void Stop (void);
     virtual bool Sync (String& FileName, float SecondsElapsed);
-    virtual IRAM_ATTR void TimerPoll ();
 
 }; // fsm_PlayFile_state_Idle
 
@@ -74,13 +72,12 @@ public:
     fsm_PlayFile_state_Starting() {}
     virtual ~fsm_PlayFile_state_Starting() {}
 
-    virtual bool Poll (bool StayDark);
+    virtual IRAM_ATTR bool Poll ();
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String& sName) { sName = F ("Starting"); }
     virtual void Start (String& FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
     virtual void Stop (void);
     virtual bool Sync (String& FileName, float SecondsElapsed);
-    virtual IRAM_ATTR void TimerPoll ();
 
 }; // fsm_PlayFile_state_Starting
 
@@ -91,13 +88,12 @@ public:
     fsm_PlayFile_state_PlayingFile() {}
     virtual ~fsm_PlayFile_state_PlayingFile() {}
 
-    virtual bool Poll (bool StayDark);
+    virtual IRAM_ATTR bool Poll ();
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String & sName) { sName = CN_File; }
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
     virtual void Stop (void);
     virtual bool Sync (String & FileName, float SecondsElapsed);
-    virtual IRAM_ATTR void TimerPoll ();
 
 private:
     struct SparseRange
@@ -105,7 +101,7 @@ private:
         uint32_t DataOffset;
         uint32_t ChannelCount;
     };
-    uint32_t LastPlayedFrameId = 0;
+    // uint32_t LastPlayedFrameId = 0;
 
 }; // fsm_PlayFile_state_PlayingFile
 
@@ -116,18 +112,14 @@ public:
     fsm_PlayFile_state_Stopping() {}
     virtual ~fsm_PlayFile_state_Stopping() {}
 
-    virtual bool Poll (bool StayDark);
+    virtual IRAM_ATTR bool Poll ();
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String& sName) { sName = F("Stopping"); }
     virtual void Start (String& FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
     virtual void Stop (void);
     virtual bool Sync (String& FileName, float SecondsElapsed);
-    virtual IRAM_ATTR void TimerPoll ();
 
 private:
-    String   FileName            = "";
-    uint32_t StartingElapsedTime = 0.0;
-    uint32_t PlayCount           = 0;
 
 }; // fsm_PlayFile_state_Stopping
 
@@ -138,13 +130,12 @@ public:
     fsm_PlayFile_state_Error() {}
     virtual ~fsm_PlayFile_state_Error() {}
 
-    virtual bool Poll (bool StayDark);
+    virtual IRAM_ATTR bool Poll ();
     virtual void Init (c_InputFPPRemotePlayFile* Parent);
     virtual void GetStateName (String& sName) { sName = F ("Error"); }
     virtual void Start (String& FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
     virtual void Stop (void);
     virtual bool Sync (String& FileName, float SecondsElapsed);
-    virtual IRAM_ATTR void TimerPoll ();
 
 private:
 

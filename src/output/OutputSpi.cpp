@@ -181,9 +181,9 @@ void c_OutputSpi::GetConfig (ArduinoJson::JsonObject & jsonConfig)
     // DEBUG_START;
 
     JsonObject SpiConfig = jsonConfig["dataspi"].to<JsonObject>();
-    SpiConfig[CN_cs_pin]    = CsPin;
-    SpiConfig[CN_data_pin]  = DataPin;
-    SpiConfig[CN_clock_pin] = ClockPin;
+    JsonWrite(SpiConfig, CN_cs_pin,    CsPin);
+    JsonWrite(SpiConfig, CN_data_pin,  DataPin);
+    JsonWrite(SpiConfig, CN_clock_pin, ClockPin);
 
     // DEBUG_END;
 } // GetConfig

@@ -23,7 +23,7 @@
 #include "utility/SaferStringConversion.hpp"
 
 //-----------------------------------------------------------------------------
-bool fsm_PlayEffect_state_Idle::Poll (bool /* StayDark */)
+bool fsm_PlayEffect_state_Idle::Poll ()
 {
     // DEBUG_START;
 
@@ -109,7 +109,7 @@ void fsm_PlayEffect_state_Idle::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    jsonStatus[CN_TimeRemaining] = F ("00:00");
+    JsonWrite(jsonStatus, CN_TimeRemaining, F ("00:00"));
 
     // DEBUG_END;
 
@@ -118,12 +118,12 @@ void fsm_PlayEffect_state_Idle::GetStatus (JsonObject& jsonStatus)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool fsm_PlayEffect_state_PlayingEffect::Poll (bool StayDark)
+bool fsm_PlayEffect_state_PlayingEffect::Poll ()
 {
     // DEBUG_START;
 
     p_InputFPPRemotePlayEffect->EffectsEngine.SetBufferInfo (OutputMgr.GetBufferUsedSize());
-    p_InputFPPRemotePlayEffect->EffectsEngine.Process (StayDark);
+    p_InputFPPRemotePlayEffect->EffectsEngine.Process ();
 
     if (p_InputFPPRemotePlayEffect->PlayEffectTimer.IsExpired())
     {
@@ -198,7 +198,7 @@ void fsm_PlayEffect_state_PlayingEffect::GetStatus (JsonObject& jsonStatus)
 
     char buf[12];
     ESP_ERROR_CHECK(saferSecondsToFormattedMinutesAndSecondsString(buf, (uint32_t)SecondsRemaining));
-    jsonStatus[CN_TimeRemaining] = buf;
+    JsonWrite(jsonStatus, CN_TimeRemaining, buf);
 
     p_InputFPPRemotePlayEffect->EffectsEngine.GetStatus (jsonStatus);
 

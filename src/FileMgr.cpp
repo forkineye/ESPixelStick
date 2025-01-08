@@ -2,7 +2,7 @@
 * FileMgr.cpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2024 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -228,7 +228,7 @@ bool c_FileMgr::SetConfig (JsonObject & json)
     // DEBUG_START;
 
     bool ConfigChanged = false;
-    JsonObject JsonDeviceConfig = json[CN_device];
+    JsonObject JsonDeviceConfig = json[(char*)CN_device].as<JsonObject>();
     if (JsonDeviceConfig)
     {
         // PrettyPrint (JsonDeviceConfig, "c_FileMgr");
@@ -280,15 +280,15 @@ void c_FileMgr::GetConfig (JsonObject& json)
 {
     // DEBUG_START;
 
-    json[CN_miso_pin]  = miso_pin;
-    json[CN_mosi_pin]  = mosi_pin;
-    json[CN_clock_pin] = clk_pin;
-    json[CN_cs_pin]    = cs_pin;
-    json[CN_sdspeed]   = MaxSdSpeed;
+    JsonWrite(json, CN_miso_pin,  miso_pin);
+    JsonWrite(json, CN_mosi_pin,  mosi_pin);
+    JsonWrite(json, CN_clock_pin, clk_pin);
+    JsonWrite(json, CN_cs_pin,    cs_pin);
+    JsonWrite(json, CN_sdspeed,   MaxSdSpeed);
 
-    json[CN_user]      = FtpUserName;
-    json[CN_password]  = FtpPassword;
-    json[CN_enabled]   = FtpEnabled;
+    JsonWrite(json, CN_user,      FtpUserName);
+    JsonWrite(json, CN_password,  FtpPassword);
+    JsonWrite(json, CN_enabled,   FtpEnabled);
 
     // DEBUG_END;
 
@@ -1457,9 +1457,15 @@ void c_FileMgr::CloseSdFile (FileId& FileHandle, bool LockStatus)
     {
         if(!FileList[FileListIndex].Paused)
         {
+            // DEBUG_V("Close the file");
             delay(10);
             FileList[FileListIndex].fsFile.close ();
         }
+        else
+        {
+            // DEBUG_V("File is paused. Not closing");
+        }
+
         FileList[FileListIndex].IsOpen = false;
         FileList[FileListIndex].handle = INVALID_FILE_HANDLE;
         FileList[FileListIndex].Paused = false;
@@ -1468,6 +1474,7 @@ void c_FileMgr::CloseSdFile (FileId& FileHandle, bool LockStatus)
         {
             if(FileList[FileListIndex].buffer.DataBuffer != OutputMgr.GetBufferAddress())
             {
+                // only free the buffer if it is not malloc'd
                 free(FileList[FileListIndex].buffer.DataBuffer);
             }
         }
@@ -1581,12 +1588,12 @@ size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size
             // DEBUG_V(String("        Offset: ") + String(FileList[FileListIndex].buffer.offset));
             if(WontFit || WriteRemainder)
             {
-                delay(10);
+                delay(20);
                 FeedWDT();
                 // DEBUG_V("Buffer cant hold this data. Write out the buffer");
-                size_t bufferWriteSize = FileList[FileListIndex].fsFile.write(FileData, FileList[FileListIndex].buffer.offset);
+                size_t bufferWriteSize = FileList[FileListIndex].fsFile.write(FileList[FileListIndex].buffer.DataBuffer, FileList[FileListIndex].buffer.offset);
                 FileList[FileListIndex].fsFile.flush();
-                delay(20);
+                delay(30);
                 FeedWDT();
                 if(FileList[FileListIndex].buffer.offset != bufferWriteSize)
                 {
@@ -1601,8 +1608,8 @@ size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size
             } // End buffer cant take the new data
 
             // DEBUG_V(String("Writing ") + String(NumBytesToWrite) + " bytes to the buffer");
-            memcpy(&FileList[FileListIndex].buffer.DataBuffer[FileList[FileListIndex].buffer.offset],
-                   FileData, NumBytesToWrite);
+            memcpy(&(FileList[FileListIndex].buffer.DataBuffer[FileList[FileListIndex].buffer.offset]), FileData, NumBytesToWrite);
+
             FileList[FileListIndex].buffer.offset += NumBytesToWrite;
             NumBytesWritten = NumBytesToWrite;
         }
@@ -1708,19 +1715,19 @@ void c_FileMgr::BuildFseqList(bool LockStatus)
         ESP_SD.chdir(); // Set to sd root
         if(!InputFile.open ("/", O_READ))
         {
-            logcon(F("ERROR: Could not open SD card."));
+            logcon(F("ERROR: Could not open SD card for Reading FSEQ List."));
             break;
         }
 
         // open output file, erase old data
         ESP_SD.chdir(); // Set to sd root
-        DeleteSdFile(String(FSEQFILELIST), true);
+        DeleteSdFile(String(F(FSEQFILELIST)), true);
 
         FsFile OutputFile;
         if(!OutputFile.open (String(F(FSEQFILELIST)).c_str(), O_WRITE | O_CREAT))
         {
             InputFile.close();
-            logcon(F("ERROR: Could not Open SD file list."));
+            logcon(F("ERROR: Could not open SD card for writting FSEQ List."));
             break;
         }
         OutputFile.print("{");
@@ -1864,6 +1871,7 @@ bool c_FileMgr::handleFileUpload (
             // DEBUG_V("New File");
             handleFileUploadNewFile (filename);
             expectedIndex = 0;
+            LOG_PORT.println(".");
         }
 
         if (index != expectedIndex)
@@ -1875,6 +1883,7 @@ bool c_FileMgr::handleFileUpload (
                 CloseSdFile(fsUploadFileHandle, false);
                 DeleteSdFile (fsUploadFileName, false);
                 fsUploadFileHandle = INVALID_FILE_HANDLE;
+                delay(1000);
                 BuildFseqList(false);
                 expectedIndex = 0;
                 fsUploadFileName = emptyString;
@@ -1894,7 +1903,8 @@ bool c_FileMgr::handleFileUpload (
             // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
             bytesWritten = WriteSdFileBuf (fsUploadFileHandle, data, len, false);
             // DEBUG_V (String ("Writing bytes: ") + String (index));
-            // LOG_PORT.print (".");
+            LOG_PORT.println(String("\033[Fprogress: ") + String(expectedIndex));
+            LOG_PORT.flush();
         }
         // PauseSdFile(fsUploadFile);
 
@@ -1904,6 +1914,7 @@ bool c_FileMgr::handleFileUpload (
             CloseSdFile(fsUploadFileHandle, false);
             DeleteSdFile (fsUploadFileName, false);
             fsUploadFileHandle = INVALID_FILE_HANDLE;
+            delay(1000);
             BuildFseqList(false);
             expectedIndex = 0;
             fsUploadFileName = emptyString;
@@ -1927,7 +1938,11 @@ bool c_FileMgr::handleFileUpload (
                 F(" Bytes out of ") + String(totalLen) +
                 F(" bytes. FileLen: ") + GetSdFileSize(filename, false));
 
+        delay(1000);
+        FeedWDT();
+
         expectedIndex = 0;
+        delay(1000);
         BuildFseqList(false);
 
         // DEBUG_V(String("Expected: ") + String(totalLen));

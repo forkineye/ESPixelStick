@@ -225,6 +225,7 @@ c_OutputMgr::~c_OutputMgr()
 void c_OutputMgr::Begin ()
 {
     // DEBUG_START;
+    // DEBUG_V(String("Current CPU ID: ") + String(xPortGetCoreID()));
 
     // IsBooting = false;
     // FileMgr.DeleteConfigFile(ConfigFileName);
@@ -286,11 +287,11 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
     // DEBUG_V ();
 
     // add the channels header
-    JsonObject OutputMgrChannelsData = jsonConfig[CN_channels];
+    JsonObject OutputMgrChannelsData = jsonConfig[(char*)CN_channels];
     if (!OutputMgrChannelsData)
     {
         // DEBUG_V ();
-        OutputMgrChannelsData = jsonConfig[CN_channels].to<JsonObject> ();
+        OutputMgrChannelsData = jsonConfig[(char*)CN_channels].to<JsonObject> ();
     }
 
     // add the channel configurations
@@ -308,7 +309,7 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
         }
 
         // save the name as the selected channel type
-        ChannelConfigData[CN_type] = int(CurrentChannel.pOutputChannelDriver->GetOutputType());
+        JsonWrite(ChannelConfigData, CN_type, int(CurrentChannel.pOutputChannelDriver->GetOutputType()));
 
         String DriverTypeId = String(int(CurrentChannel.pOutputChannelDriver->GetOutputType()));
         JsonObject ChannelConfigByTypeData = ChannelConfigData[String (DriverTypeId)];
@@ -329,7 +330,7 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
         CurrentChannel.pOutputChannelDriver->GetDriverName(DriverName);
         // DEBUG_V (String ("DriverName: ") + DriverName);
 
-        ChannelConfigByTypeData[CN_type] = DriverName;
+        JsonWrite(ChannelConfigByTypeData, CN_type, DriverName);
 
         // DEBUG_V ();
         // PrettyPrint (ChannelConfigByTypeData, String ("jsonConfig"));
@@ -369,11 +370,11 @@ void c_OutputMgr::CreateNewConfig ()
     // DEBUG_V ();
 
     // DEBUG_V("Create a new output config structure.");
-    JsonObject JsonConfig = JsonConfigDoc[CN_output_config].to<JsonObject> ();
+    JsonObject JsonConfig = JsonConfigDoc[(char*)CN_output_config].to<JsonObject> ();
     // DEBUG_V ();
 
-    JsonConfig[CN_cfgver] = CurrentConfigVersion;
-    JsonConfig[CN_MaxChannels] = sizeof(OutputBuffer);
+    JsonWrite(JsonConfig, CN_cfgver,      CurrentConfigVersion);
+    JsonWrite(JsonConfig, CN_MaxChannels, sizeof(OutputBuffer));
 
     // DEBUG_V("Collect the all ports disabled config first");
     CreateJsonConfig (JsonConfig);
@@ -466,7 +467,7 @@ void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
     // jsonStatus["PollCount"] = PollCount;
 #endif // defined(ARDUINO_ARCH_ESP32)
 
-    JsonArray OutputStatus = jsonStatus[CN_output].to<JsonArray> ();
+    JsonArray OutputStatus = jsonStatus[(char*)CN_output].to<JsonArray> ();
     for (auto & CurrentOutput : OutputChannelDrivers)
     {
         // DEBUG_V ();
@@ -1044,7 +1045,7 @@ bool c_OutputMgr::FindJsonChannelConfig (JsonDocument& jsonConfig,
 
     do // once
     {
-        JsonObject OutputChannelMgrData = jsonConfig[CN_output_config];
+        JsonObject OutputChannelMgrData = jsonConfig[(char*)CN_output_config];
         if (!OutputChannelMgrData)
         {
             logcon(String(MN_16) + MN_18);
@@ -1065,7 +1066,7 @@ bool c_OutputMgr::FindJsonChannelConfig (JsonDocument& jsonConfig,
         }
 
         // do we have a channel configuration array?
-        JsonObject OutputChannelArray = OutputChannelMgrData[CN_channels];
+        JsonObject OutputChannelArray = OutputChannelMgrData[(char*)CN_channels];
         if (!OutputChannelArray)
         {
             // if not, flag an error and stop processing
@@ -1330,7 +1331,7 @@ void c_OutputMgr::Poll()
         }
     } // done need to save the current config
 
-    if ((false == IsOutputPaused) && (false == ConfigInProgress) && (false == RebootInProgress()) )
+    if ((false == OutputIsPaused) && (false == ConfigInProgress) && (false == RebootInProgress()) )
     {
         // //DEBUG_V();
         for (DriverInfo_t & OutputChannel : OutputChannelDrivers)
@@ -1420,7 +1421,7 @@ void c_OutputMgr::PauseOutputs(bool PauseTheOutput)
     // DEBUG_START;
     // DEBUG_V(String("PauseTheOutput: ") + String(PauseTheOutput));
 
-    IsOutputPaused = PauseTheOutput;
+    OutputIsPaused = PauseTheOutput;
 
     for (auto & CurrentOutput : OutputChannelDrivers)
     {
@@ -1437,6 +1438,11 @@ void c_OutputMgr::WriteChannelData(uint32_t StartChannelId, uint32_t ChannelCoun
 
     do // once
     {
+        if(OutputIsPaused)
+        {
+            // DEBUG_V("Ignore the write request");
+            break;
+        }
         if (((StartChannelId + ChannelCount) > UsedBufferSize) || (0 == ChannelCount))
         {
             // DEBUG_V (String("ERROR: Invalid parameters"));
@@ -1496,6 +1502,11 @@ void c_OutputMgr::ReadChannelData(uint32_t StartChannelId, uint32_t ChannelCount
 
     do // once
     {
+        if(OutputIsPaused)
+        {
+            // DEBUG_V("Ignore the read request");
+            break;
+        }
         if ((StartChannelId + ChannelCount) > UsedBufferSize)
         {
             // DEBUG_V (String("ERROR: Invalid parameters"));

@@ -102,7 +102,7 @@ public:
     void GetMqttConfig (MQTTConfiguration_s& mqttConfig);   ///< Get the current config used by the driver
     void GetMqttEffectList (JsonObject& jsonConfig);   ///< Get the current config used by the driver
     void GetStatus (JsonObject& jsonStatus);
-    void Process   (bool StayDark);
+    void Process   ();
     void Poll ();                              ///< Call from loop(),  renders Input data
     void GetDriverName (String  & sDriverName) { sDriverName = "Effects"; } ///< get the name for the instantiated driver
     void SetBufferInfo (uint32_t BufferSize);

@@ -2,7 +2,7 @@
 * InputEffectEngine.cpp - Code to wrap ESPAsyncE131 for input
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -76,42 +76,6 @@ static std::vector<c_InputEffectEngine::MarqueeGroup> MarqueueGroupTable =
     {5, {255, 255, 255}, 100, 0},
 }; // MarqueueGroupTable
 
-#ifdef ARDUINO_ARCH_ESP32
-static TaskHandle_t PollTaskHandle = NULL;
-static c_InputEffectEngine *pEffectsInstance = nullptr;
-//----------------------------------------------------------------------------
-void EffectsTask (void *arg)
-{
-    uint32_t PollStartTime = millis();
-    uint32_t PollEndTime = PollStartTime;
-    uint32_t PollTime = pdMS_TO_TICKS(25);
-    const uint32_t MinPollTimeMs = 25;
-
-    while(1)
-    {
-        uint32_t DeltaTime = PollEndTime - PollStartTime;
-
-        if (DeltaTime < MinPollTimeMs)
-        {
-            PollTime = pdMS_TO_TICKS(MinPollTimeMs - DeltaTime);
-        }
-        else
-        {
-            // handle time wrap and long frames
-            PollTime = pdMS_TO_TICKS(1);
-        }
-        vTaskDelay(PollTime);
-
-        PollStartTime = millis();
-
-        pEffectsInstance->Poll();
-
-        // record the loop end time
-        PollEndTime = millis();
-    }
-} // EffectsTask
-#endif // def ARDUINO_ARCH_ESP32
-
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::c_InputEffectEngine (c_InputMgr::e_InputChannelIds NewInputChannelId,
                                           c_InputMgr::e_InputType       NewChannelType,
@@ -149,14 +113,6 @@ c_InputEffectEngine::c_InputEffectEngine () :
 //-----------------------------------------------------------------------------
 c_InputEffectEngine::~c_InputEffectEngine ()
 {
-#ifdef ARDUINO_ARCH_ESP32
-    if(PollTaskHandle)
-    {
-        logcon("Stop EffectsTask");
-        vTaskDelete(PollTaskHandle);
-        PollTaskHandle = NULL;
-    }
-#endif // def ARDUINO_ARCH_ESP32
 
 } // ~c_InputEffectEngine
 
@@ -185,59 +141,59 @@ void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
     ESP_ERROR_CHECK(saferRgbToHtmlColorString(HexColor, EffectColor.r, EffectColor.g, EffectColor.b));
     // DEBUG_V ("");
 
-    jsonConfig[CN_currenteffect]      = ActiveEffect->name;
-    jsonConfig[CN_EffectSpeed]        = EffectSpeed;
-    jsonConfig[CN_EffectReverse]      = EffectReverse;
-    jsonConfig[CN_EffectMirror]       = EffectMirror;
-    jsonConfig[CN_EffectAllLeds]      = EffectAllLeds;
-    jsonConfig[CN_EffectBrightness]   = uint32_t(EffectBrightness * 100.0);
-    jsonConfig[CN_EffectWhiteChannel] = EffectWhiteChannel;
-    jsonConfig[CN_EffectColor]        = HexColor;
-    jsonConfig[CN_pixel_count]        = effectMarqueePixelAdvanceCount;
+    JsonWrite(jsonConfig, CN_currenteffect,      ActiveEffect->name);
+    JsonWrite(jsonConfig, CN_EffectSpeed,        EffectSpeed);
+    JsonWrite(jsonConfig, CN_EffectReverse,      EffectReverse);
+    JsonWrite(jsonConfig, CN_EffectMirror,       EffectMirror);
+    JsonWrite(jsonConfig, CN_EffectAllLeds,      EffectAllLeds);
+    JsonWrite(jsonConfig, CN_EffectBrightness,   uint32_t(EffectBrightness * 100.0));
+    JsonWrite(jsonConfig, CN_EffectWhiteChannel, EffectWhiteChannel);
+    JsonWrite(jsonConfig, CN_EffectColor,        HexColor);
+    JsonWrite(jsonConfig, CN_pixel_count,        effectMarqueePixelAdvanceCount);
 
-    jsonConfig["FlashEnable"]   = FlashInfo.Enable;
-    jsonConfig["FlashMinInt"]   = FlashInfo.MinIntensity;
-    jsonConfig["FlashMaxInt"]   = FlashInfo.MaxIntensity;
-    jsonConfig["FlashMinDelay"] = FlashInfo.MinDelayMS;
-    jsonConfig["FlashMaxDelay"] = FlashInfo.MaxDelayMS;
-    jsonConfig["FlashMinDur"]   = FlashInfo.MinDurationMS;
-    jsonConfig["FlashMaxDur"]   = FlashInfo.MaxDurationMS;
-    jsonConfig["TransCount"]    = TransitionInfo.StepsToTarget;
-    jsonConfig["TransDelay"]    = TransitionInfo.TimeAtTargetMs;
+    JsonWrite(jsonConfig, "FlashEnable",   FlashInfo.Enable);
+    JsonWrite(jsonConfig, "FlashMinInt",   FlashInfo.MinIntensity);
+    JsonWrite(jsonConfig, "FlashMaxInt",   FlashInfo.MaxIntensity);
+    JsonWrite(jsonConfig, "FlashMinDelay", FlashInfo.MinDelayMS);
+    JsonWrite(jsonConfig, "FlashMaxDelay", FlashInfo.MaxDelayMS);
+    JsonWrite(jsonConfig, "FlashMinDur",   FlashInfo.MinDurationMS);
+    JsonWrite(jsonConfig, "FlashMaxDur",   FlashInfo.MaxDurationMS);
+    JsonWrite(jsonConfig, "TransCount",    TransitionInfo.StepsToTarget);
+    JsonWrite(jsonConfig, "TransDelay",    TransitionInfo.TimeAtTargetMs);
 
     // DEBUG_V ("");
 
-    JsonArray EffectsArray = jsonConfig[CN_effects].to<JsonArray> ();
+    JsonArray EffectsArray = jsonConfig[(char*)CN_effects].to<JsonArray> ();
     // DEBUG_V ("");
 
     for (EffectDescriptor_t currentEffect : ListOfEffects)
     {
         // DEBUG_V ("");
         JsonObject currentJsonEntry = EffectsArray.add<JsonObject> ();
-        currentJsonEntry[CN_name] = currentEffect.name;
+        JsonWrite(currentJsonEntry, CN_name, currentEffect.name);
     }
 
-    JsonArray TransitionsArray = jsonConfig[CN_transitions].to<JsonArray> ();
+    JsonArray TransitionsArray = jsonConfig[(char*)CN_transitions].to<JsonArray> ();
     for (auto currentTransition : TransitionColorTable)
     {
         // DEBUG_V ("");
         JsonObject currentJsonEntry = TransitionsArray.add<JsonObject> ();
-        currentJsonEntry["r"] = currentTransition.r;
-        currentJsonEntry["g"] = currentTransition.g;
-        currentJsonEntry["b"] = currentTransition.b;
+        JsonWrite(currentJsonEntry, CN_r, currentTransition.r);
+        JsonWrite(currentJsonEntry, CN_g, currentTransition.g);
+        JsonWrite(currentJsonEntry, CN_b, currentTransition.b);
     }
 
-    JsonArray MarqueeGroupArray = jsonConfig[CN_MarqueeGroups].to<JsonArray> ();
+    JsonArray MarqueeGroupArray = jsonConfig[(char*)CN_MarqueeGroups].to<JsonArray> ();
     for(auto CurrentMarqueeGroup : MarqueueGroupTable)
     {
         JsonObject currentJsonEntry = MarqueeGroupArray.add<JsonObject> ();
-        JsonObject currentJsonEntryColor = currentJsonEntry[CN_color].to<JsonObject> ();
-        currentJsonEntryColor["r"] = CurrentMarqueeGroup.Color.r;
-        currentJsonEntryColor["g"] = CurrentMarqueeGroup.Color.g;
-        currentJsonEntryColor["b"] = CurrentMarqueeGroup.Color.b;
-        currentJsonEntry[CN_brightness]    = CurrentMarqueeGroup.StartingIntensity;
-        currentJsonEntry[CN_pixel_count]   = CurrentMarqueeGroup.NumPixelsInGroup;
-        currentJsonEntry[CN_brightnessEnd] = CurrentMarqueeGroup.EndingIntensity;
+        JsonObject currentJsonEntryColor = currentJsonEntry[(char*)CN_color].to<JsonObject> ();
+        JsonWrite(currentJsonEntryColor, CN_r, CurrentMarqueeGroup.Color.r);
+        JsonWrite(currentJsonEntryColor, CN_g, CurrentMarqueeGroup.Color.g);
+        JsonWrite(currentJsonEntryColor, CN_b, CurrentMarqueeGroup.Color.b);
+        JsonWrite(currentJsonEntry, CN_brightness,    CurrentMarqueeGroup.StartingIntensity);
+        JsonWrite(currentJsonEntry, CN_pixel_count,   CurrentMarqueeGroup.NumPixelsInGroup);
+        JsonWrite(currentJsonEntry, CN_brightnessEnd, CurrentMarqueeGroup.EndingIntensity);
     }
 
     // DEBUG_END;
@@ -248,7 +204,7 @@ void c_InputEffectEngine::GetConfig (JsonObject& jsonConfig)
 void c_InputEffectEngine::GetMqttEffectList (JsonObject& jsonConfig)
 {
     // DEBUG_START;
-    JsonArray EffectsArray = jsonConfig[CN_effect_list].to<JsonArray> ();
+    JsonArray EffectsArray = jsonConfig[(char*)CN_effect_list].to<JsonArray> ();
 
     for (EffectDescriptor_t currentEffect : ListOfEffects)
     {
@@ -281,9 +237,9 @@ void c_InputEffectEngine::GetStatus (JsonObject& jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject Status = jsonStatus[F ("effects")].to<JsonObject> ();
-    Status[CN_currenteffect] = ActiveEffect->name;
-    Status[CN_id] = InputChannelId;
+    JsonObject Status = jsonStatus[(char*)CN_effects].to<JsonObject> ();
+    JsonWrite(Status, CN_currenteffect, ActiveEffect->name);
+    JsonWrite(Status, CN_id,            InputChannelId);
 
     // DEBUG_END;
 
@@ -373,13 +329,12 @@ void c_InputEffectEngine::PollFlash ()
 } // PollFlash
 
 //-----------------------------------------------------------------------------
-void c_InputEffectEngine::Process (bool _StayDark)
+void c_InputEffectEngine::Process ()
 {
     // DEBUG_START;
-    Disabled = _StayDark;
     // DEBUG_V (String ("HasBeenInitialized: ") + HasBeenInitialized);
     // DEBUG_V (String ("PixelCount: ") + PixelCount);
-#ifndef ARDUINO_ARCH_ESP32
+
     do // once
     {
         if (!HasBeenInitialized)
@@ -388,7 +343,7 @@ void c_InputEffectEngine::Process (bool _StayDark)
         }
         // DEBUG_V ("Init OK");
 
-        if ((0 == PixelCount) || (StayDark))
+        if (0 == PixelCount)
         {
             break;
         }
@@ -417,16 +372,6 @@ void c_InputEffectEngine::Process (bool _StayDark)
     } while (false);
 
     // DEBUG_END;
-#else
-    if(!PollTaskHandle)
-    {
-        logcon("Start EffectsTask");
-        pEffectsInstance = this;
-        xTaskCreatePinnedToCore(EffectsTask, "EffectsTask", 4096, NULL, EFFECTS_TASK_PRIORITY, &PollTaskHandle, 1);
-        vTaskPrioritySet(PollTaskHandle, EFFECTS_TASK_PRIORITY);
-        // DEBUG_V("End EffectsTask");
-    }
-#endif // ndef ARDUINO_ARCH_ESP32
 
 } // process
 
@@ -591,7 +536,7 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
         FlashInfo.MinIntensity = FlashInfo.MaxIntensity;
     }
 
-    JsonArray TransitionsArray = jsonConfig[CN_transitions];
+    JsonArray TransitionsArray = jsonConfig[(char*)CN_transitions];
     if(TransitionsArray)
     {
         TransitionColorTable.clear();
@@ -612,7 +557,7 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
         }
     }
 
-    JsonArray MarqueeGroupArray = jsonConfig[CN_MarqueeGroups];
+    JsonArray MarqueeGroupArray = jsonConfig[(char*)CN_MarqueeGroups];
     if(MarqueeGroupArray)
     {
         MarqueueGroupTable.clear();
@@ -622,7 +567,7 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
             MarqueeGroup NewGroup;
             JsonObject currentMarqueeGroup = _MarqueeGroup.as<JsonObject>();
             // DEBUG_V ("");
-            JsonObject GroupColor = currentMarqueeGroup[CN_color];
+            JsonObject GroupColor = currentMarqueeGroup[(char*)CN_color];
             setFromJSON (NewGroup.Color.r, GroupColor, "r");
             setFromJSON (NewGroup.Color.g, GroupColor, "g");
             setFromJSON (NewGroup.Color.b, GroupColor, "b");

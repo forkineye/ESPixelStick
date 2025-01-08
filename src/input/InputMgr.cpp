@@ -37,8 +37,6 @@
 #include "input/InputMgr.hpp"
 
 //-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 // Local Data definitions
 //-----------------------------------------------------------------------------
 typedef struct
@@ -61,6 +59,53 @@ static const InputTypeXlateMap_t InputTypeXlateMap[c_InputMgr::e_InputType::Inpu
     {c_InputMgr::e_InputType::InputType_Alexa,    "Alexa",      c_InputMgr::e_InputChannelIds::InputSecondaryChannelId},
     {c_InputMgr::e_InputType::InputType_Disabled, "Disabled",   c_InputMgr::e_InputChannelIds::InputChannelId_ALL}
 };
+
+uint32_t DeltaTime = 0;
+
+#if defined ARDUINO_ARCH_ESP32
+#   include <functional>
+
+static TaskHandle_t PollTaskHandle = NULL;
+//----------------------------------------------------------------------------
+void InputMgrTask (void *arg)
+{
+    // DEBUG_V(String("Current CPU ID: ") + String(xPortGetCoreID()));
+    // DEBUG_V(String("Current Task Priority: ") + String(uxTaskPriorityGet(NULL)));
+    uint32_t PollStartTime = millis();
+    uint32_t PollEndTime = PollStartTime;
+    uint32_t PollTime = pdMS_TO_TICKS(25);
+    const uint32_t MinPollTimeMs = 25;
+
+    while(1)
+    {
+        DeltaTime = PollEndTime - PollStartTime;
+
+        if (DeltaTime < MinPollTimeMs)
+        {
+            PollTime = pdMS_TO_TICKS(MinPollTimeMs - DeltaTime);
+            vTaskDelay(PollTime);
+        }
+        else
+        {
+            // DEBUG_V(String("handle time wrap and long frames. DeltaTime:") + String(DeltaTime));
+        }
+        FeedWDT();
+
+        PollStartTime = millis();
+
+        InputMgr.Process();
+        FeedWDT();
+
+        // record the loop end time
+        PollEndTime = millis();
+    }
+} // InputMgrTask
+#else
+void TimerPollHandler()
+{
+    InputMgr.Process();
+}
+#endif // def ARDUINO_ARCH_ESP32
 
 //-----------------------------------------------------------------------------
 // Methods
@@ -89,6 +134,15 @@ c_InputMgr::~c_InputMgr ()
 {
     // DEBUG_START;
 
+#ifdef ARDUINO_ARCH_ESP32
+    if(PollTaskHandle)
+    {
+        logcon("Stop Input Task");
+        vTaskDelete(PollTaskHandle);
+        PollTaskHandle = NULL;
+    }
+#endif // def ARDUINO_ARCH_ESP32
+
     // delete pInputInstances;
     int pInputChannelDriversIndex = 0;
     for (auto & CurrentInput : InputChannelDrivers)
@@ -111,6 +165,8 @@ void c_InputMgr::Begin (uint32_t BufferSize)
 {
     // DEBUG_START;
 
+    // DEBUG_V(String("Current CPU ID: ") + String(xPortGetCoreID()));
+
     InputDataBufferSize = BufferSize;
     // DEBUG_V (String("InputDataBufferSize: ") + String (InputDataBufferSize));
 
@@ -126,12 +182,19 @@ void c_InputMgr::Begin (uint32_t BufferSize)
         InstantiateNewInputChannel(e_InputChannelIds(CurrentInput.DriverId), e_InputType::InputType_Disabled);
         // DEBUG_V ("");
     }
-    HasBeenInitialized = true;
 
     // load up the configuration from the saved file. This also starts the drivers
     LoadConfig ();
 
     // CreateNewConfig();
+
+#if defined ARDUINO_ARCH_ESP32
+    xTaskCreatePinnedToCore(InputMgrTask, "InputMgrTask", 4096, NULL, INPUTMGR_TASK_PRIORITY, &PollTaskHandle, 1);
+#else
+    MsTicker.attach_ms (uint32_t (FPP_TICKER_PERIOD_MS), &TimerPollHandler); // Add Timer Function
+#endif // ! defined ARDUINO_ARCH_ESP32
+
+    HasBeenInitialized = true;
 
     // DEBUG_END;
 
@@ -161,12 +224,12 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
     // DEBUG_V ("");
 
     // add the channels header
-    JsonObject InputMgrChannelsData = jsonConfig[CN_channels];
+    JsonObject InputMgrChannelsData = jsonConfig[(char*)CN_channels];
     if (!InputMgrChannelsData)
     {
         // add our section header
         // DEBUG_V ("");
-        InputMgrChannelsData = jsonConfig[CN_channels].to<JsonObject> ();
+        InputMgrChannelsData = jsonConfig[(char*)CN_channels].to<JsonObject> ();
     }
 
     // add the channel configurations
@@ -191,7 +254,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
         }
 
         // save the name as the selected channel type
-        ChannelConfigData[CN_type] = int (CurrentChannel.pInputChannelDriver->GetInputType ());
+        JsonWrite(ChannelConfigData, CN_type, int (CurrentChannel.pInputChannelDriver->GetInputType ()));
 
         String DriverTypeId = String (int (CurrentChannel.pInputChannelDriver->GetInputType ()));
         JsonObject ChannelConfigByTypeData = ChannelConfigData[(String (DriverTypeId))];
@@ -207,7 +270,7 @@ void c_InputMgr::CreateJsonConfig (JsonObject & jsonConfig)
 
         // Populate the driver name
         String DriverName = ""; CurrentChannel.pInputChannelDriver->GetDriverName (DriverName);
-        ChannelConfigByTypeData[CN_type] = DriverName;
+        JsonWrite(ChannelConfigByTypeData, CN_type, DriverName);
 
         CurrentChannel.pInputChannelDriver->GetConfig (ChannelConfigByTypeData);
         // DEBUG_V ("");
@@ -237,10 +300,10 @@ void c_InputMgr::CreateNewConfig ()
     JsonDocument JsonConfigDoc;
     // DEBUG_V("");
 
-    JsonObject JsonConfig = JsonConfigDoc[CN_input_config].to<JsonObject>();
+    JsonObject JsonConfig = JsonConfigDoc[(char*)CN_input_config].to<JsonObject>();
     // DEBUG_V("");
 
-    JsonConfig[CN_cfgver] = CurrentConfigVersion;
+    JsonWrite(JsonConfig, CN_cfgver, CurrentConfigVersion);
 
     // DEBUG_V ("for each Input type");
     for (int InputTypeId = int (InputType_Start);
@@ -631,13 +694,13 @@ void c_InputMgr::Process ()
 
     do // once
     {
-        if (configInProgress)
+        if (configInProgress || PauseProcessing)
         {
             // prevent calls to process when we are doing a long operation
             break;
         }
 
-        ExternalInput.Poll (false);
+        ExternalInput.Poll ();
 
         if (NO_CONFIG_NEEDED != ConfigLoadNeeded)
         {
@@ -657,12 +720,12 @@ void c_InputMgr::Process ()
         bool aBlankTimerIsRunning = false;
         for (auto & CurrentInput : InputChannelDrivers)
         {
-            if(nullptr == CurrentInput.pInputChannelDriver)
+            if(nullptr == CurrentInput.pInputChannelDriver || aBlankTimerIsRunning)
             {
                 continue;
             }
             // DEBUG_V(String("pInputChannelDriver: 0x") + String(uint32_t(CurrentInput.pInputChannelDriver), HEX));
-            CurrentInput.pInputChannelDriver->Process (aBlankTimerIsRunning);
+            CurrentInput.pInputChannelDriver->Process ();
 
             if (!BlankTimerHasExpired (CurrentInput.pInputChannelDriver->GetInputChannelId()))
             {
@@ -721,7 +784,7 @@ bool c_InputMgr::FindJsonChannelConfig (JsonObject& jsonConfig,
 
     do // once
     {
-        JsonObject InputChannelMgrData = jsonConfig[CN_input_config];
+        JsonObject InputChannelMgrData = jsonConfig[(char*)CN_input_config];
         if (!InputChannelMgrData)
         {
             logcon (String (F ("No Input Interface Settings Found. Using Defaults")));
@@ -756,7 +819,7 @@ bool c_InputMgr::FindJsonChannelConfig (JsonObject& jsonConfig,
         }
 
         // do we have a channel configuration array?
-        JsonObject InputChannelArray = InputChannelMgrData[CN_channels];
+        JsonObject InputChannelArray = InputChannelMgrData[(char*)CN_channels];
         if (!InputChannelArray)
         {
             // if not, flag an error and stop processing
@@ -951,6 +1014,8 @@ void c_InputMgr::SetOperationalState (bool ActiveFlag)
 {
     // DEBUG_START;
     // DEBUG_V(String("ActiveFlag: ") + String(ActiveFlag));
+
+    PauseProcessing = !ActiveFlag;
 
     // pass through each active interface and set the active state
     for (auto & InputChannel : InputChannelDrivers)

@@ -51,15 +51,15 @@ void c_OutputPixel::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
-    jsonConfig[CN_color_order] = color_order;
-    jsonConfig[CN_pixel_count] = pixel_count;
-    jsonConfig[CN_group_size] = PixelGroupSize;
-    jsonConfig[CN_zig_size] = zig_size;
-    jsonConfig[CN_gamma] = gamma;
-    jsonConfig[CN_brightness] = brightness; // save as a 0 - 100 percentage
-    jsonConfig[CN_interframetime] = InterFrameGapInMicroSec;
-    jsonConfig[CN_prependnullcount] = PrependNullPixelCount;
-    jsonConfig[CN_appendnullcount] = AppendNullPixelCount;
+    JsonWrite(jsonConfig, CN_color_order,      color_order);
+    JsonWrite(jsonConfig, CN_pixel_count,      pixel_count);
+    JsonWrite(jsonConfig, CN_group_size,       PixelGroupSize);
+    JsonWrite(jsonConfig, CN_zig_size,         zig_size);
+    JsonWrite(jsonConfig, CN_gamma,            gamma);
+    JsonWrite(jsonConfig, CN_brightness,       brightness); // save as a 0 - 100 percentage
+    JsonWrite(jsonConfig, CN_interframetime,   InterFrameGapInMicroSec);
+    JsonWrite(jsonConfig, CN_prependnullcount, PrependNullPixelCount);
+    JsonWrite(jsonConfig, CN_appendnullcount,  AppendNullPixelCount);
 
     c_OutputCommon::GetConfig (jsonConfig);
 

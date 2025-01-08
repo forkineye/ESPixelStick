@@ -2,7 +2,7 @@
 * ArtnetInput.cpp - Code to wrap ESPAsyncArtnet for input
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and Artnet based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -73,9 +73,9 @@ void c_InputArtnet::GetConfig (JsonObject & jsonConfig)
 {
     // DEBUG_START;
 
-    jsonConfig[CN_universe]       = startUniverse;
-    jsonConfig[CN_universe_limit] = ChannelsPerUniverse;
-    jsonConfig[CN_universe_start] = FirstUniverseChannelOffset;
+    JsonWrite(jsonConfig, CN_universe,       startUniverse);
+    JsonWrite(jsonConfig, CN_universe_limit, ChannelsPerUniverse);
+    JsonWrite(jsonConfig, CN_universe_start, FirstUniverseChannelOffset);
 
     // DEBUG_END;
 
@@ -87,25 +87,25 @@ void c_InputArtnet::GetStatus (JsonObject & jsonStatus)
     // DEBUG_START;
 
     JsonObject ArtnetStatus = jsonStatus[F ("Artnet")].to<JsonObject> ();
-    ArtnetStatus[CN_unifirst]   = startUniverse;
-    ArtnetStatus[CN_unilast]    = LastUniverse;
-    ArtnetStatus[CN_unichanlim] = ChannelsPerUniverse;
+    JsonWrite(ArtnetStatus, CN_unifirst,   startUniverse);
+    JsonWrite(ArtnetStatus, CN_unilast,    LastUniverse);
+    JsonWrite(ArtnetStatus, CN_unichanlim, ChannelsPerUniverse);
     // DEBUG_V ("");
 
-    ArtnetStatus[F ("lastData")]   = lastData;
-    ArtnetStatus[CN_num_packets]   = num_packets;
-    ArtnetStatus[CN_packet_errors] = packet_errors;
-    ArtnetStatus[CN_last_clientIP] = pArtnet->getRemoteIP().toString ();
-    ArtnetStatus[CN_PollCounter]   = PollCounter;
+    JsonWrite(ArtnetStatus, F ("lastData"),   lastData);
+    JsonWrite(ArtnetStatus, CN_num_packets,   num_packets);
+    JsonWrite(ArtnetStatus, CN_packet_errors, packet_errors);
+    JsonWrite(ArtnetStatus, CN_last_clientIP, pArtnet->getRemoteIP().toString ());
+    JsonWrite(ArtnetStatus, CN_PollCounter,   PollCounter);
 
-    JsonArray ArtnetUniverseStatus = ArtnetStatus[CN_channels].to<JsonArray> ();
+    JsonArray ArtnetUniverseStatus = ArtnetStatus[(char*)CN_channels].to<JsonArray> ();
 
     for (auto & CurrentUniverse : UniverseArray)
     {
         JsonObject ArtnetCurrentUniverseStatus = ArtnetUniverseStatus.add<JsonObject> ();
 
-        ArtnetCurrentUniverseStatus[CN_errors] = CurrentUniverse.SequenceErrorCounter;
-        ArtnetCurrentUniverseStatus[CN_num_packets] = CurrentUniverse.num_packets;
+        JsonWrite(ArtnetCurrentUniverseStatus, CN_errors,      CurrentUniverse.SequenceErrorCounter);
+        JsonWrite(ArtnetCurrentUniverseStatus, CN_num_packets, CurrentUniverse.num_packets);
     }
 
     // DEBUG_END;
@@ -120,8 +120,9 @@ void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
                                 IPAddress remoteIP)
 {
     // DEBUG_START;
-
-    if ((startUniverse <= CurrentUniverseId) && (LastUniverse >= CurrentUniverseId))
+    if(!IsInputChannelActive)
+    {}
+    else if ((startUniverse <= CurrentUniverseId) && (LastUniverse >= CurrentUniverseId))
     {
         // Universe offset and sequence tracking
         Universe_t & CurrentUniverse = UniverseArray[CurrentUniverseId - startUniverse];

@@ -23,12 +23,10 @@
 #include "InputFPPRemotePlayItem.hpp"
 #include "InputFPPRemotePlayFileFsm.hpp"
 #include "service/fseq.h"
-#include <Ticker.h>
 
 #ifdef ARDUINO_ARCH_ESP32
 #include <esp_task.h>
 #endif // def ARDUINO_ARCH_ESP32
-
 
 class c_InputFPPRemotePlayFile : public c_InputFPPRemotePlayItem
 {
@@ -39,11 +37,10 @@ public:
     virtual void Start (String & FileName, float SecondsElapsed, uint32_t RemainingPlayCount);
     virtual void Stop ();
     virtual void Sync (String& FileName, float SecondsElapsed);
-    virtual bool Poll (bool StayDark);
+    virtual bool Poll ();
     virtual void GetStatus (JsonObject & jsonStatus);
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
 
-    void TimerPoll ();
 #ifdef ARDUINO_ARCH_ESP32
     TaskHandle_t GetTaskHandle () { return TimerPollTaskHandle; }
     volatile bool TimerPollInProgress = false;
@@ -52,7 +49,7 @@ public:
 private:
 #define ELAPSED_PLAY_TIMER_INTERVAL_MS  10
 
-    void ClearFileInfo            ();
+    void ClearFileInfo ();
 
     friend class fsm_PlayFile_state_Idle;
     friend class fsm_PlayFile_state_Starting;
@@ -69,18 +66,6 @@ private:
 
     fsm_PlayFile_state * pCurrentFsmState = &fsm_PlayFile_state_Idle_imp;
 
-    c_FileMgr::FileId FileHandleForFileBeingPlayed = c_FileMgr::INVALID_FILE_HANDLE;
-
-    struct FrameControl_t
-    {
-        uint32_t    DataOffset = 0;
-        uint32_t    ChannelsPerFrame = 0;
-        uint32_t    FrameStepTimeMS = 1;
-        uint32_t    TotalNumberOfFramesInSequence = 0;
-        uint32_t    ElapsedPlayTimeMS = 0;
-
-    } FrameControl;
-
     struct SyncControl_t
     {
         uint32_t          SyncCount = 0;
@@ -88,16 +73,7 @@ private:
         float             LastRcvdElapsedSeconds = 0.0;
     } SyncControl;
 
-#   define    FPP_TICKER_PERIOD_MS 25
-// #   define    FPP_TICKER_PERIOD_MS 1000
-    Ticker    MsTicker;
-    uint32_t  LastIsrTimeStampMS = 0;
     uint32_t  PlayedFileCount = 0;
-
-    // Logic to detect if polls have stopped coming in.
-    // This is part of the blanking logic.
-    int       PollDetectionCounter = 0;
-    static const int PollDetectionCounterLimit = 5;
 
 #define MAX_NUM_SPARSE_RANGES 5
     FSEQParsedRangeEntry SparseRanges[MAX_NUM_SPARSE_RANGES];
@@ -105,7 +81,7 @@ private:
     void        UpdateElapsedPlayTimeMS ();
     uint32_t    CalculateFrameId (uint32_t ElapsedMS, int32_t SyncOffsetMS);
     bool        ParseFseqFile ();
-    uint32_t      ReadFile(uint32_t DestinationIntensityId, uint32_t NumBytesToRead, uint32_t FileOffset);
+    uint32_t    ReadFile(uint32_t DestinationIntensityId, uint32_t NumBytesToRead, uint32_t FileOffset);
 
     String      LastFailedPlayStatusMsg;
 

@@ -51,7 +51,7 @@ void c_OutputGrinch::GetConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_START;
 
     c_OutputCommon::GetConfig (jsonConfig);
-    jsonConfig[CN_count] = NumberOfGrinchControllers;
+    JsonWrite(jsonConfig, CN_count, NumberOfGrinchControllers);
 
     // DEBUG_END;
 } // GetConfig

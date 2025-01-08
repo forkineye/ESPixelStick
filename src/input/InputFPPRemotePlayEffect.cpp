@@ -27,13 +27,10 @@ c_InputFPPRemotePlayEffect::c_InputFPPRemotePlayEffect (c_InputMgr::e_InputChann
 {
     // DEBUG_START;
 
-    // Tell input manager to not put any data into the input buffer
-    InputMgr.SetOperationalState (false);
-
     fsm_PlayEffect_state_Idle_imp.Init (this);
 
     EffectsEngine.Begin ();
-    EffectsEngine.SetOperationalState (false);
+    EffectsEngine.SetOperationalState (!InputIsPaused());
 
     // DEBUG_END;
 } // c_InputFPPRemotePlayEffect
@@ -44,7 +41,6 @@ c_InputFPPRemotePlayEffect::~c_InputFPPRemotePlayEffect ()
     // DEBUG_START;
 
     // allow the other input channels to run
-    InputMgr.SetOperationalState (true);
     EffectsEngine.SetOperationalState (false);
 
     // DEBUG_END;
@@ -56,7 +52,10 @@ void c_InputFPPRemotePlayEffect::Start (String & FileName, float duration, uint3
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Start (FileName, duration);
+    if(!InputIsPaused())
+    {
+        pCurrentFsmState->Start (FileName, duration);
+    }
 
     // DEBUG_END;
 } // Start
@@ -66,7 +65,10 @@ void c_InputFPPRemotePlayEffect::Stop ()
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Stop ();
+    if(!InputIsPaused())
+    {
+        pCurrentFsmState->Stop ();
+    }
 
     // DEBUG_END;
 } // Stop
@@ -76,19 +78,29 @@ void c_InputFPPRemotePlayEffect::Sync (String& FileName, float SecondsElapsed)
 {
     // DEBUG_START;
 
-    pCurrentFsmState->Sync (SecondsElapsed);
+    if(!InputIsPaused())
+    {
+        pCurrentFsmState->Sync (SecondsElapsed);
+    }
 
     // DEBUG_END;
 } // Sync
 
 //-----------------------------------------------------------------------------
-bool c_InputFPPRemotePlayEffect::Poll (bool StayDark)
+bool c_InputFPPRemotePlayEffect::Poll ()
 {
-    // DEBUG_START;
+    /// DEBUG_START;
 
-    return pCurrentFsmState->Poll (StayDark);
+    bool Response = false;
 
-    // DEBUG_END;
+    if(!InputIsPaused())
+    {
+        // Show that we have received a poll
+        Response = pCurrentFsmState->Poll ();
+    }
+
+    /// DEBUG_END;
+    return Response;
 
 } // Poll
 
