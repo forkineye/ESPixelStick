@@ -61,7 +61,7 @@
 #define STRINGIFY(X) #X
 #define STRING(X) STRINGIFY(X)
 
-extern void RequestReboot(uint32_t LoopDelay);
+extern void RequestReboot(uint32_t LoopDelay, bool SkipDisable = false);
 extern bool RebootInProgress();
 
 /// Core configuration structure

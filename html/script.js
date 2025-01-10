@@ -374,7 +374,7 @@ $(function () {
             uploadMultiple: false,
             createImageThumbnails: false,
             dictDefaultMessage: 'Drag an image here to upload, or click to select one',
-            acceptedFiles: '.fseq,.pl',
+            acceptedFiles: '.fseq,.pl,.zip',
             timeout: 99999999, /*milliseconds*/
             init: function () {
                 this.on('success', function (file, resp) {

@@ -24,6 +24,7 @@
 #include "FileMgr.hpp"
 #include "network/NetworkMgr.hpp"
 #include "output/OutputMgr.hpp"
+#include "UnzipFiles.hpp"
 
 SdFs sd;
 const int8_t DISABLE_CS_PIN = -1;
@@ -61,7 +62,7 @@ void ftp_callback(FtpOperation ftpOperation, unsigned int freeSpace, unsigned in
 
         case FTP_FREE_SPACE_CHANGE:
         {
-            FileMgr.BuildFseqList(false);
+            FileMgr.BuildFseqList(false, false);
             LOG_PORT.printf("FTP: Free space change, free %u of %u! Rebuilding FSEQ file list\n", freeSpace, totalSpace);
             break;
         }
@@ -180,6 +181,18 @@ void c_FileMgr::Begin ()
         }
 
         SetSpiIoPins ();
+
+#ifdef SUPPORT_UNZIP
+        if(FoundZipFile)
+        {
+            FeedWDT();
+            UnzipFiles * Unzipper = new(UnzipFiles);
+            Unzipper->Run();
+            delete Unzipper;
+            logcon("Requesting reboot after unzipping files");
+            RequestReboot(1, true);
+        }
+#endif // def SUPPORT_UNZIP
 
     } while (false);
 
@@ -427,7 +440,7 @@ void c_FileMgr::SetSpiIoPins ()
 
             DescribeSdCardToUser ();
             // DEBUG_V();
-            BuildFseqList(false);
+            BuildFseqList(false, true);
             // DEBUG_V();
         }
     }
@@ -1021,7 +1034,7 @@ void c_FileMgr::DeleteSdFile (const String & FileName, bool LockStatus)
         ESP_SD.remove (FileName);
         if(!FileName.equals(FSEQFILELIST))
         {
-            BuildFseqList(true);
+            BuildFseqList(true, false);
         }
     }
     UnLockSd(LockStatus);
@@ -1677,6 +1690,8 @@ uint64_t c_FileMgr::GetSdFileSize (const String& FileName, bool LockStatus)
 //-----------------------------------------------------------------------------
 uint64_t c_FileMgr::GetSdFileSize (const FileId& FileHandle, bool LockStatus)
 {
+    // DEBUG_START;
+
     LockSd(LockStatus);
     uint64_t response = 0;
     int FileListIndex;
@@ -1688,14 +1703,16 @@ uint64_t c_FileMgr::GetSdFileSize (const FileId& FileHandle, bool LockStatus)
     {
         logcon (String (F ("GetSdFileSize::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
+    // DEBUG_V(String("response: ") + String(response));
 
     UnLockSd(LockStatus);
+    // DEBUG_END;
     return response;
 
 } // GetSdFileSize
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::BuildFseqList(bool LockStatus)
+void c_FileMgr::BuildFseqList(bool LockStatus, bool DisplayFileNames)
 {
     // DEBUG_START;
     char entryName [256];
@@ -1769,6 +1786,13 @@ void c_FileMgr::BuildFseqList(bool LockStatus)
                 !EntryName.equals(FSEQFILELIST))
                )
             {
+                // is this a zipped file?
+                if((-1 != EntryName.indexOf(F(".zip"))) ||
+                   (-1 != EntryName.indexOf(F(".ZIP"))))
+                {
+                    FoundZipFile = true;
+                }
+
                 // do we need to add a separator?
                 if(numFiles)
                 {
@@ -1780,9 +1804,9 @@ void c_FileMgr::BuildFseqList(bool LockStatus)
                 usedBytes += CurrentEntry.size ();
                 ++numFiles;
 
-                if(IsBooting)
+                if(DisplayFileNames)
                 {
-                    logcon (String(F("SD File: '")) + EntryName + "'");
+                    logcon (String(F("SD File: '")) + EntryName + "'   " + String(CurrentEntry.size ()));
                 }
                 uint16_t Date;
                 uint16_t Time;
@@ -1846,6 +1870,79 @@ void c_FileMgr::BuildFseqList(bool LockStatus)
 } // BuildFseqList
 
 //-----------------------------------------------------------------------------
+void c_FileMgr::FindFirstZipFile(String &FileName, bool LockStatus)
+{
+    // DEBUG_START;
+    char entryName [256];
+    LockSd(LockStatus);
+
+    do // once
+    {
+        if(!SdCardIsInstalled())
+        {
+            // DEBUG_V("No SD card installed.");
+            break;
+        }
+
+        FeedWDT();
+
+        FsFile InputFile;
+        ESP_SD.chdir(); // Set to sd root
+        if(!InputFile.open ("/", O_READ))
+        {
+            logcon(F("ERROR: Could not open SD card for Reading FSEQ List."));
+            break;
+        }
+
+        // open output file, erase old data
+        ESP_SD.chdir(); // Set to sd root
+
+        FsFile CurrentEntry;
+        while (CurrentEntry.openNext (&InputFile, O_READ))
+        {
+            // DEBUG_V("Process a file entry");
+            FeedWDT();
+
+            if(CurrentEntry.isDirectory() || CurrentEntry.isHidden())
+            {
+                // DEBUG_V("Skip embedded directory and hidden files");
+                CurrentEntry.close();
+                continue;
+            }
+
+            memset(entryName, 0x0, sizeof(entryName));
+            CurrentEntry.getName (entryName, sizeof(entryName)-1);
+            String EntryName = String (entryName);
+            // DEBUG_V (         "EntryName: " + EntryName);
+            // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
+            // DEBUG_V ("      entry.size(): " + int64String(CurrentEntry.size ()));
+
+            // is this a zipped file?
+            if((-1 != EntryName.indexOf(F(".zip"))) ||
+               (-1 != EntryName.indexOf(F(".ZIP"))))
+            {
+                FileName = EntryName;
+                CurrentEntry.close();
+                InputFile.close();
+                break;
+            }
+            else
+            {
+                // DEBUG_V("Skipping File");
+            }
+            CurrentEntry.close();
+        } // end while true
+
+        InputFile.close();
+    } while(false);
+
+    UnLockSd(LockStatus);
+
+    // DEBUG_END;
+
+} // FindFirstZipFile
+
+//-----------------------------------------------------------------------------
 bool c_FileMgr::handleFileUpload (
     const String & filename,
     size_t index,
@@ -1884,7 +1981,7 @@ bool c_FileMgr::handleFileUpload (
                 DeleteSdFile (fsUploadFileName, false);
                 fsUploadFileHandle = INVALID_FILE_HANDLE;
                 delay(1000);
-                BuildFseqList(false);
+                BuildFseqList(false, false);
                 expectedIndex = 0;
                 fsUploadFileName = emptyString;
             }
@@ -1914,8 +2011,6 @@ bool c_FileMgr::handleFileUpload (
             CloseSdFile(fsUploadFileHandle, false);
             DeleteSdFile (fsUploadFileName, false);
             fsUploadFileHandle = INVALID_FILE_HANDLE;
-            delay(1000);
-            BuildFseqList(false);
             expectedIndex = 0;
             fsUploadFileName = emptyString;
             break;
@@ -1943,7 +2038,7 @@ bool c_FileMgr::handleFileUpload (
 
         expectedIndex = 0;
         delay(1000);
-        BuildFseqList(false);
+        BuildFseqList(false, false);
 
         // DEBUG_V(String("Expected: ") + String(totalLen));
         // DEBUG_V(String("     Got: ") + String(GetSdFileSize(fsUploadFileName)));
@@ -2011,6 +2106,58 @@ size_t c_FileMgr::GetDefaultFseqFileList(uint8_t * buffer, size_t maxlen)
 
     return strlen((char*)&buffer[0]);
 } // GetDefaultFseqFileList
+
+//-----------------------------------------------------------------------------
+bool c_FileMgr::SeekSdFile(const FileId & FileHandle, size_t position, SeekMode Mode)
+{
+    // DEBUG_START;
+
+    // DEBUG_V(String("FileHandle: ") + String(FileHandle));
+    // DEBUG_V(String("  position: ") + String(position));
+    // DEBUG_V(String("      Mode: ") + String(uint32_t(Mode)));
+
+    uint64_t response = false;
+    int FileListIndex;
+
+    do // once
+    {
+        if (-1 == (FileListIndex = FileListFindSdFileHandle (FileHandle)))
+        {
+            logcon (String (F ("SeekSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
+            break;
+        }
+
+        switch(Mode)
+        {
+            case SeekMode::SeekSet:
+            {
+                response = FileList[FileListIndex].fsFile.seek (position);
+                break;
+            }
+            case SeekMode::SeekEnd:
+            {
+                uint64_t EndPosition = FileList[FileListIndex].fsFile.size();
+                response = FileList[FileListIndex].fsFile.seek (EndPosition - position);
+                break;
+            }
+            case SeekMode::SeekCur:
+            {
+                uint64_t CurrentPosition = FileList[FileListIndex].fsFile.position();
+                response = FileList[FileListIndex].fsFile.seek (CurrentPosition + position);
+                break;
+            }
+            default:
+            {
+                logcon("Procedural error. Cannot set seek value");
+                break;
+            }
+        } // end switch mode
+    } while(false);
+
+    // DEBUG_END;
+    return response;
+
+} // SeekSdFile
 
 //-----------------------------------------------------------------------------
 void c_FileMgr::LockSd(bool CurrentLockState)

@@ -96,11 +96,13 @@ public:
     void   GetListOfSdFiles (std::vector<String> & Response, bool LockStatus = false);
     uint64_t GetSdFileSize  (const String & FileName, bool LockStatus = false);
     uint64_t GetSdFileSize  (const FileId & FileHandle, bool LockStatus = false);
-    void   BuildFseqList    (bool LockStatus = false);
+    void   BuildFseqList    (bool LockStatus, bool DisplayFileNames);
+    bool   SeekSdFile       (const FileId & FileHandle, size_t position, SeekMode Mode);
 
     void   GetDriverName    (String& Name) { Name = "FileMgr"; }
     void   NetworkStateChanged (bool NewState);
-    size_t GetDefaultFseqFileList(uint8_t * buffer, size_t maxlen);
+    size_t GetDefaultFseqFileList (uint8_t * buffer, size_t maxlen);
+    void   FindFirstZipFile (String &FileName, bool LockStatus);
 
 #define FSEQFILELIST "fseqfilelist.json"
     // Configuration file params
@@ -141,6 +143,7 @@ private:
     bool     FtpEnabled = true;
     uint64_t SdCardSizeMB = 0;
     uint32_t MaxSdSpeed = MaxSdTransSpeedMHz;
+    bool     FoundZipFile = false;
 
 public: struct __attribute__((__packed__, aligned(4))) CSD {
 	public: union {
