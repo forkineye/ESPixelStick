@@ -1,0 +1,145 @@
+name: Small Test
+on: [push, pull_request, workflow_dispatch]
+env:
+  VERSION_BASE: "4.JMT"
+jobs:
+  firmware:
+    strategy:
+      matrix:
+        include:
+          - target: "esp32_bigboi"
+            chip: "esp32"
+          #
+          - target: "esp32_dev4"
+            chip: "esp32"
+            
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout ESPixelStick
+      - uses: actions/checkout@v4
+
+      - name: Create version file
+        run: |
+          mkdir firmware
+          echo "${VERSION_BASE}-ci${GITHUB_RUN_ID}" > firmware/VERSION
+
+      - name: Tagged version release
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo "${GITHUB_REF#refs/*/v}" > firmware/VERSION
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade platformio
+
+      # Build and move / rename firmware files
+      # Make sure to update bootloader and boot_app0.bin location when the ESP32 core updates
+      - name: Compile for ${{ matrix.target }}
+        env:
+          chip: ${{ matrix.chip }}
+        run: |
+          pio run -e ${{ matrix.target }}
+          ls -al ./firmware/${{ matrix.chip }}
+          ls -al ./debug/${{ matrix.chip }}
+
+      - name: Upload Firmware Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-binary-${{ matrix.target }}
+          path: firmware
+
+      - name: Upload Debugging Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-debug-${{ matrix.target }}
+          path: debug
+
+  package:
+    needs: firmware
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout ESPixelStick
+      - uses: actions/checkout@v4
+
+      - name: Set release flag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo "ESPS_RELEASE=''" >> $GITHUB_ENV
+
+      # Download firmware binary artifact
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist/firmware
+          pattern: firmware-binary-*
+          merge-multiple: true
+
+      # Install Node
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install
+
+      # Build and move the web pages
+      - name: Compile Web Pages
+        run: |
+          gulp
+          gulp md
+          if [ -z "$ESPS_RELEASE" ]; then
+          gulp ci
+          fi
+          mv data/* dist/fs
+
+      - name: Set release archive filename
+        run: |
+          _VERSION=$(< dist/firmware/VERSION)
+          echo "ARCHFILE=ESPixelStick_Firmware-${_VERSION}.zip" >> $GITHUB_ENV
+
+      - name: Update firmware.json
+        run: python .scripts/ci-firmware.py
+
+      - name: Create Release Archive
+        run: zip -r ../${{ env.ARCHFILE }} *
+        working-directory: dist
+
+      - name: Upload Release Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Release Archive
+          path: ${{ env.ARCHFILE }}
+
+  release:
+    needs: package
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Download Package
+        uses: actions/download-artifact@v4
+        with:
+          name: Release Archive
+      - name: Create Draft Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: true
+          prerelease: true
+          files: ESPixelStick_Firmware*.zip
