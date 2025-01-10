@@ -569,12 +569,15 @@ bool RebootInProgress()
     return RebootCount != NotRebootingValue;
 }
 
-void RequestReboot(uint32_t LoopDelay)
+void RequestReboot(uint32_t LoopDelay, bool SkipDisable /* = false */)
 {
     RebootCount = LoopDelay;
 
-    InputMgr.SetOperationalState(false);
-    OutputMgr.PauseOutputs(true);
+    if(!SkipDisable)
+    {
+        InputMgr.SetOperationalState(false);
+        OutputMgr.PauseOutputs(true);
+    }
 
 } // RequestReboot
 
