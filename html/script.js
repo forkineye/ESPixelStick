@@ -843,7 +843,7 @@ async function RequestListOfFiles()
 } // RequestListOfFiles
 
 function BytesToMB(Value) {
-    return (Value / (1024 * 1024)).toFixed();
+     return  Math.round((Value / (1024 * 1024))).toLocaleString();
 
 } // BytesToMB
 
@@ -895,7 +895,7 @@ async function ProcessGetFileListResponse(JsonData) {
         try {
             $('#FileName_' + (CurrentRowId)).val(file.name);
             $('#FileDate_' + (CurrentRowId)).val(new Date(file.date * 1000).toLocaleString());
-            $('#FileSize_' + (CurrentRowId)).val(file.length);
+            $('#FileSize_' + (CurrentRowId)).val(file.length.toLocaleString());
             Fseq_File_List.push(file);
         }
         catch
