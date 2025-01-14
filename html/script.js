@@ -10,7 +10,7 @@ var System_Config = null;
 var Fseq_File_List = [];
 var selector = [];
 var target = document.location.host;
-// target = "192.168.10.220";
+// target = "192.168.10.188";
 
 var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
@@ -379,7 +379,7 @@ $(function () {
             init: function () {
                 this.on('success', function (file, resp) {
                     // console.log("Success");
-                    // console.log(file);
+                    // console.log("File: " + file.name);
                     // console.log(resp);
                     Dropzone.forElement('#filemanagementupload').removeAllFiles(true)
                     RequestListOfFiles();
@@ -387,19 +387,31 @@ $(function () {
 
                 this.on('complete', function (file, resp) {
                     // console.log("complete");
-                    // console.log(file);
+                    // console.log("File: " + file.name);
                     // console.log(resp);
                     $('#fseqprogress_fg').addClass("hidden");
-
-                    let DeltaTime = (new Date().getTime() - FseqFileTransferStartTime.getTime()) / 1000;
-                    let rate = Math.floor((file.size / DeltaTime) / 1000);
+                    let extensionPosition = file.name.lastIndexOf(".");
+                    if(extensionPosition !== -1)
+                    {
+                        let extension = file.name.toLowerCase().slice(extensionPosition + 1);
+                        if("zip" === extension)
+                        {
+                            let RebootNow = confirm("Downloaded a zip file. Unzip requires a reboot.\nClick 'OK' to Reboot NOW.");
+                            if(RebootNow)
+                            {
+                                reboot();
+                            }
+                        }
+                    }
+                    // let DeltaTime = (new Date().getTime() - FseqFileTransferStartTime.getTime()) / 1000;
+                    // let rate = Math.floor((file.size / DeltaTime) / 1000);
                     // console.debug("Final Transfer Rate: " + rate + "KBps");
                 });
 
                 this.on('addedfile', function (file, resp) {
                     // console.log("addedfile");
-                    // console.log(file);
-                    // console.log(resp);
+                    // console.log("File: " + file.name);
+                    // console.log("resp: " + resp);
                     FseqFileTransferStartTime = new Date();
                 });
 
@@ -418,7 +430,7 @@ $(function () {
 
             accept: function (file, done) {
                 // console.log("accept");
-                // console.log(file);
+                // console.log("File: " + file.name);
                 return done(); // triggers a send
             }
         });
