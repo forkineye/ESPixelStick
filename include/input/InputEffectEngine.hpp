@@ -63,7 +63,7 @@ public:
 
     typedef uint16_t (c_InputEffectEngine::* EffectFunc)(void);
 
-    typedef struct EffectDescriptor_s
+    struct EffectDescriptor_t
     {
         String      name;
         EffectFunc  func;
@@ -74,9 +74,9 @@ public:
         bool        hasAllLeds;
         bool        hasWhiteChannel;
         String      wsTCode;
-    } EffectDescriptor_t;
+    };
 
-    typedef struct MQTTConfiguration_s
+    struct MQTTConfiguration_t
     {
         String  effect;
         bool    mirror;
@@ -84,9 +84,9 @@ public:
         uint8_t brightness;
         bool    whiteChannel;
         CRGB    color;
-    } MQTTConfiguration_s;
+    };
 
-    struct MarqueeGroup
+    struct MarqueeGroup_t
     {
        uint32_t NumPixelsInGroup;
        CRGB     Color;
@@ -97,9 +97,9 @@ public:
     // functions to be provided by the derived class
     void Begin ();                             ///< set up the operating environment based on the current config (or defaults)
     bool SetConfig (JsonObject& jsonConfig);   ///< Set a new config in the driver
-    void SetMqttConfig (MQTTConfiguration_s& mqttConfig);   ///< Set a new config in the driver
+    void SetMqttConfig (MQTTConfiguration_t& mqttConfig);   ///< Set a new config in the driver
     void GetConfig (JsonObject& jsonConfig);   ///< Get the current config used by the driver
-    void GetMqttConfig (MQTTConfiguration_s& mqttConfig);   ///< Get the current config used by the driver
+    void GetMqttConfig (MQTTConfiguration_t& mqttConfig);   ///< Get the current config used by the driver
     void GetMqttEffectList (JsonObject& jsonConfig);   ///< Get the current config used by the driver
     void GetStatus (JsonObject& jsonStatus);
     void Process   ();

@@ -29,7 +29,7 @@ private:
 #define SERVO_PCA9685_OUTPUT_MIN_PULSE_WIDTH 650
 #define SERVO_PCA9685_OUTPUT_MAX_PULSE_WIDTH 2350
 
-    typedef struct ServoPCA9685Channel_s
+    struct ServoPCA9685Channel_t
     {
         uint8_t     Id              = -1;
         bool        Enabled         = false;
@@ -41,7 +41,7 @@ private:
         bool        IsScaled        = true;
         uint8_t     HomeValue       = 0;
 
-    } ServoPCA9685Channel_t;
+    };
 
 public:
 

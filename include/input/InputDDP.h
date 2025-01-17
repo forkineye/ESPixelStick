@@ -64,7 +64,7 @@ private:
 #define IsStorage(f)       (DDP_FLAGS1_STORAGE == ((f) & DDP_FLAGS1_STORAGE))
 #define IsTime(f)          (DDP_FLAGS1_TIME    == ((f) & DDP_FLAGS1_TIME))
 
-    typedef struct __attribute__ ((packed))
+    struct __attribute__ ((packed)) DDP_Header_t
     {
         byte  flags1;
         byte  flags2;
@@ -72,28 +72,28 @@ private:
         byte  id;
         uint32_t channelOffset;
         uint16_t dataLen;
-    } DDP_Header_t;
+    };
 
-    typedef struct __attribute__ ((packed))
+    struct __attribute__ ((packed)) DDP_packet_t
     {
         DDP_Header_t header;  // header may or may not be time code
         byte         data[DDP_MAX_DATALEN];
-    } DDP_packet_t;
+    };
 
-    typedef struct __attribute__ ((packed))
+    struct __attribute__ ((packed)) DDP_TimeCode_packet_t
     {
         DDP_Header_t header;  // header may or may not be time code
         uint32_t     TimeCode;
         byte         data[DDP_MAX_DATALEN - sizeof(TimeCode)];
-    } DDP_TimeCode_packet_t;
+    };
 
-    typedef struct __attribute__ ((packed))
+    struct __attribute__ ((packed)) DDP_stats_t
     {
         uint32_t packetsReceived;
         uint64_t bytesReceived;
         uint32_t errors;
-    } DDP_stats_t;
-        String   lastError;
+    };
+    String   lastError;
 
     AsyncUDP        * udp = nullptr;         // UDP
     uint8_t         lastReceivedSequenceNumber = 0;
@@ -114,13 +114,13 @@ private:
         BufferIsBeingProcessed,
     };
 
-    typedef struct
+    struct PacketBuffer_t
     {
         PacketBufferStatus_t PacketBufferStatus = PacketBufferStatus_t::BufferIsAvailable;
         DDP_packet_t Packet;
         IPAddress ResponseAddress;
         uint16_t  ResponsePort;
-    } PacketBuffer_t;
+    } ;
 
     PacketBuffer_t PacketBuffer;
 

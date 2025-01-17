@@ -1980,7 +1980,7 @@ bool c_FileMgr::handleFileUpload (
                 CloseSdFile(fsUploadFileHandle, false);
                 DeleteSdFile (fsUploadFileName, false);
                 fsUploadFileHandle = INVALID_FILE_HANDLE;
-                delay(1000);
+                delay(100);
                 BuildFseqList(false, false);
                 expectedIndex = 0;
                 fsUploadFileName = emptyString;
@@ -2033,11 +2033,10 @@ bool c_FileMgr::handleFileUpload (
                 F(" Bytes out of ") + String(totalLen) +
                 F(" bytes. FileLen: ") + GetSdFileSize(filename, false));
 
-        delay(1000);
         FeedWDT();
-
         expectedIndex = 0;
-        delay(1000);
+
+        delay(100);
         BuildFseqList(false, false);
 
         // DEBUG_V(String("Expected: ") + String(totalLen));

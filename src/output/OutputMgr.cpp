@@ -59,11 +59,11 @@
 //-----------------------------------------------------------------------------
 // Local Data definitions
 //-----------------------------------------------------------------------------
-typedef struct
+struct OutputTypeXlateMap_t
 {
     c_OutputMgr::e_OutputType id;
     String name;
-}OutputTypeXlateMap_t;
+};
 
 static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::OutputType_End] =
 {
@@ -126,12 +126,12 @@ static const OutputTypeXlateMap_t OutputTypeXlateMap[c_OutputMgr::e_OutputType::
 };
 
 //-----------------------------------------------------------------------------
-typedef struct
+struct OutputChannelIdToGpioAndPortEntry_t
 {
     gpio_num_t                  GpioPin;
     uart_port_t                 PortId;
     c_OutputMgr::OM_PortType_t  PortType;
-} OutputChannelIdToGpioAndPortEntry_t;
+};
 
 //-----------------------------------------------------------------------------
 static const OutputChannelIdToGpioAndPortEntry_t OutputChannelIdToGpioAndPort[] =

@@ -70,7 +70,7 @@ static std::vector<c_InputEffectEngine::dCRGB> TransitionColorTable =
 	{100, 100,  55},
 };
 
-static std::vector<c_InputEffectEngine::MarqueeGroup> MarqueueGroupTable =
+static std::vector<c_InputEffectEngine::MarqueeGroup_t> MarqueueGroupTable =
 {
     {5, {255, 0, 0}, 100, 100},
     {5, {255, 255, 255}, 100, 0},
@@ -214,7 +214,7 @@ void c_InputEffectEngine::GetMqttEffectList (JsonObject& jsonConfig)
 } // GetMqttEffectList
 
 //-----------------------------------------------------------------------------
-void c_InputEffectEngine::GetMqttConfig (MQTTConfiguration_s & mqttConfig)
+void c_InputEffectEngine::GetMqttConfig (MQTTConfiguration_t & mqttConfig)
 {
     // DEBUG_START;
 
@@ -564,7 +564,7 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
         for (auto _MarqueeGroup : MarqueeGroupArray)
         {
-            MarqueeGroup NewGroup;
+            MarqueeGroup_t NewGroup;
             JsonObject currentMarqueeGroup = _MarqueeGroup.as<JsonObject>();
             // DEBUG_V ("");
             JsonObject GroupColor = currentMarqueeGroup[(char*)CN_color];
@@ -602,7 +602,7 @@ bool c_InputEffectEngine::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 } // SetConfig
 
 //-----------------------------------------------------------------------------
-void c_InputEffectEngine::SetMqttConfig (MQTTConfiguration_s& mqttConfig)
+void c_InputEffectEngine::SetMqttConfig (MQTTConfiguration_t& mqttConfig)
 {
     // DEBUG_START;
     String effectName;

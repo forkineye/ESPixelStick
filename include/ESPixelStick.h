@@ -65,11 +65,12 @@ extern void RequestReboot(uint32_t LoopDelay, bool SkipDisable = false);
 extern bool RebootInProgress();
 
 /// Core configuration structure
-typedef struct {
+struct config_t
+{
     // Device
     String      id;
     uint32_t    BlankDelay = uint32_t(5);
-} config_t;
+};
 
 String  serializeCore          (bool pretty = false);
 void    deserializeCoreHandler (JsonDocument& jsonDoc);

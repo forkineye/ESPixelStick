@@ -192,15 +192,9 @@ public:
     };
 
 #ifdef ARDUINO_ARCH_ESP8266
-#   define OM_MAX_NUM_CHANNELS      (1200 * 3)
-#   define OM_MAX_CONFIG_SIZE       ((uint32_t)(3 * 1024))
+#   define OM_MAX_NUM_CHANNELS  (1200 * 3)
 #else // ARDUINO_ARCH_ESP32
-#   define OM_MAX_CONFIG_SIZE       ((uint32_t)(20 * 1024))
-#   ifdef BOARD_HAS_PSRAM
-#       define OM_MAX_NUM_CHANNELS  (7000 * 3)
-#   else
-#       define OM_MAX_NUM_CHANNELS  (3000 * 3)
-#   endif // !def BOARD_HAS_PSRAM
+#   define OM_MAX_NUM_CHANNELS  (3000 * 3)
 #endif // !def ARDUINO_ARCH_ESP32
 
     enum OM_PortType_t
@@ -251,10 +245,10 @@ private:
 
     String ConfigFileName;
 
-    uint8_t OutputBuffer[OM_MAX_NUM_CHANNELS];
-    uint32_t  UsedBufferSize = 0;
-    gpio_num_t ConsoleTxGpio = gpio_num_t::GPIO_NUM_1;
-    gpio_num_t ConsoleRxGpio = gpio_num_t::GPIO_NUM_3;
+    uint8_t    OutputBuffer[OM_MAX_NUM_CHANNELS];
+    uint32_t   UsedBufferSize = 0;
+    gpio_num_t ConsoleTxGpio  = gpio_num_t::GPIO_NUM_1;
+    gpio_num_t ConsoleRxGpio  = gpio_num_t::GPIO_NUM_3;
     bool       ConsoleUartIsActive = true;
 #if defined(ARDUINO_ARCH_ESP32)
     TaskHandle_t myTaskHandle = NULL;
