@@ -87,7 +87,7 @@ public:
     void      Enable ();
 
 private:
-#define DEFAULT_SSID_NOT_SET F("DEFAULT_SSID_NOT_SET")
+#define DEFAULT_SSID_NOT_SET "DEFAULT_SSID_NOT_SET"
     int       ValidateConfig ();
 
 #ifdef ARDUINO_ARCH_ESP8266
