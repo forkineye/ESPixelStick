@@ -51,8 +51,8 @@
 #endif // SECRETS_PASS
 
 /* Fallback configuration if config.json is empty or fails */
-const String default_ssid       = SECRETS_SSID;
-const String default_passphrase = SECRETS_PASS;
+const String default_ssid       = String(SECRETS_SSID);
+const String default_passphrase = String(SECRETS_PASS);
 
 /// Radio configuration
 /** ESP8266 radio configuration routines that are executed at startup. */
