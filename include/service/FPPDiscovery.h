@@ -56,7 +56,6 @@ private:
     c_InputFPPRemotePlayFile * InputFPPRemotePlayFile = nullptr;
     const IPAddress MulticastAddress = IPAddress (239, 70, 80, 80);
 
-    void GetSysInfoJSON    (JsonObject& jsonResponse);
     void GetStatusJSON     (JsonObject& jsonResponse, bool advanced);
     void BuildFseqResponse (String fname, c_FileMgr::FileId fseq, String & resp);
     void StopPlaying       (bool wait = true);
@@ -135,6 +134,7 @@ public:
     void SetInputFPPRemotePlayFile    (c_InputFPPRemotePlayFile * value);
     void ForgetInputFPPRemotePlayFile ();
     void GenerateFppSyncMsg           (uint8_t Action, const String & FileName, uint32_t CurrentFrame, const float & ElpsedTime);
+    void GetSysInfoJSON               (JsonObject& jsonResponse);
 
 #   define SYNC_PKT_START       0
 #   define SYNC_PKT_STOP        1
