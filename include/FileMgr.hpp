@@ -57,6 +57,7 @@ public:
     void    GetStatus (JsonObject& json);
 
     bool    handleFileUpload (const String & filename, size_t index, uint8_t * data, size_t len, bool final, uint32_t totalLen);
+    void    AbortSdFileUpload();
 
     typedef std::function<void (JsonDocument& json)> DeserializationHandler;
 

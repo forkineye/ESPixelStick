@@ -2194,5 +2194,26 @@ void c_FileMgr::UnLockSd(bool TargetLockState)
     // DEBUG_END;
 } // UnLockSd
 
+//-----------------------------------------------------------------------------
+void c_FileMgr::AbortSdFileUpload()
+{
+    // DEBUG_START;
+
+    do // once
+    {
+        if(fsUploadFileHandle == INVALID_FILE_HANDLE)
+        {
+            // DEBUG_V("No File Transfer in progress");
+            break;
+        }
+
+        CloseSdFile(fsUploadFileHandle);
+        // fsUploadFileHandle = INVALID_FILE_HANDLE;
+
+    } while(false);
+
+    // DEBUG_END;
+} // AbortSdFileUpload
+
 // create a global instance of the File Manager
 c_FileMgr FileMgr;
