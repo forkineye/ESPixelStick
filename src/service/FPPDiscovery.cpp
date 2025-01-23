@@ -824,6 +824,12 @@ void c_FPPDiscovery::ProcessFile (
 
         if(!inFileUpload)
         {
+            if(0 != index)
+            {
+                // DEBUG_V("Ignore non start file request. Index = " + String(index) + " Filename: '" + filename + "'");
+                request->send (500);
+                break;
+            }
             // DEBUG_V(String("Current CPU ID: ") + String(xPortGetCoreID()));
             // DEBUG_V("wait for the player to become idle");
             StopPlaying(true);
@@ -831,6 +837,19 @@ void c_FPPDiscovery::ProcessFile (
             UploadFileName = filename;
             InputMgr.SetOperationalState(false);
             OutputMgr.PauseOutputs(true);
+        }
+        else if(!UploadFileName.equals(filename))
+        {
+            if(0 != index)
+            {
+                // DEBUG_V("Ignore unexpected file fragment for '" + filename + "'");
+                request->send (500);
+                break;
+            }
+
+            // DEBUG_V("New file starting. Aborting: '" + UploadFileName + "' and starting '" + filename + "'");
+            FileMgr.AbortSdFileUpload();
+            UploadFileName = filename;
         }
 
         // DEBUG_V("Write the file block");
