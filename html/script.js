@@ -992,7 +992,7 @@ function ProcessModeConfigurationDataEffects(channelConfig) {
 
     RenumberTransitionTable();
 
-    $('#AddTransitionBtn').unbind();
+    $('#AddTransitionBtn').off();
     $('#AddTransitionBtn').on("click", (function () {
         // console.info("Add a transition");
         transitionAddRow('#000000');
@@ -1011,7 +1011,7 @@ function ProcessModeConfigurationDataEffects(channelConfig) {
 
     RenumberMarqueeGroupTable();
 
-    $('#AddMarqueeGroupBtn').unbind();
+    $('#AddMarqueeGroupBtn').off();
     $('#AddMarqueeGroupBtn').on("click", (function () {
         // console.info("Add a MarqueeGroup button pressed");
         let newMarqueeGroup = {};
@@ -1384,7 +1384,8 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
 
     // modify page title
     //TODO: Dirty hack to clean-up input names
-    if (ChannelType !== 'input') {
+    if (ChannelType !== 'input')
+    {
         let ModeDisplayName = GenerateInputOutputControlLabel(ChannelType, channelId) + " - " + $(modeControlName + ' #Title')[0].innerHTML;
         // console.info("ModeDisplayName: " + ModeDisplayName);
         $(modeControlName + ' #Title')[0].innerHTML = ModeDisplayName;
@@ -1622,7 +1623,7 @@ function CreateOptionsFromConfig(OptionListName, Config) {
                 // console.info("Set the selector type to: " + CurrentChannel.type);
                 $(jqSelector).val(CurrentChannel.type);
                 LoadDeviceSetupSelectedOption(OptionListName, ChannelId);
-                $(jqSelector).change(function () {
+                $(jqSelector).on("change", function () {
                     // console.info("Set the selector type to: " + CurrentChannel.type);
                     LoadDeviceSetupSelectedOption(OptionListName, ChannelId);
                 });
