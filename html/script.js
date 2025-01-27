@@ -375,20 +375,19 @@ $(function () {
             createImageThumbnails: false,
             dictDefaultMessage: 'Drag an image here to upload, or click to select one',
             acceptedFiles: '.fseq,.pl,.zip',
-            timeout: 99999999, /*milliseconds*/
-            init: function () {
-                this.on('success', function (file, resp) {
+            timeout: 99999999, /*milliseconds = 27 days*/
+            init: function ()
+            {
+                this.on('success', function (file) {
                     // console.log("Success");
                     // console.log("File: " + file.name);
-                    // console.log(resp);
                     Dropzone.forElement('#filemanagementupload').removeAllFiles(true)
                     RequestListOfFiles();
                 });
 
-                this.on('complete', function (file, resp) {
+                this.on('complete', function (file) {
                     // console.log("complete");
                     // console.log("File: " + file.name);
-                    // console.log(resp);
                     $('#fseqprogress_fg').addClass("hidden");
                     let extensionPosition = file.name.lastIndexOf(".");
                     if(extensionPosition !== -1)
@@ -408,10 +407,9 @@ $(function () {
                     // console.debug("Final Transfer Rate: " + rate + "KBps");
                 });
 
-                this.on('addedfile', function (file, resp) {
+                this.on('addedfile', function (file) {
                     // console.log("addedfile");
                     // console.log("File: " + file.name);
-                    // console.log("resp: " + resp);
                     FseqFileTransferStartTime = new Date();
                 });
 
@@ -426,13 +424,37 @@ $(function () {
                     let rate = Math.floor((bytesSent / DeltaTime) / 1000);
                     $('#fseqprogressrate').html(rate + "KBps");
                 });
-            },
 
-            accept: function (file, done) {
-                // console.log("accept");
-                // console.log("File: " + file.name);
-                return done(); // triggers a send
-            }
+                this.on('error', function (file, msg) {
+                    // console.log("error");
+                    // console.log("File: " + file.name);
+                    // console.log("msg: " + msg);
+                    alert("Failed uploading '" + file.name + "'\nError: '" + msg + "'");
+                });
+
+                this.on('sending', function (file, xhrObject)
+                {
+                    // console.log("sending");
+                    // console.log("File: " + file.name);
+                    // console.log("resp: " + xhrObject);
+
+                    xhrObject.addEventListener("error", function (event)
+                    {
+                        // console.error("TCP Error: " + event.type);
+                        alert("File Transfer Error: " + event.type);
+                    });
+
+                    xhrObject.addEventListener("abort", function (event)
+                    {
+                        // console.error("TCP Abort: " + event.type);
+                        alert("File Transfer Error: " + event.type);
+                    });
+                });
+
+                this.on('queuecomplete', function () {
+                    console.log("queuecomplete");
+                });
+            },
         });
 
     $("#filemanagementupload").addClass("dropzone");
