@@ -134,7 +134,11 @@ bool setFromJSON (T& OutValue, JsonVariant & Json, N Name)
     return HasBeenModified;
 };
 
-#define JsonWrite(j, n, v)  (j)[(char*)(n)] = (v)
+#if defined(ARDUINO_ARCH_ESP8266)
+#   define JsonWrite(j, n, v)  (j)[String(n)] = (v)
+#else // defined(ARDUINO_ARCH_ESP32)
+#   define JsonWrite(j, n, v)  (j)[(char*)(n)] = (v)
+#endif
 
 #define logcon(msg) \
 { \
