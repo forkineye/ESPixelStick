@@ -862,7 +862,7 @@ void c_FPPDiscovery::ProcessFile (
         }
 
         // DEBUG_V();
-        if (final)
+        if (final || writeFailed)
         {
             inFileUpload = false;
             UploadFileName = emptyString;
