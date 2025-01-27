@@ -106,12 +106,14 @@ public:
     void   FindFirstZipFile (String &FileName, bool LockStatus);
 
 #define FSEQFILELIST "fseqfilelist.json"
-    // Configuration file params
+#define SD_BLOCK_SIZE 512
+
 #if defined ARDUINO_ARCH_ESP8266
-#   // define CONFIG_MAX_SIZE (3*1024)    ///< Sanity limit for config file
+#   define MAX_SD_BUFFER_SIZE (6 * SD_BLOCK_SIZE)
 #else
-#   // define CONFIG_MAX_SIZE (4*1024)    ///< Sanity limit for config file
+#   define MAX_SD_BUFFER_SIZE (14 * SD_BLOCK_SIZE)
 #endif
+
 private:
     void    SetSpiIoPins ();
     void    SetSdSpeed ();

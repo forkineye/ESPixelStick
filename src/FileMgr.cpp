@@ -225,7 +225,7 @@ void c_FileMgr::NetworkStateChanged (bool NewState)
 //-----------------------------------------------------------------------------
  void c_FileMgr::Poll()
  {
-    // DEBUG_START;
+    /// DEBUG_START;
 #ifdef SUPPORT_FTP
     if(FtpEnabled)
     {
@@ -233,6 +233,7 @@ void c_FileMgr::NetworkStateChanged (bool NewState)
         ftpSrv.handleFTP();
     }
 #endif // def SUPPORT_FTP
+    /// DEBUG_END;
  } // Poll
 
 //-----------------------------------------------------------------------------
@@ -1553,12 +1554,13 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
     Specialized function that buffers data until the buffer is
     full and then writes out the buffer as a single operation.
 */
-size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size_t NumBytesToWrite, bool LockStatus)
+size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size_t NumBytesInSourceBuffer, bool LockStatus)
 {
     // DEBUG_START;
     LockSd(LockStatus);
 
-    size_t NumBytesWritten = 0;
+    size_t NumBytesWrittenToDestBuffer = 0;
+    bool ForceWriteToSD = (0 == NumBytesInSourceBuffer);
     do // once
     {
         int FileListIndex;
@@ -1584,7 +1586,7 @@ size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size
             FeedWDT();
 
             // DEBUG_V("Not using buffers");
-            NumBytesWritten = FileList[FileListIndex].fsFile.write(FileData, NumBytesToWrite);
+            NumBytesWrittenToDestBuffer = FileList[FileListIndex].fsFile.write(FileData, NumBytesInSourceBuffer);
             FileList[FileListIndex].fsFile.flush();
 
             delay(20);
@@ -1593,53 +1595,58 @@ size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size
         else // buffered mode
         {
             // DEBUG_V("Using buffers");
-            // does the buffer have room for this data?
-            bool WontFit = (FileList[FileListIndex].buffer.offset + NumBytesToWrite) > FileList[FileListIndex].buffer.size;
-            bool WriteRemainder = (0 == NumBytesToWrite) && (0 != FileList[FileListIndex].buffer.offset);
-            // DEBUG_V(String("       WontFit: ") + String(WontFit));
-            // DEBUG_V(String("WriteRemainder: ") + String(WriteRemainder));
-            // DEBUG_V(String("        Offset: ") + String(FileList[FileListIndex].buffer.offset));
-            if(WontFit || WriteRemainder)
+            // DEBUG_V(String("     NumBytesInSourceBuffer: ") + String(NumBytesInSourceBuffer));
+
+            while(NumBytesInSourceBuffer || ForceWriteToSD)
             {
-                delay(20);
-                FeedWDT();
-                // DEBUG_V("Buffer cant hold this data. Write out the buffer");
-                size_t bufferWriteSize = FileList[FileListIndex].fsFile.write(FileList[FileListIndex].buffer.DataBuffer, FileList[FileListIndex].buffer.offset);
-                FileList[FileListIndex].fsFile.flush();
-                delay(30);
-                FeedWDT();
-                if(FileList[FileListIndex].buffer.offset != bufferWriteSize)
+                size_t SpaceRemaining = FileList[FileListIndex].buffer.size - FileList[FileListIndex].buffer.offset;
+                size_t NumBytesToWrite = min(SpaceRemaining, NumBytesInSourceBuffer);
+                // DEBUG_V(String("             SpaceRemaining: ") + String(SpaceRemaining));
+                // DEBUG_V(String("            NumBytesToWrite: ") + String(NumBytesToWrite));
+
+                // DEBUG_V(String("Writing ") + String(NumBytesToWrite) + " bytes to the buffer");
+                memcpy(&(FileList[FileListIndex].buffer.DataBuffer[FileList[FileListIndex].buffer.offset]), FileData, NumBytesInSourceBuffer);
+
+                FileList[FileListIndex].buffer.offset += NumBytesToWrite;
+                NumBytesWrittenToDestBuffer += NumBytesToWrite;
+                NumBytesInSourceBuffer -= NumBytesToWrite;
+                // DEBUG_V(String("NumBytesWrittenToDestBuffer: ") + String(NumBytesWrittenToDestBuffer));
+                // DEBUG_V(String("     NumBytesInSourceBuffer: ") + String(NumBytesInSourceBuffer));
+
+                // is the buffer full?
+                if(ForceWriteToSD || (FileList[FileListIndex].buffer.offset == FileList[FileListIndex].buffer.size))
                 {
-                    logcon (String("WriteSdFileBuf:ERROR:SD Write Failed. Tried to write: ") +
-                            String(FileList[FileListIndex].buffer.offset) +
-                            " bytes. Actually wrote: " + String(bufferWriteSize))
-                    NumBytesWritten = 0;
-                    break;
-                } // end write failed
-
-                FileList[FileListIndex].buffer.offset = 0;
-            } // End buffer cant take the new data
-
-            // DEBUG_V(String("Writing ") + String(NumBytesToWrite) + " bytes to the buffer");
-            memcpy(&(FileList[FileListIndex].buffer.DataBuffer[FileList[FileListIndex].buffer.offset]), FileData, NumBytesToWrite);
-
-            FileList[FileListIndex].buffer.offset += NumBytesToWrite;
-            NumBytesWritten = NumBytesToWrite;
+                    // DEBUG_V("Buffer is full. Write out the buffer");
+                    // delay(20);
+                    // DEBUG_V(String("       BytesToBeWrittenToSD: ") + String(FileList[FileListIndex].buffer.offset));
+                    FeedWDT();
+                    size_t WroteToSdSize = FileList[FileListIndex].fsFile.write(FileList[FileListIndex].buffer.DataBuffer, FileList[FileListIndex].buffer.offset);
+                    FileList[FileListIndex].fsFile.flush();
+                    delay(30);
+                    FeedWDT();
+                    // DEBUG_V(String("              WroteToSdSize: ") + String(WroteToSdSize));
+                    if(FileList[FileListIndex].buffer.offset != WroteToSdSize)
+                    {
+                        logcon (String("WriteSdFileBuf:ERROR:SD Write Failed. Tried to write: ") +
+                                String(FileList[FileListIndex].buffer.offset) +
+                                " bytes. Actually wrote: " + String(WroteToSdSize))
+                        NumBytesWrittenToDestBuffer = 0;
+                        break;
+                    } // end write failed
+                    // reset the buffer
+                    FileList[FileListIndex].buffer.offset = 0;
+                    ForceWriteToSD = false;
+                }
+            }; // End write to buffer
         }
         // DEBUG_V (String (" FileHandle: ") + String (FileHandle));
         // DEBUG_V (String ("File.Handle: ") + String (FileList[FileListIndex].handle));
 
-        if(NumBytesWritten != NumBytesToWrite)
-        {
-            logcon(String(F("ERROR: SD Write failed. Tried writting ")) + String(NumBytesToWrite) + F(" bytes. Actually wrote ") + String(NumBytesWritten) + F(" bytes."));
-                    NumBytesWritten = 0;
-                    break;
-        }
     } while(false);
 
     UnLockSd(LockStatus);
     // DEBUG_END;
-    return NumBytesWritten;
+    return NumBytesWrittenToDestBuffer;
 
 } // WriteSdFile
 
@@ -1979,7 +1986,6 @@ bool c_FileMgr::handleFileUpload (
 
                 CloseSdFile(fsUploadFileHandle, false);
                 DeleteSdFile (fsUploadFileName, false);
-                fsUploadFileHandle = INVALID_FILE_HANDLE;
                 delay(100);
                 BuildFseqList(false, false);
                 expectedIndex = 0;
@@ -2000,7 +2006,7 @@ bool c_FileMgr::handleFileUpload (
             // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
             bytesWritten = WriteSdFileBuf (fsUploadFileHandle, data, len, false);
             // DEBUG_V (String ("Writing bytes: ") + String (index));
-            LOG_PORT.println(String("\033[Fprogress: ") + String(expectedIndex));
+            LOG_PORT.println(String("\033[Fprogress: ") + String(expectedIndex) + ", heap: " + String(ESP.getFreeHeap ()));
             LOG_PORT.flush();
         }
         // PauseSdFile(fsUploadFile);
@@ -2010,7 +2016,6 @@ bool c_FileMgr::handleFileUpload (
             // DEBUG_V("Write failed. Stop transfer");
             CloseSdFile(fsUploadFileHandle, false);
             DeleteSdFile (fsUploadFileName, false);
-            fsUploadFileHandle = INVALID_FILE_HANDLE;
             expectedIndex = 0;
             fsUploadFileName = emptyString;
             break;
@@ -2025,7 +2030,6 @@ bool c_FileMgr::handleFileUpload (
         uint32_t uploadTime = (uint32_t)(millis() - fsUploadStartTime) / 1000;
         FeedWDT();
         CloseSdFile (fsUploadFileHandle, false);
-        fsUploadFileHandle = INVALID_FILE_HANDLE;
 
         logcon (String (F ("Upload File: '")) + fsUploadFileName +
                 F ("' Done (") + String (uploadTime) +
@@ -2084,8 +2088,9 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
     {
         // DEBUG_V("Use the output buffer as a data buffer");
         FileList[FileListIndex].buffer.offset = 0;
-        FileList[FileListIndex].buffer.size = OutputMgr.GetBufferSize();
+        FileList[FileListIndex].buffer.size = min(uint32_t(OutputMgr.GetBufferSize() & ~(SD_BLOCK_SIZE - 1)), uint32_t(MAX_SD_BUFFER_SIZE));
         FileList[FileListIndex].buffer.DataBuffer = OutputMgr.GetBufferAddress();
+        // DEBUG_V(String("Buffer Size: ") + String(FileList[FileListIndex].buffer.size));
     }
 
     // DEBUG_END;
@@ -2208,7 +2213,6 @@ void c_FileMgr::AbortSdFileUpload()
         }
 
         CloseSdFile(fsUploadFileHandle);
-        // fsUploadFileHandle = INVALID_FILE_HANDLE;
 
     } while(false);
 
