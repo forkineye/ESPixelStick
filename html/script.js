@@ -10,7 +10,7 @@ var System_Config = null;
 var Fseq_File_List = [];
 var selector = [];
 var target = document.location.host;
-// target = "192.168.10.188";
+// target = "192.168.10.221";
 
 var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
@@ -1692,9 +1692,9 @@ function ExtractNetworkEthernetConfigFromHtmlPage() {
         System_Config.network.eth.dnss = $('#network #eth #dnss').val();
         System_Config.network.eth.dhcp = $('#network #eth #dhcp').prop('checked');
         System_Config.network.eth.type = parseInt($('#network #eth #type option:selected').val(), 10);
-        System_Config.network.eth.addr = $('#network #eth #addr').val();
+        System_Config.network.eth.addr = parseInt($('#network #eth #addr').val());
         System_Config.network.eth.power_pin = parseInt($('#network #eth #power_pin').val());
-        System_Config.network.eth.mode = $('#network #eth #mode option:selected').val(), 10;
+        System_Config.network.eth.mode = parseInt($('#network #eth #mode option:selected').val());
         System_Config.network.eth.mdc_pin = parseInt($('#network #eth #mdc_pin').val());
         System_Config.network.eth.mdio_pin = parseInt($('#network #eth #mdio_pin').val());
         System_Config.network.eth.activevalue = (parseInt($('#network #eth #activevalue option:selected').val(), 10) === 1);

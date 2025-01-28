@@ -2,7 +2,7 @@
 * pEthernetDriver->cpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -135,10 +135,10 @@ void c_EthernetDriver::GetConfig (JsonObject& json)
     JsonWrite(json, CN_dnss,        secondaryDns.toString ());
     JsonWrite(json, CN_dhcp,        UseDhcp);
 
-    JsonWrite(json, CN_type,        phy_type);
+    JsonWrite(json, CN_type,        uint32_t(phy_type));
     JsonWrite(json, CN_addr,        phy_addr);
     JsonWrite(json, CN_power_pin,   power_pin);
-    JsonWrite(json, CN_mode,        clk_mode);
+    JsonWrite(json, CN_mode,        uint32_t(clk_mode));
     JsonWrite(json, CN_mdc_pin,     mdc_pin);
     JsonWrite(json, CN_mdio_pin,    mdio_pin);
     JsonWrite(json, CN_activevalue, powerPinActiveValue);
