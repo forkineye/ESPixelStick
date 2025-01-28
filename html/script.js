@@ -669,18 +669,21 @@ async function SendConfigFileToServer(FileName = "", DataString = "")
     // console.info("Data: " + JSON.stringify(Data));
 
     let ConfigXfer = new XMLHttpRequest();
-
+    ConfigWaitMessageStart();
     ConfigXfer.addEventListener("loadend", function()
     {
         // console.info("SendConfigFileToServer: Success");
+        ConfigWaitMessageEnd(0);
         return 1;
     }, false);
     ConfigXfer.addEventListener("error", function () {
         console.error("SendConfigFileToServer: Error");
+        ConfigWaitMessageEnd(1);
         return 0;
     }, false);
     ConfigXfer.addEventListener("abort", function() {
         console.error("SendConfigFileToServer: abort");
+        ConfigWaitMessageEnd(1);
         return -1;
     }, false);
     ConfigXfer.open("PUT", "http://" + target + "/conf/" + FileName + ".json");
@@ -2314,6 +2317,48 @@ function ProcessReceivedJsonStatusMessage(JsonStat) {
     // $('#refresh').text(Status.output[0].framerefreshrate + " fps");
 } // ProcessReceivedJsonStatusMessage
 
+let MsgXferCount = 0;
+let AggregateErrorFlag = 0;
+
+function ConfigWaitMessageStart()
+{
+    // console.info("ConfigWaitMessageStart");
+    // console.info("MsgXferCount " + MsgXferCount);
+
+    $('#snackbar').modal();
+
+    MsgXferCount ++;
+    if(1 === MsgXferCount)
+    {
+        AggregateErrorFlag = 0;
+    }
+} // ConfigWaitMessageStart
+
+function ConfigWaitMessageEnd(ErrorFlag)
+{
+    // console.info("ConfigWaitMessageEnd");
+    // console.info("ErrorFlag " + ErrorFlag);
+    // console.info("MsgXferCount " + MsgXferCount);
+    MsgXferCount --;
+    AggregateErrorFlag += ErrorFlag;
+
+    if (0 === MsgXferCount)
+    {
+        $('#snackbar').modal('hide');
+
+        if(0 === AggregateErrorFlag)
+        {
+            alert("Configuration Save Success");
+        }
+        else
+        {
+            alert("Configuration Save Failed");
+        }
+    }
+
+} // ConfigWaitMessageEnd
+
+/*
 // Show "save" snackbar for 3sec
 function snackSave() {
     let x = document.getElementById('snackbar');
@@ -2322,6 +2367,7 @@ function snackSave() {
         x.className = x.className.replace('show', '');
     }, 3000);
 } // snackSave
+*/
 
 // Show reboot modal
 function showReboot() {
