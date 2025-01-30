@@ -97,6 +97,7 @@ public:
     void   GetListOfSdFiles (std::vector<String> & Response, bool LockStatus = false);
     uint64_t GetSdFileSize  (const String & FileName, bool LockStatus = false);
     uint64_t GetSdFileSize  (const FileId & FileHandle, bool LockStatus = false);
+    void   RenameSdFile     (String & OldName, String & NewName);
     void   BuildFseqList    (bool LockStatus, bool DisplayFileNames);
     bool   SeekSdFile       (const FileId & FileHandle, size_t position, SeekMode Mode);
 
