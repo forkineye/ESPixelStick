@@ -18,7 +18,6 @@
 */
 #include "ESPixelStick.h"
 #ifdef ARDUINO_ARCH_ESP32
-// #include <gpio.h>
 #include "output/OutputRmt.hpp"
 
 // forward declaration for the isr handler
