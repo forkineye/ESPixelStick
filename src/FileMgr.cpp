@@ -1719,6 +1719,25 @@ uint64_t c_FileMgr::GetSdFileSize (const FileId& FileHandle, bool LockStatus)
 } // GetSdFileSize
 
 //-----------------------------------------------------------------------------
+void c_FileMgr::RenameSdFile(String & OldName, String & NewName)
+{
+    // DEBUG_START;
+    // DEBUG_V(String("OldName: '") + OldName + "'");
+    // DEBUG_V(String("NewName: '") + NewName + "'");
+
+    // only do this in the root dir
+    ESP_SD.chdir();
+    // rename does not work if the target already exists
+    ESP_SD.remove(NewName);
+    if(!ESP_SD.rename(OldName, NewName))
+    {
+        logcon(String(CN_stars) + F("Could not rename '") + OldName + F("' to '") + NewName + F("'") + CN_stars);
+    }
+
+    // DEBUG_END;
+} // RenameSdFile
+
+//-----------------------------------------------------------------------------
 void c_FileMgr::BuildFseqList(bool LockStatus, bool DisplayFileNames)
 {
     // DEBUG_START;
@@ -1795,7 +1814,9 @@ void c_FileMgr::BuildFseqList(bool LockStatus, bool DisplayFileNames)
             {
                 // is this a zipped file?
                 if((-1 != EntryName.indexOf(F(".zip"))) ||
-                   (-1 != EntryName.indexOf(F(".ZIP"))))
+                   (-1 != EntryName.indexOf(F(".ZIP"))) ||
+                   (-1 != EntryName.indexOf(F(".xlz")))
+                   )
                 {
                     FoundZipFile = true;
                 }
@@ -1926,7 +1947,8 @@ void c_FileMgr::FindFirstZipFile(String &FileName, bool LockStatus)
 
             // is this a zipped file?
             if((-1 != EntryName.indexOf(F(".zip"))) ||
-               (-1 != EntryName.indexOf(F(".ZIP"))))
+               (-1 != EntryName.indexOf(F(".ZIP"))) ||
+               (-1 != EntryName.indexOf(F(".xlz"))))
             {
                 FileName = EntryName;
                 CurrentEntry.close();

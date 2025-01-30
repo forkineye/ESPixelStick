@@ -374,7 +374,7 @@ $(function () {
             uploadMultiple: false,
             createImageThumbnails: false,
             dictDefaultMessage: 'Drag an image here to upload, or click to select one',
-            acceptedFiles: '.fseq,.pl,.zip',
+            acceptedFiles: '.fseq,.pl,.zip,.xlz',
             timeout: 99999999, /*milliseconds = 27 days*/
             init: function ()
             {
@@ -393,7 +393,7 @@ $(function () {
                     if(extensionPosition !== -1)
                     {
                         let extension = file.name.toLowerCase().slice(extensionPosition + 1);
-                        if("zip" === extension)
+                        if(("zip" === extension) || ("xlz" === extension))
                         {
                             let RebootNow = confirm("Downloaded a zip file. Unzip requires a reboot.\nClick 'OK' to Reboot NOW.");
                             if(RebootNow)

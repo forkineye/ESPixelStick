@@ -116,14 +116,14 @@ void UnzipFiles::ProcessZipFile(String & FileName)
     int returnCode = zip.openZIP(FileName.c_str(), _OpenZipFile, _CloseZipFile, _ReadZipFile, _SeekZipFile);
     if (returnCode == UNZ_OK)
     {
+        bool IsSpecialxLightsZipFile = (-1 != FileName.indexOf(".xlz"));
         // logcon(String("Opened zip file: '") + FileName + "'");
 
         // Display the global comment and all of the FileNames within
-        returnCode = zip.getGlobalComment(szComment, sizeof(szComment));
+        // returnCode = zip.getGlobalComment(szComment, sizeof(szComment));
         // logcon(String("Global comment: '") + String(szComment) + "'");
         logcon("Files in this archive:");
-        zip.gotoFirstFile();
-        returnCode = UNZ_OK;
+        returnCode = zip.gotoFirstFile();
         while (returnCode == UNZ_OK)
         {
             // Display all files contained in the archive
@@ -131,8 +131,17 @@ void UnzipFiles::ProcessZipFile(String & FileName)
             if (returnCode == UNZ_OK)
             {
                 FeedWDT();
-                String FileName = String(szName);
-                ProcessCurrentFileInZip(fi, FileName);
+                String SubFileName = String(szName);
+                ProcessCurrentFileInZip(fi, SubFileName);
+                if(IsSpecialxLightsZipFile)
+                {
+                    String NewName = FileName;
+                    NewName.replace(".xlz", ".fseq");
+                    // DEBUG_V(String("Rename '") + SubFileName + "' to '" + NewName);
+                    FileMgr.RenameSdFile(SubFileName, NewName);
+                    // only a single file is alowed in an xlz zip file.
+                    break;
+                }
             }
             returnCode = zip.gotoNextFile();
         } // while more files...
