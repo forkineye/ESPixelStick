@@ -249,7 +249,6 @@ private:
     uint32_t   UsedBufferSize = 0;
     gpio_num_t ConsoleTxGpio  = gpio_num_t::GPIO_NUM_1;
     gpio_num_t ConsoleRxGpio  = gpio_num_t::GPIO_NUM_3;
-    bool       ConsoleUartIsActive = true;
 #if defined(ARDUINO_ARCH_ESP32)
     TaskHandle_t myTaskHandle = NULL;
     // uint32_t PollCount = 0;

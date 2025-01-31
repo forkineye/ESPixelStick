@@ -57,6 +57,7 @@ void c_ExternalInput::Init(uint32_t iInputId, uint32_t iPinId, Polarity_t Polari
 	polarity = Polarity;
 
 	// set the pin direction to input
+    ResetGpio(gpio_num_t(GpioId));
 	pinMode(GpioId, INPUT);
 
 	// DEBUG_END;
@@ -113,6 +114,8 @@ void c_ExternalInput::ProcessConfig (JsonObject JsonData)
 
 	if ((oldInputId != GpioId) || (false == Enabled))
 	{
+        ResetGpio(gpio_num_t(oldInputId));
+        ResetGpio(gpio_num_t(GpioId));
 		pinMode (oldInputId, INPUT);
 		pinMode (GpioId, INPUT_PULLUP);
 		fsm_ExternalInput_boot_imp.Init (*this);

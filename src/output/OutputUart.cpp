@@ -223,6 +223,16 @@ void c_OutputUart::Begin (OutputUartConfig_t & config )
 } // init
 
 //----------------------------------------------------------------------------
+void c_OutputUart::CheckGpio (gpio_num_t ConsoleTxGpio, gpio_num_t ConsoleRxGpio)
+{
+    DEBUG_START;
+    // the gpio we are using may have been manipulated
+    // correct if needed.
+
+    DEBUG_END;
+} // CheckGpio
+
+//----------------------------------------------------------------------------
 void c_OutputUart::StartBreak()
 {
     // DEBUG_START;
@@ -965,6 +975,7 @@ void c_OutputUart::set_pin()
     {
         // DEBUG_V();
 
+        ResetGpio(OutputUartConfig.DataPin);
         pinMode(OutputUartConfig.DataPin, OUTPUT);
         digitalWrite(OutputUartConfig.DataPin, LOW);
         ESP_ERROR_CHECK(uart_set_pin(OutputUartConfig.UartId,

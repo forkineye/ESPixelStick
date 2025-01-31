@@ -218,6 +218,7 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
         RmtConfig.tx_config.loop_en = true;
         RmtConfig.tx_config.idle_output_en = true;
         // DEBUG_V();
+        ResetGpio(OutputRmtConfig.DataPin);
         ESP_ERROR_CHECK(rmt_config(&RmtConfig));
 
         // DEBUG_V();
@@ -275,6 +276,7 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
         pParent = _pParent;
         rmt_isr_ThisPtrs[OutputRmtConfig.RmtChannelId] = this;
 
+        ResetGpio(OutputRmtConfig.DataPin);
         rmt_set_gpio(OutputRmtConfig.RmtChannelId, RMT_MODE_TX, OutputRmtConfig.DataPin, false);
 
         HasBeenInitialized = true;

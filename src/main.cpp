@@ -138,6 +138,7 @@ void TestHeap(uint32_t Id)
 void setup()
 {
 #ifdef DEBUG_GPIO
+    ResetGpio(DEBUG_GPIO);
     pinMode(DEBUG_GPIO, OUTPUT);
     digitalWrite(DEBUG_GPIO, HIGH);
 #endif // def DEBUG_GPIO
@@ -581,21 +582,26 @@ void RequestReboot(uint32_t LoopDelay, bool SkipDisable /* = false */)
 
 } // RequestReboot
 
+bool ConsoleUartIsActive = true;
+
 void _logcon (String & DriverName, String Message)
 {
-    char Spaces[7];
-    memset(Spaces, ' ', sizeof(Spaces));
-    if (DriverName.length() < (sizeof(Spaces)-1))
+    if(ConsoleUartIsActive)
     {
-        Spaces[(sizeof (Spaces) - 1) - DriverName.length ()] = '\0';
-    }
-    else
-    {
-        Spaces[0] = '\0';
-    }
+        char Spaces[7];
+        memset(Spaces, ' ', sizeof(Spaces));
+        if (DriverName.length() < (sizeof(Spaces)-1))
+        {
+            Spaces[(sizeof (Spaces) - 1) - DriverName.length ()] = '\0';
+        }
+        else
+        {
+            Spaces[0] = '\0';
+        }
 
-    LOG_PORT.println (String(F("[")) + String (Spaces) + DriverName + F("] ") + Message);
-    LOG_PORT.flush ();
+        LOG_PORT.println (String(F("[")) + String (Spaces) + DriverName + F("] ") + Message);
+        LOG_PORT.flush ();
+    }
 } // logcon
 
 void FeedWDT ()

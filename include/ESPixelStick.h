@@ -136,10 +136,26 @@ bool setFromJSON (T& OutValue, JsonVariant & Json, N Name)
 
 #if defined(ARDUINO_ARCH_ESP8266)
 #   define JsonWrite(j, n, v)  (j)[String(n)] = (v)
+void inline ResetGpio(const gpio_num_t pinId)
+{
+    if(gpio_num_t(33) > pinId)
+    {
+        pinMode(pinId, INPUT);
+    }
+}
 #else // defined(ARDUINO_ARCH_ESP32)
 #   define JsonWrite(j, n, v)  (j)[(char*)(n)] = (v)
+void inline ResetGpio(const gpio_num_t pinId)
+{
+    if(GPIO_IS_VALID_OUTPUT_GPIO(pinId))
+    {
+        gpio_reset_pin(pinId);
+        pinMode(pinId, INPUT);
+    }
+}
 #endif
 
+extern bool ConsoleUartIsActive;
 #define logcon(msg) \
 { \
     String DN; \

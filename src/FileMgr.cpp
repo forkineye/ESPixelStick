@@ -389,15 +389,21 @@ void c_FileMgr::SetSpiIoPins ()
         // DEBUG_V();
         SPI.end ();
         // DEBUG_V();
+        ResetGpio(gpio_num_t(cs_pin));
         pinMode(cs_pin, OUTPUT);
 #       ifdef USE_MISO_PULLUP
         // DEBUG_V("USE_MISO_PULLUP");
         // on some hardware MISO is missing a required pull-up resistor, use internal pull-up.
+        ResetGpio(gpio_num_t(mosi_pin));
         pinMode(miso_pin, INPUT_PULLUP);
 #       else
         // DEBUG_V();
+        ResetGpio(gpio_num_t(miso_pin));
         pinMode(miso_pin, INPUT);
 #       endif // def USE_MISO_PULLUP
+        ResetGpio(gpio_num_t(clk_pin));
+        ResetGpio(gpio_num_t(miso_pin));
+        ResetGpio(gpio_num_t(cs_pin));
         SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin); // uses HSPI by default
 #   else // ESP8266
         SPI.end ();

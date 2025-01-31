@@ -248,6 +248,7 @@ void c_OutputMgr::Begin ()
         HasBeenInitialized = true;
 
 #ifdef LED_FLASH_GPIO
+        ResetGpio(LED_FLASH_GPIO);
         pinMode (LED_FLASH_GPIO, OUTPUT);
         digitalWrite (LED_FLASH_GPIO, LED_FLASH_OFF);
 #endif // def LED_FLASH_GPIO
@@ -1295,11 +1296,13 @@ void c_OutputMgr::SetSerialUart()
     if(NeedToTurnOffConsole && ConsoleUartIsActive)
     {
         logcon ("Found an Output that uses a Serial console GPIO. Turning off Serial console output.");
-        Serial.end();
+        LOG_PORT.flush();
+        // Serial.end();
         ConsoleUartIsActive = false;
     }
     else if(!NeedToTurnOffConsole && !ConsoleUartIsActive)
     {
+        Serial.end();
         Serial.begin(115200);
         ConsoleUartIsActive = true;
         // DEBUG_V("Turn ON Console");
@@ -1318,6 +1321,7 @@ void c_OutputMgr::Poll()
     // //DEBUG_START;
 
 #ifdef LED_FLASH_GPIO
+    ResetGpio(LED_FLASH_GPIO);
     pinMode (LED_FLASH_GPIO, OUTPUT);
     digitalWrite (LED_FLASH_GPIO, LED_FLASH_OFF);
 #endif // def LED_FLASH_GPIO

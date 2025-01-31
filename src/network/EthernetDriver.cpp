@@ -201,6 +201,7 @@ void c_EthernetDriver::InitPowerPin ()
     // DEBUG_START;
 
     // Set up the power control output
+    ResetGpio(power_pin);
     pinMode (power_pin, OUTPUT);
     digitalWrite (power_pin, powerPinActiveValue);
 
