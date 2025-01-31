@@ -160,7 +160,7 @@ bool c_OutputRelay::validate ()
                ledcAttachPin(currentRelay.GpioId, Channel);
                ledcSetup(Channel, currentRelay.PwmFrequency, 8);
             #else
-                ResetGpio(currentRelay->GpioId);
+                ResetGpio(currentRelay.GpioId);
                 pinMode (currentRelay.GpioId, OUTPUT);
             #endif
         }
