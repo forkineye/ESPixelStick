@@ -45,7 +45,6 @@ class c_InputFPPRemote : public c_InputCommon
       void SetOperationalState (bool ActiveFlag);
 
 protected:
-#   define No_LocalFileToPlay "..."
 
     c_InputFPPRemotePlayItem * pInputFPPRemotePlayItem = nullptr;
     int32_t GetSyncOffsetMS () { return SyncOffsetMS; }
@@ -71,8 +70,7 @@ private:
     int32_t SyncOffsetMS = 0;
     bool    SendFppSync = false;
     String  FileBeingPlayed = No_LocalFileToPlay;
+    String  ConfiguredFileToPlay = No_LocalFileToPlay;
     bool    Stopping = false;
-
-#   define JSON_NAME_FILE_TO_PLAY CN_fseqfilename
-
+    bool    FppSyncOverride = false;
 };
