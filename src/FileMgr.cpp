@@ -1397,6 +1397,11 @@ bool c_FileMgr::ReadSdFile (const String & FileName, JsonDocument & FileData, bo
 
 } // ReadSdFile
 
+#ifdef DEBUG_SD_READS
+	size_t LastStartingPosition = 0;
+	size_t NextExpectedStartingPosition = 0;
+#endif // def DEBUG_SD_READS
+
 //-----------------------------------------------------------------------------
 size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t NumBytesToRead, size_t StartingPosition, bool LockStatus)
 {
@@ -1408,6 +1413,22 @@ size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t N
     // DEBUG_V (String ("       FileHandle: ") + String (FileHandle));
     // DEBUG_V (String ("   NumBytesToRead: ") + String (NumBytesToRead));
     // DEBUG_V (String (" StartingPosition: ") + String (StartingPosition));
+#ifdef DEBUG_SD_READS
+    if(StartingPosition < NextExpectedStartingPosition)
+    {
+        DEBUG_V("Unexpected Start Position");
+        DEBUG_V (String ("NextExpectedStartingPosition: ") + String (NextExpectedStartingPosition));
+        DEBUG_V (String ("     Actual StartingPosition: ") + String (StartingPosition));
+    }
+    NextExpectedStartingPosition = StartingPosition + NumBytesToRead;
+    if(StartingPosition <= LastStartingPosition)
+    {
+        DEBUG_V("Unexpected Start Position");
+        DEBUG_V (String ("   LastStartingPosition: ") + String (LastStartingPosition));
+        DEBUG_V (String ("Actual StartingPosition: ") + String (StartingPosition));
+    }
+    LastStartingPosition = StartingPosition;
+#endif // def DEBUG_SD_READS
 
     int FileListIndex;
     if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
@@ -1425,7 +1446,6 @@ size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t N
             response = ReadSdFile(FileHandle, FileData, ActualBytesToRead, true);
             // DEBUG_V(String("         response: ") + String(response));
         }
-
     }
     else
     {
@@ -1451,6 +1471,7 @@ size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t N
     int FileListIndex;
     if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
     {
+        // DEBUG_V(String("   NumBytesToRead: ") + String(NumBytesToRead));
         response = FileList[FileListIndex].fsFile.readBytes(((char *)FileData), NumBytesToRead);
         // DEBUG_V(String("         response: ") + String(response));
     }
