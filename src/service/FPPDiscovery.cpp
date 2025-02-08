@@ -151,6 +151,19 @@ void c_FPPDiscovery::SetOperationalState (bool ActiveFlag)
 }
 
 //-----------------------------------------------------------------------------
+void c_FPPDiscovery::GetConfig (JsonObject& jsonConfig)
+{
+    // DEBUG_START;
+
+    JsonWrite(jsonConfig, CN_fseqfilename, ConfiguredFileToPlay);
+    JsonWrite(jsonConfig, CN_BlankOnStop,  BlankOnStop);
+    JsonWrite(jsonConfig, CN_FPPoverride,  FppSyncOverride);
+
+    // DEBUG_END;
+
+} // GetConfig
+
+//-----------------------------------------------------------------------------
 void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
@@ -349,7 +362,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, float S
     // DEBUG_START;
     do // once
     {
-        if (!IsEnabled || !AllowedToRemotePlayFiles ())
+        if (!AllowedToRemotePlayFiles ())
         {
             // DEBUG_V ("Not allowed to play remote files");
             break;
@@ -451,11 +464,12 @@ void c_FPPDiscovery::ProcessBlankPacket ()
 //-----------------------------------------------------------------------------
 bool c_FPPDiscovery::PlayingFile ()
 {
+    bool Response = false;
     if (InputFPPRemotePlayFile)
     {
-        return !InputFPPRemotePlayFile->IsIdle ();
+        Response = !InputFPPRemotePlayFile->IsIdle ();
     }
-    return false;
+    return Response;
 } // PlayingFile
 
 //-----------------------------------------------------------------------------
@@ -1178,6 +1192,20 @@ void c_FPPDiscovery::ProcessFPPDJson (AsyncWebServerRequest* request)
 } // ProcessFPPDJson
 
 //-----------------------------------------------------------------------------
+bool c_FPPDiscovery::SetConfig (JsonObject& jsonConfig)
+{
+    // DEBUG_START;
+
+    setFromJSON (ConfiguredFileToPlay, jsonConfig, CN_fseqfilename);
+    setFromJSON (BlankOnStop,          jsonConfig, CN_BlankOnStop);
+    setFromJSON (FppSyncOverride,      jsonConfig, CN_FPPoverride);
+
+    // DEBUG_END;
+
+    return true;
+} // SetConfig
+
+//-----------------------------------------------------------------------------
 void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
 {
     // DEBUG_START;
@@ -1233,7 +1261,7 @@ void c_FPPDiscovery::StopPlaying (bool wait)
     {
         StopInProgress = true;
         // only process if the pointer is valid
-        while (InputFPPRemotePlayFile)
+        while (true)
         {
             // DEBUG_V("Pointer is valid");
             if(InputFPPRemotePlayFile->IsIdle())
@@ -1256,6 +1284,7 @@ void c_FPPDiscovery::StopPlaying (bool wait)
                 break;
             }
         }
+        ForgetInputFPPRemotePlayFile();
         StopInProgress = false;
     }
     else
