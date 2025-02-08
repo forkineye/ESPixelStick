@@ -194,7 +194,7 @@ uint32_t c_InputFPPRemotePlayFile::CalculateFrameId (uint32_t ElapsedMS, int32_t
 {
     // xDEBUG_START;
 
-    uint32_t CurrentFrameId = 0;
+    uint32_t CurrentFrameId = FileControl[CurrentFile].LastPlayedFrameId;
 
     do // once
     {
@@ -202,11 +202,21 @@ uint32_t c_InputFPPRemotePlayFile::CalculateFrameId (uint32_t ElapsedMS, int32_t
         // xDEBUG_V (String ("AdjustedPlayTime: ") + String (AdjustedPlayTime));
         if ((0 > SyncOffsetMS) && (ElapsedMS < abs(SyncOffsetMS)))
         {
+            // DEBUG_V (String ("SyncOffsetMS: ") + String (SyncOffsetMS));
+            // DEBUG_V (String ("   ElapsedMS: ") + String (ElapsedMS));
             break;
         }
 
         CurrentFrameId = (AdjustedPlayTime / FileControl[CurrentFile].FrameStepTimeMS);
         // xDEBUG_V (String ("  CurrentFrameId: ") + String (CurrentFrameId));
+#ifdef DEBUG_FSEQ
+        if(2 < abs(int(CurrentFrameId) - int(FileControl[CurrentFile].LastPlayedFrameId)))
+        {
+            DEBUG_V (String ("  CurrentFrameId: ") + String (CurrentFrameId));
+            DEBUG_V (String (" PreviousFrameId: ") + String (FileControl[CurrentFile].LastPlayedFrameId));
+            DEBUG_V (String ("     Frame Delta: ") + String(abs(int(CurrentFrameId) - int(FileControl[CurrentFile].LastPlayedFrameId))));
+        }
+#endif // def DEBUG_FSEQ
 
     } while (false);
 
@@ -431,7 +441,6 @@ uint32_t c_InputFPPRemotePlayFile::ReadFile(uint32_t DestinationIntensityId, uin
     // xDEBUG_START;
 
     uint32_t NumBytesRead = 0;
-    uint8_t LocalIntensityBuffer[200];
 
     do // once
     {
@@ -441,12 +450,22 @@ uint32_t c_InputFPPRemotePlayFile::ReadFile(uint32_t DestinationIntensityId, uin
             break;
         }
 
+        if(nullptr == LocalIntensityBuffer)
+        {
+            LocalIntensityBuffer = (byte*)malloc(LocalIntensityBufferSize);
+            if(nullptr == LocalIntensityBuffer)
+            {
+                logcon(String(CN_stars) + F("Could not allocate a buffer to read SD files. Rebooting. ") + CN_stars);
+                RequestReboot(1, true);
+                break;
+            }
+        }
         while (NumBytesRead < NumBytesToRead)
         {
             uint32_t NumBytesReadThisPass = FileMgr.ReadSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed,
-                                                            LocalIntensityBuffer,
-                                                            min((NumBytesToRead - NumBytesRead), sizeof(LocalIntensityBuffer)),
-                                                            FileOffset);
+                                                               LocalIntensityBuffer,
+                                                               min((NumBytesToRead - NumBytesRead), LocalIntensityBufferSize),
+                                                               FileOffset);
 
             OutputMgr.WriteChannelData(DestinationIntensityId, NumBytesReadThisPass, LocalIntensityBuffer);
 
@@ -455,6 +474,8 @@ uint32_t c_InputFPPRemotePlayFile::ReadFile(uint32_t DestinationIntensityId, uin
             DestinationIntensityId += NumBytesReadThisPass;
         }
     } while (false);
+    // xDEBUG_V(String("NumBytesToRead: ") + String(NumBytesToRead));
+    // xDEBUG_V(String("  NumBytesRead: ") + String(NumBytesRead));
 
     // xDEBUG_END;
     return NumBytesRead;
