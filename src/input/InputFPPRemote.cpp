@@ -65,17 +65,11 @@ void c_InputFPPRemote::GetConfig (JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
-    if (PlayingFile ())
-    {
-        JsonWrite(jsonConfig, JSON_NAME_FILE_TO_PLAY, pInputFPPRemotePlayItem->GetFileName ());
-    }
-    else
-    {
-        JsonWrite(jsonConfig, JSON_NAME_FILE_TO_PLAY, No_LocalFileToPlay);
-    }
-    JsonWrite(jsonConfig, CN_SyncOffset,  SyncOffsetMS);
-    JsonWrite(jsonConfig, CN_SendFppSync, SendFppSync);
-    JsonWrite(jsonConfig, CN_blankOnStop, FPPDiscovery.GetBlankOnStop());
+    FPPDiscovery.GetConfig(jsonConfig);
+    JsonWrite(jsonConfig, CN_fseqfilename, ConfiguredFileToPlay);
+    JsonWrite(jsonConfig, CN_SyncOffset,   SyncOffsetMS);
+    JsonWrite(jsonConfig, CN_SendFppSync,  SendFppSync);
+    JsonWrite(jsonConfig, CN_FPPoverride,  FppSyncOverride);
 
     // DEBUG_END;
 
@@ -264,12 +258,12 @@ bool c_InputFPPRemote::SetConfig (JsonObject& jsonConfig)
     // DEBUG_START;
 
     String FileToPlay;
-    bool BlankOnStop = FPPDiscovery.GetBlankOnStop();
-    setFromJSON (FileToPlay,   jsonConfig, JSON_NAME_FILE_TO_PLAY);
-    setFromJSON (SyncOffsetMS, jsonConfig, CN_SyncOffset);
-    setFromJSON (SendFppSync,  jsonConfig, CN_SendFppSync);
-    setFromJSON (BlankOnStop,  jsonConfig, CN_blankOnStop);
-    FPPDiscovery.SetBlankOnStop(BlankOnStop);
+    FPPDiscovery.SetConfig(jsonConfig);
+    setFromJSON (FileToPlay,      jsonConfig, CN_fseqfilename);
+    setFromJSON (SyncOffsetMS,    jsonConfig, CN_SyncOffset);
+    setFromJSON (SendFppSync,     jsonConfig, CN_SendFppSync);
+    setFromJSON (FppSyncOverride, jsonConfig, CN_FPPoverride);
+    ConfiguredFileToPlay = FileToPlay;
 
     if (PlayingFile())
     {
@@ -443,8 +437,7 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
             // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
         }
 
-        // DEBUG_V (String ("FileName: '") + FileName + "'");
-        // DEBUG_V ("Start Playing");
+        DEBUG_V (String ("Start Playing FileName: '") + FileName + "'");
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
         pInputFPPRemotePlayItem->SetSendFppSync (SendFppSync);
         pInputFPPRemotePlayItem->Start (FileName, 0, 1);
@@ -472,7 +465,7 @@ void c_InputFPPRemote::StartPlayingRemoteFile (String& FileName)
         // DEBUG_V();
         StopPlaying ();
 
-        // DEBUG_V ("Instantiate an FSEQ file player");
+        // DEBUG_V ("Instantiate a new FSEQ file player");
         if(pInputFPPRemotePlayItem)
         {
             // DEBUG_V ("Delete existing play item");
@@ -525,7 +518,7 @@ bool c_InputFPPRemote::PlayingRemoteFile ()
             break;
         }
 
-        if (!FileBeingPlayed.equals(No_LocalFileToPlay))
+        if (!FPPDiscovery.PlayingAfile())
         {
             break;
         }
