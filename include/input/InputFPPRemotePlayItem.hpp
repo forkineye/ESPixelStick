@@ -25,8 +25,14 @@
 class c_InputFPPRemotePlayItem
 {
 protected:
-    time_t   PlayDurationSec = 0;
-    bool     SendFppSync = false;
+    time_t          PlayDurationSec = 0;
+    bool            SendFppSync = false;
+#if defined(ARDUINO_ARCH_ESP8266)
+const uint32_t  LocalIntensityBufferSize = 512;
+#else
+const uint32_t  LocalIntensityBufferSize = 2048;
+#endif defined(ARDUINO_ARCH_ESP8266)
+    byte           *LocalIntensityBuffer = nullptr;
 
 private:
     bool    InputPaused = false;
