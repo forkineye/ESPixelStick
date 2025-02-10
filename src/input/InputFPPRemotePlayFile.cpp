@@ -453,6 +453,7 @@ uint32_t c_InputFPPRemotePlayFile::ReadFile(uint32_t DestinationIntensityId, uin
         if(nullptr == LocalIntensityBuffer)
         {
             LocalIntensityBuffer = (byte*)malloc(LocalIntensityBufferSize);
+            // DEBUG_V("Allocating local buffer.");
             if(nullptr == LocalIntensityBuffer)
             {
                 logcon(String(CN_stars) + F("Could not allocate a buffer to read SD files. Rebooting. ") + CN_stars);
