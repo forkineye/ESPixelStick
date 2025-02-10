@@ -30,9 +30,8 @@ protected:
 #if defined(ARDUINO_ARCH_ESP8266)
 const uint32_t  LocalIntensityBufferSize = 512;
 #else
-const uint32_t  LocalIntensityBufferSize = 1024;
+const uint32_t  LocalIntensityBufferSize = 2048;
 #endif // defined(ARDUINO_ARCH_ESP8266)
-    byte           *LocalIntensityBuffer = nullptr;
 
 private:
     bool    InputPaused = false;
@@ -79,3 +78,4 @@ public:
             void     SetOperationalState (bool ActiveFlag) {InputPaused = !ActiveFlag;}
 
 }; // c_InputFPPRemotePlayItem
+extern byte *LocalIntensityBuffer;
