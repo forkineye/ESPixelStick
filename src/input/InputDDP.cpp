@@ -18,6 +18,7 @@
 
 #include "input/InputDDP.h"
 #include "network/NetworkMgr.hpp"
+#include "service/FPPDiscovery.h"
 #include <string.h>
 
 #ifdef ARDUINO_ARCH_ESP32
@@ -160,7 +161,7 @@ void c_InputDDP::ProcessReceivedUdpPacket(AsyncUDPPacket ReceivedPacket)
         if ((packet.header.flags1 & DDP_FLAGS1_VERMASK) != DDP_FLAGS1_VER1)
         {
             stats.errors++;
-            lastError = String("Incorrect version. Flags1: 0x") + String(packet.header.flags1, HEX);
+            lastError = String(F("Incorrect version. Flags1: 0x")) + String(packet.header.flags1, HEX);
             // DEBUG_V ("Invalid version");
             break;
         }
@@ -292,6 +293,9 @@ void c_InputDDP::ProcessReceivedQuery ()
 {
     // DEBUG_START;
 
+    bool haveResponse = false;
+    JsonDocument JsonResponseDoc;
+
     DDP_packet_t & Packet = PacketBuffer.Packet;
 
     DDP_packet_t DDPresponse;
@@ -309,27 +313,30 @@ void c_InputDDP::ProcessReceivedQuery ()
         case DDP_ID_STATUS:
         {
             // DEBUG_V ("DDP_ID_STATUS query");
-            String JsonResponse = "{\"status\":{\"man\":\"ESPixelStick\",\"mod\":\"V4\",\"ver\":\"1.0\"}}";
+            haveResponse = true;
+
             DDPresponse.header.id = DDP_ID_STATUS;
-            DDPresponse.header.dataLen = htons (JsonResponse.length());
-            memcpy (&DDPresponse.data, JsonResponse.c_str (), JsonResponse.length());
-            UDPresponse.write ((const uint8_t*)&DDPresponse, uint32_t(sizeof(DDPresponse.header) + JsonResponse.length ()));
-            udp->sendTo (UDPresponse, PacketBuffer.ResponseAddress, PacketBuffer.ResponsePort);
+
+            JsonObject JsonStatus = JsonResponseDoc[(char*)CN_status].to<JsonObject> ();
+            JsonWrite(JsonStatus, F("man"), "ESPixelStick");
+            JsonWrite(JsonStatus, F("mod"), "V4");
+            JsonWrite(JsonStatus, F("ver"), VERSION);
+
+            FPPDiscovery.GetSysInfoJSON(JsonStatus);
             break;
         }
 
         case DDP_ID_CONFIG:
         {
             // DEBUG_V ("DDP_ID_CONFIG query");
+            haveResponse = true;
 
-            JsonDocument JsonConfigDoc;
-            JsonObject JsonConfig = JsonConfigDoc[(char*)CN_config].to<JsonObject> ();
-            String hostname;
-            NetworkMgr.GetHostname (hostname);
-            JsonWrite(JsonConfig, CN_hostname,        hostname);
+            DDPresponse.header.id = DDP_ID_CONFIG;
+
+            JsonObject JsonConfig = JsonResponseDoc[(char*)CN_config].to<JsonObject> ();
+            FPPDiscovery.GetSysInfoJSON(JsonConfig);
             JsonWrite(JsonConfig, CN_id,              config.id);
             JsonWrite(JsonConfig, CN_ip,              NetworkMgr.GetlocalIP ().toString ());
-            JsonWrite(JsonConfig, CN_version,         VERSION);
             JsonWrite(JsonConfig, F("hardwareType"),  FPP_VARIANT_NAME);
             JsonWrite(JsonConfig, CN_type,            FPP_TYPE_ID);
             JsonWrite(JsonConfig, CN_num_chan,        InputDataBufferSize);
@@ -338,27 +345,28 @@ void c_InputDDP::ProcessReceivedQuery ()
             OutputMgr.GetPortCounts (PixelPortCount, SerialPortCount);
             JsonWrite(JsonConfig, F("NumPixelPort"),  PixelPortCount);
             JsonWrite(JsonConfig, F("NumSerialPort"), SerialPortCount);
-
-            String JsonResponse;
-            serializeJson (JsonConfigDoc, JsonResponse);
-            // DEBUG_V (String ("JsonResponse: ") + String (JsonResponse));
-
-            DDPresponse.header.id = DDP_ID_CONFIG;
-            DDPresponse.header.dataLen = htons (JsonResponse.length ());
-            memcpy (&DDPresponse.data, JsonResponse.c_str (), JsonResponse.length ());
-            UDPresponse.write ((const uint8_t*)&DDPresponse, uint32_t (sizeof (DDPresponse.header) + JsonResponse.length ()));
-            udp->sendTo (UDPresponse, PacketBuffer.ResponseAddress, PacketBuffer.ResponsePort);
             break;
         }
 
         default:
         {
             stats.errors++;
-            lastError = String ("Unsupported query: ") + String (DDPresponse.header.id);
+            lastError = String (F("Unsupported query: ")) + String (DDPresponse.header.id);
             break;
         }
     }
 
+    if(haveResponse)
+    {
+        String JsonResponse;
+        serializeJson (JsonResponseDoc, JsonResponse);
+        // DEBUG_V(JsonResponse);
+
+        memcpy (&DDPresponse.data, JsonResponse.c_str (), JsonResponse.length ());
+        DDPresponse.header.dataLen = htons (JsonResponse.length ());
+        UDPresponse.write ((const uint8_t*)&DDPresponse, uint32_t (sizeof (DDPresponse.header) + JsonResponse.length ()));
+        udp->sendTo (UDPresponse, PacketBuffer.ResponseAddress, PacketBuffer.ResponsePort);
+    }
     // DEBUG_END;
 
 } // ProcessReceivedDiscovery

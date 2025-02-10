@@ -86,6 +86,7 @@ c_OutputRelay::~c_OutputRelay ()
             {
                 if (currentRelay.Enabled)
                 {
+                    ResetGpio(currentRelay.GpioId);
                     pinMode(currentRelay.GpioId, INPUT);
                 }
                 currentRelay.Enabled = Relay_OUTPUT_DISABLED;
@@ -159,7 +160,8 @@ bool c_OutputRelay::validate ()
                ledcAttachPin(currentRelay.GpioId, Channel);
                ledcSetup(Channel, currentRelay.PwmFrequency, 8);
             #else
-               pinMode (currentRelay.GpioId, OUTPUT);
+                ResetGpio(currentRelay.GpioId);
+                pinMode (currentRelay.GpioId, OUTPUT);
             #endif
         }
 
@@ -265,6 +267,7 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             {
                 // DEBUGV ("Revert Pin to input");
                 // The pin has changed. Let go of the old pin
+                ResetGpio(CurrentOutputChannel->GpioId);
                 pinMode (CurrentOutputChannel->GpioId, INPUT);
             }
             CurrentOutputChannel->GpioId = (gpio_num_t)temp;

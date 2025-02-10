@@ -42,15 +42,14 @@ class c_InputE131 : public c_InputCommon
     /// from sketch globals
     uint16_t    channel_count = 0;       ///< Number of channels. Derived from output module configuration.
 
-    typedef struct
+    struct Universe_t
     {
       uint32_t   DestinationOffset;
       uint32_t   BytesToCopy;
       uint32_t   SourceDataOffset;
-      uint8_t  SequenceNumber;
-      uint32_t SequenceErrorCounter;
-
-    } Universe_t;
+      uint8_t    SequenceNumber;
+      uint32_t   SequenceErrorCounter;
+    };
     Universe_t UniverseArray[MAX_NUM_UNIVERSES];
 
     void validateConfiguration ();

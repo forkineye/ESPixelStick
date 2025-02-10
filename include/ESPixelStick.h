@@ -61,15 +61,16 @@
 #define STRINGIFY(X) #X
 #define STRING(X) STRINGIFY(X)
 
-extern void RequestReboot(uint32_t LoopDelay);
+extern void RequestReboot(uint32_t LoopDelay, bool SkipDisable = false);
 extern bool RebootInProgress();
 
 /// Core configuration structure
-typedef struct {
+struct config_t
+{
     // Device
     String      id;
     uint32_t    BlankDelay = uint32_t(5);
-} config_t;
+};
 
 String  serializeCore          (bool pretty = false);
 void    deserializeCoreHandler (JsonDocument& jsonDoc);
@@ -133,8 +134,28 @@ bool setFromJSON (T& OutValue, JsonVariant & Json, N Name)
     return HasBeenModified;
 };
 
-#define JsonWrite(j, n, v)  (j)[(char*)(n)] = (v)
+#if defined(ARDUINO_ARCH_ESP8266)
+#   define JsonWrite(j, n, v)  (j)[String(n)] = (v)
+void inline ResetGpio(const gpio_num_t pinId)
+{
+    if(gpio_num_t(33) > pinId)
+    {
+        pinMode(pinId, INPUT);
+    }
+}
+#else // defined(ARDUINO_ARCH_ESP32)
+#   define JsonWrite(j, n, v)  (j)[(char*)(n)] = (v)
+void inline ResetGpio(const gpio_num_t pinId)
+{
+    if(GPIO_IS_VALID_OUTPUT_GPIO(pinId))
+    {
+        gpio_reset_pin(pinId);
+        pinMode(pinId, INPUT);
+    }
+}
+#endif
 
+extern bool ConsoleUartIsActive;
 #define logcon(msg) \
 { \
     String DN; \

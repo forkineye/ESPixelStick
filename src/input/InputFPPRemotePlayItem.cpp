@@ -21,6 +21,8 @@
 #include "input/InputFPPRemotePlayItem.hpp"
 #include <Int64String.h>
 
+byte *LocalIntensityBuffer = nullptr;
+
 //-----------------------------------------------------------------------------
 c_InputFPPRemotePlayItem::c_InputFPPRemotePlayItem (c_InputMgr::e_InputChannelIds _InputChannelId)
 

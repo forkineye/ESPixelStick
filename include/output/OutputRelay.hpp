@@ -36,7 +36,7 @@ GNU General Public License for more details.
 class c_OutputRelay : public c_OutputCommon
 {
 public:
-    typedef struct RelayChannel_s
+    struct RelayChannel_t
     {
         bool        Enabled;
         bool        InvertOutput;
@@ -50,7 +50,7 @@ public:
         uint16_t    PwmFrequency;
 #endif // defined(ARDUINO_ARCH_ESP32)
 
-    } RelayChannel_t;
+    };
 
     // These functions are inherited from c_OutputCommon
     c_OutputRelay (c_OutputMgr::e_OutputChannelIds OutputChannelId,

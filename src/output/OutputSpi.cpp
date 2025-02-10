@@ -314,6 +314,7 @@ bool c_OutputSpi::Poll ()
     if(gpio_num_t(-1) != CsPin)
     {
         // turn on the output strobe (latch data)
+        ResetGpio(CsPin);
         pinMode(CsPin, OUTPUT);
     }
 

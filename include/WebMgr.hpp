@@ -74,30 +74,7 @@ private:
     void GetInputOptions            ();
     void GetOutputOptions           ();
 
-#ifdef BOARD_HAS_PSRAM
-
-    struct SpiRamAllocator
-    {
-        void *allocate(uint32_t size)
-        {
-            return ps_malloc(size);
-        }
-
-        void deallocate(void *pointer)
-        {
-            free(pointer);
-        }
-
-        void *reallocate(void *ptr, uint32_t new_size)
-        {
-            return ps_realloc(ptr, new_size);
-        }
-    };
-
-    using WebJsonDocument = BasicJsonDocument<SpiRamAllocator>;
-#else
     using WebJsonDocument = JsonDocument;
-#endif // def BOARD_HAS_PSRAM
 
     WebJsonDocument *WebJsonDoc = nullptr;
     size_t GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t index);

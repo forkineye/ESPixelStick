@@ -264,7 +264,7 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
             }
             else
             {
-                // xDEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->TotalNumberOfFramesInSequence));
+                // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->FileControl[CurrentFile].TotalNumberOfFramesInSequence));
                 // DEBUG_V (String ("      Done Playing:: FileName: '") + p_Parent->FileControl[CurrentFile].FileName + "'");
                 Stop ();
                 Response = true;
@@ -285,7 +285,7 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
         uint32_t BufferSize = OutputMgr.GetBufferUsedSize();
         uint32_t MaxBytesToRead = (p_Parent->FileControl[CurrentFile].ChannelsPerFrame > BufferSize) ? BufferSize : p_Parent->FileControl[CurrentFile].ChannelsPerFrame;
 
-        uint32_t CurrentDestination = 0;
+        uint32_t CurrentOutputBufferOffset = 0;
         // xDEBUG_V (String ("               MaxBytesToRead: ") + String (MaxBytesToRead));
 
         InputMgr.RestartBlankTimer (p_Parent->GetInputChannelId ());
@@ -310,10 +310,10 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
             // xDEBUG_V (String ("         AdjustedFilePosition: ") + String (uint32_t(AdjustedFilePosition), HEX));
             // xDEBUG_V (String ("           CurrentDestination: ") + String (uint32_t(CurrentDestination), HEX));
             // xDEBUG_V (String ("            ActualBytesToRead: ") + String (ActualBytesToRead));
-            uint32_t ActualBytesRead = p_Parent->ReadFile(CurrentDestination, ActualBytesToRead, AdjustedFilePosition);
+            uint32_t ActualBytesRead = p_Parent->ReadFile(CurrentOutputBufferOffset, ActualBytesToRead, AdjustedFilePosition);
 
             MaxBytesToRead -= ActualBytesRead;
-            CurrentDestination += ActualBytesRead;
+            CurrentOutputBufferOffset += ActualBytesRead;
 
             if (ActualBytesRead != ActualBytesToRead)
             {
@@ -420,7 +420,7 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSecond
         // xDEBUG_V (String ("         ElapsedPlayTimeMS: ") + String (p_Parent->FileControl.ElapsedPlayTimeMS));
 
         uint32_t TargetElapsedMS = uint32_t (ElapsedSeconds * 1000);
-        uint32_t CurrentFrame = p_Parent->CalculateFrameId (p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS, 0);
+        uint32_t CurrentFrame = p_Parent->FileControl[CurrentFile].LastPlayedFrameId;
         uint32_t TargetFrameId = p_Parent->CalculateFrameId (TargetElapsedMS, 0);
         int32_t  FrameDiff = TargetFrameId - CurrentFrame;
 

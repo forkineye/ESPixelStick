@@ -151,6 +151,19 @@ void c_FPPDiscovery::SetOperationalState (bool ActiveFlag)
 }
 
 //-----------------------------------------------------------------------------
+void c_FPPDiscovery::GetConfig (JsonObject& jsonConfig)
+{
+    // DEBUG_START;
+
+    JsonWrite(jsonConfig, CN_fseqfilename, ConfiguredFileToPlay);
+    JsonWrite(jsonConfig, CN_BlankOnStop,  BlankOnStop);
+    JsonWrite(jsonConfig, CN_FPPoverride,  FppSyncOverride);
+
+    // DEBUG_END;
+
+} // GetConfig
+
+//-----------------------------------------------------------------------------
 void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
@@ -349,7 +362,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, float S
     // DEBUG_START;
     do // once
     {
-        if (!IsEnabled || !AllowedToRemotePlayFiles ())
+        if (!AllowedToRemotePlayFiles ())
         {
             // DEBUG_V ("Not allowed to play remote files");
             break;
@@ -451,11 +464,12 @@ void c_FPPDiscovery::ProcessBlankPacket ()
 //-----------------------------------------------------------------------------
 bool c_FPPDiscovery::PlayingFile ()
 {
+    bool Response = false;
     if (InputFPPRemotePlayFile)
     {
-        return !InputFPPRemotePlayFile->IsIdle ();
+        Response = !InputFPPRemotePlayFile->IsIdle ();
     }
-    return false;
+    return Response;
 } // PlayingFile
 
 //-----------------------------------------------------------------------------
@@ -675,7 +689,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
     do // once
     {
         String path = request->url();
-        if (path.startsWith("/fpp/"))
+        if (path.startsWith(F("/fpp/")))
         {
             path = path.substring(4);
         }
@@ -824,6 +838,12 @@ void c_FPPDiscovery::ProcessFile (
 
         if(!inFileUpload)
         {
+            if(0 != index)
+            {
+                // DEBUG_V("Ignore non start file request. Index = " + String(index) + " Filename: '" + filename + "'");
+                request->send (500);
+                break;
+            }
             // DEBUG_V(String("Current CPU ID: ") + String(xPortGetCoreID()));
             // DEBUG_V("wait for the player to become idle");
             StopPlaying(true);
@@ -831,6 +851,19 @@ void c_FPPDiscovery::ProcessFile (
             UploadFileName = filename;
             InputMgr.SetOperationalState(false);
             OutputMgr.PauseOutputs(true);
+        }
+        else if(!UploadFileName.equals(filename))
+        {
+            if(0 != index)
+            {
+                // DEBUG_V("Ignore unexpected file fragment for '" + filename + "'");
+                request->send (500);
+                break;
+            }
+
+            // DEBUG_V("New file starting. Aborting: '" + UploadFileName + "' and starting '" + filename + "'");
+            FileMgr.AbortSdFileUpload();
+            UploadFileName = filename;
         }
 
         // DEBUG_V("Write the file block");
@@ -843,7 +876,7 @@ void c_FPPDiscovery::ProcessFile (
         }
 
         // DEBUG_V();
-        if (final)
+        if (final || writeFailed)
         {
             inFileUpload = false;
             UploadFileName = emptyString;
@@ -941,6 +974,11 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     JsonWrite(jsonResponse, F ("majorVersion"), (uint16_t)atoi (version));
     JsonWrite(jsonResponse, F ("minorVersion"), (uint16_t)atoi (&version[2]));
     JsonWrite(jsonResponse, F ("typeId"),       FPP_TYPE_ID);
+#ifdef SUPPORT_UNZIP
+    JsonWrite(jsonResponse, F ("zip"),          true);
+#else
+    JsonWrite(jsonResponse, F ("zip"),          false);
+#endif // def SUPPORT_UNZIP
 
     JsonObject jsonResponseUtilization = jsonResponse[F ("Utilization")].to<JsonObject> ();
     JsonWrite(jsonResponseUtilization, F ("MemoryFree"), ESP.getFreeHeap ());
@@ -1159,6 +1197,20 @@ void c_FPPDiscovery::ProcessFPPDJson (AsyncWebServerRequest* request)
 } // ProcessFPPDJson
 
 //-----------------------------------------------------------------------------
+bool c_FPPDiscovery::SetConfig (JsonObject& jsonConfig)
+{
+    // DEBUG_START;
+
+    setFromJSON (ConfiguredFileToPlay, jsonConfig, CN_fseqfilename);
+    setFromJSON (BlankOnStop,          jsonConfig, CN_BlankOnStop);
+    setFromJSON (FppSyncOverride,      jsonConfig, CN_FPPoverride);
+
+    // DEBUG_END;
+
+    return true;
+} // SetConfig
+
+//-----------------------------------------------------------------------------
 void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
 {
     // DEBUG_START;
@@ -1214,7 +1266,7 @@ void c_FPPDiscovery::StopPlaying (bool wait)
     {
         StopInProgress = true;
         // only process if the pointer is valid
-        while (InputFPPRemotePlayFile)
+        while (true)
         {
             // DEBUG_V("Pointer is valid");
             if(InputFPPRemotePlayFile->IsIdle())
@@ -1237,6 +1289,7 @@ void c_FPPDiscovery::StopPlaying (bool wait)
                 break;
             }
         }
+        ForgetInputFPPRemotePlayFile();
         StopInProgress = false;
     }
     else

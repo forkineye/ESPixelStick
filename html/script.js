@@ -10,7 +10,7 @@ var System_Config = null;
 var Fseq_File_List = [];
 var selector = [];
 var target = document.location.host;
-// target = "192.168.10.220";
+// target = "192.168.10.221";
 
 var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
@@ -374,32 +374,42 @@ $(function () {
             uploadMultiple: false,
             createImageThumbnails: false,
             dictDefaultMessage: 'Drag an image here to upload, or click to select one',
-            acceptedFiles: '.fseq,.pl',
-            timeout: 99999999, /*milliseconds*/
-            init: function () {
-                this.on('success', function (file, resp) {
+            acceptedFiles: '.fseq,.pl,.zip,.xlz',
+            timeout: 99999999, /*milliseconds = 27 days*/
+            init: function ()
+            {
+                this.on('success', function (file) {
                     // console.log("Success");
-                    // console.log(file);
-                    // console.log(resp);
+                    // console.log("File: " + file.name);
                     Dropzone.forElement('#filemanagementupload').removeAllFiles(true)
                     RequestListOfFiles();
                 });
 
-                this.on('complete', function (file, resp) {
+                this.on('complete', function (file) {
                     // console.log("complete");
-                    // console.log(file);
-                    // console.log(resp);
+                    // console.log("File: " + file.name);
                     $('#fseqprogress_fg').addClass("hidden");
-
-                    let DeltaTime = (new Date().getTime() - FseqFileTransferStartTime.getTime()) / 1000;
-                    let rate = Math.floor((file.size / DeltaTime) / 1000);
+                    let extensionPosition = file.name.lastIndexOf(".");
+                    if(extensionPosition !== -1)
+                    {
+                        let extension = file.name.toLowerCase().slice(extensionPosition + 1);
+                        if(("zip" === extension) || ("xlz" === extension))
+                        {
+                            let RebootNow = confirm("Downloaded a zip file. Unzip requires a reboot.\nClick 'OK' to Reboot NOW.");
+                            if(RebootNow)
+                            {
+                                reboot();
+                            }
+                        }
+                    }
+                    // let DeltaTime = (new Date().getTime() - FseqFileTransferStartTime.getTime()) / 1000;
+                    // let rate = Math.floor((file.size / DeltaTime) / 1000);
                     // console.debug("Final Transfer Rate: " + rate + "KBps");
                 });
 
-                this.on('addedfile', function (file, resp) {
+                this.on('addedfile', function (file) {
                     // console.log("addedfile");
-                    // console.log(file);
-                    // console.log(resp);
+                    // console.log("File: " + file.name);
                     FseqFileTransferStartTime = new Date();
                 });
 
@@ -414,13 +424,37 @@ $(function () {
                     let rate = Math.floor((bytesSent / DeltaTime) / 1000);
                     $('#fseqprogressrate').html(rate + "KBps");
                 });
-            },
 
-            accept: function (file, done) {
-                // console.log("accept");
-                // console.log(file);
-                return done(); // triggers a send
-            }
+                this.on('error', function (file, msg) {
+                    // console.log("error");
+                    // console.log("File: " + file.name);
+                    // console.log("msg: " + msg);
+                    alert("Failed uploading '" + file.name + "'\nError: '" + msg + "'");
+                });
+
+                this.on('sending', function (file, xhrObject)
+                {
+                    // console.log("sending");
+                    // console.log("File: " + file.name);
+                    // console.log("resp: " + xhrObject);
+
+                    xhrObject.addEventListener("error", function (event)
+                    {
+                        // console.error("TCP Error: " + event.type);
+                        alert("File Transfer Error: " + event.type);
+                    });
+
+                    xhrObject.addEventListener("abort", function (event)
+                    {
+                        // console.error("TCP Abort: " + event.type);
+                        alert("File Transfer Error: " + event.type);
+                    });
+                });
+
+                this.on('queuecomplete', function () {
+                    console.log("queuecomplete");
+                });
+            },
         });
 
     $("#filemanagementupload").addClass("dropzone");
@@ -635,18 +669,21 @@ async function SendConfigFileToServer(FileName = "", DataString = "")
     // console.info("Data: " + JSON.stringify(Data));
 
     let ConfigXfer = new XMLHttpRequest();
-
+    ConfigWaitMessageStart();
     ConfigXfer.addEventListener("loadend", function()
     {
         // console.info("SendConfigFileToServer: Success");
+        ConfigWaitMessageEnd(0);
         return 1;
     }, false);
     ConfigXfer.addEventListener("error", function () {
         console.error("SendConfigFileToServer: Error");
+        ConfigWaitMessageEnd(1);
         return 0;
     }, false);
     ConfigXfer.addEventListener("abort", function() {
         console.error("SendConfigFileToServer: abort");
+        ConfigWaitMessageEnd(1);
         return -1;
     }, false);
     ConfigXfer.open("PUT", "http://" + target + "/conf/" + FileName + ".json");
@@ -843,7 +880,7 @@ async function RequestListOfFiles()
 } // RequestListOfFiles
 
 function BytesToMB(Value) {
-    return (Value / (1024 * 1024)).toFixed();
+     return  Math.round((Value / (1024 * 1024))).toLocaleString();
 
 } // BytesToMB
 
@@ -895,7 +932,7 @@ async function ProcessGetFileListResponse(JsonData) {
         try {
             $('#FileName_' + (CurrentRowId)).val(file.name);
             $('#FileDate_' + (CurrentRowId)).val(new Date(file.date * 1000).toLocaleString());
-            $('#FileSize_' + (CurrentRowId)).val(file.length);
+            $('#FileSize_' + (CurrentRowId)).val(file.length.toLocaleString());
             Fseq_File_List.push(file);
         }
         catch
@@ -980,7 +1017,7 @@ function ProcessModeConfigurationDataEffects(channelConfig) {
 
     RenumberTransitionTable();
 
-    $('#AddTransitionBtn').unbind();
+    $('#AddTransitionBtn').off();
     $('#AddTransitionBtn').on("click", (function () {
         // console.info("Add a transition");
         transitionAddRow('#000000');
@@ -999,7 +1036,7 @@ function ProcessModeConfigurationDataEffects(channelConfig) {
 
     RenumberMarqueeGroupTable();
 
-    $('#AddMarqueeGroupBtn').unbind();
+    $('#AddMarqueeGroupBtn').off();
     $('#AddMarqueeGroupBtn').on("click", (function () {
         // console.info("Add a MarqueeGroup button pressed");
         let newMarqueeGroup = {};
@@ -1372,7 +1409,8 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
 
     // modify page title
     //TODO: Dirty hack to clean-up input names
-    if (ChannelType !== 'input') {
+    if (ChannelType !== 'input')
+    {
         let ModeDisplayName = GenerateInputOutputControlLabel(ChannelType, channelId) + " - " + $(modeControlName + ' #Title')[0].innerHTML;
         // console.info("ModeDisplayName: " + ModeDisplayName);
         $(modeControlName + ' #Title')[0].innerHTML = ModeDisplayName;
@@ -1610,7 +1648,7 @@ function CreateOptionsFromConfig(OptionListName, Config) {
                 // console.info("Set the selector type to: " + CurrentChannel.type);
                 $(jqSelector).val(CurrentChannel.type);
                 LoadDeviceSetupSelectedOption(OptionListName, ChannelId);
-                $(jqSelector).change(function () {
+                $(jqSelector).on("change", function () {
                     // console.info("Set the selector type to: " + CurrentChannel.type);
                     LoadDeviceSetupSelectedOption(OptionListName, ChannelId);
                 });
@@ -1657,9 +1695,9 @@ function ExtractNetworkEthernetConfigFromHtmlPage() {
         System_Config.network.eth.dnss = $('#network #eth #dnss').val();
         System_Config.network.eth.dhcp = $('#network #eth #dhcp').prop('checked');
         System_Config.network.eth.type = parseInt($('#network #eth #type option:selected').val(), 10);
-        System_Config.network.eth.addr = $('#network #eth #addr').val();
+        System_Config.network.eth.addr = parseInt($('#network #eth #addr').val());
         System_Config.network.eth.power_pin = parseInt($('#network #eth #power_pin').val());
-        System_Config.network.eth.mode = $('#network #eth #mode option:selected').val(), 10;
+        System_Config.network.eth.mode = parseInt($('#network #eth #mode option:selected').val());
         System_Config.network.eth.mdc_pin = parseInt($('#network #eth #mdc_pin').val());
         System_Config.network.eth.mdio_pin = parseInt($('#network #eth #mdio_pin').val());
         System_Config.network.eth.activevalue = (parseInt($('#network #eth #activevalue option:selected').val(), 10) === 1);
@@ -2279,6 +2317,48 @@ function ProcessReceivedJsonStatusMessage(JsonStat) {
     // $('#refresh').text(Status.output[0].framerefreshrate + " fps");
 } // ProcessReceivedJsonStatusMessage
 
+let MsgXferCount = 0;
+let AggregateErrorFlag = 0;
+
+function ConfigWaitMessageStart()
+{
+    // console.info("ConfigWaitMessageStart");
+    // console.info("MsgXferCount " + MsgXferCount);
+
+    $('#snackbar').modal();
+
+    MsgXferCount ++;
+    if(1 === MsgXferCount)
+    {
+        AggregateErrorFlag = 0;
+    }
+} // ConfigWaitMessageStart
+
+function ConfigWaitMessageEnd(ErrorFlag)
+{
+    // console.info("ConfigWaitMessageEnd");
+    // console.info("ErrorFlag " + ErrorFlag);
+    // console.info("MsgXferCount " + MsgXferCount);
+    MsgXferCount --;
+    AggregateErrorFlag += ErrorFlag;
+
+    if (0 === MsgXferCount)
+    {
+        $('#snackbar').modal('hide');
+
+        if(0 === AggregateErrorFlag)
+        {
+            alert("Configuration Save Success");
+        }
+        else
+        {
+            alert("Configuration Save Failed");
+        }
+    }
+
+} // ConfigWaitMessageEnd
+
+/*
 // Show "save" snackbar for 3sec
 function snackSave() {
     let x = document.getElementById('snackbar');
@@ -2287,6 +2367,7 @@ function snackSave() {
         x.className = x.className.replace('show', '');
     }, 3000);
 } // snackSave
+*/
 
 // Show reboot modal
 function showReboot() {

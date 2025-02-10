@@ -44,7 +44,7 @@ class c_InputArtnet : public c_InputCommon
     /// from sketch globals
     uint16_t    channel_count = 0;       ///< Number of channels. Derived from output module configuration.
 
-    typedef struct
+    struct Universe_t
     {
         uint32_t    DestinationOffset;
         uint32_t    BytesToCopy;
@@ -53,7 +53,7 @@ class c_InputArtnet : public c_InputCommon
         uint8_t     SequenceNumber;
         uint32_t    num_packets;
 
-    } Universe_t;
+    };
     Universe_t UniverseArray[MAX_NUM_UNIVERSES];
 
     void SetUpArtnet ();

@@ -55,7 +55,7 @@ private:
     c_InputFPPRemotePlayItem* pPlayFileEngine = nullptr;
 
     // Keep track of last known effect configuration state
-    c_InputEffectEngine::MQTTConfiguration_s effectConfig;
+    c_InputEffectEngine::MQTTConfiguration_t effectConfig;
 
     // from original config struct
     String      ip;

@@ -965,6 +965,7 @@ void c_OutputUart::set_pin()
     {
         // DEBUG_V();
 
+        ResetGpio(OutputUartConfig.DataPin);
         pinMode(OutputUartConfig.DataPin, OUTPUT);
         digitalWrite(OutputUartConfig.DataPin, LOW);
         ESP_ERROR_CHECK(uart_set_pin(OutputUartConfig.UartId,
